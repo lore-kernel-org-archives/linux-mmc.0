@@ -1,43 +1,39 @@
 From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: [PATCH 0/6] mmc: sh_mmcif: revision-specific CCS and CLK_CTRL2 handling
-Date: Wed, 10 Jul 2013 21:21:11 +0200
-Message-ID: <1373484077-10460-1-git-send-email-g.liakhovetski@gmx.de>
-Return-path: <linux-sh-owner@vger.kernel.org>
-Sender: linux-sh-owner@vger.kernel.org
+Subject: [PATCH 4/6] ARM: shmobile: kzm9g: disable MMCIF Command Completion Signal
+Date: Wed, 10 Jul 2013 21:21:15 +0200
+Message-ID: <1373484077-10460-5-git-send-email-g.liakhovetski@gmx.de>
+References: <1373484077-10460-1-git-send-email-g.liakhovetski@gmx.de>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from moutng.kundenserver.de ([212.227.17.10]:50333 "EHLO
+	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754976Ab3GJTVZ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 10 Jul 2013 15:21:25 -0400
+In-Reply-To: <1373484077-10460-1-git-send-email-g.liakhovetski@gmx.de>
+Sender: linux-mmc-owner@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 Cc: linux-sh@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>, Simon Horman <horms@verge.net.au>, Chris Ball <cjb@laptop.org>, Nobuyuki HIRAI <nobuyuki.hirai.xe@renesas.com>, Guennadi Liakhovetski <g.liakhovetski+renesas@gmail.com>
-List-Id: linux-mmc@vger.kernel.org
 
-This patch series adds version-specific support for Command Completion 
-Signal and the CE_CLK_CTRL2 register. Presumably, the first two patches 
-will go via the MMC tree, the rest should be applied after them.
+MMCIF on sh73a0 doesn't support Command Completion Signal, a platform
+parameter has to be added to disable it on kzm9g.
 
-Cc: Guennadi Liakhovetski <g.liakhovetski+renesas@gmail.com>
+Signed-off-by: Guennadi Liakhovetski <g.liakhovetski+renesas@gmail.com>
+---
+ arch/arm/mach-shmobile/board-kzm9g.c |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
 
-Guennadi Liakhovetski (6):
-  mmc: sh_mmcif: revision-specific Command Completion Signal handling
-  mmc: sh_mmcif: revision-specific CLK_CTRL2 handling
-  ARM: shmobile: armadillo800eva: disable MMCIF Command Completion
-    Signal
-  ARM: shmobile: kzm9g: disable MMCIF Command Completion Signal
-  ARM: shmobile: ape6evm: disable MMCIF Command Completion Signal
-  ARM: shmobile: lager: disable MMCIF Command Completion Signal, add
-    CLK_CTRL2
-
- arch/arm/mach-shmobile/board-ape6evm.c         |    1 +
- arch/arm/mach-shmobile/board-armadillo800eva.c |    1 +
- arch/arm/mach-shmobile/board-kzm9g.c           |    1 +
- arch/arm/mach-shmobile/board-lager.c           |    2 +
- drivers/mmc/host/sh_mmcif.c                    |   31 +++++++++++++++++++----
- include/linux/mmc/sh_mmcif.h                   |    3 ++
- 6 files changed, 33 insertions(+), 6 deletions(-)
-
+diff --git a/arch/arm/mach-shmobile/board-kzm9g.c b/arch/arm/mach-shmobile/board-kzm9g.c
+index 165483c..7ec26a5 100644
+--- a/arch/arm/mach-shmobile/board-kzm9g.c
++++ b/arch/arm/mach-shmobile/board-kzm9g.c
+@@ -365,6 +365,7 @@ static struct resource sh_mmcif_resources[] = {
+ static struct sh_mmcif_plat_data sh_mmcif_platdata = {
+ 	.ocr		= MMC_VDD_165_195,
+ 	.caps		= MMC_CAP_8_BIT_DATA | MMC_CAP_NONREMOVABLE,
++	.ccs_unsupported = true,
+ 	.slave_id_tx	= SHDMA_SLAVE_MMCIF_TX,
+ 	.slave_id_rx	= SHDMA_SLAVE_MMCIF_RX,
+ };
 -- 
 1.7.2.5
 
-Thanks
-Guennadi
----
-Guennadi Liakhovetski, Ph.D.
-Freelance Open-Source Software Developer
-http://www.open-technology.de/
