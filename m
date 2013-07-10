@@ -1,79 +1,85 @@
-From: Simon Horman <horms@verge.net.au>
-Subject: Re: [PATCH] dmaengine: shdma: fix a build failure on platforms with
- no DMA support
-Date: Wed, 10 Jul 2013 11:09:47 +0900
-Message-ID: <20130710020947.GP32603@verge.net.au>
-References: <Pine.LNX.4.64.1305301650290.29171@axis700.grange>
- <51A77CF1.7040105@ti.com>
- <20130531024438.GB32564@verge.net.au>
- <CAGa+x8413povhYWx+BSj=TdzQDAuYFXmjF4A2kXvQt+=n+380w@mail.gmail.com>
- <Pine.LNX.4.64.1306192125480.12502@axis700.grange>
- <20130705045350.GA10947@intel.com>
- <CAOesGMjp4Ort89z8ZhQT9xAPNyG-0uU-kz9G2f_GzRFF-Y2MxA@mail.gmail.com>
- <20130708072114.GF16653@intel.com>
+From: Zhang Haijun-B42677 <B42677@freescale.com>
+Subject: =?utf-8?B?UkU6IOetlOWkjTogW1BBVENIXSBQb3dlcnBjL3Q0MjQwOiBjaGFuZ2UgdGhl?=
+ =?utf-8?Q?_compatible_flags_for_t4240qds_board?=
+Date: Wed, 10 Jul 2013 03:41:22 +0000
+Message-ID: <99E897753B6F7048BD8CCDB4661D02E139CE27@039-SN2MPN1-021.039d.mgd.msft.net>
+References: <99E897753B6F7048BD8CCDB4661D02E1396F57@039-SN2MPN1-021.039d.mgd.msft.net>
+	(from B42677@freescale.com on Tue Jul  9 01:04:01 2013)
+ <1373400262.8183.201@snotra>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from kirsty.vergenet.net ([202.4.237.240]:34956 "EHLO
-	kirsty.vergenet.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753627Ab3GJCJu (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 9 Jul 2013 22:09:50 -0400
-Content-Disposition: inline
-In-Reply-To: <20130708072114.GF16653@intel.com>
+Received: from co1ehsobe005.messaging.microsoft.com ([216.32.180.188]:5386
+	"EHLO co1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1754224Ab3GJDjU (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 9 Jul 2013 23:39:20 -0400
+In-Reply-To: <1373400262.8183.201@snotra>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Vinod Koul <vinod.koul@intel.com>
-Cc: Olof Johansson <olof@lixom.net>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Kevin Hilman <khilman@linaro.org>, Dan Murphy <dmurphy@ti.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux-sh list <linux-sh@vger.kernel.org>, Chris Ball <cjb@laptop.org>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>
+To: Wood Scott-B07421 <B07421@freescale.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linuxppc-dev@lists.ozlabs.org" <linuxppc-dev@lists.ozlabs.org>, "cbouatmailru@gmail.com" <cbouatmailru@gmail.com>, "cjb@laptop.org" <cjb@laptop.org>, Fleming Andy-AFLEMING <afleming@freescale.com>, Wrobel Heinz-R39252 <r39252@freescale.com>
 
-On Mon, Jul 08, 2013 at 12:51:14PM +0530, Vinod Koul wrote:
-> On Mon, Jul 08, 2013 at 12:52:16AM -0700, Olof Johansson wrote:
-> > On Thu, Jul 4, 2013 at 9:53 PM, Vinod Koul <vinod.koul@intel.com> wrote:
-> > > On Wed, Jun 19, 2013 at 09:32:18PM +0200, Guennadi Liakhovetski wrote:
-> > >> Hi Vinod
-> > >>
-> > >> On Wed, 19 Jun 2013, Kevin Hilman wrote:
-> > >>
-> > >> > On Thu, May 30, 2013 at 7:44 PM, Simon Horman <horms@verge.net.au> wrote:
-> > >> >
-> > >> > [...]
-> > >> >
-> > >> > > thanks for this. I will wait for a refresh (as we discussed earlier today).
-> > >> > > Can I confirm that this is a fix for v3.10? If so, could ou note
-> > >> > > that when you post your revised patch?
-> > >> >
-> > >> > Any progress on this patch?
-> > >> >
-> > >> > The SH-mobile defconfigs are still all failing in linux-next.
-> > >>
-> > >> In
-> > >>
-> > >> https://patchwork.kernel.org/patch/2640061/
-> > > And you havent CC maintainers on this patch, so I dont have it!
-> > >>
-> > >> I proposed a simple immediate fix for this problem. Arnd at the same time
-> > >> developed an alternative solution:
-> > >>
-> > >> https://patchwork.kernel.org/patch/2644121/
-> > >> https://patchwork.kernel.org/patch/2644111/
-> > > Reading these patches I agree with Arnd that client drivers should not depend on
-> > > dma slave drivers. Existing issue need to be fixed
-> > >
-> > > Arnd, Have you merged these changes?
-> > 
-> > Looks like we now have breakage in linux-next for this again (new
-> > breakage due to the header file move being applied by you on Friday,
-> > Vinod? Are you planning on sending the code in for 3.11? If not, you
-> > shouldn't apply patches right now).
-> Well they were already in my tree since 18th June. (tree was rebased to fixup for
-> pull on friday) and now these are in Linus's tree.
-> 
-> Can we have a fix for breakage for now sent to linus for now and then address the
-> proper way to do this?
+DQoNClRoYW5rcy4NCg0KUmVnYXJkcw0KSGFpanVuLg0KDQo+IC0tLS0tT3JpZ2luYWwgTWVzc2Fn
+ZS0tLS0tDQo+IEZyb206IFdvb2QgU2NvdHQtQjA3NDIxDQo+IFNlbnQ6IFdlZG5lc2RheSwgSnVs
+eSAxMCwgMjAxMyA0OjA0IEFNDQo+IFRvOiBaaGFuZyBIYWlqdW4tQjQyNjc3DQo+IENjOiBXb29k
+IFNjb3R0LUIwNzQyMTsgbGludXgtbW1jQHZnZXIua2VybmVsLm9yZzsgbGludXhwcGMtDQo+IGRl
+dkBsaXN0cy5vemxhYnMub3JnOyBjYm91YXRtYWlscnVAZ21haWwuY29tOyBjamJAbGFwdG9wLm9y
+ZzsgRmxlbWluZw0KPiBBbmR5LUFGTEVNSU5HOyBXcm9iZWwgSGVpbnotUjM5MjUyDQo+IFN1Ympl
+Y3Q6IFJlOiDnrZTlpI06IFtQQVRDSF0gUG93ZXJwYy90NDI0MDogY2hhbmdlIHRoZSBjb21wYXRp
+YmxlIGZsYWdzIGZvcg0KPiB0NDI0MHFkcyBib2FyZA0KPiANCj4gT24gMDcvMDkvMjAxMyAwMTow
+NDowMSBBTSwgWmhhbmcgSGFpanVuLUI0MjY3NyB3cm90ZToNCj4gPg0KPiA+DQo+ID4gUmVnYXJk
+cyAmIFRoYW5rcw0KPiA+DQo+ID4gSGFpanVuLg0KPiA+DQo+ID4gX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fXw0KPiA+IOWPkeS7tuS6ujogV29vZCBTY290dC1CMDc0MjEN
+Cj4gPiDlj5HpgIHml7bpl7Q6IDIwMTPlubQ35pyIOOaXpSAxNzoxNA0KPiA+IOaUtuS7tuS6ujog
+WmhhbmcgSGFpanVuLUI0MjY3Nw0KPiA+IOaKhOmAgTogbGludXgtbW1jQHZnZXIua2VybmVsLm9y
+ZzsgbGludXhwcGMtZGV2QGxpc3RzLm96bGFicy5vcmc7DQo+ID4gY2JvdWF0bWFpbHJ1QGdtYWls
+LmNvbTsgY2piQGxhcHRvcC5vcmc7IEZsZW1pbmcgQW5keS1BRkxFTUlORzsgV3JvYmVsDQo+ID4g
+SGVpbnotUjM5MjUyOyBaaGFuZyBIYWlqdW4tQjQyNjc3DQo+ID4g5Li76aKYOiBSZTogW1BBVENI
+XSBQb3dlcnBjL3Q0MjQwOiBjaGFuZ2UgdGhlIGNvbXBhdGlibGUgZmxhZ3MgZm9yDQo+ID4gdDQy
+NDBxZHMgYm9hcmQNCj4gPg0KPiA+IE9uIDA3LzA4LzIwMTMgMDI6MTY6MDMgQU0sIEhhaWp1biBa
+aGFuZyB3cm90ZToNCj4gPiA+IEluIG9yZGVyIHRvIG1ha2UgYSBkaWZmZXJlbmNlIGJldHdlZW4g
+ZGlmZmVyZW50IFQ0MjQwIGJvYXJkLg0KPiA+ID4gU3BlY2lmeSBUNDI0MFFEUyBib2FyZCB0aGUg
+dW5pcXVlIGNvbXBhdGlibGUgZmxhZ3MgZm9yIHQ0MjQwcWRzDQo+ID4gPiBlU0RIQyBob3N0Lg0K
+PiA+ID4NCj4gPiA+IFNpZ25lZC1vZmYtYnk6IEhhaWp1biBaaGFuZyA8SGFpanVuLlpoYW5nQGZy
+ZWVzY2FsZS5jb20+DQo+ID4gPiAtLS0NCj4gPiA+ICBhcmNoL3Bvd2VycGMvYm9vdC9kdHMvZnNs
+L3Q0MjQwc2ktcG9zdC5kdHNpIHwgMiArLQ0KPiA+ID4gIDEgZmlsZSBjaGFuZ2VkLCAxIGluc2Vy
+dGlvbigrKSwgMSBkZWxldGlvbigtKQ0KPiA+ID4NCj4gPiA+IGRpZmYgLS1naXQgYS9hcmNoL3Bv
+d2VycGMvYm9vdC9kdHMvZnNsL3Q0MjQwc2ktcG9zdC5kdHNpDQo+ID4gPiBiL2FyY2gvcG93ZXJw
+Yy9ib290L2R0cy9mc2wvdDQyNDBzaS1wb3N0LmR0c2kNCj4gPiA+IGluZGV4IGJkNjExYTkuLjA4
+YjQ3ZDAgMTAwNjQ0DQo+ID4gPiAtLS0gYS9hcmNoL3Bvd2VycGMvYm9vdC9kdHMvZnNsL3Q0MjQw
+c2ktcG9zdC5kdHNpDQo+ID4gPiArKysgYi9hcmNoL3Bvd2VycGMvYm9vdC9kdHMvZnNsL3Q0MjQw
+c2ktcG9zdC5kdHNpDQo+ID4gPiBAQCAtMzk3LDcgKzM5Nyw3IEBADQo+ID4gPg0KPiA+ID4gIC9p
+bmNsdWRlLyAicW9yaXEtZXNkaGMtMC5kdHNpIg0KPiA+ID4gICAgICAgc2RoY0AxMTQwMDAgew0K
+PiA+ID4gLSAgICAgICAgICAgICBjb21wYXRpYmxlID0gImZzbCx0NDI0MC1lc2RoYyIsICJmc2ws
+ZXNkaGMiOw0KPiA+ID4gKyAgICAgICAgICAgICBjb21wYXRpYmxlID0gImZzbCx0NDI0MHFkcy1l
+c2RoYyIsICJmc2wsZXNkaGMiOw0KPiA+ID4gICAgICAgICAgICAgICBzZGhjaSxhdXRvLWNtZDEy
+Ow0KPiA+ID4gICAgICAgfTsNCj4gPg0KPiA+IE5BQ0suICBUaGlzIG5vZGUgaXMgZGVzY3JpYmlu
+ZyB0aGUgc2RoYyBibG9jayBvZiB0aGUgdDQyNDAgU29DLiAgV2hhdA0KPiA+IGJvYXJkIHlvdSBz
+dGljayBpdCBpbiBkb2Vzbid0IGNoYW5nZSB3aGF0IGl0IGlzLg0KPiA+DQo+ID4gUGx1cywgd2hh
+dCBhYm91dCB1c2VycyB3aXRoIG9sZCBkZXZpY2UgdHJlZXM/DQo+ID4NCj4gPiBDdXJyZW50bHkg
+bm8gdXNlcnMgdXNlIHRoaXMgaXAgYmxvY2sgZXhjZXB0IGVzZGhjIGRyaXZlci4NCj4gDQo+IEkn
+bSBub3QgdGFsa2luZyBhYm91dCBjb2RlIHVzZXJzLiAgSSdtIHRhbGtpbmcgYWJvdXQgcGVvcGxl
+IHVzZXJzLg0KPiANCj4gPiBIb3cgYWJvdXQgY2hhbmdlIHRoaXMgaW4gYXJjaC9wb3dlcnBjL2Jv
+b3QvZHRzL3Q0MjQwcWRzLmR0cw0KPiA+DQo+ID4gKysrIGIvYXJjaC9wb3dlcnBjL2Jvb3QvZHRz
+L3Q0MjQwcWRzLmR0cw0KPiA+IEBAIC0xMTcsNiArMTE3LDEwIEBADQo+ID4gICAgICAgICAgICAg
+ICAgICAgICAgICAgfTsNCj4gPiAgICAgICAgICAgICAgICAgfTsNCj4gPg0KPiA+ICAgICAgICAg
+ICAgICAgIHNkaGNAMTE0MDAwIHsNCj4gPiAgICAgICAgICAgICAgICAgICAgICAgY29tcGF0aWJs
+ZSA9ICJmc2wsdDQyNDAtZXNkaGMiLCAiZnNsLGVzZGhjIjsNCj4gPiAgICAgICAgICAgICAgICB9
+Ow0KPiA+DQo+ID4gICAgICAgICAgICAgICAgaTJjQDExODAwMCB7DQo+ID4NCj4gPg0KPiA+ICsr
+KyBiL2FyY2gvcG93ZXJwYy9ib290L2R0cy90NDI0MHFkcy5kdHMNCj4gPiBAQCAtMTE3LDYgKzEx
+NywxMCBAQA0KPiA+ICAgICAgICAgICAgICAgICAgICAgICAgIH07DQo+ID4gICAgICAgICAgICAg
+ICAgIH07DQo+ID4NCj4gPiArICAgICAgICAgICAgICAgc2RoY0AxMTQwMDAgew0KPiA+ICsgICAg
+ICAgICAgICAgICAgICAgICAgIGNvbXBhdGlibGUgPSAiZnNsLHQ0MjQwcWRzLWVzZGhjIiwNCj4g
+PiAiZnNsLGVzZGhjIjsNCj4gPiArICAgICAgICAgICAgICAgfTsNCj4gPiArDQo+ID4gICAgICAg
+ICAgICAgICAgIGkyY0AxMTgwMDAgew0KPiANCj4gTm8uICBJdCdzIHN0aWxsIHN1cHBvc2VkIHRv
+IGJlIGRlc2NyaWJpbmcgdGhlIHNkaGMgYmxvY2sgaXRzZWxmLCBub3QgdGhlDQo+IGJvYXJkIC0t
+IGFuZCBhbnkgd29ya2Fyb3VuZHMgdGhhdCBrZXkgb2ZmIG9mIHRoaXMgd2lsbCBzdGlsbCBmYWls
+IHRvIHdvcmsNCj4gd2l0aCBleGlzdGluZyBkZXZpY2UgdHJlZXMuDQpbSGFpanVuIFdyb3RlOl0g
+U28sIGxlYXZlIGR0cyB1bmNoYW5nZWQgYW5kIHRvIGNoZWNrIGNvbXBpdGFibGUgZm9yIGJvYXJk
+IGluIHNkaGNpLXBsdGZtLmMNCmUuZy46DQoJdW5zaWduZWQgbG9uZyByb290ID0gb2ZfZ2V0X2Zs
+YXRfZHRfcm9vdCgpOw0KDQoJaWYgKG9mX2ZsYXRfZHRfaXNfY29tcGF0aWJsZShyb290LCAiZnNs
+LFQ0MjQwUURTIikpDQoJCWhvc3QtPnF1aXJrcyB8PSBYWFg7DQoNCklzIHRoaXMgb2s/DQoJDQo+
+IA0KPiAtU2NvdHQNCg==
 
-That is my preferred approach.
-
-I will repost the patch at the link
-https://patchwork.kernel.org/patch/2640061/ above, rebased for the header
-file rename.
-
-Vinod, can you take things from there?
