@@ -1,41 +1,63 @@
 From: Doug Anderson <dianders@chromium.org>
-Subject: [PATCH v3 0/5] mmc: dw_mmc: fixes for suspend/resume on exynos
-Date: Wed, 10 Jul 2013 08:42:01 -0700
-Message-ID: <1373470926-19314-1-git-send-email-dianders@chromium.org>
+Subject: [PATCH v3 4/5] mmc: dw_mmc: Always setup the bus after suspend/resume
+Date: Wed, 10 Jul 2013 08:42:05 -0700
+Message-ID: <1373470926-19314-5-git-send-email-dianders@chromium.org>
 References: <1373411961-23812-1-git-send-email-dianders@chromium.org>
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-Reply-To: <1373411961-23812-1-git-send-email-dianders@chromium.org>
-Sender: linux-samsung-soc-owner@vger.kernel.org
+ <1373470926-19314-1-git-send-email-dianders@chromium.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1373470926-19314-1-git-send-email-dianders@chromium.org>
+Sender: linux-kernel-owner@vger.kernel.org
 To: Chris Ball <cjb@laptop.org>
-Cc: Olof Johansson <olof@lixom.net>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, James Hogan <james.hogan@imgtec.com>, Grant Grundler <grundler@chromium.org>, Alim Akhtar <alim.akhtar@samsung.com>, Abhilash Kesavan <a.kesavan@samsung.com>, Tomasz Figa <tomasz.figa@gmail.com>, Doug Anderson <dianders@chromium.org>, linux-samsung-soc@vger.kernel.org, linux-mmc@vger.kernel.org, Kukjin Kim <kgene.kim@samsung.com>, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Cc: Olof Johansson <olof@lixom.net>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, James Hogan <james.hogan@imgtec.com>, Grant Grundler <grundler@chromium.org>, Alim Akhtar <alim.akhtar@samsung.com>, Abhilash Kesavan <a.kesavan@samsung.com>, Tomasz Figa <tomasz.figa@gmail.com>, Doug Anderson <dianders@chromium.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-This series of patches addresses some suspend/resume problems with
-dw_mmc on exynos platforms.  Since suspend/resume is not fully working
-on ToT Linux (3.10) on exynos5250-snow, this series was tested against
-the current ToT ChromeOS 3.8 tree.  I have confirmed basic booting
-and eMMC / SD card usage (and compiling, honest!) against ToT Linux.
+After suspend/resume all of the dw_mmc registers are reset to
+defaults.  We restore most of them, but specifically don't setup the
+clock registers after resume unless we've got a powered card.  Things
+still work because the core will eventually call set_ios() and we'll
+set things up.
 
-Changes in v3:
-- Add freeze/thaw and poweroff/restore noirq entries.
+There doesn't seem to be any reason that I can see _not_ to set things
+up after resume.  Restoring this state makes the code easier to reason
+about and should help prevent bugs.  It also allows us to do a
+register dump before and after suspend/resume to confirm that we've
+set things up OK.
 
-Changes in v2:
-- Fix typo (some -> come)
-- Use ~0 instead of 0xFFFFFFFF; add comment about value
-- Use suspend_noirq as per James Hogan.
+I examined the state of the dw_mmc instance before and after suspend
+after this patch.  I had no card inserted in an SD card slot.
 
-Doug Anderson (5):
-  mmc: dw_mmc: Invalidate cache of current_speed after suspend/resume
-  mmc: dw_mmc: Add suspend_noirq/resume_noirq callbacks for dw_mmc-pltfm
-  mmc: dw_mmc: Add exynos resume_noirq callback to clear WAKEUP_INT
-  mmc: dw_mmc: Always setup the bus after suspend/resume
-  mmc: dw_mmc: Set timeout to max upon resume
+Before this patch, differences were:
+* CLKDIV (0x08)
+* CLKENA (0x10)
+* TMOUT (0x14)
+* CMD (0x2C) - difference is not important
+* CLKSEL (0x9C - exynos specific)
 
- drivers/mmc/host/dw_mmc-exynos.c | 23 ++++++++++++++++++++++
- drivers/mmc/host/dw_mmc-pltfm.c  | 41 +++++++++++++++++++++++++++++++++++++---
- drivers/mmc/host/dw_mmc.c        | 15 +++++++++++----
- drivers/mmc/host/dw_mmc.h        |  4 ++++
- 4 files changed, 76 insertions(+), 7 deletions(-)
+After this patch, only TMOUT was different.  I have a separate patch
+for that.
 
+Signed-off-by: Doug Anderson <dianders@chromium.org>
+---
+Changes in v3: None
+Changes in v2: None
+
+ drivers/mmc/host/dw_mmc.c | 4 +---
+ 1 file changed, 1 insertion(+), 3 deletions(-)
+
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index 7a5ce6a..be095b7 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -2499,9 +2499,7 @@ int dw_mci_resume(struct dw_mci *host)
+ 		struct dw_mci_slot *slot = host->slot[i];
+ 		if (!slot)
+ 			continue;
+-		if (slot->mmc->pm_flags & MMC_PM_KEEP_POWER) {
+-			dw_mci_set_ios(slot->mmc, &slot->mmc->ios);
+-		}
++		dw_mci_set_ios(slot->mmc, &slot->mmc->ios);
+ 
+ 		ret = mmc_resume_host(host->slot[i]->mmc);
+ 		if (ret < 0)
 -- 
 1.8.3
