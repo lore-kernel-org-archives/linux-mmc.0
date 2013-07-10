@@ -1,41 +1,38 @@
-From: Nishanth Menon <nm@ti.com>
-Subject: Re: [PATCH v2] mmc: omap_hsmmc: use the generic config for omap2plus
- devices
-Date: Wed, 10 Jul 2013 16:13:57 -0500
-Message-ID: <20130710211356.GA2587@snafu>
-References: <1372422894-23729-1-git-send-email-a-bindra@ti.com>
- <1373472384-13067-1-git-send-email-a-bindra@ti.com>
+From: Scott Wood <scottwood@freescale.com>
+Subject: Re: [PATCH 1/4 V2] powerpc/85xx: Add support for 85xx cpu type
+ detection
+Date: Wed, 10 Jul 2013 16:48:13 -0500
+Message-ID: <1373492893.8183.236@snotra>
+References: <1373441941-32650-1-git-send-email-Haijun.Zhang@freescale.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Return-path: <linux-omap-owner@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"; delsp=Yes; format=Flowed
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-db9lp0253.outbound.messaging.microsoft.com ([213.199.154.253]:57980
+	"EHLO db9outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752571Ab3GJVsW convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 10 Jul 2013 17:48:22 -0400
+In-Reply-To: <1373441941-32650-1-git-send-email-Haijun.Zhang@freescale.com>
+	(from Haijun.Zhang@freescale.com on Wed Jul 10 02:39:01 2013)
 Content-Disposition: inline
-In-Reply-To: <1373472384-13067-1-git-send-email-a-bindra@ti.com>
-Sender: linux-omap-owner@vger.kernel.org
-To: a-bindra@ti.com
-Cc: linux-mmc@vger.kernel.org, cjb@laptop.org, linux-omap@vger.kernel.org, Balaji T K <balajitk@ti.com>, Ezequiel Garcia <ezequiel.garcia@free-electrons.com>, Felipe Balbi <balbi@ti.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+Cc: linux-mmc@vger.kernel.org, linuxppc-dev@lists.ozlabs.org, cbouatmailru@gmail.com, cjb@laptop.org, AFLEMING@freescale.com, r39252@freescale.com, X.Xie@freescale.com, Haijun Zhang <Haijun.Zhang@freescale.com>, Zhao Chenhui <chenhui.zhao@freescale.com>
 
-On 21:36-20130710, a-bindra@ti.com wrote:
-> From: Amarinder Bindra <a-bindra@ti.com>
-> 
-> OMAP's hs_mmc driver is used for MMC controller operation on many
-> omap2plus SoCs (OMAP2430, OMAP3, 4, 5 and AM335x).
-> 
-> Considering that the device tree entries are already present for these,
-> allow the driver to be built using the config ARCH_OMAP2PLUS rather
-> than individually adding a config for each SoC to enable the
-> support.
-> 
-> Use COMPILE_TEST to enable the build for other platforms.
-> 
-> Signed-off-by: Amarinder Bindra <a-bindra@ti.com>
-> Cc: Ezequiel Garcia <ezequiel.garcia@free-electrons.com>
-> Cc: Felipe Balbi <balbi@ti.com>
-> Cc: Nishanth Menon <nm@ti.com>
-works for O5.
+On 07/10/2013 02:39:01 AM, Haijun Zhang wrote:
+> +/* Get current SOC Version */
+> +#define GET_SVR()	(mfspr(SPRN_SVR))
 
-Acked-by: Nishanth Menon <nm@ti.com>
+Unnecessary parens.  Why do we need GET_SVR(), versus opencoding it?   
+Note that U-Boot (which this is patterned after) doesn't have  
+GET_SVR(), so code that wants to work on both can't use it anyway.
 
--- 
-Regards,
-Nishanth Menon
+> +#define IS_SVR_REV(svr, maj, min) \
+> +	((SVR_MAJ(svr) == (maj)) && (SVR_MIN(svr) == (min)))
+
+I don't think IS_SVR_REV is needed.  Callers can just do "if  
+(SVR_REV(svr) == 0x30)" or whatever, especially since we're relying on  
+them to do this for greater/less than comparisons.
+
+-Scott
