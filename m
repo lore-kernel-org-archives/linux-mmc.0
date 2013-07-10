@@ -1,115 +1,43 @@
-From: Doug Anderson <dianders@chromium.org>
-Subject: [PATCH v2 2/5] mmc: dw_mmc: Add suspend_noirq/resume_noirq callbacks for dw_mmc-pltfm
-Date: Tue,  9 Jul 2013 16:19:18 -0700
-Message-ID: <1373411961-23812-3-git-send-email-dianders@chromium.org>
-References: <1373391071-6312-1-git-send-email-dianders@chromium.org>
- <1373411961-23812-1-git-send-email-dianders@chromium.org>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-gg0-f201.google.com ([209.85.161.201]:44736 "EHLO
-	mail-gg0-f201.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753541Ab3GIXTa (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 9 Jul 2013 19:19:30 -0400
-Received: by mail-gg0-f201.google.com with SMTP id 21so553772ggh.0
-        for <linux-mmc@vger.kernel.org>; Tue, 09 Jul 2013 16:19:29 -0700 (PDT)
-In-Reply-To: <1373411961-23812-1-git-send-email-dianders@chromium.org>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Simon Horman <horms@verge.net.au>
+Subject: Re: [PATCH v3 5/7] mmc: SDHI: add DT compatibility strings for
+ further SoCs
+Date: Wed, 10 Jul 2013 09:38:34 +0900
+Message-ID: <20130710003832.GE15011@verge.net.au>
+References: <1373298887-9877-1-git-send-email-g.liakhovetski@gmx.de>
+ <1373298887-9877-6-git-send-email-g.liakhovetski@gmx.de>
+ <878v1gtgcg.wl%kuninori.morimoto.gx@renesas.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-sh-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <878v1gtgcg.wl%kuninori.morimoto.gx@renesas.com>
+Sender: linux-sh-owner@vger.kernel.org
+To: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
+Cc: Guennadi Liakhovetski <g.liakhovetski@gmx.de>, linux-sh@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>, Guennadi Liakhovetski <g.liakhovetski+renesas@gmail.com>, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: Olof Johansson <olof@lixom.net>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, James Hogan <james.hogan@imgtec.com>, Grant Grundler <grundler@chromium.org>, Alim Akhtar <alim.akhtar@samsung.com>, Abhilash Kesavan <a.kesavan@samsung.com>, Tomasz Figa <tomasz.figa@gmail.com>, Doug Anderson <dianders@chromium.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-On some devices (like exynos5420) the dw_mmc controller may be in a
-strange state after we wake up from sleep.  Add callbacks to allow for
-dealing with these quirks.  We use the "_noirq" versions of the
-callbacks since in the case of exynos5420 the strange state caused
-interrupts to fire so we need to deal with it while interrupts are
-still off.
+On Mon, Jul 08, 2013 at 11:09:07PM -0700, Kuninori Morimoto wrote:
+> 
+> Hi Guennadi
+> 
+> > diff --git a/drivers/mmc/host/sh_mobile_sdhi.c b/drivers/mmc/host/sh_mobile_sdhi.c
+> > index cc4c872..b58c1a9 100644
+> > --- a/drivers/mmc/host/sh_mobile_sdhi.c
+> > +++ b/drivers/mmc/host/sh_mobile_sdhi.c
+> > @@ -130,6 +130,9 @@ static const struct of_device_id sh_mobile_sdhi_of_match[] = {
+> >  	{ .compatible = "renesas,shmobile-sdhi" },
+> >  	{ .compatible = "renesas,sh7372-sdhi" },
+> >  	{ .compatible = "renesas,r8a7740-sdhi", .data = &sh_mobile_sdhi_of_cfg[0], },
+> > +	{ .compatible = "renesas,sh73a0-sdhi", .data = &sh_mobile_sdhi_of_cfg[0], },
+> > +	{ .compatible = "renesas,r8a73a4-sdhi", .data = &sh_mobile_sdhi_of_cfg[0], },
+> > +	{ .compatible = "renesas,r8a7790-sdhi", .data = &sh_mobile_sdhi_of_cfg[0], },
+> >  	{},
+> 
+> According to HW people, latest Renesas chip needs "TMIO_MMC_HAS_IDLE_WAIT".
+> Could you plase add r8a7778 / r8a7779 here ?
+> 
+> # or we can use common compatible name for it ?
 
-At the moment this support is only added to dw_mmc-pltfm which calls
-straight to the callback, since nobody but exynos needs it.  We can
-add some levels of indirection (a call into the generic dw_mmc code)
-when someone finds a need.
+Hi Guennadi,
 
-Signed-off-by: Doug Anderson <dianders@chromium.org>
----
-Changes in v2:
-- Use suspend_noirq as per James Hogan.
-
- drivers/mmc/host/dw_mmc-pltfm.c | 37 ++++++++++++++++++++++++++++++++++---
- drivers/mmc/host/dw_mmc.h       |  4 ++++
- 2 files changed, 38 insertions(+), 3 deletions(-)
-
-diff --git a/drivers/mmc/host/dw_mmc-pltfm.c b/drivers/mmc/host/dw_mmc-pltfm.c
-index 41c27b7..220568c 100644
---- a/drivers/mmc/host/dw_mmc-pltfm.c
-+++ b/drivers/mmc/host/dw_mmc-pltfm.c
-@@ -105,12 +105,43 @@ static int dw_mci_pltfm_resume(struct device *dev)
- 
- 	return 0;
- }
-+
-+static int dw_mci_pltfm_suspend_noirq(struct device *dev)
-+{
-+	struct dw_mci *host = dev_get_drvdata(dev);
-+	const struct dw_mci_drv_data *drv_data = host->drv_data;
-+
-+	if (drv_data && drv_data->suspend_noirq)
-+		return drv_data->suspend_noirq(host);
-+
-+	return 0;
-+}
-+
-+static int dw_mci_pltfm_resume_noirq(struct device *dev)
-+{
-+	struct dw_mci *host = dev_get_drvdata(dev);
-+	const struct dw_mci_drv_data *drv_data = host->drv_data;
-+
-+	if (drv_data && drv_data->resume_noirq)
-+		return drv_data->resume_noirq(host);
-+
-+	return 0;
-+}
-+
-+
- #else
--#define dw_mci_pltfm_suspend	NULL
--#define dw_mci_pltfm_resume	NULL
-+#define dw_mci_pltfm_suspend		NULL
-+#define dw_mci_pltfm_resume		NULL
-+#define dw_mci_pltfm_suspend_noirq	NULL
-+#define dw_mci_pltfm_resume_noirq	NULL
- #endif /* CONFIG_PM_SLEEP */
- 
--SIMPLE_DEV_PM_OPS(dw_mci_pltfm_pmops, dw_mci_pltfm_suspend, dw_mci_pltfm_resume);
-+const struct dev_pm_ops dw_mci_pltfm_pmops = {
-+	SET_SYSTEM_SLEEP_PM_OPS(dw_mci_pltfm_suspend, dw_mci_pltfm_resume)
-+	.suspend_noirq = dw_mci_pltfm_suspend_noirq,
-+	.resume_noirq = dw_mci_pltfm_resume_noirq,
-+};
-+
- EXPORT_SYMBOL_GPL(dw_mci_pltfm_pmops);
- 
- static const struct of_device_id dw_mci_pltfm_match[] = {
-diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
-index 0b74189..5d0398f 100644
---- a/drivers/mmc/host/dw_mmc.h
-+++ b/drivers/mmc/host/dw_mmc.h
-@@ -190,6 +190,8 @@ extern int dw_mci_resume(struct dw_mci *host);
-  * @prepare_command: handle CMD register extensions.
-  * @set_ios: handle bus specific extensions.
-  * @parse_dt: parse implementation specific device tree properties.
-+ * @suspend_noirq: called late in the suspend process
-+ * @resume_noirq: called early in the resume process
-  *
-  * Provide controller implementation specific extensions. The usage of this
-  * data structure is fully optional and usage of each member in this structure
-@@ -202,5 +204,7 @@ struct dw_mci_drv_data {
- 	void		(*prepare_command)(struct dw_mci *host, u32 *cmdr);
- 	void		(*set_ios)(struct dw_mci *host, struct mmc_ios *ios);
- 	int		(*parse_dt)(struct dw_mci *host);
-+	int		(*suspend_noirq)(struct dw_mci *host);
-+	int		(*resume_noirq)(struct dw_mci *host);
- };
- #endif /* _DW_MMC_H_ */
--- 
-1.8.3
-
+could you please address Morimoto-san's review?
