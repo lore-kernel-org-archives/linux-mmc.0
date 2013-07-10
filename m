@@ -1,77 +1,41 @@
 From: Doug Anderson <dianders@chromium.org>
-Subject: [PATCH v3 1/5] mmc: dw_mmc: Invalidate cache of current_speed after suspend/resume
-Date: Wed, 10 Jul 2013 08:42:02 -0700
-Message-ID: <1373470926-19314-2-git-send-email-dianders@chromium.org>
+Subject: [PATCH v3 0/5] mmc: dw_mmc: fixes for suspend/resume on exynos
+Date: Wed, 10 Jul 2013 08:42:01 -0700
+Message-ID: <1373470926-19314-1-git-send-email-dianders@chromium.org>
 References: <1373411961-23812-1-git-send-email-dianders@chromium.org>
- <1373470926-19314-1-git-send-email-dianders@chromium.org>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ve0-f202.google.com ([209.85.128.202]:39036 "EHLO
-	mail-ve0-f202.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754457Ab3GJPmP (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 10 Jul 2013 11:42:15 -0400
-Received: by mail-ve0-f202.google.com with SMTP id m1so623209ves.1
-        for <linux-mmc@vger.kernel.org>; Wed, 10 Jul 2013 08:42:14 -0700 (PDT)
-In-Reply-To: <1373470926-19314-1-git-send-email-dianders@chromium.org>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-Reply-To: <1373411961-23812-1-git-send-email-dianders@chromium.org>
+Sender: linux-samsung-soc-owner@vger.kernel.org
 To: Chris Ball <cjb@laptop.org>
-Cc: Olof Johansson <olof@lixom.net>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, James Hogan <james.hogan@imgtec.com>, Grant Grundler <grundler@chromium.org>, Alim Akhtar <alim.akhtar@samsung.com>, Abhilash Kesavan <a.kesavan@samsung.com>, Tomasz Figa <tomasz.figa@gmail.com>, Doug Anderson <dianders@chromium.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc: Olof Johansson <olof@lixom.net>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, James Hogan <james.hogan@imgtec.com>, Grant Grundler <grundler@chromium.org>, Alim Akhtar <alim.akhtar@samsung.com>, Abhilash Kesavan <a.kesavan@samsung.com>, Tomasz Figa <tomasz.figa@gmail.com>, Doug Anderson <dianders@chromium.org>, linux-samsung-soc@vger.kernel.org, linux-mmc@vger.kernel.org, Kukjin Kim <kgene.kim@samsung.com>, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+List-Id: linux-mmc@vger.kernel.org
 
-The dw_mmc driver keeps a cache of the current slot->clock in order to
-avoid doing a whole lot of work every time set_ios() is called.
-However, after suspend/resume the register values are bogus so we need
-to ensure that the cached value is invalidated.
+This series of patches addresses some suspend/resume problems with
+dw_mmc on exynos platforms.  Since suspend/resume is not fully working
+on ToT Linux (3.10) on exynos5250-snow, this series was tested against
+the current ToT ChromeOS 3.8 tree.  I have confirmed basic booting
+and eMMC / SD card usage (and compiling, honest!) against ToT Linux.
 
-In many cases we got by without this since the core mmc code fiddles
-with the clock a lot.  If we've got a card present we're probably
-running it at something like 50MHz and the core will temporarily
-switch us to 400kHz after resume.  One case that didn't work (for me)
-is the case of having no card in the slot.  The slot is initted to
-400kHz at boot time.  After suspend/resume the slot thinks it's still
-at 400kHz (due to the cache) so doesn't adjust timing.  When it tries
-to send the command at probe time it just times out and gets left in a
-bad state.
+Changes in v3:
+- Add freeze/thaw and poweroff/restore noirq entries.
 
-Invalidating the current_speed also means that we don't need to call:
-  dw_mci_setup_bus(slot, true);
-...to force an update of the clock in the case when the slot was left
-powered.
-
-Signed-off-by: Doug Anderson <dianders@chromium.org>
----
-Changes in v3: None
 Changes in v2:
 - Fix typo (some -> come)
 - Use ~0 instead of 0xFFFFFFFF; add comment about value
+- Use suspend_noirq as per James Hogan.
 
- drivers/mmc/host/dw_mmc.c | 8 +++++++-
- 1 file changed, 7 insertions(+), 1 deletion(-)
+Doug Anderson (5):
+  mmc: dw_mmc: Invalidate cache of current_speed after suspend/resume
+  mmc: dw_mmc: Add suspend_noirq/resume_noirq callbacks for dw_mmc-pltfm
+  mmc: dw_mmc: Add exynos resume_noirq callback to clear WAKEUP_INT
+  mmc: dw_mmc: Always setup the bus after suspend/resume
+  mmc: dw_mmc: Set timeout to max upon resume
 
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index bc3a1bc..7a5ce6a 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -2488,13 +2488,19 @@ int dw_mci_resume(struct dw_mci *host)
- 		   DW_MCI_ERROR_FLAGS | SDMMC_INT_CD);
- 	mci_writel(host, CTRL, SDMMC_CTRL_INT_ENABLE);
- 
-+	/*
-+	 * Invalidate the 'current_speed' value since CLKDIV has come up in
-+	 * default state and our cache is incorrect; set to something we know
-+	 * slot->clock won't be.
-+	 */
-+	host->current_speed = ~0;
-+
- 	for (i = 0; i < host->num_slots; i++) {
- 		struct dw_mci_slot *slot = host->slot[i];
- 		if (!slot)
- 			continue;
- 		if (slot->mmc->pm_flags & MMC_PM_KEEP_POWER) {
- 			dw_mci_set_ios(slot->mmc, &slot->mmc->ios);
--			dw_mci_setup_bus(slot, true);
- 		}
- 
- 		ret = mmc_resume_host(host->slot[i]->mmc);
+ drivers/mmc/host/dw_mmc-exynos.c | 23 ++++++++++++++++++++++
+ drivers/mmc/host/dw_mmc-pltfm.c  | 41 +++++++++++++++++++++++++++++++++++++---
+ drivers/mmc/host/dw_mmc.c        | 15 +++++++++++----
+ drivers/mmc/host/dw_mmc.h        |  4 ++++
+ 4 files changed, 76 insertions(+), 7 deletions(-)
+
 -- 
 1.8.3
-
