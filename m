@@ -1,87 +1,68 @@
-From: Haijun Zhang <Haijun.Zhang@freescale.com>
-Subject: [PATCH V3] powerpc/85xx: Add support for 85xx cpu type detection
-Date: Thu, 11 Jul 2013 08:23:52 +0800
-Message-ID: <1373502232-4772-1-git-send-email-Haijun.Zhang@freescale.com>
+From: Jeremie Samuel <jeremie.samuel.ext@parrot.com>
+Subject: Re: [PATCH 0/8] sdhci: Move real work out of an atomic context
+Date: Thu, 11 Jul 2013 10:28:33 +0200
+Message-ID: <51DE6CB1.7040609@parrot.com>
+References: <1373384652-21958-1-git-send-email-jeremie.samuel.ext@parrot.com> <D49C0E13-CD9B-451A-8CFB-B28404AA6A8E@nvidia.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-db8lp0185.outbound.messaging.microsoft.com ([213.199.154.185]:56453
-	"EHLO db8outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1754177Ab3GKBOa (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 10 Jul 2013 21:14:30 -0400
+Received: from co202.xi-lite.net ([149.6.83.202]:45655 "EHLO co202.xi-lite.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1755342Ab3GKI2v (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 11 Jul 2013 04:28:51 -0400
+In-Reply-To: <D49C0E13-CD9B-451A-8CFB-B28404AA6A8E@nvidia.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, linuxppc-dev@lists.ozlabs.org
-Cc: cbouatmailru@gmail.com, cjb@laptop.org, scottwood@freescale.com, AFLEMING@freescale.com, r39252@freescale.com, Haijun Zhang <Haijun.Zhang@freescale.com>, Zhao Chenhui <chenhui.zhao@freescale.com>
+To: Philip Rakity <prakity@nvidia.com>
+Cc: Chris Ball <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Matthieu Castet <matthieu.castet@parrot.com>, =?ISO-8859-1?Q?Gr=E9gor_?= =?ISO-8859-1?Q?BOIRIE?= <gregor.boirie@parrot.com>
 
-Add this file to help detect cpu type in runtime.
-These macros will be more favorable for driver
-to apply errata and workaround to specified cpu type.
+On 09/07/2013 17:52, Philip Rakity wrote:
 
-Signed-off-by: Haijun Zhang <Haijun.Zhang@freescale.com>
-Signed-off-by: Zhao Chenhui <chenhui.zhao@freescale.com>
----
-changes for v3:
-	- remove get_svr and is_svr_rev
+> On Jul 9, 2013, at 4:44 PM, Jeremie Samuel<jeremie.samuel.ext@parrot.com>  wrote:
+>
+>> Hi all,
+>>
+>> Currently the sdhci driver does everything in the atomic context.
+>> And what is worse, PIO transfers are made from the IRQ handler.
+>>
+>> Some patches were already submitted to solve this issue. But there were
+>> rejected because they involved new issues.
+>>
+>> This set of patches is an evolution of an old patch from Anton Vorontsov.
+>> I tried to fix all the problems involved by the patches. I tested it for
+>> several time now with SD cards and SDIO.
+>>
+>> So, this patch set reworks sdhci code to avoid atomic context,
+>> almost completely.
+>>
+>> Thanks,
+>>
+> Running DDR50, SDR104 or HS200 what is the performance impact ?
+I've realised performance tests with iozone benchmark and the performance impact was approximatively 0.5%.
 
- arch/powerpc/include/asm/mpc85xx.h | 47 ++++++++++++++++++++++++++++++++++++++
- 1 file changed, 47 insertions(+)
- create mode 100644 arch/powerpc/include/asm/mpc85xx.h
-
-diff --git a/arch/powerpc/include/asm/mpc85xx.h b/arch/powerpc/include/asm/mpc85xx.h
-new file mode 100644
-index 0000000..824b619
---- /dev/null
-+++ b/arch/powerpc/include/asm/mpc85xx.h
-@@ -0,0 +1,47 @@
-+/*
-+ * MPC85xx cpu type detection
-+ *
-+ * Copyright 2011-2012 Freescale Semiconductor, Inc.
-+ *
-+ * This is free software; you can redistribute it and/or modify
-+ * it under the terms of the GNU General Public License as published by
-+ * the Free Software Foundation; either version 2 of the License, or
-+ * (at your option) any later version.
-+ */
-+
-+#ifndef __ASM_PPC_MPC85XX_H
-+#define __ASM_PPC_MPC85XX_H
-+
-+#define SVR_REV(svr)	((svr) & 0xFF)		/* SOC design resision */
-+#define SVR_MAJ(svr)	(((svr) >>  4) & 0xF)	/* Major revision field*/
-+#define SVR_MIN(svr)	(((svr) >>  0) & 0xF)	/* Minor revision field*/
-+
-+/* Some parts define SVR[0:23] as the SOC version */
-+#define SVR_SOC_VER(svr) (((svr) >> 8) & 0xFFF7FF)	/* SOC Version fields */
-+
-+#define SVR_8533	0x803400
-+#define SVR_8535	0x803701
-+#define SVR_8536	0x803700
-+#define SVR_8540	0x803000
-+#define SVR_8541	0x807200
-+#define SVR_8543	0x803200
-+#define SVR_8544	0x803401
-+#define SVR_8545	0x803102
-+#define SVR_8547	0x803101
-+#define SVR_8548	0x803100
-+#define SVR_8555	0x807100
-+#define SVR_8560	0x807000
-+#define SVR_8567	0x807501
-+#define SVR_8568	0x807500
-+#define SVR_8569	0x808000
-+#define SVR_8572	0x80E000
-+#define SVR_P1010	0x80f900
-+#define SVR_P2041	0x821001
-+#define SVR_P3041	0x821103
-+#define SVR_P5010	0x822100
-+#define SVR_P5020	0x822000
-+#define SVR_P5040	0x820400
-+#define SVR_T4240	0x824800
-+#define SVR_B4860	0x868800
-+
-+#endif
--- 
-1.8.0
-
-
+>
+>
+>> Jeremie Samuel
+>>
+>> Jeremie Samuel (8):
+>>   sdhci: Turn timeout timer into delayed work
+>>   sdhci: Turn tuning timeout timer into delayed work
+>>   sdhci: Use work structs instead of tasklets
+>>   sdhci: Use threaded IRQ handler
+>>   sdhci: Delay led blinking
+>>   sdhci: Turn host->lock into a mutex
+>>   sdhci: Get rid of mdelay()s where it is safe and makes sense
+>>   sdhci: Use jiffies instead of a timeout counter
+>>
+>> drivers/mmc/host/sdhci.c  |  327 ++++++++++++++++++++++-----------------------
+>> include/linux/mmc/sdhci.h |   13 +-
+>> 2 files changed, 168 insertions(+), 172 deletions(-)
+>>
+>> -- 
+>> 1.7.10.4
+>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
