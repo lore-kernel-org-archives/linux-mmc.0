@@ -1,46 +1,87 @@
-From: Grant Grundler <grundler@chromium.org>
-Subject: Re: [PATCH 3/5] mmc: dw_mmc: Add exynos resume callback to clear WAKEUP_INT
-Date: Wed, 10 Jul 2013 17:43:58 -0700
-Message-ID: <CANEJEGt4r==VD1gUrTGr=uooFQ-_Odayr3Yv=6i3dwDpf1Y+cg@mail.gmail.com>
-References: <1373391071-6312-1-git-send-email-dianders@chromium.org>
-	<1373391071-6312-4-git-send-email-dianders@chromium.org>
-	<CAD=FV=XLp_2t83JfUBryaSvqLZr5OHEZeFZDRmQ1T=XA1MRkHg@mail.gmail.com>
+From: Haijun Zhang <Haijun.Zhang@freescale.com>
+Subject: [PATCH V3] powerpc/85xx: Add support for 85xx cpu type detection
+Date: Thu, 11 Jul 2013 08:23:52 +0800
+Message-ID: <1373502232-4772-1-git-send-email-Haijun.Zhang@freescale.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-Reply-To: <CAD=FV=XLp_2t83JfUBryaSvqLZr5OHEZeFZDRmQ1T=XA1MRkHg@mail.gmail.com>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Doug Anderson <dianders@chromium.org>
-Cc: Chris Ball <cjb@laptop.org>, Olof Johansson <olof@lixom.net>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, James Hogan <james.hogan@imgtec.com>, Grant Grundler <grundler@chromium.org>, Alim Akhtar <alim.akhtar@samsung.com>, Abhilash Kesavan <a.kesavan@samsung.com>, Tomasz Figa <tomasz.figa@gmail.com>, Kukjin Kim <kgene.kim@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Content-Type: text/plain
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-db8lp0185.outbound.messaging.microsoft.com ([213.199.154.185]:56453
+	"EHLO db8outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1754177Ab3GKBOa (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 10 Jul 2013 21:14:30 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org, linuxppc-dev@lists.ozlabs.org
+Cc: cbouatmailru@gmail.com, cjb@laptop.org, scottwood@freescale.com, AFLEMING@freescale.com, r39252@freescale.com, Haijun Zhang <Haijun.Zhang@freescale.com>, Zhao Chenhui <chenhui.zhao@freescale.com>
 
-On Tue, Jul 9, 2013 at 12:09 PM, Doug Anderson <dianders@chromium.org> wrote:
-> Hi,
->
-> On Tue, Jul 9, 2013 at 10:31 AM, Doug Anderson <dianders@chromium.org> wrote:
->> If the WAKEUP_INT is asserted at wakeup and not cleared, we'll end up
->> looping around forever.
->>
->> Signed-off-by: Doug Anderson <dianders@chromium.org>
->> ---
->>  drivers/mmc/host/dw_mmc-exynos.c | 23 +++++++++++++++++++++++
->>  1 file changed, 23 insertions(+)
->
-> Grant just pointed out that the WAKEUP_INT is supposed to only be
-> enabled if bits 8, 9, or 10 are 1.  Our driver never sets those so we
-> _should_ never get a WAKEUP_INT.  Bits 8-10 are marked as RESERVED on
-> the exynos5420 manual, so the current guess is that they're broken on
-> that silicon but that sometimes the interrupt fires anyway.
->
-> In any case, it is still a reasonable thing to clear this interrupt at
-> wakeup if it has fired, even if we're on an exynos device without any
-> problems.
+Add this file to help detect cpu type in runtime.
+These macros will be more favorable for driver
+to apply errata and workaround to specified cpu type.
 
-I agree. Can add:
-  Reviewed-by: Grant Grundler <grundler@chromium.org>
+Signed-off-by: Haijun Zhang <Haijun.Zhang@freescale.com>
+Signed-off-by: Zhao Chenhui <chenhui.zhao@freescale.com>
+---
+changes for v3:
+	- remove get_svr and is_svr_rev
 
-thanks,
-grant
+ arch/powerpc/include/asm/mpc85xx.h | 47 ++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 47 insertions(+)
+ create mode 100644 arch/powerpc/include/asm/mpc85xx.h
 
->
-> -Doug
+diff --git a/arch/powerpc/include/asm/mpc85xx.h b/arch/powerpc/include/asm/mpc85xx.h
+new file mode 100644
+index 0000000..824b619
+--- /dev/null
++++ b/arch/powerpc/include/asm/mpc85xx.h
+@@ -0,0 +1,47 @@
++/*
++ * MPC85xx cpu type detection
++ *
++ * Copyright 2011-2012 Freescale Semiconductor, Inc.
++ *
++ * This is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation; either version 2 of the License, or
++ * (at your option) any later version.
++ */
++
++#ifndef __ASM_PPC_MPC85XX_H
++#define __ASM_PPC_MPC85XX_H
++
++#define SVR_REV(svr)	((svr) & 0xFF)		/* SOC design resision */
++#define SVR_MAJ(svr)	(((svr) >>  4) & 0xF)	/* Major revision field*/
++#define SVR_MIN(svr)	(((svr) >>  0) & 0xF)	/* Minor revision field*/
++
++/* Some parts define SVR[0:23] as the SOC version */
++#define SVR_SOC_VER(svr) (((svr) >> 8) & 0xFFF7FF)	/* SOC Version fields */
++
++#define SVR_8533	0x803400
++#define SVR_8535	0x803701
++#define SVR_8536	0x803700
++#define SVR_8540	0x803000
++#define SVR_8541	0x807200
++#define SVR_8543	0x803200
++#define SVR_8544	0x803401
++#define SVR_8545	0x803102
++#define SVR_8547	0x803101
++#define SVR_8548	0x803100
++#define SVR_8555	0x807100
++#define SVR_8560	0x807000
++#define SVR_8567	0x807501
++#define SVR_8568	0x807500
++#define SVR_8569	0x808000
++#define SVR_8572	0x80E000
++#define SVR_P1010	0x80f900
++#define SVR_P2041	0x821001
++#define SVR_P3041	0x821103
++#define SVR_P5010	0x822100
++#define SVR_P5020	0x822000
++#define SVR_P5040	0x820400
++#define SVR_T4240	0x824800
++#define SVR_B4860	0x868800
++
++#endif
+-- 
+1.8.0
+
+
