@@ -1,68 +1,40 @@
-From: Jeremie Samuel <jeremie.samuel.ext@parrot.com>
-Subject: Re: [PATCH 0/8] sdhci: Move real work out of an atomic context
-Date: Thu, 11 Jul 2013 10:28:33 +0200
-Message-ID: <51DE6CB1.7040609@parrot.com>
-References: <1373384652-21958-1-git-send-email-jeremie.samuel.ext@parrot.com> <D49C0E13-CD9B-451A-8CFB-B28404AA6A8E@nvidia.com>
+From: "David Laight" <David.Laight@ACULAB.COM>
+Subject: RE: [PATCH 1/4 V2] powerpc/85xx: Add support for 85xx cpu type detection
+Date: Thu, 11 Jul 2013 09:43:35 +0100
+Message-ID: <AE90C24D6B3A694183C094C60CF0A2F6026B72DE@saturn3.aculab.com>
+References: <1373441941-32650-1-git-send-email-Haijun.Zhang@freescale.com> (from Haijun.Zhang@freescale.com on Wed Jul 10 02:39:01 2013) <1373492893.8183.236@snotra>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain;
+	charset="Windows-1252"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from co202.xi-lite.net ([149.6.83.202]:45655 "EHLO co202.xi-lite.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755342Ab3GKI2v (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 11 Jul 2013 04:28:51 -0400
-In-Reply-To: <D49C0E13-CD9B-451A-8CFB-B28404AA6A8E@nvidia.com>
+Received: from mx0.aculab.com ([213.249.233.131]:36299 "HELO mx0.aculab.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with SMTP
+	id S1755602Ab3GKIpJ convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 11 Jul 2013 04:45:09 -0400
+Received: from mx0.aculab.com ([127.0.0.1])
+ by localhost (mx0.aculab.com [127.0.0.1]) (amavisd-new, port 10024) with SMTP
+ id 26461-10 for <linux-mmc@vger.kernel.org>;
+ Thu, 11 Jul 2013 09:45:05 +0100 (BST)
+Content-class: urn:content-classes:message
+In-Reply-To: <1373492893.8183.236@snotra>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Philip Rakity <prakity@nvidia.com>
-Cc: Chris Ball <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Matthieu Castet <matthieu.castet@parrot.com>, =?ISO-8859-1?Q?Gr=E9gor_?= =?ISO-8859-1?Q?BOIRIE?= <gregor.boirie@parrot.com>
+To: Scott Wood <scottwood@freescale.com>
+Cc: Zhao Chenhui <chenhui.zhao@freescale.com>, linux-mmc@vger.kernel.org, r39252@freescale.com, AFLEMING@freescale.com, Haijun Zhang <Haijun.Zhang@freescale.com>, cbouatmailru@gmail.com, cjb@laptop.org, linuxppc-dev@lists.ozlabs.org, X.Xie@freescale.com
 
-On 09/07/2013 17:52, Philip Rakity wrote:
+> > +#define IS_SVR_REV(svr, maj, min) \
+> > +	((SVR_MAJ(svr) == (maj)) && (SVR_MIN(svr) == (min)))
+> 
+> I don't think IS_SVR_REV is needed.  Callers can just do "if
+> (SVR_REV(svr) == 0x30)" or whatever, especially since we're relying on
+> them to do this for greater/less than comparisons.
 
-> On Jul 9, 2013, at 4:44 PM, Jeremie Samuel<jeremie.samuel.ext@parrot.com>  wrote:
->
->> Hi all,
->>
->> Currently the sdhci driver does everything in the atomic context.
->> And what is worse, PIO transfers are made from the IRQ handler.
->>
->> Some patches were already submitted to solve this issue. But there were
->> rejected because they involved new issues.
->>
->> This set of patches is an evolution of an old patch from Anton Vorontsov.
->> I tried to fix all the problems involved by the patches. I tested it for
->> several time now with SD cards and SDIO.
->>
->> So, this patch set reworks sdhci code to avoid atomic context,
->> almost completely.
->>
->> Thanks,
->>
-> Running DDR50, SDR104 or HS200 what is the performance impact ?
-I've realised performance tests with iozone benchmark and the performance impact was approximatively 0.5%.
+Not only that, I'd guess that 'maj' and 'min' are likely to be
+constants - so you'd want to combine them and compare against 'svr'
+rather than have two conditionals.
 
->
->
->> Jeremie Samuel
->>
->> Jeremie Samuel (8):
->>   sdhci: Turn timeout timer into delayed work
->>   sdhci: Turn tuning timeout timer into delayed work
->>   sdhci: Use work structs instead of tasklets
->>   sdhci: Use threaded IRQ handler
->>   sdhci: Delay led blinking
->>   sdhci: Turn host->lock into a mutex
->>   sdhci: Get rid of mdelay()s where it is safe and makes sense
->>   sdhci: Use jiffies instead of a timeout counter
->>
->> drivers/mmc/host/sdhci.c  |  327 ++++++++++++++++++++++-----------------------
->> include/linux/mmc/sdhci.h |   13 +-
->> 2 files changed, 168 insertions(+), 172 deletions(-)
->>
->> -- 
->> 1.7.10.4
->>
->> --
->> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+	David
+
+
+
