@@ -1,48 +1,74 @@
 From: Felipe Balbi <balbi@ti.com>
-Subject: [PATCH] mmc: omap_hsmmc: fix dependency on indirect header inclusion
-Date: Thu, 11 Jul 2013 16:09:05 +0300
-Message-ID: <1373548145-3833-1-git-send-email-balbi@ti.com>
+Subject: Re: [PATCH v2] mmc: omap_hsmmc: use the generic config for omap2plus
+ devices
+Date: Thu, 11 Jul 2013 16:09:21 +0300
+Message-ID: <20130711130921.GD30970@arwen.pp.htv.fi>
+References: <1372422894-23729-1-git-send-email-a-bindra@ti.com>
+ <1373472384-13067-1-git-send-email-a-bindra@ti.com>
+Reply-To: <balbi@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-omap-owner@vger.kernel.org>
-Sender: linux-omap-owner@vger.kernel.org
-To: cjb@laptop.org
-Cc: linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, Balaji T K <balajitk@ti.com>, a-bindra@ti.com, Tony Lindgren <tony@atomide.com>, ezequiel.garcia@free-electrons.com, nm@ti.com, Felipe Balbi <balbi@ti.com>
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="pQhZXvAqiZgbeUkD"
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from comal.ext.ti.com ([198.47.26.152]:52325 "EHLO comal.ext.ti.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754365Ab3GKNJm (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 11 Jul 2013 09:09:42 -0400
+Content-Disposition: inline
+In-Reply-To: <1373472384-13067-1-git-send-email-a-bindra@ti.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: a-bindra@ti.com
+Cc: linux-mmc@vger.kernel.org, cjb@laptop.org, linux-omap@vger.kernel.org, Balaji T K <balajitk@ti.com>, Ezequiel Garcia <ezequiel.garcia@free-electrons.com>, Felipe Balbi <balbi@ti.com>, Nishanth Menon <nm@ti.com>
 
-omap_hsmmc.c depends on <linux/sizes.h> being
-included indirectly by another header. Once we
-enable COMPILE_TEST for this driver, we might
-compile under architectures which won't include
-<linux/sizes.h> for us. In fact, one such case
-is x86.
+--pQhZXvAqiZgbeUkD
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-In order to prevent compile breakages, let's
-explicitly include <linux/sizes.h>
+On Wed, Jul 10, 2013 at 09:36:24PM +0530, a-bindra@ti.com wrote:
+> From: Amarinder Bindra <a-bindra@ti.com>
+>=20
+> OMAP's hs_mmc driver is used for MMC controller operation on many
+> omap2plus SoCs (OMAP2430, OMAP3, 4, 5 and AM335x).
+>=20
+> Considering that the device tree entries are already present for these,
+> allow the driver to be built using the config ARCH_OMAP2PLUS rather
+> than individually adding a config for each SoC to enable the
+> support.
+>=20
+> Use COMPILE_TEST to enable the build for other platforms.
+>=20
+> Signed-off-by: Amarinder Bindra <a-bindra@ti.com>
+> Cc: Ezequiel Garcia <ezequiel.garcia@free-electrons.com>
+> Cc: Felipe Balbi <balbi@ti.com>
+> Cc: Nishanth Menon <nm@ti.com>
 
-Signed-off-by: Felipe Balbi <balbi@ti.com>
----
+Acked-by: Felipe Balbi <balbi@ti.com>
 
-This should be applied before http://marc.info/?l=linux-omap&m=137347241524118&w=2
-in order to maintain bisectability.
+--=20
+balbi
 
-cheers
+--pQhZXvAqiZgbeUkD
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
 
- drivers/mmc/host/omap_hsmmc.c | 1 +
- 1 file changed, 1 insertion(+)
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.12 (GNU/Linux)
 
-diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index 1865321..c937ffc 100644
---- a/drivers/mmc/host/omap_hsmmc.c
-+++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -21,6 +21,7 @@
- #include <linux/debugfs.h>
- #include <linux/dmaengine.h>
- #include <linux/seq_file.h>
-+#include <linux/sizes.h>
- #include <linux/interrupt.h>
- #include <linux/delay.h>
- #include <linux/dma-mapping.h>
--- 
-1.8.2.1
+iQIcBAEBAgAGBQJR3q6BAAoJEIaOsuA1yqREbsMQALFlW4vBKkyu8scdFGRj2uB8
+RKrWiCmFWMn0vkb6UIbFK1e8TM3TpflZx0U1cHv+2+IRVmzntHEoKQakmz68hp5l
+WE6XMLGbaDVksztdfhmq1rSEpI3n+F0e/awXGOJuNrfd2nGTaKjrprg5EQkAQtHm
+29UAOAPzJKpbRUwuJq39+ZPkgSPu8UF2oyPTOUie12BGczHH5vw92e1XucUZlg9h
+p5dL0KMVdlAu4eIRCjf29ASGbs+ZcXagNnfaLiTlxFBvP7k0gzN5a5grjhzWeOdu
+a0/uasKHh+iDVSLLIqhP7opK7X8CMWSoE1RNXvEeHl25rE6uHJy5P7kGXuro8aTN
+4VO/QenSdC5MlUKkwvx1eWv/2YOuaTL3nk+KMr/wXpfo0z9VcVPV4ckMQ/tgq/qP
+1jACLAQ9Gh4qcueZZ1KXUlYwipiLxmPVoAGb35QpxTfZax0DDMZCawmZ7Kk2zTzL
+LVCen5swI89Kwo8jHJwX0sx8DZiHbpRK99drNl7S1qnHCUP1EaBhnK1cAeBKhNra
+aZeee/4BY7/nsUOaRUmOF2XyPN9KQZGenYvT+VHmNhKZo6gW2bY1hoxEdtlWggPQ
+tGx9YSs+AfufJAntByDMJzFQHqkKAD8h9uxywNxTXYQDRGsKvHjsUCCgDHsYQfOx
+oYIqla8ZINCzR4U+F2zp
+=7ox6
+-----END PGP SIGNATURE-----
 
+--pQhZXvAqiZgbeUkD--
