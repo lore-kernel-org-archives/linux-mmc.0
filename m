@@ -1,83 +1,184 @@
-From: Daniel J Blueman <daniel@quora.org>
-Subject: BCM57765 card reader: irq nobody cared
-Date: Fri, 12 Jul 2013 17:07:43 +0800
-Message-ID: <CAMVG2svtmmVTwiUTZ_Crw9maSLYAYZ0qwABb+gp4PA0_6=po9Q@mail.gmail.com>
+From: Tanya Brokhman <tlinder@codeaurora.org>
+Subject: Re: [RFC/PATCH 4/4] block: Add URGENT request notification support
+ to CFQ scheduler
+Date: Fri, 12 Jul 2013 18:29:06 +0300
+Message-ID: <51E020C2.4040504@codeaurora.org>
+References: <1373547671-2779-1-git-send-email-tlinder@codeaurora.org> <x49oba9ndls.fsf@segfault.boston.devel.redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: <x49oba9ndls.fsf@segfault.boston.devel.redhat.com>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: Jeff Moyer <jmoyer@redhat.com>
+Cc: axboe@kernel.dk, linux-arm-msm@vger.kernel.org, linux-mmc@vger.kernel.org, open list <linux-kernel@vger.kernel.org>, "open list:UNIVERSAL FLASH S..." <linux-scsi@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-With the Broadcom BCM57765 card reader [1] in my Macbook Pro 10,1 (Mid
-2012), we see the sdhci-pci interrupt handler not claim the interrupt
-generated when the module initialises [2].
+Hello Jeff
 
-Beyond the MMC subsystem output, what other data may be useful in
-diagnosing this?
+Thank you for your comments. Please see inline.
 
-Many thanks,
-  Daniel
+On 7/11/2013 9:41 PM, Jeff Moyer wrote:
+> Tanya Brokhman <tlinder@codeaurora.org> writes:
+>
+>> When the scheduler reports to the block layer that there is an urgent
+>> request pending, the device driver may decide to stop the transmission
+>> of the current request in order to handle the urgent one. This is done
+>> in order to reduce the latency of an urgent request. For example:
+>> long WRITE may be stopped to handle an urgent READ.
+>
+> In general, I don't like the approach taken.  I would much rather see
+> a low-level cancellation method, and layer your urgent request handling
+> on top of that.  That could actually be used by the aio subsystem as
+> well (with a lot of work, of course).  That aside, I've provided some
+> comments below.
+>
 
---- [1]
+We shared a support for the low-level cancellation method some time ago. 
+Please look for a patch from Konstantin Dorfman from June 30 subjected:
+[RFC/PATCH v2] mmc: Add support to handle Urgent data transfer
+This patch set was released as a usage example for the mmc patch. They 
+should go together actually in order to achieve the benefit described 
+bellow.
 
-$ sudo lspci -s 03:00.1 -v
-03:00.1 SD Host controller: Broadcom Corporation NetXtreme BCM57765
-Memory Card Reader (rev 10) (prog-if 01)
-    Subsystem: Broadcom Corporation Device 96bc
-    Flags: bus master, fast devsel, latency 0, IRQ 17
-    Memory at c1820000 (64-bit, prefetchable) [size=64K]
-    Capabilities: [48] Power Management version 3
-    Capabilities: [58] MSI: Enable- Count=1/1 Maskable- 64bit+
-    Capabilities: [ac] Express Endpoint, MSI 00
-    Capabilities: [100] Advanced Error Reporting
-    Capabilities: [150] Power Budgeting <?>
-    Capabilities: [160] Virtual Channel
-    Kernel driver in use: sdhci-pci
 
---- [2]
 
-sdhci: Secure Digital Host Controller Interface driver
-sdhci: Copyright(c) Pierre Ossman
-sdhci-pci 0000:03:00.1: SDHCI controller found [14e4:16bc] (rev 10)
-mmc0: no vqmmc regulator found
-mmc0: no vmmc regulator found
-mmc0: SDHCI controller on PCI [0000:03:00.1] using ADMA
-[...]
-irq 17: nobody cared (try booting with the "irqpoll" option)
-CPU: 0 PID: 0 Comm: swapper/0 Tainted: G    W  3.10.0-031000-generic
-#201306301935
-Hardware name: Apple Inc. MacBookPro10,1/Mac-C3EC7CD22292981F, BIOS
-MBP101.88Z.00EE.B02.1208081132 08/08/2012
- ffff8802635cd89c ffff88026f203e48 ffffffff81703460 ffff88026f203e78
- ffffffff810f0d6d 000000029d3daf00 ffff8802635cd800 0000000000000011
- 0000000000000000 ffff88026f203ea8 ffffffff810f1195 0000000000000011
-Call Trace:
- <IRQ> [<ffffffff81703460>] dump_stack+0x19/0x1b
- [<ffffffff810f0d6d>] __report_bad_irq+0x3d/0xe0
- [<ffffffff810f1195>] note_interrupt+0x135/0x190
- [<ffffffff810ee9d9>] handle_irq_event_percpu+0xa9/0x210
- [<ffffffff8101b459>] ? sched_clock+0x9/0x10
- [<ffffffff810eeb8e>] handle_irq_event+0x4e/0x80
- [<ffffffff810f1db4>] handle_fasteoi_irq+0x64/0x120
- [<ffffffff81015a02>] handle_irq+0x22/0x40
- [<ffffffff817199da>] do_IRQ+0x5a/0xe0
- [<ffffffff8170ef6d>] common_interrupt+0x6d/0x6d
- <EOI> [<ffffffff810f6f03>] ? rcu_eqs_enter_common.isra.48+0x43/0x100
- [<ffffffff81598b01>] ? cpuidle_enter_state+0x61/0xe0
- [<ffffffff81598af7>] ? cpuidle_enter_state+0x57/0xe0
- [<ffffffff81598c40>] cpuidle_idle_call+0xc0/0x220
- [<ffffffff8101c77e>] arch_cpu_idle+0xe/0x30
- [<ffffffff810acd0e>] cpu_idle_loop+0x7e/0x250
- [<ffffffff810acf4b>] cpu_startup_entry+0x6b/0x70
- [<ffffffff816df8c7>] rest_init+0x77/0x80
- [<ffffffff81d13f11>] start_kernel+0x40c/0x419
- [<ffffffff81d13997>] ? do_early_param+0x87/0x87
- [<ffffffff81d13120>] ? early_idt_handlers+0x120/0x120
- [<ffffffff81d135e6>] x86_64_start_reservations+0x2a/0x2c
- [<ffffffff81d136db>] x86_64_start_kernel+0xf3/0x102
-handlers:
-[<ffffffffa000fb40>] sdhci_irq [sdhci]
-Disabling IRQ #17
---
-Daniel J Blueman
+>> @@ -2111,12 +2114,13 @@ static void blk_account_io_done(struct request *req)
+>>   		cpu = part_stat_lock();
+>>   		part = req->part;
+>>
+>> -		part_stat_inc(cpu, part, ios[rw]);
+>> -		part_stat_add(cpu, part, ticks[rw], duration);
+>> -		part_round_stats(cpu, part);
+>> -		part_dec_in_flight(part, rw);
+>> -
+>> -		hd_struct_put(part);
+>> +		if (req->part != NULL) {
+>> +			part_stat_inc(cpu, part, ios[rw]);
+>> +			part_stat_add(cpu, part, ticks[rw], duration);
+>> +			part_round_stats(cpu, part);
+>> +			part_dec_in_flight(part, rw);
+>> +			hd_struct_put(part);
+>> +		}
+>
+> A comment about why we now expect req->part might be null would be nice.
+>
+
+This is not related to my patch. Have no idea how it got in. I'll upload 
+a new version soon. Sorry about that.
+
+
+>> @@ -2783,6 +2786,14 @@ static void cfq_dispatch_insert(struct request_queue *q, struct request *rq)
+>>   	(RQ_CFQG(rq))->dispatched++;
+>>   	elv_dispatch_sort(q, rq);
+>>
+>> +	if (rq->cmd_flags & REQ_URGENT) {
+>> +		if (!cfqd->nr_urgent_pending)
+>> +			WARN_ON(1);
+>> +		else
+>> +			cfqd->nr_urgent_pending--;
+>> +		cfqd->nr_urgent_in_flight++;
+>> +	}
+>> +
+>
+> This is a rather ugly construct, and gets repeated later.  I'd be
+> inclined to just BUG.
+
+will fix.
+
+>> +/*
+>> + * Called when a request (rq) is reinserted (to cfqq). Check if there's
+>> + * something we should do about it
+>> + */
+>> +static void
+>> +cfq_rq_requeued(struct cfq_data *cfqd, struct cfq_queue *cfqq,
+>> +		struct request *rq)
+>> +{
+>> +	struct cfq_io_cq *cic = RQ_CIC(rq);
+>> +
+>> +	cfqd->rq_queued++;
+>> +	if (rq->cmd_flags & REQ_PRIO)
+>> +		cfqq->prio_pending++;
+>> +
+>> +	cfqq->dispatched--;
+>> +	(RQ_CFQG(rq))->dispatched--;
+>> +
+>> +	cfqd->rq_in_flight[cfq_cfqq_sync(cfqq)]--;
+>> +
+>> +	cfq_update_io_thinktime(cfqd, cfqq, cic);
+>> +	cfq_update_io_seektime(cfqd, cfqq, rq);
+>> +	cfq_update_idle_window(cfqd, cfqq, cic);
+>> +
+>> +	cfqq->last_request_pos = blk_rq_pos(rq) + blk_rq_sectors(rq);
+>> +
+>> +	if (cfqq == cfqd->active_queue) {
+>> +		if (cfq_cfqq_wait_request(cfqq)) {
+>> +			if (blk_rq_bytes(rq) > PAGE_CACHE_SIZE ||
+>> +			    cfqd->busy_queues > 1) {
+>> +				cfq_del_timer(cfqd, cfqq);
+>> +				cfq_clear_cfqq_wait_request(cfqq);
+>> +			} else {
+>> +				cfqg_stats_update_idle_time(cfqq->cfqg);
+>> +				cfq_mark_cfqq_must_dispatch(cfqq);
+>> +			}
+>> +		}
+>> +	} else if (cfq_should_preempt(cfqd, cfqq, rq)) {
+>> +		cfq_preempt_queue(cfqd, cfqq);
+>> +	}
+>> +}
+>
+> Huge cut-n-paste of cfq_rq_enqueued.  Please factor the code out.
+
+ok.
+
+
+>> +
+>>   static void cfq_insert_request(struct request_queue *q, struct request *rq)
+>>   {
+>>   	struct cfq_data *cfqd = q->elevator->elevator_data;
+>> @@ -3923,6 +3996,43 @@ static void cfq_insert_request(struct request_queue *q, struct request *rq)
+>>   	cfqg_stats_update_io_add(RQ_CFQG(rq), cfqd->serving_group,
+>>   				 rq->cmd_flags);
+>>   	cfq_rq_enqueued(cfqd, cfqq, rq);
+>> +
+>> +	if (rq->cmd_flags & REQ_URGENT) {
+>> +		WARN_ON(1);
+>> +		blk_dump_rq_flags(rq, "");
+>> +		rq->cmd_flags &= ~REQ_URGENT;
+>> +	}
+>> +
+>> +	/*
+>> +	 * Request is considered URGENT if:
+>> +	 * 1. The queue being served is of a lower IO priority then the new
+>> +	 *    request
+>> +	 * OR:
+>> +	 * 2. The workload being performed is ASYNC
+>> +	 * Only READ requests may be considered as URGENT
+>> +	 */
+>> +	if ((cfqd->active_queue &&
+>> +		 cfqq->ioprio_class < cfqd->active_queue->ioprio_class) ||
+>> +		(cfqd->serving_wl_type == ASYNC_WORKLOAD &&
+>> +		 rq_data_dir(rq) == READ)) {
+>> +		rq->cmd_flags |= REQ_URGENT;
+>> +		cfqd->nr_urgent_pending++;
+>> +	}
+>
+> If requests are queued from a higher priority queue, then that queue
+> will preempt the existing queue.  Why do we also need to interrupt read
+> requests from the lower priority queue?  You seemed to indicate that
+> long-running writes were the primary concern.
+>
+You're right, our main concern are long-running writes. Preempting lower 
+priority read request won't give us much benefit because read requests 
+are usually short.
+In the current implementation of urgent request in the mmc driver, short 
+requests or reads won't be preempted. The block layer notifies the 
+device driver of an urgent pending but it's the device driver decision 
+whether to stop an ongoing request or not.
+CFQ doesn't distinguish between read and sync write. And we do want to 
+preempt sync write requests.
+
+
+-- 
+QUALCOMM ISRAEL, on behalf of Qualcomm Innovation Center, Inc. is a member
+of Code Aurora Forum, hosted by The Linux Foundation
