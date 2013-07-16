@@ -1,94 +1,56 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH v3 3/5] mmc: dw_mmc: Add exynos resume_noirq callback to
- clear WAKEUP_INT
-Date: Tue, 16 Jul 2013 10:36:22 +0900
-Message-ID: <51E4A396.7010202@samsung.com>
-References: <1373411961-23812-1-git-send-email-dianders@chromium.org>
- <1373470926-19314-1-git-send-email-dianders@chromium.org>
- <1373470926-19314-4-git-send-email-dianders@chromium.org>
+From: Zhang Haijun-B42677 <B42677@freescale.com>
+Subject: RE: [PATCH 3/4 V2] mmc: esdhc: Add quirks to support T4240QDS board
+Date: Tue, 16 Jul 2013 03:11:47 +0000
+Message-ID: <99E897753B6F7048BD8CCDB4661D02E13A7CC3@039-SN2MPN1-021.039d.mgd.msft.net>
+References: <1373267764-6364-1-git-send-email-Haijun.Zhang@freescale.com>
+ <1373267764-6364-2-git-send-email-Haijun.Zhang@freescale.com>
+ <1373303919.8183.164@snotra> <20130712183503.GA24689@teo>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout1.samsung.com ([203.254.224.24]:20509 "EHLO
-	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754395Ab3GPBga (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 15 Jul 2013 21:36:30 -0400
-In-reply-to: <1373470926-19314-4-git-send-email-dianders@chromium.org>
+Received: from co9ehsobe005.messaging.microsoft.com ([207.46.163.28]:9907 "EHLO
+	co9outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1753764Ab3GPDJr (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 15 Jul 2013 23:09:47 -0400
+In-Reply-To: <20130712183503.GA24689@teo>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Doug Anderson <dianders@chromium.org>
-Cc: Chris Ball <cjb@laptop.org>, Olof Johansson <olof@lixom.net>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, James Hogan <james.hogan@imgtec.com>, Grant Grundler <grundler@chromium.org>, Alim Akhtar <alim.akhtar@samsung.com>, Abhilash Kesavan <a.kesavan@samsung.com>, Tomasz Figa <tomasz.figa@gmail.com>, Kukjin Kim <kgene.kim@samsung.com>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-samsung-soc@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Anton Vorontsov <anton@enomsg.org>, Wood Scott-B07421 <B07421@freescale.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linuxppc-dev@lists.ozlabs.org" <linuxppc-dev@lists.ozlabs.org>, "cjb@laptop.org" <cjb@laptop.org>, Fleming Andy-AFLEMING <afleming@freescale.com>, Wrobel Heinz-R39252 <r39252@freescale.com>
 
-Hi Doug,
-
-I think these patch-set didn't base on latest mmc-next.
-If you can rebase on latest mmc-next, it's helpful to me for testing.
-
-Best Regards,
-Jaehoon Chung
-
-On 07/11/2013 12:42 AM, Doug Anderson wrote:
-> If the WAKEUP_INT is asserted at wakeup and not cleared, we'll end up
-> looping around forever.  This has been seen to happen on exynos5420
-> silicon despite the fact that we haven't enabled any wakeup events.
-> 
-> Signed-off-by: Doug Anderson <dianders@chromium.org>
-> ---
-> Changes in v3: None
-> Changes in v2:
-> - Use suspend_noirq as per James Hogan.
-> 
->  drivers/mmc/host/dw_mmc-exynos.c | 23 +++++++++++++++++++++++
->  1 file changed, 23 insertions(+)
-> 
-> diff --git a/drivers/mmc/host/dw_mmc-exynos.c b/drivers/mmc/host/dw_mmc-exynos.c
-> index f013e7e..36b9620 100644
-> --- a/drivers/mmc/host/dw_mmc-exynos.c
-> +++ b/drivers/mmc/host/dw_mmc-exynos.c
-> @@ -30,6 +30,7 @@
->  #define SDMMC_CLKSEL_TIMING(x, y, z)	(SDMMC_CLKSEL_CCLK_SAMPLE(x) |	\
->  					SDMMC_CLKSEL_CCLK_DRIVE(y) |	\
->  					SDMMC_CLKSEL_CCLK_DIVIDER(z))
-> +#define SDMMC_CLKSEL_WAKEUP_INT		BIT(11)
->  
->  #define SDMMC_CMD_USE_HOLD_REG		BIT(29)
->  
-> @@ -102,6 +103,27 @@ static int dw_mci_exynos_setup_clock(struct dw_mci *host)
->  	return 0;
->  }
->  
-> +/**
-> + * dw_mci_exynos_resume_noirq - Exynos-specific resume code
-> + *
-> + * We have seen cases (at least on the exynos5420) where turning off the INT
-> + * power rail during suspend will leave the WAKEUP_INT bit in the CLKSEL
-> + * register asserted.  This bit is 1 to indicate that it fired and we can
-> + * clear it by writing a 1 back.  Clear it to prevent interrupts from going off
-> + * constantly.
-> + */
-> +
-> +static int dw_mci_exynos_resume_noirq(struct dw_mci *host)
-> +{
-> +	u32 clksel;
-> +
-> +	clksel = mci_readl(host, CLKSEL);
-> +	if (clksel & SDMMC_CLKSEL_WAKEUP_INT)
-> +		mci_writel(host, CLKSEL, clksel);
-> +
-> +	return 0;
-> +}
-> +
->  static void dw_mci_exynos_prepare_command(struct dw_mci *host, u32 *cmdr)
->  {
->  	/*
-> @@ -165,6 +187,7 @@ static const struct dw_mci_drv_data exynos_drv_data = {
->  	.caps			= exynos_dwmmc_caps,
->  	.init			= dw_mci_exynos_priv_init,
->  	.setup_clock		= dw_mci_exynos_setup_clock,
-> +	.resume_noirq		= dw_mci_exynos_resume_noirq,
->  	.prepare_command	= dw_mci_exynos_prepare_command,
->  	.set_ios		= dw_mci_exynos_set_ios,
->  	.parse_dt		= dw_mci_exynos_parse_dt,
-> 
+SGksIEFudG9uDQoNCllvdSBtZWFuIGdldCB2b2x0YWdlIHN1cHBvcnQgZnJvbSBEVFM/DQpPciBn
+ZXQgdm9sdGFnZSBib3RoIGZyb20gRFRTIGFuZCBob3N0IGNhcGFjaXR5IHJlZ2lzdGVyPw0KDQpU
+aGFua3MuDQoNClJlZ2FyZHMNCkhhaWp1bi4NCg0KDQo+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0t
+LS0tDQo+IEZyb206IGxpbnV4LW1tYy1vd25lckB2Z2VyLmtlcm5lbC5vcmcgW21haWx0bzpsaW51
+eC1tbWMtDQo+IG93bmVyQHZnZXIua2VybmVsLm9yZ10gT24gQmVoYWxmIE9mIEFudG9uIFZvcm9u
+dHNvdg0KPiBTZW50OiBTYXR1cmRheSwgSnVseSAxMywgMjAxMyAyOjM1IEFNDQo+IFRvOiBXb29k
+IFNjb3R0LUIwNzQyMQ0KPiBDYzogWmhhbmcgSGFpanVuLUI0MjY3NzsgbGludXgtbW1jQHZnZXIu
+a2VybmVsLm9yZzsgbGludXhwcGMtDQo+IGRldkBsaXN0cy5vemxhYnMub3JnOyBjamJAbGFwdG9w
+Lm9yZzsgRmxlbWluZyBBbmR5LUFGTEVNSU5HOyBXcm9iZWwNCj4gSGVpbnotUjM5MjUyDQo+IFN1
+YmplY3Q6IFJlOiBbUEFUQ0ggMy80IFYyXSBtbWM6IGVzZGhjOiBBZGQgcXVpcmtzIHRvIHN1cHBv
+cnQgVDQyNDBRRFMNCj4gYm9hcmQNCj4gDQo+IE9uIE1vbiwgSnVsIDA4LCAyMDEzIGF0IDEyOjE4
+OjM5UE0gLTA1MDAsIFNjb3R0IFdvb2Qgd3JvdGU6DQo+ID4gT24gMDcvMDgvMjAxMyAwMjoxNjow
+NCBBTSwgSGFpanVuIFpoYW5nIHdyb3RlOg0KPiA+ID5PbiBUNDI0MFFEUyBib2FyZCBjb250cm9s
+bGVycyBoYXMgYW4gdW51c2FibGUgQURNQSBlbmdpbmUsIHNvIHVzZQ0KPiA+ID5TRE1BIGluc3Rl
+YWQuDQo+ID4gPkFsc28gMy4wdiBpcyBzdXBwb3J0IG9uIFQ0MjQwUURTIGJvYXJkIGV2ZW4gaWYg
+dGhlIGNhcGFjaXR5IGRldGFpbGVkDQo+ID4gPm9ubHkgMS44diBzdXBwb3J0LiBXaXRob3V0IHRo
+aXMgcXVpcmsgU0QgY2FyZCB3aWxsIGRlY2xhcmUgdm9sdGFnZQ0KPiA+ID5ub3Qgc3VwcG9ydCBh
+bmQNCj4gPiA+DQo+ID4gPlNpZ25lZC1vZmYtYnk6IEhhaWp1biBaaGFuZyA8aGFpanVuLnpoYW5n
+QGZyZWVzY2FsZS5jb20+DQo+ID4NCj4gPiAuLi5hbmQgd2hhdD8NCj4gPg0KPiA+IFdoeSBpcyB0
+aGlzIGJvYXJkLXNwZWNpZmljPyAgSXNuJ3QgdGhlIGNvbnRyb2xsZXIgcGFydCBvZiB0aGUgU29D
+LCBub3QNCj4gPiBwYXJ0IG9mIHRoZSBib2FyZD8gIElmIGl0IHJlYWxseSBpcyBib2FyZC1zcGVj
+aWZpYywgY291bGQgeW91IGJlIG1vcmUNCj4gPiBkZXRhaWxlZCBhYm91dCB3aHkgKGlkZWFsbHkg
+d2l0aCBhbiBlcnJhdHVtIG51bWJlciksIGFuZCBjaGVjayB0aGUNCj4gPiB0b3BsZXZlbCBib2Fy
+ZCBjb21wYXRpYmxlIChvciBnZXQgdGhlIGluZm9ybWF0aW9uIGZyb20gcGxhdGZvcm0NCj4gPiBj
+b2RlKSByYXRoZXIgdGhhbiBtb2RpZnkgdGhlIGRldmljZSB0cmVlPw0KPiANCj4gWXVwLCBhbmQg
+aWYgYW55dGhpbmcsIEkgd291bGQgcmVjb21tZW5kIHRvIHJldXNlIHZvbHRhZ2UtcmFuZ2VzIHBy
+b3BlcnR5LA0KPiBpdCBpcyBhbHJlYWR5IGltcGxlbWVudGVkIGZvciBtbWMgc3BpIGRyaXZlciwN
+Cj4gDQo+IGRyaXZlcnMvbW1jL2hvc3Qvb2ZfbW1jX3NwaS5jDQo+IERvY3VtZW50YXRpb24vZGV2
+aWNldHJlZS9iaW5kaW5ncy9tbWMvbW1jLXNwaS1zbG90LnR4dA0KPiANCj4gVGhhbmtzLA0KPiAN
+Cj4gQW50b24NCj4gLS0NCj4gVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhl
+IGxpbmUgInVuc3Vic2NyaWJlIGxpbnV4LW1tYyIgaW4NCj4gdGhlIGJvZHkgb2YgYSBtZXNzYWdl
+IHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcgTW9yZSBtYWpvcmRvbW8gaW5mbyBhdA0KPiBo
+dHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwNCg0K
 
