@@ -1,33 +1,70 @@
-From: Grant Grundler <grundler@google.com>
-Subject: Bug in mmc_start_req() ?
-Date: Mon, 15 Jul 2013 11:20:06 -0700
-Message-ID: <CANEJEGs1Ke4bE+j+abBj8=NGuQxDXnL+P1NtpRauZYdB614mMg@mail.gmail.com>
+From: Simon Horman <horms@verge.net.au>
+Subject: Re: [PATCH] dmaengine: shdma: fix a build failure on platforms with
+ no DMA support
+Date: Tue, 16 Jul 2013 10:20:41 +0900
+Message-ID: <20130716012041.GA942@verge.net.au>
+References: <1373422152-29976-1-git-send-email-horms+renesas@verge.net.au>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ob0-f180.google.com ([209.85.214.180]:44020 "EHLO
-	mail-ob0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752423Ab3GOSUH (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 15 Jul 2013 14:20:07 -0400
-Received: by mail-ob0-f180.google.com with SMTP id eh20so14315650obb.11
-        for <linux-mmc@vger.kernel.org>; Mon, 15 Jul 2013 11:20:06 -0700 (PDT)
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-sh-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <1373422152-29976-1-git-send-email-horms+renesas@verge.net.au>
+Sender: linux-sh-owner@vger.kernel.org
+To: Vinod Koul <vinod.koul@intel.com>
+Cc: Olof Johansson <olof@lixom.net>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Kevin Hilman <khilman@linaro.org>, Dan Murphy <dmurphy@ti.com>, linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Chris Ball <cjb@laptop.org>, Magnus Damm <magnusdamm@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
-To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-I don't understand all the implications...but my gut feeling is this
-change is necessary. Can someone please explain why I'm wrong?
+On Wed, Jul 10, 2013 at 11:09:12AM +0900, Simon Horman wrote:
+> From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+> 
+> On platforms with no support for the shdma dmaengine driver build is
+> currently failing with
+> 
+> drivers/built-in.o: In function `sh_mobile_sdhi_probe':
+> drivers/mmc/host/sh_mobile_sdhi.c:170: undefined reference to`shdma_chan_filter'
+> 
+> Fix the breakage by defining shdma_chan_filter to NULL in such
+> configurations.
+> 
+> Signed-off-by: Guennadi Liakhovetski <g.liakhovetski+renesas@gmail.com>
+> [horms+renesas@verge.net.au: Apply change to shdma-base.h instead of sh_dma.h]
+> Signed-off-by: Simon Horman <horms+renesas@verge.net.au>
+> ---
+>  include/linux/shdma-base.h | 4 ++++
+>  1 file changed, 4 insertions(+)
 
-(key here is to use "err || start_err" - same logic as a few lines
-above to call mmc_post_req(...-EINVAL))
+> 
+> Hi Vinod,
+> 
+> please consider this fix from Guennadi for v3.11 which I have rebased on top of
+> next-20130709. It fixes a build problem on a number of shmobile defconfigs
+> including bockw.
 
--       if (err)
--               host->areq = NULL;
--       else
--               host->areq = areq;
-+       host->areq = (err || start_err) ? NULL : areq;
+Ping.
 
-If someone agrees, I'll post a proper patch.
+Would it be appropriate for me to take this change through my tree?
+It seems to resolve a regression in v3.11-rc1.
 
-thanks,
-grant
+> diff --git a/include/linux/shdma-base.h b/include/linux/shdma-base.h
+> index 382cf71..5b1c984 100644
+> --- a/include/linux/shdma-base.h
+> +++ b/include/linux/shdma-base.h
+> @@ -124,6 +124,10 @@ void shdma_chan_remove(struct shdma_chan *schan);
+>  int shdma_init(struct device *dev, struct shdma_dev *sdev,
+>  		    int chan_num);
+>  void shdma_cleanup(struct shdma_dev *sdev);
+> +#if IS_ENABLED(CONFIG_SH_DMAE_BASE)
+>  bool shdma_chan_filter(struct dma_chan *chan, void *arg);
+> +#else
+> +#define shdma_chan_filter NULL
+> +#endif
+>  
+>  #endif
+> -- 
+> 1.8.2.1
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-sh" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
