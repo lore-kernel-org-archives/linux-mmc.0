@@ -1,76 +1,38 @@
-From: boris brezillon <b.brezillon@overkiz.com>
-Subject: Re: [PATCH v3 2/7] mmc: atmel-mci: prepare clk before calling enable
-Date: Tue, 16 Jul 2013 17:49:11 +0200
-Message-ID: <51E56B77.2050105@overkiz.com>
-References: <1373986995-23899-1-git-send-email-b.brezillon@overkiz.com> <1373987208-24120-1-git-send-email-b.brezillon@overkiz.com> <20130716171324.7d483ada@skate>
+From: Scott Wood <scottwood@freescale.com>
+Subject: Re: [PATCH V3] powerpc/85xx: Add support for 85xx cpu type
+ detection
+Date: Tue, 16 Jul 2013 12:02:09 -0500
+Message-ID: <1373994129.8183.330@snotra>
+References: <1373502232-4772-1-git-send-email-Haijun.Zhang@freescale.com>
+	<99E897753B6F7048BD8CCDB4661D02E13C0099@039-SN2MPN1-023.039d.mgd.msft.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="us-ascii"; delsp=Yes; format=Flowed
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from 13.mo1.mail-out.ovh.net ([178.33.253.128]:60549 "EHLO
-	mo1.mail-out.ovh.net" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S932749Ab3GPPtS (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 16 Jul 2013 11:49:18 -0400
-Received: from mail31.ha.ovh.net (b9.ovh.net [213.186.33.59])
-	by mo1.mail-out.ovh.net (Postfix) with SMTP id 92FD3FF9413
-	for <linux-mmc@vger.kernel.org>; Tue, 16 Jul 2013 17:49:17 +0200 (CEST)
-In-Reply-To: <20130716171324.7d483ada@skate>
+Received: from co9ehsobe002.messaging.microsoft.com ([207.46.163.25]:56256
+	"EHLO co9outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S933252Ab3GPRDI convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 16 Jul 2013 13:03:08 -0400
+In-Reply-To: <99E897753B6F7048BD8CCDB4661D02E13C0099@039-SN2MPN1-023.039d.mgd.msft.net>
+	(from B42677@freescale.com on Tue Jul 16 03:46:44 2013)
+Content-Disposition: inline
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
-Cc: Nicolas Ferre <nicolas.ferre@atmel.com>, Ludovic Desroches <ludovic.desroches@atmel.com>, Jean-Christophe Plagniol-Villard <plagnioj@jcrosoft.com>, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Cc: Zhang Haijun-B42677 <B42677@freescale.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linuxppc-dev@lists.ozlabs.org" <linuxppc-dev@lists.ozlabs.org>, "cbouatmailru@gmail.com" <cbouatmailru@gmail.com>, "cjb@laptop.org" <cjb@laptop.org>, Wood Scott-B07421 <B07421@freescale.com>, Fleming Andy-AFLEMING <afleming@freescale.com>, Wrobel Heinz-R39252 <r39252@freescale.com>, Zhao Chenhui-B35336 <B35336@freescale.com>
 
-Hello Thomas,
+On 07/16/2013 03:46:44 AM, Zhang Haijun-B42677 wrote:
+> Hi, scott
+> 
+> Need I change something?
+> I have some patches depend on this.
+> Expect your advice.
+> 
+> Thanks.
+> 
+> Regards
+> Haijun.
 
-On 16/07/2013 17:13, Thomas Petazzoni wrote:
-> Dear Boris BREZILLON,
->
-> On Tue, 16 Jul 2013 17:06:48 +0200, Boris BREZILLON wrote:
->
->>   	buf = kmalloc(ATMCI_REGS_SIZE, GFP_KERNEL);
->>   	if (!buf)
->> @@ -389,9 +391,13 @@ static int atmci_regs_show(struct seq_file *s, void *v)
->>   	 * consistent.
->>   	 */
->>   	spin_lock_bh(&host->lock);
->> -	clk_enable(host->mck);
->> +	ret = clk_prepare_enable(host->mck);
-> I am not very familiar with the spin_lock_bh() variant, but are you
-> sure we are allowed to sleep within a spin_lock_bh()-protected critical
-> section?
->
-> Remember that clk_prepare_enable() calls both ->prepare() and
-> ->enable() for the clock, and ->prepare() is allowed to sleep, while
-> ->enable() is guaranteed not to sleep.
->
-> Therefore, clk_prepare() is usually called at probe time, while
-> clk_enable() is called whenever enabling/disabling the clock is really
-> needed. So not all clk_enable() can transparently be converted into a
-> clk_prepare_enable().
-You're absolutely right. We should not call clk_prepare/unprepare inside 
-a critical section,
-as the prepare/unprepare callback may sleep.
+It looks OK; go ahead and send the patches that depend on it.
 
-In this particular case it won't hurt as the mci clk is a peripheral clk 
-which does not
-implement the prepare callback (and as a result won't sleep).
-
-Anyway, I will fix it.
-
-What is the best approach to do so ?
-1) call clk_prepare/unprepare in the probe/remove functions and call 
-clk_enable/disable
-     in resume/suspend functions
-2) get clk_prepare_enable/disable_unprepare outside of the critical 
-sections (I don't think
-     there is any need for the mci host lock to be held when enabling 
-the clk,
-     clk framework already handle concurrent accesses to clks)
-
-I will check other patches of this series to see if they introduce 
-similar issues.
-
-> Best regards,
->
-> Thomas
-
+-Scott
