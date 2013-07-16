@@ -1,70 +1,94 @@
-From: Simon Horman <horms@verge.net.au>
-Subject: Re: [PATCH] dmaengine: shdma: fix a build failure on platforms with
- no DMA support
-Date: Tue, 16 Jul 2013 10:20:41 +0900
-Message-ID: <20130716012041.GA942@verge.net.au>
-References: <1373422152-29976-1-git-send-email-horms+renesas@verge.net.au>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH v3 3/5] mmc: dw_mmc: Add exynos resume_noirq callback to
+ clear WAKEUP_INT
+Date: Tue, 16 Jul 2013 10:36:22 +0900
+Message-ID: <51E4A396.7010202@samsung.com>
+References: <1373411961-23812-1-git-send-email-dianders@chromium.org>
+ <1373470926-19314-1-git-send-email-dianders@chromium.org>
+ <1373470926-19314-4-git-send-email-dianders@chromium.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-sh-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <1373422152-29976-1-git-send-email-horms+renesas@verge.net.au>
-Sender: linux-sh-owner@vger.kernel.org
-To: Vinod Koul <vinod.koul@intel.com>
-Cc: Olof Johansson <olof@lixom.net>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Kevin Hilman <khilman@linaro.org>, Dan Murphy <dmurphy@ti.com>, linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Chris Ball <cjb@laptop.org>, Magnus Damm <magnusdamm@gmail.com>
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout1.samsung.com ([203.254.224.24]:20509 "EHLO
+	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754395Ab3GPBga (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 15 Jul 2013 21:36:30 -0400
+In-reply-to: <1373470926-19314-4-git-send-email-dianders@chromium.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Doug Anderson <dianders@chromium.org>
+Cc: Chris Ball <cjb@laptop.org>, Olof Johansson <olof@lixom.net>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, James Hogan <james.hogan@imgtec.com>, Grant Grundler <grundler@chromium.org>, Alim Akhtar <alim.akhtar@samsung.com>, Abhilash Kesavan <a.kesavan@samsung.com>, Tomasz Figa <tomasz.figa@gmail.com>, Kukjin Kim <kgene.kim@samsung.com>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-samsung-soc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-On Wed, Jul 10, 2013 at 11:09:12AM +0900, Simon Horman wrote:
-> From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Hi Doug,
+
+I think these patch-set didn't base on latest mmc-next.
+If you can rebase on latest mmc-next, it's helpful to me for testing.
+
+Best Regards,
+Jaehoon Chung
+
+On 07/11/2013 12:42 AM, Doug Anderson wrote:
+> If the WAKEUP_INT is asserted at wakeup and not cleared, we'll end up
+> looping around forever.  This has been seen to happen on exynos5420
+> silicon despite the fact that we haven't enabled any wakeup events.
 > 
-> On platforms with no support for the shdma dmaengine driver build is
-> currently failing with
-> 
-> drivers/built-in.o: In function `sh_mobile_sdhi_probe':
-> drivers/mmc/host/sh_mobile_sdhi.c:170: undefined reference to`shdma_chan_filter'
-> 
-> Fix the breakage by defining shdma_chan_filter to NULL in such
-> configurations.
-> 
-> Signed-off-by: Guennadi Liakhovetski <g.liakhovetski+renesas@gmail.com>
-> [horms+renesas@verge.net.au: Apply change to shdma-base.h instead of sh_dma.h]
-> Signed-off-by: Simon Horman <horms+renesas@verge.net.au>
+> Signed-off-by: Doug Anderson <dianders@chromium.org>
 > ---
->  include/linux/shdma-base.h | 4 ++++
->  1 file changed, 4 insertions(+)
-
+> Changes in v3: None
+> Changes in v2:
+> - Use suspend_noirq as per James Hogan.
 > 
-> Hi Vinod,
+>  drivers/mmc/host/dw_mmc-exynos.c | 23 +++++++++++++++++++++++
+>  1 file changed, 23 insertions(+)
 > 
-> please consider this fix from Guennadi for v3.11 which I have rebased on top of
-> next-20130709. It fixes a build problem on a number of shmobile defconfigs
-> including bockw.
-
-Ping.
-
-Would it be appropriate for me to take this change through my tree?
-It seems to resolve a regression in v3.11-rc1.
-
-> diff --git a/include/linux/shdma-base.h b/include/linux/shdma-base.h
-> index 382cf71..5b1c984 100644
-> --- a/include/linux/shdma-base.h
-> +++ b/include/linux/shdma-base.h
-> @@ -124,6 +124,10 @@ void shdma_chan_remove(struct shdma_chan *schan);
->  int shdma_init(struct device *dev, struct shdma_dev *sdev,
->  		    int chan_num);
->  void shdma_cleanup(struct shdma_dev *sdev);
-> +#if IS_ENABLED(CONFIG_SH_DMAE_BASE)
->  bool shdma_chan_filter(struct dma_chan *chan, void *arg);
-> +#else
-> +#define shdma_chan_filter NULL
-> +#endif
+> diff --git a/drivers/mmc/host/dw_mmc-exynos.c b/drivers/mmc/host/dw_mmc-exynos.c
+> index f013e7e..36b9620 100644
+> --- a/drivers/mmc/host/dw_mmc-exynos.c
+> +++ b/drivers/mmc/host/dw_mmc-exynos.c
+> @@ -30,6 +30,7 @@
+>  #define SDMMC_CLKSEL_TIMING(x, y, z)	(SDMMC_CLKSEL_CCLK_SAMPLE(x) |	\
+>  					SDMMC_CLKSEL_CCLK_DRIVE(y) |	\
+>  					SDMMC_CLKSEL_CCLK_DIVIDER(z))
+> +#define SDMMC_CLKSEL_WAKEUP_INT		BIT(11)
 >  
->  #endif
-> -- 
-> 1.8.2.1
+>  #define SDMMC_CMD_USE_HOLD_REG		BIT(29)
+>  
+> @@ -102,6 +103,27 @@ static int dw_mci_exynos_setup_clock(struct dw_mci *host)
+>  	return 0;
+>  }
+>  
+> +/**
+> + * dw_mci_exynos_resume_noirq - Exynos-specific resume code
+> + *
+> + * We have seen cases (at least on the exynos5420) where turning off the INT
+> + * power rail during suspend will leave the WAKEUP_INT bit in the CLKSEL
+> + * register asserted.  This bit is 1 to indicate that it fired and we can
+> + * clear it by writing a 1 back.  Clear it to prevent interrupts from going off
+> + * constantly.
+> + */
+> +
+> +static int dw_mci_exynos_resume_noirq(struct dw_mci *host)
+> +{
+> +	u32 clksel;
+> +
+> +	clksel = mci_readl(host, CLKSEL);
+> +	if (clksel & SDMMC_CLKSEL_WAKEUP_INT)
+> +		mci_writel(host, CLKSEL, clksel);
+> +
+> +	return 0;
+> +}
+> +
+>  static void dw_mci_exynos_prepare_command(struct dw_mci *host, u32 *cmdr)
+>  {
+>  	/*
+> @@ -165,6 +187,7 @@ static const struct dw_mci_drv_data exynos_drv_data = {
+>  	.caps			= exynos_dwmmc_caps,
+>  	.init			= dw_mci_exynos_priv_init,
+>  	.setup_clock		= dw_mci_exynos_setup_clock,
+> +	.resume_noirq		= dw_mci_exynos_resume_noirq,
+>  	.prepare_command	= dw_mci_exynos_prepare_command,
+>  	.set_ios		= dw_mci_exynos_set_ios,
+>  	.parse_dt		= dw_mci_exynos_parse_dt,
 > 
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-sh" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
+
