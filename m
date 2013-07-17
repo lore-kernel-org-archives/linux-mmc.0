@@ -1,66 +1,43 @@
-From: Zhang Haijun-B42677 <B42677@freescale.com>
-Subject: RE: [PATCH V3] powerpc/85xx: Add support for 85xx cpu type detection
-Date: Wed, 17 Jul 2013 02:34:09 +0000
-Message-ID: <99E897753B6F7048BD8CCDB4661D02E13C4302@039-SN2MPN1-023.039d.mgd.msft.net>
-References: <1373502232-4772-1-git-send-email-Haijun.Zhang@freescale.com>
-	<99E897753B6F7048BD8CCDB4661D02E13C0099@039-SN2MPN1-023.039d.mgd.msft.net>
-	<1373994129.8183.330@snotra> <1374018865.8183.349@snotra>
+From: <wei_wang@realsil.com.cn>
+Subject: [PATCH] mmc:host: Remove a duplicate line in Makefile
+Date: Wed, 17 Jul 2013 11:38:19 +0800
+Message-ID: <1374032299-21996-1-git-send-email-wei_wang@realsil.com.cn>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from ch1ehsobe005.messaging.microsoft.com ([216.32.181.185]:42523
-	"EHLO ch1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751353Ab3GQCeP convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 16 Jul 2013 22:34:15 -0400
-In-Reply-To: <1374018865.8183.349@snotra>
-Content-Language: en-US
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Transfer-Encoding: 7bit
+Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
+List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
+List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel>
+List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
+List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
+List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
+Errors-To: driverdev-devel-bounces@linuxdriverproject.org
+Sender: driverdev-devel-bounces@linuxdriverproject.org
+To: cjb@laptop.org
+Cc: devel@linuxdriverproject.org, Wei WANG <wei_wang@realsil.com.cn>, linux-mmc@vger.kernel.org, rogerable@realtek.com
 List-Id: linux-mmc@vger.kernel.org
-To: Wood Scott-B07421 <B07421@freescale.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linuxppc-dev@lists.ozlabs.org" <linuxppc-dev@lists.ozlabs.org>, "cbouatmailru@gmail.com" <cbouatmailru@gmail.com>, "cjb@laptop.org" <cjb@laptop.org>, Fleming Andy-AFLEMING <afleming@freescale.com>, Wrobel Heinz-R39252 <r39252@freescale.com>, Zhao Chenhui-B35336 <B35336@freescale.com>
 
-Of course.
-I'll send patch v4 to add the rest of them.
+From: Wei WANG <wei_wang@realsil.com.cn>
 
-Thanks.
+Signed-off-by: Wei WANG <wei_wang@realsil.com.cn>
+---
+ drivers/mmc/host/Makefile |    2 --
+ 1 file changed, 2 deletions(-)
 
-Regards
-Haijun.
-
-
-> -----Original Message-----
-> From: Wood Scott-B07421
-> Sent: Wednesday, July 17, 2013 7:54 AM
-> To: Wood Scott-B07421
-> Cc: Zhang Haijun-B42677; linux-mmc@vger.kernel.org; linuxppc-
-> dev@lists.ozlabs.org; cbouatmailru@gmail.com; cjb@laptop.org; Wood Scott-
-> B07421; Fleming Andy-AFLEMING; Wrobel Heinz-R39252; Zhao Chenhui-B35336
-> Subject: Re: [PATCH V3] powerpc/85xx: Add support for 85xx cpu type
-> detection
-> 
-> On 07/16/2013 12:02:09 PM, Scott Wood wrote:
-> > On 07/16/2013 03:46:44 AM, Zhang Haijun-B42677 wrote:
-> >> Hi, scott
-> >>
-> >> Need I change something?
-> >> I have some patches depend on this.
-> >> Expect your advice.
-> >>
-> >> Thanks.
-> >>
-> >> Regards
-> >> Haijun.
-> >
-> > It looks OK; go ahead and send the patches that depend on it.
-> 
-> Actually, could you add p2040, p4040, p4080, p5021, and any other missing
-> ones you notice (lots of e500v2 P1/P2 chips are missing too)?
-> 
-> At the very least p2040 and p5021 ought to be there if you're using this
-> to check for p2041/p5040 errata, since they're basically the same chip
-> and thus have the same errata.
-> 
-> -Scott
-
+diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
+index d422e21..c41d0c3 100644
+--- a/drivers/mmc/host/Makefile
++++ b/drivers/mmc/host/Makefile
+@@ -52,8 +52,6 @@ obj-$(CONFIG_MMC_WMT)		+= wmt-sdmmc.o
+ 
+ obj-$(CONFIG_MMC_REALTEK_PCI)	+= rtsx_pci_sdmmc.o
+ 
+-obj-$(CONFIG_MMC_REALTEK_PCI)	+= rtsx_pci_sdmmc.o
+-
+ obj-$(CONFIG_MMC_SDHCI_PLTFM)		+= sdhci-pltfm.o
+ obj-$(CONFIG_MMC_SDHCI_CNS3XXX)		+= sdhci-cns3xxx.o
+ obj-$(CONFIG_MMC_SDHCI_ESDHC_IMX)	+= sdhci-esdhc-imx.o
+-- 
+1.7.9.5
