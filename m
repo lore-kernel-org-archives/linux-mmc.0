@@ -1,56 +1,57 @@
-From: Haijun Zhang <Haijun.Zhang@freescale.com>
-Subject: [PATCH 4/4 V2] mmc: esdhc: Add broken timeout quirk for p4/p5 board
-Date: Wed, 17 Jul 2013 18:11:31 +0800
-Message-ID: <1374055891-20703-3-git-send-email-Haijun.Zhang@freescale.com>
-References: <1374055891-20703-1-git-send-email-Haijun.Zhang@freescale.com>
+From: Mark Jackson <mpfj-list-2FZW7xY0fHgqdlJmJB21zg@public.gmane.org>
+Subject: Re: [PATCH v2] ARM: dts: add AM33XX MMC support
+Date: Wed, 17 Jul 2013 13:08:02 +0100
+Message-ID: <51E68922.5020503@newflow.co.uk>
+References: <1372303956-30208-1-git-send-email-joelf@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org>
-In-Reply-To: <1374055891-20703-1-git-send-email-Haijun.Zhang@freescale.com>
-List-Unsubscribe: <https://lists.ozlabs.org/options/linuxppc-dev>,
- <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=unsubscribe>
-List-Archive: <http://lists.ozlabs.org/pipermail/linuxppc-dev/>
-List-Post: <mailto:linuxppc-dev@lists.ozlabs.org>
-List-Help: <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=help>
-List-Subscribe: <https://lists.ozlabs.org/listinfo/linuxppc-dev>,
- <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=subscribe>
-Errors-To: linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org
-Sender: "Linuxppc-dev"
- <linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org>
-To: linux-mmc@vger.kernel.org, linuxppc-dev@lists.ozlabs.org
-Cc: scottwood@freescale.com, cjb@laptop.org, AFLEMING@freescale.com, Haijun Zhang <haijun.zhang@freescale.com>, cbouatmailru@gmail.com
+Return-path: <spi-devel-general-bounces-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>
+In-Reply-To: <1372303956-30208-1-git-send-email-joelf-l0cyMroinI0@public.gmane.org>
+List-Unsubscribe: <https://lists.sourceforge.net/lists/listinfo/spi-devel-general>,
+	<mailto:spi-devel-general-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://sourceforge.net/mailarchive/forum.php?forum_name=spi-devel-general>
+List-Post: <mailto:spi-devel-general-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>
+List-Help: <mailto:spi-devel-general-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.sourceforge.net/lists/listinfo/spi-devel-general>,
+	<mailto:spi-devel-general-request-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org?subject=subscribe>
+Errors-To: spi-devel-general-bounces-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org
+To: Joel Fernandes <joelf-l0cyMroinI0@public.gmane.org>
+Cc: Linux DaVinci Kernel List <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Benoit Cousson <b-cousson-l0cyMroinI0@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Mark Brown <broonie-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Devicetree Discuss <devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, Linux Documentation List <linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Sekhar Nori <nsekhar-l0cyMroinI0@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Gururaja Hebbar <gururaja.hebbar-l0cyMroinI0@public.gmane.org>, Vinod Koul <vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Linux OMAP List <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux SPI Devel List <spi-devel-general-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>, Balaji TK <balajitk-l0cyMroinI0@public.gmane.org>, Linux ARM Kernel List <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Matt Porter <matt-agtwNxEcTQJWk0Htik3J/w@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Sometimes command can't be completed within the time give
-in eSDHC_SYSCTL[DTOCV]. So just give the max value 0x14 to
-avoid this issue.
+On 27/06/13 04:32, Joel Fernandes wrote:
+> From: Matt Porter <mporter-l0cyMroinI0@public.gmane.org>
+> 
+> Adds AM33XX MMC support for am335x-bone, am335x-evm, and am335x-evmsk.
+> Also added is the DMA binding definitions based on the generic DMA
+> request binding.
+> 
+> The HWMOD data removal was breaking MMC so some new properties like reg,
+> interrupt etc were added.
+> 
+> Changes to DTS:
+> Interrupt and reg added by: Joel Fernandes <joelf-l0cyMroinI0@public.gmane.org>
+> Compatible added by Balaji TK <balajitk-l0cyMroinI0@public.gmane.org>
+> ti,needs-special-hs-handling added by Gururaja Hebbar <gururaja.hebbar-l0cyMroinI0@public.gmane.org>
+> 
+> Signed-off-by: Matt Porter <mporter-l0cyMroinI0@public.gmane.org>
+> Acked-by: Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>
+> Signed-off-by: Joel Fernandes <joelf-l0cyMroinI0@public.gmane.org>
+> ---
+>  .../devicetree/bindings/mmc/ti-omap-hsmmc.txt      |   26 +++++++++++++-
+>  arch/arm/boot/dts/am335x-bone.dts                  |    7 ++++
+>  arch/arm/boot/dts/am335x-evm.dts                   |    7 ++++
+>  arch/arm/boot/dts/am335x-evmsk.dts                 |    7 ++++
+>  arch/arm/boot/dts/am33xx.dtsi                      |   38 ++++++++++++++++++++
+>  5 files changed, 84 insertions(+), 1 deletion(-)
 
-Signed-off-by: Haijun Zhang <haijun.zhang@freescale.com>
----
-changes for v2:
-	- Rebuild patch of eSDHC host need long time to generate
-	 command interrupt
+Excuse my ignorance, but which git repository is this against ?
 
- drivers/mmc/host/sdhci-of-esdhc.c | 6 ++++++
- 1 file changed, 6 insertions(+)
 
-diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
-index 570bca8..30bfb5c 100644
---- a/drivers/mmc/host/sdhci-of-esdhc.c
-+++ b/drivers/mmc/host/sdhci-of-esdhc.c
-@@ -325,6 +325,12 @@ static void esdhc_of_platform_init(struct sdhci_host *host)
- 
- 	if (vvn > VENDOR_V_22)
- 		host->quirks &= ~SDHCI_QUIRK_NO_BUSY_IRQ;
-+
-+	if ((SVR_SOC_VER(svr) == SVR_B4860) ||
-+		(SVR_SOC_VER(svr) == SVR_P5020) ||
-+		(SVR_SOC_VER(svr) == SVR_P5040) ||
-+		(SVR_SOC_VER(svr) == SVR_P4080))
-+		host->quirks |= SDHCI_QUIRK_BROKEN_TIMEOUT_VAL;
- }
- 
- static int esdhc_pltfm_bus_width(struct sdhci_host *host, int width)
--- 
-1.8.0
+------------------------------------------------------------------------------
+See everything from the browser to the database with AppDynamics
+Get end-to-end visibility with application monitoring from AppDynamics
+Isolate bottlenecks and diagnose root cause in seconds.
+Start your free trial of AppDynamics Pro today!
+http://pubads.g.doubleclick.net/gampad/clk?id=48808831&iu=/4140/ostg.clktrk
