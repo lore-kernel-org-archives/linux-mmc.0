@@ -1,205 +1,114 @@
 From: Haijun Zhang <Haijun.Zhang@freescale.com>
-Subject: [PATCH 2/4 V2] mmc: esdhc: workaround for dma err in the last system transaction
-Date: Wed, 17 Jul 2013 18:11:29 +0800
-Message-ID: <1374055891-20703-1-git-send-email-Haijun.Zhang@freescale.com>
+Subject: [PATCH 3/4 V2] mmc: esdhc: Correct host version of T4240-R1.0
+Date: Wed, 17 Jul 2013 18:11:30 +0800
+Message-ID: <1374055891-20703-2-git-send-email-Haijun.Zhang@freescale.com>
+References: <1374055891-20703-1-git-send-email-Haijun.Zhang@freescale.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from ch1ehsobe002.messaging.microsoft.com ([216.32.181.182]:53600
-	"EHLO ch1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753249Ab3GQLC3 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 17 Jul 2013 07:02:29 -0400
+Received: from mail-db9lp0253.outbound.messaging.microsoft.com ([213.199.154.253]:1041
+	"EHLO db9outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1753249Ab3GQLCh (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 17 Jul 2013 07:02:37 -0400
+In-Reply-To: <1374055891-20703-1-git-send-email-Haijun.Zhang@freescale.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org, linuxppc-dev@lists.ozlabs.org
 Cc: cbouatmailru@gmail.com, cjb@laptop.org, scottwood@freescale.com, AFLEMING@freescale.com, Haijun Zhang <Haijun.Zhang@freescale.com>, Haijun Zhang <haijun.zhang@freescale.com>
 
-A-004388: eSDHC DMA might not stop if error occurs on system transaction
-
-eSDHC DMA(SDMA/ADMA) might not stop if an error occurs in the last system
-transaction. It may continue initiating additional transactions until
-software reset for data/all is issued during error recovery. There is not
-any data corruption to the SD data. The IRQSTAT[DMAE] is set when the
-erratum occurs.
-The only conditions under which issues occur are the following:
-1. SDMA - For SD Write , the error occurs in the last system transaction.
-No issue for SD read
-2. ADMA
-a. Block count is enabled: For SD write, the error occurs in the last system
-transaction. There is no issue for SD read when block count is enabled.
-b. Block count is disabled: Block count is designated by the ADMA descriptor
-table, and the error occurs in the last system transaction when ADMA is
-executing last descriptor line of table.
-
-eSDHC may initiate additional system transactions. There is no data integrity
-issue for case 1 and 2a described below. For case 2b, system data might be
-corrupted.
-
-Workaround: Set eSDHC_SYSCTL[RSTD] when IRQSTAT[DMAE] is set. For cases 2a and
-2b above, add an extra descriptor line with zero data next to the last
-descriptor line.
+Vender version and sdhc spec version of T4240-R1.0 is incorrect.
+The right value should be VVN=0x13, SVN = 0x1. The wrong version
+number will break down the ADMA data transfer.
+This defect only exist in T4240-R1.0. Will be fixed in T4240-R2.0.
+Also share vvn and svr for public use.
 
 Signed-off-by: Haijun Zhang <haijun.zhang@freescale.com>
 ---
 changes for V2:
-	- Update the svr version list
+	- Remove broken ADMA quirk.
+	- Rebuild patch of  Add quirks to support T4240 board
 
- drivers/mmc/host/sdhci-of-esdhc.c | 112 ++++++++++++++++++++++++++++++++++----
- 1 file changed, 102 insertions(+), 10 deletions(-)
+ drivers/mmc/host/sdhci-of-esdhc.c | 29 +++++++++++++----------------
+ 1 file changed, 13 insertions(+), 16 deletions(-)
 
 diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
-index 15039e2..adfaadd 100644
+index adfaadd..570bca8 100644
 --- a/drivers/mmc/host/sdhci-of-esdhc.c
 +++ b/drivers/mmc/host/sdhci-of-esdhc.c
-@@ -21,9 +21,13 @@
- #include <linux/mmc/host.h>
- #include "sdhci-pltfm.h"
- #include "sdhci-esdhc.h"
-+#include <asm/mpc85xx.h>
- 
+@@ -26,7 +26,7 @@
  #define VENDOR_V_22	0x12
  #define VENDOR_V_23	0x13
-+
-+static u32 svr;
-+
+ 
+-static u32 svr;
++static u32 svr, vvn;
+ 
  static u32 esdhc_readl(struct sdhci_host *host, int reg)
  {
- 	u32 ret;
-@@ -142,6 +146,26 @@ static void esdhc_writeb(struct sdhci_host *host, u8 val, int reg)
- 	sdhci_be32bs_writeb(host, val, reg);
+@@ -43,11 +43,9 @@ static u32 esdhc_readl(struct sdhci_host *host, int reg)
+ 	 * For FSL eSDHC, must aligned 4-byte, so use 0xFC to read the
+ 	 * the verdor version number, oxFE is SDHCI_HOST_VERSION.
+ 	 */
+-	if ((reg == SDHCI_CAPABILITIES) && (ret & SDHCI_CAN_DO_ADMA1)) {
+-		u32 tmp = in_be32(host->ioaddr + SDHCI_SLOT_INT_STATUS);
+-		tmp = (tmp & SDHCI_VENDOR_VER_MASK) >> SDHCI_VENDOR_VER_SHIFT;
+-		if (tmp > VENDOR_V_22)
+-			ret |= SDHCI_CAN_DO_ADMA2;
++	if ((reg == SDHCI_CAPABILITIES) && (ret & SDHCI_CAN_DO_ADMA1) &&
++		(vvn > VENDOR_V_22)) {
++		ret |= SDHCI_CAN_DO_ADMA2;
+ 	}
+ 
+ 	return ret;
+@@ -63,6 +61,12 @@ static u16 esdhc_readw(struct sdhci_host *host, int reg)
+ 		ret = in_be32(host->ioaddr + base) & 0xffff;
+ 	else
+ 		ret = (in_be32(host->ioaddr + base) >> shift) & 0xffff;
++
++	/* T4240-R1.0 had a incorrect vendor version and spec version */
++	if ((reg == SDHCI_HOST_VERSION) &&
++		((SVR_SOC_VER(svr) == SVR_T4240) && (SVR_REV(svr) == 0x10)))
++		ret = (VENDOR_V_23 << SDHCI_VENDOR_VER_SHIFT) | SDHCI_SPEC_200;
++
+ 	return ret;
  }
  
-+static void esdhc_reset(struct sdhci_host *host, u8 mask)
-+{
-+	u32 ier;
-+	u32 uninitialized_var(isav);
-+
-+	if (host->quirks & SDHCI_QUIRK_RESTORE_IRQS_AFTER_RESET)
-+		isav = esdhc_readl(host, SDHCI_INT_ENABLE);
-+
-+	esdhc_writeb(host, mask, SDHCI_SOFTWARE_RESET);
-+	mdelay(100);
-+
-+	if (host->quirks & SDHCI_QUIRK_RESTORE_IRQS_AFTER_RESET) {
-+		ier = esdhc_readl(host, SDHCI_INT_ENABLE);
-+		ier &= ~SDHCI_INT_ALL_MASK;
-+		ier |= isav;
-+		esdhc_writel(host, ier, SDHCI_INT_ENABLE);
-+		esdhc_writel(host, ier, SDHCI_SIGNAL_ENABLE);
-+	}
-+}
-+
- /*
-  * For Abort or Suspend after Stop at Block Gap, ignore the ADMA
-  * error(IRQSTAT[ADMAE]) if both Transfer Complete(IRQSTAT[TC])
-@@ -156,25 +180,92 @@ static void esdhci_of_adma_workaround(struct sdhci_host *host, u32 intmask)
+@@ -175,17 +179,12 @@ static void esdhc_reset(struct sdhci_host *host, u8 mask)
+  */
+ static void esdhci_of_adma_workaround(struct sdhci_host *host, u32 intmask)
+ {
+-	u32 tmp;
+ 	bool applicable;
  	dma_addr_t dmastart;
  	dma_addr_t dmanow;
  
--	tmp = in_be32(host->ioaddr + SDHCI_SLOT_INT_STATUS);
-+	tmp = esdhc_readl(host, SDHCI_SLOT_INT_STATUS);
- 	tmp = (tmp & SDHCI_VENDOR_VER_MASK) >> SDHCI_VENDOR_VER_SHIFT;
- 
+-	tmp = esdhc_readl(host, SDHCI_SLOT_INT_STATUS);
+-	tmp = (tmp & SDHCI_VENDOR_VER_MASK) >> SDHCI_VENDOR_VER_SHIFT;
+-
  	applicable = (intmask & SDHCI_INT_DATA_END) &&
- 		(intmask & SDHCI_INT_BLK_GAP) &&
- 		(tmp == VENDOR_V_23);
--	if (!applicable)
-+	if (applicable) {
-+
-+		esdhc_reset(host, SDHCI_RESET_DATA);
-+		host->data->error = 0;
-+		dmastart = sg_dma_address(host->data->sg);
-+		dmanow = dmastart + host->data->bytes_xfered;
-+
-+		/* Force update to the next DMA block boundary. */
-+		dmanow = (dmanow & ~(SDHCI_DEFAULT_BOUNDARY_SIZE - 1)) +
-+			SDHCI_DEFAULT_BOUNDARY_SIZE;
-+		host->data->bytes_xfered = dmanow - dmastart;
-+		esdhc_writel(host, dmanow, SDHCI_DMA_ADDRESS);
-+
- 		return;
-+	}
+-		(intmask & SDHCI_INT_BLK_GAP) &&
+-		(tmp == VENDOR_V_23);
++		(intmask & SDHCI_INT_BLK_GAP) && (vvn == VENDOR_V_23);
+ 	if (applicable) {
  
--	host->data->error = 0;
--	dmastart = sg_dma_address(host->data->sg);
--	dmanow = dmastart + host->data->bytes_xfered;
- 	/*
--	 * Force update to the next DMA block boundary.
-+	 * Check for A-004388: eSDHC DMA might not stop if error
-+	 * occurs on system transaction
-+	 * Impact list:
-+	 * T4240-R1.0 B4860-R1.0 P1010-R1.0
-+	 * P3041-R1.0-R2.0-R1.1 P2041-R1.0-R1.1-R2.0
-+	 * P5040-R2.0
- 	 */
--	dmanow = (dmanow & ~(SDHCI_DEFAULT_BOUNDARY_SIZE - 1)) +
--		SDHCI_DEFAULT_BOUNDARY_SIZE;
--	host->data->bytes_xfered = dmanow - dmastart;
--	sdhci_writel(host, dmanow, SDHCI_DMA_ADDRESS);
-+	if (!(((SVR_SOC_VER(svr) == SVR_T4240) && (SVR_REV(svr) == 0x10)) ||
-+		((SVR_SOC_VER(svr) == SVR_B4860) && (SVR_REV(svr) == 0x10)) ||
-+		((SVR_SOC_VER(svr) == SVR_P1010) && (SVR_REV(svr) == 0x10)) ||
-+		((SVR_SOC_VER(svr) == SVR_P3041) && (SVR_REV(svr) <= 0x20)) ||
-+		((SVR_SOC_VER(svr) == SVR_P2041) && (SVR_REV(svr) <= 0x20)) ||
-+		((SVR_SOC_VER(svr) == SVR_P5040) && SVR_REV(svr) == 0x20)))
-+		return;
-+
-+	esdhc_reset(host, SDHCI_RESET_DATA);
-+
-+	if (host->flags & SDHCI_USE_ADMA) {
-+		u32 mod, i, offset;
-+		u8 *desc;
-+		dma_addr_t addr;
-+		struct scatterlist *sg;
-+		__le32 *dataddr;
-+		__le32 *cmdlen;
-+
-+		/*
-+		 * If block count was enabled, in case read transfer there
-+		 * is no data was corrupted
-+		 */
-+		mod = esdhc_readl(host, SDHCI_TRANSFER_MODE);
-+		if ((mod & SDHCI_TRNS_BLK_CNT_EN) &&
-+			(host->data->flags & MMC_DATA_READ))
-+			host->data->error = 0;
-+
-+		BUG_ON(!host->data);
-+		desc = host->adma_desc;
-+		for_each_sg(host->data->sg, sg, host->sg_count, i) {
-+			addr = sg_dma_address(sg);
-+			offset = (4 - (addr & 0x3)) & 0x3;
-+			if (offset)
-+				desc += 8;
-+			desc += 8;
-+		}
-+
-+		/*
-+		 * Add an extra zero descriptor next to the
-+		 * terminating descriptor.
-+		 */
-+		desc += 8;
-+		WARN_ON((desc - host->adma_desc) > (128 * 2 + 1) * 4);
-+
-+		dataddr = (__le32 __force *)(desc + 4);
-+		cmdlen = (__le32 __force *)desc;
-+
-+		cmdlen[0] = cpu_to_le32(0);
-+		dataddr[0] = cpu_to_le32(0);
-+	}
-+
-+	if ((host->flags & SDHCI_USE_SDMA) &&
-+		(host->data->flags & MMC_DATA_READ))
-+		host->data->error = 0;
-+
-+	return;
- }
+ 		esdhc_reset(host, SDHCI_RESET_DATA);
+@@ -318,10 +317,9 @@ static void esdhc_of_resume(struct sdhci_host *host)
  
- static int esdhc_of_enable_dma(struct sdhci_host *host)
-@@ -299,6 +390,7 @@ static int sdhci_esdhc_probe(struct platform_device *pdev)
+ static void esdhc_of_platform_init(struct sdhci_host *host)
+ {
+-	u32 vvn;
++	svr = mfspr(SPRN_SVR);
++	vvn = esdhc_readw(host, SDHCI_HOST_VERSION);
+ 
+-	vvn = in_be32(host->ioaddr + SDHCI_SLOT_INT_STATUS);
+-	vvn = (vvn & SDHCI_VENDOR_VER_MASK) >> SDHCI_VENDOR_VER_SHIFT;
+ 	if (vvn == VENDOR_V_22)
+ 		host->quirks2 |= SDHCI_QUIRK2_HOST_NO_CMD23;
+ 
+@@ -390,7 +388,6 @@ static int sdhci_esdhc_probe(struct platform_device *pdev)
  	struct device_node *np;
  	int ret;
  
-+	svr = mfspr(SPRN_SVR);
+-	svr = mfspr(SPRN_SVR);
  	host = sdhci_pltfm_init(pdev, &sdhci_esdhc_pdata, 0);
  	if (IS_ERR(host))
  		return PTR_ERR(host);
