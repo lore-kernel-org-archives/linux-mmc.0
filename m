@@ -1,48 +1,74 @@
-From: Scott Wood <scottwood@freescale.com>
-Subject: Re: [PATCH V3] powerpc/85xx: Add support for 85xx cpu type
- detection
-Date: Tue, 16 Jul 2013 18:54:25 -0500
-Message-ID: <1374018865.8183.349@snotra>
-References: <1373502232-4772-1-git-send-email-Haijun.Zhang@freescale.com>
-	<99E897753B6F7048BD8CCDB4661D02E13C0099@039-SN2MPN1-023.039d.mgd.msft.net>
-	<1373994129.8183.330@snotra>
+From: Simon Horman <horms@verge.net.au>
+Subject: Re: [PATCH v4 5/7] mmc: SDHI: add DT compatibility strings for
+ further SoCs
+Date: Wed, 17 Jul 2013 10:22:50 +0900
+Message-ID: <20130717012247.GA2797@verge.net.au>
+References: <Pine.LNX.4.64.1307090940310.28812@axis700.grange>
+ <CANqRtoQY7hwEhN5XMXG5V234aXDFZ_kfei8ZQL+VMKaaxW=0DQ@mail.gmail.com>
+ <20130710011834.GA27240@verge.net.au>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"; delsp=Yes; format=Flowed
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from va3ehsobe002.messaging.microsoft.com ([216.32.180.12]:54079
-	"EHLO va3outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1755071Ab3GPXye convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 16 Jul 2013 19:54:34 -0400
-In-Reply-To: <1373994129.8183.330@snotra> (from scottwood@freescale.com on
-	Tue Jul 16 12:02:09 2013)
+Received: from kirsty.vergenet.net ([202.4.237.240]:42974 "EHLO
+	kirsty.vergenet.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750893Ab3GQBWx (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 16 Jul 2013 21:22:53 -0400
 Content-Disposition: inline
+In-Reply-To: <20130710011834.GA27240@verge.net.au>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Scott Wood <scottwood@freescale.com>
-Cc: Zhang Haijun-B42677 <B42677@freescale.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linuxppc-dev@lists.ozlabs.org" <linuxppc-dev@lists.ozlabs.org>, "cbouatmailru@gmail.com" <cbouatmailru@gmail.com>, "cjb@laptop.org" <cjb@laptop.org>, Wood Scott-B07421 <B07421@freescale.com>, Fleming Andy-AFLEMING <afleming@freescale.com>, Wrobel Heinz-R39252 <r39252@freescale.com>, Zhao Chenhui-B35336 <B35336@freescale.com>
+To: Magnus Damm <magnus.damm@gmail.com>
+Cc: Guennadi Liakhovetski <g.liakhovetski@gmx.de>, SH-Linux <linux-sh@vger.kernel.org>, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
 
-On 07/16/2013 12:02:09 PM, Scott Wood wrote:
-> On 07/16/2013 03:46:44 AM, Zhang Haijun-B42677 wrote:
->> Hi, scott
->> 
->> Need I change something?
->> I have some patches depend on this.
->> Expect your advice.
->> 
->> Thanks.
->> 
->> Regards
->> Haijun.
+On Wed, Jul 10, 2013 at 10:18:35AM +0900, Simon Horman wrote:
+> On Tue, Jul 09, 2013 at 06:06:00PM +0900, Magnus Damm wrote:
+> > On Tue, Jul 9, 2013 at 4:43 PM, Guennadi Liakhovetski
+> > <g.liakhovetski@gmx.de> wrote:
+> > > Add further OF compatibility strings to the SDHI driver to be able to
+> > > precisely control driver's behaviour on each of them.
+> > >
+> > > Signed-off-by: Guennadi Liakhovetski <g.liakhovetski+renesas@gmail.com>
+> > > ---
+> > >
+> > > v4:
+> > > 1. added r8a7778 and r8a7779 per Morimoto-san's request
+> > > 2. sh* and r8a* entries now sorted alphabetically
+> > 
+> > This looks good to me, thanks.
+> > 
+> > Acked-by: Magnus Damm <damm@opensource.se>
 > 
-> It looks OK; go ahead and send the patches that depend on it.
+> Thanks, I have queued this up for v3.12 in the dt branch.
+> It should appear in renesas-next-20130710
 
-Actually, could you add p2040, p4040, p4080, p5021, and any other  
-missing ones you notice (lots of e500v2 P1/P2 chips are missing too)?
+Reviewing this, I now think that it should got through the MMC tree.
+Chris, could you consider the patch below?
 
-At the very least p2040 and p5021 ought to be there if you're using  
-this to check for p2041/p5040 errata, since they're basically the same  
-chip and thus have the same errata.
+From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 
--Scott
+mmc: SDHI: add DT compatibility strings for further SoCs
+
+Add further OF compatibility strings to the SDHI driver to be able to
+precisely control driver's behaviour on each of them.
+
+Signed-off-by: Guennadi Liakhovetski <g.liakhovetski+renesas@gmail.com>
+Acked-by: Magnus Damm <damm@opensource.se>
+Acked-by: Simon Horman <horms@verge.net.au>
+
+diff --git a/drivers/mmc/host/sh_mobile_sdhi.c b/drivers/mmc/host/sh_mobile_sdhi.c
+index ebea749..afa1bba 100644
+--- a/drivers/mmc/host/sh_mobile_sdhi.c
++++ b/drivers/mmc/host/sh_mobile_sdhi.c
+@@ -129,7 +129,12 @@ static const struct sh_mobile_sdhi_ops sdhi_ops = {
+ static const struct of_device_id sh_mobile_sdhi_of_match[] = {
+ 	{ .compatible = "renesas,shmobile-sdhi" },
+ 	{ .compatible = "renesas,sh7372-sdhi" },
++	{ .compatible = "renesas,sh73a0-sdhi", .data = &sh_mobile_sdhi_of_cfg[0], },
++	{ .compatible = "renesas,r8a73a4-sdhi", .data = &sh_mobile_sdhi_of_cfg[0], },
+ 	{ .compatible = "renesas,r8a7740-sdhi", .data = &sh_mobile_sdhi_of_cfg[0], },
++	{ .compatible = "renesas,r8a7778-sdhi", .data = &sh_mobile_sdhi_of_cfg[0], },
++	{ .compatible = "renesas,r8a7779-sdhi", .data = &sh_mobile_sdhi_of_cfg[0], },
++	{ .compatible = "renesas,r8a7790-sdhi", .data = &sh_mobile_sdhi_of_cfg[0], },
+ 	{},
+ };
+ MODULE_DEVICE_TABLE(of, sh_mobile_sdhi_of_match);
