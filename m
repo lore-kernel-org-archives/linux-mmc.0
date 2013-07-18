@@ -1,104 +1,145 @@
-From: Mark Jackson <mpfj-list@newflow.co.uk>
-Subject: Re: ARM: AM335x: Kernel oops when using EDMA and MMC
-Date: Thu, 18 Jul 2013 09:55:08 +0100
-Message-ID: <51E7AD6C.2000408@newflow.co.uk>
-References: <51E6BE84.6080905@newflow.co.uk> <51E6C88B.8090608@ti.com>
+From: Balaji T K <balajitk-l0cyMroinI0@public.gmane.org>
+Subject: Re: =?GB2312?B?u9i4tDogQWJvdXQgb21hcDIgbW1jIGhvc3QgIGNsb3NlIHRvbw==?=
+ =?GB2312?B?IGxvbmcgaXJxIGluIGlycWFjdGlvbi4=?=
+Date: Thu, 18 Jul 2013 20:14:41 +0530
+Message-ID: <51E7FF59.3030000@ti.com>
+References: <201307181052572266628@gmail.com>
+ <2013071816435162919513@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-omap-owner@vger.kernel.org>
-In-Reply-To: <51E6C88B.8090608@ti.com>
-Sender: linux-omap-owner@vger.kernel.org
-To: Joel Fernandes <joelf@ti.com>
-Cc: "linux-omap@vger.kernel.org" <linux-omap@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Tony Lindgren <tony@atomide.com>, Linux MMC List <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Balaji TK <balajitk@ti.com>
+Return-path: <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
+In-Reply-To: <2013071816435162919513-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+List-Unsubscribe: <https://lists.ozlabs.org/options/devicetree-discuss>,
+ <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.ozlabs.org/pipermail/devicetree-discuss/>
+List-Post: <mailto:devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
+List-Help: <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.ozlabs.org/listinfo/devicetree-discuss>,
+ <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=subscribe>
+Errors-To: devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
+Sender: "devicetree-discuss"
+ <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
+To: majianpeng <majianpeng-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: devicetree-discuss <devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, linux-omap <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, cjb <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-kernel <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 17/07/13 17:38, Joel Fernandes wrote:
-> On 07/17/2013 10:55 AM, Mark Jackson wrote:
->> I'm trying to get the MMC port working on our custom AM3352 CPU board.
+On Thursday 18 July 2013 02:13 PM, majianpeng wrote:
+>> Hi all,
+>> 	Now i worked on omp2 and met a probelm which someplace close_irq for 3.6second.
+>> The kernel version is 2.6.37. I used trace to find in irq_action:omap_hsmmc_irq.
+>> This problem occured by removed the sdcard when there are io operations.
 >>
->> I have added MMC entries to out dts file (similar to [1]), and I've
->> enabled CONFIG_TI_EDMA.
+>> I found the read problem is in omap_hsmmc_reset_controller_fsm.
+>> In omap_hsmmc_reset_controller_fsm:
+>>> static inline void omap_hsmmc_reset_controller_fsm(struct omap_hsmmc_host *host,
+>>>                                                    unsigned long bit)
+>>> {
+>>>         unsigned long i = 0;
+>>>         unsigned long limit = (loops_per_jiffy *
+>>>                                 msecs_to_jiffies(MMC_TIMEOUT_MS));
 >>
->> Our board boots fine without an SD card inserted ...
+>>>         OMAP_HSMMC_WRITE(host->base, SYSCTL,
+>>>                          OMAP_HSMMC_READ(host->base, SYSCTL) | bit);
 >>
->> [    0.000000] Booting Linux on physical CPU 0x0
->> [    0.000000] Linux version 3.11.0-rc1-00025-g95b9b72 (mpfj@mpfj-nanobone) (gcc version 4.6.3 (Buildroot 2013.02-dirty) ) #309 Wed Jul 17 16:37:28 BST 2013
->> ...
->> [    2.789028] VFS: Mounted root (ubifs filesystem) on device 0:12.
->> [    2.797268] devtmpfs: mounted
->> [    2.801032] Freeing unused kernel memory: 200K (c0551000 - c0583000)
->> ...
->> Welcome to Buildroot
->> nanobone login:
+>>>         /*
+>>>          * OMAP4 ES2 and greater has an updated reset logic.
+>>>          * Monitor a 0->1 transition first
+>>>          */
+>>>         if (mmc_slot(host).features & HSMMC_HAS_UPDATED_RESET) {
+>>>                 while ((!(OMAP_HSMMC_READ(host->base, SYSCTL) & bit))
+>>>                                        && (i++ < limit))
+>>>                         cpu_relax();
+>>         }
+>> In func, it used loops_per_jiffy  in order to avoid do many time exceed MMC_TIMEOUT_MS.
+>> In face oops_per_jiify is like:
+>> while(i++ < loops_per_jiffy)
+>> 	cpu_relax();
+>> But actually, it used as follow:
+>>> while ((!(OMAP_HSMMC_READ(host->base, SYSCTL) & bit))
+>>>                                       && (i++ < limit))
+>> it add some operations like: read regisger, &, &&.
+>> So the time may exceed MMC_TIMEOUT_MS.
+>> I used those code to test and found it's ok:
+>> for (i = 0 ; i < 10; i++){
+>> 	if (!(OMAP_HSMMC_READ(host->base, SYSCTL) & bit))
+>> 		  break;
+>> 	j = limit/10;
+>> 	while(j--)
+>> 		cpu_relax();
+>> }
 >>
->> But when I boot with a card already inserted, I get the following oops ...
+>> Using this the problom can't occur.
+>> Am i missing something?
 >>
->> ...
->> [    1.827343] Unable to handle kernel NULL pointer dereference at virtual address 0000000c
->> [    1.835868] pgd = c0004000
->> [    1.838774] [0000000c] *pgd=00000000
->> [    1.842556] Internal error: Oops: 5 [#1] ARM
->> [    1.847063] CPU: 0 PID: 6 Comm: kworker/u2:0 Not tainted 3.11.0-rc1-00025-g95b9b72 #309
->> [    1.855511] Workqueue: kmmcd mmc_rescan
->> [    1.859556] task: cf06a080 ti: cf072000 task.ti: cf072000
->> [    1.865257] PC is at omap_hsmmc_start_command+0x74/0xf4
->> [    1.870761] LR is at omap_hsmmc_request+0xec/0x4dc
->> [    1.875806] pc : [<c0305b70>]    lr : [<c0306c64>]    psr: 60000113
->> [    1.875806] sp : cf073ca0  ip : 00000000  fp : 00000008
->> [    1.887885] r10: cf073de8  r9 : 00000001  r8 : cf11d918
->> [    1.893382] r7 : 00000003  r6 : cf33cc80  r5 : 00000001  r4 : 00000033
->> [    1.900250] r3 : 00020000  r2 : cf073db8  r1 : cf073d84  r0 : cf33cc80
->> [    1.907122] Flags: nZCv  IRQs on  FIQs on  Mode SVC_32  ISA ARM  Segment kernel
->> [    1.914813] Control: 10c5387d  Table: 80004019  DAC: 00000015
->> [    1.920859] Process kworker/u2:0 (pid: 6, stack limit = 0xcf072238)
->> [    1.927454] Stack: (0xcf073ca0 to 0xcf074000)
->> [    1.932048] 3ca0: cf33c800 cf073d40 00000003 00000000 c0076a8c cf073d40 48060220 48060220
->> [    1.940659] 3cc0: 00000004 00000004 00000002 00000002 cf073ec8 c0421a9c c051835c cf073d40
->> [    1.949271] 3ce0: cf33c800 00000001 00000008 00000008 00000002 cf073db8 cf073ec8 c02f0f28
->> [    1.957882] 3d00: 00000200 00000064 00000000 cf073db8 cf073ec8 cf073d40 cf073d50 00000000
->> [    1.966493] 3d20: cf33c800 c02f18a4 cf369800 cf369a80 00000000 cf360880 00000008 c02f9964
->> [    1.975104] 3d40: 00000000 cf073d84 cf073db8 00000000 00000001 00000001 dead4ead ffffffff
->> [    1.983717] 3d60: ffffffff c0af722c c06aa3e4 00000000 c04ddadc cf073d74 cf073d74 c02f0dc4
->> [    1.992327] 3d80: 00000000 00000033 00000000 00000000 00000000 00000000 00000000 000000b5
->> [    2.000938] 3da0: 00000000 00000000 00000000 00000000 cf073db8 cf073d40 05f5e100 00000000
->> [    2.009548] 3dc0: 00000008 00000001 00000000 00000200 00000000 00000000 cf073d40 00000001
->> [    2.018159] 3de0: cf073de8 00000000 c0cf1c02 00000880 00000008 8f360880 00000000 cf369800
->> [    2.026771] 3e00: cf33c800 00000000 cf369800 cf073e4c cf072000 c02f8740 00000000 00000015
->> [    2.035382] 3e20: 00000003 cf33c800 00000000 00000000 cf369800 cf073e4c cf072000 c02f8b20
->> [    2.043994] 3e40: 00000002 c02f25cc 00000002 02544d53 41303447 1026c914 2600bbbd c0ff8000
->> [    2.052605] 3e60: c0455884 cf33c800 00000000 c0455884 c0455890 00000000 cf072000 c02f92bc
->> [    2.061217] 3e80: c0455890 00ff8000 00000002 cf33cb14 cf33c800 c02f3a28 cf041ac0 cf33cb14
->> [    2.069829] 3ea0: cf050c00 cf051c00 00000000 c00507ec 00000002 00000000 c0050778 c0050f10
->> [    2.078441] 3ec0: 00000000 00000000 c0af7268 c06aa1c4 00000000 c0518cd0 cf06a080 cf041ac0
->> [    2.087054] 3ee0: cf050c00 cf072000 cf050c30 cf041ad8 00000089 c05d7b5c cf050c00 c0050e4c
->> [    2.095665] 3f00: 00000000 cf072000 60000113 cf04dda8 00000000 cf041ac0 c0050d08 00000000
->> [    2.104276] 3f20: 00000000 00000000 00000000 c0056c94 c0429a18 00000000 00000001 cf041ac0
->> [    2.112888] 3f40: 00000000 00000001 dead4ead ffffffff ffffffff c05ec0a0 00000000 00000000
->> [    2.121499] 3f60: c04ddadc cf073f64 cf073f64 00000000 00000001 dead4ead ffffffff ffffffff
->> [    2.130112] 3f80: c05ec0a0 00000000 00000000 c04ddadc cf073f90 cf073f90 cf073fac cf04dda8
->> [    2.138724] 3fa0: c0056bf0 00000000 00000000 c0013588 00000000 00000000 00000000 00000000
->> [    2.147334] 3fc0: 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000
->> [    2.155946] 3fe0: 00000000 00000000 00000000 00000000 00000013 00000000 57e0c5db 5ffb7d3c
->> [    2.164565] [<c0305b70>] (omap_hsmmc_start_command+0x74/0xf4) from [<00000003>] (0x3)
->> [    2.172814] Code: 13a03801 0a00001b e590c008 e5914000 (e59cc00c)
->> [    2.179314] ---[ end trace 6ec9899a56aef6aa ]---
->>
->> I have also noticed that when the kernel boots okay (without a card inserted), if
->> I then insert a card, nothing happens (even with CONFIG_MMC_DEBUG=y) ... including
->> no kernel oops.
->>
->> Can anyone shed light on what's wrong ?
+>> Thanks!
+>> Jianpeng Ma
+> I do more test and found more interesting things
 > 
-> I see this issue too on -rc1. The mmc host pointer is mangled but this could be
-> due to something totally unrelated.
+> static inline void omap_hsmmc_reset_controller_fsm(struct omap_hsmmc_host *host,
+>                                                     unsigned long bit)
+> {
+>        
 > 
-> Can you first please try rebasing on 3.10 instead of 3.11-rc1?
+>          /*
+>           * OMAP4 ES2 and greater has an updated reset logic.
+>           * Monitor a 0->1 transition first
+>           */
+>          if (mmc_slot(host).features & HSMMC_HAS_UPDATED_RESET) {
+>>                 while ((!(OMAP_HSMMC_READ(host->base, SYSCTL) & bit))
+>>                                         && (i++ < limit))
+>>                         cpu_relax();
+> 	I modify above code as:
+> 				while ((!(OMAP_HSMMC_READ(host->base, SYSCTL) & bit)) {
+> 							i++;cpu_relax();
+> 				}
+>   When the problem occur, it  can't return from while.That's mean  the transition was already oocured befroe while.
+> So it can't monitor a 0->1 transition.
 
-Well, I've rebased the code to v3.10 and I get no oops, but (with some debug info added)
-I can see that omap_hsmmc_start_command() is never called.
+Hi,
 
-I'm not sure the EDMA stuff is being compiled in ... was this added post v3.10 ?
+Which OMAP SoC are you testing on (OMAP4 ES2+ ? )
 
-Cheers
-Mark J.
+Can you try the below inlined patch
+
+diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+index eccedc7..7dbc83f 100644
+--- a/drivers/mmc/host/omap_hsmmc.c
++++ b/drivers/mmc/host/omap_hsmmc.c
+@@ -973,10 +973,9 @@ static inline void omap_hsmmc_dbg_report_irq(struct omap_hsmmc_host *host,
+ static inline void omap_hsmmc_reset_controller_fsm(struct omap_hsmmc_host *host,
+ 						   unsigned long bit)
+ {
+-	unsigned long i = 0;
+-	unsigned long limit = (loops_per_jiffy *
+-				msecs_to_jiffies(MMC_TIMEOUT_MS));
++	unsigned long timeout;
+
++	timeout = jiffies + msecs_to_jiffies(MMC_TIMEOUT_MS);
+ 	OMAP_HSMMC_WRITE(host->base, SYSCTL,
+ 			 OMAP_HSMMC_READ(host->base, SYSCTL) | bit);
+
+@@ -985,14 +984,14 @@ static inline void omap_hsmmc_reset_controller_fsm(struct omap_hsmmc_host *host,
+ 	 * Monitor a 0->1 transition first
+ 	 */
+ 	if (mmc_slot(host).features & HSMMC_HAS_UPDATED_RESET) {
+-		while ((!(OMAP_HSMMC_READ(host->base, SYSCTL) & bit))
+-					&& (i++ < limit))
++		while ((!(OMAP_HSMMC_READ(host->base, SYSCTL) & bit)) &&
++			time_before(jiffies, timeout))
+ 			cpu_relax();
+ 	}
+-	i = 0;
+
++	timeout = jiffies + msecs_to_jiffies(MMC_TIMEOUT_MS);
+ 	while ((OMAP_HSMMC_READ(host->base, SYSCTL) & bit) &&
+-		(i++ < limit))
++		time_before(jiffies, timeout))
+ 		cpu_relax();
+
+ 	if (OMAP_HSMMC_READ(host->base, SYSCTL) & bit)
+-- 
+> 
+> Thanks!
+> Jianpeng Ma
+> 
