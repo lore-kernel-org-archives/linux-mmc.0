@@ -1,7 +1,7 @@
 From: Joel Fernandes <joelf-l0cyMroinI0@public.gmane.org>
-Subject: [PATCH 1/3] dmaengine: add dma_get_slave_sg_limits()
-Date: Thu, 18 Jul 2013 11:46:39 -0500
-Message-ID: <1374166001-31340-2-git-send-email-joelf@ti.com>
+Subject: [PATCH 2/3] mmc: omap_hsmmc: set max_segs based on dma engine limits
+Date: Thu, 18 Jul 2013 11:46:40 -0500
+Message-ID: <1374166001-31340-3-git-send-email-joelf@ti.com>
 References: <1374166001-31340-1-git-send-email-joelf@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -23,100 +23,49 @@ List-Id: linux-mmc@vger.kernel.org
 
 From: Matt Porter <mporter-l0cyMroinI0@public.gmane.org>
 
-Add a dmaengine API to retrieve slave SG transfer limits.
+The EDMA DMAC has a hardware limitation that prevents supporting
+scatter gather lists with any number of segments. The DMA Engine
+API reports the maximum number of segments a channel can support
+via the optional dma_get_slave_sg_limits() API. If the max_nr_segs
+limit is present, the value is used to configure mmc->max_segs
+appropriately.
 
-The API is optionally implemented by dmaengine drivers and when
-unimplemented will return a NULL pointer. A client driver using
-this API provides the required dma channel, address width, and
-burst size of the transfer. dma_get_slave_sg_limits() returns an
-SG limits structure with the maximum number and size of SG segments
-that the given channel can handle.
-
-[Joel Fernandes <joelf-l0cyMroinI0@public.gmane.org>: Changes to allocate limits
-structure in client and fill up in DMAEngine implementation.]
+[Joel Fernandes <joelf-l0cyMroinI0@public.gmane.org>: Allocate sg_limits structure in
+client driver, and have the dmaengine implementation fill it up]
 Signed-off-by: Matt Porter <mporter-l0cyMroinI0@public.gmane.org>
+Acked-by: Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>
 Signed-off-by: Joel Fernandes <joelf-l0cyMroinI0@public.gmane.org>
 Cc: Mark Jackson <mpfj-list-2FZW7xY0fHgqdlJmJB21zg@public.gmane.org>
 ---
- include/linux/dmaengine.h |   45 +++++++++++++++++++++++++++++++++++++++++++++
- 1 file changed, 45 insertions(+)
+ drivers/mmc/host/omap_hsmmc.c |    9 +++++++++
+ 1 file changed, 9 insertions(+)
 
-diff --git a/include/linux/dmaengine.h b/include/linux/dmaengine.h
-index 96d3e4a..2985878 100644
---- a/include/linux/dmaengine.h
-+++ b/include/linux/dmaengine.h
-@@ -371,6 +371,18 @@ struct dma_slave_config {
- 	unsigned int slave_id;
- };
+diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+index eccedc7..b723095 100644
+--- a/drivers/mmc/host/omap_hsmmc.c
++++ b/drivers/mmc/host/omap_hsmmc.c
+@@ -1776,6 +1776,7 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
+ 	const struct of_device_id *match;
+ 	dma_cap_mask_t mask;
+ 	unsigned tx_req, rx_req;
++	struct dma_slave_sg_limits dma_sg_limits;
+ 	struct pinctrl *pinctrl;
  
-+/* struct dma_slave_sg_limits - expose SG transfer limits of a channel
-+ *
-+ * @max_seg_nr: maximum number of SG segments supported on a SG/SLAVE
-+ *	    channel (0 for no maximum or not a SG/SLAVE channel)
-+ * @max_seg_len: maximum length of SG segments supported on a SG/SLAVE
-+ *	     channel (0 for no maximum or not a SG/SLAVE channel)
-+ */
-+struct dma_slave_sg_limits {
-+	u32 max_seg_nr;
-+	u32 max_seg_len;
-+};
-+
- static inline const char *dma_chan_name(struct dma_chan *chan)
- {
- 	return dev_name(&chan->dev->device);
-@@ -534,6 +546,7 @@ struct dma_tx_state {
-  *	struct with auxiliary transfer status information, otherwise the call
-  *	will just return a simple status code
-  * @device_issue_pending: push pending transactions to hardware
-+ * @device_slave_sg_limits: return the slave SG capabilities
-  */
- struct dma_device {
- 
-@@ -602,6 +615,10 @@ struct dma_device {
- 					    dma_cookie_t cookie,
- 					    struct dma_tx_state *txstate);
- 	void (*device_issue_pending)(struct dma_chan *chan);
-+	int (*device_slave_sg_limits)(struct dma_chan *chan,
-+		enum dma_slave_buswidth addr_width,
-+		u32 maxburst,
-+		struct dma_slave_sg_limits *sg_limits);
- };
- 
- static inline int dmaengine_device_control(struct dma_chan *chan,
-@@ -963,6 +980,34 @@ dma_set_tx_state(struct dma_tx_state *st, dma_cookie_t last, dma_cookie_t used,
+ 	match = of_match_device(of_match_ptr(omap_mmc_of_match), &pdev->dev);
+@@ -1952,6 +1953,14 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
+ 		goto err_irq;
  	}
- }
  
-+/**
-+ * dma_get_slave_sg_limits - get DMAC SG transfer capabilities
-+ * @chan: target DMA channel
-+ * @addr_width: address width of the DMA transfer
-+ * @maxburst: maximum DMA transfer burst size
-+ * @sg_limits: point to sg_limits struct to populate with limit info
-+ *
-+ * Get SG transfer capabilities for a specified channel. If the dmaengine
-+ * driver does not implement SG transfer capabilities then NULL is
-+ * returned.
-+ */
-+static inline int
-+dma_get_slave_sg_limits(struct dma_chan *chan,
-+		       enum dma_slave_buswidth addr_width,
-+		       u32 maxburst,
-+		       struct dma_slave_sg_limits *sg_limits)
++	/* Some DMA Engines only handle a limited number of SG segments */
++	ret = dma_get_slave_sg_limits(host->rx_chan,
++				DMA_SLAVE_BUSWIDTH_4_BYTES,
++				mmc->max_blk_size / 4,
++				&dma_sg_limits);
++	if (!ret && dma_sg_limits.max_seg_nr)
++		mmc->max_segs = dma_sg_limits.max_seg_nr;
 +
-+{
-+
-+	if (chan->device->device_slave_sg_limits && sg_limits)
-+		return chan->device->device_slave_sg_limits(chan,
-+							  addr_width,
-+							  maxburst,
-+							  sg_limits);
-+
-+	return -EINVAL;
-+}
-+
- enum dma_status dma_sync_wait(struct dma_chan *chan, dma_cookie_t cookie);
- #ifdef CONFIG_DMA_ENGINE
- enum dma_status dma_wait_for_async_tx(struct dma_async_tx_descriptor *tx);
+ 	/* Request IRQ for MMC operations */
+ 	ret = request_irq(host->irq, omap_hsmmc_irq, 0,
+ 			mmc_hostname(mmc), host);
 -- 
 1.7.9.5
