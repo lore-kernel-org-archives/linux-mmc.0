@@ -1,66 +1,44 @@
-From: Simon Horman <horms+renesas@verge.net.au>
-Subject: [PATCH fix for v3.11 (repost)] dmaengine: shdma: fix a build failure
- on platforms with no DMA support
-Date: Thu, 18 Jul 2013 08:50:58 +0900
-Message-ID: <20130717235058.GA10683@verge.net.au>
+From: Zang Roy-R61911 <r61911@freescale.com>
+Subject: RE: [PATCH 3/4 V2] mmc: esdhc: Correct host version of T4240-R1.0
+Date: Thu, 18 Jul 2013 02:30:45 +0000
+Message-ID: <3E027F8168735B46AC006B1D0C7BB0020B27D1E9@039-SN2MPN1-012.039d.mgd.msft.net>
+References: <1374055891-20703-1-git-send-email-Haijun.Zhang@freescale.com>
+	<1374055891-20703-2-git-send-email-Haijun.Zhang@freescale.com>
+ <1374081074.8183.360@snotra>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-sh-owner@vger.kernel.org>
-Content-Disposition: inline
-Sender: linux-sh-owner@vger.kernel.org
-To: Vinod Koul <vinod.koul@intel.com>
-Cc: Olof Johansson <olof@lixom.net>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Kevin Hilman <khilman@linaro.org>, Dan Murphy <dmurphy@ti.com>, linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Chris Ball <cjb@laptop.org>, Magnus Damm <magnusdamm@gmail.com>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from am1ehsobe003.messaging.microsoft.com ([213.199.154.206]:13863
+	"EHLO am1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1756655Ab3GRCbJ convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 17 Jul 2013 22:31:09 -0400
+In-Reply-To: <1374081074.8183.360@snotra>
+Content-Language: en-US
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Wood Scott-B07421 <B07421@freescale.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linuxppc-dev@lists.ozlabs.org" <linuxppc-dev@lists.ozlabs.org>, "cbouatmailru@gmail.com" <cbouatmailru@gmail.com>, "cjb@laptop.org" <cjb@laptop.org>, Fleming Andy-AFLEMING <afleming@freescale.com>, Zhang Haijun-B42677 <B42677@freescale.com>
 
-From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 
-On platforms with no support for the shdma dmaengine driver build is
-currently failing with
 
-drivers/built-in.o: In function `sh_mobile_sdhi_probe':
-drivers/mmc/host/sh_mobile_sdhi.c:170: undefined reference to`shdma_chan_filter'
-
-Fix the breakage by defining shdma_chan_filter to NULL in such
-configurations.
-
-Signed-off-by: Guennadi Liakhovetski <g.liakhovetski+renesas@gmail.com>
-[horms+renesas@verge.net.au: Apply change to shdma-base.h instead of sh_dma.h]
-Signed-off-by: Simon Horman <horms+renesas@verge.net.au>
----
- include/linux/shdma-base.h | 4 ++++
- 1 file changed, 4 insertions(+)
-
-Hi Vinod,
-
-please consider this fix from Guennadi for v3.11 which I have rebased on top of
-next-20130709. It fixes a build problem on a number of shmobile defconfigs
-including bockw.
-
-Alternatively, I would be happy to take this through the renesas tree.
-
-I posted this patch last week but I'm wondering if you missed it somehow.
-This patch resolves a regression in v3.11-rc1.
-
-diff --git a/include/linux/shdma-base.h b/include/linux/shdma-base.h
-index 382cf71..5b1c984 100644
---- a/include/linux/shdma-base.h
-+++ b/include/linux/shdma-base.h
-@@ -124,6 +124,10 @@ void shdma_chan_remove(struct shdma_chan *schan);
- int shdma_init(struct device *dev, struct shdma_dev *sdev,
- 		    int chan_num);
- void shdma_cleanup(struct shdma_dev *sdev);
-+#if IS_ENABLED(CONFIG_SH_DMAE_BASE)
- bool shdma_chan_filter(struct dma_chan *chan, void *arg);
-+#else
-+#define shdma_chan_filter NULL
-+#endif
- 
- #endif
--- 
-1.8.2.1
-
---
-To unsubscribe from this list: send the line "unsubscribe linux-sh" in
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> -----Original Message-----
+> From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
+> owner@vger.kernel.org] On Behalf Of Scott Wood
+> 
+> On 07/17/2013 05:11:30 AM, Haijun Zhang wrote:
+> > Vender version and sdhc spec version of T4240-R1.0 is incorrect.
+> > The right value should be VVN=0x13, SVN = 0x1. The wrong version
+> > number will break down the ADMA data transfer.
+> > This defect only exist in T4240-R1.0. Will be fixed in T4240-R2.0.
+> > Also share vvn and svr for public use.
+> >
+> > Signed-off-by: Haijun Zhang <haijun.zhang@freescale.com>
+> 
+> We're not supporting T4240 rev 1.0 in upstream Linux, as it's not
+> production silicon.
+As discussed, production silicon Rev 2.0 will also suffer this issue. So need to address it beyond T4240-R2.0.
+thanks.
+Roy
 
