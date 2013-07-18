@@ -1,88 +1,46 @@
-From: Daniel Mack <zonque@gmail.com>
-Subject: Re: ARM: AM335x: Kernel oops when using EDMA and MMC
-Date: Thu, 18 Jul 2013 18:47:10 +0200
-Message-ID: <51E81C0E.6070709@gmail.com>
-References: <51E6BE84.6080905@newflow.co.uk> <51E6C88B.8090608@ti.com> <51E81A7E.9030805@ti.com>
+From: Joel Fernandes <joelf-l0cyMroinI0@public.gmane.org>
+Subject: [PATCH 0/3] Pending dmaengine patches
+Date: Thu, 18 Jul 2013 11:46:38 -0500
+Message-ID: <1374166001-31340-1-git-send-email-joelf@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ea0-f172.google.com ([209.85.215.172]:43874 "EHLO
-	mail-ea0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1759107Ab3GRQqq (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 18 Jul 2013 12:46:46 -0400
-In-Reply-To: <51E81A7E.9030805@ti.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
+List-Unsubscribe: <http://linux.davincidsp.com/mailman/options/davinci-linux-open-source>,
+	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://linux.davincidsp.com/pipermail/davinci-linux-open-source>
+List-Post: <mailto:davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
+List-Help: <mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=help>
+List-Subscribe: <http://linux.davincidsp.com/mailman/listinfo/davinci-linux-open-source>,
+	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=subscribe>
+Sender: <davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
+Errors-To: davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org
+To: Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Sekhar Nori <nsekhar-l0cyMroinI0@public.gmane.org>, Matt Porter <matt-agtwNxEcTQJWk0Htik3J/w@public.gmane.org>, Grant Likely <grant.likely-s3s/WqlpOiPyB63q8FvJNQ@public.gmane.org>, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Vinod Koul <vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Mark Brown <broonie-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Benoit Cousson <benoit.cousson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Balaji TK <balajitk-l0cyMroinI0@public.gmane.org>, Gururaja Hebbar <gururaja.hebbar-l0cyMroinI0@public.gmane.org>, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>
+Cc: Linux DaVinci Kernel List <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Mark Jackson <mpfj-list-2FZW7xY0fHgqdlJmJB21zg@public.gmane.org>, Devicetree Discuss <devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, Linux Documentation List <linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Jason Kridner <jkridner-hcmAuCOw+vXj4SYmN/TMmA@public.gmane.org>, Linux SPI Devel List <spi-devel-general-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>, Linux OMAP List <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux ARM Kernel List <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Balaji T K <balajitk@ti.com>
-Cc: Joel Fernandes <joelf@ti.com>, Mark Jackson <mpfj-list@newflow.co.uk>, "linux-omap@vger.kernel.org" <linux-omap@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Tony Lindgren <tony@atomide.com>, Linux MMC List <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>
 
-Hi Balaji,
+I've reworked Matt's dmaegine sg_limits series addressing review comments at [1].
 
-On 18.07.2013 18:40, Balaji T K wrote:
-> With DMA channel info retrieved from dt binding on 3.11rc1,
-> unused_chan_list is broken after hwmod cleanup removing mmc sdma
-> resource info, hence pdev resource wont have DMA resource populated.
-> 
-> arch/arm/common/edma.c
-> static int prepare_unused_channel_list(struct device *dev, void *data)
-> {
-> 	struct platform_device *pdev = to_platform_device(dev);
-> 	int i, ctlr;
-> 
-> 	for (i = 0; i < pdev->num_resources; i++) {
-> 		if ((pdev->resource[i].flags & IORESOURCE_DMA) &&
-> 				(int)pdev->resource[i].start >= 0) {
-> 			ctlr = EDMA_CTLR(pdev->resource[i].start);
-> 			clear_bit(EDMA_CHAN_SLOT(pdev->resource[i].start),
-> 					edma_cc[ctlr]->edma_unused);
-> 		}
-> 	}
-> 
-> 	return 0;
-> }
-> 
-> int edma_alloc_channel(int channel,
-> 	if (!unused_chan_list_done) {
-> 		/*
-> 		 * Scan all the platform devices to find out the EDMA channels
-> 		 * used and clear them in the unused list, making the rest
-> 		 * available for ARM usage.
-> 		 */
-> 		ret = bus_for_each_dev(&platform_bus_type, NULL, NULL,
-> 				prepare_unused_channel_list);
-> 		if (ret < 0)
-> 			return ret;
-> 
-> 		unused_chan_list_done = true;
-> 	}
-> 
-> ===========
-> 
-> with the below hack patch, edma is working fine with mmc on your 3.11rc1+ branch
-> 
-> diff --git a/arch/arm/common/edma.c b/arch/arm/common/edma.c
-> index a432e6c..5a19164 100644
-> --- a/arch/arm/common/edma.c
-> +++ b/arch/arm/common/edma.c
-> @@ -1262,8 +1262,8 @@ int edma_start(unsigned channel)
->   		if (test_bit(channel, edma_cc[ctlr]->edma_unused)) {
->   			pr_debug("EDMA: ESR%d %08x\n", j,
->   				edma_shadow0_read_array(ctlr, SH_ESR, j));
-> -			edma_shadow0_write_array(ctlr, SH_ESR, j, mask);
-> -			return 0;
-> +//			edma_shadow0_write_array(ctlr, SH_ESR, j, mask);
-> +//			return 0;
->   		}
-> 
->   		/* EDMA channel with event association */
-> 
+Currently MMC on AM33xx requires EDMA which was posted and accepted, following
+it is a series that are fixes that have to go in for it to work correctly.
+Without this series, DMA fails on MMC resulting in I/O errors.
 
-Yes, this in fact works for me as well. Thanks for the quick reply! What
-would be the proper fix for this?
+A subsequent MMC DT patch for AM33xx is also on hold [2] for the same reason.
 
+Tested on AM335x (Beaglebone Rev A5A).
 
-Best,
-Daniel
+[1] http://linux.davincidsp.com/pipermail/davinci-linux-open-source/2013-March/026658.html
+[2] http://lkml.indiana.edu/hypermail/linux/kernel/1306.3/03766.html
 
+Matt Porter (3):
+  dmaengine: add dma_get_slave_sg_limits()
+  mmc: omap_hsmmc: set max_segs based on dma engine limits
+  dma: edma: add device_slave_sg_limits() support
 
+ drivers/dma/edma.c            |   14 +++++++++++++
+ drivers/mmc/host/omap_hsmmc.c |    9 +++++++++
+ include/linux/dmaengine.h     |   45 +++++++++++++++++++++++++++++++++++++++++
+ 3 files changed, 68 insertions(+)
+
+-- 
+1.7.9.5
