@@ -1,145 +1,49 @@
-From: Balaji T K <balajitk-l0cyMroinI0@public.gmane.org>
-Subject: Re: =?GB2312?B?u9i4tDogQWJvdXQgb21hcDIgbW1jIGhvc3QgIGNsb3NlIHRvbw==?=
- =?GB2312?B?IGxvbmcgaXJxIGluIGlycWFjdGlvbi4=?=
-Date: Thu, 18 Jul 2013 20:14:41 +0530
-Message-ID: <51E7FF59.3030000@ti.com>
-References: <201307181052572266628@gmail.com>
- <2013071816435162919513@gmail.com>
+From: Scott Wood <scottwood@freescale.com>
+Subject: Re: [PATCH 3/4 V2] mmc: esdhc: Correct host version of T4240-R1.0
+Date: Thu, 18 Jul 2013 10:24:12 -0500
+Message-ID: <1374161052.5357.0@snotra>
+References: <1374055891-20703-1-git-send-email-Haijun.Zhang@freescale.com>
+	<1374055891-20703-2-git-send-email-Haijun.Zhang@freescale.com>
+	<1374081074.8183.360@snotra>
+	<3E027F8168735B46AC006B1D0C7BB0020B27D1E9@039-SN2MPN1-012.039d.mgd.msft.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
-In-Reply-To: <2013071816435162919513-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-List-Unsubscribe: <https://lists.ozlabs.org/options/devicetree-discuss>,
- <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.ozlabs.org/pipermail/devicetree-discuss/>
-List-Post: <mailto:devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
-List-Help: <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.ozlabs.org/listinfo/devicetree-discuss>,
- <mailto:devicetree-discuss-request-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org?subject=subscribe>
-Errors-To: devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
-Sender: "devicetree-discuss"
- <devicetree-discuss-bounces+gldd-devicetree-discuss=m.gmane.org-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
-To: majianpeng <majianpeng-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: devicetree-discuss <devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, linux-omap <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, cjb <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-kernel <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Type: text/plain; charset="us-ascii"; delsp=Yes; format=Flowed
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from va3ehsobe002.messaging.microsoft.com ([216.32.180.12]:46437
+	"EHLO va3outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1756756Ab3GRPYU convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 18 Jul 2013 11:24:20 -0400
+In-Reply-To: <3E027F8168735B46AC006B1D0C7BB0020B27D1E9@039-SN2MPN1-012.039d.mgd.msft.net>
+	(from r61911@freescale.com on Wed Jul 17 21:30:45 2013)
+Content-Disposition: inline
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Zang Roy-R61911 <r61911@freescale.com>
+Cc: Wood Scott-B07421 <B07421@freescale.com>, Zhang Haijun-B42677 <B42677@freescale.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linuxppc-dev@lists.ozlabs.org" <linuxppc-dev@lists.ozlabs.org>, "cbouatmailru@gmail.com" <cbouatmailru@gmail.com>, "cjb@laptop.org" <cjb@laptop.org>, Fleming Andy-AFLEMING <afleming@freescale.com>Zhang Haijun-B42677 <B42677@freescale.com>
 
-On Thursday 18 July 2013 02:13 PM, majianpeng wrote:
->> Hi all,
->> 	Now i worked on omp2 and met a probelm which someplace close_irq for 3.6second.
->> The kernel version is 2.6.37. I used trace to find in irq_action:omap_hsmmc_irq.
->> This problem occured by removed the sdcard when there are io operations.
->>
->> I found the read problem is in omap_hsmmc_reset_controller_fsm.
->> In omap_hsmmc_reset_controller_fsm:
->>> static inline void omap_hsmmc_reset_controller_fsm(struct omap_hsmmc_host *host,
->>>                                                    unsigned long bit)
->>> {
->>>         unsigned long i = 0;
->>>         unsigned long limit = (loops_per_jiffy *
->>>                                 msecs_to_jiffies(MMC_TIMEOUT_MS));
->>
->>>         OMAP_HSMMC_WRITE(host->base, SYSCTL,
->>>                          OMAP_HSMMC_READ(host->base, SYSCTL) | bit);
->>
->>>         /*
->>>          * OMAP4 ES2 and greater has an updated reset logic.
->>>          * Monitor a 0->1 transition first
->>>          */
->>>         if (mmc_slot(host).features & HSMMC_HAS_UPDATED_RESET) {
->>>                 while ((!(OMAP_HSMMC_READ(host->base, SYSCTL) & bit))
->>>                                        && (i++ < limit))
->>>                         cpu_relax();
->>         }
->> In func, it used loops_per_jiffy  in order to avoid do many time exceed MMC_TIMEOUT_MS.
->> In face oops_per_jiify is like:
->> while(i++ < loops_per_jiffy)
->> 	cpu_relax();
->> But actually, it used as follow:
->>> while ((!(OMAP_HSMMC_READ(host->base, SYSCTL) & bit))
->>>                                       && (i++ < limit))
->> it add some operations like: read regisger, &, &&.
->> So the time may exceed MMC_TIMEOUT_MS.
->> I used those code to test and found it's ok:
->> for (i = 0 ; i < 10; i++){
->> 	if (!(OMAP_HSMMC_READ(host->base, SYSCTL) & bit))
->> 		  break;
->> 	j = limit/10;
->> 	while(j--)
->> 		cpu_relax();
->> }
->>
->> Using this the problom can't occur.
->> Am i missing something?
->>
->> Thanks!
->> Jianpeng Ma
-> I do more test and found more interesting things
+On 07/17/2013 09:30:45 PM, Zang Roy-R61911 wrote:
 > 
-> static inline void omap_hsmmc_reset_controller_fsm(struct omap_hsmmc_host *host,
->                                                     unsigned long bit)
-> {
->        
 > 
->          /*
->           * OMAP4 ES2 and greater has an updated reset logic.
->           * Monitor a 0->1 transition first
->           */
->          if (mmc_slot(host).features & HSMMC_HAS_UPDATED_RESET) {
->>                 while ((!(OMAP_HSMMC_READ(host->base, SYSCTL) & bit))
->>                                         && (i++ < limit))
->>                         cpu_relax();
-> 	I modify above code as:
-> 				while ((!(OMAP_HSMMC_READ(host->base, SYSCTL) & bit)) {
-> 							i++;cpu_relax();
-> 				}
->   When the problem occur, it  can't return from while.That's mean  the transition was already oocured befroe while.
-> So it can't monitor a 0->1 transition.
+> > -----Original Message-----
+> > From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
+> > owner@vger.kernel.org] On Behalf Of Scott Wood
+> >
+> > On 07/17/2013 05:11:30 AM, Haijun Zhang wrote:
+> > > Vender version and sdhc spec version of T4240-R1.0 is incorrect.
+> > > The right value should be VVN=0x13, SVN = 0x1. The wrong version
+> > > number will break down the ADMA data transfer.
+> > > This defect only exist in T4240-R1.0. Will be fixed in T4240-R2.0.
+> > > Also share vvn and svr for public use.
+> > >
+> > > Signed-off-by: Haijun Zhang <haijun.zhang@freescale.com>
+> >
+> > We're not supporting T4240 rev 1.0 in upstream Linux, as it's not
+> > production silicon.
+> As discussed, production silicon Rev 2.0 will also suffer this issue.  
+> So need to address it beyond T4240-R2.0.
 
-Hi,
+OK -- please update the commit message.
 
-Which OMAP SoC are you testing on (OMAP4 ES2+ ? )
-
-Can you try the below inlined patch
-
-diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index eccedc7..7dbc83f 100644
---- a/drivers/mmc/host/omap_hsmmc.c
-+++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -973,10 +973,9 @@ static inline void omap_hsmmc_dbg_report_irq(struct omap_hsmmc_host *host,
- static inline void omap_hsmmc_reset_controller_fsm(struct omap_hsmmc_host *host,
- 						   unsigned long bit)
- {
--	unsigned long i = 0;
--	unsigned long limit = (loops_per_jiffy *
--				msecs_to_jiffies(MMC_TIMEOUT_MS));
-+	unsigned long timeout;
-
-+	timeout = jiffies + msecs_to_jiffies(MMC_TIMEOUT_MS);
- 	OMAP_HSMMC_WRITE(host->base, SYSCTL,
- 			 OMAP_HSMMC_READ(host->base, SYSCTL) | bit);
-
-@@ -985,14 +984,14 @@ static inline void omap_hsmmc_reset_controller_fsm(struct omap_hsmmc_host *host,
- 	 * Monitor a 0->1 transition first
- 	 */
- 	if (mmc_slot(host).features & HSMMC_HAS_UPDATED_RESET) {
--		while ((!(OMAP_HSMMC_READ(host->base, SYSCTL) & bit))
--					&& (i++ < limit))
-+		while ((!(OMAP_HSMMC_READ(host->base, SYSCTL) & bit)) &&
-+			time_before(jiffies, timeout))
- 			cpu_relax();
- 	}
--	i = 0;
-
-+	timeout = jiffies + msecs_to_jiffies(MMC_TIMEOUT_MS);
- 	while ((OMAP_HSMMC_READ(host->base, SYSCTL) & bit) &&
--		(i++ < limit))
-+		time_before(jiffies, timeout))
- 		cpu_relax();
-
- 	if (OMAP_HSMMC_READ(host->base, SYSCTL) & bit)
--- 
-> 
-> Thanks!
-> Jianpeng Ma
-> 
+-Scott
