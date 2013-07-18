@@ -1,67 +1,152 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: [PATCH] mmc: sd: fix the maximum au_size for SD3.0
-Date: Thu, 18 Jul 2013 13:34:41 +0900
-Message-ID: <51E77061.2030308@samsung.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+From: Boris BREZILLON <b.brezillon@overkiz.com>
+Subject: [PATCH v4 2/5] mmc: atmel-mci: prepare clk before calling enable
+Date: Thu, 18 Jul 2013 09:38:52 +0200
+Message-ID: <1374133132-17556-1-git-send-email-b.brezillon@overkiz.com>
+References: <1374132753-15206-1-git-send-email-b.brezillon@overkiz.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout4.samsung.com ([203.254.224.34]:50214 "EHLO
-	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750945Ab3GREeq (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 18 Jul 2013 00:34:46 -0400
-Received: from epcpsbgr5.samsung.com
- (u145.gpu120.samsung.co.kr [203.254.230.145])
- by mailout4.samsung.com (Oracle Communications Messaging Server 7u4-24.01
- (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTP id <0MQ40070N7B00PO0@mailout4.samsung.com> for
- linux-mmc@vger.kernel.org; Thu, 18 Jul 2013 13:34:39 +0900 (KST)
+Received: from 10.mo5.mail-out.ovh.net ([46.105.52.148]:48090 "EHLO
+	mo5.mail-out.ovh.net" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1751325Ab3GRHi7 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 18 Jul 2013 03:38:59 -0400
+Received: from mail604.ha.ovh.net (b9.ovh.net [213.186.33.59])
+	by mo5.mail-out.ovh.net (Postfix) with SMTP id 47809FFAD8B
+	for <linux-mmc@vger.kernel.org>; Thu, 18 Jul 2013 09:38:58 +0200 (CEST)
+In-Reply-To: <1374132753-15206-1-git-send-email-b.brezillon@overkiz.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Cc: 'Chris Ball' <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, Philip Rakity <prakity@marvell.com>, Johan Rudholm <jrudholm@gmail.com>, Aaron Lu <aaron.lu@amd.com>
+To: Nicolas Ferre <nicolas.ferre@atmel.com>, Ludovic Desroches <ludovic.desroches@atmel.com>, Jean-Christophe Plagniol-Villard <plagnioj@jcrosoft.com>, Chris Ball <cjb@laptop.org>
+Cc: linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, Boris BREZILLON <b.brezillon@overkiz.com>
 
-Since SD Physical Layer specification V3.0, AU_SIZE is supported up to 0xf.
-So If SD-card is supported v3.0, then max_au should be 0xf.
+Replace clk_enable/disable with clk_prepare_enable/disable_unprepare to
+avoid common clk framework warnings.
 
-Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
-Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
+Signed-off-by: Boris BREZILLON <b.brezillon@overkiz.com>
+Acked-by: Ludovic Desroches <ludovic.desroches@atmel.com>
 ---
- drivers/mmc/core/sd.c |   10 ++++++++--
- 1 file changed, 8 insertions(+), 2 deletions(-)
+ drivers/mmc/host/atmel-mci.c |   34 +++++++++++++++++++++++++++-------
+ 1 file changed, 27 insertions(+), 7 deletions(-)
 
-diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
-index 176d125..aa5013f 100644
---- a/drivers/mmc/core/sd.c
-+++ b/drivers/mmc/core/sd.c
-@@ -215,7 +215,7 @@ static int mmc_decode_scr(struct mmc_card *card)
- static int mmc_read_ssr(struct mmc_card *card)
+diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
+index bdb84da..69e438e 100644
+--- a/drivers/mmc/host/atmel-mci.c
++++ b/drivers/mmc/host/atmel-mci.c
+@@ -378,6 +378,8 @@ static int atmci_regs_show(struct seq_file *s, void *v)
  {
- 	unsigned int au, es, et, eo;
--	int err, i;
-+	int err, i, max_au;
- 	u32 *ssr;
- 
- 	if (!(card->csd.cmdclass & CCC_APP_SPEC)) {
-@@ -239,12 +239,18 @@ static int mmc_read_ssr(struct mmc_card *card)
- 	for (i = 0; i < 16; i++)
- 		ssr[i] = be32_to_cpu(ssr[i]);
- 
-+	/* The value of maximum au_size is supported 0xF since SD3.0 */
-+	if (card->scr.sda_spec3)
-+		max_au = 0xf;
-+	else
-+		max_au = 9;
+ 	struct atmel_mci	*host = s->private;
+ 	u32			*buf;
++	int			ret = 0;
 +
- 	/*
- 	 * UNSTUFF_BITS only works with four u32s so we have to offset the
- 	 * bitfield positions accordingly.
+ 
+ 	buf = kmalloc(ATMCI_REGS_SIZE, GFP_KERNEL);
+ 	if (!buf)
+@@ -388,12 +390,16 @@ static int atmci_regs_show(struct seq_file *s, void *v)
+ 	 * not disabling interrupts, so IMR and SR may not be
+ 	 * consistent.
  	 */
- 	au = UNSTUFF_BITS(ssr, 428 - 384, 4);
--	if (au > 0 && au <= 9) {
-+	if (au > 0 && au <= max_au) {
- 		card->ssr.au = 1 << (au + 4);
- 		es = UNSTUFF_BITS(ssr, 408 - 384, 16);
- 		et = UNSTUFF_BITS(ssr, 402 - 384, 6);
++	ret = clk_prepare_enable(host->mck);
++	if (ret)
++		goto out;
++
+ 	spin_lock_bh(&host->lock);
+-	clk_enable(host->mck);
+ 	memcpy_fromio(buf, host->regs, ATMCI_REGS_SIZE);
+-	clk_disable(host->mck);
+ 	spin_unlock_bh(&host->lock);
+ 
++	clk_disable_unprepare(host->mck);
++
+ 	seq_printf(s, "MR:\t0x%08x%s%s ",
+ 			buf[ATMCI_MR / 4],
+ 			buf[ATMCI_MR / 4] & ATMCI_MR_RDPROOF ? " RDPROOF" : "",
+@@ -442,9 +448,10 @@ static int atmci_regs_show(struct seq_file *s, void *v)
+ 				val & ATMCI_CFG_LSYNC ? " LSYNC" : "");
+ 	}
+ 
++out:
+ 	kfree(buf);
+ 
+-	return 0;
++	return ret;
+ }
+ 
+ static int atmci_regs_open(struct inode *inode, struct file *file)
+@@ -1262,6 +1269,7 @@ static void atmci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 	struct atmel_mci_slot	*slot = mmc_priv(mmc);
+ 	struct atmel_mci	*host = slot->host;
+ 	unsigned int		i;
++	bool			unprepare_clk;
+ 
+ 	slot->sdc_reg &= ~ATMCI_SDCBUS_MASK;
+ 	switch (ios->bus_width) {
+@@ -1277,9 +1285,13 @@ static void atmci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 		unsigned int clock_min = ~0U;
+ 		u32 clkdiv;
+ 
++		clk_prepare(host->mck);
++		unprepare_clk = true;
++
+ 		spin_lock_bh(&host->lock);
+ 		if (!host->mode_reg) {
+ 			clk_enable(host->mck);
++			unprepare_clk = false;
+ 			atmci_writel(host, ATMCI_CR, ATMCI_CR_SWRST);
+ 			atmci_writel(host, ATMCI_CR, ATMCI_CR_MCIEN);
+ 			if (host->caps.has_cfg_reg)
+@@ -1347,6 +1359,8 @@ static void atmci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 	} else {
+ 		bool any_slot_active = false;
+ 
++		unprepare_clk = false;
++
+ 		spin_lock_bh(&host->lock);
+ 		slot->clock = 0;
+ 		for (i = 0; i < ATMCI_MAX_NR_SLOTS; i++) {
+@@ -1360,12 +1374,16 @@ static void atmci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 			if (host->mode_reg) {
+ 				atmci_readl(host, ATMCI_MR);
+ 				clk_disable(host->mck);
++				unprepare_clk = true;
+ 			}
+ 			host->mode_reg = 0;
+ 		}
+ 		spin_unlock_bh(&host->lock);
+ 	}
+ 
++	if (unprepare_clk)
++		clk_unprepare(host->mck);
++
+ 	switch (ios->power_mode) {
+ 	case MMC_POWER_UP:
+ 		set_bit(ATMCI_CARD_NEED_INIT, &slot->flags);
+@@ -2376,10 +2394,12 @@ static int __init atmci_probe(struct platform_device *pdev)
+ 	if (!host->regs)
+ 		goto err_ioremap;
+ 
+-	clk_enable(host->mck);
++	ret = clk_prepare_enable(host->mck);
++	if (ret)
++		goto err_request_irq;
+ 	atmci_writel(host, ATMCI_CR, ATMCI_CR_SWRST);
+ 	host->bus_hz = clk_get_rate(host->mck);
+-	clk_disable(host->mck);
++	clk_disable_unprepare(host->mck);
+ 
+ 	host->mapbase = regs->start;
+ 
+@@ -2482,11 +2502,11 @@ static int __exit atmci_remove(struct platform_device *pdev)
+ 			atmci_cleanup_slot(host->slot[i], i);
+ 	}
+ 
+-	clk_enable(host->mck);
++	clk_prepare_enable(host->mck);
+ 	atmci_writel(host, ATMCI_IDR, ~0UL);
+ 	atmci_writel(host, ATMCI_CR, ATMCI_CR_MCIDIS);
+ 	atmci_readl(host, ATMCI_SR);
+-	clk_disable(host->mck);
++	clk_disable_unprepare(host->mck);
+ 
+ 	if (host->dma.chan)
+ 		dma_release_channel(host->dma.chan);
 -- 
 1.7.9.5
+
