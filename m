@@ -1,86 +1,75 @@
-From: Joel Fernandes <joelf@ti.com>
-Subject: Re: ARM: AM335x: Kernel oops when using EDMA and MMC
-Date: Thu, 18 Jul 2013 12:02:12 -0500
-Message-ID: <51E81F94.7090804@ti.com>
-References: <51E6BE84.6080905@newflow.co.uk> <51E6C88B.8090608@ti.com> <51E81A7E.9030805@ti.com> <51E81C0E.6070709@gmail.com>
+From: Russell King - ARM Linux <linux@arm.linux.org.uk>
+Subject: Re: [PATCH 1/3] dmaengine: add dma_get_slave_sg_limits()
+Date: Thu, 18 Jul 2013 18:08:25 +0100
+Message-ID: <20130718170825.GZ21614@n2100.arm.linux.org.uk>
+References: <1374166001-31340-1-git-send-email-joelf@ti.com> <1374166001-31340-2-git-send-email-joelf@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-omap-owner@vger.kernel.org>
-In-Reply-To: <51E81C0E.6070709@gmail.com>
+Content-Disposition: inline
+In-Reply-To: <1374166001-31340-2-git-send-email-joelf@ti.com>
 Sender: linux-omap-owner@vger.kernel.org
-To: Daniel Mack <zonque@gmail.com>
-Cc: Balaji T K <balajitk@ti.com>, Mark Jackson <mpfj-list@newflow.co.uk>, "linux-omap@vger.kernel.org" <linux-omap@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Tony Lindgren <tony@atomide.com>, Linux MMC List <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>
+To: Joel Fernandes <joelf@ti.com>
+Cc: Tony Lindgren <tony@atomide.com>, Sekhar Nori <nsekhar@ti.com>, Matt Porter <matt@ohporter.com>, Grant Likely <grant.likely@secretlab.ca>, Rob Herring <rob.herring@calxeda.com>, Vinod Koul <vinod.koul@intel.com>, Mark Brown <broonie@linaro.org>, Benoit Cousson <benoit.cousson@linaro.org>, Balaji TK <balajitk@ti.com>, Gururaja Hebbar <gururaja.hebbar@ti.com>, Chris Ball <cjb@laptop.org>, Jason Kridner <jkridner@beagleboard.org>, Mark Jackson <mpfj-list@newflow.co.uk>, Devicetree Discuss <devicetree-discuss@lists.ozlabs.org>, Linux OMAP List <linux-omap@vger.kernel.org>, Linux ARM Kernel List <linux-arm-kernel@lists.infradead.org>, Linux DaVinci Kernel List <davinci-linux-open-source@linux.davincidsp.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux Documentation List <linux-doc@vger.kernel.org>, Linux MMC List <linux-mmc@vger.kernel.org>Linux
 List-Id: linux-mmc@vger.kernel.org
 
-On 07/18/2013 11:47 AM, Daniel Mack wrote:
-> Hi Balaji,
-> 
-> On 18.07.2013 18:40, Balaji T K wrote:
->> With DMA channel info retrieved from dt binding on 3.11rc1,
->> unused_chan_list is broken after hwmod cleanup removing mmc sdma
->> resource info, hence pdev resource wont have DMA resource populated.
->>
->> arch/arm/common/edma.c
->> static int prepare_unused_channel_list(struct device *dev, void *data)
->> {
->> 	struct platform_device *pdev = to_platform_device(dev);
->> 	int i, ctlr;
->>
->> 	for (i = 0; i < pdev->num_resources; i++) {
->> 		if ((pdev->resource[i].flags & IORESOURCE_DMA) &&
->> 				(int)pdev->resource[i].start >= 0) {
->> 			ctlr = EDMA_CTLR(pdev->resource[i].start);
->> 			clear_bit(EDMA_CHAN_SLOT(pdev->resource[i].start),
->> 					edma_cc[ctlr]->edma_unused);
->> 		}
->> 	}
->>
->> 	return 0;
->> }
->>
->> int edma_alloc_channel(int channel,
->> 	if (!unused_chan_list_done) {
->> 		/*
->> 		 * Scan all the platform devices to find out the EDMA channels
->> 		 * used and clear them in the unused list, making the rest
->> 		 * available for ARM usage.
->> 		 */
->> 		ret = bus_for_each_dev(&platform_bus_type, NULL, NULL,
->> 				prepare_unused_channel_list);
->> 		if (ret < 0)
->> 			return ret;
->>
->> 		unused_chan_list_done = true;
->> 	}
->>
->> ===========
->>
->> with the below hack patch, edma is working fine with mmc on your 3.11rc1+ branch
->>
->> diff --git a/arch/arm/common/edma.c b/arch/arm/common/edma.c
->> index a432e6c..5a19164 100644
->> --- a/arch/arm/common/edma.c
->> +++ b/arch/arm/common/edma.c
->> @@ -1262,8 +1262,8 @@ int edma_start(unsigned channel)
->>   		if (test_bit(channel, edma_cc[ctlr]->edma_unused)) {
->>   			pr_debug("EDMA: ESR%d %08x\n", j,
->>   				edma_shadow0_read_array(ctlr, SH_ESR, j));
->> -			edma_shadow0_write_array(ctlr, SH_ESR, j, mask);
->> -			return 0;
->> +//			edma_shadow0_write_array(ctlr, SH_ESR, j, mask);
->> +//			return 0;
->>   		}
->>
->>   		/* EDMA channel with event association */
->>
-> 
-> Yes, this in fact works for me as well. Thanks for the quick reply! What
-> would be the proper fix for this?
+On Thu, Jul 18, 2013 at 11:46:39AM -0500, Joel Fernandes wrote:
+> The API is optionally implemented by dmaengine drivers and when
+> unimplemented will return a NULL pointer. A client driver using
+> this API provides the required dma channel, address width, and
+> burst size of the transfer. dma_get_slave_sg_limits() returns an
+> SG limits structure with the maximum number and size of SG segments
+> that the given channel can handle.
 
-Correct fix would be in the common EDMA driver to populate the unused
-channel list correctly as found by Balaji.
+Please look at what's already in struct device:
 
-Thanks,
+struct device {
+...
+        struct device_dma_parameters *dma_parms;
+...
+};
 
--Joel
+This provides:
+
+struct device_dma_parameters {
+        /*
+         * a low level driver may set these to teach IOMMU code about
+         * sg limitations.
+         */
+        unsigned int max_segment_size;
+        unsigned long segment_boundary_mask;
+};
+
+Now, these are helpfully accessed via:
+
+dma_get_max_seg_size(dev)
+dma_set_max_seg_size(dev)
+dma_get_seg_boundary(dev)
+dma_set_seg_boundary(dev, mask)
+
+Drivers already use these to work out how to construct the scatterlist
+before passing it to the DMA API, which means that they should also be
+used when creating a scatterlist for the DMA engine (think about it -
+you have to use the DMA API to map the buffers for the DMA engine too.)
+
+So, we already have two properties defined on a per-device basis: the
+maximum size of a scatterlist segment, and the boundary over which any
+segment must not cross.
+
+The former ties up with your max_seg_len() property, though arguably it
+may depend on the DMA engine access size.  The problem with implementing
+this new API though is that the subsystems (such as SCSI) which already
+use dma_get_max_seg_size() will be at odds with what is possible via the
+DMA engine.
+
+I strongly suggest using the infrastructure at device level and not
+implementing some private DMA engine API to convey this information.
+
+As for the maximum number of scatterlist entries, really that's a bug in
+the DMA engine implementations if they can't accept arbitary lengths.
+I've created DMA engine drivers for implementations where you have to
+program each segment individually, ones which can have the current and
+next segments, as well as those which can walk a list.  Provided you get
+informed of a transfer being completed, there really is no reason for a
+DMA engine driver to limit the number of scatterlist entries that it
+will accept.
