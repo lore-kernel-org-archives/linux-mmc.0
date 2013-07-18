@@ -1,44 +1,48 @@
-From: Zang Roy-R61911 <r61911@freescale.com>
-Subject: RE: [PATCH 3/4 V2] mmc: esdhc: Correct host version of T4240-R1.0
-Date: Thu, 18 Jul 2013 02:30:45 +0000
-Message-ID: <3E027F8168735B46AC006B1D0C7BB0020B27D1E9@039-SN2MPN1-012.039d.mgd.msft.net>
-References: <1374055891-20703-1-git-send-email-Haijun.Zhang@freescale.com>
-	<1374055891-20703-2-git-send-email-Haijun.Zhang@freescale.com>
- <1374081074.8183.360@snotra>
+From: majianpeng <majianpeng@gmail.com>
+Subject: About omap2 mmc host  close too long irq in irqaction.
+Date: Thu, 18 Jul 2013 10:53:01 +0800
+Message-ID: <201307181052572266628@gmail.com>
+Reply-To: majianpeng <majianpeng@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from am1ehsobe003.messaging.microsoft.com ([213.199.154.206]:13863
-	"EHLO am1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1756655Ab3GRCbJ convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 17 Jul 2013 22:31:09 -0400
-In-Reply-To: <1374081074.8183.360@snotra>
-Content-Language: en-US
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain;
+	charset="gb2312"
+Content-Transfer-Encoding: base64
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: balajitk <balajitk@ti.com>
+Cc: cjb <cjb@laptop.org>, linux-mmc <linux-mmc@vger.kernel.org>, linux-omap <linux-omap@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>, devicetree-discuss <devicetree-discuss@lists.ozlabs.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Wood Scott-B07421 <B07421@freescale.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linuxppc-dev@lists.ozlabs.org" <linuxppc-dev@lists.ozlabs.org>, "cbouatmailru@gmail.com" <cbouatmailru@gmail.com>, "cjb@laptop.org" <cjb@laptop.org>, Fleming Andy-AFLEMING <afleming@freescale.com>, Zhang Haijun-B42677 <B42677@freescale.com>
 
-
-
-> -----Original Message-----
-> From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
-> owner@vger.kernel.org] On Behalf Of Scott Wood
-> 
-> On 07/17/2013 05:11:30 AM, Haijun Zhang wrote:
-> > Vender version and sdhc spec version of T4240-R1.0 is incorrect.
-> > The right value should be VVN=0x13, SVN = 0x1. The wrong version
-> > number will break down the ADMA data transfer.
-> > This defect only exist in T4240-R1.0. Will be fixed in T4240-R2.0.
-> > Also share vvn and svr for public use.
-> >
-> > Signed-off-by: Haijun Zhang <haijun.zhang@freescale.com>
-> 
-> We're not supporting T4240 rev 1.0 in upstream Linux, as it's not
-> production silicon.
-As discussed, production silicon Rev 2.0 will also suffer this issue. So need to address it beyond T4240-R2.0.
-thanks.
-Roy
-
+SGkgYWxsLA0KCU5vdyBpIHdvcmtlZCBvbiBvbXAyIGFuZCBtZXQgYSBwcm9iZWxtIHdoaWNoIHNv
+bWVwbGFjZSBjbG9zZV9pcnEgZm9yIDMuNnNlY29uZC4gDQpUaGUga2VybmVsIHZlcnNpb24gaXMg
+Mi42LjM3LiBJIHVzZWQgdHJhY2UgdG8gZmluZCBpbiBpcnFfYWN0aW9uOm9tYXBfaHNtbWNfaXJx
+Lg0KVGhpcyBwcm9ibGVtIG9jY3VyZWQgYnkgcmVtb3ZlZCB0aGUgc2RjYXJkIHdoZW4gdGhlcmUg
+YXJlIGlvIG9wZXJhdGlvbnMuDQoNCkkgZm91bmQgdGhlIHJlYWQgcHJvYmxlbSBpcyBpbiBvbWFw
+X2hzbW1jX3Jlc2V0X2NvbnRyb2xsZXJfZnNtLg0KSW4gb21hcF9oc21tY19yZXNldF9jb250cm9s
+bGVyX2ZzbToNCj5zdGF0aWMgaW5saW5lIHZvaWQgb21hcF9oc21tY19yZXNldF9jb250cm9sbGVy
+X2ZzbShzdHJ1Y3Qgb21hcF9oc21tY19ob3N0ICpob3N0LA0KPiAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHVuc2lnbmVkIGxvbmcgYml0KQ0KPnsNCj4g
+ICAgICAgIHVuc2lnbmVkIGxvbmcgaSA9IDA7IA0KPiAgICAgICAgdW5zaWduZWQgbG9uZyBsaW1p
+dCA9IChsb29wc19wZXJfamlmZnkgKg0KPiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+bXNlY3NfdG9famlmZmllcyhNTUNfVElNRU9VVF9NUykpOw0KDQo+ICAgICAgICBPTUFQX0hTTU1D
+X1dSSVRFKGhvc3QtPmJhc2UsIFNZU0NUTCwNCj4gICAgICAgICAgICAgICAgICAgICAgICAgT01B
+UF9IU01NQ19SRUFEKGhvc3QtPmJhc2UsIFNZU0NUTCkgfCBiaXQpOw0KDQo+ICAgICAgICAvKiAg
+IA0KPiAgICAgICAgICogT01BUDQgRVMyIGFuZCBncmVhdGVyIGhhcyBhbiB1cGRhdGVkIHJlc2V0
+IGxvZ2ljLg0KPiAgICAgICAgICogTW9uaXRvciBhIDAtPjEgdHJhbnNpdGlvbiBmaXJzdA0KPiAg
+ICAgICAgICovDQo+ICAgICAgICBpZiAobW1jX3Nsb3QoaG9zdCkuZmVhdHVyZXMgJiBIU01NQ19I
+QVNfVVBEQVRFRF9SRVNFVCkgew0KPiAgICAgICAgICAgICAgICB3aGlsZSAoKCEoT01BUF9IU01N
+Q19SRUFEKGhvc3QtPmJhc2UsIFNZU0NUTCkgJiBiaXQpKQ0KPiAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICYmIChpKysgPCBsaW1pdCkpDQo+ICAgICAgICAgICAgICAgICAg
+ICAgICAgY3B1X3JlbGF4KCk7DQogICAgICAgIH0gICAgDQogSW4gZnVuYywgaXQgdXNlZCBsb29w
+c19wZXJfamlmZnkgIGluIG9yZGVyIHRvIGF2b2lkIGRvIG1hbnkgdGltZSBleGNlZWQgTU1DX1RJ
+TUVPVVRfTVMuDQpJbiBmYWNlIG9vcHNfcGVyX2ppaWZ5IGlzIGxpa2U6DQp3aGlsZShpKysgPCBs
+b29wc19wZXJfamlmZnkpDQoJY3B1X3JlbGF4KCk7DQpCdXQgYWN0dWFsbHksIGl0IHVzZWQgYXMg
+Zm9sbG93Og0KPndoaWxlICgoIShPTUFQX0hTTU1DX1JFQUQoaG9zdC0+YmFzZSwgU1lTQ1RMKSAm
+IGJpdCkpDQo+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAmJiAoaSsrIDwg
+bGltaXQpKQ0KaXQgYWRkIHNvbWUgb3BlcmF0aW9ucyBsaWtlOiByZWFkIHJlZ2lzZ2VyLCAmLCAm
+Ji4NClNvIHRoZSB0aW1lIG1heSBleGNlZWQgTU1DX1RJTUVPVVRfTVMuDQpJIHVzZWQgdGhvc2Ug
+Y29kZSB0byB0ZXN0IGFuZCBmb3VuZCBpdCdzIG9rOg0KZm9yIChpID0gMCA7IGkgPCAxMDsgaSsr
+KXsNCglpZiAoIShPTUFQX0hTTU1DX1JFQUQoaG9zdC0+YmFzZSwgU1lTQ1RMKSAmIGJpdCkpDQoJ
+CSAgYnJlYWs7DQoJaiA9IGxpbWl0LzEwOw0KCXdoaWxlKGotLSkNCgkJY3B1X3JlbGF4KCk7DQp9
+DQoNClVzaW5nIHRoaXMgdGhlIHByb2Jsb20gY2FuJ3Qgb2NjdXIuDQpBbSBpIG1pc3Npbmcgc29t
+ZXRoaW5nPw0KDQpUaGFua3MhDQpKaWFucGVuZyBNYQ==
