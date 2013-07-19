@@ -1,50 +1,36 @@
-From: Sachin Kamat <sachin.kamat@linaro.org>
-Subject: Re: [PATCH 1/3] mmc: sdhci-bcm-kona: Remove unneeded version.h inclusion
-Date: Fri, 19 Jul 2013 16:40:55 +0530
-Message-ID: <CAK9yfHzQyhNRYeenfMriODHXoo8Adj9nsE=Shob-o5gaF10DSw@mail.gmail.com>
-References: <1373263914-18050-1-git-send-email-sachin.kamat@linaro.org>
+From: Scott Wood <scottwood@freescale.com>
+Subject: Re: [PATCH 1/4 V4] powerpc/85xx: Add support for 85xx cpu type
+ detection
+Date: Fri, 19 Jul 2013 12:20:45 -0500
+Message-ID: <1374254445.5357.18@snotra>
+References: <1374037947-23670-1-git-send-email-Haijun.Zhang@freescale.com>
+	<99E897753B6F7048BD8CCDB4661D02E13DF580@039-SN2MPN1-022.039d.mgd.msft.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset="us-ascii"; delsp=Yes; format=Flowed
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ob0-f171.google.com ([209.85.214.171]:58926 "EHLO
-	mail-ob0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751509Ab3GSLK4 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 19 Jul 2013 07:10:56 -0400
-Received: by mail-ob0-f171.google.com with SMTP id dn14so5171368obc.16
-        for <linux-mmc@vger.kernel.org>; Fri, 19 Jul 2013 04:10:55 -0700 (PDT)
-In-Reply-To: <1373263914-18050-1-git-send-email-sachin.kamat@linaro.org>
+Received: from co1ehsobe005.messaging.microsoft.com ([216.32.180.188]:24322
+	"EHLO co1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1759755Ab3GSRVB convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 19 Jul 2013 13:21:01 -0400
+In-Reply-To: <99E897753B6F7048BD8CCDB4661D02E13DF580@039-SN2MPN1-022.039d.mgd.msft.net>
+	(from B42677@freescale.com on Thu Jul 18 21:28:20 2013)
+Content-Disposition: inline
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: csd@broadcom.com, cjb@laptop.org, sachin.kamat@linaro.org, patches@linaro.org
+Cc: Zhang Haijun-B42677 <B42677@freescale.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linuxppc-dev@lists.ozlabs.org" <linuxppc-dev@lists.ozlabs.org>, "cbouatmailru@gmail.com" <cbouatmailru@gmail.com>, "cjb@laptop.org" <cjb@laptop.org>, Wood Scott-B07421 <B07421@freescale.com>, Fleming Andy-AFLEMING <afleming@freescale.com>, Zhao Chenhui-B35336 <B35336@freescale.com>
 
-On 8 July 2013 11:41, Sachin Kamat <sachin.kamat@linaro.org> wrote:
-> version.h header inclusion is not necessary as detected by
-> versioncheck.
->
-> Signed-off-by: Sachin Kamat <sachin.kamat@linaro.org>
-> ---
->  drivers/mmc/host/sdhci-bcm-kona.c |    1 -
->  1 file changed, 1 deletion(-)
->
-> diff --git a/drivers/mmc/host/sdhci-bcm-kona.c b/drivers/mmc/host/sdhci-bcm-kona.c
-> index 87175f9..bca6d55 100644
-> --- a/drivers/mmc/host/sdhci-bcm-kona.c
-> +++ b/drivers/mmc/host/sdhci-bcm-kona.c
-> @@ -24,7 +24,6 @@
->  #include <linux/of.h>
->  #include <linux/of_device.h>
->  #include <linux/of_gpio.h>
-> -#include <linux/version.h>
->  #include <linux/mmc/slot-gpio.h>
->
->  #include "sdhci-pltfm.h"
-> --
-> 1.7.9.5
->
+On 07/18/2013 09:28:20 PM, Zhang Haijun-B42677 wrote:
+> Hi, scott
+> 
+> I had update this patch, this is the newest version.
+> If there is no other problem, can you help merge this patch?
+> I hope to make sure the following patch don't need to rebuild due to  
+> the change of this patch.
 
-Ping on this series.
+It looks OK.  I'll pick it up when I do my next batch of patch  
+application (hopefully soon).  Go ahead and send the patches that  
+depend on it.
 
--- 
-With warm regards,
-Sachin
+-Scott
