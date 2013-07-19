@@ -1,121 +1,67 @@
-From: Haijun Zhang <Haijun.Zhang@freescale.com>
-Subject: [PATCH 3/4 V3] mmc: esdhc: Correct host version of T4240-R1.0-R2.0
-Date: Fri, 19 Jul 2013 09:39:33 +0800
-Message-ID: <1374197973-6050-1-git-send-email-Haijun.Zhang@freescale.com>
+From: Jingoo Han <jg1.han@samsung.com>
+Subject: [PATCH] mmc: mmc_test: replace strict_strtol() with kstrtol_from_user()
+Date: Fri, 19 Jul 2013 16:02:43 +0900
+Message-ID: <000c01ce844d$f75ba650$e612f2f0$@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from co9ehsobe005.messaging.microsoft.com ([207.46.163.28]:41321
-	"EHLO co9outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S935040Ab3GSCbe (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 18 Jul 2013 22:31:34 -0400
+Received: from mailout1.samsung.com ([203.254.224.24]:29439 "EHLO
+	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1759747Ab3GSHCp (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 19 Jul 2013 03:02:45 -0400
+Received: from epcpsbgr3.samsung.com
+ (u143.gpu120.samsung.co.kr [203.254.230.143])
+ by mailout1.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+ (7.0.4.24.0) 64bit (built Nov 17 2011))
+ with ESMTP id <0MQ6002KG8UZV0U0@mailout1.samsung.com> for
+ linux-mmc@vger.kernel.org; Fri, 19 Jul 2013 16:02:44 +0900 (KST)
+Content-language: ko
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, linuxppc-dev@lists.ozlabs.org
-Cc: cbouatmailru@gmail.com, cjb@laptop.org, scottwood@freescale.com, AFLEMING@freescale.com, r39252@freescale.com, Haijun Zhang <Haijun.Zhang@freescale.com>, Haijun Zhang <haijun.zhang@freescale.com>
+To: Chris Ball <cjb@laptop.org>
+Cc: linux-mmc@vger.kernel.org, Jingoo Han <jg1.han@samsung.com>
 
-Vender version and sdhc spec version of T4240-R1.0-R2.0 is incorrect.
-The right value should be VVN=0x13, SVN = 0x1. The wrong version number
-will break down the ADMA data transfer. This defect only exist in
-T4240-R1.0-R2.0.
-Also share vvn and svr for public use.
+The usage of strict_strtol() is not preferred, because
+strict_strtol() is obsolete. Thus, kstrtol() should be
+used.
 
-Signed-off-by: Haijun Zhang <haijun.zhang@freescale.com>
+Also, both kstrtol() and copy_from_user() can be replaced
+with kstrtol_from_user() to make the code simpler.
+
+Signed-off-by: Jingoo Han <jg1.han@samsung.com>
 ---
- drivers/mmc/host/sdhci-of-esdhc.c | 31 ++++++++++++++-----------------
- 1 file changed, 14 insertions(+), 17 deletions(-)
+ drivers/mmc/card/mmc_test.c |   14 ++++----------
+ 1 file changed, 4 insertions(+), 10 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
-index adfaadd..509e10d 100644
---- a/drivers/mmc/host/sdhci-of-esdhc.c
-+++ b/drivers/mmc/host/sdhci-of-esdhc.c
-@@ -26,7 +26,7 @@
- #define VENDOR_V_22	0x12
- #define VENDOR_V_23	0x13
+diff --git a/drivers/mmc/card/mmc_test.c b/drivers/mmc/card/mmc_test.c
+index a69df52..0c0fc52 100644
+--- a/drivers/mmc/card/mmc_test.c
++++ b/drivers/mmc/card/mmc_test.c
+@@ -2849,18 +2849,12 @@ static ssize_t mtf_test_write(struct file *file, const char __user *buf,
+ 	struct seq_file *sf = (struct seq_file *)file->private_data;
+ 	struct mmc_card *card = (struct mmc_card *)sf->private;
+ 	struct mmc_test_card *test;
+-	char lbuf[12];
+ 	long testcase;
++	int ret;
  
--static u32 svr;
-+static u32 svr, vvn;
- 
- static u32 esdhc_readl(struct sdhci_host *host, int reg)
- {
-@@ -43,11 +43,9 @@ static u32 esdhc_readl(struct sdhci_host *host, int reg)
- 	 * For FSL eSDHC, must aligned 4-byte, so use 0xFC to read the
- 	 * the verdor version number, oxFE is SDHCI_HOST_VERSION.
- 	 */
--	if ((reg == SDHCI_CAPABILITIES) && (ret & SDHCI_CAN_DO_ADMA1)) {
--		u32 tmp = in_be32(host->ioaddr + SDHCI_SLOT_INT_STATUS);
--		tmp = (tmp & SDHCI_VENDOR_VER_MASK) >> SDHCI_VENDOR_VER_SHIFT;
--		if (tmp > VENDOR_V_22)
--			ret |= SDHCI_CAN_DO_ADMA2;
-+	if ((reg == SDHCI_CAPABILITIES) && (ret & SDHCI_CAN_DO_ADMA1) &&
-+		(vvn > VENDOR_V_22)) {
-+		ret |= SDHCI_CAN_DO_ADMA2;
- 	}
- 
- 	return ret;
-@@ -63,6 +61,12 @@ static u16 esdhc_readw(struct sdhci_host *host, int reg)
- 		ret = in_be32(host->ioaddr + base) & 0xffff;
- 	else
- 		ret = (in_be32(host->ioaddr + base) >> shift) & 0xffff;
-+
-+	/* T4240-R1.0-R2.0 had a incorrect vendor version and spec version */
-+	if ((reg == SDHCI_HOST_VERSION) &&
-+			((SVR_SOC_VER(svr) == SVR_T4240) && (SVR_REV(svr) <= 0x20)))
-+		ret = (VENDOR_V_23 << SDHCI_VENDOR_VER_SHIFT) | SDHCI_SPEC_200;
-+
- 	return ret;
- }
- 
-@@ -175,17 +179,12 @@ static void esdhc_reset(struct sdhci_host *host, u8 mask)
-  */
- static void esdhci_of_adma_workaround(struct sdhci_host *host, u32 intmask)
- {
--	u32 tmp;
- 	bool applicable;
- 	dma_addr_t dmastart;
- 	dma_addr_t dmanow;
- 
--	tmp = esdhc_readl(host, SDHCI_SLOT_INT_STATUS);
--	tmp = (tmp & SDHCI_VENDOR_VER_MASK) >> SDHCI_VENDOR_VER_SHIFT;
+-	if (count >= sizeof(lbuf))
+-		return -EINVAL;
 -
- 	applicable = (intmask & SDHCI_INT_DATA_END) &&
--		(intmask & SDHCI_INT_BLK_GAP) &&
--		(tmp == VENDOR_V_23);
-+		(intmask & SDHCI_INT_BLK_GAP) && (vvn == VENDOR_V_23);
- 	if (applicable) {
+-	if (copy_from_user(lbuf, buf, count))
+-		return -EFAULT;
+-	lbuf[count] = '\0';
+-
+-	if (strict_strtol(lbuf, 10, &testcase))
+-		return -EINVAL;
++	ret = kstrtol_from_user(buf, count, 10, &testcase);
++	if (ret)
++		return ret;
  
- 		esdhc_reset(host, SDHCI_RESET_DATA);
-@@ -215,7 +214,7 @@ static void esdhci_of_adma_workaround(struct sdhci_host *host, u32 intmask)
- 		((SVR_SOC_VER(svr) == SVR_P1010) && (SVR_REV(svr) == 0x10)) ||
- 		((SVR_SOC_VER(svr) == SVR_P3041) && (SVR_REV(svr) <= 0x20)) ||
- 		((SVR_SOC_VER(svr) == SVR_P2041) && (SVR_REV(svr) <= 0x20)) ||
--		((SVR_SOC_VER(svr) == SVR_P5040) && SVR_REV(svr) == 0x20)))
-+		((SVR_SOC_VER(svr) == SVR_P5040) && (SVR_REV(svr) == 0x20))))
- 		return;
- 
- 	esdhc_reset(host, SDHCI_RESET_DATA);
-@@ -318,10 +317,9 @@ static void esdhc_of_resume(struct sdhci_host *host)
- 
- static void esdhc_of_platform_init(struct sdhci_host *host)
- {
--	u32 vvn;
-+	svr = mfspr(SPRN_SVR);
-+	vvn = esdhc_readw(host, SDHCI_HOST_VERSION);
- 
--	vvn = in_be32(host->ioaddr + SDHCI_SLOT_INT_STATUS);
--	vvn = (vvn & SDHCI_VENDOR_VER_MASK) >> SDHCI_VENDOR_VER_SHIFT;
- 	if (vvn == VENDOR_V_22)
- 		host->quirks2 |= SDHCI_QUIRK2_HOST_NO_CMD23;
- 
-@@ -390,7 +388,6 @@ static int sdhci_esdhc_probe(struct platform_device *pdev)
- 	struct device_node *np;
- 	int ret;
- 
--	svr = mfspr(SPRN_SVR);
- 	host = sdhci_pltfm_init(pdev, &sdhci_esdhc_pdata, 0);
- 	if (IS_ERR(host))
- 		return PTR_ERR(host);
+ 	test = kzalloc(sizeof(struct mmc_test_card), GFP_KERNEL);
+ 	if (!test)
 -- 
-1.8.0
+1.7.10.4
 
 
