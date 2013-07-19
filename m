@@ -1,103 +1,91 @@
-From: Joel Fernandes <joelf-l0cyMroinI0@public.gmane.org>
-Subject: Re: [PATCH 1/3] dmaengine: add dma_get_slave_sg_limits()
-Date: Thu, 18 Jul 2013 13:57:33 -0500
-Message-ID: <51E83A9D.5020008@ti.com>
-References: <1374166001-31340-1-git-send-email-joelf@ti.com>
-	<1374166001-31340-2-git-send-email-joelf@ti.com>
-	<20130718170825.GZ21614@n2100.arm.linux.org.uk>
+From: Zhang Haijun-B42677 <B42677@freescale.com>
+Subject: RE: [PATCH 4/4 V2] mmc: esdhc: Add broken timeout quirk for p4/p5
+ board
+Date: Fri, 19 Jul 2013 02:19:59 +0000
+Message-ID: <99E897753B6F7048BD8CCDB4661D02E13DF50D@039-SN2MPN1-022.039d.mgd.msft.net>
+References: <1374055891-20703-1-git-send-email-Haijun.Zhang@freescale.com>
+	<1374055891-20703-3-git-send-email-Haijun.Zhang@freescale.com>
+ <1374081229.8183.361@snotra>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
-In-Reply-To: <20130718170825.GZ21614-l+eeeJia6m9vn6HldHNs0ANdhmdF6hFW@public.gmane.org>
-List-Unsubscribe: <http://linux.davincidsp.com/mailman/options/davinci-linux-open-source>,
-	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://linux.davincidsp.com/pipermail/davinci-linux-open-source>
-List-Post: <mailto:davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
-List-Help: <mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=help>
-List-Subscribe: <http://linux.davincidsp.com/mailman/listinfo/davinci-linux-open-source>,
-	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=subscribe>
-Sender: <davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
-Errors-To: davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org
-To: Russell King - ARM Linux <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>
-Cc: Linux Documentation List <linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Grant Likely <grant.likely-s3s/WqlpOiPyB63q8FvJNQ@public.gmane.org>, vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, Mark Brown <broonie-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Devicetree Discuss <devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Jason Kridner <jkridner-hcmAuCOw+vXj4SYmN/TMmA@public.gmane.org>, Benoit Cousson <benoit.cousson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Linux OMAP List <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux ARM Kernel List <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Linux DaVinci Kernel List <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, Balaji TK <balajitk-l0cyMroinI0@public.gmane.org>, Mark Jackson <mpfj-list-2FZW7xY0fHgqdlJmJB21zg@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29Tb/PtFMR13I2A@public.gmane.org>
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-db8lp0188.outbound.messaging.microsoft.com ([213.199.154.188]:26662
+	"EHLO db8outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S933504Ab3GSCUf convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 18 Jul 2013 22:20:35 -0400
+In-Reply-To: <1374081229.8183.361@snotra>
+Content-Language: en-US
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Wood Scott-B07421 <B07421@freescale.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linuxppc-dev@lists.ozlabs.org" <linuxppc-dev@lists.ozlabs.org>, "cbouatmailru@gmail.com" <cbouatmailru@gmail.com>, "cjb@laptop.org" <cjb@laptop.org>, Fleming Andy-AFLEMING <afleming@freescale.com>
 
-On 07/18/2013 12:08 PM, Russell King - ARM Linux wrote:
-> On Thu, Jul 18, 2013 at 11:46:39AM -0500, Joel Fernandes wrote:
->> The API is optionally implemented by dmaengine drivers and when
->> unimplemented will return a NULL pointer. A client driver using
->> this API provides the required dma channel, address width, and
->> burst size of the transfer. dma_get_slave_sg_limits() returns an
->> SG limits structure with the maximum number and size of SG segments
->> that the given channel can handle.
-> 
-> Please look at what's already in struct device:
-> 
-> struct device {
-> ...
->         struct device_dma_parameters *dma_parms;
-> ...
-> };
-> 
-> This provides:
-> 
-> struct device_dma_parameters {
->         /*
->          * a low level driver may set these to teach IOMMU code about
->          * sg limitations.
->          */
->         unsigned int max_segment_size;
->         unsigned long segment_boundary_mask;
-> };
-> 
-> Now, these are helpfully accessed via:
-> 
-> dma_get_max_seg_size(dev)
-> dma_set_max_seg_size(dev)
-> dma_get_seg_boundary(dev)
-> dma_set_seg_boundary(dev, mask)
-> Drivers already use these to work out how to construct the scatterlist
-> before passing it to the DMA API, which means that they should also be
-> used when creating a scatterlist for the DMA engine (think about it -
-> you have to use the DMA API to map the buffers for the DMA engine too.)
-> 
-> So, we already have two properties defined on a per-device basis: the
-> maximum size of a scatterlist segment, and the boundary over which any
-> segment must not cross.
-> 
-> The former ties up with your max_seg_len() property, though arguably it
-> may depend on the DMA engine access size.  The problem with implementing
-> this new API though is that the subsystems (such as SCSI) which already
-> use dma_get_max_seg_size() will be at odds with what is possible via the
-> DMA engine.
 
-Not very clear for this particular case, are you saying the DMAEngine
-driver implementation should set the max_seg_size of its own struct dev,
-and then the drivers retrieve it from the channel they are allocated?
 
-> I strongly suggest using the infrastructure at device level and not
-> implementing some private DMA engine API to convey this information.
+Thanks.
 
-Certainly see the value. OK with either approach. Can Vinod add to the
-discussion here, and we can decide a way forward? Is it ok to use the
-new CAPS API added for now so that we can keep AM33xx MMC alive?
-seg_size atleast is a real regression, the number of slots limit however
-is related more to MMC grabbing a lot of slots. Atleast for -rc cycle
-the seg_size and MMC fixes should go in.
+Regards
+Haijun.
 
-> As for the maximum number of scatterlist entries, really that's a bug in
-> the DMA engine implementations if they can't accept arbitary lengths.
-> I've created DMA engine drivers for implementations where you have to
-> program each segment individually, ones which can have the current and
-> next segments, as well as those which can walk a list.  Provided you get
-> informed of a transfer being completed, there really is no reason for a
-> DMA engine driver to limit the number of scatterlist entries that it
-> will accept.
 
-Sure, that makes sense. Can you point to such a typical example
-implementation to get some ideas?
+> -----Original Message-----
+> From: Wood Scott-B07421
+> Sent: Thursday, July 18, 2013 1:14 AM
+> To: Zhang Haijun-B42677
+> Cc: linux-mmc@vger.kernel.org; linuxppc-dev@lists.ozlabs.org;
+> cbouatmailru@gmail.com; cjb@laptop.org; Fleming Andy-AFLEMING; Zhang
+> Haijun-B42677; Zhang Haijun-B42677
+> Subject: Re: [PATCH 4/4 V2] mmc: esdhc: Add broken timeout quirk for
+> p4/p5 board
+> 
+> On 07/17/2013 05:11:31 AM, Haijun Zhang wrote:
+> > Sometimes command can't be completed within the time give in
+> > eSDHC_SYSCTL[DTOCV]. So just give the max value 0x14 to avoid this
+> > issue.
+> >
+> > Signed-off-by: Haijun Zhang <haijun.zhang@freescale.com>
+> > ---
+> > changes for v2:
+> > 	- Rebuild patch of eSDHC host need long time to generate
+> > 	 command interrupt
+> >
+> >  drivers/mmc/host/sdhci-of-esdhc.c | 6 ++++++
+> >  1 file changed, 6 insertions(+)
+> >
+> > diff --git a/drivers/mmc/host/sdhci-of-esdhc.c
+> > b/drivers/mmc/host/sdhci-of-esdhc.c
+> > index 570bca8..30bfb5c 100644
+> > --- a/drivers/mmc/host/sdhci-of-esdhc.c
+> > +++ b/drivers/mmc/host/sdhci-of-esdhc.c
+> > @@ -325,6 +325,12 @@ static void esdhc_of_platform_init(struct
+> > sdhci_host *host)
+> >
+> >  	if (vvn > VENDOR_V_22)
+> >  		host->quirks &= ~SDHCI_QUIRK_NO_BUSY_IRQ;
+> > +
+> > +	if ((SVR_SOC_VER(svr) == SVR_B4860) ||
+> > +		(SVR_SOC_VER(svr) == SVR_P5020) ||
+> > +		(SVR_SOC_VER(svr) == SVR_P5040) ||
+> > +		(SVR_SOC_VER(svr) == SVR_P4080))
+> > +		host->quirks |= SDHCI_QUIRK_BROKEN_TIMEOUT_VAL;
+> >  }
+> 
+> Please don't line up the continuation lines of the if-condition with the
+> if-body.
+[Haijun Wrote:] I'll correct it.
+> 
+> Please check variant SoCs as well.  If the bug exists on p4080, then it
+> exists on p4040.  Likewise with p5040/p5021, and p5020/p5010.
+> 
+> Is it present on all revisions of these SoCs?  How about p3041, which is
+> usually pretty similar to p5020?  p2040/p2041?  Is there an erratum
+> number for this problem?
+> 
+[Haijun Wrote:] I only checked this on these boards. No errata number yet, This
+quirk only give the host max detecting time value to check card's response. No
+impact on performance or other functions. 
 
-Thanks,
+> -Scott
 
--Joel
