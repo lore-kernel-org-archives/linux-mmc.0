@@ -1,56 +1,63 @@
-From: Joel Fernandes <joelf-l0cyMroinI0@public.gmane.org>
-Subject: [RFC 5/5] DMA: EDMA: Leave linked to Null slot instead of DUMMY slot
-Date: Sun, 21 Jul 2013 01:58:45 -0500
-Message-ID: <1374389925-32667-1-git-send-email-joelf@ti.com>
+From: Joel Fernandes <joelf@ti.com>
+Subject: [RFC 4/5] dma: edma: Find missed events and issue them
+Date: Sun, 21 Jul 2013 01:58:35 -0500
+Message-ID: <1374389915-32630-1-git-send-email-joelf@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
-List-Unsubscribe: <http://linux.davincidsp.com/mailman/options/davinci-linux-open-source>,
-	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://linux.davincidsp.com/pipermail/davinci-linux-open-source>
-List-Post: <mailto:davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
-List-Help: <mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=help>
-List-Subscribe: <http://linux.davincidsp.com/mailman/listinfo/davinci-linux-open-source>,
-	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=subscribe>
-Sender: <davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
-Errors-To: davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org
-To: Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Sekhar Nori <nsekhar-l0cyMroinI0@public.gmane.org>, Santosh Shilimkar <santosh.shilimkar-l0cyMroinI0@public.gmane.org>, Sricharan R <r.sricharan-l0cyMroinI0@public.gmane.org>, Rajendra Nayak <rnayak-l0cyMroinI0@public.gmane.org>, Lokesh Vutla <lokeshvutla-l0cyMroinI0@public.gmane.org>, Matt Porter <matt-agtwNxEcTQJWk0Htik3J/w@public.gmane.org>, Grant Likely <grant.likely-s3s/WqlpOiPyB63q8FvJNQ@public.gmane.org>, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Vinod Koul <vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Dan Williams <djbw-b10kYP2dOMg@public.gmane.org>, Mark Brown <broonie-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Benoit Cousson <benoit.cousson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Balaji TK <balajitk-l0cyMroinI0@public.gmane.org>, Gururaja Hebbar <gururaja.hebbar-l0cyMroinI0@public.gmane.org>, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, Jason Kridner <jkridner-hcmAuCOw+vXj4SYmN/TMmA@public.gmane.org>
-Cc: Linux DaVinci Kernel List <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, Joel Fernandes <joelf-l0cyMroinI0@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux OMAP List <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux ARM Kernel List <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Content-Type: text/plain
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Tony Lindgren <tony@atomide.com>, Sekhar Nori <nsekhar@ti.com>, Santosh Shilimkar <santosh.shilimkar@ti.com>, Sricharan R <r.sricharan@ti.com>, Rajendra Nayak <rnayak@ti.com>, Lokesh Vutla <lokeshvutla@ti.com>, Matt Porter <matt@ohporter.com>, Grant Likely <grant.likely@secretlab.ca>, Rob Herring <rob.herring@calxeda.com>, Vinod Koul <vinod.koul@intel.com>, Dan Williams <djbw@fb.com>, Mark Brown <broonie@linaro.org>, Benoit Cousson <benoit.cousson@linaro.org>, Russell King <linux@arm.linux.org.uk>, Arnd Bergmann <arnd@arndb.de>, Balaji TK <balajitk@ti.com>, Gururaja Hebbar <gururaja.hebbar@ti.com>, Chris Ball <cjb@laptop.org>, Jason Kridner <jkridner@beagleboard.org>
+Cc: Linux OMAP List <linux-omap@vger.kernel.org>, Linux ARM Kernel List <linux-arm-kernel@lists.infradead.org>, Linux DaVinci Kernel List <davinci-linux-open-source@linux.davincidsp.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux MMC List <linux-mmc@vger.kernel.org>, Joel Fernandes <joelf@ti.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Dummy slot has been used as a way for missed-events not to be
-reported as missing. This has been particularly troublesome for cases
-where we might want to temporarily pause all incoming events.
+In an effort to move to using Scatter gather lists of any size with
+EDMA as discussed at [1] instead of placing limitations on the driver,
+we work through the limitations of the EDMAC hardware to find missed
+events and issue them.
 
-For EDMA DMAC, there is no way to do any such pausing of events as
-the occurence of the "next" event is not software controlled.
-Using "edma_pause" in IRQ handlers doesn't help as by then the event
-in concern from the slave is already missed.
+The sequence of events that require this are:
 
-Linking a dummy slot, is seen to absorb these events which we didn't
-want to miss. So we don't link to dummy, but instead leave it linked
-to NULL set, allow an error condition and detect the channel that
-missed it.
+For the scenario where MAX slots for an EDMA channel is 3:
 
-Signed-off-by: Joel Fernandes <joelf-l0cyMroinI0@public.gmane.org>
+SG1 -> SG2 -> SG3 -> SG4 -> SG5 -> SG6 -> Null
+
+The above SG list will have to be DMA'd in 2 sets:
+
+(1) SG1 -> SG2 -> SG3 -> Null
+(2) SG4 -> SG5 -> SG6 -> Null
+
+After (1) is succesfully transferred, the events from the MMC controller
+donot stop coming and are missed by the time we have setup the transfer
+for (2). So here, we catch the events missed as an error condition and
+issue them manually.
+
+[1] http://marc.info/?l=linux-omap&m=137416733628831&w=2
+
+Signed-off-by: Joel Fernandes <joelf@ti.com>
 ---
- drivers/dma/edma.c |    3 ---
- 1 file changed, 3 deletions(-)
+ drivers/dma/edma.c |   10 +++++++++-
+ 1 file changed, 9 insertions(+), 1 deletion(-)
 
 diff --git a/drivers/dma/edma.c b/drivers/dma/edma.c
-index b0b5bcd..e9f1f27 100644
+index 0e7ed79..b0b5bcd 100644
 --- a/drivers/dma/edma.c
 +++ b/drivers/dma/edma.c
-@@ -160,9 +160,6 @@ static void edma_execute(struct edma_chan *echan)
- 		/* Link to the previous slot if not the last set */
- 		if (i != (total_process - 1))
- 			edma_link(echan->slot[i], echan->slot[i+1]);
--		/* Final pset links to the dummy pset */
--		else
--			edma_link(echan->slot[i], echan->ecc->dummy_slot);
- 	}
+@@ -414,7 +414,15 @@ static void edma_callback(unsigned ch_num, u16 ch_status, void *data)
  
- 	edesc->total_processed += total_process;
+ 		break;
+ 	case DMA_CC_ERROR:
+-		dev_dbg(dev, "transfer error on channel %d\n", ch_num);
++		if (echan->edesc) {
++			dev_dbg(dev, "Missed event on %d, retrying\n",
++				ch_num);
++			edma_clean_channel(echan->ch_num);
++			edma_stop(echan->ch_num);
++			edma_start(echan->ch_num);
++			edma_manual_trigger(echan->ch_num);
++		}
++		dev_dbg(dev, "handled error on channel %d\n", ch_num);
+ 		break;
+ 	default:
+ 		break;
 -- 
 1.7.9.5
