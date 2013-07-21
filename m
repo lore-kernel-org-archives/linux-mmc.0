@@ -1,7 +1,7 @@
 From: Joel Fernandes <joelf-l0cyMroinI0@public.gmane.org>
-Subject: [RFC 3/5] ARM: edma: Add function to manually trigger an EDMA channel
-Date: Sun, 21 Jul 2013 01:58:16 -0500
-Message-ID: <1374389896-32584-1-git-send-email-joelf@ti.com>
+Subject: [RFC 5/5] DMA: EDMA: Leave linked to Null slot instead of DUMMY slot
+Date: Sun, 21 Jul 2013 01:58:45 -0500
+Message-ID: <1374389925-32667-1-git-send-email-joelf@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
@@ -19,58 +19,38 @@ To: Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Sekhar Nori <n
 Cc: Linux DaVinci Kernel List <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, Joel Fernandes <joelf-l0cyMroinI0@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux OMAP List <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux ARM Kernel List <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Manual trigger for events missed as a result of splitting a
-scatter gather list and DMA'ing it in batches. Add a helper
-function to trigger a channel incase any such events are missed.
+Dummy slot has been used as a way for missed-events not to be
+reported as missing. This has been particularly troublesome for cases
+where we might want to temporarily pause all incoming events.
+
+For EDMA DMAC, there is no way to do any such pausing of events as
+the occurence of the "next" event is not software controlled.
+Using "edma_pause" in IRQ handlers doesn't help as by then the event
+in concern from the slave is already missed.
+
+Linking a dummy slot, is seen to absorb these events which we didn't
+want to miss. So we don't link to dummy, but instead leave it linked
+to NULL set, allow an error condition and detect the channel that
+missed it.
 
 Signed-off-by: Joel Fernandes <joelf-l0cyMroinI0@public.gmane.org>
 ---
- arch/arm/common/edma.c             |   21 +++++++++++++++++++++
- include/linux/platform_data/edma.h |    2 ++
- 2 files changed, 23 insertions(+)
+ drivers/dma/edma.c |    3 ---
+ 1 file changed, 3 deletions(-)
 
-diff --git a/arch/arm/common/edma.c b/arch/arm/common/edma.c
-index 3567ba1..205f5da 100644
---- a/arch/arm/common/edma.c
-+++ b/arch/arm/common/edma.c
-@@ -1236,6 +1236,27 @@ void edma_resume(unsigned channel)
- }
- EXPORT_SYMBOL(edma_resume);
+diff --git a/drivers/dma/edma.c b/drivers/dma/edma.c
+index b0b5bcd..e9f1f27 100644
+--- a/drivers/dma/edma.c
++++ b/drivers/dma/edma.c
+@@ -160,9 +160,6 @@ static void edma_execute(struct edma_chan *echan)
+ 		/* Link to the previous slot if not the last set */
+ 		if (i != (total_process - 1))
+ 			edma_link(echan->slot[i], echan->slot[i+1]);
+-		/* Final pset links to the dummy pset */
+-		else
+-			edma_link(echan->slot[i], echan->ecc->dummy_slot);
+ 	}
  
-+int edma_manual_trigger(unsigned channel)
-+{
-+	unsigned ctlr;
-+	int j;
-+	unsigned int mask;
-+
-+	ctlr = EDMA_CTLR(channel);
-+	channel = EDMA_CHAN_SLOT(channel);
-+	mask = BIT(channel & 0x1f);
-+
-+	j = channel >> 5;
-+
-+	/* EDMA channels without event association */
-+	edma_shadow0_write_array(ctlr, SH_ESR, j, mask);
-+
-+	pr_debug("EDMA: ESR%d %08x\n", j,
-+		edma_shadow0_read_array(ctlr, SH_ESR, j));
-+	return 0;
-+}
-+EXPORT_SYMBOL(edma_manual_trigger);
-+
- /**
-  * edma_start - start dma on a channel
-  * @channel: channel being activated
-diff --git a/include/linux/platform_data/edma.h b/include/linux/platform_data/edma.h
-index 57300fd..0e11eca 100644
---- a/include/linux/platform_data/edma.h
-+++ b/include/linux/platform_data/edma.h
-@@ -180,4 +180,6 @@ struct edma_soc_info {
- 	const s16	(*xbar_chans)[2];
- };
- 
-+int edma_manual_trigger(unsigned);
-+
- #endif
+ 	edesc->total_processed += total_process;
 -- 
 1.7.9.5
