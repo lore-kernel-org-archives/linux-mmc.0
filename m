@@ -1,63 +1,39 @@
-From: Joel Fernandes <joelf@ti.com>
-Subject: [RFC 4/5] dma: edma: Find missed events and issue them
-Date: Sun, 21 Jul 2013 01:58:35 -0500
-Message-ID: <1374389915-32630-1-git-send-email-joelf@ti.com>
+From: =?ISO-8859-1?Q?Kevyn=2DAlexandre_Par=E9?=
+	<kevyn.alexandre.pare@gmail.com>
+Subject: Unable to randomly boot rootfs (EXT3 or EXT4) from SD: MMC error -110 (TIMEDOUT)
+Date: Sun, 21 Jul 2013 13:07:43 -0400
+Message-ID: <CAL1yNcJZBSSNu4aDmL6n9uu3LkNPCOM-LbUXD2990jkPJYpLoA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Tony Lindgren <tony@atomide.com>, Sekhar Nori <nsekhar@ti.com>, Santosh Shilimkar <santosh.shilimkar@ti.com>, Sricharan R <r.sricharan@ti.com>, Rajendra Nayak <rnayak@ti.com>, Lokesh Vutla <lokeshvutla@ti.com>, Matt Porter <matt@ohporter.com>, Grant Likely <grant.likely@secretlab.ca>, Rob Herring <rob.herring@calxeda.com>, Vinod Koul <vinod.koul@intel.com>, Dan Williams <djbw@fb.com>, Mark Brown <broonie@linaro.org>, Benoit Cousson <benoit.cousson@linaro.org>, Russell King <linux@arm.linux.org.uk>, Arnd Bergmann <arnd@arndb.de>, Balaji TK <balajitk@ti.com>, Gururaja Hebbar <gururaja.hebbar@ti.com>, Chris Ball <cjb@laptop.org>, Jason Kridner <jkridner@beagleboard.org>
-Cc: Linux OMAP List <linux-omap@vger.kernel.org>, Linux ARM Kernel List <linux-arm-kernel@lists.infradead.org>, Linux DaVinci Kernel List <davinci-linux-open-source@linux.davincidsp.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux MMC List <linux-mmc@vger.kernel.org>, Joel Fernandes <joelf@ti.com>
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-ext4-owner@vger.kernel.org>
+Sender: linux-ext4-owner@vger.kernel.org
+To: linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org
+Cc: linux-ext4@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-In an effort to move to using Scatter gather lists of any size with
-EDMA as discussed at [1] instead of placing limitations on the driver,
-we work through the limitations of the EDMAC hardware to find missed
-events and issue them.
+Hi,
 
-The sequence of events that require this are:
+I'm trying to figure out why when randomly booting our system after it =
+have been hard shutdown for some time (couple of minutes to couple of =
+days) doesn't boot with MMC error?=20
 
-For the scenario where MAX slots for an EDMA channel is 3:
+WORKAROUND:
+Rebooting the system most of the time remove the issue.
 
-SG1 -> SG2 -> SG3 -> SG4 -> SG5 -> SG6 -> Null
+I try couple of version of Kernel from stable 3.2.47 & 3.4.53 without =
+success.
+I try to change FS from EXT3 to EXT4 without success.
+I try multiple SD..
 
-The above SG list will have to be DMA'd in 2 sets:
+Any proposition of test that you think that is worth trying, I'm willing =
+to try.
 
-(1) SG1 -> SG2 -> SG3 -> Null
-(2) SG4 -> SG5 -> SG6 -> Null
+Your opinions will really be appreciated,
 
-After (1) is succesfully transferred, the events from the MMC controller
-donot stop coming and are missed by the time we have setup the transfer
-for (2). So here, we catch the events missed as an error condition and
-issue them manually.
+See below for some output of my environment,
+http://pastebin.com/qchsr1FQ
 
-[1] http://marc.info/?l=linux-omap&m=137416733628831&w=2
+Thx,
 
-Signed-off-by: Joel Fernandes <joelf@ti.com>
----
- drivers/dma/edma.c |   10 +++++++++-
- 1 file changed, 9 insertions(+), 1 deletion(-)
-
-diff --git a/drivers/dma/edma.c b/drivers/dma/edma.c
-index 0e7ed79..b0b5bcd 100644
---- a/drivers/dma/edma.c
-+++ b/drivers/dma/edma.c
-@@ -414,7 +414,15 @@ static void edma_callback(unsigned ch_num, u16 ch_status, void *data)
- 
- 		break;
- 	case DMA_CC_ERROR:
--		dev_dbg(dev, "transfer error on channel %d\n", ch_num);
-+		if (echan->edesc) {
-+			dev_dbg(dev, "Missed event on %d, retrying\n",
-+				ch_num);
-+			edma_clean_channel(echan->ch_num);
-+			edma_stop(echan->ch_num);
-+			edma_start(echan->ch_num);
-+			edma_manual_trigger(echan->ch_num);
-+		}
-+		dev_dbg(dev, "handled error on channel %d\n", ch_num);
- 		break;
- 	default:
- 		break;
--- 
-1.7.9.5
+-Kevyn-Alexandre Par=E9
+ps: My intention are to enable CONFIG_MMC_DEBUG? Try kernel 3.10.1?
