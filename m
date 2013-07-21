@@ -1,152 +1,49 @@
-From: Andrea Adami <andrea.adami@gmail.com>
-Subject: [PATCH] mmc: pxamci: Refactor regulator support
-Date: Sun, 21 Jul 2013 01:07:48 +0200
-Message-ID: <1374361668-3184-1-git-send-email-andrea.adami@gmail.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: Chris Ball <cjb@laptop.org>, Russell King <linux@arm.linux.org.uk>, linux-kernel@vger.kernel.org, Marko Katic <dromede@gmail.com>
+From: Joel Fernandes <joelf-l0cyMroinI0@public.gmane.org>
+Subject: [RFC 0/5] EDMA: Support to DMA scatter-lists with any no. of entries
+Date: Sun, 21 Jul 2013 01:57:33 -0500
+Message-ID: <1374389853-32458-1-git-send-email-joelf@ti.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
+List-Unsubscribe: <http://linux.davincidsp.com/mailman/options/davinci-linux-open-source>,
+	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://linux.davincidsp.com/pipermail/davinci-linux-open-source>
+List-Post: <mailto:davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
+List-Help: <mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=help>
+List-Subscribe: <http://linux.davincidsp.com/mailman/listinfo/davinci-linux-open-source>,
+	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=subscribe>
+Sender: <davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
+Errors-To: davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org
+To: Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Sekhar Nori <nsekhar-l0cyMroinI0@public.gmane.org>, Santosh Shilimkar <santosh.shilimkar-l0cyMroinI0@public.gmane.org>, Sricharan R <r.sricharan-l0cyMroinI0@public.gmane.org>, Rajendra Nayak <rnayak-l0cyMroinI0@public.gmane.org>, Lokesh Vutla <lokeshvutla-l0cyMroinI0@public.gmane.org>, Matt Porter <matt-agtwNxEcTQJWk0Htik3J/w@public.gmane.org>, Grant Likely <grant.likely-s3s/WqlpOiPyB63q8FvJNQ@public.gmane.org>, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Vinod Koul <vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Dan Williams <djbw-b10kYP2dOMg@public.gmane.org>, Mark Brown <broonie-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Benoit Cousson <benoit.cousson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Balaji TK <balajitk-l0cyMroinI0@public.gmane.org>, Gururaja Hebbar <gururaja.hebbar-l0cyMroinI0@public.gmane.org>, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, Jason Kridner <jkridner-hcmAuCOw+vXj4SYmN/TMmA@public.gmane.org>
+Cc: Linux DaVinci Kernel List <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, Linux OMAP List <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux ARM Kernel List <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-From: Marko Katic <dromede@gmail.com>
+Re: on-going discussion at [1], I've added support to EDMA driver to be
+able to accept scatter gather lists of arbitrary length, but still make
+use of only a certain MAX number of slots. Thus free-ing up the rest of
+the slots to other slave users.  With this there is no need for slave
+drivers to query the EDMA driver how much is the MAX. It can send SG lists
+of any number of entries to DMA.
 
-Here's an interesting scenario. The spitz machine has an
-Intersil 6271A voltage regulator and an ADS7846 touchscreen
-controller.
+Tested with various number of MAX slots , even just "1". In the case where
+it is 1, only 1-slot is used to transmit an entire set of scatter list.
+If only 1 slot is used for a channel, there is a performance impact, but
+it works. A DMA resources vs Performance tradeoff.
 
-The ADS7846 driver _requires_ the use of a voltage regulator
-or if not present, CONFIG_REGULATOR_DUMMY should be used for proper operation.
-This was made mandatory by the following commit:
+[1] http://marc.info/?l=linux-omap&m=137416733628831&w=2
 
-========================================
-91143379b01b2020d8878d627ebe9dfb9d6eb4c8
-Input: ads7846 - add regulator support
+Joel Fernandes (5):
+  dma: edma: Setup parameters to DMA MAX_SG_NR at a time
+  dma: edma: Write out and handle MAX_SG_NR at a given time
+  ARM: edma: Add function to manually trigger an EDMA channel
+  dma: edma: Find missed events and issue them
+  DMA: EDMA: Leave linked to Null slot instead of DUMMY slot
 
-The ADS7846/TSC2046 touchscreen controllers can (and usually are)
-connected to various regulators for power, so add regulator support.
+ arch/arm/common/edma.c             |   21 +++++++
+ drivers/dma/edma.c                 |  113 ++++++++++++++++++++++++++----------
+ include/linux/platform_data/edma.h |    2 +
+ 3 files changed, 104 insertions(+), 32 deletions(-)
 
-Valid regulator will now be required, so boards without complete
-regulator setup should either disable regulator framework or enable
-CONFIG_REGULATOR_DUMMY.
-========================================
-
-The ADS7846 in spitz machines is not connected to
-any power regulator so it needs CONFIG_REGULATOR_DUMMY enabled.
-So to support both the Intersil 6271A regulator and
-the ADS7846 controller, CONFIG_REGULATOR and CONFIG_REGULATOR_DUMMY have
-to be defined.
-
-However, enabling CONFIG_REGULATOR and CONFIG_REGULATOR_DUMMY
-will break pxamci driver and cause the following error output:
-
-pxa2xx-mci.0 supply vmmc not found, using dummy regulator
-pxa2xx-mci pxa2xx-mci.0: ocr_mask/setpower will not be used
-pxa2xx-mci pxa2xx-mci.0: could not set regulator OCR (-22)
-pxa2xx-mci pxa2xx-mci.0: unable to set power
-pxa2xx-mci pxa2xx-mci.0: could not set regulator OCR (-22)
-pxa2xx-mci pxa2xx-mci.0: unable to set power
-
-Above failures occur in two functions;
-pxamci_init_ocr() and pxamci_set_power().
-
-Regulator support in pxamci_init_ocr() is not
-written with the existence of the dummy regulator driver in
-mind. It does not check the return value of mmc_regulator_get_ocrmask()
-and it will only fall back to platform data if no regulator was found.
-
-pxamci_set_power() fails because it does not even try to fall back
-to platform data if mmc_regulator_set_ocr() fails. It
-expects a proper regulator or no regulator at all. It will
-only fall back to platform data if no regulator was found. It does
-not properly handle the possible existence of the dummy regulator.
-
-This patch refactors pxamci_init_ocr() and  pxamci_set_power() regulator
-support to be more modular, to do more checks and to always fall back
-to platform data.
-
-Signed-off-by: Marko Katic <dromede@gmail.com>
-[andrea.adami@gmail.com: checkpatch.pl dislikes lines over 80 chars]
-Signed-off-by: Andrea Adami <andrea.adami@gmail.com>
----
- drivers/mmc/host/pxamci.c | 40 +++++++++++++++++++++++++++-------------
- 1 file changed, 27 insertions(+), 13 deletions(-)
-
-diff --git a/drivers/mmc/host/pxamci.c b/drivers/mmc/host/pxamci.c
-index 2b2f65a..341d5dc 100644
---- a/drivers/mmc/host/pxamci.c
-+++ b/drivers/mmc/host/pxamci.c
-@@ -83,18 +83,26 @@ struct pxamci_host {
- static inline void pxamci_init_ocr(struct pxamci_host *host)
- {
- #ifdef CONFIG_REGULATOR
-+	int ocr_mask;
- 	host->vcc = regulator_get(mmc_dev(host->mmc), "vmmc");
- 
- 	if (IS_ERR(host->vcc))
- 		host->vcc = NULL;
- 	else {
--		host->mmc->ocr_avail = mmc_regulator_get_ocrmask(host->vcc);
--		if (host->pdata && host->pdata->ocr_mask)
-+		ocr_mask = mmc_regulator_get_ocrmask(host->vcc);
-+		if (ocr_mask <= 0)
-+			host->mmc->ocr_avail = 0;
-+		else
-+			host->mmc->ocr_avail = ocr_mask;
-+
-+		if (host->pdata &&
-+			host->pdata->ocr_mask &&
-+			host->mmc->ocr_avail)
- 			dev_warn(mmc_dev(host->mmc),
- 				"ocr_mask/setpower will not be used\n");
- 	}
- #endif
--	if (host->vcc == NULL) {
-+	if (host->vcc == NULL || host->mmc->ocr_avail == 0) {
- 		/* fall-back to platform data */
- 		host->mmc->ocr_avail = host->pdata ?
- 			host->pdata->ocr_mask :
-@@ -108,26 +116,32 @@ static inline int pxamci_set_power(struct pxamci_host *host,
- {
- 	int on;
- 
-+#ifdef CONFIG_REGULATOR
- 	if (host->vcc) {
--		int ret;
-+		int ret = 0;
- 
--		if (power_mode == MMC_POWER_UP) {
-+		if (power_mode == MMC_POWER_UP)
- 			ret = mmc_regulator_set_ocr(host->mmc, host->vcc, vdd);
--			if (ret)
--				return ret;
--		} else if (power_mode == MMC_POWER_OFF) {
-+
-+		if (power_mode == MMC_POWER_OFF)
- 			ret = mmc_regulator_set_ocr(host->mmc, host->vcc, 0);
--			if (ret)
--				return ret;
--		}
-+
-+		if (ret == 0)
-+			return 0;
-+		else
-+			dev_warn(mmc_dev(host->mmc),
-+			 "mmc_regulator_set_ocr failed, "
-+			 "falling back to platform data\n");
- 	}
--	if (!host->vcc && host->pdata &&
-+#endif
-+
-+	if (host->pdata &&
- 	    gpio_is_valid(host->pdata->gpio_power)) {
- 		on = ((1 << vdd) & host->pdata->ocr_mask);
- 		gpio_set_value(host->pdata->gpio_power,
- 			       !!on ^ host->pdata->gpio_power_invert);
- 	}
--	if (!host->vcc && host->pdata && host->pdata->setpower)
-+	if (host->pdata && host->pdata->setpower)
- 		host->pdata->setpower(mmc_dev(host->mmc), vdd);
- 
- 	return 0;
 -- 
-1.8.1.5
+1.7.9.5
