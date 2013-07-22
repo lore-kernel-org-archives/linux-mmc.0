@@ -1,86 +1,78 @@
-From: Scott Wood <scottwood@freescale.com>
-Subject: Re: [PATCH 2/2] mmc: esdhc: get voltage from dts file
-Date: Mon, 22 Jul 2013 12:40:47 -0500
-Message-ID: <1374514847.15592.7@snotra>
-References: <1374479636-9254-1-git-send-email-Haijun.Zhang@freescale.com>
-	<1374479636-9254-2-git-send-email-Haijun.Zhang@freescale.com>
+From: Joel Fernandes <joelf@ti.com>
+Subject: [PATCH] ARM: EDMA: Fix clearing of unused list for DT DMA resources
+Date: Mon, 22 Jul 2013 12:49:17 -0500
+Message-ID: <1374515357-14574-1-git-send-email-joelf@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"; delsp=Yes; format=Flowed
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from ch1ehsobe005.messaging.microsoft.com ([216.32.181.185]:11234
-	"EHLO ch1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1755147Ab3GVRlA convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 22 Jul 2013 13:41:00 -0400
-In-Reply-To: <1374479636-9254-2-git-send-email-Haijun.Zhang@freescale.com>
-	(from Haijun.Zhang@freescale.com on Mon Jul 22 02:53:56 2013)
-Content-Disposition: inline
+Received: from comal.ext.ti.com ([198.47.26.152]:51173 "EHLO comal.ext.ti.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1756027Ab3GVRty (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 22 Jul 2013 13:49:54 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-Cc: linux-mmc@vger.kernel.org, linuxppc-dev@lists.ozlabs.org, cbouatmailru@gmail.com, cjb@laptop.org, AFLEMING@freescale.com, Haijun Zhang <Haijun.Zhang@freescale.com>, Haijun Zhang <haijun.zhang@freescale.com>
+To: Tony Lindgren <tony@atomide.com>, Sekhar Nori <nsekhar@ti.com>, Vinod Koul <vinod.koul@intel.com>, Benoit Cousson <benoit.cousson@linaro.org>, Balaji TK <balajitk@ti.com>, Arnd Bergmann <arnd@arndb.de>
+Cc: Jason Kridner <jkridner@beagleboard.org>, Mark Jackson <mpfj-list@newflow.co.uk>, Linux OMAP List <linux-omap@vger.kernel.org>, Linux ARM Kernel List <linux-arm-kernel@lists.infradead.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux MMC List <linux-mmc@vger.kernel.org>, Pantel Antoniou <panto@antoniou-consulting.com>, Joel Fernandes <joelf@ti.com>
 
-On 07/22/2013 02:53:56 AM, Haijun Zhang wrote:
-> Add voltage-range support in esdhc of T4, So we can choose
-> to read voltages from dts file as one optional.
-> If we can get a valid voltage-range from device node, we use
-> this voltage as the final voltage support. Else we still read
-> from capacity or from other provider.
-> 
-> Signed-off-by: Haijun Zhang <haijun.zhang@freescale.com>
-> Signed-off-by: Anton Vorontsov <cbouatmailru@gmail.com>
-> ---
->  drivers/mmc/host/sdhci-of-esdhc.c | 31  
-> +++++++++++++++++++++++++++++++
->  drivers/mmc/host/sdhci.c          |  3 +++
->  include/linux/mmc/sdhci.h         |  1 +
->  3 files changed, 35 insertions(+)
-> 
-> diff --git a/drivers/mmc/host/sdhci-of-esdhc.c  
-> b/drivers/mmc/host/sdhci-of-esdhc.c
-> index 15039e2..8b4b27a 100644
-> --- a/drivers/mmc/host/sdhci-of-esdhc.c
-> +++ b/drivers/mmc/host/sdhci-of-esdhc.c
-> @@ -262,6 +262,35 @@ static int esdhc_pltfm_bus_width(struct  
-> sdhci_host *host, int width)
->  	return 0;
->  }
-> 
-> +static void esdhc_get_voltage(struct sdhci_host *host,
-> +			struct platform_device *pdev)
-> +{
-> +	const u32 *voltage_ranges;
-> +	int num_ranges, i;
-> +	struct device_node *np;
-> +	np = pdev->dev.of_node;
-> +
-> +	voltage_ranges = of_get_property(np, "voltage-ranges",  
-> &num_ranges);
-> +	num_ranges = num_ranges / sizeof(*voltage_ranges) / 2;
-> +	if (!voltage_ranges || !num_ranges) {
-> +		dev_info(&pdev->dev, "OF: voltage-ranges  
-> unspecified\n");
-> +		return;
-> +	}
-> +
-> +	for (i = 0; i < num_ranges; i++) {
-> +		const int j = i * 2;
-> +		u32 mask;
-> +		mask =  
-> mmc_vddrange_to_ocrmask(be32_to_cpu(voltage_ranges[j]),
-> +				be32_to_cpu(voltage_ranges[j + 1]));
-> +		if (!mask) {
-> +			dev_info(&pdev->dev,
-> +				"OF: false voltage-ranges specified\n");
-> +			return;
-> +		}
-> +		host->ocr_mask |= mask;
-> +	}
-> +}
+HWMOD removal for MMC is breaking edma_start as the events are being manually
+triggered due to unused channel list not being clear, Thanks to Balaji TK for
+finding this issue.
 
-Don't duplicate this code.  Move it somewhere common and share it.
+This patch fixes the issue, by reading the "dmas" property from the DT node if
+it exists and clearing the bits in the unused channel list.
 
-Why did you remove the range index from the error string, and why did  
-you change it from dev_err to dev_info?
+Cc: Balaji T K <balajitk@ti.com>
+Cc: Pantel Antoniou <panto@antoniou-consulting.com>
+Signed-off-by: Joel Fernandes <joelf@ti.com>
+---
+Fixed pushed to git@github.com:joelagnel/linux-kernel.git
+   99b65c9..a411a81  master-rebase -> master-rebase
 
--Scott
+ arch/arm/common/edma.c |   31 +++++++++++++++++++++++--------
+ 1 file changed, 23 insertions(+), 8 deletions(-)
+
+diff --git a/arch/arm/common/edma.c b/arch/arm/common/edma.c
+index a432e6c..720f958 100644
+--- a/arch/arm/common/edma.c
++++ b/arch/arm/common/edma.c
+@@ -561,14 +561,29 @@ static int reserve_contiguous_slots(int ctlr, unsigned int id,
+ static int prepare_unused_channel_list(struct device *dev, void *data)
+ {
+ 	struct platform_device *pdev = to_platform_device(dev);
+-	int i, ctlr;
+-
+-	for (i = 0; i < pdev->num_resources; i++) {
+-		if ((pdev->resource[i].flags & IORESOURCE_DMA) &&
+-				(int)pdev->resource[i].start >= 0) {
+-			ctlr = EDMA_CTLR(pdev->resource[i].start);
+-			clear_bit(EDMA_CHAN_SLOT(pdev->resource[i].start),
+-					edma_cc[ctlr]->edma_unused);
++	int i = 0, ctlr;
++	u32 dma_chan;
++	__be32 *dma_chan_p;
++	struct property *prop;
++
++	if (dev->of_node) {
++		of_property_for_each_u32(dev->of_node, "dmas", prop, \
++					 dma_chan_p, dma_chan) {
++			if (i++ & 1) {
++				ctlr = EDMA_CTLR(dma_chan);
++				clear_bit(EDMA_CHAN_SLOT(dma_chan),
++						edma_cc[ctlr]->edma_unused);
++			}
++		}
++	} else {
++		for (; i < pdev->num_resources; i++) {
++			if ((pdev->resource[i].flags & IORESOURCE_DMA) &&
++			    (int)pdev->resource[i].start >= 0) {
++				ctlr = EDMA_CTLR(pdev->resource[i].start);
++				clear_bit(EDMA_CHAN_SLOT(
++					  pdev->resource[i].start),
++					  edma_cc[ctlr]->edma_unused);
++			}
+ 		}
+ 	}
+ 
+-- 
+1.7.9.5
+
