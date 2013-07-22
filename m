@@ -1,18 +1,23 @@
 From: Joel Fernandes <joelf@ti.com>
-Subject: [PATCH] ARM: EDMA: Fix clearing of unused list for DT DMA resources
-Date: Mon, 22 Jul 2013 12:49:17 -0500
-Message-ID: <1374515357-14574-1-git-send-email-joelf@ti.com>
+Subject: [PATCH v2] ARM: EDMA: Fix clearing of unused list for DT DMA resources
+Date: Mon, 22 Jul 2013 12:59:49 -0500
+Message-ID: <1374515989-7391-1-git-send-email-joelf@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from comal.ext.ti.com ([198.47.26.152]:51173 "EHLO comal.ext.ti.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1756027Ab3GVRty (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 22 Jul 2013 13:49:54 -0400
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
 To: Tony Lindgren <tony@atomide.com>, Sekhar Nori <nsekhar@ti.com>, Vinod Koul <vinod.koul@intel.com>, Benoit Cousson <benoit.cousson@linaro.org>, Balaji TK <balajitk@ti.com>, Arnd Bergmann <arnd@arndb.de>
-Cc: Jason Kridner <jkridner@beagleboard.org>, Mark Jackson <mpfj-list@newflow.co.uk>, Linux OMAP List <linux-omap@vger.kernel.org>, Linux ARM Kernel List <linux-arm-kernel@lists.infradead.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux MMC List <linux-mmc@vger.kernel.org>, Pantel Antoniou <panto@antoniou-consulting.com>, Joel Fernandes <joelf@ti.com>
+Cc: Mark Jackson <mpfj-list@newflow.co.uk>, Joel Fernandes <joelf@ti.com>, Pantel Antoniou <panto@antoniou-consulting.com>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Jason Kridner <jkridner@beagleboard.org>, Linux OMAP List <linux-omap@vger.kernel.org>, Linux ARM Kernel List <linux-arm-kernel@lists.infradead.org>
+List-Id: linux-mmc@vger.kernel.org
 
 HWMOD removal for MMC is breaking edma_start as the events are being manually
 triggered due to unused channel list not being clear, Thanks to Balaji TK for
@@ -25,14 +30,13 @@ Cc: Balaji T K <balajitk@ti.com>
 Cc: Pantel Antoniou <panto@antoniou-consulting.com>
 Signed-off-by: Joel Fernandes <joelf@ti.com>
 ---
-Fixed pushed to git@github.com:joelagnel/linux-kernel.git
-   99b65c9..a411a81  master-rebase -> master-rebase
+v2 changes: Fixed compiler warning
 
  arch/arm/common/edma.c |   31 +++++++++++++++++++++++--------
  1 file changed, 23 insertions(+), 8 deletions(-)
 
 diff --git a/arch/arm/common/edma.c b/arch/arm/common/edma.c
-index a432e6c..720f958 100644
+index a432e6c..765d578 100644
 --- a/arch/arm/common/edma.c
 +++ b/arch/arm/common/edma.c
 @@ -561,14 +561,29 @@ static int reserve_contiguous_slots(int ctlr, unsigned int id,
@@ -49,7 +53,7 @@ index a432e6c..720f958 100644
 -					edma_cc[ctlr]->edma_unused);
 +	int i = 0, ctlr;
 +	u32 dma_chan;
-+	__be32 *dma_chan_p;
++	const __be32 *dma_chan_p;
 +	struct property *prop;
 +
 +	if (dev->of_node) {
@@ -75,4 +79,3 @@ index a432e6c..720f958 100644
  
 -- 
 1.7.9.5
-
