@@ -1,13 +1,14 @@
-From: Haijun Zhang <Haijun.Zhang@freescale.com>
-Subject: [PATCH 2/2] mmc: esdhc: get voltage from dts file
-Date: Mon, 22 Jul 2013 15:53:56 +0800
-Message-ID: <1374479636-9254-2-git-send-email-Haijun.Zhang@freescale.com>
+From: Wrobel Heinz-R39252 <r39252@freescale.com>
+Subject: RE: [PATCH 1/2] Powerpc: Add voltage ranges support for T4
+Date: Mon, 22 Jul 2013 09:47:53 +0000
+Message-ID: <192298D25D96A042975E372855100DB70A1A93DC@039-SN2MPN1-012.039d.mgd.msft.net>
 References: <1374479636-9254-1-git-send-email-Haijun.Zhang@freescale.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org>
 In-Reply-To: <1374479636-9254-1-git-send-email-Haijun.Zhang@freescale.com>
+Content-Language: en-US
 List-Unsubscribe: <https://lists.ozlabs.org/options/linuxppc-dev>,
  <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=unsubscribe>
 List-Archive: <http://lists.ozlabs.org/pipermail/linuxppc-dev/>
@@ -18,98 +19,43 @@ List-Subscribe: <https://lists.ozlabs.org/listinfo/linuxppc-dev>,
 Errors-To: linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org
 Sender: "Linuxppc-dev"
  <linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org>
-To: linux-mmc@vger.kernel.org, linuxppc-dev@lists.ozlabs.org
-Cc: scottwood@freescale.com, cjb@laptop.org, AFLEMING@freescale.com, Haijun Zhang <haijun.zhang@freescale.com>, cbouatmailru@gmail.com
+To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linuxppc-dev@lists.ozlabs.org" <linuxppc-dev@lists.ozlabs.org>
+Cc: Wood Scott-B07421 <B07421@freescale.com>, "cjb@laptop.org" <cjb@laptop.org>, Fleming Andy-AFLEMING <afleming@freescale.com>, Zhang Haijun-B42677 <B42677@freescale.com>, "cbouatmailru@gmail.com" <cbouatmailru@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Add voltage-range support in esdhc of T4, So we can choose
-to read voltages from dts file as one optional.
-If we can get a valid voltage-range from device node, we use
-this voltage as the final voltage support. Else we still read
-from capacity or from other provider.
+> Subject: [PATCH 1/2] Powerpc: Add voltage ranges support for T4
+> 
+> Special voltages that can be support by eSDHC of T4 in esdhc node.
+> 
+> Signed-off-by: Haijun Zhang <haijun.zhang@freescale.com>
+> Signed-off-by: Anton Vorontsov <cbouatmailru@gmail.com>
 
-Signed-off-by: Haijun Zhang <haijun.zhang@freescale.com>
-Signed-off-by: Anton Vorontsov <cbouatmailru@gmail.com>
----
- drivers/mmc/host/sdhci-of-esdhc.c | 31 +++++++++++++++++++++++++++++++
- drivers/mmc/host/sdhci.c          |  3 +++
- include/linux/mmc/sdhci.h         |  1 +
- 3 files changed, 35 insertions(+)
+> --- a/Documentation/devicetree/bindings/mmc/fsl-esdhc.txt
+> +++ b/Documentation/devicetree/bindings/mmc/fsl-esdhc.txt
+> @@ -19,6 +19,8 @@ Optional properties:
+>      "bus-width = <1>" property.
+>    - sdhci,auto-cmd12: specifies that a controller can only handle auto
+>      CMD12.
+> +  - 3300 3300: specifies that eSDHC controller can support voltages
+> ranges
+> +    from 3300 to 3300. This is an optional.
 
-diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
-index 15039e2..8b4b27a 100644
---- a/drivers/mmc/host/sdhci-of-esdhc.c
-+++ b/drivers/mmc/host/sdhci-of-esdhc.c
-@@ -262,6 +262,35 @@ static int esdhc_pltfm_bus_width(struct sdhci_host *host, int width)
- 	return 0;
- }
- 
-+static void esdhc_get_voltage(struct sdhci_host *host,
-+			struct platform_device *pdev)
-+{
-+	const u32 *voltage_ranges;
-+	int num_ranges, i;
-+	struct device_node *np;
-+	np = pdev->dev.of_node;
-+
-+	voltage_ranges = of_get_property(np, "voltage-ranges", &num_ranges);
-+	num_ranges = num_ranges / sizeof(*voltage_ranges) / 2;
-+	if (!voltage_ranges || !num_ranges) {
-+		dev_info(&pdev->dev, "OF: voltage-ranges unspecified\n");
-+		return;
-+	}
-+
-+	for (i = 0; i < num_ranges; i++) {
-+		const int j = i * 2;
-+		u32 mask;
-+		mask = mmc_vddrange_to_ocrmask(be32_to_cpu(voltage_ranges[j]),
-+				be32_to_cpu(voltage_ranges[j + 1]));
-+		if (!mask) {
-+			dev_info(&pdev->dev,
-+				"OF: false voltage-ranges specified\n");
-+			return;
-+		}
-+		host->ocr_mask |= mask;
-+	}
-+}
-+
- static const struct sdhci_ops sdhci_esdhc_ops = {
- 	.read_l = esdhc_readl,
- 	.read_w = esdhc_readw,
-@@ -317,6 +346,8 @@ static int sdhci_esdhc_probe(struct platform_device *pdev)
- 	/* call to generic mmc_of_parse to support additional capabilities */
- 	mmc_of_parse(host->mmc);
- 
-+	esdhc_get_voltage(host, pdev);
-+
- 	ret = sdhci_add_host(host);
- 	if (ret)
- 		sdhci_pltfm_free(pdev);
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index a78bd4f..57541e0 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -3119,6 +3119,9 @@ int sdhci_add_host(struct sdhci_host *host)
- 				   SDHCI_MAX_CURRENT_MULTIPLIER;
- 	}
- 
-+	if (host->ocr_mask)
-+		ocr_avail = host->ocr_mask;
-+
- 	mmc->ocr_avail = ocr_avail;
- 	mmc->ocr_avail_sdio = ocr_avail;
- 	if (host->ocr_avail_sdio)
-diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
-index e3c6a74..3e781b8 100644
---- a/include/linux/mmc/sdhci.h
-+++ b/include/linux/mmc/sdhci.h
-@@ -171,6 +171,7 @@ struct sdhci_host {
- 	unsigned int            ocr_avail_sdio;	/* OCR bit masks */
- 	unsigned int            ocr_avail_sd;
- 	unsigned int            ocr_avail_mmc;
-+	u32 ocr_mask;		/* available voltages */
- 
- 	wait_queue_head_t	buf_ready_int;	/* Waitqueue for Buffer Read Ready interrupt */
- 	unsigned int		tuning_done;	/* Condition flag set when CMD19 succeeds */
--- 
-1.8.0
+"This is an optional." is an unclear statement.
+
+> +++ b/arch/powerpc/boot/dts/fsl/t4240si-post.dtsi
+> @@ -399,6 +399,7 @@
+>  	sdhc@114000 {
+>  		compatible = "fsl,t4240-esdhc", "fsl,esdhc";
+>  		sdhci,auto-cmd12;
+> +		voltage-ranges = <1800 1800 3300 3300>;
+
+This is IMHO incorrect and potentially dangerous.
+The T4 silicon will only support 1.8V on SDHC pins per hardware specification.
+The Freescale T4240QDS reference board has extra voltage shifters added to allow 3.3V operation, but that is _not_ a silicon feature. It is a specific board feature that may or may not translate to other boards, depending on how SD spec conformant a board builder wants to be.
+
+If the intent is to state that a physical SDHC interface on a board has to be built to support 3.3V operation to be SD spec conformant for off-the-shelf cards because a reset would change the signal voltage to 3.3V, then I am not sure that putting this down as silicon "feature" without further explanation about the background anywhere is the right way to go.
+IMHO silicon features are really just silicon features and not technically optional external circuitry additions implied by common use.
+
+Best regards,
+
+Heinz
