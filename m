@@ -1,95 +1,60 @@
-From: Diogo Sousa <diogogsousa@gmail.com>
-Subject: Re: rtsx_pci issue: Realtek 5289 SDHC/SDXC
-Date: Mon, 22 Jul 2013 05:41:30 +0100
-Message-ID: <51ECB7FA.8070508@gmail.com>
-References: <51D77CDF.4070106@gmail.com> <51EC910A.7090507@gmail.com> <51EC94D9.20303@realsil.com.cn>
+From: Haijun Zhang <Haijun.Zhang@freescale.com>
+Subject: [PATCH 1/2] Powerpc: Add voltage ranges support for T4
+Date: Mon, 22 Jul 2013 15:53:55 +0800
+Message-ID: <1374479636-9254-1-git-send-email-Haijun.Zhang@freescale.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="----enig2LCAWPBUHRCRCCNXTBWRU"
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-we0-f177.google.com ([74.125.82.177]:46027 "EHLO
-	mail-we0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754208Ab3GVElk (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 22 Jul 2013 00:41:40 -0400
-Received: by mail-we0-f177.google.com with SMTP id m19so5373065wev.8
-        for <linux-mmc@vger.kernel.org>; Sun, 21 Jul 2013 21:41:38 -0700 (PDT)
-In-Reply-To: <51EC94D9.20303@realsil.com.cn>
+Received: from mail-db9lp0253.outbound.messaging.microsoft.com ([213.199.154.253]:56821
+	"EHLO db9outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1756722Ab3GVIpR (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 22 Jul 2013 04:45:17 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: pclinux <pclinux@realsil.com.cn>
-Cc: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org, linuxppc-dev@lists.ozlabs.org
+Cc: cbouatmailru@gmail.com, cjb@laptop.org, scottwood@freescale.com, AFLEMING@freescale.com, Haijun Zhang <Haijun.Zhang@freescale.com>, Haijun Zhang <haijun.zhang@freescale.com>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
-------enig2LCAWPBUHRCRCCNXTBWRU
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
+Special voltages that can be support by eSDHC of T4 in esdhc node.
 
-On 22-07-2013 03:11, pclinux wrote:
-> =E4=BA=8E 2013=E5=B9=B407=E6=9C=8822=E6=97=A5 09:55, Diogo Sousa =E5=86=
-=99=E9=81=93:
->> Hi,
->>
->> I have sent this mail before to this mailing list but got no response =
-so
->> I'm resending it:
->>
->> I'm not sure if this is the proper way to report bugs, I will gladly
->> report it bugzilla if that is preferred.
->>
->> I have been experiencing an issue with the rtsx_pci driver.
->> I cannot read SDHC or SDXC cards. I'm running linux 3.9.9 on a x86_64.=
+Signed-off-by: Haijun Zhang <haijun.zhang@freescale.com>
+Signed-off-by: Anton Vorontsov <cbouatmailru@gmail.com>
+---
+ Documentation/devicetree/bindings/mmc/fsl-esdhc.txt | 3 +++
+ arch/powerpc/boot/dts/fsl/t4240si-post.dtsi         | 1 +
+ 2 files changed, 4 insertions(+)
 
->> Normal SD cards seems to work fine.
->=20
-> Hi Diogo:
->=20
-> From your description, it looks like a compatibility issue. But I can't=
-
-> reproduce the case in my site.
-> You said you can't read SDHC or SDXC cards. Does it mean that all of th=
-e
-> HCXC card can't be accessed, or just one card?
-> Please tell me the exact model type of your card and your notebook. So
-> we will try to find the exact same platform so we can reproduce the cas=
-e.
->=20
-> Thanks!
-> Wei WANG
-
-I have tried two SDHC card with the same results, and only one SDXC card
-(I only have this one).
-
-The cards I'm using are all from sandisk: 8GB 95MB/s, 16GB 30MB/s and
-64GB 45MB/s. The laptop I'm using is Asus K55VJ-SX061H.
-
-Thanks,
-Diogo Sousa
+diff --git a/Documentation/devicetree/bindings/mmc/fsl-esdhc.txt b/Documentation/devicetree/bindings/mmc/fsl-esdhc.txt
+index bd9be0b..4aeae6e 100644
+--- a/Documentation/devicetree/bindings/mmc/fsl-esdhc.txt
++++ b/Documentation/devicetree/bindings/mmc/fsl-esdhc.txt
+@@ -19,6 +19,8 @@ Optional properties:
+     "bus-width = <1>" property.
+   - sdhci,auto-cmd12: specifies that a controller can only handle auto
+     CMD12.
++  - 3300 3300: specifies that eSDHC controller can support voltages ranges
++    from 3300 to 3300. This is an optional.
+ 
+ Example:
+ 
+@@ -29,4 +31,5 @@ sdhci@2e000 {
+ 	interrupt-parent = <&ipic>;
+ 	/* Filled in by U-Boot */
+ 	clock-frequency = <0>;
++	voltage-ranges = <3300 3300>;
+ };
+diff --git a/arch/powerpc/boot/dts/fsl/t4240si-post.dtsi b/arch/powerpc/boot/dts/fsl/t4240si-post.dtsi
+index bd611a9..1ef2d2d 100644
+--- a/arch/powerpc/boot/dts/fsl/t4240si-post.dtsi
++++ b/arch/powerpc/boot/dts/fsl/t4240si-post.dtsi
+@@ -399,6 +399,7 @@
+ 	sdhc@114000 {
+ 		compatible = "fsl,t4240-esdhc", "fsl,esdhc";
+ 		sdhci,auto-cmd12;
++		voltage-ranges = <1800 1800 3300 3300>;
+ 	};
+ /include/ "qoriq-i2c-0.dtsi"
+ /include/ "qoriq-i2c-1.dtsi"
+-- 
+1.8.0
 
 
-
-------enig2LCAWPBUHRCRCCNXTBWRU
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.20 (GNU/Linux)
-Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
-
-iQIcBAEBAgAGBQJR7LgAAAoJEN6T8FNssaHVcMAQALBVV/4lUocGo8PKO3j1jzvd
-Z9OIovq1+wVkqu4Whwn1C0iPWQkhiHs/Rudf3K75En8TUpiI+r/UQ0y+873P5WFG
-sGuT1reL6Yw/fStBOlmj3T9HWe1F8rpHCluL5xPzo2A8KfVd/UjekH6zX6gcfw7G
-Qspl6vZIJZ7Y3NVeevH/Y0dPiHeUY/CsVUXdrZvOZiyFMRmfrwYVc7tO81bHjMdO
-2GwDWEqaA3cOHns5mjY4PZR5gQyH4/2sr7ViXhLQC6l48yi1t2Ivh/xXiLZ40GCE
-siDP3vRu8u4V2BzO7DmiMZkyxqEf7gNGzK+wEuNhwD2vEdq9/yXIgxVBdhA/xOT1
-GTFDblDavi5XHI/p2ZcR8g6gzt1+kFKIASFfk5vuUy3aqiph8zKII6/wvgokhK2W
-11Pw06d0gF5340TDxpf5HuW5ALyKwvqIsUd/xZUI0MVUBCaT8YmYKYxI7td2Srh3
-4hTVRU/F0vTHKvuNq/8OzABOtsVQSTSr71IhLlyQoeogDJQyFOq+tz0S8Xdwzjww
-P0qs5ooJAn+O/xJO68HNRsX7/qBCXjvBH5ZvkQ47mgg9UCd+zbY31221RlH4A5AI
-uZbIdVJ0N1W3G6C0t+9o7U1TVNUctFR7BX+M1qx9pFHDK1cu/xaCxK560a4zK68u
-ke/YWq0Q79X05YSQsdII
-=ENnZ
------END PGP SIGNATURE-----
-
-------enig2LCAWPBUHRCRCCNXTBWRU--
