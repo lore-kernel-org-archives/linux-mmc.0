@@ -1,56 +1,49 @@
-From: Zhang Haijun-B42677 <B42677@freescale.com>
-Subject: RE: [PATCH 1/4 V4] powerpc/85xx: Add support for 85xx cpu type
- detection
-Date: Mon, 22 Jul 2013 01:58:34 +0000
-Message-ID: <99E897753B6F7048BD8CCDB4661D02E13E32B7@039-SN2MPN1-022.039d.mgd.msft.net>
-References: <1374037947-23670-1-git-send-email-Haijun.Zhang@freescale.com>
-	<99E897753B6F7048BD8CCDB4661D02E13DF580@039-SN2MPN1-022.039d.mgd.msft.net>
- <1374254445.5357.18@snotra>
+From: Alan Stern <stern@rowland.harvard.edu>
+Subject: Re: kernel panic in sg_complete
+Date: Sun, 21 Jul 2013 22:07:35 -0400 (EDT)
+Message-ID: <Pine.LNX.4.44L0.1307212200390.24298-100000@netrider.rowland.org>
+References: <20130722002314.GA990@kroah.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: TEXT/PLAIN; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from va3ehsobe003.messaging.microsoft.com ([216.32.180.13]:20760
-	"EHLO va3outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753246Ab3GVB6p convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sun, 21 Jul 2013 21:58:45 -0400
-In-Reply-To: <1374254445.5357.18@snotra>
-Content-Language: en-US
+Received: from netrider.rowland.org ([192.131.102.5]:55898 "HELO
+	netrider.rowland.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with SMTP id S1753156Ab3GVCHg (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 21 Jul 2013 22:07:36 -0400
+In-Reply-To: <20130722002314.GA990@kroah.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Wood Scott-B07421 <B07421@freescale.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linuxppc-dev@lists.ozlabs.org" <linuxppc-dev@lists.ozlabs.org>, "cbouatmailru@gmail.com" <cbouatmailru@gmail.com>, "cjb@laptop.org" <cjb@laptop.org>, Fleming Andy-AFLEMING <afleming@freescale.com>, Zhao Chenhui-B35336 <B35336@freescale.com>
+To: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Cc: Marcin =?utf-8?Q?=C5=9Alusarz?= <marcin.slusarz@gmail.com>, linux-usb@vger.kernel.org, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
 
+On Sun, 21 Jul 2013, Greg Kroah-Hartman wrote:
 
+> On Mon, Jul 22, 2013 at 01:00:41AM +0200, Marcin =C5=9Alusarz wrote:
+> > If you want me to test some patches, just shout ;)
+>=20
+> Interesting patch, it makes sense to have this applied.  Can you rese=
+nd
+> it with a "Signed-off-by:" line so that I can add it to the tree?
 
-Many Thanks.
+Wait a minute.  The patch catches cases where io->dev is NULL in
+sg_complete().  But how does that happen?
 
-Regards
-Haijun.
+The only place io->dev gets set to NULL is in sg_clean(), and=20
+sg_clean() gets called in only two places:
 
+	if an URB could not be allocated in usb_sg_init(),
 
-> -----Original Message-----
-> From: Wood Scott-B07421
-> Sent: Saturday, July 20, 2013 1:21 AM
-> To: Zhang Haijun-B42677
-> Cc: Zhang Haijun-B42677; linux-mmc@vger.kernel.org; linuxppc-
-> dev@lists.ozlabs.org; cbouatmailru@gmail.com; cjb@laptop.org; Wood Scott-
-> B07421; Fleming Andy-AFLEMING; Zhao Chenhui-B35336
-> Subject: Re: [PATCH 1/4 V4] powerpc/85xx: Add support for 85xx cpu type
-> detection
-> 
-> On 07/18/2013 09:28:20 PM, Zhang Haijun-B42677 wrote:
-> > Hi, scott
-> >
-> > I had update this patch, this is the newest version.
-> > If there is no other problem, can you help merge this patch?
-> > I hope to make sure the following patch don't need to rebuild due to
-> > the change of this patch.
-> 
-> It looks OK.  I'll pick it up when I do my next batch of patch
-> application (hopefully soon).  Go ahead and send the patches that depend
-> on it.
-> 
-> -Scott
+	or after all the URBs have completed in usb_sg_wait().
+
+In either case, no more URBs will complete after sg_clean() is called,=20
+so sg_complete() won't run.
+
+A patch like this merely covers up the symptom without fixing the=20
+underlying cause.  How did this manage to go wrong in the first place? =
+=20
+There must be a bug in the logic of sg_complete() or usb_sg_wait(). =20
+_That_ logic bug is what needs to be fixed.
+
+Alan Stern
 
