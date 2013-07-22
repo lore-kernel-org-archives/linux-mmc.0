@@ -1,73 +1,86 @@
-From: Kumar Gala <galak@kernel.crashing.org>
-Subject: Re: [PATCH 1/2] Powerpc: Add voltage ranges support for T4
-Date: Mon, 22 Jul 2013 09:39:41 -0500
-Message-ID: <18210A71-9F5A-40B7-AC3A-03CEF6C28982@kernel.crashing.org>
-References: <1374479636-9254-1-git-send-email-Haijun.Zhang@freescale.com> <192298D25D96A042975E372855100DB70A1A93DC@039-SN2MPN1-012.039d.mgd.msft.net>
-Mime-Version: 1.0 (Apple Message framework v1283)
-Content-Type: text/plain; charset=us-ascii
+From: Scott Wood <scottwood@freescale.com>
+Subject: Re: [PATCH 2/2] mmc: esdhc: get voltage from dts file
+Date: Mon, 22 Jul 2013 12:40:47 -0500
+Message-ID: <1374514847.15592.7@snotra>
+References: <1374479636-9254-1-git-send-email-Haijun.Zhang@freescale.com>
+	<1374479636-9254-2-git-send-email-Haijun.Zhang@freescale.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"; delsp=Yes; format=Flowed
 Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from gate.crashing.org ([63.228.1.57]:53288 "EHLO gate.crashing.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1756603Ab3GVOkX convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 22 Jul 2013 10:40:23 -0400
-In-Reply-To: <192298D25D96A042975E372855100DB70A1A93DC@039-SN2MPN1-012.039d.mgd.msft.net>
+Received: from ch1ehsobe005.messaging.microsoft.com ([216.32.181.185]:11234
+	"EHLO ch1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1755147Ab3GVRlA convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 22 Jul 2013 13:41:00 -0400
+In-Reply-To: <1374479636-9254-2-git-send-email-Haijun.Zhang@freescale.com>
+	(from Haijun.Zhang@freescale.com on Mon Jul 22 02:53:56 2013)
+Content-Disposition: inline
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Wrobel Heinz-R39252 <r39252@freescale.com>
-Cc: Zhang Haijun-B42677 <B42677@freescale.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linuxppc-dev@lists.ozlabs.org" <linuxppc-dev@lists.ozlabs.org>, Wood Scott-B07421 <B07421@freescale.com>, "cjb@laptop.org" <cjb@laptop.org>, Fleming Andy-AFLEMING <afleming@freescale.com>, "cbouatmailru@gmail.com" <cbouatmailru@gmail.com>
+Cc: linux-mmc@vger.kernel.org, linuxppc-dev@lists.ozlabs.org, cbouatmailru@gmail.com, cjb@laptop.org, AFLEMING@freescale.com, Haijun Zhang <Haijun.Zhang@freescale.com>, Haijun Zhang <haijun.zhang@freescale.com>
 
-
-On Jul 22, 2013, at 4:47 AM, Wrobel Heinz-R39252 wrote:
-
->> Subject: [PATCH 1/2] Powerpc: Add voltage ranges support for T4
->> 
->> Special voltages that can be support by eSDHC of T4 in esdhc node.
->> 
->> Signed-off-by: Haijun Zhang <haijun.zhang@freescale.com>
->> Signed-off-by: Anton Vorontsov <cbouatmailru@gmail.com>
+On 07/22/2013 02:53:56 AM, Haijun Zhang wrote:
+> Add voltage-range support in esdhc of T4, So we can choose
+> to read voltages from dts file as one optional.
+> If we can get a valid voltage-range from device node, we use
+> this voltage as the final voltage support. Else we still read
+> from capacity or from other provider.
 > 
->> --- a/Documentation/devicetree/bindings/mmc/fsl-esdhc.txt
->> +++ b/Documentation/devicetree/bindings/mmc/fsl-esdhc.txt
->> @@ -19,6 +19,8 @@ Optional properties:
->>     "bus-width = <1>" property.
->>   - sdhci,auto-cmd12: specifies that a controller can only handle auto
->>     CMD12.
->> +  - 3300 3300: specifies that eSDHC controller can support voltages
->> ranges
->> +    from 3300 to 3300. This is an optional.
+> Signed-off-by: Haijun Zhang <haijun.zhang@freescale.com>
+> Signed-off-by: Anton Vorontsov <cbouatmailru@gmail.com>
+> ---
+>  drivers/mmc/host/sdhci-of-esdhc.c | 31  
+> +++++++++++++++++++++++++++++++
+>  drivers/mmc/host/sdhci.c          |  3 +++
+>  include/linux/mmc/sdhci.h         |  1 +
+>  3 files changed, 35 insertions(+)
 > 
-> "This is an optional." is an unclear statement.
+> diff --git a/drivers/mmc/host/sdhci-of-esdhc.c  
+> b/drivers/mmc/host/sdhci-of-esdhc.c
+> index 15039e2..8b4b27a 100644
+> --- a/drivers/mmc/host/sdhci-of-esdhc.c
+> +++ b/drivers/mmc/host/sdhci-of-esdhc.c
+> @@ -262,6 +262,35 @@ static int esdhc_pltfm_bus_width(struct  
+> sdhci_host *host, int width)
+>  	return 0;
+>  }
 > 
->> +++ b/arch/powerpc/boot/dts/fsl/t4240si-post.dtsi
->> @@ -399,6 +399,7 @@
->> 	sdhc@114000 {
->> 		compatible = "fsl,t4240-esdhc", "fsl,esdhc";
->> 		sdhci,auto-cmd12;
->> +		voltage-ranges = <1800 1800 3300 3300>;
-> 
-> This is IMHO incorrect and potentially dangerous.
-> The T4 silicon will only support 1.8V on SDHC pins per hardware specification.
-> The Freescale T4240QDS reference board has extra voltage shifters added to allow 3.3V operation, but that is _not_ a silicon feature. It is a specific board feature that may or may not translate to other boards, depending on how SD spec conformant a board builder wants to be.
-> 
-> If the intent is to state that a physical SDHC interface on a board has to be built to support 3.3V operation to be SD spec conformant for off-the-shelf cards because a reset would change the signal voltage to 3.3V, then I am not sure that putting this down as silicon "feature" without further explanation about the background anywhere is the right way to go.
-> IMHO silicon features are really just silicon features and not technically optional external circuitry additions implied by common use.
-> 
-> Best regards,
-> 
-> Heinz
+> +static void esdhc_get_voltage(struct sdhci_host *host,
+> +			struct platform_device *pdev)
+> +{
+> +	const u32 *voltage_ranges;
+> +	int num_ranges, i;
+> +	struct device_node *np;
+> +	np = pdev->dev.of_node;
+> +
+> +	voltage_ranges = of_get_property(np, "voltage-ranges",  
+> &num_ranges);
+> +	num_ranges = num_ranges / sizeof(*voltage_ranges) / 2;
+> +	if (!voltage_ranges || !num_ranges) {
+> +		dev_info(&pdev->dev, "OF: voltage-ranges  
+> unspecified\n");
+> +		return;
+> +	}
+> +
+> +	for (i = 0; i < num_ranges; i++) {
+> +		const int j = i * 2;
+> +		u32 mask;
+> +		mask =  
+> mmc_vddrange_to_ocrmask(be32_to_cpu(voltage_ranges[j]),
+> +				be32_to_cpu(voltage_ranges[j + 1]));
+> +		if (!mask) {
+> +			dev_info(&pdev->dev,
+> +				"OF: false voltage-ranges specified\n");
+> +			return;
+> +		}
+> +		host->ocr_mask |= mask;
+> +	}
+> +}
 
-I'd say that the t4240si-post.dtsi should be:
+Don't duplicate this code.  Move it somewhere common and share it.
 
-	voltage-ranges = <1800 1800>;
+Why did you remove the range index from the error string, and why did  
+you change it from dev_err to dev_info?
 
-Than have the t4240qds.dts do:
-
-	voltage-ranges = <1800 1800 3300 3300>;
-
-As the 3.3V sounds like a board specific feature.
-
-[ send this as 2 patches, on for the t4240si-post.dtsi and another for the t4240qds.dts ]
-
-- k
-	
+-Scott
