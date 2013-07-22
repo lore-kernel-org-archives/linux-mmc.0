@@ -1,81 +1,132 @@
-From: Mark Brown <broonie@kernel.org>
-Subject: Re: [PATCH] mmc: pxamci: Refactor regulator support
-Date: Mon, 22 Jul 2013 12:03:41 +0100
-Message-ID: <20130722110341.GR9858@sirena.org.uk>
-References: <1374361668-3184-1-git-send-email-andrea.adami@gmail.com>
-Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="PEWkPmBCIbC5Tcj0"
+From: Kumar Gala <galak@kernel.crashing.org>
+Subject: Re: [PATCH 3/4 V2] mmc: esdhc: Correct host version of T4240-R1.0
+Date: Mon, 22 Jul 2013 09:30:20 -0500
+Message-ID: <25F3761C-ECFA-4397-A4F0-551BDAEDA4C7@kernel.crashing.org>
+References: <1374055891-20703-1-git-send-email-Haijun.Zhang@freescale.com> <1374055891-20703-2-git-send-email-Haijun.Zhang@freescale.com>
+Mime-Version: 1.0 (Apple Message framework v1283)
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from cassiel.sirena.org.uk ([80.68.93.111]:48325 "EHLO
-	cassiel.sirena.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932170Ab3GVLEG (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 22 Jul 2013 07:04:06 -0400
-Content-Disposition: inline
-In-Reply-To: <1374361668-3184-1-git-send-email-andrea.adami@gmail.com>
+Received: from gate.crashing.org ([63.228.1.57]:59117 "EHLO gate.crashing.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1755657Ab3GVOae convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 22 Jul 2013 10:30:34 -0400
+In-Reply-To: <1374055891-20703-2-git-send-email-Haijun.Zhang@freescale.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Andrea Adami <andrea.adami@gmail.com>
-Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Russell King <linux@arm.linux.org.uk>, linux-kernel@vger.kernel.org, Marko Katic <dromede@gmail.com>
+To: Haijun Zhang <Haijun.Zhang@freescale.com>
+Cc: linux-mmc@vger.kernel.org, linuxppc-dev@lists.ozlabs.org, scottwood@freescale.com, cjb@laptop.org, AFLEMING@freescale.com, cbouatmailru@gmail.com
 
 
---PEWkPmBCIbC5Tcj0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+On Jul 17, 2013, at 5:11 AM, Haijun Zhang wrote:
 
-On Sun, Jul 21, 2013 at 01:07:48AM +0200, Andrea Adami wrote:
+> Vender version and sdhc spec version of T4240-R1.0 is incorrect.
+> The right value should be VVN=0x13, SVN = 0x1. The wrong version
+> number will break down the ADMA data transfer.
+> This defect only exist in T4240-R1.0. Will be fixed in T4240-R2.0.
+> Also share vvn and svr for public use.
+> 
+> Signed-off-by: Haijun Zhang <haijun.zhang@freescale.com>
+> ---
+> changes for V2:
+> 	- Remove broken ADMA quirk.
+> 	- Rebuild patch of  Add quirks to support T4240 board
+> 
+> drivers/mmc/host/sdhci-of-esdhc.c | 29 +++++++++++++----------------
+> 1 file changed, 13 insertions(+), 16 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
+> index adfaadd..570bca8 100644
+> --- a/drivers/mmc/host/sdhci-of-esdhc.c
+> +++ b/drivers/mmc/host/sdhci-of-esdhc.c
+> @@ -26,7 +26,7 @@
+> #define VENDOR_V_22	0x12
+> #define VENDOR_V_23	0x13
+> 
+> -static u32 svr;
+> +static u32 svr, vvn;
+> 
+> static u32 esdhc_readl(struct sdhci_host *host, int reg)
+> {
+> @@ -43,11 +43,9 @@ static u32 esdhc_readl(struct sdhci_host *host, int reg)
+> 	 * For FSL eSDHC, must aligned 4-byte, so use 0xFC to read the
+> 	 * the verdor version number, oxFE is SDHCI_HOST_VERSION.
+> 	 */
+> -	if ((reg == SDHCI_CAPABILITIES) && (ret & SDHCI_CAN_DO_ADMA1)) {
+> -		u32 tmp = in_be32(host->ioaddr + SDHCI_SLOT_INT_STATUS);
+> -		tmp = (tmp & SDHCI_VENDOR_VER_MASK) >> SDHCI_VENDOR_VER_SHIFT;
+> -		if (tmp > VENDOR_V_22)
+> -			ret |= SDHCI_CAN_DO_ADMA2;
+> +	if ((reg == SDHCI_CAPABILITIES) && (ret & SDHCI_CAN_DO_ADMA1) &&
+> +		(vvn > VENDOR_V_22)) {
+> +		ret |= SDHCI_CAN_DO_ADMA2;
+> 	}
+> 
+> 	return ret;
+> @@ -63,6 +61,12 @@ static u16 esdhc_readw(struct sdhci_host *host, int reg)
+> 		ret = in_be32(host->ioaddr + base) & 0xffff;
+> 	else
+> 		ret = (in_be32(host->ioaddr + base) >> shift) & 0xffff;
+> +
+> +	/* T4240-R1.0 had a incorrect vendor version and spec version */
+> +	if ((reg == SDHCI_HOST_VERSION) &&
+> +		((SVR_SOC_VER(svr) == SVR_T4240) && (SVR_REV(svr) == 0x10)))
+> +		ret = (VENDOR_V_23 << SDHCI_VENDOR_VER_SHIFT) | SDHCI_SPEC_200;
+> +
 
-> The ADS7846 driver _requires_ the use of a voltage regulator
-> or if not present, CONFIG_REGULATOR_DUMMY should be used for proper operation.
-> This was made mandatory by the following commit:
+is this check correct if this is on v2.0 Si as well?
 
-No, CONFIG_REGULATOR_DUMMY should *never* be used in production.
+- k
 
-> The ADS7846 in spitz machines is not connected to
-> any power regulator so it needs CONFIG_REGULATOR_DUMMY enabled.
+> 	return ret;
+> }
+> 
+> @@ -175,17 +179,12 @@ static void esdhc_reset(struct sdhci_host *host, u8 mask)
+>  */
+> static void esdhci_of_adma_workaround(struct sdhci_host *host, u32 intmask)
+> {
+> -	u32 tmp;
+> 	bool applicable;
+> 	dma_addr_t dmastart;
+> 	dma_addr_t dmanow;
+> 
+> -	tmp = esdhc_readl(host, SDHCI_SLOT_INT_STATUS);
+> -	tmp = (tmp & SDHCI_VENDOR_VER_MASK) >> SDHCI_VENDOR_VER_SHIFT;
+> -
+> 	applicable = (intmask & SDHCI_INT_DATA_END) &&
+> -		(intmask & SDHCI_INT_BLK_GAP) &&
+> -		(tmp == VENDOR_V_23);
+> +		(intmask & SDHCI_INT_BLK_GAP) && (vvn == VENDOR_V_23);
+> 	if (applicable) {
+> 
+> 		esdhc_reset(host, SDHCI_RESET_DATA);
+> @@ -318,10 +317,9 @@ static void esdhc_of_resume(struct sdhci_host *host)
+> 
+> static void esdhc_of_platform_init(struct sdhci_host *host)
+> {
+> -	u32 vvn;
+> +	svr = mfspr(SPRN_SVR);
+> +	vvn = esdhc_readw(host, SDHCI_HOST_VERSION);
+> 
+> -	vvn = in_be32(host->ioaddr + SDHCI_SLOT_INT_STATUS);
+> -	vvn = (vvn & SDHCI_VENDOR_VER_MASK) >> SDHCI_VENDOR_VER_SHIFT;
+> 	if (vvn == VENDOR_V_22)
+> 		host->quirks2 |= SDHCI_QUIRK2_HOST_NO_CMD23;
+> 
+> @@ -390,7 +388,6 @@ static int sdhci_esdhc_probe(struct platform_device *pdev)
+> 	struct device_node *np;
+> 	int ret;
+> 
+> -	svr = mfspr(SPRN_SVR);
+> 	host = sdhci_pltfm_init(pdev, &sdhci_esdhc_pdata, 0);
+> 	if (IS_ERR(host))
+> 		return PTR_ERR(host);
+> -- 
+> 1.8.0
+> 
+> 
+> _______________________________________________
+> Linuxppc-dev mailing list
+> Linuxppc-dev@lists.ozlabs.org
+> https://lists.ozlabs.org/listinfo/linuxppc-dev
 
-I don't think that's the case, it would be a very unusual piece of
-silicon that was able to operate without power.  It may be that it's not
-using a software controllable regulator but there will be one or more
-power supplies.  Judging by your problem here it seems like there is
-actually a software controllable regulator though...
-
-> However, enabling CONFIG_REGULATOR and CONFIG_REGULATOR_DUMMY
-> will break pxamci driver and cause the following error output:
-
-This is why you should never use CONFIG_REGULATOR_DUMMY in production,
-it's just a crutch to help things boot during development.
-
-> Regulator support in pxamci_init_ocr() is not
-> written with the existence of the dummy regulator driver in
-> mind. It does not check the return value of mmc_regulator_get_ocrmask()
-> and it will only fall back to platform data if no regulator was found.
-
-No regulator driver should be written with CONFIG_REGULATOR_DUMMY in
-mind.  My guess here is that your custom callbacks for this board should
-be being replaced by a regulator, for example the fixed voltage
-regulator if there's only one voltage supported.
-
---PEWkPmBCIbC5Tcj0
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.20 (GNU/Linux)
-
-iQIcBAEBAgAGBQJR7RGKAAoJELSic+t+oim9YkQP/11tnhVpDCcb9F0M8CafRWrb
-uGb4LLPtNaCTac0r2JPt6RA6aeROEdX1eiwZxG6UiEn/HGkXsnSLw2DhYzd260mW
-Aau8jwMhCuI1VfGYomc0c9IMBQoM+yo1nIAyKTYqvLr/eFHWrglgpNYEY7LIlyxd
-NT94As+hf3zyM9Nul8HQ3iDkdJriGkaLf2/62IJ++CKNpvh4FwtqEBfXo1ycOgf0
-mhPi5jWqx0fASYHkYptXHrKmSlKbDsbpzcDPgQBPE6IPMsiMTSW1zbDHlXPUyjI5
-StJ/bd22ET7kPe13xMXbscMNtXfujdryaTmQFO4fQnfNRbMni1Il3wHJO+1eOsfJ
-eXquimxrUXxU50h/YBWhlM61orVcMx5AXIoYW7dJATEEsQA+8IPpSiod3rFGRXxh
-21Cy1y1/Eja4RACSkNit5lUJVw8hjGTox+cz5GgPg5fnah0BSl8/AzZlilf0d5Pf
-/KuMnWwrELh1rXgCzaJZ8Ax5Gbo86bQ4H5uoM3SUAzyhA3mPMEgwLW/DIvK2aH8t
-NroB3iV1mXk1eA30ePhlPoZocnY36VUSqrmTJZoRSD2mZNUBlCZ3bAjHWqj41xEe
-dIFGKdStyL21CsTd0oS7wYaTAvICNkuUIFvd8jYcGsxmpXCJJJoQqnE2jqO+O4hj
-wwFcnSzh/Ts81hsj26Z/
-=F/nN
------END PGP SIGNATURE-----
-
---PEWkPmBCIbC5Tcj0--
