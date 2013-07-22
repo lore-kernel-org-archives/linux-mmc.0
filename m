@@ -1,81 +1,68 @@
-From: Joel Fernandes <joelf@ti.com>
-Subject: [PATCH v2] ARM: EDMA: Fix clearing of unused list for DT DMA resources
-Date: Mon, 22 Jul 2013 12:59:49 -0500
-Message-ID: <1374515989-7391-1-git-send-email-joelf@ti.com>
+From: Joel Fernandes <joelf-l0cyMroinI0@public.gmane.org>
+Subject: Re: [PATCH 1/3] dmaengine: add dma_get_slave_sg_limits()
+Date: Mon, 22 Jul 2013 16:45:51 -0500
+Message-ID: <51EDA80F.7060606@ti.com>
+References: <1374166001-31340-1-git-send-email-joelf@ti.com>
+	<1374166001-31340-2-git-send-email-joelf@ti.com>
+	<20130718161658.GW16653@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Tony Lindgren <tony@atomide.com>, Sekhar Nori <nsekhar@ti.com>, Vinod Koul <vinod.koul@intel.com>, Benoit Cousson <benoit.cousson@linaro.org>, Balaji TK <balajitk@ti.com>, Arnd Bergmann <arnd@arndb.de>
-Cc: Mark Jackson <mpfj-list@newflow.co.uk>, Joel Fernandes <joelf@ti.com>, Pantel Antoniou <panto@antoniou-consulting.com>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Jason Kridner <jkridner@beagleboard.org>, Linux OMAP List <linux-omap@vger.kernel.org>, Linux ARM Kernel List <linux-arm-kernel@lists.infradead.org>
+Return-path: <davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
+In-Reply-To: <20130718161658.GW16653-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+List-Unsubscribe: <http://linux.davincidsp.com/mailman/options/davinci-linux-open-source>,
+	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://linux.davincidsp.com/pipermail/davinci-linux-open-source>
+List-Post: <mailto:davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
+List-Help: <mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=help>
+List-Subscribe: <http://linux.davincidsp.com/mailman/listinfo/davinci-linux-open-source>,
+	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=subscribe>
+Sender: <davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
+Errors-To: davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org
+To: Vinod Koul <vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Cc: Mark Brown <broonie-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Grant Likely <grant.likely-s3s/WqlpOiPyB63q8FvJNQ@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Linux Documentation List <linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Devicetree Discuss <devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Jason Kridner <jkridner-hcmAuCOw+vXj4SYmN/TMmA@public.gmane.org>, Benoit Cousson <benoit.cousson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Linux OMAP List <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux ARM Kernel List <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Linux DaVinci Kernel List <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, Balaji TK <balajitk-l0cyMroinI0@public.gmane.org>, Mark Jackson <mpfj-list-2FZW7xY0fHgqdlJmJB21zg@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-k>
 List-Id: linux-mmc@vger.kernel.org
 
-HWMOD removal for MMC is breaking edma_start as the events are being manually
-triggered due to unused channel list not being clear, Thanks to Balaji TK for
-finding this issue.
+On 07/18/2013 11:16 AM, Vinod Koul wrote:> On Thu, Jul 18, 2013 at
+11:46:39AM -0500, Joel Fernandes wrote:
+>> From: Matt Porter <mporter-l0cyMroinI0@public.gmane.org>
+>>
+>> Add a dmaengine API to retrieve slave SG transfer limits.
+>>
+>> The API is optionally implemented by dmaengine drivers and when
+>> unimplemented will return a NULL pointer. A client driver using
+>> this API provides the required dma channel, address width, and
+>> burst size of the transfer. dma_get_slave_sg_limits() returns an
+>> SG limits structure with the maximum number and size of SG segments
+>> that the given channel can handle.
+> Hi Joel,
+>
+> I have already resurrected this and generalized the API to get the slave
+> capablities.
+> https://lkml.org/lkml/2013/7/15/147
 
-This patch fixes the issue, by reading the "dmas" property from the DT node if
-it exists and clearing the bits in the unused channel list.
+Hi Vinod,
 
-Cc: Balaji T K <balajitk@ti.com>
-Cc: Pantel Antoniou <panto@antoniou-consulting.com>
-Signed-off-by: Joel Fernandes <joelf@ti.com>
----
-v2 changes: Fixed compiler warning
+get_caps and get_sg_limits are 2 different things, looks like this was
+already discussed earlier, and this patch series is a separate API that
+adds support for SG limits.
 
- arch/arm/common/edma.c |   31 +++++++++++++++++++++++--------
- 1 file changed, 23 insertions(+), 8 deletions(-)
+Infact, you can already see here that he changed the name of the
+function from caps to dma_get_slave_sg_limits:
+http://linux.davincidsp.com/pipermail/davinci-linux-open-source/2013-March/026601.html
 
-diff --git a/arch/arm/common/edma.c b/arch/arm/common/edma.c
-index a432e6c..765d578 100644
---- a/arch/arm/common/edma.c
-+++ b/arch/arm/common/edma.c
-@@ -561,14 +561,29 @@ static int reserve_contiguous_slots(int ctlr, unsigned int id,
- static int prepare_unused_channel_list(struct device *dev, void *data)
- {
- 	struct platform_device *pdev = to_platform_device(dev);
--	int i, ctlr;
--
--	for (i = 0; i < pdev->num_resources; i++) {
--		if ((pdev->resource[i].flags & IORESOURCE_DMA) &&
--				(int)pdev->resource[i].start >= 0) {
--			ctlr = EDMA_CTLR(pdev->resource[i].start);
--			clear_bit(EDMA_CHAN_SLOT(pdev->resource[i].start),
--					edma_cc[ctlr]->edma_unused);
-+	int i = 0, ctlr;
-+	u32 dma_chan;
-+	const __be32 *dma_chan_p;
-+	struct property *prop;
-+
-+	if (dev->of_node) {
-+		of_property_for_each_u32(dev->of_node, "dmas", prop, \
-+					 dma_chan_p, dma_chan) {
-+			if (i++ & 1) {
-+				ctlr = EDMA_CTLR(dma_chan);
-+				clear_bit(EDMA_CHAN_SLOT(dma_chan),
-+						edma_cc[ctlr]->edma_unused);
-+			}
-+		}
-+	} else {
-+		for (; i < pdev->num_resources; i++) {
-+			if ((pdev->resource[i].flags & IORESOURCE_DMA) &&
-+			    (int)pdev->resource[i].start >= 0) {
-+				ctlr = EDMA_CTLR(pdev->resource[i].start);
-+				clear_bit(EDMA_CHAN_SLOT(
-+					  pdev->resource[i].start),
-+					  edma_cc[ctlr]->edma_unused);
-+			}
- 		}
- 	}
- 
--- 
-1.7.9.5
+Considering this, what is the way forward? Can this patch series be
+merged as it is a different API as discussed above?
+
+Summarizing:
+* get_caps API cannot be used for this same purpose, as get_caps is done
+_before_ the DMA channel can be configured from what it looks like:
+* get_sg_limits, on the other hand is supposed to already have the
+parameters required for configuring the DMA channel before hand.
+
+Are there any other changes to the get_sg_limits series you would like
+before it can be applied? Any other suggestions?
+
+Thanks,
+
+-Joel
