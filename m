@@ -1,59 +1,39 @@
-From: Grant Grundler <grundler@google.com>
-Subject: RFC: clearing clk_old?
-Date: Tue, 23 Jul 2013 10:47:39 -0700
-Message-ID: <CANEJEGtmqHMvXL7ax=NZ=YXnjq77+rVbO6WbKidxJEQsh=987w@mail.gmail.com>
+From: Olof Johansson <olof@lixom.net>
+Subject: Re: [PATCH] mmc: tmio: fix compiler warning
+Date: Tue, 23 Jul 2013 12:01:43 -0700
+Message-ID: <CAOesGMgMZR=yjDDWWDb21iuZaVocXqYZUg8C=hyGk4oHrRxDig@mail.gmail.com>
+References: <Pine.LNX.4.64.1307081135170.19819@axis700.grange>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ob0-f177.google.com ([209.85.214.177]:37860 "EHLO
-	mail-ob0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S933787Ab3GWRrj (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 23 Jul 2013 13:47:39 -0400
-Received: by mail-ob0-f177.google.com with SMTP id ta17so10689709obb.22
-        for <linux-mmc@vger.kernel.org>; Tue, 23 Jul 2013 10:47:39 -0700 (PDT)
+Received: from mail-qa0-f48.google.com ([209.85.216.48]:45059 "EHLO
+	mail-qa0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757036Ab3GWTBn (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 23 Jul 2013 15:01:43 -0400
+Received: by mail-qa0-f48.google.com with SMTP id o19so1838601qap.0
+        for <linux-mmc@vger.kernel.org>; Tue, 23 Jul 2013 12:01:43 -0700 (PDT)
+In-Reply-To: <Pine.LNX.4.64.1307081135170.19819@axis700.grange>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Cc: Doug Anderson <dianders@chromium.org>, Alim Akthar <alim@chromium.org>
+To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Chris Ball <cjb@laptop.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-I'm trying to see where host->clk_old is cleared in MMC core. Since I
-didn't find it, any reason to NOT do one or both of the below patches?
+On Mon, Jul 8, 2013 at 2:38 AM, Guennadi Liakhovetski
+<g.liakhovetski@gmx.de> wrote:
+> This patch fixes a compiler warning:
+>
+> drivers/mmc/host/tmio_mmc_pio.c: In function 'tmio_mmc_power_on':
+> drivers/mmc/host/tmio_mmc_pio.c:798:19: warning: ignoring return value of
+> 'regulator_enable', declared with attribute warn_unused_result [-Wunused-result]
+>
+> Signed-off-by: Guennadi Liakhovetski <g.liakhovetski+renesas@gmail.com>
 
-thanks,
-grant
+Acked-by: Olof Johansson <olof@lixom.net>
 
-ps. This is cut/pasted and white space mangled...hopefully readable though.
-
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index c9a227c..73c3792 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -787,6 +787,7 @@ void mmc_ungate_clock(struct mmc_host *host)
-                BUG_ON(host->ios.clock);
-                /* This call will also set host->clk_gated to false */
-                __mmc_set_clock(host, host->clk_old);
-+               host->clk_old = 0;
-        }
- }
-
-@@ -800,6 +801,7 @@ void mmc_set_ungated(struct mmc_host *host)
-         */
-        spin_lock_irqsave(&host->clk_lock, flags);
-        host->clk_gated = false;
-+       host->clk_old = 0;
-        spin_unlock_irqrestore(&host->clk_lock, flags);
- }
+Chris, this warniong is staring at me from my inbox every morning.
+Would you mind picking it up for 3.11?
 
 
+Thanks!
 
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index c9a227c..f5ae008 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -800,6 +800,7 @@ void mmc_set_ungated(struct mmc_host *host)
-         */
-        spin_lock_irqsave(&host->clk_lock, flags);
-        host->clk_gated = false;
-+       host->clk_old = 0;
-        spin_unlock_irqrestore(&host->clk_lock, flags);
- }
+-Olof
