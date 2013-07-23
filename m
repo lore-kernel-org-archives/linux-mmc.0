@@ -1,68 +1,159 @@
-From: Joel Fernandes <joelf-l0cyMroinI0@public.gmane.org>
-Subject: Re: [PATCH 1/3] dmaengine: add dma_get_slave_sg_limits()
-Date: Mon, 22 Jul 2013 16:45:51 -0500
-Message-ID: <51EDA80F.7060606@ti.com>
-References: <1374166001-31340-1-git-send-email-joelf@ti.com>
-	<1374166001-31340-2-git-send-email-joelf@ti.com>
-	<20130718161658.GW16653@intel.com>
+From: Zhang Haijun-B42677 <B42677@freescale.com>
+Subject: RE: [PATCH 3/4 V2] mmc: esdhc: Correct host version of T4240-R1.0
+Date: Tue, 23 Jul 2013 02:03:21 +0000
+Message-ID: <99E897753B6F7048BD8CCDB4661D02E13E4903@039-SN2MPN1-022.039d.mgd.msft.net>
+References: <1374055891-20703-1-git-send-email-Haijun.Zhang@freescale.com>
+ <1374055891-20703-2-git-send-email-Haijun.Zhang@freescale.com>
+ <25F3761C-ECFA-4397-A4F0-551BDAEDA4C7@kernel.crashing.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
-In-Reply-To: <20130718161658.GW16653-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-List-Unsubscribe: <http://linux.davincidsp.com/mailman/options/davinci-linux-open-source>,
-	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://linux.davincidsp.com/pipermail/davinci-linux-open-source>
-List-Post: <mailto:davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
-List-Help: <mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=help>
-List-Subscribe: <http://linux.davincidsp.com/mailman/listinfo/davinci-linux-open-source>,
-	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=subscribe>
-Sender: <davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
-Errors-To: davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org
-To: Vinod Koul <vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Cc: Mark Brown <broonie-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Grant Likely <grant.likely-s3s/WqlpOiPyB63q8FvJNQ@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Linux Documentation List <linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Devicetree Discuss <devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Jason Kridner <jkridner-hcmAuCOw+vXj4SYmN/TMmA@public.gmane.org>, Benoit Cousson <benoit.cousson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Linux OMAP List <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux ARM Kernel List <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Linux DaVinci Kernel List <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, Balaji TK <balajitk-l0cyMroinI0@public.gmane.org>, Mark Jackson <mpfj-list-2FZW7xY0fHgqdlJmJB21zg@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-k>
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-db8lp0184.outbound.messaging.microsoft.com ([213.199.154.184]:7524
+	"EHLO db8outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1753109Ab3GWCD2 convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 22 Jul 2013 22:03:28 -0400
+In-Reply-To: <25F3761C-ECFA-4397-A4F0-551BDAEDA4C7@kernel.crashing.org>
+Content-Language: en-US
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Kumar Gala <galak@kernel.crashing.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linuxppc-dev@lists.ozlabs.org" <linuxppc-dev@lists.ozlabs.org>, Wood Scott-B07421 <B07421@freescale.com>, "cjb@laptop.org" <cjb@laptop.org>, Fleming Andy-AFLEMING <afleming@freescale.com>, "cbouatmailru@gmail.com" <cbouatmailru@gmail.com>
 
-On 07/18/2013 11:16 AM, Vinod Koul wrote:> On Thu, Jul 18, 2013 at
-11:46:39AM -0500, Joel Fernandes wrote:
->> From: Matt Porter <mporter-l0cyMroinI0@public.gmane.org>
->>
->> Add a dmaengine API to retrieve slave SG transfer limits.
->>
->> The API is optionally implemented by dmaengine drivers and when
->> unimplemented will return a NULL pointer. A client driver using
->> this API provides the required dma channel, address width, and
->> burst size of the transfer. dma_get_slave_sg_limits() returns an
->> SG limits structure with the maximum number and size of SG segments
->> that the given channel can handle.
-> Hi Joel,
->
-> I have already resurrected this and generalized the API to get the slave
-> capablities.
-> https://lkml.org/lkml/2013/7/15/147
 
-Hi Vinod,
 
-get_caps and get_sg_limits are 2 different things, looks like this was
-already discussed earlier, and this patch series is a separate API that
-adds support for SG limits.
+Thanks.
 
-Infact, you can already see here that he changed the name of the
-function from caps to dma_get_slave_sg_limits:
-http://linux.davincidsp.com/pipermail/davinci-linux-open-source/2013-March/026601.html
+Regards
+Haijun.
 
-Considering this, what is the way forward? Can this patch series be
-merged as it is a different API as discussed above?
 
-Summarizing:
-* get_caps API cannot be used for this same purpose, as get_caps is done
-_before_ the DMA channel can be configured from what it looks like:
-* get_sg_limits, on the other hand is supposed to already have the
-parameters required for configuring the DMA channel before hand.
+> -----Original Message-----
+> From: Kumar Gala [mailto:galak@kernel.crashing.org]
+> Sent: Monday, July 22, 2013 10:30 PM
+> To: Zhang Haijun-B42677
+> Cc: linux-mmc@vger.kernel.org; linuxppc-dev@lists.ozlabs.org; Wood Scott-
+> B07421; cjb@laptop.org; Fleming Andy-AFLEMING; cbouatmailru@gmail.com
+> Subject: Re: [PATCH 3/4 V2] mmc: esdhc: Correct host version of T4240-
+> R1.0
+> 
+> 
+> On Jul 17, 2013, at 5:11 AM, Haijun Zhang wrote:
+> 
+> > Vender version and sdhc spec version of T4240-R1.0 is incorrect.
+> > The right value should be VVN=0x13, SVN = 0x1. The wrong version
+> > number will break down the ADMA data transfer.
+> > This defect only exist in T4240-R1.0. Will be fixed in T4240-R2.0.
+> > Also share vvn and svr for public use.
+> >
+> > Signed-off-by: Haijun Zhang <haijun.zhang@freescale.com>
+> > ---
+> > changes for V2:
+> > 	- Remove broken ADMA quirk.
+> > 	- Rebuild patch of  Add quirks to support T4240 board
+> >
+> > drivers/mmc/host/sdhci-of-esdhc.c | 29 +++++++++++++----------------
+> > 1 file changed, 13 insertions(+), 16 deletions(-)
+> >
+> > diff --git a/drivers/mmc/host/sdhci-of-esdhc.c
+> > b/drivers/mmc/host/sdhci-of-esdhc.c
+> > index adfaadd..570bca8 100644
+> > --- a/drivers/mmc/host/sdhci-of-esdhc.c
+> > +++ b/drivers/mmc/host/sdhci-of-esdhc.c
+> > @@ -26,7 +26,7 @@
+> > #define VENDOR_V_22	0x12
+> > #define VENDOR_V_23	0x13
+> >
+> > -static u32 svr;
+> > +static u32 svr, vvn;
+> >
+> > static u32 esdhc_readl(struct sdhci_host *host, int reg) { @@ -43,11
+> > +43,9 @@ static u32 esdhc_readl(struct sdhci_host *host, int reg)
+> > 	 * For FSL eSDHC, must aligned 4-byte, so use 0xFC to read the
+> > 	 * the verdor version number, oxFE is SDHCI_HOST_VERSION.
+> > 	 */
+> > -	if ((reg == SDHCI_CAPABILITIES) && (ret & SDHCI_CAN_DO_ADMA1)) {
+> > -		u32 tmp = in_be32(host->ioaddr + SDHCI_SLOT_INT_STATUS);
+> > -		tmp = (tmp & SDHCI_VENDOR_VER_MASK) >> SDHCI_VENDOR_VER_SHIFT;
+> > -		if (tmp > VENDOR_V_22)
+> > -			ret |= SDHCI_CAN_DO_ADMA2;
+> > +	if ((reg == SDHCI_CAPABILITIES) && (ret & SDHCI_CAN_DO_ADMA1) &&
+> > +		(vvn > VENDOR_V_22)) {
+> > +		ret |= SDHCI_CAN_DO_ADMA2;
+> > 	}
+> >
+> > 	return ret;
+> > @@ -63,6 +61,12 @@ static u16 esdhc_readw(struct sdhci_host *host, int
+> reg)
+> > 		ret = in_be32(host->ioaddr + base) & 0xffff;
+> > 	else
+> > 		ret = (in_be32(host->ioaddr + base) >> shift) & 0xffff;
+> > +
+> > +	/* T4240-R1.0 had a incorrect vendor version and spec version */
+> > +	if ((reg == SDHCI_HOST_VERSION) &&
+> > +		((SVR_SOC_VER(svr) == SVR_T4240) && (SVR_REV(svr) == 0x10)))
+> > +		ret = (VENDOR_V_23 << SDHCI_VENDOR_VER_SHIFT) |
+> SDHCI_SPEC_200;
+> > +
+> 
+> is this check correct if this is on v2.0 Si as well?
+[Haijun Wrote:] Oh, I forgot to rewrite the description above. This defect exist both
+on T4-R1.0 and T4-R2.0. I'll send patch v3 to correct this. thanks
+> 
+> - k
+> 
+> > 	return ret;
+> > }
+> >
+> > @@ -175,17 +179,12 @@ static void esdhc_reset(struct sdhci_host *host,
+> > u8 mask)  */ static void esdhci_of_adma_workaround(struct sdhci_host
+> > *host, u32 intmask) {
+> > -	u32 tmp;
+> > 	bool applicable;
+> > 	dma_addr_t dmastart;
+> > 	dma_addr_t dmanow;
+> >
+> > -	tmp = esdhc_readl(host, SDHCI_SLOT_INT_STATUS);
+> > -	tmp = (tmp & SDHCI_VENDOR_VER_MASK) >> SDHCI_VENDOR_VER_SHIFT;
+> > -
+> > 	applicable = (intmask & SDHCI_INT_DATA_END) &&
+> > -		(intmask & SDHCI_INT_BLK_GAP) &&
+> > -		(tmp == VENDOR_V_23);
+> > +		(intmask & SDHCI_INT_BLK_GAP) && (vvn == VENDOR_V_23);
+> > 	if (applicable) {
+> >
+> > 		esdhc_reset(host, SDHCI_RESET_DATA); @@ -318,10 +317,9 @@
+> static
+> > void esdhc_of_resume(struct sdhci_host *host)
+> >
+> > static void esdhc_of_platform_init(struct sdhci_host *host) {
+> > -	u32 vvn;
+> > +	svr = mfspr(SPRN_SVR);
+> > +	vvn = esdhc_readw(host, SDHCI_HOST_VERSION);
+> >
+> > -	vvn = in_be32(host->ioaddr + SDHCI_SLOT_INT_STATUS);
+> > -	vvn = (vvn & SDHCI_VENDOR_VER_MASK) >> SDHCI_VENDOR_VER_SHIFT;
+> > 	if (vvn == VENDOR_V_22)
+> > 		host->quirks2 |= SDHCI_QUIRK2_HOST_NO_CMD23;
+> >
+> > @@ -390,7 +388,6 @@ static int sdhci_esdhc_probe(struct platform_device
+> *pdev)
+> > 	struct device_node *np;
+> > 	int ret;
+> >
+> > -	svr = mfspr(SPRN_SVR);
+> > 	host = sdhci_pltfm_init(pdev, &sdhci_esdhc_pdata, 0);
+> > 	if (IS_ERR(host))
+> > 		return PTR_ERR(host);
+> > --
+> > 1.8.0
+> >
+> >
+> > _______________________________________________
+> > Linuxppc-dev mailing list
+> > Linuxppc-dev@lists.ozlabs.org
+> > https://lists.ozlabs.org/listinfo/linuxppc-dev
+> 
 
-Are there any other changes to the get_sg_limits series you would like
-before it can be applied? Any other suggestions?
 
-Thanks,
-
--Joel
