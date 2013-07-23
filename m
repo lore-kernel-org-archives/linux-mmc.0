@@ -1,109 +1,54 @@
-From: Zhang Haijun-B42677 <B42677@freescale.com>
-Subject: RE: [PATCH 2/2] mmc: esdhc: get voltage from dts file
-Date: Tue, 23 Jul 2013 02:38:33 +0000
-Message-ID: <99E897753B6F7048BD8CCDB4661D02E13E49EC@039-SN2MPN1-022.039d.mgd.msft.net>
-References: <1374479636-9254-1-git-send-email-Haijun.Zhang@freescale.com>
-	<1374479636-9254-2-git-send-email-Haijun.Zhang@freescale.com>
- <1374514847.15592.7@snotra>
+From: Olof Johansson <olof@lixom.net>
+Subject: Re: [PATCH] dmaengine: shdma: fix a build failure on platforms with
+ no DMA support
+Date: Mon, 22 Jul 2013 19:39:07 -0700
+Message-ID: <20130723023907.GC14983@quad.lixom.net>
+References: <1373422152-29976-1-git-send-email-horms+renesas@verge.net.au>
+ <20130716012041.GA942@verge.net.au>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-db9lp0252.outbound.messaging.microsoft.com ([213.199.154.252]:2760
-	"EHLO db9outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753205Ab3GWCit convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 22 Jul 2013 22:38:49 -0400
-In-Reply-To: <1374514847.15592.7@snotra>
-Content-Language: en-US
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-sh-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <20130716012041.GA942@verge.net.au>
+Sender: linux-sh-owner@vger.kernel.org
+To: Simon Horman <horms@verge.net.au>
+Cc: Vinod Koul <vinod.koul@intel.com>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Kevin Hilman <khilman@linaro.org>, Dan Murphy <dmurphy@ti.com>, linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Chris Ball <cjb@laptop.org>, Magnus Damm <magnusdamm@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Wood Scott-B07421 <B07421@freescale.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linuxppc-dev@lists.ozlabs.org" <linuxppc-dev@lists.ozlabs.org>, "cbouatmailru@gmail.com" <cbouatmailru@gmail.com>, "cjb@laptop.org" <cjb@laptop.org>, Fleming Andy-AFLEMING <afleming@freescale.com>
 
-
-
-Thanks.
-
-Regards
-Haijun.
-
-
-> -----Original Message-----
-> From: Wood Scott-B07421
-> Sent: Tuesday, July 23, 2013 1:41 AM
-> To: Zhang Haijun-B42677
-> Cc: linux-mmc@vger.kernel.org; linuxppc-dev@lists.ozlabs.org;
-> cbouatmailru@gmail.com; cjb@laptop.org; Fleming Andy-AFLEMING; Zhang
-> Haijun-B42677; Zhang Haijun-B42677
-> Subject: Re: [PATCH 2/2] mmc: esdhc: get voltage from dts file
-> 
-> On 07/22/2013 02:53:56 AM, Haijun Zhang wrote:
-> > Add voltage-range support in esdhc of T4, So we can choose to read
-> > voltages from dts file as one optional.
-> > If we can get a valid voltage-range from device node, we use this
-> > voltage as the final voltage support. Else we still read from capacity
-> > or from other provider.
-> >
-> > Signed-off-by: Haijun Zhang <haijun.zhang@freescale.com>
-> > Signed-off-by: Anton Vorontsov <cbouatmailru@gmail.com>
+On Tue, Jul 16, 2013 at 10:20:41AM +0900, Simon Horman wrote:
+> On Wed, Jul 10, 2013 at 11:09:12AM +0900, Simon Horman wrote:
+> > From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+> > 
+> > On platforms with no support for the shdma dmaengine driver build is
+> > currently failing with
+> > 
+> > drivers/built-in.o: In function `sh_mobile_sdhi_probe':
+> > drivers/mmc/host/sh_mobile_sdhi.c:170: undefined reference to`shdma_chan_filter'
+> > 
+> > Fix the breakage by defining shdma_chan_filter to NULL in such
+> > configurations.
+> > 
+> > Signed-off-by: Guennadi Liakhovetski <g.liakhovetski+renesas@gmail.com>
+> > [horms+renesas@verge.net.au: Apply change to shdma-base.h instead of sh_dma.h]
+> > Signed-off-by: Simon Horman <horms+renesas@verge.net.au>
 > > ---
-> >  drivers/mmc/host/sdhci-of-esdhc.c | 31
-> > +++++++++++++++++++++++++++++++
-> >  drivers/mmc/host/sdhci.c          |  3 +++
-> >  include/linux/mmc/sdhci.h         |  1 +
-> >  3 files changed, 35 insertions(+)
-> >
-> > diff --git a/drivers/mmc/host/sdhci-of-esdhc.c
-> > b/drivers/mmc/host/sdhci-of-esdhc.c
-> > index 15039e2..8b4b27a 100644
-> > --- a/drivers/mmc/host/sdhci-of-esdhc.c
-> > +++ b/drivers/mmc/host/sdhci-of-esdhc.c
-> > @@ -262,6 +262,35 @@ static int esdhc_pltfm_bus_width(struct
-> > sdhci_host *host, int width)
-> >  	return 0;
-> >  }
-> >
-> > +static void esdhc_get_voltage(struct sdhci_host *host,
-> > +			struct platform_device *pdev)
-> > +{
-> > +	const u32 *voltage_ranges;
-> > +	int num_ranges, i;
-> > +	struct device_node *np;
-> > +	np = pdev->dev.of_node;
-> > +
-> > +	voltage_ranges = of_get_property(np, "voltage-ranges",
-> > &num_ranges);
-> > +	num_ranges = num_ranges / sizeof(*voltage_ranges) / 2;
-> > +	if (!voltage_ranges || !num_ranges) {
-> > +		dev_info(&pdev->dev, "OF: voltage-ranges
-> > unspecified\n");
-> > +		return;
-> > +	}
-> > +
-> > +	for (i = 0; i < num_ranges; i++) {
-> > +		const int j = i * 2;
-> > +		u32 mask;
-> > +		mask =
-> > mmc_vddrange_to_ocrmask(be32_to_cpu(voltage_ranges[j]),
-> > +				be32_to_cpu(voltage_ranges[j + 1]));
-> > +		if (!mask) {
-> > +			dev_info(&pdev->dev,
-> > +				"OF: false voltage-ranges specified\n");
-> > +			return;
-> > +		}
-> > +		host->ocr_mask |= mask;
-> > +	}
-> > +}
+> >  include/linux/shdma-base.h | 4 ++++
+> >  1 file changed, 4 insertions(+)
 > 
-> Don't duplicate this code.  Move it somewhere common and share it.
-[Haijun Wrote:] So, move it drivers/mmc/host/sdhci-pltfm.c and share it as
-Sdhc_get_voltage()....?
+> > 
+> > Hi Vinod,
+> > 
+> > please consider this fix from Guennadi for v3.11 which I have rebased on top of
+> > next-20130709. It fixes a build problem on a number of shmobile defconfigs
+> > including bockw.
 > 
-> Why did you remove the range index from the error string, and why did you
-> change it from dev_err to dev_info?
-[Haijun Wrote:] I'll correct this. In case voltage-range specified if there is still err.
-It should be err.
+> Ping.
 > 
-> -Scott
+> Would it be appropriate for me to take this change through my tree?
+> It seems to resolve a regression in v3.11-rc1.
 
+I'll take it through arm-soc since there's no response from Vinod. I've
+applied it in the fixes branch we have.
+
+
+-Olof
