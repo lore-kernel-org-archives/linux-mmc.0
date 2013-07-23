@@ -1,46 +1,46 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] mmc: tmio: fix compiler warning
-Date: Tue, 23 Jul 2013 20:08:12 +0100
-Message-ID: <867ggh6qn7.fsf@void.printf.net>
-References: <Pine.LNX.4.64.1307081135170.19819@axis700.grange>
-	<CAOesGMgMZR=yjDDWWDb21iuZaVocXqYZUg8C=hyGk4oHrRxDig@mail.gmail.com>
+From: Olof Johansson <olof@lixom.net>
+Subject: Re: [PATCH] ARM: pxa: propagate errors from regulator_enable() to pxamci
+Date: Tue, 23 Jul 2013 12:15:54 -0700
+Message-ID: <CAOesGMiVzH7qyu_tBpKV5PTHBvvwE9E6Q9f39ENfVOO-6wY3+w@mail.gmail.com>
+References: <201307051751.20729.arnd@arndb.de>
+	<8638rt3svt.fsf@void.printf.net>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:33869 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S933129Ab3GWTIP (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 23 Jul 2013 15:08:15 -0400
-In-Reply-To: <CAOesGMgMZR=yjDDWWDb21iuZaVocXqYZUg8C=hyGk4oHrRxDig@mail.gmail.com>
-	(Olof Johansson's message of "Tue, 23 Jul 2013 12:01:43 -0700")
+Received: from mail-qc0-f181.google.com ([209.85.216.181]:48094 "EHLO
+	mail-qc0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S933733Ab3GWTPz (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 23 Jul 2013 15:15:55 -0400
+Received: by mail-qc0-f181.google.com with SMTP id u12so4502540qcx.26
+        for <linux-mmc@vger.kernel.org>; Tue, 23 Jul 2013 12:15:54 -0700 (PDT)
+In-Reply-To: <8638rt3svt.fsf@void.printf.net>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Olof Johansson <olof@lixom.net>
-Cc: Guennadi Liakhovetski <g.liakhovetski@gmx.de>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Chris Ball <cjb@laptop.org>
+Cc: Arnd Bergmann <arnd@arndb.de>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Mike Rapoport <mike@compulab.co.il>, Paul Gortmaker <paul.gortmaker@windriver.com>, Mark Brown <broonie@opensource.wolfsonmicro.com>, Haojian Zhuang <haojian.zhuang@gmail.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-Hi,
-
-On Tue, Jul 23 2013, Olof Johansson wrote:
-> On Mon, Jul 8, 2013 at 2:38 AM, Guennadi Liakhovetski
-> <g.liakhovetski@gmx.de> wrote:
->> This patch fixes a compiler warning:
->>
->> drivers/mmc/host/tmio_mmc_pio.c: In function 'tmio_mmc_power_on':
->> drivers/mmc/host/tmio_mmc_pio.c:798:19: warning: ignoring return value of
->> 'regulator_enable', declared with attribute warn_unused_result
->> [-Wunused-result]
->>
->> Signed-off-by: Guennadi Liakhovetski <g.liakhovetski+renesas@gmail.com>
+On Fri, Jul 5, 2013 at 8:53 AM, Chris Ball <cjb@laptop.org> wrote:
+> Hi,
 >
-> Acked-by: Olof Johansson <olof@lixom.net>
+> On Fri, Jul 05 2013, Arnd Bergmann wrote:
+>> The em_x270_mci_setpower() and em_x270_usb_hub_init() functions
+>> call regulator_enable(), which may return an error that must
+>> be checked.
+>>
+>> This changes the em_x270_usb_hub_init() function to bail out
+>> if it fails, and changes the pxamci_platform_data->setpower
+>> callback so that the a failed em_x270_mci_setpower call
+>> can be propagated by the pxamci driver into the mmc core.
+>>
+>> Signed-off-by: Arnd Bergmann <arnd@arndb.de>
 >
-> Chris, this warniong is staring at me from my inbox every morning.
-> Would you mind picking it up for 3.11?
+> For pxamci:
+>
+> Acked-by: Chris Ball <cjb@laptop.org>
 
-Sure -- pushed to mmc-next for 3.11.
+Applied with your ack to arm-soc fixes branch for 3.11, after fixing
+the set/test ordering pointed out in the thread.
 
-Thanks,
+Thanks!
 
-- Chris.
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+-Olof
