@@ -1,24 +1,24 @@
 From: Zhang Haijun-B42677 <B42677@freescale.com>
-Subject: RE: [PATCH 3/4 V2] mmc: esdhc: Correct host version of T4240-R1.0
-Date: Tue, 23 Jul 2013 02:03:21 +0000
-Message-ID: <99E897753B6F7048BD8CCDB4661D02E13E4903@039-SN2MPN1-022.039d.mgd.msft.net>
-References: <1374055891-20703-1-git-send-email-Haijun.Zhang@freescale.com>
- <1374055891-20703-2-git-send-email-Haijun.Zhang@freescale.com>
- <25F3761C-ECFA-4397-A4F0-551BDAEDA4C7@kernel.crashing.org>
+Subject: RE: [PATCH 1/2] Powerpc: Add voltage ranges support for T4
+Date: Tue, 23 Jul 2013 02:05:19 +0000
+Message-ID: <99E897753B6F7048BD8CCDB4661D02E13E4927@039-SN2MPN1-022.039d.mgd.msft.net>
+References: <1374479636-9254-1-git-send-email-Haijun.Zhang@freescale.com>
+ <192298D25D96A042975E372855100DB70A1A93DC@039-SN2MPN1-012.039d.mgd.msft.net>
+ <18210A71-9F5A-40B7-AC3A-03CEF6C28982@kernel.crashing.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-db8lp0184.outbound.messaging.microsoft.com ([213.199.154.184]:7524
-	"EHLO db8outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753109Ab3GWCD2 convert rfc822-to-8bit
+Received: from am1ehsobe002.messaging.microsoft.com ([213.199.154.205]:56629
+	"EHLO am1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752430Ab3GWCFZ convert rfc822-to-8bit
 	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 22 Jul 2013 22:03:28 -0400
-In-Reply-To: <25F3761C-ECFA-4397-A4F0-551BDAEDA4C7@kernel.crashing.org>
+	Mon, 22 Jul 2013 22:05:25 -0400
+In-Reply-To: <18210A71-9F5A-40B7-AC3A-03CEF6C28982@kernel.crashing.org>
 Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Kumar Gala <galak@kernel.crashing.org>
+To: Kumar Gala <galak@kernel.crashing.org>, Wrobel Heinz-R39252 <r39252@freescale.com>
 Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linuxppc-dev@lists.ozlabs.org" <linuxppc-dev@lists.ozlabs.org>, Wood Scott-B07421 <B07421@freescale.com>, "cjb@laptop.org" <cjb@laptop.org>, Fleming Andy-AFLEMING <afleming@freescale.com>, "cbouatmailru@gmail.com" <cbouatmailru@gmail.com>
 
 
@@ -31,129 +31,76 @@ Haijun.
 
 > -----Original Message-----
 > From: Kumar Gala [mailto:galak@kernel.crashing.org]
-> Sent: Monday, July 22, 2013 10:30 PM
-> To: Zhang Haijun-B42677
-> Cc: linux-mmc@vger.kernel.org; linuxppc-dev@lists.ozlabs.org; Wood Scott-
-> B07421; cjb@laptop.org; Fleming Andy-AFLEMING; cbouatmailru@gmail.com
-> Subject: Re: [PATCH 3/4 V2] mmc: esdhc: Correct host version of T4240-
-> R1.0
+> Sent: Monday, July 22, 2013 10:40 PM
+> To: Wrobel Heinz-R39252
+> Cc: Zhang Haijun-B42677; linux-mmc@vger.kernel.org; linuxppc-
+> dev@lists.ozlabs.org; Wood Scott-B07421; cjb@laptop.org; Fleming Andy-
+> AFLEMING; cbouatmailru@gmail.com
+> Subject: Re: [PATCH 1/2] Powerpc: Add voltage ranges support for T4
 > 
 > 
-> On Jul 17, 2013, at 5:11 AM, Haijun Zhang wrote:
+> On Jul 22, 2013, at 4:47 AM, Wrobel Heinz-R39252 wrote:
 > 
-> > Vender version and sdhc spec version of T4240-R1.0 is incorrect.
-> > The right value should be VVN=0x13, SVN = 0x1. The wrong version
-> > number will break down the ADMA data transfer.
-> > This defect only exist in T4240-R1.0. Will be fixed in T4240-R2.0.
-> > Also share vvn and svr for public use.
+> >> Subject: [PATCH 1/2] Powerpc: Add voltage ranges support for T4
+> >>
+> >> Special voltages that can be support by eSDHC of T4 in esdhc node.
+> >>
+> >> Signed-off-by: Haijun Zhang <haijun.zhang@freescale.com>
+> >> Signed-off-by: Anton Vorontsov <cbouatmailru@gmail.com>
 > >
-> > Signed-off-by: Haijun Zhang <haijun.zhang@freescale.com>
-> > ---
-> > changes for V2:
-> > 	- Remove broken ADMA quirk.
-> > 	- Rebuild patch of  Add quirks to support T4240 board
+> >> --- a/Documentation/devicetree/bindings/mmc/fsl-esdhc.txt
+> >> +++ b/Documentation/devicetree/bindings/mmc/fsl-esdhc.txt
+> >> @@ -19,6 +19,8 @@ Optional properties:
+> >>     "bus-width = <1>" property.
+> >>   - sdhci,auto-cmd12: specifies that a controller can only handle auto
+> >>     CMD12.
+> >> +  - 3300 3300: specifies that eSDHC controller can support voltages
+> >> ranges
+> >> +    from 3300 to 3300. This is an optional.
 > >
-> > drivers/mmc/host/sdhci-of-esdhc.c | 29 +++++++++++++----------------
-> > 1 file changed, 13 insertions(+), 16 deletions(-)
+> > "This is an optional." is an unclear statement.
 > >
-> > diff --git a/drivers/mmc/host/sdhci-of-esdhc.c
-> > b/drivers/mmc/host/sdhci-of-esdhc.c
-> > index adfaadd..570bca8 100644
-> > --- a/drivers/mmc/host/sdhci-of-esdhc.c
-> > +++ b/drivers/mmc/host/sdhci-of-esdhc.c
-> > @@ -26,7 +26,7 @@
-> > #define VENDOR_V_22	0x12
-> > #define VENDOR_V_23	0x13
+> >> +++ b/arch/powerpc/boot/dts/fsl/t4240si-post.dtsi
+> >> @@ -399,6 +399,7 @@
+> >> 	sdhc@114000 {
+> >> 		compatible = "fsl,t4240-esdhc", "fsl,esdhc";
+> >> 		sdhci,auto-cmd12;
+> >> +		voltage-ranges = <1800 1800 3300 3300>;
 > >
-> > -static u32 svr;
-> > +static u32 svr, vvn;
+> > This is IMHO incorrect and potentially dangerous.
+> > The T4 silicon will only support 1.8V on SDHC pins per hardware
+> specification.
+> > The Freescale T4240QDS reference board has extra voltage shifters added
+> to allow 3.3V operation, but that is _not_ a silicon feature. It is a
+> specific board feature that may or may not translate to other boards,
+> depending on how SD spec conformant a board builder wants to be.
 > >
-> > static u32 esdhc_readl(struct sdhci_host *host, int reg) { @@ -43,11
-> > +43,9 @@ static u32 esdhc_readl(struct sdhci_host *host, int reg)
-> > 	 * For FSL eSDHC, must aligned 4-byte, so use 0xFC to read the
-> > 	 * the verdor version number, oxFE is SDHCI_HOST_VERSION.
-> > 	 */
-> > -	if ((reg == SDHCI_CAPABILITIES) && (ret & SDHCI_CAN_DO_ADMA1)) {
-> > -		u32 tmp = in_be32(host->ioaddr + SDHCI_SLOT_INT_STATUS);
-> > -		tmp = (tmp & SDHCI_VENDOR_VER_MASK) >> SDHCI_VENDOR_VER_SHIFT;
-> > -		if (tmp > VENDOR_V_22)
-> > -			ret |= SDHCI_CAN_DO_ADMA2;
-> > +	if ((reg == SDHCI_CAPABILITIES) && (ret & SDHCI_CAN_DO_ADMA1) &&
-> > +		(vvn > VENDOR_V_22)) {
-> > +		ret |= SDHCI_CAN_DO_ADMA2;
-> > 	}
+> > If the intent is to state that a physical SDHC interface on a board has
+> to be built to support 3.3V operation to be SD spec conformant for off-
+> the-shelf cards because a reset would change the signal voltage to 3.3V,
+> then I am not sure that putting this down as silicon "feature" without
+> further explanation about the background anywhere is the right way to go.
+> > IMHO silicon features are really just silicon features and not
+> technically optional external circuitry additions implied by common use.
 > >
-> > 	return ret;
-> > @@ -63,6 +61,12 @@ static u16 esdhc_readw(struct sdhci_host *host, int
-> reg)
-> > 		ret = in_be32(host->ioaddr + base) & 0xffff;
-> > 	else
-> > 		ret = (in_be32(host->ioaddr + base) >> shift) & 0xffff;
-> > +
-> > +	/* T4240-R1.0 had a incorrect vendor version and spec version */
-> > +	if ((reg == SDHCI_HOST_VERSION) &&
-> > +		((SVR_SOC_VER(svr) == SVR_T4240) && (SVR_REV(svr) == 0x10)))
-> > +		ret = (VENDOR_V_23 << SDHCI_VENDOR_VER_SHIFT) |
-> SDHCI_SPEC_200;
-> > +
+> > Best regards,
+> >
+> > Heinz
 > 
-> is this check correct if this is on v2.0 Si as well?
-[Haijun Wrote:] Oh, I forgot to rewrite the description above. This defect exist both
-on T4-R1.0 and T4-R2.0. I'll send patch v3 to correct this. thanks
+> I'd say that the t4240si-post.dtsi should be:
+> 
+> 	voltage-ranges = <1800 1800>;
+> 
+> Than have the t4240qds.dts do:
+> 
+> 	voltage-ranges = <1800 1800 3300 3300>;
+> 
+> As the 3.3V sounds like a board specific feature.
+> 
+> [ send this as 2 patches, on for the t4240si-post.dtsi and another for
+> the t4240qds.dts ]
+[Haijun Wrote:] ok, thanks Heinz and Kumar.
 > 
 > - k
 > 
-> > 	return ret;
-> > }
-> >
-> > @@ -175,17 +179,12 @@ static void esdhc_reset(struct sdhci_host *host,
-> > u8 mask)  */ static void esdhci_of_adma_workaround(struct sdhci_host
-> > *host, u32 intmask) {
-> > -	u32 tmp;
-> > 	bool applicable;
-> > 	dma_addr_t dmastart;
-> > 	dma_addr_t dmanow;
-> >
-> > -	tmp = esdhc_readl(host, SDHCI_SLOT_INT_STATUS);
-> > -	tmp = (tmp & SDHCI_VENDOR_VER_MASK) >> SDHCI_VENDOR_VER_SHIFT;
-> > -
-> > 	applicable = (intmask & SDHCI_INT_DATA_END) &&
-> > -		(intmask & SDHCI_INT_BLK_GAP) &&
-> > -		(tmp == VENDOR_V_23);
-> > +		(intmask & SDHCI_INT_BLK_GAP) && (vvn == VENDOR_V_23);
-> > 	if (applicable) {
-> >
-> > 		esdhc_reset(host, SDHCI_RESET_DATA); @@ -318,10 +317,9 @@
-> static
-> > void esdhc_of_resume(struct sdhci_host *host)
-> >
-> > static void esdhc_of_platform_init(struct sdhci_host *host) {
-> > -	u32 vvn;
-> > +	svr = mfspr(SPRN_SVR);
-> > +	vvn = esdhc_readw(host, SDHCI_HOST_VERSION);
-> >
-> > -	vvn = in_be32(host->ioaddr + SDHCI_SLOT_INT_STATUS);
-> > -	vvn = (vvn & SDHCI_VENDOR_VER_MASK) >> SDHCI_VENDOR_VER_SHIFT;
-> > 	if (vvn == VENDOR_V_22)
-> > 		host->quirks2 |= SDHCI_QUIRK2_HOST_NO_CMD23;
-> >
-> > @@ -390,7 +388,6 @@ static int sdhci_esdhc_probe(struct platform_device
-> *pdev)
-> > 	struct device_node *np;
-> > 	int ret;
-> >
-> > -	svr = mfspr(SPRN_SVR);
-> > 	host = sdhci_pltfm_init(pdev, &sdhci_esdhc_pdata, 0);
-> > 	if (IS_ERR(host))
-> > 		return PTR_ERR(host);
-> > --
-> > 1.8.0
-> >
-> >
-> > _______________________________________________
-> > Linuxppc-dev mailing list
-> > Linuxppc-dev@lists.ozlabs.org
-> > https://lists.ozlabs.org/listinfo/linuxppc-dev
-> 
-
 
