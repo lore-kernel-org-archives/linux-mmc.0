@@ -1,37 +1,51 @@
-From: Franck Jullien <franck.jullien@gmail.com>
-Subject: Question about SD/MMC card sharing the same host bus
-Date: Wed, 24 Jul 2013 13:32:24 +0200
-Message-ID: <CAJfOKBzep_C4juyDHhwSgJGcB632FmnKU5AJ1jFAt_naSdV_Xw@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+From: franck.jullien@gmail.com
+Subject: [PATCH] mmc: fix null pointer use in mmc_blk_remove_req
+Date: Wed, 24 Jul 2013 15:17:48 +0200
+Message-ID: <1374671868-606-1-git-send-email-franck.jullien@gmail.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wg0-f42.google.com ([74.125.82.42]:41025 "EHLO
-	mail-wg0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751005Ab3GXLcZ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 24 Jul 2013 07:32:25 -0400
-Received: by mail-wg0-f42.google.com with SMTP id j13so2804630wgh.5
-        for <linux-mmc@vger.kernel.org>; Wed, 24 Jul 2013 04:32:24 -0700 (PDT)
+Received: from mail-wg0-f48.google.com ([74.125.82.48]:49211 "EHLO
+	mail-wg0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750986Ab3GXNRx (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 24 Jul 2013 09:17:53 -0400
+Received: by mail-wg0-f48.google.com with SMTP id f11so387228wgh.3
+        for <linux-mmc@vger.kernel.org>; Wed, 24 Jul 2013 06:17:52 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
+Cc: Franck Jullien <franck.jullien@gmail.com>
 
-Hi,
+From: Franck Jullien <franck.jullien@gmail.com>
 
-I'd like to know if the current Kernel provides support for card wired
-on the same host bus, sharing all signals.
+A previous commit (fdfa20c1631210d0) reordered the
+shutdown sequence in mmc_blk_remove_req. However,
+mmc_cleanup_queue is now called before we get the
+card pointer and, sadly, mmc_cleanup_queue set
+mq->card to NULL.
 
->From what I've read so far, "the Host sends the ALL_SEND_CID command;
-this causes all cards on the bus to start sending their unique ID,
-while monitoring the bus traffic.". Then, "the host selects a card via
-its local address using CMD 7, which places that card in the transfer
-state.".
+This patch moves the card pointer assignment before
+mmc_cleanup_queue.
 
-However, looking at the Linux mmc source code, selecting a card using
-its address seems only be done while probing cards. There is no
-xxx_select_card while sending command to the targeted card.
+Signed-off-by: Franck Jullien <franck.jullien@gmail.com>
+---
+ drivers/mmc/card/block.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
 
-Am I missing something here ?
+diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+index cd0b7f4..f4a0bea 100644
+--- a/drivers/mmc/card/block.c
++++ b/drivers/mmc/card/block.c
+@@ -2191,10 +2191,10 @@ static void mmc_blk_remove_req(struct mmc_blk_data *md)
+ 		 * is freeing the queue that stops new requests
+ 		 * from being accepted.
+ 		 */
++		card = md->queue.card;
+ 		mmc_cleanup_queue(&md->queue);
+ 		if (md->flags & MMC_BLK_PACKED_CMD)
+ 			mmc_packed_clean(&md->queue);
+-		card = md->queue.card;
+ 		if (md->disk->flags & GENHD_FL_UP) {
+ 			device_remove_file(disk_to_dev(md->disk), &md->force_ro);
+ 			if ((md->area_type & MMC_BLK_DATA_AREA_BOOT) &&
+-- 
+1.7.1
 
-Thanks in advance.
-
-Franck.
