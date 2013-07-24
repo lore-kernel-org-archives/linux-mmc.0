@@ -1,67 +1,37 @@
-From: Steffen Trumtrar <s.trumtrar@pengutronix.de>
-Subject: [RFC 2/2] mmc: host: allow setting index via devicetree
-Date: Wed, 24 Jul 2013 11:09:33 +0200
-Message-ID: <1374656973-16250-3-git-send-email-s.trumtrar@pengutronix.de>
-References: <1374656973-16250-1-git-send-email-s.trumtrar@pengutronix.de>
+From: Franck Jullien <franck.jullien@gmail.com>
+Subject: Question about SD/MMC card sharing the same host bus
+Date: Wed, 24 Jul 2013 13:32:24 +0200
+Message-ID: <CAJfOKBzep_C4juyDHhwSgJGcB632FmnKU5AJ1jFAt_naSdV_Xw@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from metis.ext.pengutronix.de ([92.198.50.35]:56714 "EHLO
-	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752153Ab3GXJKH (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 24 Jul 2013 05:10:07 -0400
-In-Reply-To: <1374656973-16250-1-git-send-email-s.trumtrar@pengutronix.de>
+Received: from mail-wg0-f42.google.com ([74.125.82.42]:41025 "EHLO
+	mail-wg0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751005Ab3GXLcZ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 24 Jul 2013 07:32:25 -0400
+Received: by mail-wg0-f42.google.com with SMTP id j13so2804630wgh.5
+        for <linux-mmc@vger.kernel.org>; Wed, 24 Jul 2013 04:32:24 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
-Cc: Chris Ball <cjb@laptop.org>, devicetree@vger.kernel.org, kernel@pengutronix.de, Steffen Trumtrar <s.trumtrar@pengutronix.de>
 
-As with gpio, uart and others, allow specifying the host index via the
-aliases-node in the devicetree.
+Hi,
 
-On embedded devices, there is often a combination of removable (e.g.
-SD card) and non-removable mmc devices (e.g. eMMC).
-Therefore the mmcblk name_idx might change depending on
-	- host of removable device
-	- removable card present or not
+I'd like to know if the current Kernel provides support for card wired
+on the same host bus, sharing all signals.
 
-This makes it difficult to hard code the root device, if it is on the
-non-removable device. E.g. if SD card is present eMMC will be mmcblk1,
-if SD card is not present at boot, eMMC will be mmcblk0.
+>From what I've read so far, "the Host sends the ALL_SEND_CID command;
+this causes all cards on the bus to start sending their unique ID,
+while monitoring the bus traffic.". Then, "the host selects a card via
+its local address using CMD 7, which places that card in the transfer
+state.".
 
-To match the host index with the mmcblk, allow setting the index via
-an alias node.
+However, looking at the Linux mmc source code, selecting a card using
+its address seems only be done while probing cards. There is no
+xxx_select_card while sending command to the targeted card.
 
-Signed-off-by: Steffen Trumtrar <s.trumtrar@pengutronix.de>
----
- drivers/mmc/core/host.c | 7 ++++++-
- 1 file changed, 6 insertions(+), 1 deletion(-)
+Am I missing something here ?
 
-diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
-index 6fb6f77..640228f 100644
---- a/drivers/mmc/core/host.c
-+++ b/drivers/mmc/core/host.c
-@@ -450,16 +450,21 @@ struct mmc_host *mmc_alloc_host(int extra, struct device *dev)
- {
- 	int err;
- 	struct mmc_host *host;
-+	int alias_id;
- 
- 	host = kzalloc(sizeof(struct mmc_host) + extra, GFP_KERNEL);
- 	if (!host)
- 		return NULL;
- 
-+	alias_id = of_alias_get_id(dev->of_node, "mmc");
-+	if (alias_id < 0)
-+		alias_id = 0;
-+
- 	/* scanning will be enabled when we're ready */
- 	host->rescan_disable = 1;
- 	idr_preload(GFP_KERNEL);
- 	spin_lock(&mmc_host_lock);
--	err = idr_alloc(&mmc_host_idr, host, 0, 0, GFP_NOWAIT);
-+	err = idr_alloc(&mmc_host_idr, host, alias_id, 0, GFP_NOWAIT);
- 	if (err >= 0)
- 		host->index = err;
- 	spin_unlock(&mmc_host_lock);
--- 
-1.8.3.2
+Thanks in advance.
 
+Franck.
