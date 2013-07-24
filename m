@@ -1,95 +1,46 @@
-From: Lars-Peter Clausen <lars@metafoo.de>
-Subject: Re: [PATCH] dma: edma: add device_slave_caps() support
-Date: Wed, 24 Jul 2013 10:40:18 +0200
-Message-ID: <51EF92F2.3030405@metafoo.de>
-References: <1374597804-3961-1-git-send-email-joelf@ti.com> <51EF8A52.90902@metafoo.de> <51EF8C2B.2030409@ti.com>,<51EF8F4E.8080806@metafoo.de> <FB20353E-4890-4462-A671-3587A3841B4A@ti.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <FB20353E-4890-4462-A671-3587A3841B4A@ti.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: "Fernandes, Joel" <joelf@ti.com>
-Cc: Vinod Koul <vinod.koul@intel.com>, Dan Williams <djbw@fb.com>, Tony Lindgren <tony@atomide.com>, "Nori, Sekhar" <nsekhar@ti.com>, Arnd Bergmann <arnd@arndb.de>, "Shilimkar, Santosh" <santosh.shilimkar@ti.com>, "Nayak, Rajendra" <rnayak@ti.com>, "Vutla, Lokesh" <lokeshvutla@ti.com>, "Krishnamoorthy, Balaji T" <balajitk@ti.com>, Matt Porter <matt@ohporter.com>, Rob Herring <rob.herring@calxeda.com>, Jason Kridner <jkridner@beagleboard.org>, Koen Kooi <koen@beagleboard.org>, Linux OMAP List <linux-omap@vger.kernel.org>, Linux ARM Kernel List <linux-arm-kernel@lists.infradead.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux MMC List <linux-mmc@vger.kernel.org>
+From: Steffen Trumtrar <s.trumtrar@pengutronix.de>
+Subject: [RFC 0/2] Set mmc(blk)X with DT alias
+Date: Wed, 24 Jul 2013 11:09:31 +0200
+Message-ID: <1374656973-16250-1-git-send-email-s.trumtrar@pengutronix.de>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from metis.ext.pengutronix.de ([92.198.50.35]:56692 "EHLO
+	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751232Ab3GXJJw (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 24 Jul 2013 05:09:52 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: Chris Ball <cjb@laptop.org>, devicetree@vger.kernel.org, kernel@pengutronix.de, Steffen Trumtrar <s.trumtrar@pengutronix.de>
 
-On 07/24/2013 10:28 AM, Fernandes, Joel wrote:
-> 
-> On Jul 24, 2013, at 3:23 AM, "Lars-Peter Clausen" <lars@metafoo.de> wrote:
-> 
->> On 07/24/2013 10:11 AM, Joel Fernandes wrote:
->>> On 07/24/2013 03:03 AM, Lars-Peter Clausen wrote:
->>>> On 07/23/2013 06:43 PM, Joel Fernandes wrote:
->>>>> Implement device_slave_caps(). EDMA has a limited number of slots.
->>>>> Slave drivers such as omap_hsmmc will query the driver to make
->>>>> sure they don't pass in more than these many scatter segments.
->>>>>
->>>>> Signed-off-by: Joel Fernandes <joelf@ti.com>
->>>>> ---
->>>>> Vinod, or Dan- If this patch looks ok, can you please merge in for
->>>>> -rc cycle? This patch is required to fix MMC support on AM33xx. This
->>>>> patch is blocking 3 other patches which fix various MMC things. Thanks!
->>>>>
->>>>> Notes:
->>>>> (1) this approach is temporary and only for -rc cycle to fix MMC on
->>>>> AM335x. It will be replace by the RFC series in future kernels:
->>>>> http://www.spinics.net/lists/arm-kernel/msg260094.html
->>>>>
->>>>> (2) Patch depends Vinod's patch at:
->>>>> http://permalink.gmane.org/gmane.linux.kernel/1525112
->>>>>
->>>>> drivers/dma/edma.c |    9 +++++++++
->>>>> 1 file changed, 9 insertions(+)
->>>>>
->>>>> diff --git a/drivers/dma/edma.c b/drivers/dma/edma.c
->>>>> index 7222cbe..81d5429 100644
->>>>> --- a/drivers/dma/edma.c
->>>>> +++ b/drivers/dma/edma.c
->>>>> @@ -517,6 +517,14 @@ static void edma_issue_pending(struct dma_chan *chan)
->>>>>    spin_unlock_irqrestore(&echan->vchan.lock, flags);
->>>>> }
->>>>>
->>>>> +static inline int edma_slave_caps(struct dma_chan *chan,
->>>>> +    struct dma_slave_caps *caps)
->>>>> +{
->>>>> +    caps->max_sg_nr = MAX_NR_SG;
->>>>
->>>> Hm, what about the other fields?
->>>
->>> Other fields are unused, the max segment size is supposed to be
->>> calculated "given" the address width and burst size. Since these
->>> can't be provided to get_caps, I have left it out for now.
->>> See: https://lkml.org/lkml/2013/3/6/464
->>
->> The PL330 driver is similar in this regard, the maximum segment size also
->> depends on address width and burst width. What I did for the get_slave_caps
->> implementation is to set it to the minimum maximum size. E.g. in you case
->> that should be SZ_64K - 1 (burstsize and addrwidth both set to 1).
-> 
-> So you're setting max to minimum maximum size? Isn't that like telling the driver that its segments can't be bigger than this... Unless I'm missing something..
+Hi!
 
-Yes. This is a limitation of the current slave_caps API. The maximum needs
-to be the maximum for all possible configurations. A specific configuration
-may allow a larger maximum. So we maybe have to extend the API to be able to
-query the limits for a certain configuration. Not sure what the best way
-would be to do that, either adding a config parameter to get_slave_caps or
-to break it into two functions like you proposed one for the static
-capabilities and one for the sg limits.
+Embedded devices often use multiple SD/MMC devices as boot/rootfs disks.
+Some of them are removable, some not. If the removable cards are not
+present, but are probed before the non-removable ones, the indexing
+scheme changes. This makes it harder to hard-code the rootfs in the
+cmdline.
 
-> 
->>
->>>
->>> Even if it did, the "segment size" itself is unused in the MMC driver
->>> that this is supposed to fix, unlike the "number of segments" which I'm
->>> populating above.
->>
->> E.g. for ALSA we'll need to know the max segment size, so I think it doesn't
->> hurt add this in this patch as well.
-> 
-> For alsa it would dma only the minimum max size even if the dma controller could do more?
-> 
+First solution I came up with was the alias-node in DT.
+I guess my implementation is pretty hacky and ugly, but you can get lost
+pretty fast in the whole mmc stack.
+For example, the second patch should use "card->host->index" instead of parsing
+the alias again, I guess. I'm not sure why it currently doesn't though.
 
-Yes, but I think 64k is still plenty enough for the max period size. The
-current davinci PCM driver even claims to only support up to 8k.
+So, if there is a better place or solution to specify a reliable ordering
+of mmc devices, please let me hear it.
 
-- Lars
+Thanks,
+Steffen
+
+
+Steffen Trumtrar (2):
+  mmc: block: allow setting name_idx via devicetree
+  mmc: host: allow setting index via devicetree
+
+ drivers/mmc/card/block.c | 7 ++++++-
+ drivers/mmc/core/host.c  | 7 ++++++-
+ 2 files changed, 12 insertions(+), 2 deletions(-)
+
+-- 
+1.8.3.2
+
