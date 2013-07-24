@@ -1,66 +1,82 @@
-From: Haijun Zhang <Haijun.Zhang@freescale.com>
-Subject: [PATCH 1/2 V2] Powerpc: Add voltage support in dts file
-Date: Wed, 24 Jul 2013 07:53:33 +0800
-Message-ID: <1374623613-16681-1-git-send-email-Haijun.Zhang@freescale.com>
+From: "Minjian Wu (minjianwu)" <minjianwu@micron.com>
+Subject: RE: eMMC bus test command failure
+Date: Wed, 24 Jul 2013 02:50:07 +0000
+Message-ID: <59606D77376AA44BB2E289FE5BA55046751F550C@NTXXIAMBX01.xacn.micron.com>
+References: <59606D77376AA44BB2E289FE5BA55046751CFA84@NTXXIAMBX01.xacn.micron.com>
+ <87ppv7r4hk.fsf@octavius.laptop.org>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-db9lp0253.outbound.messaging.microsoft.com ([213.199.154.253]:19751
-	"EHLO db9outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1755319Ab3GXApL (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 23 Jul 2013 20:45:11 -0400
+Received: from mailout.micron.com ([137.201.242.129]:20397 "EHLO
+	mailout.micron.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750731Ab3GXCuV convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 23 Jul 2013 22:50:21 -0400
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, linuxppc-dev@lists.ozlabs.org
-Cc: cbouatmailru@gmail.com, cjb@laptop.org, scottwood@freescale.com, AFLEMING@freescale.com, Haijun Zhang <Haijun.Zhang@freescale.com>, Haijun Zhang <haijun.zhang@freescale.com>
+To: Chris Ball <cjb@laptop.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-eSDHC of T4240 had 1.8v voltage support. Add this node to specify
-eSDHC voltage capacity. If this node not specified eSDHC driver
-still can read from eSDHC host capacity register.
+Hi Chris,
+	Could you let me know how about this fix? Thank you!
 
-Signed-off-by: Haijun Zhang <haijun.zhang@freescale.com>
-Signed-off-by: Anton Vorontsov <cbouatmailru@gmail.com>
----
-changes for v2:
-	- rewrite the voltage-ranges description
+-----Original Message-----
+From: Minjian Wu (minjianwu) 
+Sent: Monday, July 08, 2013 3:28 PM
+To: 'Chris Ball'
+Cc: linux-mmc@vger.kernel.org
+Subject: RE: eMMC bus test command failure
 
- Documentation/devicetree/bindings/mmc/fsl-esdhc.txt | 4 ++++
- arch/powerpc/boot/dts/fsl/t4240si-post.dtsi         | 1 +
- 2 files changed, 5 insertions(+)
+Hi Chris,
+	Sorry for the late response. Below is the patch based on Linux 3.8.4. Please help to check it. Thanks!
 
-diff --git a/Documentation/devicetree/bindings/mmc/fsl-esdhc.txt b/Documentation/devicetree/bindings/mmc/fsl-esdhc.txt
-index bd9be0b..b7943f3 100644
---- a/Documentation/devicetree/bindings/mmc/fsl-esdhc.txt
-+++ b/Documentation/devicetree/bindings/mmc/fsl-esdhc.txt
-@@ -19,6 +19,9 @@ Optional properties:
-     "bus-width = <1>" property.
-   - sdhci,auto-cmd12: specifies that a controller can only handle auto
-     CMD12.
-+  - voltage-ranges : two cells are required, first cell specifies minimum
-+    slot voltage (mV), second cell specifies maximum slot voltage (mV).
-+    Several ranges could be specified.
+diff --git a/linux-3.8.4/drivers/mmc/core/mmc_ops.c b/linux-3.8_new/drivers/mmc/
+index 6d8f701..a3ca845 100644
+--- a/linux-3.8.4/drivers/mmc/core/mmc_ops.c
++++ b/linux-3.8_new/drivers/mmc/core/mmc_ops.c
+@@ -560,6 +560,7 @@ mmc_send_bus_test(struct mmc_card *card, struct mmc_host *ho
+        else
+                data.flags = MMC_DATA_WRITE;
  
- Example:
- 
-@@ -29,4 +32,5 @@ sdhci@2e000 {
- 	interrupt-parent = <&ipic>;
- 	/* Filled in by U-Boot */
- 	clock-frequency = <0>;
-+	voltage-ranges = <3300 3300>;
- };
-diff --git a/arch/powerpc/boot/dts/fsl/t4240si-post.dtsi b/arch/powerpc/boot/dts/fsl/t4240si-post.dtsi
-index bd611a9..567d0fb 100644
---- a/arch/powerpc/boot/dts/fsl/t4240si-post.dtsi
-+++ b/arch/powerpc/boot/dts/fsl/t4240si-post.dtsi
-@@ -399,6 +399,7 @@
- 	sdhc@114000 {
- 		compatible = "fsl,t4240-esdhc", "fsl,esdhc";
- 		sdhci,auto-cmd12;
-+		voltage-ranges = <1800 1800>;
- 	};
- /include/ "qoriq-i2c-0.dtsi"
- /include/ "qoriq-i2c-1.dtsi"
++       mmc_set_data_timeout(&data,card);
+        data.sg = &sg;
+        data.sg_len = 1;
+        sg_init_one(&sg, data_buf, len);
+
+
+
+
+-----Original Message-----
+From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-owner@vger.kernel.org] On Behalf Of Chris Ball
+Sent: Thursday, June 27, 2013 10:52 PM
+To: Minjian Wu (minjianwu)
+Cc: linux-mmc@vger.kernel.org
+Subject: Re: eMMC bus test command failure
+
+Hi Minjian,
+
+On Sun, May 26 2013, Minjian Wu (minjianwu) wrote:
+> Hi,
+>
+> 	I got one issue on Linux V3.7 as following.
+>          > mmc0: switch to bus width 1 ddr 0 failed 
+>          > mmc0: error -110 whilst initialising MMC card
+>
+>          After debugging and checking the source codes, we find that
+> in mmc_send_bus_test function, there is no data timeout
+> setting(mmc_set_data_timeout). After we add the timeout setting
+> function, this issue is fixed, could you help confirm it? Thank you!
+
+Please could you submit the patch you used?
+
+Thanks,
+
+- Chris.
 -- 
-1.8.0
-
-
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
+--
+To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
