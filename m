@@ -1,120 +1,101 @@
-From: "Fernandes, Joel" <joelf@ti.com>
-Subject: Re: [PATCH] dma: edma: add device_slave_caps() support
-Date: Thu, 25 Jul 2013 03:21:18 +0000
-Message-ID: <93497CC0-D756-4748-89E5-37F1C5F51EE4@ti.com>
-References: <1374597804-3961-1-git-send-email-joelf@ti.com>
- <51EF8A52.90902@metafoo.de>
- <51EF8C2B.2030409@ti.com>,<51EF8F4E.8080806@metafoo.de>
- <FB20353E-4890-4462-A671-3587A3841B4A@ti.com> <51EF92F2.3030405@metafoo.de>
- <51F0231C.7000401@ti.com>,<51F027CB.2050608@metafoo.de>
+From: Franck Jullien <franck.jullien@gmail.com>
+Subject: Re: [PATCH] mmc: fix null pointer use in mmc_blk_remove_req
+Date: Thu, 25 Jul 2013 09:20:17 +0200
+Message-ID: <CAJfOKBwVJA61pH+1quRFLYswkSjy7doVj8brvG9tBDCJOAYR5A@mail.gmail.com>
+References: <1374671868-606-1-git-send-email-franck.jullien@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-omap-owner@vger.kernel.org>
-In-Reply-To: <51F027CB.2050608@metafoo.de>
-Content-Language: en-US
-Sender: linux-omap-owner@vger.kernel.org
-To: Lars-Peter Clausen <lars@metafoo.de>
-Cc: Vinod Koul <vinod.koul@intel.com>, Dan Williams <djbw@fb.com>, Tony Lindgren <tony@atomide.com>, "Nori, Sekhar" <nsekhar@ti.com>, Arnd Bergmann <arnd@arndb.de>, "Shilimkar, Santosh" <santosh.shilimkar@ti.com>, "Nayak, Rajendra" <rnayak@ti.com>, "Vutla, Lokesh" <lokeshvutla@ti.com>, "Krishnamoorthy, Balaji T" <balajitk@ti.com>, Rob Herring <rob.herring@calxeda.com>, Jason Kridner <jkridner@beagleboard.org>, Koen Kooi <koen@beagleboard.org>, Linux OMAP List <linux-omap@vger.kernel.org>, Linux ARM Kernel List <linux-arm-kernel@lists.infradead.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux MMC List <linux-mmc@vger.kernel.org>, "matt@ohporter.com" <matt@ohporter.com>
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-we0-f170.google.com ([74.125.82.170]:47335 "EHLO
+	mail-we0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753096Ab3GYHUS (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 25 Jul 2013 03:20:18 -0400
+Received: by mail-we0-f170.google.com with SMTP id w60so299935wes.15
+        for <linux-mmc@vger.kernel.org>; Thu, 25 Jul 2013 00:20:17 -0700 (PDT)
+In-Reply-To: <1374671868-606-1-git-send-email-franck.jullien@gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: taysom@chromium.org
 
+2013/7/24  <franck.jullien@gmail.com>:
+> From: Franck Jullien <franck.jullien@gmail.com>
+>
+> A previous commit (fdfa20c1631210d0) reordered the
+> shutdown sequence in mmc_blk_remove_req. However,
+> mmc_cleanup_queue is now called before we get the
+> card pointer and, sadly, mmc_cleanup_queue set
+> mq->card to NULL.
+>
+> This patch moves the card pointer assignment before
+> mmc_cleanup_queue.
+>
+> Signed-off-by: Franck Jullien <franck.jullien@gmail.com>
+> ---
+>  drivers/mmc/card/block.c |    2 +-
+>  1 files changed, 1 insertions(+), 1 deletions(-)
+>
+> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+> index cd0b7f4..f4a0bea 100644
+> --- a/drivers/mmc/card/block.c
+> +++ b/drivers/mmc/card/block.c
+> @@ -2191,10 +2191,10 @@ static void mmc_blk_remove_req(struct mmc_blk_data *md)
+>                  * is freeing the queue that stops new requests
+>                  * from being accepted.
+>                  */
+> +               card = md->queue.card;
+>                 mmc_cleanup_queue(&md->queue);
+>                 if (md->flags & MMC_BLK_PACKED_CMD)
+>                         mmc_packed_clean(&md->queue);
+> -               card = md->queue.card;
+>                 if (md->disk->flags & GENHD_FL_UP) {
+>                         device_remove_file(disk_to_dev(md->disk), &md->force_ro);
+>                         if ((md->area_type & MMC_BLK_DATA_AREA_BOOT) &&
+> --
+> 1.7.1
+>
 
+This is how I got this (mmc_test is unusable right now):
 
-Sent from my iPhone
+/ # echo mmc0:0001 > /sys/bus/mmc/drivers/mmcblk/unbind
 
-On Jul 24, 2013, at 2:15 PM, "Lars-Peter Clausen" <lars@metafoo.de> wrote:
+Unable to handle kernel paging request for data at address 0x000001f0
+Faulting instruction address: 0xc0316bf4
+Oops: Kernel access of bad area, sig: 11 [#1]
+P1020 RDB
+Modules linked in:
+CPU: 0 PID: 1237 Comm: echo Not tainted 3.10.0-next-20130709-dirty #12
+task: ef3489c0 ti: ef2e0000 task.ti: ef2e0000
+NIP: c0316bf4 LR: c0316be8 CTR: 00000000
+REGS: ef2e1d70 TRAP: 0300   Not tainted  (3.10.0-next-20130709-dirty)
+MSR: 00029000 <CE,EE,ME>  CR: 42004042  XER: 20000000
+DEAR: 000001f0, ESR: 00000000
 
-> On 07/24/2013 08:55 PM, Joel Fernandes wrote:
->> On 07/24/2013 03:40 AM, Lars-Peter Clausen wrote:
->>> On 07/24/2013 10:28 AM, Fernandes, Joel wrote:
->>>> 
->>>> On Jul 24, 2013, at 3:23 AM, "Lars-Peter Clausen" <lars@metafoo.de> wrote:
->>>> 
->>>>> On 07/24/2013 10:11 AM, Joel Fernandes wrote:
->>>>>> On 07/24/2013 03:03 AM, Lars-Peter Clausen wrote:
->>>>>>> On 07/23/2013 06:43 PM, Joel Fernandes wrote:
->>>>>>>> Implement device_slave_caps(). EDMA has a limited number of slots.
->>>>>>>> Slave drivers such as omap_hsmmc will query the driver to make
->>>>>>>> sure they don't pass in more than these many scatter segments.
->>>>>>>> 
->>>>>>>> Signed-off-by: Joel Fernandes <joelf@ti.com>
->>>>>>>> ---
->>>>>>>> Vinod, or Dan- If this patch looks ok, can you please merge in for
->>>>>>>> -rc cycle? This patch is required to fix MMC support on AM33xx. This
->>>>>>>> patch is blocking 3 other patches which fix various MMC things. Thanks!
->>>>>>>> 
->>>>>>>> Notes:
->>>>>>>> (1) this approach is temporary and only for -rc cycle to fix MMC on
->>>>>>>> AM335x. It will be replace by the RFC series in future kernels:
->>>>>>>> http://www.spinics.net/lists/arm-kernel/msg260094.html
->>>>>>>> 
->>>>>>>> (2) Patch depends Vinod's patch at:
->>>>>>>> http://permalink.gmane.org/gmane.linux.kernel/1525112
->>>>>>>> 
->>>>>>>> drivers/dma/edma.c |    9 +++++++++
->>>>>>>> 1 file changed, 9 insertions(+)
->>>>>>>> 
->>>>>>>> diff --git a/drivers/dma/edma.c b/drivers/dma/edma.c
->>>>>>>> index 7222cbe..81d5429 100644
->>>>>>>> --- a/drivers/dma/edma.c
->>>>>>>> +++ b/drivers/dma/edma.c
->>>>>>>> @@ -517,6 +517,14 @@ static void edma_issue_pending(struct dma_chan *chan)
->>>>>>>>    spin_unlock_irqrestore(&echan->vchan.lock, flags);
->>>>>>>> }
->>>>>>>> 
->>>>>>>> +static inline int edma_slave_caps(struct dma_chan *chan,
->>>>>>>> +    struct dma_slave_caps *caps)
->>>>>>>> +{
->>>>>>>> +    caps->max_sg_nr = MAX_NR_SG;
->>>>>>> 
->>>>>>> Hm, what about the other fields?
->>>>>> 
->>>>>> Other fields are unused, the max segment size is supposed to be
->>>>>> calculated "given" the address width and burst size. Since these
->>>>>> can't be provided to get_caps, I have left it out for now.
->>>>>> See: https://lkml.org/lkml/2013/3/6/464
->>>>> 
->>>>> The PL330 driver is similar in this regard, the maximum segment size also
->>>>> depends on address width and burst width. What I did for the get_slave_caps
->>>>> implementation is to set it to the minimum maximum size. E.g. in you case
->>>>> that should be SZ_64K - 1 (burstsize and addrwidth both set to 1).
->>>> 
->>>> So you're setting max to minimum maximum size? Isn't that like telling the driver that its segments can't be bigger than this... Unless I'm missing something..
->>> 
->>> Yes. This is a limitation of the current slave_caps API. The maximum needs
->>> to be the maximum for all possible configurations. A specific configuration
->>> may allow a larger maximum. So we maybe have to extend the API to be able to
->>> query the limits for a certain configuration. Not sure what the best way
->>> would be to do that, either adding a config parameter to get_slave_caps or
->>> to break it into two functions like you proposed one for the static
->>> capabilities and one for the sg limits.
->> 
->> I am OK with either approach as long as a decision can be made quickly
->> by maintainers. Right now lot of back and forth has happened and 3
->> different versions of the same thing have been posted since January.
->> Since this is such a trivial change, it doesn't make sense to spend so
->> much time on it IMO.... The sad part is though this change is trivial,
->> other drivers such as MMC are broken and cannot be enabled due to this.
->> We cannot afford to leave them broken.
-> 
-> Well this is a new API, so it is kind of expected that there is some back and forth and that there will be a few revisions.
+GPR00: c0316be8 ef2e1e20 ef3489c0 00000000 ef2de9b0 c05612e4 00000000 00000000
+GPR08: ef3728d0 00000002 00000002 00000000 00001aee 10174934 00000000 00000000
+GPR16: 00000000 00000000 10133928 1015718e bfe9c268 1017221c 00000000 00000001
+GPR24: 00000001 c0476384 ef2e1f18 ef2b6060 00100100 00200200 00000000 ef2f1800
+NIP [c0316bf4] mmc_blk_remove_req+0x90/0xbc
+LR [c0316be8] mmc_blk_remove_req+0x84/0xbc
+Call Trace:
+[ef2e1e20] [c0316be8] mmc_blk_remove_req+0x84/0xbc (unreliable)
+[ef2e1e30] [c03183c8] mmc_blk_remove_parts.isra.22+0x88/0xac
+[ef2e1e50] [c0318414] mmc_blk_remove+0x28/0xc8
+[ef2e1e70] [c030b5b4] mmc_bus_remove+0x20/0x34
+[ef2e1e80] [c024c5ac] __device_release_driver+0x68/0x114
+[ef2e1e90] [c024c680] device_release_driver+0x28/0x40
+[ef2e1ea0] [c024b370] driver_unbind+0x64/0xd0
+[ef2e1ec0] [c0120010] sysfs_write_file+0xfc/0x190
+[ef2e1ef0] [c00c82fc] vfs_write+0xc8/0x1b0
+[ef2e1f10] [c00c876c] SyS_write+0x4c/0xac
+[ef2e1f40] [c000d318] ret_from_syscall+0x0/0x3c
+--- Exception: c01 at 0x100bd3e8
+    LR = 0x1008a4d8
+Instruction dump:
+48003c81 807f0000 83df0004 812301ac 712a0010 4182ffd0 38630068 389f027c
+4bf31e79 813f029c 712a0002 41a2ffb8 <893e01f0> 2f890000 419effac 807f0000
+---[ end trace 2908d8b93b8cdd75 ]---
 
-Sure. Only thing bothered me is it is a few lines and is just API semantics, nothing functional really.
+Segmentation fault
 
-The MMC dt patches were posted but not applied. I said regression because the dt was agreed for -rc cycle but only thing missing is this trivial api stuff so possibly counting that as a regression fixes MMC altogether. 6 months for trivial change blocking an otherwise fully working driver is too much. I am speaking collectively for all of us, not me or anyone in particular. Anyway looks like MMC is not going anywhere till then.
-
-> 
->> 
->> If Vinod is not available, can Dan please respond on how to proceed on
->> this? We really need this trivial change to go into this -rc cycle and
->> not delay it by another kernel release. Thank you.
-> 
-> This is not something you'd merge for rc3 or even later. If the MMC driver does not work without this I guess it never worked, so strictly speaking there is no regression and it is just a new feature.
-
-Agreed.
-
--Joel
-
-> 
-> - Lars
-> 
+Franck.
