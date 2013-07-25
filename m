@@ -1,101 +1,233 @@
-From: Franck Jullien <franck.jullien@gmail.com>
-Subject: Re: [PATCH] mmc: fix null pointer use in mmc_blk_remove_req
-Date: Thu, 25 Jul 2013 09:20:17 +0200
-Message-ID: <CAJfOKBwVJA61pH+1quRFLYswkSjy7doVj8brvG9tBDCJOAYR5A@mail.gmail.com>
-References: <1374671868-606-1-git-send-email-franck.jullien@gmail.com>
+From: Oskar Andero <oskar.andero@sonymobile.com>
+Subject: Re: [PATCH] MMC: Detect execution mode errors after r/w command
+Date: Thu, 25 Jul 2013 09:50:33 +0200
+Message-ID: <20130725075031.GD22258@caracas.corpusers.net>
+References: <1373374051-28438-1-git-send-email-oskar.andero@sonymobile.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset="us-ascii"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-we0-f170.google.com ([74.125.82.170]:47335 "EHLO
-	mail-we0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753096Ab3GYHUS (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 25 Jul 2013 03:20:18 -0400
-Received: by mail-we0-f170.google.com with SMTP id w60so299935wes.15
-        for <linux-mmc@vger.kernel.org>; Thu, 25 Jul 2013 00:20:17 -0700 (PDT)
-In-Reply-To: <1374671868-606-1-git-send-email-franck.jullien@gmail.com>
+Received: from seldrel01.sonyericsson.com ([212.209.106.2]:4034 "EHLO
+	seldrel01.sonyericsson.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1753127Ab3GYHuh (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 25 Jul 2013 03:50:37 -0400
+Content-Disposition: inline
+In-Reply-To: <1373374051-28438-1-git-send-email-oskar.andero@sonymobile.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: taysom@chromium.org
+To: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Cc: Linus Walleij <linus.walleij@linaro.org>, Chris Ball <cjb@laptop.org>, Ulf Hansson <ulf.hansson@stericsson.com>, "Svensson, Lars 1" <Lars1.Svensson@sonymobile.com>, bjorn.andersson@sonymobile.com
 
-2013/7/24  <franck.jullien@gmail.com>:
-> From: Franck Jullien <franck.jullien@gmail.com>
->
-> A previous commit (fdfa20c1631210d0) reordered the
-> shutdown sequence in mmc_blk_remove_req. However,
-> mmc_cleanup_queue is now called before we get the
-> card pointer and, sadly, mmc_cleanup_queue set
-> mq->card to NULL.
->
-> This patch moves the card pointer assignment before
-> mmc_cleanup_queue.
->
-> Signed-off-by: Franck Jullien <franck.jullien@gmail.com>
+Hi,
+
+On 14:47 Tue 09 Jul     , Oskar Andero wrote:
+> From: Lars Svensson <lars1.svensson@sonymobile.com>
+> 
+> Some error bits in the status field of R1/R1b response are only set
+> by the device in response to the command following the failing
+> command. The status is only read and checked after a r/w command if
+> an error is detected during the initial command or the following data
+> transfer. In some situations this causes errors passing undetected.
+> 
+> The solution is to read the status and check for these errors after
+> each r/w operation.
+> 
+> Signed-off-by: Lars Svensson <lars1.svensson@sonymobile.com>
+> Signed-off-by: Oskar Andero <oskar.andero@sonymobile.com>
+> Cc: linux-mmc@vger.kernel.org
 > ---
->  drivers/mmc/card/block.c |    2 +-
->  1 files changed, 1 insertions(+), 1 deletions(-)
->
+>  drivers/mmc/card/block.c | 105 +++++++++++++++++++++++++----------------------
+>  1 file changed, 57 insertions(+), 48 deletions(-)
+> 
 > diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-> index cd0b7f4..f4a0bea 100644
+> index dd27b07..b2664d7 100644
 > --- a/drivers/mmc/card/block.c
 > +++ b/drivers/mmc/card/block.c
-> @@ -2191,10 +2191,10 @@ static void mmc_blk_remove_req(struct mmc_blk_data *md)
->                  * is freeing the queue that stops new requests
->                  * from being accepted.
->                  */
-> +               card = md->queue.card;
->                 mmc_cleanup_queue(&md->queue);
->                 if (md->flags & MMC_BLK_PACKED_CMD)
->                         mmc_packed_clean(&md->queue);
-> -               card = md->queue.card;
->                 if (md->disk->flags & GENHD_FL_UP) {
->                         device_remove_file(disk_to_dev(md->disk), &md->force_ro);
->                         if ((md->area_type & MMC_BLK_DATA_AREA_BOOT) &&
-> --
-> 1.7.1
->
+> @@ -754,10 +754,9 @@ static int mmc_blk_cmd_error(struct request *req, const char *name, int error,
+>   * Initial r/w and stop cmd error recovery.
+>   * We don't know whether the card received the r/w cmd or not, so try to
+>   * restore things back to a sane state.  Essentially, we do this as follows:
+> - * - Obtain card status.  If the first attempt to obtain card status fails,
+> - *   the status word will reflect the failed status cmd, not the failed
+> - *   r/w cmd.  If we fail to obtain card status, it suggests we can no
+> - *   longer communicate with the card.
+> + * - Check card status. If the status_valid argument is false, the first attempt
+> + *   to obtain card status failed and the status argument will not reflect the
+> + *   failed r/w cmd.
+>   * - Check the card state.  If the card received the cmd but there was a
+>   *   transient problem with the response, it might still be in a data transfer
+>   *   mode.  Try to send it a stop command.  If this fails, we can't recover.
+> @@ -769,38 +768,15 @@ static int mmc_blk_cmd_error(struct request *req, const char *name, int error,
+>   * Otherwise we don't understand what happened, so abort.
+>   */
+>  static int mmc_blk_cmd_recovery(struct mmc_card *card, struct request *req,
+> -	struct mmc_blk_request *brq, int *ecc_err)
+> +	struct mmc_blk_request *brq, int *ecc_err, u32 status,
+> +	bool status_valid)
+>  {
+> -	bool prev_cmd_status_valid = true;
+> -	u32 status, stop_status = 0;
+> -	int err, retry;
+> +	u32 stop_status = 0;
+> +	int err;
+>  
+>  	if (mmc_card_removed(card))
+>  		return ERR_NOMEDIUM;
+>  
+> -	/*
+> -	 * Try to get card status which indicates both the card state
+> -	 * and why there was no response.  If the first attempt fails,
+> -	 * we can't be sure the returned status is for the r/w command.
+> -	 */
+> -	for (retry = 2; retry >= 0; retry--) {
+> -		err = get_card_status(card, &status, 0);
+> -		if (!err)
+> -			break;
+> -
+> -		prev_cmd_status_valid = false;
+> -		pr_err("%s: error %d sending status command, %sing\n",
+> -		       req->rq_disk->disk_name, err, retry ? "retry" : "abort");
+> -	}
+> -
+> -	/* We couldn't get a response from the card.  Give up. */
+> -	if (err) {
+> -		/* Check if the card is removed */
+> -		if (mmc_detect_card_removed(card->host))
+> -			return ERR_NOMEDIUM;
+> -		return ERR_ABORT;
+> -	}
+> -
+>  	/* Flag ECC errors */
+>  	if ((status & R1_CARD_ECC_FAILED) ||
+>  	    (brq->stop.resp[0] & R1_CARD_ECC_FAILED) ||
+> @@ -831,12 +807,12 @@ static int mmc_blk_cmd_recovery(struct mmc_card *card, struct request *req,
+>  	/* Check for set block count errors */
+>  	if (brq->sbc.error)
+>  		return mmc_blk_cmd_error(req, "SET_BLOCK_COUNT", brq->sbc.error,
+> -				prev_cmd_status_valid, status);
+> +				status_valid, status);
+>  
+>  	/* Check for r/w command errors */
+>  	if (brq->cmd.error)
+>  		return mmc_blk_cmd_error(req, "r/w cmd", brq->cmd.error,
+> -				prev_cmd_status_valid, status);
+> +				status_valid, status);
+>  
+>  	/* Data errors */
+>  	if (!brq->stop.error)
+> @@ -1062,6 +1038,12 @@ static inline void mmc_apply_rel_rw(struct mmc_blk_request *brq,
+>  	 R1_CC_ERROR |		/* Card controller error */		\
+>  	 R1_ERROR)		/* General/unknown error */
+>  
+> +#define EXE_ERRORS							\
+> +	(R1_OUT_OF_RANGE |	/* Command argument out of range */	\
+> +	 R1_ADDRESS_ERROR |	/* Misaligned address */		\
+> +	 R1_WP_VIOLATION |	/* Tried to write to protected block */	\
+> +	 R1_ERROR)		/* General/unknown error */
+> +
+>  static int mmc_blk_err_check(struct mmc_card *card,
+>  			     struct mmc_async_req *areq)
+>  {
+> @@ -1069,7 +1051,33 @@ static int mmc_blk_err_check(struct mmc_card *card,
+>  						    mmc_active);
+>  	struct mmc_blk_request *brq = &mq_mrq->brq;
+>  	struct request *req = mq_mrq->req;
+> -	int ecc_err = 0;
+> +	int retries, err, ecc_err = 0;
+> +	u32 status = 0;
+> +	bool status_valid = true;
+> +
+> +	/*
+> +	 * Try to get card status which indicates the card state after
+> +	 * command execution. If the first attempt fails, we can't be
+> +	 * sure the returned status is for the r/w command.
+> +	 */
+> +	for (retries = 2; retries >= 0; retries--) {
+> +		err = get_card_status(card, &status, 0);
+> +		if (!err)
+> +			break;
+> +
+> +		status_valid = false;
+> +		pr_err("%s: error %d sending status command, %sing\n",
+> +		       req->rq_disk->disk_name, err,
+> +		       retries ? "retry" : "abort");
+> +	}
+> +
+> +	/* We couldn't get a response from the card.  Give up. */
+> +	if (err) {
+> +		/* Check if the card is removed */
+> +		if (mmc_detect_card_removed(card->host))
+> +			return MMC_BLK_NOMEDIUM;
+> +		return MMC_BLK_ABORT;
+> +	}
+>  
+>  	/*
+>  	 * sbc.error indicates a problem with the set block count
+> @@ -1083,7 +1091,8 @@ static int mmc_blk_err_check(struct mmc_card *card,
+>  	 */
+>  	if (brq->sbc.error || brq->cmd.error || brq->stop.error ||
+>  	    brq->data.error) {
+> -		switch (mmc_blk_cmd_recovery(card, req, brq, &ecc_err)) {
+> +		switch (mmc_blk_cmd_recovery(card, req, brq, &ecc_err, status,
+> +		    status_valid)) {
+>  		case ERR_RETRY:
+>  			return MMC_BLK_RETRY;
+>  		case ERR_ABORT:
+> @@ -1098,11 +1107,12 @@ static int mmc_blk_err_check(struct mmc_card *card,
+>  	/*
+>  	 * Check for errors relating to the execution of the
+>  	 * initial command - such as address errors.  No data
+> -	 * has been transferred.
+> +	 * has been transferred. Also check for errors during
+> +	 * command execution. In this case execution was aborted.
+>  	 */
+> -	if (brq->cmd.resp[0] & CMD_ERRORS) {
+> -		pr_err("%s: r/w command failed, status = %#x\n",
+> -		       req->rq_disk->disk_name, brq->cmd.resp[0]);
+> +	if (brq->cmd.resp[0] & CMD_ERRORS || status & EXE_ERRORS) {
+> +		pr_err("%s: r/w command failed, cmd status = %#x, status = %#x\n",
+> +		       req->rq_disk->disk_name, brq->cmd.resp[0], status);
+>  		return MMC_BLK_ABORT;
+>  	}
+>  
+> @@ -1112,11 +1122,16 @@ static int mmc_blk_err_check(struct mmc_card *card,
+>  	 * program mode, which we have to wait for it to complete.
+>  	 */
+>  	if (!mmc_host_is_spi(card->host) && rq_data_dir(req) != READ) {
+> -		u32 status;
+>  		unsigned long timeout;
+>  
+>  		timeout = jiffies + msecs_to_jiffies(MMC_BLK_TIMEOUT_MS);
+> -		do {
+> +		/*
+> +		 * Some cards mishandle the status bits,
+> +		 * so make sure to check both the busy
+> +		 * indication and the card state.
+> +		 */
+> +		while (!(status & R1_READY_FOR_DATA) ||
+> +				(R1_CURRENT_STATE(status) == R1_STATE_PRG)) {
+>  			int err = get_card_status(card, &status, 5);
+>  			if (err) {
+>  				pr_err("%s: error %d requesting status\n",
+> @@ -1134,13 +1149,7 @@ static int mmc_blk_err_check(struct mmc_card *card,
+>  
+>  				return MMC_BLK_CMD_ERR;
+>  			}
+> -			/*
+> -			 * Some cards mishandle the status bits,
+> -			 * so make sure to check both the busy
+> -			 * indication and the card state.
+> -			 */
+> -		} while (!(status & R1_READY_FOR_DATA) ||
+> -			 (R1_CURRENT_STATE(status) == R1_STATE_PRG));
+> +		}
+>  	}
+>  
+>  	if (brq->data.error) {
+> -- 
+> 1.8.1.5
+> 
 
-This is how I got this (mmc_test is unusable right now):
+Any input on this patch?
 
-/ # echo mmc0:0001 > /sys/bus/mmc/drivers/mmcblk/unbind
-
-Unable to handle kernel paging request for data at address 0x000001f0
-Faulting instruction address: 0xc0316bf4
-Oops: Kernel access of bad area, sig: 11 [#1]
-P1020 RDB
-Modules linked in:
-CPU: 0 PID: 1237 Comm: echo Not tainted 3.10.0-next-20130709-dirty #12
-task: ef3489c0 ti: ef2e0000 task.ti: ef2e0000
-NIP: c0316bf4 LR: c0316be8 CTR: 00000000
-REGS: ef2e1d70 TRAP: 0300   Not tainted  (3.10.0-next-20130709-dirty)
-MSR: 00029000 <CE,EE,ME>  CR: 42004042  XER: 20000000
-DEAR: 000001f0, ESR: 00000000
-
-GPR00: c0316be8 ef2e1e20 ef3489c0 00000000 ef2de9b0 c05612e4 00000000 00000000
-GPR08: ef3728d0 00000002 00000002 00000000 00001aee 10174934 00000000 00000000
-GPR16: 00000000 00000000 10133928 1015718e bfe9c268 1017221c 00000000 00000001
-GPR24: 00000001 c0476384 ef2e1f18 ef2b6060 00100100 00200200 00000000 ef2f1800
-NIP [c0316bf4] mmc_blk_remove_req+0x90/0xbc
-LR [c0316be8] mmc_blk_remove_req+0x84/0xbc
-Call Trace:
-[ef2e1e20] [c0316be8] mmc_blk_remove_req+0x84/0xbc (unreliable)
-[ef2e1e30] [c03183c8] mmc_blk_remove_parts.isra.22+0x88/0xac
-[ef2e1e50] [c0318414] mmc_blk_remove+0x28/0xc8
-[ef2e1e70] [c030b5b4] mmc_bus_remove+0x20/0x34
-[ef2e1e80] [c024c5ac] __device_release_driver+0x68/0x114
-[ef2e1e90] [c024c680] device_release_driver+0x28/0x40
-[ef2e1ea0] [c024b370] driver_unbind+0x64/0xd0
-[ef2e1ec0] [c0120010] sysfs_write_file+0xfc/0x190
-[ef2e1ef0] [c00c82fc] vfs_write+0xc8/0x1b0
-[ef2e1f10] [c00c876c] SyS_write+0x4c/0xac
-[ef2e1f40] [c000d318] ret_from_syscall+0x0/0x3c
---- Exception: c01 at 0x100bd3e8
-    LR = 0x1008a4d8
-Instruction dump:
-48003c81 807f0000 83df0004 812301ac 712a0010 4182ffd0 38630068 389f027c
-4bf31e79 813f029c 712a0002 41a2ffb8 <893e01f0> 2f890000 419effac 807f0000
----[ end trace 2908d8b93b8cdd75 ]---
-
-Segmentation fault
-
-Franck.
+Thanks,
+ Oskar
