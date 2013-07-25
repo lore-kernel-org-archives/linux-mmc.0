@@ -1,137 +1,120 @@
-From: Haijun Zhang <Haijun.Zhang@freescale.com>
-Subject: [PATCH 2/2 V2] mmc: esdhc: get voltage from dts file
-Date: Thu, 25 Jul 2013 08:38:11 +0800
-Message-ID: <1374712691-12807-1-git-send-email-Haijun.Zhang@freescale.com>
+From: "Fernandes, Joel" <joelf@ti.com>
+Subject: Re: [PATCH] dma: edma: add device_slave_caps() support
+Date: Thu, 25 Jul 2013 03:21:18 +0000
+Message-ID: <93497CC0-D756-4748-89E5-37F1C5F51EE4@ti.com>
+References: <1374597804-3961-1-git-send-email-joelf@ti.com>
+ <51EF8A52.90902@metafoo.de>
+ <51EF8C2B.2030409@ti.com>,<51EF8F4E.8080806@metafoo.de>
+ <FB20353E-4890-4462-A671-3587A3841B4A@ti.com> <51EF92F2.3030405@metafoo.de>
+ <51F0231C.7000401@ti.com>,<51F027CB.2050608@metafoo.de>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from co9ehsobe004.messaging.microsoft.com ([207.46.163.27]:58133
-	"EHLO co9outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752871Ab3GYB3w (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 24 Jul 2013 21:29:52 -0400
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-omap-owner@vger.kernel.org>
+In-Reply-To: <51F027CB.2050608@metafoo.de>
+Content-Language: en-US
+Sender: linux-omap-owner@vger.kernel.org
+To: Lars-Peter Clausen <lars@metafoo.de>
+Cc: Vinod Koul <vinod.koul@intel.com>, Dan Williams <djbw@fb.com>, Tony Lindgren <tony@atomide.com>, "Nori, Sekhar" <nsekhar@ti.com>, Arnd Bergmann <arnd@arndb.de>, "Shilimkar, Santosh" <santosh.shilimkar@ti.com>, "Nayak, Rajendra" <rnayak@ti.com>, "Vutla, Lokesh" <lokeshvutla@ti.com>, "Krishnamoorthy, Balaji T" <balajitk@ti.com>, Rob Herring <rob.herring@calxeda.com>, Jason Kridner <jkridner@beagleboard.org>, Koen Kooi <koen@beagleboard.org>, Linux OMAP List <linux-omap@vger.kernel.org>, Linux ARM Kernel List <linux-arm-kernel@lists.infradead.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux MMC List <linux-mmc@vger.kernel.org>, "matt@ohporter.com" <matt@ohporter.com>
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, linuxppc-dev@lists.ozlabs.org
-Cc: cbouatmailru@gmail.com, cjb@laptop.org, scottwood@freescale.com, AFLEMING@freescale.com, Haijun Zhang <Haijun.Zhang@freescale.com>, Haijun Zhang <haijun.zhang@freescale.com>
-
-Add voltage-range support in esdhc of T4, So we can choose
-to read voltages from dts file as one optional.
-If we can get a valid voltage-range from device node, we use
-this voltage as the final voltage support. Else we still read
-from capacity or from other provider.
-
-Signed-off-by: Haijun Zhang <haijun.zhang@freescale.com>
-Signed-off-by: Anton Vorontsov <cbouatmailru@gmail.com>
----
-changes for V2:
-	- change dev_info to dev_err
-	- share function in pltfm.c
-
- drivers/mmc/host/sdhci-of-esdhc.c |  1 +
- drivers/mmc/host/sdhci-pltfm.c    | 32 ++++++++++++++++++++++++++++++++
- drivers/mmc/host/sdhci-pltfm.h    |  1 +
- drivers/mmc/host/sdhci.c          |  3 +++
- include/linux/mmc/sdhci.h         |  1 +
- 5 files changed, 38 insertions(+)
-
-diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
-index 15039e2..cdfb08b 100644
---- a/drivers/mmc/host/sdhci-of-esdhc.c
-+++ b/drivers/mmc/host/sdhci-of-esdhc.c
-@@ -304,6 +304,7 @@ static int sdhci_esdhc_probe(struct platform_device *pdev)
- 		return PTR_ERR(host);
- 
- 	sdhci_get_of_property(pdev);
-+	sdhci_get_voltage(pdev);
- 
- 	np = pdev->dev.of_node;
- 	if (of_device_is_compatible(np, "fsl,p2020-esdhc")) {
-diff --git a/drivers/mmc/host/sdhci-pltfm.c b/drivers/mmc/host/sdhci-pltfm.c
-index e2065a4..4682aba 100644
---- a/drivers/mmc/host/sdhci-pltfm.c
-+++ b/drivers/mmc/host/sdhci-pltfm.c
-@@ -109,10 +109,42 @@ void sdhci_get_of_property(struct platform_device *pdev)
- 			host->mmc->pm_caps |= MMC_PM_WAKE_SDIO_IRQ;
- 	}
- }
-+
-+void sdhci_get_voltage(struct platform_device *pdev)
-+{
-+	struct sdhci_host *host = platform_get_drvdata(pdev);
-+	const u32 *voltage_ranges;
-+	int num_ranges, i;
-+	struct device_node *np;
-+
-+	np = pdev->dev.of_node;
-+	voltage_ranges = of_get_property(np, "voltage-ranges", &num_ranges);
-+	num_ranges = num_ranges / sizeof(*voltage_ranges) / 2;
-+	if (!voltage_ranges || !num_ranges) {
-+		dev_info(&pdev->dev, "OF: voltage-ranges unspecified\n");
-+		return;
-+	}
-+
-+	for (i = 0; i < num_ranges; i++) {
-+		const int j = i * 2;
-+		u32 mask;
-+
-+		mask = mmc_vddrange_to_ocrmask(be32_to_cpu(voltage_ranges[j]),
-+				be32_to_cpu(voltage_ranges[j + 1]));
-+		if (!mask) {
-+			dev_err(&pdev->dev,
-+				"OF: voltage-range #%d is invalid\n", i);
-+			return;
-+		}
-+		host->ocr_mask |= mask;
-+	}
-+}
- #else
- void sdhci_get_of_property(struct platform_device *pdev) {}
-+void sdhci_get_voltage(struct platform_device *pdev) {}
- #endif /* CONFIG_OF */
- EXPORT_SYMBOL_GPL(sdhci_get_of_property);
-+EXPORT_SYMBOL_GPL(sdhci_get_voltage);
- 
- struct sdhci_host *sdhci_pltfm_init(struct platform_device *pdev,
- 				    const struct sdhci_pltfm_data *pdata,
-diff --git a/drivers/mmc/host/sdhci-pltfm.h b/drivers/mmc/host/sdhci-pltfm.h
-index e15ced79..aba8253 100644
---- a/drivers/mmc/host/sdhci-pltfm.h
-+++ b/drivers/mmc/host/sdhci-pltfm.h
-@@ -92,6 +92,7 @@ static inline void sdhci_be32bs_writeb(struct sdhci_host *host, u8 val, int reg)
- #endif /* CONFIG_MMC_SDHCI_BIG_ENDIAN_32BIT_BYTE_SWAPPER */
- 
- extern void sdhci_get_of_property(struct platform_device *pdev);
-+extern void sdhci_get_voltage(struct platform_device *pdev);
- 
- extern struct sdhci_host *sdhci_pltfm_init(struct platform_device *pdev,
- 					  const struct sdhci_pltfm_data *pdata,
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index a78bd4f..57541e0 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -3119,6 +3119,9 @@ int sdhci_add_host(struct sdhci_host *host)
- 				   SDHCI_MAX_CURRENT_MULTIPLIER;
- 	}
- 
-+	if (host->ocr_mask)
-+		ocr_avail = host->ocr_mask;
-+
- 	mmc->ocr_avail = ocr_avail;
- 	mmc->ocr_avail_sdio = ocr_avail;
- 	if (host->ocr_avail_sdio)
-diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
-index e3c6a74..3e781b8 100644
---- a/include/linux/mmc/sdhci.h
-+++ b/include/linux/mmc/sdhci.h
-@@ -171,6 +171,7 @@ struct sdhci_host {
- 	unsigned int            ocr_avail_sdio;	/* OCR bit masks */
- 	unsigned int            ocr_avail_sd;
- 	unsigned int            ocr_avail_mmc;
-+	u32 ocr_mask;		/* available voltages */
- 
- 	wait_queue_head_t	buf_ready_int;	/* Waitqueue for Buffer Read Ready interrupt */
- 	unsigned int		tuning_done;	/* Condition flag set when CMD19 succeeds */
--- 
-1.8.0
 
 
+
+Sent from my iPhone
+
+On Jul 24, 2013, at 2:15 PM, "Lars-Peter Clausen" <lars@metafoo.de> wrote:
+
+> On 07/24/2013 08:55 PM, Joel Fernandes wrote:
+>> On 07/24/2013 03:40 AM, Lars-Peter Clausen wrote:
+>>> On 07/24/2013 10:28 AM, Fernandes, Joel wrote:
+>>>> 
+>>>> On Jul 24, 2013, at 3:23 AM, "Lars-Peter Clausen" <lars@metafoo.de> wrote:
+>>>> 
+>>>>> On 07/24/2013 10:11 AM, Joel Fernandes wrote:
+>>>>>> On 07/24/2013 03:03 AM, Lars-Peter Clausen wrote:
+>>>>>>> On 07/23/2013 06:43 PM, Joel Fernandes wrote:
+>>>>>>>> Implement device_slave_caps(). EDMA has a limited number of slots.
+>>>>>>>> Slave drivers such as omap_hsmmc will query the driver to make
+>>>>>>>> sure they don't pass in more than these many scatter segments.
+>>>>>>>> 
+>>>>>>>> Signed-off-by: Joel Fernandes <joelf@ti.com>
+>>>>>>>> ---
+>>>>>>>> Vinod, or Dan- If this patch looks ok, can you please merge in for
+>>>>>>>> -rc cycle? This patch is required to fix MMC support on AM33xx. This
+>>>>>>>> patch is blocking 3 other patches which fix various MMC things. Thanks!
+>>>>>>>> 
+>>>>>>>> Notes:
+>>>>>>>> (1) this approach is temporary and only for -rc cycle to fix MMC on
+>>>>>>>> AM335x. It will be replace by the RFC series in future kernels:
+>>>>>>>> http://www.spinics.net/lists/arm-kernel/msg260094.html
+>>>>>>>> 
+>>>>>>>> (2) Patch depends Vinod's patch at:
+>>>>>>>> http://permalink.gmane.org/gmane.linux.kernel/1525112
+>>>>>>>> 
+>>>>>>>> drivers/dma/edma.c |    9 +++++++++
+>>>>>>>> 1 file changed, 9 insertions(+)
+>>>>>>>> 
+>>>>>>>> diff --git a/drivers/dma/edma.c b/drivers/dma/edma.c
+>>>>>>>> index 7222cbe..81d5429 100644
+>>>>>>>> --- a/drivers/dma/edma.c
+>>>>>>>> +++ b/drivers/dma/edma.c
+>>>>>>>> @@ -517,6 +517,14 @@ static void edma_issue_pending(struct dma_chan *chan)
+>>>>>>>>    spin_unlock_irqrestore(&echan->vchan.lock, flags);
+>>>>>>>> }
+>>>>>>>> 
+>>>>>>>> +static inline int edma_slave_caps(struct dma_chan *chan,
+>>>>>>>> +    struct dma_slave_caps *caps)
+>>>>>>>> +{
+>>>>>>>> +    caps->max_sg_nr = MAX_NR_SG;
+>>>>>>> 
+>>>>>>> Hm, what about the other fields?
+>>>>>> 
+>>>>>> Other fields are unused, the max segment size is supposed to be
+>>>>>> calculated "given" the address width and burst size. Since these
+>>>>>> can't be provided to get_caps, I have left it out for now.
+>>>>>> See: https://lkml.org/lkml/2013/3/6/464
+>>>>> 
+>>>>> The PL330 driver is similar in this regard, the maximum segment size also
+>>>>> depends on address width and burst width. What I did for the get_slave_caps
+>>>>> implementation is to set it to the minimum maximum size. E.g. in you case
+>>>>> that should be SZ_64K - 1 (burstsize and addrwidth both set to 1).
+>>>> 
+>>>> So you're setting max to minimum maximum size? Isn't that like telling the driver that its segments can't be bigger than this... Unless I'm missing something..
+>>> 
+>>> Yes. This is a limitation of the current slave_caps API. The maximum needs
+>>> to be the maximum for all possible configurations. A specific configuration
+>>> may allow a larger maximum. So we maybe have to extend the API to be able to
+>>> query the limits for a certain configuration. Not sure what the best way
+>>> would be to do that, either adding a config parameter to get_slave_caps or
+>>> to break it into two functions like you proposed one for the static
+>>> capabilities and one for the sg limits.
+>> 
+>> I am OK with either approach as long as a decision can be made quickly
+>> by maintainers. Right now lot of back and forth has happened and 3
+>> different versions of the same thing have been posted since January.
+>> Since this is such a trivial change, it doesn't make sense to spend so
+>> much time on it IMO.... The sad part is though this change is trivial,
+>> other drivers such as MMC are broken and cannot be enabled due to this.
+>> We cannot afford to leave them broken.
+> 
+> Well this is a new API, so it is kind of expected that there is some back and forth and that there will be a few revisions.
+
+Sure. Only thing bothered me is it is a few lines and is just API semantics, nothing functional really.
+
+The MMC dt patches were posted but not applied. I said regression because the dt was agreed for -rc cycle but only thing missing is this trivial api stuff so possibly counting that as a regression fixes MMC altogether. 6 months for trivial change blocking an otherwise fully working driver is too much. I am speaking collectively for all of us, not me or anyone in particular. Anyway looks like MMC is not going anywhere till then.
+
+> 
+>> 
+>> If Vinod is not available, can Dan please respond on how to proceed on
+>> this? We really need this trivial change to go into this -rc cycle and
+>> not delay it by another kernel release. Thank you.
+> 
+> This is not something you'd merge for rc3 or even later. If the MMC driver does not work without this I guess it never worked, so strictly speaking there is no regression and it is just a new feature.
+
+Agreed.
+
+-Joel
+
+> 
+> - Lars
+> 
