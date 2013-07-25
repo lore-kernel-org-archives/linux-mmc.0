@@ -1,71 +1,63 @@
 From: Laurent Pinchart <laurent.pinchart+renesas@ideasonboard.com>
-Subject: [PATCH 11/12] mmc: tmio-mmc: Remove .get_cd() callback from platform data
-Date: Fri, 26 Jul 2013 01:26:47 +0200
-Message-ID: <1374794808-21890-12-git-send-email-laurent.pinchart+renesas@ideasonboard.com>
+Subject: [PATCH 10/12] mmc: sh_mobile_sdhi: Remove .set_pwr() callback from platform data
+Date: Fri, 26 Jul 2013 01:26:46 +0200
+Message-ID: <1374794808-21890-11-git-send-email-laurent.pinchart+renesas@ideasonboard.com>
 References: <1374794808-21890-1-git-send-email-laurent.pinchart+renesas@ideasonboard.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from perceval.ideasonboard.com ([95.142.166.194]:34842 "EHLO
-	perceval.ideasonboard.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755452Ab3GYX0E (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 25 Jul 2013 19:26:04 -0400
+Return-path: <linux-sh-owner@vger.kernel.org>
 In-Reply-To: <1374794808-21890-1-git-send-email-laurent.pinchart+renesas@ideasonboard.com>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Sender: linux-sh-owner@vger.kernel.org
 To: linux-arm-kernel@lists.infradead.org
 Cc: linux-sh@vger.kernel.org, linux-mmc@vger.kernel.org, linux-spi@vger.kernel.org, Hartley Sweeten <hsweeten@visionengravers.com>, Ryan Mallon <rmallon@gmail.com>, Chris Ball <cjb@laptop.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Ian Molton <ian@mnementh.co.uk>
+List-Id: linux-mmc@vger.kernel.org
 
-All platforms pass the CD GPIO number to the driver in the .cd_gpio
-field. The .get_cd() callback isn't used anymore, remove it
+The .set_pwr() callback isn't used anymore as all platforms register
+GPIO-controlled regulators. Remove it.
 
 Signed-off-by: Laurent Pinchart <laurent.pinchart+renesas@ideasonboard.com>
 ---
- drivers/mmc/host/tmio_mmc_pio.c | 16 +---------------
- include/linux/mfd/tmio.h        |  1 -
- 2 files changed, 1 insertion(+), 16 deletions(-)
+ drivers/mmc/host/sh_mobile_sdhi.c  | 9 ---------
+ include/linux/mmc/sh_mobile_sdhi.h | 1 -
+ 2 files changed, 10 deletions(-)
 
-diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
-index b72edb7..a335fb8 100644
---- a/drivers/mmc/host/tmio_mmc_pio.c
-+++ b/drivers/mmc/host/tmio_mmc_pio.c
-@@ -932,25 +932,11 @@ static int tmio_mmc_get_ro(struct mmc_host *mmc)
- 		 (sd_ctrl_read32(host, CTL_STATUS) & TMIO_STAT_WRPROTECT));
+diff --git a/drivers/mmc/host/sh_mobile_sdhi.c b/drivers/mmc/host/sh_mobile_sdhi.c
+index 663a672..b3fd2c3 100644
+--- a/drivers/mmc/host/sh_mobile_sdhi.c
++++ b/drivers/mmc/host/sh_mobile_sdhi.c
+@@ -70,13 +70,6 @@ static void sh_mobile_sdhi_clk_disable(struct platform_device *pdev)
+ 	clk_disable(priv->clk);
  }
  
--static int tmio_mmc_get_cd(struct mmc_host *mmc)
+-static void sh_mobile_sdhi_set_pwr(struct platform_device *pdev, int state)
 -{
--	struct tmio_mmc_host *host = mmc_priv(mmc);
--	struct tmio_mmc_data *pdata = host->pdata;
--	int ret = mmc_gpio_get_cd(mmc);
--	if (ret >= 0)
--		return ret;
+-	struct sh_mobile_sdhi_info *p = pdev->dev.platform_data;
 -
--	if (!pdata->get_cd)
--		return -ENOSYS;
--	else
--		return pdata->get_cd(host->pdev);
+-	p->set_pwr(pdev, state);
 -}
 -
- static const struct mmc_host_ops tmio_mmc_ops = {
- 	.request	= tmio_mmc_request,
- 	.set_ios	= tmio_mmc_set_ios,
- 	.get_ro         = tmio_mmc_get_ro,
--	.get_cd		= tmio_mmc_get_cd,
-+	.get_cd		= mmc_gpio_get_cd,
- 	.enable_sdio_irq = tmio_mmc_enable_sdio_irq,
- };
+ static int sh_mobile_sdhi_wait_idle(struct tmio_mmc_host *host)
+ {
+ 	int timeout = 1000;
+@@ -173,8 +166,6 @@ static int sh_mobile_sdhi_probe(struct platform_device *pdev)
+ 		mmc_data->capabilities |= p->tmio_caps;
+ 		mmc_data->capabilities2 |= p->tmio_caps2;
+ 		mmc_data->cd_gpio = p->cd_gpio;
+-		if (p->set_pwr)
+-			mmc_data->set_pwr = sh_mobile_sdhi_set_pwr;
  
-diff --git a/include/linux/mfd/tmio.h b/include/linux/mfd/tmio.h
-index ce35113..b22883d 100644
---- a/include/linux/mfd/tmio.h
-+++ b/include/linux/mfd/tmio.h
-@@ -108,7 +108,6 @@ struct tmio_mmc_data {
- 	unsigned int			cd_gpio;
- 	void (*set_pwr)(struct platform_device *host, int state);
- 	void (*set_clk_div)(struct platform_device *host, int state);
--	int (*get_cd)(struct platform_device *host);
- 	int (*write16_hook)(struct tmio_mmc_host *host, int addr);
- 	/* clock management callbacks */
- 	int (*clk_enable)(struct platform_device *pdev, unsigned int *f);
+ 		if (p->dma_slave_tx > 0 && p->dma_slave_rx > 0) {
+ 			/*
+diff --git a/include/linux/mmc/sh_mobile_sdhi.h b/include/linux/mmc/sh_mobile_sdhi.h
+index f31c692..68927ae 100644
+--- a/include/linux/mmc/sh_mobile_sdhi.h
++++ b/include/linux/mmc/sh_mobile_sdhi.h
+@@ -25,7 +25,6 @@ struct sh_mobile_sdhi_info {
+ 	unsigned long tmio_caps2;
+ 	u32 tmio_ocr_mask;	/* available MMC voltages */
+ 	unsigned int cd_gpio;
+-	void (*set_pwr)(struct platform_device *pdev, int state);
+ 
+ 	/* callbacks for board specific setup code */
+ 	int (*init)(struct platform_device *pdev,
 -- 
 1.8.1.5
 
