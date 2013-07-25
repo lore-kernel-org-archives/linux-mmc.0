@@ -1,216 +1,73 @@
 From: Laurent Pinchart <laurent.pinchart+renesas@ideasonboard.com>
-Subject: [PATCH 01/12] mmc: mmc_spi: Support CD/RO GPIOs
-Date: Fri, 26 Jul 2013 01:26:37 +0200
-Message-ID: <1374794808-21890-2-git-send-email-laurent.pinchart+renesas@ideasonboard.com>
-References: <1374794808-21890-1-git-send-email-laurent.pinchart+renesas@ideasonboard.com>
-Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <1374794808-21890-1-git-send-email-laurent.pinchart+renesas@ideasonboard.com>
-Sender: linux-sh-owner@vger.kernel.org
+Subject: [PATCH 00/12] Remove platform callbacks from mmc_spi, sh_mmcif and sh_mobile_sdhi drivers
+Date: Fri, 26 Jul 2013 01:26:36 +0200
+Message-ID: <1374794808-21890-1-git-send-email-laurent.pinchart+renesas@ideasonboard.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from perceval.ideasonboard.com ([95.142.166.194]:34830 "EHLO
+	perceval.ideasonboard.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752844Ab3GYXZ5 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 25 Jul 2013 19:25:57 -0400
+Sender: linux-mmc-owner@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 To: linux-arm-kernel@lists.infradead.org
 Cc: linux-sh@vger.kernel.org, linux-mmc@vger.kernel.org, linux-spi@vger.kernel.org, Hartley Sweeten <hsweeten@visionengravers.com>, Ryan Mallon <rmallon@gmail.com>, Chris Ball <cjb@laptop.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Ian Molton <ian@mnementh.co.uk>
-List-Id: linux-mmc@vger.kernel.org
 
-Add support for passing CD/RO GPIO numbers directly to the mmc_spi
-driver instead of relying solely on board code callbacks to retrieve the
-CD/RO signals values.
+Hello,
 
-Signed-off-by: Laurent Pinchart <laurent.pinchart+renesas@ideasonboard.com>
----
- drivers/mmc/host/mmc_spi.c    | 32 +++++++++++++++++++++---------
- drivers/mmc/host/of_mmc_spi.c | 46 +++++++++++--------------------------------
- include/linux/spi/mmc_spi.h   | 11 +++++++++++
- 3 files changed, 46 insertions(+), 43 deletions(-)
+This patch set replaces callbacks to board code with regulators and GPIOs in
+the mmc_spi, sh_mmcif and sh_mobile_sdhi MMC drivers.
 
-diff --git a/drivers/mmc/host/mmc_spi.c b/drivers/mmc/host/mmc_spi.c
-index 74145d1..4e83908 100644
---- a/drivers/mmc/host/mmc_spi.c
-+++ b/drivers/mmc/host/mmc_spi.c
-@@ -36,6 +36,7 @@
- 
- #include <linux/mmc/host.h>
- #include <linux/mmc/mmc.h>		/* for R1_SPI_* bit values */
-+#include <linux/mmc/slot-gpio.h>
- 
- #include <linux/spi/spi.h>
- #include <linux/spi/mmc_spi.h>
-@@ -1278,11 +1279,8 @@ static int mmc_spi_get_ro(struct mmc_host *mmc)
- 
- 	if (host->pdata && host->pdata->get_ro)
- 		return !!host->pdata->get_ro(mmc->parent);
--	/*
--	 * Board doesn't support read only detection; let the mmc core
--	 * decide what to do.
--	 */
--	return -ENOSYS;
-+	else
-+		return mmc_gpio_get_ro(mmc);
- }
- 
- static int mmc_spi_get_cd(struct mmc_host *mmc)
-@@ -1291,7 +1289,8 @@ static int mmc_spi_get_cd(struct mmc_host *mmc)
- 
- 	if (host->pdata && host->pdata->get_cd)
- 		return !!host->pdata->get_cd(mmc->parent);
--	return -ENOSYS;
-+	else
-+		return mmc_gpio_get_cd(mmc);
- }
- 
- static const struct mmc_host_ops mmc_spi_ops = {
-@@ -1324,6 +1323,7 @@ static int mmc_spi_probe(struct spi_device *spi)
- 	struct mmc_host		*mmc;
- 	struct mmc_spi_host	*host;
- 	int			status;
-+	bool			has_ro = false;
- 
- 	/* We rely on full duplex transfers, mostly to reduce
- 	 * per-transfer overheads (by making fewer transfers).
-@@ -1448,18 +1448,32 @@ static int mmc_spi_probe(struct spi_device *spi)
- 	}
- 
- 	/* pass platform capabilities, if any */
--	if (host->pdata)
-+	if (host->pdata) {
- 		mmc->caps |= host->pdata->caps;
-+		mmc->caps2 |= host->pdata->caps2;
-+	}
- 
- 	status = mmc_add_host(mmc);
- 	if (status != 0)
- 		goto fail_add_host;
- 
-+	if (host->pdata && host->pdata->flags & MMC_SPI_USE_CD_GPIO) {
-+		status = mmc_gpio_request_cd(mmc, host->pdata->cd_gpio);
-+		if (status != 0)
-+			goto fail_add_host;
-+	}
-+
-+	if (host->pdata && host->pdata->flags & MMC_SPI_USE_RO_GPIO) {
-+		has_ro = true;
-+		status = mmc_gpio_request_ro(mmc, host->pdata->ro_gpio);
-+		if (status != 0)
-+			goto fail_add_host;
-+	}
-+
- 	dev_info(&spi->dev, "SD/MMC host %s%s%s%s%s\n",
- 			dev_name(&mmc->class_dev),
- 			host->dma_dev ? "" : ", no DMA",
--			(host->pdata && host->pdata->get_ro)
--				? "" : ", no WP",
-+			has_ro ? "" : ", no WP",
- 			(host->pdata && host->pdata->setpower)
- 				? "" : ", no poweroff",
- 			(mmc->caps & MMC_CAP_NEEDS_POLL)
-diff --git a/drivers/mmc/host/of_mmc_spi.c b/drivers/mmc/host/of_mmc_spi.c
-index d720b5e..6e218fb 100644
---- a/drivers/mmc/host/of_mmc_spi.c
-+++ b/drivers/mmc/host/of_mmc_spi.c
-@@ -50,25 +50,6 @@ static struct of_mmc_spi *to_of_mmc_spi(struct device *dev)
- 	return container_of(dev->platform_data, struct of_mmc_spi, pdata);
- }
- 
--static int of_mmc_spi_read_gpio(struct device *dev, int gpio_num)
--{
--	struct of_mmc_spi *oms = to_of_mmc_spi(dev);
--	bool active_low = oms->alow_gpios[gpio_num];
--	bool value = gpio_get_value(oms->gpios[gpio_num]);
--
--	return active_low ^ value;
--}
--
--static int of_mmc_spi_get_cd(struct device *dev)
--{
--	return of_mmc_spi_read_gpio(dev, CD_GPIO);
--}
--
--static int of_mmc_spi_get_ro(struct device *dev)
--{
--	return of_mmc_spi_read_gpio(dev, WP_GPIO);
--}
--
- static int of_mmc_spi_init(struct device *dev,
- 			   irqreturn_t (*irqhandler)(int, void *), void *mmc)
- {
-@@ -130,20 +111,22 @@ struct mmc_spi_platform_data *mmc_spi_get_pdata(struct spi_device *spi)
- 		if (!gpio_is_valid(oms->gpios[i]))
- 			continue;
- 
--		ret = gpio_request(oms->gpios[i], dev_name(dev));
--		if (ret < 0) {
--			oms->gpios[i] = -EINVAL;
--			continue;
--		}
--
- 		if (gpio_flags & OF_GPIO_ACTIVE_LOW)
- 			oms->alow_gpios[i] = true;
- 	}
- 
--	if (gpio_is_valid(oms->gpios[CD_GPIO]))
--		oms->pdata.get_cd = of_mmc_spi_get_cd;
--	if (gpio_is_valid(oms->gpios[WP_GPIO]))
--		oms->pdata.get_ro = of_mmc_spi_get_ro;
-+	if (gpio_is_valid(oms->gpios[CD_GPIO])) {
-+		oms->pdata.cd_gpio = oms->gpios[CD_GPIO];
-+		oms->pdata.flags |= MMC_SPI_USE_CD_GPIO;
-+		if (!oms->alow_gpios[CD_GPIO])
-+			oms->pdata.caps2 |= MMC_CAP2_CD_ACTIVE_HIGH;
-+	}
-+	if (gpio_is_valid(oms->gpios[WP_GPIO])) {
-+		oms->pdata.ro_gpio = oms->gpios[WP_GPIO];
-+		oms->pdata.flags |= MMC_SPI_USE_RO_GPIO;
-+		if (!oms->alow_gpios[WP_GPIO])
-+			oms->pdata.caps2 |= MMC_CAP2_RO_ACTIVE_HIGH;
-+	}
- 
- 	oms->detect_irq = irq_of_parse_and_map(np, 0);
- 	if (oms->detect_irq != 0) {
-@@ -166,15 +149,10 @@ void mmc_spi_put_pdata(struct spi_device *spi)
- 	struct device *dev = &spi->dev;
- 	struct device_node *np = dev->of_node;
- 	struct of_mmc_spi *oms = to_of_mmc_spi(dev);
--	int i;
- 
- 	if (!dev->platform_data || !np)
- 		return;
- 
--	for (i = 0; i < ARRAY_SIZE(oms->gpios); i++) {
--		if (gpio_is_valid(oms->gpios[i]))
--			gpio_free(oms->gpios[i]);
--	}
- 	kfree(oms);
- 	dev->platform_data = NULL;
- }
-diff --git a/include/linux/spi/mmc_spi.h b/include/linux/spi/mmc_spi.h
-index 32be8db..a54da4a 100644
---- a/include/linux/spi/mmc_spi.h
-+++ b/include/linux/spi/mmc_spi.h
-@@ -7,6 +7,11 @@
- struct device;
- struct mmc_host;
- 
-+#define MMC_SPI_USE_CD_GPIO			(1 << 0)
-+#define MMC_SPI_USE_RO_GPIO			(1 << 1)
-+#define MMC_SPI_CD_GPIO_ACTIVE_LOW		(1 << 2)
-+#define MMC_SPI_RO_GPIO_ACTIVE_LOW		(1 << 3)
-+
- /* Put this in platform_data of a device being used to manage an MMC/SD
-  * card slot.  (Modeled after PXA mmc glue; see that for usage examples.)
-  *
-@@ -30,8 +35,14 @@ struct mmc_spi_platform_data {
- 	 */
- 	int (*get_cd)(struct device *);
- 
-+	/* Card Detect and Read Only GPIOs */
-+	unsigned int flags;
-+	unsigned int cd_gpio;
-+	unsigned int ro_gpio;
-+
- 	/* Capabilities to pass into mmc core (e.g. MMC_CAP_NEEDS_POLL). */
- 	unsigned long caps;
-+	unsigned long caps2;
- 
- 	/* how long to debounce card detect, in msecs */
- 	u16 detect_delay;
+Most of the required infrastructure is in place already on the drivers side,
+except for CD/RO GPIOs support in the mmc_spi driver. The series thus starts
+with patch 01/12 that adds this feature to the mmc_spi driver.
+
+Patches 02/12 to 05/12 remove the board callbacks from the ecovec24 and
+vision_ep9307 boards. The code has been compile-tested only as I don't have
+access to those boards.
+
+Patches 06/12 to 07/12 then proceed to remove the callbacks from the drivers
+themselves and from the platform data structures.
+
+This will be a bit messy to merge, as the series interleaves patches for
+drivers and board files. Given that the mmc_spi driver is marked as orphan in
+MAINTAINERS and that the vision_ep9307 hasn't seen any board-specific
+modification in the last couple of kernel versions one option would be to
+merge all patches (or at least patches 01/12 to 06/12) through Simon's tree if
+all involved maintainers agree.
+
+The series is based on tag renesas-devel-20130725 from
+git://git.kernel.org/pub/scm/linux/kernel/git/horms/renesas.git
+
+Laurent Pinchart (12):
+  mmc: mmc_spi: Support CD/RO GPIOs
+  ARM: ep93xx: vision_ep9307: Use MMC CD and RO GPIO
+  sh: ecovec24: Use MMC/SDHI CD and RO GPIO
+  sh: ecovec24: Remove mmcif .down_pwr() callback
+  sh: ecovec24: Remove MMCIF and SDHI .set_pwr() callbacks
+  mmc: mmc_spi: Remove platform data .get_cd() and .get_ro() callbacks
+  mmc: sh_mmcif: Remove .down_pwr() callback from platform data
+  mmc: sh_mmcif: Remove .set_pwr() callback from platform data
+  mmc: sh_mobile_sdhi: Remove .get_cd() callback from platform data
+  mmc: sh_mobile_sdhi: Remove .set_pwr() callback from platform data
+  mmc: tmio-mmc: Remove .get_cd() callback from platform data
+  mmc: tmio-mmc: Remove .set_pwr() callback from platform data
+
+ arch/arm/mach-ep93xx/vision_ep9307.c | 56 ++---------------------
+ arch/sh/boards/mach-ecovec24/setup.c | 89 ++++--------------------------------
+ drivers/mmc/host/mmc_spi.c           | 48 +++++++++----------
+ drivers/mmc/host/of_mmc_spi.c        | 46 +++++--------------
+ drivers/mmc/host/sh_mmcif.c          |  3 --
+ drivers/mmc/host/sh_mobile_sdhi.c    | 18 --------
+ drivers/mmc/host/tmio_mmc.h          |  1 -
+ drivers/mmc/host/tmio_mmc_pio.c      | 23 +---------
+ include/linux/mfd/tmio.h             |  2 -
+ include/linux/mmc/sh_mmcif.h         |  2 -
+ include/linux/mmc/sh_mobile_sdhi.h   |  2 -
+ include/linux/spi/mmc_spi.h          | 18 ++++----
+ 12 files changed, 56 insertions(+), 252 deletions(-)
+
 -- 
-1.8.1.5
+Regards,
+
+Laurent Pinchart
 
