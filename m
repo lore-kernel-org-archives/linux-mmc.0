@@ -1,203 +1,216 @@
-From: <dinguyen@altera.com>
-Subject: [PATCH] ARM: socfpga: dts: Add support for SD/MMC
-Date: Thu, 25 Jul 2013 17:04:41 -0500
-Message-ID: <1374789881-20611-1-git-send-email-dinguyen@altera.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: dinh.linux@gmail.com
-Cc: Mark Rutland <mark.rutland@arm.com>, devicetree@vger.kernel.org, Ian Campbell <ian.campbell@citrix.com>, Pawel Moll <pawel.moll@arm.com>, Stephen Warren <swarren@wwwdotorg.org>, linux-mmc@vger.kernel.org, Rob Herring <rob.herring@calxeda.com>, linux-arm-kernel@lists.infradead.org, Dinh Nguyen <dinguyen@altera.com>
+From: Laurent Pinchart <laurent.pinchart+renesas@ideasonboard.com>
+Subject: [PATCH 01/12] mmc: mmc_spi: Support CD/RO GPIOs
+Date: Fri, 26 Jul 2013 01:26:37 +0200
+Message-ID: <1374794808-21890-2-git-send-email-laurent.pinchart+renesas@ideasonboard.com>
+References: <1374794808-21890-1-git-send-email-laurent.pinchart+renesas@ideasonboard.com>
+Return-path: <linux-sh-owner@vger.kernel.org>
+In-Reply-To: <1374794808-21890-1-git-send-email-laurent.pinchart+renesas@ideasonboard.com>
+Sender: linux-sh-owner@vger.kernel.org
+To: linux-arm-kernel@lists.infradead.org
+Cc: linux-sh@vger.kernel.org, linux-mmc@vger.kernel.org, linux-spi@vger.kernel.org, Hartley Sweeten <hsweeten@visionengravers.com>, Ryan Mallon <rmallon@gmail.com>, Chris Ball <cjb@laptop.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Ian Molton <ian@mnementh.co.uk>
 List-Id: linux-mmc@vger.kernel.org
 
-From: Dinh Nguyen <dinguyen@altera.com>
+Add support for passing CD/RO GPIO numbers directly to the mmc_spi
+driver instead of relying solely on board code callbacks to retrieve the
+CD/RO signals values.
 
-Add bindings for SD/MMC for SOCFPGA.
-Add "syscon" to the "altr,sys-mgr" binding.
-
-Signed-off-by: Dinh Nguyen <dinguyen@altera.com>
-Reviewed-by: Pavel Machek <pavel@denx.de>
-Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: Rob Herring <rob.herring@calxeda.com>
-Cc: Pawel Moll <pawel.moll@arm.com>
-Cc: Mark Rutland <mark.rutland@arm.com>
-Cc: Stephen Warren <swarren@wwwdotorg.org>
-Cc: Ian Campbell <ian.campbell@citrix.com>
-Cc: devicetree@vger.kernel.org
-Cc: linux-mmc@vger.kernel.org
-CC: linux-arm-kernel@lists.infradead.org
-
-v4:
-- Fixed grammar in documentation file
-
-v3:
-- Add Acked-by: Jaehoon Chung
-
-v2:
-- Fixed misspellings extentions->extensions
-
+Signed-off-by: Laurent Pinchart <laurent.pinchart+renesas@ideasonboard.com>
 ---
-Re-send to updated device tree bindings maintainers.
----
- .../devicetree/bindings/mmc/socfpga-dw-mshc.txt    |   60 ++++++++++++++++++++
- arch/arm/boot/dts/socfpga.dtsi                     |   13 ++++-
- arch/arm/boot/dts/socfpga_cyclone5.dts             |   13 +++++
- arch/arm/boot/dts/socfpga_vt.dts                   |   12 ++++
- 4 files changed, 97 insertions(+), 1 deletion(-)
- create mode 100644 Documentation/devicetree/bindings/mmc/socfpga-dw-mshc.txt
+ drivers/mmc/host/mmc_spi.c    | 32 +++++++++++++++++++++---------
+ drivers/mmc/host/of_mmc_spi.c | 46 +++++++++++--------------------------------
+ include/linux/spi/mmc_spi.h   | 11 +++++++++++
+ 3 files changed, 46 insertions(+), 43 deletions(-)
 
-diff --git a/Documentation/devicetree/bindings/mmc/socfpga-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/socfpga-dw-mshc.txt
-new file mode 100644
-index 0000000..420051c
---- /dev/null
-+++ b/Documentation/devicetree/bindings/mmc/socfpga-dw-mshc.txt
-@@ -0,0 +1,60 @@
-+* Altera SOCFPGA specific extensions to the Synopsis Designware Mobile
-+  Storage Host Controller
-+
-+Required Properties:
-+
-+* compatible: should be
-+	- "altr,socfpga-dw-mshc": for controllers with Altera SOCFPGA
-+	  specific extensions.
-+
-+* altr,dw-mshc-ciu-div: Specifies the divider value for the card interface
-+  unit (ciu) clock. The value should be (n-1). For Altera's SOCFPGA, the divider
-+  value is fixed at 3, which means parent_clock/4.
-+
-+* altr,dw-mshc-sdr-timing: Specifies the value of CIU clock phase shift value
-+  in transmit mode and CIU clock phase shift value in receive mode for single
-+  data rate mode operation. Refer to notes below for the order of the cells and the
-+  valid values.
-+
-+  Notes for the sdr-timing values:
-+
-+    The order of the cells should be
-+      - First Cell: CIU clock phase shift value for RX mode, smplsel bits in
-+	the system manager SDMMC control group.
-+      - Second Cell: CIU clock phase shift value for TX mode, drvsel bits in
-+	the system manager SDMMC control group.
-+
-+    Valid values for SDR CIU clock timing for SOCFPGA:
-+      - valid value for tx phase shift and rx phase shift is 0 to 7.
-+
-+Required properties for a slot:
-+
-+* bus-width: Data width for card slot. 4-bit or 8-bit data.
-+
-+Example:
-+
-+  The MSHC controller node can be split into two portions, SoC specific and
-+  board specific portions, as listed below.
-+
-+	dwmmc0@ff704000 {
-+		compatible = "altr,socfpga-dw-mshc";
-+		reg = <0xff704000 0x1000>;
-+		interrupts = <0 139 4>;
-+		#address-cells = <1>;
-+		#size-cells = <0>;
-+	};
-+
-+	dwmmc0@ff704000 {
-+		num-slots = <1>;
-+		supports-highspeed;
-+		broken-cd;
-+		fifo-depth = <0x400>;
-+		altr,dw-mshc-ciu-div = <3>;
-+      		altr,dw-mshc-sdr-timing = <0 3>;
-+
-+		slot@0 {
-+			reg = <0>;
-+			bus-width = <4>;
-+		};
-+	};
-+
-diff --git a/arch/arm/boot/dts/socfpga.dtsi b/arch/arm/boot/dts/socfpga.dtsi
-index bee62a2..dbf7f22 100644
---- a/arch/arm/boot/dts/socfpga.dtsi
-+++ b/arch/arm/boot/dts/socfpga.dtsi
-@@ -468,6 +468,17 @@
- 			cache-level = <2>;
- 		};
+diff --git a/drivers/mmc/host/mmc_spi.c b/drivers/mmc/host/mmc_spi.c
+index 74145d1..4e83908 100644
+--- a/drivers/mmc/host/mmc_spi.c
++++ b/drivers/mmc/host/mmc_spi.c
+@@ -36,6 +36,7 @@
  
-+		mmc: dwmmc0@ff704000 {
-+			compatible = "altr,socfpga-dw-mshc";
-+			reg = <0xff704000 0x1000>;
-+			interrupts = <0 139 4>;
-+			fifo-depth = <0x400>;
-+			#address-cells = <1>;
-+			#size-cells = <0>;
-+			clocks = <&l4_mp_clk>, <&sdmmc_clk>;
-+			clock-names = "biu", "ciu";
-+		};
-+
- 		/* Local timer */
- 		timer@fffec600 {
- 			compatible = "arm,cortex-a9-twd-timer";
-@@ -521,7 +532,7 @@
- 			};
+ #include <linux/mmc/host.h>
+ #include <linux/mmc/mmc.h>		/* for R1_SPI_* bit values */
++#include <linux/mmc/slot-gpio.h>
  
- 		sysmgr@ffd08000 {
--				compatible = "altr,sys-mgr";
-+				compatible = "altr,sys-mgr", "syscon";
- 				reg = <0xffd08000 0x4000>;
- 			};
- 	};
-diff --git a/arch/arm/boot/dts/socfpga_cyclone5.dts b/arch/arm/boot/dts/socfpga_cyclone5.dts
-index 973999d..1853cb1 100644
---- a/arch/arm/boot/dts/socfpga_cyclone5.dts
-+++ b/arch/arm/boot/dts/socfpga_cyclone5.dts
-@@ -54,6 +54,19 @@
- 			status = "okay";
- 		};
+ #include <linux/spi/spi.h>
+ #include <linux/spi/mmc_spi.h>
+@@ -1278,11 +1279,8 @@ static int mmc_spi_get_ro(struct mmc_host *mmc)
  
-+		dwmmc0@ff704000 {
-+			num-slots = <1>;
-+			supports-highspeed;
-+			broken-cd;
-+			altr,dw-mshc-ciu-div = <3>;
-+			altr,dw-mshc-sdr-timing = <0 3>;
-+
-+			slot@0 {
-+				reg = <0>;
-+				bus-width = <4>;
-+			};
-+		};
-+
- 		timer0@ffc08000 {
- 			clock-frequency = <100000000>;
- 		};
-diff --git a/arch/arm/boot/dts/socfpga_vt.dts b/arch/arm/boot/dts/socfpga_vt.dts
-index d1ec0ca..d93deb0 100644
---- a/arch/arm/boot/dts/socfpga_vt.dts
-+++ b/arch/arm/boot/dts/socfpga_vt.dts
-@@ -46,6 +46,18 @@
- 			status = "okay";
- 		};
+ 	if (host->pdata && host->pdata->get_ro)
+ 		return !!host->pdata->get_ro(mmc->parent);
+-	/*
+-	 * Board doesn't support read only detection; let the mmc core
+-	 * decide what to do.
+-	 */
+-	return -ENOSYS;
++	else
++		return mmc_gpio_get_ro(mmc);
+ }
  
-+		dwmmc0@ff704000 {
-+			num-slots = <1>;
-+			supports-highspeed;
-+			broken-cd;
-+			altr,dw-mshc-ciu-div = <3>;
+ static int mmc_spi_get_cd(struct mmc_host *mmc)
+@@ -1291,7 +1289,8 @@ static int mmc_spi_get_cd(struct mmc_host *mmc)
+ 
+ 	if (host->pdata && host->pdata->get_cd)
+ 		return !!host->pdata->get_cd(mmc->parent);
+-	return -ENOSYS;
++	else
++		return mmc_gpio_get_cd(mmc);
+ }
+ 
+ static const struct mmc_host_ops mmc_spi_ops = {
+@@ -1324,6 +1323,7 @@ static int mmc_spi_probe(struct spi_device *spi)
+ 	struct mmc_host		*mmc;
+ 	struct mmc_spi_host	*host;
+ 	int			status;
++	bool			has_ro = false;
+ 
+ 	/* We rely on full duplex transfers, mostly to reduce
+ 	 * per-transfer overheads (by making fewer transfers).
+@@ -1448,18 +1448,32 @@ static int mmc_spi_probe(struct spi_device *spi)
+ 	}
+ 
+ 	/* pass platform capabilities, if any */
+-	if (host->pdata)
++	if (host->pdata) {
+ 		mmc->caps |= host->pdata->caps;
++		mmc->caps2 |= host->pdata->caps2;
++	}
+ 
+ 	status = mmc_add_host(mmc);
+ 	if (status != 0)
+ 		goto fail_add_host;
+ 
++	if (host->pdata && host->pdata->flags & MMC_SPI_USE_CD_GPIO) {
++		status = mmc_gpio_request_cd(mmc, host->pdata->cd_gpio);
++		if (status != 0)
++			goto fail_add_host;
++	}
 +
-+			slot@0 {
-+				reg = <0>;
-+				bus-width = <4>;
-+			};
-+		};
++	if (host->pdata && host->pdata->flags & MMC_SPI_USE_RO_GPIO) {
++		has_ro = true;
++		status = mmc_gpio_request_ro(mmc, host->pdata->ro_gpio);
++		if (status != 0)
++			goto fail_add_host;
++	}
 +
- 		timer0@ffc08000 {
- 			clock-frequency = <7000000>;
- 		};
+ 	dev_info(&spi->dev, "SD/MMC host %s%s%s%s%s\n",
+ 			dev_name(&mmc->class_dev),
+ 			host->dma_dev ? "" : ", no DMA",
+-			(host->pdata && host->pdata->get_ro)
+-				? "" : ", no WP",
++			has_ro ? "" : ", no WP",
+ 			(host->pdata && host->pdata->setpower)
+ 				? "" : ", no poweroff",
+ 			(mmc->caps & MMC_CAP_NEEDS_POLL)
+diff --git a/drivers/mmc/host/of_mmc_spi.c b/drivers/mmc/host/of_mmc_spi.c
+index d720b5e..6e218fb 100644
+--- a/drivers/mmc/host/of_mmc_spi.c
++++ b/drivers/mmc/host/of_mmc_spi.c
+@@ -50,25 +50,6 @@ static struct of_mmc_spi *to_of_mmc_spi(struct device *dev)
+ 	return container_of(dev->platform_data, struct of_mmc_spi, pdata);
+ }
+ 
+-static int of_mmc_spi_read_gpio(struct device *dev, int gpio_num)
+-{
+-	struct of_mmc_spi *oms = to_of_mmc_spi(dev);
+-	bool active_low = oms->alow_gpios[gpio_num];
+-	bool value = gpio_get_value(oms->gpios[gpio_num]);
+-
+-	return active_low ^ value;
+-}
+-
+-static int of_mmc_spi_get_cd(struct device *dev)
+-{
+-	return of_mmc_spi_read_gpio(dev, CD_GPIO);
+-}
+-
+-static int of_mmc_spi_get_ro(struct device *dev)
+-{
+-	return of_mmc_spi_read_gpio(dev, WP_GPIO);
+-}
+-
+ static int of_mmc_spi_init(struct device *dev,
+ 			   irqreturn_t (*irqhandler)(int, void *), void *mmc)
+ {
+@@ -130,20 +111,22 @@ struct mmc_spi_platform_data *mmc_spi_get_pdata(struct spi_device *spi)
+ 		if (!gpio_is_valid(oms->gpios[i]))
+ 			continue;
+ 
+-		ret = gpio_request(oms->gpios[i], dev_name(dev));
+-		if (ret < 0) {
+-			oms->gpios[i] = -EINVAL;
+-			continue;
+-		}
+-
+ 		if (gpio_flags & OF_GPIO_ACTIVE_LOW)
+ 			oms->alow_gpios[i] = true;
+ 	}
+ 
+-	if (gpio_is_valid(oms->gpios[CD_GPIO]))
+-		oms->pdata.get_cd = of_mmc_spi_get_cd;
+-	if (gpio_is_valid(oms->gpios[WP_GPIO]))
+-		oms->pdata.get_ro = of_mmc_spi_get_ro;
++	if (gpio_is_valid(oms->gpios[CD_GPIO])) {
++		oms->pdata.cd_gpio = oms->gpios[CD_GPIO];
++		oms->pdata.flags |= MMC_SPI_USE_CD_GPIO;
++		if (!oms->alow_gpios[CD_GPIO])
++			oms->pdata.caps2 |= MMC_CAP2_CD_ACTIVE_HIGH;
++	}
++	if (gpio_is_valid(oms->gpios[WP_GPIO])) {
++		oms->pdata.ro_gpio = oms->gpios[WP_GPIO];
++		oms->pdata.flags |= MMC_SPI_USE_RO_GPIO;
++		if (!oms->alow_gpios[WP_GPIO])
++			oms->pdata.caps2 |= MMC_CAP2_RO_ACTIVE_HIGH;
++	}
+ 
+ 	oms->detect_irq = irq_of_parse_and_map(np, 0);
+ 	if (oms->detect_irq != 0) {
+@@ -166,15 +149,10 @@ void mmc_spi_put_pdata(struct spi_device *spi)
+ 	struct device *dev = &spi->dev;
+ 	struct device_node *np = dev->of_node;
+ 	struct of_mmc_spi *oms = to_of_mmc_spi(dev);
+-	int i;
+ 
+ 	if (!dev->platform_data || !np)
+ 		return;
+ 
+-	for (i = 0; i < ARRAY_SIZE(oms->gpios); i++) {
+-		if (gpio_is_valid(oms->gpios[i]))
+-			gpio_free(oms->gpios[i]);
+-	}
+ 	kfree(oms);
+ 	dev->platform_data = NULL;
+ }
+diff --git a/include/linux/spi/mmc_spi.h b/include/linux/spi/mmc_spi.h
+index 32be8db..a54da4a 100644
+--- a/include/linux/spi/mmc_spi.h
++++ b/include/linux/spi/mmc_spi.h
+@@ -7,6 +7,11 @@
+ struct device;
+ struct mmc_host;
+ 
++#define MMC_SPI_USE_CD_GPIO			(1 << 0)
++#define MMC_SPI_USE_RO_GPIO			(1 << 1)
++#define MMC_SPI_CD_GPIO_ACTIVE_LOW		(1 << 2)
++#define MMC_SPI_RO_GPIO_ACTIVE_LOW		(1 << 3)
++
+ /* Put this in platform_data of a device being used to manage an MMC/SD
+  * card slot.  (Modeled after PXA mmc glue; see that for usage examples.)
+  *
+@@ -30,8 +35,14 @@ struct mmc_spi_platform_data {
+ 	 */
+ 	int (*get_cd)(struct device *);
+ 
++	/* Card Detect and Read Only GPIOs */
++	unsigned int flags;
++	unsigned int cd_gpio;
++	unsigned int ro_gpio;
++
+ 	/* Capabilities to pass into mmc core (e.g. MMC_CAP_NEEDS_POLL). */
+ 	unsigned long caps;
++	unsigned long caps2;
+ 
+ 	/* how long to debounce card detect, in msecs */
+ 	u16 detect_delay;
 -- 
-1.7.9.5
+1.8.1.5
+
