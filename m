@@ -1,64 +1,203 @@
-From: Andrea Adami <andrea.adami@gmail.com>
-Subject: Re: [PATCH] mmc: pxamci: Refactor regulator support
-Date: Thu, 25 Jul 2013 23:03:52 +0200
-Message-ID: <CAAQYJAteA2aQd5XRpi3NS-RazDoeWWbGFeUYcdP1kYc+sgmMUQ@mail.gmail.com>
-References: <1374361668-3184-1-git-send-email-andrea.adami@gmail.com>
-	<20130722110341.GR9858@sirena.org.uk>
+From: <dinguyen@altera.com>
+Subject: [PATCH] ARM: socfpga: dts: Add support for SD/MMC
+Date: Thu, 25 Jul 2013 17:04:41 -0500
+Message-ID: <1374789881-20611-1-git-send-email-dinguyen@altera.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-lb0-f172.google.com ([209.85.217.172]:58708 "EHLO
-	mail-lb0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754186Ab3GYVDy (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 25 Jul 2013 17:03:54 -0400
-In-Reply-To: <20130722110341.GR9858@sirena.org.uk>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: dinh.linux@gmail.com
+Cc: Mark Rutland <mark.rutland@arm.com>, devicetree@vger.kernel.org, Ian Campbell <ian.campbell@citrix.com>, Pawel Moll <pawel.moll@arm.com>, Stephen Warren <swarren@wwwdotorg.org>, linux-mmc@vger.kernel.org, Rob Herring <rob.herring@calxeda.com>, linux-arm-kernel@lists.infradead.org, Dinh Nguyen <dinguyen@altera.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Mark Brown <broonie@kernel.org>
-Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Russell King <linux@arm.linux.org.uk>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Marko Katic <dromede@gmail.com>
 
-On Mon, Jul 22, 2013 at 1:03 PM, Mark Brown <broonie@kernel.org> wrote:
-> On Sun, Jul 21, 2013 at 01:07:48AM +0200, Andrea Adami wrote:
->
->> The ADS7846 driver _requires_ the use of a voltage regulator
->> or if not present, CONFIG_REGULATOR_DUMMY should be used for proper operation.
->> This was made mandatory by the following commit:
->
-> No, CONFIG_REGULATOR_DUMMY should *never* be used in production.
->
->> The ADS7846 in spitz machines is not connected to
->> any power regulator so it needs CONFIG_REGULATOR_DUMMY enabled.
->
-> I don't think that's the case, it would be a very unusual piece of
-> silicon that was able to operate without power.  It may be that it's not
-> using a software controllable regulator but there will be one or more
-> power supplies.  Judging by your problem here it seems like there is
-> actually a software controllable regulator though...
->
->> However, enabling CONFIG_REGULATOR and CONFIG_REGULATOR_DUMMY
->> will break pxamci driver and cause the following error output:
->
-> This is why you should never use CONFIG_REGULATOR_DUMMY in production,
-> it's just a crutch to help things boot during development.
->
->> Regulator support in pxamci_init_ocr() is not
->> written with the existence of the dummy regulator driver in
->> mind. It does not check the return value of mmc_regulator_get_ocrmask()
->> and it will only fall back to platform data if no regulator was found.
->
-> No regulator driver should be written with CONFIG_REGULATOR_DUMMY in
-> mind.  My guess here is that your custom callbacks for this board should
-> be being replaced by a regulator, for example the fixed voltage
-> regulator if there's only one voltage supported.
+From: Dinh Nguyen <dinguyen@altera.com>
 
+Add bindings for SD/MMC for SOCFPGA.
+Add "syscon" to the "altr,sys-mgr" binding.
 
-Thanks Mark,
+Signed-off-by: Dinh Nguyen <dinguyen@altera.com>
+Reviewed-by: Pavel Machek <pavel@denx.de>
+Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: Rob Herring <rob.herring@calxeda.com>
+Cc: Pawel Moll <pawel.moll@arm.com>
+Cc: Mark Rutland <mark.rutland@arm.com>
+Cc: Stephen Warren <swarren@wwwdotorg.org>
+Cc: Ian Campbell <ian.campbell@citrix.com>
+Cc: devicetree@vger.kernel.org
+Cc: linux-mmc@vger.kernel.org
+CC: linux-arm-kernel@lists.infradead.org
 
-patch is withdrawn.
+v4:
+- Fixed grammar in documentation file
 
-In fact adding regulators has been self-inflicted pain...
-Poodle and spitz boot normally with # CONFIG_REGULATOR is not set.
+v3:
+- Add Acked-by: Jaehoon Chung
 
-Sorry for the noise
+v2:
+- Fixed misspellings extentions->extensions
 
-Andrea Adami
+---
+Re-send to updated device tree bindings maintainers.
+---
+ .../devicetree/bindings/mmc/socfpga-dw-mshc.txt    |   60 ++++++++++++++++++++
+ arch/arm/boot/dts/socfpga.dtsi                     |   13 ++++-
+ arch/arm/boot/dts/socfpga_cyclone5.dts             |   13 +++++
+ arch/arm/boot/dts/socfpga_vt.dts                   |   12 ++++
+ 4 files changed, 97 insertions(+), 1 deletion(-)
+ create mode 100644 Documentation/devicetree/bindings/mmc/socfpga-dw-mshc.txt
+
+diff --git a/Documentation/devicetree/bindings/mmc/socfpga-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/socfpga-dw-mshc.txt
+new file mode 100644
+index 0000000..420051c
+--- /dev/null
++++ b/Documentation/devicetree/bindings/mmc/socfpga-dw-mshc.txt
+@@ -0,0 +1,60 @@
++* Altera SOCFPGA specific extensions to the Synopsis Designware Mobile
++  Storage Host Controller
++
++Required Properties:
++
++* compatible: should be
++	- "altr,socfpga-dw-mshc": for controllers with Altera SOCFPGA
++	  specific extensions.
++
++* altr,dw-mshc-ciu-div: Specifies the divider value for the card interface
++  unit (ciu) clock. The value should be (n-1). For Altera's SOCFPGA, the divider
++  value is fixed at 3, which means parent_clock/4.
++
++* altr,dw-mshc-sdr-timing: Specifies the value of CIU clock phase shift value
++  in transmit mode and CIU clock phase shift value in receive mode for single
++  data rate mode operation. Refer to notes below for the order of the cells and the
++  valid values.
++
++  Notes for the sdr-timing values:
++
++    The order of the cells should be
++      - First Cell: CIU clock phase shift value for RX mode, smplsel bits in
++	the system manager SDMMC control group.
++      - Second Cell: CIU clock phase shift value for TX mode, drvsel bits in
++	the system manager SDMMC control group.
++
++    Valid values for SDR CIU clock timing for SOCFPGA:
++      - valid value for tx phase shift and rx phase shift is 0 to 7.
++
++Required properties for a slot:
++
++* bus-width: Data width for card slot. 4-bit or 8-bit data.
++
++Example:
++
++  The MSHC controller node can be split into two portions, SoC specific and
++  board specific portions, as listed below.
++
++	dwmmc0@ff704000 {
++		compatible = "altr,socfpga-dw-mshc";
++		reg = <0xff704000 0x1000>;
++		interrupts = <0 139 4>;
++		#address-cells = <1>;
++		#size-cells = <0>;
++	};
++
++	dwmmc0@ff704000 {
++		num-slots = <1>;
++		supports-highspeed;
++		broken-cd;
++		fifo-depth = <0x400>;
++		altr,dw-mshc-ciu-div = <3>;
++      		altr,dw-mshc-sdr-timing = <0 3>;
++
++		slot@0 {
++			reg = <0>;
++			bus-width = <4>;
++		};
++	};
++
+diff --git a/arch/arm/boot/dts/socfpga.dtsi b/arch/arm/boot/dts/socfpga.dtsi
+index bee62a2..dbf7f22 100644
+--- a/arch/arm/boot/dts/socfpga.dtsi
++++ b/arch/arm/boot/dts/socfpga.dtsi
+@@ -468,6 +468,17 @@
+ 			cache-level = <2>;
+ 		};
+ 
++		mmc: dwmmc0@ff704000 {
++			compatible = "altr,socfpga-dw-mshc";
++			reg = <0xff704000 0x1000>;
++			interrupts = <0 139 4>;
++			fifo-depth = <0x400>;
++			#address-cells = <1>;
++			#size-cells = <0>;
++			clocks = <&l4_mp_clk>, <&sdmmc_clk>;
++			clock-names = "biu", "ciu";
++		};
++
+ 		/* Local timer */
+ 		timer@fffec600 {
+ 			compatible = "arm,cortex-a9-twd-timer";
+@@ -521,7 +532,7 @@
+ 			};
+ 
+ 		sysmgr@ffd08000 {
+-				compatible = "altr,sys-mgr";
++				compatible = "altr,sys-mgr", "syscon";
+ 				reg = <0xffd08000 0x4000>;
+ 			};
+ 	};
+diff --git a/arch/arm/boot/dts/socfpga_cyclone5.dts b/arch/arm/boot/dts/socfpga_cyclone5.dts
+index 973999d..1853cb1 100644
+--- a/arch/arm/boot/dts/socfpga_cyclone5.dts
++++ b/arch/arm/boot/dts/socfpga_cyclone5.dts
+@@ -54,6 +54,19 @@
+ 			status = "okay";
+ 		};
+ 
++		dwmmc0@ff704000 {
++			num-slots = <1>;
++			supports-highspeed;
++			broken-cd;
++			altr,dw-mshc-ciu-div = <3>;
++			altr,dw-mshc-sdr-timing = <0 3>;
++
++			slot@0 {
++				reg = <0>;
++				bus-width = <4>;
++			};
++		};
++
+ 		timer0@ffc08000 {
+ 			clock-frequency = <100000000>;
+ 		};
+diff --git a/arch/arm/boot/dts/socfpga_vt.dts b/arch/arm/boot/dts/socfpga_vt.dts
+index d1ec0ca..d93deb0 100644
+--- a/arch/arm/boot/dts/socfpga_vt.dts
++++ b/arch/arm/boot/dts/socfpga_vt.dts
+@@ -46,6 +46,18 @@
+ 			status = "okay";
+ 		};
+ 
++		dwmmc0@ff704000 {
++			num-slots = <1>;
++			supports-highspeed;
++			broken-cd;
++			altr,dw-mshc-ciu-div = <3>;
++
++			slot@0 {
++				reg = <0>;
++				bus-width = <4>;
++			};
++		};
++
+ 		timer0@ffc08000 {
+ 			clock-frequency = <7000000>;
+ 		};
+-- 
+1.7.9.5
