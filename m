@@ -1,85 +1,39 @@
-From: Laurent Pinchart <laurent.pinchart+renesas@ideasonboard.com>
-Subject: [PATCH 12/12] mmc: tmio-mmc: Remove .set_pwr() callback from platform data
-Date: Fri, 26 Jul 2013 01:26:48 +0200
-Message-ID: <1374794808-21890-13-git-send-email-laurent.pinchart+renesas@ideasonboard.com>
+From: H Hartley Sweeten <hartleys@visionengravers.com>
+Subject: RE: [PATCH 02/12] ARM: ep93xx: vision_ep9307: Use MMC CD and RO GPIO
+Date: Thu, 25 Jul 2013 18:33:44 -0500
+Message-ID: <ADE657CA350FB648AAC2C43247A983F0021DAC5C20A6@AUSP01VMBX24.collaborationhost.net>
 References: <1374794808-21890-1-git-send-email-laurent.pinchart+renesas@ideasonboard.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from perceval.ideasonboard.com ([95.142.166.194]:34839 "EHLO
-	perceval.ideasonboard.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754225Ab3GYX0F (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 25 Jul 2013 19:26:05 -0400
-In-Reply-To: <1374794808-21890-1-git-send-email-laurent.pinchart+renesas@ideasonboard.com>
-Sender: linux-mmc-owner@vger.kernel.org
+ <1374794808-21890-3-git-send-email-laurent.pinchart+renesas@ideasonboard.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <1374794808-21890-3-git-send-email-laurent.pinchart+renesas@ideasonboard.com>
+Content-Language: en-US
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Laurent Pinchart <laurent.pinchart+renesas@ideasonboard.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+Cc: Ryan Mallon <rmallon@gmail.com>, "linux-sh@vger.kernel.org" <linux-sh@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-spi@vger.kernel.org" <linux-spi@vger.kernel.org>, Ian Molton <ian@mnementh.co.uk>, Chris Ball <cjb@laptop.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 List-Id: linux-mmc@vger.kernel.org
-To: linux-arm-kernel@lists.infradead.org
-Cc: linux-sh@vger.kernel.org, linux-mmc@vger.kernel.org, linux-spi@vger.kernel.org, Hartley Sweeten <hsweeten@visionengravers.com>, Ryan Mallon <rmallon@gmail.com>, Chris Ball <cjb@laptop.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Ian Molton <ian@mnementh.co.uk>
 
-The .set_pwr() callback isn't used anymore as all platforms register
-GPIO-controlled regulators. Remove it.
+On Thursday, July 25, 2013 4:27 PM, Laurent Pinchart wrote:
+>
+> Pass the CD and RO GPIO numbers to the MMC SPI driver and remove the
+> custom .get_cd() and .get_ro() callback functions.
+>
+> Signed-off-by: Laurent Pinchart <laurent.pinchart+renesas@ideasonboard.com>
+> ---
+>  arch/arm/mach-ep93xx/vision_ep9307.c | 56 +++---------------------------------
+>  1 file changed, 4 insertions(+), 52 deletions(-)
 
-Signed-off-by: Laurent Pinchart <laurent.pinchart+renesas@ideasonboard.com>
----
- drivers/mmc/host/tmio_mmc.h     | 1 -
- drivers/mmc/host/tmio_mmc_pio.c | 7 -------
- include/linux/mfd/tmio.h        | 1 -
- 3 files changed, 9 deletions(-)
+I'll try testing this tomorrow.
 
-diff --git a/drivers/mmc/host/tmio_mmc.h b/drivers/mmc/host/tmio_mmc.h
-index 86fd21e..39c2f45 100644
---- a/drivers/mmc/host/tmio_mmc.h
-+++ b/drivers/mmc/host/tmio_mmc.h
-@@ -68,7 +68,6 @@ struct tmio_mmc_host {
- 	enum tmio_mmc_power	power;
- 
- 	/* Callbacks for clock / power control */
--	void (*set_pwr)(struct platform_device *host, int state);
- 	void (*set_clk_div)(struct platform_device *host, int state);
- 
- 	/* pio related stuff */
-diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
-index a335fb8..0cd37e2 100644
---- a/drivers/mmc/host/tmio_mmc_pio.c
-+++ b/drivers/mmc/host/tmio_mmc_pio.c
-@@ -777,9 +777,6 @@ static void tmio_mmc_power_on(struct tmio_mmc_host *host, unsigned short vdd)
- 
- 	/* .set_ios() is returning void, so, no chance to report an error */
- 
--	if (host->set_pwr)
--		host->set_pwr(host->pdev, 1);
--
- 	if (!IS_ERR(mmc->supply.vmmc)) {
- 		ret = mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, vdd);
- 		/*
-@@ -809,9 +806,6 @@ static void tmio_mmc_power_off(struct tmio_mmc_host *host)
- 
- 	if (!IS_ERR(mmc->supply.vmmc))
- 		mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, 0);
--
--	if (host->set_pwr)
--		host->set_pwr(host->pdev, 0);
- }
- 
- /* Set MMC clock / power.
-@@ -998,7 +992,6 @@ int tmio_mmc_host_probe(struct tmio_mmc_host **host,
- 	_host->pdev = pdev;
- 	platform_set_drvdata(pdev, mmc);
- 
--	_host->set_pwr = pdata->set_pwr;
- 	_host->set_clk_div = pdata->set_clk_div;
- 
- 	/* SD control register space size is 0x200, 0x400 for bus_shift=1 */
-diff --git a/include/linux/mfd/tmio.h b/include/linux/mfd/tmio.h
-index b22883d..baa2346 100644
---- a/include/linux/mfd/tmio.h
-+++ b/include/linux/mfd/tmio.h
-@@ -106,7 +106,6 @@ struct tmio_mmc_data {
- 	struct tmio_mmc_dma		*dma;
- 	struct device			*dev;
- 	unsigned int			cd_gpio;
--	void (*set_pwr)(struct platform_device *host, int state);
- 	void (*set_clk_div)(struct platform_device *host, int state);
- 	int (*write16_hook)(struct tmio_mmc_host *host, int addr);
- 	/* clock management callbacks */
--- 
-1.8.1.5
-
+Thanks,
+Hartley
