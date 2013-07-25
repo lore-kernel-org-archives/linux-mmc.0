@@ -1,73 +1,94 @@
 From: Laurent Pinchart <laurent.pinchart+renesas@ideasonboard.com>
-Subject: [PATCH 00/12] Remove platform callbacks from mmc_spi, sh_mmcif and sh_mobile_sdhi drivers
-Date: Fri, 26 Jul 2013 01:26:36 +0200
-Message-ID: <1374794808-21890-1-git-send-email-laurent.pinchart+renesas@ideasonboard.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from perceval.ideasonboard.com ([95.142.166.194]:34830 "EHLO
-	perceval.ideasonboard.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752844Ab3GYXZ5 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 25 Jul 2013 19:25:57 -0400
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Subject: [PATCH 02/12] ARM: ep93xx: vision_ep9307: Use MMC CD and RO GPIO
+Date: Fri, 26 Jul 2013 01:26:38 +0200
+Message-ID: <1374794808-21890-3-git-send-email-laurent.pinchart+renesas@ideasonboard.com>
+References: <1374794808-21890-1-git-send-email-laurent.pinchart+renesas@ideasonboard.com>
+Return-path: <linux-sh-owner@vger.kernel.org>
+In-Reply-To: <1374794808-21890-1-git-send-email-laurent.pinchart+renesas@ideasonboard.com>
+Sender: linux-sh-owner@vger.kernel.org
 To: linux-arm-kernel@lists.infradead.org
 Cc: linux-sh@vger.kernel.org, linux-mmc@vger.kernel.org, linux-spi@vger.kernel.org, Hartley Sweeten <hsweeten@visionengravers.com>, Ryan Mallon <rmallon@gmail.com>, Chris Ball <cjb@laptop.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Ian Molton <ian@mnementh.co.uk>
+List-Id: linux-mmc@vger.kernel.org
 
-Hello,
+Pass the CD and RO GPIO numbers to the MMC SPI driver and remove the
+custom .get_cd() and .get_ro() callback functions.
 
-This patch set replaces callbacks to board code with regulators and GPIOs in
-the mmc_spi, sh_mmcif and sh_mobile_sdhi MMC drivers.
+Signed-off-by: Laurent Pinchart <laurent.pinchart+renesas@ideasonboard.com>
+---
+ arch/arm/mach-ep93xx/vision_ep9307.c | 56 +++---------------------------------
+ 1 file changed, 4 insertions(+), 52 deletions(-)
 
-Most of the required infrastructure is in place already on the drivers side,
-except for CD/RO GPIOs support in the mmc_spi driver. The series thus starts
-with patch 01/12 that adds this feature to the mmc_spi driver.
-
-Patches 02/12 to 05/12 remove the board callbacks from the ecovec24 and
-vision_ep9307 boards. The code has been compile-tested only as I don't have
-access to those boards.
-
-Patches 06/12 to 07/12 then proceed to remove the callbacks from the drivers
-themselves and from the platform data structures.
-
-This will be a bit messy to merge, as the series interleaves patches for
-drivers and board files. Given that the mmc_spi driver is marked as orphan in
-MAINTAINERS and that the vision_ep9307 hasn't seen any board-specific
-modification in the last couple of kernel versions one option would be to
-merge all patches (or at least patches 01/12 to 06/12) through Simon's tree if
-all involved maintainers agree.
-
-The series is based on tag renesas-devel-20130725 from
-git://git.kernel.org/pub/scm/linux/kernel/git/horms/renesas.git
-
-Laurent Pinchart (12):
-  mmc: mmc_spi: Support CD/RO GPIOs
-  ARM: ep93xx: vision_ep9307: Use MMC CD and RO GPIO
-  sh: ecovec24: Use MMC/SDHI CD and RO GPIO
-  sh: ecovec24: Remove mmcif .down_pwr() callback
-  sh: ecovec24: Remove MMCIF and SDHI .set_pwr() callbacks
-  mmc: mmc_spi: Remove platform data .get_cd() and .get_ro() callbacks
-  mmc: sh_mmcif: Remove .down_pwr() callback from platform data
-  mmc: sh_mmcif: Remove .set_pwr() callback from platform data
-  mmc: sh_mobile_sdhi: Remove .get_cd() callback from platform data
-  mmc: sh_mobile_sdhi: Remove .set_pwr() callback from platform data
-  mmc: tmio-mmc: Remove .get_cd() callback from platform data
-  mmc: tmio-mmc: Remove .set_pwr() callback from platform data
-
- arch/arm/mach-ep93xx/vision_ep9307.c | 56 ++---------------------
- arch/sh/boards/mach-ecovec24/setup.c | 89 ++++--------------------------------
- drivers/mmc/host/mmc_spi.c           | 48 +++++++++----------
- drivers/mmc/host/of_mmc_spi.c        | 46 +++++--------------
- drivers/mmc/host/sh_mmcif.c          |  3 --
- drivers/mmc/host/sh_mobile_sdhi.c    | 18 --------
- drivers/mmc/host/tmio_mmc.h          |  1 -
- drivers/mmc/host/tmio_mmc_pio.c      | 23 +---------
- include/linux/mfd/tmio.h             |  2 -
- include/linux/mmc/sh_mmcif.h         |  2 -
- include/linux/mmc/sh_mobile_sdhi.h   |  2 -
- include/linux/spi/mmc_spi.h          | 18 ++++----
- 12 files changed, 56 insertions(+), 252 deletions(-)
-
+diff --git a/arch/arm/mach-ep93xx/vision_ep9307.c b/arch/arm/mach-ep93xx/vision_ep9307.c
+index 605956f..ab94dc5 100644
+--- a/arch/arm/mach-ep93xx/vision_ep9307.c
++++ b/arch/arm/mach-ep93xx/vision_ep9307.c
+@@ -224,62 +224,14 @@ static struct ep93xx_spi_chip_ops vision_spi_flash_hw = {
+ #define VISION_SPI_MMC_WP	EP93XX_GPIO_LINE_F(0)
+ #define VISION_SPI_MMC_CD	EP93XX_GPIO_LINE_EGPIO15
+ 
+-static struct gpio vision_spi_mmc_gpios[] = {
+-	{ VISION_SPI_MMC_WP, GPIOF_DIR_IN, "mmc_spi:wp" },
+-	{ VISION_SPI_MMC_CD, GPIOF_DIR_IN, "mmc_spi:cd" },
+-};
+-
+-static int vision_spi_mmc_init(struct device *pdev,
+-			irqreturn_t (*func)(int, void *), void *pdata)
+-{
+-	int err;
+-
+-	err = gpio_request_array(vision_spi_mmc_gpios,
+-				 ARRAY_SIZE(vision_spi_mmc_gpios));
+-	if (err)
+-		return err;
+-
+-	err = gpio_set_debounce(VISION_SPI_MMC_CD, 1);
+-	if (err)
+-		goto exit_err;
+-
+-	err = request_irq(gpio_to_irq(VISION_SPI_MMC_CD), func,
+-			IRQ_TYPE_EDGE_BOTH, "mmc_spi:cd", pdata);
+-	if (err)
+-		goto exit_err;
+-
+-	return 0;
+-
+-exit_err:
+-	gpio_free_array(vision_spi_mmc_gpios, ARRAY_SIZE(vision_spi_mmc_gpios));
+-	return err;
+-
+-}
+-
+-static void vision_spi_mmc_exit(struct device *pdev, void *pdata)
+-{
+-	free_irq(gpio_to_irq(VISION_SPI_MMC_CD), pdata);
+-	gpio_free_array(vision_spi_mmc_gpios, ARRAY_SIZE(vision_spi_mmc_gpios));
+-}
+-
+-static int vision_spi_mmc_get_ro(struct device *pdev)
+-{
+-	return !!gpio_get_value(VISION_SPI_MMC_WP);
+-}
+-
+-static int vision_spi_mmc_get_cd(struct device *pdev)
+-{
+-	return !gpio_get_value(VISION_SPI_MMC_CD);
+-}
+-
+ static struct mmc_spi_platform_data vision_spi_mmc_data = {
+-	.init		= vision_spi_mmc_init,
+-	.exit		= vision_spi_mmc_exit,
+-	.get_ro		= vision_spi_mmc_get_ro,
+-	.get_cd		= vision_spi_mmc_get_cd,
+ 	.detect_delay	= 100,
+ 	.powerup_msecs	= 100,
+ 	.ocr_mask	= MMC_VDD_32_33 | MMC_VDD_33_34,
++	.flags		= MMC_SPI_USE_CD_GPIO | MMC_SPI_USE_RO_GPIO,
++	.cd_gpio	= VISION_SPI_MMC_CD,
++	.ro_gpio	= VISION_SPI_MMC_WP,
++	.caps2		= MMC_CAP2_RO_ACTIVE_HIGH,
+ };
+ 
+ static int vision_spi_mmc_hw_setup(struct spi_device *spi)
 -- 
-Regards,
-
-Laurent Pinchart
+1.8.1.5
 
