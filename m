@@ -1,89 +1,104 @@
-From: Dinh Nguyen <dinguyen@altera.com>
-Subject: Re: [PATCH] ARM: socfpga: dts: Add support for SD/MMC
-Date: Fri, 26 Jul 2013 16:22:20 -0500
-Message-ID: <1374873740.20685.58.camel@linux-builds1>
-References: <1374789881-20611-1-git-send-email-dinguyen@altera.com>
-	 <51F2B0C4.8000301@wwwdotorg.org> <1374867220.20685.44.camel@linux-builds1>
-	 <51F2D5EA.7050108@wwwdotorg.org> <1374871494.20685.46.camel@linux-builds1>
-	 <51F2E65D.8090705@wwwdotorg.org>
+From: Stephen Warren <swarren@wwwdotorg.org>
+Subject: Re: [PATCH 1/2] mmc: add Device Tree properties for UHS modes
+Date: Fri, 26 Jul 2013 15:36:20 -0600
+Message-ID: <51F2EBD4.1060603@wwwdotorg.org>
+References: <Pine.LNX.4.64.1307261747210.22137@axis700.grange> <51F2ADA2.2030503@wwwdotorg.org> <Pine.LNX.4.64.1307262215110.27439@axis700.grange>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from co1ehsobe003.messaging.microsoft.com ([216.32.180.186]:44665
-	"EHLO co1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1760415Ab3GZVWN (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 26 Jul 2013 17:22:13 -0400
-In-Reply-To: <51F2E65D.8090705@wwwdotorg.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-sh-owner@vger.kernel.org>
+In-Reply-To: <Pine.LNX.4.64.1307262215110.27439@axis700.grange>
+Sender: linux-sh-owner@vger.kernel.org
+To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Cc: linux-sh@vger.kernel.org, linux-mmc@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>, Chris Ball <cjb@laptop.org>, devicetree@vger.kernel.org, Simon Horman <horms@verge.net.au>, Ian Campbell <ian.campbell@citrix.com>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <Mark.Rutland@arm.com>, Rob Herring <rob.herring@calxeda.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Stephen Warren <swarren@wwwdotorg.org>
-Cc: Mark Rutland <mark.rutland@arm.com>, devicetree@vger.kernel.org, dinh.linux@gmail.com, Ian Campbell <ian.campbell@citrix.com>, Pawel Moll <pawel.moll@arm.com>, Seungwon Jeon <tgih.jun@samsung.com>, linux-mmc@vger.kernel.org, Rob Herring <rob.herring@calxeda.com>, Jaehoon Chung <jh80.chung@samsung.com>, Thomas Abraham <thomas.abraham@linaro.org>, Chris Ball <cjb@laptop.org>, linux-arm-kernel@lists.infradead.org
 
-On Fri, 2013-07-26 at 15:13 -0600, Stephen Warren wrote:
-> On 07/26/2013 02:44 PM, Dinh Nguyen wrote:
-> > On Fri, 2013-07-26 at 14:02 -0600, Stephen Warren wrote:
-> >> On 07/26/2013 01:33 PM, Dinh Nguyen wrote:
-> >>> On Fri, 2013-07-26 at 11:24 -0600, Stephen Warren wrote:
-> >>>> On 07/25/2013 04:04 PM, dinguyen@altera.com wrote:
-> >>>>> From: Dinh Nguyen <dinguyen@altera.com>
-> >>>>>
-> >>>>> Add bindings for SD/MMC for SOCFPGA.
-> >>>>> Add "syscon" to the "altr,sys-mgr" binding.
-> >>
-> >>>>> diff --git a/Documentation/devicetree/bindings/mmc/socfpga-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/socfpga-dw-mshc.txt
-> >>
-> >>>>> +Example:
-> >>>>> +
-> >>>>> +  The MSHC controller node can be split into two portions, SoC specific and
-> >>>>> +  board specific portions, as listed below.
-> >>>>
-> >>>> That doesn't sound like a good idea. There should be one DT node for
-> >>>> each logical block. The internal construction of the Linux drivers
-> >>>> (presumably you have entirely separate code to handle the two nodes in
-> >>>> Linux so far?) should not influence the DT construction at all.
-> >>>
-> >>> In the end, there is only 1 DT node for each logical block:
-> >>
-> >> Oh right, I see you were intending to show the distinction between the
-> >> SoC .dtsi and board .dts file. I hadn't realized that. I don't think
-> >> it's common to do that in the examples, so I would recommend just
-> >> merging the whole example together myself.
-> > 
-> > I'll merge it.
-> > 
-> >>
-> >>> dwmmc0@ff704000 {
-> >>> 	compatible = "altr,socfpga-dw-mshc";
-> >>
-> >> That should include the baseline synopsis compatible value too.
-> > 
-> > We don't need the baseline synopsis compatible because of
-> > dw_mci_pltfm_register() call.
+On 07/26/2013 02:23 PM, Guennadi Liakhovetski wrote:
+> Hi Stephen
 > 
-> It's not a matter of whether it's strictly necessary for the SW to work
-> right now. The compatible property should include entries for everything
-> that the HW is actually compatible with.
-
-Ah ok..will add the baseline compatible binding. But this also sounds
-like there's clean-up work that can be done that I have already
-_promised_ Pawell I would do for the next cycle. Along with finding
-common attributes for the clocks, I think we can also move all the
-platform compatible entries into a single of_device_id struct.
-
-Dinh
-
+> On Fri, 26 Jul 2013, Stephen Warren wrote:
 > 
-> Of course, if a plain driver for the raw synopsis controller/binding
-> wouldn't actually work on this HW at all, without explicit knowledge of
-> the extra details of the more HW-specific binding, then that's a good
-> argument for leaving it out of compatible.
+>> On 07/26/2013 09:51 AM, Guennadi Liakhovetski wrote:
+>>> Add DT properties for UHS SDR12, SDR25, SDR50, SDR104 and DDR50 modes and
+>>> for supported by the host in DDR mode VccQ values. Adding them to DT will
+>>> automatically enable respective MMC host capabilities.
+>>
+>>> diff --git a/Documentation/devicetree/bindings/mmc/mmc.txt b/Documentation/devicetree/bindings/mmc/mmc.txt
+>>
+>>> +- uhs-sdr12: the host supports UHS SDR12 mode
+>>> +- uhs-sdr25: the host supports UHS SDR25 mode
+>>> +- uhs-sdr50: the host supports UHS SDR50 mode
+>>> +- uhs-sdr104: the host supports UHS SDR104 mode
+>>> +- uhs-ddr50: the host supports UHS DDR50 mode
+>>> +- ddr-1v2: the host can support DDR, using 1.2V VccQ
+>>> +- ddr-1v8: the host can support DDR, using 1.8V VccQ
+>>
+>> Surely the driver for the host controller already knows this, so there's
+>> no need to represent it in DT?
 > 
-> _______________________________________________
-> linux-arm-kernel mailing list
-> linux-arm-kernel@lists.infradead.org
-> http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
-> 
+> Not necessarily. One driver can handle several versions of the same chip, 
+> and some versions of the chip implement some of those features, others 
+> don't.
 
+Certainly.
 
+> So, your choice is really whether to specify a chip version in the
+> compatible string or these properties.
 
+There's no choice there. The compatible property needs to specify all of
+the following:
+
+* A value which describes the exact chip the IP block is in. This can be
+matched on to enable any quirks that need to be handled due to
+integration of the IP into the particular chip. This value will list the
+chip version. An example might be tegra20-sdhci.
+
+* A value which describes the IP block version (if that IP block has a
+version independent of the SoC that contains it, as e.g. a Synopsis IP
+block might). A totally made-up example might be synopsis-dwc2-1.0.0
+
+* Various more generic values that describe the HW, and that define a n
+interface to the HW that is specific and complete enough that HW can
+program to. An example might be usb-ehci (assuming a chip that doesn't
+have so many quirks that a driver has to know more than just "it's an
+EHCI controller).
+
+Further classes of compatible value might exist, but you get the idea.
+
+All of those values have to exist in the DT right from the very start,
+so that the first DT is usable with a future kernel, which might decide
+to vary the exact compatible value(s) it matches on, provided they're
+all documented in the DT binding ABI, in order to enable/disable new
+sets of quirsk.
+
+> Now, when you consider that
+> multiple drivers have to decide upon those, and sometimes you don't have 
+> an exact IP version of the SD/MMC controller but only the SoC version, you 
+> choice becomes: 
+
+That would be a bug in the DT, given my assertions above.
+
+> either _standard_ _common_ properties as above, or 
+> compatibility strings virtually in each driver for each SoC version.
+
+My preference would certainly be to derive the data from compatible
+strings here. I'd prefer more that DT represent board differences rather
+than SoC differences; drivers can encompass the SoC differences with
+minimal code in general.
+
+Related, is it really true that zero driver involvement is required to
+enable these UHS features? If absolutely any HW can enable them without
+any driver support at all, then perhaps it's still reasonable to create
+DT properties to enable them. However, if driver support is required to
+make those features actually work, the driver had better be validating
+that support actually works on the HW it's running on before enabling
+the feature (and can therefore pass the validation results to the SD
+core rather than relying on DT properties to be set). I'm pretty sure
+that our downstream Tegra SDHCI driver contains a lot of code to make
+UHS actually work, even though the HW does support it, and hence with
+this patch applied, the DT would request that it be enabled.
+
+> That's why I decided to use explicit properties for those. Example: 
+> sh_mmcif driver supports MMCIF IP blocks on various Renesas sh-, r-mobile 
+> and r-car SuperH and ARM SoCs. On some of them DDR50 is supported, on 
+> others it isn't.
