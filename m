@@ -1,65 +1,95 @@
-From: Steffen Trumtrar <s.trumtrar@pengutronix.de>
-Subject: Re: [RFC 0/2] Set mmc(blk)X with DT alias
-Date: Fri, 26 Jul 2013 10:09:53 +0200
-Message-ID: <20130726080953.GA2118@pengutronix.de>
-References: <1374656973-16250-1-git-send-email-s.trumtrar@pengutronix.de>
- <51F16046.3020809@wwwdotorg.org>
+From: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
+Subject: Re: [PATCH 01/12] mmc: mmc_spi: Support CD/RO GPIOs
+Date: Fri, 26 Jul 2013 11:51:51 +0200
+Message-ID: <1734001.ZxAa9p5J8y@avalon>
+References: <1374794808-21890-1-git-send-email-laurent.pinchart+renesas@ideasonboard.com> <3057612.zXvbbdByqU@avalon> <51F1C165.6040600@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from metis.ext.pengutronix.de ([92.198.50.35]:33631 "EHLO
-	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752919Ab3GZIKB (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 26 Jul 2013 04:10:01 -0400
-Content-Disposition: inline
-In-Reply-To: <51F16046.3020809@wwwdotorg.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7Bit
+Return-path: <linux-sh-owner@vger.kernel.org>
+In-Reply-To: <51F1C165.6040600@gmail.com>
+Sender: linux-sh-owner@vger.kernel.org
+To: Ryan Mallon <rmallon@gmail.com>
+Cc: Laurent Pinchart <laurent.pinchart+renesas@ideasonboard.com>, linux-arm-kernel@lists.infradead.org, linux-sh@vger.kernel.org, linux-mmc@vger.kernel.org, linux-spi@vger.kernel.org, Hartley Sweeten <hsweeten@visionengravers.com>, Chris Ball <cjb@laptop.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Ian Molton <ian@mnementh.co.uk>
 List-Id: linux-mmc@vger.kernel.org
-To: Stephen Warren <swarren@wwwdotorg.org>
-Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, devicetree@vger.kernel.org, kernel@pengutronix.de
 
-On Thu, Jul 25, 2013 at 10:28:38AM -0700, Stephen Warren wrote:
-> On 07/24/2013 02:09 AM, Steffen Trumtrar wrote:
-> > Hi!
+Hi Ryan,
+
+On Friday 26 July 2013 10:23:01 Ryan Mallon wrote:
+> On 26/07/13 10:04, Laurent Pinchart wrote:
+> > On Friday 26 July 2013 09:45:26 Ryan Mallon wrote:
+> >> On 26/07/13 09:26, Laurent Pinchart wrote:
+> >>> Add support for passing CD/RO GPIO numbers directly to the mmc_spi
+> >>> driver instead of relying solely on board code callbacks to retrieve the
+> >>> CD/RO signals values.
+> >>> 
+> >>> Signed-off-by: Laurent Pinchart
+> >>> <laurent.pinchart+renesas@ideasonboard.com>
+> >>> ---
+> >>> 
+> >>>  drivers/mmc/host/mmc_spi.c    | 32 +++++++++++++++++++++---------
+> >>>  drivers/mmc/host/of_mmc_spi.c | 46 ++++++++++--------------------------
+> >>>  include/linux/spi/mmc_spi.h   | 11 +++++++++++
+> >>>  3 files changed, 46 insertions(+), 43 deletions(-)
+> >>> 
+> >>> diff --git a/drivers/mmc/host/mmc_spi.c b/drivers/mmc/host/mmc_spi.c
+> >>> index 74145d1..4e83908 100644
+> >>> --- a/drivers/mmc/host/mmc_spi.c
+> >>> +++ b/drivers/mmc/host/mmc_spi.c
+> >>> @@ -36,6 +36,7 @@
+> >>> 
+> >>>  #include <linux/mmc/host.h>
+> >>>  #include <linux/mmc/mmc.h>		/* for R1_SPI_* bit values */
+> >>> +#include <linux/mmc/slot-gpio.h>
+> >>>  #include <linux/spi/spi.h>
+> >>>  #include <linux/spi/mmc_spi.h>
+> >>> 
+> >>> @@ -1278,11 +1279,8 @@ static int mmc_spi_get_ro(struct mmc_host *mmc)
+> >>>  	if (host->pdata && host->pdata->get_ro)
+> >>>  		return !!host->pdata->get_ro(mmc->parent);
+> >>> 
+> >>> -	/*
+> >>> -	 * Board doesn't support read only detection; let the mmc core
+> >>> -	 * decide what to do.
+> >>> -	 */
+> >>> -	return -ENOSYS;
+> >>> +	else
+> >>> +		return mmc_gpio_get_ro(mmc);
+> >> 
+> >> Why not just have the board file assign mmc_gpio_get_ro as
+> >> host->pdata->get_ro? This would eliminate the need for the
+> >> MMC_SPI_USE_RO_GPIO flag.
 > > 
-> > Embedded devices often use multiple SD/MMC devices as boot/rootfs disks.
-> > Some of them are removable, some not. If the removable cards are not
-> > present, but are probed before the non-removable ones, the indexing
-> > scheme changes. This makes it harder to hard-code the rootfs in the
-> > cmdline.
-> >
-> > First solution I came up with was the alias-node in DT.
-> > I guess my implementation is pretty hacky and ugly, but you can get lost
-> > pretty fast in the whole mmc stack.
-> > For example, the second patch should use "card->host->index" instead of parsing
-> > the alias again, I guess. I'm not sure why it currently doesn't though.
-> 
-> This has been discussed a few times before and rejected IIRC. One issue
-> is that block device ID is actually decoupled from host controller ID
-> anyway, e.g. if a removable device is mounted, removed, and then
-> re-plugged the new device can get a different ID, so this approach
-> doesn't really work in all cases anyway.
-> 
+> > Because the idea is to get rid of board callbacks and rely on proper
+> > kernel abstraction layers such as the GPIO subsystem. This will be
+> > especially important when adding device tree support to the mmc_spi
+> > driver.
+> > 
+> >> Also, if host->pdata->get_ro is not set then this will assume
+> >> mmc_gpio_get_ro is valid, even if MMC_SPI_USE_RO_GPIO is not set. I'm
+> >> guessing it will end up returning -ENOSYS, but they way the code reads is
+> >> that if the host doesn't have get_ro function set, then it is must be a
+> >> gpio.
+> > 
+> > mmc_gpio_get_ro() will indeed return -ENOSYS when the MMC_SPI_USE_RO_GPIO
+> > flag isn't set, as the mmc_spi driver will not call mmc_gpio_request_ro()
+> > in that case.
+> > 
+> > This patch hides the -ENOSYS value from the mmc_spi_get_ro() and
+> > mmc_spi_get_cd() functions, perhaps making them slightly confusing, but
+> > patch 06/12 then gets rid of those functions, so I don't think it's a bit
+> > issue.
+>
+> Ah, I didn't read far enough along in the patch series :-). So all mmc spi
+> ro/cd controls are now assumed to be gpios?
 
-Hm, okay. I actually wasn't aware of the older discussions.
-
-> > So, if there is a better place or solution to specify a reliable ordering
-> > of mmc devices, please let me hear it.
-> 
-> root=UUID=xxx or root=PARTUUID=xxx are the best solution. With recent
-> U-Boot, you can enable and use the "part" command to find the partition
-> UUID automatically, and hence not need to hard-code anything. Something
-> similar could presumably be implemented for other bootloaders.
-
-I am actually okay with that. I know barebox can do that, but didn't knew that
-U-Boot is also capabable of that.
-So, I'm okay with dropping the patch.
-
-Thanks,
-Steffen
+That's correct. It's the case in practice for all the boards we support in 
+mainline. If the situation changes in the future for a new board (hardware 
+engineers tend to have strange design ideas sometimes) a custom GPIO driver 
+might be needed (for FPGA/CPLD-controlled GPIOs for instance).
 
 -- 
-Pengutronix e.K.                           |                             |
-Industrial Linux Solutions                 | http://www.pengutronix.de/  |
-Peiner Str. 6-8, 31137 Hildesheim, Germany | Phone: +49-5121-206917-0    |
-Amtsgericht Hildesheim, HRA 2686           | Fax:   +49-5121-206917-5555 |
+Regards,
+
+Laurent Pinchart
+
