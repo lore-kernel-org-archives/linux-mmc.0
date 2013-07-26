@@ -1,60 +1,85 @@
-From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: Re: [PATCH 1/2] mmc: add Device Tree properties for UHS modes
-Date: Fri, 26 Jul 2013 22:23:43 +0200 (CEST)
-Message-ID: <Pine.LNX.4.64.1307262215110.27439@axis700.grange>
-References: <Pine.LNX.4.64.1307261747210.22137@axis700.grange>
- <51F2ADA2.2030503@wwwdotorg.org>
+From: Dinh Nguyen <dinguyen@altera.com>
+Subject: Re: [PATCH] ARM: socfpga: dts: Add support for SD/MMC
+Date: Fri, 26 Jul 2013 15:44:54 -0500
+Message-ID: <1374871494.20685.46.camel@linux-builds1>
+References: <1374789881-20611-1-git-send-email-dinguyen@altera.com>
+	 <51F2B0C4.8000301@wwwdotorg.org> <1374867220.20685.44.camel@linux-builds1>
+	 <51F2D5EA.7050108@wwwdotorg.org>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.126.186]:54252 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752253Ab3GZUYG (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 26 Jul 2013 16:24:06 -0400
-In-Reply-To: <51F2ADA2.2030503@wwwdotorg.org>
+Received: from co1ehsobe005.messaging.microsoft.com ([216.32.180.188]:41580
+	"EHLO co1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1757268Ab3GZUot (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 26 Jul 2013 16:44:49 -0400
+In-Reply-To: <51F2D5EA.7050108@wwwdotorg.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Stephen Warren <swarren@wwwdotorg.org>
-Cc: linux-sh@vger.kernel.org, linux-mmc@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>, Chris Ball <cjb@laptop.org>, devicetree@vger.kernel.org, Simon Horman <horms@verge.net.au>, Ian Campbell <ian.campbell@citrix.com>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <Mark.Rutland@arm.com>, Rob Herring <rob.herring@calxeda.com>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, Thomas Abraham <thomas.abraham@linaro.org>, Chris Ball <cjb@laptop.org>, dinh.linux@gmail.com, Rob Herring <rob.herring@calxeda.com>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Ian Campbell <ian.campbell@citrix.com>, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 
-Hi Stephen
-
-On Fri, 26 Jul 2013, Stephen Warren wrote:
-
-> On 07/26/2013 09:51 AM, Guennadi Liakhovetski wrote:
-> > Add DT properties for UHS SDR12, SDR25, SDR50, SDR104 and DDR50 modes and
-> > for supported by the host in DDR mode VccQ values. Adding them to DT will
-> > automatically enable respective MMC host capabilities.
+On Fri, 2013-07-26 at 14:02 -0600, Stephen Warren wrote:
+> On 07/26/2013 01:33 PM, Dinh Nguyen wrote:
+> > On Fri, 2013-07-26 at 11:24 -0600, Stephen Warren wrote:
+> >> On 07/25/2013 04:04 PM, dinguyen@altera.com wrote:
+> >>> From: Dinh Nguyen <dinguyen@altera.com>
+> >>>
+> >>> Add bindings for SD/MMC for SOCFPGA.
+> >>> Add "syscon" to the "altr,sys-mgr" binding.
 > 
-> > diff --git a/Documentation/devicetree/bindings/mmc/mmc.txt b/Documentation/devicetree/bindings/mmc/mmc.txt
+> >>> diff --git a/Documentation/devicetree/bindings/mmc/socfpga-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/socfpga-dw-mshc.txt
 > 
-> > +- uhs-sdr12: the host supports UHS SDR12 mode
-> > +- uhs-sdr25: the host supports UHS SDR25 mode
-> > +- uhs-sdr50: the host supports UHS SDR50 mode
-> > +- uhs-sdr104: the host supports UHS SDR104 mode
-> > +- uhs-ddr50: the host supports UHS DDR50 mode
-> > +- ddr-1v2: the host can support DDR, using 1.2V VccQ
-> > +- ddr-1v8: the host can support DDR, using 1.8V VccQ
+> >>> +Example:
+> >>> +
+> >>> +  The MSHC controller node can be split into two portions, SoC specific and
+> >>> +  board specific portions, as listed below.
+> >>
+> >> That doesn't sound like a good idea. There should be one DT node for
+> >> each logical block. The internal construction of the Linux drivers
+> >> (presumably you have entirely separate code to handle the two nodes in
+> >> Linux so far?) should not influence the DT construction at all.
+> > 
+> > In the end, there is only 1 DT node for each logical block:
 > 
-> Surely the driver for the host controller already knows this, so there's
-> no need to represent it in DT?
+> Oh right, I see you were intending to show the distinction between the
+> SoC .dtsi and board .dts file. I hadn't realized that. I don't think
+> it's common to do that in the examples, so I would recommend just
+> merging the whole example together myself.
 
-Not necessarily. One driver can handle several versions of the same chip, 
-and some versions of the chip implement some of those features, others 
-don't. So, your choice is really whether to specify a chip version in the 
-compatible string or these properties. Now, when you consider that 
-multiple drivers have to decide upon those, and sometimes you don't have 
-an exact IP version of the SD/MMC controller but only the SoC version, you 
-choice becomes: either _standard_ _common_ properties as above, or 
-compatibility strings virtually in each driver for each SoC version. 
-That's why I decided to use explicit properties for those. Example: 
-sh_mmcif driver supports MMCIF IP blocks on various Renesas sh-, r-mobile 
-and r-car SuperH and ARM SoCs. On some of them DDR50 is supported, on 
-others it isn't.
+I'll merge it.
 
-Thanks
-Guennadi
----
-Guennadi Liakhovetski, Ph.D.
-Freelance Open-Source Software Developer
-http://www.open-technology.de/
+> 
+> > dwmmc0@ff704000 {
+> > 	compatible = "altr,socfpga-dw-mshc";
+> 
+> That should include the baseline synopsis compatible value too.
+
+We don't need the baseline synopsis compatible because of
+dw_mci_pltfm_register() call.
+
+Thanks,
+Dinh
+> 
+> > 	reg = <0xff704000 0x00001000>;
+> > 	interrupts = <0x00000000 0x0000008b 0x00000004>;
+> > 	fifo-depth = <0x00000400>;
+> > 	#address-cells = <0x00000001>;
+> > 	#size-cells = <0x00000000>;
+> > 	clocks = <0x00000016 0x00000017>;
+> > 	clock-names = "biu", "ciu";
+> > 	num-slots = <0x00000001>;
+> > 	supports-highspeed;
+> > 	broken-cd;
+> >  	altr,dw-mshc-ciu-div = <0x00000003>;
+> >   	altr,dw-mshc-sdr-timing = <0x00000000 0x00000003>;
+> > 	slot@0 {
+> > 		reg = <0x00000000>;
+> > 		bus-width = <0x00000004>;
+> > 		};
+> > 	};
+> 
+> 
+
+
+
