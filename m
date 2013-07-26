@@ -1,101 +1,87 @@
-From: H Hartley Sweeten <hartleys@visionengravers.com>
-Subject: RE: [PATCH 02/12] ARM: ep93xx: vision_ep9307: Use MMC CD and RO GPIO
-Date: Thu, 25 Jul 2013 19:19:52 -0500
-Message-ID: <ADE657CA350FB648AAC2C43247A983F0021DAC5C20AC@AUSP01VMBX24.collaborationhost.net>
-References: <1374794808-21890-1-git-send-email-laurent.pinchart+renesas@ideasonboard.com>
- <1374794808-21890-3-git-send-email-laurent.pinchart+renesas@ideasonboard.com>
+From: Ryan Mallon <rmallon@gmail.com>
+Subject: Re: [PATCH 01/12] mmc: mmc_spi: Support CD/RO GPIOs
+Date: Fri, 26 Jul 2013 10:23:01 +1000
+Message-ID: <51F1C165.6040600@gmail.com>
+References: <1374794808-21890-1-git-send-email-laurent.pinchart+renesas@ideasonboard.com> <1374794808-21890-2-git-send-email-laurent.pinchart+renesas@ideasonboard.com> <51F1B896.8020005@gmail.com> <3057612.zXvbbdByqU@avalon>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail1.bemta8.messagelabs.com ([216.82.243.195]:50255 "EHLO
-	mail1.bemta8.messagelabs.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753924Ab3GZAVd convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 25 Jul 2013 20:21:33 -0400
-In-Reply-To: <1374794808-21890-3-git-send-email-laurent.pinchart+renesas@ideasonboard.com>
-Content-Language: en-US
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-sh-owner@vger.kernel.org>
+In-Reply-To: <3057612.zXvbbdByqU@avalon>
+Sender: linux-sh-owner@vger.kernel.org
+To: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
+Cc: Laurent Pinchart <laurent.pinchart+renesas@ideasonboard.com>, linux-arm-kernel@lists.infradead.org, linux-sh@vger.kernel.org, linux-mmc@vger.kernel.org, linux-spi@vger.kernel.org, Hartley Sweeten <hsweeten@visionengravers.com>, Chris Ball <cjb@laptop.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Ian Molton <ian@mnementh.co.uk>
 List-Id: linux-mmc@vger.kernel.org
-To: Laurent Pinchart <laurent.pinchart+renesas@ideasonboard.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
-Cc: "linux-sh@vger.kernel.org" <linux-sh@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-spi@vger.kernel.org" <linux-spi@vger.kernel.org>, Ryan Mallon <rmallon@gmail.com>, Chris Ball <cjb@laptop.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Ian Molton <ian@mnementh.co.uk>
 
-On Thursday, July 25, 2013 4:27 PM, Laurent Pinchart wrote:
->
-> Pass the CD and RO GPIO numbers to the MMC SPI driver and remove the
-> custom .get_cd() and .get_ro() callback functions.
->
-> Signed-off-by: Laurent Pinchart <laurent.pinchart+renesas@ideasonboard.com>
-> ---
->  arch/arm/mach-ep93xx/vision_ep9307.c | 56 +++---------------------------------
->  1 file changed, 4 insertions(+), 52 deletions(-)
->
-> diff --git a/arch/arm/mach-ep93xx/vision_ep9307.c b/arch/arm/mach-ep93xx/vision_ep9307.c
-> index 605956f..ab94dc5 100644
-> --- a/arch/arm/mach-ep93xx/vision_ep9307.c
-> +++ b/arch/arm/mach-ep93xx/vision_ep9307.c
-> @@ -224,62 +224,14 @@ static struct ep93xx_spi_chip_ops vision_spi_flash_hw = {
->  #define VISION_SPI_MMC_WP	EP93XX_GPIO_LINE_F(0)
->  #define VISION_SPI_MMC_CD	EP93XX_GPIO_LINE_EGPIO15
->  
-> -static struct gpio vision_spi_mmc_gpios[] = {
-> -	{ VISION_SPI_MMC_WP, GPIOF_DIR_IN, "mmc_spi:wp" },
-> -	{ VISION_SPI_MMC_CD, GPIOF_DIR_IN, "mmc_spi:cd" },
-> -};
-> -
-> -static int vision_spi_mmc_init(struct device *pdev,
-> -			irqreturn_t (*func)(int, void *), void *pdata)
-> -{
-> -	int err;
-> -
-> -	err = gpio_request_array(vision_spi_mmc_gpios,
-> -				 ARRAY_SIZE(vision_spi_mmc_gpios));
-> -	if (err)
-> -		return err;
-> -
-> -	err = gpio_set_debounce(VISION_SPI_MMC_CD, 1);
-> -	if (err)
-> -		goto exit_err;
+On 26/07/13 10:04, Laurent Pinchart wrote:
+> Hi Ryan,
+> 
+> On Friday 26 July 2013 09:45:26 Ryan Mallon wrote:
+>> On 26/07/13 09:26, Laurent Pinchart wrote:
+>>> Add support for passing CD/RO GPIO numbers directly to the mmc_spi
+>>> driver instead of relying solely on board code callbacks to retrieve the
+>>> CD/RO signals values.
+>>>
+>>> Signed-off-by: Laurent Pinchart
+>>> <laurent.pinchart+renesas@ideasonboard.com>
+>>> ---
+>>>
+>>>  drivers/mmc/host/mmc_spi.c    | 32 +++++++++++++++++++++---------
+>>>  drivers/mmc/host/of_mmc_spi.c | 46 ++++++++++----------------------------
+>>>  include/linux/spi/mmc_spi.h   | 11 +++++++++++
+>>>  3 files changed, 46 insertions(+), 43 deletions(-)
+>>>
+>>> diff --git a/drivers/mmc/host/mmc_spi.c b/drivers/mmc/host/mmc_spi.c
+>>> index 74145d1..4e83908 100644
+>>> --- a/drivers/mmc/host/mmc_spi.c
+>>> +++ b/drivers/mmc/host/mmc_spi.c
+>>> @@ -36,6 +36,7 @@
+>>>
+>>>  #include <linux/mmc/host.h>
+>>>  #include <linux/mmc/mmc.h>		/* for R1_SPI_* bit values */
+>>> +#include <linux/mmc/slot-gpio.h>
+>>>  #include <linux/spi/spi.h>
+>>>  #include <linux/spi/mmc_spi.h>
+>>>
+>>> @@ -1278,11 +1279,8 @@ static int mmc_spi_get_ro(struct mmc_host *mmc)
+>>>  	if (host->pdata && host->pdata->get_ro)
+>>>  		return !!host->pdata->get_ro(mmc->parent);
+>>>
+>>> -	/*
+>>> -	 * Board doesn't support read only detection; let the mmc core
+>>> -	 * decide what to do.
+>>> -	 */
+>>> -	return -ENOSYS;
+>>> +	else
+>>> +		return mmc_gpio_get_ro(mmc);
+>>
+>> Why not just have the board file assign mmc_gpio_get_ro as
+>> host->pdata->get_ro? This would eliminate the need for the
+>> MMC_SPI_USE_RO_GPIO flag.
+> 
+> Because the idea is to get rid of board callbacks and rely on proper kernel 
+> abstraction layers such as the GPIO subsystem. This will be especially 
+> important when adding device tree support to the mmc_spi driver.
+> 
+>> Also, if host->pdata->get_ro is not set then this will assume
+>> mmc_gpio_get_ro is valid, even if MMC_SPI_USE_RO_GPIO is not set. I'm
+>> guessing it will end up returning -ENOSYS, but they way the code reads is
+>> that if the host doesn't have get_ro function set, then it is must be a
+>> gpio.
+> 
+> mmc_gpio_get_ro() will indeed return -ENOSYS when the MMC_SPI_USE_RO_GPIO flag 
+> isn't set, as the mmc_spi driver will not call mmc_gpio_request_ro() in that 
+> case.
+> 
+> This patch hides the -ENOSYS value from the mmc_spi_get_ro() and 
+> mmc_spi_get_cd() functions, perhaps making them slightly confusing, but patch 
+> 06/12 then gets rid of those functions, so I don't think it's a bit issue.
 
-I tested this and it _kind_ of works.
+Ah, I didn't read far enough along in the patch series :-). So all mmc
+spi ro/cd controls are now assumed to be gpios?
 
-The card detect is a bit flaky due to the gpio interrupt debounce not being enabled.
+~Ryan
 
-The only way I can see to fix this is add the following to this patch:
 
-@@ -233,8 +233,31 @@ static struct mmc_spi_platform_data vision_spi_mmc_data = {
-        .caps2          = MMC_CAP2_RO_ACTIVE_HIGH,
- };
- 
-+static int vision_spi_mmc_enable_cd_debounce(struct spi_device *spi)
-+{
-+       int ret;
-+
-+       ret = gpio_request_one(VISION_SPI_MMC_CD, GPIOF_DIR_IN, spi->modalias);
-+       if (ret)
-+               return ret;
-+
-+       ret = gpio_set_debounce(VISION_SPI_MMC_CD, 1);
-+       if (ret)
-+               return ret;
-+
-+       gpio_free(VISION_SPI_MMC_CD);
-+
-+       return 0;
-+}
-+
- static int vision_spi_mmc_hw_setup(struct spi_device *spi)
- {
-+       int ret;
-+
-+       ret = vision_spi_mmc_enable_cd_debounce(spi);
-+       if (ret)
-+               return ret;
-+
-        return gpio_request_one(VISION_SPI_MMC_CS, GPIOF_INIT_HIGH,
-                                spi->modalias);
- }
 
-Regards,
-Hartley
 
