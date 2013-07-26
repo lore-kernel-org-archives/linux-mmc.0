@@ -1,89 +1,65 @@
-From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: Re: [PATCH 00/12] Remove platform callbacks from mmc_spi, sh_mmcif
- and sh_mobile_sdhi drivers
-Date: Fri, 26 Jul 2013 09:01:23 +0200 (CEST)
-Message-ID: <Pine.LNX.4.64.1307260859410.20450@axis700.grange>
-References: <1374794808-21890-1-git-send-email-laurent.pinchart+renesas@ideasonboard.com>
+From: Steffen Trumtrar <s.trumtrar@pengutronix.de>
+Subject: Re: [RFC 0/2] Set mmc(blk)X with DT alias
+Date: Fri, 26 Jul 2013 10:09:53 +0200
+Message-ID: <20130726080953.GA2118@pengutronix.de>
+References: <1374656973-16250-1-git-send-email-s.trumtrar@pengutronix.de>
+ <51F16046.3020809@wwwdotorg.org>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <1374794808-21890-1-git-send-email-laurent.pinchart+renesas@ideasonboard.com>
-Sender: linux-sh-owner@vger.kernel.org
-To: Laurent Pinchart <laurent.pinchart+renesas@ideasonboard.com>
-Cc: linux-arm-kernel@lists.infradead.org, linux-sh@vger.kernel.org, linux-mmc@vger.kernel.org, linux-spi@vger.kernel.org, Hartley Sweeten <hsweeten@visionengravers.com>, Ryan Mallon <rmallon@gmail.com>, Chris Ball <cjb@laptop.org>, Ian Molton <ian@mnementh.co.uk>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from metis.ext.pengutronix.de ([92.198.50.35]:33631 "EHLO
+	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752919Ab3GZIKB (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 26 Jul 2013 04:10:01 -0400
+Content-Disposition: inline
+In-Reply-To: <51F16046.3020809@wwwdotorg.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Stephen Warren <swarren@wwwdotorg.org>
+Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, devicetree@vger.kernel.org, kernel@pengutronix.de
 
-Hi Laurent
+On Thu, Jul 25, 2013 at 10:28:38AM -0700, Stephen Warren wrote:
+> On 07/24/2013 02:09 AM, Steffen Trumtrar wrote:
+> > Hi!
+> > 
+> > Embedded devices often use multiple SD/MMC devices as boot/rootfs disks.
+> > Some of them are removable, some not. If the removable cards are not
+> > present, but are probed before the non-removable ones, the indexing
+> > scheme changes. This makes it harder to hard-code the rootfs in the
+> > cmdline.
+> >
+> > First solution I came up with was the alias-node in DT.
+> > I guess my implementation is pretty hacky and ugly, but you can get lost
+> > pretty fast in the whole mmc stack.
+> > For example, the second patch should use "card->host->index" instead of parsing
+> > the alias again, I guess. I'm not sure why it currently doesn't though.
+> 
+> This has been discussed a few times before and rejected IIRC. One issue
+> is that block device ID is actually decoupled from host controller ID
+> anyway, e.g. if a removable device is mounted, removed, and then
+> re-plugged the new device can get a different ID, so this approach
+> doesn't really work in all cases anyway.
+> 
 
-On Fri, 26 Jul 2013, Laurent Pinchart wrote:
+Hm, okay. I actually wasn't aware of the older discussions.
 
-> Hello,
+> > So, if there is a better place or solution to specify a reliable ordering
+> > of mmc devices, please let me hear it.
 > 
-> This patch set replaces callbacks to board code with regulators and GPIOs in
-> the mmc_spi, sh_mmcif and sh_mobile_sdhi MMC drivers.
-> 
-> Most of the required infrastructure is in place already on the drivers side,
-> except for CD/RO GPIOs support in the mmc_spi driver. The series thus starts
-> with patch 01/12 that adds this feature to the mmc_spi driver.
-> 
-> Patches 02/12 to 05/12 remove the board callbacks from the ecovec24 and
-> vision_ep9307 boards. The code has been compile-tested only as I don't have
-> access to those boards.
-> 
-> Patches 06/12 to 07/12 then proceed to remove the callbacks from the drivers
-> themselves and from the platform data structures.
-> 
-> This will be a bit messy to merge, as the series interleaves patches for
-> drivers and board files. Given that the mmc_spi driver is marked as orphan in
-> MAINTAINERS and that the vision_ep9307 hasn't seen any board-specific
-> modification in the last couple of kernel versions one option would be to
-> merge all patches (or at least patches 01/12 to 06/12) through Simon's tree if
-> all involved maintainers agree.
-> 
-> The series is based on tag renesas-devel-20130725 from
-> git://git.kernel.org/pub/scm/linux/kernel/git/horms/renesas.git
-> 
-> Laurent Pinchart (12):
->   mmc: mmc_spi: Support CD/RO GPIOs
->   ARM: ep93xx: vision_ep9307: Use MMC CD and RO GPIO
->   sh: ecovec24: Use MMC/SDHI CD and RO GPIO
->   sh: ecovec24: Remove mmcif .down_pwr() callback
->   sh: ecovec24: Remove MMCIF and SDHI .set_pwr() callbacks
->   mmc: mmc_spi: Remove platform data .get_cd() and .get_ro() callbacks
->   mmc: sh_mmcif: Remove .down_pwr() callback from platform data
->   mmc: sh_mmcif: Remove .set_pwr() callback from platform data
->   mmc: sh_mobile_sdhi: Remove .get_cd() callback from platform data
->   mmc: sh_mobile_sdhi: Remove .set_pwr() callback from platform data
->   mmc: tmio-mmc: Remove .get_cd() callback from platform data
->   mmc: tmio-mmc: Remove .set_pwr() callback from platform data
+> root=UUID=xxx or root=PARTUUID=xxx are the best solution. With recent
+> U-Boot, you can enable and use the "part" command to find the partition
+> UUID automatically, and hence not need to hard-code anything. Something
+> similar could presumably be implemented for other bootloaders.
 
-For #3-5, 7-12
+I am actually okay with that. I know barebox can do that, but didn't knew that
+U-Boot is also capabable of that.
+So, I'm okay with dropping the patch.
 
-Acked-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Thanks,
+Steffen
 
-Thanks
-Guennadi
-
->  arch/arm/mach-ep93xx/vision_ep9307.c | 56 ++---------------------
->  arch/sh/boards/mach-ecovec24/setup.c | 89 ++++--------------------------------
->  drivers/mmc/host/mmc_spi.c           | 48 +++++++++----------
->  drivers/mmc/host/of_mmc_spi.c        | 46 +++++--------------
->  drivers/mmc/host/sh_mmcif.c          |  3 --
->  drivers/mmc/host/sh_mobile_sdhi.c    | 18 --------
->  drivers/mmc/host/tmio_mmc.h          |  1 -
->  drivers/mmc/host/tmio_mmc_pio.c      | 23 +---------
->  include/linux/mfd/tmio.h             |  2 -
->  include/linux/mmc/sh_mmcif.h         |  2 -
->  include/linux/mmc/sh_mobile_sdhi.h   |  2 -
->  include/linux/spi/mmc_spi.h          | 18 ++++----
->  12 files changed, 56 insertions(+), 252 deletions(-)
-> 
-> -- 
-> Regards,
-> 
-> Laurent Pinchart
-
----
-Guennadi Liakhovetski, Ph.D.
-Freelance Open-Source Software Developer
-http://www.open-technology.de/
+-- 
+Pengutronix e.K.                           |                             |
+Industrial Linux Solutions                 | http://www.pengutronix.de/  |
+Peiner Str. 6-8, 31137 Hildesheim, Germany | Phone: +49-5121-206917-0    |
+Amtsgericht Hildesheim, HRA 2686           | Fax:   +49-5121-206917-5555 |
