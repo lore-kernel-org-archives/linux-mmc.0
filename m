@@ -1,107 +1,78 @@
-From: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
-Subject: Re: [PATCH 02/12] ARM: ep93xx: vision_ep9307: Use MMC CD and RO GPIO
-Date: Fri, 26 Jul 2013 11:54:37 +0200
-Message-ID: <1818634.2aPQusYJQq@avalon>
-References: <1374794808-21890-1-git-send-email-laurent.pinchart+renesas@ideasonboard.com> <1374794808-21890-3-git-send-email-laurent.pinchart+renesas@ideasonboard.com> <ADE657CA350FB648AAC2C43247A983F0021DAC5C20AC@AUSP01VMBX24.collaborationhost.net>
+From: Pawel Moll <pawel.moll@arm.com>
+Subject: Re: [PATCH] ARM: socfpga: dts: Add support for SD/MMC
+Date: Fri, 26 Jul 2013 14:49:22 +0100
+Message-ID: <1374846562.3213.56.camel@hornet>
+References: <1374789881-20611-1-git-send-email-dinguyen@altera.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7Bit
-Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <ADE657CA350FB648AAC2C43247A983F0021DAC5C20AC@AUSP01VMBX24.collaborationhost.net>
-Sender: linux-sh-owner@vger.kernel.org
-To: H Hartley Sweeten <hartleys@visionengravers.com>
-Cc: Laurent Pinchart <laurent.pinchart+renesas@ideasonboard.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-sh@vger.kernel.org" <linux-sh@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-spi@vger.kernel.org" <linux-spi@vger.kernel.org>, Ryan Mallon <rmallon@gmail.com>, Chris Ball <cjb@laptop.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Ian Molton <ian@mnementh.co.uk>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from service87.mimecast.com ([91.220.42.44]:56376 "EHLO
+	service87.mimecast.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755781Ab3GZNt0 convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 26 Jul 2013 09:49:26 -0400
+In-Reply-To: <1374789881-20611-1-git-send-email-dinguyen@altera.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: "dinguyen@altera.com" <dinguyen@altera.com>
+Cc: "dinh.linux@gmail.com" <dinh.linux@gmail.com>, "rob.herring@calxeda.com" <rob.herring@calxeda.com>, Mark Rutland <Mark.Rutland@arm.com>, Stephen Warren <swarren@wwwdotorg.org>, Ian Campbell <ian.campbell@citrix.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 
-Hi Hartley,
+Hello Ding,
 
-On Thursday 25 July 2013 19:19:52 H Hartley Sweeten wrote:
-> On Thursday, July 25, 2013 4:27 PM, Laurent Pinchart wrote:
-> > Pass the CD and RO GPIO numbers to the MMC SPI driver and remove the
-> > custom .get_cd() and .get_ro() callback functions.
-> > 
-> > Signed-off-by: Laurent Pinchart
-> > <laurent.pinchart+renesas@ideasonboard.com>
-> > ---
-> > 
-> >  arch/arm/mach-ep93xx/vision_ep9307.c | 56  +++---------------------------
-> >  1 file changed, 4 insertions(+), 52 deletions(-)
-> > 
-> > diff --git a/arch/arm/mach-ep93xx/vision_ep9307.c
-> > b/arch/arm/mach-ep93xx/vision_ep9307.c index 605956f..ab94dc5 100644
-> > --- a/arch/arm/mach-ep93xx/vision_ep9307.c
-> > +++ b/arch/arm/mach-ep93xx/vision_ep9307.c
-> > @@ -224,62 +224,14 @@ static struct ep93xx_spi_chip_ops
-> > vision_spi_flash_hw = {> 
-> >  #define VISION_SPI_MMC_WP	EP93XX_GPIO_LINE_F(0)
-> >  #define VISION_SPI_MMC_CD	EP93XX_GPIO_LINE_EGPIO15
-> > 
-> > -static struct gpio vision_spi_mmc_gpios[] = {
-> > -	{ VISION_SPI_MMC_WP, GPIOF_DIR_IN, "mmc_spi:wp" },
-> > -	{ VISION_SPI_MMC_CD, GPIOF_DIR_IN, "mmc_spi:cd" },
-> > -};
-> > -
-> > -static int vision_spi_mmc_init(struct device *pdev,
-> > -			irqreturn_t (*func)(int, void *), void *pdata)
-> > -{
-> > -	int err;
-> > -
-> > -	err = gpio_request_array(vision_spi_mmc_gpios,
-> > -				 ARRAY_SIZE(vision_spi_mmc_gpios));
-> > -	if (err)
-> > -		return err;
-> > -
-> > -	err = gpio_set_debounce(VISION_SPI_MMC_CD, 1);
-> > -	if (err)
-> > -		goto exit_err;
-> 
-> I tested this and it _kind_ of works.
-> 
-> The card detect is a bit flaky due to the gpio interrupt debounce not being
-> enabled.
-> 
-> The only way I can see to fix this is add the following to this patch:
-> 
-> @@ -233,8 +233,31 @@ static struct mmc_spi_platform_data vision_spi_mmc_data
-> = { .caps2          = MMC_CAP2_RO_ACTIVE_HIGH,
->  };
-> 
-> +static int vision_spi_mmc_enable_cd_debounce(struct spi_device *spi)
-> +{
-> +       int ret;
-> +
-> +       ret = gpio_request_one(VISION_SPI_MMC_CD, GPIOF_DIR_IN,
-> spi->modalias);
-> +       if (ret)
-> +               return ret;
-> +
-> +       ret = gpio_set_debounce(VISION_SPI_MMC_CD, 1);
-> +       if (ret)
-> +               return ret;
-> +
-> +       gpio_free(VISION_SPI_MMC_CD);
-> +
-> +       return 0;
-> +}
-> +
->  static int vision_spi_mmc_hw_setup(struct spi_device *spi)
->  {
-> +       int ret;
-> +
-> +       ret = vision_spi_mmc_enable_cd_debounce(spi);
-> +       if (ret)
-> +               return ret;
-> +
->         return gpio_request_one(VISION_SPI_MMC_CS, GPIOF_INIT_HIGH,
->                                 spi->modalias);
->  }
+Excuse me if the questions below were already asked and feel free to
+point me at the appropriate mail archive...
 
-What about extending the mmc_spi and MMC core with GPIO debounce support ? The 
-mmc_spi driver would get a new cd_gpio_debounce field, which would be passed 
-to mmc_gpio_request_cd(). I can cook up a patch.
+On Thu, 2013-07-25 at 23:04 +0100, dinguyen@altera.com wrote:
+> Add bindings for SD/MMC for SOCFPGA.
+> Add "syscon" to the "altr,sys-mgr" binding.
 
--- 
-Regards,
+Are those two related? As in: what does the "syscon" bit have to do with
+"Add(ing) support for SD/MMC"? Should those two be separated?
 
-Laurent Pinchart
+> +* altr,dw-mshc-ciu-div: Specifies the divider value for the card interface
+> +  unit (ciu) clock. The value should be (n-1). For Altera's SOCFPGA, the divider
+> +  value is fixed at 3, which means parent_clock/4.
+
+In what circumstances would this be different than 3? Is the interface
+in question member of the "hard part" of the SOFPGA, or is it supposed
+to be synthesized in the FPGA? 
+
+> +* altr,dw-mshc-sdr-timing: Specifies the value of CIU clock phase shift value
+> +  in transmit mode and CIU clock phase shift value in receive mode for single
+> +  data rate mode operation. Refer to notes below for the order of the cells and the
+> +  valid values.
+> +
+> +  Notes for the sdr-timing values:
+> +
+> +    The order of the cells should be
+> +      - First Cell: CIU clock phase shift value for RX mode, smplsel bits in
+> +	the system manager SDMMC control group.
+> +      - Second Cell: CIU clock phase shift value for TX mode, drvsel bits in
+> +	the system manager SDMMC control group.
+> +
+> +    Valid values for SDR CIU clock timing for SOCFPGA:
+> +      - valid value for tx phase shift and rx phase shift is 0 to 7.
+
+How does one pick those value? Do they depend on the board design? The
+FPGA synthesis options?
+
+I am not trying to be picky, just trying to establish if those value are
+"hardware" enough to be present in the tree at all...
+
+I've also noticed that Exynos defines almost identical bindings:
+
+> samsung,dw-mshc-ciu-div
+> samsung,dw-mshc-sdr-timing
+> samsung,dw-mshc-ddr-timing
+
+Aren't you both using the same "Synopsis Designware Mobile Storage Host
+Controller" by any chance? Are you sharing a driver? And if not,
+why? ;-) If the timings really must be parametrised, would it be
+possible to come up with a common set of "synopsis" properties, instead
+of "samsung" and "altr" ones? 
+
+Thanks for your time!
+
+Pawel
+
 
