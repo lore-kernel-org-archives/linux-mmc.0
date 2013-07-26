@@ -1,59 +1,112 @@
-From: H Hartley Sweeten <hartleys@visionengravers.com>
-Subject: RE: [PATCH 02/12] ARM: ep93xx: vision_ep9307: Use MMC CD and RO GPIO
-Date: Fri, 26 Jul 2013 11:26:03 -0500
-Message-ID: <ADE657CA350FB648AAC2C43247A983F0021DAC5C212B@AUSP01VMBX24.collaborationhost.net>
-References: <1374794808-21890-1-git-send-email-laurent.pinchart+renesas@ideasonboard.com>
- <1374794808-21890-3-git-send-email-laurent.pinchart+renesas@ideasonboard.com>
- <ADE657CA350FB648AAC2C43247A983F0021DAC5C20AC@AUSP01VMBX24.collaborationhost.net>
- <1818634.2aPQusYJQq@avalon>
+From: Santosh Shilimkar <santosh.shilimkar@ti.com>
+Subject: Re: [RFC/RFT PATCH 0/5] mm: ARM nobootmem and few dma_mask fixes
+Date: Fri, 26 Jul 2013 12:28:26 -0400
+Message-ID: <51F2A3AA.4060801@ti.com>
+References: <1373665694-7580-1-git-send-email-santosh.shilimkar@ti.com>
+ <20130726151021.GU24642@n2100.arm.linux.org.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <1818634.2aPQusYJQq@avalon>
-Content-Language: en-US
-Sender: linux-sh-owner@vger.kernel.org
-To: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
-Cc: Laurent Pinchart <laurent.pinchart+renesas@ideasonboard.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-sh@vger.kernel.org" <linux-sh@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-spi@vger.kernel.org" <linux-spi@vger.kernel.org>, Ryan Mallon <rmallon@gmail.com>, Chris Ball <cjb@laptop.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Ian Molton <ian@mnementh.co.uk>
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <20130726151021.GU24642@n2100.arm.linux.org.uk>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Russell King - ARM Linux <linux@arm.linux.org.uk>
+Cc: Nicolas Pitre <nicolas.pitre@linaro.org>, Jens Axboe <axboe@kernel.dk>, linux-scsi@vger.kernel.org, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, linux-kernel@vger.kernel.org, Tejun Heo <tj@kernel.org>, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Friday, July 26, 2013 2:55 AM, Laurent Pinchart wrote:
-> On Thursday 25 July 2013 19:19:52 H Hartley Sweeten wrote:
->> On Thursday, July 25, 2013 4:27 PM, Laurent Pinchart wrote:
->>> Pass the CD and RO GPIO numbers to the MMC SPI driver and remove the
->>> custom .get_cd() and .get_ro() callback functions.
->>> 
->>> Signed-off-by: Laurent Pinchart
->>> <laurent.pinchart+renesas@ideasonboard.com>
->>> ---
->>> 
->>>  arch/arm/mach-ep93xx/vision_ep9307.c | 56  +++---------------------------
->>>  1 file changed, 4 insertions(+), 52 deletions(-)
+On Friday 26 July 2013 11:10 AM, Russell King - ARM Linux wrote:
+> On Fri, Jul 12, 2013 at 05:48:09PM -0400, Santosh Shilimkar wrote:
+>> The series is an attempt to move ARM port to NO_BOOTMEM. As discussed
+>> on list NO_BOOTMEM move needed updates to max*pfn meaning to be maximum
+>> PFNs but that breaks the dma_mask for few block layer drivers since
+>> ARM start of physical memory is not PFN0 unlike most of the architectures.
+>> Some more read on it is here:
+>> 	http://lwn.net/Articles/543408/
+>> 	http://lwn.net/Articles/543424/
+>>
+>> To address this issue, we introduce generic dma_max_pfn() helper which
+>> can be overridden from the architectures.
+>> 	
+>> Another intention behind move to nobootmem is also to convert ARM to
+>> switch to memblock and getting rid of bootmem allocator dependency which
+>> don't work for LPAE machines which has physical memory starting beyond
+>> 4 GB boundary. It needs changes to core kernel and also a new memblock
+>> API. More on this can be found here:
+>> 	https://lkml.org/lkml/2013/6/29/77
+>>
+>> I have been trying to cook up these patches with kind help from Russell
+>> and we know series don't solve all the dma_mask bad assumptions. But at
+>> least I am hoping that it can get the ball rolling.	
+>>
+>> Comments/testing help is welcome !!
+> 
+> As this is related to some of the cleanup of dma_mask which I've been
+> doing, I think it may make sense to roll this into one tree.  Any
+> objection to that?
+> 
+> Can we get any acks on this stuff from Jens and Jejb etc - especially
+> for the bits which touch block/ and for the scsi bits as these are
+> touching other subsystems.  (oddly, linux-scsi wasn't on the original
+> mail for this series summary.)
+> 
+Sorry I missed the scsi lists on the summary patch.
 
-<snip>
+While browsing the code I found another spot in mmc layer which
+needs fixing. The patch is at the end of the email with Chris
+and linux-mmc cc'ed here.
 
->> I tested this and it _kind_ of works.
->> 
->> The card detect is a bit flaky due to the gpio interrupt debounce not being
->> enabled.
->> 
->> The only way I can see to fix this is add the following to this patch:
+Regards,
+Santosh
 
-<snip>
+>From 06a27a784a1fd86bf22adf1b247ac82a7c21d46b Mon Sep 17 00:00:00 2001
+From: Santosh Shilimkar <santosh.shilimkar@ti.com>
+Date: Fri, 19 Jul 2013 21:36:46 -0400
+Subject: [PATCH] mmc: Use dma_max_pfn(dev) helper for bounce_limit
+ calculations
 
-> What about extending the mmc_spi and MMC core with GPIO debounce support ? The 
-> mmc_spi driver would get a new cd_gpio_debounce field, which would be passed 
-> to mmc_gpio_request_cd(). I can cook up a patch.
+DMA bounce limit is the maximum direct DMA'able memory beyond which
+bounce buffers has to be used to perform dma operations. MMC queue layer
+relies on dma_mask but its calculation is based on max_*pfn which
+don't have uniform meaning across architectures. So make use of
+dma_max_pfn() which is expected to return the DMAable maximum pfn
+value across architectures.
 
-Works for me. That would also remove the need for the platform init to request then free
-the GPIO just to set the debounce.
+Cc: Russell King <linux@arm.linux.org.uk>
+Cc: Chris Ball <cjb@laptop.org>
 
-Make sure you do the gpiu_set_debounce() after the GPIO has been requested or you
-trigger a WARN due to the auto-requested GPIO. Then, of course, the drivers gpio request
-will fail...
+Signed-off-by: Santosh Shilimkar <santosh.shilimkar@ti.com>
+---
+ drivers/mmc/card/queue.c |    3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
 
-I'll give it a test when you post it.
-
-Thanks,
-Hartley
-
+diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
+index fa9632e..357bbc5 100644
+--- a/drivers/mmc/card/queue.c
++++ b/drivers/mmc/card/queue.c
+@@ -15,6 +15,7 @@
+ #include <linux/freezer.h>
+ #include <linux/kthread.h>
+ #include <linux/scatterlist.h>
++#include <linux/dma-mapping.h>
+ 
+ #include <linux/mmc/card.h>
+ #include <linux/mmc/host.h>
+@@ -196,7 +197,7 @@ int mmc_init_queue(struct mmc_queue *mq, struct mmc_card *card,
+ 	struct mmc_queue_req *mqrq_prev = &mq->mqrq[1];
+ 
+ 	if (mmc_dev(host)->dma_mask && *mmc_dev(host)->dma_mask)
+-		limit = *mmc_dev(host)->dma_mask;
++		limit = dma_max_pfn(mmc_dev(host)) << PAGE_SHIFT;
+ 
+ 	mq->card = card;
+ 	mq->queue = blk_init_queue(mmc_request_fn, lock);
+-- 
+1.7.9.5
