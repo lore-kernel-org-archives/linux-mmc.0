@@ -1,39 +1,94 @@
-From: Marc Dietrich <marvin24@gmx.de>
-Subject: power class selection failed warning
-Date: Sat, 27 Jul 2013 16:13:56 +0200
-Message-ID: <59782679.nKg2SBZ8OK@ax5200p>
+From: Joel Fernandes <joelf@ti.com>
+Subject: Re: [PATCH v2] ARM: EDMA: Fix clearing of unused list for DT DMA
+ resources
+Date: Sat, 27 Jul 2013 18:32:46 -0500
+Message-ID: <51F4589E.5070108@ti.com>
+References: <1374515989-7391-1-git-send-email-joelf@ti.com>
+Reply-To: <joelf@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7Bit
+Content-Type: text/plain; charset="ISO-8859-1"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mout.gmx.net ([212.227.15.15]:60702 "EHLO mout.gmx.net"
+Received: from bear.ext.ti.com ([192.94.94.41]:54893 "EHLO bear.ext.ti.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751586Ab3G0OOl (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sat, 27 Jul 2013 10:14:41 -0400
-Received: from ax5200p.localnet ([217.229.199.90]) by mail.gmx.com (mrgmx002)
- with ESMTPSA (Nemesis) id 0M8edX-1U6q7A1d59-00wFaA for
- <linux-mmc@vger.kernel.org>; Sat, 27 Jul 2013 16:14:39 +0200
+	id S1751736Ab3G0XdV (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Sat, 27 Jul 2013 19:33:21 -0400
+In-Reply-To: <1374515989-7391-1-git-send-email-joelf@ti.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
+To: Joel Fernandes <joelf@ti.com>
+Cc: Tony Lindgren <tony@atomide.com>, Sekhar Nori <nsekhar@ti.com>, Vinod Koul <vinod.koul@intel.com>, Benoit Cousson <benoit.cousson@linaro.org>, Balaji TK <balajitk@ti.com>, Arnd Bergmann <arnd@arndb.de>, Jason Kridner <jkridner@beagleboard.org>, Mark Jackson <mpfj-list@newflow.co.uk>, Linux OMAP List <linux-omap@vger.kernel.org>, Linux ARM Kernel List <linux-arm-kernel@lists.infradead.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux MMC List <linux-mmc@vger.kernel.org>, Pantel Antoniou <panto@antoniou-consulting.com>
 
-Hi,
+Hi Tony or Sekhar,
 
-since 3.11-something, I get "power class selection to bus width 8 failed" 
-during boot. This is the same device as described here already [1], but this 
-time it is non-fatal, because it's just a warning.
+If this patch looks ok, could you pick it up for -rc cycle?
 
-Since I reported [1], I was thinking about the origin of this problem and 
-found that the eMMC announces two voltage caps, but the board wired both 
-supplies vmm and qvmm to the same voltage supply, so the eMMC may report error 
-on powerclass switch - at least that's my interpretation.
+It fixes DMA breakages after the merge window for devices for which DMA
+resources are being populated in device tree instead pdev.
 
-If the interpretation above is right, is there any way to avoid this warning 
-(e.g. check the voltages of the regulator supplies).
+Thanks,
 
-Thanks!
+-Joel
 
-Marc
 
-[1] http://marc.info/?l=linux-mmc&m=133434010207837&w=2
+On 07/22/2013 12:59 PM, Joel Fernandes wrote:
+> HWMOD removal for MMC is breaking edma_start as the events are being manually
+> triggered due to unused channel list not being clear, Thanks to Balaji TK for
+> finding this issue.
+> 
+> This patch fixes the issue, by reading the "dmas" property from the DT node if
+> it exists and clearing the bits in the unused channel list.
+> 
+> Cc: Balaji T K <balajitk@ti.com>
+> Cc: Pantel Antoniou <panto@antoniou-consulting.com>
+> Signed-off-by: Joel Fernandes <joelf@ti.com>
+> ---
+> v2 changes: Fixed compiler warning
+> 
+>  arch/arm/common/edma.c |   31 +++++++++++++++++++++++--------
+>  1 file changed, 23 insertions(+), 8 deletions(-)
+> 
+> diff --git a/arch/arm/common/edma.c b/arch/arm/common/edma.c
+> index a432e6c..765d578 100644
+> --- a/arch/arm/common/edma.c
+> +++ b/arch/arm/common/edma.c
+> @@ -561,14 +561,29 @@ static int reserve_contiguous_slots(int ctlr, unsigned int id,
+>  static int prepare_unused_channel_list(struct device *dev, void *data)
+>  {
+>  	struct platform_device *pdev = to_platform_device(dev);
+> -	int i, ctlr;
+> -
+> -	for (i = 0; i < pdev->num_resources; i++) {
+> -		if ((pdev->resource[i].flags & IORESOURCE_DMA) &&
+> -				(int)pdev->resource[i].start >= 0) {
+> -			ctlr = EDMA_CTLR(pdev->resource[i].start);
+> -			clear_bit(EDMA_CHAN_SLOT(pdev->resource[i].start),
+> -					edma_cc[ctlr]->edma_unused);
+> +	int i = 0, ctlr;
+> +	u32 dma_chan;
+> +	const __be32 *dma_chan_p;
+> +	struct property *prop;
+> +
+> +	if (dev->of_node) {
+> +		of_property_for_each_u32(dev->of_node, "dmas", prop, \
+> +					 dma_chan_p, dma_chan) {
+> +			if (i++ & 1) {
+> +				ctlr = EDMA_CTLR(dma_chan);
+> +				clear_bit(EDMA_CHAN_SLOT(dma_chan),
+> +						edma_cc[ctlr]->edma_unused);
+> +			}
+> +		}
+> +	} else {
+> +		for (; i < pdev->num_resources; i++) {
+> +			if ((pdev->resource[i].flags & IORESOURCE_DMA) &&
+> +			    (int)pdev->resource[i].start >= 0) {
+> +				ctlr = EDMA_CTLR(pdev->resource[i].start);
+> +				clear_bit(EDMA_CHAN_SLOT(
+> +					  pdev->resource[i].start),
+> +					  edma_cc[ctlr]->edma_unused);
+> +			}
+>  		}
+>  	}
+>  
+> 
 
