@@ -1,54 +1,78 @@
-From: Pawel Moll <pawel.moll@arm.com>
-Subject: Re: [PATCH 1/2] mmc: add Device Tree properties for UHS modes
-Date: Mon, 29 Jul 2013 14:07:14 +0100
-Message-ID: <1375103234.10990.8.camel@hornet>
-References: <Pine.LNX.4.64.1307261747210.22137@axis700.grange>
-	 <51F2ADA2.2030503@wwwdotorg.org>
-	 <Pine.LNX.4.64.1307262215110.27439@axis700.grange>
-	 <51F2EBD4.1060603@wwwdotorg.org>
-	 <Pine.LNX.4.64.1307290753090.14405@axis700.grange>
-	 <Pine.LNX.4.64.1307290903360.14405@axis700.grange>
-	 <1375095053.3340.7.camel@hornet>
-	 <Pine.LNX.4.64.1307291312300.14405@axis700.grange>
-	 <1375098159.3340.29.camel@hornet>
-	 <Pine.LNX.4.64.1307291359520.14405@axis700.grange>
+From: Santosh Shilimkar <santosh.shilimkar@ti.com>
+Subject: Re: [RFC/RFT PATCH 0/5] mm: ARM nobootmem and few dma_mask fixes
+Date: Mon, 29 Jul 2013 09:26:44 -0400
+Message-ID: <51F66D94.9060706@ti.com>
+References: <1373665694-7580-1-git-send-email-santosh.shilimkar@ti.com> <20130726151021.GU24642@n2100.arm.linux.org.uk> <51F2A3AA.4060801@ti.com> <20130729111503.GG24642@n2100.arm.linux.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <Pine.LNX.4.64.1307291359520.14405@axis700.grange>
-Sender: linux-sh-owner@vger.kernel.org
-To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Cc: Stephen Warren <swarren@wwwdotorg.org>, "linux-sh@vger.kernel.org" <linux-sh@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Magnus Damm <magnus.damm@gmail.com>, Chris Ball <cjb@laptop.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Simon Horman <horms@verge.net.au>, Ian Campbell <ian.campbell@citrix.com>, Mark Rutland <Mark.Rutland@arm.com>, "rob.herring@calxeda.com" <rob.herring@calxeda.com>
+Content-Type: text/plain; charset="ISO-8859-1"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from bear.ext.ti.com ([192.94.94.41]:40777 "EHLO bear.ext.ti.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750891Ab3G2N11 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 29 Jul 2013 09:27:27 -0400
+In-Reply-To: <20130729111503.GG24642@n2100.arm.linux.org.uk>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Russell King - ARM Linux <linux@arm.linux.org.uk>
+Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, Nicolas Pitre <nicolas.pitre@linaro.org>, Tejun Heo <tj@kernel.org>, Jens Axboe <axboe@kernel.dk>, "linux-scsi@vger.kernel.org" <linux-scsi@vger.kernel.org>, Chris Ball <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-On Mon, 2013-07-29 at 13:05 +0100, Guennadi Liakhovetski wrote:
-> No, that's exactly the problem. We absolutely do not want to write 
-> compatible="vendor,soc-v1"; in a .dts file for SoC v2 just because we 
-> currently think, that we don't have to distinguish between those SoC 
-> versions in this specific driver. I think we all know it quite well, that 
-> there are (practically) always differences - sometimes documented, 
-> sometimes undocumented. And if you later find out, that you do have to 
-> differentiate in the driver - it's too late. Even if we disregard the 
-> argument of ugliness of having to set compatibility with soc-v1, soc-v2, 
-> soc-v3 in different DT nodes on an SoC v4.
+On Monday 29 July 2013 07:15 AM, Russell King - ARM Linux wrote:
+> On Fri, Jul 26, 2013 at 12:28:26PM -0400, Santosh Shilimkar wrote:
+>> On Friday 26 July 2013 11:10 AM, Russell King - ARM Linux wrote:
+>>> On Fri, Jul 12, 2013 at 05:48:09PM -0400, Santosh Shilimkar wrote:
+>>>> The series is an attempt to move ARM port to NO_BOOTMEM. As discussed
+>>>> on list NO_BOOTMEM move needed updates to max*pfn meaning to be maximum
+>>>> PFNs but that breaks the dma_mask for few block layer drivers since
+>>>> ARM start of physical memory is not PFN0 unlike most of the architectures.
+>>>> Some more read on it is here:
+>>>> 	http://lwn.net/Articles/543408/
+>>>> 	http://lwn.net/Articles/543424/
+>>>>
+>>>> To address this issue, we introduce generic dma_max_pfn() helper which
+>>>> can be overridden from the architectures.
+>>>> 	
+>>>> Another intention behind move to nobootmem is also to convert ARM to
+>>>> switch to memblock and getting rid of bootmem allocator dependency which
+>>>> don't work for LPAE machines which has physical memory starting beyond
+>>>> 4 GB boundary. It needs changes to core kernel and also a new memblock
+>>>> API. More on this can be found here:
+>>>> 	https://lkml.org/lkml/2013/6/29/77
+>>>>
+>>>> I have been trying to cook up these patches with kind help from Russell
+>>>> and we know series don't solve all the dma_mask bad assumptions. But at
+>>>> least I am hoping that it can get the ball rolling.	
+>>>>
+>>>> Comments/testing help is welcome !!
+>>>
+>>> As this is related to some of the cleanup of dma_mask which I've been
+>>> doing, I think it may make sense to roll this into one tree.  Any
+>>> objection to that?
+>>>
+>>> Can we get any acks on this stuff from Jens and Jejb etc - especially
+>>> for the bits which touch block/ and for the scsi bits as these are
+>>> touching other subsystems.  (oddly, linux-scsi wasn't on the original
+>>> mail for this series summary.)
+>>>
+>> Sorry I missed the scsi lists on the summary patch.
+>>
+>> While browsing the code I found another spot in mmc layer which
+>> needs fixing. The patch is at the end of the email with Chris
+>> and linux-mmc cc'ed here.
+> 
+> Would you mind putting them all in the patch system, I can add the acks
+> should anyone supply them later, and I'll repost them along with my set
+> of dma-mask patches.  Thanks.
+> 
+Done.
+7794/1, 7795/1, 7796/1, 7797/1, 7798/1, 7799/1
 
-First of all I think your example calls for more than one compatible
-string - if it seems that soc,v2 is almost like soc,v1, make it
-compatible = "soc-v2", "soc-v1" and don't touch the driver (as in: keep
-it compatible with "soc-v1" only). Then, when the realisation comes, you
-can simply add the "soc-v2" of_device_id with .data pointing at new
-features.
+Didn't know how to get XXXX/1,2,3,4... pushed into the tracker.
+BTW, I have also pushed the patched on my git tree branch [1] just
+in case you or some one needs it.
 
-Now the other thing - do you have a driver for a SoC at all? What I mean
-is that in most cases it's the components/peripherals/IPs (whatever you
-call them) matter, not the SoC itself, so the SoC compatible value can
-be unique if you wish (and, if it is a *.dtsi, it will be compatbile
-with "simple-bus" anyway ;-). Then the IP nodes can follow the rule
-above.
-
-Hope it makes some sense?
-
-Pawel
-
+Regards,
+Santosh
+[1] git://git.kernel.org/pub/scm/linux/kernel/git/ssantosh/linux-keystone.git
+3.12/nobootmem_n_dma-mask
 
