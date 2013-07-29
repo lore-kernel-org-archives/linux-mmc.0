@@ -1,40 +1,99 @@
-From: Sekhar Nori <nsekhar@ti.com>
-Subject: Re: [PATCH v2] ARM: EDMA: Fix clearing of unused list for DT DMA
- resources
-Date: Mon, 29 Jul 2013 12:34:43 +0530
-Message-ID: <51F6140B.3070600@ti.com>
-References: <1374515989-7391-1-git-send-email-joelf@ti.com>
- <51F4589E.5070108@ti.com>
+From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Subject: Re: [PATCH 1/2] mmc: add Device Tree properties for UHS modes
+Date: Mon, 29 Jul 2013 09:18:35 +0200 (CEST)
+Message-ID: <Pine.LNX.4.64.1307290903360.14405@axis700.grange>
+References: <Pine.LNX.4.64.1307261747210.22137@axis700.grange>
+ <51F2ADA2.2030503@wwwdotorg.org> <Pine.LNX.4.64.1307262215110.27439@axis700.grange>
+ <51F2EBD4.1060603@wwwdotorg.org> <Pine.LNX.4.64.1307290753090.14405@axis700.grange>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <51F4589E.5070108@ti.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: joelf@ti.com
-Cc: Balaji TK <balajitk@ti.com>, Arnd Bergmann <arnd@arndb.de>, Mark Jackson <mpfj-list@newflow.co.uk>, Tony Lindgren <tony@atomide.com>, Pantel Antoniou <panto@antoniou-consulting.com>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Vinod Koul <vinod.koul@intel.com>, Jason Kridner <jkridner@beagleboard.org>, Benoit Cousson <benoit.cousson@linaro.org>, Linux OMAP List <linux-omap@vger.kernel.org>, Linux ARM Kernel List <linux-arm-kernel@lists.infradead.org>
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <linux-sh-owner@vger.kernel.org>
+In-Reply-To: <Pine.LNX.4.64.1307290753090.14405@axis700.grange>
+Sender: linux-sh-owner@vger.kernel.org
+To: Stephen Warren <swarren@wwwdotorg.org>
+Cc: linux-sh@vger.kernel.org, linux-mmc@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>, Chris Ball <cjb@laptop.org>, devicetree@vger.kernel.org, Simon Horman <horms@verge.net.au>, Ian Campbell <ian.campbell@citrix.com>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <Mark.Rutland@arm.com>, Rob Herring <rob.herring@calxeda.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On Sunday 28 July 2013 05:02 AM, Joel Fernandes wrote:
-> Hi Tony or Sekhar,
+On Mon, 29 Jul 2013, Guennadi Liakhovetski wrote:
+
+> Hi Stephen
 > 
-> If this patch looks ok, could you pick it up for -rc cycle?
+> On Fri, 26 Jul 2013, Stephen Warren wrote:
 > 
-> It fixes DMA breakages after the merge window for devices for which DMA
-> resources are being populated in device tree instead pdev.
+> > On 07/26/2013 02:23 PM, Guennadi Liakhovetski wrote:
+> > > Hi Stephen
+> > > 
+> > > On Fri, 26 Jul 2013, Stephen Warren wrote:
+> > > 
+> > >> On 07/26/2013 09:51 AM, Guennadi Liakhovetski wrote:
+> > >>> Add DT properties for UHS SDR12, SDR25, SDR50, SDR104 and DDR50 modes and
+> > >>> for supported by the host in DDR mode VccQ values. Adding them to DT will
+> > >>> automatically enable respective MMC host capabilities.
+> > >>
+> > >>> diff --git a/Documentation/devicetree/bindings/mmc/mmc.txt b/Documentation/devicetree/bindings/mmc/mmc.txt
+> > >>
+> > >>> +- uhs-sdr12: the host supports UHS SDR12 mode
+> > >>> +- uhs-sdr25: the host supports UHS SDR25 mode
+> > >>> +- uhs-sdr50: the host supports UHS SDR50 mode
+> > >>> +- uhs-sdr104: the host supports UHS SDR104 mode
+> > >>> +- uhs-ddr50: the host supports UHS DDR50 mode
+> > >>> +- ddr-1v2: the host can support DDR, using 1.2V VccQ
+> > >>> +- ddr-1v8: the host can support DDR, using 1.8V VccQ
+> > >>
+> > >> Surely the driver for the host controller already knows this, so there's
+> > >> no need to represent it in DT?
+> > > 
+> > > Not necessarily. One driver can handle several versions of the same chip, 
+> > > and some versions of the chip implement some of those features, others 
+> > > don't.
+> > 
+> > Certainly.
+> > 
+> > > So, your choice is really whether to specify a chip version in the
+> > > compatible string or these properties.
+> > 
+> > There's no choice there. The compatible property needs to specify all of
+> > the following:
+> > 
+> > * A value which describes the exact chip the IP block is in. This can be
+> > matched on to enable any quirks that need to be handled due to
+> > integration of the IP into the particular chip. This value will list the
+> > chip version. An example might be tegra20-sdhci.
+> > 
+> > * A value which describes the IP block version (if that IP block has a
+> > version independent of the SoC that contains it, as e.g. a Synopsis IP
+> > block might). A totally made-up example might be synopsis-dwc2-1.0.0
+> > 
+> > * Various more generic values that describe the HW, and that define a n
+> > interface to the HW that is specific and complete enough that HW can
+> > program to. An example might be usb-ehci (assuming a chip that doesn't
+> > have so many quirks that a driver has to know more than just "it's an
+> > EHCI controller).
+> 
+> Yes, all these certainly make sense. As far as I understand, we are still 
+> in the process of defining good clear rules for DTs, there is an "ABI" 
+> discussion currently running on ALKML and IIRC this is also going to be a 
+> topic for one of coming conferences. So, hopefully we're approaching a 
+> state of a greater clarity about DT.
 
-But which DT-enabled platform in kernel is using EDMA? A grep for edma
-over arch/arm/boot/dts/* brings up nothing.
+A short addendum. At least with Renesas SoCs I see the situation in the 
+following way: new SoC versions appear relatively frequently. They often 
+re-use multiple IP blocks, drivers for which are scattered across the 
+entire kernel. Often the difference between an IP block on SoC A and A+1 
+can be expressed by some integers, e.g. maximum size of addressable 
+memory. Some other differences might never get supported by the driver. 
+And only occasionally the new IP would get a feature, support for which is 
+added to the driver and really modifies its behaviour. With platform data 
+therefore you either get very similar or identical configurations, maybe 
+some .max_frame_size will change, but the driver won't change anyway, and 
+only in some rare cases the driver really needs to be changed. With 
+compatibility strings we have to change _all_ Renesas drivers for _each_ 
+SoC version even if just to add a new struct of_device_id entry. This 
+doesn't seem very productive to me.
 
-Does this really have to go into the -rc cycle or can it wait till v3.12?
-
-Thanks,
-Sekhar
+Thanks
+Guennadi
+---
+Guennadi Liakhovetski, Ph.D.
+Freelance Open-Source Software Developer
+http://www.open-technology.de/
