@@ -1,53 +1,39 @@
-From: Santosh Shilimkar <santosh.shilimkar@ti.com>
-Subject: Re: [RFC/RFT PATCH 0/5] mm: ARM nobootmem and few dma_mask fixes
-Date: Mon, 29 Jul 2013 09:42:18 -0400
-Message-ID: <51F6713A.1080403@ti.com>
-References: <1373665694-7580-1-git-send-email-santosh.shilimkar@ti.com>
- <20130726151021.GU24642@n2100.arm.linux.org.uk> <51F2A3AA.4060801@ti.com>
- <20130729111503.GG24642@n2100.arm.linux.org.uk> <51F66D94.9060706@ti.com>
- <20130729134012.GK24642@n2100.arm.linux.org.uk>
+From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Subject: Re: [PATCH 1/2] mmc: add Device Tree properties for UHS modes
+Date: Mon, 29 Jul 2013 16:40:14 +0200 (CEST)
+Message-ID: <Pine.LNX.4.64.1307291636550.14405@axis700.grange>
+References: <Pine.LNX.4.64.1307261747210.22137@axis700.grange>
+ <51F2ADA2.2030503@wwwdotorg.org> <Pine.LNX.4.64.1307262215110.27439@axis700.grange>
+ <51F2EBD4.1060603@wwwdotorg.org> <Pine.LNX.4.64.1307290753090.14405@axis700.grange>
+ <Pine.LNX.4.64.1307290903360.14405@axis700.grange> <51F67091.70502@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <20130729134012.GK24642@n2100.arm.linux.org.uk>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Cc: Nicolas Pitre <nicolas.pitre@linaro.org>, Jens Axboe <axboe@kernel.dk>, "linux-scsi@vger.kernel.org" <linux-scsi@vger.kernel.org>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Tejun Heo <tj@kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from moutng.kundenserver.de ([212.227.17.8]:52733 "EHLO
+	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753765Ab3G2OkV (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 29 Jul 2013 10:40:21 -0400
+In-Reply-To: <51F67091.70502@gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Rob Herring <robherring2@gmail.com>
+Cc: Stephen Warren <swarren@wwwdotorg.org>, linux-sh@vger.kernel.org, linux-mmc@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>, Chris Ball <cjb@laptop.org>, devicetree@vger.kernel.org, Simon Horman <horms@verge.net.au>, Ian Campbell <ian.campbell@citrix.com>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <Mark.Rutland@arm.com>
 
-On Monday 29 July 2013 09:40 AM, Russell King - ARM Linux wrote:
-> On Mon, Jul 29, 2013 at 09:26:44AM -0400, Santosh Shilimkar wrote:
->> On Monday 29 July 2013 07:15 AM, Russell King - ARM Linux wrote:
->>> Would you mind putting them all in the patch system, I can add the acks
->>> should anyone supply them later, and I'll repost them along with my set
->>> of dma-mask patches.  Thanks.
->>>
->> Done.
->> 7794/1, 7795/1, 7796/1, 7797/1, 7798/1, 7799/1
->>
->> Didn't know how to get XXXX/1,2,3,4... pushed into the tracker.
->> BTW, I have also pushed the patched on my git tree branch [1] just
->> in case you or some one needs it.
-> 
-> Thanks.  I'd prefer not to have them as stable commits yet because should
-> we get acks from Jens, Jejb or cjb, we will need to add their acks to them.
->
-right.
- 
-> My dma-masks branch is still very much unstable at the moment (which is
-> why its not published) but I shall be posting the patches during this
-> week.
-> 
-Sure.
+Hi Rob
 
-Regards,
-Santosh
+On Mon, 29 Jul 2013, Rob Herring wrote:
+
+[snip]
+
+> If there is no change in the IP, then you can continue to use the
+> previous compatible string in your binding for the new SoC. The kernel
+> only has to be updated when there is a new feature, bug or other change.
+
+Please, see my other replies in this thread.
+
+Thanks
+Guennadi
+---
+Guennadi Liakhovetski, Ph.D.
+Freelance Open-Source Software Developer
+http://www.open-technology.de/
