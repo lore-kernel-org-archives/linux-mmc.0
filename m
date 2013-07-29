@@ -1,78 +1,94 @@
-From: Santosh Shilimkar <santosh.shilimkar@ti.com>
-Subject: Re: [RFC/RFT PATCH 0/5] mm: ARM nobootmem and few dma_mask fixes
-Date: Mon, 29 Jul 2013 09:26:44 -0400
-Message-ID: <51F66D94.9060706@ti.com>
-References: <1373665694-7580-1-git-send-email-santosh.shilimkar@ti.com> <20130726151021.GU24642@n2100.arm.linux.org.uk> <51F2A3AA.4060801@ti.com> <20130729111503.GG24642@n2100.arm.linux.org.uk>
+From: Joel Fernandes <joelf-l0cyMroinI0@public.gmane.org>
+Subject: [PATCH 1/9] dma: edma: Setup parameters to DMA MAX_NR_SG at a time
+Date: Mon, 29 Jul 2013 08:29:47 -0500
+Message-ID: <1375104595-16018-2-git-send-email-joelf@ti.com>
+References: <1375104595-16018-1-git-send-email-joelf@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from bear.ext.ti.com ([192.94.94.41]:40777 "EHLO bear.ext.ti.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750891Ab3G2N11 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 29 Jul 2013 09:27:27 -0400
-In-Reply-To: <20130729111503.GG24642@n2100.arm.linux.org.uk>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
+In-Reply-To: <1375104595-16018-1-git-send-email-joelf-l0cyMroinI0@public.gmane.org>
+List-Unsubscribe: <http://linux.davincidsp.com/mailman/options/davinci-linux-open-source>,
+	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://linux.davincidsp.com/pipermail/davinci-linux-open-source>
+List-Post: <mailto:davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
+List-Help: <mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=help>
+List-Subscribe: <http://linux.davincidsp.com/mailman/listinfo/davinci-linux-open-source>,
+	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=subscribe>
+Sender: <davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
+Errors-To: davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org
+To: Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Sekhar Nori <nsekhar-l0cyMroinI0@public.gmane.org>, Santosh Shilimkar <santosh.shilimkar-l0cyMroinI0@public.gmane.org>, Sricharan R <r.sricharan-l0cyMroinI0@public.gmane.org>, Rajendra Nayak <rnayak-l0cyMroinI0@public.gmane.org>, Lokesh Vutla <lokeshvutla-l0cyMroinI0@public.gmane.org>, Matt Porter <matt-agtwNxEcTQJWk0Htik3J/w@public.gmane.org>, Grant Likely <grant.likely-s3s/WqlpOiPyB63q8FvJNQ@public.gmane.org>, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Vinod Koul <vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Dan Williams <djbw-b10kYP2dOMg@public.gmane.org>, Mark Brown <broonie-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Benoit Cousson <benoit.cousson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Olof Johansson <olof-nZhT3qVonbNeoWH0uzbU5w@public.gmane.org>, Balaji TK <balajitk-l0cyMroinI0@public.gmane.org>, Gururaja Hebbar <gururaja.hebbar-l0cyMroinI0@public.gmane.org>, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, Jason Kridner <jkridner-hcmAuCOw+vXj4SYmN/TMmA@public.gmane.org>
+Cc: Linux DaVinci Kernel List <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, Joel Fernandes <joelf-l0cyMroinI0@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux OMAP List <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux ARM Kernel List <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, Nicolas Pitre <nicolas.pitre@linaro.org>, Tejun Heo <tj@kernel.org>, Jens Axboe <axboe@kernel.dk>, "linux-scsi@vger.kernel.org" <linux-scsi@vger.kernel.org>, Chris Ball <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-On Monday 29 July 2013 07:15 AM, Russell King - ARM Linux wrote:
-> On Fri, Jul 26, 2013 at 12:28:26PM -0400, Santosh Shilimkar wrote:
->> On Friday 26 July 2013 11:10 AM, Russell King - ARM Linux wrote:
->>> On Fri, Jul 12, 2013 at 05:48:09PM -0400, Santosh Shilimkar wrote:
->>>> The series is an attempt to move ARM port to NO_BOOTMEM. As discussed
->>>> on list NO_BOOTMEM move needed updates to max*pfn meaning to be maximum
->>>> PFNs but that breaks the dma_mask for few block layer drivers since
->>>> ARM start of physical memory is not PFN0 unlike most of the architectures.
->>>> Some more read on it is here:
->>>> 	http://lwn.net/Articles/543408/
->>>> 	http://lwn.net/Articles/543424/
->>>>
->>>> To address this issue, we introduce generic dma_max_pfn() helper which
->>>> can be overridden from the architectures.
->>>> 	
->>>> Another intention behind move to nobootmem is also to convert ARM to
->>>> switch to memblock and getting rid of bootmem allocator dependency which
->>>> don't work for LPAE machines which has physical memory starting beyond
->>>> 4 GB boundary. It needs changes to core kernel and also a new memblock
->>>> API. More on this can be found here:
->>>> 	https://lkml.org/lkml/2013/6/29/77
->>>>
->>>> I have been trying to cook up these patches with kind help from Russell
->>>> and we know series don't solve all the dma_mask bad assumptions. But at
->>>> least I am hoping that it can get the ball rolling.	
->>>>
->>>> Comments/testing help is welcome !!
->>>
->>> As this is related to some of the cleanup of dma_mask which I've been
->>> doing, I think it may make sense to roll this into one tree.  Any
->>> objection to that?
->>>
->>> Can we get any acks on this stuff from Jens and Jejb etc - especially
->>> for the bits which touch block/ and for the scsi bits as these are
->>> touching other subsystems.  (oddly, linux-scsi wasn't on the original
->>> mail for this series summary.)
->>>
->> Sorry I missed the scsi lists on the summary patch.
->>
->> While browsing the code I found another spot in mmc layer which
->> needs fixing. The patch is at the end of the email with Chris
->> and linux-mmc cc'ed here.
-> 
-> Would you mind putting them all in the patch system, I can add the acks
-> should anyone supply them later, and I'll repost them along with my set
-> of dma-mask patches.  Thanks.
-> 
-Done.
-7794/1, 7795/1, 7796/1, 7797/1, 7798/1, 7799/1
+Changes are made here for configuring existing parameters to support
+DMA'ing them out in batches as needed.
 
-Didn't know how to get XXXX/1,2,3,4... pushed into the tracker.
-BTW, I have also pushed the patched on my git tree branch [1] just
-in case you or some one needs it.
+Also allocate as many as slots as needed by the SG list, but not more
+than MAX_NR_SG. Then these slots will be reused accordingly.
+For ex, if MAX_NR_SG=10, and number of SG entries is 40, still only
+10 slots will be allocated to DMA the entire SG list of size 40.
 
-Regards,
-Santosh
-[1] git://git.kernel.org/pub/scm/linux/kernel/git/ssantosh/linux-keystone.git
-3.12/nobootmem_n_dma-mask
+Also enable TC interrupts for slots that are a last in a current
+iteration, or that fall on a MAX_NR_SG boundary.
 
+Signed-off-by: Joel Fernandes <joelf-l0cyMroinI0@public.gmane.org>
+---
+ drivers/dma/edma.c |   19 ++++++++++++++++---
+ 1 file changed, 16 insertions(+), 3 deletions(-)
+
+diff --git a/drivers/dma/edma.c b/drivers/dma/edma.c
+index 5f3e532..0b68f94 100644
+--- a/drivers/dma/edma.c
++++ b/drivers/dma/edma.c
+@@ -222,9 +222,9 @@ static struct dma_async_tx_descriptor *edma_prep_slave_sg(
+ 	enum dma_slave_buswidth dev_width;
+ 	u32 burst;
+ 	struct scatterlist *sg;
+-	int i;
+ 	int acnt, bcnt, ccnt, src, dst, cidx;
+ 	int src_bidx, dst_bidx, src_cidx, dst_cidx;
++	int i, num_slots_needed;
+ 
+ 	if (unlikely(!echan || !sgl || !sg_len))
+ 		return NULL;
+@@ -262,8 +262,11 @@ static struct dma_async_tx_descriptor *edma_prep_slave_sg(
+ 
+ 	edesc->pset_nr = sg_len;
+ 
+-	for_each_sg(sgl, sg, sg_len, i) {
+-		/* Allocate a PaRAM slot, if needed */
++	/* Allocate a PaRAM slot, if needed */
++
++	num_slots_needed = sg_len > MAX_NR_SG ? MAX_NR_SG : sg_len;
++
++	for (i = 0; i < num_slots_needed; i++) {
+ 		if (echan->slot[i] < 0) {
+ 			echan->slot[i] =
+ 				edma_alloc_slot(EDMA_CTLR(echan->ch_num),
+@@ -273,6 +276,10 @@ static struct dma_async_tx_descriptor *edma_prep_slave_sg(
+ 				return NULL;
+ 			}
+ 		}
++	}
++
++	/* Configure PaRAM sets for each SG */
++	for_each_sg(sgl, sg, sg_len, i) {
+ 
+ 		acnt = dev_width;
+ 
+@@ -330,6 +337,12 @@ static struct dma_async_tx_descriptor *edma_prep_slave_sg(
+ 		/* Configure A or AB synchronized transfers */
+ 		if (edesc->absync)
+ 			edesc->pset[i].opt |= SYNCDIM;
++
++		/* If this is the last in a current SG set of transactions,
++		   enable interrupts so that next set is processed */
++		if (!((i+1) % MAX_NR_SG))
++			edesc->pset[i].opt |= TCINTEN;
++
+ 		/* If this is the last set, enable completion interrupt flag */
+ 		if (i == sg_len - 1)
+ 			edesc->pset[i].opt |= TCINTEN;
+-- 
+1.7.9.5
