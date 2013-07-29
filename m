@@ -1,117 +1,64 @@
 From: Joel Fernandes <joelf@ti.com>
-Subject: [PATCH 6/9] dma: edma: Detect null slot errors and handle them correctly
-Date: Mon, 29 Jul 2013 08:29:52 -0500
-Message-ID: <1375104595-16018-7-git-send-email-joelf@ti.com>
+Subject: [PATCH 7/9] ARM: edma: Don't clear EMR of channel in edma_stop
+Date: Mon, 29 Jul 2013 08:29:53 -0500
+Message-ID: <1375104595-16018-8-git-send-email-joelf@ti.com>
 References: <1375104595-16018-1-git-send-email-joelf@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
 In-Reply-To: <1375104595-16018-1-git-send-email-joelf@ti.com>
-Sender: linux-kernel-owner@vger.kernel.org
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
 To: Tony Lindgren <tony@atomide.com>, Sekhar Nori <nsekhar@ti.com>, Santosh Shilimkar <santosh.shilimkar@ti.com>, Sricharan R <r.sricharan@ti.com>, Rajendra Nayak <rnayak@ti.com>, Lokesh Vutla <lokeshvutla@ti.com>, Matt Porter <matt@ohporter.com>, Grant Likely <grant.likely@secretlab.ca>, Rob Herring <rob.herring@calxeda.com>, Vinod Koul <vinod.koul@intel.com>, Dan Williams <djbw@fb.com>, Mark Brown <broonie@linaro.org>, Benoit Cousson <benoit.cousson@linaro.org>, Russell King <linux@arm.linux.org.uk>, Arnd Bergmann <arnd@arndb.de>, Olof Johansson <olof@lixom.net>, Balaji TK <balajitk@ti.com>, Gururaja Hebbar <gururaja.hebbar@ti.com>, Chris Ball <cjb@laptop.org>, Jason Kridner <jkridner@beagleboard.org>
-Cc: Linux OMAP List <linux-omap@vger.kernel.org>, Linux ARM Kernel List <linux-arm-kernel@lists.infradead.org>, Linux DaVinci Kernel List <davinci-linux-open-source@linux.davincidsp.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux MMC List <linux-mmc@vger.kernel.org>, Joel Fernandes <joelf@ti.com>
+Cc: Linux DaVinci Kernel List <davinci-linux-open-source@linux.davincidsp.com>, Joel Fernandes <joelf@ti.com>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux OMAP List <linux-omap@vger.kernel.org>, Linux ARM Kernel List <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
 
-For crypto IP, we continue to receive events even continuously in
-NULL slot, and request lines don't get de-asserted unlike omap_hsmmc.
-Due to this, we continously receive error interrupts when we
-manually trigger an event.
+We certainly don't want error conditions to be cleared anywhere
+as this will make us 'forget' about missed events. We depend on
+knowing which events were missed in order to be able to reissue them.
 
-We fix this, by first detecting if the Channel is currently transferring
-from a NULL slot or not, that's where the edma_read_slot in the error
-callback from interrupt handler comes in.
+This fixes a race condition where the EMR was being cleared
+by the transfer completion interrupt handler.
 
-Second thing we do is, if we detect if we are on a NULL slot, we don't
-forcefully trigger as this will only result in more error conditions.
-Instead we set a missed flag and allow the manual triggerring to happen
-in edma_execute which will eventually be called. This fixes the issue
-where we are on a NULL slot and continue to receive events from
-modules like crypto that don't stop their request events after a
-transfer is completed.
+Basically, what was happening was:
+
+            Missed event
+             |
+             |
+             V
+SG1-SG2-SG3-Null
+         \
+          \__TC Interrupt (Almost same time as ARM is executing
+TC interrupt handler, an event got missed and also forgotten
+by clearing the EMR).
+
+The EMR is ultimately being cleared by the Error interrupt
+handler once it is handled so we don't have to do it in edma_stop.
 
 Signed-off-by: Joel Fernandes <joelf@ti.com>
 ---
- drivers/dma/edma.c |   42 ++++++++++++++++++++++++++++++++++++++----
- 1 file changed, 38 insertions(+), 4 deletions(-)
+ arch/arm/common/edma.c |    1 -
+ 1 file changed, 1 deletion(-)
 
-diff --git a/drivers/dma/edma.c b/drivers/dma/edma.c
-index 1eda5cc..c72e8c9 100644
---- a/drivers/dma/edma.c
-+++ b/drivers/dma/edma.c
-@@ -70,6 +70,7 @@ struct edma_chan {
- 	int				ch_num;
- 	bool				alloced;
- 	int				slot[EDMA_MAX_SLOTS];
-+	int				missed;
- 	struct dma_slave_config		cfg;
- };
+diff --git a/arch/arm/common/edma.c b/arch/arm/common/edma.c
+index 10995b2..dec772e 100644
+--- a/arch/arm/common/edma.c
++++ b/arch/arm/common/edma.c
+@@ -1328,7 +1328,6 @@ void edma_stop(unsigned channel)
+ 		edma_shadow0_write_array(ctlr, SH_EECR, j, mask);
+ 		edma_shadow0_write_array(ctlr, SH_ECR, j, mask);
+ 		edma_shadow0_write_array(ctlr, SH_SECR, j, mask);
+-		edma_write_array(ctlr, EDMA_EMCR, j, mask);
  
-@@ -169,6 +170,18 @@ static void edma_execute(struct edma_chan *echan)
- 		dev_dbg(dev, "first transfer starting %d\n", echan->ch_num);
- 		edma_start(echan->ch_num);
- 	}
-+
-+	/* This happens due to setup times between intermediate transfers
-+	   in long SG lists which have to be broken up into transfers of
-+	   MAX_NR_SG */
-+	if (echan->missed) {
-+		dev_dbg(dev, "missed event in execute detected\n");
-+		edma_clean_channel(echan->ch_num);
-+		edma_stop(echan->ch_num);
-+		edma_start(echan->ch_num);
-+		edma_manual_trigger(echan->ch_num);
-+		echan->missed = 0;
-+	}
- }
- 
- static int edma_terminate_all(struct edma_chan *echan)
-@@ -387,6 +400,7 @@ static void edma_callback(unsigned ch_num, u16 ch_status, void *data)
- 	struct device *dev = echan->vchan.chan.device->dev;
- 	struct edma_desc *edesc;
- 	unsigned long flags;
-+	struct edmacc_param p;
- 
- 	/* Pause the channel */
- 	edma_pause(echan->ch_num);
-@@ -414,15 +428,35 @@ static void edma_callback(unsigned ch_num, u16 ch_status, void *data)
- 
- 		break;
- 	case DMA_CC_ERROR:
--		if (echan->edesc) {
--			dev_dbg(dev, "Missed event on %d, retrying\n",
--				ch_num);
-+		spin_lock_irqsave(&echan->vchan.lock, flags);
-+
-+		edma_read_slot(EDMA_CHAN_SLOT(echan->slot[0]), &p);
-+
-+		if (p.a_b_cnt == 0 && p.ccnt == 0) {
-+			dev_dbg(dev, "Error occurred, looks like slot is null, just setting miss\n");
-+			/*
-+			   Issue later based on missed flag which will be sure
-+			   to happen as:
-+			   (1) we finished transmitting an intermediate slot and
-+			       edma_execute is coming up.
-+			   (2) or we finished current transfer and issue will
-+			       call edma_execute.
-+
-+			   Important note: issuing can be dangerous here and
-+			   lead to some nasty recursion as this is a NULL slot
-+			   at this point.
-+			*/
-+			echan->missed = 1;
-+		} else {
-+			dev_dbg(dev, "Error occurred but slot is non-null, TRIGGERING\n");
- 			edma_clean_channel(echan->ch_num);
- 			edma_stop(echan->ch_num);
- 			edma_start(echan->ch_num);
- 			edma_manual_trigger(echan->ch_num);
- 		}
--		dev_dbg(dev, "handled error on channel %d\n", ch_num);
-+
-+		spin_unlock_irqrestore(&echan->vchan.lock, flags);
-+
- 		break;
- 	default:
- 		break;
+ 		pr_debug("EDMA: EER%d %08x\n", j,
+ 				edma_shadow0_read_array(ctlr, SH_EER, j));
 -- 
 1.7.9.5
