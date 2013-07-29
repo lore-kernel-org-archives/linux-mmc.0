@@ -1,99 +1,36 @@
-From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: Re: [PATCH 1/2] mmc: add Device Tree properties for UHS modes
-Date: Mon, 29 Jul 2013 09:18:35 +0200 (CEST)
-Message-ID: <Pine.LNX.4.64.1307290903360.14405@axis700.grange>
-References: <Pine.LNX.4.64.1307261747210.22137@axis700.grange>
- <51F2ADA2.2030503@wwwdotorg.org> <Pine.LNX.4.64.1307262215110.27439@axis700.grange>
- <51F2EBD4.1060603@wwwdotorg.org> <Pine.LNX.4.64.1307290753090.14405@axis700.grange>
+From: Vinod Koul <vinod.koul@intel.com>
+Subject: Re: [PATCH 1/3] dmaengine: add dma_get_slave_sg_limits()
+Date: Mon, 29 Jul 2013 12:14:15 +0530
+Message-ID: <20130729064415.GF29095@intel.com>
+References: <1374166001-31340-1-git-send-email-joelf@ti.com>
+ <1374166001-31340-2-git-send-email-joelf@ti.com>
+ <20130718170825.GZ21614@n2100.arm.linux.org.uk>
+ <51E83A9D.5020008@ti.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <Pine.LNX.4.64.1307290753090.14405@axis700.grange>
-Sender: linux-sh-owner@vger.kernel.org
-To: Stephen Warren <swarren@wwwdotorg.org>
-Cc: linux-sh@vger.kernel.org, linux-mmc@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>, Chris Ball <cjb@laptop.org>, devicetree@vger.kernel.org, Simon Horman <horms@verge.net.au>, Ian Campbell <ian.campbell@citrix.com>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <Mark.Rutland@arm.com>, Rob Herring <rob.herring@calxeda.com>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-omap-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <51E83A9D.5020008@ti.com>
+Sender: linux-omap-owner@vger.kernel.org
+To: Joel Fernandes <joelf@ti.com>
+Cc: Russell King - ARM Linux <linux@arm.linux.org.uk>, Tony Lindgren <tony@atomide.com>, Sekhar Nori <nsekhar@ti.com>, Matt Porter <matt@ohporter.com>, Grant Likely <grant.likely@secretlab.ca>, Rob Herring <rob.herring@calxeda.com>, Mark Brown <broonie@linaro.org>, Benoit Cousson <benoit.cousson@linaro.org>, Balaji TK <balajitk@ti.com>, Gururaja Hebbar <gururaja.hebbar@ti.com>, Chris Ball <cjb@laptop.org>, Jason Kridner <jkridner@beagleboard.org>, Mark Jackson <mpfj-list@newflow.co.uk>, Devicetree Discuss <devicetree-discuss@lists.ozlabs.org>, Linux OMAP List <linux-omap@vger.kernel.org>, Linux ARM Kernel List <linux-arm-kernel@lists.infradead.org>, Linux DaVinci Kernel List <davinci-linux-open-source@linux.davincidsp.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux Documentation List <linux-doc@vger.kernel.org>, Linux MMC List <linux-mmc@vger.ker>
 List-Id: linux-mmc@vger.kernel.org
 
-On Mon, 29 Jul 2013, Guennadi Liakhovetski wrote:
-
-> Hi Stephen
+On Thu, Jul 18, 2013 at 01:57:33PM -0500, Joel Fernandes wrote:
+> On 07/18/2013 12:08 PM, Russell King - ARM Linux wrote:
+> > As for the maximum number of scatterlist entries, really that's a bug in
+> > the DMA engine implementations if they can't accept arbitary lengths.
+> > I've created DMA engine drivers for implementations where you have to
+> > program each segment individually, ones which can have the current and
+> > next segments, as well as those which can walk a list.  Provided you get
+> > informed of a transfer being completed, there really is no reason for a
+> > DMA engine driver to limit the number of scatterlist entries that it
+> > will accept.
 > 
-> On Fri, 26 Jul 2013, Stephen Warren wrote:
-> 
-> > On 07/26/2013 02:23 PM, Guennadi Liakhovetski wrote:
-> > > Hi Stephen
-> > > 
-> > > On Fri, 26 Jul 2013, Stephen Warren wrote:
-> > > 
-> > >> On 07/26/2013 09:51 AM, Guennadi Liakhovetski wrote:
-> > >>> Add DT properties for UHS SDR12, SDR25, SDR50, SDR104 and DDR50 modes and
-> > >>> for supported by the host in DDR mode VccQ values. Adding them to DT will
-> > >>> automatically enable respective MMC host capabilities.
-> > >>
-> > >>> diff --git a/Documentation/devicetree/bindings/mmc/mmc.txt b/Documentation/devicetree/bindings/mmc/mmc.txt
-> > >>
-> > >>> +- uhs-sdr12: the host supports UHS SDR12 mode
-> > >>> +- uhs-sdr25: the host supports UHS SDR25 mode
-> > >>> +- uhs-sdr50: the host supports UHS SDR50 mode
-> > >>> +- uhs-sdr104: the host supports UHS SDR104 mode
-> > >>> +- uhs-ddr50: the host supports UHS DDR50 mode
-> > >>> +- ddr-1v2: the host can support DDR, using 1.2V VccQ
-> > >>> +- ddr-1v8: the host can support DDR, using 1.8V VccQ
-> > >>
-> > >> Surely the driver for the host controller already knows this, so there's
-> > >> no need to represent it in DT?
-> > > 
-> > > Not necessarily. One driver can handle several versions of the same chip, 
-> > > and some versions of the chip implement some of those features, others 
-> > > don't.
-> > 
-> > Certainly.
-> > 
-> > > So, your choice is really whether to specify a chip version in the
-> > > compatible string or these properties.
-> > 
-> > There's no choice there. The compatible property needs to specify all of
-> > the following:
-> > 
-> > * A value which describes the exact chip the IP block is in. This can be
-> > matched on to enable any quirks that need to be handled due to
-> > integration of the IP into the particular chip. This value will list the
-> > chip version. An example might be tegra20-sdhci.
-> > 
-> > * A value which describes the IP block version (if that IP block has a
-> > version independent of the SoC that contains it, as e.g. a Synopsis IP
-> > block might). A totally made-up example might be synopsis-dwc2-1.0.0
-> > 
-> > * Various more generic values that describe the HW, and that define a n
-> > interface to the HW that is specific and complete enough that HW can
-> > program to. An example might be usb-ehci (assuming a chip that doesn't
-> > have so many quirks that a driver has to know more than just "it's an
-> > EHCI controller).
-> 
-> Yes, all these certainly make sense. As far as I understand, we are still 
-> in the process of defining good clear rules for DTs, there is an "ABI" 
-> discussion currently running on ALKML and IIRC this is also going to be a 
-> topic for one of coming conferences. So, hopefully we're approaching a 
-> state of a greater clarity about DT.
+> Sure, that makes sense. Can you point to such a typical example
+> implementation to get some ideas?
+MXS MMC driver uses this: drivers/mmc/host/mxs-mmc.c
+And dma engine driver for this is mxs-dma.c
 
-A short addendum. At least with Renesas SoCs I see the situation in the 
-following way: new SoC versions appear relatively frequently. They often 
-re-use multiple IP blocks, drivers for which are scattered across the 
-entire kernel. Often the difference between an IP block on SoC A and A+1 
-can be expressed by some integers, e.g. maximum size of addressable 
-memory. Some other differences might never get supported by the driver. 
-And only occasionally the new IP would get a feature, support for which is 
-added to the driver and really modifies its behaviour. With platform data 
-therefore you either get very similar or identical configurations, maybe 
-some .max_frame_size will change, but the driver won't change anyway, and 
-only in some rare cases the driver really needs to be changed. With 
-compatibility strings we have to change _all_ Renesas drivers for _each_ 
-SoC version even if just to add a new struct of_device_id entry. This 
-doesn't seem very productive to me.
-
-Thanks
-Guennadi
----
-Guennadi Liakhovetski, Ph.D.
-Freelance Open-Source Software Developer
-http://www.open-technology.de/
+~Vinod
+-- 
