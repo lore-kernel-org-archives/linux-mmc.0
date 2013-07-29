@@ -1,67 +1,79 @@
-From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: Re: [PATCH 1/2] mmc: add Device Tree properties for UHS modes
-Date: Mon, 29 Jul 2013 15:30:22 +0200 (CEST)
-Message-ID: <Pine.LNX.4.64.1307291523120.14405@axis700.grange>
-References: <Pine.LNX.4.64.1307261747210.22137@axis700.grange>
- <51F2ADA2.2030503@wwwdotorg.org>  <Pine.LNX.4.64.1307262215110.27439@axis700.grange>
-  <51F2EBD4.1060603@wwwdotorg.org>  <Pine.LNX.4.64.1307290753090.14405@axis700.grange>
-  <Pine.LNX.4.64.1307290903360.14405@axis700.grange>  <1375095053.3340.7.camel@hornet>
-  <Pine.LNX.4.64.1307291312300.14405@axis700.grange>  <1375098159.3340.29.camel@hornet>
-  <Pine.LNX.4.64.1307291359520.14405@axis700.grange> <1375103234.10990.8.camel@hornet>
+From: Joel Fernandes <joelf-l0cyMroinI0@public.gmane.org>
+Subject: [PATCH 3/9] ARM: edma: Add function to manually trigger an EDMA
+	channel
+Date: Mon, 29 Jul 2013 08:29:49 -0500
+Message-ID: <1375104595-16018-4-git-send-email-joelf@ti.com>
+References: <1375104595-16018-1-git-send-email-joelf@ti.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <1375103234.10990.8.camel@hornet>
-Sender: linux-sh-owner@vger.kernel.org
-To: Pawel Moll <pawel.moll@arm.com>
-Cc: Stephen Warren <swarren@wwwdotorg.org>, "linux-sh@vger.kernel.org" <linux-sh@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Magnus Damm <magnus.damm@gmail.com>, Chris Ball <cjb@laptop.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Simon Horman <horms@verge.net.au>, Ian Campbell <ian.campbell@citrix.com>, Mark Rutland <Mark.Rutland@arm.com>, "rob.herring@calxeda.com" <rob.herring@calxeda.com>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
+In-Reply-To: <1375104595-16018-1-git-send-email-joelf-l0cyMroinI0@public.gmane.org>
+List-Unsubscribe: <http://linux.davincidsp.com/mailman/options/davinci-linux-open-source>,
+	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://linux.davincidsp.com/pipermail/davinci-linux-open-source>
+List-Post: <mailto:davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
+List-Help: <mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=help>
+List-Subscribe: <http://linux.davincidsp.com/mailman/listinfo/davinci-linux-open-source>,
+	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=subscribe>
+Sender: <davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
+Errors-To: davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org
+To: Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Sekhar Nori <nsekhar-l0cyMroinI0@public.gmane.org>, Santosh Shilimkar <santosh.shilimkar-l0cyMroinI0@public.gmane.org>, Sricharan R <r.sricharan-l0cyMroinI0@public.gmane.org>, Rajendra Nayak <rnayak-l0cyMroinI0@public.gmane.org>, Lokesh Vutla <lokeshvutla-l0cyMroinI0@public.gmane.org>, Matt Porter <matt-agtwNxEcTQJWk0Htik3J/w@public.gmane.org>, Grant Likely <grant.likely-s3s/WqlpOiPyB63q8FvJNQ@public.gmane.org>, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Vinod Koul <vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Dan Williams <djbw-b10kYP2dOMg@public.gmane.org>, Mark Brown <broonie-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Benoit Cousson <benoit.cousson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Olof Johansson <olof-nZhT3qVonbNeoWH0uzbU5w@public.gmane.org>, Balaji TK <balajitk-l0cyMroinI0@public.gmane.org>, Gururaja Hebbar <gururaja.hebbar-l0cyMroinI0@public.gmane.org>, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, Jason Kridner <jkridner-hcmAuCOw+vXj4SYmN/TMmA@public.gmane.org>
+Cc: Linux DaVinci Kernel List <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, Joel Fernandes <joelf-l0cyMroinI0@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux OMAP List <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux ARM Kernel List <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Mon, 29 Jul 2013, Pawel Moll wrote:
+Manual trigger for events missed as a result of splitting a
+scatter gather list and DMA'ing it in batches. Add a helper
+function to trigger a channel incase any such events are missed.
 
-> On Mon, 2013-07-29 at 13:05 +0100, Guennadi Liakhovetski wrote:
-> > No, that's exactly the problem. We absolutely do not want to write 
-> > compatible="vendor,soc-v1"; in a .dts file for SoC v2 just because we 
-> > currently think, that we don't have to distinguish between those SoC 
-> > versions in this specific driver. I think we all know it quite well, that 
-> > there are (practically) always differences - sometimes documented, 
-> > sometimes undocumented. And if you later find out, that you do have to 
-> > differentiate in the driver - it's too late. Even if we disregard the 
-> > argument of ugliness of having to set compatibility with soc-v1, soc-v2, 
-> > soc-v3 in different DT nodes on an SoC v4.
-> 
-> First of all I think your example calls for more than one compatible
-> string - if it seems that soc,v2 is almost like soc,v1, make it
-> compatible = "soc-v2", "soc-v1" and don't touch the driver (as in: keep
-> it compatible with "soc-v1" only). Then, when the realisation comes, you
-> can simply add the "soc-v2" of_device_id with .data pointing at new
-> features.
-
-Yes, this is also a possibility, but it seems only a little bit better. 
-Why should a DT node on SoC vN have a compatible string with SoC vK for 
-some random for an abstract user absolutely unrelated SoC version?... And 
-that vK would be different for different devices... So on SoC v5 MMC can 
-be compatible with with v1, sound with v2, camera with v3... Don't you 
-think it would look like a mess?
-
-> Now the other thing - do you have a driver for a SoC at all? What I mean
-> is that in most cases it's the components/peripherals/IPs (whatever you
-> call them) matter, not the SoC itself, so the SoC compatible value can
-> be unique if you wish (and, if it is a *.dtsi, it will be compatbile
-> with "simple-bus" anyway ;-). Then the IP nodes can follow the rule
-> above.
-
-Sure, I don't mean the top-level root compatibility, I mean device 
-compatibility.
-
-Thanks
-Guennadi
-
-> Hope it makes some sense?
-> 
-> Pawel
-
+Signed-off-by: Joel Fernandes <joelf-l0cyMroinI0@public.gmane.org>
 ---
-Guennadi Liakhovetski, Ph.D.
-Freelance Open-Source Software Developer
-http://www.open-technology.de/
+ arch/arm/common/edma.c             |   21 +++++++++++++++++++++
+ include/linux/platform_data/edma.h |    2 ++
+ 2 files changed, 23 insertions(+)
+
+diff --git a/arch/arm/common/edma.c b/arch/arm/common/edma.c
+index 3567ba1..10995b2 100644
+--- a/arch/arm/common/edma.c
++++ b/arch/arm/common/edma.c
+@@ -1236,6 +1236,27 @@ void edma_resume(unsigned channel)
+ }
+ EXPORT_SYMBOL(edma_resume);
+ 
++int edma_manual_trigger(unsigned channel)
++{
++	unsigned ctlr;
++	int j;
++	unsigned int mask;
++
++	ctlr = EDMA_CTLR(channel);
++	channel = EDMA_CHAN_SLOT(channel);
++	mask = BIT(channel & 0x1f);
++
++	j = channel >> 5;
++
++	/* EDMA channels without event association */
++	edma_shadow0_write_array(ctlr, SH_ESR, j, mask);
++
++	pr_debug("EDMA: ESR%d %08x\n", j,
++		 edma_shadow0_read_array(ctlr, SH_ESR, j));
++	return 0;
++}
++EXPORT_SYMBOL(edma_manual_trigger);
++
+ /**
+  * edma_start - start dma on a channel
+  * @channel: channel being activated
+diff --git a/include/linux/platform_data/edma.h b/include/linux/platform_data/edma.h
+index 57300fd..0e11eca 100644
+--- a/include/linux/platform_data/edma.h
++++ b/include/linux/platform_data/edma.h
+@@ -180,4 +180,6 @@ struct edma_soc_info {
+ 	const s16	(*xbar_chans)[2];
+ };
+ 
++int edma_manual_trigger(unsigned);
++
+ #endif
+-- 
+1.7.9.5
