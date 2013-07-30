@@ -1,57 +1,72 @@
-From: Joel Fernandes <joelf@ti.com>
-Subject: Re: [PATCH v2] ARM: EDMA: Fix clearing of unused list for DT DMA
- resources
-Date: Tue, 30 Jul 2013 00:05:25 -0500
-Message-ID: <51F74995.2050202@ti.com>
-References: <1374515989-7391-1-git-send-email-joelf@ti.com>
- <51F4589E.5070108@ti.com> <51F6140B.3070600@ti.com> <51F738BF.7070808@ti.com>
- <51F74688.3090702@ti.com>
-Reply-To: joelf@ti.com
+From: Sekhar Nori <nsekhar-l0cyMroinI0@public.gmane.org>
+Subject: Re: [PATCH 3/9] ARM: edma: Add function to manually trigger an EDMA
+	channel
+Date: Tue, 30 Jul 2013 10:48:37 +0530
+Message-ID: <51F74CAD.3040604@ti.com>
+References: <1375104595-16018-1-git-send-email-joelf@ti.com>
+	<1375104595-16018-4-git-send-email-joelf@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <51F74688.3090702@ti.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Sekhar Nori <nsekhar@ti.com>
-Cc: Balaji TK <balajitk@ti.com>, Arnd Bergmann <arnd@arndb.de>, Mark Jackson <mpfj-list@newflow.co.uk>, Tony Lindgren <tony@atomide.com>, Pantel Antoniou <panto@antoniou-consulting.com>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Vinod Koul <vinod.koul@intel.com>, Jason Kridner <jkridner@beagleboard.org>, Benoit Cousson <benoit.cousson@linaro.org>, Linux OMAP List <linux-omap@vger.kernel.org>, Linux ARM Kernel List <linux-arm-kernel@lists.infradead.org>
+Return-path: <davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
+In-Reply-To: <1375104595-16018-4-git-send-email-joelf-l0cyMroinI0@public.gmane.org>
+List-Unsubscribe: <http://linux.davincidsp.com/mailman/options/davinci-linux-open-source>,
+	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://linux.davincidsp.com/pipermail/davinci-linux-open-source>
+List-Post: <mailto:davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
+List-Help: <mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=help>
+List-Subscribe: <http://linux.davincidsp.com/mailman/listinfo/davinci-linux-open-source>,
+	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=subscribe>
+Sender: <davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
+Errors-To: davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org
+To: Joel Fernandes <joelf-l0cyMroinI0@public.gmane.org>
+Cc: Mark Brown <broonie-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Grant Likely <grant.likely-s3s/WqlpOiPyB63q8FvJNQ@public.gmane.org>, Sricharan R <r.sricharan-l0cyMroinI0@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Vinod Koul <vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Lokesh Vutla <lokeshvutla-l0cyMroinI0@public.gmane.org>, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Rajendra Nayak <rnayak-l0cyMroinI0@public.gmane.org>, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Jason Kridner <jkridner-hcmAuCOw+vXj4SYmN/TMmA@public.gmane.org>, Linux OMAP List <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux ARM Kernel List <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Linux DaVinci Kernel List <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, Balaji TK <balajitk-l0cyMroinI0@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Santosh Shilimkar <santosh.shilim>
 List-Id: linux-mmc@vger.kernel.org
 
-On 07/29/2013 11:52 PM, Sekhar Nori wrote:> On Tuesday 30 July 2013
-09:23 AM, Joel Fernandes wrote:
->> On 07/29/2013 02:04 AM, Sekhar Nori wrote:
->>> On Sunday 28 July 2013 05:02 AM, Joel Fernandes wrote:
->>>> Hi Tony or Sekhar,
->>>>
->>>> If this patch looks ok, could you pick it up for -rc cycle?
->>>>
->>>> It fixes DMA breakages after the merge window for devices for which DMA
->>>> resources are being populated in device tree instead pdev.
->>>
->>> But which DT-enabled platform in kernel is using EDMA? A grep for edma
->>> over arch/arm/boot/dts/* brings up nothing.
->>> Does this really have to go into the -rc cycle or can it wait till
->>> v3.12?
->>
->>
->> But unused channel list is also populated for private EDMA callers like
->> davinci-pcm no? IIRC, HWMOD data is also removed for McASP so EDMA for
->> those may break.
->
-> Yes, but which DT-enabled platform has davinci-pcm working today?
-> AFAICS, this bug affects DT-enabled platforms only.
+On Monday 29 July 2013 06:59 PM, Joel Fernandes wrote:
+> Manual trigger for events missed as a result of splitting a
+> scatter gather list and DMA'ing it in batches. Add a helper
+> function to trigger a channel incase any such events are missed.
+> 
+> Signed-off-by: Joel Fernandes <joelf-l0cyMroinI0@public.gmane.org>
+> ---
+>  arch/arm/common/edma.c             |   21 +++++++++++++++++++++
+>  include/linux/platform_data/edma.h |    2 ++
+>  2 files changed, 23 insertions(+)
+> 
+> diff --git a/arch/arm/common/edma.c b/arch/arm/common/edma.c
+> index 3567ba1..10995b2 100644
+> --- a/arch/arm/common/edma.c
+> +++ b/arch/arm/common/edma.c
+> @@ -1236,6 +1236,27 @@ void edma_resume(unsigned channel)
+>  }
+>  EXPORT_SYMBOL(edma_resume);
+>  
+> +int edma_manual_trigger(unsigned channel)
 
-Yes, you're right. I didn't realize nothing else is working yet. I guess
-its fine then for next kernel release.
+edma_trigger_channel() maybe? Brings consistency with
+edma_alloc_channel() edma_free_channel() etc.
+
+> +{
+> +	unsigned ctlr;
+> +	int j;
+> +	unsigned int mask;
+> +
+> +	ctlr = EDMA_CTLR(channel);
+> +	channel = EDMA_CHAN_SLOT(channel);
+> +	mask = BIT(channel & 0x1f);
+> +
+> +	j = channel >> 5;
+> +
+> +	/* EDMA channels without event association */
+
+May be actually check for no-event association before you trigger in
+software? You can do that by looking at unused channel list, no?
+
+> +	edma_shadow0_write_array(ctlr, SH_ESR, j, mask);
+
+edma_shadow0_write_array(ctlr, SH_ESR, channel >> 5, mask) is no less
+readable, but I leave it to you.
 
 Thanks,
-
--Joel
+Sekhar
