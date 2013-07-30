@@ -1,133 +1,227 @@
 From: Laurent Pinchart <laurent.pinchart+renesas@ideasonboard.com>
-Subject: [PATCH v2 04/13] sh: ecovec24: Use MMC/SDHI CD and RO GPIO
-Date: Tue, 30 Jul 2013 12:37:28 +0200
-Message-ID: <1375180657-23641-5-git-send-email-laurent.pinchart+renesas@ideasonboard.com>
+Subject: [PATCH v2 02/13] mmc: mmc_spi: Support CD/RO GPIOs
+Date: Tue, 30 Jul 2013 12:37:26 +0200
+Message-ID: <1375180657-23641-3-git-send-email-laurent.pinchart+renesas@ideasonboard.com>
 References: <1375180657-23641-1-git-send-email-laurent.pinchart+renesas@ideasonboard.com>
-Return-path: <linux-sh-owner@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from perceval.ideasonboard.com ([95.142.166.194]:37602 "EHLO
+	perceval.ideasonboard.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753626Ab3G3Kgo (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 30 Jul 2013 06:36:44 -0400
 In-Reply-To: <1375180657-23641-1-git-send-email-laurent.pinchart+renesas@ideasonboard.com>
-Sender: linux-sh-owner@vger.kernel.org
+Sender: linux-mmc-owner@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 Cc: linux-arm-kernel@lists.infradead.org, linux-sh@vger.kernel.org, linux-spi@vger.kernel.org, Hartley Sweeten <hsweeten@visionengravers.com>, Ryan Mallon <rmallon@gmail.com>, Chris Ball <cjb@laptop.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Ian Molton <ian@mnementh.co.uk>, Arnd Bergmann <arnd@arndb.de>, Olof Johansson <olof@lixom.net>
-List-Id: linux-mmc@vger.kernel.org
 
-Pass the CD and RO GPIO numbers to the MMC SPI and SDHI drivers and
-remove the custom .get_cd() and .get_ro() callback functions.
+Add support for passing CD/RO GPIO numbers directly to the mmc_spi
+driver instead of relying solely on board code callbacks to retrieve the
+CD/RO signals values. The driver will enable debouncing on the card
+detect GPIO if the cd_debounce field is set to a non-zero value.
 
 Signed-off-by: Laurent Pinchart <laurent.pinchart+renesas@ideasonboard.com>
-Acked-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 ---
- arch/sh/boards/mach-ecovec24/setup.c | 42 +++++++-----------------------------
- 1 file changed, 8 insertions(+), 34 deletions(-)
+ drivers/mmc/host/mmc_spi.c    | 33 ++++++++++++++++++++++---------
+ drivers/mmc/host/of_mmc_spi.c | 46 +++++++++++--------------------------------
+ include/linux/spi/mmc_spi.h   | 16 +++++++++++++++
+ 3 files changed, 52 insertions(+), 43 deletions(-)
 
-diff --git a/arch/sh/boards/mach-ecovec24/setup.c b/arch/sh/boards/mach-ecovec24/setup.c
-index bcbb86b..4d46700 100644
---- a/arch/sh/boards/mach-ecovec24/setup.c
-+++ b/arch/sh/boards/mach-ecovec24/setup.c
-@@ -620,18 +620,14 @@ static void sdhi0_set_pwr(struct platform_device *pdev, int state)
- 	gpio_set_value(GPIO_PTB6, state);
+diff --git a/drivers/mmc/host/mmc_spi.c b/drivers/mmc/host/mmc_spi.c
+index 74145d1..62fb82d 100644
+--- a/drivers/mmc/host/mmc_spi.c
++++ b/drivers/mmc/host/mmc_spi.c
+@@ -36,6 +36,7 @@
+ 
+ #include <linux/mmc/host.h>
+ #include <linux/mmc/mmc.h>		/* for R1_SPI_* bit values */
++#include <linux/mmc/slot-gpio.h>
+ 
+ #include <linux/spi/spi.h>
+ #include <linux/spi/mmc_spi.h>
+@@ -1278,11 +1279,8 @@ static int mmc_spi_get_ro(struct mmc_host *mmc)
+ 
+ 	if (host->pdata && host->pdata->get_ro)
+ 		return !!host->pdata->get_ro(mmc->parent);
+-	/*
+-	 * Board doesn't support read only detection; let the mmc core
+-	 * decide what to do.
+-	 */
+-	return -ENOSYS;
++	else
++		return mmc_gpio_get_ro(mmc);
  }
  
--static int sdhi0_get_cd(struct platform_device *pdev)
+ static int mmc_spi_get_cd(struct mmc_host *mmc)
+@@ -1291,7 +1289,8 @@ static int mmc_spi_get_cd(struct mmc_host *mmc)
+ 
+ 	if (host->pdata && host->pdata->get_cd)
+ 		return !!host->pdata->get_cd(mmc->parent);
+-	return -ENOSYS;
++	else
++		return mmc_gpio_get_cd(mmc);
+ }
+ 
+ static const struct mmc_host_ops mmc_spi_ops = {
+@@ -1324,6 +1323,7 @@ static int mmc_spi_probe(struct spi_device *spi)
+ 	struct mmc_host		*mmc;
+ 	struct mmc_spi_host	*host;
+ 	int			status;
++	bool			has_ro = false;
+ 
+ 	/* We rely on full duplex transfers, mostly to reduce
+ 	 * per-transfer overheads (by making fewer transfers).
+@@ -1448,18 +1448,33 @@ static int mmc_spi_probe(struct spi_device *spi)
+ 	}
+ 
+ 	/* pass platform capabilities, if any */
+-	if (host->pdata)
++	if (host->pdata) {
+ 		mmc->caps |= host->pdata->caps;
++		mmc->caps2 |= host->pdata->caps2;
++	}
+ 
+ 	status = mmc_add_host(mmc);
+ 	if (status != 0)
+ 		goto fail_add_host;
+ 
++	if (host->pdata && host->pdata->flags & MMC_SPI_USE_CD_GPIO) {
++		status = mmc_gpio_request_cd(mmc, host->pdata->cd_gpio,
++					     host->pdata->cd_debounce);
++		if (status != 0)
++			goto fail_add_host;
++	}
++
++	if (host->pdata && host->pdata->flags & MMC_SPI_USE_RO_GPIO) {
++		has_ro = true;
++		status = mmc_gpio_request_ro(mmc, host->pdata->ro_gpio);
++		if (status != 0)
++			goto fail_add_host;
++	}
++
+ 	dev_info(&spi->dev, "SD/MMC host %s%s%s%s%s\n",
+ 			dev_name(&mmc->class_dev),
+ 			host->dma_dev ? "" : ", no DMA",
+-			(host->pdata && host->pdata->get_ro)
+-				? "" : ", no WP",
++			has_ro ? "" : ", no WP",
+ 			(host->pdata && host->pdata->setpower)
+ 				? "" : ", no poweroff",
+ 			(mmc->caps & MMC_CAP_NEEDS_POLL)
+diff --git a/drivers/mmc/host/of_mmc_spi.c b/drivers/mmc/host/of_mmc_spi.c
+index d720b5e..6e218fb 100644
+--- a/drivers/mmc/host/of_mmc_spi.c
++++ b/drivers/mmc/host/of_mmc_spi.c
+@@ -50,25 +50,6 @@ static struct of_mmc_spi *to_of_mmc_spi(struct device *dev)
+ 	return container_of(dev->platform_data, struct of_mmc_spi, pdata);
+ }
+ 
+-static int of_mmc_spi_read_gpio(struct device *dev, int gpio_num)
 -{
--	return !gpio_get_value(GPIO_PTY7);
+-	struct of_mmc_spi *oms = to_of_mmc_spi(dev);
+-	bool active_low = oms->alow_gpios[gpio_num];
+-	bool value = gpio_get_value(oms->gpios[gpio_num]);
+-
+-	return active_low ^ value;
 -}
 -
- static struct sh_mobile_sdhi_info sdhi0_info = {
- 	.dma_slave_tx	= SHDMA_SLAVE_SDHI0_TX,
- 	.dma_slave_rx	= SHDMA_SLAVE_SDHI0_RX,
- 	.set_pwr	= sdhi0_set_pwr,
- 	.tmio_caps      = MMC_CAP_SDIO_IRQ | MMC_CAP_POWER_OFF_CARD |
- 			  MMC_CAP_NEEDS_POLL,
--	.get_cd		= sdhi0_get_cd,
-+	.tmio_flags	= TMIO_MMC_USE_GPIO_CD,
-+	.cd_gpio	= GPIO_PTY7,
- };
- 
- static struct resource sdhi0_resources[] = {
-@@ -678,18 +674,14 @@ static void cn12_set_pwr(struct platform_device *pdev, int state)
- 
- #if !defined(CONFIG_MMC_SH_MMCIF) && !defined(CONFIG_MMC_SH_MMCIF_MODULE)
- /* SDHI1 */
--static int sdhi1_get_cd(struct platform_device *pdev)
+-static int of_mmc_spi_get_cd(struct device *dev)
 -{
--	return !gpio_get_value(GPIO_PTW7);
+-	return of_mmc_spi_read_gpio(dev, CD_GPIO);
 -}
 -
- static struct sh_mobile_sdhi_info sdhi1_info = {
- 	.dma_slave_tx	= SHDMA_SLAVE_SDHI1_TX,
- 	.dma_slave_rx	= SHDMA_SLAVE_SDHI1_RX,
- 	.tmio_caps      = MMC_CAP_SDIO_IRQ | MMC_CAP_POWER_OFF_CARD |
- 			  MMC_CAP_NEEDS_POLL,
-+	.tmio_flags	= TMIO_MMC_USE_GPIO_CD,
-+	.cd_gpio	= GPIO_PTW7,
- 	.set_pwr	= cn12_set_pwr,
--	.get_cd		= sdhi1_get_cd,
- };
- 
- static struct resource sdhi1_resources[] = {
-@@ -719,27 +711,19 @@ static struct platform_device sdhi1_device = {
- #else
- 
- /* MMC SPI */
--static int mmc_spi_get_ro(struct device *dev)
+-static int of_mmc_spi_get_ro(struct device *dev)
 -{
--	return gpio_get_value(GPIO_PTY6);
+-	return of_mmc_spi_read_gpio(dev, WP_GPIO);
 -}
 -
--static int mmc_spi_get_cd(struct device *dev)
--{
--	return !gpio_get_value(GPIO_PTY7);
--}
--
- static void mmc_spi_setpower(struct device *dev, unsigned int maskval)
+ static int of_mmc_spi_init(struct device *dev,
+ 			   irqreturn_t (*irqhandler)(int, void *), void *mmc)
  {
- 	gpio_set_value(GPIO_PTB6, maskval ? 1 : 0);
+@@ -130,20 +111,22 @@ struct mmc_spi_platform_data *mmc_spi_get_pdata(struct spi_device *spi)
+ 		if (!gpio_is_valid(oms->gpios[i]))
+ 			continue;
+ 
+-		ret = gpio_request(oms->gpios[i], dev_name(dev));
+-		if (ret < 0) {
+-			oms->gpios[i] = -EINVAL;
+-			continue;
+-		}
+-
+ 		if (gpio_flags & OF_GPIO_ACTIVE_LOW)
+ 			oms->alow_gpios[i] = true;
+ 	}
+ 
+-	if (gpio_is_valid(oms->gpios[CD_GPIO]))
+-		oms->pdata.get_cd = of_mmc_spi_get_cd;
+-	if (gpio_is_valid(oms->gpios[WP_GPIO]))
+-		oms->pdata.get_ro = of_mmc_spi_get_ro;
++	if (gpio_is_valid(oms->gpios[CD_GPIO])) {
++		oms->pdata.cd_gpio = oms->gpios[CD_GPIO];
++		oms->pdata.flags |= MMC_SPI_USE_CD_GPIO;
++		if (!oms->alow_gpios[CD_GPIO])
++			oms->pdata.caps2 |= MMC_CAP2_CD_ACTIVE_HIGH;
++	}
++	if (gpio_is_valid(oms->gpios[WP_GPIO])) {
++		oms->pdata.ro_gpio = oms->gpios[WP_GPIO];
++		oms->pdata.flags |= MMC_SPI_USE_RO_GPIO;
++		if (!oms->alow_gpios[WP_GPIO])
++			oms->pdata.caps2 |= MMC_CAP2_RO_ACTIVE_HIGH;
++	}
+ 
+ 	oms->detect_irq = irq_of_parse_and_map(np, 0);
+ 	if (oms->detect_irq != 0) {
+@@ -166,15 +149,10 @@ void mmc_spi_put_pdata(struct spi_device *spi)
+ 	struct device *dev = &spi->dev;
+ 	struct device_node *np = dev->of_node;
+ 	struct of_mmc_spi *oms = to_of_mmc_spi(dev);
+-	int i;
+ 
+ 	if (!dev->platform_data || !np)
+ 		return;
+ 
+-	for (i = 0; i < ARRAY_SIZE(oms->gpios); i++) {
+-		if (gpio_is_valid(oms->gpios[i]))
+-			gpio_free(oms->gpios[i]);
+-	}
+ 	kfree(oms);
+ 	dev->platform_data = NULL;
  }
+diff --git a/include/linux/spi/mmc_spi.h b/include/linux/spi/mmc_spi.h
+index 32be8db..87cdb35 100644
+--- a/include/linux/spi/mmc_spi.h
++++ b/include/linux/spi/mmc_spi.h
+@@ -7,6 +7,11 @@
+ struct device;
+ struct mmc_host;
  
- static struct mmc_spi_platform_data mmc_spi_info = {
--	.get_ro = mmc_spi_get_ro,
--	.get_cd = mmc_spi_get_cd,
- 	.caps = MMC_CAP_NEEDS_POLL,
-+	.caps2 = MMC_CAP2_RO_ACTIVE_HIGH,
- 	.ocr_mask = MMC_VDD_32_33 | MMC_VDD_33_34, /* 3.3V only */
- 	.setpower = mmc_spi_setpower,
-+	.flags = MMC_SPI_USE_CD_GPIO | MMC_SPI_USE_RO_GPIO,
-+	.cd_gpio = GPIO_PTY7,
-+	.ro_gpio = GPIO_PTY6,
- };
++#define MMC_SPI_USE_CD_GPIO			(1 << 0)
++#define MMC_SPI_USE_RO_GPIO			(1 << 1)
++#define MMC_SPI_CD_GPIO_ACTIVE_LOW		(1 << 2)
++#define MMC_SPI_RO_GPIO_ACTIVE_LOW		(1 << 3)
++
+ /* Put this in platform_data of a device being used to manage an MMC/SD
+  * card slot.  (Modeled after PXA mmc glue; see that for usage examples.)
+  *
+@@ -30,8 +35,19 @@ struct mmc_spi_platform_data {
+ 	 */
+ 	int (*get_cd)(struct device *);
  
- static struct spi_board_info spi_bus[] = {
-@@ -1342,10 +1326,6 @@ static int __init arch_setup(void)
- 	gpio_direction_input(GPIO_PTR6);
++	/*
++	 * Card Detect and Read Only GPIOs. To enable debouncing on the card
++	 * detect GPIO, set the cd_debounce to the debounce time in
++	 * microseconds.
++	 */
++	unsigned int flags;
++	unsigned int cd_gpio;
++	unsigned int cd_debounce;
++	unsigned int ro_gpio;
++
+ 	/* Capabilities to pass into mmc core (e.g. MMC_CAP_NEEDS_POLL). */
+ 	unsigned long caps;
++	unsigned long caps2;
  
- 	/* SD-card slot CN11 */
--	/* Card-detect, used on CN11, either with SDHI0 or with SPI */
--	gpio_request(GPIO_PTY7, NULL);
--	gpio_direction_input(GPIO_PTY7);
--
- #if defined(CONFIG_MMC_SDHI) || defined(CONFIG_MMC_SDHI_MODULE)
- 	/* enable SDHI0 on CN11 (needs DS2.4 set to ON) */
- 	gpio_request(GPIO_FN_SDHI0WP,  NULL);
-@@ -1364,8 +1344,6 @@ static int __init arch_setup(void)
- 	gpio_direction_output(GPIO_PTM4, 1); /* active low CS */
- 	gpio_request(GPIO_PTB6, NULL); /* 3.3V power control */
- 	gpio_direction_output(GPIO_PTB6, 0); /* disable power by default */
--	gpio_request(GPIO_PTY6, NULL); /* write protect */
--	gpio_direction_input(GPIO_PTY6);
- 
- 	spi_register_board_info(spi_bus, ARRAY_SIZE(spi_bus));
- #endif
-@@ -1395,10 +1373,6 @@ static int __init arch_setup(void)
- 	gpio_request(GPIO_FN_SDHI1D1,  NULL);
- 	gpio_request(GPIO_FN_SDHI1D0,  NULL);
- 
--	/* Card-detect, used on CN12 with SDHI1 */
--	gpio_request(GPIO_PTW7, NULL);
--	gpio_direction_input(GPIO_PTW7);
--
- 	cn12_enabled = true;
- #endif
- 
+ 	/* how long to debounce card detect, in msecs */
+ 	u16 detect_delay;
 -- 
 1.8.1.5
 
