@@ -1,48 +1,33 @@
-From: Tejun Heo <tj@kernel.org>
-Subject: [PATCH 3/9] mmc: WQ_NON_REENTRANT is meaningless and going away
-Date: Tue, 30 Jul 2013 08:40:22 -0400
-Message-ID: <1375188028-11910-4-git-send-email-tj@kernel.org>
-References: <1375188028-11910-1-git-send-email-tj@kernel.org>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1375188028-11910-1-git-send-email-tj@kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-kernel@vger.kernel.org, laijs@cn.fujitsu.com
-Cc: shli@kernel.org, Tejun Heo <tj@kernel.org>, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org
+From: Seungwon Jeon <tgih.jun@samsung.com>
+Subject: RE: [PATCH 4/5] mmc: dw_mmc: Indicate that regulators may be absent
+Date: Tue, 30 Jul 2013 22:33:30 +0900
+Message-ID: <003901ce8d29$610ab3f0$23201bd0$%jun@samsung.com>
+References: <1375184777-25404-1-git-send-email-broonie@kernel.org>
+ <1375184777-25404-4-git-send-email-broonie@kernel.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ks_c_5601-1987
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout1.samsung.com ([203.254.224.24]:45115 "EHLO
+	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752927Ab3G3Ndb (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 30 Jul 2013 09:33:31 -0400
+In-reply-to: <1375184777-25404-4-git-send-email-broonie@kernel.org>
+Content-language: ko
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: 'Mark Brown' <broonie@kernel.org>, 'Liam Girdwood' <lgirdwood@gmail.com>, 'Chris Ball' <cjb@laptop.org>, 'Jaehoon Chung' <jh80.chung@samsung.com>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linaro-kernel@lists.linaro.org, 'Mark Brown' <broonie@linaro.org>
 
-Hello,
+On Tue, July 30, 2013, Mark Brown wrote:
+> From: Mark Brown <broonie@linaro.org>
+> 
+> Use regulator_get_optional() to tell the core that requests for regulators
+> can fail in a real system.
+> 
+> Signed-off-by: Mark Brown <broonie@linaro.org>
+Acked-by: Seungwon Jeon <tgih.jun@samsung.com>
 
-Please route this through the subsystem tree.  As written in the
-description, this shouldn't make any functional difference and just
-prepares for the removal of WQ_NON_REENTRANT which is already noop.
+Thanks,
+Seungwon Jeon
 
-Thanks.
-
------- 8< -------
-dbf2576e37 ("workqueue: make all workqueues non-reentrant") made
-WQ_NON_REENTRANT no-op and the flag is going away.  Remove its usages.
-
-This patch doesn't introduce any behavior changes.
-
-Signed-off-by: Tejun Heo <tj@kernel.org>
-Cc: Chris Ball <cjb@laptop.org>
-Cc: linux-mmc@vger.kernel.org
----
- drivers/mmc/host/dw_mmc.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index ee5f167..b37e3c2 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -2340,7 +2340,7 @@ int dw_mci_probe(struct dw_mci *host)
- 
- 	tasklet_init(&host->tasklet, dw_mci_tasklet_func, (unsigned long)host);
- 	host->card_workqueue = alloc_workqueue("dw-mci-card",
--			WQ_MEM_RECLAIM | WQ_NON_REENTRANT, 1);
-+					       WQ_MEM_RECLAIM, 1);
- 	if (!host->card_workqueue) {
- 		ret = -ENOMEM;
- 		goto err_dmaunmap;
--- 
-1.8.3.1
