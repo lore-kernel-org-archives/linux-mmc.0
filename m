@@ -1,87 +1,57 @@
-From: Mark Brown <broonie@kernel.org>
-Subject: Re: [PATCH 0/5] Optional regulator support
-Date: Tue, 30 Jul 2013 18:24:13 +0100
-Message-ID: <20130730172413.GW9858@sirena.org.uk>
-References: <20130730114502.GQ9858@sirena.org.uk>
- <864nbcte4j.fsf@void.printf.net>
+From: H Hartley Sweeten <hartleys@visionengravers.com>
+Subject: RE: [PATCH v2 00/13] Remove platform callbacks from mmc_spi,
+ sh_mmcif and sh_mobile_sdhi drivers
+Date: Tue, 30 Jul 2013 12:35:47 -0500
+Message-ID: <ADE657CA350FB648AAC2C43247A983F0021DAC5C24E0@AUSP01VMBX24.collaborationhost.net>
+References: <1375180657-23641-1-git-send-email-laurent.pinchart+renesas@ideasonboard.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="N1hYC8G2yr6txGRN"
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from cassiel.sirena.org.uk ([80.68.93.111]:60899 "EHLO
-	cassiel.sirena.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751040Ab3G3RYk (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 30 Jul 2013 13:24:40 -0400
-Content-Disposition: inline
-In-Reply-To: <864nbcte4j.fsf@void.printf.net>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <1375180657-23641-1-git-send-email-laurent.pinchart+renesas@ideasonboard.com>
+Content-Language: en-US
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Laurent Pinchart <laurent.pinchart+renesas@ideasonboard.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Cc: Ryan Mallon <rmallon@gmail.com>, Arnd Bergmann <arnd@arndb.de>, "linux-sh@vger.kernel.org" <linux-sh@vger.kernel.org>, "linux-spi@vger.kernel.org" <linux-spi@vger.kernel.org>, Ian Molton <ian@mnementh.co.uk>, Olof Johansson <olof@lixom.net>, Chris Ball <cjb@laptop.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: Liam Girdwood <lgirdwood@gmail.com>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linaro-kernel@lists.linaro.org, linux-arm-kernel@lists.infradead.org
 
+On Tuesday, July 30, 2013 3:37 AM, Laurent Pinchart wrote:
+>
+> This patch set replaces callbacks to board code with regulators and GPIOs in
+> the mmc_spi, sh_mmcif and sh_mobile_sdhi MMC drivers.
 
---N1hYC8G2yr6txGRN
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+Just tested this series on the vision_ep93xx board. Everything looks ok.
 
-On Tue, Jul 30, 2013 at 01:40:28PM +0100, Chris Ball wrote:
-> On Tue, Jul 30 2013, Mark Brown wrote:
+For patches 01/13, 02/13 and 07/13 you can add:
 
-> > Right now all the MMC users are converted over as-is, though it does
-> > look like drivers such as sdhci really ought to be insisting on having a
-> > regulator for VMMC in the same way that the MMC core helper does (and
-> > indeed in that case it looks like it ought to be converted over to the
-> > core code).
+Reviewed-by: H Hartley Sweeten <hsweeten@visionengravers.com>
 
-> I didn't follow this part -- I don't think the MMC core insists on a
-> VMMC regulator, and I don't think sdhci should either, because e.g.
-> an x86 laptop isn't going to have one.  What am I missing?
+For patch 03/13:
 
-You're missing the fact that there will be a VMMC regulator there since
-the card needs power to function, it just might not be one that software
-knows about or can control.  If it's one that software can control
-that's not mapped in properly (eg, because the driver for the regulator
-wasn't loaded) then obviously that's a serious problem and power saving
-features in the regulator API may for example turn off the supply even
-if it's on by default since they can't tell it's in use.
+Acked-by: H Hartley Sweeten <hsweeten@visionengravers.com>
 
-As things stand the expectation for x86 type systems is that MMC
-controllers attached via PCI or USB ought to be setting up a fixed
-regulator so that the consumer part can proceed without ignoring errors
-that might be serious on other systems.  It's probably not a bad idea to
-do this anyway though hopefully in the future this work will make it
-less needed.  For embedded systems the system integration ought to be
-doing the same thing, normally as part of the configuration of the PMIC.
+> This will be a bit messy to merge, as the series interleaves patches for
+> drivers and board files. Given that the mmc_spi driver is marked as orphan in
+> MAINTAINERS and that the vision_ep9307 hasn't seen any board-specific
+> modification in the last couple of kernel versions one option would be to
+> merge all patches (or at least patches 01/13 to 07/13) through Simon's tree if
+> all involved maintainers agree.
+>
+> If patch 01/13 should better be merged through the MMC tree (in which case
+> 02/13 should go through that tree as well), the two patches should be applied
+> first to the MMC tree, and a stable branch will be needed for Simon to base
+> the rest of the series on.
 
-The goal of this series is to make it much easier for the regulator core
-to transparently support such systems where the regulators aren't
-visible to software by transparently stubbing out normal supplies that
-really must be present somehow for the hardware to operate without
-confusing things by also stubbing out suppies that may be missing in
-normal operation.  This is the problem for the existing stubbing support
-- it works well for normal supplies but it means that any consumer that
-wants to handle a supply that's not there can't tell it's missing.
+I'm fine with whatever merge path you end up using. I don't currently have
+any changes planned to vision_ep93xx.
 
---N1hYC8G2yr6txGRN
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.20 (GNU/Linux)
-
-iQIcBAEBAgAGBQJR9/a6AAoJELSic+t+oim9tD0P/1nZKP1GVe7cQl52fJ1rK9Ol
-CdMOkU3mirx4sIt7ndi0GVRuZZCivLLC/QECuoiQIQ12VrLOLcZUGlxO+vkLFEnR
-GTs1SjJIvET5clnvI/fI8hRFYrpm6CNm8Dzf50maiin1JNll0uto6fV2Ke2UHSOb
-9QgQ/8tHxFuy5XMHmrLV9CVvqmWMoPzvjbhF7cKCLduherhKf5NWEgt3P2bnOF+E
-/c9XJj2KIU/Vdwb/sLCtOsQsnW8Urjm+2dqbWbJ+Ka3b1j/8u9otxnwgcdd6o3pf
-jrJF8/kVILsPpKCf3cI3hNTS7eHZ/vYAhS7cPpsiPUZOaxydWJSJbyOr+mhOpbGF
-k6eVCdt4xcC5G2un8EbS97YEIkDQvKNUrZs02utcdEn5HguDc7E2w4VNB07jv7FR
-ovEcBxjTEZDkJuqNYMNvMxRYEjDXZcYlZTeVjUe6PkUP85qYXTXB8l1ZbFlQeHXW
-MH96vl/3OOnF6iD0HeHVhYMdJmwaJSbrjM7NcH2p6dcIRjMGoQHNp/GDTMtehX56
-m+Obb2AXCqas1twAu2bo0BsQAJBW3yf9lm8x/cfHFP3pSsXP2IpH5YIVq1a1gywP
-Zc5H5HWEzBgVFNoanDbRVH2RQLA95CsUA0UXSpizBS2J5YpK6FbuY51uA+lMCcfL
-kwQB/F/5ORqOO+qOMQm0
-=tv0Z
------END PGP SIGNATURE-----
-
---N1hYC8G2yr6txGRN--
+Thanks,
+Hartley
