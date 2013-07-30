@@ -1,45 +1,74 @@
-From: Zhang Haijun <B42677@freescale.com>
-Subject: Re: [PATCH 1/3] mmc:core: parse voltage from device-tree
-Date: Tue, 30 Jul 2013 09:34:29 +0800
-Message-ID: <51F71825.9000904@freescale.com>
-References: <1375066595-14968-1-git-send-email-Haijun.Zhang@freescale.com> <1375135638.30721.58@snotra>
+From: Simon Horman <horms@verge.net.au>
+Subject: Re: [PATCH/RFC 2/2] ARM: shmobile: kzm9g: support DDR50 mode with
+ 1.8V VccQ on MMCIF
+Date: Tue, 30 Jul 2013 11:18:02 +0900
+Message-ID: <20130730021801.GA31526@verge.net.au>
+References: <Pine.LNX.4.64.1307261747210.22137@axis700.grange>
+ <Pine.LNX.4.64.1307261748260.22137@axis700.grange>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-db8lp0187.outbound.messaging.microsoft.com ([213.199.154.187]:41210
-	"EHLO db8outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1756516Ab3G3BeB (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 29 Jul 2013 21:34:01 -0400
-In-Reply-To: <1375135638.30721.58@snotra>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-sh-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <Pine.LNX.4.64.1307261748260.22137@axis700.grange>
+Sender: linux-sh-owner@vger.kernel.org
+To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Cc: linux-sh@vger.kernel.org, linux-mmc@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>, Chris Ball <cjb@laptop.org>, devicetree@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Scott Wood <scottwood@freescale.com>
-Cc: Haijun Zhang <Haijun.Zhang@freescale.com>, linux-mmc@vger.kernel.org, linuxppc-dev@lists.ozlabs.org, cbouatmailru@gmail.com, cjb@laptop.org, AFLEMING@freescale.com, Xie Xiaobo-R63061 <X.Xie@freescale.com>
 
-On 07/30/2013 06:07 AM, Scott Wood wrote:
-> On 07/28/2013 09:56:33 PM, Haijun Zhang wrote:
->> Add function to support get voltage from device-tree.
->> If there are voltage-range specified in device-tree node, this function
->> will parse it and return the avail voltage mask.
->>
->> Signed-off-by: Haijun Zhang <haijun.zhang@freescale.com>
->> ---
->>  drivers/mmc/core/core.c  | 48 
->> ++++++++++++++++++++++++++++++++++++++++++++++++
->>  include/linux/mmc/core.h |  1 +
->>  2 files changed, 49 insertions(+)
->
-> Move the code rather than copying it.
->
-> -Scott
-Hi, Scott
+On Fri, Jul 26, 2013 at 05:51:32PM +0200, Guennadi Liakhovetski wrote:
+> MMCIF on sh73a0 supports the UHS DDR50 mode and on the kzm9g board it can
+> be used with MMC VccQ = 1.8V. This patch enables them.
+> 
+> Signed-off-by: Guennadi Liakhovetski <g.liakhovetski+renesas@gmail.com>
+> ---
+> 
+> This patch is correct AFAICS, but pointless on kzm9g, because (at least on 
+> my board) th eMMC chip, installed on the board and connected to MMCIF 
+> doesn't support DDR, so, it cannot be enabled. This patch is therefore 
+> more of an example how these flags shall be used, than a real use case. If 
+> it is decided to apply it, it can be applied even before patch 1/2, it 
+> just won't have any effect at all.
 
-You mean?
+Thanks, understood.
 
--- 
-Thanks & Regards
+At this point I prefer not to apply it as it doesn't have any effect.
+I am more than happy to discuss this further if others would
+like it applied.
 
-Haijun
-
-
+> 
+>  arch/arm/boot/dts/sh73a0-kzm9g-reference.dts |    1 +
+>  arch/arm/boot/dts/sh73a0.dtsi                |    1 +
+>  2 files changed, 2 insertions(+), 0 deletions(-)
+> 
+> diff --git a/arch/arm/boot/dts/sh73a0-kzm9g-reference.dts b/arch/arm/boot/dts/sh73a0-kzm9g-reference.dts
+> index b99e890..d90de01 100644
+> --- a/arch/arm/boot/dts/sh73a0-kzm9g-reference.dts
+> +++ b/arch/arm/boot/dts/sh73a0-kzm9g-reference.dts
+> @@ -191,6 +191,7 @@
+>  
+>  	bus-width = <8>;
+>  	vmmc-supply = <&reg_1p8v>;
+> +	ddr-1v8;
+>  	status = "okay";
+>  };
+>  
+> diff --git a/arch/arm/boot/dts/sh73a0.dtsi b/arch/arm/boot/dts/sh73a0.dtsi
+> index 86e79fe..1146be8 100644
+> --- a/arch/arm/boot/dts/sh73a0.dtsi
+> +++ b/arch/arm/boot/dts/sh73a0.dtsi
+> @@ -186,6 +186,7 @@
+>  		interrupts = <0 140 0x4
+>  			      0 141 0x4>;
+>  		reg-io-width = <4>;
+> +		uhs-ddr50;
+>  		status = "disabled";
+>  	};
+>  
+> -- 
+> 1.7.2.5
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-sh" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
