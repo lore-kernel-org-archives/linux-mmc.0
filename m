@@ -1,46 +1,50 @@
-From: Mark Brown <broonie@kernel.org>
-Subject: [PATCH 3/5] mmc: sdhci: Indicate that regulators may be absent
-Date: Tue, 30 Jul 2013 12:46:15 +0100
-Message-ID: <1375184777-25404-3-git-send-email-broonie@kernel.org>
-References: <1375184777-25404-1-git-send-email-broonie@kernel.org>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH 0/5] Optional regulator support
+Date: Tue, 30 Jul 2013 13:40:28 +0100
+Message-ID: <864nbcte4j.fsf@void.printf.net>
+References: <20130730114502.GQ9858@sirena.org.uk>
+Mime-Version: 1.0
+Content-Type: text/plain
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1375184777-25404-1-git-send-email-broonie@kernel.org>
+In-Reply-To: <20130730114502.GQ9858@sirena.org.uk> (Mark Brown's message of
+	"Tue, 30 Jul 2013 12:45:02 +0100")
 Sender: linux-kernel-owner@vger.kernel.org
-To: Liam Girdwood <lgirdwood@gmail.com>, Chris Ball <cjb@laptop.org>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linaro-kernel@lists.linaro.org, Mark Brown <broonie@linaro.org>
+To: Mark Brown <broonie@kernel.org>
+Cc: Liam Girdwood <lgirdwood@gmail.com>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linaro-kernel@lists.linaro.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-From: Mark Brown <broonie@linaro.org>
+Hi,
 
-Use regulator_get_optional() to tell the core that requests for regulators
-can fail in a real system.
+On Tue, Jul 30 2013, Mark Brown wrote:
+> This patch series adds a variant of regulator_get() which allows
+> regulator consumers to tell the core that the supply they are requesting
+> may genuinely be absent in the system.  The goal is to help address some
+> of the problems with handling errors in regulator_get() in drivers that
+> are newly converted to the regulator API by allowing the core to provide
+> stub regulators for supplies that aren't hooked up without disrupting
+> the operation of drivers like MMC drivers which may genuinely not have
+> some of their supplies hooked up.
+>
+> Currently the code simply introduces a new API call with exactly the
+> same implementation as regulator_get() so there should be zero impact
+> from the series other than a slightly larger kernel.
 
-Signed-off-by: Mark Brown <broonie@linaro.org>
----
- drivers/mmc/host/sdhci.c | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+Looks good:
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index a78bd4f..dd2c083 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -2966,7 +2966,7 @@ int sdhci_add_host(struct sdhci_host *host)
- 		mmc->caps |= MMC_CAP_NEEDS_POLL;
- 
- 	/* If vqmmc regulator and no 1.8V signalling, then there's no UHS */
--	host->vqmmc = regulator_get(mmc_dev(mmc), "vqmmc");
-+	host->vqmmc = regulator_get_optional(mmc_dev(mmc), "vqmmc");
- 	if (IS_ERR_OR_NULL(host->vqmmc)) {
- 		if (PTR_ERR(host->vqmmc) < 0) {
- 			pr_info("%s: no vqmmc regulator found\n",
-@@ -3042,7 +3042,7 @@ int sdhci_add_host(struct sdhci_host *host)
- 
- 	ocr_avail = 0;
- 
--	host->vmmc = regulator_get(mmc_dev(mmc), "vmmc");
-+	host->vmmc = regulator_get_optional(mmc_dev(mmc), "vmmc");
- 	if (IS_ERR_OR_NULL(host->vmmc)) {
- 		if (PTR_ERR(host->vmmc) < 0) {
- 			pr_info("%s: no vmmc regulator found\n",
+Acked-by: Chris Ball <cjb@laptop.org>
+
+> Right now all the MMC users are converted over as-is, though it does
+> look like drivers such as sdhci really ought to be insisting on having a
+> regulator for VMMC in the same way that the MMC core helper does (and
+> indeed in that case it looks like it ought to be converted over to the
+> core code).
+
+I didn't follow this part -- I don't think the MMC core insists on a
+VMMC regulator, and I don't think sdhci should either, because e.g.
+an x86 laptop isn't going to have one.  What am I missing?
+
+Thanks,
+
+- Chris.
 -- 
-1.8.3.2
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
