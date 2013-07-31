@@ -1,54 +1,56 @@
-From: Scott Wood <scottwood@freescale.com>
-Subject: Re: [PATCH 1/3] mmc:core: parse voltage from device-tree
-Date: Tue, 30 Jul 2013 14:58:54 -0500
-Message-ID: <1375214334.30721.82@snotra>
-References: <1375066595-14968-1-git-send-email-Haijun.Zhang@freescale.com>
- <1375135638.30721.58@snotra> <51F71825.9000904@freescale.com>
+From: Bjorn Andersson <bjorn@kryo.se>
+Subject: Re: [PATCH] mmc: sdhci-msm: Add support for MSM chipsets
+Date: Tue, 30 Jul 2013 16:19:44 -0800
+Message-ID: <CAJAp7OgOT82G=W8RpDvaogskUmAN26CWq4gKUs45RwOeU8pXvQ@mail.gmail.com>
+References: <1375201355-26906-1-git-send-email-gdjakov@mm-sol.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"; Format="Flowed"; DelSp="Yes"
-Content-Transfer-Encoding: 7bit
-Return-path: <linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org>
-In-Reply-To: <51F71825.9000904@freescale.com> (from B42677@freescale.com on
- Mon Jul 29 20:34:29 2013)
-Content-Disposition: inline
-List-Unsubscribe: <https://lists.ozlabs.org/options/linuxppc-dev>,
- <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=unsubscribe>
-List-Archive: <http://lists.ozlabs.org/pipermail/linuxppc-dev/>
-List-Post: <mailto:linuxppc-dev@lists.ozlabs.org>
-List-Help: <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=help>
-List-Subscribe: <https://lists.ozlabs.org/listinfo/linuxppc-dev>,
- <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=subscribe>
-Errors-To: linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org
-Sender: "Linuxppc-dev"
- <linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org>
-To: Zhang Haijun <B42677@freescale.com>
-Cc: linux-mmc@vger.kernel.org, AFLEMING@freescale.com, Xie Xiaobo-R63061 <X.Xie@freescale.com>, cbouatmailru@gmail.com, cjb@laptop.org, linuxppc-dev@lists.ozlabs.org, Haijun Zhang <Haijun.Zhang@freescale.com>
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: <1375201355-26906-1-git-send-email-gdjakov@mm-sol.com>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: Georgi Djakov <gdjakov@mm-sol.com>
+Cc: linux-mmc@vger.kernel.org, cjb@laptop.org, grant.likely@linaro.org, rob.herring@calxeda.com, linux-kernel@vger.kernel.org, devicetree@vger.kernel.org, linux-arm-msm@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Asutosh Das <asutoshd@codeaurora.org>, Venkat Gopalakrishnan <venkatg@codeaurora.org>, Sahitya Tummala <stummala@codeaurora.org>, Subhash Jadavani <subhashj@codeaurora.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 07/29/2013 08:34:29 PM, Zhang Haijun wrote:
-> On 07/30/2013 06:07 AM, Scott Wood wrote:
->> On 07/28/2013 09:56:33 PM, Haijun Zhang wrote:
->>> Add function to support get voltage from device-tree.
->>> If there are voltage-range specified in device-tree node, this  
->>> function
->>> will parse it and return the avail voltage mask.
->>> 
->>> Signed-off-by: Haijun Zhang <haijun.zhang@freescale.com>
->>> ---
->>>  drivers/mmc/core/core.c  | 48  
->>> ++++++++++++++++++++++++++++++++++++++++++++++++
->>>  include/linux/mmc/core.h |  1 +
->>>  2 files changed, 49 insertions(+)
->> 
->> Move the code rather than copying it.
->> 
->> -Scott
-> Hi, Scott
-> 
-> You mean?
+On Tue, Jul 30, 2013 at 8:22 AM, Georgi Djakov <gdjakov@mm-sol.com> wrote:
+> This platform driver adds the support of Secure Digital Host
+> Controller Interface compliant controller in MSM chipsets.
+>
+> [snip]
+> +
+> +       sdhc_1: qcom,sdhc@f9824900 {
+> +               compatible = "qcom,sdhci-msm";
+> +                       reg = <0xf9824900 0x11c>, <0xf9824000 0x800>;
+> +                       reg-names = "hc_mem", "core_mem";
+> +                       interrupts = <0 123 0>, <0 138 0>;
+> +                       interrupt-names = "hc_irq", "pwr_irq";
+> +
+> +               vdd-supply = <&pm8941_l21>;
+> +               vdd-io-supply = <&pm8941_l13>;
+> +               qcom,vdd-voltage-level = <2950000 2950000>;
+> +               qcom,vdd-current-level = <9000 800000>;
+> +
+> +               qcom,vdd-io-always-on;
+> +               qcom,vdd-io-lpm-sup;
+> +               qcom,vdd-io-voltage-level = <1800000 2950000>;
+> +               qcom,vdd-io-current-level = <6 22000>;
+> +
+> +               bus-width = <4>;
+> +               non-removable;
+> +               qcom,bus-speed-mode = "HS200_1p8v", "DDR_1p8v";
+> +
+> +               gpios = <&msmgpio 40 0>, /* CLK */
+> +                       <&msmgpio 39 0>, /* CMD */
+> +                       <&msmgpio 38 0>, /* DATA0 */
+> +                       <&msmgpio 37 0>, /* DATA1 */
+> +                       <&msmgpio 36 0>, /* DATA2 */
+> +                       <&msmgpio 35 0>; /* DATA3 */
+> +               qcom,gpio-names = "CLK", "CMD", "DAT0", "DAT1", "DAT2", "DAT3";
 
-The point of factoring this out is to avoid duplicating the code.  If  
-you don't remove it from the place you copied it from (and have that  
-code call here instead), then you're not avoiding the duplication.
+I believe these gpio references (and in the rest of the patch) should
+be replaced by pinctrl. As far as I can see it provides what you want
+and gives you configurability and potential sleep states of those pins
+nicely integrated.
 
--Scott
+Regards,
+Bjorn
