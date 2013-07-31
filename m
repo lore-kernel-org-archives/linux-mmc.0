@@ -1,90 +1,108 @@
-From: "Fernandes, Joel" <joelf-l0cyMroinI0@public.gmane.org>
-Subject: Re: [PATCH 3/9] ARM: edma: Add function to manually trigger an EDMA
-	channel
-Date: Wed, 31 Jul 2013 05:34:14 +0000
-Message-ID: <D8824BFD-347E-4544-9024-2BE52D68100D@ti.com>
-References: <1375104595-16018-1-git-send-email-joelf@ti.com>
-	<1375104595-16018-4-git-send-email-joelf@ti.com>
-	<51F74CAD.3040604@ti.com>
-	<51F892D2.4090805@ti.com>,<51F89F5E.2050605@ti.com>
+From: Haijun Zhang <Haijun.Zhang@freescale.com>
+Subject: [PATCH 1/3 V2] mmc:core: parse voltage from device-tree
+Date: Wed, 31 Jul 2013 14:25:25 +0800
+Message-ID: <1375251927-3330-1-git-send-email-Haijun.Zhang@freescale.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
-In-Reply-To: <51F89F5E.2050605-l0cyMroinI0@public.gmane.org>
-Content-Language: en-US
-List-Unsubscribe: <http://linux.davincidsp.com/mailman/options/davinci-linux-open-source>,
-	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://linux.davincidsp.com/pipermail/davinci-linux-open-source>
-List-Post: <mailto:davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
-List-Help: <mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=help>
-List-Subscribe: <http://linux.davincidsp.com/mailman/listinfo/davinci-linux-open-source>,
-	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=subscribe>
-Sender: <davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
-Errors-To: davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org
-To: "Nori, Sekhar" <nsekhar-l0cyMroinI0@public.gmane.org>
-Cc: Mark Brown <broonie-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Grant Likely <grant.likely-s3s/WqlpOiPyB63q8FvJNQ@public.gmane.org>, "R,  Sricharan" <r.sricharan-l0cyMroinI0@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Vinod Koul <vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "Vutla,  Lokesh" <lokeshvutla-l0cyMroinI0@public.gmane.org>, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, "Nayak,  Rajendra" <rnayak-l0cyMroinI0@public.gmane.org>, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Jason Kridner <jkridner-hcmAuCOw+vXj4SYmN/TMmA@public.gmane.org>, Linux OMAP List <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux ARM Kernel List <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Linux DaVinci Kernel List <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, "Krishnamoorthy, Balaji T" <balajitk-l0cyMroinI0@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Type: text/plain
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from co1ehsobe006.messaging.microsoft.com ([216.32.180.189]:44488
+	"EHLO co1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752754Ab3GaHRw (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 31 Jul 2013 03:17:52 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org, linuxppc-dev@lists.ozlabs.org
+Cc: cbouatmailru@gmail.com, cjb@laptop.org, scottwood@freescale.com, AFLEMING@freescale.com, Haijun Zhang <Haijun.Zhang@freescale.com>, Haijun Zhang <haijun.zhang@freescale.com>
 
-On Jul 31, 2013, at 12:23 AM, "Nori, Sekhar" <nsekhar-l0cyMroinI0@public.gmane.org> wrote:
+Add function to support get voltage from device-tree.
+If there are voltage-range specified in device-tree node, this function
+will parse it and return the avail voltage mask.
 
-> On Wednesday 31 July 2013 10:00 AM, Joel Fernandes wrote:
->> On 07/30/2013 12:18 AM, Sekhar Nori wrote:
->>> On Monday 29 July 2013 06:59 PM, Joel Fernandes wrote:
->>>> Manual trigger for events missed as a result of splitting a
->>>> scatter gather list and DMA'ing it in batches. Add a helper
->>>> function to trigger a channel incase any such events are missed.
->>>> 
->>>> Signed-off-by: Joel Fernandes <joelf-l0cyMroinI0@public.gmane.org>
->>>> ---
->>>> arch/arm/common/edma.c             |   21 +++++++++++++++++++++
->>>> include/linux/platform_data/edma.h |    2 ++
->>>> 2 files changed, 23 insertions(+)
->>>> 
->>>> diff --git a/arch/arm/common/edma.c b/arch/arm/common/edma.c
->>>> index 3567ba1..10995b2 100644
->>>> --- a/arch/arm/common/edma.c
->>>> +++ b/arch/arm/common/edma.c
->>>> @@ -1236,6 +1236,27 @@ void edma_resume(unsigned channel)
->>>> }
->>>> EXPORT_SYMBOL(edma_resume);
->>>> 
->>>> +int edma_manual_trigger(unsigned channel)
->>> 
->>> edma_trigger_channel() maybe? Brings consistency with
->>> edma_alloc_channel() edma_free_channel() etc.
->> 
->> Ok, sure.
->> 
->>> 
->>>> +{
->>>> +    unsigned ctlr;
->>>> +    int j;
->>>> +    unsigned int mask;
->>>> +
->>>> +    ctlr = EDMA_CTLR(channel);
->>>> +    channel = EDMA_CHAN_SLOT(channel);
->>>> +    mask = BIT(channel & 0x1f);
->>>> +
->>>> +    j = channel >> 5;
->>>> +
->>>> +    /* EDMA channels without event association */
->>> 
->>> May be actually check for no-event association before you trigger in
->>> software? You can do that by looking at unused channel list, no?
->> 
->> But, we want to trigger whether there is event association or not in
->> this function. For ex, MMC has event associated but still this function
->> is used to trigger event for it.
-> 
-> Okay, just drop the misleading comment then.
+Signed-off-by: Haijun Zhang <haijun.zhang@freescale.com>
+---
+changes for v2:
+	- Update the parameters of function
 
-Ok, will do.
+ drivers/mmc/core/core.c  | 46 ++++++++++++++++++++++++++++++++++++++++++++++
+ include/linux/mmc/core.h |  1 +
+ 2 files changed, 47 insertions(+)
 
-Thanks,
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 49a5bca..ce9c957 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -27,6 +27,7 @@
+ #include <linux/fault-inject.h>
+ #include <linux/random.h>
+ #include <linux/slab.h>
++#include <linux/of.h>
+ 
+ #include <linux/mmc/card.h>
+ #include <linux/mmc/host.h>
+@@ -1196,6 +1197,51 @@ u32 mmc_vddrange_to_ocrmask(int vdd_min, int vdd_max)
+ }
+ EXPORT_SYMBOL(mmc_vddrange_to_ocrmask);
+ 
++#ifdef CONFIG_OF
++
++/*
++ * mmc_of_parse_voltage - return mask of supported voltages
++ * @np: The device node need to be parsed.
++ *
++ * 1. Return zero: voltage-ranges unspecified in device-tree.
++ * 2. Return negative errno: voltage-range is invalid.
++ * 3. Return ocr_mask: a mask of voltages that parse from device-tree
++ * node can be provided to MMC/SD/SDIO devices.
++ */
++
++u32 mmc_of_parse_voltage(struct device_node *np)
++{
++	const u32 *voltage_ranges;
++	int num_ranges, i;
++	u32 ocr_mask = 0;
++
++	voltage_ranges = of_get_property(np, "voltage-ranges", &num_ranges);
++	num_ranges = num_ranges / sizeof(*voltage_ranges) / 2;
++	if (!voltage_ranges || !num_ranges) {
++		pr_info("%s: voltage-ranges unspecified\n", np->full_name);
++		return 0;
++	}
++
++	for (i = 0; i < num_ranges; i++) {
++		const int j = i * 2;
++		u32 mask;
++
++		mask = mmc_vddrange_to_ocrmask(be32_to_cpu(voltage_ranges[j]),
++				be32_to_cpu(voltage_ranges[j + 1]));
++		if (!mask) {
++			pr_err("%s: voltage-range #%d is invalid\n",
++				np->full_name, i);
++			return -EINVAL;
++		}
++		ocr_mask |= mask;
++	}
++
++	return ocr_mask;
++}
++EXPORT_SYMBOL(mmc_of_parse_voltage);
++
++#endif /* CONFIG_OF */
++
+ #ifdef CONFIG_REGULATOR
+ 
+ /**
+diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
+index 443243b..e3f8fe3 100644
+--- a/include/linux/mmc/core.h
++++ b/include/linux/mmc/core.h
+@@ -209,5 +209,6 @@ static inline void mmc_claim_host(struct mmc_host *host)
+ }
+ 
+ extern u32 mmc_vddrange_to_ocrmask(int vdd_min, int vdd_max);
++extern u32 mmc_of_parse_voltage(struct device_node *np);
+ 
+ #endif /* LINUX_MMC_CORE_H */
+-- 
+1.8.0
 
--Joel
 
-> 
-> Regards,
-> Sekhar
