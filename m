@@ -1,107 +1,46 @@
 From: Haijun Zhang <Haijun.Zhang@freescale.com>
-Subject: [PATCH 1/3 V2] mmc:core: parse voltage from device-tree
-Date: Wed, 31 Jul 2013 14:25:25 +0800
-Message-ID: <1375251927-3330-1-git-send-email-Haijun.Zhang@freescale.com>
+Subject: [PATCH 3/3 V2] mmc:esdhc: add support to get voltage from device-tree
+Date: Wed, 31 Jul 2013 14:25:26 +0800
+Message-ID: <1375251927-3330-2-git-send-email-Haijun.Zhang@freescale.com>
+References: <1375251927-3330-1-git-send-email-Haijun.Zhang@freescale.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from co1ehsobe006.messaging.microsoft.com ([216.32.180.189]:44488
-	"EHLO co1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752754Ab3GaHRw (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 31 Jul 2013 03:17:52 -0400
+Received: from va3ehsobe002.messaging.microsoft.com ([216.32.180.12]:9585 "EHLO
+	va3outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752754Ab3GaHR4 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 31 Jul 2013 03:17:56 -0400
+In-Reply-To: <1375251927-3330-1-git-send-email-Haijun.Zhang@freescale.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org, linuxppc-dev@lists.ozlabs.org
 Cc: cbouatmailru@gmail.com, cjb@laptop.org, scottwood@freescale.com, AFLEMING@freescale.com, Haijun Zhang <Haijun.Zhang@freescale.com>, Haijun Zhang <haijun.zhang@freescale.com>
 
-Add function to support get voltage from device-tree.
-If there are voltage-range specified in device-tree node, this function
-will parse it and return the avail voltage mask.
+Add suppport to get voltage from device-tree node for esdhc host,
+if voltage-ranges was specified in device-tree node we can get
+ocr_mask instead of read from host capacity register. If not voltages
+still can be get from host capacity register.
 
 Signed-off-by: Haijun Zhang <haijun.zhang@freescale.com>
 ---
 changes for v2:
 	- Update the parameters of function
 
- drivers/mmc/core/core.c  | 46 ++++++++++++++++++++++++++++++++++++++++++++++
- include/linux/mmc/core.h |  1 +
- 2 files changed, 47 insertions(+)
+ drivers/mmc/host/sdhci-of-esdhc.c | 1 +
+ 1 file changed, 1 insertion(+)
 
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 49a5bca..ce9c957 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -27,6 +27,7 @@
- #include <linux/fault-inject.h>
- #include <linux/random.h>
- #include <linux/slab.h>
-+#include <linux/of.h>
+diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
+index 15039e2..8a7e2af 100644
+--- a/drivers/mmc/host/sdhci-of-esdhc.c
++++ b/drivers/mmc/host/sdhci-of-esdhc.c
+@@ -316,6 +316,7 @@ static int sdhci_esdhc_probe(struct platform_device *pdev)
  
- #include <linux/mmc/card.h>
- #include <linux/mmc/host.h>
-@@ -1196,6 +1197,51 @@ u32 mmc_vddrange_to_ocrmask(int vdd_min, int vdd_max)
- }
- EXPORT_SYMBOL(mmc_vddrange_to_ocrmask);
+ 	/* call to generic mmc_of_parse to support additional capabilities */
+ 	mmc_of_parse(host->mmc);
++	host->ocr_mask = mmc_of_parse_voltage(np);
  
-+#ifdef CONFIG_OF
-+
-+/*
-+ * mmc_of_parse_voltage - return mask of supported voltages
-+ * @np: The device node need to be parsed.
-+ *
-+ * 1. Return zero: voltage-ranges unspecified in device-tree.
-+ * 2. Return negative errno: voltage-range is invalid.
-+ * 3. Return ocr_mask: a mask of voltages that parse from device-tree
-+ * node can be provided to MMC/SD/SDIO devices.
-+ */
-+
-+u32 mmc_of_parse_voltage(struct device_node *np)
-+{
-+	const u32 *voltage_ranges;
-+	int num_ranges, i;
-+	u32 ocr_mask = 0;
-+
-+	voltage_ranges = of_get_property(np, "voltage-ranges", &num_ranges);
-+	num_ranges = num_ranges / sizeof(*voltage_ranges) / 2;
-+	if (!voltage_ranges || !num_ranges) {
-+		pr_info("%s: voltage-ranges unspecified\n", np->full_name);
-+		return 0;
-+	}
-+
-+	for (i = 0; i < num_ranges; i++) {
-+		const int j = i * 2;
-+		u32 mask;
-+
-+		mask = mmc_vddrange_to_ocrmask(be32_to_cpu(voltage_ranges[j]),
-+				be32_to_cpu(voltage_ranges[j + 1]));
-+		if (!mask) {
-+			pr_err("%s: voltage-range #%d is invalid\n",
-+				np->full_name, i);
-+			return -EINVAL;
-+		}
-+		ocr_mask |= mask;
-+	}
-+
-+	return ocr_mask;
-+}
-+EXPORT_SYMBOL(mmc_of_parse_voltage);
-+
-+#endif /* CONFIG_OF */
-+
- #ifdef CONFIG_REGULATOR
- 
- /**
-diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
-index 443243b..e3f8fe3 100644
---- a/include/linux/mmc/core.h
-+++ b/include/linux/mmc/core.h
-@@ -209,5 +209,6 @@ static inline void mmc_claim_host(struct mmc_host *host)
- }
- 
- extern u32 mmc_vddrange_to_ocrmask(int vdd_min, int vdd_max);
-+extern u32 mmc_of_parse_voltage(struct device_node *np);
- 
- #endif /* LINUX_MMC_CORE_H */
+ 	ret = sdhci_add_host(host);
+ 	if (ret)
 -- 
 1.8.0
 
