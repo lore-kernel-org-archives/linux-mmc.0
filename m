@@ -1,39 +1,109 @@
-From: Doug Anderson <dianders@chromium.org>
-Subject: Re: [PATCH v2 3/5] mmc: dw_mmc: Add exynos resume_noirq callback to
- clear WAKEUP_INT
-Date: Wed, 31 Jul 2013 09:18:23 -0700
-Message-ID: <CAD=FV=XZcf8xWWxrCoe9KqjnQs4p4y7ENnuUYsVKU+yrE09GeQ@mail.gmail.com>
-References: <1373391071-6312-1-git-send-email-dianders@chromium.org>
-	<1373411961-23812-1-git-send-email-dianders@chromium.org>
-	<1373411961-23812-4-git-send-email-dianders@chromium.org>
-	<002a01ce7d7d$6bd9e870$438db950$%jun@samsung.com>
-	<CAD=FV=UtX0Z1ABdi5h270ks8Py2o1iPK4DonOHJH3N0Q1YShTQ@mail.gmail.com>
-	<003f01ce8154$2f5ea1d0$8e1be570$%jun@samsung.com>
+From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Subject: Re: [PATCH] mmc: tmio-mmc: Check the regulator_enable() return value
+Date: Wed, 31 Jul 2013 19:26:25 +0200 (CEST)
+Message-ID: <Pine.LNX.4.64.1307311925460.5256@axis700.grange>
+References: <1375280311-6003-1-git-send-email-laurent.pinchart+renesas@ideasonboard.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-Reply-To: <003f01ce8154$2f5ea1d0$8e1be570$%jun@samsung.com>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Seungwon Jeon <tgih.jun@samsung.com>
-Cc: Chris Ball <cjb@laptop.org>, Olof Johansson <olof@lixom.net>, Jaehoon Chung <jh80.chung@samsung.com>, James Hogan <james.hogan@imgtec.com>, Grant Grundler <grundler@chromium.org>, Alim Akhtar <alim.akhtar@samsung.com>, Abhilash Kesavan <a.kesavan@samsung.com>, Tomasz Figa <tomasz.figa@gmail.com>, Kukjin Kim <kgene.kim@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Content-Type: TEXT/PLAIN; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-sh-owner@vger.kernel.org>
+In-Reply-To: <1375280311-6003-1-git-send-email-laurent.pinchart+renesas@ideasonboard.com>
+Sender: linux-sh-owner@vger.kernel.org
+To: Laurent Pinchart <laurent.pinchart+renesas@ideasonboard.com>
+Cc: linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, Ian Molton <ian@mnementh.co.uk>
 List-Id: linux-mmc@vger.kernel.org
 
-Seungwon,
+Hi Laurent
 
-On Mon, Jul 15, 2013 at 5:09 AM, Seungwon Jeon <tgih.jun@samsung.com> wrote:
-> Sorry for late response.
-> Yes, it's not clear.
-> If you get the confirmation, could you share this problem?
-> Possibly, auto-clear may not be implemented.
-> Then, manual should be correct.
+On Wed, 31 Jul 2013, Laurent Pinchart wrote:
 
-I just got an update from my contacts.  They confirm that bit 11 is
-not automatically cleared and that writing to it will clear it.
-Hopefully this information will make it into the next version of any
-documentation that you receive as well.
+> The regulator_enable() function is marked with __must_check, check it=
+s
+> return value and return an error in case of failure. This removes the
+> following warning during kernel compilation:
+>=20
+> drivers/mmc/host/tmio_mmc_pio.c: In function =E2=80=98tmio_mmc_power_=
+on=E2=80=99:
+> drivers/mmc/host/tmio_mmc_pio.c:795:19: warning: ignoring return valu=
+e
+> of =E2=80=98regulator_enable=E2=80=99, declared with attribute warn_u=
+nused_result
+> [-Wunused-result]
+>=20
+> The error isn't propagated back to the MMC core, as the .set_ios()
+> operation in which the regulator is enabled doesn't have a return val=
+ue.
+> This should be fixed as well.
+>=20
+> Signed-off-by: Laurent Pinchart <laurent.pinchart+renesas@ideasonboar=
+d.com>
 
-It is still unclear exactly why the WAKEUP_INT was being asserted on
-our board despite the fact that all of the wakeup control signals
-(bits 10:8) were 0.  That is still being investigated.
+Should be fixed by now:
 
--Doug
+http://thread.gmane.org/gmane.linux.kernel.mmc/21294
+
+Thanks
+Guennadi
+
+> ---
+>  drivers/mmc/host/tmio_mmc_pio.c | 16 ++++++++++++----
+>  1 file changed, 12 insertions(+), 4 deletions(-)
+>=20
+> diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_=
+mmc_pio.c
+> index 4675513..e3e2645 100644
+> --- a/drivers/mmc/host/tmio_mmc_pio.c
+> +++ b/drivers/mmc/host/tmio_mmc_pio.c
+> @@ -770,15 +770,18 @@ static int tmio_mmc_clk_update(struct mmc_host =
+*mmc)
+>  	return ret;
+>  }
+> =20
+> -static void tmio_mmc_power_on(struct tmio_mmc_host *host, unsigned s=
+hort vdd)
+> +static int tmio_mmc_power_on(struct tmio_mmc_host *host, unsigned sh=
+ort vdd)
+>  {
+>  	struct mmc_host *mmc =3D host->mmc;
+> -	int ret =3D 0;
+> +	int ret;
+> =20
+>  	/* .set_ios() is returning void, so, no chance to report an error *=
+/
+> =20
+>  	if (!IS_ERR(mmc->supply.vmmc)) {
+>  		ret =3D mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, vdd);
+> +		if (ret < 0)
+> +			return ret;
+> +
+>  		/*
+>  		 * Attention: empiric value. With a b43 WiFi SDIO card this
+>  		 * delay proved necessary for reliable card-insertion probing.
+> @@ -791,10 +794,15 @@ static void tmio_mmc_power_on(struct tmio_mmc_h=
+ost *host, unsigned short vdd)
+>  	 * It seems, VccQ should be switched on after Vcc, this is also wha=
+t the
+>  	 * omap_hsmmc.c driver does.
+>  	 */
+> -	if (!IS_ERR(mmc->supply.vqmmc) && !ret) {
+> -		regulator_enable(mmc->supply.vqmmc);
+> +	if (!IS_ERR(mmc->supply.vqmmc)) {
+> +		ret =3D regulator_enable(mmc->supply.vqmmc);
+> +		if (ret < 0)
+> +			return ret;
+> +
+>  		udelay(200);
+>  	}
+> +
+> +	return 0;
+>  }
+> =20
+>  static void tmio_mmc_power_off(struct tmio_mmc_host *host)
+> --=20
+> 1.8.1.5
+>=20
+
+---
+Guennadi Liakhovetski, Ph.D.
+=46reelance Open-Source Software Developer
+http://www.open-technology.de/
