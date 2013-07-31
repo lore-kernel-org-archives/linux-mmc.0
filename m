@@ -1,66 +1,87 @@
-From: Sekhar Nori <nsekhar-l0cyMroinI0@public.gmane.org>
-Subject: Re: [PATCH 7/9] ARM: edma: Don't clear EMR of channel in edma_stop
-Date: Wed, 31 Jul 2013 15:05:24 +0530
-Message-ID: <51F8DA5C.9060503@ti.com>
-References: <1375104595-16018-1-git-send-email-joelf@ti.com>
-	<1375104595-16018-8-git-send-email-joelf@ti.com>
-	<51F77982.7030601@ti.com> <51F89B0B.4080803@ti.com>
+From: Laurent Pinchart <laurent.pinchart+renesas@ideasonboard.com>
+Subject: [PATCH] mmc: tmio-mmc: Check the regulator_enable() return value
+Date: Wed, 31 Jul 2013 16:18:31 +0200
+Message-ID: <1375280311-6003-1-git-send-email-laurent.pinchart+renesas@ideasonboard.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <davinci-linux-open-source-bounces+gld-davinci-linux-open-source=gmane.org-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
-In-Reply-To: <51F89B0B.4080803-l0cyMroinI0@public.gmane.org>
-List-Unsubscribe: <http://linux.davincidsp.com/mailman/options/davinci-linux-open-source>,
-	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://linux.davincidsp.com/pipermail/davinci-linux-open-source>
-List-Post: <mailto:davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
-List-Help: <mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=help>
-List-Subscribe: <http://linux.davincidsp.com/mailman/listinfo/davinci-linux-open-source>,
-	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=subscribe>
-Sender: <davinci-linux-open-source-bounces+gld-davinci-linux-open-source=gmane.org-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
-Errors-To: davinci-linux-open-source-bounces+gld-davinci-linux-open-source=gmane.org-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org
-To: Joel Fernandes <joelf-l0cyMroinI0@public.gmane.org>
-Cc: Mark Brown <broonie-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Grant Likely <grant.likely-s3s/WqlpOiPyB63q8FvJNQ@public.gmane.org>, Sricharan R <r.sricharan-l0cyMroinI0@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Vinod Koul <vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Lokesh Vutla <lokeshvutla-l0cyMroinI0@public.gmane.org>, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Rajendra Nayak <rnayak-l0cyMroinI0@public.gmane.org>, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Jason Kridner <jkridner-hcmAuCOw+vXj4SYmN/TMmA@public.gmane.org>, Linux OMAP List <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux ARM Kernel List <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Linux DaVinci Kernel List <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, Balaji TK <balajitk-l0cyMroinI0@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Santosh Shilimkar <santosh.shilim>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-sh-owner@vger.kernel.org>
+Sender: linux-sh-owner@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: linux-sh@vger.kernel.org, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Ian Molton <ian@mnementh.co.uk>
 List-Id: linux-mmc@vger.kernel.org
 
-On Wednesday 31 July 2013 10:35 AM, Joel Fernandes wrote:
-> On 07/30/2013 03:29 AM, Sekhar Nori wrote:
->> On Monday 29 July 2013 06:59 PM, Joel Fernandes wrote:
->>> We certainly don't want error conditions to be cleared anywhere
->>
->> 'anywhere' is a really loaded term.
->>
->>> as this will make us 'forget' about missed events. We depend on
->>> knowing which events were missed in order to be able to reissue them.
->>
->>> This fixes a race condition where the EMR was being cleared
->>> by the transfer completion interrupt handler.
->>>
->>> Basically, what was happening was:
->>>
->>>             Missed event
->>>              |
->>>              |
->>>              V
->>> SG1-SG2-SG3-Null
->>>          \
->>>           \__TC Interrupt (Almost same time as ARM is executing
->>> TC interrupt handler, an event got missed and also forgotten
->>> by clearing the EMR).
->>
->> Sorry, but I dont see how edma_stop() is coming into picture in the race
->> you describe?
-> 
-> In edma_callback function, for the case of DMA_COMPLETE (Transfer
-> completion interrupt), edma_stop() is called when all sets have been
-> processed. This had the effect of clearing the EMR.
+The regulator_enable() function is marked with __must_check, check its
+return value and return an error in case of failure. This removes the
+following warning during kernel compilation:
 
-Ah, thanks. I was missing the fact that the race comes into picture only
-when using the DMA engine driver. I guess that should be mentioned
-somewhere since it is not immediately obvious.
+drivers/mmc/host/tmio_mmc_pio.c: In function =E2=80=98tmio_mmc_power_on=
+=E2=80=99:
+drivers/mmc/host/tmio_mmc_pio.c:795:19: warning: ignoring return value
+of =E2=80=98regulator_enable=E2=80=99, declared with attribute warn_unu=
+sed_result
+[-Wunused-result]
 
-The patch looks good to me. So if you respin just this one with some
-updated explanation based on what you wrote below, I will take it.
+The error isn't propagated back to the MMC core, as the .set_ios()
+operation in which the regulator is enabled doesn't have a return value=
+=2E
+This should be fixed as well.
 
-Thanks,
-Sekhar
+Signed-off-by: Laurent Pinchart <laurent.pinchart+renesas@ideasonboard.=
+com>
+---
+ drivers/mmc/host/tmio_mmc_pio.c | 16 ++++++++++++----
+ 1 file changed, 12 insertions(+), 4 deletions(-)
+
+diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mm=
+c_pio.c
+index 4675513..e3e2645 100644
+--- a/drivers/mmc/host/tmio_mmc_pio.c
++++ b/drivers/mmc/host/tmio_mmc_pio.c
+@@ -770,15 +770,18 @@ static int tmio_mmc_clk_update(struct mmc_host *m=
+mc)
+ 	return ret;
+ }
+=20
+-static void tmio_mmc_power_on(struct tmio_mmc_host *host, unsigned sho=
+rt vdd)
++static int tmio_mmc_power_on(struct tmio_mmc_host *host, unsigned shor=
+t vdd)
+ {
+ 	struct mmc_host *mmc =3D host->mmc;
+-	int ret =3D 0;
++	int ret;
+=20
+ 	/* .set_ios() is returning void, so, no chance to report an error */
+=20
+ 	if (!IS_ERR(mmc->supply.vmmc)) {
+ 		ret =3D mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, vdd);
++		if (ret < 0)
++			return ret;
++
+ 		/*
+ 		 * Attention: empiric value. With a b43 WiFi SDIO card this
+ 		 * delay proved necessary for reliable card-insertion probing.
+@@ -791,10 +794,15 @@ static void tmio_mmc_power_on(struct tmio_mmc_hos=
+t *host, unsigned short vdd)
+ 	 * It seems, VccQ should be switched on after Vcc, this is also what =
+the
+ 	 * omap_hsmmc.c driver does.
+ 	 */
+-	if (!IS_ERR(mmc->supply.vqmmc) && !ret) {
+-		regulator_enable(mmc->supply.vqmmc);
++	if (!IS_ERR(mmc->supply.vqmmc)) {
++		ret =3D regulator_enable(mmc->supply.vqmmc);
++		if (ret < 0)
++			return ret;
++
+ 		udelay(200);
+ 	}
++
++	return 0;
+ }
+=20
+ static void tmio_mmc_power_off(struct tmio_mmc_host *host)
+--=20
+1.8.1.5
+
