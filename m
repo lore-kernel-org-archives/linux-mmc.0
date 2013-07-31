@@ -1,63 +1,94 @@
-From: Joel Fernandes <joelf@ti.com>
-Subject: Re: [PATCH v2] ARM: EDMA: Fix clearing of unused list for DT DMA
- resources
-Date: Wed, 31 Jul 2013 00:06:33 -0500
-Message-ID: <51F89B59.6010708@ti.com>
-References: <1374515989-7391-1-git-send-email-joelf@ti.com> <51F61359.1090309@ti.com> <51F73738.6080901@ti.com> <51F7E9D0.1080107@ti.com>
+From: Joel Fernandes <joelf-l0cyMroinI0@public.gmane.org>
+Subject: Re: [PATCH 7/9] ARM: edma: Don't clear EMR of channel in edma_stop
+Date: Wed, 31 Jul 2013 00:05:15 -0500
+Message-ID: <51F89B0B.4080803@ti.com>
+References: <1375104595-16018-1-git-send-email-joelf@ti.com>
+	<1375104595-16018-8-git-send-email-joelf@ti.com>
+	<51F77982.7030601@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from bear.ext.ti.com ([192.94.94.41]:32793 "EHLO bear.ext.ti.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754374Ab3GaFW2 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 31 Jul 2013 01:22:28 -0400
-In-Reply-To: <51F7E9D0.1080107@ti.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <davinci-linux-open-source-bounces+gld-davinci-linux-open-source=gmane.org-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
+In-Reply-To: <51F77982.7030601-l0cyMroinI0@public.gmane.org>
+List-Unsubscribe: <http://linux.davincidsp.com/mailman/options/davinci-linux-open-source>,
+	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://linux.davincidsp.com/pipermail/davinci-linux-open-source>
+List-Post: <mailto:davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
+List-Help: <mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=help>
+List-Subscribe: <http://linux.davincidsp.com/mailman/listinfo/davinci-linux-open-source>,
+	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=subscribe>
+Sender: <davinci-linux-open-source-bounces+gld-davinci-linux-open-source=gmane.org-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
+Errors-To: davinci-linux-open-source-bounces+gld-davinci-linux-open-source=gmane.org-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org
+To: Sekhar Nori <nsekhar-l0cyMroinI0@public.gmane.org>
+Cc: Mark Brown <broonie-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Grant Likely <grant.likely-s3s/WqlpOiPyB63q8FvJNQ@public.gmane.org>, Sricharan R <r.sricharan-l0cyMroinI0@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Vinod Koul <vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Lokesh Vutla <lokeshvutla-l0cyMroinI0@public.gmane.org>, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Rajendra Nayak <rnayak-l0cyMroinI0@public.gmane.org>, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Jason Kridner <jkridner-hcmAuCOw+vXj4SYmN/TMmA@public.gmane.org>, Linux OMAP List <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux ARM Kernel List <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Linux DaVinci Kernel List <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, Balaji TK <balajitk-l0cyMroinI0@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Santosh Shilimkar <santosh.shilim>
 List-Id: linux-mmc@vger.kernel.org
-To: Sekhar Nori <nsekhar@ti.com>
-Cc: Tony Lindgren <tony@atomide.com>, Vinod Koul <vinod.koul@intel.com>, Benoit Cousson <benoit.cousson@linaro.org>, Balaji TK <balajitk@ti.com>, Arnd Bergmann <arnd@arndb.de>, Jason Kridner <jkridner@beagleboard.org>, Mark Jackson <mpfj-list@newflow.co.uk>, Linux OMAP List <linux-omap@vger.kernel.org>, Linux ARM Kernel List <linux-arm-kernel@lists.infradead.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux MMC List <linux-mmc@vger.kernel.org>, Pantel Antoniou <panto@antoniou-consulting.com>
 
-On 07/30/2013 11:29 AM, Sekhar Nori wrote:
-> On 7/30/2013 9:17 AM, Joel Fernandes wrote:
+On 07/30/2013 03:29 AM, Sekhar Nori wrote:
+> On Monday 29 July 2013 06:59 PM, Joel Fernandes wrote:
+>> We certainly don't want error conditions to be cleared anywhere
 > 
->>>> diff --git a/arch/arm/common/edma.c b/arch/arm/common/edma.c
->>>> index a432e6c..765d578 100644
->>>> --- a/arch/arm/common/edma.c
->>>> +++ b/arch/arm/common/edma.c
+> 'anywhere' is a really loaded term.
 > 
->>>> +	} else {
->>>> +		for (; i < pdev->num_resources; i++) {
->>>> +			if ((pdev->resource[i].flags & IORESOURCE_DMA) &&
->>>> +			    (int)pdev->resource[i].start >= 0) {
->>>> +				ctlr = EDMA_CTLR(pdev->resource[i].start);
->>>> +				clear_bit(EDMA_CHAN_SLOT(
->>>> +					  pdev->resource[i].start),
->>>> +					  edma_cc[ctlr]->edma_unused);
->>>> +			}
->>>
->>> So there is very little in common between OF and non-OF versions of this
->>> function. Why not have two different versions of this function for the
->>> two cases? The OF version can reside under the CONFIG_OF conditional
->>> already in use in the file. This will also save you the ugly line breaks
->>> you had to resort to due to too deep indentation.
+>> as this will make us 'forget' about missed events. We depend on
+>> knowing which events were missed in order to be able to reissue them.
+> 
+>> This fixes a race condition where the EMR was being cleared
+>> by the transfer completion interrupt handler.
 >>
->> Actually those line breaks are not necessary and wouldn't result in
->> compilation errors. I was planning to drop them. I'll go ahead and split
->> it out anyway, now that also the OF version of the function is going to
->> be bit longer if we use the of_parse functions.
+>> Basically, what was happening was:
 >>
->> Thanks for your review,
+>>             Missed event
+>>              |
+>>              |
+>>              V
+>> SG1-SG2-SG3-Null
+>>          \
+>>           \__TC Interrupt (Almost same time as ARM is executing
+>> TC interrupt handler, an event got missed and also forgotten
+>> by clearing the EMR).
 > 
-> It turns out, I gave a bad idea. What I suggested will break the case of
-> non-DT boot with CONFIG_OF enabled. So what you had was fine. May be
-> just return from "if (dev->of_node)" so you don't need to have an else
-> block and can save on the indentation.>
+> Sorry, but I dont see how edma_stop() is coming into picture in the race
+> you describe?
 
-Ok, sure. I will go ahead and return from the if block.
+In edma_callback function, for the case of DMA_COMPLETE (Transfer
+completion interrupt), edma_stop() is called when all sets have been
+processed. This had the effect of clearing the EMR.
+
+This has 2 problems:
+
+1.
+If error interrupt is also pending and TC interrupt clears the EMR.
+
+Due to this the ARM will execute the error interrupt even though the EMR
+is clear. As a result, the following if condition in dma_ccerr_handler
+will be true and IRQ_NONE is returned.
+
+        if ((edma_read_array(ctlr, EDMA_EMR, 0) == 0) &&
+            (edma_read_array(ctlr, EDMA_EMR, 1) == 0) &&
+            (edma_read(ctlr, EDMA_QEMR) == 0) &&
+            (edma_read(ctlr, EDMA_CCERR) == 0))
+                return IRQ_NONE;
+
+If this happens enough number of times, IRQ subsystem disables the
+interrupt thinking its spurious which creates serious problems.
+
+2.
+If the above if statement condition is removed, then EMR is 0 so the
+callback function will not be called in dma_ccerr_handler thus the event
+is forgotten, never triggered manually or never sets missed flag of the
+channel.
+
+So about the race: TC interrupt handler executing before the error
+interrupt handler can result in clearing the EMR and creates these problems.
+
+>> The EMR is ultimately being cleared by the Error interrupt
+>> handler once it is handled so we don't have to do it in edma_stop.
+> 
+> This, I agree with. edma_clean_channel() also there to re-initialize the
+> channel so doing it in edma_stop() certainly seems superfluous.
+
+Sure.
 
 Thanks,
 
 -Joel
-
-
