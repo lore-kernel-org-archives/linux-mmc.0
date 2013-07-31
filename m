@@ -1,56 +1,45 @@
-From: Bjorn Andersson <bjorn@kryo.se>
-Subject: Re: [PATCH] mmc: sdhci-msm: Add support for MSM chipsets
-Date: Tue, 30 Jul 2013 16:19:44 -0800
-Message-ID: <CAJAp7OgOT82G=W8RpDvaogskUmAN26CWq4gKUs45RwOeU8pXvQ@mail.gmail.com>
-References: <1375201355-26906-1-git-send-email-gdjakov@mm-sol.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH 4/5] mmc: dw_mmc: Indicate that regulators may be absent
+Date: Wed, 31 Jul 2013 12:29:27 +0900
+Message-ID: <51F88497.5020909@samsung.com>
+References: <1375184777-25404-1-git-send-email-broonie@kernel.org>
+ <1375184777-25404-4-git-send-email-broonie@kernel.org>
+ <003901ce8d29$610ab3f0$23201bd0$%jun@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
-In-Reply-To: <1375201355-26906-1-git-send-email-gdjakov@mm-sol.com>
-Sender: linux-arm-msm-owner@vger.kernel.org
-To: Georgi Djakov <gdjakov@mm-sol.com>
-Cc: linux-mmc@vger.kernel.org, cjb@laptop.org, grant.likely@linaro.org, rob.herring@calxeda.com, linux-kernel@vger.kernel.org, devicetree@vger.kernel.org, linux-arm-msm@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Asutosh Das <asutoshd@codeaurora.org>, Venkat Gopalakrishnan <venkatg@codeaurora.org>, Sahitya Tummala <stummala@codeaurora.org>, Subhash Jadavani <subhashj@codeaurora.org>
+Content-Type: text/plain; charset=EUC-KR
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout2.samsung.com ([203.254.224.25]:9702 "EHLO
+	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753785Ab3GaD3W (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 30 Jul 2013 23:29:22 -0400
+In-reply-to: <003901ce8d29$610ab3f0$23201bd0$%jun@samsung.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Seungwon Jeon <tgih.jun@samsung.com>
+Cc: 'Mark Brown' <broonie@kernel.org>, 'Liam Girdwood' <lgirdwood@gmail.com>, 'Chris Ball' <cjb@laptop.org>, 'Jaehoon Chung' <jh80.chung@samsung.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linaro-kernel@lists.linaro.org, 'Mark Brown' <broonie@linaro.org>
 
-On Tue, Jul 30, 2013 at 8:22 AM, Georgi Djakov <gdjakov@mm-sol.com> wrote:
-> This platform driver adds the support of Secure Digital Host
-> Controller Interface compliant controller in MSM chipsets.
->
-> [snip]
-> +
-> +       sdhc_1: qcom,sdhc@f9824900 {
-> +               compatible = "qcom,sdhci-msm";
-> +                       reg = <0xf9824900 0x11c>, <0xf9824000 0x800>;
-> +                       reg-names = "hc_mem", "core_mem";
-> +                       interrupts = <0 123 0>, <0 138 0>;
-> +                       interrupt-names = "hc_irq", "pwr_irq";
-> +
-> +               vdd-supply = <&pm8941_l21>;
-> +               vdd-io-supply = <&pm8941_l13>;
-> +               qcom,vdd-voltage-level = <2950000 2950000>;
-> +               qcom,vdd-current-level = <9000 800000>;
-> +
-> +               qcom,vdd-io-always-on;
-> +               qcom,vdd-io-lpm-sup;
-> +               qcom,vdd-io-voltage-level = <1800000 2950000>;
-> +               qcom,vdd-io-current-level = <6 22000>;
-> +
-> +               bus-width = <4>;
-> +               non-removable;
-> +               qcom,bus-speed-mode = "HS200_1p8v", "DDR_1p8v";
-> +
-> +               gpios = <&msmgpio 40 0>, /* CLK */
-> +                       <&msmgpio 39 0>, /* CMD */
-> +                       <&msmgpio 38 0>, /* DATA0 */
-> +                       <&msmgpio 37 0>, /* DATA1 */
-> +                       <&msmgpio 36 0>, /* DATA2 */
-> +                       <&msmgpio 35 0>; /* DATA3 */
-> +               qcom,gpio-names = "CLK", "CMD", "DAT0", "DAT1", "DAT2", "DAT3";
+Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
 
-I believe these gpio references (and in the rest of the patch) should
-be replaced by pinctrl. As far as I can see it provides what you want
-and gives you configurability and potential sleep states of those pins
-nicely integrated.
+Best Regards,
+Jaehoon Chung
 
-Regards,
-Bjorn
+On 07/30/2013 10:33 PM, Seungwon Jeon wrote:
+> On Tue, July 30, 2013, Mark Brown wrote:
+>> From: Mark Brown <broonie@linaro.org>
+>>
+>> Use regulator_get_optional() to tell the core that requests for regulators
+>> can fail in a real system.
+>>
+>> Signed-off-by: Mark Brown <broonie@linaro.org>
+> Acked-by: Seungwon Jeon <tgih.jun@samsung.com>
+> 
+> Thanks,
+> Seungwon Jeon
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+
