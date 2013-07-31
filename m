@@ -1,87 +1,61 @@
-From: Laurent Pinchart <laurent.pinchart+renesas@ideasonboard.com>
-Subject: [PATCH] mmc: tmio-mmc: Check the regulator_enable() return value
-Date: Wed, 31 Jul 2013 16:18:31 +0200
-Message-ID: <1375280311-6003-1-git-send-email-laurent.pinchart+renesas@ideasonboard.com>
+From: Georgi Djakov <gdjakov@mm-sol.com>
+Subject: Re: [PATCH] mmc: sdhci-msm: Add support for MSM chipsets
+Date: Wed, 31 Jul 2013 18:14:06 +0300
+Message-ID: <51F929BE.1050505@mm-sol.com>
+References: <1375201355-26906-1-git-send-email-gdjakov@mm-sol.com> <CAJAp7OgOT82G=W8RpDvaogskUmAN26CWq4gKUs45RwOeU8pXvQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-sh-owner@vger.kernel.org>
-Sender: linux-sh-owner@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: linux-sh@vger.kernel.org, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Ian Molton <ian@mnementh.co.uk>
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: <CAJAp7OgOT82G=W8RpDvaogskUmAN26CWq4gKUs45RwOeU8pXvQ@mail.gmail.com>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: Bjorn Andersson <bjorn@kryo.se>
+Cc: linux-mmc@vger.kernel.org, cjb@laptop.org, grant.likely@linaro.org, rob.herring@calxeda.com, linux-kernel@vger.kernel.org, devicetree@vger.kernel.org, linux-arm-msm@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Asutosh Das <asutoshd@codeaurora.org>, Venkat Gopalakrishnan <venkatg@codeaurora.org>, Sahitya Tummala <stummala@codeaurora.org>, Subhash Jadavani <subhashj@codeaurora.org>
 List-Id: linux-mmc@vger.kernel.org
 
-The regulator_enable() function is marked with __must_check, check its
-return value and return an error in case of failure. This removes the
-following warning during kernel compilation:
+On 07/31/2013 03:19 AM, Bjorn Andersson wrote:
+> On Tue, Jul 30, 2013 at 8:22 AM, Georgi Djakov <gdjakov@mm-sol.com> wrote:
+>> This platform driver adds the support of Secure Digital Host
+>> Controller Interface compliant controller in MSM chipsets.
+>>
+>> [snip]
+>> +
+>> +       sdhc_1: qcom,sdhc@f9824900 {
+>> +               compatible = "qcom,sdhci-msm";
+>> +                       reg = <0xf9824900 0x11c>, <0xf9824000 0x800>;
+>> +                       reg-names = "hc_mem", "core_mem";
+>> +                       interrupts = <0 123 0>, <0 138 0>;
+>> +                       interrupt-names = "hc_irq", "pwr_irq";
+>> +
+>> +               vdd-supply = <&pm8941_l21>;
+>> +               vdd-io-supply = <&pm8941_l13>;
+>> +               qcom,vdd-voltage-level = <2950000 2950000>;
+>> +               qcom,vdd-current-level = <9000 800000>;
+>> +
+>> +               qcom,vdd-io-always-on;
+>> +               qcom,vdd-io-lpm-sup;
+>> +               qcom,vdd-io-voltage-level = <1800000 2950000>;
+>> +               qcom,vdd-io-current-level = <6 22000>;
+>> +
+>> +               bus-width = <4>;
+>> +               non-removable;
+>> +               qcom,bus-speed-mode = "HS200_1p8v", "DDR_1p8v";
+>> +
+>> +               gpios = <&msmgpio 40 0>, /* CLK */
+>> +                       <&msmgpio 39 0>, /* CMD */
+>> +                       <&msmgpio 38 0>, /* DATA0 */
+>> +                       <&msmgpio 37 0>, /* DATA1 */
+>> +                       <&msmgpio 36 0>, /* DATA2 */
+>> +                       <&msmgpio 35 0>; /* DATA3 */
+>> +               qcom,gpio-names = "CLK", "CMD", "DAT0", "DAT1", "DAT2", "DAT3";
+>
+> I believe these gpio references (and in the rest of the patch) should
+> be replaced by pinctrl. As far as I can see it provides what you want
+> and gives you configurability and potential sleep states of those pins
+> nicely integrated.
+>
 
-drivers/mmc/host/tmio_mmc_pio.c: In function =E2=80=98tmio_mmc_power_on=
-=E2=80=99:
-drivers/mmc/host/tmio_mmc_pio.c:795:19: warning: ignoring return value
-of =E2=80=98regulator_enable=E2=80=99, declared with attribute warn_unu=
-sed_result
-[-Wunused-result]
+Thanks! I'll make it use the pinctrl driver that is coming too.
 
-The error isn't propagated back to the MMC core, as the .set_ios()
-operation in which the regulator is enabled doesn't have a return value=
-=2E
-This should be fixed as well.
-
-Signed-off-by: Laurent Pinchart <laurent.pinchart+renesas@ideasonboard.=
-com>
----
- drivers/mmc/host/tmio_mmc_pio.c | 16 ++++++++++++----
- 1 file changed, 12 insertions(+), 4 deletions(-)
-
-diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mm=
-c_pio.c
-index 4675513..e3e2645 100644
---- a/drivers/mmc/host/tmio_mmc_pio.c
-+++ b/drivers/mmc/host/tmio_mmc_pio.c
-@@ -770,15 +770,18 @@ static int tmio_mmc_clk_update(struct mmc_host *m=
-mc)
- 	return ret;
- }
-=20
--static void tmio_mmc_power_on(struct tmio_mmc_host *host, unsigned sho=
-rt vdd)
-+static int tmio_mmc_power_on(struct tmio_mmc_host *host, unsigned shor=
-t vdd)
- {
- 	struct mmc_host *mmc =3D host->mmc;
--	int ret =3D 0;
-+	int ret;
-=20
- 	/* .set_ios() is returning void, so, no chance to report an error */
-=20
- 	if (!IS_ERR(mmc->supply.vmmc)) {
- 		ret =3D mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, vdd);
-+		if (ret < 0)
-+			return ret;
-+
- 		/*
- 		 * Attention: empiric value. With a b43 WiFi SDIO card this
- 		 * delay proved necessary for reliable card-insertion probing.
-@@ -791,10 +794,15 @@ static void tmio_mmc_power_on(struct tmio_mmc_hos=
-t *host, unsigned short vdd)
- 	 * It seems, VccQ should be switched on after Vcc, this is also what =
-the
- 	 * omap_hsmmc.c driver does.
- 	 */
--	if (!IS_ERR(mmc->supply.vqmmc) && !ret) {
--		regulator_enable(mmc->supply.vqmmc);
-+	if (!IS_ERR(mmc->supply.vqmmc)) {
-+		ret =3D regulator_enable(mmc->supply.vqmmc);
-+		if (ret < 0)
-+			return ret;
-+
- 		udelay(200);
- 	}
-+
-+	return 0;
- }
-=20
- static void tmio_mmc_power_off(struct tmio_mmc_host *host)
---=20
-1.8.1.5
-
+BR,
+Georgi
