@@ -1,61 +1,39 @@
-From: Georgi Djakov <gdjakov@mm-sol.com>
-Subject: Re: [PATCH] mmc: sdhci-msm: Add support for MSM chipsets
-Date: Wed, 31 Jul 2013 18:14:06 +0300
-Message-ID: <51F929BE.1050505@mm-sol.com>
-References: <1375201355-26906-1-git-send-email-gdjakov@mm-sol.com> <CAJAp7OgOT82G=W8RpDvaogskUmAN26CWq4gKUs45RwOeU8pXvQ@mail.gmail.com>
+From: Doug Anderson <dianders@chromium.org>
+Subject: Re: [PATCH v2 3/5] mmc: dw_mmc: Add exynos resume_noirq callback to
+ clear WAKEUP_INT
+Date: Wed, 31 Jul 2013 09:18:23 -0700
+Message-ID: <CAD=FV=XZcf8xWWxrCoe9KqjnQs4p4y7ENnuUYsVKU+yrE09GeQ@mail.gmail.com>
+References: <1373391071-6312-1-git-send-email-dianders@chromium.org>
+	<1373411961-23812-1-git-send-email-dianders@chromium.org>
+	<1373411961-23812-4-git-send-email-dianders@chromium.org>
+	<002a01ce7d7d$6bd9e870$438db950$%jun@samsung.com>
+	<CAD=FV=UtX0Z1ABdi5h270ks8Py2o1iPK4DonOHJH3N0Q1YShTQ@mail.gmail.com>
+	<003f01ce8154$2f5ea1d0$8e1be570$%jun@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
-In-Reply-To: <CAJAp7OgOT82G=W8RpDvaogskUmAN26CWq4gKUs45RwOeU8pXvQ@mail.gmail.com>
-Sender: linux-arm-msm-owner@vger.kernel.org
-To: Bjorn Andersson <bjorn@kryo.se>
-Cc: linux-mmc@vger.kernel.org, cjb@laptop.org, grant.likely@linaro.org, rob.herring@calxeda.com, linux-kernel@vger.kernel.org, devicetree@vger.kernel.org, linux-arm-msm@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Asutosh Das <asutoshd@codeaurora.org>, Venkat Gopalakrishnan <venkatg@codeaurora.org>, Sahitya Tummala <stummala@codeaurora.org>, Subhash Jadavani <subhashj@codeaurora.org>
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-Reply-To: <003f01ce8154$2f5ea1d0$8e1be570$%jun@samsung.com>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: Seungwon Jeon <tgih.jun@samsung.com>
+Cc: Chris Ball <cjb@laptop.org>, Olof Johansson <olof@lixom.net>, Jaehoon Chung <jh80.chung@samsung.com>, James Hogan <james.hogan@imgtec.com>, Grant Grundler <grundler@chromium.org>, Alim Akhtar <alim.akhtar@samsung.com>, Abhilash Kesavan <a.kesavan@samsung.com>, Tomasz Figa <tomasz.figa@gmail.com>, Kukjin Kim <kgene.kim@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 07/31/2013 03:19 AM, Bjorn Andersson wrote:
-> On Tue, Jul 30, 2013 at 8:22 AM, Georgi Djakov <gdjakov@mm-sol.com> wrote:
->> This platform driver adds the support of Secure Digital Host
->> Controller Interface compliant controller in MSM chipsets.
->>
->> [snip]
->> +
->> +       sdhc_1: qcom,sdhc@f9824900 {
->> +               compatible = "qcom,sdhci-msm";
->> +                       reg = <0xf9824900 0x11c>, <0xf9824000 0x800>;
->> +                       reg-names = "hc_mem", "core_mem";
->> +                       interrupts = <0 123 0>, <0 138 0>;
->> +                       interrupt-names = "hc_irq", "pwr_irq";
->> +
->> +               vdd-supply = <&pm8941_l21>;
->> +               vdd-io-supply = <&pm8941_l13>;
->> +               qcom,vdd-voltage-level = <2950000 2950000>;
->> +               qcom,vdd-current-level = <9000 800000>;
->> +
->> +               qcom,vdd-io-always-on;
->> +               qcom,vdd-io-lpm-sup;
->> +               qcom,vdd-io-voltage-level = <1800000 2950000>;
->> +               qcom,vdd-io-current-level = <6 22000>;
->> +
->> +               bus-width = <4>;
->> +               non-removable;
->> +               qcom,bus-speed-mode = "HS200_1p8v", "DDR_1p8v";
->> +
->> +               gpios = <&msmgpio 40 0>, /* CLK */
->> +                       <&msmgpio 39 0>, /* CMD */
->> +                       <&msmgpio 38 0>, /* DATA0 */
->> +                       <&msmgpio 37 0>, /* DATA1 */
->> +                       <&msmgpio 36 0>, /* DATA2 */
->> +                       <&msmgpio 35 0>; /* DATA3 */
->> +               qcom,gpio-names = "CLK", "CMD", "DAT0", "DAT1", "DAT2", "DAT3";
->
-> I believe these gpio references (and in the rest of the patch) should
-> be replaced by pinctrl. As far as I can see it provides what you want
-> and gives you configurability and potential sleep states of those pins
-> nicely integrated.
->
+Seungwon,
 
-Thanks! I'll make it use the pinctrl driver that is coming too.
+On Mon, Jul 15, 2013 at 5:09 AM, Seungwon Jeon <tgih.jun@samsung.com> wrote:
+> Sorry for late response.
+> Yes, it's not clear.
+> If you get the confirmation, could you share this problem?
+> Possibly, auto-clear may not be implemented.
+> Then, manual should be correct.
 
-BR,
-Georgi
+I just got an update from my contacts.  They confirm that bit 11 is
+not automatically cleared and that writing to it will clear it.
+Hopefully this information will make it into the next version of any
+documentation that you receive as well.
+
+It is still unclear exactly why the WAKEUP_INT was being asserted on
+our board despite the fact that all of the wakeup control signals
+(bits 10:8) were 0.  That is still being investigated.
+
+-Doug
