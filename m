@@ -1,71 +1,96 @@
-From: Haijun Zhang <Haijun.Zhang@freescale.com>
-Subject: [PATCH] mmc:of_spi: Update the code of getting voltage-ranges
-Date: Wed, 31 Jul 2013 14:25:27 +0800
-Message-ID: <1375251927-3330-3-git-send-email-Haijun.Zhang@freescale.com>
-References: <1375251927-3330-1-git-send-email-Haijun.Zhang@freescale.com>
+From: "Shen, Jackey" <Jackey.Shen@amd.com>
+Subject: RE: [PATCH] mmc: clean up the duplicate code
+Date: Wed, 31 Jul 2013 09:12:17 +0000
+Message-ID: <0C8FBB70FF40A94D98BE847F9C171A9803A89B3A@SCYBEXDAG04.amd.com>
+References: <1368782263-10133-1-git-send-email-jackey.shen@amd.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from tx2ehsobe002.messaging.microsoft.com ([65.55.88.12]:19095 "EHLO
-	tx2outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752754Ab3GaHR7 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 31 Jul 2013 03:17:59 -0400
-In-Reply-To: <1375251927-3330-1-git-send-email-Haijun.Zhang@freescale.com>
+Received: from ch1ehsobe004.messaging.microsoft.com ([216.32.181.184]:18031
+	"EHLO ch1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1755480Ab3GaJMe convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 31 Jul 2013 05:12:34 -0400
+In-Reply-To: <1368782263-10133-1-git-send-email-jackey.shen@amd.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, linuxppc-dev@lists.ozlabs.org
-Cc: cbouatmailru@gmail.com, cjb@laptop.org, scottwood@freescale.com, AFLEMING@freescale.com, Haijun Zhang <Haijun.Zhang@freescale.com>, Haijun Zhang <haijun.zhang@freescale.com>
+To: Chris Ball <cjb@laptop.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "Shen, Jackey" <Jackey.Shen@amd.com>
 
-Using function mmc_of_parse_voltage() to get voltage-ranges.
+Hi Chris,
 
-Signed-off-by: Haijun Zhang <haijun.zhang@freescale.com>
+Could you please push into mmc-next if you have no comments?
+
+Thanks,
+Jackey 
+
+-----Original Message-----
+From: Jackey Shen [mailto:jackey.shen@amd.com] 
+Sent: Friday, May 17, 2013 5:18 PM
+To: linux-mmc@vger.kernel.org
+Cc: Shen, Jackey
+Subject: [PATCH] mmc: clean up the duplicate code
+
+clean up the duplicate micros:
+mmc_sd_card_uhs -> mmc_card_uhs
+mmc_sd_card_set_uhs -> mmc_card_set_uhs
+
+Signed-off-by: Jackey Shen <jackey.shen@amd.com>
 ---
- drivers/mmc/host/of_mmc_spi.c | 22 ++++------------------
- 1 file changed, 4 insertions(+), 18 deletions(-)
+ drivers/mmc/core/bus.c            |    2 +-
+ drivers/mmc/host/rtsx_pci_sdmmc.c |    2 +-
+ include/linux/mmc/card.h          |    2 --
+ 3 files changed, 2 insertions(+), 4 deletions(-)
 
-diff --git a/drivers/mmc/host/of_mmc_spi.c b/drivers/mmc/host/of_mmc_spi.c
-index d720b5e..7d10991 100644
---- a/drivers/mmc/host/of_mmc_spi.c
-+++ b/drivers/mmc/host/of_mmc_spi.c
-@@ -92,6 +92,7 @@ struct mmc_spi_platform_data *mmc_spi_get_pdata(struct spi_device *spi)
- 	struct of_mmc_spi *oms;
- 	const u32 *voltage_ranges;
- 	int num_ranges;
-+	u32 ocr_mask;
- 	int i;
- 	int ret = -EINVAL;
+diff --git a/drivers/mmc/core/bus.c b/drivers/mmc/core/bus.c
+index e219c97..820f6fa 100644
+--- a/drivers/mmc/core/bus.c
++++ b/drivers/mmc/core/bus.c
+@@ -298,7 +298,7 @@ int mmc_add_card(struct mmc_card *card)
+ 		break;
+ 	}
  
-@@ -102,26 +103,11 @@ struct mmc_spi_platform_data *mmc_spi_get_pdata(struct spi_device *spi)
- 	if (!oms)
- 		return NULL;
+-	if (mmc_sd_card_uhs(card) &&
++	if (mmc_card_uhs(card) &&
+ 		(card->sd_bus_speed < ARRAY_SIZE(uhs_speeds)))
+ 		uhs_bus_speed_mode = uhs_speeds[card->sd_bus_speed];
  
--	voltage_ranges = of_get_property(np, "voltage-ranges", &num_ranges);
--	num_ranges = num_ranges / sizeof(*voltage_ranges) / 2;
--	if (!voltage_ranges || !num_ranges) {
--		dev_err(dev, "OF: voltage-ranges unspecified\n");
-+	ocr_mask = mmc_of_parse_voltage(np);
-+	if (ocr_mask <= 0)
- 		goto err_ocr;
--	}
--
--	for (i = 0; i < num_ranges; i++) {
--		const int j = i * 2;
--		u32 mask;
- 
--		mask = mmc_vddrange_to_ocrmask(be32_to_cpu(voltage_ranges[j]),
--					       be32_to_cpu(voltage_ranges[j + 1]));
--		if (!mask) {
--			ret = -EINVAL;
--			dev_err(dev, "OF: voltage-range #%d is invalid\n", i);
--			goto err_ocr;
--		}
--		oms->pdata.ocr_mask |= mask;
--	}
-+	oms->pdata.ocr_mask |= ocr_mask;
- 
- 	for (i = 0; i < ARRAY_SIZE(oms->gpios); i++) {
- 		enum of_gpio_flags gpio_flags;
+diff --git a/drivers/mmc/host/rtsx_pci_sdmmc.c b/drivers/mmc/host/rtsx_pci_sdmmc.c
+index ad13f42..c979b86 100644
+--- a/drivers/mmc/host/rtsx_pci_sdmmc.c
++++ b/drivers/mmc/host/rtsx_pci_sdmmc.c
+@@ -359,7 +359,7 @@ static int sd_rw_multi(struct realtek_pci_sdmmc *host, struct mmc_request *mrq)
+ 	struct mmc_host *mmc = host->mmc;
+ 	struct mmc_card *card = mmc->card;
+ 	struct mmc_data *data = mrq->data;
+-	int uhs = mmc_sd_card_uhs(card);
++	int uhs = mmc_card_uhs(card);
+ 	int read = (data->flags & MMC_DATA_READ) ? 1 : 0;
+ 	u8 cfg2, trans_mode;
+ 	int err;
+diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+index f31725b..8ac2079 100644
+--- a/include/linux/mmc/card.h
++++ b/include/linux/mmc/card.h
+@@ -412,7 +412,6 @@ static inline void __maybe_unused remove_quirk(struct mmc_card *card, int data)
+ #define mmc_card_blockaddr(c)	((c)->state & MMC_STATE_BLOCKADDR)
+ #define mmc_card_ddr_mode(c)	((c)->state & MMC_STATE_HIGHSPEED_DDR)
+ #define mmc_card_uhs(c)		((c)->state & MMC_STATE_ULTRAHIGHSPEED)
+-#define mmc_sd_card_uhs(c)	((c)->state & MMC_STATE_ULTRAHIGHSPEED)
+ #define mmc_card_ext_capacity(c) ((c)->state & MMC_CARD_SDXC)
+ #define mmc_card_removed(c)	((c) && ((c)->state & MMC_CARD_REMOVED))
+ #define mmc_card_doing_bkops(c)	((c)->state & MMC_STATE_DOING_BKOPS)
+@@ -424,7 +423,6 @@ static inline void __maybe_unused remove_quirk(struct mmc_card *card, int data)
+ #define mmc_card_set_blockaddr(c) ((c)->state |= MMC_STATE_BLOCKADDR)
+ #define mmc_card_set_ddr_mode(c) ((c)->state |= MMC_STATE_HIGHSPEED_DDR)
+ #define mmc_card_set_uhs(c) ((c)->state |= MMC_STATE_ULTRAHIGHSPEED)
+-#define mmc_sd_card_set_uhs(c) ((c)->state |= MMC_STATE_ULTRAHIGHSPEED)
+ #define mmc_card_set_ext_capacity(c) ((c)->state |= MMC_CARD_SDXC)
+ #define mmc_card_set_removed(c) ((c)->state |= MMC_CARD_REMOVED)
+ #define mmc_card_set_doing_bkops(c)	((c)->state |= MMC_STATE_DOING_BKOPS)
 -- 
-1.8.0
+1.7.10.4
 
 
