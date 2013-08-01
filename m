@@ -1,7 +1,7 @@
 From: Joel Fernandes <joelf-l0cyMroinI0@public.gmane.org>
 Subject: Re: [PATCH 4/9] dma: edma: Find missed events and issue them
-Date: Wed, 31 Jul 2013 22:43:09 -0500
-Message-ID: <51F9D94D.5060702@ti.com>
+Date: Wed, 31 Jul 2013 23:39:36 -0500
+Message-ID: <51F9E688.7010608@ti.com>
 References: <1375104595-16018-1-git-send-email-joelf@ti.com>
 	<1375104595-16018-5-git-send-email-joelf@ti.com>
 	<51F7659E.3040302@ti.com> <51F89763.1010102@ti.com>
@@ -9,7 +9,7 @@ References: <1375104595-16018-1-git-send-email-joelf@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
+Return-path: <davinci-linux-open-source-bounces+gld-davinci-linux-open-source=gmane.org-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
 In-Reply-To: <51F9C793.2000001-l0cyMroinI0@public.gmane.org>
 List-Unsubscribe: <http://linux.davincidsp.com/mailman/options/davinci-linux-open-source>,
 	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=unsubscribe>
@@ -18,8 +18,8 @@ List-Post: <mailto:davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@pu
 List-Help: <mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=help>
 List-Subscribe: <http://linux.davincidsp.com/mailman/listinfo/davinci-linux-open-source>,
 	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=subscribe>
-Sender: <davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
-Errors-To: davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org
+Sender: <davinci-linux-open-source-bounces+gld-davinci-linux-open-source=gmane.org-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
+Errors-To: davinci-linux-open-source-bounces+gld-davinci-linux-open-source=gmane.org-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org
 To: joelf-l0cyMroinI0@public.gmane.org
 Cc: Mark Brown <broonie-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Grant Likely <grant.likely-s3s/WqlpOiPyB63q8FvJNQ@public.gmane.org>, Sricharan R <r.sricharan-l0cyMroinI0@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Vinod Koul <vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Lokesh Vutla <lokeshvutla-l0cyMroinI0@public.gmane.org>, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Rajendra Nayak <rnayak-l0cyMroinI0@public.gmane.org>, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Jason Kridner <jkridner-hcmAuCOw+vXj4SYmN/TMmA@public.gmane.org>, Linux OMAP List <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux ARM Kernel List <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Linux DaVinci Kernel List <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, Balaji TK <balajitk-l0cyMroinI0@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Santosh Shilimkar <santosh.shilim>
 List-Id: linux-mmc@vger.kernel.org
@@ -76,16 +76,146 @@ On 07/31/2013 09:27 PM, Joel Fernandes wrote:
 >> series, I am worried that EDMA drivers is advertizing that it can handle
 >> any length SG list while not taking care of missing any events while
 >> doing so. This will break the assumptions that driver writers make.
+> 
+> This is already being done by some other DMA engine drivers ;). We can
+> advertise more than we can handle at a time, that's the basis of this
+> whole idea.
+> 
+> I understand what you're saying but events are not something that have
+> be serviced immediately, they can be queued etc and the actually
+> transfer from the DMA controller can be delayed. As long as we don't
+> miss the event we are fine which my series takes care off.
+> 
+> So far I have tested this series on following modules in various
+> configurations and have seen no issues:
+> - Crypto AES
+> - MMC/SD
+> - SPI (128x160 display)
+> 
+>>>> Also, wont this lead to under-utilization of the peripheral bandwith?
+>>>> Meaning, MMC/SD is ready with data but cannot transfer because the DMA
+>>>> is waiting to be set-up.
+>>>
+>>> But it is waiting anyway even today. Currently based on MAX segs, MMC
+>>> driver/subsystem will make SG list of size max_segs. Between these
+>>> sessions of creating such smaller SG-lists, if for some reason the MMC
+>>> controller is sending events, these will be lost anyway.
+>>
+>> But if MMC/SD driver knows how many events it should generate if it
+>> knows the MAX SG limit. So there should not be any missed events in
+>> current code. And I am not claiming that your solution is making matters
+>> worse. But its not making it much better as well.
+> 
+> This is not true for crypto, the events are not deasserted and crypto
+> continues to send events. This is what led to the "don't trigger in
+> Null" patch where I'm setting the missed flag to avoid recursion.
+> 
+>>> This can be used only for buffers that are contiguous in memory, not
+>>> those that are scattered across memory.
+>>
+>> I was hinting at using the linking facility of EDMA to achieve this.
+>> Each PaRAM set has full 32-bit source and destination pointers so I see
+>> no reason why non-contiguous case cannot be handled.
+>>
+>> Lets say you need to transfer SG[0..6] on channel C. Now, PaRAM sets are
+>> typically 4 times the number of channels. In this case we use one DMA
+>> PaRAM set and two Link PaRAM sets per channel. P0 is the DMA PaRAM set
+>> and P1 and P2 are the Link sets.
+>>
+>> Initial setup:
+>>
+>> SG0 -> SG1 -> SG2 -> SG3 -> SG4 -> SG5 -> SG6 -> NULL
+>>  ^      ^      ^
+>>  |      |      |
+>> P0  -> P1  -> P2  -> NULL
+>>
+>> P[0..2].TCINTEN = 1, so get an interrupt after each SG element
+>> completion. On each completion interrupt, hardware automatically copies
+>> the linked PaRAM set into the DMA PaRAM set so after SG0 is transferred
+>> out, the state of hardware is:
+>>
+>> SG1  -> SG2 -> SG3 -> SG3 -> SG6 -> NULL
+>>  ^       ^
+>>  |       |
+>> P0,1    P2  -> NULL
+>>  |       ^
+>>  |       |
+>>  ---------
+>>
+>> SG1 transfer has already started by the time the TC interrupt is
+>> handled. As you can see P1 is now redundant and ready to be recycled. So
+>> in the interrupt handler, software recycles P1. Thus:
+>>
+>> SG1 -> SG2 -> SG3 -> SG4 -> SG5 -> SG6 -> NULL
+>>  ^      ^      ^
+>>  |      |      |
+>> P0  -> P2  -> P1  -> NULL
+>>
+>> Now, on next interrupt, P2 gets copied and thus can get recycled.
+>> Hardware state:
+>>
+>> SG2  -> SG3 -> SG4 -> SG5 -> SG6 -> NULL
+>>  ^       ^
+>>  |       |
+>> P0,2    P1  -> NULL
+>>  |       ^
+>>  |       |
+>>  ---------
+>>
+>> As part of TC completion interrupt handling:
+>>
+>> SG2 -> SG3 -> SG4 -> SG5 -> SG6 -> NULL
+>>  ^      ^      ^
+>>  |      |      |
+>> P0  -> P1  -> P2  -> NULL
+>>
+>> This goes on until the SG list in exhausted. If you use more PaRAM sets,
+>> interrupt handler gets more time to recycle the PaRAM set. At no point
+>> we touch P0 as it is always under active transfer. Thus the peripheral
+>> is always kept busy.
+>>
+>> Do you see any reason why such a mechanism cannot be implemented?
+> 
+> This is possible and looks like another way to do it, but there are 2
+> problems I can see with it.
+> 
+> 1. Its inefficient because of too many interrupts:
+> 
+> Imagine case where we have an SG list of size 30 and MAX_NR_SG size is
+> 10. This method will trigger 30 interrupts always, where as with my
+> patch series, you'd get only 3 interrupts. If you increase MAX_SG_NR ,
+> you'd get even fewer interrupts.
+> 
+> 2. If the interrupt handler for some reason doesn't complete or get
+> service in time, we will end up DMA'ing incorrect data as events
+> wouldn't stop coming in even if interrupt is not yet handled (in your
+> example linked sets P1 or P2 would be old ones being repeated). Where as
+> with my method, we are not doing any DMA once we finish the current
+> MAX_NR_SG set even if events continue to come.
+> 
 
-Sorry, just forgot to respond to "not taking care of missing any events
-while doing so". Can you clarify this? DMA engine driver is taking care
-of missed events.
+Actually on second thought, 1. can be tackled by having a list of PaRAM
+set instead of just 1 set for P1, and another list in P2. And ping-pong
+between the P1 and P2 sets only interrupting in between to setup one or
+the other. However 2. is still a concern.
 
-Also- missing of events doesn't result in feedback to the peripheral.
-Peripheral sends even to DMA controller, event is missed. Peripheral
-doesn't know anything about what happened and is waiting for transfer
-from the DMA controller.
+Still, what you're asking for is a rewrite of quite a bit of the driver
+which I feel is unnecessary at this point as my patch series is
+alternate method that's been tested and  working.
 
-Thanks,
+The only point of concern I think you have with the series is how will
+peripherals react if their events are not handled right away. I am
+certain that the peripheral doesn't go into an error condition state
+because it doesn't know that its event was missed and it'd be just
+waiting. I haven't dealt with EDMA queuing but wouldn't this kind of
+wait be happening even with such queues. Another note is, the waiting is
+happening even in today's state of the driver where we limit by
+MAX_NR_SG. Probably not the same kind of wait as this series (like send
+event and wait), but peripheral just not doing anything.
+
+Let me know if you had a specific case of a peripheral where this could
+be a problem and I'll be happy to test it. Thanks.
+
+Regards,
 
 -Joel
