@@ -1,81 +1,142 @@
-From: Zoran Markovic <zoran.markovic@linaro.org>
-Subject: Re: [RFC PATCH] mmc: Enable wakeup_sources for mmc core
-Date: Thu, 1 Aug 2013 00:42:28 -0700
-Message-ID: <CAME+o4kpsPkoTpS7_0STDpMQpZr0KyfD1prbYYJs147-5DiMkg@mail.gmail.com>
-References: <1371146190-16786-1-git-send-email-zoran.markovic@linaro.org>
-	<CAPDyKFrD=q4hOQps5ENJdmAPJyKG1cj7+P6MtXdQ8KQ1cPjnpQ@mail.gmail.com>
-	<CAME+o4mM-YmcZ4pcdWo7mzrDUi2R2LhihgcnbYixOm8KnGfnBA@mail.gmail.com>
-	<CAMbhsRRokPi59J8SghGL0QhUWKDqMuvfbT3TdPosXud_WxRV2Q@mail.gmail.com>
-	<CAPDyKFqy9EEb6o8wYABYT6zE-7Rb0xxo8Y0DuAwooeYZp5=Grw@mail.gmail.com>
-	<CAMbhsRSC5XhhSK-DAoS7_JAj7XUfaM_Topp4UcBaVwRCYXSscQ@mail.gmail.com>
-	<CAPDyKFpMGS-JA47pY_n7xvqdtbPumGpc2fdnYZnSVQ_Rybre3g@mail.gmail.com>
-	<CAMbhsRQwGbpa4a1RziV92qnw4VFh6+=oQiadfqa17FANEiK8_Q@mail.gmail.com>
-	<CAPDyKFroFY3-NJCFpkDYyBVx25CSfk492H_TnoS60jn2CdfWUQ@mail.gmail.com>
-	<CAMbhsRTR9im-BsJ-1m+DD-67LM=s0=KOoy-o+2PmnkDyLOP0Gg@mail.gmail.com>
-	<CAPDyKFoX-ioDVVkfQ21epJyTqQD98xvsqBR1FXzgP9bN6_Zxjg@mail.gmail.com>
-	<CAME+o4=WrfpvJo=jN1KZ_JHnYq9Frfk3EPcwtG10=aCwrbY+Rw@mail.gmail.com>
-	<CAPDyKFpKYeqoFn=S6P2tu1s2C28daCh4vcHTUCCRUOx2_MHShg@mail.gmail.com>
+From: majianpeng <majianpeng@gmail.com>
+Subject: Re: Re: [PATCH] mmc: omap_hsmmc: Fix sleep too long in ISR context.
+Date: Thu, 1 Aug 2013 16:40:05 +0800
+Message-ID: <201308011640027321434@gmail.com>
+References: <201308011017566117580@gmail.com>,
+	<51FA1AB7.8030105@yahoo.es>
+Reply-To: majianpeng <majianpeng@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ob0-f179.google.com ([209.85.214.179]:61296 "EHLO
-	mail-ob0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751551Ab3HAHm3 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 1 Aug 2013 03:42:29 -0400
-Received: by mail-ob0-f179.google.com with SMTP id fb19so3290533obc.10
-        for <linux-mmc@vger.kernel.org>; Thu, 01 Aug 2013 00:42:29 -0700 (PDT)
-In-Reply-To: <CAPDyKFpKYeqoFn=S6P2tu1s2C28daCh4vcHTUCCRUOx2_MHShg@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain;
+	charset="gb2312"
+Content-Transfer-Encoding: base64
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Hein Tibosch <hein_tibosch@yahoo.es>
+Cc: balajitk <balajitk@ti.com>, cjb <cjb@laptop.org>, mayuzheng <mayuzheng@kedacom.com>, linux-mmc <linux-mmc@vger.kernel.org>, linux-omap <linux-omap@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>, Felipe Balbi <balbi@ti.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Colin Cross <ccross@android.com>, lkml <linux-kernel@vger.kernel.org>, linux-mmc@vger.kernel.org, San Mehat <san@google.com>, John Stultz <john.stultz@linaro.org>, Chris Ball <cjb@laptop.org>, Johan Rudholm <johan.rudholm@stericsson.com>, Jaehoon Chung <jh80.chung@samsung.com>, Konstantin Dorfman <kdorfman@codeaurora.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Tejun Heo <tj@kernel.org>, Andrew Morton <akpm@linux-foundation.org>
 
-Ulf,
-I got confirmation from Broadcom that all cell phone reference designs
-have card insert/removal configured as a wakeup IRQ. Unless our
-customers change that - which I doubt - this results in a considerable
-number of products implementing this feature.
-
-Please let me know how you wish to proceed.
-
-Cheers,
-Zoran
-
-On 26 June 2013 13:57, Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> On 24 June 2013 21:58, Zoran Markovic <zoran.markovic@linaro.org> wrote:
->>>> This patch is ported from the Android common tree, so you've probably
->>>> been using it.
->>>
->>> We removed more or less all Android code in the mmc subsystem, since
->>> it just didn't work. :-)
->>>
->>> The "deferred resume" was very useful though, so after some rework we
->>> kept it and could then improve the system resume time significantly.
->>
->> For what it's worth, I fixed one bug I noticed in the Android kernel:
->> if a system has a non-removable MMC device, a suspend/resume cycle on
->> this device would hold a wake lock forever. This was a visible issue
->> on the panda board I am using.
->>
->> If there are doubts on whether or not the system should stay awake
->> during a MMC mount, we have the option to make the calls to
->> wakeup_source_register/unregister configurable. Skipping these calls
->> would leave the .ws field NULL, in which case
->> __pm_stay_awake/__pm_relax/__pm_wakeup_event would do nothing.
->
-> Even if we make this feature configurable, I can't see any host driver
-> that would benefit from it as of today. The reason is simply that host
-> drivers do not configure it's card detect irq as a wakeup irq. Myself
-> is also having quite hard to see the benefit of doing that, but I
-> don't know all the use cases.
->
-> Let's see if we can get someone else to provide input...
->
->>
->> Thoughts?
->>
->> - Zoran
->
->
-> Kind regards
-> Ulf Hansson
+PkhpIEppYW5wZW5nIE1hLA0KPg0KPk9uIDgvMS8yMDEzIDEwOjE4IEFNLCBtYWppYW5wZW5nIHdy
+b3RlOg0KPj4gV2UgZm91bmQgYSBwcm9ibGVtIHdoZW4gd2UgcmVtb3ZlZCBhIHdvcmtpbmcgc2Qg
+Y2FyZCB0aGF0IHRoZSBpcnFhY3Rpb24NCj4+IG9mIG9tYXBfaHNtbWMgY2FuIHNsZWVwIHRvIDMu
+NnMuIFRoaXMgY2F1c2Ugb3VyIHdhdGNoZG9nIHRvIHdvcmsuDQo+PiBJbiBmdW5jIG9tYXBfaHNt
+bWNfcmVzZXRfY29udHJvbGxlcl9mc20sIGl0IHNob3VsZCB3YXRjaCBhIDAtPjENCj4+IHRyYW5z
+aXRpb24uSXQgdXNlZCBsb29wc19wZXJfamlmZnkgYXMgdGhlIHRpbWVyLg0KPj4gVGhlIGNvZGUg
+aXM6DQo+Pj4gd2hpbGUgKCghKE9NQVBfSFNNTUNfUkVBRChob3N0LT5iYXNlLCBTWVNDVEwpICYg
+Yml0KSkNCj4+PiAgICAgICAgICAgICAgICAmJiAoaSsrIDwgbGltaXQpKQ0KPj4+ICAgICAgICAg
+ICAgICAgICAgICAgICAgY3B1X3JlbGF4KCk7DQo+PiBCdXQgdGhlIGxvb3BzX3Blcl9qaWZmeSBp
+czoNCj4+PiAgd2hpbGUoaSsrIDwgbGltaXQpDQo+Pj4gCWNwdV9yZWxheCgpOw0KPj4gSXQgYWRk
+IHNvbWUgY29kZXMgc28gdGhlIHRpbWUgYmVjYW1lIGxvbmcuDQo+PiBCZWNhc3VlIHRob3NlIGNv
+ZGVzIGluIElTUiBjb250ZXh0LCBpdCBjYW4ndCB1c2UgdGltZXJfYmVmb3JlL2FmdGVyLg0KPj4g
+SSBkaXZpdmVkIHRoZSB0aW1lIGludG8gMW1zIGFuZCB1c2VkIHVkZWxheSgxKSB0byBpbnN0ZWFk
+Lg0KPj4gSXQgd2lsbCBjYXVzZSBkbyBhZGRpdGlvbmFsIHVkZWxheSgxKS5CdXQgZnJvbSBteSB0
+ZXN0LGl0IGxvb2tzIGdvb2QuDQo+Pg0KPj4gUmVwb3J0ZWQtYnk6IFl1emhlbmcgTWEgPG1heXV6
+aGVuZ0BrZWRhY29tLmNvbT4NCj4+IFRlc3RlZC1ieTogWXV6aGVuZyBNYSA8bWF5dXpoZW5nQGtl
+ZGFjb20uY29tPg0KPj4gU2lnbmVkLW9mZi1ieTogSmlhbnBlbmcgTWEgPG1hamlhbnBlbmdAZ21h
+aWwuY29tPg0KPj4gLS0tDQo+PiAgZHJpdmVycy9tbWMvaG9zdC9vbWFwX2hzbW1jLmMgfCAyMCAr
+KysrKysrKysrKysrLS0tLS0tLQ0KPj4gIDEgZmlsZSBjaGFuZ2VkLCAxMyBpbnNlcnRpb25zKCsp
+LCA3IGRlbGV0aW9ucygtKQ0KPj4NCj4+IGRpZmYgLS1naXQgYS9kcml2ZXJzL21tYy9ob3N0L29t
+YXBfaHNtbWMuYyBiL2RyaXZlcnMvbW1jL2hvc3Qvb21hcF9oc21tYy5jDQo+PiBpbmRleCAxODY1
+MzIxLi45NmRhY2ExIDEwMDY0NA0KPj4gLS0tIGEvZHJpdmVycy9tbWMvaG9zdC9vbWFwX2hzbW1j
+LmMNCj4+ICsrKyBiL2RyaXZlcnMvbW1jL2hvc3Qvb21hcF9oc21tYy5jDQo+PiBAQCAtOTc3LDYg
+Kzk3Nyw4IEBAIHN0YXRpYyBpbmxpbmUgdm9pZCBvbWFwX2hzbW1jX3Jlc2V0X2NvbnRyb2xsZXJf
+ZnNtKHN0cnVjdCBvbWFwX2hzbW1jX2hvc3QgKmhvc3QsDQo+PiAgCXVuc2lnbmVkIGxvbmcgbGlt
+aXQgPSAobG9vcHNfcGVyX2ppZmZ5ICoNCj4+ICAJCQkJbXNlY3NfdG9famlmZmllcyhNTUNfVElN
+RU9VVF9NUykpOw0KPj4gIA0KPj4gKwkvKkRpdmlkZWQgdGltZSBpbnRvIHVzIGZvciB1bml0IDEs
+d2UgY2FuIHVzZSB1ZGVsYXkoMSkqLw0KPj4gKwlpID0gbGltaXQgLyAoTU1DX1RJTUVPVVRfTVMg
+KiAxMDAwKTsNCj4NCj4nbGltaXQnIGlzIGEgbnVtYmVyIG9mIGxvb3BzLCB3aGljaCB5b3Ugbm93
+IGRpdmlkZSBieSAyMCwwMDA/DQo+DQo+VG8gZ2V0IHVTLCB5b3UgY291bGQganVzdCBjaGFuZ2U6
+DQo+DQo+LQl1bnNpZ25lZCBsb25nIGxpbWl0ID0gKGxvb3BzX3Blcl9qaWZmeSAqDQo+LQkJCQlt
+c2Vjc190b19qaWZmaWVzKE1NQ19USU1FT1VUX01TKSk7DQo+Kwl1bnNpZ25lZCBsb25nIGxpbWl0
+ID0gMTAwMCAqIE1NQ19USU1FT1VUX01TOw0KPg0KWWVzLCB5b3UgYXJlIHJpZ2h0Lg0KPmFuZCBt
+YWtlIHRoaXMgYW1vdW50IG9mIGxvb3BzIHVzaW5nIHVkZWxheSgpLg0KPg0KPj4gIAlPTUFQX0hT
+TU1DX1dSSVRFKGhvc3QtPmJhc2UsIFNZU0NUTCwNCj4+ICAJCQkgT01BUF9IU01NQ19SRUFEKGhv
+c3QtPmJhc2UsIFNZU0NUTCkgfCBiaXQpOw0KPj4gIA0KPj4gQEAgLTk4NSwxNSArOTg3LDE5IEBA
+IHN0YXRpYyBpbmxpbmUgdm9pZCBvbWFwX2hzbW1jX3Jlc2V0X2NvbnRyb2xsZXJfZnNtKHN0cnVj
+dCBvbWFwX2hzbW1jX2hvc3QgKmhvc3QsDQo+PiAgCSAqIE1vbml0b3IgYSAwLT4xIHRyYW5zaXRp
+b24gZmlyc3QNCj4+ICAJICovDQo+PiAgCWlmIChtbWNfc2xvdChob3N0KS5mZWF0dXJlcyAmIEhT
+TU1DX0hBU19VUERBVEVEX1JFU0VUKSB7DQo+PiAtCQl3aGlsZSAoKCEoT01BUF9IU01NQ19SRUFE
+KGhvc3QtPmJhc2UsIFNZU0NUTCkgJiBiaXQpKQ0KPj4gLQkJCQkJJiYgKGkrKyA8IGxpbWl0KSkN
+Cj4+IC0JCQljcHVfcmVsYXgoKTsNCj4NCj5JIHN0aWxsIGRvbid0IHNlZSB3aHkgYW55IG9mIHRo
+ZXNlIGxvb3BzIGNvdWxkIGxhc3QgMy42IHNlY29uZHM/DQo+WWVzIHRoZSBfX3Jhd19yZWFkbCgp
+IHdpbGwgYWRkIHNvbWUgdGltZSwgYnV0IHNvIG11Y2g/DQo+SSdkIGxpa2UgdG8gc2VlIHdoaWNo
+IHZhbHVlIHlvdSBnZXQgZm9yICdsaW1pdCcgb24geW91ciBtYWNoaW5lDQo+V291bGQgUE0gcGxh
+eSBhIHJvbGU/IE9yIGNwdS1mcmVxLCBhbmQgJ2xvb3BzX3Blcl9qaWZmeScgaXNuJ3QgdXBkYXRl
+ZA0KPm9uIHRpbWU/DQpGcm9tIG15IHRlc3QsIGkgZm91bmQgaXQgZG9uJ3QgbW9uaXRvciBhIDAt
+PjEgdHJhbnN0aW9uLlRoYXQgaXMgdGhlIGxhc3QgcmVzdWx0IGlzICdpID0gbGltaXQnLg0KVGhl
+IGxhdGVyIHdoaWxlIG9wZXJ0aW9uIHN0b3AgYWxzbyBiZWNhdXNlICdpID0gbGltaXQnLg0KVGhl
+IGJhc2ljIHJlYXNvbiBpcyB0aGUgaGFyZHdhcmUuIA0KSXQgd3JpdGUgYml0IGFuZCBtb25pdG9y
+IDEtLT4wLS0tMT4tLS0wLkJ1dCB3ZSBzdGFydCBtb25pdG9yIHdlIG9ubHkgZ290IDAgYW5kIHRo
+ZSB2YWx1ZSBkb24ndCBjaGFuZ2UuDQpNYXliZSB0aGUgdHJhbnNpdGlvbiBpcyAxLS0+MC5TbyB0
+aGUgbW9uaXRvciBjYW4ndCB3b3JrIGJ1dCBzdGlsbCB3YXN0ZSBjcHUuDQoNCj4NCj4+ICsJCXdo
+aWxlIChpLS0pIHsNCj4+ICsJCQlpZiAoKE9NQVBfSFNNTUNfUkVBRChob3N0LT5iYXNlLCBTWVND
+VEwpICYgYml0KSkNCj4+ICsJCQkJYnJlYWs7DQo+PiArCQkJdWRlbGF5KDEpOw0KPg0KPkluIGVh
+cmxpZXIgdGhyZWFkcywgdGhlIHVzZSBvZiB1ZGVsYXkgd2FzIGRpc2xpa2VkIGJlY2F1c2UgaXQn
+cyBhIHdhc3RlDQo+b2YgY3B1IGN5Y2xlcy4gVGhlIGRlc2lyZWQgYml0IGluIFNZU0NUTCB3aWxs
+IGNoYW5nZSwgd2hpbGUgdWRlbGF5KCkNCj5pcyBzdGlsbCBtYWtpbmcgbWFueSB1c2VsZXNzIGxv
+b3BzLg0KWWVzLCBidXQgaXQgYXQgbW9zdCB3YXN0IDF1cy4NCg0KSmlhbnBlbmcgTWENCj4NCj4+
+ICsJCX0NCj4+ICAJfQ0KPj4gLQlpID0gMDsNCj4+ICANCj4+IC0Jd2hpbGUgKChPTUFQX0hTTU1D
+X1JFQUQoaG9zdC0+YmFzZSwgU1lTQ1RMKSAmIGJpdCkgJiYNCj4+IC0JCShpKysgPCBsaW1pdCkp
+DQo+PiAtCQljcHVfcmVsYXgoKTsNCj4+ICsJaSA9IGxpbWl0IC8gKE1NQ19USU1FT1VUX01TICog
+MTAwMCk7DQo+PiArCXdoaWxlIChpLS0pIHsNCj4+ICsJCWlmICghKE9NQVBfSFNNTUNfUkVBRCho
+b3N0LT5iYXNlLCBTWVNDVEwpICYgYml0KSkNCj4+ICsJCQlicmVhazsNCj4+ICsJCXVkZWFseSgx
+KTsNCj4+ICsJfQ0KPj4gIA0KPj4gIAlpZiAoT01BUF9IU01NQ19SRUFEKGhvc3QtPmJhc2UsIFNZ
+U0NUTCkgJiBiaXQpDQo+PiAgCQlkZXZfZXJyKG1tY19kZXYoaG9zdC0+bW1jKSwNCj5IZWluDQpU
+aGFua3MhDQpKaWFucGVuZyBNYQ0KPkhpIEppYW5wZW5nIE1hLA0KPg0KPk9uIDgvMS8yMDEzIDEw
+OjE4IEFNLCBtYWppYW5wZW5nIHdyb3RlOg0KPj4gV2UgZm91bmQgYSBwcm9ibGVtIHdoZW4gd2Ug
+cmVtb3ZlZCBhIHdvcmtpbmcgc2QgY2FyZCB0aGF0IHRoZSBpcnFhY3Rpb24NCj4+IG9mIG9tYXBf
+aHNtbWMgY2FuIHNsZWVwIHRvIDMuNnMuIFRoaXMgY2F1c2Ugb3VyIHdhdGNoZG9nIHRvIHdvcmsu
+DQo+PiBJbiBmdW5jIG9tYXBfaHNtbWNfcmVzZXRfY29udHJvbGxlcl9mc20sIGl0IHNob3VsZCB3
+YXRjaCBhIDAtPjENCj4+IHRyYW5zaXRpb24uSXQgdXNlZCBsb29wc19wZXJfamlmZnkgYXMgdGhl
+IHRpbWVyLg0KPj4gVGhlIGNvZGUgaXM6DQo+Pj4gd2hpbGUgKCghKE9NQVBfSFNNTUNfUkVBRCho
+b3N0LT5iYXNlLCBTWVNDVEwpICYgYml0KSkNCj4+PiAgICAgICAgICAgICAgICAmJiAoaSsrIDwg
+bGltaXQpKQ0KPj4+ICAgICAgICAgICAgICAgICAgICAgICAgY3B1X3JlbGF4KCk7DQo+PiBCdXQg
+dGhlIGxvb3BzX3Blcl9qaWZmeSBpczoNCj4+PiAgd2hpbGUoaSsrIDwgbGltaXQpDQo+Pj4gCWNw
+dV9yZWxheCgpOw0KPj4gSXQgYWRkIHNvbWUgY29kZXMgc28gdGhlIHRpbWUgYmVjYW1lIGxvbmcu
+DQo+PiBCZWNhc3VlIHRob3NlIGNvZGVzIGluIElTUiBjb250ZXh0LCBpdCBjYW4ndCB1c2UgdGlt
+ZXJfYmVmb3JlL2FmdGVyLg0KPj4gSSBkaXZpdmVkIHRoZSB0aW1lIGludG8gMW1zIGFuZCB1c2Vk
+IHVkZWxheSgxKSB0byBpbnN0ZWFkLg0KPj4gSXQgd2lsbCBjYXVzZSBkbyBhZGRpdGlvbmFsIHVk
+ZWxheSgxKS5CdXQgZnJvbSBteSB0ZXN0LGl0IGxvb2tzIGdvb2QuDQo+Pg0KPj4gUmVwb3J0ZWQt
+Ynk6IFl1emhlbmcgTWEgPG1heXV6aGVuZ0BrZWRhY29tLmNvbT4NCj4+IFRlc3RlZC1ieTogWXV6
+aGVuZyBNYSA8bWF5dXpoZW5nQGtlZGFjb20uY29tPg0KPj4gU2lnbmVkLW9mZi1ieTogSmlhbnBl
+bmcgTWEgPG1hamlhbnBlbmdAZ21haWwuY29tPg0KPj4gLS0tDQo+PiAgZHJpdmVycy9tbWMvaG9z
+dC9vbWFwX2hzbW1jLmMgfCAyMCArKysrKysrKysrKysrLS0tLS0tLQ0KPj4gIDEgZmlsZSBjaGFu
+Z2VkLCAxMyBpbnNlcnRpb25zKCspLCA3IGRlbGV0aW9ucygtKQ0KPj4NCj4+IGRpZmYgLS1naXQg
+YS9kcml2ZXJzL21tYy9ob3N0L29tYXBfaHNtbWMuYyBiL2RyaXZlcnMvbW1jL2hvc3Qvb21hcF9o
+c21tYy5jDQo+PiBpbmRleCAxODY1MzIxLi45NmRhY2ExIDEwMDY0NA0KPj4gLS0tIGEvZHJpdmVy
+cy9tbWMvaG9zdC9vbWFwX2hzbW1jLmMNCj4+ICsrKyBiL2RyaXZlcnMvbW1jL2hvc3Qvb21hcF9o
+c21tYy5jDQo+PiBAQCAtOTc3LDYgKzk3Nyw4IEBAIHN0YXRpYyBpbmxpbmUgdm9pZCBvbWFwX2hz
+bW1jX3Jlc2V0X2NvbnRyb2xsZXJfZnNtKHN0cnVjdCBvbWFwX2hzbW1jX2hvc3QgKmhvc3QsDQo+
+PiAgCXVuc2lnbmVkIGxvbmcgbGltaXQgPSAobG9vcHNfcGVyX2ppZmZ5ICoNCj4+ICAJCQkJbXNl
+Y3NfdG9famlmZmllcyhNTUNfVElNRU9VVF9NUykpOw0KPj4gIA0KPj4gKwkvKkRpdmlkZWQgdGlt
+ZSBpbnRvIHVzIGZvciB1bml0IDEsd2UgY2FuIHVzZSB1ZGVsYXkoMSkqLw0KPj4gKwlpID0gbGlt
+aXQgLyAoTU1DX1RJTUVPVVRfTVMgKiAxMDAwKTsNCj4NCj4nbGltaXQnIGlzIGEgbnVtYmVyIG9m
+IGxvb3BzLCB3aGljaCB5b3Ugbm93IGRpdmlkZSBieSAyMCwwMDA/DQo+DQo+VG8gZ2V0IHVTLCB5
+b3UgY291bGQganVzdCBjaGFuZ2U6DQo+DQo+LQl1bnNpZ25lZCBsb25nIGxpbWl0ID0gKGxvb3Bz
+X3Blcl9qaWZmeSAqDQo+LQkJCQltc2Vjc190b19qaWZmaWVzKE1NQ19USU1FT1VUX01TKSk7DQo+
+Kwl1bnNpZ25lZCBsb25nIGxpbWl0ID0gMTAwMCAqIE1NQ19USU1FT1VUX01TOw0KPg0KPmFuZCBt
+YWtlIHRoaXMgYW1vdW50IG9mIGxvb3BzIHVzaW5nIHVkZWxheSgpLg0KPg0KPj4gIAlPTUFQX0hT
+TU1DX1dSSVRFKGhvc3QtPmJhc2UsIFNZU0NUTCwNCj4+ICAJCQkgT01BUF9IU01NQ19SRUFEKGhv
+c3QtPmJhc2UsIFNZU0NUTCkgfCBiaXQpOw0KPj4gIA0KPj4gQEAgLTk4NSwxNSArOTg3LDE5IEBA
+IHN0YXRpYyBpbmxpbmUgdm9pZCBvbWFwX2hzbW1jX3Jlc2V0X2NvbnRyb2xsZXJfZnNtKHN0cnVj
+dCBvbWFwX2hzbW1jX2hvc3QgKmhvc3QsDQo+PiAgCSAqIE1vbml0b3IgYSAwLT4xIHRyYW5zaXRp
+b24gZmlyc3QNCj4+ICAJICovDQo+PiAgCWlmIChtbWNfc2xvdChob3N0KS5mZWF0dXJlcyAmIEhT
+TU1DX0hBU19VUERBVEVEX1JFU0VUKSB7DQo+PiAtCQl3aGlsZSAoKCEoT01BUF9IU01NQ19SRUFE
+KGhvc3QtPmJhc2UsIFNZU0NUTCkgJiBiaXQpKQ0KPj4gLQkJCQkJJiYgKGkrKyA8IGxpbWl0KSkN
+Cj4+IC0JCQljcHVfcmVsYXgoKTsNCj4NCj5JIHN0aWxsIGRvbid0IHNlZSB3aHkgYW55IG9mIHRo
+ZXNlIGxvb3BzIGNvdWxkIGxhc3QgMy42IHNlY29uZHM/DQo+WWVzIHRoZSBfX3Jhd19yZWFkbCgp
+IHdpbGwgYWRkIHNvbWUgdGltZSwgYnV0IHNvIG11Y2g/DQo+SSdkIGxpa2UgdG8gc2VlIHdoaWNo
+IHZhbHVlIHlvdSBnZXQgZm9yICdsaW1pdCcgb24geW91ciBtYWNoaW5lDQo+V291bGQgUE0gcGxh
+eSBhIHJvbGU/IE9yIGNwdS1mcmVxLCBhbmQgJ2xvb3BzX3Blcl9qaWZmeScgaXNuJ3QgdXBkYXRl
+ZA0KPm9uIHRpbWU/DQo+DQo+PiArCQl3aGlsZSAoaS0tKSB7DQo+PiArCQkJaWYgKChPTUFQX0hT
+TU1DX1JFQUQoaG9zdC0+YmFzZSwgU1lTQ1RMKSAmIGJpdCkpDQo+PiArCQkJCWJyZWFrOw0KPj4g
+KwkJCXVkZWxheSgxKTsNCj4NCj5JbiBlYXJsaWVyIHRocmVhZHMsIHRoZSB1c2Ugb2YgdWRlbGF5
+IHdhcyBkaXNsaWtlZCBiZWNhdXNlIGl0J3MgYSB3YXN0ZQ0KPm9mIGNwdSBjeWNsZXMuIFRoZSBk
+ZXNpcmVkIGJpdCBpbiBTWVNDVEwgd2lsbCBjaGFuZ2UsIHdoaWxlIHVkZWxheSgpDQo+aXMgc3Rp
+bGwgbWFraW5nIG1hbnkgdXNlbGVzcyBsb29wcy4NCj4NCj4+ICsJCX0NCj4+ICAJfQ0KPj4gLQlp
+ID0gMDsNCj4+ICANCj4+IC0Jd2hpbGUgKChPTUFQX0hTTU1DX1JFQUQoaG9zdC0+YmFzZSwgU1lT
+Q1RMKSAmIGJpdCkgJiYNCj4+IC0JCShpKysgPCBsaW1pdCkpDQo+PiAtCQljcHVfcmVsYXgoKTsN
+Cj4+ICsJaSA9IGxpbWl0IC8gKE1NQ19USU1FT1VUX01TICogMTAwMCk7DQo+PiArCXdoaWxlIChp
+LS0pIHsNCj4+ICsJCWlmICghKE9NQVBfSFNNTUNfUkVBRChob3N0LT5iYXNlLCBTWVNDVEwpICYg
+Yml0KSkNCj4+ICsJCQlicmVhazsNCj4+ICsJCXVkZWFseSgxKTsNCj4+ICsJfQ0KPj4gIA0KPj4g
+IAlpZiAoT01BUF9IU01NQ19SRUFEKGhvc3QtPmJhc2UsIFNZU0NUTCkgJiBiaXQpDQo+PiAgCQlk
+ZXZfZXJyKG1tY19kZXYoaG9zdC0+bW1jKSwNCj5IZWlu
