@@ -1,51 +1,81 @@
-From: Jingoo Han <jg1.han@samsung.com>
-Subject: [PATCH 2/2] mmc: vub300: Staticize vub300_init_card()
-Date: Thu, 01 Aug 2013 15:32:37 +0900
-Message-ID: <004e01ce8e80$e9fa5be0$bdef13a0$@samsung.com>
+From: Zoran Markovic <zoran.markovic@linaro.org>
+Subject: Re: [RFC PATCH] mmc: Enable wakeup_sources for mmc core
+Date: Thu, 1 Aug 2013 00:42:28 -0700
+Message-ID: <CAME+o4kpsPkoTpS7_0STDpMQpZr0KyfD1prbYYJs147-5DiMkg@mail.gmail.com>
+References: <1371146190-16786-1-git-send-email-zoran.markovic@linaro.org>
+	<CAPDyKFrD=q4hOQps5ENJdmAPJyKG1cj7+P6MtXdQ8KQ1cPjnpQ@mail.gmail.com>
+	<CAME+o4mM-YmcZ4pcdWo7mzrDUi2R2LhihgcnbYixOm8KnGfnBA@mail.gmail.com>
+	<CAMbhsRRokPi59J8SghGL0QhUWKDqMuvfbT3TdPosXud_WxRV2Q@mail.gmail.com>
+	<CAPDyKFqy9EEb6o8wYABYT6zE-7Rb0xxo8Y0DuAwooeYZp5=Grw@mail.gmail.com>
+	<CAMbhsRSC5XhhSK-DAoS7_JAj7XUfaM_Topp4UcBaVwRCYXSscQ@mail.gmail.com>
+	<CAPDyKFpMGS-JA47pY_n7xvqdtbPumGpc2fdnYZnSVQ_Rybre3g@mail.gmail.com>
+	<CAMbhsRQwGbpa4a1RziV92qnw4VFh6+=oQiadfqa17FANEiK8_Q@mail.gmail.com>
+	<CAPDyKFroFY3-NJCFpkDYyBVx25CSfk492H_TnoS60jn2CdfWUQ@mail.gmail.com>
+	<CAMbhsRTR9im-BsJ-1m+DD-67LM=s0=KOoy-o+2PmnkDyLOP0Gg@mail.gmail.com>
+	<CAPDyKFoX-ioDVVkfQ21epJyTqQD98xvsqBR1FXzgP9bN6_Zxjg@mail.gmail.com>
+	<CAME+o4=WrfpvJo=jN1KZ_JHnYq9Frfk3EPcwtG10=aCwrbY+Rw@mail.gmail.com>
+	<CAPDyKFpKYeqoFn=S6P2tu1s2C28daCh4vcHTUCCRUOx2_MHShg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout4.samsung.com ([203.254.224.34]:19046 "EHLO
-	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751532Ab3HAGcj (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 1 Aug 2013 02:32:39 -0400
-Received: from epcpsbgr2.samsung.com
- (u142.gpu120.samsung.co.kr [203.254.230.142])
- by mailout4.samsung.com (Oracle Communications Messaging Server 7u4-24.01
- (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTP id <0MQU004SRA677JI0@mailout4.samsung.com> for
- linux-mmc@vger.kernel.org; Thu, 01 Aug 2013 15:32:37 +0900 (KST)
-Content-language: ko
+Received: from mail-ob0-f179.google.com ([209.85.214.179]:61296 "EHLO
+	mail-ob0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751551Ab3HAHm3 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 1 Aug 2013 03:42:29 -0400
+Received: by mail-ob0-f179.google.com with SMTP id fb19so3290533obc.10
+        for <linux-mmc@vger.kernel.org>; Thu, 01 Aug 2013 00:42:29 -0700 (PDT)
+In-Reply-To: <CAPDyKFpKYeqoFn=S6P2tu1s2C28daCh4vcHTUCCRUOx2_MHShg@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: 'Chris Ball' <cjb@laptop.org>
-Cc: linux-mmc@vger.kernel.org, 'Tony Olech' <tony.olech@elandigitalsystems.com>, Jingoo Han <jg1.han@samsung.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Colin Cross <ccross@android.com>, lkml <linux-kernel@vger.kernel.org>, linux-mmc@vger.kernel.org, San Mehat <san@google.com>, John Stultz <john.stultz@linaro.org>, Chris Ball <cjb@laptop.org>, Johan Rudholm <johan.rudholm@stericsson.com>, Jaehoon Chung <jh80.chung@samsung.com>, Konstantin Dorfman <kdorfman@codeaurora.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Tejun Heo <tj@kernel.org>, Andrew Morton <akpm@linux-foundation.org>
 
-vub300_init_card() is used only in this file.
-Fix the following sparse warning:
+Ulf,
+I got confirmation from Broadcom that all cell phone reference designs
+have card insert/removal configured as a wakeup IRQ. Unless our
+customers change that - which I doubt - this results in a considerable
+number of products implementing this feature.
 
-drivers/mmc/host/vub300.c:2082:6: warning: symbol 'vub300_init_card' was not declared. Should it be static?
+Please let me know how you wish to proceed.
 
-Signed-off-by: Jingoo Han <jg1.han@samsung.com>
----
- drivers/mmc/host/vub300.c |    2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+Cheers,
+Zoran
 
-diff --git a/drivers/mmc/host/vub300.c b/drivers/mmc/host/vub300.c
-index cb9f361..e9028ad 100644
---- a/drivers/mmc/host/vub300.c
-+++ b/drivers/mmc/host/vub300.c
-@@ -2079,7 +2079,7 @@ static void vub300_enable_sdio_irq(struct mmc_host *mmc, int enable)
- 	kref_put(&vub300->kref, vub300_delete);
- }
- 
--void vub300_init_card(struct mmc_host *mmc, struct mmc_card *card)
-+static void vub300_init_card(struct mmc_host *mmc, struct mmc_card *card)
- {				/* NOT irq */
- 	struct vub300_mmc_host *vub300 = mmc_priv(mmc);
- 	dev_info(&vub300->udev->dev, "NO host QUIRKS for this card\n");
--- 
-1.7.10.4
-
-
+On 26 June 2013 13:57, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> On 24 June 2013 21:58, Zoran Markovic <zoran.markovic@linaro.org> wrote:
+>>>> This patch is ported from the Android common tree, so you've probably
+>>>> been using it.
+>>>
+>>> We removed more or less all Android code in the mmc subsystem, since
+>>> it just didn't work. :-)
+>>>
+>>> The "deferred resume" was very useful though, so after some rework we
+>>> kept it and could then improve the system resume time significantly.
+>>
+>> For what it's worth, I fixed one bug I noticed in the Android kernel:
+>> if a system has a non-removable MMC device, a suspend/resume cycle on
+>> this device would hold a wake lock forever. This was a visible issue
+>> on the panda board I am using.
+>>
+>> If there are doubts on whether or not the system should stay awake
+>> during a MMC mount, we have the option to make the calls to
+>> wakeup_source_register/unregister configurable. Skipping these calls
+>> would leave the .ws field NULL, in which case
+>> __pm_stay_awake/__pm_relax/__pm_wakeup_event would do nothing.
+>
+> Even if we make this feature configurable, I can't see any host driver
+> that would benefit from it as of today. The reason is simply that host
+> drivers do not configure it's card detect irq as a wakeup irq. Myself
+> is also having quite hard to see the benefit of doing that, but I
+> don't know all the use cases.
+>
+> Let's see if we can get someone else to provide input...
+>
+>>
+>> Thoughts?
+>>
+>> - Zoran
+>
+>
+> Kind regards
+> Ulf Hansson
