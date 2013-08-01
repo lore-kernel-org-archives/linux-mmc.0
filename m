@@ -1,223 +1,51 @@
-From: Sekhar Nori <nsekhar-l0cyMroinI0@public.gmane.org>
-Subject: Re: [PATCH 4/9] dma: edma: Find missed events and issue them
-Date: Thu, 1 Aug 2013 11:43:27 +0530
-Message-ID: <51F9FC87.3020706@ti.com>
-References: <1375104595-16018-1-git-send-email-joelf@ti.com>
-	<1375104595-16018-5-git-send-email-joelf@ti.com>
-	<51F7659E.3040302@ti.com> <51F89763.1010102@ti.com>
-	<51F8D667.2040406@ti.com> <51F9C793.2000001@ti.com>
+From: Jingoo Han <jg1.han@samsung.com>
+Subject: [PATCH 1/2] mmc: dw_mmc-socfpga: Staticize dw_mci_socfpga_probe()
+Date: Thu, 01 Aug 2013 15:30:09 +0900
+Message-ID: <004d01ce8e80$91d50d20$b57f2760$@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=us-ascii
 Content-Transfer-Encoding: 7bit
-Return-path: <davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
-In-Reply-To: <51F9C793.2000001-l0cyMroinI0@public.gmane.org>
-List-Unsubscribe: <http://linux.davincidsp.com/mailman/options/davinci-linux-open-source>,
-	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://linux.davincidsp.com/pipermail/davinci-linux-open-source>
-List-Post: <mailto:davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
-List-Help: <mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=help>
-List-Subscribe: <http://linux.davincidsp.com/mailman/listinfo/davinci-linux-open-source>,
-	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=subscribe>
-Sender: <davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
-Errors-To: davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org
-To: joelf-l0cyMroinI0@public.gmane.org
-Cc: Mark Brown <broonie-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Grant Likely <grant.likely-s3s/WqlpOiPyB63q8FvJNQ@public.gmane.org>, Sricharan R <r.sricharan-l0cyMroinI0@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Vinod Koul <vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Lokesh Vutla <lokeshvutla-l0cyMroinI0@public.gmane.org>, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Rajendra Nayak <rnayak-l0cyMroinI0@public.gmane.org>, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Jason Kridner <jkridner-hcmAuCOw+vXj4SYmN/TMmA@public.gmane.org>, Linux OMAP List <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux ARM Kernel List <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Linux DaVinci Kernel List <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, Balaji TK <balajitk-l0cyMroinI0@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Santosh Shilimkar <santosh.shilim>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout1.samsung.com ([203.254.224.24]:12795 "EHLO
+	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750850Ab3HAGaL (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 1 Aug 2013 02:30:11 -0400
+Received: from epcpsbgr3.samsung.com
+ (u143.gpu120.samsung.co.kr [203.254.230.143])
+ by mailout1.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+ (7.0.4.24.0) 64bit (built Nov 17 2011))
+ with ESMTP id <0MQU0094JA0W6H80@mailout1.samsung.com> for
+ linux-mmc@vger.kernel.org; Thu, 01 Aug 2013 15:30:09 +0900 (KST)
+Content-language: ko
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>
+Cc: linux-mmc@vger.kernel.org, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dinh Nguyen <dinguyen@altera.com>, Jingoo Han <jg1.han@samsung.com>
 
-On Thursday 01 August 2013 07:57 AM, Joel Fernandes wrote:
-> On 07/31/2013 04:18 AM, Sekhar Nori wrote:
->> On Wednesday 31 July 2013 10:19 AM, Joel Fernandes wrote:
->>> Hi Sekhar,
->>>
->>> On 07/30/2013 02:05 AM, Sekhar Nori wrote:
->>>> On Monday 29 July 2013 06:59 PM, Joel Fernandes wrote:
->>>>> In an effort to move to using Scatter gather lists of any size with
->>>>> EDMA as discussed at [1] instead of placing limitations on the driver,
->>>>> we work through the limitations of the EDMAC hardware to find missed
->>>>> events and issue them.
->>>>>
->>>>> The sequence of events that require this are:
->>>>>
->>>>> For the scenario where MAX slots for an EDMA channel is 3:
->>>>>
->>>>> SG1 -> SG2 -> SG3 -> SG4 -> SG5 -> SG6 -> Null
->>>>>
->>>>> The above SG list will have to be DMA'd in 2 sets:
->>>>>
->>>>> (1) SG1 -> SG2 -> SG3 -> Null
->>>>> (2) SG4 -> SG5 -> SG6 -> Null
->>>>>
->>>>> After (1) is succesfully transferred, the events from the MMC controller
->>>>> donot stop coming and are missed by the time we have setup the transfer
->>>>> for (2). So here, we catch the events missed as an error condition and
->>>>> issue them manually.
->>>>
->>>> Are you sure there wont be any effect of these missed events on the
->>>> peripheral side. For example, wont McASP get into an underrun condition
->>>> when it encounters a null PaRAM set? Even UART has to transmit to a
->>>
->>> But it will not encounter null PaRAM set because McASP uses contiguous
->>> buffers for transfer which are not scattered across physical memory.
->>> This can be accomplished with an SG of size 1. For such SGs, this patch
->>> series leaves it linked Dummy and does not link to Null set. Null set is
->>> only used for SG lists that are > MAX_NR_SG in size such as those
->>> created for example by MMC and Crypto.
->>>
->>>> particular baud so I guess it cannot wait like the way MMC/SD can.
->>>
->>> Existing driver have to wait anyway if they hit MAX SG limit today. If
->>> they don't want to wait, they would have allocated a contiguous block of
->>> memory and DMA that in one stretch so they don't lose any events, and in
->>> such cases we are not linking to Null.
->>
->> As long as DMA driver can advertize its MAX SG limit, peripherals can
->> always work around that by limiting the number of sync events they
->> generate so as to not having any of the events getting missed. With this
->> series, I am worried that EDMA drivers is advertizing that it can handle
->> any length SG list while not taking care of missing any events while
->> doing so. This will break the assumptions that driver writers make.
-> 
-> This is already being done by some other DMA engine drivers ;). We can
-> advertise more than we can handle at a time, that's the basis of this
-> whole idea.
-> 
-> I understand what you're saying but events are not something that have
-> be serviced immediately, they can be queued etc and the actually
-> transfer from the DMA controller can be delayed. As long as we don't
-> miss the event we are fine which my series takes care off.
-> 
-> So far I have tested this series on following modules in various
-> configurations and have seen no issues:
-> - Crypto AES
-> - MMC/SD
-> - SPI (128x160 display)
+dw_mci_socfpga_probe() is used only in this file.
+Fix the following sparse warning:
 
-Notice how in each of these cases the peripheral is in control of when
-data is driven out? Please test with McASP in a configuration where
-codec drives the frame-sync/bit-clock or with UART under high baud rate.
+drivers/mmc/host/dw_mmc-socfpga.c:116:5: warning: symbol 'dw_mci_socfpga_probe' was not declared. Should it be static?
 
-> 
->>>> Also, wont this lead to under-utilization of the peripheral bandwith?
->>>> Meaning, MMC/SD is ready with data but cannot transfer because the DMA
->>>> is waiting to be set-up.
->>>
->>> But it is waiting anyway even today. Currently based on MAX segs, MMC
->>> driver/subsystem will make SG list of size max_segs. Between these
->>> sessions of creating such smaller SG-lists, if for some reason the MMC
->>> controller is sending events, these will be lost anyway.
->>
->> But if MMC/SD driver knows how many events it should generate if it
->> knows the MAX SG limit. So there should not be any missed events in
->> current code. And I am not claiming that your solution is making matters
->> worse. But its not making it much better as well.
-> 
-> This is not true for crypto, the events are not deasserted and crypto
-> continues to send events. This is what led to the "don't trigger in
-> Null" patch where I'm setting the missed flag to avoid recursion.
+Signed-off-by: Jingoo Han <jg1.han@samsung.com>
+---
+ drivers/mmc/host/dw_mmc-socfpga.c |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-Sorry, I am not sure which patch you are talking about here. Can you
-provide the full subject line to avoid confusion?
+diff --git a/drivers/mmc/host/dw_mmc-socfpga.c b/drivers/mmc/host/dw_mmc-socfpga.c
+index 14b5961..35aebb8 100644
+--- a/drivers/mmc/host/dw_mmc-socfpga.c
++++ b/drivers/mmc/host/dw_mmc-socfpga.c
+@@ -113,7 +113,7 @@ static const struct of_device_id dw_mci_socfpga_match[] = {
+ };
+ MODULE_DEVICE_TABLE(of, dw_mci_socfpga_match);
+ 
+-int dw_mci_socfpga_probe(struct platform_device *pdev)
++static int dw_mci_socfpga_probe(struct platform_device *pdev)
+ {
+ 	const struct dw_mci_drv_data *drv_data;
+ 	const struct of_device_id *match;
+-- 
+1.7.10.4
 
->>> This can be used only for buffers that are contiguous in memory, not
->>> those that are scattered across memory.
->>
->> I was hinting at using the linking facility of EDMA to achieve this.
->> Each PaRAM set has full 32-bit source and destination pointers so I see
->> no reason why non-contiguous case cannot be handled.
->>
->> Lets say you need to transfer SG[0..6] on channel C. Now, PaRAM sets are
->> typically 4 times the number of channels. In this case we use one DMA
->> PaRAM set and two Link PaRAM sets per channel. P0 is the DMA PaRAM set
->> and P1 and P2 are the Link sets.
->>
->> Initial setup:
->>
->> SG0 -> SG1 -> SG2 -> SG3 -> SG4 -> SG5 -> SG6 -> NULL
->>  ^      ^      ^
->>  |      |      |
->> P0  -> P1  -> P2  -> NULL
->>
->> P[0..2].TCINTEN = 1, so get an interrupt after each SG element
->> completion. On each completion interrupt, hardware automatically copies
->> the linked PaRAM set into the DMA PaRAM set so after SG0 is transferred
->> out, the state of hardware is:
->>
->> SG1  -> SG2 -> SG3 -> SG3 -> SG6 -> NULL
->>  ^       ^
->>  |       |
->> P0,1    P2  -> NULL
->>  |       ^
->>  |       |
->>  ---------
->>
->> SG1 transfer has already started by the time the TC interrupt is
->> handled. As you can see P1 is now redundant and ready to be recycled. So
->> in the interrupt handler, software recycles P1. Thus:
->>
->> SG1 -> SG2 -> SG3 -> SG4 -> SG5 -> SG6 -> NULL
->>  ^      ^      ^
->>  |      |      |
->> P0  -> P2  -> P1  -> NULL
->>
->> Now, on next interrupt, P2 gets copied and thus can get recycled.
->> Hardware state:
->>
->> SG2  -> SG3 -> SG4 -> SG5 -> SG6 -> NULL
->>  ^       ^
->>  |       |
->> P0,2    P1  -> NULL
->>  |       ^
->>  |       |
->>  ---------
->>
->> As part of TC completion interrupt handling:
->>
->> SG2 -> SG3 -> SG4 -> SG5 -> SG6 -> NULL
->>  ^      ^      ^
->>  |      |      |
->> P0  -> P1  -> P2  -> NULL
->>
->> This goes on until the SG list in exhausted. If you use more PaRAM sets,
->> interrupt handler gets more time to recycle the PaRAM set. At no point
->> we touch P0 as it is always under active transfer. Thus the peripheral
->> is always kept busy.
->>
->> Do you see any reason why such a mechanism cannot be implemented?
-> 
-> This is possible and looks like another way to do it, but there are 2
-> problems I can see with it.
-> 
-> 1. Its inefficient because of too many interrupts:
-> 
-> Imagine case where we have an SG list of size 30 and MAX_NR_SG size is
-> 10. This method will trigger 30 interrupts always, where as with my
-> patch series, you'd get only 3 interrupts. If you increase MAX_SG_NR ,
-> you'd get even fewer interrupts.
 
-Yes, but you are seeing only one side of inefficiency. In your design
-DMA *always* stalls waiting for CPU to intervene. The whole point to DMA
-is to keep it going while CPU does bookeeping in background. This is
-simply not going to scale with fast peripherals.
-
-Besides, missed events are error conditions as far as EDMA and the
-peripheral is considered. You are handling error interrupt to support a
-successful transaction. Think about why EDMA considers missed events as
-error condition.
-
-> 
-> 2. If the interrupt handler for some reason doesn't complete or get
-> service in time, we will end up DMA'ing incorrect data as events
-> wouldn't stop coming in even if interrupt is not yet handled (in your
-> example linked sets P1 or P2 would be old ones being repeated). Where as
-> with my method, we are not doing any DMA once we finish the current
-> MAX_NR_SG set even if events continue to come.
-
-Where is repetition and possibility of wrong data being transferred? We
-have a linear list of PaRAM sets - not a loop. You would link the end to
-PaRAM set chain to dummy PaRAM set which BTW will not cause missed
-events. The more number of PaRAM sets you add to the chain, the more
-time CPU gets to intervene before DMA eventually stalls. This is a
-tradeoff system designers can manage.
-
-Thanks,
-Sekhar
