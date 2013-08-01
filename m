@@ -1,61 +1,91 @@
-From: majianpeng <majianpeng@gmail.com>
-Subject: [PATCH] mmc: omap_hsmmc: Fix sleep too long in ISR context.
-Date: Thu, 1 Aug 2013 10:18:08 +0800
-Message-ID: <201308011017566117580@gmail.com>
-Reply-To: majianpeng <majianpeng@gmail.com>
+From: Joel Fernandes <joelf-l0cyMroinI0@public.gmane.org>
+Subject: Re: [PATCH 4/9] dma: edma: Find missed events and issue them
+Date: Wed, 31 Jul 2013 22:43:09 -0500
+Message-ID: <51F9D94D.5060702@ti.com>
+References: <1375104595-16018-1-git-send-email-joelf@ti.com>
+	<1375104595-16018-5-git-send-email-joelf@ti.com>
+	<51F7659E.3040302@ti.com> <51F89763.1010102@ti.com>
+	<51F8D667.2040406@ti.com> <51F9C793.2000001@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain;
-	charset="gb2312"
-Content-Transfer-Encoding: base64
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pd0-f171.google.com ([209.85.192.171]:62253 "EHLO
-	mail-pd0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751959Ab3HACac (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 31 Jul 2013 22:30:32 -0400
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
+In-Reply-To: <51F9C793.2000001-l0cyMroinI0@public.gmane.org>
+List-Unsubscribe: <http://linux.davincidsp.com/mailman/options/davinci-linux-open-source>,
+	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://linux.davincidsp.com/pipermail/davinci-linux-open-source>
+List-Post: <mailto:davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
+List-Help: <mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=help>
+List-Subscribe: <http://linux.davincidsp.com/mailman/listinfo/davinci-linux-open-source>,
+	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=subscribe>
+Sender: <davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
+Errors-To: davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org
+To: joelf-l0cyMroinI0@public.gmane.org
+Cc: Mark Brown <broonie-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Grant Likely <grant.likely-s3s/WqlpOiPyB63q8FvJNQ@public.gmane.org>, Sricharan R <r.sricharan-l0cyMroinI0@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Vinod Koul <vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Lokesh Vutla <lokeshvutla-l0cyMroinI0@public.gmane.org>, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Rajendra Nayak <rnayak-l0cyMroinI0@public.gmane.org>, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Jason Kridner <jkridner-hcmAuCOw+vXj4SYmN/TMmA@public.gmane.org>, Linux OMAP List <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux ARM Kernel List <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Linux DaVinci Kernel List <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, Balaji TK <balajitk-l0cyMroinI0@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Santosh Shilimkar <santosh.shilim>
 List-Id: linux-mmc@vger.kernel.org
-To: balajitk <balajitk@ti.com>, cjb <cjb@laptop.org>
-Cc: mayuzheng <mayuzheng@kedacom.com>, linux-mmc <linux-mmc@vger.kernel.org>, linux-omap <linux-omap@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>
 
-V2UgZm91bmQgYSBwcm9ibGVtIHdoZW4gd2UgcmVtb3ZlZCBhIHdvcmtpbmcgc2QgY2FyZCB0aGF0
-IHRoZSBpcnFhY3Rpb24NCm9mIG9tYXBfaHNtbWMgY2FuIHNsZWVwIHRvIDMuNnMuIFRoaXMgY2F1
-c2Ugb3VyIHdhdGNoZG9nIHRvIHdvcmsuDQpJbiBmdW5jIG9tYXBfaHNtbWNfcmVzZXRfY29udHJv
-bGxlcl9mc20sIGl0IHNob3VsZCB3YXRjaCBhIDAtPjENCnRyYW5zaXRpb24uSXQgdXNlZCBsb29w
-c19wZXJfamlmZnkgYXMgdGhlIHRpbWVyLg0KVGhlIGNvZGUgaXM6DQo+IHdoaWxlICgoIShPTUFQ
-X0hTTU1DX1JFQUQoaG9zdC0+YmFzZSwgU1lTQ1RMKSAmIGJpdCkpDQo+ICAgICAgICAgICAgICAg
-ICYmIChpKysgPCBsaW1pdCkpDQo+ICAgICAgICAgICAgICAgICAgICAgICAgY3B1X3JlbGF4KCk7
-DQpCdXQgdGhlIGxvb3BzX3Blcl9qaWZmeSBpczoNCj4gIHdoaWxlKGkrKyA8IGxpbWl0KQ0KPglj
-cHVfcmVsYXgoKTsNCkl0IGFkZCBzb21lIGNvZGVzIHNvIHRoZSB0aW1lIGJlY2FtZSBsb25nLg0K
-QmVjYXN1ZSB0aG9zZSBjb2RlcyBpbiBJU1IgY29udGV4dCwgaXQgY2FuJ3QgdXNlIHRpbWVyX2Jl
-Zm9yZS9hZnRlci4NCkkgZGl2aXZlZCB0aGUgdGltZSBpbnRvIDFtcyBhbmQgdXNlZCB1ZGVsYXko
-MSkgdG8gaW5zdGVhZC4NCkl0IHdpbGwgY2F1c2UgZG8gYWRkaXRpb25hbCB1ZGVsYXkoMSkuQnV0
-IGZyb20gbXkgdGVzdCxpdCBsb29rcyBnb29kLg0KDQpSZXBvcnRlZC1ieTogWXV6aGVuZyBNYSA8
-bWF5dXpoZW5nQGtlZGFjb20uY29tPg0KVGVzdGVkLWJ5OiBZdXpoZW5nIE1hIDxtYXl1emhlbmdA
-a2VkYWNvbS5jb20+DQpTaWduZWQtb2ZmLWJ5OiBKaWFucGVuZyBNYSA8bWFqaWFucGVuZ0BnbWFp
-bC5jb20+DQotLS0NCiBkcml2ZXJzL21tYy9ob3N0L29tYXBfaHNtbWMuYyB8IDIwICsrKysrKysr
-KysrKystLS0tLS0tDQogMSBmaWxlIGNoYW5nZWQsIDEzIGluc2VydGlvbnMoKyksIDcgZGVsZXRp
-b25zKC0pDQoNCmRpZmYgLS1naXQgYS9kcml2ZXJzL21tYy9ob3N0L29tYXBfaHNtbWMuYyBiL2Ry
-aXZlcnMvbW1jL2hvc3Qvb21hcF9oc21tYy5jDQppbmRleCAxODY1MzIxLi45NmRhY2ExIDEwMDY0
-NA0KLS0tIGEvZHJpdmVycy9tbWMvaG9zdC9vbWFwX2hzbW1jLmMNCisrKyBiL2RyaXZlcnMvbW1j
-L2hvc3Qvb21hcF9oc21tYy5jDQpAQCAtOTc3LDYgKzk3Nyw4IEBAIHN0YXRpYyBpbmxpbmUgdm9p
-ZCBvbWFwX2hzbW1jX3Jlc2V0X2NvbnRyb2xsZXJfZnNtKHN0cnVjdCBvbWFwX2hzbW1jX2hvc3Qg
-Kmhvc3QsDQogCXVuc2lnbmVkIGxvbmcgbGltaXQgPSAobG9vcHNfcGVyX2ppZmZ5ICoNCiAJCQkJ
-bXNlY3NfdG9famlmZmllcyhNTUNfVElNRU9VVF9NUykpOw0KIA0KKwkvKkRpdmlkZWQgdGltZSBp
-bnRvIHVzIGZvciB1bml0IDEsd2UgY2FuIHVzZSB1ZGVsYXkoMSkqLw0KKwlpID0gbGltaXQgLyAo
-TU1DX1RJTUVPVVRfTVMgKiAxMDAwKTsNCiAJT01BUF9IU01NQ19XUklURShob3N0LT5iYXNlLCBT
-WVNDVEwsDQogCQkJIE9NQVBfSFNNTUNfUkVBRChob3N0LT5iYXNlLCBTWVNDVEwpIHwgYml0KTsN
-CiANCkBAIC05ODUsMTUgKzk4NywxOSBAQCBzdGF0aWMgaW5saW5lIHZvaWQgb21hcF9oc21tY19y
-ZXNldF9jb250cm9sbGVyX2ZzbShzdHJ1Y3Qgb21hcF9oc21tY19ob3N0ICpob3N0LA0KIAkgKiBN
-b25pdG9yIGEgMC0+MSB0cmFuc2l0aW9uIGZpcnN0DQogCSAqLw0KIAlpZiAobW1jX3Nsb3QoaG9z
-dCkuZmVhdHVyZXMgJiBIU01NQ19IQVNfVVBEQVRFRF9SRVNFVCkgew0KLQkJd2hpbGUgKCghKE9N
-QVBfSFNNTUNfUkVBRChob3N0LT5iYXNlLCBTWVNDVEwpICYgYml0KSkNCi0JCQkJCSYmIChpKysg
-PCBsaW1pdCkpDQotCQkJY3B1X3JlbGF4KCk7DQorCQl3aGlsZSAoaS0tKSB7DQorCQkJaWYgKChP
-TUFQX0hTTU1DX1JFQUQoaG9zdC0+YmFzZSwgU1lTQ1RMKSAmIGJpdCkpDQorCQkJCWJyZWFrOw0K
-KwkJCXVkZWxheSgxKTsNCisJCX0NCiAJfQ0KLQlpID0gMDsNCiANCi0Jd2hpbGUgKChPTUFQX0hT
-TU1DX1JFQUQoaG9zdC0+YmFzZSwgU1lTQ1RMKSAmIGJpdCkgJiYNCi0JCShpKysgPCBsaW1pdCkp
-DQotCQljcHVfcmVsYXgoKTsNCisJaSA9IGxpbWl0IC8gKE1NQ19USU1FT1VUX01TICogMTAwMCk7
-DQorCXdoaWxlIChpLS0pIHsNCisJCWlmICghKE9NQVBfSFNNTUNfUkVBRChob3N0LT5iYXNlLCBT
-WVNDVEwpICYgYml0KSkNCisJCQlicmVhazsNCisJCXVkZWFseSgxKTsNCisJfQ0KIA0KIAlpZiAo
-T01BUF9IU01NQ19SRUFEKGhvc3QtPmJhc2UsIFNZU0NUTCkgJiBiaXQpDQogCQlkZXZfZXJyKG1t
-Y19kZXYoaG9zdC0+bW1jKSwNCi0tIA0KMS44LjEuMg0KDQoNClRoYW5rcyENCkppYW5wZW5nIE1h
+On 07/31/2013 09:27 PM, Joel Fernandes wrote:
+> On 07/31/2013 04:18 AM, Sekhar Nori wrote:
+>> On Wednesday 31 July 2013 10:19 AM, Joel Fernandes wrote:
+>>> Hi Sekhar,
+>>>
+>>> On 07/30/2013 02:05 AM, Sekhar Nori wrote:
+>>>> On Monday 29 July 2013 06:59 PM, Joel Fernandes wrote:
+>>>>> In an effort to move to using Scatter gather lists of any size with
+>>>>> EDMA as discussed at [1] instead of placing limitations on the driver,
+>>>>> we work through the limitations of the EDMAC hardware to find missed
+>>>>> events and issue them.
+>>>>>
+>>>>> The sequence of events that require this are:
+>>>>>
+>>>>> For the scenario where MAX slots for an EDMA channel is 3:
+>>>>>
+>>>>> SG1 -> SG2 -> SG3 -> SG4 -> SG5 -> SG6 -> Null
+>>>>>
+>>>>> The above SG list will have to be DMA'd in 2 sets:
+>>>>>
+>>>>> (1) SG1 -> SG2 -> SG3 -> Null
+>>>>> (2) SG4 -> SG5 -> SG6 -> Null
+>>>>>
+>>>>> After (1) is succesfully transferred, the events from the MMC controller
+>>>>> donot stop coming and are missed by the time we have setup the transfer
+>>>>> for (2). So here, we catch the events missed as an error condition and
+>>>>> issue them manually.
+>>>>
+>>>> Are you sure there wont be any effect of these missed events on the
+>>>> peripheral side. For example, wont McASP get into an underrun condition
+>>>> when it encounters a null PaRAM set? Even UART has to transmit to a
+>>>
+>>> But it will not encounter null PaRAM set because McASP uses contiguous
+>>> buffers for transfer which are not scattered across physical memory.
+>>> This can be accomplished with an SG of size 1. For such SGs, this patch
+>>> series leaves it linked Dummy and does not link to Null set. Null set is
+>>> only used for SG lists that are > MAX_NR_SG in size such as those
+>>> created for example by MMC and Crypto.
+>>>
+>>>> particular baud so I guess it cannot wait like the way MMC/SD can.
+>>>
+>>> Existing driver have to wait anyway if they hit MAX SG limit today. If
+>>> they don't want to wait, they would have allocated a contiguous block of
+>>> memory and DMA that in one stretch so they don't lose any events, and in
+>>> such cases we are not linking to Null.
+>>
+>> As long as DMA driver can advertize its MAX SG limit, peripherals can
+>> always work around that by limiting the number of sync events they
+>> generate so as to not having any of the events getting missed. With this
+>> series, I am worried that EDMA drivers is advertizing that it can handle
+>> any length SG list while not taking care of missing any events while
+>> doing so. This will break the assumptions that driver writers make.
 
+Sorry, just forgot to respond to "not taking care of missing any events
+while doing so". Can you clarify this? DMA engine driver is taking care
+of missed events.
+
+Also- missing of events doesn't result in feedback to the peripheral.
+Peripheral sends even to DMA controller, event is missed. Peripheral
+doesn't know anything about what happened and is waiting for transfer
+from the DMA controller.
+
+Thanks,
+
+-Joel
