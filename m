@@ -1,142 +1,109 @@
-From: majianpeng <majianpeng@gmail.com>
-Subject: Re: Re: [PATCH] mmc: omap_hsmmc: Fix sleep too long in ISR context.
-Date: Thu, 1 Aug 2013 16:40:05 +0800
-Message-ID: <201308011640027321434@gmail.com>
-References: <201308011017566117580@gmail.com>,
-	<51FA1AB7.8030105@yahoo.es>
-Reply-To: majianpeng <majianpeng@gmail.com>
+From: Hein Tibosch <hein_tibosch@yahoo.es>
+Subject: Re: [PATCH] mmc: omap_hsmmc: Fix sleep too long in ISR context.
+Date: Thu, 01 Aug 2013 16:22:15 +0800
+Message-ID: <51FA1AB7.8030105@yahoo.es>
+References: <201308011017566117580@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain;
-	charset="gb2312"
-Content-Transfer-Encoding: base64
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Hein Tibosch <hein_tibosch@yahoo.es>
-Cc: balajitk <balajitk@ti.com>, cjb <cjb@laptop.org>, mayuzheng <mayuzheng@kedacom.com>, linux-mmc <linux-mmc@vger.kernel.org>, linux-omap <linux-omap@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>, Felipe Balbi <balbi@ti.com>
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from bosmailout13.eigbox.net ([66.96.186.13]:46670 "EHLO
+	bosmailout13.eigbox.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751153Ab3HAJCh (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 1 Aug 2013 05:02:37 -0400
+In-Reply-To: <201308011017566117580@gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: majianpeng <majianpeng@gmail.com>
+Cc: balajitk <balajitk@ti.com>, cjb <cjb@laptop.org>, mayuzheng <mayuzheng@kedacom.com>, linux-mmc <linux-mmc@vger.kernel.org>, linux-omap <linux-omap@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>, Felipe Balbi <balbi@ti.com>
 
-PkhpIEppYW5wZW5nIE1hLA0KPg0KPk9uIDgvMS8yMDEzIDEwOjE4IEFNLCBtYWppYW5wZW5nIHdy
-b3RlOg0KPj4gV2UgZm91bmQgYSBwcm9ibGVtIHdoZW4gd2UgcmVtb3ZlZCBhIHdvcmtpbmcgc2Qg
-Y2FyZCB0aGF0IHRoZSBpcnFhY3Rpb24NCj4+IG9mIG9tYXBfaHNtbWMgY2FuIHNsZWVwIHRvIDMu
-NnMuIFRoaXMgY2F1c2Ugb3VyIHdhdGNoZG9nIHRvIHdvcmsuDQo+PiBJbiBmdW5jIG9tYXBfaHNt
-bWNfcmVzZXRfY29udHJvbGxlcl9mc20sIGl0IHNob3VsZCB3YXRjaCBhIDAtPjENCj4+IHRyYW5z
-aXRpb24uSXQgdXNlZCBsb29wc19wZXJfamlmZnkgYXMgdGhlIHRpbWVyLg0KPj4gVGhlIGNvZGUg
-aXM6DQo+Pj4gd2hpbGUgKCghKE9NQVBfSFNNTUNfUkVBRChob3N0LT5iYXNlLCBTWVNDVEwpICYg
-Yml0KSkNCj4+PiAgICAgICAgICAgICAgICAmJiAoaSsrIDwgbGltaXQpKQ0KPj4+ICAgICAgICAg
-ICAgICAgICAgICAgICAgY3B1X3JlbGF4KCk7DQo+PiBCdXQgdGhlIGxvb3BzX3Blcl9qaWZmeSBp
-czoNCj4+PiAgd2hpbGUoaSsrIDwgbGltaXQpDQo+Pj4gCWNwdV9yZWxheCgpOw0KPj4gSXQgYWRk
-IHNvbWUgY29kZXMgc28gdGhlIHRpbWUgYmVjYW1lIGxvbmcuDQo+PiBCZWNhc3VlIHRob3NlIGNv
-ZGVzIGluIElTUiBjb250ZXh0LCBpdCBjYW4ndCB1c2UgdGltZXJfYmVmb3JlL2FmdGVyLg0KPj4g
-SSBkaXZpdmVkIHRoZSB0aW1lIGludG8gMW1zIGFuZCB1c2VkIHVkZWxheSgxKSB0byBpbnN0ZWFk
-Lg0KPj4gSXQgd2lsbCBjYXVzZSBkbyBhZGRpdGlvbmFsIHVkZWxheSgxKS5CdXQgZnJvbSBteSB0
-ZXN0LGl0IGxvb2tzIGdvb2QuDQo+Pg0KPj4gUmVwb3J0ZWQtYnk6IFl1emhlbmcgTWEgPG1heXV6
-aGVuZ0BrZWRhY29tLmNvbT4NCj4+IFRlc3RlZC1ieTogWXV6aGVuZyBNYSA8bWF5dXpoZW5nQGtl
-ZGFjb20uY29tPg0KPj4gU2lnbmVkLW9mZi1ieTogSmlhbnBlbmcgTWEgPG1hamlhbnBlbmdAZ21h
-aWwuY29tPg0KPj4gLS0tDQo+PiAgZHJpdmVycy9tbWMvaG9zdC9vbWFwX2hzbW1jLmMgfCAyMCAr
-KysrKysrKysrKysrLS0tLS0tLQ0KPj4gIDEgZmlsZSBjaGFuZ2VkLCAxMyBpbnNlcnRpb25zKCsp
-LCA3IGRlbGV0aW9ucygtKQ0KPj4NCj4+IGRpZmYgLS1naXQgYS9kcml2ZXJzL21tYy9ob3N0L29t
-YXBfaHNtbWMuYyBiL2RyaXZlcnMvbW1jL2hvc3Qvb21hcF9oc21tYy5jDQo+PiBpbmRleCAxODY1
-MzIxLi45NmRhY2ExIDEwMDY0NA0KPj4gLS0tIGEvZHJpdmVycy9tbWMvaG9zdC9vbWFwX2hzbW1j
-LmMNCj4+ICsrKyBiL2RyaXZlcnMvbW1jL2hvc3Qvb21hcF9oc21tYy5jDQo+PiBAQCAtOTc3LDYg
-Kzk3Nyw4IEBAIHN0YXRpYyBpbmxpbmUgdm9pZCBvbWFwX2hzbW1jX3Jlc2V0X2NvbnRyb2xsZXJf
-ZnNtKHN0cnVjdCBvbWFwX2hzbW1jX2hvc3QgKmhvc3QsDQo+PiAgCXVuc2lnbmVkIGxvbmcgbGlt
-aXQgPSAobG9vcHNfcGVyX2ppZmZ5ICoNCj4+ICAJCQkJbXNlY3NfdG9famlmZmllcyhNTUNfVElN
-RU9VVF9NUykpOw0KPj4gIA0KPj4gKwkvKkRpdmlkZWQgdGltZSBpbnRvIHVzIGZvciB1bml0IDEs
-d2UgY2FuIHVzZSB1ZGVsYXkoMSkqLw0KPj4gKwlpID0gbGltaXQgLyAoTU1DX1RJTUVPVVRfTVMg
-KiAxMDAwKTsNCj4NCj4nbGltaXQnIGlzIGEgbnVtYmVyIG9mIGxvb3BzLCB3aGljaCB5b3Ugbm93
-IGRpdmlkZSBieSAyMCwwMDA/DQo+DQo+VG8gZ2V0IHVTLCB5b3UgY291bGQganVzdCBjaGFuZ2U6
-DQo+DQo+LQl1bnNpZ25lZCBsb25nIGxpbWl0ID0gKGxvb3BzX3Blcl9qaWZmeSAqDQo+LQkJCQlt
-c2Vjc190b19qaWZmaWVzKE1NQ19USU1FT1VUX01TKSk7DQo+Kwl1bnNpZ25lZCBsb25nIGxpbWl0
-ID0gMTAwMCAqIE1NQ19USU1FT1VUX01TOw0KPg0KWWVzLCB5b3UgYXJlIHJpZ2h0Lg0KPmFuZCBt
-YWtlIHRoaXMgYW1vdW50IG9mIGxvb3BzIHVzaW5nIHVkZWxheSgpLg0KPg0KPj4gIAlPTUFQX0hT
-TU1DX1dSSVRFKGhvc3QtPmJhc2UsIFNZU0NUTCwNCj4+ICAJCQkgT01BUF9IU01NQ19SRUFEKGhv
-c3QtPmJhc2UsIFNZU0NUTCkgfCBiaXQpOw0KPj4gIA0KPj4gQEAgLTk4NSwxNSArOTg3LDE5IEBA
-IHN0YXRpYyBpbmxpbmUgdm9pZCBvbWFwX2hzbW1jX3Jlc2V0X2NvbnRyb2xsZXJfZnNtKHN0cnVj
-dCBvbWFwX2hzbW1jX2hvc3QgKmhvc3QsDQo+PiAgCSAqIE1vbml0b3IgYSAwLT4xIHRyYW5zaXRp
-b24gZmlyc3QNCj4+ICAJICovDQo+PiAgCWlmIChtbWNfc2xvdChob3N0KS5mZWF0dXJlcyAmIEhT
-TU1DX0hBU19VUERBVEVEX1JFU0VUKSB7DQo+PiAtCQl3aGlsZSAoKCEoT01BUF9IU01NQ19SRUFE
-KGhvc3QtPmJhc2UsIFNZU0NUTCkgJiBiaXQpKQ0KPj4gLQkJCQkJJiYgKGkrKyA8IGxpbWl0KSkN
-Cj4+IC0JCQljcHVfcmVsYXgoKTsNCj4NCj5JIHN0aWxsIGRvbid0IHNlZSB3aHkgYW55IG9mIHRo
-ZXNlIGxvb3BzIGNvdWxkIGxhc3QgMy42IHNlY29uZHM/DQo+WWVzIHRoZSBfX3Jhd19yZWFkbCgp
-IHdpbGwgYWRkIHNvbWUgdGltZSwgYnV0IHNvIG11Y2g/DQo+SSdkIGxpa2UgdG8gc2VlIHdoaWNo
-IHZhbHVlIHlvdSBnZXQgZm9yICdsaW1pdCcgb24geW91ciBtYWNoaW5lDQo+V291bGQgUE0gcGxh
-eSBhIHJvbGU/IE9yIGNwdS1mcmVxLCBhbmQgJ2xvb3BzX3Blcl9qaWZmeScgaXNuJ3QgdXBkYXRl
-ZA0KPm9uIHRpbWU/DQpGcm9tIG15IHRlc3QsIGkgZm91bmQgaXQgZG9uJ3QgbW9uaXRvciBhIDAt
-PjEgdHJhbnN0aW9uLlRoYXQgaXMgdGhlIGxhc3QgcmVzdWx0IGlzICdpID0gbGltaXQnLg0KVGhl
-IGxhdGVyIHdoaWxlIG9wZXJ0aW9uIHN0b3AgYWxzbyBiZWNhdXNlICdpID0gbGltaXQnLg0KVGhl
-IGJhc2ljIHJlYXNvbiBpcyB0aGUgaGFyZHdhcmUuIA0KSXQgd3JpdGUgYml0IGFuZCBtb25pdG9y
-IDEtLT4wLS0tMT4tLS0wLkJ1dCB3ZSBzdGFydCBtb25pdG9yIHdlIG9ubHkgZ290IDAgYW5kIHRo
-ZSB2YWx1ZSBkb24ndCBjaGFuZ2UuDQpNYXliZSB0aGUgdHJhbnNpdGlvbiBpcyAxLS0+MC5TbyB0
-aGUgbW9uaXRvciBjYW4ndCB3b3JrIGJ1dCBzdGlsbCB3YXN0ZSBjcHUuDQoNCj4NCj4+ICsJCXdo
-aWxlIChpLS0pIHsNCj4+ICsJCQlpZiAoKE9NQVBfSFNNTUNfUkVBRChob3N0LT5iYXNlLCBTWVND
-VEwpICYgYml0KSkNCj4+ICsJCQkJYnJlYWs7DQo+PiArCQkJdWRlbGF5KDEpOw0KPg0KPkluIGVh
-cmxpZXIgdGhyZWFkcywgdGhlIHVzZSBvZiB1ZGVsYXkgd2FzIGRpc2xpa2VkIGJlY2F1c2UgaXQn
-cyBhIHdhc3RlDQo+b2YgY3B1IGN5Y2xlcy4gVGhlIGRlc2lyZWQgYml0IGluIFNZU0NUTCB3aWxs
-IGNoYW5nZSwgd2hpbGUgdWRlbGF5KCkNCj5pcyBzdGlsbCBtYWtpbmcgbWFueSB1c2VsZXNzIGxv
-b3BzLg0KWWVzLCBidXQgaXQgYXQgbW9zdCB3YXN0IDF1cy4NCg0KSmlhbnBlbmcgTWENCj4NCj4+
-ICsJCX0NCj4+ICAJfQ0KPj4gLQlpID0gMDsNCj4+ICANCj4+IC0Jd2hpbGUgKChPTUFQX0hTTU1D
-X1JFQUQoaG9zdC0+YmFzZSwgU1lTQ1RMKSAmIGJpdCkgJiYNCj4+IC0JCShpKysgPCBsaW1pdCkp
-DQo+PiAtCQljcHVfcmVsYXgoKTsNCj4+ICsJaSA9IGxpbWl0IC8gKE1NQ19USU1FT1VUX01TICog
-MTAwMCk7DQo+PiArCXdoaWxlIChpLS0pIHsNCj4+ICsJCWlmICghKE9NQVBfSFNNTUNfUkVBRCho
-b3N0LT5iYXNlLCBTWVNDVEwpICYgYml0KSkNCj4+ICsJCQlicmVhazsNCj4+ICsJCXVkZWFseSgx
-KTsNCj4+ICsJfQ0KPj4gIA0KPj4gIAlpZiAoT01BUF9IU01NQ19SRUFEKGhvc3QtPmJhc2UsIFNZ
-U0NUTCkgJiBiaXQpDQo+PiAgCQlkZXZfZXJyKG1tY19kZXYoaG9zdC0+bW1jKSwNCj5IZWluDQpU
-aGFua3MhDQpKaWFucGVuZyBNYQ0KPkhpIEppYW5wZW5nIE1hLA0KPg0KPk9uIDgvMS8yMDEzIDEw
-OjE4IEFNLCBtYWppYW5wZW5nIHdyb3RlOg0KPj4gV2UgZm91bmQgYSBwcm9ibGVtIHdoZW4gd2Ug
-cmVtb3ZlZCBhIHdvcmtpbmcgc2QgY2FyZCB0aGF0IHRoZSBpcnFhY3Rpb24NCj4+IG9mIG9tYXBf
-aHNtbWMgY2FuIHNsZWVwIHRvIDMuNnMuIFRoaXMgY2F1c2Ugb3VyIHdhdGNoZG9nIHRvIHdvcmsu
-DQo+PiBJbiBmdW5jIG9tYXBfaHNtbWNfcmVzZXRfY29udHJvbGxlcl9mc20sIGl0IHNob3VsZCB3
-YXRjaCBhIDAtPjENCj4+IHRyYW5zaXRpb24uSXQgdXNlZCBsb29wc19wZXJfamlmZnkgYXMgdGhl
-IHRpbWVyLg0KPj4gVGhlIGNvZGUgaXM6DQo+Pj4gd2hpbGUgKCghKE9NQVBfSFNNTUNfUkVBRCho
-b3N0LT5iYXNlLCBTWVNDVEwpICYgYml0KSkNCj4+PiAgICAgICAgICAgICAgICAmJiAoaSsrIDwg
-bGltaXQpKQ0KPj4+ICAgICAgICAgICAgICAgICAgICAgICAgY3B1X3JlbGF4KCk7DQo+PiBCdXQg
-dGhlIGxvb3BzX3Blcl9qaWZmeSBpczoNCj4+PiAgd2hpbGUoaSsrIDwgbGltaXQpDQo+Pj4gCWNw
-dV9yZWxheCgpOw0KPj4gSXQgYWRkIHNvbWUgY29kZXMgc28gdGhlIHRpbWUgYmVjYW1lIGxvbmcu
-DQo+PiBCZWNhc3VlIHRob3NlIGNvZGVzIGluIElTUiBjb250ZXh0LCBpdCBjYW4ndCB1c2UgdGlt
-ZXJfYmVmb3JlL2FmdGVyLg0KPj4gSSBkaXZpdmVkIHRoZSB0aW1lIGludG8gMW1zIGFuZCB1c2Vk
-IHVkZWxheSgxKSB0byBpbnN0ZWFkLg0KPj4gSXQgd2lsbCBjYXVzZSBkbyBhZGRpdGlvbmFsIHVk
-ZWxheSgxKS5CdXQgZnJvbSBteSB0ZXN0LGl0IGxvb2tzIGdvb2QuDQo+Pg0KPj4gUmVwb3J0ZWQt
-Ynk6IFl1emhlbmcgTWEgPG1heXV6aGVuZ0BrZWRhY29tLmNvbT4NCj4+IFRlc3RlZC1ieTogWXV6
-aGVuZyBNYSA8bWF5dXpoZW5nQGtlZGFjb20uY29tPg0KPj4gU2lnbmVkLW9mZi1ieTogSmlhbnBl
-bmcgTWEgPG1hamlhbnBlbmdAZ21haWwuY29tPg0KPj4gLS0tDQo+PiAgZHJpdmVycy9tbWMvaG9z
-dC9vbWFwX2hzbW1jLmMgfCAyMCArKysrKysrKysrKysrLS0tLS0tLQ0KPj4gIDEgZmlsZSBjaGFu
-Z2VkLCAxMyBpbnNlcnRpb25zKCspLCA3IGRlbGV0aW9ucygtKQ0KPj4NCj4+IGRpZmYgLS1naXQg
-YS9kcml2ZXJzL21tYy9ob3N0L29tYXBfaHNtbWMuYyBiL2RyaXZlcnMvbW1jL2hvc3Qvb21hcF9o
-c21tYy5jDQo+PiBpbmRleCAxODY1MzIxLi45NmRhY2ExIDEwMDY0NA0KPj4gLS0tIGEvZHJpdmVy
-cy9tbWMvaG9zdC9vbWFwX2hzbW1jLmMNCj4+ICsrKyBiL2RyaXZlcnMvbW1jL2hvc3Qvb21hcF9o
-c21tYy5jDQo+PiBAQCAtOTc3LDYgKzk3Nyw4IEBAIHN0YXRpYyBpbmxpbmUgdm9pZCBvbWFwX2hz
-bW1jX3Jlc2V0X2NvbnRyb2xsZXJfZnNtKHN0cnVjdCBvbWFwX2hzbW1jX2hvc3QgKmhvc3QsDQo+
-PiAgCXVuc2lnbmVkIGxvbmcgbGltaXQgPSAobG9vcHNfcGVyX2ppZmZ5ICoNCj4+ICAJCQkJbXNl
-Y3NfdG9famlmZmllcyhNTUNfVElNRU9VVF9NUykpOw0KPj4gIA0KPj4gKwkvKkRpdmlkZWQgdGlt
-ZSBpbnRvIHVzIGZvciB1bml0IDEsd2UgY2FuIHVzZSB1ZGVsYXkoMSkqLw0KPj4gKwlpID0gbGlt
-aXQgLyAoTU1DX1RJTUVPVVRfTVMgKiAxMDAwKTsNCj4NCj4nbGltaXQnIGlzIGEgbnVtYmVyIG9m
-IGxvb3BzLCB3aGljaCB5b3Ugbm93IGRpdmlkZSBieSAyMCwwMDA/DQo+DQo+VG8gZ2V0IHVTLCB5
-b3UgY291bGQganVzdCBjaGFuZ2U6DQo+DQo+LQl1bnNpZ25lZCBsb25nIGxpbWl0ID0gKGxvb3Bz
-X3Blcl9qaWZmeSAqDQo+LQkJCQltc2Vjc190b19qaWZmaWVzKE1NQ19USU1FT1VUX01TKSk7DQo+
-Kwl1bnNpZ25lZCBsb25nIGxpbWl0ID0gMTAwMCAqIE1NQ19USU1FT1VUX01TOw0KPg0KPmFuZCBt
-YWtlIHRoaXMgYW1vdW50IG9mIGxvb3BzIHVzaW5nIHVkZWxheSgpLg0KPg0KPj4gIAlPTUFQX0hT
-TU1DX1dSSVRFKGhvc3QtPmJhc2UsIFNZU0NUTCwNCj4+ICAJCQkgT01BUF9IU01NQ19SRUFEKGhv
-c3QtPmJhc2UsIFNZU0NUTCkgfCBiaXQpOw0KPj4gIA0KPj4gQEAgLTk4NSwxNSArOTg3LDE5IEBA
-IHN0YXRpYyBpbmxpbmUgdm9pZCBvbWFwX2hzbW1jX3Jlc2V0X2NvbnRyb2xsZXJfZnNtKHN0cnVj
-dCBvbWFwX2hzbW1jX2hvc3QgKmhvc3QsDQo+PiAgCSAqIE1vbml0b3IgYSAwLT4xIHRyYW5zaXRp
-b24gZmlyc3QNCj4+ICAJICovDQo+PiAgCWlmIChtbWNfc2xvdChob3N0KS5mZWF0dXJlcyAmIEhT
-TU1DX0hBU19VUERBVEVEX1JFU0VUKSB7DQo+PiAtCQl3aGlsZSAoKCEoT01BUF9IU01NQ19SRUFE
-KGhvc3QtPmJhc2UsIFNZU0NUTCkgJiBiaXQpKQ0KPj4gLQkJCQkJJiYgKGkrKyA8IGxpbWl0KSkN
-Cj4+IC0JCQljcHVfcmVsYXgoKTsNCj4NCj5JIHN0aWxsIGRvbid0IHNlZSB3aHkgYW55IG9mIHRo
-ZXNlIGxvb3BzIGNvdWxkIGxhc3QgMy42IHNlY29uZHM/DQo+WWVzIHRoZSBfX3Jhd19yZWFkbCgp
-IHdpbGwgYWRkIHNvbWUgdGltZSwgYnV0IHNvIG11Y2g/DQo+SSdkIGxpa2UgdG8gc2VlIHdoaWNo
-IHZhbHVlIHlvdSBnZXQgZm9yICdsaW1pdCcgb24geW91ciBtYWNoaW5lDQo+V291bGQgUE0gcGxh
-eSBhIHJvbGU/IE9yIGNwdS1mcmVxLCBhbmQgJ2xvb3BzX3Blcl9qaWZmeScgaXNuJ3QgdXBkYXRl
-ZA0KPm9uIHRpbWU/DQo+DQo+PiArCQl3aGlsZSAoaS0tKSB7DQo+PiArCQkJaWYgKChPTUFQX0hT
-TU1DX1JFQUQoaG9zdC0+YmFzZSwgU1lTQ1RMKSAmIGJpdCkpDQo+PiArCQkJCWJyZWFrOw0KPj4g
-KwkJCXVkZWxheSgxKTsNCj4NCj5JbiBlYXJsaWVyIHRocmVhZHMsIHRoZSB1c2Ugb2YgdWRlbGF5
-IHdhcyBkaXNsaWtlZCBiZWNhdXNlIGl0J3MgYSB3YXN0ZQ0KPm9mIGNwdSBjeWNsZXMuIFRoZSBk
-ZXNpcmVkIGJpdCBpbiBTWVNDVEwgd2lsbCBjaGFuZ2UsIHdoaWxlIHVkZWxheSgpDQo+aXMgc3Rp
-bGwgbWFraW5nIG1hbnkgdXNlbGVzcyBsb29wcy4NCj4NCj4+ICsJCX0NCj4+ICAJfQ0KPj4gLQlp
-ID0gMDsNCj4+ICANCj4+IC0Jd2hpbGUgKChPTUFQX0hTTU1DX1JFQUQoaG9zdC0+YmFzZSwgU1lT
-Q1RMKSAmIGJpdCkgJiYNCj4+IC0JCShpKysgPCBsaW1pdCkpDQo+PiAtCQljcHVfcmVsYXgoKTsN
-Cj4+ICsJaSA9IGxpbWl0IC8gKE1NQ19USU1FT1VUX01TICogMTAwMCk7DQo+PiArCXdoaWxlIChp
-LS0pIHsNCj4+ICsJCWlmICghKE9NQVBfSFNNTUNfUkVBRChob3N0LT5iYXNlLCBTWVNDVEwpICYg
-Yml0KSkNCj4+ICsJCQlicmVhazsNCj4+ICsJCXVkZWFseSgxKTsNCj4+ICsJfQ0KPj4gIA0KPj4g
-IAlpZiAoT01BUF9IU01NQ19SRUFEKGhvc3QtPmJhc2UsIFNZU0NUTCkgJiBiaXQpDQo+PiAgCQlk
-ZXZfZXJyKG1tY19kZXYoaG9zdC0+bW1jKSwNCj5IZWlu
+Hi Jianpeng Ma,
+
+On 8/1/2013 10:18 AM, majianpeng wrote:
+> We found a problem when we removed a working sd card that the irqaction
+> of omap_hsmmc can sleep to 3.6s. This cause our watchdog to work.
+> In func omap_hsmmc_reset_controller_fsm, it should watch a 0->1
+> transition.It used loops_per_jiffy as the timer.
+> The code is:
+>> while ((!(OMAP_HSMMC_READ(host->base, SYSCTL) & bit))
+>>                && (i++ < limit))
+>>                        cpu_relax();
+> But the loops_per_jiffy is:
+>>  while(i++ < limit)
+>> 	cpu_relax();
+> It add some codes so the time became long.
+> Becasue those codes in ISR context, it can't use timer_before/after.
+> I divived the time into 1ms and used udelay(1) to instead.
+> It will cause do additional udelay(1).But from my test,it looks good.
+>
+> Reported-by: Yuzheng Ma <mayuzheng@kedacom.com>
+> Tested-by: Yuzheng Ma <mayuzheng@kedacom.com>
+> Signed-off-by: Jianpeng Ma <majianpeng@gmail.com>
+> ---
+>  drivers/mmc/host/omap_hsmmc.c | 20 +++++++++++++-------
+>  1 file changed, 13 insertions(+), 7 deletions(-)
+>
+> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+> index 1865321..96daca1 100644
+> --- a/drivers/mmc/host/omap_hsmmc.c
+> +++ b/drivers/mmc/host/omap_hsmmc.c
+> @@ -977,6 +977,8 @@ static inline void omap_hsmmc_reset_controller_fsm(struct omap_hsmmc_host *host,
+>  	unsigned long limit = (loops_per_jiffy *
+>  				msecs_to_jiffies(MMC_TIMEOUT_MS));
+>  
+> +	/*Divided time into us for unit 1,we can use udelay(1)*/
+> +	i = limit / (MMC_TIMEOUT_MS * 1000);
+
+'limit' is a number of loops, which you now divide by 20,000?
+
+To get uS, you could just change:
+
+-	unsigned long limit = (loops_per_jiffy *
+-				msecs_to_jiffies(MMC_TIMEOUT_MS));
++	unsigned long limit = 1000 * MMC_TIMEOUT_MS;
+
+and make this amount of loops using udelay().
+
+>  	OMAP_HSMMC_WRITE(host->base, SYSCTL,
+>  			 OMAP_HSMMC_READ(host->base, SYSCTL) | bit);
+>  
+> @@ -985,15 +987,19 @@ static inline void omap_hsmmc_reset_controller_fsm(struct omap_hsmmc_host *host,
+>  	 * Monitor a 0->1 transition first
+>  	 */
+>  	if (mmc_slot(host).features & HSMMC_HAS_UPDATED_RESET) {
+> -		while ((!(OMAP_HSMMC_READ(host->base, SYSCTL) & bit))
+> -					&& (i++ < limit))
+> -			cpu_relax();
+
+I still don't see why any of these loops could last 3.6 seconds?
+Yes the __raw_readl() will add some time, but so much?
+I'd like to see which value you get for 'limit' on your machine
+Would PM play a role? Or cpu-freq, and 'loops_per_jiffy' isn't updated
+on time?
+
+> +		while (i--) {
+> +			if ((OMAP_HSMMC_READ(host->base, SYSCTL) & bit))
+> +				break;
+> +			udelay(1);
+
+In earlier threads, the use of udelay was disliked because it's a waste
+of cpu cycles. The desired bit in SYSCTL will change, while udelay()
+is still making many useless loops.
+
+> +		}
+>  	}
+> -	i = 0;
+>  
+> -	while ((OMAP_HSMMC_READ(host->base, SYSCTL) & bit) &&
+> -		(i++ < limit))
+> -		cpu_relax();
+> +	i = limit / (MMC_TIMEOUT_MS * 1000);
+> +	while (i--) {
+> +		if (!(OMAP_HSMMC_READ(host->base, SYSCTL) & bit))
+> +			break;
+> +		udealy(1);
+> +	}
+>  
+>  	if (OMAP_HSMMC_READ(host->base, SYSCTL) & bit)
+>  		dev_err(mmc_dev(host->mmc),
+Hein
