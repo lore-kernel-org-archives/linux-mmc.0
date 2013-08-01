@@ -1,7 +1,7 @@
-From: Joel Fernandes <joelf-l0cyMroinI0@public.gmane.org>
+From: Sekhar Nori <nsekhar-l0cyMroinI0@public.gmane.org>
 Subject: Re: [PATCH 4/9] dma: edma: Find missed events and issue them
-Date: Wed, 31 Jul 2013 23:39:36 -0500
-Message-ID: <51F9E688.7010608@ti.com>
+Date: Thu, 1 Aug 2013 11:43:27 +0530
+Message-ID: <51F9FC87.3020706@ti.com>
 References: <1375104595-16018-1-git-send-email-joelf@ti.com>
 	<1375104595-16018-5-git-send-email-joelf@ti.com>
 	<51F7659E.3040302@ti.com> <51F89763.1010102@ti.com>
@@ -9,7 +9,7 @@ References: <1375104595-16018-1-git-send-email-joelf@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <davinci-linux-open-source-bounces+gld-davinci-linux-open-source=gmane.org-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
+Return-path: <davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
 In-Reply-To: <51F9C793.2000001-l0cyMroinI0@public.gmane.org>
 List-Unsubscribe: <http://linux.davincidsp.com/mailman/options/davinci-linux-open-source>,
 	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=unsubscribe>
@@ -18,13 +18,13 @@ List-Post: <mailto:davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@pu
 List-Help: <mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=help>
 List-Subscribe: <http://linux.davincidsp.com/mailman/listinfo/davinci-linux-open-source>,
 	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=subscribe>
-Sender: <davinci-linux-open-source-bounces+gld-davinci-linux-open-source=gmane.org-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
-Errors-To: davinci-linux-open-source-bounces+gld-davinci-linux-open-source=gmane.org-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org
+Sender: <davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
+Errors-To: davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org
 To: joelf-l0cyMroinI0@public.gmane.org
 Cc: Mark Brown <broonie-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Grant Likely <grant.likely-s3s/WqlpOiPyB63q8FvJNQ@public.gmane.org>, Sricharan R <r.sricharan-l0cyMroinI0@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Vinod Koul <vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Lokesh Vutla <lokeshvutla-l0cyMroinI0@public.gmane.org>, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Rajendra Nayak <rnayak-l0cyMroinI0@public.gmane.org>, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Jason Kridner <jkridner-hcmAuCOw+vXj4SYmN/TMmA@public.gmane.org>, Linux OMAP List <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux ARM Kernel List <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Linux DaVinci Kernel List <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, Balaji TK <balajitk-l0cyMroinI0@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Santosh Shilimkar <santosh.shilim>
 List-Id: linux-mmc@vger.kernel.org
 
-On 07/31/2013 09:27 PM, Joel Fernandes wrote:
+On Thursday 01 August 2013 07:57 AM, Joel Fernandes wrote:
 > On 07/31/2013 04:18 AM, Sekhar Nori wrote:
 >> On Wednesday 31 July 2013 10:19 AM, Joel Fernandes wrote:
 >>> Hi Sekhar,
@@ -91,6 +91,11 @@ On 07/31/2013 09:27 PM, Joel Fernandes wrote:
 > - Crypto AES
 > - MMC/SD
 > - SPI (128x160 display)
+
+Notice how in each of these cases the peripheral is in control of when
+data is driven out? Please test with McASP in a configuration where
+codec drives the frame-sync/bit-clock or with UART under high baud rate.
+
 > 
 >>>> Also, wont this lead to under-utilization of the peripheral bandwith?
 >>>> Meaning, MMC/SD is ready with data but cannot transfer because the DMA
@@ -109,7 +114,10 @@ On 07/31/2013 09:27 PM, Joel Fernandes wrote:
 > This is not true for crypto, the events are not deasserted and crypto
 > continues to send events. This is what led to the "don't trigger in
 > Null" patch where I'm setting the missed flag to avoid recursion.
-> 
+
+Sorry, I am not sure which patch you are talking about here. Can you
+provide the full subject line to avoid confusion?
+
 >>> This can be used only for buffers that are contiguous in memory, not
 >>> those that are scattered across memory.
 >>
@@ -185,6 +193,17 @@ On 07/31/2013 09:27 PM, Joel Fernandes wrote:
 > 10. This method will trigger 30 interrupts always, where as with my
 > patch series, you'd get only 3 interrupts. If you increase MAX_SG_NR ,
 > you'd get even fewer interrupts.
+
+Yes, but you are seeing only one side of inefficiency. In your design
+DMA *always* stalls waiting for CPU to intervene. The whole point to DMA
+is to keep it going while CPU does bookeeping in background. This is
+simply not going to scale with fast peripherals.
+
+Besides, missed events are error conditions as far as EDMA and the
+peripheral is considered. You are handling error interrupt to support a
+successful transaction. Think about why EDMA considers missed events as
+error condition.
+
 > 
 > 2. If the interrupt handler for some reason doesn't complete or get
 > service in time, we will end up DMA'ing incorrect data as events
@@ -192,30 +211,13 @@ On 07/31/2013 09:27 PM, Joel Fernandes wrote:
 > example linked sets P1 or P2 would be old ones being repeated). Where as
 > with my method, we are not doing any DMA once we finish the current
 > MAX_NR_SG set even if events continue to come.
-> 
 
-Actually on second thought, 1. can be tackled by having a list of PaRAM
-set instead of just 1 set for P1, and another list in P2. And ping-pong
-between the P1 and P2 sets only interrupting in between to setup one or
-the other. However 2. is still a concern.
+Where is repetition and possibility of wrong data being transferred? We
+have a linear list of PaRAM sets - not a loop. You would link the end to
+PaRAM set chain to dummy PaRAM set which BTW will not cause missed
+events. The more number of PaRAM sets you add to the chain, the more
+time CPU gets to intervene before DMA eventually stalls. This is a
+tradeoff system designers can manage.
 
-Still, what you're asking for is a rewrite of quite a bit of the driver
-which I feel is unnecessary at this point as my patch series is
-alternate method that's been tested and  working.
-
-The only point of concern I think you have with the series is how will
-peripherals react if their events are not handled right away. I am
-certain that the peripheral doesn't go into an error condition state
-because it doesn't know that its event was missed and it'd be just
-waiting. I haven't dealt with EDMA queuing but wouldn't this kind of
-wait be happening even with such queues. Another note is, the waiting is
-happening even in today's state of the driver where we limit by
-MAX_NR_SG. Probably not the same kind of wait as this series (like send
-event and wait), but peripheral just not doing anything.
-
-Let me know if you had a specific case of a peripheral where this could
-be a problem and I'll be happy to test it. Thanks.
-
-Regards,
-
--Joel
+Thanks,
+Sekhar
