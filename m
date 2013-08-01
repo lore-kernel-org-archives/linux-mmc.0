@@ -1,109 +1,51 @@
-From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: Re: [PATCH] mmc: tmio-mmc: Check the regulator_enable() return value
-Date: Wed, 31 Jul 2013 19:26:25 +0200 (CEST)
-Message-ID: <Pine.LNX.4.64.1307311925460.5256@axis700.grange>
-References: <1375280311-6003-1-git-send-email-laurent.pinchart+renesas@ideasonboard.com>
+From: Jingoo Han <jg1.han@samsung.com>
+Subject: [PATCH] mmc: dw_mmc: add missing MFD_SYSCON dependency for SOCFPGA
+Date: Thu, 01 Aug 2013 09:28:13 +0900
+Message-ID: <002601ce8e4e$027246c0$0756d440$@samsung.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <1375280311-6003-1-git-send-email-laurent.pinchart+renesas@ideasonboard.com>
-Sender: linux-sh-owner@vger.kernel.org
-To: Laurent Pinchart <laurent.pinchart+renesas@ideasonboard.com>
-Cc: linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, Ian Molton <ian@mnementh.co.uk>
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout2.samsung.com ([203.254.224.25]:53141 "EHLO
+	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750856Ab3HAA2P (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 31 Jul 2013 20:28:15 -0400
+Received: from epcpsbgr1.samsung.com
+ (u141.gpu120.samsung.co.kr [203.254.230.141])
+ by mailout2.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+ (7.0.4.24.0) 64bit (built Nov 17 2011))
+ with ESMTP id <0MQT00GWNTAYXN20@mailout2.samsung.com> for
+ linux-mmc@vger.kernel.org; Thu, 01 Aug 2013 09:28:14 +0900 (KST)
+Content-language: ko
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>
+Cc: linux-mmc@vger.kernel.org, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, 'Dinh Nguyen' <dinguyen@altera.com>, Jingoo Han <jg1.han@samsung.com>
 
-Hi Laurent
+Added missing MFD_SYSCON dependency for SOCFPGA in order to fix
+the following link error.
 
-On Wed, 31 Jul 2013, Laurent Pinchart wrote:
+drivers/mmc/host/dw_mmc-socfpga.c:49: undefined reference to `syscon_regmap_lookup_by_compatible'
 
-> The regulator_enable() function is marked with __must_check, check it=
-s
-> return value and return an error in case of failure. This removes the
-> following warning during kernel compilation:
->=20
-> drivers/mmc/host/tmio_mmc_pio.c: In function =E2=80=98tmio_mmc_power_=
-on=E2=80=99:
-> drivers/mmc/host/tmio_mmc_pio.c:795:19: warning: ignoring return valu=
-e
-> of =E2=80=98regulator_enable=E2=80=99, declared with attribute warn_u=
-nused_result
-> [-Wunused-result]
->=20
-> The error isn't propagated back to the MMC core, as the .set_ios()
-> operation in which the regulator is enabled doesn't have a return val=
-ue.
-> This should be fixed as well.
->=20
-> Signed-off-by: Laurent Pinchart <laurent.pinchart+renesas@ideasonboar=
-d.com>
-
-Should be fixed by now:
-
-http://thread.gmane.org/gmane.linux.kernel.mmc/21294
-
-Thanks
-Guennadi
-
-> ---
->  drivers/mmc/host/tmio_mmc_pio.c | 16 ++++++++++++----
->  1 file changed, 12 insertions(+), 4 deletions(-)
->=20
-> diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_=
-mmc_pio.c
-> index 4675513..e3e2645 100644
-> --- a/drivers/mmc/host/tmio_mmc_pio.c
-> +++ b/drivers/mmc/host/tmio_mmc_pio.c
-> @@ -770,15 +770,18 @@ static int tmio_mmc_clk_update(struct mmc_host =
-*mmc)
->  	return ret;
->  }
-> =20
-> -static void tmio_mmc_power_on(struct tmio_mmc_host *host, unsigned s=
-hort vdd)
-> +static int tmio_mmc_power_on(struct tmio_mmc_host *host, unsigned sh=
-ort vdd)
->  {
->  	struct mmc_host *mmc =3D host->mmc;
-> -	int ret =3D 0;
-> +	int ret;
-> =20
->  	/* .set_ios() is returning void, so, no chance to report an error *=
-/
-> =20
->  	if (!IS_ERR(mmc->supply.vmmc)) {
->  		ret =3D mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, vdd);
-> +		if (ret < 0)
-> +			return ret;
-> +
->  		/*
->  		 * Attention: empiric value. With a b43 WiFi SDIO card this
->  		 * delay proved necessary for reliable card-insertion probing.
-> @@ -791,10 +794,15 @@ static void tmio_mmc_power_on(struct tmio_mmc_h=
-ost *host, unsigned short vdd)
->  	 * It seems, VccQ should be switched on after Vcc, this is also wha=
-t the
->  	 * omap_hsmmc.c driver does.
->  	 */
-> -	if (!IS_ERR(mmc->supply.vqmmc) && !ret) {
-> -		regulator_enable(mmc->supply.vqmmc);
-> +	if (!IS_ERR(mmc->supply.vqmmc)) {
-> +		ret =3D regulator_enable(mmc->supply.vqmmc);
-> +		if (ret < 0)
-> +			return ret;
-> +
->  		udelay(200);
->  	}
-> +
-> +	return 0;
->  }
-> =20
->  static void tmio_mmc_power_off(struct tmio_mmc_host *host)
-> --=20
-> 1.8.1.5
->=20
-
+Signed-off-by: Jingoo Han <jg1.han@samsung.com>
 ---
-Guennadi Liakhovetski, Ph.D.
-=46reelance Open-Source Software Developer
-http://www.open-technology.de/
+ drivers/mmc/host/Kconfig |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+index 8a4c066..84102bc 100644
+--- a/drivers/mmc/host/Kconfig
++++ b/drivers/mmc/host/Kconfig
+@@ -569,7 +569,7 @@ config MMC_DW_EXYNOS
+ 
+ config MMC_DW_SOCFPGA
+ 	tristate "SOCFPGA specific extensions for Synopsys DW Memory Card Interface"
+-	depends on MMC_DW
++	depends on MMC_DW && MFD_SYSCON
+ 	select MMC_DW_PLTFM
+ 	help
+ 	  This selects support for Altera SoCFPGA specific extensions to the
+-- 
+1.7.10.4
+
+
