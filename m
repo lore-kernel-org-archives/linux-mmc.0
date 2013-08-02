@@ -1,66 +1,53 @@
-From: Dan Carpenter <dan.carpenter@oracle.com>
-Subject: Re: [PATCH 1/2] mmc: dw_mmc-socfpga: Staticize dw_mci_socfpga_probe()
-Date: Fri, 2 Aug 2013 11:34:00 +0300
-Message-ID: <20130802083400.GD5102@mwanda>
-References: <004d01ce8e80$91d50d20$b57f2760$@samsung.com>
- <1375373935.26434.1.camel@linux-builds1>
- <000b01ce8f14$d08d4480$71a7cd80$@samsung.com>
+From: Sachin Kamat <sachin.kamat@linaro.org>
+Subject: Re: [PATCH 1/1] mmc: vub300: Staticize vub300_init_card
+Date: Fri, 2 Aug 2013 14:19:08 +0530
+Message-ID: <CAK9yfHxL-EYNfCpAv8Y7hLZ8BfZ914t_c44p5sHjbvJM4TB4=Q@mail.gmail.com>
+References: <1372228350-6375-1-git-send-email-sachin.kamat@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from aserp1040.oracle.com ([141.146.126.69]:31484 "EHLO
-	aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753872Ab3HBIeT (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 2 Aug 2013 04:34:19 -0400
-Content-Disposition: inline
-In-Reply-To: <000b01ce8f14$d08d4480$71a7cd80$@samsung.com>
+Received: from mail-oa0-f46.google.com ([209.85.219.46]:50229 "EHLO
+	mail-oa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753779Ab3HBItJ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 2 Aug 2013 04:49:09 -0400
+Received: by mail-oa0-f46.google.com with SMTP id l10so797852oag.5
+        for <linux-mmc@vger.kernel.org>; Fri, 02 Aug 2013 01:49:09 -0700 (PDT)
+In-Reply-To: <1372228350-6375-1-git-send-email-sachin.kamat@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jingoo Han <jg1.han@samsung.com>
-Cc: 'Dinh Nguyen' <dinguyen@altera.com>, 'Chris Ball' <cjb@laptop.org>, linux-mmc@vger.kernel.org, 'Seungwon Jeon' <tgih.jun@samsung.com>, 'Jaehoon Chung' <jh80.chung@samsung.com>
+To: linux-mmc@vger.kernel.org
+Cc: cjb@laptop.org, tony.olech@elandigitalsystems.com, sachin.kamat@linaro.org
 
-On Fri, Aug 02, 2013 at 09:11:19AM +0900, Jingoo Han wrote:
-> On Friday, August 02, 2013 1:19 AM, Dinh Nguyen wrote:
-> > drivers/mmc/host/dw_mmc-pltfm.c:58:24: warning: incorrect type in
-> > argument 1 (different address spaces)
-> > drivers/mmc/host/dw_mmc-pltfm.c:58:24:    expected void const *ptr
-> > drivers/mmc/host/dw_mmc-pltfm.c:58:24:    got void [noderef]
-> > <asn:2>*regs
-> > drivers/mmc/host/dw_mmc-pltfm.c:59:36: warning: incorrect type in
-> > argument 1 (different address spaces)
-> > drivers/mmc/host/dw_mmc-pltfm.c:59:36:    expected void const *ptr
-> > drivers/mmc/host/dw_mmc-pltfm.c:59:36:    got void [noderef]
-> > <asn:2>*regs
-> 
-> You mean the following.
-> 
-> 58 if (IS_ERR(host->regs))
-> 59                return PTR_ERR(host->regs);
-> 
-> >From v3.11-rc1, it does not make sparse warnings,
-> because of the commit e7152b9 "err.h: IS_ERR() can accept __user pointers"
-> submitted by Dan Carpenter.
+On 26 June 2013 12:02, Sachin Kamat <sachin.kamat@linaro.org> wrote:
+> 'vub300_init_card' is used only in this file. Make it
+> static.
+>
+> Signed-off-by: Sachin Kamat <sachin.kamat@linaro.org>
+> ---
+>  drivers/mmc/host/vub300.c |    2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/host/vub300.c b/drivers/mmc/host/vub300.c
+> index cb9f361..e9028ad 100644
+> --- a/drivers/mmc/host/vub300.c
+> +++ b/drivers/mmc/host/vub300.c
+> @@ -2079,7 +2079,7 @@ static void vub300_enable_sdio_irq(struct mmc_host *mmc, int enable)
+>         kref_put(&vub300->kref, vub300_delete);
+>  }
+>
+> -void vub300_init_card(struct mmc_host *mmc, struct mmc_card *card)
+> +static void vub300_init_card(struct mmc_host *mmc, struct mmc_card *card)
+>  {                              /* NOT irq */
+>         struct vub300_mmc_host *vub300 = mmc_priv(mmc);
+>         dev_info(&vub300->udev->dev, "NO host QUIRKS for this card\n");
+> --
+> 1.7.9.5
+>
 
-You have to upgrade to a later version of Sparse as well.
+Chris,
 
-> 
-> 
-> > drivers/mmc/host/dw_mmc-pltfm.c:36:5: warning: symbol
-> > 'dw_mci_pltfm_register' was not declared. Should it be static?
-> > drivers/mmc/host/dw_mmc-pltfm.c:94:1: warning: symbol
-> > 'dw_mci_pltfm_pmops' was not declared. Should it be static?
-> 
-> 'dw_mci_pltfm_register' and 'dw_mci_pltfm_pmops' are exported as below:
-> 
-> 70: EXPORT_SYMBOL_GPL(dw_mci_pltfm_register);
-> 95: EXPORT_SYMBOL_GPL(dw_mci_pltfm_pmops);
-> 
-> So, I am not sure whether these can be static or not. :(
-> Dan, if you know how to handle this, please let me know.
+Any comments on this patch?
 
-No, don't make these static.  The way to silence this warning is to
-include "dw_mmc-pltfm.h".
-
-regards,
-dan carpenter
-
+-- 
+With warm regards,
+Sachin
