@@ -1,59 +1,68 @@
-From: Sachin Kamat <sachin.kamat@linaro.org>
-Subject: Re: [PATCH 1/3] mmc: sdhci-bcm-kona: Remove unneeded version.h inclusion
-Date: Fri, 2 Aug 2013 14:20:57 +0530
-Message-ID: <CAK9yfHyKQbw2i3yruM8RbGYU1COkYA_SPqThFhx737d_R0sWiw@mail.gmail.com>
-References: <1373263914-18050-1-git-send-email-sachin.kamat@linaro.org>
-	<51E9A207.70306@broadcom.com>
+From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Subject: Re: [PATCH] tmio_mmc_dma: fix PIO fallback on SDHI
+Date: Fri, 2 Aug 2013 13:35:47 +0200 (CEST)
+Message-ID: <Pine.LNX.4.64.1308021332260.28012@axis700.grange>
+References: <201308020117.17897.sergei.shtylyov@cogentembedded.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ob0-f178.google.com ([209.85.214.178]:53193 "EHLO
-	mail-ob0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1758090Ab3HBIu7 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 2 Aug 2013 04:50:59 -0400
-Received: by mail-ob0-f178.google.com with SMTP id ef5so715472obb.9
-        for <linux-mmc@vger.kernel.org>; Fri, 02 Aug 2013 01:50:58 -0700 (PDT)
-In-Reply-To: <51E9A207.70306@broadcom.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <linux-sh-owner@vger.kernel.org>
+In-Reply-To: <201308020117.17897.sergei.shtylyov@cogentembedded.com>
+Sender: linux-sh-owner@vger.kernel.org
+To: Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>
+Cc: linux-mmc@vger.kernel.org, ian@mnementh.co.uk, cjb@laptop.org, linux-sh@vger.kernel.org, max.filippov@cogentembedded.com
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: linux-mmc@vger.kernel.org, patches@linaro.org
 
-On 20 July 2013 02:01, Christian Daudt <csd@broadcom.com> wrote:
-> On 13-07-07 11:11 PM, Sachin Kamat wrote:
->>
->> version.h header inclusion is not necessary as detected by
->> versioncheck.
->>
->> Signed-off-by: Sachin Kamat <sachin.kamat@linaro.org>
->> ---
->>   drivers/mmc/host/sdhci-bcm-kona.c |    1 -
->>   1 file changed, 1 deletion(-)
->>
->> diff --git a/drivers/mmc/host/sdhci-bcm-kona.c
->> b/drivers/mmc/host/sdhci-bcm-kona.c
->> index 87175f9..bca6d55 100644
->> --- a/drivers/mmc/host/sdhci-bcm-kona.c
->> +++ b/drivers/mmc/host/sdhci-bcm-kona.c
->> @@ -24,7 +24,6 @@
->>   #include <linux/of.h>
->>   #include <linux/of_device.h>
->>   #include <linux/of_gpio.h>
->> -#include <linux/version.h>
->>   #include <linux/mmc/slot-gpio.h>
->>     #include "sdhci-pltfm.h"
->
-> Acked-by: Christian Daudt <csd@broadcom.com>
->
->  thanks,
->    csd
->
->
-Chris,
+Hi Sergei,
 
-Can you please check this series?
+Thanks for your patch.
 
+On Fri, 2 Aug 2013, Sergei Shtylyov wrote:
 
--- 
-With warm regards,
-Sachin
+> I'm testing SH-Mobile SDHI driver in DMA mode with a  new DMA controller  using
+> 'bonnie++' and getting DMA error after which the tmio_mmc_dma.c code falls back
+> to PIO but all commands time out after that.  It turned out that the fallback
+> code calls tmio_mmc_enable_dma() with RX/TX channels already freed and pointers
+> to them cleared, so that the function bails out early instead  of clearing the
+> DMA bit in the CTL_DMA_ENABLE register.  Fixing the RX/TX channel check so that
+> it takes place only when enabling DMA helps with the PIO fallback.
+> 
+> Signed-off-by: Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>
+> 
+> ---
+> The patch is against Chris Ball's 'mmc.git' repo, 'master' branch.
+> 
+>  drivers/mmc/host/tmio_mmc_dma.c |    2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+> 
+> Index: mmc/drivers/mmc/host/tmio_mmc_dma.c
+> ===================================================================
+> --- mmc.orig/drivers/mmc/host/tmio_mmc_dma.c
+> +++ mmc/drivers/mmc/host/tmio_mmc_dma.c
+> @@ -25,7 +25,7 @@
+>  
+>  void tmio_mmc_enable_dma(struct tmio_mmc_host *host, bool enable)
+>  {
+> -	if (!host->chan_tx || !host->chan_rx)
+> +	if (enable && !(host->chan_tx && host->chan_rx))
+>  		return;
+
+Ok, I see the problem and this does fix it. But it adds complexity to the 
+driver - one more condition to an if. Whereas, I think, it can be avoided 
+if we just move calls to
+
+tmio_mmc_enable_dma(host, false);
+
+in tmio_mmc_start_dma_rx() and tmio_mmc_start_dma_tx() a couple of lines 
+up - before clearing ->chan_rx and ->chan_tx pointers? That should work 
+too at no cost. I think that would be a better fix, could you, please, 
+try?
+
+Thanks
+Guennadi
+
+>  #if defined(CONFIG_SUPERH) || defined(CONFIG_ARCH_SHMOBILE)
+
+---
+Guennadi Liakhovetski, Ph.D.
+Freelance Open-Source Software Developer
+http://www.open-technology.de/
