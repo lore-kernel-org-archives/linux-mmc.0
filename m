@@ -1,75 +1,77 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: [PATCH  v2 4/4] mmc: sdhci-s3c: remove the duplicated calling sequence
-Date: Fri, 02 Aug 2013 23:09:02 +0900
-Message-ID: <51FBBD7E.2090700@samsung.com>
+From: Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>
+Subject: Re: [PATCH] tmio_mmc_dma: fix PIO fallback on SDHI
+Date: Fri, 02 Aug 2013 22:10:21 +0400
+Message-ID: <51FBF60D.1040309@cogentembedded.com>
+References: <201308020117.17897.sergei.shtylyov@cogentembedded.com> <Pine.LNX.4.64.1308021332260.28012@axis700.grange>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout2.samsung.com ([203.254.224.25]:45615 "EHLO
-	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750962Ab3HBOJC (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 2 Aug 2013 10:09:02 -0400
-Received: from epcpsbgr3.samsung.com
- (u143.gpu120.samsung.co.kr [203.254.230.143])
- by mailout2.samsung.com (Oracle Communications Messaging Server 7u4-24.01
- (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTP id <0MQW00K1RPZ1U6B0@mailout2.samsung.com> for
- linux-mmc@vger.kernel.org; Fri, 02 Aug 2013 23:09:01 +0900 (KST)
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-sh-owner@vger.kernel.org>
+In-Reply-To: <Pine.LNX.4.64.1308021332260.28012@axis700.grange>
+Sender: linux-sh-owner@vger.kernel.org
+To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Cc: linux-mmc@vger.kernel.org, ian@mnementh.co.uk, cjb@laptop.org, linux-sh@vger.kernel.org, max.filippov@cogentembedded.com
 List-Id: linux-mmc@vger.kernel.org
-To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Cc: 'Chris Ball' <cjb@laptop.org>, Kyungmin Park <kyungmin.park@samsung.com>, =?ISO-8859-1?Q?Heiko_St=FCbner?= <heiko@sntech.de>
 
-Didn't need to call the sdhci_s3c_notify_change in setup_card_detect_gpio().
+On 08/02/2013 03:35 PM, Guennadi Liakhovetski wrote:
 
-Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
-Signed-off-by: Kyungmin Park <Kyungmin.park@samsung.com>
-Acked-by: Heiko Stuebner <heiko@sntech.de>
-Tested-by: Heiko Stuebner <heiko@sntech.de>
----
-Changelog v2:
-	- Added acked/tested by Heiko (on s3c2416)
+>> I'm testing SH-Mobile SDHI driver in DMA mode with a  new DMA controller  using
+>> 'bonnie++' and getting DMA error after which the tmio_mmc_dma.c code falls back
+>> to PIO but all commands time out after that.  It turned out that the fallback
+>> code calls tmio_mmc_enable_dma() with RX/TX channels already freed and pointers
+>> to them cleared, so that the function bails out early instead  of clearing the
+>> DMA bit in the CTL_DMA_ENABLE register.  Fixing the RX/TX channel check so that
+>> it takes place only when enabling DMA helps with the PIO fallback.
 
- drivers/mmc/host/sdhci-s3c.c |   26 ++++++++++++--------------
- 1 file changed, 12 insertions(+), 14 deletions(-)
+>> Signed-off-by: Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>
 
-diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
-index f974778..c4ea802 100644
---- a/drivers/mmc/host/sdhci-s3c.c
-+++ b/drivers/mmc/host/sdhci-s3c.c
-@@ -409,20 +409,18 @@ static void sdhci_s3c_setup_card_detect_gpio(struct sdhci_s3c *sc)
- 	if (devm_gpio_request(dev, pdata->ext_cd_gpio, "SDHCI EXT CD") == 0) {
- 		sc->ext_cd_gpio = pdata->ext_cd_gpio;
- 		sc->ext_cd_irq = gpio_to_irq(pdata->ext_cd_gpio);
--		if (sc->ext_cd_irq &&
--		    request_threaded_irq(sc->ext_cd_irq, NULL,
--					 sdhci_s3c_gpio_card_detect_thread,
--					 IRQF_TRIGGER_RISING |
--					 IRQF_TRIGGER_FALLING |
--					 IRQF_ONESHOT,
--					 dev_name(dev), sc) == 0) {
--			int status = gpio_get_value(sc->ext_cd_gpio);
--			if (pdata->ext_cd_gpio_invert)
--				status = !status;
--			sdhci_s3c_notify_change(sc->pdev, status);
--		} else {
--			dev_warn(dev, "cannot request irq for card detect\n");
--			sc->ext_cd_irq = 0;
-+		if (sc->ext_cd_irq) {
-+			ret = request_threaded_irq(sc->ext_cd_irq, NULL,
-+					sdhci_s3c_gpio_card_detect_thread,
-+					IRQF_TRIGGER_RISING |
-+					IRQF_TRIGGER_FALLING |
-+					IRQF_ONESHOT,
-+					dev_name(dev), sc);
-+			if (ret) {
-+				dev_warn(dev,
-+					"cannot request irq for card detect\n");
-+				sc->ext_cd_irq = 0;
-+			}
- 		}
- 	} else {
- 		dev_err(dev, "cannot request gpio for card detect\n");
--- 
-1.7.9.5
+>> ---
+>> The patch is against Chris Ball's 'mmc.git' repo, 'master' branch.
+
+>>   drivers/mmc/host/tmio_mmc_dma.c |    2 +-
+>>   1 file changed, 1 insertion(+), 1 deletion(-)
+
+>> Index: mmc/drivers/mmc/host/tmio_mmc_dma.c
+>> ===================================================================
+>> --- mmc.orig/drivers/mmc/host/tmio_mmc_dma.c
+>> +++ mmc/drivers/mmc/host/tmio_mmc_dma.c
+>> @@ -25,7 +25,7 @@
+>>
+>>   void tmio_mmc_enable_dma(struct tmio_mmc_host *host, bool enable)
+>>   {
+>> -	if (!host->chan_tx || !host->chan_rx)
+>> +	if (enable && !(host->chan_tx && host->chan_rx))
+>>   		return;
+
+> Ok, I see the problem and this does fix it. But it adds complexity to the
+> driver - one more condition to an if.
+
+    So what?
+
+> Whereas, I think, it can be avoided if we just move calls to
+
+> tmio_mmc_enable_dma(host, false);
+
+> in tmio_mmc_start_dma_rx() and tmio_mmc_start_dma_tx() a couple of lines
+
+    Well, not couple. :-P
+
+> up - before clearing ->chan_rx and ->chan_tx pointers? That should work
+> too at no cost.
+
+    Well, it was my first variant. However, not knowing the hardware well, I 
+deemed it not quite safe to clear the DMA bit before shutting down the DMA 
+channels, so came up with the second version (which I consider more logically 
+correct).
+
+> I think that would be a better fix, could you, please, try?
+
+    I tried it but mystically fixing the PIO fallback makes DMA error less 
+frequent. IIRC, I didn't see DMA error with the first variant of the fix, so 
+I'll have to retry it...
+
+> Thanks
+> Guennadi
+
+WBR, Sergei
+
