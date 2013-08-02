@@ -1,51 +1,57 @@
 From: Sachin Kamat <sachin.kamat@linaro.org>
-Subject: Re: [PATCH 1/1] mmc: sdhci-bcm2835: Staticize bcm2835_sdhci_get_min_clock
-Date: Fri, 2 Aug 2013 14:19:56 +0530
-Message-ID: <CAK9yfHzTsYQvLNpd4=TquhHK5p9er0CRK45JhoBn=Ebz5k1ieQ@mail.gmail.com>
-References: <1372228021-28895-1-git-send-email-sachin.kamat@linaro.org>
+Subject: Re: [PATCH 1/3] mmc: sdhci-bcm-kona: Remove unneeded version.h inclusion
+Date: Fri, 2 Aug 2013 14:20:57 +0530
+Message-ID: <CAK9yfHyKQbw2i3yruM8RbGYU1COkYA_SPqThFhx737d_R0sWiw@mail.gmail.com>
+References: <1373263914-18050-1-git-send-email-sachin.kamat@linaro.org>
+	<51E9A207.70306@broadcom.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-oa0-f52.google.com ([209.85.219.52]:39003 "EHLO
-	mail-oa0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754442Ab3HBIt5 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 2 Aug 2013 04:49:57 -0400
-Received: by mail-oa0-f52.google.com with SMTP id n12so813045oag.11
-        for <linux-mmc@vger.kernel.org>; Fri, 02 Aug 2013 01:49:56 -0700 (PDT)
-In-Reply-To: <1372228021-28895-1-git-send-email-sachin.kamat@linaro.org>
+Received: from mail-ob0-f178.google.com ([209.85.214.178]:53193 "EHLO
+	mail-ob0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1758090Ab3HBIu7 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 2 Aug 2013 04:50:59 -0400
+Received: by mail-ob0-f178.google.com with SMTP id ef5so715472obb.9
+        for <linux-mmc@vger.kernel.org>; Fri, 02 Aug 2013 01:50:58 -0700 (PDT)
+In-Reply-To: <51E9A207.70306@broadcom.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: cjb@laptop.org, swarren@wwwdotorg.org, sachin.kamat@linaro.org
+To: Chris Ball <cjb@laptop.org>
+Cc: linux-mmc@vger.kernel.org, patches@linaro.org
 
-On 26 June 2013 11:57, Sachin Kamat <sachin.kamat@linaro.org> wrote:
-> 'bcm2835_sdhci_get_min_clock' is used only in this file.
-> Make it static.
+On 20 July 2013 02:01, Christian Daudt <csd@broadcom.com> wrote:
+> On 13-07-07 11:11 PM, Sachin Kamat wrote:
+>>
+>> version.h header inclusion is not necessary as detected by
+>> versioncheck.
+>>
+>> Signed-off-by: Sachin Kamat <sachin.kamat@linaro.org>
+>> ---
+>>   drivers/mmc/host/sdhci-bcm-kona.c |    1 -
+>>   1 file changed, 1 deletion(-)
+>>
+>> diff --git a/drivers/mmc/host/sdhci-bcm-kona.c
+>> b/drivers/mmc/host/sdhci-bcm-kona.c
+>> index 87175f9..bca6d55 100644
+>> --- a/drivers/mmc/host/sdhci-bcm-kona.c
+>> +++ b/drivers/mmc/host/sdhci-bcm-kona.c
+>> @@ -24,7 +24,6 @@
+>>   #include <linux/of.h>
+>>   #include <linux/of_device.h>
+>>   #include <linux/of_gpio.h>
+>> -#include <linux/version.h>
+>>   #include <linux/mmc/slot-gpio.h>
+>>     #include "sdhci-pltfm.h"
 >
-> Signed-off-by: Sachin Kamat <sachin.kamat@linaro.org>
-> ---
->  drivers/mmc/host/sdhci-bcm2835.c |    2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
+> Acked-by: Christian Daudt <csd@broadcom.com>
 >
-> diff --git a/drivers/mmc/host/sdhci-bcm2835.c b/drivers/mmc/host/sdhci-bcm2835.c
-> index 0584a1c..36fa2df 100644
-> --- a/drivers/mmc/host/sdhci-bcm2835.c
-> +++ b/drivers/mmc/host/sdhci-bcm2835.c
-> @@ -119,7 +119,7 @@ static u8 bcm2835_sdhci_readb(struct sdhci_host *host, int reg)
->         return byte;
->  }
+>  thanks,
+>    csd
 >
-> -unsigned int bcm2835_sdhci_get_min_clock(struct sdhci_host *host)
-> +static unsigned int bcm2835_sdhci_get_min_clock(struct sdhci_host *host)
->  {
->         return MIN_FREQ;
->  }
-> --
-> 1.7.9.5
 >
 Chris,
 
-Any comments on this patch?
+Can you please check this series?
 
 
 -- 
