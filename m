@@ -1,60 +1,67 @@
-From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: Re: [PATCH/RFC] mmc: sh_mmcif: revision-specific configuration from
- Device Tree
-Date: Mon, 5 Aug 2013 17:30:26 +0200 (CEST)
-Message-ID: <Pine.LNX.4.64.1308051722490.22479@axis700.grange>
-References: <Pine.LNX.4.64.1308051514350.22479@axis700.grange>
- <8661vkgqdw.fsf@void.printf.net>
+From: Joel Fernandes <joelf-l0cyMroinI0@public.gmane.org>
+Subject: [PATCH v3 00/12] edma: Add support for SG lists of any length
+Date: Mon, 5 Aug 2013 11:14:45 -0500
+Message-ID: <1375719297-12871-1-git-send-email-joelf@ti.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <8661vkgqdw.fsf@void.printf.net>
-Sender: linux-sh-owner@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>, devicetree@vger.kernel.org, Daniel Drake <dsd@laptop.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
+List-Unsubscribe: <http://linux.davincidsp.com/mailman/options/davinci-linux-open-source>,
+	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://linux.davincidsp.com/pipermail/davinci-linux-open-source>
+List-Post: <mailto:davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
+List-Help: <mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=help>
+List-Subscribe: <http://linux.davincidsp.com/mailman/listinfo/davinci-linux-open-source>,
+	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=subscribe>
+Sender: <davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
+Errors-To: davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org
+To: Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Sekhar Nori <nsekhar-l0cyMroinI0@public.gmane.org>, Santosh Shilimkar <santosh.shilimkar-l0cyMroinI0@public.gmane.org>, Sricharan R <r.sricharan-l0cyMroinI0@public.gmane.org>, Rajendra Nayak <rnayak-l0cyMroinI0@public.gmane.org>, Lokesh Vutla <lokeshvutla-l0cyMroinI0@public.gmane.org>, Matt Porter <matt-agtwNxEcTQJWk0Htik3J/w@public.gmane.org>, Grant Likely <grant.likely-s3s/WqlpOiPyB63q8FvJNQ@public.gmane.org>, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Vinod Koul <vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Dan Williams <djbw-b10kYP2dOMg@public.gmane.org>, Mark Brown <broonie-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Benoit Cousson <benoit.cousson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Olof Johansson <olof-nZhT3qVonbNeoWH0uzbU5w@public.gmane.org>, Balaji TK <balajitk-l0cyMroinI0@public.gmane.org>, Gururaja Hebbar <gururaja.hebbar-l0cyMroinI0@public.gmane.org>, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, Jason Kridner <jkridner-hcmAuCOw+vXj4SYmN/TMmA@public.gmane.org>
+Cc: Linux DaVinci Kernel List <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, Linux OMAP List <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux ARM Kernel List <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Chris
+Here is a more improved approach for DMA support of SG lists of any length
+in the EDMA DMA Engine driver.
 
-On Mon, 5 Aug 2013, Chris Ball wrote:
+In the previous approach [1] we depended on error interrupts to detect
+missed events and manually retrigger them, however as discussed in [2],
+there are concerns this can be trouble some for high speed peripherals
+which may need a more real-time response from the DMA controller.
 
-> Hi Guennadi,
-> 
-> On Mon, Aug 05 2013, Guennadi Liakhovetski wrote:
-> > Add compatibility strings to configure MMCIF revision-specific features.
-> > MMCIF blocks are always integrated into SoCs, so, we use SoC model to
-> > distinguish between MMCIF versions.
-> >
-> > Signed-off-by: Guennadi Liakhovetski <g.liakhovetski+renesas@gmail.com>
-> > ---
-> >
-> > Hi Chris,
-> > I marked this as RFC, because having no access to the MMC standard I'm not 
-> > certain about VccQ requirements for MMC DDR. On the one hand a comment in 
-> > mmc.c says
-> > 	 * EXT_CSD_CARD_TYPE_DDR_1_8V means 3.3V or 1.8V vccq.
-> > which suggests, that DDR (DDR50?) can be used with VccQ = 3.3V, 1.8V and 
-> > 1.2V at least. But in mmc_init_card() DDR50 is only requested from the 
-> > driver if either MMC_CAP_1_8V_DDR or MMC_CAP_1_2V_DDR is specified in 
-> > host's capabilities. So, I'm actually not sure whether MMC_CAP_UHS_DDR50 
-> > alone without 1_8V or 1_2V makes sense. That's also what I implemented in 
-> > this patch - DDR50 is only enabled in combination with either 1.2 or 1.8V 
-> > capability. Is this correct?
-> 
-> OLPC's using DDR50 at 3.3V in production.  Honestly, I don't know
-> whether it's spec compliant (I think the spec claims that 1.8V is
-> required) but it happens to work on these parts.  The host controller
-> does support 1.8V, there's just no hardware capable of supplying 1.8V
-> to MMC on the board.
+In this approach, we divide the total no of MAX slots per channel, into
+2 linked sets which are cyclically linked to each other (the cyclic
+link between the 2 sets make sure that the DMA is continuous till the whole
+SG list has exhausted). We then enable completion interrupts on both linked
+sets which results in recyling/preparing respective linked set with the
+next set of SG entries. The interrupt handler executes in parallel while
+the EDMA controller DMA's the next list. This results in no interruption.
 
-Thanks for the example. So, I think, for now it should be ok to just act 
-in a way, compatible with the mmc core, i.e. always set one of 
-MMC_CAP_1_8V_DDR or MMC_CAP_1_2V_DDR, when aiming at MMC_CAP_UHS_DDR50. 
-So, the patch should be ok then.
+Special handling is done for first linked set (as we set up both linked
+sets initially before starting with the DMA), and last one where the cyclic
+link has to be broken and a link to the Dummy slot has to be created.
+Also we keep track of whether all pending DMA operations have completed
+before we can mark it as complete.
 
-Thanks
-Guennadi
----
-Guennadi Liakhovetski, Ph.D.
-Freelance Open-Source Software Developer
-http://www.open-technology.de/
+[1] https://lkml.org/lkml/2013/7/29/312
+[2] https://lkml.org/lkml/2013/7/30/54
+
+Joel Fernandes (12):
+  dma: edma: Setup parameters to DMA MAX_NR_SG at a time
+  ARM: edma: Don't clear EMR of channel in edma_stop
+  dma: edma: remove limits on number of slots
+  dma: edma: Write out and handle MAX_NR_SG at a given time
+  ARM: edma: Add function to enable interrupt for a PaRAM slot
+  ARM: edma: Add pr_debug in edma_link
+  dma: edma: Add function to dump a PaRAM set from PaRAM
+  dma: edma: Add one more required slot to MAX slots
+  dma: edma: Implement multiple linked sets for continuity
+  dma: edma: Check if MAX_NR_SG is even in prep function
+  dma: edma: Keep tracking of Pending interrupts (pending_acks)
+  dma: edma: Return if nothing left todo in edma_execute
+
+ arch/arm/common/edma.c             |   18 ++-
+ drivers/dma/edma.c                 |  279 +++++++++++++++++++++++++++++-------
+ include/linux/platform_data/edma.h |    1 +
+ 3 files changed, 243 insertions(+), 55 deletions(-)
+
+-- 
+1.7.9.5
