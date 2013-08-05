@@ -1,7 +1,7 @@
 From: Joel Fernandes <joelf@ti.com>
-Subject: [PATCH v3 06/12] ARM: edma: Add pr_debug in edma_link
-Date: Mon, 5 Aug 2013 11:14:51 -0500
-Message-ID: <1375719297-12871-7-git-send-email-joelf@ti.com>
+Subject: [PATCH v3 12/12] dma: edma: Return if nothing left todo in edma_execute
+Date: Mon, 5 Aug 2013 11:14:57 -0500
+Message-ID: <1375719297-12871-13-git-send-email-joelf@ti.com>
 References: <1375719297-12871-1-git-send-email-joelf@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -12,25 +12,28 @@ To: Tony Lindgren <tony@atomide.com>, Sekhar Nori <nsekhar@ti.com>, Santosh Shil
 Cc: Linux OMAP List <linux-omap@vger.kernel.org>, Linux ARM Kernel List <linux-arm-kernel@lists.infradead.org>, Linux DaVinci Kernel List <davinci-linux-open-source@linux.davincidsp.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux MMC List <linux-mmc@vger.kernel.org>, Joel Fernandes <joelf@ti.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Useful for visualizing linking of PaRAM slots
+It is possible edma_execute is called even when all the SG
+elements have been submitted for transmission, we add a check
+for the same and avoid executing the rest of the function.
 
 Signed-off-by: Joel Fernandes <joelf@ti.com>
 ---
- arch/arm/common/edma.c |    2 ++
- 1 file changed, 2 insertions(+)
+ drivers/dma/edma.c |    3 +++
+ 1 file changed, 3 insertions(+)
 
-diff --git a/arch/arm/common/edma.c b/arch/arm/common/edma.c
-index aa43c49..34d3fc9 100644
---- a/arch/arm/common/edma.c
-+++ b/arch/arm/common/edma.c
-@@ -1125,6 +1125,8 @@ void edma_link(unsigned from, unsigned to)
- 	ctlr_to = EDMA_CTLR(to);
- 	to = EDMA_CHAN_SLOT(to);
+diff --git a/drivers/dma/edma.c b/drivers/dma/edma.c
+index eca1b47..62987fc 100644
+--- a/drivers/dma/edma.c
++++ b/drivers/dma/edma.c
+@@ -168,6 +168,9 @@ static void edma_execute(struct edma_chan *echan)
+ 	total_left = edesc->pset_nr - edesc->total_processed;
+ 	total_link_set = total_left > MAX_NR_LS ? MAX_NR_LS : total_left;
  
-+	pr_debug("Setting up link %d -> %d\n", from, to);
++	if (!total_left)
++		return;
 +
- 	if (from >= edma_cc[ctlr_from]->num_slots)
- 		return;
- 	if (to >= edma_cc[ctlr_to]->num_slots)
+ 	/* First time, setup 2 cyclically linked sets, each containing half
+ 	   the slots allocated for this channel */
+ 	if (edesc->total_processed == 0) {
 -- 
 1.7.9.5
