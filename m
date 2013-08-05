@@ -1,185 +1,59 @@
-From: <dinguyen@altera.com>
-Subject: [PATCHv2] ARM: socfpga: dts: Add support for SD/MMC
-Date: Mon, 5 Aug 2013 15:43:12 -0500
-Message-ID: <1375735392-6836-1-git-send-email-dinguyen@altera.com>
+From: Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>
+Subject: Re: [PATCH v2] tmio_mmc_dma: fix PIO fallback on SDHI
+Date: Tue, 06 Aug 2013 02:37:19 +0400
+Message-ID: <5200291F.2020607@cogentembedded.com>
+References: <201308030233.29446.sergei.shtylyov@cogentembedded.com> <Pine.LNX.4.64.1308040026020.11632@axis700.grange> <51FE60DF.400@cogentembedded.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-db9lp0253.outbound.messaging.microsoft.com ([213.199.154.253]:23343
-	"EHLO db9outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1755268Ab3HEUm4 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 5 Aug 2013 16:42:56 -0400
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-sh-owner@vger.kernel.org>
+In-Reply-To: <51FE60DF.400@cogentembedded.com>
+Sender: linux-sh-owner@vger.kernel.org
+To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Cc: linux-mmc@vger.kernel.org, cjb@laptop.org, linux-sh@vger.kernel.org, max.filippov@cogentembedded.com
 List-Id: linux-mmc@vger.kernel.org
-To: dinh.linux@gmail.com
-Cc: Dinh Nguyen <dinguyen@altera.com>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, Rob Herring <rob.herring@calxeda.com>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Stephen Warren <swarren@wwwdotorg.org>, Ian Campbell <ian.campbell@citrix.com>, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 
-From: Dinh Nguyen <dinguyen@altera.com>
+Hello.
 
-Add bindings for SD/MMC for SOCFPGA.
-Add "syscon" to the "altr,sys-mgr" binding.
+On 08/04/2013 06:10 PM, Sergei Shtylyov wrote:
 
-Signed-off-by: Dinh Nguyen <dinguyen@altera.com>
-Reviewed-by: Pavel Machek <pavel@denx.de>
-Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: Seungwon Jeon <tgih.jun@samsung.com>
-Cc: Rob Herring <rob.herring@calxeda.com>
-Cc: Pawel Moll <pawel.moll@arm.com>
-Cc: Mark Rutland <mark.rutland@arm.com>
-Cc: Stephen Warren <swarren@wwwdotorg.org>
-Cc: Ian Campbell <ian.campbell@citrix.com>
-Cc: devicetree@vger.kernel.org
-Cc: linux-mmc@vger.kernel.org
-CC: linux-arm-kernel@lists.infradead.org
+>>> I'm testing SH-Mobile SDHI driver in DMA mode with  a new DMA controller
+>>> using
+>>> 'bonnie++' and getting DMA error after which the tmio_mmc_dma.c code falls
+>>> back
+>>> to PIO but all commands time out after that.  It turned out that the fallback
+>>> code calls tmio_mmc_enable_dma() with RX/TX channels already freed and
+>>> pointers
+>>> to them cleared, so that the function bails out early instead  of clearing the
+>>> DMA bit in the CTL_DMA_ENABLE register. The regression was introduced by
+>>> commit
+>>> 162f43e31c5a376ec16336e5d0ac973373d54c89 (mmc: tmio: fix a deadlock).
+>>> Moving tmio_mmc_enable_dma() calls to the top of the PIO fallback code in
+>>> tmio_mmc_start_dma_{rx|tx}() helps.
 
-v2:
-- Remove bus-width and extra line in documentation
-- Merge bindings example into a single node in documentation
+>>> Signed-off-by: Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>
+>>> Cc: stable@vger.kernel.org # 3.1+
 
----
-Re-send to updated device tree bindings maintainers.
----
- .../devicetree/bindings/mmc/socfpga-dw-mshc.txt    |   48 ++++++++++++++++++++
- arch/arm/boot/dts/socfpga.dtsi                     |   13 +++++-
- arch/arm/boot/dts/socfpga_cyclone5.dts             |   13 ++++++
- arch/arm/boot/dts/socfpga_vt.dts                   |   12 +++++
- 4 files changed, 85 insertions(+), 1 deletion(-)
- create mode 100644 Documentation/devicetree/bindings/mmc/socfpga-dw-mshc.txt
+>> Acked-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 
-diff --git a/Documentation/devicetree/bindings/mmc/socfpga-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/socfpga-dw-mshc.txt
-new file mode 100644
-index 0000000..dc14922
---- /dev/null
-+++ b/Documentation/devicetree/bindings/mmc/socfpga-dw-mshc.txt
-@@ -0,0 +1,48 @@
-+* Altera SOCFPGA specific extensions to the Synopsis Designware Mobile
-+  Storage Host Controller
-+
-+Required Properties:
-+
-+* compatible: should be
-+	- "altr,socfpga-dw-mshc": for controllers with Altera SOCFPGA
-+	  specific extensions.
-+
-+* altr,dw-mshc-ciu-div: Specifies the divider value for the card interface
-+  unit (ciu) clock. The value should be (n-1). For Altera's SOCFPGA, the divider
-+  value is fixed at 3, which means parent_clock/4.
-+
-+* altr,dw-mshc-sdr-timing: Specifies the value of CIU clock phase shift value
-+  in transmit mode and CIU clock phase shift value in receive mode for single
-+  data rate mode operation. Refer to notes below for the order of the cells and the
-+  valid values.
-+
-+  Notes for the sdr-timing values:
-+
-+    The order of the cells should be
-+      - First Cell: CIU clock phase shift value for RX mode, smplsel bits in
-+	the system manager SDMMC control group.
-+      - Second Cell: CIU clock phase shift value for TX mode, drvsel bits in
-+	the system manager SDMMC control group.
-+
-+    Valid values for SDR CIU clock timing for SOCFPGA:
-+      - valid value for tx phase shift and rx phase shift is 0 to 7.
-+
-+Example:
-+	dwmmc0@ff704000 {
-+		compatible = "altr,socfpga-dw-mshc", "snps,dw-mshc";
-+		reg = <0xff704000 0x1000>;
-+		interrupts = <0 139 4>;
-+		#address-cells = <1>;
-+		#size-cells = <0>;
-+		num-slots = <1>;
-+		supports-highspeed;
-+		broken-cd;
-+		fifo-depth = <0x400>;
-+		altr,dw-mshc-ciu-div = <3>;
-+      		altr,dw-mshc-sdr-timing = <0 3>;
-+
-+		slot@0 {
-+			reg = <0>;
-+			bus-width = <4>;
-+		};
-+	};
-diff --git a/arch/arm/boot/dts/socfpga.dtsi b/arch/arm/boot/dts/socfpga.dtsi
-index bee62a2..dbf7f22 100644
---- a/arch/arm/boot/dts/socfpga.dtsi
-+++ b/arch/arm/boot/dts/socfpga.dtsi
-@@ -468,6 +468,17 @@
- 			cache-level = <2>;
- 		};
- 
-+		mmc: dwmmc0@ff704000 {
-+			compatible = "altr,socfpga-dw-mshc";
-+			reg = <0xff704000 0x1000>;
-+			interrupts = <0 139 4>;
-+			fifo-depth = <0x400>;
-+			#address-cells = <1>;
-+			#size-cells = <0>;
-+			clocks = <&l4_mp_clk>, <&sdmmc_clk>;
-+			clock-names = "biu", "ciu";
-+		};
-+
- 		/* Local timer */
- 		timer@fffec600 {
- 			compatible = "arm,cortex-a9-twd-timer";
-@@ -521,7 +532,7 @@
- 			};
- 
- 		sysmgr@ffd08000 {
--				compatible = "altr,sys-mgr";
-+				compatible = "altr,sys-mgr", "syscon";
- 				reg = <0xffd08000 0x4000>;
- 			};
- 	};
-diff --git a/arch/arm/boot/dts/socfpga_cyclone5.dts b/arch/arm/boot/dts/socfpga_cyclone5.dts
-index 973999d..1853cb1 100644
---- a/arch/arm/boot/dts/socfpga_cyclone5.dts
-+++ b/arch/arm/boot/dts/socfpga_cyclone5.dts
-@@ -54,6 +54,19 @@
- 			status = "okay";
- 		};
- 
-+		dwmmc0@ff704000 {
-+			num-slots = <1>;
-+			supports-highspeed;
-+			broken-cd;
-+			altr,dw-mshc-ciu-div = <3>;
-+			altr,dw-mshc-sdr-timing = <0 3>;
-+
-+			slot@0 {
-+				reg = <0>;
-+				bus-width = <4>;
-+			};
-+		};
-+
- 		timer0@ffc08000 {
- 			clock-frequency = <100000000>;
- 		};
-diff --git a/arch/arm/boot/dts/socfpga_vt.dts b/arch/arm/boot/dts/socfpga_vt.dts
-index d1ec0ca..d93deb0 100644
---- a/arch/arm/boot/dts/socfpga_vt.dts
-+++ b/arch/arm/boot/dts/socfpga_vt.dts
-@@ -46,6 +46,18 @@
- 			status = "okay";
- 		};
- 
-+		dwmmc0@ff704000 {
-+			num-slots = <1>;
-+			supports-highspeed;
-+			broken-cd;
-+			altr,dw-mshc-ciu-div = <3>;
-+
-+			slot@0 {
-+				reg = <0>;
-+				bus-width = <4>;
-+			};
-+		};
-+
- 		timer0@ffc08000 {
- 			clock-frequency = <7000000>;
- 		};
--- 
-1.7.9.5
+>> Not sure though how far back in stable this really has to go. We don't
+>> have any real-life problem reports with older kernels, do we?
 
+>     If we did, that error would have been fixed earlier, wouldn't it?
+
+>> I think
+>> approach to which patches should get into stable changed recently.
+
+>     Haven't heard about that (or seen any change in the policy). The issue
+> with this bug is its catastrophic consequencies: you can hardly ^C or ^Z out
+> of 'bonnie++' when it happens (in fact, you cannot ^C at all). IIRC you can't
+> even kill it from another shell.
+
+    Yeah, and the filesystem is seriously corrupt after this (I've tested only 
+on VFAT so far).
+
+>> Thanks
+>> Guennadi
+
+WBR, Sergei
 
