@@ -1,7 +1,7 @@
 From: Joel Fernandes <joelf@ti.com>
-Subject: [PATCH v3 12/12] dma: edma: Return if nothing left todo in edma_execute
-Date: Mon, 5 Aug 2013 11:14:57 -0500
-Message-ID: <1375719297-12871-13-git-send-email-joelf@ti.com>
+Subject: [PATCH v3 07/12] dma: edma: Add function to dump a PaRAM set from PaRAM
+Date: Mon, 5 Aug 2013 11:14:52 -0500
+Message-ID: <1375719297-12871-8-git-send-email-joelf@ti.com>
 References: <1375719297-12871-1-git-send-email-joelf@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -12,28 +12,58 @@ To: Tony Lindgren <tony@atomide.com>, Sekhar Nori <nsekhar@ti.com>, Santosh Shil
 Cc: Linux OMAP List <linux-omap@vger.kernel.org>, Linux ARM Kernel List <linux-arm-kernel@lists.infradead.org>, Linux DaVinci Kernel List <davinci-linux-open-source@linux.davincidsp.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux MMC List <linux-mmc@vger.kernel.org>, Joel Fernandes <joelf@ti.com>
 List-Id: linux-mmc@vger.kernel.org
 
-It is possible edma_execute is called even when all the SG
-elements have been submitted for transmission, we add a check
-for the same and avoid executing the rest of the function.
+Previously, such a dump function was used but it wasn't reading
+from the PaRAM, rather just from a edmacc_param structure, we
+add a helpful function for debugging that directly reads from
+the PaRAM and gives the current state correctly (including links
+and interrupt information).
 
 Signed-off-by: Joel Fernandes <joelf@ti.com>
 ---
- drivers/dma/edma.c |    3 +++
- 1 file changed, 3 insertions(+)
+ drivers/dma/edma.c |   31 +++++++++++++++++++++++++++++++
+ 1 file changed, 31 insertions(+)
 
 diff --git a/drivers/dma/edma.c b/drivers/dma/edma.c
-index eca1b47..62987fc 100644
+index 080d669..a242269 100644
 --- a/drivers/dma/edma.c
 +++ b/drivers/dma/edma.c
-@@ -168,6 +168,9 @@ static void edma_execute(struct edma_chan *echan)
- 	total_left = edesc->pset_nr - edesc->total_processed;
- 	total_link_set = total_left > MAX_NR_LS ? MAX_NR_LS : total_left;
+@@ -102,6 +102,37 @@ static void edma_desc_free(struct virt_dma_desc *vdesc)
+ 	kfree(container_of(vdesc, struct edma_desc, vdesc));
+ }
  
-+	if (!total_left)
-+		return;
++static inline void dump_pset(struct edma_chan *echan, int slot,
++		     struct edmacc_param *pset_unused, int pset_idx)
++{
++	struct edmacc_param pset_local, *pset;
++	pset = &pset_local;
 +
- 	/* First time, setup 2 cyclically linked sets, each containing half
- 	   the slots allocated for this channel */
- 	if (edesc->total_processed == 0) {
++	edma_read_slot(slot, pset);
++
++	dev_dbg(echan->vchan.chan.device->dev,
++		"\n pset[%d]:\n"
++		"  chnum\t%d\n"
++		"  slot\t%d\n"
++		"  opt\t%08x\n"
++		"  src\t%08x\n"
++		"  dst\t%08x\n"
++		"  abcnt\t%08x\n"
++		"  ccnt\t%08x\n"
++		"  bidx\t%08x\n"
++		"  cidx\t%08x\n"
++		"  lkrld\t%08x\n",
++		pset_idx, echan->ch_num, slot,
++		pset[0].opt,
++		pset[0].src,
++		pset[0].dst,
++		pset[0].a_b_cnt,
++		pset[0].ccnt,
++		pset[0].src_dst_bidx,
++		pset[0].src_dst_cidx,
++		pset[0].link_bcntrld);
++}
++
+ /* Dispatch a queued descriptor to the controller (caller holds lock) */
+ static void edma_execute(struct edma_chan *echan)
+ {
 -- 
 1.7.9.5
