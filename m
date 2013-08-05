@@ -1,67 +1,47 @@
-From: Joel Fernandes <joelf-l0cyMroinI0@public.gmane.org>
-Subject: [PATCH v3 00/12] edma: Add support for SG lists of any length
-Date: Mon, 5 Aug 2013 11:14:45 -0500
-Message-ID: <1375719297-12871-1-git-send-email-joelf@ti.com>
+From: Joel Fernandes <joelf@ti.com>
+Subject: [PATCH v3 03/12] dma: edma: remove limits on number of slots
+Date: Mon, 5 Aug 2013 11:14:48 -0500
+Message-ID: <1375719297-12871-4-git-send-email-joelf@ti.com>
+References: <1375719297-12871-1-git-send-email-joelf@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
-List-Unsubscribe: <http://linux.davincidsp.com/mailman/options/davinci-linux-open-source>,
-	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://linux.davincidsp.com/pipermail/davinci-linux-open-source>
-List-Post: <mailto:davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
-List-Help: <mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=help>
-List-Subscribe: <http://linux.davincidsp.com/mailman/listinfo/davinci-linux-open-source>,
-	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=subscribe>
-Sender: <davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
-Errors-To: davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org
-To: Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Sekhar Nori <nsekhar-l0cyMroinI0@public.gmane.org>, Santosh Shilimkar <santosh.shilimkar-l0cyMroinI0@public.gmane.org>, Sricharan R <r.sricharan-l0cyMroinI0@public.gmane.org>, Rajendra Nayak <rnayak-l0cyMroinI0@public.gmane.org>, Lokesh Vutla <lokeshvutla-l0cyMroinI0@public.gmane.org>, Matt Porter <matt-agtwNxEcTQJWk0Htik3J/w@public.gmane.org>, Grant Likely <grant.likely-s3s/WqlpOiPyB63q8FvJNQ@public.gmane.org>, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Vinod Koul <vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Dan Williams <djbw-b10kYP2dOMg@public.gmane.org>, Mark Brown <broonie-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Benoit Cousson <benoit.cousson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Olof Johansson <olof-nZhT3qVonbNeoWH0uzbU5w@public.gmane.org>, Balaji TK <balajitk-l0cyMroinI0@public.gmane.org>, Gururaja Hebbar <gururaja.hebbar-l0cyMroinI0@public.gmane.org>, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, Jason Kridner <jkridner-hcmAuCOw+vXj4SYmN/TMmA@public.gmane.org>
-Cc: Linux DaVinci Kernel List <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, Linux OMAP List <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux ARM Kernel List <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Content-Type: text/plain
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from arroyo.ext.ti.com ([192.94.94.40]:39202 "EHLO arroyo.ext.ti.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754215Ab3HEQPv (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 5 Aug 2013 12:15:51 -0400
+In-Reply-To: <1375719297-12871-1-git-send-email-joelf@ti.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Tony Lindgren <tony@atomide.com>, Sekhar Nori <nsekhar@ti.com>, Santosh Shilimkar <santosh.shilimkar@ti.com>, Sricharan R <r.sricharan@ti.com>, Rajendra Nayak <rnayak@ti.com>, Lokesh Vutla <lokeshvutla@ti.com>, Matt Porter <matt@ohporter.com>, Grant Likely <grant.likely@secretlab.ca>, Rob Herring <rob.herring@calxeda.com>, Vinod Koul <vinod.koul@intel.com>, Dan Williams <djbw@fb.com>, Mark Brown <broonie@linaro.org>, Benoit Cousson <benoit.cousson@linaro.org>, Russell King <linux@arm.linux.org.uk>, Arnd Bergmann <arnd@arndb.de>, Olof Johansson <olof@lixom.net>, Balaji TK <balajitk@ti.com>, Gururaja Hebbar <gururaja.hebbar@ti.com>, Chris Ball <cjb@laptop.org>, Jason Kridner <jkridner@beagleboard.org>
+Cc: Linux OMAP List <linux-omap@vger.kernel.org>, Linux ARM Kernel List <linux-arm-kernel@lists.infradead.org>, Linux DaVinci Kernel List <davinci-linux-open-source@linux.davincidsp.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux MMC List <linux-mmc@vger.kernel.org>, Joel Fernandes <joelf@ti.com>
 
-Here is a more improved approach for DMA support of SG lists of any length
-in the EDMA DMA Engine driver.
+With this series, this check is no longer required and
+we shouldn't need to reject drivers DMA'ing more than the
+MAX number of slots.
 
-In the previous approach [1] we depended on error interrupts to detect
-missed events and manually retrigger them, however as discussed in [2],
-there are concerns this can be trouble some for high speed peripherals
-which may need a more real-time response from the DMA controller.
+Signed-off-by: Joel Fernandes <joelf@ti.com>
+---
+ drivers/dma/edma.c |    6 ------
+ 1 file changed, 6 deletions(-)
 
-In this approach, we divide the total no of MAX slots per channel, into
-2 linked sets which are cyclically linked to each other (the cyclic
-link between the 2 sets make sure that the DMA is continuous till the whole
-SG list has exhausted). We then enable completion interrupts on both linked
-sets which results in recyling/preparing respective linked set with the
-next set of SG entries. The interrupt handler executes in parallel while
-the EDMA controller DMA's the next list. This results in no interruption.
-
-Special handling is done for first linked set (as we set up both linked
-sets initially before starting with the DMA), and last one where the cyclic
-link has to be broken and a link to the Dummy slot has to be created.
-Also we keep track of whether all pending DMA operations have completed
-before we can mark it as complete.
-
-[1] https://lkml.org/lkml/2013/7/29/312
-[2] https://lkml.org/lkml/2013/7/30/54
-
-Joel Fernandes (12):
-  dma: edma: Setup parameters to DMA MAX_NR_SG at a time
-  ARM: edma: Don't clear EMR of channel in edma_stop
-  dma: edma: remove limits on number of slots
-  dma: edma: Write out and handle MAX_NR_SG at a given time
-  ARM: edma: Add function to enable interrupt for a PaRAM slot
-  ARM: edma: Add pr_debug in edma_link
-  dma: edma: Add function to dump a PaRAM set from PaRAM
-  dma: edma: Add one more required slot to MAX slots
-  dma: edma: Implement multiple linked sets for continuity
-  dma: edma: Check if MAX_NR_SG is even in prep function
-  dma: edma: Keep tracking of Pending interrupts (pending_acks)
-  dma: edma: Return if nothing left todo in edma_execute
-
- arch/arm/common/edma.c             |   18 ++-
- drivers/dma/edma.c                 |  279 +++++++++++++++++++++++++++++-------
- include/linux/platform_data/edma.h |    1 +
- 3 files changed, 243 insertions(+), 55 deletions(-)
-
+diff --git a/drivers/dma/edma.c b/drivers/dma/edma.c
+index 7b0853c..b6d609c 100644
+--- a/drivers/dma/edma.c
++++ b/drivers/dma/edma.c
+@@ -247,12 +247,6 @@ static struct dma_async_tx_descriptor *edma_prep_slave_sg(
+ 		return NULL;
+ 	}
+ 
+-	if (sg_len > MAX_NR_SG) {
+-		dev_err(dev, "Exceeded max SG segments %d > %d\n",
+-			sg_len, MAX_NR_SG);
+-		return NULL;
+-	}
+-
+ 	edesc = kzalloc(sizeof(*edesc) + sg_len *
+ 		sizeof(edesc->pset[0]), GFP_ATOMIC);
+ 	if (!edesc) {
 -- 
 1.7.9.5
+
