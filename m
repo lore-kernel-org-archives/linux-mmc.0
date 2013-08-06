@@ -1,51 +1,55 @@
 From: Doug Anderson <dianders@chromium.org>
-Subject: Re: [PATCH v3 2/5] mmc: dw_mmc: Add suspend_noirq/resume_noirq
- callbacks for dw_mmc-pltfm
-Date: Tue, 6 Aug 2013 14:32:23 -0700
-Message-ID: <CAD=FV=XJeXF6qeewAyFT_C1ssaU3HjtPr6aso9cjQ9s3=k=Z_A@mail.gmail.com>
-References: <1373411961-23812-1-git-send-email-dianders@chromium.org>
-	<1373470926-19314-1-git-send-email-dianders@chromium.org>
-	<1373470926-19314-3-git-send-email-dianders@chromium.org>
-	<004001ce8154$36753510$a35f9f30$%jun@samsung.com>
+Subject: Re: [PATCH v2 3/5] mmc: dw_mmc: Add exynos resume_noirq callback to
+ clear WAKEUP_INT
+Date: Tue, 6 Aug 2013 14:36:07 -0700
+Message-ID: <CAD=FV=U3jLPTh8T3cxyebOGrCOO6O15qB57x7KxUWHXxOmR84A@mail.gmail.com>
+References: <1373391071-6312-1-git-send-email-dianders@chromium.org>
+	<1373411961-23812-1-git-send-email-dianders@chromium.org>
+	<1373411961-23812-4-git-send-email-dianders@chromium.org>
+	<002a01ce7d7d$6bd9e870$438db950$%jun@samsung.com>
+	<CAD=FV=UtX0Z1ABdi5h270ks8Py2o1iPK4DonOHJH3N0Q1YShTQ@mail.gmail.com>
+	<003f01ce8154$2f5ea1d0$8e1be570$%jun@samsung.com>
+	<CAD=FV=XZcf8xWWxrCoe9KqjnQs4p4y7ENnuUYsVKU+yrE09GeQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <004001ce8154$36753510$a35f9f30$%jun@samsung.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Seungwon Jeon <tgih.jun@samsung.com>
-Cc: Chris Ball <cjb@laptop.org>, Olof Johansson <olof@lixom.net>, Jaehoon Chung <jh80.chung@samsung.com>, James Hogan <james.hogan@imgtec.com>, Grant Grundler <grundler@chromium.org>, Alim Akhtar <alim.akhtar@samsung.com>, Abhilash Kesavan <a.kesavan@samsung.com>, Tomasz Figa <tomasz.figa@gmail.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-oa0-f43.google.com ([209.85.219.43]:50415 "EHLO
+	mail-oa0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755846Ab3HFVgI (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 6 Aug 2013 17:36:08 -0400
+Received: by mail-oa0-f43.google.com with SMTP id i10so1938243oag.30
+        for <linux-mmc@vger.kernel.org>; Tue, 06 Aug 2013 14:36:08 -0700 (PDT)
+In-Reply-To: <CAD=FV=XZcf8xWWxrCoe9KqjnQs4p4y7ENnuUYsVKU+yrE09GeQ@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Seungwon Jeon <tgih.jun@samsung.com>
+Cc: Chris Ball <cjb@laptop.org>, Olof Johansson <olof@lixom.net>, Jaehoon Chung <jh80.chung@samsung.com>, James Hogan <james.hogan@imgtec.com>, Grant Grundler <grundler@chromium.org>, Alim Akhtar <alim.akhtar@samsung.com>, Abhilash Kesavan <a.kesavan@samsung.com>, Tomasz Figa <tomasz.figa@gmail.com>, Kukjin Kim <kgene.kim@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-Seungwon Jeon,
+Seungwon,
 
-On Mon, Jul 15, 2013 at 5:09 AM, Seungwon Jeon <tgih.jun@samsung.com> wrote:
-> On Thu, July 11, 2013, Doug Anderson wrote:
->> On some devices (like exynos5420) the dw_mmc controller may be in a
->> strange state after we wake up from sleep.  Add callbacks to allow for
->> dealing with these quirks.  We use the "_noirq" versions of the
->> callbacks since in the case of exynos5420 the strange state caused
->> interrupts to fire so we need to deal with it while interrupts are
->> still off.
->>
->> At the moment this support is only added to dw_mmc-pltfm which calls
->> straight to the callback, since nobody but exynos needs it.  We can
->> add some levels of indirection (a call into the generic dw_mmc code)
->> when someone finds a need.
-> I think It would be better to add _noirq only to dw_mmc-exynos.
-> That is we can add dev_pm_ops for dw_mmc-exynos's own.
-> As you recognize, there is no common routine which is not introduced for dw_mmc xxx_noirq now.
-> I feel like it is for handling quirk.
-> If we meet use case for that in some day, it could be added commonly.
-> How do you think?
+On Wed, Jul 31, 2013 at 9:18 AM, Doug Anderson <dianders@chromium.org> wrote:
+> Seungwon,
 >
-> Thanks,
-> Seungwon Jeon
+> On Mon, Jul 15, 2013 at 5:09 AM, Seungwon Jeon <tgih.jun@samsung.com> wrote:
+>> Sorry for late response.
+>> Yes, it's not clear.
+>> If you get the confirmation, could you share this problem?
+>> Possibly, auto-clear may not be implemented.
+>> Then, manual should be correct.
+>
+> I just got an update from my contacts.  They confirm that bit 11 is
+> not automatically cleared and that writing to it will clear it.
+> Hopefully this information will make it into the next version of any
+> documentation that you receive as well.
+>
+> It is still unclear exactly why the WAKEUP_INT was being asserted on
+> our board despite the fact that all of the wakeup control signals
+> (bits 10:8) were 0.  That is still being investigated.
 
-Sorry for the long delay in responding.
+I have further confirmed from my contacts at Samsung that this is a
+real silicon errata and that clearing the WAKEUP_INT as I am doing in
+this series is the right workaround.
 
-I originally didn't do what you proposed since dw_mmc-exynos uses the
-dw_mci_pltfm_pmops directly.  ...but I agree that it is cleaner, so
-I've switched the code to do as you say.  New patch coming shortly.
-Thank you for your review.
-
--Doug
+New patch coming shortly based against ToT linux
+(v3.11-rc4-20-g0fff106).  I have confirmed that it applies cleanly to
+mmc-next, though I haven't tried booting with that tree.
