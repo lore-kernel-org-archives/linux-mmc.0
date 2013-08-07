@@ -1,44 +1,71 @@
-From: "Christian Daudt" <csd@broadcom.com>
-Subject: [PATCH] ARM: mmc: fix NONREMOVABLE test in sdhci-bcm-kona
-Date: Wed, 7 Aug 2013 11:59:41 -0700
-Message-ID: <1375901981-1495-1-git-send-email-csd@broadcom.com>
+From: "Markus Mayer" <markus.mayer@linaro.org>
+Subject: [PATCH] mmc: sdhci-bcm-kona: make linker-section warning go
+ away
+Date: Wed, 7 Aug 2013 15:39:59 -0700
+Message-ID: <1375915199-13694-1-git-send-email-markus.mayer@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>, Matt Porter <matt.porter@linaro.org>, Markus Mayer <markus.mayer@linaro.org>, Arnd Bergmann <arnd@arndb.de>, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org
-Cc: csd_b@daudt.org, Christian Daudt <csd@broadcom.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mms1.broadcom.com ([216.31.210.17]:1088 "EHLO mms1.broadcom.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1757452Ab3HGWkI (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 7 Aug 2013 18:40:08 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>, Linux MMC List <linux-mmc@vger.kernel.org>
+Cc: Christian Daudt <csd@broadcom.com>, Linaro Patches <patches@linaro.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Matt Porter <matt.porter@linaro.org>, Markus Mayer <markus.mayer@linaro.org>
 
-sdhci-bcm-kona driver is incorrectly doing "|" to bit-test
-NONREMOVABLE. Switch to "&"
+This change makes the following build warning go away:
+[...]
+  LINK    vmlinux
+  LD      vmlinux.o
+  MODPOST vmlinux.o
+WARNING: modpost: Found 2 section mismatch(es).
+To see full details build your kernel with:
+'make CONFIG_DEBUG_SECTION_MISMATCH=y'
 
-Reviewed-by: Markus Mayer <markus.mayer@linaro.org>
+Signed-off-by: Markus Mayer <markus.mayer@linaro.org>
+Reviewed-by: Christian Daudt <csd@broadcom.com>
 Reviewed-by: Matt Porter <matt.porter@linaro.org>
-Signed-off-by: Christian Daudt <csd@broadcom.com>
+---
+ drivers/mmc/host/sdhci-bcm-kona.c |    8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
 
 diff --git a/drivers/mmc/host/sdhci-bcm-kona.c b/drivers/mmc/host/sdhci-bcm-kona.c
-index 87175f9..9ffac0b 100644
+index 87175f9..34fd652 100644
 --- a/drivers/mmc/host/sdhci-bcm-kona.c
 +++ b/drivers/mmc/host/sdhci-bcm-kona.c
-@@ -263,7 +263,7 @@ static int __init sdhci_bcm_kona_probe(struct platform_device *pdev)
- 		(mmc_gpio_get_cd(host->mmc) != -ENOSYS) ? 'Y' : 'N',
- 		(mmc_gpio_get_ro(host->mmc) != -ENOSYS) ? 'Y' : 'N');
+@@ -221,13 +221,13 @@ static struct sdhci_pltfm_data sdhci_pltfm_data_kona = {
+ 		SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
+ };
  
--	if (host->mmc->caps | MMC_CAP_NONREMOVABLE)
-+	if (host->mmc->caps & MMC_CAP_NONREMOVABLE)
- 		host->quirks |= SDHCI_QUIRK_BROKEN_CARD_DETECTION;
+-static const struct of_device_id sdhci_bcm_kona_of_match[] __initdata = {
++static struct __initconst of_device_id sdhci_bcm_kona_of_match[] = {
+ 	{ .compatible = "bcm,kona-sdhci"},
+ 	{}
+ };
+ MODULE_DEVICE_TABLE(of, sdhci_bcm_kona_of_match);
  
- 	dev_dbg(dev, "is_8bit=%c\n",
-@@ -282,7 +282,7 @@ static int __init sdhci_bcm_kona_probe(struct platform_device *pdev)
- 	}
+-static int __init sdhci_bcm_kona_probe(struct platform_device *pdev)
++static int sdhci_bcm_kona_probe(struct platform_device *pdev)
+ {
+ 	struct sdhci_bcm_kona_dev *kona_dev = NULL;
+ 	struct sdhci_pltfm_host *pltfm_priv;
+@@ -336,10 +336,10 @@ static struct platform_driver sdhci_bcm_kona_driver = {
+ 		.name	= "sdhci-kona",
+ 		.owner	= THIS_MODULE,
+ 		.pm	= SDHCI_PLTFM_PMOPS,
+-		.of_match_table = of_match_ptr(sdhci_bcm_kona_of_match),
++		.of_match_table = sdhci_bcm_kona_of_match,
+ 	},
+ 	.probe		= sdhci_bcm_kona_probe,
+-	.remove		= __exit_p(sdhci_bcm_kona_remove),
++	.remove		= sdhci_bcm_kona_remove,
+ };
+ module_platform_driver(sdhci_bcm_kona_driver);
  
- 	/* if device is eMMC, emulate card insert right here */
--	if (host->mmc->caps | MMC_CAP_NONREMOVABLE) {
-+	if (host->mmc->caps & MMC_CAP_NONREMOVABLE) {
- 		ret = sdhci_bcm_kona_sd_card_emulate(host, 1);
- 		if (ret) {
- 			dev_err(dev,
 -- 
-1.7.10.4
+1.7.9.5
+
+
