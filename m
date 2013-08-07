@@ -1,118 +1,50 @@
-From: Zhang Haijun <B42677@freescale.com>
-Subject: Re: [PATCH 1/3 V2] mmc:core: parse voltage from device-tree
-Date: Wed, 7 Aug 2013 09:28:35 +0800
-Message-ID: <5201A2C3.1080608@freescale.com>
-References: <1375251927-3330-1-git-send-email-Haijun.Zhang@freescale.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
-Content-Transfer-Encoding: 7bit
+From: Derek Basehore <dbasehore@chromium.org>
+Subject: [PATCH] mmc: dw_mmc: Don't disable vmmc if keeping power in suspend
+Date: Tue,  6 Aug 2013 20:28:58 -0700
+Message-ID: <1375846138-15839-1-git-send-email-dbasehore@chromium.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from co1ehsobe006.messaging.microsoft.com ([216.32.180.189]:6158
-	"EHLO co1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753000Ab3HGB1Z (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 6 Aug 2013 21:27:25 -0400
-In-Reply-To: <1375251927-3330-1-git-send-email-Haijun.Zhang@freescale.com>
+Received: from mail-ve0-f201.google.com ([209.85.128.201]:61809 "EHLO
+	mail-ve0-f201.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756937Ab3HGD3E (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 6 Aug 2013 23:29:04 -0400
+Received: by mail-ve0-f201.google.com with SMTP id m1so138441ves.2
+        for <linux-mmc@vger.kernel.org>; Tue, 06 Aug 2013 20:29:02 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Haijun Zhang <Haijun.Zhang@freescale.com>
-Cc: linux-mmc@vger.kernel.org, linuxppc-dev@lists.ozlabs.org, cbouatmailru@gmail.com, cjb@laptop.org, scottwood@freescale.com, AFLEMING@freescale.com, Xie Xiaobo-R63061 <X.Xie@freescale.com>
+To: Seungwon Jeon <tgih.jun@samsung.com>
+Cc: Chris Ball <cjb@laptop.org>, Grant Likely <grant.likely@linaro.org>, Rob Herring <rob.herring@calxeda.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, devicetree@vger.kernel.org, Derek Basehore <dbasehore@chromium.org>
 
-On 07/31/2013 02:25 PM, Haijun Zhang wrote:
-> Add function to support get voltage from device-tree.
-> If there are voltage-range specified in device-tree node, this function
-> will parse it and return the avail voltage mask.
->
-> Signed-off-by: Haijun Zhang <haijun.zhang@freescale.com>
-> ---
-> changes for v2:
-> 	- Update the parameters of function
->
->   drivers/mmc/core/core.c  | 46 ++++++++++++++++++++++++++++++++++++++++++++++
->   include/linux/mmc/core.h |  1 +
->   2 files changed, 47 insertions(+)
->
-> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> index 49a5bca..ce9c957 100644
-> --- a/drivers/mmc/core/core.c
-> +++ b/drivers/mmc/core/core.c
-> @@ -27,6 +27,7 @@
->   #include <linux/fault-inject.h>
->   #include <linux/random.h>
->   #include <linux/slab.h>
-> +#include <linux/of.h>
->   
->   #include <linux/mmc/card.h>
->   #include <linux/mmc/host.h>
-> @@ -1196,6 +1197,51 @@ u32 mmc_vddrange_to_ocrmask(int vdd_min, int vdd_max)
->   }
->   EXPORT_SYMBOL(mmc_vddrange_to_ocrmask);
->   
-> +#ifdef CONFIG_OF
-> +
-> +/*
-> + * mmc_of_parse_voltage - return mask of supported voltages
-> + * @np: The device node need to be parsed.
-> + *
-> + * 1. Return zero: voltage-ranges unspecified in device-tree.
-> + * 2. Return negative errno: voltage-range is invalid.
-> + * 3. Return ocr_mask: a mask of voltages that parse from device-tree
-> + * node can be provided to MMC/SD/SDIO devices.
-> + */
-> +
-> +u32 mmc_of_parse_voltage(struct device_node *np)
-> +{
-> +	const u32 *voltage_ranges;
-> +	int num_ranges, i;
-> +	u32 ocr_mask = 0;
-> +
-> +	voltage_ranges = of_get_property(np, "voltage-ranges", &num_ranges);
-> +	num_ranges = num_ranges / sizeof(*voltage_ranges) / 2;
-> +	if (!voltage_ranges || !num_ranges) {
-> +		pr_info("%s: voltage-ranges unspecified\n", np->full_name);
-> +		return 0;
-> +	}
-> +
-> +	for (i = 0; i < num_ranges; i++) {
-> +		const int j = i * 2;
-> +		u32 mask;
-> +
-> +		mask = mmc_vddrange_to_ocrmask(be32_to_cpu(voltage_ranges[j]),
-> +				be32_to_cpu(voltage_ranges[j + 1]));
-> +		if (!mask) {
-> +			pr_err("%s: voltage-range #%d is invalid\n",
-> +				np->full_name, i);
-> +			return -EINVAL;
-> +		}
-> +		ocr_mask |= mask;
-> +	}
-> +
-> +	return ocr_mask;
-> +}
-> +EXPORT_SYMBOL(mmc_of_parse_voltage);
-> +
-> +#endif /* CONFIG_OF */
-> +
->   #ifdef CONFIG_REGULATOR
->   
->   /**
-> diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
-> index 443243b..e3f8fe3 100644
-> --- a/include/linux/mmc/core.h
-> +++ b/include/linux/mmc/core.h
-> @@ -209,5 +209,6 @@ static inline void mmc_claim_host(struct mmc_host *host)
->   }
->   
->   extern u32 mmc_vddrange_to_ocrmask(int vdd_min, int vdd_max);
-> +extern u32 mmc_of_parse_voltage(struct device_node *np);
->   
->   #endif /* LINUX_MMC_CORE_H */
-Hi, Anton
+If we keep power for suspend on a host for dw_mmc, don't disable vmmc-supply
+regulator when suspending the host.
 
-Could you give some advice for this patch set?
+Signed-off-by: Derek Basehore <dbasehore@chromium.org>
+Reviewed-by: Doug Anderson <dianders@chromium.org>
+---
+ drivers/mmc/host/dw_mmc.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index ee5f167..bf82d7c 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -2474,7 +2474,7 @@ int dw_mci_suspend(struct dw_mci *host)
+ 		}
+ 	}
+ 
+-	if (host->vmmc)
++	if (host->vmmc && !(host->pdata->pm_caps & MMC_PM_KEEP_POWER))
+ 		regulator_disable(host->vmmc);
+ 
+ 	return 0;
+@@ -2485,7 +2485,7 @@ int dw_mci_resume(struct dw_mci *host)
+ {
+ 	int i, ret;
+ 
+-	if (host->vmmc) {
++	if (host->vmmc && !(host->pdata->pm_caps & MMC_PM_KEEP_POWER)) {
+ 		ret = regulator_enable(host->vmmc);
+ 		if (ret) {
+ 			dev_err(host->dev,
 -- 
-Thanks & Regards
-
-Haijun
-
+1.8.3
 
