@@ -1,73 +1,95 @@
-From: majianpeng <majianpeng@gmail.com>
-Subject: [PATCH V2] mmc: omap_hsmmc: Fix sleep too long in ISR context.
-Date: Wed, 7 Aug 2013 18:05:08 +0800
-Message-ID: <201308071805022428282@gmail.com>
-Reply-To: majianpeng <majianpeng@gmail.com>
+From: Alessandro Rubini <rubini@gnudd.com>
+Subject: [PATCH 03/26] mmc: Use the new <linux/sizes.h>
+Date: Wed, 7 Aug 2013 12:16:51 +0200
+Message-ID: <85d780625135282d3dda1ad136b74db9b658d927.1375867291.git.rubini@gnudd.com>
+References: <cover.1375867291.git.rubini@gnudd.com>
 Mime-Version: 1.0
-Content-Type: text/plain;
-	charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pb0-f51.google.com ([209.85.160.51]:33973 "EHLO
-	mail-pb0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932372Ab3HGKFO (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 7 Aug 2013 06:05:14 -0400
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <cover.1375867291.git.rubini@gnudd.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-kernel@vger.kernel.org
+Cc: Davide Ciminaghi <ciminaghi@gnudd.com>, Giancarlo Asnaghi <giancarlo.asnaghi@st.com>, x86@kernel.org, "H. Peter Anvin" <hpa@zytor.com>, Ingo Molnar <mingo@redhat.com>, Russell King <linux@arm.linux.org.uk>, Thomas Gleixner <tglx@linutronix.de>, devicetree@vger.kernel.org, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: balajitk <balajitk@ti.com>, cjb <cjb@laptop.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, linux-omap <linux-omap@vger.kernel.org>, mayuzheng <mayuzheng@kedacom.com>, Hein Tibosch <hein_tibosch@yahoo.es>
 
-VjI6IA0KCWNsZWFuIHVwIGNvZGUuDQpWMToNCgl3d3cubWFpbC1hcmNoaXZlLmNvbS9saW51eC1v
-bWFwQHZnZXIuLi4vbXNnOTMyMzkuaHRtbOKAjg0KDQoNCldlIGZvdW5kIGEgcHJvYmxlbSB3aGVu
-IHdlIHJlbW92ZWQgYSB3b3JraW5nIHNkIGNhcmQgdGhhdCB0aGUgaXJxYWN0aW9uDQpvZiBvbWFw
-X2hzbW1jIGNhbiBzbGVlcCB0byAzLjZzLiBUaGlzIGNhdXNlIG91ciB3YXRjaGRvZyB0byB3b3Jr
-Lg0KSW4gZnVuYyBvbWFwX2hzbW1jX3Jlc2V0X2NvbnRyb2xsZXJfZnNtLCBpdCBzaG91bGQgd2F0
-Y2ggYSAwLT4xDQp0cmFuc2l0aW9uLkJ1dCBhdm9pZGluZyBlbmRsZXNzIHdhaXRpbmcsIGl0IHVz
-ZWQgbG9vcHNfcGVyX2ppZmZ5IGFzIHRoZSB0aW1lci4NClRoZSBjb2RlIGlzOg0KPiB3aGlsZSAo
-KCEoT01BUF9IU01NQ19SRUFEKGhvc3QtPmJhc2UsIFNZU0NUTCkgJiBiaXQpKQ0KPiAgICAgICAg
-ICAgICAgICAmJiAoaSsrIDwgbGltaXQpKQ0KPiAgICAgICAgICAgICAgICAgICAgICAgIGNwdV9y
-ZWxheCgpOw0KDQpCdXQgZ2VuZXJhbmx5IGxvb3BzX3Blcl9qaWZmeSBhcyBhIHRpbWVyLGl0IHNo
-b3VsZCBsaWtlOg0KPiAgd2hpbGUoaSsrIDwgbGltaXQpDQo+IGNwdV9yZWxheCgpOw0KDQpJIGZv
-dW5kIGZvciB0aGUgbG9uZyB0aW1lIGNhc2UsIHRoZSB3aGlsZS1vcGVhdGlvbiBzdG9wZWQgYmVj
-YXVzZSAnaSA9PSBsaW1pdCcuDQpCZWNhdXNlIGFkZGVkIHNvbWUgY29kZSwgc28gdGhlIGR1cmF0
-aW9uIGJlY2FtZSB0b28gbG9uZ2VyIHRoYW4NCk1NQ19USU1FT1VfVVMoMjBtcykuDQoNClRoZSBz
-b2Z0d2FyZSBjYW4ndCBtb25pdG9yIHRoZSB0cmFuc2l0aW9uIG9mIGhhcmR3YXJlIGZvciB0aGkg
-Y2FzZS4NCg0KQmVjYXN1ZSB0aG9zZSBjb2RlcyBpbiBJU1IgY29udGV4dCwgaXQgY2FuJ3QgdXNl
-IHRpbWVyX2JlZm9yZS9hZnRlci4NCkkgZGl2aXZlZCB0aGUgdGltZSBpbnRvIDFtcyBhbmQgdXNl
-ZCB1ZGVsYXkoMSkgdG8gaW5zdGVhZC4NCkl0IHdpbGwgY2F1c2UgZG8gYWRkaXRpb25hbCB1ZGVs
-YXkoMSkuQnV0IGZyb20gbXkgdGVzdCxpdCBsb29rcyBnb29kLg0KDQpSZXBvcnRlZC1ieTogWXV6
-aGVuZyBNYSA8bWF5dXpoZW5nQGtlZGFjb20uY29tPg0KVGVzdGVkLWJ5OiBZdXpoZW5nIE1hIDxt
-YXl1emhlbmdAa2VkYWNvbS5jb20+DQpSZXZpZXdlZC1ieTogSGVpbiBUaWJvc2NoIDxoZWluX3Rp
-Ym9zY2hAeWFob28uZXM+DQpTaWduZWQtb2ZmLWJ5OiBKaWFucGVuZyBNYSA8bWFqaWFucGVuZ0Bn
-bWFpbC5jb20+DQotLS0NCiBkcml2ZXJzL21tYy9ob3N0L29tYXBfaHNtbWMuYyB8IDI1ICsrKysr
-KysrKysrLS0tLS0tLS0tLS0tLS0NCiAxIGZpbGUgY2hhbmdlZCwgMTEgaW5zZXJ0aW9ucygrKSwg
-MTQgZGVsZXRpb25zKC0pDQoNCmRpZmYgLS1naXQgYS9kcml2ZXJzL21tYy9ob3N0L29tYXBfaHNt
-bWMuYyBiL2RyaXZlcnMvbW1jL2hvc3Qvb21hcF9oc21tYy5jDQppbmRleCAxODY1MzIxLi5iYmRh
-NWVkIDEwMDY0NA0KLS0tIGEvZHJpdmVycy9tbWMvaG9zdC9vbWFwX2hzbW1jLmMNCisrKyBiL2Ry
-aXZlcnMvbW1jL2hvc3Qvb21hcF9oc21tYy5jDQpAQCAtOTczLDkgKzk3Myw4IEBAIHN0YXRpYyBp
-bmxpbmUgdm9pZCBvbWFwX2hzbW1jX2RiZ19yZXBvcnRfaXJxKHN0cnVjdCBvbWFwX2hzbW1jX2hv
-c3QgKmhvc3QsDQogc3RhdGljIGlubGluZSB2b2lkIG9tYXBfaHNtbWNfcmVzZXRfY29udHJvbGxl
-cl9mc20oc3RydWN0IG9tYXBfaHNtbWNfaG9zdCAqaG9zdCwNCiAJCQkJCQkgICB1bnNpZ25lZCBs
-b25nIGJpdCkNCiB7DQotCXVuc2lnbmVkIGxvbmcgaSA9IDA7DQotCXVuc2lnbmVkIGxvbmcgbGlt
-aXQgPSAobG9vcHNfcGVyX2ppZmZ5ICoNCi0JCQkJbXNlY3NfdG9famlmZmllcyhNTUNfVElNRU9V
-VF9NUykpOw0KKwkvKmNoYW5nZSB0byAxbXMsc28gd2UgY2FuIHVzZSB1ZGVsYXkoMSkqLw0KKwl1
-bnNpZ25lZCBsb25nIGxpbWl0ID0gTU1DX1RJTUVPVVRfTVMgKiAxMDAwOw0KIA0KIAlPTUFQX0hT
-TU1DX1dSSVRFKGhvc3QtPmJhc2UsIFNZU0NUTCwNCiAJCQkgT01BUF9IU01NQ19SRUFEKGhvc3Qt
-PmJhc2UsIFNZU0NUTCkgfCBiaXQpOw0KQEAgLTk4NCwxNyArOTgzLDE1IEBAIHN0YXRpYyBpbmxp
-bmUgdm9pZCBvbWFwX2hzbW1jX3Jlc2V0X2NvbnRyb2xsZXJfZnNtKHN0cnVjdCBvbWFwX2hzbW1j
-X2hvc3QgKmhvc3QsDQogCSAqIE9NQVA0IEVTMiBhbmQgZ3JlYXRlciBoYXMgYW4gdXBkYXRlZCBy
-ZXNldCBsb2dpYy4NCiAJICogTW9uaXRvciBhIDAtPjEgdHJhbnNpdGlvbiBmaXJzdA0KIAkgKi8N
-Ci0JaWYgKG1tY19zbG90KGhvc3QpLmZlYXR1cmVzICYgSFNNTUNfSEFTX1VQREFURURfUkVTRVQp
-IHsNCi0JCXdoaWxlICgoIShPTUFQX0hTTU1DX1JFQUQoaG9zdC0+YmFzZSwgU1lTQ1RMKSAmIGJp
-dCkpDQotCQkJCQkmJiAoaSsrIDwgbGltaXQpKQ0KLQkJCWNwdV9yZWxheCgpOw0KLQl9DQotCWkg
-PSAwOw0KLQ0KLQl3aGlsZSAoKE9NQVBfSFNNTUNfUkVBRChob3N0LT5iYXNlLCBTWVNDVEwpICYg
-Yml0KSAmJg0KLQkJKGkrKyA8IGxpbWl0KSkNCi0JCWNwdV9yZWxheCgpOw0KLQ0KKwlpZiAobW1j
-X3Nsb3QoaG9zdCkuZmVhdHVyZXMgJiBIU01NQ19IQVNfVVBEQVRFRF9SRVNFVCkNCisJCXdoaWxl
-ICghKE9NQVBfSFNNTUNfUkVBRChob3N0LT5iYXNlLCBTWVNDVEwpICYgYml0KQ0KKwkJCSYmIGxp
-bWl0LS0pDQorCQkJdWRlbGF5KDEpOw0KKw0KKwlsaW1pdCA9IE1NQ19USU1FT1VUX01TICogMTAw
-MDsNCisJd2hpbGUgKChPTUFQX0hTTU1DX1JFQUQoaG9zdC0+YmFzZSwgU1lTQ1RMKSAmIGJpdCkg
-JiYgbGltaXQtLSkNCisJCXVkZWxheSgxKTsNCisNCiAJaWYgKE9NQVBfSFNNTUNfUkVBRChob3N0
-LT5iYXNlLCBTWVNDVEwpICYgYml0KQ0KIAkJZGV2X2VycihtbWNfZGV2KGhvc3QtPm1tYyksDQog
-CQkJIlRpbWVvdXQgd2FpdGluZyBvbiBjb250cm9sbGVyIHJlc2V0IGluICVzXG4iLA0KLS0gDQox
-LjguMS4yDQo=
+For portability, use <linux/sizes.h>.
 
+Signed-off-by: Alessandro Rubini <rubini@gnudd.com>
+Link: http://lkml.kernel.org/r/1355146956-6009-6-git-send-email-ciminaghi@gnudd.com
+Acked-by: Giancarlo Asnaghi <giancarlo.asnaghi@st.com>
+Acked-by: David Brown <davidb@codeaurora.org>
+Signed-off-by: H. Peter Anvin <hpa@linux.intel.com>
+---
+ drivers/mmc/host/mmci.c     |    2 +-
+ drivers/mmc/host/msm_sdcc.c |    2 +-
+ drivers/mmc/host/mvsdio.c   |    2 +-
+ drivers/mmc/host/pxamci.c   |    3 +--
+ 4 files changed, 4 insertions(+), 5 deletions(-)
+
+diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+index c3785ed..edd987e 100644
+--- a/drivers/mmc/host/mmci.c
++++ b/drivers/mmc/host/mmci.c
+@@ -34,11 +34,11 @@
+ #include <linux/amba/mmci.h>
+ #include <linux/pm_runtime.h>
+ #include <linux/types.h>
++#include <linux/sizes.h>
+ #include <linux/pinctrl/consumer.h>
+ 
+ #include <asm/div64.h>
+ #include <asm/io.h>
+-#include <asm/sizes.h>
+ 
+ #include "mmci.h"
+ 
+diff --git a/drivers/mmc/host/msm_sdcc.c b/drivers/mmc/host/msm_sdcc.c
+index b900de4..405f0d8 100644
+--- a/drivers/mmc/host/msm_sdcc.c
++++ b/drivers/mmc/host/msm_sdcc.c
+@@ -37,10 +37,10 @@
+ #include <linux/memory.h>
+ #include <linux/gfp.h>
+ #include <linux/gpio.h>
++#include <linux/sizes.h>
+ 
+ #include <asm/cacheflush.h>
+ #include <asm/div64.h>
+-#include <asm/sizes.h>
+ 
+ #include <linux/platform_data/mmc-msm_sdcc.h>
+ #include <mach/dma.h>
+diff --git a/drivers/mmc/host/mvsdio.c b/drivers/mmc/host/mvsdio.c
+index 4ddd83f..4dec50f 100644
+--- a/drivers/mmc/host/mvsdio.c
++++ b/drivers/mmc/host/mvsdio.c
+@@ -23,11 +23,11 @@
+ #include <linux/gpio.h>
+ #include <linux/of_gpio.h>
+ #include <linux/of_irq.h>
++#include <linux/sizes.h>
+ #include <linux/mmc/host.h>
+ #include <linux/mmc/slot-gpio.h>
+ #include <linux/pinctrl/consumer.h>
+ 
+-#include <asm/sizes.h>
+ #include <asm/unaligned.h>
+ #include <linux/platform_data/mmc-mvsdio.h>
+ 
+diff --git a/drivers/mmc/host/pxamci.c b/drivers/mmc/host/pxamci.c
+index 1956a3d..3924f36 100644
+--- a/drivers/mmc/host/pxamci.c
++++ b/drivers/mmc/host/pxamci.c
+@@ -33,8 +33,7 @@
+ #include <linux/of.h>
+ #include <linux/of_gpio.h>
+ #include <linux/of_device.h>
+-
+-#include <asm/sizes.h>
++#include <linux/sizes.h>
+ 
+ #include <mach/hardware.h>
+ #include <mach/dma.h>
+-- 
+1.7.7.2
