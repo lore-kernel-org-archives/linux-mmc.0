@@ -1,40 +1,38 @@
 From: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
-Subject: [PATCH 2/2] dw_mmc-pci: enable bus-mastering mode
-Date: Thu,  8 Aug 2013 13:44:58 +0300
-Message-ID: <1375958698-10569-2-git-send-email-andriy.shevchenko@linux.intel.com>
-References: <1375958698-10569-1-git-send-email-andriy.shevchenko@linux.intel.com>
+Subject: [PATCH 1/2] dw_mmc-pci: get resources from a proper BAR
+Date: Thu,  8 Aug 2013 13:44:57 +0300
+Message-ID: <1375958698-10569-1-git-send-email-andriy.shevchenko@linux.intel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga09.intel.com ([134.134.136.24]:33645 "EHLO mga09.intel.com"
+Received: from mga02.intel.com ([134.134.136.20]:46202 "EHLO mga02.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1757726Ab3HHKpQ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 8 Aug 2013 06:45:16 -0400
-In-Reply-To: <1375958698-10569-1-git-send-email-andriy.shevchenko@linux.intel.com>
+	id S965111Ab3HHKpj (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 8 Aug 2013 06:45:39 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Prabu Thangamuthu <Prabu.T@synopsys.com>, Seungwon Jeon <tgih.jun@samsung.com>
 Cc: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
 
-This patch enables bus-mastering mode for MMC controller to allow IDMAC
-transfers.
+There is a typo when the mapped space is from BAR 2, but BAR 0 is used instead.
+This patch fixes the typo.
 
 Signed-off-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
 ---
- drivers/mmc/host/dw_mmc-pci.c | 2 ++
- 1 file changed, 2 insertions(+)
+ drivers/mmc/host/dw_mmc-pci.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/drivers/mmc/host/dw_mmc-pci.c b/drivers/mmc/host/dw_mmc-pci.c
-index 7d148d6..f70546a 100644
+index b456b0c..7d148d6 100644
 --- a/drivers/mmc/host/dw_mmc-pci.c
 +++ b/drivers/mmc/host/dw_mmc-pci.c
-@@ -61,6 +61,8 @@ static int dw_mci_pci_probe(struct pci_dev *pdev,
- 
- 	host->regs = pcim_iomap_table(pdev)[PCI_BAR_NO];
- 
-+	pci_set_master(pdev);
-+
- 	ret = dw_mci_probe(host);
+@@ -59,7 +59,7 @@ static int dw_mci_pci_probe(struct pci_dev *pdev,
  	if (ret)
  		return ret;
+ 
+-	host->regs = pcim_iomap_table(pdev)[0];
++	host->regs = pcim_iomap_table(pdev)[PCI_BAR_NO];
+ 
+ 	ret = dw_mci_probe(host);
+ 	if (ret)
 -- 
 1.8.4.rc1
 
