@@ -1,72 +1,96 @@
 From: Laurent Pinchart <laurent.pinchart+renesas@ideasonboard.com>
-Subject: [PATCH v3 13/14] mmc: tmio-mmc: Remove .get_cd() callback from platform data
-Date: Thu,  8 Aug 2013 12:38:43 +0200
-Message-ID: <1375958324-29683-14-git-send-email-laurent.pinchart+renesas@ideasonboard.com>
+Subject: [PATCH v3 03/14] ARM: ep93xx: vision_ep9307: Use MMC CD and RO GPIO
+Date: Thu,  8 Aug 2013 12:38:33 +0200
+Message-ID: <1375958324-29683-4-git-send-email-laurent.pinchart+renesas@ideasonboard.com>
 References: <1375958324-29683-1-git-send-email-laurent.pinchart+renesas@ideasonboard.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from perceval.ideasonboard.com ([95.142.166.194]:43740 "EHLO
-	perceval.ideasonboard.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S965062Ab3HHKhu (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 8 Aug 2013 06:37:50 -0400
+Return-path: <linux-sh-owner@vger.kernel.org>
 In-Reply-To: <1375958324-29683-1-git-send-email-laurent.pinchart+renesas@ideasonboard.com>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Sender: linux-sh-owner@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 Cc: linux-arm-kernel@lists.infradead.org, linux-sh@vger.kernel.org, linux-spi@vger.kernel.org, Hartley Sweeten <hsweeten@visionengravers.com>, Ryan Mallon <rmallon@gmail.com>, Chris Ball <cjb@laptop.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Ian Molton <ian@mnementh.co.uk>, Arnd Bergmann <arnd@arndb.de>, Olof Johansson <olof@lixom.net>
+List-Id: linux-mmc@vger.kernel.org
 
-All platforms pass the CD GPIO number to the driver in the .cd_gpio
-field. The .get_cd() callback isn't used anymore, remove it
+Pass the CD and RO GPIO numbers to the MMC SPI driver and remove the
+custom .get_cd() and .get_ro() callback functions.
 
 Signed-off-by: Laurent Pinchart <laurent.pinchart+renesas@ideasonboard.com>
-Acked-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Acked-by: H Hartley Sweeten <hsweeten@visionengravers.com>
 ---
- drivers/mmc/host/tmio_mmc_pio.c | 16 +---------------
- include/linux/mfd/tmio.h        |  1 -
- 2 files changed, 1 insertion(+), 16 deletions(-)
+ arch/arm/mach-ep93xx/vision_ep9307.c | 57 ++++--------------------------------
+ 1 file changed, 5 insertions(+), 52 deletions(-)
 
-diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
-index 17f7fa9..b380225 100644
---- a/drivers/mmc/host/tmio_mmc_pio.c
-+++ b/drivers/mmc/host/tmio_mmc_pio.c
-@@ -936,25 +936,11 @@ static int tmio_mmc_get_ro(struct mmc_host *mmc)
- 		 (sd_ctrl_read32(host, CTL_STATUS) & TMIO_STAT_WRPROTECT));
- }
+diff --git a/arch/arm/mach-ep93xx/vision_ep9307.c b/arch/arm/mach-ep93xx/vision_ep9307.c
+index 605956f..5a4c06d 100644
+--- a/arch/arm/mach-ep93xx/vision_ep9307.c
++++ b/arch/arm/mach-ep93xx/vision_ep9307.c
+@@ -224,62 +224,15 @@ static struct ep93xx_spi_chip_ops vision_spi_flash_hw = {
+ #define VISION_SPI_MMC_WP	EP93XX_GPIO_LINE_F(0)
+ #define VISION_SPI_MMC_CD	EP93XX_GPIO_LINE_EGPIO15
  
--static int tmio_mmc_get_cd(struct mmc_host *mmc)
--{
--	struct tmio_mmc_host *host = mmc_priv(mmc);
--	struct tmio_mmc_data *pdata = host->pdata;
--	int ret = mmc_gpio_get_cd(mmc);
--	if (ret >= 0)
--		return ret;
+-static struct gpio vision_spi_mmc_gpios[] = {
+-	{ VISION_SPI_MMC_WP, GPIOF_DIR_IN, "mmc_spi:wp" },
+-	{ VISION_SPI_MMC_CD, GPIOF_DIR_IN, "mmc_spi:cd" },
+-};
 -
--	if (!pdata->get_cd)
--		return -ENOSYS;
--	else
--		return pdata->get_cd(host->pdev);
+-static int vision_spi_mmc_init(struct device *pdev,
+-			irqreturn_t (*func)(int, void *), void *pdata)
+-{
+-	int err;
+-
+-	err = gpio_request_array(vision_spi_mmc_gpios,
+-				 ARRAY_SIZE(vision_spi_mmc_gpios));
+-	if (err)
+-		return err;
+-
+-	err = gpio_set_debounce(VISION_SPI_MMC_CD, 1);
+-	if (err)
+-		goto exit_err;
+-
+-	err = request_irq(gpio_to_irq(VISION_SPI_MMC_CD), func,
+-			IRQ_TYPE_EDGE_BOTH, "mmc_spi:cd", pdata);
+-	if (err)
+-		goto exit_err;
+-
+-	return 0;
+-
+-exit_err:
+-	gpio_free_array(vision_spi_mmc_gpios, ARRAY_SIZE(vision_spi_mmc_gpios));
+-	return err;
+-
 -}
 -
- static const struct mmc_host_ops tmio_mmc_ops = {
- 	.request	= tmio_mmc_request,
- 	.set_ios	= tmio_mmc_set_ios,
- 	.get_ro         = tmio_mmc_get_ro,
--	.get_cd		= tmio_mmc_get_cd,
-+	.get_cd		= mmc_gpio_get_cd,
- 	.enable_sdio_irq = tmio_mmc_enable_sdio_irq,
+-static void vision_spi_mmc_exit(struct device *pdev, void *pdata)
+-{
+-	free_irq(gpio_to_irq(VISION_SPI_MMC_CD), pdata);
+-	gpio_free_array(vision_spi_mmc_gpios, ARRAY_SIZE(vision_spi_mmc_gpios));
+-}
+-
+-static int vision_spi_mmc_get_ro(struct device *pdev)
+-{
+-	return !!gpio_get_value(VISION_SPI_MMC_WP);
+-}
+-
+-static int vision_spi_mmc_get_cd(struct device *pdev)
+-{
+-	return !gpio_get_value(VISION_SPI_MMC_CD);
+-}
+-
+ static struct mmc_spi_platform_data vision_spi_mmc_data = {
+-	.init		= vision_spi_mmc_init,
+-	.exit		= vision_spi_mmc_exit,
+-	.get_ro		= vision_spi_mmc_get_ro,
+-	.get_cd		= vision_spi_mmc_get_cd,
+ 	.detect_delay	= 100,
+ 	.powerup_msecs	= 100,
+ 	.ocr_mask	= MMC_VDD_32_33 | MMC_VDD_33_34,
++	.flags		= MMC_SPI_USE_CD_GPIO | MMC_SPI_USE_RO_GPIO,
++	.cd_gpio	= VISION_SPI_MMC_CD,
++	.cd_debounce	= 1,
++	.ro_gpio	= VISION_SPI_MMC_WP,
++	.caps2		= MMC_CAP2_RO_ACTIVE_HIGH,
  };
  
-diff --git a/include/linux/mfd/tmio.h b/include/linux/mfd/tmio.h
-index ce35113..b22883d 100644
---- a/include/linux/mfd/tmio.h
-+++ b/include/linux/mfd/tmio.h
-@@ -108,7 +108,6 @@ struct tmio_mmc_data {
- 	unsigned int			cd_gpio;
- 	void (*set_pwr)(struct platform_device *host, int state);
- 	void (*set_clk_div)(struct platform_device *host, int state);
--	int (*get_cd)(struct platform_device *host);
- 	int (*write16_hook)(struct tmio_mmc_host *host, int addr);
- 	/* clock management callbacks */
- 	int (*clk_enable)(struct platform_device *pdev, unsigned int *f);
+ static int vision_spi_mmc_hw_setup(struct spi_device *spi)
 -- 
 1.8.1.5
 
