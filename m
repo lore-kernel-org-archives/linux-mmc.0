@@ -1,64 +1,52 @@
 From: Laurent Pinchart <laurent.pinchart+renesas@ideasonboard.com>
-Subject: [PATCH v3 11/14] mmc: sh_mobile_sdhi: Remove .get_cd() callback from platform data
-Date: Thu,  8 Aug 2013 12:38:41 +0200
-Message-ID: <1375958324-29683-12-git-send-email-laurent.pinchart+renesas@ideasonboard.com>
+Subject: [PATCH v3 05/14] sh: ecovec24: Remove mmcif .down_pwr() callback
+Date: Thu,  8 Aug 2013 12:38:35 +0200
+Message-ID: <1375958324-29683-6-git-send-email-laurent.pinchart+renesas@ideasonboard.com>
 References: <1375958324-29683-1-git-send-email-laurent.pinchart+renesas@ideasonboard.com>
-Return-path: <linux-sh-owner@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from perceval.ideasonboard.com ([95.142.166.194]:43750 "EHLO
+	perceval.ideasonboard.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S965077Ab3HHKhq (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 8 Aug 2013 06:37:46 -0400
 In-Reply-To: <1375958324-29683-1-git-send-email-laurent.pinchart+renesas@ideasonboard.com>
-Sender: linux-sh-owner@vger.kernel.org
+Sender: linux-mmc-owner@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 Cc: linux-arm-kernel@lists.infradead.org, linux-sh@vger.kernel.org, linux-spi@vger.kernel.org, Hartley Sweeten <hsweeten@visionengravers.com>, Ryan Mallon <rmallon@gmail.com>, Chris Ball <cjb@laptop.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Ian Molton <ian@mnementh.co.uk>, Arnd Bergmann <arnd@arndb.de>, Olof Johansson <olof@lixom.net>
-List-Id: linux-mmc@vger.kernel.org
 
-All platforms pass the CD GPIO number to the driver in the .cd_gpio
-field. The .get_cd() callback isn't used anymore, remove it.
+The callback isn't used by the mmcif driver, don't initialize it in
+board code.
 
 Signed-off-by: Laurent Pinchart <laurent.pinchart+renesas@ideasonboard.com>
 Acked-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 ---
- drivers/mmc/host/sh_mobile_sdhi.c  | 9 ---------
- include/linux/mmc/sh_mobile_sdhi.h | 1 -
- 2 files changed, 10 deletions(-)
+ arch/sh/boards/mach-ecovec24/setup.c | 6 ------
+ 1 file changed, 6 deletions(-)
 
-diff --git a/drivers/mmc/host/sh_mobile_sdhi.c b/drivers/mmc/host/sh_mobile_sdhi.c
-index ebea749..663a672 100644
---- a/drivers/mmc/host/sh_mobile_sdhi.c
-+++ b/drivers/mmc/host/sh_mobile_sdhi.c
-@@ -77,13 +77,6 @@ static void sh_mobile_sdhi_set_pwr(struct platform_device *pdev, int state)
- 	p->set_pwr(pdev, state);
- }
+diff --git a/arch/sh/boards/mach-ecovec24/setup.c b/arch/sh/boards/mach-ecovec24/setup.c
+index a1557ec..5af40f5 100644
+--- a/arch/sh/boards/mach-ecovec24/setup.c
++++ b/arch/sh/boards/mach-ecovec24/setup.c
+@@ -980,11 +980,6 @@ static struct platform_device vou_device = {
  
--static int sh_mobile_sdhi_get_cd(struct platform_device *pdev)
+ #if defined(CONFIG_MMC_SH_MMCIF) || defined(CONFIG_MMC_SH_MMCIF_MODULE)
+ /* SH_MMCIF */
+-static void mmcif_down_pwr(struct platform_device *pdev)
 -{
--	struct sh_mobile_sdhi_info *p = pdev->dev.platform_data;
--
--	return p->get_cd(pdev);
+-	cn12_set_pwr(pdev, 0);
 -}
 -
- static int sh_mobile_sdhi_wait_idle(struct tmio_mmc_host *host)
- {
- 	int timeout = 1000;
-@@ -182,8 +175,6 @@ static int sh_mobile_sdhi_probe(struct platform_device *pdev)
- 		mmc_data->cd_gpio = p->cd_gpio;
- 		if (p->set_pwr)
- 			mmc_data->set_pwr = sh_mobile_sdhi_set_pwr;
--		if (p->get_cd)
--			mmc_data->get_cd = sh_mobile_sdhi_get_cd;
+ static struct resource sh_mmcif_resources[] = {
+ 	[0] = {
+ 		.name	= "SH_MMCIF",
+@@ -1006,7 +1001,6 @@ static struct resource sh_mmcif_resources[] = {
  
- 		if (p->dma_slave_tx > 0 && p->dma_slave_rx > 0) {
- 			/*
-diff --git a/include/linux/mmc/sh_mobile_sdhi.h b/include/linux/mmc/sh_mobile_sdhi.h
-index b76bcf0..f31c692 100644
---- a/include/linux/mmc/sh_mobile_sdhi.h
-+++ b/include/linux/mmc/sh_mobile_sdhi.h
-@@ -26,7 +26,6 @@ struct sh_mobile_sdhi_info {
- 	u32 tmio_ocr_mask;	/* available MMC voltages */
- 	unsigned int cd_gpio;
- 	void (*set_pwr)(struct platform_device *pdev, int state);
--	int (*get_cd)(struct platform_device *pdev);
- 
- 	/* callbacks for board specific setup code */
- 	int (*init)(struct platform_device *pdev,
+ static struct sh_mmcif_plat_data sh_mmcif_plat = {
+ 	.set_pwr	= cn12_set_pwr,
+-	.down_pwr	= mmcif_down_pwr,
+ 	.sup_pclk	= 0, /* SH7724: Max Pclk/2 */
+ 	.caps		= MMC_CAP_4_BIT_DATA |
+ 			  MMC_CAP_8_BIT_DATA |
 -- 
 1.8.1.5
 
