@@ -1,7 +1,7 @@
 From: Laurent Pinchart <laurent.pinchart+renesas@ideasonboard.com>
-Subject: [PATCH v3 03/14] ARM: ep93xx: vision_ep9307: Use MMC CD and RO GPIO
-Date: Thu,  8 Aug 2013 12:38:33 +0200
-Message-ID: <1375958324-29683-4-git-send-email-laurent.pinchart+renesas@ideasonboard.com>
+Subject: [PATCH v3 08/14] mmc: mmc_spi: Remove platform data .get_cd() and .get_ro() callbacks
+Date: Thu,  8 Aug 2013 12:38:38 +0200
+Message-ID: <1375958324-29683-9-git-send-email-laurent.pinchart+renesas@ideasonboard.com>
 References: <1375958324-29683-1-git-send-email-laurent.pinchart+renesas@ideasonboard.com>
 Return-path: <linux-sh-owner@vger.kernel.org>
 In-Reply-To: <1375958324-29683-1-git-send-email-laurent.pinchart+renesas@ideasonboard.com>
@@ -10,87 +10,74 @@ To: linux-mmc@vger.kernel.org
 Cc: linux-arm-kernel@lists.infradead.org, linux-sh@vger.kernel.org, linux-spi@vger.kernel.org, Hartley Sweeten <hsweeten@visionengravers.com>, Ryan Mallon <rmallon@gmail.com>, Chris Ball <cjb@laptop.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Ian Molton <ian@mnementh.co.uk>, Arnd Bergmann <arnd@arndb.de>, Olof Johansson <olof@lixom.net>
 List-Id: linux-mmc@vger.kernel.org
 
-Pass the CD and RO GPIO numbers to the MMC SPI driver and remove the
-custom .get_cd() and .get_ro() callback functions.
+All platforms now pass the CD and RO GPIOs to the MMC SPI driver, those
+callbacks are not used anymore. Remove them.
 
 Signed-off-by: Laurent Pinchart <laurent.pinchart+renesas@ideasonboard.com>
-Acked-by: H Hartley Sweeten <hsweeten@visionengravers.com>
+Reviewed-by: H Hartley Sweeten <hsweeten@visionengravers.com>
 ---
- arch/arm/mach-ep93xx/vision_ep9307.c | 57 ++++--------------------------------
- 1 file changed, 5 insertions(+), 52 deletions(-)
+ drivers/mmc/host/mmc_spi.c  | 24 ++----------------------
+ include/linux/spi/mmc_spi.h |  9 ---------
+ 2 files changed, 2 insertions(+), 31 deletions(-)
 
-diff --git a/arch/arm/mach-ep93xx/vision_ep9307.c b/arch/arm/mach-ep93xx/vision_ep9307.c
-index 605956f..5a4c06d 100644
---- a/arch/arm/mach-ep93xx/vision_ep9307.c
-+++ b/arch/arm/mach-ep93xx/vision_ep9307.c
-@@ -224,62 +224,15 @@ static struct ep93xx_spi_chip_ops vision_spi_flash_hw = {
- #define VISION_SPI_MMC_WP	EP93XX_GPIO_LINE_F(0)
- #define VISION_SPI_MMC_CD	EP93XX_GPIO_LINE_EGPIO15
+diff --git a/drivers/mmc/host/mmc_spi.c b/drivers/mmc/host/mmc_spi.c
+index 62fb82d..0a87e56 100644
+--- a/drivers/mmc/host/mmc_spi.c
++++ b/drivers/mmc/host/mmc_spi.c
+@@ -1273,31 +1273,11 @@ static void mmc_spi_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 	}
+ }
  
--static struct gpio vision_spi_mmc_gpios[] = {
--	{ VISION_SPI_MMC_WP, GPIOF_DIR_IN, "mmc_spi:wp" },
--	{ VISION_SPI_MMC_CD, GPIOF_DIR_IN, "mmc_spi:cd" },
--};
--
--static int vision_spi_mmc_init(struct device *pdev,
--			irqreturn_t (*func)(int, void *), void *pdata)
+-static int mmc_spi_get_ro(struct mmc_host *mmc)
 -{
--	int err;
+-	struct mmc_spi_host *host = mmc_priv(mmc);
 -
--	err = gpio_request_array(vision_spi_mmc_gpios,
--				 ARRAY_SIZE(vision_spi_mmc_gpios));
--	if (err)
--		return err;
--
--	err = gpio_set_debounce(VISION_SPI_MMC_CD, 1);
--	if (err)
--		goto exit_err;
--
--	err = request_irq(gpio_to_irq(VISION_SPI_MMC_CD), func,
--			IRQ_TYPE_EDGE_BOTH, "mmc_spi:cd", pdata);
--	if (err)
--		goto exit_err;
--
--	return 0;
--
--exit_err:
--	gpio_free_array(vision_spi_mmc_gpios, ARRAY_SIZE(vision_spi_mmc_gpios));
--	return err;
--
+-	if (host->pdata && host->pdata->get_ro)
+-		return !!host->pdata->get_ro(mmc->parent);
+-	else
+-		return mmc_gpio_get_ro(mmc);
 -}
 -
--static void vision_spi_mmc_exit(struct device *pdev, void *pdata)
+-static int mmc_spi_get_cd(struct mmc_host *mmc)
 -{
--	free_irq(gpio_to_irq(VISION_SPI_MMC_CD), pdata);
--	gpio_free_array(vision_spi_mmc_gpios, ARRAY_SIZE(vision_spi_mmc_gpios));
+-	struct mmc_spi_host *host = mmc_priv(mmc);
+-
+-	if (host->pdata && host->pdata->get_cd)
+-		return !!host->pdata->get_cd(mmc->parent);
+-	else
+-		return mmc_gpio_get_cd(mmc);
 -}
 -
--static int vision_spi_mmc_get_ro(struct device *pdev)
--{
--	return !!gpio_get_value(VISION_SPI_MMC_WP);
--}
--
--static int vision_spi_mmc_get_cd(struct device *pdev)
--{
--	return !gpio_get_value(VISION_SPI_MMC_CD);
--}
--
- static struct mmc_spi_platform_data vision_spi_mmc_data = {
--	.init		= vision_spi_mmc_init,
--	.exit		= vision_spi_mmc_exit,
--	.get_ro		= vision_spi_mmc_get_ro,
--	.get_cd		= vision_spi_mmc_get_cd,
- 	.detect_delay	= 100,
- 	.powerup_msecs	= 100,
- 	.ocr_mask	= MMC_VDD_32_33 | MMC_VDD_33_34,
-+	.flags		= MMC_SPI_USE_CD_GPIO | MMC_SPI_USE_RO_GPIO,
-+	.cd_gpio	= VISION_SPI_MMC_CD,
-+	.cd_debounce	= 1,
-+	.ro_gpio	= VISION_SPI_MMC_WP,
-+	.caps2		= MMC_CAP2_RO_ACTIVE_HIGH,
+ static const struct mmc_host_ops mmc_spi_ops = {
+ 	.request	= mmc_spi_request,
+ 	.set_ios	= mmc_spi_set_ios,
+-	.get_ro		= mmc_spi_get_ro,
+-	.get_cd		= mmc_spi_get_cd,
++	.get_ro		= mmc_gpio_get_ro,
++	.get_cd		= mmc_gpio_get_cd,
  };
  
- static int vision_spi_mmc_hw_setup(struct spi_device *spi)
+ 
+diff --git a/include/linux/spi/mmc_spi.h b/include/linux/spi/mmc_spi.h
+index 87cdb35..274bc0f 100644
+--- a/include/linux/spi/mmc_spi.h
++++ b/include/linux/spi/mmc_spi.h
+@@ -26,15 +26,6 @@ struct mmc_spi_platform_data {
+ 		void *);
+ 	void (*exit)(struct device *, void *);
+ 
+-	/* sense switch on sd cards */
+-	int (*get_ro)(struct device *);
+-
+-	/*
+-	 * If board does not use CD interrupts, driver can optimize polling
+-	 * using this function.
+-	 */
+-	int (*get_cd)(struct device *);
+-
+ 	/*
+ 	 * Card Detect and Read Only GPIOs. To enable debouncing on the card
+ 	 * detect GPIO, set the cd_debounce to the debounce time in
 -- 
 1.8.1.5
 
