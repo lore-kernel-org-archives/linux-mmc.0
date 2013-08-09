@@ -1,67 +1,51 @@
-From: Doug Anderson <dianders@google.com>
-Subject: Re: dw_mmc: Does anyone use multiple slots?
-Date: Fri, 9 Aug 2013 08:51:57 -0700
-Message-ID: <CAD=FV=X9G66zg+OQ5C0gkkkYDdrkegkZdmWNXRDiS2V5_yY+6w@mail.gmail.com>
-References: <CAD=FV=U3aT1KKtSwAFhYURJJerp70ij8h647=xyV51et4jYipg@mail.gmail.com>
-	<CAOesGMjaF2K0CnuWBj7xdXGAQk-XRetBstaQdd9EZzBYrmDjeA@mail.gmail.com>
-	<86mworfzsf.fsf@void.printf.net>
-	<000e01ce94af$12710ef0$37532cd0$%jun@samsung.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+From: Doug Anderson <dianders@chromium.org>
+Subject: [PATCH v5 0/4] mmc: dw_mmc: fixes for suspend/resume on exynos
+Date: Fri,  9 Aug 2013 09:33:16 -0700
+Message-ID: <1376066000-5495-1-git-send-email-dianders@chromium.org>
+References: <1375825071-20922-1-git-send-email-dianders@chromium.org>
 Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-Reply-To: <000e01ce94af$12710ef0$37532cd0$%jun@samsung.com>
+In-Reply-To: <1375825071-20922-1-git-send-email-dianders@chromium.org>
 Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Seungwon Jeon <tgih.jun@samsung.com>
-Cc: Chris Ball <cjb@laptop.org>, Olof Johansson <olof@lixom.net>, James Hogan <james.hogan@imgtec.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Tomasz Figa <tomasz.figa@gmail.com>, Jaehoon Chung <jh80.chung@samsung.com>, Grant Grundler <grundler@chromium.org>, Alim Akhtar <alim.akhtar@samsung.com>, Abhilash Kesavan <a.kesavan@samsung.com>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, Kukjin Kim <kgene.kim@samsung.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Sonny Rao <sonnyrao@chromium.org>
+To: Chris Ball <cjb@laptop.org>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, James Hogan <james.hogan@imgtec.com>, Grant Grundler <grundler@chromium.org>, Alim Akhtar <alim.akhtar@samsung.com>, Abhilash Kesavan <a.kesavan@samsung.com>, Tomasz Figa <tomasz.figa@gmail.com>, Olof Johansson <olof@lixom.net>, Doug Anderson <dianders@chromium.org>, linux-samsung-soc@vger.kernel.org, linux-mmc@vger.kernel.org, Kukjin Kim <kgene.kim@samsung.com>, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-Hi,
+This series of patches addresses some suspend/resume problems with
+dw_mmc on exynos platforms, espeically exynos5420.  Since
+suspend/resume is not fully working on ToT Linux (v3.11-rc4) on
+exynos5250-snow, this series was tested against the current ToT
+ChromeOS 3.8 tree.  I have confirmed basic booting and eMMC / SD card
+usage (and compiling, honest!) against ToT Linux.
 
-On Thu, Aug 8, 2013 at 8:18 PM, Seungwon Jeon <tgih.jun@samsung.com> wrote:
-> On Fri, August 09, 2013, Chris Ball wrote:
->> On Fri, Aug 09 2013, Olof Johansson wrote:
->> > On Thu, Aug 8, 2013 at 5:16 PM, Doug Anderson <dianders@google.com> wrote:
->> >
->> >> I guess my overall question is: if there are no actual implementations
->> >> of multislot, shouldn't we kill it and simplify the code a whole lot?
->> >> If someone out there has a real multislot device they can step back in
->> >> and do it more correctly?
->> >>
->> >> Of course we need to find someone to actually go through and do the
->> >> killing of multislot, but finding that person might be easier if there
->> >> was some agreement that it was good to do.
->> >
->> > There clearly seems to be no in-tree users of multislot. If someone
->> > new comes in, we have the code in the history and can revert the
->> > removal (or at least use it as reference for re-introduction).
->> >
->> > I vote for removing it. It adds really annoying complexity for
->> > something that nobody uses.
->>
->> I agree with Olof, for what it's worth.  (The maintainers of the
->> driver are Jaehoon and Seungwon, though.)
->
-> I feel like there is no actual use case for that though origin Synopsys IP supports.
-> Multi-slot  might be not useful in terms of performance because shared bus should be allowed.
-> (At least this is the way I see it, though)
-> As Exynos's host does so, other hosts which are introduced in Linux seems use one card per host.
-> If it's really not found now, I could agree on this topic.
+I have received confirmation from Samsung that the problem solved is a
+silicon errata on exynos5420 and that this is a good fix.
 
-This all sounds very promising.  Certainly we should wait a little
-longer to see if others find / respond to this thread, but otherwise
-we can go ahead?
+Changes in v5:
+- Remove force_clkinit as per Jaehoon.
+- Update commit message to (hopefully) be clearer.
+- Cleaned up dw_mci_exynos_resume_noirq() comment as per Seungwon.
+- Don't memcpy dev_pm_ops structure, define a new one.
 
-It's possible to do this in somewhat small steps.  I think the first
-step is to remove num_slots and remove all loops over num_slots.  That
-actually sounds pretty easy/small, though it will touch a lot of code.
- After that we can try to move things out of the separate slot
-structure, I think.  That might be a bit of a bigger change.  I can
-keep that as a back burner task, but I wouldn't object at all to
-someone else doing it!  ;)
+Changes in v4:
+- Take Seungwon's suggestion and don't add any dw_mmc-pltfm code.
 
-The big question, though, is what to do about device tree bindings
-(cringe).  Really bus-width, wp-gpios, and disable-wp ought to be
-promoted up and we should remove the "slot" subnode.  ...but that of
-course breaks the stable API.
+Changes in v3:
+- Add freeze/thaw and poweroff/restore noirq entries.
 
--Doug
+Changes in v2:
+- Fix typo (some -> come)
+- Use ~0 instead of 0xFFFFFFFF; add comment about value
+- Use suspend_noirq as per James Hogan.
+
+Doug Anderson (4):
+  mmc: dw_mmc: Invalidate cache of current_speed after suspend/resume
+  mmc: dw_mmc: Add exynos resume_noirq callback to clear WAKEUP_INT
+  mmc: dw_mmc: Always setup the bus after suspend/resume
+  mmc: dw_mmc: Set timeout to max upon resume
+
+ drivers/mmc/host/dw_mmc-exynos.c | 56 +++++++++++++++++++++++++++++++++++++++-
+ drivers/mmc/host/dw_mmc.c        | 21 ++++++++++-----
+ 2 files changed, 69 insertions(+), 8 deletions(-)
+
+-- 
+1.8.3
