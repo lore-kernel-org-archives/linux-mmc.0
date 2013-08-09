@@ -1,77 +1,122 @@
-From: Dinh Nguyen <dinguyen@altera.com>
-Subject: Re: [PATCHv2] ARM: socfpga: dts: Add support for SD/MMC
-Date: Fri, 9 Aug 2013 17:41:28 -0500
-Message-ID: <1376088088.14580.4.camel@linux-builds1>
-References: <1375735392-6836-1-git-send-email-dinguyen@altera.com>
-	 <5203FC1A.3090903@wwwdotorg.org> <1375993920.22740.9.camel@linux-builds1>
-	 <5204017A.1040607@wwwdotorg.org> <1375995281.22740.16.camel@linux-builds1>
-	 <520409F2.1090906@wwwdotorg.org> <1376003457.22740.25.camel@linux-builds1>
-	 <52055867.9000602@wwwdotorg.org>
+From: Anton Vorontsov <anton@enomsg.org>
+Subject: Re: [PATCH 1/3 V3] mmc:core: parse voltage from device-tree
+Date: Fri, 9 Aug 2013 15:42:52 -0700
+Message-ID: <20130809224252.GA28851@teo>
+References: <1376017863-31453-1-git-send-email-Haijun.Zhang@freescale.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=utf-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from co1ehsobe005.messaging.microsoft.com ([216.32.180.188]:23063
-	"EHLO co1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1031355Ab3HIWlB (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 9 Aug 2013 18:41:01 -0400
-In-Reply-To: <52055867.9000602@wwwdotorg.org>
+Received: from mail-pd0-f179.google.com ([209.85.192.179]:43755 "EHLO
+	mail-pd0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1031355Ab3HIWm4 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 9 Aug 2013 18:42:56 -0400
+Received: by mail-pd0-f179.google.com with SMTP id v10so1108896pde.24
+        for <linux-mmc@vger.kernel.org>; Fri, 09 Aug 2013 15:42:55 -0700 (PDT)
+Content-Disposition: inline
+In-Reply-To: <1376017863-31453-1-git-send-email-Haijun.Zhang@freescale.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Stephen Warren <swarren@wwwdotorg.org>
-Cc: cjb@laptop.org, dinh.linux@gmail.com, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, Rob Herring <rob.herring@calxeda.com>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Ian Campbell <ian.campbell@citrix.com>, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+To: Haijun Zhang <Haijun.Zhang@freescale.com>
+Cc: linux-mmc@vger.kernel.org, cjb@laptop.org, scottwood@freescale.com, AFLEMING@freescale.com
 
-On Fri, 2013-08-09 at 15:00 -0600, Stephen Warren wrote:
-> On 08/08/2013 05:10 PM, Dinh Nguyen wrote:
-> > On Thu, 2013-08-08 at 15:13 -0600, Stephen Warren wrote:
-> ...
-> >> Why is there a need to directly represent the divider anywhere? The
-> >> driver can find the rate of the input clock, and I assume it knows what
-> >> rate it wants the clock to run at, so can't it calculate the divider
-> >> based on those two pieces of information?
-> > 
-> > CC: Chris Ball
-> >>
-> >> Or, does the driver really not know what rate it wants the clock to be
-> >> after the internal divider? If not, then I think that *rate* should be
-> >> recorded in DT, not the divider to obtain that rate.
-> >>
-> > 
-> > I believe that this is the case, that the driver does not know what rate
-> > it will clock the SD card at. I think internally we did have a "bus_hz"
-> > in DT a while back. I guess I don't really understand why it would be
-> > better to have a *rate* DT entry instead of a fixed-divider entry?
+On Fri, Aug 09, 2013 at 11:11:01AM +0800, Haijun Zhang wrote:
+> Add function to support get voltage from device-tree.
+> If there are voltage-range specified in device-tree node, this function
+> will parse it and return the available voltage mask.
 > 
-> The value of the divider depends on two things:
+> Signed-off-by: Haijun Zhang <haijun.zhang@freescale.com>
+> ---
+> changes for V3:
+> 	- Correct the type of return value.
+> changes for v2:
+> 	- Update the parameters of function
 > 
-> 1) Input clock rate.
-> 2) Desired rate after applying the internal divider.
+>  drivers/mmc/core/core.c  | 45 +++++++++++++++++++++++++++++++++++++++++++++
+>  include/linux/mmc/core.h |  2 ++
+>  2 files changed, 47 insertions(+)
 > 
-> The input clock rate may vary, either between SoCs the IP is integrated
-> into, or even at run-time perhaps base on clk_set_rate() etc.
-> 
-> If the MMC driver knows the clock rate it wants to run at, it can
-> calculate the divider easily; it can automatically adjust to any input
-> clock that its environment may provide.
-> 
-> If the MMC driver is simply told "use this divider", that's encoding
-> assumptions about the rate of the input clock which might not be valid;.
-> Encoding the desire clock rate within the MMC HW block allows the
-> divider to be calculated based on the actual environment.
+> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> index 49a5bca..1b13c37 100644
+> --- a/drivers/mmc/core/core.c
+> +++ b/drivers/mmc/core/core.c
+> @@ -1196,6 +1196,51 @@ u32 mmc_vddrange_to_ocrmask(int vdd_min, int vdd_max)
+>  }
+>  EXPORT_SYMBOL(mmc_vddrange_to_ocrmask);
+>  
+> +#ifdef CONFIG_OF
+> +
+> +/**
+> + * mmc_of_parse_voltage - return mask of supported voltages
+> + * @np: The device node need to be parsed.
+> + *
+> + * 1. Return zero: voltage-ranges unspecified in device-tree
+> + * 2. Return negative errno: voltage-range is invalid.
+> + * 3. Return ocr_mask: a mask of voltages that parse from device-tree
+> + * node that can be provided to MMC/SD/SDIO devices.
+> + */
+> +int mmc_of_parse_voltage(struct device_node *np)
+> +{
+> +	const u32 *voltage_ranges;
+> +	int num_ranges, i;
+> +	int ocr_mask;
+> +
+> +	voltage_ranges = of_get_property(np, "voltage-ranges", &num_ranges);
+> +	num_ranges = num_ranges / sizeof(*voltage_ranges) / 2;
+> +	if (!voltage_ranges || !num_ranges) {
+> +		pr_info("%s: voltage-ranges unspecified\n", np->full_name);
+> +		return 0;
+> +	}
+> +
+> +	for (i = 0; i < num_ranges; i++) {
+> +		const int j = i * 2;
+> +		u32 mask;
+> +
+> +		mask = mmc_vddrange_to_ocrmask(
+> +				be32_to_cpu(voltage_ranges[j]),
+> +				be32_to_cpu(voltage_ranges[j + 1]));
+> +		if (!mask) {
+> +			pr_err("%s: voltage-range #%d is invalid\n",
+> +				np->full_name, i);
+> +			return -EINVAL;
+> +		}
+> +		ocr_mask |= mask;
+> +	}
+> +
+> +	return ocr_mask;
 
-Thanks Stephen. That makes sense.
+Are you sure that (u32)(-EINVAL) is not a valid ocr_mask? In any case,
+please don't do these kind of hacks... don't return mask and a errors
+together.
 
-Chris, Jaehoon, and Seungwon, do you have any inputs? If not I will go
-down the path of have the "bus-hz" in the DTS node for the clock rate of
-the CIU clock. Then I would also make the same change to dw_mmc-exynos
-but would need your help on what the rate would be.
+> +}
+> +EXPORT_SYMBOL(mmc_of_parse_voltage);
+> +
+> +#endif /* CONFIG_OF */
+> +
+>  #ifdef CONFIG_REGULATOR
+>  
+>  /**
+> diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
+> index 443243b..117f719 100644
+> --- a/include/linux/mmc/core.h
+> +++ b/include/linux/mmc/core.h
+> @@ -10,6 +10,7 @@
+>  
+>  #include <linux/interrupt.h>
+>  #include <linux/completion.h>
+> +#include <linux/of.h>
+>  
+>  struct request;
+>  struct mmc_data;
+> @@ -209,5 +210,6 @@ static inline void mmc_claim_host(struct mmc_host *host)
+>  }
+>  
+>  extern u32 mmc_vddrange_to_ocrmask(int vdd_min, int vdd_max);
+> +extern int mmc_of_parse_voltage(struct device_node *np);
 
-For SOCFPGA, its 12.5 MHZ.
+You don't really need to include the whole linux/of.h, forward-declaration
+of 'struct device_node;' is enough here.
 
 Thanks,
 
-Dinh
-> 
-
-
-
+Anton
