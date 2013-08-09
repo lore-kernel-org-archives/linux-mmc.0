@@ -1,38 +1,55 @@
-From: Philippe De Swert <philippe.deswert@jollamobile.com>
-Subject: [PATCH] mmc: sdhci-pci : Remove logically dead code
-Date: Fri,  9 Aug 2013 23:01:46 +0300
-Message-ID: <1376078506-10391-1-git-send-email-philippe.deswert@jollamobile.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: cjb@laptop.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc: Philippe De Swert <philippe.deswert@jollamobile.com>
+From: Stephen Warren <swarren@wwwdotorg.org>
+Subject: Re: [PATCHv2] ARM: socfpga: dts: Add support for SD/MMC
+Date: Fri, 09 Aug 2013 15:00:23 -0600
+Message-ID: <52055867.9000602@wwwdotorg.org>
+References: <1375735392-6836-1-git-send-email-dinguyen@altera.com>  <5203FC1A.3090903@wwwdotorg.org> <1375993920.22740.9.camel@linux-builds1>  <5204017A.1040607@wwwdotorg.org> <1375995281.22740.16.camel@linux-builds1>  <520409F2.1090906@wwwdotorg.org> <1376003457.22740.25.camel@linux-builds1>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from avon.wwwdotorg.org ([70.85.31.133]:52025 "EHLO
+	avon.wwwdotorg.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1031125Ab3HIVA2 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 9 Aug 2013 17:00:28 -0400
+In-Reply-To: <1376003457.22740.25.camel@linux-builds1>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Dinh Nguyen <dinguyen@altera.com>
+Cc: cjb@laptop.org, dinh.linux@gmail.com, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, Rob Herring <rob.herring@calxeda.com>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Ian Campbell <ian.campbell@citrix.com>, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 
-The amount of slots is calculated as follows:
-slots = PCI_SLOT_INFO_SLOTS(slots) + 1;
+On 08/08/2013 05:10 PM, Dinh Nguyen wrote:
+> On Thu, 2013-08-08 at 15:13 -0600, Stephen Warren wrote:
+...
+>> Why is there a need to directly represent the divider anywhere? The
+>> driver can find the rate of the input clock, and I assume it knows what
+>> rate it wants the clock to run at, so can't it calculate the divider
+>> based on those two pieces of information?
+> 
+> CC: Chris Ball
+>>
+>> Or, does the driver really not know what rate it wants the clock to be
+>> after the internal divider? If not, then I think that *rate* should be
+>> recorded in DT, not the divider to obtain that rate.
+>>
+> 
+> I believe that this is the case, that the driver does not know what rate
+> it will clock the SD card at. I think internally we did have a "bus_hz"
+> in DT a while back. I guess I don't really understand why it would be
+> better to have a *rate* DT entry instead of a fixed-divider entry?
 
-Which means that just after it slots cannot be 0.
+The value of the divider depends on two things:
 
-Found with coverity: CID#744269
+1) Input clock rate.
+2) Desired rate after applying the internal divider.
 
-Signed-off-by: Philippe De Swert <philippe.deswert@jollamobile.com>
----
- drivers/mmc/host/sdhci-pci.c | 3 ---
- 1 file changed, 3 deletions(-)
+The input clock rate may vary, either between SoCs the IP is integrated
+into, or even at run-time perhaps base on clk_set_rate() etc.
 
-diff --git a/drivers/mmc/host/sdhci-pci.c b/drivers/mmc/host/sdhci-pci.c
-index d7d6bc8..9c76558 100644
---- a/drivers/mmc/host/sdhci-pci.c
-+++ b/drivers/mmc/host/sdhci-pci.c
-@@ -1470,9 +1470,6 @@ static int sdhci_pci_probe(struct pci_dev *pdev,
- 
- 	slots = PCI_SLOT_INFO_SLOTS(slots) + 1;
- 	dev_dbg(&pdev->dev, "found %d slot(s)\n", slots);
--	if (slots == 0)
--		return -ENODEV;
--
- 	BUG_ON(slots > MAX_SLOTS);
- 
- 	ret = pci_read_config_byte(pdev, PCI_SLOT_INFO, &first_bar);
--- 
-1.8.1.2
+If the MMC driver knows the clock rate it wants to run at, it can
+calculate the divider easily; it can automatically adjust to any input
+clock that its environment may provide.
+
+If the MMC driver is simply told "use this divider", that's encoding
+assumptions about the rate of the input clock which might not be valid;.
+Encoding the desire clock rate within the MMC HW block allows the
+divider to be calculated based on the actual environment.
