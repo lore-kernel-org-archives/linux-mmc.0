@@ -1,93 +1,38 @@
-From: Seungwon Jeon <tgih.jun@samsung.com>
-Subject: RE: [PATCH v4 3/4] mmc: dw_mmc: Always setup the bus after
- suspend/resume
-Date: Fri, 09 Aug 2013 22:35:45 +0900
-Message-ID: <001a01ce9505$59c28b20$0d47a160$%jun@samsung.com>
-References: <1373470926-19314-1-git-send-email-dianders@chromium.org>
- <1375825071-20922-1-git-send-email-dianders@chromium.org>
- <1375825071-20922-4-git-send-email-dianders@chromium.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ks_c_5601-1987
-Content-Transfer-Encoding: 7bit
+From: Kumar Gala <galak@kernel.crashing.org>
+Subject: Re: [PATCH 1/3 V2] mmc:core: parse voltage from device-tree
+Date: Fri, 9 Aug 2013 09:48:09 -0500
+Message-ID: <733059D3-105A-437B-B330-763D2C1859B2@kernel.crashing.org>
+References: <1375251927-3330-1-git-send-email-Haijun.Zhang@freescale.com>
+Mime-Version: 1.0 (Apple Message framework v1283)
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout1.samsung.com ([203.254.224.24]:22777 "EHLO
-	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S966148Ab3HINfr (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 9 Aug 2013 09:35:47 -0400
-In-reply-to: <1375825071-20922-4-git-send-email-dianders@chromium.org>
-Content-language: ko
+Received: from gate.crashing.org ([63.228.1.57]:39934 "EHLO gate.crashing.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1030310Ab3HIOsa convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 9 Aug 2013 10:48:30 -0400
+In-Reply-To: <1375251927-3330-1-git-send-email-Haijun.Zhang@freescale.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: 'Doug Anderson' <dianders@chromium.org>, 'Chris Ball' <cjb@laptop.org>
-Cc: 'Olof Johansson' <olof@lixom.net>, 'Jaehoon Chung' <jh80.chung@samsung.com>, 'James Hogan' <james.hogan@imgtec.com>, 'Grant Grundler' <grundler@chromium.org>, 'Alim Akhtar' <alim.akhtar@samsung.com>, 'Abhilash Kesavan' <a.kesavan@samsung.com>, 'Tomasz Figa' <tomasz.figa@gmail.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Haijun Zhang <Haijun.Zhang@freescale.com>
+Cc: linux-mmc@vger.kernel.org, linuxppc-dev@lists.ozlabs.org, scottwood@freescale.com, cjb@laptop.org, AFLEMING@freescale.com, cbouatmailru@gmail.com
 
-On Wed, August 07, 2013, Doug Anderson wrote:
-> After suspend/resume all of the dw_mmc registers are reset to
-> defaults.  We restore most of them, but specifically don't setup the
-> clock registers after resume unless we've got a powered card.  Things
-> still work because the core will eventually call set_ios() and we'll
-> set things up.
 
-Hmm, I didn't get the need of this call during resume.
-I think set_ios is only valid where core layer calls.
-Besides, important things is ios's parameters.
-If suspend has finished successfully, last call of set_ios() is from mmc_power_off().
-On seeing fields of 'mmc->ios' stored last, these values aren't proper in resume phase.
-Please check mmc_power_off() function.
-In case MMC_PM_KEEP_POWER it could be kept.
+On Jul 31, 2013, at 1:25 AM, Haijun Zhang wrote:
 
-Thanks,
-Seungwon Jeon
+> Add function to support get voltage from device-tree.
+> If there are voltage-range specified in device-tree node, this function
+> will parse it and return the avail voltage mask.
 > 
-> There doesn't seem to be any reason that I can see _not_ to set things
-> up after resume.  Restoring this state makes the code easier to reason
-> about and should help prevent bugs.  It also allows us to do a
-> register dump before and after suspend/resume to confirm that we've
-> set things up OK.
-> 
-> I examined the state of the dw_mmc instance before and after suspend
-> after this patch.  I had no card inserted in an SD card slot.
-> 
-> Before this patch, differences were:
-> * CLKDIV (0x08)
-> * CLKENA (0x10)
-> * TMOUT (0x14)
-> * CMD (0x2C) - difference is not important
-> * CLKSEL (0x9C - exynos specific)
-> 
-> After this patch, only TMOUT was different.  I have a separate patch
-> for that.
-> 
-> Signed-off-by: Doug Anderson <dianders@chromium.org>
+> Signed-off-by: Haijun Zhang <haijun.zhang@freescale.com>
 > ---
-> Changes in v4: None
-> Changes in v3: None
-> Changes in v2: None
+> changes for v2:
+> 	- Update the parameters of function
 > 
->  drivers/mmc/host/dw_mmc.c | 4 +---
->  1 file changed, 1 insertion(+), 3 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> index 13a363c..0fa3135 100644
-> --- a/drivers/mmc/host/dw_mmc.c
-> +++ b/drivers/mmc/host/dw_mmc.c
-> @@ -2522,9 +2522,7 @@ int dw_mci_resume(struct dw_mci *host)
->  		struct dw_mci_slot *slot = host->slot[i];
->  		if (!slot)
->  			continue;
-> -		if (slot->mmc->pm_flags & MMC_PM_KEEP_POWER) {
-> -			dw_mci_set_ios(slot->mmc, &slot->mmc->ios);
-> -		}
-> +		dw_mci_set_ios(slot->mmc, &slot->mmc->ios);
-> 
->  		ret = mmc_resume_host(host->slot[i]->mmc);
->  		if (ret < 0)
-> --
-> 1.8.3
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> drivers/mmc/core/core.c  | 46 ++++++++++++++++++++++++++++++++++++++++++++++
+> include/linux/mmc/core.h |  1 +
+> 2 files changed, 47 insertions(+)
 
+There should be a device tree binding spec update to go with this patch series.
 
+- k
