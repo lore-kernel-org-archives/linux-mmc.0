@@ -1,54 +1,144 @@
-From: Seungwon Jeon <tgih.jun@samsung.com>
-Subject: RE: dw_mmc: Does anyone use multiple slots?
-Date: Fri, 09 Aug 2013 12:18:07 +0900
-Message-ID: <000e01ce94af$12710ef0$37532cd0$%jun@samsung.com>
-References: <CAD=FV=U3aT1KKtSwAFhYURJJerp70ij8h647=xyV51et4jYipg@mail.gmail.com>
- <CAOesGMjaF2K0CnuWBj7xdXGAQk-XRetBstaQdd9EZzBYrmDjeA@mail.gmail.com>
- <86mworfzsf.fsf@void.printf.net>
+From: Zhang Haijun <B42677@freescale.com>
+Subject: Re: [PATCH 1/3 V2] mmc:core: parse voltage from device-tree
+Date: Fri, 9 Aug 2013 11:34:31 +0800
+Message-ID: <52046347.80407@freescale.com>
+References: <1375251927-3330-1-git-send-email-Haijun.Zhang@freescale.com> <20130809001540.GB7427@lizard.mcd01528.sjc.wayport.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ks_c_5601-1987
+Content-Type: text/plain; charset="UTF-8"; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout1.samsung.com ([203.254.224.24]:46415 "EHLO
-	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S967411Ab3HIDSL (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 8 Aug 2013 23:18:11 -0400
-In-reply-to: <86mworfzsf.fsf@void.printf.net>
-Content-language: ko
+Received: from mail-db9lp0251.outbound.messaging.microsoft.com ([213.199.154.251]:3433
+	"EHLO db9outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S967394Ab3HIDdM (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 8 Aug 2013 23:33:12 -0400
+In-Reply-To: <20130809001540.GB7427@lizard.mcd01528.sjc.wayport.net>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: 'Chris Ball' <cjb@laptop.org>, 'Olof Johansson' <olof@lixom.net>
-Cc: 'Doug Anderson' <dianders@google.com>, 'James Hogan' <james.hogan@imgtec.com>, linux-mmc@vger.kernel.org, 'Tomasz Figa' <tomasz.figa@gmail.com>, 'Jaehoon Chung' <jh80.chung@samsung.com>, 'Grant Grundler' <grundler@chromium.org>, 'Alim Akhtar' <alim.akhtar@samsung.com>, 'Abhilash Kesavan' <a.kesavan@samsung.com>, 'Doug Anderson' <dianders@chromium.org>, 'linux-samsung-soc' <linux-samsung-soc@vger.kernel.org>, 'Kukjin Kim' <kgene.kim@samsung.com>, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, 'Sonny Rao' <sonnyrao@chromium.org>
+To: Anton Vorontsov <anton@enomsg.org>
+Cc: Haijun Zhang <Haijun.Zhang@freescale.com>, linux-mmc@vger.kernel.org, linuxppc-dev@lists.ozlabs.org, cjb@laptop.org, scottwood@freescale.com, AFLEMING@freescale.com
 
-On Fri, August 09, 2013, Chris Ball wrote:
-> On Fri, Aug 09 2013, Olof Johansson wrote:
-> > On Thu, Aug 8, 2013 at 5:16 PM, Doug Anderson <dianders@google.com> wrote:
-> >
-> >> I guess my overall question is: if there are no actual implementations
-> >> of multislot, shouldn't we kill it and simplify the code a whole lot?
-> >> If someone out there has a real multislot device they can step back in
-> >> and do it more correctly?
-> >>
-> >> Of course we need to find someone to actually go through and do the
-> >> killing of multislot, but finding that person might be easier if there
-> >> was some agreement that it was good to do.
-> >
-> > There clearly seems to be no in-tree users of multislot. If someone
-> > new comes in, we have the code in the history and can revert the
-> > removal (or at least use it as reference for re-introduction).
-> >
-> > I vote for removing it. It adds really annoying complexity for
-> > something that nobody uses.
-> 
-> I agree with Olof, for what it's worth.  (The maintainers of the
-> driver are Jaehoon and Seungwon, though.)
+On 08/09/2013 08:15 AM, Anton Vorontsov wrote:
+> On Wed, Jul 31, 2013 at 02:25:25PM +0800, Haijun Zhang wrote:
+>> Add function to support get voltage from device-tree.
+>> If there are voltage-range specified in device-tree node, this function
+>> will parse it and return the avail voltage mask.
+>>
+>> Signed-off-by: Haijun Zhang <haijun.zhang@freescale.com>
+>> ---
+>> changes for v2:
+>> 	- Update the parameters of function
+>>
+>>   drivers/mmc/core/core.c  | 46 ++++++++++++++++++++++++++++++++++++++++++++++
+>>   include/linux/mmc/core.h |  1 +
+>>   2 files changed, 47 insertions(+)
+>>
+>> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+>> index 49a5bca..ce9c957 100644
+>> --- a/drivers/mmc/core/core.c
+>> +++ b/drivers/mmc/core/core.c
+>> @@ -27,6 +27,7 @@
+>>   #include <linux/fault-inject.h>
+>>   #include <linux/random.h>
+>>   #include <linux/slab.h>
+>> +#include <linux/of.h>
+>>   
+>>   #include <linux/mmc/card.h>
+>>   #include <linux/mmc/host.h>
+>> @@ -1196,6 +1197,51 @@ u32 mmc_vddrange_to_ocrmask(int vdd_min, int vdd_max)
+>>   }
+>>   EXPORT_SYMBOL(mmc_vddrange_to_ocrmask);
+>>   
+>> +#ifdef CONFIG_OF
+>> +
+>> +/*
+> This is not kernel-doc formatted comment for the function.. it should
+> start with /**...
+>
+>> + * mmc_of_parse_voltage - return mask of supported voltages
+>> + * @np: The device node need to be parsed.
+>> + *
+>> + * 1. Return zero: voltage-ranges unspecified in device-tree.
+>> + * 2. Return negative errno: voltage-range is invalid.
+> This doesn't seem right... the function returns the unsigned mask... You
+> can change the prototype of this func to something like this:
+>
+> int mmc_of_parse_voltage(struct device_node *np, u32 *mask);
+>
+> So the function will fill the mask and return 0 on success, and will
+> return negtive errno on errors.
+Thanks, Anton.
+I'll correct the return prototype of the function.
+In case voltage unspecified in device node is not an error in my 
+platform. So i hope to reserve the zero as unspecified case and give an 
+prompt, an available value in case success, negative errno in case 
+error. It's easy to figure out the root cause.
 
-I feel like there is no actual use case for that though origin Synopsys IP supports.
-Multi-slot  might be not useful in terms of performance because shared bus should be allowed.
-(At least this is the way I see it, though)
-As Exynos's host does so, other hosts which are introduced in Linux seems use one card per host.
-If it's really not found now, I could agree on this topic.
+>> + * 3. Return ocr_mask: a mask of voltages that parse from device-tree
+>> + * node can be provided to MMC/SD/SDIO devices.
+>> + */
+>> +
+> No need for this empty line...
+>
+>> +u32 mmc_of_parse_voltage(struct device_node *np)
+>> +{
+>> +	const u32 *voltage_ranges;
+>> +	int num_ranges, i;
+>> +	u32 ocr_mask = 0;
+>> +
+>> +	voltage_ranges = of_get_property(np, "voltage-ranges", &num_ranges);
+>> +	num_ranges = num_ranges / sizeof(*voltage_ranges) / 2;
+>> +	if (!voltage_ranges || !num_ranges) {
+>> +		pr_info("%s: voltage-ranges unspecified\n", np->full_name);
+>> +		return 0;
+>> +	}
+>> +
+>> +	for (i = 0; i < num_ranges; i++) {
+>> +		const int j = i * 2;
+>> +		u32 mask;
+>> +
+>> +		mask = mmc_vddrange_to_ocrmask(be32_to_cpu(voltage_ranges[j]),
+>> +				be32_to_cpu(voltage_ranges[j + 1]));
+> You lost some [pretty] formatting to line up the two arguments. :)
+I'll correct these. Thanks.
+>> +		if (!mask) {
+>> +			pr_err("%s: voltage-range #%d is invalid\n",
+>> +				np->full_name, i);
+>> +			return -EINVAL;
+>> +		}
+>> +		ocr_mask |= mask;
+>> +	}
+>> +
+>> +	return ocr_mask;
+>> +}
+>> +EXPORT_SYMBOL(mmc_of_parse_voltage);
+>> +
+>> +#endif /* CONFIG_OF */
+>> +
+>>   #ifdef CONFIG_REGULATOR
+>>   
+>>   /**
+>> diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
+>> index 443243b..e3f8fe3 100644
+>> --- a/include/linux/mmc/core.h
+>> +++ b/include/linux/mmc/core.h
+>> @@ -209,5 +209,6 @@ static inline void mmc_claim_host(struct mmc_host *host)
+>>   }
+>>   
+>>   extern u32 mmc_vddrange_to_ocrmask(int vdd_min, int vdd_max);
+>> +extern u32 mmc_of_parse_voltage(struct device_node *np);
+> You need to add a 'struct device_node;' forward-declaration, otherwise
+> non-OF code might fail to compile...
+I'll move of.h from core.c to core.h
+>
+> Thanks,
+>
+> Anton
+>
 
-Thanks,
-Seungwon Jeon
+
+-- 
+Thanks & Regards
+
+Haijun
+
 
