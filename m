@@ -1,82 +1,76 @@
 From: Doug Anderson <dianders@chromium.org>
-Subject: Re: [PATCH v4 1/4] mmc: dw_mmc: Invalidate cache of current_speed
- after suspend/resume
-Date: Fri, 9 Aug 2013 08:22:42 -0700
-Message-ID: <CAD=FV=VmtoxnRzjsKF1rVTwvkJRAxKGUvNZHAEwuWaeVokzSZA@mail.gmail.com>
+Subject: Re: [PATCH v4 3/4] mmc: dw_mmc: Always setup the bus after suspend/resume
+Date: Fri, 9 Aug 2013 08:43:13 -0700
+Message-ID: <CAD=FV=VO=50uMXfwY5iNa+xiamRiHTSpTMXs+EdMeUTawkeyqw@mail.gmail.com>
 References: <1373470926-19314-1-git-send-email-dianders@chromium.org>
 	<1375825071-20922-1-git-send-email-dianders@chromium.org>
-	<1375825071-20922-2-git-send-email-dianders@chromium.org>
-	<001801ce9504$d9976ab0$8cc64010$%jun@samsung.com>
+	<1375825071-20922-4-git-send-email-dianders@chromium.org>
+	<001a01ce9505$59c28b20$0d47a160$%jun@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qe0-f53.google.com ([209.85.128.53]:40366 "EHLO
-	mail-qe0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S934350Ab3HIPWn (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 9 Aug 2013 11:22:43 -0400
-Received: by mail-qe0-f53.google.com with SMTP id f6so2390752qej.26
-        for <linux-mmc@vger.kernel.org>; Fri, 09 Aug 2013 08:22:42 -0700 (PDT)
-In-Reply-To: <001801ce9504$d9976ab0$8cc64010$%jun@samsung.com>
+Received: from mail-qc0-f179.google.com ([209.85.216.179]:55735 "EHLO
+	mail-qc0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S965333Ab3HIPnO (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 9 Aug 2013 11:43:14 -0400
+Received: by mail-qc0-f179.google.com with SMTP id n10so438724qcx.38
+        for <linux-mmc@vger.kernel.org>; Fri, 09 Aug 2013 08:43:13 -0700 (PDT)
+In-Reply-To: <001a01ce9505$59c28b20$0d47a160$%jun@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>
-Cc: Chris Ball <cjb@laptop.org>, Olof Johansson <olof@lixom.net>, James Hogan <james.hogan@imgtec.com>, Grant Grundler <grundler@chromium.org>, Alim Akhtar <alim.akhtar@samsung.com>, Abhilash Kesavan <a.kesavan@samsung.com>, Tomasz Figa <tomasz.figa@gmail.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+To: Seungwon Jeon <tgih.jun@samsung.com>
+Cc: Chris Ball <cjb@laptop.org>, Olof Johansson <olof@lixom.net>, Jaehoon Chung <jh80.chung@samsung.com>, James Hogan <james.hogan@imgtec.com>, Grant Grundler <grundler@chromium.org>, Alim Akhtar <alim.akhtar@samsung.com>, Abhilash Kesavan <a.kesavan@samsung.com>, Tomasz Figa <tomasz.figa@gmail.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-Seungwon and Jaehoon,
+Seungwon,
 
-On Fri, Aug 9, 2013 at 6:32 AM, Seungwon Jeon <tgih.jun@samsung.com> wrote:
+On Fri, Aug 9, 2013 at 6:35 AM, Seungwon Jeon <tgih.jun@samsung.com> wrote:
 > On Wed, August 07, 2013, Doug Anderson wrote:
->> The dw_mmc driver keeps a cache of the current slot->clock in order to
->> avoid doing a whole lot of work every time set_ios() is called.
->> However, after suspend/resume the register values are bogus so we need
->> to ensure that the cached value is invalidated.
-> This mismatch comes only in case MMC_PM_KEEP_POWER, right?
+>> After suspend/resume all of the dw_mmc registers are reset to
+>> defaults.  We restore most of them, but specifically don't setup the
+>> clock registers after resume unless we've got a powered card.  Things
+>> still work because the core will eventually call set_ios() and we'll
+>> set things up.
+>
+> Hmm, I didn't get the need of this call during resume.
+> I think set_ios is only valid where core layer calls.
+> Besides, important things is ios's parameters.
+> If suspend has finished successfully, last call of set_ios() is from mmc_power_off().
+> On seeing fields of 'mmc->ios' stored last, these values aren't proper in resume phase.
+> Please check mmc_power_off() function.
+> In case MMC_PM_KEEP_POWER it could be kept.
 
-Actually, no.  I saw problems with the SD Card slot, which doesn't
-have MMC_KEEP_POWER.  Problems showed up when no card was inserted
-across suspend/resume.  In other words:
+Most of my reasoning has to do with the fact that the state of the
+system after suspend/resume should not be significantly different than
+the state of the system before suspend/resume.  If the state of the
+system is different in the two cases it points out potential problems
+or inefficiencies.
 
-1. At boot time, slot is all setup and configured to 400kHz.
+To make this more concrete:
 
-2. Suspend
+1. Boot up a system with no card in the SD Card slot.
+2. Note down the value of registers like CLKDIV, CLKENA, etc.
+3. Suspend / resume (S2R)
+4. Check the values of CLKDIV, CLKENA, etc.
 
-3. Resume; clock registers are reset (by suspend/resume) and not
-restored since dw_mmc still thinks slot is configured for 400kHz due
-to host->current_speed cache.
-
-4. Insert card.
-
-5. No code sees any need to change the clock for detecting the card,
-since everyone thinks it's at 400kHz.  ...but it's not.
-
-
->> In many cases we got by without this since the core mmc code fiddles
->> with the clock a lot.  If we've got a card present we're probably
->> running it at something like 50MHz and the core will temporarily
->> switch us to 400kHz after resume.  One case that didn't work (for me)
->> is the case of having no card in the slot.  The slot is initted to
->> 400kHz at boot time.  After suspend/resume the slot thinks it's still
->> at 400kHz (due to the cache) so doesn't adjust timing.  When it tries
->> to send the command at probe time it just times out and gets left in a
->> bad state.
-> I understand this change although some part of commit message (boot time, probe time...) make me confused.
-
-Sorry to be confusing.  I was trying to explain why the old code works
-fine in many cases.  It's because the core MMC code tends to adjust
-the clock a lot around suspend/resume.  When it does that, it works
-around this problem.  ...but I found one case where suspend/resume
-would happen and the MMC core didn't adjust the clock.
+You will notice that they are different.  This is a bad sign and can
+be a source of bugs (though I don't know of any).  ...or it could mean
+that power draw is different (could be better, could be worse) after a
+suspend/resume cycle.
 
 
-> I guess this change intends to update clock programming forcedly.
-> It looks like another version of 'dw_mci_setup_bus(slot, true)'.
-> Eventually, this change does same?
-
-Effectively, yes.  As Jaehoon points out, that means we can actually
-eliminate the "force" parameter to dw_mci_setup_bus().
+Said another way, if the value of CLKDIV, CLKENA, etc is not important
+when a card is not inserted, why do they get initialized at boot time?
 
 
-I will send a new version out that eliminates the "force" parameter
-and updates the commit message to (hopefully) be clearer.
+In general, I think that the mmc core code makes the assumption that
+it's up to the driver to make sure that its state is preserved across
+S2R.  For dw_mmc the driver doesn't do the "brute force" that some
+drivers do of just saving and restoring all registers using a copy
+loop.  Instead, the dw_mmc driver runs code that tries to set the
+state back to something reasonable.  Without my patch the dw_mmc
+driver doesn't run any code that restores these registers.
+dw_mci_set_ios() will do so.
+
+Another option would be to forcibly save/restore registers in suspend/resume.
 
 -Doug
