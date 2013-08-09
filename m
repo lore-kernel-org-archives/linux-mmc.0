@@ -1,110 +1,82 @@
 From: Doug Anderson <dianders@chromium.org>
-Subject: Re: [PATCH v4 2/4] mmc: dw_mmc: Add exynos resume_noirq callback to
- clear WAKEUP_INT
-Date: Fri, 9 Aug 2013 08:05:43 -0700
-Message-ID: <CAD=FV=U3LD-PmEeiNzh0F6Wb2efc==kn_=mTNjwVfB52-phSDQ@mail.gmail.com>
+Subject: Re: [PATCH v4 1/4] mmc: dw_mmc: Invalidate cache of current_speed
+ after suspend/resume
+Date: Fri, 9 Aug 2013 08:22:42 -0700
+Message-ID: <CAD=FV=VmtoxnRzjsKF1rVTwvkJRAxKGUvNZHAEwuWaeVokzSZA@mail.gmail.com>
 References: <1373470926-19314-1-git-send-email-dianders@chromium.org>
 	<1375825071-20922-1-git-send-email-dianders@chromium.org>
-	<1375825071-20922-3-git-send-email-dianders@chromium.org>
-	<001901ce9505$04483820$0cd8a860$%jun@samsung.com>
+	<1375825071-20922-2-git-send-email-dianders@chromium.org>
+	<001801ce9504$d9976ab0$8cc64010$%jun@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qa0-f42.google.com ([209.85.216.42]:36227 "EHLO
-	mail-qa0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S933972Ab3HIPFp (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 9 Aug 2013 11:05:45 -0400
-Received: by mail-qa0-f42.google.com with SMTP id bv4so937563qab.8
-        for <linux-mmc@vger.kernel.org>; Fri, 09 Aug 2013 08:05:44 -0700 (PDT)
-In-Reply-To: <001901ce9505$04483820$0cd8a860$%jun@samsung.com>
+Received: from mail-qe0-f53.google.com ([209.85.128.53]:40366 "EHLO
+	mail-qe0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S934350Ab3HIPWn (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 9 Aug 2013 11:22:43 -0400
+Received: by mail-qe0-f53.google.com with SMTP id f6so2390752qej.26
+        for <linux-mmc@vger.kernel.org>; Fri, 09 Aug 2013 08:22:42 -0700 (PDT)
+In-Reply-To: <001801ce9504$d9976ab0$8cc64010$%jun@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Seungwon Jeon <tgih.jun@samsung.com>
-Cc: Chris Ball <cjb@laptop.org>, Olof Johansson <olof@lixom.net>, Jaehoon Chung <jh80.chung@samsung.com>, James Hogan <james.hogan@imgtec.com>, Grant Grundler <grundler@chromium.org>, Alim Akhtar <alim.akhtar@samsung.com>, Abhilash Kesavan <a.kesavan@samsung.com>, Tomasz Figa <tomasz.figa@gmail.com>, Kukjin Kim <kgene.kim@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+To: Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>
+Cc: Chris Ball <cjb@laptop.org>, Olof Johansson <olof@lixom.net>, James Hogan <james.hogan@imgtec.com>, Grant Grundler <grundler@chromium.org>, Alim Akhtar <alim.akhtar@samsung.com>, Abhilash Kesavan <a.kesavan@samsung.com>, Tomasz Figa <tomasz.figa@gmail.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-Seungwon,
+Seungwon and Jaehoon,
 
-On Fri, Aug 9, 2013 at 6:33 AM, Seungwon Jeon <tgih.jun@samsung.com> wrote:
+On Fri, Aug 9, 2013 at 6:32 AM, Seungwon Jeon <tgih.jun@samsung.com> wrote:
 > On Wed, August 07, 2013, Doug Anderson wrote:
->> If the WAKEUP_INT is asserted at wakeup and not cleared, we'll end up
->> looping around forever.  This has been seen to happen on exynos5420
->> silicon despite the fact that we haven't enabled any wakeup events due
->> to a silicon errata.  It is safe to do on all exynos variants.
->>
->> Signed-off-by: Doug Anderson <dianders@chromium.org>
->> ---
->> Changes in v4:
->> - Take Seungwon's suggestion and don't add any dw_mmc-pltfm code.
->>
->> Changes in v3:
->> - Add freeze/thaw and poweroff/restore noirq entries.
->>
->> Changes in v2:
->> - Use suspend_noirq as per James Hogan.
->>
->>  drivers/mmc/host/dw_mmc-exynos.c | 51 ++++++++++++++++++++++++++++++++++++++--
->>  1 file changed, 49 insertions(+), 2 deletions(-)
->>
->> diff --git a/drivers/mmc/host/dw_mmc-exynos.c b/drivers/mmc/host/dw_mmc-exynos.c
->> index 866edef..0c1f192 100644
->> --- a/drivers/mmc/host/dw_mmc-exynos.c
->> +++ b/drivers/mmc/host/dw_mmc-exynos.c
->> @@ -30,6 +30,7 @@
->>  #define SDMMC_CLKSEL_TIMING(x, y, z) (SDMMC_CLKSEL_CCLK_SAMPLE(x) |  \
->>                                       SDMMC_CLKSEL_CCLK_DRIVE(y) |    \
->>                                       SDMMC_CLKSEL_CCLK_DIVIDER(z))
->> +#define SDMMC_CLKSEL_WAKEUP_INT              BIT(11)
->>
->>  #define EXYNOS4210_FIXED_CIU_CLK_DIV 2
->>  #define EXYNOS4412_FIXED_CIU_CLK_DIV 4
->> @@ -100,6 +101,30 @@ static int dw_mci_exynos_setup_clock(struct dw_mci *host)
->>       return 0;
->>  }
->>
->> +/**
->> + * dw_mci_exynos_resume_noirq - Exynos-specific resume code
->> + *
->> + * On exynos5420 there is a silicon errata that will sometimes leave the
->> + * WAKEUP_INT bit in the CLKSEL register asserted.  This bit is 1 to indicate
->> + * that it fired and we can clear it by writing a 1 back.  Clear it to prevent
->> + * interrupts from going off constantly.
->> + *
->> + * We run this code on all exynos variants because it doesn't hurt and the bug
->> + * may be more widespread than just exynos5420.
-> I guess just above comment can be removed. (Not be widespread)
-> Updating the origin value of CLKSEL looks like no harm while SDMMC_CLKSEL_WAKEUP_INT is cleared.
+>> The dw_mmc driver keeps a cache of the current slot->clock in order to
+>> avoid doing a whole lot of work every time set_ios() is called.
+>> However, after suspend/resume the register values are bogus so we need
+>> to ensure that the cached value is invalidated.
+> This mismatch comes only in case MMC_PM_KEEP_POWER, right?
 
-OK, no problem.  I'll clean up the comment next time revision.
+Actually, no.  I saw problems with the SD Card slot, which doesn't
+have MMC_KEEP_POWER.  Problems showed up when no card was inserted
+across suspend/resume.  In other words:
+
+1. At boot time, slot is all setup and configured to 400kHz.
+
+2. Suspend
+
+3. Resume; clock registers are reset (by suspend/resume) and not
+restored since dw_mmc still thinks slot is configured for 400kHz due
+to host->current_speed cache.
+
+4. Insert card.
+
+5. No code sees any need to change the clock for detecting the card,
+since everyone thinks it's at 400kHz.  ...but it's not.
 
 
->> -module_platform_driver(dw_mci_exynos_pltfm_driver);
->> +static int __init dw_mci_exynos_init(void)
->> +{
->> +     /* Add a "noirq" resume to platform pmops */
->> +     memcpy(&dw_mci_exynos_pmops, &dw_mci_pltfm_pmops,
->> +            sizeof(dw_mci_exynos_pmops));
->> +     WARN_ON(dw_mci_exynos_pmops.resume_noirq ||
->> +             dw_mci_exynos_pmops.thaw_noirq ||
->> +             dw_mci_exynos_pmops.restore_noirq);
->> +     dw_mci_exynos_pmops.resume_noirq = dw_mci_exynos_resume_noirq;
->> +     dw_mci_exynos_pmops.thaw_noirq = dw_mci_exynos_resume_noirq;
->> +     dw_mci_exynos_pmops.restore_noirq = dw_mci_exynos_resume_noirq;
->
-> If CONFIG_PM_SLEEP is not defined, we don't need to add it.
-> And also, instead of reusing dw_mci_pltfm_pmops, how about defining dw_mci_exynos_pmops's own?
-> Of course, suspend/resume will not different with dw_mci_pltfm* just now.
-> But specific code for exynos would be added soon.
+>> In many cases we got by without this since the core mmc code fiddles
+>> with the clock a lot.  If we've got a card present we're probably
+>> running it at something like 50MHz and the core will temporarily
+>> switch us to 400kHz after resume.  One case that didn't work (for me)
+>> is the case of having no card in the slot.  The slot is initted to
+>> 400kHz at boot time.  After suspend/resume the slot thinks it's still
+>> at 400kHz (due to the cache) so doesn't adjust timing.  When it tries
+>> to send the command at probe time it just times out and gets left in a
+>> bad state.
+> I understand this change although some part of commit message (boot time, probe time...) make me confused.
+
+Sorry to be confusing.  I was trying to explain why the old code works
+fine in many cases.  It's because the core MMC code tends to adjust
+the clock a lot around suspend/resume.  When it does that, it works
+around this problem.  ...but I found one case where suspend/resume
+would happen and the MMC core didn't adjust the clock.
 
 
-Whoops!  ...of course this should be conditional on CONFIG_PM_SLEEP.
-Thank you for catching.
+> I guess this change intends to update clock programming forcedly.
+> It looks like another version of 'dw_mci_setup_bus(slot, true)'.
+> Eventually, this change does same?
 
-I spent a bit of time debating whether I should make my own structure
-or do a copy like this.  It felt like a bit of a toss up to me, but
-I'm happy to do it the other way.  I will call dw_mci_suspend(host)
-directly and assume hope that nobody adds any important code to
-dw_mci_pltfm_suspend().  The other alternative would be make
-dw_mci_pltfm_suspend() exported or call it indirectly through
-dw_mci_pltfm_pmops, both of which seem slightly worse.
+Effectively, yes.  As Jaehoon points out, that means we can actually
+eliminate the "force" parameter to dw_mci_setup_bus().
+
+
+I will send a new version out that eliminates the "force" parameter
+and updates the commit message to (hopefully) be clearer.
 
 -Doug
