@@ -1,349 +1,110 @@
-From: Dinh Nguyen <dinguyen@altera.com>
-Subject: RE: [PATCH] mmc: dw_mmc-exynos: Common bindings for dw-mshc timing
-Date: Fri, 9 Aug 2013 09:54:20 -0500
-Message-ID: <1376060060.11201.5.camel@linux-builds1>
-References: <1376002520-7461-1-git-send-email-dinguyen@altera.com>
-	 <520459C9.8020305@samsung.com>
-	 <001301ce94fd$09c78330$1d568990$%jun@samsung.com>
+From: Doug Anderson <dianders@chromium.org>
+Subject: Re: [PATCH v4 2/4] mmc: dw_mmc: Add exynos resume_noirq callback to
+ clear WAKEUP_INT
+Date: Fri, 9 Aug 2013 08:05:43 -0700
+Message-ID: <CAD=FV=U3LD-PmEeiNzh0F6Wb2efc==kn_=mTNjwVfB52-phSDQ@mail.gmail.com>
+References: <1373470926-19314-1-git-send-email-dianders@chromium.org>
+	<1375825071-20922-1-git-send-email-dianders@chromium.org>
+	<1375825071-20922-3-git-send-email-dianders@chromium.org>
+	<001901ce9505$04483820$0cd8a860$%jun@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from co1ehsobe003.messaging.microsoft.com ([216.32.180.186]:28303
-	"EHLO co1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S933837Ab3HIO4P (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 9 Aug 2013 10:56:15 -0400
-In-Reply-To: <001301ce94fd$09c78330$1d568990$%jun@samsung.com>
+Received: from mail-qa0-f42.google.com ([209.85.216.42]:36227 "EHLO
+	mail-qa0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S933972Ab3HIPFp (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 9 Aug 2013 11:05:45 -0400
+Received: by mail-qa0-f42.google.com with SMTP id bv4so937563qab.8
+        for <linux-mmc@vger.kernel.org>; Fri, 09 Aug 2013 08:05:44 -0700 (PDT)
+In-Reply-To: <001901ce9505$04483820$0cd8a860$%jun@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Seungwon Jeon <tgih.jun@samsung.com>
-Cc: 'Jaehoon Chung' <jh80.chung@samsung.com>, dinh.linux@gmail.com, 'Arnd Bergmann' <arnd@arndb.de>, 'Olof Johansson' <olof@lixom.net>, 'Rob Herring' <rob.herring@calxeda.com>, 'Pawel Moll' <pawel.moll@arm.com>, 'Mark Rutland' <mark.rutland@arm.com>, 'Stephen Warren' <swarren@wwwdotorg.org>, 'Ian Campbell' <ian.campbell@citrix.com>, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Cc: Chris Ball <cjb@laptop.org>, Olof Johansson <olof@lixom.net>, Jaehoon Chung <jh80.chung@samsung.com>, James Hogan <james.hogan@imgtec.com>, Grant Grundler <grundler@chromium.org>, Alim Akhtar <alim.akhtar@samsung.com>, Abhilash Kesavan <a.kesavan@samsung.com>, Tomasz Figa <tomasz.figa@gmail.com>, Kukjin Kim <kgene.kim@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-Hi Seungwon Jeon,
+Seungwon,
 
-On Fri, 2013-08-09 at 21:36 +0900, Seungwon Jeon wrote:
-> On Fri, August 09, 2013, Jaehoon Chung wrote:
-> > Hi Dinh
-> > 
-> > On 08/09/2013 07:55 AM, dinguyen@altera.com wrote:
-> > > From: Dinh Nguyen <dinguyen@altera.com>
-> > >
-> > > Remove the "samsung" in "samsung,dw-mshc-ciu-div", "samsung,dw-mshc-sdr-timing",
-> > > and "samsung,dw-mshc-ddr-timing". These characteristics are not applicable to
-> > > just Samsung platforms, but to any platform that uses the Synopsis SD/MMC IP.
-> > >
-> Though host controller based on Synopsys is required to implement clock phase shift,
-> actual implementation could be different. I'm not sure that this above parameters are common just now.
-> But if some more host controllers are introduced, we may define clearly.
+On Fri, Aug 9, 2013 at 6:33 AM, Seungwon Jeon <tgih.jun@samsung.com> wrote:
+> On Wed, August 07, 2013, Doug Anderson wrote:
+>> If the WAKEUP_INT is asserted at wakeup and not cleared, we'll end up
+>> looping around forever.  This has been seen to happen on exynos5420
+>> silicon despite the fact that we haven't enabled any wakeup events due
+>> to a silicon errata.  It is safe to do on all exynos variants.
+>>
+>> Signed-off-by: Doug Anderson <dianders@chromium.org>
+>> ---
+>> Changes in v4:
+>> - Take Seungwon's suggestion and don't add any dw_mmc-pltfm code.
+>>
+>> Changes in v3:
+>> - Add freeze/thaw and poweroff/restore noirq entries.
+>>
+>> Changes in v2:
+>> - Use suspend_noirq as per James Hogan.
+>>
+>>  drivers/mmc/host/dw_mmc-exynos.c | 51 ++++++++++++++++++++++++++++++++++++++--
+>>  1 file changed, 49 insertions(+), 2 deletions(-)
+>>
+>> diff --git a/drivers/mmc/host/dw_mmc-exynos.c b/drivers/mmc/host/dw_mmc-exynos.c
+>> index 866edef..0c1f192 100644
+>> --- a/drivers/mmc/host/dw_mmc-exynos.c
+>> +++ b/drivers/mmc/host/dw_mmc-exynos.c
+>> @@ -30,6 +30,7 @@
+>>  #define SDMMC_CLKSEL_TIMING(x, y, z) (SDMMC_CLKSEL_CCLK_SAMPLE(x) |  \
+>>                                       SDMMC_CLKSEL_CCLK_DRIVE(y) |    \
+>>                                       SDMMC_CLKSEL_CCLK_DIVIDER(z))
+>> +#define SDMMC_CLKSEL_WAKEUP_INT              BIT(11)
+>>
+>>  #define EXYNOS4210_FIXED_CIU_CLK_DIV 2
+>>  #define EXYNOS4412_FIXED_CIU_CLK_DIV 4
+>> @@ -100,6 +101,30 @@ static int dw_mci_exynos_setup_clock(struct dw_mci *host)
+>>       return 0;
+>>  }
+>>
+>> +/**
+>> + * dw_mci_exynos_resume_noirq - Exynos-specific resume code
+>> + *
+>> + * On exynos5420 there is a silicon errata that will sometimes leave the
+>> + * WAKEUP_INT bit in the CLKSEL register asserted.  This bit is 1 to indicate
+>> + * that it fired and we can clear it by writing a 1 back.  Clear it to prevent
+>> + * interrupts from going off constantly.
+>> + *
+>> + * We run this code on all exynos variants because it doesn't hurt and the bug
+>> + * may be more widespread than just exynos5420.
+> I guess just above comment can be removed. (Not be widespread)
+> Updating the origin value of CLKSEL looks like no harm while SDMMC_CLKSEL_WAKEUP_INT is cleared.
 
-But the bindings can be common between socfpga and exynos right? The
-values in the bindings represent the same thing, just the implementation
-for the clock phase shift can be different.
-
-Thanks,
-
-Dinh
-> 
-> Thanks,
-> Seungwon Jeon
-> 
-> > > Signed-off-by: Dinh Nguyen <dinguyen@altera.com>
-> > > CC: Arnd Bergmann <arnd@arndb.de>
-> > > Cc: Olof Johansson <olof@lixom.net>
-> > > Cc: Jaehoon Chung <jh80.chung@samsung.com>
-> > > Cc: Seungwon Jeon <tgih.jun@samsung.com>
-> > > Cc: Rob Herring <rob.herring@calxeda.com>
-> > > Cc: Pawel Moll <pawel.moll@arm.com>
-> > > Cc: Mark Rutland <mark.rutland@arm.com>
-> > > Cc: Stephen Warren <swarren@wwwdotorg.org>
-> > > Cc: Ian Campbell <ian.campbell@citrix.com>
-> > > Cc: devicetree@vger.kernel.org
-> > > Cc: linux-mmc@vger.kernel.org
-> > > CC: linux-arm-kernel@lists.infradead.org
-> > > ---
-> > >  .../devicetree/bindings/mmc/exynos-dw-mshc.txt     |   30 --------------------
-> > >  .../devicetree/bindings/mmc/synopsis-dw-mshc.txt   |   29 +++++++++++++++++++
-> > >  arch/arm/boot/dts/cros5250-common.dtsi             |   18 ++++++------
-> > >  arch/arm/boot/dts/exynos4412-odroidx.dts           |    6 ++--
-> > >  arch/arm/boot/dts/exynos4412-origen.dts            |    6 ++--
-> > >  arch/arm/boot/dts/exynos5250-arndale.dts           |   12 ++++----
-> > >  arch/arm/boot/dts/exynos5250-smdk5250.dts          |   12 ++++----
-> > >  drivers/mmc/host/dw_mmc-exynos.c                   |    6 ++--
-> > >  8 files changed, 59 insertions(+), 60 deletions(-)
-> > >
-> > > diff --git a/Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt
-> > b/Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt
-> > > index 6d1c098..ddb1d95 100644
-> > > --- a/Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt
-> > > +++ b/Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt
-> > > @@ -17,33 +17,6 @@ Required Properties:
-> > >  	- "samsung,exynos5250-dw-mshc": for controllers with Samsung Exynos5250
-> > >  	  specific extensions.
-> > >
-> > > -* samsung,dw-mshc-ciu-div: Specifies the divider value for the card interface
-> > > -  unit (ciu) clock. This property is applicable only for Exynos5 SoC's and
-> > > -  ignored for Exynos4 SoC's. The valid range of divider value is 0 to 7.
-> > > -
-> > > -* samsung,dw-mshc-sdr-timing: Specifies the value of CIU clock phase shift value
-> > > -  in transmit mode and CIU clock phase shift value in receive mode for single
-> > > -  data rate mode operation. Refer notes below for the order of the cells and the
-> > > -  valid values.
-> > > -
-> > > -* samsung,dw-mshc-ddr-timing: Specifies the value of CUI clock phase shift value
-> > > -  in transmit mode and CIU clock phase shift value in receive mode for double
-> > > -  data rate mode operation. Refer notes below for the order of the cells and the
-> > > -  valid values.
-> > > -
-> > > -  Notes for the sdr-timing and ddr-timing values:
-> > > -
-> > > -    The order of the cells should be
-> > > -      - First Cell: CIU clock phase shift value for tx mode.
-> > > -      - Second Cell: CIU clock phase shift value for rx mode.
-> > > -
-> > > -    Valid values for SDR and DDR CIU clock timing for Exynos5250:
-> > > -      - valid value for tx phase shift and rx phase shift is 0 to 7.
-> > > -      - when CIU clock divider value is set to 3, all possible 8 phase shift
-> > > -        values can be used.
-> > > -      - if CIU clock divider value is 0 (that is divide by 1), both tx and rx
-> > > -        phase shift clocks should be 0.
-> > > -
-> > >  Required properties for a slot:
-> > >
-> > >  * gpios: specifies a list of gpios used for command, clock and data bus. The
-> > > @@ -71,9 +44,6 @@ Example:
-> > >  		broken-cd;
-> > >  		fifo-depth = <0x80>;
-> > >  		card-detect-delay = <200>;
-> > > -		samsung,dw-mshc-ciu-div = <3>;
-> > > -		samsung,dw-mshc-sdr-timing = <2 3>;
-> > > -		samsung,dw-mshc-ddr-timing = <1 2>;
-> > >
-> > >  		slot@0 {
-> > >  			reg = <0>;
-> > > diff --git a/Documentation/devicetree/bindings/mmc/synopsis-dw-mshc.txt
-> > b/Documentation/devicetree/bindings/mmc/synopsis-dw-mshc.txt
-> > > index cdcebea..cf85a8c 100644
-> > > --- a/Documentation/devicetree/bindings/mmc/synopsis-dw-mshc.txt
-> > > +++ b/Documentation/devicetree/bindings/mmc/synopsis-dw-mshc.txt
-> > > @@ -71,6 +71,32 @@ Optional properties:
-> > >  * vmmc-supply: The phandle to the regulator to use for vmmc.  If this is
-> > >    specified we'll defer probe until we can find this regulator.
-> > >
-> > > +* dw-mshc-ciu-div: Specifies the divider value for the card interface
-> > > +  unit (ciu) clock. The valid range of divider value is 0 to 7.
-> > > +
-> > > +* dw-mshc-sdr-timing: Specifies the value of CIU clock phase shift value
-> > > +  in transmit mode and CIU clock phase shift value in receive mode for single
-> > > +  data rate mode operation. Refer notes below for the order of the cells and the
-> > > +  valid values.
-> > > +
-> > > +* dw-mshc-ddr-timing: Specifies the value of CUI clock phase shift value
-> > > +  in transmit mode and CIU clock phase shift value in receive mode for double
-> > > +  data rate mode operation. Refer notes below for the order of the cells and the
-> > > +  valid values.
-> > > +
-> > > +	Notes for the sdr-timing and ddr-timing values:
-> > > +
-> > > +	The order of the cells should be
-> > > +		- First Cell: CIU clock phase shift value for tx mode.
-> > > +		- Second Cell: CIU clock phase shift value for rx mode.
-> > > +
-> > > +	Valid values for SDR and DDR CIU clock timing for Exynos5250:
-> > Exynos5250? Maybe It should be mentioned common SoC.
-> > > +		- valid value for tx phase shift and rx phase shift is 0 to 7.
-> > > +		- when CIU clock divider value is set to 3, all possible 8 phase shift
-> > > +			values can be used.
-> > > +		- if CIU clock divider value is 0 (that is divide by 1), both tx and rx
-> > > +			phase shift clocks should be 0.
-> > > +
-> > >  Aliases:
-> > >
-> > >  - All the MSHC controller nodes should be represented in the aliases node using
-> > > @@ -99,6 +125,9 @@ board specific portions as listed below.
-> > >  		fifo-depth = <0x80>;
-> > >  		card-detect-delay = <200>;
-> > >  		vmmc-supply = <&buck8>;
-> > > +		dw-mshc-ciu-div = <3>;
-> > > +		dw-mshc-sdr-timing = <2 3>;
-> > > +		dw-mshc-ddr-timing = <1 2>;
-> > >
-> > >  		slot@0 {
-> > >  			reg = <0>;
-> > > diff --git a/arch/arm/boot/dts/cros5250-common.dtsi b/arch/arm/boot/dts/cros5250-common.dtsi
-> > > index dc259e8b..93d3c85 100644
-> > > --- a/arch/arm/boot/dts/cros5250-common.dtsi
-> > > +++ b/arch/arm/boot/dts/cros5250-common.dtsi
-> > > @@ -235,9 +235,9 @@
-> > >  		broken-cd;
-> > >  		fifo-depth = <0x80>;
-> > >  		card-detect-delay = <200>;
-> > > -		samsung,dw-mshc-ciu-div = <3>;
-> > > -		samsung,dw-mshc-sdr-timing = <2 3>;
-> > > -		samsung,dw-mshc-ddr-timing = <1 2>;
-> > > +		dw-mshc-ciu-div = <3>;
-> > > +		dw-mshc-sdr-timing = <2 3>;
-> > > +		dw-mshc-ddr-timing = <1 2>;
-> > >  		pinctrl-names = "default";
-> > >  		pinctrl-0 = <&sd0_clk &sd0_cmd &sd0_cd &sd0_bus4 &sd0_bus8>;
-> > >
-> > > @@ -256,9 +256,9 @@
-> > >  		supports-highspeed;
-> > >  		fifo-depth = <0x80>;
-> > >  		card-detect-delay = <200>;
-> > > -		samsung,dw-mshc-ciu-div = <3>;
-> > > -		samsung,dw-mshc-sdr-timing = <2 3>;
-> > > -		samsung,dw-mshc-ddr-timing = <1 2>;
-> > > +		dw-mshc-ciu-div = <3>;
-> > > +		dw-mshc-sdr-timing = <2 3>;
-> > > +		dw-mshc-ddr-timing = <1 2>;
-> > >  		pinctrl-names = "default";
-> > >  		pinctrl-0 = <&sd2_clk &sd2_cmd &sd2_cd &sd2_bus4>;
-> > >
-> > > @@ -275,9 +275,9 @@
-> > >  		broken-cd;
-> > >  		fifo-depth = <0x80>;
-> > >  		card-detect-delay = <200>;
-> > > -		samsung,dw-mshc-ciu-div = <3>;
-> > > -		samsung,dw-mshc-sdr-timing = <2 3>;
-> > > -		samsung,dw-mshc-ddr-timing = <1 2>;
-> > > +		dw-mshc-ciu-div = <3>;
-> > > +		dw-mshc-sdr-timing = <2 3>;
-> > > +		dw-mshc-ddr-timing = <1 2>;
-> > >  		/* See board-specific dts files for pin setup */
-> > >
-> > >  		slot@0 {
-> > > diff --git a/arch/arm/boot/dts/exynos4412-odroidx.dts b/arch/arm/boot/dts/exynos4412-odroidx.dts
-> > > index 46c678e..e6c3b23 100644
-> > > --- a/arch/arm/boot/dts/exynos4412-odroidx.dts
-> > > +++ b/arch/arm/boot/dts/exynos4412-odroidx.dts
-> > > @@ -51,9 +51,9 @@
-> > >  		broken-cd;
-> > >  		fifo-depth = <0x80>;
-> > >  		card-detect-delay = <200>;
-> > > -		samsung,dw-mshc-ciu-div = <3>;
-> > > -		samsung,dw-mshc-sdr-timing = <2 3>;
-> > > -		samsung,dw-mshc-ddr-timing = <1 2>;
-> > > +		dw-mshc-ciu-div = <3>;
-> > > +		dw-mshc-sdr-timing = <2 3>;
-> > > +		dw-mshc-ddr-timing = <1 2>;
-> > >
-> > >  		slot@0 {
-> > >  			reg = <0>;
-> > > diff --git a/arch/arm/boot/dts/exynos4412-origen.dts b/arch/arm/boot/dts/exynos4412-origen.dts
-> > > index 7993641..b403a57 100644
-> > > --- a/arch/arm/boot/dts/exynos4412-origen.dts
-> > > +++ b/arch/arm/boot/dts/exynos4412-origen.dts
-> > > @@ -122,9 +122,9 @@
-> > >  		broken-cd;
-> > >  		fifo-depth = <0x80>;
-> > >  		card-detect-delay = <200>;
-> > > -		samsung,dw-mshc-ciu-div = <3>;
-> > > -		samsung,dw-mshc-sdr-timing = <2 3>;
-> > > -		samsung,dw-mshc-ddr-timing = <1 2>;
-> > > +		dw-mshc-ciu-div = <3>;
-> > > +		dw-mshc-sdr-timing = <2 3>;
-> > > +		dw-mshc-ddr-timing = <1 2>;
-> > >
-> > >  		slot@0 {
-> > >  			reg = <0>;
-> > > diff --git a/arch/arm/boot/dts/exynos5250-arndale.dts b/arch/arm/boot/dts/exynos5250-arndale.dts
-> > > index abc7272..72aa743 100644
-> > > --- a/arch/arm/boot/dts/exynos5250-arndale.dts
-> > > +++ b/arch/arm/boot/dts/exynos5250-arndale.dts
-> > > @@ -324,9 +324,9 @@
-> > >  		broken-cd;
-> > >  		fifo-depth = <0x80>;
-> > >  		card-detect-delay = <200>;
-> > > -		samsung,dw-mshc-ciu-div = <3>;
-> > > -		samsung,dw-mshc-sdr-timing = <2 3>;
-> > > -		samsung,dw-mshc-ddr-timing = <1 2>;
-> > > +		dw-mshc-ciu-div = <3>;
-> > > +		dw-mshc-sdr-timing = <2 3>;
-> > > +		dw-mshc-ddr-timing = <1 2>;
-> > >  		vmmc-supply = <&mmc_reg>;
-> > >  		pinctrl-names = "default";
-> > >  		pinctrl-0 = <&sd0_clk &sd0_cmd &sd0_bus4 &sd0_bus8>;
-> > > @@ -346,9 +346,9 @@
-> > >  		supports-highspeed;
-> > >  		fifo-depth = <0x80>;
-> > >  		card-detect-delay = <200>;
-> > > -		samsung,dw-mshc-ciu-div = <3>;
-> > > -		samsung,dw-mshc-sdr-timing = <2 3>;
-> > > -		samsung,dw-mshc-ddr-timing = <1 2>;
-> > > +		dw-mshc-ciu-div = <3>;
-> > > +		dw-mshc-sdr-timing = <2 3>;
-> > > +		dw-mshc-ddr-timing = <1 2>;
-> > >  		vmmc-supply = <&mmc_reg>;
-> > >  		pinctrl-names = "default";
-> > >  		pinctrl-0 = <&sd2_clk &sd2_cmd &sd2_cd &sd2_bus4>;
-> > > diff --git a/arch/arm/boot/dts/exynos5250-smdk5250.dts b/arch/arm/boot/dts/exynos5250-smdk5250.dts
-> > > index 49f18c2..220da19 100644
-> > > --- a/arch/arm/boot/dts/exynos5250-smdk5250.dts
-> > > +++ b/arch/arm/boot/dts/exynos5250-smdk5250.dts
-> > > @@ -146,9 +146,9 @@
-> > >  		broken-cd;
-> > >  		fifo-depth = <0x80>;
-> > >  		card-detect-delay = <200>;
-> > > -		samsung,dw-mshc-ciu-div = <3>;
-> > > -		samsung,dw-mshc-sdr-timing = <2 3>;
-> > > -		samsung,dw-mshc-ddr-timing = <1 2>;
-> > > +		dw-mshc-ciu-div = <3>;
-> > > +		dw-mshc-sdr-timing = <2 3>;
-> > > +		dw-mshc-ddr-timing = <1 2>;
-> > >  		pinctrl-names = "default";
-> > >  		pinctrl-0 = <&sd0_clk &sd0_cmd &sd0_bus4 &sd0_bus8>;
-> > >
-> > > @@ -167,9 +167,9 @@
-> > >  		supports-highspeed;
-> > >  		fifo-depth = <0x80>;
-> > >  		card-detect-delay = <200>;
-> > > -		samsung,dw-mshc-ciu-div = <3>;
-> > > -		samsung,dw-mshc-sdr-timing = <2 3>;
-> > > -		samsung,dw-mshc-ddr-timing = <1 2>;
-> > > +		dw-mshc-ciu-div = <3>;
-> > > +		dw-mshc-sdr-timing = <2 3>;
-> > > +		dw-mshc-ddr-timing = <1 2>;
-> > >  		pinctrl-names = "default";
-> > >  		pinctrl-0 = <&sd2_clk &sd2_cmd &sd2_cd &sd2_bus4>;
-> > >
-> > > diff --git a/drivers/mmc/host/dw_mmc-exynos.c b/drivers/mmc/host/dw_mmc-exynos.c
-> > > index 866edef..553f3c1 100644
-> > > --- a/drivers/mmc/host/dw_mmc-exynos.c
-> > > +++ b/drivers/mmc/host/dw_mmc-exynos.c
-> > > @@ -131,18 +131,18 @@ static int dw_mci_exynos_parse_dt(struct dw_mci *host)
-> > >  	u32 div = 0;
-> > >  	int ret;
-> > >
-> > > -	of_property_read_u32(np, "samsung,dw-mshc-ciu-div", &div);
-> > > +	of_property_read_u32(np, "dw-mshc-ciu-div", &div);
-> > >  	priv->ciu_div = div;
-> > >
-> > >  	ret = of_property_read_u32_array(np,
-> > > -			"samsung,dw-mshc-sdr-timing", timing, 2);
-> > > +			"dw-mshc-sdr-timing", timing, 2);
-> > >  	if (ret)
-> > >  		return ret;
-> > >
-> > >  	priv->sdr_timing = SDMMC_CLKSEL_TIMING(timing[0], timing[1], div);
-> > >
-> > >  	ret = of_property_read_u32_array(np,
-> > > -			"samsung,dw-mshc-ddr-timing", timing, 2);
-> > > +			"dw-mshc-ddr-timing", timing, 2);
-> > >  	if (ret)
-> > >  		return ret;
-> > Then we can move functions related with clksel from dw-mmc-exynos.c to dw-mmc.c, isn't it?
-> > 
-> > Best Regards,
-> > Jaehoon Chung
-> > >
-> > >
-> > 
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+OK, no problem.  I'll clean up the comment next time revision.
 
 
+>> -module_platform_driver(dw_mci_exynos_pltfm_driver);
+>> +static int __init dw_mci_exynos_init(void)
+>> +{
+>> +     /* Add a "noirq" resume to platform pmops */
+>> +     memcpy(&dw_mci_exynos_pmops, &dw_mci_pltfm_pmops,
+>> +            sizeof(dw_mci_exynos_pmops));
+>> +     WARN_ON(dw_mci_exynos_pmops.resume_noirq ||
+>> +             dw_mci_exynos_pmops.thaw_noirq ||
+>> +             dw_mci_exynos_pmops.restore_noirq);
+>> +     dw_mci_exynos_pmops.resume_noirq = dw_mci_exynos_resume_noirq;
+>> +     dw_mci_exynos_pmops.thaw_noirq = dw_mci_exynos_resume_noirq;
+>> +     dw_mci_exynos_pmops.restore_noirq = dw_mci_exynos_resume_noirq;
+>
+> If CONFIG_PM_SLEEP is not defined, we don't need to add it.
+> And also, instead of reusing dw_mci_pltfm_pmops, how about defining dw_mci_exynos_pmops's own?
+> Of course, suspend/resume will not different with dw_mci_pltfm* just now.
+> But specific code for exynos would be added soon.
 
+
+Whoops!  ...of course this should be conditional on CONFIG_PM_SLEEP.
+Thank you for catching.
+
+I spent a bit of time debating whether I should make my own structure
+or do a copy like this.  It felt like a bit of a toss up to me, but
+I'm happy to do it the other way.  I will call dw_mci_suspend(host)
+directly and assume hope that nobody adds any important code to
+dw_mci_pltfm_suspend().  The other alternative would be make
+dw_mci_pltfm_suspend() exported or call it indirectly through
+dw_mci_pltfm_pmops, both of which seem slightly worse.
+
+-Doug
