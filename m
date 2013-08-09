@@ -1,74 +1,76 @@
-From: Haijun Zhang <Haijun.Zhang@freescale.com>
-Subject: [PATCH V2] mmc:of_spi: Update the code of getting voltage-ranges
-Date: Fri, 9 Aug 2013 11:11:02 +0800
-Message-ID: <1376017863-31453-2-git-send-email-Haijun.Zhang@freescale.com>
-References: <1376017863-31453-1-git-send-email-Haijun.Zhang@freescale.com>
+From: Barry Song <21cnbao@gmail.com>
+Subject: Re: [PATCH V2] mmc:sdhci: Wait longer for command with busy flags
+Date: Fri, 9 Aug 2013 14:39:03 +0800
+Message-ID: <CAGsJ_4xjsoqwhRjt+xjqcnfDyjKejk2EXZHGWX4x7X1kvnMaSw@mail.gmail.com>
+References: <1376006647-23073-1-git-send-email-Haijun.Zhang@freescale.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-db9lp0253.outbound.messaging.microsoft.com ([213.199.154.253]:56502
-	"EHLO db9outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751028Ab3HIEEj (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 9 Aug 2013 00:04:39 -0400
-In-Reply-To: <1376017863-31453-1-git-send-email-Haijun.Zhang@freescale.com>
+Received: from mail-qe0-f47.google.com ([209.85.128.47]:34244 "EHLO
+	mail-qe0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1030396Ab3HIGqL (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 9 Aug 2013 02:46:11 -0400
+Received: by mail-qe0-f47.google.com with SMTP id b10so2174924qen.20
+        for <linux-mmc@vger.kernel.org>; Thu, 08 Aug 2013 23:46:10 -0700 (PDT)
+In-Reply-To: <1376006647-23073-1-git-send-email-Haijun.Zhang@freescale.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: cbouatmailru@gmail.com, cjb@laptop.org, scottwood@freescale.com, AFLEMING@freescale.com, Haijun Zhang <Haijun.Zhang@freescale.com>, Haijun Zhang <haijun.zhang@freescale.com>
+To: Haijun Zhang <Haijun.Zhang@freescale.com>
+Cc: linux-mmc@vger.kernel.org, cbouatmailru@gmail.com, cjb@laptop.org
 
-Using function mmc_of_parse_voltage() to get voltage-ranges.
+2013/8/9 Haijun Zhang <Haijun.Zhang@freescale.com>:
+> When command with busy flags send and also data busy end interrupt
+> will be generate, the command will be finished when data transfer
+> complete or data busy state end, Sometimes this will expend more than
+> 10*Hz time to finish this command, so we should wait longer to detect
+> command complete timeout err.
+>
+> Signed-off-by: Haijun Zhang <Haijun.Zhang@freescale.com>
+> ---
+> changes for V2:
+>         - Correct the timer
+>
+>  drivers/mmc/host/sdhci.c | 14 +++++++++++++-
+>  1 file changed, 13 insertions(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index a78bd4f..8888578 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -986,6 +986,7 @@ static void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
+>         int flags;
+>         u32 mask;
+>         unsigned long timeout;
+> +       u32 timer = 10;
+>
+>         WARN_ON(host->cmd);
+>
+> @@ -1014,7 +1015,18 @@ static void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
+>                 mdelay(1);
+>         }
+>
+> -       mod_timer(&host->timer, jiffies + 10 * HZ);
+> +       /*
+> +        * When send a commmand with busy state and also the data busy end
+> +        * interrupt can be generate, the command will be finished when date
+> +        * transfer complete or busy state end. Sometimes this will expend
+> +        * more than 10*HZ, In this case whe should wait longer to detect
+> +        * command complete timeout err.
+> +        */
+> +       if ((host->cmd->flags & MMC_RSP_BUSY) &&
+> +                       !(host->quirks & SDHCI_QUIRK_NO_BUSY_IRQ))
+> +               timer = 1000;
+> +
+> +       mod_timer(&host->timer, jiffies + timer * HZ);
 
-Signed-off-by: Haijun Zhang <haijun.zhang@freescale.com>
----
-changes for V2:
-	- changed the type of ocr_mask
+haojun, do you mean we need to wait for 1 minutes and 40 seconds for
+timeout? it seems it is too large for a kernel.
 
- drivers/mmc/host/of_mmc_spi.c | 22 ++++------------------
- 1 file changed, 4 insertions(+), 18 deletions(-)
+>
+>         host->cmd = cmd;
+>
+> --
+> 1.8.0
+>
 
-diff --git a/drivers/mmc/host/of_mmc_spi.c b/drivers/mmc/host/of_mmc_spi.c
-index d720b5e..635b895 100644
---- a/drivers/mmc/host/of_mmc_spi.c
-+++ b/drivers/mmc/host/of_mmc_spi.c
-@@ -92,6 +92,7 @@ struct mmc_spi_platform_data *mmc_spi_get_pdata(struct spi_device *spi)
- 	struct of_mmc_spi *oms;
- 	const u32 *voltage_ranges;
- 	int num_ranges;
-+	int ocr_mask;
- 	int i;
- 	int ret = -EINVAL;
- 
-@@ -102,26 +103,11 @@ struct mmc_spi_platform_data *mmc_spi_get_pdata(struct spi_device *spi)
- 	if (!oms)
- 		return NULL;
- 
--	voltage_ranges = of_get_property(np, "voltage-ranges", &num_ranges);
--	num_ranges = num_ranges / sizeof(*voltage_ranges) / 2;
--	if (!voltage_ranges || !num_ranges) {
--		dev_err(dev, "OF: voltage-ranges unspecified\n");
-+	ocr_mask = mmc_of_parse_voltage(np);
-+	if (ocr_mask <= 0)
- 		goto err_ocr;
--	}
--
--	for (i = 0; i < num_ranges; i++) {
--		const int j = i * 2;
--		u32 mask;
- 
--		mask = mmc_vddrange_to_ocrmask(be32_to_cpu(voltage_ranges[j]),
--					       be32_to_cpu(voltage_ranges[j + 1]));
--		if (!mask) {
--			ret = -EINVAL;
--			dev_err(dev, "OF: voltage-range #%d is invalid\n", i);
--			goto err_ocr;
--		}
--		oms->pdata.ocr_mask |= mask;
--	}
-+	oms->pdata.ocr_mask |= ocr_mask;
- 
- 	for (i = 0; i < ARRAY_SIZE(oms->gpios); i++) {
- 		enum of_gpio_flags gpio_flags;
--- 
-1.8.0
-
-
+-barry
