@@ -1,31 +1,42 @@
 From: Doug Anderson <dianders@chromium.org>
-Subject: [PATCH v5 4/4] mmc: dw_mmc: Set timeout to max upon resume
-Date: Fri,  9 Aug 2013 09:33:20 -0700
-Message-ID: <1376066000-5495-5-git-send-email-dianders@chromium.org>
+Subject: [PATCH v5 3/4] mmc: dw_mmc: Always setup the bus after suspend/resume
+Date: Fri,  9 Aug 2013 09:33:19 -0700
+Message-ID: <1376066000-5495-4-git-send-email-dianders@chromium.org>
 References: <1375825071-20922-1-git-send-email-dianders@chromium.org>
  <1376066000-5495-1-git-send-email-dianders@chromium.org>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qa0-f73.google.com ([209.85.216.73]:61367 "EHLO
-	mail-qa0-f73.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S968090Ab3HIQda (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 9 Aug 2013 12:33:30 -0400
-Received: by mail-qa0-f73.google.com with SMTP id f14so198762qak.2
-        for <linux-mmc@vger.kernel.org>; Fri, 09 Aug 2013 09:33:29 -0700 (PDT)
+Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1376066000-5495-1-git-send-email-dianders@chromium.org>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Sender: linux-kernel-owner@vger.kernel.org
 To: Chris Ball <cjb@laptop.org>
 Cc: Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, James Hogan <james.hogan@imgtec.com>, Grant Grundler <grundler@chromium.org>, Alim Akhtar <alim.akhtar@samsung.com>, Abhilash Kesavan <a.kesavan@samsung.com>, Tomasz Figa <tomasz.figa@gmail.com>, Olof Johansson <olof@lixom.net>, Doug Anderson <dianders@chromium.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 
-The TMOUT register is initted to 0xffffffff at probe time but isn't
-initted after suspend/resume.  Add an init of this value.
+After suspend/resume all of the dw_mmc registers are reset to
+defaults.  We restore most of them, but specifically don't setup the
+clock registers after resume unless we've got a powered card.  Things
+still work because the core will eventually call set_ios() and we'll
+set things up.
 
-No problems were observed without this (it will also get initted in
-__dw_mci_start_request if there is data to send), but it makes the
-register dump before and after suspend clean.
+There doesn't seem to be any reason that I can see _not_ to set things
+up after resume.  Restoring this state makes the code easier to reason
+about and should help prevent bugs.  It also allows us to do a
+register dump before and after suspend/resume to confirm that we've
+set things up OK.
+
+I examined the state of the dw_mmc instance before and after suspend
+after this patch.  I had no card inserted in an SD card slot.
+
+Before this patch, differences were:
+* CLKDIV (0x08)
+* CLKENA (0x10)
+* TMOUT (0x14)
+* CMD (0x2C) - difference is not important
+* CLKSEL (0x9C - exynos specific)
+
+After this patch, only TMOUT was different.  I have a separate patch
+for that.
 
 Signed-off-by: Doug Anderson <dianders@chromium.org>
-Acked-by: Seungwon Jeon <tgih.jun@samsung.com>
 Reviewed-by: Tomasz Figa <t.figa@samsung.com>
 ---
 Changes in v5: None
@@ -33,23 +44,23 @@ Changes in v4: None
 Changes in v3: None
 Changes in v2: None
 
- drivers/mmc/host/dw_mmc.c | 3 +++
- 1 file changed, 3 insertions(+)
+ drivers/mmc/host/dw_mmc.c | 4 +---
+ 1 file changed, 1 insertion(+), 3 deletions(-)
 
 diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 3d1ee2d..bc9f22c 100644
+index e614b03..3d1ee2d 100644
 --- a/drivers/mmc/host/dw_mmc.c
 +++ b/drivers/mmc/host/dw_mmc.c
-@@ -2505,6 +2505,9 @@ int dw_mci_resume(struct dw_mci *host)
- 	/* Restore the old value at FIFOTH register */
- 	mci_writel(host, FIFOTH, host->fifoth_val);
+@@ -2522,9 +2522,7 @@ int dw_mci_resume(struct dw_mci *host)
+ 		struct dw_mci_slot *slot = host->slot[i];
+ 		if (!slot)
+ 			continue;
+-		if (slot->mmc->pm_flags & MMC_PM_KEEP_POWER) {
+-			dw_mci_set_ios(slot->mmc, &slot->mmc->ios);
+-		}
++		dw_mci_set_ios(slot->mmc, &slot->mmc->ios);
  
-+	/* Put in max timeout */
-+	mci_writel(host, TMOUT, 0xFFFFFFFF);
-+
- 	mci_writel(host, RINTSTS, 0xFFFFFFFF);
- 	mci_writel(host, INTMASK, SDMMC_INT_CMD_DONE | SDMMC_INT_DATA_OVER |
- 		   SDMMC_INT_TXDR | SDMMC_INT_RXDR |
+ 		ret = mmc_resume_host(host->slot[i]->mmc);
+ 		if (ret < 0)
 -- 
 1.8.3
-
