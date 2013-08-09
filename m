@@ -1,66 +1,48 @@
-From: Doug Anderson <dianders@chromium.org>
-Subject: [PATCH v5 3/4] mmc: dw_mmc: Always setup the bus after suspend/resume
-Date: Fri,  9 Aug 2013 09:33:19 -0700
-Message-ID: <1376066000-5495-4-git-send-email-dianders@chromium.org>
+From: Fabio Estevam <festevam@gmail.com>
+Subject: Re: [PATCH v5 2/4] mmc: dw_mmc: Add exynos resume_noirq callback to
+ clear WAKEUP_INT
+Date: Fri, 9 Aug 2013 13:41:58 -0300
+Message-ID: <CAOMZO5DZ=aJsOvTyrKL=57_jGMGQX8k3mDamgXqnF-9Ou2fpAg@mail.gmail.com>
 References: <1375825071-20922-1-git-send-email-dianders@chromium.org>
- <1376066000-5495-1-git-send-email-dianders@chromium.org>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1376066000-5495-1-git-send-email-dianders@chromium.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, James Hogan <james.hogan@imgtec.com>, Grant Grundler <grundler@chromium.org>, Alim Akhtar <alim.akhtar@samsung.com>, Abhilash Kesavan <a.kesavan@samsung.com>, Tomasz Figa <tomasz.figa@gmail.com>, Olof Johansson <olof@lixom.net>, Doug Anderson <dianders@chromium.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+	<1376066000-5495-1-git-send-email-dianders@chromium.org>
+	<1376066000-5495-3-git-send-email-dianders@chromium.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-vc0-f170.google.com ([209.85.220.170]:36959 "EHLO
+	mail-vc0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S968090Ab3HIQl7 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 9 Aug 2013 12:41:59 -0400
+In-Reply-To: <1376066000-5495-3-git-send-email-dianders@chromium.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Doug Anderson <dianders@chromium.org>
+Cc: Chris Ball <cjb@laptop.org>, linux-samsung-soc@vger.kernel.org, James Hogan <james.hogan@imgtec.com>, Seungwon Jeon <tgih.jun@samsung.com>, linux-kernel@vger.kernel.org, Olof Johansson <olof@lixom.net>, linux-mmc@vger.kernel.org, Tomasz Figa <tomasz.figa@gmail.com>, Jaehoon Chung <jh80.chung@samsung.com>, Grant Grundler <grundler@chromium.org>, Kukjin Kim <kgene.kim@samsung.com>, Alim Akhtar <alim.akhtar@samsung.com>, Abhilash Kesavan <a.kesavan@samsung.com>, linux-arm-kernel@lists.infradead.org
 
-After suspend/resume all of the dw_mmc registers are reset to
-defaults.  We restore most of them, but specifically don't setup the
-clock registers after resume unless we've got a powered card.  Things
-still work because the core will eventually call set_ios() and we'll
-set things up.
+On Fri, Aug 9, 2013 at 1:33 PM, Doug Anderson <dianders@chromium.org> wrote:
 
-There doesn't seem to be any reason that I can see _not_ to set things
-up after resume.  Restoring this state makes the code easier to reason
-about and should help prevent bugs.  It also allows us to do a
-register dump before and after suspend/resume to confirm that we've
-set things up OK.
+> +#else
+> +#define dw_mci_exynos_suspend          NULL
+> +#define dw_mci_exynos_resume           NULL
+> +#define dw_mci_exynos_resume_noirq     NULL
+> +#endif /* CONFIG_PM_SLEEP */
 
-I examined the state of the dw_mmc instance before and after suspend
-after this patch.  I had no card inserted in an SD card slot.
+You could avoid this else block if you use 'static SIMPLE_DEV_PM_OPS' below.
 
-Before this patch, differences were:
-* CLKDIV (0x08)
-* CLKENA (0x10)
-* TMOUT (0x14)
-* CMD (0x2C) - difference is not important
-* CLKSEL (0x9C - exynos specific)
+> +
+>  static void dw_mci_exynos_prepare_command(struct dw_mci *host, u32 *cmdr)
+>  {
+>         /*
+> @@ -187,13 +234,20 @@ static int dw_mci_exynos_probe(struct platform_device *pdev)
+>         return dw_mci_pltfm_register(pdev, drv_data);
+>  }
+>
+> +const struct dev_pm_ops dw_mci_exynos_pmops = {
+> +       SET_SYSTEM_SLEEP_PM_OPS(dw_mci_exynos_suspend, dw_mci_exynos_resume)
+> +       .resume_noirq = dw_mci_exynos_resume_noirq,
+> +       .thaw_noirq = dw_mci_exynos_resume_noirq,
+> +       .restore_noirq = dw_mci_exynos_resume_noirq,
+> +};
 
-After this patch, only TMOUT was different.  I have a separate patch
-for that.
-
-Signed-off-by: Doug Anderson <dianders@chromium.org>
-Reviewed-by: Tomasz Figa <t.figa@samsung.com>
----
-Changes in v5: None
-Changes in v4: None
-Changes in v3: None
-Changes in v2: None
-
- drivers/mmc/host/dw_mmc.c | 4 +---
- 1 file changed, 1 insertion(+), 3 deletions(-)
-
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index e614b03..3d1ee2d 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -2522,9 +2522,7 @@ int dw_mci_resume(struct dw_mci *host)
- 		struct dw_mci_slot *slot = host->slot[i];
- 		if (!slot)
- 			continue;
--		if (slot->mmc->pm_flags & MMC_PM_KEEP_POWER) {
--			dw_mci_set_ios(slot->mmc, &slot->mmc->ios);
--		}
-+		dw_mci_set_ios(slot->mmc, &slot->mmc->ios);
- 
- 		ret = mmc_resume_host(host->slot[i]->mmc);
- 		if (ret < 0)
--- 
-1.8.3
+static SIMPLE_DEV_PM_OPS(dw_mci_exynos_pmops, dw_mci_exynos_suspend,
+ dw_mci_exynos_resume ) ;
