@@ -1,45 +1,66 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: dw_mmc: Does anyone use multiple slots?
-Date: Fri, 09 Aug 2013 01:55:44 +0100
-Message-ID: <86mworfzsf.fsf@void.printf.net>
-References: <CAD=FV=U3aT1KKtSwAFhYURJJerp70ij8h647=xyV51et4jYipg@mail.gmail.com>
-	<CAOesGMjaF2K0CnuWBj7xdXGAQk-XRetBstaQdd9EZzBYrmDjeA@mail.gmail.com>
+From: Haijun Zhang <Haijun.Zhang@freescale.com>
+Subject: [PATCH V2] mmc:sdhci: Wait longer for command with busy flags
+Date: Fri, 9 Aug 2013 08:04:07 +0800
+Message-ID: <1376006647-23073-1-git-send-email-Haijun.Zhang@freescale.com>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAOesGMjaF2K0CnuWBj7xdXGAQk-XRetBstaQdd9EZzBYrmDjeA@mail.gmail.com>
-	(Olof Johansson's message of "Thu, 8 Aug 2013 17:19:44 -0700")
-Sender: linux-kernel-owner@vger.kernel.org
-To: Olof Johansson <olof@lixom.net>
-Cc: Doug Anderson <dianders@google.com>, James Hogan <james.hogan@imgtec.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Tomasz Figa <tomasz.figa@gmail.com>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, Grant Grundler <grundler@chromium.org>, Alim Akhtar <alim.akhtar@samsung.com>, Abhilash Kesavan <a.kesavan@samsung.com>, Doug Anderson <dianders@chromium.org>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, Kukjin Kim <kgene.kim@samsung.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Sonny Rao <sonnyrao@chromium.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from va3ehsobe003.messaging.microsoft.com ([216.32.180.13]:25265
+	"EHLO va3outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S967013Ab3HIA5g (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 8 Aug 2013 20:57:36 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: cbouatmailru@gmail.com, cjb@laptop.org, Haijun Zhang <Haijun.Zhang@freescale.com>
 
-Hi,
+When command with busy flags send and also data busy end interrupt
+will be generate, the command will be finished when data transfer
+complete or data busy state end, Sometimes this will expend more than
+10*Hz time to finish this command, so we should wait longer to detect
+command complete timeout err.
 
-On Fri, Aug 09 2013, Olof Johansson wrote:
-> On Thu, Aug 8, 2013 at 5:16 PM, Doug Anderson <dianders@google.com> wrote:
->
->> I guess my overall question is: if there are no actual implementations
->> of multislot, shouldn't we kill it and simplify the code a whole lot?
->> If someone out there has a real multislot device they can step back in
->> and do it more correctly?
->>
->> Of course we need to find someone to actually go through and do the
->> killing of multislot, but finding that person might be easier if there
->> was some agreement that it was good to do.
->
-> There clearly seems to be no in-tree users of multislot. If someone
-> new comes in, we have the code in the history and can revert the
-> removal (or at least use it as reference for re-introduction).
->
-> I vote for removing it. It adds really annoying complexity for
-> something that nobody uses.
+Signed-off-by: Haijun Zhang <Haijun.Zhang@freescale.com>
+---
+changes for V2:
+	- Correct the timer
 
-I agree with Olof, for what it's worth.  (The maintainers of the
-driver are Jaehoon and Seungwon, though.)
+ drivers/mmc/host/sdhci.c | 14 +++++++++++++-
+ 1 file changed, 13 insertions(+), 1 deletion(-)
 
-Thanks,
-
-- Chris.
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index a78bd4f..8888578 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -986,6 +986,7 @@ static void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
+ 	int flags;
+ 	u32 mask;
+ 	unsigned long timeout;
++	u32 timer = 10;
+ 
+ 	WARN_ON(host->cmd);
+ 
+@@ -1014,7 +1015,18 @@ static void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
+ 		mdelay(1);
+ 	}
+ 
+-	mod_timer(&host->timer, jiffies + 10 * HZ);
++	/*
++	 * When send a commmand with busy state and also the data busy end
++	 * interrupt can be generate, the command will be finished when date
++	 * transfer complete or busy state end. Sometimes this will expend
++	 * more than 10*HZ, In this case whe should wait longer to detect
++	 * command complete timeout err.
++	 */
++	if ((host->cmd->flags & MMC_RSP_BUSY) &&
++			!(host->quirks & SDHCI_QUIRK_NO_BUSY_IRQ))
++		timer = 1000;
++
++	mod_timer(&host->timer, jiffies + timer * HZ);
+ 
+ 	host->cmd = cmd;
+ 
 -- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+1.8.0
+
+
