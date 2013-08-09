@@ -1,80 +1,96 @@
 From: Seungwon Jeon <tgih.jun@samsung.com>
-Subject: RE: [PATCH] mmc: dw_mmc: add specified capabilities2 of the controller
-Date: Fri, 09 Aug 2013 22:31:42 +0900
-Message-ID: <001701ce9504$c919c480$5b4d4d80$%jun@samsung.com>
-References: <51FA7AFB.9040703@samsung.com>
+Subject: RE: [PATCH v4 1/4] mmc: dw_mmc: Invalidate cache of current_speed
+ after suspend/resume
+Date: Fri, 09 Aug 2013 22:32:10 +0900
+Message-ID: <001801ce9504$d9976ab0$8cc64010$%jun@samsung.com>
+References: <1373470926-19314-1-git-send-email-dianders@chromium.org>
+ <1375825071-20922-1-git-send-email-dianders@chromium.org>
+ <1375825071-20922-2-git-send-email-dianders@chromium.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=Windows-1252
+Content-Type: text/plain; charset=ks_c_5601-1987
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout1.samsung.com ([203.254.224.24]:22571 "EHLO
+Received: from mailout1.samsung.com ([203.254.224.24]:22597 "EHLO
 	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S967780Ab3HINbn (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 9 Aug 2013 09:31:43 -0400
-Received: from epcpsbgr1.samsung.com
- (u141.gpu120.samsung.co.kr [203.254.230.141])
- by mailout1.samsung.com (Oracle Communications Messaging Server 7u4-24.01
- (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTP id <0MR900GCUMWVPBK0@mailout1.samsung.com> for
- linux-mmc@vger.kernel.org; Fri, 09 Aug 2013 22:31:43 +0900 (KST)
-In-reply-to: <51FA7AFB.9040703@samsung.com>
+	with ESMTP id S967822Ab3HINcL (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 9 Aug 2013 09:32:11 -0400
+In-reply-to: <1375825071-20922-2-git-send-email-dianders@chromium.org>
 Content-language: ko
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: 'Jaehoon Chung' <jh80.chung@samsung.com>, linux-mmc@vger.kernel.org
-Cc: 'Chris Ball' <cjb@laptop.org>, 'James Hogan' <james.hogan@imgtec.com>
+To: 'Doug Anderson' <dianders@chromium.org>, 'Chris Ball' <cjb@laptop.org>
+Cc: 'Olof Johansson' <olof@lixom.net>, 'Jaehoon Chung' <jh80.chung@samsung.com>, 'James Hogan' <james.hogan@imgtec.com>, 'Grant Grundler' <grundler@chromium.org>, 'Alim Akhtar' <alim.akhtar@samsung.com>, 'Abhilash Kesavan' <a.kesavan@samsung.com>, 'Tomasz Figa' <tomasz.figa@gmail.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-On Fri, August 02, 2013, Jaehoon Chung wrote:
-> Add the capabilities2 of controller to use MMC_CAP2_*
-> In future, we can use the capability like packed command with caps2.
+On Wed, August 07, 2013, Doug Anderson wrote:
+> The dw_mmc driver keeps a cache of the current slot->clock in order to
+> avoid doing a whole lot of work every time set_ios() is called.
+> However, after suspend/resume the register values are bogus so we need
+> to ensure that the cached value is invalidated.
+This mismatch comes only in case MMC_PM_KEEP_POWER, right?
+
 > 
-> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
-> ---
->  drivers/mmc/host/dw_mmc.c |    3 +++
->  drivers/mmc/host/dw_mmc.h |    2 ++
->  2 files changed, 5 insertions(+)
-> 
-> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> index ee5f167..17fe90c 100644
-> --- a/drivers/mmc/host/dw_mmc.c
-> +++ b/drivers/mmc/host/dw_mmc.c
-> @@ -1951,6 +1951,9 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
->  	if (host->pdata->caps2)
->  		mmc->caps2 = host->pdata->caps2;
-> 
-> +	if (drv_data && drv_data->caps2)
-> +		mmc->caps2 |= drv_data->caps[ctrl_id];
-drv_data->caps2?
+> In many cases we got by without this since the core mmc code fiddles
+> with the clock a lot.  If we've got a card present we're probably
+> running it at something like 50MHz and the core will temporarily
+> switch us to 400kHz after resume.  One case that didn't work (for me)
+> is the case of having no card in the slot.  The slot is initted to
+> 400kHz at boot time.  After suspend/resume the slot thinks it's still
+> at 400kHz (due to the cache) so doesn't adjust timing.  When it tries
+> to send the command at probe time it just times out and gets left in a
+> bad state.
+I understand this change although some part of commit message (boot time, probe time...) make me confused.
+I guess this change intends to update clock programming forcedly.
+It looks like another version of 'dw_mci_setup_bus(slot, true)'.
+Eventually, this change does same?
 
 Thanks,
 Seungwon Jeon
 
+> 
+> Invalidating the current_speed also means that we don't need to call:
+>   dw_mci_setup_bus(slot, true);
+> ...to force an update of the clock in the case when the slot was left
+> powered.
+> 
+> Signed-off-by: Doug Anderson <dianders@chromium.org>
+> ---
+> Changes in v4: None
+> Changes in v3: None
+> Changes in v2:
+> - Fix typo (some -> come)
+> - Use ~0 instead of 0xFFFFFFFF; add comment about value
+> 
+>  drivers/mmc/host/dw_mmc.c | 8 +++++++-
+>  1 file changed, 7 insertions(+), 1 deletion(-)
+> 
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index ee5f167..13a363c 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -2511,13 +2511,19 @@ int dw_mci_resume(struct dw_mci *host)
+>  		   DW_MCI_ERROR_FLAGS | SDMMC_INT_CD);
+>  	mci_writel(host, CTRL, SDMMC_CTRL_INT_ENABLE);
+> 
+> +	/*
+> +	 * Invalidate the 'current_speed' value since CLKDIV has come up in
+> +	 * default state and our cache is incorrect; set to something we know
+> +	 * slot->clock won't be.
+> +	 */
+> +	host->current_speed = ~0;
 > +
->  	if (host->pdata->get_bus_wd)
->  		bus_width = host->pdata->get_bus_wd(slot->id);
->  	else if (host->dev->of_node)
-> diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
-> index 81b2994..1f0a9ad 100644
-> --- a/drivers/mmc/host/dw_mmc.h
-> +++ b/drivers/mmc/host/dw_mmc.h
-> @@ -186,6 +186,7 @@ extern int dw_mci_resume(struct dw_mci *host);
->  /**
->   * dw_mci driver data - dw-mshc implementation specific driver data.
->   * @caps: mmc subsystem specified capabilities of the controller(s).
-> + * @caps2: mmc subsystem specified capabilities2 of the controller(s).
->   * @init: early implementation specific initialization.
->   * @setup_clock: implementation specific clock configuration.
->   * @prepare_command: handle CMD register extensions.
-> @@ -198,6 +199,7 @@ extern int dw_mci_resume(struct dw_mci *host);
->   */
->  struct dw_mci_drv_data {
->  	unsigned long	*caps;
-> +	unsigned long	*caps2;
->  	int		(*init)(struct dw_mci *host);
->  	int		(*setup_clock)(struct dw_mci *host);
->  	void		(*prepare_command)(struct dw_mci *host, u32 *cmdr);
+>  	for (i = 0; i < host->num_slots; i++) {
+>  		struct dw_mci_slot *slot = host->slot[i];
+>  		if (!slot)
+>  			continue;
+>  		if (slot->mmc->pm_flags & MMC_PM_KEEP_POWER) {
+>  			dw_mci_set_ios(slot->mmc, &slot->mmc->ios);
+> -			dw_mci_setup_bus(slot, true);
+>  		}
+> 
+>  		ret = mmc_resume_host(host->slot[i]->mmc);
 > --
-> 1.7.9.5
+> 1.8.3
+> 
 > --
 > To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
 > the body of a message to majordomo@vger.kernel.org
