@@ -1,69 +1,90 @@
 From: Shuah Khan <shuah.kh@samsung.com>
-Subject: [PATCH] mmc:rtsx_pci_sdmmc change driver to use dev_pm_ops infrastructure
-Date: Sat, 10 Aug 2013 09:20:54 -0600
-Message-ID: <1376148055-2539-9-git-send-email-shuah.kh@samsung.com>
+Subject: [PATCH] mmc:tmio_mmc change driver to use dev_pm_ops infrastructure
+Date: Sat, 10 Aug 2013 09:20:55 -0600
+Message-ID: <1376148055-2539-10-git-send-email-shuah.kh@samsung.com>
 References: <1376148055-2539-1-git-send-email-shuah.kh@samsung.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1376148055-2539-1-git-send-email-shuah.kh@samsung.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: cjb@laptop.org, wei_wang@realsil.com.cn, sameo@linux.intel.com, arnd@arndb.de, jg1.han@samsung.com
+To: g.liakhovetski@gmx.de, ian@mnementh.co.uk, cjb@laptop.org
 Cc: Shuah Khan <shuah.kh@samsung.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, shuahkhan@gmail.com
 List-Id: linux-mmc@vger.kernel.org
 
-Change rtsx_pci_sdmmc platform driver to register pm ops using dev_pm_ops
-instead of legacy pm_ops infrastructure.
+Change tmio_mmc platform driver to register pm ops using dev_pm_ops instead of
+legacy pm_ops infrastructure.
 
 Signed-off-by: Shuah Khan <shuah.kh@samsung.com>
 ---
- drivers/mmc/host/rtsx_pci_sdmmc.c |   13 ++++++++-----
- 1 file changed, 8 insertions(+), 5 deletions(-)
+ drivers/mmc/host/tmio_mmc.c |   24 ++++++++++++++----------
+ 1 file changed, 14 insertions(+), 10 deletions(-)
 
-diff --git a/drivers/mmc/host/rtsx_pci_sdmmc.c b/drivers/mmc/host/rtsx_pci_sdmmc.c
-index 82a35b9..fc52f28 100644
---- a/drivers/mmc/host/rtsx_pci_sdmmc.c
-+++ b/drivers/mmc/host/rtsx_pci_sdmmc.c
-@@ -1166,9 +1166,9 @@ static const struct mmc_host_ops realtek_pci_sdmmc_ops = {
- };
+diff --git a/drivers/mmc/host/tmio_mmc.c b/drivers/mmc/host/tmio_mmc.c
+index 8860d4d..3e3c730 100644
+--- a/drivers/mmc/host/tmio_mmc.c
++++ b/drivers/mmc/host/tmio_mmc.c
+@@ -24,31 +24,33 @@
+ #include "tmio_mmc.h"
  
  #ifdef CONFIG_PM
--static int rtsx_pci_sdmmc_suspend(struct platform_device *pdev,
--		pm_message_t state)
-+static int rtsx_pci_sdmmc_suspend(struct device *dev)
+-static int tmio_mmc_suspend(struct platform_device *dev, pm_message_t state)
++static int tmio_mmc_suspend(struct device *dev)
  {
+-	const struct mfd_cell *cell = mfd_get_cell(dev);
 +	struct platform_device *pdev = to_platform_device(dev);
- 	struct realtek_pci_sdmmc *host = platform_get_drvdata(pdev);
- 	struct mmc_host *mmc = host->mmc;
- 	int err;
-@@ -1182,8 +1182,9 @@ static int rtsx_pci_sdmmc_suspend(struct platform_device *pdev,
++	const struct mfd_cell *cell = mfd_get_cell(pdev);
+ 	int ret;
+ 
+-	ret = tmio_mmc_host_suspend(&dev->dev);
++	ret = tmio_mmc_host_suspend(dev);
+ 
+ 	/* Tell MFD core it can disable us now.*/
+ 	if (!ret && cell->disable)
+-		cell->disable(dev);
++		cell->disable(pdev);
+ 
+ 	return ret;
+ }
+ 
+-static int tmio_mmc_resume(struct platform_device *dev)
++static int tmio_mmc_resume(struct device *dev)
+ {
+-	const struct mfd_cell *cell = mfd_get_cell(dev);
++	struct platform_device *pdev = to_platform_device(dev);
++	const struct mfd_cell *cell = mfd_get_cell(pdev);
+ 	int ret = 0;
+ 
+ 	/* Tell the MFD core we are ready to be enabled */
+ 	if (cell->resume)
+-		ret = cell->resume(dev);
++		ret = cell->resume(pdev);
+ 
+ 	if (!ret)
+-		ret = tmio_mmc_host_resume(&dev->dev);
++		ret = tmio_mmc_host_resume(dev);
+ 
+ 	return ret;
+ }
+@@ -123,17 +125,19 @@ static int tmio_mmc_remove(struct platform_device *pdev)
  	return 0;
  }
  
--static int rtsx_pci_sdmmc_resume(struct platform_device *pdev)
-+static int rtsx_pci_sdmmc_resume(struct device *dev)
- {
-+	struct platform_device *pdev = to_platform_device(dev);
- 	struct realtek_pci_sdmmc *host = platform_get_drvdata(pdev);
- 	struct mmc_host *mmc = host->mmc;
- 
-@@ -1331,15 +1332,17 @@ static struct platform_device_id rtsx_pci_sdmmc_ids[] = {
- };
- MODULE_DEVICE_TABLE(platform, rtsx_pci_sdmmc_ids);
- 
-+static SIMPLE_DEV_PM_OPS(rtsx_pci_sdmmc_dev_pm_ops, rtsx_pci_sdmmc_suspend,
-+			 rtsx_pci_sdmmc_resume);
++static SIMPLE_DEV_PM_OPS(tmio_mmc_dev_pm_ops, tmio_mmc_suspend,
++			  tmio_mmc_resume);
 +
- static struct platform_driver rtsx_pci_sdmmc_driver = {
- 	.probe		= rtsx_pci_sdmmc_drv_probe,
- 	.remove		= rtsx_pci_sdmmc_drv_remove,
- 	.id_table       = rtsx_pci_sdmmc_ids,
--	.suspend	= rtsx_pci_sdmmc_suspend,
--	.resume		= rtsx_pci_sdmmc_resume,
- 	.driver		= {
- 		.owner	= THIS_MODULE,
- 		.name	= DRV_NAME_RTSX_PCI_SDMMC,
-+		.pm	= &rtsx_pci_sdmmc_dev_pm_ops,
+ /* ------------------- device registration ----------------------- */
+ 
+ static struct platform_driver tmio_mmc_driver = {
+ 	.driver = {
+ 		.name = "tmio-mmc",
+ 		.owner = THIS_MODULE,
++		.pm = &tmio_mmc_dev_pm_ops,
  	},
+ 	.probe = tmio_mmc_probe,
+ 	.remove = tmio_mmc_remove,
+-	.suspend = tmio_mmc_suspend,
+-	.resume = tmio_mmc_resume,
  };
- module_platform_driver(rtsx_pci_sdmmc_driver);
+ 
+ module_platform_driver(tmio_mmc_driver);
 -- 
 1.7.10.4
