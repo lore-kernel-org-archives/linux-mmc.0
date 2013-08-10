@@ -1,90 +1,66 @@
 From: Shuah Khan <shuah.kh@samsung.com>
-Subject: [PATCH] mmc:tmio_mmc change driver to use dev_pm_ops infrastructure
-Date: Sat, 10 Aug 2013 09:20:55 -0600
-Message-ID: <1376148055-2539-10-git-send-email-shuah.kh@samsung.com>
+Subject: [PATCH] mmc:msmsdcc change driver to use dev_pm_ops infrastructure
+Date: Sat, 10 Aug 2013 09:20:51 -0600
+Message-ID: <1376148055-2539-6-git-send-email-shuah.kh@samsung.com>
 References: <1376148055-2539-1-git-send-email-shuah.kh@samsung.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1376148055-2539-1-git-send-email-shuah.kh@samsung.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: g.liakhovetski@gmx.de, ian@mnementh.co.uk, cjb@laptop.org
-Cc: Shuah Khan <shuah.kh@samsung.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, shuahkhan@gmail.com
+To: davidb@codeaurora.org, dwalker@fifo99.com, bryanh@codeaurora.org, cjb@laptop.org
+Cc: Shuah Khan <shuah.kh@samsung.com>, linux-arm-msm@vger.kernel.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, shuahkhan@gmail.com
 List-Id: linux-mmc@vger.kernel.org
 
-Change tmio_mmc platform driver to register pm ops using dev_pm_ops instead of
+Change msmsdcc platform driver to register pm ops using dev_pm_ops instead of
 legacy pm_ops infrastructure.
 
 Signed-off-by: Shuah Khan <shuah.kh@samsung.com>
 ---
- drivers/mmc/host/tmio_mmc.c |   24 ++++++++++++++----------
- 1 file changed, 14 insertions(+), 10 deletions(-)
+ drivers/mmc/host/msm_sdcc.c |   13 +++++++------
+ 1 file changed, 7 insertions(+), 6 deletions(-)
 
-diff --git a/drivers/mmc/host/tmio_mmc.c b/drivers/mmc/host/tmio_mmc.c
-index 8860d4d..3e3c730 100644
---- a/drivers/mmc/host/tmio_mmc.c
-+++ b/drivers/mmc/host/tmio_mmc.c
-@@ -24,31 +24,33 @@
- #include "tmio_mmc.h"
+diff --git a/drivers/mmc/host/msm_sdcc.c b/drivers/mmc/host/msm_sdcc.c
+index b900de4..017c9d7 100644
+--- a/drivers/mmc/host/msm_sdcc.c
++++ b/drivers/mmc/host/msm_sdcc.c
+@@ -1434,9 +1434,9 @@ do_resume_work(struct work_struct *work)
  
- #ifdef CONFIG_PM
--static int tmio_mmc_suspend(struct platform_device *dev, pm_message_t state)
-+static int tmio_mmc_suspend(struct device *dev)
+ 
+ static int
+-msmsdcc_suspend(struct platform_device *dev, pm_message_t state)
++msmsdcc_suspend(struct device *dev)
  {
--	const struct mfd_cell *cell = mfd_get_cell(dev);
-+	struct platform_device *pdev = to_platform_device(dev);
-+	const struct mfd_cell *cell = mfd_get_cell(pdev);
- 	int ret;
+-	struct mmc_host *mmc = mmc_get_drvdata(dev);
++	struct mmc_host *mmc = mmc_get_drvdata(to_platform_device(dev));
+ 	int rc = 0;
  
--	ret = tmio_mmc_host_suspend(&dev->dev);
-+	ret = tmio_mmc_host_suspend(dev);
- 
- 	/* Tell MFD core it can disable us now.*/
- 	if (!ret && cell->disable)
--		cell->disable(dev);
-+		cell->disable(pdev);
- 
- 	return ret;
+ 	if (mmc) {
+@@ -1456,9 +1456,9 @@ msmsdcc_suspend(struct platform_device *dev, pm_message_t state)
  }
  
--static int tmio_mmc_resume(struct platform_device *dev)
-+static int tmio_mmc_resume(struct device *dev)
+ static int
+-msmsdcc_resume(struct platform_device *dev)
++msmsdcc_resume(struct device *dev)
  {
--	const struct mfd_cell *cell = mfd_get_cell(dev);
-+	struct platform_device *pdev = to_platform_device(dev);
-+	const struct mfd_cell *cell = mfd_get_cell(pdev);
- 	int ret = 0;
+-	struct mmc_host *mmc = mmc_get_drvdata(dev);
++	struct mmc_host *mmc = mmc_get_drvdata(to_platform_device(dev));
  
- 	/* Tell the MFD core we are ready to be enabled */
- 	if (cell->resume)
--		ret = cell->resume(dev);
-+		ret = cell->resume(pdev);
+ 	if (mmc) {
+ 		struct msmsdcc_host *host = mmc_priv(mmc);
+@@ -1482,12 +1482,13 @@ msmsdcc_resume(struct platform_device *dev)
+ #define msmsdcc_resume 0
+ #endif
  
- 	if (!ret)
--		ret = tmio_mmc_host_resume(&dev->dev);
-+		ret = tmio_mmc_host_resume(dev);
- 
- 	return ret;
- }
-@@ -123,17 +125,19 @@ static int tmio_mmc_remove(struct platform_device *pdev)
- 	return 0;
- }
- 
-+static SIMPLE_DEV_PM_OPS(tmio_mmc_dev_pm_ops, tmio_mmc_suspend,
-+			  tmio_mmc_resume);
++static SIMPLE_DEV_PM_OPS(msmdcc_dev_pm_ops, msmsdcc_suspend, msmsdcc_resume);
 +
- /* ------------------- device registration ----------------------- */
- 
- static struct platform_driver tmio_mmc_driver = {
- 	.driver = {
- 		.name = "tmio-mmc",
- 		.owner = THIS_MODULE,
-+		.pm = &tmio_mmc_dev_pm_ops,
+ static struct platform_driver msmsdcc_driver = {
+ 	.probe		= msmsdcc_probe,
+-	.suspend	= msmsdcc_suspend,
+-	.resume		= msmsdcc_resume,
+ 	.driver		= {
+ 		.name	= "msm_sdcc",
++		.pm	= &msmdcc_dev_pm_ops,
  	},
- 	.probe = tmio_mmc_probe,
- 	.remove = tmio_mmc_remove,
--	.suspend = tmio_mmc_suspend,
--	.resume = tmio_mmc_resume,
  };
  
- module_platform_driver(tmio_mmc_driver);
 -- 
 1.7.10.4
