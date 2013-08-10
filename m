@@ -1,66 +1,72 @@
 From: Shuah Khan <shuah.kh@samsung.com>
-Subject: [PATCH] mmc:cb710_mmc change driver to use dev_pm_ops infrastructure
-Date: Sat, 10 Aug 2013 09:20:50 -0600
-Message-ID: <1376148055-2539-5-git-send-email-shuah.kh@samsung.com>
+Subject: [PATCH] mmc:au1xmmc change driver to use dev_pm_ops infrastructure
+Date: Sat, 10 Aug 2013 09:20:47 -0600
+Message-ID: <1376148055-2539-2-git-send-email-shuah.kh@samsung.com>
 References: <1376148055-2539-1-git-send-email-shuah.kh@samsung.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1376148055-2539-1-git-send-email-shuah.kh@samsung.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: mirq-linux@rere.qmqm.pl, cjb@laptop.org
+To: manuel.lauss@gmail.com, cjb@laptop.org
 Cc: Shuah Khan <shuah.kh@samsung.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, shuahkhan@gmail.com
 List-Id: linux-mmc@vger.kernel.org
 
-Change cb710_mmc platform driver register pm ops using dev_pm_ops instead of
+Change au1xmmc platform driver to register pm ops using dev_pm_ops instead of
 legacy pm_ops infrastructure.
 
 Signed-off-by: Shuah Khan <shuah.kh@samsung.com>
 ---
- drivers/mmc/host/cb710-mmc.c |   11 +++++++----
- 1 file changed, 7 insertions(+), 4 deletions(-)
+ drivers/mmc/host/au1xmmc.c |   15 +++++++++------
+ 1 file changed, 9 insertions(+), 6 deletions(-)
 
-diff --git a/drivers/mmc/host/cb710-mmc.c b/drivers/mmc/host/cb710-mmc.c
-index 9d6e2b8..e79ac0d 100644
---- a/drivers/mmc/host/cb710-mmc.c
-+++ b/drivers/mmc/host/cb710-mmc.c
-@@ -664,8 +664,9 @@ static const struct mmc_host_ops cb710_mmc_host = {
+diff --git a/drivers/mmc/host/au1xmmc.c b/drivers/mmc/host/au1xmmc.c
+index df9becd..0bafd7f 100644
+--- a/drivers/mmc/host/au1xmmc.c
++++ b/drivers/mmc/host/au1xmmc.c
+@@ -1154,11 +1154,12 @@ static int au1xmmc_remove(struct platform_device *pdev)
+ }
  
  #ifdef CONFIG_PM
- 
--static int cb710_mmc_suspend(struct platform_device *pdev, pm_message_t state)
-+static int cb710_mmc_suspend(struct device *dev)
+-static int au1xmmc_suspend(struct platform_device *pdev, pm_message_t state)
++static int au1xmmc_suspend(struct device *dev)
  {
-+	struct platform_device *pdev = to_platform_device(dev);
- 	struct cb710_slot *slot = cb710_pdev_to_slot(pdev);
- 	struct mmc_host *mmc = cb710_slot_to_mmc(slot);
- 	int err;
-@@ -678,8 +679,9 @@ static int cb710_mmc_suspend(struct platform_device *pdev, pm_message_t state)
+-	struct au1xmmc_host *host = platform_get_drvdata(pdev);
++	struct au1xmmc_host *host;
+ 	int ret;
+ 
++	host = platform_get_drvdata(to_platform_device(dev));
+ 	ret = mmc_suspend_host(host->mmc);
+ 	if (ret)
+ 		return ret;
+@@ -1172,10 +1173,11 @@ static int au1xmmc_suspend(struct platform_device *pdev, pm_message_t state)
  	return 0;
  }
  
--static int cb710_mmc_resume(struct platform_device *pdev)
-+static int cb710_mmc_resume(struct device *dev)
+-static int au1xmmc_resume(struct platform_device *pdev)
++static int au1xmmc_resume(struct device *dev)
  {
-+	struct platform_device *pdev = to_platform_device(dev);
- 	struct cb710_slot *slot = cb710_pdev_to_slot(pdev);
- 	struct mmc_host *mmc = cb710_slot_to_mmc(slot);
+-	struct au1xmmc_host *host = platform_get_drvdata(pdev);
++	struct au1xmmc_host *host;
  
-@@ -688,6 +690,8 @@ static int cb710_mmc_resume(struct platform_device *pdev)
- 	return mmc_resume_host(mmc);
- }
++	host = platform_get_drvdata(to_platform_device(dev));
+ 	au1xmmc_reset_controller(host);
  
-+static SIMPLE_DEV_PM_OPS(cb710_mmc_dev_pm_ops, cb710_mmc_suspend,
-+			 cb710_mmc_resume);
- #endif /* CONFIG_PM */
- 
- static int cb710_mmc_init(struct platform_device *pdev)
-@@ -775,8 +779,7 @@ static struct platform_driver cb710_mmc_driver = {
- 	.probe = cb710_mmc_init,
- 	.remove = cb710_mmc_exit,
- #ifdef CONFIG_PM
--	.suspend = cb710_mmc_suspend,
--	.resume = cb710_mmc_resume,
-+	.driver.pm = &cb710_mmc_dev_pm_ops,
+ 	return mmc_resume_host(host->mmc);
+@@ -1185,14 +1187,15 @@ static int au1xmmc_resume(struct platform_device *pdev)
+ #define au1xmmc_resume NULL
  #endif
+ 
++static SIMPLE_DEV_PM_OPS(au1xmmc_dev_pm_ops, au1xmmc_suspend, au1xmmc_resume);
++
+ static struct platform_driver au1xmmc_driver = {
+ 	.probe         = au1xmmc_probe,
+ 	.remove        = au1xmmc_remove,
+-	.suspend       = au1xmmc_suspend,
+-	.resume        = au1xmmc_resume,
+ 	.driver        = {
+ 		.name  = DRIVER_NAME,
+ 		.owner = THIS_MODULE,
++		.pm    = &au1xmmc_dev_pm_ops,
+ 	},
  };
  
 -- 
