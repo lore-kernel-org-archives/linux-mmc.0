@@ -1,71 +1,67 @@
-From: Stephen Warren <swarren@wwwdotorg.org>
-Subject: Re: [PATCHv2] ARM: socfpga: dts: Add support for SD/MMC
-Date: Fri, 09 Aug 2013 16:58:18 -0600
-Message-ID: <5205740A.50206@wwwdotorg.org>
-References: <1375735392-6836-1-git-send-email-dinguyen@altera.com>  <5203FC1A.3090903@wwwdotorg.org> <1375993920.22740.9.camel@linux-builds1>  <5204017A.1040607@wwwdotorg.org> <1375995281.22740.16.camel@linux-builds1>  <520409F2.1090906@wwwdotorg.org> <1376003457.22740.25.camel@linux-builds1>  <52055867.9000602@wwwdotorg.org> <1376088088.14580.4.camel@linux-builds1>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from avon.wwwdotorg.org ([70.85.31.133]:35901 "EHLO
-	avon.wwwdotorg.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1031379Ab3HIW6X (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 9 Aug 2013 18:58:23 -0400
-In-Reply-To: <1376088088.14580.4.camel@linux-builds1>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Shuah Khan <shuah.kh@samsung.com>
+Subject: [PATCH] mmc:cb710_mmc change driver to use dev_pm_ops infrastructure
+Date: Sat, 10 Aug 2013 09:20:50 -0600
+Message-ID: <1376148055-2539-5-git-send-email-shuah.kh@samsung.com>
+References: <1376148055-2539-1-git-send-email-shuah.kh@samsung.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1376148055-2539-1-git-send-email-shuah.kh@samsung.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: mirq-linux@rere.qmqm.pl, cjb@laptop.org
+Cc: Shuah Khan <shuah.kh@samsung.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, shuahkhan@gmail.com
 List-Id: linux-mmc@vger.kernel.org
-To: Dinh Nguyen <dinguyen@altera.com>
-Cc: cjb@laptop.org, dinh.linux@gmail.com, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, Rob Herring <rob.herring@calxeda.com>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Ian Campbell <ian.campbell@citrix.com>, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 
-On 08/09/2013 04:41 PM, Dinh Nguyen wrote:
-> On Fri, 2013-08-09 at 15:00 -0600, Stephen Warren wrote:
->> On 08/08/2013 05:10 PM, Dinh Nguyen wrote:
->>> On Thu, 2013-08-08 at 15:13 -0600, Stephen Warren wrote:
->> ...
->>>> Why is there a need to directly represent the divider anywhere? The
->>>> driver can find the rate of the input clock, and I assume it knows what
->>>> rate it wants the clock to run at, so can't it calculate the divider
->>>> based on those two pieces of information?
->>>
->>> CC: Chris Ball
->>>>
->>>> Or, does the driver really not know what rate it wants the clock to be
->>>> after the internal divider? If not, then I think that *rate* should be
->>>> recorded in DT, not the divider to obtain that rate.
->>>>
->>>
->>> I believe that this is the case, that the driver does not know what rate
->>> it will clock the SD card at. I think internally we did have a "bus_hz"
->>> in DT a while back. I guess I don't really understand why it would be
->>> better to have a *rate* DT entry instead of a fixed-divider entry?
->>
->> The value of the divider depends on two things:
->>
->> 1) Input clock rate.
->> 2) Desired rate after applying the internal divider.
->>
->> The input clock rate may vary, either between SoCs the IP is integrated
->> into, or even at run-time perhaps base on clk_set_rate() etc.
->>
->> If the MMC driver knows the clock rate it wants to run at, it can
->> calculate the divider easily; it can automatically adjust to any input
->> clock that its environment may provide.
->>
->> If the MMC driver is simply told "use this divider", that's encoding
->> assumptions about the rate of the input clock which might not be valid;.
->> Encoding the desire clock rate within the MMC HW block allows the
->> divider to be calculated based on the actual environment.
-> 
-> Thanks Stephen. That makes sense.
-> 
-> Chris, Jaehoon, and Seungwon, do you have any inputs? If not I will go
-> down the path of have the "bus-hz" in the DTS node for the clock rate of
-> the CIU clock. Then I would also make the same change to dw_mmc-exynos
-> but would need your help on what the rate would be.
-> 
-> For SOCFPGA, its 12.5 MHZ.
+Change cb710_mmc platform driver register pm ops using dev_pm_ops instead of
+legacy pm_ops infrastructure.
 
-I'm not sure "bus-hz" is the right name; it's not clear from that name
-that it refers to an internal clock inside the MMC controller rather
-than the SD bus out to the card itself. Perhaps "controller-clock-hz" or
-something like that?
+Signed-off-by: Shuah Khan <shuah.kh@samsung.com>
+---
+ drivers/mmc/host/cb710-mmc.c |   11 +++++++----
+ 1 file changed, 7 insertions(+), 4 deletions(-)
+
+diff --git a/drivers/mmc/host/cb710-mmc.c b/drivers/mmc/host/cb710-mmc.c
+index 9d6e2b8..e79ac0d 100644
+--- a/drivers/mmc/host/cb710-mmc.c
++++ b/drivers/mmc/host/cb710-mmc.c
+@@ -664,8 +664,9 @@ static const struct mmc_host_ops cb710_mmc_host = {
+ 
+ #ifdef CONFIG_PM
+ 
+-static int cb710_mmc_suspend(struct platform_device *pdev, pm_message_t state)
++static int cb710_mmc_suspend(struct device *dev)
+ {
++	struct platform_device *pdev = to_platform_device(dev);
+ 	struct cb710_slot *slot = cb710_pdev_to_slot(pdev);
+ 	struct mmc_host *mmc = cb710_slot_to_mmc(slot);
+ 	int err;
+@@ -678,8 +679,9 @@ static int cb710_mmc_suspend(struct platform_device *pdev, pm_message_t state)
+ 	return 0;
+ }
+ 
+-static int cb710_mmc_resume(struct platform_device *pdev)
++static int cb710_mmc_resume(struct device *dev)
+ {
++	struct platform_device *pdev = to_platform_device(dev);
+ 	struct cb710_slot *slot = cb710_pdev_to_slot(pdev);
+ 	struct mmc_host *mmc = cb710_slot_to_mmc(slot);
+ 
+@@ -688,6 +690,8 @@ static int cb710_mmc_resume(struct platform_device *pdev)
+ 	return mmc_resume_host(mmc);
+ }
+ 
++static SIMPLE_DEV_PM_OPS(cb710_mmc_dev_pm_ops, cb710_mmc_suspend,
++			 cb710_mmc_resume);
+ #endif /* CONFIG_PM */
+ 
+ static int cb710_mmc_init(struct platform_device *pdev)
+@@ -775,8 +779,7 @@ static struct platform_driver cb710_mmc_driver = {
+ 	.probe = cb710_mmc_init,
+ 	.remove = cb710_mmc_exit,
+ #ifdef CONFIG_PM
+-	.suspend = cb710_mmc_suspend,
+-	.resume = cb710_mmc_resume,
++	.driver.pm = &cb710_mmc_dev_pm_ops,
+ #endif
+ };
+ 
+-- 
+1.7.10.4
