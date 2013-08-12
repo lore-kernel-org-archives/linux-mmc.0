@@ -1,126 +1,99 @@
-From: Seungwon Jeon <tgih.jun@samsung.com>
-Subject: RE: [PATCH v4 1/4] mmc: dw_mmc: Invalidate cache of current_speed
- after suspend/resume
-Date: Mon, 12 Aug 2013 16:14:38 +0900
-Message-ID: <000c01ce972b$9ba23590$d2e6a0b0$%jun@samsung.com>
-References: <1373470926-19314-1-git-send-email-dianders@chromium.org>
- <1375825071-20922-1-git-send-email-dianders@chromium.org>
- <1375825071-20922-2-git-send-email-dianders@chromium.org>
- <001801ce9504$d9976ab0$8cc64010$%jun@samsung.com>
- <CAD=FV=VmtoxnRzjsKF1rVTwvkJRAxKGUvNZHAEwuWaeVokzSZA@mail.gmail.com>
+From: Sekhar Nori <nsekhar-l0cyMroinI0@public.gmane.org>
+Subject: Re: [PATCH v3 01/12] dma: edma: Setup parameters to DMA MAX_NR_SG
+	at a time
+Date: Mon, 12 Aug 2013 12:45:23 +0530
+Message-ID: <52088B8B.9040000@ti.com>
+References: <1375719297-12871-1-git-send-email-joelf@ti.com>
+	<1375719297-12871-2-git-send-email-joelf@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-reply-to: <CAD=FV=VmtoxnRzjsKF1rVTwvkJRAxKGUvNZHAEwuWaeVokzSZA@mail.gmail.com>
-Content-language: ko
-Sender: linux-kernel-owner@vger.kernel.org
-To: 'Doug Anderson' <dianders@chromium.org>, 'Jaehoon Chung' <jh80.chung@samsung.com>
-Cc: 'Chris Ball' <cjb@laptop.org>, 'Olof Johansson' <olof@lixom.net>, 'James Hogan' <james.hogan@imgtec.com>, 'Grant Grundler' <grundler@chromium.org>, 'Alim Akhtar' <alim.akhtar@samsung.com>, 'Abhilash Kesavan' <a.kesavan@samsung.com>, 'Tomasz Figa' <tomasz.figa@gmail.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Return-path: <davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
+In-Reply-To: <1375719297-12871-2-git-send-email-joelf-l0cyMroinI0@public.gmane.org>
+List-Unsubscribe: <http://linux.davincidsp.com/mailman/options/davinci-linux-open-source>,
+	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://linux.davincidsp.com/pipermail/davinci-linux-open-source>
+List-Post: <mailto:davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
+List-Help: <mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=help>
+List-Subscribe: <http://linux.davincidsp.com/mailman/listinfo/davinci-linux-open-source>,
+	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=subscribe>
+Sender: <davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
+Errors-To: davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org
+To: Joel Fernandes <joelf-l0cyMroinI0@public.gmane.org>
+Cc: Mark Brown <broonie-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Grant Likely <grant.likely-s3s/WqlpOiPyB63q8FvJNQ@public.gmane.org>, Sricharan R <r.sricharan-l0cyMroinI0@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Vinod Koul <vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Lokesh Vutla <lokeshvutla-l0cyMroinI0@public.gmane.org>, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Rajendra Nayak <rnayak-l0cyMroinI0@public.gmane.org>, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Jason Kridner <jkridner-hcmAuCOw+vXj4SYmN/TMmA@public.gmane.org>, Linux OMAP List <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux ARM Kernel List <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Linux DaVinci Kernel List <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, Balaji TK <balajitk-l0cyMroinI0@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Santosh Shilimkar <santosh.shilim>
 List-Id: linux-mmc@vger.kernel.org
 
-On Sat, August 10, 2013, Doug Anderson wrote:
-> Seungwon and Jaehoon,
+On Monday 05 August 2013 09:44 PM, Joel Fernandes wrote:
+> Changes are made here for configuring existing parameters to support
+> DMA'ing them out in batches as needed.
 > 
-> On Fri, Aug 9, 2013 at 6:32 AM, Seungwon Jeon <tgih.jun@samsung.com> wrote:
-> > On Wed, August 07, 2013, Doug Anderson wrote:
-> >> The dw_mmc driver keeps a cache of the current slot->clock in order to
-> >> avoid doing a whole lot of work every time set_ios() is called.
-> >> However, after suspend/resume the register values are bogus so we need
-> >> to ensure that the cached value is invalidated.
-> > This mismatch comes only in case MMC_PM_KEEP_POWER, right?
+> Also allocate as many as slots as needed by the SG list, but not more
+> than MAX_NR_SG. Then these slots will be reused accordingly.
+> For ex, if MAX_NR_SG=10, and number of SG entries is 40, still only
+> 10 slots will be allocated to DMA the entire SG list of size 40.
 > 
-> Actually, no.  I saw problems with the SD Card slot, which doesn't
-> have MMC_KEEP_POWER.  Problems showed up when no card was inserted
-> across suspend/resume.  In other words:
+> Signed-off-by: Joel Fernandes <joelf-l0cyMroinI0@public.gmane.org>
+> ---
+>  drivers/dma/edma.c |   14 +++++++++++---
+>  1 file changed, 11 insertions(+), 3 deletions(-)
 > 
-> 1. At boot time, slot is all setup and configured to 400kHz.
-> 
-> 2. Suspend
-> 
-> 3. Resume; clock registers are reset (by suspend/resume) and not
-> restored since dw_mmc still thinks slot is configured for 400kHz due
-> to host->current_speed cache.
-> 
-> 4. Insert card.
-> 
-> 5. No code sees any need to change the clock for detecting the card,
-> since everyone thinks it's at 400kHz.  ...but it's not.
+> diff --git a/drivers/dma/edma.c b/drivers/dma/edma.c
+> index 5f3e532..7b0853c 100644
+> --- a/drivers/dma/edma.c
+> +++ b/drivers/dma/edma.c
+> @@ -222,9 +222,9 @@ static struct dma_async_tx_descriptor *edma_prep_slave_sg(
+>  	enum dma_slave_buswidth dev_width;
+>  	u32 burst;
+>  	struct scatterlist *sg;
+> -	int i;
+>  	int acnt, bcnt, ccnt, src, dst, cidx;
+>  	int src_bidx, dst_bidx, src_cidx, dst_cidx;
+> +	int i, num_slots_needed;
 
-Doug, your analysis is right.
-But, let me suggest another approach.
-After step #1, core layer actually call mmc_power_off because slot is empthy(get_cd() is '0').
-Then, set_ios is requested with 'ios->clock'.
-However, because current implementation doesn't update current_speed in case ios->clock is '0'.
-It causes current_speed has invalid clock rate in resume of dw-mmc.
+'nslots' is more to my liking. Better keep variable names short.
 
-So, if we can update slot->clock properly, it will be fixed.
+>  
+>  	if (unlikely(!echan || !sgl || !sg_len))
+>  		return NULL;
+> @@ -262,8 +262,11 @@ static struct dma_async_tx_descriptor *edma_prep_slave_sg(
+>  
+>  	edesc->pset_nr = sg_len;
+>  
+> -	for_each_sg(sgl, sg, sg_len, i) {
+> -		/* Allocate a PaRAM slot, if needed */
+> +	/* Allocate a PaRAM slot, if needed */
+> +
+> +	num_slots_needed = sg_len > MAX_NR_SG ? MAX_NR_SG : sg_len;
 
--static void dw_mci_setup_bus(struct dw_mci_slot *slot, bool force_clkinit)
-+static void dw_mci_setup_bus(struct dw_mci_slot *slot)
- {
-        struct dw_mci *host = slot->host;
-        u32 div;
-        u32 clk_en_a;
+nslots = min(MAX_NR_SG, sg_len);
 
--       if (slot->clock != host->current_speed || force_clkinit) {
-+       if (slot->clock && (slot->clock != host->current_speed)) {
+> +
+> +	for (i = 0; i < num_slots_needed; i++) {
+>  		if (echan->slot[i] < 0) {
+>  			echan->slot[i] =
+>  				edma_alloc_slot(EDMA_CTLR(echan->ch_num),
+> @@ -273,6 +276,10 @@ static struct dma_async_tx_descriptor *edma_prep_slave_sg(
+>  				return NULL;
+>  			}
+>  		}
+> +	}
+> +
+> +	/* Configure PaRAM sets for each SG */
+> +	for_each_sg(sgl, sg, sg_len, i) {
+>  
+>  		acnt = dev_width;
+>  
+> @@ -330,6 +337,7 @@ static struct dma_async_tx_descriptor *edma_prep_slave_sg(
+>  		/* Configure A or AB synchronized transfers */
+>  		if (edesc->absync)
+>  			edesc->pset[i].opt |= SYNCDIM;
+> +
 
+Random extra newline.
 
-@@ -807,13 +807,11 @@ static void dw_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
-
-        mci_writel(slot->host, UHS_REG, regs);
-
--       if (ios->clock) {
--               /*
--                * Use mirror of ios->clock to prevent race with mmc
--                * core ios update when finding the minimum.
--                */
--               slot->clock = ios->clock;
--       }
-+       /*
-+        * Use mirror of ios->clock to prevent race with mmc
-+        * core ios update when finding the minimum.
-+        */
-+       slot->clock = ios->clock;
+The patch as such is fine, but I dont think it makes lot of sense
+standalone. This needs to be merged into the patch where you actually
+handle the entire SG list in batches.
 
 Thanks,
-Seungwon Jeon
-
-> 
-> 
-> >> In many cases we got by without this since the core mmc code fiddles
-> >> with the clock a lot.  If we've got a card present we're probably
-> >> running it at something like 50MHz and the core will temporarily
-> >> switch us to 400kHz after resume.  One case that didn't work (for me)
-> >> is the case of having no card in the slot.  The slot is initted to
-> >> 400kHz at boot time.  After suspend/resume the slot thinks it's still
-> >> at 400kHz (due to the cache) so doesn't adjust timing.  When it tries
-> >> to send the command at probe time it just times out and gets left in a
-> >> bad state.
-> > I understand this change although some part of commit message (boot time, probe time...) make me
-> confused.
-> 
-> Sorry to be confusing.  I was trying to explain why the old code works
-> fine in many cases.  It's because the core MMC code tends to adjust
-> the clock a lot around suspend/resume.  When it does that, it works
-> around this problem.  ...but I found one case where suspend/resume
-> would happen and the MMC core didn't adjust the clock.
-> 
-> 
-> > I guess this change intends to update clock programming forcedly.
-> > It looks like another version of 'dw_mci_setup_bus(slot, true)'.
-> > Eventually, this change does same?
-> 
-> Effectively, yes.  As Jaehoon points out, that means we can actually
-> eliminate the "force" parameter to dw_mci_setup_bus().
-> 
-> 
-> I will send a new version out that eliminates the "force" parameter
-> and updates the commit message to (hopefully) be clearer.
-> 
-> -Doug
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Sekhar
