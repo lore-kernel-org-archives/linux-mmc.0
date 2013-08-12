@@ -1,56 +1,54 @@
-From: Doug Anderson <dianders@google.com>
-Subject: Re: [PATCH] mmc: dw_mmc: Don't disable vmmc if keeping power in suspend
-Date: Mon, 12 Aug 2013 10:31:32 -0700
-Message-ID: <CAD=FV=U69UONapHhy+LQ0cNe+G5SWmowvVnAWxcEP+CN_HOXkg@mail.gmail.com>
-References: <1375846138-15839-1-git-send-email-dbasehore@chromium.org>
-	<000001ce9747$680a9800$381fc800$%jun@samsung.com>
+From: Joel Fernandes <joelf-l0cyMroinI0@public.gmane.org>
+Subject: Re: [PATCH v3 08/12] dma: edma: Add one more required slot to MAX
+	slots
+Date: Mon, 12 Aug 2013 13:19:18 -0500
+Message-ID: <52092726.7030505@ti.com>
+References: <1375719297-12871-1-git-send-email-joelf@ti.com>
+	<1375719297-12871-9-git-send-email-joelf@ti.com>
+	<52087921.8040101@ti.com> <20130812133111.GZ6427@sirena.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qc0-f178.google.com ([209.85.216.178]:60324 "EHLO
-	mail-qc0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750883Ab3HLRbd (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 12 Aug 2013 13:31:33 -0400
-Received: by mail-qc0-f178.google.com with SMTP id s1so3519308qcw.37
-        for <linux-mmc@vger.kernel.org>; Mon, 12 Aug 2013 10:31:32 -0700 (PDT)
-In-Reply-To: <000001ce9747$680a9800$381fc800$%jun@samsung.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
+In-Reply-To: <20130812133111.GZ6427-GFdadSzt00ze9xe1eoZjHA@public.gmane.org>
+List-Unsubscribe: <http://linux.davincidsp.com/mailman/options/davinci-linux-open-source>,
+	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://linux.davincidsp.com/pipermail/davinci-linux-open-source>
+List-Post: <mailto:davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
+List-Help: <mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=help>
+List-Subscribe: <http://linux.davincidsp.com/mailman/listinfo/davinci-linux-open-source>,
+	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=subscribe>
+Sender: <davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
+Errors-To: davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org
+To: Mark Brown <broonie-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Cc: Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Grant Likely <grant.likely-s3s/WqlpOiPyB63q8FvJNQ@public.gmane.org>, Sricharan R <r.sricharan-l0cyMroinI0@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Vinod Koul <vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Lokesh Vutla <lokeshvutla-l0cyMroinI0@public.gmane.org>, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Rajendra Nayak <rnayak-l0cyMroinI0@public.gmane.org>, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Jason Kridner <jkridner-hcmAuCOw+vXj4SYmN/TMmA@public.gmane.org>, Linux OMAP List <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux ARM Kernel List <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Linux DaVinci Kernel List <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, Balaji TK <balajitk-l0cyMroinI0@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Santosh Shilimkar <santosh.shilimkar-l0cyMroinI0@public.gmane.org>, Dan
 List-Id: linux-mmc@vger.kernel.org
-To: Seungwon Jeon <tgih.jun@samsung.com>
-Cc: Derek Basehore <dbasehore@chromium.org>, Chris Ball <cjb@laptop.org>, Grant Likely <grant.likely@linaro.org>, Rob Herring <rob.herring@calxeda.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, devicetree@vger.kernel.org
 
-Seungwon and Derek,
+On 08/12/2013 08:31 AM, Mark Brown wrote:
+> On Mon, Aug 12, 2013 at 11:26:49AM +0530, Sekhar Nori wrote:
+> 
+>> No need for a separate patch for this, just do this in the patch where
+>> you include the two linked sets.
+> 
+> Can you guys please think about the CC lists you're using for these
+> patch serieses?  I've certainly no interest in random patches to the
+> DaVinci DMA controllers, and I suspect the same is true for most of the
+> people on the CC list.
+> 
 
-On Mon, Aug 12, 2013 at 3:33 AM, Seungwon Jeon <tgih.jun@samsung.com> wrote:
-> On Wed, August 07, 2013, Derek Basehore
->> If we keep power for suspend on a host for dw_mmc, don't disable vmmc-supply
->> regulator when suspending the host.
->
-> I have a trivial comment.
-> It would be better to add some macro for checking MMC_PM_KEEP_POWER.
-> And I just wonder how the problem is silent. Origin code has stood up somewhat long.
-> Did you see?
->
-> Acked-by: Seungwon Jeon <tgih.jun@samsung.com>
->
-> Thanks,
-> Seungwon Jeon
->
->>
->> Signed-off-by: Derek Basehore <dbasehore@chromium.org>
->> Reviewed-by: Doug Anderson <dianders@chromium.org>
->> ---
->>  drivers/mmc/host/dw_mmc.c | 4 ++--
->>  1 file changed, 2 insertions(+), 2 deletions(-)
+Sorry. I was actually getting a sense of this. What I did initially was
+I copied the CC list from last years work on the same series hoping that
+it would be a complete mail chain. Bad judgement on my part.
+I should have paid more attention to Mark's rants about his inbox
+getting spammed with this series in those old threads ;)
 
-Though I reviewed this originally, I'd actually propose not landing it.
+I guess moving forward I will use get_maintainer.pl and refine my
+git-send scripts with only interested folks. Any words of advice on when
+to and when not to CC someone remotely connected to a series is welcome.
 
-I've spent more time with the regulator code in dw_mmc and currently
-believe that the regulators should be enabled / disabled in
-MMC_POWER_UP / MMC_POWER_OFF.  When we do that then the mmc core will
-handle MMC_PM_KEEP_POWER.  You can see my current thoughts on this in
-<https://gerrit.chromium.org/gerrit/#/c/65263/>.  I will try to post
-that upstream before too long, but feel free to let me know any
-comments.
+@Sekhar, let's keep only linux-omap, linux-davinci and few other
+interested folks on the CC chain for the rest of review on the series.
 
--Doug
+Thanks,
+
+-Joel
