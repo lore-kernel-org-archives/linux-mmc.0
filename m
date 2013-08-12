@@ -1,93 +1,67 @@
-From: Sekhar Nori <nsekhar-l0cyMroinI0@public.gmane.org>
-Subject: Re: [PATCH v3 02/12] ARM: edma: Don't clear EMR of channel in
-	edma_stop
-Date: Mon, 12 Aug 2013 11:54:11 +0530
-Message-ID: <52087F8B.1080002@ti.com>
-References: <1375719297-12871-1-git-send-email-joelf@ti.com>
-	<1375719297-12871-3-git-send-email-joelf@ti.com>
-	<520385D3.1060408@ti.com> <5208639F.8070406@ti.com>
-	<CAD=GYpa75vqz120O2McxTXsPCWFb+RsO+7dZ4WRNQJgb3W=E=A@mail.gmail.com>
+From: Prasanna NAVARATNA <prasanna.navaratna@gmail.com>
+Subject: mmc: core: Add check for card type before =?utf-8?b?bW1jX2h3X3Jlc2V0X2Zvcl9pbml0?=
+Date: Mon, 12 Aug 2013 07:02:02 +0000 (UTC)
+Message-ID: <loom.20130812T082444-829@post.gmane.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=us-ascii
 Content-Transfer-Encoding: 7bit
-Return-path: <davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
-In-Reply-To: <CAD=GYpa75vqz120O2McxTXsPCWFb+RsO+7dZ4WRNQJgb3W=E=A@mail.gmail.com>
-List-Unsubscribe: <http://linux.davincidsp.com/mailman/options/davinci-linux-open-source>,
-	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://linux.davincidsp.com/pipermail/davinci-linux-open-source>
-List-Post: <mailto:davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
-List-Help: <mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=help>
-List-Subscribe: <http://linux.davincidsp.com/mailman/listinfo/davinci-linux-open-source>,
-	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=subscribe>
-Sender: <davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
-Errors-To: davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org
-To: Joel Fernandes <agnel.joel-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: Mark Brown <broonie-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Grant Likely <grant.likely-s3s/WqlpOiPyB63q8FvJNQ@public.gmane.org>, Sricharan R <r.sricharan-l0cyMroinI0@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Joel Fernandes <joelf-l0cyMroinI0@public.gmane.org>, Lokesh Vutla <lokeshvutla-l0cyMroinI0@public.gmane.org>, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Rajendra Nayak <rnayak-l0cyMroinI0@public.gmane.org>, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Jason Kridner <jkridner-hcmAuCOw+vXj4SYmN/TMmA@public.gmane.org>, Linux OMAP List <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux ARM Kernel List <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Linux DaVinci Kernel List <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, Balaji TK <balajitk-l0cyMroinI0@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Vinod Koul <vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from plane.gmane.org ([80.91.229.3]:48575 "EHLO plane.gmane.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751187Ab3HLHCZ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 12 Aug 2013 03:02:25 -0400
+Received: from list by plane.gmane.org with local (Exim 4.69)
+	(envelope-from <glkm-linux-mmc@m.gmane.org>)
+	id 1V8m91-0007fs-OJ
+	for linux-mmc@vger.kernel.org; Mon, 12 Aug 2013 09:02:24 +0200
+Received: from 202.122.18.226 ([202.122.18.226])
+        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <linux-mmc@vger.kernel.org>; Mon, 12 Aug 2013 09:02:23 +0200
+Received: from prasanna.navaratna by 202.122.18.226 with local (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <linux-mmc@vger.kernel.org>; Mon, 12 Aug 2013 09:02:23 +0200
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
 
-On Monday 12 August 2013 09:59 AM, Joel Fernandes wrote:
-> On Sun, Aug 11, 2013 at 11:25 PM, Sekhar Nori <nsekhar-l0cyMroinI0@public.gmane.org> wrote:
->> On 8/8/2013 5:19 PM, Sekhar Nori wrote:
->>> On Monday 05 August 2013 09:44 PM, Joel Fernandes wrote:
->>>> We certainly don't want error conditions to be cleared any other
->>>> place but the EDMA error handler, as this will make us 'forget'
->>>> about missed events we might need to know errors have occurred.
->>>>
->>>> This fixes a race condition where the EMR was being cleared
->>>> by the transfer completion interrupt handler.
->>>>
->>>> Basically, what was happening was:
->>>>
->>>>             Missed event
->>>>              |
->>>>              |
->>>>              V
->>>> SG1-SG2-SG3-Null
->>>>          \
->>>>           \__TC Interrupt (Almost same time as ARM is executing
->>>> TC interrupt handler, an event got missed and also forgotten
->>>> by clearing the EMR).
->>>>
->>>> This causes the following  problems:
->>>>
->>>> 1.
->>>> If error interrupt is also pending and TC interrupt clears the EMR
->>>> by calling edma_stop as has been observed in the edma_callback function,
->>>> the ARM will execute the error interrupt even though the EMR is clear.
->>>> As a result, the  dma_ccerr_handler returns IRQ_NONE. If this happens
->>>> enough number of times, IRQ subsystem disables the interrupt thinking
->>>> its spurious which makes error handler never execute again.
->>>>
->>>> 2.
->>>> Also even if error handler doesn't return IRQ_NONE, the removing of EMR
->>>> removes the knowledge about which channel had a missed event, and thus
->>>> a manual trigger on such channels cannot be performed.
->>>>
->>>> The EMR is ultimately being cleared by the Error interrupt handler
->>>> once it is handled so we remove code that does it in edma_stop and
->>>> allow it to happen there.
->>>>
->>>> Signed-off-by: Joel Fernandes <joelf-l0cyMroinI0@public.gmane.org>
->>>
->>> Queuing this for v3.11 fixes. While committing, I changed the headline
->>> to remove capitalization and made it more readable by removing register
->>> level details. The new headline is:
->>>
->>> ARM: edma: don't clear missed events in edma_stop()
->>
->> Forgot to ask, should this be tagged for stable? IOW, how serious is
->> this race in current kernel (without the entire series applied)? I have
->> never observed it myself - so please provide details how easy/difficult
->> it is to hit this condition.
-> 
-> The race was uncovered by recent EDMA patch series, So this patch can
-> go in for next kernel release as such, I am not aware of any other DMA
-> user that maybe uncovering the race condition.
+Almost all the places, before calling hw_reset ops, the card type is checked
+to make sure it is eMMC but missed during mmc_rescan_try_freq.
+The below patch adds the check for card type before calling hardware reset
+for init as double safety measure.
 
-Okay, I wont queue for -rc then. If Vinod wants to take this along with
-rest of the series, you can add my:
+>From e7941c5b3b4999318feb59fa83b78c15c13493b3 Mon Sep 17 00:00:00 2001
+From: Prasanna NAVARATNA <prasanna.navaratna@broadcom.com>
+Date: Mon, 12 Aug 2013 12:26:57 +0530
+Subject: [PATCH] mmc: core: add check for card type before
+ mmc_hw_reset_for_init
 
-Acked-by: Sekhar Nori <nsekhar-l0cyMroinI0@public.gmane.org>
+During mmc_hw_reset_for_init, the card type is not checked before
+calling hw_reset ops.
+Add check for the card type as emmc before issuing hw_reset during init.
 
-Thanks,
-Sekhar
+Signed-off-by: Prasanna NAVARATNA <prasanna.navaratna@broadcom.com>
+---
+ drivers/mmc/core/core.c |    3 ++-
+ 1 files changed, 2 insertions(+), 1 deletions(-)
+
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 49a5bca..2dad69a 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -2196,7 +2196,8 @@ EXPORT_SYMBOL(mmc_set_blockcount);
+ 
+ static void mmc_hw_reset_for_init(struct mmc_host *host)
+ {
+-	if (!(host->caps & MMC_CAP_HW_RESET) || !host->ops->hw_reset)
++	if (!(host->caps & MMC_CAP_HW_RESET) || !host->ops->hw_reset ||
++			!mmc_card_mmc(host->card))
+ 		return;
+ 	mmc_host_clk_hold(host);
+ 	host->ops->hw_reset(host);
+-- 
+1.7.6
+
+
+
+
