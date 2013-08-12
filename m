@@ -1,91 +1,146 @@
 From: Seungwon Jeon <tgih.jun@samsung.com>
-Subject: RE: [PATCH v4 3/4] mmc: dw_mmc: Always setup the bus after
- suspend/resume
-Date: Mon, 12 Aug 2013 16:20:30 +0900
-Message-ID: <000d01ce972c$6cf14730$46d3d590$%jun@samsung.com>
-References: <1373470926-19314-1-git-send-email-dianders@chromium.org>
- <1375825071-20922-1-git-send-email-dianders@chromium.org>
- <1375825071-20922-4-git-send-email-dianders@chromium.org>
- <001a01ce9505$59c28b20$0d47a160$%jun@samsung.com>
- <CAD=FV=VO=50uMXfwY5iNa+xiamRiHTSpTMXs+EdMeUTawkeyqw@mail.gmail.com>
+Subject: RE: [PATCH v5 2/4] mmc: dw_mmc: Add exynos resume_noirq callback to
+ clear WAKEUP_INT
+Date: Mon, 12 Aug 2013 16:21:48 +0900
+Message-ID: <000e01ce972c$9be7d4a0$d3b77de0$%jun@samsung.com>
+References: <1375825071-20922-1-git-send-email-dianders@chromium.org>
+ <1376066000-5495-1-git-send-email-dianders@chromium.org>
+ <1376066000-5495-3-git-send-email-dianders@chromium.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
+Content-Type: text/plain; charset=ks_c_5601-1987
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout3.samsung.com ([203.254.224.33]:18947 "EHLO
-	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752123Ab3HLHUd (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 12 Aug 2013 03:20:33 -0400
-In-reply-to: <CAD=FV=VO=50uMXfwY5iNa+xiamRiHTSpTMXs+EdMeUTawkeyqw@mail.gmail.com>
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-reply-to: <1376066000-5495-3-git-send-email-dianders@chromium.org>
 Content-language: ko
-Sender: linux-mmc-owner@vger.kernel.org
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: 'Doug Anderson' <dianders@chromium.org>, 'Chris Ball' <cjb@laptop.org>
+Cc: 'Jaehoon Chung' <jh80.chung@samsung.com>, 'James Hogan' <james.hogan@imgtec.com>, 'Grant Grundler' <grundler@chromium.org>, 'Alim Akhtar' <alim.akhtar@samsung.com>, 'Abhilash Kesavan' <a.kesavan@samsung.com>, 'Tomasz Figa' <tomasz.figa@gmail.com>, 'Olof Johansson' <olof@lixom.net>, 'Kukjin Kim' <kgene.kim@samsung.com>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-samsung-soc@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: 'Doug Anderson' <dianders@chromium.org>
-Cc: 'Chris Ball' <cjb@laptop.org>, 'Olof Johansson' <olof@lixom.net>, 'Jaehoon Chung' <jh80.chung@samsung.com>, 'James Hogan' <james.hogan@imgtec.com>, 'Grant Grundler' <grundler@chromium.org>, 'Alim Akhtar' <alim.akhtar@samsung.com>, 'Abhilash Kesavan' <a.kesavan@samsung.com>, 'Tomasz Figa' <tomasz.figa@gmail.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-On Sat, August 10, 2013,Doug Anderson wrote:
-> Seungwon,
-> 
-> On Fri, Aug 9, 2013 at 6:35 AM, Seungwon Jeon <tgih.jun@samsung.com> wrote:
-> > On Wed, August 07, 2013, Doug Anderson wrote:
-> >> After suspend/resume all of the dw_mmc registers are reset to
-> >> defaults.  We restore most of them, but specifically don't setup the
-> >> clock registers after resume unless we've got a powered card.  Things
-> >> still work because the core will eventually call set_ios() and we'll
-> >> set things up.
-> >
-> > Hmm, I didn't get the need of this call during resume.
-> > I think set_ios is only valid where core layer calls.
-> > Besides, important things is ios's parameters.
-> > If suspend has finished successfully, last call of set_ios() is from mmc_power_off().
-> > On seeing fields of 'mmc->ios' stored last, these values aren't proper in resume phase.
-> > Please check mmc_power_off() function.
-> > In case MMC_PM_KEEP_POWER it could be kept.
-> 
-> Most of my reasoning has to do with the fact that the state of the
-> system after suspend/resume should not be significantly different than
-> the state of the system before suspend/resume.  If the state of the
-> system is different in the two cases it points out potential problems
-> or inefficiencies.
-> 
-> To make this more concrete:
-> 
-> 1. Boot up a system with no card in the SD Card slot.
-> 2. Note down the value of registers like CLKDIV, CLKENA, etc.
-> 3. Suspend / resume (S2R)
-> 4. Check the values of CLKDIV, CLKENA, etc.
-> 
-> You will notice that they are different.  This is a bad sign and can
-> be a source of bugs (though I don't know of any).  ...or it could mean
-> that power draw is different (could be better, could be worse) after a
-> suspend/resume cycle.
-> 
-> 
-> Said another way, if the value of CLKDIV, CLKENA, etc is not important
-> when a card is not inserted, why do they get initialized at boot time?
-> 
-> 
-> In general, I think that the mmc core code makes the assumption that
-> it's up to the driver to make sure that its state is preserved across
-> S2R.  For dw_mmc the driver doesn't do the "brute force" that some
-> drivers do of just saving and restoring all registers using a copy
-> loop.  Instead, the dw_mmc driver runs code that tries to set the
-> state back to something reasonable.  Without my patch the dw_mmc
-> driver doesn't run any code that restores these registers.
-> dw_mci_set_ios() will do so.
+Doug,
+Looks good to me except for minor comment.
 
-This seems pretty associated with [1/4 patch]. (Anyway continued, ...)
-Basically, both CLKDIV and CLKENA will be set with the reset value of zero. This means clock is disabled.
-While resume of dw_mmc is completed, initial configuration registers will be set except for runtime registers.
-I think registers related to clock are close to runtime.
-Core layer knows the correct clock rate for current device mode and will actually request it by set_ios.
-If core layer requests set_ios no more after dw_mmc resume is completed, dw_mmc will keep the clock to be disabled.
-Then, dw_mmc doesn't need self call of dw_mci_set_ios.
+On Sat, August 10, 2013, Doug Anderson wrote:
+> If the WAKEUP_INT is asserted at wakeup and not cleared, we'll end up
+> looping around forever.  This has been seen to happen on exynos5420
+> silicon despite the fact that we haven't enabled any wakeup events due
+> to a silicon errata.  It is safe to do on all exynos variants.
+> 
+> Signed-off-by: Doug Anderson <dianders@chromium.org>
+> ---
+> Changes in v5:
+> - Cleaned up dw_mci_exynos_resume_noirq() comment as per Seungwon.
+> - Don't memcpy dev_pm_ops structure, define a new one.
+> 
+> Changes in v4:
+> - Take Seungwon's suggestion and don't add any dw_mmc-pltfm code.
+> 
+> Changes in v3:
+> - Add freeze/thaw and poweroff/restore noirq entries.
+> 
+> Changes in v2:
+> - Use suspend_noirq as per James Hogan.
+> 
+>  drivers/mmc/host/dw_mmc-exynos.c | 56 +++++++++++++++++++++++++++++++++++++++-
+>  1 file changed, 55 insertions(+), 1 deletion(-)
+> 
+> diff --git a/drivers/mmc/host/dw_mmc-exynos.c b/drivers/mmc/host/dw_mmc-exynos.c
+> index 866edef..7d88583 100644
+> --- a/drivers/mmc/host/dw_mmc-exynos.c
+> +++ b/drivers/mmc/host/dw_mmc-exynos.c
+> @@ -30,6 +30,7 @@
+>  #define SDMMC_CLKSEL_TIMING(x, y, z)	(SDMMC_CLKSEL_CCLK_SAMPLE(x) |	\
+>  					SDMMC_CLKSEL_CCLK_DRIVE(y) |	\
+>  					SDMMC_CLKSEL_CCLK_DIVIDER(z))
+> +#define SDMMC_CLKSEL_WAKEUP_INT		BIT(11)
+> 
+>  #define EXYNOS4210_FIXED_CIU_CLK_DIV	2
+>  #define EXYNOS4412_FIXED_CIU_CLK_DIV	4
+> @@ -100,6 +101,52 @@ static int dw_mci_exynos_setup_clock(struct dw_mci *host)
+>  	return 0;
+>  }
+> 
+> +#ifdef CONFIG_PM_SLEEP
+> +/*
+> + * TODO: we should probably disable the clock to the card in the suspend path.
+In suspend, clock is gated, isn't it?
+Rather, no comment looks better, if intention is not clear.
 
 Thanks,
 Seungwon Jeon
-> 
-> Another option would be to forcibly save/restore registers in suspend/resume.
-> 
-> -Doug
 
+> + */
+> +static int dw_mci_exynos_suspend(struct device *dev)
+> +{
+> +	struct dw_mci *host = dev_get_drvdata(dev);
+> +
+> +	return dw_mci_suspend(host);
+> +}
+> +
+> +static int dw_mci_exynos_resume(struct device *dev)
+> +{
+> +	struct dw_mci *host = dev_get_drvdata(dev);
+> +
+> +	return dw_mci_resume(host);
+> +}
+> +
+> +/**
+> + * dw_mci_exynos_resume_noirq - Exynos-specific resume code
+> + *
+> + * On exynos5420 there is a silicon errata that will sometimes leave the
+> + * WAKEUP_INT bit in the CLKSEL register asserted.  This bit is 1 to indicate
+> + * that it fired and we can clear it by writing a 1 back.  Clear it to prevent
+> + * interrupts from going off constantly.
+> + *
+> + * We run this code on all exynos variants because it doesn't hurt.
+> + */
+> +
+> +static int dw_mci_exynos_resume_noirq(struct device *dev)
+> +{
+> +	struct dw_mci *host = dev_get_drvdata(dev);
+> +	u32 clksel;
+> +
+> +	clksel = mci_readl(host, CLKSEL);
+> +	if (clksel & SDMMC_CLKSEL_WAKEUP_INT)
+> +		mci_writel(host, CLKSEL, clksel);
+> +
+> +	return 0;
+> +}
+> +#else
+> +#define dw_mci_exynos_suspend		NULL
+> +#define dw_mci_exynos_resume		NULL
+> +#define dw_mci_exynos_resume_noirq	NULL
+> +#endif /* CONFIG_PM_SLEEP */
+> +
+>  static void dw_mci_exynos_prepare_command(struct dw_mci *host, u32 *cmdr)
+>  {
+>  	/*
+> @@ -187,13 +234,20 @@ static int dw_mci_exynos_probe(struct platform_device *pdev)
+>  	return dw_mci_pltfm_register(pdev, drv_data);
+>  }
+> 
+> +const struct dev_pm_ops dw_mci_exynos_pmops = {
+> +	SET_SYSTEM_SLEEP_PM_OPS(dw_mci_exynos_suspend, dw_mci_exynos_resume)
+> +	.resume_noirq = dw_mci_exynos_resume_noirq,
+> +	.thaw_noirq = dw_mci_exynos_resume_noirq,
+> +	.restore_noirq = dw_mci_exynos_resume_noirq,
+> +};
+> +
+>  static struct platform_driver dw_mci_exynos_pltfm_driver = {
+>  	.probe		= dw_mci_exynos_probe,
+>  	.remove		= __exit_p(dw_mci_pltfm_remove),
+>  	.driver		= {
+>  		.name		= "dwmmc_exynos",
+>  		.of_match_table	= dw_mci_exynos_match,
+> -		.pm		= &dw_mci_pltfm_pmops,
+> +		.pm		= &dw_mci_exynos_pmops,
+>  	},
+>  };
+> 
+> --
+> 1.8.3
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
