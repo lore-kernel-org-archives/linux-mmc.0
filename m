@@ -1,52 +1,56 @@
-From: Scott Wood <scottwood@freescale.com>
-Subject: Re: [PATCH 1/3 V2] mmc:core: parse voltage from device-tree
-Date: Mon, 12 Aug 2013 11:11:29 -0500
-Message-ID: <1376323889.20487.7.camel@snotra.buserror.net>
-References: <1375251927-3330-1-git-send-email-Haijun.Zhang@freescale.com>
-	 <733059D3-105A-437B-B330-763D2C1859B2@kernel.crashing.org>
-	 <52084C7E.9000706@freescale.com>
+From: Doug Anderson <dianders@google.com>
+Subject: Re: [PATCH] mmc: dw_mmc: Don't disable vmmc if keeping power in suspend
+Date: Mon, 12 Aug 2013 10:31:32 -0700
+Message-ID: <CAD=FV=U69UONapHhy+LQ0cNe+G5SWmowvVnAWxcEP+CN_HOXkg@mail.gmail.com>
+References: <1375846138-15839-1-git-send-email-dbasehore@chromium.org>
+	<000001ce9747$680a9800$381fc800$%jun@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-db9lp0253.outbound.messaging.microsoft.com ([213.199.154.253]:46780
-	"EHLO db9outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1755995Ab3HLQLn (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 12 Aug 2013 12:11:43 -0400
-In-Reply-To: <52084C7E.9000706@freescale.com>
+Received: from mail-qc0-f178.google.com ([209.85.216.178]:60324 "EHLO
+	mail-qc0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750883Ab3HLRbd (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 12 Aug 2013 13:31:33 -0400
+Received: by mail-qc0-f178.google.com with SMTP id s1so3519308qcw.37
+        for <linux-mmc@vger.kernel.org>; Mon, 12 Aug 2013 10:31:32 -0700 (PDT)
+In-Reply-To: <000001ce9747$680a9800$381fc800$%jun@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Zhang Haijun <B42677@freescale.com>
-Cc: Kumar Gala <galak@kernel.crashing.org>, Haijun Zhang <Haijun.Zhang@freescale.com>, linux-mmc@vger.kernel.org, linuxppc-dev@lists.ozlabs.org, cjb@laptop.org, cbouatmailru@gmail.com
+To: Seungwon Jeon <tgih.jun@samsung.com>
+Cc: Derek Basehore <dbasehore@chromium.org>, Chris Ball <cjb@laptop.org>, Grant Likely <grant.likely@linaro.org>, Rob Herring <rob.herring@calxeda.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, devicetree@vger.kernel.org
 
-On Mon, 2013-08-12 at 10:46 +0800, Zhang Haijun wrote:
-> On 08/09/2013 10:48 PM, Kumar Gala wrote:
-> 
-> > On Jul 31, 2013, at 1:25 AM, Haijun Zhang wrote:
-> > 
-> > > Add function to support get voltage from device-tree.
-> > > If there are voltage-range specified in device-tree node, this function
-> > > will parse it and return the avail voltage mask.
-> > > 
-> > > Signed-off-by: Haijun Zhang <haijun.zhang@freescale.com>
-> > > ---
-> > > changes for v2:
-> > > 	- Update the parameters of function
-> > > 
-> > > drivers/mmc/core/core.c  | 46 ++++++++++++++++++++++++++++++++++++++++++++++
-> > > include/linux/mmc/core.h |  1 +
-> > > 2 files changed, 47 insertions(+)
-> > There should be a device tree binding spec update to go with this patch series.
-> > 
-> > - k
-> Hi, kumar
-> 
-> I'll update this tree binding spec after the patch set is accept by
-> Anton.
+Seungwon and Derek,
 
-Bindings should come first (or at least, at the same time).
+On Mon, Aug 12, 2013 at 3:33 AM, Seungwon Jeon <tgih.jun@samsung.com> wrote:
+> On Wed, August 07, 2013, Derek Basehore
+>> If we keep power for suspend on a host for dw_mmc, don't disable vmmc-supply
+>> regulator when suspending the host.
+>
+> I have a trivial comment.
+> It would be better to add some macro for checking MMC_PM_KEEP_POWER.
+> And I just wonder how the problem is silent. Origin code has stood up somewhat long.
+> Did you see?
+>
+> Acked-by: Seungwon Jeon <tgih.jun@samsung.com>
+>
+> Thanks,
+> Seungwon Jeon
+>
+>>
+>> Signed-off-by: Derek Basehore <dbasehore@chromium.org>
+>> Reviewed-by: Doug Anderson <dianders@chromium.org>
+>> ---
+>>  drivers/mmc/host/dw_mmc.c | 4 ++--
+>>  1 file changed, 2 insertions(+), 2 deletions(-)
 
--Scott
+Though I reviewed this originally, I'd actually propose not landing it.
 
+I've spent more time with the regulator code in dw_mmc and currently
+believe that the regulators should be enabled / disabled in
+MMC_POWER_UP / MMC_POWER_OFF.  When we do that then the mmc core will
+handle MMC_PM_KEEP_POWER.  You can see my current thoughts on this in
+<https://gerrit.chromium.org/gerrit/#/c/65263/>.  I will try to post
+that upstream before too long, but feel free to let me know any
+comments.
 
-
+-Doug
