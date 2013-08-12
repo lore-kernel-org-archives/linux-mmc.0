@@ -1,54 +1,32 @@
-From: Joel Fernandes <joelf-l0cyMroinI0@public.gmane.org>
-Subject: Re: [PATCH v3 08/12] dma: edma: Add one more required slot to MAX
-	slots
-Date: Mon, 12 Aug 2013 13:19:18 -0500
-Message-ID: <52092726.7030505@ti.com>
-References: <1375719297-12871-1-git-send-email-joelf@ti.com>
-	<1375719297-12871-9-git-send-email-joelf@ti.com>
-	<52087921.8040101@ti.com> <20130812133111.GZ6427@sirena.org.uk>
+From: Stephen Warren <swarren@wwwdotorg.org>
+Subject: Re: [PATCH] mmc: dw_mmc-exynos: Common bindings for dw-mshc timing
+Date: Mon, 12 Aug 2013 17:15:01 -0600
+Message-ID: <52096C75.1030305@wwwdotorg.org>
+References: <1376002520-7461-1-git-send-email-dinguyen@altera.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
-Return-path: <davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
-In-Reply-To: <20130812133111.GZ6427-GFdadSzt00ze9xe1eoZjHA@public.gmane.org>
-List-Unsubscribe: <http://linux.davincidsp.com/mailman/options/davinci-linux-open-source>,
-	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://linux.davincidsp.com/pipermail/davinci-linux-open-source>
-List-Post: <mailto:davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
-List-Help: <mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=help>
-List-Subscribe: <http://linux.davincidsp.com/mailman/listinfo/davinci-linux-open-source>,
-	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=subscribe>
-Sender: <davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
-Errors-To: davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org
-To: Mark Brown <broonie-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Cc: Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Grant Likely <grant.likely-s3s/WqlpOiPyB63q8FvJNQ@public.gmane.org>, Sricharan R <r.sricharan-l0cyMroinI0@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Vinod Koul <vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Lokesh Vutla <lokeshvutla-l0cyMroinI0@public.gmane.org>, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Rajendra Nayak <rnayak-l0cyMroinI0@public.gmane.org>, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Jason Kridner <jkridner-hcmAuCOw+vXj4SYmN/TMmA@public.gmane.org>, Linux OMAP List <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux ARM Kernel List <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Linux DaVinci Kernel List <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, Balaji TK <balajitk-l0cyMroinI0@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Santosh Shilimkar <santosh.shilimkar-l0cyMroinI0@public.gmane.org>, Dan
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from avon.wwwdotorg.org ([70.85.31.133]:52567 "EHLO
+	avon.wwwdotorg.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755646Ab3HLXPF (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 12 Aug 2013 19:15:05 -0400
+In-Reply-To: <1376002520-7461-1-git-send-email-dinguyen@altera.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: dinguyen@altera.com
+Cc: dinh.linux@gmail.com, Arnd Bergmann <arnd@arndb.de>, Olof Johansson <olof@lixom.net>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, Rob Herring <rob.herring@calxeda.com>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Ian Campbell <ian.campbell@citrix.com>, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 
-On 08/12/2013 08:31 AM, Mark Brown wrote:
-> On Mon, Aug 12, 2013 at 11:26:49AM +0530, Sekhar Nori wrote:
+On 08/08/2013 04:55 PM, dinguyen@altera.com wrote:
+> From: Dinh Nguyen <dinguyen@altera.com>
 > 
->> No need for a separate patch for this, just do this in the patch where
->> you include the two linked sets.
-> 
-> Can you guys please think about the CC lists you're using for these
-> patch serieses?  I've certainly no interest in random patches to the
-> DaVinci DMA controllers, and I suspect the same is true for most of the
-> people on the CC list.
-> 
+> Remove the "samsung" in "samsung,dw-mshc-ciu-div", "samsung,dw-mshc-sdr-timing",
+> and "samsung,dw-mshc-ddr-timing". These characteristics are not applicable to
+> just Samsung platforms, but to any platform that uses the Synopsis SD/MMC IP.
 
-Sorry. I was actually getting a sense of this. What I did initially was
-I copied the CC list from last years work on the same series hoping that
-it would be a complete mail chain. Bad judgement on my part.
-I should have paid more attention to Mark's rants about his inbox
-getting spammed with this series in those old threads ;)
+But the properties aren't globally standard; they apply specifically
+anywhere that this particular Synopsis IP is present. As such, I think
+at least a "synopsis," prefix is warranted.
 
-I guess moving forward I will use get_maintainer.pl and refine my
-git-send scripts with only interested folks. Any words of advice on when
-to and when not to CC someone remotely connected to a series is welcome.
-
-@Sekhar, let's keep only linux-omap, linux-davinci and few other
-interested folks on the CC chain for the rest of review on the series.
-
-Thanks,
-
--Joel
+And the driver should probably support both the old and new property
+names for backwards-compatibility?
