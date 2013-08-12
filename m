@@ -1,87 +1,65 @@
-From: Sekhar Nori <nsekhar-l0cyMroinI0@public.gmane.org>
-Subject: Re: [PATCH v3 07/12] dma: edma: Add function to dump a PaRAM set
-	from PaRAM
-Date: Mon, 12 Aug 2013 11:22:36 +0530
-Message-ID: <52087824.60002@ti.com>
+From: Sekhar Nori <nsekhar@ti.com>
+Subject: Re: [PATCH v3 08/12] dma: edma: Add one more required slot to MAX
+ slots
+Date: Mon, 12 Aug 2013 11:26:49 +0530
+Message-ID: <52087921.8040101@ti.com>
 References: <1375719297-12871-1-git-send-email-joelf@ti.com>
-	<1375719297-12871-8-git-send-email-joelf@ti.com>
+ <1375719297-12871-9-git-send-email-joelf@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
-In-Reply-To: <1375719297-12871-8-git-send-email-joelf-l0cyMroinI0@public.gmane.org>
-List-Unsubscribe: <http://linux.davincidsp.com/mailman/options/davinci-linux-open-source>,
-	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://linux.davincidsp.com/pipermail/davinci-linux-open-source>
-List-Post: <mailto:davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
-List-Help: <mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=help>
-List-Subscribe: <http://linux.davincidsp.com/mailman/listinfo/davinci-linux-open-source>,
-	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=subscribe>
-Sender: <davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
-Errors-To: davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org
-To: Joel Fernandes <joelf-l0cyMroinI0@public.gmane.org>
-Cc: Mark Brown <broonie-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Grant Likely <grant.likely-s3s/WqlpOiPyB63q8FvJNQ@public.gmane.org>, Sricharan R <r.sricharan-l0cyMroinI0@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Vinod Koul <vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Lokesh Vutla <lokeshvutla-l0cyMroinI0@public.gmane.org>, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Rajendra Nayak <rnayak-l0cyMroinI0@public.gmane.org>, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Jason Kridner <jkridner-hcmAuCOw+vXj4SYmN/TMmA@public.gmane.org>, Linux OMAP List <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux ARM Kernel List <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Linux DaVinci Kernel List <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, Balaji TK <balajitk-l0cyMroinI0@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Santosh Shilimkar <santosh.shilim>
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <1375719297-12871-9-git-send-email-joelf@ti.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Joel Fernandes <joelf@ti.com>
+Cc: Mark Brown <broonie@linaro.org>, Tony Lindgren <tony@atomide.com>, Grant Likely <grant.likely@secretlab.ca>, Sricharan R <r.sricharan@ti.com>, Russell King <linux@arm.linux.org.uk>, Vinod Koul <vinod.koul@intel.com>, Lokesh Vutla <lokeshvutla@ti.com>, Chris Ball <cjb@laptop.org>, Arnd Bergmann <arnd@arndb.de>, Rajendra Nayak <rnayak@ti.com>, Rob Herring <rob.herring@calxeda.com>, Jason Kridner <jkridner@beagleboard.org>, Linux OMAP List <linux-omap@vger.kernel.org>, Linux ARM Kernel List <linux-arm-kernel@lists.infradead.org>, Linux DaVinci Kernel List <davinci-linux-open-source@linux.davincidsp.com>, Balaji TK <balajitk@ti.com>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Gururaja Hebbar <gururaja.hebbar@ti.com>, Santosh Shilimkar <santosh.shilimkar@ti.com>, Dan Williams <djbw@fb.com>, Olof Johansson <olof@lixom>
 List-Id: linux-mmc@vger.kernel.org
 
 On Monday 05 August 2013 09:44 PM, Joel Fernandes wrote:
-> Previously, such a dump function was used but it wasn't reading
-> from the PaRAM, rather just from a edmacc_param structure, we
-> add a helpful function for debugging that directly reads from
-> the PaRAM and gives the current state correctly (including links
-> and interrupt information).
+> We'd now need a separate slot just for the channel and separate
+> ones for the 2 linked sets, so we make adjustments to allocate
+> an extra channel accordingly.
 > 
-> Signed-off-by: Joel Fernandes <joelf-l0cyMroinI0@public.gmane.org>
+> Signed-off-by: Joel Fernandes <joelf@ti.com>
 
-You should convert existing instances of PaRAM set dump to use this new
-function along with introducing it.
+No need for a separate patch for this, just do this in the patch where
+you include the two linked sets.
+
+> ---
+>  drivers/dma/edma.c |    5 ++++-
+>  1 file changed, 4 insertions(+), 1 deletion(-)
+> 
+> diff --git a/drivers/dma/edma.c b/drivers/dma/edma.c
+> index a242269..df50a04 100644
+> --- a/drivers/dma/edma.c
+> +++ b/drivers/dma/edma.c
+> @@ -48,7 +48,7 @@
+>  
+>  /* Max of 16 segments per channel to conserve PaRAM slots */
+>  #define MAX_NR_SG		16
+> -#define EDMA_MAX_SLOTS		MAX_NR_SG
+> +#define EDMA_MAX_SLOTS		(MAX_NR_SG+1)
+>  #define EDMA_DESCRIPTORS	16
+>  
+>  struct edma_desc {
+> @@ -311,6 +311,9 @@ static struct dma_async_tx_descriptor *edma_prep_slave_sg(
+>  
+>  	num_slots_needed = sg_len > MAX_NR_SG ? MAX_NR_SG : sg_len;
+>  
+> +	/* Allocate one extra to account for the channel itself */
+> +	num_slots_needed++;
+
+You can do:
+
+	nslots = min(MAX_NR_SG, sg_len) + 1;
 
 Thanks,
 Sekhar
-
-> ---
->  drivers/dma/edma.c |   31 +++++++++++++++++++++++++++++++
->  1 file changed, 31 insertions(+)
-> 
-> diff --git a/drivers/dma/edma.c b/drivers/dma/edma.c
-> index 080d669..a242269 100644
-> --- a/drivers/dma/edma.c
-> +++ b/drivers/dma/edma.c
-> @@ -102,6 +102,37 @@ static void edma_desc_free(struct virt_dma_desc *vdesc)
->  	kfree(container_of(vdesc, struct edma_desc, vdesc));
->  }
->  
-> +static inline void dump_pset(struct edma_chan *echan, int slot,
-> +		     struct edmacc_param *pset_unused, int pset_idx)
-> +{
-> +	struct edmacc_param pset_local, *pset;
-> +	pset = &pset_local;
-> +
-> +	edma_read_slot(slot, pset);
-> +
-> +	dev_dbg(echan->vchan.chan.device->dev,
-> +		"\n pset[%d]:\n"
-> +		"  chnum\t%d\n"
-> +		"  slot\t%d\n"
-> +		"  opt\t%08x\n"
-> +		"  src\t%08x\n"
-> +		"  dst\t%08x\n"
-> +		"  abcnt\t%08x\n"
-> +		"  ccnt\t%08x\n"
-> +		"  bidx\t%08x\n"
-> +		"  cidx\t%08x\n"
-> +		"  lkrld\t%08x\n",
-> +		pset_idx, echan->ch_num, slot,
-> +		pset[0].opt,
-> +		pset[0].src,
-> +		pset[0].dst,
-> +		pset[0].a_b_cnt,
-> +		pset[0].ccnt,
-> +		pset[0].src_dst_bidx,
-> +		pset[0].src_dst_cidx,
-> +		pset[0].link_bcntrld);
-> +}
-> +
->  /* Dispatch a queued descriptor to the controller (caller holds lock) */
->  static void edma_execute(struct edma_chan *echan)
->  {
-> 
