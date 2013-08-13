@@ -1,17 +1,17 @@
 From: Joel Fernandes <joelf-l0cyMroinI0@public.gmane.org>
-Subject: Re: [PATCH v3 01/12] dma: edma: Setup parameters to DMA MAX_NR_SG
-	at a time
-Date: Mon, 12 Aug 2013 19:05:33 -0500
-Message-ID: <5209784D.8080502@ti.com>
+Subject: Re: [PATCH v3 09/12] dma: edma: Implement multiple linked sets for
+	continuity
+Date: Mon, 12 Aug 2013 20:00:57 -0500
+Message-ID: <52098549.7070505@ti.com>
 References: <1375719297-12871-1-git-send-email-joelf@ti.com>
-	<1375719297-12871-2-git-send-email-joelf@ti.com>
-	<52088B8B.9040000@ti.com>
+	<1375719297-12871-10-git-send-email-joelf@ti.com>
+	<52092FF7.7040508@ti.com>
 Reply-To: <joelf-l0cyMroinI0@public.gmane.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <davinci-linux-open-source-bounces+gld-davinci-linux-open-source=gmane.org-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
-In-Reply-To: <52088B8B.9040000-l0cyMroinI0@public.gmane.org>
+Return-path: <davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
+In-Reply-To: <52092FF7.7040508-l0cyMroinI0@public.gmane.org>
 List-Unsubscribe: <http://linux.davincidsp.com/mailman/options/davinci-linux-open-source>,
 	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://linux.davincidsp.com/pipermail/davinci-linux-open-source>
@@ -19,73 +19,246 @@ List-Post: <mailto:davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@pu
 List-Help: <mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=help>
 List-Subscribe: <http://linux.davincidsp.com/mailman/listinfo/davinci-linux-open-source>,
 	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=subscribe>
-Sender: <davinci-linux-open-source-bounces+gld-davinci-linux-open-source=gmane.org-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
-Errors-To: davinci-linux-open-source-bounces+gld-davinci-linux-open-source=gmane.org-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org
+Sender: <davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
+Errors-To: davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org
 To: Sekhar Nori <nsekhar-l0cyMroinI0@public.gmane.org>
-Cc: Linux DaVinci Kernel List <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, Linux OMAP List <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Rajendra Nayak <rnayak-l0cyMroinI0@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Sricharan R <r.sricharan-l0cyMroinI0@public.gmane.org>, Santosh Shilimkar <santosh.shilimkar-l0cyMroinI0@public.gmane.org>, Linux ARM Kernel List <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Dan Williams <djbw-b10kYP2dOMg@public.gmane.org>, Vinod Koul <vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Lokesh Vutla <lokeshvutla-l0cyMroinI0@public.gmane.org>
+Cc: Mark Brown <broonie-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Grant Likely <grant.likely-s3s/WqlpOiPyB63q8FvJNQ@public.gmane.org>, Sricharan R <r.sricharan-l0cyMroinI0@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Vinod Koul <vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Lokesh Vutla <lokeshvutla-l0cyMroinI0@public.gmane.org>, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Rajendra Nayak <rnayak-l0cyMroinI0@public.gmane.org>, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Jason Kridner <jkridner-hcmAuCOw+vXj4SYmN/TMmA@public.gmane.org>, Linux OMAP List <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux ARM Kernel List <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Linux DaVinci Kernel List <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, Balaji TK <balajitk-l0cyMroinI0@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Santosh Shilimkar <santosh.shilim>
 List-Id: linux-mmc@vger.kernel.org
 
-Responding to other comments in this post,
-
-On 08/12/2013 02:15 AM, Sekhar Nori wrote:
-
-[..]
->>  	if (unlikely(!echan || !sgl || !sg_len))
->>  		return NULL;
->> @@ -262,8 +262,11 @@ static struct dma_async_tx_descriptor *edma_prep_slave_sg(
+On 08/12/2013 01:56 PM, Sekhar Nori wrote:
+> On Monday 05 August 2013 04:14 PM, Joel Fernandes wrote:
+>> Here we implement splitting up of the total MAX number of slots
+>> available for a channel into 2 cyclically linked sets. Transfer
+>> completion Interrupts are enabled on both linked sets and respective
+>> handler recycles them on completion to process the next linked set.
+>> Both linked sets are cyclically linked to each other to ensure
+>> continuity of DMA operations. Interrupt handlers execute asynchronously
+>> to the EDMA events and recycles the linked sets at the right time,
+>> as a result EDMA is not blocked or dependent on interrupts and DMA
+>> continues till the end of the SG-lists without any interruption.
+>>
+>> Suggested-by: Sekhar Nori <nsekhar-l0cyMroinI0@public.gmane.org>
+>> Signed-off-by: Joel Fernandes <joelf-l0cyMroinI0@public.gmane.org>
+>> ---
+>>  drivers/dma/edma.c |  157 +++++++++++++++++++++++++++++++++++++++-------------
+>>  1 file changed, 118 insertions(+), 39 deletions(-)
+>>
+>> diff --git a/drivers/dma/edma.c b/drivers/dma/edma.c
+>> index df50a04..70923a2 100644
+>> --- a/drivers/dma/edma.c
+>> +++ b/drivers/dma/edma.c
+>> @@ -48,6 +48,7 @@
 >>  
->>  	edesc->pset_nr = sg_len;
+>>  /* Max of 16 segments per channel to conserve PaRAM slots */
+>>  #define MAX_NR_SG		16
+>> +#define MAX_NR_LS		(MAX_NR_SG >> 1)
+>>  #define EDMA_MAX_SLOTS		(MAX_NR_SG+1)
+>>  #define EDMA_DESCRIPTORS	16
 >>  
->> -	for_each_sg(sgl, sg, sg_len, i) {
->> -		/* Allocate a PaRAM slot, if needed */
->> +	/* Allocate a PaRAM slot, if needed */
->> +
->> +	num_slots_needed = sg_len > MAX_NR_SG ? MAX_NR_SG : sg_len;
-> 
-> nslots = min(MAX_NR_SG, sg_len);
-
-Changed to this, with the +1
-
-> 
->> +
->> +	for (i = 0; i < num_slots_needed; i++) {
->>  		if (echan->slot[i] < 0) {
->>  			echan->slot[i] =
->>  				edma_alloc_slot(EDMA_CTLR(echan->ch_num),
->> @@ -273,6 +276,10 @@ static struct dma_async_tx_descriptor *edma_prep_slave_sg(
->>  				return NULL;
->>  			}
->>  		}
->> +	}
->> +
->> +	/* Configure PaRAM sets for each SG */
->> +	for_each_sg(sgl, sg, sg_len, i) {
+>> @@ -57,6 +58,7 @@ struct edma_desc {
+>>  	int				absync;
+>>  	int				pset_nr;
+>>  	int				total_processed;
+>> +	int				next_setup_linkset;
+>>  	struct edmacc_param		pset[0];
+>>  };
 >>  
->>  		acnt = dev_width;
+>> @@ -140,7 +142,9 @@ static void edma_execute(struct edma_chan *echan)
+>>  	struct edma_desc *edesc;
+>>  	struct device *dev = echan->vchan.chan.device->dev;
 >>  
->> @@ -330,6 +337,7 @@ static struct dma_async_tx_descriptor *edma_prep_slave_sg(
->>  		/* Configure A or AB synchronized transfers */
->>  		if (edesc->absync)
->>  			edesc->pset[i].opt |= SYNCDIM;
+>> -	int i, j, total_left, total_process;
+>> +	int i, total_left, total_link_set;
+>> +	int ls_cur_off, ls_next_off, slot_off;
+>> +	struct edmacc_param tmp_param;
+>>  
+>>  	/* If either we processed all psets or we're still not started */
+>>  	if (!echan->edesc ||
+>> @@ -159,48 +163,121 @@ static void edma_execute(struct edma_chan *echan)
+>>  
+>>  	/* Find out how many left */
+>>  	total_left = edesc->pset_nr - edesc->total_processed;
+>> -	total_process = total_left > MAX_NR_SG ? MAX_NR_SG : total_left;
+>> -
+>> -
+>> -	/* Write descriptor PaRAM set(s) */
+>> -	for (i = 0; i < total_process; i++) {
+>> -		j = i + edesc->total_processed;
+>> -		edma_write_slot(echan->slot[i], &edesc->pset[j]);
+>> -		dev_dbg(echan->vchan.chan.device->dev,
+>> -			"\n pset[%d]:\n"
+>> -			"  chnum\t%d\n"
+>> -			"  slot\t%d\n"
+>> -			"  opt\t%08x\n"
+>> -			"  src\t%08x\n"
+>> -			"  dst\t%08x\n"
+>> -			"  abcnt\t%08x\n"
+>> -			"  ccnt\t%08x\n"
+>> -			"  bidx\t%08x\n"
+>> -			"  cidx\t%08x\n"
+>> -			"  lkrld\t%08x\n",
+>> -			j, echan->ch_num, echan->slot[i],
+>> -			edesc->pset[j].opt,
+>> -			edesc->pset[j].src,
+>> -			edesc->pset[j].dst,
+>> -			edesc->pset[j].a_b_cnt,
+>> -			edesc->pset[j].ccnt,
+>> -			edesc->pset[j].src_dst_bidx,
+>> -			edesc->pset[j].src_dst_cidx,
+>> -			edesc->pset[j].link_bcntrld);
+>> -		/* Link to the previous slot if not the last set */
+>> -		if (i != (total_process - 1))
+> 
+>> +	total_link_set = total_left > MAX_NR_LS ? MAX_NR_LS : total_left;
+> 
+> The name you gave here sounds like this is defining total number of
+> linked PaRAM sets. Rather this is actually tracking the number of PaRAM
+> sets (slots) in current linked set, correct? Then may be just call it
+> 'nslots' or even 'num_slots'? There are just too many variables with
+> "total" prefix to keep track of in this function!
+
+I would rather just leave this naming alone. The code is quite self
+documenting: total_link_set means "Calculate what's the total size of a
+Linkset, or total no.of slots in a linkset we need". This naming is fine
+in my opinion and doesn't hurt line size at all, instead improving code
+readability. I could dump the _ between link and set to make it:
+total_linkset if that makes it any easier.
+
+I agree there are too many variables in this function, but they each
+serve a different purpose and required to implement the algorithm, which
+is precisely I made them naming a bit more descriptive.
+
+> 
 >> +
+>> +	/* First time, setup 2 cyclically linked sets, each containing half
+>> +	   the slots allocated for this channel */
+>> +	if (edesc->total_processed == 0) {
 > 
-> Random extra newline.
+> We dont need to check for this case for every DMA_COMPLETE interrupt.
+> May be move the initial setup to another function called from
+> edma_issue_pending()?
 
-Removing..
+But how? That would only change the code to (?):
 
+        if (edesc->total_processed == 0) {
+		issue_pending();
+	}
+
+Further it maybe appear that this case is uncommon, but it is a very
+common case. Most SG transfers are within the SG limit, though at times
+the else case can execute a lot too.
+
+>> +		for (i = 0; i < total_link_set; i++) {
+>> +			edma_write_slot(echan->slot[i+1], &edesc->pset[i]);
+>> +
+>> +			if (i != total_link_set - 1) {
+>> +				edma_link(echan->slot[i+1], echan->slot[i+2]);
+>> +				dump_pset(echan, echan->slot[i+1],
+>> +					  edesc->pset, i);
+>> +			}
+>> +		}
+>> +
+>> +		edesc->total_processed += total_link_set;
+>> +
+>> +		total_left = edesc->pset_nr - edesc->total_processed;
+>> +
+>> +		total_link_set = total_left > MAX_NR_LS ?
+>> +				 MAX_NR_LS : total_left;
+>> +
+>> +		if (total_link_set) {
+>> +			/* Don't setup interrupt for first linked set for cases
+>> +			   where total pset_nr is strictly within MAX_NR size */
 > 
-> The patch as such is fine, but I dont think it makes lot of sense
-> standalone. This needs to be merged into the patch where you actually
-> handle the entire SG list in batches.
+> See Documentation/CodingStyle for multi-line commenting style.
 
-I think it does actually, this patch just takes care of preparing the
-param set list correctly and allocating slots. It doesn't the actual DMA
-or take part in the algorithm. As a result, the patch can be reused
-incase in future the main algorithm is rewritten in a subsequent series.
-Further this patch was reused straight from old implementation so it
-proved to be useful being a separate patch last time. I also plan to
-rewrite just this functionality in the future.
+Ok thanks, changed accordingly.
 
-Thanks,
+>> +			if (total_left > total_link_set)
+>> +				edma_enable_interrupt(echan->slot[i]);
+>> +
+>> +			/* Setup link between linked set 0 to set 1 */
+>>  			edma_link(echan->slot[i], echan->slot[i+1]);
+>> -		/* Final pset links to the dummy pset */
+>> -		else
+>> +
+>> +			dump_pset(echan, echan->slot[i], edesc->pset, i-1);
+>> +
+>> +			/* Write out linked set 1 */
+>> +			for (; i < total_link_set + MAX_NR_LS; i++) {
+>> +				edma_write_slot(echan->slot[i+1],
+>> +						&edesc->pset[i]);
+>> +
+>> +				if (i != total_link_set + MAX_NR_LS - 1) {
+>> +					edma_link(echan->slot[i+1],
+>> +						  echan->slot[i+2]);
+>> +					dump_pset(echan, echan->slot[i+1],
+>> +						  edesc->pset, i);
+>> +				}
+>> +			}
+>> +
+>> +			edesc->total_processed += total_link_set;
+>> +			total_left = edesc->pset_nr - edesc->total_processed;
+> 
+> There is way too much duplication of code here mainly because you
+> decided not to loop twice in the course of setting up the two linked
+> sets. Can you use a loop instead?
+
+I tried to do this in a loop, its not possible without making the code
+more unreadable and introducing more variables.
+
+Further the follow 3 conditions have to be incorporated into the loop
+some how which kind of makes it messy.. right now it is linearly
+determined which case to execute.
+
+/* Setup a link from linked set 1 to set 0 */
+
+/* Setup a link between linked set 1 to dummy */
+
+/* First linked set was enough, simply link to dummy */
+
+Since it is just a couple of lines more, I am more to the favor of
+keeping the code readable than saving a few lines (for a loop of only 2
+iterations) introducing more variables and making it look hackish. There
+is a good chance in future that if implemented in such a way that I have
+to spend quite a bit of time deciphering it.
+
+>> +
+>> +			if (total_left)
+>> +				/* Setup a link from linked set 1 to set 0 */
+>> +				edma_link(echan->slot[i], echan->slot[1]);
+> 
+> If you have more SGs to service at the end of setting up the two linked
+> sets, you should stop right there and wait for CPU to recycle the linked
+> sets. Right now you are setup for re-DMAing old data.
+
+The above linking you're quoting is done in advance _but_, before the
+link is traversed, it is _guaranteed_ that the linkset being traversed
+into will be recycled. This is the basis of the whole algorithm and
+making sure that we never stall. There never ever will be a case where
+we re-DMA old data because of the guarantee that the recycling will take
+place before the traversal.
+
+Further FWIW, interrupt takes few 100s microseconds to execute, where as
+DMA is seen to take milliseconds from 1 SG entry to another in my testing.
+
+> You wont hit this issue in testing because you have setup an interrupt
+> for LS0 and that will most likely service before LS1 completes but we
+> cannot rely on that timing.
+
+This goes back to my first patch series where we stall. That doesn't
+make any sense. In this patch series, we don't want DMA to stall at any
+cost.
+
+> Just link to dummy at end of LS1 to stall the DMA and wait for the
+> completion handler to come-in and restart the DMA after recycling LS0.
+
+Nope! Linking to dummy will absorb the events and the events will never
+get triggered again. Trust me I have already done what you are saying
+and it doesn't work.
+
+> I haven't reviewed rest of the patch. Lets make sure we have a common
+> understanding here.
+
+Sure, thanks.
 
 -Joel
