@@ -1,22 +1,22 @@
 From: Prabu Thangamuthu <Prabu.T@synopsys.com>
-Subject: [PATCH 1/1] mmc: dw_mmc: Add IDMAC 64-bit addressing mode support
-Date: Tue, 13 Aug 2013 07:50:15 +0000
-Message-ID: <705D14B1C7978B40A723277C067CEDE2CD75FE@IN01WEMBXB.internal.synopsys.com>
+Subject: [PATCH v2 1/1] mmc: dw_mmc: Add IDMAC 64-bit address mode support
+Date: Tue, 13 Aug 2013 13:23:42 +0000
+Message-ID: <705D14B1C7978B40A723277C067CEDE2CD76FE@IN01WEMBXB.internal.synopsys.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from us01smtp2.synopsys.com ([198.182.44.80]:64832 "EHLO
+Received: from kiruna.synopsys.com ([198.182.44.80]:34496 "EHLO
 	kiruna.synopsys.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755546Ab3HMHuV convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 13 Aug 2013 03:50:21 -0400
+	with ESMTP id S1757753Ab3HMNXt convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 13 Aug 2013 09:23:49 -0400
 Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>
+To: Chris Ball <cjb@laptop.org>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Arnd Bergmann <arnd@arndb.de>, Wei WANG <wei_wang@realsil.com.cn>, Ludovic Desroches <ludovic.desroches@atmel.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>
 Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Manjunath M Bettegowda <Manjunath.MB@synopsys.com>, "prabu.t@synopsys.com" <prabu.t@synopsys.com>
 
-Synopsys DW_MMC IP core supports Internal DMA Controller	
+Synopsys DW_MMC IP core supports Internal DMA Controller
 with 64-bit address mode from IP version 2.70a onwards.
 For 64-bit address mode, IP has new registers and different offset
 for some of the registers which were used in 32-bit address mode.
@@ -27,10 +27,34 @@ Tested the features in DW_MMC IP core v2.70a with HAPS-51 setup and driver is wo
 
 Signed-off-by: Prabu Thangamuthu <prabu.t@synopsys.com>
 ---
+Change log v2:
+	-Add the configuration.
+
+ drivers/mmc/host/Kconfig  |    9 ++++
  drivers/mmc/host/dw_mmc.c |  106 +++++++++++++++++++++++++++++++++++++++++++++
  drivers/mmc/host/dw_mmc.h |   11 +++++
- 2 files changed, 117 insertions(+), 0 deletions(-)
+ 3 files changed, 126 insertions(+), 0 deletions(-)
 
+diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+index 8a4c066..a5ef53f 100644
+--- a/drivers/mmc/host/Kconfig
++++ b/drivers/mmc/host/Kconfig
+@@ -544,6 +544,15 @@ config MMC_DW_IDMAC
+ 	  Designware Mobile Storage IP block. This disables the external DMA
+ 	  interface.
+ 
++config MMC_DW_IDMAC_64BIT_ADDRESS
++	bool "Internal DMAC with 64-bit address support"
++	depends on MMC_DW_IDMAC
++	help
++	  This selects support for the internal DMA controller with 64-bit
++	  address mode driver. This should be enabled only if the IP
++	  supports internal DMA controller block with 64-bit addressing
++	  mode.
++
+ config MMC_DW_PLTFM
+ 	tristate "Synopsys Designware MCI Support as platform device"
+ 	depends on MMC_DW
 diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
 index ee5f167..de60f61 100644
 --- a/drivers/mmc/host/dw_mmc.c
