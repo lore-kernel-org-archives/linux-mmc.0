@@ -1,24 +1,26 @@
 From: <dinguyen@altera.com>
-Subject: [PATCHv4 2/3] ARM: socfpga: dts: Add support for SD/MMC
-Date: Wed, 14 Aug 2013 11:48:03 -0500
-Message-ID: <1376498884-9199-2-git-send-email-dinguyen@altera.com>
+Subject: [PATCHv4 3/3] mmc: dw_mmc: Use phandle to get SDR timing values from sys-mgr
+Date: Wed, 14 Aug 2013 11:48:04 -0500
+Message-ID: <1376498884-9199-3-git-send-email-dinguyen@altera.com>
 References: <1376498884-9199-1-git-send-email-dinguyen@altera.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from va3ehsobe002.messaging.microsoft.com ([216.32.180.12]:57051
-	"EHLO va3outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S932831Ab3HNQsR (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 14 Aug 2013 12:48:17 -0400
+Received: from va3ehsobe002.messaging.microsoft.com ([216.32.180.12]:1692 "EHLO
+	va3outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S932831Ab3HNQsf (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 14 Aug 2013 12:48:35 -0400
 In-Reply-To: <1376498884-9199-1-git-send-email-dinguyen@altera.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: dinh.linux@gmail.com
-Cc: Dinh Nguyen <dinguyen@altera.com>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, Rob Herring <rob.herring@calxeda.com>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Stephen Warren <swarren@wwwdotorg.org>, Ian Campbell <ian.campbell@citrix.com>, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Cc: Dinh Nguyen <dinguyen@altera.com>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, Rob Herring <rob.herring@calxeda.com>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Stephen Warren <swarren@wwwdotorg.org>, Ian Campbell <ian.campbell@citrix.com>, Chris Ball <cjb@laptop.org>, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 
 From: Dinh Nguyen <dinguyen@altera.com>
 
-Add bindings for SD/MMC for SOCFPGA.
+Update the driver to get the system manager node from a phandle. Also, the
+driver can get the correct clock value from the common clock API, thus the
+"altr,dw-mshc-ciu-div" binding is not needed at all.
 
 Signed-off-by: Dinh Nguyen <dinguyen@altera.com>
 Cc: Jaehoon Chung <jh80.chung@samsung.com>
@@ -28,165 +30,70 @@ Cc: Pawel Moll <pawel.moll@arm.com>
 Cc: Mark Rutland <mark.rutland@arm.com>
 Cc: Stephen Warren <swarren@wwwdotorg.org>
 Cc: Ian Campbell <ian.campbell@citrix.com>
+Cc: Chris Ball <cjb@laptop.org>
 Cc: devicetree@vger.kernel.org
 Cc: linux-mmc@vger.kernel.org
 CC: linux-arm-kernel@lists.infradead.org
-
-v4:
-- Add a complete binding example in documentations
-- Add a phandle entry for "altr,sysmgr" which links the system
-  manager to the SD/MMC IP block that controls the SDR timings.
-- Split up patches
-        1/3 - Add syscon binding to sys-mgr node
-        2/3 - DTS bindings and documentation for SD/MMC on SOCFPGA
-        3/3 - Driver changes to use the bindings
-
-v3:
-- Explicitly reference synopsis-dw-mshc.txt for base bindings
-- Remove "dw-mshc-ciu-div" as driver can get clock information dts "ciu" entry
-- Fixed indentation issue
-
-v2:
-- Remove bus-width and extra line in documentation
-- Merge bindings example into a single node in documentation
 ---
- .../devicetree/bindings/mmc/socfpga-dw-mshc.txt    |   56 ++++++++++++++++++++
- arch/arm/boot/dts/socfpga.dtsi                     |   11 ++++
- arch/arm/boot/dts/socfpga_cyclone5.dts             |   13 +++++
- arch/arm/boot/dts/socfpga_vt.dts                   |   11 ++++
- 4 files changed, 91 insertions(+)
- create mode 100644 Documentation/devicetree/bindings/mmc/socfpga-dw-mshc.txt
+ drivers/mmc/host/dw_mmc-socfpga.c |   14 +++-----------
+ 1 file changed, 3 insertions(+), 11 deletions(-)
 
-diff --git a/Documentation/devicetree/bindings/mmc/socfpga-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/socfpga-dw-mshc.txt
-new file mode 100644
-index 0000000..eaf98cd
---- /dev/null
-+++ b/Documentation/devicetree/bindings/mmc/socfpga-dw-mshc.txt
-@@ -0,0 +1,56 @@
-+* Altera SOCFPGA specific extensions to the Synopsis Designware Mobile
-+  Storage Host Controller
-+
-+The Synopsis designware mobile storage host controller is used to interface
-+a SoC with storage medium such as eMMC or SD/MMC cards. This file documents
-+differences between the core Synopsis dw mshc controller properties described
-+by synopsis-dw-mshc.txt and the properties used by the SOCFPGA specific
-+extensions to the Synopsis Designware Mobile Storage Host Controller.
-+
-+Required Properties:
-+
-+* compatible: should be
-+	- "altr,socfpga-dw-mshc": for controllers with Altera SOCFPGA
-+	  specific extensions.
-+
-+* altr,dw-mshc-sdr-timing: Specifies the value of CIU clock phase shift value
-+  in transmit mode and CIU clock phase shift value in receive mode for single
-+  data rate mode operation. Refer to notes below for the order of the cells and the
-+  valid values.
-+
-+  Notes for the sdr-timing values:
-+
-+    The order of the cells should be
-+      - First Cell: CIU clock phase shift value for RX mode, smplsel bits in
-+	the system manager SDMMC control group.
-+      - Second Cell: CIU clock phase shift value for TX mode, drvsel bits in
-+	the system manager SDMMC control group.
-+
-+    Valid values for SDR CIU clock timing for SOCFPGA:
-+      - valid value for tx phase shift and rx phase shift is 0 to 7.
-+
-+* altr,sysmgr: Should be the phandle to the system_mgr node. As this is where
-+		this where the register that controls the CIU clock phases
-+		reside.
-+
-+Example:
-+	dwmmc0@ff704000 {
-+		compatible = "altr,socfpga-dw-mshc", "snps,dw-mshc";
-+		reg = <0xff704000 0x1000>;
-+		interrupts = <0 139 4>;
-+		fifo-depth = <0x400>;
-+		#address-cells = <1>;
-+		#size-cells = <0>;
-+		clocks = <&l4_mp_clk>, <&sdmmc_clk>;
-+		clock-names = "biu", "ciu";
-+		num-slots = <1>;
-+		supports-highspeed;
-+		broken-cd;
-+		altr,sysmgr = <&system_mgr>;
-+		altr,dw-mshc-sdr-timing = <0 3>;
-+
-+		slot@0 {
-+			reg = <0>;
-+			bus-width = <4>;
-+		};
-+	};
-diff --git a/arch/arm/boot/dts/socfpga.dtsi b/arch/arm/boot/dts/socfpga.dtsi
-index c31c8e9..9706767 100644
---- a/arch/arm/boot/dts/socfpga.dtsi
-+++ b/arch/arm/boot/dts/socfpga.dtsi
-@@ -468,6 +468,17 @@
- 			cache-level = <2>;
- 		};
+diff --git a/drivers/mmc/host/dw_mmc-socfpga.c b/drivers/mmc/host/dw_mmc-socfpga.c
+index 14b5961..73b4440 100644
+--- a/drivers/mmc/host/dw_mmc-socfpga.c
++++ b/drivers/mmc/host/dw_mmc-socfpga.c
+@@ -31,7 +31,6 @@
  
-+		mmc: dwmmc0@ff704000 {
-+			compatible = "altr,socfpga-dw-mshc";
-+			reg = <0xff704000 0x1000>;
-+			interrupts = <0 139 4>;
-+			fifo-depth = <0x400>;
-+			#address-cells = <1>;
-+			#size-cells = <0>;
-+			clocks = <&l4_mp_clk>, <&sdmmc_clk>;
-+			clock-names = "biu", "ciu";
-+		};
-+
- 		/* Local timer */
- 		timer@fffec600 {
- 			compatible = "arm,cortex-a9-twd-timer";
-diff --git a/arch/arm/boot/dts/socfpga_cyclone5.dts b/arch/arm/boot/dts/socfpga_cyclone5.dts
-index 973999d..698dde9 100644
---- a/arch/arm/boot/dts/socfpga_cyclone5.dts
-+++ b/arch/arm/boot/dts/socfpga_cyclone5.dts
-@@ -54,6 +54,19 @@
- 			status = "okay";
- 		};
+ /* SOCFPGA implementation specific driver private data */
+ struct dw_mci_socfpga_priv_data {
+-	u8	ciu_div; /* card interface unit divisor */
+ 	u32	hs_timing; /* bitmask for CIU clock phase shift */
+ 	struct regmap   *sysreg; /* regmap for system manager register */
+ };
+@@ -39,6 +38,7 @@ struct dw_mci_socfpga_priv_data {
+ static int dw_mci_socfpga_priv_init(struct dw_mci *host)
+ {
+ 	struct dw_mci_socfpga_priv_data *priv;
++	struct device_node *np = host->dev->of_node;
  
-+		dwmmc0@ff704000 {
-+			num-slots = <1>;
-+			supports-highspeed;
-+			broken-cd;
-+			altr,sysmgr = <&system_mgr>;
-+			altr,dw-mshc-sdr-timing = <0 3>;
-+
-+			slot@0 {
-+				reg = <0>;
-+				bus-width = <4>;
-+			};
-+		};
-+
- 		timer0@ffc08000 {
- 			clock-frequency = <100000000>;
- 		};
-diff --git a/arch/arm/boot/dts/socfpga_vt.dts b/arch/arm/boot/dts/socfpga_vt.dts
-index d1ec0ca..6f23121 100644
---- a/arch/arm/boot/dts/socfpga_vt.dts
-+++ b/arch/arm/boot/dts/socfpga_vt.dts
-@@ -46,6 +46,17 @@
- 			status = "okay";
- 		};
+ 	priv = devm_kzalloc(host->dev, sizeof(*priv), GFP_KERNEL);
+ 	if (!priv) {
+@@ -46,9 +46,9 @@ static int dw_mci_socfpga_priv_init(struct dw_mci *host)
+ 		return -ENOMEM;
+ 	}
  
-+		dwmmc0@ff704000 {
-+			num-slots = <1>;
-+			supports-highspeed;
-+			broken-cd;
-+
-+			slot@0 {
-+				reg = <0>;
-+				bus-width = <4>;
-+			};
-+		};
-+
- 		timer0@ffc08000 {
- 			clock-frequency = <7000000>;
- 		};
+-	priv->sysreg = syscon_regmap_lookup_by_compatible("altr,sys-mgr");
++	priv->sysreg = syscon_regmap_lookup_by_phandle(np, "altr,sysmgr");
+ 	if (IS_ERR(priv->sysreg)) {
+-		dev_err(host->dev, "regmap for altr,sys-mgr lookup failed.\n");
++		dev_err(host->dev, "No sysmgr phandle specified!\n");
+ 		return PTR_ERR(priv->sysreg);
+ 	}
+ 	host->priv = priv;
+@@ -64,8 +64,6 @@ static int dw_mci_socfpga_setup_clock(struct dw_mci *host)
+ 	regmap_write(priv->sysreg, SYSMGR_SDMMCGRP_CTRL_OFFSET,
+ 		priv->hs_timing);
+ 	clk_prepare_enable(host->ciu_clk);
+-
+-	host->bus_hz /= (priv->ciu_div + 1);
+ 	return 0;
+ }
+ 
+@@ -82,14 +80,8 @@ static int dw_mci_socfpga_parse_dt(struct dw_mci *host)
+ 	struct dw_mci_socfpga_priv_data *priv = host->priv;
+ 	struct device_node *np = host->dev->of_node;
+ 	u32 timing[2];
+-	u32 div = 0;
+ 	int ret;
+ 
+-	ret = of_property_read_u32(np, "altr,dw-mshc-ciu-div", &div);
+-	if (ret)
+-		dev_info(host->dev, "No dw-mshc-ciu-div specified, assuming 1");
+-	priv->ciu_div = div;
+-
+ 	ret = of_property_read_u32_array(np,
+ 			"altr,dw-mshc-sdr-timing", timing, 2);
+ 	if (ret)
 -- 
 1.7.9.5
 
