@@ -1,51 +1,131 @@
-From: Olof Johansson <olof@lixom.net>
-Subject: Re: [PATCH] mmc: dw_mmc-exynos: Common bindings for dw-mshc timing
-Date: Tue, 13 Aug 2013 22:29:40 -0700
-Message-ID: <20130814052940.GC16635@quad.lixom.net>
-References: <1376002520-7461-1-git-send-email-dinguyen@altera.com>
- <52096C75.1030305@wwwdotorg.org>
+From: Haijun Zhang <Haijun.Zhang@freescale.com>
+Subject: [PATCH 1/3 V5] mmc:core: parse voltage from device-tree
+Date: Wed, 14 Aug 2013 13:46:11 +0800
+Message-ID: <1376459171-21016-1-git-send-email-Haijun.Zhang@freescale.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pb0-f53.google.com ([209.85.160.53]:59761 "EHLO
-	mail-pb0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750810Ab3HNFaY (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 14 Aug 2013 01:30:24 -0400
-Received: by mail-pb0-f53.google.com with SMTP id up15so8840052pbc.26
-        for <linux-mmc@vger.kernel.org>; Tue, 13 Aug 2013 22:30:24 -0700 (PDT)
-Content-Disposition: inline
-In-Reply-To: <52096C75.1030305@wwwdotorg.org>
+Received: from va3ehsobe005.messaging.microsoft.com ([216.32.180.31]:7907 "EHLO
+	va3outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752429Ab3HNGkR (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 14 Aug 2013 02:40:17 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Stephen Warren <swarren@wwwdotorg.org>
-Cc: dinguyen@altera.com, dinh.linux@gmail.com, Arnd Bergmann <arnd@arndb.de>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, Rob Herring <rob.herring@calxeda.com>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Ian Campbell <ian.campbell@citrix.com>, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+To: linux-mmc@vger.kernel.org, linuxppc-dev@lists.ozlabs.org, galak@kernel.crashing.org
+Cc: cbouatmailru@gmail.com, cjb@laptop.org, scottwood@freescale.com, X.Xie@freescale.com, Haijun Zhang <Haijun.Zhang@freescale.com>, Haijun Zhang <haijun.zhang@freescale.com>
 
-On Mon, Aug 12, 2013 at 05:15:01PM -0600, Stephen Warren wrote:
-> On 08/08/2013 04:55 PM, dinguyen@altera.com wrote:
-> > From: Dinh Nguyen <dinguyen@altera.com>
-> > 
-> > Remove the "samsung" in "samsung,dw-mshc-ciu-div", "samsung,dw-mshc-sdr-timing",
-> > and "samsung,dw-mshc-ddr-timing". These characteristics are not applicable to
-> > just Samsung platforms, but to any platform that uses the Synopsis SD/MMC IP.
-> 
-> But the properties aren't globally standard; they apply specifically
-> anywhere that this particular Synopsis IP is present. As such, I think
-> at least a "synopsis," prefix is warranted.
+Add function to support get voltage from device-tree.
+If there are voltage-range specified in device-tree node, this function
+will parse it and return the available voltage mask.
 
-A prefix is only really needed when a vendor is making a vendor-specific
-extension on a shared binding. Since the whole binding is
-synopsis-specific, I don't think there's need for a prefix here.
+Signed-off-by: Haijun Zhang <haijun.zhang@freescale.com>
+---
+changes for v5:
+	- add binding spec for this device node
+changes for v4:
+	- Add new parameter mask to return voltages.
 
-> And the driver should probably support both the old and new property
-> names for backwards-compatibility?
+ .../devicetree/bindings/mmc/fsl-esdhc.txt          |  4 ++
+ drivers/mmc/core/core.c                            | 44 ++++++++++++++++++++++
+ include/linux/mmc/core.h                           |  2 +
+ 3 files changed, 50 insertions(+)
 
-Yes, that sounds appropriate if the binding is considered stable and
-otherwise good.
+diff --git a/Documentation/devicetree/bindings/mmc/fsl-esdhc.txt b/Documentation/devicetree/bindings/mmc/fsl-esdhc.txt
+index bd9be0b..b7943f3 100644
+--- a/Documentation/devicetree/bindings/mmc/fsl-esdhc.txt
++++ b/Documentation/devicetree/bindings/mmc/fsl-esdhc.txt
+@@ -19,6 +19,9 @@ Optional properties:
+     "bus-width = <1>" property.
+   - sdhci,auto-cmd12: specifies that a controller can only handle auto
+     CMD12.
++  - voltage-ranges : two cells are required, first cell specifies minimum
++    slot voltage (mV), second cell specifies maximum slot voltage (mV).
++    Several ranges could be specified.
+ 
+ Example:
+ 
+@@ -29,4 +32,5 @@ sdhci@2e000 {
+ 	interrupt-parent = <&ipic>;
+ 	/* Filled in by U-Boot */
+ 	clock-frequency = <0>;
++	voltage-ranges = <3300 3300>;
+ };
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 49a5bca..b9b9fb6 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -27,6 +27,7 @@
+ #include <linux/fault-inject.h>
+ #include <linux/random.h>
+ #include <linux/slab.h>
++#include <linux/of.h>
+ 
+ #include <linux/mmc/card.h>
+ #include <linux/mmc/host.h>
+@@ -1196,6 +1197,49 @@ u32 mmc_vddrange_to_ocrmask(int vdd_min, int vdd_max)
+ }
+ EXPORT_SYMBOL(mmc_vddrange_to_ocrmask);
+ 
++#ifdef CONFIG_OF
++
++/**
++ * mmc_of_parse_voltage - return mask of supported voltages
++ * @np: The device node need to be parsed.
++ * @mask: mask of voltages available for MMC/SD/SDIO
++ *
++ * 1. Return zero on success.
++ * 2. Return negative errno: voltage-range is invalid.
++ */
++int mmc_of_parse_voltage(struct device_node *np, u32 *mask)
++{
++	const u32 *voltage_ranges;
++	int num_ranges, i;
++
++	voltage_ranges = of_get_property(np, "voltage-ranges", &num_ranges);
++	num_ranges = num_ranges / sizeof(*voltage_ranges) / 2;
++	if (!voltage_ranges || !num_ranges) {
++		pr_info("%s: voltage-ranges unspecified\n", np->full_name);
++		return -EINVAL;
++	}
++
++	for (i = 0; i < num_ranges; i++) {
++		const int j = i * 2;
++		u32 ocr_mask;
++
++		ocr_mask = mmc_vddrange_to_ocrmask(
++				be32_to_cpu(voltage_ranges[j]),
++				be32_to_cpu(voltage_ranges[j + 1]));
++		if (!ocr_mask) {
++			pr_err("%s: voltage-range #%d is invalid\n",
++				np->full_name, i);
++			return -EINVAL;
++		}
++		*mask |= ocr_mask;
++	}
++
++	return 0;
++}
++EXPORT_SYMBOL(mmc_of_parse_voltage);
++
++#endif /* CONFIG_OF */
++
+ #ifdef CONFIG_REGULATOR
+ 
+ /**
+diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
+index 443243b..da51bec 100644
+--- a/include/linux/mmc/core.h
++++ b/include/linux/mmc/core.h
+@@ -208,6 +208,8 @@ static inline void mmc_claim_host(struct mmc_host *host)
+ 	__mmc_claim_host(host, NULL);
+ }
+ 
++struct device_node;
+ extern u32 mmc_vddrange_to_ocrmask(int vdd_min, int vdd_max);
++extern int mmc_of_parse_voltage(struct device_node *np, u32 *mask);
+ 
+ #endif /* LINUX_MMC_CORE_H */
+-- 
+1.8.0
 
-The alternative is to have everybody just use the samsung,*
-properties. There's nothing wrong with that per se, besides the fact
-that if it had been caught when creating the binding, there should have
-been no prefix and the properties should have been common.
 
-
--Olof
