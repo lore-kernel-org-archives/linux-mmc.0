@@ -1,265 +1,51 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH v2 1/1] mmc: dw_mmc: Add IDMAC 64-bit address mode support
-Date: Wed, 14 Aug 2013 13:20:40 +0900
-Message-ID: <520B0598.5070801@samsung.com>
-References: <705D14B1C7978B40A723277C067CEDE2CD76FE@IN01WEMBXB.internal.synopsys.com>
+From: Olof Johansson <olof@lixom.net>
+Subject: Re: [PATCH] mmc: dw_mmc-exynos: Common bindings for dw-mshc timing
+Date: Tue, 13 Aug 2013 22:29:40 -0700
+Message-ID: <20130814052940.GC16635@quad.lixom.net>
+References: <1376002520-7461-1-git-send-email-dinguyen@altera.com>
+ <52096C75.1030305@wwwdotorg.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout3.samsung.com ([203.254.224.33]:22155 "EHLO
-	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750780Ab3HNEUn (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 14 Aug 2013 00:20:43 -0400
-Received: from epcpsbgr5.samsung.com
- (u145.gpu120.samsung.co.kr [203.254.230.145])
- by mailout3.samsung.com (Oracle Communications Messaging Server 7u4-24.01
- (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTP id <0MRI00EL76O7GNI0@mailout3.samsung.com> for
- linux-mmc@vger.kernel.org; Wed, 14 Aug 2013 13:20:41 +0900 (KST)
-In-reply-to: <705D14B1C7978B40A723277C067CEDE2CD76FE@IN01WEMBXB.internal.synopsys.com>
+Received: from mail-pb0-f53.google.com ([209.85.160.53]:59761 "EHLO
+	mail-pb0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750810Ab3HNFaY (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 14 Aug 2013 01:30:24 -0400
+Received: by mail-pb0-f53.google.com with SMTP id up15so8840052pbc.26
+        for <linux-mmc@vger.kernel.org>; Tue, 13 Aug 2013 22:30:24 -0700 (PDT)
+Content-Disposition: inline
+In-Reply-To: <52096C75.1030305@wwwdotorg.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Prabu Thangamuthu <Prabu.T@synopsys.com>
-Cc: Chris Ball <cjb@laptop.org>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Arnd Bergmann <arnd@arndb.de>, Wei WANG <wei_wang@realsil.com.cn>, Ludovic Desroches <ludovic.desroches@atmel.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Manjunath M Bettegowda <Manjunath.MB@synopsys.com>
+To: Stephen Warren <swarren@wwwdotorg.org>
+Cc: dinguyen@altera.com, dinh.linux@gmail.com, Arnd Bergmann <arnd@arndb.de>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, Rob Herring <rob.herring@calxeda.com>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Ian Campbell <ian.campbell@citrix.com>, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 
-Hi Prabu,
-
-If IP version is the lower than 2.70a, 64bit address mode didn't support.
-How do you control on this case?
-(If CONFIG_MMC_DW_IDMAC_64BIT_ADDRESS is enabled and dw-mmc ip version is lower than 2.70a..)
-
-And I think that some code should reuse the existing code..
-
-Best Regards,
-Jaehoon Chung
-
-On 08/13/2013 10:23 PM, Prabu Thangamuthu wrote:
-> Synopsys DW_MMC IP core supports Internal DMA Controller
-> with 64-bit address mode from IP version 2.70a onwards.
-> For 64-bit address mode, IP has new registers and different offset
-> for some of the registers which were used in 32-bit address mode.
-> Added driver modifications under the macro CONFIG_MMC_DW_IDMAC_64BIT_ADDRESS
-> to support IDMAC 64-bit address mode.
+On Mon, Aug 12, 2013 at 05:15:01PM -0600, Stephen Warren wrote:
+> On 08/08/2013 04:55 PM, dinguyen@altera.com wrote:
+> > From: Dinh Nguyen <dinguyen@altera.com>
+> > 
+> > Remove the "samsung" in "samsung,dw-mshc-ciu-div", "samsung,dw-mshc-sdr-timing",
+> > and "samsung,dw-mshc-ddr-timing". These characteristics are not applicable to
+> > just Samsung platforms, but to any platform that uses the Synopsis SD/MMC IP.
 > 
-> Tested the features in DW_MMC IP core v2.70a with HAPS-51 setup and driver is working fine.
-> 
-> Signed-off-by: Prabu Thangamuthu <prabu.t@synopsys.com>
-> ---
-> Change log v2:
-> 	-Add the configuration.
-> 
->  drivers/mmc/host/Kconfig  |    9 ++++
->  drivers/mmc/host/dw_mmc.c |  106 +++++++++++++++++++++++++++++++++++++++++++++
->  drivers/mmc/host/dw_mmc.h |   11 +++++
->  3 files changed, 126 insertions(+), 0 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-> index 8a4c066..a5ef53f 100644
-> --- a/drivers/mmc/host/Kconfig
-> +++ b/drivers/mmc/host/Kconfig
-> @@ -544,6 +544,15 @@ config MMC_DW_IDMAC
->  	  Designware Mobile Storage IP block. This disables the external DMA
->  	  interface.
->  
-> +config MMC_DW_IDMAC_64BIT_ADDRESS
-> +	bool "Internal DMAC with 64-bit address support"
-> +	depends on MMC_DW_IDMAC
-> +	help
-> +	  This selects support for the internal DMA controller with 64-bit
-> +	  address mode driver. This should be enabled only if the IP
-> +	  supports internal DMA controller block with 64-bit addressing
-> +	  mode.
-> +
->  config MMC_DW_PLTFM
->  	tristate "Synopsys Designware MCI Support as platform device"
->  	depends on MMC_DW
-> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> index ee5f167..de60f61 100644
-> --- a/drivers/mmc/host/dw_mmc.c
-> +++ b/drivers/mmc/host/dw_mmc.c
-> @@ -55,7 +55,31 @@
->  				 SDMMC_IDMAC_INT_CES | SDMMC_IDMAC_INT_DU | \
->  				 SDMMC_IDMAC_INT_FBE | SDMMC_IDMAC_INT_RI | \
->  				 SDMMC_IDMAC_INT_TI)
-> +#ifdef CONFIG_MMC_DW_IDMAC_64BIT_ADDRESS
-> +struct idmac_desc64 {
-> +	u32		des0;	/* Control Descriptor */
-> +#define IDMAC_DES0_DIC	BIT(1)
-> +#define IDMAC_DES0_LD	BIT(2)
-> +#define IDMAC_DES0_FD	BIT(3)
-> +#define IDMAC_DES0_CH	BIT(4)
-> +#define IDMAC_DES0_ER	BIT(5)
-> +#define IDMAC_DES0_CES	BIT(30)
-> +#define IDMAC_DES0_OWN	BIT(31)
-> +
-> +	u32		des1;	/* Reserved */
->  
-> +	u32		des2;	/* Buffer sizes */
-> +#define IDMAC_SET_BUFFER1_SIZE(d, s) \
-> +	((d)->des2 = ((d)->des2 & 0x03ffe000) | ((s) & 0x1fff))
-> +
-> +	u32		des3;	/* Reserved */
-> +
-> +	u32		des4;	/* Lower 32-bits of Buffer Address Pointer 1*/
-> +	u32		des5;	/* Upper 32-bits of Buffer Address Pointer 1*/
-> +	u32		des6;	/* Lower 32-bits of Next Descriptor Address */
-> +	u32		des7;	/* Upper 32-bits of Next Descriptor Address */
-> +};
-> +#else
->  struct idmac_desc {
->  	u32		des0;	/* Control Descriptor */
->  #define IDMAC_DES0_DIC	BIT(1)
-> @@ -74,6 +98,7 @@ struct idmac_desc {
->  
->  	u32		des3;	/* buffer 2 physical address */
->  };
-> +#endif /* CONFIG_MMC_DW_IDMAC_64BIT_ADDRESS */
->  #endif /* CONFIG_MMC_DW_IDMAC */
->  
->  /**
-> @@ -365,6 +390,40 @@ static void dw_mci_idmac_complete_dma(struct dw_mci *host)
->  	}
->  }
->  
-> +#ifdef CONFIG_MMC_DW_IDMAC_64BIT_ADDRESS
-> +static void dw_mci_translate_sglist(struct dw_mci *host, struct mmc_data *data,
-> +				    unsigned int sg_len)
-> +{
-> +	int i;
-> +	struct idmac_desc64 *desc = host->sg_cpu;
-> +
-> +	for (i = 0; i < sg_len; i++, desc++) {
-> +		unsigned int length = sg_dma_len(&data->sg[i]);
-> +		u64 mem_addr = sg_dma_address(&data->sg[i]);
-> +
-> +		/* Set the OWN bit and disable interrupts for this descriptor */
-> +		desc->des0 = IDMAC_DES0_OWN | IDMAC_DES0_DIC | IDMAC_DES0_CH;
-> +
-> +		/* Buffer length */
-> +		IDMAC_SET_BUFFER1_SIZE(desc, length);
-> +
-> +		/* Physical address to DMA to/from */
-> +		desc->des4 = mem_addr & 0xffffffff;
-> +		desc->des5 = mem_addr >> 32;
-> +	}
-> +
-> +	/* Set first descriptor */
-> +	desc = host->sg_cpu;
-> +	desc->des0 |= IDMAC_DES0_FD;
-> +
-> +	/* Set last descriptor */
-> +	desc = host->sg_cpu + (i - 1) * sizeof(struct idmac_desc64);
-> +	desc->des0 &= ~(IDMAC_DES0_CH | IDMAC_DES0_DIC);
-> +	desc->des0 |= IDMAC_DES0_LD;
-> +
-> +	wmb();
-> +}
-> +#else
->  static void dw_mci_translate_sglist(struct dw_mci *host, struct mmc_data *data,
->  				    unsigned int sg_len)
->  {
-> @@ -396,6 +455,7 @@ static void dw_mci_translate_sglist(struct dw_mci *host, struct mmc_data *data,
->  
->  	wmb();
->  }
-> +#endif /* CONFIG_MMC_DW_IDMAC_64BIT_ADDRESS */
->  
->  static void dw_mci_idmac_start_dma(struct dw_mci *host, unsigned int sg_len)
->  {
-> @@ -419,6 +479,40 @@ static void dw_mci_idmac_start_dma(struct dw_mci *host, unsigned int sg_len)
->  	mci_writel(host, PLDMND, 1);
->  }
->  
-> +#ifdef CONFIG_MMC_DW_IDMAC_64BIT_ADDRESS
-> +static int dw_mci_idmac_init(struct dw_mci *host)
-> +{
-> +	struct idmac_desc64 *p;
-> +	int i;
-> +
-> +	/* Number of descriptors in the ring buffer */
-> +	host->ring_size = PAGE_SIZE / sizeof(struct idmac_desc64);
-> +
-> +	/* Forward link the descriptor list */
-> +	for (i = 0, p = host->sg_cpu; i < host->ring_size - 1; i++, p++) {
-> +		p->des6 = (host->sg_dma + (sizeof(struct idmac_desc64) *
-> +						(i + 1))) & 0xffffffff;
-> +		p->des7 = (host->sg_dma + (sizeof(struct idmac_desc64) *
-> +						(i + 1))) >> 32;
-> +	}
-> +
-> +	/* Set the last descriptor as the end-of-ring descriptor */
-> +	p->des6 = host->sg_dma & 0xffffffff;
-> +	p->des7 = host->sg_dma >> 32;
-> +	p->des0 = IDMAC_DES0_ER;
-> +
-> +	mci_writel(host, BMOD, SDMMC_IDMAC_SWRESET);
-> +
-> +	/* Mask out interrupts - get Tx & Rx complete only */
-> +	mci_writel(host, IDINTEN, SDMMC_IDMAC_INT_NI | SDMMC_IDMAC_INT_RI |
-> +		   SDMMC_IDMAC_INT_TI);
-> +
-> +	/* Set the descriptor base address */
-> +	mci_writel(host, DBADDRL, host->sg_dma & 0xffffffff);
-> +	mci_writel(host, DBADDRU, host->sg_dma >> 32);
-> +	return 0;
-> +}
-> +#else
->  static int dw_mci_idmac_init(struct dw_mci *host)
->  {
->  	struct idmac_desc *p;
-> @@ -446,6 +540,7 @@ static int dw_mci_idmac_init(struct dw_mci *host)
->  	mci_writel(host, DBADDR, host->sg_dma);
->  	return 0;
->  }
-> +#endif /* CONFIG_MMC_DW_IDMAC_64BIT_ADDRESS */
->  
->  static const struct dw_mci_dma_ops dw_mci_idmac_ops = {
->  	.init = dw_mci_idmac_init,
-> @@ -2036,6 +2131,17 @@ static void dw_mci_cleanup_slot(struct dw_mci_slot *slot, unsigned int id)
->  
->  static void dw_mci_init_dma(struct dw_mci *host)
->  {
-> +	u32 addr_config;
-> +	/* Check ADDR_CONFIG bit in HCON to find IDMAC address bus width */
-> +	addr_config = (mci_readl(host, HCON) >> 27) & 0x01;
-> +	if (addr_config) {
-> +		dev_info(host->dev, "IDMAC with 64-bit address mode.\n");
-> +		if (!dma_set_mask(host->dev, DMA_BIT_MASK(64)))
-> +			dma_set_coherent_mask(host->dev, DMA_BIT_MASK(64));
-> +		else
-> +			goto no_dma;
-> +	}
-> +
->  	/* Alloc memory for sg translation */
->  	host->sg_cpu = dmam_alloc_coherent(host->dev, PAGE_SIZE,
->  					  &host->sg_dma, GFP_KERNEL);
-> diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
-> index 81b2994..a3a5e9c 100644
-> --- a/drivers/mmc/host/dw_mmc.h
-> +++ b/drivers/mmc/host/dw_mmc.h
-> @@ -48,11 +48,22 @@
->  #define SDMMC_UHS_REG		0x074
->  #define SDMMC_BMOD		0x080
->  #define SDMMC_PLDMND		0x084
-> +#ifdef CONFIG_MMC_DW_IDMAC_64BIT_ADDRESS
-> +#define SDMMC_DBADDRL		0x088
-> +#define SDMMC_DBADDRU		0x08c
-> +#define SDMMC_IDSTS		0x090
-> +#define SDMMC_IDINTEN		0x094
-> +#define SDMMC_DSCADDRL		0x098
-> +#define SDMMC_DSCADDRU		0x09c
-> +#define SDMMC_BUFADDRL		0x0A0
-> +#define SDMMC_BUFADDRU		0x0A4
-> +#else
->  #define SDMMC_DBADDR		0x088
->  #define SDMMC_IDSTS		0x08c
->  #define SDMMC_IDINTEN		0x090
->  #define SDMMC_DSCADDR		0x094
->  #define SDMMC_BUFADDR		0x098
-> +#endif
->  #define SDMMC_DATA(x)		(x)
->  
->  /*
-> 
+> But the properties aren't globally standard; they apply specifically
+> anywhere that this particular Synopsis IP is present. As such, I think
+> at least a "synopsis," prefix is warranted.
 
+A prefix is only really needed when a vendor is making a vendor-specific
+extension on a shared binding. Since the whole binding is
+synopsis-specific, I don't think there's need for a prefix here.
+
+> And the driver should probably support both the old and new property
+> names for backwards-compatibility?
+
+Yes, that sounds appropriate if the binding is considered stable and
+otherwise good.
+
+The alternative is to have everybody just use the samsung,*
+properties. There's nothing wrong with that per se, besides the fact
+that if it had been caught when creating the binding, there should have
+been no prefix and the properties should have been common.
+
+
+-Olof
