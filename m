@@ -1,46 +1,41 @@
-From: Daniel Mack <zonque@gmail.com>
-Subject: [PATCH] mmc: omap_hsmmc: get capabilities from DT
-Date: Wed, 14 Aug 2013 22:40:13 +0200
-Message-ID: <1376512813-27892-1-git-send-email-zonque@gmail.com>
+From: Brian Norris <computersforpeace@gmail.com>
+Subject: Re: [PATCH 1/7] mmc: lock: Use the kernel "KEYS" subsystem to get a card's password
+Date: Thu, 15 Aug 2013 01:16:12 +0000 (UTC)
+Message-ID: <loom.20130815T031441-68@post.gmane.org>
+References: <1376407290-21477-1-git-send-email-alcooperx@gmail.com> <1376407290-21477-2-git-send-email-alcooperx@gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from svenfoo.org ([82.94.215.22]:35443 "EHLO mail.zonque.de"
+Received: from plane.gmane.org ([80.91.229.3]:38638 "EHLO plane.gmane.org"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1760417Ab3HNUkZ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 14 Aug 2013 16:40:25 -0400
+	id S1758378Ab3HOBUF (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 14 Aug 2013 21:20:05 -0400
+Received: from list by plane.gmane.org with local (Exim 4.69)
+	(envelope-from <glkm-linux-mmc@m.gmane.org>)
+	id 1V9mEN-0007w0-ND
+	for linux-mmc@vger.kernel.org; Thu, 15 Aug 2013 03:20:04 +0200
+Received: from 5520-maca-inet1-outside.broadcom.com ([216.31.211.11])
+        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <linux-mmc@vger.kernel.org>; Thu, 15 Aug 2013 03:20:03 +0200
+Received: from computersforpeace by 5520-maca-inet1-outside.broadcom.com with local (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <linux-mmc@vger.kernel.org>; Thu, 15 Aug 2013 03:20:03 +0200
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: balajitk@ti.com, linux-mmc@vger.kernel.org
-Cc: cjb@laptop.org, linux-arm-kernel@lists.infradead.org, Daniel Mack <zonque@gmail.com>
+To: linux-mmc@vger.kernel.org
 
-When used in DT mode, the omap hsmmc driver has to take capabilites
-given in DT by calling mmc_of_parse().
+Al Cooper <alcooperx@gmail.com> writes:
+> From: Al Cooper <acooper@broadcom.com>
+> 
+> Use the kernel "KEYS" subsystem to get a password for a card based on
+> the card's CID. This code was based on a patch set submitted by
+> Anderson Briglia in 2006.
+> 
+> refs #SWLINUX-2545
 
-Signed-off-by: Daniel Mack <zonque@gmail.com>
----
- drivers/mmc/host/omap_hsmmc.c | 10 +++++++++-
- 1 file changed, 9 insertions(+), 1 deletion(-)
+You'll want to drop these tags, as they don't have any use in Linus' git logs.
 
-diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index 1865321..31337c1 100644
---- a/drivers/mmc/host/omap_hsmmc.c
-+++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -1907,7 +1907,15 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
- 	if (mmc_slot(host).nonremovable)
- 		mmc->caps |= MMC_CAP_NONREMOVABLE;
- 
--	mmc->pm_caps = mmc_slot(host).pm_caps;
-+	if (pdev->dev.of_node) {
-+		ret = mmc_of_parse(mmc);
-+		if (ret < 0) {
-+			dev_err(&pdev->dev, "mmc_of_parse() failed: %d\n", ret);
-+			goto err_irq;
-+		}
-+	} else {
-+		mmc->pm_caps = mmc_slot(host).pm_caps;
-+	}
- 
- 	omap_hsmmc_conf_bus_power(host);
- 
--- 
-1.8.3.1
+Brian
 
