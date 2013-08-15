@@ -1,68 +1,63 @@
 From: Georgi Djakov <gdjakov@mm-sol.com>
-Subject: [PATCH 2/5] mmc: sdhci: add quirk for slow interrupt clearance
-Date: Thu, 15 Aug 2013 17:32:17 +0300
-Message-ID: <1376577140-2652-3-git-send-email-gdjakov@mm-sol.com>
+Subject: [PATCH 4/5] mmc: sdhci: add quirk for max_discard calculation
+Date: Thu, 15 Aug 2013 17:32:19 +0300
+Message-ID: <1376577140-2652-5-git-send-email-gdjakov@mm-sol.com>
 References: <1376577140-2652-1-git-send-email-gdjakov@mm-sol.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from ns.mm-sol.com ([212.124.72.66]:52513 "EHLO extserv.mm-sol.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1757786Ab3HOOcL (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 15 Aug 2013 10:32:11 -0400
 In-Reply-To: <1376577140-2652-1-git-send-email-gdjakov@mm-sol.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: cjb@laptop.org
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Georgi Djakov <gdjakov@mm-sol.com>, Venkat Gopalakrishnan <venkatg@codeaurora.org>, Asutosh Das <asutoshd@codeaurora.org>, Sahitya Tummala <stummala@codeaurora.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: cjb@laptop.org
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Georgi Djakov <gdjakov@mm-sol.com>, Krishna Konda <kkonda@codeaurora.org>
 
-Initial version of Qualcomm SDHC has a hardware issue. This patch adds
-a quirk SDHCI_QUIRK2_SLOW_INT_CLR to enable a workaround.
+The SDHCI driver by default specifies a parameter that causes the core
+layer to calculate a max discard value which will be set on the mmc queue.
+Unfortunately the value calculated because of this would be very small
+compared to what comes in by default. As a result of this, any secure
+discard kind of operations are very slow.
 
-Hardware issue: Slow interrupt clearance at 400KHz may cause host
-driver interrupt handler to be called twice.
+Add quirk so that the SDHCI host can use the default max_discard value.
 
-Software workaround: Add 40us delay in interrupt handler when operating at
-initialization frequency(400KHz).
-
-CC: Venkat Gopalakrishnan <venkatg@codeaurora.org>
-CC: Asutosh Das <asutoshd@codeaurora.org>
-CC: Sahitya Tummala <stummala@codeaurora.org>
+CC: Krishna Konda <kkonda@codeaurora.org>
 Signed-off-by: Georgi Djakov <gdjakov@mm-sol.com>
 ---
- drivers/mmc/host/sdhci.c  |    6 ++++++
- include/linux/mmc/sdhci.h |    2 ++
- 2 files changed, 8 insertions(+)
+ drivers/mmc/host/sdhci.c  |    3 ++-
+ include/linux/mmc/sdhci.h |    4 ++++
+ 2 files changed, 6 insertions(+), 1 deletion(-)
 
 diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 57659fb..d3c9e59 100644
+index 39544b4..e21bb6f 100644
 --- a/drivers/mmc/host/sdhci.c
 +++ b/drivers/mmc/host/sdhci.c
-@@ -2460,12 +2460,18 @@ again:
- 	if (intmask & SDHCI_INT_CMD_MASK) {
- 		sdhci_writel(host, intmask & SDHCI_INT_CMD_MASK,
- 			SDHCI_INT_STATUS);
-+		if ((host->quirks2 & SDHCI_QUIRK2_SLOW_INT_CLR) &&
-+				(host->clock <= 400000))
-+			udelay(40);
- 		sdhci_cmd_irq(host, intmask & SDHCI_INT_CMD_MASK);
- 	}
+@@ -2957,7 +2957,8 @@ int sdhci_add_host(struct sdhci_host *host)
+ 	if (host->quirks & SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK)
+ 		host->timeout_clk = mmc->f_max / 1000;
  
- 	if (intmask & SDHCI_INT_DATA_MASK) {
- 		sdhci_writel(host, intmask & SDHCI_INT_DATA_MASK,
- 			SDHCI_INT_STATUS);
-+		if ((host->quirks2 & SDHCI_QUIRK2_SLOW_INT_CLR) &&
-+				(host->clock <= 400000))
-+			udelay(40);
- 		sdhci_data_irq(host, intmask & SDHCI_INT_DATA_MASK);
- 	}
+-	mmc->max_discard_to = (1 << 27) / host->timeout_clk;
++	if (!(host->quirks2 & SDHCI_QUIRK2_USE_MAX_DISCARD_SIZE))
++		mmc->max_discard_to = (1 << 27) / host->timeout_clk;
+ 
+ 	mmc->caps |= MMC_CAP_SDIO_IRQ | MMC_CAP_ERASE | MMC_CAP_CMD23;
  
 diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
-index 3783f4c..afd7cdf 100644
+index 603ef9d..f42f6dd 100644
 --- a/include/linux/mmc/sdhci.h
 +++ b/include/linux/mmc/sdhci.h
-@@ -100,6 +100,8 @@ struct sdhci_host {
- #define SDHCI_QUIRK2_BROKEN_HOST_CONTROL		(1<<5)
- /* Controller cannot de-assert Read/Write Transfer Active after transaction */
- #define SDHCI_QUIRK2_RDWR_TX_ACTIVE_EOT		(1<<6)
-+/* Controller clears interrupt slowly and IRQ handler may be called twice */
-+#define SDHCI_QUIRK2_SLOW_INT_CLR			(1<<7)
+@@ -104,6 +104,10 @@ struct sdhci_host {
+ #define SDHCI_QUIRK2_SLOW_INT_CLR			(1<<7)
+ /* Ignore CMD CRC errors for tuning commands */
+ #define SDHCI_QUIRK2_IGNORE_CMDCRC_FOR_TUNING		(1<<8)
++/* Dont use the max_discard_to so that the maximum discard unit gets picked by
++ * the mmc queue. Otherwise, it takes a long time for secure discard kind of
++ * operations to complete. */
++#define SDHCI_QUIRK2_USE_MAX_DISCARD_SIZE		(1<<9)
  
  	int irq;		/* Device IRQ */
  	void __iomem *ioaddr;	/* Mapped address */
 -- 
 1.7.9.5
+
