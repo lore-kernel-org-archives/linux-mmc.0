@@ -1,129 +1,93 @@
 From: Yuvaraj Kumar C D <yuvaraj.cd@gmail.com>
-Subject: [RFC 3/3] mmc: dw_mmc: exynos: add a quirk for SMU.
-Date: Fri, 16 Aug 2013 17:25:09 +0530
-Message-ID: <1376654109-32119-3-git-send-email-yuvaraj.cd@samsung.com>
-References: <1376654109-32119-1-git-send-email-yuvaraj.cd@samsung.com>
+Subject: [RFC 1/3] mmc: dw_mmc: exynos: move the exynos private init
+Date: Fri, 16 Aug 2013 19:17:40 +0530
+Message-ID: <1376660862-387-1-git-send-email-yuvaraj.cd@samsung.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pd0-f178.google.com ([209.85.192.178]:38807 "EHLO
-	mail-pd0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754417Ab3HPLzv (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 16 Aug 2013 07:55:51 -0400
-Received: by mail-pd0-f178.google.com with SMTP id w10so2143202pde.23
-        for <linux-mmc@vger.kernel.org>; Fri, 16 Aug 2013 04:55:50 -0700 (PDT)
-In-Reply-To: <1376654109-32119-1-git-send-email-yuvaraj.cd@samsung.com>
+Received: from mail-pa0-f44.google.com ([209.85.220.44]:48338 "EHLO
+	mail-pa0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754517Ab3HPNr5 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 16 Aug 2013 09:47:57 -0400
+Received: by mail-pa0-f44.google.com with SMTP id fz6so1898979pac.31
+        for <linux-mmc@vger.kernel.org>; Fri, 16 Aug 2013 06:47:57 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: cjb@laptop.org, jh80.chung@samsung.com, tgih.jun@samsung.com, linux-mmc@vger.kernel.org, thomas.ab@samsung.com
 Cc: Yuvaraj Kumar C D <yuvaraj.cd@samsung.com>
 
-Exynos5420 Mobile Storage Host controller has Security Management Unit
-(SMU) for channel 0 and channel 1 (mainly for eMMC).This patch adds a
-quirk to bypass SMU as it is not being used yet.
-
-This patch is on top of the below patch by Doug Anderson.
-mmc: dw_mmc: Add exynos resume_noirq callback to clear WAKEUP_INT
+Currently platform specific private data initialisation is done by
+dw_mci_exynos_priv_init and dw_mci_exynos_parse_dt.As we already have
+separate platform specific device tree parser dw_mci_exynos_parse_dt,
+move the dw_mci_exynos_priv_init code to dw_mci_exynos_parse_dt.
+We can use the dw_mci_exynos_priv_init to do some actual platform
+specific initialisation of SMU and etc.
 
 Signed-off-by: Yuvaraj Kumar C D <yuvaraj.cd@samsung.com>
 ---
- drivers/mmc/host/dw_mmc-exynos.c |   41 ++++++++++++++++++++++++++++++++++++++
- drivers/mmc/host/dw_mmc.c        |    3 +++
- include/linux/mmc/dw_mmc.h       |    2 ++
- 3 files changed, 46 insertions(+)
+ drivers/mmc/host/dw_mmc-exynos.c |   31 +++++++++++++++----------------
+ 1 file changed, 15 insertions(+), 16 deletions(-)
 
 diff --git a/drivers/mmc/host/dw_mmc-exynos.c b/drivers/mmc/host/dw_mmc-exynos.c
-index 19c845b..5d82c45 100644
+index 9990f98..19c845b 100644
 --- a/drivers/mmc/host/dw_mmc-exynos.c
 +++ b/drivers/mmc/host/dw_mmc-exynos.c
-@@ -35,6 +35,25 @@
- #define EXYNOS4210_FIXED_CIU_CLK_DIV	2
- #define EXYNOS4412_FIXED_CIU_CLK_DIV	4
+@@ -72,22 +72,8 @@ static struct dw_mci_exynos_compatible {
  
-+/* Block number in eMMC */
-+#define DWMCI_BLOCK_NUM			0xFFFFFFFF
-+
-+#define SDMMC_EMMCP_BASE		0x1000
-+#define SDMMC_MPSECURITY		(SDMMC_EMMCP_BASE + 0x0010)
-+#define SDMMC_MPSBEGIN0			(SDMMC_EMMCP_BASE + 0x0200)
-+#define SDMMC_MPSEND0			(SDMMC_EMMCP_BASE + 0x0204)
-+#define SDMMC_MPSCTRL0			(SDMMC_EMMCP_BASE + 0x020C)
-+
-+/* SMU control bits */
-+#define DWMCI_MPSCTRL_SECURE_READ_BIT		BIT(7)
-+#define DWMCI_MPSCTRL_SECURE_WRITE_BIT		BIT(6)
-+#define DWMCI_MPSCTRL_NON_SECURE_READ_BIT	BIT(5)
-+#define DWMCI_MPSCTRL_NON_SECURE_WRITE_BIT	BIT(4)
-+#define DWMCI_MPSCTRL_USE_FUSE_KEY		BIT(3)
-+#define DWMCI_MPSCTRL_ECB_MODE			BIT(2)
-+#define DWMCI_MPSCTRL_ENCRYPTION		BIT(1)
-+#define DWMCI_MPSCTRL_VALID			BIT(0)
-+
- /* Variations in Exynos specific dw-mshc controller */
- enum dw_mci_exynos_type {
- 	DW_MCI_TYPE_EXYNOS4210,
-@@ -74,6 +93,17 @@ static int dw_mci_exynos_priv_init(struct dw_mci *host)
+ static int dw_mci_exynos_priv_init(struct dw_mci *host)
  {
- 	struct dw_mci_exynos_priv_data *priv = host->priv;
+-	struct dw_mci_exynos_priv_data *priv;
+-	int idx;
+-
+-	priv = devm_kzalloc(host->dev, sizeof(*priv), GFP_KERNEL);
+-	if (!priv) {
+-		dev_err(host->dev, "mem alloc failed for private data\n");
+-		return -ENOMEM;
+-	}
+-
+-	for (idx = 0; idx < ARRAY_SIZE(exynos_compat); idx++) {
+-		if (of_device_is_compatible(host->dev->of_node,
+-					exynos_compat[idx].compatible))
+-			priv->ctrl_type = exynos_compat[idx].ctrl_type;
+-	}
++	struct dw_mci_exynos_priv_data *priv = host->priv;
  
-+	if (priv->ctrl_type == DW_MCI_TYPE_EXYNOS5420 &&
-+		host->pdata->quirks & DW_MCI_QUIRK_BYPASS_SMU) {
-+			mci_writel(host, MPSBEGIN0, 0);
-+			mci_writel(host, MPSEND0, DWMCI_BLOCK_NUM);
-+			mci_writel(host, MPSCTRL0,
-+			DWMCI_MPSCTRL_SECURE_WRITE_BIT |
-+			DWMCI_MPSCTRL_NON_SECURE_READ_BIT |
-+			DWMCI_MPSCTRL_VALID |
-+			DWMCI_MPSCTRL_NON_SECURE_WRITE_BIT);
-+	}
-+
+-	host->priv = priv;
  	return 0;
  }
  
-@@ -106,7 +136,18 @@ static int dw_mci_exynos_suspend(struct device *dev)
- static int dw_mci_exynos_resume(struct device *dev)
- {
- 	struct dw_mci *host = dev_get_drvdata(dev);
-+	struct dw_mci_exynos_priv_data *priv = host->priv;
+@@ -177,12 +163,24 @@ static void dw_mci_exynos_set_ios(struct dw_mci *host, struct mmc_ios *ios)
  
-+	if (priv->ctrl_type == DW_MCI_TYPE_EXYNOS5420 &&
-+		host->pdata->quirks & DW_MCI_QUIRK_BYPASS_SMU) {
-+			mci_writel(host, MPSBEGIN0, 0);
-+			mci_writel(host, MPSEND0, DWMCI_BLOCK_NUM);
-+			mci_writel(host, MPSCTRL0,
-+			DWMCI_MPSCTRL_SECURE_WRITE_BIT |
-+			DWMCI_MPSCTRL_NON_SECURE_READ_BIT |
-+			DWMCI_MPSCTRL_VALID |
-+			DWMCI_MPSCTRL_NON_SECURE_WRITE_BIT);
+ static int dw_mci_exynos_parse_dt(struct dw_mci *host)
+ {
+-	struct dw_mci_exynos_priv_data *priv = host->priv;
++	struct dw_mci_exynos_priv_data *priv;
+ 	struct device_node *np = host->dev->of_node;
+ 	u32 timing[2];
+ 	u32 div = 0;
++	int idx;
+ 	int ret;
+ 
++	priv = devm_kzalloc(host->dev, sizeof(*priv), GFP_KERNEL);
++	if (!priv) {
++		dev_err(host->dev, "mem alloc failed for private data\n");
++		return -ENOMEM;
 +	}
- 	return dw_mci_resume(host);
++
++	for (idx = 0; idx < ARRAY_SIZE(exynos_compat); idx++) {
++		if (of_device_is_compatible(np, exynos_compat[idx].compatible))
++			priv->ctrl_type = exynos_compat[idx].ctrl_type;
++	}
++
+ 	of_property_read_u32(np, "samsung,dw-mshc-ciu-div", &div);
+ 	priv->ciu_div = div;
+ 
+@@ -199,6 +197,7 @@ static int dw_mci_exynos_parse_dt(struct dw_mci *host)
+ 		return ret;
+ 
+ 	priv->ddr_timing = SDMMC_CLKSEL_TIMING(timing[0], timing[1], div);
++	host->priv = priv;
+ 	return 0;
  }
  
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 0c0cada..49df69f 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -2107,6 +2107,9 @@ static struct dw_mci_of_quirks {
- 	}, {
- 		.quirk	= "broken-cd",
- 		.id	= DW_MCI_QUIRK_BROKEN_CARD_DETECTION,
-+	}, {
-+		.quirk	= "bypass-smu",
-+		.id	= DW_MCI_QUIRK_BYPASS_SMU,
- 	},
- };
- 
-diff --git a/include/linux/mmc/dw_mmc.h b/include/linux/mmc/dw_mmc.h
-index 198f0fa..2d3f83f 100644
---- a/include/linux/mmc/dw_mmc.h
-+++ b/include/linux/mmc/dw_mmc.h
-@@ -209,6 +209,8 @@ struct dw_mci_dma_ops {
- #define DW_MCI_QUIRK_HIGHSPEED			BIT(2)
- /* Unreliable card detection */
- #define DW_MCI_QUIRK_BROKEN_CARD_DETECTION	BIT(3)
-+/*Bypass the Security management unit*/
-+#define DW_MCI_QUIRK_BYPASS_SMU			BIT(4)
- 
- /* Slot level quirks */
- /* This slot has no write protect */
 -- 
 1.7.9.5
 
