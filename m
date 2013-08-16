@@ -1,55 +1,43 @@
 From: Balaji T K <balajitk@ti.com>
-Subject: Re: [PATCH] mmc: omap_hsmmc: fix dependency on indirect header inclusion
-Date: Fri, 16 Aug 2013 21:59:54 +0530
-Message-ID: <520E5382.1090408@ti.com>
-References: <1373548145-3833-1-git-send-email-balbi@ti.com>
+Subject: Re: [PATCH v2] mmc: omap_hsmmc: use the generic config for omap2plus
+ devices
+Date: Fri, 16 Aug 2013 22:05:44 +0530
+Message-ID: <520E54E0.9040609@ti.com>
+References: <1372422894-23729-1-git-send-email-a-bindra@ti.com> <1373472384-13067-1-git-send-email-a-bindra@ti.com> <20130711130921.GD30970@arwen.pp.htv.fi>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-omap-owner@vger.kernel.org>
-In-Reply-To: <1373548145-3833-1-git-send-email-balbi@ti.com>
-Sender: linux-omap-owner@vger.kernel.org
-To: cjb@laptop.org, linux-mmc@vger.kernel.org
-Cc: Felipe Balbi <balbi@ti.com>, linux-omap@vger.kernel.org, a-bindra@ti.com, Tony Lindgren <tony@atomide.com>, ezequiel.garcia@free-electrons.com, nm@ti.com
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from arroyo.ext.ti.com ([192.94.94.40]:60413 "EHLO arroyo.ext.ti.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752777Ab3HPQfv (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 16 Aug 2013 12:35:51 -0400
+In-Reply-To: <20130711130921.GD30970@arwen.pp.htv.fi>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: balbi@ti.com
+Cc: a-bindra@ti.com, linux-mmc@vger.kernel.org, cjb@laptop.org, linux-omap@vger.kernel.org, Ezequiel Garcia <ezequiel.garcia@free-electrons.com>, Nishanth Menon <nm@ti.com>
 
 On Thursday 11 July 2013 06:39 PM, Felipe Balbi wrote:
-> omap_hsmmc.c depends on <linux/sizes.h> being
-> included indirectly by another header. Once we
-> enable COMPILE_TEST for this driver, we might
-> compile under architectures which won't include
-> <linux/sizes.h> for us. In fact, one such case
-> is x86.
+> On Wed, Jul 10, 2013 at 09:36:24PM +0530, a-bindra@ti.com wrote:
+>> From: Amarinder Bindra <a-bindra@ti.com>
+>>
+>> OMAP's hs_mmc driver is used for MMC controller operation on many
+>> omap2plus SoCs (OMAP2430, OMAP3, 4, 5 and AM335x).
+>>
+>> Considering that the device tree entries are already present for these,
+>> allow the driver to be built using the config ARCH_OMAP2PLUS rather
+>> than individually adding a config for each SoC to enable the
+>> support.
+>>
+>> Use COMPILE_TEST to enable the build for other platforms.
+>>
+>> Signed-off-by: Amarinder Bindra <a-bindra@ti.com>
+>> Cc: Ezequiel Garcia <ezequiel.garcia@free-electrons.com>
+>> Cc: Felipe Balbi <balbi@ti.com>
+>> Cc: Nishanth Menon <nm@ti.com>
 >
-> In order to prevent compile breakages, let's
-> explicitly include <linux/sizes.h>
+> Acked-by: Felipe Balbi <balbi@ti.com>
 >
-> Signed-off-by: Felipe Balbi <balbi@ti.com>
-> ---
->
-> This should be applied before http://marc.info/?l=linux-omap&m=137347241524118&w=2
-> in order to maintain bisectability.
-Thanks Felipe
 
 Acked-by: Balaji T K <balajitk@ti.com>
-
->
-> cheers
->
->   drivers/mmc/host/omap_hsmmc.c | 1 +
->   1 file changed, 1 insertion(+)
->
-> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-> index 1865321..c937ffc 100644
-> --- a/drivers/mmc/host/omap_hsmmc.c
-> +++ b/drivers/mmc/host/omap_hsmmc.c
-> @@ -21,6 +21,7 @@
->   #include <linux/debugfs.h>
->   #include <linux/dmaengine.h>
->   #include <linux/seq_file.h>
-> +#include <linux/sizes.h>
->   #include <linux/interrupt.h>
->   #include <linux/delay.h>
->   #include <linux/dma-mapping.h>
->
-
