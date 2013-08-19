@@ -1,52 +1,78 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [PATCH v3 1/1] mmc: dw_mmc: Add IDMAC 64-bit address mode support
-Date: Mon, 19 Aug 2013 20:39:00 +0200
-Message-ID: <201308192039.01098.arnd@arndb.de>
-References: <705D14B1C7978B40A723277C067CEDE2CD7D78@IN01WEMBXB.internal.synopsys.com>
+From: "Christian Daudt" <csd@broadcom.com>
+Subject: Re: [PATCH] mmc: sdhci-bcm-kona: make linker-section warning go
+ away
+Date: Mon, 19 Aug 2013 15:36:13 -0700
+Message-ID: <52129DDD.3000401@broadcom.com>
+References: <1375915199-13694-1-git-send-email-markus.mayer@linaro.org>
 Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="iso-8859-1"
+Content-Type: text/plain;
+ charset=iso-8859-1;
+ format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.17.9]:51961 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750961Ab3HSSjT (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 19 Aug 2013 14:39:19 -0400
-In-Reply-To: <705D14B1C7978B40A723277C067CEDE2CD7D78@IN01WEMBXB.internal.synopsys.com>
+Received: from mms1.broadcom.com ([216.31.210.17]:3541 "EHLO mms1.broadcom.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751215Ab3HSWgS (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 19 Aug 2013 18:36:18 -0400
+In-Reply-To: <1375915199-13694-1-git-send-email-markus.mayer@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Prabu Thangamuthu <Prabu.T@synopsys.com>
-Cc: Chris Ball <cjb@laptop.org>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Wei WANG <wei_wang@realsil.com.cn>, Ludovic Desroches <ludovic.desroches@atmel.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Manjunath M Bettegowda <Manjunath.MB@synopsys.com>
+To: Markus Mayer <markus.mayer@linaro.org>
+Cc: Chris Ball <cjb@laptop.org>, Linux MMC List <linux-mmc@vger.kernel.org>, Linaro Patches <patches@linaro.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Matt Porter <matt.porter@linaro.org>
 
-On Monday 19 August 2013, Prabu Thangamuthu wrote:
-> 
-> +#ifdef CONFIG_MMC_DW_IDMAC_64BIT_ADDRESS
-> +       u32     des1;   /* Reserved */
-> +
-> +       u32     des2;   /* Buffer sizes */
-> +#define IDMAC_SET_BUFFER1_SIZE(d, s) \
-> +       ((d)->des2 = ((d)->des2 & 0x03ffe000) | ((s) & 0x1fff))
-> +
-> +       u32     des3;   /* Reserved */
-> +
-> +       u32     des4;   /* Lower 32-bits of Buffer Address Pointer 1*/
-> +       u32     des5;   /* Upper 32-bits of Buffer Address Pointer 1*/
-> +       u32     des6;   /* Lower 32-bits of Next Descriptor Address */
-> +       u32     des7;   /* Upper 32-bits of Next Descriptor Address */
-> +#else
->         u32             des1;   /* Buffer sizes */
->  #define IDMAC_SET_BUFFER1_SIZE(d, s) \
->         ((d)->des1 = ((d)->des1 & 0x03ffe000) | ((s) & 0x1fff))
-> @@ -73,6 +86,7 @@ struct idmac_desc {
->         u32             des2;   /* buffer 1 physical address */
->  
->         u32             des3;   /* buffer 2 physical address */
-> +#endif /* CONFIG_MMC_DW_IDMAC_64BIT_ADDRESS */
+On 13-08-07 03:39 PM, Markus Mayer wrote:
+> This change makes the following build warning go away:
+> [...]
+>    LINK    vmlinux
+>    LD      vmlinux.o
+>    MODPOST vmlinux.o
+> WARNING: modpost: Found 2 section mismatch(es).
+> To see full details build your kernel with:
+> 'make CONFIG_DEBUG_SECTION_MISMATCH=y'
+>
+> Signed-off-by: Markus Mayer <markus.mayer@linaro.org>
+> Reviewed-by: Christian Daudt <csd@broadcom.com>
+> Reviewed-by: Matt Porter <matt.porter@linaro.org>
+> ---
+>   drivers/mmc/host/sdhci-bcm-kona.c |    8 ++++----
+>   1 file changed, 4 insertions(+), 4 deletions(-)
+>
+> diff --git a/drivers/mmc/host/sdhci-bcm-kona.c b/drivers/mmc/host/sdhci-bcm-kona.c
+> index 87175f9..34fd652 100644
+> --- a/drivers/mmc/host/sdhci-bcm-kona.c
+> +++ b/drivers/mmc/host/sdhci-bcm-kona.c
+> @@ -221,13 +221,13 @@ static struct sdhci_pltfm_data sdhci_pltfm_data_kona = {
+>   		SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
+>   };
+>   
+> -static const struct of_device_id sdhci_bcm_kona_of_match[] __initdata = {
+> +static struct __initconst of_device_id sdhci_bcm_kona_of_match[] = {
+>   	{ .compatible = "bcm,kona-sdhci"},
+>   	{}
+>   };
+>   MODULE_DEVICE_TABLE(of, sdhci_bcm_kona_of_match);
+>   
+> -static int __init sdhci_bcm_kona_probe(struct platform_device *pdev)
+> +static int sdhci_bcm_kona_probe(struct platform_device *pdev)
+>   {
+>   	struct sdhci_bcm_kona_dev *kona_dev = NULL;
+>   	struct sdhci_pltfm_host *pltfm_priv;
+> @@ -336,10 +336,10 @@ static struct platform_driver sdhci_bcm_kona_driver = {
+>   		.name	= "sdhci-kona",
+>   		.owner	= THIS_MODULE,
+>   		.pm	= SDHCI_PLTFM_PMOPS,
+> -		.of_match_table = of_match_ptr(sdhci_bcm_kona_of_match),
+> +		.of_match_table = sdhci_bcm_kona_of_match,
+>   	},
+>   	.probe		= sdhci_bcm_kona_probe,
+> -	.remove		= __exit_p(sdhci_bcm_kona_remove),
+> +	.remove		= sdhci_bcm_kona_remove,
+>   };
+>   module_platform_driver(sdhci_bcm_kona_driver);
+>   
+Applied to bcm/for-3.12/soc
 
-This is not a good idea: It means you cannot build the driver to support
-both 32 and 64 bit at run-time. You have to remove all the #ifdef here
-and replace it with runtime checks. You also need to update the binding
-document to provide a way to detect which one is present in a given
-system.
+  thanks,
+    csd
 
-	Arnd
+
