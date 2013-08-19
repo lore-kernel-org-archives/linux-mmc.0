@@ -1,57 +1,68 @@
 From: "Christian Daudt" <csd@broadcom.com>
-Subject: Re: [PATCH] ARM: mmc: fix NONREMOVABLE test in sdhci-bcm-kona
-Date: Mon, 19 Aug 2013 16:30:00 -0700
-Message-ID: <5212AA78.9040101@broadcom.com>
-References: <1375901981-1495-1-git-send-email-csd@broadcom.com>
+Subject: Re: [PATCH] mmc: change mmc_gpio_get_cd to call non-sleep gpio
+Date: Mon, 19 Aug 2013 16:36:00 -0700
+Message-ID: <5212ABE0.8030601@broadcom.com>
+References: <1375994855-12472-1-git-send-email-csd@broadcom.com>
+ <Pine.LNX.4.64.1308082258260.29611@axis700.grange>
+ <52040962.6040003@broadcom.com>
 Mime-Version: 1.0
 Content-Type: text/plain;
  charset=iso-8859-1;
  format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mms2.broadcom.com ([216.31.210.18]:3895 "EHLO mms2.broadcom.com"
+Received: from mms2.broadcom.com ([216.31.210.18]:2207 "EHLO mms2.broadcom.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751436Ab3HSXaI (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 19 Aug 2013 19:30:08 -0400
-In-Reply-To: <1375901981-1495-1-git-send-email-csd@broadcom.com>
+	id S1751165Ab3HSXgF (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 19 Aug 2013 19:36:05 -0400
+In-Reply-To: <52040962.6040003@broadcom.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Christian Daudt <csd@broadcom.com>
-Cc: Chris Ball <cjb@laptop.org>, Matt Porter <matt.porter@linaro.org>, Markus Mayer <markus.mayer@linaro.org>, Arnd Bergmann <arnd@arndb.de>, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, csd_b@daudt.org
+To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Cc: Chris Ball <cjb@laptop.org>, Shawn Guo <shawn.guo@linaro.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, "arm@kernel.org" <arm@kernel.org>
 
-On 13-08-07 11:59 AM, Christian Daudt wrote:
-> sdhci-bcm-kona driver is incorrectly doing "|" to bit-test
-> NONREMOVABLE. Switch to "&"
+On 13-08-08 02:10 PM, Christian Daudt wrote:
+> On 13-08-08 02:06 PM, Guennadi Liakhovetski wrote:
+>> On Thu, 8 Aug 2013, Christian Daudt wrote:
+>>
+>>> Given that mmc_gpio_get_cd can be called in softirq
+>>> context (by sdhci_tasklet_card -> sdhci_card_event ->
+>>> sdhci_do_get_cd -> mmc_gpio_get_cd ), it is necessary
+>>> for it to use gpio_get_value instead of
+>>> gpio_get_value_cansleep
+>>> Note that at present sdhci_card_event gets called both
+>>> from mmc_gpio_cd_irqt and sdhci_tasklet_card, and from
+>>> both it gets called immediately while the actual cd
+>>> processing is debounced to 200ms later. I think that
+>>> the better solution might be to move the sdhci_card_event
+>>> callback into mmc_rescan and remove it from its 2
+>>> present locations. That way the cd related callbacks
+>>> are aligned with the actual cd detection code. I can
+>>> submit a follow-up patch with these mods if that sounds
+>>> like a better way to solve this.
+>>>
+>>> Signed-off-by: Christian Daudt <csd@broadcom.com>
+>> I don't think this is a right approach. It will Oops if the card-detect
+>> GPIO is provided by, e.g. an I2C GPIO controller. Instead the driver
+>> should be fixed to only call this function from a sleeping context.
+> I don't think that card-detect would ever be tied to i2c but I might 
+> be wrong on that one... If there's agreement that moving 
+> sdhci_card_event into just being called from mmc_rescan is the better 
+> way to solve this, then I'll drop this patch and replace it with one 
+> that does just that.
 >
-> Reviewed-by: Markus Mayer <markus.mayer@linaro.org>
-> Reviewed-by: Matt Porter <matt.porter@linaro.org>
-> Signed-off-by: Christian Daudt <csd@broadcom.com>
+>  Thanks,
+>    csd
 >
-> diff --git a/drivers/mmc/host/sdhci-bcm-kona.c b/drivers/mmc/host/sdhci-bcm-kona.c
-> index 87175f9..9ffac0b 100644
-> --- a/drivers/mmc/host/sdhci-bcm-kona.c
-> +++ b/drivers/mmc/host/sdhci-bcm-kona.c
-> @@ -263,7 +263,7 @@ static int __init sdhci_bcm_kona_probe(struct platform_device *pdev)
->   		(mmc_gpio_get_cd(host->mmc) != -ENOSYS) ? 'Y' : 'N',
->   		(mmc_gpio_get_ro(host->mmc) != -ENOSYS) ? 'Y' : 'N');
->   
-> -	if (host->mmc->caps | MMC_CAP_NONREMOVABLE)
-> +	if (host->mmc->caps & MMC_CAP_NONREMOVABLE)
->   		host->quirks |= SDHCI_QUIRK_BROKEN_CARD_DETECTION;
->   
->   	dev_dbg(dev, "is_8bit=%c\n",
-> @@ -282,7 +282,7 @@ static int __init sdhci_bcm_kona_probe(struct platform_device *pdev)
->   	}
->   
->   	/* if device is eMMC, emulate card insert right here */
-> -	if (host->mmc->caps | MMC_CAP_NONREMOVABLE) {
-> +	if (host->mmc->caps & MMC_CAP_NONREMOVABLE) {
->   		ret = sdhci_bcm_kona_sd_card_emulate(host, 1);
->   		if (ret) {
->   			dev_err(dev,
-applied to bcm/for-3.12/soc
+[adding arm@kernel.org for more input]
+Guennadi,
+  While I can't see card-detect coming in through i2c gpio controller, I 
+think that moving this out of the sleeping context (and into mmc_rescan) 
+is probably the better solution anyways. So I'll drop this patch and 
+send another one with that change instead.
 
-  thanks,
+
+  Thanks,
     csd
 
 
