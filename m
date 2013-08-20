@@ -1,100 +1,141 @@
-From: Seungwon Jeon <tgih.jun@samsung.com>
-Subject: RE: [RFC 2/3] mmc: dw_mmc: move the platform specific init call
-Date: Tue, 20 Aug 2013 20:34:34 +0900
-Message-ID: <001e01ce9d99$3e4bb870$bae32950$%jun@samsung.com>
-References: <1376894176-2702-1-git-send-email-yuvaraj.cd@samsung.com>
- <1376894176-2702-2-git-send-email-yuvaraj.cd@samsung.com>
+From: Michal Simek <monstr@monstr.eu>
+Subject: Re: SDHCI - Add QUIRK2_BROKEN_WRITE_PROTEXT - Support Xilinx Zynq
+ (Linux 3.9.0)
+Date: Tue, 20 Aug 2013 14:54:02 +0200
+Message-ID: <521366EA.7080705@monstr.eu>
+References: <BEDA323D25EF6045A68DAB9FD91A0BF14A5E84DB@AMSPRD0411MB426.eurprd04.prod.outlook.com>
+Reply-To: monstr@monstr.eu
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ks_c_5601-1987
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="BFLC7o6olLGpGQ8su7TkXtE4bEjAuR1PH"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout2.samsung.com ([203.254.224.25]:53537 "EHLO
-	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750896Ab3HTLeg (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 20 Aug 2013 07:34:36 -0400
-Received: from epcpsbgr5.samsung.com
- (u145.gpu120.samsung.co.kr [203.254.230.145])
- by mailout2.samsung.com (Oracle Communications Messaging Server 7u4-24.01
- (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTP id <0MRT0084HUTD3WI0@mailout2.samsung.com> for
- linux-mmc@vger.kernel.org; Tue, 20 Aug 2013 20:34:34 +0900 (KST)
-In-reply-to: <1376894176-2702-2-git-send-email-yuvaraj.cd@samsung.com>
-Content-language: ko
+Received: from mail-ee0-f42.google.com ([74.125.83.42]:50811 "EHLO
+	mail-ee0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750918Ab3HTMyF (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 20 Aug 2013 08:54:05 -0400
+Received: by mail-ee0-f42.google.com with SMTP id b45so194575eek.1
+        for <linux-mmc@vger.kernel.org>; Tue, 20 Aug 2013 05:54:03 -0700 (PDT)
+In-Reply-To: <BEDA323D25EF6045A68DAB9FD91A0BF14A5E84DB@AMSPRD0411MB426.eurprd04.prod.outlook.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: 'Yuvaraj Kumar C D' <yuvaraj.cd@gmail.com>, cjb@laptop.org, jh80.chung@samsung.com, linux-mmc@vger.kernel.org, thomas.ab@samsung.com
-Cc: 'Yuvaraj Kumar C D' <yuvaraj.cd@samsung.com>
+To: James Walmsley <james@fullfat-fs.co.uk>, Chris Ball <cjb@laptop.org>
+Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-mmc@vger.kernel.org
 
-Hi Yuvaraj,
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--BFLC7o6olLGpGQ8su7TkXtE4bEjAuR1PH
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
 
-This change affects dw_mci_socfpga_parse_dt of socfpga.
-It should be considered.
+Hi James,
+
+isn't it better to implement host->ops->get_ro() function for it?
+It seems me better choice than introducing new quirk option.
+
+Chris: What do you think?
 
 Thanks,
-Seungwon Jeon
+Michal
 
-On Mon, August 19, 2013, Yuvaraj Kumar C D wrote:
-> Current platform specific private data initialisation call
-> dw_mci_exynos_priv_init can be used to do platform specific
-> initialisation of SMU and others in future.So the drv_data->init
-> call has moved to dw_mci_probe.
-> 
-> Signed-off-by: Yuvaraj Kumar C D <yuvaraj.cd@samsung.com>
+
+On 08/16/2013 02:14 PM, James Walmsley wrote:
+> Hi Michal,
+>=20
+> I have built a Xilinx Zynq based design which doesn't use the SDHCI Wri=
+te-protect line.
+> However, we use the MIO_0 pin for configuring a multiplexer and consequ=
+ently the
+> SDHCI driver thinks that the card is read-only (RO).
+>=20
+> In the patch below I have proposed a new quirk, similar to the QUIRK_BR=
+OKEN_CARD_DETECTION
+> flag, which causes the sdhci driver to assume a card with RW access.
+>=20
+> This patch was made against the latest tree from Xilinx (github.com/Xil=
+inx/linux-xlnx), Kernel 3.9.0
+> and I have attached it to the LKML to propose the additional quirk whic=
+h may be useful on other platforms.
+>=20
+> Kind regards,
+>=20
+> James Walmsley
+>=20
 > ---
->  drivers/mmc/host/dw_mmc-pltfm.c |    7 -------
->  drivers/mmc/host/dw_mmc.c       |    9 +++++++++
->  2 files changed, 9 insertions(+), 7 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/dw_mmc-pltfm.c b/drivers/mmc/host/dw_mmc-pltfm.c
-> index ee52556..a570da4 100644
-> --- a/drivers/mmc/host/dw_mmc-pltfm.c
-> +++ b/drivers/mmc/host/dw_mmc-pltfm.c
-> @@ -38,7 +38,6 @@ int dw_mci_pltfm_register(struct platform_device *pdev,
+>  drivers/mmc/host/sdhci-of-xilinxps.c | 4 ++++
+>  drivers/mmc/host/sdhci.c             | 4 ++++
+>  include/linux/mmc/sdhci.h            | 1 +
+>  3 files changed, 9 insertions(+)
+>=20
+> diff --git a/drivers/mmc/host/sdhci-of-xilinxps.c b/drivers/mmc/host/sd=
+hci-of-xilinxps.c
+> index f79e0db..5553bc0 100644
+> --- a/drivers/mmc/host/sdhci-of-xilinxps.c
+> +++ b/drivers/mmc/host/sdhci-of-xilinxps.c
+> @@ -211,6 +211,10 @@ static int sdhci_zynq_probe(struct platform_device=
+ *pdev)
+>  	if (prop =3D=3D NULL || (!(u32) be32_to_cpup(prop)))
+>  		host->quirks |=3D SDHCI_QUIRK_BROKEN_CARD_DETECTION;
+> =20
+> +	prop =3D of_get_property(np, "xlnx,has-wp", NULL);
+> +	if (prop =3D=3D NULL || (!(u32) be32_to_cpup(prop)))
+> +		host->quirks2 |=3D SDHCI_QUIRK2_BROKEN_WRITE_PROTECT;
+> +
+>  	return 0;
+> =20
+>  clk_notif_unreg:
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index 51bbba4..c40365f 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -1609,6 +1609,10 @@ static int sdhci_do_get_ro(struct sdhci_host *ho=
+st)
 >  {
->  	struct dw_mci *host;
->  	struct resource	*regs;
-> -	int ret;
-> 
->  	host = devm_kzalloc(&pdev->dev, sizeof(struct dw_mci), GFP_KERNEL);
->  	if (!host)
-> @@ -58,12 +57,6 @@ int dw_mci_pltfm_register(struct platform_device *pdev,
->  	if (IS_ERR(host->regs))
->  		return PTR_ERR(host->regs);
-> 
-> -	if (drv_data && drv_data->init) {
-> -		ret = drv_data->init(host);
-> -		if (ret)
-> -			return ret;
-> -	}
-> -
->  	platform_set_drvdata(pdev, host);
->  	return dw_mci_probe(host);
->  }
-> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> index ee5f167..0c0cada 100644
-> --- a/drivers/mmc/host/dw_mmc.c
-> +++ b/drivers/mmc/host/dw_mmc.c
-> @@ -2222,6 +2222,15 @@ int dw_mci_probe(struct dw_mci *host)
->  		host->bus_hz = clk_get_rate(host->ciu_clk);
->  	}
-> 
-> +	if (drv_data && drv_data->init) {
-> +		ret = drv_data->init(host);
-> +		if (ret) {
-> +			dev_err(host->dev,
-> +				"implementation specific init failed\n");
-> +			goto err_clk_ciu;
-> +		}
+>  	int i, ro_count;
+> =20
+> +	if(host->quirks2 & SDHCI_QUIRK2_BROKEN_WRITE_PROTECT) {
+> +		return 0;	// Return zero to assume RW.
 > +	}
 > +
->  	if (drv_data && drv_data->setup_clock) {
->  		ret = drv_data->setup_clock(host);
->  		if (ret) {
-> --
-> 1.7.9.5
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>  	if (!(host->quirks & SDHCI_QUIRK_UNSTABLE_RO_DETECT))
+>  		return sdhci_check_ro(host);
+> =20
+> diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
+> index b838ffc..3eccf12 100644
+> --- a/include/linux/mmc/sdhci.h
+> +++ b/include/linux/mmc/sdhci.h
+> @@ -95,6 +95,7 @@ struct sdhci_host {
+>  /* The system physically doesn't support 1.8v, even if the host does *=
+/
+>  #define SDHCI_QUIRK2_NO_1_8_V				(1<<2)
+>  #define SDHCI_QUIRK2_PRESET_VALUE_BROKEN		(1<<3)
+> +#define SDHCI_QUIRK2_BROKEN_WRITE_PROTECT		(1<<4)
+> =20
+>  	int irq;		/* Device IRQ */
+>  	void __iomem *ioaddr;	/* Mapped address */
+>=20
 
+
+--=20
+Michal Simek, Ing. (M.Eng), OpenPGP -> KeyID: FE3D1F91
+w: www.monstr.eu p: +42-0-721842854
+Maintainer of Linux kernel - Microblaze cpu - http://www.monstr.eu/fdt/
+Maintainer of Linux kernel - Xilinx Zynq ARM architecture
+Microblaze U-BOOT custodian and responsible for u-boot arm zynq platform
+
+
+
+--BFLC7o6olLGpGQ8su7TkXtE4bEjAuR1PH
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.10 (GNU/Linux)
+Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
+
+iEYEARECAAYFAlITZuoACgkQykllyylKDCES0gCeOXltvLEO/yWTCQYUphIjSweX
+SYYAoJEi4G8Kv24NIFSoE4lcvVb1DRhi
+=IoS4
+-----END PGP SIGNATURE-----
+
+--BFLC7o6olLGpGQ8su7TkXtE4bEjAuR1PH--
