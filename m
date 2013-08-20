@@ -1,101 +1,146 @@
-From: Prabu Thangamuthu <Prabu.T@synopsys.com>
-Subject: RE: [PATCH v3 1/1] mmc: dw_mmc: Add IDMAC 64-bit address mode
- support
-Date: Tue, 20 Aug 2013 10:24:17 +0000
-Message-ID: <705D14B1C7978B40A723277C067CEDE2CD7F04@IN01WEMBXB.internal.synopsys.com>
-References: <705D14B1C7978B40A723277C067CEDE2CD7D78@IN01WEMBXB.internal.synopsys.com>
- <201308192039.01098.arnd@arndb.de>
- <001901ce9d7a$a7ed49c0$f7c7dd40$%jun@samsung.com>
- <705D14B1C7978B40A723277C067CEDE2CD7EC6@IN01WEMBXB.internal.synopsys.com>
- <001d01ce9d8b$8d4e7fb0$a7eb7f10$%jun@samsung.com>
+From: Alim Akhtar <alim.akhtar@gmail.com>
+Subject: Re: [RFC 3/3] mmc: dw_mmc: exynos: add a quirk for SMU.
+Date: Tue, 20 Aug 2013 16:07:12 +0530
+Message-ID: <CAGOxZ50mW+s_CH8YAQN6CMh4=7eVz84EUmBJUwUAC9Gpq8MxPw@mail.gmail.com>
+References: <1376894176-2702-1-git-send-email-yuvaraj.cd@samsung.com> <1376894176-2702-3-git-send-email-yuvaraj.cd@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from us02smtp1.synopsys.com ([198.182.60.75]:42641 "EHLO
-	vaxjo.synopsys.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750967Ab3HTKYX convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 20 Aug 2013 06:24:23 -0400
-In-Reply-To: <001d01ce9d8b$8d4e7fb0$a7eb7f10$%jun@samsung.com>
-Content-Language: en-US
+Received: from mail-vb0-f51.google.com ([209.85.212.51]:34948 "EHLO
+	mail-vb0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751221Ab3HTKhx (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 20 Aug 2013 06:37:53 -0400
+Received: by mail-vb0-f51.google.com with SMTP id x16so141666vbf.10
+        for <linux-mmc@vger.kernel.org>; Tue, 20 Aug 2013 03:37:53 -0700 (PDT)
+In-Reply-To: <1376894176-2702-3-git-send-email-yuvaraj.cd@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Seungwon Jeon <tgih.jun@samsung.com>, 'Arnd Bergmann' <arnd@arndb.de>
-Cc: 'Chris Ball' <cjb@laptop.org>, 'Jaehoon Chung' <jh80.chung@samsung.com>, 'Wei WANG' <wei_wang@realsil.com.cn>, 'Ludovic Desroches' <ludovic.desroches@atmel.com>, 'Greg Kroah-Hartman' <gregkh@linuxfoundation.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, 'Manjunath M Bettegowda' <Manjunath.MB@synopsys.com>
+To: Yuvaraj Kumar C D <yuvaraj.cd@gmail.com>
+Cc: Chris Ball <cjb@laptop.org>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, linux-mmc@vger.kernel.org, Thomas P Abraham <thomas.ab@samsung.com>, Yuvaraj Kumar C D <yuvaraj.cd@samsung.com>
 
-Hi Seungwon Jeon,
+Hi Yuvaraj
 
-On Tue, August 20, 2013, Seungwon Jeon wrote:
-> On Tue, August 20, 2013, Prabu Thangamuthu wrote:
-> > Hi Arnd, Seungwon Jeon,
-> >
-> > > On Tue, August 20, 2013, Seungwon Jeon wrote:
-> > > Hi Prabu,
-> > >
-> > > On Tue, August 20, 2013, Arnd Bergmann wrote:
-> > > > On Monday 19 August 2013, Prabu Thangamuthu wrote:
-> > > > >
-> > > > > +#ifdef CONFIG_MMC_DW_IDMAC_64BIT_ADDRESS
-> > > > > +       u32     des1;   /* Reserved */
-> > > > > +
-> > > > > +       u32     des2;   /* Buffer sizes */
-> > > > > +#define IDMAC_SET_BUFFER1_SIZE(d, s) \
-> > > > > +       ((d)->des2 = ((d)->des2 & 0x03ffe000) | ((s) & 0x1fff))
-> > > > > +
-> > > > > +       u32     des3;   /* Reserved */
-> > > > > +
-> > > > > +       u32     des4;   /* Lower 32-bits of Buffer Address Pointer 1*/
-> > > > > +       u32     des5;   /* Upper 32-bits of Buffer Address Pointer 1*/
-> > > > > +       u32     des6;   /* Lower 32-bits of Next Descriptor Address */
-> > > > > +       u32     des7;   /* Upper 32-bits of Next Descriptor Address */
-> > > > > +#else
-> > > > >         u32             des1;   /* Buffer sizes */
-> > > > >  #define IDMAC_SET_BUFFER1_SIZE(d, s) \
-> > > > >         ((d)->des1 = ((d)->des1 & 0x03ffe000) | ((s) & 0x1fff))
-> > > > > @@
-> > > > > -73,6 +86,7 @@ struct idmac_desc {
-> > > > >         u32             des2;   /* buffer 1 physical address */
-> > > > >
-> > > > >         u32             des3;   /* buffer 2 physical address */
-> > > > > +#endif /* CONFIG_MMC_DW_IDMAC_64BIT_ADDRESS */
-> > > >
-> > > > This is not a good idea: It means you cannot build the driver to
-> > > > support both 32 and 64 bit at run-time. You have to remove all the
-> > > > #ifdef here and replace it with runtime checks. You also need to
-> > > > update the binding document to provide a way to detect which one
-> > > > is present in a given system.
-> >
-> > OK, I will modify the code to support both 32-bit and 64-bit at
-> > run-time based on hardware capability.
-> >
-> >
-> > > I guess HCON register can be used to identify 32 or 64 bit, right?
-> > > You already used it.
-> > > 	addr_config = (mci_readl(host, HCON) >> 27) & 0x01;
-> > >
-> > > Then, CONFIG_MMC_DW_IDMAC_64BIT_ADDRESS could be removed.
-> >
-> > You are correct. HCON register 27th bit is used to decide 32-bit or 64-bit
-> > support.
-> > But, this bit is reserved in older IP versions and it is valid from IP version
-> > 2.70a onwards only.
-> Yes, 27th is reserved bit filed. If it's read in old version host, it could be '0' by
-> reset value.
-> Then, we can decide that this host supports only 32-bit address anyway?
+On Mon, Aug 19, 2013 at 12:06 PM, Yuvaraj Kumar C D
+<yuvaraj.cd@gmail.com> wrote:
+> Exynos5420 Mobile Storage Host controller has Security Management Unit
+> (SMU) for channel 0 and channel 1 (mainly for eMMC).This patch adds a
+> quirk to bypass SMU as it is not being used yet.
+>
+> This patch is on top of the below patch by Doug Anderson.
+> mmc: dw_mmc: Add exynos resume_noirq callback to clear WAKEUP_INT
+>
+> Signed-off-by: Yuvaraj Kumar C D <yuvaraj.cd@samsung.com>
+> ---
+>  drivers/mmc/host/dw_mmc-exynos.c |   41 ++++++++++++++++++++++++++++++++++++++
+>  drivers/mmc/host/dw_mmc.c        |    3 +++
+>  include/linux/mmc/dw_mmc.h       |    2 ++
+>  3 files changed, 46 insertions(+)
+>
+> diff --git a/drivers/mmc/host/dw_mmc-exynos.c b/drivers/mmc/host/dw_mmc-exynos.c
+> index 19c845b..5d82c45 100644
+> --- a/drivers/mmc/host/dw_mmc-exynos.c
+> +++ b/drivers/mmc/host/dw_mmc-exynos.c
+> @@ -35,6 +35,25 @@
+>  #define EXYNOS4210_FIXED_CIU_CLK_DIV   2
+>  #define EXYNOS4412_FIXED_CIU_CLK_DIV   4
+>
+> +/* Block number in eMMC */
+> +#define DWMCI_BLOCK_NUM                        0xFFFFFFFF
+> +
+> +#define SDMMC_EMMCP_BASE               0x1000
+> +#define SDMMC_MPSECURITY               (SDMMC_EMMCP_BASE + 0x0010)
+> +#define SDMMC_MPSBEGIN0                        (SDMMC_EMMCP_BASE + 0x0200)
+> +#define SDMMC_MPSEND0                  (SDMMC_EMMCP_BASE + 0x0204)
+> +#define SDMMC_MPSCTRL0                 (SDMMC_EMMCP_BASE + 0x020C)
+> +
+> +/* SMU control bits */
+> +#define DWMCI_MPSCTRL_SECURE_READ_BIT          BIT(7)
+> +#define DWMCI_MPSCTRL_SECURE_WRITE_BIT         BIT(6)
+> +#define DWMCI_MPSCTRL_NON_SECURE_READ_BIT      BIT(5)
+> +#define DWMCI_MPSCTRL_NON_SECURE_WRITE_BIT     BIT(4)
+> +#define DWMCI_MPSCTRL_USE_FUSE_KEY             BIT(3)
+> +#define DWMCI_MPSCTRL_ECB_MODE                 BIT(2)
+> +#define DWMCI_MPSCTRL_ENCRYPTION               BIT(1)
+> +#define DWMCI_MPSCTRL_VALID                    BIT(0)
+> +
+>  /* Variations in Exynos specific dw-mshc controller */
+>  enum dw_mci_exynos_type {
+>         DW_MCI_TYPE_EXYNOS4210,
+> @@ -74,6 +93,17 @@ static int dw_mci_exynos_priv_init(struct dw_mci *host)
+>  {
+>         struct dw_mci_exynos_priv_data *priv = host->priv;
+>
+> +       if (priv->ctrl_type == DW_MCI_TYPE_EXYNOS5420 &&
+> +               host->pdata->quirks & DW_MCI_QUIRK_BYPASS_SMU) {
+> +                       mci_writel(host, MPSBEGIN0, 0);
+> +                       mci_writel(host, MPSEND0, DWMCI_BLOCK_NUM);
+> +                       mci_writel(host, MPSCTRL0,
+> +                       DWMCI_MPSCTRL_SECURE_WRITE_BIT |
+> +                       DWMCI_MPSCTRL_NON_SECURE_READ_BIT |
+> +                       DWMCI_MPSCTRL_VALID |
+> +                       DWMCI_MPSCTRL_NON_SECURE_WRITE_BIT);
+> +       }
+> +
+This seems to be repeating here and below, please make a function
+instead to avoid code duplication.
+>         return 0;
+>  }
+>
+> @@ -106,7 +136,18 @@ static int dw_mci_exynos_suspend(struct device *dev)
+>  static int dw_mci_exynos_resume(struct device *dev)
+>  {
+>         struct dw_mci *host = dev_get_drvdata(dev);
+> +       struct dw_mci_exynos_priv_data *priv = host->priv;
+>
+> +       if (priv->ctrl_type == DW_MCI_TYPE_EXYNOS5420 &&
+> +               host->pdata->quirks & DW_MCI_QUIRK_BYPASS_SMU) {
+> +                       mci_writel(host, MPSBEGIN0, 0);
+> +                       mci_writel(host, MPSEND0, DWMCI_BLOCK_NUM);
+> +                       mci_writel(host, MPSCTRL0,
+> +                       DWMCI_MPSCTRL_SECURE_WRITE_BIT |
+> +                       DWMCI_MPSCTRL_NON_SECURE_READ_BIT |
+> +                       DWMCI_MPSCTRL_VALID |
+> +                       DWMCI_MPSCTRL_NON_SECURE_WRITE_BIT);
+> +       }
+See comment above.
+>         return dw_mci_resume(host);
+>  }
+>
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index 0c0cada..49df69f 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -2107,6 +2107,9 @@ static struct dw_mci_of_quirks {
+>         }, {
+>                 .quirk  = "broken-cd",
+>                 .id     = DW_MCI_QUIRK_BROKEN_CARD_DETECTION,
+> +       }, {
+> +               .quirk  = "bypass-smu",
+> +               .id     = DW_MCI_QUIRK_BYPASS_SMU,
+>         },
+>  };
+>
+> diff --git a/include/linux/mmc/dw_mmc.h b/include/linux/mmc/dw_mmc.h
+> index 198f0fa..2d3f83f 100644
+> --- a/include/linux/mmc/dw_mmc.h
+> +++ b/include/linux/mmc/dw_mmc.h
+> @@ -209,6 +209,8 @@ struct dw_mci_dma_ops {
+>  #define DW_MCI_QUIRK_HIGHSPEED                 BIT(2)
+>  /* Unreliable card detection */
+>  #define DW_MCI_QUIRK_BROKEN_CARD_DETECTION     BIT(3)
+> +/*Bypass the Security management unit*/
+> +#define DW_MCI_QUIRK_BYPASS_SMU                        BIT(4)
+>
+>  /* Slot level quirks */
+>  /* This slot has no write protect */
+> --
+> 1.7.9.5
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
-Correct. If the reset value of 27th bit in older version IP's are designed with '0', then no need to get the version.
-Let me verify with IP team and confirm the reset value.
-
-> If right, we don't need to get version.
-> > So, I will consider both IP version and HCON register 27th bit to provide run-
-> > time support.
-> >
-> > Thank you Arnd and Seungwon Jeo for your valuable comments.
-> >
-> >
-> Thanks,
-> Seungwon Jeon
-
-
-Thanks & regards,
-Prabu Thangamuthu.
+-- 
+Regards,
+Alim
