@@ -1,29 +1,145 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: SDHCI - Add QUIRK2_BROKEN_WRITE_PROTEXT - Support Xilinx Zynq (Linux 3.9.0)
-Date: Tue, 20 Aug 2013 19:13:11 +0100
-Message-ID: <86li3wdydk.fsf@void.printf.net>
-References: <BEDA323D25EF6045A68DAB9FD91A0BF14A5E84DB@AMSPRD0411MB426.eurprd04.prod.outlook.com>
-	<521366EA.7080705@monstr.eu>
+From: Hein Tibosch <hein_tibosch@yahoo.es>
+Subject: Re: [PATCH V2] mmc: omap_hsmmc: Fix sleep too long in ISR context.
+Date: Wed, 21 Aug 2013 02:52:00 +0800
+Message-ID: <5213BAD0.8030406@yahoo.es>
+References: <201308071805022428282@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <521366EA.7080705@monstr.eu> (Michal Simek's message of "Tue, 20
-	Aug 2013 14:54:02 +0200")
-Sender: linux-kernel-owner@vger.kernel.org
-To: monstr@monstr.eu
-Cc: James Walmsley <james@fullfat-fs.co.uk>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-mmc@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from bosmailout02.eigbox.net ([66.96.186.2]:49597 "EHLO
+	bosmailout02.eigbox.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751188Ab3HTTfg (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 20 Aug 2013 15:35:36 -0400
+Received: from bosmailscan14.eigbox.net ([10.20.15.14])
+	by bosmailout02.eigbox.net with esmtp (Exim)
+	id 1VBr3Q-0001G5-5U
+	for linux-mmc@vger.kernel.org; Tue, 20 Aug 2013 14:53:20 -0400
+Received: from bosmailscan25.eigbox.net ([10.20.15.25])
+	by bosmailscan14.eigbox.net with esmtp (Exim)
+	id 1VBr3P-0002hq-W0
+	for linux-mmc@vger.kernel.org; Tue, 20 Aug 2013 14:53:20 -0400
+In-Reply-To: <201308071805022428282@gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: cjb <cjb@laptop.org>, Felipe Balbi <balbi@ti.com>
+Cc: majianpeng <majianpeng@gmail.com>, balajitk <balajitk@ti.com>, linux-mmc <linux-mmc@vger.kernel.org>, linux-omap <linux-omap@vger.kernel.org>, mayuzheng <mayuzheng@kedacom.com>, Matt Porter <mporter@ti.com>, Santosh Shilimkar <santosh.shilimkar@ti.com>, Tony Lindgren <tony@atomide.com>, Syed Mohammed Khasim <x0khasim@ti.com>, Madhusudhan <madhu.cr@ti.com>, Mohit Jalori <mjalori@ti.com>
 
 Hi,
 
-On Tue, Aug 20 2013, Michal Simek wrote:
-> Hi James,
+[ added some people from TI ]
+
+On 8/7/2013 6:05 PM, majianpeng wrote:
+> V2:=20
+> 	clean up code.
+> V1:
+> 	www.mail-archive.com/linux-omap@vger.../msg93239.html=E2=80=8E
 >
-> isn't it better to implement host->ops->get_ro() function for it?
-> It seems me better choice than introducing new quirk option.
+>
+> We found a problem when we removed a working sd card that the irqacti=
+on
+> of omap_hsmmc can sleep to 3.6s. This cause our watchdog to work.
+> In func omap_hsmmc_reset_controller_fsm, it should watch a 0->1
+> transition.But avoiding endless waiting, it used loops_per_jiffy as t=
+he timer.
 
-Yes, I agree.  Thanks,
+Tried on a OMAP4460:
+This can easily be replicated: just withdraw an SD-card and the kernel
+will get blocked during more than 3 seconds.
+Calling OMAP_HSMMC_READ() in this loop makes it last so long.
 
-- Chris.
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+The function waits for a 0=3D>1, followed by a 1=3D>0 transition.
+The value of 1 always comes, but in most cases the code is just too
+slow to detect it. The first loop will only stop when (i =3D=3D limit)
+
+> The code is:
+>> while ((!(OMAP_HSMMC_READ(host->base, SYSCTL) & bit))
+>>                && (i++ < limit))
+>>                        cpu_relax();
+> But generanly loops_per_jiffy as a timer,it should like:
+>>  while(i++ < limit)
+>> cpu_relax();
+> I found for the long time case, the while-opeation stoped because 'i =
+=3D=3D limit'.
+> Because added some code, so the duration became too longer than
+> MMC_TIMEOU_US(20ms).
+>
+> The software can't monitor the transition of hardware for thi case.
+>
+> Becasue those codes in ISR context, it can't use timer_before/after.
+> I divived the time into 1ms and used udelay(1) to instead.
+> It will cause do additional udelay(1).But from my test,it looks good.
+>
+> Reported-by: Yuzheng Ma <mayuzheng@kedacom.com>
+> Tested-by: Yuzheng Ma <mayuzheng@kedacom.com>
+> Reviewed-by: Hein Tibosch <hein_tibosch@yahoo.es>
+> Signed-off-by: Jianpeng Ma <majianpeng@gmail.com>
+> ---
+>  drivers/mmc/host/omap_hsmmc.c | 25 +++++++++++--------------
+>  1 file changed, 11 insertions(+), 14 deletions(-)
+>
+> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hs=
+mmc.c
+> index 1865321..bbda5ed 100644
+> --- a/drivers/mmc/host/omap_hsmmc.c
+> +++ b/drivers/mmc/host/omap_hsmmc.c
+> @@ -973,9 +973,8 @@ static inline void omap_hsmmc_dbg_report_irq(stru=
+ct omap_hsmmc_host *host,
+>  static inline void omap_hsmmc_reset_controller_fsm(struct omap_hsmmc=
+_host *host,
+>  						   unsigned long bit)
+>  {
+> -	unsigned long i =3D 0;
+> -	unsigned long limit =3D (loops_per_jiffy *
+> -				msecs_to_jiffies(MMC_TIMEOUT_MS));
+> +	/*change to 1ms,so we can use udelay(1)*/
+> +	unsigned long limit =3D MMC_TIMEOUT_MS * 1000;
+> =20
+>  	OMAP_HSMMC_WRITE(host->base, SYSCTL,
+>  			 OMAP_HSMMC_READ(host->base, SYSCTL) | bit);
+
+Checked here: the SRC-bit indeed becomes high.
+After the test 'features & HSMMC_HAS_UPDATED_RESET', the bit has
+become low again already.
+Changing to order of statements worked for me, but for Jianpeng Ma
+this didn't work (timings are 'on the edge').
+
+This reset function is also called while mounting a card and then 'SRC'
+will be high long enough (more than 100 loops). It is after withdrawing
+the card that the reset is performed extremely fast.
+
+> @@ -984,17 +983,15 @@ static inline void omap_hsmmc_reset_controller_=
+fsm(struct omap_hsmmc_host *host,
+>  	 * OMAP4 ES2 and greater has an updated reset logic.
+>  	 * Monitor a 0->1 transition first
+>  	 */
+> -	if (mmc_slot(host).features & HSMMC_HAS_UPDATED_RESET) {
+> -		while ((!(OMAP_HSMMC_READ(host->base, SYSCTL) & bit))
+> -					&& (i++ < limit))
+> -			cpu_relax();
+> -	}
+> -	i =3D 0;
+> -
+> -	while ((OMAP_HSMMC_READ(host->base, SYSCTL) & bit) &&
+> -		(i++ < limit))
+> -		cpu_relax();
+> -
+> +	if (mmc_slot(host).features & HSMMC_HAS_UPDATED_RESET)
+> +		while (!(OMAP_HSMMC_READ(host->base, SYSCTL) & bit)
+> +			&& limit--)
+> +			udelay(1);
+
+In this way, the loop will only last about 'MMC_TIMEOUT_MS' ms
+and my WDT doesn't get triggered :-)
+
+> +	limit =3D MMC_TIMEOUT_MS * 1000;
+> +	while ((OMAP_HSMMC_READ(host->base, SYSCTL) & bit) && limit--)
+> +		udelay(1);
+> +
+>  	if (OMAP_HSMMC_READ(host->base, SYSCTL) & bit)
+>  		dev_err(mmc_dev(host->mmc),
+>  			"Timeout waiting on controller reset in %s\n",
+
+Anybody an opinion on this?
+
+Thanks, Hein
