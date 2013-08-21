@@ -1,75 +1,63 @@
-From: GIRISH K S <ks.giri@samsung.com>
-Subject: Re: [PATCH V2 2/2] ARM: dts: Add dwmmc nodes in SOC specific dts file
-Date: Wed, 21 Aug 2013 09:05:08 +0000 (GMT)
-Message-ID: <18907195.1256371377075906874.JavaMail.weblogic@epml01>
-Reply-To: ks.giri@samsung.com
+From: walter harms <wharms@bfs.de>
+Subject: Re: [patch] mmc: sdhci-bcm-kona: '|' vs '&' typo
+Date: Wed, 21 Aug 2013 10:57:57 +0200
+Message-ID: <52148115.3050703@bfs.de>
+References: <20130821082423.GA5240@elgon.mountain>
+Reply-To: wharms@bfs.de
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout4.samsung.com ([203.254.224.34]:32241 "EHLO
-	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751673Ab3HUJFM (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 21 Aug 2013 05:05:12 -0400
-Received: from epcpsbgr3.samsung.com
- (u143.gpu120.samsung.co.kr [203.254.230.143])
- by mailout4.samsung.com (Oracle Communications Messaging Server 7u4-24.01
- (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTP id <0MRV0066VIJ8UA50@mailout4.samsung.com> for
- linux-mmc@vger.kernel.org; Wed, 21 Aug 2013 18:05:08 +0900 (KST)
-MIME-version: 1.0
+Received: from mx01-fr.bfs.de ([193.174.231.67]:43792 "EHLO mx01-fr.bfs.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751676Ab3HUJFt (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 21 Aug 2013 05:05:49 -0400
+In-Reply-To: <20130821082423.GA5240@elgon.mountain>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "yuvaraj.cd@gmail.com" <yuvaraj.cd@gmail.com>, "linux-samsung-soc@vger.kernel.org" <linux-samsung-soc@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Kukjin Kim <kgene.kim@samsung.com>
-Cc: YUVARAJ CD <yuvaraj.cd@samsung.com>
-
-DQoNCi0tLS0tLS0gT3JpZ2luYWwgTWVzc2FnZSAtLS0tLS0tDQpTZW5kZXIgOiB5dXZhcmFqLmNk
-QGdtYWlsLmNvbTx5dXZhcmFqLmNkQGdtYWlsLmNvbT4NCkRhdGUgOiBBdWcgMjEsIDIwMTMgMTI6
-MDcgKEdNVCswNTozMCkNClRpdGxlIDogW1BBVENIIFYyIDIvMl0gQVJNOiBkdHM6IEFkZCBkd21t
-YyBub2RlcyBpbiBTT0Mgc3BlY2lmaWMgZHRzIGZpbGUNCg0KRnJvbTogWXV2YXJhaiBLdW1hciBD
-IEQgDQoNCkV4eW5vczUgc2VyaWVzIFNPQydzIGhhdmUgZGlmZmVyZW50IHZlcnNpb25zIG9mIERX
-TU1DIGNvbnRyb2xsZXIuDQpTbyBkd21tYyBkZXZpY2Ugbm9kZXMgbW92ZWQgZnJvbSBFeHlub3M1
-IFNPQydzIGNvbW1vbiBkdHMgZmlsZSB0bw0KU09DIHNwZWNpZmljIGR0cyBmaWxlLg0KDQpjaGFu
-Z2VzIHNpbmNlIFYxOg0KMS5kaXNhYmxlIG5vZGUgYnkgc3RhdHVzID0gZGlzYWJsZWQgaW4gU09D
-IGZpbGUNCjIuZW5hYmxlIG5vZGUgYnkgc3RhdHVzID0gb2theSBpbiBib2FyZCBzcGVjaWZpYyBm
-aWxlDQoNClNpZ25lZC1vZmYtYnk6IFl1dmFyYWogS3VtYXIgQyBEIA0KLS0tDQphcmNoL2FybS9i
-b290L2R0cy9leHlub3M1MjUwLXNtZGs1MjUwLmR0cyB8ICAgMTAgKystLS0tLS0tLQ0KYXJjaC9h
-cm0vYm9vdC9kdHMvZXh5bm9zNTI1MC5kdHNpICAgICAgICAgfCAgIDE2ICsrKysrKysrKysrKysr
-KysNCjIgZmlsZXMgY2hhbmdlZCwgMTggaW5zZXJ0aW9ucygrKSwgOCBkZWxldGlvbnMoLSkNCg0K
-ZGlmZiAtLWdpdCBhL2FyY2gvYXJtL2Jvb3QvZHRzL2V4eW5vczUyNTAtc21kazUyNTAuZHRzIGIv
-YXJjaC9hcm0vYm9vdC9kdHMvZXh5bm9zNTI1MC1zbWRrNTI1MC5kdHMNCmluZGV4IDI1MzhiMzIu
-LmJkMTlkNTVkIDEwMDY0NA0KLS0tIGEvYXJjaC9hcm0vYm9vdC9kdHMvZXh5bm9zNTI1MC1zbWRr
-NTI1MC5kdHMNCisrKyBiL2FyY2gvYXJtL2Jvb3QvZHRzL2V4eW5vczUyNTAtc21kazUyNTAuZHRz
-DQpAQCAtMTQxLDYgKzE0MSw3IEBADQp9Ow0KDQpkd21tYzBAMTIyMDAwMDAgew0KKyBzdGF0dXMg
-PSAib2theSI7DQpudW0tc2xvdHMgPSA8MT47DQpzdXBwb3J0cy1oaWdoc3BlZWQ7DQpicm9rZW4t
-Y2Q7DQpAQCAtMTU4LDExICsxNTksOCBAQA0KfTsNCn07DQoNCi0gZHdtbWMxQDEyMjEwMDAwIHsN
-Ci0gc3RhdHVzID0gImRpc2FibGVkIjsNCi0gfTsNCi0NCmR3bW1jMkAxMjIyMDAwMCB7DQorIHN0
-YXR1cyA9ICJva2F5IjsNCm51bS1zbG90cyA9IDwxPjsNCnN1cHBvcnRzLWhpZ2hzcGVlZDsNCmZp
-Zm8tZGVwdGggPSA8MHg4MD47DQpAQCAtMTgwLDEwICsxNzgsNiBAQA0KfTsNCn07DQoNCi0gZHdt
-bWMzQDEyMjMwMDAwIHsNCi0gc3RhdHVzID0gImRpc2FibGVkIjsNCi0gfTsNCi0NCnNwaV8wOiBz
-cGlAMTJkMjAwMDAgew0Kc3RhdHVzID0gImRpc2FibGVkIjsNCn07DQpkaWZmIC0tZ2l0IGEvYXJj
-aC9hcm0vYm9vdC9kdHMvZXh5bm9zNTI1MC5kdHNpIGIvYXJjaC9hcm0vYm9vdC9kdHMvZXh5bm9z
-NTI1MC5kdHNpDQppbmRleCAxZWVjNjQ2Li5iMWI2ZjYxIDEwMDY0NA0KLS0tIGEvYXJjaC9hcm0v
-Ym9vdC9kdHMvZXh5bm9zNTI1MC5kdHNpDQorKysgYi9hcmNoL2FybS9ib290L2R0cy9leHlub3M1
-MjUwLmR0c2kNCkBAIC0zODcsMjEgKzM4NywzNiBAQA0KfTsNCg0KZHdtbWNfMDogZHdtbWMwQDEy
-MjAwMDAwIHsNCisgY29tcGF0aWJsZSA9ICJzYW1zdW5nLGV4eW5vczUyNTAtZHctbXNoYyI7DQor
-IGludGVycnVwdHMgPSA8MCA3NSAwPjsNCisgI2FkZHJlc3MtY2VsbHMgPSA8MT47DQorICNzaXpl
-LWNlbGxzID0gPDA+Ow0KcmVnID0gPDB4MTIyMDAwMDAgMHgxMDAwPjsNCmNsb2NrcyA9IDwmY2xv
-Y2sgMjgwPiwgPCZjbG9jayAxMzk+Ow0KY2xvY2stbmFtZXMgPSAiYml1IiwgImNpdSI7DQorIHN0
-YXR1cyA9ICJkaXNhYmxlZCI7DQp9Ow0KDQpkd21tY18xOiBkd21tYzFAMTIyMTAwMDAgew0KKyBj
-b21wYXRpYmxlID0gInNhbXN1bmcsZXh5bm9zNTI1MC1kdy1tc2hjIjsNCisgaW50ZXJydXB0cyA9
-IDwwIDc2IDA+Ow0KKyAjYWRkcmVzcy1jZWxscyA9IDwxPjsNCisgI3NpemUtY2VsbHMgPSA8MD47
-DQpyZWcgPSA8MHgxMjIxMDAwMCAweDEwMDA+Ow0KY2xvY2tzID0gPCZjbG9jayAyODE+LCA8JmNs
-b2NrIDE0MD47DQpjbG9jay1uYW1lcyA9ICJiaXUiLCAiY2l1IjsNCisgc3RhdHVzID0gImRpc2Fi
-bGVkIjsNCn07DQoNCmR3bW1jXzI6IGR3bW1jMkAxMjIyMDAwMCB7DQorIGNvbXBhdGlibGUgPSAi
-c2Ftc3VuZyxleHlub3M1MjUwLWR3LW1zaGMiOw0KKyBpbnRlcnJ1cHRzID0gPDAgNzcgMD47DQor
-ICNhZGRyZXNzLWNlbGxzID0gPDE+Ow0KKyAjc2l6ZS1jZWxscyA9IDwwPjsNCnJlZyA9IDwweDEy
-MjIwMDAwIDB4MTAwMD47DQpjbG9ja3MgPSA8JmNsb2NrIDI4Mj4sIDwmY2xvY2sgMTQxPjsNCmNs
-b2NrLW5hbWVzID0gImJpdSIsICJjaXUiOw0KKyBzdGF0dXMgPSAiZGlzYWJsZWQiOw0KfTsNCg0K
-ZHdtbWNfMzogZHdtbWMzQDEyMjMwMDAwIHsNCkBAIC00MTIsNiArNDI3LDcgQEANCiNzaXplLWNl
-bGxzID0gPDA+Ow0KY2xvY2tzID0gPCZjbG9jayAyODM+LCA8JmNsb2NrIDE0Mj47DQpjbG9jay1u
-YW1lcyA9ICJiaXUiLCAiY2l1IjsNCisgc3RhdHVzID0gImRpc2FibGVkIjsNCn07DQoNCmkyczA6
-IGkyc0AwMzgzMDAwMCB7DQoNCkxvb2tzIE9rIHRvIG1lLg0KUmV2aWV3ZWQgQnk6IEdpcmlzaCBL
-IFMgPGtzLmdpcmlAc2Ftc3VuZy5jb20+DQoNCi0tIA0KMS43LjkuNQ==
+To: Dan Carpenter <dan.carpenter@oracle.com>
+Cc: Chris Ball <cjb@laptop.org>, Grant Likely <grant.likely@linaro.org>, Rob Herring <rob.herring@calxeda.com>, Christian Daudt <csd@broadcom.com>, Arnd Bergmann <arnd@arndb.de>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, kernel-janitors@vger.kernel.org
 
 
+
+Am 21.08.2013 10:24, schrieb Dan Carpenter:
+> The intent was to test if a flag was set.  In the current code the
+> conditions are always true.
+
+I guess that it worked before ...
+That leaves the Question: are the tests needed at all ?
+
+re,
+ wh
+
+> Signed-off-by: Dan Carpenter <dan.carpenter@oracle.com>
+> ---
+> Static checker stuff.  Untested.
+> 
+> diff --git a/drivers/mmc/host/sdhci-bcm-kona.c b/drivers/mmc/host/sdhci-bcm-kona.c
+> index 87175f9..9ffac0b 100644
+> --- a/drivers/mmc/host/sdhci-bcm-kona.c
+> +++ b/drivers/mmc/host/sdhci-bcm-kona.c
+> @@ -263,7 +263,7 @@ static int __init sdhci_bcm_kona_probe(struct platform_device *pdev)
+>  		(mmc_gpio_get_cd(host->mmc) != -ENOSYS) ? 'Y' : 'N',
+>  		(mmc_gpio_get_ro(host->mmc) != -ENOSYS) ? 'Y' : 'N');
+>  
+> -	if (host->mmc->caps | MMC_CAP_NONREMOVABLE)
+> +	if (host->mmc->caps & MMC_CAP_NONREMOVABLE)
+>  		host->quirks |= SDHCI_QUIRK_BROKEN_CARD_DETECTION;
+>  
+>  	dev_dbg(dev, "is_8bit=%c\n",
+> @@ -282,7 +282,7 @@ static int __init sdhci_bcm_kona_probe(struct platform_device *pdev)
+>  	}
+>  
+>  	/* if device is eMMC, emulate card insert right here */
+> -	if (host->mmc->caps | MMC_CAP_NONREMOVABLE) {
+> +	if (host->mmc->caps & MMC_CAP_NONREMOVABLE) {
+>  		ret = sdhci_bcm_kona_sd_card_emulate(host, 1);
+>  		if (ret) {
+>  			dev_err(dev,
+> --
+> To unsubscribe from this list: send the line "unsubscribe kernel-janitors" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
