@@ -1,334 +1,176 @@
-From: Prabu Thangamuthu <Prabu.T@synopsys.com>
-Subject: [PATCH v4 1/1] mmc: dw_mmc: Add IDMAC 64-bit address mode support
-Date: Wed, 21 Aug 2013 09:33:57 +0000
-Message-ID: <705D14B1C7978B40A723277C067CEDE2CD8187@IN01WEMBXB.internal.synopsys.com>
+From: Tomasz Figa <t.figa@samsung.com>
+Subject: Re: [PATCH 4/8] ARM: dts: Add dwmmc DT nodes for exynos5420 SOC
+Date: Wed, 21 Aug 2013 12:10:13 +0200
+Message-ID: <1856833.dLvJPAi2rE@amdc1227>
+References: <1377066933-28058-1-git-send-email-yuvaraj.cd@samsung.com>
+ <1377066933-28058-2-git-send-email-yuvaraj.cd@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7Bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from hermes.synopsys.com ([198.182.44.81]:51703 "EHLO
-	hermes.synopsys.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751675Ab3HUJjP convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 21 Aug 2013 05:39:15 -0400
-Content-Language: en-US
+Received: from mailout3.w1.samsung.com ([210.118.77.13]:62032 "EHLO
+	mailout3.w1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751586Ab3HUKKR (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 21 Aug 2013 06:10:17 -0400
+In-reply-to: <1377066933-28058-2-git-send-email-yuvaraj.cd@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Seungwon Jeon <tgih.jun@samsung.com>, 'Chris Ball' <cjb@laptop.org>, 'Jaehoon Chung' <jh80.chung@samsung.com>, 'Wei WANG' <wei_wang@realsil.com.cn>, 'Ludovic Desroches' <ludovic.desroches@atmel.com>, 'Greg Kroah-Hartman' <gregkh@linuxfoundation.org>, 'Arnd Bergmann' <arnd@arndb.de>
-Cc: 'Manjunath M Bettegowda' <Manjunath.MB@synopsys.com>, "prabu.t@synopsys.com" <prabu.t@synopsys.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Yuvaraj Kumar C D <yuvaraj.cd@gmail.com>
+Cc: linux-samsung-soc@vger.kernel.org, linux-mmc@vger.kernel.org, kgene.kim@samsung.com, ks.giri@samsung.com, Yuvaraj Kumar C D <yuvaraj.cd@samsung.com>
 
-Synopsys DW_MMC IP core supports Internal DMA Controller with 64-bit address mode from IP version 2.70a onwards.
-Updated the driver to support IDMAC 64-bit addressing mode.
+Hi Yuvaraj,
 
-Tested the features in DW_MMC IP core v2.70a and v2.40a with HAPS-51 setup and driver is working fine.
+On Wednesday 21 of August 2013 12:05:33 Yuvaraj Kumar C D wrote:
+> This patch adds the device tree node entries for exynos5420 SOC.
+> Exynos5420 has a different version of DWMMC controller,so a new
+> compatible string is used to distinguish it from the prior SOC's.
 
-Signed-off-by: Prabu Thangamuthu <prabu.t@synopsys.com>
----
-Change log v4:
-	- Add the dynamic support for 32-bit and 64-bit address mode based on hw configuration.
-	- Removed the CONFIG_MMC_DW_IDMAC_64BIT_ADDRESS macro.
-	
-Change log v3:
-	-Add the condition check to find the IDMAC configuration mismatches between sw & hw.
-	-Driver should not use the IDMAC if any conflict between sw & hw configurations
-	 since the register offsets are different for both 32-bit and 64-bit configurations.
-	-Reused the existing code.
-	
-Change log v2:
-	-Add the configuration.
+Is this patch a v3 of [1]?
 
- drivers/mmc/host/dw_mmc.c  |  195 +++++++++++++++++++++++++++++++++++---------
- drivers/mmc/host/dw_mmc.h  |   11 +++
- include/linux/mmc/dw_mmc.h |    2 +
- 3 files changed, 169 insertions(+), 39 deletions(-)
+[1] - http://thread.gmane.org/gmane.linux.kernel.mmc/21981
 
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index ee5f167..523b3d7 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -55,7 +55,23 @@
- 				 SDMMC_IDMAC_INT_CES | SDMMC_IDMAC_INT_DU | \
- 				 SDMMC_IDMAC_INT_FBE | SDMMC_IDMAC_INT_RI | \
- 				 SDMMC_IDMAC_INT_TI)
-+struct idmac_desc_64addr {
-+	u32		des0;	/* Control Descriptor */
-+
-+	u32		des1;	/* Reserved */
-+
-+	u32		des2;	/*Buffer sizes */
-+#define IDMAC_64ADDR_SET_BUFFER1_SIZE(d, s) \
-+	((d)->des2 = ((d)->des2 & 0x03ffe000) | ((s) & 0x1fff))
-+
-+	u32		des3;	/* Reserved */
-+
-+	u32		des4;	/* Lower 32-bits of Buffer Address Pointer 1*/
-+	u32		des5;	/* Upper 32-bits of Buffer Address Pointer 1*/
- 
-+	u32		des6;	/* Lower 32-bits of Next Descriptor Address */
-+	u32		des7;	/* Upper 32-bits of Next Descriptor Address */
-+};
- struct idmac_desc {
- 	u32		des0;	/* Control Descriptor */
- #define IDMAC_DES0_DIC	BIT(1)
-@@ -369,30 +385,67 @@ static void dw_mci_translate_sglist(struct dw_mci *host, struct mmc_data *data,
- 				    unsigned int sg_len)
- {
- 	int i;
--	struct idmac_desc *desc = host->sg_cpu;
- 
--	for (i = 0; i < sg_len; i++, desc++) {
--		unsigned int length = sg_dma_len(&data->sg[i]);
--		u32 mem_addr = sg_dma_address(&data->sg[i]);
-+	if (host->dma_64bit_address == 1) {
-+		struct idmac_desc_64addr *desc = host->sg_cpu;
-+
-+		for (i = 0; i < sg_len; i++, desc++) {
-+			unsigned int length = sg_dma_len(&data->sg[i]);
-+			u64 mem_addr = sg_dma_address(&data->sg[i]);
-+
-+			/*
-+			 * Set the OWN bit and disable interrupts for this
-+			 * descriptor
-+			 */
-+			desc->des0 = IDMAC_DES0_OWN | IDMAC_DES0_DIC |
-+						IDMAC_DES0_CH;
-+			/* Buffer length */
-+			IDMAC_64ADDR_SET_BUFFER1_SIZE(desc, length);
-+
-+			/* Physical address to DMA to/from */
-+			desc->des4 = mem_addr & 0xffffffff;
-+			desc->des5 = mem_addr >> 32;
-+		}
-+
-+		/* Set first descriptor */
-+		desc = host->sg_cpu;
-+		desc->des0 |= IDMAC_DES0_FD;
- 
--		/* Set the OWN bit and disable interrupts for this descriptor */
--		desc->des0 = IDMAC_DES0_OWN | IDMAC_DES0_DIC | IDMAC_DES0_CH;
-+		/* Set last descriptor */
-+		desc = host->sg_cpu + (i - 1) *
-+				sizeof(struct idmac_desc_64addr);
-+		desc->des0 &= ~(IDMAC_DES0_CH | IDMAC_DES0_DIC);
-+		desc->des0 |= IDMAC_DES0_LD;
- 
--		/* Buffer length */
--		IDMAC_SET_BUFFER1_SIZE(desc, length);
-+	} else {
-+		struct idmac_desc *desc = host->sg_cpu;
- 
--		/* Physical address to DMA to/from */
--		desc->des2 = mem_addr;
--	}
-+		for (i = 0; i < sg_len; i++, desc++) {
-+			unsigned int length = sg_dma_len(&data->sg[i]);
-+			u32 mem_addr = sg_dma_address(&data->sg[i]);
-+
-+			/*
-+			 * Set the OWN bit and disable interrupts for this
-+			 * descriptor
-+			 */
-+			desc->des0 = IDMAC_DES0_OWN | IDMAC_DES0_DIC |
-+						IDMAC_DES0_CH;
-+			/* Buffer length */
-+			IDMAC_SET_BUFFER1_SIZE(desc, length);
-+
-+			/* Physical address to DMA to/from */
-+			desc->des2 = mem_addr;
-+		}
- 
--	/* Set first descriptor */
--	desc = host->sg_cpu;
--	desc->des0 |= IDMAC_DES0_FD;
-+		/* Set first descriptor */
-+		desc = host->sg_cpu;
-+		desc->des0 |= IDMAC_DES0_FD;
- 
--	/* Set last descriptor */
--	desc = host->sg_cpu + (i - 1) * sizeof(struct idmac_desc);
--	desc->des0 &= ~(IDMAC_DES0_CH | IDMAC_DES0_DIC);
--	desc->des0 |= IDMAC_DES0_LD;
-+		/* Set last descriptor */
-+		desc = host->sg_cpu + (i - 1) * sizeof(struct idmac_desc);
-+		desc->des0 &= ~(IDMAC_DES0_CH | IDMAC_DES0_DIC);
-+		desc->des0 |= IDMAC_DES0_LD;
-+	}
- 
- 	wmb();
- }
-@@ -421,29 +474,66 @@ static void dw_mci_idmac_start_dma(struct dw_mci *host, unsigned int sg_len)
- 
- static int dw_mci_idmac_init(struct dw_mci *host)
- {
--	struct idmac_desc *p;
- 	int i;
-+	if (host->dma_64bit_address == 1) {
-+		struct idmac_desc_64addr *p;
-+		/* Number of descriptors in the ring buffer */
-+		host->ring_size = PAGE_SIZE / sizeof(struct idmac_desc_64addr);
-+
-+		/* Forward link the descriptor list */
-+		for (i = 0, p = host->sg_cpu; i < host->ring_size - 1;
-+								i++, p++) {
-+			p->des6 = (host->sg_dma +
-+					(sizeof(struct idmac_desc_64addr) *
-+							(i + 1))) & 0xffffffff;
-+
-+			p->des7 = (host->sg_dma +
-+					(sizeof(struct idmac_desc_64addr) *
-+							(i + 1))) >> 32;
-+		}
- 
--	/* Number of descriptors in the ring buffer */
--	host->ring_size = PAGE_SIZE / sizeof(struct idmac_desc);
-+		/* Set the last descriptor as the end-of-ring descriptor */
-+		p->des6 = host->sg_dma & 0xffffffff;
-+		p->des7 = host->sg_dma >> 32;
-+		p->des0 = IDMAC_DES0_ER;
- 
--	/* Forward link the descriptor list */
--	for (i = 0, p = host->sg_cpu; i < host->ring_size - 1; i++, p++)
--		p->des3 = host->sg_dma + (sizeof(struct idmac_desc) * (i + 1));
-+	} else {
-+		struct idmac_desc *p;
-+		/* Number of descriptors in the ring buffer */
-+		host->ring_size = PAGE_SIZE / sizeof(struct idmac_desc);
- 
--	/* Set the last descriptor as the end-of-ring descriptor */
--	p->des3 = host->sg_dma;
--	p->des0 = IDMAC_DES0_ER;
-+		/* Forward link the descriptor list */
-+		for (i = 0, p = host->sg_cpu; i < host->ring_size - 1; i++, p++)
-+			p->des3 = host->sg_dma + (sizeof(struct idmac_desc) *
-+								(i + 1));
-+
-+		/* Set the last descriptor as the end-of-ring descriptor */
-+		p->des3 = host->sg_dma;
-+		p->des0 = IDMAC_DES0_ER;
-+	}
- 
- 	mci_writel(host, BMOD, SDMMC_IDMAC_SWRESET);
- 
--	/* Mask out interrupts - get Tx & Rx complete only */
--	mci_writel(host, IDSTS, IDMAC_INT_CLR);
--	mci_writel(host, IDINTEN, SDMMC_IDMAC_INT_NI | SDMMC_IDMAC_INT_RI |
--		   SDMMC_IDMAC_INT_TI);
-+	if (host->dma_64bit_address == 1) {
-+		/* Mask out interrupts - get Tx & Rx complete only */
-+		mci_writel(host, IDSTS64, IDMAC_INT_CLR);
-+		mci_writel(host, IDINTEN64, SDMMC_IDMAC_INT_NI |
-+				SDMMC_IDMAC_INT_RI | SDMMC_IDMAC_INT_TI);
-+
-+		/* Set the descriptor base address */
-+		mci_writel(host, DBADDRL, host->sg_dma & 0xffffffff);
-+		mci_writel(host, DBADDRU, host->sg_dma >> 32);
-+
-+	} else {
-+		/* Mask out interrupts - get Tx & Rx complete only */
-+		mci_writel(host, IDSTS, IDMAC_INT_CLR);
-+		mci_writel(host, IDINTEN, SDMMC_IDMAC_INT_NI |
-+				SDMMC_IDMAC_INT_RI | SDMMC_IDMAC_INT_TI);
-+
-+		/* Set the descriptor base address */
-+		mci_writel(host, DBADDR, host->sg_dma);
-+	}
- 
--	/* Set the descriptor base address */
--	mci_writel(host, DBADDR, host->sg_dma);
- 	return 0;
- }
- 
-@@ -1677,11 +1767,22 @@ static irqreturn_t dw_mci_interrupt(int irq, void *dev_id)
- 
- #ifdef CONFIG_MMC_DW_IDMAC
- 	/* Handle DMA interrupts */
--	pending = mci_readl(host, IDSTS);
--	if (pending & (SDMMC_IDMAC_INT_TI | SDMMC_IDMAC_INT_RI)) {
--		mci_writel(host, IDSTS, SDMMC_IDMAC_INT_TI | SDMMC_IDMAC_INT_RI);
--		mci_writel(host, IDSTS, SDMMC_IDMAC_INT_NI);
--		host->dma_ops->complete(host);
-+	if (host->dma_64bit_address == 1) {
-+		pending = mci_readl(host, IDSTS64);
-+		if (pending & (SDMMC_IDMAC_INT_TI | SDMMC_IDMAC_INT_RI)) {
-+			mci_writel(host, IDSTS64, SDMMC_IDMAC_INT_TI |
-+							SDMMC_IDMAC_INT_RI);
-+			mci_writel(host, IDSTS64, SDMMC_IDMAC_INT_NI);
-+			host->dma_ops->complete(host);
-+		}
-+	} else {
-+		pending = mci_readl(host, IDSTS);
-+		if (pending & (SDMMC_IDMAC_INT_TI | SDMMC_IDMAC_INT_RI)) {
-+			mci_writel(host, IDSTS, SDMMC_IDMAC_INT_TI |
-+							SDMMC_IDMAC_INT_RI);
-+			mci_writel(host, IDSTS, SDMMC_IDMAC_INT_NI);
-+			host->dma_ops->complete(host);
-+		}
- 	}
- #endif
- 
-@@ -2036,6 +2137,22 @@ static void dw_mci_cleanup_slot(struct dw_mci_slot *slot, unsigned int id)
- 
- static void dw_mci_init_dma(struct dw_mci *host)
- {
-+	int addr_config;
-+	/* Check ADDR_CONFIG bit in HCON to find IDMAC address bus width */
-+	addr_config = (mci_readl(host, HCON) >> 27) & 0x01;
-+
-+	if (addr_config == 1) {
-+		/* host supports IDMAC in 64-bit address mode */
-+		host->dma_64bit_address = 1;
-+		dev_info(host->dev, "IDMAC supports 64-bit address mode.\n");
-+		if (!dma_set_mask(host->dev, DMA_BIT_MASK(64)))
-+			dma_set_coherent_mask(host->dev, DMA_BIT_MASK(64));
-+	} else {
-+		/* host supports IDMAC in 32-bit address mode */
-+		host->dma_64bit_address = 0;
-+		dev_info(host->dev, "IDMAC supports 32-bit address mode.\n");
-+	}
-+
- 	/* Alloc memory for sg translation */
- 	host->sg_cpu = dmam_alloc_coherent(host->dev, PAGE_SIZE,
- 					  &host->sg_dma, GFP_KERNEL);
-diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
-index 81b2994..7414656 100644
---- a/drivers/mmc/host/dw_mmc.h
-+++ b/drivers/mmc/host/dw_mmc.h
-@@ -54,6 +54,17 @@
- #define SDMMC_DSCADDR		0x094
- #define SDMMC_BUFADDR		0x098
- #define SDMMC_DATA(x)		(x)
-+/*
-+* Registers to support idmac 64-bit address mode
-+*/
-+#define SDMMC_DBADDRL		0x088
-+#define SDMMC_DBADDRU		0x08c
-+#define SDMMC_IDSTS64		0x090
-+#define SDMMC_IDINTEN64		0x094
-+#define SDMMC_DSCADDRL		0x098
-+#define SDMMC_DSCADDRU		0x09c
-+#define SDMMC_BUFADDRL		0x0A0
-+#define SDMMC_BUFADDRU		0x0A4
- 
- /*
-  * Data offset is difference according to Version
-diff --git a/include/linux/mmc/dw_mmc.h b/include/linux/mmc/dw_mmc.h
-index 198f0fa..7460b04 100644
---- a/include/linux/mmc/dw_mmc.h
-+++ b/include/linux/mmc/dw_mmc.h
-@@ -51,6 +51,7 @@ struct mmc_data;
-  *	transfer is in progress.
-  * @use_dma: Whether DMA channel is initialized or not.
-  * @using_dma: Whether DMA is in use for the current transfer.
-+ * @dma_64bit_address: Whether DMA supports 64-bit address mode or not.
-  * @sg_dma: Bus address of DMA buffer.
-  * @sg_cpu: Virtual address of DMA buffer.
-  * @dma_ops: Pointer to platform-specific DMA callbacks.
-@@ -134,6 +135,7 @@ struct dw_mci {
- 	/* DMA interface members*/
- 	int			use_dma;
- 	int			using_dma;
-+	int			dma_64bit_address;
- 
- 	dma_addr_t		sg_dma;
- 	void			*sg_cpu;
--- 
-1.7.6.5
+Why it is named patch 4/8?
+
+> Signed-off-by: Yuvaraj Kumar C D <yuvaraj.cd@samsung.com>
+> ---
+>  .../devicetree/bindings/mmc/exynos-dw-mshc.txt     |    2 +
+>  arch/arm/boot/dts/exynos5420-smdk5420.dts          |   41
+> ++++++++++++++++++++ arch/arm/boot/dts/exynos5420.dtsi                 
+> |   33 ++++++++++++++++ 3 files changed, 76 insertions(+)
+> 
+> diff --git a/Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt
+> b/Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt index
+> 6d1c098..84cd56f 100644
+> --- a/Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt
+> +++ b/Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt
+> @@ -16,6 +16,8 @@ Required Properties:
+>  	  specific extensions.
+>  	- "samsung,exynos5250-dw-mshc": for controllers with Samsung Exynos5250
+> specific extensions.
+> +	- "samsung,exynos5420-dw-mshc": for controllers with Samsung Exynos5420
+> +	  specific extensions.
+> 
+>  * samsung,dw-mshc-ciu-div: Specifies the divider value for the card
+> interface unit (ciu) clock. This property is applicable only for Exynos5
+> SoC's and diff --git a/arch/arm/boot/dts/exynos5420-smdk5420.dts
+> b/arch/arm/boot/dts/exynos5420-smdk5420.dts index 08607df..4530700
+> 100644
+> --- a/arch/arm/boot/dts/exynos5420-smdk5420.dts
+> +++ b/arch/arm/boot/dts/exynos5420-smdk5420.dts
+> @@ -30,4 +30,45 @@
+>  			clock-frequency = <24000000>;
+>  		};
+>  	};
+> +
+> +	dwmmc0@12200000 {
+> +		num-slots = <1>;
+> +		broken-cd;
+> +		bypass-smu;
+> +		supports-highspeed;
+> +		fifo-depth = <0x80>;
+> +		card-detect-delay = <200>;
+> +		samsung,dw-mshc-ciu-div = <3>;
+> +		samsung,dw-mshc-sdr-timing = <0 4>;
+> +		samsung,dw-mshc-ddr-timing = <0 2>;
+> +		pinctrl-names = "default";
+> +		pinctrl-0 = <&sd0_clk &sd0_cmd &sd0_bus4 &sd0_bus8>;
+
+See below.
+
+> +
+> +		slot@0 {
+> +			reg = <0>;
+> +			bus-width = <8>;
+> +		};
+> +	};
+> +
+> +	dwmmc1@12210000 {
+> +		status = "disabled";
+
+You should rather keep things the other way around. A board dts shouldn't 
+care about peripherals it doesn't use, so any peripheral requiring board-
+specific data in its node should have status set as "disabled" at top level 
+and then overridden to "okay" at level in which it has all the required 
+properties to operate (in board dts in this case).
+
+> +	};
+> +
+> +	dwmmc2@12220000 {
+> +		num-slots = <1>;
+> +		supports-highspeed;
+> +		fifo-depth = <0x80>;
+> +		card-detect-delay = <200>;
+> +		samsung,dw-mshc-ciu-div = <3>;
+> +		samsung,dw-mshc-sdr-timing = <2 3>;
+> +		samsung,dw-mshc-ddr-timing = <1 2>;
+> +		pinctrl-names = "default";
+> +		pinctrl-0 = <&sd2_clk &sd2_cmd &sd2_cd &sd2_bus4>;
+
+Here would go status = "okay".
+
+> +
+> +		slot@0 {
+> +			reg = <0>;
+> +			bus-width = <4>;
+> +		};
+> +	};
+> +
+>  };
+> diff --git a/arch/arm/boot/dts/exynos5420.dtsi
+> b/arch/arm/boot/dts/exynos5420.dtsi index 9e90d1e..8559aa8 100644
+> --- a/arch/arm/boot/dts/exynos5420.dtsi
+> +++ b/arch/arm/boot/dts/exynos5420.dtsi
+> @@ -19,6 +19,9 @@
+>  	compatible = "samsung,exynos5420";
+> 
+>  	aliases {
+> +		mshc0 = &dwmmc_0;
+> +		mshc1 = &dwmmc_1;
+> +		mshc2 = &dwmmc_2;
+>  		pinctrl0 = &pinctrl_0;
+>  		pinctrl1 = &pinctrl_1;
+>  		pinctrl2 = &pinctrl_2;
+> @@ -65,6 +68,36 @@
+>  		#clock-cells = <1>;
+>  	};
+> 
+> +	dwmmc_0: dwmmc0@12200000 {
+> +		compatible = "samsung,exynos5420-dw-mshc";
+> +		interrupts = <0 75 0>;
+> +		#address-cells = <1>;
+> +		#size-cells = <0>;
+> +		reg = <0x12200000 0x2000>;
+> +		clocks = <&clock 351>, <&clock 132>;
+> +		clock-names = "biu", "ciu";
+
+Here would go status = "disabled" in this case.
+
+> +	};
+> +
+> +	dwmmc_1: dwmmc1@12210000 {
+> +		compatible = "samsung,exynos5420-dw-mshc";
+> +		interrupts = <0 76 0>;
+> +		#address-cells = <1>;
+> +		#size-cells = <0>;
+> +		reg = <0x12210000 0x2000>;
+> +		clocks = <&clock 352>, <&clock 133>;
+> +		clock-names = "biu", "ciu";
+
+...
+
+> +	};
+> +
+> +	dwmmc_2: dwmmc2@12220000 {
+> +		compatible = "samsung,exynos5420-dw-mshc";
+> +		interrupts = <0 77 0>;
+> +		#address-cells = <1>;
+> +		#size-cells = <0>;
+> +		reg = <0x12220000 0x2000>;
+> +		clocks = <&clock 353>, <&clock 134>;
+> +		clock-names = "biu", "ciu";
+
+...
+
+Best regards,
+Tomasz
+
