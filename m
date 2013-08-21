@@ -1,21 +1,21 @@
 From: Seungwon Jeon <tgih.jun@samsung.com>
-Subject: [PATCH 06/14] mmc: dw_mmc: set the supported max/min frequency
-Date: Wed, 21 Aug 2013 22:50:26 +0900
-Message-ID: <002b01ce9e75$6437e4f0$2ca7aed0$%jun@samsung.com>
+Subject: [PATCH 07/14] mmc: dw_mmc: adjust the fifoth with block size
+Date: Wed, 21 Aug 2013 22:50:39 +0900
+Message-ID: <002c01ce9e75$6bbeed40$433cc7c0$%jun@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout3.samsung.com ([203.254.224.33]:44155 "EHLO
+Received: from mailout3.samsung.com ([203.254.224.33]:44167 "EHLO
 	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751719Ab3HUNu2 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 21 Aug 2013 09:50:28 -0400
-Received: from epcpsbgr4.samsung.com
- (u144.gpu120.samsung.co.kr [203.254.230.144])
+	with ESMTP id S1751719Ab3HUNuk (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 21 Aug 2013 09:50:40 -0400
+Received: from epcpsbgr3.samsung.com
+ (u143.gpu120.samsung.co.kr [203.254.230.143])
  by mailout3.samsung.com (Oracle Communications Messaging Server 7u4-24.01
  (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTP id <0MRV000U6VQZRHK0@mailout3.samsung.com> for
- linux-mmc@vger.kernel.org; Wed, 21 Aug 2013 22:50:27 +0900 (KST)
+ with ESMTP id <0MRV00DBBVSF6MB0@mailout3.samsung.com> for
+ linux-mmc@vger.kernel.org; Wed, 21 Aug 2013 22:50:39 +0900 (KST)
 References: 
 In-reply-to: 
 Content-language: ko
@@ -24,81 +24,159 @@ List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 Cc: 'Chris Ball' <cjb@laptop.org>, 'Jaehoon Chung' <jh80.chung@samsung.com>, 'Alim Akhtar' <alim.akhtar@samsung.com>
 
-Both f_max and f_min will be informed for core layer to request
-valid clock rate. But current setting from 'host->bus_hz' may
-not represent the max/min frequency properly. Even if host can
-actually support high speed than bus_hz, core layer will not
-request clock rate over bus_hz. Basically, f_max/f_min can be set
-with the values according to spec. And then host will make its best
-effort to meet the rate.
+This change helps to choose msize, rx_watermark and
+tx_watermak depending on block size for IDMAC mode.
+For SDIO block size can be variable, so if these values
+are set incorrectly, card clock may stop.
 
 Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
 ---
- .../devicetree/bindings/mmc/synopsis-dw-mshc.txt   |    4 ++++
- drivers/mmc/host/dw_mmc.c                          |   14 ++++++++++++--
- 2 files changed, 16 insertions(+), 2 deletions(-)
+ drivers/mmc/host/dw_mmc.c  |   74 ++++++++++++++++++++++++++++++++++++++++++--
+ drivers/mmc/host/dw_mmc.h  |    4 ++
+ include/linux/mmc/dw_mmc.h |    1 +
+ 3 files changed, 76 insertions(+), 3 deletions(-)
 
-diff --git a/Documentation/devicetree/bindings/mmc/synopsis-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/synopsis-dw-mshc.txt
-index ae5f8e8..fdbf686 100644
---- a/Documentation/devicetree/bindings/mmc/synopsis-dw-mshc.txt
-+++ b/Documentation/devicetree/bindings/mmc/synopsis-dw-mshc.txt
-@@ -52,6 +52,9 @@ Optional properties:
-   is specified and the ciu clock is specified then we'll try to set the ciu
-   clock to this at probe time.
- 
-+* clock-freq-min-max: Minimum and Maximum clock frequency for card output
-+  clock(cclk_out). If it's not specified, max is 200MHZ and min is 400KHz by default.
-+
- * num-slots: specifies the number of slots supported by the controller.
-   The number of physical slots actually used could be equal or less than the
-   value specified by num-slots. If this property is not specified, the value
-@@ -97,6 +100,7 @@ board specific portions as listed below.
- 
- 	dwmmc0@12200000 {
- 		clock-frequency = <400000000>;
-+		clock-freq-min-max = <400000 200000000>;
- 		num-slots = <1>;
- 		supports-highspeed;
- 		caps2-mmc-hs200-1_8v;
 diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index a1ce7c0..296d4a4 100644
+index 296d4a4..b8ba707 100644
 --- a/drivers/mmc/host/dw_mmc.c
 +++ b/drivers/mmc/host/dw_mmc.c
-@@ -50,6 +50,9 @@
- #define DW_MCI_RECV_STATUS	2
- #define DW_MCI_DMA_THRESHOLD	16
+@@ -529,6 +529,47 @@ static void dw_mci_post_req(struct mmc_host *mmc,
+ 	data->host_cookie = 0;
+ }
  
-+#define DW_MCI_FREQ_MAX	200000000
-+#define DW_MCI_FREQ_MIN	400000
++static void dw_mci_adjust_fifoth(struct dw_mci *host, struct mmc_data *data)
++{
++#ifdef CONFIG_MMC_DW_IDMAC
++	unsigned int blksz = data->blksz;
++	const u32 mszs[] = {1, 4, 8, 16, 32, 64, 128, 256};
++	u32 fifo_width = 1 << host->data_shift;
++	u32 blksz_depth = blksz / fifo_width, fifoth_val;
++	u32 msize = 0, rx_wmark = 1, tx_wmark, tx_wmark_invers;
++	int idx = (sizeof(mszs) / sizeof(mszs[0])) - 1;
 +
- #ifdef CONFIG_MMC_DW_IDMAC
- #define IDMAC_INT_CLR		(SDMMC_IDMAC_INT_AI | SDMMC_IDMAC_INT_NI | \
- 				 SDMMC_IDMAC_INT_CES | SDMMC_IDMAC_INT_DU | \
-@@ -1929,6 +1932,7 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
- 	struct dw_mci_slot *slot;
- 	const struct dw_mci_drv_data *drv_data = host->drv_data;
- 	int ctrl_id, ret;
-+	u32 freq[2];
- 	u8 bus_width;
- 
- 	mmc = mmc_alloc_host(sizeof(struct dw_mci_slot), host->dev);
-@@ -1944,8 +1948,14 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
- 	slot->quirks = dw_mci_of_get_slot_quirks(host->dev, slot->id);
- 
- 	mmc->ops = &dw_mci_ops;
--	mmc->f_min = DIV_ROUND_UP(host->bus_hz, 510);
--	mmc->f_max = host->bus_hz;
-+	if (of_property_read_u32_array(host->dev->of_node,
-+				       "clock-freq-min-max", freq, 2)) {
-+		mmc->f_min = DW_MCI_FREQ_MIN;
-+		mmc->f_max = DW_MCI_FREQ_MAX;
-+	} else {
-+		mmc->f_min = freq[0];
-+		mmc->f_max = freq[1];
++	tx_wmark = (host->fifo_depth) / 2;
++	tx_wmark_invers = host->fifo_depth - tx_wmark;
++
++	/*
++	 * MSIZE is '1',
++	 * if blksz is not a multiple of the FIFO width
++	 */
++	if (blksz % fifo_width) {
++		msize = 0;
++		rx_wmark = 1;
++		goto done;
 +	}
++
++	do {
++		if (!((blksz_depth % mszs[idx]) ||
++		     (tx_wmark_invers % mszs[idx]))) {
++			msize = idx;
++			rx_wmark = mszs[idx] - 1;
++			break;
++		}
++	} while (--idx > 0);
++	/*
++	 * If idx is '0', it won't be tried
++	 * Thus, initial values are uesed
++	 */
++done:
++	fifoth_val = SDMMC_SET_FIFOTH(msize, rx_wmark, tx_wmark);
++	mci_writel(host, FIFOTH, fifoth_val);
++#endif
++}
++
+ static int dw_mci_submit_data_dma(struct dw_mci *host, struct mmc_data *data)
+ {
+ 	int sg_len;
+@@ -553,6 +594,14 @@ static int dw_mci_submit_data_dma(struct dw_mci *host, struct mmc_data *data)
+ 		 (unsigned long)host->sg_cpu, (unsigned long)host->sg_dma,
+ 		 sg_len);
  
- 	if (host->pdata->get_ocr)
- 		mmc->ocr_avail = host->pdata->get_ocr(id);
++	/*
++	 * Decide the MSIZE and RX/TX Watermark.
++	 * If current block size is same with previous size,
++	 * no need to update fifoth.
++	 */
++	if (host->prev_blksz != data->blksz)
++		dw_mci_adjust_fifoth(host, data);
++
+ 	/* Enable the DMA interface */
+ 	temp = mci_readl(host, CTRL);
+ 	temp |= SDMMC_CTRL_DMA_ENABLE;
+@@ -603,6 +652,21 @@ static void dw_mci_submit_data(struct dw_mci *host, struct mmc_data *data)
+ 		temp = mci_readl(host, CTRL);
+ 		temp &= ~SDMMC_CTRL_DMA_ENABLE;
+ 		mci_writel(host, CTRL, temp);
++
++		/*
++		 * Use the initial fifoth_val for PIO mode.
++		 * If next issued data may be transfered by DMA mode,
++		 * prev_blksz should be invalidated.
++		 */
++		mci_writel(host, FIFOTH, host->fifoth_val);
++		host->prev_blksz = 0;
++	} else {
++		/*
++		 * Keep the current block size.
++		 * It will be used to decide whether to update
++		 * fifoth register next time.
++		 */
++		host->prev_blksz = data->blksz;
+ 	}
+ }
+ 
+@@ -2358,8 +2422,8 @@ int dw_mci_probe(struct dw_mci *host)
+ 		fifo_size = host->pdata->fifo_depth;
+ 	}
+ 	host->fifo_depth = fifo_size;
+-	host->fifoth_val = ((0x2 << 28) | ((fifo_size/2 - 1) << 16) |
+-			((fifo_size/2) << 0));
++	host->fifoth_val =
++		SDMMC_SET_FIFOTH(0x2, fifo_size / 2 - 1, fifo_size / 2);
+ 	mci_writel(host, FIFOTH, host->fifoth_val);
+ 
+ 	/* disable clock to CIU */
+@@ -2542,8 +2606,12 @@ int dw_mci_resume(struct dw_mci *host)
+ 	if (host->use_dma && host->dma_ops->init)
+ 		host->dma_ops->init(host);
+ 
+-	/* Restore the old value at FIFOTH register */
++	/*
++	 * Restore the initial value at FIFOTH register
++	 * And Invalidate the prev_blksz with zero
++	 */
+ 	mci_writel(host, FIFOTH, host->fifoth_val);
++	host->prev_blksz = 0;
+ 
+ 	mci_writel(host, RINTSTS, 0xFFFFFFFF);
+ 	mci_writel(host, INTMASK, SDMMC_INT_CMD_DONE | SDMMC_INT_DATA_OVER |
+diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
+index 661c6f9..4002c84 100644
+--- a/drivers/mmc/host/dw_mmc.h
++++ b/drivers/mmc/host/dw_mmc.h
+@@ -128,6 +128,10 @@
+ #define SDMMC_CMD_INDX(n)		((n) & 0x1F)
+ /* Status register defines */
+ #define SDMMC_GET_FCNT(x)		(((x)>>17) & 0x1FFF)
++/* FIFOTH register defines */
++#define SDMMC_SET_FIFOTH(m, r, t)	(((m) & 0x7) << 28 | \
++					 ((r) & 0xFFF) << 16 | \
++					 ((t) & 0xFFF))
+ /* Internal DMAC interrupt defines */
+ #define SDMMC_IDMAC_INT_AI		BIT(9)
+ #define SDMMC_IDMAC_INT_NI		BIT(8)
+diff --git a/include/linux/mmc/dw_mmc.h b/include/linux/mmc/dw_mmc.h
+index 198f0fa..4ec9dcc 100644
+--- a/include/linux/mmc/dw_mmc.h
++++ b/include/linux/mmc/dw_mmc.h
+@@ -129,6 +129,7 @@ struct dw_mci {
+ 	struct mmc_request	*mrq;
+ 	struct mmc_command	*cmd;
+ 	struct mmc_data		*data;
++	unsigned int		prev_blksz;
+ 	struct workqueue_struct	*card_workqueue;
+ 
+ 	/* DMA interface members*/
 -- 
 1.7.0.4
 
