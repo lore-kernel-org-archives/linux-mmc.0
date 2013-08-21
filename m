@@ -1,138 +1,57 @@
-From: Yuvaraj Kumar C D <yuvaraj.cd@gmail.com>
-Subject: [PATCH V3 2/2] ARM: dts: exynos: change status property of dwmmc nodes
-Date: Wed, 21 Aug 2013 19:08:33 +0530
-Message-ID: <1377092313-2328-3-git-send-email-yuvaraj.cd@samsung.com>
-References: <1377092313-2328-1-git-send-email-yuvaraj.cd@samsung.com>
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-Reply-To: <1377092313-2328-1-git-send-email-yuvaraj.cd@samsung.com>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: linux-samsung-soc@vger.kernel.org, linux-mmc@vger.kernel.org, kgene.kim@samsung.com
-Cc: ks.giri@samsung.com, t.figa@samsung.com, Yuvaraj Kumar C D <yuvaraj.cd@samsung.com>
+From: Seungwon Jeon <tgih.jun@samsung.com>
+Subject: [PATCH 00/14] mmc: dw_mmc: add driver's updates
+Date: Wed, 21 Aug 2013 22:49:01 +0900
+Message-ID: <002501ce9e75$318253b0$9486fb10$%jun@samsung.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout4.samsung.com ([203.254.224.34]:12444 "EHLO
+	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751825Ab3HUNtD (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 21 Aug 2013 09:49:03 -0400
+Received: from epcpsbgr4.samsung.com
+ (u144.gpu120.samsung.co.kr [203.254.230.144])
+ by mailout4.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+ (7.0.4.24.0) 64bit (built Nov 17 2011))
+ with ESMTP id <0MRV009KJVPNTOC0@mailout4.samsung.com> for
+ linux-mmc@vger.kernel.org; Wed, 21 Aug 2013 22:49:02 +0900 (KST)
+References: 
+In-reply-to: 
+Content-language: ko
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: 'Chris Ball' <cjb@laptop.org>, 'Jaehoon Chung' <jh80.chung@samsung.com>, 'Alim Akhtar' <alim.akhtar@samsung.com>
 
-According to ePAPR, chapter 2.3.4, the status property has
-defined that it should be set to "disabled" when "the device
-is not presently operational, but it might become operational
-in the future".
+This patch set includes the tuning scheme for high speed mode such as HS200.
+Specially, the support of HS200 mode is introduced with exynos's host
+And also, it addresses the some error handling and code clean-up.
 
-So this patch disable dwmmc node by "status = disabled" in SOC
-dts file and enable dwmmc node by "status = okay" in board specific
-dts file.
+Seungwon Jeon (14):
+      mmc: dw_mmc: add support tuning scheme
+      mmc: dw_mmc: exynos: add variable delay tuning sequence
+      mmc: dw_mmc: exynos: adjust the clock rate with speed mode
+      mmc: dw_mmc: add the capability to support hs200 mode
+      mmc: dw_mmc: move supports-highspeed of quirks to caps
+      mmc: dw_mmc: set the supported max/min frequency
+      mmc: dw_mmc: adjust the fifoth with block size
+      mmc: dw_mmc: control card read threshold
+      mmc: dw_mmc: fix error handling on response error
+      mmc: dw_mmc: guarantee stop-abort cmd in data errors
+      mmc: dw_mmc: rework the code related to cmd/data completion
+      mmc: dw_mmc: gather each reset code into functions
+      mmc: dw_mmc: amend use of idmac sw reset
+      mmc: dw_mmc: fix the transfer termination in IDMAC mode
 
-Signed-off-by: Yuvaraj Kumar C D <yuvaraj.cd@samsung.com>
----
- arch/arm/boot/dts/exynos5250-arndale.dts  |   10 ++--------
- arch/arm/boot/dts/exynos5250-smdk5250.dts |   10 ++--------
- arch/arm/boot/dts/exynos5250.dtsi         |    4 ++++
- 3 files changed, 8 insertions(+), 16 deletions(-)
+ .../devicetree/bindings/mmc/synopsis-dw-mshc.txt   |    9 +
+ drivers/mmc/host/dw_mmc-exynos.c                   |  168 ++++++-
+ drivers/mmc/host/dw_mmc.c                          |  523 ++++++++++++++------
+ drivers/mmc/host/dw_mmc.h                          |   50 ++
+ include/linux/mmc/dw_mmc.h                         |    4 +
+ 5 files changed, 597 insertions(+), 157 deletions(-)
 
-diff --git a/arch/arm/boot/dts/exynos5250-arndale.dts b/arch/arm/boot/dts/exynos5250-arndale.dts
-index 452d0b0..b741dd4 100644
---- a/arch/arm/boot/dts/exynos5250-arndale.dts
-+++ b/arch/arm/boot/dts/exynos5250-arndale.dts
-@@ -367,6 +367,7 @@
- 	};
- 
- 	dwmmc_0: dwmmc0@12200000 {
-+		status = "okay";
- 		num-slots = <1>;
- 		supports-highspeed;
- 		broken-cd;
-@@ -385,11 +386,8 @@
- 		};
- 	};
- 
--	dwmmc_1: dwmmc1@12210000 {
--		status = "disabled";
--	};
--
- 	dwmmc_2: dwmmc2@12220000 {
-+		status = "okay";
- 		num-slots = <1>;
- 		supports-highspeed;
- 		fifo-depth = <0x80>;
-@@ -408,10 +406,6 @@
- 		};
- 	};
- 
--	dwmmc_3: dwmmc3@12230000 {
--		status = "disabled";
--	};
--
- 	spi_0: spi@12d20000 {
- 		status = "disabled";
- 	};
-diff --git a/arch/arm/boot/dts/exynos5250-smdk5250.dts b/arch/arm/boot/dts/exynos5250-smdk5250.dts
-index 2538b32..bd19d55d 100644
---- a/arch/arm/boot/dts/exynos5250-smdk5250.dts
-+++ b/arch/arm/boot/dts/exynos5250-smdk5250.dts
-@@ -141,6 +141,7 @@
- 	};
- 
- 	dwmmc0@12200000 {
-+		status = "okay";
- 		num-slots = <1>;
- 		supports-highspeed;
- 		broken-cd;
-@@ -158,11 +159,8 @@
- 		};
- 	};
- 
--	dwmmc1@12210000 {
--		status = "disabled";
--	};
--
- 	dwmmc2@12220000 {
-+		status = "okay";
- 		num-slots = <1>;
- 		supports-highspeed;
- 		fifo-depth = <0x80>;
-@@ -180,10 +178,6 @@
- 		};
- 	};
- 
--	dwmmc3@12230000 {
--		status = "disabled";
--	};
--
- 	spi_0: spi@12d20000 {
- 		status = "disabled";
- 	};
-diff --git a/arch/arm/boot/dts/exynos5250.dtsi b/arch/arm/boot/dts/exynos5250.dtsi
-index 3c970fe..b1b6f61 100644
---- a/arch/arm/boot/dts/exynos5250.dtsi
-+++ b/arch/arm/boot/dts/exynos5250.dtsi
-@@ -394,6 +394,7 @@
- 		reg = <0x12200000 0x1000>;
- 		clocks = <&clock 280>, <&clock 139>;
- 		clock-names = "biu", "ciu";
-+		status = "disabled";
- 	};
- 
- 	dwmmc_1: dwmmc1@12210000 {
-@@ -404,6 +405,7 @@
- 		reg = <0x12210000 0x1000>;
- 		clocks = <&clock 281>, <&clock 140>;
- 		clock-names = "biu", "ciu";
-+		status = "disabled";
- 	};
- 
- 	dwmmc_2: dwmmc2@12220000 {
-@@ -414,6 +416,7 @@
- 		reg = <0x12220000 0x1000>;
- 		clocks = <&clock 282>, <&clock 141>;
- 		clock-names = "biu", "ciu";
-+		status = "disabled";
- 	};
- 
- 	dwmmc_3: dwmmc3@12230000 {
-@@ -424,6 +427,7 @@
- 		#size-cells = <0>;
- 		clocks = <&clock 283>, <&clock 142>;
- 		clock-names = "biu", "ciu";
-+		status = "disabled";
- 	};
- 
- 	i2s0: i2s@03830000 {
--- 
-1.7.9.5
+
+Thanks,
+Seungwon Jeon
+
