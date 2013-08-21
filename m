@@ -1,21 +1,21 @@
 From: Seungwon Jeon <tgih.jun@samsung.com>
-Subject: [PATCH 01/14] mmc: dw_mmc: add support tuning scheme
-Date: Wed, 21 Aug 2013 22:49:10 +0900
-Message-ID: <002601ce9e75$36fa0400$a4ee0c00$%jun@samsung.com>
+Subject: [PATCH 02/14] mmc: dw_mmc: exynos: add variable delay tuning sequence
+Date: Wed, 21 Aug 2013 22:49:24 +0900
+Message-ID: <002701ce9e75$3eca9870$bc5fc950$%jun@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout3.samsung.com ([203.254.224.33]:44045 "EHLO
+Received: from mailout3.samsung.com ([203.254.224.33]:44066 "EHLO
 	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751921Ab3HUNtN (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 21 Aug 2013 09:49:13 -0400
-Received: from epcpsbgr2.samsung.com
- (u142.gpu120.samsung.co.kr [203.254.230.142])
+	with ESMTP id S1751921Ab3HUNtZ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 21 Aug 2013 09:49:25 -0400
+Received: from epcpsbgr5.samsung.com
+ (u145.gpu120.samsung.co.kr [203.254.230.145])
  by mailout3.samsung.com (Oracle Communications Messaging Server 7u4-24.01
  (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTP id <0MRV00APOVPZBOD0@mailout3.samsung.com> for
- linux-mmc@vger.kernel.org; Wed, 21 Aug 2013 22:49:11 +0900 (KST)
+ with ESMTP id <0MRV00APTVQ7BOD0@mailout3.samsung.com> for
+ linux-mmc@vger.kernel.org; Wed, 21 Aug 2013 22:49:24 +0900 (KST)
 References: 
 In-reply-to: 
 Content-language: ko
@@ -24,198 +24,166 @@ List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 Cc: 'Chris Ball' <cjb@laptop.org>, 'Jaehoon Chung' <jh80.chung@samsung.com>, 'Alim Akhtar' <alim.akhtar@samsung.com>
 
-For the speed modes HS200 and SDR104, tuning is needed
-to determine the correct sampling point. Actual tuning
-procedure is provided by specific host controller driver.
-This patch defines the tuning command and tuning data.
-Additionally, 'struct dw_mci_slot' is moved to header file
-to consider the extensive usages in driver.
+Implements variable delay tuning. In this change,
+exynos host can determine the correct sampling point
+for the HS200 and SDR104 speed mode.
 
 Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
 ---
- drivers/mmc/host/dw_mmc.c |   93 +++++++++++++++++++++++++++++----------------
- drivers/mmc/host/dw_mmc.h |   43 +++++++++++++++++++++
- 2 files changed, 103 insertions(+), 33 deletions(-)
+ drivers/mmc/host/dw_mmc-exynos.c |  124 ++++++++++++++++++++++++++++++++++++++
+ 1 files changed, 124 insertions(+), 0 deletions(-)
 
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index ee5f167..5d1123f 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -76,40 +76,34 @@ struct idmac_desc {
- };
- #endif /* CONFIG_MMC_DW_IDMAC */
+diff --git a/drivers/mmc/host/dw_mmc-exynos.c b/drivers/mmc/host/dw_mmc-exynos.c
+index 866edef..90f9335 100644
+--- a/drivers/mmc/host/dw_mmc-exynos.c
++++ b/drivers/mmc/host/dw_mmc-exynos.c
+@@ -14,8 +14,10 @@
+ #include <linux/clk.h>
+ #include <linux/mmc/host.h>
+ #include <linux/mmc/dw_mmc.h>
++#include <linux/mmc/mmc.h>
+ #include <linux/of.h>
+ #include <linux/of_gpio.h>
++#include <linux/slab.h>
  
--/**
-- * struct dw_mci_slot - MMC slot state
-- * @mmc: The mmc_host representing this slot.
-- * @host: The MMC controller this slot is using.
-- * @quirks: Slot-level quirks (DW_MCI_SLOT_QUIRK_XXX)
-- * @wp_gpio: If gpio_is_valid() we'll use this to read write protect.
-- * @ctype: Card type for this slot.
-- * @mrq: mmc_request currently being processed or waiting to be
-- *	processed, or NULL when the slot is idle.
-- * @queue_node: List node for placing this node in the @queue list of
-- *	&struct dw_mci.
-- * @clock: Clock rate configured by set_ios(). Protected by host->lock.
-- * @flags: Random state bits associated with the slot.
-- * @id: Number of this slot.
-- * @last_detect_state: Most recently observed card detect state.
-- */
--struct dw_mci_slot {
--	struct mmc_host		*mmc;
--	struct dw_mci		*host;
--
--	int			quirks;
--	int			wp_gpio;
--
--	u32			ctype;
--
--	struct mmc_request	*mrq;
--	struct list_head	queue_node;
-+static const u8 tuning_blk_pattern_4bit[] = {
-+	0xff, 0x0f, 0xff, 0x00, 0xff, 0xcc, 0xc3, 0xcc,
-+	0xc3, 0x3c, 0xcc, 0xff, 0xfe, 0xff, 0xfe, 0xef,
-+	0xff, 0xdf, 0xff, 0xdd, 0xff, 0xfb, 0xff, 0xfb,
-+	0xbf, 0xff, 0x7f, 0xff, 0x77, 0xf7, 0xbd, 0xef,
-+	0xff, 0xf0, 0xff, 0xf0, 0x0f, 0xfc, 0xcc, 0x3c,
-+	0xcc, 0x33, 0xcc, 0xcf, 0xff, 0xef, 0xff, 0xee,
-+	0xff, 0xfd, 0xff, 0xfd, 0xdf, 0xff, 0xbf, 0xff,
-+	0xbb, 0xff, 0xf7, 0xff, 0xf7, 0x7f, 0x7b, 0xde,
-+};
- 
--	unsigned int		clock;
--	unsigned long		flags;
--#define DW_MMC_CARD_PRESENT	0
--#define DW_MMC_CARD_NEED_INIT	1
--	int			id;
--	int			last_detect_state;
-+static const u8 tuning_blk_pattern_8bit[] = {
-+	0xff, 0xff, 0x00, 0xff, 0xff, 0xff, 0x00, 0x00,
-+	0xff, 0xff, 0xcc, 0xcc, 0xcc, 0x33, 0xcc, 0xcc,
-+	0xcc, 0x33, 0x33, 0xcc, 0xcc, 0xcc, 0xff, 0xff,
-+	0xff, 0xee, 0xff, 0xff, 0xff, 0xee, 0xee, 0xff,
-+	0xff, 0xff, 0xdd, 0xff, 0xff, 0xff, 0xdd, 0xdd,
-+	0xff, 0xff, 0xff, 0xbb, 0xff, 0xff, 0xff, 0xbb,
-+	0xbb, 0xff, 0xff, 0xff, 0x77, 0xff, 0xff, 0xff,
-+	0x77, 0x77, 0xff, 0x77, 0xbb, 0xdd, 0xee, 0xff,
-+	0xff, 0xff, 0xff, 0x00, 0xff, 0xff, 0xff, 0x00,
-+	0x00, 0xff, 0xff, 0xcc, 0xcc, 0xcc, 0x33, 0xcc,
-+	0xcc, 0xcc, 0x33, 0x33, 0xcc, 0xcc, 0xcc, 0xff,
-+	0xff, 0xff, 0xee, 0xff, 0xff, 0xff, 0xee, 0xee,
-+	0xff, 0xff, 0xff, 0xdd, 0xff, 0xff, 0xff, 0xdd,
-+	0xdd, 0xff, 0xff, 0xff, 0xbb, 0xff, 0xff, 0xff,
-+	0xbb, 0xbb, 0xff, 0xff, 0xff, 0x77, 0xff, 0xff,
-+	0xff, 0x77, 0x77, 0xff, 0x77, 0xbb, 0xdd, 0xee,
- };
- 
- #if defined(CONFIG_DEBUG_FS)
-@@ -939,6 +933,38 @@ static void dw_mci_enable_sdio_irq(struct mmc_host *mmc, int enb)
- 	}
+ #include "dw_mmc.h"
+ #include "dw_mmc-pltfm.h"
+@@ -150,6 +152,127 @@ static int dw_mci_exynos_parse_dt(struct dw_mci *host)
+ 	return 0;
  }
  
-+static int dw_mci_execute_tuning(struct mmc_host *mmc, u32 opcode)
++static inline u8 dw_mci_exynos_get_clksmpl(struct dw_mci *host)
 +{
-+	struct dw_mci_slot *slot = mmc_priv(mmc);
-+	struct dw_mci *host = slot->host;
-+	const struct dw_mci_drv_data *drv_data = host->drv_data;
-+	struct dw_mci_tuning_data tuning_data;
-+	int err = -ENOSYS;
-+
-+	if (opcode == MMC_SEND_TUNING_BLOCK_HS200) {
-+		if (mmc->ios.bus_width == MMC_BUS_WIDTH_8) {
-+			tuning_data.blk_pattern = tuning_blk_pattern_8bit;
-+			tuning_data.blksz = sizeof(tuning_blk_pattern_8bit);
-+		} else if (mmc->ios.bus_width == MMC_BUS_WIDTH_4) {
-+			tuning_data.blk_pattern = tuning_blk_pattern_4bit;
-+			tuning_data.blksz = sizeof(tuning_blk_pattern_4bit);
-+		} else {
-+			return -EINVAL;
-+		}
-+	} else if (opcode == MMC_SEND_TUNING_BLOCK) {
-+		tuning_data.blk_pattern = tuning_blk_pattern_4bit;
-+		tuning_data.blksz = sizeof(tuning_blk_pattern_4bit);
-+	} else {
-+		dev_err(host->dev,
-+			"Undefined command(%d) for tuning\n", opcode);
-+		return -EINVAL;
-+	}
-+
-+	if (drv_data && drv_data->execute_tuning)
-+		err = drv_data->execute_tuning(slot, opcode, &tuning_data);
-+	return err;
++	return SDMMC_CLKSEL_CCLK_SAMPLE(mci_readl(host, CLKSEL));
 +}
 +
- static const struct mmc_host_ops dw_mci_ops = {
- 	.request		= dw_mci_request,
- 	.pre_req		= dw_mci_pre_req,
-@@ -947,6 +973,7 @@ static const struct mmc_host_ops dw_mci_ops = {
- 	.get_ro			= dw_mci_get_ro,
- 	.get_cd			= dw_mci_get_cd,
- 	.enable_sdio_irq	= dw_mci_enable_sdio_irq,
-+	.execute_tuning		= dw_mci_execute_tuning,
++static inline void dw_mci_exynos_set_clksmpl(struct dw_mci *host, u8 sample)
++{
++	u32 clksel;
++	clksel = mci_readl(host, CLKSEL);
++	clksel = (clksel & ~0x7) | SDMMC_CLKSEL_CCLK_SAMPLE(sample);
++	mci_writel(host, CLKSEL, clksel);
++}
++
++static inline u8 dw_mci_exynos_move_next_clksmpl(struct dw_mci *host)
++{
++	u32 clksel;
++	u8 sample;
++
++	clksel = mci_readl(host, CLKSEL);
++	sample = (clksel + 1) & 0x7;
++	clksel = (clksel & ~0x7) | sample;
++	mci_writel(host, CLKSEL, clksel);
++	return sample;
++}
++
++static s8 dw_mci_exynos_get_best_clksmpl(u8 candiates)
++{
++	const u8 iter = 8;
++	u8 __c;
++	s8 i, loc = -1;
++
++	for (i = 0; i < iter; i++) {
++		__c = ror8(candiates, i);
++		if ((__c & 0xc7) == 0xc7) {
++			loc = i;
++			goto out;
++		}
++	}
++
++	for (i = 0; i < iter; i++) {
++		__c = ror8(candiates, i);
++		if ((__c & 0x83) == 0x83) {
++			loc = i;
++			goto out;
++		}
++	}
++
++out:
++	return loc;
++}
++
++static int dw_mci_exynos_execute_tuning(struct dw_mci_slot *slot, u32 opcode,
++					struct dw_mci_tuning_data *tuning_data)
++{
++	struct dw_mci *host = slot->host;
++	struct mmc_host *mmc = slot->mmc;
++	const u8 *blk_pattern = tuning_data->blk_pattern;
++	u8 *blk_test;
++	unsigned int blksz = tuning_data->blksz;
++	u8 start_smpl, smpl, candiates = 0;
++	s8 found = -1;
++	int ret = 0;
++
++	blk_test = kmalloc(blksz, GFP_KERNEL);
++	if (!blk_test)
++		return -ENOMEM;
++
++	start_smpl = dw_mci_exynos_get_clksmpl(host);
++
++	do {
++		struct mmc_request mrq = {NULL};
++		struct mmc_command cmd = {0};
++		struct mmc_command stop = {0};
++		struct mmc_data data = {0};
++		struct scatterlist sg;
++
++		cmd.opcode = opcode;
++		cmd.arg = 0;
++		cmd.flags = MMC_RSP_R1 | MMC_CMD_ADTC;
++
++		stop.opcode = MMC_STOP_TRANSMISSION;
++		stop.arg = 0;
++		stop.flags = MMC_RSP_R1B | MMC_CMD_AC;
++
++		data.blksz = blksz;
++		data.blocks = 1;
++		data.flags = MMC_DATA_READ;
++		data.sg = &sg;
++		data.sg_len = 1;
++
++		sg_init_one(&sg, blk_test, blksz);
++		mrq.cmd = &cmd;
++		mrq.stop = &stop;
++		mrq.data = &data;
++		host->mrq = &mrq;
++
++		mci_writel(host, TMOUT, ~0);
++		smpl = dw_mci_exynos_move_next_clksmpl(host);
++
++		mmc_wait_for_req(mmc, &mrq);
++
++		if (!cmd.error && !data.error) {
++			if (!memcmp(blk_pattern, blk_test, blksz))
++				candiates |= (1 << smpl);
++		} else {
++			dev_dbg(host->dev,
++				"Tuning error: cmd.error:%d, data.error:%d\n",
++				cmd.error, data.error);
++		}
++	} while (start_smpl != smpl);
++
++	found = dw_mci_exynos_get_best_clksmpl(candiates);
++	if (found >= 0)
++		dw_mci_exynos_set_clksmpl(host, found);
++	else
++		ret = -EIO;
++
++	kfree(blk_test);
++	return ret;
++}
++
+ /* Common capabilities of Exynos4/Exynos5 SoC */
+ static unsigned long exynos_dwmmc_caps[4] = {
+ 	MMC_CAP_UHS_DDR50 | MMC_CAP_1_8V_DDR |
+@@ -166,6 +289,7 @@ static const struct dw_mci_drv_data exynos_drv_data = {
+ 	.prepare_command	= dw_mci_exynos_prepare_command,
+ 	.set_ios		= dw_mci_exynos_set_ios,
+ 	.parse_dt		= dw_mci_exynos_parse_dt,
++	.execute_tuning		= dw_mci_exynos_execute_tuning,
  };
  
- static void dw_mci_request_end(struct dw_mci *host, struct mmc_request *mrq)
-diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
-index 81b2994..661c6f9 100644
---- a/drivers/mmc/host/dw_mmc.h
-+++ b/drivers/mmc/host/dw_mmc.h
-@@ -184,6 +184,47 @@ extern int dw_mci_resume(struct dw_mci *host);
- #endif
- 
- /**
-+ * struct dw_mci_slot - MMC slot state
-+ * @mmc: The mmc_host representing this slot.
-+ * @host: The MMC controller this slot is using.
-+ * @quirks: Slot-level quirks (DW_MCI_SLOT_QUIRK_XXX)
-+ * @wp_gpio: If gpio_is_valid() we'll use this to read write protect.
-+ * @ctype: Card type for this slot.
-+ * @mrq: mmc_request currently being processed or waiting to be
-+ *	processed, or NULL when the slot is idle.
-+ * @queue_node: List node for placing this node in the @queue list of
-+ *	&struct dw_mci.
-+ * @clock: Clock rate configured by set_ios(). Protected by host->lock.
-+ * @flags: Random state bits associated with the slot.
-+ * @id: Number of this slot.
-+ * @last_detect_state: Most recently observed card detect state.
-+ */
-+struct dw_mci_slot {
-+	struct mmc_host		*mmc;
-+	struct dw_mci		*host;
-+
-+	int			quirks;
-+	int			wp_gpio;
-+
-+	u32			ctype;
-+
-+	struct mmc_request	*mrq;
-+	struct list_head	queue_node;
-+
-+	unsigned int		clock;
-+	unsigned long		flags;
-+#define DW_MMC_CARD_PRESENT	0
-+#define DW_MMC_CARD_NEED_INIT	1
-+	int			id;
-+	int			last_detect_state;
-+};
-+
-+struct dw_mci_tuning_data {
-+	const u8 *blk_pattern;
-+	unsigned int blksz;
-+};
-+
-+/**
-  * dw_mci driver data - dw-mshc implementation specific driver data.
-  * @caps: mmc subsystem specified capabilities of the controller(s).
-  * @init: early implementation specific initialization.
-@@ -203,5 +244,7 @@ struct dw_mci_drv_data {
- 	void		(*prepare_command)(struct dw_mci *host, u32 *cmdr);
- 	void		(*set_ios)(struct dw_mci *host, struct mmc_ios *ios);
- 	int		(*parse_dt)(struct dw_mci *host);
-+	int		(*execute_tuning)(struct dw_mci_slot *slot, u32 opcode,
-+					struct dw_mci_tuning_data *tuning_data);
- };
- #endif /* _DW_MMC_H_ */
+ static const struct of_device_id dw_mci_exynos_match[] = {
 -- 
 1.7.0.4
 
