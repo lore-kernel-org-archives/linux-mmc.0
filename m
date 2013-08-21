@@ -1,62 +1,62 @@
-From: Seungwon Jeon <tgih.jun@samsung.com>
-Subject: [PATCH 14/14] mmc: dw_mmc: fix the transfer termination in IDMAC mode
-Date: Wed, 21 Aug 2013 22:51:45 +0900
-Message-ID: <003301ce9e75$9328cd10$b97a6730$%jun@samsung.com>
+From: "Christian Daudt" <csd@broadcom.com>
+Subject: RE: [patch] mmc: sdhci-bcm-kona: '|' vs '&' typo
+Date: Wed, 21 Aug 2013 14:30:11 +0000
+Message-ID: <400A4C8D93A8FA4CAECDE394033FA86A2AD236D7@SJEXCHMB09.corp.ad.broadcom.com>
+References: <20130821082423.GA5240@elgon.mountain>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout3.samsung.com ([203.254.224.33]:44276 "EHLO
-	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751556Ab3HUNvq (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 21 Aug 2013 09:51:46 -0400
-Received: from epcpsbgr2.samsung.com
- (u142.gpu120.samsung.co.kr [203.254.230.142])
- by mailout3.samsung.com (Oracle Communications Messaging Server 7u4-24.01
- (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTP id <0MRV00ARKVU8BOD0@mailout3.samsung.com> for
- linux-mmc@vger.kernel.org; Wed, 21 Aug 2013 22:51:46 +0900 (KST)
-References: 
-In-reply-to: 
-Content-language: ko
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain;
+ charset=us-ascii
+Content-Transfer-Encoding: 8BIT
+Return-path: <kernel-janitors-owner@vger.kernel.org>
+In-Reply-To: <20130821082423.GA5240@elgon.mountain>
+Content-Language: en-US
+Sender: kernel-janitors-owner@vger.kernel.org
+To: Dan Carpenter <dan.carpenter@oracle.com>, Chris Ball <cjb@laptop.org>
+Cc: Grant Likely <grant.likely@linaro.org>, Rob Herring <rob.herring@calxeda.com>, Arnd Bergmann <arnd@arndb.de>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "kernel-janitors@vger.kernel.org" <kernel-janitors@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: 'Chris Ball' <cjb@laptop.org>, 'Jaehoon Chung' <jh80.chung@samsung.com>, 'Alim Akhtar' <alim.akhtar@samsung.com>, 'Bing Zhao ' <bzhao@marvell.com>, 'Doug Anderson' <dianders@chromium.org>
 
-In IDMAC mode EVENT_XFER_COMPLETE is set when RI/TI of last descriptor
-is done. So if errors are happened in the middle of data transfers,
-'dw_mci_stop_dma' during error handing can be called and eventually
-prevents this flag to be set.
-This results in permanent wait for EVENT_XFER_COMPLETE in 'dw_mci_tasklet_func'.
-Therefore, if dma running is stopped forcibly, EVENT_XFER_COMPLETE should be set.
+Hi Dan,
+ Good catch. This fix is already in the "ARM: mmc: fix NONREMOVABLE test in sdhci-bcm-kona" patch that is part of the git pull request sent to armsoc yesterday:
+http://lists.infradead.org/pipermail/linux-arm-kernel/2013-August/193422.html
 
-Reported-by: Bing Zhao <bzhao@marvell.com>
-Signed-off-by: Doug Anderson <dianders@chromium.org>
-Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
+ Thanks,
+   Csd
+
+-----Original Message-----
+From: Dan Carpenter [mailto:dan.carpenter@oracle.com] 
+Sent: Wednesday, August 21, 2013 1:24 AM
+To: Chris Ball
+Cc: Grant Likely; Rob Herring; Christian Daudt; Arnd Bergmann; linux-mmc@vger.kernel.org; devicetree@vger.kernel.org; kernel-janitors@vger.kernel.org
+Subject: [patch] mmc: sdhci-bcm-kona: '|' vs '&' typo
+
+The intent was to test if a flag was set.  In the current code the
+conditions are always true.
+
+Signed-off-by: Dan Carpenter <dan.carpenter@oracle.com>
 ---
- drivers/mmc/host/dw_mmc.c |    6 +++---
- 1 files changed, 3 insertions(+), 3 deletions(-)
+Static checker stuff.  Untested.
 
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 8c1926f..5b52ac1 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -345,10 +345,10 @@ static void dw_mci_stop_dma(struct dw_mci *host)
- 	if (host->using_dma) {
- 		host->dma_ops->stop(host);
- 		host->dma_ops->cleanup(host);
--	} else {
--		/* Data transfer was stopped by the interrupt handler */
--		set_bit(EVENT_XFER_COMPLETE, &host->pending_events);
- 	}
-+
-+	/* Data transfer was stopped by the interrupt handler */
-+	set_bit(EVENT_XFER_COMPLETE, &host->pending_events);
- }
+diff --git a/drivers/mmc/host/sdhci-bcm-kona.c b/drivers/mmc/host/sdhci-bcm-kona.c
+index 87175f9..9ffac0b 100644
+--- a/drivers/mmc/host/sdhci-bcm-kona.c
++++ b/drivers/mmc/host/sdhci-bcm-kona.c
+@@ -263,7 +263,7 @@ static int __init sdhci_bcm_kona_probe(struct platform_device *pdev)
+ 		(mmc_gpio_get_cd(host->mmc) != -ENOSYS) ? 'Y' : 'N',
+ 		(mmc_gpio_get_ro(host->mmc) != -ENOSYS) ? 'Y' : 'N');
  
- static int dw_mci_get_dma_dir(struct mmc_data *data)
--- 
-1.7.4.1
+-	if (host->mmc->caps | MMC_CAP_NONREMOVABLE)
++	if (host->mmc->caps & MMC_CAP_NONREMOVABLE)
+ 		host->quirks |= SDHCI_QUIRK_BROKEN_CARD_DETECTION;
+ 
+ 	dev_dbg(dev, "is_8bit=%c\n",
+@@ -282,7 +282,7 @@ static int __init sdhci_bcm_kona_probe(struct platform_device *pdev)
+ 	}
+ 
+ 	/* if device is eMMC, emulate card insert right here */
+-	if (host->mmc->caps | MMC_CAP_NONREMOVABLE) {
++	if (host->mmc->caps & MMC_CAP_NONREMOVABLE) {
+ 		ret = sdhci_bcm_kona_sd_card_emulate(host, 1);
+ 		if (ret) {
+ 			dev_err(dev,
 
 
