@@ -1,141 +1,151 @@
-From: Grant Grundler <grundler@chromium.org>
-Subject: Re: [PATCH 03/14] mmc: dw_mmc: exynos: adjust the clock rate with
- speed mode
-Date: Wed, 21 Aug 2013 08:20:44 -0700
-Message-ID: <CANEJEGvkY4ymiXT-K=6rG+MWin9Bm8y70T1yZ16gcDYak3C=Vg@mail.gmail.com>
-References: <002801ce9e75$53f265c0$fbd73140$%jun@samsung.com>
+From: Balaji T K <balajitk@ti.com>
+Subject: Re: [PATCH V2] mmc: omap_hsmmc: Fix sleep too long in ISR context.
+Date: Wed, 21 Aug 2013 22:44:06 +0530
+Message-ID: <5214F55E.6020408@ti.com>
+References: <201308071805022428282@gmail.com> <5213BAD0.8030406@yahoo.es>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ob0-f172.google.com ([209.85.214.172]:54308 "EHLO
-	mail-ob0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751843Ab3HUPUp (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 21 Aug 2013 11:20:45 -0400
-Received: by mail-ob0-f172.google.com with SMTP id er7so1057639obc.3
-        for <linux-mmc@vger.kernel.org>; Wed, 21 Aug 2013 08:20:45 -0700 (PDT)
-In-Reply-To: <002801ce9e75$53f265c0$fbd73140$%jun@samsung.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8;
+	format=flowed
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-omap-owner@vger.kernel.org>
+In-Reply-To: <5213BAD0.8030406@yahoo.es>
+Sender: linux-omap-owner@vger.kernel.org
+To: Hein Tibosch <hein_tibosch@yahoo.es>
+Cc: cjb <cjb@laptop.org>, Felipe Balbi <balbi@ti.com>, majianpeng <majianpeng@gmail.com>, linux-mmc <linux-mmc@vger.kernel.org>, linux-omap <linux-omap@vger.kernel.org>, mayuzheng <mayuzheng@kedacom.com>, Santosh Shilimkar <santosh.shilimkar@ti.com>, Tony Lindgren <tony@atomide.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Seungwon Jeon <tgih.jun@samsung.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Jaehoon Chung <jh80.chung@samsung.com>, Alim Akhtar <alim.akhtar@samsung.com>
 
-On Wed, Aug 21, 2013 at 6:49 AM, Seungwon Jeon <tgih.jun@samsung.com> wrote:
-> Exynos's host has divider logic before 'cclk_in' to controller core.
-> It means that actual clock rate of ciu clock comes from this divider
-> value. So, source clock should be adjusted along with 'ciu_div' which
-> indicates the host's divider ratio. Setting clock rate basically fits
-> the required speed. Specially, 'cclk_in' should have double rate of
-> target speed in case of DDR 8-bit mode.
+On Wednesday 21 August 2013 12:22 AM, Hein Tibosch wrote:
+> Hi,
+>
+> [ added some people from TI ]
+>
+> On 8/7/2013 6:05 PM, majianpeng wrote:
+>> V2:
+>> 	clean up code.
+>> V1:
+>> 	www.mail-archive.com/linux-omap@vger.../msg93239.html=E2=80=8E
+>>
+>>
+>> We found a problem when we removed a working sd card that the irqact=
+ion
+>> of omap_hsmmc can sleep to 3.6s. This cause our watchdog to work.
+>> In func omap_hsmmc_reset_controller_fsm, it should watch a 0->1
+>> transition.But avoiding endless waiting, it used loops_per_jiffy as =
+the timer.
+>
+> Tried on a OMAP4460:
+> This can easily be replicated: just withdraw an SD-card and the kerne=
+l
+> will get blocked during more than 3 seconds.
+> Calling OMAP_HSMMC_READ() in this loop makes it last so long.
+>
+> The function waits for a 0=3D>1, followed by a 1=3D>0 transition.
+> The value of 1 always comes, but in most cases the code is just too
+> slow to detect it. The first loop will only stop when (i =3D=3D limit=
+)
+>
+>> The code is:
+>>> while ((!(OMAP_HSMMC_READ(host->base, SYSCTL) & bit))
+>>>                 && (i++ < limit))
+>>>                         cpu_relax();
+>> But generanly loops_per_jiffy as a timer,it should like:
+>>>   while(i++ < limit)
+>>> cpu_relax();
+>> I found for the long time case, the while-opeation stoped because 'i=
+ =3D=3D limit'.
+>> Because added some code, so the duration became too longer than
+>> MMC_TIMEOU_US(20ms).
+>>
+>> The software can't monitor the transition of hardware for thi case.
+>>
+>> Becasue those codes in ISR context, it can't use timer_before/after.
+>> I divived the time into 1ms and used udelay(1) to instead.
+>> It will cause do additional udelay(1).But from my test,it looks good=
+=2E
+>>
+>> Reported-by: Yuzheng Ma <mayuzheng@kedacom.com>
+>> Tested-by: Yuzheng Ma <mayuzheng@kedacom.com>
+>> Reviewed-by: Hein Tibosch <hein_tibosch@yahoo.es>
+>> Signed-off-by: Jianpeng Ma <majianpeng@gmail.com>
+>> ---
+>>   drivers/mmc/host/omap_hsmmc.c | 25 +++++++++++--------------
+>>   1 file changed, 11 insertions(+), 14 deletions(-)
+>>
+>> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_h=
+smmc.c
+>> index 1865321..bbda5ed 100644
+>> --- a/drivers/mmc/host/omap_hsmmc.c
+>> +++ b/drivers/mmc/host/omap_hsmmc.c
+>> @@ -973,9 +973,8 @@ static inline void omap_hsmmc_dbg_report_irq(str=
+uct omap_hsmmc_host *host,
+>>   static inline void omap_hsmmc_reset_controller_fsm(struct omap_hsm=
+mc_host *host,
+>>   						   unsigned long bit)
+>>   {
+>> -	unsigned long i =3D 0;
+>> -	unsigned long limit =3D (loops_per_jiffy *
+>> -				msecs_to_jiffies(MMC_TIMEOUT_MS));
+>> +	/*change to 1ms,so we can use udelay(1)*/
+>> +	unsigned long limit =3D MMC_TIMEOUT_MS * 1000;
+>>
+>>   	OMAP_HSMMC_WRITE(host->base, SYSCTL,
+>>   			 OMAP_HSMMC_READ(host->base, SYSCTL) | bit);
+>
+> Checked here: the SRC-bit indeed becomes high.
+> After the test 'features & HSMMC_HAS_UPDATED_RESET', the bit has
+> become low again already.
+> Changing to order of statements worked for me, but for Jianpeng Ma
+> this didn't work (timings are 'on the edge').
 
-I've refactored this code in ChromeOS-3.4 kernel.
-Please see references to dw_mci_exynos_set_bus_hz() in:
-    https://gerrit.chromium.org/gerrit/#/c/57861/9/drivers/mmc/host/dw_mmc-exynos.c
-
-Have you considered using that code? Perhaps Alim didn't point out
-this work to you?
-
-It might be easier to read here:
-    http://git.chromium.org/gitweb/?p=chromiumos/third_party/kernel.git;a=blob;f=drivers/mmc/host/dw_mmc.c;h=41ff5a0d79dffb488a413c51ba14024d4dda1275;hb=refs/heads/chromeos-3.4
-
-The same code was adopted for ChromeOS-3.8 kernel tree:
-    http://git.chromium.org/gitweb/?p=chromiumos/third_party/kernel-next.git;a=commitdiff;h=39ae94e55a0ad4584b5ff85e2a342a5f867c4d21
-
-    http://git.chromium.org/gitweb/?p=chromiumos/third_party/kernel-next.git;a=history;f=drivers/mmc/host/dw_mmc-exynos.c;h=a8288d4c9fac8b89dadff5d4bde469c43171c9cf;hb=refs/heads/chromeos-3.8
-
-thanks,
-grant
+I think 1->0 transition is missed sometimes and waiting until timeout,
+Jianpeng Ma, which SoC are you testing ?
 
 >
-> Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
-> ---
->  drivers/mmc/host/dw_mmc-exynos.c |   44 ++++++++++++++++++++++++++++---------
->  1 files changed, 33 insertions(+), 11 deletions(-)
+> This reset function is also called while mounting a card and then 'SR=
+C'
+> will be high long enough (more than 100 loops). It is after withdrawi=
+ng
+> the card that the reset is performed extremely fast.
 >
-> diff --git a/drivers/mmc/host/dw_mmc-exynos.c b/drivers/mmc/host/dw_mmc-exynos.c
-> index 90f9335..f16e2fc 100644
-> --- a/drivers/mmc/host/dw_mmc-exynos.c
-> +++ b/drivers/mmc/host/dw_mmc-exynos.c
-> @@ -49,6 +49,7 @@ struct dw_mci_exynos_priv_data {
->         u8                              ciu_div;
->         u32                             sdr_timing;
->         u32                             ddr_timing;
-> +       u32                             cur_speed;
->  };
+>> @@ -984,17 +983,15 @@ static inline void omap_hsmmc_reset_controller=
+_fsm(struct omap_hsmmc_host *host,
+>>   	 * OMAP4 ES2 and greater has an updated reset logic.
+>>   	 * Monitor a 0->1 transition first
+>>   	 */
+>> -	if (mmc_slot(host).features & HSMMC_HAS_UPDATED_RESET) {
+>> -		while ((!(OMAP_HSMMC_READ(host->base, SYSCTL) & bit))
+>> -					&& (i++ < limit))
+>> -			cpu_relax();
+>> -	}
+>> -	i =3D 0;
+>> -
+>> -	while ((OMAP_HSMMC_READ(host->base, SYSCTL) & bit) &&
+>> -		(i++ < limit))
+>> -		cpu_relax();
+>> -
+>> +	if (mmc_slot(host).features & HSMMC_HAS_UPDATED_RESET)
+>> +		while (!(OMAP_HSMMC_READ(host->base, SYSCTL) & bit)
+>> +			&& limit--)
+>> +			udelay(1);
 >
->  static struct dw_mci_exynos_compatible {
-> @@ -91,14 +92,9 @@ static int dw_mci_exynos_priv_init(struct dw_mci *host)
->  static int dw_mci_exynos_setup_clock(struct dw_mci *host)
->  {
->         struct dw_mci_exynos_priv_data *priv = host->priv;
-> +       unsigned long rate = clk_get_rate(host->ciu_clk);
+> In this way, the loop will only last about 'MMC_TIMEOUT_MS' ms
+> and my WDT doesn't get triggered :-)
 >
-> -       if (priv->ctrl_type == DW_MCI_TYPE_EXYNOS5250)
-> -               host->bus_hz /= (priv->ciu_div + 1);
-> -       else if (priv->ctrl_type == DW_MCI_TYPE_EXYNOS4412)
-> -               host->bus_hz /= EXYNOS4412_FIXED_CIU_CLK_DIV;
-> -       else if (priv->ctrl_type == DW_MCI_TYPE_EXYNOS4210)
-> -               host->bus_hz /= EXYNOS4210_FIXED_CIU_CLK_DIV;
-> -
-> +       host->bus_hz = rate / (priv->ciu_div + 1);
->         return 0;
->  }
+>> +	limit =3D MMC_TIMEOUT_MS * 1000;
+>> +	while ((OMAP_HSMMC_READ(host->base, SYSCTL) & bit) && limit--)
+>> +		udelay(1);
+>> +
+>>   	if (OMAP_HSMMC_READ(host->base, SYSCTL) & bit)
+>>   		dev_err(mmc_dev(host->mmc),
+>>   			"Timeout waiting on controller reset in %s\n",
 >
-> @@ -118,11 +114,31 @@ static void dw_mci_exynos_prepare_command(struct dw_mci *host, u32 *cmdr)
->  static void dw_mci_exynos_set_ios(struct dw_mci *host, struct mmc_ios *ios)
->  {
->         struct dw_mci_exynos_priv_data *priv = host->priv;
-> +       unsigned int wanted = ios->clock;
-> +       unsigned long actual;
-> +       u8 div = priv->ciu_div + 1;
-> +
+> Anybody an opinion on this?
 >
-> -       if (ios->timing == MMC_TIMING_UHS_DDR50)
-> +       if (ios->timing == MMC_TIMING_UHS_DDR50) {
->                 mci_writel(host, CLKSEL, priv->ddr_timing);
-> -       else
-> +               /* Should be double rate for DDR mode */
-> +               if (ios->bus_width == MMC_BUS_WIDTH_8)
-> +                       wanted <<= 1;
-> +       } else {
->                 mci_writel(host, CLKSEL, priv->sdr_timing);
-> +       }
-> +
-> +       if (wanted && (priv->cur_speed != wanted)) {
-> +               int ret = clk_set_rate(host->ciu_clk, wanted * div);
-> +               if (ret)
-> +                       dev_warn(host->dev,
-> +                               "failed to set clk-rate %u error: %d\n",
-> +                                wanted * div, ret);
-> +               actual = clk_get_rate(host->ciu_clk);
-> +               host->bus_hz = actual / div;
-> +               priv->cur_speed = wanted;
-> +               host->current_speed = 0;
-> +       }
->  }
+> Thanks, Hein
 >
->  static int dw_mci_exynos_parse_dt(struct dw_mci *host)
-> @@ -133,8 +149,14 @@ static int dw_mci_exynos_parse_dt(struct dw_mci *host)
->         u32 div = 0;
->         int ret;
->
-> -       of_property_read_u32(np, "samsung,dw-mshc-ciu-div", &div);
-> -       priv->ciu_div = div;
-> +       if (priv->ctrl_type == DW_MCI_TYPE_EXYNOS4412)
-> +               priv->ciu_div = EXYNOS4412_FIXED_CIU_CLK_DIV - 1;
-> +       else if (priv->ctrl_type == DW_MCI_TYPE_EXYNOS4210)
-> +               priv->ciu_div = EXYNOS4210_FIXED_CIU_CLK_DIV - 1;
-> +       else {
-> +               of_property_read_u32(np, "samsung,dw-mshc-ciu-div", &div);
-> +               priv->ciu_div = div;
-> +       }
->
->         ret = of_property_read_u32_array(np,
->                         "samsung,dw-mshc-sdr-timing", timing, 2);
-> --
-> 1.7.0.4
->
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+--
+To unsubscribe from this list: send the line "unsubscribe linux-omap" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
