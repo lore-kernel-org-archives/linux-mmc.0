@@ -1,21 +1,22 @@
 From: Seungwon Jeon <tgih.jun@samsung.com>
-Subject: [PATCH 02/14] mmc: dw_mmc: exynos: add variable delay tuning sequence
-Date: Wed, 21 Aug 2013 22:49:24 +0900
-Message-ID: <002701ce9e75$3eca9870$bc5fc950$%jun@samsung.com>
+Subject: [PATCH 03/14] mmc: dw_mmc: exynos: adjust the clock rate with speed
+ mode
+Date: Wed, 21 Aug 2013 22:49:59 +0900
+Message-ID: <002801ce9e75$53f265c0$fbd73140$%jun@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout3.samsung.com ([203.254.224.33]:44066 "EHLO
+Received: from mailout3.samsung.com ([203.254.224.33]:44117 "EHLO
 	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751921Ab3HUNtZ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 21 Aug 2013 09:49:25 -0400
-Received: from epcpsbgr5.samsung.com
- (u145.gpu120.samsung.co.kr [203.254.230.145])
+	with ESMTP id S1751556Ab3HUNuA (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 21 Aug 2013 09:50:00 -0400
+Received: from epcpsbgr4.samsung.com
+ (u144.gpu120.samsung.co.kr [203.254.230.144])
  by mailout3.samsung.com (Oracle Communications Messaging Server 7u4-24.01
  (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTP id <0MRV00APTVQ7BOD0@mailout3.samsung.com> for
- linux-mmc@vger.kernel.org; Wed, 21 Aug 2013 22:49:24 +0900 (KST)
+ with ESMTP id <0MRV000U6VQZRHK0@mailout3.samsung.com> for
+ linux-mmc@vger.kernel.org; Wed, 21 Aug 2013 22:49:59 +0900 (KST)
 References: 
 In-reply-to: 
 Content-language: ko
@@ -24,166 +25,98 @@ List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 Cc: 'Chris Ball' <cjb@laptop.org>, 'Jaehoon Chung' <jh80.chung@samsung.com>, 'Alim Akhtar' <alim.akhtar@samsung.com>
 
-Implements variable delay tuning. In this change,
-exynos host can determine the correct sampling point
-for the HS200 and SDR104 speed mode.
+Exynos's host has divider logic before 'cclk_in' to controller core.
+It means that actual clock rate of ciu clock comes from this divider
+value. So, source clock should be adjusted along with 'ciu_div' which
+indicates the host's divider ratio. Setting clock rate basically fits
+the required speed. Specially, 'cclk_in' should have double rate of
+target speed in case of DDR 8-bit mode.
 
 Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
 ---
- drivers/mmc/host/dw_mmc-exynos.c |  124 ++++++++++++++++++++++++++++++++++++++
- 1 files changed, 124 insertions(+), 0 deletions(-)
+ drivers/mmc/host/dw_mmc-exynos.c |   44 ++++++++++++++++++++++++++++---------
+ 1 files changed, 33 insertions(+), 11 deletions(-)
 
 diff --git a/drivers/mmc/host/dw_mmc-exynos.c b/drivers/mmc/host/dw_mmc-exynos.c
-index 866edef..90f9335 100644
+index 90f9335..f16e2fc 100644
 --- a/drivers/mmc/host/dw_mmc-exynos.c
 +++ b/drivers/mmc/host/dw_mmc-exynos.c
-@@ -14,8 +14,10 @@
- #include <linux/clk.h>
- #include <linux/mmc/host.h>
- #include <linux/mmc/dw_mmc.h>
-+#include <linux/mmc/mmc.h>
- #include <linux/of.h>
- #include <linux/of_gpio.h>
-+#include <linux/slab.h>
+@@ -49,6 +49,7 @@ struct dw_mci_exynos_priv_data {
+ 	u8				ciu_div;
+ 	u32				sdr_timing;
+ 	u32				ddr_timing;
++	u32				cur_speed;
+ };
  
- #include "dw_mmc.h"
- #include "dw_mmc-pltfm.h"
-@@ -150,6 +152,127 @@ static int dw_mci_exynos_parse_dt(struct dw_mci *host)
+ static struct dw_mci_exynos_compatible {
+@@ -91,14 +92,9 @@ static int dw_mci_exynos_priv_init(struct dw_mci *host)
+ static int dw_mci_exynos_setup_clock(struct dw_mci *host)
+ {
+ 	struct dw_mci_exynos_priv_data *priv = host->priv;
++	unsigned long rate = clk_get_rate(host->ciu_clk);
+ 
+-	if (priv->ctrl_type == DW_MCI_TYPE_EXYNOS5250)
+-		host->bus_hz /= (priv->ciu_div + 1);
+-	else if (priv->ctrl_type == DW_MCI_TYPE_EXYNOS4412)
+-		host->bus_hz /= EXYNOS4412_FIXED_CIU_CLK_DIV;
+-	else if (priv->ctrl_type == DW_MCI_TYPE_EXYNOS4210)
+-		host->bus_hz /= EXYNOS4210_FIXED_CIU_CLK_DIV;
+-
++	host->bus_hz = rate / (priv->ciu_div + 1);
  	return 0;
  }
  
-+static inline u8 dw_mci_exynos_get_clksmpl(struct dw_mci *host)
-+{
-+	return SDMMC_CLKSEL_CCLK_SAMPLE(mci_readl(host, CLKSEL));
-+}
+@@ -118,11 +114,31 @@ static void dw_mci_exynos_prepare_command(struct dw_mci *host, u32 *cmdr)
+ static void dw_mci_exynos_set_ios(struct dw_mci *host, struct mmc_ios *ios)
+ {
+ 	struct dw_mci_exynos_priv_data *priv = host->priv;
++	unsigned int wanted = ios->clock;
++	unsigned long actual;
++	u8 div = priv->ciu_div + 1;
 +
-+static inline void dw_mci_exynos_set_clksmpl(struct dw_mci *host, u8 sample)
-+{
-+	u32 clksel;
-+	clksel = mci_readl(host, CLKSEL);
-+	clksel = (clksel & ~0x7) | SDMMC_CLKSEL_CCLK_SAMPLE(sample);
-+	mci_writel(host, CLKSEL, clksel);
-+}
-+
-+static inline u8 dw_mci_exynos_move_next_clksmpl(struct dw_mci *host)
-+{
-+	u32 clksel;
-+	u8 sample;
-+
-+	clksel = mci_readl(host, CLKSEL);
-+	sample = (clksel + 1) & 0x7;
-+	clksel = (clksel & ~0x7) | sample;
-+	mci_writel(host, CLKSEL, clksel);
-+	return sample;
-+}
-+
-+static s8 dw_mci_exynos_get_best_clksmpl(u8 candiates)
-+{
-+	const u8 iter = 8;
-+	u8 __c;
-+	s8 i, loc = -1;
-+
-+	for (i = 0; i < iter; i++) {
-+		__c = ror8(candiates, i);
-+		if ((__c & 0xc7) == 0xc7) {
-+			loc = i;
-+			goto out;
-+		}
-+	}
-+
-+	for (i = 0; i < iter; i++) {
-+		__c = ror8(candiates, i);
-+		if ((__c & 0x83) == 0x83) {
-+			loc = i;
-+			goto out;
-+		}
-+	}
-+
-+out:
-+	return loc;
-+}
-+
-+static int dw_mci_exynos_execute_tuning(struct dw_mci_slot *slot, u32 opcode,
-+					struct dw_mci_tuning_data *tuning_data)
-+{
-+	struct dw_mci *host = slot->host;
-+	struct mmc_host *mmc = slot->mmc;
-+	const u8 *blk_pattern = tuning_data->blk_pattern;
-+	u8 *blk_test;
-+	unsigned int blksz = tuning_data->blksz;
-+	u8 start_smpl, smpl, candiates = 0;
-+	s8 found = -1;
-+	int ret = 0;
-+
-+	blk_test = kmalloc(blksz, GFP_KERNEL);
-+	if (!blk_test)
-+		return -ENOMEM;
-+
-+	start_smpl = dw_mci_exynos_get_clksmpl(host);
-+
-+	do {
-+		struct mmc_request mrq = {NULL};
-+		struct mmc_command cmd = {0};
-+		struct mmc_command stop = {0};
-+		struct mmc_data data = {0};
-+		struct scatterlist sg;
-+
-+		cmd.opcode = opcode;
-+		cmd.arg = 0;
-+		cmd.flags = MMC_RSP_R1 | MMC_CMD_ADTC;
-+
-+		stop.opcode = MMC_STOP_TRANSMISSION;
-+		stop.arg = 0;
-+		stop.flags = MMC_RSP_R1B | MMC_CMD_AC;
-+
-+		data.blksz = blksz;
-+		data.blocks = 1;
-+		data.flags = MMC_DATA_READ;
-+		data.sg = &sg;
-+		data.sg_len = 1;
-+
-+		sg_init_one(&sg, blk_test, blksz);
-+		mrq.cmd = &cmd;
-+		mrq.stop = &stop;
-+		mrq.data = &data;
-+		host->mrq = &mrq;
-+
-+		mci_writel(host, TMOUT, ~0);
-+		smpl = dw_mci_exynos_move_next_clksmpl(host);
-+
-+		mmc_wait_for_req(mmc, &mrq);
-+
-+		if (!cmd.error && !data.error) {
-+			if (!memcmp(blk_pattern, blk_test, blksz))
-+				candiates |= (1 << smpl);
-+		} else {
-+			dev_dbg(host->dev,
-+				"Tuning error: cmd.error:%d, data.error:%d\n",
-+				cmd.error, data.error);
-+		}
-+	} while (start_smpl != smpl);
-+
-+	found = dw_mci_exynos_get_best_clksmpl(candiates);
-+	if (found >= 0)
-+		dw_mci_exynos_set_clksmpl(host, found);
-+	else
-+		ret = -EIO;
-+
-+	kfree(blk_test);
-+	return ret;
-+}
-+
- /* Common capabilities of Exynos4/Exynos5 SoC */
- static unsigned long exynos_dwmmc_caps[4] = {
- 	MMC_CAP_UHS_DDR50 | MMC_CAP_1_8V_DDR |
-@@ -166,6 +289,7 @@ static const struct dw_mci_drv_data exynos_drv_data = {
- 	.prepare_command	= dw_mci_exynos_prepare_command,
- 	.set_ios		= dw_mci_exynos_set_ios,
- 	.parse_dt		= dw_mci_exynos_parse_dt,
-+	.execute_tuning		= dw_mci_exynos_execute_tuning,
- };
  
- static const struct of_device_id dw_mci_exynos_match[] = {
+-	if (ios->timing == MMC_TIMING_UHS_DDR50)
++	if (ios->timing == MMC_TIMING_UHS_DDR50) {
+ 		mci_writel(host, CLKSEL, priv->ddr_timing);
+-	else
++		/* Should be double rate for DDR mode */
++		if (ios->bus_width == MMC_BUS_WIDTH_8)
++			wanted <<= 1;
++	} else {
+ 		mci_writel(host, CLKSEL, priv->sdr_timing);
++	}
++
++	if (wanted && (priv->cur_speed != wanted)) {
++		int ret = clk_set_rate(host->ciu_clk, wanted * div);
++		if (ret)
++			dev_warn(host->dev,
++				"failed to set clk-rate %u error: %d\n",
++				 wanted * div, ret);
++		actual = clk_get_rate(host->ciu_clk);
++		host->bus_hz = actual / div;
++		priv->cur_speed = wanted;
++		host->current_speed = 0;
++	}
+ }
+ 
+ static int dw_mci_exynos_parse_dt(struct dw_mci *host)
+@@ -133,8 +149,14 @@ static int dw_mci_exynos_parse_dt(struct dw_mci *host)
+ 	u32 div = 0;
+ 	int ret;
+ 
+-	of_property_read_u32(np, "samsung,dw-mshc-ciu-div", &div);
+-	priv->ciu_div = div;
++	if (priv->ctrl_type == DW_MCI_TYPE_EXYNOS4412)
++		priv->ciu_div = EXYNOS4412_FIXED_CIU_CLK_DIV - 1;
++	else if (priv->ctrl_type == DW_MCI_TYPE_EXYNOS4210)
++		priv->ciu_div = EXYNOS4210_FIXED_CIU_CLK_DIV - 1;
++	else {
++		of_property_read_u32(np, "samsung,dw-mshc-ciu-div", &div);
++		priv->ciu_div = div;
++	}
+ 
+ 	ret = of_property_read_u32_array(np,
+ 			"samsung,dw-mshc-sdr-timing", timing, 2);
 -- 
 1.7.0.4
 
