@@ -1,50 +1,75 @@
-From: Lee Jones <lee.jones@linaro.org>
-Subject: Re: [PATCH 1/3] mfd:mmc:rtsx: Change default tx phase
-Date: Wed, 21 Aug 2013 09:48:42 +0100
-Message-ID: <20130821084842.GE29850@lee--X1>
-References: <cover.1377049122.git.wei_wang@realsil.com.cn>
- <0dd50ed0bb16afbb47d8de8ba6eb4f9d1c901d45.1377049122.git.wei_wang@realsil.com.cn>
+From: GIRISH K S <ks.giri@samsung.com>
+Subject: Re: [PATCH V2 2/2] ARM: dts: Add dwmmc nodes in SOC specific dts file
+Date: Wed, 21 Aug 2013 09:05:08 +0000 (GMT)
+Message-ID: <18907195.1256371377075906874.JavaMail.weblogic@epml01>
+Reply-To: ks.giri@samsung.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <0dd50ed0bb16afbb47d8de8ba6eb4f9d1c901d45.1377049122.git.wei_wang@realsil.com.cn>
-Sender: linux-kernel-owner@vger.kernel.org
-To: wei_wang@realsil.com.cn
-Cc: cjb@laptop.org, sameo@linux.intel.com, devel@linuxdriverproject.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, gregkh@linuxfoundation.org, rogerable@realtek.com
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: base64
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout4.samsung.com ([203.254.224.34]:32241 "EHLO
+	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751673Ab3HUJFM (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 21 Aug 2013 05:05:12 -0400
+Received: from epcpsbgr3.samsung.com
+ (u143.gpu120.samsung.co.kr [203.254.230.143])
+ by mailout4.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+ (7.0.4.24.0) 64bit (built Nov 17 2011))
+ with ESMTP id <0MRV0066VIJ8UA50@mailout4.samsung.com> for
+ linux-mmc@vger.kernel.org; Wed, 21 Aug 2013 18:05:08 +0900 (KST)
+MIME-version: 1.0
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: "yuvaraj.cd@gmail.com" <yuvaraj.cd@gmail.com>, "linux-samsung-soc@vger.kernel.org" <linux-samsung-soc@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Kukjin Kim <kgene.kim@samsung.com>
+Cc: YUVARAJ CD <yuvaraj.cd@samsung.com>
 
-On Wed, 21 Aug 2013, wei_wang@realsil.com.cn wrote:
+DQoNCi0tLS0tLS0gT3JpZ2luYWwgTWVzc2FnZSAtLS0tLS0tDQpTZW5kZXIgOiB5dXZhcmFqLmNk
+QGdtYWlsLmNvbTx5dXZhcmFqLmNkQGdtYWlsLmNvbT4NCkRhdGUgOiBBdWcgMjEsIDIwMTMgMTI6
+MDcgKEdNVCswNTozMCkNClRpdGxlIDogW1BBVENIIFYyIDIvMl0gQVJNOiBkdHM6IEFkZCBkd21t
+YyBub2RlcyBpbiBTT0Mgc3BlY2lmaWMgZHRzIGZpbGUNCg0KRnJvbTogWXV2YXJhaiBLdW1hciBD
+IEQgDQoNCkV4eW5vczUgc2VyaWVzIFNPQydzIGhhdmUgZGlmZmVyZW50IHZlcnNpb25zIG9mIERX
+TU1DIGNvbnRyb2xsZXIuDQpTbyBkd21tYyBkZXZpY2Ugbm9kZXMgbW92ZWQgZnJvbSBFeHlub3M1
+IFNPQydzIGNvbW1vbiBkdHMgZmlsZSB0bw0KU09DIHNwZWNpZmljIGR0cyBmaWxlLg0KDQpjaGFu
+Z2VzIHNpbmNlIFYxOg0KMS5kaXNhYmxlIG5vZGUgYnkgc3RhdHVzID0gZGlzYWJsZWQgaW4gU09D
+IGZpbGUNCjIuZW5hYmxlIG5vZGUgYnkgc3RhdHVzID0gb2theSBpbiBib2FyZCBzcGVjaWZpYyBm
+aWxlDQoNClNpZ25lZC1vZmYtYnk6IFl1dmFyYWogS3VtYXIgQyBEIA0KLS0tDQphcmNoL2FybS9i
+b290L2R0cy9leHlub3M1MjUwLXNtZGs1MjUwLmR0cyB8ICAgMTAgKystLS0tLS0tLQ0KYXJjaC9h
+cm0vYm9vdC9kdHMvZXh5bm9zNTI1MC5kdHNpICAgICAgICAgfCAgIDE2ICsrKysrKysrKysrKysr
+KysNCjIgZmlsZXMgY2hhbmdlZCwgMTggaW5zZXJ0aW9ucygrKSwgOCBkZWxldGlvbnMoLSkNCg0K
+ZGlmZiAtLWdpdCBhL2FyY2gvYXJtL2Jvb3QvZHRzL2V4eW5vczUyNTAtc21kazUyNTAuZHRzIGIv
+YXJjaC9hcm0vYm9vdC9kdHMvZXh5bm9zNTI1MC1zbWRrNTI1MC5kdHMNCmluZGV4IDI1MzhiMzIu
+LmJkMTlkNTVkIDEwMDY0NA0KLS0tIGEvYXJjaC9hcm0vYm9vdC9kdHMvZXh5bm9zNTI1MC1zbWRr
+NTI1MC5kdHMNCisrKyBiL2FyY2gvYXJtL2Jvb3QvZHRzL2V4eW5vczUyNTAtc21kazUyNTAuZHRz
+DQpAQCAtMTQxLDYgKzE0MSw3IEBADQp9Ow0KDQpkd21tYzBAMTIyMDAwMDAgew0KKyBzdGF0dXMg
+PSAib2theSI7DQpudW0tc2xvdHMgPSA8MT47DQpzdXBwb3J0cy1oaWdoc3BlZWQ7DQpicm9rZW4t
+Y2Q7DQpAQCAtMTU4LDExICsxNTksOCBAQA0KfTsNCn07DQoNCi0gZHdtbWMxQDEyMjEwMDAwIHsN
+Ci0gc3RhdHVzID0gImRpc2FibGVkIjsNCi0gfTsNCi0NCmR3bW1jMkAxMjIyMDAwMCB7DQorIHN0
+YXR1cyA9ICJva2F5IjsNCm51bS1zbG90cyA9IDwxPjsNCnN1cHBvcnRzLWhpZ2hzcGVlZDsNCmZp
+Zm8tZGVwdGggPSA8MHg4MD47DQpAQCAtMTgwLDEwICsxNzgsNiBAQA0KfTsNCn07DQoNCi0gZHdt
+bWMzQDEyMjMwMDAwIHsNCi0gc3RhdHVzID0gImRpc2FibGVkIjsNCi0gfTsNCi0NCnNwaV8wOiBz
+cGlAMTJkMjAwMDAgew0Kc3RhdHVzID0gImRpc2FibGVkIjsNCn07DQpkaWZmIC0tZ2l0IGEvYXJj
+aC9hcm0vYm9vdC9kdHMvZXh5bm9zNTI1MC5kdHNpIGIvYXJjaC9hcm0vYm9vdC9kdHMvZXh5bm9z
+NTI1MC5kdHNpDQppbmRleCAxZWVjNjQ2Li5iMWI2ZjYxIDEwMDY0NA0KLS0tIGEvYXJjaC9hcm0v
+Ym9vdC9kdHMvZXh5bm9zNTI1MC5kdHNpDQorKysgYi9hcmNoL2FybS9ib290L2R0cy9leHlub3M1
+MjUwLmR0c2kNCkBAIC0zODcsMjEgKzM4NywzNiBAQA0KfTsNCg0KZHdtbWNfMDogZHdtbWMwQDEy
+MjAwMDAwIHsNCisgY29tcGF0aWJsZSA9ICJzYW1zdW5nLGV4eW5vczUyNTAtZHctbXNoYyI7DQor
+IGludGVycnVwdHMgPSA8MCA3NSAwPjsNCisgI2FkZHJlc3MtY2VsbHMgPSA8MT47DQorICNzaXpl
+LWNlbGxzID0gPDA+Ow0KcmVnID0gPDB4MTIyMDAwMDAgMHgxMDAwPjsNCmNsb2NrcyA9IDwmY2xv
+Y2sgMjgwPiwgPCZjbG9jayAxMzk+Ow0KY2xvY2stbmFtZXMgPSAiYml1IiwgImNpdSI7DQorIHN0
+YXR1cyA9ICJkaXNhYmxlZCI7DQp9Ow0KDQpkd21tY18xOiBkd21tYzFAMTIyMTAwMDAgew0KKyBj
+b21wYXRpYmxlID0gInNhbXN1bmcsZXh5bm9zNTI1MC1kdy1tc2hjIjsNCisgaW50ZXJydXB0cyA9
+IDwwIDc2IDA+Ow0KKyAjYWRkcmVzcy1jZWxscyA9IDwxPjsNCisgI3NpemUtY2VsbHMgPSA8MD47
+DQpyZWcgPSA8MHgxMjIxMDAwMCAweDEwMDA+Ow0KY2xvY2tzID0gPCZjbG9jayAyODE+LCA8JmNs
+b2NrIDE0MD47DQpjbG9jay1uYW1lcyA9ICJiaXUiLCAiY2l1IjsNCisgc3RhdHVzID0gImRpc2Fi
+bGVkIjsNCn07DQoNCmR3bW1jXzI6IGR3bW1jMkAxMjIyMDAwMCB7DQorIGNvbXBhdGlibGUgPSAi
+c2Ftc3VuZyxleHlub3M1MjUwLWR3LW1zaGMiOw0KKyBpbnRlcnJ1cHRzID0gPDAgNzcgMD47DQor
+ICNhZGRyZXNzLWNlbGxzID0gPDE+Ow0KKyAjc2l6ZS1jZWxscyA9IDwwPjsNCnJlZyA9IDwweDEy
+MjIwMDAwIDB4MTAwMD47DQpjbG9ja3MgPSA8JmNsb2NrIDI4Mj4sIDwmY2xvY2sgMTQxPjsNCmNs
+b2NrLW5hbWVzID0gImJpdSIsICJjaXUiOw0KKyBzdGF0dXMgPSAiZGlzYWJsZWQiOw0KfTsNCg0K
+ZHdtbWNfMzogZHdtbWMzQDEyMjMwMDAwIHsNCkBAIC00MTIsNiArNDI3LDcgQEANCiNzaXplLWNl
+bGxzID0gPDA+Ow0KY2xvY2tzID0gPCZjbG9jayAyODM+LCA8JmNsb2NrIDE0Mj47DQpjbG9jay1u
+YW1lcyA9ICJiaXUiLCAiY2l1IjsNCisgc3RhdHVzID0gImRpc2FibGVkIjsNCn07DQoNCmkyczA6
+IGkyc0AwMzgzMDAwMCB7DQoNCkxvb2tzIE9rIHRvIG1lLg0KUmV2aWV3ZWQgQnk6IEdpcmlzaCBL
+IFMgPGtzLmdpcmlAc2Ftc3VuZy5jb20+DQoNCi0tIA0KMS43LjkuNQ==
 
-> From: Wei WANG <wei_wang@realsil.com.cn>
->=20
-> The default phase can meet most cards' requirement, but it is not the
-> optimal one. In some extreme situation, the rx phase point produced b=
-y
-> the following tuning process will drift quite a distance.
-> Before tuning UHS card, this patch will set a more proper initial tx
-> phase point, which is calculated from statistic data, and can achieve
-> a much better tx signal quality.
->=20
-> Signed-off-by: Wei WANG <wei_wang@realsil.com.cn>
-> ---
->  drivers/mfd/rtl8411.c             |    4 +++
->  drivers/mfd/rts5209.c             |    2 ++
->  drivers/mfd/rts5227.c             |    2 ++
->  drivers/mfd/rts5229.c             |    2 ++
->  drivers/mfd/rts5249.c             |    2 ++
->  drivers/mmc/host/rtsx_pci_sdmmc.c |   58 +++++++++++++++++++++++++++=
-----------
->  include/linux/mfd/rtsx_pci.h      |   15 ++++++++++
->  7 files changed, 69 insertions(+), 16 deletions(-)
 
-MFD parts looks okay to me:
-
-Acked-by: Lee Jones <lee.jones@linaro.org>
-
---=20
-Lee Jones
-Linaro ST-Ericsson Landing Team Lead
-Linaro.org =E2=94=82 Open source software for ARM SoCs
-=46ollow Linaro: Facebook | Twitter | Blog
