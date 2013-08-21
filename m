@@ -1,145 +1,283 @@
-From: Hein Tibosch <hein_tibosch@yahoo.es>
-Subject: Re: [PATCH V2] mmc: omap_hsmmc: Fix sleep too long in ISR context.
-Date: Wed, 21 Aug 2013 02:52:00 +0800
-Message-ID: <5213BAD0.8030406@yahoo.es>
-References: <201308071805022428282@gmail.com>
+From: <wei_wang@realsil.com.cn>
+Subject: [PATCH 1/3] mfd:mmc:rtsx: Change default tx phase
+Date: Wed, 21 Aug 2013 09:46:25 +0800
+Message-ID: <0dd50ed0bb16afbb47d8de8ba6eb4f9d1c901d45.1377049122.git.wei_wang@realsil.com.cn>
+References: <cover.1377049122.git.wei_wang@realsil.com.cn>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from bosmailout02.eigbox.net ([66.96.186.2]:49597 "EHLO
-	bosmailout02.eigbox.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751188Ab3HTTfg (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 20 Aug 2013 15:35:36 -0400
-Received: from bosmailscan14.eigbox.net ([10.20.15.14])
-	by bosmailout02.eigbox.net with esmtp (Exim)
-	id 1VBr3Q-0001G5-5U
-	for linux-mmc@vger.kernel.org; Tue, 20 Aug 2013 14:53:20 -0400
-Received: from bosmailscan25.eigbox.net ([10.20.15.25])
-	by bosmailscan14.eigbox.net with esmtp (Exim)
-	id 1VBr3P-0002hq-W0
-	for linux-mmc@vger.kernel.org; Tue, 20 Aug 2013 14:53:20 -0400
-In-Reply-To: <201308071805022428282@gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
+In-Reply-To: <cover.1377049122.git.wei_wang@realsil.com.cn>
+List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
+List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel>
+List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
+List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
+List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
+Errors-To: driverdev-devel-bounces@linuxdriverproject.org
+Sender: driverdev-devel-bounces@linuxdriverproject.org
+To: cjb@laptop.org, sameo@linux.intel.com
+Cc: gregkh@linuxfoundation.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Wei WANG <wei_wang@realsil.com.cn>, rogerable@realtek.com, devel@linuxdriverproject.org
 List-Id: linux-mmc@vger.kernel.org
-To: cjb <cjb@laptop.org>, Felipe Balbi <balbi@ti.com>
-Cc: majianpeng <majianpeng@gmail.com>, balajitk <balajitk@ti.com>, linux-mmc <linux-mmc@vger.kernel.org>, linux-omap <linux-omap@vger.kernel.org>, mayuzheng <mayuzheng@kedacom.com>, Matt Porter <mporter@ti.com>, Santosh Shilimkar <santosh.shilimkar@ti.com>, Tony Lindgren <tony@atomide.com>, Syed Mohammed Khasim <x0khasim@ti.com>, Madhusudhan <madhu.cr@ti.com>, Mohit Jalori <mjalori@ti.com>
 
-Hi,
+From: Wei WANG <wei_wang@realsil.com.cn>
 
-[ added some people from TI ]
+The default phase can meet most cards' requirement, but it is not the
+optimal one. In some extreme situation, the rx phase point produced by
+the following tuning process will drift quite a distance.
+Before tuning UHS card, this patch will set a more proper initial tx
+phase point, which is calculated from statistic data, and can achieve
+a much better tx signal quality.
 
-On 8/7/2013 6:05 PM, majianpeng wrote:
-> V2:=20
-> 	clean up code.
-> V1:
-> 	www.mail-archive.com/linux-omap@vger.../msg93239.html=E2=80=8E
->
->
-> We found a problem when we removed a working sd card that the irqacti=
-on
-> of omap_hsmmc can sleep to 3.6s. This cause our watchdog to work.
-> In func omap_hsmmc_reset_controller_fsm, it should watch a 0->1
-> transition.But avoiding endless waiting, it used loops_per_jiffy as t=
-he timer.
+Signed-off-by: Wei WANG <wei_wang@realsil.com.cn>
+---
+ drivers/mfd/rtl8411.c             |    4 +++
+ drivers/mfd/rts5209.c             |    2 ++
+ drivers/mfd/rts5227.c             |    2 ++
+ drivers/mfd/rts5229.c             |    2 ++
+ drivers/mfd/rts5249.c             |    2 ++
+ drivers/mmc/host/rtsx_pci_sdmmc.c |   58 +++++++++++++++++++++++++++----------
+ include/linux/mfd/rtsx_pci.h      |   15 ++++++++++
+ 7 files changed, 69 insertions(+), 16 deletions(-)
 
-Tried on a OMAP4460:
-This can easily be replicated: just withdraw an SD-card and the kernel
-will get blocked during more than 3 seconds.
-Calling OMAP_HSMMC_READ() in this loop makes it last so long.
-
-The function waits for a 0=3D>1, followed by a 1=3D>0 transition.
-The value of 1 always comes, but in most cases the code is just too
-slow to detect it. The first loop will only stop when (i =3D=3D limit)
-
-> The code is:
->> while ((!(OMAP_HSMMC_READ(host->base, SYSCTL) & bit))
->>                && (i++ < limit))
->>                        cpu_relax();
-> But generanly loops_per_jiffy as a timer,it should like:
->>  while(i++ < limit)
->> cpu_relax();
-> I found for the long time case, the while-opeation stoped because 'i =
-=3D=3D limit'.
-> Because added some code, so the duration became too longer than
-> MMC_TIMEOU_US(20ms).
->
-> The software can't monitor the transition of hardware for thi case.
->
-> Becasue those codes in ISR context, it can't use timer_before/after.
-> I divived the time into 1ms and used udelay(1) to instead.
-> It will cause do additional udelay(1).But from my test,it looks good.
->
-> Reported-by: Yuzheng Ma <mayuzheng@kedacom.com>
-> Tested-by: Yuzheng Ma <mayuzheng@kedacom.com>
-> Reviewed-by: Hein Tibosch <hein_tibosch@yahoo.es>
-> Signed-off-by: Jianpeng Ma <majianpeng@gmail.com>
-> ---
->  drivers/mmc/host/omap_hsmmc.c | 25 +++++++++++--------------
->  1 file changed, 11 insertions(+), 14 deletions(-)
->
-> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hs=
-mmc.c
-> index 1865321..bbda5ed 100644
-> --- a/drivers/mmc/host/omap_hsmmc.c
-> +++ b/drivers/mmc/host/omap_hsmmc.c
-> @@ -973,9 +973,8 @@ static inline void omap_hsmmc_dbg_report_irq(stru=
-ct omap_hsmmc_host *host,
->  static inline void omap_hsmmc_reset_controller_fsm(struct omap_hsmmc=
-_host *host,
->  						   unsigned long bit)
->  {
-> -	unsigned long i =3D 0;
-> -	unsigned long limit =3D (loops_per_jiffy *
-> -				msecs_to_jiffies(MMC_TIMEOUT_MS));
-> +	/*change to 1ms,so we can use udelay(1)*/
-> +	unsigned long limit =3D MMC_TIMEOUT_MS * 1000;
-> =20
->  	OMAP_HSMMC_WRITE(host->base, SYSCTL,
->  			 OMAP_HSMMC_READ(host->base, SYSCTL) | bit);
-
-Checked here: the SRC-bit indeed becomes high.
-After the test 'features & HSMMC_HAS_UPDATED_RESET', the bit has
-become low again already.
-Changing to order of statements worked for me, but for Jianpeng Ma
-this didn't work (timings are 'on the edge').
-
-This reset function is also called while mounting a card and then 'SRC'
-will be high long enough (more than 100 loops). It is after withdrawing
-the card that the reset is performed extremely fast.
-
-> @@ -984,17 +983,15 @@ static inline void omap_hsmmc_reset_controller_=
-fsm(struct omap_hsmmc_host *host,
->  	 * OMAP4 ES2 and greater has an updated reset logic.
->  	 * Monitor a 0->1 transition first
->  	 */
-> -	if (mmc_slot(host).features & HSMMC_HAS_UPDATED_RESET) {
-> -		while ((!(OMAP_HSMMC_READ(host->base, SYSCTL) & bit))
-> -					&& (i++ < limit))
-> -			cpu_relax();
-> -	}
-> -	i =3D 0;
-> -
-> -	while ((OMAP_HSMMC_READ(host->base, SYSCTL) & bit) &&
-> -		(i++ < limit))
-> -		cpu_relax();
-> -
-> +	if (mmc_slot(host).features & HSMMC_HAS_UPDATED_RESET)
-> +		while (!(OMAP_HSMMC_READ(host->base, SYSCTL) & bit)
-> +			&& limit--)
-> +			udelay(1);
-
-In this way, the loop will only last about 'MMC_TIMEOUT_MS' ms
-and my WDT doesn't get triggered :-)
-
-> +	limit =3D MMC_TIMEOUT_MS * 1000;
-> +	while ((OMAP_HSMMC_READ(host->base, SYSCTL) & bit) && limit--)
-> +		udelay(1);
-> +
->  	if (OMAP_HSMMC_READ(host->base, SYSCTL) & bit)
->  		dev_err(mmc_dev(host->mmc),
->  			"Timeout waiting on controller reset in %s\n",
-
-Anybody an opinion on this?
-
-Thanks, Hein
+diff --git a/drivers/mfd/rtl8411.c b/drivers/mfd/rtl8411.c
+index e4c1833..5280135 100644
+--- a/drivers/mfd/rtl8411.c
++++ b/drivers/mfd/rtl8411.c
+@@ -452,6 +452,8 @@ void rtl8411_init_params(struct rtsx_pcr *pcr)
+ 	pcr->sd30_drive_sel_1v8 = DRIVER_TYPE_B;
+ 	pcr->sd30_drive_sel_3v3 = DRIVER_TYPE_D;
+ 	pcr->aspm_en = ASPM_L1_EN;
++	pcr->tx_initial_phase = SET_CLOCK_PHASE(23, 7, 14);
++	pcr->rx_initial_phase = SET_CLOCK_PHASE(4, 3, 10);
+ 
+ 	pcr->ic_version = rtl8411_get_ic_version(pcr);
+ 	pcr->sd_pull_ctl_enable_tbl = rtl8411_sd_pull_ctl_enable_tbl;
+@@ -471,6 +473,8 @@ void rtl8411b_init_params(struct rtsx_pcr *pcr)
+ 	pcr->sd30_drive_sel_1v8 = DRIVER_TYPE_B;
+ 	pcr->sd30_drive_sel_3v3 = DRIVER_TYPE_D;
+ 	pcr->aspm_en = ASPM_L1_EN;
++	pcr->tx_initial_phase = SET_CLOCK_PHASE(23, 7, 14);
++	pcr->rx_initial_phase = SET_CLOCK_PHASE(4, 3, 10);
+ 
+ 	pcr->ic_version = rtl8411_get_ic_version(pcr);
+ 
+diff --git a/drivers/mfd/rts5209.c b/drivers/mfd/rts5209.c
+index 4026e1f..cb04174 100644
+--- a/drivers/mfd/rts5209.c
++++ b/drivers/mfd/rts5209.c
+@@ -270,6 +270,8 @@ void rts5209_init_params(struct rtsx_pcr *pcr)
+ 	pcr->sd30_drive_sel_1v8 = DRIVER_TYPE_B;
+ 	pcr->sd30_drive_sel_3v3 = DRIVER_TYPE_D;
+ 	pcr->aspm_en = ASPM_L1_EN;
++	pcr->tx_initial_phase = SET_CLOCK_PHASE(27, 27, 16);
++	pcr->rx_initial_phase = SET_CLOCK_PHASE(24, 6, 5);
+ 
+ 	pcr->ic_version = rts5209_get_ic_version(pcr);
+ 	pcr->sd_pull_ctl_enable_tbl = rts5209_sd_pull_ctl_enable_tbl;
+diff --git a/drivers/mfd/rts5227.c b/drivers/mfd/rts5227.c
+index d7cae82..c001151 100644
+--- a/drivers/mfd/rts5227.c
++++ b/drivers/mfd/rts5227.c
+@@ -291,6 +291,8 @@ void rts5227_init_params(struct rtsx_pcr *pcr)
+ 	pcr->sd30_drive_sel_1v8 = CFG_DRIVER_TYPE_B;
+ 	pcr->sd30_drive_sel_3v3 = CFG_DRIVER_TYPE_B;
+ 	pcr->aspm_en = ASPM_L1_EN;
++	pcr->tx_initial_phase = SET_CLOCK_PHASE(27, 27, 15);
++	pcr->rx_initial_phase = SET_CLOCK_PHASE(30, 7, 7);
+ 
+ 	pcr->sd_pull_ctl_enable_tbl = rts5227_sd_pull_ctl_enable_tbl;
+ 	pcr->sd_pull_ctl_disable_tbl = rts5227_sd_pull_ctl_disable_tbl;
+diff --git a/drivers/mfd/rts5229.c b/drivers/mfd/rts5229.c
+index 620e7fa..6353f5d 100644
+--- a/drivers/mfd/rts5229.c
++++ b/drivers/mfd/rts5229.c
+@@ -261,6 +261,8 @@ void rts5229_init_params(struct rtsx_pcr *pcr)
+ 	pcr->sd30_drive_sel_1v8 = DRIVER_TYPE_B;
+ 	pcr->sd30_drive_sel_3v3 = DRIVER_TYPE_D;
+ 	pcr->aspm_en = ASPM_L1_EN;
++	pcr->tx_initial_phase = SET_CLOCK_PHASE(27, 27, 15);
++	pcr->rx_initial_phase = SET_CLOCK_PHASE(30, 6, 6);
+ 
+ 	pcr->ic_version = rts5229_get_ic_version(pcr);
+ 	if (pcr->ic_version == IC_VER_C) {
+diff --git a/drivers/mfd/rts5249.c b/drivers/mfd/rts5249.c
+index ea90f8f..3b835f5 100644
+--- a/drivers/mfd/rts5249.c
++++ b/drivers/mfd/rts5249.c
+@@ -298,6 +298,8 @@ void rts5249_init_params(struct rtsx_pcr *pcr)
+ 	pcr->sd30_drive_sel_1v8 = CFG_DRIVER_TYPE_C;
+ 	pcr->sd30_drive_sel_3v3 = CFG_DRIVER_TYPE_B;
+ 	pcr->aspm_en = ASPM_L1_EN;
++	pcr->tx_initial_phase = SET_CLOCK_PHASE(1, 29, 16);
++	pcr->rx_initial_phase = SET_CLOCK_PHASE(24, 6, 5);
+ 
+ 	pcr->ic_version = rts5249_get_ic_version(pcr);
+ 	pcr->sd_pull_ctl_enable_tbl = rts5249_sd_pull_ctl_enable_tbl;
+diff --git a/drivers/mmc/host/rtsx_pci_sdmmc.c b/drivers/mmc/host/rtsx_pci_sdmmc.c
+index 82a35b9..fcb368e 100644
+--- a/drivers/mmc/host/rtsx_pci_sdmmc.c
++++ b/drivers/mmc/host/rtsx_pci_sdmmc.c
+@@ -56,7 +56,6 @@ struct realtek_pci_sdmmc {
+ 	bool			double_clk;
+ 	bool			eject;
+ 	bool			initial_mode;
+-	bool			ddr_mode;
+ 	int			power_state;
+ #define SDMMC_POWER_ON		1
+ #define SDMMC_POWER_OFF		0
+@@ -475,18 +474,24 @@ static void sd_normal_rw(struct realtek_pci_sdmmc *host,
+ 	kfree(buf);
+ }
+ 
+-static int sd_change_phase(struct realtek_pci_sdmmc *host, u8 sample_point)
++static int sd_change_phase(struct realtek_pci_sdmmc *host,
++		u8 sample_point, bool rx)
+ {
+ 	struct rtsx_pcr *pcr = host->pcr;
+ 	int err;
+ 
+-	dev_dbg(sdmmc_dev(host), "%s: sample_point = %d\n",
+-			__func__, sample_point);
++	dev_dbg(sdmmc_dev(host), "%s(%s): sample_point = %d\n",
++			__func__, rx ? "RX" : "TX", sample_point);
+ 
+ 	rtsx_pci_init_cmd(pcr);
+ 
+ 	rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, CLK_CTL, CHANGE_CLK, CHANGE_CLK);
+-	rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, SD_VPRX_CTL, 0x1F, sample_point);
++	if (rx)
++		rtsx_pci_add_cmd(pcr, WRITE_REG_CMD,
++				SD_VPRX_CTL, 0x1F, sample_point);
++	else
++		rtsx_pci_add_cmd(pcr, WRITE_REG_CMD,
++				SD_VPTX_CTL, 0x1F, sample_point);
+ 	rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, SD_VPCLK0_CTL, PHASE_NOT_RESET, 0);
+ 	rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, SD_VPCLK0_CTL,
+ 			PHASE_NOT_RESET, PHASE_NOT_RESET);
+@@ -602,7 +607,7 @@ static int sd_tuning_rx_cmd(struct realtek_pci_sdmmc *host,
+ 	int err;
+ 	u8 cmd[5] = {0};
+ 
+-	err = sd_change_phase(host, sample_point);
++	err = sd_change_phase(host, sample_point, true);
+ 	if (err < 0)
+ 		return err;
+ 
+@@ -664,7 +669,7 @@ static int sd_tuning_rx(struct realtek_pci_sdmmc *host, u8 opcode)
+ 		if (final_phase == 0xFF)
+ 			return -EINVAL;
+ 
+-		err = sd_change_phase(host, final_phase);
++		err = sd_change_phase(host, final_phase, true);
+ 		if (err < 0)
+ 			return err;
+ 	} else {
+@@ -833,14 +838,11 @@ static int sd_set_power_mode(struct realtek_pci_sdmmc *host,
+ 	return err;
+ }
+ 
+-static int sd_set_timing(struct realtek_pci_sdmmc *host,
+-		unsigned char timing, bool *ddr_mode)
++static int sd_set_timing(struct realtek_pci_sdmmc *host, unsigned char timing)
+ {
+ 	struct rtsx_pcr *pcr = host->pcr;
+ 	int err = 0;
+ 
+-	*ddr_mode = false;
+-
+ 	rtsx_pci_init_cmd(pcr);
+ 
+ 	switch (timing) {
+@@ -857,8 +859,6 @@ static int sd_set_timing(struct realtek_pci_sdmmc *host,
+ 		break;
+ 
+ 	case MMC_TIMING_UHS_DDR50:
+-		*ddr_mode = true;
+-
+ 		rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, SD_CFG1,
+ 				0x0C | SD_ASYNC_FIFO_NOT_RST,
+ 				SD_DDR_MODE | SD_ASYNC_FIFO_NOT_RST);
+@@ -926,7 +926,7 @@ static void sdmmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 
+ 	sd_set_bus_width(host, ios->bus_width);
+ 	sd_set_power_mode(host, ios->power_mode);
+-	sd_set_timing(host, ios->timing, &host->ddr_mode);
++	sd_set_timing(host, ios->timing);
+ 
+ 	host->vpclk = false;
+ 	host->double_clk = true;
+@@ -1148,9 +1148,35 @@ static int sdmmc_execute_tuning(struct mmc_host *mmc, u32 opcode)
+ 
+ 	rtsx_pci_start_run(pcr);
+ 
+-	if (!host->ddr_mode)
+-		err = sd_tuning_rx(host, MMC_SEND_TUNING_BLOCK);
++	/* Set initial TX phase */
++	switch (mmc->ios.timing) {
++	case MMC_TIMING_UHS_SDR104:
++		err = sd_change_phase(host, SDR104_TX_PHASE(pcr), false);
++		break;
++
++	case MMC_TIMING_UHS_SDR50:
++		err = sd_change_phase(host, SDR50_TX_PHASE(pcr), false);
++		break;
++
++	case MMC_TIMING_UHS_DDR50:
++		err = sd_change_phase(host, DDR50_TX_PHASE(pcr), false);
++		break;
++
++	default:
++		err = 0;
++	}
+ 
++	if (err)
++		goto out;
++
++	/* Tuning RX phase */
++	if ((mmc->ios.timing == MMC_TIMING_UHS_SDR104) ||
++			(mmc->ios.timing == MMC_TIMING_UHS_SDR50))
++		err = sd_tuning_rx(host, opcode);
++	else if (mmc->ios.timing == MMC_TIMING_UHS_DDR50)
++		err = sd_change_phase(host, DDR50_RX_PHASE(pcr), true);
++
++out:
+ 	mutex_unlock(&pcr->pcr_mutex);
+ 
+ 	return err;
+diff --git a/include/linux/mfd/rtsx_pci.h b/include/linux/mfd/rtsx_pci.h
+index daefca1..d1382df 100644
+--- a/include/linux/mfd/rtsx_pci.h
++++ b/include/linux/mfd/rtsx_pci.h
+@@ -847,6 +847,9 @@ struct rtsx_pcr {
+ #define PCR_REVERSE_SOCKET		(1 << 1)
+ 	u32				flags;
+ 
++	u32				tx_initial_phase;
++	u32				rx_initial_phase;
++
+ 	const u32			*sd_pull_ctl_enable_tbl;
+ 	const u32			*sd_pull_ctl_disable_tbl;
+ 	const u32			*ms_pull_ctl_enable_tbl;
+@@ -863,6 +866,18 @@ struct rtsx_pcr {
+ #define PCI_VID(pcr)			((pcr)->pci->vendor)
+ #define PCI_PID(pcr)			((pcr)->pci->device)
+ 
++#define SDR104_PHASE(val)		((val) & 0xFF)
++#define SDR50_PHASE(val)		(((val) >> 8) & 0xFF)
++#define DDR50_PHASE(val)		(((val) >> 16) & 0xFF)
++#define SDR104_TX_PHASE(pcr)		SDR104_PHASE((pcr)->tx_initial_phase)
++#define SDR50_TX_PHASE(pcr)		SDR50_PHASE((pcr)->tx_initial_phase)
++#define DDR50_TX_PHASE(pcr)		DDR50_PHASE((pcr)->tx_initial_phase)
++#define SDR104_RX_PHASE(pcr)		SDR104_PHASE((pcr)->rx_initial_phase)
++#define SDR50_RX_PHASE(pcr)		SDR50_PHASE((pcr)->rx_initial_phase)
++#define DDR50_RX_PHASE(pcr)		DDR50_PHASE((pcr)->rx_initial_phase)
++#define SET_CLOCK_PHASE(sdr104, sdr50, ddr50)	\
++				(((ddr50) << 16) | ((sdr50) << 8) | (sdr104))
++
+ void rtsx_pci_start_run(struct rtsx_pcr *pcr);
+ int rtsx_pci_write_register(struct rtsx_pcr *pcr, u16 addr, u8 mask, u8 data);
+ int rtsx_pci_read_register(struct rtsx_pcr *pcr, u16 addr, u8 *data);
+-- 
+1.7.9.5
