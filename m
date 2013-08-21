@@ -1,46 +1,87 @@
-From: Dan Carpenter <dan.carpenter@oracle.com>
-Subject: [patch] mmc: sdhci-bcm-kona: '|' vs '&' typo
-Date: Wed, 21 Aug 2013 11:24:23 +0300
-Message-ID: <20130821082423.GA5240@elgon.mountain>
+From: "Zhang, Sonic" <Sonic.Zhang@analog.com>
+Subject: RE: [PATCH RESEND] mmc: mmc_spi: use spi_get_drvdata() and
+ spi_set_drvdata()
+Date: Wed, 21 Aug 2013 08:30:49 +0000
+Message-ID: <B168F8A49F4BCF4C84FD23DA5F6363EE31BC50C0@NWD2MBX7.ad.analog.com>
+References: <000101ce9e33$2bfcc6b0$83f65410$%han@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from aserp1040.oracle.com ([141.146.126.69]:34171 "EHLO
-	aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751993Ab3HUIYi (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 21 Aug 2013 04:24:38 -0400
-Content-Disposition: inline
+Received: from tx2ehsobe005.messaging.microsoft.com ([65.55.88.15]:10390 "EHLO
+	tx2outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751618Ab3HUIb6 convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 21 Aug 2013 04:31:58 -0400
+In-Reply-To: <000101ce9e33$2bfcc6b0$83f65410$%han@samsung.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: Grant Likely <grant.likely@linaro.org>, Rob Herring <rob.herring@calxeda.com>, Christian Daudt <csd@broadcom.com>, Arnd Bergmann <arnd@arndb.de>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, kernel-janitors@vger.kernel.org
+To: Jingoo Han <jg1.han@samsung.com>, 'Chris Ball' <cjb@laptop.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-The intent was to test if a flag was set.  In the current code the
-conditions are always true.
+Acked-by: Sonic Zhang <sonic.zhang@analog.com>
 
-Signed-off-by: Dan Carpenter <dan.carpenter@oracle.com>
----
-Static checker stuff.  Untested.
+>-----Original Message-----
+>From: Jingoo Han [mailto:jg1.han@samsung.com]
+>Sent: Wednesday, August 21, 2013 1:56 PM
+>To: 'Chris Ball'
+>Cc: linux-mmc@vger.kernel.org; Zhang, Sonic; 'Jingoo Han'
+>Subject: [PATCH RESEND] mmc: mmc_spi: use spi_get_drvdata() and
+>spi_set_drvdata()
+>
+>Use the wrapper functions for getting and setting the driver data using spi_device
+>instead of using dev_{get|set}_drvdata with &spi->dev, so we can directly pass a
+>struct spi_device. This is a cosmetic change in order to enhance the readability and
+>make the code simpler.
+>
+>Signed-off-by: Jingoo Han <jg1.han@samsung.com>
+>---
+> drivers/mmc/host/mmc_spi.c |    8 ++++----
+> 1 file changed, 4 insertions(+), 4 deletions(-)
+>
+>diff --git a/drivers/mmc/host/mmc_spi.c b/drivers/mmc/host/mmc_spi.c index
+>74145d1..5bc7a90 100644
+>--- a/drivers/mmc/host/mmc_spi.c
+>+++ b/drivers/mmc/host/mmc_spi.c
+>@@ -1406,7 +1406,7 @@ static int mmc_spi_probe(struct spi_device *spi)
+>                       host->powerup_msecs = 250;
+>       }
+>
+>-      dev_set_drvdata(&spi->dev, mmc);
+>+      spi_set_drvdata(spi, mmc);
+>
+>       /* preallocate dma buffers */
+>       host->data = kmalloc(sizeof(*host->data), GFP_KERNEL); @@ -1477,7
+>+1477,7 @@ fail_glue_init:
+> fail_nobuf1:
+>       mmc_free_host(mmc);
+>       mmc_spi_put_pdata(spi);
+>-      dev_set_drvdata(&spi->dev, NULL);
+>+      spi_set_drvdata(spi, NULL);
+>
+> nomem:
+>       kfree(ones);
+>@@ -1487,7 +1487,7 @@ nomem:
+>
+> static int mmc_spi_remove(struct spi_device *spi)  {
+>-      struct mmc_host         *mmc = dev_get_drvdata(&spi->dev);
+>+      struct mmc_host         *mmc = spi_get_drvdata(spi);
+>       struct mmc_spi_host     *host;
+>
+>       if (mmc) {
+>@@ -1512,7 +1512,7 @@ static int mmc_spi_remove(struct spi_device *spi)
+>               spi->max_speed_hz = mmc->f_max;
+>               mmc_free_host(mmc);
+>               mmc_spi_put_pdata(spi);
+>-              dev_set_drvdata(&spi->dev, NULL);
+>+              spi_set_drvdata(spi, NULL);
+>       }
+>       return 0;
+> }
+>--
+>1.7.10.4
+>
+>
 
-diff --git a/drivers/mmc/host/sdhci-bcm-kona.c b/drivers/mmc/host/sdhci-bcm-kona.c
-index 87175f9..9ffac0b 100644
---- a/drivers/mmc/host/sdhci-bcm-kona.c
-+++ b/drivers/mmc/host/sdhci-bcm-kona.c
-@@ -263,7 +263,7 @@ static int __init sdhci_bcm_kona_probe(struct platform_device *pdev)
- 		(mmc_gpio_get_cd(host->mmc) != -ENOSYS) ? 'Y' : 'N',
- 		(mmc_gpio_get_ro(host->mmc) != -ENOSYS) ? 'Y' : 'N');
- 
--	if (host->mmc->caps | MMC_CAP_NONREMOVABLE)
-+	if (host->mmc->caps & MMC_CAP_NONREMOVABLE)
- 		host->quirks |= SDHCI_QUIRK_BROKEN_CARD_DETECTION;
- 
- 	dev_dbg(dev, "is_8bit=%c\n",
-@@ -282,7 +282,7 @@ static int __init sdhci_bcm_kona_probe(struct platform_device *pdev)
- 	}
- 
- 	/* if device is eMMC, emulate card insert right here */
--	if (host->mmc->caps | MMC_CAP_NONREMOVABLE) {
-+	if (host->mmc->caps & MMC_CAP_NONREMOVABLE) {
- 		ret = sdhci_bcm_kona_sd_card_emulate(host, 1);
- 		if (ret) {
- 			dev_err(dev,
+
