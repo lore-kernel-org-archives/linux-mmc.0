@@ -1,161 +1,238 @@
 From: Seungwon Jeon <tgih.jun@samsung.com>
-Subject: RE: [PATCH 03/14] mmc: dw_mmc: exynos: adjust the clock rate with
- speed mode
-Date: Thu, 22 Aug 2013 11:24:23 +0900
-Message-ID: <000901ce9ede$b7356060$25a02120$%jun@samsung.com>
-References: <002801ce9e75$53f265c0$fbd73140$%jun@samsung.com>
- <CANEJEGvkY4ymiXT-K=6rG+MWin9Bm8y70T1yZ16gcDYak3C=Vg@mail.gmail.com>
+Subject: RE: [PATCH 02/14] mmc: dw_mmc: exynos: add variable delay tuning
+ sequence
+Date: Thu, 22 Aug 2013 11:25:41 +0900
+Message-ID: <000b01ce9ede$e5d939f0$b18badd0$%jun@samsung.com>
+References: <002701ce9e75$3eca9870$bc5fc950$%jun@samsung.com>
+ <CANEJEGseG+5S+S=er23qi4TgvwknQsJ0o0p9rMsOVH2g7SnXxA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout1.samsung.com ([203.254.224.24]:51312 "EHLO
-	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752242Ab3HVCYa (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 21 Aug 2013 22:24:30 -0400
-Received: from epcpsbgr5.samsung.com
- (u145.gpu120.samsung.co.kr [203.254.230.145])
- by mailout1.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+Received: from mailout4.samsung.com ([203.254.224.34]:35512 "EHLO
+	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753336Ab3HVCZo (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 21 Aug 2013 22:25:44 -0400
+Received: from epcpsbgr3.samsung.com
+ (u143.gpu120.samsung.co.kr [203.254.230.143])
+ by mailout4.samsung.com (Oracle Communications Messaging Server 7u4-24.01
  (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTP id <0MRW0069VUON3O20@mailout1.samsung.com> for
- linux-mmc@vger.kernel.org; Thu, 22 Aug 2013 11:24:23 +0900 (KST)
-In-reply-to: <CANEJEGvkY4ymiXT-K=6rG+MWin9Bm8y70T1yZ16gcDYak3C=Vg@mail.gmail.com>
+ with ESMTP id <0MRW005PYUQUL1E0@mailout4.samsung.com> for
+ linux-mmc@vger.kernel.org; Thu, 22 Aug 2013 11:25:42 +0900 (KST)
+In-reply-to: <CANEJEGseG+5S+S=er23qi4TgvwknQsJ0o0p9rMsOVH2g7SnXxA@mail.gmail.com>
 Content-language: ko
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: 'Grant Grundler' <grundler@chromium.org>
 Cc: linux-mmc@vger.kernel.org, 'Chris Ball' <cjb@laptop.org>, 'Jaehoon Chung' <jh80.chung@samsung.com>, 'Alim Akhtar' <alim.akhtar@samsung.com>
 
-On Thursday, August 22, 2013, Grant Grundler wrote:
+On Wed, August 21, 2013, Grant Grundler
 > On Wed, Aug 21, 2013 at 6:49 AM, Seungwon Jeon <tgih.jun@samsung.com> wrote:
-> > Exynos's host has divider logic before 'cclk_in' to controller core.
-> > It means that actual clock rate of ciu clock comes from this divider
-> > value. So, source clock should be adjusted along with 'ciu_div' which
-> > indicates the host's divider ratio. Setting clock rate basically fits
-> > the required speed. Specially, 'cclk_in' should have double rate of
-> > target speed in case of DDR 8-bit mode.
-> 
-> I've refactored this code in ChromeOS-3.4 kernel.
-> Please see references to dw_mci_exynos_set_bus_hz() in:
->     https://gerrit.chromium.org/gerrit/#/c/57861/9/drivers/mmc/host/dw_mmc-exynos.c
-> 
-> Have you considered using that code? Perhaps Alim didn't point out
-> this work to you?
-> 
-> It might be easier to read here:
-> 
-> http://git.chromium.org/gitweb/?p=chromiumos/third_party/kernel.git;a=blob;f=drivers/mmc/host/dw_mmc.c
-> ;h=41ff5a0d79dffb488a413c51ba14024d4dda1275;hb=refs/heads/chromeos-3.4
-> 
-> The same code was adopted for ChromeOS-3.8 kernel tree:
->     http://git.chromium.org/gitweb/?p=chromiumos/third_party/kernel-
-> next.git;a=commitdiff;h=39ae94e55a0ad4584b5ff85e2a342a5f867c4d21
-> 
->     http://git.chromium.org/gitweb/?p=chromiumos/third_party/kernel-
-> next.git;a=history;f=drivers/mmc/host/dw_mmc-
-> exynos.c;h=a8288d4c9fac8b89dadff5d4bde469c43171c9cf;hb=refs/heads/chromeos-3.8
-
-The codes related to tuning feature have been introduced and opened already in Android kernel from our side.
-Basically this changes are based on below and updated with latest kernel:
-
-@ mmc: dw_mmc: add support of tuning feature
-https://android.googlesource.com/kernel/exynos/+/016ebd43ab27cf8b0258d1e7d3e3288d7f7aab6a%5E%21/#F0
-
-@ ARM: EXYNOS: adjust the clock rate for mmcx
-https://android.googlesource.com/kernel/exynos/+/13afd72b983cc0438a295fa827ff1246fed148b2%5E%21/#F0
-
-Thanks,
-Seungwon Jeon
-
-> thanks,
-> grant
-> 
+> > Implements variable delay tuning. In this change,
+> > exynos host can determine the correct sampling point
+> > for the HS200 and SDR104 speed mode.
 > >
 > > Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
 > > ---
-> >  drivers/mmc/host/dw_mmc-exynos.c |   44 ++++++++++++++++++++++++++++---------
-> >  1 files changed, 33 insertions(+), 11 deletions(-)
+> >  drivers/mmc/host/dw_mmc-exynos.c |  124 ++++++++++++++++++++++++++++++++++++++
+> >  1 files changed, 124 insertions(+), 0 deletions(-)
 > >
 > > diff --git a/drivers/mmc/host/dw_mmc-exynos.c b/drivers/mmc/host/dw_mmc-exynos.c
-> > index 90f9335..f16e2fc 100644
+> > index 866edef..90f9335 100644
 > > --- a/drivers/mmc/host/dw_mmc-exynos.c
 > > +++ b/drivers/mmc/host/dw_mmc-exynos.c
-> > @@ -49,6 +49,7 @@ struct dw_mci_exynos_priv_data {
-> >         u8                              ciu_div;
-> >         u32                             sdr_timing;
-> >         u32                             ddr_timing;
-> > +       u32                             cur_speed;
-> >  };
+> > @@ -14,8 +14,10 @@
+> >  #include <linux/clk.h>
+> >  #include <linux/mmc/host.h>
+> >  #include <linux/mmc/dw_mmc.h>
+> > +#include <linux/mmc/mmc.h>
+> >  #include <linux/of.h>
+> >  #include <linux/of_gpio.h>
+> > +#include <linux/slab.h>
 > >
-> >  static struct dw_mci_exynos_compatible {
-> > @@ -91,14 +92,9 @@ static int dw_mci_exynos_priv_init(struct dw_mci *host)
-> >  static int dw_mci_exynos_setup_clock(struct dw_mci *host)
-> >  {
-> >         struct dw_mci_exynos_priv_data *priv = host->priv;
-> > +       unsigned long rate = clk_get_rate(host->ciu_clk);
-> >
-> > -       if (priv->ctrl_type == DW_MCI_TYPE_EXYNOS5250)
-> > -               host->bus_hz /= (priv->ciu_div + 1);
-> > -       else if (priv->ctrl_type == DW_MCI_TYPE_EXYNOS4412)
-> > -               host->bus_hz /= EXYNOS4412_FIXED_CIU_CLK_DIV;
-> > -       else if (priv->ctrl_type == DW_MCI_TYPE_EXYNOS4210)
-> > -               host->bus_hz /= EXYNOS4210_FIXED_CIU_CLK_DIV;
-> > -
-> > +       host->bus_hz = rate / (priv->ciu_div + 1);
+> >  #include "dw_mmc.h"
+> >  #include "dw_mmc-pltfm.h"
+> > @@ -150,6 +152,127 @@ static int dw_mci_exynos_parse_dt(struct dw_mci *host)
 > >         return 0;
 > >  }
 > >
-> > @@ -118,11 +114,31 @@ static void dw_mci_exynos_prepare_command(struct dw_mci *host, u32 *cmdr)
-> >  static void dw_mci_exynos_set_ios(struct dw_mci *host, struct mmc_ios *ios)
-> >  {
-> >         struct dw_mci_exynos_priv_data *priv = host->priv;
-> > +       unsigned int wanted = ios->clock;
-> > +       unsigned long actual;
-> > +       u8 div = priv->ciu_div + 1;
+> > +static inline u8 dw_mci_exynos_get_clksmpl(struct dw_mci *host)
+> > +{
+> > +       return SDMMC_CLKSEL_CCLK_SAMPLE(mci_readl(host, CLKSEL));
+> > +}
 > > +
-> >
-> > -       if (ios->timing == MMC_TIMING_UHS_DDR50)
-> > +       if (ios->timing == MMC_TIMING_UHS_DDR50) {
-> >                 mci_writel(host, CLKSEL, priv->ddr_timing);
-> > -       else
-> > +               /* Should be double rate for DDR mode */
-> > +               if (ios->bus_width == MMC_BUS_WIDTH_8)
-> > +                       wanted <<= 1;
-> > +       } else {
-> >                 mci_writel(host, CLKSEL, priv->sdr_timing);
+> > +static inline void dw_mci_exynos_set_clksmpl(struct dw_mci *host, u8 sample)
+> > +{
+> > +       u32 clksel;
+> > +       clksel = mci_readl(host, CLKSEL);
+> > +       clksel = (clksel & ~0x7) | SDMMC_CLKSEL_CCLK_SAMPLE(sample);
+> > +       mci_writel(host, CLKSEL, clksel);
+> > +}
+> > +
+> > +static inline u8 dw_mci_exynos_move_next_clksmpl(struct dw_mci *host)
+> 
+> Hi Seungwon,
+> I rewrote the dw_mmc HS200 tuning code for ChromeOS-3.4 kernel with
+> this series of patches:
+>     https://gerrit.chromium.org/gerrit/#/c/57997 CHROMIUM: mmc:
+> dw_mmc: move struct dw_mci_slot to public header
+>     https://gerrit.chromium.org/gerrit/#/c/58269  CHROMIUM: mmc:
+> dw_mmc: move dw_mci_set_timeout() to dw_mmc.h
+>     https://gerrit.chromium.org/gerrit/#/c/57996/  CHROMIUM: mmc:
+> dw_mmc: add execute_tuning hook
+>     https://gerrit.chromium.org/gerrit/#/c/57861 CHROMIUM: mmc:
+> dw_mmc: add HS200 tuning feature
+> 
+> This code was reviewed and approved by Alim Akhtar.
+
+As mentioned previously, this change comes from below:
+@ mmc: dw_mmc: add support of tuning feature
+https://android.googlesource.com/kernel/exynos/+/016ebd43ab27cf8b0258d1e7d3e3288d7f7aab6a%5E%21/#F0
+Here, origin is split into basic feature and error handling part.
+
+> 
+> Most of the differences I don't care enough about to quibble. But the
+> handling of "clksmpl" was difficult to read and understand.  I added a
+> lot of comments so the next person without access to Samsung's
+> confidential and incomplete Exynos manuals could have a small chance
+> of debugging this code.
+> 
+> In particular look at dw_mci_exynos_execute_tuning() and
+> find_median_of_5bits() in this patch:
+>     https://gerrit.chromium.org/gerrit/#/c/57861/9/drivers/mmc/host/dw_mmc-exynos.c
+> 
+> Is there some reason you would NOT want to use find_median_of_5bits()
+> and related code?
+
+I didn't check 'find_median_of_5bits function'.
+But let me explain my case.
+First, try to find the continuous 5-bit of tuning success.
+If not, then try to find 3-bit for the second best.
+
+Thanks,
+Seungwon Jeon
+> 
+> thanks,
+> grant
+> 
+> > +{
+> > +       u32 clksel;
+> > +       u8 sample;
+> > +
+> > +       clksel = mci_readl(host, CLKSEL);
+> > +       sample = (clksel + 1) & 0x7;
+> > +       clksel = (clksel & ~0x7) | sample;
+> > +       mci_writel(host, CLKSEL, clksel);
+> > +       return sample;
+> > +}
+> > +
+> > +static s8 dw_mci_exynos_get_best_clksmpl(u8 candiates)
+> > +{
+> > +       const u8 iter = 8;
+> > +       u8 __c;
+> > +       s8 i, loc = -1;
+> > +
+> > +       for (i = 0; i < iter; i++) {
+> > +               __c = ror8(candiates, i);
+> > +               if ((__c & 0xc7) == 0xc7) {
+> > +                       loc = i;
+> > +                       goto out;
+> > +               }
 > > +       }
 > > +
-> > +       if (wanted && (priv->cur_speed != wanted)) {
-> > +               int ret = clk_set_rate(host->ciu_clk, wanted * div);
-> > +               if (ret)
-> > +                       dev_warn(host->dev,
-> > +                               "failed to set clk-rate %u error: %d\n",
-> > +                                wanted * div, ret);
-> > +               actual = clk_get_rate(host->ciu_clk);
-> > +               host->bus_hz = actual / div;
-> > +               priv->cur_speed = wanted;
-> > +               host->current_speed = 0;
+> > +       for (i = 0; i < iter; i++) {
+> > +               __c = ror8(candiates, i);
+> > +               if ((__c & 0x83) == 0x83) {
+> > +                       loc = i;
+> > +                       goto out;
+> > +               }
 > > +       }
-> >  }
+> > +
+> > +out:
+> > +       return loc;
+> > +}
+> > +
+> > +static int dw_mci_exynos_execute_tuning(struct dw_mci_slot *slot, u32 opcode,
+> > +                                       struct dw_mci_tuning_data *tuning_data)
+> > +{
+> > +       struct dw_mci *host = slot->host;
+> > +       struct mmc_host *mmc = slot->mmc;
+> > +       const u8 *blk_pattern = tuning_data->blk_pattern;
+> > +       u8 *blk_test;
+> > +       unsigned int blksz = tuning_data->blksz;
+> > +       u8 start_smpl, smpl, candiates = 0;
+> > +       s8 found = -1;
+> > +       int ret = 0;
+> > +
+> > +       blk_test = kmalloc(blksz, GFP_KERNEL);
+> > +       if (!blk_test)
+> > +               return -ENOMEM;
+> > +
+> > +       start_smpl = dw_mci_exynos_get_clksmpl(host);
+> > +
+> > +       do {
+> > +               struct mmc_request mrq = {NULL};
+> > +               struct mmc_command cmd = {0};
+> > +               struct mmc_command stop = {0};
+> > +               struct mmc_data data = {0};
+> > +               struct scatterlist sg;
+> > +
+> > +               cmd.opcode = opcode;
+> > +               cmd.arg = 0;
+> > +               cmd.flags = MMC_RSP_R1 | MMC_CMD_ADTC;
+> > +
+> > +               stop.opcode = MMC_STOP_TRANSMISSION;
+> > +               stop.arg = 0;
+> > +               stop.flags = MMC_RSP_R1B | MMC_CMD_AC;
+> > +
+> > +               data.blksz = blksz;
+> > +               data.blocks = 1;
+> > +               data.flags = MMC_DATA_READ;
+> > +               data.sg = &sg;
+> > +               data.sg_len = 1;
+> > +
+> > +               sg_init_one(&sg, blk_test, blksz);
+> > +               mrq.cmd = &cmd;
+> > +               mrq.stop = &stop;
+> > +               mrq.data = &data;
+> > +               host->mrq = &mrq;
+> > +
+> > +               mci_writel(host, TMOUT, ~0);
+> > +               smpl = dw_mci_exynos_move_next_clksmpl(host);
+> > +
+> > +               mmc_wait_for_req(mmc, &mrq);
+> > +
+> > +               if (!cmd.error && !data.error) {
+> > +                       if (!memcmp(blk_pattern, blk_test, blksz))
+> > +                               candiates |= (1 << smpl);
+> > +               } else {
+> > +                       dev_dbg(host->dev,
+> > +                               "Tuning error: cmd.error:%d, data.error:%d\n",
+> > +                               cmd.error, data.error);
+> > +               }
+> > +       } while (start_smpl != smpl);
+> > +
+> > +       found = dw_mci_exynos_get_best_clksmpl(candiates);
+> > +       if (found >= 0)
+> > +               dw_mci_exynos_set_clksmpl(host, found);
+> > +       else
+> > +               ret = -EIO;
+> > +
+> > +       kfree(blk_test);
+> > +       return ret;
+> > +}
+> > +
+> >  /* Common capabilities of Exynos4/Exynos5 SoC */
+> >  static unsigned long exynos_dwmmc_caps[4] = {
+> >         MMC_CAP_UHS_DDR50 | MMC_CAP_1_8V_DDR |
+> > @@ -166,6 +289,7 @@ static const struct dw_mci_drv_data exynos_drv_data = {
+> >         .prepare_command        = dw_mci_exynos_prepare_command,
+> >         .set_ios                = dw_mci_exynos_set_ios,
+> >         .parse_dt               = dw_mci_exynos_parse_dt,
+> > +       .execute_tuning         = dw_mci_exynos_execute_tuning,
+> >  };
 > >
-> >  static int dw_mci_exynos_parse_dt(struct dw_mci *host)
-> > @@ -133,8 +149,14 @@ static int dw_mci_exynos_parse_dt(struct dw_mci *host)
-> >         u32 div = 0;
-> >         int ret;
-> >
-> > -       of_property_read_u32(np, "samsung,dw-mshc-ciu-div", &div);
-> > -       priv->ciu_div = div;
-> > +       if (priv->ctrl_type == DW_MCI_TYPE_EXYNOS4412)
-> > +               priv->ciu_div = EXYNOS4412_FIXED_CIU_CLK_DIV - 1;
-> > +       else if (priv->ctrl_type == DW_MCI_TYPE_EXYNOS4210)
-> > +               priv->ciu_div = EXYNOS4210_FIXED_CIU_CLK_DIV - 1;
-> > +       else {
-> > +               of_property_read_u32(np, "samsung,dw-mshc-ciu-div", &div);
-> > +               priv->ciu_div = div;
-> > +       }
-> >
-> >         ret = of_property_read_u32_array(np,
-> >                         "samsung,dw-mshc-sdr-timing", timing, 2);
+> >  static const struct of_device_id dw_mci_exynos_match[] = {
 > > --
 > > 1.7.0.4
 > >
@@ -164,8 +241,4 @@ Seungwon Jeon
 > > To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
 > > the body of a message to majordomo@vger.kernel.org
 > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
