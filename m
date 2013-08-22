@@ -1,71 +1,59 @@
-From: Dinh Nguyen <dinguyen@altera.com>
-Subject: Re: [PATCHv4 2/3] ARM: socfpga: dts: Add support for SD/MMC
-Date: Thu, 22 Aug 2013 17:39:22 -0500
-Message-ID: <1377211162.30624.26.camel@linux-builds1>
-References: <1376498884-9199-1-git-send-email-dinguyen@altera.com>
-	 <1376498884-9199-2-git-send-email-dinguyen@altera.com>
-	 <520EA97D.7050404@wwwdotorg.org> <1377114530.1554.13.camel@linux-builds1>
-	 <521670CE.4000202@wwwdotorg.org>
+From: Tomasz Figa <tomasz.figa@gmail.com>
+Subject: Re: [PATCH V3] ARM: dts: Add dwmmc DT nodes for exynos5420 SOC
+Date: Fri, 23 Aug 2013 00:57:06 +0200
+Message-ID: <1626480.P3AF3x2yXx@flatron>
+References: <1377172278-15161-1-git-send-email-yuvaraj.cd@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7Bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-db9lp0253.outbound.messaging.microsoft.com ([213.199.154.253]:21459
-	"EHLO db9outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753947Ab3HVWjS (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 22 Aug 2013 18:39:18 -0400
-In-Reply-To: <521670CE.4000202@wwwdotorg.org>
+Received: from mail-bk0-f48.google.com ([209.85.214.48]:40298 "EHLO
+	mail-bk0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754330Ab3HVW5O (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 22 Aug 2013 18:57:14 -0400
+In-Reply-To: <1377172278-15161-1-git-send-email-yuvaraj.cd@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Stephen Warren <swarren@wwwdotorg.org>
-Cc: Mark Rutland <mark.rutland@arm.com>, devicetree@vger.kernel.org, dinh.linux@gmail.com, Ian Campbell <ian.campbell@citrix.com>, Pawel Moll <pawel.moll@arm.com>, Seungwon Jeon <tgih.jun@samsung.com>, linux-mmc@vger.kernel.org, Rob Herring <rob.herring@calxeda.com>, Jaehoon Chung <jh80.chung@samsung.com>, linux-arm-kernel@lists.infradead.org
+To: Yuvaraj Kumar C D <yuvaraj.cd@gmail.com>
+Cc: linux-samsung-soc@vger.kernel.org, kgene.kim@samsung.com, t.figa@samsung.com, linux-mmc@vger.kernel.org, cjb@laptop.org, jh80.chung@samsung.com, tgih.jun@samsung.com, ks.giri@samsung.com, Yuvaraj Kumar C D <yuvaraj.cd@samsung.com>
 
-On Thu, 2013-08-22 at 14:13 -0600, Stephen Warren wrote:
-> On 08/21/2013 01:48 PM, Dinh Nguyen wrote:
-> > On Fri, 2013-08-16 at 16:36 -0600, Stephen Warren wrote:
-> >> On 08/14/2013 10:48 AM, dinguyen@altera.com wrote:
-> >>> From: Dinh Nguyen <dinguyen@altera.com>
-> >>>
-> >>> Add bindings for SD/MMC for SOCFPGA.
-> >>
-> >>> diff --git a/Documentation/devicetree/bindings/mmc/socfpga-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/socfpga-dw-mshc.txt
-> >>
-> >>> +* altr,sysmgr: Should be the phandle to the system_mgr node. As this is where
-> >>> +		this where the register that controls the CIU clock phases
-> >>> +		reside.
-> >>
-> >> On the surface, this binding series seems OK, but I do have a question:
-> >> how is the sysmgr phandle used?
-> >>
-> >> I assume there's some register in this syscon device that resets or
-> >> enables or otherwise controls this MSHC module. How does the code know
-> >> which register it is? The phandle in the altr,sysmgr property would
-> >> usually be followed by a/some cell(s) that encode this information, so
-> >> that the MSHC driver doesn't have to know anything about the layout of
-> >> the syscon registers, and so the sysconf driver doesn't have to know
-> >> anything about the identity of the MSHC client device.
-> > 
-> > There is a #define SYSMGR_SDMMCGRP_CTRL_OFFSET that is in
-> > dw_mmc-socfpga.c. This defines the offset from the base address that the
-> > sysmgr phandle will give me.
-> 
-> Hmmm. That doesn't sound good. That means that the SDMMC driver knows
-> internal details about some other HW module. It'd be better if either:
-> 
-> a) The sysmgr driver was required to provide an API to the SDMMC driver
-> to set up the CIU register as requested.
-> 
-> or:
-> 
-> b) The CIU register details were represented in DT.
-> 
-> Either of these would allow the SDMMC driver to operate unchanged on an
-> SoC with a different sysmgr register layout.
+Hi Yuvaraj,
 
-Thanks Stephen...will rework accordingly.
-
-Dinh
+On Thursday 22 of August 2013 17:21:18 Yuvaraj Kumar C D wrote:
+> This patch adds the device tree node entries for exynos5420 SOC.
+> Exynos5420 has a different version of DWMMC controller,so a new
+> compatible string is used to distinguish it from the prior SOC's.
 > 
+> changes since V2:
+> 	1.dropped num-slots property from node as its not required
+> 	  if number of card slots available is 1.
+> 
+> 	2.Move the below properties
+> 		a.fifo-depth
+> 		b.card-detect-delay
+> 		c.samsung,dw-mshc-ciu-div
+> 		d.samsung,dw-mshc-sdr-timing
+> 		e.samsung,dw-mshc-ddr-timing
+> 	from board dts to SOC dts,as these are not board specific 
+properties.
+> 
+> 	3.Updated the binding document exynos-dw-mshc.txt.
+> 
+> changes since V1:
+> 	1.disable node by status = disabled in SOC file
+> 	2.enable node by status = okay in board specific file
+> 
+> Signed-off-by: Yuvaraj Kumar C D <yuvaraj.cd@samsung.com>
+> ---
+>  .../devicetree/bindings/mmc/exynos-dw-mshc.txt     |    4 ++
+>  arch/arm/boot/dts/exynos5420-smdk5420.dts          |   26 ++++++++++
+>  arch/arm/boot/dts/exynos5420.dtsi                  |   51
+> ++++++++++++++++++++ 3 files changed, 81 insertions(+)
 
+Please resend this patch with devicetree mailing list and other recipients 
+added, as listed in MAINTAINERS file for Documentation/devicetree/ and 
+arch/*/boot/dts/ directories.
 
+Best regards,
+Tomasz
 
