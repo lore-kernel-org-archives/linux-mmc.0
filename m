@@ -1,91 +1,40 @@
-From: Doug Anderson <dianders@chromium.org>
-Subject: Re: [PATCH v4 1/4] mmc: dw_mmc: Invalidate cache of current_speed
- after suspend/resume
-Date: Thu, 22 Aug 2013 09:25:54 -0700
-Message-ID: <CAD=FV=VdmRnE+2mOQU19JG7V8Dh5PwXn=-SS_=+4Db1uijcuuw@mail.gmail.com>
-References: <1373470926-19314-1-git-send-email-dianders@chromium.org>
-	<1375825071-20922-1-git-send-email-dianders@chromium.org>
-	<1375825071-20922-2-git-send-email-dianders@chromium.org>
-	<001801ce9504$d9976ab0$8cc64010$%jun@samsung.com>
-	<CAD=FV=VmtoxnRzjsKF1rVTwvkJRAxKGUvNZHAEwuWaeVokzSZA@mail.gmail.com>
-	<000c01ce972b$9ba23590$d2e6a0b0$%jun@samsung.com>
-	<CAD=FV=WVFGwG7KGBritORUMvWUVH19uaoMLyQufnL5D-Rd76Ww@mail.gmail.com>
+From: Zoran Markovic <zoran.markovic@linaro.org>
+Subject: Re: [RFC PATCH] mmc: Enable wakeup_sources for mmc core
+Date: Thu, 22 Aug 2013 10:08:01 -0700
+Message-ID: <CAME+o4mMxJD-TBgEeGNG9yDCgMGrBSTXMYZrJ09Z1M_qc6=TBw@mail.gmail.com>
+References: <1371146190-16786-1-git-send-email-zoran.markovic@linaro.org>
+	<CAPDyKFrD=q4hOQps5ENJdmAPJyKG1cj7+P6MtXdQ8KQ1cPjnpQ@mail.gmail.com>
+	<CAME+o4mM-YmcZ4pcdWo7mzrDUi2R2LhihgcnbYixOm8KnGfnBA@mail.gmail.com>
+	<CAMbhsRRokPi59J8SghGL0QhUWKDqMuvfbT3TdPosXud_WxRV2Q@mail.gmail.com>
+	<CAPDyKFqy9EEb6o8wYABYT6zE-7Rb0xxo8Y0DuAwooeYZp5=Grw@mail.gmail.com>
+	<CAMbhsRSC5XhhSK-DAoS7_JAj7XUfaM_Topp4UcBaVwRCYXSscQ@mail.gmail.com>
+	<CAPDyKFpMGS-JA47pY_n7xvqdtbPumGpc2fdnYZnSVQ_Rybre3g@mail.gmail.com>
+	<CAMbhsRQwGbpa4a1RziV92qnw4VFh6+=oQiadfqa17FANEiK8_Q@mail.gmail.com>
+	<CAPDyKFroFY3-NJCFpkDYyBVx25CSfk492H_TnoS60jn2CdfWUQ@mail.gmail.com>
+	<CAMbhsRTR9im-BsJ-1m+DD-67LM=s0=KOoy-o+2PmnkDyLOP0Gg@mail.gmail.com>
+	<CAPDyKFoX-ioDVVkfQ21epJyTqQD98xvsqBR1FXzgP9bN6_Zxjg@mail.gmail.com>
+	<CAME+o4=WrfpvJo=jN1KZ_JHnYq9Frfk3EPcwtG10=aCwrbY+Rw@mail.gmail.com>
+	<CAPDyKFpKYeqoFn=S6P2tu1s2C28daCh4vcHTUCCRUOx2_MHShg@mail.gmail.com>
+	<CAME+o4kpsPkoTpS7_0STDpMQpZr0KyfD1prbYYJs147-5DiMkg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qc0-f182.google.com ([209.85.216.182]:60732 "EHLO
-	mail-qc0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752933Ab3HVQZz (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 22 Aug 2013 12:25:55 -0400
-Received: by mail-qc0-f182.google.com with SMTP id c11so1129496qcv.27
-        for <linux-mmc@vger.kernel.org>; Thu, 22 Aug 2013 09:25:54 -0700 (PDT)
-In-Reply-To: <CAD=FV=WVFGwG7KGBritORUMvWUVH19uaoMLyQufnL5D-Rd76Ww@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CAME+o4kpsPkoTpS7_0STDpMQpZr0KyfD1prbYYJs147-5DiMkg@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Colin Cross <ccross@android.com>, lkml <linux-kernel@vger.kernel.org>, linux-mmc@vger.kernel.org, San Mehat <san@google.com>, John Stultz <john.stultz@linaro.org>, Chris Ball <cjb@laptop.org>, Jaehoon Chung <jh80.chung@samsung.com>, Konstantin Dorfman <kdorfman@codeaurora.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Tejun Heo <tj@kernel.org>, Andrew Morton <akpm@linux-foundation.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Seungwon Jeon <tgih.jun@samsung.com>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, Chris Ball <cjb@laptop.org>, Olof Johansson <olof@lixom.net>, James Hogan <james.hogan@imgtec.com>, Grant Grundler <grundler@chromium.org>, Alim Akhtar <alim.akhtar@samsung.com>, Abhilash Kesavan <a.kesavan@samsung.com>, Tomasz Figa <tomasz.figa@gmail.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-Seungwon,
-
-On Wed, Aug 21, 2013 at 5:54 PM, Doug Anderson <dianders@chromium.org> wrote:
->> Doug, your analysis is right.
->> But, let me suggest another approach.
->> After step #1, core layer actually call mmc_power_off because slot is empthy(get_cd() is '0').
->> Then, set_ios is requested with 'ios->clock'.
->> However, because current implementation doesn't update current_speed in case ios->clock is '0'.
->> It causes current_speed has invalid clock rate in resume of dw-mmc.
->>
->> So, if we can update slot->clock properly, it will be fixed.
->>
->> -static void dw_mci_setup_bus(struct dw_mci_slot *slot, bool force_clkinit)
->> +static void dw_mci_setup_bus(struct dw_mci_slot *slot)
->>  {
->>         struct dw_mci *host = slot->host;
->>         u32 div;
->>         u32 clk_en_a;
->>
->> -       if (slot->clock != host->current_speed || force_clkinit) {
->> +       if (slot->clock && (slot->clock != host->current_speed)) {
->>
->>
->> @@ -807,13 +807,11 @@ static void dw_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
->>
->>         mci_writel(slot->host, UHS_REG, regs);
->>
->> -       if (ios->clock) {
->> -               /*
->> -                * Use mirror of ios->clock to prevent race with mmc
->> -                * core ios update when finding the minimum.
->> -                */
->> -               slot->clock = ios->clock;
->> -       }
->> +       /*
->> +        * Use mirror of ios->clock to prevent race with mmc
->> +        * core ios update when finding the minimum.
->> +        */
->> +       slot->clock = ios->clock;
+Ulf,
+> I got confirmation from Broadcom that all cell phone reference designs
+> have card insert/removal configured as a wakeup IRQ. Unless our
+> customers change that - which I doubt - this results in a considerable
+> number of products implementing this feature.
 >
-> So this scares me a little bit but you're correct that it's probably
-> the right thing.  Mostly it scares me to remove code that someone
-> clearly added on purpose without understanding why they originally
-> added it and why that reason is not valid (or is no longer valid due
-> to other changes).
+> Please let me know how you wish to proceed.
 
-OK, I posted up a new patch series.  Hopefully this looks good to you.
- I did a suspend/resume stress test last night on our chromeos-3.8
-branch and things worked well.
+I think this patch would be useful for all mobile applications. What
+are the chances of getting this in the next kernel version?
 
-
-> I've come up with a new patch that's a little bit more than just your
-> patch.  It actually does something in the case of a zero clock (it
-> turns the clock off).  My patch seems to work OK on my 3.8 branch but
-> I want to do a little more testing tomorrow.  ...but booting on ToT
-> linux seems broken now on the ARM chromebook (it fails in several
-> different ways and sometimes works).  Sigh.
-
-Somehow this morning ToT linux (same revision) was working much better
-on exynos5250-snow.  I was able to boot reliably and even
-suspend/resume reliably.  I think there may be a few niggling issues
-that we'll have to track down before too long, though...
-
--Doug
+Thanks,
+Zoran
