@@ -1,40 +1,85 @@
-From: Zoran Markovic <zoran.markovic@linaro.org>
-Subject: Re: [RFC PATCH] mmc: Enable wakeup_sources for mmc core
-Date: Thu, 22 Aug 2013 10:08:01 -0700
-Message-ID: <CAME+o4mMxJD-TBgEeGNG9yDCgMGrBSTXMYZrJ09Z1M_qc6=TBw@mail.gmail.com>
-References: <1371146190-16786-1-git-send-email-zoran.markovic@linaro.org>
-	<CAPDyKFrD=q4hOQps5ENJdmAPJyKG1cj7+P6MtXdQ8KQ1cPjnpQ@mail.gmail.com>
-	<CAME+o4mM-YmcZ4pcdWo7mzrDUi2R2LhihgcnbYixOm8KnGfnBA@mail.gmail.com>
-	<CAMbhsRRokPi59J8SghGL0QhUWKDqMuvfbT3TdPosXud_WxRV2Q@mail.gmail.com>
-	<CAPDyKFqy9EEb6o8wYABYT6zE-7Rb0xxo8Y0DuAwooeYZp5=Grw@mail.gmail.com>
-	<CAMbhsRSC5XhhSK-DAoS7_JAj7XUfaM_Topp4UcBaVwRCYXSscQ@mail.gmail.com>
-	<CAPDyKFpMGS-JA47pY_n7xvqdtbPumGpc2fdnYZnSVQ_Rybre3g@mail.gmail.com>
-	<CAMbhsRQwGbpa4a1RziV92qnw4VFh6+=oQiadfqa17FANEiK8_Q@mail.gmail.com>
-	<CAPDyKFroFY3-NJCFpkDYyBVx25CSfk492H_TnoS60jn2CdfWUQ@mail.gmail.com>
-	<CAMbhsRTR9im-BsJ-1m+DD-67LM=s0=KOoy-o+2PmnkDyLOP0Gg@mail.gmail.com>
-	<CAPDyKFoX-ioDVVkfQ21epJyTqQD98xvsqBR1FXzgP9bN6_Zxjg@mail.gmail.com>
-	<CAME+o4=WrfpvJo=jN1KZ_JHnYq9Frfk3EPcwtG10=aCwrbY+Rw@mail.gmail.com>
-	<CAPDyKFpKYeqoFn=S6P2tu1s2C28daCh4vcHTUCCRUOx2_MHShg@mail.gmail.com>
-	<CAME+o4kpsPkoTpS7_0STDpMQpZr0KyfD1prbYYJs147-5DiMkg@mail.gmail.com>
+From: "Christian Daudt" <csd@broadcom.com>
+Subject: Re: [PATCH 1/3] mmc: sdhci-bcm-kona: Remove unneeded version.h
+ inclusion
+Date: Thu, 22 Aug 2013 10:46:53 -0700
+Message-ID: <52164E8D.7070404@broadcom.com>
+References: <1373263914-18050-1-git-send-email-sachin.kamat@linaro.org>
+ <51E9A207.70306@broadcom.com>
+ <CAK9yfHwJjwsCq-oAjj3Cp9kFQhxnAfUfpwv9FzcDn-tGLav4xQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAME+o4kpsPkoTpS7_0STDpMQpZr0KyfD1prbYYJs147-5DiMkg@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Colin Cross <ccross@android.com>, lkml <linux-kernel@vger.kernel.org>, linux-mmc@vger.kernel.org, San Mehat <san@google.com>, John Stultz <john.stultz@linaro.org>, Chris Ball <cjb@laptop.org>, Jaehoon Chung <jh80.chung@samsung.com>, Konstantin Dorfman <kdorfman@codeaurora.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Tejun Heo <tj@kernel.org>, Andrew Morton <akpm@linux-foundation.org>
+Content-Type: text/plain;
+ charset=iso-8859-1;
+ format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mms1.broadcom.com ([216.31.210.17]:2743 "EHLO mms1.broadcom.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753333Ab3HVRrF (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 22 Aug 2013 13:47:05 -0400
+In-Reply-To: <CAK9yfHwJjwsCq-oAjj3Cp9kFQhxnAfUfpwv9FzcDn-tGLav4xQ@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Sachin Kamat <sachin.kamat@linaro.org>
+Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Patch Tracking <patches@linaro.org>
 
-Ulf,
-> I got confirmation from Broadcom that all cell phone reference designs
-> have card insert/removal configured as a wakeup IRQ. Unless our
-> customers change that - which I doubt - this results in a considerable
-> number of products implementing this feature.
+On 13-08-21 11:07 PM, Sachin Kamat wrote:
+> On 20 July 2013 02:01, Christian Daudt <csd@broadcom.com> wrote:
+>> On 13-07-07 11:11 PM, Sachin Kamat wrote:
+>>> version.h header inclusion is not necessary as detected by
+>>> versioncheck.
+>>>
+>>> Signed-off-by: Sachin Kamat <sachin.kamat@linaro.org>
+>>> ---
+>>>    drivers/mmc/host/sdhci-bcm-kona.c |    1 -
+>>>    1 file changed, 1 deletion(-)
+>>>
+>>> diff --git a/drivers/mmc/host/sdhci-bcm-kona.c
+>>> b/drivers/mmc/host/sdhci-bcm-kona.c
+>>> index 87175f9..bca6d55 100644
+>>> --- a/drivers/mmc/host/sdhci-bcm-kona.c
+>>> +++ b/drivers/mmc/host/sdhci-bcm-kona.c
+>>> @@ -24,7 +24,6 @@
+>>>    #include <linux/of.h>
+>>>    #include <linux/of_device.h>
+>>>    #include <linux/of_gpio.h>
+>>> -#include <linux/version.h>
+>>>    #include <linux/mmc/slot-gpio.h>
+>>>      #include "sdhci-pltfm.h"
+>> Acked-by: Christian Daudt <csd@broadcom.com>
+>>
+>>   thanks,
+>>     csd
+>>
+>>
+> Ping Chris..
 >
-> Please let me know how you wish to proceed.
+>
+Hi Sachin,
+  I can pull this one into bcm tree, as I already have other patches for 
+that file in there. I'm also pulling in patch 3. Patch 2 was already 
+covered by this commit which is already in my pull request to armsoc so 
+I'll drop it:
+Author: Markus Mayer <markus.mayer@linaro.org>
+Date:   Wed Aug 7 15:39:59 2013 -0700
 
-I think this patch would be useful for all mobile applications. What
-are the chances of getting this in the next kernel version?
+     mmc: sdhci-bcm-kona: make linker-section warning go away
 
-Thanks,
-Zoran
+     This change makes the following build warning go away:
+     [...]
+       LINK    vmlinux
+       LD      vmlinux.o
+       MODPOST vmlinux.o
+     WARNING: modpost: Found 2 section mismatch(es).
+     To see full details build your kernel with:
+     'make CONFIG_DEBUG_SECTION_MISMATCH=y'
+
+     Signed-off-by: Markus Mayer <markus.mayer@linaro.org>
+     Reviewed-by: Christian Daudt <csd@broadcom.com>
+     Reviewed-by: Matt Porter <matt.porter@linaro.org>
+
+
+
+  thanks,
+    csd
+
+
