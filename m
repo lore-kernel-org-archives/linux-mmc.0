@@ -1,146 +1,121 @@
-From: Grant Grundler <grundler@chromium.org>
-Subject: Re: MMC locking: mmc_request accesses from dw_mmc driver ok?
-Date: Wed, 21 Aug 2013 13:18:32 -0700
-Message-ID: <CANEJEGtiwVo1K3Ht7iwMecfjA76M2JPFz+U_Hs8iRzNud=Y1-A@mail.gmail.com>
-References: <CANEJEGuRAzsRdwYsdb5MMrpiQxG4DgiRW=XuuQoLz3_84o9Vig@mail.gmail.com>
+From: Doug Anderson <dianders@chromium.org>
+Subject: Re: [PATCH v4 1/4] mmc: dw_mmc: Invalidate cache of current_speed
+ after suspend/resume
+Date: Wed, 21 Aug 2013 17:54:55 -0700
+Message-ID: <CAD=FV=WVFGwG7KGBritORUMvWUVH19uaoMLyQufnL5D-Rd76Ww@mail.gmail.com>
+References: <1373470926-19314-1-git-send-email-dianders@chromium.org>
+	<1375825071-20922-1-git-send-email-dianders@chromium.org>
+	<1375825071-20922-2-git-send-email-dianders@chromium.org>
+	<001801ce9504$d9976ab0$8cc64010$%jun@samsung.com>
+	<CAD=FV=VmtoxnRzjsKF1rVTwvkJRAxKGUvNZHAEwuWaeVokzSZA@mail.gmail.com>
+	<000c01ce972b$9ba23590$d2e6a0b0$%jun@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-oa0-f49.google.com ([209.85.219.49]:64559 "EHLO
-	mail-oa0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752289Ab3HUUSd (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 21 Aug 2013 16:18:33 -0400
-Received: by mail-oa0-f49.google.com with SMTP id n10so1847197oag.36
-        for <linux-mmc@vger.kernel.org>; Wed, 21 Aug 2013 13:18:32 -0700 (PDT)
-In-Reply-To: <CANEJEGuRAzsRdwYsdb5MMrpiQxG4DgiRW=XuuQoLz3_84o9Vig@mail.gmail.com>
+Received: from mail-qa0-f46.google.com ([209.85.216.46]:44061 "EHLO
+	mail-qa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752242Ab3HVAy4 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 21 Aug 2013 20:54:56 -0400
+Received: by mail-qa0-f46.google.com with SMTP id bq6so813940qab.19
+        for <linux-mmc@vger.kernel.org>; Wed, 21 Aug 2013 17:54:56 -0700 (PDT)
+In-Reply-To: <000c01ce972b$9ba23590$d2e6a0b0$%jun@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>, Jaehoon Chung <jh80.chung@samsung.com>, Doug Anderson <dianders@chromium.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Seungwon Jeon <tgih.jun@samsung.com>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, Chris Ball <cjb@laptop.org>, Olof Johansson <olof@lixom.net>, James Hogan <james.hogan@imgtec.com>, Grant Grundler <grundler@chromium.org>, Alim Akhtar <alim.akhtar@samsung.com>, Abhilash Kesavan <a.kesavan@samsung.com>, Tomasz Figa <tomasz.figa@gmail.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-On Mon, Aug 12, 2013 at 4:45 PM, Grant Grundler <grundler@chromium.org> wrote:
-> I've been working on an "task mmcqd/0:84 blocked for more than 120
-> seconds" panic for the past month or so in the chromeos-3.4 kernel
-> tree. Stack trace below. Feel free to tell me "fixed in v3.x". :)
+Seungwon,
 
-I've added this change:
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 1cf4900..a127ce1 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -135,6 +135,9 @@ void mmc_request_done(struct mmc_host *host,
-struct mmc_request *mrq)
-        struct mmc_command *cmd = mrq->cmd;
-        int err = cmd->error;
-
-+WARN_ON(!host->claimed);
-+WARN_ON(host->claimer != current);
-+
-        if (err && cmd->retries && mmc_host_is_spi(host)) {
-                if (cmd->resp[0] & R1_SPI_ILLEGAL_COMMAND)
-                        cmd->retries = 0;
-
-and the "WARN_ON(host->claimer != current)" is triggering with this
-stack trace (as I suspected):
-
-WARNING: at /mnt/host/source/src/third_party/kernel/files/drivers/mmc/core/core.c:139
-mmc_request_done+0x6c/0xf0()
-Modules linked in: i2c_dev uinput asix usbnet nf_conntrack_ipv6
-nf_defrag_ipv6 uvcvideo videobuf2_vmalloc sbs_battery mwifiex_sdio
-mwifiex cfg80211 btmrvl_sdio btmrvl rtc_s3c bluetooth zram(C)
-zsmalloc(C) fuse ip6table_filter xt_mark ip6_tables joydev
-[<800150a4>] (unwind_backtrace+0x0/0x114) from [<804ee9a0>]
-(dump_stack+0x20/0x24)
-[<804ee9a0>] (dump_stack+0x20/0x24) from [<8002bff8>]
-(warn_slowpath_null+0x44/0x5c)
-[<8002bff8>] (warn_slowpath_null+0x44/0x5c) from [<803a3e74>]
-(mmc_request_done+0x6c/0xf0)
-[<803a3e74>] (mmc_request_done+0x6c/0xf0) from [<803b9c4c>]
-(dw_mci_request_end+0xc4/0xec)
-[<803b9c4c>] (dw_mci_request_end+0xc4/0xec) from [<803ba274>]
-(dw_mci_tasklet_func+0x354/0x3a8)
-[<803ba274>] (dw_mci_tasklet_func+0x354/0x3a8) from [<80034044>]
-(tasklet_action+0xac/0x12c)
-[<80034044>] (tasklet_action+0xac/0x12c) from [<800334f8>]
-(__do_softirq+0xc4/0x208)
-[<800334f8>] (__do_softirq+0xc4/0x208) from [<80033a54>] (irq_exit+0x54/0x94)
-[<80033a54>] (irq_exit+0x54/0x94) from [<8000ef68>] (handle_IRQ+0x8c/0xc8)
-[<8000ef68>] (handle_IRQ+0x8c/0xc8) from [<800085ec>] (gic_handle_irq+0x4c/0x70)
-[<800085ec>] (gic_handle_irq+0x4c/0x70) from [<8000e200>] (__irq_svc+0x40/0x60)
-
-Is this expected behavior?
-
-It feels wrong to me since it means the dw_mmc tasklet and whatever
-thread starts the IO can access the mmc_request data structure. Do I
-have this right?
-
-If I have this right, any "obvious" fixes? e.g. add locking to
-mmc_start_request() and mmc_request_done()?
-
-thanks,
-grant
-
-> After staring at the 14 MMC and DW driver data structures,  I now
-> think dw_mmc driver is accessing MMC generic data structures
-> (mmc_request and mmc_queue_req) without grabbing either
-> mmc_blk_data->lock or mmc_queue->thread_sem and it needs to. I don't
-> have a specific stack trace yet where dw_mmc driver is accessing MMC
-> generic data without protection. This is where I need some guidance.
+On Mon, Aug 12, 2013 at 12:14 AM, Seungwon Jeon <tgih.jun@samsung.com> wrote:
+> On Sat, August 10, 2013, Doug Anderson wrote:
+>> Seungwon and Jaehoon,
+>>
+>> On Fri, Aug 9, 2013 at 6:32 AM, Seungwon Jeon <tgih.jun@samsung.com> wrote:
+>> > On Wed, August 07, 2013, Doug Anderson wrote:
+>> >> The dw_mmc driver keeps a cache of the current slot->clock in order to
+>> >> avoid doing a whole lot of work every time set_ios() is called.
+>> >> However, after suspend/resume the register values are bogus so we need
+>> >> to ensure that the cached value is invalidated.
+>> > This mismatch comes only in case MMC_PM_KEEP_POWER, right?
+>>
+>> Actually, no.  I saw problems with the SD Card slot, which doesn't
+>> have MMC_KEEP_POWER.  Problems showed up when no card was inserted
+>> across suspend/resume.  In other words:
+>>
+>> 1. At boot time, slot is all setup and configured to 400kHz.
+>>
+>> 2. Suspend
+>>
+>> 3. Resume; clock registers are reset (by suspend/resume) and not
+>> restored since dw_mmc still thinks slot is configured for 400kHz due
+>> to host->current_speed cache.
+>>
+>> 4. Insert card.
+>>
+>> 5. No code sees any need to change the clock for detecting the card,
+>> since everyone thinks it's at 400kHz.  ...but it's not.
 >
-> I am confident dw_mmc driver is always acquiring dw_mci->lock when
-> accessing data in dw_mci structure(s). I don't see any locking around
-> access into the struct mmc_request by dw_mci_slot[]->mrq though - not
-> sure where that belongs.
+> Doug, your analysis is right.
+> But, let me suggest another approach.
+> After step #1, core layer actually call mmc_power_off because slot is empthy(get_cd() is '0').
+> Then, set_ios is requested with 'ios->clock'.
+> However, because current implementation doesn't update current_speed in case ios->clock is '0'.
+> It causes current_speed has invalid clock rate in resume of dw-mmc.
 >
-> Two questions:
-> 1) is there interest in adding "assert_spin_locked()" calls to
-> document locking dependencies?
-> 2)  Does anyone understand this code well enough to confirm I'm on the
-> right track and which code path I should be looking at?
+> So, if we can update slot->clock properly, it will be fixed.
+>
+> -static void dw_mci_setup_bus(struct dw_mci_slot *slot, bool force_clkinit)
+> +static void dw_mci_setup_bus(struct dw_mci_slot *slot)
+>  {
+>         struct dw_mci *host = slot->host;
+>         u32 div;
+>         u32 clk_en_a;
+>
+> -       if (slot->clock != host->current_speed || force_clkinit) {
+> +       if (slot->clock && (slot->clock != host->current_speed)) {
 >
 >
-> Back to the bug:  mmc_start_req() is sleeping, waiting for the
-> "previous" (in flight) "async" IO to complete. (1) This IO never
-> completes (unlikely) OR (2) already did (e.g. mmc_host->areq is stale)
-> OR (3) mmc_host->areq is non-zero garbage. I'll add some code to
-> confirm (3) not the last case.
+> @@ -807,13 +807,11 @@ static void dw_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
 >
-> I have confirmed with the stress test I'm running (many async IO in
-> flight with two antagonist processes that burns CPU cycles) gets about
-> 4 completions per second that are "done" before we call
-> mmc_start_req(). So I know the race in (2) could happen.
+>         mci_writel(slot->host, UHS_REG, regs);
 >
->
-> thanks,
-> grant
->
->
-> INFO: task mmcqd/0:84 blocked for more than 120 seconds.
-> "echo 0 > /proc/sys/kernel/hung_task_timeout_secs" disables this message.
-> mmcqd/0         D 804f4890     0    84      2 0x00000000
-> [<804f4890>] (__schedule+0x614/0x780) from [<804f4dc0>] (schedule+0x94/0x98)
-> [<804f4dc0>] (schedule+0x94/0x98) from [<804f2ae0>]
-> (schedule_timeout+0x38/0x2d0)
-> [<804f2ae0>] (schedule_timeout+0x38/0x2d0) from [<804f4c14>]
-> (wait_for_common+0x164/0x1a0)
-> [<804f4c14>] (wait_for_common+0x164/0x1a0) from [<804f4d28>]
-> (wait_for_completion+0x20/0x24)
-> [<804f4d28>] (wait_for_completion+0x20/0x24) from [<803a39f8>]
-> (mmc_wait_for_req_done+0x2c/0x84)
-> [<803a39f8>] (mmc_wait_for_req_done+0x2c/0x84) from [<803a4b50>]
-> (mmc_start_req+0x60/0x120)
-> [<803a4b50>] (mmc_start_req+0x60/0x120) from [<803b09bc>]
-> (mmc_blk_issue_rw_rq+0xa0/0x3a8)
-> [<803b09bc>] (mmc_blk_issue_rw_rq+0xa0/0x3a8) from [<803b10e8>]
-> (mmc_blk_issue_rq+0x424/0x478)
-> [<803b10e8>] (mmc_blk_issue_rq+0x424/0x478) from [<803b220c>]
-> (mmc_queue_thread+0xb0/0x118)
-> [<803b220c>] (mmc_queue_thread+0xb0/0x118) from [<8004d620>] (kthread+0xa8/0xbc)
-> [<8004d620>] (kthread+0xa8/0xbc) from [<8000f1c8>] (kernel_thread_exit+0x0/0x8)
-> Kernel panic - not syncing: hung_task: blocked tasks
-> [<800150a4>] (unwind_backtrace+0x0/0x114) from [<804ee160>]
-> (dump_stack+0x20/0x24)
-> [<804ee160>] (dump_stack+0x20/0x24) from [<804ee2d0>] (panic+0xa8/0x1f4)
-> [<804ee2d0>] (panic+0xa8/0x1f4) from [<80086d44>] (watchdog+0x1f4/0x25c)
-> [<80086d44>] (watchdog+0x1f4/0x25c) from [<8004d620>] (kthread+0xa8/0xbc)
-> [<8004d620>] (kthread+0xa8/0xbc) from [<8000f1c8>] (kernel_thread_exit+0x0/0x8)
+> -       if (ios->clock) {
+> -               /*
+> -                * Use mirror of ios->clock to prevent race with mmc
+> -                * core ios update when finding the minimum.
+> -                */
+> -               slot->clock = ios->clock;
+> -       }
+> +       /*
+> +        * Use mirror of ios->clock to prevent race with mmc
+> +        * core ios update when finding the minimum.
+> +        */
+> +       slot->clock = ios->clock;
+
+So this scares me a little bit but you're correct that it's probably
+the right thing.  Mostly it scares me to remove code that someone
+clearly added on purpose without understanding why they originally
+added it and why that reason is not valid (or is no longer valid due
+to other changes).
+
+I've actually got a change similar to this as part of my WIP SDIO 3.0
+series that I haven't had time to finish (I've been saying that a lot
+recently...) at
+<https://gerrit.chromium.org/gerrit/#/c/61942/1/drivers/mmc/host/dw_mmc.c>.
+ I see a bunch of patches that seem related to SDIO 3.0 from you that
+were just posted.  I'll have to look them over if I can find the
+time...
+
+I've come up with a new patch that's a little bit more than just your
+patch.  It actually does something in the case of a zero clock (it
+turns the clock off).  My patch seems to work OK on my 3.8 branch but
+I want to do a little more testing tomorrow.  ...but booting on ToT
+linux seems broken now on the ARM chromebook (it fails in several
+different ways and sometimes works).  Sigh.
+
+In any case, I'll post up tomorrow.  It won't have as much testing as
+my old series (which I'm using every day since it's landed in our
+tree), but I'll do some basic testing and we'll deal with any issues
+that come up.
+
+-Doug
