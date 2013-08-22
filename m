@@ -1,169 +1,81 @@
-From: Yuvaraj Kumar C D <yuvaraj.cd@gmail.com>
-Subject: [PATCH V3] ARM: dts: Add dwmmc DT nodes for exynos5420 SOC
-Date: Thu, 22 Aug 2013 17:21:18 +0530
-Message-ID: <1377172278-15161-1-git-send-email-yuvaraj.cd@samsung.com>
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: linux-samsung-soc@vger.kernel.org, kgene.kim@samsung.com, t.figa@samsung.com, linux-mmc@vger.kernel.org
-Cc: cjb@laptop.org, jh80.chung@samsung.com, tgih.jun@samsung.com, ks.giri@samsung.com, Yuvaraj Kumar C D <yuvaraj.cd@samsung.com>
+From: majianpeng <majianpeng@gmail.com>
+Subject: Re: Re: [PATCH V2] mmc: omap_hsmmc: Fix sleep too long in ISR context.
+Date: Thu, 22 Aug 2013 20:03:16 +0800
+Message-ID: <201308222003128470850@gmail.com>
+References: <201308071805022428282@gmail.com> <5213BAD0.8030406@yahoo.es>,
+	<5214F55E.6020408@ti.com>
+Reply-To: majianpeng <majianpeng@gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain;
+	charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-pd0-f178.google.com ([209.85.192.178]:53333 "EHLO
+	mail-pd0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751853Ab3HVMD0 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 22 Aug 2013 08:03:26 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: balajitk <balajitk@ti.com>, Hein Tibosch <hein_tibosch@yahoo.es>
+Cc: cjb <cjb@laptop.org>, Felipe Balbi <balbi@ti.com>, linux-mmc <linux-mmc@vger.kernel.org>, linux-omap <linux-omap@vger.kernel.org>, mayuzheng <mayuzheng@kedacom.com>, Santosh Shilimkar <santosh.shilimkar@ti.com>, Tony Lindgren <tony@atomide.com>
 
-This patch adds the device tree node entries for exynos5420 SOC.
-Exynos5420 has a different version of DWMMC controller,so a new
-compatible string is used to distinguish it from the prior SOC's.
+Pk9uIFdlZG5lc2RheSAyMSBBdWd1c3QgMjAxMyAxMjoyMiBBTSwgSGVpbiBUaWJvc2NoIHdyb3Rl
+Og0KPj4gSGksDQo+Pg0KPj4gWyBhZGRlZCBzb21lIHBlb3BsZSBmcm9tIFRJIF0NCj4+DQo+PiBP
+biA4LzcvMjAxMyA2OjA1IFBNLCBtYWppYW5wZW5nIHdyb3RlOg0KPj4+IFYyOg0KPj4+IAljbGVh
+biB1cCBjb2RlLg0KPj4+IFYxOg0KPj4+IAl3d3cubWFpbC1hcmNoaXZlLmNvbS9saW51eC1vbWFw
+QHZnZXIuLi4vbXNnOTMyMzkuaHRtbOKAjg0KPj4+DQo+Pj4NCj4+PiBXZSBmb3VuZCBhIHByb2Js
+ZW0gd2hlbiB3ZSByZW1vdmVkIGEgd29ya2luZyBzZCBjYXJkIHRoYXQgdGhlIGlycWFjdGlvbg0K
+Pj4+IG9mIG9tYXBfaHNtbWMgY2FuIHNsZWVwIHRvIDMuNnMuIFRoaXMgY2F1c2Ugb3VyIHdhdGNo
+ZG9nIHRvIHdvcmsuDQo+Pj4gSW4gZnVuYyBvbWFwX2hzbW1jX3Jlc2V0X2NvbnRyb2xsZXJfZnNt
+LCBpdCBzaG91bGQgd2F0Y2ggYSAwLT4xDQo+Pj4gdHJhbnNpdGlvbi5CdXQgYXZvaWRpbmcgZW5k
+bGVzcyB3YWl0aW5nLCBpdCB1c2VkIGxvb3BzX3Blcl9qaWZmeSBhcyB0aGUgdGltZXIuDQo+Pg0K
+Pj4gVHJpZWQgb24gYSBPTUFQNDQ2MDoNCj4+IFRoaXMgY2FuIGVhc2lseSBiZSByZXBsaWNhdGVk
+OiBqdXN0IHdpdGhkcmF3IGFuIFNELWNhcmQgYW5kIHRoZSBrZXJuZWwNCj4+IHdpbGwgZ2V0IGJs
+b2NrZWQgZHVyaW5nIG1vcmUgdGhhbiAzIHNlY29uZHMuDQo+PiBDYWxsaW5nIE9NQVBfSFNNTUNf
+UkVBRCgpIGluIHRoaXMgbG9vcCBtYWtlcyBpdCBsYXN0IHNvIGxvbmcuDQo+Pg0KPj4gVGhlIGZ1
+bmN0aW9uIHdhaXRzIGZvciBhIDA9PjEsIGZvbGxvd2VkIGJ5IGEgMT0+MCB0cmFuc2l0aW9uLg0K
+Pj4gVGhlIHZhbHVlIG9mIDEgYWx3YXlzIGNvbWVzLCBidXQgaW4gbW9zdCBjYXNlcyB0aGUgY29k
+ZSBpcyBqdXN0IHRvbw0KPj4gc2xvdyB0byBkZXRlY3QgaXQuIFRoZSBmaXJzdCBsb29wIHdpbGwg
+b25seSBzdG9wIHdoZW4gKGkgPT0gbGltaXQpDQo+Pg0KPj4+IFRoZSBjb2RlIGlzOg0KPj4+PiB3
+aGlsZSAoKCEoT01BUF9IU01NQ19SRUFEKGhvc3QtPmJhc2UsIFNZU0NUTCkgJiBiaXQpKQ0KPj4+
+PiAgICAgICAgICAgICAgICAgJiYgKGkrKyA8IGxpbWl0KSkNCj4+Pj4gICAgICAgICAgICAgICAg
+ICAgICAgICAgY3B1X3JlbGF4KCk7DQo+Pj4gQnV0IGdlbmVyYW5seSBsb29wc19wZXJfamlmZnkg
+YXMgYSB0aW1lcixpdCBzaG91bGQgbGlrZToNCj4+Pj4gICB3aGlsZShpKysgPCBsaW1pdCkNCj4+
+Pj4gY3B1X3JlbGF4KCk7DQo+Pj4gSSBmb3VuZCBmb3IgdGhlIGxvbmcgdGltZSBjYXNlLCB0aGUg
+d2hpbGUtb3BlYXRpb24gc3RvcGVkIGJlY2F1c2UgJ2kgPT0gbGltaXQnLg0KPj4+IEJlY2F1c2Ug
+YWRkZWQgc29tZSBjb2RlLCBzbyB0aGUgZHVyYXRpb24gYmVjYW1lIHRvbyBsb25nZXIgdGhhbg0K
+Pj4+IE1NQ19USU1FT1VfVVMoMjBtcykuDQo+Pj4NCj4+PiBUaGUgc29mdHdhcmUgY2FuJ3QgbW9u
+aXRvciB0aGUgdHJhbnNpdGlvbiBvZiBoYXJkd2FyZSBmb3IgdGhpIGNhc2UuDQo+Pj4NCj4+PiBC
+ZWNhc3VlIHRob3NlIGNvZGVzIGluIElTUiBjb250ZXh0LCBpdCBjYW4ndCB1c2UgdGltZXJfYmVm
+b3JlL2FmdGVyLg0KPj4+IEkgZGl2aXZlZCB0aGUgdGltZSBpbnRvIDFtcyBhbmQgdXNlZCB1ZGVs
+YXkoMSkgdG8gaW5zdGVhZC4NCj4+PiBJdCB3aWxsIGNhdXNlIGRvIGFkZGl0aW9uYWwgdWRlbGF5
+KDEpLkJ1dCBmcm9tIG15IHRlc3QsaXQgbG9va3MgZ29vZC4NCj4+Pg0KPj4+IFJlcG9ydGVkLWJ5
+OiBZdXpoZW5nIE1hIDxtYXl1emhlbmdAa2VkYWNvbS5jb20+DQo+Pj4gVGVzdGVkLWJ5OiBZdXpo
+ZW5nIE1hIDxtYXl1emhlbmdAa2VkYWNvbS5jb20+DQo+Pj4gUmV2aWV3ZWQtYnk6IEhlaW4gVGli
+b3NjaCA8aGVpbl90aWJvc2NoQHlhaG9vLmVzPg0KPj4+IFNpZ25lZC1vZmYtYnk6IEppYW5wZW5n
+IE1hIDxtYWppYW5wZW5nQGdtYWlsLmNvbT4NCj4+PiAtLS0NCj4+PiAgIGRyaXZlcnMvbW1jL2hv
+c3Qvb21hcF9oc21tYy5jIHwgMjUgKysrKysrKysrKystLS0tLS0tLS0tLS0tLQ0KPj4+ICAgMSBm
+aWxlIGNoYW5nZWQsIDExIGluc2VydGlvbnMoKyksIDE0IGRlbGV0aW9ucygtKQ0KPj4+DQo+Pj4g
+ZGlmZiAtLWdpdCBhL2RyaXZlcnMvbW1jL2hvc3Qvb21hcF9oc21tYy5jIGIvZHJpdmVycy9tbWMv
+aG9zdC9vbWFwX2hzbW1jLmMNCj4+PiBpbmRleCAxODY1MzIxLi5iYmRhNWVkIDEwMDY0NA0KPj4+
+IC0tLSBhL2RyaXZlcnMvbW1jL2hvc3Qvb21hcF9oc21tYy5jDQo+Pj4gKysrIGIvZHJpdmVycy9t
+bWMvaG9zdC9vbWFwX2hzbW1jLmMNCj4+PiBAQCAtOTczLDkgKzk3Myw4IEBAIHN0YXRpYyBpbmxp
+bmUgdm9pZCBvbWFwX2hzbW1jX2RiZ19yZXBvcnRfaXJxKHN0cnVjdCBvbWFwX2hzbW1jX2hvc3Qg
+Kmhvc3QsDQo+Pj4gICBzdGF0aWMgaW5saW5lIHZvaWQgb21hcF9oc21tY19yZXNldF9jb250cm9s
+bGVyX2ZzbShzdHJ1Y3Qgb21hcF9oc21tY19ob3N0ICpob3N0LA0KPj4+ICAgCQkJCQkJICAgdW5z
+aWduZWQgbG9uZyBiaXQpDQo+Pj4gICB7DQo+Pj4gLQl1bnNpZ25lZCBsb25nIGkgPSAwOw0KPj4+
+IC0JdW5zaWduZWQgbG9uZyBsaW1pdCA9IChsb29wc19wZXJfamlmZnkgKg0KPj4+IC0JCQkJbXNl
+Y3NfdG9famlmZmllcyhNTUNfVElNRU9VVF9NUykpOw0KPj4+ICsJLypjaGFuZ2UgdG8gMW1zLHNv
+IHdlIGNhbiB1c2UgdWRlbGF5KDEpKi8NCj4+PiArCXVuc2lnbmVkIGxvbmcgbGltaXQgPSBNTUNf
+VElNRU9VVF9NUyAqIDEwMDA7DQo+Pj4NCj4+PiAgIAlPTUFQX0hTTU1DX1dSSVRFKGhvc3QtPmJh
+c2UsIFNZU0NUTCwNCj4+PiAgIAkJCSBPTUFQX0hTTU1DX1JFQUQoaG9zdC0+YmFzZSwgU1lTQ1RM
+KSB8IGJpdCk7DQo+Pg0KPj4gQ2hlY2tlZCBoZXJlOiB0aGUgU1JDLWJpdCBpbmRlZWQgYmVjb21l
+cyBoaWdoLg0KPj4gQWZ0ZXIgdGhlIHRlc3QgJ2ZlYXR1cmVzICYgSFNNTUNfSEFTX1VQREFURURf
+UkVTRVQnLCB0aGUgYml0IGhhcw0KPj4gYmVjb21lIGxvdyBhZ2FpbiBhbHJlYWR5Lg0KPj4gQ2hh
+bmdpbmcgdG8gb3JkZXIgb2Ygc3RhdGVtZW50cyB3b3JrZWQgZm9yIG1lLCBidXQgZm9yIEppYW5w
+ZW5nIE1hDQo+PiB0aGlzIGRpZG4ndCB3b3JrICh0aW1pbmdzIGFyZSAnb24gdGhlIGVkZ2UnKS4N
+Cj4NCj5JIHRoaW5rIDEtPjAgdHJhbnNpdGlvbiBpcyBtaXNzZWQgc29tZXRpbWVzIGFuZCB3YWl0
+aW5nIHVudGlsIHRpbWVvdXQsDQo+SmlhbnBlbmcgTWEsIHdoaWNoIFNvQyBhcmUgeW91IHRlc3Rp
+bmcgPw0KPg0KSGksIA0KCW15IHNvcyBpcyBETTgxMDcuDQpUaGFua3MhDQpKaWFucGVuZyBNYSEN
+Cg==
 
-changes since V2:
-	1.dropped num-slots property from node as its not required
-	  if number of card slots available is 1.
-
-	2.Move the below properties
-		a.fifo-depth
-		b.card-detect-delay
-		c.samsung,dw-mshc-ciu-div
-		d.samsung,dw-mshc-sdr-timing
-		e.samsung,dw-mshc-ddr-timing
-	from board dts to SOC dts,as these are not board specific properties.
-
-	3.Updated the binding document exynos-dw-mshc.txt.
-
-changes since V1:
-	1.disable node by status = disabled in SOC file
-	2.enable node by status = okay in board specific file
-
-Signed-off-by: Yuvaraj Kumar C D <yuvaraj.cd@samsung.com>
----
- .../devicetree/bindings/mmc/exynos-dw-mshc.txt     |    4 ++
- arch/arm/boot/dts/exynos5420-smdk5420.dts          |   26 ++++++++++
- arch/arm/boot/dts/exynos5420.dtsi                  |   51 ++++++++++++++++++++
- 3 files changed, 81 insertions(+)
-
-diff --git a/Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt
-index 6d1c098..25368e8 100644
---- a/Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt
-+++ b/Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt
-@@ -16,6 +16,8 @@ Required Properties:
- 	  specific extensions.
- 	- "samsung,exynos5250-dw-mshc": for controllers with Samsung Exynos5250
- 	  specific extensions.
-+	- "samsung,exynos5420-dw-mshc": for controllers with Samsung Exynos5420
-+	  specific extensions.
- 
- * samsung,dw-mshc-ciu-div: Specifies the divider value for the card interface
-   unit (ciu) clock. This property is applicable only for Exynos5 SoC's and
-@@ -31,6 +33,8 @@ Required Properties:
-   data rate mode operation. Refer notes below for the order of the cells and the
-   valid values.
- 
-+* bypass-smu: Bypass Security Management Unit of eMMC channel 0 and channel 1.
-+
-   Notes for the sdr-timing and ddr-timing values:
- 
-     The order of the cells should be
-diff --git a/arch/arm/boot/dts/exynos5420-smdk5420.dts b/arch/arm/boot/dts/exynos5420-smdk5420.dts
-index bafba25..bc604d4 100644
---- a/arch/arm/boot/dts/exynos5420-smdk5420.dts
-+++ b/arch/arm/boot/dts/exynos5420-smdk5420.dts
-@@ -31,6 +31,32 @@
- 		};
- 	};
- 
-+	dwmmc0@12200000 {
-+		status = "okay";
-+		broken-cd;
-+		bypass-smu;
-+		supports-highspeed;
-+		pinctrl-names = "default";
-+		pinctrl-0 = <&sd0_clk &sd0_cmd &sd0_bus4 &sd0_bus8>;
-+
-+		slot@0 {
-+			reg = <0>;
-+			bus-width = <8>;
-+		};
-+	};
-+
-+	dwmmc2@12220000 {
-+		status = "okay";
-+		supports-highspeed;
-+		pinctrl-names = "default";
-+		pinctrl-0 = <&sd2_clk &sd2_cmd &sd2_cd &sd2_bus4>;
-+
-+		slot@0 {
-+			reg = <0>;
-+			bus-width = <4>;
-+		};
-+	};
-+
- 	dp-controller@145B0000 {
- 		pinctrl-names = "default";
- 		pinctrl-0 = <&dp_hpd>;
-diff --git a/arch/arm/boot/dts/exynos5420.dtsi b/arch/arm/boot/dts/exynos5420.dtsi
-index 5353e32..1f08d1b 100644
---- a/arch/arm/boot/dts/exynos5420.dtsi
-+++ b/arch/arm/boot/dts/exynos5420.dtsi
-@@ -22,6 +22,9 @@
- 	compatible = "samsung,exynos5420";
- 
- 	aliases {
-+		mshc0 = &dwmmc_0;
-+		mshc1 = &dwmmc_1;
-+		mshc2 = &dwmmc_2;
- 		pinctrl0 = &pinctrl_0;
- 		pinctrl1 = &pinctrl_1;
- 		pinctrl2 = &pinctrl_2;
-@@ -84,6 +87,54 @@
- 		clock-names = "mfc";
- 	};
- 
-+	dwmmc_0: dwmmc0@12200000 {
-+		compatible = "samsung,exynos5420-dw-mshc";
-+		interrupts = <0 75 0>;
-+		#address-cells = <1>;
-+		#size-cells = <0>;
-+		reg = <0x12200000 0x2000>;
-+		clocks = <&clock 351>, <&clock 132>;
-+		clock-names = "biu", "ciu";
-+		fifo-depth = <0x80>;
-+		card-detect-delay = <200>;
-+		samsung,dw-mshc-ciu-div = <3>;
-+		samsung,dw-mshc-sdr-timing = <0 4>;
-+		samsung,dw-mshc-ddr-timing = <0 2>;
-+		status = "disabled";
-+	};
-+
-+	dwmmc_1: dwmmc1@12210000 {
-+		compatible = "samsung,exynos5420-dw-mshc";
-+		interrupts = <0 76 0>;
-+		#address-cells = <1>;
-+		#size-cells = <0>;
-+		reg = <0x12210000 0x2000>;
-+		clocks = <&clock 352>, <&clock 133>;
-+		clock-names = "biu", "ciu";
-+		fifo-depth = <0x80>;
-+		card-detect-delay = <200>;
-+		samsung,dw-mshc-ciu-div = <3>;
-+		samsung,dw-mshc-sdr-timing = <0 4>;
-+		samsung,dw-mshc-ddr-timing = <0 2>;
-+		status = "disabled";
-+	};
-+
-+	dwmmc_2: dwmmc2@12220000 {
-+		compatible = "samsung,exynos5420-dw-mshc";
-+		interrupts = <0 77 0>;
-+		#address-cells = <1>;
-+		#size-cells = <0>;
-+		reg = <0x12220000 0x2000>;
-+		clocks = <&clock 353>, <&clock 134>;
-+		clock-names = "biu", "ciu";
-+		fifo-depth = <0x80>;
-+		card-detect-delay = <200>;
-+		samsung,dw-mshc-ciu-div = <3>;
-+		samsung,dw-mshc-sdr-timing = <2 3>;
-+		samsung,dw-mshc-ddr-timing = <1 2>;
-+		status = "disabled";
-+	};
-+
- 	mct@101C0000 {
- 		compatible = "samsung,exynos4210-mct";
- 		reg = <0x101C0000 0x800>;
--- 
-1.7.9.5
