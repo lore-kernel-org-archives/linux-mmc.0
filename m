@@ -1,47 +1,48 @@
-From: Balaji T K <balajitk@ti.com>
-Subject: Re: [patch] mmc: omap_hsmmc: precedence bug in omap_hsmmc_context_restore()
-Date: Thu, 22 Aug 2013 20:16:28 +0530
-Message-ID: <52162444.1050908@ti.com>
-References: <20130822125613.GB2543@elgon.mountain>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from arroyo.ext.ti.com ([192.94.94.40]:60419 "EHLO arroyo.ext.ti.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752947Ab3HVOqi (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 22 Aug 2013 10:46:38 -0400
-In-Reply-To: <20130822125613.GB2543@elgon.mountain>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Doug Anderson <dianders@chromium.org>
+Subject: [PATCH v6 0/3] mmc: dw_mmc: fixes for suspend/resume on exynos
+Date: Thu, 22 Aug 2013 09:19:05 -0700
+Message-ID: <1377188348-3418-1-git-send-email-dianders@chromium.org>
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, James Hogan <james.hogan@imgtec.com>, Grant Grundler <grundler@chromium.org>, Alim Akhtar <alim.akhtar@samsung.com>, Abhilash Kesavan <a.kesavan@samsung.com>, Tomasz Figa <tomasz.figa@gmail.com>, Olof Johansson <olof@lixom.net>, Doug Anderson <dianders@chromium.org>, linux-samsung-soc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, Kukjin Kim <kgene.kim@samsung.com>, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
-To: Dan Carpenter <dan.carpenter@oracle.com>
-Cc: Chris Ball <cjb@laptop.org>, Grant Likely <grant.likely@linaro.org>, Rob Herring <rob.herring@calxeda.com>, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, devicetree@vger.kernel.org, kernel-janitors@vger.kernel.org
 
-On Thursday 22 August 2013 06:26 PM, Dan Carpenter wrote:
-> '!' has higher precedence than '&' so this doesn't work as intended
-> although since RESETDONE is 1 it would work if none of the other bits
-> are set.
->
-Hi Dan,
+This series of patches addresses some suspend/resume problems with
+dw_mmc on exynos platforms, espeically exynos5420.  This patchset was
+tested on the current ToT Chromeos 3.8 tree (which has lots of
+backports from 3.10/3.11) and on ToT Linux (v3.11-rc6).  I have
+confirmed basic booting and that SD cards work across suspend/resume
+(both if they are plugged in and if they are not plugged in).
 
-Thanks for the patch, Indeed other bits are reserved.
-however ...
+I have received confirmation from Samsung that the problem solved for
+exynos5420 is a silicon errata and that this is a good fix.
 
-> Signed-off-by: Dan Carpenter <dan.carpenter@oracle.com>
-> ---
-> Untested.
->
-> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-> index 1865321..7346b15 100644
-> --- a/drivers/mmc/host/omap_hsmmc.c
-> +++ b/drivers/mmc/host/omap_hsmmc.c
-> @@ -612,7 +612,7 @@ static int omap_hsmmc_context_restore(struct omap_hsmmc_host *host)
->   	if (host->context_loss == context_loss)
->   		return 1;
->
-> -	if (!OMAP_HSMMC_READ(host->base, SYSSTATUS) & RESETDONE)
-> +	if (!(OMAP_HSMMC_READ(host->base, SYSSTATUS) & RESETDONE))
->   		return 1;
+Changes in v6:
+- Took out TODO comment copied from main platform code.
+- Replaces previous pathes that ensured saving/restoring clocks.
 
-This check is unnecessary, will send a patch to remove this.
+Changes in v5:
+- Cleaned up dw_mci_exynos_resume_noirq() comment as per Seungwon.
+- Don't memcpy dev_pm_ops structure, define a new one.
 
+Changes in v4:
+- Take Seungwon's suggestion and don't add any dw_mmc-pltfm code.
+
+Changes in v3:
+- Add freeze/thaw and poweroff/restore noirq entries.
+
+Changes in v2:
+- Use suspend_noirq as per James Hogan.
+
+Doug Anderson (3):
+  mmc: dw_mmc: Add exynos resume_noirq callback to clear WAKEUP_INT
+  mmc: dw_mmc: Honor requests to set the clock to 0 (turn off clock)
+  mmc: dw_mmc: Set timeout to max upon resume
+
+ drivers/mmc/host/dw_mmc-exynos.c | 53 +++++++++++++++++++++++++++++++++++++++-
+ drivers/mmc/host/dw_mmc.c        | 24 ++++++++++--------
+ 2 files changed, 66 insertions(+), 11 deletions(-)
+
+-- 
+1.8.3
