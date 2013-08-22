@@ -1,85 +1,59 @@
-From: "Christian Daudt" <csd@broadcom.com>
-Subject: Re: [PATCH 1/3] mmc: sdhci-bcm-kona: Remove unneeded version.h
- inclusion
-Date: Thu, 22 Aug 2013 10:46:53 -0700
-Message-ID: <52164E8D.7070404@broadcom.com>
-References: <1373263914-18050-1-git-send-email-sachin.kamat@linaro.org>
- <51E9A207.70306@broadcom.com>
- <CAK9yfHwJjwsCq-oAjj3Cp9kFQhxnAfUfpwv9FzcDn-tGLav4xQ@mail.gmail.com>
+From: Stephen Warren <swarren@wwwdotorg.org>
+Subject: Re: [PATCHv4 2/3] ARM: socfpga: dts: Add support for SD/MMC
+Date: Thu, 22 Aug 2013 14:13:02 -0600
+Message-ID: <521670CE.4000202@wwwdotorg.org>
+References: <1376498884-9199-1-git-send-email-dinguyen@altera.com>  <1376498884-9199-2-git-send-email-dinguyen@altera.com>  <520EA97D.7050404@wwwdotorg.org> <1377114530.1554.13.camel@linux-builds1>
 Mime-Version: 1.0
-Content-Type: text/plain;
- charset=iso-8859-1;
- format=flowed
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mms1.broadcom.com ([216.31.210.17]:2743 "EHLO mms1.broadcom.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753333Ab3HVRrF (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 22 Aug 2013 13:47:05 -0400
-In-Reply-To: <CAK9yfHwJjwsCq-oAjj3Cp9kFQhxnAfUfpwv9FzcDn-tGLav4xQ@mail.gmail.com>
+Received: from avon.wwwdotorg.org ([70.85.31.133]:47037 "EHLO
+	avon.wwwdotorg.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753069Ab3HVUNF (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 22 Aug 2013 16:13:05 -0400
+In-Reply-To: <1377114530.1554.13.camel@linux-builds1>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Sachin Kamat <sachin.kamat@linaro.org>
-Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Patch Tracking <patches@linaro.org>
+To: Dinh Nguyen <dinguyen@altera.com>
+Cc: Mark Rutland <mark.rutland@arm.com>, devicetree@vger.kernel.org, dinh.linux@gmail.com, Ian Campbell <ian.campbell@citrix.com>, Pawel Moll <pawel.moll@arm.com>, Seungwon Jeon <tgih.jun@samsung.com>, linux-mmc@vger.kernel.org, Rob Herring <rob.herring@calxeda.com>, Jaehoon Chung <jh80.chung@samsung.com>, linux-arm-kernel@lists.infradead.org
 
-On 13-08-21 11:07 PM, Sachin Kamat wrote:
-> On 20 July 2013 02:01, Christian Daudt <csd@broadcom.com> wrote:
->> On 13-07-07 11:11 PM, Sachin Kamat wrote:
->>> version.h header inclusion is not necessary as detected by
->>> versioncheck.
+On 08/21/2013 01:48 PM, Dinh Nguyen wrote:
+> On Fri, 2013-08-16 at 16:36 -0600, Stephen Warren wrote:
+>> On 08/14/2013 10:48 AM, dinguyen@altera.com wrote:
+>>> From: Dinh Nguyen <dinguyen@altera.com>
 >>>
->>> Signed-off-by: Sachin Kamat <sachin.kamat@linaro.org>
->>> ---
->>>    drivers/mmc/host/sdhci-bcm-kona.c |    1 -
->>>    1 file changed, 1 deletion(-)
->>>
->>> diff --git a/drivers/mmc/host/sdhci-bcm-kona.c
->>> b/drivers/mmc/host/sdhci-bcm-kona.c
->>> index 87175f9..bca6d55 100644
->>> --- a/drivers/mmc/host/sdhci-bcm-kona.c
->>> +++ b/drivers/mmc/host/sdhci-bcm-kona.c
->>> @@ -24,7 +24,6 @@
->>>    #include <linux/of.h>
->>>    #include <linux/of_device.h>
->>>    #include <linux/of_gpio.h>
->>> -#include <linux/version.h>
->>>    #include <linux/mmc/slot-gpio.h>
->>>      #include "sdhci-pltfm.h"
->> Acked-by: Christian Daudt <csd@broadcom.com>
+>>> Add bindings for SD/MMC for SOCFPGA.
 >>
->>   thanks,
->>     csd
+>>> diff --git a/Documentation/devicetree/bindings/mmc/socfpga-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/socfpga-dw-mshc.txt
 >>
+>>> +* altr,sysmgr: Should be the phandle to the system_mgr node. As this is where
+>>> +		this where the register that controls the CIU clock phases
+>>> +		reside.
 >>
-> Ping Chris..
->
->
-Hi Sachin,
-  I can pull this one into bcm tree, as I already have other patches for 
-that file in there. I'm also pulling in patch 3. Patch 2 was already 
-covered by this commit which is already in my pull request to armsoc so 
-I'll drop it:
-Author: Markus Mayer <markus.mayer@linaro.org>
-Date:   Wed Aug 7 15:39:59 2013 -0700
+>> On the surface, this binding series seems OK, but I do have a question:
+>> how is the sysmgr phandle used?
+>>
+>> I assume there's some register in this syscon device that resets or
+>> enables or otherwise controls this MSHC module. How does the code know
+>> which register it is? The phandle in the altr,sysmgr property would
+>> usually be followed by a/some cell(s) that encode this information, so
+>> that the MSHC driver doesn't have to know anything about the layout of
+>> the syscon registers, and so the sysconf driver doesn't have to know
+>> anything about the identity of the MSHC client device.
+> 
+> There is a #define SYSMGR_SDMMCGRP_CTRL_OFFSET that is in
+> dw_mmc-socfpga.c. This defines the offset from the base address that the
+> sysmgr phandle will give me.
 
-     mmc: sdhci-bcm-kona: make linker-section warning go away
+Hmmm. That doesn't sound good. That means that the SDMMC driver knows
+internal details about some other HW module. It'd be better if either:
 
-     This change makes the following build warning go away:
-     [...]
-       LINK    vmlinux
-       LD      vmlinux.o
-       MODPOST vmlinux.o
-     WARNING: modpost: Found 2 section mismatch(es).
-     To see full details build your kernel with:
-     'make CONFIG_DEBUG_SECTION_MISMATCH=y'
+a) The sysmgr driver was required to provide an API to the SDMMC driver
+to set up the CIU register as requested.
 
-     Signed-off-by: Markus Mayer <markus.mayer@linaro.org>
-     Reviewed-by: Christian Daudt <csd@broadcom.com>
-     Reviewed-by: Matt Porter <matt.porter@linaro.org>
+or:
 
+b) The CIU register details were represented in DT.
 
-
-  thanks,
-    csd
-
-
+Either of these would allow the SDMMC driver to operate unchanged on an
+SoC with a different sysmgr register layout.
