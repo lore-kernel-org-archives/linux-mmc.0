@@ -1,63 +1,132 @@
 From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH 14/14] mmc: dw_mmc: fix the transfer termination in IDMAC
- mode
-Date: Fri, 23 Aug 2013 21:28:58 +0900
-Message-ID: <5217558A.2060404@samsung.com>
-References: <003301ce9e75$9328cd10$b97a6730$%jun@samsung.com>
+Subject: Re: [RFC V2 4/4] mmc: dw_mmc: exynos: add a quirk for SMU.
+Date: Fri, 23 Aug 2013 21:55:15 +0900
+Message-ID: <52175BB3.5020301@samsung.com>
+References: <1377256509-18922-1-git-send-email-yuvaraj.cd@samsung.com>
+ <1377256509-18922-5-git-send-email-yuvaraj.cd@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout3.samsung.com ([203.254.224.33]:13190 "EHLO
-	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755964Ab3HWM2u (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 23 Aug 2013 08:28:50 -0400
-Received: from epcpsbgr3.samsung.com
- (u143.gpu120.samsung.co.kr [203.254.230.143])
- by mailout3.samsung.com (Oracle Communications Messaging Server 7u4-24.01
- (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTP id <0MRZ00CTSHBX1AT0@mailout3.samsung.com> for
- linux-mmc@vger.kernel.org; Fri, 23 Aug 2013 21:28:49 +0900 (KST)
-In-reply-to: <003301ce9e75$9328cd10$b97a6730$%jun@samsung.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-reply-to: <1377256509-18922-5-git-send-email-yuvaraj.cd@samsung.com>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: Yuvaraj Kumar C D <yuvaraj.cd@gmail.com>
+Cc: linux-mmc@vger.kernel.org, linux-samsung-soc@vger.kernel.org, cjb@laptop.org, tgih.jun@samsung.com, alim.akhtar@samsung.com, ks.giri@samsung.com, t.figa@samsung.com, Yuvaraj Kumar C D <yuvaraj.cd@samsung.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Seungwon Jeon <tgih.jun@samsung.com>
-Cc: linux-mmc@vger.kernel.org, 'Chris Ball' <cjb@laptop.org>, 'Alim Akhtar' <alim.akhtar@samsung.com>, 'Bing Zhao ' <bzhao@marvell.com>, 'Doug Anderson' <dianders@chromium.org>
 
-Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
+Hi Yuvaraj,
 
-On 08/21/2013 10:51 PM, Seungwon Jeon wrote:
-> In IDMAC mode EVENT_XFER_COMPLETE is set when RI/TI of last descriptor
-> is done. So if errors are happened in the middle of data transfers,
-> 'dw_mci_stop_dma' during error handing can be called and eventually
-> prevents this flag to be set.
-> This results in permanent wait for EVENT_XFER_COMPLETE in 'dw_mci_tasklet_func'.
-> Therefore, if dma running is stopped forcibly, EVENT_XFER_COMPLETE should be set.
+Is there dependency with other patch?
+I didn't see the defined "DW_MCI_TYPE_EXYNOS5420".
+If i missed something, let me know.
+
+Best Regards,
+Jaehoon Chung
+
+On 08/23/2013 08:15 PM, Yuvaraj Kumar C D wrote:
+> Exynos5420 Mobile Storage Host controller has Security Management Unit
+> (SMU) for channel 0 and channel 1 (mainly for eMMC).This patch adds a
+> quirk to bypass SMU as it is not being used yet.
 > 
-> Reported-by: Bing Zhao <bzhao@marvell.com>
-> Signed-off-by: Doug Anderson <dianders@chromium.org>
-> Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
+> This patch is on top of the below patch by Doug Anderson.
+> mmc: dw_mmc: Add exynos resume_noirq callback to clear WAKEUP_INT
+> 
+> changes since V1:
+> 	1.avoid code duplication by calling dw_mci_exynos_priv_init in
+> 	  resume path.
+> 
+> Signed-off-by: Yuvaraj Kumar C D <yuvaraj.cd@samsung.com>
+> Signed-off-by: Alim Akhtar <alim.akhtar@samsung.com>
 > ---
->  drivers/mmc/host/dw_mmc.c |    6 +++---
->  1 files changed, 3 insertions(+), 3 deletions(-)
+>  drivers/mmc/host/dw_mmc-exynos.c |   33 +++++++++++++++++++++++++++++++++
+>  drivers/mmc/host/dw_mmc.c        |    3 +++
+>  include/linux/mmc/dw_mmc.h       |    2 ++
+>  3 files changed, 38 insertions(+)
 > 
-> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> index 8c1926f..5b52ac1 100644
-> --- a/drivers/mmc/host/dw_mmc.c
-> +++ b/drivers/mmc/host/dw_mmc.c
-> @@ -345,10 +345,10 @@ static void dw_mci_stop_dma(struct dw_mci *host)
->  	if (host->using_dma) {
->  		host->dma_ops->stop(host);
->  		host->dma_ops->cleanup(host);
-> -	} else {
-> -		/* Data transfer was stopped by the interrupt handler */
-> -		set_bit(EVENT_XFER_COMPLETE, &host->pending_events);
->  	}
+> diff --git a/drivers/mmc/host/dw_mmc-exynos.c b/drivers/mmc/host/dw_mmc-exynos.c
+> index 19c845b..8e70fc6 100644
+> --- a/drivers/mmc/host/dw_mmc-exynos.c
+> +++ b/drivers/mmc/host/dw_mmc-exynos.c
+> @@ -35,6 +35,25 @@
+>  #define EXYNOS4210_FIXED_CIU_CLK_DIV	2
+>  #define EXYNOS4412_FIXED_CIU_CLK_DIV	4
+>  
+> +/* Block number in eMMC */
+> +#define DWMCI_BLOCK_NUM			0xFFFFFFFF
 > +
-> +	/* Data transfer was stopped by the interrupt handler */
-> +	set_bit(EVENT_XFER_COMPLETE, &host->pending_events);
+> +#define SDMMC_EMMCP_BASE		0x1000
+> +#define SDMMC_MPSECURITY		(SDMMC_EMMCP_BASE + 0x0010)
+> +#define SDMMC_MPSBEGIN0			(SDMMC_EMMCP_BASE + 0x0200)
+> +#define SDMMC_MPSEND0			(SDMMC_EMMCP_BASE + 0x0204)
+> +#define SDMMC_MPSCTRL0			(SDMMC_EMMCP_BASE + 0x020C)
+> +
+> +/* SMU control bits */
+> +#define DWMCI_MPSCTRL_SECURE_READ_BIT		BIT(7)
+> +#define DWMCI_MPSCTRL_SECURE_WRITE_BIT		BIT(6)
+> +#define DWMCI_MPSCTRL_NON_SECURE_READ_BIT	BIT(5)
+> +#define DWMCI_MPSCTRL_NON_SECURE_WRITE_BIT	BIT(4)
+> +#define DWMCI_MPSCTRL_USE_FUSE_KEY		BIT(3)
+> +#define DWMCI_MPSCTRL_ECB_MODE			BIT(2)
+> +#define DWMCI_MPSCTRL_ENCRYPTION		BIT(1)
+> +#define DWMCI_MPSCTRL_VALID			BIT(0)
+> +
+>  /* Variations in Exynos specific dw-mshc controller */
+>  enum dw_mci_exynos_type {
+>  	DW_MCI_TYPE_EXYNOS4210,
+> @@ -74,6 +93,16 @@ static int dw_mci_exynos_priv_init(struct dw_mci *host)
+>  {
+>  	struct dw_mci_exynos_priv_data *priv = host->priv;
+>  
+> +	if (priv->ctrl_type == DW_MCI_TYPE_EXYNOS5420 &&
+> +		host->pdata->quirks & DW_MCI_QUIRK_BYPASS_SMU) {
+> +		mci_writel(host, MPSBEGIN0, 0);
+> +		mci_writel(host, MPSEND0, DWMCI_BLOCK_NUM);
+> +		mci_writel(host, MPSCTRL0, DWMCI_MPSCTRL_SECURE_WRITE_BIT |
+> +			DWMCI_MPSCTRL_NON_SECURE_READ_BIT |
+> +			DWMCI_MPSCTRL_VALID |
+> +			DWMCI_MPSCTRL_NON_SECURE_WRITE_BIT);
+> +	}
+> +
+>  	return 0;
 >  }
 >  
->  static int dw_mci_get_dma_dir(struct mmc_data *data)
+> @@ -106,7 +135,11 @@ static int dw_mci_exynos_suspend(struct device *dev)
+>  static int dw_mci_exynos_resume(struct device *dev)
+>  {
+>  	struct dw_mci *host = dev_get_drvdata(dev);
+> +	struct dw_mci_exynos_priv_data *priv = host->priv;
+>  
+> +	if (priv->ctrl_type == DW_MCI_TYPE_EXYNOS5420 &&
+> +		host->pdata->quirks & DW_MCI_QUIRK_BYPASS_SMU)
+> +		dw_mci_exynos_priv_init(host);
+>  	return dw_mci_resume(host);
+>  }
+>  
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index 0c0cada..49df69f 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -2107,6 +2107,9 @@ static struct dw_mci_of_quirks {
+>  	}, {
+>  		.quirk	= "broken-cd",
+>  		.id	= DW_MCI_QUIRK_BROKEN_CARD_DETECTION,
+> +	}, {
+> +		.quirk	= "bypass-smu",
+> +		.id	= DW_MCI_QUIRK_BYPASS_SMU,
+>  	},
+>  };
+>  
+> diff --git a/include/linux/mmc/dw_mmc.h b/include/linux/mmc/dw_mmc.h
+> index 198f0fa..2d3f83f 100644
+> --- a/include/linux/mmc/dw_mmc.h
+> +++ b/include/linux/mmc/dw_mmc.h
+> @@ -209,6 +209,8 @@ struct dw_mci_dma_ops {
+>  #define DW_MCI_QUIRK_HIGHSPEED			BIT(2)
+>  /* Unreliable card detection */
+>  #define DW_MCI_QUIRK_BROKEN_CARD_DETECTION	BIT(3)
+> +/*Bypass the Security management unit*/
+> +#define DW_MCI_QUIRK_BYPASS_SMU			BIT(4)
+>  
+>  /* Slot level quirks */
+>  /* This slot has no write protect */
 > 
-
