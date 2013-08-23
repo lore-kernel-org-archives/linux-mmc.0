@@ -1,104 +1,47 @@
-From: Haijun Zhang <Haijun.Zhang@freescale.com>
-Subject: [PATCH] mmc:sdhci: Add Auto-CMD12 err detecting and handling routine
-Date: Fri, 23 Aug 2013 19:04:45 +0800
-Message-ID: <1377255885-19330-1-git-send-email-Haijun.Zhang@freescale.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH] mmc: core: mmc bus test data timeout setting
+Date: Fri, 23 Aug 2013 13:14:06 +0200
+Message-ID: <CAPDyKFruF1kJoB=qrn6P+Px5neZijKFLEwQA382uSYR6=aiLHw@mail.gmail.com>
+References: <59606D77376AA44BB2E289FE5BA55046751F63AE@NTXXIAMBX01.xacn.micron.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from co9ehsobe005.messaging.microsoft.com ([207.46.163.28]:51252
-	"EHLO co9outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1754738Ab3HWLGV (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 23 Aug 2013 07:06:21 -0400
+Received: from mail-vb0-f47.google.com ([209.85.212.47]:52424 "EHLO
+	mail-vb0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754675Ab3HWLOI (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 23 Aug 2013 07:14:08 -0400
+Received: by mail-vb0-f47.google.com with SMTP id h10so320305vbh.6
+        for <linux-mmc@vger.kernel.org>; Fri, 23 Aug 2013 04:14:06 -0700 (PDT)
+In-Reply-To: <59606D77376AA44BB2E289FE5BA55046751F63AE@NTXXIAMBX01.xacn.micron.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, galak@kernel.crashing.org
-Cc: cbouatmailru@gmail.com, cjb@laptop.org, scottwood@freescale.com, X.Xie@freescale.com, Haijun Zhang <Haijun.Zhang@freescale.com>, Haijun Zhang <haijun.zhang@freescale.com>
+To: "Minjian Wu (minjianwu)" <minjianwu@micron.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-When Auto-CMD12 is enabled, Auto-cmd12 error status and signal
-bit should be set to reflect this behaviour in case error.
+On 26 July 2013 07:06, Minjian Wu (minjianwu) <minjianwu@micron.com> wrote:
+> Add data timeout setting for mmc bus test command(CMD14 and CMD19).
+>
+> Signed-off-by: Minjian Wu <minjianwu@micron.com>
 
-Signed-off-by: Haijun Zhang <haijun.zhang@freescale.com>
----
- drivers/mmc/host/sdhci.c | 32 +++++++++++++++++++++-----------
- 1 file changed, 21 insertions(+), 11 deletions(-)
+Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index a78bd4f..db30b3e 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -238,16 +238,23 @@ static void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios);
- 
- static void sdhci_init(struct sdhci_host *host, int soft)
- {
-+	u32 init_irq;
-+
- 	if (soft)
- 		sdhci_reset(host, SDHCI_RESET_CMD|SDHCI_RESET_DATA);
- 	else
- 		sdhci_reset(host, SDHCI_RESET_ALL);
- 
--	sdhci_clear_set_irqs(host, SDHCI_INT_ALL_MASK,
--		SDHCI_INT_BUS_POWER | SDHCI_INT_DATA_END_BIT |
--		SDHCI_INT_DATA_CRC | SDHCI_INT_DATA_TIMEOUT | SDHCI_INT_INDEX |
--		SDHCI_INT_END_BIT | SDHCI_INT_CRC | SDHCI_INT_TIMEOUT |
--		SDHCI_INT_DATA_END | SDHCI_INT_RESPONSE);
-+	init_irq = SDHCI_INT_BUS_POWER | SDHCI_INT_DATA_END_BIT |
-+			SDHCI_INT_DATA_CRC | SDHCI_INT_DATA_TIMEOUT |
-+			SDHCI_INT_INDEX | SDHCI_INT_END_BIT |
-+			SDHCI_INT_CRC | SDHCI_INT_TIMEOUT |
-+			SDHCI_INT_DATA_END | SDHCI_INT_RESPONSE;
-+
-+	if (host->flags & SDHCI_AUTO_CMD12)
-+		init_irq |= SDHCI_INT_ACMD12ERR;
-+
-+	sdhci_clear_set_irqs(host, SDHCI_INT_ALL_MASK, init_irq);
- 
- 	if (soft) {
- 		/* force clock reconfiguration */
-@@ -2238,7 +2245,7 @@ static void sdhci_cmd_irq(struct sdhci_host *host, u32 intmask)
- 	if (intmask & SDHCI_INT_TIMEOUT)
- 		host->cmd->error = -ETIMEDOUT;
- 	else if (intmask & (SDHCI_INT_CRC | SDHCI_INT_END_BIT |
--			SDHCI_INT_INDEX))
-+			SDHCI_INT_INDEX | SDHCI_INT_ACMD12ERR))
- 		host->cmd->error = -EILSEQ;
- 
- 	if (host->cmd->error) {
-@@ -2408,6 +2415,7 @@ static irqreturn_t sdhci_irq(int irq, void *dev_id)
- 	struct sdhci_host *host = dev_id;
- 	u32 intmask, unexpected = 0;
- 	int cardint = 0, max_loops = 16;
-+	u32 cmd_mask = SDHCI_INT_CMD_MASK;
- 
- 	spin_lock(&host->lock);
- 
-@@ -2454,10 +2462,12 @@ again:
- 		tasklet_schedule(&host->card_tasklet);
- 	}
- 
--	if (intmask & SDHCI_INT_CMD_MASK) {
--		sdhci_writel(host, intmask & SDHCI_INT_CMD_MASK,
--			SDHCI_INT_STATUS);
--		sdhci_cmd_irq(host, intmask & SDHCI_INT_CMD_MASK);
-+	if (host->flags & SDHCI_AUTO_CMD12)
-+		cmd_mask |= SDHCI_INT_ACMD12ERR;
-+
-+	if (intmask & cmd_mask) {
-+		sdhci_writel(host, intmask & cmd_mask, SDHCI_INT_STATUS);
-+		sdhci_cmd_irq(host, intmask & cmd_mask);
- 	}
- 
- 	if (intmask & SDHCI_INT_DATA_MASK) {
-@@ -2466,7 +2476,7 @@ again:
- 		sdhci_data_irq(host, intmask & SDHCI_INT_DATA_MASK);
- 	}
- 
--	intmask &= ~(SDHCI_INT_CMD_MASK | SDHCI_INT_DATA_MASK);
-+	intmask &= ~(cmd_mask | SDHCI_INT_DATA_MASK);
- 
- 	intmask &= ~SDHCI_INT_ERROR;
- 
--- 
-1.8.0
-
-
+> ---
+>  drivers/mmc/core/mmc_ops.c                     |    1 +
+>  1 files changed, 1 insertions(+), 0 deletions(-)
+>
+> diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
+> --- a/drivers/mmc/core/mmc_ops.c
+> +++ b/drivers/mmc/core/mmc_ops.c
+> @@ -562,6 +562,7 @@ mmc_send_bus_test(struct mmc_card *card, struct mmc_host *host, u8 opcode,
+>
+>         data.sg = &sg;
+>         data.sg_len = 1;
+> +       mmc_set_data_timeout(&data,card);
+>         sg_init_one(&sg, data_buf, len);
+>         mmc_wait_for_req(host, &mrq);
+>         err = 0;
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
