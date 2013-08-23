@@ -1,64 +1,132 @@
-From: Scott Wood <scottwood@freescale.com>
-Subject: Re: [PATCH 2/4 V2] mmc: esdhc: workaround for dma err in the last
- system transaction
-Date: Fri, 23 Aug 2013 10:40:10 -0500
-Message-ID: <1377272410.20722.46.camel@snotra.buserror.net>
-References: <1374055891-20703-1-git-send-email-Haijun.Zhang@freescale.com>
- <99E897753B6F7048BD8CCDB4661D02E13DF52C@039-SN2MPN1-022.039d.mgd.msft.net>
- <521703AB.8030702@freescale.com>
+From: <dinguyen@altera.com>
+Subject: [PATCHv5 3/3] mmc: dw_mmc: Use phandle to get SDR timing values from sys-mgr
+Date: Fri, 23 Aug 2013 10:44:46 -0500
+Message-ID: <1377272686-13253-3-git-send-email-dinguyen@altera.com>
+References: <1377272686-13253-1-git-send-email-dinguyen@altera.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org>
-In-Reply-To: <521703AB.8030702@freescale.com>
-List-Unsubscribe: <https://lists.ozlabs.org/options/linuxppc-dev>,
- <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=unsubscribe>
-List-Archive: <http://lists.ozlabs.org/pipermail/linuxppc-dev/>
-List-Post: <mailto:linuxppc-dev@lists.ozlabs.org>
-List-Help: <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=help>
-List-Subscribe: <https://lists.ozlabs.org/listinfo/linuxppc-dev>,
- <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=subscribe>
-Errors-To: linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org
-Sender: "Linuxppc-dev"
- <linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org>
-To: Zhang Haijun <B42677@freescale.com>
-Cc: Wood Scott-B07421 <B07421@freescale.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "cbouatmailru@gmail.com" <cbouatmailru@gmail.com>, "cjb@laptop.org" <cjb@laptop.org>, "linuxppc-dev@lists.ozlabs.org" <linuxppc-dev@lists.ozlabs.org>, Xie Xiaobo-R63061 <X.Xie@freescale.com>
+Content-Type: text/plain
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from ch1ehsobe002.messaging.microsoft.com ([216.32.181.182]:48583
+	"EHLO ch1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1754151Ab3HWPom (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 23 Aug 2013 11:44:42 -0400
+In-Reply-To: <1377272686-13253-1-git-send-email-dinguyen@altera.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: dinh.linux@gmail.com
+Cc: Dinh Nguyen <dinguyen@altera.com>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, Rob Herring <rob.herring@calxeda.com>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Stephen Warren <swarren@wwwdotorg.org>, Ian Campbell <ian.campbell@citrix.com>, Chris Ball <cjb@laptop.org>, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 
-On Fri, 2013-08-23 at 14:39 +0800, Zhang Haijun wrote:
-> Hi, Anton and all
-> 
-> Is there any advice on these two patches ?
-> 
-> [PATCH 2/4 V2] mmc: esdhc: workaround for dma err in the last system 
-> transaction
-> [PATCH 3/4 V3] mmc: esdhc: Correct host version of T4240-R1.0-R2.0.
-> 
-> 
-> [PATCH 1/4 V4] powerpc/85xx: Add support for 85xx cpu type detection
-> This patch is Act-by Scott.
-> Patch 4/4 is split to four patches and Act-by Anton.
-> 
-> 
-> Thanks all.
-> 
-> 
-> 
-[snip]
-> >> +	if (!(((SVR_SOC_VER(svr) == SVR_T4240) && (SVR_REV(svr) == 0x10))
-> >> ||
-> >> +		((SVR_SOC_VER(svr) == SVR_B4860) && (SVR_REV(svr) == 0x10))
-> >> ||
-> >> +		((SVR_SOC_VER(svr) == SVR_P1010) && (SVR_REV(svr) == 0x10))
-> >> ||
-> >> +		((SVR_SOC_VER(svr) == SVR_P3041) && (SVR_REV(svr) <= 0x20))
-> >> ||
-> >> +		((SVR_SOC_VER(svr) == SVR_P2041) && (SVR_REV(svr) <= 0x20))
-> >> ||
-> >> +		((SVR_SOC_VER(svr) == SVR_P5040) && SVR_REV(svr) == 0x20)))
-> >> +		return;
+From: Dinh Nguyen <dinguyen@altera.com>
 
-You need to include variants here.  If P5040 is affected, then P5021 is
-affected.  If P2041 is affected, then P2040 is affected, etc.
+Update the driver to get the system manager node from a phandle. Also, the
+driver can get the correct clock value from the common clock API, thus the
+"altr,dw-mshc-ciu-div" binding is not needed at all.
 
--Scott
+Signed-off-by: Dinh Nguyen <dinguyen@altera.com>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: Seungwon Jeon <tgih.jun@samsung.com>
+Cc: Rob Herring <rob.herring@calxeda.com>
+Cc: Pawel Moll <pawel.moll@arm.com>
+Cc: Mark Rutland <mark.rutland@arm.com>
+Cc: Stephen Warren <swarren@wwwdotorg.org>
+Cc: Ian Campbell <ian.campbell@citrix.com>
+Cc: Chris Ball <cjb@laptop.org>
+Cc: devicetree@vger.kernel.org
+Cc: linux-mmc@vger.kernel.org
+CC: linux-arm-kernel@lists.infradead.org
+
+v2:
+- Use "altr,ciu-clk-offset" to get the correct CIU clock values to be
+  set in the system manager.
+---
+ drivers/mmc/host/dw_mmc-socfpga.c |   33 +++++++++++++++------------------
+ 1 file changed, 15 insertions(+), 18 deletions(-)
+
+diff --git a/drivers/mmc/host/dw_mmc-socfpga.c b/drivers/mmc/host/dw_mmc-socfpga.c
+index 14b5961..cfd67e1 100644
+--- a/drivers/mmc/host/dw_mmc-socfpga.c
++++ b/drivers/mmc/host/dw_mmc-socfpga.c
+@@ -24,21 +24,20 @@
+ #include "dw_mmc.h"
+ #include "dw_mmc-pltfm.h"
+ 
+-#define SYSMGR_SDMMCGRP_CTRL_OFFSET		0x108
+-#define DRV_CLK_PHASE_SHIFT_SEL_MASK	0x7
+-#define SYSMGR_SDMMC_CTRL_SET(smplsel, drvsel)          \
+-	((((smplsel) & 0x7) << 3) | (((drvsel) & 0x7) << 0))
++#define DRV_CLK_PHASE_SHIFT_SEL_MASK   0x7
+ 
+ /* SOCFPGA implementation specific driver private data */
+ struct dw_mci_socfpga_priv_data {
+-	u8	ciu_div; /* card interface unit divisor */
+ 	u32	hs_timing; /* bitmask for CIU clock phase shift */
+ 	struct regmap   *sysreg; /* regmap for system manager register */
++	/* Offset for the ciu clock setting register inside the system manager.*/
++	u32     ciu_clk_offset;
+ };
+ 
+ static int dw_mci_socfpga_priv_init(struct dw_mci *host)
+ {
+ 	struct dw_mci_socfpga_priv_data *priv;
++	struct device_node *np = host->dev->of_node;
+ 
+ 	priv = devm_kzalloc(host->dev, sizeof(*priv), GFP_KERNEL);
+ 	if (!priv) {
+@@ -46,9 +45,9 @@ static int dw_mci_socfpga_priv_init(struct dw_mci *host)
+ 		return -ENOMEM;
+ 	}
+ 
+-	priv->sysreg = syscon_regmap_lookup_by_compatible("altr,sys-mgr");
++	priv->sysreg = syscon_regmap_lookup_by_phandle(np, "altr,sysmgr");
+ 	if (IS_ERR(priv->sysreg)) {
+-		dev_err(host->dev, "regmap for altr,sys-mgr lookup failed.\n");
++		dev_err(host->dev, "No sysmgr phandle specified!\n");
+ 		return PTR_ERR(priv->sysreg);
+ 	}
+ 	host->priv = priv;
+@@ -61,11 +60,8 @@ static int dw_mci_socfpga_setup_clock(struct dw_mci *host)
+ 	struct dw_mci_socfpga_priv_data *priv = host->priv;
+ 
+ 	clk_disable_unprepare(host->ciu_clk);
+-	regmap_write(priv->sysreg, SYSMGR_SDMMCGRP_CTRL_OFFSET,
+-		priv->hs_timing);
++	regmap_write(priv->sysreg, priv->ciu_clk_offset, priv->hs_timing);
+ 	clk_prepare_enable(host->ciu_clk);
+-
+-	host->bus_hz /= (priv->ciu_div + 1);
+ 	return 0;
+ }
+ 
+@@ -82,20 +78,21 @@ static int dw_mci_socfpga_parse_dt(struct dw_mci *host)
+ 	struct dw_mci_socfpga_priv_data *priv = host->priv;
+ 	struct device_node *np = host->dev->of_node;
+ 	u32 timing[2];
+-	u32 div = 0;
++	u32 offset[3];
+ 	int ret;
+ 
+-	ret = of_property_read_u32(np, "altr,dw-mshc-ciu-div", &div);
+-	if (ret)
+-		dev_info(host->dev, "No dw-mshc-ciu-div specified, assuming 1");
+-	priv->ciu_div = div;
+-
+ 	ret = of_property_read_u32_array(np,
+ 			"altr,dw-mshc-sdr-timing", timing, 2);
+ 	if (ret)
+ 		return ret;
+ 
+-	priv->hs_timing = SYSMGR_SDMMC_CTRL_SET(timing[0], timing[1]);
++	ret = of_property_read_u32_array(np, "altr,ciu-clk-offset", offset, 3);
++	if (ret)
++		return ret;
++
++	priv->ciu_clk_offset = offset[0];
++	priv->hs_timing =
++		((((timing[0]) & 0x7) << offset[2]) | (((timing[1]) & 0x7) << offset[1]));
+ 	return 0;
+ }
+ 
+-- 
+1.7.9.5
+
+
