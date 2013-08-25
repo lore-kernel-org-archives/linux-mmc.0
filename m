@@ -1,48 +1,41 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH 1/2] dw_mmc-pci: get resources from a proper BAR
-Date: Sun, 25 Aug 2013 00:02:48 -0400
-Message-ID: <87k3jaquxj.fsf@octavius.laptop.org>
-References: <1375958698-10569-1-git-send-email-andriy.shevchenko@linux.intel.com>
+Subject: Re: [PATCH v4 5/7] mmc: SDHI: add DT compatibility strings for further SoCs
+Date: Sun, 25 Aug 2013 00:09:14 -0400
+Message-ID: <87fvtyqumt.fsf@octavius.laptop.org>
+References: <Pine.LNX.4.64.1307090940310.28812@axis700.grange>
+	<CANqRtoQY7hwEhN5XMXG5V234aXDFZ_kfei8ZQL+VMKaaxW=0DQ@mail.gmail.com>
+	<20130710011834.GA27240@verge.net.au> <20130717012247.GA2797@verge.net.au>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:41662 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755544Ab3HYEC4 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sun, 25 Aug 2013 00:02:56 -0400
-In-Reply-To: <1375958698-10569-1-git-send-email-andriy.shevchenko@linux.intel.com> (Andy
-	Shevchenko's message of "Thu, 8 Aug 2013 13:44:57 +0300")
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-sh-owner@vger.kernel.org>
+In-Reply-To: <20130717012247.GA2797@verge.net.au> (Simon Horman's message of
+	"Wed, 17 Jul 2013 10:22:50 +0900")
+Sender: linux-sh-owner@vger.kernel.org
+To: Simon Horman <horms@verge.net.au>
+Cc: Magnus Damm <magnus.damm@gmail.com>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, SH-Linux <linux-sh@vger.kernel.org>, linux-mmc@vger.kernel.org, Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
-Cc: linux-mmc@vger.kernel.org, Prabu Thangamuthu <Prabu.T@synopsys.com>, Seungwon Jeon <tgih.jun@samsung.com>
 
-Hi Andy,
+Hi Simon,
 
-On Thu, Aug 08 2013, Andy Shevchenko wrote:
-> There is a typo when the mapped space is from BAR 2, but BAR 0 is used instead.
-> This patch fixes the typo.
+On Tue, Jul 16 2013, Simon Horman wrote:
+>> Thanks, I have queued this up for v3.12 in the dt branch.
+>> It should appear in renesas-next-20130710
 >
-> Signed-off-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
-> ---
->  drivers/mmc/host/dw_mmc-pci.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
+> Reviewing this, I now think that it should got through the MMC tree.
+> Chris, could you consider the patch below?
 >
-> diff --git a/drivers/mmc/host/dw_mmc-pci.c b/drivers/mmc/host/dw_mmc-pci.c
-> index b456b0c..7d148d6 100644
-> --- a/drivers/mmc/host/dw_mmc-pci.c
-> +++ b/drivers/mmc/host/dw_mmc-pci.c
-> @@ -59,7 +59,7 @@ static int dw_mci_pci_probe(struct pci_dev *pdev,
->  	if (ret)
->  		return ret;
->  
-> -	host->regs = pcim_iomap_table(pdev)[0];
-> +	host->regs = pcim_iomap_table(pdev)[PCI_BAR_NO];
->  
->  	ret = dw_mci_probe(host);
->  	if (ret)
+> From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+>
+> mmc: SDHI: add DT compatibility strings for further SoCs
+>
+> Add further OF compatibility strings to the SDHI driver to be able to
+> precisely control driver's behaviour on each of them.
+>
+> Signed-off-by: Guennadi Liakhovetski <g.liakhovetski+renesas@gmail.com>
+> Acked-by: Magnus Damm <damm@opensource.se>
+> Acked-by: Simon Horman <horms@verge.net.au>
 
-Thanks, pushed to mmc-next for 3.12.
+Sorry for the delay -- this is in mmc-next for 3.12 now.  Thanks,
 
 - Chris.
 -- 
