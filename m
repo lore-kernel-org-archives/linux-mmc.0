@@ -1,66 +1,59 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] mmc: mmc_test: replace strict_strtol() with kstrtol_from_user()
-Date: Sat, 24 Aug 2013 23:19:27 -0400
-Message-ID: <87haeesbi8.fsf@octavius.laptop.org>
-References: <000c01ce844d$f75ba650$e612f2f0$@samsung.com>
+Subject: Re: [PATCH] mmc: fix null pointer use in mmc_blk_remove_req
+Date: Sat, 24 Aug 2013 23:22:46 -0400
+Message-ID: <87d2p2sbcp.fsf@octavius.laptop.org>
+References: <1374671868-606-1-git-send-email-franck.jullien@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:41218 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:43690 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755647Ab3HYDTc (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sat, 24 Aug 2013 23:19:32 -0400
-In-Reply-To: <000c01ce844d$f75ba650$e612f2f0$@samsung.com> (Jingoo Han's
-	message of "Fri, 19 Jul 2013 16:02:43 +0900")
+	id S1755700Ab3HYDWy (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Sat, 24 Aug 2013 23:22:54 -0400
+In-Reply-To: <1374671868-606-1-git-send-email-franck.jullien@gmail.com>
+	(franck jullien's message of "Wed, 24 Jul 2013 15:17:48 +0200")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jingoo Han <jg1.han@samsung.com>
+To: franck.jullien@gmail.com
 Cc: linux-mmc@vger.kernel.org
 
-Hi Jingoo,
+Hi Franck,
 
-On Fri, Jul 19 2013, Jingoo Han wrote:
-> The usage of strict_strtol() is not preferred, because
-> strict_strtol() is obsolete. Thus, kstrtol() should be
-> used.
+On Wed, Jul 24 2013, franck.jullien@gmail.com wrote:
+> From: Franck Jullien <franck.jullien@gmail.com>
 >
-> Also, both kstrtol() and copy_from_user() can be replaced
-> with kstrtol_from_user() to make the code simpler.
+> A previous commit (fdfa20c1631210d0) reordered the
+> shutdown sequence in mmc_blk_remove_req. However,
+> mmc_cleanup_queue is now called before we get the
+> card pointer and, sadly, mmc_cleanup_queue set
+> mq->card to NULL.
 >
-> Signed-off-by: Jingoo Han <jg1.han@samsung.com>
+> This patch moves the card pointer assignment before
+> mmc_cleanup_queue.
+>
+> Signed-off-by: Franck Jullien <franck.jullien@gmail.com>
 > ---
->  drivers/mmc/card/mmc_test.c |   14 ++++----------
->  1 file changed, 4 insertions(+), 10 deletions(-)
+>  drivers/mmc/card/block.c |    2 +-
+>  1 files changed, 1 insertions(+), 1 deletions(-)
 >
-> diff --git a/drivers/mmc/card/mmc_test.c b/drivers/mmc/card/mmc_test.c
-> index a69df52..0c0fc52 100644
-> --- a/drivers/mmc/card/mmc_test.c
-> +++ b/drivers/mmc/card/mmc_test.c
-> @@ -2849,18 +2849,12 @@ static ssize_t mtf_test_write(struct file *file, const char __user *buf,
->  	struct seq_file *sf = (struct seq_file *)file->private_data;
->  	struct mmc_card *card = (struct mmc_card *)sf->private;
->  	struct mmc_test_card *test;
-> -	char lbuf[12];
->  	long testcase;
-> +	int ret;
->  
-> -	if (count >= sizeof(lbuf))
-> -		return -EINVAL;
-> -
-> -	if (copy_from_user(lbuf, buf, count))
-> -		return -EFAULT;
-> -	lbuf[count] = '\0';
-> -
-> -	if (strict_strtol(lbuf, 10, &testcase))
-> -		return -EINVAL;
-> +	ret = kstrtol_from_user(buf, count, 10, &testcase);
-> +	if (ret)
-> +		return ret;
->  
->  	test = kzalloc(sizeof(struct mmc_test_card), GFP_KERNEL);
->  	if (!test)
+> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+> index cd0b7f4..f4a0bea 100644
+> --- a/drivers/mmc/card/block.c
+> +++ b/drivers/mmc/card/block.c
+> @@ -2191,10 +2191,10 @@ static void mmc_blk_remove_req(struct mmc_blk_data *md)
+>  		 * is freeing the queue that stops new requests
+>  		 * from being accepted.
+>  		 */
+> +		card = md->queue.card;
+>  		mmc_cleanup_queue(&md->queue);
+>  		if (md->flags & MMC_BLK_PACKED_CMD)
+>  			mmc_packed_clean(&md->queue);
+> -		card = md->queue.card;
+>  		if (md->disk->flags & GENHD_FL_UP) {
+>  			device_remove_file(disk_to_dev(md->disk), &md->force_ro);
+>  			if ((md->area_type & MMC_BLK_DATA_AREA_BOOT) &&
 
-Thanks, pushed to mmc-next for 3.12.
+Thanks for the patch, pushed to mmc-next for 3.12.
 
 - Chris.
 -- 
