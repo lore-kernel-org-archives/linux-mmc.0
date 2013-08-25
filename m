@@ -1,57 +1,49 @@
-From: Daniel J Blueman <daniel@quora.org>
-Subject: BCM57765: timeout waiting for hardware interrupt
-Date: Sat, 24 Aug 2013 14:13:38 +0800
-Message-ID: <CAMVG2su7av_Aym+wh-YpkMQN__u+Niya-QXsLX_xor2rhqBuew@mail.gmail.com>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH 1/1] mmc: sdhci-bcm2835: Staticize bcm2835_sdhci_get_min_clock
+Date: Sat, 24 Aug 2013 21:38:54 -0400
+Message-ID: <87fvtyv9ap.fsf@octavius.laptop.org>
+References: <1372228021-28895-1-git-send-email-sachin.kamat@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-oa0-f41.google.com ([209.85.219.41]:41022 "EHLO
-	mail-oa0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755143Ab3HXGNj (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 24 Aug 2013 02:13:39 -0400
-Received: by mail-oa0-f41.google.com with SMTP id j6so1706378oag.14
-        for <linux-mmc@vger.kernel.org>; Fri, 23 Aug 2013 23:13:39 -0700 (PDT)
+Received: from void.printf.net ([89.145.121.20]:37984 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754537Ab3HYBjE (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Sat, 24 Aug 2013 21:39:04 -0400
+In-Reply-To: <1372228021-28895-1-git-send-email-sachin.kamat@linaro.org>
+	(Sachin Kamat's message of "Wed, 26 Jun 2013 11:57:01 +0530")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel <linux-kernel@vger.kernel.org>, Chris Ball <cjb@laptop.org>
+To: Sachin Kamat <sachin.kamat@linaro.org>
+Cc: linux-mmc@vger.kernel.org, swarren@wwwdotorg.org
 
-Chris et al,
+Hi Sachin,
 
-with 3.11-rc6 and the Broadcom BCM57765 card reader [1] in my Macbook
-Retina, interrupts are not seen during card insertion:
+On Wed, Jun 26 2013, Sachin Kamat wrote:
+> 'bcm2835_sdhci_get_min_clock' is used only in this file.
+> Make it static.
+>
+> Signed-off-by: Sachin Kamat <sachin.kamat@linaro.org>
+> ---
+>  drivers/mmc/host/sdhci-bcm2835.c |    2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/host/sdhci-bcm2835.c b/drivers/mmc/host/sdhci-bcm2835.c
+> index 0584a1c..36fa2df 100644
+> --- a/drivers/mmc/host/sdhci-bcm2835.c
+> +++ b/drivers/mmc/host/sdhci-bcm2835.c
+> @@ -119,7 +119,7 @@ static u8 bcm2835_sdhci_readb(struct sdhci_host *host, int reg)
+>  	return byte;
+>  }
+>  
+> -unsigned int bcm2835_sdhci_get_min_clock(struct sdhci_host *host)
+> +static unsigned int bcm2835_sdhci_get_min_clock(struct sdhci_host *host)
+>  {
+>  	return MIN_FREQ;
+>  }
 
-sdhci: Secure Digital Host Controller Interface driver
-sdhci: Copyright(c) Pierre Ossman
-sdhci-pci 0000:03:00.1: SDHCI controller found [14e4:16bc] (rev 10)
-mmc0: no vqmmc regulator found
-mmc0: no vmmc regulator found
-mmc0: SDHCI controller on PCI [0000:03:00.1] using ADMA
-[...]
-mmc0: Timeout waiting for hardware interrupt.
+Thanks, pushed to mmc-next for 3.12.
 
-However /proc/interrupts shows 4 interrupts occurring at insertion time:
-
- 17:          6          0          0          0          0          0
-         0          0   IO-APIC-fasteoi   mmc0
-
-Debugging shows the interrupt handler inspecting the state of the
-hardware and finding no work to do; are the missing regulators
-unexpected?
-
---- [1]
-
-$ sudo lspci -s 03:00.1 -v
-03:00.1 SD Host controller: Broadcom Corporation NetXtreme BCM57765
-Memory Card Reader (rev 10) (prog-if 01)
-    Subsystem: Broadcom Corporation Device 96bc
-    Flags: bus master, fast devsel, latency 0, IRQ 17
-    Memory at c1820000 (64-bit, prefetchable) [size=64K]
-    Capabilities: [48] Power Management version 3
-    Capabilities: [58] MSI: Enable- Count=1/1 Maskable- 64bit+
-    Capabilities: [ac] Express Endpoint, MSI 00
-    Capabilities: [100] Advanced Error Reporting
-    Capabilities: [150] Power Budgeting <?>
-    Capabilities: [160] Virtual Channel
-    Kernel driver in use: sdhci-pci
+- Chris.
 -- 
-Daniel J Blueman
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
