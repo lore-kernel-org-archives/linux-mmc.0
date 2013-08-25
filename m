@@ -1,41 +1,55 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH v4 5/7] mmc: SDHI: add DT compatibility strings for further SoCs
-Date: Sun, 25 Aug 2013 00:09:14 -0400
-Message-ID: <87fvtyqumt.fsf@octavius.laptop.org>
-References: <Pine.LNX.4.64.1307090940310.28812@axis700.grange>
-	<CANqRtoQY7hwEhN5XMXG5V234aXDFZ_kfei8ZQL+VMKaaxW=0DQ@mail.gmail.com>
-	<20130710011834.GA27240@verge.net.au> <20130717012247.GA2797@verge.net.au>
+Subject: Re: [PATCH] mmc: sh_mmcif: move header include from header into .c
+Date: Sun, 25 Aug 2013 00:09:43 -0400
+Message-ID: <87bo4mqum0.fsf@octavius.laptop.org>
+References: <Pine.LNX.4.64.1308021445040.28012@axis700.grange>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <20130717012247.GA2797@verge.net.au> (Simon Horman's message of
-	"Wed, 17 Jul 2013 10:22:50 +0900")
+In-Reply-To: <Pine.LNX.4.64.1308021445040.28012@axis700.grange> (Guennadi
+	Liakhovetski's message of "Fri, 2 Aug 2013 14:48:02 +0200 (CEST)")
 Sender: linux-sh-owner@vger.kernel.org
-To: Simon Horman <horms@verge.net.au>
-Cc: Magnus Damm <magnus.damm@gmail.com>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, SH-Linux <linux-sh@vger.kernel.org>, linux-mmc@vger.kernel.org, Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
+To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Cc: linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Simon,
+Hi Guennadi,
 
-On Tue, Jul 16 2013, Simon Horman wrote:
->> Thanks, I have queued this up for v3.12 in the dt branch.
->> It should appear in renesas-next-20130710
->
-> Reviewing this, I now think that it should got through the MMC tree.
-> Chris, could you consider the patch below?
->
-> From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
->
-> mmc: SDHI: add DT compatibility strings for further SoCs
->
-> Add further OF compatibility strings to the SDHI driver to be able to
-> precisely control driver's behaviour on each of them.
+On Fri, Aug 02 2013, Guennadi Liakhovetski wrote:
+> sh_dma.h isn't needed in sh_mmcif.h, move it into sh_mmcif.c.
 >
 > Signed-off-by: Guennadi Liakhovetski <g.liakhovetski+renesas@gmail.com>
-> Acked-by: Magnus Damm <damm@opensource.se>
-> Acked-by: Simon Horman <horms@verge.net.au>
+> ---
+>  drivers/mmc/host/sh_mmcif.c  |    1 +
+>  include/linux/mmc/sh_mmcif.h |    1 -
+>  2 files changed, 1 insertions(+), 1 deletions(-)
+>
+> diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
+> index 6706b5e..220ee30 100644
+> --- a/drivers/mmc/host/sh_mmcif.c
+> +++ b/drivers/mmc/host/sh_mmcif.c
+> @@ -61,6 +61,7 @@
+>  #include <linux/platform_device.h>
+>  #include <linux/pm_qos.h>
+>  #include <linux/pm_runtime.h>
+> +#include <linux/sh_dma.h>
+>  #include <linux/spinlock.h>
+>  #include <linux/module.h>
+>  
+> diff --git a/include/linux/mmc/sh_mmcif.h b/include/linux/mmc/sh_mmcif.h
+> index e7d5dd6..5fcd3eb 100644
+> --- a/include/linux/mmc/sh_mmcif.h
+> +++ b/include/linux/mmc/sh_mmcif.h
+> @@ -16,7 +16,6 @@
+>  
+>  #include <linux/io.h>
+>  #include <linux/platform_device.h>
+> -#include <linux/sh_dma.h>
+>  
+>  /*
+>   * MMCIF : CE_CLK_CTRL [19:16]
 
-Sorry for the delay -- this is in mmc-next for 3.12 now.  Thanks,
+Thanks, pushed to mmc-next for 3.12.
 
 - Chris.
 -- 
