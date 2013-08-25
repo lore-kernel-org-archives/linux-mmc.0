@@ -1,46 +1,42 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] mmc: dw_mmc-pltfm: include 'dw_mmc-pltfm.h'
-Date: Sat, 24 Aug 2013 23:41:27 -0400
-Message-ID: <87sixyqvx4.fsf@octavius.laptop.org>
-References: <000e01ce9247$d6063f30$8212bd90$@samsung.com>
-	<001601ce9504$c4da6d20$4e8f4760$%jun@samsung.com>
+Subject: Re: [PATCH v3 00/14] Remove platform callbacks from mmc_spi, sh_mmcif and sh_mobile_sdhi drivers
+Date: Sat, 24 Aug 2013 23:58:14 -0400
+Message-ID: <87ob8mqv55.fsf@octavius.laptop.org>
+References: <1375958324-29683-1-git-send-email-laurent.pinchart+renesas@ideasonboard.com>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:40345 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755400Ab3HYDld (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sat, 24 Aug 2013 23:41:33 -0400
-In-Reply-To: <001601ce9504$c4da6d20$4e8f4760$%jun@samsung.com> (Seungwon
-	Jeon's message of "Fri, 09 Aug 2013 22:31:35 +0900")
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-sh-owner@vger.kernel.org>
+In-Reply-To: <1375958324-29683-1-git-send-email-laurent.pinchart+renesas@ideasonboard.com>
+	(Laurent Pinchart's message of "Thu, 8 Aug 2013 12:38:30 +0200")
+Sender: linux-sh-owner@vger.kernel.org
+To: Laurent Pinchart <laurent.pinchart+renesas@ideasonboard.com>
+Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-sh@vger.kernel.org, linux-spi@vger.kernel.org, Hartley Sweeten <hsweeten@visionengravers.com>, Ryan Mallon <rmallon@gmail.com>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Ian Molton <ian@mnementh.co.uk>, Arnd Bergmann <arnd@arndb.de>, Olof Johansson <olof@lixom.net>
 List-Id: linux-mmc@vger.kernel.org
-To: Seungwon Jeon <tgih.jun@samsung.com>
-Cc: 'Jingoo Han' <jg1.han@samsung.com>, linux-mmc@vger.kernel.org, 'Jaehoon Chung' <jh80.chung@samsung.com>, 'Dan Carpenter' <dan.carpenter@oracle.com>, 'Dinh Nguyen' <dinguyen@altera.com>
 
-Hi Seungwon,
+Hi Laurent,
 
-On Fri, Aug 09 2013, Seungwon Jeon wrote:
-> On Tue, August 06, 2013,Jingoo Han wrote:
->> Include 'dw_mmc-pltfm.h' header file in order to fix
->> the following sparse warnings:
->> 
->> drivers/mmc/host/dw_mmc-pltfm.c:36:5: warning: symbol
->> dw_mci_pltfm_register' was not declared. Should
->> it be static?
->> drivers/mmc/host/dw_mmc-pltfm.c:94:1: warning: symbol
->> dw_mci_pltfm_pmops' was not declared. Should it
->> be static?
->> drivers/mmc/host/dw_mmc-pltfm.c:118:5: warning: symbol
->> dw_mci_pltfm_remove' was not declared. Should
->> it be static?
->> 
->> Suggested-by: Dan Carpenter <dan.carpenter@oracle.com>
->> Signed-off-by: Jingoo Han <jg1.han@samsung.com>
+On Thu, Aug 08 2013, Laurent Pinchart wrote:
+> This patch set replaces callbacks to board code with regulators and GPIOs in
+> the mmc_spi, sh_mmcif and sh_mobile_sdhi MMC drivers.
 >
-> Acked-by: Seungwon Jeon <tgih.jun@samsung.com>
+> Most of the required infrastructure is in place already on the drivers side,
+> except for CD debouncing support in the MMC core and CD/RO GPIOs support in
+> the mmc_spi driver. The series thus starts with patches 01/14 and 02/14 that
+> add those features to the MMC core and mmc_spi driver.
+>
+> Patches 03/14 to 07/14 remove the board callbacks from the ecovec24 and
+> vision_ep9307 boards. The code has been compile-tested only as I don't have
+> access to those boards.
+>
+> Patches 08/14 to 14/14 then proceed to remove the callbacks from the drivers
+> themselves and from the platform data structures.
 
-Thanks, pushed to mmc-next for 3.12.
+arch/arm/mach-shmobile/board-ag5evm.c has been removed from
+linux-next, so I've dropped patch 7 ("ARM: shmobile: ag5evm: Remove
+SDHI .set_pwr() callback") but taken all of the other patches into
+mmc-next for 3.12.
+
+Thanks!
 
 - Chris.
 -- 
