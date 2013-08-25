@@ -1,65 +1,57 @@
-From: boris brezillon <b.brezillon@overkiz.com>
-Subject: Re: [PATCH v4 2/5] mmc: atmel-mci: prepare clk before calling enable
-Date: Sun, 25 Aug 2013 07:35:18 +0200
-Message-ID: <52199796.4080800@overkiz.com>
-References: <1374132753-15206-1-git-send-email-b.brezillon@overkiz.com> <1374133132-17556-1-git-send-email-b.brezillon@overkiz.com> <87li3qsbk9.fsf@octavius.laptop.org>
+From: Balaji T K <balajitk@ti.com>
+Subject: Re: [PATCH] mmc: omap_hsmmc: clear status flags before starting a
+ new command
+Date: Mon, 26 Aug 2013 01:09:40 +0530
+Message-ID: <521A5D7C.4050208@ti.com>
+References: <51CE7DC8.2070905@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <87li3qsbk9.fsf@octavius.laptop.org>
+In-Reply-To: <51CE7DC8.2070905@gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: Nicolas Ferre <nicolas.ferre@atmel.com>, Ludovic Desroches <ludovic.desroches@atmel.com>, Jean-Christophe Plagniol-Villard <plagnioj@jcrosoft.com>, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
+To: Francesco Lavra <francescolavra.fl@gmail.com>
+Cc: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-Hello Chris,
-
-On 25/08/2013 05:18, Chris Ball wrote:
-> Hi,
+On Saturday 29 June 2013 11:55 AM, Francesco Lavra wrote:
+> Commit 1f6b9fa40e76fffaaa0b3bd6a0bfdcf1cdc06efa consolidated writes to
+> the STAT register in one location, moving them from omap_hsmmc_do_irq()
+> to omap_hsmmc_irq(). This move has the unwanted side effect that the
+> controller status flags are potentially cleared after a new command has
+> been started as a consequence of reading the previous status flags.
+> This means that if the new command changes the status flags before the
+> IRQ routine returns, those flags may be cleared without handling the
+> event which asserted them, and thus missing the event.
+> Move the writing of the STAT register back in omap_hsmmc_do_irq(),
+> before handling the status flags which generated the interrupt.
 >
-> On Thu, Jul 18 2013, Boris BREZILLON wrote:
->> Replace clk_enable/disable with clk_prepare_enable/disable_unprepare to
->> avoid common clk framework warnings.
->>
->> Signed-off-by: Boris BREZILLON <b.brezillon@overkiz.com>
->> Acked-by: Ludovic Desroches <ludovic.desroches@atmel.com>
-> Okay, pushed to mmc-next for 3.12.
+> Signed-off-by: Francesco Lavra <francescolavra.fl@gmail.com>
 
-Thanks.
+Reviewed and Tested-by: Balaji T K <balajitk@ti.com>
 
+> ---
+>   drivers/mmc/host/omap_hsmmc.c |    2 +-
+>   1 files changed, 1 insertions(+), 1 deletions(-)
 >
-> Boris, you got feedback from Thomas Petazzoni and Russell King, but
-> you didn't CC either of them on the patch v4
-
-I didn't knew I had to add the reviewers of a patch in the cc list
-of the future versions. I'll do it next time.
-
-> , and you didn't write a
-> changelog explaining the differences between patches v3 and v4 --
-> please do both of those next time.
-
-The changelog is in the cover letter ("Changes since v3").
-But I didn't send you this cover letter.
-
-> Also, it looks like the Ack from Ludovic happened away from the MMC
-> list, since I don't see a message from Ludovic on the thread here.
-> It would be better if the Ack happened somewhere I can see it.
-
-The 'Acked-by: Ludovic Desroches <ludovic.desroches@atmel.com>' was added
-in the 2nd version of this patch series.
-But I don't know if I should have kept it in this version since this 
-patch has evolved.
-
-
-Thanks for these feebacks, I'm still learning the good practices of the 
-kernel
-submission process.
-I'll check these points next time.
-
-Best Regards,
-
-Boris
-> Thanks,
+> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+> index eccedc7..301cb7e 100644
+> --- a/drivers/mmc/host/omap_hsmmc.c
+> +++ b/drivers/mmc/host/omap_hsmmc.c
+> @@ -1041,6 +1041,7 @@ static void omap_hsmmc_do_irq(struct omap_hsmmc_host *host, int status)
+>   		}
+>   	}
 >
-> - Chris.
+> +	OMAP_HSMMC_WRITE(host->base, STAT, status);
+>   	if (end_cmd || ((status & CC_EN) && host->cmd))
+>   		omap_hsmmc_cmd_done(host, host->cmd);
+>   	if ((end_trans || (status & TC_EN)) && host->mrq)
+> @@ -1060,7 +1061,6 @@ static irqreturn_t omap_hsmmc_irq(int irq, void *dev_id)
+>   		omap_hsmmc_do_irq(host, status);
+>
+>   		/* Flush posted write */
+> -		OMAP_HSMMC_WRITE(host->base, STAT, status);
+>   		status = OMAP_HSMMC_READ(host->base, STAT);
+>   	}
+>
+>
