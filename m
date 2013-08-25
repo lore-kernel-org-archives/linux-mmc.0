@@ -1,62 +1,40 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] mmc: omap_hsmmc: clear status flags before starting a new command
-Date: Sat, 24 Aug 2013 22:02:24 -0400
-Message-ID: <87vc2uttn3.fsf@octavius.laptop.org>
-References: <51CE7DC8.2070905@gmail.com>
+Subject: Re: [PATCH 1/2] mmc: mxs-mmc: Use devm_clk_get()
+Date: Sat, 24 Aug 2013 22:07:34 -0400
+Message-ID: <87r4ditteh.fsf@octavius.laptop.org>
+References: <1372881758-23502-1-git-send-email-festevam@gmail.com>
+	<20130704012750.GA14617@S2101-09.ap.freescale.net>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:45506 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:51982 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754537Ab3HYCC3 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sat, 24 Aug 2013 22:02:29 -0400
-In-Reply-To: <51CE7DC8.2070905@gmail.com> (Francesco Lavra's message of "Sat,
-	29 Jun 2013 08:25:12 +0200")
+	id S1754161Ab3HYCHi (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Sat, 24 Aug 2013 22:07:38 -0400
+In-Reply-To: <20130704012750.GA14617@S2101-09.ap.freescale.net> (Shawn Guo's
+	message of "Thu, 4 Jul 2013 09:27:52 +0800")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Francesco Lavra <francescolavra.fl@gmail.com>
-Cc: Balaji T K <balajitk@ti.com>, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Shawn Guo <shawn.guo@linaro.org>
+Cc: Fabio Estevam <festevam@gmail.com>, kernel@pengutronix.de, linux-mmc@vger.kernel.org
 
-Hi Balaji,
+Hi Fabio,
 
-On Sat, Jun 29 2013, Francesco Lavra wrote:
-> Commit 1f6b9fa40e76fffaaa0b3bd6a0bfdcf1cdc06efa consolidated writes to 
-> the STAT register in one location, moving them from omap_hsmmc_do_irq() 
-> to omap_hsmmc_irq(). This move has the unwanted side effect that the 
-> controller status flags are potentially cleared after a new command has 
-> been started as a consequence of reading the previous status flags. 
-> This means that if the new command changes the status flags before the 
-> IRQ routine returns, those flags may be cleared without handling the 
-> event which asserted them, and thus missing the event.
-> Move the writing of the STAT register back in omap_hsmmc_do_irq(), 
-> before handling the status flags which generated the interrupt.
+On Wed, Jul 03 2013, Shawn Guo wrote:
+> On Wed, Jul 03, 2013 at 05:02:37PM -0300, Fabio Estevam wrote:
+>> Using devm_clk_get() allows us to remove the clk_put() calls, so let's use it
+>> to simplify the code.
+>> 
+>> Rename the 'out_clk_put' label to 'out_clk_disable' now that clk_put
+>> is removed.
+>> 
+>> Signed-off-by: Fabio Estevam <festevam@gmail.com>
 >
-> Signed-off-by: Francesco Lavra <francescolavra.fl@gmail.com>
-> ---
->  drivers/mmc/host/omap_hsmmc.c |    2 +-
->  1 files changed, 1 insertions(+), 1 deletions(-)
+> Both,
 >
-> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-> index eccedc7..301cb7e 100644
-> --- a/drivers/mmc/host/omap_hsmmc.c
-> +++ b/drivers/mmc/host/omap_hsmmc.c
-> @@ -1041,6 +1041,7 @@ static void omap_hsmmc_do_irq(struct omap_hsmmc_host *host, int status)
->  		}
->  	}
->  
-> +	OMAP_HSMMC_WRITE(host->base, STAT, status);
->  	if (end_cmd || ((status & CC_EN) && host->cmd))
->  		omap_hsmmc_cmd_done(host, host->cmd);
->  	if ((end_trans || (status & TC_EN)) && host->mrq)
-> @@ -1060,7 +1061,6 @@ static irqreturn_t omap_hsmmc_irq(int irq, void *dev_id)
->  		omap_hsmmc_do_irq(host, status);
->  
->  		/* Flush posted write */
-> -		OMAP_HSMMC_WRITE(host->base, STAT, status);
->  		status = OMAP_HSMMC_READ(host->base, STAT);
->  	}
+> Acked-by: Shawn Guo <shawn.guo@linaro.org>
 
-Please could you review this patch?  Thanks,
+Thanks, both pushed to mmc-next for 3.12.
 
 - Chris.
 -- 
