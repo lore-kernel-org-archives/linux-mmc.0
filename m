@@ -1,66 +1,76 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] mmc/core: free mmc_card when cmd 3,9,7 got failed in mmc_sd_init_card
-Date: Sat, 24 Aug 2013 22:53:50 -0400
-Message-ID: <87wqnascox.fsf@octavius.laptop.org>
-References: <1374042070-32765-1-git-send-email-wei_wang@realsil.com.cn>
+Subject: Re: [PATCH] mmc: sd: fix the maximum au_size for SD3.0
+Date: Sat, 24 Aug 2013 23:08:34 -0400
+Message-ID: <87sixysc0d.fsf@octavius.laptop.org>
+References: <51E77061.2030308@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:41045 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:46556 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754933Ab3HYCx6 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sat, 24 Aug 2013 22:53:58 -0400
-In-Reply-To: <1374042070-32765-1-git-send-email-wei_wang@realsil.com.cn> (wei
-	wang's message of "Wed, 17 Jul 2013 14:21:10 +0800")
+	id S1755150Ab3HYDIn (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Sat, 24 Aug 2013 23:08:43 -0400
+In-Reply-To: <51E77061.2030308@samsung.com> (Jaehoon Chung's message of "Thu,
+	18 Jul 2013 13:34:41 +0900")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: wei_wang@realsil.com.cn
-Cc: devel@linuxdriverproject.org, linux-mmc@vger.kernel.org
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Kyungmin Park <kyungmin.park@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, Philip Rakity <prakity@marvell.com>, Johan Rudholm <jrudholm@gmail.com>, Aaron Lu <aaron.lu@amd.com>
 
-Hi Wei,
+Hi Jaehoon,
 
-On Wed, Jul 17 2013, wei_wang@realsil.com.cn wrote:
-> From: Wei WANG <wei_wang@realsil.com.cn>
+Pushed to mmc-next for 3.12 with the following minor change, let me
+know if you disagree:
+
+On Thu, Jul 18 2013, Jaehoon Chung wrote:
+> Since SD Physical Layer specification V3.0, AU_SIZE is supported up to 0xf.
+> So If SD-card is supported v3.0, then max_au should be 0xf.
 >
-> In function mmc_sd_init_card, if command 3/9/7 got failed, mmc_card
-> allocated just before won't be freed. This would cause memory leak.
->
-> Signed-off-by: Wei WANG <wei_wang@realsil.com.cn>
+> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+> Signed-off-by: Kyungmin Park <kyungmin.park@samsung.com>
 > ---
->  drivers/mmc/core/sd.c |    6 +++---
->  1 file changed, 3 insertions(+), 3 deletions(-)
+>  drivers/mmc/core/sd.c |   10 ++++++++--
+>  1 file changed, 8 insertions(+), 2 deletions(-)
 >
 > diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
-> index 176d125..1240a85 100644
+> index 176d125..aa5013f 100644
 > --- a/drivers/mmc/core/sd.c
 > +++ b/drivers/mmc/core/sd.c
-> @@ -942,13 +942,13 @@ static int mmc_sd_init_card(struct mmc_host *host, u32 ocr,
->  	if (!mmc_host_is_spi(host)) {
->  		err = mmc_send_relative_addr(host, &card->rca);
->  		if (err)
-> -			return err;
-> +			goto free_card;
->  	}
+> @@ -215,7 +215,7 @@ static int mmc_decode_scr(struct mmc_card *card)
+>  static int mmc_read_ssr(struct mmc_card *card)
+>  {
+>  	unsigned int au, es, et, eo;
+> -	int err, i;
+> +	int err, i, max_au;
+>  	u32 *ssr;
 >  
->  	if (!oldcard) {
->  		err = mmc_sd_get_csd(host, card);
->  		if (err)
-> -			return err;
-> +			goto free_card;
+>  	if (!(card->csd.cmdclass & CCC_APP_SPEC)) {
+> @@ -239,12 +239,18 @@ static int mmc_read_ssr(struct mmc_card *card)
+>  	for (i = 0; i < 16; i++)
+>  		ssr[i] = be32_to_cpu(ssr[i]);
 >  
->  		mmc_decode_cid(card);
->  	}
-> @@ -959,7 +959,7 @@ static int mmc_sd_init_card(struct mmc_host *host, u32 ocr,
->  	if (!mmc_host_is_spi(host)) {
->  		err = mmc_select_card(card);
->  		if (err)
-> -			return err;
-> +			goto free_card;
->  	}
->  
->  	err = mmc_sd_setup_card(host, card, oldcard != NULL);
+> +	/* The value of maximum au_size is supported 0xF since SD3.0 */
+> +	if (card->scr.sda_spec3)
+> +		max_au = 0xf;
+> +	else
+> +		max_au = 9;
+> +
 
-Thanks, pushed to mmc-next for 3.12.
+/* SD3.0 increases max AU size to 64MB (0xF) from 4MB (0x9) */
+max_au = card->scr.sda_spec3 ? 0xF : 0x9;
+
+>  	/*
+>  	 * UNSTUFF_BITS only works with four u32s so we have to offset the
+>  	 * bitfield positions accordingly.
+>  	 */
+>  	au = UNSTUFF_BITS(ssr, 428 - 384, 4);
+> -	if (au > 0 && au <= 9) {
+> +	if (au > 0 && au <= max_au) {
+>  		card->ssr.au = 1 << (au + 4);
+>  		es = UNSTUFF_BITS(ssr, 408 - 384, 16);
+>  		et = UNSTUFF_BITS(ssr, 402 - 384, 6);
+
+Thanks,
 
 - Chris.
 -- 
