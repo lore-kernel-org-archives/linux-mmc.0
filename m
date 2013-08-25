@@ -1,48 +1,68 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH 1/1] mmc: vub300: Staticize vub300_init_card
-Date: Sat, 24 Aug 2013 21:40:11 -0400
-Message-ID: <87bo4mv98k.fsf@octavius.laptop.org>
-References: <1372228350-6375-1-git-send-email-sachin.kamat@linaro.org>
+Subject: Re: [PATCH 6/8] sdhci: Turn host->lock into a mutex
+Date: Sat, 24 Aug 2013 21:58:30 -0400
+Message-ID: <874naev8e1.fsf@octavius.laptop.org>
+References: <1373384652-21958-1-git-send-email-jeremie.samuel.ext@parrot.com>
+	<1373384652-21958-7-git-send-email-jeremie.samuel.ext@parrot.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:38091 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:39054 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754920Ab3HYBkP (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sat, 24 Aug 2013 21:40:15 -0400
-In-Reply-To: <1372228350-6375-1-git-send-email-sachin.kamat@linaro.org>
-	(Sachin Kamat's message of "Wed, 26 Jun 2013 12:02:30 +0530")
+	id S1754157Ab3HYB6g (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Sat, 24 Aug 2013 21:58:36 -0400
+In-Reply-To: <1373384652-21958-7-git-send-email-jeremie.samuel.ext@parrot.com>
+	(Jeremie Samuel's message of "Tue, 9 Jul 2013 17:44:10 +0200")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Sachin Kamat <sachin.kamat@linaro.org>
-Cc: linux-mmc@vger.kernel.org, tony.olech@elandigitalsystems.com
+To: Jeremie Samuel <jeremie.samuel.ext@parrot.com>
+Cc: linux-mmc@vger.kernel.org, matthieu.castet@parrot.com, gregor.boirie@parrot.com, Anton Vorontsov <avorontsov@mvista.com>
 
-Hi Sachin,
+Hi Jeremie, I'm sorry for a very late review.
 
-On Wed, Jun 26 2013, Sachin Kamat wrote:
-> 'vub300_init_card' is used only in this file. Make it
-> static.
->
-> Signed-off-by: Sachin Kamat <sachin.kamat@linaro.org>
-> ---
->  drivers/mmc/host/vub300.c |    2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/host/vub300.c b/drivers/mmc/host/vub300.c
-> index cb9f361..e9028ad 100644
-> --- a/drivers/mmc/host/vub300.c
-> +++ b/drivers/mmc/host/vub300.c
-> @@ -2079,7 +2079,7 @@ static void vub300_enable_sdio_irq(struct mmc_host *mmc, int enable)
->  	kref_put(&vub300->kref, vub300_delete);
->  }
+On Tue, Jul 09 2013, Jeremie Samuel wrote:
+> @@ -118,7 +119,7 @@ struct sdhci_host {
+>  	enum led_brightness brightness;
+>  #endif
 >  
-> -void vub300_init_card(struct mmc_host *mmc, struct mmc_card *card)
-> +static void vub300_init_card(struct mmc_host *mmc, struct mmc_card *card)
->  {				/* NOT irq */
->  	struct vub300_mmc_host *vub300 = mmc_priv(mmc);
->  	dev_info(&vub300->udev->dev, "NO host QUIRKS for this card\n");
+> -	spinlock_t lock;	/* Mutex */
+> +	struct mutex lock;	/* Mutex */
+>  
+>  	int flags;		/* Host attributes */
+>  #define SDHCI_USE_SDMA		(1<<0)	/* Host is SDMA capable */
 
-Thanks, pushed to mmc-next for 3.12.
+I think you need to modify many of the drivers/mmc/host/sdhci-*
+drivers too -- for example:
+
+sdhci-pxav3.c:
+
+static int sdhci_pxav3_runtime_suspend(struct device *dev)
+{
+        struct sdhci_host *host = dev_get_drvdata(dev);
+        struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+        unsigned long flags;
+
+        if (pltfm_host->clk) {
+                spin_lock_irqsave(&host->lock, flags);
+[...]
+
+
+sdhci-s3c.c:
+
+static void sdhci_s3c_notify_change(struct platform_device *dev, int state)
+{
+        struct sdhci_host *host = platform_get_drvdata(dev);
+#ifdef CONFIG_PM_RUNTIME
+        struct sdhci_s3c *sc = sdhci_priv(host);
+#endif
+        unsigned long flags;
+
+        if (host) {
+                spin_lock_irqsave(&host->lock, flags);
+[...]
+
+
+Thanks,
 
 - Chris.
 -- 
