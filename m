@@ -1,32 +1,47 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH 0/6] mmc: sh_mmcif: revision-specific CCS and CLK_CTRL2 handling
-Date: Sun, 25 Aug 2013 00:12:00 -0400
-Message-ID: <8738pyqui7.fsf@octavius.laptop.org>
-References: <1373484077-10460-1-git-send-email-g.liakhovetski@gmx.de>
+Subject: Re: my outstanding patches for 3.12
+Date: Sun, 25 Aug 2013 00:13:08 -0400
+Message-ID: <87y57qpfvv.fsf@octavius.laptop.org>
+References: <Pine.LNX.4.64.1308091507450.937@axis700.grange>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <1373484077-10460-1-git-send-email-g.liakhovetski@gmx.de>
-	(Guennadi Liakhovetski's message of "Wed, 10 Jul 2013 21:21:11 +0200")
-Sender: linux-sh-owner@vger.kernel.org
-To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Cc: linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>, Simon Horman <horms@verge.net.au>, Nobuyuki HIRAI <nobuyuki.hirai.xe@renesas.com>, Guennadi Liakhovetski <g.liakhovetski+renesas@gmail.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from void.printf.net ([89.145.121.20]:37809 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754088Ab3HYENM (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Sun, 25 Aug 2013 00:13:12 -0400
+In-Reply-To: <Pine.LNX.4.64.1308091507450.937@axis700.grange> (Guennadi
+	Liakhovetski's message of "Fri, 9 Aug 2013 15:30:48 +0200 (CEST)")
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Cc: linux-mmc@vger.kernel.org
 
 Hi Guennadi,
 
-On Wed, Jul 10 2013, Guennadi Liakhovetski wrote:
-> This patch series adds version-specific support for Command Completion 
-> Signal and the CE_CLK_CTRL2 register. Presumably, the first two patches 
-> will go via the MMC tree, the rest should be applied after them.
+On Fri, Aug 09 2013, Guennadi Liakhovetski wrote:
+> Hi Chris
 >
-> Cc: Guennadi Liakhovetski <g.liakhovetski+renesas@gmail.com>
+> There are still a number of MMC patches from me for 3.12, that still 
+> aren't in next. Unless I'm missing anything, here's the list of patches 
+> with their respective patchwork IDs:
 >
-> Guennadi Liakhovetski (6):
->   mmc: sh_mmcif: revision-specific Command Completion Signal handling
->   mmc: sh_mmcif: revision-specific CLK_CTRL2 handling
+> mmc: SDHI: add DT compatibility strings for further SoCs
+> pw ID: 2828382
+>
+> mmc: sh_mmcif: move header include from header into .c
+> pw ID: 2837887
+>
+> mmc: sh_mmcif: add support for Device Tree DMA bindings
+> pw ID: 2770781
+>
+> mmc: sh_mmcif: revision-specific Command Completion Signal handling
+> pw ID: 2825876
+>
+> mmc: sh_mmcif: revision-specific CLK_CTRL2 handling
+> pw ID: 2825870
 
-Thanks, I've pushed these two patches to mmc-next for 3.12.
+These are all in mmc-next for 3.12 now.  Thanks for the reminder!
 
 - Chris.
 -- 
