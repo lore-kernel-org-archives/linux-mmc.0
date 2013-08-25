@@ -1,42 +1,48 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH v3 00/14] Remove platform callbacks from mmc_spi, sh_mmcif and sh_mobile_sdhi drivers
-Date: Sat, 24 Aug 2013 23:58:14 -0400
-Message-ID: <87ob8mqv55.fsf@octavius.laptop.org>
-References: <1375958324-29683-1-git-send-email-laurent.pinchart+renesas@ideasonboard.com>
+Subject: Re: [PATCH 1/2] dw_mmc-pci: get resources from a proper BAR
+Date: Sun, 25 Aug 2013 00:02:48 -0400
+Message-ID: <87k3jaquxj.fsf@octavius.laptop.org>
+References: <1375958698-10569-1-git-send-email-andriy.shevchenko@linux.intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <1375958324-29683-1-git-send-email-laurent.pinchart+renesas@ideasonboard.com>
-	(Laurent Pinchart's message of "Thu, 8 Aug 2013 12:38:30 +0200")
-Sender: linux-sh-owner@vger.kernel.org
-To: Laurent Pinchart <laurent.pinchart+renesas@ideasonboard.com>
-Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-sh@vger.kernel.org, linux-spi@vger.kernel.org, Hartley Sweeten <hsweeten@visionengravers.com>, Ryan Mallon <rmallon@gmail.com>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Ian Molton <ian@mnementh.co.uk>, Arnd Bergmann <arnd@arndb.de>, Olof Johansson <olof@lixom.net>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from void.printf.net ([89.145.121.20]:41662 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1755544Ab3HYEC4 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Sun, 25 Aug 2013 00:02:56 -0400
+In-Reply-To: <1375958698-10569-1-git-send-email-andriy.shevchenko@linux.intel.com> (Andy
+	Shevchenko's message of "Thu, 8 Aug 2013 13:44:57 +0300")
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+Cc: linux-mmc@vger.kernel.org, Prabu Thangamuthu <Prabu.T@synopsys.com>, Seungwon Jeon <tgih.jun@samsung.com>
 
-Hi Laurent,
+Hi Andy,
 
-On Thu, Aug 08 2013, Laurent Pinchart wrote:
-> This patch set replaces callbacks to board code with regulators and GPIOs in
-> the mmc_spi, sh_mmcif and sh_mobile_sdhi MMC drivers.
+On Thu, Aug 08 2013, Andy Shevchenko wrote:
+> There is a typo when the mapped space is from BAR 2, but BAR 0 is used instead.
+> This patch fixes the typo.
 >
-> Most of the required infrastructure is in place already on the drivers side,
-> except for CD debouncing support in the MMC core and CD/RO GPIOs support in
-> the mmc_spi driver. The series thus starts with patches 01/14 and 02/14 that
-> add those features to the MMC core and mmc_spi driver.
+> Signed-off-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+> ---
+>  drivers/mmc/host/dw_mmc-pci.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
 >
-> Patches 03/14 to 07/14 remove the board callbacks from the ecovec24 and
-> vision_ep9307 boards. The code has been compile-tested only as I don't have
-> access to those boards.
->
-> Patches 08/14 to 14/14 then proceed to remove the callbacks from the drivers
-> themselves and from the platform data structures.
+> diff --git a/drivers/mmc/host/dw_mmc-pci.c b/drivers/mmc/host/dw_mmc-pci.c
+> index b456b0c..7d148d6 100644
+> --- a/drivers/mmc/host/dw_mmc-pci.c
+> +++ b/drivers/mmc/host/dw_mmc-pci.c
+> @@ -59,7 +59,7 @@ static int dw_mci_pci_probe(struct pci_dev *pdev,
+>  	if (ret)
+>  		return ret;
+>  
+> -	host->regs = pcim_iomap_table(pdev)[0];
+> +	host->regs = pcim_iomap_table(pdev)[PCI_BAR_NO];
+>  
+>  	ret = dw_mci_probe(host);
+>  	if (ret)
 
-arch/arm/mach-shmobile/board-ag5evm.c has been removed from
-linux-next, so I've dropped patch 7 ("ARM: shmobile: ag5evm: Remove
-SDHI .set_pwr() callback") but taken all of the other patches into
-mmc-next for 3.12.
-
-Thanks!
+Thanks, pushed to mmc-next for 3.12.
 
 - Chris.
 -- 
