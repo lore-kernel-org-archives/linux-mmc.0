@@ -1,34 +1,37 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] mmc: sdhci: request irq after sdhci_init() is called
-Date: Sat, 24 Aug 2013 22:11:46 -0400
-Message-ID: <87mwo6tt7h.fsf@octavius.laptop.org>
-References: <1373006335-31239-1-git-send-email-shawn.guo@linaro.org>
+Subject: Re: [PATCH] mmc: dw_mmc: Handle DW_MCI_QUIRK_IDMAC_DTO properly
+Date: Sat, 24 Aug 2013 22:22:10 -0400
+Message-ID: <87d2p2tsq5.fsf@octavius.laptop.org>
+References: <1373400280-7408-1-git-send-email-dianders@chromium.org>
+	<002901ce7d7d$65223e10$2f66ba30$%jun@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:42580 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:36145 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754161Ab3HYCLv (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sat, 24 Aug 2013 22:11:51 -0400
-In-Reply-To: <1373006335-31239-1-git-send-email-shawn.guo@linaro.org> (Shawn
-	Guo's message of "Fri, 5 Jul 2013 14:38:55 +0800")
+	id S1754541Ab3HYCWQ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Sat, 24 Aug 2013 22:22:16 -0400
+In-Reply-To: <002901ce7d7d$65223e10$2f66ba30$%jun@samsung.com> (Seungwon
+	Jeon's message of "Wed, 10 Jul 2013 23:54:36 +0900")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Shawn Guo <shawn.guo@linaro.org>
-Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+To: Seungwon Jeon <tgih.jun@samsung.com>
+Cc: 'Doug Anderson' <dianders@chromium.org>, 'Markos Chandras' <markos.chandras@imgtec.com>, 'Jaehoon Chung' <jh80.chung@samsung.com>, 'James Hogan' <james.hogan@imgtec.com>, 'Grant Grundler' <grundler@chromium.org>, 'Alim Akhtar' <alim.akhtar@samsung.com>, 'Abhilash Kesavan' <a.kesavan@samsung.com>, 'Tomasz Figa' <tomasz.figa@gmail.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-Hi Shawn,
+Hi,
 
-On Fri, Jul 05 2013, Shawn Guo wrote:
-> Generally request_irq() should be called after hardware has been
-> initialized into a sane state.  However, sdhci driver currently calls
-> request_irq() before sdhci_init().  At least, the following kernel panic
-> seen on i.MX6 is caused by that.  The sdhci controller on i.MX6 may have
-> noisy glitch on DAT1 line, which will trigger SDIO interrupt handling
-> once request_irq() is called.  But at this point, the SDIO interrupt
-> handler host->sdio_irq_thread has not been registered yet.  Thus, we
-> see the NULL pointer access with wake_up_process(host->sdio_irq_thread)
-> in mmc_signal_sdio_irq().
+On Wed, Jul 10 2013, Seungwon Jeon wrote:
+> On Wed, July 10, 2013, Doug Anderson wrote:
+>> In (1fb5f68 mmc: dw_mmc: Don't loop when handling an interrupt), the
+>> code for handling DW_MCI_QUIRK_IDMAC_DTO became dead code.  Move it to
+>> where it ought to live.
+>> 
+>> Found by code inspection and compile-tested only--I don't know of any
+>> boards that need DW_MCI_QUIRK_IDMAC_DTO.
+>> 
+>> Signed-off-by: Doug Anderson <dianders@chromium.org>
+>
+> Acked-by: Seungwon Jeon <tgih.jun@samsung.com>
 
 Thanks, pushed to mmc-next for 3.12.
 
