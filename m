@@ -1,126 +1,58 @@
 From: Haijun Zhang <Haijun.Zhang@freescale.com>
-Subject: [PATCH 1/4] mmc:core: parse voltage from device-tree
-Date: Mon, 26 Aug 2013 09:19:22 +0800
-Message-ID: <1377479965-471-1-git-send-email-Haijun.Zhang@freescale.com>
+Subject: [PATCH 2/4] mmc:sdhc: get voltage from sdhc host
+Date: Mon, 26 Aug 2013 09:19:23 +0800
+Message-ID: <1377479965-471-2-git-send-email-Haijun.Zhang@freescale.com>
+References: <1377479965-471-1-git-send-email-Haijun.Zhang@freescale.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from co1ehsobe001.messaging.microsoft.com ([216.32.180.184]:55274
+Received: from co1ehsobe003.messaging.microsoft.com ([216.32.180.186]:22381
 	"EHLO co1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1755974Ab3HZBVU (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 25 Aug 2013 21:21:20 -0400
+	by vger.kernel.org with ESMTP id S1755974Ab3HZBVX (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 25 Aug 2013 21:21:23 -0400
+In-Reply-To: <1377479965-471-1-git-send-email-Haijun.Zhang@freescale.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org, galak@kernel.crashing.org
 Cc: cbouatmailru@gmail.com, cjb@laptop.org, scottwood@freescale.com, X.Xie@freescale.com, Haijun Zhang <Haijun.Zhang@freescale.com>, Haijun Zhang <haijun.zhang@freescale.com>
 
-Add function to support get voltage from device-tree.
-If there are voltage-range specified in device-tree node, this function
-will parse it and return the available voltage mask.
+We use host->ocr_mask to hold the voltage get from device-tree
+node, In case host->ocr_mask was available, we use host->ocr_mask
+as the final available voltage can be used by MMC/SD/SDIO card.
 
 Signed-off-by: Haijun Zhang <haijun.zhang@freescale.com>
-Acked-by: Anton Vorontsov <anton@enomsg.org>
+Reviewed-by: Anton Vorontsov <anton@enomsg.org>
 ---
- .../devicetree/bindings/mmc/fsl-esdhc.txt          |  4 ++
- drivers/mmc/core/core.c                            | 44 ++++++++++++++++++++++
- include/linux/mmc/core.h                           |  2 +
- 3 files changed, 50 insertions(+)
+ drivers/mmc/host/sdhci.c  | 3 +++
+ include/linux/mmc/sdhci.h | 1 +
+ 2 files changed, 4 insertions(+)
 
-diff --git a/Documentation/devicetree/bindings/mmc/fsl-esdhc.txt b/Documentation/devicetree/bindings/mmc/fsl-esdhc.txt
-index bd9be0b..b7943f3 100644
---- a/Documentation/devicetree/bindings/mmc/fsl-esdhc.txt
-+++ b/Documentation/devicetree/bindings/mmc/fsl-esdhc.txt
-@@ -19,6 +19,9 @@ Optional properties:
-     "bus-width = <1>" property.
-   - sdhci,auto-cmd12: specifies that a controller can only handle auto
-     CMD12.
-+  - voltage-ranges : two cells are required, first cell specifies minimum
-+    slot voltage (mV), second cell specifies maximum slot voltage (mV).
-+    Several ranges could be specified.
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index a78bd4f..57541e0 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -3119,6 +3119,9 @@ int sdhci_add_host(struct sdhci_host *host)
+ 				   SDHCI_MAX_CURRENT_MULTIPLIER;
+ 	}
  
- Example:
++	if (host->ocr_mask)
++		ocr_avail = host->ocr_mask;
++
+ 	mmc->ocr_avail = ocr_avail;
+ 	mmc->ocr_avail_sdio = ocr_avail;
+ 	if (host->ocr_avail_sdio)
+diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
+index e3c6a74..3e781b8 100644
+--- a/include/linux/mmc/sdhci.h
++++ b/include/linux/mmc/sdhci.h
+@@ -171,6 +171,7 @@ struct sdhci_host {
+ 	unsigned int            ocr_avail_sdio;	/* OCR bit masks */
+ 	unsigned int            ocr_avail_sd;
+ 	unsigned int            ocr_avail_mmc;
++	u32 ocr_mask;		/* available voltages */
  
-@@ -29,4 +32,5 @@ sdhci@2e000 {
- 	interrupt-parent = <&ipic>;
- 	/* Filled in by U-Boot */
- 	clock-frequency = <0>;
-+	voltage-ranges = <3300 3300>;
- };
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 49a5bca..b9b9fb6 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -27,6 +27,7 @@
- #include <linux/fault-inject.h>
- #include <linux/random.h>
- #include <linux/slab.h>
-+#include <linux/of.h>
- 
- #include <linux/mmc/card.h>
- #include <linux/mmc/host.h>
-@@ -1196,6 +1197,49 @@ u32 mmc_vddrange_to_ocrmask(int vdd_min, int vdd_max)
- }
- EXPORT_SYMBOL(mmc_vddrange_to_ocrmask);
- 
-+#ifdef CONFIG_OF
-+
-+/**
-+ * mmc_of_parse_voltage - return mask of supported voltages
-+ * @np: The device node need to be parsed.
-+ * @mask: mask of voltages available for MMC/SD/SDIO
-+ *
-+ * 1. Return zero on success.
-+ * 2. Return negative errno: voltage-range is invalid.
-+ */
-+int mmc_of_parse_voltage(struct device_node *np, u32 *mask)
-+{
-+	const u32 *voltage_ranges;
-+	int num_ranges, i;
-+
-+	voltage_ranges = of_get_property(np, "voltage-ranges", &num_ranges);
-+	num_ranges = num_ranges / sizeof(*voltage_ranges) / 2;
-+	if (!voltage_ranges || !num_ranges) {
-+		pr_info("%s: voltage-ranges unspecified\n", np->full_name);
-+		return -EINVAL;
-+	}
-+
-+	for (i = 0; i < num_ranges; i++) {
-+		const int j = i * 2;
-+		u32 ocr_mask;
-+
-+		ocr_mask = mmc_vddrange_to_ocrmask(
-+				be32_to_cpu(voltage_ranges[j]),
-+				be32_to_cpu(voltage_ranges[j + 1]));
-+		if (!ocr_mask) {
-+			pr_err("%s: voltage-range #%d is invalid\n",
-+				np->full_name, i);
-+			return -EINVAL;
-+		}
-+		*mask |= ocr_mask;
-+	}
-+
-+	return 0;
-+}
-+EXPORT_SYMBOL(mmc_of_parse_voltage);
-+
-+#endif /* CONFIG_OF */
-+
- #ifdef CONFIG_REGULATOR
- 
- /**
-diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
-index 443243b..da51bec 100644
---- a/include/linux/mmc/core.h
-+++ b/include/linux/mmc/core.h
-@@ -208,6 +208,8 @@ static inline void mmc_claim_host(struct mmc_host *host)
- 	__mmc_claim_host(host, NULL);
- }
- 
-+struct device_node;
- extern u32 mmc_vddrange_to_ocrmask(int vdd_min, int vdd_max);
-+extern int mmc_of_parse_voltage(struct device_node *np, u32 *mask);
- 
- #endif /* LINUX_MMC_CORE_H */
+ 	wait_queue_head_t	buf_ready_int;	/* Waitqueue for Buffer Read Ready interrupt */
+ 	unsigned int		tuning_done;	/* Condition flag set when CMD19 succeeds */
 -- 
 1.8.0
 
