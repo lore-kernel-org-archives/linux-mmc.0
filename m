@@ -1,108 +1,119 @@
 From: Seungwon Jeon <tgih.jun@samsung.com>
-Subject: RE: [PATCH v6 2/3] mmc: dw_mmc: Honor requests to set the clock to 0
- (turn off clock)
-Date: Mon, 26 Aug 2013 13:34:26 +0900
-Message-ID: <001201cea215$8c125e30$a4371a90$%jun@samsung.com>
-References: <1377188348-3418-1-git-send-email-dianders@chromium.org>
- <1377188348-3418-3-git-send-email-dianders@chromium.org>
+Subject: RE: [PATCH 1/3] mmc: core: do power-off with resume failure
+Date: Mon, 26 Aug 2013 15:39:21 +0900
+Message-ID: <002701cea226$ff998070$fecc8150$%jun@samsung.com>
+References: <002201ce9e6b$e0b32850$a21978f0$%jun@samsung.com>
+ <CAPDyKFq2uXxsjMZcKK=u0dNJnw5fXj5L0=Rd=OP=nk41Zadong@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ks_c_5601-1987
+Content-Type: text/plain; charset=Windows-1252
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout1.samsung.com ([203.254.224.24]:50814 "EHLO
+Received: from mailout1.samsung.com ([203.254.224.24]:16266 "EHLO
 	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755240Ab3HZEe3 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 26 Aug 2013 00:34:29 -0400
-In-reply-to: <1377188348-3418-3-git-send-email-dianders@chromium.org>
+	with ESMTP id S1755883Ab3HZGjZ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 26 Aug 2013 02:39:25 -0400
+Received: from epcpsbgr3.samsung.com
+ (u143.gpu120.samsung.co.kr [203.254.230.143])
+ by mailout1.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+ (7.0.4.24.0) 64bit (built Nov 17 2011))
+ with ESMTP id <0MS400EQFL5079J0@mailout1.samsung.com> for
+ linux-mmc@vger.kernel.org; Mon, 26 Aug 2013 15:39:24 +0900 (KST)
+In-reply-to: <CAPDyKFq2uXxsjMZcKK=u0dNJnw5fXj5L0=Rd=OP=nk41Zadong@mail.gmail.com>
 Content-language: ko
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: 'Doug Anderson' <dianders@chromium.org>, 'Chris Ball' <cjb@laptop.org>
-Cc: 'Jaehoon Chung' <jh80.chung@samsung.com>, 'James Hogan' <james.hogan@imgtec.com>, 'Grant Grundler' <grundler@chromium.org>, 'Alim Akhtar' <alim.akhtar@samsung.com>, 'Abhilash Kesavan' <a.kesavan@samsung.com>, 'Tomasz Figa' <tomasz.figa@gmail.com>, 'Olof Johansson' <olof@lixom.net>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+To: 'Ulf Hansson' <ulf.hansson@linaro.org>
+Cc: 'linux-mmc' <linux-mmc@vger.kernel.org>, 'Chris Ball' <cjb@laptop.org>
 
-On Fri, August 23, 2013, Doug Anderson wrote:
-> Previously the dw_mmc driver would ignore any requests to disable the
-> card's clock.  This doesn't seem like a good thing in general, but had
-> one extra bad side effect in the following situtation:
-> * mmc core would set clk to 400kHz at boot time while initting
-> * mmc core would set clk to 0 since no card, but it would be ignored.
-> * suspend to ram and resume; clocks in the dw_mmc IP block are now 0
->   but dw_mmc thinks that they're 400kHz (it ignored the set to 0).
-> * insert card
-> * mmc core would set clk to 400kHz which would be considered a no-op.
+On Friday, August 23, 2013, Ulf Hansson wrote:
+> On 21 August 2013 14:42, Seungwon Jeon <tgih.jun@samsung.com> wrote:
+> > Currently there is no mmc_power_off() when resume failed.
+> > Somehow, state from mmc_power_on() will be kept. This change
+> > makes a pair with its use in case of failure.
 > 
-> Note that if there is no card in the slot and we do a suspend/resume
-> cycle, we _do_ still end up with differences in a dw_mmc register
-> dump, but the differences are clock related and we've got the clock
-> disabled both before and after, so this should be OK.
+> Hi Seungwon,
 > 
-> Signed-off-by: Doug Anderson <dianders@chromium.org>
-> ---
-> Changes in v6:
-> - Replaces previous pathes that ensured saving/restoring clocks.
+> To be safe, we can not power off, even if a resume failures. The
+> reason is that the bus/card/host is still available for sending
+> commands to it and those will then likely hang since IP controllers
+> internal registers is configured for "power off" state.
+Generally when host drivers get MMC_POWER_OFF, host doesn't gate clock for host running.
+MMC_POWER_ON/OFF is related to card side. So, I guess hanging isn't expected because host is kept ready.
+
 > 
->  drivers/mmc/host/dw_mmc.c | 21 +++++++++++----------
->  1 file changed, 11 insertions(+), 10 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> index ee5f167..f6c7545 100644
-> --- a/drivers/mmc/host/dw_mmc.c
-> +++ b/drivers/mmc/host/dw_mmc.c
-> @@ -635,7 +635,11 @@ static void dw_mci_setup_bus(struct dw_mci_slot *slot, bool force_clkinit)
->  	u32 div;
->  	u32 clk_en_a;
-> 
-> -	if (slot->clock != host->current_speed || force_clkinit) {
-> +	if (slot->clock == 0) {
-> +		mci_writel(host, CLKENA, 0);
-> +		mci_send_cmd(slot,
-> +			     SDMMC_CMD_UPD_CLK | SDMMC_CMD_PRV_DAT_WAIT, 0);
-Basically dw_mmc driver uses host's low power mode(auto clock gating)
-So, how about keeping origin code rather than programming clock setting to '0'?
- 
-> +	} else if (slot->clock != host->current_speed || force_clkinit) {
-And then, if condition('slot->clock is not zero') is added in order to allow to set clock,
-print messages which Jaehoon pointed would be solved.
+> Instead, we must leave the power off to be handled from the next
+> rescan work when the card is no longer properly "detected". For
+> NONREMOVABLE we will instead at error path try to do a
+> "power_restore_host".
+It might be needed graceful error handling.
+Ok, I'll consider further.
 
 Thanks,
 Seungwon Jeon
 
->  		div = host->bus_hz / slot->clock;
->  		if (host->bus_hz % slot->clock && host->bus_hz > slot->clock)
->  			/*
-> @@ -675,9 +679,8 @@ static void dw_mci_setup_bus(struct dw_mci_slot *slot, bool force_clkinit)
->  		/* inform CIU */
->  		mci_send_cmd(slot,
->  			     SDMMC_CMD_UPD_CLK | SDMMC_CMD_PRV_DAT_WAIT, 0);
-> -
-> -		host->current_speed = slot->clock;
->  	}
-> +	host->current_speed = slot->clock;
 > 
->  	/* Set the current slot bus width */
->  	mci_writel(host, CTYPE, (slot->ctype << slot->id));
-> @@ -807,13 +810,11 @@ static void dw_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+> Kind regards
+> Ulf Hansson
 > 
->  	mci_writel(slot->host, UHS_REG, regs);
 > 
-> -	if (ios->clock) {
-> -		/*
-> -		 * Use mirror of ios->clock to prevent race with mmc
-> -		 * core ios update when finding the minimum.
-> -		 */
-> -		slot->clock = ios->clock;
-> -	}
-> +	/*
-> +	 * Use mirror of ios->clock to prevent race with mmc
-> +	 * core ios update when finding the minimum.
-> +	 */
-> +	slot->clock = ios->clock;
-> 
->  	if (drv_data && drv_data->set_ios)
->  		drv_data->set_ios(slot->host, ios);
-> --
-> 1.8.3
-> 
+> >
+> > Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
+> > ---
+> >  drivers/mmc/core/mmc.c  |    3 +++
+> >  drivers/mmc/core/sd.c   |    3 +++
+> >  drivers/mmc/core/sdio.c |    3 +++
+> >  3 files changed, 9 insertions(+), 0 deletions(-)
+> >
+> > diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+> > index 6d02012..704a561 100644
+> > --- a/drivers/mmc/core/mmc.c
+> > +++ b/drivers/mmc/core/mmc.c
+> > @@ -1536,6 +1536,9 @@ static int mmc_resume(struct mmc_host *host)
+> >         mmc_power_up(host);
+> >         mmc_select_voltage(host, host->ocr);
+> >         err = mmc_init_card(host, host->ocr, host->card);
+> > +       if (err)
+> > +               mmc_power_off(host);
+> > +
+> >         mmc_release_host(host);
+> >
+> >         return err;
+> > diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
+> > index 176d125..2690ae1 100644
+> > --- a/drivers/mmc/core/sd.c
+> > +++ b/drivers/mmc/core/sd.c
+> > @@ -1099,6 +1099,9 @@ static int mmc_sd_resume(struct mmc_host *host)
+> >         mmc_power_up(host);
+> >         mmc_select_voltage(host, host->ocr);
+> >         err = mmc_sd_init_card(host, host->ocr, host->card);
+> > +       if (err)
+> > +               mmc_power_off(host);
+> > +
+> >         mmc_release_host(host);
+> >
+> >         return err;
+> > diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
+> > index 80d89cf..8c65669 100644
+> > --- a/drivers/mmc/core/sdio.c
+> > +++ b/drivers/mmc/core/sdio.c
+> > @@ -1033,6 +1033,9 @@ static int mmc_sdio_resume(struct mmc_host *host)
+> >                 }
+> >         }
+> >
+> > +       if (err && !mmc_card_keep_power(host))
+> > +               mmc_power_off(host);
+> > +
+> >         host->pm_flags &= ~MMC_PM_KEEP_POWER;
+> >         return err;
+> >  }
+> > --
+> > 1.7.0.4
+> >
+> >
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
 > --
 > To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
 > the body of a message to majordomo@vger.kernel.org
