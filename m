@@ -1,82 +1,34 @@
-From: Doug Anderson <dianders@chromium.org>
-Subject: Re: [PATCH v6 2/3] mmc: dw_mmc: Honor requests to set the clock to 0
- (turn off clock)
-Date: Mon, 26 Aug 2013 09:05:48 -0700
-Message-ID: <CAD=FV=WYMyGVmG-DXk1ke-yQCrfF74KDaZAUCW3qzf+Xfp-tpQ@mail.gmail.com>
-References: <1377188348-3418-1-git-send-email-dianders@chromium.org>
-	<1377188348-3418-3-git-send-email-dianders@chromium.org>
-	<001201cea215$8c125e30$a4371a90$%jun@samsung.com>
-	<521B1A87.4000500@samsung.com>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH 1/4] mmc:core: parse voltage from device-tree
+Date: Mon, 26 Aug 2013 12:36:22 -0400
+Message-ID: <87zjs49zp5.fsf@octavius.laptop.org>
+References: <1377479965-471-1-git-send-email-Haijun.Zhang@freescale.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <521B1A87.4000500@samsung.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: Seungwon Jeon <tgih.jun@samsung.com>, Chris Ball <cjb@laptop.org>, James Hogan <james.hogan@imgtec.com>, Grant Grundler <grundler@chromium.org>, Alim Akhtar <alim.akhtar@samsung.com>, Abhilash Kesavan <a.kesavan@samsung.com>, Tomasz Figa <tomasz.figa@gmail.com>, Olof Johansson <olof@lixom.net>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Content-Type: text/plain
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from void.printf.net ([89.145.121.20]:50009 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752269Ab3HZQgh (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 26 Aug 2013 12:36:37 -0400
+In-Reply-To: <1377479965-471-1-git-send-email-Haijun.Zhang@freescale.com>
+	(Haijun Zhang's message of "Mon, 26 Aug 2013 09:19:22 +0800")
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Haijun Zhang <Haijun.Zhang@freescale.com>
+Cc: linux-mmc@vger.kernel.org, galak@kernel.crashing.org, cbouatmailru@gmail.com, scottwood@freescale.com, X.Xie@freescale.com
 
-Jaehoon / Seungwon,
+Hi Haijun,
 
-On Mon, Aug 26, 2013 at 2:06 AM, Jaehoon Chung <jh80.chung@samsung.com> wrote:
-> On 08/26/2013 01:34 PM, Seungwon Jeon wrote:
->> On Fri, August 23, 2013, Doug Anderson wrote:
->>> Previously the dw_mmc driver would ignore any requests to disable the
->>> card's clock.  This doesn't seem like a good thing in general, but had
->>> one extra bad side effect in the following situtation:
->>> * mmc core would set clk to 400kHz at boot time while initting
->>> * mmc core would set clk to 0 since no card, but it would be ignored.
->>> * suspend to ram and resume; clocks in the dw_mmc IP block are now 0
->>>   but dw_mmc thinks that they're 400kHz (it ignored the set to 0).
->>> * insert card
->>> * mmc core would set clk to 400kHz which would be considered a no-op.
->>>
->>> Note that if there is no card in the slot and we do a suspend/resume
->>> cycle, we _do_ still end up with differences in a dw_mmc register
->>> dump, but the differences are clock related and we've got the clock
->>> disabled both before and after, so this should be OK.
->>>
->>> Signed-off-by: Doug Anderson <dianders@chromium.org>
->>> ---
->>> Changes in v6:
->>> - Replaces previous pathes that ensured saving/restoring clocks.
->>>
->>>  drivers/mmc/host/dw_mmc.c | 21 +++++++++++----------
->>>  1 file changed, 11 insertions(+), 10 deletions(-)
->>>
->>> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
->>> index ee5f167..f6c7545 100644
->>> --- a/drivers/mmc/host/dw_mmc.c
->>> +++ b/drivers/mmc/host/dw_mmc.c
->>> @@ -635,7 +635,11 @@ static void dw_mci_setup_bus(struct dw_mci_slot *slot, bool force_clkinit)
->>>      u32 div;
->>>      u32 clk_en_a;
->>>
->>> -    if (slot->clock != host->current_speed || force_clkinit) {
->>> +    if (slot->clock == 0) {
->>> +            mci_writel(host, CLKENA, 0);
->>> +            mci_send_cmd(slot,
->>> +                         SDMMC_CMD_UPD_CLK | SDMMC_CMD_PRV_DAT_WAIT, 0);
->> Basically dw_mmc driver uses host's low power mode(auto clock gating)
->> So, how about keeping origin code rather than programming clock setting to '0'?
-> Right, Dw-mmc controller can use the Low-power mode.
-> This mode is functionality like clock-gating. Well, i didn't know what benefit we get, if set to 0.
+On Sun, Aug 25 2013, Haijun Zhang wrote:
+> Add function to support get voltage from device-tree.
+> If there are voltage-range specified in device-tree node, this function
+> will parse it and return the available voltage mask.
+>
+> Signed-off-by: Haijun Zhang <haijun.zhang@freescale.com>
+> Acked-by: Anton Vorontsov <anton@enomsg.org>
 
-Ah, right.  ...so it's unlikely that we'd save any power because we're
-already gating the clock.
+Thanks, I've pushed all four patches to mmc-next for 3.12.
 
-I'd really still rather honor the MMC subsystem's request.  It
-shouldn't _hurt_ to turn the clock off when the subsystem requests it,
-right?  One reason to honor the mmc core is that it will make things
-cleaner if/when we support a voltage change operation.  The MMC core
-has the logic for the voltage change, and part of that involves
-turning off the clock.  We'll already need a bunch of special case
-code in dw_mmc for voltage change, but it would be nice to avoid one
-extra bit.
-
-Another option would be to add a core MMC quirk to disable MMC_CLKGATE
-on a per-driver basis.  In the "single zImage" world that seems like
-the right thing to do, since the MMC_CLKGATE description seems to
-indicate that enabling that won't really work on all drivers anyway.
-
--Doug
+- Chris.
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
