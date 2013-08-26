@@ -1,48 +1,127 @@
-From: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
-Subject: Re: [PATCH v3 00/14] Remove platform callbacks from mmc_spi, sh_mmcif and sh_mobile_sdhi drivers
-Date: Sun, 25 Aug 2013 22:54:06 +0200
-Message-ID: <1591201.avzdVWpxvg@avalon>
-References: <1375958324-29683-1-git-send-email-laurent.pinchart+renesas@ideasonboard.com> <87ob8mqv55.fsf@octavius.laptop.org>
+From: Haijun Zhang <Haijun.Zhang@freescale.com>
+Subject: [PATCH 1/4] mmc:core: parse voltage from device-tree
+Date: Mon, 26 Aug 2013 09:19:22 +0800
+Message-ID: <1377479965-471-1-git-send-email-Haijun.Zhang@freescale.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7Bit
-Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <87ob8mqv55.fsf@octavius.laptop.org>
-Sender: linux-sh-owner@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: Laurent Pinchart <laurent.pinchart+renesas@ideasonboard.com>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-sh@vger.kernel.org, linux-spi@vger.kernel.org, Hartley Sweeten <hsweeten@visionengravers.com>, Ryan Mallon <rmallon@gmail.com>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Ian Molton <ian@mnementh.co.uk>, Arnd Bergmann <arnd@arndb.de>, Olof Johansson <olof@lixom.net>
+Content-Type: text/plain
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from co1ehsobe001.messaging.microsoft.com ([216.32.180.184]:55274
+	"EHLO co1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1755974Ab3HZBVU (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 25 Aug 2013 21:21:20 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org, galak@kernel.crashing.org
+Cc: cbouatmailru@gmail.com, cjb@laptop.org, scottwood@freescale.com, X.Xie@freescale.com, Haijun Zhang <Haijun.Zhang@freescale.com>, Haijun Zhang <haijun.zhang@freescale.com>
 
-Hi Chris,
+Add function to support get voltage from device-tree.
+If there are voltage-range specified in device-tree node, this function
+will parse it and return the available voltage mask.
 
-On Saturday 24 August 2013 23:58:14 Chris Ball wrote:
-> On Thu, Aug 08 2013, Laurent Pinchart wrote:
-> > This patch set replaces callbacks to board code with regulators and GPIOs
-> > in the mmc_spi, sh_mmcif and sh_mobile_sdhi MMC drivers.
-> > 
-> > Most of the required infrastructure is in place already on the drivers
-> > side, except for CD debouncing support in the MMC core and CD/RO GPIOs
-> > support in the mmc_spi driver. The series thus starts with patches 01/14
-> > and 02/14 that add those features to the MMC core and mmc_spi driver.
-> > 
-> > Patches 03/14 to 07/14 remove the board callbacks from the ecovec24 and
-> > vision_ep9307 boards. The code has been compile-tested only as I don't
-> > have
-> > access to those boards.
-> > 
-> > Patches 08/14 to 14/14 then proceed to remove the callbacks from the
-> > drivers themselves and from the platform data structures.
-> 
-> arch/arm/mach-shmobile/board-ag5evm.c has been removed from
-> linux-next, so I've dropped patch 7 ("ARM: shmobile: ag5evm: Remove
-> SDHI .set_pwr() callback") but taken all of the other patches into
-> mmc-next for 3.12.
+Signed-off-by: Haijun Zhang <haijun.zhang@freescale.com>
+Acked-by: Anton Vorontsov <anton@enomsg.org>
+---
+ .../devicetree/bindings/mmc/fsl-esdhc.txt          |  4 ++
+ drivers/mmc/core/core.c                            | 44 ++++++++++++++++++++++
+ include/linux/mmc/core.h                           |  2 +
+ 3 files changed, 50 insertions(+)
 
-Patch 7 was only meant to avoid bisection breakages if your tree gets merged 
-before the ARM tree. If it gets merged before you can indeed drop it.
-
+diff --git a/Documentation/devicetree/bindings/mmc/fsl-esdhc.txt b/Documentation/devicetree/bindings/mmc/fsl-esdhc.txt
+index bd9be0b..b7943f3 100644
+--- a/Documentation/devicetree/bindings/mmc/fsl-esdhc.txt
++++ b/Documentation/devicetree/bindings/mmc/fsl-esdhc.txt
+@@ -19,6 +19,9 @@ Optional properties:
+     "bus-width = <1>" property.
+   - sdhci,auto-cmd12: specifies that a controller can only handle auto
+     CMD12.
++  - voltage-ranges : two cells are required, first cell specifies minimum
++    slot voltage (mV), second cell specifies maximum slot voltage (mV).
++    Several ranges could be specified.
+ 
+ Example:
+ 
+@@ -29,4 +32,5 @@ sdhci@2e000 {
+ 	interrupt-parent = <&ipic>;
+ 	/* Filled in by U-Boot */
+ 	clock-frequency = <0>;
++	voltage-ranges = <3300 3300>;
+ };
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 49a5bca..b9b9fb6 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -27,6 +27,7 @@
+ #include <linux/fault-inject.h>
+ #include <linux/random.h>
+ #include <linux/slab.h>
++#include <linux/of.h>
+ 
+ #include <linux/mmc/card.h>
+ #include <linux/mmc/host.h>
+@@ -1196,6 +1197,49 @@ u32 mmc_vddrange_to_ocrmask(int vdd_min, int vdd_max)
+ }
+ EXPORT_SYMBOL(mmc_vddrange_to_ocrmask);
+ 
++#ifdef CONFIG_OF
++
++/**
++ * mmc_of_parse_voltage - return mask of supported voltages
++ * @np: The device node need to be parsed.
++ * @mask: mask of voltages available for MMC/SD/SDIO
++ *
++ * 1. Return zero on success.
++ * 2. Return negative errno: voltage-range is invalid.
++ */
++int mmc_of_parse_voltage(struct device_node *np, u32 *mask)
++{
++	const u32 *voltage_ranges;
++	int num_ranges, i;
++
++	voltage_ranges = of_get_property(np, "voltage-ranges", &num_ranges);
++	num_ranges = num_ranges / sizeof(*voltage_ranges) / 2;
++	if (!voltage_ranges || !num_ranges) {
++		pr_info("%s: voltage-ranges unspecified\n", np->full_name);
++		return -EINVAL;
++	}
++
++	for (i = 0; i < num_ranges; i++) {
++		const int j = i * 2;
++		u32 ocr_mask;
++
++		ocr_mask = mmc_vddrange_to_ocrmask(
++				be32_to_cpu(voltage_ranges[j]),
++				be32_to_cpu(voltage_ranges[j + 1]));
++		if (!ocr_mask) {
++			pr_err("%s: voltage-range #%d is invalid\n",
++				np->full_name, i);
++			return -EINVAL;
++		}
++		*mask |= ocr_mask;
++	}
++
++	return 0;
++}
++EXPORT_SYMBOL(mmc_of_parse_voltage);
++
++#endif /* CONFIG_OF */
++
+ #ifdef CONFIG_REGULATOR
+ 
+ /**
+diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
+index 443243b..da51bec 100644
+--- a/include/linux/mmc/core.h
++++ b/include/linux/mmc/core.h
+@@ -208,6 +208,8 @@ static inline void mmc_claim_host(struct mmc_host *host)
+ 	__mmc_claim_host(host, NULL);
+ }
+ 
++struct device_node;
+ extern u32 mmc_vddrange_to_ocrmask(int vdd_min, int vdd_max);
++extern int mmc_of_parse_voltage(struct device_node *np, u32 *mask);
+ 
+ #endif /* LINUX_MMC_CORE_H */
 -- 
-Regards,
+1.8.0
 
-Laurent Pinchart
 
