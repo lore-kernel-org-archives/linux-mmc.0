@@ -1,81 +1,114 @@
-From: Jeremie Samuel <jeremie.samuel.ext@parrot.com>
-Subject: Re: [PATCH 6/8] sdhci: Turn host->lock into a mutex
-Date: Mon, 26 Aug 2013 10:37:56 +0200
-Message-ID: <521B13E4.6030800@parrot.com>
-References: <1373384652-21958-1-git-send-email-jeremie.samuel.ext@parrot.com> <1373384652-21958-7-git-send-email-jeremie.samuel.ext@parrot.com> <874naev8e1.fsf@octavius.laptop.org>
+From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Subject: Re: [PATCH] mmc:tmio_mmc change driver to use dev_pm_ops infrastructure
+Date: Mon, 26 Aug 2013 10:48:29 +0200 (CEST)
+Message-ID: <Pine.LNX.4.64.1308261043010.1767@axis700.grange>
+References: <1376148055-2539-1-git-send-email-shuah.kh@samsung.com>
+ <1376148055-2539-10-git-send-email-shuah.kh@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from co202.xi-lite.net ([149.6.83.202]:34579 "EHLO co202.xi-lite.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1756305Ab3HZIiz (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 26 Aug 2013 04:38:55 -0400
-In-Reply-To: <874naev8e1.fsf@octavius.laptop.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1376148055-2539-10-git-send-email-shuah.kh@samsung.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Shuah Khan <shuah.kh@samsung.com>
+Cc: ian@mnementh.co.uk, cjb@laptop.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, shuahkhan@gmail.com
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Matthieu Castet <matthieu.castet@parrot.com>, =?ISO-8859-1?Q?Gr=E9gor_BOIRIE?= <gregor.boirie@parrot.com>
 
-Hi Chris,
+Hi Shuah Khan,
 
-Thank you for the feedback. I'll send you the modifications in 
-September. But I will not be able to test the changes. I don't have the 
-hardware.
+On Sat, 10 Aug 2013, Shuah Khan wrote:
 
-Regards,
+> Change tmio_mmc platform driver to register pm ops using dev_pm_ops instead of
+> legacy pm_ops infrastructure.
+> 
+> Signed-off-by: Shuah Khan <shuah.kh@samsung.com>
 
--- 
-Jeremie Samuel              Parrot S.A.
-Software Engineer           14, quai de Jemmapes
-R&D/OS Platform             75010 Paris, France
-http://www.parrot.com
+This looks good to me, although I don't have access to any MFD-based TMIO 
+MMC systems, so, cannot test. In fact that code hasn't been touched for a 
+while now, so, I don't even know if anyone is still using it. With that in 
+mind
 
-On 25/08/2013 03:58, Chris Ball wrote:
-> Hi Jeremie, I'm sorry for a very late review.
->
-> On Tue, Jul 09 2013, Jeremie Samuel wrote:
->> @@ -118,7 +119,7 @@ struct sdhci_host {
->>   	enum led_brightness brightness;
->>   #endif
->>   
->> -	spinlock_t lock;	/* Mutex */
->> +	struct mutex lock;	/* Mutex */
->>   
->>   	int flags;		/* Host attributes */
->>   #define SDHCI_USE_SDMA		(1<<0)	/* Host is SDMA capable */
-> I think you need to modify many of the drivers/mmc/host/sdhci-*
-> drivers too -- for example:
->
-> sdhci-pxav3.c:
->
-> static int sdhci_pxav3_runtime_suspend(struct device *dev)
-> {
->          struct sdhci_host *host = dev_get_drvdata(dev);
->          struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
->          unsigned long flags;
->
->          if (pltfm_host->clk) {
->                  spin_lock_irqsave(&host->lock, flags);
-> [...]
->
->
-> sdhci-s3c.c:
->
-> static void sdhci_s3c_notify_change(struct platform_device *dev, int state)
-> {
->          struct sdhci_host *host = platform_get_drvdata(dev);
-> #ifdef CONFIG_PM_RUNTIME
->          struct sdhci_s3c *sc = sdhci_priv(host);
-> #endif
->          unsigned long flags;
->
->          if (host) {
->                  spin_lock_irqsave(&host->lock, flags);
-> [...]
->
->
-> Thanks,
->
-> - Chris.
+Acked-by: Guennadi Liakhovetski <g.liakhovetski+renesas@gmail.com>
 
+Thanks
+Guennadi
+
+> ---
+>  drivers/mmc/host/tmio_mmc.c |   24 ++++++++++++++----------
+>  1 file changed, 14 insertions(+), 10 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/tmio_mmc.c b/drivers/mmc/host/tmio_mmc.c
+> index 8860d4d..3e3c730 100644
+> --- a/drivers/mmc/host/tmio_mmc.c
+> +++ b/drivers/mmc/host/tmio_mmc.c
+> @@ -24,31 +24,33 @@
+>  #include "tmio_mmc.h"
+>  
+>  #ifdef CONFIG_PM
+> -static int tmio_mmc_suspend(struct platform_device *dev, pm_message_t state)
+> +static int tmio_mmc_suspend(struct device *dev)
+>  {
+> -	const struct mfd_cell *cell = mfd_get_cell(dev);
+> +	struct platform_device *pdev = to_platform_device(dev);
+> +	const struct mfd_cell *cell = mfd_get_cell(pdev);
+>  	int ret;
+>  
+> -	ret = tmio_mmc_host_suspend(&dev->dev);
+> +	ret = tmio_mmc_host_suspend(dev);
+>  
+>  	/* Tell MFD core it can disable us now.*/
+>  	if (!ret && cell->disable)
+> -		cell->disable(dev);
+> +		cell->disable(pdev);
+>  
+>  	return ret;
+>  }
+>  
+> -static int tmio_mmc_resume(struct platform_device *dev)
+> +static int tmio_mmc_resume(struct device *dev)
+>  {
+> -	const struct mfd_cell *cell = mfd_get_cell(dev);
+> +	struct platform_device *pdev = to_platform_device(dev);
+> +	const struct mfd_cell *cell = mfd_get_cell(pdev);
+>  	int ret = 0;
+>  
+>  	/* Tell the MFD core we are ready to be enabled */
+>  	if (cell->resume)
+> -		ret = cell->resume(dev);
+> +		ret = cell->resume(pdev);
+>  
+>  	if (!ret)
+> -		ret = tmio_mmc_host_resume(&dev->dev);
+> +		ret = tmio_mmc_host_resume(dev);
+>  
+>  	return ret;
+>  }
+> @@ -123,17 +125,19 @@ static int tmio_mmc_remove(struct platform_device *pdev)
+>  	return 0;
+>  }
+>  
+> +static SIMPLE_DEV_PM_OPS(tmio_mmc_dev_pm_ops, tmio_mmc_suspend,
+> +			  tmio_mmc_resume);
+> +
+>  /* ------------------- device registration ----------------------- */
+>  
+>  static struct platform_driver tmio_mmc_driver = {
+>  	.driver = {
+>  		.name = "tmio-mmc",
+>  		.owner = THIS_MODULE,
+> +		.pm = &tmio_mmc_dev_pm_ops,
+>  	},
+>  	.probe = tmio_mmc_probe,
+>  	.remove = tmio_mmc_remove,
+> -	.suspend = tmio_mmc_suspend,
+> -	.resume = tmio_mmc_resume,
+>  };
+>  
+>  module_platform_driver(tmio_mmc_driver);
+> -- 
+> 1.7.10.4
+> 
+
+---
+Guennadi Liakhovetski, Ph.D.
+Freelance Open-Source Software Developer
+http://www.open-technology.de/
