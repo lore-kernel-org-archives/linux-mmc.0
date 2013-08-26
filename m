@@ -1,114 +1,198 @@
-From: Yuvaraj Kumar <yuvaraj.cd@gmail.com>
-Subject: Re: [RFC V2 1/4] mmc: dw_mmc: exynos: move the exynos private init
-Date: Mon, 26 Aug 2013 14:50:39 +0530
-Message-ID: <CAKuRcOKSzXXGnN1jZhYhimnRqmKM4pc2qB2N0AgXdRX1VFLb3Q@mail.gmail.com>
-References: <1377256509-18922-1-git-send-email-yuvaraj.cd@samsung.com>
-	<1377256509-18922-2-git-send-email-yuvaraj.cd@samsung.com>
-	<5217673C.1040305@samsung.com>
+From: Zhang Haijun <B42677@freescale.com>
+Subject: Re: [PATCH 2/4 V2] mmc: esdhc: workaround for dma err in the last
+ system transaction
+Date: Mon, 26 Aug 2013 09:03:03 +0800
+Message-ID: <521AA947.6080209@freescale.com>
+References: <1374055891-20703-1-git-send-email-Haijun.Zhang@freescale.com>
+ <99E897753B6F7048BD8CCDB4661D02E13DF52C@039-SN2MPN1-022.039d.mgd.msft.net>
+ <521703AB.8030702@freescale.com>
+ <1377272410.20722.46.camel@snotra.buserror.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-Reply-To: <5217673C.1040305@samsung.com>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, linux-samsung-soc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Seungwon Jeon <tgih.jun@samsung.com>, Alim Akhtar <alim.akhtar@samsung.com>, ks.giri@samsung.com, Tomasz Figa <t.figa@samsung.com>, Yuvaraj Kumar C D <yuvaraj.cd@samsung.com>, thomas.ab@samsung.com
+Content-Type: multipart/mixed; boundary="===============4591255572590674148=="
+Return-path: <linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org>
+In-Reply-To: <1377272410.20722.46.camel@snotra.buserror.net>
+List-Unsubscribe: <https://lists.ozlabs.org/options/linuxppc-dev>,
+ <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=unsubscribe>
+List-Archive: <http://lists.ozlabs.org/pipermail/linuxppc-dev/>
+List-Post: <mailto:linuxppc-dev@lists.ozlabs.org>
+List-Help: <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=help>
+List-Subscribe: <https://lists.ozlabs.org/listinfo/linuxppc-dev>,
+ <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=subscribe>
+Errors-To: linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org
+Sender: "Linuxppc-dev"
+ <linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org>
+To: Scott Wood <scottwood@freescale.com>
+Cc: Wood Scott-B07421 <B07421@freescale.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "cbouatmailru@gmail.com" <cbouatmailru@gmail.com>, "cjb@laptop.org" <cjb@laptop.org>, "linuxppc-dev@lists.ozlabs.org" <linuxppc-dev@lists.ozlabs.org>, Xie Xiaobo-R63061 <X.Xie@freescale.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On Fri, Aug 23, 2013 at 7:14 PM, Jaehoon Chung <jh80.chung@samsung.com> wrote:
-> Hi Yuvaraj,
+--===============4591255572590674148==
+Content-Type: multipart/alternative;
+	boundary="------------090808080303070209090801"
+
+--------------090808080303070209090801
+Content-Type: text/plain; charset="UTF-8"; format=flowed
+Content-Transfer-Encoding: 7bit
+
+On 08/23/2013 11:40 PM, Scott Wood wrote:
+> On Fri, 2013-08-23 at 14:39 +0800, Zhang Haijun wrote:
+>> Hi, Anton and all
+>>
+>> Is there any advice on these two patches ?
+>>
+>> [PATCH 2/4 V2] mmc: esdhc: workaround for dma err in the last system
+>> transaction
+>> [PATCH 3/4 V3] mmc: esdhc: Correct host version of T4240-R1.0-R2.0.
+>>
+>>
+>> [PATCH 1/4 V4] powerpc/85xx: Add support for 85xx cpu type detection
+>> This patch is Act-by Scott.
+>> Patch 4/4 is split to four patches and Act-by Anton.
+>>
+>>
+>> Thanks all.
+>>
+>>
+>>
+> [snip]
+>>>> +	if (!(((SVR_SOC_VER(svr) == SVR_T4240) && (SVR_REV(svr) == 0x10))
+>>>> ||
+>>>> +		((SVR_SOC_VER(svr) == SVR_B4860) && (SVR_REV(svr) == 0x10))
+>>>> ||
+>>>> +		((SVR_SOC_VER(svr) == SVR_P1010) && (SVR_REV(svr) == 0x10))
+>>>> ||
+>>>> +		((SVR_SOC_VER(svr) == SVR_P3041) && (SVR_REV(svr) <= 0x20))
+>>>> ||
+>>>> +		((SVR_SOC_VER(svr) == SVR_P2041) && (SVR_REV(svr) <= 0x20))
+>>>> ||
+>>>> +		((SVR_SOC_VER(svr) == SVR_P5040) && SVR_REV(svr) == 0x20)))
+>>>> +		return;
+> You need to include variants here.  If P5040 is affected, then P5021 is
+> affected.  If P2041 is affected, then P2040 is affected, etc.
 >
-> On 08/23/2013 08:15 PM, Yuvaraj Kumar C D wrote:
->> Currently platform specific private data initialisation is done by
->> dw_mci_exynos_priv_init and dw_mci_exynos_parse_dt.As we already have
->> separate platform specific device tree parser dw_mci_exynos_parse_dt,
->> move the dw_mci_exynos_priv_init code to dw_mci_exynos_parse_dt.
->> We can use the dw_mci_exynos_priv_init to do some actual platform
->> specific initialisation of SMU and etc.
->>
->> changes since V1: none
->>
->> Signed-off-by: Yuvaraj Kumar C D <yuvaraj.cd@samsung.com>
->> ---
->>  drivers/mmc/host/dw_mmc-exynos.c |   31 +++++++++++++++----------------
->>  1 file changed, 15 insertions(+), 16 deletions(-)
->>
->> diff --git a/drivers/mmc/host/dw_mmc-exynos.c b/drivers/mmc/host/dw_mmc-exynos.c
->> index 9990f98..19c845b 100644
->> --- a/drivers/mmc/host/dw_mmc-exynos.c
->> +++ b/drivers/mmc/host/dw_mmc-exynos.c
->> @@ -72,22 +72,8 @@ static struct dw_mci_exynos_compatible {
->>
->>  static int dw_mci_exynos_priv_init(struct dw_mci *host)
->>  {
->> -     struct dw_mci_exynos_priv_data *priv;
->> -     int idx;
->> -
->> -     priv = devm_kzalloc(host->dev, sizeof(*priv), GFP_KERNEL);
->> -     if (!priv) {
->> -             dev_err(host->dev, "mem alloc failed for private data\n");
->> -             return -ENOMEM;
->> -     }
->> -
->> -     for (idx = 0; idx < ARRAY_SIZE(exynos_compat); idx++) {
->> -             if (of_device_is_compatible(host->dev->of_node,
->> -                                     exynos_compat[idx].compatible))
->> -                     priv->ctrl_type = exynos_compat[idx].ctrl_type;
->> -     }
->> +     struct dw_mci_exynos_priv_data *priv = host->priv;
->>
->> -     host->priv = priv;
->>       return 0;
->>  }
->>
->> @@ -177,12 +163,24 @@ static void dw_mci_exynos_set_ios(struct dw_mci *host, struct mmc_ios *ios)
->>
->>  static int dw_mci_exynos_parse_dt(struct dw_mci *host)
->>  {
->> -     struct dw_mci_exynos_priv_data *priv = host->priv;
->> +     struct dw_mci_exynos_priv_data *priv;
->>       struct device_node *np = host->dev->of_node;
->>       u32 timing[2];
->>       u32 div = 0;
->> +     int idx;
->>       int ret;
->>
->> +     priv = devm_kzalloc(host->dev, sizeof(*priv), GFP_KERNEL);
->> +     if (!priv) {
->> +             dev_err(host->dev, "mem alloc failed for private data\n");
->> +             return -ENOMEM;
->> +     }
->> +
->> +     for (idx = 0; idx < ARRAY_SIZE(exynos_compat); idx++) {
->> +             if (of_device_is_compatible(np, exynos_compat[idx].compatible))
->> +                     priv->ctrl_type = exynos_compat[idx].ctrl_type;
->> +     }
->> +
->>       of_property_read_u32(np, "samsung,dw-mshc-ciu-div", &div);
->>       priv->ciu_div = div;
->>
->> @@ -199,6 +197,7 @@ static int dw_mci_exynos_parse_dt(struct dw_mci *host)
->>               return ret;
->>
->>       priv->ddr_timing = SDMMC_CLKSEL_TIMING(timing[0], timing[1], div);
->> +     host->priv = priv;
+> -Scott
 >
-> I'm not sure whether my thinking is right or not.
-> if host->pdata is present, then dw_mci_parse_dt() didn't called at dw_mci_probe.
-Yes, you are right.
-> then how host->priv set to priv?
-Earlier host->priv set to priv in both non-DT and DT case.True, with
-this patch it does it only in DT case.
-Is there any platform/board which still uses dw_mmc and its platform
-extension driver with non DT case?
-I found a reference of non-DT case where host->pdata is present in
-dw_mmc-pci.c driver but does not
-use platform extension driver (exynos/socfpga).
 >
-> Best Regards,
-> Jaehoon Chung
->
->>       return 0;
->>  }
->>
->>
->
+Hi, Scott
+
+This workaround is for CR:ENGR00229586: A-005055, Configs Affected 
+onlylist these soc and its version.
+I was also wonder why only these boards?
+
+But Ican't add soc like P5021 as I think it should be. Maybe there are 
+some difference between them.
+
+-- 
+Thanks & Regards
+
+Haijun
+
+
+--------------090808080303070209090801
+Content-Type: text/html; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
+
+<html>
+  <head>
+    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type">
+  </head>
+  <body bgcolor="#FFFFFF" text="#000000">
+    <div class="moz-cite-prefix">On 08/23/2013 11:40 PM, Scott Wood
+      wrote:<br>
+    </div>
+    <blockquote cite="mid:1377272410.20722.46.camel@snotra.buserror.net"
+      type="cite">
+      <pre wrap="">On Fri, 2013-08-23 at 14:39 +0800, Zhang Haijun wrote:
+</pre>
+      <blockquote type="cite">
+        <pre wrap="">Hi, Anton and all
+
+Is there any advice on these two patches ?
+
+[PATCH 2/4 V2] mmc: esdhc: workaround for dma err in the last system 
+transaction
+[PATCH 3/4 V3] mmc: esdhc: Correct host version of T4240-R1.0-R2.0.
+
+
+[PATCH 1/4 V4] powerpc/85xx: Add support for 85xx cpu type detection
+This patch is Act-by Scott.
+Patch 4/4 is split to four patches and Act-by Anton.
+
+
+Thanks all.
+
+
+
+</pre>
+      </blockquote>
+      <pre wrap="">[snip]
+</pre>
+      <blockquote type="cite">
+        <blockquote type="cite">
+          <blockquote type="cite">
+            <pre wrap="">+	if (!(((SVR_SOC_VER(svr) == SVR_T4240) &amp;&amp; (SVR_REV(svr) == 0x10))
+||
++		((SVR_SOC_VER(svr) == SVR_B4860) &amp;&amp; (SVR_REV(svr) == 0x10))
+||
++		((SVR_SOC_VER(svr) == SVR_P1010) &amp;&amp; (SVR_REV(svr) == 0x10))
+||
++		((SVR_SOC_VER(svr) == SVR_P3041) &amp;&amp; (SVR_REV(svr) &lt;= 0x20))
+||
++		((SVR_SOC_VER(svr) == SVR_P2041) &amp;&amp; (SVR_REV(svr) &lt;= 0x20))
+||
++		((SVR_SOC_VER(svr) == SVR_P5040) &amp;&amp; SVR_REV(svr) == 0x20)))
++		return;
+</pre>
+          </blockquote>
+        </blockquote>
+      </blockquote>
+      <pre wrap="">
+You need to include variants here.  If P5040 is affected, then P5021 is
+affected.  If P2041 is affected, then P2040 is affected, etc.
+
+-Scott
+
+
+</pre>
+    </blockquote>
+    <font size="-1">Hi, Scott<br>
+      <br>
+      <font size="-1"><font size="-1">This <font size="-1">worka<font
+              size="-1">round is for </font></font></font></font></font><font
+      size="-1"><font size="-1"><font size="-1"><font size="-1"><font
+              size="-1">CR:ENGR00229586: A-005055<font size="-1">,
+                Config<font size="-1">s Affected only<font size="-1">
+                    list th<font size="-1">e<font size="-1">se <font
+                          size="-1">soc and its version</font>.<br>
+                        <font size="-1">I was also wo<font size="-1">nder
+                            <font size="-1">why only these boards<font
+                                size="-1">?<br>
+                                <br>
+                                <font size="-1"><font size="-1">But <font
+                                      size="-1">I<font size="-1"> can't
+                                        add s<font size="-1">oc </font>like
+                                        P5021 as <font size="-1">I
+                                          think it should be. Maybe
+                                          there are some <font
+                                            size="-1">difference <font
+                                              size="-1">between them.</font></font></font></font></font></font></font><br>
+                              </font></font></font></font></font></font></font></font></font></font></font></font></font></font><br>
+    <pre class="moz-signature" cols="72">-- 
+Thanks &amp; Regards
+
+Haijun</pre>
+  </body>
+</html>
+
+--------------090808080303070209090801--
+
+--===============4591255572590674148==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+
+_______________________________________________
+Linuxppc-dev mailing list
+Linuxppc-dev@lists.ozlabs.org
+https://lists.ozlabs.org/listinfo/linuxppc-dev
+--===============4591255572590674148==--
