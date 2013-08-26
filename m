@@ -1,101 +1,96 @@
-From: Stephen Warren <swarren@wwwdotorg.org>
-Subject: Re: [PATCHv5 2/3] ARM: socfpga: dts: Add support for SD/MMC
-Date: Mon, 26 Aug 2013 10:44:09 -0600
-Message-ID: <521B85D9.4070205@wwwdotorg.org>
-References: <1377272686-13253-1-git-send-email-dinguyen@altera.com>  <1377272686-13253-2-git-send-email-dinguyen@altera.com>  <5217E24B.3090302@wwwdotorg.org> <1377298903.26742.14.camel@linux-builds1>
+From: Joel Fernandes <joelf-l0cyMroinI0@public.gmane.org>
+Subject: Re: [PATCH v2] ARM: EDMA: Fix clearing of unused list for DT DMA
+	resources
+Date: Mon, 26 Aug 2013 11:52:16 -0500
+Message-ID: <521B87C0.1090507@ti.com>
+References: <1377287613-16491-1-git-send-email-joelf@ti.com>
+	<521B3212.3050405@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from avon.wwwdotorg.org ([70.85.31.133]:56562 "EHLO
-	avon.wwwdotorg.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756997Ab3HZQoM (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 26 Aug 2013 12:44:12 -0400
-In-Reply-To: <1377298903.26742.14.camel@linux-builds1>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
+In-Reply-To: <521B3212.3050405-l0cyMroinI0@public.gmane.org>
+List-Unsubscribe: <http://linux.davincidsp.com/mailman/options/davinci-linux-open-source>,
+	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://linux.davincidsp.com/pipermail/davinci-linux-open-source>
+List-Post: <mailto:davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
+List-Help: <mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=help>
+List-Subscribe: <http://linux.davincidsp.com/mailman/listinfo/davinci-linux-open-source>,
+	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=subscribe>
+Sender: <davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
+Errors-To: davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org
+To: Sekhar Nori <nsekhar-l0cyMroinI0@public.gmane.org>
+Cc: Linux DaVinci Kernel List <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Pantel Antoniou <panto-wVdstyuyKrO8r51toPun2/C9HSW9iNxf@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Vinod Koul <vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Dan Williams <djbw-b10kYP2dOMg@public.gmane.org>, Linux OMAP List <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux ARM Kernel List <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Dinh Nguyen <dinguyen@altera.com>
-Cc: dinh.linux@gmail.com, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, Rob Herring <rob.herring@calxeda.com>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Ian Campbell <ian.campbell@citrix.com>, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 
-On 08/23/2013 05:01 PM, Dinh Nguyen wrote:
-> On Fri, 2013-08-23 at 16:29 -0600, Stephen Warren wrote:
->> On 08/23/2013 09:44 AM, dinguyen@altera.com wrote:
->>> From: Dinh Nguyen <dinguyen@altera.com>
->>>
->>> Add bindings for SD/MMC for SOCFPGA.
+On 08/26/2013 05:46 AM, Sekhar Nori wrote:
+> On Saturday 24 August 2013 01:23 AM, Joel Fernandes wrote:
+>> HWMOD removal for MMC and Crypto is breaking edma_start as the events are
+>> being manually triggered due to unused channel list not being clear. Atleast
+>> breakage has been seen on these peripherals, but it is expected Audio (McASP)
+>> maybe breaking too.
 >>
->>> diff --git a/Documentation/devicetree/bindings/mmc/socfpga-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/socfpga-dw-mshc.txt
+>> This patch fixes the issue, by reading the "dmas" property from the DT node if
+>> it exists and clearing the bits in the unused channel list so that these channels
+>> are not manually triggered.
 >>
->>> +* altr,sysmgr: Should be the phandle to the system_mgr node. As this is where
->>> +		this where the register that controls the CIU clock phases
->>> +		reside.
->>> +
->>> +* altr,ciu-clk-offset: The order of the cells should be:
->>> +	- First Cell: Offset of the register in the system_mgr node that controls
->>> +		the smpsel bits.
->>> +	- Second Cell: Shift value of the drvsel bits.
->>> +	- Third Cell: Shift value of the smpsel bits.
->>
->> This almost solves the issues I was thinking of. A few more thoughts though:
->>
->> * What if the sysmgr node has multiple reg entries. Is the offset cell
->> in altr,ciu-clk-offset an offset from the first reg entry, or across all
->> reg entries? It might be better to specify this as a reg index plus
->> offset, or allow the sysmgr node to define the format (#sysmgr-cells
->> perhaps).
->>
->> * What if the drvsel and smpsel bits are in different registers, even
->> different sysmgr blocks? Wouldn't it be better to have 2 separate
->> properties, each one defining the location of one bit-field?
->>
->> * bikeshed: altr,ciu-clk-offset isn't a great name; the value is more
->> than just an offset.
->>
->> Putting those together, I might expect the following properties:
->>
->> sysmgr: sysmgr {
->>     /* binding for sysmgr node must specify what those 3 cells are */
->>     #sysmgr-cells = <3>;
->> }
->>
->> dwmmc {
->>     altr,drvsel-reg-field = <
->>         &sysmgr /* sysmgr phandle */
->>         0 /* reg index */
->>         0 /* reg offset */
->>         0 /* field bit position */
->>         3 /* field bit size */>;
->>     altr,smpsel-reg-field = <
->>         &sysmgr /* sysmgr phandle */
->>         0 /* reg index */
->>         0 /* reg offset */
->>         3 /* field bit position */
->>         3 /* field bit size */>;
->> };
->>
->> That would allow the whole sysmgr concept to be completely generic.
->>
->> But, this is a bit like representing raw register I/O in DT, which has
->> been frowned upon in the past.
->>
->> Finally, what if the values for drvsel, smpsel are different in
->> different sysmgr implementations? Do you need a property that defines
->> that values?
->>
->> Another option might be to define a semantic API between the two, such
->> that you only need a sysmgr=<&sysmgr> property, yet the driver for the
->> sysmgr node exposes a function sysmgr_set_dwmmc_drvsel_smpsel(struct
->> device_node *sysmgr_node, uint drvsel, uint smpsel); Now, the sysmgr
->> driver would have to implement that on any SoC that supported a dwmmc.
+>> v2 changes:
+>> Reduced indendation by returning from if block.
 > 
-> I was trying to avoid adding a driver for the sysmgr, as it really does
-> not represent any type of device. It is a merely a register region with
-> miscellaneous registers that controls other IPs in the SOC.
-> 
-> I'm thinking perhaps I can set this register in the arch specific file,
-> then the SD/MMC driver would not need to bother with it at all?
+> Is this a v2 or v3 since you already sent a v2 about a month back?
 
-The problem with hard-coding this in the MMC driver is that it makes the
-MMC driver depend on information outside the MMC HW block. If you do
-that, you may as well just write the "syscon" registers directly in the
-MMC driver.
+No, there aren't any changes since v2, I just resubmitted the same patch.
+
+>>
+>> Reviewed-by: Sekhar Nori <nsekhar-l0cyMroinI0@public.gmane.org>
+>> Reported-by: Balaji T K <balajitk-l0cyMroinI0@public.gmane.org>
+>> Cc: Pantel Antoniou <panto-wVdstyuyKrO8r51toPun2/C9HSW9iNxf@public.gmane.org>
+>> Signed-off-by: Joel Fernandes <joelf-l0cyMroinI0@public.gmane.org>
+>> ---
+>> Note:
+>> Patch should go in for -rc cycle as it fixes existing crypto drivers.
+> 
+> We agreed the patch is not needed in -rc cycle since there are no
+> current EDMA users in DT-boot?
+
+There is now, crypto and EDMA DT patches are being merged in.
+
+>>
+>>  arch/arm/common/edma.c | 22 +++++++++++++++++++---
+>>  1 file changed, 19 insertions(+), 3 deletions(-)
+>>
+>> diff --git a/arch/arm/common/edma.c b/arch/arm/common/edma.c
+>> index 39ad030..3867e7e 100644
+>> --- a/arch/arm/common/edma.c
+>> +++ b/arch/arm/common/edma.c
+>> @@ -560,14 +560,30 @@ static int reserve_contiguous_slots(int ctlr, unsigned int id,
+>>  static int prepare_unused_channel_list(struct device *dev, void *data)
+>>  {
+>>  	struct platform_device *pdev = to_platform_device(dev);
+>> -	int i, ctlr;
+>> +	int i = 0, ctlr;
+>> +	u32 dma_chan;
+>> +	const __be32 *dma_chan_p;
+>> +	struct property *prop;
+>> +
+>> +	if (dev->of_node) {
+>> +		of_property_for_each_u32(dev->of_node, "dmas", prop,
+>> +					 dma_chan_p, dma_chan) {
+>> +			if (i++ & 1) {
+>> +				ctlr = EDMA_CTLR(dma_chan);
+>> +				clear_bit(EDMA_CHAN_SLOT(dma_chan),
+>> +					  edma_cc[ctlr]->edma_unused);
+>> +			}
+> 
+> I thought we agreed to do this differently using
+> of_property_count_strings() and of_parse_phandle_with_args(). I seemed
+> to have missed any discussion on why this cannot be done (if such a
+> discussion took place on the list).
+
+I kind of missed that particular review comment after reading [1]. Because I
+thought only change left was the indentation. Let me work on that comment and
+resubmit as v3.
+
+Regards,
+
+-Joel
