@@ -1,148 +1,81 @@
-From: Seungwon Jeon <tgih.jun@samsung.com>
-Subject: [PATCH v2] mmc: add ignorance case for CMD13 CRC error
-Date: Mon, 26 Aug 2013 16:20:04 +0900
-Message-ID: <002901cea22c$af778730$0e669590$%jun@samsung.com>
-References: <002301ce9e6b$e72da2a0$b588e7e0$%jun@samsung.com>
- <CAPDyKFrGxbo46_uhJrWc-u0k1kJxXxeKePdoou3aFpwSBUY21g@mail.gmail.com>
+From: Jeremie Samuel <jeremie.samuel.ext@parrot.com>
+Subject: Re: [PATCH 6/8] sdhci: Turn host->lock into a mutex
+Date: Mon, 26 Aug 2013 10:37:56 +0200
+Message-ID: <521B13E4.6030800@parrot.com>
+References: <1373384652-21958-1-git-send-email-jeremie.samuel.ext@parrot.com> <1373384652-21958-7-git-send-email-jeremie.samuel.ext@parrot.com> <874naev8e1.fsf@octavius.laptop.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=Windows-1252
+Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout1.samsung.com ([203.254.224.24]:24499 "EHLO
-	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756377Ab3HZHUH (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 26 Aug 2013 03:20:07 -0400
-Received: from epcpsbgr1.samsung.com
- (u141.gpu120.samsung.co.kr [203.254.230.141])
- by mailout1.samsung.com (Oracle Communications Messaging Server 7u4-24.01
- (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTP id <0MS400E0EN1H79M0@mailout1.samsung.com> for
- linux-mmc@vger.kernel.org; Mon, 26 Aug 2013 16:20:05 +0900 (KST)
-In-reply-to: <CAPDyKFrGxbo46_uhJrWc-u0k1kJxXxeKePdoou3aFpwSBUY21g@mail.gmail.com>
-Content-language: ko
+Received: from co202.xi-lite.net ([149.6.83.202]:34579 "EHLO co202.xi-lite.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1756305Ab3HZIiz (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 26 Aug 2013 04:38:55 -0400
+In-Reply-To: <874naev8e1.fsf@octavius.laptop.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: 'linux-mmc' <linux-mmc@vger.kernel.org>
-Cc: 'Chris Ball' <cjb@laptop.org>, 'Ulf Hansson' <ulf.hansson@linaro.org>
+To: Chris Ball <cjb@laptop.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Matthieu Castet <matthieu.castet@parrot.com>, =?ISO-8859-1?Q?Gr=E9gor_BOIRIE?= <gregor.boirie@parrot.com>
 
-While speed mode is changed, CMD13 cannot be guaranteed.
-According to the spec., it is not recommended to use CMD13
-to check the busy completion of the timing change.
-If CMD13 is used in this case, CRC error must be ignored.
+Hi Chris,
 
-Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
----
-Change in v2:
- - Removed function declaration.(From Ulf Hansson)
+Thank you for the feedback. I'll send you the modifications in 
+September. But I will not be able to test the changes. I don't have the 
+hardware.
 
- drivers/mmc/core/mmc_ops.c |   70 ++++++++++++++++++++++++++-----------------
- 1 files changed, 42 insertions(+), 28 deletions(-)
+Regards,
 
-diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
-index ef18348..1464c1e 100644
---- a/drivers/mmc/core/mmc_ops.c
-+++ b/drivers/mmc/core/mmc_ops.c
-@@ -23,6 +23,40 @@
- 
- #define MMC_OPS_TIMEOUT_MS	(10 * 60 * 1000) /* 10 minute timeout */
- 
-+static inline int __mmc_send_status(struct mmc_card *card, u32 *status,
-+				    bool ignore_crc)
-+{
-+	int err;
-+	struct mmc_command cmd = {0};
-+
-+	BUG_ON(!card);
-+	BUG_ON(!card->host);
-+
-+	cmd.opcode = MMC_SEND_STATUS;
-+	if (!mmc_host_is_spi(card->host))
-+		cmd.arg = card->rca << 16;
-+	cmd.flags = MMC_RSP_SPI_R2 | MMC_RSP_R1 | MMC_CMD_AC;
-+	if (ignore_crc)
-+		cmd.flags &= ~MMC_RSP_CRC;
-+
-+	err = mmc_wait_for_cmd(card->host, &cmd, MMC_CMD_RETRIES);
-+	if (err)
-+		return err;
-+
-+	/* NOTE: callers are required to understand the difference
-+	 * between "native" and SPI format status words!
-+	 */
-+	if (status)
-+		*status = cmd.resp[0];
-+
-+	return 0;
-+}
-+
-+int mmc_send_status(struct mmc_card *card, u32 *status)
-+{
-+	return __mmc_send_status(card, status, false);
-+}
-+
- static int _mmc_select_card(struct mmc_host *host, struct mmc_card *card)
- {
- 	int err;
-@@ -380,6 +414,7 @@ int __mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
- 	struct mmc_command cmd = {0};
- 	unsigned long timeout;
- 	u32 status;
-+	bool ignore_crc;
- 
- 	BUG_ON(!card);
- 	BUG_ON(!card->host);
-@@ -408,10 +443,15 @@ int __mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
- 	if (!use_busy_signal)
- 		return 0;
- 
--	/* Must check status to be sure of no errors */
-+	/*
-+	 * Must check status to be sure of no errors
-+	 * If CMD13 is to check the busy completion of the timing change,
-+	 * disable the check of CRC error.
-+	 */
-+	ignore_crc = (index == EXT_CSD_HS_TIMING) ? true : false;
- 	timeout = jiffies + msecs_to_jiffies(MMC_OPS_TIMEOUT_MS);
- 	do {
--		err = mmc_send_status(card, &status);
-+		err = __mmc_send_status(card, &status, ignore_crc);
- 		if (err)
- 			return err;
- 		if (card->host->caps & MMC_CAP_WAIT_WHILE_BUSY)
-@@ -449,32 +489,6 @@ int mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
- }
- EXPORT_SYMBOL_GPL(mmc_switch);
- 
--int mmc_send_status(struct mmc_card *card, u32 *status)
--{
--	int err;
--	struct mmc_command cmd = {0};
--
--	BUG_ON(!card);
--	BUG_ON(!card->host);
--
--	cmd.opcode = MMC_SEND_STATUS;
--	if (!mmc_host_is_spi(card->host))
--		cmd.arg = card->rca << 16;
--	cmd.flags = MMC_RSP_SPI_R2 | MMC_RSP_R1 | MMC_CMD_AC;
--
--	err = mmc_wait_for_cmd(card->host, &cmd, MMC_CMD_RETRIES);
--	if (err)
--		return err;
--
--	/* NOTE: callers are required to understand the difference
--	 * between "native" and SPI format status words!
--	 */
--	if (status)
--		*status = cmd.resp[0];
--
--	return 0;
--}
--
- static int
- mmc_send_bus_test(struct mmc_card *card, struct mmc_host *host, u8 opcode,
- 		  u8 len)
 -- 
-1.7.0.4
+Jeremie Samuel              Parrot S.A.
+Software Engineer           14, quai de Jemmapes
+R&D/OS Platform             75010 Paris, France
+http://www.parrot.com
 
+On 25/08/2013 03:58, Chris Ball wrote:
+> Hi Jeremie, I'm sorry for a very late review.
+>
+> On Tue, Jul 09 2013, Jeremie Samuel wrote:
+>> @@ -118,7 +119,7 @@ struct sdhci_host {
+>>   	enum led_brightness brightness;
+>>   #endif
+>>   
+>> -	spinlock_t lock;	/* Mutex */
+>> +	struct mutex lock;	/* Mutex */
+>>   
+>>   	int flags;		/* Host attributes */
+>>   #define SDHCI_USE_SDMA		(1<<0)	/* Host is SDMA capable */
+> I think you need to modify many of the drivers/mmc/host/sdhci-*
+> drivers too -- for example:
+>
+> sdhci-pxav3.c:
+>
+> static int sdhci_pxav3_runtime_suspend(struct device *dev)
+> {
+>          struct sdhci_host *host = dev_get_drvdata(dev);
+>          struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+>          unsigned long flags;
+>
+>          if (pltfm_host->clk) {
+>                  spin_lock_irqsave(&host->lock, flags);
+> [...]
+>
+>
+> sdhci-s3c.c:
+>
+> static void sdhci_s3c_notify_change(struct platform_device *dev, int state)
+> {
+>          struct sdhci_host *host = platform_get_drvdata(dev);
+> #ifdef CONFIG_PM_RUNTIME
+>          struct sdhci_s3c *sc = sdhci_priv(host);
+> #endif
+>          unsigned long flags;
+>
+>          if (host) {
+>                  spin_lock_irqsave(&host->lock, flags);
+> [...]
+>
+>
+> Thanks,
+>
+> - Chris.
 
