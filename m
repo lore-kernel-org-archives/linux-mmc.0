@@ -1,122 +1,114 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH v6 2/3] mmc: dw_mmc: Honor requests to set the clock to 0
- (turn off clock)
-Date: Mon, 26 Aug 2013 18:06:15 +0900
-Message-ID: <521B1A87.4000500@samsung.com>
-References: <1377188348-3418-1-git-send-email-dianders@chromium.org>
- <1377188348-3418-3-git-send-email-dianders@chromium.org>
- <001201cea215$8c125e30$a4371a90$%jun@samsung.com>
+From: Yuvaraj Kumar <yuvaraj.cd@gmail.com>
+Subject: Re: [RFC V2 1/4] mmc: dw_mmc: exynos: move the exynos private init
+Date: Mon, 26 Aug 2013 14:50:39 +0530
+Message-ID: <CAKuRcOKSzXXGnN1jZhYhimnRqmKM4pc2qB2N0AgXdRX1VFLb3Q@mail.gmail.com>
+References: <1377256509-18922-1-git-send-email-yuvaraj.cd@samsung.com>
+	<1377256509-18922-2-git-send-email-yuvaraj.cd@samsung.com>
+	<5217673C.1040305@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=EUC-KR
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout3.samsung.com ([203.254.224.33]:56855 "EHLO
-	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751850Ab3HZJGG (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 26 Aug 2013 05:06:06 -0400
-In-reply-to: <001201cea215$8c125e30$a4371a90$%jun@samsung.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-Reply-To: <5217673C.1040305@samsung.com>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, linux-samsung-soc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Seungwon Jeon <tgih.jun@samsung.com>, Alim Akhtar <alim.akhtar@samsung.com>, ks.giri@samsung.com, Tomasz Figa <t.figa@samsung.com>, Yuvaraj Kumar C D <yuvaraj.cd@samsung.com>, thomas.ab@samsung.com
 List-Id: linux-mmc@vger.kernel.org
-To: Seungwon Jeon <tgih.jun@samsung.com>
-Cc: 'Doug Anderson' <dianders@chromium.org>, 'Chris Ball' <cjb@laptop.org>, 'Jaehoon Chung' <jh80.chung@samsung.com>, 'James Hogan' <james.hogan@imgtec.com>, 'Grant Grundler' <grundler@chromium.org>, 'Alim Akhtar' <alim.akhtar@samsung.com>, 'Abhilash Kesavan' <a.kesavan@samsung.com>, 'Tomasz Figa' <tomasz.figa@gmail.com>, 'Olof Johansson' <olof@lixom.net>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-On 08/26/2013 01:34 PM, Seungwon Jeon wrote:
-> On Fri, August 23, 2013, Doug Anderson wrote:
->> Previously the dw_mmc driver would ignore any requests to disable the
->> card's clock.  This doesn't seem like a good thing in general, but had
->> one extra bad side effect in the following situtation:
->> * mmc core would set clk to 400kHz at boot time while initting
->> * mmc core would set clk to 0 since no card, but it would be ignored.
->> * suspend to ram and resume; clocks in the dw_mmc IP block are now 0
->>   but dw_mmc thinks that they're 400kHz (it ignored the set to 0).
->> * insert card
->> * mmc core would set clk to 400kHz which would be considered a no-op.
+On Fri, Aug 23, 2013 at 7:14 PM, Jaehoon Chung <jh80.chung@samsung.com> wrote:
+> Hi Yuvaraj,
+>
+> On 08/23/2013 08:15 PM, Yuvaraj Kumar C D wrote:
+>> Currently platform specific private data initialisation is done by
+>> dw_mci_exynos_priv_init and dw_mci_exynos_parse_dt.As we already have
+>> separate platform specific device tree parser dw_mci_exynos_parse_dt,
+>> move the dw_mci_exynos_priv_init code to dw_mci_exynos_parse_dt.
+>> We can use the dw_mci_exynos_priv_init to do some actual platform
+>> specific initialisation of SMU and etc.
 >>
->> Note that if there is no card in the slot and we do a suspend/resume
->> cycle, we _do_ still end up with differences in a dw_mmc register
->> dump, but the differences are clock related and we've got the clock
->> disabled both before and after, so this should be OK.
+>> changes since V1: none
 >>
->> Signed-off-by: Doug Anderson <dianders@chromium.org>
+>> Signed-off-by: Yuvaraj Kumar C D <yuvaraj.cd@samsung.com>
 >> ---
->> Changes in v6:
->> - Replaces previous pathes that ensured saving/restoring clocks.
+>>  drivers/mmc/host/dw_mmc-exynos.c |   31 +++++++++++++++----------------
+>>  1 file changed, 15 insertions(+), 16 deletions(-)
 >>
->>  drivers/mmc/host/dw_mmc.c | 21 +++++++++++----------
->>  1 file changed, 11 insertions(+), 10 deletions(-)
+>> diff --git a/drivers/mmc/host/dw_mmc-exynos.c b/drivers/mmc/host/dw_mmc-exynos.c
+>> index 9990f98..19c845b 100644
+>> --- a/drivers/mmc/host/dw_mmc-exynos.c
+>> +++ b/drivers/mmc/host/dw_mmc-exynos.c
+>> @@ -72,22 +72,8 @@ static struct dw_mci_exynos_compatible {
 >>
->> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
->> index ee5f167..f6c7545 100644
->> --- a/drivers/mmc/host/dw_mmc.c
->> +++ b/drivers/mmc/host/dw_mmc.c
->> @@ -635,7 +635,11 @@ static void dw_mci_setup_bus(struct dw_mci_slot *slot, bool force_clkinit)
->>  	u32 div;
->>  	u32 clk_en_a;
->>
->> -	if (slot->clock != host->current_speed || force_clkinit) {
->> +	if (slot->clock == 0) {
->> +		mci_writel(host, CLKENA, 0);
->> +		mci_send_cmd(slot,
->> +			     SDMMC_CMD_UPD_CLK | SDMMC_CMD_PRV_DAT_WAIT, 0);
-> Basically dw_mmc driver uses host's low power mode(auto clock gating)
-> So, how about keeping origin code rather than programming clock setting to '0'?
-Right, Dw-mmc controller can use the Low-power mode. 
-This mode is functionality like clock-gating. Well, i didn't know what benefit we get, if set to 0.
-
-Best Regards,
-Jaehoon Chung
->  
->> +	} else if (slot->clock != host->current_speed || force_clkinit) {
-> And then, if condition('slot->clock is not zero') is added in order to allow to set clock,
-> print messages which Jaehoon pointed would be solved.
-> 
-> Thanks,
-> Seungwon Jeon
-> 
->>  		div = host->bus_hz / slot->clock;
->>  		if (host->bus_hz % slot->clock && host->bus_hz > slot->clock)
->>  			/*
->> @@ -675,9 +679,8 @@ static void dw_mci_setup_bus(struct dw_mci_slot *slot, bool force_clkinit)
->>  		/* inform CIU */
->>  		mci_send_cmd(slot,
->>  			     SDMMC_CMD_UPD_CLK | SDMMC_CMD_PRV_DAT_WAIT, 0);
+>>  static int dw_mci_exynos_priv_init(struct dw_mci *host)
+>>  {
+>> -     struct dw_mci_exynos_priv_data *priv;
+>> -     int idx;
 >> -
->> -		host->current_speed = slot->clock;
->>  	}
->> +	host->current_speed = slot->clock;
+>> -     priv = devm_kzalloc(host->dev, sizeof(*priv), GFP_KERNEL);
+>> -     if (!priv) {
+>> -             dev_err(host->dev, "mem alloc failed for private data\n");
+>> -             return -ENOMEM;
+>> -     }
+>> -
+>> -     for (idx = 0; idx < ARRAY_SIZE(exynos_compat); idx++) {
+>> -             if (of_device_is_compatible(host->dev->of_node,
+>> -                                     exynos_compat[idx].compatible))
+>> -                     priv->ctrl_type = exynos_compat[idx].ctrl_type;
+>> -     }
+>> +     struct dw_mci_exynos_priv_data *priv = host->priv;
 >>
->>  	/* Set the current slot bus width */
->>  	mci_writel(host, CTYPE, (slot->ctype << slot->id));
->> @@ -807,13 +810,11 @@ static void dw_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+>> -     host->priv = priv;
+>>       return 0;
+>>  }
 >>
->>  	mci_writel(slot->host, UHS_REG, regs);
+>> @@ -177,12 +163,24 @@ static void dw_mci_exynos_set_ios(struct dw_mci *host, struct mmc_ios *ios)
 >>
->> -	if (ios->clock) {
->> -		/*
->> -		 * Use mirror of ios->clock to prevent race with mmc
->> -		 * core ios update when finding the minimum.
->> -		 */
->> -		slot->clock = ios->clock;
->> -	}
->> +	/*
->> +	 * Use mirror of ios->clock to prevent race with mmc
->> +	 * core ios update when finding the minimum.
->> +	 */
->> +	slot->clock = ios->clock;
+>>  static int dw_mci_exynos_parse_dt(struct dw_mci *host)
+>>  {
+>> -     struct dw_mci_exynos_priv_data *priv = host->priv;
+>> +     struct dw_mci_exynos_priv_data *priv;
+>>       struct device_node *np = host->dev->of_node;
+>>       u32 timing[2];
+>>       u32 div = 0;
+>> +     int idx;
+>>       int ret;
 >>
->>  	if (drv_data && drv_data->set_ios)
->>  		drv_data->set_ios(slot->host, ios);
->> --
->> 1.8.3
+>> +     priv = devm_kzalloc(host->dev, sizeof(*priv), GFP_KERNEL);
+>> +     if (!priv) {
+>> +             dev_err(host->dev, "mem alloc failed for private data\n");
+>> +             return -ENOMEM;
+>> +     }
+>> +
+>> +     for (idx = 0; idx < ARRAY_SIZE(exynos_compat); idx++) {
+>> +             if (of_device_is_compatible(np, exynos_compat[idx].compatible))
+>> +                     priv->ctrl_type = exynos_compat[idx].ctrl_type;
+>> +     }
+>> +
+>>       of_property_read_u32(np, "samsung,dw-mshc-ciu-div", &div);
+>>       priv->ciu_div = div;
 >>
->> --
->> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-
+>> @@ -199,6 +197,7 @@ static int dw_mci_exynos_parse_dt(struct dw_mci *host)
+>>               return ret;
+>>
+>>       priv->ddr_timing = SDMMC_CLKSEL_TIMING(timing[0], timing[1], div);
+>> +     host->priv = priv;
+>
+> I'm not sure whether my thinking is right or not.
+> if host->pdata is present, then dw_mci_parse_dt() didn't called at dw_mci_probe.
+Yes, you are right.
+> then how host->priv set to priv?
+Earlier host->priv set to priv in both non-DT and DT case.True, with
+this patch it does it only in DT case.
+Is there any platform/board which still uses dw_mmc and its platform
+extension driver with non DT case?
+I found a reference of non-DT case where host->pdata is present in
+dw_mmc-pci.c driver but does not
+use platform extension driver (exynos/socfpga).
+>
+> Best Regards,
+> Jaehoon Chung
+>
+>>       return 0;
+>>  }
+>>
+>>
+>
