@@ -1,16 +1,14 @@
 From: Zhang Haijun <B42677@freescale.com>
-Subject: Re: [PATCH 2/4 V2] mmc: esdhc: workaround for dma err in the last
- system transaction
-Date: Mon, 26 Aug 2013 09:03:03 +0800
-Message-ID: <521AA947.6080209@freescale.com>
-References: <1374055891-20703-1-git-send-email-Haijun.Zhang@freescale.com>
- <99E897753B6F7048BD8CCDB4661D02E13DF52C@039-SN2MPN1-022.039d.mgd.msft.net>
- <521703AB.8030702@freescale.com>
- <1377272410.20722.46.camel@snotra.buserror.net>
+Subject: Re: [PATCH V3] mmc:of_spi: Update the code of getting voltage-ranges
+Date: Mon, 26 Aug 2013 09:05:16 +0800
+Message-ID: <521AA9CC.2090403@freescale.com>
+References: <1376271546-25085-1-git-send-email-Haijun.Zhang@freescale.com>
+ <1376271546-25085-3-git-send-email-Haijun.Zhang@freescale.com>
+ <87txiepflk.fsf@octavius.laptop.org>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============4591255572590674148=="
+Content-Type: multipart/mixed; boundary="===============7904672804084438192=="
 Return-path: <linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org>
-In-Reply-To: <1377272410.20722.46.camel@snotra.buserror.net>
+In-Reply-To: <87txiepflk.fsf@octavius.laptop.org>
 List-Unsubscribe: <https://lists.ozlabs.org/options/linuxppc-dev>,
  <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=unsubscribe>
 List-Archive: <http://lists.ozlabs.org/pipermail/linuxppc-dev/>
@@ -21,65 +19,37 @@ List-Subscribe: <https://lists.ozlabs.org/listinfo/linuxppc-dev>,
 Errors-To: linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org
 Sender: "Linuxppc-dev"
  <linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org>
-To: Scott Wood <scottwood@freescale.com>
-Cc: Wood Scott-B07421 <B07421@freescale.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "cbouatmailru@gmail.com" <cbouatmailru@gmail.com>, "cjb@laptop.org" <cjb@laptop.org>, "linuxppc-dev@lists.ozlabs.org" <linuxppc-dev@lists.ozlabs.org>, Xie Xiaobo-R63061 <X.Xie@freescale.com>
+To: Chris Ball <cjb@laptop.org>
+Cc: linux-mmc@vger.kernel.org, Haijun Zhang <Haijun.Zhang@freescale.com>, cbouatmailru@gmail.com, scottwood@freescale.com, linuxppc-dev@lists.ozlabs.org, X.Xie@freescale.com
 List-Id: linux-mmc@vger.kernel.org
 
---===============4591255572590674148==
+--===============7904672804084438192==
 Content-Type: multipart/alternative;
-	boundary="------------090808080303070209090801"
+	boundary="------------000903090906070703000208"
 
---------------090808080303070209090801
-Content-Type: text/plain; charset="UTF-8"; format=flowed
+--------------000903090906070703000208
+Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
 Content-Transfer-Encoding: 7bit
 
-On 08/23/2013 11:40 PM, Scott Wood wrote:
-> On Fri, 2013-08-23 at 14:39 +0800, Zhang Haijun wrote:
->> Hi, Anton and all
->>
->> Is there any advice on these two patches ?
->>
->> [PATCH 2/4 V2] mmc: esdhc: workaround for dma err in the last system
->> transaction
->> [PATCH 3/4 V3] mmc: esdhc: Correct host version of T4240-R1.0-R2.0.
->>
->>
->> [PATCH 1/4 V4] powerpc/85xx: Add support for 85xx cpu type detection
->> This patch is Act-by Scott.
->> Patch 4/4 is split to four patches and Act-by Anton.
->>
->>
->> Thanks all.
->>
->>
->>
-> [snip]
->>>> +	if (!(((SVR_SOC_VER(svr) == SVR_T4240) && (SVR_REV(svr) == 0x10))
->>>> ||
->>>> +		((SVR_SOC_VER(svr) == SVR_B4860) && (SVR_REV(svr) == 0x10))
->>>> ||
->>>> +		((SVR_SOC_VER(svr) == SVR_P1010) && (SVR_REV(svr) == 0x10))
->>>> ||
->>>> +		((SVR_SOC_VER(svr) == SVR_P3041) && (SVR_REV(svr) <= 0x20))
->>>> ||
->>>> +		((SVR_SOC_VER(svr) == SVR_P2041) && (SVR_REV(svr) <= 0x20))
->>>> ||
->>>> +		((SVR_SOC_VER(svr) == SVR_P5040) && SVR_REV(svr) == 0x20)))
->>>> +		return;
-> You need to include variants here.  If P5040 is affected, then P5021 is
-> affected.  If P2041 is affected, then P2040 is affected, etc.
+On 08/25/2013 12:19 PM, Chris Ball wrote:
+> Hi Haijun,
 >
-> -Scott
+> On Sun, Aug 11 2013, Haijun Zhang wrote:
+>> Using function mmc_of_parse_voltage() to get voltage-ranges.
+>>
+>> Signed-off-by: Haijun Zhang <haijun.zhang@freescale.com>
+> The patchset contains patches 1-3 of 3, and also this unnumbered patch
+> v3.  Which order should I use to apply this patch?
 >
+> Thanks,
 >
-Hi, Scott
+> - Chris.
 
-This workaround is for CR:ENGR00229586: A-005055, Configs Affected 
-onlylist these soc and its version.
-I was also wonder why only these boards?
+Thanks Chris,
 
-But Ican't add soc like P5021 as I think it should be. Maybe there are 
-some difference between them.
+So, I'll numbered them an resend them to you.
+
+Thanks a lot.
 
 -- 
 Thanks & Regards
@@ -87,95 +57,48 @@ Thanks & Regards
 Haijun
 
 
---------------090808080303070209090801
-Content-Type: text/html; charset="UTF-8"
+--------------000903090906070703000208
+Content-Type: text/html; charset="ISO-8859-1"
 Content-Transfer-Encoding: 7bit
 
 <html>
   <head>
-    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type">
+    <meta content="text/html; charset=ISO-8859-1"
+      http-equiv="Content-Type">
   </head>
   <body bgcolor="#FFFFFF" text="#000000">
-    <div class="moz-cite-prefix">On 08/23/2013 11:40 PM, Scott Wood
+    <div class="moz-cite-prefix">On 08/25/2013 12:19 PM, Chris Ball
       wrote:<br>
     </div>
-    <blockquote cite="mid:1377272410.20722.46.camel@snotra.buserror.net"
+    <blockquote cite="mid:87txiepflk.fsf@octavius.laptop.org"
       type="cite">
-      <pre wrap="">On Fri, 2013-08-23 at 14:39 +0800, Zhang Haijun wrote:
+      <pre wrap="">Hi Haijun,
+
+On Sun, Aug 11 2013, Haijun Zhang wrote:
 </pre>
       <blockquote type="cite">
-        <pre wrap="">Hi, Anton and all
+        <pre wrap="">Using function mmc_of_parse_voltage() to get voltage-ranges.
 
-Is there any advice on these two patches ?
-
-[PATCH 2/4 V2] mmc: esdhc: workaround for dma err in the last system 
-transaction
-[PATCH 3/4 V3] mmc: esdhc: Correct host version of T4240-R1.0-R2.0.
-
-
-[PATCH 1/4 V4] powerpc/85xx: Add support for 85xx cpu type detection
-This patch is Act-by Scott.
-Patch 4/4 is split to four patches and Act-by Anton.
-
-
-Thanks all.
-
-
-
+Signed-off-by: Haijun Zhang <a class="moz-txt-link-rfc2396E" href="mailto:haijun.zhang@freescale.com">&lt;haijun.zhang@freescale.com&gt;</a>
 </pre>
-      </blockquote>
-      <pre wrap="">[snip]
-</pre>
-      <blockquote type="cite">
-        <blockquote type="cite">
-          <blockquote type="cite">
-            <pre wrap="">+	if (!(((SVR_SOC_VER(svr) == SVR_T4240) &amp;&amp; (SVR_REV(svr) == 0x10))
-||
-+		((SVR_SOC_VER(svr) == SVR_B4860) &amp;&amp; (SVR_REV(svr) == 0x10))
-||
-+		((SVR_SOC_VER(svr) == SVR_P1010) &amp;&amp; (SVR_REV(svr) == 0x10))
-||
-+		((SVR_SOC_VER(svr) == SVR_P3041) &amp;&amp; (SVR_REV(svr) &lt;= 0x20))
-||
-+		((SVR_SOC_VER(svr) == SVR_P2041) &amp;&amp; (SVR_REV(svr) &lt;= 0x20))
-||
-+		((SVR_SOC_VER(svr) == SVR_P5040) &amp;&amp; SVR_REV(svr) == 0x20)))
-+		return;
-</pre>
-          </blockquote>
-        </blockquote>
       </blockquote>
       <pre wrap="">
-You need to include variants here.  If P5040 is affected, then P5021 is
-affected.  If P2041 is affected, then P2040 is affected, etc.
+The patchset contains patches 1-3 of 3, and also this unnumbered patch
+v3.  Which order should I use to apply this patch?
 
--Scott
+Thanks,
 
-
+- Chris.
 </pre>
     </blockquote>
-    <font size="-1">Hi, Scott<br>
-      <br>
-      <font size="-1"><font size="-1">This <font size="-1">worka<font
-              size="-1">round is for </font></font></font></font></font><font
-      size="-1"><font size="-1"><font size="-1"><font size="-1"><font
-              size="-1">CR:ENGR00229586: A-005055<font size="-1">,
-                Config<font size="-1">s Affected only<font size="-1">
-                    list th<font size="-1">e<font size="-1">se <font
-                          size="-1">soc and its version</font>.<br>
-                        <font size="-1">I was also wo<font size="-1">nder
-                            <font size="-1">why only these boards<font
-                                size="-1">?<br>
-                                <br>
-                                <font size="-1"><font size="-1">But <font
-                                      size="-1">I<font size="-1"> can't
-                                        add s<font size="-1">oc </font>like
-                                        P5021 as <font size="-1">I
-                                          think it should be. Maybe
-                                          there are some <font
-                                            size="-1">difference <font
-                                              size="-1">between them.</font></font></font></font></font></font></font><br>
-                              </font></font></font></font></font></font></font></font></font></font></font></font></font></font><br>
+    <font size="-1"><br>
+      <font size="-1">Thanks Chris,<br>
+        <br>
+        <font size="-1">So<font size="-1">, I'll numbered them an rese<font
+              size="-1">nd them to you.<br>
+              <br>
+              <font size="-1"><font size="-1">T</font>hanks a lot.</font><br>
+            </font></font></font></font></font><br>
     <pre class="moz-signature" cols="72">-- 
 Thanks &amp; Regards
 
@@ -183,9 +106,9 @@ Haijun</pre>
   </body>
 </html>
 
---------------090808080303070209090801--
+--------------000903090906070703000208--
 
---===============4591255572590674148==
+--===============7904672804084438192==
 Content-Type: text/plain; charset="us-ascii"
 MIME-Version: 1.0
 Content-Transfer-Encoding: 7bit
@@ -195,4 +118,4 @@ _______________________________________________
 Linuxppc-dev mailing list
 Linuxppc-dev@lists.ozlabs.org
 https://lists.ozlabs.org/listinfo/linuxppc-dev
---===============4591255572590674148==--
+--===============7904672804084438192==--
