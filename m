@@ -1,114 +1,122 @@
-From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: Re: [PATCH] mmc:tmio_mmc change driver to use dev_pm_ops infrastructure
-Date: Mon, 26 Aug 2013 10:48:29 +0200 (CEST)
-Message-ID: <Pine.LNX.4.64.1308261043010.1767@axis700.grange>
-References: <1376148055-2539-1-git-send-email-shuah.kh@samsung.com>
- <1376148055-2539-10-git-send-email-shuah.kh@samsung.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH v6 2/3] mmc: dw_mmc: Honor requests to set the clock to 0
+ (turn off clock)
+Date: Mon, 26 Aug 2013 18:06:15 +0900
+Message-ID: <521B1A87.4000500@samsung.com>
+References: <1377188348-3418-1-git-send-email-dianders@chromium.org>
+ <1377188348-3418-3-git-send-email-dianders@chromium.org>
+ <001201cea215$8c125e30$a4371a90$%jun@samsung.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1376148055-2539-10-git-send-email-shuah.kh@samsung.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Shuah Khan <shuah.kh@samsung.com>
-Cc: ian@mnementh.co.uk, cjb@laptop.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, shuahkhan@gmail.com
+Content-Type: text/plain; charset=EUC-KR
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout3.samsung.com ([203.254.224.33]:56855 "EHLO
+	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751850Ab3HZJGG (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 26 Aug 2013 05:06:06 -0400
+In-reply-to: <001201cea215$8c125e30$a4371a90$%jun@samsung.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Seungwon Jeon <tgih.jun@samsung.com>
+Cc: 'Doug Anderson' <dianders@chromium.org>, 'Chris Ball' <cjb@laptop.org>, 'Jaehoon Chung' <jh80.chung@samsung.com>, 'James Hogan' <james.hogan@imgtec.com>, 'Grant Grundler' <grundler@chromium.org>, 'Alim Akhtar' <alim.akhtar@samsung.com>, 'Abhilash Kesavan' <a.kesavan@samsung.com>, 'Tomasz Figa' <tomasz.figa@gmail.com>, 'Olof Johansson' <olof@lixom.net>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-Hi Shuah Khan,
+On 08/26/2013 01:34 PM, Seungwon Jeon wrote:
+> On Fri, August 23, 2013, Doug Anderson wrote:
+>> Previously the dw_mmc driver would ignore any requests to disable the
+>> card's clock.  This doesn't seem like a good thing in general, but had
+>> one extra bad side effect in the following situtation:
+>> * mmc core would set clk to 400kHz at boot time while initting
+>> * mmc core would set clk to 0 since no card, but it would be ignored.
+>> * suspend to ram and resume; clocks in the dw_mmc IP block are now 0
+>>   but dw_mmc thinks that they're 400kHz (it ignored the set to 0).
+>> * insert card
+>> * mmc core would set clk to 400kHz which would be considered a no-op.
+>>
+>> Note that if there is no card in the slot and we do a suspend/resume
+>> cycle, we _do_ still end up with differences in a dw_mmc register
+>> dump, but the differences are clock related and we've got the clock
+>> disabled both before and after, so this should be OK.
+>>
+>> Signed-off-by: Doug Anderson <dianders@chromium.org>
+>> ---
+>> Changes in v6:
+>> - Replaces previous pathes that ensured saving/restoring clocks.
+>>
+>>  drivers/mmc/host/dw_mmc.c | 21 +++++++++++----------
+>>  1 file changed, 11 insertions(+), 10 deletions(-)
+>>
+>> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+>> index ee5f167..f6c7545 100644
+>> --- a/drivers/mmc/host/dw_mmc.c
+>> +++ b/drivers/mmc/host/dw_mmc.c
+>> @@ -635,7 +635,11 @@ static void dw_mci_setup_bus(struct dw_mci_slot *slot, bool force_clkinit)
+>>  	u32 div;
+>>  	u32 clk_en_a;
+>>
+>> -	if (slot->clock != host->current_speed || force_clkinit) {
+>> +	if (slot->clock == 0) {
+>> +		mci_writel(host, CLKENA, 0);
+>> +		mci_send_cmd(slot,
+>> +			     SDMMC_CMD_UPD_CLK | SDMMC_CMD_PRV_DAT_WAIT, 0);
+> Basically dw_mmc driver uses host's low power mode(auto clock gating)
+> So, how about keeping origin code rather than programming clock setting to '0'?
+Right, Dw-mmc controller can use the Low-power mode. 
+This mode is functionality like clock-gating. Well, i didn't know what benefit we get, if set to 0.
 
-On Sat, 10 Aug 2013, Shuah Khan wrote:
-
-> Change tmio_mmc platform driver to register pm ops using dev_pm_ops instead of
-> legacy pm_ops infrastructure.
+Best Regards,
+Jaehoon Chung
+>  
+>> +	} else if (slot->clock != host->current_speed || force_clkinit) {
+> And then, if condition('slot->clock is not zero') is added in order to allow to set clock,
+> print messages which Jaehoon pointed would be solved.
 > 
-> Signed-off-by: Shuah Khan <shuah.kh@samsung.com>
-
-This looks good to me, although I don't have access to any MFD-based TMIO 
-MMC systems, so, cannot test. In fact that code hasn't been touched for a 
-while now, so, I don't even know if anyone is still using it. With that in 
-mind
-
-Acked-by: Guennadi Liakhovetski <g.liakhovetski+renesas@gmail.com>
-
-Thanks
-Guennadi
-
-> ---
->  drivers/mmc/host/tmio_mmc.c |   24 ++++++++++++++----------
->  1 file changed, 14 insertions(+), 10 deletions(-)
+> Thanks,
+> Seungwon Jeon
 > 
-> diff --git a/drivers/mmc/host/tmio_mmc.c b/drivers/mmc/host/tmio_mmc.c
-> index 8860d4d..3e3c730 100644
-> --- a/drivers/mmc/host/tmio_mmc.c
-> +++ b/drivers/mmc/host/tmio_mmc.c
-> @@ -24,31 +24,33 @@
->  #include "tmio_mmc.h"
->  
->  #ifdef CONFIG_PM
-> -static int tmio_mmc_suspend(struct platform_device *dev, pm_message_t state)
-> +static int tmio_mmc_suspend(struct device *dev)
->  {
-> -	const struct mfd_cell *cell = mfd_get_cell(dev);
-> +	struct platform_device *pdev = to_platform_device(dev);
-> +	const struct mfd_cell *cell = mfd_get_cell(pdev);
->  	int ret;
->  
-> -	ret = tmio_mmc_host_suspend(&dev->dev);
-> +	ret = tmio_mmc_host_suspend(dev);
->  
->  	/* Tell MFD core it can disable us now.*/
->  	if (!ret && cell->disable)
-> -		cell->disable(dev);
-> +		cell->disable(pdev);
->  
->  	return ret;
->  }
->  
-> -static int tmio_mmc_resume(struct platform_device *dev)
-> +static int tmio_mmc_resume(struct device *dev)
->  {
-> -	const struct mfd_cell *cell = mfd_get_cell(dev);
-> +	struct platform_device *pdev = to_platform_device(dev);
-> +	const struct mfd_cell *cell = mfd_get_cell(pdev);
->  	int ret = 0;
->  
->  	/* Tell the MFD core we are ready to be enabled */
->  	if (cell->resume)
-> -		ret = cell->resume(dev);
-> +		ret = cell->resume(pdev);
->  
->  	if (!ret)
-> -		ret = tmio_mmc_host_resume(&dev->dev);
-> +		ret = tmio_mmc_host_resume(dev);
->  
->  	return ret;
->  }
-> @@ -123,17 +125,19 @@ static int tmio_mmc_remove(struct platform_device *pdev)
->  	return 0;
->  }
->  
-> +static SIMPLE_DEV_PM_OPS(tmio_mmc_dev_pm_ops, tmio_mmc_suspend,
-> +			  tmio_mmc_resume);
-> +
->  /* ------------------- device registration ----------------------- */
->  
->  static struct platform_driver tmio_mmc_driver = {
->  	.driver = {
->  		.name = "tmio-mmc",
->  		.owner = THIS_MODULE,
-> +		.pm = &tmio_mmc_dev_pm_ops,
->  	},
->  	.probe = tmio_mmc_probe,
->  	.remove = tmio_mmc_remove,
-> -	.suspend = tmio_mmc_suspend,
-> -	.resume = tmio_mmc_resume,
->  };
->  
->  module_platform_driver(tmio_mmc_driver);
-> -- 
-> 1.7.10.4
+>>  		div = host->bus_hz / slot->clock;
+>>  		if (host->bus_hz % slot->clock && host->bus_hz > slot->clock)
+>>  			/*
+>> @@ -675,9 +679,8 @@ static void dw_mci_setup_bus(struct dw_mci_slot *slot, bool force_clkinit)
+>>  		/* inform CIU */
+>>  		mci_send_cmd(slot,
+>>  			     SDMMC_CMD_UPD_CLK | SDMMC_CMD_PRV_DAT_WAIT, 0);
+>> -
+>> -		host->current_speed = slot->clock;
+>>  	}
+>> +	host->current_speed = slot->clock;
+>>
+>>  	/* Set the current slot bus width */
+>>  	mci_writel(host, CTYPE, (slot->ctype << slot->id));
+>> @@ -807,13 +810,11 @@ static void dw_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+>>
+>>  	mci_writel(slot->host, UHS_REG, regs);
+>>
+>> -	if (ios->clock) {
+>> -		/*
+>> -		 * Use mirror of ios->clock to prevent race with mmc
+>> -		 * core ios update when finding the minimum.
+>> -		 */
+>> -		slot->clock = ios->clock;
+>> -	}
+>> +	/*
+>> +	 * Use mirror of ios->clock to prevent race with mmc
+>> +	 * core ios update when finding the minimum.
+>> +	 */
+>> +	slot->clock = ios->clock;
+>>
+>>  	if (drv_data && drv_data->set_ios)
+>>  		drv_data->set_ios(slot->host, ios);
+>> --
+>> 1.8.3
+>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 > 
 
----
-Guennadi Liakhovetski, Ph.D.
-Freelance Open-Source Software Developer
-http://www.open-technology.de/
