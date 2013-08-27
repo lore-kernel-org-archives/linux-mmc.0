@@ -1,82 +1,125 @@
-From: Steffen Trumtrar <s.trumtrar@pengutronix.de>
-Subject: Re: [PATCHv5 2/3] ARM: socfpga: dts: Add support for SD/MMC
-Date: Tue, 27 Aug 2013 17:31:22 +0200
-Message-ID: <20130827153122.GH24795@pengutronix.de>
-References: <1377272686-13253-1-git-send-email-dinguyen@altera.com>
- <1377272686-13253-2-git-send-email-dinguyen@altera.com>
+From: =?ISO-8859-1?Q?Kevyn=2DAlexandre_Par=E9?=
+	<kevyn.alexandre.pare@gmail.com>
+Subject: Re: Unable to randomly boot rootfs (EXT3 or EXT4) from SD: MMC error
+ -110 (TIMEDOUT)
+Date: Tue, 27 Aug 2013 17:47:22 -0400
+Message-ID: <CAL1yNc+9pOWLCLfk7WpWvvsLfb01cFCJSi+4mTvnks9VrwoF1Q@mail.gmail.com>
+References: <CAL1yNcJZBSSNu4aDmL6n9uu3LkNPCOM-LbUXD2990jkPJYpLoA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from metis.ext.pengutronix.de ([92.198.50.35]:53905 "EHLO
-	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753753Ab3H0Pbo (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 27 Aug 2013 11:31:44 -0400
-Content-Disposition: inline
-In-Reply-To: <1377272686-13253-2-git-send-email-dinguyen@altera.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-omap-owner@vger.kernel.org>
+In-Reply-To: <CAL1yNcJZBSSNu4aDmL6n9uu3LkNPCOM-LbUXD2990jkPJYpLoA@mail.gmail.com>
+Sender: linux-omap-owner@vger.kernel.org
+To: linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org
+Cc: linux-ext4@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: dinguyen@altera.com
-Cc: dinh.linux@gmail.com, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, Rob Herring <rob.herring@calxeda.com>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Stephen Warren <swarren@wwwdotorg.org>, Ian Campbell <ian.campbell@citrix.com>, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 
-Hi!
+Hi,
+Another test with 3.4.59 with EXT4 and:
+tune2fs -o journal_data_ordered -e panic (partition)
+results in kernel panic:
 
-On Fri, Aug 23, 2013 at 10:44:45AM -0500, dinguyen@altera.com wrote:
-> From: Dinh Nguyen <dinguyen@altera.com>
-> 
-> Add bindings for SD/MMC for SOCFPGA.
-> 
-> Signed-off-by: Dinh Nguyen <dinguyen@altera.com>
-> Cc: Jaehoon Chung <jh80.chung@samsung.com>
-> Cc: Seungwon Jeon <tgih.jun@samsung.com>
-> Cc: Rob Herring <rob.herring@calxeda.com>
-> Cc: Pawel Moll <pawel.moll@arm.com>
-> Cc: Mark Rutland <mark.rutland@arm.com>
-> Cc: Stephen Warren <swarren@wwwdotorg.org>
-> Cc: Ian Campbell <ian.campbell@citrix.com>
-> Cc: devicetree@vger.kernel.org
-> Cc: linux-mmc@vger.kernel.org
-> CC: linux-arm-kernel@lists.infradead.org
-> 
-> v5:
-> - Add "altr,ciu-clk-offset" that represents the necessary offset
->   and shift values in the sysmgr phandle. This is used to set
->   the correct CIU clock values.
-> 
-> v4:
-> - Add a complete binding example in documentations
-> - Add a phandle entry for "altr,sysmgr" which links the system
->   manager to the SD/MMC IP block that controls the SDR timings.
-> - Split up patches
->         1/3 - Add syscon binding to sys-mgr node
->         2/3 - DTS bindings and documentation for SD/MMC on SOCFPGA
->         3/3 - Driver changes to use the bindings
-> 
-> v3:
-> - Explicitly reference synopsis-dw-mshc.txt for base bindings
-> - Remove "dw-mshc-ciu-div" as driver can get clock information dts "ciu" entry
-> - Fixed indentation issue
-> 
-> v2:
-> - Remove bus-width and extra line in documentation
-> - Merge bindings example into a single node in documentation
-> ---
+[...]
+Waiting for root device /dev/mmcblk0p2...
+mmc0: host does not support reading read-only switch. assuming write-en=
+able.
+mmc0: new high speed SDXC card at address aaaa
+mmcblk0: mmc0:aaaa SU64G 59.4 GiB
+ mmcblk0: p1 p2
+mmc1: mmc_rescan_try_freq: trying to init card at 400000 Hz
+mmc1: new SDIO card at address 0001
+EXT4-fs (mmcblk0p2): mounted filesystem with ordered data mode. Opts: (=
+null)
+VFS: Mounted root (ext4 filesystem) on device 179:2.
+devtmpfs: mounted
+=46reeing init memory: 220K
+INIT: version 2.86 booting
+mmcblk0: error -110 sending status command, retrying
+mmcblk0: error -110 sending status command, retrying
+mmcblk0: error -110 sending status command, aborting
+end_request: I/O error, dev mmcblk0, sector 4391640
+mmcblk0: error -110 sending status command, retrying
+mmcblk0: error -110 sending status command, retrying
+mmcblk0: error -110 sending status command, aborting
+end_request: I/O error, dev mmcblk0, sector 4391640
+mmcblk0: error -110 sending status command, retrying
+mmcblk0: error -110 sending status command, retrying
+mmcblk0: error -110 sending status command, aborting
+end_request: I/O error, dev mmcblk0, sector 4391640
+mmcblk0: error -110 sending status command, retrying
+mmcblk0: error -110 sending status command, retrying
+mmcblk0: error -110 sending status command, aborting
+end_request: I/O error, dev mmcblk0, sector 4391640
+mmcblk0: error -110 sending status command, retrying
+mmcblk0: error -110 sending status command, retrying
+mmcblk0: error -110 sending status command, aborting
+end_request: I/O error, dev mmcblk0, sector 131072
+Buffer I/O error on device mmcblk0p2, logical block 0
+lost page write due to I/O error on mmcblk0p2
+EXT4-fs error (device mmcblk0p2): ext4_find_entry:932: inode #131526:
+comm rc: reading directory lblock 0
+Aborting journal on device mmcblk0p2-8.
+mmcblk0: error -110 sending status command, retrying
+mmcblk0: error -110 sending status command, retrying
+mmcblk0: error -110 sending status command, aborting
+end_request: I/O error, dev mmcblk0, sector 59113472
+Buffer I/O error on device mmcblk0p2, logical block 7372800
+lost page write due to I/O error on mmcblk0p2
+JBD2: Error -5 detected when updating journal superblock for mmcblk0p2-=
+8.
+mmcblk0: error -110 sending status command, retrying
+mmcblk0: error -110 sending status command, retrying
+mmcblk0: error -110 sending status command, aborting
+end_request: I/O error, dev mmcblk0, sector 59113472
+Buffer I/O error on device mmcblk0p2, logical block 7372800
+lost page write due to I/O error on mmcblk0p2
+JBD2: Error -5 detected when updating journal superblock for mmcblk0p2-=
+8.
+Kernel panic - not syncing: EXT4-fs (device mmcblk0p2): panic forced af=
+ter error
 
-You should put your changelogs here and not above the ---
-AFAIK nobody cares for the development history of a patch once it is applied.
 
->  .../devicetree/bindings/mmc/socfpga-dw-mshc.txt    |   63 ++++++++++++++++++++
->  arch/arm/boot/dts/socfpga.dtsi                     |   11 ++++
->  arch/arm/boot/dts/socfpga_cyclone5.dts             |   14 +++++
->  arch/arm/boot/dts/socfpga_vt.dts                   |   14 +++++
->  4 files changed, 102 insertions(+)
->  create mode 100644 Documentation/devicetree/bindings/mmc/socfpga-dw-mshc.txt
-> 
+If you need specific details let me know.
 
-Regards,
-Steffen
+thx
 
--- 
-Pengutronix e.K.                           |                             |
-Industrial Linux Solutions                 | http://www.pengutronix.de/  |
-Peiner Str. 6-8, 31137 Hildesheim, Germany | Phone: +49-5121-206917-0    |
-Amtsgericht Hildesheim, HRA 2686           | Fax:   +49-5121-206917-5555 |
+-KA
+
+On Sun, Jul 21, 2013 at 1:07 PM, Kevyn-Alexandre Par=E9
+<kevyn.alexandre.pare@gmail.com> wrote:
+> Hi,
+>
+> I'm trying to figure out why when randomly booting our system after i=
+t =3D
+> have been hard shutdown for some time (couple of minutes to couple of=
+ =3D
+> days) doesn't boot with MMC error?=3D20
+>
+> WORKAROUND:
+> Rebooting the system most of the time remove the issue.
+>
+> I try couple of version of Kernel from stable 3.2.47 & 3.4.53 without=
+ =3D
+> success.
+> I try to change FS from EXT3 to EXT4 without success.
+> I try multiple SD..
+>
+> Any proposition of test that you think that is worth trying, I'm will=
+ing =3D
+> to try.
+>
+> Your opinions will really be appreciated,
+>
+> See below for some output of my environment,
+> http://pastebin.com/qchsr1FQ
+>
+> Thx,
+>
+> -Kevyn-Alexandre Par=3DE9
+> ps: My intention are to enable CONFIG_MMC_DEBUG? Try kernel 3.10.1?
+--
+To unsubscribe from this list: send the line "unsubscribe linux-omap" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
