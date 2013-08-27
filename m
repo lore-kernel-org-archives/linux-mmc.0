@@ -1,88 +1,41 @@
-From: YUVARAJ CD <yuvaraj.cd@samsung.com>
-Subject: Re: Re: [PATCH V3] ARM: dts: Add dwmmc DT nodes for exynos5420 SOC
-Date: Tue, 27 Aug 2013 06:40:48 +0000 (GMT)
-Message-ID: <25858666.81171377585647211.JavaMail.weblogic@epml04>
-Reply-To: yuvaraj.cd@samsung.com
+From: Christian Gmeiner <christian.gmeiner@gmail.com>
+Subject: Re: mmc0: Timeout waiting for hardware interrupt.
+Date: Tue, 27 Aug 2013 09:43:15 +0200
+Message-ID: <CAH9NwWfjUQbw6-K5PCtb7KyNhgGRR0wvWu+_w-shje5zOgqarA@mail.gmail.com>
+References: <CAH9NwWcQ6528NxSShnO2Nfa4dyqD0j68wO9CqfR3i=cpGXQjNg@mail.gmail.com>
+ <loom.20130823T162510-762@post.gmane.org> <CAH9NwWePDSADpVm2MzUCYHPfYLb0RrWJL=yqOCqSPwFF1e=tuw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout2.samsung.com ([203.254.224.25]:38064 "EHLO
-	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752358Ab3H0Gkv (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 27 Aug 2013 02:40:51 -0400
-Received: from epcpsbgr3.samsung.com
- (u143.gpu120.samsung.co.kr [203.254.230.143])
- by mailout2.samsung.com (Oracle Communications Messaging Server 7u4-24.01
- (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTP id <0MS600HJ0FVGFJL0@mailout2.samsung.com> for
- linux-mmc@vger.kernel.org; Tue, 27 Aug 2013 15:40:48 +0900 (KST)
-MIME-version: 1.0
+Received: from mail-qa0-f50.google.com ([209.85.216.50]:46017 "EHLO
+	mail-qa0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753206Ab3H0Hng (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 27 Aug 2013 03:43:36 -0400
+Received: by mail-qa0-f50.google.com with SMTP id o13so2217304qaj.9
+        for <linux-mmc@vger.kernel.org>; Tue, 27 Aug 2013 00:43:35 -0700 (PDT)
+In-Reply-To: <CAH9NwWePDSADpVm2MzUCYHPfYLb0RrWJL=yqOCqSPwFF1e=tuw@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Doug Anderson <dianders@google.com>
-Cc: linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, Kukjin Kim <kgene.kim@samsung.com>, Tomasz Figa <t.figa@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, GIRISH K S <ks.giri@samsung.com>
+To: Prasanna NAVARATNA <prasanna.navaratna@gmail.com>
+Cc: linux-mmc@vger.kernel.org
 
-LS0tLS0tLSBPcmlnaW5hbCBNZXNzYWdlIC0tLS0tLS0NClNlbmRlciA6IERvdWcgQW5kZXJzb248
-ZGlhbmRlcnNAZ29vZ2xlLmNvbT4NCkRhdGUgOiBBdWcgMjQsIDIwMTMgMDk6MTggKEdNVCswNToz
-MCkNClRpdGxlIDogUmU6IFtQQVRDSCBWM10gQVJNOiBkdHM6IEFkZCBkd21tYyBEVCBub2RlcyBm
-b3IgZXh5bm9zNTQyMCBTT0MNCiANCll1dmFyYWosDQoNCk9uIFRodSwgQXVnIDIyLCAyMDEzIGF0
-IDExOjI1IFBNLCBZdXZhcmFqIENkIHdyb3RlOg0KPj4+ICAgICAgICAgICAgICAgICBiLmNhcmQt
-ZGV0ZWN0LWRlbGF5DQo+Pj4gICAgICAgICAgICAgICAgIGMuc2Ftc3VuZyxkdy1tc2hjLWNpdS1k
-aXYNCj4+PiAgICAgICAgICAgICAgICAgZC5zYW1zdW5nLGR3LW1zaGMtc2RyLXRpbWluZw0KPj4+
-ICAgICAgICAgICAgICAgICBlLnNhbXN1bmcsZHctbXNoYy1kZHItdGltaW5nDQoNCk9LLCBzbyBJ
-IGRvbid0IGtub3cgYWJvdXQgY2FyZC1kZXRlY3QtZGVsYXksIGJ1dCBoZXJlJ3MgbXkgYmVsaWVm
-DQphYm91dCB0aGUgb3RoZXJzLiAgRmVlbCBmcmVlIHRvIHRlbGwgbWUgSSdtIHdyb25nLCBzaW5j
-ZSBJJ20gbm90IGFuIEVFDQpieSB0cmFpbmluZyBhbmQgYWxzbyB0aGUgc3R1ZmYgYmVsb3cgaGFz
-IGJlZW4gY29iYmxlZCB0b2dldGhlciBmcm9tDQpsb3RzIG9mIGRpZmZlcmVudCBkb2NzLiAgSSBh
-bHNvIGhhdmVuJ3QgZXhwZXJpbWVudGVkIGVub3VnaCB0byBrbm93DQoxMDAlIHRoYXQgaXQncyBj
-b3JyZWN0LiAgSSBhbHNvIGtub3cgbm90aGluZyBhYm91dCB0aGUgYWN0dWFsDQpzaWduYWxpbmcg
-cHJvdG9jb2xzIG9mIFNEL01NQy4uLiAgRW5vdWdoIGNhdmVhdHM/DQoNCg0Kc2RyLXRpbWluZyAv
-IGRkci10aW1pbmc6DQoNCiogRmlyc3QgbnVtYmVyIChJIHRoaW5rKSBhbGxvd3MgeW91IHRvIGRy
-aXZlIGRhdGEgcmVsYXRlZCBsaW5lcyBhdCBhDQpwaGFzZSBvZmZzZXQgZnJvbSB0aGUgY2xvY2sg
-bGluZS4gIFNvIGlmIHlvdSBoYXZlIGNyYXp5IHJvdXRpbmcgb24NCnlvdXIgYm9hcmQgYW5kIHRo
-ZSBkYXRhIGxpbmVzIGFyZSBtdWNoIGxvbmdlciB0aGFuIHRoZSBjbG9jayBsaW5lcyB5b3UNCm1p
-Z2h0IHdhbnQgdG8gZG8gdGhpcy4gIFRoaXMgaXMgbm90IGNvbW1vbiwgc28gdXN1YWxseSB5b3Ug
-d2FudCAwDQpoZXJlLiAgTm90ZSB0aGF0IHNvbWUgb3RoZXIgZG9jcyBJIGhhdmUgZGlzYWdyZWUg
-d2l0aCB0aGlzIGFuZCBjbGFpbQ0KdGhhdCB0aGlzIG51bWJlciBoYXMgdG8gZG8gd2l0aCBob2xk
-IHRpbWUgcmVxdWlyZW1lbnRzLg0KDQoqIFNlY29uZCBudW1iZXIgYWxsb3dzIHlvdSB0byBzYW1w
-bGUgc2lnbmFscyBmcm9tIHRoZSBjYXJkIGF0IGEgcGhhc2UNCm9mZnNldCBmcm9tIHRoZSBjbG9j
-ayBsaW5lLiAgVGhpcyBudW1iZXIgbWlnaHQgZGVwZW5kIG9uIHRoZSBjYXJkLCBidXQNCmhvcGVm
-dWxseSBub3QgbXVjaC4gIEl0J3Mgc3VwcG9zZWQgdG8gZGVwZW5kIG1vcmUgb24gdGhlIGxlbmd0
-aCBvZiB0aGUNCmxpbmVzIChBS0EgZGVwZW5kcyBvbiB0aGUgYm9hcmQpLCB0aG91Z2ggaXQgbWln
-aHQgYWxzbyBkZXBlbmQgb24NCnB1bGx1cCB2YWx1ZXMgYXMgd2VsbCBhbmQgc29tZXdoYXQgb24g
-dGhlIGNhcmQ/ICBUaGlzIG51bWJlciBuZWVkcyB0bw0KYmUgdHVuZWQgKGxpa2UgbGluayB0cmFp
-bmluZykgd2hlbiB5b3Ugb3BlcmF0ZSBhIGNhcmQgYXQgPiA1ME1Iei4NCg0KKiBGb3IgY2l1LWRp
-djoNCg0KV2l0aCBhIGNpdS1kaXYgb2YgMyAocmVhbGx5IDMrMSA9IDQpIHlvdSBnZXQgcGhhc2Ug
-b2Zmc2V0cyBvZiA0NSBkZWdyZWVzLg0KV2l0aCBhIGNpdS1kaXYgb2YgMSAocmVhbGx5IDErMSA9
-IDIpIHlvdSBnZXQgcGhhc2Ugb2Zmc2V0cyBvZiA5MCBkZWdyZWVzLg0KV0l0aCBhIGNpdS1kaXYg
-b2YgMCAocmVhbGx5IDArMSA9IDEpIHlvdSBnZXQgbm8gcGhhc2Ugb2Zmc2V0cyAoSSB3b3VsZA0K
-aGF2ZSBndWVzc2VkIDE4MCwgYnV0IG1hbnVhbCBzYXlzIG90aGVyd2lzZSkNCg0KU28gY2l1LWRp
-diBpbnRpbWF0ZWx5IGFmZmVjdHMgdGhlIHNkci10aW1pbmcgYW5kIGRkci10aW1pbmcuICBUaHVz
-IGlmDQp0aG9zZSBhcmUgYm9hcmQtc3BlY2lmaWMgdGhlbiBzbyBpcyBjaXUtZGl2Lg0KDQotLS0N
-Cg0KQWxsIG9mIHRoZSBhYm92ZSBzdWdnZXN0cyB0byBtZSB0aGUgZm9sbG93aW5nIHVudGVzdGVk
-IHRoaW5nczoNCg0KKiBJZiB5b3UgaGFwcGVuZWQgdG8gaGF2ZSBhIHNpdHVhdGlvbiB3aGVyZSB5
-b3UgaGFkIGEgImNpdS1kaXYiIG9mIDMNCmFuZCBhbGwgb2YgeW91ciBzZHItdGltaW5nL2Rkci10
-aW1pbmcgdmFsdWVzIHdlcmUgZXZlbiwgeW91IGNvdWxkIGN1dA0KdGhlIGlucHV0IGNsb2NrIGlu
-IGhhbGYsIGNoYW5nZSAiY2l1LWRpdiIgdG8gMSwgYW5kIGN1dCBhbGwgeW91cg0KdGltaW5ncyBp
-biBoYWxmLiAgSSdkIGltYWdpbmUgdGhhdCB3b3VsZCBzYXZlIHlvdSBwb3dlciAoYmV0dGVyIHRv
-DQpzbG93IGNsb2NrcyBkb3duIGhpZ2hlciBpbiB0aGUgY2xvY2sgdHJlZT8pLiAgSXQgd291bGQg
-YmUgc29ydGEgbmljZQ0KaWYgdGhpcyB3YXMgZG9uZSBhdXRvbWF0aWNhbGx5IChhc3N1bWluZyB0
-aGF0IHlvdSBoYXZlIGZ1bGwgY29udHJvbCBvZg0KaW5wdXQgY2xvY2spLg0KDQoqIEknbSBhIGxp
-dHRsZSB1bmNsZWFyIGV4YWN0bHkgaG93IHRoZSBDTEtESVYgcmVnaXN0ZXIgaW50ZXJhY3RzIHdp
-dGgNCmFsbCBvZiB0aGUgYWJvdmUuICBJIGd1ZXNzIEknZCBiZSB1bmRlciB0aGUgYXNzdW1wdGlv
-biB0aGF0IHRoZSBDTEtESVYNCmFwcGxpZXMgdG8gdGhlIG1haW4gY2xvY2ssIHRoZSBzYW1wbGUg
-Y2xvY2ssIGFuZCB0aGUgZHJpdmUgY2xvY2suDQouLi5idXQgbWF5YmUgSSdtIGNvbmZ1c2VkLiAg
-SSB0aGluayB5b3UgYWxzbyBnZXQgZGlmZmVyZW50IHJlc3VsdHMgKGluDQp0ZXJtcyBvZiBob3cg
-bWFueSBucyB0aGUgZHJpdmUgYW5kIHNhbXBsZSBhcmUgZGVsYXllZCkgZGVwZW5kaW5nIG9uDQp3
-aGV0aGVyIHRoZSBDTEtESVYgYXBwbGllcyBfYWZ0ZXJfIGNpdS1kaXYgb3IgYmVmb3JlLiAgTXkg
-Z3Vlc3MgaXMNCnRoYXQgaXQgYXBwbGllcyBhZnRlci4NCg0KLS0tDQoNCkFueXdheSwgbm90IHN1
-cmUgdGhhdCBoZWxwcyBhIHdob2xlIGxvdCwgYnV0IHRoYXQncyBhIHN1bW1hcnkgb2Ygd2hhdA0K
-SSd2ZSBjb21lIHRvIHVuZGVyc3RhbmQuICBJJ20gaGFwcHkgdG8gYmUgZW5saWdodGVuZWQuICBJ
-J20gc3RpbGwNCnRyeWluZyB0byBmaWd1cmUgaG93IGhvdyB0aGVzZSBudW1iZXJzIHdlcmUgcGlj
-a2VkIGZvciBvdXIgaGFyZHdhcmUNCmFuZCB3aGV0aGVyIHRob3NlIG51bWJlcnMgYXJlIGFjdHVh
-bGx5IHJpZ2h0Lg0KDQpUaGFua3MgRG91Zy5JdCB3YXMgdmVyeSBpbmZvcm1hdGl2ZSBhbmQgSSdt
-IGVubGlnaHRlbmVkLg0KSSB3aWxsIGluY29ycG9yYXRlIHRoZXNlIGNoYW5nZXMgaW4gbmV4dCB2
-ZXJzaW9uIGFuZCBwb3N0IHNvb24uIA0KDQoNCi1Eb3Vn
+2013/8/23 Christian Gmeiner <christian.gmeiner@gmail.com>:
+> Hi Prasanna.
+>
+>> What was the previous command sent before CMD13 when timeout happened?
+>> Can you share some 5 seconds log before the Timeout start happening?
+>
+> As the log got quite big I have uploaded it.
+> http://dpaste.dzfl.pl/a2b30bc5
+>
+>> eMMC version being used is 4.41 or 4.5?
+>
+> The eMMC is a 4.41 one -
+> http://omapworld.com/iNAND_e_MMC_4_41_IF_data_sheet_v1_0[1].pdf
+>
 
+ping
 
+thanks
+--
+Christian Gmeiner, MSc
