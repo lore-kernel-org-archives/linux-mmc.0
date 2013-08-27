@@ -1,135 +1,88 @@
-From: Yuvaraj Kumar <yuvaraj.cd@gmail.com>
-Subject: Re: [RFC V2 1/4] mmc: dw_mmc: exynos: move the exynos private init
-Date: Tue, 27 Aug 2013 11:33:16 +0530
-Message-ID: <CAKuRcOLGZeeXjy=U4-MSm5r+_VRUMbvAMSG5ioUR+9Lyf-eGmQ@mail.gmail.com>
-References: <1377256509-18922-1-git-send-email-yuvaraj.cd@samsung.com>
-	<1377256509-18922-2-git-send-email-yuvaraj.cd@samsung.com>
-	<5217673C.1040305@samsung.com>
-	<CAKuRcOKSzXXGnN1jZhYhimnRqmKM4pc2qB2N0AgXdRX1VFLb3Q@mail.gmail.com>
-	<521C1044.8060804@samsung.com>
+From: YUVARAJ CD <yuvaraj.cd@samsung.com>
+Subject: Re: Re: [PATCH V3] ARM: dts: Add dwmmc DT nodes for exynos5420 SOC
+Date: Tue, 27 Aug 2013 06:40:48 +0000 (GMT)
+Message-ID: <25858666.81171377585647211.JavaMail.weblogic@epml04>
+Reply-To: yuvaraj.cd@samsung.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-Reply-To: <521C1044.8060804@samsung.com>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>, shashidharh@vayavyalabs.com
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, linux-samsung-soc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Seungwon Jeon <tgih.jun@samsung.com>, Alim Akhtar <alim.akhtar@samsung.com>, ks.giri@samsung.com, Tomasz Figa <t.figa@samsung.com>, Yuvaraj Kumar C D <yuvaraj.cd@samsung.com>, thomas.ab@samsung.com
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: base64
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout2.samsung.com ([203.254.224.25]:38064 "EHLO
+	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752358Ab3H0Gkv (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 27 Aug 2013 02:40:51 -0400
+Received: from epcpsbgr3.samsung.com
+ (u143.gpu120.samsung.co.kr [203.254.230.143])
+ by mailout2.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+ (7.0.4.24.0) 64bit (built Nov 17 2011))
+ with ESMTP id <0MS600HJ0FVGFJL0@mailout2.samsung.com> for
+ linux-mmc@vger.kernel.org; Tue, 27 Aug 2013 15:40:48 +0900 (KST)
+MIME-version: 1.0
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Doug Anderson <dianders@google.com>
+Cc: linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, Kukjin Kim <kgene.kim@samsung.com>, Tomasz Figa <t.figa@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, GIRISH K S <ks.giri@samsung.com>
 
-On Tue, Aug 27, 2013 at 8:04 AM, Jaehoon Chung <jh80.chung@samsung.com> wrote:
-> Dear Yuvaraj,
->
-> On 08/26/2013 06:20 PM, Yuvaraj Kumar wrote:
->> On Fri, Aug 23, 2013 at 7:14 PM, Jaehoon Chung <jh80.chung@samsung.com> wrote:
->>> Hi Yuvaraj,
->>>
->>> On 08/23/2013 08:15 PM, Yuvaraj Kumar C D wrote:
->>>> Currently platform specific private data initialisation is done by
->>>> dw_mci_exynos_priv_init and dw_mci_exynos_parse_dt.As we already have
->>>> separate platform specific device tree parser dw_mci_exynos_parse_dt,
->>>> move the dw_mci_exynos_priv_init code to dw_mci_exynos_parse_dt.
->>>> We can use the dw_mci_exynos_priv_init to do some actual platform
->>>> specific initialisation of SMU and etc.
->>>>
->>>> changes since V1: none
->>>>
->>>> Signed-off-by: Yuvaraj Kumar C D <yuvaraj.cd@samsung.com>
->>>> ---
->>>>  drivers/mmc/host/dw_mmc-exynos.c |   31 +++++++++++++++----------------
->>>>  1 file changed, 15 insertions(+), 16 deletions(-)
->>>>
->>>> diff --git a/drivers/mmc/host/dw_mmc-exynos.c b/drivers/mmc/host/dw_mmc-exynos.c
->>>> index 9990f98..19c845b 100644
->>>> --- a/drivers/mmc/host/dw_mmc-exynos.c
->>>> +++ b/drivers/mmc/host/dw_mmc-exynos.c
->>>> @@ -72,22 +72,8 @@ static struct dw_mci_exynos_compatible {
->>>>
->>>>  static int dw_mci_exynos_priv_init(struct dw_mci *host)
->>>>  {
->>>> -     struct dw_mci_exynos_priv_data *priv;
->>>> -     int idx;
->>>> -
->>>> -     priv = devm_kzalloc(host->dev, sizeof(*priv), GFP_KERNEL);
->>>> -     if (!priv) {
->>>> -             dev_err(host->dev, "mem alloc failed for private data\n");
->>>> -             return -ENOMEM;
->>>> -     }
->>>> -
->>>> -     for (idx = 0; idx < ARRAY_SIZE(exynos_compat); idx++) {
->>>> -             if (of_device_is_compatible(host->dev->of_node,
->>>> -                                     exynos_compat[idx].compatible))
->>>> -                     priv->ctrl_type = exynos_compat[idx].ctrl_type;
->>>> -     }
->>>> +     struct dw_mci_exynos_priv_data *priv = host->priv;
->>>>
->>>> -     host->priv = priv;
->>>>       return 0;
->>>>  }
->>>>
->>>> @@ -177,12 +163,24 @@ static void dw_mci_exynos_set_ios(struct dw_mci *host, struct mmc_ios *ios)
->>>>
->>>>  static int dw_mci_exynos_parse_dt(struct dw_mci *host)
->>>>  {
->>>> -     struct dw_mci_exynos_priv_data *priv = host->priv;
->>>> +     struct dw_mci_exynos_priv_data *priv;
->>>>       struct device_node *np = host->dev->of_node;
->>>>       u32 timing[2];
->>>>       u32 div = 0;
->>>> +     int idx;
->>>>       int ret;
->>>>
->>>> +     priv = devm_kzalloc(host->dev, sizeof(*priv), GFP_KERNEL);
->>>> +     if (!priv) {
->>>> +             dev_err(host->dev, "mem alloc failed for private data\n");
->>>> +             return -ENOMEM;
->>>> +     }
->>>> +
->>>> +     for (idx = 0; idx < ARRAY_SIZE(exynos_compat); idx++) {
->>>> +             if (of_device_is_compatible(np, exynos_compat[idx].compatible))
->>>> +                     priv->ctrl_type = exynos_compat[idx].ctrl_type;
->>>> +     }
->>>> +
->>>>       of_property_read_u32(np, "samsung,dw-mshc-ciu-div", &div);
->>>>       priv->ciu_div = div;
->>>>
->>>> @@ -199,6 +197,7 @@ static int dw_mci_exynos_parse_dt(struct dw_mci *host)
->>>>               return ret;
->>>>
->>>>       priv->ddr_timing = SDMMC_CLKSEL_TIMING(timing[0], timing[1], div);
->>>> +     host->priv = priv;
->>>
->>> I'm not sure whether my thinking is right or not.
->>> if host->pdata is present, then dw_mci_parse_dt() didn't called at dw_mci_probe.
->> Yes, you are right.
->>> then how host->priv set to priv?
->> Earlier host->priv set to priv in both non-DT and DT case.True, with
->> this patch it does it only in DT case.
->> Is there any platform/board which still uses dw_mmc and its platform
->> extension driver with non DT case?
-> You're right. i didn't see the extension driver with non DT-case?
-> Then we can also modify the host->pdata into dw_mci_probe().
-I think its not necessary becuase dw_mmc-pci.c driver calls
-dw_mci_probe with host->pdata NOT NULL.
-Only dwmmc platform extension driver (exynos/socfpga) which are
-basically DT based uses host->priv .
->
-> Best Regards,
-> Jaehoon Chung
->> I found a reference of non-DT case where host->pdata is present in
->> dw_mmc-pci.c driver but does not
->> use platform extension driver (exynos/socfpga).
->>>
->>> Best Regards,
->>> Jaehoon Chung
->>>
->>>>       return 0;
->>>>  }
->>>>
->>>>
->>>
->> --
->> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->
+LS0tLS0tLSBPcmlnaW5hbCBNZXNzYWdlIC0tLS0tLS0NClNlbmRlciA6IERvdWcgQW5kZXJzb248
+ZGlhbmRlcnNAZ29vZ2xlLmNvbT4NCkRhdGUgOiBBdWcgMjQsIDIwMTMgMDk6MTggKEdNVCswNToz
+MCkNClRpdGxlIDogUmU6IFtQQVRDSCBWM10gQVJNOiBkdHM6IEFkZCBkd21tYyBEVCBub2RlcyBm
+b3IgZXh5bm9zNTQyMCBTT0MNCiANCll1dmFyYWosDQoNCk9uIFRodSwgQXVnIDIyLCAyMDEzIGF0
+IDExOjI1IFBNLCBZdXZhcmFqIENkIHdyb3RlOg0KPj4+ICAgICAgICAgICAgICAgICBiLmNhcmQt
+ZGV0ZWN0LWRlbGF5DQo+Pj4gICAgICAgICAgICAgICAgIGMuc2Ftc3VuZyxkdy1tc2hjLWNpdS1k
+aXYNCj4+PiAgICAgICAgICAgICAgICAgZC5zYW1zdW5nLGR3LW1zaGMtc2RyLXRpbWluZw0KPj4+
+ICAgICAgICAgICAgICAgICBlLnNhbXN1bmcsZHctbXNoYy1kZHItdGltaW5nDQoNCk9LLCBzbyBJ
+IGRvbid0IGtub3cgYWJvdXQgY2FyZC1kZXRlY3QtZGVsYXksIGJ1dCBoZXJlJ3MgbXkgYmVsaWVm
+DQphYm91dCB0aGUgb3RoZXJzLiAgRmVlbCBmcmVlIHRvIHRlbGwgbWUgSSdtIHdyb25nLCBzaW5j
+ZSBJJ20gbm90IGFuIEVFDQpieSB0cmFpbmluZyBhbmQgYWxzbyB0aGUgc3R1ZmYgYmVsb3cgaGFz
+IGJlZW4gY29iYmxlZCB0b2dldGhlciBmcm9tDQpsb3RzIG9mIGRpZmZlcmVudCBkb2NzLiAgSSBh
+bHNvIGhhdmVuJ3QgZXhwZXJpbWVudGVkIGVub3VnaCB0byBrbm93DQoxMDAlIHRoYXQgaXQncyBj
+b3JyZWN0LiAgSSBhbHNvIGtub3cgbm90aGluZyBhYm91dCB0aGUgYWN0dWFsDQpzaWduYWxpbmcg
+cHJvdG9jb2xzIG9mIFNEL01NQy4uLiAgRW5vdWdoIGNhdmVhdHM/DQoNCg0Kc2RyLXRpbWluZyAv
+IGRkci10aW1pbmc6DQoNCiogRmlyc3QgbnVtYmVyIChJIHRoaW5rKSBhbGxvd3MgeW91IHRvIGRy
+aXZlIGRhdGEgcmVsYXRlZCBsaW5lcyBhdCBhDQpwaGFzZSBvZmZzZXQgZnJvbSB0aGUgY2xvY2sg
+bGluZS4gIFNvIGlmIHlvdSBoYXZlIGNyYXp5IHJvdXRpbmcgb24NCnlvdXIgYm9hcmQgYW5kIHRo
+ZSBkYXRhIGxpbmVzIGFyZSBtdWNoIGxvbmdlciB0aGFuIHRoZSBjbG9jayBsaW5lcyB5b3UNCm1p
+Z2h0IHdhbnQgdG8gZG8gdGhpcy4gIFRoaXMgaXMgbm90IGNvbW1vbiwgc28gdXN1YWxseSB5b3Ug
+d2FudCAwDQpoZXJlLiAgTm90ZSB0aGF0IHNvbWUgb3RoZXIgZG9jcyBJIGhhdmUgZGlzYWdyZWUg
+d2l0aCB0aGlzIGFuZCBjbGFpbQ0KdGhhdCB0aGlzIG51bWJlciBoYXMgdG8gZG8gd2l0aCBob2xk
+IHRpbWUgcmVxdWlyZW1lbnRzLg0KDQoqIFNlY29uZCBudW1iZXIgYWxsb3dzIHlvdSB0byBzYW1w
+bGUgc2lnbmFscyBmcm9tIHRoZSBjYXJkIGF0IGEgcGhhc2UNCm9mZnNldCBmcm9tIHRoZSBjbG9j
+ayBsaW5lLiAgVGhpcyBudW1iZXIgbWlnaHQgZGVwZW5kIG9uIHRoZSBjYXJkLCBidXQNCmhvcGVm
+dWxseSBub3QgbXVjaC4gIEl0J3Mgc3VwcG9zZWQgdG8gZGVwZW5kIG1vcmUgb24gdGhlIGxlbmd0
+aCBvZiB0aGUNCmxpbmVzIChBS0EgZGVwZW5kcyBvbiB0aGUgYm9hcmQpLCB0aG91Z2ggaXQgbWln
+aHQgYWxzbyBkZXBlbmQgb24NCnB1bGx1cCB2YWx1ZXMgYXMgd2VsbCBhbmQgc29tZXdoYXQgb24g
+dGhlIGNhcmQ/ICBUaGlzIG51bWJlciBuZWVkcyB0bw0KYmUgdHVuZWQgKGxpa2UgbGluayB0cmFp
+bmluZykgd2hlbiB5b3Ugb3BlcmF0ZSBhIGNhcmQgYXQgPiA1ME1Iei4NCg0KKiBGb3IgY2l1LWRp
+djoNCg0KV2l0aCBhIGNpdS1kaXYgb2YgMyAocmVhbGx5IDMrMSA9IDQpIHlvdSBnZXQgcGhhc2Ug
+b2Zmc2V0cyBvZiA0NSBkZWdyZWVzLg0KV2l0aCBhIGNpdS1kaXYgb2YgMSAocmVhbGx5IDErMSA9
+IDIpIHlvdSBnZXQgcGhhc2Ugb2Zmc2V0cyBvZiA5MCBkZWdyZWVzLg0KV0l0aCBhIGNpdS1kaXYg
+b2YgMCAocmVhbGx5IDArMSA9IDEpIHlvdSBnZXQgbm8gcGhhc2Ugb2Zmc2V0cyAoSSB3b3VsZA0K
+aGF2ZSBndWVzc2VkIDE4MCwgYnV0IG1hbnVhbCBzYXlzIG90aGVyd2lzZSkNCg0KU28gY2l1LWRp
+diBpbnRpbWF0ZWx5IGFmZmVjdHMgdGhlIHNkci10aW1pbmcgYW5kIGRkci10aW1pbmcuICBUaHVz
+IGlmDQp0aG9zZSBhcmUgYm9hcmQtc3BlY2lmaWMgdGhlbiBzbyBpcyBjaXUtZGl2Lg0KDQotLS0N
+Cg0KQWxsIG9mIHRoZSBhYm92ZSBzdWdnZXN0cyB0byBtZSB0aGUgZm9sbG93aW5nIHVudGVzdGVk
+IHRoaW5nczoNCg0KKiBJZiB5b3UgaGFwcGVuZWQgdG8gaGF2ZSBhIHNpdHVhdGlvbiB3aGVyZSB5
+b3UgaGFkIGEgImNpdS1kaXYiIG9mIDMNCmFuZCBhbGwgb2YgeW91ciBzZHItdGltaW5nL2Rkci10
+aW1pbmcgdmFsdWVzIHdlcmUgZXZlbiwgeW91IGNvdWxkIGN1dA0KdGhlIGlucHV0IGNsb2NrIGlu
+IGhhbGYsIGNoYW5nZSAiY2l1LWRpdiIgdG8gMSwgYW5kIGN1dCBhbGwgeW91cg0KdGltaW5ncyBp
+biBoYWxmLiAgSSdkIGltYWdpbmUgdGhhdCB3b3VsZCBzYXZlIHlvdSBwb3dlciAoYmV0dGVyIHRv
+DQpzbG93IGNsb2NrcyBkb3duIGhpZ2hlciBpbiB0aGUgY2xvY2sgdHJlZT8pLiAgSXQgd291bGQg
+YmUgc29ydGEgbmljZQ0KaWYgdGhpcyB3YXMgZG9uZSBhdXRvbWF0aWNhbGx5IChhc3N1bWluZyB0
+aGF0IHlvdSBoYXZlIGZ1bGwgY29udHJvbCBvZg0KaW5wdXQgY2xvY2spLg0KDQoqIEknbSBhIGxp
+dHRsZSB1bmNsZWFyIGV4YWN0bHkgaG93IHRoZSBDTEtESVYgcmVnaXN0ZXIgaW50ZXJhY3RzIHdp
+dGgNCmFsbCBvZiB0aGUgYWJvdmUuICBJIGd1ZXNzIEknZCBiZSB1bmRlciB0aGUgYXNzdW1wdGlv
+biB0aGF0IHRoZSBDTEtESVYNCmFwcGxpZXMgdG8gdGhlIG1haW4gY2xvY2ssIHRoZSBzYW1wbGUg
+Y2xvY2ssIGFuZCB0aGUgZHJpdmUgY2xvY2suDQouLi5idXQgbWF5YmUgSSdtIGNvbmZ1c2VkLiAg
+SSB0aGluayB5b3UgYWxzbyBnZXQgZGlmZmVyZW50IHJlc3VsdHMgKGluDQp0ZXJtcyBvZiBob3cg
+bWFueSBucyB0aGUgZHJpdmUgYW5kIHNhbXBsZSBhcmUgZGVsYXllZCkgZGVwZW5kaW5nIG9uDQp3
+aGV0aGVyIHRoZSBDTEtESVYgYXBwbGllcyBfYWZ0ZXJfIGNpdS1kaXYgb3IgYmVmb3JlLiAgTXkg
+Z3Vlc3MgaXMNCnRoYXQgaXQgYXBwbGllcyBhZnRlci4NCg0KLS0tDQoNCkFueXdheSwgbm90IHN1
+cmUgdGhhdCBoZWxwcyBhIHdob2xlIGxvdCwgYnV0IHRoYXQncyBhIHN1bW1hcnkgb2Ygd2hhdA0K
+SSd2ZSBjb21lIHRvIHVuZGVyc3RhbmQuICBJJ20gaGFwcHkgdG8gYmUgZW5saWdodGVuZWQuICBJ
+J20gc3RpbGwNCnRyeWluZyB0byBmaWd1cmUgaG93IGhvdyB0aGVzZSBudW1iZXJzIHdlcmUgcGlj
+a2VkIGZvciBvdXIgaGFyZHdhcmUNCmFuZCB3aGV0aGVyIHRob3NlIG51bWJlcnMgYXJlIGFjdHVh
+bGx5IHJpZ2h0Lg0KDQpUaGFua3MgRG91Zy5JdCB3YXMgdmVyeSBpbmZvcm1hdGl2ZSBhbmQgSSdt
+IGVubGlnaHRlbmVkLg0KSSB3aWxsIGluY29ycG9yYXRlIHRoZXNlIGNoYW5nZXMgaW4gbmV4dCB2
+ZXJzaW9uIGFuZCBwb3N0IHNvb24uIA0KDQoNCi1Eb3Vn
+
+
