@@ -1,53 +1,50 @@
-From: Alim Akhtar <alim.akhtar@gmail.com>
-Subject: Re: [RFC V2 0/4] dw_mmc platform specific private data init
-Date: Wed, 28 Aug 2013 11:16:19 +0530
-Message-ID: <CAGOxZ510xNnRPobEQuwTEfs-xxJdwtkvDVzjm_tU6oMT3ux2SQ@mail.gmail.com>
-References: <1377256509-18922-1-git-send-email-yuvaraj.cd@samsung.com>
+From: Prasanna NAVARATNA <prasanna.navaratna@gmail.com>
+Subject: Re: mmc0: Timeout waiting for hardware interrupt.
+Date: Wed, 28 Aug 2013 07:35:47 +0000 (UTC)
+Message-ID: <loom.20130828T090935-8@post.gmane.org>
+References: <CAH9NwWcQ6528NxSShnO2Nfa4dyqD0j68wO9CqfR3i=cpGXQjNg@mail.gmail.com> <loom.20130823T162510-762@post.gmane.org> <CAH9NwWePDSADpVm2MzUCYHPfYLb0RrWJL=yqOCqSPwFF1e=tuw@mail.gmail.com> <CAH9NwWfjUQbw6-K5PCtb7KyNhgGRR0wvWu+_w-shje5zOgqarA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-Reply-To: <1377256509-18922-1-git-send-email-yuvaraj.cd@samsung.com>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Yuvaraj Kumar C D <yuvaraj.cd@gmail.com>
-Cc: linux-mmc@vger.kernel.org, "linux-samsung-soc@vger.kernel.org" <linux-samsung-soc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, Alim Akhtar <alim.akhtar@samsung.com>, Girish K S <ks.giri@samsung.com>, "t.figa@samsung.com" <t.figa@samsung.com>, Yuvaraj Kumar C D <yuvaraj.cd@samsung.com>
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from plane.gmane.org ([80.91.229.3]:46054 "EHLO plane.gmane.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752347Ab3H1HhK (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 28 Aug 2013 03:37:10 -0400
+Received: from list by plane.gmane.org with local (Exim 4.69)
+	(envelope-from <glkm-linux-mmc@m.gmane.org>)
+	id 1VEaIS-0005ey-H6
+	for linux-mmc@vger.kernel.org; Wed, 28 Aug 2013 09:37:08 +0200
+Received: from 202.122.18.226 ([202.122.18.226])
+        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <linux-mmc@vger.kernel.org>; Wed, 28 Aug 2013 09:36:08 +0200
+Received: from prasanna.navaratna by 202.122.18.226 with local (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <linux-mmc@vger.kernel.org>; Wed, 28 Aug 2013 09:36:08 +0200
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
 
-Hi Yuvaraj
+Hello Christian,
 
-On Fri, Aug 23, 2013 at 4:45 PM, Yuvaraj Kumar C D <yuvaraj.cd@gmail.com> wrote:
-> changes from V1:
->         1.Added a new RFC patch
->                 mmc: dw_mmc: socfpga: move socfpga private init
->         2.Avoid code duplication in
->                 mmc: dw_mmc: exynos: add a quirk for SMU.
->
-> Yuvaraj Kumar C D (4):
->   mmc: dw_mmc: exynos: move the exynos private init
->   mmc: dw_mmc: socfpga: move socfpga private init
->   mmc: dw_mmc: move the platform specific init call
->   mmc: dw_mmc: exynos: add a quirk for SMU.
->
->  drivers/mmc/host/dw_mmc-exynos.c  |   60 ++++++++++++++++++++++++++++---------
->  drivers/mmc/host/dw_mmc-pltfm.c   |    7 -----
->  drivers/mmc/host/dw_mmc-socfpga.c |   29 +++++++++---------
->  drivers/mmc/host/dw_mmc.c         |   12 ++++++++
->  include/linux/mmc/dw_mmc.h        |    2 ++
->  5 files changed, 74 insertions(+), 36 deletions(-)
+Sorry for the late reply. I had faced the similar problem in the past.
 
-Tested this serise on exynos5420.
-Tested-by: Alim Akhtar <alim.akhtar@samsung.com>
+There are certain 4.5 features like BKOPS, Sanitize, cache control operations 
+which uses CMD6 to trigger the operation and use DAT0 line for busy signalling 
+which was not monitored for proper completion.
 
->
-> --
-> 1.7.9.5
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Although in your case, eMMC is 4.41 and still BKOPS is supported. I see CMD6 
+being sent before getting hardware timeout.
 
+I modified the timeout handling to consider such case (including erase as it 
+also sometimes for some eMMC takes long time) and resolved these cases of 
+"Timeout waiting for hardware interrupt".
 
+I'll soon present the patch in this forum for more discussions on it.
 
--- 
 Regards,
-Alim
+Prasana NAVARATNA
+
+
+
