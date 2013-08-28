@@ -1,56 +1,37 @@
-From: Theodore Ts'o <tytso@mit.edu>
-Subject: Re: Unable to randomly boot rootfs (EXT3 or EXT4) from SD: MMC error
- -110 (TIMEDOUT)
-Date: Wed, 28 Aug 2013 13:56:22 -0400
-Message-ID: <20130828175622.GA27079@thunk.org>
-References: <CAL1yNcJZBSSNu4aDmL6n9uu3LkNPCOM-LbUXD2990jkPJYpLoA@mail.gmail.com>
- <CAL1yNc+9pOWLCLfk7WpWvvsLfb01cFCJSi+4mTvnks9VrwoF1Q@mail.gmail.com>
- <20130827220143.GC9182@thunk.org>
- <CAL1yNcLzXir7KFavxaQK3OWWU5hHc06tvOSLrdvWB-VoEJdXQA@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+From: Mischa Jonker <Mischa.Jonker@synopsys.com>
+Subject: [PATCH] mmc/dw_mmc: Add support for ARC
+Date: Wed, 28 Aug 2013 20:40:29 +0200
+Message-ID: <1377715229-2414-1-git-send-email-mjonker@synopsys.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from imap.thunk.org ([74.207.234.97]:50721 "EHLO imap.thunk.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753014Ab3H1R4Y (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 28 Aug 2013 13:56:24 -0400
-Content-Disposition: inline
-In-Reply-To: <CAL1yNcLzXir7KFavxaQK3OWWU5hHc06tvOSLrdvWB-VoEJdXQA@mail.gmail.com>
+Received: from vaxjo.synopsys.com ([198.182.60.75]:59362 "EHLO
+	vaxjo.synopsys.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754008Ab3H1Skz (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 28 Aug 2013 14:40:55 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Kevyn-Alexandre =?iso-8859-1?Q?Par=E9?= <kevyn.alexandre.pare@gmail.com>
-Cc: linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, linux-ext4@vger.kernel.org, arnd@linaro.org
+To: Chris Ball <cjb@laptop.org>, Arnd Bergmann <arnd@arndb.de>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Vineet.Gupta1@synopsys.com
+Cc: Mischa Jonker <Mischa.Jonker@synopsys.com>
 
-On Wed, Aug 28, 2013 at 11:22:58AM -0400, Kevyn-Alexandre Par=E9 wrote:
-> We try multiple of our system ( Different micro SD from SanDisk +
-> Overo with OMAP3) and they are all doing this with the SanDisk 64GB,
-> 32GB :
-> http://www.sandisk.com/products/memory-cards/microsd/ultra-class10-fo=
-r-android/?capacity=3D64GB
->=20
-> The problem seem to be easier to reproduce when we just flash the
-> micro SD (partition, format & copy rootfs) at it first boot.
-> Also, when we let the system down for a couple of days and then
-> sometimes we need to reboot the system multiple times before it fall
-> back alright.
->=20
-> We found a old patch that was simply increasing the timeout of the ho=
-st:
-> http://cgit.openembedded.org/cgit.cgi/openembedded/tree/recipes/linux=
-/linux-omap-2.6.39/sakoman/0024-omap-mmc-Adjust-dto-to-eliminate-timeou=
-t-errors.patch?h=3Dorg.openembedded.dev
->=20
-> By settings the timeout to zero I reproduce kind of the same timeout
-> error at every boot. That was expected since I don't let enough time
-> to the controller to respond...
->=20
-> Could the mix of that MMC controller and these card is not optimal? I=
-s
-> the driver fully supporting the UHS-I speed grade?
+Adapt Kconfig to include ARC in supported architectures
 
-I've cc'ed Arnd Bergman who works at Linaro; I suspect that if he
-doesn't know the answer off the top of his head, he can probably
-direct you to someone who will.
+Signed-off-by: Mischa Jonker <mjonker@synopsys.com>
+---
+ drivers/mmc/host/Kconfig |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-							- Ted
+diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+index 8a4c066..6496d50 100644
+--- a/drivers/mmc/host/Kconfig
++++ b/drivers/mmc/host/Kconfig
+@@ -530,7 +530,7 @@ config SDH_BFIN_MISSING_CMD_PULLUP_WORKAROUND
+ 
+ config MMC_DW
+ 	tristate "Synopsys DesignWare Memory Card Interface"
+-	depends on ARM
++	depends on ARC || ARM
+ 	help
+ 	  This selects support for the Synopsys DesignWare Mobile Storage IP
+ 	  block, this provides host support for SD and MMC interfaces, in both
+-- 
+1.7.9.5
+
