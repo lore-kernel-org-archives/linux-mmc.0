@@ -1,35 +1,53 @@
-From: Theodore Ts'o <tytso@mit.edu>
-Subject: Re: Unable to randomly boot rootfs (EXT3 or EXT4) from SD: MMC error
- -110 (TIMEDOUT)
-Date: Tue, 27 Aug 2013 18:01:43 -0400
-Message-ID: <20130827220143.GC9182@thunk.org>
-References: <CAL1yNcJZBSSNu4aDmL6n9uu3LkNPCOM-LbUXD2990jkPJYpLoA@mail.gmail.com>
- <CAL1yNc+9pOWLCLfk7WpWvvsLfb01cFCJSi+4mTvnks9VrwoF1Q@mail.gmail.com>
+From: Alim Akhtar <alim.akhtar@gmail.com>
+Subject: Re: [RFC V2 0/4] dw_mmc platform specific private data init
+Date: Wed, 28 Aug 2013 11:16:19 +0530
+Message-ID: <CAGOxZ510xNnRPobEQuwTEfs-xxJdwtkvDVzjm_tU6oMT3ux2SQ@mail.gmail.com>
+References: <1377256509-18922-1-git-send-email-yuvaraj.cd@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-ext4-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <CAL1yNc+9pOWLCLfk7WpWvvsLfb01cFCJSi+4mTvnks9VrwoF1Q@mail.gmail.com>
-Sender: linux-ext4-owner@vger.kernel.org
-To: Kevyn-Alexandre =?iso-8859-1?Q?Par=E9?= <kevyn.alexandre.pare@gmail.com>
-Cc: linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, linux-ext4@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-Reply-To: <1377256509-18922-1-git-send-email-yuvaraj.cd@samsung.com>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: Yuvaraj Kumar C D <yuvaraj.cd@gmail.com>
+Cc: linux-mmc@vger.kernel.org, "linux-samsung-soc@vger.kernel.org" <linux-samsung-soc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, Alim Akhtar <alim.akhtar@samsung.com>, Girish K S <ks.giri@samsung.com>, "t.figa@samsung.com" <t.figa@samsung.com>, Yuvaraj Kumar C D <yuvaraj.cd@samsung.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On Tue, Aug 27, 2013 at 05:47:22PM -0400, Kevyn-Alexandre Par=E9 wrote:
-> mmcblk0: error -110 sending status command, retrying
-> mmcblk0: error -110 sending status command, retrying
-> mmcblk0: error -110 sending status command, aborting
+Hi Yuvaraj
 
-This looks like a hardware problem; either with the MMC reader, or the
-MMC/SD card.
+On Fri, Aug 23, 2013 at 4:45 PM, Yuvaraj Kumar C D <yuvaraj.cd@gmail.com> wrote:
+> changes from V1:
+>         1.Added a new RFC patch
+>                 mmc: dw_mmc: socfpga: move socfpga private init
+>         2.Avoid code duplication in
+>                 mmc: dw_mmc: exynos: add a quirk for SMU.
+>
+> Yuvaraj Kumar C D (4):
+>   mmc: dw_mmc: exynos: move the exynos private init
+>   mmc: dw_mmc: socfpga: move socfpga private init
+>   mmc: dw_mmc: move the platform specific init call
+>   mmc: dw_mmc: exynos: add a quirk for SMU.
+>
+>  drivers/mmc/host/dw_mmc-exynos.c  |   60 ++++++++++++++++++++++++++++---------
+>  drivers/mmc/host/dw_mmc-pltfm.c   |    7 -----
+>  drivers/mmc/host/dw_mmc-socfpga.c |   29 +++++++++---------
+>  drivers/mmc/host/dw_mmc.c         |   12 ++++++++
+>  include/linux/mmc/dw_mmc.h        |    2 ++
+>  5 files changed, 74 insertions(+), 36 deletions(-)
 
-Can you try swapping out the hardware and see if the problem goes
-away?
+Tested this serise on exynos5420.
+Tested-by: Alim Akhtar <alim.akhtar@samsung.com>
 
-						- Ted
---
-To unsubscribe from this list: send the line "unsubscribe linux-ext4" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
+> --
+> 1.7.9.5
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+
+
+-- 
+Regards,
+Alim
