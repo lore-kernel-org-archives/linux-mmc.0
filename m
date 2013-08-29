@@ -1,104 +1,78 @@
 From: Seungwon Jeon <tgih.jun@samsung.com>
-Subject: RE: [PATCH v6 2/3] mmc: dw_mmc: Honor requests to set the clock to 0
- (turn off clock)
-Date: Thu, 29 Aug 2013 16:04:49 +0900
-Message-ID: <000301cea486$0d813eb0$2883bc10$%jun@samsung.com>
-References: <1377188348-3418-1-git-send-email-dianders@chromium.org>
- <1377188348-3418-3-git-send-email-dianders@chromium.org>
- <001201cea215$8c125e30$a4371a90$%jun@samsung.com>
- <521B1A87.4000500@samsung.com>
- <CAD=FV=WYMyGVmG-DXk1ke-yQCrfF74KDaZAUCW3qzf+Xfp-tpQ@mail.gmail.com>
+Subject: RE: [RFC V3 0/4] dw_mmc platform specific private data and SMU init
+Date: Thu, 29 Aug 2013 16:12:34 +0900
+Message-ID: <000401cea487$22820690$678613b0$%jun@samsung.com>
+References: <1377691731-7226-1-git-send-email-yuvaraj.cd@samsung.com>
+ <521EBA6D.2070900@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=Windows-1252
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout4.samsung.com ([203.254.224.34]:49377 "EHLO
-	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754814Ab3H2HE6 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 29 Aug 2013 03:04:58 -0400
-In-reply-to: <CAD=FV=WYMyGVmG-DXk1ke-yQCrfF74KDaZAUCW3qzf+Xfp-tpQ@mail.gmail.com>
+Received: from mailout2.samsung.com ([203.254.224.25]:14670 "EHLO
+	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752777Ab3H2HMg (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 29 Aug 2013 03:12:36 -0400
+In-reply-to: <521EBA6D.2070900@samsung.com>
 Content-language: ko
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: 'Doug Anderson' <dianders@chromium.org>, 'Jaehoon Chung' <jh80.chung@samsung.com>
-Cc: 'Chris Ball' <cjb@laptop.org>, 'James Hogan' <james.hogan@imgtec.com>, 'Grant Grundler' <grundler@chromium.org>, 'Alim Akhtar' <alim.akhtar@samsung.com>, 'Abhilash Kesavan' <a.kesavan@samsung.com>, 'Tomasz Figa' <tomasz.figa@gmail.com>, 'Olof Johansson' <olof@lixom.net>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+To: 'Jaehoon Chung' <jh80.chung@samsung.com>, 'Yuvaraj Kumar C D' <yuvaraj.cd@gmail.com>
+Cc: linux-mmc@vger.kernel.org, linux-samsung-soc@vger.kernel.org, cjb@laptop.org, ks.giri@samsung.com, t.figa@samsung.com, alim.akhtar@samsung.com, 'Yuvaraj Kumar C D' <yuvaraj.cd@samsung.com>
 
-On Tuesday, August 27, 2013, Doug Anderson wrote:
-> Jaehoon / Seungwon,
+On Thursday, August 29, 2013, Jaehoon Chung wrote:
+> Hi Yuvaraj,
 > 
-> On Mon, Aug 26, 2013 at 2:06 AM, Jaehoon Chung <jh80.chung@samsung.com> wrote:
-> > On 08/26/2013 01:34 PM, Seungwon Jeon wrote:
-> >> On Fri, August 23, 2013, Doug Anderson wrote:
-> >>> Previously the dw_mmc driver would ignore any requests to disable the
-> >>> card's clock.  This doesn't seem like a good thing in general, but had
-> >>> one extra bad side effect in the following situtation:
-> >>> * mmc core would set clk to 400kHz at boot time while initting
-> >>> * mmc core would set clk to 0 since no card, but it would be ignored.
-> >>> * suspend to ram and resume; clocks in the dw_mmc IP block are now 0
-> >>>   but dw_mmc thinks that they're 400kHz (it ignored the set to 0).
-> >>> * insert card
-> >>> * mmc core would set clk to 400kHz which would be considered a no-op.
-> >>>
-> >>> Note that if there is no card in the slot and we do a suspend/resume
-> >>> cycle, we _do_ still end up with differences in a dw_mmc register
-> >>> dump, but the differences are clock related and we've got the clock
-> >>> disabled both before and after, so this should be OK.
-> >>>
-> >>> Signed-off-by: Doug Anderson <dianders@chromium.org>
-> >>> ---
-> >>> Changes in v6:
-> >>> - Replaces previous pathes that ensured saving/restoring clocks.
-> >>>
-> >>>  drivers/mmc/host/dw_mmc.c | 21 +++++++++++----------
-> >>>  1 file changed, 11 insertions(+), 10 deletions(-)
-> >>>
-> >>> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> >>> index ee5f167..f6c7545 100644
-> >>> --- a/drivers/mmc/host/dw_mmc.c
-> >>> +++ b/drivers/mmc/host/dw_mmc.c
-> >>> @@ -635,7 +635,11 @@ static void dw_mci_setup_bus(struct dw_mci_slot *slot, bool force_clkinit)
-> >>>      u32 div;
-> >>>      u32 clk_en_a;
-> >>>
-> >>> -    if (slot->clock != host->current_speed || force_clkinit) {
-> >>> +    if (slot->clock == 0) {
-> >>> +            mci_writel(host, CLKENA, 0);
-> >>> +            mci_send_cmd(slot,
-> >>> +                         SDMMC_CMD_UPD_CLK | SDMMC_CMD_PRV_DAT_WAIT, 0);
-> >> Basically dw_mmc driver uses host's low power mode(auto clock gating)
-> >> So, how about keeping origin code rather than programming clock setting to '0'?
-> > Right, Dw-mmc controller can use the Low-power mode.
-> > This mode is functionality like clock-gating. Well, i didn't know what benefit we get, if set to 0.
+> I have tested on Exynos4 series.
+> I didn't test for SMU feature. If Seungwon could test or review and confirm this patch,
+> then looks good to me.
 > 
-> Ah, right.  ...so it's unlikely that we'd save any power because we're
-> already gating the clock.
-> 
-> I'd really still rather honor the MMC subsystem's request.  It
-> shouldn't _hurt_ to turn the clock off when the subsystem requests it,
-Even though turning off by clock programming doesn't hurt, 
-it is costly behavior when considering low power mode of host's own support.
-Just now, how about focusing on the problem clock isn't updated properly after suspend/resume?
+> With exynos4 series,
+> Tested-by: Jaehoon Chung <jh80.chung@samsung.com>
 
-> right?  One reason to honor the mmc core is that it will make things
-> cleaner if/when we support a voltage change operation.  The MMC core
-> has the logic for the voltage change, and part of that involves
-> turning off the clock.  We'll already need a bunch of special case
-> code in dw_mmc for voltage change, but it would be nice to avoid one
-> extra bit.
-Turning off clock during voltage switching would be another procedure.
-I guess it could be discussed later.
-I want to fix some minor change to prevent frequent message that Jaehoon pointed.
+Just now, this series looks good to me.
+But direct access for SMU concerning (4/4, exynos: configure SMU in exynos5420') 
+will be removed in driver before long.
+I will sort your patches with the pending others.
+
+Acked-by: Seungwon Jeon <tgih.jun@samsung.com>
 
 Thanks,
 Seungwon Jeon
 
 > 
-> Another option would be to add a core MMC quirk to disable MMC_CLKGATE
-> on a per-driver basis.  In the "single zImage" world that seems like
-> the right thing to do, since the MMC_CLKGATE description seems to
-> indicate that enabling that won't really work on all drivers anyway.
+> Best Regards.
+> Jaehoon Chung
 > 
-> -Doug
+> On 08/28/2013 09:08 PM, Yuvaraj Kumar C D wrote:
+> > changes from V2:
+> > 	1.dropped the bypass-smu quirk
+> > 		mmc: dw_mmc: exynos: configure SMU in exynos5420.
+> > 	2.Changed the subject line for this patch
+> > 	  add a quirk for SMU -> configure SMU in exynos5420
+> >
+> > 	mmc: dw_mmc: exynos: configure SMU in exynos5420
+> > 	was earlier
+> > 	mmc: dw_mmc: exynos: add a quirk for SMU.
+> >
+> > changes from V1:
+> > 	1.Added a new RFC patch
+> > 		mmc: dw_mmc: socfpga: move socfpga private init
+> > 	2.Avoid code duplication in
+> > 		mmc: dw_mmc: exynos: add a quirk for SMU.
+> >
+> > Yuvaraj Kumar C D (4):
+> >   mmc: dw_mmc: exynos: move the exynos private init
+> >   mmc: dw_mmc: socfpga: move socfpga private init
+> >   mmc: dw_mmc: move the platform specific init call
+> >   mmc: dw_mmc: exynos: configure SMU in exynos5420.
+> >
+> >  drivers/mmc/host/dw_mmc-exynos.c  |   56 +++++++++++++++++++++++++++----------
+> >  drivers/mmc/host/dw_mmc-pltfm.c   |    7 -----
+> >  drivers/mmc/host/dw_mmc-socfpga.c |   29 ++++++++++---------
+> >  drivers/mmc/host/dw_mmc.c         |    9 ++++++
+> >  4 files changed, 65 insertions(+), 36 deletions(-)
+> >
+> 
 > --
 > To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
 > the body of a message to majordomo@vger.kernel.org
