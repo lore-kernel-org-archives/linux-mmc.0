@@ -1,80 +1,111 @@
 From: Seungwon Jeon <tgih.jun@samsung.com>
-Subject: RE: [RFC V3 0/4] dw_mmc platform specific private data and SMU init
-Date: Thu, 29 Aug 2013 16:12:34 +0900
-Message-ID: <000401cea487$22820690$678613b0$%jun@samsung.com>
+Subject: RE: [RFC V3 4/4] mmc: dw_mmc: exynos: configure SMU in exynos5420.
+Date: Thu, 29 Aug 2013 17:23:22 +0900
+Message-ID: <000901cea491$06b8a360$1429ea20$%jun@samsung.com>
 References: <1377691731-7226-1-git-send-email-yuvaraj.cd@samsung.com>
- <521EBA6D.2070900@samsung.com>
+ <1377691731-7226-5-git-send-email-yuvaraj.cd@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=Windows-1252
+Content-Type: text/plain; charset=ks_c_5601-1987
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout2.samsung.com ([203.254.224.25]:14670 "EHLO
-	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752777Ab3H2HMg (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 29 Aug 2013 03:12:36 -0400
-In-reply-to: <521EBA6D.2070900@samsung.com>
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-reply-to: <1377691731-7226-5-git-send-email-yuvaraj.cd@samsung.com>
 Content-language: ko
-Sender: linux-mmc-owner@vger.kernel.org
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: 'Yuvaraj Kumar C D' <yuvaraj.cd@gmail.com>, linux-mmc@vger.kernel.org, linux-samsung-soc@vger.kernel.org, cjb@laptop.org, jh80.chung@samsung.com
+Cc: ks.giri@samsung.com, t.figa@samsung.com, alim.akhtar@samsung.com, 'Yuvaraj Kumar C D' <yuvaraj.cd@samsung.com>
 List-Id: linux-mmc@vger.kernel.org
-To: 'Jaehoon Chung' <jh80.chung@samsung.com>, 'Yuvaraj Kumar C D' <yuvaraj.cd@gmail.com>
-Cc: linux-mmc@vger.kernel.org, linux-samsung-soc@vger.kernel.org, cjb@laptop.org, ks.giri@samsung.com, t.figa@samsung.com, alim.akhtar@samsung.com, 'Yuvaraj Kumar C D' <yuvaraj.cd@samsung.com>
 
-On Thursday, August 29, 2013, Jaehoon Chung wrote:
-> Hi Yuvaraj,
+On Wed, August 28, 2013, Yuvaraj Kumar C D wrote:
+> Exynos5420 Mobile Storage Host controller has Security Management Unit
+> (SMU) for channel 0 and channel 1 (mainly for eMMC).This patch configures
+> SMU for exynos5420.
 > 
-> I have tested on Exynos4 series.
-> I didn't test for SMU feature. If Seungwon could test or review and confirm this patch,
-> then looks good to me.
+> This patch is on top of the below patch by Doug Anderson.
+> mmc: dw_mmc: Add exynos resume_noirq callback to clear WAKEUP_INT
 > 
-> With exynos4 series,
-> Tested-by: Jaehoon Chung <jh80.chung@samsung.com>
+> changes since V2:
+> 	1.Droppped the bypass-smu quirk.
+> 	2.Changed the subject line for this patch
+> 	  add a quirk for SMU -> configure SMU in exynos5420
+> 
+> changes since V1:
+> 	1.avoid code duplication by calling dw_mci_exynos_priv_init in
+> 	  resume path.
+> 
+> Signed-off-by: Yuvaraj Kumar C D <yuvaraj.cd@samsung.com>
+> Signed-off-by: Alim Akhtar <alim.akhtar@samsung.com>
+> ---
+>  drivers/mmc/host/dw_mmc-exynos.c |   29 +++++++++++++++++++++++++++++
+>  1 file changed, 29 insertions(+)
+> 
+> diff --git a/drivers/mmc/host/dw_mmc-exynos.c b/drivers/mmc/host/dw_mmc-exynos.c
+> index 19c845b..db28f10 100644
+> --- a/drivers/mmc/host/dw_mmc-exynos.c
+> +++ b/drivers/mmc/host/dw_mmc-exynos.c
+> @@ -35,6 +35,25 @@
+>  #define EXYNOS4210_FIXED_CIU_CLK_DIV	2
+>  #define EXYNOS4412_FIXED_CIU_CLK_DIV	4
+> 
+> +/* Block number in eMMC */
+> +#define DWMCI_BLOCK_NUM			0xFFFFFFFF
+> +
+> +#define SDMMC_EMMCP_BASE		0x1000
+> +#define SDMMC_MPSECURITY		(SDMMC_EMMCP_BASE + 0x0010)
+> +#define SDMMC_MPSBEGIN0			(SDMMC_EMMCP_BASE + 0x0200)
+> +#define SDMMC_MPSEND0			(SDMMC_EMMCP_BASE + 0x0204)
+> +#define SDMMC_MPSCTRL0			(SDMMC_EMMCP_BASE + 0x020C)
+> +
+> +/* SMU control bits */
+> +#define DWMCI_MPSCTRL_SECURE_READ_BIT		BIT(7)
+> +#define DWMCI_MPSCTRL_SECURE_WRITE_BIT		BIT(6)
+> +#define DWMCI_MPSCTRL_NON_SECURE_READ_BIT	BIT(5)
+> +#define DWMCI_MPSCTRL_NON_SECURE_WRITE_BIT	BIT(4)
+> +#define DWMCI_MPSCTRL_USE_FUSE_KEY		BIT(3)
+> +#define DWMCI_MPSCTRL_ECB_MODE			BIT(2)
+> +#define DWMCI_MPSCTRL_ENCRYPTION		BIT(1)
+> +#define DWMCI_MPSCTRL_VALID			BIT(0)
+> +
+>  /* Variations in Exynos specific dw-mshc controller */
+>  enum dw_mci_exynos_type {
+>  	DW_MCI_TYPE_EXYNOS4210,
+> @@ -74,6 +93,15 @@ static int dw_mci_exynos_priv_init(struct dw_mci *host)
+>  {
+>  	struct dw_mci_exynos_priv_data *priv = host->priv;
+> 
+> +	if (priv->ctrl_type == DW_MCI_TYPE_EXYNOS5420) {
+> +		mci_writel(host, MPSBEGIN0, 0);
+> +		mci_writel(host, MPSEND0, DWMCI_BLOCK_NUM);
+> +		mci_writel(host, MPSCTRL0, DWMCI_MPSCTRL_SECURE_WRITE_BIT |
+> +			DWMCI_MPSCTRL_NON_SECURE_READ_BIT |
+> +			DWMCI_MPSCTRL_VALID |
+> +			DWMCI_MPSCTRL_NON_SECURE_WRITE_BIT);
+Yuvaraj,
 
-Just now, this series looks good to me.
-But direct access for SMU concerning (4/4, exynos: configure SMU in exynos5420') 
-will be removed in driver before long.
-I will sort your patches with the pending others.
-
-Acked-by: Seungwon Jeon <tgih.jun@samsung.com>
+Just one thing to check.
+ch#0 and #1 of three hosts are only valid for SMU control.
+Did you consider #2 host?
+It seems not.
 
 Thanks,
 Seungwon Jeon
 
+> +	}
+> +
+>  	return 0;
+>  }
 > 
-> Best Regards.
-> Jaehoon Chung
+> @@ -107,6 +135,7 @@ static int dw_mci_exynos_resume(struct device *dev)
+>  {
+>  	struct dw_mci *host = dev_get_drvdata(dev);
 > 
-> On 08/28/2013 09:08 PM, Yuvaraj Kumar C D wrote:
-> > changes from V2:
-> > 	1.dropped the bypass-smu quirk
-> > 		mmc: dw_mmc: exynos: configure SMU in exynos5420.
-> > 	2.Changed the subject line for this patch
-> > 	  add a quirk for SMU -> configure SMU in exynos5420
-> >
-> > 	mmc: dw_mmc: exynos: configure SMU in exynos5420
-> > 	was earlier
-> > 	mmc: dw_mmc: exynos: add a quirk for SMU.
-> >
-> > changes from V1:
-> > 	1.Added a new RFC patch
-> > 		mmc: dw_mmc: socfpga: move socfpga private init
-> > 	2.Avoid code duplication in
-> > 		mmc: dw_mmc: exynos: add a quirk for SMU.
-> >
-> > Yuvaraj Kumar C D (4):
-> >   mmc: dw_mmc: exynos: move the exynos private init
-> >   mmc: dw_mmc: socfpga: move socfpga private init
-> >   mmc: dw_mmc: move the platform specific init call
-> >   mmc: dw_mmc: exynos: configure SMU in exynos5420.
-> >
-> >  drivers/mmc/host/dw_mmc-exynos.c  |   56 +++++++++++++++++++++++++++----------
-> >  drivers/mmc/host/dw_mmc-pltfm.c   |    7 -----
-> >  drivers/mmc/host/dw_mmc-socfpga.c |   29 ++++++++++---------
-> >  drivers/mmc/host/dw_mmc.c         |    9 ++++++
-> >  4 files changed, 65 insertions(+), 36 deletions(-)
-> >
+> +	dw_mci_exynos_priv_init(host);
+>  	return dw_mci_resume(host);
+>  }
+> 
+> --
+> 1.7.9.5
 > 
 > --
 > To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
