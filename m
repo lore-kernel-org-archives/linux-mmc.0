@@ -1,101 +1,48 @@
 From: Seungwon Jeon <tgih.jun@samsung.com>
-Subject: RE: [RFC V3 2/4] mmc: dw_mmc: socfpga: move socfpga private init
-Date: Thu, 29 Aug 2013 20:59:48 +0900
-Message-ID: <001601cea4af$42e662f0$c8b328d0$%jun@samsung.com>
-References: <1377691731-7226-1-git-send-email-yuvaraj.cd@samsung.com>
- <1377691731-7226-3-git-send-email-yuvaraj.cd@samsung.com>
+Subject: RE: [PATCH] mmc/dw_mmc: Add support for ARC
+Date: Thu, 29 Aug 2013 21:05:49 +0900
+Message-ID: <001701cea4b0$19b00b10$4d102130$%jun@samsung.com>
+References: <1377715229-2414-1-git-send-email-mjonker@synopsys.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ks_c_5601-1987
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-reply-to: <1377691731-7226-3-git-send-email-yuvaraj.cd@samsung.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout4.samsung.com ([203.254.224.34]:48334 "EHLO
+	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754761Ab3H2MF5 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 29 Aug 2013 08:05:57 -0400
+In-reply-to: <1377715229-2414-1-git-send-email-mjonker@synopsys.com>
 Content-language: ko
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: 'Yuvaraj Kumar C D' <yuvaraj.cd@gmail.com>, linux-mmc@vger.kernel.org, linux-samsung-soc@vger.kernel.org, cjb@laptop.org, jh80.chung@samsung.com
-Cc: ks.giri@samsung.com, t.figa@samsung.com, alim.akhtar@samsung.com, 'Yuvaraj Kumar C D' <yuvaraj.cd@samsung.com>, 'Dinh Nguyen' <dinguyen@altera.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: 'Mischa Jonker' <Mischa.Jonker@synopsys.com>, 'Chris Ball' <cjb@laptop.org>, 'Arnd Bergmann' <arnd@arndb.de>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Vineet.Gupta1@synopsys.com
 
-On Wed, August 28, 2013, Yuvaraj Kumar C D wrote:
-> Currently platform specific private data initialisation is done by
-> dw_mci_socfpga_priv_init and dw_mci_socfpga_parse_dt.As we already have
-> separate platform specific device tree parser dw_mci_socfpga_parse_dt,
-> move the dw_mci_socfpga_priv_init code to dw_mci_socfpga_parse_dt.
-> We can use the dw_mci_socfpga_priv_init to do some actual platform
-> specific initialisation.
+On Thu, August 29, 2013, Mischa Jonker wrote:
+> Adapt Kconfig to include ARC in supported architectures
 > 
-> This patch is compile tested only.
-CC'ed Dinh Nguyen
+> Signed-off-by: Mischa Jonker <mjonker@synopsys.com>
+Acked-by: Seungwon Jeon <tgih.jun@samsung.com>
 
 Thanks,
 Seungwon Jeon
 
-> 
-> changes since V2: none
-> 
-> Signed-off-by: Yuvaraj Kumar C D <yuvaraj.cd@samsung.com>
 > ---
->  drivers/mmc/host/dw_mmc-socfpga.c |   29 ++++++++++++++---------------
->  1 file changed, 14 insertions(+), 15 deletions(-)
+>  drivers/mmc/host/Kconfig |    2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
 > 
-> diff --git a/drivers/mmc/host/dw_mmc-socfpga.c b/drivers/mmc/host/dw_mmc-socfpga.c
-> index 14b5961..953f260 100644
-> --- a/drivers/mmc/host/dw_mmc-socfpga.c
-> +++ b/drivers/mmc/host/dw_mmc-socfpga.c
-> @@ -38,20 +38,6 @@ struct dw_mci_socfpga_priv_data {
+> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+> index 8a4c066..6496d50 100644
+> --- a/drivers/mmc/host/Kconfig
+> +++ b/drivers/mmc/host/Kconfig
+> @@ -530,7 +530,7 @@ config SDH_BFIN_MISSING_CMD_PULLUP_WORKAROUND
 > 
->  static int dw_mci_socfpga_priv_init(struct dw_mci *host)
->  {
-> -	struct dw_mci_socfpga_priv_data *priv;
-> -
-> -	priv = devm_kzalloc(host->dev, sizeof(*priv), GFP_KERNEL);
-> -	if (!priv) {
-> -		dev_err(host->dev, "mem alloc failed for private data\n");
-> -		return -ENOMEM;
-> -	}
-> -
-> -	priv->sysreg = syscon_regmap_lookup_by_compatible("altr,sys-mgr");
-> -	if (IS_ERR(priv->sysreg)) {
-> -		dev_err(host->dev, "regmap for altr,sys-mgr lookup failed.\n");
-> -		return PTR_ERR(priv->sysreg);
-> -	}
-> -	host->priv = priv;
-> 
->  	return 0;
->  }
-> @@ -79,12 +65,24 @@ static void dw_mci_socfpga_prepare_command(struct dw_mci *host, u32 *cmdr)
-> 
->  static int dw_mci_socfpga_parse_dt(struct dw_mci *host)
->  {
-> -	struct dw_mci_socfpga_priv_data *priv = host->priv;
-> +	struct dw_mci_socfpga_priv_data *priv;
->  	struct device_node *np = host->dev->of_node;
->  	u32 timing[2];
->  	u32 div = 0;
->  	int ret;
-> 
-> +	priv = devm_kzalloc(host->dev, sizeof(*priv), GFP_KERNEL);
-> +	if (!priv) {
-> +		dev_err(host->dev, "mem alloc failed for private data\n");
-> +		return -ENOMEM;
-> +	}
-> +
-> +	priv->sysreg = syscon_regmap_lookup_by_compatible("altr,sys-mgr");
-> +	if (IS_ERR(priv->sysreg)) {
-> +		dev_err(host->dev, "regmap for altr,sys-mgr lookup failed.\n");
-> +		return PTR_ERR(priv->sysreg);
-> +	}
-> +
->  	ret = of_property_read_u32(np, "altr,dw-mshc-ciu-div", &div);
->  	if (ret)
->  		dev_info(host->dev, "No dw-mshc-ciu-div specified, assuming 1");
-> @@ -96,6 +94,7 @@ static int dw_mci_socfpga_parse_dt(struct dw_mci *host)
->  		return ret;
-> 
->  	priv->hs_timing = SYSMGR_SDMMC_CTRL_SET(timing[0], timing[1]);
-> +	host->priv = priv;
->  	return 0;
->  }
-> 
+>  config MMC_DW
+>  	tristate "Synopsys DesignWare Memory Card Interface"
+> -	depends on ARM
+> +	depends on ARC || ARM
+>  	help
+>  	  This selects support for the Synopsys DesignWare Mobile Storage IP
+>  	  block, this provides host support for SD and MMC interfaces, in both
 > --
 > 1.7.9.5
 > 
@@ -103,3 +50,4 @@ Seungwon Jeon
 > To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
