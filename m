@@ -1,23 +1,18 @@
-From: Alim Akhtar <alim.akhtar@gmail.com>
+From: Yuvaraj Kumar <yuvaraj.cd@gmail.com>
 Subject: Re: [RFC V3 4/4] mmc: dw_mmc: exynos: configure SMU in exynos5420.
-Date: Thu, 29 Aug 2013 14:38:42 +0530
-Message-ID: <CAGOxZ53iuTNtY5jWMBNfdcp05QSwdbSY+-A4G6zrjV2ae8BJ6A@mail.gmail.com>
+Date: Thu, 29 Aug 2013 15:12:06 +0530
+Message-ID: <CAKuRcOLaGDxdy=dm5MQpW0nWW4jkR4Nn58jH17-e1EESZi=QWA@mail.gmail.com>
 References: <1377691731-7226-1-git-send-email-yuvaraj.cd@samsung.com>
- <1377691731-7226-5-git-send-email-yuvaraj.cd@samsung.com> <000901cea491$06b8a360$1429ea20$%jun@samsung.com>
+	<1377691731-7226-5-git-send-email-yuvaraj.cd@samsung.com>
+	<000901cea491$06b8a360$1429ea20$%jun@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ve0-f179.google.com ([209.85.128.179]:63375 "EHLO
-	mail-ve0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751650Ab3H2JJY (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 29 Aug 2013 05:09:24 -0400
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
 In-Reply-To: <000901cea491$06b8a360$1429ea20$%jun@samsung.com>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Sender: linux-samsung-soc-owner@vger.kernel.org
 To: Seungwon Jeon <tgih.jun@samsung.com>
-Cc: Yuvaraj Kumar C D <yuvaraj.cd@gmail.com>, linux-mmc@vger.kernel.org, "linux-samsung-soc@vger.kernel.org" <linux-samsung-soc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Jaehoon Chung <jh80.chung@samsung.com>, Girish K S <ks.giri@samsung.com>, "t.figa@samsung.com" <t.figa@samsung.com>, Alim Akhtar <alim.akhtar@samsung.com>, Yuvaraj Kumar C D <yuvaraj.cd@samsung.com>
-
-Hi Seungwon,
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, "linux-samsung-soc@vger.kernel.org" <linux-samsung-soc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Jaehoon Chung <jh80.chung@samsung.com>, "ks.giri@samsung.com" <ks.giri@samsung.com>, Tomasz Figa <t.figa@samsung.com>, Alim Akhtar <alim.akhtar@samsung.com>, Yuvaraj Kumar C D <yuvaraj.cd@samsung.com>
+List-Id: linux-mmc@vger.kernel.org
 
 On Thu, Aug 29, 2013 at 1:53 PM, Seungwon Jeon <tgih.jun@samsung.com> wrote:
 > On Wed, August 28, 2013, Yuvaraj Kumar C D wrote:
@@ -90,11 +85,8 @@ On Thu, Aug 29, 2013 at 1:53 PM, Seungwon Jeon <tgih.jun@samsung.com> wrote:
 > ch#0 and #1 of three hosts are only valid for SMU control.
 > Did you consider #2 host?
 > It seems not.
+Yes.AFAIK, host#2 doesn't have SMU.
 >
-
-Only host#0 and host#1 has SMU (On exynos5420).
-Host #2 does not contain SMU.
-
 > Thanks,
 > Seungwon Jeon
 >
@@ -119,13 +111,3 @@ Host #2 does not contain SMU.
 >> the body of a message to majordomo@vger.kernel.org
 >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 >
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-samsung-soc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
-
-
--- 
-Regards,
-Alim
