@@ -1,112 +1,126 @@
 From: Doug Anderson <dianders@chromium.org>
-Subject: Re: [PATCH v6 2/3] mmc: dw_mmc: Honor requests to set the clock to 0
- (turn off clock)
-Date: Thu, 29 Aug 2013 09:34:14 -0700
-Message-ID: <CAD=FV=VXpH31X3+LnJA6ewyrYzOZ1zu_4mL=93U9WnguR=3Nhw@mail.gmail.com>
+Subject: [PATCH v7 1/3] mmc: dw_mmc: Add exynos resume_noirq callback to clear WAKEUP_INT
+Date: Thu, 29 Aug 2013 09:39:08 -0700
+Message-ID: <1377794350-12335-2-git-send-email-dianders@chromium.org>
 References: <1377188348-3418-1-git-send-email-dianders@chromium.org>
-	<1377188348-3418-3-git-send-email-dianders@chromium.org>
-	<001201cea215$8c125e30$a4371a90$%jun@samsung.com>
-	<521B1A87.4000500@samsung.com>
-	<CAD=FV=WYMyGVmG-DXk1ke-yQCrfF74KDaZAUCW3qzf+Xfp-tpQ@mail.gmail.com>
-	<000301cea486$0d813eb0$2883bc10$%jun@samsung.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <000301cea486$0d813eb0$2883bc10$%jun@samsung.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Seungwon Jeon <tgih.jun@samsung.com>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, Chris Ball <cjb@laptop.org>, James Hogan <james.hogan@imgtec.com>, Grant Grundler <grundler@chromium.org>, Alim Akhtar <alim.akhtar@samsung.com>, Abhilash Kesavan <a.kesavan@samsung.com>, Tomasz Figa <tomasz.figa@gmail.com>, Olof Johansson <olof@lixom.net>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+ <1377794350-12335-1-git-send-email-dianders@chromium.org>
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-Reply-To: <1377794350-12335-1-git-send-email-dianders@chromium.org>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, James Hogan <james.hogan@imgtec.com>, Grant Grundler <grundler@chromium.org>, Alim Akhtar <alim.akhtar@samsung.com>, Abhilash Kesavan <a.kesavan@samsung.com>, Tomasz Figa <tomasz.figa@gmail.com>, Olof Johansson <olof@lixom.net>, Doug Anderson <dianders@chromium.org>, Kukjin Kim <kgene.kim@samsung.com>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-samsung-soc@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-Seungwon,
+If the WAKEUP_INT is asserted at wakeup and not cleared, we'll end up
+looping around forever.  This has been seen to happen on exynos5420
+silicon despite the fact that we haven't enabled any wakeup events due
+to a silicon errata.  It is safe to do on all exynos variants.
 
-On Thu, Aug 29, 2013 at 12:04 AM, Seungwon Jeon <tgih.jun@samsung.com> wrote:
->> I'd really still rather honor the MMC subsystem's request.  It
->> shouldn't _hurt_ to turn the clock off when the subsystem requests it,
-> Even though turning off by clock programming doesn't hurt,
-> it is costly behavior when considering low power mode of host's own support.
+Signed-off-by: Doug Anderson <dianders@chromium.org>
+---
+Changes in v7: None
+Changes in v6:
+- Took out TODO comment copied from main platform code.
 
-It is costly?  We are talking about these two commands, right?
+Changes in v5:
+- Cleaned up dw_mci_exynos_resume_noirq() comment as per Seungwon.
+- Don't memcpy dev_pm_ops structure, define a new one.
 
-  mci_writel(host, CLKENA, 0);
-  mci_send_cmd(slot,
-      SDMMC_CMD_UPD_CLK | SDMMC_CMD_PRV_DAT_WAIT, 0);
+Changes in v4:
+- Take Seungwon's suggestion and don't add any dw_mmc-pltfm code.
 
-Do you have a reason to believe that these are more costly than all of
-the rest of the code that's executed when the user defines
-CONFIG_MMC_CLKGATE?  You're still proposing doing all of the updates
-of the clock when slot->clock is non-zero, right?  ...so at best
-skipping this code will be 33% faster since the re-enable code
-disables and then reenables the clock.  If it's the
-"SDMMC_CMD_PRV_DAT_WAIT" that you're worried about then skipping this
-code will only be 25% faster since there are already three calls with
-SDMMC_CMD_PRV_DAT_WAIT in the enable code.
+Changes in v3:
+- Add freeze/thaw and poweroff/restore noirq entries.
 
+Changes in v2:
+- Use suspend_noirq as per James Hogan.
 
-> Just now, how about focusing on the problem clock isn't updated properly after suspend/resume?
+ drivers/mmc/host/dw_mmc-exynos.c | 53 +++++++++++++++++++++++++++++++++++++++-
+ 1 file changed, 52 insertions(+), 1 deletion(-)
 
-I tried to do that in the original patches, but you pointed out
-(correctly) that we should do the correct fix rather than a hackier
-fix.  IMHO the most correct fix is to honor the MMC core's request to
-turn the clock off.  Partially honoring the MMC core (as you suggest)
-is certainly less hacky that my original proposal but I still think
-turning the clock off is better.
-
-
->> right?  One reason to honor the mmc core is that it will make things
->> cleaner if/when we support a voltage change operation.  The MMC core
->> has the logic for the voltage change, and part of that involves
->> turning off the clock.  We'll already need a bunch of special case
->> code in dw_mmc for voltage change, but it would be nice to avoid one
->> extra bit.
-> Turning off clock during voltage switching would be another procedure.
-> I guess it could be discussed later.
-
-Agreed that we're not trying to get voltage switching done here, but
-forward thinking is nice.  If there's no reason _not_ to turn the
-clock off and it will help us later, let's do it. Also, we've already
-agreed that MMC_CLKGATE isn't so useful for dw_mmc, so trying to do
-something awkward to make MMC_CLKGATE slightly faster doesn't seem
-worth it.
-
-
-> I want to fix some minor change to prevent frequent message that Jaehoon pointed.
-
-As far as I can tell, the frequent messages and whether or not to
-actually turn the clock off are unrelated.  I will send up a patch
-that fixes the frequent messages by caching the last value printed and
-only printing if it changed.  I have verified that this works and that
-the system still functions OK (can boot to prompt) with
-CONFIG_MMC_CLKGATE.
-
-
-Note: re-reading over some of the previous messages, it sounds like
-you're proposing using the patch from your email directly, AKA:
-
-http://article.gmane.org/gmane.linux.kernel/1542482
-
-Did you test that patch?  Did it work for you?  It doesn't actually
-compile cleanly for me (you removed the "force_clkinit" param in the
-function but not the callers).  That's easy to fix, but implies that
-this patch was just a proposal and not a tested solution.
-
-...but aside from not compiling cleanly, I don't think it will work
-for the same reasons that the original code didn't work.  Specifically
-it doesn't address the core problem that we need to update
-host->current_speed when the clock is 0.  Otherwise we won't re-init
-and we run into the original problem, right?  To be certain I took
-your patch and applied it, then fixed the callers of
-dw_mci_setup_bus() not to pass a second parameter.  I did a
-suspend/resume with no card in and then plugged a card in.  It didn't
-work.
-
-
-As I said above, new patch coming shortly.  As always: feel free to
-point out any glaring mistakes I made in the above.  ;)  Note that I
-will be out of communication for the next week or so and buried
-beneath email for a few days after that, so my response might be a
-little delayed.
-
-
-
--Doug
+diff --git a/drivers/mmc/host/dw_mmc-exynos.c b/drivers/mmc/host/dw_mmc-exynos.c
+index 866edef..e8c6cc9 100644
+--- a/drivers/mmc/host/dw_mmc-exynos.c
++++ b/drivers/mmc/host/dw_mmc-exynos.c
+@@ -30,6 +30,7 @@
+ #define SDMMC_CLKSEL_TIMING(x, y, z)	(SDMMC_CLKSEL_CCLK_SAMPLE(x) |	\
+ 					SDMMC_CLKSEL_CCLK_DRIVE(y) |	\
+ 					SDMMC_CLKSEL_CCLK_DIVIDER(z))
++#define SDMMC_CLKSEL_WAKEUP_INT		BIT(11)
+ 
+ #define EXYNOS4210_FIXED_CIU_CLK_DIV	2
+ #define EXYNOS4412_FIXED_CIU_CLK_DIV	4
+@@ -100,6 +101,49 @@ static int dw_mci_exynos_setup_clock(struct dw_mci *host)
+ 	return 0;
+ }
+ 
++#ifdef CONFIG_PM_SLEEP
++static int dw_mci_exynos_suspend(struct device *dev)
++{
++	struct dw_mci *host = dev_get_drvdata(dev);
++
++	return dw_mci_suspend(host);
++}
++
++static int dw_mci_exynos_resume(struct device *dev)
++{
++	struct dw_mci *host = dev_get_drvdata(dev);
++
++	return dw_mci_resume(host);
++}
++
++/**
++ * dw_mci_exynos_resume_noirq - Exynos-specific resume code
++ *
++ * On exynos5420 there is a silicon errata that will sometimes leave the
++ * WAKEUP_INT bit in the CLKSEL register asserted.  This bit is 1 to indicate
++ * that it fired and we can clear it by writing a 1 back.  Clear it to prevent
++ * interrupts from going off constantly.
++ *
++ * We run this code on all exynos variants because it doesn't hurt.
++ */
++
++static int dw_mci_exynos_resume_noirq(struct device *dev)
++{
++	struct dw_mci *host = dev_get_drvdata(dev);
++	u32 clksel;
++
++	clksel = mci_readl(host, CLKSEL);
++	if (clksel & SDMMC_CLKSEL_WAKEUP_INT)
++		mci_writel(host, CLKSEL, clksel);
++
++	return 0;
++}
++#else
++#define dw_mci_exynos_suspend		NULL
++#define dw_mci_exynos_resume		NULL
++#define dw_mci_exynos_resume_noirq	NULL
++#endif /* CONFIG_PM_SLEEP */
++
+ static void dw_mci_exynos_prepare_command(struct dw_mci *host, u32 *cmdr)
+ {
+ 	/*
+@@ -187,13 +231,20 @@ static int dw_mci_exynos_probe(struct platform_device *pdev)
+ 	return dw_mci_pltfm_register(pdev, drv_data);
+ }
+ 
++const struct dev_pm_ops dw_mci_exynos_pmops = {
++	SET_SYSTEM_SLEEP_PM_OPS(dw_mci_exynos_suspend, dw_mci_exynos_resume)
++	.resume_noirq = dw_mci_exynos_resume_noirq,
++	.thaw_noirq = dw_mci_exynos_resume_noirq,
++	.restore_noirq = dw_mci_exynos_resume_noirq,
++};
++
+ static struct platform_driver dw_mci_exynos_pltfm_driver = {
+ 	.probe		= dw_mci_exynos_probe,
+ 	.remove		= __exit_p(dw_mci_pltfm_remove),
+ 	.driver		= {
+ 		.name		= "dwmmc_exynos",
+ 		.of_match_table	= dw_mci_exynos_match,
+-		.pm		= &dw_mci_pltfm_pmops,
++		.pm		= &dw_mci_exynos_pmops,
+ 	},
+ };
+ 
+-- 
+1.8.4
