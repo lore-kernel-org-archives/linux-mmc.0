@@ -1,175 +1,147 @@
-From: Joel Fernandes <joelf-l0cyMroinI0@public.gmane.org>
-Subject: [PATCH v4 2/6] dma: edma: Write out and handle MAX_NR_SG at a given
-	time
-Date: Thu, 29 Aug 2013 18:05:41 -0500
-Message-ID: <1377817545-18015-3-git-send-email-joelf@ti.com>
+From: Joel Fernandes <joelf@ti.com>
+Subject: [PATCH v4 4/6] dma: edma: Find missed events and issue them
+Date: Thu, 29 Aug 2013 18:05:43 -0500
+Message-ID: <1377817545-18015-5-git-send-email-joelf@ti.com>
 References: <1377817545-18015-1-git-send-email-joelf@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
-In-Reply-To: <1377817545-18015-1-git-send-email-joelf-l0cyMroinI0@public.gmane.org>
-List-Unsubscribe: <http://linux.davincidsp.com/mailman/options/davinci-linux-open-source>,
-	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://linux.davincidsp.com/pipermail/davinci-linux-open-source>
-List-Post: <mailto:davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
-List-Help: <mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=help>
-List-Subscribe: <http://linux.davincidsp.com/mailman/listinfo/davinci-linux-open-source>,
-	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=subscribe>
-Sender: <davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
-Errors-To: davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org
-To: Sekhar Nori <nsekhar-l0cyMroinI0@public.gmane.org>, Matt Porter <matt-agtwNxEcTQJWk0Htik3J/w@public.gmane.org>, Vinod Koul <vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Dan Williams <djbw-b10kYP2dOMg@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Sricharan R <r.sricharan-l0cyMroinI0@public.gmane.org>
-Cc: Linux DaVinci Kernel List <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, Joel Fernandes <joelf-l0cyMroinI0@public.gmane.org>, Koen Kooi <koen-QLwJDigV5abLmq1fohREcCpxlwaOVQ5f@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Franklin Cooper <fcooper-l0cyMroinI0@public.gmane.org>, Linux OMAP List <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux ARM Kernel List <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Content-Type: text/plain
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from bear.ext.ti.com ([192.94.94.41]:54478 "EHLO bear.ext.ti.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751522Ab3H2XGd (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 29 Aug 2013 19:06:33 -0400
+In-Reply-To: <1377817545-18015-1-git-send-email-joelf@ti.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Sekhar Nori <nsekhar@ti.com>, Matt Porter <matt@ohporter.com>, Vinod Koul <vinod.koul@intel.com>, Dan Williams <djbw@fb.com>, Russell King <linux@arm.linux.org.uk>, Sricharan R <r.sricharan@ti.com>
+Cc: Linux OMAP List <linux-omap@vger.kernel.org>, Linux ARM Kernel List <linux-arm-kernel@lists.infradead.org>, Linux DaVinci Kernel List <davinci-linux-open-source@linux.davincidsp.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux MMC List <linux-mmc@vger.kernel.org>, Koen Kooi <koen@dominion.thruhere.net>, Franklin Cooper <fcooper@ti.com>, Joel Fernandes <joelf@ti.com>
 
-Process SG-elements in batches of MAX_NR_SG if they are greater
-than MAX_NR_SG. Due to this, at any given time only those many
-slots will be used in the given channel no matter how long the
-scatter list is. We keep track of how much has been written
-inorder to process the next batch of elements in the scatter-list
-and detect completion.
+In an effort to move to using Scatter gather lists of any size with
+EDMA as discussed at [1] instead of placing limitations on the driver,
+we work through the limitations of the EDMAC hardware to find missed
+events and issue them.
 
-For such intermediate transfer completions (one batch of MAX_NR_SG),
-make use of pause and resume functions instead of start and stop
-when such intermediate transfer is in progress or completed as we
-donot want to clear any pending events.
+The sequence of events that require this are:
 
-Signed-off-by: Joel Fernandes <joelf-l0cyMroinI0@public.gmane.org>
+For the scenario where MAX slots for an EDMA channel is 3:
+
+SG1 -> SG2 -> SG3 -> SG4 -> SG5 -> SG6 -> Null
+
+The above SG list will have to be DMA'd in 2 sets:
+
+(1) SG1 -> SG2 -> SG3 -> Null
+(2) SG4 -> SG5 -> SG6 -> Null
+
+After (1) is succesfully transferred, the events from the MMC controller
+donot stop coming and are missed by the time we have setup the transfer
+for (2). So here, we catch the events missed as an error condition and
+issue them manually.
+
+In the second part of the patch, we make handle the NULL slot cases:
+For crypto IP, we continue to receive events even continuously in
+NULL slot, the setup of the next set of SG elements happens after
+the error handler executes. This is results in some recursion problems.
+Due to this, we continously receive error interrupts when we manually
+trigger an event from the error handler.
+
+We fix this, by first detecting if the Channel is currently transferring
+from a NULL slot or not, that's where the edma_read_slot in the error
+callback from interrupt handler comes in. With this we can determine if
+the set up of the next SG list has completed, and we manually trigger
+only in this case. If the setup has _not_ completed, we are still in NULL
+so we just set a missed flag and allow the manual triggerring to happen
+in edma_execute which will be eventually called. This fixes the above
+mentioned race conditions seen with the crypto drivers.
+
+[1] http://marc.info/?l=linux-omap&m=137416733628831&w=2
+
+Signed-off-by: Joel Fernandes <joelf@ti.com>
 ---
- drivers/dma/edma.c | 79 ++++++++++++++++++++++++++++++++++++------------------
- 1 file changed, 53 insertions(+), 26 deletions(-)
+ drivers/dma/edma.c | 50 +++++++++++++++++++++++++++++++++++++++++++++++++-
+ 1 file changed, 49 insertions(+), 1 deletion(-)
 
 diff --git a/drivers/dma/edma.c b/drivers/dma/edma.c
-index e522ad5..732829b 100644
+index 732829b..0e77b57 100644
 --- a/drivers/dma/edma.c
 +++ b/drivers/dma/edma.c
-@@ -56,6 +56,7 @@ struct edma_desc {
- 	struct list_head		node;
- 	int				absync;
- 	int				pset_nr;
-+	int				processed;
- 	struct edmacc_param		pset[0];
+@@ -70,6 +70,7 @@ struct edma_chan {
+ 	int				ch_num;
+ 	bool				alloced;
+ 	int				slot[EDMA_MAX_SLOTS];
++	int				missed;
+ 	struct dma_slave_config		cfg;
  };
  
-@@ -104,22 +105,34 @@ static void edma_desc_free(struct virt_dma_desc *vdesc)
- /* Dispatch a queued descriptor to the controller (caller holds lock) */
- static void edma_execute(struct edma_chan *echan)
- {
--	struct virt_dma_desc *vdesc = vchan_next_desc(&echan->vchan);
-+	struct virt_dma_desc *vdesc;
- 	struct edma_desc *edesc;
--	int i;
--
--	if (!vdesc) {
--		echan->edesc = NULL;
--		return;
-+	struct device *dev = echan->vchan.chan.device->dev;
-+	int i, j, left, nslots;
-+
-+	/* If either we processed all psets or we're still not started */
-+	if (!echan->edesc ||
-+	    echan->edesc->pset_nr == echan->edesc->processed) {
-+		/* Get next vdesc */
-+		vdesc = vchan_next_desc(&echan->vchan);
-+		if (!vdesc) {
-+			echan->edesc = NULL;
-+			return;
-+		}
-+		list_del(&vdesc->node);
-+		echan->edesc = to_edma_desc(&vdesc->tx);
+@@ -170,6 +171,20 @@ static void edma_execute(struct edma_chan *echan)
+ 		dev_dbg(dev, "first transfer starting %d\n", echan->ch_num);
+ 		edma_start(echan->ch_num);
  	}
- 
--	list_del(&vdesc->node);
-+	edesc = echan->edesc;
- 
--	echan->edesc = edesc = to_edma_desc(&vdesc->tx);
-+	/* Find out how many left */
-+	left = edesc->pset_nr - edesc->processed;
-+	nslots = min(MAX_NR_SG, left);
- 
- 	/* Write descriptor PaRAM set(s) */
--	for (i = 0; i < edesc->pset_nr; i++) {
--		edma_write_slot(echan->slot[i], &edesc->pset[i]);
-+	for (i = 0; i < nslots; i++) {
-+		j = i + edesc->processed;
-+		edma_write_slot(echan->slot[i], &edesc->pset[j]);
- 		dev_dbg(echan->vchan.chan.device->dev,
- 			"\n pset[%d]:\n"
- 			"  chnum\t%d\n"
-@@ -132,24 +145,31 @@ static void edma_execute(struct edma_chan *echan)
- 			"  bidx\t%08x\n"
- 			"  cidx\t%08x\n"
- 			"  lkrld\t%08x\n",
--			i, echan->ch_num, echan->slot[i],
--			edesc->pset[i].opt,
--			edesc->pset[i].src,
--			edesc->pset[i].dst,
--			edesc->pset[i].a_b_cnt,
--			edesc->pset[i].ccnt,
--			edesc->pset[i].src_dst_bidx,
--			edesc->pset[i].src_dst_cidx,
--			edesc->pset[i].link_bcntrld);
-+			j, echan->ch_num, echan->slot[i],
-+			edesc->pset[j].opt,
-+			edesc->pset[j].src,
-+			edesc->pset[j].dst,
-+			edesc->pset[j].a_b_cnt,
-+			edesc->pset[j].ccnt,
-+			edesc->pset[j].src_dst_bidx,
-+			edesc->pset[j].src_dst_cidx,
-+			edesc->pset[j].link_bcntrld);
- 		/* Link to the previous slot if not the last set */
--		if (i != (edesc->pset_nr - 1))
-+		if (i != (nslots - 1))
- 			edma_link(echan->slot[i], echan->slot[i+1]);
- 		/* Final pset links to the dummy pset */
- 		else
- 			edma_link(echan->slot[i], echan->ecc->dummy_slot);
- 	}
- 
--	edma_start(echan->ch_num);
-+	edesc->processed += nslots;
 +
-+	edma_resume(echan->ch_num);
-+
-+	if (edesc->processed <= MAX_NR_SG) {
-+		dev_dbg(dev, "first transfer starting %d\n", echan->ch_num);
++	/*
++	 * This happens due to setup times between intermediate transfers
++	 * in long SG lists which have to be broken up into transfers of
++	 * MAX_NR_SG
++	 */
++	if (echan->missed) {
++		dev_dbg(dev, "missed event in execute detected\n");
++		edma_clean_channel(echan->ch_num);
++		edma_stop(echan->ch_num);
 +		edma_start(echan->ch_num);
++		edma_trigger_channel(echan->ch_num);
++		echan->missed = 0;
 +	}
  }
  
  static int edma_terminate_all(struct edma_chan *echan)
-@@ -368,19 +388,26 @@ static void edma_callback(unsigned ch_num, u16 ch_status, void *data)
+@@ -387,6 +402,7 @@ static void edma_callback(unsigned ch_num, u16 ch_status, void *data)
+ 	struct device *dev = echan->vchan.chan.device->dev;
  	struct edma_desc *edesc;
  	unsigned long flags;
++	struct edmacc_param p;
  
--	/* Stop the channel */
--	edma_stop(echan->ch_num);
-+	/* Pause the channel */
-+	edma_pause(echan->ch_num);
+ 	/* Pause the channel */
+ 	edma_pause(echan->ch_num);
+@@ -414,7 +430,39 @@ static void edma_callback(unsigned ch_num, u16 ch_status, void *data)
  
- 	switch (ch_status) {
- 	case DMA_COMPLETE:
--		dev_dbg(dev, "transfer complete on channel %d\n", ch_num);
--
- 		spin_lock_irqsave(&echan->vchan.lock, flags);
- 
- 		edesc = echan->edesc;
- 		if (edesc) {
-+			if (edesc->processed == edesc->pset_nr) {
-+				dev_dbg(dev, "transfer complete." \
-+					" stopping channel %d\n", ch_num);
-+				edma_stop(echan->ch_num);
-+				vchan_cookie_complete(&edesc->vdesc);
-+			} else {
-+				dev_dbg(dev, "Intermediate transfer complete" \
-+					" on channel %d\n", ch_num);
-+			}
+ 		break;
+ 	case DMA_CC_ERROR:
+-		dev_dbg(dev, "transfer error on channel %d\n", ch_num);
++		spin_lock_irqsave(&echan->vchan.lock, flags);
 +
- 			edma_execute(echan);
--			vchan_cookie_complete(&edesc->vdesc);
- 		}
- 
- 		spin_unlock_irqrestore(&echan->vchan.lock, flags);
++		edma_read_slot(EDMA_CHAN_SLOT(echan->slot[0]), &p);
++
++		/*
++		 * Issue later based on missed flag which will be sure
++		 * to happen as:
++		 * (1) we finished transmitting an intermediate slot and
++		 *     edma_execute is coming up.
++		 * (2) or we finished current transfer and issue will
++		 *     call edma_execute.
++		 *
++		 * Important note: issuing can be dangerous here and
++		 * lead to some nasty recursion when we are in a NULL
++		 * slot. So we avoid doing so and set the missed flag.
++		 */
++		if (p.a_b_cnt == 0 && p.ccnt == 0) {
++			dev_dbg(dev, "Error occurred, looks like slot is null, just setting miss\n");
++			echan->missed = 1;
++		} else {
++			/*
++			 * The slot is already programmed but the event got
++			 * missed, so its safe to issue it here.
++			 */
++			dev_dbg(dev, "Error occurred but slot is non-null, TRIGGERING\n");
++			edma_clean_channel(echan->ch_num);
++			edma_stop(echan->ch_num);
++			edma_start(echan->ch_num);
++			edma_trigger_channel(echan->ch_num);
++		}
++
++		spin_unlock_irqrestore(&echan->vchan.lock, flags);
++
+ 		break;
+ 	default:
+ 		break;
 -- 
 1.8.1.2
+
