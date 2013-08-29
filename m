@@ -1,11 +1,13 @@
 From: Joel Fernandes <joelf-l0cyMroinI0@public.gmane.org>
-Subject: [PATCH v4 0/6] dma: edma: Support scatter-lists of any length
-Date: Thu, 29 Aug 2013 18:05:39 -0500
-Message-ID: <1377817545-18015-1-git-send-email-joelf@ti.com>
+Subject: [PATCH v4 1/6] dma: edma: Setup parameters to DMA MAX_NR_SG at a time
+Date: Thu, 29 Aug 2013 18:05:40 -0500
+Message-ID: <1377817545-18015-2-git-send-email-joelf@ti.com>
+References: <1377817545-18015-1-git-send-email-joelf@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
+In-Reply-To: <1377817545-18015-1-git-send-email-joelf-l0cyMroinI0@public.gmane.org>
 List-Unsubscribe: <http://linux.davincidsp.com/mailman/options/davinci-linux-open-source>,
 	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://linux.davincidsp.com/pipermail/davinci-linux-open-source>
@@ -16,62 +18,76 @@ List-Subscribe: <http://linux.davincidsp.com/mailman/listinfo/davinci-linux-open
 Sender: <davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
 Errors-To: davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org
 To: Sekhar Nori <nsekhar-l0cyMroinI0@public.gmane.org>, Matt Porter <matt-agtwNxEcTQJWk0Htik3J/w@public.gmane.org>, Vinod Koul <vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Dan Williams <djbw-b10kYP2dOMg@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Sricharan R <r.sricharan-l0cyMroinI0@public.gmane.org>
-Cc: Linux DaVinci Kernel List <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, Koen Kooi <koen-QLwJDigV5abLmq1fohREcCpxlwaOVQ5f@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Franklin Cooper <fcooper-l0cyMroinI0@public.gmane.org>, Linux OMAP List <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux ARM Kernel List <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Cc: Linux DaVinci Kernel List <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, Joel Fernandes <joelf-l0cyMroinI0@public.gmane.org>, Koen Kooi <koen-QLwJDigV5abLmq1fohREcCpxlwaOVQ5f@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Franklin Cooper <fcooper-l0cyMroinI0@public.gmane.org>, Linux OMAP List <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux ARM Kernel List <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-The following series adds support to EDMA driver to enable DMA of
-scatter-gather lists of arbitrary length, but still make use of only
-a certain MAX number of slots at a time for a given channel. Thus
-free-ing up the rest of the slots to other slaves/channels.  With this
-there is no need for slave drivers to query the EDMA driver about how
-much is the MAX it can send at a time as done in [1]. Drivers can send
-SG lists of any number of entries to DMA. Reference discussion at [2].
+Changes are made here for configuring existing parameters to support
+DMA'ing them out in batches as needed.
 
-With this, all the patches for MMC and EDMA related to "sg limits" can be
-dropped.
+Also allocate as many as slots as needed by the SG list, but not more
+than MAX_NR_SG. Then these slots will be reused accordingly.
+For ex, if MAX_NR_SG=10, and number of SG entries is 40, still only
+10 slots will be allocated to DMA the entire SG list of size 40.
 
-Tested omap-aes and omap_hsmmc drivers with different MAX number of slots,
-even just 1. In the case where it is 1, only 1-slot is used to DMA an
-entire scatter list of arbitrary length.
-Since this series touches EDMA private API code also shared with davinci-pcm,
-playback of a 16-bit 44.1KHz audio file with davinci-pcm has been tested.
+Also enable TC interrupts for slots that are a last in a current
+iteration, or that fall on a MAX_NR_SG boundary.
 
-Sample test run with 1 vs 16 (MAX number of slots/SG) in omap-aes driver:
-MAX slots = 1:
- (128 bit key, 8192 byte blocks): 1266 operations in 1 seconds (10371072 bytes)
-MAX slots = 16:
- (128 bit key, 8192 byte blocks): 1601 operations in 1 seconds (13115392 bytes)
+Signed-off-by: Joel Fernandes <joelf-l0cyMroinI0@public.gmane.org>
+---
+ drivers/dma/edma.c | 18 +++++++++++++++---
+ 1 file changed, 15 insertions(+), 3 deletions(-)
 
-Note: For the above test, 8K buffer is mapped into SG list of size 2 so
-only 2 slots are required. So beyond size 2, there will not be any noticeable
-performance improvement. But above experiment just shows as proof of concept
-that even using 1 slot is managed by just DMA'ing 1 SG entry at a time.
-
-Patch series history:
-v1: The initial patch series
-v2: Several style related cleanups.
-v3: Rewrote major portions of the series to avoid usage of error interrupts.
-v4: Go back to v1: After performing tests, it is determined that the v1
-series is a good enough approach and that v3 triggers problems in certain cases.
-Tests have shown that there is not any noticeable performance difference between
-using vs not using error interrupts. v4 also squashes some patches in v1.
-At this point, we are freezing the overall architecture of the patch series to v4.
-
-[1] https://lkml.org/lkml/2013/7/18/432
-[2] http://marc.info/?l=linux-omap&m=137416733628831&w=2
-
-Joel Fernandes (6):
-  dma: edma: Setup parameters to DMA MAX_NR_SG at a time
-  dma: edma: Write out and handle MAX_NR_SG at a given time
-  ARM: edma: Add function to manually trigger an EDMA channel
-  dma: edma: Find missed events and issue them
-  dma: edma: Leave linked to Null slot instead of DUMMY slot
-  dma: edma: Remove limits on number of slots
-
- arch/arm/common/edma.c             |  17 ++++
- drivers/dma/edma.c                 | 164 ++++++++++++++++++++++++++++---------
- include/linux/platform_data/edma.h |   2 +
- 3 files changed, 144 insertions(+), 39 deletions(-)
-
+diff --git a/drivers/dma/edma.c b/drivers/dma/edma.c
+index 5f3e532..e522ad5 100644
+--- a/drivers/dma/edma.c
++++ b/drivers/dma/edma.c
+@@ -222,9 +222,9 @@ static struct dma_async_tx_descriptor *edma_prep_slave_sg(
+ 	enum dma_slave_buswidth dev_width;
+ 	u32 burst;
+ 	struct scatterlist *sg;
+-	int i;
+ 	int acnt, bcnt, ccnt, src, dst, cidx;
+ 	int src_bidx, dst_bidx, src_cidx, dst_cidx;
++	int i, nslots;
+ 
+ 	if (unlikely(!echan || !sgl || !sg_len))
+ 		return NULL;
+@@ -262,8 +262,10 @@ static struct dma_async_tx_descriptor *edma_prep_slave_sg(
+ 
+ 	edesc->pset_nr = sg_len;
+ 
+-	for_each_sg(sgl, sg, sg_len, i) {
+-		/* Allocate a PaRAM slot, if needed */
++	/* Allocate a PaRAM slot, if needed */
++	nslots = min_t(unsigned, MAX_NR_SG, sg_len);
++
++	for (i = 0; i < nslots; i++) {
+ 		if (echan->slot[i] < 0) {
+ 			echan->slot[i] =
+ 				edma_alloc_slot(EDMA_CTLR(echan->ch_num),
+@@ -273,6 +275,10 @@ static struct dma_async_tx_descriptor *edma_prep_slave_sg(
+ 				return NULL;
+ 			}
+ 		}
++	}
++
++	/* Configure PaRAM sets for each SG */
++	for_each_sg(sgl, sg, sg_len, i) {
+ 
+ 		acnt = dev_width;
+ 
+@@ -330,6 +336,12 @@ static struct dma_async_tx_descriptor *edma_prep_slave_sg(
+ 		/* Configure A or AB synchronized transfers */
+ 		if (edesc->absync)
+ 			edesc->pset[i].opt |= SYNCDIM;
++
++		/* If this is the last in a current SG set of transactions,
++		   enable interrupts so that next set is processed */
++		if (!((i+1) % MAX_NR_SG))
++			edesc->pset[i].opt |= TCINTEN;
++
+ 		/* If this is the last set, enable completion interrupt flag */
+ 		if (i == sg_len - 1)
+ 			edesc->pset[i].opt |= TCINTEN;
 -- 
 1.8.1.2
