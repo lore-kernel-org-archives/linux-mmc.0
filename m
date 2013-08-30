@@ -1,13 +1,13 @@
 From: Yuvaraj Kumar C D <yuvaraj.cd@gmail.com>
-Subject: [RFC V4 2/4] mmc: dw_mmc: socfpga: move socfpga private init
-Date: Fri, 30 Aug 2013 15:17:41 +0530
-Message-ID: <1377856063-3391-3-git-send-email-yuvaraj.cd@samsung.com>
+Subject: [RFC V4 1/4] mmc: dw_mmc: exynos: move the exynos private init
+Date: Fri, 30 Aug 2013 15:17:40 +0530
+Message-ID: <1377856063-3391-2-git-send-email-yuvaraj.cd@samsung.com>
 References: <1377856063-3391-1-git-send-email-yuvaraj.cd@samsung.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pb0-f50.google.com ([209.85.160.50]:59053 "EHLO
-	mail-pb0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754717Ab3H3JsG (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 30 Aug 2013 05:48:06 -0400
+Received: from mail-pa0-f50.google.com ([209.85.220.50]:40628 "EHLO
+	mail-pa0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753358Ab3H3JsD (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 30 Aug 2013 05:48:03 -0400
 In-Reply-To: <1377856063-3391-1-git-send-email-yuvaraj.cd@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
@@ -15,31 +15,31 @@ To: linux-mmc@vger.kernel.org, linux-samsung-soc@vger.kernel.org, cjb@laptop.org
 Cc: ks.giri@samsung.com, t.figa@samsung.com, alim.akhtar@samsung.com, dianders@chromium.org, Yuvaraj Kumar C D <yuvaraj.cd@samsung.com>
 
 Currently platform specific private data initialisation is done by
-dw_mci_socfpga_priv_init and dw_mci_socfpga_parse_dt.As we already have
-separate platform specific device tree parser dw_mci_socfpga_parse_dt,
-move the dw_mci_socfpga_priv_init code to dw_mci_socfpga_parse_dt.
-We can use the dw_mci_socfpga_priv_init to do some actual platform
-specific initialisation.
-
-This patch is compile tested only.
+dw_mci_exynos_priv_init and dw_mci_exynos_parse_dt.As we already have
+separate platform specific device tree parser dw_mci_exynos_parse_dt,
+move the dw_mci_exynos_priv_init code to dw_mci_exynos_parse_dt.
+We can use the dw_mci_exynos_priv_init to do some actual platform
+specific initialisation of SMU and etc.
 
 changes since V3: none
 changes since V2: none
+changes since V1: none
 
 Signed-off-by: Yuvaraj Kumar C D <yuvaraj.cd@samsung.com>
 ---
- drivers/mmc/host/dw_mmc-socfpga.c |   29 ++++++++++++++---------------
- 1 file changed, 14 insertions(+), 15 deletions(-)
+ drivers/mmc/host/dw_mmc-exynos.c |   31 +++++++++++++++----------------
+ 1 file changed, 15 insertions(+), 16 deletions(-)
 
-diff --git a/drivers/mmc/host/dw_mmc-socfpga.c b/drivers/mmc/host/dw_mmc-socfpga.c
-index 14b5961..953f260 100644
---- a/drivers/mmc/host/dw_mmc-socfpga.c
-+++ b/drivers/mmc/host/dw_mmc-socfpga.c
-@@ -38,20 +38,6 @@ struct dw_mci_socfpga_priv_data {
+diff --git a/drivers/mmc/host/dw_mmc-exynos.c b/drivers/mmc/host/dw_mmc-exynos.c
+index 9990f98..19c845b 100644
+--- a/drivers/mmc/host/dw_mmc-exynos.c
++++ b/drivers/mmc/host/dw_mmc-exynos.c
+@@ -72,22 +72,8 @@ static struct dw_mci_exynos_compatible {
  
- static int dw_mci_socfpga_priv_init(struct dw_mci *host)
+ static int dw_mci_exynos_priv_init(struct dw_mci *host)
  {
--	struct dw_mci_socfpga_priv_data *priv;
+-	struct dw_mci_exynos_priv_data *priv;
+-	int idx;
 -
 -	priv = devm_kzalloc(host->dev, sizeof(*priv), GFP_KERNEL);
 -	if (!priv) {
@@ -47,24 +47,27 @@ index 14b5961..953f260 100644
 -		return -ENOMEM;
 -	}
 -
--	priv->sysreg = syscon_regmap_lookup_by_compatible("altr,sys-mgr");
--	if (IS_ERR(priv->sysreg)) {
--		dev_err(host->dev, "regmap for altr,sys-mgr lookup failed.\n");
--		return PTR_ERR(priv->sysreg);
+-	for (idx = 0; idx < ARRAY_SIZE(exynos_compat); idx++) {
+-		if (of_device_is_compatible(host->dev->of_node,
+-					exynos_compat[idx].compatible))
+-			priv->ctrl_type = exynos_compat[idx].ctrl_type;
 -	}
--	host->priv = priv;
++	struct dw_mci_exynos_priv_data *priv = host->priv;
  
+-	host->priv = priv;
  	return 0;
  }
-@@ -79,12 +65,24 @@ static void dw_mci_socfpga_prepare_command(struct dw_mci *host, u32 *cmdr)
  
- static int dw_mci_socfpga_parse_dt(struct dw_mci *host)
+@@ -177,12 +163,24 @@ static void dw_mci_exynos_set_ios(struct dw_mci *host, struct mmc_ios *ios)
+ 
+ static int dw_mci_exynos_parse_dt(struct dw_mci *host)
  {
--	struct dw_mci_socfpga_priv_data *priv = host->priv;
-+	struct dw_mci_socfpga_priv_data *priv;
+-	struct dw_mci_exynos_priv_data *priv = host->priv;
++	struct dw_mci_exynos_priv_data *priv;
  	struct device_node *np = host->dev->of_node;
  	u32 timing[2];
  	u32 div = 0;
++	int idx;
  	int ret;
  
 +	priv = devm_kzalloc(host->dev, sizeof(*priv), GFP_KERNEL);
@@ -73,19 +76,18 @@ index 14b5961..953f260 100644
 +		return -ENOMEM;
 +	}
 +
-+	priv->sysreg = syscon_regmap_lookup_by_compatible("altr,sys-mgr");
-+	if (IS_ERR(priv->sysreg)) {
-+		dev_err(host->dev, "regmap for altr,sys-mgr lookup failed.\n");
-+		return PTR_ERR(priv->sysreg);
++	for (idx = 0; idx < ARRAY_SIZE(exynos_compat); idx++) {
++		if (of_device_is_compatible(np, exynos_compat[idx].compatible))
++			priv->ctrl_type = exynos_compat[idx].ctrl_type;
 +	}
 +
- 	ret = of_property_read_u32(np, "altr,dw-mshc-ciu-div", &div);
- 	if (ret)
- 		dev_info(host->dev, "No dw-mshc-ciu-div specified, assuming 1");
-@@ -96,6 +94,7 @@ static int dw_mci_socfpga_parse_dt(struct dw_mci *host)
+ 	of_property_read_u32(np, "samsung,dw-mshc-ciu-div", &div);
+ 	priv->ciu_div = div;
+ 
+@@ -199,6 +197,7 @@ static int dw_mci_exynos_parse_dt(struct dw_mci *host)
  		return ret;
  
- 	priv->hs_timing = SYSMGR_SDMMC_CTRL_SET(timing[0], timing[1]);
+ 	priv->ddr_timing = SDMMC_CLKSEL_TIMING(timing[0], timing[1], div);
 +	host->priv = priv;
  	return 0;
  }
