@@ -1,34 +1,93 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] mmc/dw_mmc: Add support for ARC
-Date: Thu, 29 Aug 2013 21:57:12 -0400
-Message-ID: <87ppswvt3b.fsf@octavius.laptop.org>
-References: <1377715229-2414-1-git-send-email-mjonker@synopsys.com>
-	<001701cea4b0$19b00b10$4d102130$%jun@samsung.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH v2 3/4] mmc: sdhci-s3c: revert
+ "fix missing clock for gpio card-detect"
+Date: Fri, 30 Aug 2013 11:59:21 +0900
+Message-ID: <52200A89.9050601@samsung.com>
+References: <51FBBD7D.2020203@samsung.com> <871u5cx99m.fsf@octavius.laptop.org>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:51407 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754936Ab3H3B5T (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 29 Aug 2013 21:57:19 -0400
-In-Reply-To: <001701cea4b0$19b00b10$4d102130$%jun@samsung.com> (Seungwon
-	Jeon's message of "Thu, 29 Aug 2013 21:05:49 +0900")
+Received: from mailout3.samsung.com ([203.254.224.33]:46782 "EHLO
+	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752536Ab3H3C7J (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 29 Aug 2013 22:59:09 -0400
+Received: from epcpsbgr4.samsung.com
+ (u144.gpu120.samsung.co.kr [203.254.230.144])
+ by mailout3.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+ (7.0.4.24.0) 64bit (built Nov 17 2011))
+ with ESMTP id <0MSB002FJPMJOIJ0@mailout3.samsung.com> for
+ linux-mmc@vger.kernel.org; Fri, 30 Aug 2013 11:59:07 +0900 (KST)
+In-reply-to: <871u5cx99m.fsf@octavius.laptop.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Seungwon Jeon <tgih.jun@samsung.com>
-Cc: 'Mischa Jonker' <Mischa.Jonker@synopsys.com>, 'Arnd Bergmann' <arnd@arndb.de>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Vineet.Gupta1@synopsys.com
+To: Chris Ball <cjb@laptop.org>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Kyungmin Park <kyungmin.park@samsung.com>, =?ISO-8859-1?Q?Heiko_St=FCb?= =?ISO-8859-1?Q?ner?= <heiko@sntech.de>
 
-Hi,
+Dear, Chris.
 
-On Thu, Aug 29 2013, Seungwon Jeon wrote:
-> On Thu, August 29, 2013, Mischa Jonker wrote:
->> Adapt Kconfig to include ARC in supported architectures
->> 
->> Signed-off-by: Mischa Jonker <mjonker@synopsys.com>
-> Acked-by: Seungwon Jeon <tgih.jun@samsung.com>
+On 08/30/2013 10:22 AM, Chris Ball wrote:
+> Hi,
+> 
+> On Fri, Aug 02 2013, Jaehoon Chung wrote:
+>> Fixed the warning message.(clk_disable/enable didn't pair)
+>> [..]
+>>
+>> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+>> Signed-off-by: Kyungmin Park <Kyungmin.park@samsung.com>
+>> Acked-by: Heiko Stuebner <heiko@sntech.de>
+>> Tested-by: Heiko Stuebner <heiko@sntech.de>
+>> ---
+>> Changelog v2:
+>> 	- Added acked/tested by Heiko (on s3c2416)
+>>
+>>  drivers/mmc/host/sdhci-s3c.c |    9 ---------
+>>  1 file changed, 9 deletions(-)
+>>
+>> diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
+>> index 6debda9..f974778 100644
+>> --- a/drivers/mmc/host/sdhci-s3c.c
+>> +++ b/drivers/mmc/host/sdhci-s3c.c
+>> @@ -373,27 +373,18 @@ static struct sdhci_ops sdhci_s3c_ops = {
+>>  static void sdhci_s3c_notify_change(struct platform_device *dev, int state)
+>>  {
+>>  	struct sdhci_host *host = platform_get_drvdata(dev);
+>> -#ifdef CONFIG_PM_RUNTIME
+>> -	struct sdhci_s3c *sc = sdhci_priv(host);
+>> -#endif
+>>  	unsigned long flags;
+>>  
+>>  	if (host) {
+>>  		spin_lock_irqsave(&host->lock, flags);
+>>  		if (state) {
+>>  			dev_dbg(&dev->dev, "card inserted.\n");
+>> -#ifdef CONFIG_PM_RUNTIME
+>> -			clk_prepare_enable(sc->clk_io);
+>> -#endif
+>>  			host->flags &= ~SDHCI_DEVICE_DEAD;
+>>  			host->quirks |= SDHCI_QUIRK_BROKEN_CARD_DETECTION;
+>>  		} else {
+>>  			dev_dbg(&dev->dev, "card removed.\n");
+>>  			host->flags |= SDHCI_DEVICE_DEAD;
+>>  			host->quirks &= ~SDHCI_QUIRK_BROKEN_CARD_DETECTION;
+>> -#ifdef CONFIG_PM_RUNTIME
+>> -			clk_disable_unprepare(sc->clk_io);
+>> -#endif
+>>  		}
+>>  		tasklet_schedule(&host->card_tasklet);
+>>  		spin_unlock_irqrestore(&host->lock, flags);
+> 
+> Jaehoon/Heiko, it looks this patch was itself a bug fix -- can we
+> not find a way to support cd-gpios and runtime PM at the same time?
+I will find them.
 
-Thanks, pushed to mmc-next for 3.12.
+Thanks for review.
 
-- Chris.
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+Best Regards,
+Jaehoon Chung
+> 
+> Thanks,
+> 
+> - Chris.
+> 
+
