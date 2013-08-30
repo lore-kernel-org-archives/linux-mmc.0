@@ -1,112 +1,175 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH  v2 4/4] mmc: sdhci-s3c: remove the duplicated calling
- sequence
-Date: Fri, 30 Aug 2013 12:01:22 +0900
-Message-ID: <52200B02.9080105@samsung.com>
-References: <51FBBD7E.2090700@samsung.com> <87wqn4vtze.fsf@octavius.laptop.org>
+From: Seungwon Jeon <tgih.jun@samsung.com>
+Subject: RE: [RFC V3 4/4] mmc: dw_mmc: exynos: configure SMU in exynos5420.
+Date: Fri, 30 Aug 2013 12:44:43 +0900
+Message-ID: <000a01cea533$43cfa580$cb6ef080$%jun@samsung.com>
+References: <1377691731-7226-1-git-send-email-yuvaraj.cd@samsung.com>
+ <CAKuRcO+R4G9LXdXGJOXFNGB+XZeJwvnVq1U5wtCKRPmNN8DWPA@mail.gmail.com>
+ <001001cea4a3$9eb13080$dc139180$%jun@samsung.com>
+ <49209892.KLA1Q6dtil@amdc1227>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout2.samsung.com ([203.254.224.25]:39738 "EHLO
-	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751968Ab3H3DBK (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 29 Aug 2013 23:01:10 -0400
-Received: from epcpsbgr5.samsung.com
- (u145.gpu120.samsung.co.kr [203.254.230.145])
- by mailout2.samsung.com (Oracle Communications Messaging Server 7u4-24.01
- (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTP id <0MSB00B7JPPN9MI0@mailout2.samsung.com> for
- linux-mmc@vger.kernel.org; Fri, 30 Aug 2013 12:01:08 +0900 (KST)
-In-reply-to: <87wqn4vtze.fsf@octavius.laptop.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-reply-to: <49209892.KLA1Q6dtil@amdc1227>
+Content-language: ko
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: 'Tomasz Figa' <t.figa@samsung.com>
+Cc: 'Yuvaraj Kumar' <yuvaraj.cd@gmail.com>, 'Alim Akhtar' <alim.akhtar@gmail.com>, 'linux-mmc' <linux-mmc@vger.kernel.org>, linux-samsung-soc@vger.kernel.org, 'Chris Ball' <cjb@laptop.org>, 'Jaehoon Chung' <jh80.chung@samsung.com>, 'Girish K S' <ks.giri@samsung.com>, 'Alim Akhtar' <alim.akhtar@samsung.com>, 'Yuvaraj Kumar C D' <yuvaraj.cd@samsung.com>, swarren@wwwdotorg.org, mark.rutland@arm.com, ian.campbell@citrix.com, rob.herring@calxeda.com, pawel.moll@arm.com, galak@codeaurora.org, devicetree@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Kyungmin Park <kyungmin.park@samsung.com>, =?windows-1252?Q?Heiko_St=FC?= =?windows-1252?Q?bner?= <heiko@sntech.de>
 
-Dear Chris.
+On Thu, August 29, 2013, Tomasz Figa wrote:
+> Hi Seungwon,
+> 
+> On Thursday 29 of August 2013 19:36:28 Seungwon Jeon wrote:
+> > Yuvaraj Kumar wrote:
+> > > On Thu, Aug 29, 2013 at 3:14 PM, Seungwon Jeon <tgih.jun@samsung.com>
+> wrote:
+> > > > On Thu, August 29, 2013, Alim Akhtar wrote:
+> > > >> Hi Seungwon,
+> > > >>
+> > > >> On Thu, Aug 29, 2013 at 1:53 PM, Seungwon Jeon
+> <tgih.jun@samsung.com> wrote:
+> > > >> > On Wed, August 28, 2013, Yuvaraj Kumar C D wrote:
+> > > >> >> Exynos5420 Mobile Storage Host controller has Security Management
+> > > >> >> Unit
+> > > >> >> (SMU) for channel 0 and channel 1 (mainly for eMMC).This patch
+> > > >> >> configures SMU for exynos5420.
+> > > >> >>
+> > > >> >> This patch is on top of the below patch by Doug Anderson.
+> > > >> >> mmc: dw_mmc: Add exynos resume_noirq callback to clear WAKEUP_INT
+> > > >> >>
+> > > >> >> changes since V2:
+> > > >> >>       1.Droppped the bypass-smu quirk.
+> > > >> >>       2.Changed the subject line for this patch
+> > > >> >>
+> > > >> >>         add a quirk for SMU -> configure SMU in exynos5420
+> > > >> >>
+> > > >> >> changes since V1:
+> > > >> >>       1.avoid code duplication by calling dw_mci_exynos_priv_init
+> > > >> >>       in
+> > > >> >>
+> > > >> >>         resume path.
+> > > >> >>
+> > > >> >> Signed-off-by: Yuvaraj Kumar C D <yuvaraj.cd@samsung.com>
+> > > >> >> Signed-off-by: Alim Akhtar <alim.akhtar@samsung.com>
+> > > >> >> ---
+> > > >> >>
+> > > >> >>  drivers/mmc/host/dw_mmc-exynos.c |   29
+> > > >> >>  +++++++++++++++++++++++++++++
+> > > >> >>  1 file changed, 29 insertions(+)
+> > > >> >>
+> > > >> >> diff --git a/drivers/mmc/host/dw_mmc-exynos.c
+> > > >> >> b/drivers/mmc/host/dw_mmc-exynos.c index 19c845b..db28f10 100644
+> > > >> >> --- a/drivers/mmc/host/dw_mmc-exynos.c
+> > > >> >> +++ b/drivers/mmc/host/dw_mmc-exynos.c
+> > > >> >> @@ -35,6 +35,25 @@
+> > > >> >>
+> > > >> >>  #define EXYNOS4210_FIXED_CIU_CLK_DIV 2
+> > > >> >>  #define EXYNOS4412_FIXED_CIU_CLK_DIV 4
+> > > >> >>
+> > > >> >> +/* Block number in eMMC */
+> > > >> >> +#define DWMCI_BLOCK_NUM                      0xFFFFFFFF
+> > > >> >> +
+> > > >> >> +#define SDMMC_EMMCP_BASE             0x1000
+> > > >> >> +#define SDMMC_MPSECURITY             (SDMMC_EMMCP_BASE + 0x0010)
+> > > >> >> +#define SDMMC_MPSBEGIN0                      (SDMMC_EMMCP_BASE +
+> > > >> >> 0x0200) +#define SDMMC_MPSEND0
+> > > >> >> (SDMMC_EMMCP_BASE + 0x0204) +#define SDMMC_MPSCTRL0
+> > > >> >>          (SDMMC_EMMCP_BASE + 0x020C) +
+> > > >> >> +/* SMU control bits */
+> > > >> >> +#define DWMCI_MPSCTRL_SECURE_READ_BIT                BIT(7)
+> > > >> >> +#define DWMCI_MPSCTRL_SECURE_WRITE_BIT               BIT(6)
+> > > >> >> +#define DWMCI_MPSCTRL_NON_SECURE_READ_BIT    BIT(5)
+> > > >> >> +#define DWMCI_MPSCTRL_NON_SECURE_WRITE_BIT   BIT(4)
+> > > >> >> +#define DWMCI_MPSCTRL_USE_FUSE_KEY           BIT(3)
+> > > >> >> +#define DWMCI_MPSCTRL_ECB_MODE                       BIT(2)
+> > > >> >> +#define DWMCI_MPSCTRL_ENCRYPTION             BIT(1)
+> > > >> >> +#define DWMCI_MPSCTRL_VALID                  BIT(0)
+> > > >> >> +
+> > > >> >>
+> > > >> >>  /* Variations in Exynos specific dw-mshc controller */
+> > > >> >>  enum dw_mci_exynos_type {
+> > > >> >>
+> > > >> >>       DW_MCI_TYPE_EXYNOS4210,
+> > > >> >>
+> > > >> >> @@ -74,6 +93,15 @@ static int dw_mci_exynos_priv_init(struct
+> > > >> >> dw_mci *host)> >> >>
+> > > >> >>  {
+> > > >> >>
+> > > >> >>       struct dw_mci_exynos_priv_data *priv = host->priv;
+> > > >> >>
+> > > >> >> +     if (priv->ctrl_type == DW_MCI_TYPE_EXYNOS5420) {
+> > > >> >> +             mci_writel(host, MPSBEGIN0, 0);
+> > > >> >> +             mci_writel(host, MPSEND0, DWMCI_BLOCK_NUM);
+> > > >> >> +             mci_writel(host, MPSCTRL0,
+> > > >> >> DWMCI_MPSCTRL_SECURE_WRITE_BIT | +
+> > > >> >> DWMCI_MPSCTRL_NON_SECURE_READ_BIT |
+> > > >> >> +                     DWMCI_MPSCTRL_VALID |
+> > > >> >> +                     DWMCI_MPSCTRL_NON_SECURE_WRITE_BIT);
+> > > >> >
+> > > >> > Yuvaraj,
+> > > >> >
+> > > >> > Just one thing to check.
+> > > >> > ch#0 and #1 of three hosts are only valid for SMU control.
+> > > >> > Did you consider #2 host?
+> > > >> > It seems not.
+> > > >>
+> > > >> Only host#0 and host#1 has SMU (On exynos5420).
+> > > >> Host #2 does not contain SMU.
+> > > >
+> > > > Let me clear it.
+> > > > I mean that current change allows for ch2 to access registers related
+> > > > to SMU, even though ch2 doesn't actually has SMU. It's not valid IO
+> > > > area.>
+> > > No,host#0 and host#1 are compatible with "samsung,exynos5420-dw-mshc"
+> > > but host#2 is compatible with the "samsung,exynos5250-dw-mshc".
+> > > Below is the DT patch posted in another thread.
+> > > [1] [PATCH V4] ARM: dts: Add dwmmc DT nodes for exynos5420 SOC
+> > > http://www.mail-archive.com/linux-samsung-soc@vger.kernel.org/msg21985.
+> > > html I will resubmit the DT patch[1] with reg = <0x12220000 0x1000> for
+> > > host#2.
+> > Hmm. If we notice exynos5420's other newly added registers apart from
+> > SMU, it is difficult to say exynos5420 is compatible with exynos5250
+> > fully for #2. But because there is no use case for new registers, it
+> > could be acceptable. Ok, we should be careful to configure DT file
+> > though.
+> 
+> Could you elaborate a bit more on the differences in DW MMC IP between
+> Exynos5250 and Exynos5420? If the differences are significant, then it
+> might be necessary to use different compatible value, as it should not
+> depend on any use case (or lack of).
+Actually the reason is  that extended register of ch2 doesn't work rather than none of use case.
+Ch2 is targeted for removable card type.
 
-On 08/30/2013 10:37 AM, Chris Ball wrote:
-> Hi,
->=20
-> On Fri, Aug 02 2013, Jaehoon Chung wrote:
->> Didn't need to call the sdhci_s3c_notify_change in setup_card_detect=
-_gpio().
->>
->> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
->> Signed-off-by: Kyungmin Park <Kyungmin.park@samsung.com>
->> Acked-by: Heiko Stuebner <heiko@sntech.de>
->> Tested-by: Heiko Stuebner <heiko@sntech.de>
->> ---
->> Changelog v2:
->> 	- Added acked/tested by Heiko (on s3c2416)
->>
->>  drivers/mmc/host/sdhci-s3c.c |   26 ++++++++++++--------------
->>  1 file changed, 12 insertions(+), 14 deletions(-)
->>
->> diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s=
-3c.c
->> index f974778..c4ea802 100644
->> --- a/drivers/mmc/host/sdhci-s3c.c
->> +++ b/drivers/mmc/host/sdhci-s3c.c
->> @@ -409,20 +409,18 @@ static void sdhci_s3c_setup_card_detect_gpio(s=
-truct sdhci_s3c *sc)
->>  	if (devm_gpio_request(dev, pdata->ext_cd_gpio, "SDHCI EXT CD") =3D=
-=3D 0) {
->>  		sc->ext_cd_gpio =3D pdata->ext_cd_gpio;
->>  		sc->ext_cd_irq =3D gpio_to_irq(pdata->ext_cd_gpio);
->> -		if (sc->ext_cd_irq &&
->> -		    request_threaded_irq(sc->ext_cd_irq, NULL,
->> -					 sdhci_s3c_gpio_card_detect_thread,
->> -					 IRQF_TRIGGER_RISING |
->> -					 IRQF_TRIGGER_FALLING |
->> -					 IRQF_ONESHOT,
->> -					 dev_name(dev), sc) =3D=3D 0) {
->> -			int status =3D gpio_get_value(sc->ext_cd_gpio);
->> -			if (pdata->ext_cd_gpio_invert)
->> -				status =3D !status;
->> -			sdhci_s3c_notify_change(sc->pdev, status);
->> -		} else {
->> -			dev_warn(dev, "cannot request irq for card detect\n");
->> -			sc->ext_cd_irq =3D 0;
->> +		if (sc->ext_cd_irq) {
->> +			ret =3D request_threaded_irq(sc->ext_cd_irq, NULL,
->> +					sdhci_s3c_gpio_card_detect_thread,
->> +					IRQF_TRIGGER_RISING |
->> +					IRQF_TRIGGER_FALLING |
->> +					IRQF_ONESHOT,
->> +					dev_name(dev), sc);
->> +			if (ret) {
->> +				dev_warn(dev,
->> +					"cannot request irq for card detect\n");
->> +				sc->ext_cd_irq =3D 0;
->> +			}
->>  		}
->>  	} else {
->>  		dev_err(dev, "cannot request gpio for card detect\n");
->=20
-> Jaehoon, this is really bad.  Heiko's ACK was conditional on fixing
-> the error below:
->=20
-> /home/cjb/git/mmc/drivers/mmc/host/sdhci-s3c.c: In function =91sdhci_=
-s3c_setup_card_detect_gpio=92:
-> /home/cjb/git/mmc/drivers/mmc/host/sdhci-s3c.c:422:4: error: =91ret=92=
- undeclared (first use in this function)
->=20
-> But you reposted the same patch with his ACK and no fix.
-Sorry.. I will check this.
->=20
-> I don't mind the part where you probably didn't read his email
-> carefully -- I'm much more concerned that you've now submitted a
-> patch to me twice that you've apparently never compiled yourself.
-> I need you to compile and test all of the patches you send me.
-Ok..It's my mistake..
+> 
+> If the DW MMC version used in Exynos 5420 provides the whole set of
+> functionality of the version used in Exynos 5250 and some extra extensions,
+> then it can be called "compatible with Exynos 5250", but if you ever need
+> to support those extra extensions, you will have to add a separate
+> compatible string for it.
+> 
+> With regard to SMU that is present only on selected instances, you can as
+> well create two compatible values for the DW MMC IP on Exynos 5420, e.g.
+> "samsung,exynos5420-dw-mshc" and "samsung,exynos5420-dw-mshc-smu".
+I think your suggestion is a nice thing. It makes sense.
+And I missed one thing.
+Apart from added register, Exynos5420 ch2 is designed for I/O of 1.2V voltage unlike Exynos5250.
+So it is worthy to be distinguished.
 
-Best Regards,
-Jaehoon Chung
->=20
-> Thanks,
->=20
-> - Chris.
->=20
+Yuvaraj,
+Could you apply Tomasz's suggestion ("samsung,exynos5420-dw-mshc" and "samsung,exynos5420-dw-mshc-smu") and resend it?
 
+Thanks,
+Seungwon Jeon
+
+> 
+> [Adding devicetree ML and DT maintainers on CC, as this is something they
+> should be able to comment on.]
+> 
+> Best regards,
+> Tomasz
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
