@@ -1,21 +1,21 @@
 From: Seungwon Jeon <tgih.jun@samsung.com>
-Subject: [PATCH 12/22] mmc: dw_mmc: add the capability to support hs200 mode
-Date: Sat, 31 Aug 2013 00:13:09 +0900
-Message-ID: <000f01cea593$6fada6b0$4f08f410$%jun@samsung.com>
+Subject: [PATCH 13/22] mmc: dw_mmc: move supports-highspeed of quirks to caps
+Date: Sat, 31 Aug 2013 00:13:22 +0900
+Message-ID: <001001cea593$77bbb950$67332bf0$%jun@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout1.samsung.com ([203.254.224.24]:47238 "EHLO
-	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756321Ab3H3PNK (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 30 Aug 2013 11:13:10 -0400
-Received: from epcpsbgr1.samsung.com
- (u141.gpu120.samsung.co.kr [203.254.230.141])
- by mailout1.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+Received: from mailout3.samsung.com ([203.254.224.33]:46317 "EHLO
+	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756321Ab3H3PNX (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 30 Aug 2013 11:13:23 -0400
+Received: from epcpsbgr4.samsung.com
+ (u144.gpu120.samsung.co.kr [203.254.230.144])
+ by mailout3.samsung.com (Oracle Communications Messaging Server 7u4-24.01
  (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTP id <0MSC00GCNNLLHW40@mailout1.samsung.com> for
- linux-mmc@vger.kernel.org; Sat, 31 Aug 2013 00:13:09 +0900 (KST)
+ with ESMTP id <0MSC000AHNMBFUP0@mailout3.samsung.com> for
+ linux-mmc@vger.kernel.org; Sat, 31 Aug 2013 00:13:23 +0900 (KST)
 References: 
 In-reply-to: 
 Content-language: ko
@@ -24,55 +24,48 @@ List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 Cc: 'Chris Ball' <cjb@laptop.org>, 'Jaehoon Chung' <jh80.chung@samsung.com>
 
-As host controller can support eMMC's HS200 mode at
-1.8V or 1.2V, these capability will be added.
+'supports-highspeed' is not one of the quirks but is a capability.
+So, it's removed from quirks.
 
 Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
 Tested-by: Alim Akhtar <alim.akhtar@samsung.com>
 ---
- .../devicetree/bindings/mmc/synopsis-dw-mshc.txt   |    5 +++++
- drivers/mmc/host/dw_mmc.c                          |    6 ++++++
- 2 files changed, 11 insertions(+), 0 deletions(-)
+ drivers/mmc/host/dw_mmc.c |    9 +++------
+ 1 files changed, 3 insertions(+), 6 deletions(-)
 
-diff --git a/Documentation/devicetree/bindings/mmc/synopsis-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/synopsis-dw-mshc.txt
-index cdcebea..ae5f8e8 100644
---- a/Documentation/devicetree/bindings/mmc/synopsis-dw-mshc.txt
-+++ b/Documentation/devicetree/bindings/mmc/synopsis-dw-mshc.txt
-@@ -66,6 +66,10 @@ Optional properties:
- 
- * supports-highspeed: Enables support for high speed cards (up to 50MHz)
- 
-+* caps2-mmc-hs200-1_8v: Supports mmc HS200 SDR 1.8V mode
-+
-+* caps2-mmc-hs200-1_2v: Supports mmc HS200 SDR 1.2V mode
-+
- * broken-cd: as documented in mmc core bindings.
- 
- * vmmc-supply: The phandle to the regulator to use for vmmc.  If this is
-@@ -95,6 +99,7 @@ board specific portions as listed below.
- 		clock-frequency = <400000000>;
- 		num-slots = <1>;
- 		supports-highspeed;
-+		caps2-mmc-hs200-1_8v;
- 		broken-cd;
- 		fifo-depth = <0x80>;
- 		card-detect-delay = <200>;
 diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 764790b..5f30df9 100644
+index 5f30df9..7c7cfa2 100644
 --- a/drivers/mmc/host/dw_mmc.c
 +++ b/drivers/mmc/host/dw_mmc.c
-@@ -2187,6 +2187,12 @@ static struct dw_mci_board *dw_mci_parse_dt(struct dw_mci *host)
+@@ -1999,9 +1999,6 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
+ 		mmc->caps |= MMC_CAP_4_BIT_DATA;
+ 	}
+ 
+-	if (host->pdata->quirks & DW_MCI_QUIRK_HIGHSPEED)
+-		mmc->caps |= MMC_CAP_SD_HIGHSPEED | MMC_CAP_MMC_HIGHSPEED;
+-
+ 	if (host->pdata->blk_settings) {
+ 		mmc->max_segs = host->pdata->blk_settings->max_segs;
+ 		mmc->max_blk_size = host->pdata->blk_settings->max_blk_size;
+@@ -2130,9 +2127,6 @@ static struct dw_mci_of_quirks {
+ 	int id;
+ } of_quirks[] = {
+ 	{
+-		.quirk	= "supports-highspeed",
+-		.id	= DW_MCI_QUIRK_HIGHSPEED,
+-	}, {
+ 		.quirk	= "broken-cd",
+ 		.id	= DW_MCI_QUIRK_BROKEN_CARD_DETECTION,
+ 	},
+@@ -2187,6 +2181,9 @@ static struct dw_mci_board *dw_mci_parse_dt(struct dw_mci *host)
  	if (of_find_property(np, "enable-sdio-wakeup", NULL))
  		pdata->pm_caps |= MMC_PM_WAKE_SDIO_IRQ;
  
-+	if (of_find_property(np, "caps2-mmc-hs200-1_8v", NULL))
-+		pdata->caps2 |= MMC_CAP2_HS200_1_8V_SDR;
++	if (of_find_property(np, "supports-highspeed", NULL))
++		pdata->caps |= MMC_CAP_SD_HIGHSPEED | MMC_CAP_MMC_HIGHSPEED;
 +
-+	if (of_find_property(np, "caps2-mmc-hs200-1_2v", NULL))
-+		pdata->caps2 |= MMC_CAP2_HS200_1_2V_SDR;
-+
- 	return pdata;
- }
+ 	if (of_find_property(np, "caps2-mmc-hs200-1_8v", NULL))
+ 		pdata->caps2 |= MMC_CAP2_HS200_1_8V_SDR;
  
 -- 
 1.7.0.4
