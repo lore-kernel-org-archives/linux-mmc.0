@@ -1,51 +1,95 @@
 From: Yuvaraj Kumar C D <yuvaraj.cd@gmail.com>
-Subject: [RFC V4 0/4] dw_mmc platform specific private data and SMU init
-Date: Fri, 30 Aug 2013 15:17:39 +0530
-Message-ID: <1377856063-3391-1-git-send-email-yuvaraj.cd@samsung.com>
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-Sender: linux-samsung-soc-owner@vger.kernel.org
+Subject: [RFC V4 2/4] mmc: dw_mmc: socfpga: move socfpga private init
+Date: Fri, 30 Aug 2013 15:17:41 +0530
+Message-ID: <1377856063-3391-3-git-send-email-yuvaraj.cd@samsung.com>
+References: <1377856063-3391-1-git-send-email-yuvaraj.cd@samsung.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-pb0-f50.google.com ([209.85.160.50]:59053 "EHLO
+	mail-pb0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754717Ab3H3JsG (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 30 Aug 2013 05:48:06 -0400
+In-Reply-To: <1377856063-3391-1-git-send-email-yuvaraj.cd@samsung.com>
+Sender: linux-mmc-owner@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org, linux-samsung-soc@vger.kernel.org, cjb@laptop.org, jh80.chung@samsung.com, tgih.jun@samsung.com
 Cc: ks.giri@samsung.com, t.figa@samsung.com, alim.akhtar@samsung.com, dianders@chromium.org, Yuvaraj Kumar C D <yuvaraj.cd@samsung.com>
-List-Id: linux-mmc@vger.kernel.org
 
+Currently platform specific private data initialisation is done by
+dw_mci_socfpga_priv_init and dw_mci_socfpga_parse_dt.As we already have
+separate platform specific device tree parser dw_mci_socfpga_parse_dt,
+move the dw_mci_socfpga_priv_init code to dw_mci_socfpga_parse_dt.
+We can use the dw_mci_socfpga_priv_init to do some actual platform
+specific initialisation.
 
-changes from V3: changes only in the patch
-	mmc: dw_mmc: exynos: configure SMU in exynos5420.
-	1.Added new compatible string "samsung,exynos5420-dw-mshc-smu" for
-	  the host with SMU.
-	2.Used compatible string "samsung,exynos5420-dw-mshc-smu"
-	  for controller instance which has SMU.
-	3.Used compatible string "samsung,exynos5420-dw-mshc"
-	  for controller instance which does not have SMU.
+This patch is compile tested only.
 
-changes from V2:
-	1.dropped the bypass-smu quirk 
-		mmc: dw_mmc: exynos: configure SMU in exynos5420.
-	2.Changed the subject line for this patch
-	  add a quirk for SMU -> configure SMU in exynos5420
-	
-	mmc: dw_mmc: exynos: configure SMU in exynos5420 
-	was earlier 
-	mmc: dw_mmc: exynos: add a quirk for SMU.
+changes since V3: none
+changes since V2: none
 
-changes from V1:
-	1.Added a new RFC patch 
-		mmc: dw_mmc: socfpga: move socfpga private init
-	2.Avoid code duplication in
-		mmc: dw_mmc: exynos: add a quirk for SMU.
+Signed-off-by: Yuvaraj Kumar C D <yuvaraj.cd@samsung.com>
+---
+ drivers/mmc/host/dw_mmc-socfpga.c |   29 ++++++++++++++---------------
+ 1 file changed, 14 insertions(+), 15 deletions(-)
 
-
-Yuvaraj Kumar C D (4):
-  mmc: dw_mmc: exynos: move the exynos private init
-  mmc: dw_mmc: socfpga: move socfpga private init
-  mmc: dw_mmc: move the platform specific init call
-  mmc: dw_mmc: exynos: configure SMU in exynos5420.
-
- drivers/mmc/host/dw_mmc-exynos.c  |   65 ++++++++++++++++++++++++++++---------
- drivers/mmc/host/dw_mmc-pltfm.c   |    7 ----
- drivers/mmc/host/dw_mmc-socfpga.c |   29 ++++++++---------
- drivers/mmc/host/dw_mmc.c         |    9 +++++
- 4 files changed, 73 insertions(+), 37 deletions(-)
-
+diff --git a/drivers/mmc/host/dw_mmc-socfpga.c b/drivers/mmc/host/dw_mmc-socfpga.c
+index 14b5961..953f260 100644
+--- a/drivers/mmc/host/dw_mmc-socfpga.c
++++ b/drivers/mmc/host/dw_mmc-socfpga.c
+@@ -38,20 +38,6 @@ struct dw_mci_socfpga_priv_data {
+ 
+ static int dw_mci_socfpga_priv_init(struct dw_mci *host)
+ {
+-	struct dw_mci_socfpga_priv_data *priv;
+-
+-	priv = devm_kzalloc(host->dev, sizeof(*priv), GFP_KERNEL);
+-	if (!priv) {
+-		dev_err(host->dev, "mem alloc failed for private data\n");
+-		return -ENOMEM;
+-	}
+-
+-	priv->sysreg = syscon_regmap_lookup_by_compatible("altr,sys-mgr");
+-	if (IS_ERR(priv->sysreg)) {
+-		dev_err(host->dev, "regmap for altr,sys-mgr lookup failed.\n");
+-		return PTR_ERR(priv->sysreg);
+-	}
+-	host->priv = priv;
+ 
+ 	return 0;
+ }
+@@ -79,12 +65,24 @@ static void dw_mci_socfpga_prepare_command(struct dw_mci *host, u32 *cmdr)
+ 
+ static int dw_mci_socfpga_parse_dt(struct dw_mci *host)
+ {
+-	struct dw_mci_socfpga_priv_data *priv = host->priv;
++	struct dw_mci_socfpga_priv_data *priv;
+ 	struct device_node *np = host->dev->of_node;
+ 	u32 timing[2];
+ 	u32 div = 0;
+ 	int ret;
+ 
++	priv = devm_kzalloc(host->dev, sizeof(*priv), GFP_KERNEL);
++	if (!priv) {
++		dev_err(host->dev, "mem alloc failed for private data\n");
++		return -ENOMEM;
++	}
++
++	priv->sysreg = syscon_regmap_lookup_by_compatible("altr,sys-mgr");
++	if (IS_ERR(priv->sysreg)) {
++		dev_err(host->dev, "regmap for altr,sys-mgr lookup failed.\n");
++		return PTR_ERR(priv->sysreg);
++	}
++
+ 	ret = of_property_read_u32(np, "altr,dw-mshc-ciu-div", &div);
+ 	if (ret)
+ 		dev_info(host->dev, "No dw-mshc-ciu-div specified, assuming 1");
+@@ -96,6 +94,7 @@ static int dw_mci_socfpga_parse_dt(struct dw_mci *host)
+ 		return ret;
+ 
+ 	priv->hs_timing = SYSMGR_SDMMC_CTRL_SET(timing[0], timing[1]);
++	host->priv = priv;
+ 	return 0;
+ }
+ 
 -- 
 1.7.9.5
+
