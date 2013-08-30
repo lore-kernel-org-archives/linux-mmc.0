@@ -1,47 +1,73 @@
-From: Christian Gmeiner <christian.gmeiner@gmail.com>
-Subject: Re: mmc0: Timeout waiting for hardware interrupt.
-Date: Fri, 30 Aug 2013 15:33:36 +0200
-Message-ID: <CAH9NwWcdxDWHpy1O7+9SPysima72FWPPEVP_us_0KCZrv6Tv1w@mail.gmail.com>
-References: <CAH9NwWcQ6528NxSShnO2Nfa4dyqD0j68wO9CqfR3i=cpGXQjNg@mail.gmail.com>
- <loom.20130823T162510-762@post.gmane.org> <CAH9NwWePDSADpVm2MzUCYHPfYLb0RrWJL=yqOCqSPwFF1e=tuw@mail.gmail.com>
- <CAH9NwWfjUQbw6-K5PCtb7KyNhgGRR0wvWu+_w-shje5zOgqarA@mail.gmail.com> <loom.20130828T090935-8@post.gmane.org>
+From: Seungwon Jeon <tgih.jun@samsung.com>
+Subject: [PATCH 00/22] mmc: dw_mmc: add driver's updates
+Date: Sat, 31 Aug 2013 00:10:55 +0900
+Message-ID: <000301cea593$202711d0$60753570$%jun@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qc0-f172.google.com ([209.85.216.172]:41284 "EHLO
-	mail-qc0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753058Ab3H3Nd6 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 30 Aug 2013 09:33:58 -0400
-Received: by mail-qc0-f172.google.com with SMTP id c11so859614qcv.31
-        for <linux-mmc@vger.kernel.org>; Fri, 30 Aug 2013 06:33:56 -0700 (PDT)
-In-Reply-To: <loom.20130828T090935-8@post.gmane.org>
+Received: from mailout3.samsung.com ([203.254.224.33]:46099 "EHLO
+	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756023Ab3H3PK5 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 30 Aug 2013 11:10:57 -0400
+Received: from epcpsbgr2.samsung.com
+ (u142.gpu120.samsung.co.kr [203.254.230.142])
+ by mailout3.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+ (7.0.4.24.0) 64bit (built Nov 17 2011))
+ with ESMTP id <0MSC0009CNI3FUP0@mailout3.samsung.com> for
+ linux-mmc@vger.kernel.org; Sat, 31 Aug 2013 00:10:56 +0900 (KST)
+References: 
+In-reply-to: 
+Content-language: ko
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Prasanna NAVARATNA <prasanna.navaratna@gmail.com>
-Cc: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: 'Chris Ball' <cjb@laptop.org>, 'Jaehoon Chung' <jh80.chung@samsung.com>, 'Alim Akhtar' <alim.akhtar@samsung.com>
 
-Hi Prasanna.
+This patch set includes updates of dw_mmc driver.
 
-> Sorry for the late reply. I had faced the similar problem in the past.
->
+- Tuning scheme for high speed mode such as HS200.
+- Support of HS200 mode in exynos host
+- Involved some fixes and code clean-up
 
-No problem...
 
-> There are certain 4.5 features like BKOPS, Sanitize, cache control operations
-> which uses CMD6 to trigger the operation and use DAT0 line for busy signalling
-> which was not monitored for proper completion.
->
-> Although in your case, eMMC is 4.41 and still BKOPS is supported. I see CMD6
-> being sent before getting hardware timeout.
->
-> I modified the timeout handling to consider such case (including erase as it
-> also sometimes for some eMMC takes long time) and resolved these cases of
-> "Timeout waiting for hardware interrupt".
->
-> I'll soon present the patch in this forum for more discussions on it.
+Doug Anderson (4):
+      mmc: dw_mmc: don't queue up a card detect at slot startup
+      mmc: dw_mmc: Add exynos resume_noirq callback to clear WAKEUP_INT
+      mmc: dw_mmc: Honor requests to set the clock to 0
+      mmc: dw_mmc: Set timeout to max upon resume
 
-I am looking forward to get my hands on your patch :)
+Seungwon Jeon (14):
+      mmc: dw_mmc: add support tuning scheme
+      mmc: dw_mmc: exynos: add variable delay tuning sequence
+      mmc: dw_mmc: exynos: adjust the clock rate with speed mode
+      mmc: dw_mmc: add the capability to support hs200 mode
+      mmc: dw_mmc: move supports-highspeed of quirks to caps
+      mmc: dw_mmc: set the supported max/min frequency
+      mmc: dw_mmc: adjust the fifoth with block size
+      mmc: dw_mmc: control card read threshold
+      mmc: dw_mmc: fix error handling on response error
+      mmc: dw_mmc: guarantee stop-abort cmd in data errors
+      mmc: dw_mmc: rework the code related to cmd/data completion
+      mmc: dw_mmc: gather each reset code into functions
+      mmc: dw_mmc: amend use of idmac sw reset
+      mmc: dw_mmc: fix the transfer termination in IDMAC mode
 
-greets
---
-Christian Gmeiner, MSc
+Yuvaraj Kumar C D (4):
+      mmc: dw_mmc: exynos: move the exynos private init
+      mmc: dw_mmc: socfpga: move socfpga private init
+      mmc: dw_mmc: move the platform specific init call
+      mmc: dw_mmc: exynos: configure SMU in exynos5420
+
+.../devicetree/bindings/mmc/synopsis-dw-mshc.txt   |    9 +
+ drivers/mmc/host/dw_mmc-exynos.c                   |  294 +++++++++-
+ drivers/mmc/host/dw_mmc-pltfm.c                    |    7 -
+ drivers/mmc/host/dw_mmc-socfpga.c                  |   29 +-
+ drivers/mmc/host/dw_mmc.c                          |  583 ++++++++++++++------
+ drivers/mmc/host/dw_mmc.h                          |   55 ++
+ include/linux/mmc/dw_mmc.h                         |    4 +
+ 7 files changed, 763 insertions(+), 218 deletions(-)
+
+Thanks,
+Seungwon Jeon
+
