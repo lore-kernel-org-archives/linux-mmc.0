@@ -1,70 +1,138 @@
 From: "Al Cooper" <alcooperx@gmail.com>
-Subject: [PATCH V2 0/7] Add password protected lock/unlock support for
- SD/MMC
-Date: Fri, 30 Aug 2013 16:14:18 -0400
-Message-ID: <1377893665-26754-1-git-send-email-alcooperx@gmail.com>
+Subject: [PATCH V2 4/7] mmc: lock: Add card lock/unlock maintenance
+ commands
+Date: Fri, 30 Aug 2013 16:14:22 -0400
+Message-ID: <1377893665-26754-5-git-send-email-alcooperx@gmail.com>
+References: <1377893665-26754-1-git-send-email-alcooperx@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mms2.broadcom.com ([216.31.210.18]:3341 "EHLO mms2.broadcom.com"
+Received: from mms3.broadcom.com ([216.31.210.19]:3772 "EHLO mms3.broadcom.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754033Ab3H3UPi (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 30 Aug 2013 16:15:38 -0400
+	id S1755370Ab3H3UPm (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 30 Aug 2013 16:15:42 -0400
+In-Reply-To: <1377893665-26754-1-git-send-email-alcooperx@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: cjb@laptop.org, linux-mmc@vger.kernel.org, ulf.hansson@linaro.org
 Cc: Al Cooper <alcooperx@gmail.com>
 
-This set of patches adds support for password protected locking
-and unlocking of MMC and SD devices. It uses the LOCK/UNLOCK command
-(CMD42) available in both the MMC and SD command sets.
+Create a sysfs interface that allows a user to manage an inserted
+cards lock state. The sysfs attribute "lock" will be added to the
+device's sysfs directory. The following commands are supported:
+"setpw"   - Set the cards password
+"clearpw" - Clear the cards password
+"lock"    - Lock the card
+"unlock"  - Unlock the card
+"erase"   - Force erase the card, clear the password and unlock it
+Commands that require a password will request the password through
+the kernels KEYS subsystem.
 
-Some of this code was based on a patch set submitted in 2006 by
-Anderson Briglia "Add MMC Password Protection (lock/unlock)". This
-patch set never made it into mainline. 
+Signed-off-by: Al Cooper <alcooperx@gmail.com>
+---
+ drivers/mmc/core/mmc.c | 81 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 81 insertions(+)
 
-By default, a card with no password assigned is always in "unlocked"
-state. After password assignment, in the next power cycle the card
-switches to a "locked" state where only the "basic" and "lock card"
-command classes are accepted by the card. Only after unlocking it with
-the correct password can the card be used for normal operations like
-block I/O.
-
-Password management and caching is done through the "Kernel Key
-Retention Service" mechanism and the sysfs filesystem. Two new sysfs
-attributes were added. The "lock" attribute is used to lock, unlock,
-assign a password, clear a password and force erase a card. The
-"unlock_retry" attribute is used to retry an unlock that failed
-during boot because the rootfs was not yet available with the password.
-
-Changed for V2:
-The V2 changes were not functional and were just general cleanup.
-  - Use stub functions to reduce the number of CONFIG ifdefs.
-  - Add static to a few functions that were local.
-  - Use pr_warn instead of pr_warning.
-  - Improve a few variable names and messages.
-
-Al Cooper (7):
-  mmc: lock: Use the kernel "KEYS" subsystem to get a card's password
-  mmc: lock: Add low level LOCK_UNLOCK command
-  mmc: lock: Add function to unlock a password locked card
-  mmc: lock: Add card lock/unlock maintenance commands
-  mmc: lock: Change SD init functionality to handle locked SD cards
-  mmc: lock: Prevent partition table read for locked cards.
-  mmc: lock: Change MMC init to handle locked cards.
-
- drivers/mmc/card/block.c   |   7 +++
- drivers/mmc/core/Kconfig   |   8 +++
- drivers/mmc/core/core.c    | 131 ++++++++++++++++++++++++++++++++++++++++++++
- drivers/mmc/core/core.h    |  15 ++++-
- drivers/mmc/core/mmc.c     | 123 +++++++++++++++++++++++++++++++++++++++++
- drivers/mmc/core/mmc_ops.c | 112 +++++++++++++++++++++++++++++++++++++
- drivers/mmc/core/mmc_ops.h |  13 +++++
- drivers/mmc/core/sd.c      | 134 +++++++++++++++++++++++++++++++++------------
- include/linux/mmc/card.h   |   6 ++
- 9 files changed, 512 insertions(+), 37 deletions(-)
-
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index 6d02012..307434c 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -654,6 +654,84 @@ out:
+ 	return err;
+ }
+ 
++#ifdef CONFIG_MMC_LOCK
++
++ssize_t mmc_lock_show(struct device *dev, struct device_attribute *att,
++			  char *buf)
++{
++	struct mmc_card *card = mmc_dev_to_card(dev);
++
++	if (!mmc_card_lockable(card))
++		return sprintf(buf, "unsupported\n");
++	else
++		return sprintf(buf, "%slocked\n", mmc_card_locked(card) ?
++			       "" : "un");
++}
++
++
++static struct lock_cmd {
++	const char *name;
++	int io_cmd;
++	int locked_required;
++	int need_pw;
++} lock_cmds[] = {
++	{ "erase" , MMC_LOCK_MODE_ERASE,  true,  false },
++	{ "clrpw", MMC_LOCK_MODE_CLR_PWD, false, true },
++	{ "setpw", MMC_LOCK_MODE_SET_PWD, false, true },
++	{ "lock", MMC_LOCK_MODE_LOCK, false,  true },
++	{ "unlock", MMC_LOCK_MODE_UNLOCK, true,  true },
++};
++
++/*
++ * implement MMC password functions: force erase, set password,
++ * clear password, lock and unlock.
++ */
++ssize_t mmc_lock_store(struct device *dev, struct device_attribute *att,
++			   const char *data, size_t len)
++{
++	struct mmc_card *card = mmc_dev_to_card(dev);
++	int res = -EINVAL;
++	int x;
++	struct mmc_password password;
++
++	mmc_claim_host(card->host);
++	if (!mmc_card_lockable(card))
++		goto out;
++	for (x = 0; x < ARRAY_SIZE(lock_cmds); x++) {
++		if (sysfs_streq(data, lock_cmds[x].name))
++			break;
++	}
++	if (x >= ARRAY_SIZE(lock_cmds))
++		goto out;
++
++	if ((lock_cmds[x].locked_required && !mmc_card_locked(card)) ||
++	    (!lock_cmds[x].locked_required && mmc_card_locked(card))) {
++		dev_warn(dev, "%s requires %slocked card\n",
++			 lock_cmds[x].name,
++			 lock_cmds[x].locked_required ? "" : "un");
++		goto out;
++	}
++	if (lock_cmds[x].need_pw) {
++		res = mmc_get_password(card, &password);
++		if (res)
++			goto out;
++	}
++	res = mmc_lock_unlock(card, &password, lock_cmds[x].io_cmd);
++out:
++	mmc_release_host(card->host);
++	if (res == 0)
++		return len;
++	else
++		return res;
++}
++
++static DEVICE_ATTR(lock, S_IWUSR | S_IRUGO,
++		   mmc_lock_show, mmc_lock_store);
++
++
++#endif /* CONFIG_MMC_LOCK */
++
++
+ MMC_DEV_ATTR(cid, "%08x%08x%08x%08x\n", card->raw_cid[0], card->raw_cid[1],
+ 	card->raw_cid[2], card->raw_cid[3]);
+ MMC_DEV_ATTR(csd, "%08x%08x%08x%08x\n", card->raw_csd[0], card->raw_csd[1],
+@@ -691,6 +769,9 @@ static struct attribute *mmc_std_attrs[] = {
+ 	&dev_attr_enhanced_area_size.attr,
+ 	&dev_attr_raw_rpmb_size_mult.attr,
+ 	&dev_attr_rel_sectors.attr,
++#ifdef CONFIG_MMC_LOCK
++	&dev_attr_lock.attr,
++#endif /* CONFIG_MMC_LOCK */
+ 	NULL,
+ };
+ 
 -- 
 1.8.1.3
 
