@@ -1,175 +1,141 @@
 From: Seungwon Jeon <tgih.jun@samsung.com>
-Subject: RE: [RFC V3 4/4] mmc: dw_mmc: exynos: configure SMU in exynos5420.
-Date: Fri, 30 Aug 2013 12:44:43 +0900
-Message-ID: <000a01cea533$43cfa580$cb6ef080$%jun@samsung.com>
-References: <1377691731-7226-1-git-send-email-yuvaraj.cd@samsung.com>
- <CAKuRcO+R4G9LXdXGJOXFNGB+XZeJwvnVq1U5wtCKRPmNN8DWPA@mail.gmail.com>
- <001001cea4a3$9eb13080$dc139180$%jun@samsung.com>
- <49209892.KLA1Q6dtil@amdc1227>
+Subject: RE: [PATCH v6 2/3] mmc: dw_mmc: Honor requests to set the clock to 0
+ (turn off clock)
+Date: Fri, 30 Aug 2013 12:55:12 +0900
+Message-ID: <000b01cea534$bae75bd0$30b61370$%jun@samsung.com>
+References: <1377188348-3418-1-git-send-email-dianders@chromium.org>
+ <1377188348-3418-3-git-send-email-dianders@chromium.org>
+ <001201cea215$8c125e30$a4371a90$%jun@samsung.com>
+ <521B1A87.4000500@samsung.com>
+ <CAD=FV=WYMyGVmG-DXk1ke-yQCrfF74KDaZAUCW3qzf+Xfp-tpQ@mail.gmail.com>
+ <000301cea486$0d813eb0$2883bc10$%jun@samsung.com>
+ <CAD=FV=VXpH31X3+LnJA6ewyrYzOZ1zu_4mL=93U9WnguR=3Nhw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=windows-1252
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-reply-to: <49209892.KLA1Q6dtil@amdc1227>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout1.samsung.com ([203.254.224.24]:59112 "EHLO
+	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752710Ab3H3DzP (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 29 Aug 2013 23:55:15 -0400
+In-reply-to: <CAD=FV=VXpH31X3+LnJA6ewyrYzOZ1zu_4mL=93U9WnguR=3Nhw@mail.gmail.com>
 Content-language: ko
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: 'Tomasz Figa' <t.figa@samsung.com>
-Cc: 'Yuvaraj Kumar' <yuvaraj.cd@gmail.com>, 'Alim Akhtar' <alim.akhtar@gmail.com>, 'linux-mmc' <linux-mmc@vger.kernel.org>, linux-samsung-soc@vger.kernel.org, 'Chris Ball' <cjb@laptop.org>, 'Jaehoon Chung' <jh80.chung@samsung.com>, 'Girish K S' <ks.giri@samsung.com>, 'Alim Akhtar' <alim.akhtar@samsung.com>, 'Yuvaraj Kumar C D' <yuvaraj.cd@samsung.com>, swarren@wwwdotorg.org, mark.rutland@arm.com, ian.campbell@citrix.com, rob.herring@calxeda.com, pawel.moll@arm.com, galak@codeaurora.org, devicetree@vger.kernel.org
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: 'Doug Anderson' <dianders@chromium.org>
+Cc: 'Jaehoon Chung' <jh80.chung@samsung.com>, 'Chris Ball' <cjb@laptop.org>, 'James Hogan' <james.hogan@imgtec.com>, 'Grant Grundler' <grundler@chromium.org>, 'Alim Akhtar' <alim.akhtar@samsung.com>, 'Abhilash Kesavan' <a.kesavan@samsung.com>, 'Tomasz Figa' <tomasz.figa@gmail.com>, 'Olof Johansson' <olof@lixom.net>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-On Thu, August 29, 2013, Tomasz Figa wrote:
-> Hi Seungwon,
+On Fri, August 30, 2013, Doug Anderson wrote:
+> Seungwon,
 > 
-> On Thursday 29 of August 2013 19:36:28 Seungwon Jeon wrote:
-> > Yuvaraj Kumar wrote:
-> > > On Thu, Aug 29, 2013 at 3:14 PM, Seungwon Jeon <tgih.jun@samsung.com>
-> wrote:
-> > > > On Thu, August 29, 2013, Alim Akhtar wrote:
-> > > >> Hi Seungwon,
-> > > >>
-> > > >> On Thu, Aug 29, 2013 at 1:53 PM, Seungwon Jeon
-> <tgih.jun@samsung.com> wrote:
-> > > >> > On Wed, August 28, 2013, Yuvaraj Kumar C D wrote:
-> > > >> >> Exynos5420 Mobile Storage Host controller has Security Management
-> > > >> >> Unit
-> > > >> >> (SMU) for channel 0 and channel 1 (mainly for eMMC).This patch
-> > > >> >> configures SMU for exynos5420.
-> > > >> >>
-> > > >> >> This patch is on top of the below patch by Doug Anderson.
-> > > >> >> mmc: dw_mmc: Add exynos resume_noirq callback to clear WAKEUP_INT
-> > > >> >>
-> > > >> >> changes since V2:
-> > > >> >>       1.Droppped the bypass-smu quirk.
-> > > >> >>       2.Changed the subject line for this patch
-> > > >> >>
-> > > >> >>         add a quirk for SMU -> configure SMU in exynos5420
-> > > >> >>
-> > > >> >> changes since V1:
-> > > >> >>       1.avoid code duplication by calling dw_mci_exynos_priv_init
-> > > >> >>       in
-> > > >> >>
-> > > >> >>         resume path.
-> > > >> >>
-> > > >> >> Signed-off-by: Yuvaraj Kumar C D <yuvaraj.cd@samsung.com>
-> > > >> >> Signed-off-by: Alim Akhtar <alim.akhtar@samsung.com>
-> > > >> >> ---
-> > > >> >>
-> > > >> >>  drivers/mmc/host/dw_mmc-exynos.c |   29
-> > > >> >>  +++++++++++++++++++++++++++++
-> > > >> >>  1 file changed, 29 insertions(+)
-> > > >> >>
-> > > >> >> diff --git a/drivers/mmc/host/dw_mmc-exynos.c
-> > > >> >> b/drivers/mmc/host/dw_mmc-exynos.c index 19c845b..db28f10 100644
-> > > >> >> --- a/drivers/mmc/host/dw_mmc-exynos.c
-> > > >> >> +++ b/drivers/mmc/host/dw_mmc-exynos.c
-> > > >> >> @@ -35,6 +35,25 @@
-> > > >> >>
-> > > >> >>  #define EXYNOS4210_FIXED_CIU_CLK_DIV 2
-> > > >> >>  #define EXYNOS4412_FIXED_CIU_CLK_DIV 4
-> > > >> >>
-> > > >> >> +/* Block number in eMMC */
-> > > >> >> +#define DWMCI_BLOCK_NUM                      0xFFFFFFFF
-> > > >> >> +
-> > > >> >> +#define SDMMC_EMMCP_BASE             0x1000
-> > > >> >> +#define SDMMC_MPSECURITY             (SDMMC_EMMCP_BASE + 0x0010)
-> > > >> >> +#define SDMMC_MPSBEGIN0                      (SDMMC_EMMCP_BASE +
-> > > >> >> 0x0200) +#define SDMMC_MPSEND0
-> > > >> >> (SDMMC_EMMCP_BASE + 0x0204) +#define SDMMC_MPSCTRL0
-> > > >> >>          (SDMMC_EMMCP_BASE + 0x020C) +
-> > > >> >> +/* SMU control bits */
-> > > >> >> +#define DWMCI_MPSCTRL_SECURE_READ_BIT                BIT(7)
-> > > >> >> +#define DWMCI_MPSCTRL_SECURE_WRITE_BIT               BIT(6)
-> > > >> >> +#define DWMCI_MPSCTRL_NON_SECURE_READ_BIT    BIT(5)
-> > > >> >> +#define DWMCI_MPSCTRL_NON_SECURE_WRITE_BIT   BIT(4)
-> > > >> >> +#define DWMCI_MPSCTRL_USE_FUSE_KEY           BIT(3)
-> > > >> >> +#define DWMCI_MPSCTRL_ECB_MODE                       BIT(2)
-> > > >> >> +#define DWMCI_MPSCTRL_ENCRYPTION             BIT(1)
-> > > >> >> +#define DWMCI_MPSCTRL_VALID                  BIT(0)
-> > > >> >> +
-> > > >> >>
-> > > >> >>  /* Variations in Exynos specific dw-mshc controller */
-> > > >> >>  enum dw_mci_exynos_type {
-> > > >> >>
-> > > >> >>       DW_MCI_TYPE_EXYNOS4210,
-> > > >> >>
-> > > >> >> @@ -74,6 +93,15 @@ static int dw_mci_exynos_priv_init(struct
-> > > >> >> dw_mci *host)> >> >>
-> > > >> >>  {
-> > > >> >>
-> > > >> >>       struct dw_mci_exynos_priv_data *priv = host->priv;
-> > > >> >>
-> > > >> >> +     if (priv->ctrl_type == DW_MCI_TYPE_EXYNOS5420) {
-> > > >> >> +             mci_writel(host, MPSBEGIN0, 0);
-> > > >> >> +             mci_writel(host, MPSEND0, DWMCI_BLOCK_NUM);
-> > > >> >> +             mci_writel(host, MPSCTRL0,
-> > > >> >> DWMCI_MPSCTRL_SECURE_WRITE_BIT | +
-> > > >> >> DWMCI_MPSCTRL_NON_SECURE_READ_BIT |
-> > > >> >> +                     DWMCI_MPSCTRL_VALID |
-> > > >> >> +                     DWMCI_MPSCTRL_NON_SECURE_WRITE_BIT);
-> > > >> >
-> > > >> > Yuvaraj,
-> > > >> >
-> > > >> > Just one thing to check.
-> > > >> > ch#0 and #1 of three hosts are only valid for SMU control.
-> > > >> > Did you consider #2 host?
-> > > >> > It seems not.
-> > > >>
-> > > >> Only host#0 and host#1 has SMU (On exynos5420).
-> > > >> Host #2 does not contain SMU.
-> > > >
-> > > > Let me clear it.
-> > > > I mean that current change allows for ch2 to access registers related
-> > > > to SMU, even though ch2 doesn't actually has SMU. It's not valid IO
-> > > > area.>
-> > > No,host#0 and host#1 are compatible with "samsung,exynos5420-dw-mshc"
-> > > but host#2 is compatible with the "samsung,exynos5250-dw-mshc".
-> > > Below is the DT patch posted in another thread.
-> > > [1] [PATCH V4] ARM: dts: Add dwmmc DT nodes for exynos5420 SOC
-> > > http://www.mail-archive.com/linux-samsung-soc@vger.kernel.org/msg21985.
-> > > html I will resubmit the DT patch[1] with reg = <0x12220000 0x1000> for
-> > > host#2.
-> > Hmm. If we notice exynos5420's other newly added registers apart from
-> > SMU, it is difficult to say exynos5420 is compatible with exynos5250
-> > fully for #2. But because there is no use case for new registers, it
-> > could be acceptable. Ok, we should be careful to configure DT file
-> > though.
+> On Thu, Aug 29, 2013 at 12:04 AM, Seungwon Jeon <tgih.jun@samsung.com> wrote:
+> >> I'd really still rather honor the MMC subsystem's request.  It
+> >> shouldn't _hurt_ to turn the clock off when the subsystem requests it,
+> > Even though turning off by clock programming doesn't hurt,
+> > it is costly behavior when considering low power mode of host's own support.
 > 
-> Could you elaborate a bit more on the differences in DW MMC IP between
-> Exynos5250 and Exynos5420? If the differences are significant, then it
-> might be necessary to use different compatible value, as it should not
-> depend on any use case (or lack of).
-Actually the reason is  that extended register of ch2 doesn't work rather than none of use case.
-Ch2 is targeted for removable card type.
+> It is costly?  We are talking about these two commands, right?
+> 
+>   mci_writel(host, CLKENA, 0);
+>   mci_send_cmd(slot,
+>       SDMMC_CMD_UPD_CLK | SDMMC_CMD_PRV_DAT_WAIT, 0);
+I mean that because host supports auto clock gating, we don't need to
+clock programming with setting '0'. If MMC_CLKGATE is enabled, clock programming
+will be executed with between '0' clock and working clock frequently. Actually the result is same.
+Of course, if host didn't support this feature, we would have considered that manually to save the power consumption.
 
 > 
-> If the DW MMC version used in Exynos 5420 provides the whole set of
-> functionality of the version used in Exynos 5250 and some extra extensions,
-> then it can be called "compatible with Exynos 5250", but if you ever need
-> to support those extra extensions, you will have to add a separate
-> compatible string for it.
-> 
-> With regard to SMU that is present only on selected instances, you can as
-> well create two compatible values for the DW MMC IP on Exynos 5420, e.g.
-> "samsung,exynos5420-dw-mshc" and "samsung,exynos5420-dw-mshc-smu".
-I think your suggestion is a nice thing. It makes sense.
-And I missed one thing.
-Apart from added register, Exynos5420 ch2 is designed for I/O of 1.2V voltage unlike Exynos5250.
-So it is worthy to be distinguished.
+> Do you have a reason to believe that these are more costly than all of
+> the rest of the code that's executed when the user defines
+> CONFIG_MMC_CLKGATE?  You're still proposing doing all of the updates
+> of the clock when slot->clock is non-zero, right?  ...so at best
+No, origin condition should be remained;
+Required clock should be different with current clock.
 
-Yuvaraj,
-Could you apply Tomasz's suggestion ("samsung,exynos5420-dw-mshc" and "samsung,exynos5420-dw-mshc-smu") and resend it?
+> skipping this code will be 33% faster since the re-enable code
+> disables and then reenables the clock.  If it's the
+> "SDMMC_CMD_PRV_DAT_WAIT" that you're worried about then skipping this
+> code will only be 25% faster since there are already three calls with
+> SDMMC_CMD_PRV_DAT_WAIT in the enable code.
+> 
+> 
+> > Just now, how about focusing on the problem clock isn't updated properly after suspend/resume?
+> 
+> I tried to do that in the original patches, but you pointed out
+> (correctly) that we should do the correct fix rather than a hackier
+> fix.  IMHO the most correct fix is to honor the MMC core's request to
+> turn the clock off.  Partially honoring the MMC core (as you suggest)
+> is certainly less hacky that my original proposal but I still think
+> turning the clock off is better.
+> 
+> 
+> >> right?  One reason to honor the mmc core is that it will make things
+> >> cleaner if/when we support a voltage change operation.  The MMC core
+> >> has the logic for the voltage change, and part of that involves
+> >> turning off the clock.  We'll already need a bunch of special case
+> >> code in dw_mmc for voltage change, but it would be nice to avoid one
+> >> extra bit.
+> > Turning off clock during voltage switching would be another procedure.
+> > I guess it could be discussed later.
+> 
+> Agreed that we're not trying to get voltage switching done here, but
+> forward thinking is nice.  If there's no reason _not_ to turn the
+> clock off and it will help us later, let's do it. Also, we've already
+> agreed that MMC_CLKGATE isn't so useful for dw_mmc, so trying to do
+> something awkward to make MMC_CLKGATE slightly faster doesn't seem
+> worth it.
+> 
+> 
+> > I want to fix some minor change to prevent frequent message that Jaehoon pointed.
+> 
+> As far as I can tell, the frequent messages and whether or not to
+> actually turn the clock off are unrelated.  I will send up a patch
+> that fixes the frequent messages by caching the last value printed and
+> only printing if it changed.  I have verified that this works and that
+> the system still functions OK (can boot to prompt) with
+> CONFIG_MMC_CLKGATE.
+> 
+> 
+> Note: re-reading over some of the previous messages, it sounds like
+> you're proposing using the patch from your email directly, AKA:
+> 
+> http://article.gmane.org/gmane.linux.kernel/1542482
+> 
+> Did you test that patch?  Did it work for you?  It doesn't actually
+> compile cleanly for me (you removed the "force_clkinit" param in the
+> function but not the callers).  That's easy to fix, but implies that
+> this patch was just a proposal and not a tested solution.
+> 
+> ...but aside from not compiling cleanly, I don't think it will work
+> for the same reasons that the original code didn't work.  Specifically
+> it doesn't address the core problem that we need to update
+> host->current_speed when the clock is 0.  Otherwise we won't re-init
+> and we run into the original problem, right?  To be certain I took
+> your patch and applied it, then fixed the callers of
+> dw_mci_setup_bus() not to pass a second parameter.  I did a
+> suspend/resume with no card in and then plugged a card in.  It didn't
+> work.
+
+Some change proposed from me are mixed with both current existing part and your new patch.
+It's not whole code to replace your patch. But if it makes you confused, sorry about that.
+Important thing I intended is that if required clock(slot->clock) is '0', not try to update clock.
+with considering automatic clock gating. Please check first comment from me on v6.
 
 Thanks,
 Seungwon Jeon
-
 > 
-> [Adding devicetree ML and DT maintainers on CC, as this is something they
-> should be able to comment on.]
 > 
-> Best regards,
-> Tomasz
+> As I said above, new patch coming shortly.  As always: feel free to
+> point out any glaring mistakes I made in the above.  ;)  Note that I
+> will be out of communication for the next week or so and buried
+> beneath email for a few days after that, so my response might be a
+> little delayed.
 > 
+> 
+> 
+> -Doug
 > --
 > To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
