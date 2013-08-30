@@ -1,115 +1,162 @@
-From: Yuvaraj Kumar C D <yuvaraj.cd@gmail.com>
-Subject: [PATCH] mmc: dw_mmc: update binding document exynos-dw-mshc.txt
-Date: Fri, 30 Aug 2013 16:50:11 +0530
-Message-ID: <1377861611-3891-1-git-send-email-yuvaraj.cd@samsung.com>
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: linux-mmc@vger.kernel.org, linux-samsung-soc@vger.kernel.org, cjb@laptop.org, jh80.chung@samsung.com, tgih.jun@samsung.com
-Cc: ks.giri@samsung.com, t.figa@samsung.com, alim.akhtar@samsung.com, dianders@chromium.org, devicetree@vger.kernel.org, Yuvaraj Kumar C D <yuvaraj.cd@samsung.com>
+From: Seungwon Jeon <tgih.jun@samsung.com>
+Subject: RE: [PATCH v7 2/3] mmc: dw_mmc: Honor requests to set the clock to 0
+ (turn off clock)
+Date: Fri, 30 Aug 2013 20:31:46 +0900
+Message-ID: <000201cea574$8287f2a0$8797d7e0$%jun@samsung.com>
+References: <1377188348-3418-1-git-send-email-dianders@chromium.org>
+ <1377794350-12335-1-git-send-email-dianders@chromium.org>
+ <1377794350-12335-3-git-send-email-dianders@chromium.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ks_c_5601-1987
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout1.samsung.com ([203.254.224.24]:31621 "EHLO
+	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752684Ab3H3Lbs (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 30 Aug 2013 07:31:48 -0400
+In-reply-to: <1377794350-12335-3-git-send-email-dianders@chromium.org>
+Content-language: ko
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: 'Doug Anderson' <dianders@chromium.org>, 'Chris Ball' <cjb@laptop.org>
+Cc: 'Jaehoon Chung' <jh80.chung@samsung.com>, 'James Hogan' <james.hogan@imgtec.com>, 'Grant Grundler' <grundler@chromium.org>, 'Alim Akhtar' <alim.akhtar@samsung.com>, 'Abhilash Kesavan' <a.kesavan@samsung.com>, 'Tomasz Figa' <tomasz.figa@gmail.com>, 'Olof Johansson' <olof@lixom.net>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-This patch updates the exynos-dw-mshc.txt.Currently we are using
-"pinctrl" binding property to describe the CMD and DATA line's
-of Mobile Storage Host Controller(mshc) node.
+Hi Doug,
 
-Compatibility string is added in the driver with the patch.
-[1] mmc: dw_mmc: exynos: configure SMU in exynos5420.
+On Friday, August 30, 2013, Doug Anderson wrote:
+> Previously the dw_mmc driver would ignore any requests to disable the
+> card's clock.  This doesn't seem like a good thing in general, but had
+> one extra bad side effect in the following situtation:
+> * mmc core would set clk to 400kHz at boot time while initting
+> * mmc core would set clk to 0 since no card, but it would be ignored.
+> * suspend to ram and resume; clocks in the dw_mmc IP block are now 0
+>   but dw_mmc thinks that they're 400kHz (it ignored the set to 0).
+> * insert card
+> * mmc core would set clk to 400kHz which would be considered a no-op.
+> 
+> Note that if there is no card in the slot and we do a suspend/resume
+> cycle, we _do_ still end up with differences in a dw_mmc register
+> dump, but the differences are clock related and we've got the clock
+> disabled both before and after, so this should be OK.
 
-DT nodes has been added in separate patch.
-[2] ARM: dts: Add dwmmc DT nodes for exynos5420 SOC
+I looked into this change with various kinds.
+When we consider the SDIO, clock off may need to be cared.
+As we know, because low power mode is off in case of SDIO,
+there is no way to disable clock though '0' is requested for clock rate.
+Ok, it would be better if some minor things below are applied.
+I guess I can update those.
 
-Signed-off-by: Yuvaraj Kumar C D <yuvaraj.cd@samsung.com>
----
- .../devicetree/bindings/mmc/exynos-dw-mshc.txt     |   39 +++++++++++---------
- 1 file changed, 21 insertions(+), 18 deletions(-)
+> 
+> Signed-off-by: Doug Anderson <dianders@chromium.org>
+> ---
+> Changes in v7:
+> - Avoid printing the same clock over and over again w/ MMC_CLKGATE.
+> 
+> Changes in v6:
+> - Replaces previous pathes that ensured saving/restoring clocks.
+> 
+>  drivers/mmc/host/dw_mmc.c | 36 ++++++++++++++++++++++--------------
+>  1 file changed, 22 insertions(+), 14 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index ee5f167..1584705 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -88,6 +88,8 @@ struct idmac_desc {
+>   * @queue_node: List node for placing this node in the @queue list of
+>   *	&struct dw_mci.
+>   * @clock: Clock rate configured by set_ios(). Protected by host->lock.
+> + * @last_printed_clock: The last clock we printed.  Keeping track of this helps
+'last_printed_clock' can be changed to a nice name.
 
-diff --git a/Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt
-index 84cd56f..0e1d4d9 100644
---- a/Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt
-+++ b/Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt
-@@ -7,9 +7,9 @@ differences between the core Synopsis dw mshc controller properties described
- by synopsis-dw-mshc.txt and the properties used by the Samsung Exynos specific
- extensions to the Synopsis Designware Mobile Storage Host Controller.
- 
--Required Properties:
-+Required SoC Specific Properties:
- 
--* compatible: should be
-+* compatible: should be one of the following
- 	- "samsung,exynos4210-dw-mshc": for controllers with Samsung Exynos4210
- 	  specific extensions.
- 	- "samsung,exynos4412-dw-mshc": for controllers with Samsung Exynos4412
-@@ -17,7 +17,12 @@ Required Properties:
- 	- "samsung,exynos5250-dw-mshc": for controllers with Samsung Exynos5250
- 	  specific extensions.
- 	- "samsung,exynos5420-dw-mshc": for controllers with Samsung Exynos5420
--	  specific extensions.
-+	  specific extensions which does not have SMU(Security Management Unit).
-+	- "samsung,exynos5420-dw-mshc-smu": for controllers with Samsung
-+	  Exynos5420 specific extensions which has SMU(Security Management
-+	  Unit).
-+
-+Required Board Specific Properties:
- 
- * samsung,dw-mshc-ciu-div: Specifies the divider value for the card interface
-   unit (ciu) clock. This property is applicable only for Exynos5 SoC's and
-@@ -46,44 +51,42 @@ Required Properties:
-       - if CIU clock divider value is 0 (that is divide by 1), both tx and rx
-         phase shift clocks should be 0.
- 
--Required properties for a slot:
--
--* gpios: specifies a list of gpios used for command, clock and data bus. The
--  first gpio is the command line and the second gpio is the clock line. The
--  rest of the gpios (depending on the bus-width property) are the data lines in
--  no particular order. The format of the gpio specifier depends on the gpio
--  controller.
-+* pinctrl-0: Should specify pin control groups used for this controller.
-+* pinctrl-names: Should contain only one value - "default".
- 
-+Required properties for a slot:
-+	Refer synopsis-dw-mshc.txt
- Example:
- 
-   The MSHC controller node can be split into two portions, SoC specific and
-   board specific portions as listed below.
- 
--	dwmmc0@12200000 {
-+	mshc@12200000 {
- 		compatible = "samsung,exynos5250-dw-mshc";
- 		reg = <0x12200000 0x1000>;
- 		interrupts = <0 75 0>;
- 		#address-cells = <1>;
- 		#size-cells = <0>;
-+		clocks = <&clock 351>, <&clock 132>;
-+		clock-names = "biu", "ciu";
-+		fifo-depth = <0x80>;
-+		status = "disabled";
- 	};
- 
--	dwmmc0@12200000 {
-+	mshc@12200000 {
-+		status = "okay";
- 		num-slots = <1>;
- 		supports-highspeed;
- 		broken-cd;
--		fifo-depth = <0x80>;
- 		card-detect-delay = <200>;
- 		samsung,dw-mshc-ciu-div = <3>;
- 		samsung,dw-mshc-sdr-timing = <2 3>;
- 		samsung,dw-mshc-ddr-timing = <1 2>;
-+		pinctrl-names = "default";
-+		pinctrl-0 = <&sd0_clk &sd0_cmd &sd0_bus4 &sd0_bus8>;
- 
- 		slot@0 {
- 			reg = <0>;
- 			bus-width = <8>;
--			gpios = <&gpc0 0 2 0 3>, <&gpc0 1 2 0 3>,
--				<&gpc1 0 2 3 3>, <&gpc1 1 2 3 3>,
--				<&gpc1 2 2 3 3>, <&gpc1 3 2 3 3>,
--				<&gpc0 3 2 3 3>, <&gpc0 4 2 3 3>,
--				<&gpc0 5 2 3 3>, <&gpc0 6 2 3 3>;
- 		};
- 	};
--- 
-1.7.9.5
+> + *	us to avoid spamming the console with CONFIG_MMC_CLKGATE.
+>   * @flags: Random state bits associated with the slot.
+>   * @id: Number of this slot.
+>   * @last_detect_state: Most recently observed card detect state.
+> @@ -105,6 +107,7 @@ struct dw_mci_slot {
+>  	struct list_head	queue_node;
+> 
+>  	unsigned int		clock;
+> +	unsigned int		last_printed_clock;
+>  	unsigned long		flags;
+>  #define DW_MMC_CARD_PRESENT	0
+>  #define DW_MMC_CARD_NEED_INIT	1
+> @@ -635,7 +638,11 @@ static void dw_mci_setup_bus(struct dw_mci_slot *slot, bool force_clkinit)
+>  	u32 div;
+>  	u32 clk_en_a;
+> 
+> -	if (slot->clock != host->current_speed || force_clkinit) {
+> +	if (slot->clock == 0) {
+> +		mci_writel(host, CLKENA, 0);
+> +		mci_send_cmd(slot,
+> +			     SDMMC_CMD_UPD_CLK | SDMMC_CMD_PRV_DAT_WAIT, 0);
+In the dw_mci_setup_bus(), above two lines related to clock-disable are necessary both if and else-if statement
+That is it can be executed unconditionally.
+
+
+> +	} else if (slot->clock != host->current_speed || force_clkinit) {
+>  		div = host->bus_hz / slot->clock;
+>  		if (host->bus_hz % slot->clock && host->bus_hz > slot->clock)
+>  			/*
+> @@ -646,10 +653,14 @@ static void dw_mci_setup_bus(struct dw_mci_slot *slot, bool force_clkinit)
+> 
+>  		div = (host->bus_hz != slot->clock) ? DIV_ROUND_UP(div, 2) : 0;
+> 
+> -		dev_info(&slot->mmc->class_dev,
+> -			 "Bus speed (slot %d) = %dHz (slot req %dHz, actual %dHZ"
+> -			 " div = %d)\n", slot->id, host->bus_hz, slot->clock,
+> -			 div ? ((host->bus_hz / div) >> 1) : host->bus_hz, div);
+> +		if (slot->clock != slot->last_printed_clock || force_clkinit) {
+If 'bus_hz' or 'div' is different with old one as well, it should be considered.
+'div' can be a good factor to compare this condition. Then 'last_printed_clock' should reflect clock divider.
+
+Thanks,
+Seungwon Jeon
+> +			dev_info(&slot->mmc->class_dev,
+> +				 "Bus speed (slot %d) = %dHz (slot req %dHz, actual %dHZ div = %d)\n",
+> +				 slot->id, host->bus_hz, slot->clock,
+> +				 div ? ((host->bus_hz / div) >> 1) :
+> +				 host->bus_hz, div);
+> +			slot->last_printed_clock = slot->clock;
+> +		}
+> 
+>  		/* disable clock */
+>  		mci_writel(host, CLKENA, 0);
+> @@ -675,9 +686,8 @@ static void dw_mci_setup_bus(struct dw_mci_slot *slot, bool force_clkinit)
+>  		/* inform CIU */
+>  		mci_send_cmd(slot,
+>  			     SDMMC_CMD_UPD_CLK | SDMMC_CMD_PRV_DAT_WAIT, 0);
+> -
+> -		host->current_speed = slot->clock;
+>  	}
+> +	host->current_speed = slot->clock;
+> 
+>  	/* Set the current slot bus width */
+>  	mci_writel(host, CTYPE, (slot->ctype << slot->id));
+> @@ -807,13 +817,11 @@ static void dw_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+> 
+>  	mci_writel(slot->host, UHS_REG, regs);
+> 
+> -	if (ios->clock) {
+> -		/*
+> -		 * Use mirror of ios->clock to prevent race with mmc
+> -		 * core ios update when finding the minimum.
+> -		 */
+> -		slot->clock = ios->clock;
+> -	}
+> +	/*
+> +	 * Use mirror of ios->clock to prevent race with mmc
+> +	 * core ios update when finding the minimum.
+> +	 */
+> +	slot->clock = ios->clock;
+> 
+>  	if (drv_data && drv_data->set_ios)
+>  		drv_data->set_ios(slot->host, ios);
+> --
+> 1.8.4
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
