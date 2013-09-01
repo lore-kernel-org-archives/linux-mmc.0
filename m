@@ -1,73 +1,47 @@
-From: Axel Lin <axel.lin@ingics.com>
-Subject: [PATCH] mmc: omap: Use DIV_ROUND_UP instead of open coded
-Date: Sun, 01 Sep 2013 15:07:14 +0800
-Message-ID: <1378019234.6087.1.camel@phoenix>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH V2 1/7] mmc: lock: Use the kernel "KEYS" subsystem to get a card's password
+Date: Sun, 01 Sep 2013 19:53:34 +0100
+Message-ID: <86li3gcr0x.fsf@void.printf.net>
+References: <1377893665-26754-1-git-send-email-alcooperx@gmail.com>
+	<1377893665-26754-2-git-send-email-alcooperx@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pd0-f173.google.com ([209.85.192.173]:56347 "EHLO
-	mail-pd0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752028Ab3IAHHT (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 1 Sep 2013 03:07:19 -0400
-Received: by mail-pd0-f173.google.com with SMTP id p10so3507304pdj.18
-        for <linux-mmc@vger.kernel.org>; Sun, 01 Sep 2013 00:07:19 -0700 (PDT)
+Received: from void.printf.net ([89.145.121.20]:42982 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1756660Ab3IASxg (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Sun, 1 Sep 2013 14:53:36 -0400
+In-Reply-To: <1377893665-26754-2-git-send-email-alcooperx@gmail.com> (Al
+	Cooper's message of "Fri, 30 Aug 2013 16:14:19 -0400")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: Lokesh Vutla <lokeshvutla@ti.com>, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org
+To: Al Cooper <alcooperx@gmail.com>
+Cc: linux-mmc@vger.kernel.org, ulf.hansson@linaro.org
 
-This patch makes the intention of the code more clear.
+Hi Al,
 
-Signed-off-by: Axel Lin <axel.lin@ingics.com>
----
- drivers/mmc/host/omap.c | 10 +++++-----
- 1 file changed, 5 insertions(+), 5 deletions(-)
+On Fri, Aug 30 2013, Al Cooper wrote:
+> --- a/drivers/mmc/core/Kconfig
+> +++ b/drivers/mmc/core/Kconfig
+> @@ -26,3 +26,11 @@ config MMC_CLKGATE
+>  	  support handling this in order for it to be of any use.
+>  
+>  	  If unsure, say N.
+> +
+> +config MMC_LOCK
+> +	bool "MMC/SD password based card lock/unlock"
+> +	select KEYS
+> +	help
+> +	  This will add the ability to lock/unlock SD and MMC cards.
+> +
+> +	  If unsure, say N.
 
-diff --git a/drivers/mmc/host/omap.c b/drivers/mmc/host/omap.c
-index b94f38e..3187af0 100644
---- a/drivers/mmc/host/omap.c
-+++ b/drivers/mmc/host/omap.c
-@@ -189,7 +189,7 @@ static void mmc_omap_fclk_offdelay(struct mmc_omap_slot *slot)
- 	unsigned long tick_ns;
- 
- 	if (slot != NULL && slot->host->fclk_enabled && slot->fclk_freq > 0) {
--		tick_ns = (1000000000 + slot->fclk_freq - 1) / slot->fclk_freq;
-+		tick_ns = DIV_ROUND_UP(1000000000, slot->fclk_freq);
- 		ndelay(8 * tick_ns);
- 	}
- }
-@@ -444,7 +444,7 @@ static void mmc_omap_send_stop_work(struct work_struct *work)
- 	struct mmc_data *data = host->stop_data;
- 	unsigned long tick_ns;
- 
--	tick_ns = (1000000000 + slot->fclk_freq - 1)/slot->fclk_freq;
-+	tick_ns = DIV_ROUND_UP(1000000000, slot->fclk_freq);
- 	ndelay(8*tick_ns);
- 
- 	mmc_omap_start_command(host, data->stop);
-@@ -486,7 +486,7 @@ mmc_omap_send_abort(struct mmc_omap_host *host, int maxloops)
- 	u16 stat = 0;
- 
- 	/* Sending abort takes 80 clocks. Have some extra and round up */
--	timeout = (120*1000000 + slot->fclk_freq - 1)/slot->fclk_freq;
-+	timeout = DIV_ROUND_UP(120 * 1000000, slot->fclk_freq);
- 	restarts = 0;
- 	while (restarts < maxloops) {
- 		OMAP_MMC_WRITE(host, STAT, 0xFFFF);
-@@ -686,8 +686,8 @@ mmc_omap_xfer_data(struct mmc_omap_host *host, int write)
- 	if (n > host->buffer_bytes_left)
- 		n = host->buffer_bytes_left;
- 
--	nwords = n / 2;
--	nwords += n & 1; /* handle odd number of bytes to transfer */
-+	/* Round up to handle odd number of bytes to transfer */
-+	nwords = DIV_ROUND_UP(n, 2);
- 
- 	host->buffer_bytes_left -= n;
- 	host->total_bytes_left -= n;
+Is there a good reason to have this behind a Kconfig entry, rather
+than just enabled for everyone?  I'm happy to just enable it if we
+don't expect any downside.
+
+Thanks,
+
+- Chris.
 -- 
-1.8.1.2
-
-
-
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
