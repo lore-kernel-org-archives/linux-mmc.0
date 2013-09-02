@@ -1,36 +1,32 @@
-From: Sekhar Nori <nsekhar-l0cyMroinI0@public.gmane.org>
-Subject: Re: [PATCH v4 3/6] ARM: edma: Add function to manually trigger an
-	EDMA channel
-Date: Mon, 2 Sep 2013 19:38:51 +0530
-Message-ID: <52249BF3.6000705@ti.com>
-References: <1377817545-18015-1-git-send-email-joelf@ti.com>
-	<1377817545-18015-4-git-send-email-joelf@ti.com>
+From: Mutoni Williams <mutoni_w@hotmail.com>
+Subject: Hallo..........
+Date: Mon, 2 Sep 2013 08:33:05 -0700 (PDT)
+Message-ID: <1378135985.44511.YahooMailBasic__18171.4976592504$1378136420$gmane$org@web163905.mail.gq1.yahoo.com>
+Reply-To: mutoniwilliam@yahoo.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
-In-Reply-To: <1377817545-18015-4-git-send-email-joelf-l0cyMroinI0@public.gmane.org>
-List-Unsubscribe: <http://linux.davincidsp.com/mailman/options/davinci-linux-open-source>,
-	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://linux.davincidsp.com/pipermail/davinci-linux-open-source>
-List-Post: <mailto:davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
-List-Help: <mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=help>
-List-Subscribe: <http://linux.davincidsp.com/mailman/listinfo/davinci-linux-open-source>,
-	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=subscribe>
-Sender: <davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
-Errors-To: davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org
-To: Joel Fernandes <joelf-l0cyMroinI0@public.gmane.org>
-Cc: Linux DaVinci Kernel List <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Vinod Koul <vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Koen Kooi <koen-QLwJDigV5abLmq1fohREcCpxlwaOVQ5f@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Sricharan R <r.sricharan-l0cyMroinI0@public.gmane.org>, Franklin Cooper <fcooper-l0cyMroinI0@public.gmane.org>, Dan Williams <djbw-b10kYP2dOMg@public.gmane.org>, Linux OMAP List <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux ARM Kernel List <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from nm2-vm4.bullet.mail.gq1.yahoo.com ([98.136.218.131]:33459 "EHLO
+	nm2-vm4.bullet.mail.gq1.yahoo.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1758812Ab3IBPkJ convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 2 Sep 2013 11:40:09 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-On 8/30/2013 4:35 AM, Joel Fernandes wrote:
-> Manual trigger for events missed as a result of splitting a
-> scatter gather list and DMA'ing it in batches. Add a helper
-> function to trigger a channel incase any such events are missed.
-> 
-> Signed-off-by: Joel Fernandes <joelf-l0cyMroinI0@public.gmane.org>
 
-Acked-by: Sekhar Nori <nsekhar-l0cyMroinI0@public.gmane.org>
-
-Thanks,
-Sekhar
+Hello,How are you,I hope you're well,my name is Mutoni,I'm medium heigh=
+t and fair in complexion,i love,caring and I decided to contact you.I r=
+eally want to have a good relationship with you.Next I have a special s=
+omething I want to discuss with you,and tell you more about my self.Hop=
+e hear from you soon.I know age will not be a bearier to our relationsh=
+ip,I will give my best. Yours,Miss.Mutoni.
+=20
+Hallo,Wie geht es dir,ich hoffe,du bist gut,mein Name ist Mutoni, ich m=
+ittlerer H=F6he und Messe in Teint bin,ich liebe,f=FCrsorgliche und ich=
+ beschlossen,you.I kontaktieren wirklich wollen,eine gute Beziehung mit=
+ Ihnen haben.Weiter habe ich eine besondere etwas m=F6chte ich mit Ihne=
+n zu besprechen haben,und erfahren Sie mehr =FCber meine self.Hope von =
+Ihnen zu h=F6ren soon.i wissen Alter wird kein bearier,unsere Beziehung=
+ zu sein, werde ich mein Bestes geben.Yours,Miss.Mutoni.
