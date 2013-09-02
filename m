@@ -1,95 +1,165 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH] mmc: enable BKOPS for supported eMMC(4.41)
-Date: Mon, 02 Sep 2013 15:24:49 +0900
-Message-ID: <52242F31.4030103@samsung.com>
-References: <loom.20130830T140917-496@post.gmane.org>
+From: <micky_ching@realsil.com.cn>
+Subject: [PATCH] mmc: rtsx: change phase searching method
+Date: Mon, 2 Sep 2013 17:16:52 +0800
+Message-ID: <1378113412-24200-1-git-send-email-micky_ching@realsil.com.cn>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout3.samsung.com ([203.254.224.33]:32728 "EHLO
-	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753713Ab3IBGYk (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 2 Sep 2013 02:24:40 -0400
-Received: from epcpsbgr1.samsung.com
- (u141.gpu120.samsung.co.kr [203.254.230.141])
- by mailout3.samsung.com (Oracle Communications Messaging Server 7u4-24.01
- (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTP id <0MSH00BOCJ4G2GH0@mailout3.samsung.com> for
- linux-mmc@vger.kernel.org; Mon, 02 Sep 2013 15:24:33 +0900 (KST)
-In-reply-to: <loom.20130830T140917-496@post.gmane.org>
+Received: from rtits2.realtek.com ([60.250.210.242]:41534 "EHLO
+	rtits2.realtek.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755639Ab3IBJTp (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 2 Sep 2013 05:19:45 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Prasanna NAVARATNA <prasanna.navaratna@gmail.com>
-Cc: linux-mmc@vger.kernel.org
+To: cjb@laptop.org, sameo@linux.intel.com
+Cc: devel@linuxdriverproject.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, gregkh@linuxfoundation.org, wei_wang@realtek.com, Micky Ching <micky_ching@realsil.com.cn>
 
-Hi, Prasanna. 
+From: Micky Ching <micky_ching@realsil.com.cn>
 
-Why do you use MMC_CAP2_BKOPS_EN?
-Maybe we had discussed about this point. i know that we can enable the BKOPS with the mmc-util.
-(Actually, This code had included into my first patch. but it's removed.)
+The new phase searching method is more concise, and makes the code
+easier to understand.
 
-Best Regards,
-Jaehoon Chung
+Signed-off-by: Micky Ching <micky_ching@realsil.com.cn>
+---
+ drivers/mmc/host/rtsx_pci_sdmmc.c |  107 +++++++++++--------------------------
+ 1 file changed, 30 insertions(+), 77 deletions(-)
 
-On 08/30/2013 09:09 PM, Prasanna NAVARATNA wrote:
->>From d596be94f87b86ccb372a4ae55ee478951524895 Mon Sep 17 00:00:00 2001
-> From: Prasanna NAVARATNA <prasanna.navaratna@broadcom.com>
-> Date: Fri, 30 Aug 2013 17:18:32 +0530
-> Subject: [PATCH] mmc: enable BKOPS for supported eMMC(4.41)
-> 
-> BKOPS feature is optional for eMMC 4.41. If an eMMC supports BKOPS
-> and is of version 4.41 then BKOPS feature is ignored and not enabled.
-> 
-> Enable BKOPS for such eMMC. Also a capability is added to control
-> the enabling of feature (only for eMMC 4.41, not valid for 4.5)
-> 
-> Signed-off-by: Prasanna NAVARATNA <prasanna.navaratna@broadcom.com>
-> ---
->  drivers/mmc/core/mmc.c   |   18 ++++++++++++++++++
->  include/linux/mmc/host.h |    1 +
->  2 files changed, 19 insertions(+), 0 deletions(-)
-> 
-> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-> index 6d02012..fc44fd7 100644
-> --- a/drivers/mmc/core/mmc.c
-> +++ b/drivers/mmc/core/mmc.c
-> @@ -1269,6 +1269,24 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
->  	}
->  
->  	/*
-> +	 * Enable BKOPS feature (if supported and not enabled)
-> +	 */
-> +	if (!card->ext_csd.bkops_en && (host->caps2 & MMC_CAP2_BKOPS_EN) &&
-> +			(ext_csd[EXT_CSD_BKOPS_SUPPORT] & 0x1)) {
-> +		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-> +				EXT_CSD_BKOPS_EN, 1,
-> +				card->ext_csd.generic_cmd6_time);
-> +		if (err && err != -EBADMSG)
-> +			goto free_card;
-> +		if (err) {
-> +			pr_warning("%s: Enabling BKOPS failed\n",
-> +				   mmc_hostname(card->host));
-> +			err = 0;
-> +		} else
-> +			card->ext_csd.bkops_en = 1;
-> +	}
-> +
-> +	/*
->  	 * Enable HPI feature (if supported)
->  	 */
->  	if (card->ext_csd.hpi) {
-> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-> index 3b0c33a..2c79487 100644
-> --- a/include/linux/mmc/host.h
-> +++ b/include/linux/mmc/host.h
-> @@ -281,6 +281,7 @@ struct mmc_host {
->  				 MMC_CAP2_PACKED_WR)
->  #define MMC_CAP2_NO_PRESCAN_POWERUP (1 << 14)	/* Don't power up before scan */
->  #define MMC_CAP2_SANITIZE	(1 << 15)		/* Support Sanitize */
-> +#define MMC_CAP2_BKOPS_EN	(1 << 16)		/* Enable BKOPS */
->  
->  	mmc_pm_flag_t		pm_caps;	/* supported pm features */
->  
-> 
+diff --git a/drivers/mmc/host/rtsx_pci_sdmmc.c b/drivers/mmc/host/rtsx_pci_sdmmc.c
+index f981f7d..299a27c 100644
+--- a/drivers/mmc/host/rtsx_pci_sdmmc.c
++++ b/drivers/mmc/host/rtsx_pci_sdmmc.c
+@@ -32,15 +32,6 @@
+ #include <linux/mfd/rtsx_pci.h>
+ #include <asm/unaligned.h>
+ 
+-/* SD Tuning Data Structure
+- * Record continuous timing phase path
+- */
+-struct timing_phase_path {
+-	int start;
+-	int end;
+-	int mid;
+-	int len;
+-};
+ 
+ struct realtek_pci_sdmmc {
+ 	struct platform_device	*pdev;
+@@ -497,85 +488,47 @@ static int sd_change_phase(struct realtek_pci_sdmmc *host, u8 sample_point)
+ 	return 0;
+ }
+ 
+-static u8 sd_search_final_phase(struct realtek_pci_sdmmc *host, u32 phase_map)
++static inline u32 get_phase_point(u32 phase_map, unsigned int idx)
+ {
+-	struct timing_phase_path path[MAX_PHASE + 1];
+-	int i, j, cont_path_cnt;
+-	int new_block, max_len, final_path_idx;
+-	u8 final_phase = 0xFF;
++	idx &= MAX_PHASE;
++	return phase_map & (1 << idx);
++}
++
++static int get_phase_len(u32 phase_map, unsigned int idx)
++{
++	int i;
+ 
+-	/* Parse phase_map, take it as a bit-ring */
+-	cont_path_cnt = 0;
+-	new_block = 1;
+-	j = 0;
+ 	for (i = 0; i < MAX_PHASE + 1; i++) {
+-		if (phase_map & (1 << i)) {
+-			if (new_block) {
+-				new_block = 0;
+-				j = cont_path_cnt++;
+-				path[j].start = i;
+-				path[j].end = i;
+-			} else {
+-				path[j].end = i;
+-			}
+-		} else {
+-			new_block = 1;
+-			if (cont_path_cnt) {
+-				/* Calculate path length and middle point */
+-				int idx = cont_path_cnt - 1;
+-				path[idx].len =
+-					path[idx].end - path[idx].start + 1;
+-				path[idx].mid =
+-					path[idx].start + path[idx].len / 2;
+-			}
+-		}
++		if (get_phase_point(phase_map, idx + i) == 0)
++			return i;
+ 	}
++	return MAX_PHASE + 1;
++}
+ 
+-	if (cont_path_cnt == 0) {
+-		dev_dbg(sdmmc_dev(host), "No continuous phase path\n");
+-		goto finish;
+-	} else {
+-		/* Calculate last continuous path length and middle point */
+-		int idx = cont_path_cnt - 1;
+-		path[idx].len = path[idx].end - path[idx].start + 1;
+-		path[idx].mid = path[idx].start + path[idx].len / 2;
+-	}
++static u8 sd_search_final_phase(struct realtek_pci_sdmmc *host, u32 phase_map)
++{
++	int start = 0, len = 0;
++	int start_final = 0, len_final = 0;
++	u8 final_phase = 0xFF;
+ 
+-	/* Connect the first and last continuous paths if they are adjacent */
+-	if (!path[0].start && (path[cont_path_cnt - 1].end == MAX_PHASE)) {
+-		/* Using negative index */
+-		path[0].start = path[cont_path_cnt - 1].start - MAX_PHASE - 1;
+-		path[0].len += path[cont_path_cnt - 1].len;
+-		path[0].mid = path[0].start + path[0].len / 2;
+-		/* Convert negative middle point index to positive one */
+-		if (path[0].mid < 0)
+-			path[0].mid += MAX_PHASE + 1;
+-		cont_path_cnt--;
++	if (phase_map == 0) {
++		dev_dbg(sdmmc_dev(host), "Phase: [map:%x]\n", phase_map);
++		return final_phase;
+ 	}
+ 
+-	/* Choose the longest continuous phase path */
+-	max_len = 0;
+-	final_phase = 0;
+-	final_path_idx = 0;
+-	for (i = 0; i < cont_path_cnt; i++) {
+-		if (path[i].len > max_len) {
+-			max_len = path[i].len;
+-			final_phase = (u8)path[i].mid;
+-			final_path_idx = i;
++	while (start < MAX_PHASE + 1) {
++		len = get_phase_len(phase_map, start);
++		if (len_final < len) {
++			start_final = start;
++			len_final = len;
+ 		}
+-
+-		dev_dbg(sdmmc_dev(host), "path[%d].start = %d\n",
+-				i, path[i].start);
+-		dev_dbg(sdmmc_dev(host), "path[%d].end = %d\n",
+-				i, path[i].end);
+-		dev_dbg(sdmmc_dev(host), "path[%d].len = %d\n",
+-				i, path[i].len);
+-		dev_dbg(sdmmc_dev(host), "path[%d].mid = %d\n",
+-				i, path[i].mid);
++		start += len ? len : 1;
+ 	}
+ 
+-finish:
+-	dev_dbg(sdmmc_dev(host), "Final chosen phase: %d\n", final_phase);
++	final_phase = (start_final + len_final / 2) & MAX_PHASE;
++	dev_dbg(sdmmc_dev(host), "Phase: [map:%x] [maxlen:%d] [final:%d]\n",
++		phase_map, len_final, final_phase);
++
+ 	return final_phase;
+ }
+ 
+-- 
+1.7.9.5
 
