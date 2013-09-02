@@ -1,165 +1,56 @@
-From: <micky_ching@realsil.com.cn>
-Subject: [PATCH] mmc: rtsx: change phase searching method
-Date: Mon, 2 Sep 2013 17:16:52 +0800
-Message-ID: <1378113412-24200-1-git-send-email-micky_ching@realsil.com.cn>
+From: Vinod Koul <vkoul@infradead.org>
+Subject: Re: [PATCH v4 0/6] dma: edma: Support scatter-lists of any length
+Date: Mon, 02 Sep 2013 17:29:53 +0530
+Message-ID: <1378123193.9854.1.camel@vkoul-udesk3>
+References: <1377817545-18015-1-git-send-email-joelf@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from rtits2.realtek.com ([60.250.210.242]:41534 "EHLO
-	rtits2.realtek.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755639Ab3IBJTp (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 2 Sep 2013 05:19:45 -0400
+Received: from merlin.infradead.org ([205.233.59.134]:40686 "EHLO
+	merlin.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756346Ab3IBMqT (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 2 Sep 2013 08:46:19 -0400
+In-Reply-To: <1377817545-18015-1-git-send-email-joelf@ti.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: cjb@laptop.org, sameo@linux.intel.com
-Cc: devel@linuxdriverproject.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, gregkh@linuxfoundation.org, wei_wang@realtek.com, Micky Ching <micky_ching@realsil.com.cn>
+To: Joel Fernandes <joelf@ti.com>
+Cc: vinod.koul@intel.com, Sekhar Nori <nsekhar@ti.com>, Matt Porter <matt@ohporter.com>, Russell King <linux@arm.linux.org.uk>, Sricharan R <r.sricharan@ti.com>, Linux DaVinci Kernel List <davinci-linux-open-source@linux.davincidsp.com>, Koen Kooi <koen@dominion.thruhere.net>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Franklin Cooper <fcooper@ti.com>, Linux OMAP List <linux-omap@vger.kernel.org>, Linux ARM Kernel List <linux-arm-kernel@lists.infradead.org>
 
-From: Micky Ching <micky_ching@realsil.com.cn>
+On Thu, 2013-08-29 at 18:05 -0500, Joel Fernandes wrote:
+> The following series adds support to EDMA driver to enable DMA of
+> scatter-gather lists of arbitrary length, but still make use of only
+> a certain MAX number of slots at a time for a given channel. Thus
+> free-ing up the rest of the slots to other slaves/channels.  With this
+> there is no need for slave drivers to query the EDMA driver about how
+> much is the MAX it can send at a time as done in [1]. Drivers can send
+> SG lists of any number of entries to DMA. Reference discussion at [2].
+> 
+> With this, all the patches for MMC and EDMA related to "sg limits" can be
+> dropped.
+> 
+> Tested omap-aes and omap_hsmmc drivers with different MAX number of slots,
+> even just 1. In the case where it is 1, only 1-slot is used to DMA an
+> entire scatter list of arbitrary length.
+> Since this series touches EDMA private API code also shared with davinci-pcm,
+> playback of a 16-bit 44.1KHz audio file with davinci-pcm has been tested.
+> 
+> Sample test run with 1 vs 16 (MAX number of slots/SG) in omap-aes driver:
+> MAX slots = 1:
+>  (128 bit key, 8192 byte blocks): 1266 operations in 1 seconds (10371072 bytes)
+> MAX slots = 16:
+>  (128 bit key, 8192 byte blocks): 1601 operations in 1 seconds (13115392 bytes)
+> 
+> Note: For the above test, 8K buffer is mapped into SG list of size 2 so
+> only 2 slots are required. So beyond size 2, there will not be any noticeable
+> performance improvement. But above experiment just shows as proof of concept
+> that even using 1 slot is managed by just DMA'ing 1 SG entry at a time.
+much better series, thanks
 
-The new phase searching method is more concise, and makes the code
-easier to understand.
+I think i am okay with this, if anyone has objections pls speak up. Also
+I need ack on the ARM patch 3/6 before I can carry this.
 
-Signed-off-by: Micky Ching <micky_ching@realsil.com.cn>
----
- drivers/mmc/host/rtsx_pci_sdmmc.c |  107 +++++++++++--------------------------
- 1 file changed, 30 insertions(+), 77 deletions(-)
-
-diff --git a/drivers/mmc/host/rtsx_pci_sdmmc.c b/drivers/mmc/host/rtsx_pci_sdmmc.c
-index f981f7d..299a27c 100644
---- a/drivers/mmc/host/rtsx_pci_sdmmc.c
-+++ b/drivers/mmc/host/rtsx_pci_sdmmc.c
-@@ -32,15 +32,6 @@
- #include <linux/mfd/rtsx_pci.h>
- #include <asm/unaligned.h>
- 
--/* SD Tuning Data Structure
-- * Record continuous timing phase path
-- */
--struct timing_phase_path {
--	int start;
--	int end;
--	int mid;
--	int len;
--};
- 
- struct realtek_pci_sdmmc {
- 	struct platform_device	*pdev;
-@@ -497,85 +488,47 @@ static int sd_change_phase(struct realtek_pci_sdmmc *host, u8 sample_point)
- 	return 0;
- }
- 
--static u8 sd_search_final_phase(struct realtek_pci_sdmmc *host, u32 phase_map)
-+static inline u32 get_phase_point(u32 phase_map, unsigned int idx)
- {
--	struct timing_phase_path path[MAX_PHASE + 1];
--	int i, j, cont_path_cnt;
--	int new_block, max_len, final_path_idx;
--	u8 final_phase = 0xFF;
-+	idx &= MAX_PHASE;
-+	return phase_map & (1 << idx);
-+}
-+
-+static int get_phase_len(u32 phase_map, unsigned int idx)
-+{
-+	int i;
- 
--	/* Parse phase_map, take it as a bit-ring */
--	cont_path_cnt = 0;
--	new_block = 1;
--	j = 0;
- 	for (i = 0; i < MAX_PHASE + 1; i++) {
--		if (phase_map & (1 << i)) {
--			if (new_block) {
--				new_block = 0;
--				j = cont_path_cnt++;
--				path[j].start = i;
--				path[j].end = i;
--			} else {
--				path[j].end = i;
--			}
--		} else {
--			new_block = 1;
--			if (cont_path_cnt) {
--				/* Calculate path length and middle point */
--				int idx = cont_path_cnt - 1;
--				path[idx].len =
--					path[idx].end - path[idx].start + 1;
--				path[idx].mid =
--					path[idx].start + path[idx].len / 2;
--			}
--		}
-+		if (get_phase_point(phase_map, idx + i) == 0)
-+			return i;
- 	}
-+	return MAX_PHASE + 1;
-+}
- 
--	if (cont_path_cnt == 0) {
--		dev_dbg(sdmmc_dev(host), "No continuous phase path\n");
--		goto finish;
--	} else {
--		/* Calculate last continuous path length and middle point */
--		int idx = cont_path_cnt - 1;
--		path[idx].len = path[idx].end - path[idx].start + 1;
--		path[idx].mid = path[idx].start + path[idx].len / 2;
--	}
-+static u8 sd_search_final_phase(struct realtek_pci_sdmmc *host, u32 phase_map)
-+{
-+	int start = 0, len = 0;
-+	int start_final = 0, len_final = 0;
-+	u8 final_phase = 0xFF;
- 
--	/* Connect the first and last continuous paths if they are adjacent */
--	if (!path[0].start && (path[cont_path_cnt - 1].end == MAX_PHASE)) {
--		/* Using negative index */
--		path[0].start = path[cont_path_cnt - 1].start - MAX_PHASE - 1;
--		path[0].len += path[cont_path_cnt - 1].len;
--		path[0].mid = path[0].start + path[0].len / 2;
--		/* Convert negative middle point index to positive one */
--		if (path[0].mid < 0)
--			path[0].mid += MAX_PHASE + 1;
--		cont_path_cnt--;
-+	if (phase_map == 0) {
-+		dev_dbg(sdmmc_dev(host), "Phase: [map:%x]\n", phase_map);
-+		return final_phase;
- 	}
- 
--	/* Choose the longest continuous phase path */
--	max_len = 0;
--	final_phase = 0;
--	final_path_idx = 0;
--	for (i = 0; i < cont_path_cnt; i++) {
--		if (path[i].len > max_len) {
--			max_len = path[i].len;
--			final_phase = (u8)path[i].mid;
--			final_path_idx = i;
-+	while (start < MAX_PHASE + 1) {
-+		len = get_phase_len(phase_map, start);
-+		if (len_final < len) {
-+			start_final = start;
-+			len_final = len;
- 		}
--
--		dev_dbg(sdmmc_dev(host), "path[%d].start = %d\n",
--				i, path[i].start);
--		dev_dbg(sdmmc_dev(host), "path[%d].end = %d\n",
--				i, path[i].end);
--		dev_dbg(sdmmc_dev(host), "path[%d].len = %d\n",
--				i, path[i].len);
--		dev_dbg(sdmmc_dev(host), "path[%d].mid = %d\n",
--				i, path[i].mid);
-+		start += len ? len : 1;
- 	}
- 
--finish:
--	dev_dbg(sdmmc_dev(host), "Final chosen phase: %d\n", final_phase);
-+	final_phase = (start_final + len_final / 2) & MAX_PHASE;
-+	dev_dbg(sdmmc_dev(host), "Phase: [map:%x] [maxlen:%d] [final:%d]\n",
-+		phase_map, len_final, final_phase);
-+
- 	return final_phase;
- }
- 
 -- 
-1.7.9.5
+Vinod Koul
+Intel Corp.
 
