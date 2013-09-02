@@ -1,43 +1,54 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH V2 1/7] mmc: lock: Use the kernel "KEYS" subsystem to get a card's password
-Date: Sun, 01 Sep 2013 22:08:17 +0100
-Message-ID: <8661ukckse.fsf@void.printf.net>
-References: <1377893665-26754-1-git-send-email-alcooperx@gmail.com>
-	<1377893665-26754-2-git-send-email-alcooperx@gmail.com>
-	<86li3gcr0x.fsf@void.printf.net>
+From: Jingoo Han <jg1.han@samsung.com>
+Subject: [PATCH] mmc: mvsdio: use devm_ioremap_resource() instead of
+ devm_request_and_ioremap()
+Date: Mon, 02 Sep 2013 10:31:28 +0900
+Message-ID: <005301cea77c$255f50f0$701df2d0$%han@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:54381 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752286Ab3IAVIT (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sun, 1 Sep 2013 17:08:19 -0400
-In-Reply-To: <86li3gcr0x.fsf@void.printf.net> (Chris Ball's message of "Sun,
-	01 Sep 2013 19:53:34 +0100")
+Received: from mailout3.samsung.com ([203.254.224.33]:36808 "EHLO
+	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752366Ab3IBBbi (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 1 Sep 2013 21:31:38 -0400
+Received: from epcpsbgr4.samsung.com
+ (u144.gpu120.samsung.co.kr [203.254.230.144])
+ by mailout3.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+ (7.0.4.24.0) 64bit (built Nov 17 2011))
+ with ESMTP id <0MSH008FD5K6ANE0@mailout3.samsung.com> for
+ linux-mmc@vger.kernel.org; Mon, 02 Sep 2013 10:31:28 +0900 (KST)
+Content-language: ko
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Al Cooper <alcooperx@gmail.com>, linux-mmc@vger.kernel.org, ulf.hansson@linaro.org
+To: 'Chris Ball' <cjb@laptop.org>
+Cc: linux-mmc@vger.kernel.org, 'Nicolas Pitre' <nico@fluxnic.net>, 'Thomas Petazzoni' <thomas.petazzoni@free-electrons.com>, 'Simon Baatz' <gmbnomis@gmail.com>, 'Jingoo Han' <jg1.han@samsung.com>
 
-Hi,
+Use devm_ioremap_resource() because devm_request_and_ioremap() is
+obsoleted by devm_ioremap_resource().
 
-On Sun, Sep 01 2013, Chris Ball wrote:
->> +config MMC_LOCK
->> +	bool "MMC/SD password based card lock/unlock"
->> +	select KEYS
->> +	help
->> +	  This will add the ability to lock/unlock SD and MMC cards.
->> +
->> +	  If unsure, say N.
->
-> Is there a good reason to have this behind a Kconfig entry, rather
-> than just enabled for everyone?  I'm happy to just enable it if we
-> don't expect any downside.
+Signed-off-by: Jingoo Han <jg1.han@samsung.com>
+---
+ drivers/mmc/host/mvsdio.c |    6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
 
-Well, I guess it's the dependency on the KEYS subsystem.  I can see
-that some people would like to build embedded devices with MMC but
-without KEYS.  It's a shame to have this code go entirely untested
-by most of our users, though..
-
-- Chris.
+diff --git a/drivers/mmc/host/mvsdio.c b/drivers/mmc/host/mvsdio.c
+index 06c5b0b..a592407 100644
+--- a/drivers/mmc/host/mvsdio.c
++++ b/drivers/mmc/host/mvsdio.c
+@@ -775,9 +775,9 @@ static int __init mvsd_probe(struct platform_device *pdev)
+ 
+ 	spin_lock_init(&host->lock);
+ 
+-	host->base = devm_request_and_ioremap(&pdev->dev, r);
+-	if (!host->base) {
+-		ret = -ENOMEM;
++	host->base = devm_ioremap_resource(&pdev->dev, r);
++	if (IS_ERR(host->base)) {
++		ret = PTR_ERR(host->base);
+ 		goto out;
+ 	}
+ 
 -- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+1.7.10.4
+
+
