@@ -1,56 +1,36 @@
-From: Vinod Koul <vkoul@infradead.org>
-Subject: Re: [PATCH v4 0/6] dma: edma: Support scatter-lists of any length
-Date: Mon, 02 Sep 2013 17:29:53 +0530
-Message-ID: <1378123193.9854.1.camel@vkoul-udesk3>
+From: Sekhar Nori <nsekhar-l0cyMroinI0@public.gmane.org>
+Subject: Re: [PATCH v4 3/6] ARM: edma: Add function to manually trigger an
+	EDMA channel
+Date: Mon, 2 Sep 2013 19:38:51 +0530
+Message-ID: <52249BF3.6000705@ti.com>
 References: <1377817545-18015-1-git-send-email-joelf@ti.com>
+	<1377817545-18015-4-git-send-email-joelf@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from merlin.infradead.org ([205.233.59.134]:40686 "EHLO
-	merlin.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756346Ab3IBMqT (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 2 Sep 2013 08:46:19 -0400
-In-Reply-To: <1377817545-18015-1-git-send-email-joelf@ti.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
+In-Reply-To: <1377817545-18015-4-git-send-email-joelf-l0cyMroinI0@public.gmane.org>
+List-Unsubscribe: <http://linux.davincidsp.com/mailman/options/davinci-linux-open-source>,
+	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://linux.davincidsp.com/pipermail/davinci-linux-open-source>
+List-Post: <mailto:davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
+List-Help: <mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=help>
+List-Subscribe: <http://linux.davincidsp.com/mailman/listinfo/davinci-linux-open-source>,
+	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=subscribe>
+Sender: <davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
+Errors-To: davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org
+To: Joel Fernandes <joelf-l0cyMroinI0@public.gmane.org>
+Cc: Linux DaVinci Kernel List <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Vinod Koul <vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Koen Kooi <koen-QLwJDigV5abLmq1fohREcCpxlwaOVQ5f@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Sricharan R <r.sricharan-l0cyMroinI0@public.gmane.org>, Franklin Cooper <fcooper-l0cyMroinI0@public.gmane.org>, Dan Williams <djbw-b10kYP2dOMg@public.gmane.org>, Linux OMAP List <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux ARM Kernel List <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Joel Fernandes <joelf@ti.com>
-Cc: vinod.koul@intel.com, Sekhar Nori <nsekhar@ti.com>, Matt Porter <matt@ohporter.com>, Russell King <linux@arm.linux.org.uk>, Sricharan R <r.sricharan@ti.com>, Linux DaVinci Kernel List <davinci-linux-open-source@linux.davincidsp.com>, Koen Kooi <koen@dominion.thruhere.net>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Franklin Cooper <fcooper@ti.com>, Linux OMAP List <linux-omap@vger.kernel.org>, Linux ARM Kernel List <linux-arm-kernel@lists.infradead.org>
 
-On Thu, 2013-08-29 at 18:05 -0500, Joel Fernandes wrote:
-> The following series adds support to EDMA driver to enable DMA of
-> scatter-gather lists of arbitrary length, but still make use of only
-> a certain MAX number of slots at a time for a given channel. Thus
-> free-ing up the rest of the slots to other slaves/channels.  With this
-> there is no need for slave drivers to query the EDMA driver about how
-> much is the MAX it can send at a time as done in [1]. Drivers can send
-> SG lists of any number of entries to DMA. Reference discussion at [2].
+On 8/30/2013 4:35 AM, Joel Fernandes wrote:
+> Manual trigger for events missed as a result of splitting a
+> scatter gather list and DMA'ing it in batches. Add a helper
+> function to trigger a channel incase any such events are missed.
 > 
-> With this, all the patches for MMC and EDMA related to "sg limits" can be
-> dropped.
-> 
-> Tested omap-aes and omap_hsmmc drivers with different MAX number of slots,
-> even just 1. In the case where it is 1, only 1-slot is used to DMA an
-> entire scatter list of arbitrary length.
-> Since this series touches EDMA private API code also shared with davinci-pcm,
-> playback of a 16-bit 44.1KHz audio file with davinci-pcm has been tested.
-> 
-> Sample test run with 1 vs 16 (MAX number of slots/SG) in omap-aes driver:
-> MAX slots = 1:
->  (128 bit key, 8192 byte blocks): 1266 operations in 1 seconds (10371072 bytes)
-> MAX slots = 16:
->  (128 bit key, 8192 byte blocks): 1601 operations in 1 seconds (13115392 bytes)
-> 
-> Note: For the above test, 8K buffer is mapped into SG list of size 2 so
-> only 2 slots are required. So beyond size 2, there will not be any noticeable
-> performance improvement. But above experiment just shows as proof of concept
-> that even using 1 slot is managed by just DMA'ing 1 SG entry at a time.
-much better series, thanks
+> Signed-off-by: Joel Fernandes <joelf-l0cyMroinI0@public.gmane.org>
 
-I think i am okay with this, if anyone has objections pls speak up. Also
-I need ack on the ARM patch 3/6 before I can carry this.
+Acked-by: Sekhar Nori <nsekhar-l0cyMroinI0@public.gmane.org>
 
--- 
-Vinod Koul
-Intel Corp.
-
+Thanks,
+Sekhar
