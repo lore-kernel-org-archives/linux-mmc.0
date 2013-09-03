@@ -1,356 +1,181 @@
-From: Joel Fernandes <joelf-l0cyMroinI0@public.gmane.org>
-Subject: Re: [PATCH v4 2/6] dma: edma: Write out and handle MAX_NR_SG at a
-	given time
-Date: Tue, 3 Sep 2013 10:02:46 -0500
-Message-ID: <5225FA16.5000100@ti.com>
-References: <1377817545-18015-1-git-send-email-joelf@ti.com>
-	<1377817545-18015-3-git-send-email-joelf@ti.com>
-	<20130903040815.GC15824@intel.com>
+From: Daniel J Blueman <daniel@quora.org>
+Subject: Re: BCM57765: timeout waiting for hardware interrupt
+Date: Tue, 3 Sep 2013 23:32:25 +0800
+Message-ID: <CAMVG2svnL7jB8MA3mHNJjWpXtkVAuWJHYh8EGKV1BaD-o+NN6w@mail.gmail.com>
+References: <CAMVG2su7av_Aym+wh-YpkMQN__u+Niya-QXsLX_xor2rhqBuew@mail.gmail.com>
+	<CAMVG2svAvReEQFVoUmq5+vz-fp+M-8BC0JUf7A=Gq09ir7O8Pg@mail.gmail.com>
+	<86vc2ib1yt.fsf@void.printf.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
-In-Reply-To: <20130903040815.GC15824-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-List-Unsubscribe: <http://linux.davincidsp.com/mailman/options/davinci-linux-open-source>,
-	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://linux.davincidsp.com/pipermail/davinci-linux-open-source>
-List-Post: <mailto:davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
-List-Help: <mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=help>
-List-Subscribe: <http://linux.davincidsp.com/mailman/listinfo/davinci-linux-open-source>,
-	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=subscribe>
-Sender: <davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
-Errors-To: davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org
-To: Vinod Koul <vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Cc: Linux DaVinci Kernel List <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Koen Kooi <koen-QLwJDigV5abLmq1fohREcCpxlwaOVQ5f@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Sricharan R <r.sricharan-l0cyMroinI0@public.gmane.org>, Franklin Cooper <fcooper-l0cyMroinI0@public.gmane.org>, Dan Williams <djbw-b10kYP2dOMg@public.gmane.org>, Linux OMAP List <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux ARM Kernel List <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-oa0-f41.google.com ([209.85.219.41]:48465 "EHLO
+	mail-oa0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755989Ab3ICPc0 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 3 Sep 2013 11:32:26 -0400
+Received: by mail-oa0-f41.google.com with SMTP id j6so894598oag.28
+        for <linux-mmc@vger.kernel.org>; Tue, 03 Sep 2013 08:32:25 -0700 (PDT)
+In-Reply-To: <86vc2ib1yt.fsf@void.printf.net>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel <linux-kernel@vger.kernel.org>
 
-On 09/02/2013 11:08 PM, Vinod Koul wrote:
-> On Thu, Aug 29, 2013 at 06:05:41PM -0500, Joel Fernandes wrote:
->> Process SG-elements in batches of MAX_NR_SG if they are greater
->> than MAX_NR_SG. Due to this, at any given time only those many
->> slots will be used in the given channel no matter how long the
->> scatter list is. We keep track of how much has been written
->> inorder to process the next batch of elements in the scatter-list
->> and detect completion.
->>
->> For such intermediate transfer completions (one batch of MAX_NR_SG),
->> make use of pause and resume functions instead of start and stop
->> when such intermediate transfer is in progress or completed as we
->> donot want to clear any pending events.
->>
->> Signed-off-by: Joel Fernandes <joelf-l0cyMroinI0@public.gmane.org>
->> ---
->>  drivers/dma/edma.c | 79 ++++++++++++++++++++++++++++++++++++------------------
->>  1 file changed, 53 insertions(+), 26 deletions(-)
->>
->> diff --git a/drivers/dma/edma.c b/drivers/dma/edma.c
->> index e522ad5..732829b 100644
->> --- a/drivers/dma/edma.c
->> +++ b/drivers/dma/edma.c
->> @@ -56,6 +56,7 @@ struct edma_desc {
->>  	struct list_head		node;
->>  	int				absync;
->>  	int				pset_nr;
->> +	int				processed;
->>  	struct edmacc_param		pset[0];
->>  };
->>  
->> @@ -104,22 +105,34 @@ static void edma_desc_free(struct virt_dma_desc *vdesc)
->>  /* Dispatch a queued descriptor to the controller (caller holds lock) */
->>  static void edma_execute(struct edma_chan *echan)
->>  {
->> -	struct virt_dma_desc *vdesc = vchan_next_desc(&echan->vchan);
->> +	struct virt_dma_desc *vdesc;
->>  	struct edma_desc *edesc;
->> -	int i;
->> -
->> -	if (!vdesc) {
->> -		echan->edesc = NULL;
->> -		return;
->> +	struct device *dev = echan->vchan.chan.device->dev;
->> +	int i, j, left, nslots;
->> +
->> +	/* If either we processed all psets or we're still not started */
->> +	if (!echan->edesc ||
->> +	    echan->edesc->pset_nr == echan->edesc->processed) {
->> +		/* Get next vdesc */
->> +		vdesc = vchan_next_desc(&echan->vchan);
->> +		if (!vdesc) {
->> +			echan->edesc = NULL;
->> +			return;
->> +		}
->> +		list_del(&vdesc->node);
->> +		echan->edesc = to_edma_desc(&vdesc->tx);
->>  	}
->>  
->> -	list_del(&vdesc->node);
->> +	edesc = echan->edesc;
->>  
->> -	echan->edesc = edesc = to_edma_desc(&vdesc->tx);
->> +	/* Find out how many left */
->> +	left = edesc->pset_nr - edesc->processed;
->> +	nslots = min(MAX_NR_SG, left);
->>  
->>  	/* Write descriptor PaRAM set(s) */
->> -	for (i = 0; i < edesc->pset_nr; i++) {
->> -		edma_write_slot(echan->slot[i], &edesc->pset[i]);
->> +	for (i = 0; i < nslots; i++) {
->> +		j = i + edesc->processed;
->> +		edma_write_slot(echan->slot[i], &edesc->pset[j]);
->>  		dev_dbg(echan->vchan.chan.device->dev,
->>  			"\n pset[%d]:\n"
->>  			"  chnum\t%d\n"
->> @@ -132,24 +145,31 @@ static void edma_execute(struct edma_chan *echan)
->>  			"  bidx\t%08x\n"
->>  			"  cidx\t%08x\n"
->>  			"  lkrld\t%08x\n",
->> -			i, echan->ch_num, echan->slot[i],
->> -			edesc->pset[i].opt,
->> -			edesc->pset[i].src,
->> -			edesc->pset[i].dst,
->> -			edesc->pset[i].a_b_cnt,
->> -			edesc->pset[i].ccnt,
->> -			edesc->pset[i].src_dst_bidx,
->> -			edesc->pset[i].src_dst_cidx,
->> -			edesc->pset[i].link_bcntrld);
->> +			j, echan->ch_num, echan->slot[i],
->> +			edesc->pset[j].opt,
->> +			edesc->pset[j].src,
->> +			edesc->pset[j].dst,
->> +			edesc->pset[j].a_b_cnt,
->> +			edesc->pset[j].ccnt,
->> +			edesc->pset[j].src_dst_bidx,
->> +			edesc->pset[j].src_dst_cidx,
->> +			edesc->pset[j].link_bcntrld);
->>  		/* Link to the previous slot if not the last set */
->> -		if (i != (edesc->pset_nr - 1))
->> +		if (i != (nslots - 1))
->>  			edma_link(echan->slot[i], echan->slot[i+1]);
->>  		/* Final pset links to the dummy pset */
->>  		else
->>  			edma_link(echan->slot[i], echan->ecc->dummy_slot);
->>  	}
->>  
->> -	edma_start(echan->ch_num);
->> +	edesc->processed += nslots;
->> +
->> +	edma_resume(echan->ch_num);
->> +
->> +	if (edesc->processed <= MAX_NR_SG) {
->> +		dev_dbg(dev, "first transfer starting %d\n", echan->ch_num);
->> +		edma_start(echan->ch_num);
->> +	}
->>  }
->>  
->>  static int edma_terminate_all(struct edma_chan *echan)
->> @@ -368,19 +388,26 @@ static void edma_callback(unsigned ch_num, u16 ch_status, void *data)
->>  	struct edma_desc *edesc;
->>  	unsigned long flags;
->>  
->> -	/* Stop the channel */
->> -	edma_stop(echan->ch_num);
->> +	/* Pause the channel */
->> +	edma_pause(echan->ch_num);
->>  
->>  	switch (ch_status) {
->>  	case DMA_COMPLETE:
->> -		dev_dbg(dev, "transfer complete on channel %d\n", ch_num);
->> -
->>  		spin_lock_irqsave(&echan->vchan.lock, flags);
->>  
->>  		edesc = echan->edesc;
->>  		if (edesc) {
->> +			if (edesc->processed == edesc->pset_nr) {
->> +				dev_dbg(dev, "transfer complete." \
->> +					" stopping channel %d\n", ch_num);
->> +				edma_stop(echan->ch_num);
->> +				vchan_cookie_complete(&edesc->vdesc);
->> +			} else {
->> +				dev_dbg(dev, "Intermediate transfer complete" \
->> +					" on channel %d\n", ch_num);
-> No, these two not right... Consider someone seeing this message will try to
-> grep "transfer complete stopping channel" and will fail miserable to find the
-> offending line. And this makes it uglier...
-> 
-> Also I believe checkpatch has this check, don't you run that before sending
-> patches?
+On 3 September 2013 19:04, Chris Ball <cjb@laptop.org> wrote:
+> On Tue, Sep 03 2013, Daniel J Blueman wrote:
+>> Please let me know if there's a better vector for reporting and
+>> looking into this issue, if you can.
+>
+> Do you know whether it's ever worked on this hardware?  If so, could
+> you try bisecting to find the first bad commit?
 
-Sorry I did run checkpatch but the >80 char warnings were still there. Thanks
-for pointing out that user-visible strings should not be split.
+Yes; the card reader works when an ethernet cable is plugged into the
+first PCI function on the chip, the Broadcom NIC (see comment #3):
+https://bugs.launchpad.net/ubuntu/+source/linux/+bug/1067222
 
-> 
-> Quoting CodingStyle:
-> 
->                 Chapter 2: Breaking long lines and strings
-> 
-> Coding style is all about readability and maintainability using commonly
-> available tools.
-> 
-> The limit on the length of lines is 80 columns and this is a strongly
-> preferred limit.
-> 
-> Statements longer than 80 columns will be broken into sensible chunks, unless
-> exceeding 80 columns significantly increases readability and does not hide
-> information. Descendants are always substantially shorter than the parent and
-> are placed substantially to the right. The same applies to function headers
-> with a long argument list. However, never break user-visible strings such as
-> printk messages, because that breaks the ability to grep for them.
->                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Google also use this in one of their Chromebook models:
+https://groups.google.com/a/chromium.org/forum/#!msg/chromium-os-reviews/nwFj3KVQy_Y/FOckx1trSkUJ
 
-Sure, I removed the string split and a generate a new patch below, Thanks.
+> If not, I suspect it's going to be very difficult to debug/fix
+> remotely, and we need to wait for someone who has the hardware and
+> wants to create the fix.  (Or get the hardware into the hands of
+> someone who's willing to take a look.)
 
----8<---
-From: Joel Fernandes <joelf-l0cyMroinI0@public.gmane.org>
-Subject: [PATCH v4 2/6] dma: edma: Write out and handle MAX_NR_SG at a given
- time
+Got hardware and willing to take a look; just was wanting some tips on
+where to look with your experience of SDHCI/MMC.
 
-Process SG-elements in batches of MAX_NR_SG if they are greater
-than MAX_NR_SG. Due to this, at any given time only those many
-slots will be used in the given channel no matter how long the
-scatter list is. We keep track of how much has been written
-inorder to process the next batch of elements in the scatter-list
-and detect completion.
+Doing some further debugging, the card reader's parent device (the
+NIC) is in D3 [1] while the card reader is in D0. I'll add the missing
+device IDs to the tg3 driver and force it to bring the NIC into D0 and
+see what happens.
 
-For such intermediate transfer completions (one batch of MAX_NR_SG),
-make use of pause and resume functions instead of start and stop
-when such intermediate transfer is in progress or completed as we
-donot want to clear any pending events.
+Daniel
 
-Signed-off-by: Joel Fernandes <joelf-l0cyMroinI0@public.gmane.org>
----
- drivers/dma/edma.c | 77 ++++++++++++++++++++++++++++++++++++------------------
- 1 file changed, 51 insertions(+), 26 deletions(-)
+--- [1]
 
-diff --git a/drivers/dma/edma.c b/drivers/dma/edma.c
-index e522ad5..f5232bc 100644
---- a/drivers/dma/edma.c
-+++ b/drivers/dma/edma.c
-@@ -56,6 +56,7 @@ struct edma_desc {
- 	struct list_head		node;
- 	int				absync;
- 	int				pset_nr;
-+	int				processed;
- 	struct edmacc_param		pset[0];
- };
+$ sudo lspci -s 3:0 -vv
+03:00.0 Ethernet controller: Broadcom Corporation Device 16a3 (rev 10)
+    Subsystem: Broadcom Corporation Device 16b4
+    Control: I/O- Mem- BusMaster- SpecCycle- MemWINV- VGASnoop-
+ParErr- Stepping- SERR- FastB2B- DisINTx-
+    Status: Cap+ 66MHz- UDF- FastB2B- ParErr- DEVSEL=fast >TAbort-
+<TAbort- <MAbort- >SERR- <PERR- INTx-
+    Interrupt: pin A routed to IRQ 0
+    Region 0: Memory at c1800000 (64-bit, prefetchable) [disabled] [size=64K]
+    Region 2: Memory at c1810000 (64-bit, prefetchable) [disabled] [size=64K]
+    Expansion ROM at c1830000 [disabled] [size=2K]
+    Capabilities: [48] Power Management version 3
+        Flags: PMEClk- DSI- D1- D2- AuxCurrent=0mA
+PME(D0+,D1-,D2-,D3hot+,D3cold+)
+        Status: D3 NoSoftRst+ PME-Enable- DSel=0 DScale=1 PME-
+    Capabilities: [58] MSI: Enable- Count=1/8 Maskable- 64bit+
+        Address: 0000000000000000  Data: 0000
+    Capabilities: [a0] MSI-X: Enable- Count=6 Masked-
+        Vector table: BAR=2 offset=00000000
+        PBA: BAR=2 offset=00000120
+    Capabilities: [ac] Express (v2) Endpoint, MSI 00
+        DevCap:    MaxPayload 128 bytes, PhantFunc 0, Latency L0s <4us, L1 <64us
+            ExtTag- AttnBtn- AttnInd- PwrInd- RBE+ FLReset-
+        DevCtl:    Report errors: Correctable- Non-Fatal- Fatal- Unsupported-
+            RlxdOrd+ ExtTag- PhantFunc- AuxPwr+ NoSnoop+
+            MaxPayload 128 bytes, MaxReadReq 512 bytes
+        DevSta:    CorrErr+ UncorrErr- FatalErr- UnsuppReq+ AuxPwr+ TransPend-
+        LnkCap:    Port #0, Speed 2.5GT/s, Width x1, ASPM L0s L1,
+Latency L0 <2us, L1 <64us
+            ClockPM+ Surprise- LLActRep- BwNot-
+        LnkCtl:    ASPM L1 Enabled; RCB 64 bytes Disabled- Retrain- CommClk+
+            ExtSynch- ClockPM+ AutWidDis- BWInt- AutBWInt-
+        LnkSta:    Speed 2.5GT/s, Width x1, TrErr- Train- SlotClk+
+DLActive- BWMgmt- ABWMgmt-
+        DevCap2: Completion Timeout: Range ABCD, TimeoutDis+
+        DevCtl2: Completion Timeout: 50us to 50ms, TimeoutDis-
+        LnkCtl2: Target Link Speed: 2.5GT/s, EnterCompliance-
+SpeedDis-, Selectable De-emphasis: -6dB
+             Transmit Margin: Normal Operating Range,
+EnterModifiedCompliance- ComplianceSOS-
+             Compliance De-emphasis: -6dB
+        LnkSta2: Current De-emphasis Level: -6dB,
+EqualizationComplete-, EqualizationPhase1-
+             EqualizationPhase2-, EqualizationPhase3-, LinkEqualizationRequest-
+    Capabilities: [100 v1] Advanced Error Reporting
+        UESta:    DLP- SDES- TLP- FCP- CmpltTO- CmpltAbrt- UnxCmplt-
+RxOF- MalfTLP- ECRC- UnsupReq- ACSViol-
+        UEMsk:    DLP- SDES- TLP- FCP- CmpltTO- CmpltAbrt- UnxCmplt-
+RxOF- MalfTLP- ECRC- UnsupReq- ACSViol-
+        UESvrt:    DLP+ SDES+ TLP- FCP+ CmpltTO- CmpltAbrt- UnxCmplt-
+RxOF+ MalfTLP+ ECRC- UnsupReq- ACSViol-
+        CESta:    RxErr- BadTLP- BadDLLP- Rollover- Timeout- NonFatalErr+
+        CEMsk:    RxErr- BadTLP- BadDLLP- Rollover- Timeout- NonFatalErr+
+        AERCap:    First Error Pointer: 00, GenCap+ CGenEn- ChkCap+ ChkEn-
+    Capabilities: [13c v1] Device Serial Number 00-00-00-10-18-00-00-00
+    Capabilities: [150 v1] Power Budgeting <?>
+    Capabilities: [160 v1] Virtual Channel
+        Caps:    LPEVC=0 RefClk=100ns PATEntryBits=1
+        Arb:    Fixed- WRR32- WRR64- WRR128-
+        Ctrl:    ArbSelect=Fixed
+        Status:    InProgress-
+        VC0:    Caps:    PATOffset=00 MaxTimeSlots=1 RejSnoopTrans-
+            Arb:    Fixed- WRR32- WRR64- WRR128- TWRR128- WRR256-
+            Ctrl:    Enable+ ID=0 ArbSelect=Fixed TC/VC=ff
+            Status:    NegoPending- InProgress-
 
-@@ -104,22 +105,34 @@ static void edma_desc_free(struct virt_dma_desc *vdesc)
- /* Dispatch a queued descriptor to the controller (caller holds lock) */
- static void edma_execute(struct edma_chan *echan)
- {
--	struct virt_dma_desc *vdesc = vchan_next_desc(&echan->vchan);
-+	struct virt_dma_desc *vdesc;
- 	struct edma_desc *edesc;
--	int i;
--
--	if (!vdesc) {
--		echan->edesc = NULL;
--		return;
-+	struct device *dev = echan->vchan.chan.device->dev;
-+	int i, j, left, nslots;
-+
-+	/* If either we processed all psets or we're still not started */
-+	if (!echan->edesc ||
-+	    echan->edesc->pset_nr == echan->edesc->processed) {
-+		/* Get next vdesc */
-+		vdesc = vchan_next_desc(&echan->vchan);
-+		if (!vdesc) {
-+			echan->edesc = NULL;
-+			return;
-+		}
-+		list_del(&vdesc->node);
-+		echan->edesc = to_edma_desc(&vdesc->tx);
- 	}
-
--	list_del(&vdesc->node);
-+	edesc = echan->edesc;
-
--	echan->edesc = edesc = to_edma_desc(&vdesc->tx);
-+	/* Find out how many left */
-+	left = edesc->pset_nr - edesc->processed;
-+	nslots = min(MAX_NR_SG, left);
-
- 	/* Write descriptor PaRAM set(s) */
--	for (i = 0; i < edesc->pset_nr; i++) {
--		edma_write_slot(echan->slot[i], &edesc->pset[i]);
-+	for (i = 0; i < nslots; i++) {
-+		j = i + edesc->processed;
-+		edma_write_slot(echan->slot[i], &edesc->pset[j]);
- 		dev_dbg(echan->vchan.chan.device->dev,
- 			"\n pset[%d]:\n"
- 			"  chnum\t%d\n"
-@@ -132,24 +145,31 @@ static void edma_execute(struct edma_chan *echan)
- 			"  bidx\t%08x\n"
- 			"  cidx\t%08x\n"
- 			"  lkrld\t%08x\n",
--			i, echan->ch_num, echan->slot[i],
--			edesc->pset[i].opt,
--			edesc->pset[i].src,
--			edesc->pset[i].dst,
--			edesc->pset[i].a_b_cnt,
--			edesc->pset[i].ccnt,
--			edesc->pset[i].src_dst_bidx,
--			edesc->pset[i].src_dst_cidx,
--			edesc->pset[i].link_bcntrld);
-+			j, echan->ch_num, echan->slot[i],
-+			edesc->pset[j].opt,
-+			edesc->pset[j].src,
-+			edesc->pset[j].dst,
-+			edesc->pset[j].a_b_cnt,
-+			edesc->pset[j].ccnt,
-+			edesc->pset[j].src_dst_bidx,
-+			edesc->pset[j].src_dst_cidx,
-+			edesc->pset[j].link_bcntrld);
- 		/* Link to the previous slot if not the last set */
--		if (i != (edesc->pset_nr - 1))
-+		if (i != (nslots - 1))
- 			edma_link(echan->slot[i], echan->slot[i+1]);
- 		/* Final pset links to the dummy pset */
- 		else
- 			edma_link(echan->slot[i], echan->ecc->dummy_slot);
- 	}
-
--	edma_start(echan->ch_num);
-+	edesc->processed += nslots;
-+
-+	edma_resume(echan->ch_num);
-+
-+	if (edesc->processed <= MAX_NR_SG) {
-+		dev_dbg(dev, "first transfer starting %d\n", echan->ch_num);
-+		edma_start(echan->ch_num);
-+	}
- }
-
- static int edma_terminate_all(struct edma_chan *echan)
-@@ -368,19 +388,24 @@ static void edma_callback(unsigned ch_num, u16 ch_status,
-void *data)
- 	struct edma_desc *edesc;
- 	unsigned long flags;
-
--	/* Stop the channel */
--	edma_stop(echan->ch_num);
-+	/* Pause the channel */
-+	edma_pause(echan->ch_num);
-
- 	switch (ch_status) {
- 	case DMA_COMPLETE:
--		dev_dbg(dev, "transfer complete on channel %d\n", ch_num);
--
- 		spin_lock_irqsave(&echan->vchan.lock, flags);
-
- 		edesc = echan->edesc;
- 		if (edesc) {
-+			if (edesc->processed == edesc->pset_nr) {
-+				dev_dbg(dev, "Transfer complete, stopping channel %d\n", ch_num);
-+				edma_stop(echan->ch_num);
-+				vchan_cookie_complete(&edesc->vdesc);
-+			} else {
-+				dev_dbg(dev, "Intermediate transfer complete on channel %d\n", ch_num);
-+			}
-+
- 			edma_execute(echan);
--			vchan_cookie_complete(&edesc->vdesc);
- 		}
-
- 		spin_unlock_irqrestore(&echan->vchan.lock, flags);
--- 
-1.8.1.2
+03:00.1 SD Host controller: Broadcom Corporation NetXtreme BCM57765
+Memory Card Reader (rev 10) (prog-if 01)
+    Subsystem: Broadcom Corporation Device 96bc
+    Control: I/O- Mem+ BusMaster+ SpecCycle- MemWINV- VGASnoop-
+ParErr- Stepping- SERR- FastB2B- DisINTx-
+    Status: Cap+ 66MHz- UDF- FastB2B- ParErr- DEVSEL=fast >TAbort-
+<TAbort- <MAbort- >SERR- <PERR- INTx-
+    Latency: 0, Cache Line Size: 256 bytes
+    Interrupt: pin B routed to IRQ 17
+    Region 0: Memory at c1820000 (64-bit, prefetchable) [size=64K]
+    Capabilities: [48] Power Management version 3
+        Flags: PMEClk- DSI- D1- D2- AuxCurrent=0mA
+PME(D0+,D1-,D2-,D3hot+,D3cold+)
+        Status: D0 NoSoftRst+ PME-Enable- DSel=0 DScale=1 PME-
+    Capabilities: [58] MSI: Enable- Count=1/1 Maskable- 64bit+
+        Address: 0000000000000000  Data: 0000
+    Capabilities: [ac] Express (v2) Endpoint, MSI 00
+        DevCap:    MaxPayload 128 bytes, PhantFunc 0, Latency L0s <4us, L1 <64us
+            ExtTag- AttnBtn- AttnInd- PwrInd- RBE+ FLReset-
+        DevCtl:    Report errors: Correctable- Non-Fatal- Fatal- Unsupported-
+            RlxdOrd+ ExtTag- PhantFunc- AuxPwr+ NoSnoop+
+            MaxPayload 128 bytes, MaxReadReq 4096 bytes
+        DevSta:    CorrErr+ UncorrErr- FatalErr- UnsuppReq+ AuxPwr+ TransPend-
+        LnkCap:    Port #0, Speed 2.5GT/s, Width x1, ASPM L0s L1,
+Latency L0 <1us, L1 <2us
+            ClockPM+ Surprise- LLActRep- BwNot-
+        LnkCtl:    ASPM L1 Enabled; RCB 64 bytes Disabled- Retrain- CommClk+
+            ExtSynch- ClockPM+ AutWidDis- BWInt- AutBWInt-
+        LnkSta:    Speed 2.5GT/s, Width x1, TrErr- Train- SlotClk+
+DLActive- BWMgmt- ABWMgmt-
+        DevCap2: Completion Timeout: Range ABCD, TimeoutDis+
+        DevCtl2: Completion Timeout: 50us to 50ms, TimeoutDis-
+        LnkCtl2: Target Link Speed: 2.5GT/s, EnterCompliance-
+SpeedDis-, Selectable De-emphasis: -6dB
+             Transmit Margin: Normal Operating Range,
+EnterModifiedCompliance- ComplianceSOS-
+             Compliance De-emphasis: -6dB
+        LnkSta2: Current De-emphasis Level: -6dB,
+EqualizationComplete-, EqualizationPhase1-
+             EqualizationPhase2-, EqualizationPhase3-, LinkEqualizationRequest-
+    Capabilities: [100 v1] Advanced Error Reporting
+        UESta:    DLP- SDES- TLP- FCP- CmpltTO- CmpltAbrt- UnxCmplt-
+RxOF- MalfTLP- ECRC- UnsupReq- ACSViol-
+        UEMsk:    DLP- SDES- TLP- FCP- CmpltTO- CmpltAbrt- UnxCmplt-
+RxOF- MalfTLP- ECRC- UnsupReq- ACSViol-
+        UESvrt:    DLP+ SDES+ TLP- FCP+ CmpltTO- CmpltAbrt- UnxCmplt-
+RxOF+ MalfTLP+ ECRC- UnsupReq- ACSViol-
+        CESta:    RxErr- BadTLP- BadDLLP- Rollover- Timeout- NonFatalErr+
+        CEMsk:    RxErr- BadTLP- BadDLLP- Rollover- Timeout- NonFatalErr+
+        AERCap:    First Error Pointer: 00, GenCap+ CGenEn- ChkCap+ ChkEn-
+    Capabilities: [150 v1] Power Budgeting <?>
+    Capabilities: [160 v1] Virtual Channel
+        Caps:    LPEVC=0 RefClk=100ns PATEntryBits=1
+        Arb:    Fixed- WRR32- WRR64- WRR128-
+        Ctrl:    ArbSelect=Fixed
+        Status:    InProgress-
+        VC0:    Caps:    PATOffset=00 MaxTimeSlots=1 RejSnoopTrans-
+            Arb:    Fixed- WRR32- WRR64- WRR128- TWRR128- WRR256-
+            Ctrl:    Enable+ ID=0 ArbSelect=Fixed TC/VC=ff
+            Status:    NegoPending- InProgress-
+    Kernel driver in use: sdhci-pci
