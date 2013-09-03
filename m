@@ -1,145 +1,86 @@
-From: Zhang Haijun <B42677@freescale.com>
-Subject: Re: [PATCH 1/5] powerpc/85xx: Add support for 85xx cpu type detection
-Date: Tue, 3 Sep 2013 15:43:03 +0800
-Message-ID: <52259307.9020101@freescale.com>
-References: <1378193597-29059-1-git-send-email-Haijun.Zhang@freescale.com>
+From: Seungwon Jeon <tgih.jun@samsung.com>
+Subject: RE: [PATCH 00/22] mmc: dw_mmc: add driver's updates
+Date: Tue, 03 Sep 2013 17:06:30 +0900
+Message-ID: <005601cea87c$7f0b9680$7d22c380$%jun@samsung.com>
+References: <000301cea593$202711d0$60753570$%jun@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from [216.32.181.184] ([216.32.181.184]:32870 "EHLO
-	ch1outboundpool.messaging.microsoft.com" rhost-flags-FAIL-FAIL-OK-OK)
-	by vger.kernel.org with ESMTP id S1759308Ab3ICHk3 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 3 Sep 2013 03:40:29 -0400
-In-Reply-To: <1378193597-29059-1-git-send-email-Haijun.Zhang@freescale.com>
+Received: from mailout3.samsung.com ([203.254.224.33]:55354 "EHLO
+	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754045Ab3ICIGc (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 3 Sep 2013 04:06:32 -0400
+Received: from epcpsbgr3.samsung.com
+ (u143.gpu120.samsung.co.kr [203.254.230.143])
+ by mailout3.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+ (7.0.4.24.0) 64bit (built Nov 17 2011))
+ with ESMTP id <0MSJ008F2II9EKC0@mailout3.samsung.com> for
+ linux-mmc@vger.kernel.org; Tue, 03 Sep 2013 17:06:30 +0900 (KST)
+In-reply-to: <000301cea593$202711d0$60753570$%jun@samsung.com>
+Content-language: ko
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Haijun Zhang <Haijun.Zhang@freescale.com>
-Cc: cbouatmailru@gmail.com, galak@kernel.crashing.org, linux-mmc@vger.kernel.org, cjb@laptop.org, scottwood@freescale.com, X.Xie@freescale.com, Zhao Chenhui <chenhui.zhao@freescale.com>
+To: 'Seungwon Jeon' <tgih.jun@samsung.com>, linux-mmc@vger.kernel.org
+Cc: 'Chris Ball' <cjb@laptop.org>, 'Jaehoon Chung' <jh80.chung@samsung.com>, 'Alim Akhtar' <alim.akhtar@samsung.com>
 
-Hi, Anton and all
+Hi Chris,
 
-I update all the patch send.
+Please could you apply this updates for mmc-next?
 
-Kindly for review.
+Thanks,
+Seungwon Jeon
 
-Thanks.
-
-On 09/03/2013 03:33 PM, Haijun Zhang wrote:
-> Add this file to help detect cpu type in runtime.
-> These macros will be more favorable for driver
-> to apply errata and workaround to specified cpu type.
->
-> Signed-off-by: Haijun Zhang <Haijun.Zhang@freescale.com>
-> Signed-off-by: Zhao Chenhui <chenhui.zhao@freescale.com>
-> ---
->   arch/powerpc/include/asm/mpc85xx.h | 92 ++++++++++++++++++++++++++++++++++++++
->   1 file changed, 92 insertions(+)
->   create mode 100644 arch/powerpc/include/asm/mpc85xx.h
->
-> diff --git a/arch/powerpc/include/asm/mpc85xx.h b/arch/powerpc/include/asm/mpc85xx.h
-> new file mode 100644
-> index 0000000..736d4ac
-> --- /dev/null
-> +++ b/arch/powerpc/include/asm/mpc85xx.h
-> @@ -0,0 +1,92 @@
-> +/*
-> + * MPC85xx cpu type detection
-> + *
-> + * Copyright 2011-2012 Freescale Semiconductor, Inc.
-> + *
-> + * This is free software; you can redistribute it and/or modify
-> + * it under the terms of the GNU General Public License as published by
-> + * the Free Software Foundation; either version 2 of the License, or
-> + * (at your option) any later version.
-> + */
-> +
-> +#ifndef __ASM_PPC_MPC85XX_H
-> +#define __ASM_PPC_MPC85XX_H
-> +
-> +#define SVR_REV(svr)	((svr) & 0xFF)		/* SOC design resision */
-> +#define SVR_MAJ(svr)	(((svr) >>  4) & 0xF)	/* Major revision field*/
-> +#define SVR_MIN(svr)	(((svr) >>  0) & 0xF)	/* Minor revision field*/
-> +
-> +/* Some parts define SVR[0:23] as the SOC version */
-> +#define SVR_SOC_VER(svr) (((svr) >> 8) & 0xFFF7FF)	/* SOC Version fields */
-> +
-> +#define SVR_8533	0x803400
-> +#define SVR_8535	0x803701
-> +#define SVR_8536	0x803700
-> +#define SVR_8540	0x803000
-> +#define SVR_8541	0x807200
-> +#define SVR_8543	0x803200
-> +#define SVR_8544	0x803401
-> +#define SVR_8545	0x803102
-> +#define SVR_8547	0x803101
-> +#define SVR_8548	0x803100
-> +#define SVR_8555	0x807100
-> +#define SVR_8560	0x807000
-> +#define SVR_8567	0x807501
-> +#define SVR_8568	0x807500
-> +#define SVR_8569	0x808000
-> +#define SVR_8572	0x80E000
-> +#define SVR_P1010	0x80F100
-> +#define SVR_P1011	0x80E500
-> +#define SVR_P1012	0x80E501
-> +#define SVR_P1013	0x80E700
-> +#define SVR_P1014	0x80F101
-> +#define SVR_P1017	0x80F700
-> +#define SVR_P1020	0x80E400
-> +#define SVR_P1021	0x80E401
-> +#define SVR_P1022	0x80E600
-> +#define SVR_P1023	0x80F600
-> +#define SVR_P1024	0x80E402
-> +#define SVR_P1025	0x80E403
-> +#define SVR_P2010	0x80E300
-> +#define SVR_P2020	0x80E200
-> +#define SVR_P2040	0x821000
-> +#define SVR_P2041	0x821001
-> +#define SVR_P3041	0x821103
-> +#define SVR_P4040	0x820100
-> +#define SVR_P4080	0x820000
-> +#define SVR_P5010	0x822100
-> +#define SVR_P5020	0x822000
-> +#define SVR_P5021	0X820500
-> +#define SVR_P5040	0x820400
-> +#define SVR_T4240	0x824000
-> +#define SVR_T4120	0x824001
-> +#define SVR_T4160	0x824100
-> +#define SVR_C291	0x850000
-> +#define SVR_C292	0x850020
-> +#define SVR_C293	0x850030
-> +#define SVR_B4860	0X868000
-> +#define SVR_G4860	0x868001
-> +#define SVR_G4060	0x868003
-> +#define SVR_B4440	0x868100
-> +#define SVR_G4440	0x868101
-> +#define SVR_B4420	0x868102
-> +#define SVR_B4220	0x868103
-> +#define SVR_T1040	0x852000
-> +#define SVR_T1041	0x852001
-> +#define SVR_T1042	0x852002
-> +#define SVR_T1020	0x852100
-> +#define SVR_T1021	0x852101
-> +#define SVR_T1022	0x852102
-> +
-> +#define SVR_8610	0x80A000
-> +#define SVR_8641	0x809000
-> +#define SVR_8641D	0x809001
-> +
-> +#define SVR_9130	0x860001
-> +#define SVR_9131	0x860000
-> +#define SVR_9132	0x861000
-> +#define SVR_9232	0x861400
-> +
-> +#define SVR_Unknown	0xFFFFFF
-> +
-> +#endif
->
-
-
--- 
-Thanks & Regards
-
-Haijun
+On Sat, August 31, 2013, Seungwon Jeon wrote:
+> This patch set includes updates of dw_mmc driver.
+> 
+> - Tuning scheme for high speed mode such as HS200.
+> - Support of HS200 mode in exynos host
+> - Involved some fixes and code clean-up
+> 
+> 
+> Doug Anderson (4):
+>       mmc: dw_mmc: don't queue up a card detect at slot startup
+>       mmc: dw_mmc: Add exynos resume_noirq callback to clear WAKEUP_INT
+>       mmc: dw_mmc: Honor requests to set the clock to 0
+>       mmc: dw_mmc: Set timeout to max upon resume
+> 
+> Seungwon Jeon (14):
+>       mmc: dw_mmc: add support tuning scheme
+>       mmc: dw_mmc: exynos: add variable delay tuning sequence
+>       mmc: dw_mmc: exynos: adjust the clock rate with speed mode
+>       mmc: dw_mmc: add the capability to support hs200 mode
+>       mmc: dw_mmc: move supports-highspeed of quirks to caps
+>       mmc: dw_mmc: set the supported max/min frequency
+>       mmc: dw_mmc: adjust the fifoth with block size
+>       mmc: dw_mmc: control card read threshold
+>       mmc: dw_mmc: fix error handling on response error
+>       mmc: dw_mmc: guarantee stop-abort cmd in data errors
+>       mmc: dw_mmc: rework the code related to cmd/data completion
+>       mmc: dw_mmc: gather each reset code into functions
+>       mmc: dw_mmc: amend use of idmac sw reset
+>       mmc: dw_mmc: fix the transfer termination in IDMAC mode
+> 
+> Yuvaraj Kumar C D (4):
+>       mmc: dw_mmc: exynos: move the exynos private init
+>       mmc: dw_mmc: socfpga: move socfpga private init
+>       mmc: dw_mmc: move the platform specific init call
+>       mmc: dw_mmc: exynos: configure SMU in exynos5420
+> 
+> .../devicetree/bindings/mmc/synopsis-dw-mshc.txt   |    9 +
+>  drivers/mmc/host/dw_mmc-exynos.c                   |  294 +++++++++-
+>  drivers/mmc/host/dw_mmc-pltfm.c                    |    7 -
+>  drivers/mmc/host/dw_mmc-socfpga.c                  |   29 +-
+>  drivers/mmc/host/dw_mmc.c                          |  583 ++++++++++++++------
+>  drivers/mmc/host/dw_mmc.h                          |   55 ++
+>  include/linux/mmc/dw_mmc.h                         |    4 +
+>  7 files changed, 763 insertions(+), 218 deletions(-)
+> 
+> Thanks,
+> Seungwon Jeon
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
