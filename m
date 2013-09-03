@@ -1,173 +1,162 @@
-From: Daniel Lezcano <daniel.lezcano@linaro.org>
-Subject: Re: [PATCH V3 4/4] mmc: mmci: Save and restore register context
-Date: Tue, 03 Sep 2013 11:53:02 +0200
-Message-ID: <5225B17E.8090908@linaro.org>
-References: <1378200576-13413-1-git-send-email-ulf.hansson@linaro.org> <1378200576-13413-5-git-send-email-ulf.hansson@linaro.org>
+From: Seungwon Jeon <tgih.jun@samsung.com>
+Subject: RE: [PATCH v2] mmc: add ignorance case for CMD13 CRC error
+Date: Tue, 03 Sep 2013 18:59:38 +0900
+Message-ID: <005801cea88c$4d77d5b0$e8678110$%jun@samsung.com>
+References: <002301ce9e6b$e72da2a0$b588e7e0$%jun@samsung.com>
+ <CAPDyKFrGxbo46_uhJrWc-u0k1kJxXxeKePdoou3aFpwSBUY21g@mail.gmail.com>
+ <002901cea22c$af778730$0e669590$%jun@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bk0-f53.google.com ([209.85.214.53]:39948 "EHLO
-	mail-bk0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755817Ab3ICJxH (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 3 Sep 2013 05:53:07 -0400
-Received: by mail-bk0-f53.google.com with SMTP id d7so1950086bkh.26
-        for <linux-mmc@vger.kernel.org>; Tue, 03 Sep 2013 02:53:05 -0700 (PDT)
-In-Reply-To: <1378200576-13413-5-git-send-email-ulf.hansson@linaro.org>
+Received: from mailout1.samsung.com ([203.254.224.24]:53875 "EHLO
+	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1759897Ab3ICJ7m (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 3 Sep 2013 05:59:42 -0400
+Received: from epcpsbgr1.samsung.com
+ (u141.gpu120.samsung.co.kr [203.254.230.141])
+ by mailout1.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+ (7.0.4.24.0) 64bit (built Nov 17 2011))
+ with ESMTP id <0MSJ00CDTNR3QXZ0@mailout1.samsung.com> for
+ linux-mmc@vger.kernel.org; Tue, 03 Sep 2013 18:59:41 +0900 (KST)
+In-reply-to: <002901cea22c$af778730$0e669590$%jun@samsung.com>
+Content-language: ko
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-arm-kernel@lists.infradead.org, Russell King <linux@arm.linux.org.uk>, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Linus Walleij <linus.walleij@linaro.org>
+To: 'Seungwon Jeon' <tgih.jun@samsung.com>, 'linux-mmc' <linux-mmc@vger.kernel.org>
+Cc: 'Chris Ball' <cjb@laptop.org>, 'Ulf Hansson' <ulf.hansson@linaro.org>
 
-On 09/03/2013 11:29 AM, Ulf Hansson wrote:
-> If a corresponding power domain exists for the device and it manages
-> to cut the domain regulator while the device is runtime suspended,
-> the IP loses it's registers context. We restore the context in the
-> .runtime_resume callback from the existing register caches to adapt
-> to this siutuation.
->=20
-> We also want to make sure the registers are in a known state while
-> restoring context in the case when the power domain did not drop the
-> power, since there are restrictions for the order of writing to these
-> registers. To handle this, we clear the registers in the
-> .runtime_suspend callback.
->=20
-> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
-> Acked-by: Rickard Andersson <rickard.andersson@stericsson.com>
-> Cc: Daniel Lezcano <daniel.lezcano@linaro.org>
+On Mon, August 26, 2013, Seungwon Jeon wrote:
+> While speed mode is changed, CMD13 cannot be guaranteed.
+> According to the spec., it is not recommended to use CMD13
+> to check the busy completion of the timing change.
+> If CMD13 is used in this case, CRC error must be ignored.
+> 
+> Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
 > ---
+> Change in v2:
+>  - Removed function declaration.(From Ulf Hansson)
+Hi Ulf,
 
-Reviewed-by: Daniel Lezcano <daniel.lezcano@linaro.org>
+I hope that you find this change.
 
+Thanks,
+Seungwon Jeon
 
-
->  drivers/mmc/host/mmci.c |   43 +++++++++++++++++++++++++++++++++++++=
-++++++
->  1 file changed, 43 insertions(+)
->=20
-> diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-> index 82afcd3..97e541b 100644
-> --- a/drivers/mmc/host/mmci.c
-> +++ b/drivers/mmc/host/mmci.c
-> @@ -62,6 +62,7 @@ static unsigned int fmax =3D 515633;
->   * @signal_direction: input/out direction of bus signals can be indi=
-cated
->   * @pwrreg_clkgate: MMCIPOWER register must be used to gate the cloc=
-k
->   * @busy_detect: true if busy detection on dat0 is supported
-> + * @pwrreg_nopower: bits in MMCIPOWER don't controls ext. power supp=
-ly
->   */
->  struct variant_data {
->  	unsigned int		clkreg;
-> @@ -76,6 +77,7 @@ struct variant_data {
->  	bool			signal_direction;
->  	bool			pwrreg_clkgate;
->  	bool			busy_detect;
-> +	bool			pwrreg_nopower;
->  };
-> =20
->  static struct variant_data variant_arm =3D {
-> @@ -109,6 +111,7 @@ static struct variant_data variant_u300 =3D {
->  	.pwrreg_powerup		=3D MCI_PWR_ON,
->  	.signal_direction	=3D true,
->  	.pwrreg_clkgate		=3D true,
-> +	.pwrreg_nopower		=3D true,
->  };
-> =20
->  static struct variant_data variant_nomadik =3D {
-> @@ -121,6 +124,7 @@ static struct variant_data variant_nomadik =3D {
->  	.pwrreg_powerup		=3D MCI_PWR_ON,
->  	.signal_direction	=3D true,
->  	.pwrreg_clkgate		=3D true,
-> +	.pwrreg_nopower		=3D true,
->  };
-> =20
->  static struct variant_data variant_ux500 =3D {
-> @@ -135,6 +139,7 @@ static struct variant_data variant_ux500 =3D {
->  	.signal_direction	=3D true,
->  	.pwrreg_clkgate		=3D true,
->  	.busy_detect		=3D true,
-> +	.pwrreg_nopower		=3D true,
->  };
-> =20
->  static struct variant_data variant_ux500v2 =3D {
-> @@ -150,6 +155,7 @@ static struct variant_data variant_ux500v2 =3D {
->  	.signal_direction	=3D true,
->  	.pwrreg_clkgate		=3D true,
->  	.busy_detect		=3D true,
-> +	.pwrreg_nopower		=3D true,
->  };
-> =20
->  static int mmci_card_busy(struct mmc_host *mmc)
-> @@ -1759,6 +1765,41 @@ static int mmci_resume(struct device *dev)
->  #endif
-> =20
->  #ifdef CONFIG_PM_RUNTIME
-> +static void mmci_save(struct mmci_host *host)
+> 
+>  drivers/mmc/core/mmc_ops.c |   70 ++++++++++++++++++++++++++-----------------
+>  1 files changed, 42 insertions(+), 28 deletions(-)
+> 
+> diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
+> index ef18348..1464c1e 100644
+> --- a/drivers/mmc/core/mmc_ops.c
+> +++ b/drivers/mmc/core/mmc_ops.c
+> @@ -23,6 +23,40 @@
+> 
+>  #define MMC_OPS_TIMEOUT_MS	(10 * 60 * 1000) /* 10 minute timeout */
+> 
+> +static inline int __mmc_send_status(struct mmc_card *card, u32 *status,
+> +				    bool ignore_crc)
 > +{
-> +	unsigned long flags;
+> +	int err;
+> +	struct mmc_command cmd = {0};
 > +
-> +	if (host->variant->pwrreg_nopower) {
-> +		spin_lock_irqsave(&host->lock, flags);
+> +	BUG_ON(!card);
+> +	BUG_ON(!card->host);
 > +
-> +		writel(0, host->base + MMCIMASK0);
-> +		writel(0, host->base + MMCIDATACTRL);
-> +		writel(0, host->base + MMCIPOWER);
-> +		writel(0, host->base + MMCICLOCK);
-> +		mmci_reg_delay(host);
+> +	cmd.opcode = MMC_SEND_STATUS;
+> +	if (!mmc_host_is_spi(card->host))
+> +		cmd.arg = card->rca << 16;
+> +	cmd.flags = MMC_RSP_SPI_R2 | MMC_RSP_R1 | MMC_CMD_AC;
+> +	if (ignore_crc)
+> +		cmd.flags &= ~MMC_RSP_CRC;
 > +
-> +		spin_unlock_irqrestore(&host->lock, flags);
-> +	}
+> +	err = mmc_wait_for_cmd(card->host, &cmd, MMC_CMD_RETRIES);
+> +	if (err)
+> +		return err;
 > +
+> +	/* NOTE: callers are required to understand the difference
+> +	 * between "native" and SPI format status words!
+> +	 */
+> +	if (status)
+> +		*status = cmd.resp[0];
+> +
+> +	return 0;
 > +}
 > +
-> +static void mmci_restore(struct mmci_host *host)
+> +int mmc_send_status(struct mmc_card *card, u32 *status)
 > +{
-> +	unsigned long flags;
-> +
-> +	if (host->variant->pwrreg_nopower) {
-> +		spin_lock_irqsave(&host->lock, flags);
-> +
-> +		writel(host->clk_reg, host->base + MMCICLOCK);
-> +		writel(host->datactrl_reg, host->base + MMCIDATACTRL);
-> +		writel(host->pwr_reg, host->base + MMCIPOWER);
-> +		writel(MCI_IRQENABLE, host->base + MMCIMASK0);
-> +		mmci_reg_delay(host);
-> +
-> +		spin_unlock_irqrestore(&host->lock, flags);
-> +	}
+> +	return __mmc_send_status(card, status, false);
 > +}
 > +
->  static int mmci_runtime_suspend(struct device *dev)
+>  static int _mmc_select_card(struct mmc_host *host, struct mmc_card *card)
 >  {
->  	struct amba_device *adev =3D to_amba_device(dev);
-> @@ -1767,6 +1808,7 @@ static int mmci_runtime_suspend(struct device *=
-dev)
->  	if (mmc) {
->  		struct mmci_host *host =3D mmc_priv(mmc);
->  		pinctrl_pm_select_sleep_state(dev);
-> +		mmci_save(host);
->  		clk_disable_unprepare(host->clk);
->  	}
-> =20
-> @@ -1781,6 +1823,7 @@ static int mmci_runtime_resume(struct device *d=
-ev)
->  	if (mmc) {
->  		struct mmci_host *host =3D mmc_priv(mmc);
->  		clk_prepare_enable(host->clk);
-> +		mmci_restore(host);
->  		pinctrl_pm_select_default_state(dev);
->  	}
-> =20
->=20
-
-
---=20
- <http://www.linaro.org/> Linaro.org =E2=94=82 Open source software for=
- ARM SoCs
-
-=46ollow Linaro:  <http://www.facebook.com/pages/Linaro> Facebook |
-<http://twitter.com/#!/linaroorg> Twitter |
-<http://www.linaro.org/linaro-blog/> Blog
+>  	int err;
+> @@ -380,6 +414,7 @@ int __mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
+>  	struct mmc_command cmd = {0};
+>  	unsigned long timeout;
+>  	u32 status;
+> +	bool ignore_crc;
+> 
+>  	BUG_ON(!card);
+>  	BUG_ON(!card->host);
+> @@ -408,10 +443,15 @@ int __mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
+>  	if (!use_busy_signal)
+>  		return 0;
+> 
+> -	/* Must check status to be sure of no errors */
+> +	/*
+> +	 * Must check status to be sure of no errors
+> +	 * If CMD13 is to check the busy completion of the timing change,
+> +	 * disable the check of CRC error.
+> +	 */
+> +	ignore_crc = (index == EXT_CSD_HS_TIMING) ? true : false;
+>  	timeout = jiffies + msecs_to_jiffies(MMC_OPS_TIMEOUT_MS);
+>  	do {
+> -		err = mmc_send_status(card, &status);
+> +		err = __mmc_send_status(card, &status, ignore_crc);
+>  		if (err)
+>  			return err;
+>  		if (card->host->caps & MMC_CAP_WAIT_WHILE_BUSY)
+> @@ -449,32 +489,6 @@ int mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
+>  }
+>  EXPORT_SYMBOL_GPL(mmc_switch);
+> 
+> -int mmc_send_status(struct mmc_card *card, u32 *status)
+> -{
+> -	int err;
+> -	struct mmc_command cmd = {0};
+> -
+> -	BUG_ON(!card);
+> -	BUG_ON(!card->host);
+> -
+> -	cmd.opcode = MMC_SEND_STATUS;
+> -	if (!mmc_host_is_spi(card->host))
+> -		cmd.arg = card->rca << 16;
+> -	cmd.flags = MMC_RSP_SPI_R2 | MMC_RSP_R1 | MMC_CMD_AC;
+> -
+> -	err = mmc_wait_for_cmd(card->host, &cmd, MMC_CMD_RETRIES);
+> -	if (err)
+> -		return err;
+> -
+> -	/* NOTE: callers are required to understand the difference
+> -	 * between "native" and SPI format status words!
+> -	 */
+> -	if (status)
+> -		*status = cmd.resp[0];
+> -
+> -	return 0;
+> -}
+> -
+>  static int
+>  mmc_send_bus_test(struct mmc_card *card, struct mmc_host *host, u8 opcode,
+>  		  u8 len)
+> --
+> 1.7.0.4
+> 
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
