@@ -1,150 +1,55 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [PATCH V3 4/4] mmc: mmci: Save and restore register context
-Date: Tue,  3 Sep 2013 11:29:36 +0200
-Message-ID: <1378200576-13413-5-git-send-email-ulf.hansson@linaro.org>
-References: <1378200576-13413-1-git-send-email-ulf.hansson@linaro.org>
+From: Nitin Singla <nitin.akshainie@gmail.com>
+Subject: Re: [PATCH] mmc: enable BKOPS for supported eMMC(4.41)
+Date: Tue, 3 Sep 2013 15:04:38 +0530
+Message-ID: <CAOprVPLx1NR37YJOYzXSkQ7w70o5kWp0dbKdn0OzCr_0B7TkUQ@mail.gmail.com>
+References: <loom.20130830T140917-496@post.gmane.org>
+	<52242F31.4030103@samsung.com>
+	<loom.20130903T105514-341@post.gmane.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ee0-f48.google.com ([74.125.83.48]:34000 "EHLO
-	mail-ee0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932610Ab3ICJaU (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 3 Sep 2013 05:30:20 -0400
-Received: by mail-ee0-f48.google.com with SMTP id l10so2853274eei.35
-        for <linux-mmc@vger.kernel.org>; Tue, 03 Sep 2013 02:30:18 -0700 (PDT)
-In-Reply-To: <1378200576-13413-1-git-send-email-ulf.hansson@linaro.org>
+Received: from mail-lb0-f181.google.com ([209.85.217.181]:49806 "EHLO
+	mail-lb0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932313Ab3ICJek (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 3 Sep 2013 05:34:40 -0400
+Received: by mail-lb0-f181.google.com with SMTP id u14so4794380lbd.12
+        for <linux-mmc@vger.kernel.org>; Tue, 03 Sep 2013 02:34:38 -0700 (PDT)
+In-Reply-To: <loom.20130903T105514-341@post.gmane.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-arm-kernel@lists.infradead.org, Russell King <linux@arm.linux.org.uk>
-Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Daniel Lezcano <daniel.lezcano@linaro.org>, Linus Walleij <linus.walleij@linaro.org>, Ulf Hansson <ulf.hansson@linaro.org>
+To: Prasanna NAVARATNA <prasanna.navaratna@gmail.com>
+Cc: linux-mmc@vger.kernel.org
 
-If a corresponding power domain exists for the device and it manages
-to cut the domain regulator while the device is runtime suspended,
-the IP loses it's registers context. We restore the context in the
-.runtime_resume callback from the existing register caches to adapt
-to this siutuation.
+Hi Prasanna,
 
-We also want to make sure the registers are in a known state while
-restoring context in the case when the power domain did not drop the
-power, since there are restrictions for the order of writing to these
-registers. To handle this, we clear the registers in the
-.runtime_suspend callback.
+MMC-Utils open source utility for enabling and disabling features.
+It use ioctl defined in block/card to send commands to host.
+git://git.kernel.org/pub/scm/linux/kernel/git/cjb/mmc-utils.git
 
-Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
-Acked-by: Rickard Andersson <rickard.andersson@stericsson.com>
-Cc: Daniel Lezcano <daniel.lezcano@linaro.org>
----
- drivers/mmc/host/mmci.c |   43 +++++++++++++++++++++++++++++++++++++++++++
- 1 file changed, 43 insertions(+)
+Thanks,
+Nitin
 
-diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index 82afcd3..97e541b 100644
---- a/drivers/mmc/host/mmci.c
-+++ b/drivers/mmc/host/mmci.c
-@@ -62,6 +62,7 @@ static unsigned int fmax = 515633;
-  * @signal_direction: input/out direction of bus signals can be indicated
-  * @pwrreg_clkgate: MMCIPOWER register must be used to gate the clock
-  * @busy_detect: true if busy detection on dat0 is supported
-+ * @pwrreg_nopower: bits in MMCIPOWER don't controls ext. power supply
-  */
- struct variant_data {
- 	unsigned int		clkreg;
-@@ -76,6 +77,7 @@ struct variant_data {
- 	bool			signal_direction;
- 	bool			pwrreg_clkgate;
- 	bool			busy_detect;
-+	bool			pwrreg_nopower;
- };
- 
- static struct variant_data variant_arm = {
-@@ -109,6 +111,7 @@ static struct variant_data variant_u300 = {
- 	.pwrreg_powerup		= MCI_PWR_ON,
- 	.signal_direction	= true,
- 	.pwrreg_clkgate		= true,
-+	.pwrreg_nopower		= true,
- };
- 
- static struct variant_data variant_nomadik = {
-@@ -121,6 +124,7 @@ static struct variant_data variant_nomadik = {
- 	.pwrreg_powerup		= MCI_PWR_ON,
- 	.signal_direction	= true,
- 	.pwrreg_clkgate		= true,
-+	.pwrreg_nopower		= true,
- };
- 
- static struct variant_data variant_ux500 = {
-@@ -135,6 +139,7 @@ static struct variant_data variant_ux500 = {
- 	.signal_direction	= true,
- 	.pwrreg_clkgate		= true,
- 	.busy_detect		= true,
-+	.pwrreg_nopower		= true,
- };
- 
- static struct variant_data variant_ux500v2 = {
-@@ -150,6 +155,7 @@ static struct variant_data variant_ux500v2 = {
- 	.signal_direction	= true,
- 	.pwrreg_clkgate		= true,
- 	.busy_detect		= true,
-+	.pwrreg_nopower		= true,
- };
- 
- static int mmci_card_busy(struct mmc_host *mmc)
-@@ -1759,6 +1765,41 @@ static int mmci_resume(struct device *dev)
- #endif
- 
- #ifdef CONFIG_PM_RUNTIME
-+static void mmci_save(struct mmci_host *host)
-+{
-+	unsigned long flags;
-+
-+	if (host->variant->pwrreg_nopower) {
-+		spin_lock_irqsave(&host->lock, flags);
-+
-+		writel(0, host->base + MMCIMASK0);
-+		writel(0, host->base + MMCIDATACTRL);
-+		writel(0, host->base + MMCIPOWER);
-+		writel(0, host->base + MMCICLOCK);
-+		mmci_reg_delay(host);
-+
-+		spin_unlock_irqrestore(&host->lock, flags);
-+	}
-+
-+}
-+
-+static void mmci_restore(struct mmci_host *host)
-+{
-+	unsigned long flags;
-+
-+	if (host->variant->pwrreg_nopower) {
-+		spin_lock_irqsave(&host->lock, flags);
-+
-+		writel(host->clk_reg, host->base + MMCICLOCK);
-+		writel(host->datactrl_reg, host->base + MMCIDATACTRL);
-+		writel(host->pwr_reg, host->base + MMCIPOWER);
-+		writel(MCI_IRQENABLE, host->base + MMCIMASK0);
-+		mmci_reg_delay(host);
-+
-+		spin_unlock_irqrestore(&host->lock, flags);
-+	}
-+}
-+
- static int mmci_runtime_suspend(struct device *dev)
- {
- 	struct amba_device *adev = to_amba_device(dev);
-@@ -1767,6 +1808,7 @@ static int mmci_runtime_suspend(struct device *dev)
- 	if (mmc) {
- 		struct mmci_host *host = mmc_priv(mmc);
- 		pinctrl_pm_select_sleep_state(dev);
-+		mmci_save(host);
- 		clk_disable_unprepare(host->clk);
- 	}
- 
-@@ -1781,6 +1823,7 @@ static int mmci_runtime_resume(struct device *dev)
- 	if (mmc) {
- 		struct mmci_host *host = mmc_priv(mmc);
- 		clk_prepare_enable(host->clk);
-+		mmci_restore(host);
- 		pinctrl_pm_select_default_state(dev);
- 	}
- 
--- 
-1.7.9.5
-
+On Tue, Sep 3, 2013 at 2:28 PM, Prasanna NAVARATNA
+<prasanna.navaratna@gmail.com> wrote:
+> Hello Jaehoon,
+>
+>> Why do you use MMC_CAP2_BKOPS_EN?
+> Because BKOPS on eMMC4.41 is optional. So the capability is provided for the
+> platform to either enable/disable this feature (its not mandatory to always
+> enable BKOPS on 4.41)
+>
+>> Maybe we had discussed about this point. i know that we can enable the
+> BKOPS with the mmc-util.
+>> (Actually, This code had included into my first patch. but it's removed.)
+> I'm not aware of this discussion and currently I'm running on eMMC4.41 and
+> bkops is supported but not enabled. So i suggested this patch.
+> Do you mean to say, right now, i can enable it using mmc-utils?
+> Will you please elaborate?
+>
+> Thanks,
+> Prasanna
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
