@@ -1,92 +1,156 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH v2 3/4] mmc: sdhci-s3c: revert
- "fix missing clock for gpio card-detect"
-Date: Tue, 03 Sep 2013 21:26:27 +0900
-Message-ID: <5225D573.8040101@samsung.com>
-References: <51FBBD7D.2020203@samsung.com> <871u5cx99m.fsf@octavius.laptop.org>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v2] mmc: add ignorance case for CMD13 CRC error
+Date: Tue, 3 Sep 2013 14:58:47 +0200
+Message-ID: <CAPDyKForsH3rsLevSiCfm4nkYHV_FvFVH=YhSsvb=bqLgCtBwA@mail.gmail.com>
+References: <002301ce9e6b$e72da2a0$b588e7e0$%jun@samsung.com>
+	<CAPDyKFrGxbo46_uhJrWc-u0k1kJxXxeKePdoou3aFpwSBUY21g@mail.gmail.com>
+	<002901cea22c$af778730$0e669590$%jun@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout2.samsung.com ([203.254.224.25]:27973 "EHLO
-	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752612Ab3ICM0K (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 3 Sep 2013 08:26:10 -0400
-Received: from epcpsbgr3.samsung.com
- (u143.gpu120.samsung.co.kr [203.254.230.143])
- by mailout2.samsung.com (Oracle Communications Messaging Server 7u4-24.01
- (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTP id <0MSJ004ICUJKCAM0@mailout2.samsung.com> for
- linux-mmc@vger.kernel.org; Tue, 03 Sep 2013 21:26:09 +0900 (KST)
-In-reply-to: <871u5cx99m.fsf@octavius.laptop.org>
+Received: from mail-vb0-f53.google.com ([209.85.212.53]:63065 "EHLO
+	mail-vb0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752612Ab3ICM6s (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 3 Sep 2013 08:58:48 -0400
+Received: by mail-vb0-f53.google.com with SMTP id i3so3971887vbh.12
+        for <linux-mmc@vger.kernel.org>; Tue, 03 Sep 2013 05:58:47 -0700 (PDT)
+In-Reply-To: <002901cea22c$af778730$0e669590$%jun@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Kyungmin Park <kyungmin.park@samsung.com>, =?ISO-8859-1?Q?Heiko_St=FCb?= =?ISO-8859-1?Q?ner?= <heiko@sntech.de>
+To: Seungwon Jeon <tgih.jun@samsung.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>
 
-Hi,
+On 26 August 2013 09:20, Seungwon Jeon <tgih.jun@samsung.com> wrote:
+> While speed mode is changed, CMD13 cannot be guaranteed.
+> According to the spec., it is not recommended to use CMD13
+> to check the busy completion of the timing change.
+> If CMD13 is used in this case, CRC error must be ignored.
+>
+> Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
+> ---
+> Change in v2:
+>  - Removed function declaration.(From Ulf Hansson)
+>
+>  drivers/mmc/core/mmc_ops.c |   70 ++++++++++++++++++++++++++-----------------
+>  1 files changed, 42 insertions(+), 28 deletions(-)
+>
+> diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
+> index ef18348..1464c1e 100644
+> --- a/drivers/mmc/core/mmc_ops.c
+> +++ b/drivers/mmc/core/mmc_ops.c
+> @@ -23,6 +23,40 @@
+>
+>  #define MMC_OPS_TIMEOUT_MS     (10 * 60 * 1000) /* 10 minute timeout */
+>
+> +static inline int __mmc_send_status(struct mmc_card *card, u32 *status,
+> +                                   bool ignore_crc)
 
-On 08/30/2013 10:22 AM, Chris Ball wrote:
-> Hi,
-> 
-> On Fri, Aug 02 2013, Jaehoon Chung wrote:
->> Fixed the warning message.(clk_disable/enable didn't pair)
->> [..]
->>
->> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
->> Signed-off-by: Kyungmin Park <Kyungmin.park@samsung.com>
->> Acked-by: Heiko Stuebner <heiko@sntech.de>
->> Tested-by: Heiko Stuebner <heiko@sntech.de>
->> ---
->> Changelog v2:
->> 	- Added acked/tested by Heiko (on s3c2416)
->>
->>  drivers/mmc/host/sdhci-s3c.c |    9 ---------
->>  1 file changed, 9 deletions(-)
->>
->> diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
->> index 6debda9..f974778 100644
->> --- a/drivers/mmc/host/sdhci-s3c.c
->> +++ b/drivers/mmc/host/sdhci-s3c.c
->> @@ -373,27 +373,18 @@ static struct sdhci_ops sdhci_s3c_ops = {
->>  static void sdhci_s3c_notify_change(struct platform_device *dev, int state)
->>  {
->>  	struct sdhci_host *host = platform_get_drvdata(dev);
->> -#ifdef CONFIG_PM_RUNTIME
->> -	struct sdhci_s3c *sc = sdhci_priv(host);
->> -#endif
->>  	unsigned long flags;
->>  
->>  	if (host) {
->>  		spin_lock_irqsave(&host->lock, flags);
->>  		if (state) {
->>  			dev_dbg(&dev->dev, "card inserted.\n");
->> -#ifdef CONFIG_PM_RUNTIME
->> -			clk_prepare_enable(sc->clk_io);
->> -#endif
->>  			host->flags &= ~SDHCI_DEVICE_DEAD;
->>  			host->quirks |= SDHCI_QUIRK_BROKEN_CARD_DETECTION;
->>  		} else {
->>  			dev_dbg(&dev->dev, "card removed.\n");
->>  			host->flags |= SDHCI_DEVICE_DEAD;
->>  			host->quirks &= ~SDHCI_QUIRK_BROKEN_CARD_DETECTION;
->> -#ifdef CONFIG_PM_RUNTIME
->> -			clk_disable_unprepare(sc->clk_io);
->> -#endif
->>  		}
->>  		tasklet_schedule(&host->card_tasklet);
->>  		spin_unlock_irqrestore(&host->lock, flags);
-> 
-> Jaehoon/Heiko, it looks this patch was itself a bug fix -- can we
-> not find a way to support cd-gpios and runtime PM at the same time?
-I will check with slot-gpio.c. If it's working well, i think good that sdhci-s3c use it.
-Then Patch v2 3/4~4/4 can be dropped. I will send the other patch series on this week.
+Is there any specific reason to you made this function inline?
 
-Best Regards,
-Jaehoon Chung
-> 
-> Thanks,
-> 
-> - Chris.
-> 
+> +{
+> +       int err;
+> +       struct mmc_command cmd = {0};
+> +
+> +       BUG_ON(!card);
+> +       BUG_ON(!card->host);
+> +
+> +       cmd.opcode = MMC_SEND_STATUS;
+> +       if (!mmc_host_is_spi(card->host))
+> +               cmd.arg = card->rca << 16;
+> +       cmd.flags = MMC_RSP_SPI_R2 | MMC_RSP_R1 | MMC_CMD_AC;
+> +       if (ignore_crc)
+> +               cmd.flags &= ~MMC_RSP_CRC;
+> +
+> +       err = mmc_wait_for_cmd(card->host, &cmd, MMC_CMD_RETRIES);
+> +       if (err)
+> +               return err;
+> +
+> +       /* NOTE: callers are required to understand the difference
+> +        * between "native" and SPI format status words!
+> +        */
+> +       if (status)
+> +               *status = cmd.resp[0];
+> +
+> +       return 0;
+> +}
+> +
+> +int mmc_send_status(struct mmc_card *card, u32 *status)
+> +{
+> +       return __mmc_send_status(card, status, false);
+> +}
+> +
+>  static int _mmc_select_card(struct mmc_host *host, struct mmc_card *card)
+>  {
+>         int err;
+> @@ -380,6 +414,7 @@ int __mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
+>         struct mmc_command cmd = {0};
+>         unsigned long timeout;
+>         u32 status;
+> +       bool ignore_crc;
+>
+>         BUG_ON(!card);
+>         BUG_ON(!card->host);
+> @@ -408,10 +443,15 @@ int __mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
+>         if (!use_busy_signal)
+>                 return 0;
+>
+> -       /* Must check status to be sure of no errors */
+> +       /*
+> +        * Must check status to be sure of no errors
+> +        * If CMD13 is to check the busy completion of the timing change,
+> +        * disable the check of CRC error.
+> +        */
+> +       ignore_crc = (index == EXT_CSD_HS_TIMING) ? true : false;
 
+You need to consider MMC_CAP_WAIT_WHILE_BUSY in the condition for
+"ignore_crc" as well. Otherwise you will ignore CRC in cases where we
+actually can detect it.
+
+Kind regards
+Ulf Hansson
+
+
+>         timeout = jiffies + msecs_to_jiffies(MMC_OPS_TIMEOUT_MS);
+>         do {
+> -               err = mmc_send_status(card, &status);
+> +               err = __mmc_send_status(card, &status, ignore_crc);
+>                 if (err)
+>                         return err;
+>                 if (card->host->caps & MMC_CAP_WAIT_WHILE_BUSY)
+> @@ -449,32 +489,6 @@ int mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
+>  }
+>  EXPORT_SYMBOL_GPL(mmc_switch);
+>
+> -int mmc_send_status(struct mmc_card *card, u32 *status)
+> -{
+> -       int err;
+> -       struct mmc_command cmd = {0};
+> -
+> -       BUG_ON(!card);
+> -       BUG_ON(!card->host);
+> -
+> -       cmd.opcode = MMC_SEND_STATUS;
+> -       if (!mmc_host_is_spi(card->host))
+> -               cmd.arg = card->rca << 16;
+> -       cmd.flags = MMC_RSP_SPI_R2 | MMC_RSP_R1 | MMC_CMD_AC;
+> -
+> -       err = mmc_wait_for_cmd(card->host, &cmd, MMC_CMD_RETRIES);
+> -       if (err)
+> -               return err;
+> -
+> -       /* NOTE: callers are required to understand the difference
+> -        * between "native" and SPI format status words!
+> -        */
+> -       if (status)
+> -               *status = cmd.resp[0];
+> -
+> -       return 0;
+> -}
+> -
+>  static int
+>  mmc_send_bus_test(struct mmc_card *card, struct mmc_host *host, u8 opcode,
+>                   u8 len)
+> --
+> 1.7.0.4
+>
+>
