@@ -1,181 +1,178 @@
-From: Daniel J Blueman <daniel@quora.org>
-Subject: Re: BCM57765: timeout waiting for hardware interrupt
-Date: Tue, 3 Sep 2013 23:32:25 +0800
-Message-ID: <CAMVG2svnL7jB8MA3mHNJjWpXtkVAuWJHYh8EGKV1BaD-o+NN6w@mail.gmail.com>
-References: <CAMVG2su7av_Aym+wh-YpkMQN__u+Niya-QXsLX_xor2rhqBuew@mail.gmail.com>
-	<CAMVG2svAvReEQFVoUmq5+vz-fp+M-8BC0JUf7A=Gq09ir7O8Pg@mail.gmail.com>
-	<86vc2ib1yt.fsf@void.printf.net>
+From: Seungwon Jeon <tgih.jun@samsung.com>
+Subject: RE: [PATCH v2] mmc: add ignorance case for CMD13 CRC error
+Date: Wed, 04 Sep 2013 10:53:23 +0900
+Message-ID: <001d01cea911$8a509c80$9ef1d580$%jun@samsung.com>
+References: <002301ce9e6b$e72da2a0$b588e7e0$%jun@samsung.com>
+ <CAPDyKFrGxbo46_uhJrWc-u0k1kJxXxeKePdoou3aFpwSBUY21g@mail.gmail.com>
+ <002901cea22c$af778730$0e669590$%jun@samsung.com>
+ <CAPDyKForsH3rsLevSiCfm4nkYHV_FvFVH=YhSsvb=bqLgCtBwA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-oa0-f41.google.com ([209.85.219.41]:48465 "EHLO
-	mail-oa0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755989Ab3ICPc0 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 3 Sep 2013 11:32:26 -0400
-Received: by mail-oa0-f41.google.com with SMTP id j6so894598oag.28
-        for <linux-mmc@vger.kernel.org>; Tue, 03 Sep 2013 08:32:25 -0700 (PDT)
-In-Reply-To: <86vc2ib1yt.fsf@void.printf.net>
+Received: from mailout4.samsung.com ([203.254.224.34]:29530 "EHLO
+	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1761691Ab3IDBxZ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 3 Sep 2013 21:53:25 -0400
+Received: from epcpsbgr4.samsung.com
+ (u144.gpu120.samsung.co.kr [203.254.230.144])
+ by mailout4.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+ (7.0.4.24.0) 64bit (built Nov 17 2011))
+ with ESMTP id <0MSK00I7LVW72CF0@mailout4.samsung.com> for
+ linux-mmc@vger.kernel.org; Wed, 04 Sep 2013 10:53:24 +0900 (KST)
+In-reply-to: <CAPDyKForsH3rsLevSiCfm4nkYHV_FvFVH=YhSsvb=bqLgCtBwA@mail.gmail.com>
+Content-language: ko
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel <linux-kernel@vger.kernel.org>
+To: 'Ulf Hansson' <ulf.hansson@linaro.org>
+Cc: 'linux-mmc' <linux-mmc@vger.kernel.org>, 'Chris Ball' <cjb@laptop.org>
 
-On 3 September 2013 19:04, Chris Ball <cjb@laptop.org> wrote:
-> On Tue, Sep 03 2013, Daniel J Blueman wrote:
->> Please let me know if there's a better vector for reporting and
->> looking into this issue, if you can.
->
-> Do you know whether it's ever worked on this hardware?  If so, could
-> you try bisecting to find the first bad commit?
+On Tue, September 03, 2013, Ulf Hansson wrote:
+> On 26 August 2013 09:20, Seungwon Jeon <tgih.jun@samsung.com> wrote:
+> > While speed mode is changed, CMD13 cannot be guaranteed.
+> > According to the spec., it is not recommended to use CMD13
+> > to check the busy completion of the timing change.
+> > If CMD13 is used in this case, CRC error must be ignored.
+> >
+> > Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
+> > ---
+> > Change in v2:
+> >  - Removed function declaration.(From Ulf Hansson)
+> >
+> >  drivers/mmc/core/mmc_ops.c |   70 ++++++++++++++++++++++++++-----------------
+> >  1 files changed, 42 insertions(+), 28 deletions(-)
+> >
+> > diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
+> > index ef18348..1464c1e 100644
+> > --- a/drivers/mmc/core/mmc_ops.c
+> > +++ b/drivers/mmc/core/mmc_ops.c
+> > @@ -23,6 +23,40 @@
+> >
+> >  #define MMC_OPS_TIMEOUT_MS     (10 * 60 * 1000) /* 10 minute timeout */
+> >
+> > +static inline int __mmc_send_status(struct mmc_card *card, u32 *status,
+> > +                                   bool ignore_crc)
+> 
+> Is there any specific reason to you made this function inline?
+First, when considering that mmc_send_status() just wraps __mmc_send_status(),
+we can reduce call stack though it seems trivial.
+And __mmc_send_status() will be used only in 'mmc_ops.c'. Currently it is called
+in do~while loop. inline function could be helpful to avoid frequent call.
 
-Yes; the card reader works when an ethernet cable is plugged into the
-first PCI function on the chip, the Broadcom NIC (see comment #3):
-https://bugs.launchpad.net/ubuntu/+source/linux/+bug/1067222
+> 
+> > +{
+> > +       int err;
+> > +       struct mmc_command cmd = {0};
+> > +
+> > +       BUG_ON(!card);
+> > +       BUG_ON(!card->host);
+> > +
+> > +       cmd.opcode = MMC_SEND_STATUS;
+> > +       if (!mmc_host_is_spi(card->host))
+> > +               cmd.arg = card->rca << 16;
+> > +       cmd.flags = MMC_RSP_SPI_R2 | MMC_RSP_R1 | MMC_CMD_AC;
+> > +       if (ignore_crc)
+> > +               cmd.flags &= ~MMC_RSP_CRC;
+> > +
+> > +       err = mmc_wait_for_cmd(card->host, &cmd, MMC_CMD_RETRIES);
+> > +       if (err)
+> > +               return err;
+> > +
+> > +       /* NOTE: callers are required to understand the difference
+> > +        * between "native" and SPI format status words!
+> > +        */
+> > +       if (status)
+> > +               *status = cmd.resp[0];
+> > +
+> > +       return 0;
+> > +}
+> > +
+> > +int mmc_send_status(struct mmc_card *card, u32 *status)
+> > +{
+> > +       return __mmc_send_status(card, status, false);
+> > +}
+> > +
+> >  static int _mmc_select_card(struct mmc_host *host, struct mmc_card *card)
+> >  {
+> >         int err;
+> > @@ -380,6 +414,7 @@ int __mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
+> >         struct mmc_command cmd = {0};
+> >         unsigned long timeout;
+> >         u32 status;
+> > +       bool ignore_crc;
+> >
+> >         BUG_ON(!card);
+> >         BUG_ON(!card->host);
+> > @@ -408,10 +443,15 @@ int __mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
+> >         if (!use_busy_signal)
+> >                 return 0;
+> >
+> > -       /* Must check status to be sure of no errors */
+> > +       /*
+> > +        * Must check status to be sure of no errors
+> > +        * If CMD13 is to check the busy completion of the timing change,
+> > +        * disable the check of CRC error.
+> > +        */
+> > +       ignore_crc = (index == EXT_CSD_HS_TIMING) ? true : false;
+> 
+> You need to consider MMC_CAP_WAIT_WHILE_BUSY in the condition for
+> "ignore_crc" as well. Otherwise you will ignore CRC in cases where we
+> actually can detect it.
+Ok, it would be good.
 
-Google also use this in one of their Chromebook models:
-https://groups.google.com/a/chromium.org/forum/#!msg/chromium-os-reviews/nwFj3KVQy_Y/FOckx1trSkUJ
+Thanks,
+Seungwon Jeon
+> 
+> Kind regards
+> Ulf Hansson
+> 
+> 
+> >         timeout = jiffies + msecs_to_jiffies(MMC_OPS_TIMEOUT_MS);
+> >         do {
+> > -               err = mmc_send_status(card, &status);
+> > +               err = __mmc_send_status(card, &status, ignore_crc);
+> >                 if (err)
+> >                         return err;
+> >                 if (card->host->caps & MMC_CAP_WAIT_WHILE_BUSY)
+> > @@ -449,32 +489,6 @@ int mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
+> >  }
+> >  EXPORT_SYMBOL_GPL(mmc_switch);
+> >
+> > -int mmc_send_status(struct mmc_card *card, u32 *status)
+> > -{
+> > -       int err;
+> > -       struct mmc_command cmd = {0};
+> > -
+> > -       BUG_ON(!card);
+> > -       BUG_ON(!card->host);
+> > -
+> > -       cmd.opcode = MMC_SEND_STATUS;
+> > -       if (!mmc_host_is_spi(card->host))
+> > -               cmd.arg = card->rca << 16;
+> > -       cmd.flags = MMC_RSP_SPI_R2 | MMC_RSP_R1 | MMC_CMD_AC;
+> > -
+> > -       err = mmc_wait_for_cmd(card->host, &cmd, MMC_CMD_RETRIES);
+> > -       if (err)
+> > -               return err;
+> > -
+> > -       /* NOTE: callers are required to understand the difference
+> > -        * between "native" and SPI format status words!
+> > -        */
+> > -       if (status)
+> > -               *status = cmd.resp[0];
+> > -
+> > -       return 0;
+> > -}
+> > -
+> >  static int
+> >  mmc_send_bus_test(struct mmc_card *card, struct mmc_host *host, u8 opcode,
+> >                   u8 len)
+> > --
+> > 1.7.0.4
+> >
+> >
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
-> If not, I suspect it's going to be very difficult to debug/fix
-> remotely, and we need to wait for someone who has the hardware and
-> wants to create the fix.  (Or get the hardware into the hands of
-> someone who's willing to take a look.)
-
-Got hardware and willing to take a look; just was wanting some tips on
-where to look with your experience of SDHCI/MMC.
-
-Doing some further debugging, the card reader's parent device (the
-NIC) is in D3 [1] while the card reader is in D0. I'll add the missing
-device IDs to the tg3 driver and force it to bring the NIC into D0 and
-see what happens.
-
-Daniel
-
---- [1]
-
-$ sudo lspci -s 3:0 -vv
-03:00.0 Ethernet controller: Broadcom Corporation Device 16a3 (rev 10)
-    Subsystem: Broadcom Corporation Device 16b4
-    Control: I/O- Mem- BusMaster- SpecCycle- MemWINV- VGASnoop-
-ParErr- Stepping- SERR- FastB2B- DisINTx-
-    Status: Cap+ 66MHz- UDF- FastB2B- ParErr- DEVSEL=fast >TAbort-
-<TAbort- <MAbort- >SERR- <PERR- INTx-
-    Interrupt: pin A routed to IRQ 0
-    Region 0: Memory at c1800000 (64-bit, prefetchable) [disabled] [size=64K]
-    Region 2: Memory at c1810000 (64-bit, prefetchable) [disabled] [size=64K]
-    Expansion ROM at c1830000 [disabled] [size=2K]
-    Capabilities: [48] Power Management version 3
-        Flags: PMEClk- DSI- D1- D2- AuxCurrent=0mA
-PME(D0+,D1-,D2-,D3hot+,D3cold+)
-        Status: D3 NoSoftRst+ PME-Enable- DSel=0 DScale=1 PME-
-    Capabilities: [58] MSI: Enable- Count=1/8 Maskable- 64bit+
-        Address: 0000000000000000  Data: 0000
-    Capabilities: [a0] MSI-X: Enable- Count=6 Masked-
-        Vector table: BAR=2 offset=00000000
-        PBA: BAR=2 offset=00000120
-    Capabilities: [ac] Express (v2) Endpoint, MSI 00
-        DevCap:    MaxPayload 128 bytes, PhantFunc 0, Latency L0s <4us, L1 <64us
-            ExtTag- AttnBtn- AttnInd- PwrInd- RBE+ FLReset-
-        DevCtl:    Report errors: Correctable- Non-Fatal- Fatal- Unsupported-
-            RlxdOrd+ ExtTag- PhantFunc- AuxPwr+ NoSnoop+
-            MaxPayload 128 bytes, MaxReadReq 512 bytes
-        DevSta:    CorrErr+ UncorrErr- FatalErr- UnsuppReq+ AuxPwr+ TransPend-
-        LnkCap:    Port #0, Speed 2.5GT/s, Width x1, ASPM L0s L1,
-Latency L0 <2us, L1 <64us
-            ClockPM+ Surprise- LLActRep- BwNot-
-        LnkCtl:    ASPM L1 Enabled; RCB 64 bytes Disabled- Retrain- CommClk+
-            ExtSynch- ClockPM+ AutWidDis- BWInt- AutBWInt-
-        LnkSta:    Speed 2.5GT/s, Width x1, TrErr- Train- SlotClk+
-DLActive- BWMgmt- ABWMgmt-
-        DevCap2: Completion Timeout: Range ABCD, TimeoutDis+
-        DevCtl2: Completion Timeout: 50us to 50ms, TimeoutDis-
-        LnkCtl2: Target Link Speed: 2.5GT/s, EnterCompliance-
-SpeedDis-, Selectable De-emphasis: -6dB
-             Transmit Margin: Normal Operating Range,
-EnterModifiedCompliance- ComplianceSOS-
-             Compliance De-emphasis: -6dB
-        LnkSta2: Current De-emphasis Level: -6dB,
-EqualizationComplete-, EqualizationPhase1-
-             EqualizationPhase2-, EqualizationPhase3-, LinkEqualizationRequest-
-    Capabilities: [100 v1] Advanced Error Reporting
-        UESta:    DLP- SDES- TLP- FCP- CmpltTO- CmpltAbrt- UnxCmplt-
-RxOF- MalfTLP- ECRC- UnsupReq- ACSViol-
-        UEMsk:    DLP- SDES- TLP- FCP- CmpltTO- CmpltAbrt- UnxCmplt-
-RxOF- MalfTLP- ECRC- UnsupReq- ACSViol-
-        UESvrt:    DLP+ SDES+ TLP- FCP+ CmpltTO- CmpltAbrt- UnxCmplt-
-RxOF+ MalfTLP+ ECRC- UnsupReq- ACSViol-
-        CESta:    RxErr- BadTLP- BadDLLP- Rollover- Timeout- NonFatalErr+
-        CEMsk:    RxErr- BadTLP- BadDLLP- Rollover- Timeout- NonFatalErr+
-        AERCap:    First Error Pointer: 00, GenCap+ CGenEn- ChkCap+ ChkEn-
-    Capabilities: [13c v1] Device Serial Number 00-00-00-10-18-00-00-00
-    Capabilities: [150 v1] Power Budgeting <?>
-    Capabilities: [160 v1] Virtual Channel
-        Caps:    LPEVC=0 RefClk=100ns PATEntryBits=1
-        Arb:    Fixed- WRR32- WRR64- WRR128-
-        Ctrl:    ArbSelect=Fixed
-        Status:    InProgress-
-        VC0:    Caps:    PATOffset=00 MaxTimeSlots=1 RejSnoopTrans-
-            Arb:    Fixed- WRR32- WRR64- WRR128- TWRR128- WRR256-
-            Ctrl:    Enable+ ID=0 ArbSelect=Fixed TC/VC=ff
-            Status:    NegoPending- InProgress-
-
-03:00.1 SD Host controller: Broadcom Corporation NetXtreme BCM57765
-Memory Card Reader (rev 10) (prog-if 01)
-    Subsystem: Broadcom Corporation Device 96bc
-    Control: I/O- Mem+ BusMaster+ SpecCycle- MemWINV- VGASnoop-
-ParErr- Stepping- SERR- FastB2B- DisINTx-
-    Status: Cap+ 66MHz- UDF- FastB2B- ParErr- DEVSEL=fast >TAbort-
-<TAbort- <MAbort- >SERR- <PERR- INTx-
-    Latency: 0, Cache Line Size: 256 bytes
-    Interrupt: pin B routed to IRQ 17
-    Region 0: Memory at c1820000 (64-bit, prefetchable) [size=64K]
-    Capabilities: [48] Power Management version 3
-        Flags: PMEClk- DSI- D1- D2- AuxCurrent=0mA
-PME(D0+,D1-,D2-,D3hot+,D3cold+)
-        Status: D0 NoSoftRst+ PME-Enable- DSel=0 DScale=1 PME-
-    Capabilities: [58] MSI: Enable- Count=1/1 Maskable- 64bit+
-        Address: 0000000000000000  Data: 0000
-    Capabilities: [ac] Express (v2) Endpoint, MSI 00
-        DevCap:    MaxPayload 128 bytes, PhantFunc 0, Latency L0s <4us, L1 <64us
-            ExtTag- AttnBtn- AttnInd- PwrInd- RBE+ FLReset-
-        DevCtl:    Report errors: Correctable- Non-Fatal- Fatal- Unsupported-
-            RlxdOrd+ ExtTag- PhantFunc- AuxPwr+ NoSnoop+
-            MaxPayload 128 bytes, MaxReadReq 4096 bytes
-        DevSta:    CorrErr+ UncorrErr- FatalErr- UnsuppReq+ AuxPwr+ TransPend-
-        LnkCap:    Port #0, Speed 2.5GT/s, Width x1, ASPM L0s L1,
-Latency L0 <1us, L1 <2us
-            ClockPM+ Surprise- LLActRep- BwNot-
-        LnkCtl:    ASPM L1 Enabled; RCB 64 bytes Disabled- Retrain- CommClk+
-            ExtSynch- ClockPM+ AutWidDis- BWInt- AutBWInt-
-        LnkSta:    Speed 2.5GT/s, Width x1, TrErr- Train- SlotClk+
-DLActive- BWMgmt- ABWMgmt-
-        DevCap2: Completion Timeout: Range ABCD, TimeoutDis+
-        DevCtl2: Completion Timeout: 50us to 50ms, TimeoutDis-
-        LnkCtl2: Target Link Speed: 2.5GT/s, EnterCompliance-
-SpeedDis-, Selectable De-emphasis: -6dB
-             Transmit Margin: Normal Operating Range,
-EnterModifiedCompliance- ComplianceSOS-
-             Compliance De-emphasis: -6dB
-        LnkSta2: Current De-emphasis Level: -6dB,
-EqualizationComplete-, EqualizationPhase1-
-             EqualizationPhase2-, EqualizationPhase3-, LinkEqualizationRequest-
-    Capabilities: [100 v1] Advanced Error Reporting
-        UESta:    DLP- SDES- TLP- FCP- CmpltTO- CmpltAbrt- UnxCmplt-
-RxOF- MalfTLP- ECRC- UnsupReq- ACSViol-
-        UEMsk:    DLP- SDES- TLP- FCP- CmpltTO- CmpltAbrt- UnxCmplt-
-RxOF- MalfTLP- ECRC- UnsupReq- ACSViol-
-        UESvrt:    DLP+ SDES+ TLP- FCP+ CmpltTO- CmpltAbrt- UnxCmplt-
-RxOF+ MalfTLP+ ECRC- UnsupReq- ACSViol-
-        CESta:    RxErr- BadTLP- BadDLLP- Rollover- Timeout- NonFatalErr+
-        CEMsk:    RxErr- BadTLP- BadDLLP- Rollover- Timeout- NonFatalErr+
-        AERCap:    First Error Pointer: 00, GenCap+ CGenEn- ChkCap+ ChkEn-
-    Capabilities: [150 v1] Power Budgeting <?>
-    Capabilities: [160 v1] Virtual Channel
-        Caps:    LPEVC=0 RefClk=100ns PATEntryBits=1
-        Arb:    Fixed- WRR32- WRR64- WRR128-
-        Ctrl:    ArbSelect=Fixed
-        Status:    InProgress-
-        VC0:    Caps:    PATOffset=00 MaxTimeSlots=1 RejSnoopTrans-
-            Arb:    Fixed- WRR32- WRR64- WRR128- TWRR128- WRR256-
-            Ctrl:    Enable+ ID=0 ArbSelect=Fixed TC/VC=ff
-            Status:    NegoPending- InProgress-
-    Kernel driver in use: sdhci-pci
