@@ -1,145 +1,326 @@
-From: Shawn Guo <shawn.guo@linaro.org>
-Subject: Re: [PATCH 8/8] ARM: dts: imx6qdl: add uhs pinctrl state for usdhc3
-Date: Thu, 5 Sep 2013 14:43:13 +0800
-Message-ID: <20130905064311.GE775@shlinux1.ap.freescale.net>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH 4/8] sdhci: sdhci-esdhci-imx: add sd3.0 clock tuning support
+Date: Thu, 5 Sep 2013 09:33:06 +0200
+Message-ID: <CAPDyKFq+0vOUUPAdHjFn1fw_sBT+WOoaxgf1nC710p+0QonuuA@mail.gmail.com>
 References: <1378299257-2980-1-git-send-email-b29396@freescale.com>
- <1378299257-2980-9-git-send-email-b29396@freescale.com>
+	<1378299257-2980-5-git-send-email-b29396@freescale.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-db8lp0187.outbound.messaging.microsoft.com ([213.199.154.187]:8965
-	"EHLO db8outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753833Ab3IEGoW (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 5 Sep 2013 02:44:22 -0400
-Content-Disposition: inline
-In-Reply-To: <1378299257-2980-9-git-send-email-b29396@freescale.com>
+Received: from mail-ve0-f178.google.com ([209.85.128.178]:60341 "EHLO
+	mail-ve0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1763401Ab3IEHdI (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 5 Sep 2013 03:33:08 -0400
+Received: by mail-ve0-f178.google.com with SMTP id jw12so234589veb.37
+        for <linux-mmc@vger.kernel.org>; Thu, 05 Sep 2013 00:33:06 -0700 (PDT)
+In-Reply-To: <1378299257-2980-5-git-send-email-b29396@freescale.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Dong Aisheng <b29396@freescale.com>
-Cc: linux-mmc@vger.kernel.org, cjb@laptop.org, anton@enomsg.org, linux-arm-kernel@lists.infradead.org, s.hauer@pengutronix.de
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, anton@enomsg.org, Shawn Guo <shawn.guo@linaro.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Sascha Hauer <s.hauer@pengutronix.de>
 
-On Wed, Sep 04, 2013 at 08:54:17PM +0800, Dong Aisheng wrote:
-> This is needed for supporting ultra high speed cards like SD3.0 cards.
-> 
+On 4 September 2013 14:54, Dong Aisheng <b29396@freescale.com> wrote:
+> Freescale i.MX6Q/DL uSDHC clock tuning progress is a little different from
+> the standard tuning process defined in host controller spec v3.0.
+> Thus we use platform_execute_tuning instead of standard sdhci tuning.
+>
+> The main difference are:
+> 1) not only generate Buffer Read Ready interrupt when tuning is performing.
+> It generates all other DATA interrupts like the normal data command.
+> 2) SDHCI_CTRL_EXEC_TUNING is not automatically cleared by HW,
+> instead it's controlled by SW.
+> 3) SDHCI_CTRL_TUNED_CLK is not automatically set by HW,
+> it's controlled by SW.
+> 4) the clock delay for every tuning is set by SW.
+>
 > Signed-off-by: Dong Aisheng <b29396@freescale.com>
 > ---
->  arch/arm/boot/dts/imx6dl.dtsi            |   33 ++++++++++++++++++++++++++++++
->  arch/arm/boot/dts/imx6q.dtsi             |   33 ++++++++++++++++++++++++++++++
->  arch/arm/boot/dts/imx6qdl-sabreauto.dtsi |    4 ++-
->  3 files changed, 69 insertions(+), 1 deletions(-)
-> 
-> diff --git a/arch/arm/boot/dts/imx6dl.dtsi b/arch/arm/boot/dts/imx6dl.dtsi
-> index 2b3ecd6..e983b81 100644
-> --- a/arch/arm/boot/dts/imx6dl.dtsi
-> +++ b/arch/arm/boot/dts/imx6dl.dtsi
-> @@ -203,6 +203,39 @@
->  							MX6DL_PAD_SD3_DAT3__SD3_DATA3 0x17059
->  						>;
->  					};
+>  drivers/mmc/host/sdhci-esdhc-imx.c |  194 +++++++++++++++++++++++++++++++++++-
+>  1 files changed, 193 insertions(+), 1 deletions(-)
+>
+> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+> index 3118a82..36b9f63 100644
+> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
+> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+> @@ -34,9 +34,21 @@
+>  #define ESDHC_WTMK_LVL                 0x44
+>  #define ESDHC_MIX_CTRL                 0x48
+>  #define  ESDHC_MIX_CTRL_AC23EN         (1 << 7)
+> +#define  ESDHC_MIX_CTRL_EXE_TUNE       (1 << 22)
+> +#define  ESDHC_MIX_CTRL_SMPCLK_SEL     (1 << 23)
+> +#define  ESDHC_MIX_CTRL_AUTO_TUNE      (1 << 24)
+> +#define  ESDHC_MIX_CTRL_FBCLK_SEL      (1 << 25)
+>  /* Bits 3 and 6 are not SDHCI standard definitions */
+>  #define  ESDHC_MIX_CTRL_SDHCI_MASK     0xb7
+>
+> +/* tune control register */
+> +#define ESDHC_TUNE_CTRL_STATUS         0x68
+> +#define  ESDHC_TUNE_CTRL_STEP          1
+> +#define  ESDHC_TUNE_CTRL_MIN           0
+> +#define  ESDHC_TUNE_CTRL_MAX           ((1 << 7) - 1)
 > +
-> +                                       pinctrl_usdhc3_3: usdhc3grp-3 { /* 100Mhz */
-> +                                               fsl,pins = <
-> +                                                       MX6DL_PAD_SD3_CMD__SD3_CMD 0x170B9
-> +                                                       MX6DL_PAD_SD3_CLK__SD3_CLK 0x100B9
-> +                                                       MX6DL_PAD_SD3_DAT0__SD3_DATA0 0x170B9
-> +                                                       MX6DL_PAD_SD3_DAT1__SD3_DATA1 0x170B9
-> +                                                       MX6DL_PAD_SD3_DAT2__SD3_DATA2 0x170B9
-> +                                                       MX6DL_PAD_SD3_DAT3__SD3_DATA3 0x170B9
-> +                                                       MX6DL_PAD_SD3_DAT4__SD3_DATA4 0x170B9
-> +                                                       MX6DL_PAD_SD3_DAT5__SD3_DATA5 0x170B9
-> +                                                       MX6DL_PAD_SD3_DAT6__SD3_DATA6 0x170B9
-> +                                                       MX6DL_PAD_SD3_DAT7__SD3_DATA7 0x170B9
-> +                                                       MX6DL_PAD_GPIO_18__SD3_VSELECT 0x17059
-
-The patch needs to be rebased on my for-next, or linux-next or v3.12-rc1
-(to be available).  Also please use lowercase for hex values.
-
-Shawn
-
-> +                                               >;
-> +                                       };
+> +#define ESDHC_TUNING_BLOCK_PATTERN_LEN 64
 > +
-> +                                       pinctrl_usdhc3_4: usdhc3grp-4 { /* 200Mhz */
-> +                                               fsl,pins = <
-> +                                                       MX6DL_PAD_SD3_CMD__SD3_CMD 0x170F9
-> +                                                       MX6DL_PAD_SD3_CLK__SD3_CLK 0x100F9
-> +                                                       MX6DL_PAD_SD3_DAT0__SD3_DATA0 0x170F9
-> +                                                       MX6DL_PAD_SD3_DAT1__SD3_DATA1 0x170F9
-> +                                                       MX6DL_PAD_SD3_DAT2__SD3_DATA2 0x170F9
-> +                                                       MX6DL_PAD_SD3_DAT3__SD3_DATA3 0x170F9
-> +                                                       MX6DL_PAD_SD3_DAT4__SD3_DATA4 0x170F9
-> +                                                       MX6DL_PAD_SD3_DAT5__SD3_DATA5 0x170F9
-> +                                                       MX6DL_PAD_SD3_DAT6__SD3_DATA6 0x170F9
-> +                                                       MX6DL_PAD_SD3_DAT7__SD3_DATA7 0x170F9
-> +                                                       MX6DL_PAD_GPIO_18__SD3_VSELECT 0x17059
-> +                                               >;
-> +                                       };
-> +
->  				};
->  
->  				weim {
-> diff --git a/arch/arm/boot/dts/imx6q.dtsi b/arch/arm/boot/dts/imx6q.dtsi
-> index ba09dc3..a63b623 100644
-> --- a/arch/arm/boot/dts/imx6q.dtsi
-> +++ b/arch/arm/boot/dts/imx6q.dtsi
-> @@ -337,6 +337,39 @@
->  							MX6Q_PAD_SD3_DAT3__SD3_DATA3 0x17059
->  						>;
->  					};
-> +
-> +                                       pinctrl_usdhc3_3: usdhc3grp-3 { /* 100Mhz */
-> +                                               fsl,pins = <
-> +                                                       MX6Q_PAD_SD3_CMD__SD3_CMD 0x170B9
-> +                                                       MX6Q_PAD_SD3_CLK__SD3_CLK 0x100B9
-> +                                                       MX6Q_PAD_SD3_DAT0__SD3_DATA0 0x170B9
-> +                                                       MX6Q_PAD_SD3_DAT1__SD3_DATA1 0x170B9
-> +                                                       MX6Q_PAD_SD3_DAT2__SD3_DATA2 0x170B9
-> +                                                       MX6Q_PAD_SD3_DAT3__SD3_DATA3 0x170B9
-> +                                                       MX6Q_PAD_SD3_DAT4__SD3_DATA4 0x170B9
-> +                                                       MX6Q_PAD_SD3_DAT5__SD3_DATA5 0x170B9
-> +                                                       MX6Q_PAD_SD3_DAT6__SD3_DATA6 0x170B9
-> +                                                       MX6Q_PAD_SD3_DAT7__SD3_DATA7 0x170B9
-> +                                                       MX6Q_PAD_GPIO_18__SD3_VSELECT 0x17059
-> +                                               >;
-> +                                       };
-> +
-> +                                       pinctrl_usdhc3_4: usdhc3grp-4 { /* 200Mhz */
-> +                                               fsl,pins = <
-> +                                                       MX6Q_PAD_SD3_CMD__SD3_CMD 0x170F9
-> +                                                       MX6Q_PAD_SD3_CLK__SD3_CLK 0x100F9
-> +                                                       MX6Q_PAD_SD3_DAT0__SD3_DATA0 0x170F9
-> +                                                       MX6Q_PAD_SD3_DAT1__SD3_DATA1 0x170F9
-> +                                                       MX6Q_PAD_SD3_DAT2__SD3_DATA2 0x170F9
-> +                                                       MX6Q_PAD_SD3_DAT3__SD3_DATA3 0x170F9
-> +                                                       MX6Q_PAD_SD3_DAT4__SD3_DATA4 0x170F9
-> +                                                       MX6Q_PAD_SD3_DAT5__SD3_DATA5 0x170F9
-> +                                                       MX6Q_PAD_SD3_DAT6__SD3_DATA6 0x170F9
-> +                                                       MX6Q_PAD_SD3_DAT7__SD3_DATA7 0x170F9
-> +                                                       MX6Q_PAD_GPIO_18__SD3_VSELECT 0x17059
-> +                                               >;
-> +                                       };
-> +
->  				};
->  
->  				usdhc4 {
-> diff --git a/arch/arm/boot/dts/imx6qdl-sabreauto.dtsi b/arch/arm/boot/dts/imx6qdl-sabreauto.dtsi
-> index e994011..c2c4d85 100644
-> --- a/arch/arm/boot/dts/imx6qdl-sabreauto.dtsi
-> +++ b/arch/arm/boot/dts/imx6qdl-sabreauto.dtsi
-> @@ -52,8 +52,10 @@
+>  /*
+>   * Our interpretation of the SDHCI_HOST_CONTROL register
+>   */
+> @@ -87,7 +99,7 @@ struct pltfm_imx_data {
+>                 MULTIBLK_IN_PROCESS, /* exact multiblock cmd in process */
+>                 WAIT_FOR_INT,        /* sent CMD12, waiting for response INT */
+>         } multiblock_status;
+> -
+> +       u32 uhs_mode;
 >  };
->  
->  &usdhc3 {
-> -	pinctrl-names = "default";
-> +	pinctrl-names = "default", "state_100mhz", "state_200mhz";
->  	pinctrl-0 = <&pinctrl_usdhc3_1>;
-> +	pinctrl-1 = <&pinctrl_usdhc3_3>;
-> +	pinctrl-2 = <&pinctrl_usdhc3_4>;
->  	cd-gpios = <&gpio6 15 0>;
->  	wp-gpios = <&gpio1 13 0>;
->  	status = "okay";
-> -- 
-> 1.7.1
-> 
-> 
+>
+>  static struct platform_device_id imx_esdhc_devtype[] = {
+> @@ -161,6 +173,17 @@ static u32 esdhc_readl_le(struct sdhci_host *host, int reg)
+>         struct pltfm_imx_data *imx_data = pltfm_host->priv;
+>         u32 val = readl(host->ioaddr + reg);
+>
+> +       if (unlikely(reg == SDHCI_PRESENT_STATE)) {
+> +               u32 fsl_prss = val;
+> +               val = 0;
+> +               /* save the least 20 bits */
+> +               val |= fsl_prss & 0x000FFFFF;
+> +               /* move dat[0-3] bits */
+> +               val |= (fsl_prss & 0x0F000000) >> 4;
+> +               /* move cmd line bit */
+> +               val |= (fsl_prss & 0x00800000) << 1;
+> +       }
+> +
+>         if (unlikely(reg == SDHCI_CAPABILITIES)) {
+>                 /* In FSL esdhc IC module, only bit20 is used to indicate the
+>                  * ADMA2 capability of esdhc, but this bit is messed up on
+> @@ -175,6 +198,17 @@ static u32 esdhc_readl_le(struct sdhci_host *host, int reg)
+>                 }
+>         }
+>
+> +       if (unlikely(reg == SDHCI_CAPABILITIES_1) && is_imx6q_usdhc(imx_data))
+> +               val = SDHCI_SUPPORT_DDR50 | SDHCI_SUPPORT_SDR104
+> +                               | SDHCI_SUPPORT_SDR50;
+> +
+> +       if (unlikely(reg == SDHCI_MAX_CURRENT) && is_imx6q_usdhc(imx_data)) {
+> +               val = 0;
+> +               val |= 0xFF << SDHCI_MAX_CURRENT_330_SHIFT;
+> +               val |= 0xFF << SDHCI_MAX_CURRENT_300_SHIFT;
+> +               val |= 0xFF << SDHCI_MAX_CURRENT_180_SHIFT;
+> +       }
+> +
+>         if (unlikely(reg == SDHCI_INT_STATUS)) {
+>                 if (val & ESDHC_INT_VENDOR_SPEC_DMA_ERR) {
+>                         val &= ~ESDHC_INT_VENDOR_SPEC_DMA_ERR;
+> @@ -253,6 +287,8 @@ static u16 esdhc_readw_le(struct sdhci_host *host, int reg)
+>  {
+>         struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+>         struct pltfm_imx_data *imx_data = pltfm_host->priv;
+> +       u16 ret = 0;
+> +       u32 val;
+>
+>         if (unlikely(reg == SDHCI_HOST_VERSION)) {
+>                 reg ^= 2;
+> @@ -265,6 +301,25 @@ static u16 esdhc_readw_le(struct sdhci_host *host, int reg)
+>                 }
+>         }
+>
+> +       if (unlikely(reg == SDHCI_HOST_CONTROL2)) {
+> +               val = readl(host->ioaddr + ESDHC_VENDOR_SPEC);
+> +               if (val & ESDHC_VENDOR_SPEC_VSELECT)
+> +                       ret |= SDHCI_CTRL_VDD_180;
+> +
+> +               if (is_imx6q_usdhc(imx_data)) {
+> +                       val = readl(host->ioaddr + ESDHC_MIX_CTRL);
+> +                       if (val & ESDHC_MIX_CTRL_EXE_TUNE)
+> +                               ret |= SDHCI_CTRL_EXEC_TUNING;
+> +                       if (val & ESDHC_MIX_CTRL_SMPCLK_SEL)
+> +                               ret |= SDHCI_CTRL_TUNED_CLK;
+> +               }
+> +
+> +               ret |= (imx_data->uhs_mode & SDHCI_CTRL_UHS_MASK);
+> +               ret &= ~SDHCI_CTRL_PRESET_VAL_ENABLE;
+> +
+> +               return ret;
+> +       }
+> +
+>         return readw(host->ioaddr + reg);
+>  }
+>
+> @@ -272,8 +327,32 @@ static void esdhc_writew_le(struct sdhci_host *host, u16 val, int reg)
+>  {
+>         struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+>         struct pltfm_imx_data *imx_data = pltfm_host->priv;
+> +       u32 new_val = 0;
+>
+>         switch (reg) {
+> +       case SDHCI_CLOCK_CONTROL:
+> +               new_val = readl(host->ioaddr + ESDHC_VENDOR_SPEC);
+> +               if (val & SDHCI_CLOCK_CARD_EN)
+> +                       new_val |= ESDHC_VENDOR_SPEC_FRC_SDCLK_ON;
+> +               else
+> +                       new_val &= ~ESDHC_VENDOR_SPEC_FRC_SDCLK_ON;
+> +                       writel(new_val, host->ioaddr + ESDHC_VENDOR_SPEC);
+> +               return;
+> +       case SDHCI_HOST_CONTROL2:
+> +               new_val = readl(host->ioaddr + ESDHC_VENDOR_SPEC);
+> +               if (val & SDHCI_CTRL_VDD_180)
+> +                       new_val |= ESDHC_VENDOR_SPEC_VSELECT;
+> +               else
+> +                       new_val &= ~ESDHC_VENDOR_SPEC_VSELECT;
+> +               writel(new_val, host->ioaddr + ESDHC_VENDOR_SPEC);
+> +               imx_data->uhs_mode = val & SDHCI_CTRL_UHS_MASK;
+> +               new_val = readl(host->ioaddr + ESDHC_MIX_CTRL);
+> +               if (val & SDHCI_CTRL_TUNED_CLK)
+> +                       new_val |= ESDHC_MIX_CTRL_SMPCLK_SEL;
+> +               else
+> +                       new_val &= ~ESDHC_MIX_CTRL_SMPCLK_SEL;
+> +               writel(new_val , host->ioaddr + ESDHC_MIX_CTRL);
+> +               return;
+>         case SDHCI_TRANSFER_MODE:
+>                 if ((imx_data->flags & ESDHC_FLAG_MULTIBLK_NO_INT)
+>                                 && (host->cmd->opcode == SD_IO_RW_EXTENDED)
+> @@ -451,6 +530,118 @@ static int esdhc_pltfm_bus_width(struct sdhci_host *host, int width)
+>         return 0;
+>  }
+>
+> +static void esdhc_prepare_tuning(struct sdhci_host *host, u32 val)
+> +{
+> +       u32 reg;
+> +
+> +       reg = readl(host->ioaddr + ESDHC_MIX_CTRL);
+> +       reg |= ESDHC_MIX_CTRL_EXE_TUNE | ESDHC_MIX_CTRL_SMPCLK_SEL |
+> +                       ESDHC_MIX_CTRL_FBCLK_SEL;
+> +       writel(reg, host->ioaddr + ESDHC_MIX_CTRL);
+> +       writel((val << 8), host->ioaddr + ESDHC_TUNE_CTRL_STATUS);
+> +       dev_dbg(mmc_dev(host->mmc),
+> +               "tunning with delay 0x%x ESDHC_TUNE_CTRL_STATUS 0x%x\n",
+> +                       val, readl(host->ioaddr + ESDHC_TUNE_CTRL_STATUS));
+> +}
+> +
+> +static void request_done(struct mmc_request *mrq)
+> +{
+> +       complete(&mrq->completion);
+> +}
+> +
+> +static int esdhc_send_tuning_cmd(struct sdhci_host *host, u32 opcode)
 
+This function implements protocol related code. It should not reside
+in a host driver but instead as an API in the mmc protocol layer which
+host drivers shall call.
+
+I realize that there are already other host drivers implementing
+similar protocol code as here. Those should move to use the new API
+once it is available.
+
+Kind regards
+Ulf Hansson
+
+> +{
+> +       struct mmc_command cmd = {0};
+> +       struct mmc_request mrq = {0};
+> +       struct mmc_data data = {0};
+> +       struct scatterlist sg;
+> +       char tuning_pattern[ESDHC_TUNING_BLOCK_PATTERN_LEN];
+> +
+> +       cmd.opcode = opcode;
+> +       cmd.arg = 0;
+> +       cmd.flags = MMC_RSP_R1 | MMC_CMD_ADTC;
+> +
+> +       data.blksz = ESDHC_TUNING_BLOCK_PATTERN_LEN;
+> +       data.blocks = 1;
+> +       data.flags = MMC_DATA_READ;
+> +       data.sg = &sg;
+> +       data.sg_len = 1;
+> +
+> +       sg_init_one(&sg, tuning_pattern, sizeof(tuning_pattern));
+> +
+> +       mrq.cmd = &cmd;
+> +       mrq.cmd->mrq = &mrq;
+> +       mrq.data = &data;
+> +       mrq.data->mrq = &mrq;
+> +       mrq.cmd->data = mrq.data;
+> +
+> +       mrq.done = request_done;
+> +       init_completion(&(mrq.completion));
+> +
+> +       disable_irq(host->irq);
+> +       spin_lock(&host->lock);
+> +       host->mrq = &mrq;
+> +
+> +       sdhci_send_command(host, mrq.cmd);
+> +
+> +       spin_unlock(&host->lock);
+> +       enable_irq(host->irq);
+> +
+> +       wait_for_completion(&mrq.completion);
+> +
+> +       if (cmd.error)
+> +               return cmd.error;
+> +       if (data.error)
+> +               return data.error;
+> +
+> +       return 0;
+> +}
+> +
+> +static void esdhc_post_tuning(struct sdhci_host *host)
+> +{
+> +       u32 reg;
+> +
+> +       reg = readl(host->ioaddr + ESDHC_MIX_CTRL);
+> +       reg &= ~ESDHC_MIX_CTRL_EXE_TUNE;
+> +       writel(reg, host->ioaddr + ESDHC_MIX_CTRL);
+> +}
+> +
+> +static int esdhc_executing_tuning(struct sdhci_host *host, u32 opcode)
+> +{
+> +       int min, max, avg, ret;
+> +
+> +       /* find the mininum delay first which can pass tuning*/
+> +       min = ESDHC_TUNE_CTRL_MIN;
+> +       while (min < ESDHC_TUNE_CTRL_MAX) {
+> +               esdhc_prepare_tuning(host, min);
+> +               if (!esdhc_send_tuning_cmd(host, opcode))
+> +                       break;
+> +               min += ESDHC_TUNE_CTRL_STEP;
+> +       }
+> +
+> +       /* find the maxinum delay which can not pass tuning*/
+> +       max = min + ESDHC_TUNE_CTRL_STEP;
+> +       while (max < ESDHC_TUNE_CTRL_MAX) {
+> +               esdhc_prepare_tuning(host, max);
+> +               if (esdhc_send_tuning_cmd(host, opcode)) {
+> +                       max -= ESDHC_TUNE_CTRL_STEP;
+> +                       break;
+> +               }
+> +               max += ESDHC_TUNE_CTRL_STEP;
+> +       }
+> +
+> +       /* use average delay to get the best timing */
+> +       avg = (min + max) / 2;
+> +       esdhc_prepare_tuning(host, avg);
+> +       ret = esdhc_send_tuning_cmd(host, opcode);
+> +       esdhc_post_tuning(host);
+> +
+> +       dev_dbg(mmc_dev(host->mmc), "tunning %s at 0x%x ret %d\n",
+> +               ret ? "failed" : "passed", avg, ret);
+> +
+> +       return ret;
+> +}
+> +
+>  static const struct sdhci_ops sdhci_esdhc_ops = {
+>         .read_l = esdhc_readl_le,
+>         .read_w = esdhc_readw_le,
+> @@ -462,6 +653,7 @@ static const struct sdhci_ops sdhci_esdhc_ops = {
+>         .get_min_clock = esdhc_pltfm_get_min_clock,
+>         .get_ro = esdhc_pltfm_get_ro,
+>         .platform_bus_width = esdhc_pltfm_bus_width,
+> +       .platform_execute_tuning = esdhc_executing_tuning,
+>  };
+>
+>  static const struct sdhci_pltfm_data sdhci_esdhc_imx_pdata = {
+> --
+> 1.7.1
+>
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
