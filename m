@@ -1,93 +1,65 @@
-From: Dong Aisheng <dongas86@gmail.com>
-Subject: Re: [PATCH 0/8] mmc: sdhci-esdhc-imx: add SD3.0 support
-Date: Fri, 6 Sep 2013 02:01:31 +0800
-Message-ID: <CAA+hA=Sq0UfafVZNV3BXzXBy5Q0_gMXxG9iWgvT6easY7OtJGg@mail.gmail.com>
+From: Matt Sealey <neko@bakuhatsu.net>
+Subject: Re: [PATCH 5/8] sdhci: sdhci-esdhc-imx: change pinctrl state
+ according to uhs mode
+Date: Thu, 5 Sep 2013 13:40:06 -0500
+Message-ID: <CAHCPf3tYXsT6kTbJcqJx1gN_G9G2iqi1-f+jRcpw95CEPkW8NQ@mail.gmail.com>
 References: <1378299257-2980-1-git-send-email-b29396@freescale.com>
-	<CAPDyKFprH0dixTojis63R0oho6CLaPuzSVDuPia6HWQ6cLYmNA@mail.gmail.com>
+ <1378299257-2980-6-git-send-email-b29396@freescale.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qe0-f45.google.com ([209.85.128.45]:43212 "EHLO
-	mail-qe0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753214Ab3IESBb (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 5 Sep 2013 14:01:31 -0400
-Received: by mail-qe0-f45.google.com with SMTP id 6so1141945qea.4
-        for <linux-mmc@vger.kernel.org>; Thu, 05 Sep 2013 11:01:31 -0700 (PDT)
-In-Reply-To: <CAPDyKFprH0dixTojis63R0oho6CLaPuzSVDuPia6HWQ6cLYmNA@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <1378299257-2980-6-git-send-email-b29396@freescale.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Dong Aisheng <b29396@freescale.com>
+Cc: Shawn Guo <shawn.guo@linaro.org>, Sascha Hauer <s.hauer@pengutronix.de>, anton@enomsg.org, linux-mmc@vger.kernel.org, cjb@laptop.org, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Dong Aisheng <b29396@freescale.com>, Shawn Guo <shawn.guo@linaro.org>, Sascha Hauer <s.hauer@pengutronix.de>, anton@enomsg.org, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 
-Hi Ulf,
+> +       if (of_find_property(np, "no-1-8-v", NULL))
+> +               boarddata->support_vsel = false;
+> +       else
+> +               boarddata->support_vsel = true;
+> +
+>         return 0;
 
-On Thu, Sep 5, 2013 at 3:42 PM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> On 4 September 2013 14:54, Dong Aisheng <b29396@freescale.com> wrote:
->> This patch series add SD3.0 support for i.MX6Q/DL.
->> Since freescale i.MX6Q/DL uSDHC clock tuning progress is a little different from
->> the standard tuning process defined in host controller spec v3.0.
->> So we add a hook to allow execute platform specific tuning instead of
->> standard host controller tuning.
->>
->> The main difference are:
->> 1) not only generate Buffer Read Ready interrupt when tuning is performing.
->> It generates all other DATA interrupts like the normal data command.
->> 2) SDHCI_CTRL_EXEC_TUNING is not automatically cleared by HW,
->> instead it's controlled by SW.
->> 3) SDHCI_CTRL_TUNED_CLK is not automatically set by HW,
->> it's controlled by SW.
->> 4) the clock delay for every tuning is set by SW.
->
-> An overall question. Do you have any thoughts around periodic/idle
-> re-tuning. It is has nothing directly to do with this patchset, but
-> since you implemented the tuning sequence here, maybe you have some
-> thoughts around it?
->
+No, no, no, no, no :(
 
-It seems sdhci already implements re-tuning mode1 based on timer.
-The i.MX6 supports auto-retuning, so we may not use timer
-based(periodic) re-tuning.
-I plan to add auto-retuning support based on standard host
-controller spec into sdhci driver later if no one else does it.
+Please do not just strip the prefix from a definition in code, or just
+convert the underscores into hyphens to make a device tree property.
+SDHCI_QUIRK2_NO_1_8_V should never, ever, EVER become no-1-8-v and NO
+DEFINITION FROM SOURCE CODE should EVER make it into a device tree.
+This is how we ended up with manure like "dr_mode" in the USB
+bindings. Please follow good common sense as well as the bindings.
 
-Regards
-Dong Aisheng
+In this case a suitable standard for describing a voltage would be
+no-1v8 (replacing the decimal point with the v) which is how 99.9% of
+schematics are written in the world where a period is not a desirable
+character in a net name or component/signal description. But even that
+is stupid and not expandable.
 
-> Kind regards
-> Ulf Hansson
->
->>
->> Tested on i.MX6Q Sabreauto board.
->>
->> The series is based on latest Linus tree.
->>
->> Dong Aisheng (8):
->>   mmc: sdhci: add hooks for platform specific tuning
->>   mmc: sdhci: allow platform access of sdhci_send_command
->>   sdhci: sdhci-esdhc-imx: support real clock on and off for imx6q
->>   sdhci: sdhci-esdhci-imx: add sd3.0 clock tuning support
->>   sdhci: sdhci-esdhc-imx: change pinctrl state according to uhs mode
->>   mmc: sdhci-esdhc: correct pre_div for imx6q
->>   mmc: sdhci-esdhc: set actual_clock in clock setting
->>   ARM: dts: imx6qdl: add uhs pinctrl state for usdhc3
->>
->>  arch/arm/boot/dts/imx6dl.dtsi               |   33 +++
->>  arch/arm/boot/dts/imx6q.dtsi                |   33 +++
->>  arch/arm/boot/dts/imx6qdl-sabreauto.dtsi    |    4 +-
->>  drivers/mmc/host/sdhci-esdhc-imx.c          |  307 ++++++++++++++++++++++++++-
->>  drivers/mmc/host/sdhci-esdhc.h              |   35 +++-
->>  drivers/mmc/host/sdhci.c                    |   12 +-
->>  drivers/mmc/host/sdhci.h                    |    3 +
->>  include/linux/platform_data/mmc-esdhc-imx.h |    4 +
->>  8 files changed, 419 insertions(+), 12 deletions(-)
->>
->>
->> --
->> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
-> _______________________________________________
-> linux-arm-kernel mailing list
-> linux-arm-kernel@lists.infradead.org
-> http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
+This property should probably be called "voltage-selects" or something
+and you should put in a list of supported voltages (in uV units just
+like cpufreq operating points and regulators, please, for consistency,
+and update the binding).
+
+Then you can parse the list and find out precisely what voltages you
+can switch to - there are more possibilities than an implied 3-ish
+volts and a switch to 1.8V for MMC. The standard for the OCR register
+is a bunch of ranges - so specify which voltages you HAVE available,
+if you can switch. The driver (as per standard) can determine if this
+is in one range or another.
+
+Lack of this property would imply that whatever the chip is driving
+right now for logic is what it should stay at (support_vsel = false in
+the code).
+
+--
+Matt Sealey <neko@bakuhatsu.net>
