@@ -1,179 +1,40 @@
 From: Prasanna NAVARATNA <prasanna.navaratna@gmail.com>
-Subject: [PATCH] mmc: sdhci: extend wait for busy signalling
-Date: Thu, 5 Sep 2013 09:23:20 +0000 (UTC)
-Message-ID: <loom.20130905T112200-603@post.gmane.org>
+Subject: Re: mmc0: Timeout waiting for hardware interrupt.
+Date: Thu, 5 Sep 2013 09:53:02 +0000 (UTC)
+Message-ID: <loom.20130905T115114-86@post.gmane.org>
+References: <CAH9NwWcQ6528NxSShnO2Nfa4dyqD0j68wO9CqfR3i=cpGXQjNg@mail.gmail.com> <loom.20130823T162510-762@post.gmane.org> <CAH9NwWePDSADpVm2MzUCYHPfYLb0RrWJL=yqOCqSPwFF1e=tuw@mail.gmail.com> <CAH9NwWfjUQbw6-K5PCtb7KyNhgGRR0wvWu+_w-shje5zOgqarA@mail.gmail.com> <loom.20130828T090935-8@post.gmane.org> <CAH9NwWcdxDWHpy1O7+9SPysima72FWPPEVP_us_0KCZrv6Tv1w@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from plane.gmane.org ([80.91.229.3]:37623 "EHLO plane.gmane.org"
+Received: from plane.gmane.org ([80.91.229.3]:50552 "EHLO plane.gmane.org"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S935566Ab3IEJXl (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 5 Sep 2013 05:23:41 -0400
+	id S1763385Ab3IEJx0 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 5 Sep 2013 05:53:26 -0400
 Received: from list by plane.gmane.org with local (Exim 4.69)
 	(envelope-from <glkm-linux-mmc@m.gmane.org>)
-	id 1VHVmu-00038r-BT
-	for linux-mmc@vger.kernel.org; Thu, 05 Sep 2013 11:23:40 +0200
+	id 1VHWFc-0007mP-L8
+	for linux-mmc@vger.kernel.org; Thu, 05 Sep 2013 11:53:20 +0200
 Received: from 202.122.18.226 ([202.122.18.226])
         by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
         id 1AlnuQ-0007hv-00
-        for <linux-mmc@vger.kernel.org>; Thu, 05 Sep 2013 11:23:40 +0200
+        for <linux-mmc@vger.kernel.org>; Thu, 05 Sep 2013 11:53:20 +0200
 Received: from prasanna.navaratna by 202.122.18.226 with local (Gmexim 0.1 (Debian))
         id 1AlnuQ-0007hv-00
-        for <linux-mmc@vger.kernel.org>; Thu, 05 Sep 2013 11:23:40 +0200
+        for <linux-mmc@vger.kernel.org>; Thu, 05 Sep 2013 11:53:20 +0200
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 
->From 20efc7e04ebef28c03912824c7edb1bd8f14a20a Mon Sep 17 00:00:00 2001
-From: Prasanna NAVARATNA <prasanna.navaratna@broadcom.com>
-Date: Tue, 3 Sep 2013 17:31:46 +0530
-Subject: [PATCH] mmc: sdhci: extend wait for busy signalling
+Hello Christian,
 
-Certain eMMC features like sanitize, BKOPS, cache, erase etc take
-long time (more than max time) to finish operation during which
-the eMMC pulls DAT0 low to indicate busyness.
-In such special rare cases, data timeout will be triggered as an
-error but actually operation is still in progress with DAT0 low!
+> I am looking forward to get my hands on your patch :)
+I have submitted the patch to fix "Timeout waiting for hardware interrupt"
+faced by me. Please have a look.
+The subject of patch is "[PATCH] mmc: sdhci: extend wait for busy signalling"
 
-Hence trigger a workqueue to monitor the DAT0 busy signalling by
-the eMMC and extend wait for successful completion of operation.
+Regards,
+Prasanna NAVARATNA
 
-Signed-off-by: Prasanna NAVARATNA <prasanna.navaratna@broadcom.com>
----
- drivers/mmc/host/sdhci.c  |   68 ++++++++++++++++++++++++++++++++++++++++++++-
- include/linux/mmc/sdhci.h |    2 +
- 2 files changed, 69 insertions(+), 1 deletions(-)
-
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index b4d7f27..5d6b065 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -42,7 +42,8 @@
- #define SDHCI_USE_LEDS_CLASS
- #endif
- 
--#define MAX_TUNING_LOOP 40
-+#define MAX_TUNING_LOOP 	40
-+#define MAX_BUSY_WAIT_LOOP 	100
- 
- static unsigned int debug_quirks = 0;
- static unsigned int debug_quirks2;
-@@ -2100,6 +2101,44 @@ static const struct mmc_host_ops sdhci_ops = {
- 
- /*****************************************************************************\
-  *                                                                           *
-+ * Workqueues								     *
-+ *                                                                           *
-+\*****************************************************************************/
-+
-+/* Internal work. Work to wait for the busy signalling to finish. Certain
-+ * eMMC operations may take too long time to complete.
-+ */
-+static void sdhci_work_wait_for_busy(struct work_struct *work)
-+{
-+	struct sdhci_host *host = container_of(work, struct sdhci_host,
-+					      wait_for_busy_work);
-+	int wait_cnt = 0;
-+
-+	/*
-+	 * According to Arasan, when DTOERR occured while CMD38/CMD6,
-+	 * which is not treated as normal and as an error by the Host,
-+	 * host driver should reset CMD & DATA Lines for SDHC internal state.
-+	 */
-+	pr_debug("Resetting CMD & DATA Lines at once\n");
-+	sdhci_reset(host, SDHCI_RESET_CMD | SDHCI_RESET_DATA);
-+
-+	pr_info("Waiting for BUSY signalling to end\n");
-+	while (wait_cnt++ < MAX_BUSY_WAIT_LOOP &&
-+		(sdhci_readl(host, SDHCI_PRESENT_STATE) &
-+			SDHCI_DATA_LVL_DAT0_MASK) == 0) {
-+		msleep(100);
-+        }
-+	pr_info("End of BUSY signalling\n");
-+
-+	if (wait_cnt >= MAX_BUSY_WAIT_LOOP)
-+		pr_err("%s: Operation takes too long to finish!\n",
-+				mmc_hostname(host->mmc));
-+
-+	sdhci_finish_command(host);
-+}
-+
-+/*****************************************************************************\
-+ *                                                                           *
-  * Tasklets                                                                  *
-  *                                                                           *
- \*****************************************************************************/
-@@ -2328,6 +2367,26 @@ static void sdhci_data_irq(struct sdhci_host *host,
-u32 intmask)
- 				sdhci_finish_command(host);
- 				return;
- 			}
-+
-+			/*
-+			 * Some eMMC takes a long time for the erase & certain
-+			 * operations to finish. Timeout might be triggered well
-+			 * before erase or SWITCH operation finishes. If this
-+			 * happens schedule a workqueue work item to monitor
-+			 * the DAT0 line to wait for operation to finish.
-+			 */
-+			if (intmask & SDHCI_INT_DATA_TIMEOUT &&
-+					(host->cmd->opcode == MMC_ERASE ||
-+					 host->cmd->opcode == MMC_SWITCH)) {
-+				if ((sdhci_readl(host, SDHCI_PRESENT_STATE) &
-+						SDHCI_DATA_LVL_DAT0_MASK) == 0) {
-+					schedule_work(&host->wait_for_busy_work);
-+					return;
-+				} else {
-+					sdhci_finish_command(host);
-+					return;
-+				}
-+			}
- 		}
- 
- 		pr_err("%s: Got data interrupt 0x%08x even "
-@@ -2559,6 +2618,9 @@ int sdhci_suspend_host(struct sdhci_host *host)
- 		host->flags &= ~SDHCI_NEEDS_RETUNING;
- 	}
- 
-+	/* Flush and wait for busy operation to complete */
-+	flush_work(&host->wait_for_busy_work);
-+
- 	ret = mmc_suspend_host(host->mmc);
- 	if (ret) {
- 		if (host->flags & SDHCI_USING_RETUNING_TIMER) {
-@@ -3206,6 +3268,7 @@ int sdhci_add_host(struct sdhci_host *host)
- 		sdhci_tasklet_finish, (unsigned long)host);
- 
- 	setup_timer(&host->timer, sdhci_timeout_timer, (unsigned long)host);
-+	INIT_WORK(&host->wait_for_busy_work, sdhci_work_wait_for_busy);
- 
- 	if (host->version >= SDHCI_SPEC_300) {
- 		init_waitqueue_head(&host->buf_ready_int);
-@@ -3308,6 +3371,9 @@ void sdhci_remove_host(struct sdhci_host *host, int dead)
- 	sdhci_mask_irqs(host, SDHCI_INT_ALL_MASK);
- 	free_irq(host->irq, host);
- 
-+	/* Flush and wait for busy operation to complete */
-+	flush_work(&host->wait_for_busy_work);
-+
- 	del_timer_sync(&host->timer);
- 
- 	tasklet_kill(&host->card_tasklet);
-diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
-index 3e781b8..3c86e43 100644
---- a/include/linux/mmc/sdhci.h
-+++ b/include/linux/mmc/sdhci.h
-@@ -144,6 +144,8 @@ struct sdhci_host {
- 	bool runtime_suspended;	/* Host is runtime suspended */
- 	bool bus_on;		/* Bus power prevents runtime suspend */
- 
-+	struct work_struct wait_for_busy_work; /* work to wait for busy to end */
-+
- 	struct mmc_request *mrq;	/* Current request */
- 	struct mmc_command *cmd;	/* Current command */
- 	struct mmc_data *data;	/* Current data request */
--- 
-1.7.6
 
 
