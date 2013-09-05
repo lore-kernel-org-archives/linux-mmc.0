@@ -1,65 +1,95 @@
-From: Matt Sealey <neko@bakuhatsu.net>
-Subject: Re: [PATCH 5/8] sdhci: sdhci-esdhc-imx: change pinctrl state
- according to uhs mode
-Date: Thu, 5 Sep 2013 13:40:06 -0500
-Message-ID: <CAHCPf3tYXsT6kTbJcqJx1gN_G9G2iqi1-f+jRcpw95CEPkW8NQ@mail.gmail.com>
-References: <1378299257-2980-1-git-send-email-b29396@freescale.com>
- <1378299257-2980-6-git-send-email-b29396@freescale.com>
+From: Zoran Markovic <zoran.markovic@linaro.org>
+Subject: Re: [RFC PATCH] mmc: Enable wakeup_sources for mmc core
+Date: Thu, 5 Sep 2013 14:54:14 -0700
+Message-ID: <CAME+o4m8GM40wUHmiw5-2xWtSn2VmUTVv9kbc-SdqP12a9wLHQ@mail.gmail.com>
+References: <1371146190-16786-1-git-send-email-zoran.markovic@linaro.org>
+	<CAPDyKFpEa2hMPZmvpg1SOqK2d-NZrenwumSU4B4pmqqsWh+e0g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <1378299257-2980-6-git-send-email-b29396@freescale.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Dong Aisheng <b29396@freescale.com>
-Cc: Shawn Guo <shawn.guo@linaro.org>, Sascha Hauer <s.hauer@pengutronix.de>, anton@enomsg.org, linux-mmc@vger.kernel.org, cjb@laptop.org, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-ob0-f177.google.com ([209.85.214.177]:43572 "EHLO
+	mail-ob0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752738Ab3IEVyO (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 5 Sep 2013 17:54:14 -0400
+Received: by mail-ob0-f177.google.com with SMTP id f8so2667103obp.36
+        for <linux-mmc@vger.kernel.org>; Thu, 05 Sep 2013 14:54:14 -0700 (PDT)
+In-Reply-To: <CAPDyKFpEa2hMPZmvpg1SOqK2d-NZrenwumSU4B4pmqqsWh+e0g@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, San Mehat <san@google.com>, Colin Cross <ccross@android.com>, John Stultz <john.stultz@linaro.org>, Chris Ball <cjb@laptop.org>, Johan Rudholm <johan.rudholm@stericsson.com>, Jaehoon Chung <jh80.chung@samsung.com>, Konstantin Dorfman <kdorfman@codeaurora.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Tejun Heo <tj@kernel.org>, Andrew Morton <akpm@linux-foundation.org>
 
-> +       if (of_find_property(np, "no-1-8-v", NULL))
-> +               boarddata->support_vsel = false;
-> +       else
-> +               boarddata->support_vsel = true;
-> +
->         return 0;
+Hi Ulf,
+Thanks for reviewing this, it was very helpful!
 
-No, no, no, no, no :(
+> 1. mmc_detect_change does obviously not have to be run the same number
+> of times as the mmc_rescan function. In other words, the calls to
+> __pm_stay_awake is not paired with __pm_relay, I suppose this does not
+> matter?
+It shouldn't, since a single __pm_relax() would cancel all previous
+calls to __pm_stay_awake() on the same wakeup source. What is
+important is that mmc_rescan() is scheduled after __pm_stay_awake() to
+make sure wakeup source is released.
 
-Please do not just strip the prefix from a definition in code, or just
-convert the underscores into hyphens to make a device tree property.
-SDHCI_QUIRK2_NO_1_8_V should never, ever, EVER become no-1-8-v and NO
-DEFINITION FROM SOURCE CODE should EVER make it into a device tree.
-This is how we ended up with manure like "dr_mode" in the USB
-bindings. Please follow good common sense as well as the bindings.
+> 2. mmc_detect_change can for example be called while the device
+> suspend sequence is progressing. At this point the rescan work is
+> disabled, thus __pm_relax will not be called, until the next rescan
+> work as executed which is after the complete resume cycle
+> (mmc_pm_notify:PM_POST_SUSPEND). Is that an issue?
+If started, mmc_detect_change() should run uninterrupted to call
+__pm_stay_awake(), which should abort any previous suspend requests.
+The abort sequence should restart the rescan work, so __pm_relax()
+eventually gets called.
 
-In this case a suitable standard for describing a voltage would be
-no-1v8 (replacing the decimal point with the v) which is how 99.9% of
-schematics are written in the world where a period is not a desirable
-character in a net name or component/signal description. But even that
-is stupid and not expandable.
+>>         /* If there is a non-removable card registered, only scan once */
+>> -       if ((host->caps & MMC_CAP_NONREMOVABLE) && host->rescan_entered)
+>> +       if ((host->caps & MMC_CAP_NONREMOVABLE) && host->rescan_entered) {
+>> +               __pm_relax(host->ws);
+>
+> By calling __pm_relax here, this indicates to me that is seems like
+> you might have prevented, even for a very small timeslot, with a
+> MMC_CAP_NONREMOVABLE card/host from the system to suspend.
+>
+> For sure, you must not prevent the suspend even for small timeslots,
+> when MMC_CAP_NONREMOVABLE is set.
+I agree. It appears that the corresponding __pm_stay_awake() is
+indiscriminately called on system resume regardless of card type, so
+this needs to be fixed.
 
-This property should probably be called "voltage-selects" or something
-and you should put in a list of supported voltages (in uV units just
-like cpufreq operating points and regulators, please, for consistency,
-and update the binding).
+>>         mmc_release_host(host);
+>>
+>>   out:
+>> -       if (host->caps & MMC_CAP_NEEDS_POLL)
+>> +       if (extend_wakeup)
+>> +               /* extra 1/2 second should be enough, hopefully */
+>> +               __pm_wakeup_event(host->ws, MSEC_PER_SEC/2);
+>> +       else
+>> +               __pm_relax(host->ws);
+>> +
+>> +       if (host->caps & MMC_CAP_NEEDS_POLL) {
+>> +               __pm_stay_awake(host->ws);
+>
+> This does not make sense.
+>
+> So when using polling mode to detect card insert/remove, you will
+> prevent suspend forever? Maybe I missed a point somewhere?
+>
+>>                 mmc_schedule_delayed_work(&host->detect, HZ);
+>> +       }
+>>  }
+You are right, and I find it interesting that the same wake_lock()
+call exists in the Android kernel. Would someone from the Android team
+be able to comment?
 
-Then you can parse the list and find out precisely what voltages you
-can switch to - there are more possibilities than an implied 3-ish
-volts and a switch to 1.8V for MMC. The standard for the OCR register
-is a bunch of ranges - so specify which voltages you HAVE available,
-if you can switch. The driver (as per standard) can determine if this
-is in one range or another.
+>>         /* clear pm flags now and let card drivers set them as needed */
+>> @@ -2628,7 +2645,8 @@ int mmc_suspend_host(struct mmc_host *host)
+>>  {
+>
+> This function has become deprecated. You need to rebase this patch and
+> please do not add some new code in here.
+>
+If suspend is now initiated from the bus level, will there be a
+host-level suspend/resume function at all? I need to know where this
+code should move in the next revision of patch...
 
-Lack of this property would imply that whatever the chip is driving
-right now for logic is what it should stay at (support_vsel = false in
-the code).
-
---
-Matt Sealey <neko@bakuhatsu.net>
+Regards, Zoran
