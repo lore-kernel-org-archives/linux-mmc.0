@@ -1,124 +1,241 @@
-From: Yuvaraj Kumar <yuvaraj.cd@gmail.com>
-Subject: Re: [RFC V3 2/4] mmc: dw_mmc: socfpga: move socfpga private init
-Date: Thu, 5 Sep 2013 11:11:16 +0530
-Message-ID: <CAKuRcOJtpvjJGTiPgJ4fcLiGwGZN2ruHODEBZytz2cwuWBAPDQ@mail.gmail.com>
-References: <1377691731-7226-1-git-send-email-yuvaraj.cd@samsung.com>
-	<1377691731-7226-3-git-send-email-yuvaraj.cd@samsung.com>
-	<001601cea4af$42e662f0$c8b328d0$%jun@samsung.com>
-	<1378323066.9054.3.camel@linux-builds1>
+From: Simon Horman <horms@verge.net.au>
+Subject: Re: [PATCH] ARM: shmobile: update SDHI DT compatibility string to
+ the <unit>-<soc> format
+Date: Thu, 5 Sep 2013 15:01:03 +0900
+Message-ID: <20130905060102.GH14960@verge.net.au>
+References: <Pine.LNX.4.64.1308291650120.3786@axis700.grange>
+ <1621893.Re68yLczyK@avalon>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-Reply-To: <1378323066.9054.3.camel@linux-builds1>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Dinh Nguyen <dinguyen@altera.com>
-Cc: Seungwon Jeon <tgih.jun@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-samsung-soc@vger.kernel.org" <linux-samsung-soc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Jaehoon Chung <jh80.chung@samsung.com>, "ks.giri@samsung.com" <ks.giri@samsung.com>, Tomasz Figa <t.figa@samsung.com>, Alim Akhtar <alim.akhtar@samsung.com>, Yuvaraj Kumar C D <yuvaraj.cd@samsung.com>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-sh-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <1621893.Re68yLczyK@avalon>
+Sender: linux-sh-owner@vger.kernel.org
+To: Laurent Pinchart <laurent.pinchart@ideasonboard.com>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Chris Ball <cjb@laptop.org>
+Cc: linux-sh@vger.kernel.org, Olof Johansson <olof@lixom.net>, Arnd Bergmann <arnd@arndb.de>, Magnus Damm <magnus.damm@gmail.com>, linux-arm-kernel@lists.infradead.org, devicetree@vger.kernel.org, Stephen Warren <swarren@wwwdotorg.org>, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Thu, Sep 5, 2013 at 1:01 AM, Dinh Nguyen <dinguyen@altera.com> wrote:
-> On Thu, 2013-08-29 at 20:59 +0900, Seungwon Jeon wrote:
->> On Wed, August 28, 2013, Yuvaraj Kumar C D wrote:
->> > Currently platform specific private data initialisation is done by
->> > dw_mci_socfpga_priv_init and dw_mci_socfpga_parse_dt.As we already have
->> > separate platform specific device tree parser dw_mci_socfpga_parse_dt,
->> > move the dw_mci_socfpga_priv_init code to dw_mci_socfpga_parse_dt.
->> > We can use the dw_mci_socfpga_priv_init to do some actual platform
->> > specific initialisation.
->
-> I am looking to remove all of dw_mmc-socfpga file. The only reason for
-> this file is to set the sdr timing values. But since the register that
-> controls these SDR values are located out of the IP, it is probably best
-> to implement the settings in platform specific code.
-Well,This patch is included in this series becuase PATCHV4 3/4 of this
-sereis will affect
-dw_mmc-socfpga driver. However, if you are planning to remove the
-whole file,still you can do
-on top of this patch. :)
->
-> Dinh
->> >
->> > This patch is compile tested only.
->> CC'ed Dinh Nguyen
->>
->> Thanks,
->> Seungwon Jeon
->>
->> >
->> > changes since V2: none
->> >
->> > Signed-off-by: Yuvaraj Kumar C D <yuvaraj.cd@samsung.com>
->> > ---
->> >  drivers/mmc/host/dw_mmc-socfpga.c |   29 ++++++++++++++---------------
->> >  1 file changed, 14 insertions(+), 15 deletions(-)
->> >
->> > diff --git a/drivers/mmc/host/dw_mmc-socfpga.c b/drivers/mmc/host/dw_mmc-socfpga.c
->> > index 14b5961..953f260 100644
->> > --- a/drivers/mmc/host/dw_mmc-socfpga.c
->> > +++ b/drivers/mmc/host/dw_mmc-socfpga.c
->> > @@ -38,20 +38,6 @@ struct dw_mci_socfpga_priv_data {
->> >
->> >  static int dw_mci_socfpga_priv_init(struct dw_mci *host)
->> >  {
->> > -   struct dw_mci_socfpga_priv_data *priv;
->> > -
->> > -   priv = devm_kzalloc(host->dev, sizeof(*priv), GFP_KERNEL);
->> > -   if (!priv) {
->> > -           dev_err(host->dev, "mem alloc failed for private data\n");
->> > -           return -ENOMEM;
->> > -   }
->> > -
->> > -   priv->sysreg = syscon_regmap_lookup_by_compatible("altr,sys-mgr");
->> > -   if (IS_ERR(priv->sysreg)) {
->> > -           dev_err(host->dev, "regmap for altr,sys-mgr lookup failed.\n");
->> > -           return PTR_ERR(priv->sysreg);
->> > -   }
->> > -   host->priv = priv;
->> >
->> >     return 0;
->> >  }
->> > @@ -79,12 +65,24 @@ static void dw_mci_socfpga_prepare_command(struct dw_mci *host, u32 *cmdr)
->> >
->> >  static int dw_mci_socfpga_parse_dt(struct dw_mci *host)
->> >  {
->> > -   struct dw_mci_socfpga_priv_data *priv = host->priv;
->> > +   struct dw_mci_socfpga_priv_data *priv;
->> >     struct device_node *np = host->dev->of_node;
->> >     u32 timing[2];
->> >     u32 div = 0;
->> >     int ret;
->> >
->> > +   priv = devm_kzalloc(host->dev, sizeof(*priv), GFP_KERNEL);
->> > +   if (!priv) {
->> > +           dev_err(host->dev, "mem alloc failed for private data\n");
->> > +           return -ENOMEM;
->> > +   }
->> > +
->> > +   priv->sysreg = syscon_regmap_lookup_by_compatible("altr,sys-mgr");
->> > +   if (IS_ERR(priv->sysreg)) {
->> > +           dev_err(host->dev, "regmap for altr,sys-mgr lookup failed.\n");
->> > +           return PTR_ERR(priv->sysreg);
->> > +   }
->> > +
->> >     ret = of_property_read_u32(np, "altr,dw-mshc-ciu-div", &div);
->> >     if (ret)
->> >             dev_info(host->dev, "No dw-mshc-ciu-div specified, assuming 1");
->> > @@ -96,6 +94,7 @@ static int dw_mci_socfpga_parse_dt(struct dw_mci *host)
->> >             return ret;
->> >
->> >     priv->hs_timing = SYSMGR_SDMMC_CTRL_SET(timing[0], timing[1]);
->> > +   host->priv = priv;
->> >     return 0;
->> >  }
->> >
->> > --
->> > 1.7.9.5
->> >
->> > --
->> > To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->> > the body of a message to majordomo@vger.kernel.org
->> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->>
->
->
->
+On Fri, Aug 30, 2013 at 01:47:21AM +0200, Laurent Pinchart wrote:
+> Hi Guennadi,
+> 
+> Thank you for the patch.
+> 
+> On Thursday 29 August 2013 17:14:49 Guennadi Liakhovetski wrote:
+> > Currently DT compatibility strings of both types can be found in the kernel
+> > sources: <unit>-<soc> and <soc>-<unit>, whereas a unique format should be
+> > followed and the former one is preferred. This patch converts the SDHI
+> > MMC driver and its users to the common standard. This is safe for now, since
+> > ATM no real products are using this driver with DT.
+> > 
+> > Signed-off-by: Guennadi Liakhovetski <g.liakhovetski+renesas@gmail.com>
+> 
+> Acked-by: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
+> 
+> > ---
+> > 
+> > Ok, the "no real products" is an assumption, that Laurent and Simon kind
+> > of agreed upon, so, I'm using it here to avoid having to carry old
+> > compatibility strings with us around. If anyone has other information -
+> > please shout. Otherwise, I think, it would be the easiest for Chris to ack
+> > this and for Simon to pull this via the ARM tree for late 3.12 (possibly,
+> > post -rc1) inclusion.
+
+Thanks, I believe that is a good plan.
+
+Chris, could we get an Ack?
+
+> > 
+> >  Documentation/devicetree/bindings/mmc/tmio_mmc.txt |   17 ++++++++++-------
+> > arch/arm/boot/dts/r8a73a4.dtsi                     |    6 +++---
+> >  arch/arm/boot/dts/r8a7740.dtsi                     |    4 ++--
+> >  arch/arm/boot/dts/r8a7790.dtsi                     |    8 ++++----
+> >  arch/arm/boot/dts/sh73a0.dtsi                      |    6 +++---
+> >  drivers/mmc/host/sh_mobile_sdhi.c                  |   16 ++++++++--------
+> >  6 files changed, 30 insertions(+), 27 deletions(-)
+> > 
+> > diff --git a/Documentation/devicetree/bindings/mmc/tmio_mmc.txt
+> > b/Documentation/devicetree/bindings/mmc/tmio_mmc.txt index df204e1..6a2a116
+> > 100644
+> > --- a/Documentation/devicetree/bindings/mmc/tmio_mmc.txt
+> > +++ b/Documentation/devicetree/bindings/mmc/tmio_mmc.txt
+> > @@ -9,12 +9,15 @@ compulsory and any optional properties, common to all
+> > SD/MMC drivers, as described in mmc.txt, can be used. Additionally the
+> > following tmio_mmc-specific optional bindings can be used.
+> > 
+> > +Required properties:
+> > +- compatible:	"renesas,sdhi-shmobile" - a generic sh-mobile SDHI unit
+> > +		"renesas,sdhi-sh7372" - SDHI IP on SH7372 SoC
+> > +		"renesas,sdhi-sh73a0" - SDHI IP on SH73A0 SoC
+> > +		"renesas,sdhi-r8a73a4" - SDHI IP on R8A73A4 SoC
+> > +		"renesas,sdhi-r8a7740" - SDHI IP on R8A7740 SoC
+> > +		"renesas,sdhi-r8a7778" - SDHI IP on R8A7778 SoC
+> > +		"renesas,sdhi-r8a7779" - SDHI IP on R8A7779 SoC
+> > +		"renesas,sdhi-r8a7790" - SDHI IP on R8A7790 SoC
+> > +
+> >  Optional properties:
+> >  - toshiba,mmc-wrprotect-disable: write-protect detection is unavailable
+> > -
+> > -When used with Renesas SDHI hardware, the following compatibility strings
+> > -configure various model-specific properties:
+> > -
+> > -"renesas,sh7372-sdhi":	(default) compatible with SH7372
+> > -"renesas,r8a7740-sdhi":	compatible with R8A7740: certain MMC/SD commands
+> > have to -			wait for the interface to become idle.
+> > diff --git a/arch/arm/boot/dts/r8a73a4.dtsi b/arch/arm/boot/dts/r8a73a4.dtsi
+> > index b0511b1..cc7211b 100644
+> > --- a/arch/arm/boot/dts/r8a73a4.dtsi
+> > +++ b/arch/arm/boot/dts/r8a73a4.dtsi
+> > @@ -236,7 +236,7 @@
+> >  	};
+> > 
+> >  	sdhi0: sdhi@ee100000 {
+> > -		compatible = "renesas,r8a73a4-sdhi";
+> > +		compatible = "renesas,sdhi-r8a73a4";
+> >  		reg = <0 0xee100000 0 0x100>;
+> >  		interrupt-parent = <&gic>;
+> >  		interrupts = <0 165 4>;
+> > @@ -245,7 +245,7 @@
+> >  	};
+> > 
+> >  	sdhi1: sdhi@ee120000 {
+> > -		compatible = "renesas,r8a73a4-sdhi";
+> > +		compatible = "renesas,sdhi-r8a73a4";
+> >  		reg = <0 0xee120000 0 0x100>;
+> >  		interrupt-parent = <&gic>;
+> >  		interrupts = <0 166 4>;
+> > @@ -254,7 +254,7 @@
+> >  	};
+> > 
+> >  	sdhi2: sdhi@ee140000 {
+> > -		compatible = "renesas,r8a73a4-sdhi";
+> > +		compatible = "renesas,sdhi-r8a73a4";
+> >  		reg = <0 0xee140000 0 0x100>;
+> >  		interrupt-parent = <&gic>;
+> >  		interrupts = <0 167 4>;
+> > diff --git a/arch/arm/boot/dts/r8a7740.dtsi b/arch/arm/boot/dts/r8a7740.dtsi
+> > index 8fc4a5d..c4992b5 100644
+> > --- a/arch/arm/boot/dts/r8a7740.dtsi
+> > +++ b/arch/arm/boot/dts/r8a7740.dtsi
+> > @@ -155,7 +155,7 @@
+> >  	};
+> > 
+> >  	sdhi0: sdhi@e6850000 {
+> > -		compatible = "renesas,r8a7740-sdhi";
+> > +		compatible = "renesas,sdhi-r8a7740";
+> >  		reg = <0xe6850000 0x100>;
+> >  		interrupt-parent = <&gic>;
+> >  		interrupts = <0 117 4
+> > @@ -167,7 +167,7 @@
+> >  	};
+> > 
+> >  	sdhi1: sdhi@e6860000 {
+> > -		compatible = "renesas,r8a7740-sdhi";
+> > +		compatible = "renesas,sdhi-r8a7740";
+> >  		reg = <0xe6860000 0x100>;
+> >  		interrupt-parent = <&gic>;
+> >  		interrupts = <0 121 4
+> > diff --git a/arch/arm/boot/dts/r8a7790.dtsi b/arch/arm/boot/dts/r8a7790.dtsi
+> > index 3b879e7..885f9f4 100644
+> > --- a/arch/arm/boot/dts/r8a7790.dtsi
+> > +++ b/arch/arm/boot/dts/r8a7790.dtsi
+> > @@ -152,7 +152,7 @@
+> >  	};
+> > 
+> >  	sdhi0: sdhi@ee100000 {
+> > -		compatible = "renesas,r8a7790-sdhi";
+> > +		compatible = "renesas,sdhi-r8a7790";
+> >  		reg = <0 0xee100000 0 0x100>;
+> >  		interrupt-parent = <&gic>;
+> >  		interrupts = <0 165 4>;
+> > @@ -161,7 +161,7 @@
+> >  	};
+> > 
+> >  	sdhi1: sdhi@ee120000 {
+> > -		compatible = "renesas,r8a7790-sdhi";
+> > +		compatible = "renesas,sdhi-r8a7790";
+> >  		reg = <0 0xee120000 0 0x100>;
+> >  		interrupt-parent = <&gic>;
+> >  		interrupts = <0 166 4>;
+> > @@ -170,7 +170,7 @@
+> >  	};
+> > 
+> >  	sdhi2: sdhi@ee140000 {
+> > -		compatible = "renesas,r8a7790-sdhi";
+> > +		compatible = "renesas,sdhi-r8a7790";
+> >  		reg = <0 0xee140000 0 0x100>;
+> >  		interrupt-parent = <&gic>;
+> >  		interrupts = <0 167 4>;
+> > @@ -179,7 +179,7 @@
+> >  	};
+> > 
+> >  	sdhi3: sdhi@ee160000 {
+> > -		compatible = "renesas,r8a7790-sdhi";
+> > +		compatible = "renesas,sdhi-r8a7790";
+> >  		reg = <0 0xee160000 0 0x100>;
+> >  		interrupt-parent = <&gic>;
+> >  		interrupts = <0 168 4>;
+> > diff --git a/arch/arm/boot/dts/sh73a0.dtsi b/arch/arm/boot/dts/sh73a0.dtsi
+> > index ba59a58..3955c76 100644
+> > --- a/arch/arm/boot/dts/sh73a0.dtsi
+> > +++ b/arch/arm/boot/dts/sh73a0.dtsi
+> > @@ -196,7 +196,7 @@
+> >  	};
+> > 
+> >  	sdhi0: sdhi@ee100000 {
+> > -		compatible = "renesas,r8a7740-sdhi";
+> > +		compatible = "renesas,sdhi-r8a7740";
+> >  		reg = <0xee100000 0x100>;
+> >  		interrupt-parent = <&gic>;
+> >  		interrupts = <0 83 4
+> > @@ -208,7 +208,7 @@
+> > 
+> >  	/* SDHI1 and SDHI2 have no CD pins, no need for CD IRQ */
+> >  	sdhi1: sdhi@ee120000 {
+> > -		compatible = "renesas,r8a7740-sdhi";
+> > +		compatible = "renesas,sdhi-r8a7740";
+> >  		reg = <0xee120000 0x100>;
+> >  		interrupt-parent = <&gic>;
+> >  		interrupts = <0 88 4
+> > @@ -219,7 +219,7 @@
+> >  	};
+> > 
+> >  	sdhi2: sdhi@ee140000 {
+> > -		compatible = "renesas,r8a7740-sdhi";
+> > +		compatible = "renesas,sdhi-r8a7740";
+> >  		reg = <0xee140000 0x100>;
+> >  		interrupt-parent = <&gic>;
+> >  		interrupts = <0 104 4
+> > diff --git a/drivers/mmc/host/sh_mobile_sdhi.c
+> > b/drivers/mmc/host/sh_mobile_sdhi.c index 87ed3fb..f344659 100644
+> > --- a/drivers/mmc/host/sh_mobile_sdhi.c
+> > +++ b/drivers/mmc/host/sh_mobile_sdhi.c
+> > @@ -113,14 +113,14 @@ static const struct sh_mobile_sdhi_ops sdhi_ops = {
+> >  };
+> > 
+> >  static const struct of_device_id sh_mobile_sdhi_of_match[] = {
+> > -	{ .compatible = "renesas,shmobile-sdhi" },
+> > -	{ .compatible = "renesas,sh7372-sdhi" },
+> > -	{ .compatible = "renesas,sh73a0-sdhi", .data = &sh_mobile_sdhi_of_cfg[0],
+> > }, -	{ .compatible = "renesas,r8a73a4-sdhi", .data =
+> > &sh_mobile_sdhi_of_cfg[0], }, -	{ .compatible = "renesas,r8a7740-sdhi",
+> > .data = &sh_mobile_sdhi_of_cfg[0], }, -	{ .compatible =
+> > "renesas,r8a7778-sdhi", .data = &sh_mobile_sdhi_of_cfg[0], }, -	{
+> > .compatible = "renesas,r8a7779-sdhi", .data = &sh_mobile_sdhi_of_cfg[0], },
+> > -	{ .compatible = "renesas,r8a7790-sdhi", .data =
+> > &sh_mobile_sdhi_of_cfg[0], }, +	{ .compatible = "renesas,sdhi-shmobile" },
+> > +	{ .compatible = "renesas,sdhi-sh7372" },
+> > +	{ .compatible = "renesas,sdhi-sh73a0", .data = &sh_mobile_sdhi_of_cfg[0],
+> > }, +	{ .compatible = "renesas,sdhi-r8a73a4", .data =
+> > &sh_mobile_sdhi_of_cfg[0], }, +	{ .compatible = "renesas,sdhi-r8a7740",
+> > .data = &sh_mobile_sdhi_of_cfg[0], }, +	{ .compatible =
+> > "renesas,sdhi-r8a7778", .data = &sh_mobile_sdhi_of_cfg[0], }, +	{
+> > .compatible = "renesas,sdhi-r8a7779", .data = &sh_mobile_sdhi_of_cfg[0], },
+> > +	{ .compatible = "renesas,sdhi-r8a7790", .data =
+> > &sh_mobile_sdhi_of_cfg[0], }, {},
+> >  };
+> >  MODULE_DEVICE_TABLE(of, sh_mobile_sdhi_of_match);
+> -- 
+> Regards,
+> 
+> Laurent Pinchart
+> 
