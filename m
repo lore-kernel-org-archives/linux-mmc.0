@@ -1,241 +1,335 @@
-From: Simon Horman <horms@verge.net.au>
-Subject: Re: [PATCH] ARM: shmobile: update SDHI DT compatibility string to
- the <unit>-<soc> format
-Date: Thu, 5 Sep 2013 15:01:03 +0900
-Message-ID: <20130905060102.GH14960@verge.net.au>
-References: <Pine.LNX.4.64.1308291650120.3786@axis700.grange>
- <1621893.Re68yLczyK@avalon>
+From: Shawn Guo <shawn.guo@linaro.org>
+Subject: Re: [PATCH 4/8] sdhci: sdhci-esdhci-imx: add sd3.0 clock tuning
+ support
+Date: Thu, 5 Sep 2013 14:00:26 +0800
+Message-ID: <20130905060024.GC775@shlinux1.ap.freescale.net>
+References: <1378299257-2980-1-git-send-email-b29396@freescale.com>
+ <1378299257-2980-5-git-send-email-b29396@freescale.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-sh-owner@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from ch1ehsobe006.messaging.microsoft.com ([216.32.181.186]:42700
+	"EHLO ch1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1754000Ab3IEGBe (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 5 Sep 2013 02:01:34 -0400
 Content-Disposition: inline
-In-Reply-To: <1621893.Re68yLczyK@avalon>
-Sender: linux-sh-owner@vger.kernel.org
-To: Laurent Pinchart <laurent.pinchart@ideasonboard.com>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Chris Ball <cjb@laptop.org>
-Cc: linux-sh@vger.kernel.org, Olof Johansson <olof@lixom.net>, Arnd Bergmann <arnd@arndb.de>, Magnus Damm <magnus.damm@gmail.com>, linux-arm-kernel@lists.infradead.org, devicetree@vger.kernel.org, Stephen Warren <swarren@wwwdotorg.org>, linux-mmc@vger.kernel.org
+In-Reply-To: <1378299257-2980-5-git-send-email-b29396@freescale.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Dong Aisheng <b29396@freescale.com>
+Cc: linux-mmc@vger.kernel.org, cjb@laptop.org, anton@enomsg.org, linux-arm-kernel@lists.infradead.org, s.hauer@pengutronix.de
 
-On Fri, Aug 30, 2013 at 01:47:21AM +0200, Laurent Pinchart wrote:
-> Hi Guennadi,
-> 
-> Thank you for the patch.
-> 
-> On Thursday 29 August 2013 17:14:49 Guennadi Liakhovetski wrote:
-> > Currently DT compatibility strings of both types can be found in the kernel
-> > sources: <unit>-<soc> and <soc>-<unit>, whereas a unique format should be
-> > followed and the former one is preferred. This patch converts the SDHI
-> > MMC driver and its users to the common standard. This is safe for now, since
-> > ATM no real products are using this driver with DT.
-> > 
-> > Signed-off-by: Guennadi Liakhovetski <g.liakhovetski+renesas@gmail.com>
-> 
-> Acked-by: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
-> 
-> > ---
-> > 
-> > Ok, the "no real products" is an assumption, that Laurent and Simon kind
-> > of agreed upon, so, I'm using it here to avoid having to carry old
-> > compatibility strings with us around. If anyone has other information -
-> > please shout. Otherwise, I think, it would be the easiest for Chris to ack
-> > this and for Simon to pull this via the ARM tree for late 3.12 (possibly,
-> > post -rc1) inclusion.
+Nothing major, only a few nitpicks.
 
-Thanks, I believe that is a good plan.
+On Wed, Sep 04, 2013 at 08:54:13PM +0800, Dong Aisheng wrote:
+> Freescale i.MX6Q/DL uSDHC clock tuning progress is a little different from
+> the standard tuning process defined in host controller spec v3.0.
+> Thus we use platform_execute_tuning instead of standard sdhci tuning.
+> 
+> The main difference are:
+> 1) not only generate Buffer Read Ready interrupt when tuning is performing.
+> It generates all other DATA interrupts like the normal data command.
+> 2) SDHCI_CTRL_EXEC_TUNING is not automatically cleared by HW,
+> instead it's controlled by SW.
+> 3) SDHCI_CTRL_TUNED_CLK is not automatically set by HW,
+> it's controlled by SW.
+> 4) the clock delay for every tuning is set by SW.
+> 
+> Signed-off-by: Dong Aisheng <b29396@freescale.com>
+> ---
+>  drivers/mmc/host/sdhci-esdhc-imx.c |  194 +++++++++++++++++++++++++++++++++++-
+>  1 files changed, 193 insertions(+), 1 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+> index 3118a82..36b9f63 100644
+> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
+> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+> @@ -34,9 +34,21 @@
+>  #define ESDHC_WTMK_LVL			0x44
+>  #define ESDHC_MIX_CTRL			0x48
+>  #define  ESDHC_MIX_CTRL_AC23EN		(1 << 7)
+> +#define  ESDHC_MIX_CTRL_EXE_TUNE	(1 << 22)
+> +#define  ESDHC_MIX_CTRL_SMPCLK_SEL	(1 << 23)
+> +#define  ESDHC_MIX_CTRL_AUTO_TUNE	(1 << 24)
 
-Chris, could we get an Ack?
+It seems unused?
 
-> > 
-> >  Documentation/devicetree/bindings/mmc/tmio_mmc.txt |   17 ++++++++++-------
-> > arch/arm/boot/dts/r8a73a4.dtsi                     |    6 +++---
-> >  arch/arm/boot/dts/r8a7740.dtsi                     |    4 ++--
-> >  arch/arm/boot/dts/r8a7790.dtsi                     |    8 ++++----
-> >  arch/arm/boot/dts/sh73a0.dtsi                      |    6 +++---
-> >  drivers/mmc/host/sh_mobile_sdhi.c                  |   16 ++++++++--------
-> >  6 files changed, 30 insertions(+), 27 deletions(-)
-> > 
-> > diff --git a/Documentation/devicetree/bindings/mmc/tmio_mmc.txt
-> > b/Documentation/devicetree/bindings/mmc/tmio_mmc.txt index df204e1..6a2a116
-> > 100644
-> > --- a/Documentation/devicetree/bindings/mmc/tmio_mmc.txt
-> > +++ b/Documentation/devicetree/bindings/mmc/tmio_mmc.txt
-> > @@ -9,12 +9,15 @@ compulsory and any optional properties, common to all
-> > SD/MMC drivers, as described in mmc.txt, can be used. Additionally the
-> > following tmio_mmc-specific optional bindings can be used.
-> > 
-> > +Required properties:
-> > +- compatible:	"renesas,sdhi-shmobile" - a generic sh-mobile SDHI unit
-> > +		"renesas,sdhi-sh7372" - SDHI IP on SH7372 SoC
-> > +		"renesas,sdhi-sh73a0" - SDHI IP on SH73A0 SoC
-> > +		"renesas,sdhi-r8a73a4" - SDHI IP on R8A73A4 SoC
-> > +		"renesas,sdhi-r8a7740" - SDHI IP on R8A7740 SoC
-> > +		"renesas,sdhi-r8a7778" - SDHI IP on R8A7778 SoC
-> > +		"renesas,sdhi-r8a7779" - SDHI IP on R8A7779 SoC
-> > +		"renesas,sdhi-r8a7790" - SDHI IP on R8A7790 SoC
-> > +
-> >  Optional properties:
-> >  - toshiba,mmc-wrprotect-disable: write-protect detection is unavailable
-> > -
-> > -When used with Renesas SDHI hardware, the following compatibility strings
-> > -configure various model-specific properties:
-> > -
-> > -"renesas,sh7372-sdhi":	(default) compatible with SH7372
-> > -"renesas,r8a7740-sdhi":	compatible with R8A7740: certain MMC/SD commands
-> > have to -			wait for the interface to become idle.
-> > diff --git a/arch/arm/boot/dts/r8a73a4.dtsi b/arch/arm/boot/dts/r8a73a4.dtsi
-> > index b0511b1..cc7211b 100644
-> > --- a/arch/arm/boot/dts/r8a73a4.dtsi
-> > +++ b/arch/arm/boot/dts/r8a73a4.dtsi
-> > @@ -236,7 +236,7 @@
-> >  	};
-> > 
-> >  	sdhi0: sdhi@ee100000 {
-> > -		compatible = "renesas,r8a73a4-sdhi";
-> > +		compatible = "renesas,sdhi-r8a73a4";
-> >  		reg = <0 0xee100000 0 0x100>;
-> >  		interrupt-parent = <&gic>;
-> >  		interrupts = <0 165 4>;
-> > @@ -245,7 +245,7 @@
-> >  	};
-> > 
-> >  	sdhi1: sdhi@ee120000 {
-> > -		compatible = "renesas,r8a73a4-sdhi";
-> > +		compatible = "renesas,sdhi-r8a73a4";
-> >  		reg = <0 0xee120000 0 0x100>;
-> >  		interrupt-parent = <&gic>;
-> >  		interrupts = <0 166 4>;
-> > @@ -254,7 +254,7 @@
-> >  	};
-> > 
-> >  	sdhi2: sdhi@ee140000 {
-> > -		compatible = "renesas,r8a73a4-sdhi";
-> > +		compatible = "renesas,sdhi-r8a73a4";
-> >  		reg = <0 0xee140000 0 0x100>;
-> >  		interrupt-parent = <&gic>;
-> >  		interrupts = <0 167 4>;
-> > diff --git a/arch/arm/boot/dts/r8a7740.dtsi b/arch/arm/boot/dts/r8a7740.dtsi
-> > index 8fc4a5d..c4992b5 100644
-> > --- a/arch/arm/boot/dts/r8a7740.dtsi
-> > +++ b/arch/arm/boot/dts/r8a7740.dtsi
-> > @@ -155,7 +155,7 @@
-> >  	};
-> > 
-> >  	sdhi0: sdhi@e6850000 {
-> > -		compatible = "renesas,r8a7740-sdhi";
-> > +		compatible = "renesas,sdhi-r8a7740";
-> >  		reg = <0xe6850000 0x100>;
-> >  		interrupt-parent = <&gic>;
-> >  		interrupts = <0 117 4
-> > @@ -167,7 +167,7 @@
-> >  	};
-> > 
-> >  	sdhi1: sdhi@e6860000 {
-> > -		compatible = "renesas,r8a7740-sdhi";
-> > +		compatible = "renesas,sdhi-r8a7740";
-> >  		reg = <0xe6860000 0x100>;
-> >  		interrupt-parent = <&gic>;
-> >  		interrupts = <0 121 4
-> > diff --git a/arch/arm/boot/dts/r8a7790.dtsi b/arch/arm/boot/dts/r8a7790.dtsi
-> > index 3b879e7..885f9f4 100644
-> > --- a/arch/arm/boot/dts/r8a7790.dtsi
-> > +++ b/arch/arm/boot/dts/r8a7790.dtsi
-> > @@ -152,7 +152,7 @@
-> >  	};
-> > 
-> >  	sdhi0: sdhi@ee100000 {
-> > -		compatible = "renesas,r8a7790-sdhi";
-> > +		compatible = "renesas,sdhi-r8a7790";
-> >  		reg = <0 0xee100000 0 0x100>;
-> >  		interrupt-parent = <&gic>;
-> >  		interrupts = <0 165 4>;
-> > @@ -161,7 +161,7 @@
-> >  	};
-> > 
-> >  	sdhi1: sdhi@ee120000 {
-> > -		compatible = "renesas,r8a7790-sdhi";
-> > +		compatible = "renesas,sdhi-r8a7790";
-> >  		reg = <0 0xee120000 0 0x100>;
-> >  		interrupt-parent = <&gic>;
-> >  		interrupts = <0 166 4>;
-> > @@ -170,7 +170,7 @@
-> >  	};
-> > 
-> >  	sdhi2: sdhi@ee140000 {
-> > -		compatible = "renesas,r8a7790-sdhi";
-> > +		compatible = "renesas,sdhi-r8a7790";
-> >  		reg = <0 0xee140000 0 0x100>;
-> >  		interrupt-parent = <&gic>;
-> >  		interrupts = <0 167 4>;
-> > @@ -179,7 +179,7 @@
-> >  	};
-> > 
-> >  	sdhi3: sdhi@ee160000 {
-> > -		compatible = "renesas,r8a7790-sdhi";
-> > +		compatible = "renesas,sdhi-r8a7790";
-> >  		reg = <0 0xee160000 0 0x100>;
-> >  		interrupt-parent = <&gic>;
-> >  		interrupts = <0 168 4>;
-> > diff --git a/arch/arm/boot/dts/sh73a0.dtsi b/arch/arm/boot/dts/sh73a0.dtsi
-> > index ba59a58..3955c76 100644
-> > --- a/arch/arm/boot/dts/sh73a0.dtsi
-> > +++ b/arch/arm/boot/dts/sh73a0.dtsi
-> > @@ -196,7 +196,7 @@
-> >  	};
-> > 
-> >  	sdhi0: sdhi@ee100000 {
-> > -		compatible = "renesas,r8a7740-sdhi";
-> > +		compatible = "renesas,sdhi-r8a7740";
-> >  		reg = <0xee100000 0x100>;
-> >  		interrupt-parent = <&gic>;
-> >  		interrupts = <0 83 4
-> > @@ -208,7 +208,7 @@
-> > 
-> >  	/* SDHI1 and SDHI2 have no CD pins, no need for CD IRQ */
-> >  	sdhi1: sdhi@ee120000 {
-> > -		compatible = "renesas,r8a7740-sdhi";
-> > +		compatible = "renesas,sdhi-r8a7740";
-> >  		reg = <0xee120000 0x100>;
-> >  		interrupt-parent = <&gic>;
-> >  		interrupts = <0 88 4
-> > @@ -219,7 +219,7 @@
-> >  	};
-> > 
-> >  	sdhi2: sdhi@ee140000 {
-> > -		compatible = "renesas,r8a7740-sdhi";
-> > +		compatible = "renesas,sdhi-r8a7740";
-> >  		reg = <0xee140000 0x100>;
-> >  		interrupt-parent = <&gic>;
-> >  		interrupts = <0 104 4
-> > diff --git a/drivers/mmc/host/sh_mobile_sdhi.c
-> > b/drivers/mmc/host/sh_mobile_sdhi.c index 87ed3fb..f344659 100644
-> > --- a/drivers/mmc/host/sh_mobile_sdhi.c
-> > +++ b/drivers/mmc/host/sh_mobile_sdhi.c
-> > @@ -113,14 +113,14 @@ static const struct sh_mobile_sdhi_ops sdhi_ops = {
-> >  };
-> > 
-> >  static const struct of_device_id sh_mobile_sdhi_of_match[] = {
-> > -	{ .compatible = "renesas,shmobile-sdhi" },
-> > -	{ .compatible = "renesas,sh7372-sdhi" },
-> > -	{ .compatible = "renesas,sh73a0-sdhi", .data = &sh_mobile_sdhi_of_cfg[0],
-> > }, -	{ .compatible = "renesas,r8a73a4-sdhi", .data =
-> > &sh_mobile_sdhi_of_cfg[0], }, -	{ .compatible = "renesas,r8a7740-sdhi",
-> > .data = &sh_mobile_sdhi_of_cfg[0], }, -	{ .compatible =
-> > "renesas,r8a7778-sdhi", .data = &sh_mobile_sdhi_of_cfg[0], }, -	{
-> > .compatible = "renesas,r8a7779-sdhi", .data = &sh_mobile_sdhi_of_cfg[0], },
-> > -	{ .compatible = "renesas,r8a7790-sdhi", .data =
-> > &sh_mobile_sdhi_of_cfg[0], }, +	{ .compatible = "renesas,sdhi-shmobile" },
-> > +	{ .compatible = "renesas,sdhi-sh7372" },
-> > +	{ .compatible = "renesas,sdhi-sh73a0", .data = &sh_mobile_sdhi_of_cfg[0],
-> > }, +	{ .compatible = "renesas,sdhi-r8a73a4", .data =
-> > &sh_mobile_sdhi_of_cfg[0], }, +	{ .compatible = "renesas,sdhi-r8a7740",
-> > .data = &sh_mobile_sdhi_of_cfg[0], }, +	{ .compatible =
-> > "renesas,sdhi-r8a7778", .data = &sh_mobile_sdhi_of_cfg[0], }, +	{
-> > .compatible = "renesas,sdhi-r8a7779", .data = &sh_mobile_sdhi_of_cfg[0], },
-> > +	{ .compatible = "renesas,sdhi-r8a7790", .data =
-> > &sh_mobile_sdhi_of_cfg[0], }, {},
-> >  };
-> >  MODULE_DEVICE_TABLE(of, sh_mobile_sdhi_of_match);
+> +#define  ESDHC_MIX_CTRL_FBCLK_SEL	(1 << 25)
+>  /* Bits 3 and 6 are not SDHCI standard definitions */
+>  #define  ESDHC_MIX_CTRL_SDHCI_MASK	0xb7
+>  
+> +/* tune control register */
+> +#define ESDHC_TUNE_CTRL_STATUS		0x68
+> +#define  ESDHC_TUNE_CTRL_STEP		1
+> +#define  ESDHC_TUNE_CTRL_MIN		0
+> +#define  ESDHC_TUNE_CTRL_MAX		((1 << 7) - 1)
+> +
+> +#define ESDHC_TUNING_BLOCK_PATTERN_LEN	64
+> +
+>  /*
+>   * Our interpretation of the SDHCI_HOST_CONTROL register
+>   */
+> @@ -87,7 +99,7 @@ struct pltfm_imx_data {
+>  		MULTIBLK_IN_PROCESS, /* exact multiblock cmd in process */
+>  		WAIT_FOR_INT,        /* sent CMD12, waiting for response INT */
+>  	} multiblock_status;
+> -
+> +	u32 uhs_mode;
+>  };
+>  
+>  static struct platform_device_id imx_esdhc_devtype[] = {
+> @@ -161,6 +173,17 @@ static u32 esdhc_readl_le(struct sdhci_host *host, int reg)
+>  	struct pltfm_imx_data *imx_data = pltfm_host->priv;
+>  	u32 val = readl(host->ioaddr + reg);
+>  
+> +	if (unlikely(reg == SDHCI_PRESENT_STATE)) {
+> +		u32 fsl_prss = val;
+> +		val = 0;
+> +		/* save the least 20 bits */
+> +		val |= fsl_prss & 0x000FFFFF;
+
+Nit: you can do the following to save one assignment, right?
+
+		val = fsl_prss & 0x000FFFFF;
+
+> +		/* move dat[0-3] bits */
+> +		val |= (fsl_prss & 0x0F000000) >> 4;
+> +		/* move cmd line bit */
+> +		val |= (fsl_prss & 0x00800000) << 1;
+> +	}
+> +
+>  	if (unlikely(reg == SDHCI_CAPABILITIES)) {
+>  		/* In FSL esdhc IC module, only bit20 is used to indicate the
+>  		 * ADMA2 capability of esdhc, but this bit is messed up on
+> @@ -175,6 +198,17 @@ static u32 esdhc_readl_le(struct sdhci_host *host, int reg)
+>  		}
+>  	}
+>  
+> +	if (unlikely(reg == SDHCI_CAPABILITIES_1) && is_imx6q_usdhc(imx_data))
+> +		val = SDHCI_SUPPORT_DDR50 | SDHCI_SUPPORT_SDR104
+> +				| SDHCI_SUPPORT_SDR50;
+> +
+> +	if (unlikely(reg == SDHCI_MAX_CURRENT) && is_imx6q_usdhc(imx_data)) {
+> +		val = 0;
+> +		val |= 0xFF << SDHCI_MAX_CURRENT_330_SHIFT;
+> +		val |= 0xFF << SDHCI_MAX_CURRENT_300_SHIFT;
+> +		val |= 0xFF << SDHCI_MAX_CURRENT_180_SHIFT;
+> +	}
+> +
+>  	if (unlikely(reg == SDHCI_INT_STATUS)) {
+>  		if (val & ESDHC_INT_VENDOR_SPEC_DMA_ERR) {
+>  			val &= ~ESDHC_INT_VENDOR_SPEC_DMA_ERR;
+> @@ -253,6 +287,8 @@ static u16 esdhc_readw_le(struct sdhci_host *host, int reg)
+>  {
+>  	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+>  	struct pltfm_imx_data *imx_data = pltfm_host->priv;
+> +	u16 ret = 0;
+> +	u32 val;
+>  
+>  	if (unlikely(reg == SDHCI_HOST_VERSION)) {
+>  		reg ^= 2;
+> @@ -265,6 +301,25 @@ static u16 esdhc_readw_le(struct sdhci_host *host, int reg)
+>  		}
+>  	}
+>  
+> +	if (unlikely(reg == SDHCI_HOST_CONTROL2)) {
+> +		val = readl(host->ioaddr + ESDHC_VENDOR_SPEC);
+> +		if (val & ESDHC_VENDOR_SPEC_VSELECT)
+> +			ret |= SDHCI_CTRL_VDD_180;
+> +
+> +		if (is_imx6q_usdhc(imx_data)) {
+> +			val = readl(host->ioaddr + ESDHC_MIX_CTRL);
+> +			if (val & ESDHC_MIX_CTRL_EXE_TUNE)
+> +				ret |= SDHCI_CTRL_EXEC_TUNING;
+> +			if (val & ESDHC_MIX_CTRL_SMPCLK_SEL)
+> +				ret |= SDHCI_CTRL_TUNED_CLK;
+> +		}
+> +
+> +		ret |= (imx_data->uhs_mode & SDHCI_CTRL_UHS_MASK);
+> +		ret &= ~SDHCI_CTRL_PRESET_VAL_ENABLE;
+> +
+> +		return ret;
+> +	}
+> +
+>  	return readw(host->ioaddr + reg);
+>  }
+>  
+> @@ -272,8 +327,32 @@ static void esdhc_writew_le(struct sdhci_host *host, u16 val, int reg)
+>  {
+>  	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+>  	struct pltfm_imx_data *imx_data = pltfm_host->priv;
+> +	u32 new_val = 0;
+>  
+>  	switch (reg) {
+> +	case SDHCI_CLOCK_CONTROL:
+> +		new_val = readl(host->ioaddr + ESDHC_VENDOR_SPEC);
+> +		if (val & SDHCI_CLOCK_CARD_EN)
+> +			new_val |= ESDHC_VENDOR_SPEC_FRC_SDCLK_ON;
+> +		else
+> +			new_val &= ~ESDHC_VENDOR_SPEC_FRC_SDCLK_ON;
+> +			writel(new_val, host->ioaddr + ESDHC_VENDOR_SPEC);
+> +		return;
+> +	case SDHCI_HOST_CONTROL2:
+> +		new_val = readl(host->ioaddr + ESDHC_VENDOR_SPEC);
+> +		if (val & SDHCI_CTRL_VDD_180)
+> +			new_val |= ESDHC_VENDOR_SPEC_VSELECT;
+> +		else
+> +			new_val &= ~ESDHC_VENDOR_SPEC_VSELECT;
+> +		writel(new_val, host->ioaddr + ESDHC_VENDOR_SPEC);
+> +		imx_data->uhs_mode = val & SDHCI_CTRL_UHS_MASK;
+> +		new_val = readl(host->ioaddr + ESDHC_MIX_CTRL);
+> +		if (val & SDHCI_CTRL_TUNED_CLK)
+> +			new_val |= ESDHC_MIX_CTRL_SMPCLK_SEL;
+> +		else
+> +			new_val &= ~ESDHC_MIX_CTRL_SMPCLK_SEL;
+> +		writel(new_val , host->ioaddr + ESDHC_MIX_CTRL);
+> +		return;
+>  	case SDHCI_TRANSFER_MODE:
+>  		if ((imx_data->flags & ESDHC_FLAG_MULTIBLK_NO_INT)
+>  				&& (host->cmd->opcode == SD_IO_RW_EXTENDED)
+> @@ -451,6 +530,118 @@ static int esdhc_pltfm_bus_width(struct sdhci_host *host, int width)
+>  	return 0;
+>  }
+>  
+> +static void esdhc_prepare_tuning(struct sdhci_host *host, u32 val)
+> +{
+> +	u32 reg;
+> +
+> +	reg = readl(host->ioaddr + ESDHC_MIX_CTRL);
+> +	reg |= ESDHC_MIX_CTRL_EXE_TUNE | ESDHC_MIX_CTRL_SMPCLK_SEL |
+> +			ESDHC_MIX_CTRL_FBCLK_SEL;
+> +	writel(reg, host->ioaddr + ESDHC_MIX_CTRL);
+> +	writel((val << 8), host->ioaddr + ESDHC_TUNE_CTRL_STATUS);
+
+Nit: unnecessary parentheses around val << 8
+
+> +	dev_dbg(mmc_dev(host->mmc),
+> +		"tunning with delay 0x%x ESDHC_TUNE_CTRL_STATUS 0x%x\n",
+> +			val, readl(host->ioaddr + ESDHC_TUNE_CTRL_STATUS));
+> +}
+> +
+> +static void request_done(struct mmc_request *mrq)
+
+s/request_done/esdhc_request_done to have proper namespace.
+
+> +{
+> +	complete(&mrq->completion);
+> +}
+> +
+> +static int esdhc_send_tuning_cmd(struct sdhci_host *host, u32 opcode)
+> +{
+> +	struct mmc_command cmd = {0};
+> +	struct mmc_request mrq = {0};
+> +	struct mmc_data data = {0};
+> +	struct scatterlist sg;
+> +	char tuning_pattern[ESDHC_TUNING_BLOCK_PATTERN_LEN];
+> +
+> +	cmd.opcode = opcode;
+> +	cmd.arg = 0;
+> +	cmd.flags = MMC_RSP_R1 | MMC_CMD_ADTC;
+> +
+> +	data.blksz = ESDHC_TUNING_BLOCK_PATTERN_LEN;
+> +	data.blocks = 1;
+> +	data.flags = MMC_DATA_READ;
+> +	data.sg = &sg;
+> +	data.sg_len = 1;
+> +
+> +	sg_init_one(&sg, tuning_pattern, sizeof(tuning_pattern));
+> +
+> +	mrq.cmd = &cmd;
+> +	mrq.cmd->mrq = &mrq;
+> +	mrq.data = &data;
+> +	mrq.data->mrq = &mrq;
+> +	mrq.cmd->data = mrq.data;
+> +
+> +	mrq.done = request_done;
+> +	init_completion(&(mrq.completion));
+> +
+> +	disable_irq(host->irq);
+> +	spin_lock(&host->lock);
+> +	host->mrq = &mrq;
+> +
+> +	sdhci_send_command(host, mrq.cmd);
+> +
+> +	spin_unlock(&host->lock);
+> +	enable_irq(host->irq);
+> +
+> +	wait_for_completion(&mrq.completion);
+> +
+> +	if (cmd.error)
+> +		return cmd.error;
+> +	if (data.error)
+> +		return data.error;
+> +
+> +	return 0;
+> +}
+> +
+> +static void esdhc_post_tuning(struct sdhci_host *host)
+> +{
+> +	u32 reg;
+> +
+> +	reg = readl(host->ioaddr + ESDHC_MIX_CTRL);
+> +	reg &= ~ESDHC_MIX_CTRL_EXE_TUNE;
+> +	writel(reg, host->ioaddr + ESDHC_MIX_CTRL);
+> +}
+> +
+> +static int esdhc_executing_tuning(struct sdhci_host *host, u32 opcode)
+> +{
+> +	int min, max, avg, ret;
+> +
+> +	/* find the mininum delay first which can pass tuning*/
+
+Nit: put a space before */
+
+> +	min = ESDHC_TUNE_CTRL_MIN;
+> +	while (min < ESDHC_TUNE_CTRL_MAX) {
+> +		esdhc_prepare_tuning(host, min);
+> +		if (!esdhc_send_tuning_cmd(host, opcode))
+> +			break;
+> +		min += ESDHC_TUNE_CTRL_STEP;
+> +	}
+> +
+> +	/* find the maxinum delay which can not pass tuning*/
+
+Ditto
+
+Shawn
+
+> +	max = min + ESDHC_TUNE_CTRL_STEP;
+> +	while (max < ESDHC_TUNE_CTRL_MAX) {
+> +		esdhc_prepare_tuning(host, max);
+> +		if (esdhc_send_tuning_cmd(host, opcode)) {
+> +			max -= ESDHC_TUNE_CTRL_STEP;
+> +			break;
+> +		}
+> +		max += ESDHC_TUNE_CTRL_STEP;
+> +	}
+> +
+> +	/* use average delay to get the best timing */
+> +	avg = (min + max) / 2;
+> +	esdhc_prepare_tuning(host, avg);
+> +	ret = esdhc_send_tuning_cmd(host, opcode);
+> +	esdhc_post_tuning(host);
+> +
+> +	dev_dbg(mmc_dev(host->mmc), "tunning %s at 0x%x ret %d\n",
+> +		ret ? "failed" : "passed", avg, ret);
+> +
+> +	return ret;
+> +}
+> +
+>  static const struct sdhci_ops sdhci_esdhc_ops = {
+>  	.read_l = esdhc_readl_le,
+>  	.read_w = esdhc_readw_le,
+> @@ -462,6 +653,7 @@ static const struct sdhci_ops sdhci_esdhc_ops = {
+>  	.get_min_clock = esdhc_pltfm_get_min_clock,
+>  	.get_ro = esdhc_pltfm_get_ro,
+>  	.platform_bus_width = esdhc_pltfm_bus_width,
+> +	.platform_execute_tuning = esdhc_executing_tuning,
+>  };
+>  
+>  static const struct sdhci_pltfm_data sdhci_esdhc_imx_pdata = {
 > -- 
-> Regards,
+> 1.7.1
 > 
-> Laurent Pinchart
 > 
+
