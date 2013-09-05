@@ -1,115 +1,92 @@
-From: Dinh Nguyen <dinguyen@altera.com>
-Subject: RE: [RFC V3 2/4] mmc: dw_mmc: socfpga: move socfpga private init
-Date: Wed, 4 Sep 2013 14:31:06 -0500
-Message-ID: <1378323066.9054.3.camel@linux-builds1>
-References: <1377691731-7226-1-git-send-email-yuvaraj.cd@samsung.com>
-	 <1377691731-7226-3-git-send-email-yuvaraj.cd@samsung.com>
-	 <001601cea4af$42e662f0$c8b328d0$%jun@samsung.com>
+From: Shawn Guo <shawn.guo@linaro.org>
+Subject: Re: [PATCH 1/8] mmc: sdhci: add hooks for platform specific tuning
+Date: Thu, 5 Sep 2013 11:14:04 +0800
+Message-ID: <20130905031401.GA775@shlinux1.ap.freescale.net>
+References: <1378299257-2980-1-git-send-email-b29396@freescale.com>
+ <1378299257-2980-2-git-send-email-b29396@freescale.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-Reply-To: <001601cea4af$42e662f0$c8b328d0$%jun@samsung.com>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Seungwon Jeon <tgih.jun@samsung.com>
-Cc: 'Yuvaraj Kumar C D' <yuvaraj.cd@gmail.com>, linux-mmc@vger.kernel.org, linux-samsung-soc@vger.kernel.org, cjb@laptop.org, jh80.chung@samsung.com, ks.giri@samsung.com, t.figa@samsung.com, alim.akhtar@samsung.com, 'Yuvaraj Kumar C D' <yuvaraj.cd@samsung.com>
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+Content-Disposition: inline
+In-Reply-To: <1378299257-2980-2-git-send-email-b29396@freescale.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Dong Aisheng <b29396@freescale.com>
+Cc: s.hauer@pengutronix.de, cjb@laptop.org, linux-mmc@vger.kernel.org, anton@enomsg.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Thu, 2013-08-29 at 20:59 +0900, Seungwon Jeon wrote:
-> On Wed, August 28, 2013, Yuvaraj Kumar C D wrote:
-> > Currently platform specific private data initialisation is done by
-> > dw_mci_socfpga_priv_init and dw_mci_socfpga_parse_dt.As we already have
-> > separate platform specific device tree parser dw_mci_socfpga_parse_dt,
-> > move the dw_mci_socfpga_priv_init code to dw_mci_socfpga_parse_dt.
-> > We can use the dw_mci_socfpga_priv_init to do some actual platform
-> > specific initialisation.
-
-I am looking to remove all of dw_mmc-socfpga file. The only reason for
-this file is to set the sdr timing values. But since the register that
-controls these SDR values are located out of the IP, it is probably best
-to implement the settings in platform specific code.
-
-Dinh
-> > 
-> > This patch is compile tested only.
-> CC'ed Dinh Nguyen
+On Wed, Sep 04, 2013 at 08:54:10PM +0800, Dong Aisheng wrote:
+> The tuning of some platforms may not follow the standard host control
+> spec v3.0, e.g. Freescale uSDHC on i.MX6Q/DL.
+> Add a hook here to allow execute platform specific tuning instead of
+> standard host controller tuning.
 > 
-> Thanks,
-> Seungwon Jeon
+> Signed-off-by: Dong Aisheng <b29396@freescale.com>
+> ---
+>  drivers/mmc/host/sdhci.c |    8 ++++++++
+>  drivers/mmc/host/sdhci.h |    1 +
+>  2 files changed, 9 insertions(+), 0 deletions(-)
 > 
-> > 
-> > changes since V2: none
-> > 
-> > Signed-off-by: Yuvaraj Kumar C D <yuvaraj.cd@samsung.com>
-> > ---
-> >  drivers/mmc/host/dw_mmc-socfpga.c |   29 ++++++++++++++---------------
-> >  1 file changed, 14 insertions(+), 15 deletions(-)
-> > 
-> > diff --git a/drivers/mmc/host/dw_mmc-socfpga.c b/drivers/mmc/host/dw_mmc-socfpga.c
-> > index 14b5961..953f260 100644
-> > --- a/drivers/mmc/host/dw_mmc-socfpga.c
-> > +++ b/drivers/mmc/host/dw_mmc-socfpga.c
-> > @@ -38,20 +38,6 @@ struct dw_mci_socfpga_priv_data {
-> > 
-> >  static int dw_mci_socfpga_priv_init(struct dw_mci *host)
-> >  {
-> > -	struct dw_mci_socfpga_priv_data *priv;
-> > -
-> > -	priv = devm_kzalloc(host->dev, sizeof(*priv), GFP_KERNEL);
-> > -	if (!priv) {
-> > -		dev_err(host->dev, "mem alloc failed for private data\n");
-> > -		return -ENOMEM;
-> > -	}
-> > -
-> > -	priv->sysreg = syscon_regmap_lookup_by_compatible("altr,sys-mgr");
-> > -	if (IS_ERR(priv->sysreg)) {
-> > -		dev_err(host->dev, "regmap for altr,sys-mgr lookup failed.\n");
-> > -		return PTR_ERR(priv->sysreg);
-> > -	}
-> > -	host->priv = priv;
-> > 
-> >  	return 0;
-> >  }
-> > @@ -79,12 +65,24 @@ static void dw_mci_socfpga_prepare_command(struct dw_mci *host, u32 *cmdr)
-> > 
-> >  static int dw_mci_socfpga_parse_dt(struct dw_mci *host)
-> >  {
-> > -	struct dw_mci_socfpga_priv_data *priv = host->priv;
-> > +	struct dw_mci_socfpga_priv_data *priv;
-> >  	struct device_node *np = host->dev->of_node;
-> >  	u32 timing[2];
-> >  	u32 div = 0;
-> >  	int ret;
-> > 
-> > +	priv = devm_kzalloc(host->dev, sizeof(*priv), GFP_KERNEL);
-> > +	if (!priv) {
-> > +		dev_err(host->dev, "mem alloc failed for private data\n");
-> > +		return -ENOMEM;
-> > +	}
-> > +
-> > +	priv->sysreg = syscon_regmap_lookup_by_compatible("altr,sys-mgr");
-> > +	if (IS_ERR(priv->sysreg)) {
-> > +		dev_err(host->dev, "regmap for altr,sys-mgr lookup failed.\n");
-> > +		return PTR_ERR(priv->sysreg);
-> > +	}
-> > +
-> >  	ret = of_property_read_u32(np, "altr,dw-mshc-ciu-div", &div);
-> >  	if (ret)
-> >  		dev_info(host->dev, "No dw-mshc-ciu-div specified, assuming 1");
-> > @@ -96,6 +94,7 @@ static int dw_mci_socfpga_parse_dt(struct dw_mci *host)
-> >  		return ret;
-> > 
-> >  	priv->hs_timing = SYSMGR_SDMMC_CTRL_SET(timing[0], timing[1]);
-> > +	host->priv = priv;
-> >  	return 0;
-> >  }
-> > 
-> > --
-> > 1.7.9.5
-> > 
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index dd2c083..2890cfd 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -1875,6 +1875,14 @@ static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
+>  		return 0;
+>  	}
+>  
+> +	if (host->ops->platform_execute_tuning) {
+> +		spin_unlock(&host->lock);
+> +		enable_irq(host->irq);
+
+Hmm, you want these two functions be called before
+platform_execute_tuning()?  That probably means you do not need to call
+spin_lock() and disable_irq() for platform_execute_tuning()?  In that
+case, can we not just put this platform hook at the beginning of the
+function, something like below?
+
+	host = mmc_priv(mmc);
+
+	if (host->ops->platform_execute_tuning) {
+		sdhci_runtime_pm_get(host);
+		err = host->ops->platform_execute_tuning(host, opcode);
+		sdhci_runtime_pm_put(host);
+	}
+
+I guess that's more clear to tell that platform_execute_tuning hook is
+there to replace sdhci_execute_tuning() completely.  Is it the case?
+
+Shawn
+
+> +		err = host->ops->platform_execute_tuning(host, opcode);
+> +		sdhci_runtime_pm_put(host);
+> +		return err;
+> +	}
+> +
+>  	sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
+>  
+>  	/*
+> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+> index b037f18..976c14b 100644
+> --- a/drivers/mmc/host/sdhci.h
+> +++ b/drivers/mmc/host/sdhci.h
+> @@ -288,6 +288,7 @@ struct sdhci_ops {
+>  	unsigned int    (*get_ro)(struct sdhci_host *host);
+>  	void	(*platform_reset_enter)(struct sdhci_host *host, u8 mask);
+>  	void	(*platform_reset_exit)(struct sdhci_host *host, u8 mask);
+> +	int	(*platform_execute_tuning)(struct sdhci_host *host, u32 opcode);
+>  	int	(*set_uhs_signaling)(struct sdhci_host *host, unsigned int uhs);
+>  	void	(*hw_reset)(struct sdhci_host *host);
+>  	void	(*platform_suspend)(struct sdhci_host *host);
+> -- 
+> 1.7.1
 > 
 > 
