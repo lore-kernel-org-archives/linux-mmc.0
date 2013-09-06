@@ -1,74 +1,89 @@
-From: Mark Jackson <mpfj-list@newflow.co.uk>
+From: Joel Fernandes <joelf-l0cyMroinI0@public.gmane.org>
 Subject: Re: [PATCH v2] ARM: EDMA: Fix clearing of unused list for DT DMA
- resources
-Date: Fri, 06 Sep 2013 20:15:27 +0100
-Message-ID: <522A29CF.2090001@newflow.co.uk>
-References: <1377287613-16491-1-git-send-email-joelf@ti.com> <522A2943.4060502@newflow.co.uk>
+	resources
+Date: Fri, 6 Sep 2013 14:51:14 -0500
+Message-ID: <522A3232.2090103@ti.com>
+References: <1377287613-16491-1-git-send-email-joelf@ti.com>
+	<522A2943.4060502@newflow.co.uk> <522A29CF.2090001@newflow.co.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <522A2943.4060502@newflow.co.uk>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Joel Fernandes <joelf@ti.com>
-Cc: Sekhar Nori <nsekhar@ti.com>, Tony Lindgren <tony@atomide.com>, Matt Porter <matt@ohporter.com>, Vinod Koul <vinod.koul@intel.com>, Dan Williams <djbw@fb.com>, Russell King <linux@arm.linux.org.uk>, Linux OMAP List <linux-omap@vger.kernel.org>, Linux ARM Kernel List <linux-arm-kernel@lists.infradead.org>, Linux DaVinci Kernel List <davinci-linux-open-source@linux.davincidsp.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux MMC List <linux-mmc@vger.kernel.org>, Pantel Antoniou <panto@antoniou-consulting.com>
+Return-path: <davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
+In-Reply-To: <522A29CF.2090001-2FZW7xY0fHgqdlJmJB21zg@public.gmane.org>
+List-Unsubscribe: <http://linux.davincidsp.com/mailman/options/davinci-linux-open-source>,
+	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://linux.davincidsp.com/pipermail/davinci-linux-open-source>
+List-Post: <mailto:davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
+List-Help: <mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=help>
+List-Subscribe: <http://linux.davincidsp.com/mailman/listinfo/davinci-linux-open-source>,
+	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=subscribe>
+Sender: <davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
+Errors-To: davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org
+To: Mark Jackson <mpfj-list-2FZW7xY0fHgqdlJmJB21zg@public.gmane.org>
+Cc: Linux DaVinci Kernel List <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Vinod Koul <vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Pantel Antoniou <panto-wVdstyuyKrO8r51toPun2/C9HSW9iNxf@public.gmane.org>, Dan Williams <djbw-b10kYP2dOMg@public.gmane.org>, Linux OMAP List <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux ARM Kernel List <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 06/09/13 20:13, Mark Jackson wrote:
-> On 23/08/13 20:53, Joel Fernandes wrote:
->> HWMOD removal for MMC and Crypto is breaking edma_start as the events are
->> being manually triggered due to unused channel list not being clear. Atleast
->> breakage has been seen on these peripherals, but it is expected Audio (McASP)
->> maybe breaking too.
+On 09/06/2013 02:15 PM, Mark Jackson wrote:
+> On 06/09/13 20:13, Mark Jackson wrote:
+>> On 23/08/13 20:53, Joel Fernandes wrote:
+>>> HWMOD removal for MMC and Crypto is breaking edma_start as the events are
+>>> being manually triggered due to unused channel list not being clear. Atleast
+>>> breakage has been seen on these peripherals, but it is expected Audio (McASP)
+>>> maybe breaking too.
+>>>
+>>> This patch fixes the issue, by reading the "dmas" property from the DT node if
+>>> it exists and clearing the bits in the unused channel list so that these channels
+>>> are not manually triggered.
+>>>
+>>> v2 changes:
+>>> Reduced indendation by returning from if block.
+>>>
+>>> Reviewed-by: Sekhar Nori <nsekhar-l0cyMroinI0@public.gmane.org>
+>>> Reported-by: Balaji T K <balajitk-l0cyMroinI0@public.gmane.org>
+>>> Cc: Pantel Antoniou <panto-wVdstyuyKrO8r51toPun2/C9HSW9iNxf@public.gmane.org>
+>>> Signed-off-by: Joel Fernandes <joelf-l0cyMroinI0@public.gmane.org>
+>>> ---
+>>> Note:
+>>> Patch should go in for -rc cycle as it fixes existing crypto drivers.
+>>>
+>>>  arch/arm/common/edma.c | 22 +++++++++++++++++++---
+>>>  1 file changed, 19 insertions(+), 3 deletions(-)
+>>>
+>>> diff --git a/arch/arm/common/edma.c b/arch/arm/common/edma.c
+>>> index 39ad030..3867e7e 100644
+>>> --- a/arch/arm/common/edma.c
+>>> +++ b/arch/arm/common/edma.c
+>>> @@ -560,14 +560,30 @@ static int reserve_contiguous_slots(int ctlr, unsigned int id,
+>>>  static int prepare_unused_channel_list(struct device *dev, void *data)
+>>>  {
+>>>  	struct platform_device *pdev = to_platform_device(dev);
+>>> -	int i, ctlr;
+>>> +	int i = 0, ctlr;
+>>> +	u32 dma_chan;
+>>> +	const __be32 *dma_chan_p;
+>>> +	struct property *prop;
+>>> +
+>>> +	if (dev->of_node) {
+>>> +		of_property_for_each_u32(dev->of_node, "dmas", prop,
+>>> +					 dma_chan_p, dma_chan) {
+>>> +			if (i++ & 1) {
+>>> +				ctlr = EDMA_CTLR(dma_chan);
+>>> +				clear_bit(EDMA_CHAN_SLOT(dma_chan),
+>>> +					  edma_cc[ctlr]->edma_unused);
+>>> +			}
+>>> +		}
+>>> +		return;
 >>
->> This patch fixes the issue, by reading the "dmas" property from the DT node if
->> it exists and clearing the bits in the unused channel list so that these channels
->> are not manually triggered.
+>> This should return something here, otherwise we get:-
 >>
->> v2 changes:
->> Reduced indendation by returning from if block.
->>
->> Reviewed-by: Sekhar Nori <nsekhar@ti.com>
->> Reported-by: Balaji T K <balajitk@ti.com>
->> Cc: Pantel Antoniou <panto@antoniou-consulting.com>
->> Signed-off-by: Joel Fernandes <joelf@ti.com>
->> ---
->> Note:
->> Patch should go in for -rc cycle as it fixes existing crypto drivers.
->>
->>  arch/arm/common/edma.c | 22 +++++++++++++++++++---
->>  1 file changed, 19 insertions(+), 3 deletions(-)
->>
->> diff --git a/arch/arm/common/edma.c b/arch/arm/common/edma.c
->> index 39ad030..3867e7e 100644
->> --- a/arch/arm/common/edma.c
->> +++ b/arch/arm/common/edma.c
->> @@ -560,14 +560,30 @@ static int reserve_contiguous_slots(int ctlr, unsigned int id,
->>  static int prepare_unused_channel_list(struct device *dev, void *data)
->>  {
->>  	struct platform_device *pdev = to_platform_device(dev);
->> -	int i, ctlr;
->> +	int i = 0, ctlr;
->> +	u32 dma_chan;
->> +	const __be32 *dma_chan_p;
->> +	struct property *prop;
->> +
->> +	if (dev->of_node) {
->> +		of_property_for_each_u32(dev->of_node, "dmas", prop,
->> +					 dma_chan_p, dma_chan) {
->> +			if (i++ & 1) {
->> +				ctlr = EDMA_CTLR(dma_chan);
->> +				clear_bit(EDMA_CHAN_SLOT(dma_chan),
->> +					  edma_cc[ctlr]->edma_unused);
->> +			}
->> +		}
->> +		return;
+>> arch/arm/common/edma.c: In function 'prepare_unused_channel_list':
+>> arch/arm/common/edma.c:577:3: warning: 'return' with no value, in function returning non-void [-Wreturn-type]
 > 
-> This should return something here, otherwise we get:-
-> 
-> arch/arm/common/edma.c: In function 'prepare_unused_channel_list':
-> arch/arm/common/edma.c:577:3: warning: 'return' with no value, in function returning non-void [-Wreturn-type]
+> Other than that I can confirm it fixes the issue for me ...
 
-Other than that I can confirm it fixes the issue for me ...
+Thanks for pointing that out. Will fix it in the next revision.
 
-Tested-by: Mark Jackson <mpfj@newflow.co.uk>
+
+Regards,
+
+-Joel
