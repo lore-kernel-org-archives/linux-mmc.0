@@ -1,230 +1,93 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH] mmc: sdhci: add support for pre_req and post_req
-Date: Fri, 06 Sep 2013 17:05:23 +0900
-Message-ID: <52298CC3.8020308@samsung.com>
-References: <1378447313-12935-1-git-send-email-chanho.min@lge.com>
+From: Mark Jackson <mpfj-list-2FZW7xY0fHgqdlJmJB21zg@public.gmane.org>
+Subject: Re: [PATCH v2] ARM: EDMA: Fix clearing of unused list for DT DMA
+	resources
+Date: Fri, 6 Sep 2013 20:13:07 +0100
+Message-ID: <522A2943.4060502@newflow.co.uk>
+References: <1377287613-16491-1-git-send-email-joelf@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout2.samsung.com ([203.254.224.25]:18710 "EHLO
-	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750737Ab3IFIFM (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 6 Sep 2013 04:05:12 -0400
-In-reply-to: <1378447313-12935-1-git-send-email-chanho.min@lge.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
+In-Reply-To: <1377287613-16491-1-git-send-email-joelf-l0cyMroinI0@public.gmane.org>
+List-Unsubscribe: <http://linux.davincidsp.com/mailman/options/davinci-linux-open-source>,
+	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://linux.davincidsp.com/pipermail/davinci-linux-open-source>
+List-Post: <mailto:davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
+List-Help: <mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=help>
+List-Subscribe: <http://linux.davincidsp.com/mailman/listinfo/davinci-linux-open-source>,
+	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=subscribe>
+Sender: <davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
+Errors-To: davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org
+To: Joel Fernandes <joelf-l0cyMroinI0@public.gmane.org>
+Cc: Linux DaVinci Kernel List <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Vinod Koul <vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Pantel Antoniou <panto-wVdstyuyKrO8r51toPun2/C9HSW9iNxf@public.gmane.org>, Dan Williams <djbw-b10kYP2dOMg@public.gmane.org>, Linux OMAP List <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux ARM Kernel List <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-Hi, Chanho.
-
-I remembered Shawn Guo had posted this patch.
-Do you resend it?
-
-Best Regards,
-Jaehoon Chung
-
-On 09/06/2013 03:01 PM, Chanho Min wrote:
-> This patch supports non-blocking mmc request function for the sdchi driver.
-> (commit: aa8b683a7d392271ed349c6ab9f36b8c313794b7)
+On 23/08/13 20:53, Joel Fernandes wrote:
+> HWMOD removal for MMC and Crypto is breaking edma_start as the events are
+> being manually triggered due to unused channel list not being clear. Atleast
+> breakage has been seen on these peripherals, but it is expected Audio (McASP)
+> maybe breaking too.
 > 
-> pre_req() runs dma_map_sg(), post_req() runs dma_unmap_sg.  If not calling
-> pre_req() before sdhci_request(), dma_map_sg will be issued before
-> starting the transfer.  It is optional to use pre_req().  If issuing
-> pre_req(), post_req() must be called as well.
+> This patch fixes the issue, by reading the "dmas" property from the DT node if
+> it exists and clearing the bits in the unused channel list so that these channels
+> are not manually triggered.
 > 
-> benchmark results:
->  ARM CA9 1GHz, UHS DDR50 mode
+> v2 changes:
+> Reduced indendation by returning from if block.
 > 
->  Before:
->  dd if=/dev/mmcblk0p15 of=/dev/null bs=64k count=1024
->  67108864 bytes (64.0MB) copied, 1.188846 seconds, 53.8MB/s
-> 
->  After:
->  dd if=/dev/mmcblk0p15 of=/dev/null bs=64k count=1024
->  67108864 bytes (64.0MB) copied, 0.993098 seconds, 64.4MB/s
-> 
-> Signed-off-by: Chanho Min <chanho.min@lge.com>
+> Reviewed-by: Sekhar Nori <nsekhar-l0cyMroinI0@public.gmane.org>
+> Reported-by: Balaji T K <balajitk-l0cyMroinI0@public.gmane.org>
+> Cc: Pantel Antoniou <panto-wVdstyuyKrO8r51toPun2/C9HSW9iNxf@public.gmane.org>
+> Signed-off-by: Joel Fernandes <joelf-l0cyMroinI0@public.gmane.org>
 > ---
->  drivers/mmc/host/sdhci.c  |   96 +++++++++++++++++++++++++++++++++++++++------
->  include/linux/mmc/sdhci.h |    6 +++
->  2 files changed, 90 insertions(+), 12 deletions(-)
+> Note:
+> Patch should go in for -rc cycle as it fixes existing crypto drivers.
 > 
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 2ea429c..0465a9a 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -465,6 +465,42 @@ static void sdhci_set_adma_desc(u8 *desc, u32 addr, int len, unsigned cmd)
->  	dataddr[0] = cpu_to_le32(addr);
->  }
->  
-> +static int sdhci_pre_dma_transfer(struct sdhci_host *host,
-> +				       struct mmc_data *data,
-> +				       struct sdhci_next *next)
-> +{
-> +	int sg_count = 0;
-> +
-> +	if (!next && data->host_cookie &&
-> +	    data->host_cookie != host->next_data.cookie) {
-> +		pr_warn("[%s] invalid cookie: data->host_cookie %d"
-> +			" host->next_data.cookie %d\n",
-> +			__func__, data->host_cookie, host->next_data.cookie);
-> +		data->host_cookie = 0;
-> +	}
-> +
-> +	/* Check if next job is already prepared */
-> +	if (next ||
-> +	    (!next && data->host_cookie != host->next_data.cookie)) {
-> +		sg_count = dma_map_sg(mmc_dev(host->mmc), data->sg,
-> +					data->sg_len,
-> +					(data->flags & MMC_DATA_READ) ?
-> +						DMA_FROM_DEVICE :
-> +						DMA_TO_DEVICE);
-> +	} else {
-> +		sg_count = host->next_data.sg_count;
-> +		host->next_data.sg_count = 0;
-> +	}
-> +
-> +	if (next) {
-> +		next->sg_count = sg_count;
-> +		data->host_cookie = ++next->cookie < 0 ? 1 : next->cookie;
-> +	} else
-> +		host->sg_count = sg_count;
-> +
-> +	return sg_count;
-> +}
-> +
->  static int sdhci_adma_table_pre(struct sdhci_host *host,
->  	struct mmc_data *data)
+>  arch/arm/common/edma.c | 22 +++++++++++++++++++---
+>  1 file changed, 19 insertions(+), 3 deletions(-)
+> 
+> diff --git a/arch/arm/common/edma.c b/arch/arm/common/edma.c
+> index 39ad030..3867e7e 100644
+> --- a/arch/arm/common/edma.c
+> +++ b/arch/arm/common/edma.c
+> @@ -560,14 +560,30 @@ static int reserve_contiguous_slots(int ctlr, unsigned int id,
+>  static int prepare_unused_channel_list(struct device *dev, void *data)
 >  {
-> @@ -502,8 +538,8 @@ static int sdhci_adma_table_pre(struct sdhci_host *host,
->  		goto fail;
->  	BUG_ON(host->align_addr & 0x3);
->  
-> -	host->sg_count = dma_map_sg(mmc_dev(host->mmc),
-> -		data->sg, data->sg_len, direction);
-> +	host->sg_count = sdhci_pre_dma_transfer(host, data, NULL);
+>  	struct platform_device *pdev = to_platform_device(dev);
+> -	int i, ctlr;
+> +	int i = 0, ctlr;
+> +	u32 dma_chan;
+> +	const __be32 *dma_chan_p;
+> +	struct property *prop;
 > +
->  	if (host->sg_count == 0)
->  		goto unmap_align;
->  
-> @@ -643,9 +679,10 @@ static void sdhci_adma_table_post(struct sdhci_host *host,
->  			}
->  		}
->  	}
-> -
-> -	dma_unmap_sg(mmc_dev(host->mmc), data->sg,
-> -		data->sg_len, direction);
-> +	if (!data->host_cookie) {
-> +		dma_unmap_sg(mmc_dev(host->mmc), data->sg,
-> +			data->sg_len, direction);
-> +	}
->  }
->  
->  static u8 sdhci_calc_timeout(struct sdhci_host *host, struct mmc_command *cmd)
-> @@ -824,12 +861,8 @@ static void sdhci_prepare_data(struct sdhci_host *host, struct mmc_command *cmd)
->  			}
->  		} else {
->  			int sg_cnt;
-> +			sg_cnt = sdhci_pre_dma_transfer(host, data, NULL);
->  
-> -			sg_cnt = dma_map_sg(mmc_dev(host->mmc),
-> -					data->sg, data->sg_len,
-> -					(data->flags & MMC_DATA_READ) ?
-> -						DMA_FROM_DEVICE :
-> -						DMA_TO_DEVICE);
->  			if (sg_cnt == 0) {
->  				/*
->  				 * This only happens when someone fed
-> @@ -928,9 +961,12 @@ static void sdhci_finish_data(struct sdhci_host *host)
->  		if (host->flags & SDHCI_USE_ADMA)
->  			sdhci_adma_table_post(host, data);
->  		else {
-> -			dma_unmap_sg(mmc_dev(host->mmc), data->sg,
-> -				data->sg_len, (data->flags & MMC_DATA_READ) ?
-> +			if (!data->host_cookie) {
-> +				dma_unmap_sg(mmc_dev(host->mmc), data->sg,
-> +					data->sg_len,
-> +					(data->flags & MMC_DATA_READ) ?
->  					DMA_FROM_DEVICE : DMA_TO_DEVICE);
+> +	if (dev->of_node) {
+> +		of_property_for_each_u32(dev->of_node, "dmas", prop,
+> +					 dma_chan_p, dma_chan) {
+> +			if (i++ & 1) {
+> +				ctlr = EDMA_CTLR(dma_chan);
+> +				clear_bit(EDMA_CHAN_SLOT(dma_chan),
+> +					  edma_cc[ctlr]->edma_unused);
 > +			}
+> +		}
+> +		return;
+
+This should return something here, otherwise we get:-
+
+arch/arm/common/edma.c: In function 'prepare_unused_channel_list':
+arch/arm/common/edma.c:577:3: warning: 'return' with no value, in function returning non-void [-Wreturn-type]
+
+Mark J.
+
+> +	}
+>  
+> -	for (i = 0; i < pdev->num_resources; i++) {
+> +	/* For non-OF case */
+> +	for (; i < pdev->num_resources; i++) {
+>  		if ((pdev->resource[i].flags & IORESOURCE_DMA) &&
+>  				(int)pdev->resource[i].start >= 0) {
+>  			ctlr = EDMA_CTLR(pdev->resource[i].start);
+>  			clear_bit(EDMA_CHAN_SLOT(pdev->resource[i].start),
+> -					edma_cc[ctlr]->edma_unused);
+> +				  edma_cc[ctlr]->edma_unused);
 >  		}
 >  	}
->  
-> @@ -2066,8 +2102,42 @@ static void sdhci_card_event(struct mmc_host *mmc)
->  	spin_unlock_irqrestore(&host->lock, flags);
->  }
->  
-> +static void sdhci_post_req(struct mmc_host *mmc, struct mmc_request *mrq,
-> +				int err)
-> +{
-> +	struct sdhci_host *host = mmc_priv(mmc);
-> +	struct mmc_data *data = mrq->data;
-> +
-> +	if (host->flags & SDHCI_REQ_USE_DMA) {
-> +		dma_unmap_sg(mmc_dev(host->mmc), data->sg, data->sg_len,
-> +			(data->flags & MMC_DATA_READ) ?
-> +			DMA_FROM_DEVICE :
-> +			DMA_TO_DEVICE);
-> +		data->host_cookie = 0;
-> +	}
-> +}
-> +
-> +static void sdhci_pre_req(struct mmc_host *mmc, struct mmc_request *mrq,
-> +			       bool is_first_req)
-> +{
-> +	struct sdhci_host *host = mmc_priv(mmc);
-> +	struct mmc_data *data = mrq->data;
-> +
-> +	if (mrq->data->host_cookie) {
-> +		mrq->data->host_cookie = 0;
-> +		return;
-> +	}
-> +
-> +	if (host->flags & SDHCI_REQ_USE_DMA) {
-> +		if (!sdhci_pre_dma_transfer(host, data, &host->next_data))
-> +			mrq->data->host_cookie = 0;
-> +	}
-> +}
-> +
->  static const struct mmc_host_ops sdhci_ops = {
->  	.request	= sdhci_request,
-> +	.post_req	= sdhci_post_req,
-> +	.pre_req	= sdhci_pre_req,
->  	.set_ios	= sdhci_set_ios,
->  	.get_cd		= sdhci_get_cd,
->  	.get_ro		= sdhci_get_ro,
-> @@ -3204,6 +3274,8 @@ int sdhci_add_host(struct sdhci_host *host)
->  	}
->  #endif
->  
-> +	host->next_data.cookie = 1;
-> +
->  	mmiowb();
->  
->  	mmc_add_host(mmc);
-> diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
-> index b838ffc..220a515 100644
-> --- a/include/linux/mmc/sdhci.h
-> +++ b/include/linux/mmc/sdhci.h
-> @@ -17,6 +17,11 @@
->  #include <linux/io.h>
->  #include <linux/mmc/host.h>
->  
-> +struct sdhci_next {
-> +	unsigned int	sg_count;
-> +	s32		cookie;
-> +};
-> +
->  struct sdhci_host {
->  	/* Data set by hardware interface driver */
->  	const char *hw_name;	/* Hardware bus name */
-> @@ -177,5 +182,6 @@ struct sdhci_host {
->  	struct timer_list	tuning_timer;	/* Timer for tuning */
->  
->  	unsigned long private[0] ____cacheline_aligned;
-> +	struct sdhci_next	next_data;
->  };
->  #endif /* LINUX_MMC_SDHCI_H */
-> 
-
