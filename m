@@ -1,161 +1,92 @@
 From: <dinguyen@altera.com>
-Subject: [PATCH 3/3] arm: dts: socfpga: Add support for SD/MMC
-Date: Mon, 9 Sep 2013 10:33:53 -0500
-Message-ID: <1378740833-4883-4-git-send-email-dinguyen@altera.com>
-References: <1378740833-4883-1-git-send-email-dinguyen@altera.com>
+Subject: [PATCH 0/3] Add support for SD/MMC on SOCFPGA
+Date: Mon, 9 Sep 2013 10:33:50 -0500
+Message-ID: <1378740833-4883-1-git-send-email-dinguyen@altera.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from co1ehsobe005.messaging.microsoft.com ([216.32.180.188]:59565
+Received: from co1ehsobe001.messaging.microsoft.com ([216.32.180.184]:56141
 	"EHLO co1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753996Ab3IIPeG (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 9 Sep 2013 11:34:06 -0400
-In-Reply-To: <1378740833-4883-1-git-send-email-dinguyen@altera.com>
+	by vger.kernel.org with ESMTP id S1753760Ab3IIPeE (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 9 Sep 2013 11:34:04 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: dinh.linux@gmail.com
-Cc: Dinh Nguyen <dinguyen@altera.com>, Pavel Machek <pavel@denx.de>, Arnd Bergmann <arnd@arndb.de>, Olof Johansson <olof@lixom.net>, Rob Herring <rob.herring@calxeda.com>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Stephen Warren <swarren@wwwdotorg.org>, Ian Campbell <ian.campbell@citrix.com>, Chris Ball <cjb@laptop.org>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Cc: Dinh Nguyen <dinguyen@altera.com>, Pavel Machek <pavel@denx.de>, Rob Herring <rob.herring@calxeda.com>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Stephen Warren <swarren@wwwdotorg.org>, Ian Campbell <ian.campbell@citrix.com>, Chris Ball <cjb@laptop.org>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, Arnd Bergmann <arnd@arndb.de>, Olof Johansson <olof@lixom.net>, linux-arm-kernel@lists.infradead.org
 
 From: Dinh Nguyen <dinguyen@altera.com>
 
-Add bindings for SD/MMC for SOCFPGA.
+Hi,
 
-Signed-off-by: Dinh Nguyen <dinguyen@altera.com>
-Cc: Pavel Machek <pavel@denx.de>
-CC: Arnd Bergmann <arnd@arndb.de>
-CC: Olof Johansson <olof@lixom.net>
-Cc: Rob Herring <rob.herring@calxeda.com>
-Cc: Pawel Moll <pawel.moll@arm.com>
-Cc: Mark Rutland <mark.rutland@arm.com>
-Cc: Stephen Warren <swarren@wwwdotorg.org>
-Cc: Ian Campbell <ian.campbell@citrix.com>
-Cc: Chris Ball <cjb@laptop.org>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: Seungwon Jeon <tgih.jun@samsung.com>
-Cc: devicetree@vger.kernel.org
-Cc: linux-mmc@vger.kernel.org
-CC: linux-arm-kernel@lists.infradead.org
----
- .../devicetree/bindings/mmc/socfpga-dw-mshc.txt    |   38 ++++++++++++++++++++
- arch/arm/boot/dts/socfpga.dtsi                     |   11 ++++++
- arch/arm/boot/dts/socfpga_cyclone5.dts             |   12 +++++++
- arch/arm/boot/dts/socfpga_vt.dts                   |   12 +++++++
- 4 files changed, 73 insertions(+)
+Here is a patch series that enables SD/MMC support for the SOCFPGA platform.
+This is the 6th revision of the series. This series is intended for v3.13.
+
+v6:
+- Reuse "samsung,dw-mshc-sdr-timing" binding
+- Clean up dw_mmc-socfpga.c to have only the necessary functions
+	- Remove dw_mci_socfpga_parse_dt(), as we'll let the platform function:
+		socfpga_sysmgr_set_dwmmc_drvsel_smpsel() do that work
+	- Always use SDMMC_CMD_USE_HOLD_REG
+- Add mach-socfpga/system_mgr.c, which contains function that will set the
+  SD/MMC SDR values in the System Manager.
+- Expose an API function in the mach-socfpga platform code so that the SD/MMC
+  driver can use to set the SDR values.
+
+I know that there's a general rule not to have drivers access specific
+function(s) in platform code, but for this case I am really unsure of what
+would be the best solution. The system manager IP block itself does not warrant
+a driver, so a "syscon" driver should suffice. However, there are specific
+register offsets that are needed, these can be defined in either in the SD/MMC 
+or DTS entry. But in order for the DTS entries to be correct, it would need register 
+offset information as well. And I was informed that register offsets were frowned 
+upon in the past.
+   
+So for this go-around, I am exposing an API from the mach-socfpga platform
+code that will only be used by a platform-specific implementation of the SD/MMC
+driver.
+
+v5:
+- Add "altr,ciu-clk-offset" that represents the necessary offset
+	and shift values in the sysmgr phandle. This is used to set
+	the correct CIU clock values.
+    
+v4:
+- Add a complete binding example in documentations
+- Add a phandle entry for "altr,sysmgr" which links the system
+	manager to the SD/MMC IP block that controls the SDR timings.
+- Split up patches
+	1/3 - Add syscon binding to sys-mgr node
+	2/3 - DTS bindings and documentation for SD/MMC on SOCFPGA
+	3/3 - Driver changes to use the bindings
+    
+v3:
+- Explicitly reference synopsis-dw-mshc.txt for base bindings
+- Remove "dw-mshc-ciu-div" as driver can get clock information dts "ciu" entry
+- Fixed indentation issue
+    
+v2:
+- Remove bus-width and extra line in documentation
+- Merge bindings example into a single node in documentation
+
+
+Dinh Nguyen (3):
+  arm: socfpga: Set the SDMMC clock phase in system manager
+  mmc: dw_mmc-socfpga: Clean up SOCFPGA platform specific functionality
+  arm: dts: socfpga: Add support for SD/MMC
+
+ .../devicetree/bindings/mmc/socfpga-dw-mshc.txt    |   38 ++++++++++++
+ arch/arm/boot/dts/socfpga.dtsi                     |   11 ++++
+ arch/arm/boot/dts/socfpga_cyclone5.dts             |   12 ++++
+ arch/arm/boot/dts/socfpga_vt.dts                   |   12 ++++
+ arch/arm/mach-socfpga/Makefile                     |    2 +-
+ arch/arm/mach-socfpga/core.h                       |    6 ++
+ arch/arm/mach-socfpga/system_mgr.c                 |   32 ++++++++++
+ drivers/mmc/host/dw_mmc-pltfm.h                    |    2 +-
+ drivers/mmc/host/dw_mmc-socfpga.c                  |   63 +-------------------
+ 9 files changed, 115 insertions(+), 63 deletions(-)
  create mode 100644 Documentation/devicetree/bindings/mmc/socfpga-dw-mshc.txt
+ create mode 100644 arch/arm/mach-socfpga/system_mgr.c
 
-diff --git a/Documentation/devicetree/bindings/mmc/socfpga-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/socfpga-dw-mshc.txt
-new file mode 100644
-index 0000000..f565835
---- /dev/null
-+++ b/Documentation/devicetree/bindings/mmc/socfpga-dw-mshc.txt
-@@ -0,0 +1,38 @@
-+* Altera SOCFPGA specific extensions to the Synopsis Designware Mobile
-+  Storage Host Controller
-+
-+The Synopsis designware mobile storage host controller is used to interface
-+a SoC with storage medium such as eMMC or SD/MMC cards. This file documents
-+differences between the core Synopsis dw mshc controller properties described
-+by synopsis-dw-mshc.txt and the properties used by the SOCFPGA specific
-+extensions to the Synopsis Designware Mobile Storage Host Controller.
-+
-+Required Properties:
-+
-+* compatible: should be
-+        - "altr,socfpga-dw-mshc": for controllers with Altera SOCFPGA
-+          specific extensions.
-+
-+* samsung,dw-mshc-sdr-timing: See exynos-dw-mshc.txt for more information about
-+	this binding.
-+
-+Example:
-+        dwmmc0@ff704000 {
-+                compatible = "altr,socfpga-dw-mshc", "snps,dw-mshc";
-+                reg = <0xff704000 0x1000>;
-+                interrupts = <0 139 4>;
-+                fifo-depth = <0x400>;
-+                #address-cells = <1>;
-+                #size-cells = <0>;
-+                clocks = <&l4_mp_clk>, <&sdmmc_clk>;
-+                clock-names = "biu", "ciu";
-+                num-slots = <1>;
-+                supports-highspeed;
-+                broken-cd;
-+                samsung,dw-mshc-sdr-timing = <0 3>;
-+
-+                slot@0 {
-+                        reg = <0>;
-+                        bus-width = <4>;
-+                };
-+        };
-diff --git a/arch/arm/boot/dts/socfpga.dtsi b/arch/arm/boot/dts/socfpga.dtsi
-index bee62a2..25ad850 100644
---- a/arch/arm/boot/dts/socfpga.dtsi
-+++ b/arch/arm/boot/dts/socfpga.dtsi
-@@ -468,6 +468,17 @@
- 			cache-level = <2>;
- 		};
- 
-+		mmc: dwmmc0@ff704000 {
-+			compatible = "altr,socfpga-dw-mshc";
-+			reg = <0xff704000 0x1000>;
-+			interrupts = <0 139 4>;
-+			fifo-depth = <0x400>;
-+			#address-cells = <1>;
-+			#size-cells = <0>;
-+			clocks = <&l4_mp_clk>, <&sdmmc_clk>;
-+			clock-names = "biu", "ciu";
-+		};
-+
- 		/* Local timer */
- 		timer@fffec600 {
- 			compatible = "arm,cortex-a9-twd-timer";
-diff --git a/arch/arm/boot/dts/socfpga_cyclone5.dts b/arch/arm/boot/dts/socfpga_cyclone5.dts
-index 973999d..b4b68ad 100644
---- a/arch/arm/boot/dts/socfpga_cyclone5.dts
-+++ b/arch/arm/boot/dts/socfpga_cyclone5.dts
-@@ -48,6 +48,18 @@
- 			};
- 		};
- 
-+		dwmmc0@ff704000 {
-+			num-slots = <1>;
-+			supports-highspeed;
-+			broken-cd;
-+			samsung,dw-mshc-sdr-timing = <0 3>;
-+
-+			slot@0 {
-+				reg = <0>;
-+				bus-width = <4>;
-+			};
-+		};
-+
- 		ethernet@ff702000 {
- 			phy-mode = "rgmii";
- 			phy-addr = <0xffffffff>; /* probe for phy addr */
-diff --git a/arch/arm/boot/dts/socfpga_vt.dts b/arch/arm/boot/dts/socfpga_vt.dts
-index d1ec0ca..7dc709b 100644
---- a/arch/arm/boot/dts/socfpga_vt.dts
-+++ b/arch/arm/boot/dts/socfpga_vt.dts
-@@ -41,6 +41,18 @@
- 			};
- 		};
- 
-+		dwmmc0@ff704000 {
-+			num-slots = <1>;
-+			supports-highspeed;
-+			broken-cd;
-+			samsung,dw-mshc-sdr-timing = <0 3>;
-+
-+			slot@0 {
-+				reg = <0>;
-+				bus-width = <4>;
-+			};
-+		};
-+
- 		ethernet@ff700000 {
- 			phy-mode = "gmii";
- 			status = "okay";
 -- 
 1.7.9.5
-
 
