@@ -1,91 +1,61 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [RFC PATCH] mmc: core: remove the mmc_sd_card_uhs()
-Date: Tue, 10 Sep 2013 15:01:16 +0900
-Message-ID: <522EB5AC.8070108@samsung.com>
-References: <522EB1B3.6020402@samsung.com>
+From: Nicolas Ferre <nicolas.ferre@atmel.com>
+Subject: Re: [PATCH] mmc: atmel-mci: abort transfer on timeout error
+Date: Tue, 10 Sep 2013 09:54:39 +0200
+Message-ID: <522ED03F.5070404@atmel.com>
+References: <1378740596-25026-1-git-send-email-ludovic.desroches@atmel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout1.samsung.com ([203.254.224.24]:54551 "EHLO
-	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753221Ab3IJGAx (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 10 Sep 2013 02:00:53 -0400
-Received: from epcpsbgr5.samsung.com
- (u145.gpu120.samsung.co.kr [203.254.230.145])
- by mailout1.samsung.com (Oracle Communications Messaging Server 7u4-24.01
- (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTP id <0MSW00EIMBDFOKR0@mailout1.samsung.com> for
- linux-mmc@vger.kernel.org; Tue, 10 Sep 2013 15:00:52 +0900 (KST)
-In-reply-to: <522EB1B3.6020402@samsung.com>
+Received: from eusmtp01.atmel.com ([212.144.249.243]:5965 "EHLO
+	eusmtp01.atmel.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752868Ab3IJHyk (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 10 Sep 2013 03:54:40 -0400
+In-Reply-To: <1378740596-25026-1-git-send-email-ludovic.desroches@atmel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, 'Chris Ball' <cjb@laptop.org>, Ulf Hansson <ulf.hansson@linaro.org>, Seungwon Jeon <tgih.jun@samsung.com>, 'Konstantin Dorfman' <kdorfman@codeaurora.org>, Wei WANG <wei_wang@realsil.com.cn>, jackey.shen@amd.com
+To: ludovic.desroches@atmel.com, linux-mmc@vger.kernel.org, cjb@laptop.org
+Cc: linux-arm-kernel@lists.infradead.org, etesial@gmail.com
 
-I found this patch has already posted at mailing.
+On 09/09/2013 17:29, ludovic.desroches@atmel.com :
+> From: Ludovic Desroches <ludovic.desroches@atmel.com>
+>
+> When a software timeout occurs, the transfer is not stopped. In DMA case, it
+> causes DMA channel to be stuck because the transfer is still active causing
+> following transfers to be queued but not computed.
+>
+> Cc: <stable@vger.kernel.org> #3.9+
+> Signed-off-by: Ludovic Desroches <ludovic.desroches@atmel.com>
 
-http://permalink.gmane.org/gmane.linux.kernel.mmc/20474
+Acked-by: Nicolas Ferre <nicolas.ferre@atmel.com>
 
-On 09/10/2013 02:44 PM, Jaehoon Chung wrote:
-> mmc_sd_card_uhs() didn't has difference with mmc_card_uhs().
-> And mmc_sd_card_set_uhs() didn't use anywhere.
-> 
-> I'm not sure why mmc_sd_card_uhs() used.
-> If need to check whether card is sd or not, then we can use the mmc_card_sd().
-> 
-> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+Thanks.
+
+> Reported-by: Alexander Morozov <etesial@gmail.com>
 > ---
->  drivers/mmc/core/bus.c            |    2 +-
->  drivers/mmc/host/rtsx_pci_sdmmc.c |    2 +-
->  include/linux/mmc/card.h          |    2 --
->  3 files changed, 2 insertions(+), 4 deletions(-)
-> 
-> diff --git a/drivers/mmc/core/bus.c b/drivers/mmc/core/bus.c
-> index 704bf66..cdca8a7 100644
-> --- a/drivers/mmc/core/bus.c
-> +++ b/drivers/mmc/core/bus.c
-> @@ -340,7 +340,7 @@ int mmc_add_card(struct mmc_card *card)
->  		break;
->  	}
->  
-> -	if (mmc_sd_card_uhs(card) &&
-> +	if (mmc_card_uhs(card) &&
->  		(card->sd_bus_speed < ARRAY_SIZE(uhs_speeds)))
->  		uhs_bus_speed_mode = uhs_speeds[card->sd_bus_speed];
->  
-> diff --git a/drivers/mmc/host/rtsx_pci_sdmmc.c b/drivers/mmc/host/rtsx_pci_sdmmc.c
-> index 82a35b9..b6964a1 100644
-> --- a/drivers/mmc/host/rtsx_pci_sdmmc.c
-> +++ b/drivers/mmc/host/rtsx_pci_sdmmc.c
-> @@ -359,7 +359,7 @@ static int sd_rw_multi(struct realtek_pci_sdmmc *host, struct mmc_request *mrq)
->  	struct mmc_host *mmc = host->mmc;
->  	struct mmc_card *card = mmc->card;
->  	struct mmc_data *data = mrq->data;
-> -	int uhs = mmc_sd_card_uhs(card);
-> +	int uhs = mmc_card_uhs(card);
->  	int read = (data->flags & MMC_DATA_READ) ? 1 : 0;
->  	u8 cfg2, trans_mode;
->  	int err;
-> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-> index 842de3e..f42cdbd 100644
-> --- a/include/linux/mmc/card.h
-> +++ b/include/linux/mmc/card.h
-> @@ -420,7 +420,6 @@ static inline void __maybe_unused remove_quirk(struct mmc_card *card, int data)
->  #define mmc_card_blockaddr(c)	((c)->state & MMC_STATE_BLOCKADDR)
->  #define mmc_card_ddr_mode(c)	((c)->state & MMC_STATE_HIGHSPEED_DDR)
->  #define mmc_card_uhs(c)		((c)->state & MMC_STATE_ULTRAHIGHSPEED)
-> -#define mmc_sd_card_uhs(c)	((c)->state & MMC_STATE_ULTRAHIGHSPEED)
->  #define mmc_card_ext_capacity(c) ((c)->state & MMC_CARD_SDXC)
->  #define mmc_card_removed(c)	((c) && ((c)->state & MMC_CARD_REMOVED))
->  #define mmc_card_doing_bkops(c)	((c)->state & MMC_STATE_DOING_BKOPS)
-> @@ -432,7 +431,6 @@ static inline void __maybe_unused remove_quirk(struct mmc_card *card, int data)
->  #define mmc_card_set_blockaddr(c) ((c)->state |= MMC_STATE_BLOCKADDR)
->  #define mmc_card_set_ddr_mode(c) ((c)->state |= MMC_STATE_HIGHSPEED_DDR)
->  #define mmc_card_set_uhs(c) ((c)->state |= MMC_STATE_ULTRAHIGHSPEED)
-> -#define mmc_sd_card_set_uhs(c) ((c)->state |= MMC_STATE_ULTRAHIGHSPEED)
->  #define mmc_card_set_ext_capacity(c) ((c)->state |= MMC_CARD_SDXC)
->  #define mmc_card_set_removed(c) ((c)->state |= MMC_CARD_REMOVED)
->  #define mmc_card_set_doing_bkops(c)	((c)->state |= MMC_STATE_DOING_BKOPS)
-> 
+>   drivers/mmc/host/atmel-mci.c | 7 +++++++
+>   1 file changed, 7 insertions(+)
+>
+> diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
+> index bdb84da..e9ea2fc 100644
+> --- a/drivers/mmc/host/atmel-mci.c
+> +++ b/drivers/mmc/host/atmel-mci.c
+> @@ -582,6 +582,13 @@ static void atmci_timeout_timer(unsigned long data)
+>   	if (host->mrq->cmd->data) {
+>   		host->mrq->cmd->data->error = -ETIMEDOUT;
+>   		host->data = NULL;
+> +		/*
+> +		 * With some SDIO modules, sometimes DMA transfer hangs. If
+> +		 * stop_transfer() is not called then the DMA request is not
+> +		 * removed, following ones are queued and never computed.
+> +		 */
+> +		if (host->state == STATE_DATA_XFER)
+> +			host->stop_transfer(host);
+>   	} else {
+>   		host->mrq->cmd->error = -ETIMEDOUT;
+>   		host->cmd = NULL;
+>
 
+
+-- 
+Nicolas Ferre
