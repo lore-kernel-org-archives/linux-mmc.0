@@ -1,49 +1,84 @@
-From: Stephen Warren <swarren@wwwdotorg.org>
-Subject: Re: [PATCH 3/3] arm: dts: socfpga: Add support for SD/MMC
-Date: Mon, 09 Sep 2013 15:11:43 -0600
-Message-ID: <522E398F.3080100@wwwdotorg.org>
-References: <1378740833-4883-1-git-send-email-dinguyen@altera.com> <1378740833-4883-4-git-send-email-dinguyen@altera.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: [RFC PATCH] mmc: core: remove the mmc_sd_card_uhs()
+Date: Tue, 10 Sep 2013 14:44:19 +0900
+Message-ID: <522EB1B3.6020402@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from avon.wwwdotorg.org ([70.85.31.133]:50625 "EHLO
-	avon.wwwdotorg.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755275Ab3IIVLs (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 9 Sep 2013 17:11:48 -0400
-In-Reply-To: <1378740833-4883-4-git-send-email-dinguyen@altera.com>
+Received: from mailout3.samsung.com ([203.254.224.33]:8270 "EHLO
+	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753454Ab3IJFn4 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 10 Sep 2013 01:43:56 -0400
+Received: from epcpsbgr4.samsung.com
+ (u144.gpu120.samsung.co.kr [203.254.230.144])
+ by mailout3.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+ (7.0.4.24.0) 64bit (built Nov 17 2011))
+ with ESMTP id <0MSW00M6LAL66QM0@mailout3.samsung.com> for
+ linux-mmc@vger.kernel.org; Tue, 10 Sep 2013 14:43:54 +0900 (KST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: dinguyen@altera.com
-Cc: dinh.linux@gmail.com, Pavel Machek <pavel@denx.de>, Arnd Bergmann <arnd@arndb.de>, Olof Johansson <olof@lixom.net>, Rob Herring <rob.herring@calxeda.com>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Ian Campbell <ian.campbell@citrix.com>, Chris Ball <cjb@laptop.org>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Cc: 'Chris Ball' <cjb@laptop.org>, Ulf Hansson <ulf.hansson@linaro.org>, Seungwon Jeon <tgih.jun@samsung.com>, 'Konstantin Dorfman' <kdorfman@codeaurora.org>, Wei WANG <wei_wang@realsil.com.cn>
 
-On 09/09/2013 09:33 AM, dinguyen@altera.com wrote:
-> From: Dinh Nguyen <dinguyen@altera.com>
-> 
-> Add bindings for SD/MMC for SOCFPGA.
+mmc_sd_card_uhs() didn't has difference with mmc_card_uhs().
+And mmc_sd_card_set_uhs() didn't use anywhere.
 
-> diff --git a/Documentation/devicetree/bindings/mmc/socfpga-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/socfpga-dw-mshc.txt
+I'm not sure why mmc_sd_card_uhs() used.
+If need to check whether card is sd or not, then we can use the mmc_card_sd().
 
-> +* Altera SOCFPGA specific extensions to the Synopsis Designware Mobile
-> +  Storage Host Controller
-> +
-> +The Synopsis designware mobile storage host controller is used to interface
-> +a SoC with storage medium such as eMMC or SD/MMC cards. This file documents
-> +differences between the core Synopsis dw mshc controller properties described
-> +by synopsis-dw-mshc.txt and the properties used by the SOCFPGA specific
-> +extensions to the Synopsis Designware Mobile Storage Host Controller.
-> +
-> +Required Properties:
-> +
-> +* compatible: should be
-> +        - "altr,socfpga-dw-mshc": for controllers with Altera SOCFPGA
-> +          specific extensions.
-> +
-> +* samsung,dw-mshc-sdr-timing: See exynos-dw-mshc.txt for more information about
-> +	this binding.
+Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+---
+ drivers/mmc/core/bus.c            |    2 +-
+ drivers/mmc/host/rtsx_pci_sdmmc.c |    2 +-
+ include/linux/mmc/card.h          |    2 --
+ 3 files changed, 2 insertions(+), 4 deletions(-)
 
-s/binding/property/
-
-It's odd that this isn't "synopsis," rather than "samsung," if the
-property is generic across all/some uses of the Synopsis core. But, I
-guess this is fine.
+diff --git a/drivers/mmc/core/bus.c b/drivers/mmc/core/bus.c
+index 704bf66..cdca8a7 100644
+--- a/drivers/mmc/core/bus.c
++++ b/drivers/mmc/core/bus.c
+@@ -340,7 +340,7 @@ int mmc_add_card(struct mmc_card *card)
+ 		break;
+ 	}
+ 
+-	if (mmc_sd_card_uhs(card) &&
++	if (mmc_card_uhs(card) &&
+ 		(card->sd_bus_speed < ARRAY_SIZE(uhs_speeds)))
+ 		uhs_bus_speed_mode = uhs_speeds[card->sd_bus_speed];
+ 
+diff --git a/drivers/mmc/host/rtsx_pci_sdmmc.c b/drivers/mmc/host/rtsx_pci_sdmmc.c
+index 82a35b9..b6964a1 100644
+--- a/drivers/mmc/host/rtsx_pci_sdmmc.c
++++ b/drivers/mmc/host/rtsx_pci_sdmmc.c
+@@ -359,7 +359,7 @@ static int sd_rw_multi(struct realtek_pci_sdmmc *host, struct mmc_request *mrq)
+ 	struct mmc_host *mmc = host->mmc;
+ 	struct mmc_card *card = mmc->card;
+ 	struct mmc_data *data = mrq->data;
+-	int uhs = mmc_sd_card_uhs(card);
++	int uhs = mmc_card_uhs(card);
+ 	int read = (data->flags & MMC_DATA_READ) ? 1 : 0;
+ 	u8 cfg2, trans_mode;
+ 	int err;
+diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+index 842de3e..f42cdbd 100644
+--- a/include/linux/mmc/card.h
++++ b/include/linux/mmc/card.h
+@@ -420,7 +420,6 @@ static inline void __maybe_unused remove_quirk(struct mmc_card *card, int data)
+ #define mmc_card_blockaddr(c)	((c)->state & MMC_STATE_BLOCKADDR)
+ #define mmc_card_ddr_mode(c)	((c)->state & MMC_STATE_HIGHSPEED_DDR)
+ #define mmc_card_uhs(c)		((c)->state & MMC_STATE_ULTRAHIGHSPEED)
+-#define mmc_sd_card_uhs(c)	((c)->state & MMC_STATE_ULTRAHIGHSPEED)
+ #define mmc_card_ext_capacity(c) ((c)->state & MMC_CARD_SDXC)
+ #define mmc_card_removed(c)	((c) && ((c)->state & MMC_CARD_REMOVED))
+ #define mmc_card_doing_bkops(c)	((c)->state & MMC_STATE_DOING_BKOPS)
+@@ -432,7 +431,6 @@ static inline void __maybe_unused remove_quirk(struct mmc_card *card, int data)
+ #define mmc_card_set_blockaddr(c) ((c)->state |= MMC_STATE_BLOCKADDR)
+ #define mmc_card_set_ddr_mode(c) ((c)->state |= MMC_STATE_HIGHSPEED_DDR)
+ #define mmc_card_set_uhs(c) ((c)->state |= MMC_STATE_ULTRAHIGHSPEED)
+-#define mmc_sd_card_set_uhs(c) ((c)->state |= MMC_STATE_ULTRAHIGHSPEED)
+ #define mmc_card_set_ext_capacity(c) ((c)->state |= MMC_CARD_SDXC)
+ #define mmc_card_set_removed(c) ((c)->state |= MMC_CARD_REMOVED)
+ #define mmc_card_set_doing_bkops(c)	((c)->state |= MMC_STATE_DOING_BKOPS)
+-- 
+1.7.9.5
