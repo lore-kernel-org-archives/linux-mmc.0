@@ -1,52 +1,105 @@
 From: Jarkko Nikula <jarkko.nikula@bitmer.com>
-Subject: [PATCH 3/6] mmc: omap: Remove mem_res field from struct mmc_omap_host
-Date: Wed, 11 Sep 2013 21:01:54 +0300
-Message-ID: <1378922517-3968-3-git-send-email-jarkko.nikula@bitmer.com>
+Subject: [PATCH 4/6] mmc: omap: Convert to devm_ioremap_resource
+Date: Wed, 11 Sep 2013 21:01:55 +0300
+Message-ID: <1378922517-3968-4-git-send-email-jarkko.nikula@bitmer.com>
 References: <1378922517-3968-1-git-send-email-jarkko.nikula@bitmer.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from bitmer.com ([213.157.87.50]:45646 "EHLO bitmer.com"
+Received: from bitmer.com ([213.157.87.50]:45649 "EHLO bitmer.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754170Ab3IKS3W (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 11 Sep 2013 14:29:22 -0400
+	id S1754840Ab3IKS31 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 11 Sep 2013 14:29:27 -0400
 In-Reply-To: <1378922517-3968-1-git-send-email-jarkko.nikula@bitmer.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 Cc: Chris Ball <cjb@laptop.org>, Aaro Koskinen <aaro.koskinen@iki.fi>, Jarkko Nikula <jarkko.nikula@bitmer.com>
 
-Field mem_res in struct mmc_omap_host is used only once in mmc_omap_probe
-when setting the phys_base field so we may just se the phys_base straight
-and remove needless mem_res.
+Simplify probe and cleanup code by using devm_ioremap_resource. This also
+makes probe code to follow more common allocate private struct followed by
+other initialization style.
 
 Signed-off-by: Jarkko Nikula <jarkko.nikula@bitmer.com>
 ---
- drivers/mmc/host/omap.c | 4 +---
- 1 file changed, 1 insertion(+), 3 deletions(-)
+ drivers/mmc/host/omap.c | 41 ++++++++++++-----------------------------
+ 1 file changed, 12 insertions(+), 29 deletions(-)
 
 diff --git a/drivers/mmc/host/omap.c b/drivers/mmc/host/omap.c
-index 4d9fc5c..088432d 100644
+index 088432d..5ff6da9 100644
 --- a/drivers/mmc/host/omap.c
 +++ b/drivers/mmc/host/omap.c
-@@ -141,7 +141,6 @@ struct mmc_omap_host {
- 	u32			dma_rx_burst;
- 	struct dma_chan		*dma_tx;
- 	u32			dma_tx_burst;
--	struct resource		*mem_res;
- 	void __iomem		*virt_base;
- 	unsigned int		phys_base;
- 	int			irq;
-@@ -1381,10 +1380,9 @@ static int mmc_omap_probe(struct platform_device *pdev)
- 	platform_set_drvdata(pdev, host);
+@@ -1343,22 +1343,19 @@ static int mmc_omap_probe(struct platform_device *pdev)
+ 		return -ENXIO;
+ 	}
  
- 	host->id = pdev->id;
--	host->mem_res = res;
+-	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
++	host = devm_kzalloc(&pdev->dev, sizeof(struct mmc_omap_host),
++			    GFP_KERNEL);
++	if (host == NULL)
++		return -ENOMEM;
++
+ 	irq = platform_get_irq(pdev, 0);
+-	if (res == NULL || irq < 0)
++	if (irq < 0)
+ 		return -ENXIO;
+ 
+-	res = request_mem_region(res->start, resource_size(res),
+-				 pdev->name);
+-	if (res == NULL)
+-		return -EBUSY;
+-
+-	host = devm_kzalloc(&pdev->dev, sizeof(struct mmc_omap_host),
+-			    GFP_KERNEL);
+-	if (host == NULL) {
+-		ret = -ENOMEM;
+-		goto err_free_mem_region;
+-	}
++	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
++	host->virt_base = devm_ioremap_resource(&pdev->dev, res);
++	if (IS_ERR(host->virt_base))
++		return PTR_ERR(host->virt_base);
+ 
+ 	INIT_WORK(&host->slot_release_work, mmc_omap_slot_release_work);
+ 	INIT_WORK(&host->send_stop_work, mmc_omap_send_stop_work);
+@@ -1383,15 +1380,9 @@ static int mmc_omap_probe(struct platform_device *pdev)
  	host->irq = irq;
  	host->use_dma = 1;
--	host->phys_base = host->mem_res->start;
-+	host->phys_base = res->start;
- 	host->virt_base = ioremap(res->start, resource_size(res));
- 	if (!host->virt_base)
- 		goto err_ioremap;
+ 	host->phys_base = res->start;
+-	host->virt_base = ioremap(res->start, resource_size(res));
+-	if (!host->virt_base)
+-		goto err_ioremap;
+-
+ 	host->iclk = clk_get(&pdev->dev, "ick");
+-	if (IS_ERR(host->iclk)) {
+-		ret = PTR_ERR(host->iclk);
+-		goto err_free_mmc_host;
+-	}
++	if (IS_ERR(host->iclk))
++		return PTR_ERR(host->iclk);
+ 	clk_enable(host->iclk);
+ 
+ 	host->fclk = clk_get(&pdev->dev, "fck");
+@@ -1468,11 +1459,6 @@ err_free_dma:
+ err_free_iclk:
+ 	clk_disable(host->iclk);
+ 	clk_put(host->iclk);
+-err_free_mmc_host:
+-	iounmap(host->virt_base);
+-err_ioremap:
+-err_free_mem_region:
+-	release_mem_region(res->start, resource_size(res));
+ 	return ret;
+ }
+ 
+@@ -1500,9 +1486,6 @@ static int mmc_omap_remove(struct platform_device *pdev)
+ 	if (host->dma_rx)
+ 		dma_release_channel(host->dma_rx);
+ 
+-	iounmap(host->virt_base);
+-	release_mem_region(pdev->resource[0].start,
+-			   pdev->resource[0].end - pdev->resource[0].start + 1);
+ 	destroy_workqueue(host->mmc_omap_wq);
+ 
+ 	return 0;
 -- 
 1.8.4.rc3
 
