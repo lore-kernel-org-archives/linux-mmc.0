@@ -1,52 +1,160 @@
-From: Koen Kooi <koen@dominion.thruhere.net>
-Subject: Re: [PATCH 0/3] ARM: dts: Enable EDMA, MMC and SPI on AM33XX for v3.13
-Date: Wed, 11 Sep 2013 07:18:32 +0200
-Message-ID: <88E4C15C-B1AA-4A39-A5E1-CF9E8420C2BE@dominion.thruhere.net>
-References: <1378841079-15796-1-git-send-email-joelf@ti.com> <5EB8AE91-A996-4CF1-86B7-C8FDEC177E89@dominion.thruhere.net> <522F7DC0.7030603@ti.com>
-Mime-Version: 1.0 (Mac OS X Mail 6.5 \(1508\))
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <522F7DC0.7030603@ti.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Joel Fernandes <joelf@ti.com>
-Cc: Benoit Cousson <bcousson@baylibre.com>, Nishanth Menon <nm@ti.com>, Devicetree Discuss <devicetree@vger.kernel.org>, Linux OMAP List <linux-omap@vger.kernel.org>, Linux ARM Kernel List <linux-arm-kernel@lists.infradead.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux Documentation List <linux-doc@vger.kernel.org>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux SPI Devel List <spi-devel-general@lists.sourceforge.net>
+From: Dirk Behme <dirk.behme@gmail.com>
+Subject: [RFC PATCH] mmc: core: Update ext_csd if touched by ioctl
+Date: Wed, 11 Sep 2013 07:26:46 +0200
+Message-ID: <1378877206-3376-1-git-send-email-dirk.behme@gmail.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-ee0-f52.google.com ([74.125.83.52]:43212 "EHLO
+	mail-ee0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755654Ab3IKF0v (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 11 Sep 2013 01:26:51 -0400
+Received: by mail-ee0-f52.google.com with SMTP id c41so4271849eek.25
+        for <linux-mmc@vger.kernel.org>; Tue, 10 Sep 2013 22:26:50 -0700 (PDT)
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: Chris Ball <cjb@laptop.org>, Dirk Behme <dirk.behme@gmail.com>
 
+In case an ioctl changes an EXT_CSD register, update the internal ext_csd
+data structure, too. Else the driver's internal ext_csd data structure and
+the EXT_CSD register content doesn't match any more. In this case additional
+ioctls changing the ext_csd would revert the initial one due to the old data
+in the driver's internal ext_csd data.
 
-Op 10 sep. 2013, om 22:14 heeft Joel Fernandes <joelf@ti.com> het volgende geschreven:
+E.g. using the mmc utils utility to enable the bootpart
 
-> On 09/10/2013 02:39 PM, Koen Kooi wrote:
->> 
->> Op 10 sep. 2013, om 21:24 heeft Joel Fernandes <joelf@ti.com> het volgende geschreven:
->> 
->>> Here are last few patches required to add EDMA and MMC/SPI support for AM33xx.
->>> 
->>> Now that all dependent DMA patches and fixes are in linux next or mainline, except
->>> for [1] which should go in for 3.12 -rc cycle, it is safe to enable MMC and SPI support
->>> and this patch series enables it. These are originally Matt Porter's patches with
->>> changes to make it work with recent kernels, addition of irq, memory resources and
->>> enable other extra properties.
->>> 
->>> These patches should cleanly apply on master branch after Koen's patch [2] for basic
->>> BBB DT support is applied.
->>> 
->>> MMC support is enabled for: Beaglebone, AM335x EVM and EVM-SK boards. MMC support
->>> for BBB is intentionally not added due to custom fixes and other patches that are
->>> in Koen's tree and which will be separately submitted by him.
->> 
->> Correct, but your patches for MMC support on BBW are missing the card detect entries to make it hotplug work.
-> 
-> I thought it was determined that this would be submitted by you separately after
-> rebasing as we discussed [1] and [2].
+mmc bootpart enable 1 0 /dev/mmcblk1
 
-I have no problem submitting that, I just think it's weird that the patch you submitted contains a known broken version for BBW.
+correctly writes to the EXT_CSD structure of the device, but
+doesn't update
 
-> 
-> [1] https://lkml.org/lkml/2013/9/6/183
-> [2] http://marc.info/?l=linux-omap&m=137879246709612&w=2
-> 
-> 
-> Regards,
-> 
-> -Joel
+card->ext_csd.part_config
+
+Issuing additional MMC_SWITCH commands afterwards use the then (wrong)
+card->ext_csd.part_config. Resulting in an undo of the initial mmc bootpart
+enable.
+
+Fix this by updating the ext_csd in case of an EXT_CSD update ioctl.
+
+Signed-off-by: Dirk Behme <dirk.behme@gmail.com>
+---
+Notes:
+
+This fixes the issue discussed in
+
+http://marc.info/?l=linux-mmc&m=137820629730918
+
+This patch is marked as RFC due to two reasons:
+
+* exporting mmc_update_ext_csd() in core/mmc.c and calling it directly from
+  card/block.c
+* It seems it's not allowed to call mmc_part_add() in mmc_read_ext_csd()
+  several times. So this is disabled by passing an 'update' variable to
+  mmc_read_ext_csd() disabling the mmc_part_add() in case we just want to
+  update the ext_csd variables.
+
+How can this be done better/cleaner?
+
+ drivers/mmc/card/block.c |   14 ++++++++++++++
+ drivers/mmc/core/mmc.c   |   26 ++++++++++++++++++++++----
+ 2 files changed, 36 insertions(+), 4 deletions(-)
+
+diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+index 1a3163f..0a4bd62 100644
+--- a/drivers/mmc/card/block.c
++++ b/drivers/mmc/card/block.c
+@@ -132,6 +132,8 @@ enum {
+ module_param(perdev_minors, int, 0444);
+ MODULE_PARM_DESC(perdev_minors, "Minors numbers to allocate per device");
+ 
++int mmc_update_ext_csd(struct mmc_card *card);
++
+ static inline int mmc_blk_part_switch(struct mmc_card *card,
+ 				      struct mmc_blk_data *md);
+ static int get_card_status(struct mmc_card *card, u32 *status, int retries);
+@@ -600,6 +602,18 @@ static int mmc_blk_ioctl_cmd(struct block_device *bdev,
+ 					__func__, status, err);
+ 	}
+ 
++	if ((cmd.opcode == MMC_SWITCH) && ((cmd.arg >> 24) & 0x3)) {
++		/*
++		 * In case the IOCTL has modified the EXT_CSD,
++		 * update it, i.e. re-read the EXT_CSD.
++		 */
++		err = mmc_update_ext_csd(card);
++		if (err)
++			dev_err(mmc_dev(card->host),
++					"%s: EXT_CSD update failed, error %d\n",
++					__func__, err);
++	}
++
+ cmd_rel_host:
+ 	mmc_put_card(card);
+ 
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index 6d02012..5db9d8c 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -269,7 +269,7 @@ static void mmc_select_card_type(struct mmc_card *card)
+ /*
+  * Decode extended CSD.
+  */
+-static int mmc_read_ext_csd(struct mmc_card *card, u8 *ext_csd)
++static int mmc_read_ext_csd(struct mmc_card *card, u8 *ext_csd, int update)
+ {
+ 	int err = 0, idx;
+ 	unsigned int part_size;
+@@ -348,7 +348,8 @@ static int mmc_read_ext_csd(struct mmc_card *card, u8 *ext_csd)
+ 		 * There are two boot regions of equal size, defined in
+ 		 * multiples of 128K.
+ 		 */
+-		if (ext_csd[EXT_CSD_BOOT_MULT] && mmc_boot_partition_access(card->host)) {
++		if (ext_csd[EXT_CSD_BOOT_MULT] && mmc_boot_partition_access(card->host) &&
++		    !update) {
+ 			for (idx = 0; idx < MMC_NUM_BOOT_PARTITION; idx++) {
+ 				part_size = ext_csd[EXT_CSD_BOOT_MULT] << 17;
+ 				mmc_part_add(card, part_size,
+@@ -519,7 +520,8 @@ static int mmc_read_ext_csd(struct mmc_card *card, u8 *ext_csd)
+ 		 * RPMB regions are defined in multiples of 128K.
+ 		 */
+ 		card->ext_csd.raw_rpmb_size_mult = ext_csd[EXT_CSD_RPMB_MULT];
+-		if (ext_csd[EXT_CSD_RPMB_MULT] && mmc_host_cmd23(card->host)) {
++		if (ext_csd[EXT_CSD_RPMB_MULT] && mmc_host_cmd23(card->host) &&
++		    !update) {
+ 			mmc_part_add(card, ext_csd[EXT_CSD_RPMB_MULT] << 17,
+ 				EXT_CSD_PART_CONFIG_ACC_RPMB,
+ 				"rpmb", 0, false,
+@@ -983,7 +985,7 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+ 		err = mmc_get_ext_csd(card, &ext_csd);
+ 		if (err)
+ 			goto free_card;
+-		err = mmc_read_ext_csd(card, ext_csd);
++		err = mmc_read_ext_csd(card, ext_csd, 0);
+ 		if (err)
+ 			goto free_card;
+ 
+@@ -1634,6 +1636,22 @@ static void mmc_attach_bus_ops(struct mmc_host *host)
+ 	mmc_attach_bus(host, bus_ops);
+ }
+ 
++int mmc_update_ext_csd(struct mmc_card *card)
++{
++	u8 *new_ext_csd;
++	int err;
++
++	err = mmc_get_ext_csd(card, &new_ext_csd);
++	if (err || new_ext_csd == NULL)
++		goto out;
++
++	err = mmc_read_ext_csd(card, new_ext_csd, 1);
++
++out:
++	mmc_free_ext_csd(new_ext_csd);
++	return err;
++}
++
+ /*
+  * Starting point for MMC card init.
+  */
+-- 
+1.7.10.4
+
