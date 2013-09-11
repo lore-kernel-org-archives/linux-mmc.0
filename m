@@ -1,88 +1,96 @@
-From: Koen Kooi <koen@dominion.thruhere.net>
-Subject: Re: [PATCH 0/3] ARM: dts: Enable EDMA, MMC and SPI on AM33XX for v3.13
-Date: Wed, 11 Sep 2013 08:06:15 +0200
-Message-ID: <9A0C149F-8BF4-4970-859F-A8E59EAC31E4@dominion.thruhere.net>
-References: <1378841079-15796-1-git-send-email-joelf@ti.com> <5EB8AE91-A996-4CF1-86B7-C8FDEC177E89@dominion.thruhere.net> <522F7DC0.7030603@ti.com> <88E4C15C-B1AA-4A39-A5E1-CF9E8420C2BE@dominion.thruhere.net> <523006E8.5080104@ti.com>
-Mime-Version: 1.0 (Mac OS X Mail 6.5 \(1508\))
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
+From: Dong Aisheng <b29396@freescale.com>
+Subject: Re: [PATCH 5/8] sdhci: sdhci-esdhc-imx: change pinctrl state
+ according to uhs mode
+Date: Wed, 11 Sep 2013 17:26:06 +0800
+Message-ID: <20130911092605.GA2891@b29396-Latitude-E6410>
+References: <1378299257-2980-1-git-send-email-b29396@freescale.com>
+ <1378299257-2980-6-git-send-email-b29396@freescale.com>
+ <CAHCPf3tYXsT6kTbJcqJx1gN_G9G2iqi1-f+jRcpw95CEPkW8NQ@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wi0-f182.google.com ([209.85.212.182]:39763 "EHLO
-	mail-wi0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754289Ab3IKGGR convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 11 Sep 2013 02:06:17 -0400
-Received: by mail-wi0-f182.google.com with SMTP id ez12so1692921wid.3
-        for <linux-mmc@vger.kernel.org>; Tue, 10 Sep 2013 23:06:16 -0700 (PDT)
-In-Reply-To: <523006E8.5080104@ti.com>
+Received: from mail-db9lp0252.outbound.messaging.microsoft.com ([213.199.154.252]:26688
+	"EHLO db9outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752572Ab3IKJ1U (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 11 Sep 2013 05:27:20 -0400
+Content-Disposition: inline
+In-Reply-To: <CAHCPf3tYXsT6kTbJcqJx1gN_G9G2iqi1-f+jRcpw95CEPkW8NQ@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Joel Fernandes <joelf@ti.com>
-Cc: Benoit Cousson <bcousson@baylibre.com>, Nishanth Menon <nm@ti.com>, Devicetree Discuss <devicetree@vger.kernel.org>, Linux OMAP List <linux-omap@vger.kernel.org>, Linux ARM Kernel List <linux-arm-kernel@lists.infradead.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux Documentation List <linux-doc@vger.kernel.org>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux SPI Devel List <spi-devel-general@lists.sourceforge.net>
+To: Matt Sealey <neko@bakuhatsu.net>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Shawn Guo <shawn.guo@linaro.org>, Sascha Hauer <s.hauer@pengutronix.de>, "anton@enomsg.org" <anton@enomsg.org>, "cjb@laptop.org" <cjb@laptop.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 
+Hi Matt,
 
-Op 11 sep. 2013, om 08:00 heeft Joel Fernandes <joelf@ti.com> het volgende geschreven:
+Sorry for the late reply.
 
-> On 09/11/2013 12:18 AM, Koen Kooi wrote:
->> 
->> Op 10 sep. 2013, om 22:14 heeft Joel Fernandes <joelf@ti.com> het volgende geschreven:
->> 
->>> On 09/10/2013 02:39 PM, Koen Kooi wrote:
->>>> 
->>>> Op 10 sep. 2013, om 21:24 heeft Joel Fernandes <joelf@ti.com> het volgende geschreven:
->>>> 
->>>>> Here are last few patches required to add EDMA and MMC/SPI support for AM33xx.
->>>>> 
->>>>> Now that all dependent DMA patches and fixes are in linux next or mainline, except
->>>>> for [1] which should go in for 3.12 -rc cycle, it is safe to enable MMC and SPI support
->>>>> and this patch series enables it. These are originally Matt Porter's patches with
->>>>> changes to make it work with recent kernels, addition of irq, memory resources and
->>>>> enable other extra properties.
->>>>> 
->>>>> These patches should cleanly apply on master branch after Koen's patch [2] for basic
->>>>> BBB DT support is applied.
->>>>> 
->>>>> MMC support is enabled for: Beaglebone, AM335x EVM and EVM-SK boards. MMC support
->>>>> for BBB is intentionally not added due to custom fixes and other patches that are
->>>>> in Koen's tree and which will be separately submitted by him.
->>>> 
->>>> Correct, but your patches for MMC support on BBW are missing the card detect entries to make it hotplug work.
->>> 
->>> I thought it was determined that this would be submitted by you separately after
->>> rebasing as we discussed [1] and [2].
->> 
->> I have no problem submitting that, I just think it's weird that the patch you submitted contains a known broken version for BBW.
+On Fri, Sep 06, 2013 at 02:40:06AM +0800, Matt Sealey wrote:
+> > +       if (of_find_property(np, "no-1-8-v", NULL))
+> > +               boarddata->support_vsel = false;
+> > +       else
+> > +               boarddata->support_vsel = true;
+> > +
+> >         return 0;
 > 
-> There's nothing "broken" about $subject series. Please don't confuse maintainers
-> by using wrong words like that. This series is perfectly OK as such to be merged.
-
-But plugging in an SD card doesn't work in this series, I'd call that broken.
-
-> Further, I am puzzled by all this noise because card-detect additions were
-> initially agreed to be posted separately by you along with other custom DTS for
-> BBW MMC.
-
-I agreed to post the mmc fixes needed for BBW and BBB, so I assumed you'd drop all beaglebone entries from your series.
-
-> Its obvious I wouldn't squash patches that we _agreed_ you would send
-> out- and that are especially additions than any real fixes. Hopefully this makes
-> it clear, if you need any help please let me know.
-
-Right, so now your patch series will add a half-assed DT entry which only works if the uSD card is present at boot. Anyway, fixup series underway already
-
+> No, no, no, no, no :(
 > 
-> Thanks!
+> Please do not just strip the prefix from a definition in code, or just
+> convert the underscores into hyphens to make a device tree property.
+> SDHCI_QUIRK2_NO_1_8_V should never, ever, EVER become no-1-8-v and NO
+> DEFINITION FROM SOURCE CODE should EVER make it into a device tree.
+> This is how we ended up with manure like "dr_mode" in the USB
+> bindings. Please follow good common sense as well as the bindings.
 > 
-> -Joel
+> In this case a suitable standard for describing a voltage would be
+> no-1v8 (replacing the decimal point with the v) which is how 99.9% of
+> schematics are written in the world where a period is not a desirable
+> character in a net name or component/signal description. But even that
+> is stupid and not expandable.
 > 
+
+I somehow agree with your idea on the naming.
+But currently i'm just using the standard property defined in:
+Documentation/devicetree/bindings/mmc/mmc.txt
+- no-1-8-v: when present, denotes that 1.8v card voltage is not supported on
+  this system, even if the controller claims it is.
+
+> This property should probably be called "voltage-selects" or something
+> and you should put in a list of supported voltages (in uV units just
+> like cpufreq operating points and regulators, please, for consistency,
+> and update the binding).
 > 
->>> 
->>> [1] https://lkml.org/lkml/2013/9/6/183
->>> [2] http://marc.info/?l=linux-omap&m=137879246709612&w=2
->>> 
->>> 
->>> Regards,
->>> 
->>> -Joel
->> 
+> Then you can parse the list and find out precisely what voltages you
+> can switch to - there are more possibilities than an implied 3-ish
+> volts and a switch to 1.8V for MMC. The standard for the OCR register
+> is a bunch of ranges - so specify which voltages you HAVE available,
+> if you can switch. The driver (as per standard) can determine if this
+> is in one range or another.
 > 
+> Lack of this property would imply that whatever the chip is driving
+> right now for logic is what it should stay at (support_vsel = false in
+> the code).
+> 
+
+Here the no-1-8-v is for indicating no 1.8v signal voltage switch support,
+not the host supply voltage.
+The spec only defines 1.8v/3.3v switch, so no-1-8-v seems ok for me currently.
+
+And for host supply voltage, it's usually provided by host controller and
+can be retrieved from host capability register.
+And even if it's using an external regulator, this capability can still be
+retrieved from the standard regulator API regulator_is_supported_voltage.
+That's how sdhci driver used currently.
+So i'm not sure if we really need add the voltage-selects on device tree
+for mmc since that's regulator's work.
+
+Anyway, above is just my initial thoughts on your question.
+Since this issue actually is not related to this series,
+maybe you could create a new mail thread about this if you want
+or patching is welcome for the further discussion more specific.
+
+Regards
+Dong Aisheng
+
+> --
+> Matt Sealey <neko@bakuhatsu.net>
 
