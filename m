@@ -1,96 +1,135 @@
-From: Dong Aisheng <b29396@freescale.com>
-Subject: Re: [PATCH 5/8] sdhci: sdhci-esdhc-imx: change pinctrl state
- according to uhs mode
-Date: Wed, 11 Sep 2013 17:26:06 +0800
-Message-ID: <20130911092605.GA2891@b29396-Latitude-E6410>
-References: <1378299257-2980-1-git-send-email-b29396@freescale.com>
- <1378299257-2980-6-git-send-email-b29396@freescale.com>
- <CAHCPf3tYXsT6kTbJcqJx1gN_G9G2iqi1-f+jRcpw95CEPkW8NQ@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: [PATCH] mmc: core: Do not poll for busy with status cmd for all switch cmds
+Date: Wed, 11 Sep 2013 11:54:16 +0200
+Message-ID: <1378893256-27460-1-git-send-email-ulf.hansson@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-db9lp0252.outbound.messaging.microsoft.com ([213.199.154.252]:26688
-	"EHLO db9outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752572Ab3IKJ1U (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 11 Sep 2013 05:27:20 -0400
-Content-Disposition: inline
-In-Reply-To: <CAHCPf3tYXsT6kTbJcqJx1gN_G9G2iqi1-f+jRcpw95CEPkW8NQ@mail.gmail.com>
+Received: from mail-la0-f44.google.com ([209.85.215.44]:62224 "EHLO
+	mail-la0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751178Ab3IKJyl (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 11 Sep 2013 05:54:41 -0400
+Received: by mail-la0-f44.google.com with SMTP id eo20so7232501lab.17
+        for <linux-mmc@vger.kernel.org>; Wed, 11 Sep 2013 02:54:40 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Matt Sealey <neko@bakuhatsu.net>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Shawn Guo <shawn.guo@linaro.org>, Sascha Hauer <s.hauer@pengutronix.de>, "anton@enomsg.org" <anton@enomsg.org>, "cjb@laptop.org" <cjb@laptop.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+To: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>
 
-Hi Matt,
+Some switch operations like poweroff notify, shall according to the
+spec not be followed by any other new commands. For these cases and
+when the host does'nt support MMC_CAP_WAIT_WHILE_BUSY, we must not
+send status commands to poll for busy detection. Instead wait for
+the stated timeout from the EXT_CSD before completing the request.
 
-Sorry for the late reply.
+Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>
+---
+ drivers/mmc/core/core.c    |    2 +-
+ drivers/mmc/core/mmc.c     |    6 +++---
+ drivers/mmc/core/mmc_ops.c |   23 ++++++++++++++++++-----
+ include/linux/mmc/core.h   |    3 ++-
+ 4 files changed, 24 insertions(+), 10 deletions(-)
 
-On Fri, Sep 06, 2013 at 02:40:06AM +0800, Matt Sealey wrote:
-> > +       if (of_find_property(np, "no-1-8-v", NULL))
-> > +               boarddata->support_vsel = false;
-> > +       else
-> > +               boarddata->support_vsel = true;
-> > +
-> >         return 0;
-> 
-> No, no, no, no, no :(
-> 
-> Please do not just strip the prefix from a definition in code, or just
-> convert the underscores into hyphens to make a device tree property.
-> SDHCI_QUIRK2_NO_1_8_V should never, ever, EVER become no-1-8-v and NO
-> DEFINITION FROM SOURCE CODE should EVER make it into a device tree.
-> This is how we ended up with manure like "dr_mode" in the USB
-> bindings. Please follow good common sense as well as the bindings.
-> 
-> In this case a suitable standard for describing a voltage would be
-> no-1v8 (replacing the decimal point with the v) which is how 99.9% of
-> schematics are written in the world where a period is not a desirable
-> character in a net name or component/signal description. But even that
-> is stupid and not expandable.
-> 
-
-I somehow agree with your idea on the naming.
-But currently i'm just using the standard property defined in:
-Documentation/devicetree/bindings/mmc/mmc.txt
-- no-1-8-v: when present, denotes that 1.8v card voltage is not supported on
-  this system, even if the controller claims it is.
-
-> This property should probably be called "voltage-selects" or something
-> and you should put in a list of supported voltages (in uV units just
-> like cpufreq operating points and regulators, please, for consistency,
-> and update the binding).
-> 
-> Then you can parse the list and find out precisely what voltages you
-> can switch to - there are more possibilities than an implied 3-ish
-> volts and a switch to 1.8V for MMC. The standard for the OCR register
-> is a bunch of ranges - so specify which voltages you HAVE available,
-> if you can switch. The driver (as per standard) can determine if this
-> is in one range or another.
-> 
-> Lack of this property would imply that whatever the chip is driving
-> right now for logic is what it should stay at (support_vsel = false in
-> the code).
-> 
-
-Here the no-1-8-v is for indicating no 1.8v signal voltage switch support,
-not the host supply voltage.
-The spec only defines 1.8v/3.3v switch, so no-1-8-v seems ok for me currently.
-
-And for host supply voltage, it's usually provided by host controller and
-can be retrieved from host capability register.
-And even if it's using an external regulator, this capability can still be
-retrieved from the standard regulator API regulator_is_supported_voltage.
-That's how sdhci driver used currently.
-So i'm not sure if we really need add the voltage-selects on device tree
-for mmc since that's regulator's work.
-
-Anyway, above is just my initial thoughts on your question.
-Since this issue actually is not related to this series,
-maybe you could create a new mail thread about this if you want
-or patching is welcome for the further discussion more specific.
-
-Regards
-Dong Aisheng
-
-> --
-> Matt Sealey <neko@bakuhatsu.net>
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index b9b9fb6..15eba0c 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -301,7 +301,7 @@ void mmc_start_bkops(struct mmc_card *card, bool from_exception)
+ 	}
+ 
+ 	err = __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+-			EXT_CSD_BKOPS_START, 1, timeout, use_busy_signal);
++			EXT_CSD_BKOPS_START, 1, timeout, use_busy_signal, true);
+ 	if (err) {
+ 		pr_warn("%s: Error %d starting bkops\n",
+ 			mmc_hostname(card->host), err);
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index 6d02012..8f0c516 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -1404,9 +1404,9 @@ static int mmc_poweroff_notify(struct mmc_card *card, unsigned int notify_type)
+ 	if (notify_type == EXT_CSD_POWER_OFF_LONG)
+ 		timeout = card->ext_csd.power_off_longtime;
+ 
+-	err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+-			 EXT_CSD_POWER_OFF_NOTIFICATION,
+-			 notify_type, timeout);
++	err = __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
++			EXT_CSD_POWER_OFF_NOTIFICATION,
++			notify_type, timeout, true, false);
+ 	if (err)
+ 		pr_err("%s: Power Off Notification timed out, %u\n",
+ 		       mmc_hostname(card->host), timeout);
+diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
+index ef18348..5ea83b6 100644
+--- a/drivers/mmc/core/mmc_ops.c
++++ b/drivers/mmc/core/mmc_ops.c
+@@ -370,11 +370,12 @@ int mmc_spi_set_crc(struct mmc_host *host, int use_crc)
+  *	@timeout_ms: timeout (ms) for operation performed by register write,
+  *                   timeout of zero implies maximum possible timeout
+  *	@use_busy_signal: use the busy signal as response type
++ *	@send_status: send status cmd to poll for busy
+  *
+  *	Modifies the EXT_CSD register for selected card.
+  */
+ int __mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
+-	       unsigned int timeout_ms, bool use_busy_signal)
++		unsigned int timeout_ms, bool use_busy_signal, bool send_status)
+ {
+ 	int err;
+ 	struct mmc_command cmd = {0};
+@@ -411,14 +412,26 @@ int __mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
+ 	/* Must check status to be sure of no errors */
+ 	timeout = jiffies + msecs_to_jiffies(MMC_OPS_TIMEOUT_MS);
+ 	do {
+-		err = mmc_send_status(card, &status);
+-		if (err)
+-			return err;
++		if (send_status) {
++			err = mmc_send_status(card, &status);
++			if (err)
++				return err;
++		}
+ 		if (card->host->caps & MMC_CAP_WAIT_WHILE_BUSY)
+ 			break;
+ 		if (mmc_host_is_spi(card->host))
+ 			break;
+ 
++		/*
++		 * We are not allowed to issue a status command and the host
++		 * does'nt support MMC_CAP_WAIT_WHILE_BUSY, then we can only
++		 * rely on waiting for the stated timeout to be sufficient.
++		 */
++		if (!send_status) {
++			mmc_delay(timeout_ms);
++			return 0;
++		}
++
+ 		/* Timeout if the device never leaves the program state. */
+ 		if (time_after(jiffies, timeout)) {
+ 			pr_err("%s: Card stuck in programming state! %s\n",
+@@ -445,7 +458,7 @@ EXPORT_SYMBOL_GPL(__mmc_switch);
+ int mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
+ 		unsigned int timeout_ms)
+ {
+-	return __mmc_switch(card, set, index, value, timeout_ms, true);
++	return __mmc_switch(card, set, index, value, timeout_ms, true, true);
+ }
+ EXPORT_SYMBOL_GPL(mmc_switch);
+ 
+diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
+index da51bec..64274ec 100644
+--- a/include/linux/mmc/core.h
++++ b/include/linux/mmc/core.h
+@@ -151,7 +151,8 @@ extern int mmc_app_cmd(struct mmc_host *, struct mmc_card *);
+ extern int mmc_wait_for_app_cmd(struct mmc_host *, struct mmc_card *,
+ 	struct mmc_command *, int);
+ extern void mmc_start_bkops(struct mmc_card *card, bool from_exception);
+-extern int __mmc_switch(struct mmc_card *, u8, u8, u8, unsigned int, bool);
++extern int __mmc_switch(struct mmc_card *, u8, u8, u8, unsigned int, bool,
++			bool);
+ extern int mmc_switch(struct mmc_card *, u8, u8, u8, unsigned int);
+ extern int mmc_send_ext_csd(struct mmc_card *card, u8 *ext_csd);
+ 
+-- 
+1.7.9.5
 
