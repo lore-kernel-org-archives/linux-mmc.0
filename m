@@ -1,49 +1,116 @@
-From: Sekhar Nori <nsekhar-l0cyMroinI0@public.gmane.org>
-Subject: Re: [PATCH v3] ARM: EDMA: Fix clearing of unused list for DT DMA
-	resources
-Date: Thu, 12 Sep 2013 15:28:23 +0530
-Message-ID: <5231903F.7080301@ti.com>
-References: <1378839171-14455-1-git-send-email-joelf@ti.com>
+From: Geert Uytterhoeven <geert@linux-m68k.org>
+Subject: Uninitialized rx_req/tx_req (was: Re: [PATCH v2 2/3] mmc: omap_hsmmc:
+ Skip platform_get_resource_byname() for dt case)
+Date: Thu, 12 Sep 2013 14:41:00 +0200
+Message-ID: <CAMuHMdVVjkZBZyJe2qnUxHeRVo+8WD_Vx1ZKin_pA7XLRCW8uw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
-In-Reply-To: <1378839171-14455-1-git-send-email-joelf-l0cyMroinI0@public.gmane.org>
-List-Unsubscribe: <http://linux.davincidsp.com/mailman/options/davinci-linux-open-source>,
-	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://linux.davincidsp.com/pipermail/davinci-linux-open-source>
-List-Post: <mailto:davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
-List-Help: <mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=help>
-List-Subscribe: <http://linux.davincidsp.com/mailman/listinfo/davinci-linux-open-source>,
-	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=subscribe>
-Sender: <davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
-Errors-To: davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org
-To: Joel Fernandes <joelf-l0cyMroinI0@public.gmane.org>
-Cc: Linux DaVinci Kernel List <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Vinod Koul <vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Pantel Antoniou <panto-wVdstyuyKrO8r51toPun2/C9HSW9iNxf@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Koen Kooi <koen-hcmAuCOw+vXj4SYmN/TMmA@public.gmane.org>, Jyri Sarah <jsarha-l0cyMroinI0@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Jason Kridner <jkridner-hcmAuCOw+vXj4SYmN/TMmA@public.gmane.org>, Dan Williams <djbw-b10kYP2dOMg@public.gmane.org>, Linux OMAP List <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux ARM Kernel List <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-omap-owner@vger.kernel.org>
+Sender: linux-omap-owner@vger.kernel.org
+To: Matt Porter <matt.porter@linaro.org>
+Cc: Balaji T K <balajitk@ti.com>, Chris Ball <cjb@laptop.org>, Grant Likely <grant.likely@secretlab.ca>, Rob Herring <rob.herring@calxeda.com>, Vinod Koul <vinod.koul@intel.com>, Tony Lindgren <tony@atomide.com>, Devicetree Discuss <devicetree-discuss@lists.ozlabs.org>, Linux OMAP List <linux-omap@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux MMC List <linux-mmc@vger.kernel.org>, Arnd Bergmann <arnd@arndb.de>, Dan Williams <djbw@fb.com>, Jon Hunter <jon-hunter@ti.com>, Santosh Shilimkar <santosh.shilimkar@ti.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On Wednesday 11 September 2013 12:22 AM, Joel Fernandes wrote:
-> HWMOD removal for MMC is breaking edma_start as the events are being manually
-> triggered due to unused channel list not being clear.
-> 
-> This patch fixes the issue, by reading the "dmas" property from the DT node if
-> it exists and clearing the bits in the unused channel list. For this purpose
-> we use the of_* helpers to parse the arguments in the dmas phandle list.
-> 
-> Reviewed-by: Sekhar Nori <nsekhar-l0cyMroinI0@public.gmane.org>
-> Reported-by: Balaji T K <balajitk-l0cyMroinI0@public.gmane.org>
-> Cc: Pantel Antoniou <panto-wVdstyuyKrO8r51toPun2/C9HSW9iNxf@public.gmane.org>
-> Signed-off-by: Joel Fernandes <joelf-l0cyMroinI0@public.gmane.org>
+On Tue, Mar 5, 2013 at 10:13 PM, Matt Porter <mporter@ti.com> wrote:
+> From: Santosh Shilimkar <santosh.shilimkar@ti.com>
+>
+> MMC driver probe will abort for DT case because of failed
+> platform_get_resource_byname() lookup. Fix it by skipping resource
+> byname lookup for device tree build.
+>
+> Issue is hidden because hwmod popullates the IO resources which
+> helps to succeed platform_get_resource_byname() and probe.
+>
+> Signed-off-by: Santosh Shilimkar <santosh.shilimkar@ti.com>
 > ---
-> This patch is a repost of v2 with minor change of return value.
+>  drivers/mmc/host/omap_hsmmc.c |   28 +++++++++++++++-------------
+>  1 file changed, 15 insertions(+), 13 deletions(-)
+>
+> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hs=
+mmc.c
+> index e79b12d..8ae1225 100644
+> --- a/drivers/mmc/host/omap_hsmmc.c
+> +++ b/drivers/mmc/host/omap_hsmmc.c
+> @@ -1896,21 +1896,23 @@ static int omap_hsmmc_probe(struct platform_d=
+evice *pdev)
+>
+>         omap_hsmmc_conf_bus_power(host);
+>
+> -       res =3D platform_get_resource_byname(pdev, IORESOURCE_DMA, "t=
+x");
+> -       if (!res) {
+> -               dev_err(mmc_dev(host->mmc), "cannot get DMA TX channe=
+l\n");
+> -               ret =3D -ENXIO;
+> -               goto err_irq;
+> -       }
+> -       tx_req =3D res->start;
+> +       if (!pdev->dev.of_node) {
+> +               res =3D platform_get_resource_byname(pdev, IORESOURCE=
+_DMA, "tx");
+> +               if (!res) {
+> +                       dev_err(mmc_dev(host->mmc), "cannot get DMA T=
+X channel\n");
+> +                       ret =3D -ENXIO;
+> +                       goto err_irq;
+> +               }
+> +               tx_req =3D res->start;
+>
+> -       res =3D platform_get_resource_byname(pdev, IORESOURCE_DMA, "r=
+x");
+> -       if (!res) {
+> -               dev_err(mmc_dev(host->mmc), "cannot get DMA RX channe=
+l\n");
+> -               ret =3D -ENXIO;
+> -               goto err_irq;
+> +               res =3D platform_get_resource_byname(pdev, IORESOURCE=
+_DMA, "rx");
+> +               if (!res) {
+> +                       dev_err(mmc_dev(host->mmc), "cannot get DMA R=
+X channel\n");
+> +                       ret =3D -ENXIO;
+> +                       goto err_irq;
+> +               }
+> +               rx_req =3D res->start;
+>         }
+> -       rx_req =3D res->start;
+>
+>         dma_cap_zero(mask);
+>         dma_cap_set(DMA_SLAVE, mask);
 
-Is this patch meant for merging? If yes, I see no resolution of the
-comments given in this thread:
+Now this is in mainline, I get (gcc 4.1.2):
 
-https://lkml.org/lkml/2013/7/30/9
+drivers/mmc/host/omap_hsmmc.c: In function =E2=80=98omap_hsmmc_probe=E2=
+=80=99:
+drivers/mmc/host/omap_hsmmc.c:1779: warning: =E2=80=98rx_req=E2=80=99 m=
+ay be used
+uninitialized in this function
+drivers/mmc/host/omap_hsmmc.c:1779: warning: =E2=80=98tx_req=E2=80=99 m=
+ay be used
+uninitialized in this function
 
-It is better to send one version with all comments fixed. Helps avoid
-confusion.
+Indeed, rx_req and tx_req are not initialized in the DT case.
 
-Thanks,
-Sekhar
+Initializing them to zero is probably not the right fix. Where are the =
+values
+supposed to come from in the DT case?
+
+Gr{oetje,eeting}s,
+
+                        Geert
+
+--
+Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-=
+m68k.org
+
+In personal conversations with technical people, I call myself a hacker=
+=2E But
+when I'm talking to journalists I just say "programmer" or something li=
+ke that.
+                                -- Linus Torvalds
+--
+To unsubscribe from this list: send the line "unsubscribe linux-omap" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
