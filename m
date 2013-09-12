@@ -1,8 +1,8 @@
 From: Balaji T K <balajitk@ti.com>
 Subject: Re: Uninitialized rx_req/tx_req (was: Re: [PATCH v2 2/3] mmc: omap_hsmmc:
  Skip platform_get_resource_byname() for dt case)
-Date: Thu, 12 Sep 2013 20:40:11 +0530
-Message-ID: <5231D953.4070908@ti.com>
+Date: Thu, 12 Sep 2013 20:41:48 +0530
+Message-ID: <5231D9B4.5000308@ti.com>
 References: <CAMuHMdVVjkZBZyJe2qnUxHeRVo+8WD_Vx1ZKin_pA7XLRCW8uw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=windows-1252;
@@ -12,7 +12,7 @@ Return-path: <linux-omap-owner@vger.kernel.org>
 In-Reply-To: <CAMuHMdVVjkZBZyJe2qnUxHeRVo+8WD_Vx1ZKin_pA7XLRCW8uw@mail.gmail.com>
 Sender: linux-omap-owner@vger.kernel.org
 To: Geert Uytterhoeven <geert@linux-m68k.org>
-Cc: Matt Porter <matt.porter@linaro.org>, Chris Ball <cjb@laptop.org>, Grant Likely <grant.likely@secretlab.ca>, Rob Herring <rob.herring@calxeda.com>, Vinod Koul <vinod.koul@intel.com>, Tony Lindgren <tony@atomide.com>, Devicetree Discuss <devicetree-discuss@lists.ozlabs.org>, Linux OMAP List <linux-omap@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux MMC List <linux-mmc@vger.kernel.org>, Arnd Bergmann <arnd@arndb.de>, Dan Williams <djbw@fb.com>, Santosh Shilimkar <santosh.shilimkar@ti.com>
+Cc: Matt Porter <matt.porter@linaro.org>, Chris Ball <cjb@laptop.org>, Grant Likely <grant.likely@secretlab.ca>, Rob Herring <rob.herring@calxeda.com>, Vinod Koul <vinod.koul@intel.com>, Tony Lindgren <tony@atomide.com>, Linux OMAP List <linux-omap@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux MMC List <linux-mmc@vger.kernel.org>, Arnd Bergmann <arnd@arndb.de>, Santosh Shilimkar <santosh.shilimkar@ti.com>
 List-Id: linux-mmc@vger.kernel.org
 
 On Thursday 12 September 2013 06:11 PM, Geert Uytterhoeven wrote:
@@ -97,6 +97,30 @@ RX channel\n");
 e values
 > supposed to come from in the DT case?
 >
+Hi,
+
+rx_req and tx_req are not used in DT case [1].
+dma_request_slave_channel is used to get dma info from mmc dt node.
+
+__dma_request_channel is fallback case for non dt boot.
+
+Note __dma_request_channel is called if dma info is not populated in
+dts files.
+
+static inline struct dma_chan
+*__dma_request_slave_channel_compat(const dma_cap_mask_t *mask,
+				  dma_filter_fn fn, void *fn_param,
+				  struct device *dev, char *name)
+{
+	struct dma_chan *chan;
+
+	chan =3D dma_request_slave_channel(dev, name);
+	if (chan)
+		return chan;
+
+	return __dma_request_channel(mask, fn, fn_param);
+}
+
 > Gr{oetje,eeting}s,
 >
 >                          Geert
