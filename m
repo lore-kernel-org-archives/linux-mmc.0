@@ -1,51 +1,37 @@
-From: Sachin Kamat <sachin.kamat@linaro.org>
-Subject: [PATCH 1/1] mmc: wmt-sdmmc: Fix NULL pointer dereference
-Date: Thu, 12 Sep 2013 13:51:18 +0530
-Message-ID: <1378974078-15416-1-git-send-email-sachin.kamat@linaro.org>
+From: Viresh Kumar <viresh.kumar@linaro.org>
+Subject: Re: [PATCH 1/1] mmc: sdhci-spear: Fix NULL pointer dereference
+Date: Thu, 12 Sep 2013 14:26:52 +0530
+Message-ID: <CAKohpo=2cdrKZXqkGZ9oKcJEJT170WUVVvB1HZDR+3EbR24qtA@mail.gmail.com>
+References: <1378968200-16577-1-git-send-email-sachin.kamat@linaro.org>
+	<CAKohponUT5hh=saFcx7riFJB-DbPwhkYz2_7Gc2i--GWC6bYCg@mail.gmail.com>
+	<CAK9yfHzpLj6ZAcqikFWkOSWCSpU_NvchETgG0_65sU1Kb_F=kA@mail.gmail.com>
+	<CAKohponoo6Kjc6P=e2K0ys6iZ7upB24UGhBNeSbg22M8qqTkWw@mail.gmail.com>
+	<CAK9yfHzORfv84mDrH_KCx79Oi5w9jdtLk3MuOu8Dex1+M3N6EQ@mail.gmail.com>
+	<CAKohpomgTk+JoHJpzNEqQRUXB5AHT+ijChc=0t3VKa+KtMcDRw@mail.gmail.com>
+	<CAK9yfHw16Nk2bBpCrZN0b-manzL7MvqFiuerAzdsOCpzrju96A@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pb0-f42.google.com ([209.85.160.42]:63537 "EHLO
-	mail-pb0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751810Ab3ILIj3 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 12 Sep 2013 04:39:29 -0400
-Received: by mail-pb0-f42.google.com with SMTP id un15so10273852pbc.29
-        for <linux-mmc@vger.kernel.org>; Thu, 12 Sep 2013 01:39:28 -0700 (PDT)
+Received: from mail-ob0-f169.google.com ([209.85.214.169]:47206 "EHLO
+	mail-ob0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755238Ab3ILI4w (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 12 Sep 2013 04:56:52 -0400
+Received: by mail-ob0-f169.google.com with SMTP id wp4so239932obc.0
+        for <linux-mmc@vger.kernel.org>; Thu, 12 Sep 2013 01:56:52 -0700 (PDT)
+In-Reply-To: <CAK9yfHw16Nk2bBpCrZN0b-manzL7MvqFiuerAzdsOCpzrju96A@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: cjb@laptop.org, linux@prisktech.co.nz, sachin.kamat@linaro.org
+To: Sachin Kamat <sachin.kamat@linaro.org>
+Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, spear-devel <spear-devel@list.st.com>
 
-'of_id' is dereferenced before NULL pointer check. Move it to
-after the check.
+On 12 September 2013 13:52, Sachin Kamat <sachin.kamat@linaro.org> wrote:
+> sdhci_probe only checks for IS_ERR. We would need to change it to
+> IS_ERR_OR_NULL (which I do not prefer personally as there is some
+> discussion for its removal). In that case we would need to return as I
+> mentioned in my earlier email. Let me know your opinion.
 
-Signed-off-by: Sachin Kamat <sachin.kamat@linaro.org>
----
-Compile tested.
----
- drivers/mmc/host/wmt-sdmmc.c |    4 +++-
- 1 file changed, 3 insertions(+), 1 deletion(-)
+The problem with pdata normally is that it can't be NULL. Its not like clk/
+regulator framework where NULL's are valid...
 
-diff --git a/drivers/mmc/host/wmt-sdmmc.c b/drivers/mmc/host/wmt-sdmmc.c
-index 34231d5..3523a72 100644
---- a/drivers/mmc/host/wmt-sdmmc.c
-+++ b/drivers/mmc/host/wmt-sdmmc.c
-@@ -771,7 +771,7 @@ static int wmt_mci_probe(struct platform_device *pdev)
- 	struct device_node *np = pdev->dev.of_node;
- 	const struct of_device_id *of_id =
- 		of_match_device(wmt_mci_dt_ids, &pdev->dev);
--	const struct wmt_mci_caps *wmt_caps = of_id->data;
-+	const struct wmt_mci_caps *wmt_caps;
- 	int ret;
- 	int regular_irq, dma_irq;
- 
-@@ -780,6 +780,8 @@ static int wmt_mci_probe(struct platform_device *pdev)
- 		return -EFAULT;
- 	}
- 
-+	wmt_caps = of_id->data;
-+
- 	if (!np) {
- 		dev_err(&pdev->dev, "Missing SDMMC description in devicetree\n");
- 		return -EFAULT;
--- 
-1.7.9.5
-
+And that's why we are checking NULL later in the probe().. Probably you can
+just move that up a bit.. and nothing else..
