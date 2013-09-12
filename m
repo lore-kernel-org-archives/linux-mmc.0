@@ -1,43 +1,42 @@
 From: Sachin Kamat <sachin.kamat@linaro.org>
-Subject: Re: [PATCH 1/1] mmc: sdhci-spear: Fix NULL pointer dereference
-Date: Thu, 12 Sep 2013 13:52:36 +0530
-Message-ID: <CAK9yfHw16Nk2bBpCrZN0b-manzL7MvqFiuerAzdsOCpzrju96A@mail.gmail.com>
-References: <1378968200-16577-1-git-send-email-sachin.kamat@linaro.org>
-	<CAKohponUT5hh=saFcx7riFJB-DbPwhkYz2_7Gc2i--GWC6bYCg@mail.gmail.com>
-	<CAK9yfHzpLj6ZAcqikFWkOSWCSpU_NvchETgG0_65sU1Kb_F=kA@mail.gmail.com>
-	<CAKohponoo6Kjc6P=e2K0ys6iZ7upB24UGhBNeSbg22M8qqTkWw@mail.gmail.com>
-	<CAK9yfHzORfv84mDrH_KCx79Oi5w9jdtLk3MuOu8Dex1+M3N6EQ@mail.gmail.com>
-	<CAKohpomgTk+JoHJpzNEqQRUXB5AHT+ijChc=0t3VKa+KtMcDRw@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Subject: [PATCH 1/1] mmc: ushc: Fix incorrect parameter in sizeof
+Date: Thu, 12 Sep 2013 13:44:13 +0530
+Message-ID: <1378973653-12750-1-git-send-email-sachin.kamat@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ob0-f179.google.com ([209.85.214.179]:36869 "EHLO
-	mail-ob0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751939Ab3ILIWg (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 12 Sep 2013 04:22:36 -0400
-Received: by mail-ob0-f179.google.com with SMTP id wn1so212083obc.10
-        for <linux-mmc@vger.kernel.org>; Thu, 12 Sep 2013 01:22:36 -0700 (PDT)
-In-Reply-To: <CAKohpomgTk+JoHJpzNEqQRUXB5AHT+ijChc=0t3VKa+KtMcDRw@mail.gmail.com>
+Received: from mail-pd0-f171.google.com ([209.85.192.171]:44612 "EHLO
+	mail-pd0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750935Ab3ILIc1 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 12 Sep 2013 04:32:27 -0400
+Received: by mail-pd0-f171.google.com with SMTP id g10so10378763pdj.30
+        for <linux-mmc@vger.kernel.org>; Thu, 12 Sep 2013 01:32:26 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Viresh Kumar <viresh.kumar@linaro.org>
-Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, spear-devel <spear-devel@list.st.com>
+To: linux-mmc@vger.kernel.org
+Cc: cjb@laptop.org, sachin.kamat@linaro.org, David Vrabel <david.vrabel@csr.com>
 
-On 12 September 2013 13:50, Viresh Kumar <viresh.kumar@linaro.org> wrote:
-> On 12 September 2013 13:48, Sachin Kamat <sachin.kamat@linaro.org> wrote:
->>>>  96      return ERR_PTR(-ENODATA);
->>
->> Wouldn't this be unconditional error return whether pdata is null or not?
->
-> Stupid me... I meant return pdata from this place..
->
-> Necessary checks are done in sdhci_probe()
+sizeof should be of the parent structure type.
 
-sdhci_probe only checks for IS_ERR. We would need to change it to
-IS_ERR_OR_NULL (which I do not prefer personally as there is some
-discussion for its removal). In that case we would need to return as I
-mentioned in my earlier email. Let me know your opinion.
+Signed-off-by: Sachin Kamat <sachin.kamat@linaro.org>
+Cc: David Vrabel <david.vrabel@csr.com>
+---
+Compile tested.
+---
+ drivers/mmc/host/ushc.c |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
+diff --git a/drivers/mmc/host/ushc.c b/drivers/mmc/host/ushc.c
+index c0105a2..d2c386f 100644
+--- a/drivers/mmc/host/ushc.c
++++ b/drivers/mmc/host/ushc.c
+@@ -504,7 +504,7 @@ static int ushc_probe(struct usb_interface *intf, const struct usb_device_id *id
+ 		ret = -ENOMEM;
+ 		goto err;
+ 	}
+-	ushc->csw = kzalloc(sizeof(struct ushc_cbw), GFP_KERNEL);
++	ushc->csw = kzalloc(sizeof(struct ushc_csw), GFP_KERNEL);
+ 	if (ushc->csw == NULL) {
+ 		ret = -ENOMEM;
+ 		goto err;
 -- 
-With warm regards,
-Sachin
+1.7.9.5
+
