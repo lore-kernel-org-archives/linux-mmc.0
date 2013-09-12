@@ -1,44 +1,41 @@
 From: Sachin Kamat <sachin.kamat@linaro.org>
-Subject: [PATCH 1/3] mmc: mvsdio: Convert to devm_ioremap_resource
-Date: Thu, 12 Sep 2013 12:16:34 +0530
-Message-ID: <1378968396-18604-1-git-send-email-sachin.kamat@linaro.org>
+Subject: [PATCH 3/3] mmc: dw_mmc-socfpga: Staticize dw_mci_socfpga_probe
+Date: Thu, 12 Sep 2013 12:16:36 +0530
+Message-ID: <1378968396-18604-3-git-send-email-sachin.kamat@linaro.org>
+References: <1378968396-18604-1-git-send-email-sachin.kamat@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pb0-f44.google.com ([209.85.160.44]:51129 "EHLO
-	mail-pb0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754786Ab3ILHEn (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 12 Sep 2013 03:04:43 -0400
-Received: by mail-pb0-f44.google.com with SMTP id xa7so10197780pbc.17
-        for <linux-mmc@vger.kernel.org>; Thu, 12 Sep 2013 00:04:43 -0700 (PDT)
+Received: from mail-pa0-f49.google.com ([209.85.220.49]:62999 "EHLO
+	mail-pa0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754786Ab3ILHEt (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 12 Sep 2013 03:04:49 -0400
+Received: by mail-pa0-f49.google.com with SMTP id ld10so694792pab.22
+        for <linux-mmc@vger.kernel.org>; Thu, 12 Sep 2013 00:04:49 -0700 (PDT)
+In-Reply-To: <1378968396-18604-1-git-send-email-sachin.kamat@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 Cc: tgih.jun@samsung.com, jh80.chung@samsung.com, cjb@laptop.org, nico@fluxnic.net, sachin.kamat@linaro.org
 
-devm_request_and_ioremap() is deprecated. Use devm_ioremap_resource()
-instead.
+'dw_mci_socfpga_probe' is used only in this file. Make it static.
 
 Signed-off-by: Sachin Kamat <sachin.kamat@linaro.org>
 ---
- drivers/mmc/host/mvsdio.c |    6 +++---
- 1 file changed, 3 insertions(+), 3 deletions(-)
+ drivers/mmc/host/dw_mmc-socfpga.c |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/host/mvsdio.c b/drivers/mmc/host/mvsdio.c
-index 06c5b0b..a592407 100644
---- a/drivers/mmc/host/mvsdio.c
-+++ b/drivers/mmc/host/mvsdio.c
-@@ -775,9 +775,9 @@ static int __init mvsd_probe(struct platform_device *pdev)
+diff --git a/drivers/mmc/host/dw_mmc-socfpga.c b/drivers/mmc/host/dw_mmc-socfpga.c
+index 5ce00b2..56c7fe2 100644
+--- a/drivers/mmc/host/dw_mmc-socfpga.c
++++ b/drivers/mmc/host/dw_mmc-socfpga.c
+@@ -113,7 +113,7 @@ static const struct of_device_id dw_mci_socfpga_match[] = {
+ };
+ MODULE_DEVICE_TABLE(of, dw_mci_socfpga_match);
  
- 	spin_lock_init(&host->lock);
- 
--	host->base = devm_request_and_ioremap(&pdev->dev, r);
--	if (!host->base) {
--		ret = -ENOMEM;
-+	host->base = devm_ioremap_resource(&pdev->dev, r);
-+	if (IS_ERR(host->base)) {
-+		ret = PTR_ERR(host->base);
- 		goto out;
- 	}
- 
+-int dw_mci_socfpga_probe(struct platform_device *pdev)
++static int dw_mci_socfpga_probe(struct platform_device *pdev)
+ {
+ 	const struct dw_mci_drv_data *drv_data;
+ 	const struct of_device_id *match;
 -- 
 1.7.9.5
 
