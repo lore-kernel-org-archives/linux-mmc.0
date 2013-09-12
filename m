@@ -1,153 +1,315 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH] mmc: core: Do not poll for busy with status cmd for all
- switch cmds
-Date: Thu, 12 Sep 2013 11:41:57 +0900
-Message-ID: <523129F5.8030800@samsung.com>
-References: <1378893256-27460-1-git-send-email-ulf.hansson@linaro.org>
+From: Michal Simek <monstr@monstr.eu>
+Subject: Re: [RFC PATCH] amba: Ensure drvdata is NULL
+Date: Thu, 12 Sep 2013 07:57:54 +0200
+Message-ID: <523157E2.4090707@monstr.eu>
+References: <346db238d6c8c418bddb1e8a166e9818b5074c06.1378305864.git.michal.simek@xilinx.com>
+Reply-To: monstr@monstr.eu
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="bIniuQhkFibj80X14rlEFb50ECVjD17KV"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout2.samsung.com ([203.254.224.25]:47778 "EHLO
-	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751052Ab3ILClc (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 11 Sep 2013 22:41:32 -0400
-Received: from epcpsbgr1.samsung.com
- (u141.gpu120.samsung.co.kr [203.254.230.141])
- by mailout2.samsung.com (Oracle Communications Messaging Server 7u4-24.01
- (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTP id <0MSZ00FPZRGYMSJ0@mailout2.samsung.com> for
- linux-mmc@vger.kernel.org; Thu, 12 Sep 2013 11:41:31 +0900 (KST)
-In-reply-to: <1378893256-27460-1-git-send-email-ulf.hansson@linaro.org>
+Received: from mail-ea0-f181.google.com ([209.85.215.181]:48785 "EHLO
+	mail-ea0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755191Ab3ILF56 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 12 Sep 2013 01:57:58 -0400
+Received: by mail-ea0-f181.google.com with SMTP id d10so5089455eaj.40
+        for <linux-mmc@vger.kernel.org>; Wed, 11 Sep 2013 22:57:56 -0700 (PDT)
+In-Reply-To: <346db238d6c8c418bddb1e8a166e9818b5074c06.1378305864.git.michal.simek@xilinx.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Jaehoon Chung <jh80.chung@samsung.com>
+To: Michal Simek <michal.simek@xilinx.com>, Russell King <linux@arm.linux.org.uk>
+Cc: linux-kernel@vger.kernel.org, Vinod Koul <vinod.koul@intel.com>, Dan Williams <djbw@fb.com>, Dmitry Torokhov <dmitry.torokhov@gmail.com>, Chris Ball <cjb@laptop.org>, Alessandro Zummo <a.zummo@towertech.it>, Linus Walleij <linus.walleij@linaro.org>, Mark Brown <broonie@kernel.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Jiri Slaby <jslaby@suse.cz>, Jean-Christophe Plagniol-Villard <plagnioj@jcrosoft.com>, Tomi Valkeinen <tomi.valkeinen@ti.com>, Wim Van Sebroeck <wim@iguana.be>, Andrew Morton <akpm@linux-foundation.org>, "zhangwei(Jovi)" <jovi.zhangwei@huawei.com>, Randy Dunlap <rdunlap@infradead.org>, linux-arm-kernel@lists.infradead.org, linux-input@vger.kernel.org, linux-mmc@vger.kernel.org, rtc-linux@googlegroups.com, linux-spi@vger.kernel.org, linux-serial@vger.kernel.org, linux-fbdev@vger.kernel.org, linux-watchdog@vger.kernel.org
 
-Hi Ulf,
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--bIniuQhkFibj80X14rlEFb50ECVjD17KV
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
 
-I will test with this patch, and share the result.
-Thanks for posting this patch.
+Hi Russell,
 
-Best Regards,
-Jaehoon Chung
+any comment on this one?
 
-On 09/11/2013 06:54 PM, Ulf Hansson wrote:
-> Some switch operations like poweroff notify, shall according to the
-> spec not be followed by any other new commands. For these cases and
-> when the host does'nt support MMC_CAP_WAIT_WHILE_BUSY, we must not
-> send status commands to poll for busy detection. Instead wait for
-> the stated timeout from the EXT_CSD before completing the request.
-> 
-> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
-> Cc: Jaehoon Chung <jh80.chung@samsung.com>
+Thanks,
+Michal
+
+
+On 09/04/2013 04:44 PM, Michal Simek wrote:
+> This patch is inpired by the patch for drvdata
+> "device-core: Ensure drvdata =3D NULL when no driver is bound"
+> (sha1: 0998d0631001288a5974afc0b2a5f568bcdecb4d)
+>=20
+> Also it fixes all occurences in drivers.
+>=20
+> Signed-off-by: Michal Simek <michal.simek@xilinx.com>
 > ---
->  drivers/mmc/core/core.c    |    2 +-
->  drivers/mmc/core/mmc.c     |    6 +++---
->  drivers/mmc/core/mmc_ops.c |   23 ++++++++++++++++++-----
->  include/linux/mmc/core.h   |    3 ++-
->  4 files changed, 24 insertions(+), 10 deletions(-)
-> 
-> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> index b9b9fb6..15eba0c 100644
-> --- a/drivers/mmc/core/core.c
-> +++ b/drivers/mmc/core/core.c
-> @@ -301,7 +301,7 @@ void mmc_start_bkops(struct mmc_card *card, bool from_exception)
->  	}
->  
->  	err = __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-> -			EXT_CSD_BKOPS_START, 1, timeout, use_busy_signal);
-> +			EXT_CSD_BKOPS_START, 1, timeout, use_busy_signal, true);
->  	if (err) {
->  		pr_warn("%s: Error %d starting bkops\n",
->  			mmc_hostname(card->host), err);
-> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-> index 6d02012..8f0c516 100644
-> --- a/drivers/mmc/core/mmc.c
-> +++ b/drivers/mmc/core/mmc.c
-> @@ -1404,9 +1404,9 @@ static int mmc_poweroff_notify(struct mmc_card *card, unsigned int notify_type)
->  	if (notify_type == EXT_CSD_POWER_OFF_LONG)
->  		timeout = card->ext_csd.power_off_longtime;
->  
-> -	err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-> -			 EXT_CSD_POWER_OFF_NOTIFICATION,
-> -			 notify_type, timeout);
-> +	err = __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-> +			EXT_CSD_POWER_OFF_NOTIFICATION,
-> +			notify_type, timeout, true, false);
->  	if (err)
->  		pr_err("%s: Power Off Notification timed out, %u\n",
->  		       mmc_hostname(card->host), timeout);
-> diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
-> index ef18348..5ea83b6 100644
-> --- a/drivers/mmc/core/mmc_ops.c
-> +++ b/drivers/mmc/core/mmc_ops.c
-> @@ -370,11 +370,12 @@ int mmc_spi_set_crc(struct mmc_host *host, int use_crc)
->   *	@timeout_ms: timeout (ms) for operation performed by register write,
->   *                   timeout of zero implies maximum possible timeout
->   *	@use_busy_signal: use the busy signal as response type
-> + *	@send_status: send status cmd to poll for busy
->   *
->   *	Modifies the EXT_CSD register for selected card.
->   */
->  int __mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
-> -	       unsigned int timeout_ms, bool use_busy_signal)
-> +		unsigned int timeout_ms, bool use_busy_signal, bool send_status)
+>  arch/arm/kernel/etm.c           | 6 ------
+>  drivers/amba/bus.c              | 2 ++
+>  drivers/dma/pl330.c             | 3 ---
+>  drivers/input/serio/ambakmi.c   | 2 --
+>  drivers/mmc/host/mmci.c         | 2 --
+>  drivers/rtc/rtc-pl030.c         | 2 --
+>  drivers/rtc/rtc-pl031.c         | 2 --
+>  drivers/spi/spi-pl022.c         | 1 -
+>  drivers/tty/serial/amba-pl010.c | 3 ---
+>  drivers/tty/serial/amba-pl011.c | 3 ---
+>  drivers/video/amba-clcd.c       | 2 --
+>  drivers/watchdog/sp805_wdt.c    | 1 -
+>  12 files changed, 2 insertions(+), 27 deletions(-)
+>=20
+> diff --git a/arch/arm/kernel/etm.c b/arch/arm/kernel/etm.c
+> index 8ff0ecd..131a6ab 100644
+> --- a/arch/arm/kernel/etm.c
+> +++ b/arch/arm/kernel/etm.c
+> @@ -385,7 +385,6 @@ out:
+>  	return ret;
+>=20
+>  out_unmap:
+> -	amba_set_drvdata(dev, NULL);
+>  	iounmap(t->etb_regs);
+>=20
+>  out_release:
+> @@ -398,8 +397,6 @@ static int etb_remove(struct amba_device *dev)
 >  {
->  	int err;
->  	struct mmc_command cmd = {0};
-> @@ -411,14 +412,26 @@ int __mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
->  	/* Must check status to be sure of no errors */
->  	timeout = jiffies + msecs_to_jiffies(MMC_OPS_TIMEOUT_MS);
->  	do {
-> -		err = mmc_send_status(card, &status);
-> -		if (err)
-> -			return err;
-> +		if (send_status) {
-> +			err = mmc_send_status(card, &status);
-> +			if (err)
-> +				return err;
-> +		}
->  		if (card->host->caps & MMC_CAP_WAIT_WHILE_BUSY)
->  			break;
->  		if (mmc_host_is_spi(card->host))
->  			break;
->  
-> +		/*
-> +		 * We are not allowed to issue a status command and the host
-> +		 * does'nt support MMC_CAP_WAIT_WHILE_BUSY, then we can only
-> +		 * rely on waiting for the stated timeout to be sufficient.
-> +		 */
-> +		if (!send_status) {
-> +			mmc_delay(timeout_ms);
-> +			return 0;
-> +		}
-> +
->  		/* Timeout if the device never leaves the program state. */
->  		if (time_after(jiffies, timeout)) {
->  			pr_err("%s: Card stuck in programming state! %s\n",
-> @@ -445,7 +458,7 @@ EXPORT_SYMBOL_GPL(__mmc_switch);
->  int mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
->  		unsigned int timeout_ms)
+>  	struct tracectx *t =3D amba_get_drvdata(dev);
+>=20
+> -	amba_set_drvdata(dev, NULL);
+> -
+>  	iounmap(t->etb_regs);
+>  	t->etb_regs =3D NULL;
+>=20
+> @@ -588,7 +585,6 @@ out:
+>  	return ret;
+>=20
+>  out_unmap:
+> -	amba_set_drvdata(dev, NULL);
+>  	iounmap(t->etm_regs);
+>=20
+>  out_release:
+> @@ -601,8 +597,6 @@ static int etm_remove(struct amba_device *dev)
 >  {
-> -	return __mmc_switch(card, set, index, value, timeout_ms, true);
-> +	return __mmc_switch(card, set, index, value, timeout_ms, true, true);
->  }
->  EXPORT_SYMBOL_GPL(mmc_switch);
->  
-> diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
-> index da51bec..64274ec 100644
-> --- a/include/linux/mmc/core.h
-> +++ b/include/linux/mmc/core.h
-> @@ -151,7 +151,8 @@ extern int mmc_app_cmd(struct mmc_host *, struct mmc_card *);
->  extern int mmc_wait_for_app_cmd(struct mmc_host *, struct mmc_card *,
->  	struct mmc_command *, int);
->  extern void mmc_start_bkops(struct mmc_card *card, bool from_exception);
-> -extern int __mmc_switch(struct mmc_card *, u8, u8, u8, unsigned int, bool);
-> +extern int __mmc_switch(struct mmc_card *, u8, u8, u8, unsigned int, bool,
-> +			bool);
->  extern int mmc_switch(struct mmc_card *, u8, u8, u8, unsigned int);
->  extern int mmc_send_ext_csd(struct mmc_card *card, u8 *ext_csd);
->  
-> 
+>  	struct tracectx *t =3D amba_get_drvdata(dev);
+>=20
+> -	amba_set_drvdata(dev, NULL);
+> -
+>  	iounmap(t->etm_regs);
+>  	t->etm_regs =3D NULL;
+>=20
+> diff --git a/drivers/amba/bus.c b/drivers/amba/bus.c
+> index c670727..9762090 100644
+> --- a/drivers/amba/bus.c
+> +++ b/drivers/amba/bus.c
+> @@ -373,6 +373,7 @@ static int amba_probe(struct device *dev)
+>  		if (ret =3D=3D 0)
+>  			break;
+>=20
+> +		amba_set_drvdata(pcdev, NULL);
+>  		pm_runtime_disable(dev);
+>  		pm_runtime_set_suspended(dev);
+>  		pm_runtime_put_noidle(dev);
+> @@ -391,6 +392,7 @@ static int amba_remove(struct device *dev)
+>=20
+>  	pm_runtime_get_sync(dev);
+>  	ret =3D drv->remove(pcdev);
+> +	amba_set_drvdata(pcdev, NULL);
+>  	pm_runtime_put_noidle(dev);
+>=20
+>  	/* Undo the runtime PM settings in amba_probe() */
+> diff --git a/drivers/dma/pl330.c b/drivers/dma/pl330.c
+> index fa645d8..626f99e 100644
+> --- a/drivers/dma/pl330.c
+> +++ b/drivers/dma/pl330.c
+> @@ -3026,8 +3026,6 @@ pl330_probe(struct amba_device *adev, const struc=
+t amba_id *id)
+>=20
+>  	return 0;
+>  probe_err3:
+> -	amba_set_drvdata(adev, NULL);
+> -
+>  	/* Idle the DMAC */
+>  	list_for_each_entry_safe(pch, _p, &pdmac->ddma.channels,
+>  			chan.device_node) {
+> @@ -3061,7 +3059,6 @@ static int pl330_remove(struct amba_device *adev)=
 
+>  		of_dma_controller_free(adev->dev.of_node);
+>=20
+>  	dma_async_device_unregister(&pdmac->ddma);
+> -	amba_set_drvdata(adev, NULL);
+>=20
+>  	/* Idle the DMAC */
+>  	list_for_each_entry_safe(pch, _p, &pdmac->ddma.channels,
+> diff --git a/drivers/input/serio/ambakmi.c b/drivers/input/serio/ambakm=
+i.c
+> index 4e2fd44..b7c206d 100644
+> --- a/drivers/input/serio/ambakmi.c
+> +++ b/drivers/input/serio/ambakmi.c
+> @@ -167,8 +167,6 @@ static int amba_kmi_remove(struct amba_device *dev)=
+
+>  {
+>  	struct amba_kmi_port *kmi =3D amba_get_drvdata(dev);
+>=20
+> -	amba_set_drvdata(dev, NULL);
+> -
+>  	serio_unregister_port(kmi->io);
+>  	clk_put(kmi->clk);
+>  	iounmap(kmi->base);
+> diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+> index c3785ed..07e17f1 100644
+> --- a/drivers/mmc/host/mmci.c
+> +++ b/drivers/mmc/host/mmci.c
+> @@ -1678,8 +1678,6 @@ static int mmci_remove(struct amba_device *dev)
+>  {
+>  	struct mmc_host *mmc =3D amba_get_drvdata(dev);
+>=20
+> -	amba_set_drvdata(dev, NULL);
+> -
+>  	if (mmc) {
+>  		struct mmci_host *host =3D mmc_priv(mmc);
+>=20
+> diff --git a/drivers/rtc/rtc-pl030.c b/drivers/rtc/rtc-pl030.c
+> index 22bacdb..a804f75 100644
+> --- a/drivers/rtc/rtc-pl030.c
+> +++ b/drivers/rtc/rtc-pl030.c
+> @@ -153,8 +153,6 @@ static int pl030_remove(struct amba_device *dev)
+>  {
+>  	struct pl030_rtc *rtc =3D amba_get_drvdata(dev);
+>=20
+> -	amba_set_drvdata(dev, NULL);
+> -
+>  	writel(0, rtc->base + RTC_CR);
+>=20
+>  	free_irq(dev->irq[0], rtc);
+> diff --git a/drivers/rtc/rtc-pl031.c b/drivers/rtc/rtc-pl031.c
+> index 0f0609b..c9ca86e 100644
+> --- a/drivers/rtc/rtc-pl031.c
+> +++ b/drivers/rtc/rtc-pl031.c
+> @@ -305,7 +305,6 @@ static int pl031_remove(struct amba_device *adev)
+>  {
+>  	struct pl031_local *ldata =3D dev_get_drvdata(&adev->dev);
+>=20
+> -	amba_set_drvdata(adev, NULL);
+>  	free_irq(adev->irq[0], ldata);
+>  	rtc_device_unregister(ldata->rtc);
+>  	iounmap(ldata->base);
+> @@ -392,7 +391,6 @@ out_no_irq:
+>  	rtc_device_unregister(ldata->rtc);
+>  out_no_rtc:
+>  	iounmap(ldata->base);
+> -	amba_set_drvdata(adev, NULL);
+>  out_no_remap:
+>  	kfree(ldata);
+>  out:
+> diff --git a/drivers/spi/spi-pl022.c b/drivers/spi/spi-pl022.c
+> index abef061..e12813e 100644
+> --- a/drivers/spi/spi-pl022.c
+> +++ b/drivers/spi/spi-pl022.c
+> @@ -2306,7 +2306,6 @@ pl022_remove(struct amba_device *adev)
+>  	amba_release_regions(adev);
+>  	tasklet_disable(&pl022->pump_transfers);
+>  	spi_unregister_master(pl022->master);
+> -	amba_set_drvdata(adev, NULL);
+>  	return 0;
+>  }
+>=20
+> diff --git a/drivers/tty/serial/amba-pl010.c b/drivers/tty/serial/amba-=
+pl010.c
+> index c368405..f630b78 100644
+> --- a/drivers/tty/serial/amba-pl010.c
+> +++ b/drivers/tty/serial/amba-pl010.c
+> @@ -728,7 +728,6 @@ static int pl010_probe(struct amba_device *dev, con=
+st struct amba_id *id)
+>  	amba_set_drvdata(dev, uap);
+>  	ret =3D uart_add_one_port(&amba_reg, &uap->port);
+>  	if (ret) {
+> -		amba_set_drvdata(dev, NULL);
+>  		amba_ports[i] =3D NULL;
+>  		clk_put(uap->clk);
+>   unmap:
+> @@ -745,8 +744,6 @@ static int pl010_remove(struct amba_device *dev)
+>  	struct uart_amba_port *uap =3D amba_get_drvdata(dev);
+>  	int i;
+>=20
+> -	amba_set_drvdata(dev, NULL);
+> -
+>  	uart_remove_one_port(&amba_reg, &uap->port);
+>=20
+>  	for (i =3D 0; i < ARRAY_SIZE(amba_ports); i++)
+> diff --git a/drivers/tty/serial/amba-pl011.c b/drivers/tty/serial/amba-=
+pl011.c
+> index 28b35ad..2a1efe0 100644
+> --- a/drivers/tty/serial/amba-pl011.c
+> +++ b/drivers/tty/serial/amba-pl011.c
+> @@ -2143,7 +2143,6 @@ static int pl011_probe(struct amba_device *dev, c=
+onst struct amba_id *id)
+>  	amba_set_drvdata(dev, uap);
+>  	ret =3D uart_add_one_port(&amba_reg, &uap->port);
+>  	if (ret) {
+> -		amba_set_drvdata(dev, NULL);
+>  		amba_ports[i] =3D NULL;
+>  		pl011_dma_remove(uap);
+>  	}
+> @@ -2156,8 +2155,6 @@ static int pl011_remove(struct amba_device *dev)
+>  	struct uart_amba_port *uap =3D amba_get_drvdata(dev);
+>  	int i;
+>=20
+> -	amba_set_drvdata(dev, NULL);
+> -
+>  	uart_remove_one_port(&amba_reg, &uap->port);
+>=20
+>  	for (i =3D 0; i < ARRAY_SIZE(amba_ports); i++)
+> diff --git a/drivers/video/amba-clcd.c b/drivers/video/amba-clcd.c
+> index 0a2cce7..0bab6ab 100644
+> --- a/drivers/video/amba-clcd.c
+> +++ b/drivers/video/amba-clcd.c
+> @@ -594,8 +594,6 @@ static int clcdfb_remove(struct amba_device *dev)
+>  {
+>  	struct clcd_fb *fb =3D amba_get_drvdata(dev);
+>=20
+> -	amba_set_drvdata(dev, NULL);
+> -
+>  	clcdfb_disable(fb);
+>  	unregister_framebuffer(&fb->fb);
+>  	if (fb->fb.cmap.len)
+> diff --git a/drivers/watchdog/sp805_wdt.c b/drivers/watchdog/sp805_wdt.=
+c
+> index 58df98a..3f786ce 100644
+> --- a/drivers/watchdog/sp805_wdt.c
+> +++ b/drivers/watchdog/sp805_wdt.c
+> @@ -268,7 +268,6 @@ static int sp805_wdt_remove(struct amba_device *ade=
+v)
+>  	struct sp805_wdt *wdt =3D amba_get_drvdata(adev);
+>=20
+>  	watchdog_unregister_device(&wdt->wdd);
+> -	amba_set_drvdata(adev, NULL);
+>  	watchdog_set_drvdata(&wdt->wdd, NULL);
+>=20
+>  	return 0;
+> --
+> 1.8.2.3
+>=20
+
+
+--=20
+Michal Simek, Ing. (M.Eng), OpenPGP -> KeyID: FE3D1F91
+w: www.monstr.eu p: +42-0-721842854
+Maintainer of Linux kernel - Microblaze cpu - http://www.monstr.eu/fdt/
+Maintainer of Linux kernel - Xilinx Zynq ARM architecture
+Microblaze U-BOOT custodian and responsible for u-boot arm zynq platform
+
+
+
+--bIniuQhkFibj80X14rlEFb50ECVjD17KV
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.10 (GNU/Linux)
+Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
+
+iEYEARECAAYFAlIxV+IACgkQykllyylKDCG+6ACeIhGU2N7vWeSAf38mc0uHP6w4
+7AUAn0sVkV4sqjIRdjzGgvleKuI7k+w3
+=lw5O
+-----END PGP SIGNATURE-----
+
+--bIniuQhkFibj80X14rlEFb50ECVjD17KV--
