@@ -1,52 +1,42 @@
 From: Sachin Kamat <sachin.kamat@linaro.org>
-Subject: [PATCH 1/1] mmc: sdhci-spear: Fix NULL pointer dereference
-Date: Thu, 12 Sep 2013 12:13:20 +0530
-Message-ID: <1378968200-16577-1-git-send-email-sachin.kamat@linaro.org>
+Subject: [PATCH 2/3] mmc: dw_mmc-socfpga: Remove redundant of_match_ptr
+Date: Thu, 12 Sep 2013 12:16:35 +0530
+Message-ID: <1378968396-18604-2-git-send-email-sachin.kamat@linaro.org>
+References: <1378968396-18604-1-git-send-email-sachin.kamat@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pd0-f176.google.com ([209.85.192.176]:37714 "EHLO
-	mail-pd0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753393Ab3ILHB2 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 12 Sep 2013 03:01:28 -0400
-Received: by mail-pd0-f176.google.com with SMTP id q10so10266522pdj.21
-        for <linux-mmc@vger.kernel.org>; Thu, 12 Sep 2013 00:01:27 -0700 (PDT)
+Received: from mail-pd0-f171.google.com ([209.85.192.171]:50918 "EHLO
+	mail-pd0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754786Ab3ILHEq (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 12 Sep 2013 03:04:46 -0400
+Received: by mail-pd0-f171.google.com with SMTP id g10so10244526pdj.2
+        for <linux-mmc@vger.kernel.org>; Thu, 12 Sep 2013 00:04:46 -0700 (PDT)
+In-Reply-To: <1378968396-18604-1-git-send-email-sachin.kamat@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
-Cc: cjb@laptop.org, spear-devel@list.st.com, sachin.kamat@linaro.org, Viresh Kumar <viresh.kumar@linaro.org>
+Cc: tgih.jun@samsung.com, jh80.chung@samsung.com, cjb@laptop.org, nico@fluxnic.net, sachin.kamat@linaro.org
 
-pdata could be NULL if cd_gpio = -1. Hence move the NULL check
-outside the if condition.
+'dw_mci_socfpga_match' is always compiled in.
+Hence of_match_ptr is not necessary.
 
 Signed-off-by: Sachin Kamat <sachin.kamat@linaro.org>
-Cc: Viresh Kumar <viresh.kumar@linaro.org>
 ---
-Only compile tested.
----
- drivers/mmc/host/sdhci-spear.c |   10 +++++-----
- 1 file changed, 5 insertions(+), 5 deletions(-)
+ drivers/mmc/host/dw_mmc-socfpga.c |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/host/sdhci-spear.c b/drivers/mmc/host/sdhci-spear.c
-index 2dba9f8..4f3557a 100644
---- a/drivers/mmc/host/sdhci-spear.c
-+++ b/drivers/mmc/host/sdhci-spear.c
-@@ -82,12 +82,12 @@ static struct sdhci_plat_data *sdhci_probe_config_dt(struct platform_device *pde
- 		cd_gpio = -1;
- 
- 	/* If pdata is required */
--	if (cd_gpio != -1) {
-+	if (cd_gpio != -1)
- 		pdata = devm_kzalloc(&pdev->dev, sizeof(*pdata), GFP_KERNEL);
--		if (!pdata) {
--			dev_err(&pdev->dev, "DT: kzalloc failed\n");
--			return ERR_PTR(-ENOMEM);
--		}
-+
-+	if (!pdata) {
-+		dev_err(&pdev->dev, "pdata is NULL\n");
-+		return ERR_PTR(-ENOMEM);
- 	}
- 
- 	pdata->card_int_gpio = cd_gpio;
+diff --git a/drivers/mmc/host/dw_mmc-socfpga.c b/drivers/mmc/host/dw_mmc-socfpga.c
+index 14b5961..5ce00b2 100644
+--- a/drivers/mmc/host/dw_mmc-socfpga.c
++++ b/drivers/mmc/host/dw_mmc-socfpga.c
+@@ -128,7 +128,7 @@ static struct platform_driver dw_mci_socfpga_pltfm_driver = {
+ 	.remove		= __exit_p(dw_mci_pltfm_remove),
+ 	.driver		= {
+ 		.name		= "dwmmc_socfpga",
+-		.of_match_table	= of_match_ptr(dw_mci_socfpga_match),
++		.of_match_table	= dw_mci_socfpga_match,
+ 		.pm		= &dw_mci_pltfm_pmops,
+ 	},
+ };
 -- 
 1.7.9.5
 
