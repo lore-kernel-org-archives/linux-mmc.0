@@ -1,182 +1,315 @@
 From: Dong Aisheng <b29396@freescale.com>
-Subject: [PATCH v2 3/9] mmc: sdhci-esdhci: move common esdhc_set_clock to platform driver
-Date: Fri, 13 Sep 2013 19:11:32 +0800
-Message-ID: <1379070698-7344-4-git-send-email-b29396@freescale.com>
+Subject: [PATCH v2 5/9] sdhci: sdhci-esdhci-imx: add sd3.0 clock tuning support
+Date: Fri, 13 Sep 2013 19:11:34 +0800
+Message-ID: <1379070698-7344-6-git-send-email-b29396@freescale.com>
 References: <1379070698-7344-1-git-send-email-b29396@freescale.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from [216.32.180.14] ([216.32.180.14]:8356 "EHLO
-	va3outboundpool.messaging.microsoft.com" rhost-flags-FAIL-FAIL-OK-FAIL)
-	by vger.kernel.org with ESMTP id S1751418Ab3IMLVR (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 13 Sep 2013 07:21:17 -0400
+Received: from [213.199.154.253] ([213.199.154.253]:57870 "EHLO
+	db9outboundpool.messaging.microsoft.com" rhost-flags-FAIL-FAIL-OK-FAIL)
+	by vger.kernel.org with ESMTP id S1751418Ab3IMLVW (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 13 Sep 2013 07:21:22 -0400
 In-Reply-To: <1379070698-7344-1-git-send-email-b29396@freescale.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 Cc: linux-arm-kernel@lists.infradead.org, cjb@laptop.org, shawn.guo@linaro.org, anton@enomsg.org, s.hauer@pengutronix.de, w.sang@pengutronix.de, ulf.hansson@linaro.org, neko@bakuhatsu.net, b29396@freescale.com
 
-We need a lot of imx6 specific things into common esdhc_set_clock
-for support SD3.0 and eMMC DDR mode which is not needed for power pc
-platforms, so esdhc_set_clock seems not so common anymore.
+Freescale i.MX6Q/DL uSDHC clock tuning progress is a little different from
+the standard tuning process defined in host controller spec v3.0.
+Thus we use platform_execute_tuning instead of standard sdhci tuning.
 
-Instead of keeping add platform specfics things into this common API,
-we choose to move that code into platform driver itself to handle.
-This can also exclude the dependency between imx and power pc on this
-headfile and is easy for maintain in the future.
+The main difference are:
+1) not only generate Buffer Read Ready interrupt when tuning is performing.
+It generates all other DATA interrupts like the normal data command.
+2) SDHCI_CTRL_EXEC_TUNING is not automatically cleared by HW,
+instead it's controlled by SW.
+3) SDHCI_CTRL_TUNED_CLK is not automatically set by HW,
+it's controlled by SW.
+4) the clock delay for every tuning is set by SW.
 
 Signed-off-by: Dong Aisheng <b29396@freescale.com>
 ---
- drivers/mmc/host/sdhci-esdhc-imx.c |   35 ++++++++++++++++++++++++++++++++-
- drivers/mmc/host/sdhci-esdhc.h     |   37 ------------------------------------
- drivers/mmc/host/sdhci-of-esdhc.c  |   35 ++++++++++++++++++++++++++++++++-
- 3 files changed, 66 insertions(+), 41 deletions(-)
+ChangeLog since v1:
+* some minor changes addressed Shawn's comments
+* add a bit delay for the card to be ready for the next tuning.
+---
+ drivers/mmc/host/sdhci-esdhc-imx.c |  196 +++++++++++++++++++++++++++++++++++-
+ 1 files changed, 195 insertions(+), 1 deletions(-)
 
 diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-index abc8cf0..67eaec9 100644
+index 37fafd7..f906c20 100644
 --- a/drivers/mmc/host/sdhci-esdhc-imx.c
 +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-@@ -409,8 +409,39 @@ static inline void esdhc_pltfm_set_clock(struct sdhci_host *host,
- 					 unsigned int clock)
- {
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
--
--	esdhc_set_clock(host, clock, clk_get_rate(pltfm_host->clk));
-+	unsigned int host_clock = clk_get_rate(pltfm_host->clk);
-+	int pre_div = 2;
-+	int div = 1;
-+	u32 temp;
-+
-+	if (clock == 0)
-+		goto out;
-+
-+	temp = sdhci_readl(host, ESDHC_SYSTEM_CONTROL);
-+	temp &= ~(ESDHC_CLOCK_IPGEN | ESDHC_CLOCK_HCKEN | ESDHC_CLOCK_PEREN
-+		| ESDHC_CLOCK_MASK);
-+	sdhci_writel(host, temp, ESDHC_SYSTEM_CONTROL);
-+
-+	while (host_clock / pre_div / 16 > clock && pre_div < 256)
-+		pre_div *= 2;
-+
-+	while (host_clock / pre_div / div > clock && div < 16)
-+		div++;
-+
-+	dev_dbg(mmc_dev(host->mmc), "desired SD clock: %d, actual: %d\n",
-+		clock, host_clock / pre_div / div);
-+
-+	pre_div >>= 1;
-+	div--;
-+
-+	temp = sdhci_readl(host, ESDHC_SYSTEM_CONTROL);
-+	temp |= (ESDHC_CLOCK_IPGEN | ESDHC_CLOCK_HCKEN | ESDHC_CLOCK_PEREN
-+		| (div << ESDHC_DIVIDER_SHIFT)
-+		| (pre_div << ESDHC_PREDIV_SHIFT));
-+	sdhci_writel(host, temp, ESDHC_SYSTEM_CONTROL);
-+	mdelay(1);
-+out:
-+	host->clock = clock;
- }
+@@ -34,13 +34,25 @@
+ /* VENDOR SPEC register */
+ #define ESDHC_VENDOR_SPEC		0xc0
+ #define  ESDHC_VENDOR_SPEC_SDIO_QUIRK	(1 << 1)
++#define  ESDHC_VENDOR_SPEC_VSELECT	(1 << 1)
+ #define  ESDHC_VENDOR_SPEC_FRC_SDCLK_ON	(1 << 8)
+ #define ESDHC_WTMK_LVL			0x44
+ #define ESDHC_MIX_CTRL			0x48
+ #define  ESDHC_MIX_CTRL_AC23EN		(1 << 7)
++#define  ESDHC_MIX_CTRL_EXE_TUNE	(1 << 22)
++#define  ESDHC_MIX_CTRL_SMPCLK_SEL	(1 << 23)
++#define  ESDHC_MIX_CTRL_FBCLK_SEL	(1 << 25)
+ /* Bits 3 and 6 are not SDHCI standard definitions */
+ #define  ESDHC_MIX_CTRL_SDHCI_MASK	0xb7
  
- static unsigned int esdhc_pltfm_get_ro(struct sdhci_host *host)
-diff --git a/drivers/mmc/host/sdhci-esdhc.h b/drivers/mmc/host/sdhci-esdhc.h
-index a2a0642..a7d9f95 100644
---- a/drivers/mmc/host/sdhci-esdhc.h
-+++ b/drivers/mmc/host/sdhci-esdhc.h
-@@ -49,41 +49,4 @@
- 
- #define ESDHC_HOST_CONTROL_RES	0x05
- 
--static inline void esdhc_set_clock(struct sdhci_host *host, unsigned int clock,
--				   unsigned int host_clock)
--{
--	int pre_div = 2;
--	int div = 1;
--	u32 temp;
--
--	if (clock == 0)
--		goto out;
--
--	temp = sdhci_readl(host, ESDHC_SYSTEM_CONTROL);
--	temp &= ~(ESDHC_CLOCK_IPGEN | ESDHC_CLOCK_HCKEN | ESDHC_CLOCK_PEREN
--		| ESDHC_CLOCK_MASK);
--	sdhci_writel(host, temp, ESDHC_SYSTEM_CONTROL);
--
--	while (host_clock / pre_div / 16 > clock && pre_div < 256)
--		pre_div *= 2;
--
--	while (host_clock / pre_div / div > clock && div < 16)
--		div++;
--
--	dev_dbg(mmc_dev(host->mmc), "desired SD clock: %d, actual: %d\n",
--		clock, host_clock / pre_div / div);
--
--	pre_div >>= 1;
--	div--;
--
--	temp = sdhci_readl(host, ESDHC_SYSTEM_CONTROL);
--	temp |= (ESDHC_CLOCK_IPGEN | ESDHC_CLOCK_HCKEN | ESDHC_CLOCK_PEREN
--		| (div << ESDHC_DIVIDER_SHIFT)
--		| (pre_div << ESDHC_PREDIV_SHIFT));
--	sdhci_writel(host, temp, ESDHC_SYSTEM_CONTROL);
--	mdelay(1);
--out:
--	host->clock = clock;
--}
--
- #endif /* _DRIVERS_MMC_SDHCI_ESDHC_H */
-diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
-index e328252..b1605a1 100644
---- a/drivers/mmc/host/sdhci-of-esdhc.c
-+++ b/drivers/mmc/host/sdhci-of-esdhc.c
-@@ -199,6 +199,14 @@ static unsigned int esdhc_of_get_min_clock(struct sdhci_host *host)
- 
- static void esdhc_of_set_clock(struct sdhci_host *host, unsigned int clock)
- {
++/* tune control register */
++#define ESDHC_TUNE_CTRL_STATUS		0x68
++#define  ESDHC_TUNE_CTRL_STEP		1
++#define  ESDHC_TUNE_CTRL_MIN		0
++#define  ESDHC_TUNE_CTRL_MAX		((1 << 7) - 1)
 +
-+	int pre_div = 2;
-+	int div = 1;
-+	u32 temp;
++#define ESDHC_TUNING_BLOCK_PATTERN_LEN	64
 +
-+	if (clock == 0)
-+		goto out;
+ /*
+  * Our interpretation of the SDHCI_HOST_CONTROL register
+  */
+@@ -91,7 +103,7 @@ struct pltfm_imx_data {
+ 		MULTIBLK_IN_PROCESS, /* exact multiblock cmd in process */
+ 		WAIT_FOR_INT,        /* sent CMD12, waiting for response INT */
+ 	} multiblock_status;
+-
++	u32 uhs_mode;
+ };
+ 
+ static struct platform_device_id imx_esdhc_devtype[] = {
+@@ -165,6 +177,16 @@ static u32 esdhc_readl_le(struct sdhci_host *host, int reg)
+ 	struct pltfm_imx_data *imx_data = pltfm_host->priv;
+ 	u32 val = readl(host->ioaddr + reg);
+ 
++	if (unlikely(reg == SDHCI_PRESENT_STATE)) {
++		u32 fsl_prss = val;
++		/* save the least 20 bits */
++		val = fsl_prss & 0x000FFFFF;
++		/* move dat[0-3] bits */
++		val |= (fsl_prss & 0x0F000000) >> 4;
++		/* move cmd line bit */
++		val |= (fsl_prss & 0x00800000) << 1;
++	}
 +
- 	/* Workaround to reduce the clock frequency for p1010 esdhc */
- 	if (of_find_compatible_node(NULL, NULL, "fsl,p1010-esdhc")) {
- 		if (clock > 20000000)
-@@ -207,8 +215,31 @@ static void esdhc_of_set_clock(struct sdhci_host *host, unsigned int clock)
- 			clock -= 5000000;
+ 	if (unlikely(reg == SDHCI_CAPABILITIES)) {
+ 		/* In FSL esdhc IC module, only bit20 is used to indicate the
+ 		 * ADMA2 capability of esdhc, but this bit is messed up on
+@@ -179,6 +201,17 @@ static u32 esdhc_readl_le(struct sdhci_host *host, int reg)
+ 		}
  	}
  
--	/* Set the clock */
--	esdhc_set_clock(host, clock, host->max_clk);
-+	temp = sdhci_readl(host, ESDHC_SYSTEM_CONTROL);
-+	temp &= ~(ESDHC_CLOCK_IPGEN | ESDHC_CLOCK_HCKEN | ESDHC_CLOCK_PEREN
-+		| ESDHC_CLOCK_MASK);
-+	sdhci_writel(host, temp, ESDHC_SYSTEM_CONTROL);
++	if (unlikely(reg == SDHCI_CAPABILITIES_1) && is_imx6q_usdhc(imx_data))
++		val = SDHCI_SUPPORT_DDR50 | SDHCI_SUPPORT_SDR104
++				| SDHCI_SUPPORT_SDR50;
 +
-+	while (host->max_clk / pre_div / 16 > clock && pre_div < 256)
-+		pre_div *= 2;
++	if (unlikely(reg == SDHCI_MAX_CURRENT) && is_imx6q_usdhc(imx_data)) {
++		val = 0;
++		val |= 0xFF << SDHCI_MAX_CURRENT_330_SHIFT;
++		val |= 0xFF << SDHCI_MAX_CURRENT_300_SHIFT;
++		val |= 0xFF << SDHCI_MAX_CURRENT_180_SHIFT;
++	}
 +
-+	while (host->max_clk / pre_div / div > clock && div < 16)
-+		div++;
+ 	if (unlikely(reg == SDHCI_INT_STATUS)) {
+ 		if (val & ESDHC_INT_VENDOR_SPEC_DMA_ERR) {
+ 			val &= ~ESDHC_INT_VENDOR_SPEC_DMA_ERR;
+@@ -257,6 +290,8 @@ static u16 esdhc_readw_le(struct sdhci_host *host, int reg)
+ {
+ 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+ 	struct pltfm_imx_data *imx_data = pltfm_host->priv;
++	u16 ret = 0;
++	u32 val;
+ 
+ 	if (unlikely(reg == SDHCI_HOST_VERSION)) {
+ 		reg ^= 2;
+@@ -269,6 +304,25 @@ static u16 esdhc_readw_le(struct sdhci_host *host, int reg)
+ 		}
+ 	}
+ 
++	if (unlikely(reg == SDHCI_HOST_CONTROL2)) {
++		val = readl(host->ioaddr + ESDHC_VENDOR_SPEC);
++		if (val & ESDHC_VENDOR_SPEC_VSELECT)
++			ret |= SDHCI_CTRL_VDD_180;
 +
-+	dev_dbg(mmc_dev(host->mmc), "desired SD clock: %d, actual: %d\n",
-+		clock, host_clock / pre_div / div);
++		if (is_imx6q_usdhc(imx_data)) {
++			val = readl(host->ioaddr + ESDHC_MIX_CTRL);
++			if (val & ESDHC_MIX_CTRL_EXE_TUNE)
++				ret |= SDHCI_CTRL_EXEC_TUNING;
++			if (val & ESDHC_MIX_CTRL_SMPCLK_SEL)
++				ret |= SDHCI_CTRL_TUNED_CLK;
++		}
 +
-+	pre_div >>= 1;
-+	div--;
++		ret |= (imx_data->uhs_mode & SDHCI_CTRL_UHS_MASK);
++		ret &= ~SDHCI_CTRL_PRESET_VAL_ENABLE;
 +
-+	temp = sdhci_readl(host, ESDHC_SYSTEM_CONTROL);
-+	temp |= (ESDHC_CLOCK_IPGEN | ESDHC_CLOCK_HCKEN | ESDHC_CLOCK_PEREN
-+		| (div << ESDHC_DIVIDER_SHIFT)
-+		| (pre_div << ESDHC_PREDIV_SHIFT));
-+	sdhci_writel(host, temp, ESDHC_SYSTEM_CONTROL);
-+	mdelay(1);
-+out:
-+	host->clock = clock;
++		return ret;
++	}
++
+ 	return readw(host->ioaddr + reg);
  }
  
- #ifdef CONFIG_PM
+@@ -276,8 +330,32 @@ static void esdhc_writew_le(struct sdhci_host *host, u16 val, int reg)
+ {
+ 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+ 	struct pltfm_imx_data *imx_data = pltfm_host->priv;
++	u32 new_val = 0;
+ 
+ 	switch (reg) {
++	case SDHCI_CLOCK_CONTROL:
++		new_val = readl(host->ioaddr + ESDHC_VENDOR_SPEC);
++		if (val & SDHCI_CLOCK_CARD_EN)
++			new_val |= ESDHC_VENDOR_SPEC_FRC_SDCLK_ON;
++		else
++			new_val &= ~ESDHC_VENDOR_SPEC_FRC_SDCLK_ON;
++			writel(new_val, host->ioaddr + ESDHC_VENDOR_SPEC);
++		return;
++	case SDHCI_HOST_CONTROL2:
++		new_val = readl(host->ioaddr + ESDHC_VENDOR_SPEC);
++		if (val & SDHCI_CTRL_VDD_180)
++			new_val |= ESDHC_VENDOR_SPEC_VSELECT;
++		else
++			new_val &= ~ESDHC_VENDOR_SPEC_VSELECT;
++		writel(new_val, host->ioaddr + ESDHC_VENDOR_SPEC);
++		imx_data->uhs_mode = val & SDHCI_CTRL_UHS_MASK;
++		new_val = readl(host->ioaddr + ESDHC_MIX_CTRL);
++		if (val & SDHCI_CTRL_TUNED_CLK)
++			new_val |= ESDHC_MIX_CTRL_SMPCLK_SEL;
++		else
++			new_val &= ~ESDHC_MIX_CTRL_SMPCLK_SEL;
++		writel(new_val , host->ioaddr + ESDHC_MIX_CTRL);
++		return;
+ 	case SDHCI_TRANSFER_MODE:
+ 		if ((imx_data->flags & ESDHC_FLAG_MULTIBLK_NO_INT)
+ 				&& (host->cmd->opcode == SD_IO_RW_EXTENDED)
+@@ -500,6 +578,121 @@ static int esdhc_pltfm_bus_width(struct sdhci_host *host, int width)
+ 	return 0;
+ }
+ 
++static void esdhc_prepare_tuning(struct sdhci_host *host, u32 val)
++{
++	u32 reg;
++
++	/* FIXME: delay a bit for card to be ready for next tuning due to errors */
++	mdelay(1);
++
++	reg = readl(host->ioaddr + ESDHC_MIX_CTRL);
++	reg |= ESDHC_MIX_CTRL_EXE_TUNE | ESDHC_MIX_CTRL_SMPCLK_SEL |
++			ESDHC_MIX_CTRL_FBCLK_SEL;
++	writel(reg, host->ioaddr + ESDHC_MIX_CTRL);
++	writel(val << 8, host->ioaddr + ESDHC_TUNE_CTRL_STATUS);
++	dev_dbg(mmc_dev(host->mmc),
++		"tunning with delay 0x%x ESDHC_TUNE_CTRL_STATUS 0x%x\n",
++			val, readl(host->ioaddr + ESDHC_TUNE_CTRL_STATUS));
++}
++
++static void esdhc_request_done(struct mmc_request *mrq)
++{
++	complete(&mrq->completion);
++}
++
++static int esdhc_send_tuning_cmd(struct sdhci_host *host, u32 opcode)
++{
++	struct mmc_command cmd = {0};
++	struct mmc_request mrq = {0};
++	struct mmc_data data = {0};
++	struct scatterlist sg;
++	char tuning_pattern[ESDHC_TUNING_BLOCK_PATTERN_LEN];
++
++	cmd.opcode = opcode;
++	cmd.arg = 0;
++	cmd.flags = MMC_RSP_R1 | MMC_CMD_ADTC;
++
++	data.blksz = ESDHC_TUNING_BLOCK_PATTERN_LEN;
++	data.blocks = 1;
++	data.flags = MMC_DATA_READ;
++	data.sg = &sg;
++	data.sg_len = 1;
++
++	sg_init_one(&sg, tuning_pattern, sizeof(tuning_pattern));
++
++	mrq.cmd = &cmd;
++	mrq.cmd->mrq = &mrq;
++	mrq.data = &data;
++	mrq.data->mrq = &mrq;
++	mrq.cmd->data = mrq.data;
++
++	mrq.done = esdhc_request_done;
++	init_completion(&(mrq.completion));
++
++	disable_irq(host->irq);
++	spin_lock(&host->lock);
++	host->mrq = &mrq;
++
++	sdhci_send_command(host, mrq.cmd);
++
++	spin_unlock(&host->lock);
++	enable_irq(host->irq);
++
++	wait_for_completion(&mrq.completion);
++
++	if (cmd.error)
++		return cmd.error;
++	if (data.error)
++		return data.error;
++
++	return 0;
++}
++
++static void esdhc_post_tuning(struct sdhci_host *host)
++{
++	u32 reg;
++
++	reg = readl(host->ioaddr + ESDHC_MIX_CTRL);
++	reg &= ~ESDHC_MIX_CTRL_EXE_TUNE;
++	writel(reg, host->ioaddr + ESDHC_MIX_CTRL);
++}
++
++static int esdhc_executing_tuning(struct sdhci_host *host, u32 opcode)
++{
++	int min, max, avg, ret;
++
++	/* find the mininum delay first which can pass tuning */
++	min = ESDHC_TUNE_CTRL_MIN;
++	while (min < ESDHC_TUNE_CTRL_MAX) {
++		esdhc_prepare_tuning(host, min);
++		if (!esdhc_send_tuning_cmd(host, opcode))
++			break;
++		min += ESDHC_TUNE_CTRL_STEP;
++	}
++
++	/* find the maxinum delay which can not pass tuning */
++	max = min + ESDHC_TUNE_CTRL_STEP;
++	while (max < ESDHC_TUNE_CTRL_MAX) {
++		esdhc_prepare_tuning(host, max);
++		if (esdhc_send_tuning_cmd(host, opcode)) {
++			max -= ESDHC_TUNE_CTRL_STEP;
++			break;
++		}
++		max += ESDHC_TUNE_CTRL_STEP;
++	}
++
++	/* use average delay to get the best timing */
++	avg = (min + max) / 2;
++	esdhc_prepare_tuning(host, avg);
++	ret = esdhc_send_tuning_cmd(host, opcode);
++	esdhc_post_tuning(host);
++
++	dev_dbg(mmc_dev(host->mmc), "tunning %s at 0x%x ret %d\n",
++		ret ? "failed" : "passed", avg, ret);
++
++	return ret;
++}
++
+ static const struct sdhci_ops sdhci_esdhc_ops = {
+ 	.read_l = esdhc_readl_le,
+ 	.read_w = esdhc_readw_le,
+@@ -511,6 +704,7 @@ static const struct sdhci_ops sdhci_esdhc_ops = {
+ 	.get_min_clock = esdhc_pltfm_get_min_clock,
+ 	.get_ro = esdhc_pltfm_get_ro,
+ 	.platform_bus_width = esdhc_pltfm_bus_width,
++	.platform_execute_tuning = esdhc_executing_tuning,
+ };
+ 
+ static const struct sdhci_pltfm_data sdhci_esdhc_imx_pdata = {
 -- 
 1.7.1
 
