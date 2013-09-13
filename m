@@ -1,315 +1,219 @@
 From: Dong Aisheng <b29396@freescale.com>
-Subject: [PATCH v2 5/9] sdhci: sdhci-esdhci-imx: add sd3.0 clock tuning support
-Date: Fri, 13 Sep 2013 19:11:34 +0800
-Message-ID: <1379070698-7344-6-git-send-email-b29396@freescale.com>
+Subject: [PATCH v2 6/9] sdhci: sdhci-esdhc-imx: change pinctrl state according to uhs mode
+Date: Fri, 13 Sep 2013 19:11:35 +0800
+Message-ID: <1379070698-7344-7-git-send-email-b29396@freescale.com>
 References: <1379070698-7344-1-git-send-email-b29396@freescale.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from [213.199.154.253] ([213.199.154.253]:57870 "EHLO
-	db9outboundpool.messaging.microsoft.com" rhost-flags-FAIL-FAIL-OK-FAIL)
-	by vger.kernel.org with ESMTP id S1751418Ab3IMLVW (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 13 Sep 2013 07:21:22 -0400
+Received: from [216.32.180.12] ([216.32.180.12]:18771 "EHLO
+	va3outboundpool.messaging.microsoft.com" rhost-flags-FAIL-FAIL-OK-FAIL)
+	by vger.kernel.org with ESMTP id S1754244Ab3IMLV1 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 13 Sep 2013 07:21:27 -0400
 In-Reply-To: <1379070698-7344-1-git-send-email-b29396@freescale.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 Cc: linux-arm-kernel@lists.infradead.org, cjb@laptop.org, shawn.guo@linaro.org, anton@enomsg.org, s.hauer@pengutronix.de, w.sang@pengutronix.de, ulf.hansson@linaro.org, neko@bakuhatsu.net, b29396@freescale.com
 
-Freescale i.MX6Q/DL uSDHC clock tuning progress is a little different from
-the standard tuning process defined in host controller spec v3.0.
-Thus we use platform_execute_tuning instead of standard sdhci tuning.
+Without proper pinctrl state, the card may not be able to work
+on high speed stablely. e.g. SDR104.
 
-The main difference are:
-1) not only generate Buffer Read Ready interrupt when tuning is performing.
-It generates all other DATA interrupts like the normal data command.
-2) SDHCI_CTRL_EXEC_TUNING is not automatically cleared by HW,
-instead it's controlled by SW.
-3) SDHCI_CTRL_TUNED_CLK is not automatically set by HW,
-it's controlled by SW.
-4) the clock delay for every tuning is set by SW.
+This patch add pinctrl state switch code according to different
+uhs mode include 100mhz sate, 200mhz sate and normal state
+(50Mhz and below).
 
 Signed-off-by: Dong Aisheng <b29396@freescale.com>
 ---
 ChangeLog since v1:
-* some minor changes addressed Shawn's comments
-* add a bit delay for the card to be ready for the next tuning.
+* addressed Shawn's comments
 ---
- drivers/mmc/host/sdhci-esdhc-imx.c |  196 +++++++++++++++++++++++++++++++++++-
- 1 files changed, 195 insertions(+), 1 deletions(-)
+ drivers/mmc/host/sdhci-esdhc-imx.c          |   96 ++++++++++++++++++++++++++-
+ include/linux/platform_data/mmc-esdhc-imx.h |    4 +
+ 2 files changed, 99 insertions(+), 1 deletions(-)
 
 diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-index 37fafd7..f906c20 100644
+index f906c20..ed00d6d 100644
 --- a/drivers/mmc/host/sdhci-esdhc-imx.c
 +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-@@ -34,13 +34,25 @@
- /* VENDOR SPEC register */
- #define ESDHC_VENDOR_SPEC		0xc0
- #define  ESDHC_VENDOR_SPEC_SDIO_QUIRK	(1 << 1)
-+#define  ESDHC_VENDOR_SPEC_VSELECT	(1 << 1)
- #define  ESDHC_VENDOR_SPEC_FRC_SDCLK_ON	(1 << 8)
- #define ESDHC_WTMK_LVL			0x44
- #define ESDHC_MIX_CTRL			0x48
- #define  ESDHC_MIX_CTRL_AC23EN		(1 << 7)
-+#define  ESDHC_MIX_CTRL_EXE_TUNE	(1 << 22)
-+#define  ESDHC_MIX_CTRL_SMPCLK_SEL	(1 << 23)
-+#define  ESDHC_MIX_CTRL_FBCLK_SEL	(1 << 25)
- /* Bits 3 and 6 are not SDHCI standard definitions */
- #define  ESDHC_MIX_CTRL_SDHCI_MASK	0xb7
+@@ -53,6 +53,10 @@
  
-+/* tune control register */
-+#define ESDHC_TUNE_CTRL_STATUS		0x68
-+#define  ESDHC_TUNE_CTRL_STEP		1
-+#define  ESDHC_TUNE_CTRL_MIN		0
-+#define  ESDHC_TUNE_CTRL_MAX		((1 << 7) - 1)
-+
-+#define ESDHC_TUNING_BLOCK_PATTERN_LEN	64
+ #define ESDHC_TUNING_BLOCK_PATTERN_LEN	64
+ 
++/* pinctrl state */
++#define ESDHC_PINCTRL_STATE_100MHZ	"state_100mhz"
++#define ESDHC_PINCTRL_STATE_200MHZ	"state_200mhz"
 +
  /*
   * Our interpretation of the SDHCI_HOST_CONTROL register
   */
-@@ -91,7 +103,7 @@ struct pltfm_imx_data {
- 		MULTIBLK_IN_PROCESS, /* exact multiblock cmd in process */
- 		WAIT_FOR_INT,        /* sent CMD12, waiting for response INT */
- 	} multiblock_status;
--
-+	u32 uhs_mode;
- };
- 
- static struct platform_device_id imx_esdhc_devtype[] = {
-@@ -165,6 +177,16 @@ static u32 esdhc_readl_le(struct sdhci_host *host, int reg)
- 	struct pltfm_imx_data *imx_data = pltfm_host->priv;
- 	u32 val = readl(host->ioaddr + reg);
- 
-+	if (unlikely(reg == SDHCI_PRESENT_STATE)) {
-+		u32 fsl_prss = val;
-+		/* save the least 20 bits */
-+		val = fsl_prss & 0x000FFFFF;
-+		/* move dat[0-3] bits */
-+		val |= (fsl_prss & 0x0F000000) >> 4;
-+		/* move cmd line bit */
-+		val |= (fsl_prss & 0x00800000) << 1;
-+	}
-+
- 	if (unlikely(reg == SDHCI_CAPABILITIES)) {
- 		/* In FSL esdhc IC module, only bit20 is used to indicate the
- 		 * ADMA2 capability of esdhc, but this bit is messed up on
-@@ -179,6 +201,17 @@ static u32 esdhc_readl_le(struct sdhci_host *host, int reg)
- 		}
- 	}
- 
-+	if (unlikely(reg == SDHCI_CAPABILITIES_1) && is_imx6q_usdhc(imx_data))
-+		val = SDHCI_SUPPORT_DDR50 | SDHCI_SUPPORT_SDR104
-+				| SDHCI_SUPPORT_SDR50;
-+
-+	if (unlikely(reg == SDHCI_MAX_CURRENT) && is_imx6q_usdhc(imx_data)) {
-+		val = 0;
-+		val |= 0xFF << SDHCI_MAX_CURRENT_330_SHIFT;
-+		val |= 0xFF << SDHCI_MAX_CURRENT_300_SHIFT;
-+		val |= 0xFF << SDHCI_MAX_CURRENT_180_SHIFT;
-+	}
-+
- 	if (unlikely(reg == SDHCI_INT_STATUS)) {
- 		if (val & ESDHC_INT_VENDOR_SPEC_DMA_ERR) {
- 			val &= ~ESDHC_INT_VENDOR_SPEC_DMA_ERR;
-@@ -257,6 +290,8 @@ static u16 esdhc_readw_le(struct sdhci_host *host, int reg)
- {
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
- 	struct pltfm_imx_data *imx_data = pltfm_host->priv;
-+	u16 ret = 0;
-+	u32 val;
- 
- 	if (unlikely(reg == SDHCI_HOST_VERSION)) {
- 		reg ^= 2;
-@@ -269,6 +304,25 @@ static u16 esdhc_readw_le(struct sdhci_host *host, int reg)
- 		}
- 	}
- 
-+	if (unlikely(reg == SDHCI_HOST_CONTROL2)) {
-+		val = readl(host->ioaddr + ESDHC_VENDOR_SPEC);
-+		if (val & ESDHC_VENDOR_SPEC_VSELECT)
-+			ret |= SDHCI_CTRL_VDD_180;
-+
-+		if (is_imx6q_usdhc(imx_data)) {
-+			val = readl(host->ioaddr + ESDHC_MIX_CTRL);
-+			if (val & ESDHC_MIX_CTRL_EXE_TUNE)
-+				ret |= SDHCI_CTRL_EXEC_TUNING;
-+			if (val & ESDHC_MIX_CTRL_SMPCLK_SEL)
-+				ret |= SDHCI_CTRL_TUNED_CLK;
-+		}
-+
-+		ret |= (imx_data->uhs_mode & SDHCI_CTRL_UHS_MASK);
-+		ret &= ~SDHCI_CTRL_PRESET_VAL_ENABLE;
-+
-+		return ret;
-+	}
-+
- 	return readw(host->ioaddr + reg);
+@@ -94,6 +98,9 @@ struct pltfm_imx_data {
+ 	u32 scratchpad;
+ 	enum imx_esdhc_type devtype;
+ 	struct pinctrl *pinctrl;
++	struct pinctrl_state *pins_default;
++	struct pinctrl_state *pins_100mhz;
++	struct pinctrl_state *pins_200mhz;
+ 	struct esdhc_platform_data boarddata;
+ 	struct clk *clk_ipg;
+ 	struct clk *clk_ahb;
+@@ -693,6 +700,62 @@ static int esdhc_executing_tuning(struct sdhci_host *host, u32 opcode)
+ 	return ret;
  }
  
-@@ -276,8 +330,32 @@ static void esdhc_writew_le(struct sdhci_host *host, u16 val, int reg)
- {
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
- 	struct pltfm_imx_data *imx_data = pltfm_host->priv;
-+	u32 new_val = 0;
- 
- 	switch (reg) {
-+	case SDHCI_CLOCK_CONTROL:
-+		new_val = readl(host->ioaddr + ESDHC_VENDOR_SPEC);
-+		if (val & SDHCI_CLOCK_CARD_EN)
-+			new_val |= ESDHC_VENDOR_SPEC_FRC_SDCLK_ON;
-+		else
-+			new_val &= ~ESDHC_VENDOR_SPEC_FRC_SDCLK_ON;
-+			writel(new_val, host->ioaddr + ESDHC_VENDOR_SPEC);
-+		return;
-+	case SDHCI_HOST_CONTROL2:
-+		new_val = readl(host->ioaddr + ESDHC_VENDOR_SPEC);
-+		if (val & SDHCI_CTRL_VDD_180)
-+			new_val |= ESDHC_VENDOR_SPEC_VSELECT;
-+		else
-+			new_val &= ~ESDHC_VENDOR_SPEC_VSELECT;
-+		writel(new_val, host->ioaddr + ESDHC_VENDOR_SPEC);
-+		imx_data->uhs_mode = val & SDHCI_CTRL_UHS_MASK;
-+		new_val = readl(host->ioaddr + ESDHC_MIX_CTRL);
-+		if (val & SDHCI_CTRL_TUNED_CLK)
-+			new_val |= ESDHC_MIX_CTRL_SMPCLK_SEL;
-+		else
-+			new_val &= ~ESDHC_MIX_CTRL_SMPCLK_SEL;
-+		writel(new_val , host->ioaddr + ESDHC_MIX_CTRL);
-+		return;
- 	case SDHCI_TRANSFER_MODE:
- 		if ((imx_data->flags & ESDHC_FLAG_MULTIBLK_NO_INT)
- 				&& (host->cmd->opcode == SD_IO_RW_EXTENDED)
-@@ -500,6 +578,121 @@ static int esdhc_pltfm_bus_width(struct sdhci_host *host, int width)
- 	return 0;
- }
- 
-+static void esdhc_prepare_tuning(struct sdhci_host *host, u32 val)
++static int esdhc_change_pinstate(struct sdhci_host *host,
++						unsigned int uhs)
 +{
-+	u32 reg;
++	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++	struct pltfm_imx_data *imx_data = pltfm_host->priv;
++	struct pinctrl_state *pinctrl;
 +
-+	/* FIXME: delay a bit for card to be ready for next tuning due to errors */
-+	mdelay(1);
++	dev_dbg(mmc_dev(host->mmc), "change pinctrl state for uhs %d\n", uhs);
 +
-+	reg = readl(host->ioaddr + ESDHC_MIX_CTRL);
-+	reg |= ESDHC_MIX_CTRL_EXE_TUNE | ESDHC_MIX_CTRL_SMPCLK_SEL |
-+			ESDHC_MIX_CTRL_FBCLK_SEL;
-+	writel(reg, host->ioaddr + ESDHC_MIX_CTRL);
-+	writel(val << 8, host->ioaddr + ESDHC_TUNE_CTRL_STATUS);
-+	dev_dbg(mmc_dev(host->mmc),
-+		"tunning with delay 0x%x ESDHC_TUNE_CTRL_STATUS 0x%x\n",
-+			val, readl(host->ioaddr + ESDHC_TUNE_CTRL_STATUS));
-+}
++	if (IS_ERR(imx_data->pinctrl) ||
++		IS_ERR(imx_data->pins_default) ||
++		IS_ERR(imx_data->pins_100mhz) ||
++		IS_ERR(imx_data->pins_200mhz))
++		return -EINVAL;
 +
-+static void esdhc_request_done(struct mmc_request *mrq)
-+{
-+	complete(&mrq->completion);
-+}
-+
-+static int esdhc_send_tuning_cmd(struct sdhci_host *host, u32 opcode)
-+{
-+	struct mmc_command cmd = {0};
-+	struct mmc_request mrq = {0};
-+	struct mmc_data data = {0};
-+	struct scatterlist sg;
-+	char tuning_pattern[ESDHC_TUNING_BLOCK_PATTERN_LEN];
-+
-+	cmd.opcode = opcode;
-+	cmd.arg = 0;
-+	cmd.flags = MMC_RSP_R1 | MMC_CMD_ADTC;
-+
-+	data.blksz = ESDHC_TUNING_BLOCK_PATTERN_LEN;
-+	data.blocks = 1;
-+	data.flags = MMC_DATA_READ;
-+	data.sg = &sg;
-+	data.sg_len = 1;
-+
-+	sg_init_one(&sg, tuning_pattern, sizeof(tuning_pattern));
-+
-+	mrq.cmd = &cmd;
-+	mrq.cmd->mrq = &mrq;
-+	mrq.data = &data;
-+	mrq.data->mrq = &mrq;
-+	mrq.cmd->data = mrq.data;
-+
-+	mrq.done = esdhc_request_done;
-+	init_completion(&(mrq.completion));
-+
-+	disable_irq(host->irq);
-+	spin_lock(&host->lock);
-+	host->mrq = &mrq;
-+
-+	sdhci_send_command(host, mrq.cmd);
-+
-+	spin_unlock(&host->lock);
-+	enable_irq(host->irq);
-+
-+	wait_for_completion(&mrq.completion);
-+
-+	if (cmd.error)
-+		return cmd.error;
-+	if (data.error)
-+		return data.error;
-+
-+	return 0;
-+}
-+
-+static void esdhc_post_tuning(struct sdhci_host *host)
-+{
-+	u32 reg;
-+
-+	reg = readl(host->ioaddr + ESDHC_MIX_CTRL);
-+	reg &= ~ESDHC_MIX_CTRL_EXE_TUNE;
-+	writel(reg, host->ioaddr + ESDHC_MIX_CTRL);
-+}
-+
-+static int esdhc_executing_tuning(struct sdhci_host *host, u32 opcode)
-+{
-+	int min, max, avg, ret;
-+
-+	/* find the mininum delay first which can pass tuning */
-+	min = ESDHC_TUNE_CTRL_MIN;
-+	while (min < ESDHC_TUNE_CTRL_MAX) {
-+		esdhc_prepare_tuning(host, min);
-+		if (!esdhc_send_tuning_cmd(host, opcode))
-+			break;
-+		min += ESDHC_TUNE_CTRL_STEP;
++	switch (uhs) {
++	case MMC_TIMING_UHS_SDR50:
++		pinctrl = imx_data->pins_100mhz;
++		break;
++	case MMC_TIMING_UHS_SDR104:
++		pinctrl = imx_data->pins_200mhz;
++		break;
++	default:
++		/* back to default state for other legacy timing */
++		pinctrl = imx_data->pins_default;
 +	}
 +
-+	/* find the maxinum delay which can not pass tuning */
-+	max = min + ESDHC_TUNE_CTRL_STEP;
-+	while (max < ESDHC_TUNE_CTRL_MAX) {
-+		esdhc_prepare_tuning(host, max);
-+		if (esdhc_send_tuning_cmd(host, opcode)) {
-+			max -= ESDHC_TUNE_CTRL_STEP;
-+			break;
-+		}
-+		max += ESDHC_TUNE_CTRL_STEP;
++	return pinctrl_select_state(imx_data->pinctrl, pinctrl);
++}
++
++static int esdhc_set_uhs_signaling(struct sdhci_host *host, unsigned int uhs)
++{
++	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++	struct pltfm_imx_data *imx_data = pltfm_host->priv;
++
++	switch (uhs) {
++	case MMC_TIMING_UHS_SDR12:
++		imx_data->uhs_mode = SDHCI_CTRL_UHS_SDR12;
++		break;
++	case MMC_TIMING_UHS_SDR25:
++		imx_data->uhs_mode = SDHCI_CTRL_UHS_SDR25;
++		break;
++	case MMC_TIMING_UHS_SDR50:
++		imx_data->uhs_mode = SDHCI_CTRL_UHS_SDR50;
++		break;
++	case MMC_TIMING_UHS_SDR104:
++		imx_data->uhs_mode = SDHCI_CTRL_UHS_SDR104;
++		break;
++	case MMC_TIMING_UHS_DDR50:
++		imx_data->uhs_mode = SDHCI_CTRL_UHS_DDR50;
++		break;
 +	}
 +
-+	/* use average delay to get the best timing */
-+	avg = (min + max) / 2;
-+	esdhc_prepare_tuning(host, avg);
-+	ret = esdhc_send_tuning_cmd(host, opcode);
-+	esdhc_post_tuning(host);
-+
-+	dev_dbg(mmc_dev(host->mmc), "tunning %s at 0x%x ret %d\n",
-+		ret ? "failed" : "passed", avg, ret);
-+
-+	return ret;
++	return esdhc_change_pinstate(host, uhs);
 +}
 +
  static const struct sdhci_ops sdhci_esdhc_ops = {
  	.read_l = esdhc_readl_le,
  	.read_w = esdhc_readw_le,
-@@ -511,6 +704,7 @@ static const struct sdhci_ops sdhci_esdhc_ops = {
+@@ -704,6 +767,7 @@ static const struct sdhci_ops sdhci_esdhc_ops = {
  	.get_min_clock = esdhc_pltfm_get_min_clock,
  	.get_ro = esdhc_pltfm_get_ro,
  	.platform_bus_width = esdhc_pltfm_bus_width,
-+	.platform_execute_tuning = esdhc_executing_tuning,
++	.set_uhs_signaling = esdhc_set_uhs_signaling,
+ 	.platform_execute_tuning = esdhc_executing_tuning,
  };
  
- static const struct sdhci_pltfm_data sdhci_esdhc_imx_pdata = {
+@@ -746,6 +810,11 @@ sdhci_esdhc_imx_probe_dt(struct platform_device *pdev,
+ 
+ 	of_property_read_u32(np, "max-frequency", &boarddata->f_max);
+ 
++	if (of_find_property(np, "no-1-8-v", NULL))
++		boarddata->support_vsel = false;
++	else
++		boarddata->support_vsel = true;
++
+ 	return 0;
+ }
+ #else
+@@ -808,12 +877,20 @@ static int sdhci_esdhc_imx_probe(struct platform_device *pdev)
+ 	clk_prepare_enable(imx_data->clk_ipg);
+ 	clk_prepare_enable(imx_data->clk_ahb);
+ 
+-	imx_data->pinctrl = devm_pinctrl_get_select_default(&pdev->dev);
++	imx_data->pinctrl = devm_pinctrl_get(&pdev->dev);
+ 	if (IS_ERR(imx_data->pinctrl)) {
+ 		err = PTR_ERR(imx_data->pinctrl);
+ 		goto disable_clk;
+ 	}
+ 
++	imx_data->pins_default = pinctrl_lookup_state(imx_data->pinctrl,
++						PINCTRL_STATE_DEFAULT);
++	if (IS_ERR(imx_data->pins_default)) {
++		err = PTR_ERR(imx_data->pins_default);
++		dev_err(mmc_dev(host->mmc), "could not get default state\n");
++		goto disable_clk;
++	}
++
+ 	host->quirks |= SDHCI_QUIRK_BROKEN_TIMEOUT_VAL;
+ 
+ 	if (is_imx25_esdhc(imx_data) || is_imx35_esdhc(imx_data))
+@@ -890,6 +967,23 @@ static int sdhci_esdhc_imx_probe(struct platform_device *pdev)
+ 		break;
+ 	}
+ 
++	/* sdr50 and sdr104 needs work on 1.8v signal voltage */
++	if ((boarddata->support_vsel) && is_imx6q_usdhc(imx_data)) {
++		imx_data->pins_100mhz = pinctrl_lookup_state(imx_data->pinctrl,
++						ESDHC_PINCTRL_STATE_100MHZ);
++		imx_data->pins_200mhz = pinctrl_lookup_state(imx_data->pinctrl,
++						ESDHC_PINCTRL_STATE_200MHZ);
++		if (IS_ERR(imx_data->pins_100mhz) ||
++				IS_ERR(imx_data->pins_200mhz)) {
++			dev_warn(mmc_dev(host->mmc),
++				"could not get ultra high speed state, work on normal mode\n");
++			/* fall back to not support uhs by specify no 1.8v quirk */
++			host->quirks2 |= SDHCI_QUIRK2_NO_1_8_V;
++		}
++	} else {
++		host->quirks2 |= SDHCI_QUIRK2_NO_1_8_V;
++	}
++
+ 	err = sdhci_add_host(host);
+ 	if (err)
+ 		goto disable_clk;
+diff --git a/include/linux/platform_data/mmc-esdhc-imx.h b/include/linux/platform_data/mmc-esdhc-imx.h
+index d44912d..a0f5a8f 100644
+--- a/include/linux/platform_data/mmc-esdhc-imx.h
++++ b/include/linux/platform_data/mmc-esdhc-imx.h
+@@ -10,6 +10,8 @@
+ #ifndef __ASM_ARCH_IMX_ESDHC_H
+ #define __ASM_ARCH_IMX_ESDHC_H
+ 
++#include <linux/types.h>
++
+ enum wp_types {
+ 	ESDHC_WP_NONE,		/* no WP, neither controller nor gpio */
+ 	ESDHC_WP_CONTROLLER,	/* mmc controller internal WP */
+@@ -32,6 +34,7 @@ enum cd_types {
+  * @cd_gpio:	gpio for card_detect interrupt
+  * @wp_type:	type of write_protect method (see wp_types enum above)
+  * @cd_type:	type of card_detect method (see cd_types enum above)
++ * @support_vsel:  indicate it supports 1.8v switching
+  */
+ 
+ struct esdhc_platform_data {
+@@ -41,5 +44,6 @@ struct esdhc_platform_data {
+ 	enum cd_types cd_type;
+ 	int max_bus_width;
+ 	unsigned int f_max;
++	bool support_vsel;
+ };
+ #endif /* __ASM_ARCH_IMX_ESDHC_H */
 -- 
 1.7.1
 
