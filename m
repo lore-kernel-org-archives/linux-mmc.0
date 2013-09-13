@@ -1,49 +1,69 @@
 From: Sekhar Nori <nsekhar@ti.com>
-Subject: [PATCH 0/3] mmc: omap_hsmmc: get rid of ti,non-removable
-Date: Fri, 13 Sep 2013 15:39:43 +0530
-Message-ID: <cover.1379066249.git.nsekhar@ti.com>
+Subject: [PATCH 1/3] mmc: omap_hsmmc: remove TI specific DT binding for non removable cards
+Date: Fri, 13 Sep 2013 15:39:44 +0530
+Message-ID: <a62bc46e3672482d8a7c94610c4bdb020d84dfcd.1379066249.git.nsekhar@ti.com>
+References: <cover.1379066249.git.nsekhar@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from bear.ext.ti.com ([192.94.94.41]:56384 "EHLO bear.ext.ti.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755311Ab3IMKKQ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 13 Sep 2013 06:10:16 -0400
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Return-path: <linux-omap-owner@vger.kernel.org>
+In-Reply-To: <cover.1379066249.git.nsekhar@ti.com>
+Sender: linux-omap-owner@vger.kernel.org
 To: Chris Ball <cjb@laptop.org>, Benoit Cousson <bcousson@baylibre.com>
 Cc: Grant Likely <grant.likely@linaro.org>, Rob Herring <rob.herring@calxeda.com>, Device Tree Mailing List <devicetree@vger.kernel.org>, Linux OMAP Mailing List <linux-omap@vger.kernel.org>, Koen Kooi <koen@dominion.thruhere.net>, Linux MMC Mailing List <linux-mmc@vger.kernel.org>, Sekhar Nori <nsekhar@ti.com>
+List-Id: linux-mmc@vger.kernel.org
 
-Get rid of TI specific binding ti,non-removable in favour of the
-generic binding present for the same purpose.
+Remove the vendor specific "ti,non-removable" DT binding and
+support the generic binding "non-removable" instead.
 
-This patch set does not support the old binding anymore. So, yes,
-it does introduce an ABI breakage. IMHO, it is not really worth
-supporting both bindings ATM since DT-usage in OMAP is still very
-nascent and almost always DTB and uImage are upgraded together.
-
-The series applies to Koen's series titled "ARM: dts: Beaglebone MMC fixes"
-
-The patch set is tested on Bone Black, but I could not get the eMMC
-to detect on my board with or without this patch set. The removable
-MMC/SD works though.
-
-Sekhar Nori (3):
-  mmc: omap_hsmmc: remove TI specific DT binding for non removable
-    cards
-  ARM: OMAP2+: DT: start using generic binding for non-removable mmc
-    cards
-  ARM: OMAP2+: BBB DT: mark eMMC as non removable
-
+Signed-off-by: Sekhar Nori <nsekhar@ti.com>
+---
  Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt |    5 ++---
- arch/arm/boot/dts/am335x-boneblack.dts                  |    1 +
- arch/arm/boot/dts/omap4-panda-common.dtsi               |    2 +-
- arch/arm/boot/dts/omap4-sdp.dts                         |    4 ++--
- arch/arm/boot/dts/omap4-var-som.dts                     |    2 +-
- arch/arm/boot/dts/omap5-uevm.dts                        |    4 ++--
  drivers/mmc/host/omap_hsmmc.c                           |    2 +-
- 7 files changed, 10 insertions(+), 10 deletions(-)
+ 2 files changed, 3 insertions(+), 4 deletions(-)
 
+diff --git a/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt b/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
+index 8c8908a..0d463b8 100644
+--- a/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
++++ b/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
+@@ -17,7 +17,6 @@ Optional properties:
+ ti,dual-volt: boolean, supports dual voltage cards
+ <supply-name>-supply: phandle to the regulator device tree node
+ "supply-name" examples are "vmmc", "vmmc_aux" etc
+-ti,non-removable: non-removable slot (like eMMC)
+ ti,needs-special-reset: Requires a special softreset sequence
+ ti,needs-special-hs-handling: HSMMC IP needs special setting for handling High Speed
+ dmas: List of DMA specifiers with the controller specific format
+@@ -38,7 +37,7 @@ Examples:
+ 		ti,dual-volt;
+ 		bus-width = <4>;
+ 		vmmc-supply = <&vmmc>; /* phandle to regulator node */
+-		ti,non-removable;
++		non-removable;
+ 	};
+ 
+ [generic DMA request binding]
+@@ -50,7 +49,7 @@ Examples:
+ 		ti,dual-volt;
+ 		bus-width = <4>;
+ 		vmmc-supply = <&vmmc>; /* phandle to regulator node */
+-		ti,non-removable;
++		non-removable;
+ 		dmas = <&edma 24
+ 			&edma 25>;
+ 		dma-names = "tx", "rx";
+diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+index 6ac63df..0cb06ff 100644
+--- a/drivers/mmc/host/omap_hsmmc.c
++++ b/drivers/mmc/host/omap_hsmmc.c
+@@ -1738,7 +1738,7 @@ static struct omap_mmc_platform_data *of_get_hsmmc_pdata(struct device *dev)
+ 	pdata->slots[0].switch_pin = cd_gpio;
+ 	pdata->slots[0].gpio_wp = wp_gpio;
+ 
+-	if (of_find_property(np, "ti,non-removable", NULL)) {
++	if (of_find_property(np, "non-removable", NULL)) {
+ 		pdata->slots[0].nonremovable = true;
+ 		pdata->slots[0].no_regulator_off_init = true;
+ 	}
 -- 
 1.7.10.1
 
