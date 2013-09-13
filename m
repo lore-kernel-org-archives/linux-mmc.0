@@ -1,71 +1,89 @@
 From: Dong Aisheng <b29396@freescale.com>
-Subject: [PATCH v2 2/9] mmc: sdhci: allow platform access of sdhci_send_command
-Date: Fri, 13 Sep 2013 19:11:31 +0800
-Message-ID: <1379070698-7344-3-git-send-email-b29396@freescale.com>
+Subject: [PATCH v2 4/9] sdhci: sdhci-esdhc-imx: support real clock on and off for imx6q
+Date: Fri, 13 Sep 2013 19:11:33 +0800
+Message-ID: <1379070698-7344-5-git-send-email-b29396@freescale.com>
 References: <1379070698-7344-1-git-send-email-b29396@freescale.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from [207.46.163.26] ([207.46.163.26]:14147 "EHLO
-	co9outboundpool.messaging.microsoft.com" rhost-flags-FAIL-FAIL-OK-FAIL)
-	by vger.kernel.org with ESMTP id S1751418Ab3IMLVK (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 13 Sep 2013 07:21:10 -0400
+Received: from [216.32.180.12] ([216.32.180.12]:39294 "EHLO
+	va3outboundpool.messaging.microsoft.com" rhost-flags-FAIL-FAIL-OK-FAIL)
+	by vger.kernel.org with ESMTP id S1751418Ab3IMLVP (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 13 Sep 2013 07:21:15 -0400
 In-Reply-To: <1379070698-7344-1-git-send-email-b29396@freescale.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 Cc: linux-arm-kernel@lists.infradead.org, cjb@laptop.org, shawn.guo@linaro.org, anton@enomsg.org, s.hauer@pengutronix.de, w.sang@pengutronix.de, ulf.hansson@linaro.org, neko@bakuhatsu.net, b29396@freescale.com
 
-It helps for platform code to use it send tuning commands.
+The signal voltage switch flow requires to shutdown and output
+clock in a specific sequence according to standard host controller
+v3.0 spec. In that timing, the card must really receive clock or not.
+
+However, for i.MX6Q, the uSDHC will not output clock even the clock
+is enabled until there is command or data in transfer on the bus,
+which will then cause singal voltage switch always to fail.
+
+For i.MX6Q, we clear ESDHC_VENDOR_SPEC_FRC_SDCLK_ON bit to let
+controller to gate off clock automatically and set that bit
+to force clock output if clock is on.
+
+This is required by SD3.0 support.
 
 Signed-off-by: Dong Aisheng <b29396@freescale.com>
 ---
- drivers/mmc/host/sdhci.c |    4 ++--
- drivers/mmc/host/sdhci.h |    2 ++
- 2 files changed, 4 insertions(+), 2 deletions(-)
+ drivers/mmc/host/sdhci-esdhc-imx.c |   19 +++++++++++++++++--
+ 1 files changed, 17 insertions(+), 2 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 072d78c..66bce7a 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -49,7 +49,6 @@ static unsigned int debug_quirks2;
- 
- static void sdhci_finish_data(struct sdhci_host *);
- 
--static void sdhci_send_command(struct sdhci_host *, struct mmc_command *);
- static void sdhci_finish_command(struct sdhci_host *);
- static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode);
- static void sdhci_tuning_timer(unsigned long data);
-@@ -981,7 +980,7 @@ static void sdhci_finish_data(struct sdhci_host *host)
- 		tasklet_schedule(&host->finish_tasklet);
- }
- 
--static void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
-+void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
+diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+index 67eaec9..37fafd7 100644
+--- a/drivers/mmc/host/sdhci-esdhc-imx.c
++++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+@@ -34,6 +34,7 @@
+ /* VENDOR SPEC register */
+ #define ESDHC_VENDOR_SPEC		0xc0
+ #define  ESDHC_VENDOR_SPEC_SDIO_QUIRK	(1 << 1)
++#define  ESDHC_VENDOR_SPEC_FRC_SDCLK_ON	(1 << 8)
+ #define ESDHC_WTMK_LVL			0x44
+ #define ESDHC_MIX_CTRL			0x48
+ #define  ESDHC_MIX_CTRL_AC23EN		(1 << 7)
+@@ -409,13 +410,20 @@ static inline void esdhc_pltfm_set_clock(struct sdhci_host *host,
+ 					 unsigned int clock)
  {
- 	int flags;
- 	u32 mask;
-@@ -1053,6 +1052,7 @@ static void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
+ 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++	struct pltfm_imx_data *imx_data = pltfm_host->priv;
+ 	unsigned int host_clock = clk_get_rate(pltfm_host->clk);
+ 	int pre_div = 2;
+ 	int div = 1;
+-	u32 temp;
++	u32 temp, val;
  
- 	sdhci_writew(host, SDHCI_MAKE_CMD(cmd->opcode, flags), SDHCI_COMMAND);
- }
-+EXPORT_SYMBOL_GPL(sdhci_send_command);
+-	if (clock == 0)
++	if (clock == 0) {
++		if (is_imx6q_usdhc(imx_data)) {
++			val = readl(host->ioaddr + ESDHC_VENDOR_SPEC);
++			writel(val & ~ESDHC_VENDOR_SPEC_FRC_SDCLK_ON,
++					host->ioaddr + ESDHC_VENDOR_SPEC);
++		}
+ 		goto out;
++	}
  
- static void sdhci_finish_command(struct sdhci_host *host)
- {
-diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index 976c14b..0a3ed01 100644
---- a/drivers/mmc/host/sdhci.h
-+++ b/drivers/mmc/host/sdhci.h
-@@ -394,6 +394,8 @@ static inline void *sdhci_priv(struct sdhci_host *host)
- extern void sdhci_card_detect(struct sdhci_host *host);
- extern int sdhci_add_host(struct sdhci_host *host);
- extern void sdhci_remove_host(struct sdhci_host *host, int dead);
-+extern void sdhci_send_command(struct sdhci_host *host,
-+				struct mmc_command *cmd);
- 
- #ifdef CONFIG_PM
- extern int sdhci_suspend_host(struct sdhci_host *host);
+ 	temp = sdhci_readl(host, ESDHC_SYSTEM_CONTROL);
+ 	temp &= ~(ESDHC_CLOCK_IPGEN | ESDHC_CLOCK_HCKEN | ESDHC_CLOCK_PEREN
+@@ -439,6 +447,13 @@ static inline void esdhc_pltfm_set_clock(struct sdhci_host *host,
+ 		| (div << ESDHC_DIVIDER_SHIFT)
+ 		| (pre_div << ESDHC_PREDIV_SHIFT));
+ 	sdhci_writel(host, temp, ESDHC_SYSTEM_CONTROL);
++
++	if (is_imx6q_usdhc(imx_data)) {
++		val = readl(host->ioaddr + ESDHC_VENDOR_SPEC);
++		writel(val | ESDHC_VENDOR_SPEC_FRC_SDCLK_ON,
++		host->ioaddr + ESDHC_VENDOR_SPEC);
++	}
++
+ 	mdelay(1);
+ out:
+ 	host->clock = clock;
 -- 
 1.7.1
 
