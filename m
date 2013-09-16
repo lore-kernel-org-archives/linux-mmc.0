@@ -1,257 +1,46 @@
-From: Joel Fernandes <joelf-l0cyMroinI0@public.gmane.org>
-Subject: Re: [PATCH v3] ARM: EDMA: Fix clearing of unused list for DT DMA
-	resources
-Date: Mon, 16 Sep 2013 11:26:53 -0500
-Message-ID: <5237314D.7080102@ti.com>
-References: <1378839171-14455-1-git-send-email-joelf@ti.com>
-	<5231903F.7080301@ti.com> <5233B471.40603@ti.com>
-	<5236F00B.5040605@ti.com>
+From: Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>
+Subject: Re: [PATCH 3/3] arm: dts: socfpga: Add support for SD/MMC
+Date: Mon, 16 Sep 2013 10:36:19 -0600
+Message-ID: <52373383.7030601@wwwdotorg.org>
+References: <1378740833-4883-1-git-send-email-dinguyen@altera.com> <1378740833-4883-4-git-send-email-dinguyen@altera.com> <522E398F.3080100@wwwdotorg.org> <1963011.uUY4o6LRbA@flatron>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
-Return-path: <davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
-In-Reply-To: <5236F00B.5040605-l0cyMroinI0@public.gmane.org>
-List-Unsubscribe: <http://linux.davincidsp.com/mailman/options/davinci-linux-open-source>,
-	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://linux.davincidsp.com/pipermail/davinci-linux-open-source>
-List-Post: <mailto:davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
-List-Help: <mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=help>
-List-Subscribe: <http://linux.davincidsp.com/mailman/listinfo/davinci-linux-open-source>,
-	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=subscribe>
-Sender: <davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
-Errors-To: davinci-linux-open-source-bounces-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org
-To: Sekhar Nori <nsekhar-l0cyMroinI0@public.gmane.org>
-Cc: Linux DaVinci Kernel List <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Vinod Koul <vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Pantel Antoniou <panto-wVdstyuyKrO8r51toPun2/C9HSW9iNxf@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Koen Kooi <koen-hcmAuCOw+vXj4SYmN/TMmA@public.gmane.org>, Jyri Sarah <jsarha-l0cyMroinI0@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Dan Williams <djbw-b10kYP2dOMg@public.gmane.org>, Linux OMAP List <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux ARM Kernel List <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1963011.uUY4o6LRbA@flatron>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Tomasz Figa <tomasz.figa-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: dinguyen-EIB2kfCEclfQT0dZR+AlfA@public.gmane.org, dinh.linux-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, Pavel Machek <pavel-ynQEQJNshbs@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Olof Johansson <olof-nZhT3qVonbNeoWH0uzbU5w@public.gmane.org>, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Pawel Moll <pawel.moll-5wv7dgnIgG8@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Ian Campbell <ian.campbell-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org>, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, Seungwon Jeon <tgih.jun-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-On 09/16/2013 06:48 AM, Sekhar Nori wrote:
-> Hi Joel,
+On 09/14/2013 06:30 AM, Tomasz Figa wrote:
+...
+> Just as a side note, correct name is Synopsys, not Synopsis. There are
+> multiple places around Documentation/devicetree where this typo is
+> present[1]. Should we consider correcting this or the typo will have
+> to stay?
 > 
-> On Saturday 14 September 2013 06:27 AM, Joel Fernandes wrote:
->> From: Joel Fernandes <joelf-l0cyMroinI0@public.gmane.org>
->> Subject: [PATCH v4] ARM: EDMA: Fix clearing of unused list for DT DMA resources
->>
->> HWMOD removal for MMC is breaking edma_start as the events are being manually
->> triggered due to unused channel list not being clear.
->>
->> This patch fixes the issue, by reading the "dmas" property from the DT node if
->> it exists and clearing the bits in the unused channel list. For this purpose
->> we use the of_* helpers to parse the arguments in the dmas phandle list.
->>
->> Reviewed-by: Sekhar Nori <nsekhar-l0cyMroinI0@public.gmane.org>
->> Reported-by: Balaji T K <balajitk-l0cyMroinI0@public.gmane.org>
->> Cc: Pantel Antoniou <panto-wVdstyuyKrO8r51toPun2/C9HSW9iNxf@public.gmane.org>
->> Signed-off-by: Joel Fernandes <joelf-l0cyMroinI0@public.gmane.org>
->> ---
->> Changes since v1, in v2 and v3:
->> - Reduced indentation of non-of case by returning from of-case
->> - Using of_* helpers for parsing
->>
->> Note:
->> This patch should go into the merge window as it is a critical bug fix.
-> 
-> I still cannot find any users of edma in the device tree sources either
-> in linux-next or linus/master. Why cannot this wait until v3.13?
+> [1] git grep -i synopsis Documentation/devicetree/
+> Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt:* Samsung Exynos specific extensions to the Synopsis Designware Mobile
+> Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt:The Synopsis designware mobile storage host controller is used to interface
+> Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt:differences between the core Synopsis dw mshc controller properties described
+> Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt:by synopsis-dw-mshc.txt and the properties used by the Samsung Exynos specific
+> Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt:extensions to the Synopsis Designware Mobile Storage Host Controller.
+> Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.txt:* Rockchip specific extensions to the Synopsis Designware Mobile
+> Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.txt:The Synopsis designware mobile storage host controller is used to interface
+> Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.txt:differences between the core Synopsis dw mshc controller properties described
+> Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.txt:by synopsis-dw-mshc.txt and the properties used by the Rockchip specific
+> Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.txt:extensions to the Synopsis Designware Mobile Storage Host Controller.
+> Documentation/devicetree/bindings/mmc/synopsis-dw-mshc.txt:* Synopsis Designware Mobile Storage Host Controller
+> Documentation/devicetree/bindings/mmc/synopsis-dw-mshc.txt:The Synopsis designware mobile storage host controller is used to interface
+> Documentation/devicetree/bindings/mmc/synopsis-dw-mshc.txt:properties used by the Synopsis Designware Mobile Storage Host Controller.
+> Documentation/devicetree/bindings/mmc/synopsis-dw-mshc.txt:     - snps,dw-mshc: for controllers compliant with synopsis dw-mshc.
+> Documentation/devicetree/bindings/pci/designware-pcie.txt:* Synopsis Designware PCIe interface
 
-I understand this affects only DT users of EDMA. But I get so many private
-reports of breakage due to this patch not being there that I think it will save
-everyone a lot of pain, specially folks creating integration trees to have this
-patch available by default.
-
-Further, EDMA DT enabling is surely to go in for 3.13, so its best if this is
-applied in advance here.
-
-I feel we shouldn't leave code intentionally broken just because it is not yet
-enabled in DTS, specially when it is about to be enabled in DT. For example, a
-potential problem is MMC/SD file system corruption due to DMA failure.
-
->>  arch/arm/common/edma.c | 23 +++++++++++++++++++++--
->>  1 file changed, 21 insertions(+), 2 deletions(-)
->>
->> diff --git a/arch/arm/common/edma.c b/arch/arm/common/edma.c
->> index 39ad030..43c7b22 100644
->> --- a/arch/arm/common/edma.c
->> +++ b/arch/arm/common/edma.c
->> @@ -560,14 +560,33 @@ static int reserve_contiguous_slots(int ctlr, unsigned int
->> id,
->>  static int prepare_unused_channel_list(struct device *dev, void *data)
->>  {
->>  	struct platform_device *pdev = to_platform_device(dev);
->> -	int i, ctlr;
->> +	int i, count, ctlr;
->> +	struct of_phandle_args  dma_spec;
->>
->> +	if (dev->of_node) {
->> +		count = of_property_count_strings(dev->of_node, "dma-names");
->> +		if (count < 0)
->> +			return 0;
->> +		for (i = 0; i < count; i++) {
->> +			if (of_parse_phandle_with_args(dev->of_node, "dmas",
->> +						       "#dma-cells", i,
->> +						       &dma_spec))
->> +				continue;
-> 
-> This will break for the case where devices on platform bus use non-EDMA
-> dma controllers like SDMA or CPPI (DRA7x has both EDMA and SDMA on the
-> same chip). You need to do an additional check to make sure the dma
-> controller is indeed EDMA. Something like.
-
-Ok, edma is probed earlier so I could never see any problem.
-Thanks for pointing this out,
-
-Using the below method is more future-proof than using compatible literal
-strings directly. The only problem is the matches table has to be defined
-earlier in the sources. What do you think?
-
-                        if (!of_match_node(edma_of_ids, dma_spec.np) {
-                                of_node_put(dma_spec.np);
-                                continue;
-                        }
-
-
-> 	if(!of_device_is_compatible(dma_spec.np, "ti,edma3"))
-> 		continue;
-> 
-> Don forget to call of_node_put() on dma_spec.np (something that needs to
-> be done even with your current code).
-
-Ok, will do.
-
-
->> +
->> +			ctlr = EDMA_CTLR(dma_spec.args[0]);
->> +			clear_bit(EDMA_CHAN_SLOT(dma_spec.args[0]),
->> +				  edma_cc[ctlr]->edma_unused);
-> 
-> We don't support the second controller when using DT and the controller
-> number is not really encoded in the argument to edma phandle. So just
-> simplify this to:
-> 
-> 	clear_bit(EDMA_CHAN_SLOT(dma_spec.args[0]), 	
-> 		  edma_cc[0]->edma_unused);
-
-I think let's not make that assumption just incase in the future we support more
-than one EDMA controller for DT-based boot. Is that ok?
-
-> 
->> +		}
->> +		return 0;
->> +	}
->> +
->> +	/* For non-OF case */
->>  	for (i = 0; i < pdev->num_resources; i++) {
->>  		if ((pdev->resource[i].flags & IORESOURCE_DMA) &&
->>  				(int)pdev->resource[i].start >= 0) {
->>  			ctlr = EDMA_CTLR(pdev->resource[i].start);
->>  			clear_bit(EDMA_CHAN_SLOT(pdev->resource[i].start),
->> -					edma_cc[ctlr]->edma_unused);
->> +				  edma_cc[ctlr]->edma_unused);
-> 
-> This is a useful change and I am okay with it happening in this
-> otherwise unrelated patch, but please mention this in changelog.
-
-Below is the updated version (v5), can you check and let me know if you had any
-other comments?
-
----8<---
-From: Joel Fernandes <joelf-l0cyMroinI0@public.gmane.org>
-Subject: [PATCH v5] ARM: EDMA: Fix clearing of unused list for DT DMA resources
-
-HWMOD removal for MMC is breaking edma_start as the events are being manually
-triggered due to unused channel list not being clear.
-
-The above issue is fixed by reading the "dmas" property from the DT node if it
-exists and clearing the bits in the unused channel list if the dma controller
-used by any device is EDMA. For this purpose we use the of_* helpers to parse
-the arguments in the dmas phandle list.
-
-Also introduced is a minor clean up of a checkpatch error in old code.
-
-Reviewed-by: Sekhar Nori <nsekhar-l0cyMroinI0@public.gmane.org>
-Reported-by: Balaji T K <balajitk-l0cyMroinI0@public.gmane.org>
-Cc: Pantel Antoniou <panto-wVdstyuyKrO8r51toPun2/C9HSW9iNxf@public.gmane.org>
-Signed-off-by: Joel Fernandes <joelf-l0cyMroinI0@public.gmane.org>
----
-Changes since v4:
-- Using of_node_put on dma_spec's node pointer.
-- Update changelog with minor cleanup information.
-
-Changes since v1, in v2 and v3:
- - Reduced indentation of non-of case by returning from of-case
- - Using of_* helpers for parsing
-
- arch/arm/common/edma.c | 39 ++++++++++++++++++++++++++++++++-------
- 1 file changed, 32 insertions(+), 7 deletions(-)
-
-diff --git a/arch/arm/common/edma.c b/arch/arm/common/edma.c
-index 117f955..8b5c6ed 100644
---- a/arch/arm/common/edma.c
-+++ b/arch/arm/common/edma.c
-@@ -269,6 +269,11 @@ static const struct edmacc_param dummy_paramset = {
- 	.ccnt = 1,
- };
-
-+static const struct of_device_id edma_of_ids[] = {
-+	{ .compatible = "ti,edma3", },
-+	{}
-+};
-+
- /*****************************************************************************/
-
- static void map_dmach_queue(unsigned ctlr, unsigned ch_no,
-@@ -560,14 +565,39 @@ static int reserve_contiguous_slots(int ctlr, unsigned int id,
- static int prepare_unused_channel_list(struct device *dev, void *data)
- {
- 	struct platform_device *pdev = to_platform_device(dev);
--	int i, ctlr;
-+	int i, count, ctlr;
-+	struct of_phandle_args  dma_spec;
-
-+	if (dev->of_node) {
-+		count = of_property_count_strings(dev->of_node, "dma-names");
-+		if (count < 0)
-+			return 0;
-+		for (i = 0; i < count; i++) {
-+			if (of_parse_phandle_with_args(dev->of_node, "dmas",
-+						       "#dma-cells", i,
-+						       &dma_spec))
-+				continue;
-+
-+			if (!of_match_node(edma_of_ids, dma_spec.np)) {
-+				of_node_put(dma_spec.np);
-+				continue;
-+			}
-+
-+			ctlr = EDMA_CTLR(dma_spec.args[0]);
-+			clear_bit(EDMA_CHAN_SLOT(dma_spec.args[0]),
-+				  edma_cc[ctlr]->edma_unused);
-+			of_node_put(dma_spec.np);
-+		}
-+		return 0;
-+	}
-+
-+	/* For non-OF case */
- 	for (i = 0; i < pdev->num_resources; i++) {
- 		if ((pdev->resource[i].flags & IORESOURCE_DMA) &&
- 				(int)pdev->resource[i].start >= 0) {
- 			ctlr = EDMA_CTLR(pdev->resource[i].start);
- 			clear_bit(EDMA_CHAN_SLOT(pdev->resource[i].start),
--					edma_cc[ctlr]->edma_unused);
-+				  edma_cc[ctlr]->edma_unused);
- 		}
- 	}
-
-@@ -1762,11 +1792,6 @@ static int edma_probe(struct platform_device *pdev)
- 	return 0;
- }
-
--static const struct of_device_id edma_of_ids[] = {
--	{ .compatible = "ti,edma3", },
--	{}
--};
--
- static struct platform_driver edma_driver = {
- 	.driver = {
- 		.name	= "edma",
--- 
-1.8.1.2
+Those typos only appear to exist in free-form text and not in any
+property names/values. As such, they can all easily be fixed without
+impacting any DT content or ABI.
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
