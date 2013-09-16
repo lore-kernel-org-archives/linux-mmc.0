@@ -1,58 +1,85 @@
-From: Dinh Nguyen <dinguyen-EIB2kfCEclfQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH 3/3] arm: dts: socfpga: Add support for SD/MMC
-Date: Mon, 16 Sep 2013 15:29:45 -0500
-Message-ID: <1379363385.17505.11.camel@linux-builds1>
-References: <1378740833-4883-1-git-send-email-dinguyen@altera.com>
-	 <1378740833-4883-4-git-send-email-dinguyen@altera.com>
-	 <522E398F.3080100@wwwdotorg.org> <1963011.uUY4o6LRbA@flatron>
-	 <52373383.7030601@wwwdotorg.org>
+From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Subject: Re: [PATCH 0/7] mmc: core: Fixup ocr mask setup to prevent spec
+ violation
+Date: Mon, 16 Sep 2013 22:57:39 +0200 (CEST)
+Message-ID: <Pine.LNX.4.64.1309162253320.17217@axis700.grange>
+References: <1379341068-27097-1-git-send-email-ulf.hansson@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <52373383.7030601-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>
-Cc: Tomasz Figa <tomasz.figa-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, dinh.linux-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, Pavel Machek <pavel-ynQEQJNshbs@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Olof Johansson <olof-nZhT3qVonbNeoWH0uzbU5w@public.gmane.org>, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Pawel Moll <pawel.moll-5wv7dgnIgG8@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Ian Campbell <ian.campbell-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org>, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, Seungwon Jeon <tgih.jun-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from moutng.kundenserver.de ([212.227.17.9]:62362 "EHLO
+	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751197Ab3IPU5r (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 16 Sep 2013 16:57:47 -0400
+In-Reply-To: <1379341068-27097-1-git-send-email-ulf.hansson@linaro.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Prasanna NAVARATNA <prasanna.navaratna@gmail.com>
 
-On Mon, 2013-09-16 at 10:36 -0600, Stephen Warren wrote:
-> On 09/14/2013 06:30 AM, Tomasz Figa wrote:
-> ...
-> > Just as a side note, correct name is Synopsys, not Synopsis. There are
-> > multiple places around Documentation/devicetree where this typo is
-> > present[1]. Should we consider correcting this or the typo will have
-> > to stay?
+Hi Ulf
 
-I can send a patch to fix the typos.
+On Mon, 16 Sep 2013, Ulf Hansson wrote:
 
-Dinh
-> > 
-> > [1] git grep -i synopsis Documentation/devicetree/
-> > Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt:* Samsung Exynos specific extensions to the Synopsis Designware Mobile
-> > Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt:The Synopsis designware mobile storage host controller is used to interface
-> > Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt:differences between the core Synopsis dw mshc controller properties described
-> > Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt:by synopsis-dw-mshc.txt and the properties used by the Samsung Exynos specific
-> > Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt:extensions to the Synopsis Designware Mobile Storage Host Controller.
-> > Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.txt:* Rockchip specific extensions to the Synopsis Designware Mobile
-> > Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.txt:The Synopsis designware mobile storage host controller is used to interface
-> > Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.txt:differences between the core Synopsis dw mshc controller properties described
-> > Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.txt:by synopsis-dw-mshc.txt and the properties used by the Rockchip specific
-> > Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.txt:extensions to the Synopsis Designware Mobile Storage Host Controller.
-> > Documentation/devicetree/bindings/mmc/synopsis-dw-mshc.txt:* Synopsis Designware Mobile Storage Host Controller
-> > Documentation/devicetree/bindings/mmc/synopsis-dw-mshc.txt:The Synopsis designware mobile storage host controller is used to interface
-> > Documentation/devicetree/bindings/mmc/synopsis-dw-mshc.txt:properties used by the Synopsis Designware Mobile Storage Host Controller.
-> > Documentation/devicetree/bindings/mmc/synopsis-dw-mshc.txt:     - snps,dw-mshc: for controllers compliant with synopsis dw-mshc.
-> > Documentation/devicetree/bindings/pci/designware-pcie.txt:* Synopsis Designware PCIe interface
+> According to the eMMC/SD/SDIO specs the VDD voltage level must not be changed
+> during the initialization, without a complete power cycle of the card.
 > 
-> Those typos only appear to exist in free-form text and not in any
-> property names/values. As such, they can all easily be fixed without
-> impacting any DT content or ABI.
+> Before this patchset, some host drivers were trying to change voltage level
+> at MMC_POWER_ON state, which is also what the protocol layer advised them to.
+> This was not correctly done and is the reason to why quite messy code in
+> the protocol layer has been needed, to handle a re-initialization sequence,
+> typically triggered from a power_restore or resume.
+> 
+> I have tried to make each patch in the patchset as small and separate as
+> possible, surely the is room for improvments. Any suggestions are appreciated.
+> 
+> An important note; MMC_CAP2_FULL_PWR_CYCLE, will need to be set by a host
+> to tell the protocol layer that the host is able to perform a complete power
+> cycle. Thus the protocol layer will try to negotiate the lowest possible VDD
+> voltage level between the card and host.
+
+I've got a question to this one. You mean a power cycle of a card, right? 
+What if the card power is supplied by a regulator. How do you tell whether 
+you can power cycle it or not? Maybe you can theoretically switch that 
+regulator - sometimes. On other occasions other users might be preventing 
+it from really powering off. Do you really need a guarantee, that every 
+time you issue a power down .set_ios() the card will really be switched 
+off? I don't see how this can be possible in my example?
+
+Thanks
+Guennadi
+
+> 
+> 
+> Ulf Hansson (7):
+>   mmc: core: Let mmc_power_up|cycle take ocr as parameter
+>   mmc: core: Let mmc_set_signal_voltage take ocr as parameter
+>   mmc: core: Remove unnecessary retry mechanism at SDIO attach
+>   mmc: core: Cleanup code for setting ocr mask for SDIO
+>   mmc: core: Move cached value of the negotiated ocr mask to card
+>     struct
+>   mmc: core: Prevent violation of specs while initializing cards
+>   mmc: core: Collect common code for card ocr validation
+> 
+>  drivers/mmc/core/core.c  |   66 +++++++++++++++++--------------------
+>  drivers/mmc/core/core.h  |    6 ++--
+>  drivers/mmc/core/mmc.c   |   29 +++++-----------
+>  drivers/mmc/core/sd.c    |   41 +++++++----------------
+>  drivers/mmc/core/sdio.c  |   82 ++++++++++++++--------------------------------
+>  include/linux/mmc/card.h |    1 +
+>  include/linux/mmc/host.h |    1 -
+>  7 files changed, 79 insertions(+), 147 deletions(-)
+> 
+> -- 
+> 1.7.9.5
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 > 
 
-
-
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+---
+Guennadi Liakhovetski, Ph.D.
+Freelance Open-Source Software Developer
+http://www.open-technology.de/
