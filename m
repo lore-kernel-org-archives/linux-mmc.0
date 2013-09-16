@@ -1,78 +1,382 @@
-From: Tomasz Figa <tomasz.figa-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: [PATCH 3/3] arm: dts: socfpga: Add support for SD/MMC
-Date: Sat, 14 Sep 2013 14:30:45 +0200
-Message-ID: <1963011.uUY4o6LRbA@flatron>
-References: <1378740833-4883-1-git-send-email-dinguyen@altera.com> <1378740833-4883-4-git-send-email-dinguyen@altera.com> <522E398F.3080100@wwwdotorg.org>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH 4/8] sdhci: sdhci-esdhci-imx: add sd3.0 clock tuning support
+Date: Mon, 16 Sep 2013 09:48:11 +0200
+Message-ID: <CAPDyKFoFC3Y8f16HOJ5BO1xMPj09e98Chv9sEC3k70Mn8hY79Q@mail.gmail.com>
+References: <1378299257-2980-1-git-send-email-b29396@freescale.com>
+	<1378299257-2980-5-git-send-email-b29396@freescale.com>
+	<CAPDyKFq+0vOUUPAdHjFn1fw_sBT+WOoaxgf1nC710p+0QonuuA@mail.gmail.com>
+	<CAA+hA=SHkR07XBoSt_8fJLRbyvc+=LTu5qUYM+BMSp1QXokh6w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7Bit
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <522E398F.3080100-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>
-Cc: dinguyen-EIB2kfCEclfQT0dZR+AlfA@public.gmane.org, dinh.linux-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, Pavel Machek <pavel-ynQEQJNshbs@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Olof Johansson <olof-nZhT3qVonbNeoWH0uzbU5w@public.gmane.org>, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Pawel Moll <pawel.moll-5wv7dgnIgG8@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Ian Campbell <ian.campbell-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org>, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, Seungwon Jeon <tgih.jun-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-ve0-f177.google.com ([209.85.128.177]:63650 "EHLO
+	mail-ve0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751065Ab3IPHsM (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 16 Sep 2013 03:48:12 -0400
+Received: by mail-ve0-f177.google.com with SMTP id db12so2641689veb.36
+        for <linux-mmc@vger.kernel.org>; Mon, 16 Sep 2013 00:48:11 -0700 (PDT)
+In-Reply-To: <CAA+hA=SHkR07XBoSt_8fJLRbyvc+=LTu5qUYM+BMSp1QXokh6w@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Dong Aisheng <dongas86@gmail.com>
+Cc: Dong Aisheng <b29396@freescale.com>, Shawn Guo <shawn.guo@linaro.org>, Sascha Hauer <s.hauer@pengutronix.de>, anton@enomsg.org, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 
-On Monday 09 of September 2013 15:11:43 Stephen Warren wrote:
-> On 09/09/2013 09:33 AM, dinguyen-EIB2kfCEclfQT0dZR+AlfA@public.gmane.org wrote:
-> > From: Dinh Nguyen <dinguyen-EIB2kfCEclfQT0dZR+AlfA@public.gmane.org>
-> > 
-> > Add bindings for SD/MMC for SOCFPGA.
-> > 
-> > diff --git a/Documentation/devicetree/bindings/mmc/socfpga-dw-mshc.txt
-> > b/Documentation/devicetree/bindings/mmc/socfpga-dw-mshc.txt
-> > 
-> > +* Altera SOCFPGA specific extensions to the Synopsis Designware
-> > Mobile
-> > +  Storage Host Controller
-> > +
-> > +The Synopsis designware mobile storage host controller is used to
-> > interface +a SoC with storage medium such as eMMC or SD/MMC cards.
-> > This file documents +differences between the core Synopsis dw mshc
-> > controller properties described +by synopsis-dw-mshc.txt and the
-> > properties used by the SOCFPGA specific +extensions to the Synopsis
-> > Designware Mobile Storage Host Controller. +
-> > +Required Properties:
-> > +
-> > +* compatible: should be
-> > +        - "altr,socfpga-dw-mshc": for controllers with Altera SOCFPGA
-> > +          specific extensions.
-> > +
-> > +* samsung,dw-mshc-sdr-timing: See exynos-dw-mshc.txt for more
-> > information about +	this binding.
-> 
-> s/binding/property/
-> 
-> It's odd that this isn't "synopsis," rather than "samsung," if the
-> property is generic across all/some uses of the Synopsis core. But, I
-> guess this is fine.
+On 5 September 2013 19:52, Dong Aisheng <dongas86@gmail.com> wrote:
+> On Thu, Sep 5, 2013 at 3:33 PM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>> On 4 September 2013 14:54, Dong Aisheng <b29396@freescale.com> wrote:
+>>> Freescale i.MX6Q/DL uSDHC clock tuning progress is a little different from
+>>> the standard tuning process defined in host controller spec v3.0.
+>>> Thus we use platform_execute_tuning instead of standard sdhci tuning.
+>>>
+>>> The main difference are:
+>>> 1) not only generate Buffer Read Ready interrupt when tuning is performing.
+>>> It generates all other DATA interrupts like the normal data command.
+>>> 2) SDHCI_CTRL_EXEC_TUNING is not automatically cleared by HW,
+>>> instead it's controlled by SW.
+>>> 3) SDHCI_CTRL_TUNED_CLK is not automatically set by HW,
+>>> it's controlled by SW.
+>>> 4) the clock delay for every tuning is set by SW.
+>>>
+>>> Signed-off-by: Dong Aisheng <b29396@freescale.com>
+>>> ---
+>>>  drivers/mmc/host/sdhci-esdhc-imx.c |  194 +++++++++++++++++++++++++++++++++++-
+>>>  1 files changed, 193 insertions(+), 1 deletions(-)
+>>>
+>>> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+>>> index 3118a82..36b9f63 100644
+>>> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
+>>> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+>>> @@ -34,9 +34,21 @@
+>>>  #define ESDHC_WTMK_LVL                 0x44
+>>>  #define ESDHC_MIX_CTRL                 0x48
+>>>  #define  ESDHC_MIX_CTRL_AC23EN         (1 << 7)
+>>> +#define  ESDHC_MIX_CTRL_EXE_TUNE       (1 << 22)
+>>> +#define  ESDHC_MIX_CTRL_SMPCLK_SEL     (1 << 23)
+>>> +#define  ESDHC_MIX_CTRL_AUTO_TUNE      (1 << 24)
+>>> +#define  ESDHC_MIX_CTRL_FBCLK_SEL      (1 << 25)
+>>>  /* Bits 3 and 6 are not SDHCI standard definitions */
+>>>  #define  ESDHC_MIX_CTRL_SDHCI_MASK     0xb7
+>>>
+>>> +/* tune control register */
+>>> +#define ESDHC_TUNE_CTRL_STATUS         0x68
+>>> +#define  ESDHC_TUNE_CTRL_STEP          1
+>>> +#define  ESDHC_TUNE_CTRL_MIN           0
+>>> +#define  ESDHC_TUNE_CTRL_MAX           ((1 << 7) - 1)
+>>> +
+>>> +#define ESDHC_TUNING_BLOCK_PATTERN_LEN 64
+>>> +
+>>>  /*
+>>>   * Our interpretation of the SDHCI_HOST_CONTROL register
+>>>   */
+>>> @@ -87,7 +99,7 @@ struct pltfm_imx_data {
+>>>                 MULTIBLK_IN_PROCESS, /* exact multiblock cmd in process */
+>>>                 WAIT_FOR_INT,        /* sent CMD12, waiting for response INT */
+>>>         } multiblock_status;
+>>> -
+>>> +       u32 uhs_mode;
+>>>  };
+>>>
+>>>  static struct platform_device_id imx_esdhc_devtype[] = {
+>>> @@ -161,6 +173,17 @@ static u32 esdhc_readl_le(struct sdhci_host *host, int reg)
+>>>         struct pltfm_imx_data *imx_data = pltfm_host->priv;
+>>>         u32 val = readl(host->ioaddr + reg);
+>>>
+>>> +       if (unlikely(reg == SDHCI_PRESENT_STATE)) {
+>>> +               u32 fsl_prss = val;
+>>> +               val = 0;
+>>> +               /* save the least 20 bits */
+>>> +               val |= fsl_prss & 0x000FFFFF;
+>>> +               /* move dat[0-3] bits */
+>>> +               val |= (fsl_prss & 0x0F000000) >> 4;
+>>> +               /* move cmd line bit */
+>>> +               val |= (fsl_prss & 0x00800000) << 1;
+>>> +       }
+>>> +
+>>>         if (unlikely(reg == SDHCI_CAPABILITIES)) {
+>>>                 /* In FSL esdhc IC module, only bit20 is used to indicate the
+>>>                  * ADMA2 capability of esdhc, but this bit is messed up on
+>>> @@ -175,6 +198,17 @@ static u32 esdhc_readl_le(struct sdhci_host *host, int reg)
+>>>                 }
+>>>         }
+>>>
+>>> +       if (unlikely(reg == SDHCI_CAPABILITIES_1) && is_imx6q_usdhc(imx_data))
+>>> +               val = SDHCI_SUPPORT_DDR50 | SDHCI_SUPPORT_SDR104
+>>> +                               | SDHCI_SUPPORT_SDR50;
+>>> +
+>>> +       if (unlikely(reg == SDHCI_MAX_CURRENT) && is_imx6q_usdhc(imx_data)) {
+>>> +               val = 0;
+>>> +               val |= 0xFF << SDHCI_MAX_CURRENT_330_SHIFT;
+>>> +               val |= 0xFF << SDHCI_MAX_CURRENT_300_SHIFT;
+>>> +               val |= 0xFF << SDHCI_MAX_CURRENT_180_SHIFT;
+>>> +       }
+>>> +
+>>>         if (unlikely(reg == SDHCI_INT_STATUS)) {
+>>>                 if (val & ESDHC_INT_VENDOR_SPEC_DMA_ERR) {
+>>>                         val &= ~ESDHC_INT_VENDOR_SPEC_DMA_ERR;
+>>> @@ -253,6 +287,8 @@ static u16 esdhc_readw_le(struct sdhci_host *host, int reg)
+>>>  {
+>>>         struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+>>>         struct pltfm_imx_data *imx_data = pltfm_host->priv;
+>>> +       u16 ret = 0;
+>>> +       u32 val;
+>>>
+>>>         if (unlikely(reg == SDHCI_HOST_VERSION)) {
+>>>                 reg ^= 2;
+>>> @@ -265,6 +301,25 @@ static u16 esdhc_readw_le(struct sdhci_host *host, int reg)
+>>>                 }
+>>>         }
+>>>
+>>> +       if (unlikely(reg == SDHCI_HOST_CONTROL2)) {
+>>> +               val = readl(host->ioaddr + ESDHC_VENDOR_SPEC);
+>>> +               if (val & ESDHC_VENDOR_SPEC_VSELECT)
+>>> +                       ret |= SDHCI_CTRL_VDD_180;
+>>> +
+>>> +               if (is_imx6q_usdhc(imx_data)) {
+>>> +                       val = readl(host->ioaddr + ESDHC_MIX_CTRL);
+>>> +                       if (val & ESDHC_MIX_CTRL_EXE_TUNE)
+>>> +                               ret |= SDHCI_CTRL_EXEC_TUNING;
+>>> +                       if (val & ESDHC_MIX_CTRL_SMPCLK_SEL)
+>>> +                               ret |= SDHCI_CTRL_TUNED_CLK;
+>>> +               }
+>>> +
+>>> +               ret |= (imx_data->uhs_mode & SDHCI_CTRL_UHS_MASK);
+>>> +               ret &= ~SDHCI_CTRL_PRESET_VAL_ENABLE;
+>>> +
+>>> +               return ret;
+>>> +       }
+>>> +
+>>>         return readw(host->ioaddr + reg);
+>>>  }
+>>>
+>>> @@ -272,8 +327,32 @@ static void esdhc_writew_le(struct sdhci_host *host, u16 val, int reg)
+>>>  {
+>>>         struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+>>>         struct pltfm_imx_data *imx_data = pltfm_host->priv;
+>>> +       u32 new_val = 0;
+>>>
+>>>         switch (reg) {
+>>> +       case SDHCI_CLOCK_CONTROL:
+>>> +               new_val = readl(host->ioaddr + ESDHC_VENDOR_SPEC);
+>>> +               if (val & SDHCI_CLOCK_CARD_EN)
+>>> +                       new_val |= ESDHC_VENDOR_SPEC_FRC_SDCLK_ON;
+>>> +               else
+>>> +                       new_val &= ~ESDHC_VENDOR_SPEC_FRC_SDCLK_ON;
+>>> +                       writel(new_val, host->ioaddr + ESDHC_VENDOR_SPEC);
+>>> +               return;
+>>> +       case SDHCI_HOST_CONTROL2:
+>>> +               new_val = readl(host->ioaddr + ESDHC_VENDOR_SPEC);
+>>> +               if (val & SDHCI_CTRL_VDD_180)
+>>> +                       new_val |= ESDHC_VENDOR_SPEC_VSELECT;
+>>> +               else
+>>> +                       new_val &= ~ESDHC_VENDOR_SPEC_VSELECT;
+>>> +               writel(new_val, host->ioaddr + ESDHC_VENDOR_SPEC);
+>>> +               imx_data->uhs_mode = val & SDHCI_CTRL_UHS_MASK;
+>>> +               new_val = readl(host->ioaddr + ESDHC_MIX_CTRL);
+>>> +               if (val & SDHCI_CTRL_TUNED_CLK)
+>>> +                       new_val |= ESDHC_MIX_CTRL_SMPCLK_SEL;
+>>> +               else
+>>> +                       new_val &= ~ESDHC_MIX_CTRL_SMPCLK_SEL;
+>>> +               writel(new_val , host->ioaddr + ESDHC_MIX_CTRL);
+>>> +               return;
+>>>         case SDHCI_TRANSFER_MODE:
+>>>                 if ((imx_data->flags & ESDHC_FLAG_MULTIBLK_NO_INT)
+>>>                                 && (host->cmd->opcode == SD_IO_RW_EXTENDED)
+>>> @@ -451,6 +530,118 @@ static int esdhc_pltfm_bus_width(struct sdhci_host *host, int width)
+>>>         return 0;
+>>>  }
+>>>
+>>> +static void esdhc_prepare_tuning(struct sdhci_host *host, u32 val)
+>>> +{
+>>> +       u32 reg;
+>>> +
+>>> +       reg = readl(host->ioaddr + ESDHC_MIX_CTRL);
+>>> +       reg |= ESDHC_MIX_CTRL_EXE_TUNE | ESDHC_MIX_CTRL_SMPCLK_SEL |
+>>> +                       ESDHC_MIX_CTRL_FBCLK_SEL;
+>>> +       writel(reg, host->ioaddr + ESDHC_MIX_CTRL);
+>>> +       writel((val << 8), host->ioaddr + ESDHC_TUNE_CTRL_STATUS);
+>>> +       dev_dbg(mmc_dev(host->mmc),
+>>> +               "tunning with delay 0x%x ESDHC_TUNE_CTRL_STATUS 0x%x\n",
+>>> +                       val, readl(host->ioaddr + ESDHC_TUNE_CTRL_STATUS));
+>>> +}
+>>> +
+>>> +static void request_done(struct mmc_request *mrq)
+>>> +{
+>>> +       complete(&mrq->completion);
+>>> +}
+>>> +
+>>> +static int esdhc_send_tuning_cmd(struct sdhci_host *host, u32 opcode)
+>>
+>> This function implements protocol related code. It should not reside
+>> in a host driver but instead as an API in the mmc protocol layer which
+>> host drivers shall call.
+>>
+>> I realize that there are already other host drivers implementing
+>> similar protocol code as here. Those should move to use the new API
+>> once it is available.
+>
+> That sounds like a good idea.
+> The tuning comand sending process seems could be implemented in protocal layer
+> since it's standard.
+> One problem is that since the tuning command handling is tightly
+> related to host controller.
+> It may be a big rework on current code if implement such API and
+> switch all the drivers to call it.
+> And it may also increase the host driver complication since it needs
+> to treat tuning
+> command differently in driver and do specfic settings at specific
+> places, e.g sdhci.
+> Not sure it's good enough.
 
-Just as a side note, correct name is Synopsys, not Synopsis. There are
-multiple places around Documentation/devicetree where this typo is
-present[1]. Should we consider correcting this or the typo will have
-to stay?
+Hi Dong,
 
-[1] git grep -i synopsis Documentation/devicetree/
-Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt:* Samsung Exynos specific extensions to the Synopsis Designware Mobile
-Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt:The Synopsis designware mobile storage host controller is used to interface
-Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt:differences between the core Synopsis dw mshc controller properties described
-Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt:by synopsis-dw-mshc.txt and the properties used by the Samsung Exynos specific
-Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt:extensions to the Synopsis Designware Mobile Storage Host Controller.
-Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.txt:* Rockchip specific extensions to the Synopsis Designware Mobile
-Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.txt:The Synopsis designware mobile storage host controller is used to interface
-Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.txt:differences between the core Synopsis dw mshc controller properties described
-Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.txt:by synopsis-dw-mshc.txt and the properties used by the Rockchip specific
-Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.txt:extensions to the Synopsis Designware Mobile Storage Host Controller.
-Documentation/devicetree/bindings/mmc/synopsis-dw-mshc.txt:* Synopsis Designware Mobile Storage Host Controller
-Documentation/devicetree/bindings/mmc/synopsis-dw-mshc.txt:The Synopsis designware mobile storage host controller is used to interface
-Documentation/devicetree/bindings/mmc/synopsis-dw-mshc.txt:properties used by the Synopsis Designware Mobile Storage Host Controller.
-Documentation/devicetree/bindings/mmc/synopsis-dw-mshc.txt:     - snps,dw-mshc: for controllers compliant with synopsis dw-mshc.
-Documentation/devicetree/bindings/pci/designware-pcie.txt:* Synopsis Designware PCIe interface
+I am not proposing to move the entire tuning sequence to the protocol
+layer, only the part that is related to send the actual tuning
+command.
+Typically, "esdhc_send_tuning_cmd" could be an API that host driver's
+can call. I think this could prevent us from having a lot of
+duplicated code in host drivers.
 
-Best regards,
-Tomasz
+Not directly related to this patch; regarding periodic re-tuning; this
+kind of feature should also be implemented in the protocol layer.
+Otherwise each an every driver will re-implement similar
+timer/work-queue and maybe even block statistics to trigger re-tuning.
+Sdhci has already done this, which to me feels plain wrong for host
+driver to do.
 
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+So before this goes out of control, we need to be aligned on what code
+should reside the protocol layer, because that is in the end what this
+discussion boils done to.
+
+Kind regards
+Ulf Hansson
+
+>
+> For imx, since it's based on sdhci, it may be less impact even once there's
+> such an API for it to switch to.
+> So i may would like to keep the using as sdhci currently if could,
+> which also will block
+> my following eMMC4.5 and SDIO3.0 work.
+>
+> Regards
+> Dong Aisheng
+>
+>>
+>> Kind regards
+>> Ulf Hansson
+>>
+>>> +{
+>>> +       struct mmc_command cmd = {0};
+>>> +       struct mmc_request mrq = {0};
+>>> +       struct mmc_data data = {0};
+>>> +       struct scatterlist sg;
+>>> +       char tuning_pattern[ESDHC_TUNING_BLOCK_PATTERN_LEN];
+>>> +
+>>> +       cmd.opcode = opcode;
+>>> +       cmd.arg = 0;
+>>> +       cmd.flags = MMC_RSP_R1 | MMC_CMD_ADTC;
+>>> +
+>>> +       data.blksz = ESDHC_TUNING_BLOCK_PATTERN_LEN;
+>>> +       data.blocks = 1;
+>>> +       data.flags = MMC_DATA_READ;
+>>> +       data.sg = &sg;
+>>> +       data.sg_len = 1;
+>>> +
+>>> +       sg_init_one(&sg, tuning_pattern, sizeof(tuning_pattern));
+>>> +
+>>> +       mrq.cmd = &cmd;
+>>> +       mrq.cmd->mrq = &mrq;
+>>> +       mrq.data = &data;
+>>> +       mrq.data->mrq = &mrq;
+>>> +       mrq.cmd->data = mrq.data;
+>>> +
+>>> +       mrq.done = request_done;
+>>> +       init_completion(&(mrq.completion));
+>>> +
+>>> +       disable_irq(host->irq);
+>>> +       spin_lock(&host->lock);
+>>> +       host->mrq = &mrq;
+>>> +
+>>> +       sdhci_send_command(host, mrq.cmd);
+>>> +
+>>> +       spin_unlock(&host->lock);
+>>> +       enable_irq(host->irq);
+>>> +
+>>> +       wait_for_completion(&mrq.completion);
+>>> +
+>>> +       if (cmd.error)
+>>> +               return cmd.error;
+>>> +       if (data.error)
+>>> +               return data.error;
+>>> +
+>>> +       return 0;
+>>> +}
+>>> +
+>>> +static void esdhc_post_tuning(struct sdhci_host *host)
+>>> +{
+>>> +       u32 reg;
+>>> +
+>>> +       reg = readl(host->ioaddr + ESDHC_MIX_CTRL);
+>>> +       reg &= ~ESDHC_MIX_CTRL_EXE_TUNE;
+>>> +       writel(reg, host->ioaddr + ESDHC_MIX_CTRL);
+>>> +}
+>>> +
+>>> +static int esdhc_executing_tuning(struct sdhci_host *host, u32 opcode)
+>>> +{
+>>> +       int min, max, avg, ret;
+>>> +
+>>> +       /* find the mininum delay first which can pass tuning*/
+>>> +       min = ESDHC_TUNE_CTRL_MIN;
+>>> +       while (min < ESDHC_TUNE_CTRL_MAX) {
+>>> +               esdhc_prepare_tuning(host, min);
+>>> +               if (!esdhc_send_tuning_cmd(host, opcode))
+>>> +                       break;
+>>> +               min += ESDHC_TUNE_CTRL_STEP;
+>>> +       }
+>>> +
+>>> +       /* find the maxinum delay which can not pass tuning*/
+>>> +       max = min + ESDHC_TUNE_CTRL_STEP;
+>>> +       while (max < ESDHC_TUNE_CTRL_MAX) {
+>>> +               esdhc_prepare_tuning(host, max);
+>>> +               if (esdhc_send_tuning_cmd(host, opcode)) {
+>>> +                       max -= ESDHC_TUNE_CTRL_STEP;
+>>> +                       break;
+>>> +               }
+>>> +               max += ESDHC_TUNE_CTRL_STEP;
+>>> +       }
+>>> +
+>>> +       /* use average delay to get the best timing */
+>>> +       avg = (min + max) / 2;
+>>> +       esdhc_prepare_tuning(host, avg);
+>>> +       ret = esdhc_send_tuning_cmd(host, opcode);
+>>> +       esdhc_post_tuning(host);
+>>> +
+>>> +       dev_dbg(mmc_dev(host->mmc), "tunning %s at 0x%x ret %d\n",
+>>> +               ret ? "failed" : "passed", avg, ret);
+>>> +
+>>> +       return ret;
+>>> +}
+>>> +
+>>>  static const struct sdhci_ops sdhci_esdhc_ops = {
+>>>         .read_l = esdhc_readl_le,
+>>>         .read_w = esdhc_readw_le,
+>>> @@ -462,6 +653,7 @@ static const struct sdhci_ops sdhci_esdhc_ops = {
+>>>         .get_min_clock = esdhc_pltfm_get_min_clock,
+>>>         .get_ro = esdhc_pltfm_get_ro,
+>>>         .platform_bus_width = esdhc_pltfm_bus_width,
+>>> +       .platform_execute_tuning = esdhc_executing_tuning,
+>>>  };
+>>>
+>>>  static const struct sdhci_pltfm_data sdhci_esdhc_imx_pdata = {
+>>> --
+>>> 1.7.1
+>>>
+>>>
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+>>> the body of a message to majordomo@vger.kernel.org
+>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
+>> _______________________________________________
+>> linux-arm-kernel mailing list
+>> linux-arm-kernel@lists.infradead.org
+>> http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
