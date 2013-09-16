@@ -1,107 +1,121 @@
-From: Shawn Guo <shawn.guo@linaro.org>
-Subject: Re: [PATCH v2 9/9] ARM: dts: imx6qdl: add uhs pinctrl state for
- usdhc3
-Date: Mon, 16 Sep 2013 16:44:15 +0800
-Message-ID: <20130916084413.GK31147@S2101-09.ap.freescale.net>
-References: <1379070698-7344-1-git-send-email-b29396@freescale.com>
- <1379070698-7344-10-git-send-email-b29396@freescale.com>
+From: Sekhar Nori <nsekhar-l0cyMroinI0@public.gmane.org>
+Subject: Re: [PATCH v3] ARM: EDMA: Fix clearing of unused list for DT DMA
+	resources
+Date: Mon, 16 Sep 2013 17:18:27 +0530
+Message-ID: <5236F00B.5040605@ti.com>
+References: <1378839171-14455-1-git-send-email-joelf@ti.com>
+	<5231903F.7080301@ti.com> <5233B471.40603@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from co1ehsobe001.messaging.microsoft.com ([216.32.180.184]:19074
-	"EHLO co1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751237Ab3IPInd (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 16 Sep 2013 04:43:33 -0400
-Content-Disposition: inline
-In-Reply-To: <1379070698-7344-10-git-send-email-b29396@freescale.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Transfer-Encoding: 7bit
+Return-path: <davinci-linux-open-source-bounces+gld-davinci-linux-open-source=gmane.org-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
+In-Reply-To: <5233B471.40603-l0cyMroinI0@public.gmane.org>
+List-Unsubscribe: <http://linux.davincidsp.com/mailman/options/davinci-linux-open-source>,
+	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://linux.davincidsp.com/pipermail/davinci-linux-open-source>
+List-Post: <mailto:davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
+List-Help: <mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=help>
+List-Subscribe: <http://linux.davincidsp.com/mailman/listinfo/davinci-linux-open-source>,
+	<mailto:davinci-linux-open-source-request-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org?subject=subscribe>
+Sender: <davinci-linux-open-source-bounces+gld-davinci-linux-open-source=gmane.org-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>
+Errors-To: davinci-linux-open-source-bounces+gld-davinci-linux-open-source=gmane.org-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org
+To: joelf-l0cyMroinI0@public.gmane.org
+Cc: Linux DaVinci Kernel List <davinci-linux-open-source-VycZQUHpC/PFrsHnngEfi1aTQe2KTcn/@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Vinod Koul <vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Koen Kooi <koen-hcmAuCOw+vXj4SYmN/TMmA@public.gmane.org>, Jyri Sarah <jsarha-l0cyMroinI0@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Dan Williams <djbw-b10kYP2dOMg@public.gmane.org>, Linux OMAP List <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux ARM Kernel List <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Dong Aisheng <b29396@freescale.com>
-Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, cjb@laptop.org, anton@enomsg.org, s.hauer@pengutronix.de, w.sang@pengutronix.de, ulf.hansson@linaro.org, neko@bakuhatsu.net
 
-On Fri, Sep 13, 2013 at 07:11:38PM +0800, Dong Aisheng wrote:
-> This is needed for supporting ultra high speed cards like SD3.0 cards.
+Hi Joel,
+
+On Saturday 14 September 2013 06:27 AM, Joel Fernandes wrote:
+> From: Joel Fernandes <joelf-l0cyMroinI0@public.gmane.org>
+> Subject: [PATCH v4] ARM: EDMA: Fix clearing of unused list for DT DMA resources
 > 
-> Signed-off-by: Dong Aisheng <b29396@freescale.com>
+> HWMOD removal for MMC is breaking edma_start as the events are being manually
+> triggered due to unused channel list not being clear.
+> 
+> This patch fixes the issue, by reading the "dmas" property from the DT node if
+> it exists and clearing the bits in the unused channel list. For this purpose
+> we use the of_* helpers to parse the arguments in the dmas phandle list.
+> 
+> Reviewed-by: Sekhar Nori <nsekhar-l0cyMroinI0@public.gmane.org>
+> Reported-by: Balaji T K <balajitk-l0cyMroinI0@public.gmane.org>
+> Cc: Pantel Antoniou <panto-wVdstyuyKrO8r51toPun2/C9HSW9iNxf@public.gmane.org>
+> Signed-off-by: Joel Fernandes <joelf-l0cyMroinI0@public.gmane.org>
 > ---
->  arch/arm/boot/dts/imx6qdl-sabreauto.dtsi |    5 ++++-
->  arch/arm/boot/dts/imx6qdl.dtsi           |   30 ++++++++++++++++++++++++++++++
->  2 files changed, 34 insertions(+), 1 deletions(-)
+> Changes since v1, in v2 and v3:
+> - Reduced indentation of non-of case by returning from of-case
+> - Using of_* helpers for parsing
 > 
-> diff --git a/arch/arm/boot/dts/imx6qdl-sabreauto.dtsi b/arch/arm/boot/dts/imx6qdl-sabreauto.dtsi
-> index 1cbbc51..ff6f1e8 100644
-> --- a/arch/arm/boot/dts/imx6qdl-sabreauto.dtsi
-> +++ b/arch/arm/boot/dts/imx6qdl-sabreauto.dtsi
-> @@ -54,6 +54,7 @@
->  			fsl,pins = <
->  				MX6QDL_PAD_NANDF_CS2__GPIO6_IO15 0x80000000
->  				MX6QDL_PAD_SD2_DAT2__GPIO1_IO13  0x80000000
-> +				MX6QDL_PAD_GPIO_18__SD3_VSELECT 0x17059
->  			>;
->  		};
->  	};
-> @@ -74,8 +75,10 @@
->  };
->  
->  &usdhc3 {
-> -	pinctrl-names = "default";
-> +	pinctrl-names = "default", "state_100mhz", "state_200mhz";
->  	pinctrl-0 = <&pinctrl_usdhc3_1>;
-> +	pinctrl-1 = <&pinctrl_usdhc3_1_100mhz>;
-> +	pinctrl-2 = <&pinctrl_usdhc3_1_200mhz>;
->  	cd-gpios = <&gpio6 15 0>;
->  	wp-gpios = <&gpio1 13 0>;
->  	status = "okay";
-> diff --git a/arch/arm/boot/dts/imx6qdl.dtsi b/arch/arm/boot/dts/imx6qdl.dtsi
-> index ccd55c2..cb17574 100644
-> --- a/arch/arm/boot/dts/imx6qdl.dtsi
-> +++ b/arch/arm/boot/dts/imx6qdl.dtsi
-> @@ -1184,6 +1184,36 @@
->  						>;
->  					};
->  
-> +					pinctrl_usdhc3_1_100mhz: usdhc3grp-1-100mhz { /* 100Mhz */
-> +						fsl,pins = <
-> +							MX6QDL_PAD_SD3_CMD__SD3_CMD 0x170B9
-> +							MX6QDL_PAD_SD3_CLK__SD3_CLK 0x100B9
-> +							MX6QDL_PAD_SD3_DAT0__SD3_DATA0 0x170B9
-> +							MX6QDL_PAD_SD3_DAT1__SD3_DATA1 0x170B9
-> +							MX6QDL_PAD_SD3_DAT2__SD3_DATA2 0x170B9
-> +							MX6QDL_PAD_SD3_DAT3__SD3_DATA3 0x170B9
-> +							MX6QDL_PAD_SD3_DAT4__SD3_DATA4 0x170B9
-> +							MX6QDL_PAD_SD3_DAT5__SD3_DATA5 0x170B9
-> +							MX6QDL_PAD_SD3_DAT6__SD3_DATA6 0x170B9
-> +							MX6QDL_PAD_SD3_DAT7__SD3_DATA7 0x170B9
+> Note:
+> This patch should go into the merge window as it is a critical bug fix.
 
-I commented in the previous review that we use lowercase for hex values
-in device tree.  It seems that you missed the comment.  Since this patch
-can be applied independently, I just fixed them up and applied it.
+I still cannot find any users of edma in the device tree sources either
+in linux-next or linus/master. Why cannot this wait until v3.13?
 
-Shawn
+> 
+>  arch/arm/common/edma.c | 23 +++++++++++++++++++++--
+>  1 file changed, 21 insertions(+), 2 deletions(-)
+> 
+> diff --git a/arch/arm/common/edma.c b/arch/arm/common/edma.c
+> index 39ad030..43c7b22 100644
+> --- a/arch/arm/common/edma.c
+> +++ b/arch/arm/common/edma.c
+> @@ -560,14 +560,33 @@ static int reserve_contiguous_slots(int ctlr, unsigned int
+> id,
+>  static int prepare_unused_channel_list(struct device *dev, void *data)
+>  {
+>  	struct platform_device *pdev = to_platform_device(dev);
+> -	int i, ctlr;
+> +	int i, count, ctlr;
+> +	struct of_phandle_args  dma_spec;
+> 
+> +	if (dev->of_node) {
+> +		count = of_property_count_strings(dev->of_node, "dma-names");
+> +		if (count < 0)
+> +			return 0;
+> +		for (i = 0; i < count; i++) {
+> +			if (of_parse_phandle_with_args(dev->of_node, "dmas",
+> +						       "#dma-cells", i,
+> +						       &dma_spec))
+> +				continue;
 
-> +						>;
-> +					};
+This will break for the case where devices on platform bus use non-EDMA
+dma controllers like SDMA or CPPI (DRA7x has both EDMA and SDMA on the
+same chip). You need to do an additional check to make sure the dma
+controller is indeed EDMA. Something like.
+
+	if(!of_device_is_compatible(dma_spec.np, "ti,edma3"))
+		continue;
+
+Don forget to call of_node_put() on dma_spec.np (something that needs to
+be done even with your current code).
+
 > +
-> +					pinctrl_usdhc3_1_200mhz: usdhc3grp-1-200mhz { /* 200Mhz */
-> +						fsl,pins = <
-> +							MX6QDL_PAD_SD3_CMD__SD3_CMD 0x170F9
-> +							MX6QDL_PAD_SD3_CLK__SD3_CLK 0x100F9
-> +							MX6QDL_PAD_SD3_DAT0__SD3_DATA0 0x170F9
-> +							MX6QDL_PAD_SD3_DAT1__SD3_DATA1 0x170F9
-> +							MX6QDL_PAD_SD3_DAT2__SD3_DATA2 0x170F9
-> +							MX6QDL_PAD_SD3_DAT3__SD3_DATA3 0x170F9
-> +							MX6QDL_PAD_SD3_DAT4__SD3_DATA4 0x170F9
-> +							MX6QDL_PAD_SD3_DAT5__SD3_DATA5 0x170F9
-> +							MX6QDL_PAD_SD3_DAT6__SD3_DATA6 0x170F9
-> +							MX6QDL_PAD_SD3_DAT7__SD3_DATA7 0x170F9
-> +						>;
-> +					};
-> +
->  					pinctrl_usdhc3_2: usdhc3grp-2 {
->  						fsl,pins = <
->  							MX6QDL_PAD_SD3_CMD__SD3_CMD    0x17059
-> -- 
-> 1.7.1
-> 
-> 
+> +			ctlr = EDMA_CTLR(dma_spec.args[0]);
+> +			clear_bit(EDMA_CHAN_SLOT(dma_spec.args[0]),
+> +				  edma_cc[ctlr]->edma_unused);
 
+We don't support the second controller when using DT and the controller
+number is not really encoded in the argument to edma phandle. So just
+simplify this to:
+
+	clear_bit(EDMA_CHAN_SLOT(dma_spec.args[0]), 	
+		  edma_cc[0]->edma_unused);
+
+> +		}
+> +		return 0;
+> +	}
+> +
+> +	/* For non-OF case */
+>  	for (i = 0; i < pdev->num_resources; i++) {
+>  		if ((pdev->resource[i].flags & IORESOURCE_DMA) &&
+>  				(int)pdev->resource[i].start >= 0) {
+>  			ctlr = EDMA_CTLR(pdev->resource[i].start);
+>  			clear_bit(EDMA_CHAN_SLOT(pdev->resource[i].start),
+> -					edma_cc[ctlr]->edma_unused);
+> +				  edma_cc[ctlr]->edma_unused);
+
+This is a useful change and I am okay with it happening in this
+otherwise unrelated patch, but please mention this in changelog.
+
+Thanks,
+Sekhar
