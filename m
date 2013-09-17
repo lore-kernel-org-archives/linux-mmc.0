@@ -1,187 +1,137 @@
-From: Haijun Zhang <Haijun.Zhang@freescale.com>
-Subject: [PATCH V2] mmc:core: Avoid useless detecting task when card is busy
-Date: Tue, 17 Sep 2013 17:03:32 +0800
-Message-ID: <1379408612-5098-1-git-send-email-Haijun.Zhang@freescale.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH 0/7] mmc: core: Fixup ocr mask setup to prevent spec violation
+Date: Tue, 17 Sep 2013 11:29:21 +0200
+Message-ID: <CAPDyKFpfe7mL4aLBo4S4tibpoL8DoiK3TiVzPvc4V-eG1Yrm_w@mail.gmail.com>
+References: <1379341068-27097-1-git-send-email-ulf.hansson@linaro.org>
+	<Pine.LNX.4.64.1309162253320.17217@axis700.grange>
+	<CAPDyKFrvPkwAVfi8gv0hG3DKeiJm+_AqODhERX=O0ZxB-gcHiw@mail.gmail.com>
+	<Pine.LNX.4.64.1309171008190.20367@axis700.grange>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-db8lp0188.outbound.messaging.microsoft.com ([213.199.154.188]:48259
-	"EHLO db8outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751584Ab3IQJIN (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 17 Sep 2013 05:08:13 -0400
+Received: from mail-ve0-f177.google.com ([209.85.128.177]:59771 "EHLO
+	mail-ve0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751863Ab3IQJ3W (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 17 Sep 2013 05:29:22 -0400
+Received: by mail-ve0-f177.google.com with SMTP id db12so3847652veb.8
+        for <linux-mmc@vger.kernel.org>; Tue, 17 Sep 2013 02:29:21 -0700 (PDT)
+In-Reply-To: <Pine.LNX.4.64.1309171008190.20367@axis700.grange>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: cbouatmailru@gmail.com, cjb@laptop.org, scottwood@freescale.com, X.Xie@freescale.com, ulf.hansson@linaro.org, Haijun Zhang <Haijun.Zhang@freescale.com>, Haijun Zhang <haijun.zhang@freescale.com>
+To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Prasanna NAVARATNA <prasanna.navaratna@gmail.com>, Mark Brown <broonie@kernel.org>
 
-When card is in cpu polling mode to detect card present. Card detecting
-task will be scheduled about once every second. When card is busy in large
-file transfer, detecting task will be hang and call trace will be prompt.
-When handling the request, CMD13 is always followed by every command when
-it was complete. So assume that card is present to avoid this duplicate
-detecting. Only polling card when card is free to reduce conflict with
-data transfer.
+On 17 September 2013 10:16, Guennadi Liakhovetski <g.liakhovetski@gmx.de> wrote:
+> (adding Mark to cc)
+>
+> On Tue, 17 Sep 2013, Ulf Hansson wrote:
+>
+>> On 16 September 2013 22:57, Guennadi Liakhovetski <g.liakhovetski@gmx.de> wrote:
+>> > Hi Ulf
+>> >
+>> > On Mon, 16 Sep 2013, Ulf Hansson wrote:
+>> >
+>> >> According to the eMMC/SD/SDIO specs the VDD voltage level must not be changed
+>> >> during the initialization, without a complete power cycle of the card.
+>> >>
+>> >> Before this patchset, some host drivers were trying to change voltage level
+>> >> at MMC_POWER_ON state, which is also what the protocol layer advised them to.
+>> >> This was not correctly done and is the reason to why quite messy code in
+>> >> the protocol layer has been needed, to handle a re-initialization sequence,
+>> >> typically triggered from a power_restore or resume.
+>> >>
+>> >> I have tried to make each patch in the patchset as small and separate as
+>> >> possible, surely the is room for improvments. Any suggestions are appreciated.
+>> >>
+>> >> An important note; MMC_CAP2_FULL_PWR_CYCLE, will need to be set by a host
+>> >> to tell the protocol layer that the host is able to perform a complete power
+>> >> cycle. Thus the protocol layer will try to negotiate the lowest possible VDD
+>> >> voltage level between the card and host.
+>>
+>> Hi Guennadi,
+>>
+>> >
+>> > I've got a question to this one. You mean a power cycle of a card, right?
+>>
+>> Correct!
+>>
+>> > What if the card power is supplied by a regulator. How do you tell whether
+>> > you can power cycle it or not? Maybe you can theoretically switch that
+>> > regulator - sometimes. On other occasions other users might be preventing
+>> > it from really powering off. Do you really need a guarantee, that every
+>> > time you issue a power down .set_ios() the card will really be switched
+>> > off? I don't see how this can be possible in my example?
+>>
+>> Yes, we need a guarantee to be able to conform to the specs.
+>>
+>> In one of my cases I am also using a regulator, but from a board
+>> configuration point of view I know I am the only user on this
+>> regulator, thus I can be sure I can switch it off when I want.
+>>
+>> I see your point though, and I am not sure how to adapt to this
+>> configuration. I suggest you to not set the MMC_CAP2_FULL_PWR_CYCLE
+>> for that mmc host - unless you can find a way to make sure you can cut
+>> and restore power when needed.
+>
+> So, do I understand correctly, that if we get a regulator exclusively and
+> it is capable of changing status (REGULATOR_CHANGE_STATUS) and it is not
+> always on, then we can assume, that every call to regulator_enable() /
+> regulator_disable() with a suitable use count _will_ switch power off or
+> on? Maybe then we could adjust mmc_regulator_get_supply() accordingly -
+> first try to get the regulator exclusively, if it fails, try shared. If
+> succeeded and the conditions are satisfied - set the new PWR_CYCLE flag.
 
-<7>mmc0: req done (CMD13): 0: 00000e00 00000000 00000000 00000000
-INFO: task kworker/u:1:12 blocked for more than 120 seconds.
-"echo 0 > /proc/sys/kernel/hung_task_timeout_secs" disables this message.
-kworker/u:1     D 00000000     0    12      2 0x00000000
-Call Trace:
-[ee06dd50] [44042028] 0x44042028
-(unreliable)
-[ee06de10] [c0007a0c] __switch_to+0xa0/0xf0
-[ee06de30] [c04dd50c] __schedule+0x1f8/0x4a4
+For SD and SDIO cards, that would be enough - but not for eMMC since
+we have both VCC and VCCQ.
 
-[ee06dea0] [c04dd898] schedule+0x30/0xbc
+If you want to change voltage level for eMMC, both VCC and VCCQ must
+be possible to power cycle, unless you have a hw-reset wire connected
+to the eMMC which is implemented by a host->ops callback. This
+complicates things for SD/SDIO as well, while trying to setup the
+conditions for when to set the PWR_CYCLE flag.
 
-[ee06deb0] [c03816a4] __mmc_claim_host+0x98/0x19c
+BTW, thanks for bringing up this discussion! I have been thinking a
+bit around this as well. :-)
 
-[ee06df00] [c0385f88] mmc_sd_detect+0x38/0xc0
+Kind regards
+Ulf Hansson
 
-[ee06df10] [c0382b0c] mmc_rescan+0x294/0x2e0
-[ee06df40] [c00661cc] process_one_work+0x140/0x3e0
-
-[ee06df70] [c0066bf8] worker_thread+0x18c/0x36c
-[ee06dfb0] [c006bf10] kthread+0x7c/0x80
-
-[ee06dff0] [c000de58] kernel_thread+0x4c/0x68
-<7>sdhci [sdhci_irq()]: *** mmc0 got interrupt: 0x00000001
-
-Signed-off-by: Haijun Zhang <haijun.zhang@freescale.com>
----
-changes for V2:
-	- Add card detecting once the last request is done.
-
- drivers/mmc/card/block.c | 28 ++++++++++++++++++++++++++--
- drivers/mmc/core/core.c  |  5 +++++
- drivers/mmc/core/mmc.c   |  3 ++-
- drivers/mmc/core/sd.c    |  3 ++-
- drivers/mmc/core/sdio.c  |  3 ++-
- 5 files changed, 37 insertions(+), 5 deletions(-)
-
-diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-index 1a3163f..f280320 100644
---- a/drivers/mmc/card/block.c
-+++ b/drivers/mmc/card/block.c
-@@ -1960,9 +1960,20 @@ static int mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
- 	struct mmc_host *host = card->host;
- 	unsigned long flags;
- 
--	if (req && !mq->mqrq_prev->req)
-+	if (req && !mq->mqrq_prev->req) {
-+		/*
-+		 * When we are here, card polling task will be blocked.
-+		 * So disable it to void this useless schedule.
-+		 */
-+		if (host->caps & MMC_CAP_NEEDS_POLL) {
-+			spin_lock_irqsave(&host->lock, flags);
-+			host->rescan_disable = 1;
-+			spin_unlock_irqrestore(&host->lock, flags);
-+		}
-+
- 		/* claim host only for the first request */
- 		mmc_get_card(card);
-+	}
- 
- 	ret = mmc_blk_part_switch(card, md);
- 	if (ret) {
-@@ -1999,7 +2010,7 @@ static int mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
- 
- out:
- 	if ((!req && !(mq->flags & MMC_QUEUE_NEW_REQUEST)) ||
--	     (req && (req->cmd_flags & MMC_REQ_SPECIAL_MASK)))
-+	     (req && (req->cmd_flags & MMC_REQ_SPECIAL_MASK))) {
- 		/*
- 		 * Release host when there are no more requests
- 		 * and after special request(discard, flush) is done.
-@@ -2007,6 +2018,19 @@ out:
- 		 * the 'mmc_blk_issue_rq' with 'mqrq_prev->req'.
- 		 */
- 		mmc_put_card(card);
-+
-+		/*
-+		 * Detecting card status immediately in case card being
-+		 * removed just after the request is complete.
-+		 */
-+		if (host->caps & MMC_CAP_NEEDS_POLL) {
-+			spin_lock_irqsave(&host->lock, flags);
-+			host->rescan_disable = 0;
-+			spin_unlock_irqrestore(&host->lock, flags);
-+			mmc_detect_change(host, 0);
-+		}
-+	}
-+
- 	return ret;
- }
- 
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index b9b9fb6..2831c03 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -925,15 +925,20 @@ EXPORT_SYMBOL(__mmc_claim_host);
-  */
- int mmc_try_claim_host(struct mmc_host *host)
- {
-+	struct mmc_card *card;
- 	int claimed_host = 0;
- 	unsigned long flags;
- 
-+	card = host->card;
-+	pm_runtime_get_sync(&card->dev);
-+
- 	spin_lock_irqsave(&host->lock, flags);
- 	if (!host->claimed || host->claimer == current) {
- 		host->claimed = 1;
- 		host->claimer = current;
- 		host->claim_cnt += 1;
- 		claimed_host = 1;
-+		set_current_state(TASK_RUNNING);
- 	}
- 	spin_unlock_irqrestore(&host->lock, flags);
- 	if (host->ops->enable && claimed_host && host->claim_cnt == 1)
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index 6d02012..90e5555 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -1447,7 +1447,8 @@ static void mmc_detect(struct mmc_host *host)
- 	BUG_ON(!host);
- 	BUG_ON(!host->card);
- 
--	mmc_get_card(host->card);
-+	if (!mmc_try_claim_host(host))
-+		return;
- 
- 	/*
- 	 * Just check if our card has been removed.
-diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
-index 5e8823d..7dfb24d 100644
---- a/drivers/mmc/core/sd.c
-+++ b/drivers/mmc/core/sd.c
-@@ -1045,7 +1045,8 @@ static void mmc_sd_detect(struct mmc_host *host)
- 	BUG_ON(!host);
- 	BUG_ON(!host->card);
- 
--	mmc_get_card(host->card);
-+	if (!mmc_try_claim_host(host))
-+		return;
- 
- 	/*
- 	 * Just check if our card has been removed.
-diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
-index 80d89cff..e0cabf5 100644
---- a/drivers/mmc/core/sdio.c
-+++ b/drivers/mmc/core/sdio.c
-@@ -875,7 +875,8 @@ static void mmc_sdio_detect(struct mmc_host *host)
- 		}
- 	}
- 
--	mmc_claim_host(host);
-+	if (!mmc_try_claim_host(host))
-+		return;
- 
- 	/*
- 	 * Just check if our card has been removed.
--- 
-1.8.0
-
-
+>
+> Thanks
+> Guennadi
+>
+>> Kind regards
+>> Ulf Hansson
+>>
+>> >
+>> > Thanks
+>> > Guennadi
+>> >
+>> >>
+>> >>
+>> >> Ulf Hansson (7):
+>> >>   mmc: core: Let mmc_power_up|cycle take ocr as parameter
+>> >>   mmc: core: Let mmc_set_signal_voltage take ocr as parameter
+>> >>   mmc: core: Remove unnecessary retry mechanism at SDIO attach
+>> >>   mmc: core: Cleanup code for setting ocr mask for SDIO
+>> >>   mmc: core: Move cached value of the negotiated ocr mask to card
+>> >>     struct
+>> >>   mmc: core: Prevent violation of specs while initializing cards
+>> >>   mmc: core: Collect common code for card ocr validation
+>> >>
+>> >>  drivers/mmc/core/core.c  |   66 +++++++++++++++++--------------------
+>> >>  drivers/mmc/core/core.h  |    6 ++--
+>> >>  drivers/mmc/core/mmc.c   |   29 +++++-----------
+>> >>  drivers/mmc/core/sd.c    |   41 +++++++----------------
+>> >>  drivers/mmc/core/sdio.c  |   82 ++++++++++++++--------------------------------
+>> >>  include/linux/mmc/card.h |    1 +
+>> >>  include/linux/mmc/host.h |    1 -
+>> >>  7 files changed, 79 insertions(+), 147 deletions(-)
+>> >>
+>> >> --
+>> >> 1.7.9.5
+>
+> ---
+> Guennadi Liakhovetski, Ph.D.
+> Freelance Open-Source Software Developer
+> http://www.open-technology.de/
