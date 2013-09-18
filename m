@@ -1,106 +1,266 @@
-From: Fabio Estevam <festevam-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: Adding aliases to mmc
-Date: Tue, 17 Sep 2013 21:06:44 -0300
-Message-ID: <CAOMZO5AT3bduZ0=EtWHuHVg6tSWrdr_ZjX5PLu815o0qgkeSig@mail.gmail.com>
-References: <CAOMZO5CJ36JHJMaiG3QVdtpBoWd_ZyHQuRTrKHz4bLP39gpJtQ@mail.gmail.com>
+From: Zhang Haijun <b42677@freescale.com>
+Subject: Re: [PATCH V2] mmc:core: Avoid useless detecting task when card is
+ busy
+Date: Wed, 18 Sep 2013 11:52:15 +0800
+Message-ID: <5239236F.1090208@freescale.com>
+References: <1379408612-5098-1-git-send-email-Haijun.Zhang@freescale.com> <CAPDyKFpim0GsVynFgauS3Ebdo48-QhKdaAUPxP+Pp5Zoqxp0dw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <CAOMZO5CJ36JHJMaiG3QVdtpBoWd_ZyHQuRTrKHz4bLP39gpJtQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Dirk Behme <dirk.behme-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Sascha Hauer <kernel-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org>
+Content-Type: text/plain; charset=UTF-8;
+	format=flowed
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-db9lp0250.outbound.messaging.microsoft.com ([213.199.154.250]:21164
+	"EHLO db9outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751292Ab3IRDwW convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 17 Sep 2013 23:52:22 -0400
+In-Reply-To: <CAPDyKFpim0GsVynFgauS3Ebdo48-QhKdaAUPxP+Pp5Zoqxp0dw@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, Haijun Zhang <Haijun.Zhang@freescale.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Anton Vorontsov <cbouatmailru@gmail.com>, Chris Ball <cjb@laptop.org>, scottwood@freescale.com, X.Xie@freescale.com
 
-Hi Dirk,
 
-On Tue, Sep 17, 2013 at 3:04 PM, Fabio Estevam <festevam-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
-> Hi Dirk,
+=E4=BA=8E 2013/9/17 21:21, Ulf Hansson =E5=86=99=E9=81=93:
+> Hi Haijun,
 >
-> I have adapted your patch at:
-> http://lists.infradead.org/pipermail/linux-arm-kernel/2012-July/111022.html
+> On 17 September 2013 11:03, Haijun Zhang <Haijun.Zhang@freescale.com>=
+ wrote:
+>> When card is in cpu polling mode to detect card present. Card detect=
+ing
+>> task will be scheduled about once every second. When card is busy in=
+ large
+>> file transfer, detecting task will be hang and call trace will be pr=
+ompt.
+>> When handling the request, CMD13 is always followed by every command=
+ when
+>> it was complete. So assume that card is present to avoid this duplic=
+ate
+>> detecting. Only polling card when card is free to reduce conflict wi=
+th
+>> data transfer.
+>>
+>> <7>mmc0: req done (CMD13): 0: 00000e00 00000000 00000000 00000000
+>> INFO: task kworker/u:1:12 blocked for more than 120 seconds.
+>> "echo 0 > /proc/sys/kernel/hung_task_timeout_secs" disables this mes=
+sage.
+>> kworker/u:1     D 00000000     0    12      2 0x00000000
+>> Call Trace:
+>> [ee06dd50] [44042028] 0x44042028
+>> (unreliable)
+>> [ee06de10] [c0007a0c] __switch_to+0xa0/0xf0
+>> [ee06de30] [c04dd50c] __schedule+0x1f8/0x4a4
+>>
+>> [ee06dea0] [c04dd898] schedule+0x30/0xbc
+>>
+>> [ee06deb0] [c03816a4] __mmc_claim_host+0x98/0x19c
+>>
+>> [ee06df00] [c0385f88] mmc_sd_detect+0x38/0xc0
+>>
+>> [ee06df10] [c0382b0c] mmc_rescan+0x294/0x2e0
+>> [ee06df40] [c00661cc] process_one_work+0x140/0x3e0
+>>
+>> [ee06df70] [c0066bf8] worker_thread+0x18c/0x36c
+>> [ee06dfb0] [c006bf10] kthread+0x7c/0x80
+>>
+>> [ee06dff0] [c000de58] kernel_thread+0x4c/0x68
+>> <7>sdhci [sdhci_irq()]: *** mmc0 got interrupt: 0x00000001
+>>
+>> Signed-off-by: Haijun Zhang <haijun.zhang@freescale.com>
+>> ---
+>> changes for V2:
+>>          - Add card detecting once the last request is done.
+>>
+>>   drivers/mmc/card/block.c | 28 ++++++++++++++++++++++++++--
+>>   drivers/mmc/core/core.c  |  5 +++++
+>>   drivers/mmc/core/mmc.c   |  3 ++-
+>>   drivers/mmc/core/sd.c    |  3 ++-
+>>   drivers/mmc/core/sdio.c  |  3 ++-
+>>   5 files changed, 37 insertions(+), 5 deletions(-)
+>>
+>> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+>> index 1a3163f..f280320 100644
+>> --- a/drivers/mmc/card/block.c
+>> +++ b/drivers/mmc/card/block.c
+>> @@ -1960,9 +1960,20 @@ static int mmc_blk_issue_rq(struct mmc_queue =
+*mq, struct request *req)
+>>          struct mmc_host *host =3D card->host;
+>>          unsigned long flags;
+>>
+>> -       if (req && !mq->mqrq_prev->req)
+>> +       if (req && !mq->mqrq_prev->req) {
+>> +               /*
+>> +                * When we are here, card polling task will be block=
+ed.
+>> +                * So disable it to void this useless schedule.
+> "avoid"
+:-)
+>> +                */
+>> +               if (host->caps & MMC_CAP_NEEDS_POLL) {
+>> +                       spin_lock_irqsave(&host->lock, flags);
+>> +                       host->rescan_disable =3D 1;
+>> +                       spin_unlock_irqrestore(&host->lock, flags);
+> I believe you need to add "cancel_delayed_work_sync(&host->detect)" w=
+ell!?
 >
-> and tested it on 3.12-rc1 on a mx6qsabresd board.
+> Do note, that I am not confident sure that cancel_delayed_work_sync i=
+s
+> safe to run this from this context. What about the scenario were the
+When we are here the current task is still running,
+Invoke cancel_delayed_work_sync here will cause the task hang.
+> detect work is just about to remove a card then will be waiting for
+> the block queue to close, which then waits for the
+> cancel_delayed_work_sync to end. :-)
+Let me confirm whether I understand what you mean.
+You worried about the remove task is block by the block queue. This=20
+patch changed the priority of remove task?
+There several scenario here:
+a . schedule detect work( HZ )
+b . block work queue
+c . schedule detect work immediately ( 0 )
+d. detect remove task running
+1. a->b->c->d
+2. a->d->b->c->b->c->d
+3. a->b->b->c->b->c->b->d
+
+So if step 'd' is really running is depend on the followed task 'b'.
+
+Or, I miss something else? Hope to make this clear.:-)
 >
-> Do you have plans to submit it? Maybe as a RFC?
 >
-> It solves the mmcblkX order issue on my tests and it would be nice we
-> could have this problem addressed.
+>> +               }
+>> +
+>>                  /* claim host only for the first request */
+>>                  mmc_get_card(card);
+>> +       }
+>>
+>>          ret =3D mmc_blk_part_switch(card, md);
+>>          if (ret) {
+>> @@ -1999,7 +2010,7 @@ static int mmc_blk_issue_rq(struct mmc_queue *=
+mq, struct request *req)
+>>
+>>   out:
+>>          if ((!req && !(mq->flags & MMC_QUEUE_NEW_REQUEST)) ||
+>> -            (req && (req->cmd_flags & MMC_REQ_SPECIAL_MASK)))
+>> +            (req && (req->cmd_flags & MMC_REQ_SPECIAL_MASK))) {
+>>                  /*
+>>                   * Release host when there are no more requests
+>>                   * and after special request(discard, flush) is don=
+e.
+>> @@ -2007,6 +2018,19 @@ out:
+>>                   * the 'mmc_blk_issue_rq' with 'mqrq_prev->req'.
+>>                   */
+>>                  mmc_put_card(card);
+>> +
+>> +               /*
+>> +                * Detecting card status immediately in case card be=
+ing
+>> +                * removed just after the request is complete.
+>> +                */
+>> +               if (host->caps & MMC_CAP_NEEDS_POLL) {
+>> +                       spin_lock_irqsave(&host->lock, flags);
+>> +                       host->rescan_disable =3D 0;
+>> +                       spin_unlock_irqrestore(&host->lock, flags);
+>> +                       mmc_detect_change(host, 0);
+>> +               }
+>> +       }
+>> +
+>>          return ret;
+>>   }
+>>
+>> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+>> index b9b9fb6..2831c03 100644
+>> --- a/drivers/mmc/core/core.c
+>> +++ b/drivers/mmc/core/core.c
+>> @@ -925,15 +925,20 @@ EXPORT_SYMBOL(__mmc_claim_host);
+>>    */
+>>   int mmc_try_claim_host(struct mmc_host *host)
+>>   {
+>> +       struct mmc_card *card;
+>>          int claimed_host =3D 0;
+>>          unsigned long flags;
+>>
+>> +       card =3D host->card;
+>> +       pm_runtime_get_sync(&card->dev);
+> Nope, this wont work. pm_runtime_get_sync can trigger an
+> mmc_claim_host, thus this entire function is not "non-blocking" any
+> more.
+I missed this. so this check should be invoked before schedule detect w=
+ork.
+>
+> Could and option be to just do a best effort? Skipping the try_claim
+> entirely -  maybe?
+You mean just to check the card status without hold the task? or rewrit=
+e=20
+another
+function like: non_block_claim_host?
+>
+>> +
+>>          spin_lock_irqsave(&host->lock, flags);
+>>          if (!host->claimed || host->claimer =3D=3D current) {
+>>                  host->claimed =3D 1;
+>>                  host->claimer =3D current;
+>>                  host->claim_cnt +=3D 1;
+>>                  claimed_host =3D 1;
+>> +               set_current_state(TASK_RUNNING);
+>>          }
+>>          spin_unlock_irqrestore(&host->lock, flags);
+>>          if (host->ops->enable && claimed_host && host->claim_cnt =3D=
+=3D 1)
+>> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+>> index 6d02012..90e5555 100644
+>> --- a/drivers/mmc/core/mmc.c
+>> +++ b/drivers/mmc/core/mmc.c
+>> @@ -1447,7 +1447,8 @@ static void mmc_detect(struct mmc_host *host)
+>>          BUG_ON(!host);
+>>          BUG_ON(!host->card);
+>>
+>> -       mmc_get_card(host->card);
+>> +       if (!mmc_try_claim_host(host))
+>> +               return;
+>>
+>>          /*
+>>           * Just check if our card has been removed.
+>> diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
+>> index 5e8823d..7dfb24d 100644
+>> --- a/drivers/mmc/core/sd.c
+>> +++ b/drivers/mmc/core/sd.c
+>> @@ -1045,7 +1045,8 @@ static void mmc_sd_detect(struct mmc_host *hos=
+t)
+>>          BUG_ON(!host);
+>>          BUG_ON(!host->card);
+>>
+>> -       mmc_get_card(host->card);
+>> +       if (!mmc_try_claim_host(host))
+>> +               return;
+>>
+>>          /*
+>>           * Just check if our card has been removed.
+>> diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
+>> index 80d89cff..e0cabf5 100644
+>> --- a/drivers/mmc/core/sdio.c
+>> +++ b/drivers/mmc/core/sdio.c
+>> @@ -875,7 +875,8 @@ static void mmc_sdio_detect(struct mmc_host *hos=
+t)
+>>                  }
+>>          }
+>>
+>> -       mmc_claim_host(host);
+>> +       if (!mmc_try_claim_host(host))
+>> +               return;
+>>
+>>          /*
+>>           * Just check if our card has been removed.
+>> --
+>> 1.8.0
+>>
+>>
+> Kind regards
+> Ulf Hansson
+>
 
-I simplied your patch a bit:
+--=20
+Thanks & Regards
+Haijun.
 
-diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-index 1a3163f..94f842b 100644
---- a/drivers/mmc/card/block.c
-+++ b/drivers/mmc/card/block.c
-@@ -2026,7 +2026,7 @@ static struct mmc_blk_data
-*mmc_blk_alloc_req(struct mmc_card *card,
-     struct mmc_blk_data *md;
-     int devidx, ret;
 
--    devidx = find_first_zero_bit(dev_use, max_devices);
-+    devidx = find_next_zero_bit(dev_use, max_devices, card->host->devidx);
-     if (devidx >= max_devices)
-         return ERR_PTR(-ENOSPC);
-     __set_bit(devidx, dev_use);
-@@ -2044,7 +2044,8 @@ static struct mmc_blk_data
-*mmc_blk_alloc_req(struct mmc_card *card,
-      * index anymore so we keep track of a name index.
-      */
-     if (!subname) {
--        md->name_idx = find_first_zero_bit(name_use, max_devices);
-+        md->name_idx = find_next_zero_bit(name_use, max_devices,
-+                card->host->devidx);
-         __set_bit(md->name_idx, name_use);
-     } else
-         md->name_idx = ((struct mmc_blk_data *)
-diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c
-b/drivers/mmc/host/sdhci-esdhc-imx.c
-index abc8cf0..e11a6af 100644
---- a/drivers/mmc/host/sdhci-esdhc-imx.c
-+++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-@@ -524,8 +524,9 @@ static int sdhci_esdhc_imx_probe(struct
-platform_device *pdev)
-     struct sdhci_pltfm_host *pltfm_host;
-     struct sdhci_host *host;
-     struct esdhc_platform_data *boarddata;
--    int err;
-+    int err, ret;
-     struct pltfm_imx_data *imx_data;
-+    struct device_node *np = pdev->dev.of_node;
-
-     host = sdhci_pltfm_init(pdev, &sdhci_esdhc_imx_pdata, 0);
-     if (IS_ERR(host))
-@@ -602,6 +603,13 @@ static int sdhci_esdhc_imx_probe(struct
-platform_device *pdev)
-                     host->mmc->parent->platform_data);
-     }
-
-+
-+    if (np) {
-+        ret = of_alias_get_id(np, "mmcblk");
-+        if (ret >= 0)
-+            host->mmc->devidx = ret;
-+    }
-+
-     /* write_protect */
-     if (boarddata->wp_type == ESDHC_WP_GPIO) {
-         err = mmc_gpio_request_ro(host->mmc, boarddata->wp_gpio);
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index 3b0c33a..8209f72 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -362,6 +362,8 @@ struct mmc_host {
-
-     unsigned int        slotno;    /* used for sdio acpi binding */
-
-+    /* preferred mmc block device index (mmcblkX) */
-+    unsigned int        devidx;
-     unsigned long        private[0] ____cacheline_aligned;
- };
-
-What do you think?
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
