@@ -1,69 +1,67 @@
-From: Sekhar Nori <nsekhar@ti.com>
-Subject: Re: [PATCH v3] ARM: EDMA: Fix clearing of unused list for DT DMA
- resources
-Date: Thu, 19 Sep 2013 15:05:04 +0530
-Message-ID: <523AC548.5020908@ti.com>
-References: <1378839171-14455-1-git-send-email-joelf@ti.com> <5231903F.7080301@ti.com> <5233B471.40603@ti.com> <5236F00B.5040605@ti.com> <5237314D.7080102@ti.com> <5237E3C3.8050602@ti.com> <5237EAF3.70505@ti.com> <5237F147.1020302@ti.com> <52386733.8010807@ti.com>
+From: Nicolas Ferre <nicolas.ferre@atmel.com>
+Subject: Re: [PATCH] at91: mmc: fix missing pinctrl in dt
+Date: Thu, 19 Sep 2013 15:21:12 +0200
+Message-ID: <523AFA48.80606@atmel.com>
+References: <1379411857-18516-1-git-send-email-jiri.prchal@aksignal.cz> <1379411857-18516-2-git-send-email-jiri.prchal@aksignal.cz>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-omap-owner@vger.kernel.org>
-In-Reply-To: <52386733.8010807@ti.com>
-Sender: linux-omap-owner@vger.kernel.org
-To: joelf@ti.com
-Cc: Vinod Koul <vinod.koul@intel.com>, Dan Williams <djbw@fb.com>, Russell King <linux@arm.linux.org.uk>, Jyri Sarah <jsarha@ti.com>, Koen Kooi <koen@beagleboard.org>, Linux OMAP List <linux-omap@vger.kernel.org>, Linux ARM Kernel List <linux-arm-kernel@lists.infradead.org>, Linux DaVinci Kernel List <davinci-linux-open-source@linux.davincidsp.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux MMC List <linux-mmc@vger.kernel.org>, Pantel Antoniou <panto@antoniou-consulting.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from eusmtp01.atmel.com ([212.144.249.243]:50339 "EHLO
+	eusmtp01.atmel.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752716Ab3ISNVT (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 19 Sep 2013 09:21:19 -0400
+In-Reply-To: <1379411857-18516-2-git-send-email-jiri.prchal@aksignal.cz>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Jiri Prchal <jiri.prchal@aksignal.cz>
+Cc: linux-mmc@vger.kernel.org, ludovic.desroches@atmel.com, linux-arm-kernel@lists.infradead.org, Jean-Christophe PLAGNIOL-VILLARD <plagnioj@jcrosoft.com>
 
-On Tuesday 17 September 2013 07:59 PM, Joel Fernandes wrote:
-> On 09/17/2013 01:05 AM, Sekhar Nori wrote:
-> [..]
->>>> mixed messages. In short, we aim for consistency with situation today,
->>>> not tomorrow.
->>>
->>> What you're asking to do infact breaks consistency with the rest of the code.
->>
->> Well, ideally we support second CC even with DT to be consistent all
->> around. Since that has not happened, I don't want the code to pretend
->> that it it supports the second channel controller with DT that too only
->> in parts of code.
-> 
-> Ok, I agree that the bindings don't talk about encoding a controller number in
-> the channel provided from DT so it shouldn't assume that without binding
-> updates. Following this suggestion, I've update the patch to the below:
-> 
-> ---8<---
-> From: Joel Fernandes <joelf@ti.com>
-> Subject: [PATCH v6] ARM: EDMA: Fix clearing of unused list for DT DMA resources
-> 
-> HWMOD removal for MMC is breaking edma_start as the events are being manually
-> triggered due to unused channel list not being clear.
-> 
-> The above issue is fixed by reading the "dmas" property from the DT node if it
-> exists and clearing the bits in the unused channel list if the dma controller
-> used by any device is EDMA. For this purpose we use the of_* helpers to parse
-> the arguments in the dmas phandle list.
-> 
-> Also introduced is a minor clean up of a checkpatch error in old code.
+On 17/09/2013 11:57, Jiri Prchal :
+> This patch adds pinctrl to soc dtsi file.
+>
+> Signed-off-by: Jiri Prchal <jiri.prchal@aksignal.cz>
 
-The patch looks good to me. I made some modifications to commit message
-- mostly for brevity.
 
-    ARM: edma: dt: create unused channel list
+Jiri,
 
-    HWMOD removal for MMC is breaking edma_start() as the events
-    are being manually triggered due to EDMA unused channel list
-    not being ready.
+I will rework your patch by splitting the two lines. This will allow us 
+to be consistent with other AT91 SoC/boards Device Tree descriptions.
 
-    The above issue is fixed by reading the "dmas" property from
-    the DT node if it exists and then clearing the bits in the
-    unused channel list if the dma controller used by any device
-    is EDMA.
++		pinctrl-names = "default";
 
-    This is similar to approach taken in non-DT case.
+This one is going in the SoC file, like you did.
 
-    Also introduced is a minor clean up of a checkpatch error in
-    old code.
++		pinctrl-0 = <&pinctrl_mmc0_slot0_clk_cmd_dat0>;
 
-Thanks,
-Sekhar
+This one is under the responsibility of the board itself. The reason 
+behind this is that the dat0 line can be multiplexed on another pin.
 
+So, if you need a particular pinctrl configuration on the board side, 
+please send another patch for this addition.
+
+Thanks bye,
+
+
+> ---
+>   arch/arm/boot/dts/at91sam9x5.dtsi |    2 ++
+>   1 file changed, 2 insertions(+)
+>
+> diff --git a/arch/arm/boot/dts/at91sam9x5.dtsi b/arch/arm/boot/dts/at91sam9x5.dtsi
+> index cf78ac0..c5d26b0 100644
+> --- a/arch/arm/boot/dts/at91sam9x5.dtsi
+> +++ b/arch/arm/boot/dts/at91sam9x5.dtsi
+> @@ -556,6 +556,8 @@
+>   				interrupts = <12 IRQ_TYPE_LEVEL_HIGH 0>;
+>   				dmas = <&dma0 1 AT91_DMA_CFG_PER_ID(0)>;
+>   				dma-names = "rxtx";
+> +				pinctrl-names = "default";
+> +				pinctrl-0 = <&pinctrl_mmc0_slot0_clk_cmd_dat0>;
+>   				#address-cells = <1>;
+>   				#size-cells = <0>;
+>   				status = "disabled";
+>
+
+
+-- 
+Nicolas Ferre
