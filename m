@@ -1,138 +1,95 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [RFC/PATCH] mmc: core: Signal wakeup event at card insert/removal
-Date: Fri, 20 Sep 2013 11:48:43 +0200
-Message-ID: <1379670523-13229-1-git-send-email-ulf.hansson@linaro.org>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-lb0-f169.google.com ([209.85.217.169]:40882 "EHLO
-	mail-lb0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754221Ab3ITJsv (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 20 Sep 2013 05:48:51 -0400
-Received: by mail-lb0-f169.google.com with SMTP id z5so405284lbh.28
-        for <linux-mmc@vger.kernel.org>; Fri, 20 Sep 2013 02:48:50 -0700 (PDT)
-Sender: linux-mmc-owner@vger.kernel.org
+From: Russell King <rmk+kernel@arm.linux.org.uk>
+Subject: [PATCH 39/51] DMA-API: others: use dma_set_coherent_mask()
+Date: Fri, 20 Sep 2013 00:11:38 +0100
+Message-ID: <E1VMnNq-0007s4-HN@rmk-PC.arm.linux.org.uk>
+References: <20130919212235.GD12758@n2100.arm.linux.org.uk>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <20130919212235.GD12758@n2100.arm.linux.org.uk>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: alsa-devel@alsa-project.org, b43-dev@lists.infradead.org, devel@driverdev.osuosl.org, devicetree@vger.kernel.org, dri-devel@lists.freedesktop.org, e1000-devel@lists.sourceforge.net, linux-arm-kernel@lists.infradead.org, linux-crypto@vger.kernel.org, linux-doc@vger.kernel.org, linux-fbdev@vger.kernel.org, linux-ide@vger.kernel.org, linux-media@vger.kernel.org, linux-mmc@vger.kernel.org, linux-nvme@lists.infradead.org, linux-omap@vger.kernel.org, linuxppc-dev@lists.ozlabs.org, linux-samsung-soc@vger.kernel.org, linux-scsi@vger.kernel.org, linux-tegra@vger.kernel.org, linux-usb@vger.kernel.org, linux-wireless@vger.kernel.org, netdev@vger.kernel.org, Solarflare linux maintainers <linux-net-drivers@solarflare.com>, uclinux-dist-devel@blackfin.uclinux.org
+Cc: Kukjin Kim <kgene.kim@samsung.com>, Joonyoung Shim <jy0922.shim@samsung.com>, David Airlie <airlied@linux.ie>, Seung-Woo Kim <sw0312.kim@samsung.com>, Inki Dae <inki.dae@samsung.com>, Kyungmin Park <kyungmin.park@samsung.com>, Tejun Heo <tj@kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, San Mehat <san@google.com>, Colin Cross <ccross@android.com>, John Stultz <john.stultz@linaro.org>, Zoran Markovic <zoran.markovic@linaro.org>
 
-We want to give user space provision to fully consume a card
-insert/remove event, when the event was caused by a wakeup irq.
+The correct way for a driver to specify the coherent DMA mask is
+not to directly access the field in the struct device, but to use
+dma_set_coherent_mask().  Only arch and bus code should access this
+member directly.
 
-By signaling the wakeup event for a time of 5 s for devices configured
-as wakeup capable, we likely will be prevent a sleep long enough to let
-user space consume the event.
+Convert all direct write accesses to using the correct API.
 
-To enable this feature, host drivers must thus configure their devices
-as wakeup capable.
-
-This is a reworked implementation of the old wakelocks for the mmc
-subsystem, originally authored by Colin Cross and San Mehat for the
-Android kernel. Zoran Markovic shall also be given cred for recently
-re-trying to upstream this feature.
-
-Cc: San Mehat <san@google.com>
-Cc: Colin Cross <ccross@android.com>
-Cc: John Stultz <john.stultz@linaro.org>
-Cc: Zoran Markovic <zoran.markovic@linaro.org>
-Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+Signed-off-by: Russell King <rmk+kernel@arm.linux.org.uk>
 ---
+ drivers/ata/pata_ixp4xx_cf.c             |    5 ++++-
+ drivers/gpu/drm/exynos/exynos_drm_drv.c  |    6 +++++-
+ drivers/gpu/drm/omapdrm/omap_dmm_tiler.c |    5 +++--
+ 3 files changed, 12 insertions(+), 4 deletions(-)
 
-This patch has just been compile tested, since I at very moment did not
-have a good board to test it on. I am working on that.
-
-Any help in testing this patch is thus greatly appreciated. While
-testing also don't forget to enable the host device as wakeup capable.
-Use "device_init_wakeup" from the host probe function.
-
----
- drivers/mmc/core/core.c |   39 +++++++++++++++++++++++++++------------
- 1 file changed, 27 insertions(+), 12 deletions(-)
-
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index bf18b6b..3e8229e 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -23,6 +23,7 @@
- #include <linux/log2.h>
- #include <linux/regulator/consumer.h>
- #include <linux/pm_runtime.h>
-+#include <linux/pm_wakeup.h>
- #include <linux/suspend.h>
- #include <linux/fault-inject.h>
- #include <linux/random.h>
-@@ -1723,6 +1724,28 @@ void mmc_detach_bus(struct mmc_host *host)
- 	mmc_bus_put(host);
- }
+diff --git a/drivers/ata/pata_ixp4xx_cf.c b/drivers/ata/pata_ixp4xx_cf.c
+index 1ec53f8..ddf470c 100644
+--- a/drivers/ata/pata_ixp4xx_cf.c
++++ b/drivers/ata/pata_ixp4xx_cf.c
+@@ -144,6 +144,7 @@ static int ixp4xx_pata_probe(struct platform_device *pdev)
+ 	struct ata_host *host;
+ 	struct ata_port *ap;
+ 	struct ixp4xx_pata_data *data = dev_get_platdata(&pdev->dev);
++	int ret;
  
-+static void _mmc_detect_change(struct mmc_host *host, unsigned long delay,
-+				bool cd_irq)
-+{
-+#ifdef CONFIG_MMC_DEBUG
-+	unsigned long flags;
-+	spin_lock_irqsave(&host->lock, flags);
-+	WARN_ON(host->removed);
-+	spin_unlock_irqrestore(&host->lock, flags);
-+#endif
-+
-+	/*
-+	 * If the device is configured as wakeup, we prevent a new sleep for
-+	 * 5 s to give provision for user space to consume the event.
-+	 */
-+	if (cd_irq && !(host->caps & MMC_CAP_NEEDS_POLL) &&
-+		device_can_wakeup(mmc_dev(host)))
-+		pm_wakeup_event(mmc_dev(host), 5000);
-+
-+	host->detect_change = 1;
-+	mmc_schedule_delayed_work(&host->detect, delay);
-+}
-+
- /**
-  *	mmc_detect_change - process change of state on a MMC socket
-  *	@host: host which changed state.
-@@ -1735,16 +1758,8 @@ void mmc_detach_bus(struct mmc_host *host)
-  */
- void mmc_detect_change(struct mmc_host *host, unsigned long delay)
+ 	cs0 = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+ 	cs1 = platform_get_resource(pdev, IORESOURCE_MEM, 1);
+@@ -157,7 +158,9 @@ static int ixp4xx_pata_probe(struct platform_device *pdev)
+ 		return -ENOMEM;
+ 
+ 	/* acquire resources and fill host */
+-	pdev->dev.coherent_dma_mask = DMA_BIT_MASK(32);
++	ret = dma_set_coherent_mask(&pdev->dev, DMA_BIT_MASK(32));
++	if (ret)
++		return ret;
+ 
+ 	data->cs0 = devm_ioremap(&pdev->dev, cs0->start, 0x1000);
+ 	data->cs1 = devm_ioremap(&pdev->dev, cs1->start, 0x1000);
+diff --git a/drivers/gpu/drm/exynos/exynos_drm_drv.c b/drivers/gpu/drm/exynos/exynos_drm_drv.c
+index bb82ef7..81192d0 100644
+--- a/drivers/gpu/drm/exynos/exynos_drm_drv.c
++++ b/drivers/gpu/drm/exynos/exynos_drm_drv.c
+@@ -286,7 +286,11 @@ static struct drm_driver exynos_drm_driver = {
+ 
+ static int exynos_drm_platform_probe(struct platform_device *pdev)
  {
--#ifdef CONFIG_MMC_DEBUG
--	unsigned long flags;
--	spin_lock_irqsave(&host->lock, flags);
--	WARN_ON(host->removed);
--	spin_unlock_irqrestore(&host->lock, flags);
--#endif
--	host->detect_change = 1;
--	mmc_schedule_delayed_work(&host->detect, delay);
-+	_mmc_detect_change(host, delay, true);
- }
--
- EXPORT_SYMBOL(mmc_detect_change);
+-	pdev->dev.coherent_dma_mask = DMA_BIT_MASK(32);
++	int ret;
++
++	ret = dma_set_coherent_mask(&pdev->dev, DMA_BIT_MASK(32));
++	if (ret)
++		return ret;
  
- void mmc_init_erase(struct mmc_card *card)
-@@ -2423,7 +2438,7 @@ int mmc_detect_card_removed(struct mmc_host *host)
- 			 * rescan handle the card removal.
- 			 */
- 			cancel_delayed_work(&host->detect);
--			mmc_detect_change(host, 0);
-+			_mmc_detect_change(host, 0, false);
- 		}
+ 	return drm_platform_init(&exynos_drm_driver, pdev);
+ }
+diff --git a/drivers/gpu/drm/omapdrm/omap_dmm_tiler.c b/drivers/gpu/drm/omapdrm/omap_dmm_tiler.c
+index acf6678..701c4c1 100644
+--- a/drivers/gpu/drm/omapdrm/omap_dmm_tiler.c
++++ b/drivers/gpu/drm/omapdrm/omap_dmm_tiler.c
+@@ -664,8 +664,9 @@ static int omap_dmm_probe(struct platform_device *dev)
  	}
  
-@@ -2505,7 +2520,7 @@ void mmc_start_host(struct mmc_host *host)
- 		mmc_power_off(host);
- 	else
- 		mmc_power_up(host);
--	mmc_detect_change(host, 0);
-+	_mmc_detect_change(host, 0, false);
- }
+ 	/* set dma mask for device */
+-	/* NOTE: this is a workaround for the hwmod not initializing properly */
+-	dev->dev.coherent_dma_mask = DMA_BIT_MASK(32);
++	ret = dma_set_coherent_mask(&dev->dev, DMA_BIT_MASK(32));
++	if (ret)
++		goto fail;
  
- void mmc_stop_host(struct mmc_host *host)
-@@ -2724,7 +2739,7 @@ int mmc_pm_notify(struct notifier_block *notify_block,
- 		spin_lock_irqsave(&host->lock, flags);
- 		host->rescan_disable = 0;
- 		spin_unlock_irqrestore(&host->lock, flags);
--		mmc_detect_change(host, 0);
-+		_mmc_detect_change(host, 0, false);
- 
- 	}
+ 	omap_dmm->dummy_pa = page_to_phys(omap_dmm->dummy_page);
  
 -- 
-1.7.9.5
-
+1.7.4.4
