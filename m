@@ -1,39 +1,69 @@
-From: Prasanna NAVARATNA <prasanna.navaratna@gmail.com>
-Subject: Re: mmc0: Timeout waiting for hardware interrupt.
-Date: Thu, 19 Sep 2013 05:44:47 +0000 (UTC)
-Message-ID: <loom.20130919T074320-235@post.gmane.org>
-References: <CAH9NwWcQ6528NxSShnO2Nfa4dyqD0j68wO9CqfR3i=cpGXQjNg@mail.gmail.com> <loom.20130823T162510-762@post.gmane.org> <CAH9NwWePDSADpVm2MzUCYHPfYLb0RrWJL=yqOCqSPwFF1e=tuw@mail.gmail.com> <CAH9NwWfjUQbw6-K5PCtb7KyNhgGRR0wvWu+_w-shje5zOgqarA@mail.gmail.com> <loom.20130828T090935-8@post.gmane.org> <CAH9NwWcdxDWHpy1O7+9SPysima72FWPPEVP_us_0KCZrv6Tv1w@mail.gmail.com> <loom.20130905T115114-86@post.gmane.org> <CAH9NwWdL03wV7NA+Jo9XZvtgFnXc0T5yR1dzULvvnzsqaFQTGA@mail.gmail.com>
+From: Sekhar Nori <nsekhar@ti.com>
+Subject: Re: [PATCH v3] ARM: EDMA: Fix clearing of unused list for DT DMA
+ resources
+Date: Thu, 19 Sep 2013 15:05:04 +0530
+Message-ID: <523AC548.5020908@ti.com>
+References: <1378839171-14455-1-git-send-email-joelf@ti.com> <5231903F.7080301@ti.com> <5233B471.40603@ti.com> <5236F00B.5040605@ti.com> <5237314D.7080102@ti.com> <5237E3C3.8050602@ti.com> <5237EAF3.70505@ti.com> <5237F147.1020302@ti.com> <52386733.8010807@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from plane.gmane.org ([80.91.229.3]:57524 "EHLO plane.gmane.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752244Ab3ISFpJ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 19 Sep 2013 01:45:09 -0400
-Received: from list by plane.gmane.org with local (Exim 4.69)
-	(envelope-from <glkm-linux-mmc@m.gmane.org>)
-	id 1VMX35-0003QI-V3
-	for linux-mmc@vger.kernel.org; Thu, 19 Sep 2013 07:45:08 +0200
-Received: from 202.122.18.226 ([202.122.18.226])
-        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <linux-mmc@vger.kernel.org>; Thu, 19 Sep 2013 07:45:07 +0200
-Received: from prasanna.navaratna by 202.122.18.226 with local (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <linux-mmc@vger.kernel.org>; Thu, 19 Sep 2013 07:45:07 +0200
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-omap-owner@vger.kernel.org>
+In-Reply-To: <52386733.8010807@ti.com>
+Sender: linux-omap-owner@vger.kernel.org
+To: joelf@ti.com
+Cc: Vinod Koul <vinod.koul@intel.com>, Dan Williams <djbw@fb.com>, Russell King <linux@arm.linux.org.uk>, Jyri Sarah <jsarha@ti.com>, Koen Kooi <koen@beagleboard.org>, Linux OMAP List <linux-omap@vger.kernel.org>, Linux ARM Kernel List <linux-arm-kernel@lists.infradead.org>, Linux DaVinci Kernel List <davinci-linux-open-source@linux.davincidsp.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux MMC List <linux-mmc@vger.kernel.org>, Pantel Antoniou <panto@antoniou-consulting.com>
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
 
+On Tuesday 17 September 2013 07:59 PM, Joel Fernandes wrote:
+> On 09/17/2013 01:05 AM, Sekhar Nori wrote:
+> [..]
+>>>> mixed messages. In short, we aim for consistency with situation today,
+>>>> not tomorrow.
+>>>
+>>> What you're asking to do infact breaks consistency with the rest of the code.
+>>
+>> Well, ideally we support second CC even with DT to be consistent all
+>> around. Since that has not happened, I don't want the code to pretend
+>> that it it supports the second channel controller with DT that too only
+>> in parts of code.
+> 
+> Ok, I agree that the bindings don't talk about encoding a controller number in
+> the channel provided from DT so it shouldn't assume that without binding
+> updates. Following this suggestion, I've update the patch to the below:
+> 
+> ---8<---
+> From: Joel Fernandes <joelf@ti.com>
+> Subject: [PATCH v6] ARM: EDMA: Fix clearing of unused list for DT DMA resources
+> 
+> HWMOD removal for MMC is breaking edma_start as the events are being manually
+> triggered due to unused channel list not being clear.
+> 
+> The above issue is fixed by reading the "dmas" property from the DT node if it
+> exists and clearing the bits in the unused channel list if the dma controller
+> used by any device is EDMA. For this purpose we use the of_* helpers to parse
+> the arguments in the dmas phandle list.
+> 
+> Also introduced is a minor clean up of a checkpatch error in old code.
 
-> Did you found time to tide up your patch?
-Yes, patch is almost ready. I'm trying to compile and test it once before
-submitting. Will post it soon.
+The patch looks good to me. I made some modifications to commit message
+- mostly for brevity.
 
-Thanks & Regards,
-Prasanna NAVARATNA
+    ARM: edma: dt: create unused channel list
 
+    HWMOD removal for MMC is breaking edma_start() as the events
+    are being manually triggered due to EDMA unused channel list
+    not being ready.
 
+    The above issue is fixed by reading the "dmas" property from
+    the DT node if it exists and then clearing the bits in the
+    unused channel list if the dma controller used by any device
+    is EDMA.
 
+    This is similar to approach taken in non-DT case.
+
+    Also introduced is a minor clean up of a checkpatch error in
+    old code.
+
+Thanks,
+Sekhar
 
