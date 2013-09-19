@@ -1,128 +1,69 @@
-From: Ben Gardiner <ben.l.gardiner@gmail.com>
-Subject: [PATCH 3/3] support setting the OTP write reliability settings
-Date: Thu, 19 Sep 2013 11:14:29 -0400
-Message-ID: <06c38eb8dcbf25bee62d50a6a9b9162c734ce7ad.1379602866.git.ben.l.gardiner@gmail.com>
-References: <cover.1379602866.git.ben.l.gardiner@gmail.com>
+From: Grant Grundler <grundler@chromium.org>
+Subject: [PATCH] mmc: core: remove issue_fn indirect function call
+Date: Thu, 19 Sep 2013 10:20:14 -0700
+Message-ID: <1379611214-1089-1-git-send-email-grundler@chromium.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qc0-f176.google.com ([209.85.216.176]:57597 "EHLO
-	mail-qc0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752780Ab3ISPOn (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 19 Sep 2013 11:14:43 -0400
-Received: by mail-qc0-f176.google.com with SMTP id t7so5514641qcv.21
-        for <linux-mmc@vger.kernel.org>; Thu, 19 Sep 2013 08:14:42 -0700 (PDT)
-In-Reply-To: <cover.1379602866.git.ben.l.gardiner@gmail.com>
-In-Reply-To: <cover.1379602866.git.ben.l.gardiner@gmail.com>
-References: <cover.1379602866.git.ben.l.gardiner@gmail.com>
+Received: from mail-pd0-f175.google.com ([209.85.192.175]:35484 "EHLO
+	mail-pd0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752035Ab3ISRVL (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 19 Sep 2013 13:21:11 -0400
+Received: by mail-pd0-f175.google.com with SMTP id q10so8625131pdj.6
+        for <linux-mmc@vger.kernel.org>; Thu, 19 Sep 2013 10:21:10 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: cjb@laptop.org
-Cc: linux-mmc@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>, Seungwon Jeon <tgih.jun@samsung.com>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Grant Grundler <grundler@chromium.org>
 
-Signed-off-by: Ben Gardiner <ben.l.gardiner@gmail.com>
+struct mmc_queue defines issue_fn as an indirect function call.
+issue_fn field only gets set to mmc_blk_issue_rq and only gets
+invoked immediately after calling blk_fetch_request().
+Don't bother with indirect function call - it's pointless and just
+obfuscates the code.
+
+Signed-off-by: Grant Grundler <grundler@chromium.org>
 ---
- mmc.c      |  5 +++++
- mmc_cmds.c | 62 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
- mmc_cmds.h |  1 +
- 3 files changed, 68 insertions(+)
+ drivers/mmc/card/block.c | 1 -
+ drivers/mmc/card/queue.c | 2 +-
+ drivers/mmc/card/queue.h | 1 -
+ 3 files changed, 1 insertion(+), 3 deletions(-)
 
-diff --git a/mmc.c b/mmc.c
-index 725b842..926e92f 100644
---- a/mmc.c
-+++ b/mmc.c
-@@ -75,6 +75,11 @@ static struct Command commands[] = {
- 		"Enable the enhanced user area for the <device>.\nDry-run only unless -y is passed.\nNOTE!  This is a one-time programmable (unreversible) change.",
- 	  NULL
- 	},
-+	{ do_write_reliability_set, -2,
-+	  "write_reliability set", "<-y|-n> " "<partition> " "<device>\n"
-+		"Enable write reliability per partition for the <device>.\nDry-run only unless -y is passed.\nNOTE!  This is a one-time programmable (unreversible) change.",
-+	  NULL
-+	},
- 	{ do_status_get, -1,
- 	  "status get", "<device>\n"
- 	  "Print the response to STATUS_SEND (CMD13).",
-diff --git a/mmc_cmds.c b/mmc_cmds.c
-index 7874b23..079f322 100644
---- a/mmc_cmds.c
-+++ b/mmc_cmds.c
-@@ -632,6 +632,68 @@ int do_enh_area_set(int nargs, char **argv)
- 	return 0;
- }
+diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+index 1a3163f..b2cdd10 100644
+--- a/drivers/mmc/card/block.c
++++ b/drivers/mmc/card/block.c
+@@ -2072,7 +2072,6 @@ static struct mmc_blk_data *mmc_blk_alloc_req(struct mmc_card *card,
+ 	if (ret)
+ 		goto err_putdisk;
  
-+int do_write_reliability_set(int nargs, char **argv)
-+{
-+	__u8 value;
-+	__u8 ext_csd[512];
-+	int fd, ret;
-+
-+	int dry_run = 1;
-+	int partition;
-+	char *device;
-+
-+	CHECK(nargs != 4, "Usage: mmc write_reliability set <-y|-n> "
-+			"<partition> </path/to/mmcblkX>\n", exit(1));
-+
-+	if (!strcmp("-y", argv[1]))
-+		dry_run = 0;
-+
-+	partition = strtol(argv[2], NULL, 10);
-+	device = argv[3];
-+
-+	fd = open(device, O_RDWR);
-+	if (fd < 0) {
-+		perror("open");
-+		exit(1);
-+	}
-+
-+	ret = read_extcsd(fd, ext_csd);
-+	if (ret) {
-+		fprintf(stderr, "Could not read EXT_CSD from %s\n", device);
-+		exit(1);
-+	}
-+
-+	/* assert not PARTITION_SETTING_COMPLETED */
-+	if (ext_csd[EXT_CSD_PARTITION_SETTING_COMPLETED])
-+	{
-+		printf(" Device is already partitioned\n");
-+		exit(1);
-+	}
-+
-+	/* assert HS_CTRL_REL */
-+	if (!(ext_csd[EXT_CSD_WR_REL_PARAM] & HS_CTRL_REL)) {
-+		printf("Cannot set write reliability parameters, WR_REL_SET is "
-+				"read-only\n");
-+		exit(1);
-+	}
-+
-+	value = ext_csd[EXT_CSD_WR_REL_SET] | (1<<partition);
-+	ret = write_extcsd_value(fd, EXT_CSD_WR_REL_SET, value);
-+	if (ret) {
-+		fprintf(stderr, "Could not write 0x%02x to EXT_CSD[%d] in %s\n",
-+				value, EXT_CSD_WR_REL_SET, device);
-+		exit(1);
-+	}
-+
-+	printf("Done setting EXT_CSD_WR_REL_SET to 0x%02x on %s\n",
-+		value, device);
-+
-+	if (!set_partitioning_setting_completed(dry_run, device, fd))
-+		exit(1);
-+
-+	return 0;
-+}
-+
- int do_read_extcsd(int nargs, char **argv)
- {
- 	__u8 ext_csd[512], ext_csd_rev, reg;
-diff --git a/mmc_cmds.h b/mmc_cmds.h
-index fa347f5..f06cc10 100644
---- a/mmc_cmds.h
-+++ b/mmc_cmds.h
-@@ -27,3 +27,4 @@ int do_hwreset_dis(int nargs, char **argv);
- int do_sanitize(int nargs, char **argv);
- int do_status_get(int nargs, char **argv);
- int do_enh_area_set(int nargs, char **argv);
-+int do_write_reliability_set(int nargs, char **argv);
+-	md->queue.issue_fn = mmc_blk_issue_rq;
+ 	md->queue.data = md;
+ 
+ 	md->disk->major	= MMC_BLOCK_MAJOR;
+diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
+index fa9632e..6f9adc5 100644
+--- a/drivers/mmc/card/queue.c
++++ b/drivers/mmc/card/queue.c
+@@ -67,7 +67,7 @@ static int mmc_queue_thread(void *d)
+ 		if (req || mq->mqrq_prev->req) {
+ 			set_current_state(TASK_RUNNING);
+ 			cmd_flags = req ? req->cmd_flags : 0;
+-			mq->issue_fn(mq, req);
++			mmc_blk_issue_rq(mq, req);
+ 			if (mq->flags & MMC_QUEUE_NEW_REQUEST) {
+ 				mq->flags &= ~MMC_QUEUE_NEW_REQUEST;
+ 				continue; /* fetch again */
+diff --git a/drivers/mmc/card/queue.h b/drivers/mmc/card/queue.h
+index 5752d50..35380015 100644
+--- a/drivers/mmc/card/queue.h
++++ b/drivers/mmc/card/queue.h
+@@ -51,7 +51,6 @@ struct mmc_queue {
+ #define MMC_QUEUE_SUSPENDED	(1 << 0)
+ #define MMC_QUEUE_NEW_REQUEST	(1 << 1)
+ 
+-	int			(*issue_fn)(struct mmc_queue *, struct request *);
+ 	void			*data;
+ 	struct request_queue	*queue;
+ 	struct mmc_queue_req	mqrq[2];
 -- 
-1.8.1.2
+1.8.4
 
