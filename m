@@ -1,65 +1,87 @@
-From: "Christian Daudt" <csd@broadcom.com>
-Subject: Re: [PATCH 1/2] mmc: sdhci-bcm-kona: Use sdhci_pltfm_unregister
- instead of open coded
-Date: Fri, 20 Sep 2013 10:32:25 -0700
-Message-ID: <523C86A9.7000504@broadcom.com>
-References: <1379404772.12080.1.camel@phoenix>
+From: Jeff Kirsher <jeffrey.t.kirsher@intel.com>
+Subject: Re: [PATCH 12/51] DMA-API: net: intel/e1000: replace
+ dma_set_mask()+dma_set_coherent_mask() with new helper
+Date: Fri, 20 Sep 2013 12:45:55 -0700
+Message-ID: <1379706355.1972.8.camel@jtkirshe-mobl>
+References: <20130919212235.GD12758@n2100.arm.linux.org.uk>
+ <E1VMluG-0007gV-6y@rmk-PC.arm.linux.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain;
- charset=utf-8;
- format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mms1.broadcom.com ([216.31.210.17]:4626 "EHLO mms1.broadcom.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752982Ab3ITRcn (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 20 Sep 2013 13:32:43 -0400
-In-Reply-To: <1379404772.12080.1.camel@phoenix>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: multipart/mixed; boundary="===============7923185765950412603=="
+Return-path: <linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org>
+In-Reply-To: <E1VMluG-0007gV-6y@rmk-PC.arm.linux.org.uk>
+List-Unsubscribe: <https://lists.ozlabs.org/options/linuxppc-dev>,
+ <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=unsubscribe>
+List-Archive: <http://lists.ozlabs.org/pipermail/linuxppc-dev/>
+List-Post: <mailto:linuxppc-dev@lists.ozlabs.org>
+List-Help: <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=help>
+List-Subscribe: <https://lists.ozlabs.org/listinfo/linuxppc-dev>,
+ <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=subscribe>
+Errors-To: linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org
+Sender: "Linuxppc-dev"
+ <linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org>
+To: Russell King <rmk+kernel@arm.linux.org.uk>
+Cc: alsa-devel@alsa-project.org, linux-doc@vger.kernel.org, linux-mmc@vger.kernel.org, Peter P Waskiewicz Jr <peter.p.waskiewicz.jr@intel.com>, linux-fbdev@vger.kernel.org, linux-nvme@lists.infradead.org, linux-ide@vger.kernel.org, Carolyn Wyborny <carolyn.wyborny@intel.com>, devel@driverdev.osuosl.org, linux-samsung-soc@vger.kernel.org, linux-scsi@vger.kernel.org, e1000-devel@lists.sourceforge.net, Don Skidmore <donald.c.skidmore@intel.com>, Jesse Brandeburg <jesse.brandeburg@intel.com>, b43-dev@lists.infradead.org, linux-media@vger.kernel.org, Alex Duyck <alexander.h.duyck@intel.com>, devicetree@vger.kernel.org, Greg Rose <gregory.v.rose@intel.com>, dri-devel@lists.freedesktop.org, linux-tegra@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Solarflare linux maintainers <linux-net-drivers@solarflare.com>, netdev@vger.kernel.org, linux-usb
 List-Id: linux-mmc@vger.kernel.org
-To: Axel Lin <axel.lin@ingics.com>
-Cc: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org
 
-On 13-09-17 12:59 AM, Axel Lin wrote:
-> This avoid duplicated implementation and also fixes missing iounmap() and
-> release_mem_region() calls in sdhci_bcm_kona_remove().
-> sdhci_pltfm_init() calls request_mem_region() and ioremap(), thus we need to
-> call the corresponding iounmap() and release_mem_region() calls in
-> sdhci_bcm_kona_remove().
->
-> Signed-off-by: Axel Lin <axel.lin@ingics.com>
+
+--===============7923185765950412603==
+Content-Type: multipart/signed; micalg="pgp-sha512";
+	protocol="application/pgp-signature"; boundary="=-IwGSEViKnlGxN4Ur4LPe"
+
+
+--=-IwGSEViKnlGxN4Ur4LPe
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+
+On Thu, 2013-09-19 at 22:37 +0100, Russell King wrote:
+> Replace the following sequence:
+>=20
+>         dma_set_mask(dev, mask);
+>         dma_set_coherent_mask(dev, mask);
+>=20
+> with a call to the new helper dma_set_mask_and_coherent().
+>=20
+> Signed-off-by: Russell King <rmk+kernel@arm.linux.org.uk>
 > ---
->   drivers/mmc/host/sdhci-bcm-kona.c | 14 +-------------
->   1 file changed, 1 insertion(+), 13 deletions(-)
->
-> diff --git a/drivers/mmc/host/sdhci-bcm-kona.c b/drivers/mmc/host/sdhci-bcm-kona.c
-> index 85472d3..7a190fe 100644
-> --- a/drivers/mmc/host/sdhci-bcm-kona.c
-> +++ b/drivers/mmc/host/sdhci-bcm-kona.c
-> @@ -316,19 +316,7 @@ err_pltfm_free:
->   
->   static int __exit sdhci_bcm_kona_remove(struct platform_device *pdev)
->   {
-> -	struct sdhci_host *host = platform_get_drvdata(pdev);
-> -	int dead;
-> -	u32 scratch;
-> -
-> -	dead = 0;
-> -	scratch = readl(host->ioaddr + SDHCI_INT_STATUS);
-> -	if (scratch == (u32)-1)
-> -		dead = 1;
-> -	sdhci_remove_host(host, dead);
-> -
-> -	sdhci_free_host(host);
-> -
-> -	return 0;
-> +	return sdhci_pltfm_unregister(pdev);
->   }
->   
->   static struct platform_driver sdhci_bcm_kona_driver = {
-Acked-by: Christian Daudt <csd@broadcom.com>
+>  drivers/net/ethernet/intel/e1000/e1000_main.c |    9 ++-------
+>  1 files changed, 2 insertions(+), 7 deletions(-)
 
-  Thanks !
-    csd
+Acked-by: Jeff Kirsher <jeffrey.t.kirsher@intel.com>
+
+--=-IwGSEViKnlGxN4Ur4LPe
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: This is a digitally signed message part
+Content-Transfer-Encoding: 7bit
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.14 (GNU/Linux)
+
+iQIcBAABCgAGBQJSPKXzAAoJEOVv75VaS+3OXRMP/0inX8RE/LpymWBicNP8WD6j
+xJGDMRHzZ+Frac/Q0qSWiCNSvfBn/WZ9glR0uxnIz51/TjfFzITWZBzcsgeVJlAv
+BAQt/pIzXrw1Qwwcnm3ZGBJ6XhGFQ8rI+6Fv/1nQ7peb1PoVjpM+pkGszhgOD7AZ
+KU0EqTKIIGnRKxdVZwraXXEIrrwCwEnEJnHylot3scVYOEww+8UkQzp1ItDHeXuD
+FQurkbrCawaVB7bctDl45kmo66I+Pn6SLo22LFDI7m8Q92KePKR0pNHv4dLuRrh2
+5j6S2j1jeZca3DT0dFzyV1jgBjOzWmHfA38yHpk0FesH+3DAlTgkTxLc2PpARAww
+cKqu5d/i1rk0INt61H6tp3qYWH7HQ563PW9aIxX82PsRdXtedvTUjtxAZ/kIWAUQ
+uFX5Q0Y0u9XlfC8spRAcUvi9AxKATY/mDXcd1oBFO2yLYWcfo/2R4THAqz/yjhea
+KQQVh9gE2Uc06/fWbh2W+uGdluMNJJSEKTbkNxea2w9+MEGLV9+Cjdfb9x/w4oMf
+vT5rD9lIZh1k9xZGjB++HrOd6Gy6l9j+wYQqIiC0Ut9P5gOjrd2gyhg3xzvz894/
+eYO6FFFLJeQijLVHEU5nUVg+0IQQQaUc0Cq6WGr/USpjapQUq0xuQLLRCaph1uPM
+crlJOl4YrRaaUMl8RxDR
+=UEsD
+-----END PGP SIGNATURE-----
+
+--=-IwGSEViKnlGxN4Ur4LPe--
 
 
+--===============7923185765950412603==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+
+_______________________________________________
+Linuxppc-dev mailing list
+Linuxppc-dev@lists.ozlabs.org
+https://lists.ozlabs.org/listinfo/linuxppc-dev
+--===============7923185765950412603==--
