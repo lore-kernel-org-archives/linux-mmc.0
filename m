@@ -1,50 +1,93 @@
-From: Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>
-Subject: Re: Adding aliases to mmc
-Date: Fri, 20 Sep 2013 11:03:12 -0600
-Message-ID: <523C7FD0.3030006@wwwdotorg.org>
-References: <CAOMZO5CJ36JHJMaiG3QVdtpBoWd_ZyHQuRTrKHz4bLP39gpJtQ@mail.gmail.com> <5239C40C.9030503@wwwdotorg.org> <5239DC65.3080803@gmail.com> <5239DF55.8010308@wwwdotorg.org> <523A8A08.2060508@gmail.com> <523C7231.7040701@wwwdotorg.org> <523C79C4.1070308@gmail.com>
+From: =?ISO-8859-1?Q?Kevyn=2DAlexandre_Par=E9?=
+	<kevyn.alexandre.pare@gmail.com>
+Subject: Re: OMAP35x MMC Host Controller compatibility with SDXC?
+Date: Fri, 20 Sep 2013 13:13:38 -0400
+Message-ID: <CAL1yNcJMOQ8+YQUeiqZssCsQSNenvnRhtipPh+kkcw-rHa6zpQ@mail.gmail.com>
+References: <CAL1yNcLxUnDCfZJxLVUjSDLtgvuBYEjL-pw_aZ8dA1rVu5o=4Q@mail.gmail.com>
+	<523B0AB1.1050008@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <523C79C4.1070308-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Dirk Behme <dirk.behme-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: Fabio Estevam <festevam-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Sascha Hauer <kernel-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org>
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-omap-owner@vger.kernel.org>
+In-Reply-To: <523B0AB1.1050008@ti.com>
+Sender: linux-omap-owner@vger.kernel.org
+To: Balaji T K <balajitk@ti.com>
+Cc: linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-On 09/20/2013 10:37 AM, Dirk Behme wrote:
-> Am 20.09.2013 18:05, schrieb Stephen Warren:
->> On 09/18/2013 11:22 PM, Dirk Behme wrote:
->> ...
->>> If you have an embedded system were you just care a little about boot
->>> time you don't want to do anything like U-Boot's "part uuid" every time
->>> you boot. Or even worse, you just have a minimalistic boot loader (e.g.
->>> U-Boot's SPL) which doesn't know anything about UUIDs and file systems.
->>>
->>> As mentioned above, no I don't think UUIDs work for production embedded
->>> systems.
+Hi Balaji,
+
+>> My test shows that I'm having some timeout in some cases (v3.4.60):
+>> omap_hsmmc omap_hsmmc.0: IRQ Status is 18000
+>> omap_hsmmc omap_hsmmc.0: MMC IRQ 0x18000 : ERRI CTO
+>> mmc0: req done (CMD52): -110: 00000000 00000000 00000000 00000000
+>> mmc0: starting CMD52 arg 80000c08 flags 00000195
 >>
->> As I said above, whatever generates the filesystem image can easily
->> embed the appropriate UUID in the system's boot scripts or bootloader
->> environment. There's no need to run the "part" command at run-time if
->> there's a more appropriate flow for your situation.
-> 
-> Using a simple boot loader as an example, there are no boot scripts or
-> boot loader environment. The only thing the boot loader does is loading
-> the device tree and the kernel into RAM. Where do you want to embed an
-> UUID in such a product?
+>> omap_hsmmc omap_hsmmc.0: mmc0: CMD5, argument 0x00000000
+>> omap_hsmmc omap_hsmmc.0: IRQ Status is 18000
+>> omap_hsmmc omap_hsmmc.0: MMC IRQ 0x18000 : ERRI CTO
+>> mmc0: req failed (CMD5): -110, retrying...
+>>
+>> mmc1: starting CMD8 arg 000001aa flags 000002f5
+>> omap_hsmmc omap_hsmmc.1: mmc1: CMD8, argument 0x000001aa
+>> mmc0: starting CMD18 arg 00020000 flags 000000b5
+>> omap_hsmmc omap_hsmmc.1: IRQ Status is 18000
+>> omap_hsmmc omap_hsmmc.1: MMC IRQ 0x18000 : ERRI CTO
+>> mmc1: req done (CMD8): -110: 00000000 00000000 00000000 00000000
+>>
+>> So CMD 52,5 and 8 gives me timeout...
+>
+>
+> For SD cards, these cmd's are expected to timeout during card
+> initialization.
 
-I think the initrd would be typical.
+When you say that they are expected to timeout for SD are you
+including for microSD also? So for what will it not timeout normally
+(CMD 52,5 and 8)?
 
-> To my understanding, the UUID is different for each SD card/eMMC, correct?
+>> Looking at the 3.11.1 there is 2 more validation for UHS that are not in
+>> 3.4.60:
+>> omap_hsmmc_set_clock  // Enable High-Speed Support
+>> omap_set_bus_width
+>>
+>
+> Those changes are not for SD3.0 speed modes
 
-Yes by default.
+thx for the confirmation.
 
-Although for an embedded product with a fixed eMMC, there's no reason
-you couldn't make every device have the same UUID for the fixed device.
-Obviously you wouldn't want to do that for any removable device.
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>> Is it safe to use SDXC with OMAP35x or not? Should this pop a error
+>> message?
+>
+>
+> SDXC cards should work albeit at High Speed mode (as in SD2.0).
+> Refer to [1] for card size Vs speed mode/SD spec version.
+
+Your link clearly says that there should be no problem running SDXC
+with Spec 2.0:
+
+High Speed  SD, SDHC and SDXC ---  25MB/s 2.00
+
+> Can you check if the filesystem type on SDXC card
+> is supported by the system software running on OMAP35x.
+
+By that you mean?
+
+I'm using similar script as this one to partition my system:
+http://git.sakoman.com/git/gitweb.cgi?p=meta-sakoman.git;a=blob;f=scripts/mksdcard.sh;h=a817935dba988f6f0f0c3dd534374797a661034e;hb=HEAD
+
+Creating 2 partition boot (FAT32) and rootfs (EXT3):
+mkfs.vfat -F 32 -n boot ${PART1}
+mke2fs -j -L rootfs ${PART2}
+
+
+Just to help you understand a bit more the reason of my question. I'm
+having a MMC error only with (micro)SDXC 64GB ((micro)SDHC 32GB no
+problem so far) and our system is not booting the rootfs.
+
+card mmcblk0: error -110 sending status command, retrying
+... (stuck there infinitely if tune2fs -e continue)
+see my post:
+http://marc.info/?l=linux-omap&m=137764004920777&w=3
+
+Best Regards,
+
+-KA
