@@ -1,89 +1,138 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: core: remove dead function mmc_try_claim_host
-Date: Fri, 20 Sep 2013 09:35:09 +0200
-Message-ID: <CAPDyKFrLpVGp4qmObJ1w2pufDTPQ0ssLRxFpRYHUtMq9Vu9KMA@mail.gmail.com>
-References: <1379640096-32383-1-git-send-email-grundler@chromium.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Subject: [RFC/PATCH] mmc: core: Signal wakeup event at card insert/removal
+Date: Fri, 20 Sep 2013 11:48:43 +0200
+Message-ID: <1379670523-13229-1-git-send-email-ulf.hansson@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-vb0-f50.google.com ([209.85.212.50]:62839 "EHLO
-	mail-vb0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754177Ab3ITHfK (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 20 Sep 2013 03:35:10 -0400
-Received: by mail-vb0-f50.google.com with SMTP id x14so32172vbb.23
-        for <linux-mmc@vger.kernel.org>; Fri, 20 Sep 2013 00:35:09 -0700 (PDT)
-In-Reply-To: <1379640096-32383-1-git-send-email-grundler@chromium.org>
+Received: from mail-lb0-f169.google.com ([209.85.217.169]:40882 "EHLO
+	mail-lb0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754221Ab3ITJsv (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 20 Sep 2013 05:48:51 -0400
+Received: by mail-lb0-f169.google.com with SMTP id z5so405284lbh.28
+        for <linux-mmc@vger.kernel.org>; Fri, 20 Sep 2013 02:48:50 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Grant Grundler <grundler@chromium.org>
-Cc: Chris Ball <cjb@laptop.org>, Seungwon Jeon <tgih.jun@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+To: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, San Mehat <san@google.com>, Colin Cross <ccross@android.com>, John Stultz <john.stultz@linaro.org>, Zoran Markovic <zoran.markovic@linaro.org>
 
-On 20 September 2013 03:21, Grant Grundler <grundler@chromium.org> wrote:
-> cscsope says there are no callers for mmc_try_claim_host in the kernel.
-> No reason to keep it.
->
-> Signed-off-by: Grant Grundler <grundler@chromium.org>
+We want to give user space provision to fully consume a card
+insert/remove event, when the event was caused by a wakeup irq.
 
-Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
+By signaling the wakeup event for a time of 5 s for devices configured
+as wakeup capable, we likely will be prevent a sleep long enough to let
+user space consume the event.
 
-> ---
->  drivers/mmc/core/core.c  | 25 -------------------------
->  include/linux/mmc/core.h |  1 -
->  2 files changed, 26 deletions(-)
->
-> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> index bf18b6b..006ead2 100644
-> --- a/drivers/mmc/core/core.c
-> +++ b/drivers/mmc/core/core.c
-> @@ -918,31 +918,6 @@ int __mmc_claim_host(struct mmc_host *host, atomic_t *abort)
->  EXPORT_SYMBOL(__mmc_claim_host);
->
->  /**
-> - *     mmc_try_claim_host - try exclusively to claim a host
-> - *     @host: mmc host to claim
-> - *
-> - *     Returns %1 if the host is claimed, %0 otherwise.
-> - */
-> -int mmc_try_claim_host(struct mmc_host *host)
-> -{
-> -       int claimed_host = 0;
-> -       unsigned long flags;
-> -
-> -       spin_lock_irqsave(&host->lock, flags);
-> -       if (!host->claimed || host->claimer == current) {
-> -               host->claimed = 1;
-> -               host->claimer = current;
-> -               host->claim_cnt += 1;
-> -               claimed_host = 1;
-> -       }
-> -       spin_unlock_irqrestore(&host->lock, flags);
-> -       if (host->ops->enable && claimed_host && host->claim_cnt == 1)
-> -               host->ops->enable(host);
-> -       return claimed_host;
-> -}
-> -EXPORT_SYMBOL(mmc_try_claim_host);
-> -
-> -/**
->   *     mmc_release_host - release a host
->   *     @host: mmc host to release
->   *
-> diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
-> index da51bec..a00fc49 100644
-> --- a/include/linux/mmc/core.h
-> +++ b/include/linux/mmc/core.h
-> @@ -188,7 +188,6 @@ extern unsigned int mmc_align_data_size(struct mmc_card *, unsigned int);
->
->  extern int __mmc_claim_host(struct mmc_host *host, atomic_t *abort);
->  extern void mmc_release_host(struct mmc_host *host);
-> -extern int mmc_try_claim_host(struct mmc_host *host);
->
->  extern void mmc_get_card(struct mmc_card *card);
->  extern void mmc_put_card(struct mmc_card *card);
-> --
-> 1.8.4
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-kernel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> Please read the FAQ at  http://www.tux.org/lkml/
+To enable this feature, host drivers must thus configure their devices
+as wakeup capable.
+
+This is a reworked implementation of the old wakelocks for the mmc
+subsystem, originally authored by Colin Cross and San Mehat for the
+Android kernel. Zoran Markovic shall also be given cred for recently
+re-trying to upstream this feature.
+
+Cc: San Mehat <san@google.com>
+Cc: Colin Cross <ccross@android.com>
+Cc: John Stultz <john.stultz@linaro.org>
+Cc: Zoran Markovic <zoran.markovic@linaro.org>
+Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+---
+
+This patch has just been compile tested, since I at very moment did not
+have a good board to test it on. I am working on that.
+
+Any help in testing this patch is thus greatly appreciated. While
+testing also don't forget to enable the host device as wakeup capable.
+Use "device_init_wakeup" from the host probe function.
+
+---
+ drivers/mmc/core/core.c |   39 +++++++++++++++++++++++++++------------
+ 1 file changed, 27 insertions(+), 12 deletions(-)
+
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index bf18b6b..3e8229e 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -23,6 +23,7 @@
+ #include <linux/log2.h>
+ #include <linux/regulator/consumer.h>
+ #include <linux/pm_runtime.h>
++#include <linux/pm_wakeup.h>
+ #include <linux/suspend.h>
+ #include <linux/fault-inject.h>
+ #include <linux/random.h>
+@@ -1723,6 +1724,28 @@ void mmc_detach_bus(struct mmc_host *host)
+ 	mmc_bus_put(host);
+ }
+ 
++static void _mmc_detect_change(struct mmc_host *host, unsigned long delay,
++				bool cd_irq)
++{
++#ifdef CONFIG_MMC_DEBUG
++	unsigned long flags;
++	spin_lock_irqsave(&host->lock, flags);
++	WARN_ON(host->removed);
++	spin_unlock_irqrestore(&host->lock, flags);
++#endif
++
++	/*
++	 * If the device is configured as wakeup, we prevent a new sleep for
++	 * 5 s to give provision for user space to consume the event.
++	 */
++	if (cd_irq && !(host->caps & MMC_CAP_NEEDS_POLL) &&
++		device_can_wakeup(mmc_dev(host)))
++		pm_wakeup_event(mmc_dev(host), 5000);
++
++	host->detect_change = 1;
++	mmc_schedule_delayed_work(&host->detect, delay);
++}
++
+ /**
+  *	mmc_detect_change - process change of state on a MMC socket
+  *	@host: host which changed state.
+@@ -1735,16 +1758,8 @@ void mmc_detach_bus(struct mmc_host *host)
+  */
+ void mmc_detect_change(struct mmc_host *host, unsigned long delay)
+ {
+-#ifdef CONFIG_MMC_DEBUG
+-	unsigned long flags;
+-	spin_lock_irqsave(&host->lock, flags);
+-	WARN_ON(host->removed);
+-	spin_unlock_irqrestore(&host->lock, flags);
+-#endif
+-	host->detect_change = 1;
+-	mmc_schedule_delayed_work(&host->detect, delay);
++	_mmc_detect_change(host, delay, true);
+ }
+-
+ EXPORT_SYMBOL(mmc_detect_change);
+ 
+ void mmc_init_erase(struct mmc_card *card)
+@@ -2423,7 +2438,7 @@ int mmc_detect_card_removed(struct mmc_host *host)
+ 			 * rescan handle the card removal.
+ 			 */
+ 			cancel_delayed_work(&host->detect);
+-			mmc_detect_change(host, 0);
++			_mmc_detect_change(host, 0, false);
+ 		}
+ 	}
+ 
+@@ -2505,7 +2520,7 @@ void mmc_start_host(struct mmc_host *host)
+ 		mmc_power_off(host);
+ 	else
+ 		mmc_power_up(host);
+-	mmc_detect_change(host, 0);
++	_mmc_detect_change(host, 0, false);
+ }
+ 
+ void mmc_stop_host(struct mmc_host *host)
+@@ -2724,7 +2739,7 @@ int mmc_pm_notify(struct notifier_block *notify_block,
+ 		spin_lock_irqsave(&host->lock, flags);
+ 		host->rescan_disable = 0;
+ 		spin_unlock_irqrestore(&host->lock, flags);
+-		mmc_detect_change(host, 0);
++		_mmc_detect_change(host, 0, false);
+ 
+ 	}
+ 
+-- 
+1.7.9.5
+
