@@ -1,58 +1,69 @@
-From: Ben Hutchings <bhutchings-s/n/eUQHGBpZroRs9YW3xA@public.gmane.org>
-Subject: Re: [PATCH 01/51] DMA-API: provide a helper to set both DMA and
- coherent DMA masks
-Date: Fri, 20 Sep 2013 02:21:37 +0100
-Message-ID: <1379640097.2500.4.camel@bwh-desktop.uk.level5networks.com>
-References: <20130919212235.GD12758@n2100.arm.linux.org.uk>
-	 <E1VMlja-0007fA-HU@rmk-PC.arm.linux.org.uk>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <E1VMlja-0007fA-HU-eh5Bv4kxaXIANfyc6IWni62ZND6+EDdj@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Russell King <rmk+kernel-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>
-Cc: alsa-devel-K7yf7f+aM1XWsZ/bQMPhNw@public.gmane.org, b43-dev-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, devel-gWbeCf7V1WCQmaza687I9mD2FQJk+8+b@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, dri-devel-PD4FTy7X32lNgt0PjOBp9y5qC8QIuHrW@public.gmane.org, e1000-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-crypto-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-fbdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-ide-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-media-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-nvme-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linuxppc-dev-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org, linux-samsung-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-scsi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-usb-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, netdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Solarflare linux maintainers <linux-net-drivers-s/n/eUQHGBpZroRs9YW3xA@public.gmane.org>, uclinux-dist-devel-ZG0+EudsQA8dtHy/vicBwGD2FQJk+8+b@public.gmane.org, Rob Landley <rob-VoJi6FS/r0vR7s880joybQ@public.gmane.org>, Vinod Koul <vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Dan
+From: Grant Grundler <grundler@chromium.org>
+Subject: [PATCH] mmc: core: remove dead function mmc_try_claim_host
+Date: Thu, 19 Sep 2013 18:21:36 -0700
+Message-ID: <1379640096-32383-1-git-send-email-grundler@chromium.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>, Seungwon Jeon <tgih.jun@samsung.com>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Grant Grundler <grundler@chromium.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Thu, 2013-09-19 at 22:25 +0100, Russell King wrote:
-> Provide a helper to set both the DMA and coherent DMA masks to the
-> same value - this avoids duplicated code in a number of drivers,
-> sometimes with buggy error handling, and also allows us identify
-> which drivers do things differently.
-> 
-> Signed-off-by: Russell King <rmk+kernel-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>
-> ---
->  Documentation/DMA-API-HOWTO.txt |   37 ++++++++++++++++++++++---------------
->  Documentation/DMA-API.txt       |    8 ++++++++
->  include/linux/dma-mapping.h     |   14 ++++++++++++++
->  3 files changed, 44 insertions(+), 15 deletions(-)
-> 
-> diff --git a/Documentation/DMA-API-HOWTO.txt b/Documentation/DMA-API-HOWTO.txt
-> index 14129f1..5e98303 100644
-> --- a/Documentation/DMA-API-HOWTO.txt
-> +++ b/Documentation/DMA-API-HOWTO.txt
-[...]
-> -dma_set_coherent_mask() will always be able to set the same or a
-> -smaller mask as dma_set_mask(). However for the rare case that a
-> +The coherent coherent mask will always be able to set the same or a
-> +smaller mask as the streaming mask. However for the rare case that a
-[...]
+cscsope says there are no callers for mmc_try_claim_host in the kernel.
+No reason to keep it.
 
-The new wording doesn't make sense; a mask doesn't set itself.  I would
-suggest:
+Signed-off-by: Grant Grundler <grundler@chromium.org>
+---
+ drivers/mmc/core/core.c  | 25 -------------------------
+ include/linux/mmc/core.h |  1 -
+ 2 files changed, 26 deletions(-)
 
-"The coherent mask can always be set to the same or a smaller mask than
-the streaming mask."
-
-Ben.
-
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index bf18b6b..006ead2 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -918,31 +918,6 @@ int __mmc_claim_host(struct mmc_host *host, atomic_t *abort)
+ EXPORT_SYMBOL(__mmc_claim_host);
+ 
+ /**
+- *	mmc_try_claim_host - try exclusively to claim a host
+- *	@host: mmc host to claim
+- *
+- *	Returns %1 if the host is claimed, %0 otherwise.
+- */
+-int mmc_try_claim_host(struct mmc_host *host)
+-{
+-	int claimed_host = 0;
+-	unsigned long flags;
+-
+-	spin_lock_irqsave(&host->lock, flags);
+-	if (!host->claimed || host->claimer == current) {
+-		host->claimed = 1;
+-		host->claimer = current;
+-		host->claim_cnt += 1;
+-		claimed_host = 1;
+-	}
+-	spin_unlock_irqrestore(&host->lock, flags);
+-	if (host->ops->enable && claimed_host && host->claim_cnt == 1)
+-		host->ops->enable(host);
+-	return claimed_host;
+-}
+-EXPORT_SYMBOL(mmc_try_claim_host);
+-
+-/**
+  *	mmc_release_host - release a host
+  *	@host: mmc host to release
+  *
+diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
+index da51bec..a00fc49 100644
+--- a/include/linux/mmc/core.h
++++ b/include/linux/mmc/core.h
+@@ -188,7 +188,6 @@ extern unsigned int mmc_align_data_size(struct mmc_card *, unsigned int);
+ 
+ extern int __mmc_claim_host(struct mmc_host *host, atomic_t *abort);
+ extern void mmc_release_host(struct mmc_host *host);
+-extern int mmc_try_claim_host(struct mmc_host *host);
+ 
+ extern void mmc_get_card(struct mmc_card *card);
+ extern void mmc_put_card(struct mmc_card *card);
 -- 
-Ben Hutchings, Staff Engineer, Solarflare
-Not speaking for my employer; that's the marketing department's job.
-They asked us to note that Solarflare product names are trademarked.
-
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+1.8.4
