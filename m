@@ -1,46 +1,83 @@
-From: Dirk Behme <dirk.behme@gmail.com>
-Subject: Re: Adding aliases to mmc
-Date: Fri, 20 Sep 2013 18:37:24 +0200
-Message-ID: <523C79C4.1070308@gmail.com>
-References: <CAOMZO5CJ36JHJMaiG3QVdtpBoWd_ZyHQuRTrKHz4bLP39gpJtQ@mail.gmail.com> <5239C40C.9030503@wwwdotorg.org> <5239DC65.3080803@gmail.com> <5239DF55.8010308@wwwdotorg.org> <523A8A08.2060508@gmail.com> <523C7231.7040701@wwwdotorg.org>
+From: Mark Brown <broonie@kernel.org>
+Subject: Re: [PATCH 28/51] DMA-API: sound: fix dma mask handling in a lot of
+ drivers
+Date: Fri, 20 Sep 2013 17:36:54 +0100
+Message-ID: <20130920163654.GN21013@sirena.org.uk>
+References: <20130919212235.GD12758@n2100.arm.linux.org.uk>
+ <E1VMm9m-0007ij-ER@rmk-PC.arm.linux.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bk0-f41.google.com ([209.85.214.41]:33578 "EHLO
-	mail-bk0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752228Ab3ITQh0 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 20 Sep 2013 12:37:26 -0400
-In-Reply-To: <523C7231.7040701@wwwdotorg.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: multipart/mixed; boundary="===============4406136581201344290=="
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <E1VMm9m-0007ij-ER@rmk-PC.arm.linux.org.uk>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Russell King <rmk+kernel@arm.linux.org.uk>
+Cc: alsa-devel@alsa-project.org, linux-doc@vger.kernel.org, Takashi Iwai <tiwai@suse.de>, linux-mmc@vger.kernel.org, linux-fbdev@vger.kernel.org, linux-nvme@lists.infradead.org, Jaroslav Kysela <perex@perex.cz>, Peter Ujfalusi <peter.ujfalusi@ti.com>, linux-ide@vger.kernel.org, devel@driverdev.osuosl.org, linux-samsung-soc@vger.kernel.org, linux-scsi@vger.kernel.org, e1000-devel@lists.sourceforge.net, b43-dev@lists.infradead.org, linux-media@vger.kernel.org, devicetree@vger.kernel.org, Haojian Zhuang <haojian.zhuang@gmail.com>, Timur Tabi <timur@tabi.org>, Kukjin Kim <kgene.kim@samsung.com>, dri-devel@lists.freedesktop.org, Ben Dooks <ben-linux@fluff.org>, linux-tegra@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Solarflare linux maintainers <linux-net-drivers@solarflare.com>, Eric Miao <eric.y.miao@gmail.com>, Sangbeom Kim <sbkim73@samsu>
 List-Id: linux-mmc@vger.kernel.org
-To: Stephen Warren <swarren@wwwdotorg.org>
-Cc: Fabio Estevam <festevam@gmail.com>, linux-mmc@vger.kernel.org, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Sascha Hauer <kernel@pengutronix.de>
 
-Am 20.09.2013 18:05, schrieb Stephen Warren:
-> On 09/18/2013 11:22 PM, Dirk Behme wrote:
+
+--===============4406136581201344290==
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="NbUNL4d9A9kY58qh"
+Content-Disposition: inline
+
+
+--NbUNL4d9A9kY58qh
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
+
+On Thu, Sep 19, 2013 at 10:53:02PM +0100, Russell King wrote:
+> This code sequence is unsafe in modules:
+>=20
+> static u64 mask =3D DMA_BIT_MASK(something);
 > ...
->> If you have an embedded system were you just care a little about boot
->> time you don't want to do anything like U-Boot's "part uuid" every time
->> you boot. Or even worse, you just have a minimalistic boot loader (e.g.
->> U-Boot's SPL) which doesn't know anything about UUIDs and file systems.
->>
->> As mentioned above, no I don't think UUIDs work for production embedded
->> systems.
->
-> As I said above, whatever generates the filesystem image can easily
-> embed the appropriate UUID in the system's boot scripts or bootloader
-> environment. There's no need to run the "part" command at run-time if
-> there's a more appropriate flow for your situation.
+> 	if (!dev->dma_mask)
+> 		dev->dma_mask =3D &mask;
 
-Using a simple boot loader as an example, there are no boot scripts or 
-boot loader environment. The only thing the boot loader does is 
-loading the device tree and the kernel into RAM. Where do you want to 
-embed an UUID in such a product?
+Acked-by: Mark Brown <broonie@linaro.org>
 
-To my understanding, the UUID is different for each SD card/eMMC, correct?
+--NbUNL4d9A9kY58qh
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
 
-Best regards
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.21 (GNU/Linux)
 
-Dirk
+iQIcBAEBAgAGBQJSPHmjAAoJELSic+t+oim9WB4QAINsf282vDwWmQYHGXTeorHo
+q0pJ/9bTwBrSE0KzOK9H6UvL7oxCgzMPOT8RiSjWcdEXX/FavpH1TCf+ETkaYyEA
+NaPvO/uUV/99qWhM/PJQvtv4yxhIR7ENiZKywUuFnWQuc44yGUWBLK8ooA4xXtme
+WMcWyy7SMMcP/+9eBd9aNe1FPYFirsqSrrCpWSR/fD+TWFKMB6HG+OZGNYRFMrRm
+Xet5sWMGwzBiL453M0ujAEHKd/g4VOkweCydEq+2Rt2am6ph+SrMuoQvCDZ1bvbh
+71nyYA+j2xNy8jb7AA9PukWoeXyAI0xRY8zh939Uvdxf4SPUIVgw9wJE5rMRGoT5
+k4We/z2A4m1DGCtg1JQN86HAe7jv3YlGLoPOhsrOnOEV55VnXIz0Lm9x3HjTNfvG
+LcJXBGeHmU3Jvj3JEpA57YDbOhpwx0klK7RS5v6BjIJrJUSwjATqt1WQVr528HDp
+rXQpUqxUL3KObdlA5TYweR2I0KxWe47rw612XGqhRiI+equSdTDP770QsO1nXlsA
+qCfn3Gh7t+hyB3yFZUquWEXwKVv0YMh3Ds/bR2RtZluSl3SzM9n/Dp45w6SMu1LN
+oSpxUS7KNzTPXQp0kns7dDFnJJWXid7mUScjK4rc5pSyBF4NSEqJsmqHm0whd/qL
+uR8J7AFq8DkXx3g+/4gf
+=H53r
+-----END PGP SIGNATURE-----
 
+--NbUNL4d9A9kY58qh--
+
+
+--===============4406136581201344290==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+
+_______________________________________________
+linux-arm-kernel mailing list
+linux-arm-kernel@lists.infradead.org
+http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
+
+--===============4406136581201344290==--
