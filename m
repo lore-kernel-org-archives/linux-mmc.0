@@ -1,233 +1,102 @@
-From: Simon Horman <horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org>
-Subject: Re: [PATCH] ARM: shmobile: update SDHI DT compatibility string to
- the <unit>-<soc> format
-Date: Sat, 21 Sep 2013 10:14:09 -0700
-Message-ID: <20130921171409.GA6863@verge.net.au>
-References: <Pine.LNX.4.64.1308291650120.3786@axis700.grange>
- <1621893.Re68yLczyK@avalon>
- <20130905060102.GH14960@verge.net.au>
- <86ob87tpsi.fsf@void.printf.net>
+From: Christian Daudt <bcm@fixthebug.org>
+Subject: Re: [PATCH] rename ARCH_BCM to ARCH_BCM_MOBILE
+Date: Sat, 21 Sep 2013 12:16:30 -0700
+Message-ID: <CAEPRUYq_btMrBeyUtoCVA69yRpc3kn-zpuykUdp9zRxZ0kERDg@mail.gmail.com>
+References: <1379718260-24349-1-git-send-email-csd@broadcom.com>
+	<CAOesGMjViyCa+FhNmrESc+WmnW+=wzsqBpj=jHeuCyobAmMojg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <86ob87tpsi.fsf-zkTaxWjgBN6ccd+RBA7C9g@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>
-Cc: Laurent Pinchart <laurent.pinchart-ryLnwIuWjnjg/C1BVhZhaw@public.gmane.org>, Guennadi Liakhovetski <g.liakhovetski-Mmb7MZpHnFY@public.gmane.org>, linux-sh-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Olof Johansson <olof-nZhT3qVonbNeoWH0uzbU5w@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Magnus Damm <magnus.damm-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-ea0-f169.google.com ([209.85.215.169]:41595 "EHLO
+	mail-ea0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750899Ab3IUTQb (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 21 Sep 2013 15:16:31 -0400
+Received: by mail-ea0-f169.google.com with SMTP id k11so924021eaj.28
+        for <linux-mmc@vger.kernel.org>; Sat, 21 Sep 2013 12:16:30 -0700 (PDT)
+In-Reply-To: <CAOesGMjViyCa+FhNmrESc+WmnW+=wzsqBpj=jHeuCyobAmMojg@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Olof Johansson <olof@lixom.net>
+Cc: Christian Daudt <csd@broadcom.com>, Arnd Bergmann <arnd@arndb.de>, Rob Herring <rob.herring@calxeda.com>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Stephen Warren <swarren@wwwdotorg.org>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Russell King <linux@arm.linux.org.uk>, Daniel Lezcano <daniel.lezcano@linaro.org>, Thomas Gleixner <tglx@linutronix.de>, Chris Ball <cjb@laptop.org>, Domenico Andreoli <cavokz@gmail.com>, Hauke Mehrtens <hauke@hauke-m.de>, Matt Porter <matt.porter@linaro.org>, Alex Elder <alex.elder@linaro.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 
-On Thu, Sep 05, 2013 at 01:29:33PM +0100, Chris Ball wrote:
-> Hi,
-> 
-> On Thu, Sep 05 2013, Simon Horman wrote:
-> >> > Ok, the "no real products" is an assumption, that Laurent and Simon kind
-> >> > of agreed upon, so, I'm using it here to avoid having to carry old
-> >> > compatibility strings with us around. If anyone has other information -
-> >> > please shout. Otherwise, I think, it would be the easiest for Chris to ack
-> >> > this and for Simon to pull this via the ARM tree for late 3.12 (possibly,
-> >> > post -rc1) inclusion.
+[plain-text resend]
+On Fri, Sep 20, 2013 at 5:23 PM, Olof Johansson <olof@lixom.net> wrote:
+>
+> On Fri, Sep 20, 2013 at 4:04 PM, Christian Daudt <csd@broadcom.com> wrote:
+> > Currently ARCH_BCM has been used for Broadcom
+> > Mobile V7 based SoCs. In order to allow other Broadcom
+> > SoCs to also use mach-bcm directory and files, this patch
+> > renames the original ARCH_BCM to ARCH_BCM_MOBILE, and
+> > uses ARCH_BCM to define any Broadcom chip residing
+> > in mach-bcm directory.
 > >
-> > Thanks, I believe that is a good plan.
+> > Signed-off-by: Christian Daudt <csd@broadcom.com>
 > >
-> > Chris, could we get an Ack?
-> 
-> Acked-by: Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>
+> > diff --git a/arch/arm/boot/dts/Makefile b/arch/arm/boot/dts/Makefile
+> > index cc0f1fb..dd00e22 100644
+> > --- a/arch/arm/boot/dts/Makefile
+> > +++ b/arch/arm/boot/dts/Makefile
+> > @@ -42,8 +42,6 @@ dtb-$(CONFIG_ARCH_AT91)       += sama5d34ek.dtb
+> >  dtb-$(CONFIG_ARCH_AT91)        += sama5d35ek.dtb
+> >
+> >  dtb-$(CONFIG_ARCH_BCM2835) += bcm2835-rpi-b.dtb
+> > -dtb-$(CONFIG_ARCH_BCM) += bcm11351-brt.dtb \
+> > -       bcm28155-ap.dtb
+> >  dtb-$(CONFIG_ARCH_DAVINCI) += da850-enbw-cmc.dtb \
+> >         da850-evm.dtb
+> >  dtb-$(CONFIG_ARCH_DOVE) += dove-cm-a510.dtb \
+> > @@ -101,6 +99,8 @@ dtb-$(CONFIG_ARCH_KIRKWOOD) += kirkwood-cloudbox.dtb \
+> >         kirkwood-ts219-6282.dtb \
+> >         kirkwood-openblocks_a6.dtb
+> >  dtb-$(CONFIG_ARCH_MARCO) += marco-evb.dtb
+> > +dtb-$(CONFIG_ARCH_BCM_MOBILE) += bcm11351-brt.dtb \
+> > +       bcm28155-ap.dtb
+>
+> This reordering looks off. The entries should be alphabetically
+> ordered, so if anything it should move up above BCM2835.
 
-Thanks, and sorry for the delay.
+Heh. I started the rename with ARCH_MOBiLE_BCM and later renamed to
+ARCH_BCM_MOBILE. Forgot to move it up to reflect the change in
+ordering. Fixed.
 
-I have queued up the following, And I will push it either in the next
-half hour or some time next week - I have to jump on a plane shortly.
+>
+>
+>
+> > diff --git a/drivers/clocksource/Makefile b/drivers/clocksource/Makefile
+> > index 704d6d3..4207ab4 100644
+> > --- a/drivers/clocksource/Makefile
+> > +++ b/drivers/clocksource/Makefile
+> > @@ -25,7 +25,7 @@ obj-$(CONFIG_SUN4I_TIMER)     += sun4i_timer.o
+> >  obj-$(CONFIG_ARCH_TEGRA)       += tegra20_timer.o
+> >  obj-$(CONFIG_VT8500_TIMER)     += vt8500_timer.o
+> >  obj-$(CONFIG_ARCH_NSPIRE)      += zevio-timer.o
+> > -obj-$(CONFIG_ARCH_BCM)         += bcm_kona_timer.o
+> > +obj-$(CONFIG_ARCH_BCM_MOBILE)  += bcm_kona_timer.o
+> >  obj-$(CONFIG_CADENCE_TTC_TIMER)        += cadence_ttc_timer.o
+> >  obj-$(CONFIG_CLKSRC_EXYNOS_MCT)        += exynos_mct.o
+> >  obj-$(CONFIG_CLKSRC_SAMSUNG_PWM)       += samsung_pwm_timer.o
+> > diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+> > index 7fc5099..7e89650 100644
+> > --- a/drivers/mmc/host/Kconfig
+> > +++ b/drivers/mmc/host/Kconfig
+> > @@ -251,7 +251,7 @@ config MMC_SDHCI_S3C_DMA
+> >
+> >  config MMC_SDHCI_BCM_KONA
+> >         tristate "SDHCI support on Broadcom KONA platform"
+> > -       depends on ARCH_BCM
+> > +       depends on ARCH_BCM_MOBILE
+> >         select MMC_SDHCI_PLTFM
+> >         help
+> >           This selects the Broadcom Kona Secure Digital Host Controller
+>
+> Since nothing breaks (i.e. ARCH_BCM is still there, and will be
+> enabled for any ARCH_BCM_MOBILE platform), the above two can go
+> through the corresponding subsystem trees as separate patches.
+>
+I was thinking of doing that, but it will actually break if the
+changes to drivers show up before the changes to mach-bcm because the
+drivers will no longer be compiled. I'll split it and keep the
+nag-ometer set to high to ensure their inclusion then...
 
-Guennadi, it seems that SDHI (and MMCIF) support form
-armadillo800eva-reference never made it into my tree.  And I have dropped
-r8a7740.dtsi changes from the patch below accordingly.  Would you care to
-repost that series with the compatibility string updated?
-
-
-From: Guennadi Liakhovetski <g.liakhovetski-Mmb7MZpHnFY@public.gmane.org>
-
-[PATCH] ARM: shmobile: update SDHI DT compatibility string to the <unit>-<soc> format
-
-Currently DT compatibility strings of both types can be found in the kernel
-sources: <unit>-<soc> and <soc>-<unit>, whereas a unique format should be
-followed and the former one is preferred. This patch converts the SDHI
-MMC driver and its users to the common standard. This is safe for now, since
-ATM no real products are using this driver with DT.
-
-Signed-off-by: Guennadi Liakhovetski <g.liakhovetski+renesas-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Acked-by: Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>
-[Removed r8a7740.dtsi portion as it is not applicable]
-Signed-off-by: Simon Horman <horms+renesas-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org>
----
- Documentation/devicetree/bindings/mmc/tmio_mmc.txt | 17 ++++++++++-------
- arch/arm/boot/dts/r8a73a4.dtsi                     |  6 +++---
- arch/arm/boot/dts/r8a7790.dtsi                     |  8 ++++----
- arch/arm/boot/dts/sh73a0.dtsi                      |  6 +++---
- drivers/mmc/host/sh_mobile_sdhi.c                  | 16 ++++++++--------
- 5 files changed, 28 insertions(+), 25 deletions(-)
-
-diff --git a/Documentation/devicetree/bindings/mmc/tmio_mmc.txt b/Documentation/devicetree/bindings/mmc/tmio_mmc.txt
-index df204e1..6a2a116 100644
---- a/Documentation/devicetree/bindings/mmc/tmio_mmc.txt
-+++ b/Documentation/devicetree/bindings/mmc/tmio_mmc.txt
-@@ -9,12 +9,15 @@ compulsory and any optional properties, common to all SD/MMC drivers, as
- described in mmc.txt, can be used. Additionally the following tmio_mmc-specific
- optional bindings can be used.
- 
-+Required properties:
-+- compatible:	"renesas,sdhi-shmobile" - a generic sh-mobile SDHI unit
-+		"renesas,sdhi-sh7372" - SDHI IP on SH7372 SoC
-+		"renesas,sdhi-sh73a0" - SDHI IP on SH73A0 SoC
-+		"renesas,sdhi-r8a73a4" - SDHI IP on R8A73A4 SoC
-+		"renesas,sdhi-r8a7740" - SDHI IP on R8A7740 SoC
-+		"renesas,sdhi-r8a7778" - SDHI IP on R8A7778 SoC
-+		"renesas,sdhi-r8a7779" - SDHI IP on R8A7779 SoC
-+		"renesas,sdhi-r8a7790" - SDHI IP on R8A7790 SoC
-+
- Optional properties:
- - toshiba,mmc-wrprotect-disable: write-protect detection is unavailable
--
--When used with Renesas SDHI hardware, the following compatibility strings
--configure various model-specific properties:
--
--"renesas,sh7372-sdhi":	(default) compatible with SH7372
--"renesas,r8a7740-sdhi":	compatible with R8A7740: certain MMC/SD commands have to
--			wait for the interface to become idle.
-diff --git a/arch/arm/boot/dts/r8a73a4.dtsi b/arch/arm/boot/dts/r8a73a4.dtsi
-index 6c26caa..658fcc5 100644
---- a/arch/arm/boot/dts/r8a73a4.dtsi
-+++ b/arch/arm/boot/dts/r8a73a4.dtsi
-@@ -193,7 +193,7 @@
- 	};
- 
- 	sdhi0: sdhi@ee100000 {
--		compatible = "renesas,r8a73a4-sdhi";
-+		compatible = "renesas,sdhi-r8a73a4";
- 		reg = <0 0xee100000 0 0x100>;
- 		interrupt-parent = <&gic>;
- 		interrupts = <0 165 4>;
-@@ -202,7 +202,7 @@
- 	};
- 
- 	sdhi1: sdhi@ee120000 {
--		compatible = "renesas,r8a73a4-sdhi";
-+		compatible = "renesas,sdhi-r8a73a4";
- 		reg = <0 0xee120000 0 0x100>;
- 		interrupt-parent = <&gic>;
- 		interrupts = <0 166 4>;
-@@ -211,7 +211,7 @@
- 	};
- 
- 	sdhi2: sdhi@ee140000 {
--		compatible = "renesas,r8a73a4-sdhi";
-+		compatible = "renesas,sdhi-r8a73a4";
- 		reg = <0 0xee140000 0 0x100>;
- 		interrupt-parent = <&gic>;
- 		interrupts = <0 167 4>;
-diff --git a/arch/arm/boot/dts/r8a7790.dtsi b/arch/arm/boot/dts/r8a7790.dtsi
-index 3b879e7..885f9f4 100644
---- a/arch/arm/boot/dts/r8a7790.dtsi
-+++ b/arch/arm/boot/dts/r8a7790.dtsi
-@@ -152,7 +152,7 @@
- 	};
- 
- 	sdhi0: sdhi@ee100000 {
--		compatible = "renesas,r8a7790-sdhi";
-+		compatible = "renesas,sdhi-r8a7790";
- 		reg = <0 0xee100000 0 0x100>;
- 		interrupt-parent = <&gic>;
- 		interrupts = <0 165 4>;
-@@ -161,7 +161,7 @@
- 	};
- 
- 	sdhi1: sdhi@ee120000 {
--		compatible = "renesas,r8a7790-sdhi";
-+		compatible = "renesas,sdhi-r8a7790";
- 		reg = <0 0xee120000 0 0x100>;
- 		interrupt-parent = <&gic>;
- 		interrupts = <0 166 4>;
-@@ -170,7 +170,7 @@
- 	};
- 
- 	sdhi2: sdhi@ee140000 {
--		compatible = "renesas,r8a7790-sdhi";
-+		compatible = "renesas,sdhi-r8a7790";
- 		reg = <0 0xee140000 0 0x100>;
- 		interrupt-parent = <&gic>;
- 		interrupts = <0 167 4>;
-@@ -179,7 +179,7 @@
- 	};
- 
- 	sdhi3: sdhi@ee160000 {
--		compatible = "renesas,r8a7790-sdhi";
-+		compatible = "renesas,sdhi-r8a7790";
- 		reg = <0 0xee160000 0 0x100>;
- 		interrupt-parent = <&gic>;
- 		interrupts = <0 168 4>;
-diff --git a/arch/arm/boot/dts/sh73a0.dtsi b/arch/arm/boot/dts/sh73a0.dtsi
-index ba59a58..3955c76 100644
---- a/arch/arm/boot/dts/sh73a0.dtsi
-+++ b/arch/arm/boot/dts/sh73a0.dtsi
-@@ -196,7 +196,7 @@
- 	};
- 
- 	sdhi0: sdhi@ee100000 {
--		compatible = "renesas,r8a7740-sdhi";
-+		compatible = "renesas,sdhi-r8a7740";
- 		reg = <0xee100000 0x100>;
- 		interrupt-parent = <&gic>;
- 		interrupts = <0 83 4
-@@ -208,7 +208,7 @@
- 
- 	/* SDHI1 and SDHI2 have no CD pins, no need for CD IRQ */
- 	sdhi1: sdhi@ee120000 {
--		compatible = "renesas,r8a7740-sdhi";
-+		compatible = "renesas,sdhi-r8a7740";
- 		reg = <0xee120000 0x100>;
- 		interrupt-parent = <&gic>;
- 		interrupts = <0 88 4
-@@ -219,7 +219,7 @@
- 	};
- 
- 	sdhi2: sdhi@ee140000 {
--		compatible = "renesas,r8a7740-sdhi";
-+		compatible = "renesas,sdhi-r8a7740";
- 		reg = <0xee140000 0x100>;
- 		interrupt-parent = <&gic>;
- 		interrupts = <0 104 4
-diff --git a/drivers/mmc/host/sh_mobile_sdhi.c b/drivers/mmc/host/sh_mobile_sdhi.c
-index 87ed3fb..f344659 100644
---- a/drivers/mmc/host/sh_mobile_sdhi.c
-+++ b/drivers/mmc/host/sh_mobile_sdhi.c
-@@ -113,14 +113,14 @@ static const struct sh_mobile_sdhi_ops sdhi_ops = {
- };
- 
- static const struct of_device_id sh_mobile_sdhi_of_match[] = {
--	{ .compatible = "renesas,shmobile-sdhi" },
--	{ .compatible = "renesas,sh7372-sdhi" },
--	{ .compatible = "renesas,sh73a0-sdhi", .data = &sh_mobile_sdhi_of_cfg[0], },
--	{ .compatible = "renesas,r8a73a4-sdhi", .data = &sh_mobile_sdhi_of_cfg[0], },
--	{ .compatible = "renesas,r8a7740-sdhi", .data = &sh_mobile_sdhi_of_cfg[0], },
--	{ .compatible = "renesas,r8a7778-sdhi", .data = &sh_mobile_sdhi_of_cfg[0], },
--	{ .compatible = "renesas,r8a7779-sdhi", .data = &sh_mobile_sdhi_of_cfg[0], },
--	{ .compatible = "renesas,r8a7790-sdhi", .data = &sh_mobile_sdhi_of_cfg[0], },
-+	{ .compatible = "renesas,sdhi-shmobile" },
-+	{ .compatible = "renesas,sdhi-sh7372" },
-+	{ .compatible = "renesas,sdhi-sh73a0", .data = &sh_mobile_sdhi_of_cfg[0], },
-+	{ .compatible = "renesas,sdhi-r8a73a4", .data = &sh_mobile_sdhi_of_cfg[0], },
-+	{ .compatible = "renesas,sdhi-r8a7740", .data = &sh_mobile_sdhi_of_cfg[0], },
-+	{ .compatible = "renesas,sdhi-r8a7778", .data = &sh_mobile_sdhi_of_cfg[0], },
-+	{ .compatible = "renesas,sdhi-r8a7779", .data = &sh_mobile_sdhi_of_cfg[0], },
-+	{ .compatible = "renesas,sdhi-r8a7790", .data = &sh_mobile_sdhi_of_cfg[0], },
- 	{},
- };
- MODULE_DEVICE_TABLE(of, sh_mobile_sdhi_of_match);
--- 
-1.8.4
-
-
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+ Thanks,
+   csd
