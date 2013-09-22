@@ -1,119 +1,35 @@
-From: Dirk Behme <dirk.behme-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: Adding aliases to mmc
-Date: Sun, 22 Sep 2013 08:48:43 +0200
-Message-ID: <523E92CB.1080302@gmail.com>
-References: <CAOMZO5CJ36JHJMaiG3QVdtpBoWd_ZyHQuRTrKHz4bLP39gpJtQ@mail.gmail.com> <CAOMZO5AT3bduZ0=EtWHuHVg6tSWrdr_ZjX5PLu815o0qgkeSig@mail.gmail.com>
+From: Grant Likely <grant.likely@linaro.org>
+Subject: Re: [PATCH 22/51] DMA-API: amba: get rid of separate dma_mask
+Date: Sun, 22 Sep 2013 07:18:28 -0500
+Message-ID: <20130922121828.58F02C42373@trevor.secretlab.ca>
+References: <20130919212235.GD12758@n2100.arm.linux.org.uk>
+ <E1VMm3x-0007hp-Lv@rmk-PC.arm.linux.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <CAOMZO5AT3bduZ0=EtWHuHVg6tSWrdr_ZjX5PLu815o0qgkeSig-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Fabio Estevam <festevam-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Sascha Hauer <kernel-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org>, Michael Olbrich <m.olbrich-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org>
+Return-path: <linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org>
+In-Reply-To: <E1VMm3x-0007hp-Lv@rmk-PC.arm.linux.org.uk>
+List-Unsubscribe: <https://lists.ozlabs.org/options/linuxppc-dev>,
+ <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=unsubscribe>
+List-Archive: <http://lists.ozlabs.org/pipermail/linuxppc-dev/>
+List-Post: <mailto:linuxppc-dev@lists.ozlabs.org>
+List-Help: <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=help>
+List-Subscribe: <https://lists.ozlabs.org/listinfo/linuxppc-dev>,
+ <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=subscribe>
+Errors-To: linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org
+Sender: "Linuxppc-dev"
+ <linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org>
+To: Russell King <rmk+kernel@arm.linux.org.uk>, alsa-devel@alsa-project.org, b43-dev@lists.infradead.org, devel@driverdev.osuosl.org, devicetree@vger.kernel.org, dri-devel@lists.freedesktop.org, e1000-devel@lists.sourceforge.net, linux-arm-kernel@lists.infradead.org, linux-crypto@vger.kernel.org, linux-doc@vger.kernel.org, linux-fbdev@vger.kernel.org, linux-ide@vger.kernel.org, linux-media@vger.kernel.org, linux-mmc@vger.kernel.org, linux-nvme@lists.infradead.org, linux-omap@vger.kernel.org, linuxppc-dev@lists.ozlabs.org, linux-samsung-soc@vger.kernel.org, linux-scsi@vger.kernel.org, linux-tegra@vger.kernel.org, linux-usb@vger.kernel.org, linux-wireless@vger.kernel.org, netdev@vger.kernel.org, Solarflare linux maintainers <linux-net-drivers@solarflare.com>, uclinux-dist-devel@blackfin.uclinux.org
+Cc: Rob Herring <rob.herring@calxeda.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Fabio,
+On Thu, 19 Sep 2013 22:47:01 +0100, Russell King <rmk+kernel@arm.linux.org.uk> wrote:
+> AMBA Primecell devices always treat streaming and coherent DMA exactly
+> the same, so there's no point in having the masks separated.
+> 
+> Signed-off-by: Russell King <rmk+kernel@arm.linux.org.uk>
 
-Am 18.09.2013 02:06, schrieb Fabio Estevam:
-> Hi Dirk,
->
-> On Tue, Sep 17, 2013 at 3:04 PM, Fabio Estevam <festevam-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
->> Hi Dirk,
->>
->> I have adapted your patch at:
->> http://lists.infradead.org/pipermail/linux-arm-kernel/2012-July/111022.html
->>
->> and tested it on 3.12-rc1 on a mx6qsabresd board.
->>
->> Do you have plans to submit it? Maybe as a RFC?
->>
->> It solves the mmcblkX order issue on my tests and it would be nice we
->> could have this problem addressed.
->
-> I simplied your patch a bit:
->
-> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-> index 1a3163f..94f842b 100644
-> --- a/drivers/mmc/card/block.c
-> +++ b/drivers/mmc/card/block.c
-> @@ -2026,7 +2026,7 @@ static struct mmc_blk_data
-> *mmc_blk_alloc_req(struct mmc_card *card,
->       struct mmc_blk_data *md;
->       int devidx, ret;
->
-> -    devidx = find_first_zero_bit(dev_use, max_devices);
-> +    devidx = find_next_zero_bit(dev_use, max_devices, card->host->devidx);
->       if (devidx >= max_devices)
->           return ERR_PTR(-ENOSPC);
->       __set_bit(devidx, dev_use);
-> @@ -2044,7 +2044,8 @@ static struct mmc_blk_data
-> *mmc_blk_alloc_req(struct mmc_card *card,
->        * index anymore so we keep track of a name index.
->        */
->       if (!subname) {
-> -        md->name_idx = find_first_zero_bit(name_use, max_devices);
-> +        md->name_idx = find_next_zero_bit(name_use, max_devices,
-> +                card->host->devidx);
->           __set_bit(md->name_idx, name_use);
->       } else
->           md->name_idx = ((struct mmc_blk_data *)
-> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c
-> b/drivers/mmc/host/sdhci-esdhc-imx.c
-> index abc8cf0..e11a6af 100644
-> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
-> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-> @@ -524,8 +524,9 @@ static int sdhci_esdhc_imx_probe(struct
-> platform_device *pdev)
->       struct sdhci_pltfm_host *pltfm_host;
->       struct sdhci_host *host;
->       struct esdhc_platform_data *boarddata;
-> -    int err;
-> +    int err, ret;
->       struct pltfm_imx_data *imx_data;
-> +    struct device_node *np = pdev->dev.of_node;
->
->       host = sdhci_pltfm_init(pdev, &sdhci_esdhc_imx_pdata, 0);
->       if (IS_ERR(host))
-> @@ -602,6 +603,13 @@ static int sdhci_esdhc_imx_probe(struct
-> platform_device *pdev)
->                       host->mmc->parent->platform_data);
->       }
->
-> +
-> +    if (np) {
-> +        ret = of_alias_get_id(np, "mmcblk");
-> +        if (ret >= 0)
-> +            host->mmc->devidx = ret;
-> +    }
-> +
->       /* write_protect */
->       if (boarddata->wp_type == ESDHC_WP_GPIO) {
->           err = mmc_gpio_request_ro(host->mmc, boarddata->wp_gpio);
-> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-> index 3b0c33a..8209f72 100644
-> --- a/include/linux/mmc/host.h
-> +++ b/include/linux/mmc/host.h
-> @@ -362,6 +362,8 @@ struct mmc_host {
->
->       unsigned int        slotno;    /* used for sdio acpi binding */
->
-> +    /* preferred mmc block device index (mmcblkX) */
-> +    unsigned int        devidx;
->       unsigned long        private[0] ____cacheline_aligned;
->   };
->
-> What do you think?
+for the drivers/of/platform.c portion:
+Acked-by: Grant Likely <grant.likely@linaro.org>
 
-Do you like to send this as a proper patch? Following the recent 
-discussion it sounds to me that there is really some need for 
-something like this. Then we could discuss the technical details.
-
-Best regards
-
-Dirk
-
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+g.
