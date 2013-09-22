@@ -1,35 +1,33 @@
-From: Grant Likely <grant.likely@linaro.org>
-Subject: Re: [PATCH 22/51] DMA-API: amba: get rid of separate dma_mask
-Date: Sun, 22 Sep 2013 07:18:28 -0500
-Message-ID: <20130922121828.58F02C42373@trevor.secretlab.ca>
-References: <20130919212235.GD12758@n2100.arm.linux.org.uk>
- <E1VMm3x-0007hp-Lv@rmk-PC.arm.linux.org.uk>
+From: Fabio Estevam <festevam@gmail.com>
+Subject: Re: Adding aliases to mmc
+Date: Sun, 22 Sep 2013 12:24:24 -0300
+Message-ID: <CAOMZO5CVTRvC1z_xzco1A9FE+GALEHAZe8WNU20sNy+oZdNe+A@mail.gmail.com>
+References: <CAOMZO5CJ36JHJMaiG3QVdtpBoWd_ZyHQuRTrKHz4bLP39gpJtQ@mail.gmail.com>
+	<CAOMZO5AT3bduZ0=EtWHuHVg6tSWrdr_ZjX5PLu815o0qgkeSig@mail.gmail.com>
+	<523E92CB.1080302@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org>
-In-Reply-To: <E1VMm3x-0007hp-Lv@rmk-PC.arm.linux.org.uk>
-List-Unsubscribe: <https://lists.ozlabs.org/options/linuxppc-dev>,
- <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=unsubscribe>
-List-Archive: <http://lists.ozlabs.org/pipermail/linuxppc-dev/>
-List-Post: <mailto:linuxppc-dev@lists.ozlabs.org>
-List-Help: <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=help>
-List-Subscribe: <https://lists.ozlabs.org/listinfo/linuxppc-dev>,
- <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=subscribe>
-Errors-To: linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org
-Sender: "Linuxppc-dev"
- <linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org>
-To: Russell King <rmk+kernel@arm.linux.org.uk>, alsa-devel@alsa-project.org, b43-dev@lists.infradead.org, devel@driverdev.osuosl.org, devicetree@vger.kernel.org, dri-devel@lists.freedesktop.org, e1000-devel@lists.sourceforge.net, linux-arm-kernel@lists.infradead.org, linux-crypto@vger.kernel.org, linux-doc@vger.kernel.org, linux-fbdev@vger.kernel.org, linux-ide@vger.kernel.org, linux-media@vger.kernel.org, linux-mmc@vger.kernel.org, linux-nvme@lists.infradead.org, linux-omap@vger.kernel.org, linuxppc-dev@lists.ozlabs.org, linux-samsung-soc@vger.kernel.org, linux-scsi@vger.kernel.org, linux-tegra@vger.kernel.org, linux-usb@vger.kernel.org, linux-wireless@vger.kernel.org, netdev@vger.kernel.org, Solarflare linux maintainers <linux-net-drivers@solarflare.com>, uclinux-dist-devel@blackfin.uclinux.org
-Cc: Rob Herring <rob.herring@calxeda.com>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-ve0-f171.google.com ([209.85.128.171]:61600 "EHLO
+	mail-ve0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752002Ab3IVPYZ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 22 Sep 2013 11:24:25 -0400
+In-Reply-To: <523E92CB.1080302@gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Dirk Behme <dirk.behme@gmail.com>
+Cc: linux-mmc@vger.kernel.org, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Sascha Hauer <kernel@pengutronix.de>, Michael Olbrich <m.olbrich@pengutronix.de>
 
-On Thu, 19 Sep 2013 22:47:01 +0100, Russell King <rmk+kernel@arm.linux.org.uk> wrote:
-> AMBA Primecell devices always treat streaming and coherent DMA exactly
-> the same, so there's no point in having the masks separated.
-> 
-> Signed-off-by: Russell King <rmk+kernel@arm.linux.org.uk>
+Hi Dirk,
 
-for the drivers/of/platform.c portion:
-Acked-by: Grant Likely <grant.likely@linaro.org>
+On Sun, Sep 22, 2013 at 3:48 AM, Dirk Behme <dirk.behme@gmail.com> wrote:
 
-g.
+> Do you like to send this as a proper patch? Following the recent discussion
+> it sounds to me that there is really some need for something like this. Then
+> we could discuss the technical details.
+
+Please do so.
+
+Thanks,
+
+Fabio Estevam
