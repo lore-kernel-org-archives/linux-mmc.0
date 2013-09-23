@@ -1,47 +1,95 @@
-From: Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>
-Subject: Re: [PATCH] mmc: sdhci-esdhc-imx: Allow the usage of mmc aliases
-Date: Mon, 23 Sep 2013 15:27:12 -0600
-Message-ID: <5240B230.6000605@wwwdotorg.org>
-References: <1379903897-16019-1-git-send-email-festevam@gmail.com>
+From: Grant Grundler <grundler@chromium.org>
+Subject: Re: [PATCH] mmc: core: remove dead function mmc_try_claim_host
+Date: Mon, 23 Sep 2013 14:56:47 -0700
+Message-ID: <CANEJEGvEx9YFJ5iFwzqY1jQG9Y+7Fsk1GJqbx6hvveJQ-w2rPQ@mail.gmail.com>
+References: <1379640096-32383-1-git-send-email-grundler@chromium.org>
+	<CAPDyKFrLpVGp4qmObJ1w2pufDTPQ0ssLRxFpRYHUtMq9Vu9KMA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1379903897-16019-1-git-send-email-festevam-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Fabio Estevam <festevam-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org, dirk.behme-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, kernel-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org, shawn.guo-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, arnd-r2nGTMty4D4@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Fabio Estevam <fabio.estevam-KZfg59tc24xl57MIdRCFDg@public.gmane.org>, Dirk Behme <dirk.behme-V5te9oGctAVWk0Htik3J/w@public.gmane.org>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CAPDyKFrLpVGp4qmObJ1w2pufDTPQ0ssLRxFpRYHUtMq9Vu9KMA@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Grant Grundler <grundler@chromium.org>, Chris Ball <cjb@laptop.org>, Seungwon Jeon <tgih.jun@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 09/22/2013 08:38 PM, Fabio Estevam wrote:
-> From: Fabio Estevam <fabio.estevam-KZfg59tc24xl57MIdRCFDg@public.gmane.org>
-> 
-> On embedded devices, there is often a combination of removable mmc
-> devices (e.g. MMC/SD cards) and hard wired ones (e.g. eMMC).
-> Depending on the hardware configuration, the 'mmcblkN' node might
-> change if the removable device is available or not at boot time.
-> 
-> E.g. if the removable device is attached at boot time, it might
-> become mmxblk0. And the hard wired one mmcblk1. But if the removable
-> device isn't there at boot time, the hard wired one will become
-> mmcblk0. This makes it somehow difficult to hard code the root device
-> to the non-removable device and boot fast.
-> 
-> Allow the sdhci-esdhc-imx driver to retrieve the mmc aliases, so that we can 
-> map via the device tree which mmcblk corresponds to the rootfs.
+On Fri, Sep 20, 2013 at 12:35 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> On 20 September 2013 03:21, Grant Grundler <grundler@chromium.org> wrote:
+>> cscsope says there are no callers for mmc_try_claim_host in the kernel.
+>> No reason to keep it.
+>>
+>> Signed-off-by: Grant Grundler <grundler@chromium.org>
+>
+> Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
 
-> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+Thank you Ulf!
 
-> -	devidx = find_first_zero_bit(dev_use, max_devices);
-> +	devidx = find_next_zero_bit(dev_use, max_devices, card->host->devidx);
+In which maintainer's git tree/branch should I expect this patch to land?
 
-I'm not sure if this works; what if the SD card gets detected/removed
-without recycling the device name/ID a few times before the fixed eMMC
-is detected?
+Just looking for some confirmation that it was applied.
 
-So, in the perfect case this will achieve what you want, but not in some
-unusual cases. So I don't think it's a good idea to rely on this.
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+thanks,
+grant
+
+>
+>> ---
+>>  drivers/mmc/core/core.c  | 25 -------------------------
+>>  include/linux/mmc/core.h |  1 -
+>>  2 files changed, 26 deletions(-)
+>>
+>> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+>> index bf18b6b..006ead2 100644
+>> --- a/drivers/mmc/core/core.c
+>> +++ b/drivers/mmc/core/core.c
+>> @@ -918,31 +918,6 @@ int __mmc_claim_host(struct mmc_host *host, atomic_t *abort)
+>>  EXPORT_SYMBOL(__mmc_claim_host);
+>>
+>>  /**
+>> - *     mmc_try_claim_host - try exclusively to claim a host
+>> - *     @host: mmc host to claim
+>> - *
+>> - *     Returns %1 if the host is claimed, %0 otherwise.
+>> - */
+>> -int mmc_try_claim_host(struct mmc_host *host)
+>> -{
+>> -       int claimed_host = 0;
+>> -       unsigned long flags;
+>> -
+>> -       spin_lock_irqsave(&host->lock, flags);
+>> -       if (!host->claimed || host->claimer == current) {
+>> -               host->claimed = 1;
+>> -               host->claimer = current;
+>> -               host->claim_cnt += 1;
+>> -               claimed_host = 1;
+>> -       }
+>> -       spin_unlock_irqrestore(&host->lock, flags);
+>> -       if (host->ops->enable && claimed_host && host->claim_cnt == 1)
+>> -               host->ops->enable(host);
+>> -       return claimed_host;
+>> -}
+>> -EXPORT_SYMBOL(mmc_try_claim_host);
+>> -
+>> -/**
+>>   *     mmc_release_host - release a host
+>>   *     @host: mmc host to release
+>>   *
+>> diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
+>> index da51bec..a00fc49 100644
+>> --- a/include/linux/mmc/core.h
+>> +++ b/include/linux/mmc/core.h
+>> @@ -188,7 +188,6 @@ extern unsigned int mmc_align_data_size(struct mmc_card *, unsigned int);
+>>
+>>  extern int __mmc_claim_host(struct mmc_host *host, atomic_t *abort);
+>>  extern void mmc_release_host(struct mmc_host *host);
+>> -extern int mmc_try_claim_host(struct mmc_host *host);
+>>
+>>  extern void mmc_get_card(struct mmc_card *card);
+>>  extern void mmc_put_card(struct mmc_card *card);
+>> --
+>> 1.8.4
+>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe linux-kernel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>> Please read the FAQ at  http://www.tux.org/lkml/
