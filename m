@@ -1,76 +1,54 @@
-From: Johan Hovold <jhovold-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: [PATCH 5/7] usb: gadget: pxa25x_udc: fix deferred probe from __init
-Date: Mon, 23 Sep 2013 16:27:30 +0200
-Message-ID: <1379946452-25649-6-git-send-email-jhovold@gmail.com>
+From: Sascha Hauer <s.hauer@pengutronix.de>
+Subject: Re: [PATCH 0/7] driver core: prevent deferred probe with
+ platform_driver_probe
+Date: Mon, 23 Sep 2013 16:50:29 +0200
+Message-ID: <20130923145029.GV30088@pengutronix.de>
 References: <20130923134028.GF21013@sirena.org.uk>
  <1379946452-25649-1-git-send-email-jhovold@gmail.com>
-Return-path: <linux-usb-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1379946452-25649-1-git-send-email-jhovold-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Sender: linux-usb-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>
-Cc: Grant Likely <grant.likely-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Mark Brown <broonie-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mtd-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-pcmcia-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-usb-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-fbdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Johan Hovold <jhovold-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Eric Miao <eric.y.miao-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Haojian Zhuang <haojian.zhuang-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Felipe Balbi <balbi-l0cyMroinI0@public.gmane.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from metis.ext.pengutronix.de ([92.198.50.35]:44659 "EHLO
+	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752522Ab3IWOvC (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 23 Sep 2013 10:51:02 -0400
+Content-Disposition: inline
+In-Reply-To: <1379946452-25649-1-git-send-email-jhovold@gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Johan Hovold <jhovold@gmail.com>
+Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Grant Likely <grant.likely@linaro.org>, Mark Brown <broonie@linaro.org>, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, linux-mtd@lists.infradead.org, linux-pcmcia@lists.infradead.org, linux-usb@vger.kernel.org, linux-fbdev@vger.kernel.org
 
-Move probe out of __init section and don't use platform_driver_probe
-which cannot be used with deferred probing.
+On Mon, Sep 23, 2013 at 04:27:25PM +0200, Johan Hovold wrote:
+> Deferred probing cannot be used with platform_driver_probe as by the
+> time probing is retried either the driver has been unregistered or its
+> probe function has been set to platform_drv_probe_fail.
+> 
+> With commit e9354576 ("gpiolib: Defer failed gpio requests by default")
+> the gpio subsystem started returning -EPROBE_DEFER, which in turn
+> several platform drivers using platform_driver_probe return to driver
+> core. Other subsystems (e.g. regulator) has since started doing the
+> same.
+> 
+> The first patch in this series prevents platform drivers using
+> platform_driver_probe from requesting probe deferral while warning that
+> it is not supported.
+> 
+> The remaining patches move six platform-driver probe functions that rely
+> on gpio_request out of __init. There are likely other probe functions
+> that might return -EPROBE_DEFER and should be moved out of __init as
+> well.
 
-Since commit e9354576 ("gpiolib: Defer failed gpio requests by default")
-this driver might return -EPROBE_DEFER if a gpio_request fails.
+As usually when I read this I wonder why platform_driver_probe exists
+anyway. The only advantage I can think off is that the probe functions
+are in __init and thus can be disposed of later. Now you remove the
+__init annotations from these probe functions. Wouldn't it be better to
+convert the drivers to regular platform_driver_register instead?
 
-Cc: Eric Miao <eric.y.miao-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>
-Cc: Haojian Zhuang <haojian.zhuang-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: Felipe Balbi <balbi-l0cyMroinI0@public.gmane.org>
-Signed-off-by: Johan Hovold <jhovold-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
----
- drivers/usb/gadget/pxa25x_udc.c | 9 +++++----
- 1 file changed, 5 insertions(+), 4 deletions(-)
+Sascha
 
-diff --git a/drivers/usb/gadget/pxa25x_udc.c b/drivers/usb/gadget/pxa25x_udc.c
-index cc92074..0ac6064 100644
---- a/drivers/usb/gadget/pxa25x_udc.c
-+++ b/drivers/usb/gadget/pxa25x_udc.c
-@@ -2054,7 +2054,7 @@ static struct pxa25x_udc memory = {
- /*
-  *	probe - binds to the platform device
-  */
--static int __init pxa25x_udc_probe(struct platform_device *pdev)
-+static int pxa25x_udc_probe(struct platform_device *pdev)
- {
- 	struct pxa25x_udc *dev = &memory;
- 	int retval, irq;
-@@ -2203,7 +2203,7 @@ static void pxa25x_udc_shutdown(struct platform_device *_dev)
- 	pullup_off();
- }
- 
--static int __exit pxa25x_udc_remove(struct platform_device *pdev)
-+static int pxa25x_udc_remove(struct platform_device *pdev)
- {
- 	struct pxa25x_udc *dev = platform_get_drvdata(pdev);
- 
-@@ -2294,7 +2294,8 @@ static int pxa25x_udc_resume(struct platform_device *dev)
- 
- static struct platform_driver udc_driver = {
- 	.shutdown	= pxa25x_udc_shutdown,
--	.remove		= __exit_p(pxa25x_udc_remove),
-+	.probe		= pxa25x_udc_probe,
-+	.remove		= pxa25x_udc_remove,
- 	.suspend	= pxa25x_udc_suspend,
- 	.resume		= pxa25x_udc_resume,
- 	.driver		= {
-@@ -2303,7 +2304,7 @@ static struct platform_driver udc_driver = {
- 	},
- };
- 
--module_platform_driver_probe(udc_driver, pxa25x_udc_probe);
-+module_platform_driver(udc_driver);
- 
- MODULE_DESCRIPTION(DRIVER_DESC);
- MODULE_AUTHOR("Frank Becker, Robert Schwebel, David Brownell");
 -- 
-1.8.3.2
-
---
-To unsubscribe from this list: send the line "unsubscribe linux-usb" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Pengutronix e.K.                           |                             |
+Industrial Linux Solutions                 | http://www.pengutronix.de/  |
+Peiner Str. 6-8, 31137 Hildesheim, Germany | Phone: +49-5121-206917-0    |
+Amtsgericht Hildesheim, HRA 2686           | Fax:   +49-5121-206917-5555 |
