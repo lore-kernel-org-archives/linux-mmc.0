@@ -1,57 +1,39 @@
-From: Jingoo Han <jg1.han@samsung.com>
-Subject: [PATCH] mmc: sdhci-pci: remove unnecessary pci_set_drvdata()
-Date: Mon, 23 Sep 2013 10:23:30 +0900
-Message-ID: <002601ceb7fb$83531ea0$89f95be0$%han@samsung.com>
+From: Fabio Estevam <festevam-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: Re: Adding aliases to mmc
+Date: Sun, 22 Sep 2013 23:17:44 -0300
+Message-ID: <CAOMZO5Bdehorz5=vYYRojjv7VhOncKAAofL_pXxpzNVj_vu1jg@mail.gmail.com>
+References: <CAOMZO5CJ36JHJMaiG3QVdtpBoWd_ZyHQuRTrKHz4bLP39gpJtQ@mail.gmail.com>
+	<CAOMZO5AT3bduZ0=EtWHuHVg6tSWrdr_ZjX5PLu815o0qgkeSig@mail.gmail.com>
+	<523E92CB.1080302@gmail.com>
+	<CAOMZO5CVTRvC1z_xzco1A9FE+GALEHAZe8WNU20sNy+oZdNe+A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout2.samsung.com ([203.254.224.25]:36432 "EHLO
-	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752611Ab3IWBXe (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 22 Sep 2013 21:23:34 -0400
-Received: from epcpsbgr1.samsung.com
- (u141.gpu120.samsung.co.kr [203.254.230.141])
- by mailout2.samsung.com (Oracle Communications Messaging Server 7u4-24.01
- (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTP id <0MTK00GPG164EPC0@mailout2.samsung.com> for
- linux-mmc@vger.kernel.org; Mon, 23 Sep 2013 10:23:33 +0900 (KST)
-Content-language: ko
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <CAOMZO5CVTRvC1z_xzco1A9FE+GALEHAZe8WNU20sNy+oZdNe+A-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Dirk Behme <dirk.behme-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Sascha Hauer <kernel-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org>, Michael Olbrich <m.olbrich-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: 'Chris Ball' <cjb@laptop.org>
-Cc: linux-mmc@vger.kernel.org, 'Adrian Hunter' <adrian.hunter@intel.com>, 'Jingoo Han' <jg1.han@samsung.com>
 
-The driver core clears the driver data to NULL after device_release
-or on probe failure. Thus, it is not needed to manually clear the
-device driver data to NULL.
+Hi Dirk,
 
-Signed-off-by: Jingoo Han <jg1.han@samsung.com>
----
- drivers/mmc/host/sdhci-pci.c |    2 --
- 1 file changed, 2 deletions(-)
+On Sun, Sep 22, 2013 at 12:24 PM, Fabio Estevam <festevam-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
+> Hi Dirk,
+>
+> On Sun, Sep 22, 2013 at 3:48 AM, Dirk Behme <dirk.behme-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
+>
+>> Do you like to send this as a proper patch? Following the recent discussion
+>> it sounds to me that there is really some need for something like this. Then
+>> we could discuss the technical details.
+>
+> Please do so.
 
-diff --git a/drivers/mmc/host/sdhci-pci.c b/drivers/mmc/host/sdhci-pci.c
-index d7d6bc8..f0d20f0 100644
---- a/drivers/mmc/host/sdhci-pci.c
-+++ b/drivers/mmc/host/sdhci-pci.c
-@@ -1533,7 +1533,6 @@ static int sdhci_pci_probe(struct pci_dev *pdev,
- 	return 0;
- 
- free:
--	pci_set_drvdata(pdev, NULL);
- 	kfree(chip);
- 
- err:
-@@ -1555,7 +1554,6 @@ static void sdhci_pci_remove(struct pci_dev *pdev)
- 		for (i = 0; i < chip->num_slots; i++)
- 			sdhci_pci_remove_slot(chip->slots[i]);
- 
--		pci_set_drvdata(pdev, NULL);
- 		kfree(chip);
- 	}
- 
--- 
-1.7.10.4
+Sorry, I misread your email. I can submit it to the list.
 
+Regards,
 
+Fabio Estevam
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
