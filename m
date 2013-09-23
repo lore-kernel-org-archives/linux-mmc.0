@@ -1,15 +1,15 @@
 From: Christian Daudt <bcm@fixthebug.org>
-Subject: [PATCH v2 3/4] rename ARCH_BCM to ARCH_BCM_MOBILE (mmc)
-Date: Mon, 23 Sep 2013 10:20:35 -0700
-Message-ID: <1379956836-5866-4-git-send-email-bcm@fixthebug.org>
+Subject: [PATCH v2 4/4] rename ARCH_BCM to ARCH_BCM_MOBILE (dt)
+Date: Mon, 23 Sep 2013 10:20:36 -0700
+Message-ID: <1379956836-5866-5-git-send-email-bcm@fixthebug.org>
 References: <1379956836-5866-1-git-send-email-bcm@fixthebug.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pa0-f49.google.com ([209.85.220.49]:36254 "EHLO
-	mail-pa0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752691Ab3IWRVH (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 23 Sep 2013 13:21:07 -0400
-Received: by mail-pa0-f49.google.com with SMTP id ld10so3813776pab.8
-        for <linux-mmc@vger.kernel.org>; Mon, 23 Sep 2013 10:21:07 -0700 (PDT)
+Received: from mail-pd0-f175.google.com ([209.85.192.175]:60239 "EHLO
+	mail-pd0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752635Ab3IWRV1 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 23 Sep 2013 13:21:27 -0400
+Received: by mail-pd0-f175.google.com with SMTP id q10so3466506pdj.6
+        for <linux-mmc@vger.kernel.org>; Mon, 23 Sep 2013 10:21:27 -0700 (PDT)
 In-Reply-To: <1379956836-5866-1-git-send-email-bcm@fixthebug.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
@@ -30,19 +30,22 @@ Changes from v1:
  - fix alpha ordering in dts/Makefile
  - break into 4 patches for separate subsys
 
-diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-index 7fc5099..7e89650 100644
---- a/drivers/mmc/host/Kconfig
-+++ b/drivers/mmc/host/Kconfig
-@@ -251,7 +251,7 @@ config MMC_SDHCI_S3C_DMA
+diff --git a/arch/arm/boot/dts/Makefile b/arch/arm/boot/dts/Makefile
+index cc0f1fb..2b07eb8 100644
+--- a/arch/arm/boot/dts/Makefile
++++ b/arch/arm/boot/dts/Makefile
+@@ -41,9 +41,9 @@ dtb-$(CONFIG_ARCH_AT91)	+= sama5d33ek.dtb
+ dtb-$(CONFIG_ARCH_AT91)	+= sama5d34ek.dtb
+ dtb-$(CONFIG_ARCH_AT91)	+= sama5d35ek.dtb
  
- config MMC_SDHCI_BCM_KONA
- 	tristate "SDHCI support on Broadcom KONA platform"
--	depends on ARCH_BCM
-+	depends on ARCH_BCM_MOBILE
- 	select MMC_SDHCI_PLTFM
- 	help
- 	  This selects the Broadcom Kona Secure Digital Host Controller
+-dtb-$(CONFIG_ARCH_BCM2835) += bcm2835-rpi-b.dtb
+-dtb-$(CONFIG_ARCH_BCM) += bcm11351-brt.dtb \
++dtb-$(CONFIG_ARCH_BCM_MOBILE) += bcm11351-brt.dtb \
+ 	bcm28155-ap.dtb
++dtb-$(CONFIG_ARCH_BCM2835) += bcm2835-rpi-b.dtb
+ dtb-$(CONFIG_ARCH_DAVINCI) += da850-enbw-cmc.dtb \
+ 	da850-evm.dtb
+ dtb-$(CONFIG_ARCH_DOVE) += dove-cm-a510.dtb \
 -- 
 1.7.10.4
 
