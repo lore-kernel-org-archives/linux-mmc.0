@@ -1,85 +1,158 @@
-From: Oliver Metz <oliver@freetz.org>
-Subject: [PATCH 2/2] Don't use u8 for fields with more than 1 byte
-Date: Mon, 23 Sep 2013 08:40:52 +0200
-Message-ID: <1379918452-25211-2-git-send-email-oliver@freetz.org>
-References: <1379918452-25211-1-git-send-email-oliver@freetz.org>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [RFC/PATCH] mmc: core: Signal wakeup event at card insert/removal
+Date: Mon, 23 Sep 2013 19:55:46 +0900
+Message-ID: <52401E32.1080304@samsung.com>
+References: <1379670523-13229-1-git-send-email-ulf.hansson@linaro.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from dd12814.kasserver.com ([85.13.134.252]:38453 "EHLO
-	dd12814.kasserver.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753234Ab3IWGsh (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 23 Sep 2013 02:48:37 -0400
-In-Reply-To: <1379918452-25211-1-git-send-email-oliver@freetz.org>
+Received: from mailout3.samsung.com ([203.254.224.33]:27443 "EHLO
+	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752642Ab3IWKzL (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 23 Sep 2013 06:55:11 -0400
+Received: from epcpsbgr3.samsung.com
+ (u143.gpu120.samsung.co.kr [203.254.230.143])
+ by mailout3.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+ (7.0.4.24.0) 64bit (built Nov 17 2011))
+ with ESMTP id <0MTK00ER3RNBLU40@mailout3.samsung.com> for
+ linux-mmc@vger.kernel.org; Mon, 23 Sep 2013 19:55:09 +0900 (KST)
+In-reply-to: <1379670523-13229-1-git-send-email-ulf.hansson@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: ben.l.gardiner@gmail.com
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, San Mehat <san@google.com>, Colin Cross <ccross@android.com>, John Stultz <john.stultz@linaro.org>, Zoran Markovic <zoran.markovic@linaro.org>, cpgs@samsung.com
 
-Signed-off-by: Oliver Metz <oliver@freetz.org>
----
- mmc_cmds.c | 19 ++++++++++---------
- 1 file changed, 10 insertions(+), 9 deletions(-)
+Hi Ulf,
 
-diff --git a/mmc_cmds.c b/mmc_cmds.c
-index f3f6c03..145faa4 100644
---- a/mmc_cmds.c
-+++ b/mmc_cmds.c
-@@ -700,6 +700,7 @@ int do_read_smart_status(int nargs, char **argv)
- int do_read_extcsd(int nargs, char **argv)
- {
- 	__u8 ext_csd[512], ext_csd_rev, reg;
-+	__u32 regl;
- 	int fd, ret;
- 	char *device;
- 	const char *str;
-@@ -1005,15 +1006,15 @@ int do_read_extcsd(int nargs, char **argv)
- 		else
- 			printf(" Device cannot have enhanced tech.\n");
- 
--		reg = (ext_csd[EXT_CSD_MAX_ENH_SIZE_MULT_2] << 16) |
-+		regl = (ext_csd[EXT_CSD_MAX_ENH_SIZE_MULT_2] << 16) |
- 			(ext_csd[EXT_CSD_MAX_ENH_SIZE_MULT_1] << 8) |
- 			ext_csd[EXT_CSD_MAX_ENH_SIZE_MULT_0];
- 
- 		printf("Max Enhanced Area Size [MAX_ENH_SIZE_MULT]: 0x%06x\n",
--			   reg);
-+			   regl);
- 		unsigned int wp_sz = get_hc_wp_grp_size(ext_csd);
- 		unsigned int erase_sz = get_hc_erase_grp_size(ext_csd);
--		printf(" i.e. %lu KiB\n", 512l * reg * wp_sz * erase_sz);
-+		printf(" i.e. %lu KiB\n", 512l * regl * wp_sz * erase_sz);
- 
- 		printf("Partitions attribute [PARTITIONS_ATTRIBUTE]: 0x%02x\n",
- 			ext_csd[EXT_CSD_PARTITIONS_ATTRIBUTE]);
-@@ -1036,23 +1037,23 @@ int do_read_extcsd(int nargs, char **argv)
- 		printf(" [GP_SIZE_MULT_1]: 0x%06x\n", (ext_csd[145] << 16) |
- 			   (ext_csd[144] << 8) | ext_csd[143]);
- 
--		reg =	(ext_csd[EXT_CSD_ENH_SIZE_MULT_2] << 16) |
-+		regl =	(ext_csd[EXT_CSD_ENH_SIZE_MULT_2] << 16) |
- 			(ext_csd[EXT_CSD_ENH_SIZE_MULT_1] << 8) |
- 			ext_csd[EXT_CSD_ENH_SIZE_MULT_0];
- 		printf("Enhanced User Data Area Size"
--			" [ENH_SIZE_MULT]: 0x%06x\n", reg);
--		printf(" i.e. %lu KiB\n", 512l * reg *
-+			" [ENH_SIZE_MULT]: 0x%06x\n", regl);
-+		printf(" i.e. %lu KiB\n", 512l * regl *
- 		       get_hc_erase_grp_size(ext_csd) *
- 		       get_hc_wp_grp_size(ext_csd));
- 
--		reg =	(ext_csd[EXT_CSD_ENH_START_ADDR_3] << 24) |
-+		regl =	(ext_csd[EXT_CSD_ENH_START_ADDR_3] << 24) |
- 			(ext_csd[EXT_CSD_ENH_START_ADDR_2] << 16) |
- 			(ext_csd[EXT_CSD_ENH_START_ADDR_1] << 8) |
- 			ext_csd[EXT_CSD_ENH_START_ADDR_0];
- 		printf("Enhanced User Data Start Address"
--			" [ENH_START_ADDR]: 0x%06x\n", reg);
-+			" [ENH_START_ADDR]: 0x%06x\n", regl);
- 		printf(" i.e. %lu bytes offset\n", (is_blockaddresed(ext_csd) ?
--				1l : 512l) * reg);
-+				1l : 512l) * regl);
- 
- 		/* A441]: reserved [135] */
- 		printf("Bad Block Management mode"
--- 
-1.8.4
+On 09/20/2013 06:48 PM, Ulf Hansson wrote:
+> We want to give user space provision to fully consume a card
+> insert/remove event, when the event was caused by a wakeup irq.
+> 
+> By signaling the wakeup event for a time of 5 s for devices configured
+> as wakeup capable, we likely will be prevent a sleep long enough to let
+> user space consume the event.
+> 
+> To enable this feature, host drivers must thus configure their devices
+> as wakeup capable.
+> 
+> This is a reworked implementation of the old wakelocks for the mmc
+> subsystem, originally authored by Colin Cross and San Mehat for the
+> Android kernel. Zoran Markovic shall also be given cred for recently
+> re-trying to upstream this feature.
+> 
+> Cc: San Mehat <san@google.com>
+> Cc: Colin Cross <ccross@android.com>
+> Cc: John Stultz <john.stultz@linaro.org>
+> Cc: Zoran Markovic <zoran.markovic@linaro.org>
+> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+> ---
+> 
+> This patch has just been compile tested, since I at very moment did not
+> have a good board to test it on. I am working on that.
+> 
+> Any help in testing this patch is thus greatly appreciated. While
+> testing also don't forget to enable the host device as wakeup capable.
+> Use "device_init_wakeup" from the host probe function.
+
+I used the device_init_wakeup(&pdev->dev, 1) into host controller. (Also enabled the irq for wakeup)
+It didn't work when device is suspended.
+Well, i might missed something.
+As my understanding, it's helpful that wakeup-event is used when device is suspended.
+How do you call mmc_detect_change() during suspended?
+
+Best Regards,
+Jaehoon Chung
+> 
+> ---
+>  drivers/mmc/core/core.c |   39 +++++++++++++++++++++++++++------------
+>  1 file changed, 27 insertions(+), 12 deletions(-)
+> 
+> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> index bf18b6b..3e8229e 100644
+> --- a/drivers/mmc/core/core.c
+> +++ b/drivers/mmc/core/core.c
+> @@ -23,6 +23,7 @@
+>  #include <linux/log2.h>
+>  #include <linux/regulator/consumer.h>
+>  #include <linux/pm_runtime.h>
+> +#include <linux/pm_wakeup.h>
+>  #include <linux/suspend.h>
+>  #include <linux/fault-inject.h>
+>  #include <linux/random.h>
+> @@ -1723,6 +1724,28 @@ void mmc_detach_bus(struct mmc_host *host)
+>  	mmc_bus_put(host);
+>  }
+>  
+> +static void _mmc_detect_change(struct mmc_host *host, unsigned long delay,
+> +				bool cd_irq)
+> +{
+> +#ifdef CONFIG_MMC_DEBUG
+> +	unsigned long flags;
+> +	spin_lock_irqsave(&host->lock, flags);
+> +	WARN_ON(host->removed);
+> +	spin_unlock_irqrestore(&host->lock, flags);
+> +#endif
+> +
+> +	/*
+> +	 * If the device is configured as wakeup, we prevent a new sleep for
+> +	 * 5 s to give provision for user space to consume the event.
+> +	 */
+> +	if (cd_irq && !(host->caps & MMC_CAP_NEEDS_POLL) &&
+> +		device_can_wakeup(mmc_dev(host)))
+> +		pm_wakeup_event(mmc_dev(host), 5000);
+> +
+> +	host->detect_change = 1;
+> +	mmc_schedule_delayed_work(&host->detect, delay);
+> +}
+> +
+>  /**
+>   *	mmc_detect_change - process change of state on a MMC socket
+>   *	@host: host which changed state.
+> @@ -1735,16 +1758,8 @@ void mmc_detach_bus(struct mmc_host *host)
+>   */
+>  void mmc_detect_change(struct mmc_host *host, unsigned long delay)
+>  {
+> -#ifdef CONFIG_MMC_DEBUG
+> -	unsigned long flags;
+> -	spin_lock_irqsave(&host->lock, flags);
+> -	WARN_ON(host->removed);
+> -	spin_unlock_irqrestore(&host->lock, flags);
+> -#endif
+> -	host->detect_change = 1;
+> -	mmc_schedule_delayed_work(&host->detect, delay);
+> +	_mmc_detect_change(host, delay, true);
+>  }
+> -
+>  EXPORT_SYMBOL(mmc_detect_change);
+>  
+>  void mmc_init_erase(struct mmc_card *card)
+> @@ -2423,7 +2438,7 @@ int mmc_detect_card_removed(struct mmc_host *host)
+>  			 * rescan handle the card removal.
+>  			 */
+>  			cancel_delayed_work(&host->detect);
+> -			mmc_detect_change(host, 0);
+> +			_mmc_detect_change(host, 0, false);
+>  		}
+>  	}
+>  
+> @@ -2505,7 +2520,7 @@ void mmc_start_host(struct mmc_host *host)
+>  		mmc_power_off(host);
+>  	else
+>  		mmc_power_up(host);
+> -	mmc_detect_change(host, 0);
+> +	_mmc_detect_change(host, 0, false);
+>  }
+>  
+>  void mmc_stop_host(struct mmc_host *host)
+> @@ -2724,7 +2739,7 @@ int mmc_pm_notify(struct notifier_block *notify_block,
+>  		spin_lock_irqsave(&host->lock, flags);
+>  		host->rescan_disable = 0;
+>  		spin_unlock_irqrestore(&host->lock, flags);
+> -		mmc_detect_change(host, 0);
+> +		_mmc_detect_change(host, 0, false);
+>  
+>  	}
+>  
+> 
 
