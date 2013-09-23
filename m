@@ -1,51 +1,65 @@
-From: Christian Daudt <bcm@fixthebug.org>
-Subject: [PATCH v2 4/4] rename ARCH_BCM to ARCH_BCM_MOBILE (dt)
-Date: Mon, 23 Sep 2013 10:20:36 -0700
-Message-ID: <1379956836-5866-5-git-send-email-bcm@fixthebug.org>
-References: <1379956836-5866-1-git-send-email-bcm@fixthebug.org>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pd0-f175.google.com ([209.85.192.175]:60239 "EHLO
-	mail-pd0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752635Ab3IWRV1 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 23 Sep 2013 13:21:27 -0400
-Received: by mail-pd0-f175.google.com with SMTP id q10so3466506pdj.6
-        for <linux-mmc@vger.kernel.org>; Mon, 23 Sep 2013 10:21:27 -0700 (PDT)
-In-Reply-To: <1379956836-5866-1-git-send-email-bcm@fixthebug.org>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Alan Stern <stern@rowland.harvard.edu>
+Subject: Re: [PATCH 36/51] DMA-API: usb: use dma_set_coherent_mask()
+Date: Mon, 23 Sep 2013 14:27:39 -0400 (EDT)
+Message-ID: <Pine.LNX.4.44L0.1309231418030.1348-100000@iolanthe.rowland.org>
+References: <E1VMmHX-0007jq-Cj@rmk-PC.arm.linux.org.uk>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <E1VMmHX-0007jq-Cj@rmk-PC.arm.linux.org.uk>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Russell King <rmk+kernel@arm.linux.org.uk>
+Cc: alsa-devel@alsa-project.org, linux-doc@vger.kernel.org, Alexander Shishkin <alexander.shishkin@linux.intel.com>, linux-mmc@vger.kernel.org, linux-fbdev@vger.kernel.org, linux-nvme@lists.infradead.org, linux-ide@vger.kernel.org, devel@driverdev.osuosl.org, linux-samsung-soc@vger.kernel.org, linux-scsi@vger.kernel.org, e1000-devel@lists.sourceforge.net, b43-dev@lists.infradead.org, linux-media@vger.kernel.org, devicetree@vger.kernel.org, Stephen Warren <swarren@wwwdotorg.org>, Kukjin Kim <kgene.kim@samsung.com>, dri-devel@lists.freedesktop.org, linux-tegra@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Solarflare linux maintainers <linux-net-drivers@solarflare.com>, netdev@vger.kernel.org, linux-usb@vger.kernel.org, linux-wireless@vger.kernel.org, Felipe Balbi <balbi@ti.com>, linux-crypto@vger.kernel.org, Greg Kroah-Hartman <gregkh@linu>
 List-Id: linux-mmc@vger.kernel.org
-To: Olof Johansson <olof@lixom.net>, Arnd Bergmann <arnd@arndb.de>, Stephen Warren <swarren@wwwdotorg.org>, Rob Herring <rob.herring@calxeda.com>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Russell King <linux@arm.linux.org.uk>, Daniel Lezcano <daniel.lezcano@linaro.org>, Thomas Gleixner <tglx@linutronix.de>, Chris Ball <cjb@laptop.org>
-Cc: Domenico Andreoli <cavokz@gmail.com>, Christian Daudt <csd@broadcom.com>, Hauke Mehrtens <hauke@hauke-m.de>, Matt Porter <matt.porter@linaro.org>, Alex Elder <alex.elder@linaro.org>, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Christian Daudt <bcm@fixthebug.org>
 
-Currently ARCH_BCM has been used for Broadcom
-Mobile V7 based SoCs. In order to allow other Broadcom
-SoCs to also use mach-bcm directory and files, this patch
-renames the original ARCH_BCM to ARCH_BCM_MOBILE, and
-uses ARCH_BCM to define any Broadcom chip residing
-in mach-bcm directory.
+On Thu, 19 Sep 2013, Russell King wrote:
 
-Signed-off-by: Christian Daudt <bcm@fixthebug.org>
-Acked-by: Olof Johansson <olof@lixom.net>
+> The correct way for a driver to specify the coherent DMA mask is
+> not to directly access the field in the struct device, but to use
+> dma_set_coherent_mask().  Only arch and bus code should access this
+> member directly.
+> 
+> Convert all direct write accesses to using the correct API.
+> 
+> Signed-off-by: Russell King <rmk+kernel@arm.linux.org.uk>
 
-Changes from v1:
- - fix alpha ordering in dts/Makefile
- - break into 4 patches for separate subsys
+> diff --git a/drivers/usb/host/ehci-platform.c b/drivers/usb/host/ehci-platform.c
+> index f6b790c..5b0cd2d 100644
+> --- a/drivers/usb/host/ehci-platform.c
+> +++ b/drivers/usb/host/ehci-platform.c
 
-diff --git a/arch/arm/boot/dts/Makefile b/arch/arm/boot/dts/Makefile
-index cc0f1fb..2b07eb8 100644
---- a/arch/arm/boot/dts/Makefile
-+++ b/arch/arm/boot/dts/Makefile
-@@ -41,9 +41,9 @@ dtb-$(CONFIG_ARCH_AT91)	+= sama5d33ek.dtb
- dtb-$(CONFIG_ARCH_AT91)	+= sama5d34ek.dtb
- dtb-$(CONFIG_ARCH_AT91)	+= sama5d35ek.dtb
- 
--dtb-$(CONFIG_ARCH_BCM2835) += bcm2835-rpi-b.dtb
--dtb-$(CONFIG_ARCH_BCM) += bcm11351-brt.dtb \
-+dtb-$(CONFIG_ARCH_BCM_MOBILE) += bcm11351-brt.dtb \
- 	bcm28155-ap.dtb
-+dtb-$(CONFIG_ARCH_BCM2835) += bcm2835-rpi-b.dtb
- dtb-$(CONFIG_ARCH_DAVINCI) += da850-enbw-cmc.dtb \
- 	da850-evm.dtb
- dtb-$(CONFIG_ARCH_DOVE) += dove-cm-a510.dtb \
--- 
-1.7.10.4
+> @@ -91,8 +91,9 @@ static int ehci_platform_probe(struct platform_device *dev)
+>  		dev->dev.platform_data = &ehci_platform_defaults;
+>  	if (!dev->dev.dma_mask)
+>  		dev->dev.dma_mask = &dev->dev.coherent_dma_mask;
+> -	if (!dev->dev.coherent_dma_mask)
+> -		dev->dev.coherent_dma_mask = DMA_BIT_MASK(32);
+> +	err = dma_set_coherent_mask(&dev->dev, DMA_BIT_MASK(32));
+> +	if (err)
+> +		return err;
+>  
+>  	pdata = dev_get_platdata(&dev->dev);
 
+ehci-platform.c is a generic file, intended for use by multiple
+platforms.  Is it not possible that on some platforms, the arch or bus
+code may already have initialized the DMA masks?  Isn't something like 
+this (i.e., DMA bindings) planned for Device Tree?
+
+By eliminating the tests above and calling dma_set_coherent_mask or
+dma_coerce_mask_and_coherent unconditionally, this patch (and the next)
+would overwrite those initial settings.
+
+I don't know to what extent the same may be true for the other,
+platform-specific, drivers changed by this patch.  But it's something 
+to be aware of.
+
+Alan Stern
