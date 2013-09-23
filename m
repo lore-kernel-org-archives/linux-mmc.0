@@ -1,69 +1,79 @@
-From: Sascha Hauer <s.hauer@pengutronix.de>
-Subject: Re: [PATCH 0/7] driver core: prevent deferred probe with
- platform_driver_probe
-Date: Mon, 23 Sep 2013 17:24:27 +0200
-Message-ID: <20130923152427.GX30088@pengutronix.de>
-References: <20130923134028.GF21013@sirena.org.uk>
- <1379946452-25649-1-git-send-email-jhovold@gmail.com>
- <20130923145029.GV30088@pengutronix.de>
- <20130923152018.GB1454@localhost>
+From: Nicolas Ferre <nicolas.ferre@atmel.com>
+Subject: Re: [PATCH 4/7] pcmcia: at91_cf: fix deferred probe from __init
+Date: Mon, 23 Sep 2013 18:53:28 +0200
+Message-ID: <52407208.1060300@atmel.com>
+References: <20130923134028.GF21013@sirena.org.uk> <1379946452-25649-1-git-send-email-jhovold@gmail.com> <1379946452-25649-5-git-send-email-jhovold@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-pcmcia-bounces+glkpd-linux-pcmcia=m.gmane.org@lists.infradead.org>
-Content-Disposition: inline
-In-Reply-To: <20130923152018.GB1454@localhost>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-pcmcia>,
- <mailto:linux-pcmcia-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-pcmcia/>
-List-Post: <mailto:linux-pcmcia@lists.infradead.org>
-List-Help: <mailto:linux-pcmcia-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-pcmcia>,
- <mailto:linux-pcmcia-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-pcmcia" <linux-pcmcia-bounces@lists.infradead.org>
-Errors-To: linux-pcmcia-bounces+glkpd-linux-pcmcia=m.gmane.org@lists.infradead.org
-To: Johan Hovold <jhovold@gmail.com>
-Cc: linux-fbdev@vger.kernel.org, linux-usb@vger.kernel.org, Mark Brown <broonie@linaro.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, linux-pcmcia@lists.infradead.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mtd@lists.infradead.org, Grant Likely <grant.likely@linaro.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1379946452-25649-5-git-send-email-jhovold@gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Johan Hovold <jhovold@gmail.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Cc: Grant Likely <grant.likely@linaro.org>, Mark Brown <broonie@linaro.org>, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, linux-mtd@lists.infradead.org, linux-pcmcia@lists.infradead.org, linux-usb@vger.kernel.org, linux-fbdev@vger.kernel.org, Jean-Christophe PLAGNIOL-VILLARD <plagnioj@jcrosoft.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On Mon, Sep 23, 2013 at 05:20:18PM +0200, Johan Hovold wrote:
-> On Mon, Sep 23, 2013 at 04:50:29PM +0200, Sascha Hauer wrote:
-> > On Mon, Sep 23, 2013 at 04:27:25PM +0200, Johan Hovold wrote:
-> > > Deferred probing cannot be used with platform_driver_probe as by the
-> > > time probing is retried either the driver has been unregistered or its
-> > > probe function has been set to platform_drv_probe_fail.
-> > > 
-> > > With commit e9354576 ("gpiolib: Defer failed gpio requests by default")
-> > > the gpio subsystem started returning -EPROBE_DEFER, which in turn
-> > > several platform drivers using platform_driver_probe return to driver
-> > > core. Other subsystems (e.g. regulator) has since started doing the
-> > > same.
-> > > 
-> > > The first patch in this series prevents platform drivers using
-> > > platform_driver_probe from requesting probe deferral while warning that
-> > > it is not supported.
-> > > 
-> > > The remaining patches move six platform-driver probe functions that rely
-> > > on gpio_request out of __init. There are likely other probe functions
-> > > that might return -EPROBE_DEFER and should be moved out of __init as
-> > > well.
-> > 
-> > As usually when I read this I wonder why platform_driver_probe exists
-> > anyway. The only advantage I can think off is that the probe functions
-> > are in __init and thus can be disposed of later. Now you remove the
-> > __init annotations from these probe functions. Wouldn't it be better to
-> > convert the drivers to regular platform_driver_register instead?
-> 
-> Perhaps that paragraph was a bit unclear: I move them out of __init
-> _and_ use platform_driver_register instead of platform_driver_probe as
-> well.
+On 23/09/2013 16:27, Johan Hovold :
+> Move probe out of __init section and don't use platform_driver_probe
+> which cannot be used with deferred probing.
+>
+> Since commit e9354576 ("gpiolib: Defer failed gpio requests by default")
+> this driver might return -EPROBE_DEFER if a gpio_request fails.
+>
+> Cc: Jean-Christophe PLAGNIOL-VILLARD <plagnioj@jcrosoft.com>
+> Cc: Nicolas Ferre <nicolas.ferre@atmel.com>
 
-Oh yes, I should have looked closer. Sorry for the noise.
+Acked-by: Nicolas Ferre <nicolas.ferre@atmel.com>
 
-Sascha
+Thanks Johan.
+
+> Signed-off-by: Johan Hovold <jhovold@gmail.com>
+> ---
+>   drivers/pcmcia/at91_cf.c | 11 +++++------
+>   1 file changed, 5 insertions(+), 6 deletions(-)
+>
+> diff --git a/drivers/pcmcia/at91_cf.c b/drivers/pcmcia/at91_cf.c
+> index b8f5acf..de24232 100644
+> --- a/drivers/pcmcia/at91_cf.c
+> +++ b/drivers/pcmcia/at91_cf.c
+> @@ -245,7 +245,7 @@ static int at91_cf_dt_init(struct platform_device *pdev)
+>   }
+>   #endif
+>
+> -static int __init at91_cf_probe(struct platform_device *pdev)
+> +static int at91_cf_probe(struct platform_device *pdev)
+>   {
+>   	struct at91_cf_socket	*cf;
+>   	struct at91_cf_data	*board = pdev->dev.platform_data;
+> @@ -354,7 +354,7 @@ fail0a:
+>   	return status;
+>   }
+>
+> -static int __exit at91_cf_remove(struct platform_device *pdev)
+> +static int at91_cf_remove(struct platform_device *pdev)
+>   {
+>   	struct at91_cf_socket	*cf = platform_get_drvdata(pdev);
+>
+> @@ -404,14 +404,13 @@ static struct platform_driver at91_cf_driver = {
+>   		.owner		= THIS_MODULE,
+>   		.of_match_table = of_match_ptr(at91_cf_dt_ids),
+>   	},
+> -	.remove		= __exit_p(at91_cf_remove),
+> +	.probe		= at91_cf_probe,
+> +	.remove		= at91_cf_remove,
+>   	.suspend	= at91_cf_suspend,
+>   	.resume		= at91_cf_resume,
+>   };
+>
+> -/*--------------------------------------------------------------------------*/
+> -
+> -module_platform_driver_probe(at91_cf_driver, at91_cf_probe);
+> +module_platform_driver(at91_cf_driver);
+>
+>   MODULE_DESCRIPTION("AT91 Compact Flash Driver");
+>   MODULE_AUTHOR("David Brownell");
+>
+
 
 -- 
-Pengutronix e.K.                           |                             |
-Industrial Linux Solutions                 | http://www.pengutronix.de/  |
-Peiner Str. 6-8, 31137 Hildesheim, Germany | Phone: +49-5121-206917-0    |
-Amtsgericht Hildesheim, HRA 2686           | Fax:   +49-5121-206917-5555 |
+Nicolas Ferre
