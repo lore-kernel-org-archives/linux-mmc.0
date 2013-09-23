@@ -1,108 +1,54 @@
-From: Fabio Estevam <festevam@gmail.com>
-Subject: [PATCH] mmc: sdhci-esdhc-imx: Allow the usage of mmc aliases
-Date: Sun, 22 Sep 2013 23:38:17 -0300
-Message-ID: <1379903897-16019-1-git-send-email-festevam@gmail.com>
+From: Oliver Metz <oliver@freetz.org>
+Subject: [PATCH 1/2] Add defines for ext_csd field MAX_ENH_SIZE_MULT
+Date: Mon, 23 Sep 2013 08:40:51 +0200
+Message-ID: <1379918452-25211-1-git-send-email-oliver@freetz.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-yh0-f47.google.com ([209.85.213.47]:47800 "EHLO
-	mail-yh0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753252Ab3IWCib (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 22 Sep 2013 22:38:31 -0400
-Received: by mail-yh0-f47.google.com with SMTP id l109so1113957yhq.6
-        for <linux-mmc@vger.kernel.org>; Sun, 22 Sep 2013 19:38:30 -0700 (PDT)
+Received: from dd12814.kasserver.com ([85.13.134.252]:38454 "EHLO
+	dd12814.kasserver.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753280Ab3IWGsh (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 23 Sep 2013 02:48:37 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: cjb@laptop.org
-Cc: dirk.behme@gmail.com, kernel@pengutronix.de, shawn.guo@linaro.org, linux-mmc@vger.kernel.org, swarren@wwwdotorg.org, arnd@arndb.de, devicetree-discuss@lists.ozlabs.org, Fabio Estevam <fabio.estevam@freescale.com>, Dirk Behme <dirk.behme@de.bosch.com>
+To: linux-mmc@vger.kernel.org
+Cc: ben.l.gardiner@gmail.com
 
-From: Fabio Estevam <fabio.estevam@freescale.com>
-
-On embedded devices, there is often a combination of removable mmc
-devices (e.g. MMC/SD cards) and hard wired ones (e.g. eMMC).
-Depending on the hardware configuration, the 'mmcblkN' node might
-change if the removable device is available or not at boot time.
-
-E.g. if the removable device is attached at boot time, it might
-become mmxblk0. And the hard wired one mmcblk1. But if the removable
-device isn't there at boot time, the hard wired one will become
-mmcblk0. This makes it somehow difficult to hard code the root device
-to the non-removable device and boot fast.
-
-Allow the sdhci-esdhc-imx driver to retrieve the mmc aliases, so that we can 
-map via the device tree which mmcblk corresponds to the rootfs.
-
-Signed-off-by: Dirk Behme <dirk.behme@de.bosch.com>
-Signed-off-by: Fabio Estevam <fabio.estevam@freescale.com>
+Signed-off-by: Oliver Metz <oliver@freetz.org>
 ---
- drivers/mmc/card/block.c           |  5 +++--
- drivers/mmc/host/sdhci-esdhc-imx.c | 10 +++++++++-
- include/linux/mmc/host.h           |  2 ++
- 3 files changed, 14 insertions(+), 3 deletions(-)
+ mmc.h      | 3 +++
+ mmc_cmds.c | 6 ++++--
+ 2 files changed, 7 insertions(+), 2 deletions(-)
 
-diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-index 1a3163f..94f842b 100644
---- a/drivers/mmc/card/block.c
-+++ b/drivers/mmc/card/block.c
-@@ -2026,7 +2026,7 @@ static struct mmc_blk_data *mmc_blk_alloc_req(struct mmc_card *card,
- 	struct mmc_blk_data *md;
- 	int devidx, ret;
+diff --git a/mmc.h b/mmc.h
+index a345c1d..ac82446 100644
+--- a/mmc.h
++++ b/mmc.h
+@@ -52,6 +52,9 @@
+ #define EXT_CSD_BKOPS_EN		163	/* R/W */
+ #define EXT_CSD_RST_N_FUNCTION		162	/* R/W */
+ #define EXT_CSD_PARTITIONING_SUPPORT	160	/* RO */
++#define EXT_CSD_MAX_ENH_SIZE_MULT_2	159
++#define EXT_CSD_MAX_ENH_SIZE_MULT_1	158
++#define EXT_CSD_MAX_ENH_SIZE_MULT_0	157
+ #define EXT_CSD_PARTITIONS_ATTRIBUTE	156	/* R/W */
+ #define EXT_CSD_PARTITION_SETTING_COMPLETED	155	/* R/W */
+ #define EXT_CSD_ENH_SIZE_MULT_2		142
+diff --git a/mmc_cmds.c b/mmc_cmds.c
+index 867a88d..f3f6c03 100644
+--- a/mmc_cmds.c
++++ b/mmc_cmds.c
+@@ -1005,8 +1005,10 @@ int do_read_extcsd(int nargs, char **argv)
+ 		else
+ 			printf(" Device cannot have enhanced tech.\n");
  
--	devidx = find_first_zero_bit(dev_use, max_devices);
-+	devidx = find_next_zero_bit(dev_use, max_devices, card->host->devidx);
- 	if (devidx >= max_devices)
- 		return ERR_PTR(-ENOSPC);
- 	__set_bit(devidx, dev_use);
-@@ -2044,7 +2044,8 @@ static struct mmc_blk_data *mmc_blk_alloc_req(struct mmc_card *card,
- 	 * index anymore so we keep track of a name index.
- 	 */
- 	if (!subname) {
--		md->name_idx = find_first_zero_bit(name_use, max_devices);
-+		md->name_idx = find_next_zero_bit(name_use, max_devices,
-+						  card->host->devidx);
- 		__set_bit(md->name_idx, name_use);
- 	} else
- 		md->name_idx = ((struct mmc_blk_data *)
-diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-index abc8cf0..e11a6af 100644
---- a/drivers/mmc/host/sdhci-esdhc-imx.c
-+++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-@@ -524,8 +524,9 @@ static int sdhci_esdhc_imx_probe(struct platform_device *pdev)
- 	struct sdhci_pltfm_host *pltfm_host;
- 	struct sdhci_host *host;
- 	struct esdhc_platform_data *boarddata;
--	int err;
-+	int err, ret;
- 	struct pltfm_imx_data *imx_data;
-+	struct device_node *np = pdev->dev.of_node;
- 
- 	host = sdhci_pltfm_init(pdev, &sdhci_esdhc_imx_pdata, 0);
- 	if (IS_ERR(host))
-@@ -602,6 +603,13 @@ static int sdhci_esdhc_imx_probe(struct platform_device *pdev)
- 					host->mmc->parent->platform_data);
- 	}
- 
+-		reg = (ext_csd[159] << 16) | (ext_csd[158] << 8) |
+-			ext_csd[157];
++		reg = (ext_csd[EXT_CSD_MAX_ENH_SIZE_MULT_2] << 16) |
++			(ext_csd[EXT_CSD_MAX_ENH_SIZE_MULT_1] << 8) |
++			ext_csd[EXT_CSD_MAX_ENH_SIZE_MULT_0];
 +
-+	if (np) {
-+		ret = of_alias_get_id(np, "mmcblk");
-+		if (ret >= 0)
-+			host->mmc->devidx = ret;
-+	}
-+
- 	/* write_protect */
- 	if (boarddata->wp_type == ESDHC_WP_GPIO) {
- 		err = mmc_gpio_request_ro(host->mmc, boarddata->wp_gpio);
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index 3b0c33a..8209f72 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -362,6 +362,8 @@ struct mmc_host {
- 
- 	unsigned int		slotno;	/* used for sdio acpi binding */
- 
-+	/* preferred mmc block device index (mmcblkX) */
-+	unsigned int		devidx;
- 	unsigned long		private[0] ____cacheline_aligned;
- };
- 
+ 		printf("Max Enhanced Area Size [MAX_ENH_SIZE_MULT]: 0x%06x\n",
+ 			   reg);
+ 		unsigned int wp_sz = get_hc_wp_grp_size(ext_csd);
 -- 
-1.8.1.2
+1.8.4
 
