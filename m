@@ -1,39 +1,108 @@
-From: Fabio Estevam <festevam-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: Adding aliases to mmc
-Date: Sun, 22 Sep 2013 23:17:44 -0300
-Message-ID: <CAOMZO5Bdehorz5=vYYRojjv7VhOncKAAofL_pXxpzNVj_vu1jg@mail.gmail.com>
-References: <CAOMZO5CJ36JHJMaiG3QVdtpBoWd_ZyHQuRTrKHz4bLP39gpJtQ@mail.gmail.com>
-	<CAOMZO5AT3bduZ0=EtWHuHVg6tSWrdr_ZjX5PLu815o0qgkeSig@mail.gmail.com>
-	<523E92CB.1080302@gmail.com>
-	<CAOMZO5CVTRvC1z_xzco1A9FE+GALEHAZe8WNU20sNy+oZdNe+A@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <CAOMZO5CVTRvC1z_xzco1A9FE+GALEHAZe8WNU20sNy+oZdNe+A-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Dirk Behme <dirk.behme-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Sascha Hauer <kernel-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org>, Michael Olbrich <m.olbrich-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org>
+From: Fabio Estevam <festevam@gmail.com>
+Subject: [PATCH] mmc: sdhci-esdhc-imx: Allow the usage of mmc aliases
+Date: Sun, 22 Sep 2013 23:38:17 -0300
+Message-ID: <1379903897-16019-1-git-send-email-festevam@gmail.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-yh0-f47.google.com ([209.85.213.47]:47800 "EHLO
+	mail-yh0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753252Ab3IWCib (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 22 Sep 2013 22:38:31 -0400
+Received: by mail-yh0-f47.google.com with SMTP id l109so1113957yhq.6
+        for <linux-mmc@vger.kernel.org>; Sun, 22 Sep 2013 19:38:30 -0700 (PDT)
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: cjb@laptop.org
+Cc: dirk.behme@gmail.com, kernel@pengutronix.de, shawn.guo@linaro.org, linux-mmc@vger.kernel.org, swarren@wwwdotorg.org, arnd@arndb.de, devicetree-discuss@lists.ozlabs.org, Fabio Estevam <fabio.estevam@freescale.com>, Dirk Behme <dirk.behme@de.bosch.com>
 
-Hi Dirk,
+From: Fabio Estevam <fabio.estevam@freescale.com>
 
-On Sun, Sep 22, 2013 at 12:24 PM, Fabio Estevam <festevam-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
-> Hi Dirk,
->
-> On Sun, Sep 22, 2013 at 3:48 AM, Dirk Behme <dirk.behme-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
->
->> Do you like to send this as a proper patch? Following the recent discussion
->> it sounds to me that there is really some need for something like this. Then
->> we could discuss the technical details.
->
-> Please do so.
+On embedded devices, there is often a combination of removable mmc
+devices (e.g. MMC/SD cards) and hard wired ones (e.g. eMMC).
+Depending on the hardware configuration, the 'mmcblkN' node might
+change if the removable device is available or not at boot time.
 
-Sorry, I misread your email. I can submit it to the list.
+E.g. if the removable device is attached at boot time, it might
+become mmxblk0. And the hard wired one mmcblk1. But if the removable
+device isn't there at boot time, the hard wired one will become
+mmcblk0. This makes it somehow difficult to hard code the root device
+to the non-removable device and boot fast.
 
-Regards,
+Allow the sdhci-esdhc-imx driver to retrieve the mmc aliases, so that we can 
+map via the device tree which mmcblk corresponds to the rootfs.
 
-Fabio Estevam
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Signed-off-by: Dirk Behme <dirk.behme@de.bosch.com>
+Signed-off-by: Fabio Estevam <fabio.estevam@freescale.com>
+---
+ drivers/mmc/card/block.c           |  5 +++--
+ drivers/mmc/host/sdhci-esdhc-imx.c | 10 +++++++++-
+ include/linux/mmc/host.h           |  2 ++
+ 3 files changed, 14 insertions(+), 3 deletions(-)
+
+diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+index 1a3163f..94f842b 100644
+--- a/drivers/mmc/card/block.c
++++ b/drivers/mmc/card/block.c
+@@ -2026,7 +2026,7 @@ static struct mmc_blk_data *mmc_blk_alloc_req(struct mmc_card *card,
+ 	struct mmc_blk_data *md;
+ 	int devidx, ret;
+ 
+-	devidx = find_first_zero_bit(dev_use, max_devices);
++	devidx = find_next_zero_bit(dev_use, max_devices, card->host->devidx);
+ 	if (devidx >= max_devices)
+ 		return ERR_PTR(-ENOSPC);
+ 	__set_bit(devidx, dev_use);
+@@ -2044,7 +2044,8 @@ static struct mmc_blk_data *mmc_blk_alloc_req(struct mmc_card *card,
+ 	 * index anymore so we keep track of a name index.
+ 	 */
+ 	if (!subname) {
+-		md->name_idx = find_first_zero_bit(name_use, max_devices);
++		md->name_idx = find_next_zero_bit(name_use, max_devices,
++						  card->host->devidx);
+ 		__set_bit(md->name_idx, name_use);
+ 	} else
+ 		md->name_idx = ((struct mmc_blk_data *)
+diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+index abc8cf0..e11a6af 100644
+--- a/drivers/mmc/host/sdhci-esdhc-imx.c
++++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+@@ -524,8 +524,9 @@ static int sdhci_esdhc_imx_probe(struct platform_device *pdev)
+ 	struct sdhci_pltfm_host *pltfm_host;
+ 	struct sdhci_host *host;
+ 	struct esdhc_platform_data *boarddata;
+-	int err;
++	int err, ret;
+ 	struct pltfm_imx_data *imx_data;
++	struct device_node *np = pdev->dev.of_node;
+ 
+ 	host = sdhci_pltfm_init(pdev, &sdhci_esdhc_imx_pdata, 0);
+ 	if (IS_ERR(host))
+@@ -602,6 +603,13 @@ static int sdhci_esdhc_imx_probe(struct platform_device *pdev)
+ 					host->mmc->parent->platform_data);
+ 	}
+ 
++
++	if (np) {
++		ret = of_alias_get_id(np, "mmcblk");
++		if (ret >= 0)
++			host->mmc->devidx = ret;
++	}
++
+ 	/* write_protect */
+ 	if (boarddata->wp_type == ESDHC_WP_GPIO) {
+ 		err = mmc_gpio_request_ro(host->mmc, boarddata->wp_gpio);
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index 3b0c33a..8209f72 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -362,6 +362,8 @@ struct mmc_host {
+ 
+ 	unsigned int		slotno;	/* used for sdio acpi binding */
+ 
++	/* preferred mmc block device index (mmcblkX) */
++	unsigned int		devidx;
+ 	unsigned long		private[0] ____cacheline_aligned;
+ };
+ 
+-- 
+1.8.1.2
+
