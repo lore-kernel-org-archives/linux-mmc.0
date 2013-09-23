@@ -1,79 +1,39 @@
-From: Nicolas Ferre <nicolas.ferre@atmel.com>
-Subject: Re: [PATCH 4/7] pcmcia: at91_cf: fix deferred probe from __init
-Date: Mon, 23 Sep 2013 18:53:28 +0200
-Message-ID: <52407208.1060300@atmel.com>
-References: <20130923134028.GF21013@sirena.org.uk> <1379946452-25649-1-git-send-email-jhovold@gmail.com> <1379946452-25649-5-git-send-email-jhovold@gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1379946452-25649-5-git-send-email-jhovold@gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Johan Hovold <jhovold@gmail.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Cc: Grant Likely <grant.likely@linaro.org>, Mark Brown <broonie@linaro.org>, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, linux-mtd@lists.infradead.org, linux-pcmcia@lists.infradead.org, linux-usb@vger.kernel.org, linux-fbdev@vger.kernel.org, Jean-Christophe PLAGNIOL-VILLARD <plagnioj@jcrosoft.com>
+From: Christian Daudt <bcm-xK7y4jjYLqYh9ZMKESR00Q@public.gmane.org>
+Subject: [PATCH v2 0/4] ARCH_BCM rename
+Date: Mon, 23 Sep 2013 10:20:32 -0700
+Message-ID: <1379956836-5866-1-git-send-email-bcm@fixthebug.org>
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Olof Johansson <olof-nZhT3qVonbNeoWH0uzbU5w@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Pawel Moll <pawel.moll-5wv7dgnIgG8@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Ian Campbell <ijc+devicetree-KcIKpvwj1kUDXYZnReoRVg@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Daniel Lezcano <daniel.lezcano-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>
+Cc: Domenico Andreoli <cavokz-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Christian Daudt <csd-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>, Hauke Mehrtens <hauke-5/S+JYg5SzeELgA04lAiVw@public.gmane.org>, Matt Porter <matt.porter-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Alex Elder <alex.elder-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Christian Daudt <bcm-xK7y4jjYLqYh9ZMKESR00Q@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 23/09/2013 16:27, Johan Hovold :
-> Move probe out of __init section and don't use platform_driver_probe
-> which cannot be used with deferred probing.
->
-> Since commit e9354576 ("gpiolib: Defer failed gpio requests by default")
-> this driver might return -EPROBE_DEFER if a gpio_request fails.
->
-> Cc: Jean-Christophe PLAGNIOL-VILLARD <plagnioj@jcrosoft.com>
-> Cc: Nicolas Ferre <nicolas.ferre@atmel.com>
+Rename ARCH_BCM to ARCH_BCM_MOBILE. Currently only the 
+Broadcom mobile SoCs reside in the mach-bcm directory and are 
+chosen by the ARCH_BCM config option.
+ This patchset changes so that ARCH_BCM becomes a menu select
+for Broadcom ARM SoCs. ARCH_BCM_MOBILE is created to signify 
+the (multiplatform) Mobile SoCs.
 
-Acked-by: Nicolas Ferre <nicolas.ferre@atmel.com>
+Christian Daudt (4):
+  rename ARCH_BCM to ARCH_BCM_MOBILE (mach-bcm)
+  rename ARCH_BCM to ARCH_BCM_MOBILE (clocksource)
+  rename ARCH_BCM to ARCH_BCM_MOBILE (mmc)
+  rename ARCH_BCM to ARCH_BCM_MOBILE (dt)
 
-Thanks Johan.
-
-> Signed-off-by: Johan Hovold <jhovold@gmail.com>
-> ---
->   drivers/pcmcia/at91_cf.c | 11 +++++------
->   1 file changed, 5 insertions(+), 6 deletions(-)
->
-> diff --git a/drivers/pcmcia/at91_cf.c b/drivers/pcmcia/at91_cf.c
-> index b8f5acf..de24232 100644
-> --- a/drivers/pcmcia/at91_cf.c
-> +++ b/drivers/pcmcia/at91_cf.c
-> @@ -245,7 +245,7 @@ static int at91_cf_dt_init(struct platform_device *pdev)
->   }
->   #endif
->
-> -static int __init at91_cf_probe(struct platform_device *pdev)
-> +static int at91_cf_probe(struct platform_device *pdev)
->   {
->   	struct at91_cf_socket	*cf;
->   	struct at91_cf_data	*board = pdev->dev.platform_data;
-> @@ -354,7 +354,7 @@ fail0a:
->   	return status;
->   }
->
-> -static int __exit at91_cf_remove(struct platform_device *pdev)
-> +static int at91_cf_remove(struct platform_device *pdev)
->   {
->   	struct at91_cf_socket	*cf = platform_get_drvdata(pdev);
->
-> @@ -404,14 +404,13 @@ static struct platform_driver at91_cf_driver = {
->   		.owner		= THIS_MODULE,
->   		.of_match_table = of_match_ptr(at91_cf_dt_ids),
->   	},
-> -	.remove		= __exit_p(at91_cf_remove),
-> +	.probe		= at91_cf_probe,
-> +	.remove		= at91_cf_remove,
->   	.suspend	= at91_cf_suspend,
->   	.resume		= at91_cf_resume,
->   };
->
-> -/*--------------------------------------------------------------------------*/
-> -
-> -module_platform_driver_probe(at91_cf_driver, at91_cf_probe);
-> +module_platform_driver(at91_cf_driver);
->
->   MODULE_DESCRIPTION("AT91 Compact Flash Driver");
->   MODULE_AUTHOR("David Brownell");
->
-
+ arch/arm/boot/dts/Makefile          |    4 ++--
+ arch/arm/configs/bcm_defconfig      |    1 +
+ arch/arm/configs/multi_v7_defconfig |    1 +
+ arch/arm/mach-bcm/Kconfig           |   20 ++++++++++++++++++--
+ arch/arm/mach-bcm/Makefile          |    2 +-
+ drivers/clocksource/Makefile        |    2 +-
+ drivers/mmc/host/Kconfig            |    2 +-
+ 7 files changed, 25 insertions(+), 7 deletions(-)
 
 -- 
-Nicolas Ferre
+1.7.10.4
+
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
