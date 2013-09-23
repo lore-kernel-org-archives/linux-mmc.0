@@ -1,78 +1,112 @@
 From: Johan Hovold <jhovold@gmail.com>
-Subject: [PATCH 2/7] mmc: mvsdio: fix deferred probe from __init
-Date: Mon, 23 Sep 2013 16:27:27 +0200
-Message-ID: <1379946452-25649-3-git-send-email-jhovold@gmail.com>
+Subject: [PATCH 1/7] driver core: prevent deferred probe with
+ platform_driver_probe
+Date: Mon, 23 Sep 2013 16:27:26 +0200
+Message-ID: <1379946452-25649-2-git-send-email-jhovold@gmail.com>
 References: <20130923134028.GF21013@sirena.org.uk>
  <1379946452-25649-1-git-send-email-jhovold@gmail.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mtd-bounces+gldm-linux-mtd-36=gmane.org@lists.infradead.org>
 In-Reply-To: <1379946452-25649-1-git-send-email-jhovold@gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-mtd>,
+ <mailto:linux-mtd-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-mtd/>
+List-Post: <mailto:linux-mtd@lists.infradead.org>
+List-Help: <mailto:linux-mtd-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-mtd>,
+ <mailto:linux-mtd-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-mtd" <linux-mtd-bounces@lists.infradead.org>
+Errors-To: linux-mtd-bounces+gldm-linux-mtd-36=gmane.org@lists.infradead.org
 To: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Cc: Grant Likely <grant.likely@linaro.org>, Mark Brown <broonie@linaro.org>, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, linux-mtd@lists.infradead.org, linux-pcmcia@lists.infradead.org, linux-usb@vger.kernel.org, linux-fbdev@vger.kernel.org, Johan Hovold <jhovold@gmail.com>, Nicolas Pitre <nico@fluxnic.net>, Chris Ball <cjb@laptop.org>
+Cc: linux-fbdev@vger.kernel.org, linux-usb@vger.kernel.org, Mark Brown <broonie@linaro.org>, Johan Hovold <jhovold@gmail.com>, linux-pcmcia@lists.infradead.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mtd@lists.infradead.org, Grant Likely <grant.likely@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Move probe out of __init section and don't use platform_driver_probe
-which cannot be used with deferred probing.
+Prevent drivers relying on platform_driver_probe from requesting
+deferred probing in order to avoid further futile probe attempts (either
+the driver has been unregistered or its probe function has been set to
+platform_drv_probe_fail when probing is retried).
 
-Since commit e9354576 ("gpiolib: Defer failed gpio requests by default")
-this driver might return -EPROBE_DEFER if the mmc_gpio_request_cd fails.
+Note that several platform drivers currently return subsystem errors
+from probe and that these can include -EPROBE_DEFER (e.g. if a gpio
+request fails).
 
-Cc: Nicolas Pitre <nico@fluxnic.net>
-Cc: Chris Ball <cjb@laptop.org>
+Add a warning to platform_drv_probe that can be used to catch drivers
+that inadvertently request probe deferral while using
+platform_driver_probe.
+
 Signed-off-by: Johan Hovold <jhovold@gmail.com>
 ---
- drivers/mmc/host/mvsdio.c | 11 ++++++-----
- 1 file changed, 6 insertions(+), 5 deletions(-)
+ drivers/base/platform.c         | 17 +++++++++++++----
+ include/linux/platform_device.h |  1 +
+ 2 files changed, 14 insertions(+), 4 deletions(-)
 
-diff --git a/drivers/mmc/host/mvsdio.c b/drivers/mmc/host/mvsdio.c
-index 06c5b0b..deecee0 100644
---- a/drivers/mmc/host/mvsdio.c
-+++ b/drivers/mmc/host/mvsdio.c
-@@ -655,7 +655,7 @@ static const struct mmc_host_ops mvsd_ops = {
- 	.enable_sdio_irq	= mvsd_enable_sdio_irq,
- };
+diff --git a/drivers/base/platform.c b/drivers/base/platform.c
+index 4f8bef3..47051cd 100644
+--- a/drivers/base/platform.c
++++ b/drivers/base/platform.c
+@@ -488,6 +488,11 @@ static int platform_drv_probe(struct device *_dev)
+ 	if (ret && ACPI_HANDLE(_dev))
+ 		acpi_dev_pm_detach(_dev, true);
  
--static void __init
-+static void
- mv_conf_mbus_windows(struct mvsd_host *host,
- 		     const struct mbus_dram_target_info *dram)
- {
-@@ -677,7 +677,7 @@ mv_conf_mbus_windows(struct mvsd_host *host,
- 	}
- }
- 
--static int __init mvsd_probe(struct platform_device *pdev)
-+static int mvsd_probe(struct platform_device *pdev)
- {
- 	struct device_node *np = pdev->dev.of_node;
- 	struct mmc_host *mmc = NULL;
-@@ -819,7 +819,7 @@ out:
++	if (drv->prevent_deferred_probe && ret == -EPROBE_DEFER) {
++		dev_warn(_dev, "probe deferral not supported\n");
++		ret = -ENXIO;
++	}
++
  	return ret;
  }
  
--static int __exit mvsd_remove(struct platform_device *pdev)
-+static int mvsd_remove(struct platform_device *pdev)
+@@ -553,8 +558,7 @@ EXPORT_SYMBOL_GPL(platform_driver_unregister);
+ /**
+  * platform_driver_probe - register driver for non-hotpluggable device
+  * @drv: platform driver structure
+- * @probe: the driver probe routine, probably from an __init section,
+- *         must not return -EPROBE_DEFER.
++ * @probe: the driver probe routine, probably from an __init section
+  *
+  * Use this instead of platform_driver_register() when you know the device
+  * is not hotpluggable and has already been registered, and you want to
+@@ -565,8 +569,7 @@ EXPORT_SYMBOL_GPL(platform_driver_unregister);
+  * into system-on-chip processors, where the controller devices have been
+  * configured as part of board setup.
+  *
+- * This is incompatible with deferred probing so probe() must not
+- * return -EPROBE_DEFER.
++ * Note that this is incompatible with deferred probing.
+  *
+  * Returns zero if the driver registered and bound to a device, else returns
+  * a negative error code and with the driver not registered.
+@@ -576,6 +579,12 @@ int __init_or_module platform_driver_probe(struct platform_driver *drv,
  {
- 	struct mmc_host *mmc = platform_get_drvdata(pdev);
+ 	int retval, code;
  
-@@ -872,7 +872,8 @@ static const struct of_device_id mvsdio_dt_ids[] = {
- MODULE_DEVICE_TABLE(of, mvsdio_dt_ids);
++	/*
++	 * Prevent driver from requesting probe deferral to avoid further
++	 * futile probe attempts.
++	 */
++	drv->prevent_deferred_probe = true;
++
+ 	/* make sure driver won't have bind/unbind attributes */
+ 	drv->driver.suppress_bind_attrs = true;
  
- static struct platform_driver mvsd_driver = {
--	.remove		= __exit_p(mvsd_remove),
-+	.probe		= mvsd_probe,
-+	.remove		= mvsd_remove,
- 	.suspend	= mvsd_suspend,
- 	.resume		= mvsd_resume,
- 	.driver		= {
-@@ -881,7 +882,7 @@ static struct platform_driver mvsd_driver = {
- 	},
+diff --git a/include/linux/platform_device.h b/include/linux/platform_device.h
+index ce8e4ff..16f6654 100644
+--- a/include/linux/platform_device.h
++++ b/include/linux/platform_device.h
+@@ -178,6 +178,7 @@ struct platform_driver {
+ 	int (*resume)(struct platform_device *);
+ 	struct device_driver driver;
+ 	const struct platform_device_id *id_table;
++	bool prevent_deferred_probe;
  };
  
--module_platform_driver_probe(mvsd_driver, mvsd_probe);
-+module_platform_driver(mvsd_driver);
- 
- /* maximum card clock frequency (default 50MHz) */
- module_param(maxfreq, int, 0);
+ #define to_platform_driver(drv)	(container_of((drv), struct platform_driver, \
 -- 
 1.8.3.2
+
+
+______________________________________________________
+Linux MTD discussion mailing list
+http://lists.infradead.org/mailman/listinfo/linux-mtd/
