@@ -1,84 +1,76 @@
-From: Johan Hovold <jhovold@gmail.com>
-Subject: [PATCH 6/7] usb: phy: gpio-vbus: fix deferred probe from __init
-Date: Mon, 23 Sep 2013 16:27:31 +0200
-Message-ID: <1379946452-25649-7-git-send-email-jhovold@gmail.com>
+From: Johan Hovold <jhovold-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: [PATCH 5/7] usb: gadget: pxa25x_udc: fix deferred probe from __init
+Date: Mon, 23 Sep 2013 16:27:30 +0200
+Message-ID: <1379946452-25649-6-git-send-email-jhovold@gmail.com>
 References: <20130923134028.GF21013@sirena.org.uk>
  <1379946452-25649-1-git-send-email-jhovold@gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-pcmcia-bounces+glkpd-linux-pcmcia=m.gmane.org@lists.infradead.org>
-In-Reply-To: <1379946452-25649-1-git-send-email-jhovold@gmail.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-pcmcia>,
- <mailto:linux-pcmcia-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-pcmcia/>
-List-Post: <mailto:linux-pcmcia@lists.infradead.org>
-List-Help: <mailto:linux-pcmcia-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-pcmcia>,
- <mailto:linux-pcmcia-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-pcmcia" <linux-pcmcia-bounces@lists.infradead.org>
-Errors-To: linux-pcmcia-bounces+glkpd-linux-pcmcia=m.gmane.org@lists.infradead.org
-To: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Cc: linux-fbdev@vger.kernel.org, linux-usb@vger.kernel.org, Mark Brown <broonie@linaro.org>, Johan Hovold <jhovold@gmail.com>, linux-pcmcia@lists.infradead.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Felipe Balbi <balbi@ti.com>, linux-mtd@lists.infradead.org, Grant Likely <grant.likely@linaro.org>
+Return-path: <linux-usb-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1379946452-25649-1-git-send-email-jhovold-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Sender: linux-usb-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>
+Cc: Grant Likely <grant.likely-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Mark Brown <broonie-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mtd-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-pcmcia-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-usb-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-fbdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Johan Hovold <jhovold-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Eric Miao <eric.y.miao-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Haojian Zhuang <haojian.zhuang-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Felipe Balbi <balbi-l0cyMroinI0@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
 Move probe out of __init section and don't use platform_driver_probe
 which cannot be used with deferred probing.
 
 Since commit e9354576 ("gpiolib: Defer failed gpio requests by default")
-and 04bf3011 ("regulator: Support driver probe deferral") this driver
-might return -EPROBE_DEFER if a gpio_request or regulator_get fails.
+this driver might return -EPROBE_DEFER if a gpio_request fails.
 
-Cc: Felipe Balbi <balbi@ti.com>
-Signed-off-by: Johan Hovold <jhovold@gmail.com>
+Cc: Eric Miao <eric.y.miao-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>
+Cc: Haojian Zhuang <haojian.zhuang-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: Felipe Balbi <balbi-l0cyMroinI0@public.gmane.org>
+Signed-off-by: Johan Hovold <jhovold-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
 ---
- drivers/usb/phy/phy-gpio-vbus-usb.c | 11 +++++------
- 1 file changed, 5 insertions(+), 6 deletions(-)
+ drivers/usb/gadget/pxa25x_udc.c | 9 +++++----
+ 1 file changed, 5 insertions(+), 4 deletions(-)
 
-diff --git a/drivers/usb/phy/phy-gpio-vbus-usb.c b/drivers/usb/phy/phy-gpio-vbus-usb.c
-index b2f29c9..02799a5 100644
---- a/drivers/usb/phy/phy-gpio-vbus-usb.c
-+++ b/drivers/usb/phy/phy-gpio-vbus-usb.c
-@@ -241,7 +241,7 @@ static int gpio_vbus_set_suspend(struct usb_phy *phy, int suspend)
- 
- /* platform driver interface */
- 
--static int __init gpio_vbus_probe(struct platform_device *pdev)
-+static int gpio_vbus_probe(struct platform_device *pdev)
+diff --git a/drivers/usb/gadget/pxa25x_udc.c b/drivers/usb/gadget/pxa25x_udc.c
+index cc92074..0ac6064 100644
+--- a/drivers/usb/gadget/pxa25x_udc.c
++++ b/drivers/usb/gadget/pxa25x_udc.c
+@@ -2054,7 +2054,7 @@ static struct pxa25x_udc memory = {
+ /*
+  *	probe - binds to the platform device
+  */
+-static int __init pxa25x_udc_probe(struct platform_device *pdev)
++static int pxa25x_udc_probe(struct platform_device *pdev)
  {
- 	struct gpio_vbus_mach_info *pdata = dev_get_platdata(&pdev->dev);
- 	struct gpio_vbus_data *gpio_vbus;
-@@ -349,7 +349,7 @@ err_gpio:
- 	return err;
+ 	struct pxa25x_udc *dev = &memory;
+ 	int retval, irq;
+@@ -2203,7 +2203,7 @@ static void pxa25x_udc_shutdown(struct platform_device *_dev)
+ 	pullup_off();
  }
  
--static int __exit gpio_vbus_remove(struct platform_device *pdev)
-+static int gpio_vbus_remove(struct platform_device *pdev)
+-static int __exit pxa25x_udc_remove(struct platform_device *pdev)
++static int pxa25x_udc_remove(struct platform_device *pdev)
  {
- 	struct gpio_vbus_data *gpio_vbus = platform_get_drvdata(pdev);
- 	struct gpio_vbus_mach_info *pdata = dev_get_platdata(&pdev->dev);
-@@ -398,8 +398,6 @@ static const struct dev_pm_ops gpio_vbus_dev_pm_ops = {
- };
- #endif
+ 	struct pxa25x_udc *dev = platform_get_drvdata(pdev);
  
--/* NOTE:  the gpio-vbus device may *NOT* be hotplugged */
--
- MODULE_ALIAS("platform:gpio-vbus");
+@@ -2294,7 +2294,8 @@ static int pxa25x_udc_resume(struct platform_device *dev)
  
- static struct platform_driver gpio_vbus_driver = {
-@@ -410,10 +408,11 @@ static struct platform_driver gpio_vbus_driver = {
- 		.pm = &gpio_vbus_dev_pm_ops,
- #endif
+ static struct platform_driver udc_driver = {
+ 	.shutdown	= pxa25x_udc_shutdown,
+-	.remove		= __exit_p(pxa25x_udc_remove),
++	.probe		= pxa25x_udc_probe,
++	.remove		= pxa25x_udc_remove,
+ 	.suspend	= pxa25x_udc_suspend,
+ 	.resume		= pxa25x_udc_resume,
+ 	.driver		= {
+@@ -2303,7 +2304,7 @@ static struct platform_driver udc_driver = {
  	},
--	.remove  = __exit_p(gpio_vbus_remove),
-+	.probe		= gpio_vbus_probe,
-+	.remove		= gpio_vbus_remove,
  };
  
--module_platform_driver_probe(gpio_vbus_driver, gpio_vbus_probe);
-+module_platform_driver(gpio_vbus_driver);
+-module_platform_driver_probe(udc_driver, pxa25x_udc_probe);
++module_platform_driver(udc_driver);
  
- MODULE_DESCRIPTION("simple GPIO controlled OTG transceiver driver");
- MODULE_AUTHOR("Philipp Zabel");
+ MODULE_DESCRIPTION(DRIVER_DESC);
+ MODULE_AUTHOR("Frank Becker, Robert Schwebel, David Brownell");
 -- 
 1.8.3.2
+
+--
+To unsubscribe from this list: send the line "unsubscribe linux-usb" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
