@@ -1,143 +1,191 @@
-From: <dinguyen-EIB2kfCEclfQT0dZR+AlfA@public.gmane.org>
-Subject: [PATCHv2 2/3] mmc: dw_mmc-socfpga: Clean up SOCFPGA platform specific functionality
-Date: Mon, 23 Sep 2013 17:35:59 -0500
-Message-ID: <1379975760-18084-2-git-send-email-dinguyen@altera.com>
-References: <1379975760-18084-1-git-send-email-dinguyen@altera.com>
+From: Haijun Zhang <Haijun.Zhang@freescale.com>
+Subject: [PATCH V3] mmc:core: Avoid useless detecting task when card is busy
+Date: Tue, 24 Sep 2013 10:08:31 +0800
+Message-ID: <1379988511-1111-1-git-send-email-Haijun.Zhang@freescale.com>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1379975760-18084-1-git-send-email-dinguyen-EIB2kfCEclfQT0dZR+AlfA@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: dinh.linux-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org
-Cc: Dinh Nguyen <dinguyen-EIB2kfCEclfQT0dZR+AlfA@public.gmane.org>, Pavel Machek <pavel-ynQEQJNshbs@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Olof Johansson <olof-nZhT3qVonbNeoWH0uzbU5w@public.gmane.org>, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Pawel Moll <pawel.moll-5wv7dgnIgG8@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>, Ian Campbell <ian.campbell-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org>, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, Seungwon Jeon <tgih.jun-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-db9lp0252.outbound.messaging.microsoft.com ([213.199.154.252]:54435
+	"EHLO db9outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1753434Ab3IXCN4 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 23 Sep 2013 22:13:56 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: cbouatmailru@gmail.com, cjb@laptop.org, scottwood@freescale.com, X.Xie@freescale.com, ulf.hansson@linaro.org, Haijun Zhang <Haijun.Zhang@freescale.com>, Haijun Zhang <haijun.zhang@freescale.com>
 
-From: Dinh Nguyen <dinguyen-EIB2kfCEclfQT0dZR+AlfA@public.gmane.org>
+When card is in cpu polling mode to detect card present. Card detecting
+task will be scheduled about once every second. When card is busy in large
+file transfer, detecting task will be hang and call trace will be prompt.
+When handling the request, CMD13 is always followed by every command when
+it was complete. So assume that card is present to avoid this duplicate
+detecting. Only polling card when card is free to reduce conflict with
+data transfer.
 
-The SDR timing registers for the SD/MMC IP block for SOCFPGA is located
-in the system manager. This system manager IP block is located outside of
-the SD IP block itself. Therefore, the function to set the SDR timing
-register should be in the platform specific code so that the SD driver can
-be autonomous of any future System Manager changes.
+<7>mmc0: req done (CMD13): 0: 00000e00 00000000 00000000 00000000
+INFO: task kworker/u:1:12 blocked for more than 120 seconds.
+"echo 0 > /proc/sys/kernel/hung_task_timeout_secs" disables this message.
+kworker/u:1     D 00000000     0    12      2 0x00000000
+Call Trace:
+[ee06dd50] [44042028] 0x44042028
+(unreliable)
+[ee06de10] [c0007a0c] __switch_to+0xa0/0xf0
+[ee06de30] [c04dd50c] __schedule+0x1f8/0x4a4
 
-Also, there is no need for "altr,dw-mshc-ciu-div" as the driver can get
-the value of the CIU clock from the common clock API.
+[ee06dea0] [c04dd898] schedule+0x30/0xbc
 
-Signed-off-by: Dinh Nguyen <dinguyen-EIB2kfCEclfQT0dZR+AlfA@public.gmane.org>
-Cc: Pavel Machek <pavel-ynQEQJNshbs@public.gmane.org>
-CC: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
-CC: Olof Johansson <olof-nZhT3qVonbNeoWH0uzbU5w@public.gmane.org>
-Cc: Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>
-Cc: Pawel Moll <pawel.moll-5wv7dgnIgG8@public.gmane.org>
-Cc: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
-Cc: Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>
-Cc: Ian Campbell <ian.campbell-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org>
-Cc: Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>
-Cc: Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
-Cc: Seungwon Jeon <tgih.jun-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
-Cc: devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-CC: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+[ee06deb0] [c03816a4] __mmc_claim_host+0x98/0x19c
+
+[ee06df00] [c0385f88] mmc_sd_detect+0x38/0xc0
+
+[ee06df10] [c0382b0c] mmc_rescan+0x294/0x2e0
+[ee06df40] [c00661cc] process_one_work+0x140/0x3e0
+
+[ee06df70] [c0066bf8] worker_thread+0x18c/0x36c
+[ee06dfb0] [c006bf10] kthread+0x7c/0x80
+
+[ee06dff0] [c000de58] kernel_thread+0x4c/0x68
+<7>sdhci [sdhci_irq()]: *** mmc0 got interrupt: 0x00000001
+
+Signed-off-by: Haijun Zhang <haijun.zhang@freescale.com>
 ---
-v2:
-- Let the mmc driver walk the DTB to get the SDR values
----
----
- drivers/mmc/host/dw_mmc-socfpga.c |   38 +++++++++----------------------------
- 1 file changed, 9 insertions(+), 29 deletions(-)
+changes for V3:
+	- Remove mmc_try_claim_host.
+changes for V2:
+	- Add card detecting once the last request is done.
 
-diff --git a/drivers/mmc/host/dw_mmc-socfpga.c b/drivers/mmc/host/dw_mmc-socfpga.c
-index 14b5961..3be2e2a 100644
---- a/drivers/mmc/host/dw_mmc-socfpga.c
-+++ b/drivers/mmc/host/dw_mmc-socfpga.c
-@@ -24,16 +24,12 @@
- #include "dw_mmc.h"
- #include "dw_mmc-pltfm.h"
+ drivers/mmc/card/block.c | 29 +++++++++++++++++++++++++++--
+ drivers/mmc/core/mmc.c   |  5 +++++
+ drivers/mmc/core/sd.c    |  5 +++++
+ drivers/mmc/core/sdio.c  |  5 +++++
+ 4 files changed, 42 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+index 1a3163f..d1f1730 100644
+--- a/drivers/mmc/card/block.c
++++ b/drivers/mmc/card/block.c
+@@ -1960,9 +1960,21 @@ static int mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
+ 	struct mmc_host *host = card->host;
+ 	unsigned long flags;
  
--#define SYSMGR_SDMMCGRP_CTRL_OFFSET		0x108
--#define DRV_CLK_PHASE_SHIFT_SEL_MASK	0x7
--#define SYSMGR_SDMMC_CTRL_SET(smplsel, drvsel)          \
--	((((smplsel) & 0x7) << 3) | (((drvsel) & 0x7) << 0))
-+extern void socfpga_sysmgr_set_dwmmc_drvsel_smpsel(u32 drvsel, u32 smplsel);
- 
- /* SOCFPGA implementation specific driver private data */
- struct dw_mci_socfpga_priv_data {
--	u8	ciu_div; /* card interface unit divisor */
--	u32	hs_timing; /* bitmask for CIU clock phase shift */
--	struct regmap   *sysreg; /* regmap for system manager register */
-+	u32     drvsel; /*Phase shift for the Drive clock, or tx mode.*/
-+	u32	smplsel; /*Phase shift for the Sample clock, or rx mode.*/
- };
- 
- static int dw_mci_socfpga_priv_init(struct dw_mci *host)
-@@ -45,14 +41,7 @@ static int dw_mci_socfpga_priv_init(struct dw_mci *host)
- 		dev_err(host->dev, "mem alloc failed for private data\n");
- 		return -ENOMEM;
- 	}
--
--	priv->sysreg = syscon_regmap_lookup_by_compatible("altr,sys-mgr");
--	if (IS_ERR(priv->sysreg)) {
--		dev_err(host->dev, "regmap for altr,sys-mgr lookup failed.\n");
--		return PTR_ERR(priv->sysreg);
--	}
- 	host->priv = priv;
--
- 	return 0;
- }
- 
-@@ -61,20 +50,15 @@ static int dw_mci_socfpga_setup_clock(struct dw_mci *host)
- 	struct dw_mci_socfpga_priv_data *priv = host->priv;
- 
- 	clk_disable_unprepare(host->ciu_clk);
--	regmap_write(priv->sysreg, SYSMGR_SDMMCGRP_CTRL_OFFSET,
--		priv->hs_timing);
-+	socfpga_sysmgr_set_dwmmc_drvsel_smpsel(priv->drvsel, priv->smplsel);
- 	clk_prepare_enable(host->ciu_clk);
- 
--	host->bus_hz /= (priv->ciu_div + 1);
- 	return 0;
- }
- 
- static void dw_mci_socfpga_prepare_command(struct dw_mci *host, u32 *cmdr)
- {
--	struct dw_mci_socfpga_priv_data *priv = host->priv;
--
--	if (priv->hs_timing & DRV_CLK_PHASE_SHIFT_SEL_MASK)
--		*cmdr |= SDMMC_CMD_USE_HOLD_REG;
-+	*cmdr |= SDMMC_CMD_USE_HOLD_REG;
- }
- 
- static int dw_mci_socfpga_parse_dt(struct dw_mci *host)
-@@ -82,20 +66,16 @@ static int dw_mci_socfpga_parse_dt(struct dw_mci *host)
- 	struct dw_mci_socfpga_priv_data *priv = host->priv;
- 	struct device_node *np = host->dev->of_node;
- 	u32 timing[2];
--	u32 div = 0;
- 	int ret;
- 
--	ret = of_property_read_u32(np, "altr,dw-mshc-ciu-div", &div);
--	if (ret)
--		dev_info(host->dev, "No dw-mshc-ciu-div specified, assuming 1");
--	priv->ciu_div = div;
--
- 	ret = of_property_read_u32_array(np,
--			"altr,dw-mshc-sdr-timing", timing, 2);
-+		"samsung,dw-mshc-sdr-timing", timing, 2);
- 	if (ret)
- 		return ret;
- 
--	priv->hs_timing = SYSMGR_SDMMC_CTRL_SET(timing[0], timing[1]);
-+	priv->drvsel = timing[0];
-+	priv->smplsel = timing[1];
+-	if (req && !mq->mqrq_prev->req)
++	if (req && !mq->mqrq_prev->req) {
++		/*
++		 * When we are here, card polling task will be blocked.
++		 * So disable it to avoid this useless schedule.
++		 */
++		if (host->caps & MMC_CAP_NEEDS_POLL) {
++			spin_lock_irqsave(&host->lock, flags);
++			host->rescan_disable = 1;
++			spin_unlock_irqrestore(&host->lock, flags);
++			cancel_delayed_work(&host->detect);
++		}
 +
- 	return 0;
+ 		/* claim host only for the first request */
+ 		mmc_get_card(card);
++	}
+ 
+ 	ret = mmc_blk_part_switch(card, md);
+ 	if (ret) {
+@@ -1999,7 +2011,7 @@ static int mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
+ 
+ out:
+ 	if ((!req && !(mq->flags & MMC_QUEUE_NEW_REQUEST)) ||
+-	     (req && (req->cmd_flags & MMC_REQ_SPECIAL_MASK)))
++			(req && (req->cmd_flags & MMC_REQ_SPECIAL_MASK))) {
+ 		/*
+ 		 * Release host when there are no more requests
+ 		 * and after special request(discard, flush) is done.
+@@ -2007,6 +2019,19 @@ out:
+ 		 * the 'mmc_blk_issue_rq' with 'mqrq_prev->req'.
+ 		 */
+ 		mmc_put_card(card);
++
++		/*
++		 * Detecting card status immediately in case card being
++		 * removed just after the request is complete.
++		 */
++		if (host->caps & MMC_CAP_NEEDS_POLL) {
++			spin_lock_irqsave(&host->lock, flags);
++			host->rescan_disable = 0;
++			spin_unlock_irqrestore(&host->lock, flags);
++			mmc_detect_change(host, 0);
++		}
++	}
++
+ 	return ret;
  }
  
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index 6d02012..4bdf68c 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -1443,6 +1443,7 @@ static int mmc_alive(struct mmc_host *host)
+ static void mmc_detect(struct mmc_host *host)
+ {
+ 	int err;
++	unsigned long flags;
+ 
+ 	BUG_ON(!host);
+ 	BUG_ON(!host->card);
+@@ -1457,6 +1458,10 @@ static void mmc_detect(struct mmc_host *host)
+ 	mmc_put_card(host->card);
+ 
+ 	if (err) {
++		spin_lock_irqsave(&host->lock, flags);
++		host->rescan_disable = 0;
++		spin_unlock_irqrestore(&host->lock, flags);
++
+ 		mmc_remove(host);
+ 
+ 		mmc_claim_host(host);
+diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
+index 5e8823d..c87203c 100644
+--- a/drivers/mmc/core/sd.c
++++ b/drivers/mmc/core/sd.c
+@@ -1041,6 +1041,7 @@ static int mmc_sd_alive(struct mmc_host *host)
+ static void mmc_sd_detect(struct mmc_host *host)
+ {
+ 	int err;
++	unsigned long flags;
+ 
+ 	BUG_ON(!host);
+ 	BUG_ON(!host->card);
+@@ -1055,6 +1056,10 @@ static void mmc_sd_detect(struct mmc_host *host)
+ 	mmc_put_card(host->card);
+ 
+ 	if (err) {
++		spin_lock_irqsave(&host->lock, flags);
++		host->rescan_disable = 0;
++		spin_unlock_irqrestore(&host->lock, flags);
++
+ 		mmc_sd_remove(host);
+ 
+ 		mmc_claim_host(host);
+diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
+index 80d89cff..a59e34b 100644
+--- a/drivers/mmc/core/sdio.c
++++ b/drivers/mmc/core/sdio.c
+@@ -862,6 +862,7 @@ static int mmc_sdio_alive(struct mmc_host *host)
+ static void mmc_sdio_detect(struct mmc_host *host)
+ {
+ 	int err;
++	unsigned long flags;
+ 
+ 	BUG_ON(!host);
+ 	BUG_ON(!host->card);
+@@ -900,6 +901,10 @@ static void mmc_sdio_detect(struct mmc_host *host)
+ 
+ out:
+ 	if (err) {
++		spin_lock_irqsave(&host->lock, flags);
++		host->rescan_disable = 0;
++		spin_unlock_irqrestore(&host->lock, flags);
++
+ 		mmc_sdio_remove(host);
+ 
+ 		mmc_claim_host(host);
 -- 
-1.7.9.5
+1.8.0
 
 
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
