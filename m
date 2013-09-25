@@ -1,141 +1,34 @@
-From: Haijun Zhang <Haijun.Zhang@freescale.com>
-Subject: [PATCH v4] mmc:core: Avoid useless detecting task when card is busy
-Date: Wed, 25 Sep 2013 10:31:40 +0800
-Message-ID: <1380076300-793-1-git-send-email-Haijun.Zhang@freescale.com>
+From: reg Kroah-Hartman <gregkh@linuxfoundation.org>
+Subject: Re: [PATCH 1/2] mmc:sdhci-pci:Add O2Micor/BayHubTect PCI SD Host
+Date: Tue, 24 Sep 2013 20:30:55 -0700
+Message-ID: <20130925033055.GA29234@kroah.com>
+References: <9ac149a4448d4d99a280a37b104da1e3@BN1PR04MB091.namprd04.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from am1ehsobe006.messaging.microsoft.com ([213.199.154.209]:34150
-	"EHLO am1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1754953Ab3IYChN (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 24 Sep 2013 22:37:13 -0400
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <9ac149a4448d4d99a280a37b104da1e3@BN1PR04MB091.namprd04.prod.outlook.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Peter Guo <peter.guo@bayhubtech.com>
+Cc: Chris Ball <cjb@laptop.org>, Bjorn Helgaas <bhelgaas@google.com>, Adrian Hunter <adrian.hunter@intel.com>, Bill Pemberton <wfp5p@virginia.edu>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-pci@vger.kernel.org" <linux-pci@vger.kernel.org>, Samuel Guan <samuel.guan@bayhubtech.com>
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: cbouatmailru@gmail.com, cjb@laptop.org, scottwood@freescale.com, X.Xie@freescale.com, ulf.hansson@linaro.org, Haijun Zhang <Haijun.Zhang@freescale.com>, Haijun Zhang <haijun.zhang@freescale.com>
 
-When card is in cpu polling mode to detect card present. Card detecting
-task will be scheduled about once every second. When card is busy in large
-file transfer, detecting task will be hang and call trace will be prompt.
-When handling the request, CMD13 is always followed by every command when
-it was complete. So assume that card is present to avoid this duplicate
-detecting. Only polling card when card is free to reduce conflict with
-data transfer.
+On Wed, Sep 25, 2013 at 03:20:07AM +0000, Peter Guo wrote:
+> --- a/include/linux/pci_ids.h
+> +++ b/include/linux/pci_ids.h
+> @@ -1700,6 +1700,11 @@
+>  #define PCI_DEVICE_ID_O2_8221		0x8221
+>  #define PCI_DEVICE_ID_O2_8320		0x8320
+>  #define PCI_DEVICE_ID_O2_8321		0x8321
+> +#define PCI_DEVICE_ID_O2_8520		0x8520
+> +#define	PCI_DEVICE_ID_O2_8420		0x8420
+> +#define	PCI_DEVICE_ID_O2_8421		0x8421
+> +#define	PCI_DEVICE_ID_O2_8620		0x8620
+> +#define	PCI_DEVICE_ID_O2_8621		0x8621
 
-<7>mmc0: req done (CMD13): 0: 00000e00 00000000 00000000 00000000
-INFO: task kworker/u:1:12 blocked for more than 120 seconds.
-"echo 0 > /proc/sys/kernel/hung_task_timeout_secs" disables this message.
-kworker/u:1     D 00000000     0    12      2 0x00000000
-Call Trace:
-[ee06dd50] [44042028] 0x44042028
-(unreliable)
-[ee06de10] [c0007a0c] __switch_to+0xa0/0xf0
-[ee06de30] [c04dd50c] __schedule+0x1f8/0x4a4
+Please read the top of this file for why you shouldn't be adding new
+device ids to it.
 
-[ee06dea0] [c04dd898] schedule+0x30/0xbc
+thanks,
 
-[ee06deb0] [c03816a4] __mmc_claim_host+0x98/0x19c
-
-[ee06df00] [c0385f88] mmc_sd_detect+0x38/0xc0
-
-[ee06df10] [c0382b0c] mmc_rescan+0x294/0x2e0
-[ee06df40] [c00661cc] process_one_work+0x140/0x3e0
-
-[ee06df70] [c0066bf8] worker_thread+0x18c/0x36c
-[ee06dfb0] [c006bf10] kthread+0x7c/0x80
-
-[ee06dff0] [c000de58] kernel_thread+0x4c/0x68
-<7>sdhci [sdhci_irq()]: *** mmc0 got interrupt: 0x00000001
-
-Signed-off-by: Haijun Zhang <haijun.zhang@freescale.com>
----
-changes for V4:
-	- Enable detect change during req error recovery
-
- drivers/mmc/card/block.c | 29 +++++++++++++++++++++++++++--
- drivers/mmc/core/core.c  |  5 +++++
- 2 files changed, 32 insertions(+), 2 deletions(-)
-
-diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-index 1a3163f..d1f1730 100644
---- a/drivers/mmc/card/block.c
-+++ b/drivers/mmc/card/block.c
-@@ -1960,9 +1960,21 @@ static int mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
- 	struct mmc_host *host = card->host;
- 	unsigned long flags;
- 
--	if (req && !mq->mqrq_prev->req)
-+	if (req && !mq->mqrq_prev->req) {
-+		/*
-+		 * When we are here, card polling task will be blocked.
-+		 * So disable it to avoid this useless schedule.
-+		 */
-+		if (host->caps & MMC_CAP_NEEDS_POLL) {
-+			spin_lock_irqsave(&host->lock, flags);
-+			host->rescan_disable = 1;
-+			spin_unlock_irqrestore(&host->lock, flags);
-+			cancel_delayed_work(&host->detect);
-+		}
-+
- 		/* claim host only for the first request */
- 		mmc_get_card(card);
-+	}
- 
- 	ret = mmc_blk_part_switch(card, md);
- 	if (ret) {
-@@ -1999,7 +2011,7 @@ static int mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
- 
- out:
- 	if ((!req && !(mq->flags & MMC_QUEUE_NEW_REQUEST)) ||
--	     (req && (req->cmd_flags & MMC_REQ_SPECIAL_MASK)))
-+			(req && (req->cmd_flags & MMC_REQ_SPECIAL_MASK))) {
- 		/*
- 		 * Release host when there are no more requests
- 		 * and after special request(discard, flush) is done.
-@@ -2007,6 +2019,19 @@ out:
- 		 * the 'mmc_blk_issue_rq' with 'mqrq_prev->req'.
- 		 */
- 		mmc_put_card(card);
-+
-+		/*
-+		 * Detecting card status immediately in case card being
-+		 * removed just after the request is complete.
-+		 */
-+		if (host->caps & MMC_CAP_NEEDS_POLL) {
-+			spin_lock_irqsave(&host->lock, flags);
-+			host->rescan_disable = 0;
-+			spin_unlock_irqrestore(&host->lock, flags);
-+			mmc_detect_change(host, 0);
-+		}
-+	}
-+
- 	return ret;
- }
- 
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index bf18b6b..fea6caf 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -2400,6 +2400,7 @@ int mmc_detect_card_removed(struct mmc_host *host)
- {
- 	struct mmc_card *card = host->card;
- 	int ret;
-+	unsigned long flags;
- 
- 	WARN_ON(!host->claimed);
- 
-@@ -2414,6 +2415,10 @@ int mmc_detect_card_removed(struct mmc_host *host)
- 	if (!host->detect_change && !(host->caps & MMC_CAP_NEEDS_POLL))
- 		return ret;
- 
-+	spin_lock_irqsave(&host->lock, flags);
-+	host->rescan_disable = 0;
-+	spin_unlock_irqrestore(&host->lock, flags);
-+
- 	host->detect_change = 0;
- 	if (!ret) {
- 		ret = _mmc_detect_card_removed(host);
--- 
-1.8.0
-
-
+greg k-h
