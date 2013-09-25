@@ -1,7 +1,7 @@
 From: Tony Lindgren <tony@atomide.com>
-Subject: [PATCH 1/2] mmc: omap_hsmmc: Fix context save and restore for DT
-Date: Wed, 25 Sep 2013 16:47:37 -0700
-Message-ID: <20130925234737.3745.64262.stgit@localhost>
+Subject: [PATCH 2/2] mmc: omap_hsmmc: Enable SDIO interrupt
+Date: Wed, 25 Sep 2013 16:47:40 -0700
+Message-ID: <20130925234740.3745.50637.stgit@localhost>
 References: <20130925234544.3745.55170.stgit@localhost>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
@@ -13,114 +13,199 @@ To: cjb@laptop.org
 Cc: linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, Balaji T K <balajitk@ti.com>, linux-arm-kernel@lists.infradead.org, Andreas Fenkart <afenkart@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
 
-We want to get rid of the omap specific platform init code
-callbacks as they don't play nice with device tree.
+There have been various patches floating around for enabling
+the SDIO IRQ for hsmmc, but none of them ever got merged.
 
-Let's convert the context loss check to be based on a
-register state detection instead.
+Probably the reason for not merging the SDIO interrupt patches
+has been the lack of wake-up path for SDIO on some omaps that
+has also needed remuxing the SDIO DAT1 line to a GPIO making
+the patches complex.
+
+This patch adds the minimal SDIO IRQ support to hsmmc for
+omaps that do have the wake-up path. For those omaps, the
+DAT1 line need to have the wake-up enable bit set, and the
+wake-up interrupt is the same as for the MMC controller.
+
+This patch has been tested on am3730 es1.2 with wl12xx
+connected to MMC2 with wl12xx waking to Ethernet traffic
+from off-idle mode. Note that for omaps that do not have
+the SDIO wake-up path, this patch will not work for idle
+modes and further patches for remuxing DAT1 to GPIO are
+needed.
+
+Based on earlier patches [1][2] by David Vrabel
+<david.vrabel@csr.com>, Steve Sakoman <steve@sakoman.com>
+and Andreas Fenkart <andreas.fenkart@streamunlimited.com>
+with the SDIO IRQ handing improved following how sdhci.c
+is doing it.
+
+[1] http://www.sakoman.com/cgi-bin/gitweb.cgi?p=linux.git;a=commitdiff_plain;h=010810d22f6f49ac03da4ba384969432e0320453
+[2] http://comments.gmane.org/gmane.linux.kernel.mmc/20446
 
 Cc: Andreas Fenkart <afenkart@gmail.com>
 Cc: Balaji T K <balajitk@ti.com>
 Signed-off-by: Tony Lindgren <tony@atomide.com>
 ---
- drivers/mmc/host/omap_hsmmc.c |   41 ++++++++---------------------------------
- 1 file changed, 8 insertions(+), 33 deletions(-)
+ drivers/mmc/host/omap_hsmmc.c |   75 +++++++++++++++++++++++++++++++++++++----
+ 1 file changed, 67 insertions(+), 8 deletions(-)
 
 diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index 6ac63df..aa97497 100644
+index aa97497..e925c0e 100644
 --- a/drivers/mmc/host/omap_hsmmc.c
 +++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -171,19 +171,19 @@ struct omap_hsmmc_host {
- 	unsigned char		bus_mode;
- 	unsigned char		power_mode;
- 	int			suspended;
-+	u32			hctl;
-+	u32			capa;
- 	int			irq;
- 	int			use_dma, dma_ch;
- 	struct dma_chan		*tx_chan;
- 	struct dma_chan		*rx_chan;
- 	int			slot_id;
- 	int			response_busy;
--	int			context_loss;
- 	int			protect_card;
+@@ -103,6 +103,7 @@
+ #define TC_EN			(1 << 1)
+ #define BWR_EN			(1 << 4)
+ #define BRR_EN			(1 << 5)
++#define CIRQ_EN			(1 << 8)
+ #define ERR_EN			(1 << 15)
+ #define CTO_EN			(1 << 16)
+ #define CCRC_EN			(1 << 17)
+@@ -183,6 +184,11 @@ struct omap_hsmmc_host {
  	int			reqs_blocked;
  	int			use_reg;
  	int			req_in_progress;
++
++	int			flags;
++#define HSMMC_RUNTIME_SUSPENDED	(1 << 0)	/* Runtime suspended */
++#define HSMMC_SDIO_IRQ_ENABLED	(1 << 1)	/* SDIO irq enabled */
++
  	struct omap_hsmmc_next	next_data;
--
  	struct	omap_mmc_platform_data	*pdata;
  };
- 
-@@ -597,25 +597,16 @@ static void omap_hsmmc_set_bus_mode(struct omap_hsmmc_host *host)
- static int omap_hsmmc_context_restore(struct omap_hsmmc_host *host)
+@@ -463,27 +469,34 @@ static void omap_hsmmc_stop_clock(struct omap_hsmmc_host *host)
+ static void omap_hsmmc_enable_irq(struct omap_hsmmc_host *host,
+ 				  struct mmc_command *cmd)
  {
- 	struct mmc_ios *ios = &host->mmc->ios;
--	struct omap_mmc_platform_data *pdata = host->pdata;
--	int context_loss = 0;
- 	u32 hctl, capa;
- 	unsigned long timeout;
+-	unsigned int irq_mask;
++	u32 irq_mask = INT_EN_MASK;
++	unsigned long flags;
  
--	if (pdata->get_context_loss_count) {
--		context_loss = pdata->get_context_loss_count(host->dev);
--		if (context_loss < 0)
--			return 1;
--	}
--
--	dev_dbg(mmc_dev(host->mmc), "context was %slost\n",
--		context_loss == host->context_loss ? "not " : "");
--	if (host->context_loss == context_loss)
--		return 1;
--
- 	if (!OMAP_HSMMC_READ(host->base, SYSSTATUS) & RESETDONE)
- 		return 1;
+ 	if (host->use_dma)
+-		irq_mask = INT_EN_MASK & ~(BRR_EN | BWR_EN);
+-	else
+-		irq_mask = INT_EN_MASK;
++		irq_mask &= ~(BRR_EN | BWR_EN);
  
-+	if (host->hctl == OMAP_HSMMC_READ(host->base, HCTL) &&
-+	    host->capa == OMAP_HSMMC_READ(host->base, CAPA))
-+		return 0;
+ 	/* Disable timeout for erases */
+ 	if (cmd->opcode == MMC_ERASE)
+ 		irq_mask &= ~DTO_EN;
+ 
++	spin_lock_irqsave(&host->irq_lock, flags);
+ 	OMAP_HSMMC_WRITE(host->base, STAT, STAT_CLEAR);
+ 	OMAP_HSMMC_WRITE(host->base, ISE, irq_mask);
++	if (host->flags & HSMMC_SDIO_IRQ_ENABLED)
++		irq_mask |= CIRQ_EN;
+ 	OMAP_HSMMC_WRITE(host->base, IE, irq_mask);
++	spin_unlock_irqrestore(&host->irq_lock, flags);
+ }
+ 
+ static void omap_hsmmc_disable_irq(struct omap_hsmmc_host *host)
+ {
++	unsigned long flags;
 +
- 	if (host->pdata->controller_flags & OMAP_HSMMC_SUPPORTS_DUAL_VOLT) {
- 		if (host->power_mode != MMC_POWER_OFF &&
- 		    (1 << ios->vdd) <= MMC_VDD_23_24)
-@@ -655,8 +646,6 @@ static int omap_hsmmc_context_restore(struct omap_hsmmc_host *host)
- 	omap_hsmmc_set_bus_mode(host);
++	spin_lock_irqsave(&host->irq_lock, flags);
+ 	OMAP_HSMMC_WRITE(host->base, ISE, 0);
+ 	OMAP_HSMMC_WRITE(host->base, IE, 0);
+ 	OMAP_HSMMC_WRITE(host->base, STAT, STAT_CLEAR);
++	spin_unlock_irqrestore(&host->irq_lock, flags);
+ }
  
- out:
--	host->context_loss = context_loss;
--
- 	dev_dbg(mmc_dev(host->mmc), "context is restored\n");
+ /* Calculate divisor for the given clock frequency */
+@@ -1040,8 +1053,12 @@ static irqreturn_t omap_hsmmc_irq(int irq, void *dev_id)
+ 	int status;
+ 
+ 	status = OMAP_HSMMC_READ(host->base, STAT);
+-	while (status & INT_EN_MASK && host->req_in_progress) {
+-		omap_hsmmc_do_irq(host, status);
++	while (status & (INT_EN_MASK | CIRQ_EN)) {
++		if (host->req_in_progress)
++			omap_hsmmc_do_irq(host, status);
++
++		if (status & CIRQ_EN)
++			mmc_signal_sdio_irq(host->mmc);
+ 
+ 		/* Flush posted write */
+ 		status = OMAP_HSMMC_READ(host->base, STAT);
+@@ -1556,6 +1573,43 @@ static void omap_hsmmc_init_card(struct mmc_host *mmc, struct mmc_card *card)
+ 		mmc_slot(host).init_card(card);
+ }
+ 
++static void omap_hsmmc_enable_sdio_irq_nolock(struct omap_hsmmc_host *host,
++					 int enable)
++{
++	u32 irq_mask;
++
++	if (enable)
++		host->flags |= HSMMC_SDIO_IRQ_ENABLED;
++	else
++		host->flags &= ~HSMMC_SDIO_IRQ_ENABLED;
++
++	/* SDIO IRQ will be enabled as appropriate in runtime resume */
++	if (host->flags & HSMMC_RUNTIME_SUSPENDED)
++		goto out;
++
++	irq_mask = OMAP_HSMMC_READ(host->base, IE);
++	if (enable)
++		irq_mask |= CIRQ_EN;
++	else
++		irq_mask &= ~CIRQ_EN;
++	OMAP_HSMMC_WRITE(host->base, IE, irq_mask);
++	if (!host->req_in_progress)
++		OMAP_HSMMC_WRITE(host->base, ISE, irq_mask);
++
++out:
++	OMAP_HSMMC_READ(host->base, IE);
++}
++
++static void omap_hsmmc_enable_sdio_irq(struct mmc_host *mmc, int enable)
++{
++	struct omap_hsmmc_host *host = mmc_priv(mmc);
++	unsigned long flags;
++
++	spin_lock_irqsave(&host->irq_lock, flags);
++	omap_hsmmc_enable_sdio_irq_nolock(host, enable);
++	spin_unlock_irqrestore(&host->irq_lock, flags);
++}
++
+ static void omap_hsmmc_conf_bus_power(struct omap_hsmmc_host *host)
+ {
+ 	u32 hctl, capa, value;
+@@ -1608,7 +1662,7 @@ static const struct mmc_host_ops omap_hsmmc_ops = {
+ 	.get_cd = omap_hsmmc_get_cd,
+ 	.get_ro = omap_hsmmc_get_ro,
+ 	.init_card = omap_hsmmc_init_card,
+-	/* NYET -- enable_sdio_irq */
++	.enable_sdio_irq = omap_hsmmc_enable_sdio_irq,
+ };
+ 
+ #ifdef CONFIG_DEBUG_FS
+@@ -1874,7 +1928,8 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
+ 	mmc->max_seg_size = mmc->max_req_size;
+ 
+ 	mmc->caps |= MMC_CAP_MMC_HIGHSPEED | MMC_CAP_SD_HIGHSPEED |
+-		     MMC_CAP_WAIT_WHILE_BUSY | MMC_CAP_ERASE;
++		     MMC_CAP_WAIT_WHILE_BUSY | MMC_CAP_ERASE |
++		     MMC_CAP_SDIO_IRQ;
+ 
+ 	mmc->caps |= mmc_slot(host).caps;
+ 	if (mmc->caps & MMC_CAP_8_BIT_DATA)
+@@ -2172,6 +2227,7 @@ static int omap_hsmmc_runtime_suspend(struct device *dev)
+ 
+ 	host = platform_get_drvdata(to_platform_device(dev));
+ 	omap_hsmmc_context_save(host);
++	host->flags |= HSMMC_RUNTIME_SUSPENDED;
+ 	dev_dbg(dev, "disabled\n");
+ 
  	return 0;
- }
-@@ -666,15 +655,8 @@ out:
-  */
- static void omap_hsmmc_context_save(struct omap_hsmmc_host *host)
- {
--	struct omap_mmc_platform_data *pdata = host->pdata;
--	int context_loss;
--
--	if (pdata->get_context_loss_count) {
--		context_loss = pdata->get_context_loss_count(host->dev);
--		if (context_loss < 0)
--			return;
--		host->context_loss = context_loss;
--	}
-+	host->hctl = OMAP_HSMMC_READ(host->base, HCTL);
-+	host->capa = OMAP_HSMMC_READ(host->base, CAPA);
- }
+@@ -2183,6 +2239,9 @@ static int omap_hsmmc_runtime_resume(struct device *dev)
  
- #else
-@@ -1635,13 +1617,6 @@ static int omap_hsmmc_regs_show(struct seq_file *s, void *data)
- {
- 	struct mmc_host *mmc = s->private;
- 	struct omap_hsmmc_host *host = mmc_priv(mmc);
--	int context_loss = 0;
--
--	if (host->pdata->get_context_loss_count)
--		context_loss = host->pdata->get_context_loss_count(host->dev);
--
--	seq_printf(s, "mmc%d:\n ctx_loss:\t%d:%d\n\nregs:\n",
--			mmc->index, host->context_loss, context_loss);
+ 	host = platform_get_drvdata(to_platform_device(dev));
+ 	omap_hsmmc_context_restore(host);
++	host->flags &= ~HSMMC_RUNTIME_SUSPENDED;
++	if ((host->flags & HSMMC_SDIO_IRQ_ENABLED))
++		omap_hsmmc_enable_sdio_irq_nolock(host, true);
+ 	dev_dbg(dev, "enabled\n");
  
- 	if (host->suspended) {
- 		seq_printf(s, "host suspended, can't read registers\n");
+ 	return 0;
 
