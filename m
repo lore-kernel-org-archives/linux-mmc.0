@@ -1,29 +1,158 @@
-From: Simon Horman <horms@verge.net.au>
-Subject: Re: [PATCH 6/6] ARM: shmobile: lager: disable MMCIF Command
- Completion Signal, add CLK_CTRL2
-Date: Wed, 25 Sep 2013 16:12:29 +0900
-Message-ID: <20130925071229.GQ6663@verge.net.au>
-References: <1373484077-10460-1-git-send-email-g.liakhovetski@gmx.de>
- <1373484077-10460-7-git-send-email-g.liakhovetski@gmx.de>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v4] mmc:core: Avoid useless detecting task when card is busy
+Date: Wed, 25 Sep 2013 09:20:55 +0200
+Message-ID: <CAPDyKFoWDtPF4gqc6jH4Fp-Q6qTUiJ7wr_TUx4pacbmRS4=_Yg@mail.gmail.com>
+References: <1380076300-793-1-git-send-email-Haijun.Zhang@freescale.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from kirsty.vergenet.net ([202.4.237.240]:48622 "EHLO
-	kirsty.vergenet.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750949Ab3IYHMc (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 25 Sep 2013 03:12:32 -0400
-Content-Disposition: inline
-In-Reply-To: <1373484077-10460-7-git-send-email-g.liakhovetski@gmx.de>
+Received: from mail-ve0-f169.google.com ([209.85.128.169]:57471 "EHLO
+	mail-ve0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753131Ab3IYHU4 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 25 Sep 2013 03:20:56 -0400
+Received: by mail-ve0-f169.google.com with SMTP id db12so4531889veb.28
+        for <linux-mmc@vger.kernel.org>; Wed, 25 Sep 2013 00:20:55 -0700 (PDT)
+In-Reply-To: <1380076300-793-1-git-send-email-Haijun.Zhang@freescale.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Cc: linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>, Chris Ball <cjb@laptop.org>, Nobuyuki HIRAI <nobuyuki.hirai.xe@renesas.com>, Guennadi Liakhovetski <g.liakhovetski+renesas@gmail.com>
+To: Haijun Zhang <Haijun.Zhang@freescale.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Anton Vorontsov <cbouatmailru@gmail.com>, Chris Ball <cjb@laptop.org>, scottwood@freescale.com, X.Xie@freescale.com
 
-On Wed, Jul 10, 2013 at 09:21:17PM +0200, Guennadi Liakhovetski wrote:
-> MMCIF on r8a7790 doesn't support Command Completion Signal, but it does
-> implement a CE_CLK_CTRL2 register. Platform parameters have to be added to
-> account for these features on lager.
-> 
-> Signed-off-by: Guennadi Liakhovetski <g.liakhovetski+renesas@gmail.com>
+On 25 September 2013 04:31, Haijun Zhang <Haijun.Zhang@freescale.com> wrote:
+> When card is in cpu polling mode to detect card present. Card detecting
+> task will be scheduled about once every second. When card is busy in large
+> file transfer, detecting task will be hang and call trace will be prompt.
+> When handling the request, CMD13 is always followed by every command when
+> it was complete. So assume that card is present to avoid this duplicate
+> detecting. Only polling card when card is free to reduce conflict with
+> data transfer.
+>
+> <7>mmc0: req done (CMD13): 0: 00000e00 00000000 00000000 00000000
+> INFO: task kworker/u:1:12 blocked for more than 120 seconds.
+> "echo 0 > /proc/sys/kernel/hung_task_timeout_secs" disables this message.
+> kworker/u:1     D 00000000     0    12      2 0x00000000
+> Call Trace:
+> [ee06dd50] [44042028] 0x44042028
+> (unreliable)
+> [ee06de10] [c0007a0c] __switch_to+0xa0/0xf0
+> [ee06de30] [c04dd50c] __schedule+0x1f8/0x4a4
+>
+> [ee06dea0] [c04dd898] schedule+0x30/0xbc
+>
+> [ee06deb0] [c03816a4] __mmc_claim_host+0x98/0x19c
+>
+> [ee06df00] [c0385f88] mmc_sd_detect+0x38/0xc0
+>
+> [ee06df10] [c0382b0c] mmc_rescan+0x294/0x2e0
+> [ee06df40] [c00661cc] process_one_work+0x140/0x3e0
+>
+> [ee06df70] [c0066bf8] worker_thread+0x18c/0x36c
+> [ee06dfb0] [c006bf10] kthread+0x7c/0x80
+>
+> [ee06dff0] [c000de58] kernel_thread+0x4c/0x68
+> <7>sdhci [sdhci_irq()]: *** mmc0 got interrupt: 0x00000001
+>
+> Signed-off-by: Haijun Zhang <haijun.zhang@freescale.com>
+> ---
+> changes for V4:
+>         - Enable detect change during req error recovery
+>
+>  drivers/mmc/card/block.c | 29 +++++++++++++++++++++++++++--
+>  drivers/mmc/core/core.c  |  5 +++++
+>  2 files changed, 32 insertions(+), 2 deletions(-)
+>
+> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+> index 1a3163f..d1f1730 100644
+> --- a/drivers/mmc/card/block.c
+> +++ b/drivers/mmc/card/block.c
+> @@ -1960,9 +1960,21 @@ static int mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
+>         struct mmc_host *host = card->host;
+>         unsigned long flags;
+>
+> -       if (req && !mq->mqrq_prev->req)
+> +       if (req && !mq->mqrq_prev->req) {
+> +               /*
+> +                * When we are here, card polling task will be blocked.
+> +                * So disable it to avoid this useless schedule.
+> +                */
+> +               if (host->caps & MMC_CAP_NEEDS_POLL) {
+> +                       spin_lock_irqsave(&host->lock, flags);
+> +                       host->rescan_disable = 1;
+> +                       spin_unlock_irqrestore(&host->lock, flags);
+> +                       cancel_delayed_work(&host->detect);
 
-Thanks, I have queued this up for v3.13.
+Sorry, I missed that you added the "cancel" operation in v3. This is
+not needed, please remove.
+
+> +               }
+> +
+>                 /* claim host only for the first request */
+>                 mmc_get_card(card);
+> +       }
+>
+>         ret = mmc_blk_part_switch(card, md);
+>         if (ret) {
+> @@ -1999,7 +2011,7 @@ static int mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
+>
+>  out:
+>         if ((!req && !(mq->flags & MMC_QUEUE_NEW_REQUEST)) ||
+> -            (req && (req->cmd_flags & MMC_REQ_SPECIAL_MASK)))
+> +                       (req && (req->cmd_flags & MMC_REQ_SPECIAL_MASK))) {
+>                 /*
+>                  * Release host when there are no more requests
+>                  * and after special request(discard, flush) is done.
+> @@ -2007,6 +2019,19 @@ out:
+>                  * the 'mmc_blk_issue_rq' with 'mqrq_prev->req'.
+>                  */
+>                 mmc_put_card(card);
+> +
+> +               /*
+> +                * Detecting card status immediately in case card being
+> +                * removed just after the request is complete.
+> +                */
+> +               if (host->caps & MMC_CAP_NEEDS_POLL) {
+> +                       spin_lock_irqsave(&host->lock, flags);
+> +                       host->rescan_disable = 0;
+> +                       spin_unlock_irqrestore(&host->lock, flags);
+> +                       mmc_detect_change(host, 0);
+> +               }
+> +       }
+> +
+>         return ret;
+>  }
+>
+> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> index bf18b6b..fea6caf 100644
+> --- a/drivers/mmc/core/core.c
+> +++ b/drivers/mmc/core/core.c
+> @@ -2400,6 +2400,7 @@ int mmc_detect_card_removed(struct mmc_host *host)
+>  {
+>         struct mmc_card *card = host->card;
+>         int ret;
+> +       unsigned long flags;
+>
+>         WARN_ON(!host->claimed);
+>
+> @@ -2414,6 +2415,10 @@ int mmc_detect_card_removed(struct mmc_host *host)
+>         if (!host->detect_change && !(host->caps & MMC_CAP_NEEDS_POLL))
+>                 return ret;
+>
+> +       spin_lock_irqsave(&host->lock, flags);
+> +       host->rescan_disable = 0;
+> +       spin_unlock_irqrestore(&host->lock, flags);
+> +
+
+This code shall remain further down, specific for polling mode when
+card is detected to be removed.
+So put it before "cancel_delayed_work".
+
+>         host->detect_change = 0;
+>         if (!ret) {
+>                 ret = _mmc_detect_card_removed(host);
+> --
+> 1.8.0
+>
+>
+
+Kind regards
+Ulf Hansson
