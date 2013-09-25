@@ -1,42 +1,126 @@
 From: Tony Lindgren <tony@atomide.com>
-Subject: [PATCH 0/2] patches to enable SDIO interrupt support for omap_hsmmc
- for v3.13
-Date: Wed, 25 Sep 2013 16:47:32 -0700
-Message-ID: <20130925234544.3745.55170.stgit@localhost>
+Subject: [PATCH 1/2] mmc: omap_hsmmc: Fix context save and restore for DT
+Date: Wed, 25 Sep 2013 16:47:37 -0700
+Message-ID: <20130925234737.3745.64262.stgit@localhost>
+References: <20130925234544.3745.55170.stgit@localhost>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mho-02-ewr.mailhop.org ([204.13.248.72]:26074 "EHLO
-	mho-02-ewr.mailhop.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750866Ab3IYXrg (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 25 Sep 2013 19:47:36 -0400
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Return-path: <linux-omap-owner@vger.kernel.org>
+In-Reply-To: <20130925234544.3745.55170.stgit@localhost>
+Sender: linux-omap-owner@vger.kernel.org
 To: cjb@laptop.org
-Cc: linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Cc: linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, Balaji T K <balajitk@ti.com>, linux-arm-kernel@lists.infradead.org, Andreas Fenkart <afenkart@gmail.com>
+List-Id: linux-mmc@vger.kernel.org
 
-Hi all,
+We want to get rid of the omap specific platform init code
+callbacks as they don't play nice with device tree.
 
-Here are some patches to enable the SDIO interrupt support
-for omap_hsmmc. Note that this series does not do the remux,
-but relies on working io chain wake-up events. So omaps that
-do require remuxing for wake-up events need more work, but
-let's do this first.
+Let's convert the context loss check to be based on a
+register state detection instead.
 
-Regards,
-
-Tony
-
+Cc: Andreas Fenkart <afenkart@gmail.com>
+Cc: Balaji T K <balajitk@ti.com>
+Signed-off-by: Tony Lindgren <tony@atomide.com>
 ---
+ drivers/mmc/host/omap_hsmmc.c |   41 ++++++++---------------------------------
+ 1 file changed, 8 insertions(+), 33 deletions(-)
 
-Tony Lindgren (2):
-      mmc: omap_hsmmc: Fix context save and restore for DT
-      mmc: omap_hsmmc: Enable SDIO interrupt
+diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+index 6ac63df..aa97497 100644
+--- a/drivers/mmc/host/omap_hsmmc.c
++++ b/drivers/mmc/host/omap_hsmmc.c
+@@ -171,19 +171,19 @@ struct omap_hsmmc_host {
+ 	unsigned char		bus_mode;
+ 	unsigned char		power_mode;
+ 	int			suspended;
++	u32			hctl;
++	u32			capa;
+ 	int			irq;
+ 	int			use_dma, dma_ch;
+ 	struct dma_chan		*tx_chan;
+ 	struct dma_chan		*rx_chan;
+ 	int			slot_id;
+ 	int			response_busy;
+-	int			context_loss;
+ 	int			protect_card;
+ 	int			reqs_blocked;
+ 	int			use_reg;
+ 	int			req_in_progress;
+ 	struct omap_hsmmc_next	next_data;
+-
+ 	struct	omap_mmc_platform_data	*pdata;
+ };
+ 
+@@ -597,25 +597,16 @@ static void omap_hsmmc_set_bus_mode(struct omap_hsmmc_host *host)
+ static int omap_hsmmc_context_restore(struct omap_hsmmc_host *host)
+ {
+ 	struct mmc_ios *ios = &host->mmc->ios;
+-	struct omap_mmc_platform_data *pdata = host->pdata;
+-	int context_loss = 0;
+ 	u32 hctl, capa;
+ 	unsigned long timeout;
+ 
+-	if (pdata->get_context_loss_count) {
+-		context_loss = pdata->get_context_loss_count(host->dev);
+-		if (context_loss < 0)
+-			return 1;
+-	}
+-
+-	dev_dbg(mmc_dev(host->mmc), "context was %slost\n",
+-		context_loss == host->context_loss ? "not " : "");
+-	if (host->context_loss == context_loss)
+-		return 1;
+-
+ 	if (!OMAP_HSMMC_READ(host->base, SYSSTATUS) & RESETDONE)
+ 		return 1;
+ 
++	if (host->hctl == OMAP_HSMMC_READ(host->base, HCTL) &&
++	    host->capa == OMAP_HSMMC_READ(host->base, CAPA))
++		return 0;
++
+ 	if (host->pdata->controller_flags & OMAP_HSMMC_SUPPORTS_DUAL_VOLT) {
+ 		if (host->power_mode != MMC_POWER_OFF &&
+ 		    (1 << ios->vdd) <= MMC_VDD_23_24)
+@@ -655,8 +646,6 @@ static int omap_hsmmc_context_restore(struct omap_hsmmc_host *host)
+ 	omap_hsmmc_set_bus_mode(host);
+ 
+ out:
+-	host->context_loss = context_loss;
+-
+ 	dev_dbg(mmc_dev(host->mmc), "context is restored\n");
+ 	return 0;
+ }
+@@ -666,15 +655,8 @@ out:
+  */
+ static void omap_hsmmc_context_save(struct omap_hsmmc_host *host)
+ {
+-	struct omap_mmc_platform_data *pdata = host->pdata;
+-	int context_loss;
+-
+-	if (pdata->get_context_loss_count) {
+-		context_loss = pdata->get_context_loss_count(host->dev);
+-		if (context_loss < 0)
+-			return;
+-		host->context_loss = context_loss;
+-	}
++	host->hctl = OMAP_HSMMC_READ(host->base, HCTL);
++	host->capa = OMAP_HSMMC_READ(host->base, CAPA);
+ }
+ 
+ #else
+@@ -1635,13 +1617,6 @@ static int omap_hsmmc_regs_show(struct seq_file *s, void *data)
+ {
+ 	struct mmc_host *mmc = s->private;
+ 	struct omap_hsmmc_host *host = mmc_priv(mmc);
+-	int context_loss = 0;
+-
+-	if (host->pdata->get_context_loss_count)
+-		context_loss = host->pdata->get_context_loss_count(host->dev);
+-
+-	seq_printf(s, "mmc%d:\n ctx_loss:\t%d:%d\n\nregs:\n",
+-			mmc->index, host->context_loss, context_loss);
+ 
+ 	if (host->suspended) {
+ 		seq_printf(s, "host suspended, can't read registers\n");
 
-
- drivers/mmc/host/omap_hsmmc.c |  116 +++++++++++++++++++++++++++--------------
- 1 file changed, 75 insertions(+), 41 deletions(-)
-
--- 
-Signature
