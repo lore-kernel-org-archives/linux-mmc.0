@@ -1,58 +1,152 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH v2 0/9] mmc: sdhci-esdhc-imx: add SD3.0 support
-Date: Thu, 26 Sep 2013 07:57:43 -0400
-Message-ID: <87siwrre14.fsf@octavius.laptop.org>
-References: <1379070698-7344-1-git-send-email-b29396@freescale.com>
-	<87siws2ve7.fsf@octavius.laptop.org>
-	<20130926090158.GC21081@S2101-09.ap.freescale.net>
+From: Tony Lindgren <tony@atomide.com>
+Subject: Re: [PATCH 2/2] mmc: omap_hsmmc: Enable SDIO interrupt
+Date: Thu, 26 Sep 2013 07:19:37 -0700
+Message-ID: <20130926141936.GE8949@atomide.com>
+References: <20130925234544.3745.55170.stgit@localhost>
+ <20130925234740.3745.50637.stgit@localhost>
+ <CALtMJEBKbbpM47uhM-KeSRHRkM5CJkgBx4kFq4j+GG9sKXEfag@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:36806 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1756549Ab3IZL5y (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 26 Sep 2013 07:57:54 -0400
-In-Reply-To: <20130926090158.GC21081@S2101-09.ap.freescale.net> (Shawn Guo's
-	message of "Thu, 26 Sep 2013 17:02:00 +0800")
+Received: from mho-02-ewr.mailhop.org ([204.13.248.72]:57941 "EHLO
+	mho-02-ewr.mailhop.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750792Ab3IZOTm (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 26 Sep 2013 10:19:42 -0400
+Content-Disposition: inline
+In-Reply-To: <CALtMJEBKbbpM47uhM-KeSRHRkM5CJkgBx4kFq4j+GG9sKXEfag@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Shawn Guo <shawn.guo@linaro.org>
-Cc: ulf.hansson@linaro.org, s.hauer@pengutronix.de, anton@enomsg.org, linux-mmc@vger.kernel.org, w.sang@pengutronix.de, neko@bakuhatsu.net, Dong Aisheng <b29396@freescale.com>, linux-arm-kernel@lists.infradead.org
+To: Andreas Fenkart <afenkart@gmail.com>
+Cc: Chris Ball <cjb@laptop.org>, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, Balaji T K <balajitk@ti.com>, linux-arm-kernel@lists.infradead.org
 
 Hi,
 
-On Thu, Sep 26 2013, Shawn Guo wrote:
-> On Wed, Sep 25, 2013 at 10:01:52PM -0400, Chris Ball wrote:
->> Hi Shawn, Sascha,
->> 
->> On Fri, Sep 13 2013, Dong Aisheng wrote:
->> > This patch series add SD3.0 support for i.MX6Q/DL.
->> > Since freescale i.MX6Q/DL uSDHC clock tuning progress is a little
->> > different from
->> > the standard tuning process defined in host controller spec v3.0.
->> > So we add a hook to allow execute platform specific tuning instead of
->> > standard host controller tuning.
->> >
->> > The main difference are:
->> > 1) not only generate Buffer Read Ready interrupt when tuning is performing.
->> > It generates all other DATA interrupts like the normal data command.
->> > 2) SDHCI_CTRL_EXEC_TUNING is not automatically cleared by HW,
->> > instead it's controlled by SW.
->> > 3) SDHCI_CTRL_TUNED_CLK is not automatically set by HW,
->> > it's controlled by SW.
->> > 4) the clock delay for every tuning is set by SW.
->> >
->> > Tested on i.MX6Q Sabreauto board.
->> 
->> Please could someone ACK this series?  Thanks,
->
-> Acked-by: Shawn Guo <shawn.guo@linaro.org>
->
-> One thing need to mention is that the series only adds support for
-> UHS SDR cards, and DDR cards haven't been working yet.
+* Andreas Fenkart <afenkart@gmail.com> [130926 01:34]:
+> 2013/9/26 Tony Lindgren <tony@atomide.com>:
+> > @@ -463,27 +469,34 @@ static void omap_hsmmc_stop_clock(struct omap_hsmmc_host *host)
+> >  static void omap_hsmmc_enable_irq(struct omap_hsmmc_host *host,
+> >                                   struct mmc_command *cmd)
+> >  {
+> > -       unsigned int irq_mask;
+> > +       u32 irq_mask = INT_EN_MASK;
+> > +       unsigned long flags;
+> >
+> >         if (host->use_dma)
+> > -               irq_mask = INT_EN_MASK & ~(BRR_EN | BWR_EN);
+> > -       else
+> > -               irq_mask = INT_EN_MASK;
+> > +               irq_mask &= ~(BRR_EN | BWR_EN);
+> >
+> >         /* Disable timeout for erases */
+> >         if (cmd->opcode == MMC_ERASE)
+> >                 irq_mask &= ~DTO_EN;
+> >
+> > +       spin_lock_irqsave(&host->irq_lock, flags);
+> >         OMAP_HSMMC_WRITE(host->base, STAT, STAT_CLEAR);
+> >         OMAP_HSMMC_WRITE(host->base, ISE, irq_mask);
+> > +       if (host->flags & HSMMC_SDIO_IRQ_ENABLED)
+> > +               irq_mask |= CIRQ_EN;
+> >         OMAP_HSMMC_WRITE(host->base, IE, irq_mask);
+> > +       spin_unlock_irqrestore(&host->irq_lock, flags);
+> >  }
+> >
+> >  static void omap_hsmmc_disable_irq(struct omap_hsmmc_host *host)
+> >  {
+> > +       unsigned long flags;
+> > +
+> > +       spin_lock_irqsave(&host->irq_lock, flags);
+> >         OMAP_HSMMC_WRITE(host->base, ISE, 0);
+> >         OMAP_HSMMC_WRITE(host->base, IE, 0);
+> >         OMAP_HSMMC_WRITE(host->base, STAT, STAT_CLEAR);
+> 
+> This is wrong. SDIO IRQ must not be disabled upon host initiated transfer.
+> see omap_hsmmc_request_done
 
-Thanks, patches 1-8 pushed to mmc-next for 3.13 with Shawn's ACK.
+Hmm I don't quite follow you here, are you saying that
+omap_hsmmc_request_done() should call this conditionally?
 
-- Chris.
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+Or maybe even do a patch on top of this based on what you discovered
+with your earlier patches?
+
+I know we don't have the remuxing support yet, but that has
+dependencies to the pending pinctrl wake-up handling in general,
+and pinctrl state grouping. So let's remove those dependencies
+for now and get the basics going first before moving on to
+the remuxing part :)
+ 
+> > +       spin_unlock_irqrestore(&host->irq_lock, flags);
+> >  }
+> >
+> >  /* Calculate divisor for the given clock frequency */
+> > @@ -1040,8 +1053,12 @@ static irqreturn_t omap_hsmmc_irq(int irq, void *dev_id)
+> >         int status;
+> >
+> >         status = OMAP_HSMMC_READ(host->base, STAT);
+> > -       while (status & INT_EN_MASK && host->req_in_progress) {
+> > -               omap_hsmmc_do_irq(host, status);
+> > +       while (status & (INT_EN_MASK | CIRQ_EN)) {
+> > +               if (host->req_in_progress)
+> > +                       omap_hsmmc_do_irq(host, status);
+> > +
+> > +               if (status & CIRQ_EN)
+> > +                       mmc_signal_sdio_irq(host->mmc);
+> >
+> >                 /* Flush posted write */
+> >                 status = OMAP_HSMMC_READ(host->base, STAT);
+> > @@ -1556,6 +1573,43 @@ static void omap_hsmmc_init_card(struct mmc_host *mmc, struct mmc_card *card)
+> >                 mmc_slot(host).init_card(card);
+> >  }
+> >
+> > +static void omap_hsmmc_enable_sdio_irq_nolock(struct omap_hsmmc_host *host,
+> > +                                        int enable)
+> > +{
+> > +       u32 irq_mask;
+> > +
+> > +       if (enable)
+> > +               host->flags |= HSMMC_SDIO_IRQ_ENABLED;
+> > +       else
+> > +               host->flags &= ~HSMMC_SDIO_IRQ_ENABLED;
+> > +
+> > +       /* SDIO IRQ will be enabled as appropriate in runtime resume */
+> > +       if (host->flags & HSMMC_RUNTIME_SUSPENDED)
+> > +               goto out;
+> 
+> Not sure here, will the module still come out of suspend even with
+> SDIO IRQ disabled?
+> Otherwise nak, sdio irq must enabled independent of pm runtime state. In the
+> worst case need pm_runtime_get().
+
+Well this handling is similar to what's done in sdhci.c and
+seems to work for me for off-idle on 3730. In that case the
+whole MMC block is powered off and the wake up follows the
+dedicated io chain path. For the am33xx off-idle case, the
+wake-up path would be remuxed to the GPIO in the first GPIO
+bank that's always on, so again the whole MMC block is off.
+
+Maybe try to test this with your case with some additional
+patches?
+
+> >  static void omap_hsmmc_conf_bus_power(struct omap_hsmmc_host *host)
+> >  {
+> >         u32 hctl, capa, value;
+> > @@ -1608,7 +1662,7 @@ static const struct mmc_host_ops omap_hsmmc_ops = {
+> >         .get_cd = omap_hsmmc_get_cd,
+> >         .get_ro = omap_hsmmc_get_ro,
+> >         .init_card = omap_hsmmc_init_card,
+> > -       /* NYET -- enable_sdio_irq */
+> > +       .enable_sdio_irq = omap_hsmmc_enable_sdio_irq,
+> 
+> What about am335x, if this patch goes in, it will break that platform.
+> quirk flag via device tree?
+
+I think it should still work, except the wake-up won't work for
+the off-idle case unless the SDIO interrupt is remux to the
+GPIO input?
+
+If there are other issues then yes, we can use the compatible
+flags.
+
+Thanks for the review and comments, 
+
+Tony
+ 
