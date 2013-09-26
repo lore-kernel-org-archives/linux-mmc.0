@@ -1,99 +1,39 @@
-From: Archit Taneja <archit@ti.com>
-Subject: Re: [PATCH 39/51] DMA-API: others: use dma_set_coherent_mask()
-Date: Thu, 26 Sep 2013 16:21:36 +0530
-Message-ID: <524411B8.4070000@ti.com>
-References: <20130919212235.GD12758@n2100.arm.linux.org.uk>
- <E1VMnNq-0007s4-HN@rmk-PC.arm.linux.org.uk>
+From: Jongman Heo <jongman.heo@samsung.com>
+Subject: [PATCH] mmc-util: Fix typo in comment in do_enh_area_set()
+Date: Thu, 26 Sep 2013 11:52:39 +0000 (GMT)
+Message-ID: <10345463.108251380196359446.JavaMail.weblogic@epv6ml08>
+Reply-To: jongman.heo@samsung.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"; Format="flowed"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <E1VMnNq-0007s4-HN@rmk-PC.arm.linux.org.uk>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Russell King <rmk+kernel@arm.linux.org.uk>, alsa-devel@alsa-project.org, b43-dev@lists.infradead.org, devel@driverdev.osuosl.org, devicetree@vger.kernel.org, dri-devel@lists.freedesktop.org, e1000-devel@lists.sourceforge.net, linux-arm-kernel@lists.infradead.org, linux-crypto@vger.kernel.org, linux-doc@vger.kernel.org, linux-fbdev@vger.kernel.org, linux-ide@vger.kernel.org, linux-media@vger.kernel.org, linux-mmc@vger.kernel.org, linux-nvme@lists.infradead.org, linux-omap@vger.kernel.org, linuxppc-dev@lists.ozlabs.org, linux-samsung-soc@vger.kernel.org, linux-scsi@vger.kernel.org, linux-tegra@vger.kernel.org, linux-usb@vger.kernel.org, linux-wireless@vger.kernel.org, netdev@vger.kernel.org, Solarflare linux maintainers <linux-net-drivers@solarflare.com>, uclinux-dist-devel@blackfin.uclinux.org
-Cc: Kukjin Kim <kgene.kim@samsung.com>, Joonyoung Shim <jy0922.shim@samsung.com>, David Airlie <airlied@linux.ie>, Seung-Woo Kim <sw0312.kim@samsung.com>, Rob Clark <robdclark@gmail.com>, Inki Dae <inki.dae@samsung.com>, Kyungmin Park <kyungmin.park@samsung.com>, "Valkeinen, Tomi" <tomi.valkeinen@ti.com>, Tejun Heo <tj@kernel.org>
+Content-Type: text/plain; charset=euc-kr
+Content-Transfer-Encoding: base64
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout2.samsung.com ([203.254.224.25]:38896 "EHLO
+	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756350Ab3IZLwk (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 26 Sep 2013 07:52:40 -0400
+Received: from epcpsbgr2.samsung.com
+ (u142.gpu120.samsung.co.kr [203.254.230.142])
+ by mailout2.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+ (7.0.4.24.0) 64bit (built Nov 17 2011))
+ with ESMTP id <0MTQ00GTFEB5SET0@mailout2.samsung.com> for
+ linux-mmc@vger.kernel.org; Thu, 26 Sep 2013 20:52:39 +0900 (KST)
+MIME-version: 1.0
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Cc: =?euc-kr?Q?=C7=E3=C1=BE=B8=B8?= <jongman.heo@samsung.com>
 
-Hi,
+DQpFUkFTRV9HUk9VUF9ERUYgYml0IGlzIHNldCB0byAxLCBzbyBtYWtlIHRoZSBjb21tZW50IGNv
+bnNpc3RlbnQgd2l0aCB0aGUgY29kZQ0KDQpTaWduZWQtb2ZmLWJ5OiBKb25nbWFuIEhlbyA8am9u
+Z21hbi5oZW9Ac2Ftc3VuZy5jb20+DQotLS0NCiBtbWNfY21kcy5jIHwgMiArLQ0KIDEgZmlsZSBj
+aGFuZ2VkLCAxIGluc2VydGlvbigrKSwgMSBkZWxldGlvbigtKQ0KDQpkaWZmIC0tZ2l0IGEvbW1j
+X2NtZHMuYyBiL21tY19jbWRzLmMNCmluZGV4IGI4YWZhNzQuLjRkMTBmMzUgMTAwNjQ0DQotLS0g
+YS9tbWNfY21kcy5jDQorKysgYi9tbWNfY21kcy5jDQpAQCAtNTQ4LDcgKzU0OCw3IEBAIGludCBk
+b19lbmhfYXJlYV9zZXQoaW50IG5hcmdzLCBjaGFyICoqYXJndikNCiAJZW5oX3N0YXJ0X2FkZHIg
+Lz0gYWxpZ247DQogCWVuaF9zdGFydF9hZGRyICo9IGFsaWduOw0KIA0KLQkvKiBzZXQgRVhUX0NT
+RF9FUkFTRV9HUk9VUF9ERUYgYml0IDAgKi8NCisJLyogc2V0IEVYVF9DU0RfRVJBU0VfR1JPVVBf
+REVGIGJpdCAxICovDQogCXJldCA9IHdyaXRlX2V4dGNzZF92YWx1ZShmZCwgRVhUX0NTRF9FUkFT
+RV9HUk9VUF9ERUYsIDB4MSk7DQogCWlmIChyZXQpIHsNCiAJCWZwcmludGYoc3RkZXJyLCAiQ291
+bGQgbm90IHdyaXRlIDB4MSB0byAiDQotLSANCjEuOC4zLjE=
 
-On Friday 20 September 2013 04:41 AM, Russell King wrote:
-> The correct way for a driver to specify the coherent DMA mask is
-> not to directly access the field in the struct device, but to use
-> dma_set_coherent_mask().  Only arch and bus code should access this
-> member directly.
->
-> Convert all direct write accesses to using the correct API.
->
-> Signed-off-by: Russell King <rmk+kernel@arm.linux.org.uk>
-> ---
->   drivers/ata/pata_ixp4xx_cf.c             |    5 ++++-
->   drivers/gpu/drm/exynos/exynos_drm_drv.c  |    6 +++++-
->   drivers/gpu/drm/omapdrm/omap_dmm_tiler.c |    5 +++--
->   3 files changed, 12 insertions(+), 4 deletions(-)
->
-> diff --git a/drivers/ata/pata_ixp4xx_cf.c b/drivers/ata/pata_ixp4xx_cf.c
-> index 1ec53f8..ddf470c 100644
-> --- a/drivers/ata/pata_ixp4xx_cf.c
-> +++ b/drivers/ata/pata_ixp4xx_cf.c
-> @@ -144,6 +144,7 @@ static int ixp4xx_pata_probe(struct platform_device *pdev)
->   	struct ata_host *host;
->   	struct ata_port *ap;
->   	struct ixp4xx_pata_data *data = dev_get_platdata(&pdev->dev);
-> +	int ret;
->
->   	cs0 = platform_get_resource(pdev, IORESOURCE_MEM, 0);
->   	cs1 = platform_get_resource(pdev, IORESOURCE_MEM, 1);
-> @@ -157,7 +158,9 @@ static int ixp4xx_pata_probe(struct platform_device *pdev)
->   		return -ENOMEM;
->
->   	/* acquire resources and fill host */
-> -	pdev->dev.coherent_dma_mask = DMA_BIT_MASK(32);
-> +	ret = dma_set_coherent_mask(&pdev->dev, DMA_BIT_MASK(32));
-> +	if (ret)
-> +		return ret;
->
->   	data->cs0 = devm_ioremap(&pdev->dev, cs0->start, 0x1000);
->   	data->cs1 = devm_ioremap(&pdev->dev, cs1->start, 0x1000);
-> diff --git a/drivers/gpu/drm/exynos/exynos_drm_drv.c b/drivers/gpu/drm/exynos/exynos_drm_drv.c
-> index bb82ef7..81192d0 100644
-> --- a/drivers/gpu/drm/exynos/exynos_drm_drv.c
-> +++ b/drivers/gpu/drm/exynos/exynos_drm_drv.c
-> @@ -286,7 +286,11 @@ static struct drm_driver exynos_drm_driver = {
->
->   static int exynos_drm_platform_probe(struct platform_device *pdev)
->   {
-> -	pdev->dev.coherent_dma_mask = DMA_BIT_MASK(32);
-> +	int ret;
-> +
-> +	ret = dma_set_coherent_mask(&pdev->dev, DMA_BIT_MASK(32));
-> +	if (ret)
-> +		return ret;
->
->   	return drm_platform_init(&exynos_drm_driver, pdev);
->   }
-> diff --git a/drivers/gpu/drm/omapdrm/omap_dmm_tiler.c b/drivers/gpu/drm/omapdrm/omap_dmm_tiler.c
-> index acf6678..701c4c1 100644
-> --- a/drivers/gpu/drm/omapdrm/omap_dmm_tiler.c
-> +++ b/drivers/gpu/drm/omapdrm/omap_dmm_tiler.c
-> @@ -664,8 +664,9 @@ static int omap_dmm_probe(struct platform_device *dev)
->   	}
->
->   	/* set dma mask for device */
-> -	/* NOTE: this is a workaround for the hwmod not initializing properly */
-> -	dev->dev.coherent_dma_mask = DMA_BIT_MASK(32);
-> +	ret = dma_set_coherent_mask(&dev->dev, DMA_BIT_MASK(32));
-> +	if (ret)
-> +		goto fail;
 
-Tested with omapdrm on omap4 panda es board.
-
-Thanks,
-Archit
