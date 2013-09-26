@@ -1,77 +1,89 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [PATCH 27/27] mmc: core: Remove deprecated mmc_suspend|resume_host APIs
-Date: Thu, 26 Sep 2013 16:54:52 +0200
-Message-ID: <1380207292-16968-28-git-send-email-ulf.hansson@linaro.org>
+Subject: [PATCH 17/27] mmc: wmt-sdmmc: Move away from using deprecated APIs
+Date: Thu, 26 Sep 2013 16:54:42 +0200
+Message-ID: <1380207292-16968-18-git-send-email-ulf.hansson@linaro.org>
 References: <1380207292-16968-1-git-send-email-ulf.hansson@linaro.org>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ea0-f179.google.com ([209.85.215.179]:34836 "EHLO
-	mail-ea0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753414Ab3IZO4X (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 26 Sep 2013 10:56:23 -0400
-Received: by mail-ea0-f179.google.com with SMTP id b10so617802eae.10
-        for <linux-mmc@vger.kernel.org>; Thu, 26 Sep 2013 07:56:22 -0700 (PDT)
+Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1380207292-16968-1-git-send-email-ulf.hansson@linaro.org>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Sender: linux-kernel-owner@vger.kernel.org
 To: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Tony Prisk <linux@prisktech.co.nz>, linux-arm-kernel@lists.infradead.org
+List-Id: linux-mmc@vger.kernel.org
 
-The are no more users of the deprecated mmc_suspend|resume_host API,
-so let's remove it.
+Suspend and resume of cards are being handled from the protocol layer
+and consequently the mmc_suspend|resume_host APIs are deprecated.
 
+This means we can simplify the suspend|resume callbacks by removing the
+use of the deprecated APIs.
+
+Cc: Tony Prisk <linux@prisktech.co.nz>
+Cc: linux-arm-kernel@lists.infradead.org
 Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 ---
- drivers/mmc/core/core.c  |   22 ----------------------
- include/linux/mmc/host.h |    3 ---
- 2 files changed, 25 deletions(-)
+ drivers/mmc/host/wmt-sdmmc.c |   27 ++++++++++-----------------
+ 1 file changed, 10 insertions(+), 17 deletions(-)
 
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 006ead2..be24b87 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -2632,28 +2632,6 @@ EXPORT_SYMBOL(mmc_cache_ctrl);
+diff --git a/drivers/mmc/host/wmt-sdmmc.c b/drivers/mmc/host/wmt-sdmmc.c
+index 34231d5..be94470 100644
+--- a/drivers/mmc/host/wmt-sdmmc.c
++++ b/drivers/mmc/host/wmt-sdmmc.c
+@@ -939,28 +939,23 @@ static int wmt_mci_suspend(struct device *dev)
+ 	struct platform_device *pdev = to_platform_device(dev);
+ 	struct mmc_host *mmc = platform_get_drvdata(pdev);
+ 	struct wmt_mci_priv *priv;
+-	int ret;
  
- #ifdef CONFIG_PM
+ 	if (!mmc)
+ 		return 0;
  
--/**
-- *	mmc_suspend_host - suspend a host
-- *	@host: mmc host
-- */
--int mmc_suspend_host(struct mmc_host *host)
--{
--	/* This function is deprecated */
--	return 0;
--}
--EXPORT_SYMBOL(mmc_suspend_host);
+ 	priv = mmc_priv(mmc);
+-	ret = mmc_suspend_host(mmc);
 -
--/**
-- *	mmc_resume_host - resume a previously suspended host
-- *	@host: mmc host
-- */
--int mmc_resume_host(struct mmc_host *host)
--{
--	/* This function is deprecated */
--	return 0;
--}
--EXPORT_SYMBOL(mmc_resume_host);
--
- /* Do the card removal on suspend if card is assumed removeable
-  * Do that in pm notifier while userspace isn't yet frozen, so we will be able
-    to sync the card.
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index 3b0c33a..a579d3a 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -382,9 +382,6 @@ static inline void *mmc_priv(struct mmc_host *host)
- #define mmc_classdev(x)	(&(x)->class_dev)
- #define mmc_hostname(x)	(dev_name(&(x)->class_dev))
+-	if (!ret) {
+-		reg_tmp = readb(priv->sdmmc_base + SDMMC_BUSMODE);
+-		writeb(reg_tmp | BM_SOFT_RESET, priv->sdmmc_base +
+-		       SDMMC_BUSMODE);
++	reg_tmp = readb(priv->sdmmc_base + SDMMC_BUSMODE);
++	writeb(reg_tmp | BM_SOFT_RESET, priv->sdmmc_base +
++	       SDMMC_BUSMODE);
  
--int mmc_suspend_host(struct mmc_host *);
--int mmc_resume_host(struct mmc_host *);
--
- int mmc_power_save_host(struct mmc_host *host);
- int mmc_power_restore_host(struct mmc_host *host);
+-		reg_tmp = readw(priv->sdmmc_base + SDMMC_BLKLEN);
+-		writew(reg_tmp & 0x5FFF, priv->sdmmc_base + SDMMC_BLKLEN);
++	reg_tmp = readw(priv->sdmmc_base + SDMMC_BLKLEN);
++	writew(reg_tmp & 0x5FFF, priv->sdmmc_base + SDMMC_BLKLEN);
  
+-		writeb(0xFF, priv->sdmmc_base + SDMMC_STS0);
+-		writeb(0xFF, priv->sdmmc_base + SDMMC_STS1);
++	writeb(0xFF, priv->sdmmc_base + SDMMC_STS0);
++	writeb(0xFF, priv->sdmmc_base + SDMMC_STS1);
+ 
+-		clk_disable(priv->clk_sdmmc);
+-	}
+-	return ret;
++	clk_disable(priv->clk_sdmmc);
++	return 0;
+ }
+ 
+ static int wmt_mci_resume(struct device *dev)
+@@ -969,7 +964,6 @@ static int wmt_mci_resume(struct device *dev)
+ 	struct platform_device *pdev = to_platform_device(dev);
+ 	struct mmc_host *mmc = platform_get_drvdata(pdev);
+ 	struct wmt_mci_priv *priv;
+-	int ret = 0;
+ 
+ 	if (mmc) {
+ 		priv = mmc_priv(mmc);
+@@ -987,10 +981,9 @@ static int wmt_mci_resume(struct device *dev)
+ 		writeb(reg_tmp | INT0_DI_INT_EN, priv->sdmmc_base +
+ 		       SDMMC_INTMASK0);
+ 
+-		ret = mmc_resume_host(mmc);
+ 	}
+ 
+-	return ret;
++	return 0;
+ }
+ 
+ static const struct dev_pm_ops wmt_mci_pm = {
 -- 
 1.7.9.5
-
