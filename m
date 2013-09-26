@@ -1,37 +1,35 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] mmc: clean up the duplicate code
-Date: Wed, 25 Sep 2013 21:52:45 -0400
-Message-ID: <871u4c4adu.fsf@octavius.laptop.org>
-References: <1368782263-10133-1-git-send-email-jackey.shen@amd.com>
+Subject: Re: [PATCH 1/3] mmc: mvsdio: Convert to devm_ioremap_resource
+Date: Wed, 25 Sep 2013 21:57:58 -0400
+Message-ID: <87wqm42vkp.fsf@octavius.laptop.org>
+References: <1378968396-18604-1-git-send-email-sachin.kamat@linaro.org>
+	<CAK9yfHwvD9wfTWzZ5DFUz7Y5DTRof5kUiiCWfnsN_rd1e+SQ_w@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:57824 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:49002 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750833Ab3IZBwt (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 25 Sep 2013 21:52:49 -0400
-In-Reply-To: <1368782263-10133-1-git-send-email-jackey.shen@amd.com> (Jackey
-	Shen's message of "Fri, 17 May 2013 17:17:43 +0800")
+	id S1751107Ab3IZB6F (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 25 Sep 2013 21:58:05 -0400
+In-Reply-To: <CAK9yfHwvD9wfTWzZ5DFUz7Y5DTRof5kUiiCWfnsN_rd1e+SQ_w@mail.gmail.com> (Sachin
+	Kamat's message of "Tue, 24 Sep 2013 17:37:51 +0530")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jackey Shen <jackey.shen@amd.com>
-Cc: linux-mmc@vger.kernel.org
+To: Sachin Kamat <sachin.kamat@linaro.org>
+Cc: linux-mmc@vger.kernel.org, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>
 
-Hi Jackey,
+Hi Sachin,
 
-On Fri, May 17 2013, Jackey Shen wrote:
-> clean up the duplicate micros:
-> mmc_sd_card_uhs -> mmc_card_uhs
-> mmc_sd_card_set_uhs -> mmc_card_set_uhs
+On Tue, Sep 24 2013, Sachin Kamat wrote:
+> On 12 September 2013 12:16, Sachin Kamat <sachin.kamat@linaro.org> wrote:
+>> devm_request_and_ioremap() is deprecated. Use devm_ioremap_resource()
+>> instead.
+>>
+>> Signed-off-by: Sachin Kamat <sachin.kamat@linaro.org>
 >
-> Signed-off-by: Jackey Shen <jackey.shen@amd.com>
-> ---
->  drivers/mmc/core/bus.c            |    2 +-
->  drivers/mmc/host/rtsx_pci_sdmmc.c |    2 +-
->  include/linux/mmc/card.h          |    2 --
->  3 files changed, 2 insertions(+), 4 deletions(-)
+> Gentle ping on this series Chris.
 
-Sorry for the long delay -- pushed to mmc-next for 3.13 now, thanks.
+Thanks, all pushed to mmc-next for 3.13.
 
 - Chris.
 -- 
