@@ -1,43 +1,34 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH v2 0/9] mmc: sdhci-esdhc-imx: add SD3.0 support
-Date: Wed, 25 Sep 2013 22:01:52 -0400
-Message-ID: <87siws2ve7.fsf@octavius.laptop.org>
-References: <1379070698-7344-1-git-send-email-b29396@freescale.com>
+Subject: Re: [PATCH 1/2] mmc: sdhci-bcm-kona: Use sdhci_pltfm_unregister instead of open coded
+Date: Wed, 25 Sep 2013 22:06:15 -0400
+Message-ID: <87ob7g2v6w.fsf@octavius.laptop.org>
+References: <1379404772.12080.1.camel@phoenix>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:33628 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:34117 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753991Ab3IZCCD (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 25 Sep 2013 22:02:03 -0400
-In-Reply-To: <1379070698-7344-1-git-send-email-b29396@freescale.com> (Dong
-	Aisheng's message of "Fri, 13 Sep 2013 19:11:29 +0800")
+	id S1752857Ab3IZCGY (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 25 Sep 2013 22:06:24 -0400
+In-Reply-To: <1379404772.12080.1.camel@phoenix> (Axel Lin's message of "Tue,
+	17 Sep 2013 15:59:32 +0800")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Dong Aisheng <b29396@freescale.com>
-Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, shawn.guo@linaro.org, anton@enomsg.org, s.hauer@pengutronix.de, w.sang@pengutronix.de, ulf.hansson@linaro.org, neko@bakuhatsu.net
+To: Axel Lin <axel.lin@ingics.com>
+Cc: Christian Daudt <csd@broadcom.com>, linux-mmc@vger.kernel.org
 
-Hi Shawn, Sascha,
+Hi Axel,
 
-On Fri, Sep 13 2013, Dong Aisheng wrote:
-> This patch series add SD3.0 support for i.MX6Q/DL.
-> Since freescale i.MX6Q/DL uSDHC clock tuning progress is a little different from
-> the standard tuning process defined in host controller spec v3.0.
-> So we add a hook to allow execute platform specific tuning instead of
-> standard host controller tuning.
+On Tue, Sep 17 2013, Axel Lin wrote:
+> This avoid duplicated implementation and also fixes missing iounmap() and
+> release_mem_region() calls in sdhci_bcm_kona_remove().
+> sdhci_pltfm_init() calls request_mem_region() and ioremap(), thus we need to
+> call the corresponding iounmap() and release_mem_region() calls in
+> sdhci_bcm_kona_remove().
 >
-> The main difference are:
-> 1) not only generate Buffer Read Ready interrupt when tuning is performing.
-> It generates all other DATA interrupts like the normal data command.
-> 2) SDHCI_CTRL_EXEC_TUNING is not automatically cleared by HW,
-> instead it's controlled by SW.
-> 3) SDHCI_CTRL_TUNED_CLK is not automatically set by HW,
-> it's controlled by SW.
-> 4) the clock delay for every tuning is set by SW.
->
-> Tested on i.MX6Q Sabreauto board.
+> Signed-off-by: Axel Lin <axel.lin@ingics.com>
 
-Please could someone ACK this series?  Thanks,
+Thanks, pushed to mmc-next for 3.13.
 
 - Chris.
 -- 
