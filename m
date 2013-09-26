@@ -1,42 +1,40 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH v3] mmc: add ignorance case for CMD13 CRC error
-Date: Wed, 25 Sep 2013 21:41:09 -0400
-Message-ID: <87eh8c4ax6.fsf@octavius.laptop.org>
-References: <002301ce9e6b$e72da2a0$b588e7e0$%jun@samsung.com>
-	<CAPDyKFrGxbo46_uhJrWc-u0k1kJxXxeKePdoou3aFpwSBUY21g@mail.gmail.com>
-	<002901cea22c$af778730$0e669590$%jun@samsung.com>
-	<CAPDyKForsH3rsLevSiCfm4nkYHV_FvFVH=YhSsvb=bqLgCtBwA@mail.gmail.com>
-	<001d01cea911$8a509c80$9ef1d580$%jun@samsung.com>
-	<002b01cea969$3ab56630$b0203290$%jun@samsung.com>
-	<CAPDyKFpEOnnWE4igkG_EzW-Zt60m1Dq=A0t1yeGnh064YO=bHw@mail.gmail.com>
+Subject: Re: [PATCH] mmc: atmel-mci: abort transfer on timeout error
+Date: Wed, 25 Sep 2013 21:46:53 -0400
+Message-ID: <87a9j04anm.fsf@octavius.laptop.org>
+References: <1378740596-25026-1-git-send-email-ludovic.desroches@atmel.com>
+	<522ED03F.5070404@atmel.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:44497 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:49599 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750896Ab3IZBlP (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 25 Sep 2013 21:41:15 -0400
-In-Reply-To: <CAPDyKFpEOnnWE4igkG_EzW-Zt60m1Dq=A0t1yeGnh064YO=bHw@mail.gmail.com> (Ulf
-	Hansson's message of "Wed, 4 Sep 2013 14:31:30 +0200")
+	id S1753449Ab3IZBrF (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 25 Sep 2013 21:47:05 -0400
+In-Reply-To: <522ED03F.5070404@atmel.com> (Nicolas Ferre's message of "Tue, 10
+	Sep 2013 09:54:39 +0200")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Seungwon Jeon <tgih.jun@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>
+To: Nicolas Ferre <nicolas.ferre@atmel.com>
+Cc: ludovic.desroches@atmel.com, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, etesial@gmail.com
 
 Hi,
 
-On Wed, Sep 04 2013, Ulf Hansson wrote:
-> On 4 September 2013 14:21, Seungwon Jeon <tgih.jun@samsung.com> wrote:
->> While speed mode is changed, CMD13 cannot be guaranteed.
->> According to the spec., it is not recommended to use CMD13
->> to check the busy completion of the timing change.
->> If CMD13 is used in this case, CRC error must be ignored.
+On Tue, Sep 10 2013, Nicolas Ferre wrote:
+> On 09/09/2013 17:29, ludovic.desroches@atmel.com :
+>> From: Ludovic Desroches <ludovic.desroches@atmel.com>
 >>
->> Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
+>> When a software timeout occurs, the transfer is not stopped. In DMA case, it
+>> causes DMA channel to be stuck because the transfer is still active causing
+>> following transfers to be queued but not computed.
+>>
+>> Cc: <stable@vger.kernel.org> #3.9+
+>> Signed-off-by: Ludovic Desroches <ludovic.desroches@atmel.com>
+>> Reported-by: Alexander Morozov <etesial@gmail.com>
 >
-> Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
+> Acked-by: Nicolas Ferre <nicolas.ferre@atmel.com>
 
-Thanks, pushed to mmc-next for 3.13 with Ulf's ACK.
+Thanks, pushed to mmc-next for 3.12.
 
 - Chris.
 -- 
