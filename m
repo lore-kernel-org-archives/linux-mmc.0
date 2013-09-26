@@ -1,48 +1,38 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH 0/3] Write-reliability settings support
-Date: Wed, 25 Sep 2013 22:18:32 -0400
-Message-ID: <87k3i42umf.fsf@octavius.laptop.org>
-References: <cover.1379602866.git.ben.l.gardiner@gmail.com>
+Subject: Re: [PATCH] mmc: core: remove issue_fn indirect function call
+Date: Wed, 25 Sep 2013 22:21:38 -0400
+Message-ID: <87fvss2uh9.fsf@octavius.laptop.org>
+References: <1379611214-1089-1-git-send-email-grundler@chromium.org>
+	<CAPDyKFr0h=uTz4xOAULLc0Ff23xB-xVuuk+XnBz_Uq5YMryHbA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:50735 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:54373 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754262Ab3IZCSt (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 25 Sep 2013 22:18:49 -0400
-In-Reply-To: <cover.1379602866.git.ben.l.gardiner@gmail.com> (Ben Gardiner's
-	message of "Thu, 19 Sep 2013 11:14:26 -0400")
+	id S1751384Ab3IZCVz (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 25 Sep 2013 22:21:55 -0400
+In-Reply-To: <CAPDyKFr0h=uTz4xOAULLc0Ff23xB-xVuuk+XnBz_Uq5YMryHbA@mail.gmail.com> (Ulf
+	Hansson's message of "Fri, 20 Sep 2013 09:33:06 +0200")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ben Gardiner <ben.l.gardiner@gmail.com>
-Cc: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Grant Grundler <grundler@chromium.org>, Seungwon Jeon <tgih.jun@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-Hi Ben,
+Hi,
 
-On Thu, Sep 19 2013, Ben Gardiner wrote:
-> This series builds on top of 
-> d91d3698c6464a83b7c301eb84da109f9f94b54c
+On Fri, Sep 20 2013, Ulf Hansson wrote:
+> On 19 September 2013 19:20, Grant Grundler <grundler@chromium.org> wrote:
+>> struct mmc_queue defines issue_fn as an indirect function call.
+>> issue_fn field only gets set to mmc_blk_issue_rq and only gets
+>> invoked immediately after calling blk_fetch_request().
+>> Don't bother with indirect function call - it's pointless and just
+>> obfuscates the code.
+>>
+>> Signed-off-by: Grant Grundler <grundler@chromium.org>
 >
-> It introduces
->  * an extracted function for setting the PARTITION_SETTING_COMPLETE bit
->  * a command for setting the write-reliability bits
->  * pretty-printing the write-reliability bits from EXTCSD registers
->
-> available also https://github.com/BenGardiner/mmc-utils/tree/features/reliable-write
-> if it helps.
->
-> Ben Gardiner (3):
->   extract PARTITION_SETTING_COMPLETE function
->   pretty print write reliability settings
->   support setting the OTP write reliability settings
->
->  mmc.c      |   5 +++
->  mmc.h      |   1 +
->  mmc_cmds.c | 143 ++++++++++++++++++++++++++++++++++++++++++++++++++++---------
->  mmc_cmds.h |   1 +
->  4 files changed, 129 insertions(+), 21 deletions(-)
+> Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
 
-I've pushed all three patches to mmc-utils now.  Thanks!
+Thanks, pushed to mmc-next for 3.13.
 
 - Chris.
 -- 
