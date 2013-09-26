@@ -1,66 +1,80 @@
 From: Grant Grundler <grundler@chromium.org>
-Subject: [PATCH 3/7] mmc: core: restructure error handling for start req
-Date: Thu, 26 Sep 2013 12:22:56 -0700
-Message-ID: <1380223380-22451-4-git-send-email-grundler@chromium.org>
+Subject: [PATCH 1/7] mmc: core: rename "data" to saved_areq
+Date: Thu, 26 Sep 2013 12:22:54 -0700
+Message-ID: <1380223380-22451-2-git-send-email-grundler@chromium.org>
 References: <1380223380-22451-1-git-send-email-grundler@chromium.org>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pb0-f45.google.com ([209.85.160.45]:37366 "EHLO
-	mail-pb0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752998Ab3IZTXm (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 26 Sep 2013 15:23:42 -0400
-Received: by mail-pb0-f45.google.com with SMTP id mc17so1550961pbc.18
-        for <linux-mmc@vger.kernel.org>; Thu, 26 Sep 2013 12:23:41 -0700 (PDT)
+Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1380223380-22451-1-git-send-email-grundler@chromium.org>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Sender: linux-kernel-owner@vger.kernel.org
 To: Chris Ball <cjb@laptop.org>, Ulf Hansson <ulf.hansson@linaro.org>, Seungwon Jeon <tgih.jun@samsung.com>
 Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Grant Grundler <grundler@chromium.org>
+List-Id: linux-mmc@vger.kernel.org
 
-This is an intermediate step to fixing the locking around the
-access to host->areq. Reduce the number of "if (saved_areq) vs
-"if (areq)" tests in the main code path since I'm going to add
-references to "host->lock" in the next patch.
+Replace "data" with a more descriptive name.
+
+Using a local variable (ie a register) makes explicit what the
+compiler is doing under the covers anyway: the function is
+dereferencing one pointer value the whole time.
 
 Signed-off-by: Grant Grundler <grundler@chromium.org>
 ---
- drivers/mmc/core/core.c | 19 +++++++++----------
- 1 file changed, 9 insertions(+), 10 deletions(-)
+ drivers/mmc/core/core.c | 20 ++++++++++----------
+ 1 file changed, 10 insertions(+), 10 deletions(-)
 
 diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 675139e..4d5de98 100644
+index 006ead2..e5a40ee 100644
 --- a/drivers/mmc/core/core.c
 +++ b/drivers/mmc/core/core.c
-@@ -556,21 +556,20 @@ struct mmc_async_req *mmc_start_req(struct mmc_host *host,
+@@ -529,14 +529,14 @@ struct mmc_async_req *mmc_start_req(struct mmc_host *host,
+ {
+ 	int err = 0;
+ 	int start_err = 0;
+-	struct mmc_async_req *data = host->areq;
++	struct mmc_async_req *saved_areq = host->areq;
+ 
+ 	/* Prepare a new request */
+ 	if (areq)
+-		mmc_pre_req(host, areq->mrq, !host->areq);
++		mmc_pre_req(host, areq->mrq, !saved_areq);
+ 
+-	if (host->areq) {
+-		err = mmc_wait_for_data_req_done(host, host->areq->mrq,	areq);
++	if (saved_areq) {
++		err = mmc_wait_for_data_req_done(host, saved_areq->mrq,	areq);
+ 		if (err == MMC_BLK_NEW_REQUEST) {
+ 			if (error)
+ 				*error = err;
+@@ -550,17 +550,17 @@ struct mmc_async_req *mmc_start_req(struct mmc_host *host,
+ 		 * Check BKOPS urgency for each R1 response
+ 		 */
+ 		if (host->card && mmc_card_mmc(host->card) &&
+-		    ((mmc_resp_type(host->areq->mrq->cmd) == MMC_RSP_R1) ||
+-		     (mmc_resp_type(host->areq->mrq->cmd) == MMC_RSP_R1B)) &&
+-		    (host->areq->mrq->cmd->resp[0] & R1_EXCEPTION_EVENT))
++		    ((mmc_resp_type(saved_areq->mrq->cmd) == MMC_RSP_R1) ||
++		     (mmc_resp_type(saved_areq->mrq->cmd) == MMC_RSP_R1B)) &&
++		    (saved_areq->mrq->cmd->resp[0] & R1_EXCEPTION_EVENT))
  			mmc_start_bkops(host->card, true);
  	}
  
--	if (!saved_err && areq)
-+	/* Don't start something new if previous one failed. */
-+	if (!saved_err && areq) {
+ 	if (!err && areq)
  		start_err = __mmc_start_data_req(host, areq->mrq);
-+		/* Cancel a prepared request if it was not started. */
-+		if (start_err) {
-+			mmc_post_req(host, areq->mrq, -EINVAL);
-+			host->areq = NULL;
-+		} else 
-+			host->areq = areq;
-+	}
  
- 	if (saved_areq)
- 		mmc_post_req(host, saved_areq->mrq, 0);
+-	if (host->areq)
+-		mmc_post_req(host, host->areq->mrq, 0);
++	if (saved_areq)
++		mmc_post_req(host, saved_areq->mrq, 0);
  
--	 /* Cancel a prepared request if it was not started. */
--	if ((saved_err || start_err) && areq)
--		mmc_post_req(host, areq->mrq, -EINVAL);
--
--	if (saved_err)
--		host->areq = NULL;
--	else
--		host->areq = areq;
--
+ 	 /* Cancel a prepared request if it was not started. */
+ 	if ((err || start_err) && areq)
+@@ -573,7 +573,7 @@ struct mmc_async_req *mmc_start_req(struct mmc_host *host,
+ 
  	if (error)
- 		*error = saved_err;
- 	return saved_areq;
+ 		*error = err;
+-	return data;
++	return saved_areq;
+ }
+ EXPORT_SYMBOL(mmc_start_req);
+ 
 -- 
 1.8.4
-
