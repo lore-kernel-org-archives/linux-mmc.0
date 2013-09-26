@@ -1,74 +1,75 @@
-From: Grant Grundler <grundler@chromium.org>
-Subject: Re: [PATCH] mmc: core: remove issue_fn indirect function call
-Date: Thu, 26 Sep 2013 15:16:32 -0700
-Message-ID: <CANEJEGuGWKVudcKMrZKLPEMEpQ5sJFJn4xwOOe7N6q9_qfy3bw@mail.gmail.com>
-References: <1379611214-1089-1-git-send-email-grundler@chromium.org>
-	<CAPDyKFr0h=uTz4xOAULLc0Ff23xB-xVuuk+XnBz_Uq5YMryHbA@mail.gmail.com>
-	<87fvss2uh9.fsf@octavius.laptop.org>
-	<8738os2tqt.fsf@octavius.laptop.org>
-	<CANEJEGt9E3apwKMpLFL8_5cy8GW9EdcNgXtm-XGAmQWgYftVjw@mail.gmail.com>
+From: Olof Johansson <olof@lixom.net>
+Subject: Re: [PATCH v3] ARM: EDMA: Fix clearing of unused list for DT DMA resources
+Date: Thu, 26 Sep 2013 16:13:33 -0700
+Message-ID: <CAOesGMgELbnuu8PM7Ah2xKo2H5rzgAN3w0g6wA7aVFsjuds-8g@mail.gmail.com>
+References: <1380232546-821-1-git-send-email-joelf@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-oa0-f50.google.com ([209.85.219.50]:57214 "EHLO
-	mail-oa0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754509Ab3IZWQc convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 26 Sep 2013 18:16:32 -0400
-Received: by mail-oa0-f50.google.com with SMTP id j1so1446700oag.23
-        for <linux-mmc@vger.kernel.org>; Thu, 26 Sep 2013 15:16:32 -0700 (PDT)
-In-Reply-To: <CANEJEGt9E3apwKMpLFL8_5cy8GW9EdcNgXtm-XGAmQWgYftVjw@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1380232546-821-1-git-send-email-joelf@ti.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Joel Fernandes <joelf@ti.com>
+Cc: Sekhar Nori <nsekhar@ti.com>, Vinod Koul <vinod.koul@intel.com>, Dan Williams <djbw@fb.com>, Linux OMAP List <linux-omap@vger.kernel.org>, Linux ARM Kernel List <linux-arm-kernel@lists.infradead.org>, Linux DaVinci Kernel List <davinci-linux-open-source@linux.davincidsp.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux MMC List <linux-mmc@vger.kernel.org>, Tony Lindgren <tony@atomide.com>, Nishanth Menon <nm@ti.com>, Pantel Antoniou <panto@antoniou-consulting.com>, Jason Kridner <jkridner@beagleboard.org>, Koen Kooi <koen@dominion.thruhere.net>, "arm@kernel.org" <arm@kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Grant Grundler <grundler@chromium.org>
-Cc: Chris Ball <cjb@laptop.org>, Ulf Hansson <ulf.hansson@linaro.org>, Seungwon Jeon <tgih.jun@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-On Thu, Sep 26, 2013 at 2:56 PM, Grant Grundler <grundler@chromium.org>=
- wrote:
-> On Wed, Sep 25, 2013 at 7:37 PM, Chris Ball <cjb@laptop.org> wrote:
->> Hi,
->>
->> On Wed, Sep 25 2013, Chris Ball wrote:
->>> Hi,
->>>
->>> On Fri, Sep 20 2013, Ulf Hansson wrote:
->>>> On 19 September 2013 19:20, Grant Grundler <grundler@chromium.org>=
- wrote:
->>>>> struct mmc_queue defines issue_fn as an indirect function call.
->>>>> issue_fn field only gets set to mmc_blk_issue_rq and only gets
->>>>> invoked immediately after calling blk_fetch_request().
->>>>> Don't bother with indirect function call - it's pointless and jus=
-t
->>>>> obfuscates the code.
->>>>>
->>>>> Signed-off-by: Grant Grundler <grundler@chromium.org>
->>>>
->>>> Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
->>>
->>> Thanks, pushed to mmc-next for 3.13.
->>
->> Have dropped this, it's breaking my build:
->>
->> /home/cjb/git/mmc/drivers/mmc/card/block.c:1955:12: warning: =E2=80=98=
-mmc_blk_issue_rq=E2=80=99 defined but not used [-Wunused-function]
+On Thu, Sep 26, 2013 at 2:55 PM, Joel Fernandes <joelf@ti.com> wrote:
+> HWMOD removal for MMC is breaking edma_start as the events are being manually
+> triggered due to unused channel list not being clear.
 >
-> The function is declared static. :(  Let me respin to remove the
-> static and add a function prototype to a header file.
+> The above issue is fixed by reading the "dmas" property from the DT node if it
+> exists and clearing the bits in the unused channel list if the dma controller
+> used by any device is EDMA. For this purpose we use the of_* helpers to parse
+> the arguments in the dmas phandle list.
+>
+> Also introduced is a minor clean up of a checkpatch error in old code.
+>
+> Reviewed-by: Sekhar Nori <nsekhar@ti.com>
+> Reported-by: Balaji T K <balajitk@ti.com>
+> Cc: Sekhar Nori <nsekhar@ti.com>
+> Cc: Tony Lindgren <tony@atomide.com>
+> Cc: Olof Johansson <olof@lixom.net>
+> Cc: Nishanth Menon <nm@ti.com>
+> Cc: Pantel Antoniou <panto@antoniou-consulting.com>
+> Cc: Jason Kridner <jkridner@beagleboard.org>
+> Cc: Koen Kooi <koen@dominion.thruhere.net>
+> Signed-off-by: Joel Fernandes <joelf@ti.com>
+> ---
+> Just resending this patch after discussing with Sekhar and Olof.
 
-block.o and queue.o are linked together into one .ko all the time:
-obj-$(CONFIG_MMC_BLOCK)         +=3D mmc_block.o
-mmc_block-objs                  :=3D block.o queue.o
+Actually, the patch you talked to me about was v3 of this. It seems
+that you have reposted v6 but labelled it v3. This is very confusing.
 
-Two ways to handle this: I can
-1) add a local function prototype of mmc_blk_issue_rq() to queue.c
-2) move mmc_init_queue() and mmc_queue_thread() from queue.c to block.c
+> AM335x is being booted by many users such as the beaglebone community. DT is
+> the only boot method available for all these users.  EDMA is required for the
+> operation for many common peripherals in AM335x SoC such as McASP, MMC and
+> Crypto.
+>
+> Although EDMA DT nodes are going in only for 3.13, in reality the kernel has
+> been used for more than a year with EDMA code and out of tree EDMA DTS patches.
+> Hence though the DT nodes are still not in mainline, this patch can be still be
+> considered a critical fix as such and it would be great if it could be included
+> in 3.12-rc release. Thanks.
 
-(2) actually makes sense since both functions are block IO specific.
+This is really the root of this problem. If you sit on code out of
+tree for a year, and something breaks that we couldn't even have
+detected since we didn't have the out-of-tree pieces. We'll help you
+the first few times (such as now) but we will eventually stop caring.
 
-Thoughts? Preference? Other ideas?
+If I was in a worse mood, then I'd just say that since your users
+already has to have out-of-tree code to even use this functionality,
+they could just add this fix on top of that stack of patches. But I'm
+in a slightly better mood than that and I'll pick it up this time. :)
 
-thanks,
-grant
+> More details about why this broke an existing feature folks were using:
+> Previously the DMA resources for platform devices were being populated through
+> HWMOD, however with the recent clean ups with HWMOD, this data has been moved
+> to Device tree. The EDMA code though is not aware of this so it fails to fetch
+> the DMA resources correctly which it needs to prepare the unused channel list
+> (basically doesn't properly clear the channels that are in use, in the unused
+> list).
 
-ps. It's more obvious now that the return value from
-mmc_blk_issue_rq() is getting ignored. *sigh*
+So that we can learn for next time: What should we (as in us
+maintainers and you TI) have done differently to avoid this?
+
+
+-Olof
