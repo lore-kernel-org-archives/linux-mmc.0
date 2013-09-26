@@ -1,34 +1,45 @@
-From: Nicolas Pitre <nicolas.pitre@linaro.org>
-Subject: Re: [PATCH 09/27] mmc: mvsdio: Remove redundant suspend and resume
- callbacks
-Date: Thu, 26 Sep 2013 11:40:19 -0400 (EDT)
-Message-ID: <alpine.LFD.2.03.1309261136010.312@syhkavp.arg>
-References: <1380207292-16968-1-git-send-email-ulf.hansson@linaro.org> <1380207292-16968-10-git-send-email-ulf.hansson@linaro.org>
-Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+From: Grant Grundler <grundler@chromium.org>
+Subject: [PATCH 0/7] mmc: core: cleanup and locking patches description
+Date: Thu, 26 Sep 2013 12:22:53 -0700
+Message-ID: <1380223380-22451-1-git-send-email-grundler@chromium.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qc0-f170.google.com ([209.85.216.170]:56324 "EHLO
-	mail-qc0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752948Ab3IZPkW (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 26 Sep 2013 11:40:22 -0400
-Received: by mail-qc0-f170.google.com with SMTP id m20so882382qcx.1
-        for <linux-mmc@vger.kernel.org>; Thu, 26 Sep 2013 08:40:21 -0700 (PDT)
-In-Reply-To: <1380207292-16968-10-git-send-email-ulf.hansson@linaro.org>
+Received: from mail-pa0-f43.google.com ([209.85.220.43]:46539 "EHLO
+	mail-pa0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752983Ab3IZTXc (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 26 Sep 2013 15:23:32 -0400
+Received: by mail-pa0-f43.google.com with SMTP id hz1so1726249pad.30
+        for <linux-mmc@vger.kernel.org>; Thu, 26 Sep 2013 12:23:32 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, Jason Cooper <jason@lakedaemon.net>, Andrew Lunn <andrew@lunn.ch>
+To: Chris Ball <cjb@laptop.org>, Ulf Hansson <ulf.hansson@linaro.org>, Seungwon Jeon <tgih.jun@samsung.com>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Grant Grundler <grundler@chromium.org>
 
-On Thu, 26 Sep 2013, Ulf Hansson wrote:
+Following 7 patches are mostly cleanup with one key patch around host->areq
+locking.  The host->areq locking problem description is here:
+	http://www.spinics.net/lists/linux-mmc/msg21644.html
 
-> Suspend and resume of cards are handled by the protocol layer and
-> consequently the mmc_suspend|resume_host APIs are marked as deprecated.
+I do believe this preposed host->areq locking patch is a complete fix.
+But it appears to fix the problem and is better than nothing.
 
-Having the protocol layer take care of card suspend is perfectly sound.
+This patch sequence applies clean to linus' 3.12-rc2 branch and only compile
+tested in this form. This is a forward port (and cleanup) of the
+same patch I've been testing on ChromeOS-3.4 tree using Exynos5250 chipset.
 
-However, what about host controllers?  Shouldn't they suspend themselves 
-as well?  There is certainly potential for power saving by gating clocks 
-to the host IP block or the like.
+cheers,
+grant
+
+0000-mmc-core-cleanups-and-locking-description (this email)
+0001-mmc-core-rename-data-to-saved_areq.patch
+0002-mmc-core-rename-local-var-err-to-saved_err.patch
+0003-mmc-core-restructure-error-handling-for-start-req.patch
+0004-mmc-core-use-common-code-path-to-return-error.patch
+0005-mmc-core-handling-polling-more-gracefully.patch
+0006-mmc-core-protect-references-to-host-areq-with-host-l.patch
+0007-mmc-core-mmc_start_req-is-a-misnomer-mmc_process_are.patch
 
 
-Nicolas
+ drivers/mmc/card/block.c    |   8 ++--
+ drivers/mmc/card/mmc_test.c |   4 +-
+ drivers/mmc/core/core.c     | 103 +++++++++++++++++++++++++-------------------
+ include/linux/mmc/core.h    |   2 +-
+ 4 files changed, 66 insertions(+), 51 deletions(-)
