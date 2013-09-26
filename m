@@ -1,38 +1,38 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] mmc: core: remove issue_fn indirect function call
-Date: Wed, 25 Sep 2013 22:21:38 -0400
-Message-ID: <87fvss2uh9.fsf@octavius.laptop.org>
-References: <1379611214-1089-1-git-send-email-grundler@chromium.org>
-	<CAPDyKFr0h=uTz4xOAULLc0Ff23xB-xVuuk+XnBz_Uq5YMryHbA@mail.gmail.com>
+Subject: Re: [PATCH 1/2] Add defines for ext_csd field MAX_ENH_SIZE_MULT
+Date: Wed, 25 Sep 2013 22:25:12 -0400
+Message-ID: <87bo3g2ubb.fsf@octavius.laptop.org>
+References: <1379918452-25211-1-git-send-email-oliver@freetz.org>
+	<CA+5vRUVRGnaY5SDf36G=Hw-03dJ-h8vYfh7LjRQk1ZUE74pGGA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:54373 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:54499 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751384Ab3IZCVz (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 25 Sep 2013 22:21:55 -0400
-In-Reply-To: <CAPDyKFr0h=uTz4xOAULLc0Ff23xB-xVuuk+XnBz_Uq5YMryHbA@mail.gmail.com> (Ulf
-	Hansson's message of "Fri, 20 Sep 2013 09:33:06 +0200")
+	id S1751281Ab3IZCZV (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 25 Sep 2013 22:25:21 -0400
+In-Reply-To: <CA+5vRUVRGnaY5SDf36G=Hw-03dJ-h8vYfh7LjRQk1ZUE74pGGA@mail.gmail.com> (Ben
+	Gardiner's message of "Mon, 23 Sep 2013 23:26:25 -0400")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Grant Grundler <grundler@chromium.org>, Seungwon Jeon <tgih.jun@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+To: Ben Gardiner <ben.l.gardiner@gmail.com>
+Cc: Oliver Metz <oliver@freetz.org>, linux-mmc@vger.kernel.org
 
-Hi,
+Hi Oliver,
 
-On Fri, Sep 20 2013, Ulf Hansson wrote:
-> On 19 September 2013 19:20, Grant Grundler <grundler@chromium.org> wrote:
->> struct mmc_queue defines issue_fn as an indirect function call.
->> issue_fn field only gets set to mmc_blk_issue_rq and only gets
->> invoked immediately after calling blk_fetch_request().
->> Don't bother with indirect function call - it's pointless and just
->> obfuscates the code.
->>
->> Signed-off-by: Grant Grundler <grundler@chromium.org>
+On Mon, Sep 23 2013, Ben Gardiner wrote:
+> On Mon, Sep 23, 2013 at 2:40 AM, Oliver Metz <oliver@freetz.org> wrote:
+>> Signed-off-by: Oliver Metz <oliver@freetz.org>
+>> ---
+>>  mmc.h      | 3 +++
+>>  mmc_cmds.c | 6 ++++--
+>>  2 files changed, 7 insertions(+), 2 deletions(-)
 >
-> Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
+> Looks good to me.
+>
+> Reviewed-by: Ben Gardiner <ben.l.gardiner@gmail.com>
 
-Thanks, pushed to mmc-next for 3.13.
+Thanks, pushed to mmc-utils with Ben's Reviewed-by.
 
 - Chris.
 -- 
