@@ -1,63 +1,56 @@
-From: Dinh Nguyen <dinh.linux-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: [PATCH 1/3] arm: socfpga: Set the SDMMC clock phase in system manager
-Date: Wed, 25 Sep 2013 22:00:14 -0500
-Message-ID: <D47AF394-7C05-4CF3-98B6-2D94C63CD389@gmail.com>
-References: <1378740833-4883-1-git-send-email-dinguyen@altera.com> <1378740833-4883-2-git-send-email-dinguyen@altera.com> <20130914110031.GB15077@amd.pavel.ucw.cz> <8761to4ai8.fsf@octavius.laptop.org>
-Mime-Version: 1.0 (Apple Message framework v1283)
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 8BIT
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <8761to4ai8.fsf-DGHOrqG7t0YzNDMTQreKSUB+6BGkLq7r@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>
-Cc: Pavel Machek <pavel-ynQEQJNshbs@public.gmane.org>, dinguyen-EIB2kfCEclfQT0dZR+AlfA@public.gmane.org, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Olof Johansson <olof-nZhT3qVonbNeoWH0uzbU5w@public.gmane.org>, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Pawel Moll <pawel.moll-5wv7dgnIgG8@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>, Ian Campbell <ian.campbell-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org>, Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, Seungwon Jeon <tgih.jun-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+From: Sachin Kamat <sachin.kamat@linaro.org>
+Subject: Re: [PATCH 1/1] mmc: ushc: Fix incorrect parameter in sizeof
+Date: Thu, 26 Sep 2013 08:32:32 +0530
+Message-ID: <CAK9yfHwbU83ZioTmHOGUjQj5ROpuqxxD_RF6+f8B5mgKtXAp2Q@mail.gmail.com>
+References: <1378973653-12750-1-git-send-email-sachin.kamat@linaro.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-ob0-f172.google.com ([209.85.214.172]:35770 "EHLO
+	mail-ob0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751283Ab3IZDCd (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 25 Sep 2013 23:02:33 -0400
+Received: by mail-ob0-f172.google.com with SMTP id gq1so1213978obb.31
+        for <linux-mmc@vger.kernel.org>; Wed, 25 Sep 2013 20:02:32 -0700 (PDT)
+In-Reply-To: <1378973653-12750-1-git-send-email-sachin.kamat@linaro.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: Chris Ball <cjb@laptop.org>, Sachin Kamat <sachin.kamat@linaro.org>, David Vrabel <david.vrabel@csr.com>
 
 Hi Chris,
 
-On Sep 25, 2013, at 8:50 PM, Chris Ball wrote:
+On 12 September 2013 13:44, Sachin Kamat <sachin.kamat@linaro.org> wrote:
+> sizeof should be of the parent structure type.
+>
+> Signed-off-by: Sachin Kamat <sachin.kamat@linaro.org>
+> Cc: David Vrabel <david.vrabel@csr.com>
+> ---
+> Compile tested.
+> ---
+>  drivers/mmc/host/ushc.c |    2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/host/ushc.c b/drivers/mmc/host/ushc.c
+> index c0105a2..d2c386f 100644
+> --- a/drivers/mmc/host/ushc.c
+> +++ b/drivers/mmc/host/ushc.c
+> @@ -504,7 +504,7 @@ static int ushc_probe(struct usb_interface *intf, const struct usb_device_id *id
+>                 ret = -ENOMEM;
+>                 goto err;
+>         }
+> -       ushc->csw = kzalloc(sizeof(struct ushc_cbw), GFP_KERNEL);
+> +       ushc->csw = kzalloc(sizeof(struct ushc_csw), GFP_KERNEL);
+>         if (ushc->csw == NULL) {
+>                 ret = -ENOMEM;
+>                 goto err;
+> --
+> 1.7.9.5
+>
 
-> Hi Dinh,
-> 
-> On Sat, Sep 14 2013, Pavel Machek wrote:
->>> From: Dinh Nguyen <dinguyen-EIB2kfCEclfQT0dZR+AlfA@public.gmane.org>
->>> 
->>> Add functionality in the System Manager to set the SDR settings for the
->>> SD/MMC IP.
->>> 
->>> Signed-off-by: Dinh Nguyen <dinguyen-EIB2kfCEclfQT0dZR+AlfA@public.gmane.org>
->>> Cc: Pavel Machek <pavel-ynQEQJNshbs@public.gmane.org>
->> 
->>> +void socfpga_sysmgr_set_dwmmc_drvsel_smpsel(void)
->>> +{
->>> +	struct device_node *np;
->>> +	u32 timing[2];
->>> +	u32 hs_timing;
->>> +
->>> +	np = of_find_compatible_node(NULL, NULL, "altr,socfpga-dw-mshc");
->>> +	of_property_read_u32_array(np, "samsung,dw-mshc-sdr-timing", timing, 2);
->>> +	hs_timing = SYSMGR_SDMMC_CTRL_SET(timing[0], timing[1]);
->>> +	writel(hs_timing, sys_manager_base_addr + SYSMGR_SDMMCGRP_CTRL_OFFSET);
->>> +}
->>> +EXPORT_SYMBOL(socfpga_sysmgr_set_dwmmc_drvsel_smpsel);
->> 
->> To get the abstraction right, would it make sense to have timing
->> parameters as arguments to socfpga_sysmgr_set_dwmmc_drvsel_smpsel(),
->> so that sysmgr code is not walking MMC's device tree directly?
-> 
-> I think this review comment from Pavel is still open, please reply.
+Thanks for applying my other patches. Can you please check this one too?
 
-I sent a Rev 2 that addresses this comment on 9/23. Let me know if I need to resend it in case you missed it.
 
-Thanks,
-Dinh
-> Thanks,
-> 
-> - Chris.
-> -- 
-> Chris Ball   <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>   <http://printf.net/>
-
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+-- 
+With warm regards,
+Sachin
