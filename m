@@ -1,39 +1,58 @@
-From: Jongman Heo <jongman.heo@samsung.com>
-Subject: [PATCH] mmc-util: Fix typo in comment in do_enh_area_set()
-Date: Thu, 26 Sep 2013 11:52:39 +0000 (GMT)
-Message-ID: <10345463.108251380196359446.JavaMail.weblogic@epv6ml08>
-Reply-To: jongman.heo@samsung.com
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH v2 0/9] mmc: sdhci-esdhc-imx: add SD3.0 support
+Date: Thu, 26 Sep 2013 07:57:43 -0400
+Message-ID: <87siwrre14.fsf@octavius.laptop.org>
+References: <1379070698-7344-1-git-send-email-b29396@freescale.com>
+	<87siws2ve7.fsf@octavius.laptop.org>
+	<20130926090158.GC21081@S2101-09.ap.freescale.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=euc-kr
-Content-Transfer-Encoding: base64
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout2.samsung.com ([203.254.224.25]:38896 "EHLO
-	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756350Ab3IZLwk (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 26 Sep 2013 07:52:40 -0400
-Received: from epcpsbgr2.samsung.com
- (u142.gpu120.samsung.co.kr [203.254.230.142])
- by mailout2.samsung.com (Oracle Communications Messaging Server 7u4-24.01
- (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTP id <0MTQ00GTFEB5SET0@mailout2.samsung.com> for
- linux-mmc@vger.kernel.org; Thu, 26 Sep 2013 20:52:39 +0900 (KST)
-MIME-version: 1.0
+Received: from void.printf.net ([89.145.121.20]:36806 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1756549Ab3IZL5y (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 26 Sep 2013 07:57:54 -0400
+In-Reply-To: <20130926090158.GC21081@S2101-09.ap.freescale.net> (Shawn Guo's
+	message of "Thu, 26 Sep 2013 17:02:00 +0800")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Cc: =?euc-kr?Q?=C7=E3=C1=BE=B8=B8?= <jongman.heo@samsung.com>
+To: Shawn Guo <shawn.guo@linaro.org>
+Cc: ulf.hansson@linaro.org, s.hauer@pengutronix.de, anton@enomsg.org, linux-mmc@vger.kernel.org, w.sang@pengutronix.de, neko@bakuhatsu.net, Dong Aisheng <b29396@freescale.com>, linux-arm-kernel@lists.infradead.org
 
-DQpFUkFTRV9HUk9VUF9ERUYgYml0IGlzIHNldCB0byAxLCBzbyBtYWtlIHRoZSBjb21tZW50IGNv
-bnNpc3RlbnQgd2l0aCB0aGUgY29kZQ0KDQpTaWduZWQtb2ZmLWJ5OiBKb25nbWFuIEhlbyA8am9u
-Z21hbi5oZW9Ac2Ftc3VuZy5jb20+DQotLS0NCiBtbWNfY21kcy5jIHwgMiArLQ0KIDEgZmlsZSBj
-aGFuZ2VkLCAxIGluc2VydGlvbigrKSwgMSBkZWxldGlvbigtKQ0KDQpkaWZmIC0tZ2l0IGEvbW1j
-X2NtZHMuYyBiL21tY19jbWRzLmMNCmluZGV4IGI4YWZhNzQuLjRkMTBmMzUgMTAwNjQ0DQotLS0g
-YS9tbWNfY21kcy5jDQorKysgYi9tbWNfY21kcy5jDQpAQCAtNTQ4LDcgKzU0OCw3IEBAIGludCBk
-b19lbmhfYXJlYV9zZXQoaW50IG5hcmdzLCBjaGFyICoqYXJndikNCiAJZW5oX3N0YXJ0X2FkZHIg
-Lz0gYWxpZ247DQogCWVuaF9zdGFydF9hZGRyICo9IGFsaWduOw0KIA0KLQkvKiBzZXQgRVhUX0NT
-RF9FUkFTRV9HUk9VUF9ERUYgYml0IDAgKi8NCisJLyogc2V0IEVYVF9DU0RfRVJBU0VfR1JPVVBf
-REVGIGJpdCAxICovDQogCXJldCA9IHdyaXRlX2V4dGNzZF92YWx1ZShmZCwgRVhUX0NTRF9FUkFT
-RV9HUk9VUF9ERUYsIDB4MSk7DQogCWlmIChyZXQpIHsNCiAJCWZwcmludGYoc3RkZXJyLCAiQ291
-bGQgbm90IHdyaXRlIDB4MSB0byAiDQotLSANCjEuOC4zLjE=
+Hi,
 
+On Thu, Sep 26 2013, Shawn Guo wrote:
+> On Wed, Sep 25, 2013 at 10:01:52PM -0400, Chris Ball wrote:
+>> Hi Shawn, Sascha,
+>> 
+>> On Fri, Sep 13 2013, Dong Aisheng wrote:
+>> > This patch series add SD3.0 support for i.MX6Q/DL.
+>> > Since freescale i.MX6Q/DL uSDHC clock tuning progress is a little
+>> > different from
+>> > the standard tuning process defined in host controller spec v3.0.
+>> > So we add a hook to allow execute platform specific tuning instead of
+>> > standard host controller tuning.
+>> >
+>> > The main difference are:
+>> > 1) not only generate Buffer Read Ready interrupt when tuning is performing.
+>> > It generates all other DATA interrupts like the normal data command.
+>> > 2) SDHCI_CTRL_EXEC_TUNING is not automatically cleared by HW,
+>> > instead it's controlled by SW.
+>> > 3) SDHCI_CTRL_TUNED_CLK is not automatically set by HW,
+>> > it's controlled by SW.
+>> > 4) the clock delay for every tuning is set by SW.
+>> >
+>> > Tested on i.MX6Q Sabreauto board.
+>> 
+>> Please could someone ACK this series?  Thanks,
+>
+> Acked-by: Shawn Guo <shawn.guo@linaro.org>
+>
+> One thing need to mention is that the series only adds support for
+> UHS SDR cards, and DDR cards haven't been working yet.
 
+Thanks, patches 1-8 pushed to mmc-next for 3.13 with Shawn's ACK.
+
+- Chris.
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
