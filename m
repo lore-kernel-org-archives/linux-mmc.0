@@ -1,51 +1,34 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [PATCH 02/27] mmc: au1xmmc: Move away from using deprecated APIs
-Date: Thu, 26 Sep 2013 16:54:27 +0200
-Message-ID: <1380207292-16968-3-git-send-email-ulf.hansson@linaro.org>
-References: <1380207292-16968-1-git-send-email-ulf.hansson@linaro.org>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1380207292-16968-1-git-send-email-ulf.hansson@linaro.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Manuel Lauss <manuel.lauss@googlemail.com>
+From: Nicolas Pitre <nicolas.pitre@linaro.org>
+Subject: Re: [PATCH 09/27] mmc: mvsdio: Remove redundant suspend and resume
+ callbacks
+Date: Thu, 26 Sep 2013 11:40:19 -0400 (EDT)
+Message-ID: <alpine.LFD.2.03.1309261136010.312@syhkavp.arg>
+References: <1380207292-16968-1-git-send-email-ulf.hansson@linaro.org> <1380207292-16968-10-git-send-email-ulf.hansson@linaro.org>
+Mime-Version: 1.0
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qc0-f170.google.com ([209.85.216.170]:56324 "EHLO
+	mail-qc0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752948Ab3IZPkW (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 26 Sep 2013 11:40:22 -0400
+Received: by mail-qc0-f170.google.com with SMTP id m20so882382qcx.1
+        for <linux-mmc@vger.kernel.org>; Thu, 26 Sep 2013 08:40:21 -0700 (PDT)
+In-Reply-To: <1380207292-16968-10-git-send-email-ulf.hansson@linaro.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, Jason Cooper <jason@lakedaemon.net>, Andrew Lunn <andrew@lunn.ch>
 
-Suspend and resume of cards are being handled from the protocol layer
-and consequently the mmc_suspend|resume_host APIs are deprecated.
+On Thu, 26 Sep 2013, Ulf Hansson wrote:
 
-This means we can simplify the suspend|resume callbacks by removing the
-use of the deprecated APIs.
+> Suspend and resume of cards are handled by the protocol layer and
+> consequently the mmc_suspend|resume_host APIs are marked as deprecated.
 
-Cc: Manuel Lauss <manuel.lauss@googlemail.com>
-Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
----
- drivers/mmc/host/au1xmmc.c |    7 +------
- 1 file changed, 1 insertion(+), 6 deletions(-)
+Having the protocol layer take care of card suspend is perfectly sound.
 
-diff --git a/drivers/mmc/host/au1xmmc.c b/drivers/mmc/host/au1xmmc.c
-index df9becd..f5443a6 100644
---- a/drivers/mmc/host/au1xmmc.c
-+++ b/drivers/mmc/host/au1xmmc.c
-@@ -1157,11 +1157,6 @@ static int au1xmmc_remove(struct platform_device *pdev)
- static int au1xmmc_suspend(struct platform_device *pdev, pm_message_t state)
- {
- 	struct au1xmmc_host *host = platform_get_drvdata(pdev);
--	int ret;
--
--	ret = mmc_suspend_host(host->mmc);
--	if (ret)
--		return ret;
- 
- 	au_writel(0, HOST_CONFIG2(host));
- 	au_writel(0, HOST_CONFIG(host));
-@@ -1178,7 +1173,7 @@ static int au1xmmc_resume(struct platform_device *pdev)
- 
- 	au1xmmc_reset_controller(host);
- 
--	return mmc_resume_host(host->mmc);
-+	return 0;
- }
- #else
- #define au1xmmc_suspend NULL
--- 
-1.7.9.5
+However, what about host controllers?  Shouldn't they suspend themselves 
+as well?  There is certainly potential for power saving by gating clocks 
+to the host IP block or the like.
+
+
+Nicolas
