@@ -1,39 +1,57 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH 2/2] Don't use u8 for fields with more than 1 byte
-Date: Wed, 25 Sep 2013 22:26:30 -0400
-Message-ID: <877ge42u95.fsf@octavius.laptop.org>
-References: <1379918452-25211-1-git-send-email-oliver@freetz.org>
-	<1379918452-25211-2-git-send-email-oliver@freetz.org>
-	<CA+5vRUXr_Dt8oPnqGijUso9L5eZSTb7DFdL-F833ajTYi4TZeg@mail.gmail.com>
+Subject: Re: [PATCH] mmc: core: remove issue_fn indirect function call
+Date: Wed, 25 Sep 2013 22:37:30 -0400
+Message-ID: <8738os2tqt.fsf@octavius.laptop.org>
+References: <1379611214-1089-1-git-send-email-grundler@chromium.org>
+	<CAPDyKFr0h=uTz4xOAULLc0Ff23xB-xVuuk+XnBz_Uq5YMryHbA@mail.gmail.com>
+	<87fvss2uh9.fsf@octavius.laptop.org>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:57473 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:49550 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752941Ab3IZC0e (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 25 Sep 2013 22:26:34 -0400
-In-Reply-To: <CA+5vRUXr_Dt8oPnqGijUso9L5eZSTb7DFdL-F833ajTYi4TZeg@mail.gmail.com> (Ben
-	Gardiner's message of "Mon, 23 Sep 2013 23:25:59 -0400")
+	id S1751281Ab3IZChi convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 25 Sep 2013 22:37:38 -0400
+In-Reply-To: <87fvss2uh9.fsf@octavius.laptop.org> (Chris Ball's message of
+	"Wed, 25 Sep 2013 22:21:38 -0400")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ben Gardiner <ben.l.gardiner@gmail.com>
-Cc: Oliver Metz <oliver@freetz.org>, linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Grant Grundler <grundler@chromium.org>, Seungwon Jeon <tgih.jun@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-Hi Oliver,
+Hi,
 
-On Mon, Sep 23 2013, Ben Gardiner wrote:
-> On Mon, Sep 23, 2013 at 2:40 AM, Oliver Metz <oliver@freetz.org> wrote:
->> Signed-off-by: Oliver Metz <oliver@freetz.org>
->> ---
->>  mmc_cmds.c | 19 ++++++++++---------
->>  1 file changed, 10 insertions(+), 9 deletions(-)
+On Wed, Sep 25 2013, Chris Ball wrote:
+> Hi,
 >
-> Looks good to me.
+> On Fri, Sep 20 2013, Ulf Hansson wrote:
+>> On 19 September 2013 19:20, Grant Grundler <grundler@chromium.org> w=
+rote:
+>>> struct mmc_queue defines issue_fn as an indirect function call.
+>>> issue_fn field only gets set to mmc_blk_issue_rq and only gets
+>>> invoked immediately after calling blk_fetch_request().
+>>> Don't bother with indirect function call - it's pointless and just
+>>> obfuscates the code.
+>>>
+>>> Signed-off-by: Grant Grundler <grundler@chromium.org>
+>>
+>> Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
 >
-> Reviewed-by: Ben Gardiner <ben.l.gardiner@gmail.com>
+> Thanks, pushed to mmc-next for 3.13.
 
-Thanks, pushed to mmc-utils with Ben's Reviewed-by.
+Have dropped this, it's breaking my build:
+
+/home/cjb/git/mmc/drivers/mmc/card/block.c:1955:12: warning: =E2=80=98m=
+mc_blk_issue_rq=E2=80=99 defined but not used [-Wunused-function]
+/home/cjb/git/mmc/drivers/mmc/card/queue.c: In function =E2=80=98mmc_qu=
+eue_thread=E2=80=99:
+/home/cjb/git/mmc/drivers/mmc/card/queue.c:70:4: error: implicit declar=
+ation of function =E2=80=98mmc_blk_issue_rq=E2=80=99 [-Werror=3Dimplici=
+t-function-declaration]
+
+Grant, please could you take a look and resubmit?
 
 - Chris.
--- 
+--=20
 Chris Ball   <cjb@laptop.org>   <http://printf.net/>
