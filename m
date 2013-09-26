@@ -1,13 +1,13 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [PATCH 25/27] mmc: via-sdmmc: Move away from using deprecated APIs
-Date: Thu, 26 Sep 2013 16:54:50 +0200
-Message-ID: <1380207292-16968-26-git-send-email-ulf.hansson@linaro.org>
+Subject: [PATCH 26/27] mmc: mmci: Move away from using deprecated APIs
+Date: Thu, 26 Sep 2013 16:54:51 +0200
+Message-ID: <1380207292-16968-27-git-send-email-ulf.hansson@linaro.org>
 References: <1380207292-16968-1-git-send-email-ulf.hansson@linaro.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1380207292-16968-1-git-send-email-ulf.hansson@linaro.org>
 Sender: linux-kernel-owner@vger.kernel.org
 To: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Bruce Chang <brucechang@via.com.tw>, Harald Welte <HaraldWelte@viatech.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Russell King <linux@arm.linux.org.uk>
 List-Id: linux-mmc@vger.kernel.org
 
 Suspend and resume of cards are being handled from the protocol layer
@@ -16,48 +16,57 @@ and consequently the mmc_suspend|resume_host APIs are deprecated.
 This means we can simplify the suspend|resume callbacks by removing the
 use of the deprecated APIs.
 
-Cc: Bruce Chang <brucechang@via.com.tw>
-Cc: Harald Welte <HaraldWelte@viatech.com>
+Cc: Russell King <linux@arm.linux.org.uk>
 Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 ---
- drivers/mmc/host/via-sdmmc.c |    7 +------
- 1 file changed, 1 insertion(+), 6 deletions(-)
+ drivers/mmc/host/mmci.c |   17 ++++-------------
+ 1 file changed, 4 insertions(+), 13 deletions(-)
 
-diff --git a/drivers/mmc/host/via-sdmmc.c b/drivers/mmc/host/via-sdmmc.c
-index 4f84586..63fac78 100644
---- a/drivers/mmc/host/via-sdmmc.c
-+++ b/drivers/mmc/host/via-sdmmc.c
-@@ -1269,21 +1269,18 @@ static void via_init_sdc_pm(struct via_crdr_mmc_host *host)
- static int via_sd_suspend(struct pci_dev *pcidev, pm_message_t state)
+diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+index c3785ed..9e8a482 100644
+--- a/drivers/mmc/host/mmci.c
++++ b/drivers/mmc/host/mmci.c
+@@ -1725,37 +1725,28 @@ static int mmci_suspend(struct device *dev)
  {
- 	struct via_crdr_mmc_host *host;
+ 	struct amba_device *adev = to_amba_device(dev);
+ 	struct mmc_host *mmc = amba_get_drvdata(adev);
 -	int ret = 0;
  
- 	host = pci_get_drvdata(pcidev);
- 
- 	via_save_pcictrlreg(host);
- 	via_save_sdcreg(host);
- 
--	ret = mmc_suspend_host(host->mmc);
+ 	if (mmc) {
+ 		struct mmci_host *host = mmc_priv(mmc);
 -
- 	pci_save_state(pcidev);
- 	pci_enable_wake(pcidev, pci_choose_state(pcidev, state), 0);
- 	pci_disable_device(pcidev);
- 	pci_set_power_state(pcidev, pci_choose_state(pcidev, state));
+-		ret = mmc_suspend_host(mmc);
+-		if (ret == 0) {
+-			pm_runtime_get_sync(dev);
+-			writel(0, host->base + MMCIMASK0);
+-		}
++		pm_runtime_get_sync(dev);
++		writel(0, host->base + MMCIMASK0);
+ 	}
  
 -	return ret;
 +	return 0;
  }
  
- static int via_sd_resume(struct pci_dev *pcidev)
-@@ -1316,8 +1313,6 @@ static int via_sd_resume(struct pci_dev *pcidev)
- 	via_restore_pcictrlreg(sdhost);
- 	via_init_sdc_pm(sdhost);
+ static int mmci_resume(struct device *dev)
+ {
+ 	struct amba_device *adev = to_amba_device(dev);
+ 	struct mmc_host *mmc = amba_get_drvdata(adev);
+-	int ret = 0;
  
--	ret = mmc_resume_host(sdhost->mmc);
+ 	if (mmc) {
+ 		struct mmci_host *host = mmc_priv(mmc);
 -
- 	return ret;
+ 		writel(MCI_IRQENABLE, host->base + MMCIMASK0);
+ 		pm_runtime_put(dev);
+-
+-		ret = mmc_resume_host(mmc);
+ 	}
+ 
+-	return ret;
++	return 0;
  }
+ #endif
  
 -- 
 1.7.9.5
