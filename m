@@ -1,13 +1,13 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [PATCH 17/27] mmc: wmt-sdmmc: Move away from using deprecated APIs
-Date: Thu, 26 Sep 2013 16:54:42 +0200
-Message-ID: <1380207292-16968-18-git-send-email-ulf.hansson@linaro.org>
+Subject: [PATCH 25/27] mmc: via-sdmmc: Move away from using deprecated APIs
+Date: Thu, 26 Sep 2013 16:54:50 +0200
+Message-ID: <1380207292-16968-26-git-send-email-ulf.hansson@linaro.org>
 References: <1380207292-16968-1-git-send-email-ulf.hansson@linaro.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1380207292-16968-1-git-send-email-ulf.hansson@linaro.org>
 Sender: linux-kernel-owner@vger.kernel.org
 To: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Tony Prisk <linux@prisktech.co.nz>, linux-arm-kernel@lists.infradead.org
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Bruce Chang <brucechang@via.com.tw>, Harald Welte <HaraldWelte@viatech.com>
 List-Id: linux-mmc@vger.kernel.org
 
 Suspend and resume of cards are being handled from the protocol layer
@@ -16,74 +16,48 @@ and consequently the mmc_suspend|resume_host APIs are deprecated.
 This means we can simplify the suspend|resume callbacks by removing the
 use of the deprecated APIs.
 
-Cc: Tony Prisk <linux@prisktech.co.nz>
-Cc: linux-arm-kernel@lists.infradead.org
+Cc: Bruce Chang <brucechang@via.com.tw>
+Cc: Harald Welte <HaraldWelte@viatech.com>
 Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 ---
- drivers/mmc/host/wmt-sdmmc.c |   27 ++++++++++-----------------
- 1 file changed, 10 insertions(+), 17 deletions(-)
+ drivers/mmc/host/via-sdmmc.c |    7 +------
+ 1 file changed, 1 insertion(+), 6 deletions(-)
 
-diff --git a/drivers/mmc/host/wmt-sdmmc.c b/drivers/mmc/host/wmt-sdmmc.c
-index 34231d5..be94470 100644
---- a/drivers/mmc/host/wmt-sdmmc.c
-+++ b/drivers/mmc/host/wmt-sdmmc.c
-@@ -939,28 +939,23 @@ static int wmt_mci_suspend(struct device *dev)
- 	struct platform_device *pdev = to_platform_device(dev);
- 	struct mmc_host *mmc = platform_get_drvdata(pdev);
- 	struct wmt_mci_priv *priv;
--	int ret;
- 
- 	if (!mmc)
- 		return 0;
- 
- 	priv = mmc_priv(mmc);
--	ret = mmc_suspend_host(mmc);
--
--	if (!ret) {
--		reg_tmp = readb(priv->sdmmc_base + SDMMC_BUSMODE);
--		writeb(reg_tmp | BM_SOFT_RESET, priv->sdmmc_base +
--		       SDMMC_BUSMODE);
-+	reg_tmp = readb(priv->sdmmc_base + SDMMC_BUSMODE);
-+	writeb(reg_tmp | BM_SOFT_RESET, priv->sdmmc_base +
-+	       SDMMC_BUSMODE);
- 
--		reg_tmp = readw(priv->sdmmc_base + SDMMC_BLKLEN);
--		writew(reg_tmp & 0x5FFF, priv->sdmmc_base + SDMMC_BLKLEN);
-+	reg_tmp = readw(priv->sdmmc_base + SDMMC_BLKLEN);
-+	writew(reg_tmp & 0x5FFF, priv->sdmmc_base + SDMMC_BLKLEN);
- 
--		writeb(0xFF, priv->sdmmc_base + SDMMC_STS0);
--		writeb(0xFF, priv->sdmmc_base + SDMMC_STS1);
-+	writeb(0xFF, priv->sdmmc_base + SDMMC_STS0);
-+	writeb(0xFF, priv->sdmmc_base + SDMMC_STS1);
- 
--		clk_disable(priv->clk_sdmmc);
--	}
--	return ret;
-+	clk_disable(priv->clk_sdmmc);
-+	return 0;
- }
- 
- static int wmt_mci_resume(struct device *dev)
-@@ -969,7 +964,6 @@ static int wmt_mci_resume(struct device *dev)
- 	struct platform_device *pdev = to_platform_device(dev);
- 	struct mmc_host *mmc = platform_get_drvdata(pdev);
- 	struct wmt_mci_priv *priv;
+diff --git a/drivers/mmc/host/via-sdmmc.c b/drivers/mmc/host/via-sdmmc.c
+index 4f84586..63fac78 100644
+--- a/drivers/mmc/host/via-sdmmc.c
++++ b/drivers/mmc/host/via-sdmmc.c
+@@ -1269,21 +1269,18 @@ static void via_init_sdc_pm(struct via_crdr_mmc_host *host)
+ static int via_sd_suspend(struct pci_dev *pcidev, pm_message_t state)
+ {
+ 	struct via_crdr_mmc_host *host;
 -	int ret = 0;
  
- 	if (mmc) {
- 		priv = mmc_priv(mmc);
-@@ -987,10 +981,9 @@ static int wmt_mci_resume(struct device *dev)
- 		writeb(reg_tmp | INT0_DI_INT_EN, priv->sdmmc_base +
- 		       SDMMC_INTMASK0);
+ 	host = pci_get_drvdata(pcidev);
  
--		ret = mmc_resume_host(mmc);
- 	}
+ 	via_save_pcictrlreg(host);
+ 	via_save_sdcreg(host);
+ 
+-	ret = mmc_suspend_host(host->mmc);
+-
+ 	pci_save_state(pcidev);
+ 	pci_enable_wake(pcidev, pci_choose_state(pcidev, state), 0);
+ 	pci_disable_device(pcidev);
+ 	pci_set_power_state(pcidev, pci_choose_state(pcidev, state));
  
 -	return ret;
 +	return 0;
  }
  
- static const struct dev_pm_ops wmt_mci_pm = {
+ static int via_sd_resume(struct pci_dev *pcidev)
+@@ -1316,8 +1313,6 @@ static int via_sd_resume(struct pci_dev *pcidev)
+ 	via_restore_pcictrlreg(sdhost);
+ 	via_init_sdc_pm(sdhost);
+ 
+-	ret = mmc_resume_host(sdhost->mmc);
+-
+ 	return ret;
+ }
+ 
 -- 
 1.7.9.5
