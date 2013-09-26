@@ -1,77 +1,61 @@
 From: Grant Grundler <grundler@chromium.org>
-Subject: [PATCH 2/7] mmc: core: rename local var err to saved_err
-Date: Thu, 26 Sep 2013 12:22:55 -0700
-Message-ID: <1380223380-22451-3-git-send-email-grundler@chromium.org>
+Subject: Re: [PATCH 0/7] mmc: core: cleanup and locking patches description
+Date: Thu, 26 Sep 2013 12:57:39 -0700
+Message-ID: <CANEJEGvFFu-MDQX4UNcfr58Jxg6BKkw=gAMqz0Vv6jV9miixfg@mail.gmail.com>
 References: <1380223380-22451-1-git-send-email-grundler@chromium.org>
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-oa0-f49.google.com ([209.85.219.49]:57253 "EHLO
+	mail-oa0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750789Ab3IZT5k (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 26 Sep 2013 15:57:40 -0400
+Received: by mail-oa0-f49.google.com with SMTP id i4so1285472oah.22
+        for <linux-mmc@vger.kernel.org>; Thu, 26 Sep 2013 12:57:39 -0700 (PDT)
 In-Reply-To: <1380223380-22451-1-git-send-email-grundler@chromium.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>, Ulf Hansson <ulf.hansson@linaro.org>, Seungwon Jeon <tgih.jun@samsung.com>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Grant Grundler <grundler@chromium.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Grant Grundler <grundler@chromium.org>
+Cc: Chris Ball <cjb@laptop.org>, Ulf Hansson <ulf.hansson@linaro.org>, Seungwon Jeon <tgih.jun@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, LKML <linux-kernel@vger.kernel.org>
 
-Just making it more obvious 'err' refers to the status of the in flight
-request (aka saved_areq) and not the new async request we might start.
+Argh...too much wordsmithing...
 
-Signed-off-by: Grant Grundler <grundler@chromium.org>
----
- drivers/mmc/core/core.c | 16 ++++++++--------
- 1 file changed, 8 insertions(+), 8 deletions(-)
+On Thu, Sep 26, 2013 at 12:22 PM, Grant Grundler <grundler@chromium.org> wrote:
+> Following 7 patches are mostly cleanup with one key patch around host->areq
+> locking.  The host->areq locking problem description is here:
+>         http://www.spinics.net/lists/linux-mmc/msg21644.html
+>
+> I do believe this preposed host->areq locking patch is a complete fix.
 
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index e5a40ee..675139e 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -527,7 +527,7 @@ static void mmc_post_req(struct mmc_host *host, struct mmc_request *mrq,
- struct mmc_async_req *mmc_start_req(struct mmc_host *host,
- 				    struct mmc_async_req *areq, int *error)
- {
--	int err = 0;
-+	int saved_err = 0;
- 	int start_err = 0;
- 	struct mmc_async_req *saved_areq = host->areq;
- 
-@@ -536,10 +536,10 @@ struct mmc_async_req *mmc_start_req(struct mmc_host *host,
- 		mmc_pre_req(host, areq->mrq, !saved_areq);
- 
- 	if (saved_areq) {
--		err = mmc_wait_for_data_req_done(host, saved_areq->mrq,	areq);
--		if (err == MMC_BLK_NEW_REQUEST) {
-+		saved_err = mmc_wait_for_data_req_done(host, saved_areq->mrq,	areq);
-+		if (saved_err == MMC_BLK_NEW_REQUEST) {
- 			if (error)
--				*error = err;
-+				*error = saved_err;
- 			/*
- 			 * The previous request was not completed,
- 			 * nothing to return
-@@ -556,23 +556,23 @@ struct mmc_async_req *mmc_start_req(struct mmc_host *host,
- 			mmc_start_bkops(host->card, true);
- 	}
- 
--	if (!err && areq)
-+	if (!saved_err && areq)
- 		start_err = __mmc_start_data_req(host, areq->mrq);
- 
- 	if (saved_areq)
- 		mmc_post_req(host, saved_areq->mrq, 0);
- 
- 	 /* Cancel a prepared request if it was not started. */
--	if ((err || start_err) && areq)
-+	if ((saved_err || start_err) && areq)
- 		mmc_post_req(host, areq->mrq, -EINVAL);
- 
--	if (err)
-+	if (saved_err)
- 		host->areq = NULL;
- 	else
- 		host->areq = areq;
- 
- 	if (error)
--		*error = err;
-+		*error = saved_err;
- 	return saved_areq;
- }
- EXPORT_SYMBOL(mmc_start_req);
--- 
-1.8.4
+... is NOT a complete fix.
+
+> But it appears to fix the problem and is better than nothing.
+
+Still true.
+
+cheers,
+grant
+
+>
+> This patch sequence applies clean to linus' 3.12-rc2 branch and only compile
+> tested in this form. This is a forward port (and cleanup) of the
+> same patch I've been testing on ChromeOS-3.4 tree using Exynos5250 chipset.
+>
+> cheers,
+> grant
+>
+> 0000-mmc-core-cleanups-and-locking-description (this email)
+> 0001-mmc-core-rename-data-to-saved_areq.patch
+> 0002-mmc-core-rename-local-var-err-to-saved_err.patch
+> 0003-mmc-core-restructure-error-handling-for-start-req.patch
+> 0004-mmc-core-use-common-code-path-to-return-error.patch
+> 0005-mmc-core-handling-polling-more-gracefully.patch
+> 0006-mmc-core-protect-references-to-host-areq-with-host-l.patch
+> 0007-mmc-core-mmc_start_req-is-a-misnomer-mmc_process_are.patch
+>
+>
+>  drivers/mmc/card/block.c    |   8 ++--
+>  drivers/mmc/card/mmc_test.c |   4 +-
+>  drivers/mmc/core/core.c     | 103 +++++++++++++++++++++++++-------------------
+>  include/linux/mmc/core.h    |   2 +-
+>  4 files changed, 66 insertions(+), 51 deletions(-)
