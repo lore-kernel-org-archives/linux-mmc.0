@@ -1,83 +1,83 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [PATCH 11/27] mmc: sdhci: Move away from using deprecated APIs
-Date: Thu, 26 Sep 2013 16:54:36 +0200
-Message-ID: <1380207292-16968-12-git-send-email-ulf.hansson@linaro.org>
+Subject: [PATCH 18/27] mmc: s3cmci: Remove redundant suspend and resume
+ callbacks
+Date: Thu, 26 Sep 2013 16:54:43 +0200
+Message-ID: <1380207292-16968-19-git-send-email-ulf.hansson@linaro.org>
 References: <1380207292-16968-1-git-send-email-ulf.hansson@linaro.org>
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
 In-Reply-To: <1380207292-16968-1-git-send-email-ulf.hansson@linaro.org>
-Sender: linux-kernel-owner@vger.kernel.org
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
 To: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-arm-kernel@lists.infradead.org, Ben Dooks <ben-linux@fluff.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Suspend and resume of cards are being handled from the protocol layer
-and consequently the mmc_suspend|resume_host APIs are deprecated.
+Suspend and resume of cards are handled by the protocol layer and
+consequently the mmc_suspend|resume_host APIs are marked as deprecated.
 
-This means we can simplify the suspend|resume callbacks by removing the
-use of the deprecated APIs.
+While moving away from using the deprecated APIs, there are nothing
+left to be done for the suspend and resume callbacks, so remove them.
 
+Cc: Ben Dooks <ben-linux@fluff.org>
+Cc: linux-arm-kernel@lists.infradead.org
 Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 ---
- drivers/mmc/host/sdhci.c |   20 ++------------------
- 1 file changed, 2 insertions(+), 18 deletions(-)
+ drivers/mmc/host/s3cmci.c |   29 -----------------------------
+ 1 file changed, 29 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 7a7fb4f..bdb7598 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -2546,8 +2546,6 @@ EXPORT_SYMBOL_GPL(sdhci_disable_irq_wakeups);
+diff --git a/drivers/mmc/host/s3cmci.c b/drivers/mmc/host/s3cmci.c
+index 8d6794c..2fce5ea 100644
+--- a/drivers/mmc/host/s3cmci.c
++++ b/drivers/mmc/host/s3cmci.c
+@@ -1949,39 +1949,10 @@ static struct platform_device_id s3cmci_driver_ids[] = {
  
- int sdhci_suspend_host(struct sdhci_host *host)
- {
--	int ret;
+ MODULE_DEVICE_TABLE(platform, s3cmci_driver_ids);
+ 
 -
- 	if (host->ops->platform_suspend)
- 		host->ops->platform_suspend(host);
- 
-@@ -2559,19 +2557,6 @@ int sdhci_suspend_host(struct sdhci_host *host)
- 		host->flags &= ~SDHCI_NEEDS_RETUNING;
- 	}
- 
--	ret = mmc_suspend_host(host->mmc);
--	if (ret) {
--		if (host->flags & SDHCI_USING_RETUNING_TIMER) {
--			host->flags |= SDHCI_NEEDS_RETUNING;
--			mod_timer(&host->tuning_timer, jiffies +
--					host->tuning_count * HZ);
--		}
+-#ifdef CONFIG_PM
 -
--		sdhci_enable_card_detection(host);
+-static int s3cmci_suspend(struct device *dev)
+-{
+-	struct mmc_host *mmc = platform_get_drvdata(to_platform_device(dev));
 -
--		return ret;
--	}
+-	return mmc_suspend_host(mmc);
+-}
 -
- 	if (!device_may_wakeup(mmc_dev(host->mmc))) {
- 		sdhci_mask_irqs(host, SDHCI_INT_ALL_MASK);
- 		free_irq(host->irq, host);
-@@ -2579,14 +2564,14 @@ int sdhci_suspend_host(struct sdhci_host *host)
- 		sdhci_enable_irq_wakeups(host);
- 		enable_irq_wake(host->irq);
- 	}
--	return ret;
-+	return 0;
- }
- 
- EXPORT_SYMBOL_GPL(sdhci_suspend_host);
- 
- int sdhci_resume_host(struct sdhci_host *host)
- {
--	int ret;
-+	int ret = 0;
- 
- 	if (host->flags & (SDHCI_USE_SDMA | SDHCI_USE_ADMA)) {
- 		if (host->ops->enable_dma)
-@@ -2615,7 +2600,6 @@ int sdhci_resume_host(struct sdhci_host *host)
- 		mmiowb();
- 	}
- 
--	ret = mmc_resume_host(host->mmc);
- 	sdhci_enable_card_detection(host);
- 
- 	if (host->ops->platform_resume)
+-static int s3cmci_resume(struct device *dev)
+-{
+-	struct mmc_host *mmc = platform_get_drvdata(to_platform_device(dev));
+-
+-	return mmc_resume_host(mmc);
+-}
+-
+-static const struct dev_pm_ops s3cmci_pm = {
+-	.suspend	= s3cmci_suspend,
+-	.resume		= s3cmci_resume,
+-};
+-
+-#define s3cmci_pm_ops &s3cmci_pm
+-#else /* CONFIG_PM */
+-#define s3cmci_pm_ops NULL
+-#endif /* CONFIG_PM */
+-
+-
+ static struct platform_driver s3cmci_driver = {
+ 	.driver	= {
+ 		.name	= "s3c-sdi",
+ 		.owner	= THIS_MODULE,
+-		.pm	= s3cmci_pm_ops,
+ 	},
+ 	.id_table	= s3cmci_driver_ids,
+ 	.probe		= s3cmci_probe,
 -- 
 1.7.9.5
