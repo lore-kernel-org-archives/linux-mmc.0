@@ -1,20 +1,14 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [PATCH 12/27] mmc: tifm_sd: Move away from using deprecated APIs
-Date: Thu, 26 Sep 2013 16:54:37 +0200
-Message-ID: <1380207292-16968-13-git-send-email-ulf.hansson@linaro.org>
+Subject: [PATCH 11/27] mmc: sdhci: Move away from using deprecated APIs
+Date: Thu, 26 Sep 2013 16:54:36 +0200
+Message-ID: <1380207292-16968-12-git-send-email-ulf.hansson@linaro.org>
 References: <1380207292-16968-1-git-send-email-ulf.hansson@linaro.org>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ea0-f181.google.com ([209.85.215.181]:54581 "EHLO
-	mail-ea0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753140Ab3IZOzj (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 26 Sep 2013 10:55:39 -0400
-Received: by mail-ea0-f181.google.com with SMTP id d10so598355eaj.26
-        for <linux-mmc@vger.kernel.org>; Thu, 26 Sep 2013 07:55:38 -0700 (PDT)
+Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1380207292-16968-1-git-send-email-ulf.hansson@linaro.org>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Sender: linux-kernel-owner@vger.kernel.org
 To: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Alex Dubov <oakad@yahoo.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>
+List-Id: linux-mmc@vger.kernel.org
 
 Suspend and resume of cards are being handled from the protocol layer
 and consequently the mmc_suspend|resume_host APIs are deprecated.
@@ -22,34 +16,68 @@ and consequently the mmc_suspend|resume_host APIs are deprecated.
 This means we can simplify the suspend|resume callbacks by removing the
 use of the deprecated APIs.
 
-Cc: Alex Dubov <oakad@yahoo.com>
 Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 ---
- drivers/mmc/host/tifm_sd.c |    4 +---
- 1 file changed, 1 insertion(+), 3 deletions(-)
+ drivers/mmc/host/sdhci.c |   20 ++------------------
+ 1 file changed, 2 insertions(+), 18 deletions(-)
 
-diff --git a/drivers/mmc/host/tifm_sd.c b/drivers/mmc/host/tifm_sd.c
-index 43d9628..d1760eb 100644
---- a/drivers/mmc/host/tifm_sd.c
-+++ b/drivers/mmc/host/tifm_sd.c
-@@ -1030,7 +1030,7 @@ static void tifm_sd_remove(struct tifm_dev *sock)
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 7a7fb4f..bdb7598 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -2546,8 +2546,6 @@ EXPORT_SYMBOL_GPL(sdhci_disable_irq_wakeups);
  
- static int tifm_sd_suspend(struct tifm_dev *sock, pm_message_t state)
+ int sdhci_suspend_host(struct sdhci_host *host)
  {
--	return mmc_suspend_host(tifm_get_drvdata(sock));
+-	int ret;
+-
+ 	if (host->ops->platform_suspend)
+ 		host->ops->platform_suspend(host);
+ 
+@@ -2559,19 +2557,6 @@ int sdhci_suspend_host(struct sdhci_host *host)
+ 		host->flags &= ~SDHCI_NEEDS_RETUNING;
+ 	}
+ 
+-	ret = mmc_suspend_host(host->mmc);
+-	if (ret) {
+-		if (host->flags & SDHCI_USING_RETUNING_TIMER) {
+-			host->flags |= SDHCI_NEEDS_RETUNING;
+-			mod_timer(&host->tuning_timer, jiffies +
+-					host->tuning_count * HZ);
+-		}
+-
+-		sdhci_enable_card_detection(host);
+-
+-		return ret;
+-	}
+-
+ 	if (!device_may_wakeup(mmc_dev(host->mmc))) {
+ 		sdhci_mask_irqs(host, SDHCI_INT_ALL_MASK);
+ 		free_irq(host->irq, host);
+@@ -2579,14 +2564,14 @@ int sdhci_suspend_host(struct sdhci_host *host)
+ 		sdhci_enable_irq_wakeups(host);
+ 		enable_irq_wake(host->irq);
+ 	}
+-	return ret;
 +	return 0;
  }
  
- static int tifm_sd_resume(struct tifm_dev *sock)
-@@ -1044,8 +1044,6 @@ static int tifm_sd_resume(struct tifm_dev *sock)
+ EXPORT_SYMBOL_GPL(sdhci_suspend_host);
  
- 	if (rc)
- 		host->eject = 1;
--	else
--		rc = mmc_resume_host(mmc);
+ int sdhci_resume_host(struct sdhci_host *host)
+ {
+-	int ret;
++	int ret = 0;
  
- 	return rc;
- }
+ 	if (host->flags & (SDHCI_USE_SDMA | SDHCI_USE_ADMA)) {
+ 		if (host->ops->enable_dma)
+@@ -2615,7 +2600,6 @@ int sdhci_resume_host(struct sdhci_host *host)
+ 		mmiowb();
+ 	}
+ 
+-	ret = mmc_resume_host(host->mmc);
+ 	sdhci_enable_card_detection(host);
+ 
+ 	if (host->ops->platform_resume)
 -- 
 1.7.9.5
-
