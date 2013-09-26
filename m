@@ -1,84 +1,87 @@
-From: Balaji T K <balajitk@ti.com>
-Subject: Re: [PATCH 2/2] mmc: omap_hsmmc: Enable SDIO interrupt
-Date: Thu, 26 Sep 2013 20:01:34 +0530
-Message-ID: <52444546.4060303@ti.com>
-References: <20130925234544.3745.55170.stgit@localhost> <20130925234740.3745.50637.stgit@localhost> <CALtMJEBKbbpM47uhM-KeSRHRkM5CJkgBx4kFq4j+GG9sKXEfag@mail.gmail.com> <20130926141936.GE8949@atomide.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: [PATCH 00/27] mmc: Remove the deprecated APIs mmc_suspend|resume_host
+Date: Thu, 26 Sep 2013 16:54:25 +0200
+Message-ID: <1380207292-16968-1-git-send-email-ulf.hansson@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-omap-owner@vger.kernel.org>
-In-Reply-To: <20130926141936.GE8949@atomide.com>
-Sender: linux-omap-owner@vger.kernel.org
-To: Tony Lindgren <tony@atomide.com>
-Cc: Andreas Fenkart <afenkart@gmail.com>, Chris Ball <cjb@laptop.org>, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-ea0-f180.google.com ([209.85.215.180]:44591 "EHLO
+	mail-ea0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750793Ab3IZOy7 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 26 Sep 2013 10:54:59 -0400
+Received: by mail-ea0-f180.google.com with SMTP id h10so603970eaj.25
+        for <linux-mmc@vger.kernel.org>; Thu, 26 Sep 2013 07:54:58 -0700 (PDT)
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>
 
-On Thursday 26 September 2013 07:49 PM, Tony Lindgren wrote:
-> Hi,
->
-> * Andreas Fenkart <afenkart@gmail.com> [130926 01:34]:
->> 2013/9/26 Tony Lindgren <tony@atomide.com>:
->>> @@ -463,27 +469,34 @@ static void omap_hsmmc_stop_clock(struct omap_hsmmc_host *host)
->>>   static void omap_hsmmc_enable_irq(struct omap_hsmmc_host *host,
->>>                                    struct mmc_command *cmd)
->>>   {
->>> -       unsigned int irq_mask;
->>> +       u32 irq_mask = INT_EN_MASK;
->>> +       unsigned long flags;
->>>
->>>          if (host->use_dma)
->>> -               irq_mask = INT_EN_MASK & ~(BRR_EN | BWR_EN);
->>> -       else
->>> -               irq_mask = INT_EN_MASK;
->>> +               irq_mask &= ~(BRR_EN | BWR_EN);
->>>
->>>          /* Disable timeout for erases */
->>>          if (cmd->opcode == MMC_ERASE)
->>>                  irq_mask &= ~DTO_EN;
->>>
->>> +       spin_lock_irqsave(&host->irq_lock, flags);
->>>          OMAP_HSMMC_WRITE(host->base, STAT, STAT_CLEAR);
->>>          OMAP_HSMMC_WRITE(host->base, ISE, irq_mask);
->>> +       if (host->flags & HSMMC_SDIO_IRQ_ENABLED)
->>> +               irq_mask |= CIRQ_EN;
->>>          OMAP_HSMMC_WRITE(host->base, IE, irq_mask);
->>> +       spin_unlock_irqrestore(&host->irq_lock, flags);
->>>   }
->>>
->>>   static void omap_hsmmc_disable_irq(struct omap_hsmmc_host *host)
->>>   {
->>> +       unsigned long flags;
->>> +
->>> +       spin_lock_irqsave(&host->irq_lock, flags);
->>>          OMAP_HSMMC_WRITE(host->base, ISE, 0);
->>>          OMAP_HSMMC_WRITE(host->base, IE, 0);
->>>          OMAP_HSMMC_WRITE(host->base, STAT, STAT_CLEAR);
->>
->> This is wrong. SDIO IRQ must not be disabled upon host initiated transfer.
->> see omap_hsmmc_request_done
->
-> Hmm I don't quite follow you here, are you saying that
-> omap_hsmmc_request_done() should call this conditionally?
->
-> Or maybe even do a patch on top of this based on what you discovered
-> with your earlier patches?
-Hi Tony,
+This patchset is removing the use of the deprecated APIs from each and every
+host driver. The final patch then removes the acutal APIs from mmc core.
 
-Resetting CIRQ_ENABLE in ISE and IE, clears the (latched) pending CIRQ_EN
-if set in STAT register and also disables SDIO interrupt during interrupt
-period (outside of command/data transaction).
+I hope to collect acks from each maintainer and then try to merge this through
+Chris tree, unless anybody has a better suggestion for the way forward.
 
-+	u32 irq_mask = 0;
-+	unsigned long flags;
-+
-+	spin_lock_irqsave(&host->irq_lock, flags);
-+
-+	/* no transfer running, need to signal cirq if */
-+	if (host->sdio_irq_en)
-+		irq_mask |= CIRQ_EN;
-+
-+	OMAP_HSMMC_WRITE(host->base, ISE, irq_mask);
-+	OMAP_HSMMC_WRITE(host->base, IE, irq_mask);
+Ulf Hansson (27):
+  mmc: atmel-mci: Remove redundant suspend and resume callbacks
+  mmc: au1xmmc: Move away from using deprecated APIs
+  mmc: bfin_sdh: Move away from using deprecated APIs
+  mmc: cb710: Move away from using deprecated APIs
+  mmc: davinci_mmc: Move away from using deprecated APIs
+  mmc: dw_mmc: Move away from using deprecated APIs
+  mmc: jz4740: Move away from using deprecated APIs
+  mmc: msm_sdcc: Move away from using deprecated APIs
+  mmc: mvsdio: Remove redundant suspend and resume callbacks
+  mmc: vub300: Remove redundant suspend and resume callbacks
+  mmc: sdhci: Move away from using deprecated APIs
+  mmc: tifm_sd: Move away from using deprecated APIs
+  mmc: omap: Remove redundant suspend and resume callbacks
+  mmc: omap_hsmmc: Move away from using deprecated APIs
+  mmc: mxs-mmc: Move away from using deprecated APIs
+  mmc: mxcmmc: Move away from using deprecated APIs
+  mmc: wmt-sdmmc: Move away from using deprecated APIs
+  mmc: s3cmci: Remove redundant suspend and resume callbacks
+  mmc: pxamci: Remove redundant suspend and resume callbacks
+  mmc: wbsd: Move away from using deprecated APIs
+  mmc: rtsx: Remove redundant suspend and resume callbacks
+  mmc: sdricoh_cs: Move away from using deprecated APIs
+  mmc: sh_mmcif: Move away from using deprecated APIs
+  mmc: tmio: Move away from using deprecated APIs
+  mmc: via-sdmmc: Move away from using deprecated APIs
+  mmc: mmci: Move away from using deprecated APIs
+  mmc: core: Remove deprecated mmc_suspend|resume_host APIs
 
-I will try testing these patches with above code change and let you know
+ drivers/mmc/core/core.c           |   22 -------------
+ drivers/mmc/host/atmel-mci.c      |   61 -------------------------------------
+ drivers/mmc/host/au1xmmc.c        |    7 +----
+ drivers/mmc/host/bfin_sdh.c       |   12 +-------
+ drivers/mmc/host/cb710-mmc.c      |   10 +-----
+ drivers/mmc/host/davinci_mmc.c    |   26 +++-------------
+ drivers/mmc/host/dw_mmc.c         |   21 -------------
+ drivers/mmc/host/jz4740_mmc.c     |    4 ---
+ drivers/mmc/host/mmci.c           |   17 +++--------
+ drivers/mmc/host/msm_sdcc.c       |   27 ++--------------
+ drivers/mmc/host/mvsdio.c         |   29 ------------------
+ drivers/mmc/host/mxcmmc.c         |   12 ++------
+ drivers/mmc/host/mxs-mmc.c        |   12 ++------
+ drivers/mmc/host/omap.c           |   53 --------------------------------
+ drivers/mmc/host/omap_hsmmc.c     |   37 ++--------------------
+ drivers/mmc/host/pxamci.c         |   32 -------------------
+ drivers/mmc/host/rtsx_pci_sdmmc.c |   33 --------------------
+ drivers/mmc/host/s3cmci.c         |   29 ------------------
+ drivers/mmc/host/sdhci.c          |   20 ++----------
+ drivers/mmc/host/sdricoh_cs.c     |    3 --
+ drivers/mmc/host/sh_mmcif.c       |   10 ++----
+ drivers/mmc/host/tifm_sd.c        |    4 +--
+ drivers/mmc/host/tmio_mmc_pio.c   |    9 ++----
+ drivers/mmc/host/via-sdmmc.c      |    7 +----
+ drivers/mmc/host/vub300.c         |   30 ------------------
+ drivers/mmc/host/wbsd.c           |   33 +++-----------------
+ drivers/mmc/host/wmt-sdmmc.c      |   27 ++++++----------
+ include/linux/mmc/host.h          |    3 --
+ 28 files changed, 46 insertions(+), 544 deletions(-)
+
+-- 
+1.7.9.5
 
