@@ -1,75 +1,104 @@
-From: Olof Johansson <olof@lixom.net>
-Subject: Re: [PATCH v3] ARM: EDMA: Fix clearing of unused list for DT DMA resources
-Date: Thu, 26 Sep 2013 16:13:33 -0700
-Message-ID: <CAOesGMgELbnuu8PM7Ah2xKo2H5rzgAN3w0g6wA7aVFsjuds-8g@mail.gmail.com>
-References: <1380232546-821-1-git-send-email-joelf@ti.com>
+From: Matt Sealey <neko@bakuhatsu.net>
+Subject: Re: [PATCH 5/8] sdhci: sdhci-esdhc-imx: change pinctrl state
+ according to uhs mode
+Date: Thu, 26 Sep 2013 19:28:03 -0500
+Message-ID: <CAHCPf3t=ozAA1sNp6ARMxEugoWO3bxeFhk_dr2Z20YC_VQ=4+Q@mail.gmail.com>
+References: <1378299257-2980-1-git-send-email-b29396@freescale.com>
+	<1378299257-2980-6-git-send-email-b29396@freescale.com>
+	<CAHCPf3tYXsT6kTbJcqJx1gN_G9G2iqi1-f+jRcpw95CEPkW8NQ@mail.gmail.com>
+	<20130911092605.GA2891@b29396-Latitude-E6410>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1380232546-821-1-git-send-email-joelf@ti.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Joel Fernandes <joelf@ti.com>
-Cc: Sekhar Nori <nsekhar@ti.com>, Vinod Koul <vinod.koul@intel.com>, Dan Williams <djbw@fb.com>, Linux OMAP List <linux-omap@vger.kernel.org>, Linux ARM Kernel List <linux-arm-kernel@lists.infradead.org>, Linux DaVinci Kernel List <davinci-linux-open-source@linux.davincidsp.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux MMC List <linux-mmc@vger.kernel.org>, Tony Lindgren <tony@atomide.com>, Nishanth Menon <nm@ti.com>, Pantel Antoniou <panto@antoniou-consulting.com>, Jason Kridner <jkridner@beagleboard.org>, Koen Kooi <koen@dominion.thruhere.net>, "arm@kernel.org" <arm@kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qc0-f172.google.com ([209.85.216.172]:36362 "EHLO
+	mail-qc0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752250Ab3I0A2E (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 26 Sep 2013 20:28:04 -0400
+Received: by mail-qc0-f172.google.com with SMTP id l13so1303934qcy.17
+        for <linux-mmc@vger.kernel.org>; Thu, 26 Sep 2013 17:28:03 -0700 (PDT)
+In-Reply-To: <20130911092605.GA2891@b29396-Latitude-E6410>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Dong Aisheng <b29396@freescale.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Shawn Guo <shawn.guo@linaro.org>, Sascha Hauer <s.hauer@pengutronix.de>, "anton@enomsg.org" <anton@enomsg.org>, "cjb@laptop.org" <cjb@laptop.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 
-On Thu, Sep 26, 2013 at 2:55 PM, Joel Fernandes <joelf@ti.com> wrote:
-> HWMOD removal for MMC is breaking edma_start as the events are being manually
-> triggered due to unused channel list not being clear.
+On Wed, Sep 11, 2013 at 4:26 AM, Dong Aisheng <b29396@freescale.com> wrote:
+> Hi Matt,
 >
-> The above issue is fixed by reading the "dmas" property from the DT node if it
-> exists and clearing the bits in the unused channel list if the dma controller
-> used by any device is EDMA. For this purpose we use the of_* helpers to parse
-> the arguments in the dmas phandle list.
+> I somehow agree with your idea on the naming.
+> But currently i'm just using the standard property defined in:
+> Documentation/devicetree/bindings/mmc/mmc.txt
+> - no-1-8-v: when present, denotes that 1.8v card voltage is not supported on
+>   this system, even if the controller claims it is.
+
+Whoever did that needs kicking :<
+
+>> This property should probably be called "voltage-selects" or something
+>> and you should put in a list of supported voltages (in uV units just
+>> like cpufreq operating points and regulators, please, for consistency,
+>> and update the binding).
 >
-> Also introduced is a minor clean up of a checkpatch error in old code.
->
-> Reviewed-by: Sekhar Nori <nsekhar@ti.com>
-> Reported-by: Balaji T K <balajitk@ti.com>
-> Cc: Sekhar Nori <nsekhar@ti.com>
-> Cc: Tony Lindgren <tony@atomide.com>
-> Cc: Olof Johansson <olof@lixom.net>
-> Cc: Nishanth Menon <nm@ti.com>
-> Cc: Pantel Antoniou <panto@antoniou-consulting.com>
-> Cc: Jason Kridner <jkridner@beagleboard.org>
-> Cc: Koen Kooi <koen@dominion.thruhere.net>
-> Signed-off-by: Joel Fernandes <joelf@ti.com>
-> ---
-> Just resending this patch after discussing with Sekhar and Olof.
+> Here the no-1-8-v is for indicating no 1.8v signal voltage switch support,
+> not the host supply voltage.
+> The spec only defines 1.8v/3.3v switch, so no-1-8-v seems ok for me currently.
 
-Actually, the patch you talked to me about was v3 of this. It seems
-that you have reposted v6 but labelled it v3. This is very confusing.
+I thought the spec also has a 1.2V mode.. so what do the MMC guys
+propose, adding no-1-2-v properties too? And if there exists in the
+future a 0.8V mode, another property? And another?
 
-> AM335x is being booted by many users such as the beaglebone community. DT is
-> the only boot method available for all these users.  EDMA is required for the
-> operation for many common peripherals in AM335x SoC such as McASP, MMC and
-> Crypto.
->
-> Although EDMA DT nodes are going in only for 3.13, in reality the kernel has
-> been used for more than a year with EDMA code and out of tree EDMA DTS patches.
-> Hence though the DT nodes are still not in mainline, this patch can be still be
-> considered a critical fix as such and it would be great if it could be included
-> in 3.12-rc release. Thanks.
+> That's how sdhci driver used currently.
+> So i'm not sure if we really need add the voltage-selects on device tree
+> for mmc since that's regulator's work.
 
-This is really the root of this problem. If you sit on code out of
-tree for a year, and something breaks that we couldn't even have
-detected since we didn't have the out-of-tree pieces. We'll help you
-the first few times (such as now) but we will eventually stop caring.
+Understood. My initial thought is simply that the MMC class should
+define a behavior which you could assume - in this case, that a host
+supports a certain set of voltages (for supply and for signalling),
+and a card supports a certain set of voltages (for supply and for
+signalling). In the case of the combinations here, this is all in the
+spec and defined.
 
-If I was in a worse mood, then I'd just say that since your users
-already has to have out-of-tree code to even use this functionality,
-they could just add this fix on top of that stack of patches. But I'm
-in a slightly better mood than that and I'll pick it up this time. :)
+However, what device trees should do is essentially provide
+information where the defaults or documentation contain assumptions,
+and supplant them when necessary.
 
-> More details about why this broke an existing feature folks were using:
-> Previously the DMA resources for platform devices were being populated through
-> HWMOD, however with the recent clean ups with HWMOD, this data has been moved
-> to Device tree. The EDMA code though is not aware of this so it fails to fetch
-> the DMA resources correctly which it needs to prepare the unused channel list
-> (basically doesn't properly clear the channels that are in use, in the unused
-> list).
+An MMC host controller given a regulator now knows it can change
+voltages. But to what values? Most regulators are fixed or have a wide
+range. A regulator that is defined for 1.8V and 3.3V is defined as
+1.8V *through* 3.3V meaning you COULD set it to 2.5V if you wanted to.
+A property defining the valid voltages is good here.
 
-So that we can learn for next time: What should we (as in us
-maintainers and you TI) have done differently to avoid this?
+For the case where someone screwed a board design or a regulator is
+weak somehow, you could put 1.85V in the property to say, this is my
+close-enough-to-1.8V value. Otherwise what happens is you get a
+regulator set failure if the range didn't include 1.8V, or weird
+issues because the voltage isn't high enough *for the design*.
 
+For signalling voltage, sure, there could be 1.8V and 3.3V defined in
+the host and the card, but the same applies - assume those in the
+driver, and the DT can define which ones are valid. For a driver
+probing, it can look in the DT table and see, I have a matching
+1800000uV and a matching 3300000uV voltage. If it sees 1200000uV and
+it has no clue how to orient the system into using that voltage, it
+ignores it (it couldn't use it anyway, since it would have no
+knowledge of how to instruct a card to signal at that voltage). This
+works for the supply regulator setting and the signalling setting with
+a common, future-proof format..
 
--Olof
+In the future, it may work when the kernel is updated to support this
+as-of-yet non-existing functionality and the DT would have been
+correct from the start.
+
+> Anyway, above is just my initial thoughts on your question.
+> Since this issue actually is not related to this series,
+> maybe you could create a new mail thread about this if you want
+> or patching is welcome for the further discussion more specific.
+
+Well, a new thread.. sure. That might be for another day (it took me 2
+weeks to get back to this one, I don't know the next time I will have
+enough time to go through LAKML :)
+
+I have written it on my whiteboard for future discussion, so I'll
+bring it up again as soon as I can..
+
+-- 
+Matt Sealey <neko@bakuhatsu.net>
