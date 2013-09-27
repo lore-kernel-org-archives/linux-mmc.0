@@ -1,143 +1,114 @@
-From: Vishal Annapurve <vannapurve@nvidia.com>
-Subject: [PATCH] mmc: Reducing cache operations in the host driver
-Date: Fri, 27 Sep 2013 17:07:04 +0530
-Message-ID: <52456DE0.6030500@nvidia.com>
-References: <52455A33.2050106@nvidia.com>
-Mime-Version: 1.0
-Content-Type: multipart/mixed;
-	boundary="------------020700070002080008080605"
+From: Romain Izard <romain.izard.pro@gmail.com>
+Subject: [PATCH] Re: How to trigger sdio bus probing from user space
+Date: Fri, 27 Sep 2013 13:56:14 +0000 (UTC)
+Message-ID: <l242pu$fog$1@ger.gmane.org>
+References: <52455BCD.5040309@rt-rk.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from hqemgate15.nvidia.com ([216.228.121.64]:11359 "EHLO
-	hqemgate15.nvidia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751049Ab3I0LhH (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 27 Sep 2013 07:37:07 -0400
-In-Reply-To: <52455A33.2050106@nvidia.com>
+Received: from plane.gmane.org ([80.91.229.3]:36907 "EHLO plane.gmane.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751993Ab3I0N4i (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 27 Sep 2013 09:56:38 -0400
+Received: from list by plane.gmane.org with local (Exim 4.69)
+	(envelope-from <glkm-linux-mmc@m.gmane.org>)
+	id 1VPYX4-0004gD-GD
+	for linux-mmc@vger.kernel.org; Fri, 27 Sep 2013 15:56:34 +0200
+Received: from 146.187.3.109.rev.sfr.net ([109.3.187.146])
+        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <linux-mmc@vger.kernel.org>; Fri, 27 Sep 2013 15:56:34 +0200
+Received: from romain.izard.pro by 146.187.3.109.rev.sfr.net with local (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <linux-mmc@vger.kernel.org>; Fri, 27 Sep 2013 15:56:34 +0200
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 
---------------020700070002080008080605
-Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
-Content-Transfer-Encoding: 7bit
+On 2013-09-27, Bojan Prtvar <bojan.prtvar@rt-rk.com> wrote:
+>
+> Is there a clean way to trigger sdio bus probing from user space?
+>
+> I have a non removable sdio WiFi/BT module on embedded system that needs
+> to be tested and calibrated on production line.
+> In order to speed up production process, I need to be able to replace
+> the  WiFi/BT modules in run time without reboot.
+> Modules are connected to the host with a ribbon cable, not with a  sdio
+> connector.
+>
+> I came up with fallowing two-part solution:
+> a)
+> I extended WiFi driver's /proc interface with a call to
+> mmc_detect_change()
+> b)
+> I also needed to let the sdio host think module is removable by
+> commenting fallowing in sdhci-mv.c:
+> sdhci_mv_probe_dt(struct platform_device *pdev)
+> {
+>     struct device_node *np = pdev->dev.of_node;
+>     struct sdhci_host *host = platform_get_drvdata(pdev);
+>
+>     if (of_get_property(np, "mrvl,card-wired", NULL)) {
+>         /*
+>          * RT-RK
+>          * We need to comment out these in order to be able to
+>          * trigger sdio bus probing on the fly
+>          */
+>         //host->quirks |= SDHCI_QUIRK_BROKEN_CARD_DETECTION;
+>         //host->mmc->caps |= MMC_CAP_NONREMOVABLE;
+>     }
+>
+> This works in situations when working modules are inserted.
+> Unfortunately, it does not work in case when broken module is inserted
+> on production line.
+> In this case production board needs to be rebooted, because the WiFi
+> driver's /proc interface is gone, and I can not force a call to
+> mmc_detect_change() any more.
+>
+> Is there cleaner and better approach?
 
-Hi,
+For internal use I have added a 'rescan' sysfs entry to the mmc
+controller, instead of the sdio device itself. It is quite similar to
+the way it is done in the scsi subsystem, and uses the same
+'mmc_detect_change' function as you do .
 
-I am attaching a patch which attempts to reduce the cache operations
-while doing MMC transactions. I have tested it only on arm and the
-tests performed with benchmarks like iozone/bonnie showed that the data
-integrity is maintained while I/O bandwidth is increased.
-I have tested it with K3.1 and I believe it can apply to 3.12 also.
+Updated to use the new attribute groups syntax for 3.12, I obtain the
+following patch - compile-tested only, nothing more, as I do not have a
+3.12 test system available.
 
-My understanding from the important API's dealing with DMA memory is as
-follows:
-1) dma_map_sg/ dma_sync_sg_for_device -> make sure that cache is flushed
-after CPU is done updating the memory allocated for DMA and is called
-before giving control of DMA memory to the device.
-2) dma_unmap_sg/dma_sync_sg_for_cpu -> Make sure that cache is
-invalidated before reading from the DMA area which was used by the device
-to write the data.
+---
 
-About the patch:
-Changes in sdhci_adma_table_pre make sure that we only flush if we have
-updated DMA area after the call to dma_map_sg.
-
-Changes in sdhci_adma_table_post take care of following:
-1) Remove invalidation of cache for memory locations which are going to
-be updated by CPU, as they are not being read.
-2) Perform the unmap of sg before CPU accesses DMA area as the changes
-we did for unaligned cases might get lost due to invalidation afterwards.
-I was not able to induce unaligned buffer accesses using normal
-filesystem/raw device operations. Maybe that's why this issue was not
-discovered so far.
-3) Only drawback is sg->dma_address gets used after the call to
-dma_unmap_sg.
-
-I would like to understand if this patch can cause any regressions for
-any of the architectures or with the MMC functionality.
-
-Thanks & Regards,
-Vishal Annapurve
-
-
-
------------------------------------------------------------------------------------
-This email message is for the sole use of the intended recipient(s) and may contain
-confidential information.  Any unauthorized review, use, disclosure or distribution
-is prohibited.  If you are not the intended recipient, please contact the sender by
-reply email and destroy all copies of the original message.
------------------------------------------------------------------------------------
-
---------------020700070002080008080605
-Content-Type: text/x-patch; name="arm_mmc_reduce_cache_ops.patch"
-Content-Transfer-Encoding: 7bit
-Content-Disposition: attachment; filename="arm_mmc_reduce_cache_ops.patch"
-
-Author: Vishal Annapurve <vannapurve@nvidia.com>
-
-    MMC: Remove unnecessary cache operations
-    
-    1) This change removes unnecessary cache operations happening
-    after and before DMA setup in MMC host driver.
-    
-    Signed-off-by: Vishal Annapurve <vannapurve@nvidia.com>
-
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 6e43c84..d5cd0ae 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -434,6 +434,7 @@ static int sdhci_adma_table_pre(struct sdhci_host *host,
- 	dma_addr_t addr;
- 	dma_addr_t align_addr;
- 	int len, offset;
-+	int align_buf_modified_len = 0;
- 
- 	struct scatterlist *sg;
- 	int i;
-@@ -498,6 +499,7 @@ static int sdhci_adma_table_pre(struct sdhci_host *host,
- 
- 			align += 4;
- 			align_addr += 4;
-+			align_buf_modified_len += 4;
- 
- 			desc += 8;
- 
-@@ -538,9 +540,10 @@ static int sdhci_adma_table_pre(struct sdhci_host *host,
- 	/*
- 	 * Resync align buffer as we might have changed it.
- 	 */
--	if (data->flags & MMC_DATA_WRITE) {
-+	if ((data->flags & MMC_DATA_WRITE) &&
-+			align_buf_modified_len) {
- 		dma_sync_single_for_device(mmc_dev(host->mmc),
--			host->align_addr, 128 * 4, direction);
-+			host->align_addr, align_buf_modified_len, direction);
- 	}
- 
- 	host->adma_addr = dma_map_single(mmc_dev(host->mmc),
-@@ -583,9 +586,10 @@ static void sdhci_adma_table_post(struct sdhci_host *host,
- 	dma_unmap_single(mmc_dev(host->mmc), host->align_addr,
- 		128 * 4, direction);
- 
-+	dma_unmap_sg(mmc_dev(host->mmc), data->sg,
-+		data->sg_len, direction);
-+
- 	if (data->flags & MMC_DATA_READ) {
--		dma_sync_sg_for_cpu(mmc_dev(host->mmc), data->sg,
--			data->sg_len, direction);
- 
- 		align = host->align_buffer;
- 
-@@ -602,9 +606,6 @@ static void sdhci_adma_table_post(struct sdhci_host *host,
- 			}
- 		}
- 	}
--
--	dma_unmap_sg(mmc_dev(host->mmc), data->sg,
--		data->sg_len, direction);
+diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+index 49bc403..b5b0811 100644
+--- a/drivers/mmc/core/host.c
++++ b/drivers/mmc/core/host.c
+@@ -39,9 +39,26 @@ static void mmc_host_classdev_release(struct device *dev)
+        kfree(host);
  }
  
- static u8 sdhci_calc_timeout(struct sdhci_host *host, struct mmc_command *cmd)
++static ssize_t rescan_store(struct device *dev, struct device_attribute *attr,
++                            const char *buf, size_t count)
++{
++       struct mmc_host *host = cls_dev_to_mmc_host(dev);
++       mmc_detect_change(host, 0);
++       return count;
++}
++
++static DEVICE_ATTR_WO(rescan);
++
++static struct attribute *mmc_host_attrs[] = {
++       &dev_attr_rescan.attr,
++       NULL,
++};
++ATTRIBUTE_GROUPS(mmc_host);
++
+ static struct class mmc_host_class = {
+        .name           = "mmc_host",
+        .dev_release    = mmc_host_classdev_release,
++       .dev_groups     = mmc_host_groups,
+ };
+ 
+ int mmc_register_host_class(void)
 
 
+-- 
+Romain Izard
 
---------------020700070002080008080605--
