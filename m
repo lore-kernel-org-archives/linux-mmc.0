@@ -1,65 +1,64 @@
-From: Mark Brown <broonie@kernel.org>
-Subject: Re: [PATCH 0/7] mmc: core: Fixup ocr mask setup to prevent spec
- violation
-Date: Fri, 27 Sep 2013 11:44:05 +0100
-Message-ID: <20130927104405.GB19304@sirena.org.uk>
-References: <1379341068-27097-1-git-send-email-ulf.hansson@linaro.org>
- <Pine.LNX.4.64.1309162253320.17217@axis700.grange>
- <CAPDyKFrvPkwAVfi8gv0hG3DKeiJm+_AqODhERX=O0ZxB-gcHiw@mail.gmail.com>
- <Pine.LNX.4.64.1309171008190.20367@axis700.grange>
- <CAPDyKFpfe7mL4aLBo4S4tibpoL8DoiK3TiVzPvc4V-eG1Yrm_w@mail.gmail.com>
- <20130917110429.GR21013@sirena.org.uk>
- <CAPDyKFqMhE54bi-B+8TswObs=PTj31kxjPcDoDuyLoOQsKStFA@mail.gmail.com>
- <CAPDyKFoXmfzSG931MTUhg3B4KPL3aR_0Uw=N=iiRKBg94YHntw@mail.gmail.com>
+From: Bojan Prtvar <bojan.prtvar@rt-rk.com>
+Subject: How to trigger sdio bus probing from user space
+Date: Fri, 27 Sep 2013 12:19:57 +0200
+Message-ID: <52455BCD.5040309@rt-rk.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="olLTNZSltDMg5Vbm"
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from cassiel.sirena.org.uk ([80.68.93.111]:43351 "EHLO
-	cassiel.sirena.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750946Ab3I0KoK (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 27 Sep 2013 06:44:10 -0400
-Content-Disposition: inline
-In-Reply-To: <CAPDyKFoXmfzSG931MTUhg3B4KPL3aR_0Uw=N=iiRKBg94YHntw@mail.gmail.com>
+Received: from mail.rt-rk.ftn.uns.ac.rs ([147.91.177.140]:60052 "EHLO
+	mail.rt-rk.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750949Ab3I0KuN (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 27 Sep 2013 06:50:13 -0400
+Received: from mail.rt-rk.com (mail.localdomain [127.0.0.1])
+	by mail.rt-rk.com (Postfix) with SMTP id 1BFB525B695
+	for <linux-mmc@vger.kernel.org>; Fri, 27 Sep 2013 12:19:58 +0200 (CEST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Guennadi Liakhovetski <g.liakhovetski@gmx.de>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Prasanna NAVARATNA <prasanna.navaratna@gmail.com>
+To: linux-mmc@vger.kernel.org
 
+Hi,
 
---olLTNZSltDMg5Vbm
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+Is there a clean way to trigger sdio bus probing from user space?
 
-On Fri, Sep 27, 2013 at 11:56:26AM +0200, Ulf Hansson wrote:
+I have a non removable sdio WiFi/BT module on embedded system that needs
+to be tested and calibrated on production line.
+In order to speed up production process, I need to be able to replace
+the  WiFi/BT modules in run time without reboot.
+Modules are connected to the host with a ribbon cable, not with a  sdio
+connector.
 
-> To go forward, I suppose our discussion shall not prevent Chris from
-> merging this patchset? We shall be able to address your input as work
-> on top if this patchset, right?
+I came up with fallowing two-part solution:
+a)
+I extended WiFi driver's /proc interface with a call to
+mmc_detect_change()
+b)
+I also needed to let the sdio host think module is removable by
+commenting fallowing in sdhci-mv.c:
+sdhci_mv_probe_dt(struct platform_device *pdev)
+{
+    struct device_node *np = pdev->dev.of_node;
+    struct sdhci_host *host = platform_get_drvdata(pdev);
 
-To be honest I don't think I saw the original patches so I can't offer
-much comment either way but that seems like a sensible idea.
+    if (of_get_property(np, "mrvl,card-wired", NULL)) {
+        /*
+         * RT-RK
+         * We need to comment out these in order to be able to
+         * trigger sdio bus probing on the fly
+         */
+        //host->quirks |= SDHCI_QUIRK_BROKEN_CARD_DETECTION;
+        //host->mmc->caps |= MMC_CAP_NONREMOVABLE;
+    }
 
---olLTNZSltDMg5Vbm
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
+This works in situations when working modules are inserted.
+Unfortunately, it does not work in case when broken module is inserted
+on production line.
+In this case production board needs to be rebooted, because the WiFi
+driver's /proc interface is gone, and I can not force a call to
+mmc_detect_change() any more.
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.21 (GNU/Linux)
+Is there cleaner and better approach?
 
-iQIcBAEBAgAGBQJSRWFyAAoJELSic+t+oim9NqoP/ipdEyvut16mjQFZ324WJ1xV
-6HfaqAz1FGT7OzUlmEaCw/Xn09ApXXIZYZC5UezlP7emvtjGVcSd98WlvP7CD+hD
-NINasZoogPmTQA09AxPAPvApc782zRIrAbAabT2mo3/1ZU+RuzGUY4W1vEGKE1WE
-OGcaF7JcyYKXN2+E8umr1EtYfibA22QIxaG/6Vd2p3aiabzWSGKWYvSH3ZtAz5iK
-J8ctgvNY4uyFCbmHEDxPkEOTCWIKwfpkDjwIEm0ZY4qbFBnl333FUKSdIJxf41fU
-t0TytToeSlBuCet2esx9kHTziY5oXVw+RM3LKS3nU/wUpR5w3j3S+5iTYJybMYUG
-AMT9mOTLwiX1St4ZFeTV8JQBtL5m82yOHGVkDQ5KW1cGPGRmxX2T430VP8E6U0DH
-6bdTMz6FEPpB4oQkVaY0FktLGbwOKUh2qLp59Rr7DEoXyBTTvsNowrPFodV0DrnY
-5GjSquXyNKV1B0plJFXyTK8X+Hpy8zOAd+eXdRIj13wEz8dmJsUWtBxJWcOwJFyK
-PZSaKfpMDg9UevE+iNT1CdNeDDUrraGWK2ZT7sCcd3WcRFjTD23Hkboh03wofQ8W
-4yXdj4/Jq0J2BSeOGeT1WCzkaVtkMrHSstxjM3+6s2JjzOOo97A52FJFmTo4MM8S
-ttQURZZWyaJ3fHSUpPoS
-=XjMD
------END PGP SIGNATURE-----
+Best regards,
+Bojan
 
---olLTNZSltDMg5Vbm--
