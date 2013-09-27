@@ -1,67 +1,64 @@
-From: Sachin Kamat <sachin.kamat@linaro.org>
-Subject: Re: [PATCH v2 1/1] mmc: sdhci-spear: Fix NULL pointer dereference
-Date: Fri, 27 Sep 2013 15:11:41 +0530
-Message-ID: <CAK9yfHxNtcNu39oKB58ceSaVUJXd3QB=1zAZS4tHc92dY_oGYA@mail.gmail.com>
-References: <1378976643-26717-1-git-send-email-sachin.kamat@linaro.org>
-	<CAKohpok10OndjAULMBk7M+j1v1Tzsa2N7n71SOKqLiQXiAHJUQ@mail.gmail.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH 0/7] mmc: core: Fixup ocr mask setup to prevent spec violation
+Date: Fri, 27 Sep 2013 11:56:26 +0200
+Message-ID: <CAPDyKFoXmfzSG931MTUhg3B4KPL3aR_0Uw=N=iiRKBg94YHntw@mail.gmail.com>
+References: <1379341068-27097-1-git-send-email-ulf.hansson@linaro.org>
+	<Pine.LNX.4.64.1309162253320.17217@axis700.grange>
+	<CAPDyKFrvPkwAVfi8gv0hG3DKeiJm+_AqODhERX=O0ZxB-gcHiw@mail.gmail.com>
+	<Pine.LNX.4.64.1309171008190.20367@axis700.grange>
+	<CAPDyKFpfe7mL4aLBo4S4tibpoL8DoiK3TiVzPvc4V-eG1Yrm_w@mail.gmail.com>
+	<20130917110429.GR21013@sirena.org.uk>
+	<CAPDyKFqMhE54bi-B+8TswObs=PTj31kxjPcDoDuyLoOQsKStFA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ob0-f169.google.com ([209.85.214.169]:59734 "EHLO
-	mail-ob0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752699Ab3I0Jlm (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 27 Sep 2013 05:41:42 -0400
-Received: by mail-ob0-f169.google.com with SMTP id wp4so3011203obc.28
-        for <linux-mmc@vger.kernel.org>; Fri, 27 Sep 2013 02:41:42 -0700 (PDT)
-In-Reply-To: <CAKohpok10OndjAULMBk7M+j1v1Tzsa2N7n71SOKqLiQXiAHJUQ@mail.gmail.com>
+Received: from mail-ve0-f172.google.com ([209.85.128.172]:36339 "EHLO
+	mail-ve0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751498Ab3I0J41 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 27 Sep 2013 05:56:27 -0400
+Received: by mail-ve0-f172.google.com with SMTP id oz11so1823408veb.17
+        for <linux-mmc@vger.kernel.org>; Fri, 27 Sep 2013 02:56:26 -0700 (PDT)
+In-Reply-To: <CAPDyKFqMhE54bi-B+8TswObs=PTj31kxjPcDoDuyLoOQsKStFA@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: linux-mmc@vger.kernel.org
+To: Mark Brown <broonie@kernel.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Prasanna NAVARATNA <prasanna.navaratna@gmail.com>
 
-On 12 September 2013 14:54, Viresh Kumar <viresh.kumar@linaro.org> wrote:
-> On 12 September 2013 14:34, Sachin Kamat <sachin.kamat@linaro.org> wrote:
->> pdata could be NULL if cd_gpio = -1. Dereference pdata only
->> if it is not NULL.
+On 17 September 2013 14:50, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> On 17 September 2013 13:04, Mark Brown <broonie@kernel.org> wrote:
+>> On Tue, Sep 17, 2013 at 11:29:21AM +0200, Ulf Hansson wrote:
 >>
->> Signed-off-by: Sachin Kamat <sachin.kamat@linaro.org>
->> Cc: Viresh Kumar <viresh.kumar@linaro.org>
->> ---
->> Compile tested.
->> Changes since v1:
->> * Moved the pdata assignment inside if condition.
->> ---
->>  drivers/mmc/host/sdhci-spear.c |    8 +++-----
->>  1 file changed, 3 insertions(+), 5 deletions(-)
+>>> If you want to change voltage level for eMMC, both VCC and VCCQ must
+>>> be possible to power cycle, unless you have a hw-reset wire connected
+>>> to the eMMC which is implemented by a host->ops callback. This
+>>> complicates things for SD/SDIO as well, while trying to setup the
+>>> conditions for when to set the PWR_CYCLE flag.
 >>
->> diff --git a/drivers/mmc/host/sdhci-spear.c b/drivers/mmc/host/sdhci-spear.c
->> index 2dba9f8..76ddd89 100644
->> --- a/drivers/mmc/host/sdhci-spear.c
->> +++ b/drivers/mmc/host/sdhci-spear.c
->> @@ -84,14 +84,12 @@ static struct sdhci_plat_data *sdhci_probe_config_dt(struct platform_device *pde
->>         /* If pdata is required */
->>         if (cd_gpio != -1) {
->>                 pdata = devm_kzalloc(&pdev->dev, sizeof(*pdata), GFP_KERNEL);
->> -               if (!pdata) {
->> +               if (!pdata)
->>                         dev_err(&pdev->dev, "DT: kzalloc failed\n");
->> -                       return ERR_PTR(-ENOMEM);
->> -               }
->> +               else
->> +                       pdata->card_int_gpio = cd_gpio;
->>         }
->>
->> -       pdata->card_int_gpio = cd_gpio;
->> -
->>         return pdata;
->>  }
->>  #else
+>> Should the hardware resets not be being converted over to be represented
+>> as GPIOs (or the reset controller API) to factor things out?
 >
-> Acked-by: Viresh Kumar <viresh.kumar@linaro.org>
+> In some cases the power is controlled from inside the mmc controller,
+> thus writing to some of it's registers will affect the power to the
+> card. In other cases I believe we should be able to consider them as
+> GPIOs. I think this is the reason to why a specific mmc host->ops is
+> being used, to cover all cases.
+>
+> Maybe converting them to the "reset controller API" would be suitable
+> for all cases, not sure.
+>
+> Note that, as of today only some sdhci variants have implemented the
+> hw-reset support.
+>
+> Kind regards
+> Ulf Hansson
 
+Hi Mark & Guennadi,
 
-Ping Chris.
+I appreciated you ideas and thoughts around this patchset.
 
--- 
-With warm regards,
-Sachin
+To go forward, I suppose our discussion shall not prevent Chris from
+merging this patchset? We shall be able to address your input as work
+on top if this patchset, right?
+
+Kind regards
+Ulf Hansson
