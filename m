@@ -1,93 +1,76 @@
-From: Alan Stern <stern-nwvwT67g6+6dFdvTe/nMLpVzexx5G7lz@public.gmane.org>
-Subject: Re: [PATCH 10/27] mmc: vub300: Remove redundant suspend and resume
- callbacks
-Date: Fri, 27 Sep 2013 12:22:44 -0400 (EDT)
-Message-ID: <Pine.LNX.4.44L0.1309271219530.10254-100000@netrider.rowland.org>
-References: <1380207292-16968-11-git-send-email-ulf.hansson@linaro.org>
-Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-usb-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1380207292-16968-11-git-send-email-ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Sender: linux-usb-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, Tony Olech <tony.olech-ze5PQcJzaeOs0fm86SgGizGjJy/sRE9J@public.gmane.org>, linux-usb-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+From: Georgi Djakov <gdjakov@mm-sol.com>
+Subject: [PATCH v6 0/2] mmc: sdhci-msm: Add support for MSM chipsets
+Date: Fri, 27 Sep 2013 19:57:19 +0300
+Message-ID: <1380301041-26405-1-git-send-email-gdjakov@mm-sol.com>
+Return-path: <linux-doc-owner@vger.kernel.org>
+Sender: linux-doc-owner@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: cjb@laptop.org, grant.likely@linaro.org, rob.herring@calxeda.com, devicetree@vger.kernel.org, mark.rutland@arm.com, swarren@wwwdotorg.org, ian.campbell@citrix.com, rob@landley.net, linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org, Georgi Djakov <gdjakov@mm-sol.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On Thu, 26 Sep 2013, Ulf Hansson wrote:
+This patchset adds support of the Secure Digital Host Controller
+Interface compliant controller found in Qualcomm MSM chipsets.
+It has been tested on a APQ8074 Dragonboard.
 
-> Suspend and resume of cards are handled by the protocol layer and
-> consequently the mmc_suspend|resume_host APIs are marked as deprecated.
-> 
-> While moving away from using the deprecated APIs, there are nothing
-> left to be done for the suspend and resume callbacks, so remove them.
-> 
-> Cc: Tony Olech <tony.olech-ze5PQcJzaeOs0fm86SgGizGjJy/sRE9J@public.gmane.org>
-> Cc: linux-usb-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-> Signed-off-by: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-> ---
->  drivers/mmc/host/vub300.c |   30 ------------------------------
->  1 file changed, 30 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/vub300.c b/drivers/mmc/host/vub300.c
-> index e9028ad..db99edc 100644
-> --- a/drivers/mmc/host/vub300.c
-> +++ b/drivers/mmc/host/vub300.c
-> @@ -2389,34 +2389,6 @@ static void vub300_disconnect(struct usb_interface *interface)
->  	}
->  }
->  
-> -#ifdef CONFIG_PM
-> -static int vub300_suspend(struct usb_interface *intf, pm_message_t message)
-> -{
-> -	struct vub300_mmc_host *vub300 = usb_get_intfdata(intf);
-> -	if (!vub300 || !vub300->mmc) {
-> -		return 0;
-> -	} else {
-> -		struct mmc_host *mmc = vub300->mmc;
-> -		mmc_suspend_host(mmc);
-> -		return 0;
-> -	}
-> -}
-> -
-> -static int vub300_resume(struct usb_interface *intf)
-> -{
-> -	struct vub300_mmc_host *vub300 = usb_get_intfdata(intf);
-> -	if (!vub300 || !vub300->mmc) {
-> -		return 0;
-> -	} else {
-> -		struct mmc_host *mmc = vub300->mmc;
-> -		mmc_resume_host(mmc);
-> -		return 0;
-> -	}
-> -}
-> -#else
-> -#define vub300_suspend NULL
-> -#define vub300_resume NULL
-> -#endif
->  static int vub300_pre_reset(struct usb_interface *intf)
->  {				/* NOT irq */
->  	struct vub300_mmc_host *vub300 = usb_get_intfdata(intf);
-> @@ -2437,8 +2409,6 @@ static struct usb_driver vub300_driver = {
->  	.name = "vub300",
->  	.probe = vub300_probe,
->  	.disconnect = vub300_disconnect,
-> -	.suspend = vub300_suspend,
-> -	.resume = vub300_resume,
->  	.pre_reset = vub300_pre_reset,
->  	.post_reset = vub300_post_reset,
->  	.id_table = vub300_table,
+Changes from v5:
+- Driver is split into multiple patches
+- Do not initialize variables that are assigned later in code
+- Remove some useless comments
+- Use shorter variable names
+- Change pr_err() to dev_err()
+- Optimized sdhci_msm_setup_vreg()
+- Some code alignment fixes
+- Improved DT values sanity check
+- Added dev_dbg print for sdhci controller version in probe()
+- Added usleep_range() after SW reset - it can take some time
+- Added SDHCI_QUIRK_SINGLE_POWER_WRITE - power handled by PMIC
+- Renamed DT property vdd-io to vddio
 
-You shouldn't do it this way.  The USB core treats drivers differently 
-depending on whether their suspend and resume callbacks are defined.  
-If those method pointers are NULL, the driver will be treated as though 
-it doesn't support power management at all.
+Changes from v4:
+- Simplified sdhci_msm_vreg_disable() and sdhci_msm_set_vdd_io_vol()
+- Use devm_ioremap_resource() instead of devm_ioremap()
+- Converted IS_ERR_OR_NULL to IS_ERR
+- Disable regulators in sdhci_msm_remove()
+- Check for DT node at the beginning in sdhci_msm_probe()
+- Removed more redundant code
+- Changes in some error messages
+- Minor fixes
 
-You should keep the pointers and the routines.  The contents of the 
-routines can be removed, leaving nothing but a "return 0;" line.
+Changes from v3:
+- Allocate memory for all required structs at once
+- Added termination entry in sdhci_msm_dt_match[]
+- Fixed a missing sdhci_pltfm_free() in probe()
+- Removed redundant of_match_ptr
+- Removed the unneeded function sdhci_msm_vreg_reset()
 
-Alan Stern
+Changes from v2:
+- Added DT bindings for clocks
+- Moved voltage regulators data to platform data
+- Removed unneeded includes
+- Removed obsolete and wrapper functions
+- Removed error checking where unnecessary
+- Removed redundant _clk suffix from clock names
+- Just return instead of goto where possible
+- Minor fixes
 
---
-To unsubscribe from this list: send the line "unsubscribe linux-usb" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Changes from v1:
+- GPIO references are replaced by pinctrl
+- DT parsing is done mostly by mmc_of_parse()
+- Use of_match_device() for DT matching
+- A few minor changes
+
+Georgi Djakov (2):
+  mmc: sdhci-msm: Initial SDHCI MSM driver documentation
+  mmc: sdhci-msm: Initial support for MSM chipsets
+
+ .../devicetree/bindings/mmc/sdhci-msm.txt          |   70 +++
+ drivers/mmc/host/Kconfig                           |   13 +
+ drivers/mmc/host/Makefile                          |    1 +
+ drivers/mmc/host/sdhci-msm.c                       |  644 ++++++++++++++++++++
+ 4 files changed, 728 insertions(+)
+ create mode 100644 Documentation/devicetree/bindings/mmc/sdhci-msm.txt
+ create mode 100644 drivers/mmc/host/sdhci-msm.c
+
+-- 
+1.7.9.5
+
