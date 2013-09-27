@@ -1,164 +1,64 @@
-From: Zhang Haijun <b42677@freescale.com>
-Subject: Re: [PATCH V5] mmc:core: Avoid useless detecting task when card is
- busy
-Date: Fri, 27 Sep 2013 11:06:25 +0800
-Message-ID: <5244F631.9020904@freescale.com>
-References: <1380164213-25130-1-git-send-email-Haijun.Zhang@freescale.com>
+From: Dong Aisheng <b29396@freescale.com>
+Subject: [PATCH 1/1] mmc: sdhci-of-esdhc: fix building error
+Date: Fri, 27 Sep 2013 12:00:14 +0800
+Message-ID: <1380254414-12045-1-git-send-email-b29396@freescale.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=GB2312
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-db8lp0189.outbound.messaging.microsoft.com ([213.199.154.189]:13508
-	"EHLO db8outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1750826Ab3I0DGV convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 26 Sep 2013 23:06:21 -0400
-In-Reply-To: <1380164213-25130-1-git-send-email-Haijun.Zhang@freescale.com>
+Received: from mail-db9lp0249.outbound.messaging.microsoft.com ([213.199.154.249]:53636
+	"EHLO db9outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1750707Ab3I0EMB (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 27 Sep 2013 00:12:01 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Haijun Zhang <Haijun.Zhang@freescale.com>, cjb@laptop.org
-Cc: linux-mmc@vger.kernel.org, cbouatmailru@gmail.com, scottwood@freescale.com, X.Xie@freescale.com, ulf.hansson@linaro.org
+To: linux-mmc@vger.kernel.org
+Cc: linux-arm-kernel@lists.infradead.org, cjb@laptop.org, shawn.guo@linaro.org, fengguang.wu@intel.com, b29396@freescale.com
 
-Hi, chris
+tree:   git://git.kernel.org/pub/scm/linux/kernel/git/cjb/mmc.git mmc-next
+head:   53279906cf17c2b6138c70f41ec8f2da53cea65f
+commit: d31fc00a71b4f3a52d23c5a995ccd63e50a2c877 [36/41] mmc: sdhci-esdhc: move common esdhc_set_clock to platform driver
+config: make ARCH=powerpc allmodconfig
 
-This patch is Acked-by: Ulf
+All error/warnings:
 
-Could you help check on this?
+   drivers/mmc/host/sdhci-of-esdhc.c: In function 'esdhc_of_set_clock':
+>> drivers/mmc/host/sdhci-of-esdhc.c:229:179: error: 'host_clock' undeclared (first use in this function)
+     dev_dbg(mmc_dev(host->mmc), "desired SD clock: %d, actual: %d\n",
+                                                                                                                                                                                      ^
+   drivers/mmc/host/sdhci-of-esdhc.c:229:179: note: each undeclared identifier is reported only once for each function it appears in
 
+vim +/host_clock +229 drivers/mmc/host/sdhci-of-esdhc.c
 
-=D3=DA 2013/9/26 10:56, Haijun Zhang =D0=B4=B5=C0:
-> When card is in cpu polling mode to detect card present. Card detecti=
-ng
-> task will be scheduled about once every second. When card is busy in =
-large
-> file transfer, detecting task will be hang and call trace will be pro=
-mpt.
-> When handling the request, CMD13 is always followed by every command =
-when
-> it was complete. So assume that card is present to avoid this duplica=
-te
-> detecting. Only polling card when card is free to reduce conflict wit=
-h
-> data transfer.
->
-> <7>mmc0: req done (CMD13): 0: 00000e00 00000000 00000000 00000000
-> INFO: task kworker/u:1:12 blocked for more than 120 seconds.
-> "echo 0 > /proc/sys/kernel/hung_task_timeout_secs" disables this mess=
-age.
-> kworker/u:1     D 00000000     0    12      2 0x00000000
-> Call Trace:
-> [ee06dd50] [44042028] 0x44042028
-> (unreliable)
-> [ee06de10] [c0007a0c] __switch_to+0xa0/0xf0
-> [ee06de30] [c04dd50c] __schedule+0x1f8/0x4a4
->
-> [ee06dea0] [c04dd898] schedule+0x30/0xbc
->
-> [ee06deb0] [c03816a4] __mmc_claim_host+0x98/0x19c
->
-> [ee06df00] [c0385f88] mmc_sd_detect+0x38/0xc0
->
-> [ee06df10] [c0382b0c] mmc_rescan+0x294/0x2e0
-> [ee06df40] [c00661cc] process_one_work+0x140/0x3e0
->
-> [ee06df70] [c0066bf8] worker_thread+0x18c/0x36c
-> [ee06dfb0] [c006bf10] kthread+0x7c/0x80
->
-> [ee06dff0] [c000de58] kernel_thread+0x4c/0x68
-> <7>sdhci [sdhci_irq()]: *** mmc0 got interrupt: 0x00000001
->
-> Signed-off-by: Haijun Zhang <haijun.zhang@freescale.com>
-> Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
-> ---
->  drivers/mmc/card/block.c | 28 ++++++++++++++++++++++++++--
->  drivers/mmc/core/core.c  |  5 +++++
->  2 files changed, 31 insertions(+), 2 deletions(-)
->
-> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-> index 1a3163f..988f16b 100644
-> --- a/drivers/mmc/card/block.c
-> +++ b/drivers/mmc/card/block.c
-> @@ -1960,9 +1960,20 @@ static int mmc_blk_issue_rq(struct mmc_queue *=
-mq, struct request *req)
->  	struct mmc_host *host =3D card->host;
->  	unsigned long flags;
-> =20
-> -	if (req && !mq->mqrq_prev->req)
-> +	if (req && !mq->mqrq_prev->req) {
-> +		/*
-> +		 * When we are here, card polling task will be blocked.
-> +		 * So disable it to avoid this useless schedule.
-> +		 */
-> +		if (host->caps & MMC_CAP_NEEDS_POLL) {
-> +			spin_lock_irqsave(&host->lock, flags);
-> +			host->rescan_disable =3D 1;
-> +			spin_unlock_irqrestore(&host->lock, flags);
-> +		}
-> +
->  		/* claim host only for the first request */
->  		mmc_get_card(card);
-> +	}
-> =20
->  	ret =3D mmc_blk_part_switch(card, md);
->  	if (ret) {
-> @@ -1999,7 +2010,7 @@ static int mmc_blk_issue_rq(struct mmc_queue *m=
-q, struct request *req)
-> =20
->  out:
->  	if ((!req && !(mq->flags & MMC_QUEUE_NEW_REQUEST)) ||
-> -	     (req && (req->cmd_flags & MMC_REQ_SPECIAL_MASK)))
-> +			(req && (req->cmd_flags & MMC_REQ_SPECIAL_MASK))) {
->  		/*
->  		 * Release host when there are no more requests
->  		 * and after special request(discard, flush) is done.
-> @@ -2007,6 +2018,19 @@ out:
->  		 * the 'mmc_blk_issue_rq' with 'mqrq_prev->req'.
->  		 */
->  		mmc_put_card(card);
-> +
-> +		/*
-> +		 * Detecting card status immediately in case card being
-> +		 * removed just after the request is complete.
-> +		 */
-> +		if (host->caps & MMC_CAP_NEEDS_POLL) {
-> +			spin_lock_irqsave(&host->lock, flags);
-> +			host->rescan_disable =3D 0;
-> +			spin_unlock_irqrestore(&host->lock, flags);
-> +			mmc_detect_change(host, 0);
-> +		}
-> +	}
-> +
->  	return ret;
->  }
-> =20
-> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> index bf18b6b..9ab7020 100644
-> --- a/drivers/mmc/core/core.c
-> +++ b/drivers/mmc/core/core.c
-> @@ -2400,6 +2400,7 @@ int mmc_detect_card_removed(struct mmc_host *ho=
-st)
->  {
->  	struct mmc_card *card =3D host->card;
->  	int ret;
-> +	unsigned long flags;
-> =20
->  	WARN_ON(!host->claimed);
-> =20
-> @@ -2422,6 +2423,10 @@ int mmc_detect_card_removed(struct mmc_host *h=
-ost)
->  			 * Schedule a detect work as soon as possible to let a
->  			 * rescan handle the card removal.
->  			 */
-> +			spin_lock_irqsave(&host->lock, flags);
-> +			host->rescan_disable =3D 0;
-> +			spin_unlock_irqrestore(&host->lock, flags);
-> +
->  			cancel_delayed_work(&host->detect);
->  			mmc_detect_change(host, 0);
->  		}
+   223          while (host->max_clk / pre_div / 16 > clock && pre_div < 256)
+   224                  pre_div *= 2;
+   225
+   226          while (host->max_clk / pre_div / div > clock && div < 16)
+   227                  div++;
+   228
+ > 229           dev_dbg(mmc_dev(host->mmc), "desired SD clock: %d, actual: %d\n",
+   230                  clock, host_clock / pre_div / div);
+   231
+   232          pre_div >>= 1;
 
---=20
-Thanks & Regards
-Haijun.
+Signed-off-by: Dong Aisheng <b29396@freescale.com>
+---
+ drivers/mmc/host/sdhci-of-esdhc.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
+index b1605a1..0b24997 100644
+--- a/drivers/mmc/host/sdhci-of-esdhc.c
++++ b/drivers/mmc/host/sdhci-of-esdhc.c
+@@ -227,7 +227,7 @@ static void esdhc_of_set_clock(struct sdhci_host *host, unsigned int clock)
+ 		div++;
+ 
+ 	dev_dbg(mmc_dev(host->mmc), "desired SD clock: %d, actual: %d\n",
+-		clock, host_clock / pre_div / div);
++		clock, host->max_clk / pre_div / div);
+ 
+ 	pre_div >>= 1;
+ 	div--;
+-- 
+1.7.2.rc3
 
 
