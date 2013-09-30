@@ -1,106 +1,53 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 10/27] mmc: vub300: Remove redundant suspend and resume callbacks
-Date: Mon, 30 Sep 2013 10:24:20 +0200
-Message-ID: <CAPDyKFoN_m7P-hpDvnew4qEWOPxBUaffpP2ZYjVEfE1XVsRjTw@mail.gmail.com>
-References: <1380207292-16968-11-git-send-email-ulf.hansson@linaro.org>
-	<Pine.LNX.4.44L0.1309271219530.10254-100000@netrider.rowland.org>
+From: Hans Verkuil <hverkuil@xs4all.nl>
+Subject: Re: [PATCH 19/51] DMA-API: media: dt3155v4l: replace dma_set_mask()+dma_set_coherent_mask()
+ with new helper
+Date: Mon, 30 Sep 2013 13:57:47 +0200
+Message-ID: <5249673B.5020705@xs4all.nl>
+References: <20130919212235.GD12758@n2100.arm.linux.org.uk> <E1VMm13-0007hO-9l@rmk-PC.arm.linux.org.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ve0-f182.google.com ([209.85.128.182]:39186 "EHLO
-	mail-ve0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752848Ab3I3IYV (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 30 Sep 2013 04:24:21 -0400
-Received: by mail-ve0-f182.google.com with SMTP id oy12so3711499veb.41
-        for <linux-mmc@vger.kernel.org>; Mon, 30 Sep 2013 01:24:20 -0700 (PDT)
-In-Reply-To: <Pine.LNX.4.44L0.1309271219530.10254-100000@netrider.rowland.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Transfer-Encoding: 7bit
+Return-path: <netdev-owner@vger.kernel.org>
+In-Reply-To: <E1VMm13-0007hO-9l@rmk-PC.arm.linux.org.uk>
+Sender: netdev-owner@vger.kernel.org
+To: Russell King <rmk+kernel@arm.linux.org.uk>
+Cc: alsa-devel@alsa-project.org, b43-dev@lists.infradead.org, devel@driverdev.osuosl.org, devicetree@vger.kernel.org, dri-devel@lists.freedesktop.org, e1000-devel@lists.sourceforge.net, linux-arm-kernel@lists.infradead.org, linux-crypto@vger.kernel.org, linux-doc@vger.kernel.org, linux-fbdev@vger.kernel.org, linux-ide@vger.kernel.org, linux-media@vger.kernel.org, linux-mmc@vger.kernel.org, linux-nvme@lists.infradead.org, linux-omap@vger.kernel.org, linuxppc-dev@lists.ozlabs.org, linux-samsung-soc@vger.kernel.org, linux-scsi@vger.kernel.org, linux-tegra@vger.kernel.org, linux-usb@vger.kernel.org, linux-wireless@vger.kernel.org, netdev@vger.kernel.org, Solarflare linux maintainers <linux-net-drivers@solarflare.com>, uclinux-dist-devel@blackfin.uclinux.org, Mauro Carvalho Chehab <m.chehab@samsung.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Alan Stern <stern@rowland.harvard.edu>
-Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Tony Olech <tony.olech@elandigitalsystems.com>, linux-usb@vger.kernel.org
 
-On 27 September 2013 18:22, Alan Stern <stern@rowland.harvard.edu> wrote:
-> On Thu, 26 Sep 2013, Ulf Hansson wrote:
->
->> Suspend and resume of cards are handled by the protocol layer and
->> consequently the mmc_suspend|resume_host APIs are marked as deprecated.
->>
->> While moving away from using the deprecated APIs, there are nothing
->> left to be done for the suspend and resume callbacks, so remove them.
->>
->> Cc: Tony Olech <tony.olech@elandigitalsystems.com>
->> Cc: linux-usb@vger.kernel.org
->> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
->> ---
->>  drivers/mmc/host/vub300.c |   30 ------------------------------
->>  1 file changed, 30 deletions(-)
->>
->> diff --git a/drivers/mmc/host/vub300.c b/drivers/mmc/host/vub300.c
->> index e9028ad..db99edc 100644
->> --- a/drivers/mmc/host/vub300.c
->> +++ b/drivers/mmc/host/vub300.c
->> @@ -2389,34 +2389,6 @@ static void vub300_disconnect(struct usb_interface *interface)
->>       }
->>  }
->>
->> -#ifdef CONFIG_PM
->> -static int vub300_suspend(struct usb_interface *intf, pm_message_t message)
->> -{
->> -     struct vub300_mmc_host *vub300 = usb_get_intfdata(intf);
->> -     if (!vub300 || !vub300->mmc) {
->> -             return 0;
->> -     } else {
->> -             struct mmc_host *mmc = vub300->mmc;
->> -             mmc_suspend_host(mmc);
->> -             return 0;
->> -     }
->> -}
->> -
->> -static int vub300_resume(struct usb_interface *intf)
->> -{
->> -     struct vub300_mmc_host *vub300 = usb_get_intfdata(intf);
->> -     if (!vub300 || !vub300->mmc) {
->> -             return 0;
->> -     } else {
->> -             struct mmc_host *mmc = vub300->mmc;
->> -             mmc_resume_host(mmc);
->> -             return 0;
->> -     }
->> -}
->> -#else
->> -#define vub300_suspend NULL
->> -#define vub300_resume NULL
->> -#endif
->>  static int vub300_pre_reset(struct usb_interface *intf)
->>  {                            /* NOT irq */
->>       struct vub300_mmc_host *vub300 = usb_get_intfdata(intf);
->> @@ -2437,8 +2409,6 @@ static struct usb_driver vub300_driver = {
->>       .name = "vub300",
->>       .probe = vub300_probe,
->>       .disconnect = vub300_disconnect,
->> -     .suspend = vub300_suspend,
->> -     .resume = vub300_resume,
->>       .pre_reset = vub300_pre_reset,
->>       .post_reset = vub300_post_reset,
->>       .id_table = vub300_table,
->
-> You shouldn't do it this way.  The USB core treats drivers differently
-> depending on whether their suspend and resume callbacks are defined.
-> If those method pointers are NULL, the driver will be treated as though
-> it doesn't support power management at all.
->
-> You should keep the pointers and the routines.  The contents of the
-> routines can be removed, leaving nothing but a "return 0;" line.
+On 09/19/2013 11:44 PM, Russell King wrote:
+> Replace the following sequence:
+> 
+> 	dma_set_mask(dev, mask);
+> 	dma_set_coherent_mask(dev, mask);
+> 
+> with a call to the new helper dma_set_mask_and_coherent().
+> 
+> Signed-off-by: Russell King <rmk+kernel@arm.linux.org.uk>
 
-Thanks for your comment Alan. Did not know USB core was handling the
-callbacks like that, should of course have checked that.
+Acked-by: Hans Verkuil <hans.verkuil@cisco.com>
 
-Instead of sending a v2, I have dropped this patch and just sent a new
-one with an updated commit message as well.
+Regards,
 
-Kind regards
-Ulf Hansson
+	Hans
 
->
-> Alan Stern
->
+> ---
+>  drivers/staging/media/dt3155v4l/dt3155v4l.c |    5 +----
+>  1 files changed, 1 insertions(+), 4 deletions(-)
+> 
+> diff --git a/drivers/staging/media/dt3155v4l/dt3155v4l.c b/drivers/staging/media/dt3155v4l/dt3155v4l.c
+> index 90d6ac4..081407b 100644
+> --- a/drivers/staging/media/dt3155v4l/dt3155v4l.c
+> +++ b/drivers/staging/media/dt3155v4l/dt3155v4l.c
+> @@ -901,10 +901,7 @@ dt3155_probe(struct pci_dev *pdev, const struct pci_device_id *id)
+>  	int err;
+>  	struct dt3155_priv *pd;
+>  
+> -	err = dma_set_mask(&pdev->dev, DMA_BIT_MASK(32));
+> -	if (err)
+> -		return -ENODEV;
+> -	err = dma_set_coherent_mask(&pdev->dev, DMA_BIT_MASK(32));
+> +	err = dma_set_mask_and_coherent(&pdev->dev, DMA_BIT_MASK(32));
+>  	if (err)
+>  		return -ENODEV;
+>  	pd = kzalloc(sizeof(*pd), GFP_KERNEL);
+> 
