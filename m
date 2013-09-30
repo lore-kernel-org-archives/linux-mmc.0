@@ -1,50 +1,47 @@
-From: Bojan Prtvar <bojan.prtvar@rt-rk.com>
-Subject: Re: [PATCH] Re: How to trigger sdio bus probing from user space
-Date: Mon, 30 Sep 2013 11:56:50 +0000 (UTC)
-Message-ID: <loom.20130930T135052-748@post.gmane.org>
-References: <52455BCD.5040309@rt-rk.com> <l242pu$fog$1@ger.gmane.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 7bit
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: [PATCH 1/2] MIPS: db1235: Don't use MMC_CLKGATE
+Date: Mon, 30 Sep 2013 16:41:59 +0200
+Message-ID: <1380552120-31003-2-git-send-email-ulf.hansson@linaro.org>
+References: <1380552120-31003-1-git-send-email-ulf.hansson@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from plane.gmane.org ([80.91.229.3]:43593 "EHLO plane.gmane.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754218Ab3I3MAG (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 30 Sep 2013 08:00:06 -0400
-Received: from list by plane.gmane.org with local (Exim 4.69)
-	(envelope-from <glkm-linux-mmc@m.gmane.org>)
-	id 1VQc8y-0006tS-7V
-	for linux-mmc@vger.kernel.org; Mon, 30 Sep 2013 14:00:04 +0200
-Received: from cable-89-216-124-204.static.sbb.rs ([89.216.124.204])
-        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <linux-mmc@vger.kernel.org>; Mon, 30 Sep 2013 14:00:04 +0200
-Received: from bojan.prtvar by cable-89-216-124-204.static.sbb.rs with local (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <linux-mmc@vger.kernel.org>; Mon, 30 Sep 2013 14:00:04 +0200
+Received: from mail-ee0-f43.google.com ([74.125.83.43]:62376 "EHLO
+	mail-ee0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753979Ab3I3OmJ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 30 Sep 2013 10:42:09 -0400
+Received: by mail-ee0-f43.google.com with SMTP id e52so2751571eek.16
+        for <linux-mmc@vger.kernel.org>; Mon, 30 Sep 2013 07:42:08 -0700 (PDT)
+In-Reply-To: <1380552120-31003-1-git-send-email-ulf.hansson@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
+Cc: Linus Walleij <linus.walleij@linaro.org>, Ulf Hansson <ulf.hansson@linaro.org>, Ralf Baechle <ralf@linux-mips.org>, linux-mips@linux-mips.org
 
-Romain Izard <romain.izard.pro <at> gmail.com> writes:
+As a first step in removing code for MMC_CLKGATE, MIPS db1235 defconfig
+which is the only current user, shall move away from this option.
 
-> 
-> For internal use I have added a 'rescan' sysfs entry to the mmc
-> controller, instead of the sdio device itself. It is quite similar to
-> the way it is done in the scsi subsystem, and uses the same
-> 'mmc_detect_change' function as you do .
-> 
-> Updated to use the new attribute groups syntax for 3.12, I obtain the
-> following patch - compile-tested only, nothing more, as I do not have a
-> 3.12 test system available.
+The mmc host drivers au1xmmc and jz4740_mmc, which are used on MIPS
+don't support clock gating through MMC_CLKGATE, thus removing the
+config option will have no effect on power save - clock gating wise.
 
-Hi Romain,
+Cc: Ralf Baechle <ralf@linux-mips.org>
+Cc: linux-mips@linux-mips.org
+Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+---
+ arch/mips/configs/db1235_defconfig |    1 -
+ 1 file changed, 1 deletion(-)
 
-Than you. This is exactly what I was looking for. My kernel version is
-3.4.19 so I had back port your patch a little. At the and it is working OK.
-
-Regards,
-Bojan
-
-
+diff --git a/arch/mips/configs/db1235_defconfig b/arch/mips/configs/db1235_defconfig
+index e2b4ad5..28e49f2 100644
+--- a/arch/mips/configs/db1235_defconfig
++++ b/arch/mips/configs/db1235_defconfig
+@@ -351,7 +351,6 @@ CONFIG_USB_OHCI_HCD=y
+ CONFIG_USB_OHCI_HCD_PLATFORM=y
+ CONFIG_USB_STORAGE=y
+ CONFIG_MMC=y
+-CONFIG_MMC_CLKGATE=y
+ CONFIG_MMC_AU1X=y
+ CONFIG_NEW_LEDS=y
+ CONFIG_LEDS_CLASS=y
+-- 
+1.7.9.5
 
