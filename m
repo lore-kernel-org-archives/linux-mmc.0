@@ -1,132 +1,77 @@
-From: Joel Fernandes <joelf@ti.com>
-Subject: [PATCH v2 4/9] ARM: dts: Add AES data and documentation for AM33XX
-Date: Mon, 30 Sep 2013 10:13:01 -0500
-Message-ID: <1380553986-15910-5-git-send-email-joelf@ti.com>
-References: <1380553986-15910-1-git-send-email-joelf@ti.com>
+From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Subject: Re: [PATCH 0/2] mmc: core: Remove all code related to MMC_CLKGATE
+Date: Mon, 30 Sep 2013 23:10:49 +0200 (CEST)
+Message-ID: <Pine.LNX.4.64.1309302301400.24147@axis700.grange>
+References: <1380552120-31003-1-git-send-email-ulf.hansson@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1380553986-15910-1-git-send-email-joelf@ti.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Linux OMAP List <linux-omap@vger.kernel.org>, Linux ARM Kernel List <linux-arm-kernel@lists.infradead.org>, Linux MMC List <linux-mmc@vger.kernel.org>, Benoit Cousson <bcousson@baylibre.com>
-Cc: Paul Walmsley <paul@pwsan.com>, Rob Herring <rob.herring@calxeda.com>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Stephen Warren <swarren@wwwdotorg.org>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Rob Landley <rob@landley.net>, Tony Lindgren <tony@atomide.com>, Russell King <linux@arm.linux.org.uk>, "Mark A. Greer" <mgreer@animalcreek.com>, "open list:OPEN FIRMWARE AND..." <devicetree@vger.kernel.org>, "open list:DOCUMENTATION" <linux-doc@vger.kernel.org>, open list <linux-kernel@vger.kernel.org>
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from moutng.kundenserver.de ([212.227.17.10]:49650 "EHLO
+	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755881Ab3I3VK5 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 30 Sep 2013 17:10:57 -0400
+In-Reply-To: <1380552120-31003-1-git-send-email-ulf.hansson@linaro.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Linus Walleij <linus.walleij@linaro.org>, Magnus Damm <magnus.damm@gmail.com>
 
-From: "Mark A. Greer" <mgreer@animalcreek.com>
+Hi Ulf
 
-Add the generic AM33XX AES module's device tree data and
-enable it for the am335x-evm, am335x-evmsk, and am335x-bone
-platforms.  Also add Documentation file describing the data
-for the AES module.
+On Mon, 30 Sep 2013, Ulf Hansson wrote:
 
-[joelf@ti.com: Dropped interrupt-parent propert]
+> This patchset is remove all code related to MMC_CLKGATE. A significant
+> portion of code can then be removed from the core layer which would
+> simplify maintainance.
+> 
+> At the moment it seems like only some MIPS platforms were using
+> MMC_CLKGATE, but at the same time the corresponding host drivers
+> were not taking advantage of the mechanism. This made me feel confident
+> in removing the feature entirely from the mmc subsystem could be done.
+> 
+> Also do note that for host drivers that would like to implement clock
+> gating as a power save operation, using runtime PM is a far easier
+> way to address this. Several host drivers is already fully supporting
+> this as well.
+> 
+> Ulf Hansson (2):
+>   MIPS: db1235: Don't use MMC_CLKGATE
+>   mmc: core: Remove MMC_CLKGATE
 
-CC: Paul Walmsley <paul@pwsan.com>
-Signed-off-by: Mark A. Greer <mgreer@animalcreek.com>
+Do I understand correctly, that you're proposing to remove the aggressive 
+clock gating feature from MMC? If so, then please take into account my 
+NAK. At least two SD / MMC drivers, that I'm aware of, actively used and 
+developed on multiple platforms - sh_mmcif and tmio / sdhi implement MMC 
+clock gating and rely on it to save power between IO.
+
+Thanks
+Guennadi
+
+> 
+>  Documentation/mmc/mmc-dev-attrs.txt |   10 --
+>  arch/mips/configs/db1235_defconfig  |    1 -
+>  drivers/mmc/core/Kconfig            |   10 --
+>  drivers/mmc/core/core.c             |  116 +----------------
+>  drivers/mmc/core/core.h             |    3 -
+>  drivers/mmc/core/debugfs.c          |    5 -
+>  drivers/mmc/core/host.c             |  245 -----------------------------------
+>  drivers/mmc/core/mmc.c              |    6 +-
+>  drivers/mmc/core/sd.c               |   12 +-
+>  drivers/mmc/core/sdio.c             |    5 +-
+>  drivers/mmc/core/sdio_irq.c         |   10 +-
+>  include/linux/mmc/host.h            |   27 ----
+>  12 files changed, 12 insertions(+), 438 deletions(-)
+> 
+> -- 
+> 1.7.9.5
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+
 ---
- .../devicetree/bindings/crypto/omap-aes.txt        | 34 ++++++++++++++++++++++
- arch/arm/boot/dts/am335x-bone.dts                  |  4 +++
- arch/arm/boot/dts/am335x-evm.dts                   |  4 +++
- arch/arm/boot/dts/am335x-evmsk.dts                 |  4 +++
- arch/arm/boot/dts/am33xx.dtsi                      | 10 +++++++
- 5 files changed, 56 insertions(+)
- create mode 100644 Documentation/devicetree/bindings/crypto/omap-aes.txt
-
-diff --git a/Documentation/devicetree/bindings/crypto/omap-aes.txt b/Documentation/devicetree/bindings/crypto/omap-aes.txt
-new file mode 100644
-index 0000000..4bb1e27
---- /dev/null
-+++ b/Documentation/devicetree/bindings/crypto/omap-aes.txt
-@@ -0,0 +1,34 @@
-+OMAP SoC AES crypto Module
-+
-+Required properties:
-+
-+- compatible : Should contain entries for this and backward compatible
-+  AES versions:
-+  - "ti,omap2-aes" for OMAP2.
-+  - "ti,omap3-aes" for OMAP3.
-+  - "ti,omap4-aes" for OMAP4 and AM33XX.
-+  Note that the OMAP2 and 3 versions are compatible (OMAP3 supports
-+  more algorithms) but they are incompatible with OMAP4.
-+- ti,hwmods: Name of the hwmod associated with the AES odule
-+- reg : Offset and length of the register set for the module
-+- interrupt-parent : the phandle for the interrupt controller that
-+  services interrupts for this module.
-+- interrupts : the interrupt number for the AES odule.
-+
-+Optional properties:
-+- dmas: DMA specifier for tx and rx dma. See the DMA client binding,
-+	Documentation/devicetree/bindings/dma/dma.txt
-+- dma-names: DMA request names. Should be '"tx", "rx"' if dma is present.
-+
-+Example:
-+	/* AM335x */
-+	aes: aes@53500000 {
-+		compatible = "ti,omap4-aes";
-+		ti,hwmods = "aes";
-+		reg = <0x53500000 0xa0>;
-+		interrupt-parent = <&intc>;
-+		interrupts = <102>;
-+		dmas = <&edma 6
-+			&edma 5>;
-+		dma-names = "tx", "rx";
-+	};
-diff --git a/arch/arm/boot/dts/am335x-bone.dts b/arch/arm/boot/dts/am335x-bone.dts
-index 8a9802e..94ee427 100644
---- a/arch/arm/boot/dts/am335x-bone.dts
-+++ b/arch/arm/boot/dts/am335x-bone.dts
-@@ -23,3 +23,7 @@
- &sham {
- 	status = "okay";
- };
-+
-+&aes {
-+	status = "okay";
-+};
-diff --git a/arch/arm/boot/dts/am335x-evm.dts b/arch/arm/boot/dts/am335x-evm.dts
-index d59e51c..86463fa 100644
---- a/arch/arm/boot/dts/am335x-evm.dts
-+++ b/arch/arm/boot/dts/am335x-evm.dts
-@@ -526,3 +526,7 @@
- &sham {
- 	status = "okay";
- };
-+
-+&aes {
-+	status = "okay";
-+};
-diff --git a/arch/arm/boot/dts/am335x-evmsk.dts b/arch/arm/boot/dts/am335x-evmsk.dts
-index d45a330..f577e65 100644
---- a/arch/arm/boot/dts/am335x-evmsk.dts
-+++ b/arch/arm/boot/dts/am335x-evmsk.dts
-@@ -428,3 +428,7 @@
- &sham {
- 	status = "okay";
- };
-+
-+&aes {
-+	status = "okay";
-+};
-diff --git a/arch/arm/boot/dts/am33xx.dtsi b/arch/arm/boot/dts/am33xx.dtsi
-index 299710b..0daa1b2 100644
---- a/arch/arm/boot/dts/am33xx.dtsi
-+++ b/arch/arm/boot/dts/am33xx.dtsi
-@@ -719,5 +719,15 @@
- 			dmas = <&edma 36>;
- 			dma-names = "rx";
- 		};
-+
-+		aes: aes@53500000 {
-+			compatible = "ti,omap4-aes";
-+			ti,hwmods = "aes";
-+			reg = <0x53500000 0xa0>;
-+			interrupts = <102>;
-+			dmas = <&edma 6
-+				&edma 5>;
-+			dma-names = "tx", "rx";
-+		};
- 	};
- };
--- 
-1.8.1.2
+Guennadi Liakhovetski, Ph.D.
+Freelance Open-Source Software Developer
+http://www.open-technology.de/
