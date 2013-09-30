@@ -1,68 +1,43 @@
 From: Joel Fernandes <joelf@ti.com>
-Subject: [PATCH v2 0/9] ARM: dts: DT data for OMAP platforms for v3.13
-Date: Mon, 30 Sep 2013 10:12:57 -0500
-Message-ID: <1380553986-15910-1-git-send-email-joelf@ti.com>
+Subject: [PATCH v2 1/9] omap4: dts: Add node for AES
+Date: Mon, 30 Sep 2013 10:12:58 -0500
+Message-ID: <1380553986-15910-2-git-send-email-joelf@ti.com>
+References: <1380553986-15910-1-git-send-email-joelf@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+Content-Type: text/plain
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1380553986-15910-1-git-send-email-joelf@ti.com>
+Sender: linux-kernel-owner@vger.kernel.org
 To: Linux OMAP List <linux-omap@vger.kernel.org>, Linux ARM Kernel List <linux-arm-kernel@lists.infradead.org>, Linux MMC List <linux-mmc@vger.kernel.org>, Benoit Cousson <bcousson@baylibre.com>
+Cc: Joel Fernandes <joelf@ti.com>, Tony Lindgren <tony@atomide.com>, Rob Herring <rob.herring@calxeda.com>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Stephen Warren <swarren@wwwdotorg.org>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Russell King <linux@arm.linux.org.uk>, "open list:OMAP DEVICE TREE..." <devicetree@vger.kernel.org>, open list <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Following series is a collection of dts patches for the below features:
-crypto:
- aes, sha on am335x
- aes, des on am437x
- aes, des on omap4
-display:
-  beaglebone black HDMI
-  am335x-evm panel
+OMAP4 has an AES module that uses the omap-aes crypto driver.
+Add DT entries for the same.
 
-Series is based on Benoit Cousson's for_3.13/dts branch (commit sha 45646cd)
-Available at: git@github.com:joelagnel/linux-kernel.git (branch for-benoit)
+Signed-off-by: Joel Fernandes <joelf@ti.com>
+---
+ arch/arm/boot/dts/omap4.dtsi | 9 +++++++++
+ 1 file changed, 9 insertions(+)
 
-v2 changes:
- - Fixed hex capitalization
- - Dropped interrupt-parent property and use macros
-
-Benoit Parrot (1):
-  ARM: dts: AM33XX: Add LCDC info into am335x-evm
-
-Darren Etheridge (1):
-  dts: boneblack: add pinmux and hdmi node to enable display
-
-Joel Fernandes (5):
-  omap4: dts: Add node for AES
-  omap4: dts: Add node for DES3DES module
-  am33xx: dts: Fix AES interrupt number
-  ARM: am437x: dts: Add AES node for am437x
-  ARM: am437x: dts: Add DES node for am437x
-
-Mark A. Greer (2):
-  ARM: dts: Add SHAM data and documentation for AM33XX
-  ARM: dts: Add AES data and documentation for AM33XX
-
- .../devicetree/bindings/crypto/omap-aes.txt        | 34 ++++++++++
- .../devicetree/bindings/crypto/omap-sham.txt       | 31 +++++++++
- arch/arm/boot/dts/am335x-bone.dts                  |  8 +++
- arch/arm/boot/dts/am335x-boneblack.dts             | 48 +++++++++++++
- arch/arm/boot/dts/am335x-evm.dts                   | 79 ++++++++++++++++++++++
- arch/arm/boot/dts/am335x-evmsk.dts                 |  8 +++
- arch/arm/boot/dts/am33xx.dtsi                      | 28 ++++++++
- arch/arm/boot/dts/am4372.dtsi                      | 14 ++++
- arch/arm/boot/dts/omap4.dtsi                       | 18 +++++
- 9 files changed, 268 insertions(+)
- create mode 100644 Documentation/devicetree/bindings/crypto/omap-aes.txt
- create mode 100644 Documentation/devicetree/bindings/crypto/omap-sham.txt
-
+diff --git a/arch/arm/boot/dts/omap4.dtsi b/arch/arm/boot/dts/omap4.dtsi
+index 45708e1..16a44d6 100644
+--- a/arch/arm/boot/dts/omap4.dtsi
++++ b/arch/arm/boot/dts/omap4.dtsi
+@@ -663,5 +663,14 @@
+ 			ram-bits = <12>;
+ 			ti,has-mailbox;
+ 		};
++
++		aes: aes@4b501000 {
++			compatible = "ti,omap4-aes";
++			ti,hwmods = "aes";
++			reg = <0x4b501000 0xa0>;
++			interrupts = <GIC_SPI 85 IRQ_TYPE_LEVEL_HIGH>;
++			dmas = <&sdma 111>, <&sdma 110>;
++			dma-names = "tx", "rx";
++		};
+ 	};
+ };
 -- 
 1.8.1.2
