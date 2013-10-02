@@ -1,53 +1,48 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: core: Do not poll for busy with status cmd for all
- switch cmds
-Date: Wed, 2 Oct 2013 16:08:12 +0200
-Message-ID: <CAPDyKFoc1UOgYDD+ssMmrM9koBYN4yniC-n=dLACmSEvioWJtw@mail.gmail.com>
-References: <1378893256-27460-1-git-send-email-ulf.hansson@linaro.org>
-	<523129F5.8030800@samsung.com>
-	<86mwmrbznu.fsf@void.printf.net>
+Subject: Re: [PATCH 1/2] MIPS: db1235: Don't use MMC_CLKGATE
+Date: Wed, 2 Oct 2013 16:11:26 +0200
+Message-ID: <CAPDyKFo+RxX72Q3V9opOnXB=yUG4ZZ=KSTS_0jPL9D6V+5HbBw@mail.gmail.com>
+References: <1380552120-31003-1-git-send-email-ulf.hansson@linaro.org>
+	<1380552120-31003-2-git-send-email-ulf.hansson@linaro.org>
+	<20131002092457.GB23236@linux-mips.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-vc0-f169.google.com ([209.85.220.169]:57819 "EHLO
-	mail-vc0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753447Ab3JBOIN (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 2 Oct 2013 10:08:13 -0400
-Received: by mail-vc0-f169.google.com with SMTP id ib11so511953vcb.14
-        for <linux-mmc@vger.kernel.org>; Wed, 02 Oct 2013 07:08:12 -0700 (PDT)
-In-Reply-To: <86mwmrbznu.fsf@void.printf.net>
+Received: from mail-vc0-f174.google.com ([209.85.220.174]:52785 "EHLO
+	mail-vc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752944Ab3JBOL0 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 2 Oct 2013 10:11:26 -0400
+Received: by mail-vc0-f174.google.com with SMTP id gd11so503618vcb.5
+        for <linux-mmc@vger.kernel.org>; Wed, 02 Oct 2013 07:11:26 -0700 (PDT)
+In-Reply-To: <20131002092457.GB23236@linux-mips.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>
+To: Ralf Baechle <ralf@linux-mips.org>, Chris Ball <cjb@laptop.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Linus Walleij <linus.walleij@linaro.org>, linux-mips@linux-mips.org
 
-On 2 October 2013 14:55, Chris Ball <cjb@laptop.org> wrote:
-> Hi Jaehoon,
+On 2 October 2013 11:24, Ralf Baechle <ralf@linux-mips.org> wrote:
+> On Mon, Sep 30, 2013 at 04:41:59PM +0200, Ulf Hansson wrote:
 >
-> On Thu, Sep 12 2013, Jaehoon Chung wrote:
->> I will test with this patch, and share the result.
->> Thanks for posting this patch.
+>> As a first step in removing code for MMC_CLKGATE, MIPS db1235 defconfig
+>> which is the only current user, shall move away from this option.
+>>
+>> The mmc host drivers au1xmmc and jz4740_mmc, which are used on MIPS
+>> don't support clock gating through MMC_CLKGATE, thus removing the
+>> config option will have no effect on power save - clock gating wise.
+>>
+>> Cc: Ralf Baechle <ralf@linux-mips.org>
+>> Cc: linux-mips@linux-mips.org
+>> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 >
-> Did you get a chance to test this?  Thanks,
+> Acked-by: Ralf Baechle <ralf@linux-mips.org>
 >
+> Feel free to feed this MIPS patch to Linus via the MMC tree.
+>
+>   Ralf
 
-Hi Chris,
+Thanks Ralf!
 
-FYI:
+Chris, do you mind taking this through your tree?
 
-I have tested this on a ux500 board with some out of tree patches to
-enable suspend/resume and with MMC_CAP2_FULL_PWR_CYCLE. I could not
-find any regression and moreover I think it important that we do not
-violate the eMMC spec for power off notify, which is what we did
-before.
-
-The background to this patch, comes from a off list discussion between
-Jaehoon and me. It seems like Jaehoon encountered some issues with
-power off notify. I was hoping this patch might help him.
-
-Kind
+Kind regards
 Ulf Hansson
-
-> - Chris.
-> --
-> Chris Ball   <cjb@laptop.org>   <http://printf.net/>
