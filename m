@@ -1,74 +1,55 @@
 From: Jingoo Han <jg1.han@samsung.com>
-Subject: [PATCH 1/2] mmc: mmc_spi: use spi_get_drvdata() and spi_set_drvdata()
-Date: Wed, 02 Oct 2013 17:35:45 +0900
-Message-ID: <000201cebf4a$63a313c0$2ae93b40$%han@samsung.com>
+Subject: [PATCH 2/2] mmc: mmc_spi: remove unnecessary spi_set_drvdata()
+Date: Wed, 02 Oct 2013 17:36:21 +0900
+Message-ID: <000301cebf4a$78d9d530$6a8d7f90$%han@samsung.com>
+References: <000201cebf4a$63a313c0$2ae93b40$%han@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout1.samsung.com ([203.254.224.24]:29669 "EHLO
-	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753340Ab3JBIfs (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 2 Oct 2013 04:35:48 -0400
-Received: from epcpsbgr5.samsung.com
- (u145.gpu120.samsung.co.kr [203.254.230.145])
- by mailout1.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+Received: from mailout4.samsung.com ([203.254.224.34]:37888 "EHLO
+	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753346Ab3JBIgn (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 2 Oct 2013 04:36:43 -0400
+Received: from epcpsbgr4.samsung.com
+ (u144.gpu120.samsung.co.kr [203.254.230.144])
+ by mailout4.samsung.com (Oracle Communications Messaging Server 7u4-24.01
  (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTP id <0MU100JIY971RA50@mailout1.samsung.com> for
- linux-mmc@vger.kernel.org; Wed, 02 Oct 2013 17:35:46 +0900 (KST)
+ with ESMTP id <0MU1002WR98CGRR0@mailout4.samsung.com> for
+ linux-mmc@vger.kernel.org; Wed, 02 Oct 2013 17:36:22 +0900 (KST)
+In-reply-to: <000201cebf4a$63a313c0$2ae93b40$%han@samsung.com>
 Content-language: ko
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: 'Chris Ball' <cjb@laptop.org>
 Cc: linux-mmc@vger.kernel.org, 'Sonic Zhang' <sonic.zhang@analog.com>, 'Jingoo Han' <jg1.han@samsung.com>
 
-Use the wrapper functions for getting and setting the driver data using
-spi_device instead of using dev_{get|set}_drvdata with &spi->dev, so we
-can directly pass a struct spi_device.
+The driver core clears the driver data to NULL after device_release
+or on probe failure. Thus, it is not needed to manually clear the
+device driver data to NULL.
 
 Signed-off-by: Jingoo Han <jg1.han@samsung.com>
-Acked-by: Sonic Zhang <sonic.zhang@analog.com>
 ---
- drivers/mmc/host/mmc_spi.c |    8 ++++----
- 1 file changed, 4 insertions(+), 4 deletions(-)
+ drivers/mmc/host/mmc_spi.c |    2 --
+ 1 file changed, 2 deletions(-)
 
 diff --git a/drivers/mmc/host/mmc_spi.c b/drivers/mmc/host/mmc_spi.c
-index 0a87e56..40770a5 100644
+index 40770a5..4c5e279 100644
 --- a/drivers/mmc/host/mmc_spi.c
 +++ b/drivers/mmc/host/mmc_spi.c
-@@ -1386,7 +1386,7 @@ static int mmc_spi_probe(struct spi_device *spi)
- 			host->powerup_msecs = 250;
- 	}
- 
--	dev_set_drvdata(&spi->dev, mmc);
-+	spi_set_drvdata(spi, mmc);
- 
- 	/* preallocate dma buffers */
- 	host->data = kmalloc(sizeof(*host->data), GFP_KERNEL);
-@@ -1472,7 +1472,7 @@ fail_glue_init:
+@@ -1472,7 +1472,6 @@ fail_glue_init:
  fail_nobuf1:
  	mmc_free_host(mmc);
  	mmc_spi_put_pdata(spi);
--	dev_set_drvdata(&spi->dev, NULL);
-+	spi_set_drvdata(spi, NULL);
+-	spi_set_drvdata(spi, NULL);
  
  nomem:
  	kfree(ones);
-@@ -1482,7 +1482,7 @@ nomem:
- 
- static int mmc_spi_remove(struct spi_device *spi)
- {
--	struct mmc_host		*mmc = dev_get_drvdata(&spi->dev);
-+	struct mmc_host		*mmc = spi_get_drvdata(spi);
- 	struct mmc_spi_host	*host;
- 
- 	if (mmc) {
-@@ -1507,7 +1507,7 @@ static int mmc_spi_remove(struct spi_device *spi)
+@@ -1507,7 +1506,6 @@ static int mmc_spi_remove(struct spi_device *spi)
  		spi->max_speed_hz = mmc->f_max;
  		mmc_free_host(mmc);
  		mmc_spi_put_pdata(spi);
--		dev_set_drvdata(&spi->dev, NULL);
-+		spi_set_drvdata(spi, NULL);
+-		spi_set_drvdata(spi, NULL);
  	}
  	return 0;
  }
