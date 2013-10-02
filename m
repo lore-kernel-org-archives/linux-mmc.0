@@ -1,78 +1,78 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [PATCH 7/7] mmc: sh_mmcif: Extend clock gating routine for runtime suspend
-Date: Wed,  2 Oct 2013 10:30:51 +0200
-Message-ID: <1380702651-13389-8-git-send-email-ulf.hansson@linaro.org>
-References: <1380702651-13389-1-git-send-email-ulf.hansson@linaro.org>
+From: Jingoo Han <jg1.han@samsung.com>
+Subject: [PATCH 1/2] mmc: mmc_spi: use spi_get_drvdata() and spi_set_drvdata()
+Date: Wed, 02 Oct 2013 17:35:45 +0900
+Message-ID: <000201cebf4a$63a313c0$2ae93b40$%han@samsung.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-lb0-f178.google.com ([209.85.217.178]:50788 "EHLO
-	mail-lb0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753151Ab3JBIbR (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 2 Oct 2013 04:31:17 -0400
-Received: by mail-lb0-f178.google.com with SMTP id z5so472765lbh.9
-        for <linux-mmc@vger.kernel.org>; Wed, 02 Oct 2013 01:31:16 -0700 (PDT)
-In-Reply-To: <1380702651-13389-1-git-send-email-ulf.hansson@linaro.org>
+Received: from mailout1.samsung.com ([203.254.224.24]:29669 "EHLO
+	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753340Ab3JBIfs (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 2 Oct 2013 04:35:48 -0400
+Received: from epcpsbgr5.samsung.com
+ (u145.gpu120.samsung.co.kr [203.254.230.145])
+ by mailout1.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+ (7.0.4.24.0) 64bit (built Nov 17 2011))
+ with ESMTP id <0MU100JIY971RA50@mailout1.samsung.com> for
+ linux-mmc@vger.kernel.org; Wed, 02 Oct 2013 17:35:46 +0900 (KST)
+Content-language: ko
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+To: 'Chris Ball' <cjb@laptop.org>
+Cc: linux-mmc@vger.kernel.org, 'Sonic Zhang' <sonic.zhang@analog.com>, 'Jingoo Han' <jg1.han@samsung.com>
 
-At request inactivity, we don't want to rely on gating the clock only
-through the clock API since this will depend on the clock tree and the
-clients using the clocks.
+Use the wrapper functions for getting and setting the driver data using
+spi_device instead of using dev_{get|set}_drvdata with &spi->dev, so we
+can directly pass a struct spi_device.
 
-To make sure the clock is fully gated towards the card in runtime
-suspend, we perform clock gating using the internal registers of the
-controller.
-
-Cc: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+Signed-off-by: Jingoo Han <jg1.han@samsung.com>
+Acked-by: Sonic Zhang <sonic.zhang@analog.com>
 ---
- drivers/mmc/host/sh_mmcif.c |   11 +++++++++++
- 1 file changed, 11 insertions(+)
+ drivers/mmc/host/mmc_spi.c |    8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
 
-diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
-index 0c3a5cf..4e9dbd6 100644
---- a/drivers/mmc/host/sh_mmcif.c
-+++ b/drivers/mmc/host/sh_mmcif.c
-@@ -230,6 +230,7 @@ struct sh_mmcif_host {
- 	struct platform_device *pd;
- 	struct clk *hclk;
- 	unsigned int clk;
-+	unsigned int clk_cache;
- 	int bus_width;
- 	unsigned char timing;
- 	bool sd_error;
-@@ -1007,6 +1008,7 @@ static void sh_mmcif_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+diff --git a/drivers/mmc/host/mmc_spi.c b/drivers/mmc/host/mmc_spi.c
+index 0a87e56..40770a5 100644
+--- a/drivers/mmc/host/mmc_spi.c
++++ b/drivers/mmc/host/mmc_spi.c
+@@ -1386,7 +1386,7 @@ static int mmc_spi_probe(struct spi_device *spi)
+ 			host->powerup_msecs = 250;
+ 	}
  
- 	sh_mmcif_clock_control(host, ios->clock);
+-	dev_set_drvdata(&spi->dev, mmc);
++	spi_set_drvdata(spi, mmc);
  
-+	host->clk_cache = ios->clock;
- 	host->timing = ios->timing;
- 	host->bus_width = ios->bus_width;
- 	host->state = STATE_IDLE;
-@@ -1545,6 +1547,9 @@ static int sh_mmcif_runtime_suspend(struct device *dev)
+ 	/* preallocate dma buffers */
+ 	host->data = kmalloc(sizeof(*host->data), GFP_KERNEL);
+@@ -1472,7 +1472,7 @@ fail_glue_init:
+ fail_nobuf1:
+ 	mmc_free_host(mmc);
+ 	mmc_spi_put_pdata(spi);
+-	dev_set_drvdata(&spi->dev, NULL);
++	spi_set_drvdata(spi, NULL);
+ 
+ nomem:
+ 	kfree(ones);
+@@ -1482,7 +1482,7 @@ nomem:
+ 
+ static int mmc_spi_remove(struct spi_device *spi)
  {
- 	struct sh_mmcif_host *host = dev_get_drvdata(dev);
+-	struct mmc_host		*mmc = dev_get_drvdata(&spi->dev);
++	struct mmc_host		*mmc = spi_get_drvdata(spi);
+ 	struct mmc_spi_host	*host;
  
-+	if (host->clk_cache)
-+		sh_mmcif_clock_control(host, 0);
-+
- 	clk_disable_unprepare(host->hclk);
+ 	if (mmc) {
+@@ -1507,7 +1507,7 @@ static int mmc_spi_remove(struct spi_device *spi)
+ 		spi->max_speed_hz = mmc->f_max;
+ 		mmc_free_host(mmc);
+ 		mmc_spi_put_pdata(spi);
+-		dev_set_drvdata(&spi->dev, NULL);
++		spi_set_drvdata(spi, NULL);
+ 	}
  	return 0;
  }
-@@ -1554,6 +1559,12 @@ static int sh_mmcif_runtime_resume(struct device *dev)
- 	struct sh_mmcif_host *host = dev_get_drvdata(dev);
- 
- 	clk_prepare_enable(host->hclk);
-+
-+	if (host->clk_cache) {
-+		sh_mmcif_sync_reset(host);
-+		sh_mmcif_clock_control(host, host->clk_cache);
-+	}
-+
- 	return 0;
- }
- #endif
 -- 
-1.7.9.5
+1.7.10.4
+
 
