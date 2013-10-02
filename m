@@ -1,42 +1,31 @@
-From: Ralf Baechle <ralf@linux-mips.org>
-Subject: Re: [PATCH 1/2] MIPS: db1235: Don't use MMC_CLKGATE
-Date: Wed, 2 Oct 2013 11:24:57 +0200
-Message-ID: <20131002092457.GB23236@linux-mips.org>
-References: <1380552120-31003-1-git-send-email-ulf.hansson@linaro.org>
- <1380552120-31003-2-git-send-email-ulf.hansson@linaro.org>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH] mmc: core: Do not poll for busy with status cmd for all switch cmds
+Date: Wed, 02 Oct 2013 13:55:17 +0100
+Message-ID: <86mwmrbznu.fsf@void.printf.net>
+References: <1378893256-27460-1-git-send-email-ulf.hansson@linaro.org>
+	<523129F5.8030800@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eddie.linux-mips.org ([78.24.191.182]:37971 "EHLO
-	cvs.linux-mips.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752963Ab3JBJZF (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 2 Oct 2013 05:25:05 -0400
-Received: from localhost.localdomain ([127.0.0.1]:45777 "EHLO linux-mips.org"
-        rhost-flags-OK-OK-OK-FAIL) by eddie.linux-mips.org with ESMTP
-        id S6838727Ab3JBJZDjcqRl (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 2 Oct 2013 11:25:03 +0200
-Content-Disposition: inline
-In-Reply-To: <1380552120-31003-2-git-send-email-ulf.hansson@linaro.org>
+Received: from void.printf.net ([89.145.121.20]:39101 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754024Ab3JBMzU (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 2 Oct 2013 08:55:20 -0400
+In-Reply-To: <523129F5.8030800@samsung.com> (Jaehoon Chung's message of "Thu,
+	12 Sep 2013 11:41:57 +0900")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Linus Walleij <linus.walleij@linaro.org>, linux-mips@linux-mips.org
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
 
-On Mon, Sep 30, 2013 at 04:41:59PM +0200, Ulf Hansson wrote:
+Hi Jaehoon,
 
-> As a first step in removing code for MMC_CLKGATE, MIPS db1235 defconfig
-> which is the only current user, shall move away from this option.
-> 
-> The mmc host drivers au1xmmc and jz4740_mmc, which are used on MIPS
-> don't support clock gating through MMC_CLKGATE, thus removing the
-> config option will have no effect on power save - clock gating wise.
-> 
-> Cc: Ralf Baechle <ralf@linux-mips.org>
-> Cc: linux-mips@linux-mips.org
-> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+On Thu, Sep 12 2013, Jaehoon Chung wrote:
+> I will test with this patch, and share the result.
+> Thanks for posting this patch.
 
-Acked-by: Ralf Baechle <ralf@linux-mips.org>
+Did you get a chance to test this?  Thanks,
 
-Feel free to feed this MIPS patch to Linus via the MMC tree.
-
-  Ralf
+- Chris.
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
