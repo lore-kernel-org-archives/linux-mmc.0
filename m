@@ -1,57 +1,42 @@
-From: Jingoo Han <jg1.han@samsung.com>
-Subject: [PATCH] mmc: sdhci-pci: remove unnecessary pci_set_drvdata()
-Date: Wed, 02 Oct 2013 17:44:36 +0900
-Message-ID: <000001cebf4b$a0011140$e00333c0$%han@samsung.com>
+From: Ralf Baechle <ralf@linux-mips.org>
+Subject: Re: [PATCH 1/2] MIPS: db1235: Don't use MMC_CLKGATE
+Date: Wed, 2 Oct 2013 11:24:57 +0200
+Message-ID: <20131002092457.GB23236@linux-mips.org>
+References: <1380552120-31003-1-git-send-email-ulf.hansson@linaro.org>
+ <1380552120-31003-2-git-send-email-ulf.hansson@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout1.samsung.com ([203.254.224.24]:30890 "EHLO
-	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753541Ab3JBIoi (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 2 Oct 2013 04:44:38 -0400
-Received: from epcpsbgr2.samsung.com
- (u142.gpu120.samsung.co.kr [203.254.230.142])
- by mailout1.samsung.com (Oracle Communications Messaging Server 7u4-24.01
- (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTP id <0MU1004A59M6PB20@mailout1.samsung.com> for
- linux-mmc@vger.kernel.org; Wed, 02 Oct 2013 17:44:37 +0900 (KST)
-Content-language: ko
+Received: from eddie.linux-mips.org ([78.24.191.182]:37971 "EHLO
+	cvs.linux-mips.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752963Ab3JBJZF (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 2 Oct 2013 05:25:05 -0400
+Received: from localhost.localdomain ([127.0.0.1]:45777 "EHLO linux-mips.org"
+        rhost-flags-OK-OK-OK-FAIL) by eddie.linux-mips.org with ESMTP
+        id S6838727Ab3JBJZDjcqRl (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 2 Oct 2013 11:25:03 +0200
+Content-Disposition: inline
+In-Reply-To: <1380552120-31003-2-git-send-email-ulf.hansson@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: 'Chris Ball' <cjb@laptop.org>
-Cc: linux-mmc@vger.kernel.org, 'Adrian Hunter' <adrian.hunter@intel.com>, 'Jingoo Han' <jg1.han@samsung.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Linus Walleij <linus.walleij@linaro.org>, linux-mips@linux-mips.org
 
-The driver core clears the driver data to NULL after device_release
-or on probe failure. Thus, it is not needed to manually clear the
-device driver data to NULL.
+On Mon, Sep 30, 2013 at 04:41:59PM +0200, Ulf Hansson wrote:
 
-Signed-off-by: Jingoo Han <jg1.han@samsung.com>
----
- drivers/mmc/host/sdhci-pci.c |    2 --
- 1 file changed, 2 deletions(-)
+> As a first step in removing code for MMC_CLKGATE, MIPS db1235 defconfig
+> which is the only current user, shall move away from this option.
+> 
+> The mmc host drivers au1xmmc and jz4740_mmc, which are used on MIPS
+> don't support clock gating through MMC_CLKGATE, thus removing the
+> config option will have no effect on power save - clock gating wise.
+> 
+> Cc: Ralf Baechle <ralf@linux-mips.org>
+> Cc: linux-mips@linux-mips.org
+> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 
-diff --git a/drivers/mmc/host/sdhci-pci.c b/drivers/mmc/host/sdhci-pci.c
-index d7d6bc8..f0d20f0 100644
---- a/drivers/mmc/host/sdhci-pci.c
-+++ b/drivers/mmc/host/sdhci-pci.c
-@@ -1533,7 +1533,6 @@ static int sdhci_pci_probe(struct pci_dev *pdev,
- 	return 0;
- 
- free:
--	pci_set_drvdata(pdev, NULL);
- 	kfree(chip);
- 
- err:
-@@ -1555,7 +1554,6 @@ static void sdhci_pci_remove(struct pci_dev *pdev)
- 		for (i = 0; i < chip->num_slots; i++)
- 			sdhci_pci_remove_slot(chip->slots[i]);
- 
--		pci_set_drvdata(pdev, NULL);
- 		kfree(chip);
- 	}
- 
--- 
-1.7.10.4
+Acked-by: Ralf Baechle <ralf@linux-mips.org>
 
+Feel free to feed this MIPS patch to Linus via the MMC tree.
 
+  Ralf
