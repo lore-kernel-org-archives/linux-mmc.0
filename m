@@ -1,73 +1,113 @@
-From: Michal Simek <michal.simek@xilinx.com>
-Subject: [PATCH 4/9] mmc: mmci: Remove unnecessary amba_set_drvdata()
-Date: Thu,  3 Oct 2013 11:46:26 +0200
-Message-ID: <c7c68ca23d51c799ce20be3e2f65019e4a537387.1380793579.git.michal.simek@xilinx.com>
-References: <27e289763bbcb7d10f84081543cfc3a4dc770398.1380793579.git.michal.simek@xilinx.com>
-Content-Type: multipart/signed;
-    boundary="=_mimegpg-monstr-desktop-4100-1380793611-0001";
-    micalg=pgp-sha1; protocol="application/pgp-signature"
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: [PATCH] mmc: core: Remove redundant mmc_power_up|off at runtime callbacks
+Date: Thu,  3 Oct 2013 11:59:38 +0200
+Message-ID: <1380794378-4308-1-git-send-email-ulf.hansson@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ee0-f49.google.com ([74.125.83.49]:47970 "EHLO
-	mail-ee0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752871Ab3JCJqz (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 3 Oct 2013 05:46:55 -0400
-Received: by mail-ee0-f49.google.com with SMTP id d41so967525eek.36
-        for <linux-mmc@vger.kernel.org>; Thu, 03 Oct 2013 02:46:54 -0700 (PDT)
-In-Reply-To: <27e289763bbcb7d10f84081543cfc3a4dc770398.1380793579.git.michal.simek@xilinx.com>
-In-Reply-To: <27e289763bbcb7d10f84081543cfc3a4dc770398.1380793579.git.michal.simek@xilinx.com>
-References: <27e289763bbcb7d10f84081543cfc3a4dc770398.1380793579.git.michal.simek@xilinx.com>
+Received: from mail-ea0-f180.google.com ([209.85.215.180]:36740 "EHLO
+	mail-ea0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753552Ab3JCJ7n (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 3 Oct 2013 05:59:43 -0400
+Received: by mail-ea0-f180.google.com with SMTP id h10so953611eaj.25
+        for <linux-mmc@vger.kernel.org>; Thu, 03 Oct 2013 02:59:41 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-kernel@vger.kernel.org, monstr@monstr.eu
-Cc: Russell King <linux@arm.linux.org.uk>, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>
 
-This is a MIME GnuPG-signed message.  If you see this text, it means that
-your E-mail or Usenet software does not support MIME signed messages.
-The Internet standard for MIME PGP messages, RFC 2015, was published in 1996.
-To open this message correctly you will need to install E-mail or Usenet
-software that supports modern Internet standards.
+Commit "mmc: core: Push common suspend|resume code into each bus_ops"
+moved the responsibility for doing mmc_power_up|off into each
+suspend/resume bus_ops. When using MMC_CAP_AGGRESSIVE_PM, through the
+runtime callbacks, calls to mmc_power_up|off became redundant.
 
---=_mimegpg-monstr-desktop-4100-1380793611-0001
+When removing them, we are also able to remove the calls to
+mmc_claim|release_host, thus simplifing code a bit more.
 
-Driver core clears the driver data to NULL after device_release
-or on probe failure, so just remove it from here.
-
-Driver core change:
-"device-core: Ensure drvdata = NULL when no driver is bound"
-(sha1: 0998d0631001288a5974afc0b2a5f568bcdecb4d)
-
-Signed-off-by: Michal Simek <michal.simek@xilinx.com>
+Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 ---
- drivers/mmc/host/mmci.c | 2 --
- 1 file changed, 2 deletions(-)
+ drivers/mmc/core/mmc.c |   13 +------------
+ drivers/mmc/core/sd.c  |   13 +------------
+ 2 files changed, 2 insertions(+), 24 deletions(-)
 
-diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index c3785ed..07e17f1 100644
---- a/drivers/mmc/host/mmci.c
-+++ b/drivers/mmc/host/mmci.c
-@@ -1678,8 +1678,6 @@ static int mmci_remove(struct amba_device *dev)
- {
- 	struct mmc_host *mmc = amba_get_drvdata(dev);
-
--	amba_set_drvdata(dev, NULL);
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index 6d02012..f0dcc53 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -1552,18 +1552,11 @@ static int mmc_runtime_suspend(struct mmc_host *host)
+ 	if (!(host->caps & MMC_CAP_AGGRESSIVE_PM))
+ 		return 0;
+ 
+-	mmc_claim_host(host);
 -
- 	if (mmc) {
- 		struct mmci_host *host = mmc_priv(mmc);
+ 	err = mmc_suspend(host);
+-	if (err) {
++	if (err)
+ 		pr_err("%s: error %d doing aggessive suspend\n",
+ 			mmc_hostname(host), err);
+-		goto out;
+-	}
+-	mmc_power_off(host);
+ 
+-out:
+-	mmc_release_host(host);
+ 	return err;
+ }
+ 
+@@ -1577,15 +1570,11 @@ static int mmc_runtime_resume(struct mmc_host *host)
+ 	if (!(host->caps & MMC_CAP_AGGRESSIVE_PM))
+ 		return 0;
+ 
+-	mmc_claim_host(host);
+-
+-	mmc_power_up(host);
+ 	err = mmc_resume(host);
+ 	if (err)
+ 		pr_err("%s: error %d doing aggessive resume\n",
+ 			mmc_hostname(host), err);
+ 
+-	mmc_release_host(host);
+ 	return 0;
+ }
+ 
+diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
+index 5e8823d..0f2a1f9 100644
+--- a/drivers/mmc/core/sd.c
++++ b/drivers/mmc/core/sd.c
+@@ -1117,18 +1117,11 @@ static int mmc_sd_runtime_suspend(struct mmc_host *host)
+ 	if (!(host->caps & MMC_CAP_AGGRESSIVE_PM))
+ 		return 0;
+ 
+-	mmc_claim_host(host);
+-
+ 	err = mmc_sd_suspend(host);
+-	if (err) {
++	if (err)
+ 		pr_err("%s: error %d doing aggessive suspend\n",
+ 			mmc_hostname(host), err);
+-		goto out;
+-	}
+-	mmc_power_off(host);
+ 
+-out:
+-	mmc_release_host(host);
+ 	return err;
+ }
+ 
+@@ -1142,15 +1135,11 @@ static int mmc_sd_runtime_resume(struct mmc_host *host)
+ 	if (!(host->caps & MMC_CAP_AGGRESSIVE_PM))
+ 		return 0;
+ 
+-	mmc_claim_host(host);
+-
+-	mmc_power_up(host);
+ 	err = mmc_sd_resume(host);
+ 	if (err)
+ 		pr_err("%s: error %d doing aggessive resume\n",
+ 			mmc_hostname(host), err);
+ 
+-	mmc_release_host(host);
+ 	return 0;
+ }
+ 
+-- 
+1.7.9.5
 
---
-1.8.2.3
-
-
---=_mimegpg-monstr-desktop-4100-1380793611-0001
-Content-Type: application/pgp-signature
-Content-Transfer-Encoding: 7bit
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.10 (GNU/Linux)
-
-iEYEABECAAYFAlJNPQsACgkQykllyylKDCFmVwCdEwk3Xf6xuDtUXSyUl+dGvE9L
-GkIAn0cK2NLnNGUqzyb5R71eOZItNowQ
-=EsND
------END PGP SIGNATURE-----
-
---=_mimegpg-monstr-desktop-4100-1380793611-0001--
