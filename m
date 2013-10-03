@@ -1,201 +1,79 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [PATCH] mmc: Don't force card to active state when entering suspend
-Date: Thu,  3 Oct 2013 12:05:59 +0200
-Message-ID: <1380794759-7506-1-git-send-email-ulf.hansson@linaro.org>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ee0-f42.google.com ([74.125.83.42]:42162 "EHLO
-	mail-ee0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752634Ab3JCKGG (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 3 Oct 2013 06:06:06 -0400
-Received: by mail-ee0-f42.google.com with SMTP id b45so993406eek.1
-        for <linux-mmc@vger.kernel.org>; Thu, 03 Oct 2013 03:06:04 -0700 (PDT)
-Sender: linux-mmc-owner@vger.kernel.org
+From: Benoit Cousson <bcousson@baylibre.com>
+Subject: Re: [PATCH v2 0/9] ARM: dts: DT data for OMAP platforms for v3.13
+Date: Thu, 03 Oct 2013 15:25:12 +0200
+Message-ID: <524D7038.9070303@baylibre.com>
+References: <1380553986-15910-1-git-send-email-joelf@ti.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-omap-owner@vger.kernel.org>
+In-Reply-To: <1380553986-15910-1-git-send-email-joelf@ti.com>
+Sender: linux-omap-owner@vger.kernel.org
+To: Joel Fernandes <joelf@ti.com>
+Cc: Linux OMAP List <linux-omap@vger.kernel.org>, Linux ARM Kernel List <linux-arm-kernel@lists.infradead.org>, Linux MMC List <linux-mmc@vger.kernel.org>, Mark Rutland <mark.rutland@arm.com>, "swarren@wwwdotorg.org" <swarren@wwwdotorg.org>, "rob.herring@calxeda.com" <rob.herring@calxeda.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Pawel Moll <Pawel.Moll@arm.com>
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>
 
-By adding a card state that records if it is suspended or resumed, we
-can accept asyncronus suspend/resume requests for the mmc and sd
-bus_ops.
++ DT list and DT maintainers.
 
-MMC_CAP_AGGRESSIVE_PM, will at request inactivity through the runtime
-bus_ops callbacks, execute a suspend of the the card. In the state were
-this has been done, we can receive a suspend request for the mmc bus,
-which for sd and mmc forced the card to active state by a
-pm_runtime_get_sync. In other words, the card was resumed and then
-immediately suspended again, completely unnecessary.
+Hi Joel,
 
-Since the suspend/resume bus_ops callbacks for sd and mmc are now
-capable of handling asynchronous requests, we no longer need to force
-the card to active state before executing suspend. Evidently preventing
-the above sequence for MMC_CAP_AGGRESSIVE_PM.
+Thanks for the update. It looks good to me.
 
-Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
----
- drivers/mmc/card/block.c |    2 --
- drivers/mmc/core/mmc.c   |   18 ++++++++++++++----
- drivers/mmc/core/sd.c    |   21 +++++++++++++++++----
- include/linux/mmc/card.h |    4 ++++
- 4 files changed, 35 insertions(+), 10 deletions(-)
+For the new bindings added below;
 
-diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-index 1a3163f..29d5d98 100644
---- a/drivers/mmc/card/block.c
-+++ b/drivers/mmc/card/block.c
-@@ -2448,7 +2448,6 @@ static int _mmc_blk_suspend(struct mmc_card *card)
- 	struct mmc_blk_data *md = mmc_get_drvdata(card);
- 
- 	if (md) {
--		pm_runtime_get_sync(&card->dev);
- 		mmc_queue_suspend(&md->queue);
- 		list_for_each_entry(part_md, &md->part, part) {
- 			mmc_queue_suspend(&part_md->queue);
-@@ -2483,7 +2482,6 @@ static int mmc_blk_resume(struct mmc_card *card)
- 		list_for_each_entry(part_md, &md->part, part) {
- 			mmc_queue_resume(&part_md->queue);
- 		}
--		pm_runtime_put(&card->dev);
- 	}
- 	return 0;
- }
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index 6d02012..5b236e0 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -1477,6 +1477,9 @@ static int _mmc_suspend(struct mmc_host *host, bool is_suspend)
- 
- 	mmc_claim_host(host);
- 
-+	if (mmc_card_suspended(host->card))
-+		goto out;
-+
- 	if (mmc_card_doing_bkops(host->card)) {
- 		err = mmc_stop_bkops(host->card);
- 		if (err)
-@@ -1496,8 +1499,10 @@ static int _mmc_suspend(struct mmc_host *host, bool is_suspend)
- 		err = mmc_deselect_cards(host);
- 	host->card->state &= ~(MMC_STATE_HIGHSPEED | MMC_STATE_HIGHSPEED_200);
- 
--	if (!err)
-+	if (!err) {
- 		mmc_power_off(host);
-+		mmc_card_set_suspended(host->card);
-+	}
- out:
- 	mmc_release_host(host);
- 	return err;
-@@ -1527,21 +1532,26 @@ static int mmc_shutdown(struct mmc_host *host)
-  */
- static int mmc_resume(struct mmc_host *host)
- {
--	int err;
-+	int err = 0;
- 
- 	BUG_ON(!host);
- 	BUG_ON(!host->card);
- 
- 	mmc_claim_host(host);
-+
-+	if (!mmc_card_suspended(host->card))
-+		goto out;
-+
- 	mmc_power_up(host);
- 	mmc_select_voltage(host, host->ocr);
- 	err = mmc_init_card(host, host->ocr, host->card);
--	mmc_release_host(host);
-+	mmc_card_clr_suspended(host->card);
- 
-+out:
-+	mmc_release_host(host);
- 	return err;
- }
- 
--
- /*
-  * Callback for runtime_suspend.
-  */
-diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
-index 5e8823d..ef302f3 100644
---- a/drivers/mmc/core/sd.c
-+++ b/drivers/mmc/core/sd.c
-@@ -1075,13 +1075,20 @@ static int mmc_sd_suspend(struct mmc_host *host)
- 	BUG_ON(!host->card);
- 
- 	mmc_claim_host(host);
-+
-+	if (mmc_card_suspended(host->card))
-+		goto out;
-+
- 	if (!mmc_host_is_spi(host))
- 		err = mmc_deselect_cards(host);
- 	host->card->state &= ~MMC_STATE_HIGHSPEED;
--	if (!err)
-+	if (!err) {
- 		mmc_power_off(host);
--	mmc_release_host(host);
-+		mmc_card_set_suspended(host->card);
-+	}
- 
-+out:
-+	mmc_release_host(host);
- 	return err;
- }
- 
-@@ -1093,17 +1100,23 @@ static int mmc_sd_suspend(struct mmc_host *host)
-  */
- static int mmc_sd_resume(struct mmc_host *host)
- {
--	int err;
-+	int err = 0;
- 
- 	BUG_ON(!host);
- 	BUG_ON(!host->card);
- 
- 	mmc_claim_host(host);
-+
-+	if (!mmc_card_suspended(host->card))
-+		goto out;
-+
- 	mmc_power_up(host);
- 	mmc_select_voltage(host, host->ocr);
- 	err = mmc_sd_init_card(host, host->ocr, host->card);
--	mmc_release_host(host);
-+	mmc_card_clr_suspended(host->card);
- 
-+out:
-+	mmc_release_host(host);
- 	return err;
- }
- 
-diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-index f42cdbd..111a199 100644
---- a/include/linux/mmc/card.h
-+++ b/include/linux/mmc/card.h
-@@ -257,6 +257,7 @@ struct mmc_card {
- #define MMC_CARD_REMOVED	(1<<7)		/* card has been removed */
- #define MMC_STATE_HIGHSPEED_200	(1<<8)		/* card is in HS200 mode */
- #define MMC_STATE_DOING_BKOPS	(1<<10)		/* card is doing BKOPS */
-+#define MMC_STATE_SUSPENDED	(1<<11)		/* card is suspended */
- 	unsigned int		quirks; 	/* card quirks */
- #define MMC_QUIRK_LENIENT_FN0	(1<<0)		/* allow SDIO FN0 writes outside of the VS CCCR range */
- #define MMC_QUIRK_BLKSZ_FOR_BYTE_MODE (1<<1)	/* use func->cur_blksize */
-@@ -423,6 +424,7 @@ static inline void __maybe_unused remove_quirk(struct mmc_card *card, int data)
- #define mmc_card_ext_capacity(c) ((c)->state & MMC_CARD_SDXC)
- #define mmc_card_removed(c)	((c) && ((c)->state & MMC_CARD_REMOVED))
- #define mmc_card_doing_bkops(c)	((c)->state & MMC_STATE_DOING_BKOPS)
-+#define mmc_card_suspended(c)	((c)->state & MMC_STATE_SUSPENDED)
- 
- #define mmc_card_set_present(c)	((c)->state |= MMC_STATE_PRESENT)
- #define mmc_card_set_readonly(c) ((c)->state |= MMC_STATE_READONLY)
-@@ -435,6 +437,8 @@ static inline void __maybe_unused remove_quirk(struct mmc_card *card, int data)
- #define mmc_card_set_removed(c) ((c)->state |= MMC_CARD_REMOVED)
- #define mmc_card_set_doing_bkops(c)	((c)->state |= MMC_STATE_DOING_BKOPS)
- #define mmc_card_clr_doing_bkops(c)	((c)->state &= ~MMC_STATE_DOING_BKOPS)
-+#define mmc_card_set_suspended(c) ((c)->state |= MMC_STATE_SUSPENDED)
-+#define mmc_card_clr_suspended(c) ((c)->state &= ~MMC_STATE_SUSPENDED)
- 
- /*
-  * Quirk add/remove for MMC products.
--- 
-1.7.9.5
+ >   .../devicetree/bindings/crypto/omap-aes.txt        | 34 ++++++++++
+ >   .../devicetree/bindings/crypto/omap-sham.txt       | 31 +++++++++
+
+I will need the acked-by from one of the DT maintainers.
+
+Regards,
+Benoit
+
+On 30/09/2013 17:12, Joel Fernandes wrote:
+> Following series is a collection of dts patches for the below features:
+> crypto:
+>   aes, sha on am335x
+>   aes, des on am437x
+>   aes, des on omap4
+> display:
+>    beaglebone black HDMI
+>    am335x-evm panel
+>
+> Series is based on Benoit Cousson's for_3.13/dts branch (commit sha 45646cd)
+> Available at: git@github.com:joelagnel/linux-kernel.git (branch for-benoit)
+>
+> v2 changes:
+>   - Fixed hex capitalization
+>   - Dropped interrupt-parent property and use macros
+>
+> Benoit Parrot (1):
+>    ARM: dts: AM33XX: Add LCDC info into am335x-evm
+>
+> Darren Etheridge (1):
+>    dts: boneblack: add pinmux and hdmi node to enable display
+>
+> Joel Fernandes (5):
+>    omap4: dts: Add node for AES
+>    omap4: dts: Add node for DES3DES module
+>    am33xx: dts: Fix AES interrupt number
+>    ARM: am437x: dts: Add AES node for am437x
+>    ARM: am437x: dts: Add DES node for am437x
+>
+> Mark A. Greer (2):
+>    ARM: dts: Add SHAM data and documentation for AM33XX
+>    ARM: dts: Add AES data and documentation for AM33XX
+>
+>   .../devicetree/bindings/crypto/omap-aes.txt        | 34 ++++++++++
+>   .../devicetree/bindings/crypto/omap-sham.txt       | 31 +++++++++
+>   arch/arm/boot/dts/am335x-bone.dts                  |  8 +++
+>   arch/arm/boot/dts/am335x-boneblack.dts             | 48 +++++++++++++
+>   arch/arm/boot/dts/am335x-evm.dts                   | 79 ++++++++++++++++++++++
+>   arch/arm/boot/dts/am335x-evmsk.dts                 |  8 +++
+>   arch/arm/boot/dts/am33xx.dtsi                      | 28 ++++++++
+>   arch/arm/boot/dts/am4372.dtsi                      | 14 ++++
+>   arch/arm/boot/dts/omap4.dtsi                       | 18 +++++
+>   9 files changed, 268 insertions(+)
+>   create mode 100644 Documentation/devicetree/bindings/crypto/omap-aes.txt
+>   create mode 100644 Documentation/devicetree/bindings/crypto/omap-sham.txt
+>
 
