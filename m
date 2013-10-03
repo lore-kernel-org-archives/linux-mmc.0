@@ -1,62 +1,95 @@
-From: "Tim Kryger" <tim.kryger@linaro.org>
-Subject: [PATCH 3/6] ARM: dts: Specify clocks for SDHCIs on bcm11351
-Date: Thu, 3 Oct 2013 13:13:11 -0700
-Message-ID: <1380831194-27238-4-git-send-email-tim.kryger@linaro.org>
-References: <1380831194-27238-1-git-send-email-tim.kryger@linaro.org>
+From: Grant Grundler <grundler@chromium.org>
+Subject: Re: [PATCH 0/7] mmc: core: cleanup and locking patches description
+Date: Thu, 3 Oct 2013 13:35:51 -0700
+Message-ID: <CANEJEGtK+og5XeaCNtnVJhCPWmN1y78BX=yghc-8=kuV1+f=Xw@mail.gmail.com>
+References: <1380223380-22451-1-git-send-email-grundler@chromium.org>
+	<CANEJEGvFFu-MDQX4UNcfr58Jxg6BKkw=gAMqz0Vv6jV9miixfg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1380831194-27238-1-git-send-email-tim.kryger@linaro.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Christian Daudt <bcm@fixthebug.org>, Rob Herring <rob.herring@calxeda.com>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Stephen Warren <swarren@wwwdotorg.org>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Daniel Lezcano <daniel.lezcano@linaro.org>, Thomas Gleixner <tglx@linutronix.de>, Chris Ball <cjb@laptop.org>
-Cc: Tim Kryger <tim.kryger@linaro.org>, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, patches@linaro.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qa0-f46.google.com ([209.85.216.46]:39297 "EHLO
+	mail-qa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754893Ab3JCUfx (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 3 Oct 2013 16:35:53 -0400
+Received: by mail-qa0-f46.google.com with SMTP id j7so380889qaq.5
+        for <linux-mmc@vger.kernel.org>; Thu, 03 Oct 2013 13:35:52 -0700 (PDT)
+In-Reply-To: <CANEJEGvFFu-MDQX4UNcfr58Jxg6BKkw=gAMqz0Vv6jV9miixfg@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Seungwon Jeon <tgih.jun@samsung.com>, ALIM AKHTAR <alim.akhtar@samsung.com>, Jaehoon Chung <jh80.chung@samsung.co>
+Cc: Chris Ball <cjb@laptop.org>, Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, LKML <linux-kernel@vger.kernel.org>
 
-Specify the external clock label in each SDHCI node.
+Ping?
 
-Signed-off-by: Tim Kryger <tim.kryger@linaro.org>
-Reviewed-by: Markus Mayer <markus.mayer@linaro.org>
-Reviewed-by: Matt Porter <matt.porter@linaro.org>
----
- arch/arm/boot/dts/bcm11351.dtsi | 4 ++++
- 1 file changed, 4 insertions(+)
+Has anyone had a chance to review/test this series and/or be willing
+to do so this week?
 
-diff --git a/arch/arm/boot/dts/bcm11351.dtsi b/arch/arm/boot/dts/bcm11351.dtsi
-index 406c050..d1ce441 100644
---- a/arch/arm/boot/dts/bcm11351.dtsi
-+++ b/arch/arm/boot/dts/bcm11351.dtsi
-@@ -101,6 +101,7 @@
- 	sdio1: sdio@3f180000 {
- 		compatible = "brcm,kona-sdhci";
- 		reg = <0x3f180000 0x10000>;
-+		clocks = <&sdio1_clk>;
- 		interrupts = <0x0 77 0x4>;
- 		status = "disabled";
- 	};
-@@ -108,6 +109,7 @@
- 	sdio2: sdio@3f190000 {
- 		compatible = "brcm,kona-sdhci";
- 		reg = <0x3f190000 0x10000>;
-+		clocks = <&sdio2_clk>;
- 		interrupts = <0x0 76 0x4>;
- 		status = "disabled";
- 	};
-@@ -115,6 +117,7 @@
- 	sdio3: sdio@3f1a0000 {
- 		compatible = "brcm,kona-sdhci";
- 		reg = <0x3f1a0000 0x10000>;
-+		clocks = <&sdio3_clk>;
- 		interrupts = <0x0 74 0x4>;
- 		status = "disabled";
- 	};
-@@ -122,6 +125,7 @@
- 	sdio4: sdio@3f1b0000 {
- 		compatible = "brcm,kona-sdhci";
- 		reg = <0x3f1b0000 0x10000>;
-+		clocks = <&sdio4_clk>;
- 		interrupts = <0x0 73 0x4>;
- 		status = "disabled";
- 	};
--- 
-1.8.0.1
+grundler@firesword:~$ pwclient list -w 'grundler@chromium.org' -p LKML
+Patches submitted by Grant Grundler <grundler@chromium.org>:
+ID      State        Name
+--      -----        ----
+...
+2950961 New          [1/7] mmc: core: rename "data" to saved_areq
+2951081 New          [2/7] mmc: core: rename local var err to saved_err
+2950981 New          [3/7] mmc: core: restructure error handling for start req
+2951001 New          [4/7] mmc: core: use common code path to return error
+2951061 New          [5/7] mmc: core: handling polling more gracefully
+2951041 New          [6/7] mmc: core: protect references to host->areq
+with host->lock
+2951021 New          [7/7] mmc: core: mmc_start_req is a misnomer ->
+mmc_process_areq
+
+
+To remind, this is the fio command line that results in mmcqd hangs on
+the exynos 5250 system (uses dw_mmc storage controller):
+
+$FIO --name=short_randwrite --size=2G --time_based --runtime=90 \
+        --readwrite=randwrite --numjobs=2 --bs=4k --norandommap
+--ioengine=psync \
+        --direct=0 --invalidate=1 --filename=/dev/mmcblk0p5
+
+thanks,
+grant
+
+On Thu, Sep 26, 2013 at 12:57 PM, Grant Grundler <grundler@chromium.org> wrote:
+> Argh...too much wordsmithing...
+>
+> On Thu, Sep 26, 2013 at 12:22 PM, Grant Grundler <grundler@chromium.org> wrote:
+>> Following 7 patches are mostly cleanup with one key patch around host->areq
+>> locking.  The host->areq locking problem description is here:
+>>         http://www.spinics.net/lists/linux-mmc/msg21644.html
+>>
+>> I do believe this preposed host->areq locking patch is a complete fix.
+>
+> ... is NOT a complete fix.
+>
+>> But it appears to fix the problem and is better than nothing.
+>
+> Still true.
+>
+> cheers,
+> grant
+>
+>>
+>> This patch sequence applies clean to linus' 3.12-rc2 branch and only compile
+>> tested in this form. This is a forward port (and cleanup) of the
+>> same patch I've been testing on ChromeOS-3.4 tree using Exynos5250 chipset.
+>>
+>> cheers,
+>> grant
+>>
+>> 0000-mmc-core-cleanups-and-locking-description (this email)
+>> 0001-mmc-core-rename-data-to-saved_areq.patch
+>> 0002-mmc-core-rename-local-var-err-to-saved_err.patch
+>> 0003-mmc-core-restructure-error-handling-for-start-req.patch
+>> 0004-mmc-core-use-common-code-path-to-return-error.patch
+>> 0005-mmc-core-handling-polling-more-gracefully.patch
+>> 0006-mmc-core-protect-references-to-host-areq-with-host-l.patch
+>> 0007-mmc-core-mmc_start_req-is-a-misnomer-mmc_process_are.patch
+>>
+>>
+>>  drivers/mmc/card/block.c    |   8 ++--
+>>  drivers/mmc/card/mmc_test.c |   4 +-
+>>  drivers/mmc/core/core.c     | 103 +++++++++++++++++++++++++-------------------
+>>  include/linux/mmc/core.h    |   2 +-
+>>  4 files changed, 66 insertions(+), 51 deletions(-)
