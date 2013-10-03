@@ -1,38 +1,113 @@
 From: "Tim Kryger" <tim.kryger@linaro.org>
-Subject: [PATCH 0/6] Update Kona drivers to use clocks
-Date: Thu, 3 Oct 2013 13:13:08 -0700
-Message-ID: <1380831194-27238-1-git-send-email-tim.kryger@linaro.org>
+Subject: [PATCH 6/6] mmc: sdhci-bcm-kona: Add basic use of clocks
+Date: Thu, 3 Oct 2013 13:13:14 -0700
+Message-ID: <1380831194-27238-7-git-send-email-tim.kryger@linaro.org>
+References: <1380831194-27238-1-git-send-email-tim.kryger@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mms1.broadcom.com ([216.31.210.17]:3206 "EHLO mms1.broadcom.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1755470Ab3JCUNy (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 3 Oct 2013 16:13:54 -0400
+In-Reply-To: <1380831194-27238-1-git-send-email-tim.kryger@linaro.org>
+Sender: linux-mmc-owner@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 To: Christian Daudt <bcm@fixthebug.org>, Rob Herring <rob.herring@calxeda.com>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Stephen Warren <swarren@wwwdotorg.org>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Daniel Lezcano <daniel.lezcano@linaro.org>, Thomas Gleixner <tglx@linutronix.de>, Chris Ball <cjb@laptop.org>
 Cc: Tim Kryger <tim.kryger@linaro.org>, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, patches@linaro.org
-List-Id: linux-mmc@vger.kernel.org
 
-This series declares the clocks present on bcm11351 (aka bcm281xx) SoCs
-to be fixed at the rates configured by development bootloaders and then
-updates the Kona drivers to make use of clock calls where appropriate.
+Enable the external clock needed by the host controller during the
+probe and disable it during the remove.
 
-This patch series depends on the following three commits being present:
+Signed-off-by: Tim Kryger <tim.kryger@linaro.org>
+Reviewed-by: Markus Mayer <markus.mayer@linaro.org>
+Reviewed-by: Matt Porter <matt.porter@linaro.org>
+---
+ drivers/mmc/host/sdhci-bcm-kona.c | 30 ++++++++++++++++++++++++++++--
+ 1 file changed, 28 insertions(+), 2 deletions(-)
 
-https://lkml.org/lkml/2013/9/18/409
-https://lkml.org/lkml/2013/9/20/305
-http://www.spinics.net/lists/arm-kernel/msg274973.html
-
-Tim Kryger (6):
-  ARM: dts: Declare clocks as fixed on bcm11351
-  ARM: dts: Specify clocks for UARTs on bcm11351
-  ARM: dts: Specify clocks for SDHCIs on bcm11351
-  clocksource: kona: Add basic use of external clock
-  ARM: dts: Specify clocks for timer on bcm11351
-  mmc: sdhci-bcm-kona: Add basic use of clocks
-
- arch/arm/boot/dts/bcm11351.dtsi      | 111 +++++++++++++++++++++++++++++++++--
- drivers/clocksource/bcm_kona_timer.c |  14 ++++-
- drivers/mmc/host/sdhci-bcm-kona.c    |  30 +++++++++-
- 3 files changed, 145 insertions(+), 10 deletions(-)
-
+diff --git a/drivers/mmc/host/sdhci-bcm-kona.c b/drivers/mmc/host/sdhci-bcm-kona.c
+index 85472d3..91db099 100644
+--- a/drivers/mmc/host/sdhci-bcm-kona.c
++++ b/drivers/mmc/host/sdhci-bcm-kona.c
+@@ -54,6 +54,7 @@
+ 
+ struct sdhci_bcm_kona_dev {
+ 	struct mutex	write_lock; /* protect back to back writes */
++	struct clk	*external_clk;
+ };
+ 
+ 
+@@ -252,11 +253,29 @@ static int sdhci_bcm_kona_probe(struct platform_device *pdev)
+ 	mmc_of_parse(host->mmc);
+ 
+ 	if (!host->mmc->f_max) {
+-		dev_err(&pdev->dev, "Missing max-freq for SDHCI cfg\n");
++		dev_err(dev, "Missing max-freq for SDHCI cfg\n");
+ 		ret = -ENXIO;
+ 		goto err_pltfm_free;
+ 	}
+ 
++	/* Get and enable the external clock */
++	kona_dev->external_clk = devm_clk_get(dev, NULL);
++	if (IS_ERR(kona_dev->external_clk)) {
++		dev_err(dev, "Failed to get external clock\n");
++		ret = PTR_ERR(kona_dev->external_clk);
++		goto err_pltfm_free;
++	}
++
++	if (clk_set_rate(kona_dev->external_clk, host->mmc->f_max) != 0) {
++		dev_err(dev, "Failed to set rate external clock\n");
++		goto err_pltfm_free;
++	}
++
++	if (clk_prepare_enable(kona_dev->external_clk) != 0) {
++		dev_err(dev, "Failed to enable external clock\n");
++		goto err_pltfm_free;
++	}
++
+ 	dev_dbg(dev, "non-removable=%c\n",
+ 		(host->mmc->caps & MMC_CAP_NONREMOVABLE) ? 'Y' : 'N');
+ 	dev_dbg(dev, "cd_gpio %c, wp_gpio %c\n",
+@@ -271,7 +290,7 @@ static int sdhci_bcm_kona_probe(struct platform_device *pdev)
+ 
+ 	ret = sdhci_bcm_kona_sd_reset(host);
+ 	if (ret)
+-		goto err_pltfm_free;
++		goto err_clk_disable;
+ 
+ 	sdhci_bcm_kona_sd_init(host);
+ 
+@@ -307,6 +326,9 @@ err_remove_host:
+ err_reset:
+ 	sdhci_bcm_kona_sd_reset(host);
+ 
++err_clk_disable:
++	clk_disable_unprepare(kona_dev->external_clk);
++
+ err_pltfm_free:
+ 	sdhci_pltfm_free(pdev);
+ 
+@@ -317,6 +339,8 @@ err_pltfm_free:
+ static int __exit sdhci_bcm_kona_remove(struct platform_device *pdev)
+ {
+ 	struct sdhci_host *host = platform_get_drvdata(pdev);
++	struct sdhci_pltfm_host *pltfm_priv = sdhci_priv(host);
++	struct sdhci_bcm_kona_dev *kona_dev = sdhci_pltfm_priv(pltfm_priv);
+ 	int dead;
+ 	u32 scratch;
+ 
+@@ -326,6 +350,8 @@ static int __exit sdhci_bcm_kona_remove(struct platform_device *pdev)
+ 		dead = 1;
+ 	sdhci_remove_host(host, dead);
+ 
++	clk_disable_unprepare(kona_dev->external_clk);
++
+ 	sdhci_free_host(host);
+ 
+ 	return 0;
 -- 
 1.8.0.1
+
+
