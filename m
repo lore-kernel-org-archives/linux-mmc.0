@@ -1,31 +1,47 @@
-From: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Subject: Re: [PATCH] amba: Ensure drvdata is NULL
-Date: Wed, 2 Oct 2013 21:25:21 +0100
-Message-ID: <20131002202521.GU12758@n2100.arm.linux.org.uk>
-References: <1b2479137287fa8dfda3089ca0cb9fba8c4b1f1d.1380524337.git.michal.simek@xilinx.com>
+From: Axel Lin <axel.lin@ingics.com>
+Subject: [PATCH] mmc: sdhci-s3c: Remove unused define for NUM_GPIOS
+Date: Thu, 03 Oct 2013 16:59:10 +0800
+Message-ID: <1380790750.30876.0.camel@phoenix>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-input-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <1b2479137287fa8dfda3089ca0cb9fba8c4b1f1d.1380524337.git.michal.simek@xilinx.com>
-Sender: linux-input-owner@vger.kernel.org
-To: Michal Simek <michal.simek@xilinx.com>
-Cc: linux-kernel@vger.kernel.org, monstr@monstr.eu, Dan Williams <dan.j.williams@intel.com>, Vinod Koul <vinod.koul@intel.com>, Dmitry Torokhov <dmitry.torokhov@gmail.com>, Chris Ball <cjb@laptop.org>, Alessandro Zummo <a.zummo@towertech.it>, Linus Walleij <linus.walleij@linaro.org>, Mark Brown <broonie@kernel.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Jiri Slaby <jslaby@suse.cz>, Jean-Christophe Plagniol-Villard <plagnioj@jcrosoft.com>, Tomi Valkeinen <tomi.valkeinen@ti.com>, Wim Van Sebroeck <wim@iguana.be>, Andrew Morton <akpm@linux-foundation.org>, "zhangwei(Jovi)" <jovi.zhangwei@huawei.com>, Randy Dunlap <rdunlap@infradead.org>, linux-arm-kernel@lists.infradead.org, linux-input@vger.kernel.org, linux-mmc@vger.kernel.org, rtc-linux@googlegroups.com, linux-spi@vger.kernel.org, linux-serial@vger.kernel.org, linux-fbdev@vger.kernel.org, linux-watchdog@vger
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-pb0-f51.google.com ([209.85.160.51]:48422 "EHLO
+	mail-pb0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751191Ab3JCI7P (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 3 Oct 2013 04:59:15 -0400
+Received: by mail-pb0-f51.google.com with SMTP id jt11so2142143pbb.38
+        for <linux-mmc@vger.kernel.org>; Thu, 03 Oct 2013 01:59:14 -0700 (PDT)
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>
+Cc: Thomas Abraham <thomas.abraham@linaro.org>, linux-mmc@vger.kernel.org
 
-On Mon, Sep 30, 2013 at 08:59:06AM +0200, Michal Simek wrote:
-> This patch is inpired by the patch for drvdata
-> "device-core: Ensure drvdata = NULL when no driver is bound"
-> (sha1: 0998d0631001288a5974afc0b2a5f568bcdecb4d)
-> 
-> Also it fixes all occurences in drivers.
-> 
-> Signed-off-by: Michal Simek <michal.simek@xilinx.com>
-> ---
-> This patch has been sent as RFC in this thread.
-> http://lkml.org/lkml/2013/9/4/393
+NUM_GPIOS is not used after commit e19499ae
+"mmc: sdhci-s3c: let device core setup the default pin configuration".
+Thus remove it.
 
-Why not have the driver core do this?  Then it gets applied to all bus
-types uniformly.
+Signed-off-by: Axel Lin <axel.lin@ingics.com>
+---
+ drivers/mmc/host/sdhci-s3c.c | 3 ---
+ 1 file changed, 3 deletions(-)
 
-Thanks.
+diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
+index 926aaf6..d0732d2 100644
+--- a/drivers/mmc/host/sdhci-s3c.c
++++ b/drivers/mmc/host/sdhci-s3c.c
+@@ -33,9 +33,6 @@
+ 
+ #define MAX_BUS_CLK	(4)
+ 
+-/* Number of gpio's used is max data bus width + command and clock lines */
+-#define NUM_GPIOS(x)	(x + 2)
+-
+ /**
+  * struct sdhci_s3c - S3C SDHCI instance
+  * @host: The SDHCI host created
+-- 
+1.8.1.2
+
+
+
