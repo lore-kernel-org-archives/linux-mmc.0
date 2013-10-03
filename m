@@ -1,78 +1,48 @@
-From: Axel Lin <axel.lin@ingics.com>
-Subject: [PATCH] mmc: wmt-sdmmc: Simplify wmt_set_sd_power implementation
-Date: Thu, 03 Oct 2013 17:04:40 +0800
-Message-ID: <1380791080.30876.2.camel@phoenix>
+From: Michal Simek <michal.simek@xilinx.com>
+Subject: Re: [PATCH] amba: Ensure drvdata is NULL
+Date: Thu, 3 Oct 2013 11:13:05 +0200
+Message-ID: <d5a0aab9-f023-4464-b4a1-f7055e6c82d5@CO9EHSMHS010.ehs.local>
+References: <1b2479137287fa8dfda3089ca0cb9fba8c4b1f1d.1380524337.git.michal.simek@xilinx.com>
+ <20131002202521.GU12758@n2100.arm.linux.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pd0-f173.google.com ([209.85.192.173]:44133 "EHLO
-	mail-pd0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752421Ab3JCJEp (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 3 Oct 2013 05:04:45 -0400
-Received: by mail-pd0-f173.google.com with SMTP id p10so2169396pdj.4
-        for <linux-mmc@vger.kernel.org>; Thu, 03 Oct 2013 02:04:45 -0700 (PDT)
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <20131002202521.GU12758@n2100.arm.linux.org.uk>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Russell King - ARM Linux <linux@arm.linux.org.uk>
+Cc: linux-fbdev@vger.kernel.org, Dmitry Torokhov <dmitry.torokhov@gmail.com>, Linus Walleij <linus.walleij@linaro.org>, Wim Van Sebroeck <wim@iguana.be>, Jiri Slaby <jslaby@suse.cz>, "zhangwei(Jovi)" <jovi.zhangwei@huawei.com>, Vinod Koul <vinod.koul@intel.com>, Michal Simek <michal.simek@xilinx.com>, Tomi Valkeinen <tomi.valkeinen@ti.com>, linux-serial@vger.kernel.org, linux-input@vger.kernel.org, Chris Ball <cjb@laptop.org>, Jean-Christophe Plagniol-Villard <plagnioj@jcrosoft.com>, linux-watchdog@vger.kernel.org, rtc-linux@googlegroups.com, Mark Brown <broonie@kernel.org>, Dan Williams <dan.j.williams@intel.com>, linux-arm-kernel@lists.infradead.org, Alessandro Zummo <a.zummo@towertech.it>, monstr@monstr.eu, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Randy Dunlap <rdunlap@infradead.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-spi@vger.kernel.
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: Tony Prisk <linux@prisktech.co.nz>, linux-mmc@vger.kernel.org
 
-Simplify the code to set/clear BM_SD_OFF bit:
+On 10/02/2013 10:25 PM, Russell King - ARM Linux wrote:
+> On Mon, Sep 30, 2013 at 08:59:06AM +0200, Michal Simek wrote:
+>> This patch is inpired by the patch for drvdata
+>> "device-core: Ensure drvdata = NULL when no driver is bound"
+>> (sha1: 0998d0631001288a5974afc0b2a5f568bcdecb4d)
+>>
+>> Also it fixes all occurences in drivers.
+>>
+>> Signed-off-by: Michal Simek <michal.simek@xilinx.com>
+>> ---
+>> This patch has been sent as RFC in this thread.
+>> http://lkml.org/lkml/2013/9/4/393
+> 
+> Why not have the driver core do this?  Then it gets applied to all bus
+> types uniformly.
 
-          | power_inverted: 0  | power_inverted: 1
--------------------------------------------------
-enable: 0 | SET BM_SD_OFF      | CLEAR BM_SD_OFF
--------------------------------------------------
-enable: 1 | CLEAR BM_SD_OFF    | SET BM_SD_OFF
+ok - I have checked that path and it should be already done
+in really_probe function which calls amba_probe() and then driver probe function.
 
-Signed-off-by: Axel Lin <axel.lin@ingics.com>
----
- drivers/mmc/host/wmt-sdmmc.c | 30 ++++++++----------------------
- 1 file changed, 8 insertions(+), 22 deletions(-)
+It means that the patch should contain just "amba_set_drvdata(dev, NULL);"
+removal and not touching bus.c file.
 
-diff --git a/drivers/mmc/host/wmt-sdmmc.c b/drivers/mmc/host/wmt-sdmmc.c
-index 34231d5..57858ef 100644
---- a/drivers/mmc/host/wmt-sdmmc.c
-+++ b/drivers/mmc/host/wmt-sdmmc.c
-@@ -212,28 +212,14 @@ struct wmt_mci_priv {
- 
- static void wmt_set_sd_power(struct wmt_mci_priv *priv, int enable)
- {
--	u32 reg_tmp;
--	if (enable) {
--		if (priv->power_inverted) {
--			reg_tmp = readb(priv->sdmmc_base + SDMMC_BUSMODE);
--			writeb(reg_tmp | BM_SD_OFF,
--			       priv->sdmmc_base + SDMMC_BUSMODE);
--		} else {
--			reg_tmp = readb(priv->sdmmc_base + SDMMC_BUSMODE);
--			writeb(reg_tmp & (~BM_SD_OFF),
--			       priv->sdmmc_base + SDMMC_BUSMODE);
--		}
--	} else {
--		if (priv->power_inverted) {
--			reg_tmp = readb(priv->sdmmc_base + SDMMC_BUSMODE);
--			writeb(reg_tmp & (~BM_SD_OFF),
--			       priv->sdmmc_base + SDMMC_BUSMODE);
--		} else {
--			reg_tmp = readb(priv->sdmmc_base + SDMMC_BUSMODE);
--			writeb(reg_tmp | BM_SD_OFF,
--			       priv->sdmmc_base + SDMMC_BUSMODE);
--		}
--	}
-+	u32 reg_tmp = readb(priv->sdmmc_base + SDMMC_BUSMODE);
-+
-+	if (enable ^ priv->power_inverted)
-+		reg_tmp &= ~BM_SD_OFF;
-+	else
-+		reg_tmp |= BM_SD_OFF;
-+
-+	writeb(reg_tmp, priv->sdmmc_base + SDMMC_BUSMODE);
- }
- 
- static void wmt_mci_read_response(struct mmc_host *mmc)
--- 
-1.8.1.2
-
-
-
+Thanks,
+Michal
