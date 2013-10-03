@@ -1,7 +1,7 @@
 From: "Tim Kryger" <tim.kryger@linaro.org>
-Subject: [PATCH 1/6] ARM: dts: Declare clocks as fixed on bcm11351
-Date: Thu, 3 Oct 2013 13:13:09 -0700
-Message-ID: <1380831194-27238-2-git-send-email-tim.kryger@linaro.org>
+Subject: [PATCH 4/6] clocksource: kona: Add basic use of external clock
+Date: Thu, 3 Oct 2013 13:13:12 -0700
+Message-ID: <1380831194-27238-5-git-send-email-tim.kryger@linaro.org>
 References: <1380831194-27238-1-git-send-email-tim.kryger@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -13,122 +13,49 @@ To: Christian Daudt <bcm@fixthebug.org>, Rob Herring <rob.herring@calxeda.com>, 
 Cc: Tim Kryger <tim.kryger@linaro.org>, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, patches@linaro.org
 List-Id: linux-mmc@vger.kernel.org
 
-Declare clocks that are enabled and configured by bootloaders as fixed
-rate clocks in the DTS such that device drivers may use standard clock
-function calls.
+When an clock handle is specified in the device tree, enable it and use
+it to determine the external clock frequency.
 
 Signed-off-by: Tim Kryger <tim.kryger@linaro.org>
 Reviewed-by: Markus Mayer <markus.mayer@linaro.org>
 Reviewed-by: Matt Porter <matt.porter@linaro.org>
 ---
- arch/arm/boot/dts/bcm11351.dtsi | 97 +++++++++++++++++++++++++++++++++++++++++
- 1 file changed, 97 insertions(+)
+ drivers/clocksource/bcm_kona_timer.c | 14 +++++++++++---
+ 1 file changed, 11 insertions(+), 3 deletions(-)
 
-diff --git a/arch/arm/boot/dts/bcm11351.dtsi b/arch/arm/boot/dts/bcm11351.dtsi
-index 98e6bc0..c348b09 100644
---- a/arch/arm/boot/dts/bcm11351.dtsi
-+++ b/arch/arm/boot/dts/bcm11351.dtsi
-@@ -126,4 +126,101 @@
- 		status = "disabled";
- 	};
+diff --git a/drivers/clocksource/bcm_kona_timer.c b/drivers/clocksource/bcm_kona_timer.c
+index 0d7d8c3..fd11f96 100644
+--- a/drivers/clocksource/bcm_kona_timer.c
++++ b/drivers/clocksource/bcm_kona_timer.c
+@@ -17,6 +17,7 @@
+ #include <linux/jiffies.h>
+ #include <linux/clockchips.h>
+ #include <linux/types.h>
++#include <linux/clk.h>
  
-+	clocks {
-+		bsc1_clk: bsc1 {
-+			compatible = "fixed-clock";
-+			clock-frequency = <13000000>;
-+			#clock-cells = <0>;
-+		};
+ #include <linux/io.h>
+ #include <asm/mach/time.h>
+@@ -107,11 +108,18 @@ static const struct of_device_id bcm_timer_ids[] __initconst = {
+ static void __init kona_timers_init(struct device_node *node)
+ {
+ 	u32 freq;
++	struct clk *external_clk;
+ 
+-	if (!of_property_read_u32(node, "clock-frequency", &freq))
++	external_clk = of_clk_get_by_name(node, NULL);
 +
-+		bsc2_clk: bsc2 {
-+			compatible = "fixed-clock";
-+			clock-frequency = <13000000>;
-+			#clock-cells = <0>;
-+		};
-+
-+		bsc3_clk: bsc3 {
-+			compatible = "fixed-clock";
-+			clock-frequency = <13000000>;
-+			#clock-cells = <0>;
-+		};
-+
-+		bsc4_clk: bsc4 {
-+			compatible = "fixed-clock";
-+			clock-frequency = <13000000>;
-+			#clock-cells = <0>;
-+		};
-+
-+		hub_timer_clk: hub_timer {
-+			compatible = "fixed-clock";
-+			clock-frequency = <32768>;
-+			#clock-cells = <0>;
-+		};
-+
-+		pwm_clk: pwm {
-+			compatible = "fixed-clock";
-+			clock-frequency = <26000000>;
-+			#clock-cells = <0>;
-+		};
-+
-+		sdio1_clk: sdio1 {
-+			compatible = "fixed-clock";
-+			clock-frequency = <48000000>;
-+			#clock-cells = <0>;
-+		};
-+
-+		sdio2_clk: sdio2 {
-+			compatible = "fixed-clock";
-+			clock-frequency = <48000000>;
-+			#clock-cells = <0>;
-+		};
-+
-+		sdio3_clk: sdio3 {
-+			compatible = "fixed-clock";
-+			clock-frequency = <48000000>;
-+			#clock-cells = <0>;
-+		};
-+
-+		sdio4_clk: sdio4 {
-+			compatible = "fixed-clock";
-+			clock-frequency = <48000000>;
-+			#clock-cells = <0>;
-+		};
-+
-+		tmon_1m_clk: tmon_1m {
-+			compatible = "fixed-clock";
-+			clock-frequency = <1000000>;
-+			#clock-cells = <0>;
-+		};
-+
-+		uartb_clk: uartb {
-+			compatible = "fixed-clock";
-+			clock-frequency = <13000000>;
-+			#clock-cells = <0>;
-+		};
-+
-+		uartb2_clk: uartb2 {
-+			compatible = "fixed-clock";
-+			clock-frequency = <13000000>;
-+			#clock-cells = <0>;
-+		};
-+
-+		uartb3_clk: uartb3 {
-+			compatible = "fixed-clock";
-+			clock-frequency = <13000000>;
-+			#clock-cells = <0>;
-+		};
-+
-+		uartb4_clk: uartb4 {
-+			compatible = "fixed-clock";
-+			clock-frequency = <13000000>;
-+			#clock-cells = <0>;
-+		};
-+
-+		usb_otg_ahb_clk: usb_otg_ahb {
-+			compatible = "fixed-clock";
-+			clock-frequency = <52000000>;
-+			#clock-cells = <0>;
-+		};
-+	};
- };
++	if (!IS_ERR(external_clk)) {
++		arch_timer_rate = clk_get_rate(external_clk);
++		clk_prepare_enable(external_clk);
++	} else if (!of_property_read_u32(node, "clock-frequency", &freq)) {
+ 		arch_timer_rate = freq;
+-	else
+-		panic("clock-frequency not set in the .dts file");
++	} else {
++		panic("neither clock-frequency or clocks handle in .dts file");
++	}
+ 
+ 	/* Setup IRQ numbers */
+ 	timers.tmr_irq = irq_of_parse_and_map(node, 0);
 -- 
 1.8.0.1
