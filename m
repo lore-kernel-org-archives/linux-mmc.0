@@ -1,49 +1,150 @@
-From: Benoit Cousson <bcousson@baylibre.com>
-Subject: Re: [PATCH v2 5/9] am33xx: dts: Fix AES interrupt number
-Date: Fri, 04 Oct 2013 16:19:48 +0200
-Message-ID: <524ECE84.6030902@baylibre.com>
-References: <1380553986-15910-1-git-send-email-joelf@ti.com> <1380553986-15910-6-git-send-email-joelf@ti.com>
+From: Mark Rutland <mark.rutland@arm.com>
+Subject: Re: [PATCH v2 3/9] ARM: dts: Add SHAM data and documentation for
+ AM33XX
+Date: Fri, 4 Oct 2013 15:26:45 +0100
+Message-ID: <20131004142644.GI6999@e106331-lin.cambridge.arm.com>
+References: <1380553986-15910-1-git-send-email-joelf@ti.com>
+ <1380553986-15910-4-git-send-email-joelf@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wi0-f180.google.com ([209.85.212.180]:48274 "EHLO
-	mail-wi0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754057Ab3JDOTx (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 4 Oct 2013 10:19:53 -0400
-Received: by mail-wi0-f180.google.com with SMTP id hj3so1729921wib.7
-        for <linux-mmc@vger.kernel.org>; Fri, 04 Oct 2013 07:19:52 -0700 (PDT)
-In-Reply-To: <1380553986-15910-6-git-send-email-joelf@ti.com>
+Received: from cam-admin0.cambridge.arm.com ([217.140.96.50]:49871 "EHLO
+	cam-admin0.cambridge.arm.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1754057Ab3JDO0t (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 4 Oct 2013 10:26:49 -0400
+Content-Disposition: inline
+In-Reply-To: <1380553986-15910-4-git-send-email-joelf@ti.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Joel Fernandes <joelf@ti.com>
-Cc: Linux OMAP List <linux-omap@vger.kernel.org>, Linux ARM Kernel List <linux-arm-kernel@lists.infradead.org>, Linux MMC List <linux-mmc@vger.kernel.org>, Tony Lindgren <tony@atomide.com>, Rob Herring <rob.herring@calxeda.com>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Stephen Warren <swarren@wwwdotorg.org>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Russell King <linux@arm.linux.org.uk>, "open list:OMAP DEVICE TREE..." <devicetree@vger.kernel.org>, open list <linux-kernel@vger.kernel.org>
+Cc: Linux OMAP List <linux-omap@vger.kernel.org>, Linux ARM Kernel List <linux-arm-kernel@lists.infradead.org>, Linux MMC List <linux-mmc@vger.kernel.org>, Benoit Cousson <bcousson@baylibre.com>, Paul Walmsley <paul@pwsan.com>, "rob.herring@calxeda.com" <rob.herring@calxeda.com>, Pawel Moll <Pawel.Moll@arm.com>, Stephen Warren <swarren@wwwdotorg.org>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Rob Landley <rob@landley.net>, Tony Lindgren <tony@atomide.com>, Russell King <linux@arm.linux.org.uk>, "Mark A. Greer" <mgreer@animalcreek.com>, "open list:OPEN FIRMWARE AND..." <devicetree@vger.kernel.org>, "open list:DOCUMENTATION" <linux-doc@vger.kernel.org>, open list <linux-kernel@vger.kernel.org>
 
-On 30/09/2013 17:13, Joel Fernandes wrote:
-> Signed-off-by: Joel Fernandes <joelf@ti.com>
-
-Even if this is obvious, a small changelog is always recommended.
-
-
-Thanks,
-Benoit
-
+On Mon, Sep 30, 2013 at 04:13:00PM +0100, Joel Fernandes wrote:
+> From: "Mark A. Greer" <mgreer@animalcreek.com>
+> 
+> Add the generic AM33XX SHAM module's device tree data and
+> enable it for the am335x-evm, am335x-evmsk, and am335x-bone
+> platforms.  Also add Documentation file describing the data
+> for the SHAM module.
+> 
+> [joelf@ti.com: Dropped interrupt-parrent property]
+> CC: Paul Walmsley <paul@pwsan.com>
+> Signed-off-by: Mark A. Greer <mgreer@animalcreek.com>
 > ---
->   arch/arm/boot/dts/am33xx.dtsi | 2 +-
->   1 file changed, 1 insertion(+), 1 deletion(-)
->
+>  .../devicetree/bindings/crypto/omap-sham.txt       | 31 ++++++++++++++++++++++
+>  arch/arm/boot/dts/am335x-bone.dts                  |  4 +++
+>  arch/arm/boot/dts/am335x-evm.dts                   |  4 +++
+>  arch/arm/boot/dts/am335x-evmsk.dts                 |  4 +++
+>  arch/arm/boot/dts/am33xx.dtsi                      |  9 +++++++
+>  5 files changed, 52 insertions(+)
+>  create mode 100644 Documentation/devicetree/bindings/crypto/omap-sham.txt
+> 
+> diff --git a/Documentation/devicetree/bindings/crypto/omap-sham.txt b/Documentation/devicetree/bindings/crypto/omap-sham.txt
+> new file mode 100644
+> index 0000000..b97710f
+> --- /dev/null
+> +++ b/Documentation/devicetree/bindings/crypto/omap-sham.txt
+> @@ -0,0 +1,31 @@
+> +OMAP SoC SHA crypto Module
+> +
+> +Required properties:
+> +
+> +- compatible : Should contain entries for this and backward compatible
+> +  SHAM versions:
+> +  - "ti,omap2-sham" for OMAP2 & OMAP3.
+> +  - "ti,omap4-sham" for OMAP4 and AM33XX.
+> +  Note that these two versions are incompatible.
+> +- ti,hwmods: Name of the hwmod associated with the SHAM module
+> +- reg : Offset and length of the register set for the module
+> +- interrupt-parent : the phandle for the interrupt controller that
+> +  services interrupts for this module.
+
+I don't think this is strictly speaking necessary -- it's mostly going
+to be implicit (it is in the dtsi below). As this is a standard
+property, you don't need to document it here.
+
+> +- interrupts : the interrupt number for the SHAM module.
+
+Sorry, I missed this last time, but this should be interrupt-specifier
+rather than interrupt number.
+
+Otherwise, this looks good to me. With the fixups above:
+
+Acked-by: Mark Rutland <mark.rutland@arm.com>
+
+> +
+> +Optional properties:
+> +- dmas: DMA specifier for the rx dma. See the DMA client binding,
+> +	Documentation/devicetree/bindings/dma/dma.txt
+> +- dma-names: DMA request name. Should be "rx" if a dma is present.
+> +
+> +Example:
+> +	/* AM335x */
+> +	sham: sham@53100000 {
+> +		compatible = "ti,omap4-sham";
+> +		ti,hwmods = "sham";
+> +		reg = <0x53100000 0x200>;
+> +		interrupt-parent = <&intc>;
+> +		interrupts = <109>;
+> +		dmas = <&edma 36>;
+> +		dma-names = "rx";
+> +	};
+> diff --git a/arch/arm/boot/dts/am335x-bone.dts b/arch/arm/boot/dts/am335x-bone.dts
+> index 0d63348..8a9802e 100644
+> --- a/arch/arm/boot/dts/am335x-bone.dts
+> +++ b/arch/arm/boot/dts/am335x-bone.dts
+> @@ -19,3 +19,7 @@
+>  &mmc1 {
+>  	vmmc-supply = <&ldo3_reg>;
+>  };
+> +
+> +&sham {
+> +	status = "okay";
+> +};
+> diff --git a/arch/arm/boot/dts/am335x-evm.dts b/arch/arm/boot/dts/am335x-evm.dts
+> index 23b0a3e..d59e51c 100644
+> --- a/arch/arm/boot/dts/am335x-evm.dts
+> +++ b/arch/arm/boot/dts/am335x-evm.dts
+> @@ -522,3 +522,7 @@
+>  	status = "okay";
+>  	vmmc-supply = <&vmmc_reg>;
+>  };
+> +
+> +&sham {
+> +	status = "okay";
+> +};
+> diff --git a/arch/arm/boot/dts/am335x-evmsk.dts b/arch/arm/boot/dts/am335x-evmsk.dts
+> index bc93895..d45a330 100644
+> --- a/arch/arm/boot/dts/am335x-evmsk.dts
+> +++ b/arch/arm/boot/dts/am335x-evmsk.dts
+> @@ -424,3 +424,7 @@
+>  	status = "okay";
+>  	vmmc-supply = <&vmmc_reg>;
+>  };
+> +
+> +&sham {
+> +	status = "okay";
+> +};
 > diff --git a/arch/arm/boot/dts/am33xx.dtsi b/arch/arm/boot/dts/am33xx.dtsi
-> index 0daa1b2..d7be90a 100644
+> index 553adc6..299710b 100644
 > --- a/arch/arm/boot/dts/am33xx.dtsi
 > +++ b/arch/arm/boot/dts/am33xx.dtsi
-> @@ -724,7 +724,7 @@
->   			compatible = "ti,omap4-aes";
->   			ti,hwmods = "aes";
->   			reg = <0x53500000 0xa0>;
-> -			interrupts = <102>;
-> +			interrupts = <103>;
->   			dmas = <&edma 6
->   				&edma 5>;
->   			dma-names = "tx", "rx";
->
-
+> @@ -710,5 +710,14 @@
+>  			#size-cells = <1>;
+>  			status = "disabled";
+>  		};
+> +
+> +		sham: sham@53100000 {
+> +			compatible = "ti,omap4-sham";
+> +			ti,hwmods = "sham";
+> +			reg = <0x53100000 0x200>;
+> +			interrupts = <109>;
+> +			dmas = <&edma 36>;
+> +			dma-names = "rx";
+> +		};
+>  	};
+>  };
+> -- 
+> 1.8.1.2
+> 
+> 
