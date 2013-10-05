@@ -1,73 +1,166 @@
-From: Andreas Fenkart <afenkart-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: [PATCH v3 4/4] mmc: omap_hsmmc: debugfs entries for SDIO IRQ detection and GPIO remuxing.
-Date: Sat,  5 Oct 2013 13:17:10 +0200
-Message-ID: <1380971830-21492-5-git-send-email-afenkart@gmail.com>
-References: <1380971830-21492-1-git-send-email-afenkart@gmail.com>
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1380971830-21492-1-git-send-email-afenkart-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>
-Cc: Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Grant Likely <grant.likely-s3s/WqlpOiPyB63q8FvJNQ@public.gmane.org>, Felipe Balbi <balbi-l0cyMroinI0@public.gmane.org>, Venkatraman S <svenkatr-l0cyMroinI0@public.gmane.org>, Balaji T K <balajitk-l0cyMroinI0@public.gmane.org>, zonque-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, devicetree-discuss-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Andreas Fenkart <afenkart-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+From: Joel Fernandes <joelf@ti.com>
+Subject: Re: [PATCH v2 3/9] ARM: dts: Add SHAM data and documentation for
+ AM33XX
+Date: Sat, 5 Oct 2013 13:18:08 -0500
+Message-ID: <525057E0.80009@ti.com>
+References: <1380553986-15910-1-git-send-email-joelf@ti.com>
+ <1380553986-15910-4-git-send-email-joelf@ti.com>
+ <20131004142644.GI6999@e106331-lin.cambridge.arm.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <20131004142644.GI6999@e106331-lin.cambridge.arm.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Mark Rutland <mark.rutland@arm.com>
+Cc: "open list:OPEN FIRMWARE AND..." <devicetree@vger.kernel.org>, Paul Walmsley <paul@pwsan.com>, Russell King <linux@arm.linux.org.uk>, Rob Landley <rob@landley.net>, Pawel Moll <Pawel.Moll@arm.com>, Stephen Warren <swarren@wwwdotorg.org>, Tony Lindgren <tony@atomide.com>, open list <linux-kernel@vger.kernel.org>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Linux MMC List <linux-mmc@vger.kernel.org>, "Mark A. Greer" <mgreer@animalcreek.com>, "rob.herring@calxeda.com" <rob.herring@calxeda.com>, DOCUMENTATION <linux-doc@vger.kernel.org>, Benoit Cousson <bcousson@baylibre.com>, Linux OMAP List <linux-omap@vger.kernel.org>, Linux ARM Kernel List <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Update the debugfs related code for the SDIO IRQ support.
-Note that PSTATE shows current state of data lines, incl.
-SDIO IRQ pending
+On 10/04/2013 09:26 AM, Mark Rutland wrote:
+> On Mon, Sep 30, 2013 at 04:13:00PM +0100, Joel Fernandes wrote:
+>> From: "Mark A. Greer" <mgreer@animalcreek.com>
+>>
+>> Add the generic AM33XX SHAM module's device tree data and
+>> enable it for the am335x-evm, am335x-evmsk, and am335x-bone
+>> platforms.  Also add Documentation file describing the data
+>> for the SHAM module.
+>>
+>> [joelf@ti.com: Dropped interrupt-parrent property]
+>> CC: Paul Walmsley <paul@pwsan.com>
+>> Signed-off-by: Mark A. Greer <mgreer@animalcreek.com>
+>> ---
+>>  .../devicetree/bindings/crypto/omap-sham.txt       | 31 ++++++++++++++++++++++
+>>  arch/arm/boot/dts/am335x-bone.dts                  |  4 +++
+>>  arch/arm/boot/dts/am335x-evm.dts                   |  4 +++
+>>  arch/arm/boot/dts/am335x-evmsk.dts                 |  4 +++
+>>  arch/arm/boot/dts/am33xx.dtsi                      |  9 +++++++
+>>  5 files changed, 52 insertions(+)
+>>  create mode 100644 Documentation/devicetree/bindings/crypto/omap-sham.txt
+>>
+>> diff --git a/Documentation/devicetree/bindings/crypto/omap-sham.txt b/Documentation/devicetree/bindings/crypto/omap-sham.txt
+>> new file mode 100644
+>> index 0000000..b97710f
+>> --- /dev/null
+>> +++ b/Documentation/devicetree/bindings/crypto/omap-sham.txt
+>> @@ -0,0 +1,31 @@
+>> +OMAP SoC SHA crypto Module
+>> +
+>> +Required properties:
+>> +
+>> +- compatible : Should contain entries for this and backward compatible
+>> +  SHAM versions:
+>> +  - "ti,omap2-sham" for OMAP2 & OMAP3.
+>> +  - "ti,omap4-sham" for OMAP4 and AM33XX.
+>> +  Note that these two versions are incompatible.
+>> +- ti,hwmods: Name of the hwmod associated with the SHAM module
+>> +- reg : Offset and length of the register set for the module
+>> +- interrupt-parent : the phandle for the interrupt controller that
+>> +  services interrupts for this module.
+> 
+> I don't think this is strictly speaking necessary -- it's mostly going
+> to be implicit (it is in the dtsi below). As this is a standard
+> property, you don't need to document it here.
 
-Signed-off-by: Andreas Fenkart <afenkart-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Ok, dropping from documentation.
 
-diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index a8894ee..f7fe06f 100644
---- a/drivers/mmc/host/omap_hsmmc.c
-+++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -81,6 +81,7 @@ static void apply_clk_hack(struct device *dev)
- #define OMAP_HSMMC_RSP54	0x0118
- #define OMAP_HSMMC_RSP76	0x011C
- #define OMAP_HSMMC_DATA		0x0120
-+#define OMAP_HSMMC_PSTATE	0x0124
- #define OMAP_HSMMC_HCTL		0x0128
- #define OMAP_HSMMC_SYSCTL	0x012C
- #define OMAP_HSMMC_STAT		0x0130
-@@ -1812,6 +1813,22 @@ static int omap_hsmmc_regs_show(struct seq_file *s, void *data)
- {
- 	struct mmc_host *mmc = s->private;
- 	struct omap_hsmmc_host *host = mmc_priv(mmc);
-+	unsigned long flags;
-+
-+	spin_lock_irqsave(&host->irq_lock, flags);
-+	seq_puts(s, "\n");
-+	seq_printf(s, "sdio irq\t%s\n", ((host->flags & HSMMC_SDIO_IRQ_ENABLED)
-+					 ? "enabled" : "disabled"));
-+	if (host->flags & HSMMC_SWAKEUP_QUIRK) {
-+		seq_printf(s, "pinmux config\t%s\n", ((host->flags &
-+						       HSMMC_RUNTIME_SUSPENDED)
-+						      ?  "gpio" : "sdio"));
-+		if (host->flags & HSMMC_RUNTIME_SUSPENDED)
-+			seq_printf(s, "sdio irq pin\t%s\n",
-+				   gpio_get_value(mmc_slot(host).gpio_cirq) ?
-+				   "high" : "low");
-+	}
-+	spin_unlock_irqrestore(&host->irq_lock, flags);
- 
- 	if (host->suspended) {
- 		seq_printf(s, "host suspended, can't read registers\n");
-@@ -1819,9 +1836,11 @@ static int omap_hsmmc_regs_show(struct seq_file *s, void *data)
- 	}
- 
- 	pm_runtime_get_sync(host->dev);
--
-+	seq_puts(s, "\nregs:\n");
- 	seq_printf(s, "CON:\t\t0x%08x\n",
- 			OMAP_HSMMC_READ(host->base, CON));
-+	seq_printf(s, "PSTATE:\t\t0x%08x\n",
-+		   OMAP_HSMMC_READ(host->base, PSTATE));
- 	seq_printf(s, "HCTL:\t\t0x%08x\n",
- 			OMAP_HSMMC_READ(host->base, HCTL));
- 	seq_printf(s, "SYSCTL:\t\t0x%08x\n",
--- 
-1.7.10.4
+>> +- interrupts : the interrupt number for the SHAM module.
+> 
+> Sorry, I missed this last time, but this should be interrupt-specifier
+> rather than interrupt number.
 
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Ok, done.
+
+> 
+> Otherwise, this looks good to me. With the fixups above:
+> 
+> Acked-by: Mark Rutland <mark.rutland@arm.com>
+
+Thanks!
+
+-Joel
+
+> 
+>> +
+>> +Optional properties:
+>> +- dmas: DMA specifier for the rx dma. See the DMA client binding,
+>> +	Documentation/devicetree/bindings/dma/dma.txt
+>> +- dma-names: DMA request name. Should be "rx" if a dma is present.
+>> +
+>> +Example:
+>> +	/* AM335x */
+>> +	sham: sham@53100000 {
+>> +		compatible = "ti,omap4-sham";
+>> +		ti,hwmods = "sham";
+>> +		reg = <0x53100000 0x200>;
+>> +		interrupt-parent = <&intc>;
+>> +		interrupts = <109>;
+>> +		dmas = <&edma 36>;
+>> +		dma-names = "rx";
+>> +	};
+>> diff --git a/arch/arm/boot/dts/am335x-bone.dts b/arch/arm/boot/dts/am335x-bone.dts
+>> index 0d63348..8a9802e 100644
+>> --- a/arch/arm/boot/dts/am335x-bone.dts
+>> +++ b/arch/arm/boot/dts/am335x-bone.dts
+>> @@ -19,3 +19,7 @@
+>>  &mmc1 {
+>>  	vmmc-supply = <&ldo3_reg>;
+>>  };
+>> +
+>> +&sham {
+>> +	status = "okay";
+>> +};
+>> diff --git a/arch/arm/boot/dts/am335x-evm.dts b/arch/arm/boot/dts/am335x-evm.dts
+>> index 23b0a3e..d59e51c 100644
+>> --- a/arch/arm/boot/dts/am335x-evm.dts
+>> +++ b/arch/arm/boot/dts/am335x-evm.dts
+>> @@ -522,3 +522,7 @@
+>>  	status = "okay";
+>>  	vmmc-supply = <&vmmc_reg>;
+>>  };
+>> +
+>> +&sham {
+>> +	status = "okay";
+>> +};
+>> diff --git a/arch/arm/boot/dts/am335x-evmsk.dts b/arch/arm/boot/dts/am335x-evmsk.dts
+>> index bc93895..d45a330 100644
+>> --- a/arch/arm/boot/dts/am335x-evmsk.dts
+>> +++ b/arch/arm/boot/dts/am335x-evmsk.dts
+>> @@ -424,3 +424,7 @@
+>>  	status = "okay";
+>>  	vmmc-supply = <&vmmc_reg>;
+>>  };
+>> +
+>> +&sham {
+>> +	status = "okay";
+>> +};
+>> diff --git a/arch/arm/boot/dts/am33xx.dtsi b/arch/arm/boot/dts/am33xx.dtsi
+>> index 553adc6..299710b 100644
+>> --- a/arch/arm/boot/dts/am33xx.dtsi
+>> +++ b/arch/arm/boot/dts/am33xx.dtsi
+>> @@ -710,5 +710,14 @@
+>>  			#size-cells = <1>;
+>>  			status = "disabled";
+>>  		};
+>> +
+>> +		sham: sham@53100000 {
+>> +			compatible = "ti,omap4-sham";
+>> +			ti,hwmods = "sham";
+>> +			reg = <0x53100000 0x200>;
+>> +			interrupts = <109>;
+>> +			dmas = <&edma 36>;
+>> +			dma-names = "rx";
+>> +		};
+>>  	};
+>>  };
+>> -- 
+>> 1.8.1.2
+>>
+>>
