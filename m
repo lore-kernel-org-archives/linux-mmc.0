@@ -1,112 +1,44 @@
-From: Joel Fernandes <joelf@ti.com>
-Subject: Re: [PATCH v2 0/9] ARM: dts: DT data for OMAP platforms for v3.13
-Date: Fri, 4 Oct 2013 09:50:37 -0500
-Message-ID: <524ED5BD.2060504@ti.com>
-References: <1380553986-15910-1-git-send-email-joelf@ti.com> <524D7038.9070303@baylibre.com> <524E213B.6030306@ti.com> <524ECC63.3050303@baylibre.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"
-Content-Transfer-Encoding: 7bit
+From: Fabio Estevam <festevam@gmail.com>
+Subject: [PATCH 1/3] mmc:sdhci-esdhc-imx: Use NULL instead of zero
+Date: Fri,  4 Oct 2013 22:59:23 -0300
+Message-ID: <1380938365-7769-1-git-send-email-festevam@gmail.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from bear.ext.ti.com ([192.94.94.41]:39179 "EHLO bear.ext.ti.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753755Ab3JDOvG (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 4 Oct 2013 10:51:06 -0400
-In-Reply-To: <524ECC63.3050303@baylibre.com>
+Received: from mail-yh0-f48.google.com ([209.85.213.48]:40887 "EHLO
+	mail-yh0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751196Ab3JEB7j (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 4 Oct 2013 21:59:39 -0400
+Received: by mail-yh0-f48.google.com with SMTP id f11so1182870yha.21
+        for <linux-mmc@vger.kernel.org>; Fri, 04 Oct 2013 18:59:38 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Benoit Cousson <bcousson@baylibre.com>
-Cc: Linux OMAP List <linux-omap@vger.kernel.org>, Linux ARM Kernel List <linux-arm-kernel@lists.infradead.org>, Linux MMC List <linux-mmc@vger.kernel.org>, Mark Rutland <mark.rutland@arm.com>, "swarren@wwwdotorg.org" <swarren@wwwdotorg.org>, "rob.herring@calxeda.com" <rob.herring@calxeda.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Pawel Moll <Pawel.Moll@arm.com>
+To: cjb@laptop.org
+Cc: linux-mmc@vger.kernel.org, Fabio Estevam <fabio.estevam@freescale.com>, Shawn Guo <shawn.guo@linaro.org>
 
-On 10/04/2013 09:10 AM, Benoit Cousson wrote:
-> On 04/10/2013 04:00, Joel Fernandes wrote:
->> On 10/03/2013 08:25 AM, Benoit Cousson wrote:
->>> + DT list and DT maintainers.
->>>
->>> Hi Joel,
->>>
->>> Thanks for the update. It looks good to me.
->>>
->>> For the new bindings added below;
->>>
->>>>    .../devicetree/bindings/crypto/omap-aes.txt        | 34 ++++++++++
->>>>    .../devicetree/bindings/crypto/omap-sham.txt       | 31 +++++++++
->>>
->>> I will need the acked-by from one of the DT maintainers.
->>
->> Sure. To help with giving Ack for this, I'd like to also mention these patches
->> were due for long time and reposted. The supporting code is already in the
->> kernel.
->>
->> Also bindings were reviewed by Mark Rutland comments in the following thread
->> were addressed:
->> http://www.spinics.net/lists/arm-kernel/msg269006.html
-> 
-> OK, that's good news, at least it was already reviewed by Mark.
-> 
-> I'm fixing and pulling the series, and will add Mark's Acked-by as soon as he
-> will send it.
-> 
-> Meanwhile some nits, I'm fixing myself this time :-)
-> 
-> None of your subjects is following the same guideline and the repertory
-> guideline...
-> 
->   omap4: dts: Add node for AES
->   omap4: dts: Add node for DES3DES module
->   am33xx: dts: Fix AES interrupt number
->   ARM: am437x: dts: Add AES node for am437x
->   ARM: am437x: dts: Add DES node for am437x
-> 
-> It should be ARM: dts: OMAPXXX or AMXXX...
-> 
-> Regards,
-> Benoit
-> 
-On 10/04/2013 09:10 AM, Benoit Cousson wrote:> On 04/10/2013 04:00, Joel
-Fernandes wrote:
->> On 10/03/2013 08:25 AM, Benoit Cousson wrote:
->>> + DT list and DT maintainers.
->>>
->>> Hi Joel,
->>>
->>> Thanks for the update. It looks good to me.
->>>
->>> For the new bindings added below;
->>>
->>>>    .../devicetree/bindings/crypto/omap-aes.txt        | 34 ++++++++++
->>>>    .../devicetree/bindings/crypto/omap-sham.txt       | 31 +++++++++
->>>
->>> I will need the acked-by from one of the DT maintainers.
->>
->> Sure. To help with giving Ack for this, I'd like to also mention these patches
->> were due for long time and reposted. The supporting code is already in the
->> kernel.
->>
->> Also bindings were reviewed by Mark Rutland comments in the following thread
->> were addressed:
->> http://www.spinics.net/lists/arm-kernel/msg269006.html
->
-> OK, that's good news, at least it was already reviewed by Mark.
->
-> I'm fixing and pulling the series, and will add Mark's Acked-by as soon as he
-> will send it.
->
-> Meanwhile some nits, I'm fixing myself this time :-)
->
-> None of your subjects is following the same guideline and the repertory
-> guideline...
->
->   omap4: dts: Add node for AES
->   omap4: dts: Add node for DES3DES module
->   am33xx: dts: Fix AES interrupt number
->   ARM: am437x: dts: Add AES node for am437x
->   ARM: am437x: dts: Add DES node for am437x
->
-> It should be ARM: dts: OMAPXXX or AMXXX...
+From: Fabio Estevam <fabio.estevam@freescale.com>
 
-Thanks & sorry about that.
-I think Mark came back with some more comments on 2 of those patches. I will
-work on those and repost.
+Fix the following sparse warning:
 
--Joel
+drivers/mmc/host/sdhci-esdhc-imx.c:617:35: warning: Using plain integer as NULL pointer
+
+Cc: Shawn Guo <shawn.guo@linaro.org>
+Signed-off-by: Fabio Estevam <fabio.estevam@freescale.com>
+---
+ drivers/mmc/host/sdhci-esdhc-imx.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+index b9899e9..086ea52 100644
+--- a/drivers/mmc/host/sdhci-esdhc-imx.c
++++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+@@ -614,7 +614,7 @@ static void esdhc_request_done(struct mmc_request *mrq)
+ static int esdhc_send_tuning_cmd(struct sdhci_host *host, u32 opcode)
+ {
+ 	struct mmc_command cmd = {0};
+-	struct mmc_request mrq = {0};
++	struct mmc_request mrq = { NULL };
+ 	struct mmc_data data = {0};
+ 	struct scatterlist sg;
+ 	char tuning_pattern[ESDHC_TUNING_BLOCK_PATTERN_LEN];
+-- 
+1.8.1.2
 
