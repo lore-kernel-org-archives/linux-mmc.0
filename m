@@ -1,80 +1,31 @@
-From: Tony Prisk <linux@prisktech.co.nz>
-Subject: Re: [PATCH] mmc: wmt-sdmmc: Simplify wmt_set_sd_power implementation
-Date: Sat, 05 Oct 2013 17:24:54 +1300
-Message-ID: <524F9496.8080209@prisktech.co.nz>
-References: <1380791080.30876.2.camel@phoenix>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from server.prisktech.co.nz ([115.188.14.127]:59557 "EHLO
-	server.prisktech.co.nz" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750741Ab3JEEYn (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 5 Oct 2013 00:24:43 -0400
-In-Reply-To: <1380791080.30876.2.camel@phoenix>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Andreas Fenkart <afenkart@gmail.com>
+Subject: [PATCH v3 0/4] mmc: omap_hsmmc: SDIO irq
+Date: Sat,  5 Oct 2013 13:17:06 +0200
+Message-ID: <1380971830-21492-1-git-send-email-afenkart@gmail.com>
+Return-path: <linux-doc-owner@vger.kernel.org>
+Sender: linux-doc-owner@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>
+Cc: Tony Lindgren <tony@atomide.com>, Grant Likely <grant.likely@secretlab.ca>, Felipe Balbi <balbi@ti.com>, Venkatraman S <svenkatr@ti.com>, Balaji T K <balajitk@ti.com>, zonque@gmail.com, devicetree-discuss@lists.ozlabs.org, devicetree@vger.kernel.org, linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, Andreas Fenkart <afenkart@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Axel Lin <axel.lin@ingics.com>, Chris Ball <cjb@laptop.org>
-Cc: linux-mmc@vger.kernel.org
 
-On 03/10/13 22:04, Axel Lin wrote:
-> Simplify the code to set/clear BM_SD_OFF bit:
->
->            | power_inverted: 0  | power_inverted: 1
-> -------------------------------------------------
-> enable: 0 | SET BM_SD_OFF      | CLEAR BM_SD_OFF
-> -------------------------------------------------
-> enable: 1 | CLEAR BM_SD_OFF    | SET BM_SD_OFF
->
-> Signed-off-by: Axel Lin <axel.lin@ingics.com>
-> ---
->   drivers/mmc/host/wmt-sdmmc.c | 30 ++++++++----------------------
->   1 file changed, 8 insertions(+), 22 deletions(-)
->
-> diff --git a/drivers/mmc/host/wmt-sdmmc.c b/drivers/mmc/host/wmt-sdmmc.c
-> index 34231d5..57858ef 100644
-> --- a/drivers/mmc/host/wmt-sdmmc.c
-> +++ b/drivers/mmc/host/wmt-sdmmc.c
-> @@ -212,28 +212,14 @@ struct wmt_mci_priv {
->   
->   static void wmt_set_sd_power(struct wmt_mci_priv *priv, int enable)
->   {
-> -	u32 reg_tmp;
-> -	if (enable) {
-> -		if (priv->power_inverted) {
-> -			reg_tmp = readb(priv->sdmmc_base + SDMMC_BUSMODE);
-> -			writeb(reg_tmp | BM_SD_OFF,
-> -			       priv->sdmmc_base + SDMMC_BUSMODE);
-> -		} else {
-> -			reg_tmp = readb(priv->sdmmc_base + SDMMC_BUSMODE);
-> -			writeb(reg_tmp & (~BM_SD_OFF),
-> -			       priv->sdmmc_base + SDMMC_BUSMODE);
-> -		}
-> -	} else {
-> -		if (priv->power_inverted) {
-> -			reg_tmp = readb(priv->sdmmc_base + SDMMC_BUSMODE);
-> -			writeb(reg_tmp & (~BM_SD_OFF),
-> -			       priv->sdmmc_base + SDMMC_BUSMODE);
-> -		} else {
-> -			reg_tmp = readb(priv->sdmmc_base + SDMMC_BUSMODE);
-> -			writeb(reg_tmp | BM_SD_OFF,
-> -			       priv->sdmmc_base + SDMMC_BUSMODE);
-> -		}
-> -	}
-> +	u32 reg_tmp = readb(priv->sdmmc_base + SDMMC_BUSMODE);
-> +
-> +	if (enable ^ priv->power_inverted)
-> +		reg_tmp &= ~BM_SD_OFF;
-> +	else
-> +		reg_tmp |= BM_SD_OFF;
-> +
-> +	writeb(reg_tmp, priv->sdmmc_base + SDMMC_BUSMODE);
->   }
->   
->   static void wmt_mci_read_response(struct mmc_host *mmc)
-Acked-by: Tony Prisk <linux@prisktech.co.nz>
+Changes:
+- split the subject patch into normal handling and
+  workaround for am335x
+- rebase
 
-Thanks Axel - much better code.
+Andreas Fenkart (3):
+  mmc: omap_hsmmc: Enable SDIO IRQ.
+  mmc: omap_hsmmc: Remux pins to support SDIO interrupt on AM335x
+  mmc: omap_hsmmc: debugfs for SDIO IRQ and GPIO remux
 
-Regards
-Tony Prisk
+Tony Lindgren (1):
+  mmc: omap_hsmmc: Fix context save and restore for DT
+
+ .../devicetree/bindings/mmc/ti-omap-hsmmc.txt      |   42 +++
+ drivers/mmc/host/omap_hsmmc.c                      |  363 +++++++++++++++++---
+ include/linux/platform_data/mmc-omap.h             |    4 +
+ 3 files changed, 357 insertions(+), 52 deletions(-)
+
+-- 
+1.7.10.4
+
