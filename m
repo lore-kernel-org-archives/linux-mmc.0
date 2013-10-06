@@ -1,52 +1,66 @@
 From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH 2/3] mmc: dw_mmc: Remove redundant of_match_ptr
-Date: Sun, 06 Oct 2013 17:26:01 +0900
-Message-ID: <52511E99.8050108@samsung.com>
-References: <1380517173-10537-1-git-send-email-sachin.kamat@linaro.org>
- <1380517173-10537-2-git-send-email-sachin.kamat@linaro.org>
+Subject: Re: [PATCH] mmc: dw_mmc: Add hardware lock error (HLE) to the CMD
+ error flag
+Date: Sun, 06 Oct 2013 17:28:41 +0900
+Message-ID: <52511F39.8000207@samsung.com>
+References: <1380791881-31484-1-git-send-email-alim.akhtar@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout2.samsung.com ([203.254.224.25]:15228 "EHLO
-	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751995Ab3JFIZ7 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 6 Oct 2013 04:25:59 -0400
-Received: from epcpsbgr4.samsung.com
- (u144.gpu120.samsung.co.kr [203.254.230.144])
- by mailout2.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+Received: from mailout3.samsung.com ([203.254.224.33]:16721 "EHLO
+	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751843Ab3JFI2i (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 6 Oct 2013 04:28:38 -0400
+Received: from epcpsbgr3.samsung.com
+ (u143.gpu120.samsung.co.kr [203.254.230.143])
+ by mailout3.samsung.com (Oracle Communications Messaging Server 7u4-24.01
  (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTP id <0MU8005C4NEEULB0@mailout2.samsung.com> for
- linux-mmc@vger.kernel.org; Sun, 06 Oct 2013 17:25:57 +0900 (KST)
-In-reply-to: <1380517173-10537-2-git-send-email-sachin.kamat@linaro.org>
+ with ESMTP id <0MU800105NJPIJ40@mailout3.samsung.com> for
+ linux-mmc@vger.kernel.org; Sun, 06 Oct 2013 17:28:37 +0900 (KST)
+In-reply-to: <1380791881-31484-1-git-send-email-alim.akhtar@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Sachin Kamat <sachin.kamat@linaro.org>
-Cc: linux-mmc@vger.kernel.org, cjb@laptop.org, tgih.jun@samsung.com
+To: alim akhtar <alim.akhtar@samsung.com>
+Cc: linux-mmc@vger.kernel.org, tgih.jun@samsung.com, cjb@laptop.org, dianders@chromium.org
 
-Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
+Hi Alim,
 
-On 09/30/2013 01:59 PM, Sachin Kamat wrote:
-> The data structure of_match_ptr() protects is always compiled in.
-> Hence of_match_ptr() is not needed.
+On 10/03/2013 06:18 PM, alim akhtar wrote:
+> From: Alim Akhtar <alim.akhtar@samsung.com>
 > 
-> Signed-off-by: Sachin Kamat <sachin.kamat@linaro.org>
+> Hardware locked error set when the dw_mmc controller cannot load a
+> command issued by software. When software sets the start_cmd bit in the
+> CMD register, the controller tries to load the command. If the command
+> buffer is already filled with a command, this error is raised. Currently
+> driver does not handle HLE interrupt, which results in a system hang.
+When SDMMC_INT_HLE is set into CMD_ERROR_FLAGS,
+then could driver handle the HLE interrupt?
+
+Best Regards,
+Jaehoon Chung
+> 
+> HLE can be simulated by quickly inserting and removing sd card in card
+> slot (30 ~ 40 times in say 20 secs)
+> 
+> Reviewed-by: Doug Anderson <dianders@chromium.org>
+> Signed-off-by: Alim Akhtar <alim.akhtar@samsung.com>
 > ---
->  drivers/mmc/host/dw_mmc-pltfm.c |    2 +-
+>  drivers/mmc/host/dw_mmc.c | 2 +-
 >  1 file changed, 1 insertion(+), 1 deletion(-)
 > 
-> diff --git a/drivers/mmc/host/dw_mmc-pltfm.c b/drivers/mmc/host/dw_mmc-pltfm.c
-> index 5c49656..2553bfb 100644
-> --- a/drivers/mmc/host/dw_mmc-pltfm.c
-> +++ b/drivers/mmc/host/dw_mmc-pltfm.c
-> @@ -123,7 +123,7 @@ static struct platform_driver dw_mci_pltfm_driver = {
->  	.remove		= dw_mci_pltfm_remove,
->  	.driver		= {
->  		.name		= "dw_mmc",
-> -		.of_match_table	= of_match_ptr(dw_mci_pltfm_match),
-> +		.of_match_table	= dw_mci_pltfm_match,
->  		.pm		= &dw_mci_pltfm_pmops,
->  	},
->  };
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index 0a6a512..24b4a52 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -44,7 +44,7 @@
+>  				 SDMMC_INT_HTO | SDMMC_INT_SBE  | \
+>  				 SDMMC_INT_EBE)
+>  #define DW_MCI_CMD_ERROR_FLAGS	(SDMMC_INT_RTO | SDMMC_INT_RCRC | \
+> -				 SDMMC_INT_RESP_ERR)
+> +				 SDMMC_INT_RESP_ERR | SDMMC_INT_HLE)
+>  #define DW_MCI_ERROR_FLAGS	(DW_MCI_DATA_ERROR_FLAGS | \
+>  				 DW_MCI_CMD_ERROR_FLAGS  | SDMMC_INT_HLE)
+>  #define DW_MCI_SEND_STATUS	1
 > 
 
