@@ -1,75 +1,106 @@
 From: Jarkko Nikula <jarkko.nikula@bitmer.com>
-Subject: [PATCH FIX+RESEND 6/7] mmc: omap: Remove always set use_dma flag from struct mmc_omap_host
-Date: Sun,  6 Oct 2013 20:36:17 +0300
-Message-ID: <1381080978-29127-6-git-send-email-jarkko.nikula@bitmer.com>
+Subject: [PATCH FIX+RESEND 7/7] mmc: omap: Get DMA request numbers via platform resource
+Date: Sun,  6 Oct 2013 20:36:18 +0300
+Message-ID: <1381080978-29127-7-git-send-email-jarkko.nikula@bitmer.com>
 References: <1381080978-29127-1-git-send-email-jarkko.nikula@bitmer.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from bitmer.com ([213.157.87.50]:46803 "EHLO bitmer.com"
+Received: from bitmer.com ([213.157.87.50]:46806 "EHLO bitmer.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753947Ab3JFRio (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sun, 6 Oct 2013 13:38:44 -0400
+	id S1753947Ab3JFRir (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Sun, 6 Oct 2013 13:38:47 -0400
 In-Reply-To: <1381080978-29127-1-git-send-email-jarkko.nikula@bitmer.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 Cc: Chris Ball <cjb@laptop.org>, aaro.koskinen@iki.fi, Jarkko Nikula <jarkko.nikula@bitmer.com>
 
-Because use_dma is set only in mmc_omap_probe and unset nowhere there is no
-need to carry that flag in struct mmc_omap_host for mmc_omap_prepare_data
-function.
+There is no need to define MMC DMA TX and RX request numbers locally for
+OMAP1xxx and OMAP24xx and assign them non-portable way since they already
+come via platform resources. See commits
+
+6c432f7 ("ARM: OMAP1: Pass dma request lines in platform data to MMC driver")
+b955eef ("ARM: OMAP2: Use hwmod to initialize mmc for 2420")
+
+Note that mmc_omap_probe doesn't change failure mechanism in case if it
+fails get DMA request number or DMA channel. In that case it just falls
+back to PIO transfer for TX and/or RX.
 
 Signed-off-by: Jarkko Nikula <jarkko.nikula@bitmer.com>
 ---
- drivers/mmc/host/omap.c | 15 +++++----------
- 1 file changed, 5 insertions(+), 10 deletions(-)
+Aaro:
+Sorry to bother you but I know you have OMAP1xxx based boards and I
+apreciate if you can give a quick test :-)
+I have tested this set on OMAP2420 based Nokia N810.
+---
+ drivers/mmc/host/omap.c | 39 +++++++++++++--------------------------
+ 1 file changed, 13 insertions(+), 26 deletions(-)
 
 diff --git a/drivers/mmc/host/omap.c b/drivers/mmc/host/omap.c
-index 0737ea4..1b56f06 100644
+index 1b56f06..eb22953 100644
 --- a/drivers/mmc/host/omap.c
 +++ b/drivers/mmc/host/omap.c
-@@ -163,7 +163,6 @@ struct mmc_omap_host {
- 	u32			total_bytes_left;
+@@ -90,17 +90,6 @@
+ #define OMAP_MMC_CMDTYPE_AC	2
+ #define OMAP_MMC_CMDTYPE_ADTC	3
  
- 	unsigned		features;
--	unsigned		use_dma:1;
- 	unsigned		brs_received:1, dma_done:1;
- 	unsigned		dma_in_use:1;
- 	spinlock_t		dma_lock;
-@@ -955,7 +954,7 @@ static void
- mmc_omap_prepare_data(struct mmc_omap_host *host, struct mmc_request *req)
- {
- 	struct mmc_data *data = req->data;
--	int i, use_dma, block_size;
-+	int i, use_dma = 1, block_size;
- 	unsigned sg_len;
+-#define OMAP_DMA_MMC_TX		21
+-#define OMAP_DMA_MMC_RX		22
+-#define OMAP_DMA_MMC2_TX	54
+-#define OMAP_DMA_MMC2_RX	55
+-
+-#define OMAP24XX_DMA_MMC2_TX	47
+-#define OMAP24XX_DMA_MMC2_RX	48
+-#define OMAP24XX_DMA_MMC1_TX	61
+-#define OMAP24XX_DMA_MMC1_RX	62
+-
+-
+ #define DRIVER_NAME "mmci-omap"
  
- 	host->data = data;
-@@ -980,13 +979,10 @@ mmc_omap_prepare_data(struct mmc_omap_host *host, struct mmc_request *req)
- 	sg_len = (data->blocks == 1) ? 1 : data->sg_len;
+ /* Specifies how often in millisecs to poll for card status changes
+@@ -1328,7 +1317,6 @@ static int mmc_omap_probe(struct platform_device *pdev)
+ 	struct mmc_omap_host *host = NULL;
+ 	struct resource *res;
+ 	dma_cap_mask_t mask;
+-	unsigned sig;
+ 	int i, ret = 0;
+ 	int irq;
  
- 	/* Only do DMA for entire blocks */
--	use_dma = host->use_dma;
--	if (use_dma) {
--		for (i = 0; i < sg_len; i++) {
--			if ((data->sg[i].length % block_size) != 0) {
--				use_dma = 0;
--				break;
--			}
-+	for (i = 0; i < sg_len; i++) {
-+		if ((data->sg[i].length % block_size) != 0) {
-+			use_dma = 0;
-+			break;
- 		}
- 	}
+@@ -1394,22 +1382,21 @@ static int mmc_omap_probe(struct platform_device *pdev)
+ 	host->dma_tx_burst = -1;
+ 	host->dma_rx_burst = -1;
  
-@@ -1380,7 +1376,6 @@ static int mmc_omap_probe(struct platform_device *pdev)
+-	if (mmc_omap2())
+-		sig = host->id == 0 ? OMAP24XX_DMA_MMC1_TX : OMAP24XX_DMA_MMC2_TX;
+-	else
+-		sig = host->id == 0 ? OMAP_DMA_MMC_TX : OMAP_DMA_MMC2_TX;
+-	host->dma_tx = dma_request_channel(mask, omap_dma_filter_fn, &sig);
++	res = platform_get_resource_byname(pdev, IORESOURCE_DMA, "tx");
++	if (res)
++		host->dma_tx = dma_request_channel(mask, omap_dma_filter_fn,
++						   &res->start);
+ 	if (!host->dma_tx)
+-		dev_warn(host->dev, "unable to obtain TX DMA engine channel %u\n",
+-			sig);
+-	if (mmc_omap2())
+-		sig = host->id == 0 ? OMAP24XX_DMA_MMC1_RX : OMAP24XX_DMA_MMC2_RX;
+-	else
+-		sig = host->id == 0 ? OMAP_DMA_MMC_RX : OMAP_DMA_MMC2_RX;
+-	host->dma_rx = dma_request_channel(mask, omap_dma_filter_fn, &sig);
++		dev_warn(host->dev,
++			 "unable to obtain TX DMA. Falling back to PIO\n");
++
++	res = platform_get_resource_byname(pdev, IORESOURCE_DMA, "rx");
++	if (res)
++		host->dma_rx = dma_request_channel(mask, omap_dma_filter_fn,
++						   &res->start);
+ 	if (!host->dma_rx)
+-		dev_warn(host->dev, "unable to obtain RX DMA engine channel %u\n",
+-			sig);
++		dev_warn(host->dev,
++			 "unable to obtain RX DMA. Falling back to PIO\n");
  
- 	host->id = pdev->id;
- 	host->irq = irq;
--	host->use_dma = 1;
- 	host->phys_base = res->start;
- 	host->iclk = clk_get(&pdev->dev, "ick");
- 	if (IS_ERR(host->iclk))
+ 	ret = request_irq(host->irq, mmc_omap_irq, 0, DRIVER_NAME, host);
+ 	if (ret)
 -- 
 1.8.4.rc3
 
