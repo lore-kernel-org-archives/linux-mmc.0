@@ -1,182 +1,114 @@
-From: Joel Fernandes <joelf@ti.com>
-Subject: Re: [PATCH v2 4/9] ARM: dts: Add AES data and documentation for AM33XX
-Date: Sat, 5 Oct 2013 13:29:18 -0500
-Message-ID: <52505A7E.80802@ti.com>
-References: <1380553986-15910-1-git-send-email-joelf@ti.com>
- <1380553986-15910-5-git-send-email-joelf@ti.com>
- <20131004143348.GJ6999@e106331-lin.cambridge.arm.com>
+From: Axel Lin <axel.lin@ingics.com>
+Subject: Question about commit "mmc: core: Support aggressive power
+ management for (e)MMC/SD"
+Date: Sun, 06 Oct 2013 12:07:03 +0800
+Message-ID: <1381032423.7156.1.camel@phoenix>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <20131004143348.GJ6999@e106331-lin.cambridge.arm.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Mark Rutland <mark.rutland@arm.com>
-Cc: "open list:OPEN FIRMWARE AND..." <devicetree@vger.kernel.org>, Paul Walmsley <paul@pwsan.com>, Russell King <linux@arm.linux.org.uk>, Rob Landley <rob@landley.net>, Pawel Moll <Pawel.Moll@arm.com>, Stephen Warren <swarren@wwwdotorg.org>, Tony Lindgren <tony@atomide.com>, open list <linux-kernel@vger.kernel.org>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Linux MMC List <linux-mmc@vger.kernel.org>, "Mark A. Greer" <mgreer@animalcreek.com>, "rob.herring@calxeda.com" <rob.herring@calxeda.com>, DOCUMENTATION <linux-doc@vger.kernel.org>, Benoit Cousson <bcousson@baylibre.com>, Linux OMAP List <linux-omap@vger.kernel.org>, Linux ARM Kernel List <linux-arm-kernel@lists.infradead.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-pd0-f169.google.com ([209.85.192.169]:36488 "EHLO
+	mail-pd0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751004Ab3JFEHJ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 6 Oct 2013 00:07:09 -0400
+Received: by mail-pd0-f169.google.com with SMTP id r10so5750068pdi.28
+        for <linux-mmc@vger.kernel.org>; Sat, 05 Oct 2013 21:07:08 -0700 (PDT)
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <cjb@laptop.org>
+Cc: linux-mmc@vger.kernel.org
 
-These patches were not authored by me but I'll go ahead and fix them up anyway.
+Hi Ulf,
 
-On 10/04/2013 09:33 AM, Mark Rutland wrote:
-> On Mon, Sep 30, 2013 at 04:13:01PM +0100, Joel Fernandes wrote:
->> From: "Mark A. Greer" <mgreer@animalcreek.com>
->>
->> Add the generic AM33XX AES module's device tree data and
->> enable it for the am335x-evm, am335x-evmsk, and am335x-bone
->> platforms.  Also add Documentation file describing the data
->> for the AES module.
->>
->> [joelf@ti.com: Dropped interrupt-parent propert]
->>
->> CC: Paul Walmsley <paul@pwsan.com>
->> Signed-off-by: Mark A. Greer <mgreer@animalcreek.com>
->> ---
->>  .../devicetree/bindings/crypto/omap-aes.txt        | 34 ++++++++++++++++++++++
->>  arch/arm/boot/dts/am335x-bone.dts                  |  4 +++
->>  arch/arm/boot/dts/am335x-evm.dts                   |  4 +++
->>  arch/arm/boot/dts/am335x-evmsk.dts                 |  4 +++
->>  arch/arm/boot/dts/am33xx.dtsi                      | 10 +++++++
->>  5 files changed, 56 insertions(+)
->>  create mode 100644 Documentation/devicetree/bindings/crypto/omap-aes.txt
->>
->> diff --git a/Documentation/devicetree/bindings/crypto/omap-aes.txt b/Documentation/devicetree/bindings/crypto/omap-aes.txt
->> new file mode 100644
->> index 0000000..4bb1e27
->> --- /dev/null
->> +++ b/Documentation/devicetree/bindings/crypto/omap-aes.txt
->> @@ -0,0 +1,34 @@
->> +OMAP SoC AES crypto Module
->> +
->> +Required properties:
->> +
->> +- compatible : Should contain entries for this and backward compatible
->> +  AES versions:
->> +  - "ti,omap2-aes" for OMAP2.
->> +  - "ti,omap3-aes" for OMAP3.
->> +  - "ti,omap4-aes" for OMAP4 and AM33XX.
->> +  Note that the OMAP2 and 3 versions are compatible (OMAP3 supports
->> +  more algorithms) but they are incompatible with OMAP4.
->> +- ti,hwmods: Name of the hwmod associated with the AES odule
->> +- reg : Offset and length of the register set for the module
->> +- interrupt-parent : the phandle for the interrupt controller that
->> +  services interrupts for this module.
->> +- interrupts : the interrupt number for the AES odule.
-> 
-> Similar comments to the SHAM module here:
-> 
-> * s/interrupt number/interrupt-specifier/
-> * Drop interrupt-parent.
-> * s/AES odule/AES module/
+While reading the code, I don't figure out why we need a nested mmc_claim_host
+/mmc_release_host calls and additional mmc_power_off/mmc_power_up calls in
+commit c4d770d72.
 
-Ok, done.
+The implementation of mmc_suspend/mmc_resume and mmc_sd_suspend/mmc_sd_resume
+already calls mmc_claim_host/mmc_release_host and mmc_power_off/mmc_power_up.
 
->> +
->> +Optional properties:
->> +- dmas: DMA specifier for tx and rx dma. See the DMA client binding,
->> +	Documentation/devicetree/bindings/dma/dma.txt
-> 
-> s/DMA specifier/DMA specifiers/
-> 
->> +- dma-names: DMA request names. Should be '"tx", "rx"' if dma is present.
-> 
-> Nit: I'd prefer 'Should include "tx" and "rx" if present' -- I hope the
+I don't have a hardware handy to test it at this moment.
+I'm wondering if it still works with below diff:
 
-Ok, changed to the same.
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index 6d02012..f0dcc53 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -1552,18 +1552,11 @@ static int mmc_runtime_suspend(struct mmc_host *host)
+ 	if (!(host->caps & MMC_CAP_AGGRESSIVE_PM))
+ 		return 0;
+ 
+-	mmc_claim_host(host);
+-
+ 	err = mmc_suspend(host);
+-	if (err) {
++	if (err)
+ 		pr_err("%s: error %d doing aggessive suspend\n",
+ 			mmc_hostname(host), err);
+-		goto out;
+-	}
+-	mmc_power_off(host);
+ 
+-out:
+-	mmc_release_host(host);
+ 	return err;
+ }
+ 
+@@ -1577,15 +1570,11 @@ static int mmc_runtime_resume(struct mmc_host *host)
+ 	if (!(host->caps & MMC_CAP_AGGRESSIVE_PM))
+ 		return 0;
+ 
+-	mmc_claim_host(host);
+-
+-	mmc_power_up(host);
+ 	err = mmc_resume(host);
+ 	if (err)
+ 		pr_err("%s: error %d doing aggessive resume\n",
+ 			mmc_hostname(host), err);
+ 
+-	mmc_release_host(host);
+ 	return 0;
+ }
+ 
+diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
+index 5e8823d..0f2a1f9 100644
+--- a/drivers/mmc/core/sd.c
++++ b/drivers/mmc/core/sd.c
+@@ -1117,18 +1117,11 @@ static int mmc_sd_runtime_suspend(struct mmc_host *host)
+ 	if (!(host->caps & MMC_CAP_AGGRESSIVE_PM))
+ 		return 0;
+ 
+-	mmc_claim_host(host);
+-
+ 	err = mmc_sd_suspend(host);
+-	if (err) {
++	if (err)
+ 		pr_err("%s: error %d doing aggessive suspend\n",
+ 			mmc_hostname(host), err);
+-		goto out;
+-	}
+-	mmc_power_off(host);
+ 
+-out:
+-	mmc_release_host(host);
+ 	return err;
+ }
+ 
+@@ -1142,15 +1135,11 @@ static int mmc_sd_runtime_resume(struct mmc_host *host)
+ 	if (!(host->caps & MMC_CAP_AGGRESSIVE_PM))
+ 		return 0;
+ 
+-	mmc_claim_host(host);
+-
+-	mmc_power_up(host);
+ 	err = mmc_sd_resume(host);
+ 	if (err)
+ 		pr_err("%s: error %d doing aggessive resume\n",
+ 			mmc_hostname(host), err);
+ 
+-	mmc_release_host(host);
+ 	return 0;
+ }
+ 
 
-> driver's requesting these by name rather than relying on a specific
-> ordering (it makes future expansion and optional components far easier
-> to handle sanely).
 
-Yes, that's the case. Its handled by name using the
-dma_request_slave_channel_compat API.
-
->> +
->> +Example:
->> +	/* AM335x */
->> +	aes: aes@53500000 {
->> +		compatible = "ti,omap4-aes";
->> +		ti,hwmods = "aes";
->> +		reg = <0x53500000 0xa0>;
->> +		interrupt-parent = <&intc>;
->> +		interrupts = <102>;
->> +		dmas = <&edma 6
->> +			&edma 5>;
->> +		dma-names = "tx", "rx";
->> +	};
-> 
-> Minor nit, but for consistency could you bracket the DMAs individually:
-> 
-> 		dmas = <&edma 6>,
-> 		       <&edma 5>;
-
-Ok changed as above.
-
-> 
->> diff --git a/arch/arm/boot/dts/am335x-bone.dts b/arch/arm/boot/dts/am335x-bone.dts
->> index 8a9802e..94ee427 100644
->> --- a/arch/arm/boot/dts/am335x-bone.dts
->> +++ b/arch/arm/boot/dts/am335x-bone.dts
->> @@ -23,3 +23,7 @@
->>  &sham {
->>  	status = "okay";
->>  };
->> +
->> +&aes {
->> +	status = "okay";
->> +};
->> diff --git a/arch/arm/boot/dts/am335x-evm.dts b/arch/arm/boot/dts/am335x-evm.dts
->> index d59e51c..86463fa 100644
->> --- a/arch/arm/boot/dts/am335x-evm.dts
->> +++ b/arch/arm/boot/dts/am335x-evm.dts
->> @@ -526,3 +526,7 @@
->>  &sham {
->>  	status = "okay";
->>  };
->> +
->> +&aes {
->> +	status = "okay";
->> +};
->> diff --git a/arch/arm/boot/dts/am335x-evmsk.dts b/arch/arm/boot/dts/am335x-evmsk.dts
->> index d45a330..f577e65 100644
->> --- a/arch/arm/boot/dts/am335x-evmsk.dts
->> +++ b/arch/arm/boot/dts/am335x-evmsk.dts
->> @@ -428,3 +428,7 @@
->>  &sham {
->>  	status = "okay";
->>  };
->> +
->> +&aes {
->> +	status = "okay";
->> +};
->> diff --git a/arch/arm/boot/dts/am33xx.dtsi b/arch/arm/boot/dts/am33xx.dtsi
->> index 299710b..0daa1b2 100644
->> --- a/arch/arm/boot/dts/am33xx.dtsi
->> +++ b/arch/arm/boot/dts/am33xx.dtsi
->> @@ -719,5 +719,15 @@
->>  			dmas = <&edma 36>;
->>  			dma-names = "rx";
->>  		};
->> +
->> +		aes: aes@53500000 {
->> +			compatible = "ti,omap4-aes";
->> +			ti,hwmods = "aes";
->> +			reg = <0x53500000 0xa0>;
->> +			interrupts = <102>;
->> +			dmas = <&edma 6
->> +				&edma 5>;
-> 
-> Bracketing here too, please.
-
-Done.
-
-Thanks,
-
--Joel
