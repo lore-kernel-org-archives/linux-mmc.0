@@ -1,52 +1,75 @@
 From: Jarkko Nikula <jarkko.nikula@bitmer.com>
-Subject: [PATCH FIX+RESEND 4/7] mmc: omap: Remove mem_res field from struct mmc_omap_host
-Date: Sun,  6 Oct 2013 20:36:15 +0300
-Message-ID: <1381080978-29127-4-git-send-email-jarkko.nikula@bitmer.com>
+Subject: [PATCH FIX+RESEND 6/7] mmc: omap: Remove always set use_dma flag from struct mmc_omap_host
+Date: Sun,  6 Oct 2013 20:36:17 +0300
+Message-ID: <1381080978-29127-6-git-send-email-jarkko.nikula@bitmer.com>
 References: <1381080978-29127-1-git-send-email-jarkko.nikula@bitmer.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from bitmer.com ([213.157.87.50]:46796 "EHLO bitmer.com"
+Received: from bitmer.com ([213.157.87.50]:46803 "EHLO bitmer.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753947Ab3JFRil (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sun, 6 Oct 2013 13:38:41 -0400
+	id S1753947Ab3JFRio (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Sun, 6 Oct 2013 13:38:44 -0400
 In-Reply-To: <1381080978-29127-1-git-send-email-jarkko.nikula@bitmer.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 Cc: Chris Ball <cjb@laptop.org>, aaro.koskinen@iki.fi, Jarkko Nikula <jarkko.nikula@bitmer.com>
 
-Field mem_res in struct mmc_omap_host is used only once in mmc_omap_probe
-when setting the phys_base field so we may just se the phys_base straight
-and remove needless mem_res.
+Because use_dma is set only in mmc_omap_probe and unset nowhere there is no
+need to carry that flag in struct mmc_omap_host for mmc_omap_prepare_data
+function.
 
 Signed-off-by: Jarkko Nikula <jarkko.nikula@bitmer.com>
 ---
- drivers/mmc/host/omap.c | 4 +---
- 1 file changed, 1 insertion(+), 3 deletions(-)
+ drivers/mmc/host/omap.c | 15 +++++----------
+ 1 file changed, 5 insertions(+), 10 deletions(-)
 
 diff --git a/drivers/mmc/host/omap.c b/drivers/mmc/host/omap.c
-index 7668d47..ec5defa 100644
+index 0737ea4..1b56f06 100644
 --- a/drivers/mmc/host/omap.c
 +++ b/drivers/mmc/host/omap.c
-@@ -141,7 +141,6 @@ struct mmc_omap_host {
- 	u32			dma_rx_burst;
- 	struct dma_chan		*dma_tx;
- 	u32			dma_tx_burst;
--	struct resource		*mem_res;
- 	void __iomem		*virt_base;
- 	unsigned int		phys_base;
- 	int			irq;
-@@ -1383,10 +1382,9 @@ static int mmc_omap_probe(struct platform_device *pdev)
- 	platform_set_drvdata(pdev, host);
+@@ -163,7 +163,6 @@ struct mmc_omap_host {
+ 	u32			total_bytes_left;
+ 
+ 	unsigned		features;
+-	unsigned		use_dma:1;
+ 	unsigned		brs_received:1, dma_done:1;
+ 	unsigned		dma_in_use:1;
+ 	spinlock_t		dma_lock;
+@@ -955,7 +954,7 @@ static void
+ mmc_omap_prepare_data(struct mmc_omap_host *host, struct mmc_request *req)
+ {
+ 	struct mmc_data *data = req->data;
+-	int i, use_dma, block_size;
++	int i, use_dma = 1, block_size;
+ 	unsigned sg_len;
+ 
+ 	host->data = data;
+@@ -980,13 +979,10 @@ mmc_omap_prepare_data(struct mmc_omap_host *host, struct mmc_request *req)
+ 	sg_len = (data->blocks == 1) ? 1 : data->sg_len;
+ 
+ 	/* Only do DMA for entire blocks */
+-	use_dma = host->use_dma;
+-	if (use_dma) {
+-		for (i = 0; i < sg_len; i++) {
+-			if ((data->sg[i].length % block_size) != 0) {
+-				use_dma = 0;
+-				break;
+-			}
++	for (i = 0; i < sg_len; i++) {
++		if ((data->sg[i].length % block_size) != 0) {
++			use_dma = 0;
++			break;
+ 		}
+ 	}
+ 
+@@ -1380,7 +1376,6 @@ static int mmc_omap_probe(struct platform_device *pdev)
  
  	host->id = pdev->id;
--	host->mem_res = res;
  	host->irq = irq;
- 	host->use_dma = 1;
--	host->phys_base = host->mem_res->start;
-+	host->phys_base = res->start;
- 	host->virt_base = ioremap(res->start, resource_size(res));
- 	if (!host->virt_base)
- 		goto err_ioremap;
+-	host->use_dma = 1;
+ 	host->phys_base = res->start;
+ 	host->iclk = clk_get(&pdev->dev, "ick");
+ 	if (IS_ERR(host->iclk))
 -- 
 1.8.4.rc3
 
