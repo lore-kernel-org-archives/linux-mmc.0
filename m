@@ -1,16 +1,16 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
 Subject: Re: [PATCH] mmc: fix null pointer use in mmc_blk_remove_req
-Date: Mon, 07 Oct 2013 11:48:00 +0300
-Message-ID: <52527540.501@intel.com>
+Date: Mon, 07 Oct 2013 11:50:45 +0300
+Message-ID: <525275E5.5000900@intel.com>
 References: <1374671868-606-1-git-send-email-franck.jullien@gmail.com> <87d2p2sbcp.fsf@octavius.laptop.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga09.intel.com ([134.134.136.24]:14019 "EHLO mga09.intel.com"
+Received: from mga09.intel.com ([134.134.136.24]:51345 "EHLO mga09.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754093Ab3JGItM (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 7 Oct 2013 04:49:12 -0400
+	id S1754045Ab3JGIvz (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 7 Oct 2013 04:51:55 -0400
 In-Reply-To: <87d2p2sbcp.fsf@octavius.laptop.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
@@ -55,11 +55,14 @@ On 25/08/13 06:22, Chris Ball wrote:
 >>  			if ((md->area_type & MMC_BLK_DATA_AREA_BOOT) &&
 > 
 > Thanks for the patch, pushed to mmc-next for 3.12.
+> 
+> - Chris.
+> 
 
 Hi
 
 The regression is in 3.11, and causes an oops (see below)
-Adding linux-stable
+Adding linux-stable (correctly this time!)
 
 The fix is now in linus' tree with commit id:
 
@@ -119,4 +122,3 @@ Please cherry-pick this for 3.11
 [  108.164895]  RSP <ffff88013426dbe8>
 [  108.168794] CR2: 0000000000000398
 [  108.174595] ---[ end trace b9c7313fc09b25d8 ]---
-
