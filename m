@@ -1,124 +1,94 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH] mmc: fix null pointer use in mmc_blk_remove_req
-Date: Mon, 07 Oct 2013 11:54:11 +0300
-Message-ID: <525276B3.4060809@intel.com>
-References: <1374671868-606-1-git-send-email-franck.jullien@gmail.com> <87d2p2sbcp.fsf@octavius.laptop.org>
+From: ALIM AKHTAR <alim.akhtar@samsung.com>
+Subject: Re: Re: [PATCH] mmc: dw_mmc: Add hardware lock error (HLE) to the CMD
+ error flag
+Date: Mon, 07 Oct 2013 09:00:26 +0000 (GMT)
+Message-ID: <32277109.227361381136426293.JavaMail.weblogic@epv6ml06>
+Reply-To: alim.akhtar@samsung.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: base64
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga02.intel.com ([134.134.136.20]:31275 "EHLO mga02.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751556Ab3JGIzV (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 7 Oct 2013 04:55:21 -0400
-In-Reply-To: <87d2p2sbcp.fsf@octavius.laptop.org>
+Received: from mailout3.samsung.com ([203.254.224.33]:32688 "EHLO
+	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753953Ab3JGJAd (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 7 Oct 2013 05:00:33 -0400
+Received: from epcpsbgr5.samsung.com
+ (u145.gpu120.samsung.co.kr [203.254.230.145])
+ by mailout3.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+ (7.0.4.24.0) 64bit (built Nov 17 2011))
+ with ESMTP id <0MUA00MUEJOPXX70@mailout3.samsung.com> for
+ linux-mmc@vger.kernel.org; Mon, 07 Oct 2013 18:00:26 +0900 (KST)
+MIME-version: 1.0
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: stable@vger.kernel.org
-Cc: Chris Ball <cjb@laptop.org>, franck.jullien@gmail.com, linux-mmc@vger.kernel.org
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Seungwon Jeon <tgih.jun@samsung.com>, "cjb@laptop.org" <cjb@laptop.org>, "dianders@chromium.org" <dianders@chromium.org>
 
-On 25/08/13 06:22, Chris Ball wrote:
-> Hi Franck,
-> 
-> On Wed, Jul 24 2013, franck.jullien@gmail.com wrote:
->> From: Franck Jullien <franck.jullien@gmail.com>
->>
->> A previous commit (fdfa20c1631210d0) reordered the
->> shutdown sequence in mmc_blk_remove_req. However,
->> mmc_cleanup_queue is now called before we get the
->> card pointer and, sadly, mmc_cleanup_queue set
->> mq->card to NULL.
->>
->> This patch moves the card pointer assignment before
->> mmc_cleanup_queue.
->>
->> Signed-off-by: Franck Jullien <franck.jullien@gmail.com>
->> ---
->>  drivers/mmc/card/block.c |    2 +-
->>  1 files changed, 1 insertions(+), 1 deletions(-)
->>
->> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
->> index cd0b7f4..f4a0bea 100644
->> --- a/drivers/mmc/card/block.c
->> +++ b/drivers/mmc/card/block.c
->> @@ -2191,10 +2191,10 @@ static void mmc_blk_remove_req(struct mmc_blk_data *md)
->>  		 * is freeing the queue that stops new requests
->>  		 * from being accepted.
->>  		 */
->> +		card = md->queue.card;
->>  		mmc_cleanup_queue(&md->queue);
->>  		if (md->flags & MMC_BLK_PACKED_CMD)
->>  			mmc_packed_clean(&md->queue);
->> -		card = md->queue.card;
->>  		if (md->disk->flags & GENHD_FL_UP) {
->>  			device_remove_file(disk_to_dev(md->disk), &md->force_ro);
->>  			if ((md->area_type & MMC_BLK_DATA_AREA_BOOT) &&
-> 
-> Thanks for the patch, pushed to mmc-next for 3.12.
-> 
-> - Chris.
-> 
+SGkgSmFlb2hvb24sDQpUaGFua3MgZm9yIHF1aWNrIHJldmlldy4NCj4tLS0tLS0tIE9yaWdpbmFs
+IE1lc3NhZ2UgLS0tLS0tLQ0KPlNlbmRlciA6IEphZWhvb24gQ2h1bmc8amg4MC5jaHVuZ0BzYW1z
+dW5nLmNvbT4gUzQvRW5naW5lZXIvU3lzdGVtIFMvVyBMYWIuL1NhbXN1bmcgRWxlY3Ryb25pY3MN
+Cj5EYXRlIDogT2N0IDA3LCAyMDEzIDE3OjM2IChHTVQrMDk6MDApDQo+VGl0bGUgOiBSZTogW1BB
+VENIXSBtbWM6IGR3X21tYzogQWRkIGhhcmR3YXJlIGxvY2sgZXJyb3IgKEhMRSkgdG8gdGhlIENN
+RCBlcnJvciBmbGFnDQoNCj5IaSwgQWxpbS4NCg0KPk9uIDEwLzA3LzIwMTMgMDU6MjEgUE0sIEFM
+SU0gQUtIVEFSIHdyb3RlOg0KPj4gDQo+PiANCj4+PiAtLS0tLS0tIE9yaWdpbmFsIE1lc3NhZ2Ug
+LS0tLS0tLQ0KPj4+IFNlbmRlciA6IEphZWhvb24gQ2h1bmcgUzQvRW5naW5lZXIvU3lzdGVtIFMv
+VyBMYWIuL1NhbXN1bmcgRWxlY3Ryb25pY3MNCj4+PiBEYXRlIDogT2N0IDA3LCAyMDEzIDEzOjM0
+IChHTVQrMDk6MDApDQo+Pj4gVGl0bGUgOiBSZTogW1BBVENIXSBtbWM6IGR3X21tYzogQWRkIGhh
+cmR3YXJlIGxvY2sgZXJyb3IgKEhMRSkgdG8gdGhlIENNRCBlcnJvciBmbGFnDQo+PiANCj4+PiBP
+biAxMC8wNy8yMDEzIDAxOjIyIFBNLCBBTElNIEFLSFRBUiB3cm90ZToNCj4+Pj4gSGkgSmFlaG9v
+biwNCj4+Pj4NCj4+Pj4+IC0tLS0tLS0gT3JpZ2luYWwgTWVzc2FnZSAtLS0tLS0tDQo+Pj4+PiBT
+ZW5kZXIgOiBKYWVob29uIENodW5nIFM0L0VuZ2luZWVyL1N5c3RlbSBTL1cgTGFiLi9TYW1zdW5n
+IEVsZWN0cm9uaWNzDQo+Pj4+PiBEYXRlIDogT2N0IDA2LCAyMDEzIDE3OjI4IChHTVQrMDk6MDAp
+DQo+Pj4+IFRpdGxlIDogUmU6IFtQQVRDSF0gbW1jOiBkd19tbWM6IEFkZCBoYXJkd2FyZSBsb2Nr
+IGVycm9yIChITEUpIHRvIHRoZSBDTUQgZXJyb3IgZmxhZw0KPj4+ICANCj4+Pj4gSGkgQWxpbSwN
+Cj4+Pg0KPj4+PiBPbiAxMC8wMy8yMDEzIDA2OjE4IFBNLCBhbGltIGFraHRhciB3cm90ZToNCj4+
+Pj4+IEZyb206IEFsaW0gQWtodGFyIA0KPj4+Pj4NCj4+Pj4+IEhhcmR3YXJlIGxvY2tlZCBlcnJv
+ciBzZXQgd2hlbiB0aGUgZHdfbW1jIGNvbnRyb2xsZXIgY2Fubm90IGxvYWQgYQ0KPj4+Pj4gY29t
+bWFuZCBpc3N1ZWQgYnkgc29mdHdhcmUuIFdoZW4gc29mdHdhcmUgc2V0cyB0aGUgc3RhcnRfY21k
+IGJpdCBpbiB0aGUNCj4+Pj4+IENNRCByZWdpc3RlciwgdGhlIGNvbnRyb2xsZXIgdHJpZXMgdG8g
+bG9hZCB0aGUgY29tbWFuZC4gSWYgdGhlIGNvbW1hbmQNCj4+Pj4+IGJ1ZmZlciBpcyBhbHJlYWR5
+IGZpbGxlZCB3aXRoIGEgY29tbWFuZCwgdGhpcyBlcnJvciBpcyByYWlzZWQuIEN1cnJlbnRseQ0K
+Pj4+Pj4gZHJpdmVyIGRvZXMgbm90IGhhbmRsZSBITEUgaW50ZXJydXB0LCB3aGljaCByZXN1bHRz
+IGluIGEgc3lzdGVtIGhhbmcuDQo+Pj4+IFdoZW4gU0RNTUNfSU5UX0hMRSBpcyBzZXQgaW50byBD
+TURfRVJST1JfRkxBR1MsLnRoZW4gY291bGQgZHJpdmVyIGhhbmRsZSB0aGUgSExFIGludGVycnVw
+dD8NCj4+PiBZZXMsIHRoaXMgd2lsbCBiZSBoYW5kbGVkIGFzIGEgcGFydCBvZiBEV19NQ0lfQ01E
+X0VSUk9SX0ZMQUdTIGVycm9yIGhhbmRsaW5nLg0KPj4+IENvdWxkIHNvbWUgY29tbWFuZCBvciBk
+YXRhIGJlIGxvc3Q/DQo+PiBObywgRGF0YSBhbmQgY29tbWFuZCB3aWxsIG5vdCBiZSBsb3N0IGFz
+IHRoZXkgYXJlIG5vdCBzZW5kIG91dC4NCj5NYXliZSBpdCBuZWVkcyB0byBkaXNjdXNzIGhvdyBy
+ZWNvdmVyeSB0aGUgY29tbWFuZC9kYXRhLCB3aGVuIEhMRSBpbnRlcnJ1cHQgaXMgb2NjdXJlZC4N
+Cj5JIHdhbnQgdG8ga25vdywgZG8geW91IGhhdmUgdGhlIHJlY292ZXJ5IG1ldGhvZCB3aGVuIEhM
+RSBpbnRlcnJ1cHQgaXMgb2NjdXJlZD8NCj4NCj5BcyB5b3UgbWVudGlvbmVkLCB0aGlzIHBhdGNo
+IGNvbnRyb2xsZWQgdGhlIEhMRSBlcnJvciBhbmQgY2FuJ3Qgc2VuZCB0aGUgYW55IGNvbW1hbmQv
+ZGF0YS4NCj5QYXRjaCBsaWtlIHRoaXMgaGFkIGFscmVhZHkgcG9zdGVkIGF0IG1haWxpbmcgbGlz
+dC4NCkNhbiB5b3UgcG9pbnQgdG8gdGhlIGxpbms/DQo+QnV0IHdlIGFsc28gbmVlZCB0byBjb250
+cm9sIGFmdGVyIG9jY3VycmVkIHRoZSBITEUuDQpXZWxsLCBkd19tbWMgY29udHJvbGxlciBkb2N1
+bWVudCBqdXN0IHNheSAiVGhlIHNvZnR3YXJlIHRoZW4gaGFzIHRvIHJlbG9hZCB0aGUgY29tbWFu
+ZCIgdG8gcmVjb3ZlciBmcm9tIEhMRS4NCj5JbiBTRC1jYXJkJ3MgY2FzZSwgY2FyZCBjYW4gYmUg
+aW5zZXJ0ZWQvcmVtb3ZlZC4gYnV0IGluIGNhc2Ugb2YgZU1NQywgY2FuJ3QgaXQuDQo+SXQgc2hv
+dWxkIGJlIG1haW50YWluZWQgdGhlIGhhcmR3YXJlIGxvY2sgc3RhdHVzLg0KSExFIGlzIGluZGVw
+ZW5kZW50IG9mIGVtbWMvc2Qgc2xvdCBhbmQgaGFuZGxpbmcgc2hvdWxkIGJlIHRoZSBzYW1lLg0K
+SW5zZXJ0L3JlbW92YWwgaXMgb25lIHdheSB0byBzaW11bGF0ZSBITEUsIHRoaXMgaXMgaG93IEkg
+Zm91bmQgdGhpcy4NCkFyZSB5b3Ugc3VnZ2VzdGluZyB0byBjaGVjayBmb3IgSU5UX1NUQVRVRSBm
+b3IgZW1tYyBhbmQgaGFuZGxlIGl0IGluIGNhc2Ugb2YgSExFPyANCj4+QmVzdCBSZWdhcmRzLA0K
+Pj5KYWVob29uIENodW5nDQoNCj4+Pj4NCj4+Pj4+IEJlc3QgUmVnYXJkcywNCj4+Pj4+IEphZWhv
+b24gQ2h1bmcNCj4+Pj4+DQo+Pj4+PiBITEUgY2FuIGJlIHNpbXVsYXRlZCBieSBxdWlja2x5IGlu
+c2VydGluZyBhbmQgcmVtb3Zpbmcgc2QgY2FyZCBpbiBjYXJkDQo+Pj4+PiBzbG90ICgzMCB+IDQw
+IHRpbWVzIGluIHNheSAyMCBzZWNzKQ0KPj4+Pj4NCj4+Pj4+IFJldmlld2VkLWJ5OiBEb3VnIEFu
+ZGVyc29uIA0KPj4+Pj4gU2lnbmVkLW9mZi1ieTogQWxpbSBBa2h0YXIgDQo+Pj4+PiAtLS0NCj4+
+Pj4+ICAgZHJpdmVycy9tbWMvaG9zdC9kd19tbWMuYyB8IDIgKy0NCj4+Pj4+ICAgMSBmaWxlIGNo
+YW5nZWQsIDEgaW5zZXJ0aW9uKCspLCAxIGRlbGV0aW9uKC0pDQo+Pj4+Pg0KPj4+Pj4gZGlmZiAt
+LWdpdCBhL2RyaXZlcnMvbW1jL2hvc3QvZHdfbW1jLmMgYi9kcml2ZXJzL21tYy9ob3N0L2R3X21t
+Yy5jDQo+Pj4+PiBpbmRleCAwYTZhNTEyLi4yNGI0YTUyIDEwMDY0NA0KPj4+Pj4gLS0tIGEvZHJp
+dmVycy9tbWMvaG9zdC9kd19tbWMuYw0KPj4+Pj4gKysrIGIvZHJpdmVycy9tbWMvaG9zdC9kd19t
+bWMuYw0KPj4+Pj4gQEAgLTQ0LDcgKzQ0LDcgQEANCj4+Pj4+ICAgU0RNTUNfSU5UX0hUTyB8IFNE
+TU1DX0lOVF9TQkUgIHwgXA0KPj4+Pj4gICBTRE1NQ19JTlRfRUJFKQ0KPj4+Pj4gICAjZGVmaW5l
+IERXX01DSV9DTURfRVJST1JfRkxBR1MgKFNETU1DX0lOVF9SVE8gfCBTRE1NQ19JTlRfUkNSQyB8
+IFwNCj4+Pj4+IC0gU0RNTUNfSU5UX1JFU1BfRVJSKQ0KPj4+Pj4gKyBTRE1NQ19JTlRfUkVTUF9F
+UlIgfCBTRE1NQ19JTlRfSExFKQ0KPj4+Pj4gICAjZGVmaW5lIERXX01DSV9FUlJPUl9GTEFHUyAo
+RFdfTUNJX0RBVEFfRVJST1JfRkxBR1MgfCBcDQo+Pj4+PiAgIERXX01DSV9DTURfRVJST1JfRkxB
+R1MgIHwgU0RNTUNfSU5UX0hMRSkNCj4+Pj4+ICAgI2RlZmluZSBEV19NQ0lfU0VORF9TVEFUVVMg
+MQ0KPj4+Pj4gTounsubscribefromthislistsendthelineunsubscribelinuxmmcinthebody
+ofamessaP+tomajordomovgerkerP+lorgMoremajordomoiP/oathttp//vP+rkernelorg/maj
+ordomoinfohtbWw9PQ==
 
-Hi
 
-The regression is in 3.11, and causes an oops (see below)
-Adding linux-stable (third time lucky?!?!)
-
-The fix is now in linus' tree with commit id:
-
-	8efb83a2f8518a6ffcc074177f8d659c5165ef37
-
-Please cherry-pick this for 3.11
-
-
-[  107.814928] BUG: unable to handle kernel NULL pointer dereference at 0000000000000398
-[  107.823706] IP: [<ffffffffa000d201>] mmc_blk_remove_req+0x56/0x8b [mmc_block]
-[  107.831709] PGD 134323067 PUD 1343c2067 PMD 0 
-[  107.836703] Oops: 0000 [#1] PREEMPT SMP 
-[  107.841098] Modules linked in: sdhci_acpi(-) mmc_block sdhci
-[  107.847468] CPU: 1 PID: 133 Comm: rmmod Not tainted 3.11.3+ #15
-[  107.854090] task: ffff8801341dc440 ti: ffff88013426c000 task.ti: ffff88013426c000
-[  107.862456] RIP: 0010:[<ffffffffa000d201>]  [<ffffffffa000d201>] mmc_blk_remove_req+0x56/0x8b [mmc_block]
-[  107.873172] RSP: 0018:ffff88013426dbe8  EFLAGS: 00010202
-[  107.879111] RAX: ffff8801341e63a8 RBX: ffff8801341e6000 RCX: 00000000000160a0
-[  107.887088] RDX: 0000000000000000 RSI: 0000000000000001 RDI: 0000000000000023
-[  107.895058] RBP: ffff88013426dbf8 R08: ffff88013b443180 R09: ffff88013426dfd8
-[  107.903035] R10: 000000000000273c R11: ffff880134330e00 R12: 0000000000000000
-[  107.911005] R13: ffff8801341e5000 R14: ffffffffa001c098 R15: 0000000000000000
-[  107.918985] FS:  00007f9bab888700(0000) GS:ffff88013fc80000(0000) knlGS:0000000000000000
-[  107.928031] CS:  0010 DS: 0000 ES: 0000 CR0: 000000008005003b
-[  107.934455] CR2: 0000000000000398 CR3: 0000000134263000 CR4: 00000000001007e0
-[  107.942422] Stack:
-[  107.944669]  ffff8801341e5ba8 ffff8801341e53a8 ffff88013426dc18 ffffffffa000dbfa
-[  107.952965]  ffff8801341e4800 ffff8801341e4808 ffff88013426dc48 ffffffffa000fca0
-[  107.961260]  000000000000bbc9 ffff8801341e4808 ffffffffa0012010 ffffffff81a82210
-[  107.969556] Call Trace:
-[  107.972307]  [<ffffffffa000dbfa>] mmc_blk_remove_parts.isra.16+0x5c/0x6c [mmc_block]
-[  107.980980]  [<ffffffffa000fca0>] mmc_blk_remove+0x25/0xa9 [mmc_block]
-[  107.988289]  [<ffffffff8140dd6c>] mmc_bus_remove+0x15/0x19
-[  107.994432]  [<ffffffff812f14a8>] __device_release_driver+0x86/0xdc
-[  108.001448]  [<ffffffff812f175d>] device_release_driver+0x1e/0x2b
-[  108.008269]  [<ffffffff812f10bc>] bus_remove_device+0xe5/0xfa
-[  108.014701]  [<ffffffff812eeb96>] device_del+0x12c/0x186
-[  108.020646]  [<ffffffff8140e2cc>] mmc_remove_card+0x66/0x76
-[  108.026884]  [<ffffffff8140ec55>] mmc_remove+0x23/0x32
-[  108.032636]  [<ffffffff8140dbb2>] mmc_stop_host+0x58/0x9f
-[  108.038678]  [<ffffffff8140e301>] mmc_remove_host+0x1d/0x3e
-[  108.044923]  [<ffffffffa0001d76>] sdhci_remove_host+0x94/0x122 [sdhci]
-[  108.052235]  [<ffffffffa001a145>] sdhci_acpi_remove+0x79/0x8b [sdhci_acpi]
-[  108.059932]  [<ffffffff812f2e50>] platform_drv_remove+0x1a/0x3e
-[  108.066559]  [<ffffffff812f14a8>] __device_release_driver+0x86/0xdc
-[  108.073574]  [<ffffffff812f1c9f>] driver_detach+0x81/0xb2
-[  108.079611]  [<ffffffff812f1357>] bus_remove_driver+0x6f/0xb4
-[  108.086045]  [<ffffffffa001a568>] ? sdhci_acpi_probe+0x411/0x411 [sdhci_acpi]
-[  108.094031]  [<ffffffff812f20a3>] driver_unregister+0x4e/0x73
-[  108.100464]  [<ffffffff812f2d26>] platform_driver_unregister+0xd/0xf
-[  108.107578]  [<ffffffffa001a578>] sdhci_acpi_driver_exit+0x10/0xa98 [sdhci_acpi]
-[  108.115859]  [<ffffffff8107eac3>] SyS_delete_module+0x1b6/0x244
-[  108.122488]  [<ffffffff8102c638>] ? do_page_fault+0x9/0xd
-[  108.128535]  [<ffffffff815cd052>] system_call_fastpath+0x16/0x1b
-[  108.135250] Code: 00 48 8b 7b 08 4c 8b 63 10 f6 87 60 03 00 00 10 74 41 48 8d b3 d8 03 00 00 48 83 c7 70 e8 26 10 2e e1 f6 83 18 04 00 00 02 74 1f <41> 80 bc 24 98 03 00 00 00 74 14 48 8b 7b 08 48 8d b3 f8 03 00 
-[  108.156804] RIP  [<ffffffffa000d201>] mmc_blk_remove_req+0x56/0x8b [mmc_block]
-[  108.164895]  RSP <ffff88013426dbe8>
-[  108.168794] CR2: 0000000000000398
-[  108.174595] ---[ end trace b9c7313fc09b25d8 ]---
