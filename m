@@ -1,70 +1,118 @@
-From: ALIM AKHTAR <alim.akhtar@samsung.com>
-Subject: Re: Re: [PATCH] mmc: dw_mmc: Add hardware lock error (HLE) to the CMD
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH] mmc: dw_mmc: Add hardware lock error (HLE) to the CMD
  error flag
-Date: Mon, 07 Oct 2013 08:21:29 +0000 (GMT)
-Message-ID: <29218680.225111381134088889.JavaMail.weblogic@epv6ml06>
-Reply-To: alim.akhtar@samsung.com
+Date: Mon, 07 Oct 2013 17:36:37 +0900
+Message-ID: <52527295.2090906@samsung.com>
+References: <29218680.225111381134088889.JavaMail.weblogic@epv6ml06>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: base64
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout3.samsung.com ([203.254.224.33]:25377 "EHLO
-	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752300Ab3JGIVk (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 7 Oct 2013 04:21:40 -0400
-Received: from epcpsbgr2.samsung.com
- (u142.gpu120.samsung.co.kr [203.254.230.142])
- by mailout3.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+Received: from mailout2.samsung.com ([203.254.224.25]:28961 "EHLO
+	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752727Ab3JGIgf (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 7 Oct 2013 04:36:35 -0400
+Received: from epcpsbgr4.samsung.com
+ (u144.gpu120.samsung.co.kr [203.254.230.144])
+ by mailout2.samsung.com (Oracle Communications Messaging Server 7u4-24.01
  (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTP id <0MUA00MOLHW3XX50@mailout3.samsung.com> for
- linux-mmc@vger.kernel.org; Mon, 07 Oct 2013 17:21:39 +0900 (KST)
-MIME-version: 1.0
+ with ESMTP id <0MUA006KDIKW9DH0@mailout2.samsung.com> for
+ linux-mmc@vger.kernel.org; Mon, 07 Oct 2013 17:36:33 +0900 (KST)
+In-reply-to: <29218680.225111381134088889.JavaMail.weblogic@epv6ml06>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
+To: alim.akhtar@samsung.com
 Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Seungwon Jeon <tgih.jun@samsung.com>, "cjb@laptop.org" <cjb@laptop.org>, "dianders@chromium.org" <dianders@chromium.org>
 
-DQoNCj4tLS0tLS0tIE9yaWdpbmFsIE1lc3NhZ2UgLS0tLS0tLQ0KPlNlbmRlciA6IEphZWhvb24g
-Q2h1bmc8amg4MC5jaHVuZ0BzYW1zdW5nLmNvbT4gUzQvRW5naW5lZXIvU3lzdGVtIFMvVyBMYWIu
-L1NhbXN1bmcgRWxlY3Ryb25pY3MNCj5EYXRlIDogT2N0IDA3LCAyMDEzIDEzOjM0IChHTVQrMDk6
-MDApDQo+VGl0bGUgOiBSZTogW1BBVENIXSBtbWM6IGR3X21tYzogQWRkIGhhcmR3YXJlIGxvY2sg
-ZXJyb3IgKEhMRSkgdG8gdGhlIENNRCBlcnJvciBmbGFnDQoNCj5PbiAxMC8wNy8yMDEzIDAxOjIy
-IFBNLCBBTElNIEFLSFRBUiB3cm90ZToNCj4+IEhpIEphZWhvb24sDQo+PiANCj4+PiAtLS0tLS0t
-IE9yaWdpbmFsIE1lc3NhZ2UgLS0tLS0tLQ0KPj4+IFNlbmRlciA6IEphZWhvb24gQ2h1bmcgUzQv
-RW5naW5lZXIvU3lzdGVtIFMvVyBMYWIuL1NhbXN1bmcgRWxlY3Ryb25pY3MNCj4+PiBEYXRlIDog
-T2N0IDA2LCAyMDEzIDE3OjI4IChHTVQrMDk6MDApDQo+PiBUaXRsZSA6IFJlOiBbUEFUQ0hdIG1t
-YzogZHdfbW1jOiBBZGQgaGFyZHdhcmUgbG9jayBlcnJvciAoSExFKSB0byB0aGUgQ01EIGVycm9y
-IGZsYWcNCj4gIA0KPj4gSGkgQWxpbSwNCj4gDQo+PiBPbiAxMC8wMy8yMDEzIDA2OjE4IFBNLCBh
-bGltIGFraHRhciB3cm90ZToNCj4+PiBGcm9tOiBBbGltIEFraHRhciANCj4+Pg0KPj4+IEhhcmR3
-YXJlIGxvY2tlZCBlcnJvciBzZXQgd2hlbiB0aGUgZHdfbW1jIGNvbnRyb2xsZXIgY2Fubm90IGxv
-YWQgYQ0KPj4+IGNvbW1hbmQgaXNzdWVkIGJ5IHNvZnR3YXJlLiBXaGVuIHNvZnR3YXJlIHNldHMg
-dGhlIHN0YXJ0X2NtZCBiaXQgaW4gdGhlDQo+Pj4gQ01EIHJlZ2lzdGVyLCB0aGUgY29udHJvbGxl
-ciB0cmllcyB0byBsb2FkIHRoZSBjb21tYW5kLiBJZiB0aGUgY29tbWFuZA0KPj4+IGJ1ZmZlciBp
-cyBhbHJlYWR5IGZpbGxlZCB3aXRoIGEgY29tbWFuZCwgdGhpcyBlcnJvciBpcyByYWlzZWQuIEN1
-cnJlbnRseQ0KPj4+IGRyaXZlciBkb2VzIG5vdCBoYW5kbGUgSExFIGludGVycnVwdCwgd2hpY2gg
-cmVzdWx0cyBpbiBhIHN5c3RlbSBoYW5nLg0KPj4gV2hlbiBTRE1NQ19JTlRfSExFIGlzIHNldCBp
-bnRvIENNRF9FUlJPUl9GTEFHUywudGhlbiBjb3VsZCBkcml2ZXIgaGFuZGxlIHRoZSBITEUgaW50
-ZXJydXB0Pw0KPiBZZXMsIHRoaXMgd2lsbCBiZSBoYW5kbGVkIGFzIGEgcGFydCBvZiBEV19NQ0lf
-Q01EX0VSUk9SX0ZMQUdTIGVycm9yIGhhbmRsaW5nLg0KPkNvdWxkIHNvbWUgY29tbWFuZCBvciBk
-YXRhIGJlIGxvc3Q/DQpObywgRGF0YSBhbmQgY29tbWFuZCB3aWxsIG5vdCBiZSBsb3N0IGFzIHRo
-ZXkgYXJlIG5vdCBzZW5kIG91dC4NCj4+IA0KPj4+IEJlc3QgUmVnYXJkcywNCj4+PiBKYWVob29u
-IENodW5nDQo+Pj4NCj4+PiBITEUgY2FuIGJlIHNpbXVsYXRlZCBieSBxdWlja2x5IGluc2VydGlu
-ZyBhbmQgcmVtb3Zpbmcgc2QgY2FyZCBpbiBjYXJkDQo+Pj4gc2xvdCAoMzAgfiA0MCB0aW1lcyBp
-biBzYXkgMjAgc2VjcykNCj4+Pg0KPj4+IFJldmlld2VkLWJ5OiBEb3VnIEFuZGVyc29uIA0KPj4+
-IFNpZ25lZC1vZmYtYnk6IEFsaW0gQWtodGFyIA0KPj4+IC0tLQ0KPj4+ICAgZHJpdmVycy9tbWMv
-aG9zdC9kd19tbWMuYyB8IDIgKy0NCj4+PiAgIDEgZmlsZSBjaGFuZ2VkLCAxIGluc2VydGlvbigr
-KSwgMSBkZWxldGlvbigtKQ0KPj4+DQo+Pj4gZGlmZiAtLWdpdCBhL2RyaXZlcnMvbW1jL2hvc3Qv
-ZHdfbW1jLmMgYi9kcml2ZXJzL21tYy9ob3N0L2R3X21tYy5jDQo+Pj4gaW5kZXggMGE2YTUxMi4u
-MjRiNGE1MiAxMDA2NDQNCj4+PiAtLS0gYS9kcml2ZXJzL21tYy9ob3N0L2R3X21tYy5jDQo+Pj4g
-KysrIGIvZHJpdmVycy9tbWMvaG9zdC9kd19tbWMuYw0KPj4+IEBAIC00NCw3ICs0NCw3IEBADQo+
-Pj4gICBTRE1NQ19JTlRfSFRPIHwgU0RNTUNfSU5UX1NCRSAgfCBcDQo+Pj4gICBTRE1NQ19JTlRf
-RUJFKQ0KPj4+ICAgI2RlZmluZSBEV19NQ0lfQ01EX0VSUk9SX0ZMQUdTIChTRE1NQ19JTlRfUlRP
-IHwgU0RNTUNfSU5UX1JDUkMgfCBcDQo+Pj4gLSBTRE1NQ19JTlRfUkVTUF9FUlIpDQo+Pj4gKyBT
-RE1NQ19JTlRfUkVTUF9FUlIgfCBTRE1NQ19JTlRfSExFKQ0KPj4+ICAgI2RlZmluZSBEV19NQ0lf
-RVJST1JfRkxBR1MgKERXX01DSV9EQVRBX0VSUk9SX0ZMQUdTIHwgXA0KPj4+ICAgRFdfTUNJX0NN
-RF9FUlJPUl9GTEFHUyAgfCBTRE1NQ19JTlRfSExFKQ0KPj4+ICAgI2RlZmluZSBEV19NQ0lfU0VO
-RF9TVEFUVVMgMQ0KPj4+IE6Lp7Lm7HK4m3n66JrYYrJYrLbHp3bYXpYp3rp7Lm7HK4m3pYp7sZpn
-Ip7YXm6HcqH2pnrLGj/raJmo6K3aJqL4Hq5Hqz/paK4DKK3pmo6K3aJqIj/6GrYbbaf/7z/q5Hq5
-3paK4P5mo6K3aJqIp36IbW1sPT0=
+Hi, Alim.
 
+On 10/07/2013 05:21 PM, ALIM AKHTAR wrote:
+>=20
+>=20
+>> ------- Original Message -------
+>> Sender : Jaehoon Chung<jh80.chung@samsung.com> S4/Engineer/System S/=
+W Lab./Samsung Electronics
+>> Date : Oct 07, 2013 13:34 (GMT+09:00)
+>> Title : Re: [PATCH] mmc: dw_mmc: Add hardware lock error (HLE) to th=
+e CMD error flag
+>=20
+>> On 10/07/2013 01:22 PM, ALIM AKHTAR wrote:
+>>> Hi Jaehoon,
+>>>
+>>>> ------- Original Message -------
+>>>> Sender : Jaehoon Chung S4/Engineer/System S/W Lab./Samsung Electro=
+nics
+>>>> Date : Oct 06, 2013 17:28 (GMT+09:00)
+>>> Title : Re: [PATCH] mmc: dw_mmc: Add hardware lock error (HLE) to t=
+he CMD error flag
+>> =20
+>>> Hi Alim,
+>>
+>>> On 10/03/2013 06:18 PM, alim akhtar wrote:
+>>>> From: Alim Akhtar=20
+>>>>
+>>>> Hardware locked error set when the dw_mmc controller cannot load a
+>>>> command issued by software. When software sets the start_cmd bit i=
+n the
+>>>> CMD register, the controller tries to load the command. If the com=
+mand
+>>>> buffer is already filled with a command, this error is raised. Cur=
+rently
+>>>> driver does not handle HLE interrupt, which results in a system ha=
+ng.
+>>> When SDMMC_INT_HLE is set into CMD_ERROR_FLAGS,.then could driver h=
+andle the HLE interrupt?
+>> Yes, this will be handled as a part of DW_MCI_CMD_ERROR_FLAGS error =
+handling.
+>> Could some command or data be lost?
+> No, Data and command will not be lost as they are not send out.
+Maybe it needs to discuss how recovery the command/data, when HLE inter=
+rupt is occured.
+I want to know, do you have the recovery method when HLE interrupt is o=
+ccured?
+
+As you mentioned, this patch controlled the HLE error and can't send th=
+e any command/data.
+Patch like this had already posted at mailing list.
+But we also need to control after occurred the HLE.
+
+In SD-card's case, card can be inserted/removed. but in case of eMMC, c=
+an't it.
+It should be maintained the hardware lock status.
+
+Best Regards,
+Jaehoon Chung
+
+>>>
+>>>> Best Regards,
+>>>> Jaehoon Chung
+>>>>
+>>>> HLE can be simulated by quickly inserting and removing sd card in =
+card
+>>>> slot (30 ~ 40 times in say 20 secs)
+>>>>
+>>>> Reviewed-by: Doug Anderson=20
+>>>> Signed-off-by: Alim Akhtar=20
+>>>> ---
+>>>>   drivers/mmc/host/dw_mmc.c | 2 +-
+>>>>   1 file changed, 1 insertion(+), 1 deletion(-)
+>>>>
+>>>> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+>>>> index 0a6a512..24b4a52 100644
+>>>> --- a/drivers/mmc/host/dw_mmc.c
+>>>> +++ b/drivers/mmc/host/dw_mmc.c
+>>>> @@ -44,7 +44,7 @@
+>>>>   SDMMC_INT_HTO | SDMMC_INT_SBE  | \
+>>>>   SDMMC_INT_EBE)
+>>>>   #define DW_MCI_CMD_ERROR_FLAGS (SDMMC_INT_RTO | SDMMC_INT_RCRC |=
+ \
+>>>> - SDMMC_INT_RESP_ERR)
+>>>> + SDMMC_INT_RESP_ERR | SDMMC_INT_HLE)
+>>>>   #define DW_MCI_ERROR_FLAGS (DW_MCI_DATA_ERROR_FLAGS | \
+>>>>   DW_MCI_CMD_ERROR_FLAGS  | SDMMC_INT_HLE)
+>>>>   #define DW_MCI_SEND_STATUS 1
+>>>> N=8B=A7=B2=E6=ECr=B8=9By=FA=E8=9A=D8b=B2X=AC=B6=C7=A7v=D8^=96)=DE=BA=
+{.n=C7+=89=B7=A5=8A{=B1=9Ag"=9E=D8^n=87r=A1=F6=A6z=CB=1A?=EBh=99=A8=E8=AD=
+=DA&=A2=F8=1E=AEG=AB?=E9h=AE=03(=AD=E9=9A=8E=8A=DD=A2j"?=FA=1A=B6=1Bm=A7=
+=FF=EF?=EA=E4z=B9=DE=96=8A=E0=FEf=A3=A2=B7h=9A=88=A7~=88mml=3D=3D
 
