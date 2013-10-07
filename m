@@ -1,20 +1,20 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
 Subject: Re: [PATCH] mmc: fix null pointer use in mmc_blk_remove_req
-Date: Mon, 07 Oct 2013 11:50:45 +0300
-Message-ID: <525275E5.5000900@intel.com>
+Date: Mon, 07 Oct 2013 11:54:11 +0300
+Message-ID: <525276B3.4060809@intel.com>
 References: <1374671868-606-1-git-send-email-franck.jullien@gmail.com> <87d2p2sbcp.fsf@octavius.laptop.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga09.intel.com ([134.134.136.24]:51345 "EHLO mga09.intel.com"
+Received: from mga02.intel.com ([134.134.136.20]:31275 "EHLO mga02.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754045Ab3JGIvz (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 7 Oct 2013 04:51:55 -0400
+	id S1751556Ab3JGIzV (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 7 Oct 2013 04:55:21 -0400
 In-Reply-To: <87d2p2sbcp.fsf@octavius.laptop.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-stable@vger.kernel.org
+To: stable@vger.kernel.org
 Cc: Chris Ball <cjb@laptop.org>, franck.jullien@gmail.com, linux-mmc@vger.kernel.org
 
 On 25/08/13 06:22, Chris Ball wrote:
@@ -62,7 +62,7 @@ On 25/08/13 06:22, Chris Ball wrote:
 Hi
 
 The regression is in 3.11, and causes an oops (see below)
-Adding linux-stable (correctly this time!)
+Adding linux-stable (third time lucky?!?!)
 
 The fix is now in linus' tree with commit id:
 
