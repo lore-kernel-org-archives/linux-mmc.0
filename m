@@ -1,94 +1,78 @@
-From: ALIM AKHTAR <alim.akhtar@samsung.com>
-Subject: Re: Re: [PATCH] mmc: dw_mmc: Add hardware lock error (HLE) to the CMD
- error flag
-Date: Mon, 07 Oct 2013 09:00:26 +0000 (GMT)
-Message-ID: <32277109.227361381136426293.JavaMail.weblogic@epv6ml06>
-Reply-To: alim.akhtar@samsung.com
+From: Fabio Estevam <fabio.estevam@freescale.com>
+Subject: [PATCH 2/2] mmc: sdhci-esdhc-imx: Remove custom properties
+Date: Mon, 7 Oct 2013 14:32:24 -0300
+Message-ID: <1381167144-18098-2-git-send-email-fabio.estevam@freescale.com>
+References: <1381167144-18098-1-git-send-email-fabio.estevam@freescale.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: base64
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout3.samsung.com ([203.254.224.33]:32688 "EHLO
-	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753953Ab3JGJAd (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 7 Oct 2013 05:00:33 -0400
-Received: from epcpsbgr5.samsung.com
- (u145.gpu120.samsung.co.kr [203.254.230.145])
- by mailout3.samsung.com (Oracle Communications Messaging Server 7u4-24.01
- (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTP id <0MUA00MUEJOPXX70@mailout3.samsung.com> for
- linux-mmc@vger.kernel.org; Mon, 07 Oct 2013 18:00:26 +0900 (KST)
-MIME-version: 1.0
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1381167144-18098-1-git-send-email-fabio.estevam@freescale.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: shawn.guo@linaro.org
+Cc: linux-kernel@vger.kernel.org, Fabio Estevam <fabio.estevam@freescale.com>, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Seungwon Jeon <tgih.jun@samsung.com>, "cjb@laptop.org" <cjb@laptop.org>, "dianders@chromium.org" <dianders@chromium.org>
 
-SGkgSmFlb2hvb24sDQpUaGFua3MgZm9yIHF1aWNrIHJldmlldy4NCj4tLS0tLS0tIE9yaWdpbmFs
-IE1lc3NhZ2UgLS0tLS0tLQ0KPlNlbmRlciA6IEphZWhvb24gQ2h1bmc8amg4MC5jaHVuZ0BzYW1z
-dW5nLmNvbT4gUzQvRW5naW5lZXIvU3lzdGVtIFMvVyBMYWIuL1NhbXN1bmcgRWxlY3Ryb25pY3MN
-Cj5EYXRlIDogT2N0IDA3LCAyMDEzIDE3OjM2IChHTVQrMDk6MDApDQo+VGl0bGUgOiBSZTogW1BB
-VENIXSBtbWM6IGR3X21tYzogQWRkIGhhcmR3YXJlIGxvY2sgZXJyb3IgKEhMRSkgdG8gdGhlIENN
-RCBlcnJvciBmbGFnDQoNCj5IaSwgQWxpbS4NCg0KPk9uIDEwLzA3LzIwMTMgMDU6MjEgUE0sIEFM
-SU0gQUtIVEFSIHdyb3RlOg0KPj4gDQo+PiANCj4+PiAtLS0tLS0tIE9yaWdpbmFsIE1lc3NhZ2Ug
-LS0tLS0tLQ0KPj4+IFNlbmRlciA6IEphZWhvb24gQ2h1bmcgUzQvRW5naW5lZXIvU3lzdGVtIFMv
-VyBMYWIuL1NhbXN1bmcgRWxlY3Ryb25pY3MNCj4+PiBEYXRlIDogT2N0IDA3LCAyMDEzIDEzOjM0
-IChHTVQrMDk6MDApDQo+Pj4gVGl0bGUgOiBSZTogW1BBVENIXSBtbWM6IGR3X21tYzogQWRkIGhh
-cmR3YXJlIGxvY2sgZXJyb3IgKEhMRSkgdG8gdGhlIENNRCBlcnJvciBmbGFnDQo+PiANCj4+PiBP
-biAxMC8wNy8yMDEzIDAxOjIyIFBNLCBBTElNIEFLSFRBUiB3cm90ZToNCj4+Pj4gSGkgSmFlaG9v
-biwNCj4+Pj4NCj4+Pj4+IC0tLS0tLS0gT3JpZ2luYWwgTWVzc2FnZSAtLS0tLS0tDQo+Pj4+PiBT
-ZW5kZXIgOiBKYWVob29uIENodW5nIFM0L0VuZ2luZWVyL1N5c3RlbSBTL1cgTGFiLi9TYW1zdW5n
-IEVsZWN0cm9uaWNzDQo+Pj4+PiBEYXRlIDogT2N0IDA2LCAyMDEzIDE3OjI4IChHTVQrMDk6MDAp
-DQo+Pj4+IFRpdGxlIDogUmU6IFtQQVRDSF0gbW1jOiBkd19tbWM6IEFkZCBoYXJkd2FyZSBsb2Nr
-IGVycm9yIChITEUpIHRvIHRoZSBDTUQgZXJyb3IgZmxhZw0KPj4+ICANCj4+Pj4gSGkgQWxpbSwN
-Cj4+Pg0KPj4+PiBPbiAxMC8wMy8yMDEzIDA2OjE4IFBNLCBhbGltIGFraHRhciB3cm90ZToNCj4+
-Pj4+IEZyb206IEFsaW0gQWtodGFyIA0KPj4+Pj4NCj4+Pj4+IEhhcmR3YXJlIGxvY2tlZCBlcnJv
-ciBzZXQgd2hlbiB0aGUgZHdfbW1jIGNvbnRyb2xsZXIgY2Fubm90IGxvYWQgYQ0KPj4+Pj4gY29t
-bWFuZCBpc3N1ZWQgYnkgc29mdHdhcmUuIFdoZW4gc29mdHdhcmUgc2V0cyB0aGUgc3RhcnRfY21k
-IGJpdCBpbiB0aGUNCj4+Pj4+IENNRCByZWdpc3RlciwgdGhlIGNvbnRyb2xsZXIgdHJpZXMgdG8g
-bG9hZCB0aGUgY29tbWFuZC4gSWYgdGhlIGNvbW1hbmQNCj4+Pj4+IGJ1ZmZlciBpcyBhbHJlYWR5
-IGZpbGxlZCB3aXRoIGEgY29tbWFuZCwgdGhpcyBlcnJvciBpcyByYWlzZWQuIEN1cnJlbnRseQ0K
-Pj4+Pj4gZHJpdmVyIGRvZXMgbm90IGhhbmRsZSBITEUgaW50ZXJydXB0LCB3aGljaCByZXN1bHRz
-IGluIGEgc3lzdGVtIGhhbmcuDQo+Pj4+IFdoZW4gU0RNTUNfSU5UX0hMRSBpcyBzZXQgaW50byBD
-TURfRVJST1JfRkxBR1MsLnRoZW4gY291bGQgZHJpdmVyIGhhbmRsZSB0aGUgSExFIGludGVycnVw
-dD8NCj4+PiBZZXMsIHRoaXMgd2lsbCBiZSBoYW5kbGVkIGFzIGEgcGFydCBvZiBEV19NQ0lfQ01E
-X0VSUk9SX0ZMQUdTIGVycm9yIGhhbmRsaW5nLg0KPj4+IENvdWxkIHNvbWUgY29tbWFuZCBvciBk
-YXRhIGJlIGxvc3Q/DQo+PiBObywgRGF0YSBhbmQgY29tbWFuZCB3aWxsIG5vdCBiZSBsb3N0IGFz
-IHRoZXkgYXJlIG5vdCBzZW5kIG91dC4NCj5NYXliZSBpdCBuZWVkcyB0byBkaXNjdXNzIGhvdyBy
-ZWNvdmVyeSB0aGUgY29tbWFuZC9kYXRhLCB3aGVuIEhMRSBpbnRlcnJ1cHQgaXMgb2NjdXJlZC4N
-Cj5JIHdhbnQgdG8ga25vdywgZG8geW91IGhhdmUgdGhlIHJlY292ZXJ5IG1ldGhvZCB3aGVuIEhM
-RSBpbnRlcnJ1cHQgaXMgb2NjdXJlZD8NCj4NCj5BcyB5b3UgbWVudGlvbmVkLCB0aGlzIHBhdGNo
-IGNvbnRyb2xsZWQgdGhlIEhMRSBlcnJvciBhbmQgY2FuJ3Qgc2VuZCB0aGUgYW55IGNvbW1hbmQv
-ZGF0YS4NCj5QYXRjaCBsaWtlIHRoaXMgaGFkIGFscmVhZHkgcG9zdGVkIGF0IG1haWxpbmcgbGlz
-dC4NCkNhbiB5b3UgcG9pbnQgdG8gdGhlIGxpbms/DQo+QnV0IHdlIGFsc28gbmVlZCB0byBjb250
-cm9sIGFmdGVyIG9jY3VycmVkIHRoZSBITEUuDQpXZWxsLCBkd19tbWMgY29udHJvbGxlciBkb2N1
-bWVudCBqdXN0IHNheSAiVGhlIHNvZnR3YXJlIHRoZW4gaGFzIHRvIHJlbG9hZCB0aGUgY29tbWFu
-ZCIgdG8gcmVjb3ZlciBmcm9tIEhMRS4NCj5JbiBTRC1jYXJkJ3MgY2FzZSwgY2FyZCBjYW4gYmUg
-aW5zZXJ0ZWQvcmVtb3ZlZC4gYnV0IGluIGNhc2Ugb2YgZU1NQywgY2FuJ3QgaXQuDQo+SXQgc2hv
-dWxkIGJlIG1haW50YWluZWQgdGhlIGhhcmR3YXJlIGxvY2sgc3RhdHVzLg0KSExFIGlzIGluZGVw
-ZW5kZW50IG9mIGVtbWMvc2Qgc2xvdCBhbmQgaGFuZGxpbmcgc2hvdWxkIGJlIHRoZSBzYW1lLg0K
-SW5zZXJ0L3JlbW92YWwgaXMgb25lIHdheSB0byBzaW11bGF0ZSBITEUsIHRoaXMgaXMgaG93IEkg
-Zm91bmQgdGhpcy4NCkFyZSB5b3Ugc3VnZ2VzdGluZyB0byBjaGVjayBmb3IgSU5UX1NUQVRVRSBm
-b3IgZW1tYyBhbmQgaGFuZGxlIGl0IGluIGNhc2Ugb2YgSExFPyANCj4+QmVzdCBSZWdhcmRzLA0K
-Pj5KYWVob29uIENodW5nDQoNCj4+Pj4NCj4+Pj4+IEJlc3QgUmVnYXJkcywNCj4+Pj4+IEphZWhv
-b24gQ2h1bmcNCj4+Pj4+DQo+Pj4+PiBITEUgY2FuIGJlIHNpbXVsYXRlZCBieSBxdWlja2x5IGlu
-c2VydGluZyBhbmQgcmVtb3Zpbmcgc2QgY2FyZCBpbiBjYXJkDQo+Pj4+PiBzbG90ICgzMCB+IDQw
-IHRpbWVzIGluIHNheSAyMCBzZWNzKQ0KPj4+Pj4NCj4+Pj4+IFJldmlld2VkLWJ5OiBEb3VnIEFu
-ZGVyc29uIA0KPj4+Pj4gU2lnbmVkLW9mZi1ieTogQWxpbSBBa2h0YXIgDQo+Pj4+PiAtLS0NCj4+
-Pj4+ICAgZHJpdmVycy9tbWMvaG9zdC9kd19tbWMuYyB8IDIgKy0NCj4+Pj4+ICAgMSBmaWxlIGNo
-YW5nZWQsIDEgaW5zZXJ0aW9uKCspLCAxIGRlbGV0aW9uKC0pDQo+Pj4+Pg0KPj4+Pj4gZGlmZiAt
-LWdpdCBhL2RyaXZlcnMvbW1jL2hvc3QvZHdfbW1jLmMgYi9kcml2ZXJzL21tYy9ob3N0L2R3X21t
-Yy5jDQo+Pj4+PiBpbmRleCAwYTZhNTEyLi4yNGI0YTUyIDEwMDY0NA0KPj4+Pj4gLS0tIGEvZHJp
-dmVycy9tbWMvaG9zdC9kd19tbWMuYw0KPj4+Pj4gKysrIGIvZHJpdmVycy9tbWMvaG9zdC9kd19t
-bWMuYw0KPj4+Pj4gQEAgLTQ0LDcgKzQ0LDcgQEANCj4+Pj4+ICAgU0RNTUNfSU5UX0hUTyB8IFNE
-TU1DX0lOVF9TQkUgIHwgXA0KPj4+Pj4gICBTRE1NQ19JTlRfRUJFKQ0KPj4+Pj4gICAjZGVmaW5l
-IERXX01DSV9DTURfRVJST1JfRkxBR1MgKFNETU1DX0lOVF9SVE8gfCBTRE1NQ19JTlRfUkNSQyB8
-IFwNCj4+Pj4+IC0gU0RNTUNfSU5UX1JFU1BfRVJSKQ0KPj4+Pj4gKyBTRE1NQ19JTlRfUkVTUF9F
-UlIgfCBTRE1NQ19JTlRfSExFKQ0KPj4+Pj4gICAjZGVmaW5lIERXX01DSV9FUlJPUl9GTEFHUyAo
-RFdfTUNJX0RBVEFfRVJST1JfRkxBR1MgfCBcDQo+Pj4+PiAgIERXX01DSV9DTURfRVJST1JfRkxB
-R1MgIHwgU0RNTUNfSU5UX0hMRSkNCj4+Pj4+ICAgI2RlZmluZSBEV19NQ0lfU0VORF9TVEFUVVMg
-MQ0KPj4+Pj4gTounsubscribefromthislistsendthelineunsubscribelinuxmmcinthebody
-ofamessaP+tomajordomovgerkerP+lorgMoremajordomoiP/oathttp//vP+rkernelorg/maj
-ordomoinfohtbWw9PQ==
+According to Documentation/devicetree/bindings/mmc/mmc.txt:
 
+"Card detection:
+If no property below is supplied, host native card detect is used.
+Only one of the properties in this section should be supplied:
+  - broken-cd: There is no card detection available; polling must be used.
+  - cd-gpios: Specify GPIOs for card detection, see gpio binding
+  - non-removable: non-removable slot (like eMMC); assume always present. "
 
+So remove the custom fsl,cd-controller and fsl,wp-controller properties, as the
+mmc core can take care of it.
+
+Tested on mx51babbage, mx53qsb boards and mx6qsabresd boards.
+
+Cc: Chris Ball <cjb@laptop.org>
+Cc: <linux-mmc@vger.kernel.org>
+Signed-off-by: Fabio Estevam <fabio.estevam@freescale.com>
+---
+ Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.txt | 6 ------
+ drivers/mmc/host/sdhci-esdhc-imx.c                      | 6 ------
+ 2 files changed, 12 deletions(-)
+
+diff --git a/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.txt b/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.txt
+index 1dd6225..5da8ab0 100644
+--- a/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.txt
++++ b/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.txt
+@@ -9,18 +9,12 @@ by mmc.txt and the properties used by the sdhci-esdhc-imx driver.
+ Required properties:
+ - compatible : Should be "fsl,<chip>-esdhc"
+ 
+-Optional properties:
+-- fsl,cd-controller : Indicate to use controller internal card detection
+-- fsl,wp-controller : Indicate to use controller internal write protection
+-
+ Examples:
+ 
+ esdhc@70004000 {
+ 	compatible = "fsl,imx51-esdhc";
+ 	reg = <0x70004000 0x4000>;
+ 	interrupts = <1>;
+-	fsl,cd-controller;
+-	fsl,wp-controller;
+ };
+ 
+ esdhc@70008000 {
+diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+index b9899e9..07662d1 100644
+--- a/drivers/mmc/host/sdhci-esdhc-imx.c
++++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+@@ -796,12 +796,6 @@ sdhci_esdhc_imx_probe_dt(struct platform_device *pdev,
+ 	if (of_get_property(np, "non-removable", NULL))
+ 		boarddata->cd_type = ESDHC_CD_PERMANENT;
+ 
+-	if (of_get_property(np, "fsl,cd-controller", NULL))
+-		boarddata->cd_type = ESDHC_CD_CONTROLLER;
+-
+-	if (of_get_property(np, "fsl,wp-controller", NULL))
+-		boarddata->wp_type = ESDHC_WP_CONTROLLER;
+-
+ 	boarddata->cd_gpio = of_get_named_gpio(np, "cd-gpios", 0);
+ 	if (gpio_is_valid(boarddata->cd_gpio))
+ 		boarddata->cd_type = ESDHC_CD_GPIO;
+-- 
+1.8.1.2
