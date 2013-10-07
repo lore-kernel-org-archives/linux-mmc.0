@@ -1,78 +1,142 @@
-From: Fabio Estevam <fabio.estevam@freescale.com>
-Subject: [PATCH 2/2] mmc: sdhci-esdhc-imx: Remove custom properties
-Date: Mon, 7 Oct 2013 14:32:24 -0300
-Message-ID: <1381167144-18098-2-git-send-email-fabio.estevam@freescale.com>
-References: <1381167144-18098-1-git-send-email-fabio.estevam@freescale.com>
+From: "Tim Kryger" <tim.kryger@linaro.org>
+Subject: [PATCH v2 1/6] ARM: dts: Declare clocks as fixed on bcm11351
+Date: Mon, 7 Oct 2013 11:23:55 -0700
+Message-ID: <1381170240-23227-2-git-send-email-tim.kryger@linaro.org>
+References: <1381170240-23227-1-git-send-email-tim.kryger@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1381167144-18098-1-git-send-email-fabio.estevam@freescale.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: shawn.guo@linaro.org
-Cc: linux-kernel@vger.kernel.org, Fabio Estevam <fabio.estevam@freescale.com>, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <1381170240-23227-1-git-send-email-tim.kryger@linaro.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Christian Daudt <bcm@fixthebug.org>, Rob Herring <rob.herring@calxeda.com>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Stephen Warren <swarren@wwwdotorg.org>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Daniel Lezcano <daniel.lezcano@linaro.org>, Thomas Gleixner <tglx@linutronix.de>, Chris Ball <cjb@laptop.org>
+Cc: devicetree@vger.kernel.org, patches@linaro.org, Tim Kryger <tim.kryger@linaro.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-According to Documentation/devicetree/bindings/mmc/mmc.txt:
+Declare clocks that are enabled and configured by bootloaders as fixed
+rate clocks in the DTS such that device drivers may use standard clock
+function calls.
 
-"Card detection:
-If no property below is supplied, host native card detect is used.
-Only one of the properties in this section should be supplied:
-  - broken-cd: There is no card detection available; polling must be used.
-  - cd-gpios: Specify GPIOs for card detection, see gpio binding
-  - non-removable: non-removable slot (like eMMC); assume always present. "
-
-So remove the custom fsl,cd-controller and fsl,wp-controller properties, as the
-mmc core can take care of it.
-
-Tested on mx51babbage, mx53qsb boards and mx6qsabresd boards.
-
-Cc: Chris Ball <cjb@laptop.org>
-Cc: <linux-mmc@vger.kernel.org>
-Signed-off-by: Fabio Estevam <fabio.estevam@freescale.com>
+Signed-off-by: Tim Kryger <tim.kryger@linaro.org>
+Reviewed-by: Markus Mayer <markus.mayer@linaro.org>
+Reviewed-by: Matt Porter <matt.porter@linaro.org>
 ---
- Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.txt | 6 ------
- drivers/mmc/host/sdhci-esdhc-imx.c                      | 6 ------
- 2 files changed, 12 deletions(-)
+ arch/arm/boot/dts/bcm11351.dtsi | 97 +++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 97 insertions(+)
 
-diff --git a/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.txt b/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.txt
-index 1dd6225..5da8ab0 100644
---- a/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.txt
-+++ b/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.txt
-@@ -9,18 +9,12 @@ by mmc.txt and the properties used by the sdhci-esdhc-imx driver.
- Required properties:
- - compatible : Should be "fsl,<chip>-esdhc"
+diff --git a/arch/arm/boot/dts/bcm11351.dtsi b/arch/arm/boot/dts/bcm11351.dtsi
+index 98e6bc0..c6464fb 100644
+--- a/arch/arm/boot/dts/bcm11351.dtsi
++++ b/arch/arm/boot/dts/bcm11351.dtsi
+@@ -126,4 +126,101 @@
+ 		status = "disabled";
+ 	};
  
--Optional properties:
--- fsl,cd-controller : Indicate to use controller internal card detection
--- fsl,wp-controller : Indicate to use controller internal write protection
--
- Examples:
- 
- esdhc@70004000 {
- 	compatible = "fsl,imx51-esdhc";
- 	reg = <0x70004000 0x4000>;
- 	interrupts = <1>;
--	fsl,cd-controller;
--	fsl,wp-controller;
++	clocks {
++		bsc1_clk: bsc1 {
++			compatible = "fixed-clock";
++			clock-frequency = <13000000>;
++			#clock-cells = <0>;
++		};
++
++		bsc2_clk: bsc2 {
++			compatible = "fixed-clock";
++			clock-frequency = <13000000>;
++			#clock-cells = <0>;
++		};
++
++		bsc3_clk: bsc3 {
++			compatible = "fixed-clock";
++			clock-frequency = <13000000>;
++			#clock-cells = <0>;
++		};
++
++		pmu_bsc_clk: pmu_bsc {
++			compatible = "fixed-clock";
++			clock-frequency = <13000000>;
++			#clock-cells = <0>;
++		};
++
++		hub_timer_clk: hub_timer {
++			compatible = "fixed-clock";
++			clock-frequency = <32768>;
++			#clock-cells = <0>;
++		};
++
++		pwm_clk: pwm {
++			compatible = "fixed-clock";
++			clock-frequency = <26000000>;
++			#clock-cells = <0>;
++		};
++
++		sdio1_clk: sdio1 {
++			compatible = "fixed-clock";
++			clock-frequency = <48000000>;
++			#clock-cells = <0>;
++		};
++
++		sdio2_clk: sdio2 {
++			compatible = "fixed-clock";
++			clock-frequency = <48000000>;
++			#clock-cells = <0>;
++		};
++
++		sdio3_clk: sdio3 {
++			compatible = "fixed-clock";
++			clock-frequency = <48000000>;
++			#clock-cells = <0>;
++		};
++
++		sdio4_clk: sdio4 {
++			compatible = "fixed-clock";
++			clock-frequency = <48000000>;
++			#clock-cells = <0>;
++		};
++
++		tmon_1m_clk: tmon_1m {
++			compatible = "fixed-clock";
++			clock-frequency = <1000000>;
++			#clock-cells = <0>;
++		};
++
++		uartb_clk: uartb {
++			compatible = "fixed-clock";
++			clock-frequency = <13000000>;
++			#clock-cells = <0>;
++		};
++
++		uartb2_clk: uartb2 {
++			compatible = "fixed-clock";
++			clock-frequency = <13000000>;
++			#clock-cells = <0>;
++		};
++
++		uartb3_clk: uartb3 {
++			compatible = "fixed-clock";
++			clock-frequency = <13000000>;
++			#clock-cells = <0>;
++		};
++
++		uartb4_clk: uartb4 {
++			compatible = "fixed-clock";
++			clock-frequency = <13000000>;
++			#clock-cells = <0>;
++		};
++
++		usb_otg_ahb_clk: usb_otg_ahb {
++			compatible = "fixed-clock";
++			clock-frequency = <52000000>;
++			#clock-cells = <0>;
++		};
++	};
  };
- 
- esdhc@70008000 {
-diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-index b9899e9..07662d1 100644
---- a/drivers/mmc/host/sdhci-esdhc-imx.c
-+++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-@@ -796,12 +796,6 @@ sdhci_esdhc_imx_probe_dt(struct platform_device *pdev,
- 	if (of_get_property(np, "non-removable", NULL))
- 		boarddata->cd_type = ESDHC_CD_PERMANENT;
- 
--	if (of_get_property(np, "fsl,cd-controller", NULL))
--		boarddata->cd_type = ESDHC_CD_CONTROLLER;
--
--	if (of_get_property(np, "fsl,wp-controller", NULL))
--		boarddata->wp_type = ESDHC_WP_CONTROLLER;
--
- 	boarddata->cd_gpio = of_get_named_gpio(np, "cd-gpios", 0);
- 	if (gpio_is_valid(boarddata->cd_gpio))
- 		boarddata->cd_type = ESDHC_CD_GPIO;
 -- 
-1.8.1.2
+1.8.0.1
