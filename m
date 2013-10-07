@@ -1,119 +1,70 @@
-From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Subject: [PATCH 04/11] MMC: convert bus code to use dev_groups
-Date: Sun,  6 Oct 2013 23:55:43 -0700
-Message-ID: <1381128950-28125-5-git-send-email-gregkh@linuxfoundation.org>
-References: <1381128950-28125-1-git-send-email-gregkh@linuxfoundation.org>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1381128950-28125-1-git-send-email-gregkh@linuxfoundation.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-kernel@vger.kernel.org
-Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Chris Ball <cjb@laptop.org>, Ulf Hansson <ulf.hansson@linaro.org>, Konstantin Dorfman <kdorfman@codeaurora.org>, Seungwon Jeon <tgih.jun@samsung.com>, linux-mmc@vger.kernel.org
+From: ALIM AKHTAR <alim.akhtar@samsung.com>
+Subject: Re: Re: [PATCH] mmc: dw_mmc: Add hardware lock error (HLE) to the CMD
+ error flag
+Date: Mon, 07 Oct 2013 08:21:29 +0000 (GMT)
+Message-ID: <29218680.225111381134088889.JavaMail.weblogic@epv6ml06>
+Reply-To: alim.akhtar@samsung.com
+Mime-Version: 1.0
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: base64
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout3.samsung.com ([203.254.224.33]:25377 "EHLO
+	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752300Ab3JGIVk (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 7 Oct 2013 04:21:40 -0400
+Received: from epcpsbgr2.samsung.com
+ (u142.gpu120.samsung.co.kr [203.254.230.142])
+ by mailout3.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+ (7.0.4.24.0) 64bit (built Nov 17 2011))
+ with ESMTP id <0MUA00MOLHW3XX50@mailout3.samsung.com> for
+ linux-mmc@vger.kernel.org; Mon, 07 Oct 2013 17:21:39 +0900 (KST)
+MIME-version: 1.0
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Seungwon Jeon <tgih.jun@samsung.com>, "cjb@laptop.org" <cjb@laptop.org>, "dianders@chromium.org" <dianders@chromium.org>
 
-The dev_attrs field of struct bus_type is going away soon, dev_groups
-should be used instead.  This converts the MMC bus code to use the
-correct field.
+DQoNCj4tLS0tLS0tIE9yaWdpbmFsIE1lc3NhZ2UgLS0tLS0tLQ0KPlNlbmRlciA6IEphZWhvb24g
+Q2h1bmc8amg4MC5jaHVuZ0BzYW1zdW5nLmNvbT4gUzQvRW5naW5lZXIvU3lzdGVtIFMvVyBMYWIu
+L1NhbXN1bmcgRWxlY3Ryb25pY3MNCj5EYXRlIDogT2N0IDA3LCAyMDEzIDEzOjM0IChHTVQrMDk6
+MDApDQo+VGl0bGUgOiBSZTogW1BBVENIXSBtbWM6IGR3X21tYzogQWRkIGhhcmR3YXJlIGxvY2sg
+ZXJyb3IgKEhMRSkgdG8gdGhlIENNRCBlcnJvciBmbGFnDQoNCj5PbiAxMC8wNy8yMDEzIDAxOjIy
+IFBNLCBBTElNIEFLSFRBUiB3cm90ZToNCj4+IEhpIEphZWhvb24sDQo+PiANCj4+PiAtLS0tLS0t
+IE9yaWdpbmFsIE1lc3NhZ2UgLS0tLS0tLQ0KPj4+IFNlbmRlciA6IEphZWhvb24gQ2h1bmcgUzQv
+RW5naW5lZXIvU3lzdGVtIFMvVyBMYWIuL1NhbXN1bmcgRWxlY3Ryb25pY3MNCj4+PiBEYXRlIDog
+T2N0IDA2LCAyMDEzIDE3OjI4IChHTVQrMDk6MDApDQo+PiBUaXRsZSA6IFJlOiBbUEFUQ0hdIG1t
+YzogZHdfbW1jOiBBZGQgaGFyZHdhcmUgbG9jayBlcnJvciAoSExFKSB0byB0aGUgQ01EIGVycm9y
+IGZsYWcNCj4gIA0KPj4gSGkgQWxpbSwNCj4gDQo+PiBPbiAxMC8wMy8yMDEzIDA2OjE4IFBNLCBh
+bGltIGFraHRhciB3cm90ZToNCj4+PiBGcm9tOiBBbGltIEFraHRhciANCj4+Pg0KPj4+IEhhcmR3
+YXJlIGxvY2tlZCBlcnJvciBzZXQgd2hlbiB0aGUgZHdfbW1jIGNvbnRyb2xsZXIgY2Fubm90IGxv
+YWQgYQ0KPj4+IGNvbW1hbmQgaXNzdWVkIGJ5IHNvZnR3YXJlLiBXaGVuIHNvZnR3YXJlIHNldHMg
+dGhlIHN0YXJ0X2NtZCBiaXQgaW4gdGhlDQo+Pj4gQ01EIHJlZ2lzdGVyLCB0aGUgY29udHJvbGxl
+ciB0cmllcyB0byBsb2FkIHRoZSBjb21tYW5kLiBJZiB0aGUgY29tbWFuZA0KPj4+IGJ1ZmZlciBp
+cyBhbHJlYWR5IGZpbGxlZCB3aXRoIGEgY29tbWFuZCwgdGhpcyBlcnJvciBpcyByYWlzZWQuIEN1
+cnJlbnRseQ0KPj4+IGRyaXZlciBkb2VzIG5vdCBoYW5kbGUgSExFIGludGVycnVwdCwgd2hpY2gg
+cmVzdWx0cyBpbiBhIHN5c3RlbSBoYW5nLg0KPj4gV2hlbiBTRE1NQ19JTlRfSExFIGlzIHNldCBp
+bnRvIENNRF9FUlJPUl9GTEFHUywudGhlbiBjb3VsZCBkcml2ZXIgaGFuZGxlIHRoZSBITEUgaW50
+ZXJydXB0Pw0KPiBZZXMsIHRoaXMgd2lsbCBiZSBoYW5kbGVkIGFzIGEgcGFydCBvZiBEV19NQ0lf
+Q01EX0VSUk9SX0ZMQUdTIGVycm9yIGhhbmRsaW5nLg0KPkNvdWxkIHNvbWUgY29tbWFuZCBvciBk
+YXRhIGJlIGxvc3Q/DQpObywgRGF0YSBhbmQgY29tbWFuZCB3aWxsIG5vdCBiZSBsb3N0IGFzIHRo
+ZXkgYXJlIG5vdCBzZW5kIG91dC4NCj4+IA0KPj4+IEJlc3QgUmVnYXJkcywNCj4+PiBKYWVob29u
+IENodW5nDQo+Pj4NCj4+PiBITEUgY2FuIGJlIHNpbXVsYXRlZCBieSBxdWlja2x5IGluc2VydGlu
+ZyBhbmQgcmVtb3Zpbmcgc2QgY2FyZCBpbiBjYXJkDQo+Pj4gc2xvdCAoMzAgfiA0MCB0aW1lcyBp
+biBzYXkgMjAgc2VjcykNCj4+Pg0KPj4+IFJldmlld2VkLWJ5OiBEb3VnIEFuZGVyc29uIA0KPj4+
+IFNpZ25lZC1vZmYtYnk6IEFsaW0gQWtodGFyIA0KPj4+IC0tLQ0KPj4+ICAgZHJpdmVycy9tbWMv
+aG9zdC9kd19tbWMuYyB8IDIgKy0NCj4+PiAgIDEgZmlsZSBjaGFuZ2VkLCAxIGluc2VydGlvbigr
+KSwgMSBkZWxldGlvbigtKQ0KPj4+DQo+Pj4gZGlmZiAtLWdpdCBhL2RyaXZlcnMvbW1jL2hvc3Qv
+ZHdfbW1jLmMgYi9kcml2ZXJzL21tYy9ob3N0L2R3X21tYy5jDQo+Pj4gaW5kZXggMGE2YTUxMi4u
+MjRiNGE1MiAxMDA2NDQNCj4+PiAtLS0gYS9kcml2ZXJzL21tYy9ob3N0L2R3X21tYy5jDQo+Pj4g
+KysrIGIvZHJpdmVycy9tbWMvaG9zdC9kd19tbWMuYw0KPj4+IEBAIC00NCw3ICs0NCw3IEBADQo+
+Pj4gICBTRE1NQ19JTlRfSFRPIHwgU0RNTUNfSU5UX1NCRSAgfCBcDQo+Pj4gICBTRE1NQ19JTlRf
+RUJFKQ0KPj4+ICAgI2RlZmluZSBEV19NQ0lfQ01EX0VSUk9SX0ZMQUdTIChTRE1NQ19JTlRfUlRP
+IHwgU0RNTUNfSU5UX1JDUkMgfCBcDQo+Pj4gLSBTRE1NQ19JTlRfUkVTUF9FUlIpDQo+Pj4gKyBT
+RE1NQ19JTlRfUkVTUF9FUlIgfCBTRE1NQ19JTlRfSExFKQ0KPj4+ICAgI2RlZmluZSBEV19NQ0lf
+RVJST1JfRkxBR1MgKERXX01DSV9EQVRBX0VSUk9SX0ZMQUdTIHwgXA0KPj4+ICAgRFdfTUNJX0NN
+RF9FUlJPUl9GTEFHUyAgfCBTRE1NQ19JTlRfSExFKQ0KPj4+ICAgI2RlZmluZSBEV19NQ0lfU0VO
+RF9TVEFUVVMgMQ0KPj4+IE6Lp7Lm7HK4m3n66JrYYrJYrLbHp3bYXpYp3rp7Lm7HK4m3pYp7sZpn
+Ip7YXm6HcqH2pnrLGj/raJmo6K3aJqL4Hq5Hqz/paK4DKK3pmo6K3aJqIj/6GrYbbaf/7z/q5Hq5
+3paK4P5mo6K3aJqIp36IbW1sPT0=
 
-Cc: Chris Ball <cjb@laptop.org>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Konstantin Dorfman <kdorfman@codeaurora.org>
-Cc: Seungwon Jeon <tgih.jun@samsung.com>
-Cc: <linux-mmc@vger.kernel.org>
-Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
----
 
-Chris, I can take this through my driver-core tree if you like, just let
-me know what would be the easiest for you.
-
- drivers/mmc/core/bus.c      | 12 +++++++-----
- drivers/mmc/core/sdio_bus.c | 21 ++++++++++++---------
- 2 files changed, 19 insertions(+), 14 deletions(-)
-
-diff --git a/drivers/mmc/core/bus.c b/drivers/mmc/core/bus.c
-index 704bf66..3e227bd 100644
---- a/drivers/mmc/core/bus.c
-+++ b/drivers/mmc/core/bus.c
-@@ -27,7 +27,7 @@
- 
- #define to_mmc_driver(d)	container_of(d, struct mmc_driver, drv)
- 
--static ssize_t mmc_type_show(struct device *dev,
-+static ssize_t type_show(struct device *dev,
- 	struct device_attribute *attr, char *buf)
- {
- 	struct mmc_card *card = mmc_dev_to_card(dev);
-@@ -45,11 +45,13 @@ static ssize_t mmc_type_show(struct device *dev,
- 		return -EFAULT;
- 	}
- }
-+static DEVICE_ATTR_RO(type);
- 
--static struct device_attribute mmc_dev_attrs[] = {
--	__ATTR(type, S_IRUGO, mmc_type_show, NULL),
--	__ATTR_NULL,
-+static struct attribute *mmc_dev_attrs[] = {
-+	&dev_attr_type.attr,
-+	NULL,
- };
-+ATTRIBUTE_GROUPS(mmc_dev);
- 
- /*
-  * This currently matches any MMC driver to any MMC card - drivers
-@@ -218,7 +220,7 @@ static const struct dev_pm_ops mmc_bus_pm_ops = {
- 
- static struct bus_type mmc_bus_type = {
- 	.name		= "mmc",
--	.dev_attrs	= mmc_dev_attrs,
-+	.dev_groups	= mmc_dev_groups,
- 	.match		= mmc_bus_match,
- 	.uevent		= mmc_bus_uevent,
- 	.probe		= mmc_bus_probe,
-diff --git a/drivers/mmc/core/sdio_bus.c b/drivers/mmc/core/sdio_bus.c
-index 6d67492..ef89565 100644
---- a/drivers/mmc/core/sdio_bus.c
-+++ b/drivers/mmc/core/sdio_bus.c
-@@ -34,7 +34,8 @@ field##_show(struct device *dev, struct device_attribute *attr, char *buf)				\
- 									\
- 	func = dev_to_sdio_func (dev);					\
- 	return sprintf (buf, format_string, func->field);		\
--}
-+}									\
-+static DEVICE_ATTR_RO(field)
- 
- sdio_config_attr(class, "0x%02x\n");
- sdio_config_attr(vendor, "0x%04x\n");
-@@ -47,14 +48,16 @@ static ssize_t modalias_show(struct device *dev, struct device_attribute *attr,
- 	return sprintf(buf, "sdio:c%02Xv%04Xd%04X\n",
- 			func->class, func->vendor, func->device);
- }
--
--static struct device_attribute sdio_dev_attrs[] = {
--	__ATTR_RO(class),
--	__ATTR_RO(vendor),
--	__ATTR_RO(device),
--	__ATTR_RO(modalias),
--	__ATTR_NULL,
-+static DEVICE_ATTR_RO(modalias);
-+
-+static struct attribute *sdio_dev_attrs[] = {
-+	&dev_attr_class.attr,
-+	&dev_attr_vendor.attr,
-+	&dev_attr_device.attr,
-+	&dev_attr_modalias.attr,
-+	NULL,
- };
-+ATTRIBUTE_GROUPS(sdio_dev);
- 
- static const struct sdio_device_id *sdio_match_one(struct sdio_func *func,
- 	const struct sdio_device_id *id)
-@@ -225,7 +228,7 @@ static const struct dev_pm_ops sdio_bus_pm_ops = {
- 
- static struct bus_type sdio_bus_type = {
- 	.name		= "sdio",
--	.dev_attrs	= sdio_dev_attrs,
-+	.dev_groups	= sdio_dev_groups,
- 	.match		= sdio_bus_match,
- 	.uevent		= sdio_bus_uevent,
- 	.probe		= sdio_bus_probe,
--- 
-1.8.4.6.g82e253f.dirty
