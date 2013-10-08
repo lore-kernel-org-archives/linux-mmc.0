@@ -1,115 +1,81 @@
-From: "Tim Kryger" <tim.kryger@linaro.org>
-Subject: [PATCH v2 6/6] mmc: sdhci-bcm-kona: Add basic use of clocks
-Date: Mon, 7 Oct 2013 11:24:00 -0700
-Message-ID: <1381170240-23227-7-git-send-email-tim.kryger@linaro.org>
-References: <1381170240-23227-1-git-send-email-tim.kryger@linaro.org>
+From: Sonic Zhang <sonic.adi@gmail.com>
+Subject: Re: [PATCH 03/27] mmc: bfin_sdh: Move away from using deprecated APIs
+Date: Tue, 8 Oct 2013 11:05:40 +0800
+Message-ID: <CAJxxZ0MjV+6TkfQbWTg+crpux=XRFYWGmdc73ouruNGWVZkeLQ@mail.gmail.com>
+References: <1380207292-16968-1-git-send-email-ulf.hansson@linaro.org>
+	<1380207292-16968-4-git-send-email-ulf.hansson@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <1381170240-23227-1-git-send-email-tim.kryger@linaro.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Christian Daudt <bcm@fixthebug.org>, Rob Herring <rob.herring@calxeda.com>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Stephen Warren <swarren@wwwdotorg.org>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Daniel Lezcano <daniel.lezcano@linaro.org>, Thomas Gleixner <tglx@linutronix.de>, Chris Ball <cjb@laptop.org>
-Cc: devicetree@vger.kernel.org, patches@linaro.org, Tim Kryger <tim.kryger@linaro.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-lb0-f173.google.com ([209.85.217.173]:62954 "EHLO
+	mail-lb0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751869Ab3JHDFm (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 7 Oct 2013 23:05:42 -0400
+In-Reply-To: <1380207292-16968-4-git-send-email-ulf.hansson@linaro.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Linux Kernel <linux-kernel@vger.kernel.org>, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Sonic Zhang <sonic.zhang@analog.com>, uclinux-dist-devel <uclinux-dist-devel@blackfin.uclinux.org>
 
-Enable the external clock needed by the host controller during the
-probe and disable it during the remove.
+Acked-by: Sonic Zhang <sonic.zhang@analog.com>
 
-Signed-off-by: Tim Kryger <tim.kryger@linaro.org>
-Reviewed-by: Markus Mayer <markus.mayer@linaro.org>
-Reviewed-by: Matt Porter <matt.porter@linaro.org>
----
- drivers/mmc/host/sdhci-bcm-kona.c | 30 ++++++++++++++++++++++++++++--
- 1 file changed, 28 insertions(+), 2 deletions(-)
-
-diff --git a/drivers/mmc/host/sdhci-bcm-kona.c b/drivers/mmc/host/sdhci-bcm-kona.c
-index 85472d3..91db099 100644
---- a/drivers/mmc/host/sdhci-bcm-kona.c
-+++ b/drivers/mmc/host/sdhci-bcm-kona.c
-@@ -54,6 +54,7 @@
- 
- struct sdhci_bcm_kona_dev {
- 	struct mutex	write_lock; /* protect back to back writes */
-+	struct clk	*external_clk;
- };
- 
- 
-@@ -252,11 +253,29 @@ static int sdhci_bcm_kona_probe(struct platform_device *pdev)
- 	mmc_of_parse(host->mmc);
- 
- 	if (!host->mmc->f_max) {
--		dev_err(&pdev->dev, "Missing max-freq for SDHCI cfg\n");
-+		dev_err(dev, "Missing max-freq for SDHCI cfg\n");
- 		ret = -ENXIO;
- 		goto err_pltfm_free;
- 	}
- 
-+	/* Get and enable the external clock */
-+	kona_dev->external_clk = devm_clk_get(dev, NULL);
-+	if (IS_ERR(kona_dev->external_clk)) {
-+		dev_err(dev, "Failed to get external clock\n");
-+		ret = PTR_ERR(kona_dev->external_clk);
-+		goto err_pltfm_free;
-+	}
-+
-+	if (clk_set_rate(kona_dev->external_clk, host->mmc->f_max) != 0) {
-+		dev_err(dev, "Failed to set rate external clock\n");
-+		goto err_pltfm_free;
-+	}
-+
-+	if (clk_prepare_enable(kona_dev->external_clk) != 0) {
-+		dev_err(dev, "Failed to enable external clock\n");
-+		goto err_pltfm_free;
-+	}
-+
- 	dev_dbg(dev, "non-removable=%c\n",
- 		(host->mmc->caps & MMC_CAP_NONREMOVABLE) ? 'Y' : 'N');
- 	dev_dbg(dev, "cd_gpio %c, wp_gpio %c\n",
-@@ -271,7 +290,7 @@ static int sdhci_bcm_kona_probe(struct platform_device *pdev)
- 
- 	ret = sdhci_bcm_kona_sd_reset(host);
- 	if (ret)
--		goto err_pltfm_free;
-+		goto err_clk_disable;
- 
- 	sdhci_bcm_kona_sd_init(host);
- 
-@@ -307,6 +326,9 @@ err_remove_host:
- err_reset:
- 	sdhci_bcm_kona_sd_reset(host);
- 
-+err_clk_disable:
-+	clk_disable_unprepare(kona_dev->external_clk);
-+
- err_pltfm_free:
- 	sdhci_pltfm_free(pdev);
- 
-@@ -317,6 +339,8 @@ err_pltfm_free:
- static int __exit sdhci_bcm_kona_remove(struct platform_device *pdev)
- {
- 	struct sdhci_host *host = platform_get_drvdata(pdev);
-+	struct sdhci_pltfm_host *pltfm_priv = sdhci_priv(host);
-+	struct sdhci_bcm_kona_dev *kona_dev = sdhci_pltfm_priv(pltfm_priv);
- 	int dead;
- 	u32 scratch;
- 
-@@ -326,6 +350,8 @@ static int __exit sdhci_bcm_kona_remove(struct platform_device *pdev)
- 		dead = 1;
- 	sdhci_remove_host(host, dead);
- 
-+	clk_disable_unprepare(kona_dev->external_clk);
-+
- 	sdhci_free_host(host);
- 
- 	return 0;
--- 
-1.8.0.1
+On Thu, Sep 26, 2013 at 10:54 PM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> Suspend and resume of cards are being handled from the protocol layer
+> and consequently the mmc_suspend|resume_host APIs are deprecated.
+>
+> This means we can simplify the suspend|resume callbacks by removing the
+> use of the deprecated APIs.
+>
+> Cc: Sonic Zhang <sonic.zhang@analog.com>
+> Cc: uclinux-dist-devel@blackfin.uclinux.org
+> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+> ---
+>  drivers/mmc/host/bfin_sdh.c |   12 +-----------
+>  1 file changed, 1 insertion(+), 11 deletions(-)
+>
+> diff --git a/drivers/mmc/host/bfin_sdh.c b/drivers/mmc/host/bfin_sdh.c
+> index 94fae2f..bc9110f 100644
+> --- a/drivers/mmc/host/bfin_sdh.c
+> +++ b/drivers/mmc/host/bfin_sdh.c
+> @@ -640,21 +640,15 @@ static int sdh_remove(struct platform_device *pdev)
+>  #ifdef CONFIG_PM
+>  static int sdh_suspend(struct platform_device *dev, pm_message_t state)
+>  {
+> -       struct mmc_host *mmc = platform_get_drvdata(dev);
+>         struct bfin_sd_host *drv_data = get_sdh_data(dev);
+> -       int ret = 0;
+> -
+> -       if (mmc)
+> -               ret = mmc_suspend_host(mmc);
+>
+>         peripheral_free_list(drv_data->pin_req);
+>
+> -       return ret;
+> +       return 0;
+>  }
+>
+>  static int sdh_resume(struct platform_device *dev)
+>  {
+> -       struct mmc_host *mmc = platform_get_drvdata(dev);
+>         struct bfin_sd_host *drv_data = get_sdh_data(dev);
+>         int ret = 0;
+>
+> @@ -665,10 +659,6 @@ static int sdh_resume(struct platform_device *dev)
+>         }
+>
+>         sdh_reset();
+> -
+> -       if (mmc)
+> -               ret = mmc_resume_host(mmc);
+> -
+>         return ret;
+>  }
+>  #else
+> --
+> 1.7.9.5
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-kernel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> Please read the FAQ at  http://www.tux.org/lkml/
