@@ -1,194 +1,82 @@
-From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: Re: [PATCH 0/2] mmc: core: Remove all code related to MMC_CLKGATE
-Date: Tue, 8 Oct 2013 14:53:48 +0200 (CEST)
-Message-ID: <Pine.LNX.4.64.1310081424430.31629@axis700.grange>
-References: <1380552120-31003-1-git-send-email-ulf.hansson@linaro.org>
- <Pine.LNX.4.64.1309302301400.24147@axis700.grange>
- <CAPDyKFq17j7cOjDQogTofKQOTHyUMbQxg7eRS7OARL-0U7phZQ@mail.gmail.com>
- <Pine.LNX.4.64.1310011106270.27413@axis700.grange>
+From: Fabio Estevam <fabio.estevam@freescale.com>
+Subject: [PATCH] mmc: sdhci-esdhc-imx: Check the return value from clk_prepare_enable()
+Date: Tue, 8 Oct 2013 10:47:28 -0300
+Message-ID: <1381240048-22685-1-git-send-email-fabio.estevam@freescale.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.126.171]:52082 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751797Ab3JHMx5 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 8 Oct 2013 08:53:57 -0400
-In-Reply-To: <Pine.LNX.4.64.1310011106270.27413@axis700.grange>
+Received: from [213.199.154.209] ([213.199.154.209]:33287 "EHLO
+	am1outboundpool.messaging.microsoft.com" rhost-flags-FAIL-FAIL-OK-OK)
+	by vger.kernel.org with ESMTP id S1754348Ab3JHNwN (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 8 Oct 2013 09:52:13 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Linus Walleij <linus.walleij@linaro.org>, Magnus Damm <magnus.damm@gmail.com>
+To: cjb@laptop.org
+Cc: shawn.guo@linaro.org, festevam@gmail.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Fabio Estevam <fabio.estevam@freescale.com>
 
-Hi Ulf,
+clk_prepare_enable() may fail, so let's check its return value and propagate it
+in the case of error.
 
-Let me try to add a bit more to your explanations below.
+Also, fix the sequence for disabling the clock in the probe error path and 
+also in the remove function.
 
-On Tue, 1 Oct 2013, Guennadi Liakhovetski wrote:
-
-> Hi Ulf
-> 
-> On Tue, 1 Oct 2013, Ulf Hansson wrote:
-> 
-> > On 30 September 2013 23:10, Guennadi Liakhovetski <g.liakhovetski@gmx.de> wrote:
-> > > Hi Ulf
-> > >
-> > > On Mon, 30 Sep 2013, Ulf Hansson wrote:
-> > >
-> > >> This patchset is remove all code related to MMC_CLKGATE. A significant
-> > >> portion of code can then be removed from the core layer which would
-> > >> simplify maintainance.
-> > >>
-> > >> At the moment it seems like only some MIPS platforms were using
-> > >> MMC_CLKGATE, but at the same time the corresponding host drivers
-> > >> were not taking advantage of the mechanism. This made me feel confident
-> > >> in removing the feature entirely from the mmc subsystem could be done.
-> > >>
-> > >> Also do note that for host drivers that would like to implement clock
-> > >> gating as a power save operation, using runtime PM is a far easier
-> > >> way to address this. Several host drivers is already fully supporting
-> > >> this as well.
-> > >>
-> > >> Ulf Hansson (2):
-> > >>   MIPS: db1235: Don't use MMC_CLKGATE
-> > >>   mmc: core: Remove MMC_CLKGATE
-> > >
-> > > Do I understand correctly, that you're proposing to remove the aggressive
-> > > clock gating feature from MMC? If so, then please take into account my
-> > > NAK. At least two SD / MMC drivers, that I'm aware of, actively used and
-> > > developed on multiple platforms - sh_mmcif and tmio / sdhi implement MMC
-> > > clock gating and rely on it to save power between IO.
-> > 
-> > Guennadi, thanks for your NAK, you have understood correctly what my
-> > intention is. :-)
-> > 
-> > Looking into your two examples, sh_mmcif and sh_mobile_sdhci (using
-> > tmio), I realize that they use runtime PM in an awkward way.
-
-I'm not sure what exactly you find awkward there. I know that a lot of 
-work has been invested in runtime PM and clock gating on those two 
-drivers, and the results were rather good: we were able to runtime suspend 
-and wake up controllers according to .power_mode as provided to drivers' 
-.set_ios() methods. We were able to use power domains and show, that even 
-when the whole domain is powered up and down as a result of our runtime 
-PM, we still can communicate with MMC, SD, and SDIO cards in slots. We 
-added support for regulators. We also added support for aggressive MMC 
-clock gating, which allowed us to save power by gating the clock _when_ it 
-was safe, as decided by higher level protocols.
-
-E.g. look at this comment in tmio_mmc_pio.c:
-
-/*
- * We differentiate between the following 3 power states:
- * 1. card slot powered off, controller stopped. This is used, when either there
- *    is no card in the slot, or the card really has to be powered down.
- * 2. card slot powered on, controller stopped. This is used, when a card is in
- *    the slot, but no activity is currently taking place. This is a power-
- *    saving mode with card-state preserved. This state can be entered, e.g.
- *    when MMC clock-gating is used.
- * 3. card slot powered on, controller running. This is the actual active state.
- */
-enum tmio_mmc_power {
-	TMIO_MMC_OFF_STOP,	/* card power off, controller stopped */
-	TMIO_MMC_ON_STOP,	/* card power on, controller stopped */
-	TMIO_MMC_ON_RUN,	/* card power on, controller running */
-};
-
-Now, if you remove clock gating, would you still be able to really support 
-all these modes? IIUC, the clock gating is there for higher level MMC/SD 
-protocols (MMC, SD, SDHC, SDXC, SDIO,...) to inform the mmc core and 
-controller drivers, that according to that protocol the clock can be 
-switched off now. It seems to me, that you're just completely removing 
-that functionality. Neither the mmc core nor low level controller drivers 
-can know when the clock can be switched off. So, I don't see how runtime 
-PM by itself can solve the problem. You can choose a different approach to 
-signal idle / power-saving states from protocol drivers, but you anyway 
-need to actually do that. In your patch "mmc: core: Remove MMC_CLKGATE" 
-however, you just remove those calls from sd.c and mmc.c, so, I don't see 
-how that functionality can be implemented after your proposed patches.
-
-Thanks
-Guennadi
-
-> >  I would
-> > suggest to move parts of the clock gating from .set_ios to runtime PM
-> > callbacks instead. Obviously proper calls to pm_runtime_get|put needs
-> > to be adopted as well. pm_runtime_get|put should be used to make sure
-> > your "runtime resources" are active while I/O operations are ongoing,
-> > they aren't in those drivers as of today.
-> > 
-> > So to give you some more details about why I wanted to push for a
-> > removal of MMC_CLKGATE. You have one reason above. I want host drivers
-> > that considers power save at request inactivity, to implement proper
-> > runtime PM support and to do clock gating as a part of runtime PM.
-> > There are already good references, like mmci and sdhci-* for example.
-> > 
-> > MMC_CLKGATE is an old way of dealing with clock gating for power save,
-> > runtime PM is better suited and has been there now for a long time
-> > now. It is time to switch.
-> > 
-> > I don't think mmc clock gating should be depending on a separate
-> > kernel config as MMC_CLKGATE, which likely is the reason to why there
-> > are no defconfig that has this option enabled. Instead RUNTIME_PM
-> > already has this implicit meaning of handling with power save at
-> > request inactivity.
-> > 
-> > Finally, it is nice to remove code from a maintenance point of view.
-> > The MMC_CLKGATE code is being used in a lot of places around the core
-> > layer, since "mmc_host_clk_hold|release" needs to be called so many
-> > times.
-> > 
-> > What are your thoughts on the way forward? Could we adopt fully
-> > runtime pm support for sh_mmcif sh_mobile_sdhci soon?
-> 
-> Sorry, I don't have any information whether or when this will be done.
-> 
-> Thanks
-> Guennadi
-> 
-> > Kind regards
-> > Ulf Hansson
-> > 
-> > >
-> > > Thanks
-> > > Guennadi
-> > >
-> > >>
-> > >>  Documentation/mmc/mmc-dev-attrs.txt |   10 --
-> > >>  arch/mips/configs/db1235_defconfig  |    1 -
-> > >>  drivers/mmc/core/Kconfig            |   10 --
-> > >>  drivers/mmc/core/core.c             |  116 +----------------
-> > >>  drivers/mmc/core/core.h             |    3 -
-> > >>  drivers/mmc/core/debugfs.c          |    5 -
-> > >>  drivers/mmc/core/host.c             |  245 -----------------------------------
-> > >>  drivers/mmc/core/mmc.c              |    6 +-
-> > >>  drivers/mmc/core/sd.c               |   12 +-
-> > >>  drivers/mmc/core/sdio.c             |    5 +-
-> > >>  drivers/mmc/core/sdio_irq.c         |   10 +-
-> > >>  include/linux/mmc/host.h            |   27 ----
-> > >>  12 files changed, 12 insertions(+), 438 deletions(-)
-> > >>
-> > >> --
-> > >> 1.7.9.5
-> > >>
-> > >> --
-> > >> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> > >> the body of a message to majordomo@vger.kernel.org
-> > >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> > >>
-> > >
-> > > ---
-> > > Guennadi Liakhovetski, Ph.D.
-> > > Freelance Open-Source Software Developer
-> > > http://www.open-technology.de/
-> > 
-> 
-> ---
-> Guennadi Liakhovetski, Ph.D.
-> Freelance Open-Source Software Developer
-> http://www.open-technology.de/
-> 
-
+Signed-off-by: Fabio Estevam <fabio.estevam@freescale.com>
 ---
-Guennadi Liakhovetski, Ph.D.
-Freelance Open-Source Software Developer
-http://www.open-technology.de/
+ drivers/mmc/host/sdhci-esdhc-imx.c | 24 +++++++++++++++++-------
+ 1 file changed, 17 insertions(+), 7 deletions(-)
+
+diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+index b9899e9..abc9836 100644
+--- a/drivers/mmc/host/sdhci-esdhc-imx.c
++++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+@@ -877,9 +877,17 @@ static int sdhci_esdhc_imx_probe(struct platform_device *pdev)
+ 
+ 	pltfm_host->clk = imx_data->clk_per;
+ 
+-	clk_prepare_enable(imx_data->clk_per);
+-	clk_prepare_enable(imx_data->clk_ipg);
+-	clk_prepare_enable(imx_data->clk_ahb);
++	err = clk_prepare_enable(imx_data->clk_per);
++	if (err)
++		goto free_sdhci;
++
++	err = clk_prepare_enable(imx_data->clk_ipg);
++	if (err)
++		goto err_ipg;
++
++	err = clk_prepare_enable(imx_data->clk_ahb);
++	if (err)
++		goto err_ahb;
+ 
+ 	imx_data->pinctrl = devm_pinctrl_get(&pdev->dev);
+ 	if (IS_ERR(imx_data->pinctrl)) {
+@@ -995,9 +1003,11 @@ static int sdhci_esdhc_imx_probe(struct platform_device *pdev)
+ 	return 0;
+ 
+ disable_clk:
+-	clk_disable_unprepare(imx_data->clk_per);
+-	clk_disable_unprepare(imx_data->clk_ipg);
+ 	clk_disable_unprepare(imx_data->clk_ahb);
++err_ahb:
++	clk_disable_unprepare(imx_data->clk_ipg);
++err_ipg:
++	clk_disable_unprepare(imx_data->clk_per);
+ free_sdhci:
+ 	sdhci_pltfm_free(pdev);
+ 	return err;
+@@ -1012,9 +1022,9 @@ static int sdhci_esdhc_imx_remove(struct platform_device *pdev)
+ 
+ 	sdhci_remove_host(host, dead);
+ 
+-	clk_disable_unprepare(imx_data->clk_per);
+-	clk_disable_unprepare(imx_data->clk_ipg);
+ 	clk_disable_unprepare(imx_data->clk_ahb);
++	clk_disable_unprepare(imx_data->clk_ipg);
++	clk_disable_unprepare(imx_data->clk_per);
+ 
+ 	sdhci_pltfm_free(pdev);
+ 
+-- 
+1.8.1.2
+
+
