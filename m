@@ -1,48 +1,94 @@
-From: Axel Lin <axel.lin@ingics.com>
-Subject: [PATCH 2/2] mmc: wmt-sdmmc: Remove deprecated IRQF_DISABLED
-Date: Wed, 09 Oct 2013 09:38:16 +0800
-Message-ID: <1381282696.27485.8.camel@phoenix>
-References: <1381282567.27485.6.camel@phoenix>
+From: Shawn Guo <shawn.guo@linaro.org>
+Subject: Re: [PATCH] mmc: sdhci-esdhc-imx: Check the return value from
+ clk_prepare_enable()
+Date: Wed, 9 Oct 2013 09:42:09 +0800
+Message-ID: <20131009014208.GD8946@S2101-09.ap.freescale.net>
+References: <1381240048-22685-1-git-send-email-fabio.estevam@freescale.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="us-ascii"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pa0-f53.google.com ([209.85.220.53]:55129 "EHLO
-	mail-pa0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751494Ab3JIBiU (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 8 Oct 2013 21:38:20 -0400
-Received: by mail-pa0-f53.google.com with SMTP id kq14so273084pab.40
-        for <linux-mmc@vger.kernel.org>; Tue, 08 Oct 2013 18:38:20 -0700 (PDT)
-In-Reply-To: <1381282567.27485.6.camel@phoenix>
+Received: from co1ehsobe003.messaging.microsoft.com ([216.32.180.186]:6847
+	"EHLO co1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751494Ab3JIBly (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 8 Oct 2013 21:41:54 -0400
+Content-Disposition: inline
+In-Reply-To: <1381240048-22685-1-git-send-email-fabio.estevam@freescale.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: Tony Prisk <linux@prisktech.co.nz>, linux-mmc@vger.kernel.org
+To: Fabio Estevam <fabio.estevam@freescale.com>
+Cc: cjb@laptop.org, festevam@gmail.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-It's a NOOP since 2.6.35 and it will be removed one day.
-This is not trivial because current code uses hard coded 32 instead of
-IRQF_DISABLED in the request_irq call.
+On Tue, Oct 08, 2013 at 10:47:28AM -0300, Fabio Estevam wrote:
+> clk_prepare_enable() may fail, so let's check its return value and propagate it
+> in the case of error.
+> 
+> Also, fix the sequence for disabling the clock in the probe error path and 
+> also in the remove function.
+> 
+> Signed-off-by: Fabio Estevam <fabio.estevam@freescale.com>
+> ---
+>  drivers/mmc/host/sdhci-esdhc-imx.c | 24 +++++++++++++++++-------
+>  1 file changed, 17 insertions(+), 7 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+> index b9899e9..abc9836 100644
+> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
+> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+> @@ -877,9 +877,17 @@ static int sdhci_esdhc_imx_probe(struct platform_device *pdev)
+>  
+>  	pltfm_host->clk = imx_data->clk_per;
+>  
+> -	clk_prepare_enable(imx_data->clk_per);
+> -	clk_prepare_enable(imx_data->clk_ipg);
+> -	clk_prepare_enable(imx_data->clk_ahb);
+> +	err = clk_prepare_enable(imx_data->clk_per);
+> +	if (err)
+> +		goto free_sdhci;
+> +
+> +	err = clk_prepare_enable(imx_data->clk_ipg);
+> +	if (err)
+> +		goto err_ipg;
+> +
+> +	err = clk_prepare_enable(imx_data->clk_ahb);
+> +	if (err)
+> +		goto err_ahb;
+>  
+>  	imx_data->pinctrl = devm_pinctrl_get(&pdev->dev);
+>  	if (IS_ERR(imx_data->pinctrl)) {
+> @@ -995,9 +1003,11 @@ static int sdhci_esdhc_imx_probe(struct platform_device *pdev)
+>  	return 0;
+>  
+>  disable_clk:
+> -	clk_disable_unprepare(imx_data->clk_per);
+> -	clk_disable_unprepare(imx_data->clk_ipg);
+>  	clk_disable_unprepare(imx_data->clk_ahb);
+> +err_ahb:
 
-Signed-off-by: Axel Lin <axel.lin@ingics.com>
----
- drivers/mmc/host/wmt-sdmmc.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+Naming schema of the existing labels seems to be 'acting' rather than
+'reasoning', so I guess 'disable_ipg:' might fit here better?
 
-diff --git a/drivers/mmc/host/wmt-sdmmc.c b/drivers/mmc/host/wmt-sdmmc.c
-index 5501c9f..8a48a50 100644
---- a/drivers/mmc/host/wmt-sdmmc.c
-+++ b/drivers/mmc/host/wmt-sdmmc.c
-@@ -829,7 +829,7 @@ static int wmt_mci_probe(struct platform_device *pdev)
- 		goto fail3;
- 	}
- 
--	ret = request_irq(dma_irq, wmt_mci_dma_isr, 32, "sdmmc", priv);
-+	ret = request_irq(dma_irq, wmt_mci_dma_isr, 0, "sdmmc", priv);
- 	if (ret) {
- 		dev_err(&pdev->dev, "Register DMA IRQ fail\n");
- 		goto fail4;
--- 
-1.8.1.2
+Shawn
 
-
+> +	clk_disable_unprepare(imx_data->clk_ipg);
+> +err_ipg:
+> +	clk_disable_unprepare(imx_data->clk_per);
+>  free_sdhci:
+>  	sdhci_pltfm_free(pdev);
+>  	return err;
+> @@ -1012,9 +1022,9 @@ static int sdhci_esdhc_imx_remove(struct platform_device *pdev)
+>  
+>  	sdhci_remove_host(host, dead);
+>  
+> -	clk_disable_unprepare(imx_data->clk_per);
+> -	clk_disable_unprepare(imx_data->clk_ipg);
+>  	clk_disable_unprepare(imx_data->clk_ahb);
+> +	clk_disable_unprepare(imx_data->clk_ipg);
+> +	clk_disable_unprepare(imx_data->clk_per);
+>  
+>  	sdhci_pltfm_free(pdev);
+>  
+> -- 
+> 1.8.1.2
+> 
+> 
 
