@@ -1,85 +1,52 @@
-From: David Cohen <david.a.cohen@linux.intel.com>
-Subject: Re: [PATCH v2] mmc: sdhci-pci: add Intel Merrifield support
-Date: Tue, 08 Oct 2013 18:17:36 -0700
-Message-ID: <5254AEB0.9060304@linux.intel.com>
-References: <1380658695-20047-1-git-send-email-david.a.cohen@linux.intel.com>
+From: Axel Lin <axel.lin@ingics.com>
+Subject: [PATCH 1/2] mmc: wmt-sdmmc: Prevent NULL dereference for of_id->data
+Date: Wed, 09 Oct 2013 09:36:07 +0800
+Message-ID: <1381282567.27485.6.camel@phoenix>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1380658695-20047-1-git-send-email-david.a.cohen@linux.intel.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: cjb@laptop.org, bhelgaas@google.com, adrian.hunter@intel.com, wfp5p@virginia.edu, gregkh@linuxfoundation.org, g.liakhovetski@gmx.de
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-pci@vger.kernel.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-pb0-f45.google.com ([209.85.160.45]:57321 "EHLO
+	mail-pb0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755356Ab3JIBgO (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 8 Oct 2013 21:36:14 -0400
+Received: by mail-pb0-f45.google.com with SMTP id mc17so147198pbc.4
+        for <linux-mmc@vger.kernel.org>; Tue, 08 Oct 2013 18:36:12 -0700 (PDT)
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>
+Cc: Tony Prisk <linux@prisktech.co.nz>, linux-mmc@vger.kernel.org
 
-Kindly ping :)
-Any comments?
+Ensure having NULL checking for of_id before dereference of_id->data.
 
-Br, David Cohen
+Signed-off-by: Axel Lin <axel.lin@ingics.com>
+---
+ drivers/mmc/host/wmt-sdmmc.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
 
-On 10/01/2013 01:18 PM, David Cohen wrote:
-> Implement initial SDHCI Intel Merrifield support.
-> This patch is based on previous one from Yunpeng Gao <yunpeng.gao@intel.com>
->
-> Signed-off-by: David Cohen <david.a.cohen@linux.intel.com>
-> ---
->   drivers/mmc/host/sdhci-pci.c | 30 ++++++++++++++++++++++++++++++
->   1 file changed, 30 insertions(+)
->
-> diff --git a/drivers/mmc/host/sdhci-pci.c b/drivers/mmc/host/sdhci-pci.c
-> index d7d6bc8..06f026a 100644
-> --- a/drivers/mmc/host/sdhci-pci.c
-> +++ b/drivers/mmc/host/sdhci-pci.c
-> @@ -37,6 +37,7 @@
->   #define PCI_DEVICE_ID_INTEL_BYT_SDIO	0x0f15
->   #define PCI_DEVICE_ID_INTEL_BYT_SD	0x0f16
->   #define PCI_DEVICE_ID_INTEL_BYT_EMMC2	0x0f50
-> +#define PCI_DEVICE_ID_INTEL_MRFL_MMC	0x1190
->
->   /*
->    * PCI registers
-> @@ -356,6 +357,28 @@ static const struct sdhci_pci_fixes sdhci_intel_byt_sd = {
->   	.allow_runtime_pm = true,
->   };
->
-> +/* Define Host controllers for Intel Merrifield platform */
-> +#define INTEL_MRFL_EMMC_0	0
-> +#define INTEL_MRFL_EMMC_1	1
-> +
-> +static int intel_mrfl_mmc_probe_slot(struct sdhci_pci_slot *slot)
-> +{
-> +	if ((PCI_FUNC(slot->chip->pdev->devfn) != INTEL_MRFL_EMMC_0) &&
-> +	    (PCI_FUNC(slot->chip->pdev->devfn) != INTEL_MRFL_EMMC_1))
-> +		/* SD support is not ready yet */
-> +		return -ENODEV;
-> +
-> +	slot->host->mmc->caps |= MMC_CAP_8_BIT_DATA | MMC_CAP_NONREMOVABLE |
-> +				 MMC_CAP_1_8V_DDR;
-> +
-> +	return 0;
-> +}
-> +
-> +static const struct sdhci_pci_fixes sdhci_intel_mrfl_mmc = {
-> +	.quirks		= SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC,
-> +	.probe_slot	= intel_mrfl_mmc_probe_slot,
-> +};
-> +
->   /* O2Micro extra registers */
->   #define O2_SD_LOCK_WP		0xD3
->   #define O2_SD_MULTI_VCC3V	0xEE
-> @@ -940,6 +963,13 @@ static const struct pci_device_id pci_ids[] = {
->   	},
->
->   	{
-> +		.vendor		= PCI_VENDOR_ID_INTEL,
-> +		.device		= PCI_DEVICE_ID_INTEL_MRFL_MMC,
-> +		.subvendor	= PCI_ANY_ID,
-> +		.subdevice	= PCI_ANY_ID,
-> +		.driver_data	= (kernel_ulong_t)&sdhci_intel_mrfl_mmc,
-> +	},
-> +	{
->   		.vendor		= PCI_VENDOR_ID_O2,
->   		.device		= PCI_DEVICE_ID_O2_8120,
->   		.subvendor	= PCI_ANY_ID,
->
+diff --git a/drivers/mmc/host/wmt-sdmmc.c b/drivers/mmc/host/wmt-sdmmc.c
+index 57858ef..5501c9f 100644
+--- a/drivers/mmc/host/wmt-sdmmc.c
++++ b/drivers/mmc/host/wmt-sdmmc.c
+@@ -757,7 +757,7 @@ static int wmt_mci_probe(struct platform_device *pdev)
+ 	struct device_node *np = pdev->dev.of_node;
+ 	const struct of_device_id *of_id =
+ 		of_match_device(wmt_mci_dt_ids, &pdev->dev);
+-	const struct wmt_mci_caps *wmt_caps = of_id->data;
++	const struct wmt_mci_caps *wmt_caps;
+ 	int ret;
+ 	int regular_irq, dma_irq;
+ 
+@@ -771,6 +771,7 @@ static int wmt_mci_probe(struct platform_device *pdev)
+ 		return -EFAULT;
+ 	}
+ 
++	wmt_caps = of_id->data;
+ 	regular_irq = irq_of_parse_and_map(np, 0);
+ 	dma_irq = irq_of_parse_and_map(np, 1);
+ 
+-- 
+1.8.1.2
+
+
+
