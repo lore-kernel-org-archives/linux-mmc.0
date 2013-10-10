@@ -1,41 +1,63 @@
-From: Konstantin Dorfman <kdorfman@codeaurora.org>
-Subject: Re: help with 'discard' mount option on eMMC
-Date: Thu, 10 Oct 2013 14:17:56 +0300
-Message-ID: <52568CE4.3040801@codeaurora.org>
-References: <loom.20131010T083357-685@post.gmane.org> <52566B05.3000204@codeaurora.org> <loom.20131010T112824-880@post.gmane.org>
+From: "Rafael J. Wysocki" <rjw@rjwysocki.net>
+Subject: Re: [PATCH 1/2] PM / Runtime: Add helper function to get value of use_autosuspend
+Date: Thu, 10 Oct 2013 15:03:14 +0200
+Message-ID: <1949708.gMXnLB4oHE@vostro.rjw.lan>
+References: <1381399307-21534-1-git-send-email-ulf.hansson@linaro.org> <1381399307-21534-2-git-send-email-ulf.hansson@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp.codeaurora.org ([198.145.11.231]:36680 "EHLO
-	smtp.codeaurora.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752900Ab3JJLSB (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 10 Oct 2013 07:18:01 -0400
-In-Reply-To: <loom.20131010T112824-880@post.gmane.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7Bit
+Return-path: <linux-pm-owner@vger.kernel.org>
+In-Reply-To: <1381399307-21534-2-git-send-email-ulf.hansson@linaro.org>
+Sender: linux-pm-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Len Brown <len.brown@intel.com>, Pavel Machek <pavel@ucw.cz>, Kevin Hilman <khilman@linaro.org>, Alan Stern <stern@rowland.harvard.edu>, Mika Westerberg <mika.westerberg@linux.intel.com>, linux-pm@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Prasanna NAVARATNA <prasanna.navaratna@gmail.com>
-Cc: linux-mmc@vger.kernel.org
 
-Hello,
+On Thursday, October 10, 2013 12:01:46 PM Ulf Hansson wrote:
+> In some cases it will be useful to know whether a device has the
+> autosuspend mode enabled. Provide a helper function that returns the
+> current setting.
+> 
+> Cc: Len Brown <len.brown@intel.com>
+> Cc: Pavel Machek <pavel@ucw.cz>
+> Cc: Rafael J. Wysocki <rjw@rjwysocki.net>
+> Cc: Kevin Hilman <khilman@linaro.org>
+> Cc: Alan Stern <stern@rowland.harvard.edu>
+> Cc: Mika Westerberg <mika.westerberg@linux.intel.com>
+> Cc: linux-pm@vger.kernel.org
+> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+> ---
+>  include/linux/pm_runtime.h |    6 ++++++
+>  1 file changed, 6 insertions(+)
+> 
+> diff --git a/include/linux/pm_runtime.h b/include/linux/pm_runtime.h
+> index 6fa7cea..bcc2ad4 100644
+> --- a/include/linux/pm_runtime.h
+> +++ b/include/linux/pm_runtime.h
+> @@ -91,6 +91,11 @@ static inline bool pm_runtime_status_suspended(struct device *dev)
+>  	return dev->power.runtime_status == RPM_SUSPENDED;
+>  }
+>  
+> +static inline bool pm_runtime_autosuspend_used(struct device *dev)
 
-On 10/10/13 12:40, Prasanna NAVARATNA wrote:
->> Hello,
->> Could you please post kernel log of such failure?
->> What hw are you using?
-> I'm using sdhci controller. Hynix eMMC4.41. Linux Kernel 3.4.5
-> There are no kernel log failures as such.
-I need it to understand the flow. Also - how exactly reboot done? Is it 
-urgent reboot with no fs sync?
+What about pm_runtime_autosuspend_in_use()?
 
-> Do we need to have BKOPS in eMMC and wait for BKOPS to complete before
-> shutting down? (Or)
-BKOPS itself when disabled impact on busy time for write commands.
-
-
+> +{
+> +	return dev->power.use_autosuspend;
+> +}
+> +
+>  static inline bool pm_runtime_enabled(struct device *dev)
+>  {
+>  	return !dev->power.disable_depth;
+> @@ -140,6 +145,7 @@ static inline void device_set_run_wake(struct device *dev, bool enable) {}
+>  static inline bool pm_runtime_suspended(struct device *dev) { return false; }
+>  static inline bool pm_runtime_active(struct device *dev) { return true; }
+>  static inline bool pm_runtime_status_suspended(struct device *dev) { return false; }
+> +static inline bool pm_runtime_autosuspend_used(struct device *dev) { return false; }
+>  static inline bool pm_runtime_enabled(struct device *dev) { return false; }
+>  
+>  static inline int pm_generic_runtime_suspend(struct device *dev) { return 0; }
+> 
 -- 
-sent by an employee of the Qualcomm Innovation Center, Inc.
-The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum,
-hosted by The Linux Foundation
-
-
+I speak only for myself.
+Rafael J. Wysocki, Intel Open Source Technology Center.
