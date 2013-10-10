@@ -1,226 +1,142 @@
-From: Oskar Andero <oskar.andero@sonymobile.com>
-Subject: [PATCH 1/1] MMC: Detect execution mode errors after r/w command
-Date: Thu, 10 Oct 2013 15:28:08 +0200
-Message-ID: <1381411688-7128-1-git-send-email-oskar.andero@sonymobile.com>
+From: Balaji T K <balajitk@ti.com>
+Subject: Re: [PATCH 14/27] mmc: omap_hsmmc: Move away from using deprecated
+ APIs
+Date: Thu, 10 Oct 2013 19:36:31 +0530
+Message-ID: <5256B467.8080402@ti.com>
+References: <1380207292-16968-1-git-send-email-ulf.hansson@linaro.org> <1380207292-16968-15-git-send-email-ulf.hansson@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from seldrel01.sonyericsson.com ([212.209.106.2]:14230 "EHLO
-	seldrel01.sonyericsson.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751269Ab3JJN2T (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 10 Oct 2013 09:28:19 -0400
+Received: from arroyo.ext.ti.com ([192.94.94.40]:45865 "EHLO arroyo.ext.ti.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752251Ab3JJOGg (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 10 Oct 2013 10:06:36 -0400
+In-Reply-To: <1380207292-16968-15-git-send-email-ulf.hansson@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
-Cc: Chris Ball <cjb@laptop.org>, Ulf Hansson <ulf.hansson@linaro.org>, Lars Svensson <lars1.svensson@sonymobile.com>, Oskar Andero <oskar.andero@sonymobile.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, linux-omap@vger.kernel.org
 
-From: Lars Svensson <lars1.svensson@sonymobile.com>
+On Thursday 26 September 2013 08:24 PM, Ulf Hansson wrote:
+> Suspend and resume of cards are being handled from the protocol layer
+> and consequently the mmc_suspend|resume_host APIs are deprecated.
+>
+> This means we can simplify the suspend|resume callbacks by removing the
+> use of the deprecated APIs. Additional cleanup done for keeping track
+> suspended state.
+>
+> Cc: Balaji T K <balajitk@ti.com>
+> Cc: linux-omap@vger.kernel.org
+> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 
-Some error bits in the status field of R1/R1b response are only set
-by the device in response to the command following the failing
-command. The status is only read and checked after a r/w command if
-an error is detected during the initial command or the following data
-transfer. In some situations this causes errors passing undetected.
+Acked-by: Balaji T K <balajitk@ti.com>
 
-The solution is to read the status and check for these errors after
-each r/w operation.
-
-Signed-off-by: Lars Svensson <lars1.svensson@sonymobile.com>
-Signed-off-by: Oskar Andero <oskar.andero@sonymobile.com>
-Cc: linux-mmc@vger.kernel.org
----
- drivers/mmc/card/block.c | 105 +++++++++++++++++++++++++----------------------
- 1 file changed, 57 insertions(+), 48 deletions(-)
-
-diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-index 1a3163f..05de087 100644
---- a/drivers/mmc/card/block.c
-+++ b/drivers/mmc/card/block.c
-@@ -797,10 +797,9 @@ static int mmc_blk_cmd_error(struct request *req, const char *name, int error,
-  * Initial r/w and stop cmd error recovery.
-  * We don't know whether the card received the r/w cmd or not, so try to
-  * restore things back to a sane state.  Essentially, we do this as follows:
-- * - Obtain card status.  If the first attempt to obtain card status fails,
-- *   the status word will reflect the failed status cmd, not the failed
-- *   r/w cmd.  If we fail to obtain card status, it suggests we can no
-- *   longer communicate with the card.
-+ * - Check card status. If the status_valid argument is false, the first attempt
-+ *   to obtain card status failed and the status argument will not reflect the
-+ *   failed r/w cmd.
-  * - Check the card state.  If the card received the cmd but there was a
-  *   transient problem with the response, it might still be in a data transfer
-  *   mode.  Try to send it a stop command.  If this fails, we can't recover.
-@@ -812,38 +811,15 @@ static int mmc_blk_cmd_error(struct request *req, const char *name, int error,
-  * Otherwise we don't understand what happened, so abort.
-  */
- static int mmc_blk_cmd_recovery(struct mmc_card *card, struct request *req,
--	struct mmc_blk_request *brq, int *ecc_err, int *gen_err)
-+	struct mmc_blk_request *brq, int *ecc_err, int *gen_err,
-+	bool status_valid, int status)
- {
--	bool prev_cmd_status_valid = true;
--	u32 status, stop_status = 0;
--	int err, retry;
-+	u32 stop_status = 0;
-+	int err;
- 
- 	if (mmc_card_removed(card))
- 		return ERR_NOMEDIUM;
- 
--	/*
--	 * Try to get card status which indicates both the card state
--	 * and why there was no response.  If the first attempt fails,
--	 * we can't be sure the returned status is for the r/w command.
--	 */
--	for (retry = 2; retry >= 0; retry--) {
--		err = get_card_status(card, &status, 0);
--		if (!err)
--			break;
--
--		prev_cmd_status_valid = false;
--		pr_err("%s: error %d sending status command, %sing\n",
--		       req->rq_disk->disk_name, err, retry ? "retry" : "abort");
--	}
--
--	/* We couldn't get a response from the card.  Give up. */
--	if (err) {
--		/* Check if the card is removed */
--		if (mmc_detect_card_removed(card->host))
--			return ERR_NOMEDIUM;
--		return ERR_ABORT;
--	}
--
- 	/* Flag ECC errors */
- 	if ((status & R1_CARD_ECC_FAILED) ||
- 	    (brq->stop.resp[0] & R1_CARD_ECC_FAILED) ||
-@@ -891,12 +867,12 @@ static int mmc_blk_cmd_recovery(struct mmc_card *card, struct request *req,
- 	/* Check for set block count errors */
- 	if (brq->sbc.error)
- 		return mmc_blk_cmd_error(req, "SET_BLOCK_COUNT", brq->sbc.error,
--				prev_cmd_status_valid, status);
-+				status_valid, status);
- 
- 	/* Check for r/w command errors */
- 	if (brq->cmd.error)
- 		return mmc_blk_cmd_error(req, "r/w cmd", brq->cmd.error,
--				prev_cmd_status_valid, status);
-+				status_valid, status);
- 
- 	/* Data errors */
- 	if (!brq->stop.error)
-@@ -1107,6 +1083,12 @@ static inline void mmc_apply_rel_rw(struct mmc_blk_request *brq,
- 	 R1_CC_ERROR |		/* Card controller error */		\
- 	 R1_ERROR)		/* General/unknown error */
- 
-+#define EXE_ERRORS							\
-+	(R1_OUT_OF_RANGE |	/* Command argument out of range */	\
-+	 R1_ADDRESS_ERROR |	/* Misaligned address */		\
-+	 R1_WP_VIOLATION |	/* Tried to write to protected block */	\
-+	 R1_ERROR)		/* General/unknown error */
-+
- static int mmc_blk_err_check(struct mmc_card *card,
- 			     struct mmc_async_req *areq)
- {
-@@ -1114,7 +1096,33 @@ static int mmc_blk_err_check(struct mmc_card *card,
- 						    mmc_active);
- 	struct mmc_blk_request *brq = &mq_mrq->brq;
- 	struct request *req = mq_mrq->req;
--	int ecc_err = 0, gen_err = 0;
-+	int retries, err, ecc_err = 0, gen_err = 0;
-+	u32 status = 0;
-+	bool status_valid = true;
-+
-+	/*
-+	 * Try to get card status which indicates the card state after
-+	 * command execution. If the first attempt fails, we can't be
-+	 * sure the returned status is for the r/w command.
-+	 */
-+	for (retries = 2; retries >= 0; retries--) {
-+		err = get_card_status(card, &status, 0);
-+		if (!err)
-+			break;
-+
-+		status_valid = false;
-+		pr_err("%s: error %d sending status command, %sing\n",
-+		       req->rq_disk->disk_name, err,
-+		       retries ? "retry" : "abort");
-+	}
-+
-+	/* We couldn't get a response from the card.  Give up. */
-+	if (err) {
-+		/* Check if the card is removed */
-+		if (mmc_detect_card_removed(card->host))
-+			return MMC_BLK_NOMEDIUM;
-+		return MMC_BLK_ABORT;
-+	}
- 
- 	/*
- 	 * sbc.error indicates a problem with the set block count
-@@ -1128,7 +1136,8 @@ static int mmc_blk_err_check(struct mmc_card *card,
- 	 */
- 	if (brq->sbc.error || brq->cmd.error || brq->stop.error ||
- 	    brq->data.error) {
--		switch (mmc_blk_cmd_recovery(card, req, brq, &ecc_err, &gen_err)) {
-+		switch (mmc_blk_cmd_recovery(card, req, brq, &ecc_err, &gen_err,
-+					     status_valid, status)) {
- 		case ERR_RETRY:
- 			return MMC_BLK_RETRY;
- 		case ERR_ABORT:
-@@ -1143,11 +1152,12 @@ static int mmc_blk_err_check(struct mmc_card *card,
- 	/*
- 	 * Check for errors relating to the execution of the
- 	 * initial command - such as address errors.  No data
--	 * has been transferred.
-+	 * has been transferred. Also check for errors during
-+	 * command execution. In this case execution was aborted.
- 	 */
--	if (brq->cmd.resp[0] & CMD_ERRORS) {
--		pr_err("%s: r/w command failed, status = %#x\n",
--		       req->rq_disk->disk_name, brq->cmd.resp[0]);
-+	if (brq->cmd.resp[0] & CMD_ERRORS || status & EXE_ERRORS) {
-+		pr_err("%s: r/w command failed, cmd status = %#x, status = %#x\n",
-+		       req->rq_disk->disk_name, brq->cmd.resp[0], status);
- 		return MMC_BLK_ABORT;
- 	}
- 
-@@ -1157,7 +1167,6 @@ static int mmc_blk_err_check(struct mmc_card *card,
- 	 * program mode, which we have to wait for it to complete.
- 	 */
- 	if (!mmc_host_is_spi(card->host) && rq_data_dir(req) != READ) {
--		u32 status;
- 		unsigned long timeout;
- 
- 		/* Check stop command response */
-@@ -1169,7 +1178,13 @@ static int mmc_blk_err_check(struct mmc_card *card,
- 		}
- 
- 		timeout = jiffies + msecs_to_jiffies(MMC_BLK_TIMEOUT_MS);
--		do {
-+		/*
-+		 * Some cards mishandle the status bits,
-+		 * so make sure to check both the busy
-+		 * indication and the card state.
-+		 */
-+		while (!(status & R1_READY_FOR_DATA) ||
-+				(R1_CURRENT_STATE(status) == R1_STATE_PRG)) {
- 			int err = get_card_status(card, &status, 5);
- 			if (err) {
- 				pr_err("%s: error %d requesting status\n",
-@@ -1194,13 +1209,7 @@ static int mmc_blk_err_check(struct mmc_card *card,
- 
- 				return MMC_BLK_CMD_ERR;
- 			}
--			/*
--			 * Some cards mishandle the status bits,
--			 * so make sure to check both the busy
--			 * indication and the card state.
--			 */
--		} while (!(status & R1_READY_FOR_DATA) ||
--			 (R1_CURRENT_STATE(status) == R1_STATE_PRG));
-+		}
- 	}
- 
- 	/* if general error occurs, retry the write operation. */
--- 
-1.8.1.5
+> ---
+>   drivers/mmc/host/omap_hsmmc.c |   37 +++----------------------------------
+>   1 file changed, 3 insertions(+), 34 deletions(-)
+>
+> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+> index 6ac63df..eb6fb28 100644
+> --- a/drivers/mmc/host/omap_hsmmc.c
+> +++ b/drivers/mmc/host/omap_hsmmc.c
+> @@ -170,7 +170,6 @@ struct omap_hsmmc_host {
+>   	unsigned int		dma_sg_idx;
+>   	unsigned char		bus_mode;
+>   	unsigned char		power_mode;
+> -	int			suspended;
+>   	int			irq;
+>   	int			use_dma, dma_ch;
+>   	struct dma_chan		*tx_chan;
+> @@ -1178,9 +1177,6 @@ static irqreturn_t omap_hsmmc_detect(int irq, void *dev_id)
+>   	struct omap_mmc_slot_data *slot = &mmc_slot(host);
+>   	int carddetect;
+>
+> -	if (host->suspended)
+> -		return IRQ_HANDLED;
+> -
+>   	sysfs_notify(&host->mmc->class_dev.kobj, NULL, "cover_switch");
+>
+>   	if (slot->card_detect)
+> @@ -1643,11 +1639,6 @@ static int omap_hsmmc_regs_show(struct seq_file *s, void *data)
+>   	seq_printf(s, "mmc%d:\n ctx_loss:\t%d:%d\n\nregs:\n",
+>   			mmc->index, host->context_loss, context_loss);
+>
+> -	if (host->suspended) {
+> -		seq_printf(s, "host suspended, can't read registers\n");
+> -		return 0;
+> -	}
+> -
+>   	pm_runtime_get_sync(host->dev);
+>
+>   	seq_printf(s, "CON:\t\t0x%08x\n",
+> @@ -2119,23 +2110,12 @@ static void omap_hsmmc_complete(struct device *dev)
+>
+>   static int omap_hsmmc_suspend(struct device *dev)
+>   {
+> -	int ret = 0;
+>   	struct omap_hsmmc_host *host = dev_get_drvdata(dev);
+>
+>   	if (!host)
+>   		return 0;
+>
+> -	if (host && host->suspended)
+> -		return 0;
+> -
+>   	pm_runtime_get_sync(host->dev);
+> -	host->suspended = 1;
+> -	ret = mmc_suspend_host(host->mmc);
+> -
+> -	if (ret) {
+> -		host->suspended = 0;
+> -		goto err;
+> -	}
+>
+>   	if (!(host->mmc->pm_flags & MMC_PM_KEEP_POWER)) {
+>   		omap_hsmmc_disable_irq(host);
+> @@ -2145,23 +2125,19 @@ static int omap_hsmmc_suspend(struct device *dev)
+>
+>   	if (host->dbclk)
+>   		clk_disable_unprepare(host->dbclk);
+> -err:
+> +
+>   	pm_runtime_put_sync(host->dev);
+> -	return ret;
+> +	return 0;
+>   }
+>
+>   /* Routine to resume the MMC device */
+>   static int omap_hsmmc_resume(struct device *dev)
+>   {
+> -	int ret = 0;
+>   	struct omap_hsmmc_host *host = dev_get_drvdata(dev);
+>
+>   	if (!host)
+>   		return 0;
+>
+> -	if (host && !host->suspended)
+> -		return 0;
+> -
+>   	pm_runtime_get_sync(host->dev);
+>
+>   	if (host->dbclk)
+> @@ -2172,16 +2148,9 @@ static int omap_hsmmc_resume(struct device *dev)
+>
+>   	omap_hsmmc_protect_card(host);
+>
+> -	/* Notify the core to resume the host */
+> -	ret = mmc_resume_host(host->mmc);
+> -	if (ret == 0)
+> -		host->suspended = 0;
+> -
+>   	pm_runtime_mark_last_busy(host->dev);
+>   	pm_runtime_put_autosuspend(host->dev);
+> -
+> -	return ret;
+> -
+> +	return 0;
+>   }
+>
+>   #else
+>
 
