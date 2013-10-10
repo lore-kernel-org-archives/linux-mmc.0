@@ -1,48 +1,32 @@
-From: Prasanna NAVARATNA <prasanna.navaratna@gmail.com>
-Subject: help with 'discard' mount option on eMMC
-Date: Thu, 10 Oct 2013 06:44:57 +0000 (UTC)
-Message-ID: <loom.20131010T083357-685@post.gmane.org>
+From: Jamilahussain <WEB@HUSSEIN699.onmicrosoft.com>
+Subject: RE: INVESTMENT/ RELOCATION ASSISTANCE. 10th/10/2013
+Date: Thu, 10 Oct 2013 12:26:41 +0530
+Message-ID: <cd658acf-ed4b-48bd-ae6b-b3412e5e8a80@HKNPR02MB244.apcprd02.prod.outlook.com>
+Reply-To: <mrs.induja.in@postribe.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from plane.gmane.org ([80.91.229.3]:37593 "EHLO plane.gmane.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751269Ab3JJGpU (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 10 Oct 2013 02:45:20 -0400
-Received: from list by plane.gmane.org with local (Exim 4.69)
-	(envelope-from <glkm-linux-mmc@m.gmane.org>)
-	id 1VU9zq-00042O-8P
-	for linux-mmc@vger.kernel.org; Thu, 10 Oct 2013 08:45:18 +0200
-Received: from 202.122.18.226 ([202.122.18.226])
-        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <linux-mmc@vger.kernel.org>; Thu, 10 Oct 2013 08:45:18 +0200
-Received: from prasanna.navaratna by 202.122.18.226 with local (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <linux-mmc@vger.kernel.org>; Thu, 10 Oct 2013 08:45:18 +0200
+Received: from emea01-db3-ndr.ptr.protection.outlook.com ([157.56.120.101]:7895
+	"EHLO emea01-db3-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1753980Ab3JJG5f convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 10 Oct 2013 02:57:35 -0400
+Content-Description: Mail message body
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
+To: Recipients <WEB@HUSSEIN699.onmicrosoft.com>
 
-Hello,
+Dear Beloved, 
 
-I'm using Hynix eMMC4.41 with Linux kernel 3.4.5.
+I am Mrs. Jamila Hussein a Teacher and a Muslim Convert here in Syria,i had sent a previous mail which i am not sure you got. I need your assistance to invest and assist relocate 3 kids who are 17 years and below so that they can get a better life there in your country due to the on going crises here in Syria.
 
-After mounting ext4 partition /userdata with 'discard' mount option enabled,
-fs triggers TRIM commands to eMMC after every file deletion. With this
-setup, for a continuous reboot test (5s awake and issue reboot and repeat)
-with 10 or 20 iterations, i see data corruption in eMMC consistently.
+I need your trust, before the death of their parents they had a savings with an Indian Bank, so money is not the issue. 
 
-mount options are :- noatime,nosuid,nodev,noauto_da_alloc,discard
-encryptable="path"
+I got your reference in my search for someone who suits my 
+purpose.If you can help me reply, let me know.
 
-What am i missing here? if 'discard' mount option is removed, then no data
-corruption in eMMC for more than 200 iterations. Does TRIM needs some extra
-care? BKOPS is not enabled in eMMC (is bkops mandatory if using TRIM?)
-Apologies, if this is not proper platform to ask such question. Please guide
-and throw some light.
+Regards,
 
-Thanks,
-Prasanna NAVARATNA
-
+Mrs. Jamila Hussein
+=====================================4
