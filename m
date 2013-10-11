@@ -1,82 +1,50 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [PATCH] PM / Runtime: Respect autosuspend when idle triggers suspend
-Date: Fri, 11 Oct 2013 11:23:40 +0200
-Message-ID: <1381483420-18864-1-git-send-email-ulf.hansson@linaro.org>
-Return-path: <linux-pm-owner@vger.kernel.org>
-Sender: linux-pm-owner@vger.kernel.org
-To: "Rafael J. Wysocki" <rjw@rjwysocki.net>, Len Brown <len.brown@intel.com>, Pavel Machek <pavel@ucw.cz>, linux-pm@vger.kernel.org
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Alan Stern <stern@rowland.harvard.edu>, Mika Westerberg <mika.westerberg@linux.intel.com>, Kevin Hilman <khilman@linaro.org>, Rob Landley <rob@landley.net>, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org
+Subject: [PATCH 0/4] mmc: core: Extend runtime PM support for sd/mmc
+Date: Fri, 11 Oct 2013 14:28:14 +0200
+Message-ID: <1381494498-16699-1-git-send-email-ulf.hansson@linaro.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-la0-f53.google.com ([209.85.215.53]:44918 "EHLO
+	mail-la0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752713Ab3JKM2f (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 11 Oct 2013 08:28:35 -0400
+Received: by mail-la0-f53.google.com with SMTP id el20so3280593lab.40
+        for <linux-mmc@vger.kernel.org>; Fri, 11 Oct 2013 05:28:34 -0700 (PDT)
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
+Cc: "Rafael J. Wysocki" <rjw@rjwysocki.net>, Kevin Hilman <khilman@linaro.org>, Alan Stern <stern@rowland.harvard.edu>, Colin Cross <ccross@android.com>, Android Kernel Team <kernel-team@android.com>, John Stultz <john.stultz@linaro.org>, Ulf Hansson <ulf.hansson@linaro.org>
 
-For devices which don't have a .runtime_idle callback or if it returns
-0, rpm_idle will end up in triggering a call to rpm_suspend, thus
-trying to carry out a runtime_suspend directly from runtime_idle.
+This patchset is step by step improving support for runtime PM in the mmc core
+layer for sd and mmc. The sequence for how to handle suspend/resume while using
+MMC_CAP_AGGRESSIVE_PM is now optimized to only perform actions when needed and
+thus improving especially the suspend time. 
 
-In the above situation we want to respect devices which has enabled
-autosuspend, we therfore append the flag sent to rpm_suspend with
-RPM_AUTO.
+The two first patches has been sent earlier to the mmc-list, but for convenience
+I have decided to fold them in here instead. The old versions of these can be
+dropped.
 
-Do note that driver's still needs to update the device last busy mark,
-to control the delay for this circumstance.
+The final patch is adding a new host cap, MMC_CAP_RUNTIME_RESUME, which means
+the resume is moved to be finalized at the runtime_resume. Using this feature
+will have great impact on the total resume time for the platform.
 
-Updated runtime PM documentation accordingly.
+Patches has been tested on ux500, using a various of combination of
+MMC_CAP_RUNTIME_RESUME, MMC_CAP_AGGRESSIVE_PM and MMC_CAP_NONREMOVABLE. The
+needed CONFIG_MMC_UNSAFE_RESUME has also been set.
 
-Cc: Alan Stern <stern@rowland.harvard.edu>
-Cc: Mika Westerberg <mika.westerberg@linux.intel.com>
-Cc: Kevin Hilman <khilman@linaro.org>
-Cc: Rob Landley <rob@landley.net>
-Cc: Chris Ball <cjb@laptop.org>
-Cc: linux-mmc@vger.kernel.org
-Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
----
- Documentation/power/runtime_pm.txt |    9 ++++-----
- drivers/base/power/runtime.c       |    6 ++++--
- 2 files changed, 8 insertions(+), 7 deletions(-)
+Ulf Hansson (4):
+  mmc: Don't force card to active state when entering suspend/shutdown
+  mmc: core: Remove redundant mmc_power_up|off at runtime callbacks
+  mmc: core: Improve runtime PM support during suspend/resume for
+    sd/mmc
+  mmc: core: Add MMC_CAP_RUNTIME_RESUME to resume at runtime_resume
 
-diff --git a/Documentation/power/runtime_pm.txt b/Documentation/power/runtime_pm.txt
-index 71d8fe4..80df87a 100644
---- a/Documentation/power/runtime_pm.txt
-+++ b/Documentation/power/runtime_pm.txt
-@@ -145,11 +145,10 @@ The action performed by the idle callback is totally dependent on the subsystem
- if the device can be suspended (i.e. if all of the conditions necessary for
- suspending the device are satisfied) and to queue up a suspend request for the
- device in that case.  If there is no idle callback, or if the callback returns
--0, then the PM core will attempt to carry out a runtime suspend of the device;
--in essence, it will call pm_runtime_suspend() directly.  To prevent this (for
--example, if the callback routine has started a delayed suspend), the routine
--should return a non-zero value.  Negative error return codes are ignored by the
--PM core.
-+0, then the PM core will attempt to carry out a runtime suspend of the device,
-+also respecting devices configured for autosuspend. In essence it means a call
-+to pm_runtime_autosuspend(). To prevent this, the routine must return a non-zero
-+value. Negative error return codes are ignored by the PM core.
- 
- The helper functions provided by the PM core, described in Section 4, guarantee
- that the following constraints are met with respect to runtime PM callbacks for
-diff --git a/drivers/base/power/runtime.c b/drivers/base/power/runtime.c
-index 268a350..4edb2a0 100644
---- a/drivers/base/power/runtime.c
-+++ b/drivers/base/power/runtime.c
-@@ -258,7 +258,9 @@ static int __rpm_callback(int (*cb)(struct device *), struct device *dev)
-  * Check if the device's runtime PM status allows it to be suspended.  If
-  * another idle notification has been started earlier, return immediately.  If
-  * the RPM_ASYNC flag is set then queue an idle-notification request; otherwise
-- * run the ->runtime_idle() callback directly.
-+ * run the ->runtime_idle() callback directly. If the ->runtime_idle callback
-+ * does'nt exist or if it returns 0, run rpm_suspend with RPM_AUTO flag to
-+ * respect drivers using autosuspend.
-  *
-  * This function must be called under dev->power.lock with interrupts disabled.
-  */
-@@ -331,7 +333,7 @@ static int rpm_idle(struct device *dev, int rpmflags)
- 
-  out:
- 	trace_rpm_return_int(dev, _THIS_IP_, retval);
--	return retval ? retval : rpm_suspend(dev, rpmflags);
-+	return retval ? retval : rpm_suspend(dev, rpmflags | RPM_AUTO);
- }
- 
- /**
+ drivers/mmc/card/block.c |    2 -
+ drivers/mmc/core/mmc.c   |   94 ++++++++++++++++++++++++++++++++--------------
+ drivers/mmc/core/sd.c    |   79 ++++++++++++++++++++++++++------------
+ include/linux/mmc/card.h |    4 ++
+ include/linux/mmc/host.h |    1 +
+ 5 files changed, 125 insertions(+), 55 deletions(-)
+
 -- 
 1.7.9.5
 
