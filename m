@@ -1,31 +1,33 @@
-From: Alan Stern <stern@rowland.harvard.edu>
-Subject: Re: [PATCH] PM / Runtime: Respect autosuspend when idle triggers
- suspend
-Date: Fri, 11 Oct 2013 10:28:00 -0400 (EDT)
-Message-ID: <Pine.LNX.4.44L0.1310111027170.1052-100000@iolanthe.rowland.org>
-References: <1381483420-18864-1-git-send-email-ulf.hansson@linaro.org>
+From: Shawn Guo <shawn.guo@linaro.org>
+Subject: Re: [PATCH v2] mmc: sdhci-esdhc-imx: Check the return value from
+ clk_prepare_enable()
+Date: Sat, 12 Oct 2013 15:38:59 +0800
+Message-ID: <20131012073857.GD21305@S2101-09.ap.freescale.net>
+References: <1381351059-30650-1-git-send-email-festevam@gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-pm-owner@vger.kernel.org>
-In-Reply-To: <1381483420-18864-1-git-send-email-ulf.hansson@linaro.org>
-Sender: linux-pm-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: "Rafael J. Wysocki" <rjw@rjwysocki.net>, Len Brown <len.brown@intel.com>, Pavel Machek <pavel@ucw.cz>, linux-pm@vger.kernel.org, Mika Westerberg <mika.westerberg@linux.intel.com>, Kevin Hilman <khilman@linaro.org>, Rob Landley <rob@landley.net>, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from [213.199.154.248] ([213.199.154.248]:59741 "EHLO
+	db9outboundpool.messaging.microsoft.com" rhost-flags-FAIL-FAIL-OK-OK)
+	by vger.kernel.org with ESMTP id S1751805Ab3JLHjf (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 12 Oct 2013 03:39:35 -0400
+Content-Disposition: inline
+In-Reply-To: <1381351059-30650-1-git-send-email-festevam@gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Fabio Estevam <festevam@gmail.com>
+Cc: cjb@laptop.org, linux-mmc@vger.kernel.org, Fabio Estevam <fabio.estevam@freescale.com>
 
-On Fri, 11 Oct 2013, Ulf Hansson wrote:
+On Wed, Oct 09, 2013 at 05:37:39PM -0300, Fabio Estevam wrote:
+> From: Fabio Estevam <fabio.estevam@freescale.com>
+> 
+> clk_prepare_enable() may fail, so let's check its return value and propagate it
+> in the case of error.
+> 
+> Also, fix the sequence for disabling the clock in the probe error path and
+> also in the remove funct
+> 
+> Signed-off-by: Fabio Estevam <fabio.estevam@freescale.com>
 
-> --- a/drivers/base/power/runtime.c
-> +++ b/drivers/base/power/runtime.c
-> @@ -258,7 +258,9 @@ static int __rpm_callback(int (*cb)(struct device *), struct device *dev)
->   * Check if the device's runtime PM status allows it to be suspended.  If
->   * another idle notification has been started earlier, return immediately.  If
->   * the RPM_ASYNC flag is set then queue an idle-notification request; otherwise
-> - * run the ->runtime_idle() callback directly.
-> + * run the ->runtime_idle() callback directly. If the ->runtime_idle callback
-> + * does'nt exist or if it returns 0, run rpm_suspend with RPM_AUTO flag to
-
-s/does'nt/doesn't/
-
-Alan Stern
+Acked-by: Shawn Guo <shawn.guo@linaro.org>
 
