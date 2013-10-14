@@ -1,93 +1,80 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [PATCH V2] PM / Runtime: Respect autosuspend when idle triggers suspend
-Date: Mon, 14 Oct 2013 09:21:04 +0200
-Message-ID: <1381735264-3077-1-git-send-email-ulf.hansson@linaro.org>
-Return-path: <linux-pm-owner@vger.kernel.org>
-Sender: linux-pm-owner@vger.kernel.org
-To: "Rafael J. Wysocki" <rjw@rjwysocki.net>, Len Brown <len.brown@intel.com>, Pavel Machek <pavel@ucw.cz>, linux-pm@vger.kernel.org
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Alan Stern <stern@rowland.harvard.edu>, Mika Westerberg <mika.westerberg@linux.intel.com>, Kevin Hilman <khilman@linaro.org>, Rob Landley <rob@landley.net>, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org
+From: Romain Izard <romain.izard.pro@gmail.com>
+Subject: Re: [PATCH 2/4] drivers/mmc/host: don't use
+ devm_pinctrl_get_select_default() in probe
+Date: Mon, 14 Oct 2013 07:28:09 +0000 (UTC)
+Message-ID: <l3g6e9$fqh$1@ger.gmane.org>
+References: <1381681071-6021-1-git-send-email-wsa@the-dreams.de>
+ <1381681071-6021-3-git-send-email-wsa@the-dreams.de>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from plane.gmane.org ([80.91.229.3]:48601 "EHLO plane.gmane.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753235Ab3JNH2d (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 14 Oct 2013 03:28:33 -0400
+Received: from list by plane.gmane.org with local (Exim 4.69)
+	(envelope-from <glkm-linux-mmc@m.gmane.org>)
+	id 1VVcZr-00008X-MB
+	for linux-mmc@vger.kernel.org; Mon, 14 Oct 2013 09:28:31 +0200
+Received: from 146.187.3.109.rev.sfr.net ([109.3.187.146])
+        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <linux-mmc@vger.kernel.org>; Mon, 14 Oct 2013 09:28:31 +0200
+Received: from romain.izard.pro by 146.187.3.109.rev.sfr.net with local (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <linux-mmc@vger.kernel.org>; Mon, 14 Oct 2013 09:28:31 +0200
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linux-omap@vger.kernel.org
 
-For devices which don't have a .runtime_idle callback or if it returns
-0, rpm_idle will end up in triggering a call to rpm_suspend, thus
-trying to carry out a runtime_suspend directly from runtime_idle.
+On 2013-10-13, Wolfram Sang <wsa@the-dreams.de> wrote:
+> Since commit ab78029 (drivers/pinctrl: grab default handles from device core),
+> we can rely on device core for setting the default pins. Compile tested only.
+>
+> Acked-by: Linus Walleij <linus.walleij@linaro.org> (personally at LCE13)
+> Signed-off-by: Wolfram Sang <wsa@the-dreams.de>
+> ---
+>  drivers/mmc/host/mvsdio.c          | 7 +------
+>  drivers/mmc/host/omap_hsmmc.c      | 7 -------
+>  drivers/mmc/host/sdhci-esdhc-imx.c | 8 --------
+>  3 files changed, 1 insertion(+), 21 deletions(-)
+>
+> diff --git a/drivers/mmc/host/mvsdio.c b/drivers/mmc/host/mvsdio.c
+> index 06c5b0b..8c9f448 100644
+> --- a/drivers/mmc/host/mvsdio.c
+> +++ b/drivers/mmc/host/mvsdio.c
+> @@ -25,7 +25,6 @@
+>  #include <linux/of_irq.h>
+>  #include <linux/mmc/host.h>
+>  #include <linux/mmc/slot-gpio.h>
+> -#include <linux/pinctrl/consumer.h>
+>  
+>  #include <asm/sizes.h>
+>  #include <asm/unaligned.h>
+> @@ -685,7 +684,7 @@ static int __init mvsd_probe(struct platform_device *pdev)
+>  	const struct mbus_dram_target_info *dram;
+>  	struct resource *r;
+>  	int ret, irq;
+> -	struct pinctrl *pinctrl;
+> +	int gpio_card_detect, gpio_write_protect;
+>  
 
-In the above situation we want to respect devices which has enabled
-autosuspend, we therfore append the flag sent to rpm_suspend with
-RPM_AUTO.
+This new line does not belong to this patch.
 
-Do note that driver's still needs to update the device last busy mark,
-to control the delay for this circumstance.
+>  	r = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+>  	irq = platform_get_irq(pdev, 0);
+> @@ -702,10 +701,6 @@ static int __init mvsd_probe(struct platform_device *pdev)
+>  	host->mmc = mmc;
+>  	host->dev = &pdev->dev;
+>  
+> -	pinctrl = devm_pinctrl_get_select_default(&pdev->dev);
+> -	if (IS_ERR(pinctrl))
+> -		dev_warn(&pdev->dev, "no pins associated\n");
+> -
+>  	/*
+>  	 * Some non-DT platforms do not pass a clock, and the clock
+>  	 * frequency is passed through platform_data. On DT platforms,
 
-Updated runtime PM documentation accordingly.
-
-Cc: Alan Stern <stern@rowland.harvard.edu>
-Cc: Mika Westerberg <mika.westerberg@linux.intel.com>
-Cc: Kevin Hilman <khilman@linaro.org>
-Cc: Rob Landley <rob@landley.net>
-Cc: Chris Ball <cjb@laptop.org>
-Cc: linux-mmc@vger.kernel.org
-Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
----
- Documentation/power/runtime_pm.txt |   13 +++++++------
- drivers/base/power/runtime.c       |    6 ++++--
- 2 files changed, 11 insertions(+), 8 deletions(-)
-
-diff --git a/Documentation/power/runtime_pm.txt b/Documentation/power/runtime_pm.txt
-index 71d8fe4..236d9f4 100644
---- a/Documentation/power/runtime_pm.txt
-+++ b/Documentation/power/runtime_pm.txt
-@@ -145,11 +145,12 @@ The action performed by the idle callback is totally dependent on the subsystem
- if the device can be suspended (i.e. if all of the conditions necessary for
- suspending the device are satisfied) and to queue up a suspend request for the
- device in that case.  If there is no idle callback, or if the callback returns
--0, then the PM core will attempt to carry out a runtime suspend of the device;
--in essence, it will call pm_runtime_suspend() directly.  To prevent this (for
--example, if the callback routine has started a delayed suspend), the routine
--should return a non-zero value.  Negative error return codes are ignored by the
--PM core.
-+0, then the PM core will attempt to carry out a runtime suspend of the device,
-+also respecting devices configured for autosuspend. In essence it means a call
-+to pm_runtime_autosuspend(). Do note that driver's still needs to update the
-+device last busy mark (pm_runtime_mark_last_busy), to control the delay under
-+this circumstance. To prevent this, the routine must return a non-zero value.
-+Negative error return codes are ignored by the PM core.
- 
- The helper functions provided by the PM core, described in Section 4, guarantee
- that the following constraints are met with respect to runtime PM callbacks for
-@@ -308,7 +309,7 @@ drivers/base/power/runtime.c and include/linux/pm_runtime.h:
-     - execute the subsystem-level idle callback for the device; returns an
-       error code on failure, where -EINPROGRESS means that ->runtime_idle() is
-       already being executed; if there is no callback or the callback returns 0
--      then run pm_runtime_suspend(dev) and return its result
-+      then run pm_runtime_autosuspend(dev) and return its result
- 
-   int pm_runtime_suspend(struct device *dev);
-     - execute the subsystem-level suspend callback for the device; returns 0 on
-diff --git a/drivers/base/power/runtime.c b/drivers/base/power/runtime.c
-index 268a350..e6867d4 100644
---- a/drivers/base/power/runtime.c
-+++ b/drivers/base/power/runtime.c
-@@ -258,7 +258,9 @@ static int __rpm_callback(int (*cb)(struct device *), struct device *dev)
-  * Check if the device's runtime PM status allows it to be suspended.  If
-  * another idle notification has been started earlier, return immediately.  If
-  * the RPM_ASYNC flag is set then queue an idle-notification request; otherwise
-- * run the ->runtime_idle() callback directly.
-+ * run the ->runtime_idle() callback directly. If the ->runtime_idle callback
-+ * doesn't exist or if it returns 0, run rpm_suspend with RPM_AUTO flag to
-+ * respect drivers using autosuspend.
-  *
-  * This function must be called under dev->power.lock with interrupts disabled.
-  */
-@@ -331,7 +333,7 @@ static int rpm_idle(struct device *dev, int rpmflags)
- 
-  out:
- 	trace_rpm_return_int(dev, _THIS_IP_, retval);
--	return retval ? retval : rpm_suspend(dev, rpmflags);
-+	return retval ? retval : rpm_suspend(dev, rpmflags | RPM_AUTO);
- }
- 
- /**
+Best regards,
 -- 
-1.7.9.5
+Romain Izard
 
