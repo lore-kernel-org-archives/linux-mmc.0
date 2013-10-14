@@ -1,14 +1,16 @@
 From: <dinguyen@altera.com>
-Subject: [RESEND PATCHv2 1/3] arm: socfpga: Set the SDMMC clock phase in system manager
-Date: Mon, 14 Oct 2013 14:47:29 -0500
-Message-ID: <1381780051-1826-1-git-send-email-dinguyen@altera.com>
+Subject: [RESEND PATCHv2 3/3] arm: dts: socfpga: Add support for SD/MMC
+Date: Mon, 14 Oct 2013 14:47:31 -0500
+Message-ID: <1381780051-1826-3-git-send-email-dinguyen@altera.com>
+References: <1381780051-1826-1-git-send-email-dinguyen@altera.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-db9lp0248.outbound.messaging.microsoft.com ([213.199.154.248]:5227
+Received: from mail-db9lp0251.outbound.messaging.microsoft.com ([213.199.154.251]:38096
 	"EHLO db9outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1756718Ab3JNTsC (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 14 Oct 2013 15:48:02 -0400
+	by vger.kernel.org with ESMTP id S1756807Ab3JNTsA (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 14 Oct 2013 15:48:00 -0400
+In-Reply-To: <1381780051-1826-1-git-send-email-dinguyen@altera.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: dinh.linux@gmail.com
@@ -16,10 +18,10 @@ Cc: Dinh Nguyen <dinguyen@altera.com>, Pavel Machek <pavel@denx.de>, Arnd Bergma
 
 From: Dinh Nguyen <dinguyen@altera.com>
 
-Add functionality in the System Manager to set the SDR settings for the
-SD/MMC IP.
+Add bindings for SD/MMC for SOCFPGA.
 
 Signed-off-by: Dinh Nguyen <dinguyen@altera.com>
+Reviewed-by: Pavel Machek <pavel@denx.de>
 Cc: Pavel Machek <pavel@denx.de>
 CC: Arnd Bergmann <arnd@arndb.de>
 CC: Olof Johansson <olof@lixom.net>
@@ -34,78 +36,129 @@ Cc: Seungwon Jeon <tgih.jun@samsung.com>
 Cc: devicetree@vger.kernel.org
 Cc: linux-mmc@vger.kernel.org
 CC: linux-arm-kernel@lists.infradead.org
-
 ---
 v2:
-- Have socfpga_sysmgr_set_dwmmc_drvsel_smpsel() take in the SDR settings
-directly so that it does not have to walk the DTB.
+- Fix documentation s/binding/property and s/Synopsis/Synopsys
 ---
- arch/arm/mach-socfpga/Makefile     |    2 +-
- arch/arm/mach-socfpga/core.h       |    6 ++++++
- arch/arm/mach-socfpga/system_mgr.c |   28 ++++++++++++++++++++++++++++
- 3 files changed, 35 insertions(+), 1 deletion(-)
- create mode 100644 arch/arm/mach-socfpga/system_mgr.c
+ .../devicetree/bindings/mmc/socfpga-dw-mshc.txt    |   38 ++++++++++++++++++++
+ arch/arm/boot/dts/socfpga.dtsi                     |   11 ++++++
+ arch/arm/boot/dts/socfpga_cyclone5.dts             |   12 +++++++
+ arch/arm/boot/dts/socfpga_vt.dts                   |   12 +++++++
+ 4 files changed, 73 insertions(+)
+ create mode 100644 Documentation/devicetree/bindings/mmc/socfpga-dw-mshc.txt
 
-diff --git a/arch/arm/mach-socfpga/Makefile b/arch/arm/mach-socfpga/Makefile
-index 6dd7a93..e4ff8b9 100644
---- a/arch/arm/mach-socfpga/Makefile
-+++ b/arch/arm/mach-socfpga/Makefile
-@@ -2,5 +2,5 @@
- # Makefile for the linux kernel.
- #
- 
--obj-y					:= socfpga.o
-+obj-y					:= socfpga.o system_mgr.o
- obj-$(CONFIG_SMP)	+= headsmp.o platsmp.o
-diff --git a/arch/arm/mach-socfpga/core.h b/arch/arm/mach-socfpga/core.h
-index 572b8f7..b05fa6a 100644
---- a/arch/arm/mach-socfpga/core.h
-+++ b/arch/arm/mach-socfpga/core.h
-@@ -44,4 +44,10 @@ extern unsigned long cpu1start_addr;
- 
- #define SOCFPGA_SCU_VIRT_BASE   0xfffec000
- 
-+/* SDMMC Group for System Manager defines */
-+#define SYSMGR_SDMMCGRP_CTRL_OFFSET             0x108
-+#define DRV_CLK_PHASE_SHIFT_SEL_MASK    0x7
-+#define SYSMGR_SDMMC_CTRL_SET(smplsel, drvsel)          \
-+	((((smplsel) & 0x7) << 3) | (((drvsel) & 0x7) << 0))
-+
- #endif
-diff --git a/arch/arm/mach-socfpga/system_mgr.c b/arch/arm/mach-socfpga/system_mgr.c
+diff --git a/Documentation/devicetree/bindings/mmc/socfpga-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/socfpga-dw-mshc.txt
 new file mode 100644
-index 0000000..9fdce1d
+index 0000000..531336a
 --- /dev/null
-+++ b/arch/arm/mach-socfpga/system_mgr.c
-@@ -0,0 +1,28 @@
-+/*
-+ * Copyright Altera Corporation (C) 2013. All Rights Reserved.
-+ *
-+ * This program is free software; you can redistribute it and/or modify it
-+ * under the terms and conditions of the GNU General Public License,
-+ * version 2, as published by the Free Software Foundation.
-+ *
-+ * This program is distributed in the hope it will be useful, but WITHOUT
-+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
-+ * more details.
-+ *
-+ * You should have received a copy of the GNU General Public License along with
-+ * this program.  If not, see <http://www.gnu.org/licenses/>.
-+ */
-+#include <linux/of_platform.h>
-+#include <asm/mach/map.h>
++++ b/Documentation/devicetree/bindings/mmc/socfpga-dw-mshc.txt
+@@ -0,0 +1,38 @@
++* Altera SOCFPGA specific extensions to the Synopsys Designware Mobile
++  Storage Host Controller
 +
-+#include "core.h"
++The Synopsys designware mobile storage host controller is used to interface
++a SoC with storage medium such as eMMC or SD/MMC cards. This file documents
++differences between the core Synopsys dw mshc controller properties described
++by synopsys-dw-mshc.txt and the properties used by the SOCFPGA specific
++extensions to the Synopsys Designware Mobile Storage Host Controller.
 +
-+void socfpga_sysmgr_set_dwmmc_drvsel_smpsel(u32 drvsel, u32 smplsel)
-+{
-+	u32 hs_timing;
++Required Properties:
 +
-+	hs_timing = SYSMGR_SDMMC_CTRL_SET(smplsel, drvsel);
-+	writel(hs_timing, sys_manager_base_addr + SYSMGR_SDMMCGRP_CTRL_OFFSET);
-+}
-+EXPORT_SYMBOL(socfpga_sysmgr_set_dwmmc_drvsel_smpsel);
++* compatible: should be
++        - "altr,socfpga-dw-mshc": for controllers with Altera SOCFPGA
++          specific extensions.
++
++* samsung,dw-mshc-sdr-timing: See exynos-dw-mshc.txt for more information about
++	this property.
++
++Example:
++        dwmmc0@ff704000 {
++                compatible = "altr,socfpga-dw-mshc", "snps,dw-mshc";
++                reg = <0xff704000 0x1000>;
++                interrupts = <0 139 4>;
++                fifo-depth = <0x400>;
++                #address-cells = <1>;
++                #size-cells = <0>;
++                clocks = <&l4_mp_clk>, <&sdmmc_clk>;
++                clock-names = "biu", "ciu";
++                num-slots = <1>;
++                supports-highspeed;
++                broken-cd;
++                samsung,dw-mshc-sdr-timing = <3 0>;
++
++                slot@0 {
++                        reg = <0>;
++                        bus-width = <4>;
++                };
++        };
+diff --git a/arch/arm/boot/dts/socfpga.dtsi b/arch/arm/boot/dts/socfpga.dtsi
+index e273fa9..1ee6079 100644
+--- a/arch/arm/boot/dts/socfpga.dtsi
++++ b/arch/arm/boot/dts/socfpga.dtsi
+@@ -468,6 +468,17 @@
+ 			cache-level = <2>;
+ 		};
+ 
++		mmc: dwmmc0@ff704000 {
++			compatible = "altr,socfpga-dw-mshc";
++			reg = <0xff704000 0x1000>;
++			interrupts = <0 139 4>;
++			fifo-depth = <0x400>;
++			#address-cells = <1>;
++			#size-cells = <0>;
++			clocks = <&l4_mp_clk>, <&sdmmc_clk>;
++			clock-names = "biu", "ciu";
++		};
++
+ 		/* Local timer */
+ 		timer@fffec600 {
+ 			compatible = "arm,cortex-a9-twd-timer";
+diff --git a/arch/arm/boot/dts/socfpga_cyclone5.dts b/arch/arm/boot/dts/socfpga_cyclone5.dts
+index 973999d..bfed066 100644
+--- a/arch/arm/boot/dts/socfpga_cyclone5.dts
++++ b/arch/arm/boot/dts/socfpga_cyclone5.dts
+@@ -48,6 +48,18 @@
+ 			};
+ 		};
+ 
++		dwmmc0@ff704000 {
++			num-slots = <1>;
++			supports-highspeed;
++			broken-cd;
++			samsung,dw-mshc-sdr-timing = <3 0>;
++
++			slot@0 {
++				reg = <0>;
++				bus-width = <4>;
++			};
++		};
++
+ 		ethernet@ff702000 {
+ 			phy-mode = "rgmii";
+ 			phy-addr = <0xffffffff>; /* probe for phy addr */
+diff --git a/arch/arm/boot/dts/socfpga_vt.dts b/arch/arm/boot/dts/socfpga_vt.dts
+index d1ec0ca..25b2653 100644
+--- a/arch/arm/boot/dts/socfpga_vt.dts
++++ b/arch/arm/boot/dts/socfpga_vt.dts
+@@ -41,6 +41,18 @@
+ 			};
+ 		};
+ 
++		dwmmc0@ff704000 {
++			num-slots = <1>;
++			supports-highspeed;
++			broken-cd;
++			samsung,dw-mshc-sdr-timing = <3 0>;
++
++			slot@0 {
++				reg = <0>;
++				bus-width = <4>;
++			};
++		};
++
+ 		ethernet@ff700000 {
+ 			phy-mode = "gmii";
+ 			status = "okay";
 -- 
 1.7.9.5
 
