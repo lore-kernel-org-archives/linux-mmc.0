@@ -1,130 +1,81 @@
-From: Balaji T K <balajitk@ti.com>
-Subject: Re: [PATCH v3 3/4] mmc: omap_hsmmc: Remux pins to support SDIO
- interrupt on AM335x
-Date: Tue, 15 Oct 2013 22:04:14 +0530
-Message-ID: <525D6E86.1040208@ti.com>
-References: <1380971830-21492-1-git-send-email-afenkart@gmail.com>
- <1380971830-21492-4-git-send-email-afenkart@gmail.com>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: [RESEND PATCHv2 1/3] arm: socfpga: Set the SDMMC clock phase in system manager
+Date: Tue, 15 Oct 2013 21:01:44 +0200
+Message-ID: <201310152101.44669.arnd@arndb.de>
+References: <1381780051-1826-1-git-send-email-dinguyen@altera.com> <201310151450.48650.arnd@arndb.de> <525D41AA.7060503@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"; Format="flowed"
+Content-Type: Text/Plain;
+  charset="iso-8859-15"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <1380971830-21492-4-git-send-email-afenkart@gmail.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Andreas Fenkart <afenkart@gmail.com>
-Cc: devicetree@vger.kernel.org, linux-omap@vger.kernel.org, linux-doc@vger.kernel.org, Tony Lindgren <tony@atomide.com>, devicetree-discuss@lists.ozlabs.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Felipe Balbi <balbi@ti.com>, zonque@gmail.com, Grant Likely <grant.likely@secretlab.ca>, Chris Ball <cjb@laptop.org>, linux-arm-kernel@lists.infradead.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from moutng.kundenserver.de ([212.227.17.10]:60178 "EHLO
+	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1759671Ab3JOTCD (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 15 Oct 2013 15:02:03 -0400
+In-Reply-To: <525D41AA.7060503@gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Dinh Nguyen <dinh.linux@gmail.com>
+Cc: dinguyen@altera.com, Pavel Machek <pavel@denx.de>, Olof Johansson <olof@lixom.net>, Rob Herring <rob.herring@calxeda.com>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Stephen Warren <swarren@wwwdotorg.org>, Ian Campbell <ian.campbell@citrix.com>, Chris Ball <cjb@laptop.org>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 
-Thanks Andreas for the patch,
+On Tuesday 15 October 2013, Dinh Nguyen wrote:
+> Hi Arnd,
+> 
+> On 10/15/13 7:50 AM, Arnd Bergmann wrote:
+> > On Monday 14 October 2013, dinguyen@altera.com wrote:
+> >> +void socfpga_sysmgr_set_dwmmc_drvsel_smpsel(u32 drvsel, u32 smplsel)
+> >> +{
+> >> +       u32 hs_timing;
+> >> +
+> >> +       hs_timing = SYSMGR_SDMMC_CTRL_SET(smplsel, drvsel);
+> >> +       writel(hs_timing, sys_manager_base_addr + SYSMGR_SDMMCGRP_CTRL_OFFSET);
+> >> +}
+> >> +EXPORT_SYMBOL(socfpga_sysmgr_set_dwmmc_drvsel_smpsel);
+> > This looks like the wrong approach. What are you trying to do? If you want to
+> > set a clock, please use the clk API.
+> I can't use the clk API because this function is setting up a clock 
+> phase bit for the SD/MMC
+> clock that is used to clock the card, not the IP. This register is 
+> located outside the SD/MMC
+> and the clock manager.
+> 
+> Just to refresh your memory on this topic:
+> I tried to use the syscon approach that you suggested:
+> 
+> http://lists.infradead.org/pipermail/linux-arm-kernel/2013-May/168470.html
+> http://lists.infradead.org/pipermail/linux-arm-kernel/2013-May/170423.html
 
-On Saturday 05 October 2013 04:47 PM, Andreas Fenkart wrote:
-> The am335x can't detect pending cirq in PM runtime suspend.
-> This patch reconfigures dat1 as a GPIO before going to suspend.
-> SDIO interrupts are detected with the GPIO, while in runtime
-> suspend, standard detection of the module block otherwise.
->
-> Signed-off-by: Andreas Fenkart <afenkart@gmail.com>
->
-> @@ -2293,23 +2440,66 @@ static int omap_hsmmc_resume(struct device *dev)
->   static int omap_hsmmc_runtime_suspend(struct device *dev)
->   {
->   	struct omap_hsmmc_host *host;
-> +	unsigned long flags;
-> +	int ret = 0;
->
->   	host = platform_get_drvdata(to_platform_device(dev));
->   	omap_hsmmc_context_save(host);
->   	dev_dbg(dev, "disabled\n");
->
-> -	return 0;
-> +	if (host->flags & HSMMC_SWAKEUP_QUIRK) {
-> +		spin_lock_irqsave(&host->irq_lock, flags);
-> +		OMAP_HSMMC_WRITE(host->base, ISE, 0);
-> +		OMAP_HSMMC_WRITE(host->base, IE, 0);
-> +		OMAP_HSMMC_WRITE(host->base, STAT, STAT_CLEAR);
-> +		spin_unlock_irqrestore(&host->irq_lock, flags);
-> +
-> +		ret = pinctrl_select_state(host->pinctrl, host->idle);
-> +		if (ret < 0)
-> +			dev_warn(mmc_dev(host->mmc), "Unable to select idle pinmux\n");
-> +
-> +		enable_irq(mmc_slot(host).sdio_irq);
-> +	}
-> +
-> +	spin_lock_irqsave(&host->irq_lock, flags);
-> +	/* infinite loop, if irq not cleared in omap_hsmmc_enable_sdio_irq */
-> +	host->flags |= HSMMC_RUNTIME_SUSPENDED;
+Ah, thanks. I knew this problem had come up before, I just didn't remember
+it was for socfpga.
 
-Can you provide more details about the infinite loop and how it will get recovered.
+> But this approach was rejected by Stephen Warren because we wanted to 
+> the SD driver to be automonous
+> of registers outside its IP:
+> 
+> http://lists.infradead.org/pipermail/linux-arm-kernel/2013-August/194014.html
+> 
+> So I went with the approach of exposing a platform API so that the 
+> SD/MMC platform specific
+> code can call it.
+> 
+> The system manager has a plethora of registers that controls other IPs 
+> on the SOC, so I kinda thought
+> syscon was the way to go with this. A driver for this IP did not make 
+> sense to me.
+> 
+> Please advise if you know of another approach?
 
-> +	spin_unlock_irqrestore(&host->irq_lock, flags);
-> +
-> +	return ret;
->   }
->
->   static int omap_hsmmc_runtime_resume(struct device *dev)
->   {
->   	struct omap_hsmmc_host *host;
-> +	unsigned long flags;
-> +	int ret = 0;
->
->   	host = platform_get_drvdata(to_platform_device(dev));
->   	omap_hsmmc_context_restore(host);
->   	dev_dbg(dev, "enabled\n");
->
-> -	return 0;
-> +	spin_lock_irqsave(&host->irq_lock, flags);
-> +	/* infinite loop, if irq not cleared in omap_hsmmc_enable_sdio_irq */
-> +	host->flags &= ~HSMMC_RUNTIME_SUSPENDED;
-> +	spin_unlock_irqrestore(&host->irq_lock, flags);
-> +
-> +	if (host->flags & HSMMC_SWAKEUP_QUIRK) {
-> +		disable_irq(mmc_slot(host).sdio_irq);
-> +
-> +		ret = pinctrl_select_state(host->pinctrl, host->active);
-> +		if (ret < 0)
-> +			dev_warn(mmc_dev(host->mmc), "Unable to select active pinmux\n");
-> +
-> +		spin_lock_irqsave(&host->irq_lock, flags);
-> +		if (host->flags & HSMMC_SDIO_IRQ_ENABLED) {
-> +			OMAP_HSMMC_WRITE(host->base, STAT, STAT_CLEAR);
-> +			OMAP_HSMMC_WRITE(host->base, ISE, CIRQ_EN);
-> +			OMAP_HSMMC_WRITE(host->base, IE, CIRQ_EN);
-> +		}
-> +		spin_unlock_irqrestore(&host->irq_lock, flags);
-> +	}
-> +	return ret;
->   }
->
->   static struct dev_pm_ops omap_hsmmc_dev_pm_ops = {
-> diff --git a/include/linux/platform_data/mmc-omap.h b/include/linux/platform_data/mmc-omap.h
-> index 2bf1b30..fd5fff5 100644
-> --- a/include/linux/platform_data/mmc-omap.h
-> +++ b/include/linux/platform_data/mmc-omap.h
-> @@ -115,6 +115,7 @@ struct omap_mmc_platform_data {
->
->   		int switch_pin;			/* gpio (card detect) */
->   		int gpio_wp;			/* gpio (write protect) */
-> +		int gpio_cirq;			/* gpio (card irq) */
->
->   		int (*set_bus_mode)(struct device *dev, int slot, int bus_mode);
->   		int (*set_power)(struct device *dev, int slot,
-> @@ -145,6 +146,9 @@ struct omap_mmc_platform_data {
->   		int card_detect_irq;
->   		int (*card_detect)(struct device *dev, int slot);
->
-> +		/* SDIO IRQs */
-> +		int sdio_irq;
-> +
->   		unsigned int ban_openended:1;
->
->   	} slots[OMAP_MMC_MAX_SLOTS];
->
+I don't remember the details of what we have gone through before, but
+I think this should still work:
+
+1 Create a "syscon" backend driver to control your "system manager", which
+  lets other drivers hook into it without calling a private API.
+2 Create a trivial clock driver that is independent of your existing
+  clock driver and independent of the other drivers using the system
+  manager, by using syscon as the low-level interface.
+3 Make the sdmmc driver use the normal clock API and link its clock to the
+  driver from step 2 in the device tree.
+
+Is this what you have tried before?
+
+	Arnd
