@@ -1,81 +1,336 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [RESEND PATCHv2 1/3] arm: socfpga: Set the SDMMC clock phase in system manager
-Date: Tue, 15 Oct 2013 21:01:44 +0200
-Message-ID: <201310152101.44669.arnd@arndb.de>
-References: <1381780051-1826-1-git-send-email-dinguyen@altera.com> <201310151450.48650.arnd@arndb.de> <525D41AA.7060503@gmail.com>
-Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="iso-8859-15"
-Content-Transfer-Encoding: 7bit
+From: Soren Brinkmann <soren.brinkmann@xilinx.com>
+Subject: [PATCH 1/2] mmc: arasan: Add driver for Arasan SDHCI
+Date: Tue, 15 Oct 2013 12:08:04 -0700
+Message-ID: <1381864085-8806-1-git-send-email-soren.brinkmann@xilinx.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.17.10]:60178 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1759671Ab3JOTCD (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 15 Oct 2013 15:02:03 -0400
-In-Reply-To: <525D41AA.7060503@gmail.com>
+Received: from mail-pb0-f44.google.com ([209.85.160.44]:38203 "EHLO
+	mail-pb0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757185Ab3JOTIZ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 15 Oct 2013 15:08:25 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Dinh Nguyen <dinh.linux@gmail.com>
-Cc: dinguyen@altera.com, Pavel Machek <pavel@denx.de>, Olof Johansson <olof@lixom.net>, Rob Herring <rob.herring@calxeda.com>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Stephen Warren <swarren@wwwdotorg.org>, Ian Campbell <ian.campbell@citrix.com>, Chris Ball <cjb@laptop.org>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+To: Rob Herring <rob.herring@calxeda.com>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Stephen Warren <swarren@wwwdotorg.org>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Rob Landley <rob@landley.net>, Russell King <linux@arm.linux.org.uk>, Chris Ball <cjb@laptop.org>, Michal Simek <michal.simek@xilinx.com>, Grant Likely <grant.likely@linaro.org>
+Cc: linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, linux-doc@vger.kernel.org, devicetree@vger.kernel.org, Soren Brinkmann <soren.brinkmann@xilinx.com>
 
-On Tuesday 15 October 2013, Dinh Nguyen wrote:
-> Hi Arnd,
-> 
-> On 10/15/13 7:50 AM, Arnd Bergmann wrote:
-> > On Monday 14 October 2013, dinguyen@altera.com wrote:
-> >> +void socfpga_sysmgr_set_dwmmc_drvsel_smpsel(u32 drvsel, u32 smplsel)
-> >> +{
-> >> +       u32 hs_timing;
-> >> +
-> >> +       hs_timing = SYSMGR_SDMMC_CTRL_SET(smplsel, drvsel);
-> >> +       writel(hs_timing, sys_manager_base_addr + SYSMGR_SDMMCGRP_CTRL_OFFSET);
-> >> +}
-> >> +EXPORT_SYMBOL(socfpga_sysmgr_set_dwmmc_drvsel_smpsel);
-> > This looks like the wrong approach. What are you trying to do? If you want to
-> > set a clock, please use the clk API.
-> I can't use the clk API because this function is setting up a clock 
-> phase bit for the SD/MMC
-> clock that is used to clock the card, not the IP. This register is 
-> located outside the SD/MMC
-> and the clock manager.
-> 
-> Just to refresh your memory on this topic:
-> I tried to use the syscon approach that you suggested:
-> 
-> http://lists.infradead.org/pipermail/linux-arm-kernel/2013-May/168470.html
-> http://lists.infradead.org/pipermail/linux-arm-kernel/2013-May/170423.html
+Add a driver for Arasan's SDHCI controller core.
 
-Ah, thanks. I knew this problem had come up before, I just didn't remember
-it was for socfpga.
+Signed-off-by: Soren Brinkmann <soren.brinkmann@xilinx.com>
+---
+ .../devicetree/bindings/mmc/arasan,sdhci.txt       |  23 +++
+ MAINTAINERS                                        |   1 +
+ drivers/mmc/host/Kconfig                           |  12 ++
+ drivers/mmc/host/Makefile                          |   1 +
+ drivers/mmc/host/sdhci-of-arasan.c                 | 224 +++++++++++++++++++++
+ 5 files changed, 261 insertions(+)
+ create mode 100644 Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
+ create mode 100644 drivers/mmc/host/sdhci-of-arasan.c
 
-> But this approach was rejected by Stephen Warren because we wanted to 
-> the SD driver to be automonous
-> of registers outside its IP:
-> 
-> http://lists.infradead.org/pipermail/linux-arm-kernel/2013-August/194014.html
-> 
-> So I went with the approach of exposing a platform API so that the 
-> SD/MMC platform specific
-> code can call it.
-> 
-> The system manager has a plethora of registers that controls other IPs 
-> on the SOC, so I kinda thought
-> syscon was the way to go with this. A driver for this IP did not make 
-> sense to me.
-> 
-> Please advise if you know of another approach?
+diff --git a/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
+new file mode 100644
+index 000000000000..20f0fc25e270
+--- /dev/null
++++ b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
+@@ -0,0 +1,23 @@
++Device Tree Bindings for the Arasan SDCHI Controller
++
++  The bindings follow the mmc[1] and the clock bindings[2]. Only deviations are
++  documented here.
++
++  [1] Documentation/devicetree/bindings/mmc/mmc.txt
++  [2] Documentation/devicetree/bindings/clock/clock-bindings.txt
++
++Required Properties:
++  - compatible: Compatibility string. Must be 'arasan,sdhci'
++  - reg: From mmc bindings: Register location and length.
++  - clocks: From clock bindings: Handles to clock inputs.
++  - clock-names: From clock bindings: Tuple including "clk_xin" and "clk_ahb"
++
++Example:
++	sdhci@e0100000 {
++		compatible = "arasan,sdhci";
++		reg = <0xe0100000 0x1000>;
++		clock-names = "clk_xin", "clk_ahb";
++		clocks = <&clkc 21>, <&clkc 32>;
++		interrupt-parent = <&gic>;
++		interrupts = <0 24 4>;
++	} ;
+diff --git a/MAINTAINERS b/MAINTAINERS
+index 72b1e5c2378a..e2c99b377f8f 100644
+--- a/MAINTAINERS
++++ b/MAINTAINERS
+@@ -1348,6 +1348,7 @@ T:	git git://git.xilinx.com/linux-xlnx.git
+ S:	Supported
+ F:	arch/arm/mach-zynq/
+ F:	drivers/cpuidle/cpuidle-zynq.c
++F:	drivers/mmc/host/sdhci-of-arasan.c
+ 
+ ARM SMMU DRIVER
+ M:	Will Deacon <will.deacon@arm.com>
+diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+index 7fc5099e44b2..1eb090c187bb 100644
+--- a/drivers/mmc/host/Kconfig
++++ b/drivers/mmc/host/Kconfig
+@@ -104,6 +104,18 @@ config MMC_SDHCI_PLTFM
+ 
+ 	  If unsure, say N.
+ 
++config MMC_SDHCI_OF_ARASAN
++	tristate "SDHCI OF support for the Arasan SDHCI controllers"
++	depends on MMC_SDHCI_PLTFM
++	depends on OF
++	help
++	  This selects the Arasan Secure Digital Host Controller Interface
++	  (SDHCI). This hardware is found e.g. in Xilinx' Zynq SoC.
++
++	  If you have a controller with this interface, say Y or M here.
++
++	  If unsure, say N.
++
+ config MMC_SDHCI_OF_ESDHC
+ 	tristate "SDHCI OF support for the Freescale eSDHC controller"
+ 	depends on MMC_SDHCI_PLTFM
+diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
+index c41d0c364509..f93617ec6548 100644
+--- a/drivers/mmc/host/Makefile
++++ b/drivers/mmc/host/Makefile
+@@ -57,6 +57,7 @@ obj-$(CONFIG_MMC_SDHCI_CNS3XXX)		+= sdhci-cns3xxx.o
+ obj-$(CONFIG_MMC_SDHCI_ESDHC_IMX)	+= sdhci-esdhc-imx.o
+ obj-$(CONFIG_MMC_SDHCI_DOVE)		+= sdhci-dove.o
+ obj-$(CONFIG_MMC_SDHCI_TEGRA)		+= sdhci-tegra.o
++obj-$(CONFIG_MMC_SDHCI_OF_ARASAN)	+= sdhci-of-arasan.o
+ obj-$(CONFIG_MMC_SDHCI_OF_ESDHC)	+= sdhci-of-esdhc.o
+ obj-$(CONFIG_MMC_SDHCI_OF_HLWD)		+= sdhci-of-hlwd.o
+ obj-$(CONFIG_MMC_SDHCI_BCM_KONA)	+= sdhci-bcm-kona.o
+diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
+new file mode 100644
+index 000000000000..6ac93c4c2cf5
+--- /dev/null
++++ b/drivers/mmc/host/sdhci-of-arasan.c
+@@ -0,0 +1,224 @@
++/*
++ * Arasan Secure Digital Host Controller Interface.
++ * Copyright (C) 2011 - 2012 Michal Simek <monstr@monstr.eu>
++ * Copyright (c) 2012 Wind River Systems, Inc.
++ * Copyright (C) 2013 Pengutronix e.K.
++ * Copyright (C) 2013 Xilinx Inc.
++ *
++ * Based on sdhci-of-esdhc.c
++ *
++ * Copyright (c) 2007 Freescale Semiconductor, Inc.
++ * Copyright (c) 2009 MontaVista Software, Inc.
++ *
++ * Authors: Xiaobo Xie <X.Xie@freescale.com>
++ *	    Anton Vorontsov <avorontsov@ru.mvista.com>
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation; either version 2 of the License, or (at
++ * your option) any later version.
++ */
++
++#include <linux/module.h>
++#include "sdhci-pltfm.h"
++
++#define SDHCI_ARASAN_CLK_CTRL_OFFSET	0x2c
++
++#define CLK_CTRL_TIMEOUT_SHIFT		16
++#define CLK_CTRL_TIMEOUT_MASK		(0xf << CLK_CTRL_TIMEOUT_SHIFT)
++#define CLK_CTRL_TIMEOUT_MIN_EXP	13
++
++/**
++ * struct sdhci_arasan_data
++ * @clk_ahb:	Pointer to the AHB clock
++ */
++struct sdhci_arasan_data {
++	struct clk	*clk_ahb;
++};
++
++static unsigned int sdhci_arasan_get_timeout_clock(struct sdhci_host *host)
++{
++	u32 div;
++	unsigned long freq;
++	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++
++	div = readl(host->ioaddr + SDHCI_ARASAN_CLK_CTRL_OFFSET);
++	div = (div & CLK_CTRL_TIMEOUT_MASK) >> CLK_CTRL_TIMEOUT_SHIFT;
++
++	freq = clk_get_rate(pltfm_host->clk);
++	freq /= 1 << (CLK_CTRL_TIMEOUT_MIN_EXP + div);
++
++	return freq;
++}
++
++static struct sdhci_ops sdhci_arasan_ops = {
++	.get_max_clock = sdhci_pltfm_clk_get_max_clock,
++	.get_timeout_clock = sdhci_arasan_get_timeout_clock,
++};
++
++static struct sdhci_pltfm_data sdhci_arasan_pdata = {
++	.ops = &sdhci_arasan_ops,
++};
++
++#ifdef CONFIG_PM_SLEEP
++/**
++ * sdhci_arasan_suspend - Suspend method for the driver
++ * @dev:	Address of the device structure
++ * Returns 0 on success and error value on error
++ *
++ * Put the device in a low power state.
++ */
++static int sdhci_arasan_suspend(struct device *dev)
++{
++	struct platform_device *pdev = to_platform_device(dev);
++	struct sdhci_host *host = platform_get_drvdata(pdev);
++	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++	struct sdhci_arasan_data *sdhci_arasan = pltfm_host->priv;
++	int ret;
++
++	ret = sdhci_suspend_host(host);
++	if (ret)
++		return ret;
++
++	clk_disable(pltfm_host->clk);
++	clk_disable(sdhci_arasan->clk_ahb);
++
++	return 0;
++}
++
++/**
++ * sdhci_arasan_resume - Resume method for the driver
++ * @dev:	Address of the device structure
++ * Returns 0 on success and error value on error
++ *
++ * Resume operation after suspend
++ */
++static int sdhci_arasan_resume(struct device *dev)
++{
++	struct platform_device *pdev = to_platform_device(dev);
++	struct sdhci_host *host = platform_get_drvdata(pdev);
++	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++	struct sdhci_arasan_data *sdhci_arasan = pltfm_host->priv;
++	int ret;
++
++	ret = clk_enable(sdhci_arasan->clk_ahb);
++	if (ret) {
++		dev_err(dev, "Cannot enable AHB clock.\n");
++		return ret;
++	}
++
++	ret = clk_enable(pltfm_host->clk);
++	if (ret) {
++		dev_err(dev, "Cannot enable SD clock.\n");
++		clk_disable(sdhci_arasan->clk_ahb);
++		return ret;
++	}
++
++	return sdhci_resume_host(host);
++}
++#endif /* ! CONFIG_PM_SLEEP */
++
++static SIMPLE_DEV_PM_OPS(sdhci_arasan_dev_pm_ops, sdhci_arasan_suspend,
++			 sdhci_arasan_resume);
++
++static int sdhci_arasan_probe(struct platform_device *pdev)
++{
++	int ret;
++	struct clk *clk_xin;
++	struct sdhci_host *host;
++	struct sdhci_pltfm_host *pltfm_host;
++	struct sdhci_arasan_data *sdhci_arasan;
++
++	sdhci_arasan = devm_kzalloc(&pdev->dev, sizeof(*sdhci_arasan),
++			GFP_KERNEL);
++	if (!sdhci_arasan)
++		return -ENOMEM;
++
++	sdhci_arasan->clk_ahb = devm_clk_get(&pdev->dev, "clk_ahb");
++	if (IS_ERR(sdhci_arasan->clk_ahb)) {
++		dev_err(&pdev->dev, "clk_ahb clock not found.\n");
++		return PTR_ERR(sdhci_arasan->clk_ahb);
++	}
++
++	clk_xin = devm_clk_get(&pdev->dev, "clk_xin");
++	if (IS_ERR(clk_xin)) {
++		dev_err(&pdev->dev, "clk_xin clock not found.\n");
++		return PTR_ERR(clk_xin);
++	}
++
++	ret = clk_prepare_enable(sdhci_arasan->clk_ahb);
++	if (ret) {
++		dev_err(&pdev->dev, "Unable to enable AHB clock.\n");
++		return ret;
++	}
++
++	ret = clk_prepare_enable(clk_xin);
++	if (ret) {
++		dev_err(&pdev->dev, "Unable to enable SD clock.\n");
++		goto clk_dis_ahb;
++	}
++
++	host = sdhci_pltfm_init(pdev, &sdhci_arasan_pdata, 0);
++	if (IS_ERR(host)) {
++		ret = PTR_ERR(host);
++		dev_err(&pdev->dev, "platform init failed (%u)\n", ret);
++		goto clk_disable_all;
++	}
++
++	sdhci_get_of_property(pdev);
++	pltfm_host = sdhci_priv(host);
++	pltfm_host->priv = sdhci_arasan;
++	pltfm_host->clk = clk_xin;
++
++	ret = sdhci_add_host(host);
++	if (ret) {
++		dev_err(&pdev->dev, "platform register failed (%u)\n", ret);
++		goto err_pltfm_free;
++	}
++
++	return 0;
++
++err_pltfm_free:
++	sdhci_pltfm_free(pdev);
++clk_disable_all:
++	clk_disable_unprepare(clk_xin);
++clk_dis_ahb:
++	clk_disable_unprepare(sdhci_arasan->clk_ahb);
++
++	return ret;
++}
++
++static int sdhci_arasan_remove(struct platform_device *pdev)
++{
++	struct sdhci_host *host = platform_get_drvdata(pdev);
++	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++	struct sdhci_arasan_data *sdhci_arasan = pltfm_host->priv;
++
++	clk_disable_unprepare(pltfm_host->clk);
++	clk_disable_unprepare(sdhci_arasan->clk_ahb);
++
++	return sdhci_pltfm_unregister(pdev);
++}
++
++static const struct of_device_id sdhci_arasan_of_match[] = {
++	{ .compatible = "arasan,sdhci" },
++	{ }
++};
++MODULE_DEVICE_TABLE(of, sdhci_arasan_of_match);
++
++static struct platform_driver sdhci_arasan_driver = {
++	.driver = {
++		.name = "sdhci-arasan",
++		.owner = THIS_MODULE,
++		.of_match_table = sdhci_arasan_of_match,
++		.pm = &sdhci_arasan_dev_pm_ops,
++	},
++	.probe = sdhci_arasan_probe,
++	.remove = sdhci_arasan_remove,
++};
++
++module_platform_driver(sdhci_arasan_driver);
++
++MODULE_DESCRIPTION("Driver for the Arasan SDHCI Controller");
++MODULE_AUTHOR("Soeren Brinkmann <soren.brinkmann@xilinx.com");
++MODULE_LICENSE("GPL");
+-- 
+1.8.4
 
-I don't remember the details of what we have gone through before, but
-I think this should still work:
-
-1 Create a "syscon" backend driver to control your "system manager", which
-  lets other drivers hook into it without calling a private API.
-2 Create a trivial clock driver that is independent of your existing
-  clock driver and independent of the other drivers using the system
-  manager, by using syscon as the low-level interface.
-3 Make the sdmmc driver use the normal clock API and link its clock to the
-  driver from step 2 in the device tree.
-
-Is this what you have tried before?
-
-	Arnd
