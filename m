@@ -1,105 +1,165 @@
-From: Alan Stern <stern@rowland.harvard.edu>
-Subject: Re: [PATCH V3] PM / Runtime: Respect autosuspend when idle triggers
- suspend
-Date: Tue, 15 Oct 2013 16:43:38 -0400 (EDT)
-Message-ID: <Pine.LNX.4.44L0.1310151643240.1377-100000@iolanthe.rowland.org>
-References: <1381868708-4792-1-git-send-email-ulf.hansson@linaro.org>
-Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+From: Doug Anderson <dianders@chromium.org>
+Subject: [PATCH 1/2] mmc: dw_mmc: Cleanup disable of low power mode w/ SDIO interrupts
+Date: Tue, 15 Oct 2013 15:39:21 -0700
+Message-ID: <1381876762-10892-2-git-send-email-dianders@chromium.org>
+References: <1381876762-10892-1-git-send-email-dianders@chromium.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from iolanthe.rowland.org ([192.131.102.54]:58718 "HELO
-	iolanthe.rowland.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with SMTP id S933716Ab3JOUnk (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 15 Oct 2013 16:43:40 -0400
-In-Reply-To: <1381868708-4792-1-git-send-email-ulf.hansson@linaro.org>
+Received: from mail-pb0-f73.google.com ([209.85.160.73]:62129 "EHLO
+	mail-pb0-f73.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S933632Ab3JOWjc (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 15 Oct 2013 18:39:32 -0400
+Received: by mail-pb0-f73.google.com with SMTP id jt11so923788pbb.4
+        for <linux-mmc@vger.kernel.org>; Tue, 15 Oct 2013 15:39:32 -0700 (PDT)
+In-Reply-To: <1381876762-10892-1-git-send-email-dianders@chromium.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: "Rafael J. Wysocki" <rjw@rjwysocki.net>, Len Brown <len.brown@intel.com>, Pavel Machek <pavel@ucw.cz>, linux-pm@vger.kernel.org, Mika Westerberg <mika.westerberg@linux.intel.com>, Kevin Hilman <khilman@linaro.org>, Rob Landley <rob@landley.net>, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, James Hogan <james.hogan@imgtec.com>, Grant Grundler <grundler@chromium.org>, Alim Akhtar <alim.akhtar@samsung.com>, Abhilash Kesavan <a.kesavan@samsung.com>, Tomasz Figa <tomasz.figa@gmail.com>, Olof Johansson <olof@lixom.net>, Sonny Rao <sonnyrao@chromium.org>, Bing Zhao <bzhao@marvell.com>, Doug Anderson <dianders@chromium.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-On Tue, 15 Oct 2013, Ulf Hansson wrote:
+In the patch (9623b5b mmc: dw_mmc: Disable low power mode if SDIO
+interrupts are used) I added code that disabled the low power mode of
+dw_mmc when SDIO interrupts are used.  That code worked but always
+felt a little hacky because we ended up disabling low power as a side
+effect of the first enable_sdio_irq() call.  That wouldn't be so bad
+except that disabling low power involves a complicated process of
+writing to the CMD/CMDARG registers and that extra process makes it
+difficult to cleanly the read-modify-write race in
+dw_mci_enable_sdio_irq() (see future patch in the series).
 
-> For devices which don't have a .runtime_idle callback or if it returns
-> 0, rpm_idle will end up in triggering a call to rpm_suspend, thus
-> trying to carry out a runtime_suspend directly from runtime_idle.
-> 
-> In the above situation we want to respect devices which has enabled
-> autosuspend, we therfore append the flag sent to rpm_suspend with
-> RPM_AUTO.
-> 
-> Do note that drivers still needs to update the device last busy mark,
-> to control the delay for this circumstance.
-> 
-> Updated runtime PM documentation accordingly.
-> 
-> Cc: Alan Stern <stern@rowland.harvard.edu>
-> Cc: Mika Westerberg <mika.westerberg@linux.intel.com>
-> Cc: Kevin Hilman <khilman@linaro.org>
-> Cc: Rob Landley <rob@landley.net>
-> Cc: Chris Ball <cjb@laptop.org>
-> Cc: linux-mmc@vger.kernel.org
-> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
-> Acked-by: Kevin Hilman <khilman@linaro.org>
-> ---
->  Documentation/power/runtime_pm.txt |   14 ++++++++------
->  drivers/base/power/runtime.c       |    5 +++--
->  2 files changed, 11 insertions(+), 8 deletions(-)
-> 
-> diff --git a/Documentation/power/runtime_pm.txt b/Documentation/power/runtime_pm.txt
-> index 71d8fe4..0f54333 100644
-> --- a/Documentation/power/runtime_pm.txt
-> +++ b/Documentation/power/runtime_pm.txt
-> @@ -145,11 +145,13 @@ The action performed by the idle callback is totally dependent on the subsystem
->  if the device can be suspended (i.e. if all of the conditions necessary for
->  suspending the device are satisfied) and to queue up a suspend request for the
->  device in that case.  If there is no idle callback, or if the callback returns
-> -0, then the PM core will attempt to carry out a runtime suspend of the device;
-> -in essence, it will call pm_runtime_suspend() directly.  To prevent this (for
-> -example, if the callback routine has started a delayed suspend), the routine
-> -should return a non-zero value.  Negative error return codes are ignored by the
-> -PM core.
-> +0, then the PM core will attempt to carry out a runtime suspend of the device,
-> +also respecting devices configured for autosuspend.  In essence this means a
-> +call to pm_runtime_autosuspend() (do note that drivers needs to update the
-> +device last busy mark, pm_runtime_mark_last_busy(), to control the delay under
-> +this circumstance).  To prevent this (for example, if the callback routine has
-> +started a delayed suspend), the routine must return a non-zero value.  Negative
-> +error return codes are ignored by the PM core.
->  
->  The helper functions provided by the PM core, described in Section 4, guarantee
->  that the following constraints are met with respect to runtime PM callbacks for
-> @@ -308,7 +310,7 @@ drivers/base/power/runtime.c and include/linux/pm_runtime.h:
->      - execute the subsystem-level idle callback for the device; returns an
->        error code on failure, where -EINPROGRESS means that ->runtime_idle() is
->        already being executed; if there is no callback or the callback returns 0
-> -      then run pm_runtime_suspend(dev) and return its result
-> +      then run pm_runtime_autosuspend(dev) and return its result
->  
->    int pm_runtime_suspend(struct device *dev);
->      - execute the subsystem-level suspend callback for the device; returns 0 on
-> diff --git a/drivers/base/power/runtime.c b/drivers/base/power/runtime.c
-> index 268a350..72e00e6 100644
-> --- a/drivers/base/power/runtime.c
-> +++ b/drivers/base/power/runtime.c
-> @@ -258,7 +258,8 @@ static int __rpm_callback(int (*cb)(struct device *), struct device *dev)
->   * Check if the device's runtime PM status allows it to be suspended.  If
->   * another idle notification has been started earlier, return immediately.  If
->   * the RPM_ASYNC flag is set then queue an idle-notification request; otherwise
-> - * run the ->runtime_idle() callback directly.
-> + * run the ->runtime_idle() callback directly. If the ->runtime_idle callback
-> + * doesn't exist or if it returns 0, call rpm_suspend with the RPM_AUTO flag.
->   *
->   * This function must be called under dev->power.lock with interrupts disabled.
->   */
-> @@ -331,7 +332,7 @@ static int rpm_idle(struct device *dev, int rpmflags)
->  
->   out:
->  	trace_rpm_return_int(dev, _THIS_IP_, retval);
-> -	return retval ? retval : rpm_suspend(dev, rpmflags);
-> +	return retval ? retval : rpm_suspend(dev, rpmflags | RPM_AUTO);
->  }
->  
->  /**
+Change the code to take advantage of the init_card() callback of the
+mmc core to know when an SDIO card has been inserted.  If we've got a
+SDIO card and we're configured to use SDIO Interrupts then turn off
+"low power mode" right away.
 
-Acked-by: Alan Stern <stern@rowland.harvard.edu>
+Signed-off-by: Doug Anderson <dianders@chromium.org>
+---
+ drivers/mmc/host/dw_mmc.c | 68 ++++++++++++++++++++++++-----------------------
+ drivers/mmc/host/dw_mmc.h |  1 +
+ 2 files changed, 36 insertions(+), 33 deletions(-)
+
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index 0a6a512..1b75816 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -27,6 +27,7 @@
+ #include <linux/stat.h>
+ #include <linux/delay.h>
+ #include <linux/irq.h>
++#include <linux/mmc/card.h>
+ #include <linux/mmc/host.h>
+ #include <linux/mmc/mmc.h>
+ #include <linux/mmc/sdio.h>
+@@ -822,7 +823,7 @@ static void dw_mci_setup_bus(struct dw_mci_slot *slot, bool force_clkinit)
+ 
+ 		/* enable clock; only low power if no SDIO */
+ 		clk_en_a = SDMMC_CLKEN_ENABLE << slot->id;
+-		if (!(mci_readl(host, INTMASK) & SDMMC_INT_SDIO(slot->id)))
++		if (!test_bit(DW_MMC_CARD_NO_LOW_PWR, &slot->flags))
+ 			clk_en_a |= SDMMC_CLKEN_LOW_PWR << slot->id;
+ 		mci_writel(host, CLKENA, clk_en_a);
+ 
+@@ -1050,27 +1051,37 @@ static int dw_mci_get_cd(struct mmc_host *mmc)
+ 	return present;
+ }
+ 
+-/*
+- * Disable lower power mode.
+- *
+- * Low power mode will stop the card clock when idle.  According to the
+- * description of the CLKENA register we should disable low power mode
+- * for SDIO cards if we need SDIO interrupts to work.
+- *
+- * This function is fast if low power mode is already disabled.
+- */
+-static void dw_mci_disable_low_power(struct dw_mci_slot *slot)
++static void dw_mci_init_card(struct mmc_host *mmc, struct mmc_card *card)
+ {
++	struct dw_mci_slot *slot = mmc_priv(mmc);
+ 	struct dw_mci *host = slot->host;
+-	u32 clk_en_a;
+-	const u32 clken_low_pwr = SDMMC_CLKEN_LOW_PWR << slot->id;
+ 
+-	clk_en_a = mci_readl(host, CLKENA);
++	/*
++	 * Low power mode will stop the card clock when idle.  According to the
++	 * description of the CLKENA register we should disable low power mode
++	 * for SDIO cards if we need SDIO interrupts to work.
++	 */
++	if (mmc->caps | MMC_CAP_SDIO_IRQ) {
++		const u32 clken_low_pwr = SDMMC_CLKEN_LOW_PWR << slot->id;
++		u32 clk_en_a_old;
++		u32 clk_en_a;
+ 
+-	if (clk_en_a & clken_low_pwr) {
+-		mci_writel(host, CLKENA, clk_en_a & ~clken_low_pwr);
+-		mci_send_cmd(slot, SDMMC_CMD_UPD_CLK |
+-			     SDMMC_CMD_PRV_DAT_WAIT, 0);
++		clk_en_a_old = mci_readl(host, CLKENA);
++
++		if (card->type == MMC_TYPE_SDIO ||
++		    card->type == MMC_TYPE_SD_COMBO) {
++			set_bit(DW_MMC_CARD_NO_LOW_PWR, &slot->flags);
++			clk_en_a = clk_en_a_old & ~clken_low_pwr;
++		} else {
++			clear_bit(DW_MMC_CARD_NO_LOW_PWR, &slot->flags);
++			clk_en_a = clk_en_a_old | clken_low_pwr;
++		}
++
++		if (clk_en_a != clk_en_a_old) {
++			mci_writel(host, CLKENA, clk_en_a);
++			mci_send_cmd(slot, SDMMC_CMD_UPD_CLK |
++				     SDMMC_CMD_PRV_DAT_WAIT, 0);
++		}
+ 	}
+ }
+ 
+@@ -1082,21 +1093,11 @@ static void dw_mci_enable_sdio_irq(struct mmc_host *mmc, int enb)
+ 
+ 	/* Enable/disable Slot Specific SDIO interrupt */
+ 	int_mask = mci_readl(host, INTMASK);
+-	if (enb) {
+-		/*
+-		 * Turn off low power mode if it was enabled.  This is a bit of
+-		 * a heavy operation and we disable / enable IRQs a lot, so
+-		 * we'll leave low power mode disabled and it will get
+-		 * re-enabled again in dw_mci_setup_bus().
+-		 */
+-		dw_mci_disable_low_power(slot);
+-
+-		mci_writel(host, INTMASK,
+-			   (int_mask | SDMMC_INT_SDIO(slot->id)));
+-	} else {
+-		mci_writel(host, INTMASK,
+-			   (int_mask & ~SDMMC_INT_SDIO(slot->id)));
+-	}
++	if (enb)
++		int_mask |= SDMMC_INT_SDIO(slot->id);
++	else
++		int_mask &= ~SDMMC_INT_SDIO(slot->id);
++	mci_writel(host, INTMASK, int_mask);
+ }
+ 
+ static int dw_mci_execute_tuning(struct mmc_host *mmc, u32 opcode)
+@@ -1140,6 +1141,7 @@ static const struct mmc_host_ops dw_mci_ops = {
+ 	.get_cd			= dw_mci_get_cd,
+ 	.enable_sdio_irq	= dw_mci_enable_sdio_irq,
+ 	.execute_tuning		= dw_mci_execute_tuning,
++	.init_card		= dw_mci_init_card,
+ };
+ 
+ static void dw_mci_request_end(struct dw_mci *host, struct mmc_request *mrq)
+diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
+index 6bf24ab..26d4657 100644
+--- a/drivers/mmc/host/dw_mmc.h
++++ b/drivers/mmc/host/dw_mmc.h
+@@ -227,6 +227,7 @@ struct dw_mci_slot {
+ 	unsigned long		flags;
+ #define DW_MMC_CARD_PRESENT	0
+ #define DW_MMC_CARD_NEED_INIT	1
++#define DW_MMC_CARD_NO_LOW_PWR	2
+ 	int			id;
+ 	int			last_detect_state;
+ };
+-- 
+1.8.4
 
