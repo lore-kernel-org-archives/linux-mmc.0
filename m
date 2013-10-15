@@ -1,41 +1,152 @@
 From: Doug Anderson <dianders@chromium.org>
-Subject: [PATCH 0/2] Prevent races when doing read-modify-write of INTMASK
-Date: Tue, 15 Oct 2013 15:39:20 -0700
-Message-ID: <1381876762-10892-1-git-send-email-dianders@chromium.org>
+Subject: [PATCH 2/2] mmc: dw_mmc: Protect read-modify-write of INTMASK with a lock
+Date: Tue, 15 Oct 2013 15:39:22 -0700
+Message-ID: <1381876762-10892-3-git-send-email-dianders@chromium.org>
+References: <1381876762-10892-1-git-send-email-dianders@chromium.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ve0-f201.google.com ([209.85.128.201]:48245 "EHLO
-	mail-ve0-f201.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S933633Ab3JOWjc (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 15 Oct 2013 18:39:32 -0400
-Received: by mail-ve0-f201.google.com with SMTP id oy12so163529veb.2
+Received: from mail-pb0-f74.google.com ([209.85.160.74]:33503 "EHLO
+	mail-pb0-f74.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S933654Ab3JOWjd (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 15 Oct 2013 18:39:33 -0400
+Received: by mail-pb0-f74.google.com with SMTP id rq2so924394pbb.1
         for <linux-mmc@vger.kernel.org>; Tue, 15 Oct 2013 15:39:32 -0700 (PDT)
+In-Reply-To: <1381876762-10892-1-git-send-email-dianders@chromium.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Chris Ball <cjb@laptop.org>
 Cc: Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, James Hogan <james.hogan@imgtec.com>, Grant Grundler <grundler@chromium.org>, Alim Akhtar <alim.akhtar@samsung.com>, Abhilash Kesavan <a.kesavan@samsung.com>, Tomasz Figa <tomasz.figa@gmail.com>, Olof Johansson <olof@lixom.net>, Sonny Rao <sonnyrao@chromium.org>, Bing Zhao <bzhao@marvell.com>, Doug Anderson <dianders@chromium.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-Bing Zhao at Marvell discovered a race in the way that dw_mmc was
-doing a read-modify-write of the INTMASK register.  This 2-patch
-series attempts to fix the problem using a simple spinlock.  In order
-to do so cleanly, we include a patch to tidy up the way that we
-disable low power mode when using SDIO interrupts.
+We're running into cases where our enabling of the SDIO interrupt in
+dw_mmc doesn't actually take effect.  Specifically, adding patch like
+this:
 
-This patch series was not tested on ToT Linux other than basic
-compiling and booting, since we don't have the whole Marvell SDIO
-stack up and running in mainline yet.  This series is based on
-mmc-next (e76b855 mmc: sdhci-esdhc-imx: set actual_clock in clock
-setting) merged atop mainlinx Linux.
+ +++ b/drivers/mmc/host/dw_mmc.c
+ @@ -1076,6 +1076,9 @@ static void dw_mci_enable_sdio_irq(struct mmc_host *mmc, int enb)
 
+      mci_writel(host, INTMASK,
+           (int_mask | SDMMC_INT_SDIO(slot->id)));
+ +    int_mask = mci_readl(host, INTMASK);
+ +    if (!(int_mask & SDMMC_INT_SDIO(slot->id)))
+ +      dev_err(&mmc->class_dev, "failed to enable sdio irq\n");
+    } else {
 
-Doug Anderson (2):
-  mmc: dw_mmc: Cleanup disable of low power mode w/ SDIO interrupts
-  mmc: dw_mmc: Protect read-modify-write of INTMASK with a lock
+...actually triggers the error message.  That's because the
+dw_mci_enable_sdio_irq() unsafely does a read-modify-write of the
+INTMASK register.
 
- drivers/mmc/host/dw_mmc.c  | 79 +++++++++++++++++++++++++++-------------------
- drivers/mmc/host/dw_mmc.h  |  1 +
- include/linux/mmc/dw_mmc.h |  6 ++++
- 3 files changed, 54 insertions(+), 32 deletions(-)
+We can't just use the standard host->lock since that lock is not irq
+safe and mmc_signal_sdio_irq() (called from interrupt context) calls
+dw_mci_enable_sdio_irq().  Add a new irq-safe lock to protect INTMASK.
 
+An alternate solution to this is to punt mmc_signal_sdio_irq() to the
+tasklet and then protect INTMASK modifications by the standard host
+lock.  This seemed like a bit more of a high-latency change.
+
+Reported-by: Bing Zhao <bzhao@marvell.com>
+Signed-off-by: Doug Anderson <dianders@chromium.org>
+---
+ drivers/mmc/host/dw_mmc.c  | 13 +++++++++++++
+ include/linux/mmc/dw_mmc.h |  6 ++++++
+ 2 files changed, 19 insertions(+)
+
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index 1b75816..b810654 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -657,6 +657,7 @@ disable:
+ 
+ static int dw_mci_submit_data_dma(struct dw_mci *host, struct mmc_data *data)
+ {
++	unsigned long irqflags;
+ 	int sg_len;
+ 	u32 temp;
+ 
+@@ -693,9 +694,11 @@ static int dw_mci_submit_data_dma(struct dw_mci *host, struct mmc_data *data)
+ 	mci_writel(host, CTRL, temp);
+ 
+ 	/* Disable RX/TX IRQs, let DMA handle it */
++	spin_lock_irqsave(&host->intmask_lock, irqflags);
+ 	temp = mci_readl(host, INTMASK);
+ 	temp  &= ~(SDMMC_INT_RXDR | SDMMC_INT_TXDR);
+ 	mci_writel(host, INTMASK, temp);
++	spin_unlock_irqrestore(&host->intmask_lock, irqflags);
+ 
+ 	host->dma_ops->start(host, sg_len);
+ 
+@@ -704,6 +707,7 @@ static int dw_mci_submit_data_dma(struct dw_mci *host, struct mmc_data *data)
+ 
+ static void dw_mci_submit_data(struct dw_mci *host, struct mmc_data *data)
+ {
++	unsigned long irqflags;
+ 	u32 temp;
+ 
+ 	data->error = -EINPROGRESS;
+@@ -732,9 +736,12 @@ static void dw_mci_submit_data(struct dw_mci *host, struct mmc_data *data)
+ 		host->part_buf_count = 0;
+ 
+ 		mci_writel(host, RINTSTS, SDMMC_INT_TXDR | SDMMC_INT_RXDR);
++
++		spin_lock_irqsave(&host->intmask_lock, irqflags);
+ 		temp = mci_readl(host, INTMASK);
+ 		temp |= SDMMC_INT_TXDR | SDMMC_INT_RXDR;
+ 		mci_writel(host, INTMASK, temp);
++		spin_unlock_irqrestore(&host->intmask_lock, irqflags);
+ 
+ 		temp = mci_readl(host, CTRL);
+ 		temp &= ~SDMMC_CTRL_DMA_ENABLE;
+@@ -1089,8 +1096,11 @@ static void dw_mci_enable_sdio_irq(struct mmc_host *mmc, int enb)
+ {
+ 	struct dw_mci_slot *slot = mmc_priv(mmc);
+ 	struct dw_mci *host = slot->host;
++	unsigned long irqflags;
+ 	u32 int_mask;
+ 
++	spin_lock_irqsave(&host->intmask_lock, irqflags);
++
+ 	/* Enable/disable Slot Specific SDIO interrupt */
+ 	int_mask = mci_readl(host, INTMASK);
+ 	if (enb)
+@@ -1098,6 +1108,8 @@ static void dw_mci_enable_sdio_irq(struct mmc_host *mmc, int enb)
+ 	else
+ 		int_mask &= ~SDMMC_INT_SDIO(slot->id);
+ 	mci_writel(host, INTMASK, int_mask);
++
++	spin_unlock_irqrestore(&host->intmask_lock, irqflags);
+ }
+ 
+ static int dw_mci_execute_tuning(struct mmc_host *mmc, u32 opcode)
+@@ -2500,6 +2512,7 @@ int dw_mci_probe(struct dw_mci *host)
+ 	host->quirks = host->pdata->quirks;
+ 
+ 	spin_lock_init(&host->lock);
++	spin_lock_init(&host->intmask_lock);
+ 	INIT_LIST_HEAD(&host->queue);
+ 
+ 	/*
+diff --git a/include/linux/mmc/dw_mmc.h b/include/linux/mmc/dw_mmc.h
+index 6ce7d2c..002ab56 100644
+--- a/include/linux/mmc/dw_mmc.h
++++ b/include/linux/mmc/dw_mmc.h
+@@ -102,6 +102,11 @@ struct mmc_data;
+  * @cur_slot, @mrq and @state. These must always be updated
+  * at the same time while holding @lock.
+  *
++ * @intmask_lock is an irq-safe spinlock protecting the INTMASK register
++ * to allow the interrupt handler to modify it directly.  Held for only long
++ * enough to read-modify-write INTMASK and no other locks are grabbed when
++ * holding this one.
++ *
+  * The @mrq field of struct dw_mci_slot is also protected by @lock,
+  * and must always be written at the same time as the slot is added to
+  * @queue.
+@@ -121,6 +126,7 @@ struct mmc_data;
+  */
+ struct dw_mci {
+ 	spinlock_t		lock;
++	spinlock_t		intmask_lock;
+ 	void __iomem		*regs;
+ 
+ 	struct scatterlist	*sg;
 -- 
 1.8.4
 
