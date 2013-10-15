@@ -1,111 +1,130 @@
-From: Alan Stern <stern@rowland.harvard.edu>
-Subject: Re: [PATCH V2] PM / Runtime: Respect autosuspend when idle triggers
- suspend
-Date: Tue, 15 Oct 2013 11:07:00 -0400 (EDT)
-Message-ID: <Pine.LNX.4.44L0.1310151057100.1377-100000@iolanthe.rowland.org>
-References: <1381735264-3077-1-git-send-email-ulf.hansson@linaro.org>
+From: Balaji T K <balajitk@ti.com>
+Subject: Re: [PATCH v3 3/4] mmc: omap_hsmmc: Remux pins to support SDIO
+ interrupt on AM335x
+Date: Tue, 15 Oct 2013 22:04:14 +0530
+Message-ID: <525D6E86.1040208@ti.com>
+References: <1380971830-21492-1-git-send-email-afenkart@gmail.com>
+ <1380971830-21492-4-git-send-email-afenkart@gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-pm-owner@vger.kernel.org>
-In-Reply-To: <1381735264-3077-1-git-send-email-ulf.hansson@linaro.org>
-Sender: linux-pm-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: "Rafael J. Wysocki" <rjw@rjwysocki.net>, Len Brown <len.brown@intel.com>, Pavel Machek <pavel@ucw.cz>, linux-pm@vger.kernel.org, Mika Westerberg <mika.westerberg@linux.intel.com>, Kevin Hilman <khilman@linaro.org>, Rob Landley <rob@landley.net>, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"; Format="flowed"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <1380971830-21492-4-git-send-email-afenkart@gmail.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Andreas Fenkart <afenkart@gmail.com>
+Cc: devicetree@vger.kernel.org, linux-omap@vger.kernel.org, linux-doc@vger.kernel.org, Tony Lindgren <tony@atomide.com>, devicetree-discuss@lists.ozlabs.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Felipe Balbi <balbi@ti.com>, zonque@gmail.com, Grant Likely <grant.likely@secretlab.ca>, Chris Ball <cjb@laptop.org>, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Mon, 14 Oct 2013, Ulf Hansson wrote:
+Thanks Andreas for the patch,
 
-> For devices which don't have a .runtime_idle callback or if it returns
-> 0, rpm_idle will end up in triggering a call to rpm_suspend, thus
-> trying to carry out a runtime_suspend directly from runtime_idle.
-> 
-> In the above situation we want to respect devices which has enabled
-> autosuspend, we therfore append the flag sent to rpm_suspend with
-> RPM_AUTO.
-> 
-> Do note that driver's still needs to update the device last busy mark,
-> to control the delay for this circumstance.
-> 
-> Updated runtime PM documentation accordingly.
-> 
-> Cc: Alan Stern <stern@rowland.harvard.edu>
-> Cc: Mika Westerberg <mika.westerberg@linux.intel.com>
-> Cc: Kevin Hilman <khilman@linaro.org>
-> Cc: Rob Landley <rob@landley.net>
-> Cc: Chris Ball <cjb@laptop.org>
-> Cc: linux-mmc@vger.kernel.org
-> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
-> ---
->  Documentation/power/runtime_pm.txt |   13 +++++++------
->  drivers/base/power/runtime.c       |    6 ++++--
->  2 files changed, 11 insertions(+), 8 deletions(-)
-> 
-> diff --git a/Documentation/power/runtime_pm.txt b/Documentation/power/runtime_pm.txt
-> index 71d8fe4..236d9f4 100644
-> --- a/Documentation/power/runtime_pm.txt
-> +++ b/Documentation/power/runtime_pm.txt
+On Saturday 05 October 2013 04:47 PM, Andreas Fenkart wrote:
+> The am335x can't detect pending cirq in PM runtime suspend.
+> This patch reconfigures dat1 as a GPIO before going to suspend.
+> SDIO interrupts are detected with the GPIO, while in runtime
+> suspend, standard detection of the module block otherwise.
+>
+> Signed-off-by: Andreas Fenkart <afenkart@gmail.com>
+>
+> @@ -2293,23 +2440,66 @@ static int omap_hsmmc_resume(struct device *dev)
+>   static int omap_hsmmc_runtime_suspend(struct device *dev)
+>   {
+>   	struct omap_hsmmc_host *host;
+> +	unsigned long flags;
+> +	int ret = 0;
+>
+>   	host = platform_get_drvdata(to_platform_device(dev));
+>   	omap_hsmmc_context_save(host);
+>   	dev_dbg(dev, "disabled\n");
+>
+> -	return 0;
+> +	if (host->flags & HSMMC_SWAKEUP_QUIRK) {
+> +		spin_lock_irqsave(&host->irq_lock, flags);
+> +		OMAP_HSMMC_WRITE(host->base, ISE, 0);
+> +		OMAP_HSMMC_WRITE(host->base, IE, 0);
+> +		OMAP_HSMMC_WRITE(host->base, STAT, STAT_CLEAR);
+> +		spin_unlock_irqrestore(&host->irq_lock, flags);
+> +
+> +		ret = pinctrl_select_state(host->pinctrl, host->idle);
+> +		if (ret < 0)
+> +			dev_warn(mmc_dev(host->mmc), "Unable to select idle pinmux\n");
+> +
+> +		enable_irq(mmc_slot(host).sdio_irq);
+> +	}
+> +
+> +	spin_lock_irqsave(&host->irq_lock, flags);
+> +	/* infinite loop, if irq not cleared in omap_hsmmc_enable_sdio_irq */
+> +	host->flags |= HSMMC_RUNTIME_SUSPENDED;
 
-Note that the style in this file is to use _two_ spaces after the 
-period at the end of each sentence.
+Can you provide more details about the infinite loop and how it will get recovered.
 
-> @@ -145,11 +145,12 @@ The action performed by the idle callback is totally dependent on the subsystem
->  if the device can be suspended (i.e. if all of the conditions necessary for
->  suspending the device are satisfied) and to queue up a suspend request for the
->  device in that case.  If there is no idle callback, or if the callback returns
-> -0, then the PM core will attempt to carry out a runtime suspend of the device;
-> -in essence, it will call pm_runtime_suspend() directly.  To prevent this (for
-> -example, if the callback routine has started a delayed suspend), the routine
-> -should return a non-zero value.  Negative error return codes are ignored by the
-> -PM core.
-> +0, then the PM core will attempt to carry out a runtime suspend of the device,
-> +also respecting devices configured for autosuspend. In essence it means a call
-
-s/it/this/
-
-> +to pm_runtime_autosuspend(). Do note that driver's still needs to update the
-
-s/driver's still needs/drivers need/
-
-This entire sentence should be inside parentheses.
-
-> +device last busy mark (pm_runtime_mark_last_busy), to control the delay under
-> +this circumstance. To prevent this, the routine must return a non-zero value.
-
-Don't remove the phrase "(for example, if the callback function has 
-started a delayed suspend)".
-
-> +Negative error return codes are ignored by the PM core.
->  
->  The helper functions provided by the PM core, described in Section 4, guarantee
->  that the following constraints are met with respect to runtime PM callbacks for
-> @@ -308,7 +309,7 @@ drivers/base/power/runtime.c and include/linux/pm_runtime.h:
->      - execute the subsystem-level idle callback for the device; returns an
->        error code on failure, where -EINPROGRESS means that ->runtime_idle() is
->        already being executed; if there is no callback or the callback returns 0
-> -      then run pm_runtime_suspend(dev) and return its result
-> +      then run pm_runtime_autosuspend(dev) and return its result
->  
->    int pm_runtime_suspend(struct device *dev);
->      - execute the subsystem-level suspend callback for the device; returns 0 on
-> diff --git a/drivers/base/power/runtime.c b/drivers/base/power/runtime.c
-> index 268a350..e6867d4 100644
-> --- a/drivers/base/power/runtime.c
-> +++ b/drivers/base/power/runtime.c
-> @@ -258,7 +258,9 @@ static int __rpm_callback(int (*cb)(struct device *), struct device *dev)
->   * Check if the device's runtime PM status allows it to be suspended.  If
->   * another idle notification has been started earlier, return immediately.  If
->   * the RPM_ASYNC flag is set then queue an idle-notification request; otherwise
-> - * run the ->runtime_idle() callback directly.
-> + * run the ->runtime_idle() callback directly. If the ->runtime_idle callback
-> + * doesn't exist or if it returns 0, run rpm_suspend with RPM_AUTO flag to
-
-s/run rpm_suspend with/call rpm_suspend() with the/
-
-> + * respect drivers using autosuspend.
-
-I think you can end the sentence after "flag".  Otherwise it sounds 
-like the only reason for calling rpm_suspend() is to respect drivers 
-using autosuspend, which is not accurate.
-
-Alan Stern
-
+> +	spin_unlock_irqrestore(&host->irq_lock, flags);
+> +
+> +	return ret;
+>   }
+>
+>   static int omap_hsmmc_runtime_resume(struct device *dev)
+>   {
+>   	struct omap_hsmmc_host *host;
+> +	unsigned long flags;
+> +	int ret = 0;
+>
+>   	host = platform_get_drvdata(to_platform_device(dev));
+>   	omap_hsmmc_context_restore(host);
+>   	dev_dbg(dev, "enabled\n");
+>
+> -	return 0;
+> +	spin_lock_irqsave(&host->irq_lock, flags);
+> +	/* infinite loop, if irq not cleared in omap_hsmmc_enable_sdio_irq */
+> +	host->flags &= ~HSMMC_RUNTIME_SUSPENDED;
+> +	spin_unlock_irqrestore(&host->irq_lock, flags);
+> +
+> +	if (host->flags & HSMMC_SWAKEUP_QUIRK) {
+> +		disable_irq(mmc_slot(host).sdio_irq);
+> +
+> +		ret = pinctrl_select_state(host->pinctrl, host->active);
+> +		if (ret < 0)
+> +			dev_warn(mmc_dev(host->mmc), "Unable to select active pinmux\n");
+> +
+> +		spin_lock_irqsave(&host->irq_lock, flags);
+> +		if (host->flags & HSMMC_SDIO_IRQ_ENABLED) {
+> +			OMAP_HSMMC_WRITE(host->base, STAT, STAT_CLEAR);
+> +			OMAP_HSMMC_WRITE(host->base, ISE, CIRQ_EN);
+> +			OMAP_HSMMC_WRITE(host->base, IE, CIRQ_EN);
+> +		}
+> +		spin_unlock_irqrestore(&host->irq_lock, flags);
+> +	}
+> +	return ret;
+>   }
+>
+>   static struct dev_pm_ops omap_hsmmc_dev_pm_ops = {
+> diff --git a/include/linux/platform_data/mmc-omap.h b/include/linux/platform_data/mmc-omap.h
+> index 2bf1b30..fd5fff5 100644
+> --- a/include/linux/platform_data/mmc-omap.h
+> +++ b/include/linux/platform_data/mmc-omap.h
+> @@ -115,6 +115,7 @@ struct omap_mmc_platform_data {
+>
+>   		int switch_pin;			/* gpio (card detect) */
+>   		int gpio_wp;			/* gpio (write protect) */
+> +		int gpio_cirq;			/* gpio (card irq) */
+>
+>   		int (*set_bus_mode)(struct device *dev, int slot, int bus_mode);
+>   		int (*set_power)(struct device *dev, int slot,
+> @@ -145,6 +146,9 @@ struct omap_mmc_platform_data {
+>   		int card_detect_irq;
+>   		int (*card_detect)(struct device *dev, int slot);
+>
+> +		/* SDIO IRQs */
+> +		int sdio_irq;
+> +
+>   		unsigned int ban_openended:1;
+>
+>   	} slots[OMAP_MMC_MAX_SLOTS];
+>
