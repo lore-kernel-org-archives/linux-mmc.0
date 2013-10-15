@@ -1,74 +1,111 @@
-From: Dinh Nguyen <dinh.linux@gmail.com>
-Subject: Re: [RESEND PATCHv2 1/3] arm: socfpga: Set the SDMMC clock phase
- in system manager
-Date: Tue, 15 Oct 2013 08:22:50 -0500
-Message-ID: <525D41AA.7060503@gmail.com>
-References: <1381780051-1826-1-git-send-email-dinguyen@altera.com> <201310151450.48650.arnd@arndb.de>
+From: Alan Stern <stern@rowland.harvard.edu>
+Subject: Re: [PATCH V2] PM / Runtime: Respect autosuspend when idle triggers
+ suspend
+Date: Tue, 15 Oct 2013 11:07:00 -0400 (EDT)
+Message-ID: <Pine.LNX.4.44L0.1310151057100.1377-100000@iolanthe.rowland.org>
+References: <1381735264-3077-1-git-send-email-ulf.hansson@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-15; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ob0-f176.google.com ([209.85.214.176]:58252 "EHLO
-	mail-ob0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1758938Ab3JONWv (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 15 Oct 2013 09:22:51 -0400
-In-Reply-To: <201310151450.48650.arnd@arndb.de>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <linux-pm-owner@vger.kernel.org>
+In-Reply-To: <1381735264-3077-1-git-send-email-ulf.hansson@linaro.org>
+Sender: linux-pm-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: "Rafael J. Wysocki" <rjw@rjwysocki.net>, Len Brown <len.brown@intel.com>, Pavel Machek <pavel@ucw.cz>, linux-pm@vger.kernel.org, Mika Westerberg <mika.westerberg@linux.intel.com>, Kevin Hilman <khilman@linaro.org>, Rob Landley <rob@landley.net>, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Arnd Bergmann <arnd@arndb.de>, dinguyen@altera.com
-Cc: Pavel Machek <pavel@denx.de>, Olof Johansson <olof@lixom.net>, Rob Herring <rob.herring@calxeda.com>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Stephen Warren <swarren@wwwdotorg.org>, Ian Campbell <ian.campbell@citrix.com>, Chris Ball <cjb@laptop.org>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 
-Hi Arnd,
+On Mon, 14 Oct 2013, Ulf Hansson wrote:
 
-On 10/15/13 7:50 AM, Arnd Bergmann wrote:
-> On Monday 14 October 2013, dinguyen@altera.com wrote:
->> +void socfpga_sysmgr_set_dwmmc_drvsel_smpsel(u32 drvsel, u32 smplsel)
->> +{
->> +       u32 hs_timing;
->> +
->> +       hs_timing = SYSMGR_SDMMC_CTRL_SET(smplsel, drvsel);
->> +       writel(hs_timing, sys_manager_base_addr + SYSMGR_SDMMCGRP_CTRL_OFFSET);
->> +}
->> +EXPORT_SYMBOL(socfpga_sysmgr_set_dwmmc_drvsel_smpsel);
-> This looks like the wrong approach. What are you trying to do? If you want to
-> set a clock, please use the clk API.
-I can't use the clk API because this function is setting up a clock 
-phase bit for the SD/MMC
-clock that is used to clock the card, not the IP. This register is 
-located outside the SD/MMC
-and the clock manager.
+> For devices which don't have a .runtime_idle callback or if it returns
+> 0, rpm_idle will end up in triggering a call to rpm_suspend, thus
+> trying to carry out a runtime_suspend directly from runtime_idle.
+> 
+> In the above situation we want to respect devices which has enabled
+> autosuspend, we therfore append the flag sent to rpm_suspend with
+> RPM_AUTO.
+> 
+> Do note that driver's still needs to update the device last busy mark,
+> to control the delay for this circumstance.
+> 
+> Updated runtime PM documentation accordingly.
+> 
+> Cc: Alan Stern <stern@rowland.harvard.edu>
+> Cc: Mika Westerberg <mika.westerberg@linux.intel.com>
+> Cc: Kevin Hilman <khilman@linaro.org>
+> Cc: Rob Landley <rob@landley.net>
+> Cc: Chris Ball <cjb@laptop.org>
+> Cc: linux-mmc@vger.kernel.org
+> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+> ---
+>  Documentation/power/runtime_pm.txt |   13 +++++++------
+>  drivers/base/power/runtime.c       |    6 ++++--
+>  2 files changed, 11 insertions(+), 8 deletions(-)
+> 
+> diff --git a/Documentation/power/runtime_pm.txt b/Documentation/power/runtime_pm.txt
+> index 71d8fe4..236d9f4 100644
+> --- a/Documentation/power/runtime_pm.txt
+> +++ b/Documentation/power/runtime_pm.txt
 
-Just to refresh your memory on this topic:
-I tried to use the syscon approach that you suggested:
+Note that the style in this file is to use _two_ spaces after the 
+period at the end of each sentence.
 
-http://lists.infradead.org/pipermail/linux-arm-kernel/2013-May/168470.html
-http://lists.infradead.org/pipermail/linux-arm-kernel/2013-May/170423.html
+> @@ -145,11 +145,12 @@ The action performed by the idle callback is totally dependent on the subsystem
+>  if the device can be suspended (i.e. if all of the conditions necessary for
+>  suspending the device are satisfied) and to queue up a suspend request for the
+>  device in that case.  If there is no idle callback, or if the callback returns
+> -0, then the PM core will attempt to carry out a runtime suspend of the device;
+> -in essence, it will call pm_runtime_suspend() directly.  To prevent this (for
+> -example, if the callback routine has started a delayed suspend), the routine
+> -should return a non-zero value.  Negative error return codes are ignored by the
+> -PM core.
+> +0, then the PM core will attempt to carry out a runtime suspend of the device,
+> +also respecting devices configured for autosuspend. In essence it means a call
 
-But this approach was rejected by Stephen Warren because we wanted to 
-the SD driver to be automonous
-of registers outside its IP:
+s/it/this/
 
-http://lists.infradead.org/pipermail/linux-arm-kernel/2013-August/194014.html
+> +to pm_runtime_autosuspend(). Do note that driver's still needs to update the
 
-So I went with the approach of exposing a platform API so that the 
-SD/MMC platform specific
-code can call it.
+s/driver's still needs/drivers need/
 
-The system manager has a plethora of registers that controls other IPs 
-on the SOC, so I kinda thought
-syscon was the way to go with this. A driver for this IP did not make 
-sense to me.
+This entire sentence should be inside parentheses.
 
-Please advise if you know of another approach?
+> +device last busy mark (pm_runtime_mark_last_busy), to control the delay under
+> +this circumstance. To prevent this, the routine must return a non-zero value.
 
-Thanks,
-Dinh
+Don't remove the phrase "(for example, if the callback function has 
+started a delayed suspend)".
 
+> +Negative error return codes are ignored by the PM core.
+>  
+>  The helper functions provided by the PM core, described in Section 4, guarantee
+>  that the following constraints are met with respect to runtime PM callbacks for
+> @@ -308,7 +309,7 @@ drivers/base/power/runtime.c and include/linux/pm_runtime.h:
+>      - execute the subsystem-level idle callback for the device; returns an
+>        error code on failure, where -EINPROGRESS means that ->runtime_idle() is
+>        already being executed; if there is no callback or the callback returns 0
+> -      then run pm_runtime_suspend(dev) and return its result
+> +      then run pm_runtime_autosuspend(dev) and return its result
+>  
+>    int pm_runtime_suspend(struct device *dev);
+>      - execute the subsystem-level suspend callback for the device; returns 0 on
+> diff --git a/drivers/base/power/runtime.c b/drivers/base/power/runtime.c
+> index 268a350..e6867d4 100644
+> --- a/drivers/base/power/runtime.c
+> +++ b/drivers/base/power/runtime.c
+> @@ -258,7 +258,9 @@ static int __rpm_callback(int (*cb)(struct device *), struct device *dev)
+>   * Check if the device's runtime PM status allows it to be suspended.  If
+>   * another idle notification has been started earlier, return immediately.  If
+>   * the RPM_ASYNC flag is set then queue an idle-notification request; otherwise
+> - * run the ->runtime_idle() callback directly.
+> + * run the ->runtime_idle() callback directly. If the ->runtime_idle callback
+> + * doesn't exist or if it returns 0, run rpm_suspend with RPM_AUTO flag to
 
+s/run rpm_suspend with/call rpm_suspend() with the/
 
+> + * respect drivers using autosuspend.
 
+I think you can end the sentence after "flag".  Otherwise it sounds 
+like the only reason for calling rpm_suspend() is to respect drivers 
+using autosuspend, which is not accurate.
 
-
->
-> 	Arnd
+Alan Stern
 
