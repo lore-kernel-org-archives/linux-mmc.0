@@ -1,326 +1,151 @@
 From: Dong Aisheng <b29396@freescale.com>
-Subject: Re: [PATCH 02/10] mmc: sdhci-esdhc-imx: add std tuning support for
- mx6sl
-Date: Tue, 15 Oct 2013 15:41:48 +0800
-Message-ID: <20131015074146.GB21188@b29396-Latitude-E6410>
+Subject: Re: [PATCH 07/10] mmc: sdhci-esdhc-imx: add delay line setting
+ support
+Date: Tue, 15 Oct 2013 15:55:16 +0800
+Message-ID: <20131015075515.GC21188@b29396-Latitude-E6410>
 References: <1381317616-1229-1-git-send-email-b29396@freescale.com>
- <1381317616-1229-3-git-send-email-b29396@freescale.com>
- <20131015071826.GA14908@S2101-09.ap.freescale.net>
+ <1381317616-1229-8-git-send-email-b29396@freescale.com>
+ <20131015073704.GB14908@S2101-09.ap.freescale.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from va3ehsobe010.messaging.microsoft.com ([216.32.180.30]:38286
-	"EHLO va3outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751672Ab3JOHny (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 15 Oct 2013 03:43:54 -0400
+Received: from co1ehsobe003.messaging.microsoft.com ([216.32.180.186]:58151
+	"EHLO co1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1750904Ab3JOH51 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 15 Oct 2013 03:57:27 -0400
 Content-Disposition: inline
-In-Reply-To: <20131015071826.GA14908@S2101-09.ap.freescale.net>
+In-Reply-To: <20131015073704.GB14908@S2101-09.ap.freescale.net>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Shawn Guo <shawn.guo@linaro.org>
 Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, cjb@laptop.org, anton@enomsg.org, s.hauer@pengutronix.de, w.sang@pengutronix.de, john.tobias.ph@gmail.com
 
-On Tue, Oct 15, 2013 at 03:18:28PM +0800, Shawn Guo wrote:
-> Wolfram's email address is changed to Wolfram Sang <wsa@the-dreams.de>.
-> 
-Thanks for the forward.
-
-> On Wed, Oct 09, 2013 at 07:20:08PM +0800, Dong Aisheng wrote:
-> > The mx6sl supports standard sdhci tuning, then esdhc_executing_tuning
-> > is only needed for mx6q/dl. We introduce is_imx6_usdhc() and
-> > is_imx6sl_usdhc() to handle the difference.
-> 
-> This is clumsy and less future proof.  I sent a series with you on copy
-> to use a new approach for defining features and quirks among different
-> esdhc variants. 
-> 
-
-I just replied some concerns on the new approach in  your patch series.
-Can't say it's suitable for usdhc to me.
-Please check it.
-
-> > The standard tuning is enabled by setting ESDHC_TUNE_CTRL_STD_TUNING_EN bit
-> > in new register ESDHC_TUNE_CTRL and operates with new tuning bits
-> > defined in SDHCI_ACMD12_ERR register.
+On Tue, Oct 15, 2013 at 03:37:06PM +0800, Shawn Guo wrote:
+> On Wed, Oct 09, 2013 at 07:20:13PM +0800, Dong Aisheng wrote:
+> > The DLL(Delay Line) is newly added to assist in sampling read data.
+> > The DLL provides the ability to programmatically select a quantized
+> > delay (in fractions of the clock period) regardless of on-chip variations
+> > such as process, voltage and temperature (PVT).
 > > 
-> > Note: mx6sl can also work on the old manually tuning mode as mx6q/dl if
-> > not enable standard tuning mode.
+> > This patch adds a user interface to set slave delay line via device tree.
+> > It's usually used in high speed mode like mmc DDR mode when the signal
+> > quality is not good caused by board design, e.g. the signal path is too long.
+> > User can manual set delay line to find a suitable data sampling window
+> > for card to work properly.
 > > 
 > > Signed-off-by: Dong Aisheng <b29396@freescale.com>
 > > ---
-> >  drivers/mmc/host/sdhci-esdhc-imx.c |  108 +++++++++++++++++++++++++++---------
-> >  1 files changed, 82 insertions(+), 26 deletions(-)
+> >  .../devicetree/bindings/mmc/fsl-imx-esdhc.txt      |    1 +
+> >  drivers/mmc/host/sdhci-esdhc-imx.c                 |   18 ++++++++++++++++++
+> >  include/linux/platform_data/mmc-esdhc-imx.h        |    1 +
+> >  3 files changed, 20 insertions(+), 0 deletions(-)
 > > 
+> > diff --git a/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.txt b/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.txt
+> > index 1dd6225..ebd3ff5 100644
+> > --- a/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.txt
+> > +++ b/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.txt
+> > @@ -12,6 +12,7 @@ Required properties:
+> >  Optional properties:
+> >  - fsl,cd-controller : Indicate to use controller internal card detection
+> >  - fsl,wp-controller : Indicate to use controller internal write protection
+> > +- fsl,delay-line : Specify delay line value of manual override for slave delay.
+> 
+> It needs more documentation and should refer to the register bits in RM.
+> Otherwise, I hardly think people will understand what it is.
+> 
+
+Ok, i could improve it a bit.
+But user may still need refer to spec to know the details.
+
+> >  
+> >  Examples:
+> >  
 > > diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-> > index b9899e9..2cce244 100644
+> > index b6ae5c1..91b2d85 100644
 > > --- a/drivers/mmc/host/sdhci-esdhc-imx.c
 > > +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-> > @@ -51,6 +51,11 @@
-> >  #define  ESDHC_TUNE_CTRL_MIN		0
-> >  #define  ESDHC_TUNE_CTRL_MAX		((1 << 7) - 1)
+> > @@ -46,6 +46,11 @@
+> >  /* Bits 3 and 6 are not SDHCI standard definitions */
+> >  #define  ESDHC_MIX_CTRL_SDHCI_MASK	0xb7
 > >  
-> > +#define ESDHC_TUNING_CTRL		0xCC
-> 
-> Please follow the convention in this file to use lowercase for hex
-> value.
-> 
-
-Got it.
-
-> > +#define ESDHC_STD_TUNING_EN		(1 << 24)
-> > +/* NOTE: the minimum valid tuning start tap for mx6sl is 1 */
-> > +#define ESDHC_TUNING_START_TAP		0x1
+> > +/* dll control register */
+> > +#define ESDHC_DLL_CTRL			0x60
+> > +#define ESDHC_DLL_OVERRIDE_VAL_SHIFT	9
+> > +#define ESDHC_DLL_OVERRIDE_EN_SHIFT	8
 > > +
-> >  #define ESDHC_TUNING_BLOCK_PATTERN_LEN	64
+> >  /* tune control register */
+> >  #define ESDHC_TUNE_CTRL_STATUS		0x68
+> >  #define  ESDHC_TUNE_CTRL_STEP		1
+> > @@ -803,6 +808,7 @@ static int esdhc_set_uhs_signaling(struct sdhci_host *host, unsigned int uhs)
+> >  {
+> >  	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> >  	struct pltfm_imx_data *imx_data = pltfm_host->priv;
+> > +	struct esdhc_platform_data *boarddata = &imx_data->boarddata;
 > >  
-> >  /* pinctrl state */
-> > @@ -91,6 +96,7 @@ enum imx_esdhc_type {
-> >  	IMX51_ESDHC,
-> >  	IMX53_ESDHC,
-> >  	IMX6Q_USDHC,
-> > +	IMX6SL_USDHC,
-> >  };
-> >  
-> >  struct pltfm_imx_data {
-> > @@ -130,6 +136,9 @@ static struct platform_device_id imx_esdhc_devtype[] = {
-> >  		.name = "sdhci-usdhc-imx6q",
-> >  		.driver_data = IMX6Q_USDHC,
-> >  	}, {
-> > +		.name = "sdhci-usdhc-imx6sl",
-> > +		.driver_data = IMX6SL_USDHC,
-> > +	}, {
-> >  		/* sentinel */
-> >  	}
-> >  };
-> > @@ -141,6 +150,7 @@ static const struct of_device_id imx_esdhc_dt_ids[] = {
-> >  	{ .compatible = "fsl,imx51-esdhc", .data = &imx_esdhc_devtype[IMX51_ESDHC], },
-> >  	{ .compatible = "fsl,imx53-esdhc", .data = &imx_esdhc_devtype[IMX53_ESDHC], },
-> >  	{ .compatible = "fsl,imx6q-usdhc", .data = &imx_esdhc_devtype[IMX6Q_USDHC], },
-> > +	{ .compatible = "fsl,imx6sl-usdhc", .data = &imx_esdhc_devtype[IMX6SL_USDHC], },
+> >  	switch (uhs) {
+> >  	case MMC_TIMING_UHS_SDR12:
+> > @@ -823,6 +829,15 @@ static int esdhc_set_uhs_signaling(struct sdhci_host *host, unsigned int uhs)
+> >  				ESDHC_MIX_CTRL_DDREN,
+> >  				host->ioaddr + ESDHC_MIX_CTRL);
+> >  		imx_data->is_ddr = 1;
+> > +		if (boarddata->delay_line) {
+> > +			u32 v;
+> > +			v = boarddata->delay_line <<
+> > +				ESDHC_DLL_OVERRIDE_VAL_SHIFT |
+> > +				(1 << ESDHC_DLL_OVERRIDE_EN_SHIFT);
+> > +			if (is_imx53_esdhc(imx_data))
+> > +				v <<= 1;
 > 
-> There are some attempts to get of_match_device() return the best match.
-> 
-> http://thread.gmane.org/gmane.linux.kernel/1572529
-> 
-> But before the attempts succeed, we're suggested to sort the
-> of_device_id table in driver from the specific to the generic.  That
-> said, if you put "fsl,imx6sl-usdhc" before "fsl,imx6q-usdhc", we do not
-> need the changes in patch #3.
-> 
+> Is the patch (series) tested on imx53?  Or is it just a note that imx53
+> has different bit position? 
 
-Yes, i noticed that issue before and that how patch #3 comes out.
-If it's ok, i'm glad to put it before fsl,imx6q-usdhc.
+Only tested on imx6sl.
+mx53 register offset is differet.
+
+> 
+> > +			writel(v, host->ioaddr + ESDHC_DLL_CTRL);
+> 
+> Is it safe to always write other bits as zero?
+
+Right, for the feature this patch added, only OVERRIDE_VAL need to set.
 
 Regards
 Dong Aisheng
 
+> 
 > Shawn
 > 
-> >  	{ /* sentinel */ }
-> >  };
-> >  MODULE_DEVICE_TABLE(of, imx_esdhc_dt_ids);
-> > @@ -170,6 +180,17 @@ static inline int is_imx6q_usdhc(struct pltfm_imx_data *data)
-> >  	return data->devtype == IMX6Q_USDHC;
-> >  }
-> >  
-> > +static inline int is_imx6sl_usdhc(struct pltfm_imx_data *data)
-> > +{
-> > +	return data->devtype == IMX6SL_USDHC;
-> > +}
-> > +
-> > +static inline int is_imx6_usdhc(struct pltfm_imx_data *data)
-> > +{
-> > +	return (data->devtype == IMX6Q_USDHC) ||
-> > +		(data->devtype == IMX6SL_USDHC);
-> > +}
-> > +
-> >  static inline void esdhc_clrset_le(struct sdhci_host *host, u32 mask, u32 val, int reg)
-> >  {
-> >  	void __iomem *base = host->ioaddr + (reg & ~0x3);
-> > @@ -208,11 +229,16 @@ static u32 esdhc_readl_le(struct sdhci_host *host, int reg)
-> >  		}
-> >  	}
-> >  
-> > -	if (unlikely(reg == SDHCI_CAPABILITIES_1) && is_imx6q_usdhc(imx_data))
-> > -		val = SDHCI_SUPPORT_DDR50 | SDHCI_SUPPORT_SDR104
-> > -				| SDHCI_SUPPORT_SDR50;
-> > +	if (unlikely(reg == SDHCI_CAPABILITIES_1)) {
-> > +		if (is_imx6q_usdhc(imx_data))
-> > +			/* imx6q/dl does not have cap_1 register, fake one */
-> > +			val = SDHCI_SUPPORT_DDR50 | SDHCI_SUPPORT_SDR104
-> > +					| SDHCI_SUPPORT_SDR50;
-> > +		else if (is_imx6sl_usdhc(imx_data))
-> > +			val = readl(host->ioaddr + SDHCI_CAPABILITIES) & 0xFFFF;
-> > +	}
-> >  
-> > -	if (unlikely(reg == SDHCI_MAX_CURRENT) && is_imx6q_usdhc(imx_data)) {
-> > +	if (unlikely(reg == SDHCI_MAX_CURRENT) && is_imx6_usdhc(imx_data)) {
-> >  		val = 0;
-> >  		val |= 0xFF << SDHCI_MAX_CURRENT_330_SHIFT;
-> >  		val |= 0xFF << SDHCI_MAX_CURRENT_300_SHIFT;
-> > @@ -316,13 +342,16 @@ static u16 esdhc_readw_le(struct sdhci_host *host, int reg)
-> >  		if (val & ESDHC_VENDOR_SPEC_VSELECT)
-> >  			ret |= SDHCI_CTRL_VDD_180;
-> >  
-> > -		if (is_imx6q_usdhc(imx_data)) {
-> > +		if (is_imx6q_usdhc(imx_data))
-> >  			val = readl(host->ioaddr + ESDHC_MIX_CTRL);
-> > -			if (val & ESDHC_MIX_CTRL_EXE_TUNE)
-> > -				ret |= SDHCI_CTRL_EXEC_TUNING;
-> > -			if (val & ESDHC_MIX_CTRL_SMPCLK_SEL)
-> > -				ret |= SDHCI_CTRL_TUNED_CLK;
-> > -		}
-> > +		else if (is_imx6sl_usdhc(imx_data))
-> > +			/* the std tuning bits is in ACMD12_ERR for imx6sl */
-> > +			val = readl(host->ioaddr + SDHCI_ACMD12_ERR);
-> > +
-> > +		if (val & ESDHC_MIX_CTRL_EXE_TUNE)
-> > +			ret |= SDHCI_CTRL_EXEC_TUNING;
-> > +		if (val & ESDHC_MIX_CTRL_SMPCLK_SEL)
-> > +			ret |= SDHCI_CTRL_TUNED_CLK;
-> >  
-> >  		ret |= (imx_data->uhs_mode & SDHCI_CTRL_UHS_MASK);
-> >  		ret &= ~SDHCI_CTRL_PRESET_VAL_ENABLE;
-> > @@ -356,12 +385,37 @@ static void esdhc_writew_le(struct sdhci_host *host, u16 val, int reg)
-> >  			new_val &= ~ESDHC_VENDOR_SPEC_VSELECT;
-> >  		writel(new_val, host->ioaddr + ESDHC_VENDOR_SPEC);
-> >  		imx_data->uhs_mode = val & SDHCI_CTRL_UHS_MASK;
-> > -		new_val = readl(host->ioaddr + ESDHC_MIX_CTRL);
-> > -		if (val & SDHCI_CTRL_TUNED_CLK)
-> > -			new_val |= ESDHC_MIX_CTRL_SMPCLK_SEL;
-> > -		else
-> > -			new_val &= ~ESDHC_MIX_CTRL_SMPCLK_SEL;
-> > -		writel(new_val , host->ioaddr + ESDHC_MIX_CTRL);
-> > +		if (is_imx6q_usdhc(imx_data)) {
-> > +			new_val = readl(host->ioaddr + ESDHC_MIX_CTRL);
-> > +			if (val & SDHCI_CTRL_TUNED_CLK)
-> > +				new_val |= ESDHC_MIX_CTRL_SMPCLK_SEL;
-> > +			else
-> > +				new_val &= ~ESDHC_MIX_CTRL_SMPCLK_SEL;
-> > +			writel(new_val , host->ioaddr + ESDHC_MIX_CTRL);
-> > +		} else if (is_imx6sl_usdhc(imx_data)) {
-> > +			u32 v = readl(host->ioaddr + SDHCI_ACMD12_ERR);
-> > +			u32 m = readl(host->ioaddr + ESDHC_MIX_CTRL);
-> > +			new_val = readl(host->ioaddr + ESDHC_TUNING_CTRL);
-> > +			if (val & SDHCI_CTRL_EXEC_TUNING) {
-> > +				new_val |= ESDHC_STD_TUNING_EN |
-> > +						ESDHC_TUNING_START_TAP;
-> > +				v |= ESDHC_MIX_CTRL_EXE_TUNE;
-> > +				m |= ESDHC_MIX_CTRL_FBCLK_SEL;
-> > +			} else {
-> > +				new_val &= ~ESDHC_STD_TUNING_EN;
-> > +				v &= ~ESDHC_MIX_CTRL_EXE_TUNE;
-> > +				m &= ~ESDHC_MIX_CTRL_FBCLK_SEL;
-> > +			}
-> > +
-> > +			if (val & SDHCI_CTRL_TUNED_CLK)
-> > +				v |= ESDHC_MIX_CTRL_SMPCLK_SEL;
-> > +			else
-> > +				v &= ~ESDHC_MIX_CTRL_SMPCLK_SEL;
-> > +
-> > +			writel(new_val, host->ioaddr + ESDHC_TUNING_CTRL);
-> > +			writel(v, host->ioaddr + SDHCI_ACMD12_ERR);
-> > +			writel(m, host->ioaddr + ESDHC_MIX_CTRL);
 > > +		}
-> >  		return;
-> >  	case SDHCI_TRANSFER_MODE:
-> >  		if ((imx_data->flags & ESDHC_FLAG_MULTIBLK_NO_INT)
-> > @@ -374,7 +428,7 @@ static void esdhc_writew_le(struct sdhci_host *host, u16 val, int reg)
-> >  			writel(v, host->ioaddr + ESDHC_VENDOR_SPEC);
-> >  		}
-> >  
-> > -		if (is_imx6q_usdhc(imx_data)) {
-> > +		if (is_imx6_usdhc(imx_data)) {
-> >  			u32 m = readl(host->ioaddr + ESDHC_MIX_CTRL);
-> >  			/* Swap AC23 bit */
-> >  			if (val & SDHCI_TRNS_AUTO_CMD23) {
-> > @@ -399,7 +453,7 @@ static void esdhc_writew_le(struct sdhci_host *host, u16 val, int reg)
-> >  		    (imx_data->flags & ESDHC_FLAG_MULTIBLK_NO_INT))
-> >  			imx_data->multiblock_status = MULTIBLK_IN_PROCESS;
-> >  
-> > -		if (is_imx6q_usdhc(imx_data))
-> > +		if (is_imx6_usdhc(imx_data))
-> >  			writel(val << 16,
-> >  			       host->ioaddr + SDHCI_TRANSFER_MODE);
-> >  		else
-> > @@ -465,7 +519,7 @@ static void esdhc_writeb_le(struct sdhci_host *host, u8 val, int reg)
-> >  		 * The reset on usdhc fails to clear MIX_CTRL register.
-> >  		 * Do it manually here.
-> >  		 */
-> > -		if (is_imx6q_usdhc(imx_data))
-> > +		if (is_imx6_usdhc(imx_data))
-> >  			writel(0, host->ioaddr + ESDHC_MIX_CTRL);
-> >  	}
-> >  }
-> > @@ -502,7 +556,7 @@ static inline void esdhc_pltfm_set_clock(struct sdhci_host *host,
-> >  	u32 temp, val;
-> >  
-> >  	if (clock == 0) {
-> > -		if (is_imx6q_usdhc(imx_data)) {
-> > +		if (is_imx6_usdhc(imx_data)) {
-> >  			val = readl(host->ioaddr + ESDHC_VENDOR_SPEC);
-> >  			writel(val & ~ESDHC_VENDOR_SPEC_FRC_SDCLK_ON,
-> >  					host->ioaddr + ESDHC_VENDOR_SPEC);
-> > @@ -510,7 +564,7 @@ static inline void esdhc_pltfm_set_clock(struct sdhci_host *host,
-> >  		goto out;
+> >  		break;
 > >  	}
 > >  
-> > -	if (is_imx6q_usdhc(imx_data))
-> > +	if (is_imx6_usdhc(imx_data))
-> >  		pre_div = 1;
+> > @@ -887,6 +902,9 @@ sdhci_esdhc_imx_probe_dt(struct platform_device *pdev,
+> >  	else
+> >  		boarddata->support_vsel = true;
 > >  
-> >  	temp = sdhci_readl(host, ESDHC_SYSTEM_CONTROL);
-> > @@ -537,7 +591,7 @@ static inline void esdhc_pltfm_set_clock(struct sdhci_host *host,
-> >  		| (pre_div << ESDHC_PREDIV_SHIFT));
-> >  	sdhci_writel(host, temp, ESDHC_SYSTEM_CONTROL);
-> >  
-> > -	if (is_imx6q_usdhc(imx_data)) {
-> > +	if (is_imx6_usdhc(imx_data)) {
-> >  		val = readl(host->ioaddr + ESDHC_VENDOR_SPEC);
-> >  		writel(val | ESDHC_VENDOR_SPEC_FRC_SDCLK_ON,
-> >  		host->ioaddr + ESDHC_VENDOR_SPEC);
-> > @@ -760,7 +814,7 @@ static int esdhc_set_uhs_signaling(struct sdhci_host *host, unsigned int uhs)
-> >  	return esdhc_change_pinstate(host, uhs);
+> > +	if (of_property_read_u32(np, "fsl,delay-line", &boarddata->delay_line))
+> > +		boarddata->delay_line = 0;
+> > +
+> >  	return 0;
 > >  }
-> >  
-> > -static const struct sdhci_ops sdhci_esdhc_ops = {
-> > +static struct sdhci_ops sdhci_esdhc_ops = {
-> >  	.read_l = esdhc_readl_le,
-> >  	.read_w = esdhc_readw_le,
-> >  	.write_l = esdhc_writel_le,
-> > @@ -772,7 +826,6 @@ static const struct sdhci_ops sdhci_esdhc_ops = {
-> >  	.get_ro = esdhc_pltfm_get_ro,
-> >  	.platform_bus_width = esdhc_pltfm_bus_width,
-> >  	.set_uhs_signaling = esdhc_set_uhs_signaling,
-> > -	.platform_execute_tuning = esdhc_executing_tuning,
+> >  #else
+> > diff --git a/include/linux/platform_data/mmc-esdhc-imx.h b/include/linux/platform_data/mmc-esdhc-imx.h
+> > index a0f5a8f..75f70f6 100644
+> > --- a/include/linux/platform_data/mmc-esdhc-imx.h
+> > +++ b/include/linux/platform_data/mmc-esdhc-imx.h
+> > @@ -45,5 +45,6 @@ struct esdhc_platform_data {
+> >  	int max_bus_width;
+> >  	unsigned int f_max;
+> >  	bool support_vsel;
+> > +	unsigned int delay_line;
 > >  };
-> >  
-> >  static const struct sdhci_pltfm_data sdhci_esdhc_imx_pdata = {
-> > @@ -909,9 +962,12 @@ static int sdhci_esdhc_imx_probe(struct platform_device *pdev)
-> >  	 * The imx6q ROM code will change the default watermark level setting
-> >  	 * to something insane.  Change it back here.
-> >  	 */
-> > -	if (is_imx6q_usdhc(imx_data))
-> > +	if (is_imx6_usdhc(imx_data))
-> >  		writel(0x08100810, host->ioaddr + ESDHC_WTMK_LVL);
-> >  
-> > +	if (is_imx6q_usdhc(imx_data))
-> > +		sdhci_esdhc_ops.platform_execute_tuning =
-> > +					esdhc_executing_tuning;
-> >  	boarddata = &imx_data->boarddata;
-> >  	if (sdhci_esdhc_imx_probe_dt(pdev, boarddata) < 0) {
-> >  		if (!host->mmc->parent->platform_data) {
-> > @@ -972,7 +1028,7 @@ static int sdhci_esdhc_imx_probe(struct platform_device *pdev)
-> >  	}
-> >  
-> >  	/* sdr50 and sdr104 needs work on 1.8v signal voltage */
-> > -	if ((boarddata->support_vsel) && is_imx6q_usdhc(imx_data)) {
-> > +	if ((boarddata->support_vsel) && is_imx6_usdhc(imx_data)) {
-> >  		imx_data->pins_100mhz = pinctrl_lookup_state(imx_data->pinctrl,
-> >  						ESDHC_PINCTRL_STATE_100MHZ);
-> >  		imx_data->pins_200mhz = pinctrl_lookup_state(imx_data->pinctrl,
+> >  #endif /* __ASM_ARCH_IMX_ESDHC_H */
 > > -- 
 > > 1.7.2.rc3
 > > 
 > > 
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
