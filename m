@@ -1,77 +1,129 @@
-From: Shawn Guo <shawn.guo@linaro.org>
-Subject: Re: [PATCH 0/5] mmc: sdhci-esdhc-imx: eliminate enum imx_esdhc_type
-Date: Tue, 15 Oct 2013 16:54:00 +0800
-Message-ID: <20131015085358.GC14908@S2101-09.ap.freescale.net>
-References: <1381739024-24924-1-git-send-email-shawn.guo@linaro.org>
- <20131015073631.GA21188@b29396-Latitude-E6410>
+From: Dinh Nguyen <dinh.linux@gmail.com>
+Subject: Re: [RESEND PATCHv2 1/3] arm: socfpga: Set the SDMMC clock phase
+ in system manager
+Date: Tue, 15 Oct 2013 07:37:48 -0500
+Message-ID: <525D371C.3070201@gmail.com>
+References: <1381780051-1826-1-git-send-email-dinguyen@altera.com> <525CE5FD.8070107@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-db8lp0189.outbound.messaging.microsoft.com ([213.199.154.189]:18179
-	"EHLO db8outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753502Ab3JOIxW (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 15 Oct 2013 04:53:22 -0400
-Content-Disposition: inline
-In-Reply-To: <20131015073631.GA21188@b29396-Latitude-E6410>
+Received: from mail-ob0-f169.google.com ([209.85.214.169]:40154 "EHLO
+	mail-ob0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1759131Ab3JOMiA (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 15 Oct 2013 08:38:00 -0400
+In-Reply-To: <525CE5FD.8070107@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Dong Aisheng <b29396@freescale.com>
-Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, linux-arm-kernel@lists.infradead.org
+To: Jaehoon Chung <jh80.chung@samsung.com>, dinguyen@altera.com
+Cc: Mark Rutland <mark.rutland@arm.com>, devicetree@vger.kernel.org, Arnd Bergmann <arnd@arndb.de>, Pawel Moll <pawel.moll@arm.com>, Stephen Warren <swarren@wwwdotorg.org>, Seungwon Jeon <tgih.jun@samsung.com>, Pavel Machek <pavel@denx.de>, linux-mmc@vger.kernel.org, Rob Herring <rob.herring@calxeda.com>, linux-arm-kernel@lists.infradead.org, Olof Johansson <olof@lixom.net>, Chris Ball <cjb@laptop.org>, Ian Campbell <ian.campbell@citrix.com>
 
-On Tue, Oct 15, 2013 at 03:36:32PM +0800, Dong Aisheng wrote:
-> On Mon, Oct 14, 2013 at 04:23:39PM +0800, Shawn Guo wrote:
-> > When I was reviewing Dong's imx6sl standard tuning patches, I found that
-> > it's a little clumsy to use enum imx_esdhc_type for handling features
-> > and quirks on different esdhc variants.  
-> >
-> > Instead, the approach used in
-> > fec driver (drivers/net/ethernet/freescale/fec_main.c) should be more
-> > scalable in the long run.  It defines flags for all those features and
-> > quirks and creates a mapping between esdhc variant and the flags.
-> > 
-> 
-> It cause troubles if i try to rebase my patch series based on it
-> because esdhc/usdhc also have a lot register difference.
+Hi Jaehoo,
 
-We now have data structure esdhc_soc_data, which can handle whatever
-differences between these variants.
+On 10/15/13 1:51 AM, Jaehoon Chung wrote:
+> Hi Dinh,
+>
+> On 10/15/2013 04:47 AM, dinguyen@altera.com wrote:
+>> From: Dinh Nguyen <dinguyen@altera.com>
+>>
+>> Add functionality in the System Manager to set the SDR settings for the
+>> SD/MMC IP.
+>>
+>> Signed-off-by: Dinh Nguyen <dinguyen@altera.com>
+>> Cc: Pavel Machek <pavel@denx.de>
+>> CC: Arnd Bergmann <arnd@arndb.de>
+>> CC: Olof Johansson <olof@lixom.net>
+>> Cc: Rob Herring <rob.herring@calxeda.com>
+>> Cc: Pawel Moll <pawel.moll@arm.com>
+>> Cc: Mark Rutland <mark.rutland@arm.com>
+>> Cc: Stephen Warren <swarren@wwwdotorg.org>
+>> Cc: Ian Campbell <ian.campbell@citrix.com>
+>> Cc: Chris Ball <cjb@laptop.org>
+>> Cc: Jaehoon Chung <jh80.chung@samsung.com>
+>> Cc: Seungwon Jeon <tgih.jun@samsung.com>
+>> Cc: devicetree@vger.kernel.org
+>> Cc: linux-mmc@vger.kernel.org
+>> CC: linux-arm-kernel@lists.infradead.org
+>>
+>> ---
+>> v2:
+>> - Have socfpga_sysmgr_set_dwmmc_drvsel_smpsel() take in the SDR settings
+>> directly so that it does not have to walk the DTB.
+>> ---
+>>   arch/arm/mach-socfpga/Makefile     |    2 +-
+>>   arch/arm/mach-socfpga/core.h       |    6 ++++++
+>>   arch/arm/mach-socfpga/system_mgr.c |   28 ++++++++++++++++++++++++++++
+>>   3 files changed, 35 insertions(+), 1 deletion(-)
+>>   create mode 100644 arch/arm/mach-socfpga/system_mgr.c
+>>
+>> diff --git a/arch/arm/mach-socfpga/Makefile b/arch/arm/mach-socfpga/Makefile
+>> index 6dd7a93..e4ff8b9 100644
+>> --- a/arch/arm/mach-socfpga/Makefile
+>> +++ b/arch/arm/mach-socfpga/Makefile
+>> @@ -2,5 +2,5 @@
+>>   # Makefile for the linux kernel.
+>>   #
+>>   
+>> -obj-y					:= socfpga.o
+>> +obj-y					:= socfpga.o system_mgr.o
+>>   obj-$(CONFIG_SMP)	+= headsmp.o platsmp.o
+>> diff --git a/arch/arm/mach-socfpga/core.h b/arch/arm/mach-socfpga/core.h
+>> index 572b8f7..b05fa6a 100644
+>> --- a/arch/arm/mach-socfpga/core.h
+>> +++ b/arch/arm/mach-socfpga/core.h
+>> @@ -44,4 +44,10 @@ extern unsigned long cpu1start_addr;
+>>   
+>>   #define SOCFPGA_SCU_VIRT_BASE   0xfffec000
+>>   
+>> +/* SDMMC Group for System Manager defines */
+>> +#define SYSMGR_SDMMCGRP_CTRL_OFFSET             0x108
+>> +#define DRV_CLK_PHASE_SHIFT_SEL_MASK    0x7
+> I didn't see where this define is used. When do this use?
+It's not used at all. I will remove.
 
-> Originally we could simply use is_imx*_usdhc to handle those tiny difference,
-
-No.  The addition of is_imx6_usdhc() is a sign that we're not going to
-handle these differences easily.  Saying if a feature like std_tuning
-is only available on imx6sl and imx6slx, is_imx6_usdhc() will not fit
-then, and you need if (is_imx6sl_usdhc() || is_imx6slx_usdhc()) for it.
-Furthermore, think about it when you have imx7x come to play here,
-something like if (is_imx6sl_usdhc() || is_imx6slx_usdhc() ||
-is_imx7x_usdhc())?  The if-clause will become a mess sooner or later.
-
-> however, now if you eliminate the entire is_imx*_usdhc, we may have to
-> add a lot arbitrary and hard to naming flags for register offset/mask
-> different issue.
-> It does not make too much sense.
-> e.g. 
-> http://www.spinics.net/lists/arm-kernel/msg278507.html
-> http://permalink.gmane.org/gmane.linux.kernel.mmc/22934
-
-Having flags for them make sense to me.  By doing so, we can get the
-"characters" of particular SoC from reading its 'flags' variable.
-
-> Add maybe even more when we keep adding new features like:
-> mx5 DDR support and etc.(register offset is different between imx5&imx6)
-> It's hard to say how many similar cases left for me currently.
-
-The register difference introduced by adding new features can just be
-covered by the feature flag, I think.
-
-Shawn
-
-> Looking at fec_main.c, the flags seem more like for simply features.
-> Not the same complicated situation as esdhc/usdhc.
-> I'm not sure this is so suitable for esdhc/usdhc.
-> 
-> Due to the problems this patch may introduce, it's probably may be good
-> to stick the old way to me since i did not see quite neccessary to switch
-> to new way on current code.
-> Or you may find a better fix for this issue.
+Thanks for the review.
+Dinh
+>
+> Best Regards,
+> Jaehoon Chung
+>
+>> +#define SYSMGR_SDMMC_CTRL_SET(smplsel, drvsel)          \
+>> +	((((smplsel) & 0x7) << 3) | (((drvsel) & 0x7) << 0))
+>> +
+>>   #endif
+>> diff --git a/arch/arm/mach-socfpga/system_mgr.c b/arch/arm/mach-socfpga/system_mgr.c
+>> new file mode 100644
+>> index 0000000..9fdce1d
+>> --- /dev/null
+>> +++ b/arch/arm/mach-socfpga/system_mgr.c
+>> @@ -0,0 +1,28 @@
+>> +/*
+>> + * Copyright Altera Corporation (C) 2013. All Rights Reserved.
+>> + *
+>> + * This program is free software; you can redistribute it and/or modify it
+>> + * under the terms and conditions of the GNU General Public License,
+>> + * version 2, as published by the Free Software Foundation.
+>> + *
+>> + * This program is distributed in the hope it will be useful, but WITHOUT
+>> + * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+>> + * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
+>> + * more details.
+>> + *
+>> + * You should have received a copy of the GNU General Public License along with
+>> + * this program.  If not, see <http://www.gnu.org/licenses/>.
+>> + */
+>> +#include <linux/of_platform.h>
+>> +#include <asm/mach/map.h>
+>> +
+>> +#include "core.h"
+>> +
+>> +void socfpga_sysmgr_set_dwmmc_drvsel_smpsel(u32 drvsel, u32 smplsel)
+>> +{
+>> +	u32 hs_timing;
+>> +
+>> +	hs_timing = SYSMGR_SDMMC_CTRL_SET(smplsel, drvsel);
+>> +	writel(hs_timing, sys_manager_base_addr + SYSMGR_SDMMCGRP_CTRL_OFFSET);
+>> +}
+>> +EXPORT_SYMBOL(socfpga_sysmgr_set_dwmmc_drvsel_smpsel);
+>>
 
