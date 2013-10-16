@@ -1,121 +1,132 @@
 From: Jeremie Samuel <jeremie.samuel.ext@parrot.com>
-Subject: [PATCH 1/8] sdhci: Turn timeout timer into delayed work
-Date: Wed, 16 Oct 2013 18:20:51 +0200
-Message-ID: <1381940458-12628-2-git-send-email-jeremie.samuel.ext@parrot.com>
+Subject: [PATCH 4/8] sdhci: Use threaded IRQ handler
+Date: Wed, 16 Oct 2013 18:20:54 +0200
+Message-ID: <1381940458-12628-5-git-send-email-jeremie.samuel.ext@parrot.com>
 References: <1381940458-12628-1-git-send-email-jeremie.samuel.ext@parrot.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from co202.xi-lite.net ([149.6.83.202]:33745 "EHLO co202.xi-lite.net"
+Received: from co202.xi-lite.net ([149.6.83.202]:33759 "EHLO co202.xi-lite.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932488Ab3JPQW3 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 16 Oct 2013 12:22:29 -0400
+	id S932481Ab3JPQWb (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 16 Oct 2013 12:22:31 -0400
 In-Reply-To: <1381940458-12628-1-git-send-email-jeremie.samuel.ext@parrot.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Chris Ball <cjb@laptop.org>
 Cc: linux-mmc@vger.kernel.org, =?UTF-8?q?Gr=C3=A9gor=20Boirie?= <gregor.boirie@parrot.com>, Matthieu Castet <matthieu.castet@parrot.com>, Jeremie Samuel <jeremie.samuel.ext@parrot.com>, Anton Vorontsov <avorontsov@mvista.com>
 
-There is no need for the timeout handler to run in the atomic
-context, so this patch turns timeout timeout into the delayed
-work.
+We only need atomic context to disable SDHCI interrupts, after that
+we can run in a kernel thread.
 
-Note that the timeout handler still grabs an irqsave spinlock,
-we'll deal with it in a separate patch.
+Note that irq handler still grabs an irqsave spinlock, we'll deal
+with it in a subsequent patch.
 
-Patch based on http://thread.gmane.org/gmane.linux.kernel.mmc/2579.
+Patch based on: http://thread.gmane.org/gmane.linux.kernel.mmc/2579.
 
 Signed-off-by: Anton Vorontsov <avorontsov@mvista.com>
 Signed-off-by: Jeremie Samuel <jeremie.samuel.ext@parrot.com>
 ---
- drivers/mmc/host/sdhci.c  |   13 +++++++------
- include/linux/mmc/sdhci.h |    3 ++-
- 2 files changed, 9 insertions(+), 7 deletions(-)
+ drivers/mmc/host/sdhci.c |   46 ++++++++++++++++++++++++++++------------------
+ 1 file changed, 28 insertions(+), 18 deletions(-)
 
 diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 66bce7a..b312ec6 100644
+index 362a838..0bb892c 100644
 --- a/drivers/mmc/host/sdhci.c
 +++ b/drivers/mmc/host/sdhci.c
-@@ -13,6 +13,7 @@
-  *     - JMicron (hardware and technical support)
-  */
- 
-+#include <linux/workqueue.h>
- #include <linux/delay.h>
- #include <linux/highmem.h>
- #include <linux/io.h>
-@@ -1013,7 +1014,7 @@ void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
- 		mdelay(1);
+@@ -2413,9 +2413,8 @@ static void sdhci_data_irq(struct sdhci_host *host, u32 intmask)
  	}
- 
--	mod_timer(&host->timer, jiffies + 10 * HZ);
-+	schedule_delayed_work(&host->timeout_work, 10 * HZ);
- 
- 	host->cmd = cmd;
- 
-@@ -2140,7 +2141,7 @@ static void sdhci_tasklet_finish(unsigned long param)
- 		return;
- 	}
- 
--	del_timer(&host->timer);
-+	cancel_delayed_work(&host->timeout_work);
- 
- 	mrq = host->mrq;
- 
-@@ -2180,12 +2181,12 @@ static void sdhci_tasklet_finish(unsigned long param)
- 	sdhci_runtime_pm_put(host);
  }
  
--static void sdhci_timeout_timer(unsigned long data)
-+static void sdhci_timeout_work(struct work_struct *wk)
+-static irqreturn_t sdhci_irq(int irq, void *dev_id)
++static irqreturn_t sdhci_irq_thread(int irq, void *dev_id)
  {
- 	struct sdhci_host *host;
- 	unsigned long flags;
+-	irqreturn_t result;
+ 	struct sdhci_host *host = dev_id;
+ 	u32 intmask, unexpected = 0;
+ 	int cardint = 0, max_loops = 16;
+@@ -2431,15 +2430,7 @@ static irqreturn_t sdhci_irq(int irq, void *dev_id)
  
--	host = (struct sdhci_host*)data;
-+	host = container_of(wk, struct sdhci_host, timeout_work.work);
+ 	intmask = sdhci_readl(host, SDHCI_INT_STATUS);
  
- 	spin_lock_irqsave(&host->lock, flags);
+-	if (!intmask || intmask == 0xffffffff) {
+-		result = IRQ_NONE;
+-		goto out;
+-	}
+-
+ again:
+-	DBG("*** %s got interrupt: 0x%08x\n",
+-		mmc_hostname(host->mmc), intmask);
+-
+ 	if (intmask & (SDHCI_INT_CARD_INSERT | SDHCI_INT_CARD_REMOVE)) {
+ 		u32 present = sdhci_readl(host, SDHCI_PRESENT_STATE) &
+ 			      SDHCI_CARD_PRESENT;
+@@ -2499,12 +2490,10 @@ again:
+ 		sdhci_writel(host, intmask, SDHCI_INT_STATUS);
+ 	}
  
-@@ -3213,7 +3214,7 @@ int sdhci_add_host(struct sdhci_host *host)
- 	tasklet_init(&host->finish_tasklet,
- 		sdhci_tasklet_finish, (unsigned long)host);
+-	result = IRQ_HANDLED;
+-
+ 	intmask = sdhci_readl(host, SDHCI_INT_STATUS);
+ 	if (intmask && --max_loops)
+ 		goto again;
+-out:
++
+ 	spin_unlock(&host->lock);
  
--	setup_timer(&host->timer, sdhci_timeout_timer, (unsigned long)host);
-+	INIT_DELAYED_WORK(&host->timeout_work, sdhci_timeout_work);
+ 	if (unexpected) {
+@@ -2518,7 +2507,27 @@ out:
+ 	if (cardint)
+ 		mmc_signal_sdio_irq(host->mmc);
  
- 	if (host->version >= SDHCI_SPEC_300) {
- 		init_waitqueue_head(&host->buf_ready_int);
-@@ -3316,7 +3317,7 @@ void sdhci_remove_host(struct sdhci_host *host, int dead)
- 	sdhci_mask_irqs(host, SDHCI_INT_ALL_MASK);
- 	free_irq(host->irq, host);
+-	return result;
++	intmask = sdhci_readl(host, SDHCI_INT_ENABLE);
++	sdhci_writel(host, intmask, SDHCI_SIGNAL_ENABLE);
++
++	return IRQ_HANDLED;
++}
++
++static irqreturn_t sdhci_irq(int irq, void *dev_id)
++{
++	struct sdhci_host *host = dev_id;
++	u32 intmask = sdhci_readl(host, SDHCI_INT_STATUS);
++
++	if (!intmask || intmask == 0xffffffff)
++		return IRQ_NONE;
++
++	/* Disable interrupts */
++	sdhci_writel(host, 0, SDHCI_SIGNAL_ENABLE);
++
++	DBG("*** %s got interrupt: 0x%08x\n",
++		mmc_hostname(host->mmc), intmask);
++
++	return IRQ_WAKE_THREAD;
+ }
  
--	del_timer_sync(&host->timer);
-+	flush_delayed_work(&host->timeout_work);
+ /*****************************************************************************\
+@@ -2605,8 +2614,9 @@ int sdhci_resume_host(struct sdhci_host *host)
+ 	}
  
- 	tasklet_kill(&host->card_tasklet);
- 	tasklet_kill(&host->finish_tasklet);
-diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
-index 3e781b8..98cf934 100644
---- a/include/linux/mmc/sdhci.h
-+++ b/include/linux/mmc/sdhci.h
-@@ -12,6 +12,7 @@
- #define LINUX_MMC_SDHCI_H
+ 	if (!device_may_wakeup(mmc_dev(host->mmc))) {
+-		ret = request_irq(host->irq, sdhci_irq, IRQF_SHARED,
+-				  mmc_hostname(host->mmc), host);
++		ret = request_threaded_irq(host->irq, sdhci_irq,
++			sdhci_irq_thread, IRQF_SHARED,
++			mmc_hostname(host->mmc), host);
+ 		if (ret)
+ 			return ret;
+ 	} else {
+@@ -3226,8 +3236,8 @@ int sdhci_add_host(struct sdhci_host *host)
  
- #include <linux/scatterlist.h>
-+#include <linux/workqueue.h>
- #include <linux/compiler.h>
- #include <linux/types.h>
- #include <linux/io.h>
-@@ -163,7 +164,7 @@ struct sdhci_host {
- 	struct tasklet_struct card_tasklet;	/* Tasklet structures */
- 	struct tasklet_struct finish_tasklet;
+ 	sdhci_init(host, 0);
  
--	struct timer_list timer;	/* Timer for timeouts */
-+	struct delayed_work	timeout_work;	/* Work for timeouts */
- 
- 	u32 caps;		/* Alternative CAPABILITY_0 */
- 	u32 caps1;		/* Alternative CAPABILITY_1 */
+-	ret = request_irq(host->irq, sdhci_irq, IRQF_SHARED,
+-		mmc_hostname(mmc), host);
++	ret = request_threaded_irq(host->irq, sdhci_irq, sdhci_irq_thread,
++			  IRQF_SHARED, mmc_hostname(host->mmc), host);
+ 	if (ret) {
+ 		pr_err("%s: Failed to request IRQ %d: %d\n",
+ 		       mmc_hostname(mmc), host->irq, ret);
 -- 
 1.7.10.4
 
