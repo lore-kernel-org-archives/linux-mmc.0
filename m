@@ -1,188 +1,132 @@
 From: Jeremie Samuel <jeremie.samuel.ext@parrot.com>
-Subject: [PATCH 2/8] sdhci: Turn tuning timeout timer into delayed work
-Date: Wed, 16 Oct 2013 18:20:52 +0200
-Message-ID: <1381940458-12628-3-git-send-email-jeremie.samuel.ext@parrot.com>
+Subject: [PATCH 8/8] sdhci: Use jiffies instead of a timeout counter
+Date: Wed, 16 Oct 2013 18:20:58 +0200
+Message-ID: <1381940458-12628-9-git-send-email-jeremie.samuel.ext@parrot.com>
 References: <1381940458-12628-1-git-send-email-jeremie.samuel.ext@parrot.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from co202.xi-lite.net ([149.6.83.202]:33749 "EHLO co202.xi-lite.net"
+Received: from co202.xi-lite.net ([149.6.83.202]:33778 "EHLO co202.xi-lite.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932534Ab3JPQW3 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 16 Oct 2013 12:22:29 -0400
+	id S932593Ab3JPQWg (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 16 Oct 2013 12:22:36 -0400
 In-Reply-To: <1381940458-12628-1-git-send-email-jeremie.samuel.ext@parrot.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Chris Ball <cjb@laptop.org>
-Cc: linux-mmc@vger.kernel.org, =?UTF-8?q?Gr=C3=A9gor=20Boirie?= <gregor.boirie@parrot.com>, Matthieu Castet <matthieu.castet@parrot.com>, Jeremie Samuel <jeremie.samuel.ext@parrot.com>
+Cc: linux-mmc@vger.kernel.org, =?UTF-8?q?Gr=C3=A9gor=20Boirie?= <gregor.boirie@parrot.com>, Matthieu Castet <matthieu.castet@parrot.com>, Jeremie Samuel <jeremie.samuel.ext@parrot.com>, Anton Vorontsov <avorontsov@mvista.com>
 
-Same as previous patch
+Just a cosmetic change, should not affect functionality.
 
+Patch based on: http://thread.gmane.org/gmane.linux.kernel.mmc/2579.
+
+Signed-off-by: Anton Vorontsov <avorontsov@mvista.com>
 Signed-off-by: Jeremie Samuel <jeremie.samuel.ext@parrot.com>
 ---
- drivers/mmc/host/sdhci.c  |   46 ++++++++++++++++++++++-----------------------
- include/linux/mmc/sdhci.h |    2 +-
- 2 files changed, 24 insertions(+), 24 deletions(-)
+ drivers/mmc/host/sdhci.c |   22 +++++++++-------------
+ 1 file changed, 9 insertions(+), 13 deletions(-)
 
 diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index b312ec6..03c9995 100644
+index 843e99d..3e148c0 100644
 --- a/drivers/mmc/host/sdhci.c
 +++ b/drivers/mmc/host/sdhci.c
-@@ -52,7 +52,7 @@ static void sdhci_finish_data(struct sdhci_host *);
- 
- static void sdhci_finish_command(struct sdhci_host *);
- static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode);
--static void sdhci_tuning_timer(unsigned long data);
-+static void sdhci_tuning_timeout_work(struct work_struct *wk);
- static void sdhci_enable_preset_value(struct sdhci_host *host, bool enable);
- 
- #ifdef CONFIG_PM_RUNTIME
-@@ -267,7 +267,7 @@ static void sdhci_reinit(struct sdhci_host *host)
- 	if (host->flags & SDHCI_USING_RETUNING_TIMER) {
- 		host->flags &= ~SDHCI_USING_RETUNING_TIMER;
- 
--		del_timer_sync(&host->tuning_timer);
-+		flush_delayed_work(&host->tuning_timeout_work);
- 		host->flags &= ~SDHCI_NEEDS_RETUNING;
- 		host->mmc->max_blk_count =
- 			(host->quirks & SDHCI_QUIRK_NO_MULTIBLOCK) ? 1 : 65535;
-@@ -1380,7 +1380,7 @@ static void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
- 
- 		present_state = sdhci_readl(host, SDHCI_PRESENT_STATE);
- 		/*
--		 * Check if the re-tuning timer has already expired and there
-+		 * Check if the re-tuning timeout has already expired and there
- 		 * is no on-going data transfer. If so, we need to execute
- 		 * tuning procedure before sending command.
- 		 */
-@@ -2002,32 +2002,33 @@ static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
- out:
- 	/*
- 	 * If this is the very first time we are here, we start the retuning
--	 * timer. Since only during the first time, SDHCI_NEEDS_RETUNING
--	 * flag won't be set, we check this condition before actually starting
--	 * the timer.
-+	 * timeout workqueue. Since only during the first time,
-+	 * SDHCI_NEEDS_RETUNING flag won't be set, we check this condition
-+	 * before actually starting the timeout worqueue.
- 	 */
- 	if (!(host->flags & SDHCI_NEEDS_RETUNING) && host->tuning_count &&
- 	    (host->tuning_mode == SDHCI_TUNING_MODE_1)) {
- 		host->flags |= SDHCI_USING_RETUNING_TIMER;
--		mod_timer(&host->tuning_timer, jiffies +
-+		schedule_delayed_work(&host->tuning_timeout_work,
- 			host->tuning_count * HZ);
- 		/* Tuning mode 1 limits the maximum data length to 4MB */
- 		mmc->max_blk_count = (4 * 1024 * 1024) / mmc->max_blk_size;
- 	} else {
- 		host->flags &= ~SDHCI_NEEDS_RETUNING;
--		/* Reload the new initial value for timer */
-+		/* Reload the new initial value for timeout workqueue */
- 		if (host->tuning_mode == SDHCI_TUNING_MODE_1)
--			mod_timer(&host->tuning_timer, jiffies +
-+			schedule_delayed_work(&host->tuning_timeout_work,
- 				host->tuning_count * HZ);
+@@ -209,17 +209,16 @@ static void sdhci_reset(struct sdhci_host *host, u8 mask)
  	}
  
- 	/*
- 	 * In case tuning fails, host controllers which support re-tuning can
--	 * try tuning again at a later time, when the re-tuning timer expires.
-+	 * try tuning again at a later time, when the re-tuning timeout
-+	 * workqueue expires.
- 	 * So for these controllers, we return 0. Since there might be other
- 	 * controllers who do not have this capability, we return error for
- 	 * them. SDHCI_USING_RETUNING_TIMER means the host is currently using
--	 * a retuning timer to do the retuning for the card.
-+	 * a retuning timeout workqueue to do the retuning for the card.
- 	 */
- 	if (err && (host->flags & SDHCI_USING_RETUNING_TIMER))
- 		err = 0;
-@@ -2212,12 +2213,12 @@ static void sdhci_timeout_work(struct work_struct *wk)
- 	spin_unlock_irqrestore(&host->lock, flags);
- }
+ 	/* Wait max 100 ms */
+-	timeout = 100;
++	timeout = jiffies + msecs_to_jiffies(100);
  
--static void sdhci_tuning_timer(unsigned long data)
-+static void sdhci_tuning_timeout_work(struct work_struct *wk)
- {
- 	struct sdhci_host *host;
- 	unsigned long flags;
- 
--	host = (struct sdhci_host *)data;
-+	host = container_of(wk, struct sdhci_host, tuning_timeout_work.work);
- 
- 	spin_lock_irqsave(&host->lock, flags);
- 
-@@ -2564,7 +2565,7 @@ int sdhci_suspend_host(struct sdhci_host *host)
- 
- 	/* Disable tuning since we are suspending */
- 	if (host->flags & SDHCI_USING_RETUNING_TIMER) {
--		del_timer_sync(&host->tuning_timer);
-+		flush_delayed_work(&host->tuning_timeout_work);
- 		host->flags &= ~SDHCI_NEEDS_RETUNING;
- 	}
- 
-@@ -2572,7 +2573,7 @@ int sdhci_suspend_host(struct sdhci_host *host)
- 	if (ret) {
- 		if (host->flags & SDHCI_USING_RETUNING_TIMER) {
- 			host->flags |= SDHCI_NEEDS_RETUNING;
--			mod_timer(&host->tuning_timer, jiffies +
-+			schedule_delayed_work(&host->tuning_timeout_work,
- 					host->tuning_count * HZ);
+ 	/* hw clears the bit when it's done */
+ 	while (sdhci_readb(host, SDHCI_SOFTWARE_RESET) & mask) {
+-		if (timeout == 0) {
++		if (time_after(jiffies, timeout)) {
+ 			pr_err("%s: Reset 0x%x never completed.\n",
+ 				mmc_hostname(host->mmc), (int)mask);
+ 			sdhci_dumpregs(host);
+ 			return;
  		}
- 
-@@ -2676,7 +2677,7 @@ int sdhci_runtime_suspend_host(struct sdhci_host *host)
- 
- 	/* Disable tuning since we are suspending */
- 	if (host->flags & SDHCI_USING_RETUNING_TIMER) {
--		del_timer_sync(&host->tuning_timer);
-+		flush_delayed_work(&host->tuning_timeout_work);
- 		host->flags &= ~SDHCI_NEEDS_RETUNING;
+-		timeout--;
+ 		msleep(1);
  	}
  
-@@ -3034,13 +3035,13 @@ int sdhci_add_host(struct sdhci_host *host)
- 	if (caps[1] & SDHCI_DRIVER_TYPE_D)
- 		mmc->caps |= MMC_CAP_DRIVER_TYPE_D;
+@@ -995,7 +994,7 @@ void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
+ 	WARN_ON(host->cmd);
  
--	/* Initial value for re-tuning timer count */
-+	/* Initial value for re-tuning timeout count */
- 	host->tuning_count = (caps[1] & SDHCI_RETUNING_TIMER_COUNT_MASK) >>
- 			      SDHCI_RETUNING_TIMER_COUNT_SHIFT;
+ 	/* Wait max 10 ms */
+-	timeout = 10;
++	timeout = jiffies + msecs_to_jiffies(10);
  
- 	/*
--	 * In case Re-tuning Timer is not disabled, the actual value of
--	 * re-tuning timer will be 2 ^ (n - 1).
-+	 * In case Re-tuning Timeout is not disabled, the actual value of
-+	 * re-tuning timeout will be 2 ^ (n - 1).
+ 	mask = SDHCI_CMD_INHIBIT;
+ 	if ((cmd->data != NULL) || (cmd->flags & MMC_RSP_BUSY))
+@@ -1007,7 +1006,7 @@ void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
+ 		mask &= ~SDHCI_DATA_INHIBIT;
+ 
+ 	while (sdhci_readl(host, SDHCI_PRESENT_STATE) & mask) {
+-		if (timeout == 0) {
++		if (time_after(jiffies, timeout)) {
+ 			pr_err("%s: Controller never released "
+ 				"inhibit bit(s).\n", mmc_hostname(host->mmc));
+ 			sdhci_dumpregs(host);
+@@ -1015,7 +1014,6 @@ void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
+ 			schedule_work(&host->finish_work);
+ 			return;
+ 		}
+-		timeout--;
+ 		mdelay(1);
+ 	}
+ 
+@@ -1228,16 +1226,15 @@ clock_set:
+ 	sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
+ 
+ 	/* Wait max 20 ms */
+-	timeout = 20;
++	timeout = jiffies + msecs_to_jiffies(20);
+ 	while (!((clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL))
+ 		& SDHCI_CLOCK_INT_STABLE)) {
+-		if (timeout == 0) {
++		if (time_after(jiffies, timeout)) {
+ 			pr_err("%s: Internal clock never "
+ 				"stabilised.\n", mmc_hostname(host->mmc));
+ 			sdhci_dumpregs(host);
+ 			return;
+ 		}
+-		timeout--;
+ 		msleep(1);
+ 	}
+ 
+@@ -1902,12 +1899,12 @@ static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
+ 	 * Issue CMD19 repeatedly till Execute Tuning is set to 0 or the number
+ 	 * of loops reaches 40 times or a timeout of 150ms occurs.
  	 */
- 	if (host->tuning_count)
- 		host->tuning_count = 1 << (host->tuning_count - 1);
-@@ -3219,10 +3220,9 @@ int sdhci_add_host(struct sdhci_host *host)
- 	if (host->version >= SDHCI_SPEC_300) {
- 		init_waitqueue_head(&host->buf_ready_int);
+-	timeout = 150;
++	timeout = jiffies + msecs_to_jiffies(150);
+ 	do {
+ 		struct mmc_command cmd = {0};
+ 		struct mmc_request mrq = {NULL};
  
--		/* Initialize re-tuning timer */
--		init_timer(&host->tuning_timer);
--		host->tuning_timer.data = (unsigned long)host;
--		host->tuning_timer.function = sdhci_tuning_timer;
-+		/* Initialize re-tuning timeout work */
-+		INIT_DELAYED_WORK(&host->tuning_timeout_work,
-+					sdhci_tuning_timeout_work);
- 	}
+-		if (!tuning_loop_counter && !timeout)
++		if (!tuning_loop_counter && time_after(jiffies, timeout))
+ 			break;
  
- 	sdhci_init(host, 0);
-diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
-index 98cf934..2b0f4f3 100644
---- a/include/linux/mmc/sdhci.h
-+++ b/include/linux/mmc/sdhci.h
-@@ -180,7 +180,7 @@ struct sdhci_host {
- 	unsigned int		tuning_count;	/* Timer count for re-tuning */
- 	unsigned int		tuning_mode;	/* Re-tuning mode supported by host */
- #define SDHCI_TUNING_MODE_1	0
--	struct timer_list	tuning_timer;	/* Timer for tuning */
-+	struct delayed_work	tuning_timeout_work;	/* Work for tuning timeouts */
+ 		cmd.opcode = opcode;
+@@ -1978,7 +1975,6 @@ static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
  
- 	unsigned long private[0] ____cacheline_aligned;
- };
+ 		ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
+ 		tuning_loop_counter--;
+-		timeout--;
+ 		msleep(1);
+ 	} while (ctrl & SDHCI_CTRL_EXEC_TUNING);
+ 
+@@ -1986,7 +1982,7 @@ static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
+ 	 * The Host Driver has exhausted the maximum number of loops allowed,
+ 	 * so use fixed sampling frequency.
+ 	 */
+-	if (!tuning_loop_counter || !timeout) {
++	if (!tuning_loop_counter || time_after(jiffies, timeout)) {
+ 		ctrl &= ~SDHCI_CTRL_TUNED_CLK;
+ 		sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
+ 	} else {
 -- 
 1.7.10.4
 
