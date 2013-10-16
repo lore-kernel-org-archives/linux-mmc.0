@@ -1,59 +1,55 @@
-From: Balaji T K <balajitk@ti.com>
-Subject: [PATCH 1/6] mmc: omap_hsmmc: start using generic non-removable DT binding
-Date: Wed, 16 Oct 2013 20:48:22 +0530
-Message-ID: <1381936707-10336-2-git-send-email-balajitk@ti.com>
-References: <1381936707-10336-1-git-send-email-balajitk@ti.com>
+From: Jeremie Samuel <jeremie.samuel.ext@parrot.com>
+Subject: [PATCH 0/8] sdhci: Move real work out of an atomic context
+Date: Wed, 16 Oct 2013 18:20:50 +0200
+Message-ID: <1381940458-12628-1-git-send-email-jeremie.samuel.ext@parrot.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from bear.ext.ti.com ([192.94.94.41]:59666 "EHLO bear.ext.ti.com"
+Received: from co202.xi-lite.net ([149.6.83.202]:33740 "EHLO co202.xi-lite.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1758922Ab3JPPTP (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 16 Oct 2013 11:19:15 -0400
-In-Reply-To: <1381936707-10336-1-git-send-email-balajitk@ti.com>
+	id S932481Ab3JPQW2 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 16 Oct 2013 12:22:28 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: bcousson@baylibre.com, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, cjb@laptop.org
-Cc: linux-omap@vger.kernel.org, uri.y@variscite.com, Sekhar Nori <nsekhar@ti.com>, Balaji T K <balajitk@ti.com>
+To: Chris Ball <cjb@laptop.org>
+Cc: linux-mmc@vger.kernel.org, =?UTF-8?q?Gr=C3=A9gor=20Boirie?= <gregor.boirie@parrot.com>, Matthieu Castet <matthieu.castet@parrot.com>, Jeremie Samuel <jeremie.samuel.ext@parrot.com>
 
-From: Sekhar Nori <nsekhar@ti.com>
+Hi all,
 
-add generic "non-removable" binding support for omap_hsmmc
+Currently the sdhci driver does everything in the atomic context.
+And what is worse, PIO transfers are made from the IRQ handler.
 
-Signed-off-by: Sekhar Nori <nsekhar@ti.com>
-Signed-off-by: Balaji T K <balajitk@ti.com>
----
- .../devicetree/bindings/mmc/ti-omap-hsmmc.txt      |    2 +-
- drivers/mmc/host/omap_hsmmc.c                      |    3 +++
- 2 files changed, 4 insertions(+), 1 deletions(-)
+Some patches were already submitted to solve this issue. But there were
+rejected because they involved new issues.
 
-diff --git a/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt b/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
-index 8c8908a..3b95719 100644
---- a/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
-+++ b/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
-@@ -17,7 +17,7 @@ Optional properties:
- ti,dual-volt: boolean, supports dual voltage cards
- <supply-name>-supply: phandle to the regulator device tree node
- "supply-name" examples are "vmmc", "vmmc_aux" etc
--ti,non-removable: non-removable slot (like eMMC)
-+ti,non-removable: non-removable eMMC with always on vccq and configurable vcc
- ti,needs-special-reset: Requires a special softreset sequence
- ti,needs-special-hs-handling: HSMMC IP needs special setting for handling High Speed
- dmas: List of DMA specifiers with the controller specific format
-diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index 6ac63df..5992048 100644
---- a/drivers/mmc/host/omap_hsmmc.c
-+++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -1738,6 +1738,9 @@ static struct omap_mmc_platform_data *of_get_hsmmc_pdata(struct device *dev)
- 	pdata->slots[0].switch_pin = cd_gpio;
- 	pdata->slots[0].gpio_wp = wp_gpio;
- 
-+	if (of_find_property(np, "non-removable", NULL)) {
-+		pdata->slots[0].nonremovable = true;
-+	}
- 	if (of_find_property(np, "ti,non-removable", NULL)) {
- 		pdata->slots[0].nonremovable = true;
- 		pdata->slots[0].no_regulator_off_init = true;
+This set of patches is an evolution of an old patch from Anton Vorontsov.
+I tried to fix all the problems involved by the patches. I tested it for
+several time now with SD cards and SDIO.
+
+So, this patch set reworks sdhci code to avoid atomic context,
+almost completely.
+
+Thanks,
+
+Jeremie Samuel
+
+Jeremie Samuel (8):
+  sdhci: Turn timeout timer into delayed work
+  sdhci: Turn tuning timeout timer into delayed work
+  sdhci: Use work structs instead of tasklets
+  sdhci: Use threaded IRQ handler
+  sdhci: Delay led blinking
+  sdhci: Turn host->lock into a mutex
+  sdhci: Get rid of mdelay()s where it is safe and makes sense
+  sdhci: Use jiffies instead of a timeout counter
+
+ drivers/mmc/host/sdhci-esdhc-imx.c |    4 +-
+ drivers/mmc/host/sdhci-pxav3.c     |   10 +-
+ drivers/mmc/host/sdhci-s3c.c       |    5 +-
+ drivers/mmc/host/sdhci.c           |  329 ++++++++++++++++++------------------
+ include/linux/mmc/sdhci.h          |   13 +-
+ 5 files changed, 177 insertions(+), 184 deletions(-)
+
 -- 
-1.7.5.4
+1.7.10.4
 
