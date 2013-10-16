@@ -1,69 +1,56 @@
-From: "Tim Kryger" <tim.kryger@linaro.org>
-Subject: [RESEND PATCH v2 2/6] ARM: dts: Specify clocks for UARTs on
- bcm11351
-Date: Wed, 16 Oct 2013 14:47:06 -0700
-Message-ID: <1381960030-1640-3-git-send-email-tim.kryger@linaro.org>
-References: <1381960030-1640-1-git-send-email-tim.kryger@linaro.org>
-Mime-Version: 1.0
-Content-Type: text/plain
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1381960030-1640-1-git-send-email-tim.kryger@linaro.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Christian Daudt <bcm@fixthebug.org>, Rob Herring <rob.herring@calxeda.com>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Stephen Warren <swarren@wwwdotorg.org>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Daniel Lezcano <daniel.lezcano@linaro.org>, Thomas Gleixner <tglx@linutronix.de>, Chris Ball <cjb@laptop.org>
-Cc: Tim Kryger <tim.kryger@linaro.org>, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, patches@linaro.org
+From: Alexandre Belloni <alexandre.belloni@free-electrons.com>
+Subject: [PATCHv2] mmc: atmel-mci: add vmmc-supply support
+Date: Thu, 17 Oct 2013 00:19:59 +0200
+Message-ID: <1381961999-8187-1-git-send-email-alexandre.belloni@free-electrons.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from top.free-electrons.com ([176.31.233.9]:47683 "EHLO
+	mail.free-electrons.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1755830Ab3JPWUI (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Oct 2013 18:20:08 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ludovic Desroches <ludovic.desroches@atmel.com>
+Cc: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Alexandre Belloni <alexandre.belloni@free-electrons.com>
 
-Rather than declaring the frequency of the external clock, specify the
-label of the clock such that the driver may determine the frequency on
-its own.
+Other MMC hosts handle a regulator named vmmc-supply that allows to power the
+MMC card or SDIO device before communicating on the bus.
 
-Signed-off-by: Tim Kryger <tim.kryger@linaro.org>
-Reviewed-by: Markus Mayer <markus.mayer@linaro.org>
-Reviewed-by: Matt Porter <matt.porter@linaro.org>
+Signed-off-by: Alexandre Belloni <alexandre.belloni@free-electrons.com>
 ---
- arch/arm/boot/dts/bcm11351.dtsi | 8 ++++----
- 1 file changed, 4 insertions(+), 4 deletions(-)
 
-diff --git a/arch/arm/boot/dts/bcm11351.dtsi b/arch/arm/boot/dts/bcm11351.dtsi
-index c6464fb..ce65367 100644
---- a/arch/arm/boot/dts/bcm11351.dtsi
-+++ b/arch/arm/boot/dts/bcm11351.dtsi
-@@ -43,7 +43,7 @@
- 		compatible = "brcm,bcm11351-dw-apb-uart", "snps,dw-apb-uart";
- 		status = "disabled";
- 		reg = <0x3e000000 0x1000>;
--		clock-frequency = <13000000>;
-+		clocks = <&uartb_clk>;
- 		interrupts = <GIC_SPI 67 IRQ_TYPE_LEVEL_HIGH>;
- 		reg-shift = <2>;
- 		reg-io-width = <4>;
-@@ -53,7 +53,7 @@
- 		compatible = "brcm,bcm11351-dw-apb-uart", "snps,dw-apb-uart";
- 		status = "disabled";
- 		reg = <0x3e001000 0x1000>;
--		clock-frequency = <13000000>;
-+		clocks = <&uartb2_clk>;
- 		interrupts = <GIC_SPI 66 IRQ_TYPE_LEVEL_HIGH>;
- 		reg-shift = <2>;
- 		reg-io-width = <4>;
-@@ -63,7 +63,7 @@
- 		compatible = "brcm,bcm11351-dw-apb-uart", "snps,dw-apb-uart";
- 		status = "disabled";
- 		reg = <0x3e002000 0x1000>;
--		clock-frequency = <13000000>;
-+		clocks = <&uartb3_clk>;
- 		interrupts = <GIC_SPI 65 IRQ_TYPE_LEVEL_HIGH>;
- 		reg-shift = <2>;
- 		reg-io-width = <4>;
-@@ -73,7 +73,7 @@
- 		compatible = "brcm,bcm11351-dw-apb-uart", "snps,dw-apb-uart";
- 		status = "disabled";
- 		reg = <0x3e003000 0x1000>;
--		clock-frequency = <13000000>;
-+		clocks = <&uartb4_clk>;
- 		interrupts = <GIC_SPI 64 IRQ_TYPE_LEVEL_HIGH>;
- 		reg-shift = <2>;
- 		reg-io-width = <4>;
+Changes in v2:
+ - use mmc_regulator_get_supply instead of devm_regulator_get
+
+ drivers/mmc/host/atmel-mci.c | 9 +++++++++
+ 1 file changed, 9 insertions(+)
+
+diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
+index 69e438e..4ea5333 100644
+--- a/drivers/mmc/host/atmel-mci.c
++++ b/drivers/mmc/host/atmel-mci.c
+@@ -23,6 +23,7 @@
+ #include <linux/of_device.h>
+ #include <linux/of_gpio.h>
+ #include <linux/platform_device.h>
++#include <linux/regulator/consumer.h>
+ #include <linux/scatterlist.h>
+ #include <linux/seq_file.h>
+ #include <linux/slab.h>
+@@ -2198,6 +2199,14 @@ static int __init atmci_init_slot(struct atmel_mci *host,
+ 	host->slot[id] = slot;
+ 	mmc_add_host(mmc);
+ 
++	mmc_regulator_get_supply(mmc);
++	if (!IS_ERR(mmc->supply.vmmc)) {
++		int ret = regulator_enable(mmc->supply.vmmc);
++		if (ret)
++			dev_err(&mmc->class_dev,
++				"failed to enable regulator: %d\n", ret);
++	}
++
+ 	if (gpio_is_valid(slot->detect_pin)) {
+ 		int ret;
+ 
 -- 
-1.8.0.1
+1.8.1.2
+
