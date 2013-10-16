@@ -1,132 +1,72 @@
-From: Jeremie Samuel <jeremie.samuel.ext@parrot.com>
-Subject: [PATCH 8/8] sdhci: Use jiffies instead of a timeout counter
-Date: Wed, 16 Oct 2013 18:20:58 +0200
-Message-ID: <1381940458-12628-9-git-send-email-jeremie.samuel.ext@parrot.com>
-References: <1381940458-12628-1-git-send-email-jeremie.samuel.ext@parrot.com>
+From: Doug Anderson <dianders@chromium.org>
+Subject: Re: [PATCH 2/2] mmc: dw_mmc: Protect read-modify-write of INTMASK
+ with a lock
+Date: Wed, 16 Oct 2013 09:43:01 -0700
+Message-ID: <CAD=FV=V4OPOjs=4cvXOomt1UnzUdw5VApkNAX2ERKZ46DC6_gg@mail.gmail.com>
+References: <1381876762-10892-1-git-send-email-dianders@chromium.org>
+	<1381876762-10892-3-git-send-email-dianders@chromium.org>
+	<525E611A.6070708@imgtec.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from co202.xi-lite.net ([149.6.83.202]:33778 "EHLO co202.xi-lite.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932593Ab3JPQWg (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 16 Oct 2013 12:22:36 -0400
-In-Reply-To: <1381940458-12628-1-git-send-email-jeremie.samuel.ext@parrot.com>
+Received: from mail-vc0-f170.google.com ([209.85.220.170]:34391 "EHLO
+	mail-vc0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752782Ab3JPQnC (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Oct 2013 12:43:02 -0400
+Received: by mail-vc0-f170.google.com with SMTP id lc6so532324vcb.1
+        for <linux-mmc@vger.kernel.org>; Wed, 16 Oct 2013 09:43:01 -0700 (PDT)
+In-Reply-To: <525E611A.6070708@imgtec.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: linux-mmc@vger.kernel.org, =?UTF-8?q?Gr=C3=A9gor=20Boirie?= <gregor.boirie@parrot.com>, Matthieu Castet <matthieu.castet@parrot.com>, Jeremie Samuel <jeremie.samuel.ext@parrot.com>, Anton Vorontsov <avorontsov@mvista.com>
+To: James Hogan <james.hogan@imgtec.com>
+Cc: Chris Ball <cjb@laptop.org>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, Grant Grundler <grundler@chromium.org>, Alim Akhtar <alim.akhtar@samsung.com>, Abhilash Kesavan <a.kesavan@samsung.com>, Tomasz Figa <tomasz.figa@gmail.com>, Olof Johansson <olof@lixom.net>, Sonny Rao <sonnyrao@chromium.org>, Bing Zhao <bzhao@marvell.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-Just a cosmetic change, should not affect functionality.
+James,
 
-Patch based on: http://thread.gmane.org/gmane.linux.kernel.mmc/2579.
+On Wed, Oct 16, 2013 at 2:49 AM, James Hogan <james.hogan@imgtec.com> wrote:
+>> We can't just use the standard host->lock since that lock is not irq
+>> safe and mmc_signal_sdio_irq() (called from interrupt context) calls
+>> dw_mci_enable_sdio_irq().  Add a new irq-safe lock to protect INTMASK.
+>>
+>> An alternate solution to this is to punt mmc_signal_sdio_irq() to the
+>> tasklet and then protect INTMASK modifications by the standard host
+>> lock.  This seemed like a bit more of a high-latency change.
+>
+> A probably lighter-weight alternative to that alternative is to just
+> make the existing lock irq safe. Has this been considered?
+>
+> I'm not entirely convinced it's worth having a separate lock rather than
+> changing the existing one, but the patch still appears to be correct, so:
+> Reviewed-by: James Hogan <james.hogan@imgtec.com>
 
-Signed-off-by: Anton Vorontsov <avorontsov@mvista.com>
-Signed-off-by: Jeremie Samuel <jeremie.samuel.ext@parrot.com>
----
- drivers/mmc/host/sdhci.c |   22 +++++++++-------------
- 1 file changed, 9 insertions(+), 13 deletions(-)
+I did look at that alternate solution and rejected it, but am happy to
+send that up if people think it's better.  Here's why I rejected it:
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 843e99d..3e148c0 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -209,17 +209,16 @@ static void sdhci_reset(struct sdhci_host *host, u8 mask)
- 	}
- 
- 	/* Wait max 100 ms */
--	timeout = 100;
-+	timeout = jiffies + msecs_to_jiffies(100);
- 
- 	/* hw clears the bit when it's done */
- 	while (sdhci_readb(host, SDHCI_SOFTWARE_RESET) & mask) {
--		if (timeout == 0) {
-+		if (time_after(jiffies, timeout)) {
- 			pr_err("%s: Reset 0x%x never completed.\n",
- 				mmc_hostname(host->mmc), (int)mask);
- 			sdhci_dumpregs(host);
- 			return;
- 		}
--		timeout--;
- 		msleep(1);
- 	}
- 
-@@ -995,7 +994,7 @@ void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
- 	WARN_ON(host->cmd);
- 
- 	/* Wait max 10 ms */
--	timeout = 10;
-+	timeout = jiffies + msecs_to_jiffies(10);
- 
- 	mask = SDHCI_CMD_INHIBIT;
- 	if ((cmd->data != NULL) || (cmd->flags & MMC_RSP_BUSY))
-@@ -1007,7 +1006,7 @@ void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
- 		mask &= ~SDHCI_DATA_INHIBIT;
- 
- 	while (sdhci_readl(host, SDHCI_PRESENT_STATE) & mask) {
--		if (timeout == 0) {
-+		if (time_after(jiffies, timeout)) {
- 			pr_err("%s: Controller never released "
- 				"inhibit bit(s).\n", mmc_hostname(host->mmc));
- 			sdhci_dumpregs(host);
-@@ -1015,7 +1014,6 @@ void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
- 			schedule_work(&host->finish_work);
- 			return;
- 		}
--		timeout--;
- 		mdelay(1);
- 	}
- 
-@@ -1228,16 +1226,15 @@ clock_set:
- 	sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
- 
- 	/* Wait max 20 ms */
--	timeout = 20;
-+	timeout = jiffies + msecs_to_jiffies(20);
- 	while (!((clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL))
- 		& SDHCI_CLOCK_INT_STABLE)) {
--		if (timeout == 0) {
-+		if (time_after(jiffies, timeout)) {
- 			pr_err("%s: Internal clock never "
- 				"stabilised.\n", mmc_hostname(host->mmc));
- 			sdhci_dumpregs(host);
- 			return;
- 		}
--		timeout--;
- 		msleep(1);
- 	}
- 
-@@ -1902,12 +1899,12 @@ static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
- 	 * Issue CMD19 repeatedly till Execute Tuning is set to 0 or the number
- 	 * of loops reaches 40 times or a timeout of 150ms occurs.
- 	 */
--	timeout = 150;
-+	timeout = jiffies + msecs_to_jiffies(150);
- 	do {
- 		struct mmc_command cmd = {0};
- 		struct mmc_request mrq = {NULL};
- 
--		if (!tuning_loop_counter && !timeout)
-+		if (!tuning_loop_counter && time_after(jiffies, timeout))
- 			break;
- 
- 		cmd.opcode = opcode;
-@@ -1978,7 +1975,6 @@ static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
- 
- 		ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
- 		tuning_loop_counter--;
--		timeout--;
- 		msleep(1);
- 	} while (ctrl & SDHCI_CTRL_EXEC_TUNING);
- 
-@@ -1986,7 +1982,7 @@ static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
- 	 * The Host Driver has exhausted the maximum number of loops allowed,
- 	 * so use fixed sampling frequency.
- 	 */
--	if (!tuning_loop_counter || !timeout) {
-+	if (!tuning_loop_counter || time_after(jiffies, timeout)) {
- 		ctrl &= ~SDHCI_CTRL_TUNED_CLK;
- 		sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
- 	} else {
--- 
-1.7.10.4
+1. It looks like someone has gone through quite a bit of work to _not_
+grab the existing lock in the IRQ handler.  The IRQ handler always
+pushes all real work over to the tasklet.  I can only assume that they
+did this for some good reason and I'd hate to switch it without
+knowing for sure why.
 
+2. We might have performance problems if we blindly changed the
+existing code to an IRQ-safe spinlock.  We hold the existing
+"host->lock" spinlock for the entire duration of
+dw_mci_tasklet_func().  That's a pretty intense chunk of code, full of
+nested loops (some with 500ms timeouts!), mdelay(20) calls to handle
+some errors, etc.  I say "might" because I think that the expected
+case is that code runs pretty quickly.  I ran some brief tests on one
+system and saw a worst case time of 170us and an common case time of
+~10us.  Are we OK with having interrupts disabled for that long?  Are
+we OK with having the dw_mci interrupt handler potentially spin on a
+spinlock for that long?
+
+
+I don't think it would be terrible to look at reworking the way that
+dw_mmc handles interrupts, but that seems pretty major.
+
+
+BTW: is the cost of an extra lock actually that high?  ...or are you
+talking the cost in terms of code complexity?
+
+
+-Doug
