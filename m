@@ -1,56 +1,278 @@
-From: <micky_ching@realsil.com.cn>
-Subject: [PATCH] mmc: rtsx: fix card poweroff bug
-Date: Wed, 16 Oct 2013 15:26:52 +0800
-Message-ID: <1381908412-6310-1-git-send-email-micky_ching@realsil.com.cn>
+From: Peter Guo <peter.guo@bayhubtech.com>
+Subject: [PATCH v2] mmc:sdhci-pci: Add Support of O2Mirco/BayHubTech SD Host
+Date: Wed, 16 Oct 2013 07:26:23 +0000
+Message-ID: <97254cf7c23548fdbb3ebc10170af6a8@BL2PR04MB083.namprd04.prod.outlook.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
-List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
-List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel>
-List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
-List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
-List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
-Errors-To: driverdev-devel-bounces@linuxdriverproject.org
-Sender: driverdev-devel-bounces@linuxdriverproject.org
-To: cjb@laptop.org, sameo@linux.intel.com
-Cc: gregkh@linuxfoundation.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, wei_wang@realtek.com.cn, devel@linuxdriverproject.org
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-bn1lp0152.outbound.protection.outlook.com ([207.46.163.152]:7045
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1760094Ab3JPH01 convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Oct 2013 03:26:27 -0400
+Content-Language: en-US
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>, Adrian Hunter <adrian.hunter@intel.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Bill Pemberton <wfp5p@virginia.edu>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Cc: "adam.lee@canonical.com" <adam.lee@canonical.com>, Samuel Guan <samuel.guan@bayhubtech.com>, Xiaoguang Yu <xiaoguang.yu@bayhubtech.com>, Shirley Her <shirley.her@bayhubtech.com>, Yuxiang Wan <yuxiang.wan@bayhubtech.com>
 
-From: Micky Ching <micky_ching@realsil.com.cn>
+Add O2Micro/BayHubTech SD Host DeviceId 8520 support and specified Init.
+Apply SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12 for SD Host Controller.
+Apply SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC for SD Host Controller.
 
-If the host driver removed while card in the slot, the host will not
-power off card power correctly. This bug is produced because host
-eject flag set before the last mmc_set_ios callback, we should set the
-eject flag after power off.
-
-Signed-off-by: Micky Ching <micky_ching@realsil.com.cn>
+Signed-off-by: peter.guo <peter.guo@bayhubtech.com>
 ---
- drivers/mmc/host/rtsx_pci_sdmmc.c |    3 ++-
- 1 file changed, 2 insertions(+), 1 deletion(-)
+ drivers/mmc/host/sdhci-pci.c |  208 ++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 208 insertions(+)
 
-diff --git a/drivers/mmc/host/rtsx_pci_sdmmc.c b/drivers/mmc/host/rtsx_pci_sdmmc.c
-index 375a880e..c9a7328 100644
---- a/drivers/mmc/host/rtsx_pci_sdmmc.c
-+++ b/drivers/mmc/host/rtsx_pci_sdmmc.c
-@@ -1328,7 +1328,6 @@ static int rtsx_pci_sdmmc_drv_remove(struct platform_device *pdev)
- 	pcr->slots[RTSX_SD_CARD].p_dev = NULL;
- 	pcr->slots[RTSX_SD_CARD].card_event = NULL;
- 	mmc = host->mmc;
--	host->eject = true;
- 
- 	mutex_lock(&host->host_mutex);
- 	if (host->mrq) {
-@@ -1346,6 +1345,8 @@ static int rtsx_pci_sdmmc_drv_remove(struct platform_device *pdev)
- 	mutex_unlock(&host->host_mutex);
- 
- 	mmc_remove_host(mmc);
-+	host->eject = true;
+diff --git a/drivers/mmc/host/sdhci-pci.c b/drivers/mmc/host/sdhci-pci.c
+index d7d6bc8..b0611f0 100644
+--- a/drivers/mmc/host/sdhci-pci.c
++++ b/drivers/mmc/host/sdhci-pci.c
+@@ -364,11 +364,155 @@ static const struct sdhci_pci_fixes sdhci_intel_byt_sd = {
+ #define O2_SD_ADMA1		0xE2
+ #define O2_SD_ADMA2		0xE7
+ #define O2_SD_INF_MOD		0xF1
++#define	O2_SD_PLL_SETTING	0x304
++#define	O2_SD_CLK_SETTING	0x328
++#define	O2_SD_UHS1_CAP_SETTING	0x33C
++#define	O2_SD_VENDOR_SETTING 0x110
 +
- 	mmc_free_host(mmc);
++#define PCI_DEVICE_ID_FUJIN2		0x8520
++
++static void o2_host_pci_init(struct sdhci_pci_chip *chip)
++{
++	u32 scratch_32;
++	int ret;
++	/* Improve write performance for SD3.0 */
++	ret = pci_read_config_dword(chip->pdev, 0x88, &scratch_32);
++	if (ret)
++		return;
++	scratch_32 &= ~((1 << 12) | (1 << 13) | (1 << 14));
++	pci_write_config_dword(chip->pdev, 0x88, scratch_32);
++
++
++	/* Enable Link abnormal reset generating Reset */
++	ret = pci_read_config_dword(chip->pdev, 0x64, &scratch_32);
++	if (ret)
++		return;
++	scratch_32 &= ~((1 << 19) | (1 << 11));
++	scratch_32 |= (1 << 10);
++	pci_write_config_dword(chip->pdev, 0x64, scratch_32);
++
++	/* set card power over current protection	*/
++	ret = pci_read_config_dword(chip->pdev, 0xd4, &scratch_32);
++	if (ret)
++		return;
++	scratch_32 |= (1 << 4);
++	pci_write_config_dword(chip->pdev, 0xd4, scratch_32);
++
++	/* Set timeout CLK */
++	ret = pci_read_config_dword(chip->pdev,
++				O2_SD_CLK_SETTING, &scratch_32);
++	if (ret)
++		return;
++	scratch_32 &= ~(0xFF00);
++	scratch_32 |= 0x07E0C800;
++	pci_write_config_dword(chip->pdev,
++				O2_SD_CLK_SETTING, scratch_32);
++
++	/* adjust the output delay for SD mode */
++	pci_write_config_dword(chip->pdev, 0x350, 0x00002492);
++
++	/* Set the output voltage setting of Aux 1.2v LDO */
++	ret = pci_read_config_dword(chip->pdev,
++				0x68, &scratch_32);
++	if (ret)
++		return;
++	scratch_32 &= ~(3 << 12);
++	pci_write_config_dword(chip->pdev,
++				0x68, scratch_32);
++
++	/* Set Max power supply capability of SD host */
++	ret = pci_read_config_dword(chip->pdev,
++				0x334, &scratch_32);
++	if (ret)
++		return;
++	scratch_32 &= ~(0x01FE);
++	scratch_32 |= 0x00CC;
++	pci_write_config_dword(chip->pdev,
++				0x334, scratch_32);
++	/* Set DLL Tuning Window */
++	ret = pci_read_config_dword(chip->pdev,
++				0x300, &scratch_32);
++	if (ret)
++		return;
++	scratch_32 &= ~(0x000000FF);
++	scratch_32 |= 0x00000066;
++	pci_write_config_dword(chip->pdev,
++				0x300, scratch_32);
++
++	/* Set UHS2 T_EIDLE */
++	ret = pci_read_config_dword(chip->pdev,
++				0x35C, &scratch_32);
++	if (ret)
++		return;
++	scratch_32 &= ~(0x000000FC);
++	scratch_32 |= 0x00000084;
++	pci_write_config_dword(chip->pdev,
++				0x35C, scratch_32);
++
++	/* Set UHS2 Termination */
++	ret = pci_read_config_dword(chip->pdev,
++				0x3E0, &scratch_32);
++	if (ret)
++		return;
++	scratch_32 &= ~((1 << 21) | (1 << 30));
++
++	/* Set RTD3 function disabled */
++	scratch_32 |= ((1 << 29) | (1 << 28));
++	pci_write_config_dword(chip->pdev,
++				0x3E0, scratch_32);
++
++	/* Set L1 Entrance Timer */
++	ret = pci_read_config_dword(chip->pdev,
++				O2_SD_CAPS, &scratch_32);
++	if (ret)
++		return;
++	scratch_32 &= ~(0xf0000000);
++	scratch_32 |= 0x30000000;
++	pci_write_config_dword(chip->pdev,
++				O2_SD_CAPS, scratch_32);
++
++	ret = pci_read_config_dword(chip->pdev,
++				0xfc, &scratch_32);
++	if (ret)
++		return;
++	scratch_32 &= ~(0x000f0000);
++	scratch_32 |= 0x00080000;
++	pci_write_config_dword(chip->pdev,
++				0xfc, scratch_32);
++}
++
++static int o2_probe_slot(struct sdhci_pci_slot *slot)
++{
++	struct sdhci_pci_chip	*chip;
++	struct sdhci_host	*host;
++	u32			reg;
++
++	chip = slot->chip;
++	host = slot->host;
++	switch (chip->pdev->device) {
++	case PCI_DEVICE_ID_FUJIN2:
++		reg = sdhci_readl(host, O2_SD_VENDOR_SETTING);
++		if (reg & 0x1)
++			host->quirks |= SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12;
++
++		/* set dll watch dog timer	*/
++		reg = sdhci_readl(host, 0x1C8);
++		reg |= (1 << 12);
++		sdhci_writel(host, reg, 0x1C8);
++
++		break;
++	default:
++		break;
++	}
++
++	return 0;
++}
  
- 	dev_dbg(&(pdev->dev),
+ static int o2_probe(struct sdhci_pci_chip *chip)
+ {
+ 	int ret;
+ 	u8 scratch;
++	u32 scratch_32;
+ 
+ 	switch (chip->pdev->device) {
+ 	case PCI_DEVICE_ID_O2_8220:
+@@ -419,6 +563,52 @@ static int o2_probe(struct sdhci_pci_chip *chip)
+ 			return ret;
+ 		scratch |= 0x80;
+ 		pci_write_config_byte(chip->pdev, O2_SD_LOCK_WP, scratch);
++		break;
++
++	case PCI_DEVICE_ID_FUJIN2:
++	    /* UnLock WP */
++		ret = pci_read_config_byte(chip->pdev, O2_SD_LOCK_WP, &scratch);
++		if (ret)
++			return ret;
++		scratch &= 0x7f;
++		pci_write_config_byte(chip->pdev, O2_SD_LOCK_WP, scratch);
++
++		ret = pci_read_config_dword(chip->pdev,
++				O2_SD_PLL_SETTING, &scratch_32);
++		if (ret)
++			return ret;
++		scratch_32 &= ~(0x1F3F070E);
++		scratch_32 |= 0x18270106;
++		pci_write_config_dword(chip->pdev,
++				O2_SD_PLL_SETTING, scratch_32);
++
++		o2_host_pci_init(chip);
++
++
++		/* Disable ADMA1/ADMA2/ADMA3*/
++		ret = pci_read_config_dword(chip->pdev, 0x330, &scratch_32);
++		if (ret)
++			return ret;
++		scratch_32 &= ~(0xE6);
++		pci_write_config_dword(chip->pdev, 0x330, scratch_32);
++
++		ret = pci_read_config_dword(chip->pdev,
++				O2_SD_CLKREQ, &scratch_32);
++		if (ret)
++			return ret;
++		scratch_32 |= 0x3;
++		pci_write_config_dword(chip->pdev, O2_SD_CLKREQ, scratch_32);
++
++
++		/* Lock WP */
++		ret = pci_read_config_byte(chip->pdev,
++				O2_SD_LOCK_WP, &scratch);
++		if (ret)
++			return ret;
++		scratch |= 0x80;
++		pci_write_config_byte(chip->pdev, O2_SD_LOCK_WP, scratch);
++
++		break;
+ 	}
+ 
+ 	return 0;
+@@ -613,8 +803,18 @@ static int jmicron_resume(struct sdhci_pci_chip *chip)
+ 	return 0;
+ }
+ 
++static int o2_resume(struct sdhci_pci_chip *chip)
++{
++	o2_probe(chip);
++	return 0;
++}
++
++
+ static const struct sdhci_pci_fixes sdhci_o2 = {
+ 	.probe		= o2_probe,
++	.quirks		= SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC,
++	.probe_slot = o2_probe_slot,
++	.resume		= o2_resume,
+ };
+ 
+ static const struct sdhci_pci_fixes sdhci_jmicron = {
+@@ -979,6 +1179,14 @@ static const struct pci_device_id pci_ids[] = {
+ 		.driver_data	= (kernel_ulong_t)&sdhci_o2,
+ 	},
+ 
++	{
++		.vendor		= PCI_VENDOR_ID_O2,
++		.device		= PCI_DEVICE_ID_FUJIN2,
++		.subvendor	= PCI_ANY_ID,
++		.subdevice	= PCI_ANY_ID,
++		.driver_data	= (kernel_ulong_t)&sdhci_o2,
++	},
++
+ 	{	/* Generic SD host controller */
+ 		PCI_DEVICE_CLASS((PCI_CLASS_SYSTEM_SDHCI << 8), 0xFFFF00)
+ 	},
 -- 
 1.7.9.5
+
