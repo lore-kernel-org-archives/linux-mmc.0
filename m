@@ -1,152 +1,113 @@
-From: Doug Anderson <dianders@chromium.org>
-Subject: [PATCH 2/2] mmc: dw_mmc: Protect read-modify-write of INTMASK with a lock
-Date: Tue, 15 Oct 2013 15:39:22 -0700
-Message-ID: <1381876762-10892-3-git-send-email-dianders@chromium.org>
-References: <1381876762-10892-1-git-send-email-dianders@chromium.org>
+From: "Rafael J. Wysocki" <rjw@rjwysocki.net>
+Subject: Re: [PATCH V3] PM / Runtime: Respect autosuspend when idle triggers suspend
+Date: Wed, 16 Oct 2013 02:21:29 +0200
+Message-ID: <5764286.HPu6e8VtQu@vostro.rjw.lan>
+References: <Pine.LNX.4.44L0.1310151643240.1377-100000@iolanthe.rowland.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7Bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pb0-f74.google.com ([209.85.160.74]:33503 "EHLO
-	mail-pb0-f74.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S933654Ab3JOWjd (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 15 Oct 2013 18:39:33 -0400
-Received: by mail-pb0-f74.google.com with SMTP id rq2so924394pbb.1
-        for <linux-mmc@vger.kernel.org>; Tue, 15 Oct 2013 15:39:32 -0700 (PDT)
-In-Reply-To: <1381876762-10892-1-git-send-email-dianders@chromium.org>
+Received: from v094114.home.net.pl ([79.96.170.134]:52383 "HELO
+	v094114.home.net.pl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with SMTP id S1759727Ab3JPAJj (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 15 Oct 2013 20:09:39 -0400
+In-Reply-To: <Pine.LNX.4.44L0.1310151643240.1377-100000@iolanthe.rowland.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, James Hogan <james.hogan@imgtec.com>, Grant Grundler <grundler@chromium.org>, Alim Akhtar <alim.akhtar@samsung.com>, Abhilash Kesavan <a.kesavan@samsung.com>, Tomasz Figa <tomasz.figa@gmail.com>, Olof Johansson <olof@lixom.net>, Sonny Rao <sonnyrao@chromium.org>, Bing Zhao <bzhao@marvell.com>, Doug Anderson <dianders@chromium.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Alan Stern <stern@rowland.harvard.edu>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Len Brown <len.brown@intel.com>, Pavel Machek <pavel@ucw.cz>, linux-pm@vger.kernel.org, Mika Westerberg <mika.westerberg@linux.intel.com>, Kevin Hilman <khilman@linaro.org>, Rob Landley <rob@landley.net>, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org
 
-We're running into cases where our enabling of the SDIO interrupt in
-dw_mmc doesn't actually take effect.  Specifically, adding patch like
-this:
+On Tuesday, October 15, 2013 04:43:38 PM Alan Stern wrote:
+> On Tue, 15 Oct 2013, Ulf Hansson wrote:
+> 
+> > For devices which don't have a .runtime_idle callback or if it returns
+> > 0, rpm_idle will end up in triggering a call to rpm_suspend, thus
+> > trying to carry out a runtime_suspend directly from runtime_idle.
+> > 
+> > In the above situation we want to respect devices which has enabled
+> > autosuspend, we therfore append the flag sent to rpm_suspend with
+> > RPM_AUTO.
+> > 
+> > Do note that drivers still needs to update the device last busy mark,
+> > to control the delay for this circumstance.
+> > 
+> > Updated runtime PM documentation accordingly.
+> > 
+> > Cc: Alan Stern <stern@rowland.harvard.edu>
+> > Cc: Mika Westerberg <mika.westerberg@linux.intel.com>
+> > Cc: Kevin Hilman <khilman@linaro.org>
+> > Cc: Rob Landley <rob@landley.net>
+> > Cc: Chris Ball <cjb@laptop.org>
+> > Cc: linux-mmc@vger.kernel.org
+> > Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+> > Acked-by: Kevin Hilman <khilman@linaro.org>
+> > ---
+> >  Documentation/power/runtime_pm.txt |   14 ++++++++------
+> >  drivers/base/power/runtime.c       |    5 +++--
+> >  2 files changed, 11 insertions(+), 8 deletions(-)
+> > 
+> > diff --git a/Documentation/power/runtime_pm.txt b/Documentation/power/runtime_pm.txt
+> > index 71d8fe4..0f54333 100644
+> > --- a/Documentation/power/runtime_pm.txt
+> > +++ b/Documentation/power/runtime_pm.txt
+> > @@ -145,11 +145,13 @@ The action performed by the idle callback is totally dependent on the subsystem
+> >  if the device can be suspended (i.e. if all of the conditions necessary for
+> >  suspending the device are satisfied) and to queue up a suspend request for the
+> >  device in that case.  If there is no idle callback, or if the callback returns
+> > -0, then the PM core will attempt to carry out a runtime suspend of the device;
+> > -in essence, it will call pm_runtime_suspend() directly.  To prevent this (for
+> > -example, if the callback routine has started a delayed suspend), the routine
+> > -should return a non-zero value.  Negative error return codes are ignored by the
+> > -PM core.
+> > +0, then the PM core will attempt to carry out a runtime suspend of the device,
+> > +also respecting devices configured for autosuspend.  In essence this means a
+> > +call to pm_runtime_autosuspend() (do note that drivers needs to update the
+> > +device last busy mark, pm_runtime_mark_last_busy(), to control the delay under
+> > +this circumstance).  To prevent this (for example, if the callback routine has
+> > +started a delayed suspend), the routine must return a non-zero value.  Negative
+> > +error return codes are ignored by the PM core.
+> >  
+> >  The helper functions provided by the PM core, described in Section 4, guarantee
+> >  that the following constraints are met with respect to runtime PM callbacks for
+> > @@ -308,7 +310,7 @@ drivers/base/power/runtime.c and include/linux/pm_runtime.h:
+> >      - execute the subsystem-level idle callback for the device; returns an
+> >        error code on failure, where -EINPROGRESS means that ->runtime_idle() is
+> >        already being executed; if there is no callback or the callback returns 0
+> > -      then run pm_runtime_suspend(dev) and return its result
+> > +      then run pm_runtime_autosuspend(dev) and return its result
+> >  
+> >    int pm_runtime_suspend(struct device *dev);
+> >      - execute the subsystem-level suspend callback for the device; returns 0 on
+> > diff --git a/drivers/base/power/runtime.c b/drivers/base/power/runtime.c
+> > index 268a350..72e00e6 100644
+> > --- a/drivers/base/power/runtime.c
+> > +++ b/drivers/base/power/runtime.c
+> > @@ -258,7 +258,8 @@ static int __rpm_callback(int (*cb)(struct device *), struct device *dev)
+> >   * Check if the device's runtime PM status allows it to be suspended.  If
+> >   * another idle notification has been started earlier, return immediately.  If
+> >   * the RPM_ASYNC flag is set then queue an idle-notification request; otherwise
+> > - * run the ->runtime_idle() callback directly.
+> > + * run the ->runtime_idle() callback directly. If the ->runtime_idle callback
+> > + * doesn't exist or if it returns 0, call rpm_suspend with the RPM_AUTO flag.
+> >   *
+> >   * This function must be called under dev->power.lock with interrupts disabled.
+> >   */
+> > @@ -331,7 +332,7 @@ static int rpm_idle(struct device *dev, int rpmflags)
+> >  
+> >   out:
+> >  	trace_rpm_return_int(dev, _THIS_IP_, retval);
+> > -	return retval ? retval : rpm_suspend(dev, rpmflags);
+> > +	return retval ? retval : rpm_suspend(dev, rpmflags | RPM_AUTO);
+> >  }
+> >  
+> >  /**
+> 
+> Acked-by: Alan Stern <stern@rowland.harvard.edu>
 
- +++ b/drivers/mmc/host/dw_mmc.c
- @@ -1076,6 +1076,9 @@ static void dw_mci_enable_sdio_irq(struct mmc_host *mmc, int enb)
+I've queued up this patch for 3.13.
 
-      mci_writel(host, INTMASK,
-           (int_mask | SDMMC_INT_SDIO(slot->id)));
- +    int_mask = mci_readl(host, INTMASK);
- +    if (!(int_mask & SDMMC_INT_SDIO(slot->id)))
- +      dev_err(&mmc->class_dev, "failed to enable sdio irq\n");
-    } else {
+Thanks!
 
-...actually triggers the error message.  That's because the
-dw_mci_enable_sdio_irq() unsafely does a read-modify-write of the
-INTMASK register.
-
-We can't just use the standard host->lock since that lock is not irq
-safe and mmc_signal_sdio_irq() (called from interrupt context) calls
-dw_mci_enable_sdio_irq().  Add a new irq-safe lock to protect INTMASK.
-
-An alternate solution to this is to punt mmc_signal_sdio_irq() to the
-tasklet and then protect INTMASK modifications by the standard host
-lock.  This seemed like a bit more of a high-latency change.
-
-Reported-by: Bing Zhao <bzhao@marvell.com>
-Signed-off-by: Doug Anderson <dianders@chromium.org>
----
- drivers/mmc/host/dw_mmc.c  | 13 +++++++++++++
- include/linux/mmc/dw_mmc.h |  6 ++++++
- 2 files changed, 19 insertions(+)
-
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 1b75816..b810654 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -657,6 +657,7 @@ disable:
- 
- static int dw_mci_submit_data_dma(struct dw_mci *host, struct mmc_data *data)
- {
-+	unsigned long irqflags;
- 	int sg_len;
- 	u32 temp;
- 
-@@ -693,9 +694,11 @@ static int dw_mci_submit_data_dma(struct dw_mci *host, struct mmc_data *data)
- 	mci_writel(host, CTRL, temp);
- 
- 	/* Disable RX/TX IRQs, let DMA handle it */
-+	spin_lock_irqsave(&host->intmask_lock, irqflags);
- 	temp = mci_readl(host, INTMASK);
- 	temp  &= ~(SDMMC_INT_RXDR | SDMMC_INT_TXDR);
- 	mci_writel(host, INTMASK, temp);
-+	spin_unlock_irqrestore(&host->intmask_lock, irqflags);
- 
- 	host->dma_ops->start(host, sg_len);
- 
-@@ -704,6 +707,7 @@ static int dw_mci_submit_data_dma(struct dw_mci *host, struct mmc_data *data)
- 
- static void dw_mci_submit_data(struct dw_mci *host, struct mmc_data *data)
- {
-+	unsigned long irqflags;
- 	u32 temp;
- 
- 	data->error = -EINPROGRESS;
-@@ -732,9 +736,12 @@ static void dw_mci_submit_data(struct dw_mci *host, struct mmc_data *data)
- 		host->part_buf_count = 0;
- 
- 		mci_writel(host, RINTSTS, SDMMC_INT_TXDR | SDMMC_INT_RXDR);
-+
-+		spin_lock_irqsave(&host->intmask_lock, irqflags);
- 		temp = mci_readl(host, INTMASK);
- 		temp |= SDMMC_INT_TXDR | SDMMC_INT_RXDR;
- 		mci_writel(host, INTMASK, temp);
-+		spin_unlock_irqrestore(&host->intmask_lock, irqflags);
- 
- 		temp = mci_readl(host, CTRL);
- 		temp &= ~SDMMC_CTRL_DMA_ENABLE;
-@@ -1089,8 +1096,11 @@ static void dw_mci_enable_sdio_irq(struct mmc_host *mmc, int enb)
- {
- 	struct dw_mci_slot *slot = mmc_priv(mmc);
- 	struct dw_mci *host = slot->host;
-+	unsigned long irqflags;
- 	u32 int_mask;
- 
-+	spin_lock_irqsave(&host->intmask_lock, irqflags);
-+
- 	/* Enable/disable Slot Specific SDIO interrupt */
- 	int_mask = mci_readl(host, INTMASK);
- 	if (enb)
-@@ -1098,6 +1108,8 @@ static void dw_mci_enable_sdio_irq(struct mmc_host *mmc, int enb)
- 	else
- 		int_mask &= ~SDMMC_INT_SDIO(slot->id);
- 	mci_writel(host, INTMASK, int_mask);
-+
-+	spin_unlock_irqrestore(&host->intmask_lock, irqflags);
- }
- 
- static int dw_mci_execute_tuning(struct mmc_host *mmc, u32 opcode)
-@@ -2500,6 +2512,7 @@ int dw_mci_probe(struct dw_mci *host)
- 	host->quirks = host->pdata->quirks;
- 
- 	spin_lock_init(&host->lock);
-+	spin_lock_init(&host->intmask_lock);
- 	INIT_LIST_HEAD(&host->queue);
- 
- 	/*
-diff --git a/include/linux/mmc/dw_mmc.h b/include/linux/mmc/dw_mmc.h
-index 6ce7d2c..002ab56 100644
---- a/include/linux/mmc/dw_mmc.h
-+++ b/include/linux/mmc/dw_mmc.h
-@@ -102,6 +102,11 @@ struct mmc_data;
-  * @cur_slot, @mrq and @state. These must always be updated
-  * at the same time while holding @lock.
-  *
-+ * @intmask_lock is an irq-safe spinlock protecting the INTMASK register
-+ * to allow the interrupt handler to modify it directly.  Held for only long
-+ * enough to read-modify-write INTMASK and no other locks are grabbed when
-+ * holding this one.
-+ *
-  * The @mrq field of struct dw_mci_slot is also protected by @lock,
-  * and must always be written at the same time as the slot is added to
-  * @queue.
-@@ -121,6 +126,7 @@ struct mmc_data;
-  */
- struct dw_mci {
- 	spinlock_t		lock;
-+	spinlock_t		intmask_lock;
- 	void __iomem		*regs;
- 
- 	struct scatterlist	*sg;
 -- 
-1.8.4
-
+I speak only for myself.
+Rafael J. Wysocki, Intel Open Source Technology Center.
