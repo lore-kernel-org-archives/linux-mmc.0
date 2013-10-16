@@ -1,59 +1,41 @@
-From: Sonic Zhang <sonic.adi@gmail.com>
-Subject: [PATCH] mmc: bfin_sdh: Forgot to write SDH_CFG register in function set_ios.
-Date: Wed, 16 Oct 2013 13:42:05 +0800
-Message-ID: <1381902125-23597-1-git-send-email-sonic.adi@gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain
+From: Sachin Kamat <sachin.kamat@linaro.org>
+Subject: [PATCH 1/1] mmc: dw_mmc: Add missing description
+Date: Wed, 16 Oct 2013 11:35:54 +0530
+Message-ID: <1381903554-3456-1-git-send-email-sachin.kamat@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from co9ehsobe005.messaging.microsoft.com ([207.46.163.28]:52675
-	"EHLO co9outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1750908Ab3JPF2u (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Oct 2013 01:28:50 -0400
+Received: from mail-pa0-f42.google.com ([209.85.220.42]:34151 "EHLO
+	mail-pa0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750844Ab3JPGGm (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Oct 2013 02:06:42 -0400
+Received: by mail-pa0-f42.google.com with SMTP id kx10so566814pab.15
+        for <linux-mmc@vger.kernel.org>; Tue, 15 Oct 2013 23:06:42 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org
-Cc: adi-buildroot-devel@lists.sourceforge.net, Sonic Zhang <sonic.zhang@analog.com>
+To: linux-mmc@vger.kernel.org
+Cc: jh80.chung@samsung.com, cjb@laptop.org, sachin.kamat@linaro.org, Seungwon Jeon <tgih.jun@samsung.com>
 
-From: Sonic Zhang <sonic.zhang@analog.com>
+Commit 0976f16d ("mmc: dw_mmc: add support tuning scheme") introduced
+the execute_tuning hook but did not add its description for kernel docs.
+Update the same.
 
-The DMA operation in SDIO CMD53 may fail because the 4 bit SDIO mode
-is not set up correctly on BF548.
-Remove 2 blank lines as well.
-
-Signed-off-by: Sonic Zhang <sonic.zhang@analog.com>
+Signed-off-by: Sachin Kamat <sachin.kamat@linaro.org>
+Cc: Seungwon Jeon <tgih.jun@samsung.com>
 ---
- drivers/mmc/host/bfin_sdh.c | 3 +--
- 1 file changed, 1 insertion(+), 2 deletions(-)
+ drivers/mmc/host/dw_mmc.h |    1 +
+ 1 file changed, 1 insertion(+)
 
-diff --git a/drivers/mmc/host/bfin_sdh.c b/drivers/mmc/host/bfin_sdh.c
-index 94fae2f..e62c5bc 100644
---- a/drivers/mmc/host/bfin_sdh.c
-+++ b/drivers/mmc/host/bfin_sdh.c
-@@ -391,6 +391,7 @@ static void sdh_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 		/* Disable 4 bit SDIO */
- 		cfg &= ~SD4E;
- 	}
-+	bfin_write_SDH_CFG(cfg);
- 
- 	host->power_mode = ios->power_mode;
- #ifndef RSI_BLKSZ
-@@ -415,7 +416,6 @@ static void sdh_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 		cfg &= ~SD_CMD_OD;
- # endif
- 
--
- 	if (ios->power_mode != MMC_POWER_OFF)
- 		cfg |= PWR_ON;
- 	else
-@@ -433,7 +433,6 @@ static void sdh_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 		clk_ctl |= CLK_E;
- 		host->clk_div = clk_div;
- 		bfin_write_SDH_CLK_CTL(clk_ctl);
--
- 	} else
- 		sdh_stop_clock(host);
- 
+diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
+index 6bf24ab..306451f 100644
+--- a/drivers/mmc/host/dw_mmc.h
++++ b/drivers/mmc/host/dw_mmc.h
+@@ -244,6 +244,7 @@ struct dw_mci_tuning_data {
+  * @prepare_command: handle CMD register extensions.
+  * @set_ios: handle bus specific extensions.
+  * @parse_dt: parse implementation specific device tree properties.
++ * @execute_tuning: implementation specific tuning procedure.
+  *
+  * Provide controller implementation specific extensions. The usage of this
+  * data structure is fully optional and usage of each member in this structure
 -- 
-1.8.2.3
-
+1.7.9.5
 
