@@ -1,91 +1,69 @@
-From: James Hogan <james.hogan@imgtec.com>
-Subject: Re: [PATCH 2/2] mmc: dw_mmc: Protect read-modify-write of INTMASK
- with a lock
-Date: Wed, 16 Oct 2013 21:23:36 +0100
-Message-ID: <CAAG0J98c6eA_c2McSvFcQUMUfPy-DgdHi7Te1tZqpT8XjjMQvw@mail.gmail.com>
-References: <1381876762-10892-1-git-send-email-dianders@chromium.org>
-	<1381876762-10892-3-git-send-email-dianders@chromium.org>
-	<525E611A.6070708@imgtec.com>
-	<CAD=FV=V4OPOjs=4cvXOomt1UnzUdw5VApkNAX2ERKZ46DC6_gg@mail.gmail.com>
+From: "Tim Kryger" <tim.kryger@linaro.org>
+Subject: [RESEND PATCH v2 3/6] ARM: dts: Specify clocks for SDHCIs on
+ bcm11351
+Date: Wed, 16 Oct 2013 14:47:07 -0700
+Message-ID: <1381960030-1640-4-git-send-email-tim.kryger@linaro.org>
+References: <1381960030-1640-1-git-send-email-tim.kryger@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bk0-f52.google.com ([209.85.214.52]:38050 "EHLO
-	mail-bk0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1761470Ab3JPUXi (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Oct 2013 16:23:38 -0400
-Received: by mail-bk0-f52.google.com with SMTP id e11so455231bkh.25
-        for <linux-mmc@vger.kernel.org>; Wed, 16 Oct 2013 13:23:37 -0700 (PDT)
-In-Reply-To: <CAD=FV=V4OPOjs=4cvXOomt1UnzUdw5VApkNAX2ERKZ46DC6_gg@mail.gmail.com>
+Received: from mms1.broadcom.com ([216.31.210.17]:3072 "EHLO mms1.broadcom.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1755398Ab3JPVsQ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 16 Oct 2013 17:48:16 -0400
+In-Reply-To: <1381960030-1640-1-git-send-email-tim.kryger@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Doug Anderson <dianders@chromium.org>
-Cc: Chris Ball <cjb@laptop.org>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, Grant Grundler <grundler@chromium.org>, Alim Akhtar <alim.akhtar@samsung.com>, Abhilash Kesavan <a.kesavan@samsung.com>, Tomasz Figa <tomasz.figa@gmail.com>, Olof Johansson <olof@lixom.net>, Sonny Rao <sonnyrao@chromium.org>, Bing Zhao <bzhao@marvell.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+To: Christian Daudt <bcm@fixthebug.org>, Rob Herring <rob.herring@calxeda.com>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Stephen Warren <swarren@wwwdotorg.org>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Daniel Lezcano <daniel.lezcano@linaro.org>, Thomas Gleixner <tglx@linutronix.de>, Chris Ball <cjb@laptop.org>
+Cc: Tim Kryger <tim.kryger@linaro.org>, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, patches@linaro.org
 
-Hi Doug,
+Specify the external clock label in each SDHCI node.
 
-On 16 October 2013 17:43, Doug Anderson <dianders@chromium.org> wrote:
-> On Wed, Oct 16, 2013 at 2:49 AM, James Hogan <james.hogan@imgtec.com> wrote:
->>> We can't just use the standard host->lock since that lock is not irq
->>> safe and mmc_signal_sdio_irq() (called from interrupt context) calls
->>> dw_mci_enable_sdio_irq().  Add a new irq-safe lock to protect INTMASK.
->>>
->>> An alternate solution to this is to punt mmc_signal_sdio_irq() to the
->>> tasklet and then protect INTMASK modifications by the standard host
->>> lock.  This seemed like a bit more of a high-latency change.
->>
->> A probably lighter-weight alternative to that alternative is to just
->> make the existing lock irq safe. Has this been considered?
->>
->> I'm not entirely convinced it's worth having a separate lock rather than
->> changing the existing one, but the patch still appears to be correct, so:
->> Reviewed-by: James Hogan <james.hogan@imgtec.com>
->
-> I did look at that alternate solution and rejected it, but am happy to
-> send that up if people think it's better.  Here's why I rejected it:
->
-> 1. It looks like someone has gone through quite a bit of work to _not_
-> grab the existing lock in the IRQ handler.  The IRQ handler always
-> pushes all real work over to the tasklet.  I can only assume that they
-> did this for some good reason and I'd hate to switch it without
-> knowing for sure why.
->
-> 2. We might have performance problems if we blindly changed the
-> existing code to an IRQ-safe spinlock.  We hold the existing
-> "host->lock" spinlock for the entire duration of
-> dw_mci_tasklet_func().  That's a pretty intense chunk of code, full of
-> nested loops (some with 500ms timeouts!), mdelay(20) calls to handle
-> some errors, etc.  I say "might" because I think that the expected
-> case is that code runs pretty quickly.  I ran some brief tests on one
-> system and saw a worst case time of 170us and an common case time of
-> ~10us.  Are we OK with having interrupts disabled for that long?  Are
-> we OK with having the dw_mci interrupt handler potentially spin on a
-> spinlock for that long?
->
+Signed-off-by: Tim Kryger <tim.kryger@linaro.org>
+Reviewed-by: Markus Mayer <markus.mayer@linaro.org>
+Reviewed-by: Matt Porter <matt.porter@linaro.org>
+---
+ arch/arm/boot/dts/bcm11351.dtsi | 4 ++++
+ 1 file changed, 4 insertions(+)
 
-Fair enough, I'm convinced now. That code did look pretty heavy when I
-looked at it too.
+diff --git a/arch/arm/boot/dts/bcm11351.dtsi b/arch/arm/boot/dts/bcm11351.dtsi
+index ce65367..193659c 100644
+--- a/arch/arm/boot/dts/bcm11351.dtsi
++++ b/arch/arm/boot/dts/bcm11351.dtsi
+@@ -101,6 +101,7 @@
+ 	sdio1: sdio@3f180000 {
+ 		compatible = "brcm,kona-sdhci";
+ 		reg = <0x3f180000 0x10000>;
++		clocks = <&sdio1_clk>;
+ 		interrupts = <0x0 77 0x4>;
+ 		status = "disabled";
+ 	};
+@@ -108,6 +109,7 @@
+ 	sdio2: sdio@3f190000 {
+ 		compatible = "brcm,kona-sdhci";
+ 		reg = <0x3f190000 0x10000>;
++		clocks = <&sdio2_clk>;
+ 		interrupts = <0x0 76 0x4>;
+ 		status = "disabled";
+ 	};
+@@ -115,6 +117,7 @@
+ 	sdio3: sdio@3f1a0000 {
+ 		compatible = "brcm,kona-sdhci";
+ 		reg = <0x3f1a0000 0x10000>;
++		clocks = <&sdio3_clk>;
+ 		interrupts = <0x0 74 0x4>;
+ 		status = "disabled";
+ 	};
+@@ -122,6 +125,7 @@
+ 	sdio4: sdio@3f1b0000 {
+ 		compatible = "brcm,kona-sdhci";
+ 		reg = <0x3f1b0000 0x10000>;
++		clocks = <&sdio4_clk>;
+ 		interrupts = <0x0 73 0x4>;
+ 		status = "disabled";
+ 	};
+-- 
+1.8.0.1
 
->
-> I don't think it would be terrible to look at reworking the way that
-> dw_mmc handles interrupts, but that seems pretty major.
 
-Yeh, I suppose at least the potentially large delays are all for
-exceptional cases, so it's not a critical problem.
-
-> BTW: is the cost of an extra lock actually that high?
-
-I don't know tbh. In this case the spinlock usage doesn't appear to
-actually overlap.
-
-> ...or are you talking the cost in terms of code complexity?
-
-In this case it'd only be a space and code complexity thing I think. I
-suppose in some cases the benefit of finer-grained locking is probably
-pretty marginal, but there's a good case for it here. It might be
-worth renaming the lock to irq_lock or something like that so it's
-clear it doesn't have to protect only for INTMASK in the future - up
-to you.
-
-Cheers
-James
