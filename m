@@ -1,64 +1,91 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [RESEND PATCHv2 1/3] arm: socfpga: Set the SDMMC clock phase in system manager
-Date: Wed, 16 Oct 2013 20:56:49 +0200
-Message-ID: <201310162056.49706.arnd@arndb.de>
-References: <1381780051-1826-1-git-send-email-dinguyen@altera.com> <201310152147.27569.arnd@arndb.de> <525DA3BE.2030304@gmail.com>
+From: James Hogan <james.hogan@imgtec.com>
+Subject: Re: [PATCH 2/2] mmc: dw_mmc: Protect read-modify-write of INTMASK
+ with a lock
+Date: Wed, 16 Oct 2013 21:23:36 +0100
+Message-ID: <CAAG0J98c6eA_c2McSvFcQUMUfPy-DgdHi7Te1tZqpT8XjjMQvw@mail.gmail.com>
+References: <1381876762-10892-1-git-send-email-dianders@chromium.org>
+	<1381876762-10892-3-git-send-email-dianders@chromium.org>
+	<525E611A.6070708@imgtec.com>
+	<CAD=FV=V4OPOjs=4cvXOomt1UnzUdw5VApkNAX2ERKZ46DC6_gg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="iso-8859-15"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.17.8]:58919 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1761302Ab3JPS5M (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Oct 2013 14:57:12 -0400
-In-Reply-To: <525DA3BE.2030304@gmail.com>
+Received: from mail-bk0-f52.google.com ([209.85.214.52]:38050 "EHLO
+	mail-bk0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1761470Ab3JPUXi (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Oct 2013 16:23:38 -0400
+Received: by mail-bk0-f52.google.com with SMTP id e11so455231bkh.25
+        for <linux-mmc@vger.kernel.org>; Wed, 16 Oct 2013 13:23:37 -0700 (PDT)
+In-Reply-To: <CAD=FV=V4OPOjs=4cvXOomt1UnzUdw5VApkNAX2ERKZ46DC6_gg@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Dinh Nguyen <dinh.linux@gmail.com>
-Cc: dinguyen@altera.com, Pavel Machek <pavel@denx.de>, Olof Johansson <olof@lixom.net>, Rob Herring <rob.herring@calxeda.com>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Stephen Warren <swarren@wwwdotorg.org>, Ian Campbell <ian.campbell@citrix.com>, Chris Ball <cjb@laptop.org>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+To: Doug Anderson <dianders@chromium.org>
+Cc: Chris Ball <cjb@laptop.org>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, Grant Grundler <grundler@chromium.org>, Alim Akhtar <alim.akhtar@samsung.com>, Abhilash Kesavan <a.kesavan@samsung.com>, Tomasz Figa <tomasz.figa@gmail.com>, Olof Johansson <olof@lixom.net>, Sonny Rao <sonnyrao@chromium.org>, Bing Zhao <bzhao@marvell.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-On Tuesday 15 October 2013, Dinh Nguyen wrote:
-> This makes sense for the SD/MMC driver, but do you think I can use the 
-> same approach for
-> other drivers that this system manager touches?
+Hi Doug,
 
-It might not be as straightforward for every driver, but something like
-this should work at least for some of the more interesting ones. For the
-rest, you can have a system manager driver that exports functions.
-
-> i.e. The ethernet IP's 
-> PHY setting is controlled
-> by a register that is in the system manager as well.
+On 16 October 2013 17:43, Doug Anderson <dianders@chromium.org> wrote:
+> On Wed, Oct 16, 2013 at 2:49 AM, James Hogan <james.hogan@imgtec.com> wrote:
+>>> We can't just use the standard host->lock since that lock is not irq
+>>> safe and mmc_signal_sdio_irq() (called from interrupt context) calls
+>>> dw_mci_enable_sdio_irq().  Add a new irq-safe lock to protect INTMASK.
+>>>
+>>> An alternate solution to this is to punt mmc_signal_sdio_irq() to the
+>>> tasklet and then protect INTMASK modifications by the standard host
+>>> lock.  This seemed like a bit more of a high-latency change.
+>>
+>> A probably lighter-weight alternative to that alternative is to just
+>> make the existing lock irq safe. Has this been considered?
+>>
+>> I'm not entirely convinced it's worth having a separate lock rather than
+>> changing the existing one, but the patch still appears to be correct, so:
+>> Reviewed-by: James Hogan <james.hogan@imgtec.com>
 >
-> I have submitted this patch for enabling ethernet. It is making use of 
-> the driver platform specific
-> driver calls to touch the system manager.
-> 
-> http://lists.infradead.org/pipermail/linux-arm-kernel/2013-September/200173.html
+> I did look at that alternate solution and rejected it, but am happy to
+> send that up if people think it's better.  Here's why I rejected it:
+>
+> 1. It looks like someone has gone through quite a bit of work to _not_
+> grab the existing lock in the IRQ handler.  The IRQ handler always
+> pushes all real work over to the tasklet.  I can only assume that they
+> did this for some good reason and I'd hate to switch it without
+> knowing for sure why.
+>
+> 2. We might have performance problems if we blindly changed the
+> existing code to an IRQ-safe spinlock.  We hold the existing
+> "host->lock" spinlock for the entire duration of
+> dw_mci_tasklet_func().  That's a pretty intense chunk of code, full of
+> nested loops (some with 500ms timeouts!), mdelay(20) calls to handle
+> some errors, etc.  I say "might" because I think that the expected
+> case is that code runs pretty quickly.  I ran some brief tests on one
+> system and saw a worst case time of 170us and an common case time of
+> ~10us.  Are we OK with having interrupts disabled for that long?  Are
+> we OK with having the dw_mci interrupt handler potentially spin on a
+> spinlock for that long?
+>
 
-I definitely don't want to see auxdata getting used for stuff like this.
+Fair enough, I'm convinced now. That code did look pretty heavy when I
+looked at it too.
 
-In case of the ethernet driver, I suspect an SoC specific PHY driver would
-be the right approach.
- 
-> Just wondering if that is right approach for the ethernet driver? If 
-> not, then I think I may have
-> to come up with a generic system manager driver so that it can be used 
-> for other IPs.
+>
+> I don't think it would be terrible to look at reworking the way that
+> dw_mmc handles interrupts, but that seems pretty major.
 
-The general way of handling this should be to see if there is a subsystem
-available for handling a particular feature. In case of clk and phy, we
-have those subsystems, so it's a matter of writing an appropriate driver
-that communicates with the high-level drivers using that.
+Yeh, I suppose at least the potentially large delays are all for
+exceptional cases, so it's not a critical problem.
 
-I don't know what other features are provided by the system manager that
-might need a different solution, but if you can't come up with a nice
-solution, you can either have an soc specific portion in the device driver
-(as you suggested for sdmmc first), or you can have that platform specific
-mfd driver exporting some functions.
-If the functionality is actually something common but doesn't have a
-subsystem in Linux yet, the "right" approach might also be to introduce
-a new subsystem, which I realize can be a lot of work.
+> BTW: is the cost of an extra lock actually that high?
 
-	Arnd
+I don't know tbh. In this case the spinlock usage doesn't appear to
+actually overlap.
+
+> ...or are you talking the cost in terms of code complexity?
+
+In this case it'd only be a space and code complexity thing I think. I
+suppose in some cases the benefit of finer-grained locking is probably
+pretty marginal, but there's a good case for it here. It might be
+worth renaming the lock to irq_lock or something like that so it's
+clear it doesn't have to protect only for INTMASK in the future - up
+to you.
+
+Cheers
+James
