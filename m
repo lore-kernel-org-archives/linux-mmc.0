@@ -1,132 +1,188 @@
 From: Jeremie Samuel <jeremie.samuel.ext@parrot.com>
-Subject: [PATCH 4/8] sdhci: Use threaded IRQ handler
-Date: Wed, 16 Oct 2013 18:20:54 +0200
-Message-ID: <1381940458-12628-5-git-send-email-jeremie.samuel.ext@parrot.com>
+Subject: [PATCH 2/8] sdhci: Turn tuning timeout timer into delayed work
+Date: Wed, 16 Oct 2013 18:20:52 +0200
+Message-ID: <1381940458-12628-3-git-send-email-jeremie.samuel.ext@parrot.com>
 References: <1381940458-12628-1-git-send-email-jeremie.samuel.ext@parrot.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from co202.xi-lite.net ([149.6.83.202]:33759 "EHLO co202.xi-lite.net"
+Received: from co202.xi-lite.net ([149.6.83.202]:33749 "EHLO co202.xi-lite.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932481Ab3JPQWb (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 16 Oct 2013 12:22:31 -0400
+	id S932534Ab3JPQW3 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 16 Oct 2013 12:22:29 -0400
 In-Reply-To: <1381940458-12628-1-git-send-email-jeremie.samuel.ext@parrot.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Chris Ball <cjb@laptop.org>
-Cc: linux-mmc@vger.kernel.org, =?UTF-8?q?Gr=C3=A9gor=20Boirie?= <gregor.boirie@parrot.com>, Matthieu Castet <matthieu.castet@parrot.com>, Jeremie Samuel <jeremie.samuel.ext@parrot.com>, Anton Vorontsov <avorontsov@mvista.com>
+Cc: linux-mmc@vger.kernel.org, =?UTF-8?q?Gr=C3=A9gor=20Boirie?= <gregor.boirie@parrot.com>, Matthieu Castet <matthieu.castet@parrot.com>, Jeremie Samuel <jeremie.samuel.ext@parrot.com>
 
-We only need atomic context to disable SDHCI interrupts, after that
-we can run in a kernel thread.
+Same as previous patch
 
-Note that irq handler still grabs an irqsave spinlock, we'll deal
-with it in a subsequent patch.
-
-Patch based on: http://thread.gmane.org/gmane.linux.kernel.mmc/2579.
-
-Signed-off-by: Anton Vorontsov <avorontsov@mvista.com>
 Signed-off-by: Jeremie Samuel <jeremie.samuel.ext@parrot.com>
 ---
- drivers/mmc/host/sdhci.c |   46 ++++++++++++++++++++++++++++------------------
- 1 file changed, 28 insertions(+), 18 deletions(-)
+ drivers/mmc/host/sdhci.c  |   46 ++++++++++++++++++++++-----------------------
+ include/linux/mmc/sdhci.h |    2 +-
+ 2 files changed, 24 insertions(+), 24 deletions(-)
 
 diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 362a838..0bb892c 100644
+index b312ec6..03c9995 100644
 --- a/drivers/mmc/host/sdhci.c
 +++ b/drivers/mmc/host/sdhci.c
-@@ -2413,9 +2413,8 @@ static void sdhci_data_irq(struct sdhci_host *host, u32 intmask)
- 	}
- }
+@@ -52,7 +52,7 @@ static void sdhci_finish_data(struct sdhci_host *);
  
--static irqreturn_t sdhci_irq(int irq, void *dev_id)
-+static irqreturn_t sdhci_irq_thread(int irq, void *dev_id)
- {
--	irqreturn_t result;
- 	struct sdhci_host *host = dev_id;
- 	u32 intmask, unexpected = 0;
- 	int cardint = 0, max_loops = 16;
-@@ -2431,15 +2430,7 @@ static irqreturn_t sdhci_irq(int irq, void *dev_id)
+ static void sdhci_finish_command(struct sdhci_host *);
+ static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode);
+-static void sdhci_tuning_timer(unsigned long data);
++static void sdhci_tuning_timeout_work(struct work_struct *wk);
+ static void sdhci_enable_preset_value(struct sdhci_host *host, bool enable);
  
- 	intmask = sdhci_readl(host, SDHCI_INT_STATUS);
+ #ifdef CONFIG_PM_RUNTIME
+@@ -267,7 +267,7 @@ static void sdhci_reinit(struct sdhci_host *host)
+ 	if (host->flags & SDHCI_USING_RETUNING_TIMER) {
+ 		host->flags &= ~SDHCI_USING_RETUNING_TIMER;
  
--	if (!intmask || intmask == 0xffffffff) {
--		result = IRQ_NONE;
--		goto out;
--	}
--
- again:
--	DBG("*** %s got interrupt: 0x%08x\n",
--		mmc_hostname(host->mmc), intmask);
--
- 	if (intmask & (SDHCI_INT_CARD_INSERT | SDHCI_INT_CARD_REMOVE)) {
- 		u32 present = sdhci_readl(host, SDHCI_PRESENT_STATE) &
- 			      SDHCI_CARD_PRESENT;
-@@ -2499,12 +2490,10 @@ again:
- 		sdhci_writel(host, intmask, SDHCI_INT_STATUS);
- 	}
+-		del_timer_sync(&host->tuning_timer);
++		flush_delayed_work(&host->tuning_timeout_work);
+ 		host->flags &= ~SDHCI_NEEDS_RETUNING;
+ 		host->mmc->max_blk_count =
+ 			(host->quirks & SDHCI_QUIRK_NO_MULTIBLOCK) ? 1 : 65535;
+@@ -1380,7 +1380,7 @@ static void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
  
--	result = IRQ_HANDLED;
--
- 	intmask = sdhci_readl(host, SDHCI_INT_STATUS);
- 	if (intmask && --max_loops)
- 		goto again;
--out:
-+
- 	spin_unlock(&host->lock);
- 
- 	if (unexpected) {
-@@ -2518,7 +2507,27 @@ out:
- 	if (cardint)
- 		mmc_signal_sdio_irq(host->mmc);
- 
--	return result;
-+	intmask = sdhci_readl(host, SDHCI_INT_ENABLE);
-+	sdhci_writel(host, intmask, SDHCI_SIGNAL_ENABLE);
-+
-+	return IRQ_HANDLED;
-+}
-+
-+static irqreturn_t sdhci_irq(int irq, void *dev_id)
-+{
-+	struct sdhci_host *host = dev_id;
-+	u32 intmask = sdhci_readl(host, SDHCI_INT_STATUS);
-+
-+	if (!intmask || intmask == 0xffffffff)
-+		return IRQ_NONE;
-+
-+	/* Disable interrupts */
-+	sdhci_writel(host, 0, SDHCI_SIGNAL_ENABLE);
-+
-+	DBG("*** %s got interrupt: 0x%08x\n",
-+		mmc_hostname(host->mmc), intmask);
-+
-+	return IRQ_WAKE_THREAD;
- }
- 
- /*****************************************************************************\
-@@ -2605,8 +2614,9 @@ int sdhci_resume_host(struct sdhci_host *host)
- 	}
- 
- 	if (!device_may_wakeup(mmc_dev(host->mmc))) {
--		ret = request_irq(host->irq, sdhci_irq, IRQF_SHARED,
--				  mmc_hostname(host->mmc), host);
-+		ret = request_threaded_irq(host->irq, sdhci_irq,
-+			sdhci_irq_thread, IRQF_SHARED,
-+			mmc_hostname(host->mmc), host);
- 		if (ret)
- 			return ret;
+ 		present_state = sdhci_readl(host, SDHCI_PRESENT_STATE);
+ 		/*
+-		 * Check if the re-tuning timer has already expired and there
++		 * Check if the re-tuning timeout has already expired and there
+ 		 * is no on-going data transfer. If so, we need to execute
+ 		 * tuning procedure before sending command.
+ 		 */
+@@ -2002,32 +2002,33 @@ static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
+ out:
+ 	/*
+ 	 * If this is the very first time we are here, we start the retuning
+-	 * timer. Since only during the first time, SDHCI_NEEDS_RETUNING
+-	 * flag won't be set, we check this condition before actually starting
+-	 * the timer.
++	 * timeout workqueue. Since only during the first time,
++	 * SDHCI_NEEDS_RETUNING flag won't be set, we check this condition
++	 * before actually starting the timeout worqueue.
+ 	 */
+ 	if (!(host->flags & SDHCI_NEEDS_RETUNING) && host->tuning_count &&
+ 	    (host->tuning_mode == SDHCI_TUNING_MODE_1)) {
+ 		host->flags |= SDHCI_USING_RETUNING_TIMER;
+-		mod_timer(&host->tuning_timer, jiffies +
++		schedule_delayed_work(&host->tuning_timeout_work,
+ 			host->tuning_count * HZ);
+ 		/* Tuning mode 1 limits the maximum data length to 4MB */
+ 		mmc->max_blk_count = (4 * 1024 * 1024) / mmc->max_blk_size;
  	} else {
-@@ -3226,8 +3236,8 @@ int sdhci_add_host(struct sdhci_host *host)
+ 		host->flags &= ~SDHCI_NEEDS_RETUNING;
+-		/* Reload the new initial value for timer */
++		/* Reload the new initial value for timeout workqueue */
+ 		if (host->tuning_mode == SDHCI_TUNING_MODE_1)
+-			mod_timer(&host->tuning_timer, jiffies +
++			schedule_delayed_work(&host->tuning_timeout_work,
+ 				host->tuning_count * HZ);
+ 	}
+ 
+ 	/*
+ 	 * In case tuning fails, host controllers which support re-tuning can
+-	 * try tuning again at a later time, when the re-tuning timer expires.
++	 * try tuning again at a later time, when the re-tuning timeout
++	 * workqueue expires.
+ 	 * So for these controllers, we return 0. Since there might be other
+ 	 * controllers who do not have this capability, we return error for
+ 	 * them. SDHCI_USING_RETUNING_TIMER means the host is currently using
+-	 * a retuning timer to do the retuning for the card.
++	 * a retuning timeout workqueue to do the retuning for the card.
+ 	 */
+ 	if (err && (host->flags & SDHCI_USING_RETUNING_TIMER))
+ 		err = 0;
+@@ -2212,12 +2213,12 @@ static void sdhci_timeout_work(struct work_struct *wk)
+ 	spin_unlock_irqrestore(&host->lock, flags);
+ }
+ 
+-static void sdhci_tuning_timer(unsigned long data)
++static void sdhci_tuning_timeout_work(struct work_struct *wk)
+ {
+ 	struct sdhci_host *host;
+ 	unsigned long flags;
+ 
+-	host = (struct sdhci_host *)data;
++	host = container_of(wk, struct sdhci_host, tuning_timeout_work.work);
+ 
+ 	spin_lock_irqsave(&host->lock, flags);
+ 
+@@ -2564,7 +2565,7 @@ int sdhci_suspend_host(struct sdhci_host *host)
+ 
+ 	/* Disable tuning since we are suspending */
+ 	if (host->flags & SDHCI_USING_RETUNING_TIMER) {
+-		del_timer_sync(&host->tuning_timer);
++		flush_delayed_work(&host->tuning_timeout_work);
+ 		host->flags &= ~SDHCI_NEEDS_RETUNING;
+ 	}
+ 
+@@ -2572,7 +2573,7 @@ int sdhci_suspend_host(struct sdhci_host *host)
+ 	if (ret) {
+ 		if (host->flags & SDHCI_USING_RETUNING_TIMER) {
+ 			host->flags |= SDHCI_NEEDS_RETUNING;
+-			mod_timer(&host->tuning_timer, jiffies +
++			schedule_delayed_work(&host->tuning_timeout_work,
+ 					host->tuning_count * HZ);
+ 		}
+ 
+@@ -2676,7 +2677,7 @@ int sdhci_runtime_suspend_host(struct sdhci_host *host)
+ 
+ 	/* Disable tuning since we are suspending */
+ 	if (host->flags & SDHCI_USING_RETUNING_TIMER) {
+-		del_timer_sync(&host->tuning_timer);
++		flush_delayed_work(&host->tuning_timeout_work);
+ 		host->flags &= ~SDHCI_NEEDS_RETUNING;
+ 	}
+ 
+@@ -3034,13 +3035,13 @@ int sdhci_add_host(struct sdhci_host *host)
+ 	if (caps[1] & SDHCI_DRIVER_TYPE_D)
+ 		mmc->caps |= MMC_CAP_DRIVER_TYPE_D;
+ 
+-	/* Initial value for re-tuning timer count */
++	/* Initial value for re-tuning timeout count */
+ 	host->tuning_count = (caps[1] & SDHCI_RETUNING_TIMER_COUNT_MASK) >>
+ 			      SDHCI_RETUNING_TIMER_COUNT_SHIFT;
+ 
+ 	/*
+-	 * In case Re-tuning Timer is not disabled, the actual value of
+-	 * re-tuning timer will be 2 ^ (n - 1).
++	 * In case Re-tuning Timeout is not disabled, the actual value of
++	 * re-tuning timeout will be 2 ^ (n - 1).
+ 	 */
+ 	if (host->tuning_count)
+ 		host->tuning_count = 1 << (host->tuning_count - 1);
+@@ -3219,10 +3220,9 @@ int sdhci_add_host(struct sdhci_host *host)
+ 	if (host->version >= SDHCI_SPEC_300) {
+ 		init_waitqueue_head(&host->buf_ready_int);
+ 
+-		/* Initialize re-tuning timer */
+-		init_timer(&host->tuning_timer);
+-		host->tuning_timer.data = (unsigned long)host;
+-		host->tuning_timer.function = sdhci_tuning_timer;
++		/* Initialize re-tuning timeout work */
++		INIT_DELAYED_WORK(&host->tuning_timeout_work,
++					sdhci_tuning_timeout_work);
+ 	}
  
  	sdhci_init(host, 0);
+diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
+index 98cf934..2b0f4f3 100644
+--- a/include/linux/mmc/sdhci.h
++++ b/include/linux/mmc/sdhci.h
+@@ -180,7 +180,7 @@ struct sdhci_host {
+ 	unsigned int		tuning_count;	/* Timer count for re-tuning */
+ 	unsigned int		tuning_mode;	/* Re-tuning mode supported by host */
+ #define SDHCI_TUNING_MODE_1	0
+-	struct timer_list	tuning_timer;	/* Timer for tuning */
++	struct delayed_work	tuning_timeout_work;	/* Work for tuning timeouts */
  
--	ret = request_irq(host->irq, sdhci_irq, IRQF_SHARED,
--		mmc_hostname(mmc), host);
-+	ret = request_threaded_irq(host->irq, sdhci_irq, sdhci_irq_thread,
-+			  IRQF_SHARED, mmc_hostname(host->mmc), host);
- 	if (ret) {
- 		pr_err("%s: Failed to request IRQ %d: %d\n",
- 		       mmc_hostname(mmc), host->irq, ret);
+ 	unsigned long private[0] ____cacheline_aligned;
+ };
 -- 
 1.7.10.4
 
