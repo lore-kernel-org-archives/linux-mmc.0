@@ -1,41 +1,61 @@
-From: Adam Lee <adam.lee@canonical.com>
-Subject: Re: [PATCH v2] mmc:sdhci-pci: Add Support of O2Mirco/BayHubTech SD
- Host
-Date: Wed, 16 Oct 2013 16:15:32 +0800
-Message-ID: <20131016081532.GB3416@adam-laptop>
-References: <97254cf7c23548fdbb3ebc10170af6a8@BL2PR04MB083.namprd04.prod.outlook.com>
+From: James Hogan <james.hogan@imgtec.com>
+Subject: Re: [PATCH 2/2] mmc: dw_mmc: Protect read-modify-write of INTMASK
+ with a lock
+Date: Wed, 16 Oct 2013 10:49:14 +0100
+Message-ID: <525E611A.6070708@imgtec.com>
+References: <1381876762-10892-1-git-send-email-dianders@chromium.org> <1381876762-10892-3-git-send-email-dianders@chromium.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="ISO-8859-1"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pd0-f179.google.com ([209.85.192.179]:40495 "EHLO
-	mail-pd0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755193Ab3JPIPm (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Oct 2013 04:15:42 -0400
-Received: by mail-pd0-f179.google.com with SMTP id v10so537452pde.24
-        for <linux-mmc@vger.kernel.org>; Wed, 16 Oct 2013 01:15:42 -0700 (PDT)
-Content-Disposition: inline
-In-Reply-To: <97254cf7c23548fdbb3ebc10170af6a8@BL2PR04MB083.namprd04.prod.outlook.com>
+Received: from multi.imgtec.com ([194.200.65.239]:23418 "EHLO multi.imgtec.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1760173Ab3JPJtS (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 16 Oct 2013 05:49:18 -0400
+In-Reply-To: <1381876762-10892-3-git-send-email-dianders@chromium.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Peter Guo <peter.guo@bayhubtech.com>, Chris Ball <cjb@laptop.org>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Bill Pemberton <wfp5p@virginia.edu>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Samuel Guan <samuel.guan@bayhubtech.com>, Xiaoguang Yu <xiaoguang.yu@bayhubtech.com>, Shirley Her <shirley.her@bayhubtech.com>, Yuxiang Wan <yuxiang.wan@bayhubtech.com>
+To: Doug Anderson <dianders@chromium.org>
+Cc: Chris Ball <cjb@laptop.org>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, Grant Grundler <grundler@chromium.org>, Alim Akhtar <alim.akhtar@samsung.com>, Abhilash Kesavan <a.kesavan@samsung.com>, Tomasz Figa <tomasz.figa@gmail.com>, Olof Johansson <olof@lixom.net>, Sonny Rao <sonnyrao@chromium.org>, Bing Zhao <bzhao@marvell.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-On Wed, Oct 16, 2013 at 07:26:23AM +0000, Peter Guo wrote:
-> Add O2Micro/BayHubTech SD Host DeviceId 8520 support and specified Init.
-> Apply SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12 for SD Host Controller.
-> Apply SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC for SD Host Controller.
+Hi Doug.
+
+Nice catch.
+
+On 15/10/13 23:39, Doug Anderson wrote:
+> We're running into cases where our enabling of the SDIO interrupt in
+> dw_mmc doesn't actually take effect.  Specifically, adding patch like
+> this:
 > 
-> Signed-off-by: peter.guo <peter.guo@bayhubtech.com>
-> ---
->  drivers/mmc/host/sdhci-pci.c |  208 ++++++++++++++++++++++++++++++++++++++++++
->  1 file changed, 208 insertions(+)
+>  +++ b/drivers/mmc/host/dw_mmc.c
+>  @@ -1076,6 +1076,9 @@ static void dw_mci_enable_sdio_irq(struct mmc_host *mmc, int enb)
+> 
+>       mci_writel(host, INTMASK,
+>            (int_mask | SDMMC_INT_SDIO(slot->id)));
+>  +    int_mask = mci_readl(host, INTMASK);
+>  +    if (!(int_mask & SDMMC_INT_SDIO(slot->id)))
+>  +      dev_err(&mmc->class_dev, "failed to enable sdio irq\n");
+>     } else {
+> 
+> ...actually triggers the error message.  That's because the
+> dw_mci_enable_sdio_irq() unsafely does a read-modify-write of the
+> INTMASK register.
+> 
+> We can't just use the standard host->lock since that lock is not irq
+> safe and mmc_signal_sdio_irq() (called from interrupt context) calls
+> dw_mci_enable_sdio_irq().  Add a new irq-safe lock to protect INTMASK.
+> 
+> An alternate solution to this is to punt mmc_signal_sdio_irq() to the
+> tasklet and then protect INTMASK modifications by the standard host
+> lock.  This seemed like a bit more of a high-latency change.
 
-I'm enabling "O2 Micro, Inc. Device [1217:8520]" on some laptops, it
-works after this patch applied.
+A probably lighter-weight alternative to that alternative is to just
+make the existing lock irq safe. Has this been considered?
 
-Chris, please take a look? Thanks.
+I'm not entirely convinced it's worth having a separate lock rather than
+changing the existing one, but the patch still appears to be correct, so:
+Reviewed-by: James Hogan <james.hogan@imgtec.com>
 
-Tested-by: Adam Lee <adam.lee@canonical.com>
+Cheers
+James
 
--- 
-Adam Lee
