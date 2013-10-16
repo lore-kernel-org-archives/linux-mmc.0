@@ -1,41 +1,56 @@
-From: Sachin Kamat <sachin.kamat@linaro.org>
-Subject: [PATCH 1/1] mmc: dw_mmc: Add missing description
-Date: Wed, 16 Oct 2013 11:35:54 +0530
-Message-ID: <1381903554-3456-1-git-send-email-sachin.kamat@linaro.org>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pa0-f42.google.com ([209.85.220.42]:34151 "EHLO
-	mail-pa0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750844Ab3JPGGm (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Oct 2013 02:06:42 -0400
-Received: by mail-pa0-f42.google.com with SMTP id kx10so566814pab.15
-        for <linux-mmc@vger.kernel.org>; Tue, 15 Oct 2013 23:06:42 -0700 (PDT)
-Sender: linux-mmc-owner@vger.kernel.org
+From: <micky_ching@realsil.com.cn>
+Subject: [PATCH] mmc: rtsx: fix card poweroff bug
+Date: Wed, 16 Oct 2013 15:26:52 +0800
+Message-ID: <1381908412-6310-1-git-send-email-micky_ching@realsil.com.cn>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
+List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
+List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel>
+List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
+List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
+List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
+Errors-To: driverdev-devel-bounces@linuxdriverproject.org
+Sender: driverdev-devel-bounces@linuxdriverproject.org
+To: cjb@laptop.org, sameo@linux.intel.com
+Cc: gregkh@linuxfoundation.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, wei_wang@realtek.com.cn, devel@linuxdriverproject.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: jh80.chung@samsung.com, cjb@laptop.org, sachin.kamat@linaro.org, Seungwon Jeon <tgih.jun@samsung.com>
 
-Commit 0976f16d ("mmc: dw_mmc: add support tuning scheme") introduced
-the execute_tuning hook but did not add its description for kernel docs.
-Update the same.
+From: Micky Ching <micky_ching@realsil.com.cn>
 
-Signed-off-by: Sachin Kamat <sachin.kamat@linaro.org>
-Cc: Seungwon Jeon <tgih.jun@samsung.com>
+If the host driver removed while card in the slot, the host will not
+power off card power correctly. This bug is produced because host
+eject flag set before the last mmc_set_ios callback, we should set the
+eject flag after power off.
+
+Signed-off-by: Micky Ching <micky_ching@realsil.com.cn>
 ---
- drivers/mmc/host/dw_mmc.h |    1 +
- 1 file changed, 1 insertion(+)
+ drivers/mmc/host/rtsx_pci_sdmmc.c |    3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
-index 6bf24ab..306451f 100644
---- a/drivers/mmc/host/dw_mmc.h
-+++ b/drivers/mmc/host/dw_mmc.h
-@@ -244,6 +244,7 @@ struct dw_mci_tuning_data {
-  * @prepare_command: handle CMD register extensions.
-  * @set_ios: handle bus specific extensions.
-  * @parse_dt: parse implementation specific device tree properties.
-+ * @execute_tuning: implementation specific tuning procedure.
-  *
-  * Provide controller implementation specific extensions. The usage of this
-  * data structure is fully optional and usage of each member in this structure
+diff --git a/drivers/mmc/host/rtsx_pci_sdmmc.c b/drivers/mmc/host/rtsx_pci_sdmmc.c
+index 375a880e..c9a7328 100644
+--- a/drivers/mmc/host/rtsx_pci_sdmmc.c
++++ b/drivers/mmc/host/rtsx_pci_sdmmc.c
+@@ -1328,7 +1328,6 @@ static int rtsx_pci_sdmmc_drv_remove(struct platform_device *pdev)
+ 	pcr->slots[RTSX_SD_CARD].p_dev = NULL;
+ 	pcr->slots[RTSX_SD_CARD].card_event = NULL;
+ 	mmc = host->mmc;
+-	host->eject = true;
+ 
+ 	mutex_lock(&host->host_mutex);
+ 	if (host->mrq) {
+@@ -1346,6 +1345,8 @@ static int rtsx_pci_sdmmc_drv_remove(struct platform_device *pdev)
+ 	mutex_unlock(&host->host_mutex);
+ 
+ 	mmc_remove_host(mmc);
++	host->eject = true;
++
+ 	mmc_free_host(mmc);
+ 
+ 	dev_dbg(&(pdev->dev),
 -- 
 1.7.9.5
-
