@@ -1,30 +1,172 @@
-From: "WEBMASTER" <13@oefa.gob.pe>
-Subject: system administrator
-Date: Thu, 17 Oct 2013 09:36:28 +0100
-Message-ID: <20131017084752.CD2651FB170E@mail.oefa.gob.pe>
-Reply-To: 647812717@qq.com
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH 5/7] mmc: sd_mmcif: Move clock handling into runtime PM callbacks
+Date: Thu, 17 Oct 2013 14:49:25 +0200
+Message-ID: <CAPDyKFqA-PQmnWH0nQmzGCdEbQ6uUXaOKf9S5KJrK0aaYH8Z-w@mail.gmail.com>
+References: <1380702651-13389-1-git-send-email-ulf.hansson@linaro.org>
+	<1380702651-13389-6-git-send-email-ulf.hansson@linaro.org>
+	<Pine.LNX.4.64.1310171248040.27369@axis700.grange>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail.oefa.gob.pe ([190.116.34.227]:46078 "EHLO mail.oefa.gob.pe"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754686Ab3JQM3I convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 17 Oct 2013 08:29:08 -0400
-Content-Description: Mail message body
+Received: from mail-ve0-f177.google.com ([209.85.128.177]:51190 "EHLO
+	mail-ve0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755148Ab3JQMt0 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 17 Oct 2013 08:49:26 -0400
+Received: by mail-ve0-f177.google.com with SMTP id oz11so953313veb.36
+        for <linux-mmc@vger.kernel.org>; Thu, 17 Oct 2013 05:49:25 -0700 (PDT)
+In-Reply-To: <Pine.LNX.4.64.1310171248040.27369@axis700.grange>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Recipients <13@oefa.gob.pe>
+To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>
 
-Dear user
-your email has exceeded 2GB, which is created by Webmaster, you are currently running at 2.30GB, you can not Send or receive new messages until you check your account.Complete the form to verify your account.
+On 17 October 2013 12:59, Guennadi Liakhovetski <g.liakhovetski@gmx.de> wrote:
+> On Wed, 2 Oct 2013, Ulf Hansson wrote:
+>
+>> Implement callbacks for runtime suspend|resume and leave the clock
+>> to be handled from there.
+>>
+>> The .set_ios function is still capable of using the interal registers
+>> to gate the clock when the frequency is zero, but the operations needed
+>> towards the clk API is now handled from the runtime callbacks.
+>>
+>> >From now on, CONFIG_PM_RUNTIME is required handle power save with full
+>> clock gating at request inactivity.
+>>
+>> Cc: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+>> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+>> ---
+>>  drivers/mmc/host/sh_mmcif.c |   47 ++++++++++++++++++++++++++-----------------
+>>  1 file changed, 29 insertions(+), 18 deletions(-)
+>>
+>> diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
+>> index f4532dc..e234856 100644
+>> --- a/drivers/mmc/host/sh_mmcif.c
+>> +++ b/drivers/mmc/host/sh_mmcif.c
+>> @@ -964,19 +964,6 @@ static void sh_mmcif_request(struct mmc_host *mmc, struct mmc_request *mrq)
+>>       sh_mmcif_start_cmd(host, mrq);
+>>  }
+>>
+>> -static int sh_mmcif_clk_update(struct sh_mmcif_host *host)
+>> -{
+>> -     int ret = clk_prepare_enable(host->hclk);
+>> -
+>> -     if (!ret) {
+>> -             host->clk = clk_get_rate(host->hclk);
+>> -             host->mmc->f_max = host->clk / 2;
+>> -             host->mmc->f_min = host->clk / 512;
+>> -     }
+>> -
+>> -     return ret;
+>> -}
+>> -
+>
+> This reverts effect of this commit:
+>
+> commit a6609267107ecc5598b79aa353036c1f57e7257e
+> Author: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+> Date:   Thu Apr 19 18:02:50 2012 +0200
+>
+>     mmc: sh_mmcif: re-read the clock frequency every time it is turned on
+>
+> Thanks
+> Guennadi
 
-Please complete the details below to confirm your account
+Thanks for your comment! I missed this, sorry.
 
-(1) E-mail:
-(2) Name:
-(3) Password:
-(4) Confirm Password:
+So we must make sure to handle the clk update while enabling the clock
+from the runtime callbacks as well. I will update the patch
+accordingly.
 
-thank you
-system administrator
+Kind regards
+Uffe
+
+>
+>>  static void sh_mmcif_set_power(struct sh_mmcif_host *host, struct mmc_ios *ios)
+>>  {
+>>       struct mmc_host *mmc = host->mmc;
+>> @@ -1021,7 +1008,6 @@ static void sh_mmcif_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+>>                       }
+>>               }
+>>               if (host->power) {
+>> -                     clk_disable_unprepare(host->hclk);
+>>                       host->power = false;
+>>                       if (ios->power_mode == MMC_POWER_OFF)
+>>                               sh_mmcif_set_power(host, ios);
+>> @@ -1032,7 +1018,6 @@ static void sh_mmcif_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+>>
+>>       if (ios->clock) {
+>>               if (!host->power) {
+>> -                     sh_mmcif_clk_update(host);
+>>                       host->power = true;
+>>                       sh_mmcif_sync_reset(host);
+>>               }
+>> @@ -1440,9 +1425,16 @@ static int sh_mmcif_probe(struct platform_device *pdev)
+>>               dev_err(&pdev->dev, "cannot get clock: %d\n", ret);
+>>               goto eofparse;
+>>       }
+>> -     ret = sh_mmcif_clk_update(host);
+>> -     if (ret < 0)
+>> +
+>> +     ret = clk_prepare_enable(host->hclk);
+>> +     if (ret) {
+>> +             dev_err(&pdev->dev, "cannot enable clock: %d\n", ret);
+>>               goto eclkupdate;
+>> +     }
+>> +
+>> +     host->clk = clk_get_rate(host->hclk);
+>> +     host->mmc->f_max = host->clk / 2;
+>> +     host->mmc->f_min = host->clk / 512;
+>>
+>>       INIT_DELAYED_WORK(&host->timeout_work, mmcif_timeout_work);
+>>
+>> @@ -1478,7 +1470,6 @@ static int sh_mmcif_probe(struct platform_device *pdev)
+>>       pm_runtime_set_active(&pdev->dev);
+>>       pm_runtime_enable(&pdev->dev);
+>>
+>> -     clk_disable_unprepare(host->hclk);
+>>       ret = mmc_add_host(mmc);
+>>       if (ret < 0)
+>>               goto emmcaddh;
+>> @@ -1568,6 +1559,24 @@ static int sh_mmcif_resume(struct device *dev)
+>>  }
+>>  #endif
+>>
+>> +#ifdef CONFIG_PM_RUNTIME
+>> +static int sh_mmcif_runtime_suspend(struct device *dev)
+>> +{
+>> +     struct sh_mmcif_host *host = dev_get_drvdata(dev);
+>> +
+>> +     clk_disable_unprepare(host->hclk);
+>> +     return 0;
+>> +}
+>> +
+>> +static int sh_mmcif_runtime_resume(struct device *dev)
+>> +{
+>> +     struct sh_mmcif_host *host = dev_get_drvdata(dev);
+>> +
+>> +     clk_prepare_enable(host->hclk);
+>> +     return 0;
+>> +}
+>> +#endif
+>> +
+>>  static const struct of_device_id mmcif_of_match[] = {
+>>       { .compatible = "renesas,sh-mmcif" },
+>>       { }
+>> @@ -1576,6 +1585,8 @@ MODULE_DEVICE_TABLE(of, mmcif_of_match);
+>>
+>>  static const struct dev_pm_ops sh_mmcif_dev_pm_ops = {
+>>       SET_SYSTEM_SLEEP_PM_OPS(sh_mmcif_suspend, sh_mmcif_resume)
+>> +     SET_RUNTIME_PM_OPS(sh_mmcif_runtime_suspend, sh_mmcif_runtime_resume,
+>> +                        NULL)
+>>  };
+>>
+>>  static struct platform_driver sh_mmcif_driver = {
+>> --
+>> 1.7.9.5
+>>
+>
+> ---
+> Guennadi Liakhovetski, Ph.D.
+> Freelance Open-Source Software Developer
+> http://www.open-technology.de/
