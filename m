@@ -1,82 +1,119 @@
 From: Mark Rutland <mark.rutland@arm.com>
-Subject: Re: [RESEND PATCH v2 6/6] mmc: sdhci-bcm-kona: Add basic use of
- clocks
-Date: Thu, 17 Oct 2013 15:13:09 +0100
-Message-ID: <20131017141309.GG24056@e106331-lin.cambridge.arm.com>
-References: <1381960030-1640-1-git-send-email-tim.kryger@linaro.org>
- <1381960030-1640-7-git-send-email-tim.kryger@linaro.org>
+Subject: Re: [PATCH 1/6] mmc: omap_hsmmc: start using generic non-removable
+ DT binding
+Date: Thu, 17 Oct 2013 16:25:53 +0100
+Message-ID: <20131017152553.GI24056@e106331-lin.cambridge.arm.com>
+References: <1381936707-10336-1-git-send-email-balajitk@ti.com>
+ <1381936707-10336-2-git-send-email-balajitk@ti.com>
+ <20131017083856.GA24056@e106331-lin.cambridge.arm.com>
+ <525FC1BC.9080207@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from cam-admin0.cambridge.arm.com ([217.140.96.50]:49284 "EHLO
+Received: from cam-admin0.cambridge.arm.com ([217.140.96.50]:50870 "EHLO
 	cam-admin0.cambridge.arm.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1755352Ab3JQONM (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 17 Oct 2013 10:13:12 -0400
+	by vger.kernel.org with ESMTP id S1757017Ab3JQP0B (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 17 Oct 2013 11:26:01 -0400
 Content-Disposition: inline
-In-Reply-To: <1381960030-1640-7-git-send-email-tim.kryger@linaro.org>
+In-Reply-To: <525FC1BC.9080207@ti.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Tim Kryger <tim.kryger@linaro.org>
-Cc: Christian Daudt <bcm@fixthebug.org>, "rob.herring@calxeda.com" <rob.herring@calxeda.com>, Pawel Moll <Pawel.Moll@arm.com>, Stephen Warren <swarren@wwwdotorg.org>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Daniel Lezcano <daniel.lezcano@linaro.org>, Thomas Gleixner <tglx@linutronix.de>, Chris Ball <cjb@laptop.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "patches@linaro.org" <patches@linaro.org>
+To: Balaji T K <balajitk@ti.com>
+Cc: "bcousson@baylibre.com" <bcousson@baylibre.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "cjb@laptop.org" <cjb@laptop.org>, "linux-omap@vger.kernel.org" <linux-omap@vger.kernel.org>, "uri.y@variscite.com" <uri.y@variscite.com>, Sekhar Nori <nsekhar@ti.com>
 
-On Wed, Oct 16, 2013 at 10:47:10PM +0100, Tim Kryger wrote:
-> Enable the external clock needed by the host controller during the
-> probe and disable it during the remove.
+On Thu, Oct 17, 2013 at 11:53:48AM +0100, Balaji T K wrote:
+> On Thursday 17 October 2013 02:08 PM, Mark Rutland wrote:
+> > On Wed, Oct 16, 2013 at 04:18:22PM +0100, Balaji T K wrote:
+> >> From: Sekhar Nori <nsekhar@ti.com>
+> >>
+> >> add generic "non-removable" binding support for omap_hsmmc
+> >>
+> >> Signed-off-by: Sekhar Nori <nsekhar@ti.com>
+> >> Signed-off-by: Balaji T K <balajitk@ti.com>
+> >> ---
+> >>   .../devicetree/bindings/mmc/ti-omap-hsmmc.txt      |    2 +-
+> >>   drivers/mmc/host/omap_hsmmc.c                      |    3 +++
+> >>   2 files changed, 4 insertions(+), 1 deletions(-)
+> >>
+> >> diff --git a/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt b/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
+> >> index 8c8908a..3b95719 100644
+> >> --- a/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
+> >> +++ b/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
+> >> @@ -17,7 +17,7 @@ Optional properties:
+> >>   ti,dual-volt: boolean, supports dual voltage cards
+> >>   <supply-name>-supply: phandle to the regulator device tree node
+> >>   "supply-name" examples are "vmmc", "vmmc_aux" etc
+> >> -ti,non-removable: non-removable slot (like eMMC)
+> >> +ti,non-removable: non-removable eMMC with always on vccq and configurable vcc
+> >
+> > Why this change?
+> >
+> Hi,
+> 
+> earlier ti,non-removable was used for all eMMC and SDIO card, now it will
+> be used only for eMMC with always on vccq and configurable vcc.
 
-This requires a biding document update.
-
-I note that the binding is already incomplete (it does not describe the
-interrupts or reg).
+Please expand the commit message to mention this. It wasn't clear why
+adding support for a property meant modifying the description of
+another.
 
 > 
-> Signed-off-by: Tim Kryger <tim.kryger@linaro.org>
-> Reviewed-by: Markus Mayer <markus.mayer@linaro.org>
-> Reviewed-by: Matt Porter <matt.porter@linaro.org>
-> ---
->  drivers/mmc/host/sdhci-bcm-kona.c | 30 ++++++++++++++++++++++++++++--
->  1 file changed, 28 insertions(+), 2 deletions(-)
+> > What do "vccq" and "vcc" correspond to? The regulators are called "vmmc"
+> > and "vmmc_aux"...
+> >
 > 
-> diff --git a/drivers/mmc/host/sdhci-bcm-kona.c b/drivers/mmc/host/sdhci-bcm-kona.c
-> index 85472d3..91db099 100644
-> --- a/drivers/mmc/host/sdhci-bcm-kona.c
-> +++ b/drivers/mmc/host/sdhci-bcm-kona.c
-> @@ -54,6 +54,7 @@
->  
->  struct sdhci_bcm_kona_dev {
->  	struct mutex	write_lock; /* protect back to back writes */
-> +	struct clk	*external_clk;
+> vccq and vcc are supply names of eMMC part
 
-Is this the only clock input the unit has?
+The binding has vmmc-supply and vmmc_aux-supply. How do {vmmc,vmmc_aux}
+and {vcc,vccq} relate? That should be clarified in the binding document,
+something like:
 
-Are there any other external resources the device needs (e.g. gpios,
-regulators)?
+- vmmc-supply: phandle of the regulator for the VCC input
+- vmmc_aux-supply: phandle of the regulator for the VCCQ input
 
->  };
->  
->  
-> @@ -252,11 +253,29 @@ static int sdhci_bcm_kona_probe(struct platform_device *pdev)
->  	mmc_of_parse(host->mmc);
->  
->  	if (!host->mmc->f_max) {
-> -		dev_err(&pdev->dev, "Missing max-freq for SDHCI cfg\n");
-> +		dev_err(dev, "Missing max-freq for SDHCI cfg\n");
+> 
+> > Why is no mention of "non-removable" added, given that it's added to the
+> > code?
+> 
+> Because this file makes a reference to mmc.txt and the core properties described
+> by mmc.txt are not added in ti-omap-hsmmc.txt
 
-This seems like an unrelated change.
+There is room for confusion here. While "non-removable" is a generic
+property, it would be good to contrast "non-removable" and
+"ti,non-removable" in the binding as they imply different things.
 
->  		ret = -ENXIO;
->  		goto err_pltfm_free;
->  	}
->  
-> +	/* Get and enable the external clock */
-> +	kona_dev->external_clk = devm_clk_get(dev, NULL);
-> +	if (IS_ERR(kona_dev->external_clk)) {
-> +		dev_err(dev, "Failed to get external clock\n");
-> +		ret = PTR_ERR(kona_dev->external_clk);
-> +		goto err_pltfm_free;
+> 
+> >
+> > Is one preferred over the other? That should be noted.
+> >
+> >>   ti,needs-special-reset: Requires a special softreset sequence
+> >>   ti,needs-special-hs-handling: HSMMC IP needs special setting for handling High Speed
+> >>   dmas: List of DMA specifiers with the controller specific format
+> >> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+> >> index 6ac63df..5992048 100644
+> >> --- a/drivers/mmc/host/omap_hsmmc.c
+> >> +++ b/drivers/mmc/host/omap_hsmmc.c
+> >> @@ -1738,6 +1738,9 @@ static struct omap_mmc_platform_data *of_get_hsmmc_pdata(struct device *dev)
+> >>   	pdata->slots[0].switch_pin = cd_gpio;
+> >>   	pdata->slots[0].gpio_wp = wp_gpio;
+> >>
+> >> +	if (of_find_property(np, "non-removable", NULL)) {
+> >> +		pdata->slots[0].nonremovable = true;
+> >> +	}
+> >
+> > This wasn't mentioned in the binding, and it seems to have different
+> > semantics to "ti,non-removable". Why is it different?
+> >
+> 
+> When ti,non-removable was added, Only OMAP platform that had eMMC was that on OMAP4
+> where power to eMMC cannot be switched off without sending CMD5 sleep command,
+> so no_regulator_off_init was needed to get it detected during boot.
+> 
+> Now start using generic non-removable for all removable cards which do not
+> have such limitation.
 
-This seems like a pretty clear breakage of existing DTBs.
-
-Why?
+OK. I think this would be much clearer with something in the binding
+contrasting the two properties.
 
 Thanks,
 Mark.
