@@ -1,37 +1,82 @@
 From: Mark Rutland <mark.rutland@arm.com>
-Subject: Re: [RESEND PATCH v2 5/6] ARM: dts: Specify clocks for timer on
- bcm11351
-Date: Thu, 17 Oct 2013 15:06:59 +0100
-Message-ID: <20131017140659.GF24056@e106331-lin.cambridge.arm.com>
+Subject: Re: [RESEND PATCH v2 6/6] mmc: sdhci-bcm-kona: Add basic use of
+ clocks
+Date: Thu, 17 Oct 2013 15:13:09 +0100
+Message-ID: <20131017141309.GG24056@e106331-lin.cambridge.arm.com>
 References: <1381960030-1640-1-git-send-email-tim.kryger@linaro.org>
- <1381960030-1640-6-git-send-email-tim.kryger@linaro.org>
+ <1381960030-1640-7-git-send-email-tim.kryger@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from cam-admin0.cambridge.arm.com ([217.140.96.50]:49172 "EHLO
+Received: from cam-admin0.cambridge.arm.com ([217.140.96.50]:49284 "EHLO
 	cam-admin0.cambridge.arm.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1755352Ab3JQOHB (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 17 Oct 2013 10:07:01 -0400
+	by vger.kernel.org with ESMTP id S1755352Ab3JQONM (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 17 Oct 2013 10:13:12 -0400
 Content-Disposition: inline
-In-Reply-To: <1381960030-1640-6-git-send-email-tim.kryger@linaro.org>
+In-Reply-To: <1381960030-1640-7-git-send-email-tim.kryger@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Tim Kryger <tim.kryger@linaro.org>
 Cc: Christian Daudt <bcm@fixthebug.org>, "rob.herring@calxeda.com" <rob.herring@calxeda.com>, Pawel Moll <Pawel.Moll@arm.com>, Stephen Warren <swarren@wwwdotorg.org>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Daniel Lezcano <daniel.lezcano@linaro.org>, Thomas Gleixner <tglx@linutronix.de>, Chris Ball <cjb@laptop.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "patches@linaro.org" <patches@linaro.org>
 
-> diff --git a/arch/arm/boot/dts/bcm11351.dtsi b/arch/arm/boot/dts/bcm11351.dtsi
-> index 193659c..39c1395 100644
-> --- a/arch/arm/boot/dts/bcm11351.dtsi
-> +++ b/arch/arm/boot/dts/bcm11351.dtsi
-> @@ -95,7 +95,7 @@
->  		compatible = "brcm,kona-timer";
->  		reg = <0x35006000 0x1000>;
->  		interrupts = <GIC_SPI 7 IRQ_TYPE_LEVEL_HIGH>;
-> -		clock-frequency = <32768>;
-> +		clocks = <&hub_timer_clk>;
+On Wed, Oct 16, 2013 at 10:47:10PM +0100, Tim Kryger wrote:
+> Enable the external clock needed by the host controller during the
+> probe and disable it during the remove.
 
-This should probably be after the code change that enables support for a
-clocks property.
+This requires a biding document update.
+
+I note that the binding is already incomplete (it does not describe the
+interrupts or reg).
+
+> 
+> Signed-off-by: Tim Kryger <tim.kryger@linaro.org>
+> Reviewed-by: Markus Mayer <markus.mayer@linaro.org>
+> Reviewed-by: Matt Porter <matt.porter@linaro.org>
+> ---
+>  drivers/mmc/host/sdhci-bcm-kona.c | 30 ++++++++++++++++++++++++++++--
+>  1 file changed, 28 insertions(+), 2 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci-bcm-kona.c b/drivers/mmc/host/sdhci-bcm-kona.c
+> index 85472d3..91db099 100644
+> --- a/drivers/mmc/host/sdhci-bcm-kona.c
+> +++ b/drivers/mmc/host/sdhci-bcm-kona.c
+> @@ -54,6 +54,7 @@
+>  
+>  struct sdhci_bcm_kona_dev {
+>  	struct mutex	write_lock; /* protect back to back writes */
+> +	struct clk	*external_clk;
+
+Is this the only clock input the unit has?
+
+Are there any other external resources the device needs (e.g. gpios,
+regulators)?
+
+>  };
+>  
+>  
+> @@ -252,11 +253,29 @@ static int sdhci_bcm_kona_probe(struct platform_device *pdev)
+>  	mmc_of_parse(host->mmc);
+>  
+>  	if (!host->mmc->f_max) {
+> -		dev_err(&pdev->dev, "Missing max-freq for SDHCI cfg\n");
+> +		dev_err(dev, "Missing max-freq for SDHCI cfg\n");
+
+This seems like an unrelated change.
+
+>  		ret = -ENXIO;
+>  		goto err_pltfm_free;
+>  	}
+>  
+> +	/* Get and enable the external clock */
+> +	kona_dev->external_clk = devm_clk_get(dev, NULL);
+> +	if (IS_ERR(kona_dev->external_clk)) {
+> +		dev_err(dev, "Failed to get external clock\n");
+> +		ret = PTR_ERR(kona_dev->external_clk);
+> +		goto err_pltfm_free;
+
+This seems like a pretty clear breakage of existing DTBs.
+
+Why?
 
 Thanks,
 Mark.
