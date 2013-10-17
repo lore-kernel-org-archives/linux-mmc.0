@@ -1,75 +1,75 @@
-From: Mark Rutland <mark.rutland@arm.com>
-Subject: Re: [PATCH 1/6] mmc: omap_hsmmc: start using generic non-removable
- DT binding
-Date: Thu, 17 Oct 2013 09:38:56 +0100
-Message-ID: <20131017083856.GA24056@e106331-lin.cambridge.arm.com>
-References: <1381936707-10336-1-git-send-email-balajitk@ti.com>
- <1381936707-10336-2-git-send-email-balajitk@ti.com>
+From: Alexandre Belloni <alexandre.belloni@free-electrons.com>
+Subject: Re: [PATCHv2] mmc: atmel-mci: add vmmc-supply support
+Date: Thu, 17 Oct 2013 10:59:20 +0200
+Message-ID: <525FA6E8.5030303@free-electrons.com>
+References: <1381961999-8187-1-git-send-email-alexandre.belloni@free-electrons.com> <CAPDyKFpWq+cT5nrqifrt+bNR3acT1rpdyxgfjY-63MCfEC18DA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-omap-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <1381936707-10336-2-git-send-email-balajitk@ti.com>
-Sender: linux-omap-owner@vger.kernel.org
-To: Balaji T K <balajitk@ti.com>
-Cc: "bcousson@baylibre.com" <bcousson@baylibre.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "cjb@laptop.org" <cjb@laptop.org>, "linux-omap@vger.kernel.org" <linux-omap@vger.kernel.org>, "uri.y@variscite.com" <uri.y@variscite.com>, Sekhar Nori <nsekhar@ti.com>
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from top.free-electrons.com ([176.31.233.9]:49314 "EHLO
+	mail.free-electrons.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1752567Ab3JQI7V (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 17 Oct 2013 04:59:21 -0400
+In-Reply-To: <CAPDyKFpWq+cT5nrqifrt+bNR3acT1rpdyxgfjY-63MCfEC18DA@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Ludovic Desroches <ludovic.desroches@atmel.com>, Chris Ball <cjb@laptop.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-On Wed, Oct 16, 2013 at 04:18:22PM +0100, Balaji T K wrote:
-> From: Sekhar Nori <nsekhar@ti.com>
-> 
-> add generic "non-removable" binding support for omap_hsmmc
-> 
-> Signed-off-by: Sekhar Nori <nsekhar@ti.com>
-> Signed-off-by: Balaji T K <balajitk@ti.com>
-> ---
->  .../devicetree/bindings/mmc/ti-omap-hsmmc.txt      |    2 +-
->  drivers/mmc/host/omap_hsmmc.c                      |    3 +++
->  2 files changed, 4 insertions(+), 1 deletions(-)
-> 
-> diff --git a/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt b/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
-> index 8c8908a..3b95719 100644
-> --- a/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
-> +++ b/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
-> @@ -17,7 +17,7 @@ Optional properties:
->  ti,dual-volt: boolean, supports dual voltage cards
->  <supply-name>-supply: phandle to the regulator device tree node
->  "supply-name" examples are "vmmc", "vmmc_aux" etc
-> -ti,non-removable: non-removable slot (like eMMC)
-> +ti,non-removable: non-removable eMMC with always on vccq and configurable vcc
+On 17/10/2013 10:34, Ulf Hansson wrote:
+> On 17 October 2013 00:19, Alexandre Belloni
+> <alexandre.belloni@free-electrons.com> wrote:
+>> Other MMC hosts handle a regulator named vmmc-supply that allows to power the
+>> MMC card or SDIO device before communicating on the bus.
+>>
+>> Signed-off-by: Alexandre Belloni <alexandre.belloni@free-electrons.com>
+>> ---
+>>
+>> Changes in v2:
+>>  - use mmc_regulator_get_supply instead of devm_regulator_get
+>>
+>>  drivers/mmc/host/atmel-mci.c | 9 +++++++++
+>>  1 file changed, 9 insertions(+)
+>>
+>> diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
+>> index 69e438e..4ea5333 100644
+>> --- a/drivers/mmc/host/atmel-mci.c
+>> +++ b/drivers/mmc/host/atmel-mci.c
+>> @@ -23,6 +23,7 @@
+>>  #include <linux/of_device.h>
+>>  #include <linux/of_gpio.h>
+>>  #include <linux/platform_device.h>
+>> +#include <linux/regulator/consumer.h>
+>>  #include <linux/scatterlist.h>
+>>  #include <linux/seq_file.h>
+>>  #include <linux/slab.h>
+>> @@ -2198,6 +2199,14 @@ static int __init atmci_init_slot(struct atmel_mci *host,
+>>         host->slot[id] = slot;
+>>         mmc_add_host(mmc);
+>>
+>> +       mmc_regulator_get_supply(mmc);
+>> +       if (!IS_ERR(mmc->supply.vmmc)) {
+>> +               int ret = regulator_enable(mmc->supply.vmmc);
+> You should not enable the regulator here, instead handle that from the
+> .set_ios function. This complete code chunk must also be moved prior
+> to mmc_add_host above.
 
-Why this change?
+Right, I was wondering about that. I actually had a version where it was
+before mmc_add_host
+>
+> When enabling/disabling the regulator from the .set_ios, I suppose you
+> want to use mmc_regulator_set_ocr API instead.
 
-What do "vccq" and "vcc" correspond to? The regulators are called "vmmc"
-and "vmmc_aux"...
+Oh right, I pretty new to the mmc subsystem and I was probably to tired
+to find that one yesterday. I actually looked for regulator_enable in
+mmc/core/core.c and didn't see it ...
 
-Why is no mention of "non-removable" added, given that it's added to the
-code?
+Thank you for your prompt reviews.
 
-Is one preferred over the other? That should be noted.
 
->  ti,needs-special-reset: Requires a special softreset sequence
->  ti,needs-special-hs-handling: HSMMC IP needs special setting for handling High Speed
->  dmas: List of DMA specifiers with the controller specific format
-> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-> index 6ac63df..5992048 100644
-> --- a/drivers/mmc/host/omap_hsmmc.c
-> +++ b/drivers/mmc/host/omap_hsmmc.c
-> @@ -1738,6 +1738,9 @@ static struct omap_mmc_platform_data *of_get_hsmmc_pdata(struct device *dev)
->  	pdata->slots[0].switch_pin = cd_gpio;
->  	pdata->slots[0].gpio_wp = wp_gpio;
->  
-> +	if (of_find_property(np, "non-removable", NULL)) {
-> +		pdata->slots[0].nonremovable = true;
-> +	}
-
-This wasn't mentioned in the binding, and it seems to have different
-semantics to "ti,non-removable". Why is it different?
-
->  	if (of_find_property(np, "ti,non-removable", NULL)) {
->  		pdata->slots[0].nonremovable = true;
->  		pdata->slots[0].no_regulator_off_init = true;
-
-Cheers,
-Mark.
+-- 
+Alexandre Belloni, Free Electrons
+Embedded Linux, Kernel and Android engineering
+http://free-electrons.com
 
