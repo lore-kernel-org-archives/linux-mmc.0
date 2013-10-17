@@ -1,50 +1,100 @@
-From: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
-Subject: Re: [RESEND PATCH v2 0/6] Update Kona drivers to use clocks
-Date: Thu, 17 Oct 2013 14:47:01 +0100
-Message-ID: <20131017134701.GC24056@e106331-lin.cambridge.arm.com>
+From: Mark Rutland <mark.rutland@arm.com>
+Subject: Re: [RESEND PATCH v2 2/6] ARM: dts: Specify clocks for UARTs on
+ bcm11351
+Date: Thu, 17 Oct 2013 14:56:02 +0100
+Message-ID: <20131017135602.GD24056@e106331-lin.cambridge.arm.com>
 References: <1381960030-1640-1-git-send-email-tim.kryger@linaro.org>
+ <1381960030-1640-3-git-send-email-tim.kryger@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from cam-admin0.cambridge.arm.com ([217.140.96.50]:48982 "EHLO
+	cam-admin0.cambridge.arm.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1755281Ab3JQN4H (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 17 Oct 2013 09:56:07 -0400
 Content-Disposition: inline
-In-Reply-To: <1381960030-1640-1-git-send-email-tim.kryger-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Tim Kryger <tim.kryger-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Christian Daudt <bcm-xK7y4jjYLqYh9ZMKESR00Q@public.gmane.org>, "rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org" <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Pawel Moll <Pawel.Moll-5wv7dgnIgG8@public.gmane.org>, Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>, Ian Campbell <ijc+devicetree-KcIKpvwj1kUDXYZnReoRVg@public.gmane.org>, Daniel Lezcano <daniel.lezcano-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "patches-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <patches-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+In-Reply-To: <1381960030-1640-3-git-send-email-tim.kryger@linaro.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Tim Kryger <tim.kryger@linaro.org>
+Cc: Christian Daudt <bcm@fixthebug.org>, "rob.herring@calxeda.com" <rob.herring@calxeda.com>, Pawel Moll <Pawel.Moll@arm.com>, Stephen Warren <swarren@wwwdotorg.org>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Daniel Lezcano <daniel.lezcano@linaro.org>, Thomas Gleixner <tglx@linutronix.de>, Chris Ball <cjb@laptop.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "patches@linaro.org" <patches@linaro.org>
 
-On Wed, Oct 16, 2013 at 10:47:04PM +0100, Tim Kryger wrote:
-> This series declares the clocks present on bcm11351 (aka bcm281xx) SoCs
-> to be fixed at the rates configured by development bootloaders and then
-> updates the Kona drivers to make use of clock calls where appropriate.
-> 
-> This patch series depends on the following three commits being present:
-> 
-> https://lkml.org/lkml/2013/9/18/409
-> https://lkml.org/lkml/2013/9/20/305
-> http://www.spinics.net/lists/arm-kernel/msg274973.html
-> 
-> Changes in v2:
->   - Renamed bsc4_clk to pmu_bsc_clk
-> 
-> Tim Kryger (6):
->   ARM: dts: Declare clocks as fixed on bcm11351
->   ARM: dts: Specify clocks for UARTs on bcm11351
->   ARM: dts: Specify clocks for SDHCIs on bcm11351
->   clocksource: kona: Add basic use of external clock
->   ARM: dts: Specify clocks for timer on bcm11351
->   mmc: sdhci-bcm-kona: Add basic use of clocks
-> 
->  arch/arm/boot/dts/bcm11351.dtsi      | 111 +++++++++++++++++++++++++++++++++--
->  drivers/clocksource/bcm_kona_timer.c |  14 ++++-
->  drivers/mmc/host/sdhci-bcm-kona.c    |  30 +++++++++-
+On Wed, Oct 16, 2013 at 10:47:06PM +0100, Tim Kryger wrote:
+> Rather than declaring the frequency of the external clock, specify the
+> label of the clock such that the driver may determine the frequency on
+> its own.
 
-This requires a description in the binding documents, so we can figure
-out which clocks we need to describe, and how to describe them.
+Nit: we're not specifying the label of the clock. Clocks are represented
+py a phand+args pair, and the important part is that we're specifying
+the clock itself.
+
+How about something like:
+
+---->8----
+Currently the rate of the external clock input to "snps,dw-apb-uart"
+devices is described by a clock-frequency property rather than by
+reference to the clock itself.
+
+This patch changes the "snps,dw-apb-uart" entries in bcm11351.dtsi to
+refer to the parent clock directly, following the common clock bindings.
+---->8----
+
+Also, this should probably be moved after the driver change, so as to
+not be unbootable temporarily.
 
 Thanks,
 Mark.
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+> 
+> Signed-off-by: Tim Kryger <tim.kryger@linaro.org>
+> Reviewed-by: Markus Mayer <markus.mayer@linaro.org>
+> Reviewed-by: Matt Porter <matt.porter@linaro.org>
+> ---
+>  arch/arm/boot/dts/bcm11351.dtsi | 8 ++++----
+>  1 file changed, 4 insertions(+), 4 deletions(-)
+> 
+> diff --git a/arch/arm/boot/dts/bcm11351.dtsi b/arch/arm/boot/dts/bcm11351.dtsi
+> index c6464fb..ce65367 100644
+> --- a/arch/arm/boot/dts/bcm11351.dtsi
+> +++ b/arch/arm/boot/dts/bcm11351.dtsi
+> @@ -43,7 +43,7 @@
+>  		compatible = "brcm,bcm11351-dw-apb-uart", "snps,dw-apb-uart";
+>  		status = "disabled";
+>  		reg = <0x3e000000 0x1000>;
+> -		clock-frequency = <13000000>;
+> +		clocks = <&uartb_clk>;
+>  		interrupts = <GIC_SPI 67 IRQ_TYPE_LEVEL_HIGH>;
+>  		reg-shift = <2>;
+>  		reg-io-width = <4>;
+> @@ -53,7 +53,7 @@
+>  		compatible = "brcm,bcm11351-dw-apb-uart", "snps,dw-apb-uart";
+>  		status = "disabled";
+>  		reg = <0x3e001000 0x1000>;
+> -		clock-frequency = <13000000>;
+> +		clocks = <&uartb2_clk>;
+>  		interrupts = <GIC_SPI 66 IRQ_TYPE_LEVEL_HIGH>;
+>  		reg-shift = <2>;
+>  		reg-io-width = <4>;
+> @@ -63,7 +63,7 @@
+>  		compatible = "brcm,bcm11351-dw-apb-uart", "snps,dw-apb-uart";
+>  		status = "disabled";
+>  		reg = <0x3e002000 0x1000>;
+> -		clock-frequency = <13000000>;
+> +		clocks = <&uartb3_clk>;
+>  		interrupts = <GIC_SPI 65 IRQ_TYPE_LEVEL_HIGH>;
+>  		reg-shift = <2>;
+>  		reg-io-width = <4>;
+> @@ -73,7 +73,7 @@
+>  		compatible = "brcm,bcm11351-dw-apb-uart", "snps,dw-apb-uart";
+>  		status = "disabled";
+>  		reg = <0x3e003000 0x1000>;
+> -		clock-frequency = <13000000>;
+> +		clocks = <&uartb4_clk>;
+>  		interrupts = <GIC_SPI 64 IRQ_TYPE_LEVEL_HIGH>;
+>  		reg-shift = <2>;
+>  		reg-io-width = <4>;
+> -- 
+> 1.8.0.1
+> 
+> 
+> 
