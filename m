@@ -1,96 +1,144 @@
-From: <dinguyen@altera.com>
-Subject: [PATCH 2/4] arm: dts: Add a system manager compatible property
-Date: Wed, 16 Oct 2013 19:32:39 -0500
-Message-ID: <1381969961-12679-3-git-send-email-dinguyen@altera.com>
-References: <1381969961-12679-1-git-send-email-dinguyen@altera.com>
+From: <gregkh@linuxfoundation.org>
+Subject: patch "MMC: convert bus code to use dev_groups" added to driver-core tree
+Date: Wed, 16 Oct 2013 18:39:17 -0700
+Message-ID: <13819739571466@kroah.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=ASCII
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-db9lp0253.outbound.messaging.microsoft.com ([213.199.154.253]:19540
-	"EHLO db9outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1760735Ab3JQAdT (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Oct 2013 20:33:19 -0400
-In-Reply-To: <1381969961-12679-1-git-send-email-dinguyen@altera.com>
+Received: from mail.linuxfoundation.org ([140.211.169.12]:38655 "EHLO
+	mail.linuxfoundation.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1760887Ab3JQBjV (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Oct 2013 21:39:21 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: dinh.linux@gmail.com
-Cc: Dinh Nguyen <dinguyen@altera.com>, Pavel Machek <pavel@denx.de>, Arnd Bergmann <arnd@arndb.de>, Mike Turquette <mturquette@linaro.org>, Olof Johansson <olof@lixom.net>, Rob Herring <rob.herring@calxeda.com>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Stephen Warren <swarren@wwwdotorg.org>, Ian Campbell <ian.campbell@citrix.com>, Chris Ball <cjb@laptop.org>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+To: gregkh@linuxfoundation.org, cjb@laptop.org, kdorfman@codeaurora.org, linux-mmc@vger.kernel.org, tgih.jun@samsung.com, ulf.hansson@linaro.org
 
-From: Dinh Nguyen <dinguyen@altera.com>
 
-The "altr,sysmgr-sdmmc-sdr" compatible property is used for the SOCFPGA
-clk-sysmgr driver. This property represents the register inside the
-system manager that controls the clock phase of the SD/MMC driver.
+This is a note to let you know that I've just added the patch titled
 
-Signed-off-by: Dinh Nguyen <dinguyen@altera.com>
-Cc: Pavel Machek <pavel@denx.de>
-CC: Arnd Bergmann <arnd@arndb.de>
-Cc: Mike Turquette <mturquette@linaro.org>
-CC: Olof Johansson <olof@lixom.net>
-Cc: Rob Herring <rob.herring@calxeda.com>
-Cc: Pawel Moll <pawel.moll@arm.com>
-Cc: Mark Rutland <mark.rutland@arm.com>
-Cc: Stephen Warren <swarren@wwwdotorg.org>
-Cc: Ian Campbell <ian.campbell@citrix.com>
+    MMC: convert bus code to use dev_groups
+
+to my driver-core git tree which can be found at
+    git://git.kernel.org/pub/scm/linux/kernel/git/gregkh/driver-core.git
+in the driver-core-next branch.
+
+The patch will show up in the next release of the linux-next tree
+(usually sometime within the next 24 hours during the week.)
+
+The patch will also be merged in the next major kernel release
+during the merge window.
+
+If you have any questions about this process, please let me know.
+
+
+>From f24fc57b24444fe31fbddb5716195bb8bbc70b58 Mon Sep 17 00:00:00 2001
+From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Date: Sun, 6 Oct 2013 23:55:43 -0700
+Subject: MMC: convert bus code to use dev_groups
+
+The dev_attrs field of struct bus_type is going away soon, dev_groups
+should be used instead.  This converts the MMC bus code to use the
+correct field.
+
 Cc: Chris Ball <cjb@laptop.org>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Konstantin Dorfman <kdorfman@codeaurora.org>
 Cc: Seungwon Jeon <tgih.jun@samsung.com>
-Cc: devicetree@vger.kernel.org
-Cc: linux-mmc@vger.kernel.org
-CC: linux-arm-kernel@lists.infradead.org
+Cc: <linux-mmc@vger.kernel.org>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
 ---
- .../bindings/arm/altera/socfpga-system.txt         |   10 ++++++++++
- arch/arm/boot/dts/socfpga.dtsi                     |   12 ++++++++++--
- 2 files changed, 20 insertions(+), 2 deletions(-)
+ drivers/mmc/core/bus.c      | 12 +++++++-----
+ drivers/mmc/core/sdio_bus.c | 21 ++++++++++++---------
+ 2 files changed, 19 insertions(+), 14 deletions(-)
 
-diff --git a/Documentation/devicetree/bindings/arm/altera/socfpga-system.txt b/Documentation/devicetree/bindings/arm/altera/socfpga-system.txt
-index f4d04a0..7a6c7ed 100644
---- a/Documentation/devicetree/bindings/arm/altera/socfpga-system.txt
-+++ b/Documentation/devicetree/bindings/arm/altera/socfpga-system.txt
-@@ -5,9 +5,19 @@ Required properties:
- - reg : Should contain 1 register ranges(address and length)
- - cpu1-start-addr : CPU1 start address in hex.
+diff --git a/drivers/mmc/core/bus.c b/drivers/mmc/core/bus.c
+index 704bf66f..3e227bd9 100644
+--- a/drivers/mmc/core/bus.c
++++ b/drivers/mmc/core/bus.c
+@@ -27,7 +27,7 @@
  
-+Optional properties:
-+- compatible = "altr,sysmgr-sdmmc-sdr". This compatible property is used
-+to represent the clock phase settings for the SD/MMC IP.
-+
- Example:
- 	 sysmgr@ffd08000 {
- 		compatible = "altr,sys-mgr";
- 		reg = <0xffd08000 0x1000>;
- 		cpu1-start-addr = <0xffd080c4>;
-+
-+		sysmgr_sdr_mmc: sysmgr_sdr_mmc {
-+			#clock-cells = <0>;
-+			compatible = "altr,sysmgr-sdmmc-sdr";
-+			reg = <0x108 1>;
-+		};
- 	};
-diff --git a/arch/arm/boot/dts/socfpga.dtsi b/arch/arm/boot/dts/socfpga.dtsi
-index e273fa9..0662d04 100644
---- a/arch/arm/boot/dts/socfpga.dtsi
-+++ b/arch/arm/boot/dts/socfpga.dtsi
-@@ -521,8 +521,16 @@
- 			};
+ #define to_mmc_driver(d)	container_of(d, struct mmc_driver, drv)
  
- 		sysmgr@ffd08000 {
--				compatible = "altr,sys-mgr";
--				reg = <0xffd08000 0x4000>;
-+			#address-cells = <1>;
-+			#size-cells = <1>;
-+			compatible = "altr,sys-mgr";
-+			reg = <0xffd08000 0x4000>;
-+
-+			sysmgr_sdr_mmc: sysmgr_sdr_mmc {
-+				#clock-cells = <0>;
-+				compatible = "altr,sysmgr-sdmmc-sdr";
-+				reg = <0x108 1>;
- 			};
-+		};
- 	};
+-static ssize_t mmc_type_show(struct device *dev,
++static ssize_t type_show(struct device *dev,
+ 	struct device_attribute *attr, char *buf)
+ {
+ 	struct mmc_card *card = mmc_dev_to_card(dev);
+@@ -45,11 +45,13 @@ static ssize_t mmc_type_show(struct device *dev,
+ 		return -EFAULT;
+ 	}
+ }
++static DEVICE_ATTR_RO(type);
+ 
+-static struct device_attribute mmc_dev_attrs[] = {
+-	__ATTR(type, S_IRUGO, mmc_type_show, NULL),
+-	__ATTR_NULL,
++static struct attribute *mmc_dev_attrs[] = {
++	&dev_attr_type.attr,
++	NULL,
  };
++ATTRIBUTE_GROUPS(mmc_dev);
+ 
+ /*
+  * This currently matches any MMC driver to any MMC card - drivers
+@@ -218,7 +220,7 @@ static const struct dev_pm_ops mmc_bus_pm_ops = {
+ 
+ static struct bus_type mmc_bus_type = {
+ 	.name		= "mmc",
+-	.dev_attrs	= mmc_dev_attrs,
++	.dev_groups	= mmc_dev_groups,
+ 	.match		= mmc_bus_match,
+ 	.uevent		= mmc_bus_uevent,
+ 	.probe		= mmc_bus_probe,
+diff --git a/drivers/mmc/core/sdio_bus.c b/drivers/mmc/core/sdio_bus.c
+index 6d67492a..ef895656 100644
+--- a/drivers/mmc/core/sdio_bus.c
++++ b/drivers/mmc/core/sdio_bus.c
+@@ -34,7 +34,8 @@ field##_show(struct device *dev, struct device_attribute *attr, char *buf)				\
+ 									\
+ 	func = dev_to_sdio_func (dev);					\
+ 	return sprintf (buf, format_string, func->field);		\
+-}
++}									\
++static DEVICE_ATTR_RO(field)
+ 
+ sdio_config_attr(class, "0x%02x\n");
+ sdio_config_attr(vendor, "0x%04x\n");
+@@ -47,14 +48,16 @@ static ssize_t modalias_show(struct device *dev, struct device_attribute *attr,
+ 	return sprintf(buf, "sdio:c%02Xv%04Xd%04X\n",
+ 			func->class, func->vendor, func->device);
+ }
+-
+-static struct device_attribute sdio_dev_attrs[] = {
+-	__ATTR_RO(class),
+-	__ATTR_RO(vendor),
+-	__ATTR_RO(device),
+-	__ATTR_RO(modalias),
+-	__ATTR_NULL,
++static DEVICE_ATTR_RO(modalias);
++
++static struct attribute *sdio_dev_attrs[] = {
++	&dev_attr_class.attr,
++	&dev_attr_vendor.attr,
++	&dev_attr_device.attr,
++	&dev_attr_modalias.attr,
++	NULL,
+ };
++ATTRIBUTE_GROUPS(sdio_dev);
+ 
+ static const struct sdio_device_id *sdio_match_one(struct sdio_func *func,
+ 	const struct sdio_device_id *id)
+@@ -225,7 +228,7 @@ static const struct dev_pm_ops sdio_bus_pm_ops = {
+ 
+ static struct bus_type sdio_bus_type = {
+ 	.name		= "sdio",
+-	.dev_attrs	= sdio_dev_attrs,
++	.dev_groups	= sdio_dev_groups,
+ 	.match		= sdio_bus_match,
+ 	.uevent		= sdio_bus_uevent,
+ 	.probe		= sdio_bus_probe,
 -- 
-1.7.9.5
+1.8.4.3.gca3854a
 
 
