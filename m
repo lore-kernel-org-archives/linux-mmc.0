@@ -1,42 +1,24 @@
-From: Axel Lin <axel.lin@ingics.com>
-Subject: [PATCH] mmc: wmt-sdmmc: Use GFP_KERNEL instead of hard-coded value
-Date: Fri, 18 Oct 2013 11:53:07 +0800
-Message-ID: <1382068387.21520.1.camel@phoenix>
+From: "ben.cjohn@yahoo.com.hk" <serviere@agroparistech.fr>
+Subject: REMINDER
+Date: Fri, 18 Oct 2013 07:43:43 +0200 (CEST)
+Message-ID: <353820348.376980.1382075023571.JavaMail.zimbra@agroparistech.fr>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=ISO-8859-15
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pa0-f54.google.com ([209.85.220.54]:55926 "EHLO
-	mail-pa0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755131Ab3JRDxP (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 17 Oct 2013 23:53:15 -0400
-Received: by mail-pa0-f54.google.com with SMTP id kx10so3863294pab.41
-        for <linux-mmc@vger.kernel.org>; Thu, 17 Oct 2013 20:53:14 -0700 (PDT)
+Received: from mx1.agroparistech.fr ([193.54.111.4]:46237 "EHLO
+	mx1.agroparistech.fr" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750949Ab3JRF5X (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 18 Oct 2013 01:57:23 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: Tony Prisk <linux@prisktech.co.nz>, linux-mmc@vger.kernel.org
 
-Signed-off-by: Axel Lin <axel.lin@ingics.com>
----
- drivers/mmc/host/wmt-sdmmc.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+Dear beneficiary,
 
-diff --git a/drivers/mmc/host/wmt-sdmmc.c b/drivers/mmc/host/wmt-sdmmc.c
-index 34231d5..3605c37 100644
---- a/drivers/mmc/host/wmt-sdmmc.c
-+++ b/drivers/mmc/host/wmt-sdmmc.c
-@@ -852,7 +852,7 @@ static int wmt_mci_probe(struct platform_device *pdev)
- 	priv->dma_desc_buffer = dma_alloc_coherent(&pdev->dev,
- 						   mmc->max_blk_count * 16,
- 						   &priv->dma_desc_device_addr,
--						   208);
-+						   GFP_KERNEL);
- 	if (!priv->dma_desc_buffer) {
- 		dev_err(&pdev->dev, "DMA alloc fail\n");
- 		ret = -EPERM;
--- 
-1.8.1.2
+This is to re-notify you of the $300,000.00 USD that was deposited
+here in the western union office in your name is available for pickup.
+Contact us via email for your M.T.C.N Numbers.
 
-
-
+Contact Person:Mr. ben c john
+Email: eric.john28@yahoo.com.hk
+Contact Phone : +44 7024043572
