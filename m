@@ -1,43 +1,214 @@
-From: Dong Aisheng <b29396@freescale.com>
-Subject: [PATCH v2 3/8] mmc: sdhci: report error once the maximum tuning loops exhausted or timeout
-Date: Fri, 18 Oct 2013 18:54:16 +0800
-Message-ID: <1382093661-4074-4-git-send-email-b29396@freescale.com>
+From: Shawn Guo <shawn.guo@linaro.org>
+Subject: Re: [PATCH v2 1/8] mmc: sdhci-esdhc-imx: add std tuning support for
+ mx6sl
+Date: Fri, 18 Oct 2013 19:33:50 +0800
+Message-ID: <20131018113348.GC6043@S2101-09.ap.freescale.net>
 References: <1382093661-4074-1-git-send-email-b29396@freescale.com>
+ <1382093661-4074-2-git-send-email-b29396@freescale.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset="us-ascii"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-db9lp0251.outbound.messaging.microsoft.com ([213.199.154.251]:7411
-	"EHLO db9outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752956Ab3JRLL3 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 18 Oct 2013 07:11:29 -0400
-In-Reply-To: <1382093661-4074-1-git-send-email-b29396@freescale.com>
+Received: from va3ehsobe003.messaging.microsoft.com ([216.32.180.13]:36459
+	"EHLO va3outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752951Ab3JRLdo (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 18 Oct 2013 07:33:44 -0400
+Content-Disposition: inline
+In-Reply-To: <1382093661-4074-2-git-send-email-b29396@freescale.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: linux-arm-kernel@lists.infradead.org, cjb@laptop.org, shawn.guo@linaro.org, s.hauer@pengutronix.de, b29396@freescale.com, wsa@the-dreams.de
+To: Dong Aisheng <b29396@freescale.com>
+Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, cjb@laptop.org, s.hauer@pengutronix.de, wsa@the-dreams.de
 
-The original code missed to report an error when the maximum tuning loops exhausted
-or timeout, it will cause the upper layer to wrongly think the tuning process
-is passed.
+On Fri, Oct 18, 2013 at 06:54:14PM +0800, Dong Aisheng wrote:
+> The mx6sl supports standard sdhci tuning, then esdhc_executing_tuning
+> is only needed for mx6q/dl. We introduce is_imx6_usdhc() and
+> is_imx6sl_usdhc() to handle the difference.
+> 
+> The standard tuning is enabled by setting ESDHC_TUNE_CTRL_STD_TUNING_EN bit
+> in new register ESDHC_TUNE_CTRL and operates with new tuning bits
+> defined in SDHCI_ACMD12_ERR register.
+> 
+> Note: mx6sl can also work on the old manually tuning mode as mx6q/dl if
+> not enable standard tuning mode.
+> 
+> Signed-off-by: Dong Aisheng <b29396@freescale.com>
+> ---
+>  drivers/mmc/host/sdhci-esdhc-imx.c |   90 +++++++++++++++++++++++++++++-------
+>  1 files changed, 73 insertions(+), 17 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+> index c84c808..a4e0e3b 100644
+> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
+> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+> @@ -51,6 +51,11 @@
+>  #define  ESDHC_TUNE_CTRL_MIN		0
+>  #define  ESDHC_TUNE_CTRL_MAX		((1 << 7) - 1)
+>  
+> +#define ESDHC_TUNING_CTRL		0xcc
+> +#define ESDHC_STD_TUNING_EN		(1 << 24)
+> +/* NOTE: the minimum valid tuning start tap for mx6sl is 1 */
+> +#define ESDHC_TUNING_START_TAP		0x1
+> +
+>  #define ESDHC_TUNING_BLOCK_PATTERN_LEN	64
+>  
+>  /* pinctrl state */
+> @@ -94,6 +99,12 @@
+>   * integrated on the i.MX6 series.
+>   */
+>  #define ESDHC_FLAG_USDHC		BIT(3)
+> +/* The IP supports manual tuning process */
+> +#define ESDHC_FLAG_MAN_TUNING		BIT(4)
+> +/* The IP supports standard tuning process */
+> +#define ESDHC_FLAG_STD_TUNING		BIT(4)
 
-Signed-off-by: Dong Aisheng <b29396@freescale.com>
----
- drivers/mmc/host/sdhci.c |    1 +
- 1 files changed, 1 insertions(+), 0 deletions(-)
+BIT(4) for both flags?
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 66bce7a..cbde17d 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -1989,6 +1989,7 @@ static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
- 	if (!tuning_loop_counter || !timeout) {
- 		ctrl &= ~SDHCI_CTRL_TUNED_CLK;
- 		sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
-+		err = -EIO;
- 	} else {
- 		if (!(ctrl & SDHCI_CTRL_TUNED_CLK)) {
- 			pr_info(DRIVER_NAME ": Tuning procedure"
--- 
-1.7.2.rc3
+Shawn
 
+> +/* The IP has SDHCI_CAPABILITIES_1 register */
+> +#define ESDHC_FLAG_HAVE_CAP1		BIT(5)
+>  
+>  struct esdhc_soc_data {
+>  	u32 flags;
+> @@ -116,7 +127,12 @@ static struct esdhc_soc_data esdhc_imx53_data = {
+>  };
+>  
+>  static struct esdhc_soc_data usdhc_imx6q_data = {
+> -	.flags = ESDHC_FLAG_USDHC,
+> +	.flags = ESDHC_FLAG_USDHC | ESDHC_FLAG_MAN_TUNING,
+> +};
+> +
+> +static struct esdhc_soc_data usdhc_imx6sl_data = {
+> +	.flags = ESDHC_FLAG_USDHC | ESDHC_FLAG_STD_TUNING
+> +			| ESDHC_FLAG_HAVE_CAP1,
+>  };
+>  
+>  struct pltfm_imx_data {
+> @@ -159,6 +175,7 @@ static const struct of_device_id imx_esdhc_dt_ids[] = {
+>  	{ .compatible = "fsl,imx35-esdhc", .data = &esdhc_imx35_data, },
+>  	{ .compatible = "fsl,imx51-esdhc", .data = &esdhc_imx51_data, },
+>  	{ .compatible = "fsl,imx53-esdhc", .data = &esdhc_imx53_data, },
+> +	{ .compatible = "fsl,imx6sl-usdhc", .data = &usdhc_imx6sl_data, },
+>  	{ .compatible = "fsl,imx6q-usdhc", .data = &usdhc_imx6q_data, },
+>  	{ /* sentinel */ }
+>  };
+> @@ -222,9 +239,16 @@ static u32 esdhc_readl_le(struct sdhci_host *host, int reg)
+>  		}
+>  	}
+>  
+> -	if (unlikely(reg == SDHCI_CAPABILITIES_1) && esdhc_is_usdhc(imx_data))
+> -		val = SDHCI_SUPPORT_DDR50 | SDHCI_SUPPORT_SDR104
+> -				| SDHCI_SUPPORT_SDR50;
+> +	if (unlikely(reg == SDHCI_CAPABILITIES_1)) {
+> +		if (esdhc_is_usdhc(imx_data)) {
+> +			if (imx_data->socdata->flags & ESDHC_FLAG_HAVE_CAP1)
+> +				val = readl(host->ioaddr + SDHCI_CAPABILITIES) & 0xFFFF;
+> +			else
+> +				/* imx6q/dl does not have cap_1 register, fake one */
+> +				val = SDHCI_SUPPORT_DDR50 | SDHCI_SUPPORT_SDR104
+> +					| SDHCI_SUPPORT_SDR50;
+> +		}
+> +	}
+>  
+>  	if (unlikely(reg == SDHCI_MAX_CURRENT) && esdhc_is_usdhc(imx_data)) {
+>  		val = 0;
+> @@ -331,13 +355,18 @@ static u16 esdhc_readw_le(struct sdhci_host *host, int reg)
+>  			ret |= SDHCI_CTRL_VDD_180;
+>  
+>  		if (esdhc_is_usdhc(imx_data)) {
+> -			val = readl(host->ioaddr + ESDHC_MIX_CTRL);
+> -			if (val & ESDHC_MIX_CTRL_EXE_TUNE)
+> -				ret |= SDHCI_CTRL_EXEC_TUNING;
+> -			if (val & ESDHC_MIX_CTRL_SMPCLK_SEL)
+> -				ret |= SDHCI_CTRL_TUNED_CLK;
+> +			if (imx_data->socdata->flags & ESDHC_FLAG_MAN_TUNING)
+> +				val = readl(host->ioaddr + ESDHC_MIX_CTRL);
+> +			else if (imx_data->socdata->flags & ESDHC_FLAG_STD_TUNING)
+> +				/* the std tuning bits is in ACMD12_ERR for imx6sl */
+> +				val = readl(host->ioaddr + SDHCI_ACMD12_ERR);
+>  		}
+>  
+> +		if (val & ESDHC_MIX_CTRL_EXE_TUNE)
+> +			ret |= SDHCI_CTRL_EXEC_TUNING;
+> +		if (val & ESDHC_MIX_CTRL_SMPCLK_SEL)
+> +			ret |= SDHCI_CTRL_TUNED_CLK;
+> +
+>  		ret |= (imx_data->uhs_mode & SDHCI_CTRL_UHS_MASK);
+>  		ret &= ~SDHCI_CTRL_PRESET_VAL_ENABLE;
+>  
+> @@ -370,12 +399,37 @@ static void esdhc_writew_le(struct sdhci_host *host, u16 val, int reg)
+>  			new_val &= ~ESDHC_VENDOR_SPEC_VSELECT;
+>  		writel(new_val, host->ioaddr + ESDHC_VENDOR_SPEC);
+>  		imx_data->uhs_mode = val & SDHCI_CTRL_UHS_MASK;
+> -		new_val = readl(host->ioaddr + ESDHC_MIX_CTRL);
+> -		if (val & SDHCI_CTRL_TUNED_CLK)
+> -			new_val |= ESDHC_MIX_CTRL_SMPCLK_SEL;
+> -		else
+> -			new_val &= ~ESDHC_MIX_CTRL_SMPCLK_SEL;
+> -		writel(new_val , host->ioaddr + ESDHC_MIX_CTRL);
+> +		if (imx_data->socdata->flags & ESDHC_FLAG_MAN_TUNING) {
+> +			new_val = readl(host->ioaddr + ESDHC_MIX_CTRL);
+> +			if (val & SDHCI_CTRL_TUNED_CLK)
+> +				new_val |= ESDHC_MIX_CTRL_SMPCLK_SEL;
+> +			else
+> +				new_val &= ~ESDHC_MIX_CTRL_SMPCLK_SEL;
+> +			writel(new_val , host->ioaddr + ESDHC_MIX_CTRL);
+> +		} else if (imx_data->socdata->flags & ESDHC_FLAG_STD_TUNING) {
+> +			u32 v = readl(host->ioaddr + SDHCI_ACMD12_ERR);
+> +			u32 m = readl(host->ioaddr + ESDHC_MIX_CTRL);
+> +			new_val = readl(host->ioaddr + ESDHC_TUNING_CTRL);
+> +			if (val & SDHCI_CTRL_EXEC_TUNING) {
+> +				new_val |= ESDHC_STD_TUNING_EN |
+> +						ESDHC_TUNING_START_TAP;
+> +				v |= ESDHC_MIX_CTRL_EXE_TUNE;
+> +				m |= ESDHC_MIX_CTRL_FBCLK_SEL;
+> +			} else {
+> +				new_val &= ~ESDHC_STD_TUNING_EN;
+> +				v &= ~ESDHC_MIX_CTRL_EXE_TUNE;
+> +				m &= ~ESDHC_MIX_CTRL_FBCLK_SEL;
+> +			}
+> +
+> +			if (val & SDHCI_CTRL_TUNED_CLK)
+> +				v |= ESDHC_MIX_CTRL_SMPCLK_SEL;
+> +			else
+> +				v &= ~ESDHC_MIX_CTRL_SMPCLK_SEL;
+> +
+> +			writel(new_val, host->ioaddr + ESDHC_TUNING_CTRL);
+> +			writel(v, host->ioaddr + SDHCI_ACMD12_ERR);
+> +			writel(m, host->ioaddr + ESDHC_MIX_CTRL);
+> +		}
+>  		return;
+>  	case SDHCI_TRANSFER_MODE:
+>  		if ((imx_data->socdata->flags & ESDHC_FLAG_MULTIBLK_NO_INT)
+> @@ -774,7 +828,7 @@ static int esdhc_set_uhs_signaling(struct sdhci_host *host, unsigned int uhs)
+>  	return esdhc_change_pinstate(host, uhs);
+>  }
+>  
+> -static const struct sdhci_ops sdhci_esdhc_ops = {
+> +static struct sdhci_ops sdhci_esdhc_ops = {
+>  	.read_l = esdhc_readl_le,
+>  	.read_w = esdhc_readw_le,
+>  	.write_l = esdhc_writel_le,
+> @@ -786,7 +840,6 @@ static const struct sdhci_ops sdhci_esdhc_ops = {
+>  	.get_ro = esdhc_pltfm_get_ro,
+>  	.platform_bus_width = esdhc_pltfm_bus_width,
+>  	.set_uhs_signaling = esdhc_set_uhs_signaling,
+> -	.platform_execute_tuning = esdhc_executing_tuning,
+>  };
+>  
+>  static const struct sdhci_pltfm_data sdhci_esdhc_imx_pdata = {
+> @@ -922,6 +975,9 @@ static int sdhci_esdhc_imx_probe(struct platform_device *pdev)
+>  	if (esdhc_is_usdhc(imx_data))
+>  		writel(0x08100810, host->ioaddr + ESDHC_WTMK_LVL);
+>  
+> +	if (imx_data->socdata->flags & ESDHC_FLAG_MAN_TUNING)
+> +		sdhci_esdhc_ops.platform_execute_tuning =
+> +					esdhc_executing_tuning;
+>  	boarddata = &imx_data->boarddata;
+>  	if (sdhci_esdhc_imx_probe_dt(pdev, boarddata) < 0) {
+>  		if (!host->mmc->parent->platform_data) {
+> -- 
+> 1.7.2.rc3
+> 
+> 
 
