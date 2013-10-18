@@ -1,97 +1,127 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH 2/2] mmc: dw_mmc: Protect read-modify-write of INTMASK with
- a lock
-Date: Fri, 18 Oct 2013 18:51:15 +0900
-Message-ID: <52610493.1000909@samsung.com>
-References: <1381876762-10892-1-git-send-email-dianders@chromium.org>
- <1381876762-10892-3-git-send-email-dianders@chromium.org>
- <525E611A.6070708@imgtec.com>
- <CAD=FV=V4OPOjs=4cvXOomt1UnzUdw5VApkNAX2ERKZ46DC6_gg@mail.gmail.com>
- <CAAG0J98c6eA_c2McSvFcQUMUfPy-DgdHi7Te1tZqpT8XjjMQvw@mail.gmail.com>
+From: Javier Martinez Canillas <martinez.javier@gmail.com>
+Subject: Re: [PATCH v3 3/4] mmc: omap_hsmmc: Remux pins to support SDIO
+ interrupt on AM335x
+Date: Fri, 18 Oct 2013 12:12:48 +0200
+Message-ID: <CAAwP0s1vNcRrekDbJOdm5vzk3VEWRm-5g8c9s+6KPczFj7LBsA@mail.gmail.com>
+References: <1380971830-21492-1-git-send-email-afenkart@gmail.com>
+ <1380971830-21492-4-git-send-email-afenkart@gmail.com> <20131018172053.70cf2c2b@notabene.brown>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout2.samsung.com ([203.254.224.25]:24300 "EHLO
-	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752574Ab3JRJvW (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 18 Oct 2013 05:51:22 -0400
-In-reply-to: <CAAG0J98c6eA_c2McSvFcQUMUfPy-DgdHi7Te1tZqpT8XjjMQvw@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20131018172053.70cf2c2b@notabene.brown>
+Sender: linux-kernel-owner@vger.kernel.org
+To: NeilBrown <neilb@suse.de>
+Cc: Andreas Fenkart <afenkart@gmail.com>, Chris Ball <cjb@laptop.org>, Tony Lindgren <tony@atomide.com>, Grant Likely <grant.likely@secretlab.ca>, Felipe Balbi <balbi@ti.com>, Venkatraman S <svenkatr@ti.com>, Balaji T K <balajitk@ti.com>, zonque@gmail.com, "devicetree-discuss@lists.ozlabs.org" <devicetree-discuss@lists.ozlabs.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, linux-doc@vger.kernel.org, Linux Kernel <linux-kernel@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, linux-mmc@vger.kernel.org, "linux-omap@vger.kernel.org" <linux-omap@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: James Hogan <james.hogan@imgtec.com>, Doug Anderson <dianders@chromium.org>
-Cc: Chris Ball <cjb@laptop.org>, Seungwon Jeon <tgih.jun@samsung.com>, Grant Grundler <grundler@chromium.org>, Alim Akhtar <alim.akhtar@samsung.com>, Abhilash Kesavan <a.kesavan@samsung.com>, Tomasz Figa <tomasz.figa@gmail.com>, Olof Johansson <olof@lixom.net>, Sonny Rao <sonnyrao@chromium.org>, Bing Zhao <bzhao@marvell.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-On 10/17/2013 05:23 AM, James Hogan wrote:
-> Hi Doug,
-> 
-> On 16 October 2013 17:43, Doug Anderson <dianders@chromium.org> wrote:
->> On Wed, Oct 16, 2013 at 2:49 AM, James Hogan <james.hogan@imgtec.com> wrote:
->>>> We can't just use the standard host->lock since that lock is not irq
->>>> safe and mmc_signal_sdio_irq() (called from interrupt context) calls
->>>> dw_mci_enable_sdio_irq().  Add a new irq-safe lock to protect INTMASK.
->>>>
->>>> An alternate solution to this is to punt mmc_signal_sdio_irq() to the
->>>> tasklet and then protect INTMASK modifications by the standard host
->>>> lock.  This seemed like a bit more of a high-latency change.
->>>
->>> A probably lighter-weight alternative to that alternative is to just
->>> make the existing lock irq safe. Has this been considered?
->>>
->>> I'm not entirely convinced it's worth having a separate lock rather than
->>> changing the existing one, but the patch still appears to be correct, so:
->>> Reviewed-by: James Hogan <james.hogan@imgtec.com>
+On Fri, Oct 18, 2013 at 8:20 AM, NeilBrown <neilb@suse.de> wrote:
+> On Sat,  5 Oct 2013 13:17:09 +0200 Andreas Fenkart <afenkart@gmail.com> wrote:
+>
+>> The am335x can't detect pending cirq in PM runtime suspend.
+>> This patch reconfigures dat1 as a GPIO before going to suspend.
+>> SDIO interrupts are detected with the GPIO, while in runtime
+>> suspend, standard detection of the module block otherwise.
 >>
->> I did look at that alternate solution and rejected it, but am happy to
->> send that up if people think it's better.  Here's why I rejected it:
+>> Signed-off-by: Andreas Fenkart <afenkart@gmail.com>
 >>
->> 1. It looks like someone has gone through quite a bit of work to _not_
->> grab the existing lock in the IRQ handler.  The IRQ handler always
->> pushes all real work over to the tasklet.  I can only assume that they
->> did this for some good reason and I'd hate to switch it without
->> knowing for sure why.
+>> diff --git a/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt b/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
+>> index 1136e6b..146f3ad 100644
+>> --- a/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
+>> +++ b/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
+>> @@ -21,8 +21,11 @@ ti,non-removable: non-removable slot (like eMMC)
+>>  ti,needs-special-reset: Requires a special softreset sequence
+>>  ti,needs-special-hs-handling: HSMMC IP needs special setting for handling High Speed
+>>  ti,quirk-swakup-missing: SOC missing the swakeup line, will not detect
+>> -SDIO irq while in suspend. Fallback to polling. Affected chips are
+>> -am335x,
+>> +SDIO irq while in suspend. The workaround is to reconfigure the dat1 line as a
+>> +GPIO upon suspend. Beyond this option and the GPIO config, you also need to set
+>> +named pinctrl states "default", "active" and "idle ", see example below.  The
+>> +MMC driver will then then toggle between default and idle during the runtime
+>> +Affected chips are am335x,
 >>
->> 2. We might have performance problems if we blindly changed the
->> existing code to an IRQ-safe spinlock.  We hold the existing
->> "host->lock" spinlock for the entire duration of
->> dw_mci_tasklet_func().  That's a pretty intense chunk of code, full of
->> nested loops (some with 500ms timeouts!), mdelay(20) calls to handle
->> some errors, etc.  I say "might" because I think that the expected
->> case is that code runs pretty quickly.  I ran some brief tests on one
->> system and saw a worst case time of 170us and an common case time of
->> ~10us.  Are we OK with having interrupts disabled for that long?  Are
->> we OK with having the dw_mci interrupt handler potentially spin on a
->> spinlock for that long?
->>
-> 
-> Fair enough, I'm convinced now. That code did look pretty heavy when I
-> looked at it too.
-> 
->>
->> I don't think it would be terrible to look at reworking the way that
->> dw_mmc handles interrupts, but that seems pretty major.
-Yes, Reworking is pretty major.
-but if we need to rework, i think we can rework it in future.
-> 
-> Yeh, I suppose at least the potentially large delays are all for
-> exceptional cases, so it's not a critical problem.
-> 
->> BTW: is the cost of an extra lock actually that high?
-> 
-> I don't know tbh. In this case the spinlock usage doesn't appear to
-> actually overlap.
-> 
->> ...or are you talking the cost in terms of code complexity?
-> 
-> In this case it'd only be a space and code complexity thing I think. I
-> suppose in some cases the benefit of finer-grained locking is probably
-> pretty marginal, but there's a good case for it here. It might be
-> worth renaming the lock to irq_lock or something like that so it's
-> clear it doesn't have to protect only for INTMASK in the future - up
-> to you.
-It seems good that use the irq_lock than intmask_lock. (It's just naming)
-> 
-> Cheers
-> James
-> 
+>>                              ------
+>>                              | PRCM |
+>> @@ -49,3 +52,24 @@ Example:
+>>               vmmc-supply = <&vmmc>; /* phandle to regulator node */
+>>               ti,non-removable;
+>>       };
+>> +
+>> +[am335x with with gpio for sdio irq]
+>> +
+>> +     mmc1_cirq_pin: pinmux_cirq_pin {
+>> +             pinctrl-single,pins = <
+>> +                     0x0f8 0x3f      /* MMC0_DAT1 as GPIO2_28 */
+>> +             >;
+>> +     };
+>> +
+>> +     mmc1: mmc@48060000 {
+>> +             ti,non-removable;
+>> +             bus-width = <4>;
+>> +             vmmc-supply = <&ldo2_reg>;
+>> +             vmmc_aux-supply = <&vmmc>;
+>> +             ti,quirk-swakeup-missing;
+>> +             pinctrl-names = "default", "active", "idle";
+>> +             pinctrl-0 = <&mmc1_pins>;
+>> +             pinctrl-1 = <&mmc1_pins>;
+>> +             pinctrl-2 = <&mmc1_cirq_pin>;
+>> +             ti,cirq-gpio = <&gpio3 28 0>;
+>> +     };
+>
+>
+> hi,
+>  I've been trying to get SD irq to work on my  OMAP3 DM3730.
+> I seems to need the magic to catch interrupts while FCLK is off, as
+> the only way I can get it to work at the moment is to keep FCLK on.
+>
+> I discovered your patch and tried it out, but it doesn't seem to work for me.
+>
+> I have a Libertas WIFI chip attached to the second mmc (which is sometimes
+> called mmc1, and sometimes mmc2 - very confusing!).
 
+Hi Neil,
+
+I have a DM3730 board with the same setup, Libertas (Marvell SD8686)
+wifi + bt chip attached to mmc2.
+
+I was going to try to add support for this to the DTS but it would be
+great if I can use your as a reference.
+
+Would you be so kind to share your DTS?
+
+Thanks a lot and best regards,
+Javier
+
+> I added:
+>         mmc2_cirq_pin: pinmux_cirq_pin {
+>                 pinctrl-single,pins = <
+>                         0x012e (PIN_INPUT_PULLUP | MUX_MODE4)   /* MMC2_DAT1 as GPIO5_5 */
+>                 >;
+>         };
+>
+> and
+>
+> &mmc2 {
+>         ti,quirk-swakeup-missing;
+>         pinctrl-names = "default", "active", "idle";
+>         pinctrl-0 = <&mmc2_pins>;
+>         pinctrl-1 = <&mmc2_pins>;
+>         pinctrl-2 = <&mmc2_cirq_pin>;
+>         ti,cirq-gpio = <&gpio5 5 0>; /* GPIO133 = 128+5 */
+> };
+>
+> to my dts file but it doesn't make any apparent difference.
+>
+> Any idea what I might be doing wrong?
+> (the base kernel I am applying patches to is from 8th Oct,
+>  commit 0e7a3ed04f0cd4311096d691888f88569310ee6c)
+>
+> BTW,
+>  - with the default polling, I get about 1Mb/sec with iperf
+>  - with sd-irq enabled and FCLK kept on the whole time, I get 4Mb/sec
+>  - with sd-irq enable, FCLK kept on, and the 5ms polling also
+>    running, I get over 5Mb/sec!
+> Still much less than the 40Mb/sec that I would like to get...
+>
+> Thanks,
+> NeilBrown
