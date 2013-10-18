@@ -1,50 +1,68 @@
-From: Matt Porter <matt.porter@linaro.org>
-Subject: Re: [RESEND PATCH v2 6/6] mmc: sdhci-bcm-kona: Add basic use of
- clocks
-Date: Fri, 18 Oct 2013 09:22:57 -0400
-Message-ID: <20131018132257.GG2721@beef>
-References: <1381960030-1640-1-git-send-email-tim.kryger@linaro.org>
- <1381960030-1640-7-git-send-email-tim.kryger@linaro.org>
- <20131017141309.GG24056@e106331-lin.cambridge.arm.com>
+From: Doug Anderson <dianders@chromium.org>
+Subject: Re: [PATCH 1/2] mmc: dw_mmc: Cleanup disable of low power mode w/
+ SDIO interrupts
+Date: Fri, 18 Oct 2013 13:09:18 -0700
+Message-ID: <CAD=FV=UiUxoqbAeq+3iUChqksHd_NpJs2rM83=ng3fprMj0E-A@mail.gmail.com>
+References: <1381876762-10892-1-git-send-email-dianders@chromium.org>
+	<1381876762-10892-2-git-send-email-dianders@chromium.org>
+	<52610273.3080005@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ie0-f174.google.com ([209.85.223.174]:43141 "EHLO
-	mail-ie0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752210Ab3JRNXD (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 18 Oct 2013 09:23:03 -0400
-Content-Disposition: inline
-In-Reply-To: <20131017141309.GG24056@e106331-lin.cambridge.arm.com>
+Received: from mail-ve0-f180.google.com ([209.85.128.180]:39042 "EHLO
+	mail-ve0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753519Ab3JRUJT (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 18 Oct 2013 16:09:19 -0400
+Received: by mail-ve0-f180.google.com with SMTP id db12so2241238veb.39
+        for <linux-mmc@vger.kernel.org>; Fri, 18 Oct 2013 13:09:18 -0700 (PDT)
+In-Reply-To: <52610273.3080005@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Mark Rutland <mark.rutland@arm.com>
-Cc: Tim Kryger <tim.kryger@linaro.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Christian Daudt <bcm@fixthebug.org>, Pawel Moll <Pawel.Moll@arm.com>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Daniel Lezcano <daniel.lezcano@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "rob.herring@calxeda.com" <rob.herring@calxeda.com>, "patches@linaro.org" <patches@linaro.org>, Stephen Warren <swarren@wwwdotorg.org>, Thomas Gleixner <tglx@linutronix.de>, Chris Ball <cjb@laptop.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: Chris Ball <cjb@laptop.org>, Seungwon Jeon <tgih.jun@samsung.com>, James Hogan <james.hogan@imgtec.com>, Grant Grundler <grundler@chromium.org>, Alim Akhtar <alim.akhtar@samsung.com>, Abhilash Kesavan <a.kesavan@samsung.com>, Tomasz Figa <tomasz.figa@gmail.com>, Olof Johansson <olof@lixom.net>, Sonny Rao <sonnyrao@chromium.org>, Bing Zhao <bzhao@marvell.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-On Thu, Oct 17, 2013 at 03:13:09PM +0100, Mark Rutland wrote:
-> On Wed, Oct 16, 2013 at 10:47:10PM +0100, Tim Kryger wrote:
-> > +	/* Get and enable the external clock */
-> > +	kona_dev->external_clk = devm_clk_get(dev, NULL);
-> > +	if (IS_ERR(kona_dev->external_clk)) {
-> > +		dev_err(dev, "Failed to get external clock\n");
-> > +		ret = PTR_ERR(kona_dev->external_clk);
-> > +		goto err_pltfm_free;
-> 
-> This seems like a pretty clear breakage of existing DTBs.
-> 
-> Why?
+Jaehoon,
 
-Normal kernel incremental development. The notion of breaking DTBs is
-pretty much incompatible with the long-standing tradition of developing
-kernel support in an incremental fashion.
+On Fri, Oct 18, 2013 at 2:42 AM, Jaehoon Chung <jh80.chung@samsung.com> wrote:
+>> -     clk_en_a = mci_readl(host, CLKENA);
+>> +     /*
+>> +      * Low power mode will stop the card clock when idle.  According to the
+>> +      * description of the CLKENA register we should disable low power mode
+>> +      * for SDIO cards if we need SDIO interrupts to work.
+>> +      */
+>> +     if (mmc->caps | MMC_CAP_SDIO_IRQ) {
+> mmc->caps & MMC_CAP_SDIO_IRQ?
 
-In this case, the bootloader available on these boards has had clocks
-and regulators enabled for all the drivers currently upstream. This
-allowed development of the sdhci driver (and others) independent of having
-the common clk driver and PMU/regulator drivers ready. That's been especially
-important given the flux that the common clk framework is in with regards
-to bindings.
+Wow, that was an embarrassing one.  Thanks.
 
-Are you suggesting that the required clock needs to be made logically
-optional in the code to retain backward compatbility?
+>> +             const u32 clken_low_pwr = SDMMC_CLKEN_LOW_PWR << slot->id;
+>> +             u32 clk_en_a_old;
+>> +             u32 clk_en_a;
+>>
+>> -     if (clk_en_a & clken_low_pwr) {
+>> -             mci_writel(host, CLKENA, clk_en_a & ~clken_low_pwr);
+>> -             mci_send_cmd(slot, SDMMC_CMD_UPD_CLK |
+>> -                          SDMMC_CMD_PRV_DAT_WAIT, 0);
+>> +             clk_en_a_old = mci_readl(host, CLKENA);
+>> +
+>> +             if (card->type == MMC_TYPE_SDIO ||
+>> +                 card->type == MMC_TYPE_SD_COMBO) {
+>> +                     set_bit(DW_MMC_CARD_NO_LOW_PWR, &slot->flags);
+>> +                     clk_en_a = clk_en_a_old & ~clken_low_pwr;
+>> +             } else {
+>> +                     clear_bit(DW_MMC_CARD_NO_LOW_PWR, &slot->flags);
+>> +                     clk_en_a = clk_en_a_old | clken_low_pwr;
+> When this condition is entered? card->type is always MMC_TYPE_SDIO or MMC_TYPE_SD_COMBO, isn't?
 
--Matt
+Ugh, that's not intuitive.  This callback is only called for SDIO
+cards and not MMC/SD cards?  That means if you plug in an SDIO card
+and then eject it and plug in an SD card you won't get to low power.
+Hrm.
+
+I dug around a bit and couldn't find a better way to do this and then
+I realized that the other user of the init_card() callback has the
+same bug, so for the next version of the series I'm proposing a fix
+for mmc core to add this for all types.  If you have a better
+suggestion, I'm all ears.
+
+-Doug
