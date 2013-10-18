@@ -1,52 +1,97 @@
 From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH 1/1] mmc: dw_mmc: Add missing description
-Date: Fri, 18 Oct 2013 18:43:38 +0900
-Message-ID: <526102CA.7000907@samsung.com>
-References: <1381903554-3456-1-git-send-email-sachin.kamat@linaro.org>
+Subject: Re: [PATCH 2/2] mmc: dw_mmc: Protect read-modify-write of INTMASK with
+ a lock
+Date: Fri, 18 Oct 2013 18:51:15 +0900
+Message-ID: <52610493.1000909@samsung.com>
+References: <1381876762-10892-1-git-send-email-dianders@chromium.org>
+ <1381876762-10892-3-git-send-email-dianders@chromium.org>
+ <525E611A.6070708@imgtec.com>
+ <CAD=FV=V4OPOjs=4cvXOomt1UnzUdw5VApkNAX2ERKZ46DC6_gg@mail.gmail.com>
+ <CAAG0J98c6eA_c2McSvFcQUMUfPy-DgdHi7Te1tZqpT8XjjMQvw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout4.samsung.com ([203.254.224.34]:44736 "EHLO
-	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752467Ab3JRJng (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 18 Oct 2013 05:43:36 -0400
-Received: from epcpsbgr1.samsung.com
- (u141.gpu120.samsung.co.kr [203.254.230.141])
- by mailout4.samsung.com (Oracle Communications Messaging Server 7u4-24.01
- (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTP id <0MUU00KQIZ06LX30@mailout4.samsung.com> for
- linux-mmc@vger.kernel.org; Fri, 18 Oct 2013 18:43:34 +0900 (KST)
-In-reply-to: <1381903554-3456-1-git-send-email-sachin.kamat@linaro.org>
+Received: from mailout2.samsung.com ([203.254.224.25]:24300 "EHLO
+	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752574Ab3JRJvW (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 18 Oct 2013 05:51:22 -0400
+In-reply-to: <CAAG0J98c6eA_c2McSvFcQUMUfPy-DgdHi7Te1tZqpT8XjjMQvw@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Sachin Kamat <sachin.kamat@linaro.org>, linux-mmc@vger.kernel.org
-Cc: cjb@laptop.org, Seungwon Jeon <tgih.jun@samsung.com>
+To: James Hogan <james.hogan@imgtec.com>, Doug Anderson <dianders@chromium.org>
+Cc: Chris Ball <cjb@laptop.org>, Seungwon Jeon <tgih.jun@samsung.com>, Grant Grundler <grundler@chromium.org>, Alim Akhtar <alim.akhtar@samsung.com>, Abhilash Kesavan <a.kesavan@samsung.com>, Tomasz Figa <tomasz.figa@gmail.com>, Olof Johansson <olof@lixom.net>, Sonny Rao <sonnyrao@chromium.org>, Bing Zhao <bzhao@marvell.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
-
-On 10/16/2013 03:05 PM, Sachin Kamat wrote:
-> Commit 0976f16d ("mmc: dw_mmc: add support tuning scheme") introduced
-> the execute_tuning hook but did not add its description for kernel docs.
-> Update the same.
+On 10/17/2013 05:23 AM, James Hogan wrote:
+> Hi Doug,
 > 
-> Signed-off-by: Sachin Kamat <sachin.kamat@linaro.org>
-> Cc: Seungwon Jeon <tgih.jun@samsung.com>
-> ---
->  drivers/mmc/host/dw_mmc.h |    1 +
->  1 file changed, 1 insertion(+)
+> On 16 October 2013 17:43, Doug Anderson <dianders@chromium.org> wrote:
+>> On Wed, Oct 16, 2013 at 2:49 AM, James Hogan <james.hogan@imgtec.com> wrote:
+>>>> We can't just use the standard host->lock since that lock is not irq
+>>>> safe and mmc_signal_sdio_irq() (called from interrupt context) calls
+>>>> dw_mci_enable_sdio_irq().  Add a new irq-safe lock to protect INTMASK.
+>>>>
+>>>> An alternate solution to this is to punt mmc_signal_sdio_irq() to the
+>>>> tasklet and then protect INTMASK modifications by the standard host
+>>>> lock.  This seemed like a bit more of a high-latency change.
+>>>
+>>> A probably lighter-weight alternative to that alternative is to just
+>>> make the existing lock irq safe. Has this been considered?
+>>>
+>>> I'm not entirely convinced it's worth having a separate lock rather than
+>>> changing the existing one, but the patch still appears to be correct, so:
+>>> Reviewed-by: James Hogan <james.hogan@imgtec.com>
+>>
+>> I did look at that alternate solution and rejected it, but am happy to
+>> send that up if people think it's better.  Here's why I rejected it:
+>>
+>> 1. It looks like someone has gone through quite a bit of work to _not_
+>> grab the existing lock in the IRQ handler.  The IRQ handler always
+>> pushes all real work over to the tasklet.  I can only assume that they
+>> did this for some good reason and I'd hate to switch it without
+>> knowing for sure why.
+>>
+>> 2. We might have performance problems if we blindly changed the
+>> existing code to an IRQ-safe spinlock.  We hold the existing
+>> "host->lock" spinlock for the entire duration of
+>> dw_mci_tasklet_func().  That's a pretty intense chunk of code, full of
+>> nested loops (some with 500ms timeouts!), mdelay(20) calls to handle
+>> some errors, etc.  I say "might" because I think that the expected
+>> case is that code runs pretty quickly.  I ran some brief tests on one
+>> system and saw a worst case time of 170us and an common case time of
+>> ~10us.  Are we OK with having interrupts disabled for that long?  Are
+>> we OK with having the dw_mci interrupt handler potentially spin on a
+>> spinlock for that long?
+>>
 > 
-> diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
-> index 6bf24ab..306451f 100644
-> --- a/drivers/mmc/host/dw_mmc.h
-> +++ b/drivers/mmc/host/dw_mmc.h
-> @@ -244,6 +244,7 @@ struct dw_mci_tuning_data {
->   * @prepare_command: handle CMD register extensions.
->   * @set_ios: handle bus specific extensions.
->   * @parse_dt: parse implementation specific device tree properties.
-> + * @execute_tuning: implementation specific tuning procedure.
->   *
->   * Provide controller implementation specific extensions. The usage of this
->   * data structure is fully optional and usage of each member in this structure
+> Fair enough, I'm convinced now. That code did look pretty heavy when I
+> looked at it too.
+> 
+>>
+>> I don't think it would be terrible to look at reworking the way that
+>> dw_mmc handles interrupts, but that seems pretty major.
+Yes, Reworking is pretty major.
+but if we need to rework, i think we can rework it in future.
+> 
+> Yeh, I suppose at least the potentially large delays are all for
+> exceptional cases, so it's not a critical problem.
+> 
+>> BTW: is the cost of an extra lock actually that high?
+> 
+> I don't know tbh. In this case the spinlock usage doesn't appear to
+> actually overlap.
+> 
+>> ...or are you talking the cost in terms of code complexity?
+> 
+> In this case it'd only be a space and code complexity thing I think. I
+> suppose in some cases the benefit of finer-grained locking is probably
+> pretty marginal, but there's a good case for it here. It might be
+> worth renaming the lock to irq_lock or something like that so it's
+> clear it doesn't have to protect only for INTMASK in the future - up
+> to you.
+It seems good that use the irq_lock than intmask_lock. (It's just naming)
+> 
+> Cheers
+> James
 > 
 
