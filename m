@@ -1,119 +1,42 @@
-From: Mark Rutland <mark.rutland@arm.com>
-Subject: Re: [PATCH 1/6] mmc: omap_hsmmc: start using generic non-removable
- DT binding
-Date: Thu, 17 Oct 2013 16:25:53 +0100
-Message-ID: <20131017152553.GI24056@e106331-lin.cambridge.arm.com>
-References: <1381936707-10336-1-git-send-email-balajitk@ti.com>
- <1381936707-10336-2-git-send-email-balajitk@ti.com>
- <20131017083856.GA24056@e106331-lin.cambridge.arm.com>
- <525FC1BC.9080207@ti.com>
+From: Axel Lin <axel.lin@ingics.com>
+Subject: [PATCH] mmc: wmt-sdmmc: Use GFP_KERNEL instead of hard-coded value
+Date: Fri, 18 Oct 2013 11:53:07 +0800
+Message-ID: <1382068387.21520.1.camel@phoenix>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from cam-admin0.cambridge.arm.com ([217.140.96.50]:50870 "EHLO
-	cam-admin0.cambridge.arm.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1757017Ab3JQP0B (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 17 Oct 2013 11:26:01 -0400
-Content-Disposition: inline
-In-Reply-To: <525FC1BC.9080207@ti.com>
+Received: from mail-pa0-f54.google.com ([209.85.220.54]:55926 "EHLO
+	mail-pa0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755131Ab3JRDxP (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 17 Oct 2013 23:53:15 -0400
+Received: by mail-pa0-f54.google.com with SMTP id kx10so3863294pab.41
+        for <linux-mmc@vger.kernel.org>; Thu, 17 Oct 2013 20:53:14 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Balaji T K <balajitk@ti.com>
-Cc: "bcousson@baylibre.com" <bcousson@baylibre.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "cjb@laptop.org" <cjb@laptop.org>, "linux-omap@vger.kernel.org" <linux-omap@vger.kernel.org>, "uri.y@variscite.com" <uri.y@variscite.com>, Sekhar Nori <nsekhar@ti.com>
+To: Chris Ball <cjb@laptop.org>
+Cc: Tony Prisk <linux@prisktech.co.nz>, linux-mmc@vger.kernel.org
 
-On Thu, Oct 17, 2013 at 11:53:48AM +0100, Balaji T K wrote:
-> On Thursday 17 October 2013 02:08 PM, Mark Rutland wrote:
-> > On Wed, Oct 16, 2013 at 04:18:22PM +0100, Balaji T K wrote:
-> >> From: Sekhar Nori <nsekhar@ti.com>
-> >>
-> >> add generic "non-removable" binding support for omap_hsmmc
-> >>
-> >> Signed-off-by: Sekhar Nori <nsekhar@ti.com>
-> >> Signed-off-by: Balaji T K <balajitk@ti.com>
-> >> ---
-> >>   .../devicetree/bindings/mmc/ti-omap-hsmmc.txt      |    2 +-
-> >>   drivers/mmc/host/omap_hsmmc.c                      |    3 +++
-> >>   2 files changed, 4 insertions(+), 1 deletions(-)
-> >>
-> >> diff --git a/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt b/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
-> >> index 8c8908a..3b95719 100644
-> >> --- a/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
-> >> +++ b/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
-> >> @@ -17,7 +17,7 @@ Optional properties:
-> >>   ti,dual-volt: boolean, supports dual voltage cards
-> >>   <supply-name>-supply: phandle to the regulator device tree node
-> >>   "supply-name" examples are "vmmc", "vmmc_aux" etc
-> >> -ti,non-removable: non-removable slot (like eMMC)
-> >> +ti,non-removable: non-removable eMMC with always on vccq and configurable vcc
-> >
-> > Why this change?
-> >
-> Hi,
-> 
-> earlier ti,non-removable was used for all eMMC and SDIO card, now it will
-> be used only for eMMC with always on vccq and configurable vcc.
+Signed-off-by: Axel Lin <axel.lin@ingics.com>
+---
+ drivers/mmc/host/wmt-sdmmc.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-Please expand the commit message to mention this. It wasn't clear why
-adding support for a property meant modifying the description of
-another.
+diff --git a/drivers/mmc/host/wmt-sdmmc.c b/drivers/mmc/host/wmt-sdmmc.c
+index 34231d5..3605c37 100644
+--- a/drivers/mmc/host/wmt-sdmmc.c
++++ b/drivers/mmc/host/wmt-sdmmc.c
+@@ -852,7 +852,7 @@ static int wmt_mci_probe(struct platform_device *pdev)
+ 	priv->dma_desc_buffer = dma_alloc_coherent(&pdev->dev,
+ 						   mmc->max_blk_count * 16,
+ 						   &priv->dma_desc_device_addr,
+-						   208);
++						   GFP_KERNEL);
+ 	if (!priv->dma_desc_buffer) {
+ 		dev_err(&pdev->dev, "DMA alloc fail\n");
+ 		ret = -EPERM;
+-- 
+1.8.1.2
 
-> 
-> > What do "vccq" and "vcc" correspond to? The regulators are called "vmmc"
-> > and "vmmc_aux"...
-> >
-> 
-> vccq and vcc are supply names of eMMC part
 
-The binding has vmmc-supply and vmmc_aux-supply. How do {vmmc,vmmc_aux}
-and {vcc,vccq} relate? That should be clarified in the binding document,
-something like:
 
-- vmmc-supply: phandle of the regulator for the VCC input
-- vmmc_aux-supply: phandle of the regulator for the VCCQ input
-
-> 
-> > Why is no mention of "non-removable" added, given that it's added to the
-> > code?
-> 
-> Because this file makes a reference to mmc.txt and the core properties described
-> by mmc.txt are not added in ti-omap-hsmmc.txt
-
-There is room for confusion here. While "non-removable" is a generic
-property, it would be good to contrast "non-removable" and
-"ti,non-removable" in the binding as they imply different things.
-
-> 
-> >
-> > Is one preferred over the other? That should be noted.
-> >
-> >>   ti,needs-special-reset: Requires a special softreset sequence
-> >>   ti,needs-special-hs-handling: HSMMC IP needs special setting for handling High Speed
-> >>   dmas: List of DMA specifiers with the controller specific format
-> >> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-> >> index 6ac63df..5992048 100644
-> >> --- a/drivers/mmc/host/omap_hsmmc.c
-> >> +++ b/drivers/mmc/host/omap_hsmmc.c
-> >> @@ -1738,6 +1738,9 @@ static struct omap_mmc_platform_data *of_get_hsmmc_pdata(struct device *dev)
-> >>   	pdata->slots[0].switch_pin = cd_gpio;
-> >>   	pdata->slots[0].gpio_wp = wp_gpio;
-> >>
-> >> +	if (of_find_property(np, "non-removable", NULL)) {
-> >> +		pdata->slots[0].nonremovable = true;
-> >> +	}
-> >
-> > This wasn't mentioned in the binding, and it seems to have different
-> > semantics to "ti,non-removable". Why is it different?
-> >
-> 
-> When ti,non-removable was added, Only OMAP platform that had eMMC was that on OMAP4
-> where power to eMMC cannot be switched off without sending CMD5 sleep command,
-> so no_regulator_off_init was needed to get it detected during boot.
-> 
-> Now start using generic non-removable for all removable cards which do not
-> have such limitation.
-
-OK. I think this would be much clearer with something in the binding
-contrasting the two properties.
-
-Thanks,
-Mark.
