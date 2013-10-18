@@ -1,149 +1,254 @@
-From: NeilBrown <neilb@suse.de>
-Subject: Re: [PATCH v3 3/4] mmc: omap_hsmmc: Remux pins to support SDIO
- interrupt on AM335x
-Date: Fri, 18 Oct 2013 17:20:53 +1100
-Message-ID: <20131018172053.70cf2c2b@notabene.brown>
-References: <1380971830-21492-1-git-send-email-afenkart@gmail.com>
-	<1380971830-21492-4-git-send-email-afenkart@gmail.com>
+From: Dong Aisheng <b29396@freescale.com>
+Subject: Re: eMMC 4.51
+Date: Fri, 18 Oct 2013 14:59:31 +0800
+Message-ID: <20131018065930.GA22289@shlinux2.ap.freescale.net>
+References: <CACUGKYPDQJPvtXj3NBm8=eYCioWmq=pRVSORNYNZjD13N5ceeg@mail.gmail.com>
+ <CA+6rjLzLhA-zzTqWuzFCMXa1v9CgS-O+Rrnqsfpw9=UY_1vuMA@mail.gmail.com>
+ <CACUGKYPn-qL2_z83wK0EYtDexmyYQX6YVPwHTp5C4_d2M9BH4w@mail.gmail.com>
+ <CA+6rjLzaLZ=R_iEjgu4wB57j1pFraHpAjrg24Er2=SVefVGt7g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=PGP-SHA1;
- boundary="Sig_/.i2Ap0RDt8DcOydutI46yBm"; protocol="application/pgp-signature"
-Return-path: <linux-doc-owner@vger.kernel.org>
-In-Reply-To: <1380971830-21492-4-git-send-email-afenkart@gmail.com>
-Sender: linux-doc-owner@vger.kernel.org
-To: Andreas Fenkart <afenkart@gmail.com>
-Cc: Chris Ball <cjb@laptop.org>, Tony Lindgren <tony@atomide.com>, Grant Likely <grant.likely@secretlab.ca>, Felipe Balbi <balbi@ti.com>, Venkatraman S <svenkatr@ti.com>, Balaji T K <balajitk@ti.com>, zonque@gmail.com, devicetree-discuss@lists.ozlabs.org, devicetree@vger.kernel.org, linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from va3ehsobe003.messaging.microsoft.com ([216.32.180.13]:18769
+	"EHLO va3outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751061Ab3JRHPx (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 18 Oct 2013 03:15:53 -0400
+Content-Disposition: inline
+In-Reply-To: <CA+6rjLzaLZ=R_iEjgu4wB57j1pFraHpAjrg24Er2=SVefVGt7g@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Jackey Shen <jackey.shen.bo@gmail.com>
+Cc: John Tobias <john.tobias.ph@gmail.com>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 
---Sig_/.i2Ap0RDt8DcOydutI46yBm
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: quoted-printable
+Hi Jackey,
 
-On Sat,  5 Oct 2013 13:17:09 +0200 Andreas Fenkart <afenkart@gmail.com> wro=
-te:
+The imx6sl SD controller supports SDIO 3.0.
+I've verified it with a Broadcom SDIO 3.0 WiFi card and it can be
+identified as SDR104 mode.
 
-> The am335x can't detect pending cirq in PM runtime suspend.
-> This patch reconfigures dat1 as a GPIO before going to suspend.
-> SDIO interrupts are detected with the GPIO, while in runtime
-> suspend, standard detection of the module block otherwise.
->=20
-> Signed-off-by: Andreas Fenkart <afenkart@gmail.com>
->=20
-> diff --git a/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt b/Do=
-cumentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
-> index 1136e6b..146f3ad 100644
-> --- a/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
-> +++ b/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
-> @@ -21,8 +21,11 @@ ti,non-removable: non-removable slot (like eMMC)
->  ti,needs-special-reset: Requires a special softreset sequence
->  ti,needs-special-hs-handling: HSMMC IP needs special setting for handlin=
-g High Speed
->  ti,quirk-swakup-missing: SOC missing the swakeup line, will not detect
-> -SDIO irq while in suspend. Fallback to polling. Affected chips are
-> -am335x,
-> +SDIO irq while in suspend. The workaround is to reconfigure the dat1 lin=
-e as a
-> +GPIO upon suspend. Beyond this option and the GPIO config, you also need=
- to set
-> +named pinctrl states "default", "active" and "idle ", see example below.=
-  The
-> +MMC driver will then then toggle between default and idle during the run=
-time
-> +Affected chips are am335x,
-> =20
->                              ------
->                              | PRCM |
-> @@ -49,3 +52,24 @@ Example:
->  		vmmc-supply =3D <&vmmc>; /* phandle to regulator node */
->  		ti,non-removable;
->  	};
-> +
-> +[am335x with with gpio for sdio irq]
-> +
-> +	mmc1_cirq_pin: pinmux_cirq_pin {
-> +		pinctrl-single,pins =3D <
-> +			0x0f8 0x3f	/* MMC0_DAT1 as GPIO2_28 */
-> +		>;
-> +	};
-> +
-> +	mmc1: mmc@48060000 {
-> +		ti,non-removable;
-> +		bus-width =3D <4>;
-> +		vmmc-supply =3D <&ldo2_reg>;
-> +		vmmc_aux-supply =3D <&vmmc>;
-> +	        ti,quirk-swakeup-missing;
-> +		pinctrl-names =3D "default", "active", "idle";
-> +		pinctrl-0 =3D <&mmc1_pins>;
-> +		pinctrl-1 =3D <&mmc1_pins>;
-> +		pinctrl-2 =3D <&mmc1_cirq_pin>;
-> +		ti,cirq-gpio =3D <&gpio3 28 0>;
-> +	};
+Regards
+Dong Aisheng
 
+On Fri, Oct 18, 2013 at 02:04:01PM +0800, Jackey Shen wrote:
+> Hi John,
+> 
+> Does your SD host controller support 3.0 card? As I know, Marvel
+> SDIO8797 can work at UHS-I SDR104. Did you test it?
+> 
+> Thanks,
+> Jackey
+> 
+> On Thu, Oct 10, 2013 at 2:00 AM, John Tobias <john.tobias.ph@gmail.com> wrote:
+> > Hi Jackey,
+> >
+> > The Marvel SD8797 work fine but there are some cases that the firmware
+> > failed to load during the system boot up. Although, we managed it by
+> > power cycling the power source of the Marvel chip so that the kernel
+> > will able to detect and reinitialize again.
+> >
+> > The module was running in high speed, 4bit bus width.
+> >
+> > Here are some info:
+> >
+> > # iperf -c 192.168.x.x -t 60 -i 10
+> > ------------------------------------------------------------
+> > Client connecting to 192.168.x.x, TCP port 5001
+> > TCP window size: 20.7 KByte (default)
+> > ------------------------------------------------------------
+> > [  3] local 192.168.x.x port 52071 connected with 192.168.x.x port 5001
+> > [ ID] Interval       Transfer     Bandwidth
+> > [  3]  0.0-10.0 sec  48.0 MBytes  40.3 Mbits/sec
+> > [  3] 10.0-20.0 sec  53.4 MBytes  44.8 Mbits/sec
+> > [  3] 20.0-30.0 sec  53.8 MBytes  45.1 Mbits/sec
+> > [  3] 30.0-40.0 sec  56.4 MBytes  47.3 Mbits/sec
+> > [  3] 40.0-50.0 sec  54.2 MBytes  45.5 Mbits/sec
+> > [  3] 50.0-60.0 sec  53.5 MBytes  44.9 Mbits/sec
+> > [  3]  0.0-60.0 sec   319 MBytes  44.6 Mbits/sec
+> >
+> > # iwconfig mlan0
+> > mlan0     IEEE 802.11abgn  ESSID:"Pxx-xxx"
+> >           Mode:Managed  Frequency:2.437 GHz  Access Point:
+> > BC:Dx:xx:xx:xx:xx
+> >           Bit Rate=135 Mb/s
+> >           Retry  long limit:7   RTS thr:off   Fragment thr:off
+> >           Encryption key:off
+> >           Power Management:on
+> >           Link Quality=70/70  Signal level=-28 dBm
+> >           Rx invalid nwid:0  Rx invalid crypt:0  Rx invalid frag:0
+> >           Tx excessive retries:0  Invalid misc:0   Missed beacon:0
+> >
+> > Regards,
+> >
+> > john
+> >
+> >
+> >
+> > On Wed, Oct 9, 2013 at 12:23 AM, Jackey Shen <jackey.shen.bo@gmail.com>
+> > wrote:
+> >> Hi John,
+> >>
+> >> Does wifi module (Marvel SD8797) work fine on your board? What speed does
+> >> it
+> >> run at? SDR104?
+> >>
+> >> Thanks,
+> >> Jackey
+> >>
+> >> On Wed, Oct 9, 2013 at 10:00 AM, John Tobias <john.tobias.ph@gmail.com>
+> >> wrote:
+> >>>
+> >>> Hello,
+> >>>
+> >>> I am using git://gitorious.org/thierryreding/linux-next.git to boot my
+> >>> custom board based on iMX6 sololite. My board has SanDisk iNAND 4.51
+> >>> I/F and wifi module (Marvel SD8797). The latest update of
+> >>> sdhci-esdhc-imx.c supports DDR50/SDR50/SDR104 and I would like to use
+> >>> it for my device.
+> >>>
+> >>> In my .dts file, I have the following settings:
+> >>>
+> >>> /* WIFI module */
+> >>> &usdhc2 {
+> >>> pinctrl-names = "default", "state_100mhz", "state_200mhz";
+> >>> pinctrl-0 = <&pinctrl_usdhc2_2_default>;
+> >>> pinctrl-1 = <&pinctrl_usdhc2_3_100mhz>;
+> >>> pinctrl-2 = <&pinctrl_usdhc2_4_200mhz>;
+> >>> bus-width = <4>;
+> >>> status = "okay";
+> >>> };
+> >>>
+> >>> /* eMMC module  */
+> >>> &usdhc4 {
+> >>> pinctrl-names = "default", "state_100mhz", "state_200mhz";
+> >>> pinctrl-0 = <&pinctrl_usdhc4_2_default>;
+> >>> pinctrl-1 = <&pinctrl_usdhc4_3_100mhz>;
+> >>> pinctrl-2 = <&pinctrl_usdhc4_4_200mhz>;
+> >>> bus-width = <8>;
+> >>> status = "okay";
+> >>> compatible = "fsl,imx6sl-usdhc", "fsl,imx6q-usdhc";
+> >>> reg = <0x0219c000 0x4000>;
+> >>> };
+> >>>
+> >>> Then, in my .dtsi file:
+> >>>
+> >>> usdhc2 {
+> >>> /*WIFI pinmux */
+> >>> pinctrl_usdhc2_2_default: default {
+> >>> fsl,pins = <
+> >>> EVT1_PAD_SD2_CMD__SD2_CMD     0x17039
+> >>> EVT1_PAD_SD2_CLK__SD2_CLK     0x17039
+> >>> EVT1_PAD_SD2_DATA0__SD2_DATA0 0x17039
+> >>> EVT1_PAD_SD2_DATA1__SD2_DATA1 0x17039
+> >>> EVT1_PAD_SD2_DATA2__SD2_DATA2 0x17039
+> >>> EVT1_PAD_SD2_DATA3__SD2_DATA3 0x17039
+> >>> >;
+> >>> };
+> >>>
+> >>> pinctrl_usdhc2_3_100mhz: state_100mhz { /* 100Mhz */
+> >>> fsl,pins = <
+> >>> EVT1_PAD_SD2_CMD__SD2_CMD 0x170B9
+> >>> EVT1_PAD_SD2_CLK__SD2_CLK 0x100B9
+> >>> EVT1_PAD_SD2_DATA0__SD2_DATA0 0x170B9
+> >>> EVT1_PAD_SD2_DATA1__SD2_DATA1 0x170B9
+> >>> EVT1_PAD_SD2_DATA2__SD2_DATA2 0x170B9
+> >>> EVT1_PAD_SD2_DATA3__SD2_DATA3 0x170B9
+> >>> >;
+> >>> };
+> >>>
+> >>> pinctrl_usdhc2_4_200mhz: state_200mhz { /* 200Mhz */
+> >>> fsl,pins = <
+> >>> EVT1_PAD_SD2_CMD__SD2_CMD 0x170F9
+> >>> EVT1_PAD_SD2_CLK__SD2_CLK 0x100F9
+> >>> EVT1_PAD_SD2_DATA0__SD2_DATA0 0x170F9
+> >>> EVT1_PAD_SD2_DATA1__SD2_DATA1 0x170F9
+> >>> EVT1_PAD_SD2_DATA2__SD2_DATA2 0x170F9
+> >>> EVT1_PAD_SD2_DATA3__SD2_DATA3 0x170F9
+> >>> >;
+> >>> };
+> >>> };
+> >>>
+> >>> usdhc4 {
+> >>> /* eMMC pinmux */
+> >>> pinctrl_usdhc4_2_default: default {
+> >>> fsl,pins = <
+> >>> EVT1_PAD_EPDC_BDR1__SD4_CMD       0x17039
+> >>> EVT1_PAD_EPDC_BDR0__SD4_CLK       0x10039
+> >>> EVT1_PAD_EPDC_PWR_COM__SD4_DATA0  0x17039
+> >>> EVT1_PAD_EPDC_PWR_IRQ__SD4_DATA1  0x17039
+> >>> EVT1_PAD_EPDC_PWR_STAT__SD4_DATA2 0x17039
+> >>> EVT1_PAD_EPDC_PWR_WAKE__SD4_DATA3 0x17039
+> >>> EVT1_PAD_FEC_MDC__SD4_DATA4 0x17039
+> >>> EVT1_PAD_FEC_RX_DATA0__SD4_DATA5  0x17039
+> >>> EVT1_PAD_FEC_TX_EN__SD4_DATA6     0x17039
+> >>> EVT1_PAD_FEC_TX_DATA1__SD4_DATA7  0x17039
+> >>> >;
+> >>> };
+> >>>
+> >>> pinctrl_usdhc4_3_100mhz: state_100mhz { /* 100Mhz */
+> >>> fsl,pins = <
+> >>> EVT1_PAD_EPDC_BDR1__SD4_CMD 0x170B9
+> >>> EVT1_PAD_EPDC_BDR0__SD4_CLK   0x100B9
+> >>> EVT1_PAD_EPDC_PWR_COM__SD4_DATA0 0x170B9
+> >>> EVT1_PAD_EPDC_PWR_IRQ__SD4_DATA1 0x170B9
+> >>> EVT1_PAD_EPDC_PWR_STAT__SD4_DATA2 0x170B9
+> >>> EVT1_PAD_EPDC_PWR_WAKE__SD4_DATA3 0x170B9
+> >>> EVT1_PAD_FEC_MDC__SD4_DATA4 0x170B9
+> >>> EVT1_PAD_FEC_RX_DATA0__SD4_DATA5  0x170B9
+> >>> EVT1_PAD_FEC_TX_EN__SD4_DATA6     0x170B9
+> >>> EVT1_PAD_FEC_TX_DATA1__SD4_DATA7  0x170B9
+> >>> >;
+> >>> };
+> >>>
+> >>> pinctrl_usdhc4_4_200mhz: state_200mhz { /* 200Mhz */
+> >>> fsl,pins = <
+> >>> EVT1_PAD_EPDC_BDR1__SD4_CMD 0x170F9
+> >>> EVT1_PAD_EPDC_BDR0__SD4_CLK   0x100F9
+> >>> EVT1_PAD_EPDC_PWR_COM__SD4_DATA0 0x170F9
+> >>> EVT1_PAD_EPDC_PWR_IRQ__SD4_DATA1 0x170F9
+> >>> EVT1_PAD_EPDC_PWR_STAT__SD4_DATA2 0x170F9
+> >>> EVT1_PAD_EPDC_PWR_WAKE__SD4_DATA3 0x170F9
+> >>> EVT1_PAD_FEC_MDC__SD4_DATA4 0x170F9
+> >>> EVT1_PAD_FEC_RX_DATA0__SD4_DATA5  0x170F9
+> >>> EVT1_PAD_FEC_TX_EN__SD4_DATA6     0x170F9
+> >>> EVT1_PAD_FEC_TX_DATA1__SD4_DATA7  0x170F9
+> >>> >;
+> >>> };
+> >>> };
+> >>>
+> >>>
+> >>> 1. After using the said pinmux settings, the sdhci-esdh-imx controller
+> >>> wasn't able to configure it correctly due the the group name for the
+> >>> two port were the same (default, state_100mhz, state_200mhz).
+> >>>
+> >>> 2. Then, I temporarily disabled usdhc4 to test if the driver able to
+> >>> enable the SDR50 for my wifi. Then, I was getting the following
+> >>> errors:
+> >>>
+> >>> [    1.655024] mmc0: error -110 whilst initialising SDIO card
+> >>> [    3.746340] mmc0: error -110 whilst initialising SDIO card
+> >>> [    3.818624] mmc0: host doesn't support card's voltages
+> >>> [    3.823783] mmc0: error -22 whilst initialising SDIO card
+> >>> [    3.901670] mmc0: host doesn't support card's voltages
+> >>> [    3.906862] mmc0: error -22 whilst initialising SDIO card
+> >>> [   34.307777] mmc0: host doesn't support card's voltages
+> >>> [   34.312980] mmc0: error -22 whilst initialising SDIO card
+> >>>
+> >>> 3. Then, I tried the eMMC to see if the driver able to enable the
+> >>> DDR50. After booting it, the kernel detect the eMMC only in hight
+> >>> speed mode.
+> >>>
+> >>>
+> >>> I would like to know if anyone here can help me to figure out how to
+> >>> enable the DDR50 for my eMMC and SDR50 for my wifi as well.
+> >>>
+> >>> Regards,
+> >>>
+> >>> john
+> >>> --
+> >>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> >>> the body of a message to majordomo@vger.kernel.org
+> >>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> >>
+> >>
+> 
 
-hi,
- I've been trying to get SD irq to work on my  OMAP3 DM3730.
-I seems to need the magic to catch interrupts while FCLK is off, as
-the only way I can get it to work at the moment is to keep FCLK on.
-
-I discovered your patch and tried it out, but it doesn't seem to work for m=
-e.
-
-I have a Libertas WIFI chip attached to the second mmc (which is sometimes
-called mmc1, and sometimes mmc2 - very confusing!).
-I added:
-	mmc2_cirq_pin: pinmux_cirq_pin {
-		pinctrl-single,pins =3D <
-			0x012e (PIN_INPUT_PULLUP | MUX_MODE4)	/* MMC2_DAT1 as GPIO5_5 */
-		>;
-	};
-
-and
-
-&mmc2 {
-	ti,quirk-swakeup-missing;
-	pinctrl-names =3D "default", "active", "idle";
-	pinctrl-0 =3D <&mmc2_pins>;
-	pinctrl-1 =3D <&mmc2_pins>;
-	pinctrl-2 =3D <&mmc2_cirq_pin>;
-	ti,cirq-gpio =3D <&gpio5 5 0>; /* GPIO133 =3D 128+5 */
-};
-
-to my dts file but it doesn't make any apparent difference.
-
-Any idea what I might be doing wrong?
-(the base kernel I am applying patches to is from 8th Oct,
- commit 0e7a3ed04f0cd4311096d691888f88569310ee6c)
-
-BTW,
- - with the default polling, I get about 1Mb/sec with iperf
- - with sd-irq enabled and FCLK kept on the whole time, I get 4Mb/sec
- - with sd-irq enable, FCLK kept on, and the 5ms polling also
-   running, I get over 5Mb/sec!
-Still much less than the 40Mb/sec that I would like to get...
-
-Thanks,
-NeilBrown
-
---Sig_/.i2Ap0RDt8DcOydutI46yBm
-Content-Type: application/pgp-signature; name=signature.asc
-Content-Disposition: attachment; filename=signature.asc
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.19 (GNU/Linux)
-
-iQIVAwUBUmDTRTnsnt1WYoG5AQJ53hAAsE2v2MrDYKDpBDpSIHQzhaZ4SE57Mzl3
-SrGc536xSAy8Skxz1+9m/WkjOhzssF/q9LE6jJtYL8INa8Fg6c7izFtZm0yLBLbb
-pgYxNvcYKbueAcT4RbcwTxnODJOw7VZL1/NrSRKfvKCx7FOyKv+UpRHGwFwgGfmP
-e5ND7m8lYP3rk5LzZ8X8RQTCL5gVKOpD2UXdMAwWDalMedsbI5Z8tY8I+w242ASX
-Ul+lsoJNeA/BckTKxJK9S/GxN76ZMbOFkf1O+oFAmeV+jmKx/mqg4mdkcGVulqEo
-6HNn2vOv1weNj48Z/yoln6WXJL+x/1oLmnTjxlN78KKhW/eKBlEG0yuL4PSdeo2h
-MTSXIIlGrD+4uzDAqypFAT8rpG1lvd5bOk4nNvIPDMUKjV/6fEDtArQWIOcwaxN1
-LBNYs7kNw3IwR22t+o5oK+/1OFD0y+7gHGDY+NSS4YuxLdeb5RLkvjjT19SCFw6o
-2pcpLKZFlbFVl3nk33z1l3NPR498DXvKBwD7BNjdxuV8JKWRGXRd5PzYS5hqZXnc
-w44oxzeLxVPrPiiIB6G74EBBXWDk+0uhIqT0G9H2pMIETbCTGeOrjkmuRYA1zwXv
-01bLWDT0CoYEHzMnPrn3J8i4wa5JW47xWcik5HNl3u0l9XjRYbAPzEgHiRdYhRLP
-tEk2JyUl864=
-=M33O
------END PGP SIGNATURE-----
-
---Sig_/.i2Ap0RDt8DcOydutI46yBm--
