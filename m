@@ -1,61 +1,203 @@
 From: Dong Aisheng <b29396@freescale.com>
-Subject: [PATCH v2 0/8] mmc: sdhci-esdhc-imx: add std tuning for mx6sl and DDR mode support
-Date: Fri, 18 Oct 2013 18:54:13 +0800
-Message-ID: <1382093661-4074-1-git-send-email-b29396@freescale.com>
+Subject: [PATCH v2 1/8] mmc: sdhci-esdhc-imx: add std tuning support for mx6sl
+Date: Fri, 18 Oct 2013 18:54:14 +0800
+Message-ID: <1382093661-4074-2-git-send-email-b29396@freescale.com>
+References: <1382093661-4074-1-git-send-email-b29396@freescale.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from co1ehsobe003.messaging.microsoft.com ([216.32.180.186]:42930
-	"EHLO co1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752946Ab3JRLKl (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 18 Oct 2013 07:10:41 -0400
+Received: from ch1ehsobe001.messaging.microsoft.com ([216.32.181.181]:8658
+	"EHLO ch1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752956Ab3JRLKp (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 18 Oct 2013 07:10:45 -0400
+In-Reply-To: <1382093661-4074-1-git-send-email-b29396@freescale.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 Cc: linux-arm-kernel@lists.infradead.org, cjb@laptop.org, shawn.guo@linaro.org, s.hauer@pengutronix.de, b29396@freescale.com, wsa@the-dreams.de
 
-The i.MX6SL supports standard tuning as defined in standard host control spec v3.0.
-So this patch series add std tuning support for i.MX6SL.
-(NOTE i.MX6SL can also work on the old manual tuning mode as i.MX6Q/DL)
-In the meanwhile, it also adds DDR mode support.
-Then SD3.0 cards which can only support DDR50 can work properly now
-with this patch series.
+The mx6sl supports standard sdhci tuning, then esdhc_executing_tuning
+is only needed for mx6q/dl. We introduce is_imx6_usdhc() and
+is_imx6sl_usdhc() to handle the difference.
 
-Patch 1~3 add stardard tuning support for i.MX6SL.
-Patch 4~5 add DDR mode and delay line support
-Patch 6~8 some other related minor fixes.
+The standard tuning is enabled by setting ESDHC_TUNE_CTRL_STD_TUNING_EN bit
+in new register ESDHC_TUNE_CTRL and operates with new tuning bits
+defined in SDHCI_ACMD12_ERR register.
 
-Tested on i.MX6SL EVK board.
+Note: mx6sl can also work on the old manually tuning mode as mx6q/dl if
+not enable standard tuning mode.
 
-The patch series is generated based on the latest mmc-next branch with Shawn's
-(1)[PATCH v2 0/4] mmc: sdhci-esdhc-imx: eliminate enum imx_esdhc_type in Chris' tree.
+Signed-off-by: Dong Aisheng <b29396@freescale.com>
+---
+ drivers/mmc/host/sdhci-esdhc-imx.c |   90 +++++++++++++++++++++++++++++-------
+ 1 files changed, 73 insertions(+), 17 deletions(-)
 
-1. http://www.spinics.net/lists/arm-kernel/msg280517.html
-
-ChangeLog:
-v1->v2:
- - Only a few minor changes on patch 1 and 5 based on comments from Shawn
-   while other patches have no change.
- - rebase on Shawn's patch series
-   [PATCH v2 0/4] mmc: sdhci-esdhc-imx: eliminate enum imx_esdhc_type
-
-Dong Aisheng (8):
-  mmc: sdhci-esdhc-imx: add std tuning support for mx6sl
-  mmc: sdhci-esdhc-imx: fix reading cap_1 register value for mx6sl
-  mmc: sdhci: report error once the maximum tuning loops exhausted or
-    timeout
-  mmc: sdhci-esdhc-imx: add DDR mode support for mx6
-  mmc: sdhci-esdhc-imx: add delay line setting support
-  mmc: sdhci-esdhc-imx: enable SDR50 tuning for imx6q/dl
-  mmc: sdhci-esdhc-imx: add preset value quirk for mx6
-  mmc: sdhci: remove unneeded call when have preset value quirk
-
- .../devicetree/bindings/mmc/fsl-imx-esdhc.txt      |    5 +
- drivers/mmc/host/sdhci-esdhc-imx.c                 |  134 +++++++++++++++++---
- drivers/mmc/host/sdhci.c                           |    4 +-
- include/linux/platform_data/mmc-esdhc-imx.h        |    1 +
- 4 files changed, 122 insertions(+), 22 deletions(-)
-
+diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+index c84c808..a4e0e3b 100644
+--- a/drivers/mmc/host/sdhci-esdhc-imx.c
++++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+@@ -51,6 +51,11 @@
+ #define  ESDHC_TUNE_CTRL_MIN		0
+ #define  ESDHC_TUNE_CTRL_MAX		((1 << 7) - 1)
+ 
++#define ESDHC_TUNING_CTRL		0xcc
++#define ESDHC_STD_TUNING_EN		(1 << 24)
++/* NOTE: the minimum valid tuning start tap for mx6sl is 1 */
++#define ESDHC_TUNING_START_TAP		0x1
++
+ #define ESDHC_TUNING_BLOCK_PATTERN_LEN	64
+ 
+ /* pinctrl state */
+@@ -94,6 +99,12 @@
+  * integrated on the i.MX6 series.
+  */
+ #define ESDHC_FLAG_USDHC		BIT(3)
++/* The IP supports manual tuning process */
++#define ESDHC_FLAG_MAN_TUNING		BIT(4)
++/* The IP supports standard tuning process */
++#define ESDHC_FLAG_STD_TUNING		BIT(4)
++/* The IP has SDHCI_CAPABILITIES_1 register */
++#define ESDHC_FLAG_HAVE_CAP1		BIT(5)
+ 
+ struct esdhc_soc_data {
+ 	u32 flags;
+@@ -116,7 +127,12 @@ static struct esdhc_soc_data esdhc_imx53_data = {
+ };
+ 
+ static struct esdhc_soc_data usdhc_imx6q_data = {
+-	.flags = ESDHC_FLAG_USDHC,
++	.flags = ESDHC_FLAG_USDHC | ESDHC_FLAG_MAN_TUNING,
++};
++
++static struct esdhc_soc_data usdhc_imx6sl_data = {
++	.flags = ESDHC_FLAG_USDHC | ESDHC_FLAG_STD_TUNING
++			| ESDHC_FLAG_HAVE_CAP1,
+ };
+ 
+ struct pltfm_imx_data {
+@@ -159,6 +175,7 @@ static const struct of_device_id imx_esdhc_dt_ids[] = {
+ 	{ .compatible = "fsl,imx35-esdhc", .data = &esdhc_imx35_data, },
+ 	{ .compatible = "fsl,imx51-esdhc", .data = &esdhc_imx51_data, },
+ 	{ .compatible = "fsl,imx53-esdhc", .data = &esdhc_imx53_data, },
++	{ .compatible = "fsl,imx6sl-usdhc", .data = &usdhc_imx6sl_data, },
+ 	{ .compatible = "fsl,imx6q-usdhc", .data = &usdhc_imx6q_data, },
+ 	{ /* sentinel */ }
+ };
+@@ -222,9 +239,16 @@ static u32 esdhc_readl_le(struct sdhci_host *host, int reg)
+ 		}
+ 	}
+ 
+-	if (unlikely(reg == SDHCI_CAPABILITIES_1) && esdhc_is_usdhc(imx_data))
+-		val = SDHCI_SUPPORT_DDR50 | SDHCI_SUPPORT_SDR104
+-				| SDHCI_SUPPORT_SDR50;
++	if (unlikely(reg == SDHCI_CAPABILITIES_1)) {
++		if (esdhc_is_usdhc(imx_data)) {
++			if (imx_data->socdata->flags & ESDHC_FLAG_HAVE_CAP1)
++				val = readl(host->ioaddr + SDHCI_CAPABILITIES) & 0xFFFF;
++			else
++				/* imx6q/dl does not have cap_1 register, fake one */
++				val = SDHCI_SUPPORT_DDR50 | SDHCI_SUPPORT_SDR104
++					| SDHCI_SUPPORT_SDR50;
++		}
++	}
+ 
+ 	if (unlikely(reg == SDHCI_MAX_CURRENT) && esdhc_is_usdhc(imx_data)) {
+ 		val = 0;
+@@ -331,13 +355,18 @@ static u16 esdhc_readw_le(struct sdhci_host *host, int reg)
+ 			ret |= SDHCI_CTRL_VDD_180;
+ 
+ 		if (esdhc_is_usdhc(imx_data)) {
+-			val = readl(host->ioaddr + ESDHC_MIX_CTRL);
+-			if (val & ESDHC_MIX_CTRL_EXE_TUNE)
+-				ret |= SDHCI_CTRL_EXEC_TUNING;
+-			if (val & ESDHC_MIX_CTRL_SMPCLK_SEL)
+-				ret |= SDHCI_CTRL_TUNED_CLK;
++			if (imx_data->socdata->flags & ESDHC_FLAG_MAN_TUNING)
++				val = readl(host->ioaddr + ESDHC_MIX_CTRL);
++			else if (imx_data->socdata->flags & ESDHC_FLAG_STD_TUNING)
++				/* the std tuning bits is in ACMD12_ERR for imx6sl */
++				val = readl(host->ioaddr + SDHCI_ACMD12_ERR);
+ 		}
+ 
++		if (val & ESDHC_MIX_CTRL_EXE_TUNE)
++			ret |= SDHCI_CTRL_EXEC_TUNING;
++		if (val & ESDHC_MIX_CTRL_SMPCLK_SEL)
++			ret |= SDHCI_CTRL_TUNED_CLK;
++
+ 		ret |= (imx_data->uhs_mode & SDHCI_CTRL_UHS_MASK);
+ 		ret &= ~SDHCI_CTRL_PRESET_VAL_ENABLE;
+ 
+@@ -370,12 +399,37 @@ static void esdhc_writew_le(struct sdhci_host *host, u16 val, int reg)
+ 			new_val &= ~ESDHC_VENDOR_SPEC_VSELECT;
+ 		writel(new_val, host->ioaddr + ESDHC_VENDOR_SPEC);
+ 		imx_data->uhs_mode = val & SDHCI_CTRL_UHS_MASK;
+-		new_val = readl(host->ioaddr + ESDHC_MIX_CTRL);
+-		if (val & SDHCI_CTRL_TUNED_CLK)
+-			new_val |= ESDHC_MIX_CTRL_SMPCLK_SEL;
+-		else
+-			new_val &= ~ESDHC_MIX_CTRL_SMPCLK_SEL;
+-		writel(new_val , host->ioaddr + ESDHC_MIX_CTRL);
++		if (imx_data->socdata->flags & ESDHC_FLAG_MAN_TUNING) {
++			new_val = readl(host->ioaddr + ESDHC_MIX_CTRL);
++			if (val & SDHCI_CTRL_TUNED_CLK)
++				new_val |= ESDHC_MIX_CTRL_SMPCLK_SEL;
++			else
++				new_val &= ~ESDHC_MIX_CTRL_SMPCLK_SEL;
++			writel(new_val , host->ioaddr + ESDHC_MIX_CTRL);
++		} else if (imx_data->socdata->flags & ESDHC_FLAG_STD_TUNING) {
++			u32 v = readl(host->ioaddr + SDHCI_ACMD12_ERR);
++			u32 m = readl(host->ioaddr + ESDHC_MIX_CTRL);
++			new_val = readl(host->ioaddr + ESDHC_TUNING_CTRL);
++			if (val & SDHCI_CTRL_EXEC_TUNING) {
++				new_val |= ESDHC_STD_TUNING_EN |
++						ESDHC_TUNING_START_TAP;
++				v |= ESDHC_MIX_CTRL_EXE_TUNE;
++				m |= ESDHC_MIX_CTRL_FBCLK_SEL;
++			} else {
++				new_val &= ~ESDHC_STD_TUNING_EN;
++				v &= ~ESDHC_MIX_CTRL_EXE_TUNE;
++				m &= ~ESDHC_MIX_CTRL_FBCLK_SEL;
++			}
++
++			if (val & SDHCI_CTRL_TUNED_CLK)
++				v |= ESDHC_MIX_CTRL_SMPCLK_SEL;
++			else
++				v &= ~ESDHC_MIX_CTRL_SMPCLK_SEL;
++
++			writel(new_val, host->ioaddr + ESDHC_TUNING_CTRL);
++			writel(v, host->ioaddr + SDHCI_ACMD12_ERR);
++			writel(m, host->ioaddr + ESDHC_MIX_CTRL);
++		}
+ 		return;
+ 	case SDHCI_TRANSFER_MODE:
+ 		if ((imx_data->socdata->flags & ESDHC_FLAG_MULTIBLK_NO_INT)
+@@ -774,7 +828,7 @@ static int esdhc_set_uhs_signaling(struct sdhci_host *host, unsigned int uhs)
+ 	return esdhc_change_pinstate(host, uhs);
+ }
+ 
+-static const struct sdhci_ops sdhci_esdhc_ops = {
++static struct sdhci_ops sdhci_esdhc_ops = {
+ 	.read_l = esdhc_readl_le,
+ 	.read_w = esdhc_readw_le,
+ 	.write_l = esdhc_writel_le,
+@@ -786,7 +840,6 @@ static const struct sdhci_ops sdhci_esdhc_ops = {
+ 	.get_ro = esdhc_pltfm_get_ro,
+ 	.platform_bus_width = esdhc_pltfm_bus_width,
+ 	.set_uhs_signaling = esdhc_set_uhs_signaling,
+-	.platform_execute_tuning = esdhc_executing_tuning,
+ };
+ 
+ static const struct sdhci_pltfm_data sdhci_esdhc_imx_pdata = {
+@@ -922,6 +975,9 @@ static int sdhci_esdhc_imx_probe(struct platform_device *pdev)
+ 	if (esdhc_is_usdhc(imx_data))
+ 		writel(0x08100810, host->ioaddr + ESDHC_WTMK_LVL);
+ 
++	if (imx_data->socdata->flags & ESDHC_FLAG_MAN_TUNING)
++		sdhci_esdhc_ops.platform_execute_tuning =
++					esdhc_executing_tuning;
+ 	boarddata = &imx_data->boarddata;
+ 	if (sdhci_esdhc_imx_probe_dt(pdev, boarddata) < 0) {
+ 		if (!host->mmc->parent->platform_data) {
 -- 
 1.7.2.rc3
 
