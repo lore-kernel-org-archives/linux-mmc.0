@@ -1,54 +1,77 @@
 From: Balaji T K <balajitk@ti.com>
-Subject: [PATCH 4/5] mmc: omap_hsmmc: correct max value of clkd
-Date: Mon, 21 Oct 2013 00:25:21 +0530
-Message-ID: <1382295322-18995-4-git-send-email-balajitk@ti.com>
+Subject: [PATCH 3/5] mmc: omap_hsmmc: fix timeout for cmd and data soft reset
+Date: Mon, 21 Oct 2013 00:25:20 +0530
+Message-ID: <1382295322-18995-3-git-send-email-balajitk@ti.com>
 References: <1382295322-18995-1-git-send-email-balajitk@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from devils.ext.ti.com ([198.47.26.153]:55461 "EHLO
-	devils.ext.ti.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751654Ab3JTSzj (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 20 Oct 2013 14:55:39 -0400
+Received: from comal.ext.ti.com ([198.47.26.152]:43126 "EHLO comal.ext.ti.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751574Ab3JTSzi (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Sun, 20 Oct 2013 14:55:38 -0400
 In-Reply-To: <1382295322-18995-1-git-send-email-balajitk@ti.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org, cjb@laptop.org, tony@atomide.com
-Cc: linux-omap@vger.kernel.org, Balaji T K <balajitk@ti.com>
+Cc: linux-omap@vger.kernel.org, Jianpeng Ma <majianpeng@gmail.com>, Balaji T K <balajitk@ti.com>
 
-clock divisor can take a max value of 1023.
-Update code so that card init can be handled at f_min even at
-higher IP clock frequencies from which clock to the card is
-derived.
+From: Jianpeng Ma <majianpeng@gmail.com>
 
+With HSMMC_HAS_UPDATED_RESET reset of cmd/data (SRC/SRD) can be to
+quick and can be missed resulting in wait for software timeout.
+With cpu_relax timeout can be long and unpredictable. Use udelay instead for
+timeout implementation.
+
+Reported-by: Yuzheng Ma <mayuzheng@kedacom.com>
+Tested-by: Yuzheng Ma <mayuzheng@kedacom.com>
+Reviewed-by: Hein Tibosch <hein_tibosch@yahoo.es>
+Signed-off-by: Jianpeng Ma <majianpeng@gmail.com>
 Signed-off-by: Balaji T K <balajitk@ti.com>
 ---
- drivers/mmc/host/omap_hsmmc.c |    5 +++--
- 1 files changed, 3 insertions(+), 2 deletions(-)
+ drivers/mmc/host/omap_hsmmc.c |   10 +++++-----
+ 1 files changed, 5 insertions(+), 5 deletions(-)
 
 diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index 9f74a57..60db34d 100644
+index 9ebff99..9f74a57 100644
 --- a/drivers/mmc/host/omap_hsmmc.c
 +++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -75,6 +75,7 @@
- #define ICE			0x1
- #define ICS			0x2
- #define CEN			(1 << 2)
-+#define CLKD_MAX		0x3FF		/* max clock divisor: 1023 */
- #define CLKD_MASK		0x0000FFC0
- #define CLKD_SHIFT		6
- #define DTO_MASK		0x000F0000
-@@ -497,8 +498,8 @@ static u16 calc_divisor(struct omap_hsmmc_host *host, struct mmc_ios *ios)
+@@ -119,7 +119,8 @@
+ 		BRR_EN | BWR_EN | TC_EN | CC_EN)
  
- 	if (ios->clock) {
- 		dsor = DIV_ROUND_UP(clk_get_rate(host->fclk), ios->clock);
--		if (dsor > 250)
--			dsor = 250;
-+		if (dsor > CLKD_MAX)
-+			dsor = CLKD_MAX;
+ #define MMC_AUTOSUSPEND_DELAY	100
+-#define MMC_TIMEOUT_MS		20
++#define MMC_TIMEOUT_MS		20		/* 20 mSec */
++#define MMC_TIMEOUT_US		20000		/* 20000 micro Sec */
+ #define OMAP_MMC_MIN_CLOCK	400000
+ #define OMAP_MMC_MAX_CLOCK	52000000
+ #define DRIVER_NAME		"omap_hsmmc"
+@@ -967,8 +968,7 @@ static inline void omap_hsmmc_reset_controller_fsm(struct omap_hsmmc_host *host,
+ 						   unsigned long bit)
+ {
+ 	unsigned long i = 0;
+-	unsigned long limit = (loops_per_jiffy *
+-				msecs_to_jiffies(MMC_TIMEOUT_MS));
++	unsigned long limit = MMC_TIMEOUT_US;
+ 
+ 	OMAP_HSMMC_WRITE(host->base, SYSCTL,
+ 			 OMAP_HSMMC_READ(host->base, SYSCTL) | bit);
+@@ -980,13 +980,13 @@ static inline void omap_hsmmc_reset_controller_fsm(struct omap_hsmmc_host *host,
+ 	if (mmc_slot(host).features & HSMMC_HAS_UPDATED_RESET) {
+ 		while ((!(OMAP_HSMMC_READ(host->base, SYSCTL) & bit))
+ 					&& (i++ < limit))
+-			cpu_relax();
++			udelay(1);
  	}
+ 	i = 0;
  
- 	return dsor;
+ 	while ((OMAP_HSMMC_READ(host->base, SYSCTL) & bit) &&
+ 		(i++ < limit))
+-		cpu_relax();
++		udelay(1);
+ 
+ 	if (OMAP_HSMMC_READ(host->base, SYSCTL) & bit)
+ 		dev_err(mmc_dev(host->mmc),
 -- 
 1.7.5.4
 
