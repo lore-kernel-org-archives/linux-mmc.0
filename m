@@ -1,35 +1,39 @@
 From: Balaji T K <balajitk@ti.com>
-Subject: [PATCH v2 4/6] ARM: dts: dra7-evm: mark eMMC as non removable
-Date: Mon, 21 Oct 2013 00:19:57 +0530
-Message-ID: <1382294999-18790-5-git-send-email-balajitk@ti.com>
-References: <1381936707-10336-1-git-send-email-balajitk@ti.com>
- <1382294999-18790-1-git-send-email-balajitk@ti.com>
+Subject: [PATCH 1/5] mmc: omap_hsmmc: Fix pbias_disable for omap4
+Date: Mon, 21 Oct 2013 00:25:18 +0530
+Message-ID: <1382295322-18995-1-git-send-email-balajitk@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-omap-owner@vger.kernel.org>
-In-Reply-To: <1382294999-18790-1-git-send-email-balajitk@ti.com>
 Sender: linux-omap-owner@vger.kernel.org
-To: bcousson@baylibre.com, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, cjb@laptop.org, uri.y@variscite.com, mark.rutland@arm.com
+To: linux-mmc@vger.kernel.org, cjb@laptop.org, tony@atomide.com
 Cc: linux-omap@vger.kernel.org, Balaji T K <balajitk@ti.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Mark the eMMC on dra7-evm as non removable.
+pbias_disable is set to protect the mmc pbias i/o cells in DT boot
+by preventing voltage switch. Currently pbias_disable is enabled only
+for omap3 and not for omap4 due to reg_offset difference of 0x100.
+Enable pbias_disable for omap4+ too by using res->start
+which does not include the reg_offset.
 
 Signed-off-by: Balaji T K <balajitk@ti.com>
 ---
- arch/arm/boot/dts/dra7-evm.dts |    1 +
- 1 files changed, 1 insertions(+), 0 deletions(-)
+ drivers/mmc/host/omap_hsmmc.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
 
-diff --git a/arch/arm/boot/dts/dra7-evm.dts b/arch/arm/boot/dts/dra7-evm.dts
-index 3abf5f4..799890f 100644
---- a/arch/arm/boot/dts/dra7-evm.dts
-+++ b/arch/arm/boot/dts/dra7-evm.dts
-@@ -268,4 +268,5 @@
- 	status = "okay";
- 	vmmc-supply = <&mmc2_3v3>;
- 	bus-width = <8>;
-+	non-removable;
- };
+diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+index 7d2d929..84a1140 100644
+--- a/drivers/mmc/host/omap_hsmmc.c
++++ b/drivers/mmc/host/omap_hsmmc.c
+@@ -1876,7 +1876,7 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
+ 	omap_hsmmc_context_save(host);
+ 
+ 	/* This can be removed once we support PBIAS with DT */
+-	if (host->dev->of_node && host->mapbase == 0x4809c000)
++	if (host->dev->of_node && res->start == 0x4809c000)
+ 		host->pbias_disable = 1;
+ 
+ 	host->dbclk = clk_get(&pdev->dev, "mmchsdb_fck");
 -- 
 1.7.5.4
 
