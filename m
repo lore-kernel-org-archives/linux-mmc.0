@@ -1,44 +1,38 @@
 From: Balaji T K <balajitk@ti.com>
-Subject: [PATCH v2 3/6] ARM: dts: am335x-boneblack: mark eMMC as non removable
-Date: Mon, 21 Oct 2013 00:19:56 +0530
-Message-ID: <1382294999-18790-4-git-send-email-balajitk@ti.com>
+Subject: [PATCH v2 6/6] ARM: dts: omap4-var-som: fix bus-width
+Date: Mon, 21 Oct 2013 00:19:59 +0530
+Message-ID: <1382294999-18790-7-git-send-email-balajitk@ti.com>
 References: <1381936707-10336-1-git-send-email-balajitk@ti.com>
  <1382294999-18790-1-git-send-email-balajitk@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from bear.ext.ti.com ([192.94.94.41]:48745 "EHLO bear.ext.ti.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751547Ab3JTSub (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sun, 20 Oct 2013 14:50:31 -0400
+Return-path: <linux-omap-owner@vger.kernel.org>
 In-Reply-To: <1382294999-18790-1-git-send-email-balajitk@ti.com>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Sender: linux-omap-owner@vger.kernel.org
 To: bcousson@baylibre.com, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, cjb@laptop.org, uri.y@variscite.com, mark.rutland@arm.com
-Cc: linux-omap@vger.kernel.org, Sekhar Nori <nsekhar@ti.com>, Balaji T K <balajitk@ti.com>
+Cc: linux-omap@vger.kernel.org, Balaji T K <balajitk@ti.com>
+List-Id: linux-mmc@vger.kernel.org
 
-From: Sekhar Nori <nsekhar@ti.com>
+ti,bus-width does not exist, use generic bus-width binding
 
-Mark the eMMC module on BeagleBone black as non removable.
-
-Signed-off-by: Sekhar Nori <nsekhar@ti.com>
 Signed-off-by: Balaji T K <balajitk@ti.com>
 ---
- arch/arm/boot/dts/am335x-boneblack.dts |    1 +
- 1 files changed, 1 insertions(+), 0 deletions(-)
+ arch/arm/boot/dts/omap4-var-som.dts |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
 
-diff --git a/arch/arm/boot/dts/am335x-boneblack.dts b/arch/arm/boot/dts/am335x-boneblack.dts
-index 6b71ad9..2e189cd 100644
---- a/arch/arm/boot/dts/am335x-boneblack.dts
-+++ b/arch/arm/boot/dts/am335x-boneblack.dts
-@@ -25,6 +25,7 @@
- 	pinctrl-names = "default";
- 	pinctrl-0 = <&emmc_pins>;
- 	bus-width = <8>;
-+	non-removable;
- 	status = "okay";
- 	ti,vcc-aux-disable-is-sleep;
+diff --git a/arch/arm/boot/dts/omap4-var-som.dts b/arch/arm/boot/dts/omap4-var-som.dts
+index b25b9ad..2ae8608 100644
+--- a/arch/arm/boot/dts/omap4-var-som.dts
++++ b/arch/arm/boot/dts/omap4-var-som.dts
+@@ -75,7 +75,7 @@
+ 
+ &mmc1 {
+ 	vmmc-supply = <&vmmc>;
+-	ti,bus-width = <8>;
++	bus-width = <8>;
+ 	non-removable;
  };
+ 
 -- 
 1.7.5.4
 
