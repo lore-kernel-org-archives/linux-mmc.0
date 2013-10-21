@@ -1,52 +1,55 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH 3/8] sdhci: Use work structs instead of tasklets
-Date: Mon, 21 Oct 2013 12:44:20 +0100
-Message-ID: <86li1mq25n.fsf@void.printf.net>
-References: <1381940458-12628-1-git-send-email-jeremie.samuel.ext@parrot.com>
-	<1381940458-12628-4-git-send-email-jeremie.samuel.ext@parrot.com>
-	<874n8b9ywb.fsf@octavius.laptop.org> <5264E78B.1020209@parrot.com>
+From: Dong Aisheng <b29396@freescale.com>
+Subject: [PATCH 0/7] mmc: sdhci-esdhc-imx: fix acmd23 unwork and ddr not supported on sabresd issues
+Date: Mon, 21 Oct 2013 22:27:00 +0800
+Message-ID: <1382365627-26816-1-git-send-email-b29396@freescale.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:40689 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753205Ab3JULoY (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 21 Oct 2013 07:44:24 -0400
-In-Reply-To: <5264E78B.1020209@parrot.com> (Jeremie Samuel's message of "Mon,
-	21 Oct 2013 10:36:27 +0200")
+Received: from va3ehsobe004.messaging.microsoft.com ([216.32.180.14]:9186 "EHLO
+	va3outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1753084Ab3JUOoI (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 21 Oct 2013 10:44:08 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jeremie Samuel <jeremie.samuel.ext@parrot.com>
-Cc: linux-mmc@vger.kernel.org, =?utf-8?Q?Gr=C3=A9gor?= Boirie <gregor.boirie@parrot.com>, Matthieu Castet <matthieu.castet@parrot.com>, Anton Vorontsov <avorontsov@mvista.com>
+To: linux-mmc@vger.kernel.org
+Cc: linux-arm-kernel@lists.infradead.org, cjb@laptop.org, shawn.guo@linaro.org, s.hauer@pengutronix.de, b29396@freescale.com, wsa@the-dreams.de, ulf.hansson@linaro.org
 
-Hi Jeremie,
+Patch 1~3 fix acmd23 unwork issue.
+Currently the eMMC chip integrated on i.MX6Q SabreSD boards does not work.
+(It's easily reproduced once you enable usdhc4 on sabresd, see patch 3)
+It's caused by acmd setting bits are never cleared once it's been set
+which cause the next normal commands to work abnormally.
 
-On Mon, Oct 21 2013, Jeremie Samuel wrote:
-> Do you have a way for me to compile the driver for all the
-> architectures impacted by the patch? So I could send a patch which
-> compile for all these architectures.
+Patch 4~6 fix DDR not supported on SabreSD board.
+The SabreSD board does not have 1.8v signal voltage switch support for uSDHC,
+thus it can not support UHS_DDR50 mode which can only run at 1.8v signal voltage.
 
-If you can get an ARM cross-compiler going, it would look something
-like this:
+The issue is that current mmc DDR mode support implemented in MMC core depends
+on UHS_DDR50, which then cause such controller like uSDHC on SabreSD without 1.8v
+capability can not support eMMC DDR mode too.
+(But the SabreSD board does support eMMC DDR mode since the eMMC DDR mode can
+work on either 1.8v or 3.3v)
+So this patch gets rid of this limitation to let controller not support
+1.8v signal voltage can also support eMMC DDR mode.
 
-$ mkdir obj.dove obj.imx obj.s3c obj.spear obj.tegra
+Patch 7 add eMMC hs200 support
 
-$ cp arch/arm/configs/dove_defconfig obj.dove
-$ cp arch/arm/configs/imx_v6_v7_defconfig obj.imx
-$ cp arch/arm/configs/s3c6400_defconfig obj.s3c
-$ cp arch/arm/configs/spear3xx_defconfig obj.spear
-$ cp arch/arm/configs/tegra_defconfig obj.tegra
+Dong Aisheng (7):
+  mmc: sdhci: clear auto cmd setting bits for no data cmds
+  mmc: sdhci-esdhc-imx: add SDHCI_TRANSFER_MODE read function
+  ARM: dts: sabresd: add usdhc4 support
+  mmc: sdhci-esdhc-imx: add MMC_CAP_1_8V_DDR for mx6
+  mmc: sdhci-esdhc-imx: fix cpas over write issue
+  mmc: core: mmc DDR mode should not depend on UHS_DDR50
+  mmc: sdhci-esdhc-imx: add eMMC HS200 mode support
 
-$ ARCH=arm CROSS_COMPILE=arm-linux-gnu- make -j12 O=obj.dove
-$ ARCH=arm CROSS_COMPILE=arm-linux-gnu- make -j12 O=obj.imx
-$ ARCH=arm CROSS_COMPILE=arm-linux-gnu- make -j12 O=obj.s3c
-$ ARCH=arm CROSS_COMPILE=arm-linux-gnu- make -j12 O=obj.spear
-$ ARCH=arm CROSS_COMPILE=arm-linux-gnu- make -j12 O=obj.tegra
+ arch/arm/boot/dts/imx6qdl-sabresd.dtsi |    9 +++++++++
+ drivers/mmc/core/mmc.c                 |    8 ++------
+ drivers/mmc/host/sdhci-esdhc-imx.c     |   21 ++++++++++++++++++++-
+ drivers/mmc/host/sdhci.c               |    5 +++++
+ 4 files changed, 36 insertions(+), 7 deletions(-)
 
-There's also sdhci-sirf, but it has its own architecture.
-
-Thanks,
-
-- Chris.
 -- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+1.7.2.rc3
+
+
