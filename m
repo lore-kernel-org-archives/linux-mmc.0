@@ -1,253 +1,106 @@
-From: John Tobias <john.tobias.ph@gmail.com>
-Subject: Re: eMMC 4.51
-Date: Mon, 21 Oct 2013 15:58:57 -0700
-Message-ID: <CACUGKYO-_j0G+P+rG3-GqdYnmx7VfQhiEqVGhyLFK2mpEsnnkw@mail.gmail.com>
-References: <CACUGKYPDQJPvtXj3NBm8=eYCioWmq=pRVSORNYNZjD13N5ceeg@mail.gmail.com>
-	<CA+6rjLzLhA-zzTqWuzFCMXa1v9CgS-O+Rrnqsfpw9=UY_1vuMA@mail.gmail.com>
-	<CACUGKYPn-qL2_z83wK0EYtDexmyYQX6YVPwHTp5C4_d2M9BH4w@mail.gmail.com>
-	<CA+6rjLzaLZ=R_iEjgu4wB57j1pFraHpAjrg24Er2=SVefVGt7g@mail.gmail.com>
+From: Tim Kryger <tim.kryger@linaro.org>
+Subject: Re: [RESEND PATCH v2 6/6] mmc: sdhci-bcm-kona: Add basic use of clocks
+Date: Mon, 21 Oct 2013 16:13:10 -0700
+Message-ID: <CAAYSxhorTkuMHU=mqWG5WsNYE1c2dh9-44yLhT6DGhEpgWSZxw@mail.gmail.com>
+References: <1381960030-1640-1-git-send-email-tim.kryger@linaro.org>
+	<1381960030-1640-7-git-send-email-tim.kryger@linaro.org>
+	<20131017141309.GG24056@e106331-lin.cambridge.arm.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-la0-f51.google.com ([209.85.215.51]:38151 "EHLO
-	mail-la0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752421Ab3JUW67 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 21 Oct 2013 18:58:59 -0400
-Received: by mail-la0-f51.google.com with SMTP id ea20so2115424lab.38
-        for <linux-mmc@vger.kernel.org>; Mon, 21 Oct 2013 15:58:57 -0700 (PDT)
-In-Reply-To: <CA+6rjLzaLZ=R_iEjgu4wB57j1pFraHpAjrg24Er2=SVefVGt7g@mail.gmail.com>
+Received: from mail-ob0-f178.google.com ([209.85.214.178]:34011 "EHLO
+	mail-ob0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751539Ab3JUXNL (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 21 Oct 2013 19:13:11 -0400
+Received: by mail-ob0-f178.google.com with SMTP id uz6so6450614obc.23
+        for <linux-mmc@vger.kernel.org>; Mon, 21 Oct 2013 16:13:11 -0700 (PDT)
+In-Reply-To: <20131017141309.GG24056@e106331-lin.cambridge.arm.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jackey Shen <jackey.shen.bo@gmail.com>
-Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Dong Aisheng <b29396@freescale.com>
+To: Mark Rutland <mark.rutland@arm.com>
+Cc: Christian Daudt <bcm@fixthebug.org>, "rob.herring@calxeda.com" <rob.herring@calxeda.com>, Pawel Moll <Pawel.Moll@arm.com>, Stephen Warren <swarren@wwwdotorg.org>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Daniel Lezcano <daniel.lezcano@linaro.org>, Thomas Gleixner <tglx@linutronix.de>, Chris Ball <cjb@laptop.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "patches@linaro.org" <patches@linaro.org>
 
-Hi Jackey,
-
-I have a Marvell Datasheet and it support SDR12, SDR25 and SDR50 (upto
-100MHz). SDR104 is not supported.
-
-Regards,
-
-john
-
-On Thu, Oct 17, 2013 at 11:04 PM, Jackey Shen <jackey.shen.bo@gmail.com> wrote:
-> Hi John,
+On Thu, Oct 17, 2013 at 7:13 AM, Mark Rutland <mark.rutland@arm.com> wrote:
+> On Wed, Oct 16, 2013 at 10:47:10PM +0100, Tim Kryger wrote:
+>> Enable the external clock needed by the host controller during the
+>> probe and disable it during the remove.
 >
-> Does your SD host controller support 3.0 card? As I know, Marvel
-> SDIO8797 can work at UHS-I SDR104. Did you test it?
+> This requires a biding document update.
+
+The current best practice for declaring the association of a clock
+with a consumer device is to embed the common clock bindings 'clocks'
+property inside its node but this is not the only way it may be done.
+
+Given that clk_get() still works for clocks found using string
+matching, is it appropriate to mandate that all drivers that uses the
+clk api mention the common clock bindings 'clocks' property in the
+documentation for their device's binding?
+
+> I note that the binding is already incomplete (it does not describe the
+> interrupts or reg).
+
+The current document reflects the standard for
+Documentation/devicetree/bindings/mmc where normal properties are
+described in mmc.txt and only the deviations described in vendor
+specific files.
+
+>>
+>> Signed-off-by: Tim Kryger <tim.kryger@linaro.org>
+>> Reviewed-by: Markus Mayer <markus.mayer@linaro.org>
+>> Reviewed-by: Matt Porter <matt.porter@linaro.org>
+>> ---
+>>  drivers/mmc/host/sdhci-bcm-kona.c | 30 ++++++++++++++++++++++++++++--
+>>  1 file changed, 28 insertions(+), 2 deletions(-)
+>>
+>> diff --git a/drivers/mmc/host/sdhci-bcm-kona.c b/drivers/mmc/host/sdhci-bcm-kona.c
+>> index 85472d3..91db099 100644
+>> --- a/drivers/mmc/host/sdhci-bcm-kona.c
+>> +++ b/drivers/mmc/host/sdhci-bcm-kona.c
+>> @@ -54,6 +54,7 @@
+>>
+>>  struct sdhci_bcm_kona_dev {
+>>       struct mutex    write_lock; /* protect back to back writes */
+>> +     struct clk      *external_clk;
 >
-> Thanks,
-> Jackey
+> Is this the only clock input the unit has?
+
+The SDHCI block only receives one clock.
+
+> Are there any other external resources the device needs (e.g. gpios,
+> regulators)?
+
+Yes but the cd-gpio and vmmc/vqmmc regulators are handled by the
+common SDHCI driver.
+
 >
-> On Thu, Oct 10, 2013 at 2:00 AM, John Tobias <john.tobias.ph@gmail.com> wrote:
->> Hi Jackey,
->>
->> The Marvel SD8797 work fine but there are some cases that the firmware
->> failed to load during the system boot up. Although, we managed it by
->> power cycling the power source of the Marvel chip so that the kernel
->> will able to detect and reinitialize again.
->>
->> The module was running in high speed, 4bit bus width.
->>
->> Here are some info:
->>
->> # iperf -c 192.168.x.x -t 60 -i 10
->> ------------------------------------------------------------
->> Client connecting to 192.168.x.x, TCP port 5001
->> TCP window size: 20.7 KByte (default)
->> ------------------------------------------------------------
->> [  3] local 192.168.x.x port 52071 connected with 192.168.x.x port 5001
->> [ ID] Interval       Transfer     Bandwidth
->> [  3]  0.0-10.0 sec  48.0 MBytes  40.3 Mbits/sec
->> [  3] 10.0-20.0 sec  53.4 MBytes  44.8 Mbits/sec
->> [  3] 20.0-30.0 sec  53.8 MBytes  45.1 Mbits/sec
->> [  3] 30.0-40.0 sec  56.4 MBytes  47.3 Mbits/sec
->> [  3] 40.0-50.0 sec  54.2 MBytes  45.5 Mbits/sec
->> [  3] 50.0-60.0 sec  53.5 MBytes  44.9 Mbits/sec
->> [  3]  0.0-60.0 sec   319 MBytes  44.6 Mbits/sec
->>
->> # iwconfig mlan0
->> mlan0     IEEE 802.11abgn  ESSID:"Pxx-xxx"
->>           Mode:Managed  Frequency:2.437 GHz  Access Point:
->> BC:Dx:xx:xx:xx:xx
->>           Bit Rate=135 Mb/s
->>           Retry  long limit:7   RTS thr:off   Fragment thr:off
->>           Encryption key:off
->>           Power Management:on
->>           Link Quality=70/70  Signal level=-28 dBm
->>           Rx invalid nwid:0  Rx invalid crypt:0  Rx invalid frag:0
->>           Tx excessive retries:0  Invalid misc:0   Missed beacon:0
->>
->> Regards,
->>
->> john
+>>  };
 >>
 >>
+>> @@ -252,11 +253,29 @@ static int sdhci_bcm_kona_probe(struct platform_device *pdev)
+>>       mmc_of_parse(host->mmc);
 >>
->> On Wed, Oct 9, 2013 at 12:23 AM, Jackey Shen <jackey.shen.bo@gmail.com>
->> wrote:
->>> Hi John,
->>>
->>> Does wifi module (Marvel SD8797) work fine on your board? What speed does
->>> it
->>> run at? SDR104?
->>>
->>> Thanks,
->>> Jackey
->>>
->>> On Wed, Oct 9, 2013 at 10:00 AM, John Tobias <john.tobias.ph@gmail.com>
->>> wrote:
->>>>
->>>> Hello,
->>>>
->>>> I am using git://gitorious.org/thierryreding/linux-next.git to boot my
->>>> custom board based on iMX6 sololite. My board has SanDisk iNAND 4.51
->>>> I/F and wifi module (Marvel SD8797). The latest update of
->>>> sdhci-esdhc-imx.c supports DDR50/SDR50/SDR104 and I would like to use
->>>> it for my device.
->>>>
->>>> In my .dts file, I have the following settings:
->>>>
->>>> /* WIFI module */
->>>> &usdhc2 {
->>>> pinctrl-names = "default", "state_100mhz", "state_200mhz";
->>>> pinctrl-0 = <&pinctrl_usdhc2_2_default>;
->>>> pinctrl-1 = <&pinctrl_usdhc2_3_100mhz>;
->>>> pinctrl-2 = <&pinctrl_usdhc2_4_200mhz>;
->>>> bus-width = <4>;
->>>> status = "okay";
->>>> };
->>>>
->>>> /* eMMC module  */
->>>> &usdhc4 {
->>>> pinctrl-names = "default", "state_100mhz", "state_200mhz";
->>>> pinctrl-0 = <&pinctrl_usdhc4_2_default>;
->>>> pinctrl-1 = <&pinctrl_usdhc4_3_100mhz>;
->>>> pinctrl-2 = <&pinctrl_usdhc4_4_200mhz>;
->>>> bus-width = <8>;
->>>> status = "okay";
->>>> compatible = "fsl,imx6sl-usdhc", "fsl,imx6q-usdhc";
->>>> reg = <0x0219c000 0x4000>;
->>>> };
->>>>
->>>> Then, in my .dtsi file:
->>>>
->>>> usdhc2 {
->>>> /*WIFI pinmux */
->>>> pinctrl_usdhc2_2_default: default {
->>>> fsl,pins = <
->>>> EVT1_PAD_SD2_CMD__SD2_CMD     0x17039
->>>> EVT1_PAD_SD2_CLK__SD2_CLK     0x17039
->>>> EVT1_PAD_SD2_DATA0__SD2_DATA0 0x17039
->>>> EVT1_PAD_SD2_DATA1__SD2_DATA1 0x17039
->>>> EVT1_PAD_SD2_DATA2__SD2_DATA2 0x17039
->>>> EVT1_PAD_SD2_DATA3__SD2_DATA3 0x17039
->>>> >;
->>>> };
->>>>
->>>> pinctrl_usdhc2_3_100mhz: state_100mhz { /* 100Mhz */
->>>> fsl,pins = <
->>>> EVT1_PAD_SD2_CMD__SD2_CMD 0x170B9
->>>> EVT1_PAD_SD2_CLK__SD2_CLK 0x100B9
->>>> EVT1_PAD_SD2_DATA0__SD2_DATA0 0x170B9
->>>> EVT1_PAD_SD2_DATA1__SD2_DATA1 0x170B9
->>>> EVT1_PAD_SD2_DATA2__SD2_DATA2 0x170B9
->>>> EVT1_PAD_SD2_DATA3__SD2_DATA3 0x170B9
->>>> >;
->>>> };
->>>>
->>>> pinctrl_usdhc2_4_200mhz: state_200mhz { /* 200Mhz */
->>>> fsl,pins = <
->>>> EVT1_PAD_SD2_CMD__SD2_CMD 0x170F9
->>>> EVT1_PAD_SD2_CLK__SD2_CLK 0x100F9
->>>> EVT1_PAD_SD2_DATA0__SD2_DATA0 0x170F9
->>>> EVT1_PAD_SD2_DATA1__SD2_DATA1 0x170F9
->>>> EVT1_PAD_SD2_DATA2__SD2_DATA2 0x170F9
->>>> EVT1_PAD_SD2_DATA3__SD2_DATA3 0x170F9
->>>> >;
->>>> };
->>>> };
->>>>
->>>> usdhc4 {
->>>> /* eMMC pinmux */
->>>> pinctrl_usdhc4_2_default: default {
->>>> fsl,pins = <
->>>> EVT1_PAD_EPDC_BDR1__SD4_CMD       0x17039
->>>> EVT1_PAD_EPDC_BDR0__SD4_CLK       0x10039
->>>> EVT1_PAD_EPDC_PWR_COM__SD4_DATA0  0x17039
->>>> EVT1_PAD_EPDC_PWR_IRQ__SD4_DATA1  0x17039
->>>> EVT1_PAD_EPDC_PWR_STAT__SD4_DATA2 0x17039
->>>> EVT1_PAD_EPDC_PWR_WAKE__SD4_DATA3 0x17039
->>>> EVT1_PAD_FEC_MDC__SD4_DATA4 0x17039
->>>> EVT1_PAD_FEC_RX_DATA0__SD4_DATA5  0x17039
->>>> EVT1_PAD_FEC_TX_EN__SD4_DATA6     0x17039
->>>> EVT1_PAD_FEC_TX_DATA1__SD4_DATA7  0x17039
->>>> >;
->>>> };
->>>>
->>>> pinctrl_usdhc4_3_100mhz: state_100mhz { /* 100Mhz */
->>>> fsl,pins = <
->>>> EVT1_PAD_EPDC_BDR1__SD4_CMD 0x170B9
->>>> EVT1_PAD_EPDC_BDR0__SD4_CLK   0x100B9
->>>> EVT1_PAD_EPDC_PWR_COM__SD4_DATA0 0x170B9
->>>> EVT1_PAD_EPDC_PWR_IRQ__SD4_DATA1 0x170B9
->>>> EVT1_PAD_EPDC_PWR_STAT__SD4_DATA2 0x170B9
->>>> EVT1_PAD_EPDC_PWR_WAKE__SD4_DATA3 0x170B9
->>>> EVT1_PAD_FEC_MDC__SD4_DATA4 0x170B9
->>>> EVT1_PAD_FEC_RX_DATA0__SD4_DATA5  0x170B9
->>>> EVT1_PAD_FEC_TX_EN__SD4_DATA6     0x170B9
->>>> EVT1_PAD_FEC_TX_DATA1__SD4_DATA7  0x170B9
->>>> >;
->>>> };
->>>>
->>>> pinctrl_usdhc4_4_200mhz: state_200mhz { /* 200Mhz */
->>>> fsl,pins = <
->>>> EVT1_PAD_EPDC_BDR1__SD4_CMD 0x170F9
->>>> EVT1_PAD_EPDC_BDR0__SD4_CLK   0x100F9
->>>> EVT1_PAD_EPDC_PWR_COM__SD4_DATA0 0x170F9
->>>> EVT1_PAD_EPDC_PWR_IRQ__SD4_DATA1 0x170F9
->>>> EVT1_PAD_EPDC_PWR_STAT__SD4_DATA2 0x170F9
->>>> EVT1_PAD_EPDC_PWR_WAKE__SD4_DATA3 0x170F9
->>>> EVT1_PAD_FEC_MDC__SD4_DATA4 0x170F9
->>>> EVT1_PAD_FEC_RX_DATA0__SD4_DATA5  0x170F9
->>>> EVT1_PAD_FEC_TX_EN__SD4_DATA6     0x170F9
->>>> EVT1_PAD_FEC_TX_DATA1__SD4_DATA7  0x170F9
->>>> >;
->>>> };
->>>> };
->>>>
->>>>
->>>> 1. After using the said pinmux settings, the sdhci-esdh-imx controller
->>>> wasn't able to configure it correctly due the the group name for the
->>>> two port were the same (default, state_100mhz, state_200mhz).
->>>>
->>>> 2. Then, I temporarily disabled usdhc4 to test if the driver able to
->>>> enable the SDR50 for my wifi. Then, I was getting the following
->>>> errors:
->>>>
->>>> [    1.655024] mmc0: error -110 whilst initialising SDIO card
->>>> [    3.746340] mmc0: error -110 whilst initialising SDIO card
->>>> [    3.818624] mmc0: host doesn't support card's voltages
->>>> [    3.823783] mmc0: error -22 whilst initialising SDIO card
->>>> [    3.901670] mmc0: host doesn't support card's voltages
->>>> [    3.906862] mmc0: error -22 whilst initialising SDIO card
->>>> [   34.307777] mmc0: host doesn't support card's voltages
->>>> [   34.312980] mmc0: error -22 whilst initialising SDIO card
->>>>
->>>> 3. Then, I tried the eMMC to see if the driver able to enable the
->>>> DDR50. After booting it, the kernel detect the eMMC only in hight
->>>> speed mode.
->>>>
->>>>
->>>> I would like to know if anyone here can help me to figure out how to
->>>> enable the DDR50 for my eMMC and SDR50 for my wifi as well.
->>>>
->>>> Regards,
->>>>
->>>> john
->>>> --
->>>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->>>> the body of a message to majordomo@vger.kernel.org
->>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>
->>>
+>>       if (!host->mmc->f_max) {
+>> -             dev_err(&pdev->dev, "Missing max-freq for SDHCI cfg\n");
+>> +             dev_err(dev, "Missing max-freq for SDHCI cfg\n");
+>
+> This seems like an unrelated change.
+
+Agreed.  I will remove this change.
+
+>>               ret = -ENXIO;
+>>               goto err_pltfm_free;
+>>       }
+>>
+>> +     /* Get and enable the external clock */
+>> +     kona_dev->external_clk = devm_clk_get(dev, NULL);
+>> +     if (IS_ERR(kona_dev->external_clk)) {
+>> +             dev_err(dev, "Failed to get external clock\n");
+>> +             ret = PTR_ERR(kona_dev->external_clk);
+>> +             goto err_pltfm_free;
+>
+> This seems like a pretty clear breakage of existing DTBs.
+>
+> Why?
+
+The defconfig that builds this driver and DTBs currently sets
+CONFIG_ARM_APPENDED_DTB=y so there isn't any actual breakage risk.
