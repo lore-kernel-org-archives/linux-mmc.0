@@ -1,42 +1,35 @@
-From: Balaji T K <balajitk@ti.com>
-Subject: [PATCH 5/5] mmc: omap_hsmmc: remove unused no_off
-Date: Mon, 21 Oct 2013 00:25:22 +0530
-Message-ID: <1382295322-18995-5-git-send-email-balajitk@ti.com>
-References: <1382295322-18995-1-git-send-email-balajitk@ti.com>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH v2] mmc: sdhci-pci: add Intel Merrifield support
+Date: Sun, 20 Oct 2013 21:19:58 -0400
+Message-ID: <87hacba08x.fsf@octavius.laptop.org>
+References: <1380658695-20047-1-git-send-email-david.a.cohen@linux.intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <linux-omap-owner@vger.kernel.org>
-In-Reply-To: <1382295322-18995-1-git-send-email-balajitk@ti.com>
-Sender: linux-omap-owner@vger.kernel.org
-To: linux-mmc@vger.kernel.org, cjb@laptop.org, tony@atomide.com
-Cc: linux-omap@vger.kernel.org, Balaji T K <balajitk@ti.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from void.printf.net ([89.145.121.20]:33380 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752081Ab3JUBUO (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Sun, 20 Oct 2013 21:20:14 -0400
+In-Reply-To: <1380658695-20047-1-git-send-email-david.a.cohen@linux.intel.com>
+	(David Cohen's message of "Tue, 1 Oct 2013 13:18:15 -0700")
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: David Cohen <david.a.cohen@linux.intel.com>
+Cc: bhelgaas@google.com, adrian.hunter@intel.com, wfp5p@virginia.edu, gregkh@linuxfoundation.org, g.liakhovetski@gmx.de, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-pci@vger.kernel.org
 
-With lazy disable gone, no_off is not used any more in omap_hsmmc
+Hi David,
 
-Signed-off-by: Balaji T K <balajitk@ti.com>
----
- drivers/mmc/host/omap_hsmmc.c |    7 -------
- 1 files changed, 0 insertions(+), 7 deletions(-)
+On Tue, Oct 01 2013, David Cohen wrote:
+> Implement initial SDHCI Intel Merrifield support.
+> This patch is based on previous one from Yunpeng Gao <yunpeng.gao@intel.com>
+>
+> Signed-off-by: David Cohen <david.a.cohen@linux.intel.com>
+> ---
+>  drivers/mmc/host/sdhci-pci.c | 30 ++++++++++++++++++++++++++++++
+>  1 file changed, 30 insertions(+)
 
-diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index 60db34d..1646347 100644
---- a/drivers/mmc/host/omap_hsmmc.c
-+++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -1829,13 +1829,6 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
- 
- 	mmc->ops	= &omap_hsmmc_ops;
- 
--	/*
--	 * If regulator_disable can only put vcc_aux to sleep then there is
--	 * no off state.
--	 */
--	if (mmc_slot(host).vcc_aux_disable_is_sleep)
--		mmc_slot(host).no_off = 1;
--
- 	mmc->f_min = OMAP_MMC_MIN_CLOCK;
- 
- 	if (pdata->max_freq > 0)
+Thanks, pushed to mmc-next for 3.13.
+
+- Chris.
 -- 
-1.7.5.4
-
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
