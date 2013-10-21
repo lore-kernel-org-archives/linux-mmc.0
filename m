@@ -1,45 +1,56 @@
 From: Dong Aisheng <b29396@freescale.com>
-Subject: [PATCH 3/7] ARM: dts: sabresd: add usdhc4 support
-Date: Mon, 21 Oct 2013 22:27:03 +0800
-Message-ID: <1382365627-26816-4-git-send-email-b29396@freescale.com>
+Subject: [PATCH 2/7] mmc: sdhci-esdhc-imx: add SDHCI_TRANSFER_MODE read function
+Date: Mon, 21 Oct 2013 22:27:02 +0800
+Message-ID: <1382365627-26816-3-git-send-email-b29396@freescale.com>
 References: <1382365627-26816-1-git-send-email-b29396@freescale.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from va3ehsobe001.messaging.microsoft.com ([216.32.180.11]:51133
-	"EHLO va3outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753109Ab3JUOoQ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 21 Oct 2013 10:44:16 -0400
+Received: from tx2ehsobe003.messaging.microsoft.com ([65.55.88.13]:33421 "EHLO
+	tx2outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1753109Ab3JUOoN (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 21 Oct 2013 10:44:13 -0400
 In-Reply-To: <1382365627-26816-1-git-send-email-b29396@freescale.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 Cc: linux-arm-kernel@lists.infradead.org, cjb@laptop.org, shawn.guo@linaro.org, s.hauer@pengutronix.de, b29396@freescale.com, wsa@the-dreams.de, ulf.hansson@linaro.org
 
-Add usdhc4 support which has an eMMC card mounted on board.
+Used to read out the correct value of SDHCI_TRANSFER_MODE register
+for upper layer.
 
 Signed-off-by: Dong Aisheng <b29396@freescale.com>
 ---
- arch/arm/boot/dts/imx6qdl-sabresd.dtsi |    9 +++++++++
- 1 files changed, 9 insertions(+), 0 deletions(-)
+ drivers/mmc/host/sdhci-esdhc-imx.c |   16 ++++++++++++++++
+ 1 files changed, 16 insertions(+), 0 deletions(-)
 
-diff --git a/arch/arm/boot/dts/imx6qdl-sabresd.dtsi b/arch/arm/boot/dts/imx6qdl-sabresd.dtsi
-index 39eafc2..76762a3 100644
---- a/arch/arm/boot/dts/imx6qdl-sabresd.dtsi
-+++ b/arch/arm/boot/dts/imx6qdl-sabresd.dtsi
-@@ -241,3 +241,12 @@
- 	wp-gpios = <&gpio2 1 0>;
- 	status = "okay";
- };
+diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+index 461a4c3..2be77e0 100644
+--- a/drivers/mmc/host/sdhci-esdhc-imx.c
++++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+@@ -385,6 +385,22 @@ static u16 esdhc_readw_le(struct sdhci_host *host, int reg)
+ 		return ret;
+ 	}
+ 
++	if (unlikely(reg == SDHCI_TRANSFER_MODE)) {
++		if (esdhc_is_usdhc(imx_data)) {
++			u32 m = readl(host->ioaddr + ESDHC_MIX_CTRL);
++			ret = m & ESDHC_MIX_CTRL_SDHCI_MASK;
++			/* Swap AC23 bit */
++			if (m & ESDHC_MIX_CTRL_AC23EN) {
++				ret &= ~ESDHC_MIX_CTRL_AC23EN;
++				ret |= SDHCI_TRNS_AUTO_CMD23;
++			}
++		} else {
++			ret = readw(host->ioaddr + SDHCI_TRANSFER_MODE);
++		}
 +
-+&usdhc4 {
-+	pinctrl-names = "default";
-+	pinctrl-0 = <&pinctrl_usdhc4_1>;
-+	bus-width = <8>;
-+	non-removable;
-+	no-1-8-v;
-+	status = "okay";
-+};
++		return ret;
++	}
++
+ 	return readw(host->ioaddr + reg);
+ }
+ 
 -- 
 1.7.2.rc3
 
