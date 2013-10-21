@@ -1,452 +1,82 @@
-From: Zhangfei Gao <zhangfei.gao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH 2/2] mmc: dw_mmc: add dw_mmc-k3 for k3 platform
-Date: Mon, 21 Oct 2013 15:13:59 +0800
-Message-ID: <1382339639-16764-3-git-send-email-zhangfei.gao@linaro.org>
-References: <1382339639-16764-1-git-send-email-zhangfei.gao@linaro.org>
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1382339639-16764-1-git-send-email-zhangfei.gao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Zhangfei Gao <zhangfei.gao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+From: Jeremie Samuel <jeremie.samuel.ext@parrot.com>
+Subject: Re: [PATCH 3/8] sdhci: Use work structs instead of tasklets
+Date: Mon, 21 Oct 2013 10:36:27 +0200
+Message-ID: <5264E78B.1020209@parrot.com>
+References: <1381940458-12628-1-git-send-email-jeremie.samuel.ext@parrot.com> <1381940458-12628-4-git-send-email-jeremie.samuel.ext@parrot.com> <874n8b9ywb.fsf@octavius.laptop.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8;
+	format=flowed
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from co202.xi-lite.net ([149.6.83.202]:49940 "EHLO co202.xi-lite.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752810Ab3JUIhv (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 21 Oct 2013 04:37:51 -0400
+In-Reply-To: <874n8b9ywb.fsf@octavius.laptop.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>
+Cc: linux-mmc@vger.kernel.org, =?UTF-8?B?R3LDqWdvciBCb2lyaWU=?= <gregor.boirie@parrot.com>, Matthieu Castet <matthieu.castet@parrot.com>, Anton Vorontsov <avorontsov@mvista.com>
 
-Add dw_mmc-k3.c for k3v2, support sd/emmc
+Hi Chris,
 
-Signed-off-by: Zhangfei Gao <zhangfei.gao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Tested-by: Zhigang Wang <brooke.wangzhigang-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>
----
- .../devicetree/bindings/mmc/k3-dw-mshc.txt         |   77 +++++
- drivers/mmc/host/Kconfig                           |   10 +
- drivers/mmc/host/Makefile                          |    1 +
- drivers/mmc/host/dw_mmc-k3.c                       |  298 ++++++++++++++++++++
- 4 files changed, 386 insertions(+)
- create mode 100644 Documentation/devicetree/bindings/mmc/k3-dw-mshc.txt
- create mode 100644 drivers/mmc/host/dw_mmc-k3.c
+Thanks for the feedback.
 
-diff --git a/Documentation/devicetree/bindings/mmc/k3-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/k3-dw-mshc.txt
-new file mode 100644
-index 0000000..0de8c27
---- /dev/null
-+++ b/Documentation/devicetree/bindings/mmc/k3-dw-mshc.txt
-@@ -0,0 +1,77 @@
-+* Hisilicon specific extensions to the Synopsys Designware Mobile
-+  Storage Host Controller
-+
-+Read synopsis-dw-mshc.txt for more details
-+The Synopsys designware mobile storage host controller is used to interface
-+a SoC with storage medium such as eMMC or SD/MMC cards. This file documents
-+differences between the core Synopsys dw mshc controller properties described
-+by synopsis-dw-mshc.txt and the properties used by the Hisilicon specific
-+extensions to the Synopsys Designware Mobile Storage Host Controller.
-+
-+Required Properties:
-+
-+* compatible: should be
-+	- "hisilicon,hi4511-dw-mshc": for controllers with hi4511
-+	  specific extentions.
-+* vmmc-supply: should be vmmc used in dwmmc
-+* fifo-depth: should be provided if register can not provide correct value
-+* clken-reg: should be clock enable register and offset
-+* drv-sel-reg: should be driver delay select register, offset and bits
-+* sam-sel-reg: should be sample delay select register, offset and bits
-+* div-reg: should be divider register, offset and bits
-+* tune-table: should be array of clock tune mmc controller
-+
-+Example:
-+
-+  The MSHC controller node can be split into two portions, SoC specific and
-+  board specific portions as listed below.
-+
-+	dwmmc_0: dwmmc0@fcd03000 {
-+		compatible = "hisilicon,hi4511-dw-mshc";
-+		reg = <0xfcd03000 0x1000>;
-+		interrupts = <0 16 4>;
-+		#address-cells = <1>;
-+		#size-cells = <0>;
-+		clocks = <&clk_sd>, <&clk_ddrc_per>;
-+		clock-names = "ciu", "biu";
-+		clken-reg = <0x1f8 0>;
-+		drv-sel-reg = <0x1f8 4 4>;
-+		sam-sel-reg = <0x1f8 8 4>;
-+		div-reg = <0x1f8 1 3>;
-+		tune-table =
-+		<180000000 6 6 13 13 25000000>,
-+		<0 0 0 0 0 0>,
-+		<360000000 6 4 2 0 50000000>,
-+		<180000000 6 4 13 13 25000000>,
-+		<360000000 6 4 2 0 50000000>,
-+		<720000000 6 1 9 4 100000000>,
-+		<0 0 0 0 0 0>,
-+		<360000000 7 1 3 0 50000000>;
-+	};
-+	dwmmc0@fcd03000 {
-+		num-slots = <1>;
-+		vmmc-supply = <&ldo12>;
-+		fifo-depth = <0x100>;
-+		supports-highspeed;
-+		pinctrl-names = "default";
-+		pinctrl-0 = <&sd_pmx_pins &sd_cfg_func1 &sd_cfg_func2>;
-+		slot@0 {
-+			reg = <0>;
-+			bus-width = <4>;
-+			disable-wp;
-+			cd-gpios = <&gpio10 3 0>;
-+		};
-+	};
-+
-+PCTRL:
-+
-+Required Properties:
-+* compatible: should be
-+	- "hisilicon,pctrl": Peripheral control
-+
-+Example:
-+
-+	pctrl: pctrl@fca09000 {
-+		compatible = "hisilicon,pctrl";
-+		reg = <0xfca09000 0x1000>;
-+	};
-diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-index 7fc5099..45aaa2d 100644
---- a/drivers/mmc/host/Kconfig
-+++ b/drivers/mmc/host/Kconfig
-@@ -575,6 +575,16 @@ config MMC_DW_SOCFPGA
- 	  This selects support for Altera SoCFPGA specific extensions to the
- 	  Synopsys DesignWare Memory Card Interface driver.
- 
-+config MMC_DW_K3
-+	tristate "K3 specific extensions for Synopsys DW Memory Card Interface"
-+	depends on MMC_DW
-+	select MMC_DW_PLTFM
-+	select MMC_DW_IDMAC
-+	help
-+	  This selects support for Hisilicon K3 SoC specific extensions to the
-+	  Synopsys DesignWare Memory Card Interface driver. Select this option
-+	  for platforms based on Hisilicon K3 SoC's.
-+
- config MMC_DW_PCI
- 	tristate "Synopsys Designware MCI support on PCI bus"
- 	depends on MMC_DW && PCI
-diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
-index c41d0c3..64f5f8d 100644
---- a/drivers/mmc/host/Makefile
-+++ b/drivers/mmc/host/Makefile
-@@ -43,6 +43,7 @@ obj-$(CONFIG_MMC_DW)		+= dw_mmc.o
- obj-$(CONFIG_MMC_DW_PLTFM)	+= dw_mmc-pltfm.o
- obj-$(CONFIG_MMC_DW_EXYNOS)	+= dw_mmc-exynos.o
- obj-$(CONFIG_MMC_DW_SOCFPGA)	+= dw_mmc-socfpga.o
-+obj-$(CONFIG_MMC_DW_K3)		+= dw_mmc-k3.o
- obj-$(CONFIG_MMC_DW_PCI)	+= dw_mmc-pci.o
- obj-$(CONFIG_MMC_SH_MMCIF)	+= sh_mmcif.o
- obj-$(CONFIG_MMC_JZ4740)	+= jz4740_mmc.o
-diff --git a/drivers/mmc/host/dw_mmc-k3.c b/drivers/mmc/host/dw_mmc-k3.c
-new file mode 100644
-index 0000000..f186b84
---- /dev/null
-+++ b/drivers/mmc/host/dw_mmc-k3.c
-@@ -0,0 +1,298 @@
-+/*
-+ * Copyright (c) 2013 Linaro Ltd.
-+ * Copyright (c) 2013 Hisilicon Limited.
-+ *
-+ * This program is free software; you can redistribute it and/or modify
-+ * it under the terms of the GNU General Public License as published by
-+ * the Free Software Foundation; either version 2 of the License, or
-+ * (at your option) any later version.
-+ */
-+
-+#include <linux/module.h>
-+#include <linux/platform_device.h>
-+#include <linux/clk.h>
-+#include <linux/mmc/host.h>
-+#include <linux/mmc/dw_mmc.h>
-+#include <linux/of.h>
-+#include <linux/of_gpio.h>
-+#include <linux/of_address.h>
-+
-+#include "dw_mmc.h"
-+#include "dw_mmc-pltfm.h"
-+
-+enum dw_mci_k3_type {
-+	DW_MCI_TYPE_HI4511,
-+};
-+
-+static struct dw_mci_k3_compatible {
-+	char				*compatible;
-+	enum dw_mci_k3_type		type;
-+} k3_compat[] = {
-+	{
-+		.compatible	= "hisilicon,hi4511-dw-mshc",
-+		.type		= DW_MCI_TYPE_HI4511,
-+	},
-+};
-+
-+#define TABLE_WIDTH 6
-+#define TABLE_HEIGHT 8
-+struct dw_mci_k3_priv_data {
-+	enum dw_mci_k3_type	type;
-+	int			old_timing;
-+	u32			table[TABLE_WIDTH * TABLE_HEIGHT];
-+	u32			clken_reg;
-+	u32			clken_bit;
-+	u32			sam_sel_reg;
-+	u32			sam_sel_off;
-+	u32			sam_sel_bits;
-+	u32			drv_sel_reg;
-+	u32			drv_sel_off;
-+	u32			drv_sel_bits;
-+	u32			div_reg;
-+	u32			div_off;
-+	u32			div_bits;
-+};
-+
-+static void __iomem *pctrl;
-+static DEFINE_SPINLOCK(mmc_tuning_lock);
-+
-+static u32 dw_mci_k3_delay(u32 val, u32 para, u32 off, u32 len)
-+{
-+	u32 i;
-+
-+	if (para >= 0) {
-+		for (i = 0; i < len; i++) {
-+			if (para % 2)
-+				val |= 1<<(off + i);
-+			else
-+				val &= ~(1<<(off + i));
-+			para = para >> 1;
-+		}
-+	}
-+	return val;
-+}
-+
-+static void dw_mci_k3_set_timing(struct dw_mci_k3_priv_data *priv,
-+					u32 sam, u32 drv, u32 div)
-+{
-+	u32 val;
-+	unsigned long flags;
-+
-+	if (!pctrl)
-+		return;
-+
-+	spin_lock_irqsave(&mmc_tuning_lock, flags);
-+
-+	/* disable clock */
-+	val = readl(pctrl + priv->clken_reg);
-+	val &= ~(1 << priv->clken_bit);
-+	writel(val, pctrl + priv->clken_reg);
-+
-+	val = readl(pctrl + priv->sam_sel_reg);
-+	val = dw_mci_k3_delay(val, sam, priv->sam_sel_off, priv->sam_sel_bits);
-+	writel(val, pctrl + priv->sam_sel_reg);
-+
-+	val = readl(pctrl + priv->drv_sel_reg);
-+	val = dw_mci_k3_delay(val, drv, priv->drv_sel_off, priv->drv_sel_bits);
-+	writel(val, pctrl + priv->drv_sel_reg);
-+
-+	val = readl(pctrl + priv->div_reg);
-+	val = dw_mci_k3_delay(val, drv, priv->div_off, priv->div_bits);
-+	writel(val, pctrl + priv->div_reg);
-+
-+	/* enable clock */
-+	val = readl(pctrl + priv->clken_reg);
-+	val |= 1 << priv->clken_bit;
-+	writel(val, pctrl + priv->clken_reg);
-+
-+	spin_unlock_irqrestore(&mmc_tuning_lock, flags);
-+}
-+
-+static void dw_mci_k3_tun(struct dw_mci *host, int timing)
-+{
-+	struct dw_mci_k3_priv_data *priv = host->priv;
-+	struct device_node *np = host->dev->of_node;
-+	int ret;
-+	u32 *table = &priv->table[TABLE_WIDTH * timing];
-+
-+	if (priv->old_timing == timing)
-+		return;
-+
-+	ret = clk_set_rate(host->ciu_clk, table[0]);
-+	if (ret) {
-+		dev_err(host->dev, "clk_set_rate failed\n");
-+		return;
-+	}
-+	dw_mci_k3_set_timing(priv, (table[3] + table[4]) / 2,
-+			table[2], table[1]);
-+	host->bus_hz = table[5];
-+	priv->old_timing = timing;
-+}
-+
-+static void dw_mci_k3_set_ios(struct dw_mci *host, struct mmc_ios *ios)
-+{
-+	struct dw_mci_k3_priv_data *priv = host->priv;
-+
-+	if (priv->type == DW_MCI_TYPE_HI4511)
-+		dw_mci_k3_tun(host, ios->timing);
-+}
-+
-+static int dw_mci_k3_priv_init(struct dw_mci *host)
-+{
-+	struct dw_mci_k3_priv_data *priv;
-+	int i, ret;
-+
-+	priv = devm_kzalloc(host->dev, sizeof(*priv), GFP_KERNEL);
-+	if (!priv) {
-+		dev_err(host->dev, "mem alloc failed for private data\n");
-+		return -ENOMEM;
-+	}
-+	priv->old_timing = -1;
-+	host->priv = priv;
-+
-+	for (i = 0; i < ARRAY_SIZE(k3_compat); i++) {
-+		if (of_device_is_compatible(host->dev->of_node,
-+					k3_compat[i].compatible))
-+			priv->type = k3_compat[i].type;
-+	}
-+
-+	if (priv->type == DW_MCI_TYPE_HI4511) {
-+		ret = of_property_read_u32_array(host->dev->of_node,
-+			"tune-table", priv->table, TABLE_WIDTH * TABLE_HEIGHT);
-+		if (ret)
-+			return -EINVAL;
-+
-+		if (!pctrl) {
-+			struct device_node *node;
-+
-+			node = of_find_compatible_node(NULL, NULL,
-+						"hisilicon,pctrl");
-+			pctrl = of_iomap(node, 0);
-+		}
-+	}
-+
-+	return 0;
-+}
-+
-+static int dw_mci_k3_setup_clock(struct dw_mci *host)
-+{
-+	struct dw_mci_k3_priv_data *priv = host->priv;
-+
-+	if (priv->type == DW_MCI_TYPE_HI4511)
-+		dw_mci_k3_tun(host, MMC_TIMING_LEGACY);
-+
-+	return 0;
-+}
-+
-+static int dw_mci_k3_parse_dt(struct dw_mci *host)
-+{
-+	struct dw_mci_k3_priv_data *priv = host->priv;
-+	struct device_node *np = host->dev->of_node;
-+	u32 data[3];
-+	int ret;
-+
-+	if (priv->type == DW_MCI_TYPE_HI4511) {
-+		ret = of_property_read_u32_array(np,
-+				"clken-reg", data, 2);
-+		if (!ret) {
-+			priv->clken_reg = data[0];
-+			priv->clken_bit = data[1];
-+		}
-+
-+		ret = of_property_read_u32_array(np,
-+				"drv-sel-reg", data, 3);
-+		if (!ret) {
-+			priv->drv_sel_reg = data[0];
-+			priv->drv_sel_off = data[1];
-+			priv->drv_sel_bits = data[2];
-+		}
-+
-+		ret = of_property_read_u32_array(np,
-+				"sam-sel-reg", data, 3);
-+		if (!ret) {
-+			priv->sam_sel_reg = data[0];
-+			priv->sam_sel_off = data[1];
-+			priv->sam_sel_bits = data[2];
-+		}
-+
-+		ret = of_property_read_u32_array(np,
-+				"div-reg", data, 3);
-+		if (!ret) {
-+			priv->div_reg = data[0];
-+			priv->div_off = data[1];
-+			priv->div_bits = data[2];
-+		}
-+	}
-+
-+	return 0;
-+}
-+
-+static unsigned long k3_dwmmc_caps[4] = {
-+	MMC_CAP_4_BIT_DATA | MMC_CAP_SD_HIGHSPEED,
-+	MMC_CAP_8_BIT_DATA | MMC_CAP_MMC_HIGHSPEED,
-+	0,
-+	0,
-+};
-+
-+static const struct dw_mci_drv_data k3_drv_data = {
-+	.caps			= k3_dwmmc_caps,
-+	.init			= dw_mci_k3_priv_init,
-+	.set_ios		= dw_mci_k3_set_ios,
-+	.setup_clock		= dw_mci_k3_setup_clock,
-+	.parse_dt		= dw_mci_k3_parse_dt,
-+};
-+
-+static const struct of_device_id dw_mci_k3_match[] = {
-+	{ .compatible = "hisilicon,hi4511-dw-mshc",
-+			.data = &k3_drv_data, },
-+	{},
-+};
-+MODULE_DEVICE_TABLE(of, dw_mci_k3_match);
-+
-+static int dw_mci_k3_probe(struct platform_device *pdev)
-+{
-+	const struct dw_mci_drv_data *drv_data;
-+	const struct of_device_id *match;
-+
-+	match = of_match_node(dw_mci_k3_match, pdev->dev.of_node);
-+	drv_data = match->data;
-+
-+	return dw_mci_pltfm_register(pdev, drv_data);
-+}
-+
-+static int dw_mci_k3_suspend(struct device *dev)
-+{
-+	struct dw_mci *host = dev_get_drvdata(dev);
-+
-+	return dw_mci_suspend(host);
-+}
-+
-+static int dw_mci_k3_resume(struct device *dev)
-+{
-+	struct dw_mci *host = dev_get_drvdata(dev);
-+	struct dw_mci_k3_priv_data *priv = host->priv;
-+
-+	if (priv->type == DW_MCI_TYPE_HI4511) {
-+		priv->old_timing = -1;
-+		dw_mci_k3_tun(host, MMC_TIMING_LEGACY);
-+	}
-+
-+	return dw_mci_resume(host);
-+}
-+
-+SIMPLE_DEV_PM_OPS(dw_mci_k3_pmops, dw_mci_k3_suspend, dw_mci_k3_resume);
-+
-+static struct platform_driver dw_mci_k3_pltfm_driver = {
-+	.probe		= dw_mci_k3_probe,
-+	.remove		= dw_mci_pltfm_remove,
-+	.driver		= {
-+		.name		= "dwmmc_k3",
-+		.of_match_table	= dw_mci_k3_match,
-+		.pm		= &dw_mci_k3_pmops,
-+	},
-+};
-+
-+module_platform_driver(dw_mci_k3_pltfm_driver);
-+
-+MODULE_DESCRIPTION("K3 Specific DW-MSHC Driver Extension");
-+MODULE_LICENSE("GPL v2");
--- 
-1.7.9.5
+Do you have a way for me to compile the driver for all the architecture=
+s=20
+impacted by the patch? So I could send a patch which compile for all=20
+these architectures.
 
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Cordially,
+
+Jeremie
+
+--=20
+Jeremie Samuel              Parrot S.A.
+Software Engineer           14, quai de Jemmapes
+R&D/OS Platform             75010 Paris, France
+http://www.parrot.com
+
+On 21/10/2013 03:49, Chris Ball wrote:
+> Hi Jeremie,
+>
+> On Wed, Oct 16 2013, Jeremie Samuel wrote:
+>> The driver can happily live without an atomic context and tasklets,
+>> so turn the tasklets into the work structs.
+>>
+>> Tasklets handlers still grab irqsave spinlocks, but we'll deal
+>> with it in a separate patch.
+>>
+>> Patch based on:http://thread.gmane.org/gmane.linux.kernel.mmc/2579.
+>>
+>> Signed-off-by: Anton Vorontsov<avorontsov@mvista.com>
+>> Signed-off-by: Jeremie Samuel<jeremie.samuel.ext@parrot.com>
+>> [..]
+>> diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
+>> index 2b0f4f3..05cd76c 100644
+>> --- a/include/linux/mmc/sdhci.h
+>> +++ b/include/linux/mmc/sdhci.h
+>> @@ -161,8 +161,8 @@ struct sdhci_host {
+>>   	dma_addr_t adma_addr;	/* Mapped ADMA descr. table */
+>>   	dma_addr_t align_addr;	/* Mapped bounce buffer */
+>>  =20
+>> -	struct tasklet_struct card_tasklet;	/* Tasklet structures */
+>> -	struct tasklet_struct finish_tasklet;
+>> +	struct work_struct	card_detect_work;
+>> +	struct work_struct	finish_work;
+> More compile errors:
+>
+>   =CE=BB git grep card_tasklet drivers/mmc/host
+> drivers/mmc/host/sdhci-bcm-kona.c: * to generate the CD IRQ handled i=
+n sdhci.c which schedules card_tasklet.
+> drivers/mmc/host/sdhci-dove.c:  tasklet_schedule(&host->card_tasklet)=
+;
+> drivers/mmc/host/sdhci-s3c.c:           tasklet_schedule(&host->card_=
+tasklet);
+> drivers/mmc/host/sdhci-spear.c: tasklet_schedule(&host->card_tasklet)=
+;
+>
+> Thanks,
+>
+> - Chris.
+
