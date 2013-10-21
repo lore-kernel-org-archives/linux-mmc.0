@@ -1,143 +1,52 @@
-From: Zhang Haijun <b42677@freescale.com>
-Subject: Re: [PATCH 1/2] mmc:sdhc: Add vendor specific interrupt and handle
- routine
-Date: Mon, 21 Oct 2013 17:20:21 +0800
-Message-ID: <5264F1D5.3080403@freescale.com>
-References: <1379395711-28462-1-git-send-email-Haijun.Zhang@freescale.com> <1379395711-28462-2-git-send-email-Haijun.Zhang@freescale.com>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH 3/8] sdhci: Use work structs instead of tasklets
+Date: Mon, 21 Oct 2013 12:44:20 +0100
+Message-ID: <86li1mq25n.fsf@void.printf.net>
+References: <1381940458-12628-1-git-send-email-jeremie.samuel.ext@parrot.com>
+	<1381940458-12628-4-git-send-email-jeremie.samuel.ext@parrot.com>
+	<874n8b9ywb.fsf@octavius.laptop.org> <5264E78B.1020209@parrot.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=GB2312
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from [213.199.154.207] ([213.199.154.207]:12305 "EHLO
-	am1outboundpool.messaging.microsoft.com" rhost-flags-FAIL-FAIL-OK-OK)
-	by vger.kernel.org with ESMTP id S1754972Ab3JUJV1 convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 21 Oct 2013 05:21:27 -0400
-In-Reply-To: <1379395711-28462-2-git-send-email-Haijun.Zhang@freescale.com>
+Received: from void.printf.net ([89.145.121.20]:40689 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753205Ab3JULoY (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 21 Oct 2013 07:44:24 -0400
+In-Reply-To: <5264E78B.1020209@parrot.com> (Jeremie Samuel's message of "Mon,
+	21 Oct 2013 10:36:27 +0200")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Haijun Zhang <Haijun.Zhang@freescale.com>, linux-mmc@vger.kernel.org
-Cc: cbouatmailru@gmail.com, cjb@laptop.org, scottwood@freescale.com, X.Xie@freescale.com, ulf.hansson@linaro.org
+To: Jeremie Samuel <jeremie.samuel.ext@parrot.com>
+Cc: linux-mmc@vger.kernel.org, =?utf-8?Q?Gr=C3=A9gor?= Boirie <gregor.boirie@parrot.com>, Matthieu Castet <matthieu.castet@parrot.com>, Anton Vorontsov <avorontsov@mvista.com>
 
-Hi, Ulf
+Hi Jeremie,
 
-Coud you give some advice on this patch?
+On Mon, Oct 21 2013, Jeremie Samuel wrote:
+> Do you have a way for me to compile the driver for all the
+> architectures impacted by the patch? So I could send a patch which
+> compile for all these architectures.
 
+If you can get an ARM cross-compiler going, it would look something
+like this:
 
-Thanks.
+$ mkdir obj.dove obj.imx obj.s3c obj.spear obj.tegra
 
-=D3=DA 2013/9/17 13:28, Haijun Zhang =D0=B4=B5=C0:
-> As spec detailed:
-> Error Interrupt Status Register(Offset 032h)[15-12]
-> Error Interrupt Status Enable Register (Offset 036h)[15-12]
-> Error Interrupt Signal Enable Register (Offset 03Ah)[15-12]
->
-> Bits above are specified by vendor itself.
-> So add interface to handle this requirememt.
-> Also share sdhci_dma_show in sdhc.h for platform usr.
->
-> Signed-off-by: Haijun Zhang <Haijun.Zhang@freescale.com>
-> ---
->  drivers/mmc/host/sdhci.c | 25 +++++++++++++++++++------
->  drivers/mmc/host/sdhci.h |  5 +++++
->  2 files changed, 24 insertions(+), 6 deletions(-)
->
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index b4d7f27..2ba9c6d 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -238,16 +238,25 @@ static void sdhci_set_ios(struct mmc_host *mmc,=
- struct mmc_ios *ios);
-> =20
->  static void sdhci_init(struct sdhci_host *host, int soft)
->  {
-> +	u32 pltm_irq =3D 0, irq =3D 0;
-> +
->  	if (soft)
->  		sdhci_reset(host, SDHCI_RESET_CMD|SDHCI_RESET_DATA);
->  	else
->  		sdhci_reset(host, SDHCI_RESET_ALL);
-> =20
-> -	sdhci_clear_set_irqs(host, SDHCI_INT_ALL_MASK,
-> -		SDHCI_INT_BUS_POWER | SDHCI_INT_DATA_END_BIT |
-> +	irq =3D SDHCI_INT_BUS_POWER | SDHCI_INT_DATA_END_BIT |
->  		SDHCI_INT_DATA_CRC | SDHCI_INT_DATA_TIMEOUT | SDHCI_INT_INDEX |
->  		SDHCI_INT_END_BIT | SDHCI_INT_CRC | SDHCI_INT_TIMEOUT |
-> -		SDHCI_INT_DATA_END | SDHCI_INT_RESPONSE);
-> +		SDHCI_INT_DATA_END | SDHCI_INT_RESPONSE;
-> +	/* Vendor Specific Error Status, Status enable and Signal Enable */
-> +	if (host->ops->get_platform_irq)
-> +		host->ops->get_platform_irq(host, &pltm_irq);
-> +
-> +	if (pltm_irq)
-> +		irq |=3D pltm_irq;
-> +
-> +	sdhci_clear_set_irqs(host, SDHCI_INT_ALL_MASK, irq);
-> =20
->  	if (soft) {
->  		/* force clock reconfiguration */
-> @@ -2241,6 +2250,9 @@ static void sdhci_cmd_irq(struct sdhci_host *ho=
-st, u32 intmask)
->  			SDHCI_INT_INDEX))
->  		host->cmd->error =3D -EILSEQ;
-> =20
-> +	if (host->ops->handle_platform_irq)
-> +		host->ops->handle_platform_irq(host, intmask);
-> +
->  	if (host->cmd->error) {
->  		tasklet_schedule(&host->finish_tasklet);
->  		return;
-> @@ -2273,7 +2285,7 @@ static void sdhci_cmd_irq(struct sdhci_host *ho=
-st, u32 intmask)
->  }
-> =20
->  #ifdef CONFIG_MMC_DEBUG
-> -static void sdhci_show_adma_error(struct sdhci_host *host)
-> +void sdhci_show_adma_error(struct sdhci_host *host)
->  {
->  	const char *name =3D mmc_hostname(host->mmc);
->  	u8 *desc =3D host->adma_desc;
-> @@ -2350,10 +2362,11 @@ static void sdhci_data_irq(struct sdhci_host =
-*host, u32 intmask)
->  		pr_err("%s: ADMA error\n", mmc_hostname(host->mmc));
->  		sdhci_show_adma_error(host);
->  		host->data->error =3D -EIO;
-> -		if (host->ops->adma_workaround)
-> -			host->ops->adma_workaround(host, intmask);
->  	}
-> =20
-> +	if (host->ops->handle_platform_irq)
-> +		host->ops->handle_platform_irq(host, intmask);
-> +
->  	if (host->data->error)
->  		sdhci_finish_data(host);
->  	else {
-> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-> index b037f18..a0f1734 100644
-> --- a/drivers/mmc/host/sdhci.h
-> +++ b/drivers/mmc/host/sdhci.h
-> @@ -292,6 +292,8 @@ struct sdhci_ops {
->  	void	(*hw_reset)(struct sdhci_host *host);
->  	void	(*platform_suspend)(struct sdhci_host *host);
->  	void	(*platform_resume)(struct sdhci_host *host);
-> +	void    (*get_platform_irq)(struct sdhci_host *host, u32 *irq);
-> +	void    (*handle_platform_irq)(struct sdhci_host *host, u32 intmask=
-);
->  	void    (*adma_workaround)(struct sdhci_host *host, u32 intmask);
->  	void	(*platform_init)(struct sdhci_host *host);
->  	void    (*card_event)(struct sdhci_host *host);
-> @@ -405,4 +407,7 @@ extern int sdhci_runtime_suspend_host(struct sdhc=
-i_host *host);
->  extern int sdhci_runtime_resume_host(struct sdhci_host *host);
->  #endif
-> =20
-> +#ifdef CONFIG_MMC_DEBUG
-> +extern void sdhci_show_adma_error(struct sdhci_host *host);
-> +#endif
->  #endif /* __SDHCI_HW_H */
+$ cp arch/arm/configs/dove_defconfig obj.dove
+$ cp arch/arm/configs/imx_v6_v7_defconfig obj.imx
+$ cp arch/arm/configs/s3c6400_defconfig obj.s3c
+$ cp arch/arm/configs/spear3xx_defconfig obj.spear
+$ cp arch/arm/configs/tegra_defconfig obj.tegra
 
---=20
-Thanks & Regards
-Haijun.
+$ ARCH=arm CROSS_COMPILE=arm-linux-gnu- make -j12 O=obj.dove
+$ ARCH=arm CROSS_COMPILE=arm-linux-gnu- make -j12 O=obj.imx
+$ ARCH=arm CROSS_COMPILE=arm-linux-gnu- make -j12 O=obj.s3c
+$ ARCH=arm CROSS_COMPILE=arm-linux-gnu- make -j12 O=obj.spear
+$ ARCH=arm CROSS_COMPILE=arm-linux-gnu- make -j12 O=obj.tegra
 
+There's also sdhci-sirf, but it has its own architecture.
 
+Thanks,
+
+- Chris.
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
