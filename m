@@ -1,56 +1,42 @@
 From: Dong Aisheng <b29396@freescale.com>
-Subject: [PATCH 2/7] mmc: sdhci-esdhc-imx: add SDHCI_TRANSFER_MODE read function
-Date: Mon, 21 Oct 2013 22:27:02 +0800
-Message-ID: <1382365627-26816-3-git-send-email-b29396@freescale.com>
+Subject: [PATCH 5/7] mmc: sdhci-esdhc-imx: fix cpas over write issue
+Date: Mon, 21 Oct 2013 22:27:05 +0800
+Message-ID: <1382365627-26816-6-git-send-email-b29396@freescale.com>
 References: <1382365627-26816-1-git-send-email-b29396@freescale.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from tx2ehsobe003.messaging.microsoft.com ([65.55.88.13]:33421 "EHLO
-	tx2outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753109Ab3JUOoN (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 21 Oct 2013 10:44:13 -0400
+Received: from mail-db9lp0249.outbound.messaging.microsoft.com ([213.199.154.249]:42157
+	"EHLO db9outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1753223Ab3JUOoX (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 21 Oct 2013 10:44:23 -0400
 In-Reply-To: <1382365627-26816-1-git-send-email-b29396@freescale.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 Cc: linux-arm-kernel@lists.infradead.org, cjb@laptop.org, shawn.guo@linaro.org, s.hauer@pengutronix.de, b29396@freescale.com, wsa@the-dreams.de, ulf.hansson@linaro.org
 
-Used to read out the correct value of SDHCI_TRANSFER_MODE register
-for upper layer.
+We should use '|=' instead '=', or it may over write
+the original caps assigned before this line.
 
 Signed-off-by: Dong Aisheng <b29396@freescale.com>
 ---
- drivers/mmc/host/sdhci-esdhc-imx.c |   16 ++++++++++++++++
- 1 files changed, 16 insertions(+), 0 deletions(-)
+ drivers/mmc/host/sdhci-esdhc-imx.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
 
 diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-index 461a4c3..2be77e0 100644
+index 5fe484f..baa27c7 100644
 --- a/drivers/mmc/host/sdhci-esdhc-imx.c
 +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-@@ -385,6 +385,22 @@ static u16 esdhc_readw_le(struct sdhci_host *host, int reg)
- 		return ret;
- 	}
+@@ -1070,7 +1070,7 @@ static int sdhci_esdhc_imx_probe(struct platform_device *pdev)
+ 		break;
  
-+	if (unlikely(reg == SDHCI_TRANSFER_MODE)) {
-+		if (esdhc_is_usdhc(imx_data)) {
-+			u32 m = readl(host->ioaddr + ESDHC_MIX_CTRL);
-+			ret = m & ESDHC_MIX_CTRL_SDHCI_MASK;
-+			/* Swap AC23 bit */
-+			if (m & ESDHC_MIX_CTRL_AC23EN) {
-+				ret &= ~ESDHC_MIX_CTRL_AC23EN;
-+				ret |= SDHCI_TRNS_AUTO_CMD23;
-+			}
-+		} else {
-+			ret = readw(host->ioaddr + SDHCI_TRANSFER_MODE);
-+		}
-+
-+		return ret;
-+	}
-+
- 	return readw(host->ioaddr + reg);
- }
+ 	case ESDHC_CD_PERMANENT:
+-		host->mmc->caps = MMC_CAP_NONREMOVABLE;
++		host->mmc->caps |= MMC_CAP_NONREMOVABLE;
+ 		break;
  
+ 	case ESDHC_CD_NONE:
 -- 
 1.7.2.rc3
 
