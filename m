@@ -1,96 +1,253 @@
-From: Tim Kryger <tim.kryger-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [RESEND PATCH v2 4/6] clocksource: kona: Add basic use of
- external clock
-Date: Mon, 21 Oct 2013 14:07:14 -0700
-Message-ID: <CAAYSxhoBvr2Q=ZEQX6hgBjLorgjCjeLLqB9WP2RQ1YFBejjHbg@mail.gmail.com>
-References: <1381960030-1640-1-git-send-email-tim.kryger@linaro.org>
-	<1381960030-1640-5-git-send-email-tim.kryger@linaro.org>
-	<20131017140542.GE24056@e106331-lin.cambridge.arm.com>
+From: John Tobias <john.tobias.ph@gmail.com>
+Subject: Re: eMMC 4.51
+Date: Mon, 21 Oct 2013 15:58:57 -0700
+Message-ID: <CACUGKYO-_j0G+P+rG3-GqdYnmx7VfQhiEqVGhyLFK2mpEsnnkw@mail.gmail.com>
+References: <CACUGKYPDQJPvtXj3NBm8=eYCioWmq=pRVSORNYNZjD13N5ceeg@mail.gmail.com>
+	<CA+6rjLzLhA-zzTqWuzFCMXa1v9CgS-O+Rrnqsfpw9=UY_1vuMA@mail.gmail.com>
+	<CACUGKYPn-qL2_z83wK0EYtDexmyYQX6YVPwHTp5C4_d2M9BH4w@mail.gmail.com>
+	<CA+6rjLzaLZ=R_iEjgu4wB57j1pFraHpAjrg24Er2=SVefVGt7g@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20131017140542.GE24056-NuALmloUBlrZROr8t4l/smS4ubULX0JqMm0uRHvK7Nw@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
-Cc: Christian Daudt <bcm-xK7y4jjYLqYh9ZMKESR00Q@public.gmane.org>, "rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org" <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Pawel Moll <Pawel.Moll-5wv7dgnIgG8@public.gmane.org>, Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>, Ian Campbell <ijc+devicetree-KcIKpvwj1kUDXYZnReoRVg@public.gmane.org>, Daniel Lezcano <daniel.lezcano-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "patches-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <patches-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-la0-f51.google.com ([209.85.215.51]:38151 "EHLO
+	mail-la0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752421Ab3JUW67 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 21 Oct 2013 18:58:59 -0400
+Received: by mail-la0-f51.google.com with SMTP id ea20so2115424lab.38
+        for <linux-mmc@vger.kernel.org>; Mon, 21 Oct 2013 15:58:57 -0700 (PDT)
+In-Reply-To: <CA+6rjLzaLZ=R_iEjgu4wB57j1pFraHpAjrg24Er2=SVefVGt7g@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Jackey Shen <jackey.shen.bo@gmail.com>
+Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Dong Aisheng <b29396@freescale.com>
 
-On Thu, Oct 17, 2013 at 7:05 AM, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org> wrote:
-> On Wed, Oct 16, 2013 at 10:47:08PM +0100, Tim Kryger wrote:
->> When an clock handle is specified in the device tree, enable it and use
->> it to determine the external clock frequency.
+Hi Jackey,
+
+I have a Marvell Datasheet and it support SDR12, SDR25 and SDR50 (upto
+100MHz). SDR104 is not supported.
+
+Regards,
+
+john
+
+On Thu, Oct 17, 2013 at 11:04 PM, Jackey Shen <jackey.shen.bo@gmail.com> wrote:
+> Hi John,
 >
-> I'd drop handle here and just say "When a clock is specified".
+> Does your SD host controller support 3.0 card? As I know, Marvel
+> SDIO8797 can work at UHS-I SDR104. Did you test it?
 >
-> This will need a binding document update.
-
-Can you be more specific about what you are looking for here?
-
-Shall I just say that the frequency property is now deprecated since
-it actually belongs to the external clock whose association with a
-kona timer instance might be declared in the DT using the common clock
-bindings but could also be declared through other means?
-
->> Signed-off-by: Tim Kryger <tim.kryger-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
->> Reviewed-by: Markus Mayer <markus.mayer-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
->> Reviewed-by: Matt Porter <matt.porter-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
->> ---
->>  drivers/clocksource/bcm_kona_timer.c | 14 +++++++++++---
->>  1 file changed, 11 insertions(+), 3 deletions(-)
+> Thanks,
+> Jackey
+>
+> On Thu, Oct 10, 2013 at 2:00 AM, John Tobias <john.tobias.ph@gmail.com> wrote:
+>> Hi Jackey,
 >>
->> diff --git a/drivers/clocksource/bcm_kona_timer.c b/drivers/clocksource/bcm_kona_timer.c
->> index 0d7d8c3..fd11f96 100644
->> --- a/drivers/clocksource/bcm_kona_timer.c
->> +++ b/drivers/clocksource/bcm_kona_timer.c
->> @@ -17,6 +17,7 @@
->>  #include <linux/jiffies.h>
->>  #include <linux/clockchips.h>
->>  #include <linux/types.h>
->> +#include <linux/clk.h>
+>> The Marvel SD8797 work fine but there are some cases that the firmware
+>> failed to load during the system boot up. Although, we managed it by
+>> power cycling the power source of the Marvel chip so that the kernel
+>> will able to detect and reinitialize again.
 >>
->>  #include <linux/io.h>
->>  #include <asm/mach/time.h>
->> @@ -107,11 +108,18 @@ static const struct of_device_id bcm_timer_ids[] __initconst = {
->>  static void __init kona_timers_init(struct device_node *node)
->>  {
->>       u32 freq;
->> +     struct clk *external_clk;
+>> The module was running in high speed, 4bit bus width.
 >>
->> -     if (!of_property_read_u32(node, "clock-frequency", &freq))
->> +     external_clk = of_clk_get_by_name(node, NULL);
->
-> Is there only a single external clock input to the kona timer, or is
-> only one relevant here?
->
-> Are there any other inputs currently not modelled (e.g. regulators)?
-
-The timer block relies upon a single clock and does not use any regulators.
-
->> +
->> +     if (!IS_ERR(external_clk)) {
->> +             arch_timer_rate = clk_get_rate(external_clk);
->> +             clk_prepare_enable(external_clk);
->> +     } else if (!of_property_read_u32(node, "clock-frequency", &freq)) {
->>               arch_timer_rate = freq;
->> -     else
->> -             panic("clock-frequency not set in the .dts file");
->> +     } else {
->> +             panic("neither clock-frequency or clocks handle in .dts file");
->
-> Nit: it's not a handle, it's a phandle+args pair.
->
-> Why not just "Unable to determine clock frequency"?
-
-Sure that sounds fine.
-
->
-> Do we need to panic here? Might a system have other clocks it could use
-> to continue?
-
-I completely agree that this driver could be improved.  However, this
-is unrelated to the topic of this series so I will address it later in
-a separate patch.
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>> Here are some info:
+>>
+>> # iperf -c 192.168.x.x -t 60 -i 10
+>> ------------------------------------------------------------
+>> Client connecting to 192.168.x.x, TCP port 5001
+>> TCP window size: 20.7 KByte (default)
+>> ------------------------------------------------------------
+>> [  3] local 192.168.x.x port 52071 connected with 192.168.x.x port 5001
+>> [ ID] Interval       Transfer     Bandwidth
+>> [  3]  0.0-10.0 sec  48.0 MBytes  40.3 Mbits/sec
+>> [  3] 10.0-20.0 sec  53.4 MBytes  44.8 Mbits/sec
+>> [  3] 20.0-30.0 sec  53.8 MBytes  45.1 Mbits/sec
+>> [  3] 30.0-40.0 sec  56.4 MBytes  47.3 Mbits/sec
+>> [  3] 40.0-50.0 sec  54.2 MBytes  45.5 Mbits/sec
+>> [  3] 50.0-60.0 sec  53.5 MBytes  44.9 Mbits/sec
+>> [  3]  0.0-60.0 sec   319 MBytes  44.6 Mbits/sec
+>>
+>> # iwconfig mlan0
+>> mlan0     IEEE 802.11abgn  ESSID:"Pxx-xxx"
+>>           Mode:Managed  Frequency:2.437 GHz  Access Point:
+>> BC:Dx:xx:xx:xx:xx
+>>           Bit Rate=135 Mb/s
+>>           Retry  long limit:7   RTS thr:off   Fragment thr:off
+>>           Encryption key:off
+>>           Power Management:on
+>>           Link Quality=70/70  Signal level=-28 dBm
+>>           Rx invalid nwid:0  Rx invalid crypt:0  Rx invalid frag:0
+>>           Tx excessive retries:0  Invalid misc:0   Missed beacon:0
+>>
+>> Regards,
+>>
+>> john
+>>
+>>
+>>
+>> On Wed, Oct 9, 2013 at 12:23 AM, Jackey Shen <jackey.shen.bo@gmail.com>
+>> wrote:
+>>> Hi John,
+>>>
+>>> Does wifi module (Marvel SD8797) work fine on your board? What speed does
+>>> it
+>>> run at? SDR104?
+>>>
+>>> Thanks,
+>>> Jackey
+>>>
+>>> On Wed, Oct 9, 2013 at 10:00 AM, John Tobias <john.tobias.ph@gmail.com>
+>>> wrote:
+>>>>
+>>>> Hello,
+>>>>
+>>>> I am using git://gitorious.org/thierryreding/linux-next.git to boot my
+>>>> custom board based on iMX6 sololite. My board has SanDisk iNAND 4.51
+>>>> I/F and wifi module (Marvel SD8797). The latest update of
+>>>> sdhci-esdhc-imx.c supports DDR50/SDR50/SDR104 and I would like to use
+>>>> it for my device.
+>>>>
+>>>> In my .dts file, I have the following settings:
+>>>>
+>>>> /* WIFI module */
+>>>> &usdhc2 {
+>>>> pinctrl-names = "default", "state_100mhz", "state_200mhz";
+>>>> pinctrl-0 = <&pinctrl_usdhc2_2_default>;
+>>>> pinctrl-1 = <&pinctrl_usdhc2_3_100mhz>;
+>>>> pinctrl-2 = <&pinctrl_usdhc2_4_200mhz>;
+>>>> bus-width = <4>;
+>>>> status = "okay";
+>>>> };
+>>>>
+>>>> /* eMMC module  */
+>>>> &usdhc4 {
+>>>> pinctrl-names = "default", "state_100mhz", "state_200mhz";
+>>>> pinctrl-0 = <&pinctrl_usdhc4_2_default>;
+>>>> pinctrl-1 = <&pinctrl_usdhc4_3_100mhz>;
+>>>> pinctrl-2 = <&pinctrl_usdhc4_4_200mhz>;
+>>>> bus-width = <8>;
+>>>> status = "okay";
+>>>> compatible = "fsl,imx6sl-usdhc", "fsl,imx6q-usdhc";
+>>>> reg = <0x0219c000 0x4000>;
+>>>> };
+>>>>
+>>>> Then, in my .dtsi file:
+>>>>
+>>>> usdhc2 {
+>>>> /*WIFI pinmux */
+>>>> pinctrl_usdhc2_2_default: default {
+>>>> fsl,pins = <
+>>>> EVT1_PAD_SD2_CMD__SD2_CMD     0x17039
+>>>> EVT1_PAD_SD2_CLK__SD2_CLK     0x17039
+>>>> EVT1_PAD_SD2_DATA0__SD2_DATA0 0x17039
+>>>> EVT1_PAD_SD2_DATA1__SD2_DATA1 0x17039
+>>>> EVT1_PAD_SD2_DATA2__SD2_DATA2 0x17039
+>>>> EVT1_PAD_SD2_DATA3__SD2_DATA3 0x17039
+>>>> >;
+>>>> };
+>>>>
+>>>> pinctrl_usdhc2_3_100mhz: state_100mhz { /* 100Mhz */
+>>>> fsl,pins = <
+>>>> EVT1_PAD_SD2_CMD__SD2_CMD 0x170B9
+>>>> EVT1_PAD_SD2_CLK__SD2_CLK 0x100B9
+>>>> EVT1_PAD_SD2_DATA0__SD2_DATA0 0x170B9
+>>>> EVT1_PAD_SD2_DATA1__SD2_DATA1 0x170B9
+>>>> EVT1_PAD_SD2_DATA2__SD2_DATA2 0x170B9
+>>>> EVT1_PAD_SD2_DATA3__SD2_DATA3 0x170B9
+>>>> >;
+>>>> };
+>>>>
+>>>> pinctrl_usdhc2_4_200mhz: state_200mhz { /* 200Mhz */
+>>>> fsl,pins = <
+>>>> EVT1_PAD_SD2_CMD__SD2_CMD 0x170F9
+>>>> EVT1_PAD_SD2_CLK__SD2_CLK 0x100F9
+>>>> EVT1_PAD_SD2_DATA0__SD2_DATA0 0x170F9
+>>>> EVT1_PAD_SD2_DATA1__SD2_DATA1 0x170F9
+>>>> EVT1_PAD_SD2_DATA2__SD2_DATA2 0x170F9
+>>>> EVT1_PAD_SD2_DATA3__SD2_DATA3 0x170F9
+>>>> >;
+>>>> };
+>>>> };
+>>>>
+>>>> usdhc4 {
+>>>> /* eMMC pinmux */
+>>>> pinctrl_usdhc4_2_default: default {
+>>>> fsl,pins = <
+>>>> EVT1_PAD_EPDC_BDR1__SD4_CMD       0x17039
+>>>> EVT1_PAD_EPDC_BDR0__SD4_CLK       0x10039
+>>>> EVT1_PAD_EPDC_PWR_COM__SD4_DATA0  0x17039
+>>>> EVT1_PAD_EPDC_PWR_IRQ__SD4_DATA1  0x17039
+>>>> EVT1_PAD_EPDC_PWR_STAT__SD4_DATA2 0x17039
+>>>> EVT1_PAD_EPDC_PWR_WAKE__SD4_DATA3 0x17039
+>>>> EVT1_PAD_FEC_MDC__SD4_DATA4 0x17039
+>>>> EVT1_PAD_FEC_RX_DATA0__SD4_DATA5  0x17039
+>>>> EVT1_PAD_FEC_TX_EN__SD4_DATA6     0x17039
+>>>> EVT1_PAD_FEC_TX_DATA1__SD4_DATA7  0x17039
+>>>> >;
+>>>> };
+>>>>
+>>>> pinctrl_usdhc4_3_100mhz: state_100mhz { /* 100Mhz */
+>>>> fsl,pins = <
+>>>> EVT1_PAD_EPDC_BDR1__SD4_CMD 0x170B9
+>>>> EVT1_PAD_EPDC_BDR0__SD4_CLK   0x100B9
+>>>> EVT1_PAD_EPDC_PWR_COM__SD4_DATA0 0x170B9
+>>>> EVT1_PAD_EPDC_PWR_IRQ__SD4_DATA1 0x170B9
+>>>> EVT1_PAD_EPDC_PWR_STAT__SD4_DATA2 0x170B9
+>>>> EVT1_PAD_EPDC_PWR_WAKE__SD4_DATA3 0x170B9
+>>>> EVT1_PAD_FEC_MDC__SD4_DATA4 0x170B9
+>>>> EVT1_PAD_FEC_RX_DATA0__SD4_DATA5  0x170B9
+>>>> EVT1_PAD_FEC_TX_EN__SD4_DATA6     0x170B9
+>>>> EVT1_PAD_FEC_TX_DATA1__SD4_DATA7  0x170B9
+>>>> >;
+>>>> };
+>>>>
+>>>> pinctrl_usdhc4_4_200mhz: state_200mhz { /* 200Mhz */
+>>>> fsl,pins = <
+>>>> EVT1_PAD_EPDC_BDR1__SD4_CMD 0x170F9
+>>>> EVT1_PAD_EPDC_BDR0__SD4_CLK   0x100F9
+>>>> EVT1_PAD_EPDC_PWR_COM__SD4_DATA0 0x170F9
+>>>> EVT1_PAD_EPDC_PWR_IRQ__SD4_DATA1 0x170F9
+>>>> EVT1_PAD_EPDC_PWR_STAT__SD4_DATA2 0x170F9
+>>>> EVT1_PAD_EPDC_PWR_WAKE__SD4_DATA3 0x170F9
+>>>> EVT1_PAD_FEC_MDC__SD4_DATA4 0x170F9
+>>>> EVT1_PAD_FEC_RX_DATA0__SD4_DATA5  0x170F9
+>>>> EVT1_PAD_FEC_TX_EN__SD4_DATA6     0x170F9
+>>>> EVT1_PAD_FEC_TX_DATA1__SD4_DATA7  0x170F9
+>>>> >;
+>>>> };
+>>>> };
+>>>>
+>>>>
+>>>> 1. After using the said pinmux settings, the sdhci-esdh-imx controller
+>>>> wasn't able to configure it correctly due the the group name for the
+>>>> two port were the same (default, state_100mhz, state_200mhz).
+>>>>
+>>>> 2. Then, I temporarily disabled usdhc4 to test if the driver able to
+>>>> enable the SDR50 for my wifi. Then, I was getting the following
+>>>> errors:
+>>>>
+>>>> [    1.655024] mmc0: error -110 whilst initialising SDIO card
+>>>> [    3.746340] mmc0: error -110 whilst initialising SDIO card
+>>>> [    3.818624] mmc0: host doesn't support card's voltages
+>>>> [    3.823783] mmc0: error -22 whilst initialising SDIO card
+>>>> [    3.901670] mmc0: host doesn't support card's voltages
+>>>> [    3.906862] mmc0: error -22 whilst initialising SDIO card
+>>>> [   34.307777] mmc0: host doesn't support card's voltages
+>>>> [   34.312980] mmc0: error -22 whilst initialising SDIO card
+>>>>
+>>>> 3. Then, I tried the eMMC to see if the driver able to enable the
+>>>> DDR50. After booting it, the kernel detect the eMMC only in hight
+>>>> speed mode.
+>>>>
+>>>>
+>>>> I would like to know if anyone here can help me to figure out how to
+>>>> enable the DDR50 for my eMMC and SDR50 for my wifi as well.
+>>>>
+>>>> Regards,
+>>>>
+>>>> john
+>>>> --
+>>>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+>>>> the body of a message to majordomo@vger.kernel.org
+>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>
+>>>
