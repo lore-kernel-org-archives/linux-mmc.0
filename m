@@ -1,66 +1,38 @@
-From: Sachin Kamat <sachin.kamat@linaro.org>
-Subject: Re: [PATCH v2 1/1] mmc: sdhci-spear: Fix NULL pointer dereference
-Date: Mon, 21 Oct 2013 08:40:31 +0530
-Message-ID: <CAK9yfHwhpAera9jFf=A31zvfZJ2cocZWmt94w=WShD2wyu=AYw@mail.gmail.com>
-References: <1378976643-26717-1-git-send-email-sachin.kamat@linaro.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+From: Zhangfei Gao <zhangfei.gao@linaro.org>
+Subject: [v2 PATCH 0/2] mmc: dw_mmc: add dw_mmc-k3
+Date: Mon, 21 Oct 2013 15:13:57 +0800
+Message-ID: <1382339639-16764-1-git-send-email-zhangfei.gao@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pb0-f44.google.com ([209.85.160.44]:61593 "EHLO
-	mail-pb0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752326Ab3JUDKb (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 20 Oct 2013 23:10:31 -0400
-Received: by mail-pb0-f44.google.com with SMTP id xa7so6336441pbc.17
-        for <linux-mmc@vger.kernel.org>; Sun, 20 Oct 2013 20:10:31 -0700 (PDT)
-In-Reply-To: <1378976643-26717-1-git-send-email-sachin.kamat@linaro.org>
+Received: from mail-pd0-f169.google.com ([209.85.192.169]:39352 "EHLO
+	mail-pd0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752685Ab3JUHOL (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 21 Oct 2013 03:14:11 -0400
+Received: by mail-pd0-f169.google.com with SMTP id q10so5833482pdj.0
+        for <linux-mmc@vger.kernel.org>; Mon, 21 Oct 2013 00:14:10 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: Chris Ball <cjb@laptop.org>, Sachin Kamat <sachin.kamat@linaro.org>
+To: Chris Ball <cjb@laptop.org>, Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, devicetree@vger.kernel.org, Zhangfei Gao <zhangfei.gao@linaro.org>
 
-On 12 September 2013 14:34, Sachin Kamat <sachin.kamat@linaro.org> wrote:
-> pdata could be NULL if cd_gpio = -1. Dereference pdata only
-> if it is not NULL.
->
-> Signed-off-by: Sachin Kamat <sachin.kamat@linaro.org>
-> Cc: Viresh Kumar <viresh.kumar@linaro.org>
-> ---
-> Compile tested.
-> Changes since v1:
-> * Moved the pdata assignment inside if condition.
-> ---
->  drivers/mmc/host/sdhci-spear.c |    8 +++-----
->  1 file changed, 3 insertions(+), 5 deletions(-)
->
-> diff --git a/drivers/mmc/host/sdhci-spear.c b/drivers/mmc/host/sdhci-spear.c
-> index 2dba9f8..76ddd89 100644
-> --- a/drivers/mmc/host/sdhci-spear.c
-> +++ b/drivers/mmc/host/sdhci-spear.c
-> @@ -84,14 +84,12 @@ static struct sdhci_plat_data *sdhci_probe_config_dt(struct platform_device *pde
->         /* If pdata is required */
->         if (cd_gpio != -1) {
->                 pdata = devm_kzalloc(&pdev->dev, sizeof(*pdata), GFP_KERNEL);
-> -               if (!pdata) {
-> +               if (!pdata)
->                         dev_err(&pdev->dev, "DT: kzalloc failed\n");
-> -                       return ERR_PTR(-ENOMEM);
-> -               }
-> +               else
-> +                       pdata->card_int_gpio = cd_gpio;
->         }
->
-> -       pdata->card_int_gpio = cd_gpio;
-> -
->         return pdata;
->  }
->  #else
-> --
-> 1.7.9.5
->
+v2:
+Follow Jaehoon's suggestion
+Use slot-gpio.c handle cd pin
+Move table out to dts
+other suggestion
 
-Gentle ping, Chris.
+Zhangfei Gao (2):
+  mmc: dw_mmc: add dw_mci_of_get_cd_gpio to handle cd pin
+  mmc: dw_mmc: add dw_mmc-k3 for k3 platform
 
+ .../devicetree/bindings/mmc/k3-dw-mshc.txt         |   77 +++++
+ drivers/mmc/host/Kconfig                           |   10 +
+ drivers/mmc/host/Makefile                          |    1 +
+ drivers/mmc/host/dw_mmc-k3.c                       |  298 ++++++++++++++++++++
+ drivers/mmc/host/dw_mmc.c                          |   34 +++
+ 5 files changed, 420 insertions(+)
+ create mode 100644 Documentation/devicetree/bindings/mmc/k3-dw-mshc.txt
+ create mode 100644 drivers/mmc/host/dw_mmc-k3.c
 
 -- 
-With warm regards,
-Sachin
+1.7.9.5
+
