@@ -1,40 +1,96 @@
-From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH v2 0/8] sdhci: Move real work out of an atomic context
-Date: Mon, 21 Oct 2013 16:02:12 -0400
-Message-ID: <87txgabdff.fsf@octavius.laptop.org>
-References: <1382369157-16129-1-git-send-email-jeremie.samuel.ext@parrot.com>
+From: Tim Kryger <tim.kryger-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [RESEND PATCH v2 4/6] clocksource: kona: Add basic use of
+ external clock
+Date: Mon, 21 Oct 2013 14:07:14 -0700
+Message-ID: <CAAYSxhoBvr2Q=ZEQX6hgBjLorgjCjeLLqB9WP2RQ1YFBejjHbg@mail.gmail.com>
+References: <1381960030-1640-1-git-send-email-tim.kryger@linaro.org>
+	<1381960030-1640-5-git-send-email-tim.kryger@linaro.org>
+	<20131017140542.GE24056@e106331-lin.cambridge.arm.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:54868 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751802Ab3JUUCX (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 21 Oct 2013 16:02:23 -0400
-In-Reply-To: <1382369157-16129-1-git-send-email-jeremie.samuel.ext@parrot.com>
-	(Jeremie Samuel's message of "Mon, 21 Oct 2013 17:25:49 +0200")
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20131017140542.GE24056-NuALmloUBlrZROr8t4l/smS4ubULX0JqMm0uRHvK7Nw@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
+Cc: Christian Daudt <bcm-xK7y4jjYLqYh9ZMKESR00Q@public.gmane.org>, "rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org" <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Pawel Moll <Pawel.Moll-5wv7dgnIgG8@public.gmane.org>, Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>, Ian Campbell <ijc+devicetree-KcIKpvwj1kUDXYZnReoRVg@public.gmane.org>, Daniel Lezcano <daniel.lezcano-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "patches-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <patches-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Jeremie Samuel <jeremie.samuel.ext@parrot.com>
-Cc: linux-mmc@vger.kernel.org, =?utf-8?Q?Gr=C3=A9gor?= Boirie <gregor.boirie@parrot.com>, Matthieu Castet <matthieu.castet@parrot.com>
 
-Hi Jeremie,
-
-On Mon, Oct 21 2013, Jeremie Samuel wrote:
-> Currently the sdhci driver does everything in the atomic context.
-> And what is worse, PIO transfers are made from the IRQ handler.
+On Thu, Oct 17, 2013 at 7:05 AM, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org> wrote:
+> On Wed, Oct 16, 2013 at 10:47:08PM +0100, Tim Kryger wrote:
+>> When an clock handle is specified in the device tree, enable it and use
+>> it to determine the external clock frequency.
 >
-> Some patches were already submitted to solve this issue. But there were
-> rejected because they involved new issues.
+> I'd drop handle here and just say "When a clock is specified".
 >
-> This set of patches is an evolution of an old patch from Anton Vorontsov.
-> I tried to fix all the problems involved by the patches. I tested it for
-> several time now with SD cards and SDIO.
+> This will need a binding document update.
+
+Can you be more specific about what you are looking for here?
+
+Shall I just say that the frequency property is now deprecated since
+it actually belongs to the external clock whose association with a
+kona timer instance might be declared in the DT using the common clock
+bindings but could also be declared through other means?
+
+>> Signed-off-by: Tim Kryger <tim.kryger-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+>> Reviewed-by: Markus Mayer <markus.mayer-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+>> Reviewed-by: Matt Porter <matt.porter-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+>> ---
+>>  drivers/clocksource/bcm_kona_timer.c | 14 +++++++++++---
+>>  1 file changed, 11 insertions(+), 3 deletions(-)
+>>
+>> diff --git a/drivers/clocksource/bcm_kona_timer.c b/drivers/clocksource/bcm_kona_timer.c
+>> index 0d7d8c3..fd11f96 100644
+>> --- a/drivers/clocksource/bcm_kona_timer.c
+>> +++ b/drivers/clocksource/bcm_kona_timer.c
+>> @@ -17,6 +17,7 @@
+>>  #include <linux/jiffies.h>
+>>  #include <linux/clockchips.h>
+>>  #include <linux/types.h>
+>> +#include <linux/clk.h>
+>>
+>>  #include <linux/io.h>
+>>  #include <asm/mach/time.h>
+>> @@ -107,11 +108,18 @@ static const struct of_device_id bcm_timer_ids[] __initconst = {
+>>  static void __init kona_timers_init(struct device_node *node)
+>>  {
+>>       u32 freq;
+>> +     struct clk *external_clk;
+>>
+>> -     if (!of_property_read_u32(node, "clock-frequency", &freq))
+>> +     external_clk = of_clk_get_by_name(node, NULL);
 >
-> So, this patch set reworks sdhci code to avoid atomic context,
-> almost completely.
+> Is there only a single external clock input to the kona timer, or is
+> only one relevant here?
+>
+> Are there any other inputs currently not modelled (e.g. regulators)?
 
-I've merged this series to mmc-next for 3.13 now.  Thanks very much!
+The timer block relies upon a single clock and does not use any regulators.
 
-- Chris.
--- 
-Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+>> +
+>> +     if (!IS_ERR(external_clk)) {
+>> +             arch_timer_rate = clk_get_rate(external_clk);
+>> +             clk_prepare_enable(external_clk);
+>> +     } else if (!of_property_read_u32(node, "clock-frequency", &freq)) {
+>>               arch_timer_rate = freq;
+>> -     else
+>> -             panic("clock-frequency not set in the .dts file");
+>> +     } else {
+>> +             panic("neither clock-frequency or clocks handle in .dts file");
+>
+> Nit: it's not a handle, it's a phandle+args pair.
+>
+> Why not just "Unable to determine clock frequency"?
+
+Sure that sounds fine.
+
+>
+> Do we need to panic here? Might a system have other clocks it could use
+> to continue?
+
+I completely agree that this driver could be improved.  However, this
+is unrelated to the topic of this series so I will address it later in
+a separate patch.
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
