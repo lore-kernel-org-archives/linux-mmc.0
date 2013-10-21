@@ -1,69 +1,75 @@
-From: Jeremie Samuel <jeremie.samuel.ext@parrot.com>
-Subject: Re: [PATCH v2 0/8] sdhci: Move real work out of an atomic context
-Date: Mon, 21 Oct 2013 17:52:56 +0200
-Message-ID: <52654DD8.1090806@parrot.com>
-References: <1382369157-16129-1-git-send-email-jeremie.samuel.ext@parrot.com> <86hacaprmz.fsf@void.printf.net>
+From: John Tobias <john.tobias.ph@gmail.com>
+Subject: Re: [PATCH 2/7] mmc: sdhci-esdhc-imx: add SDHCI_TRANSFER_MODE read function
+Date: Mon, 21 Oct 2013 09:01:59 -0700
+Message-ID: <CACUGKYPo2zWDTbmyksiwmJY8tghkYjr=dKD8pDzxugeOoojCNQ@mail.gmail.com>
+References: <1382365627-26816-1-git-send-email-b29396@freescale.com>
+	<1382365627-26816-3-git-send-email-b29396@freescale.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from co202.xi-lite.net ([149.6.83.202]:37382 "EHLO co202.xi-lite.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753432Ab3JUPyT (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 21 Oct 2013 11:54:19 -0400
-In-Reply-To: <86hacaprmz.fsf@void.printf.net>
+Received: from mail-lb0-f172.google.com ([209.85.217.172]:35316 "EHLO
+	mail-lb0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750772Ab3JUQCB (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 21 Oct 2013 12:02:01 -0400
+Received: by mail-lb0-f172.google.com with SMTP id c11so4907320lbj.31
+        for <linux-mmc@vger.kernel.org>; Mon, 21 Oct 2013 09:01:59 -0700 (PDT)
+In-Reply-To: <1382365627-26816-3-git-send-email-b29396@freescale.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: linux-mmc@vger.kernel.org, =?ISO-8859-1?Q?Gr=E9gor_Boirie?= <gregor.boirie@parrot.com>, Matthieu Castet <matthieu.castet@parrot.com>
+To: Dong Aisheng <b29396@freescale.com>
+Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, cjb@laptop.org, Shawn Guo <shawn.guo@linaro.org>, s.hauer@pengutronix.de, wsa@the-dreams.de, ulf.hansson@linaro.org
 
-v2:
-Patches on sdhci-bcm-kona.c, sdhci-dove.c, sdhci-s3c.c, sdhci-sirf.c, 
-sdhci-spear.c in order to consider the change tasklet -> workqueue
+Hi Dong,
 
-Version of 16 oct 13:
-Patches on sdhci-esdhc-imx.c, sdhci-pxav3.c, sdhci-s3c.c in order to 
-consider the change spinlock -> mutex
+I compiled my kernel after applying your patch but it didn't compile
+it correctly due to esdhc_is_usdhc function. It should be
+is_imx6_usdhc?
 
-Version of 06 jul 13:
-Resend in order to include the patches in kernel 3.12
+Regards,
 
-Version of 24 may 13:
-First version of my patches (based on Anton Vorontsov's patches http://thread.gmane.org/gmane.linux.kernel.mmc/2579)
+john
 
-Sorry for the issues. It's my first submission on a Linux mailing list.
-
-Cordially,
-
--- 
-Jeremie Samuel              Parrot S.A.
-Software Engineer           14, quai de Jemmapes
-R&D/OS Platform             75010 Paris, France
-http://www.parrot.com
-
-On 21/10/2013 17:31, Chris Ball wrote:
-> Hi Jeremie,
+On Mon, Oct 21, 2013 at 7:27 AM, Dong Aisheng <b29396@freescale.com> wrote:
+> Used to read out the correct value of SDHCI_TRANSFER_MODE register
+> for upper layer.
 >
-> On Mon, Oct 21 2013, Jeremie Samuel wrote:
->> Currently the sdhci driver does everything in the atomic context.
->> And what is worse, PIO transfers are made from the IRQ handler.
->>
->> Some patches were already submitted to solve this issue. But there were
->> rejected because they involved new issues.
->>
->> This set of patches is an evolution of an old patch from Anton Vorontsov.
->> I tried to fix all the problems involved by the patches. I tested it for
->> several time now with SD cards and SDIO.
->>
->> So, this patch set reworks sdhci code to avoid atomic context,
->> almost completely.
-> Could we get a changelog from patchset v1 to v2, for the record?
-> (And isn't this more like v4 of your series?)
+> Signed-off-by: Dong Aisheng <b29396@freescale.com>
+> ---
+>  drivers/mmc/host/sdhci-esdhc-imx.c |   16 ++++++++++++++++
+>  1 files changed, 16 insertions(+), 0 deletions(-)
 >
-> You don't have to resend the patchset, just replying with the
-> changelog here is fine.
+> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+> index 461a4c3..2be77e0 100644
+> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
+> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+> @@ -385,6 +385,22 @@ static u16 esdhc_readw_le(struct sdhci_host *host, int reg)
+>                 return ret;
+>         }
 >
-> Thanks!
+> +       if (unlikely(reg == SDHCI_TRANSFER_MODE)) {
+> +               if (esdhc_is_usdhc(imx_data)) {
+> +                       u32 m = readl(host->ioaddr + ESDHC_MIX_CTRL);
+> +                       ret = m & ESDHC_MIX_CTRL_SDHCI_MASK;
+> +                       /* Swap AC23 bit */
+> +                       if (m & ESDHC_MIX_CTRL_AC23EN) {
+> +                               ret &= ~ESDHC_MIX_CTRL_AC23EN;
+> +                               ret |= SDHCI_TRNS_AUTO_CMD23;
+> +                       }
+> +               } else {
+> +                       ret = readw(host->ioaddr + SDHCI_TRANSFER_MODE);
+> +               }
+> +
+> +               return ret;
+> +       }
+> +
+>         return readw(host->ioaddr + reg);
+>  }
 >
-> - Chris.
-
+> --
+> 1.7.2.rc3
+>
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
