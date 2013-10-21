@@ -1,121 +1,59 @@
 From: Jeremie Samuel <jeremie.samuel.ext@parrot.com>
-Subject: [PATCH v2 1/8] sdhci: Turn timeout timer into delayed work
-Date: Mon, 21 Oct 2013 17:25:50 +0200
-Message-ID: <1382369157-16129-2-git-send-email-jeremie.samuel.ext@parrot.com>
-References: <1382369157-16129-1-git-send-email-jeremie.samuel.ext@parrot.com>
+Subject: [PATCH v2 0/8] sdhci: Move real work out of an atomic context
+Date: Mon, 21 Oct 2013 17:25:49 +0200
+Message-ID: <1382369157-16129-1-git-send-email-jeremie.samuel.ext@parrot.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from co202.xi-lite.net ([149.6.83.202]:36369 "EHLO co202.xi-lite.net"
+Received: from co202.xi-lite.net ([149.6.83.202]:36366 "EHLO co202.xi-lite.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753694Ab3JUP1Z (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	id S1753526Ab3JUP1Z (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
 	Mon, 21 Oct 2013 11:27:25 -0400
-In-Reply-To: <1382369157-16129-1-git-send-email-jeremie.samuel.ext@parrot.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Chris Ball <cjb@laptop.org>
-Cc: linux-mmc@vger.kernel.org, =?UTF-8?q?Gr=C3=A9gor=20Boirie?= <gregor.boirie@parrot.com>, Matthieu Castet <matthieu.castet@parrot.com>, Jeremie Samuel <jeremie.samuel.ext@parrot.com>, Anton Vorontsov <avorontsov@mvista.com>
+Cc: linux-mmc@vger.kernel.org, =?UTF-8?q?Gr=C3=A9gor=20Boirie?= <gregor.boirie@parrot.com>, Matthieu Castet <matthieu.castet@parrot.com>, Jeremie Samuel <jeremie.samuel.ext@parrot.com>
 
-There is no need for the timeout handler to run in the atomic
-context, so this patch turns timeout timeout into the delayed
-work.
+Hi all,
 
-Note that the timeout handler still grabs an irqsave spinlock,
-we'll deal with it in a separate patch.
+Currently the sdhci driver does everything in the atomic context.
+And what is worse, PIO transfers are made from the IRQ handler.
 
-Patch based on http://thread.gmane.org/gmane.linux.kernel.mmc/2579.
+Some patches were already submitted to solve this issue. But there were
+rejected because they involved new issues.
 
-Signed-off-by: Anton Vorontsov <avorontsov@mvista.com>
-Signed-off-by: Jeremie Samuel <jeremie.samuel.ext@parrot.com>
----
- drivers/mmc/host/sdhci.c  |   13 +++++++------
- include/linux/mmc/sdhci.h |    3 ++-
- 2 files changed, 9 insertions(+), 7 deletions(-)
+This set of patches is an evolution of an old patch from Anton Vorontsov.
+I tried to fix all the problems involved by the patches. I tested it for
+several time now with SD cards and SDIO.
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 66bce7a..b312ec6 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -13,6 +13,7 @@
-  *     - JMicron (hardware and technical support)
-  */
- 
-+#include <linux/workqueue.h>
- #include <linux/delay.h>
- #include <linux/highmem.h>
- #include <linux/io.h>
-@@ -1013,7 +1014,7 @@ void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
- 		mdelay(1);
- 	}
- 
--	mod_timer(&host->timer, jiffies + 10 * HZ);
-+	schedule_delayed_work(&host->timeout_work, 10 * HZ);
- 
- 	host->cmd = cmd;
- 
-@@ -2140,7 +2141,7 @@ static void sdhci_tasklet_finish(unsigned long param)
- 		return;
- 	}
- 
--	del_timer(&host->timer);
-+	cancel_delayed_work(&host->timeout_work);
- 
- 	mrq = host->mrq;
- 
-@@ -2180,12 +2181,12 @@ static void sdhci_tasklet_finish(unsigned long param)
- 	sdhci_runtime_pm_put(host);
- }
- 
--static void sdhci_timeout_timer(unsigned long data)
-+static void sdhci_timeout_work(struct work_struct *wk)
- {
- 	struct sdhci_host *host;
- 	unsigned long flags;
- 
--	host = (struct sdhci_host*)data;
-+	host = container_of(wk, struct sdhci_host, timeout_work.work);
- 
- 	spin_lock_irqsave(&host->lock, flags);
- 
-@@ -3213,7 +3214,7 @@ int sdhci_add_host(struct sdhci_host *host)
- 	tasklet_init(&host->finish_tasklet,
- 		sdhci_tasklet_finish, (unsigned long)host);
- 
--	setup_timer(&host->timer, sdhci_timeout_timer, (unsigned long)host);
-+	INIT_DELAYED_WORK(&host->timeout_work, sdhci_timeout_work);
- 
- 	if (host->version >= SDHCI_SPEC_300) {
- 		init_waitqueue_head(&host->buf_ready_int);
-@@ -3316,7 +3317,7 @@ void sdhci_remove_host(struct sdhci_host *host, int dead)
- 	sdhci_mask_irqs(host, SDHCI_INT_ALL_MASK);
- 	free_irq(host->irq, host);
- 
--	del_timer_sync(&host->timer);
-+	flush_delayed_work(&host->timeout_work);
- 
- 	tasklet_kill(&host->card_tasklet);
- 	tasklet_kill(&host->finish_tasklet);
-diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
-index 3e781b8..98cf934 100644
---- a/include/linux/mmc/sdhci.h
-+++ b/include/linux/mmc/sdhci.h
-@@ -12,6 +12,7 @@
- #define LINUX_MMC_SDHCI_H
- 
- #include <linux/scatterlist.h>
-+#include <linux/workqueue.h>
- #include <linux/compiler.h>
- #include <linux/types.h>
- #include <linux/io.h>
-@@ -163,7 +164,7 @@ struct sdhci_host {
- 	struct tasklet_struct card_tasklet;	/* Tasklet structures */
- 	struct tasklet_struct finish_tasklet;
- 
--	struct timer_list timer;	/* Timer for timeouts */
-+	struct delayed_work	timeout_work;	/* Work for timeouts */
- 
- 	u32 caps;		/* Alternative CAPABILITY_0 */
- 	u32 caps1;		/* Alternative CAPABILITY_1 */
+So, this patch set reworks sdhci code to avoid atomic context,
+almost completely.
+
+Thanks,
+
+Jeremie Samuel
+
+Jeremie Samuel (8):
+  sdhci: Turn timeout timer into delayed work
+  sdhci: Turn tuning timeout timer into delayed work
+  sdhci: Use work structs instead of tasklets
+  sdhci: Use threaded IRQ handler
+  sdhci: Delay led blinking
+  sdhci: Turn host->lock into a mutex
+  sdhci: Get rid of mdelay()s where it is safe and makes sense
+  sdhci: Use jiffies instead of a timeout counter
+
+ drivers/mmc/host/sdhci-bcm-kona.c  |    2 +-
+ drivers/mmc/host/sdhci-dove.c      |    6 +-
+ drivers/mmc/host/sdhci-esdhc-imx.c |    4 +-
+ drivers/mmc/host/sdhci-pxav3.c     |   10 +-
+ drivers/mmc/host/sdhci-s3c.c       |    7 +-
+ drivers/mmc/host/sdhci-sirf.c      |    4 +-
+ drivers/mmc/host/sdhci-spear.c     |    2 +-
+ drivers/mmc/host/sdhci.c           |  329 ++++++++++++++++++------------------
+ include/linux/mmc/sdhci.h          |   13 +-
+ 9 files changed, 185 insertions(+), 192 deletions(-)
+
 -- 
 1.7.10.4
 
