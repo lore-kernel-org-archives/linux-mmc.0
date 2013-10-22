@@ -1,106 +1,52 @@
-From: Tim Kryger <tim.kryger@linaro.org>
-Subject: Re: [RESEND PATCH v2 6/6] mmc: sdhci-bcm-kona: Add basic use of clocks
-Date: Mon, 21 Oct 2013 16:13:10 -0700
-Message-ID: <CAAYSxhorTkuMHU=mqWG5WsNYE1c2dh9-44yLhT6DGhEpgWSZxw@mail.gmail.com>
-References: <1381960030-1640-1-git-send-email-tim.kryger@linaro.org>
-	<1381960030-1640-7-git-send-email-tim.kryger@linaro.org>
-	<20131017141309.GG24056@e106331-lin.cambridge.arm.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: dw_mmc: priv->sdr_timing set wrong
+Date: Tue, 22 Oct 2013 15:45:42 +0900
+Message-ID: <52661F16.3080602@samsung.com>
+References: <CANEJEGt+kx3_EjgBGxkZ9TJec9ngf=FOcwhg2+eAtPY9-2xxCA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ob0-f178.google.com ([209.85.214.178]:34011 "EHLO
-	mail-ob0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751539Ab3JUXNL (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 21 Oct 2013 19:13:11 -0400
-Received: by mail-ob0-f178.google.com with SMTP id uz6so6450614obc.23
-        for <linux-mmc@vger.kernel.org>; Mon, 21 Oct 2013 16:13:11 -0700 (PDT)
-In-Reply-To: <20131017141309.GG24056@e106331-lin.cambridge.arm.com>
+Received: from mailout4.samsung.com ([203.254.224.34]:61970 "EHLO
+	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750868Ab3JVGpn (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Oct 2013 02:45:43 -0400
+Received: from epcpsbgr4.samsung.com
+ (u144.gpu120.samsung.co.kr [203.254.230.144])
+ by mailout4.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+ (7.0.4.24.0) 64bit (built Nov 17 2011))
+ with ESMTP id <0MV200JGR5G4K730@mailout4.samsung.com> for
+ linux-mmc@vger.kernel.org; Tue, 22 Oct 2013 15:45:41 +0900 (KST)
+In-reply-to: <CANEJEGt+kx3_EjgBGxkZ9TJec9ngf=FOcwhg2+eAtPY9-2xxCA@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Mark Rutland <mark.rutland@arm.com>
-Cc: Christian Daudt <bcm@fixthebug.org>, "rob.herring@calxeda.com" <rob.herring@calxeda.com>, Pawel Moll <Pawel.Moll@arm.com>, Stephen Warren <swarren@wwwdotorg.org>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Daniel Lezcano <daniel.lezcano@linaro.org>, Thomas Gleixner <tglx@linutronix.de>, Chris Ball <cjb@laptop.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "patches@linaro.org" <patches@linaro.org>
+To: Grant Grundler <grundler@chromium.org>, Chris Ball <cjb@laptop.org>, Yuvaraj Kumar C D <yuvaraj.cd@gmail.com>, Seungwon Jeon <tgih.jun@samsung.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Sonny Rao <sonnyrao@chromium.org>, ALIM AKHTAR <alim.akhtar@samsung.com>, Douglas Anderson <dianders@chromium.org>
 
-On Thu, Oct 17, 2013 at 7:13 AM, Mark Rutland <mark.rutland@arm.com> wrote:
-> On Wed, Oct 16, 2013 at 10:47:10PM +0100, Tim Kryger wrote:
->> Enable the external clock needed by the host controller during the
->> probe and disable it during the remove.
->
-> This requires a biding document update.
+Hi Grant,
 
-The current best practice for declaring the association of a clock
-with a consumer device is to embed the common clock bindings 'clocks'
-property inside its node but this is not the only way it may be done.
+Good catch..sdr-timing is set to wrong value.(set to ddr-timing)
+Do you have the plan that send the fixing patch at mailing?
 
-Given that clk_get() still works for clocks found using string
-matching, is it appropriate to mandate that all drivers that uses the
-clk api mention the common clock bindings 'clocks' property in the
-documentation for their device's binding?
+Best Regards,
+Jaehoon Chung
 
-> I note that the binding is already incomplete (it does not describe the
-> interrupts or reg).
+On 10/19/2013 05:13 AM, Grant Grundler wrote:
+> Chris, Yuvaraj, Alim, Jaehoon,
+> 
+> This patch is wrong:
+> https://git.kernel.org/cgit/linux/kernel/git/cjb/mmc.git/commit/?h=mmc-next&id=e6c784eded7b39caeaf2e9206336fa1daeccfd09
+> 
+> sdr_timing needs to come from the of_property "samsung,dw-mshc-sdr-timing".
+> Assignment of priv->sdr_timing needs to move back where it was before.
+> 
+> Can one of you guys "just fix it" or do you need a patch from me (or Sonny)?
+> 
+> (This came up during my review of eMMC patches that sonny is
+> backporting to ChromeOS-3.8 kernel and I'm not done yet - have a ton
+> more to do here.)
+> 
+> thanks,
+> grant
+> 
 
-The current document reflects the standard for
-Documentation/devicetree/bindings/mmc where normal properties are
-described in mmc.txt and only the deviations described in vendor
-specific files.
-
->>
->> Signed-off-by: Tim Kryger <tim.kryger@linaro.org>
->> Reviewed-by: Markus Mayer <markus.mayer@linaro.org>
->> Reviewed-by: Matt Porter <matt.porter@linaro.org>
->> ---
->>  drivers/mmc/host/sdhci-bcm-kona.c | 30 ++++++++++++++++++++++++++++--
->>  1 file changed, 28 insertions(+), 2 deletions(-)
->>
->> diff --git a/drivers/mmc/host/sdhci-bcm-kona.c b/drivers/mmc/host/sdhci-bcm-kona.c
->> index 85472d3..91db099 100644
->> --- a/drivers/mmc/host/sdhci-bcm-kona.c
->> +++ b/drivers/mmc/host/sdhci-bcm-kona.c
->> @@ -54,6 +54,7 @@
->>
->>  struct sdhci_bcm_kona_dev {
->>       struct mutex    write_lock; /* protect back to back writes */
->> +     struct clk      *external_clk;
->
-> Is this the only clock input the unit has?
-
-The SDHCI block only receives one clock.
-
-> Are there any other external resources the device needs (e.g. gpios,
-> regulators)?
-
-Yes but the cd-gpio and vmmc/vqmmc regulators are handled by the
-common SDHCI driver.
-
->
->>  };
->>
->>
->> @@ -252,11 +253,29 @@ static int sdhci_bcm_kona_probe(struct platform_device *pdev)
->>       mmc_of_parse(host->mmc);
->>
->>       if (!host->mmc->f_max) {
->> -             dev_err(&pdev->dev, "Missing max-freq for SDHCI cfg\n");
->> +             dev_err(dev, "Missing max-freq for SDHCI cfg\n");
->
-> This seems like an unrelated change.
-
-Agreed.  I will remove this change.
-
->>               ret = -ENXIO;
->>               goto err_pltfm_free;
->>       }
->>
->> +     /* Get and enable the external clock */
->> +     kona_dev->external_clk = devm_clk_get(dev, NULL);
->> +     if (IS_ERR(kona_dev->external_clk)) {
->> +             dev_err(dev, "Failed to get external clock\n");
->> +             ret = PTR_ERR(kona_dev->external_clk);
->> +             goto err_pltfm_free;
->
-> This seems like a pretty clear breakage of existing DTBs.
->
-> Why?
-
-The defconfig that builds this driver and DTBs currently sets
-CONFIG_ARM_APPENDED_DTB=y so there isn't any actual breakage risk.
