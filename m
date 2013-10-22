@@ -1,51 +1,123 @@
-From: Yuvaraj Kumar <yuvaraj.cd@gmail.com>
-Subject: Re: dw_mmc: priv->sdr_timing set wrong
-Date: Tue, 22 Oct 2013 14:02:34 +0530
-Message-ID: <CAKuRcOLxnO0n8wVzJ=4WicvKDe3R=2Jvkg6B_v2NmNY3wDyZ+A@mail.gmail.com>
-References: <CANEJEGt+kx3_EjgBGxkZ9TJec9ngf=FOcwhg2+eAtPY9-2xxCA@mail.gmail.com>
-	<52661F16.3080602@samsung.com>
+From: Axel Lin <axel.lin@ingics.com>
+Subject: [PATCH RFT] mmc: wmt-sdmmc: Fix setting BM_EIGHTBIT_MODE bit in
+ wmt_mci_set_ios()
+Date: Tue, 22 Oct 2013 16:54:22 +0800
+Message-ID: <1382432062.4804.1.camel@phoenix>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qe0-f45.google.com ([209.85.128.45]:55435 "EHLO
-	mail-qe0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750988Ab3JVIcf (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Oct 2013 04:32:35 -0400
-Received: by mail-qe0-f45.google.com with SMTP id 8so4525918qea.4
-        for <linux-mmc@vger.kernel.org>; Tue, 22 Oct 2013 01:32:34 -0700 (PDT)
-In-Reply-To: <52661F16.3080602@samsung.com>
+Received: from mail-pd0-f175.google.com ([209.85.192.175]:35424 "EHLO
+	mail-pd0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751126Ab3JVIy0 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Oct 2013 04:54:26 -0400
+Received: by mail-pd0-f175.google.com with SMTP id g10so7973183pdj.34
+        for <linux-mmc@vger.kernel.org>; Tue, 22 Oct 2013 01:54:26 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: Grant Grundler <grundler@chromium.org>, Chris Ball <cjb@laptop.org>, Seungwon Jeon <tgih.jun@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Sonny Rao <sonnyrao@chromium.org>, ALIM AKHTAR <alim.akhtar@samsung.com>, Douglas Anderson <dianders@chromium.org>
+To: Chris Ball <cjb@laptop.org>
+Cc: Tony Prisk <linux@prisktech.co.nz>, linux-mmc@vger.kernel.org
 
-On Tue, Oct 22, 2013 at 12:15 PM, Jaehoon Chung <jh80.chung@samsung.com> wrote:
-> Hi Grant,
->
-> Good catch..sdr-timing is set to wrong value.(set to ddr-timing)
-> Do you have the plan that send the fixing patch at mailing?
-Oops..
-Grant, Thanks for pointing out this.I will prepare the fix and send soon.
->
-> Best Regards,
-> Jaehoon Chung
->
-> On 10/19/2013 05:13 AM, Grant Grundler wrote:
->> Chris, Yuvaraj, Alim, Jaehoon,
->>
->> This patch is wrong:
->> https://git.kernel.org/cgit/linux/kernel/git/cjb/mmc.git/commit/?h=mmc-next&id=e6c784eded7b39caeaf2e9206336fa1daeccfd09
->>
->> sdr_timing needs to come from the of_property "samsung,dw-mshc-sdr-timing".
->> Assignment of priv->sdr_timing needs to move back where it was before.
->>
->> Can one of you guys "just fix it" or do you need a patch from me (or Sonny)?
->>
->> (This came up during my review of eMMC patches that sonny is
->> backporting to ChromeOS-3.8 kernel and I'm not done yet - have a ton
->> more to do here.)
->>
->> thanks,
->> grant
->>
->
+For MMC_BUS_WIDTH_8 case, current code missed setting BM_EIGHTBIT_MODE bit.
+Also has a small refactor to make the code looks better in readability.
+
+So the bit settings witch below logic:
+
+SDMMC_BUSMODE register:
+Set EIGHTBIT_MODE bit for 8 bit mode, Set FOURBIT_MODE bit for 4 bit mode.
+Clear both EIGHTBIT_MODE and FOURBIT_MODE bits for 1 bit mode.
+
+SDMMC_EXTCTRL register:
+Set EXT_EIGHTBIT bit for 8 bit mode, Clear EXT_EIGHTBIT bit for 1/4 bit mode.
+
+Add define for EXT_EIGHTBIT to avoid using magic number.
+BM_ONEBIT_MASK is no longer used, thus remove it.
+
+Signed-off-by: Axel Lin <axel.lin@ingics.com>
+---
+Hi Tony,
+After checking wm8505+sdmmc+controller+suppliment.pdf, I'm wondering if this
+dirver works for MMC_BUS_WIDTH_8 case without setting BM_EIGHTBIT_MODE bit.
+I don't have this h/w to test.
+I'd appreciate if you can review and test if this patch works.
+Thanks,
+Axel
+ drivers/mmc/host/wmt-sdmmc.c | 31 +++++++++++++++----------------
+ 1 file changed, 15 insertions(+), 16 deletions(-)
+
+diff --git a/drivers/mmc/host/wmt-sdmmc.c b/drivers/mmc/host/wmt-sdmmc.c
+index 8a48a50..6ed18f8 100644
+--- a/drivers/mmc/host/wmt-sdmmc.c
++++ b/drivers/mmc/host/wmt-sdmmc.c
+@@ -72,7 +72,6 @@
+ #define BM_SPI_CS			0x20
+ #define BM_SD_POWER			0x40
+ #define BM_SOFT_RESET			0x80
+-#define BM_ONEBIT_MASK			0xFD
+ 
+ /* SDMMC_BLKLEN bit fields */
+ #define BLKL_CRCERR_ABORT		0x0800
+@@ -120,6 +119,8 @@
+ #define STS2_DATARSP_BUSY		0x20
+ #define STS2_DIS_FORCECLK		0x80
+ 
++/* SDMMC_EXTCTRL bit fields */
++#define EXT_EIGHTBIT			0x04
+ 
+ /* MMC/SD DMA Controller Registers */
+ #define SDDMA_GCR			0x100
+@@ -672,7 +673,7 @@ static void wmt_mci_request(struct mmc_host *mmc, struct mmc_request *req)
+ static void wmt_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ {
+ 	struct wmt_mci_priv *priv;
+-	u32 reg_tmp;
++	u32 busmode, extctrl;
+ 
+ 	priv = mmc_priv(mmc);
+ 
+@@ -687,28 +688,26 @@ static void wmt_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 	if (ios->clock != 0)
+ 		clk_set_rate(priv->clk_sdmmc, ios->clock);
+ 
++	busmode = readb(priv->sdmmc_base + SDMMC_BUSMODE);
++	extctrl = readb(priv->sdmmc_base + SDMMC_EXTCTRL);
++
++	busmode &= ~(BM_EIGHTBIT_MODE | BM_FOURBIT_MODE);
++	extctrl &= ~EXT_EIGHTBIT;
++
+ 	switch (ios->bus_width) {
+ 	case MMC_BUS_WIDTH_8:
+-		reg_tmp = readb(priv->sdmmc_base + SDMMC_EXTCTRL);
+-		writeb(reg_tmp | 0x04, priv->sdmmc_base + SDMMC_EXTCTRL);
++		busmode |= BM_EIGHTBIT_MODE;
++		extctrl |= EXT_EIGHTBIT;
+ 		break;
+ 	case MMC_BUS_WIDTH_4:
+-		reg_tmp = readb(priv->sdmmc_base + SDMMC_BUSMODE);
+-		writeb(reg_tmp | BM_FOURBIT_MODE, priv->sdmmc_base +
+-		       SDMMC_BUSMODE);
+-
+-		reg_tmp = readb(priv->sdmmc_base + SDMMC_EXTCTRL);
+-		writeb(reg_tmp & 0xFB, priv->sdmmc_base + SDMMC_EXTCTRL);
++		busmode |= BM_FOURBIT_MODE;
+ 		break;
+ 	case MMC_BUS_WIDTH_1:
+-		reg_tmp = readb(priv->sdmmc_base + SDMMC_BUSMODE);
+-		writeb(reg_tmp & BM_ONEBIT_MASK, priv->sdmmc_base +
+-		       SDMMC_BUSMODE);
+-
+-		reg_tmp = readb(priv->sdmmc_base + SDMMC_EXTCTRL);
+-		writeb(reg_tmp & 0xFB, priv->sdmmc_base + SDMMC_EXTCTRL);
+ 		break;
+ 	}
++
++	writeb(busmode, priv->sdmmc_base + SDMMC_BUSMODE);
++	writeb(extctrl, priv->sdmmc_base + SDMMC_EXTCTRL);
+ }
+ 
+ static int wmt_mci_get_ro(struct mmc_host *mmc)
+-- 
+1.8.1.2
+
+
+
