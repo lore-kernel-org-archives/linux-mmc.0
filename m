@@ -1,123 +1,47 @@
-From: Axel Lin <axel.lin@ingics.com>
-Subject: [PATCH RFT] mmc: wmt-sdmmc: Fix setting BM_EIGHTBIT_MODE bit in
- wmt_mci_set_ios()
-Date: Tue, 22 Oct 2013 16:54:22 +0800
-Message-ID: <1382432062.4804.1.camel@phoenix>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+From: Yuvaraj Kumar C D <yuvaraj.cd@gmail.com>
+Subject: [PATCH] mmc: dw_mmc: exynos: Revert the sdr_timing assignment
+Date: Tue, 22 Oct 2013 14:41:56 +0530
+Message-ID: <1382433116-22180-1-git-send-email-yuvaraj.cd@samsung.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pd0-f175.google.com ([209.85.192.175]:35424 "EHLO
-	mail-pd0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751126Ab3JVIy0 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Oct 2013 04:54:26 -0400
-Received: by mail-pd0-f175.google.com with SMTP id g10so7973183pdj.34
-        for <linux-mmc@vger.kernel.org>; Tue, 22 Oct 2013 01:54:26 -0700 (PDT)
+Received: from mail-pb0-f52.google.com ([209.85.160.52]:51778 "EHLO
+	mail-pb0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751126Ab3JVJMU (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Oct 2013 05:12:20 -0400
+Received: by mail-pb0-f52.google.com with SMTP id wy17so5300766pbc.25
+        for <linux-mmc@vger.kernel.org>; Tue, 22 Oct 2013 02:12:20 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: Tony Prisk <linux@prisktech.co.nz>, linux-mmc@vger.kernel.org
+To: cjb@laptop.org, jh80.chung@samsung.com, tgih.jun@samsung.com, linux-mmc@vger.kernel.org, thomas.ab@samsung.com, grundler@chromium.org
+Cc: dianders@chromium.org, sonnyrao@chromium.org, Yuvaraj Kumar C D <yuvaraj.cd@samsung.com>
 
-For MMC_BUS_WIDTH_8 case, current code missed setting BM_EIGHTBIT_MODE bit.
-Also has a small refactor to make the code looks better in readability.
+commit 4ad602c9df1e3b04979c260b5612141b4b892257 was wrongly assigning
+ddr_timing value to sdr_timing.This patch fix's this by reverting
+the sdr_timing assignment statement to the earlier location.
 
-So the bit settings witch below logic:
-
-SDMMC_BUSMODE register:
-Set EIGHTBIT_MODE bit for 8 bit mode, Set FOURBIT_MODE bit for 4 bit mode.
-Clear both EIGHTBIT_MODE and FOURBIT_MODE bits for 1 bit mode.
-
-SDMMC_EXTCTRL register:
-Set EXT_EIGHTBIT bit for 8 bit mode, Clear EXT_EIGHTBIT bit for 1/4 bit mode.
-
-Add define for EXT_EIGHTBIT to avoid using magic number.
-BM_ONEBIT_MASK is no longer used, thus remove it.
-
-Signed-off-by: Axel Lin <axel.lin@ingics.com>
+Signed-off-by: Yuvaraj Kumar C D <yuvaraj.cd@samsung.com>
 ---
-Hi Tony,
-After checking wm8505+sdmmc+controller+suppliment.pdf, I'm wondering if this
-dirver works for MMC_BUS_WIDTH_8 case without setting BM_EIGHTBIT_MODE bit.
-I don't have this h/w to test.
-I'd appreciate if you can review and test if this patch works.
-Thanks,
-Axel
- drivers/mmc/host/wmt-sdmmc.c | 31 +++++++++++++++----------------
- 1 file changed, 15 insertions(+), 16 deletions(-)
+ drivers/mmc/host/dw_mmc-exynos.c |    3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/host/wmt-sdmmc.c b/drivers/mmc/host/wmt-sdmmc.c
-index 8a48a50..6ed18f8 100644
---- a/drivers/mmc/host/wmt-sdmmc.c
-+++ b/drivers/mmc/host/wmt-sdmmc.c
-@@ -72,7 +72,6 @@
- #define BM_SPI_CS			0x20
- #define BM_SD_POWER			0x40
- #define BM_SOFT_RESET			0x80
--#define BM_ONEBIT_MASK			0xFD
+diff --git a/drivers/mmc/host/dw_mmc-exynos.c b/drivers/mmc/host/dw_mmc-exynos.c
+index d42e664..3423c5e 100644
+--- a/drivers/mmc/host/dw_mmc-exynos.c
++++ b/drivers/mmc/host/dw_mmc-exynos.c
+@@ -251,12 +251,13 @@ static int dw_mci_exynos_parse_dt(struct dw_mci *host)
+ 	if (ret)
+ 		return ret;
  
- /* SDMMC_BLKLEN bit fields */
- #define BLKL_CRCERR_ABORT		0x0800
-@@ -120,6 +119,8 @@
- #define STS2_DATARSP_BUSY		0x20
- #define STS2_DIS_FORCECLK		0x80
- 
-+/* SDMMC_EXTCTRL bit fields */
-+#define EXT_EIGHTBIT			0x04
- 
- /* MMC/SD DMA Controller Registers */
- #define SDDMA_GCR			0x100
-@@ -672,7 +673,7 @@ static void wmt_mci_request(struct mmc_host *mmc, struct mmc_request *req)
- static void wmt_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- {
- 	struct wmt_mci_priv *priv;
--	u32 reg_tmp;
-+	u32 busmode, extctrl;
- 
- 	priv = mmc_priv(mmc);
- 
-@@ -687,28 +688,26 @@ static void wmt_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 	if (ios->clock != 0)
- 		clk_set_rate(priv->clk_sdmmc, ios->clock);
- 
-+	busmode = readb(priv->sdmmc_base + SDMMC_BUSMODE);
-+	extctrl = readb(priv->sdmmc_base + SDMMC_EXTCTRL);
++	priv->sdr_timing = SDMMC_CLKSEL_TIMING(timing[0], timing[1], div);
 +
-+	busmode &= ~(BM_EIGHTBIT_MODE | BM_FOURBIT_MODE);
-+	extctrl &= ~EXT_EIGHTBIT;
-+
- 	switch (ios->bus_width) {
- 	case MMC_BUS_WIDTH_8:
--		reg_tmp = readb(priv->sdmmc_base + SDMMC_EXTCTRL);
--		writeb(reg_tmp | 0x04, priv->sdmmc_base + SDMMC_EXTCTRL);
-+		busmode |= BM_EIGHTBIT_MODE;
-+		extctrl |= EXT_EIGHTBIT;
- 		break;
- 	case MMC_BUS_WIDTH_4:
--		reg_tmp = readb(priv->sdmmc_base + SDMMC_BUSMODE);
--		writeb(reg_tmp | BM_FOURBIT_MODE, priv->sdmmc_base +
--		       SDMMC_BUSMODE);
--
--		reg_tmp = readb(priv->sdmmc_base + SDMMC_EXTCTRL);
--		writeb(reg_tmp & 0xFB, priv->sdmmc_base + SDMMC_EXTCTRL);
-+		busmode |= BM_FOURBIT_MODE;
- 		break;
- 	case MMC_BUS_WIDTH_1:
--		reg_tmp = readb(priv->sdmmc_base + SDMMC_BUSMODE);
--		writeb(reg_tmp & BM_ONEBIT_MASK, priv->sdmmc_base +
--		       SDMMC_BUSMODE);
--
--		reg_tmp = readb(priv->sdmmc_base + SDMMC_EXTCTRL);
--		writeb(reg_tmp & 0xFB, priv->sdmmc_base + SDMMC_EXTCTRL);
- 		break;
- 	}
-+
-+	writeb(busmode, priv->sdmmc_base + SDMMC_BUSMODE);
-+	writeb(extctrl, priv->sdmmc_base + SDMMC_EXTCTRL);
- }
+ 	ret = of_property_read_u32_array(np,
+ 			"samsung,dw-mshc-ddr-timing", timing, 2);
+ 	if (ret)
+ 		return ret;
  
- static int wmt_mci_get_ro(struct mmc_host *mmc)
+-	priv->sdr_timing = SDMMC_CLKSEL_TIMING(timing[0], timing[1], div);
+ 	priv->ddr_timing = SDMMC_CLKSEL_TIMING(timing[0], timing[1], div);
+ 	host->priv = priv;
+ 	return 0;
 -- 
-1.8.1.2
-
-
+1.7.9.5
 
