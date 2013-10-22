@@ -1,52 +1,81 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: dw_mmc: priv->sdr_timing set wrong
-Date: Tue, 22 Oct 2013 15:45:42 +0900
-Message-ID: <52661F16.3080602@samsung.com>
-References: <CANEJEGt+kx3_EjgBGxkZ9TJec9ngf=FOcwhg2+eAtPY9-2xxCA@mail.gmail.com>
+From: "Shen, Jackey" <Jackey.Shen@amd.com>
+Subject: RE: [PATCH] mmc: sdhci-pci: identify correct base addresses for
+ slots
+Date: Tue, 22 Oct 2013 08:24:58 +0000
+Message-ID: <0C8FBB70FF40A94D98BE847F9C171A9803ACEAFE@SCYBEXDAG04.amd.com>
+References: <1372670535-2778-1-git-send-email-jackey.shen@amd.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout4.samsung.com ([203.254.224.34]:61970 "EHLO
-	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750868Ab3JVGpn (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Oct 2013 02:45:43 -0400
-Received: from epcpsbgr4.samsung.com
- (u144.gpu120.samsung.co.kr [203.254.230.144])
- by mailout4.samsung.com (Oracle Communications Messaging Server 7u4-24.01
- (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTP id <0MV200JGR5G4K730@mailout4.samsung.com> for
- linux-mmc@vger.kernel.org; Tue, 22 Oct 2013 15:45:41 +0900 (KST)
-In-reply-to: <CANEJEGt+kx3_EjgBGxkZ9TJec9ngf=FOcwhg2+eAtPY9-2xxCA@mail.gmail.com>
+Received: from va3ehsobe005.messaging.microsoft.com ([216.32.180.31]:53985
+	"EHLO va3outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1753407Ab3JVIZI convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 22 Oct 2013 04:25:08 -0400
+In-Reply-To: <1372670535-2778-1-git-send-email-jackey.shen@amd.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Grant Grundler <grundler@chromium.org>, Chris Ball <cjb@laptop.org>, Yuvaraj Kumar C D <yuvaraj.cd@gmail.com>, Seungwon Jeon <tgih.jun@samsung.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Sonny Rao <sonnyrao@chromium.org>, ALIM AKHTAR <alim.akhtar@samsung.com>, Douglas Anderson <dianders@chromium.org>
+To: Chris Ball <cjb@laptop.org>
+Cc: "Shen, Jackey" <Jackey.Shen@amd.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-Hi Grant,
+Hi Chris,
 
-Good catch..sdr-timing is set to wrong value.(set to ddr-timing)
-Do you have the plan that send the fixing patch at mailing?
+Do you have any comments on this patch?
 
-Best Regards,
-Jaehoon Chung
+Thanks,
+Jackey
 
-On 10/19/2013 05:13 AM, Grant Grundler wrote:
-> Chris, Yuvaraj, Alim, Jaehoon,
-> 
-> This patch is wrong:
-> https://git.kernel.org/cgit/linux/kernel/git/cjb/mmc.git/commit/?h=mmc-next&id=e6c784eded7b39caeaf2e9206336fa1daeccfd09
-> 
-> sdr_timing needs to come from the of_property "samsung,dw-mshc-sdr-timing".
-> Assignment of priv->sdr_timing needs to move back where it was before.
-> 
-> Can one of you guys "just fix it" or do you need a patch from me (or Sonny)?
-> 
-> (This came up during my review of eMMC patches that sonny is
-> backporting to ChromeOS-3.8 kernel and I'm not done yet - have a ton
-> more to do here.)
-> 
-> thanks,
-> grant
-> 
+-----Original Message-----
+From: Jackey Shen [mailto:jackey.shen@amd.com] 
+Sent: Monday, July 01, 2013 5:22 PM
+To: linux-mmc@vger.kernel.org
+Cc: Shen, Jackey
+Subject: [PATCH] mmc: sdhci-pci: identify correct base addresses for slots
+
+A PCI Based SD Host Controller can support up to a total of six SD Slots, and
+the base addresses are specified by Slot Information Register of its PCI header.
+Please refer to C.3.3 of SD Host Controller Standard Specification Version 3.0.
+
+Signed-off-by: Jackey Shen <jackey.shen@amd.com>
+---
+ drivers/mmc/host/sdhci-pci.c |    7 ++++---
+ 1 file changed, 4 insertions(+), 3 deletions(-)
+
+diff --git a/drivers/mmc/host/sdhci-pci.c b/drivers/mmc/host/sdhci-pci.c
+index d7d6bc8..3a84e95 100644
+--- a/drivers/mmc/host/sdhci-pci.c
++++ b/drivers/mmc/host/sdhci-pci.c
+@@ -50,7 +50,8 @@
+ #define  PCI_SLOT_INFO_SLOTS(x)		((x >> 4) & 7)
+ #define  PCI_SLOT_INFO_FIRST_BAR_MASK	0x07
+ 
+-#define MAX_SLOTS			8
++#define MAX_SLOTS			6
++#define MAX_BARS			6
+ 
+ struct sdhci_pci_chip;
+ struct sdhci_pci_slot;
+@@ -1282,7 +1283,7 @@ static struct sdhci_pci_slot *sdhci_pci_probe_slot(
+ {
+ 	struct sdhci_pci_slot *slot;
+ 	struct sdhci_host *host;
+-	int ret, bar = first_bar + slotno;
++	int ret, bar = (first_bar + slotno) % MAX_BARS;
+ 
+ 	if (!(pci_resource_flags(pdev, bar) & IORESOURCE_MEM)) {
+ 		dev_err(&pdev->dev, "BAR %d is not iomem. Aborting.\n", bar);
+@@ -1481,7 +1482,7 @@ static int sdhci_pci_probe(struct pci_dev *pdev,
+ 
+ 	first_bar &= PCI_SLOT_INFO_FIRST_BAR_MASK;
+ 
+-	if (first_bar > 5) {
++	if (first_bar > MAX_BARS - 1) {
+ 		dev_err(&pdev->dev, "Invalid first BAR. Aborting.\n");
+ 		return -ENODEV;
+ 	}
+-- 
+1.7.10.4
+
 
