@@ -1,56 +1,124 @@
-From: Peter Guo <peter.guo@bayhubtech.com>
-Subject: RE: [PATCH v2] mmc:sdhci-pci: Add Support of O2Mirco/BayHubTech SD
- Host
-Date: Wed, 23 Oct 2013 03:49:51 +0000
-Message-ID: <ba51eef0193e40df9cf25b73af6890b6@BL2PR04MB083.namprd04.prod.outlook.com>
-References: <97254cf7c23548fdbb3ebc10170af6a8@BL2PR04MB083.namprd04.prod.outlook.com>
- <20131016081532.GB3416@adam-laptop>
+From: Tony Prisk <linux@prisktech.co.nz>
+Subject: Re: [PATCH RFT] mmc: wmt-sdmmc: Fix setting BM_EIGHTBIT_MODE bit
+ in wmt_mci_set_ios()
+Date: Wed, 23 Oct 2013 17:51:17 +1300
+Message-ID: <526755C5.80704@prisktech.co.nz>
+References: <1382432062.4804.1.camel@phoenix>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-by2lp0244.outbound.protection.outlook.com ([207.46.163.244]:31077
-	"EHLO na01-by2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1754343Ab3JWDt4 convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Oct 2013 23:49:56 -0400
-In-Reply-To: <20131016081532.GB3416@adam-laptop>
-Content-Language: en-US
+Received: from server.prisktech.co.nz ([115.188.14.127]:52835 "EHLO
+	server.prisktech.co.nz" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750866Ab3JWEvT (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 23 Oct 2013 00:51:19 -0400
+In-Reply-To: <1382432062.4804.1.camel@phoenix>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Bill Pemberton <wfp5p@virginia.edu>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Samuel Guan <samuel.guan@bayhubtech.com>, Xiaoguang Yu <xiaoguang.yu@bayhubtech.com>, Shirley Her <shirley.her@bayhubtech.com>, Yuxiang Wan <yuxiang.wan@bayhubtech.com>, Adam Lee <adam.lee@canonical.com>
+To: Axel Lin <axel.lin@ingics.com>, Chris Ball <cjb@laptop.org>
+Cc: linux-mmc@vger.kernel.org
 
-Hi Chris,
-
-Do you have any comments on this patch?
-
-Thanks,
-Peter.Guo
-
------Original Message-----
-From: Adam Lee [mailto:adam.lee@canonical.com] 
-Sent: Wednesday, October 16, 2013 4:16 PM
-To: Peter Guo; Chris Ball
-Cc: Adrian Hunter; Greg Kroah-Hartman; Bill Pemberton; Guennadi Liakhovetski; linux-mmc@vger.kernel.org; linux-kernel@vger.kernel.org; Samuel Guan; Xiaoguang Yu; Shirley Her; Yuxiang Wan
-Subject: Re: [PATCH v2] mmc:sdhci-pci: Add Support of O2Mirco/BayHubTech SD Host
-
-On Wed, Oct 16, 2013 at 07:26:23AM +0000, Peter Guo wrote:
-> Add O2Micro/BayHubTech SD Host DeviceId 8520 support and specified Init.
-> Apply SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12 for SD Host Controller.
-> Apply SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC for SD Host Controller.
-> 
-> Signed-off-by: peter.guo <peter.guo@bayhubtech.com>
+On 22/10/13 21:54, Axel Lin wrote:
+> For MMC_BUS_WIDTH_8 case, current code missed setting BM_EIGHTBIT_MODE bit.
+> Also has a small refactor to make the code looks better in readability.
+>
+> So the bit settings witch below logic:
+>
+> SDMMC_BUSMODE register:
+> Set EIGHTBIT_MODE bit for 8 bit mode, Set FOURBIT_MODE bit for 4 bit mode.
+> Clear both EIGHTBIT_MODE and FOURBIT_MODE bits for 1 bit mode.
+>
+> SDMMC_EXTCTRL register:
+> Set EXT_EIGHTBIT bit for 8 bit mode, Clear EXT_EIGHTBIT bit for 1/4 bit mode.
+>
+> Add define for EXT_EIGHTBIT to avoid using magic number.
+> BM_ONEBIT_MASK is no longer used, thus remove it.
+>
+> Signed-off-by: Axel Lin <axel.lin@ingics.com>
 > ---
->  drivers/mmc/host/sdhci-pci.c |  208 
-> ++++++++++++++++++++++++++++++++++++++++++
->  1 file changed, 208 insertions(+)
+> Hi Tony,
+> After checking wm8505+sdmmc+controller+suppliment.pdf, I'm wondering if this
+> dirver works for MMC_BUS_WIDTH_8 case without setting BM_EIGHTBIT_MODE bit.
+> I don't have this h/w to test.
+> I'd appreciate if you can review and test if this patch works.
+> Thanks,
+> Axel
+>   drivers/mmc/host/wmt-sdmmc.c | 31 +++++++++++++++----------------
+>   1 file changed, 15 insertions(+), 16 deletions(-)
+>
+> diff --git a/drivers/mmc/host/wmt-sdmmc.c b/drivers/mmc/host/wmt-sdmmc.c
+> index 8a48a50..6ed18f8 100644
+> --- a/drivers/mmc/host/wmt-sdmmc.c
+> +++ b/drivers/mmc/host/wmt-sdmmc.c
+> @@ -72,7 +72,6 @@
+>   #define BM_SPI_CS			0x20
+>   #define BM_SD_POWER			0x40
+>   #define BM_SOFT_RESET			0x80
+> -#define BM_ONEBIT_MASK			0xFD
+>   
+>   /* SDMMC_BLKLEN bit fields */
+>   #define BLKL_CRCERR_ABORT		0x0800
+> @@ -120,6 +119,8 @@
+>   #define STS2_DATARSP_BUSY		0x20
+>   #define STS2_DIS_FORCECLK		0x80
+>   
+> +/* SDMMC_EXTCTRL bit fields */
+> +#define EXT_EIGHTBIT			0x04
+>   
+>   /* MMC/SD DMA Controller Registers */
+>   #define SDDMA_GCR			0x100
+> @@ -672,7 +673,7 @@ static void wmt_mci_request(struct mmc_host *mmc, struct mmc_request *req)
+>   static void wmt_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+>   {
+>   	struct wmt_mci_priv *priv;
+> -	u32 reg_tmp;
+> +	u32 busmode, extctrl;
+>   
+>   	priv = mmc_priv(mmc);
+>   
+> @@ -687,28 +688,26 @@ static void wmt_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+>   	if (ios->clock != 0)
+>   		clk_set_rate(priv->clk_sdmmc, ios->clock);
+>   
+> +	busmode = readb(priv->sdmmc_base + SDMMC_BUSMODE);
+> +	extctrl = readb(priv->sdmmc_base + SDMMC_EXTCTRL);
+> +
+> +	busmode &= ~(BM_EIGHTBIT_MODE | BM_FOURBIT_MODE);
+> +	extctrl &= ~EXT_EIGHTBIT;
+> +
+>   	switch (ios->bus_width) {
+>   	case MMC_BUS_WIDTH_8:
+> -		reg_tmp = readb(priv->sdmmc_base + SDMMC_EXTCTRL);
+> -		writeb(reg_tmp | 0x04, priv->sdmmc_base + SDMMC_EXTCTRL);
+> +		busmode |= BM_EIGHTBIT_MODE;
+> +		extctrl |= EXT_EIGHTBIT;
+>   		break;
+>   	case MMC_BUS_WIDTH_4:
+> -		reg_tmp = readb(priv->sdmmc_base + SDMMC_BUSMODE);
+> -		writeb(reg_tmp | BM_FOURBIT_MODE, priv->sdmmc_base +
+> -		       SDMMC_BUSMODE);
+> -
+> -		reg_tmp = readb(priv->sdmmc_base + SDMMC_EXTCTRL);
+> -		writeb(reg_tmp & 0xFB, priv->sdmmc_base + SDMMC_EXTCTRL);
+> +		busmode |= BM_FOURBIT_MODE;
+>   		break;
+>   	case MMC_BUS_WIDTH_1:
+> -		reg_tmp = readb(priv->sdmmc_base + SDMMC_BUSMODE);
+> -		writeb(reg_tmp & BM_ONEBIT_MASK, priv->sdmmc_base +
+> -		       SDMMC_BUSMODE);
+> -
+> -		reg_tmp = readb(priv->sdmmc_base + SDMMC_EXTCTRL);
+> -		writeb(reg_tmp & 0xFB, priv->sdmmc_base + SDMMC_EXTCTRL);
+>   		break;
+>   	}
+> +
+> +	writeb(busmode, priv->sdmmc_base + SDMMC_BUSMODE);
+> +	writeb(extctrl, priv->sdmmc_base + SDMMC_EXTCTRL);
+>   }
+>   
+>   static int wmt_mci_get_ro(struct mmc_host *mmc)
+I don't have any means of testing this - All the vendor hardware I have 
+uses 4-bit mode.
 
-I'm enabling "O2 Micro, Inc. Device [1217:8520]" on some laptops, it works after this patch applied.
-
-Chris, please take a look? Thanks.
-
-Tested-by: Adam Lee <adam.lee@canonical.com>
-
---
-Adam Lee
+Regards
+Tony Prisk
