@@ -1,53 +1,56 @@
-From: Shawn Guo <shawn.guo@linaro.org>
-Subject: Re: [PATCH 5/7] mmc: sdhci-esdhc-imx: fix cpas over write issue
-Date: Wed, 23 Oct 2013 10:51:48 +0800
-Message-ID: <20131023025146.GC2839@S2101-09.ap.freescale.net>
-References: <1382365627-26816-1-git-send-email-b29396@freescale.com>
- <1382365627-26816-6-git-send-email-b29396@freescale.com>
+From: Peter Guo <peter.guo@bayhubtech.com>
+Subject: RE: [PATCH v2] mmc:sdhci-pci: Add Support of O2Mirco/BayHubTech SD
+ Host
+Date: Wed, 23 Oct 2013 03:49:51 +0000
+Message-ID: <ba51eef0193e40df9cf25b73af6890b6@BL2PR04MB083.namprd04.prod.outlook.com>
+References: <97254cf7c23548fdbb3ebc10170af6a8@BL2PR04MB083.namprd04.prod.outlook.com>
+ <20131016081532.GB3416@adam-laptop>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from co9ehsobe005.messaging.microsoft.com ([207.46.163.28]:22556
-	"EHLO co9outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1755581Ab3JWCv6 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Oct 2013 22:51:58 -0400
-Content-Disposition: inline
-In-Reply-To: <1382365627-26816-6-git-send-email-b29396@freescale.com>
+Received: from mail-by2lp0244.outbound.protection.outlook.com ([207.46.163.244]:31077
+	"EHLO na01-by2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1754343Ab3JWDt4 convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Oct 2013 23:49:56 -0400
+In-Reply-To: <20131016081532.GB3416@adam-laptop>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Dong Aisheng <b29396@freescale.com>
-Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, cjb@laptop.org, s.hauer@pengutronix.de, wsa@the-dreams.de, ulf.hansson@linaro.org
+To: Chris Ball <cjb@laptop.org>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Bill Pemberton <wfp5p@virginia.edu>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Samuel Guan <samuel.guan@bayhubtech.com>, Xiaoguang Yu <xiaoguang.yu@bayhubtech.com>, Shirley Her <shirley.her@bayhubtech.com>, Yuxiang Wan <yuxiang.wan@bayhubtech.com>, Adam Lee <adam.lee@canonical.com>
 
-On Mon, Oct 21, 2013 at 10:27:05PM +0800, Dong Aisheng wrote:
-> We should use '|=' instead '=', or it may over write
-> the original caps assigned before this line.
+Hi Chris,
+
+Do you have any comments on this patch?
+
+Thanks,
+Peter.Guo
+
+-----Original Message-----
+From: Adam Lee [mailto:adam.lee@canonical.com] 
+Sent: Wednesday, October 16, 2013 4:16 PM
+To: Peter Guo; Chris Ball
+Cc: Adrian Hunter; Greg Kroah-Hartman; Bill Pemberton; Guennadi Liakhovetski; linux-mmc@vger.kernel.org; linux-kernel@vger.kernel.org; Samuel Guan; Xiaoguang Yu; Shirley Her; Yuxiang Wan
+Subject: Re: [PATCH v2] mmc:sdhci-pci: Add Support of O2Mirco/BayHubTech SD Host
+
+On Wed, Oct 16, 2013 at 07:26:23AM +0000, Peter Guo wrote:
+> Add O2Micro/BayHubTech SD Host DeviceId 8520 support and specified Init.
+> Apply SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12 for SD Host Controller.
+> Apply SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC for SD Host Controller.
 > 
-> Signed-off-by: Dong Aisheng <b29396@freescale.com>
+> Signed-off-by: peter.guo <peter.guo@bayhubtech.com>
 > ---
->  drivers/mmc/host/sdhci-esdhc-imx.c |    2 +-
->  1 files changed, 1 insertions(+), 1 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-> index 5fe484f..baa27c7 100644
-> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
-> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-> @@ -1070,7 +1070,7 @@ static int sdhci_esdhc_imx_probe(struct platform_device *pdev)
->  		break;
->  
->  	case ESDHC_CD_PERMANENT:
-> -		host->mmc->caps = MMC_CAP_NONREMOVABLE;
-> +		host->mmc->caps |= MMC_CAP_NONREMOVABLE;
+>  drivers/mmc/host/sdhci-pci.c |  208 
+> ++++++++++++++++++++++++++++++++++++++++++
+>  1 file changed, 208 insertions(+)
 
-I think it will be more logical if you switch the order of this patch
-and the previous one.
+I'm enabling "O2 Micro, Inc. Device [1217:8520]" on some laptops, it works after this patch applied.
 
-Shawn
+Chris, please take a look? Thanks.
 
->  		break;
->  
->  	case ESDHC_CD_NONE:
-> -- 
-> 1.7.2.rc3
-> 
-> 
+Tested-by: Adam Lee <adam.lee@canonical.com>
 
+--
+Adam Lee
