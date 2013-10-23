@@ -1,87 +1,70 @@
 From: Seungwon Jeon <tgih.jun@samsung.com>
-Subject: RE: [PATCH 1/2] mmc: dw_mmc: Cleanup disable of low power mode w/ SDIO
- interrupts
-Date: Wed, 23 Oct 2013 20:25:36 +0900
-Message-ID: <001701cecfe2$9831eb90$c895c2b0$%jun@samsung.com>
-References: <1381876762-10892-1-git-send-email-dianders@chromium.org>
- <1381876762-10892-2-git-send-email-dianders@chromium.org>
- <52610273.3080005@samsung.com>
- <CAD=FV=UiUxoqbAeq+3iUChqksHd_NpJs2rM83=ng3fprMj0E-A@mail.gmail.com>
+Subject: RE: [PATCH] mmc: dw_mmc: exynos: Revert the sdr_timing assignment
+Date: Wed, 23 Oct 2013 20:27:39 +0900
+Message-ID: <001801cecfe2$e191cb70$a4b56250$%jun@samsung.com>
+References: <1382433116-22180-1-git-send-email-yuvaraj.cd@samsung.com>
+ <52664F88.50605@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=Windows-1252
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout1.samsung.com ([203.254.224.24]:46370 "EHLO
-	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752461Ab3JWLZi (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 23 Oct 2013 07:25:38 -0400
-In-reply-to: <CAD=FV=UiUxoqbAeq+3iUChqksHd_NpJs2rM83=ng3fprMj0E-A@mail.gmail.com>
+Received: from mailout2.samsung.com ([203.254.224.25]:9306 "EHLO
+	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753262Ab3JWL1l (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 23 Oct 2013 07:27:41 -0400
+Received: from epcpsbgr1.samsung.com
+ (u141.gpu120.samsung.co.kr [203.254.230.141])
+ by mailout2.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+ (7.0.4.24.0) 64bit (built Nov 17 2011))
+ with ESMTP id <0MV400E85D64XI70@mailout2.samsung.com> for
+ linux-mmc@vger.kernel.org; Wed, 23 Oct 2013 20:27:40 +0900 (KST)
+In-reply-to: <52664F88.50605@samsung.com>
 Content-language: ko
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: 'Doug Anderson' <dianders@chromium.org>, 'Jaehoon Chung' <jh80.chung@samsung.com>
-Cc: 'Chris Ball' <cjb@laptop.org>, 'James Hogan' <james.hogan@imgtec.com>, 'Grant Grundler' <grundler@chromium.org>, 'Alim Akhtar' <alim.akhtar@samsung.com>, 'Abhilash Kesavan' <a.kesavan@samsung.com>, 'Tomasz Figa' <tomasz.figa@gmail.com>, 'Olof Johansson' <olof@lixom.net>, 'Sonny Rao' <sonnyrao@chromium.org>, 'Bing Zhao' <bzhao@marvell.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+To: 'Jaehoon Chung' <jh80.chung@samsung.com>, 'Yuvaraj Kumar C D' <yuvaraj.cd@gmail.com>, cjb@laptop.org, linux-mmc@vger.kernel.org, thomas.ab@samsung.com, grundler@chromium.org
+Cc: dianders@chromium.org, sonnyrao@chromium.org, 'Yuvaraj Kumar C D' <yuvaraj.cd@samsung.com>
 
-Hi Doug,
+On Tue, October 22, 2013, Jaehoon Chung wrote:
+> Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
+> Reported-by: Grant Grundler <grundler@chromium.org>
 
-This change looks good.
-There's comment below.
-
-On Sat, October 19, 2013, Doug Anderson wrote:
-> Jaehoon,
-> 
-> On Fri, Oct 18, 2013 at 2:42 AM, Jaehoon Chung <jh80.chung@samsung.com> wrote:
-> >> -     clk_en_a = mci_readl(host, CLKENA);
-> >> +     /*
-> >> +      * Low power mode will stop the card clock when idle.  According to the
-> >> +      * description of the CLKENA register we should disable low power mode
-> >> +      * for SDIO cards if we need SDIO interrupts to work.
-> >> +      */
-> >> +     if (mmc->caps | MMC_CAP_SDIO_IRQ) {
-> > mmc->caps & MMC_CAP_SDIO_IRQ?
-> 
-> Wow, that was an embarrassing one.  Thanks.
-> 
-> >> +             const u32 clken_low_pwr = SDMMC_CLKEN_LOW_PWR << slot->id;
-> >> +             u32 clk_en_a_old;
-> >> +             u32 clk_en_a;
-> >>
-> >> -     if (clk_en_a & clken_low_pwr) {
-> >> -             mci_writel(host, CLKENA, clk_en_a & ~clken_low_pwr);
-> >> -             mci_send_cmd(slot, SDMMC_CMD_UPD_CLK |
-> >> -                          SDMMC_CMD_PRV_DAT_WAIT, 0);
-> >> +             clk_en_a_old = mci_readl(host, CLKENA);
-> >> +
-> >> +             if (card->type == MMC_TYPE_SDIO ||
-> >> +                 card->type == MMC_TYPE_SD_COMBO) {
-&& card->quirks & MMC_QUIRK_BROKEN_CLK_GATING
-How about considering MMC_QUIRK_BROKEN_CLK_GATING?
-Some sdio device can work with gating clock.
-For this, mmc_fixup_device() should be called prior to init_card() in core(sdio.c).
-I guess you found that.
+Acked-by: Seungwon Jeon <tgih.jun@samsung.com>
 
 Thanks,
 Seungwon Jeon
-
-> >> +                     set_bit(DW_MMC_CARD_NO_LOW_PWR, &slot->flags);
-> >> +                     clk_en_a = clk_en_a_old & ~clken_low_pwr;
-> >> +             } else {
-> >> +                     clear_bit(DW_MMC_CARD_NO_LOW_PWR, &slot->flags);
-> >> +                     clk_en_a = clk_en_a_old | clken_low_pwr;
-> > When this condition is entered? card->type is always MMC_TYPE_SDIO or MMC_TYPE_SD_COMBO, isn't?
 > 
-> Ugh, that's not intuitive.  This callback is only called for SDIO
-> cards and not MMC/SD cards?  That means if you plug in an SDIO card
-> and then eject it and plug in an SD card you won't get to low power.
-> Hrm.
+> On 10/22/2013 06:11 PM, Yuvaraj Kumar C D wrote:
+> > commit 4ad602c9df1e3b04979c260b5612141b4b892257 was wrongly assigning
+> > ddr_timing value to sdr_timing.This patch fix's this by reverting
+> > the sdr_timing assignment statement to the earlier location.
+> >
+> > Signed-off-by: Yuvaraj Kumar C D <yuvaraj.cd@samsung.com>
+> > ---
+> >  drivers/mmc/host/dw_mmc-exynos.c |    3 ++-
+> >  1 file changed, 2 insertions(+), 1 deletion(-)
+> >
+> > diff --git a/drivers/mmc/host/dw_mmc-exynos.c b/drivers/mmc/host/dw_mmc-exynos.c
+> > index d42e664..3423c5e 100644
+> > --- a/drivers/mmc/host/dw_mmc-exynos.c
+> > +++ b/drivers/mmc/host/dw_mmc-exynos.c
+> > @@ -251,12 +251,13 @@ static int dw_mci_exynos_parse_dt(struct dw_mci *host)
+> >  	if (ret)
+> >  		return ret;
+> >
+> > +	priv->sdr_timing = SDMMC_CLKSEL_TIMING(timing[0], timing[1], div);
+> > +
+> >  	ret = of_property_read_u32_array(np,
+> >  			"samsung,dw-mshc-ddr-timing", timing, 2);
+> >  	if (ret)
+> >  		return ret;
+> >
+> > -	priv->sdr_timing = SDMMC_CLKSEL_TIMING(timing[0], timing[1], div);
+> >  	priv->ddr_timing = SDMMC_CLKSEL_TIMING(timing[0], timing[1], div);
+> >  	host->priv = priv;
+> >  	return 0;
+> >
 > 
-> I dug around a bit and couldn't find a better way to do this and then
-> I realized that the other user of the init_card() callback has the
-> same bug, so for the next version of the series I'm proposing a fix
-> for mmc core to add this for all types.  If you have a better
-> suggestion, I'm all ears.
-> 
-> -Doug
 > --
 > To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
 > the body of a message to majordomo@vger.kernel.org
