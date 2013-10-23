@@ -1,124 +1,96 @@
-From: Tony Prisk <linux@prisktech.co.nz>
-Subject: Re: [PATCH RFT] mmc: wmt-sdmmc: Fix setting BM_EIGHTBIT_MODE bit
- in wmt_mci_set_ios()
-Date: Wed, 23 Oct 2013 17:51:17 +1300
-Message-ID: <526755C5.80704@prisktech.co.nz>
-References: <1382432062.4804.1.camel@phoenix>
+From: Dong Aisheng <b29396@freescale.com>
+Subject: Re: [PATCH 1/7] mmc: sdhci: clear auto cmd setting bits for no
+ data cmds
+Date: Wed, 23 Oct 2013 13:54:04 +0800
+Message-ID: <20131023055402.GA14667@shlinux2.ap.freescale.net>
+References: <1382365627-26816-1-git-send-email-b29396@freescale.com>
+ <1382365627-26816-2-git-send-email-b29396@freescale.com>
+ <20131023023325.GB2839@S2101-09.ap.freescale.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="us-ascii"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from server.prisktech.co.nz ([115.188.14.127]:52835 "EHLO
-	server.prisktech.co.nz" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750866Ab3JWEvT (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 23 Oct 2013 00:51:19 -0400
-In-Reply-To: <1382432062.4804.1.camel@phoenix>
+Received: from va3ehsobe005.messaging.microsoft.com ([216.32.180.31]:26931
+	"EHLO va3outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751025Ab3JWGLZ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 23 Oct 2013 02:11:25 -0400
+Content-Disposition: inline
+In-Reply-To: <20131023023325.GB2839@S2101-09.ap.freescale.net>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Axel Lin <axel.lin@ingics.com>, Chris Ball <cjb@laptop.org>
-Cc: linux-mmc@vger.kernel.org
+To: Shawn Guo <shawn.guo@linaro.org>
+Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, cjb@laptop.org, s.hauer@pengutronix.de, wsa@the-dreams.de, ulf.hansson@linaro.org
 
-On 22/10/13 21:54, Axel Lin wrote:
-> For MMC_BUS_WIDTH_8 case, current code missed setting BM_EIGHTBIT_MODE bit.
-> Also has a small refactor to make the code looks better in readability.
->
-> So the bit settings witch below logic:
->
-> SDMMC_BUSMODE register:
-> Set EIGHTBIT_MODE bit for 8 bit mode, Set FOURBIT_MODE bit for 4 bit mode.
-> Clear both EIGHTBIT_MODE and FOURBIT_MODE bits for 1 bit mode.
->
-> SDMMC_EXTCTRL register:
-> Set EXT_EIGHTBIT bit for 8 bit mode, Clear EXT_EIGHTBIT bit for 1/4 bit mode.
->
-> Add define for EXT_EIGHTBIT to avoid using magic number.
-> BM_ONEBIT_MASK is no longer used, thus remove it.
->
-> Signed-off-by: Axel Lin <axel.lin@ingics.com>
-> ---
-> Hi Tony,
-> After checking wm8505+sdmmc+controller+suppliment.pdf, I'm wondering if this
-> dirver works for MMC_BUS_WIDTH_8 case without setting BM_EIGHTBIT_MODE bit.
-> I don't have this h/w to test.
-> I'd appreciate if you can review and test if this patch works.
-> Thanks,
-> Axel
->   drivers/mmc/host/wmt-sdmmc.c | 31 +++++++++++++++----------------
->   1 file changed, 15 insertions(+), 16 deletions(-)
->
-> diff --git a/drivers/mmc/host/wmt-sdmmc.c b/drivers/mmc/host/wmt-sdmmc.c
-> index 8a48a50..6ed18f8 100644
-> --- a/drivers/mmc/host/wmt-sdmmc.c
-> +++ b/drivers/mmc/host/wmt-sdmmc.c
-> @@ -72,7 +72,6 @@
->   #define BM_SPI_CS			0x20
->   #define BM_SD_POWER			0x40
->   #define BM_SOFT_RESET			0x80
-> -#define BM_ONEBIT_MASK			0xFD
->   
->   /* SDMMC_BLKLEN bit fields */
->   #define BLKL_CRCERR_ABORT		0x0800
-> @@ -120,6 +119,8 @@
->   #define STS2_DATARSP_BUSY		0x20
->   #define STS2_DIS_FORCECLK		0x80
->   
-> +/* SDMMC_EXTCTRL bit fields */
-> +#define EXT_EIGHTBIT			0x04
->   
->   /* MMC/SD DMA Controller Registers */
->   #define SDDMA_GCR			0x100
-> @@ -672,7 +673,7 @@ static void wmt_mci_request(struct mmc_host *mmc, struct mmc_request *req)
->   static void wmt_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
->   {
->   	struct wmt_mci_priv *priv;
-> -	u32 reg_tmp;
-> +	u32 busmode, extctrl;
->   
->   	priv = mmc_priv(mmc);
->   
-> @@ -687,28 +688,26 @@ static void wmt_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
->   	if (ios->clock != 0)
->   		clk_set_rate(priv->clk_sdmmc, ios->clock);
->   
-> +	busmode = readb(priv->sdmmc_base + SDMMC_BUSMODE);
-> +	extctrl = readb(priv->sdmmc_base + SDMMC_EXTCTRL);
-> +
-> +	busmode &= ~(BM_EIGHTBIT_MODE | BM_FOURBIT_MODE);
-> +	extctrl &= ~EXT_EIGHTBIT;
-> +
->   	switch (ios->bus_width) {
->   	case MMC_BUS_WIDTH_8:
-> -		reg_tmp = readb(priv->sdmmc_base + SDMMC_EXTCTRL);
-> -		writeb(reg_tmp | 0x04, priv->sdmmc_base + SDMMC_EXTCTRL);
-> +		busmode |= BM_EIGHTBIT_MODE;
-> +		extctrl |= EXT_EIGHTBIT;
->   		break;
->   	case MMC_BUS_WIDTH_4:
-> -		reg_tmp = readb(priv->sdmmc_base + SDMMC_BUSMODE);
-> -		writeb(reg_tmp | BM_FOURBIT_MODE, priv->sdmmc_base +
-> -		       SDMMC_BUSMODE);
-> -
-> -		reg_tmp = readb(priv->sdmmc_base + SDMMC_EXTCTRL);
-> -		writeb(reg_tmp & 0xFB, priv->sdmmc_base + SDMMC_EXTCTRL);
-> +		busmode |= BM_FOURBIT_MODE;
->   		break;
->   	case MMC_BUS_WIDTH_1:
-> -		reg_tmp = readb(priv->sdmmc_base + SDMMC_BUSMODE);
-> -		writeb(reg_tmp & BM_ONEBIT_MASK, priv->sdmmc_base +
-> -		       SDMMC_BUSMODE);
-> -
-> -		reg_tmp = readb(priv->sdmmc_base + SDMMC_EXTCTRL);
-> -		writeb(reg_tmp & 0xFB, priv->sdmmc_base + SDMMC_EXTCTRL);
->   		break;
->   	}
-> +
-> +	writeb(busmode, priv->sdmmc_base + SDMMC_BUSMODE);
-> +	writeb(extctrl, priv->sdmmc_base + SDMMC_EXTCTRL);
->   }
->   
->   static int wmt_mci_get_ro(struct mmc_host *mmc)
-I don't have any means of testing this - All the vendor hardware I have 
-uses 4-bit mode.
+On Wed, Oct 23, 2013 at 10:33:28AM +0800, Shawn Guo wrote:
+> On Mon, Oct 21, 2013 at 10:27:01PM +0800, Dong Aisheng wrote:
+> > The auto cmd settings bits should be cleared before sending new commands
+> > or we may receive command timeout error for normal commands due to wrongly
+> > pre-sent auto cmd.
+> > 
+> > e.g. we receive CMD13 timeout error due to ACMD23 is wrongly enabled
+> > by former data commands.
+> > 
+> > mmc2: new high speed DDR MMC card at address 0001
+> > mmcblk1: mmc2:0001 SEM08G 7.39 GiB
+> > mmcblk1boot0: mmc2:0001 SEM08G partition 1 2.00 MiB
+> > mmcblk1boot1: mmc2:0001 SEM08G partition 2 2.00 MiB
+> > mmcblk1rpmb: mmc2:0001 SEM08G partition 3 128 KiB
+> >  mmcblk1: p1 p2 p3 p4 < p5 p6 p7 >
+> > mmc2: Timeout waiting for hardware interrupt.
+> >  mmcblk1boot1: unknown partition table
+> > mmc2: Timeout waiting for hardware interrupt.
+> >  mmcblk1boot0: unknown partition table
+> > 
+> > Signed-off-by: Dong Aisheng <b29396@freescale.com>
+> > ---
+> >  drivers/mmc/host/sdhci.c |    5 +++++
+> >  1 files changed, 5 insertions(+), 0 deletions(-)
+> > 
+> > diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> > index a21a710..f868e9b 100644
+> > --- a/drivers/mmc/host/sdhci.c
+> > +++ b/drivers/mmc/host/sdhci.c
+> > @@ -898,6 +898,11 @@ static void sdhci_set_transfer_mode(struct sdhci_host *host,
+> >  	u16 mode;
+> >  	struct mmc_data *data = cmd->data;
+> >  
+> > +	/* clear Auto CMD settings for no data CMDs */
+> > +	mode = sdhci_readw(host, SDHCI_TRANSFER_MODE);
+> > +	sdhci_writew(host, mode & ~(SDHCI_TRNS_AUTO_CMD12 |
+> > +			SDHCI_TRNS_AUTO_CMD23), SDHCI_TRANSFER_MODE);
+> > +
+> 
+> IMO, it will be more readable if we move the code into the if-clause
+> of (data == NULL), something like:
+> 
+> 	if (data == NULL) {
+> 		/* clear Auto CMD settings for no data CMDs */
+> 		mode = sdhci_readw(host, SDHCI_TRANSFER_MODE);
+> 		mode &= SDHCI_TRNS_AUTO_CMD12 | SDHCI_TRNS_AUTO_CMD23;
+> 		sdhci_writew(host, mode, SDHCI_TRANSFER_MODE);
+> 	}
+> 
+
+I'm fine with it.
+Will change to:
+
+if (data == NULL) {
+	/* clear Auto CMD settings for no data CMDs */
+	mode = sdhci_readw(host, SDHCI_TRANSFER_MODE);
+	mode &= ~(SDHCI_TRNS_AUTO_CMD12 | SDHCI_TRNS_AUTO_CMD23);
+	sdhci_writew(host, mode, SDHCI_TRANSFER_MODE);
+	return;
+}
 
 Regards
-Tony Prisk
+Dong Aisheng
+
+> Shawn
+> 
+> >  	if (data == NULL)
+> >  		return;
+> >  
+> > -- 
+> > 1.7.2.rc3
+> > 
+> > 
+
