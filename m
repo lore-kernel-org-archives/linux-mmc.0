@@ -1,39 +1,89 @@
 From: Seungwon Jeon <tgih.jun@samsung.com>
-Subject: RE: [PATCH 1/1] mmc: dw_mmc: Add missing description
-Date: Wed, 23 Oct 2013 20:19:01 +0900
-Message-ID: <001601cecfe1$acf0b350$06d219f0$%jun@samsung.com>
-References: <1381903554-3456-1-git-send-email-sachin.kamat@linaro.org>
+Subject: RE: [PATCH 1/2] mmc: dw_mmc: Cleanup disable of low power mode w/ SDIO
+ interrupts
+Date: Wed, 23 Oct 2013 20:25:36 +0900
+Message-ID: <001701cecfe2$9831eb90$c895c2b0$%jun@samsung.com>
+References: <1381876762-10892-1-git-send-email-dianders@chromium.org>
+ <1381876762-10892-2-git-send-email-dianders@chromium.org>
+ <52610273.3080005@samsung.com>
+ <CAD=FV=UiUxoqbAeq+3iUChqksHd_NpJs2rM83=ng3fprMj0E-A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ks_c_5601-1987
+Content-Type: text/plain; charset=Windows-1252
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout3.samsung.com ([203.254.224.33]:56357 "EHLO
-	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753265Ab3JWLTD (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 23 Oct 2013 07:19:03 -0400
-Received: from epcpsbgr2.samsung.com
- (u142.gpu120.samsung.co.kr [203.254.230.142])
- by mailout3.samsung.com (Oracle Communications Messaging Server 7u4-24.01
- (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTP id <0MV40033BCRODUB0@mailout3.samsung.com> for
- linux-mmc@vger.kernel.org; Wed, 23 Oct 2013 20:19:01 +0900 (KST)
-In-reply-to: <1381903554-3456-1-git-send-email-sachin.kamat@linaro.org>
+Received: from mailout1.samsung.com ([203.254.224.24]:46370 "EHLO
+	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752461Ab3JWLZi (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 23 Oct 2013 07:25:38 -0400
+In-reply-to: <CAD=FV=UiUxoqbAeq+3iUChqksHd_NpJs2rM83=ng3fprMj0E-A@mail.gmail.com>
 Content-language: ko
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: 'Sachin Kamat' <sachin.kamat@linaro.org>, linux-mmc@vger.kernel.org
-Cc: jh80.chung@samsung.com, cjb@laptop.org
+To: 'Doug Anderson' <dianders@chromium.org>, 'Jaehoon Chung' <jh80.chung@samsung.com>
+Cc: 'Chris Ball' <cjb@laptop.org>, 'James Hogan' <james.hogan@imgtec.com>, 'Grant Grundler' <grundler@chromium.org>, 'Alim Akhtar' <alim.akhtar@samsung.com>, 'Abhilash Kesavan' <a.kesavan@samsung.com>, 'Tomasz Figa' <tomasz.figa@gmail.com>, 'Olof Johansson' <olof@lixom.net>, 'Sonny Rao' <sonnyrao@chromium.org>, 'Bing Zhao' <bzhao@marvell.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-On Wed, October 16, 2013, Sachin Kamat wrote:
-> Commit 0976f16d ("mmc: dw_mmc: add support tuning scheme") introduced
-> the execute_tuning hook but did not add its description for kernel docs.
-> Update the same.
+Hi Doug,
+
+This change looks good.
+There's comment below.
+
+On Sat, October 19, 2013, Doug Anderson wrote:
+> Jaehoon,
 > 
-> Signed-off-by: Sachin Kamat <sachin.kamat@linaro.org>
-> Cc: Seungwon Jeon <tgih.jun@samsung.com>
-
-Acked-by: Seungwon Jeon <tgih.jun@samsung.com>
+> On Fri, Oct 18, 2013 at 2:42 AM, Jaehoon Chung <jh80.chung@samsung.com> wrote:
+> >> -     clk_en_a = mci_readl(host, CLKENA);
+> >> +     /*
+> >> +      * Low power mode will stop the card clock when idle.  According to the
+> >> +      * description of the CLKENA register we should disable low power mode
+> >> +      * for SDIO cards if we need SDIO interrupts to work.
+> >> +      */
+> >> +     if (mmc->caps | MMC_CAP_SDIO_IRQ) {
+> > mmc->caps & MMC_CAP_SDIO_IRQ?
+> 
+> Wow, that was an embarrassing one.  Thanks.
+> 
+> >> +             const u32 clken_low_pwr = SDMMC_CLKEN_LOW_PWR << slot->id;
+> >> +             u32 clk_en_a_old;
+> >> +             u32 clk_en_a;
+> >>
+> >> -     if (clk_en_a & clken_low_pwr) {
+> >> -             mci_writel(host, CLKENA, clk_en_a & ~clken_low_pwr);
+> >> -             mci_send_cmd(slot, SDMMC_CMD_UPD_CLK |
+> >> -                          SDMMC_CMD_PRV_DAT_WAIT, 0);
+> >> +             clk_en_a_old = mci_readl(host, CLKENA);
+> >> +
+> >> +             if (card->type == MMC_TYPE_SDIO ||
+> >> +                 card->type == MMC_TYPE_SD_COMBO) {
+&& card->quirks & MMC_QUIRK_BROKEN_CLK_GATING
+How about considering MMC_QUIRK_BROKEN_CLK_GATING?
+Some sdio device can work with gating clock.
+For this, mmc_fixup_device() should be called prior to init_card() in core(sdio.c).
+I guess you found that.
 
 Thanks,
 Seungwon Jeon
+
+> >> +                     set_bit(DW_MMC_CARD_NO_LOW_PWR, &slot->flags);
+> >> +                     clk_en_a = clk_en_a_old & ~clken_low_pwr;
+> >> +             } else {
+> >> +                     clear_bit(DW_MMC_CARD_NO_LOW_PWR, &slot->flags);
+> >> +                     clk_en_a = clk_en_a_old | clken_low_pwr;
+> > When this condition is entered? card->type is always MMC_TYPE_SDIO or MMC_TYPE_SD_COMBO, isn't?
+> 
+> Ugh, that's not intuitive.  This callback is only called for SDIO
+> cards and not MMC/SD cards?  That means if you plug in an SDIO card
+> and then eject it and plug in an SD card you won't get to low power.
+> Hrm.
+> 
+> I dug around a bit and couldn't find a better way to do this and then
+> I realized that the other user of the init_card() callback has the
+> same bug, so for the next version of the series I'm proposing a fix
+> for mmc core to add this for all types.  If you have a better
+> suggestion, I'm all ears.
+> 
+> -Doug
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
