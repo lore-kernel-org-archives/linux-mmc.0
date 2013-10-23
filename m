@@ -1,48 +1,53 @@
-From: <andreas.koop@zf.com>
-Subject: [PATCH 1/1] mmc: mmc_spi: Enable stable writes
-Date: Wed, 23 Oct 2013 13:29:15 +0000
-Message-ID: <4D4D24CE952D2A4684FC7FAAEF13D7164BE076@DLNV00136.emea.zf-world.com>
+From: Jeremie Samuel <jeremie.samuel.ext@parrot.com>
+Subject: Re: [PATCH] mmc: sdhci: dove: Fix build breakage
+Date: Wed, 23 Oct 2013 15:45:01 +0200
+Message-ID: <5267D2DD.5000309@parrot.com>
+References: <1382533832-21085-1-git-send-email-treding@nvidia.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mx03.zf.com ([149.238.2.133]:62484 "EHLO mx01.zf.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751275Ab3JWNoU convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 23 Oct 2013 09:44:20 -0400
-Content-Language: de-DE
+Received: from co202.xi-lite.net ([149.6.83.202]:36272 "EHLO co202.xi-lite.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751161Ab3JWNq1 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 23 Oct 2013 09:46:27 -0400
+In-Reply-To: <1382533832-21085-1-git-send-email-treding@nvidia.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
+To: Thierry Reding <thierry.reding@gmail.com>
+Cc: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-Hello,
+Soory, I thought I had corrected this typo.
 
-While using the mmc_spi driver occasionally errors like this popped up:
+Signed-off-by: Jeremie Samuel <jeremie.samuel.ext@parrot.com>
 
-mmcblk0: error -84 transferring data
-end_request: I/O error, dev mmcblk0, sector 581756
+-- 
+Jeremie Samuel              Parrot S.A.
+Software Engineer           14, quai de Jemmapes
+R&D/OS Platform             75010 Paris, France
+http://www.parrot.com
 
-I looked on the Internet for occurences of the same problem and came across a helpful post [1]. It includes source code to reproduce the bug. There is also an analysis about the cause. During transmission data in the supplied buffer is beeing modified. Thus the previously calculated check sum is not correct anymore.
+On 23/10/2013 15:10, Thierry Reding wrote:
+> Commit 2d7c51f (mmc: sdhci: Use work structs instead of tasklets)
+> converts tasklets to work structs, but typos the conversion in the Dove
+> driver.
+>
+> Signed-off-by: Thierry Reding <treding@nvidia.com>
+> ---
+>   drivers/mmc/host/sdhci-dove.c | 2 +-
+>   1 file changed, 1 insertion(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/host/sdhci-dove.c b/drivers/mmc/host/sdhci-dove.c
+> index 45c7f25..95f1076 100644
+> --- a/drivers/mmc/host/sdhci-dove.c
+> +++ b/drivers/mmc/host/sdhci-dove.c
+> @@ -39,7 +39,7 @@ static irqreturn_t sdhci_dove_carddetect_irq(int irq, void *data)
+>   {
+>   	struct sdhci_host *host = data;
+>   
+> -	schedule_schedule(&host->card_detect_work);
+> +	schedule_work(&host->card_detect_work);
+>   	return IRQ_HANDLED;
+>   }
+>   
 
-After some digging I found out that device drivers are supposed to report they need stable writes.  To fix this I set the appropriate flag at queue initialization if CRC checksumming is enabled for that SPI host.
-
-[1]
-https://groups.google.com/forum/#!msg/sim1/gLlzWeXGFr8/KevXinUXfc8J
-
-Signed-off-by: Andreas Koop <andreas.koop <at> zf.com>
----
-diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
-index fa9632e..3fdef37 100644
---- a/drivers/mmc/card/queue.c
-+++ b/drivers/mmc/card/queue.c
-@@ -207,6 +207,9 @@ int mmc_init_queue(struct mmc_queue *mq, struct mmc_card *card,
- 	mq->mqrq_prev = mqrq_prev;
- 	mq->queue->queuedata = mq;
- 
-+	if (mmc_host_is_spi(host) && host->use_spi_crc)
-+		mq->queue->backing_dev_info.capabilities |= BDI_CAP_STABLE_WRITES;
-+
- 	blk_queue_prep_rq(mq->queue, mmc_prep_request);
- 	queue_flag_set_unlocked(QUEUE_FLAG_NONROT, mq->queue);
- 	if (mmc_can_erase(card))
---
