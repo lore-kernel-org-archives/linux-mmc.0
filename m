@@ -1,67 +1,79 @@
-From: Alexey Neyman <stilor@att.net>
-Subject: Avoid needless loop in sdhci_irq() for Card Interrupt
-Date: Tue, 22 Oct 2013 11:19:12 -0700
-Message-ID: <3529161.O27qBHpvvG@mistral>
+From: Shawn Guo <shawn.guo@linaro.org>
+Subject: Re: [PATCH 1/7] mmc: sdhci: clear auto cmd setting bits for no data
+ cmds
+Date: Wed, 23 Oct 2013 10:33:28 +0800
+Message-ID: <20131023023325.GB2839@S2101-09.ap.freescale.net>
+References: <1382365627-26816-1-git-send-email-b29396@freescale.com>
+ <1382365627-26816-2-git-send-email-b29396@freescale.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="nextPart1519988.raWdKt6FTN"
-Content-Transfer-Encoding: 7Bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
-
-This is a multi-part message in MIME format.
-
---nextPart1519988.raWdKt6FTN
-Content-Transfer-Encoding: 7Bit
 Content-Type: text/plain; charset="us-ascii"
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from co9ehsobe001.messaging.microsoft.com ([207.46.163.24]:24051
+	"EHLO co9outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1754359Ab3JWCdh (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Oct 2013 22:33:37 -0400
+Content-Disposition: inline
+In-Reply-To: <1382365627-26816-2-git-send-email-b29396@freescale.com>
+Sender: linux-mmc-owner@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
+To: Dong Aisheng <b29396@freescale.com>
+Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, cjb@laptop.org, s.hauer@pengutronix.de, wsa@the-dreams.de, ulf.hansson@linaro.org
 
-[Patch ping #2]
+On Mon, Oct 21, 2013 at 10:27:01PM +0800, Dong Aisheng wrote:
+> The auto cmd settings bits should be cleared before sending new commands
+> or we may receive command timeout error for normal commands due to wrongly
+> pre-sent auto cmd.
+> 
+> e.g. we receive CMD13 timeout error due to ACMD23 is wrongly enabled
+> by former data commands.
+> 
+> mmc2: new high speed DDR MMC card at address 0001
+> mmcblk1: mmc2:0001 SEM08G 7.39 GiB
+> mmcblk1boot0: mmc2:0001 SEM08G partition 1 2.00 MiB
+> mmcblk1boot1: mmc2:0001 SEM08G partition 2 2.00 MiB
+> mmcblk1rpmb: mmc2:0001 SEM08G partition 3 128 KiB
+>  mmcblk1: p1 p2 p3 p4 < p5 p6 p7 >
+> mmc2: Timeout waiting for hardware interrupt.
+>  mmcblk1boot1: unknown partition table
+> mmc2: Timeout waiting for hardware interrupt.
+>  mmcblk1boot0: unknown partition table
+> 
+> Signed-off-by: Dong Aisheng <b29396@freescale.com>
+> ---
+>  drivers/mmc/host/sdhci.c |    5 +++++
+>  1 files changed, 5 insertions(+), 0 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index a21a710..f868e9b 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -898,6 +898,11 @@ static void sdhci_set_transfer_mode(struct sdhci_host *host,
+>  	u16 mode;
+>  	struct mmc_data *data = cmd->data;
+>  
+> +	/* clear Auto CMD settings for no data CMDs */
+> +	mode = sdhci_readw(host, SDHCI_TRANSFER_MODE);
+> +	sdhci_writew(host, mode & ~(SDHCI_TRNS_AUTO_CMD12 |
+> +			SDHCI_TRNS_AUTO_CMD23), SDHCI_TRANSFER_MODE);
+> +
 
-Hi all,
+IMO, it will be more readable if we move the code into the if-clause
+of (data == NULL), something like:
 
-I've discovered that the sdhci_irq() function needlessly iterates re-reading 
-the interrupt status and doing nothing (until it runs out of max_loops) when 
-it handles the "Card Interrupt" status in the interrupt status register.
+	if (data == NULL) {
+		/* clear Auto CMD settings for no data CMDs */
+		mode = sdhci_readw(host, SDHCI_TRANSFER_MODE);
+		mode &= SDHCI_TRNS_AUTO_CMD12 | SDHCI_TRNS_AUTO_CMD23;
+		sdhci_writew(host, mode, SDHCI_TRANSFER_MODE);
+	}
 
-The reason is that the "Card Interrupt" bit is not cleared until the 
-sdhci_irq() calls mmc_signal_sdio_irq(), so if Card Interrupt was asserted, 
-re-reading the interrupt status will find this bit set over and over, even if 
-no other bits are reported.
+Shawn
 
-The fix: ignore Card Interrupt bits in the interrupt status if we already know 
-that mmc_signal_sdio_irq() is going to be called at the end of sdhci_irq().
+>  	if (data == NULL)
+>  		return;
+>  
+> -- 
+> 1.7.2.rc3
+> 
+> 
 
-Signed-off-by: Alexey Neyman <stilor@att.net>
---nextPart1519988.raWdKt6FTN
-Content-Disposition: attachment; filename="sdhci.c.diff"
-Content-Transfer-Encoding: 7Bit
-Content-Type: text/x-patch; charset="utf-8"; name="sdhci.c.diff"
-
-commit 7f23315b344ca51ddf22a78f326f88404fa8c81d
-Author: Alexey Neyman <stilor@att.net>
-Date:   Wed Oct 9 22:23:54 2013 -0700
-
-    Avoid a loop in sdhci.c.
-
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 7a7fb4f..a83cd1b 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -2491,6 +2491,14 @@ again:
- 	result = IRQ_HANDLED;
- 
- 	intmask = sdhci_readl(host, SDHCI_INT_STATUS);
-+
-+	/*
-+	 * If we know we'll call the driver to signal SDIO IRQ, disregard
-+	 * further indications of Card Interrupt in the status to avoid a
-+	 * needless loop.
-+	 */
-+	if (cardint)
-+		intmask &= ~SDHCI_INT_CARD_INT;
- 	if (intmask && --max_loops)
- 		goto again;
- out:
-
---nextPart1519988.raWdKt6FTN--
