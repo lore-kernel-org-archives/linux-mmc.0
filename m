@@ -1,63 +1,32 @@
-From: Doug Anderson <dianders@chromium.org>
-Subject: Re: [PATCH 1/2] mmc: dw_mmc: Cleanup disable of low power mode w/
- SDIO interrupts
-Date: Thu, 24 Oct 2013 08:28:26 +0100
-Message-ID: <CAD=FV=WL0K4qiRGsQxG7vfp41dV9fp=7d6d6i5qomJd7jbLEPg@mail.gmail.com>
-References: <1381876762-10892-1-git-send-email-dianders@chromium.org>
-	<1381876762-10892-2-git-send-email-dianders@chromium.org>
-	<52610273.3080005@samsung.com>
-	<CAD=FV=UiUxoqbAeq+3iUChqksHd_NpJs2rM83=ng3fprMj0E-A@mail.gmail.com>
-	<001701cecfe2$9831eb90$c895c2b0$%jun@samsung.com>
+From: Mr Hassan Ali <mrhassanali017@gmail.com>
+Subject: Salam Alaykum
+Date: Thu, 24 Oct 2013 12:23:32 -0700 (PDT)
+Message-ID: <1382642612.84624.YahooMailBasic@web160601.mail.bf1.yahoo.com>
+Reply-To: mrhassanali42@yahoo.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ve0-f176.google.com ([209.85.128.176]:52289 "EHLO
-	mail-ve0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751610Ab3JXH21 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 24 Oct 2013 03:28:27 -0400
-Received: by mail-ve0-f176.google.com with SMTP id jx11so1079600veb.35
-        for <linux-mmc@vger.kernel.org>; Thu, 24 Oct 2013 00:28:26 -0700 (PDT)
-In-Reply-To: <001701cecfe2$9831eb90$c895c2b0$%jun@samsung.com>
+Received: from nm49.bullet.mail.ne1.yahoo.com ([98.138.120.56]:28853 "EHLO
+	nm49.bullet.mail.ne1.yahoo.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1754997Ab3JXTYq convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 24 Oct 2013 15:24:46 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Seungwon Jeon <tgih.jun@samsung.com>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, Chris Ball <cjb@laptop.org>, James Hogan <james.hogan@imgtec.com>, Grant Grundler <grundler@chromium.org>, Alim Akhtar <alim.akhtar@samsung.com>, Abhilash Kesavan <a.kesavan@samsung.com>, Tomasz Figa <tomasz.figa@gmail.com>, Olof Johansson <olof@lixom.net>, Sonny Rao <sonnyrao@chromium.org>, Bing Zhao <bzhao@marvell.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
-
-Seungwon,
-
-On Wed, Oct 23, 2013 at 12:25 PM, Seungwon Jeon <tgih.jun@samsung.com> wrote:
->> >> +             if (card->type == MMC_TYPE_SDIO ||
->> >> +                 card->type == MMC_TYPE_SD_COMBO) {
-> && card->quirks & MMC_QUIRK_BROKEN_CLK_GATING
-> How about considering MMC_QUIRK_BROKEN_CLK_GATING?
-> Some sdio device can work with gating clock.
-> For this, mmc_fixup_device() should be called prior to init_card() in core(sdio.c).
-> I guess you found that.
-
-By SDIO devices, are you referring to actual SDIO cards or some
-implementations of dw_mmc?
-
-As far as I understand in the CLKENA description in the generic
-documentation from Synopsys it say that for SDIO cards you must not
-stop the clock if interrupts must be detected.  To me, that means that
-all dw_mmc implementations require this change if they support SDIO
-interrupts (hence checking for MMC_CAP_SDIO_IRQ).
-
-I guess I did make the assumption in this change that all (reasonable)
-SDIO cards would be using SDIO interrupts if they are available.  If
-we could find out ahead of time if a given SDIO driver was planning to
-use interrupts we could do better.  The old solution did better in
-this way and we could probably make it work (and still fix the
-read-modify-write race) if we thought this was really important.  The
-code gets a little more twisted to try to avoid holding the IRQ-safe
-spinlock while updating the clock, but I could attempt it...
 
 
-NOTE: We've recently found that there are still occasions when we lose
-SDIO interrupts with dw_mmc and our Marvell WiFi driver, especially
-when those interrupts happen back-to-back.  That problem appears
-unrelated to this one (it's what Bing was investigating when he found
-the original race).  Anyone that has any thoughts, please let me
-know...
+Salam Alaykum
 
--Doug
+Dear
+
+I know that this message will come to you as a surprise. I am the Auditing and Accounting section manager with Bank Burkina Faso. I Hope that you will not expose or betray this trust and confident that I am about to repose on you for the mutual benefit of our both families. I need your urgent assistance in transferring the sum of ($15.5) million to your account within 10 or 14 banking days. you will have 40% of the above mentioned sum while 50% will be for me, and the other 10% will be for the expenses, the late deceased was a good costume to our bank and I am his personal accountant for years of which that is how I get his full information These are the details about the deceased and his family. Late Hassan El-madi used his late wife (MRS.HAJIA EL-MADI) as his next of kin but unfortunatel
+ y,
+
+she died along side with him in their car accident So, nobody knows about the account and as such, you should not be afraid in this deal. Just keep it as secret between us. if you can give me your capability and assurance that you will not seat on top of this money when is transfer into your account. please I will like to know from you if you can help?
+
+
+Thank you mrhassanali42@yahoo.com
+Mr Hassan Ali
+Ouagadougou
+
