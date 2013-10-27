@@ -1,42 +1,34 @@
-From: Fabio Estevam <festevam@gmail.com>
-Subject: Re: [PATCH v2] mmc: sdhci-esdhc-imx: Check the return value from clk_prepare_enable()
-Date: Sat, 26 Oct 2013 16:11:45 -0200
-Message-ID: <CAOMZO5ADVoqiumJFCKWkX=VoS_Uj_VUO0H9V7AK-m2Z1iGJd=w@mail.gmail.com>
-References: <1381351059-30650-1-git-send-email-festevam@gmail.com>
-	<20131012073857.GD21305@S2101-09.ap.freescale.net>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH] mmc: sdhci-pci: identify correct base addresses for slots
+Date: Sat, 26 Oct 2013 21:23:47 -0400
+Message-ID: <87iowjld5o.fsf@octavius.laptop.org>
+References: <1372670535-2778-1-git-send-email-jackey.shen@amd.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ve0-f171.google.com ([209.85.128.171]:52129 "EHLO
-	mail-ve0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753120Ab3JZSLt (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 26 Oct 2013 14:11:49 -0400
-Received: by mail-ve0-f171.google.com with SMTP id pa12so3347899veb.2
-        for <linux-mmc@vger.kernel.org>; Sat, 26 Oct 2013 11:11:49 -0700 (PDT)
-In-Reply-To: <20131012073857.GD21305@S2101-09.ap.freescale.net>
+Received: from void.printf.net ([89.145.121.20]:47921 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753864Ab3J0BXx (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Sat, 26 Oct 2013 21:23:53 -0400
+In-Reply-To: <1372670535-2778-1-git-send-email-jackey.shen@amd.com> (Jackey
+	Shen's message of "Mon, 1 Jul 2013 17:22:15 +0800")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Shawn Guo <shawn.guo@linaro.org>
-Cc: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, Fabio Estevam <fabio.estevam@freescale.com>
+To: Jackey Shen <jackey.shen@amd.com>
+Cc: linux-mmc@vger.kernel.org
 
-Chris,
+Hi Jackey,
 
-On Sat, Oct 12, 2013 at 4:38 AM, Shawn Guo <shawn.guo@linaro.org> wrote:
-> On Wed, Oct 09, 2013 at 05:37:39PM -0300, Fabio Estevam wrote:
->> From: Fabio Estevam <fabio.estevam@freescale.com>
->>
->> clk_prepare_enable() may fail, so let's check its return value and propagate it
->> in the case of error.
->>
->> Also, fix the sequence for disabling the clock in the probe error path and
->> also in the remove funct
->>
->> Signed-off-by: Fabio Estevam <fabio.estevam@freescale.com>
->
-> Acked-by: Shawn Guo <shawn.guo@linaro.org>
+On Mon, Jul 01 2013, Jackey Shen wrote:
+> A PCI Based SD Host Controller can support up to a total of six SD Slots, and
+> the base addresses are specified by Slot Information Register of its PCI header.
+> Please refer to C.3.3 of SD Host Controller Standard Specification Version 3.0.
 
-Any comments on this one?
+Out of curiosity (and for the patch record), do you have hardware that
+requires this patch that you've tested it on, or is it just theoretical?
 
-Regards,
+Thanks,
 
-Fabio Estevam
+- Chris.
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
