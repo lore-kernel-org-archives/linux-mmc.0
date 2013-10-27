@@ -1,55 +1,34 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] mmc: sdhci: dove: Fix build breakage
-Date: Sun, 27 Oct 2013 08:56:55 -0400
-Message-ID: <87ppqqkh2g.fsf@octavius.laptop.org>
-References: <1382533832-21085-1-git-send-email-treding@nvidia.com>
+Subject: Re: [PATCH v2] mmc:sdhci-pci: Add Support of O2Mirco/BayHubTech SD Host
+Date: Sun, 27 Oct 2013 13:02:53 +0000
+Message-ID: <868uxeoohu.fsf@void.printf.net>
+References: <97254cf7c23548fdbb3ebc10170af6a8@BL2PR04MB083.namprd04.prod.outlook.com>
+	<20131016081532.GB3416@adam-laptop>
+	<ba51eef0193e40df9cf25b73af6890b6@BL2PR04MB083.namprd04.prod.outlook.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:60984 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:43459 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753161Ab3J0M5A (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sun, 27 Oct 2013 08:57:00 -0400
-In-Reply-To: <1382533832-21085-1-git-send-email-treding@nvidia.com> (Thierry
-	Reding's message of "Wed, 23 Oct 2013 15:10:32 +0200")
+	id S1753498Ab3J0NDA (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Sun, 27 Oct 2013 09:03:00 -0400
+In-Reply-To: <ba51eef0193e40df9cf25b73af6890b6@BL2PR04MB083.namprd04.prod.outlook.com>
+	(Peter Guo's message of "Wed, 23 Oct 2013 03:49:51 +0000")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Thierry Reding <thierry.reding@gmail.com>, Jeremie Samuel <jeremie.samuel.ext@parrot.com>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Peter Guo <peter.guo@bayhubtech.com>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Bill Pemberton <wfp5p@virginia.edu>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Samuel Guan <samuel.guan@bayhubtech.com>, Xiaoguang Yu <xiaoguang.yu@bayhubtech.com>, Shirley Her <shirley.her@bayhubtech.com>, Yuxiang Wan <yuxiang.wan@bayhubtech.com>, Adam Lee <adam.lee@canonical.com>
 
-Hi,
+Hi Peter,
 
-On Wed, Oct 23 2013, Thierry Reding wrote:
-> Commit 2d7c51f (mmc: sdhci: Use work structs instead of tasklets)
-> converts tasklets to work structs, but typos the conversion in the Dove
-> driver.
->
-> Signed-off-by: Thierry Reding <treding@nvidia.com>
-> ---
->  drivers/mmc/host/sdhci-dove.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/host/sdhci-dove.c b/drivers/mmc/host/sdhci-dove.c
-> index 45c7f25..95f1076 100644
-> --- a/drivers/mmc/host/sdhci-dove.c
-> +++ b/drivers/mmc/host/sdhci-dove.c
-> @@ -39,7 +39,7 @@ static irqreturn_t sdhci_dove_carddetect_irq(int irq, void *data)
->  {
->  	struct sdhci_host *host = data;
->  
-> -	schedule_schedule(&host->card_detect_work);
-> +	schedule_work(&host->card_detect_work);
->  	return IRQ_HANDLED;
->  }
+On Wed, Oct 23 2013, Peter Guo wrote:
+> Do you have any comments on this patch?
 
-Thanks, Thierry -- I hope it's okay with you if I merge your fix into
-the original patch and add your S-o-b to that patch:
+It would be nice if there were fewer magic constants in the patch, and
+adding another 200 lines to sdhci-pci seems to suggest that it might
+be time to split it out into sdhci-pci-o2micro.c.
 
-    Signed-off-by: Anton Vorontsov <avorontsov@mvista.com>
-    Signed-off-by: Jeremie Samuel <jeremie.samuel.ext@parrot.com>
-    [treding: Fix typo causing sdhci-dove build breakage]
-    Signed-off-by: Thierry Reding <treding@nvidia.com>
-    Signed-off-by: Chris Ball <cjb@laptop.org>
+Thanks,
 
 - Chris.
 -- 
