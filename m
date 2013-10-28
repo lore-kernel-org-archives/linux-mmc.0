@@ -1,148 +1,86 @@
-From: Kumar Gala <galak@codeaurora.org>
-Subject: Re: [PATCH 2/2] mmc: dw_mmc: add dw_mmc-k3 for k3 platform
-Date: Mon, 28 Oct 2013 01:29:03 -0500
-Message-ID: <0D287D95-C302-4A59-98AC-C654F5AC97B4@codeaurora.org>
-References: <1382339639-16764-3-git-send-email-zhangfei.gao@linaro.org> <1382533396-6584-1-git-send-email-zhangfei.gao@linaro.org>
-Mime-Version: 1.0 (Apple Message framework v1283)
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp.codeaurora.org ([198.145.11.231]:58199 "EHLO
-	smtp.codeaurora.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755580Ab3J1G3H convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 28 Oct 2013 02:29:07 -0400
-In-Reply-To: <1382533396-6584-1-git-send-email-zhangfei.gao@linaro.org>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Thierry Reding <thierry.reding@gmail.com>
+Subject: Re: [PATCH] mmc: sdhci: dove: Fix build breakage
+Date: Mon, 28 Oct 2013 08:47:44 +0100
+Message-ID: <20131028074744.GD6629@ulmo.nvidia.com>
+References: <1382533832-21085-1-git-send-email-treding@nvidia.com>
+ <87ppqqkh2g.fsf@octavius.laptop.org>
+Mime-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="zjcmjzIkjQU2rmur"
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <87ppqqkh2g.fsf@octavius.laptop.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>
+Cc: Jeremie Samuel <jeremie.samuel.ext@parrot.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Zhangfei Gao <zhangfei.gao@linaro.org>
-Cc: Chris Ball <cjb@laptop.org>, Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, devicetree@vger.kernel.org
 
 
-On Oct 23, 2013, at 8:03 AM, Zhangfei Gao wrote:
+--zjcmjzIkjQU2rmur
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-> update: fix typo
-> 
-> Add dw_mmc-k3.c for k3v2, support sd/emmc
-> 
-> Signed-off-by: Zhangfei Gao <zhangfei.gao@linaro.org>
-> Tested-by: Zhigang Wang <brooke.wangzhigang@huawei.com>
-> ---
-> .../devicetree/bindings/mmc/k3-dw-mshc.txt         |   77 +++++
-> drivers/mmc/host/Kconfig                           |   10 +
-> drivers/mmc/host/Makefile                          |    1 +
-> drivers/mmc/host/dw_mmc-k3.c                       |  297 ++++++++++++++++++++
-> 4 files changed, 385 insertions(+)
-> create mode 100644 Documentation/devicetree/bindings/mmc/k3-dw-mshc.txt
-> create mode 100644 drivers/mmc/host/dw_mmc-k3.c
-> 
-> diff --git a/Documentation/devicetree/bindings/mmc/k3-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/k3-dw-mshc.txt
-> new file mode 100644
-> index 0000000..0de8c27
-> --- /dev/null
-> +++ b/Documentation/devicetree/bindings/mmc/k3-dw-mshc.txt
-> @@ -0,0 +1,77 @@
-> +* Hisilicon specific extensions to the Synopsys Designware Mobile
-> +  Storage Host Controller
-> +
-> +Read synopsis-dw-mshc.txt for more details
-> +The Synopsys designware mobile storage host controller is used to interface
-> +a SoC with storage medium such as eMMC or SD/MMC cards. This file documents
-> +differences between the core Synopsys dw mshc controller properties described
-> +by synopsis-dw-mshc.txt and the properties used by the Hisilicon specific
-> +extensions to the Synopsys Designware Mobile Storage Host Controller.
-> +
-> +Required Properties:
-> +
-> +* compatible: should be
-> +	- "hisilicon,hi4511-dw-mshc": for controllers with hi4511
-> +	  specific extentions.
-> +* vmmc-supply: should be vmmc used in dwmmc
-> +* fifo-depth: should be provided if register can not provide correct value
-> +* clken-reg: should be clock enable register and offset
-> +* drv-sel-reg: should be driver delay select register, offset and bits
-> +* sam-sel-reg: should be sample delay select register, offset and bits
-> +* div-reg: should be divider register, offset and bits
-> +* tune-table: should be array of clock tune mmc controller
-> +
+On Sun, Oct 27, 2013 at 08:56:55AM -0400, Chris Ball wrote:
+> Hi,
+>=20
+> On Wed, Oct 23 2013, Thierry Reding wrote:
+> > Commit 2d7c51f (mmc: sdhci: Use work structs instead of tasklets)
+> > converts tasklets to work structs, but typos the conversion in the Dove
+> > driver.
+> >
+> > Signed-off-by: Thierry Reding <treding@nvidia.com>
+> > ---
+> >  drivers/mmc/host/sdhci-dove.c | 2 +-
+> >  1 file changed, 1 insertion(+), 1 deletion(-)
+> >
+> > diff --git a/drivers/mmc/host/sdhci-dove.c b/drivers/mmc/host/sdhci-dov=
+e.c
+> > index 45c7f25..95f1076 100644
+> > --- a/drivers/mmc/host/sdhci-dove.c
+> > +++ b/drivers/mmc/host/sdhci-dove.c
+> > @@ -39,7 +39,7 @@ static irqreturn_t sdhci_dove_carddetect_irq(int irq,=
+ void *data)
+> >  {
+> >  	struct sdhci_host *host =3D data;
+> > =20
+> > -	schedule_schedule(&host->card_detect_work);
+> > +	schedule_work(&host->card_detect_work);
+> >  	return IRQ_HANDLED;
+> >  }
+>=20
+> Thanks, Thierry -- I hope it's okay with you if I merge your fix into
+> the original patch and add your S-o-b to that patch:
+>=20
+>     Signed-off-by: Anton Vorontsov <avorontsov@mvista.com>
+>     Signed-off-by: Jeremie Samuel <jeremie.samuel.ext@parrot.com>
+>     [treding: Fix typo causing sdhci-dove build breakage]
+>     Signed-off-by: Thierry Reding <treding@nvidia.com>
+>     Signed-off-by: Chris Ball <cjb@laptop.org>
 
-1. These should have vendor prefixes
-2. why do we need the *-reg properties
-3. for the *-reg properties its not clear what bits means?
-4. tune-table is not well described, what does 'clock tune' mean, why an array?
+Sure, no problem.
 
+Thierry
 
-> +Example:
-> +
-> +  The MSHC controller node can be split into two portions, SoC specific and
-> +  board specific portions as listed below.
-> +
+--zjcmjzIkjQU2rmur
+Content-Type: application/pgp-signature
 
-Does dtc merge this all into a single node?  Would probably be good to have comments
-in the example stating both that the merge into one node, and which is board and which
-is soc.
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
 
-> +	dwmmc_0: dwmmc0@fcd03000 {
-> +		compatible = "hisilicon,hi4511-dw-mshc";
-> +		reg = <0xfcd03000 0x1000>;
-> +		interrupts = <0 16 4>;
-> +		#address-cells = <1>;
-> +		#size-cells = <0>;
-> +		clocks = <&clk_sd>, <&clk_ddrc_per>;
-> +		clock-names = "ciu", "biu";
-> +		clken-reg = <0x1f8 0>;
-> +		drv-sel-reg = <0x1f8 4 4>;
-> +		sam-sel-reg = <0x1f8 8 4>;
-> +		div-reg = <0x1f8 1 3>;
-> +		tune-table =
-> +		<180000000 6 6 13 13 25000000>,
-> +		<0 0 0 0 0 0>,
-> +		<360000000 6 4 2 0 50000000>,
-> +		<180000000 6 4 13 13 25000000>,
-> +		<360000000 6 4 2 0 50000000>,
-> +		<720000000 6 1 9 4 100000000>,
-> +		<0 0 0 0 0 0>,
-> +		<360000000 7 1 3 0 50000000>;
-> +	};
-> +	dwmmc0@fcd03000 {
-> +		num-slots = <1>;
-> +		vmmc-supply = <&ldo12>;
-> +		fifo-depth = <0x100>;
-> +		supports-highspeed;
-> +		pinctrl-names = "default";
-> +		pinctrl-0 = <&sd_pmx_pins &sd_cfg_func1 &sd_cfg_func2>;
-> +		slot@0 {
-> +			reg = <0>;
-> +			bus-width = <4>;
-> +			disable-wp;
-> +			cd-gpios = <&gpio10 3 0>;
-> +		};
-> +	};
-> +
-> +PCTRL:
-> +
+iQIcBAEBAgAGBQJSbhagAAoJEN0jrNd/PrOh2LcQALwF1OL2ke7UL2BnxMdMoYQu
+cr4CLHo9EuDi/Io8HajA/vuyY9bHLo8FLmm1vMzIYxk5Xh51J8N8gMP8pOaQ5lrp
+7pFIugg9/24A+ojncB9QEu8n40qb4SG06VwZq3g9gRk04pn3ppesR9H/DBWRVSFH
+omyvrljnUE88/QzJbkfAgKZKoZZDvw2/nCk/Twl7xDFrSpbWNbUFzXVgFP4NWoff
++YeXp+c6h/4jUuTGlTeOLmYGqURSIMoRHx/P4MwZK5/vszvO/eXYmVTngGNBWf+b
+1nmwOnvpdsqNTpxczszL5qKy2m4vLKS4RiGwWCEh3qHCnJQMTyJQc/VVSke4xTpA
+Pku/qLsEkEVFccydXtGFD5Qz+jhk9OqMbl65rxK9hSu+1HrTiWgUfPSbph5IrpoA
+gEKXI1sLZQNXu2/acYNkYyhZjRZ4tXnirFM4FyYyNh6uv2GPDsXYhnkjpnhGWeqm
+NY1CxhAfj45ssJ2t4+WbTIb68tZfo5PHANiqiQI/PSls2q3k3vSO5MTWYicDJuyq
+Avmt/ModuqBDGK9wSJL3mSsVVdJVAzCGc+zc3SBO47ILvOuxmA7xarPijaECMYkG
+DkwtQApkFKu46pCdWpValVOIkHdJci+vQKWiOKdAFab0DrFP+uRqQPkDgntnZpff
+5BLrDCNBPcAX9AHlDxKB
+=/Nly
+-----END PGP SIGNATURE-----
 
-should have a description
-
-> +Required Properties:
-> +* compatible: should be
-> +	- "hisilicon,pctrl": Peripheral control
-> +
-
-Reg is not described as a required property.
-
-> +Example:
-> +
-> +	pctrl: pctrl@fca09000 {
-> +		compatible = "hisilicon,pctrl";
-> +		reg = <0xfca09000 0x1000>;
-> +	};
-
-This should be in its own binding document, and not part of the mmc binding
-
-- k
-> 
-
--- 
-Employee of Qualcomm Innovation Center, Inc.
-Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum, hosted by The Linux Foundation
-
+--zjcmjzIkjQU2rmur--
