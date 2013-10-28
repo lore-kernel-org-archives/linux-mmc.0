@@ -1,81 +1,85 @@
-From: Doug Anderson <dianders@chromium.org>
-Subject: Re: [PATCH 1/2] mmc: dw_mmc: Cleanup disable of low power mode w/
- SDIO interrupts
-Date: Mon, 28 Oct 2013 15:39:46 -0700
-Message-ID: <CAD=FV=VLNdNMg2gAj7yUs2ZgP0GqO5SOQLARq+p1qQTGwFDsQQ@mail.gmail.com>
-References: <1381876762-10892-1-git-send-email-dianders@chromium.org>
-	<1381876762-10892-2-git-send-email-dianders@chromium.org>
-	<52610273.3080005@samsung.com>
-	<CAD=FV=UiUxoqbAeq+3iUChqksHd_NpJs2rM83=ng3fprMj0E-A@mail.gmail.com>
-	<001701cecfe2$9831eb90$c895c2b0$%jun@samsung.com>
-	<CAD=FV=WL0K4qiRGsQxG7vfp41dV9fp=7d6d6i5qomJd7jbLEPg@mail.gmail.com>
-	<000f01ced164$a8181b50$f84851f0$%jun@samsung.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-vb0-f44.google.com ([209.85.212.44]:37792 "EHLO
-	mail-vb0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757491Ab3J1Wjs (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 28 Oct 2013 18:39:48 -0400
-Received: by mail-vb0-f44.google.com with SMTP id 11so5131604vbe.3
-        for <linux-mmc@vger.kernel.org>; Mon, 28 Oct 2013 15:39:47 -0700 (PDT)
-In-Reply-To: <000f01ced164$a8181b50$f84851f0$%jun@samsung.com>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Laurent Pinchart <laurent.pinchart+renesas@ideasonboard.com>
+Subject: [PATCH 00/12] Prepare various SH/R Mobile/Car drivers for CCF migration
+Date: Mon, 28 Oct 2013 23:49:17 +0100
+Message-ID: <1383000569-8916-1-git-send-email-laurent.pinchart+renesas@ideasonboard.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-arm-kernel@lists.infradead.org
+Cc: linux-sh@vger.kernel.org, Mike Turquette <mturquette@linaro.org>, Daniel Lezcano <daniel.lezcano@linaro.org>, linux-kernel@vger.kernel.org, Tejun Heo <tj@kernel.org>, linux-ide@vger.kernel.org, David Airlie <airlied@linux.ie>, dri-devel@lists.freedesktop.org, Wolfram Sang <wsa@the-dreams.de>, linux-i2c@vger.kernel.org, Chris Ball <cjb@laptop.org>, Guennadi Liakhovetski <g.liakhovetski+renesas@gmail.com>, linux-mmc@vger.kernel.org, Felipe Balbi <balbi@ti.com>, linux-usb@vger.kernel.org, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, Jean-Christophe Plagniol-Villard <plagnioj@jcrosoft.com>, Tomi Valkeinen <tomi.valkeinen@ti.com>, linux-fbdev@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Seungwon Jeon <tgih.jun@samsung.com>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, Chris Ball <cjb@laptop.org>, James Hogan <james.hogan@imgtec.com>, Grant Grundler <grundler@chromium.org>, Alim Akhtar <alim.akhtar@samsung.com>, Abhilash Kesavan <a.kesavan@samsung.com>, Tomasz Figa <tomasz.figa@gmail.com>, Olof Johansson <olof@lixom.net>, Sonny Rao <sonnyrao@chromium.org>, Bing Zhao <bzhao@marvell.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-Seungwon,
+Hello,
 
-On Fri, Oct 25, 2013 at 2:29 AM, Seungwon Jeon <tgih.jun@samsung.com> wrote:
->> By SDIO devices, are you referring to actual SDIO cards or some
->> implementations of dw_mmc?
->>
->> As far as I understand in the CLKENA description in the generic
->> documentation from Synopsys it say that for SDIO cards you must not
->> stop the clock if interrupts must be detected.  To me, that means that
->> all dw_mmc implementations require this change if they support SDIO
->> interrupts (hence checking for MMC_CAP_SDIO_IRQ).
->
-> CLKENA description in manual means that host controller can't detect the SDIO interrupt signal
-> or wifi device can't generate the interrupt without clock?
+This patch series, based on v3.12-rc7, prepares various Renesas SH-Mobile,
+R-Mobile and R-Car drivers for migration to CCF by adding clock prepare and
+unprepare support.
 
-My reading of the "if interrupts must be detected" in the manual
-implies that that interrupts simply can't be detected by the
-controller.
+The patches are pretty straightforward. Most of the drivers called
+clk_enable and clk_disable in sleepable context, I've thus just converted them
+to clk_prepare_enable and clk_disable_unprepare.
 
+The clocksource drivers were slightly more complex to handle as clk_enable and
+clk_disable were called in non-sleepable context. As the clocksource framework
+architecture doesn't provide any sleepable callback in which clocks could be
+prepared and unprepared, I've added clk_prepare and clk_unprepare calls in the
+probe and suspend/resume handlers (clocksources can't be removed so the remove
+handler doesn't need a clk_unprepare call).
 
-> Host controller based on Synopsys supports asynchronous interrupts. It seems to depend on wifi Device.
-> If host can do and  wifi device can also work with clock gating, we may enable low-power mode.
+I'd like to get all these patches merged in v3.14. As they will need to go
+through their respective subsystems' trees, I would appreciate if all
+maintainers involved could notify me when they merge patches from this series
+in their tree to help me tracking the merge status. I don't plan to send pull
+requests individually for these patches, and I will repost patches
+individually if changes are requested during review.
 
-Ah, interesting!  I wish I had known about this earlier and we could
-have actually used it in our designs.  Please correct me if I'm wrong
-but...
+Cc: Daniel Lezcano <daniel.lezcano@linaro.org>
+Cc: linux-kernel@vger.kernel.org
+Cc: Tejun Heo <tj@kernel.org>
+Cc: linux-ide@vger.kernel.org
+Cc: David Airlie <airlied@linux.ie>
+Cc: dri-devel@lists.freedesktop.org
+Cc: Wolfram Sang <wsa@the-dreams.de>
+Cc: linux-i2c@vger.kernel.org
+Cc: Chris Ball <cjb@laptop.org>
+Cc: Guennadi Liakhovetski <g.liakhovetski+renesas@gmail.com>
+Cc: linux-mmc@vger.kernel.org
+Cc: Felipe Balbi <balbi@ti.com>
+Cc: linux-usb@vger.kernel.org
+Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Cc: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+Cc: Jean-Christophe Plagniol-Villard <plagnioj@jcrosoft.com>
+Cc: Tomi Valkeinen <tomi.valkeinen@ti.com>
+Cc: linux-fbdev@vger.kernel.org
 
-It looks like asynchronous interrupts is when you use a separate INT#
-line for your SDIO interrupts and is available only for eSDIO
-(embedded SDIO?), right.  ...so that means it more a property of the
-board rather than the card itself.  In other words: to use
-asynchronous interrupts you need to be on a SoC that supports the INT#
-line, you need to have it wired up to an eSDIO module, and you need
-the eSDIO card to support it.
+Laurent Pinchart (12):
+  clocksource: sh_cmt: Add clk_prepare/unprepare support
+  clocksource: sh_mtu2: Add clk_prepare/unprepare support
+  clocksource: sh_tmu: Add clk_prepare/unprepare support
+  sata_rcar: Convert to clk_prepare/unprepare
+  drm: shmob_drm: Convert to clk_prepare/unprepare
+  i2c: sh_mobile: Convert to clk_prepare/unprepare
+  mmc: sh_mmcif: Convert to clk_prepare/unprepare
+  mmc: sh_mobile_sdhi: Convert to clk_prepare/unprepare
+  usb: gadget: r8a66597-udc: Convert to clk_prepare/unprepare
+  usb: r8a66597-hcd: Convert to clk_prepare/unprepare
+  fbdev: shmobile-hdmi: Convert to clk_prepare/unprepare
+  fbdev: shmobile-lcdcfb: Convert to clk_prepare/unprepare
 
-Assuming that I understand all of the above I'd suggest (in a future
-patch) that we add a property like 'dedicated-sdio-irq' to device
-trees.  If we see this property AND we don't see
-MMC_QUIRK_BROKEN_CLK_GATING then we know we don't need to disable
-clock gating.
+ drivers/ata/sata_rcar.c                   | 10 +++++-----
+ drivers/clocksource/sh_cmt.c              | 20 ++++++++++++++++----
+ drivers/clocksource/sh_mtu2.c             | 16 ++++++++++++++--
+ drivers/clocksource/sh_tmu.c              | 20 +++++++++++++++++---
+ drivers/gpu/drm/shmobile/shmob_drm_crtc.c |  4 ++--
+ drivers/i2c/busses/i2c-sh_mobile.c        |  8 ++++----
+ drivers/mmc/host/sh_mmcif.c               | 12 ++++++------
+ drivers/mmc/host/sh_mobile_sdhi.c         |  4 ++--
+ drivers/usb/gadget/r8a66597-udc.c         |  6 +++---
+ drivers/usb/host/r8a66597-hcd.c           |  4 ++--
+ drivers/video/sh_mobile_hdmi.c            |  6 +++---
+ drivers/video/sh_mobile_lcdcfb.c          |  4 ++--
+ 12 files changed, 76 insertions(+), 38 deletions(-)
 
-Does that sound right?  If so I'd still love to land my patch and we
-could add the extra logic in a separate patch.
+-- 
+Regards,
 
-
-> For MMC_QUIRK_BROKEN_CLK_GATING, I referred the code in 'mmc/core/quirks.c'
-> In addition, although host can support MMC_CAP_SDIO_IRQ, some wifi drivers use
-> OOB(Out-of-band) interrupt. That means host can apply clock gating to reduce
-> power consumption.
-
-I think OOB interrupt is the same as asynchronous interrupt, but if
-I'm wrong please correct me.
-
--Doug
+Laurent Pinchart
