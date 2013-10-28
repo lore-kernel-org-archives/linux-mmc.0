@@ -1,89 +1,86 @@
-From: Laurent Pinchart <laurent.pinchart+renesas@ideasonboard.com>
-Subject: [PATCH 07/12] mmc: sh_mmcif: Convert to clk_prepare/unprepare
-Date: Mon, 28 Oct 2013 23:49:24 +0100
-Message-ID: <1383000569-8916-8-git-send-email-laurent.pinchart+renesas@ideasonboard.com>
-References: <1383000569-8916-1-git-send-email-laurent.pinchart+renesas@ideasonboard.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from perceval.ideasonboard.com ([95.142.166.194]:59229 "EHLO
-	perceval.ideasonboard.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757660Ab3J1WtM (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 28 Oct 2013 18:49:12 -0400
-In-Reply-To: <1383000569-8916-1-git-send-email-laurent.pinchart+renesas@ideasonboard.com>
-Sender: linux-mmc-owner@vger.kernel.org
+From: =?utf-8?B?U8O2cmVu?= Brinkmann <soren.brinkmann@xilinx.com>
+Subject: Re: [PATCH 1/2] mmc: arasan: Add driver for Arasan SDHCI
+Date: Mon, 28 Oct 2013 15:50:36 -0700
+Message-ID: <9bba3f23-e6b8-4a9a-93ab-4f89f525a4a2@CO1EHSMHS030.ehs.local>
+References: <1381864085-8806-1-git-send-email-soren.brinkmann@xilinx.com>
+ <1587218.cW45zK0ty2@flatron>
+ <b6ced7bb-e8df-4cc1-95a1-df575e37dea7@CO1EHSMHS001.ehs.local>
+ <1873048.2t2L2zW4W9@flatron>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <1873048.2t2L2zW4W9@flatron>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Tomasz Figa <tomasz.figa@gmail.com>
+Cc: Rob Herring <rob.herring@calxeda.com>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Stephen Warren <swarren@wwwdotorg.org>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Rob Landley <rob@landley.net>, Russell King <linux@arm.linux.org.uk>, Chris Ball <cjb@laptop.org>, Michal Simek <michal.simek@xilinx.com>, Grant Likely <grant.likely@linaro.org>, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, linux-doc@vger.kernel.org, devicetree@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-arm-kernel@lists.infradead.org
-Cc: linux-sh@vger.kernel.org, Mike Turquette <mturquette@linaro.org>, Chris Ball <cjb@laptop.org>, Guennadi Liakhovetski <g.liakhovetski+renesas@gmail.com>, linux-mmc@vger.kernel.org
 
-Turn clk_enable() and clk_disable() calls into clk_prepare_enable() and
-clk_disable_unprepare() to get ready for the migration to the common
-clock framework.
+On Mon, Oct 28, 2013 at 11:19:13PM +0100, Tomasz Figa wrote:
+> On Monday 28 of October 2013 14:47:38 S=C3=B6ren Brinkmann wrote:
+> > On Mon, Oct 28, 2013 at 10:16:49PM +0100, Tomasz Figa wrote:
+> > > Hi Soren,
+> > >=20
+> > > On Tuesday 15 of October 2013 12:08:04 Soren Brinkmann wrote:
+> > > > Add a driver for Arasan's SDHCI controller core.
+> > > >=20
+> > > > Signed-off-by: Soren Brinkmann <soren.brinkmann@xilinx.com>
+> > > > ---
+> > > >=20
+> > > >  .../devicetree/bindings/mmc/arasan,sdhci.txt       |  23 +++
+> > > >  MAINTAINERS                                        |   1 +
+> > > >  drivers/mmc/host/Kconfig                           |  12 ++
+> > > >  drivers/mmc/host/Makefile                          |   1 +
+> > > >  drivers/mmc/host/sdhci-of-arasan.c                 | 224
+> > > >=20
+> > > > +++++++++++++++++++++ 5 files changed, 261 insertions(+)
+> > > >=20
+> > > >  create mode 100644
+> > > >=20
+> > > > Documentation/devicetree/bindings/mmc/arasan,sdhci.txt create m=
+ode
+> > > > 100644 drivers/mmc/host/sdhci-of-arasan.c
+> > > >=20
+> > > > diff --git a/Documentation/devicetree/bindings/mmc/arasan,sdhci=
+=2Etxt
+> > > > b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt new fi=
+le
+> > > > mode
+> > > > 100644
+> > > > index 000000000000..20f0fc25e270
+> > > > --- /dev/null
+> > > > +++ b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
+> > > > @@ -0,0 +1,23 @@
+> > > > +Device Tree Bindings for the Arasan SDCHI Controller
+> > > > +
+> > > > +  The bindings follow the mmc[1] and the clock bindings[2]. On=
+ly
+> > > > deviations are +  documented here.
+> > > > +
+> > > > +  [1] Documentation/devicetree/bindings/mmc/mmc.txt
+> > > > +  [2] Documentation/devicetree/bindings/clock/clock-bindings.t=
+xt
+> > > > +
+> > >=20
+> > > > +Required Properties:
+> > > According to the example below, the list of required properties l=
+acks
+> > > interrupt-related properties.
+> >=20
+> > Well, the interrupt bindings seem to differ between platforms and
+> > architecture and looking at documentation for other sdhci bindings =
+it
+> > seemed to be okay to avoid documenting them in this place.
+>=20
+> Sure, but I believe that this controller always has an interrupt sign=
+al,=20
+> so at least it should be marked that interrupts need to be specified.
+Okay, I'll add these lines:
+  - interrupts: Interrupt specifier                                    =
+         =20
+  - interrupt-parent: Phandle for the interrupt controller that service=
+s                                =20
+                      interrupts for this device.
 
-Cc: Chris Ball <cjb@laptop.org>
-Cc: Guennadi Liakhovetski <g.liakhovetski+renesas@gmail.com>
-Cc: linux-mmc@vger.kernel.org
-Signed-off-by: Laurent Pinchart <laurent.pinchart+renesas@ideasonboard.com>
----
- drivers/mmc/host/sh_mmcif.c | 12 ++++++------
- 1 file changed, 6 insertions(+), 6 deletions(-)
-
-diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
-index 36629a0..37a6c57 100644
---- a/drivers/mmc/host/sh_mmcif.c
-+++ b/drivers/mmc/host/sh_mmcif.c
-@@ -964,7 +964,7 @@ static void sh_mmcif_request(struct mmc_host *mmc, struct mmc_request *mrq)
- 
- static int sh_mmcif_clk_update(struct sh_mmcif_host *host)
- {
--	int ret = clk_enable(host->hclk);
-+	int ret = clk_prepare_enable(host->hclk);
- 
- 	if (!ret) {
- 		host->clk = clk_get_rate(host->hclk);
-@@ -1018,7 +1018,7 @@ static void sh_mmcif_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 		}
- 		if (host->power) {
- 			pm_runtime_put_sync(&host->pd->dev);
--			clk_disable(host->hclk);
-+			clk_disable_unprepare(host->hclk);
- 			host->power = false;
- 			if (ios->power_mode == MMC_POWER_OFF)
- 				sh_mmcif_set_power(host, ios);
-@@ -1466,7 +1466,7 @@ static int sh_mmcif_probe(struct platform_device *pdev)
- 
- 	mutex_init(&host->thread_lock);
- 
--	clk_disable(host->hclk);
-+	clk_disable_unprepare(host->hclk);
- 	ret = mmc_add_host(mmc);
- 	if (ret < 0)
- 		goto emmcaddh;
-@@ -1487,7 +1487,7 @@ ereqirq1:
- ereqirq0:
- 	pm_runtime_suspend(&pdev->dev);
- eresume:
--	clk_disable(host->hclk);
-+	clk_disable_unprepare(host->hclk);
- eclkupdate:
- 	clk_put(host->hclk);
- eclkget:
-@@ -1505,7 +1505,7 @@ static int sh_mmcif_remove(struct platform_device *pdev)
- 	int irq[2];
- 
- 	host->dying = true;
--	clk_enable(host->hclk);
-+	clk_prepare_enable(host->hclk);
- 	pm_runtime_get_sync(&pdev->dev);
- 
- 	dev_pm_qos_hide_latency_limit(&pdev->dev);
-@@ -1530,7 +1530,7 @@ static int sh_mmcif_remove(struct platform_device *pdev)
- 	if (irq[1] >= 0)
- 		free_irq(irq[1], host);
- 
--	clk_disable(host->hclk);
-+	clk_disable_unprepare(host->hclk);
- 	mmc_free_host(host->mmc);
- 	pm_runtime_put_sync(&pdev->dev);
- 	pm_runtime_disable(&pdev->dev);
--- 
-1.8.1.5
-
+	S=C3=B6ren
