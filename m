@@ -1,111 +1,130 @@
-From: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
-Subject: Re: [PATCH 08/19] mmc: sdhi: Enable the driver on all ARM platforms
-Date: Tue, 29 Oct 2013 23:23:15 +0100
-Message-ID: <2104528.1psQi38nVt@avalon>
-References: <1383004027-25036-1-git-send-email-laurent.pinchart+renesas@ideasonboard.com> <172884142.S8DiPq9kQF@avalon> <52701EE8.4040302@cogentembedded.com>
+From: Laurent Pinchart <laurent.pinchart+renesas-ryLnwIuWjnjg/C1BVhZhaw@public.gmane.org>
+Subject: [PATCH v2 00/19] Enable various Renesas drivers on all ARM platforms
+Date: Tue, 29 Oct 2013 23:37:35 +0100
+Message-ID: <1383086274-11049-1-git-send-email-laurent.pinchart+renesas@ideasonboard.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7Bit
-Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <52701EE8.4040302@cogentembedded.com>
-Sender: linux-sh-owner@vger.kernel.org
-To: Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>
-Cc: Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Laurent Pinchart <laurent.pinchart+renesas@ideasonboard.com>, linux-sh@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org
+Content-Transfer-Encoding: 7bit
+Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
+List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
+Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+To: linux-sh-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: linux-fbdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Wolfram Sang <wsa-z923LK4zBo2bacvFa/9K2g@public.gmane.org>, Linus Walleij <linus.walleij-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Guennadi Liakhovetski <g.liakhovetski+renesas-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Thierry Reding <thierry.reding-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-mtd-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Vinod Koul <vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Magnus Damm <magnus.damm-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Eduardo Valentin <eduardo.valentin-l0cyMroinI0@public.gmane.org>, Tomi Valkeinen <tomi.valkeinen-l0cyMroinI0@public.gmane.org>, linux-serial-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-input-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Zhang Rui <rui.zhang-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, Jean-Christophe Plagniol-Villard <plagnioj-sclMFOaUSTBWk0Htik3J/w@public.gmane.org>, linux-media-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-pwm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Samuel Ortiz <samuel-jcdQHdrhKHMdnm+yROfE0A@public.gmane.org>, linux-pm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ian Molton <ian-zdned+2MO1+9FHfhHBbuYA@public.gmane.org>, Mark Brown <broonie-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Sergei Shtylyov <sergei.shtylyov-M4DtvfQ/ZS1MRgGoP+s0PdBPR1lH4CV8@public.gmane.org>, Greg
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Sergei,
+Hello,
 
-On Tuesday 29 October 2013 23:47:36 Sergei Shtylyov wrote:
-> On 10/29/2013 04:15 PM, Laurent Pinchart wrote:
-> >>>>> Renesas ARM platforms are transitioning from single-platform to
-> >>>>> multi-platform kernels using the new ARCH_SHMOBILE_MULTI. Make the
-> >>>>> driver available on all ARM platforms to enable it on both
-> >>>>> ARCH_SHMOBILE and ARCH_SHMOBILE_MULTI and increase build testing
-> >>>>> coverage.
-> >>>>> 
-> >>>>> Cc: Chris Ball <cjb@laptop.org>
-> >>>>> Cc: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-> >>>>> Cc: Ian Molton <ian@mnementh.co.uk>
-> >>>>> Cc: linux-mmc@vger.kernel.org
-> >>>>> Signed-off-by: Laurent Pinchart
-> >>>>> <laurent.pinchart+renesas@ideasonboard.com>
-> >> 
-> >> [...]
-> >> 
-> >>>>> diff --git a/drivers/mmc/host/tmio_mmc_dma.c
-> >>>>> b/drivers/mmc/host/tmio_mmc_dma.c index 65edb4a..535bc35 100644
-> >>>>> --- a/drivers/mmc/host/tmio_mmc_dma.c
-> >>>>> +++ b/drivers/mmc/host/tmio_mmc_dma.c
-> >>>>> @@ -28,7 +28,7 @@ void tmio_mmc_enable_dma(struct tmio_mmc_host *host,
-> >>>>> bool enable)>
-> >>>>> 
-> >>>>>    	if (!host->chan_tx || !host->chan_rx)
-> >>>>>    	
-> >>>>>    		return;
-> >>>>> 
-> >>>>> -#if defined(CONFIG_SUPERH) || defined(CONFIG_ARCH_SHMOBILE)
-> >>>>> +#if defined(CONFIG_SUPERH) || defined(CONFIG_ARM)
-> >>>> 
-> >>>> I'm not sure about this one. In principle DMA so far is only used on
-> >>>> SDHI with TMIO. But this #if was for a theoretical case, when a TMIO
-> >>>> MMC IP inside an MFD is also used with DMA. Bus since I had no
-> >>>> indormation about whether the CTL_DMA_ENABLE register was SDHI specific
-> >>>> or not, I put it under an #if for the time being. In any case, I don't
-> >>>> think making it #ifdef CONFIG_ARM makes much sense. We can either
-> >>>> remove the #if completely, or keep it to limit the scope of this write
-> >>>> to sh-mobile arches.
-> >>> 
-> >>> SUPERH || ARCH_SHMOBILE covers all the platforms this driver currently
-> >>> builds on. Now that we're adding ARCH_SHMOBILE_MULTI the #if needs to
-> >>> cover that case as well. I'm fine with limiting the CTL_DMA_ENABLE write
-> >>> to SUPERH only (which would modify the driver's behaviour)
-> >> 
-> >> I'm afraid that would break the driver's ability to work in DMA mode on
-> >> SH-Mobile SoCs.
-> > 
-> > So can you confirm that writing the CTL_DMA_ENABLE register is required on
-> > all Renesas ARM SoCs (including SH-Mobile, R-Mobile and R-Car) ?
-> 
-> I can't actually say anything about all SH-Mobile and R-Mobile SoCs, only
-> about the R-Car SoCs: though the datasheets don't contain the SDHI register
-> info, from my experience the register exists on R8A777x (I had to fix up the
-> broken PIO fallback in the SDHI driver).
+This patch series, based on v3.12-rc7, prepares various Renesas drivers
+for migration to multiplatform kernels by enabling their compilation or
+otherwise fixing them on all ARM platforms. The patches are pretty
+straightforward and are described in their commit message.
 
-OK.
+Changes since v1:
 
-> >>> or enabling it unconditionally, but I don't think adding a
-> >>> defined(CONFIG_ARCH_SHMOBILE_MULTI) to the above #if makes sense, unless
-> >>> there's a plan to add support for DMA for non-SH (including both SUPERH
-> >>> and ARCH_SHMOBILE) platforms.
-> >> 
-> >> Not only the plan -- I have already posted the patches to do it for
-> >> R8A777x, and Simon has queued them for 3.13.
-> > 
-> > Could you please point me to those patches ?
-> 
-> https://git.kernel.org/cgit/linux/kernel/git/horms/renesas.git/commit/?h=nex
-> t&id=1eb6b5a0e55bfcfb0852b7d0f9442841ff807345
-> https://git.kernel.org/cgit/linux/kernel/git/horms/renesas.git/commit/?h=ne
-> xt&id=a43e5bd76a4a3df58167d85e8020a1c9e566ad75
-> https://git.kernel.org/cgit/linux/kernel/git/horms/renesas.git/commit/?h=ne
-> xt&id=5d6aa3435275a5308684f90c17424b055ef7f572
-> https://git.kernel.org/cgit/linux/kernel/git/horms/renesas.git/commit/?h=ne
-> xt&id=e6a8b11b82fdeaa78dad52552f945b772ee1a5c9
+- The drivers can also be selected when COMPILE_TEST is enabled, regardless of
+  the architecture. This should provide a good compromise between wide build
+  test coverage and not clobbering configuration with drivers useless on
+  non-SuperH, non-ARM platforms.
 
-But that's still an ARCH_SHMOBILE platform. Guennadi's point, if I understood 
-it correctly, was that whether the CTL_DMA_ENABLE register is part of the 
-standard TMIO controller, or is Renesas-specific, is unknown. As we have no 
-current or planned TMIO DMA users other than SUPERH and ARCH_SHMOBILE this is 
-impossible to test. That is why the code is conditionally compiled.
+- DMA configuration is now unconditional in patch 08/19
 
-We could either get rid of the #if completely and always write to the 
-register, or add ARCH_SHMOBILE_MULTI to the condition. I now agree that adding 
-ARM as a dependency makes no sense. Given that this will break on 
-multiplatform kernels anyway, I'm enclined to write to the CTL_DMA_ENABLE 
-register unconditionally. I'll update the patch accordingly.
+I'd like to get all these patches merged in v3.14. As they will need to go
+through their respective subsystems' trees, I would appreciate if all
+maintainers involved could notify me when they merge patches from this series
+in their tree to help me tracking the merge status. I don't plan to send pull
+requests individually for these patches, and I will repost patches
+individually if changes are requested during review.
+
+If you believe the issue should be solved in a different way please reply to
+the cover letter to let other maintainers chime in.
+
+Cc: Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>
+Cc: "David S. Miller" <davem-fT/PcQaiUtIeIZ0/mPfg9Q@public.gmane.org>
+Cc: David Woodhouse <dwmw2-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>
+Cc: Dmitry Torokhov <dmitry.torokhov-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: Eduardo Valentin <eduardo.valentin-l0cyMroinI0@public.gmane.org>
+Cc: Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>
+Cc: Guennadi Liakhovetski <g.liakhovetski+renesas-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: Ian Molton <ian-zdned+2MO1+9FHfhHBbuYA@public.gmane.org>
+Cc: iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+Cc: Jean-Christophe Plagniol-Villard <plagnioj-sclMFOaUSTBWk0Htik3J/w@public.gmane.org>
+Cc: Joerg Roedel <joro-zLv9SwRftAIdnm+yROfE0A@public.gmane.org>
+Cc: Linus Walleij <linus.walleij-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Magnus Damm <magnus.damm-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: Mark Brown <broonie-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Cc: Mauro Carvalho Chehab <m.chehab-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
+Cc: Samuel Ortiz <samuel-jcdQHdrhKHMdnm+yROfE0A@public.gmane.org>
+Cc: Sergei Shtylyov <sergei.shtylyov-M4DtvfQ/ZS1MRgGoP+s0PdBPR1lH4CV8@public.gmane.org>
+Cc: Thierry Reding <thierry.reding-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: Tomi Valkeinen <tomi.valkeinen-l0cyMroinI0@public.gmane.org>
+Cc: Vinod Koul <vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Cc: Wolfram Sang <wsa-z923LK4zBo2bacvFa/9K2g@public.gmane.org>
+Cc: Zhang Rui <rui.zhang-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Cc: dmaengine-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: linux-fbdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: linux-input-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: linux-media-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: linux-mtd-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+Cc: linux-pm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: linux-pwm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: linux-serial-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: linux-spi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: netdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+
+Laurent Pinchart (19):
+  serial: sh-sci: Enable the driver on all ARM platforms
+  DMA: shdma: Enable the driver on all ARM platforms
+  i2c: sh_mobile: Enable the driver on all ARM platforms
+  input: sh_keysc: Enable the driver on all ARM platforms
+  iommu: shmobile: Enable the driver on all ARM platforms
+  i2c: rcar: Enable the driver on all ARM platforms
+  v4l: sh_vou: Enable the driver on all ARM platforms
+  mmc: sdhi: Enable the driver on all ARM platforms
+  mmc: sh_mmcif: Enable the driver on all ARM platforms
+  mtd: sh_flctl: Enable the driver on all ARM platforms
+  net: sh_eth: Set receive alignment correctly on all ARM platforms
+  irda: sh_irda: Enable the driver on all ARM platforms
+  pinctrl: sh-pfc: Enable the driver on all ARM platforms
+  pwm: pwm-renesas-tpu: Enable the driver on all ARM platforms
+  sh: intc: Enable the driver on all ARM platforms
+  spi: sh_msiof: Enable the driver on all ARM platforms
+  spi: sh_hspi: Enable the driver on all ARM platforms
+  thermal: rcar-thermal: Enable the driver on all ARM platforms
+  fbdev: sh-mobile-lcdcfb: Enable the driver on all ARM platforms
+
+ drivers/dma/sh/Kconfig                | 2 +-
+ drivers/dma/sh/shdmac.c               | 6 +++---
+ drivers/i2c/busses/Kconfig            | 4 ++--
+ drivers/input/keyboard/Kconfig        | 2 +-
+ drivers/iommu/Kconfig                 | 2 +-
+ drivers/media/platform/Kconfig        | 2 +-
+ drivers/mmc/host/Kconfig              | 4 ++--
+ drivers/mmc/host/tmio_mmc_dma.c       | 4 +---
+ drivers/mtd/nand/Kconfig              | 2 +-
+ drivers/net/ethernet/renesas/sh_eth.c | 2 +-
+ drivers/net/ethernet/renesas/sh_eth.h | 2 +-
+ drivers/net/irda/Kconfig              | 2 +-
+ drivers/pinctrl/Makefile              | 2 +-
+ drivers/pinctrl/sh-pfc/Kconfig        | 2 +-
+ drivers/pwm/Kconfig                   | 2 +-
+ drivers/sh/intc/Kconfig               | 2 +-
+ drivers/spi/Kconfig                   | 4 ++--
+ drivers/thermal/Kconfig               | 2 +-
+ drivers/tty/serial/Kconfig            | 2 +-
+ drivers/video/Kconfig                 | 6 +++---
+ 20 files changed, 27 insertions(+), 29 deletions(-)
 
 -- 
 Regards,
 
 Laurent Pinchart
-
