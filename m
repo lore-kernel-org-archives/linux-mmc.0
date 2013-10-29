@@ -1,139 +1,111 @@
-From: Richard Retanubun <RichardRetanubun@RuggedCom.com>
-Subject: [PATCH 2/2] Add 'mmc partition access' command
-Date: Tue, 29 Oct 2013 16:43:22 -0400
-Message-ID: <1383079402-20918-1-git-send-email-RichardRetanubun@RuggedCom.com>
+From: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
+Subject: Re: [PATCH 08/19] mmc: sdhi: Enable the driver on all ARM platforms
+Date: Tue, 29 Oct 2013 23:23:15 +0100
+Message-ID: <2104528.1psQi38nVt@avalon>
+References: <1383004027-25036-1-git-send-email-laurent.pinchart+renesas@ideasonboard.com> <172884142.S8DiPq9kQF@avalon> <52701EE8.4040302@cogentembedded.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail2.ruggedcom.com ([204.50.148.11]:22814 "EHLO
-	mail2.ruggedcom.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752797Ab3J2Un7 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 29 Oct 2013 16:43:59 -0400
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7Bit
+Return-path: <linux-sh-owner@vger.kernel.org>
+In-Reply-To: <52701EE8.4040302@cogentembedded.com>
+Sender: linux-sh-owner@vger.kernel.org
+To: Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>
+Cc: Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Laurent Pinchart <laurent.pinchart+renesas@ideasonboard.com>, linux-sh@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: cjb@laptop.org
-Cc: ben.l.gardiner@gmail.com, linux-mmc@vger.kernel.org, Richard Retanubun <RichardRetanubun@RuggedCom.com>
 
-This command alters the PARTITION_CONFIG[PARTITION_ACCESS] bits to allow
-R/W to the various partition that exist on the device.
----
- Hi Chris and mmc-utils maintainers,
+Hi Sergei,
 
- WARNING: While this alters the bits that I want, it actually does not work.
- Any subsequent access (e.g. mmc extcsd read) ends up with the system being
- unresponsive. I have obviously done something uneducatedly stupid.
+On Tuesday 29 October 2013 23:47:36 Sergei Shtylyov wrote:
+> On 10/29/2013 04:15 PM, Laurent Pinchart wrote:
+> >>>>> Renesas ARM platforms are transitioning from single-platform to
+> >>>>> multi-platform kernels using the new ARCH_SHMOBILE_MULTI. Make the
+> >>>>> driver available on all ARM platforms to enable it on both
+> >>>>> ARCH_SHMOBILE and ARCH_SHMOBILE_MULTI and increase build testing
+> >>>>> coverage.
+> >>>>> 
+> >>>>> Cc: Chris Ball <cjb@laptop.org>
+> >>>>> Cc: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+> >>>>> Cc: Ian Molton <ian@mnementh.co.uk>
+> >>>>> Cc: linux-mmc@vger.kernel.org
+> >>>>> Signed-off-by: Laurent Pinchart
+> >>>>> <laurent.pinchart+renesas@ideasonboard.com>
+> >> 
+> >> [...]
+> >> 
+> >>>>> diff --git a/drivers/mmc/host/tmio_mmc_dma.c
+> >>>>> b/drivers/mmc/host/tmio_mmc_dma.c index 65edb4a..535bc35 100644
+> >>>>> --- a/drivers/mmc/host/tmio_mmc_dma.c
+> >>>>> +++ b/drivers/mmc/host/tmio_mmc_dma.c
+> >>>>> @@ -28,7 +28,7 @@ void tmio_mmc_enable_dma(struct tmio_mmc_host *host,
+> >>>>> bool enable)>
+> >>>>> 
+> >>>>>    	if (!host->chan_tx || !host->chan_rx)
+> >>>>>    	
+> >>>>>    		return;
+> >>>>> 
+> >>>>> -#if defined(CONFIG_SUPERH) || defined(CONFIG_ARCH_SHMOBILE)
+> >>>>> +#if defined(CONFIG_SUPERH) || defined(CONFIG_ARM)
+> >>>> 
+> >>>> I'm not sure about this one. In principle DMA so far is only used on
+> >>>> SDHI with TMIO. But this #if was for a theoretical case, when a TMIO
+> >>>> MMC IP inside an MFD is also used with DMA. Bus since I had no
+> >>>> indormation about whether the CTL_DMA_ENABLE register was SDHI specific
+> >>>> or not, I put it under an #if for the time being. In any case, I don't
+> >>>> think making it #ifdef CONFIG_ARM makes much sense. We can either
+> >>>> remove the #if completely, or keep it to limit the scope of this write
+> >>>> to sh-mobile arches.
+> >>> 
+> >>> SUPERH || ARCH_SHMOBILE covers all the platforms this driver currently
+> >>> builds on. Now that we're adding ARCH_SHMOBILE_MULTI the #if needs to
+> >>> cover that case as well. I'm fine with limiting the CTL_DMA_ENABLE write
+> >>> to SUPERH only (which would modify the driver's behaviour)
+> >> 
+> >> I'm afraid that would break the driver's ability to work in DMA mode on
+> >> SH-Mobile SoCs.
+> > 
+> > So can you confirm that writing the CTL_DMA_ENABLE register is required on
+> > all Renesas ARM SoCs (including SH-Mobile, R-Mobile and R-Car) ?
+> 
+> I can't actually say anything about all SH-Mobile and R-Mobile SoCs, only
+> about the R-Car SoCs: though the datasheets don't contain the SDHI register
+> info, from my experience the register exists on R8A777x (I had to fix up the
+> broken PIO fallback in the SDHI driver).
 
- I am posting to show exactly what I have done and hoping that someone 
- can point me in the right direction.
+OK.
 
- I am trying to put MLO and u-boot into the boot partition (/dev/mmcblk1boot0)
- and then boot from it. I thought if I set the PARTITION_ACCESS to allow boot0
- I can then dd into it. So far all dd attempts returns with write operation
- not permitted.
+> >>> or enabling it unconditionally, but I don't think adding a
+> >>> defined(CONFIG_ARCH_SHMOBILE_MULTI) to the above #if makes sense, unless
+> >>> there's a plan to add support for DMA for non-SH (including both SUPERH
+> >>> and ARCH_SHMOBILE) platforms.
+> >> 
+> >> Not only the plan -- I have already posted the patches to do it for
+> >> R8A777x, and Simon has queued them for 3.13.
+> > 
+> > Could you please point me to those patches ?
+> 
+> https://git.kernel.org/cgit/linux/kernel/git/horms/renesas.git/commit/?h=nex
+> t&id=1eb6b5a0e55bfcfb0852b7d0f9442841ff807345
+> https://git.kernel.org/cgit/linux/kernel/git/horms/renesas.git/commit/?h=ne
+> xt&id=a43e5bd76a4a3df58167d85e8020a1c9e566ad75
+> https://git.kernel.org/cgit/linux/kernel/git/horms/renesas.git/commit/?h=ne
+> xt&id=5d6aa3435275a5308684f90c17424b055ef7f572
+> https://git.kernel.org/cgit/linux/kernel/git/horms/renesas.git/commit/?h=ne
+> xt&id=e6a8b11b82fdeaa78dad52552f945b772ee1a5c9
 
- What am I missing?
+But that's still an ARCH_SHMOBILE platform. Guennadi's point, if I understood 
+it correctly, was that whether the CTL_DMA_ENABLE register is part of the 
+standard TMIO controller, or is Renesas-specific, is unknown. As we have no 
+current or planned TMIO DMA users other than SUPERH and ARCH_SHMOBILE this is 
+impossible to test. That is why the code is conditionally compiled.
 
- Thanks for everyone's time.
+We could either get rid of the #if completely and always write to the 
+register, or add ARCH_SHMOBILE_MULTI to the condition. I now agree that adding 
+ARM as a dependency makes no sense. Given that this will break on 
+multiplatform kernels anyway, I'm enclined to write to the CTL_DMA_ENABLE 
+register unconditionally. I'll update the patch accordingly.
 
- Richard Retanubun
-
- mmc.c      |    5 +++++
- mmc_cmds.c |   53 +++++++++++++++++++++++++++++++++++++++++++++++++++++
- mmc_cmds.h |    1 +
- 3 files changed, 59 insertions(+)
-
-diff --git a/mmc.c b/mmc.c
-index 926e92f..985db33 100644
---- a/mmc.c
-+++ b/mmc.c
-@@ -90,6 +90,11 @@ static struct Command commands[] = {
- 		"Enable the boot partition for the <device>.\nTo receive acknowledgment of boot from the card set <send_ack>\nto 1, else set it to 0.",
- 	  NULL
- 	},
-+	{ do_write_partition_access, -2,
-+	  "partition access", "<partition_number> " "<device>\n"
-+		"Enable R/W access to the specified partition on <device>.",
-+	  NULL
-+	},
- 	{ do_write_bkops_en, -1,
- 	  "bkops enable", "<device>\n"
- 		"Enable the eMMC BKOPS feature on <device>.\nNOTE!  This is a one-time programmable (unreversible) change.",
-diff --git a/mmc_cmds.c b/mmc_cmds.c
-index af6f09f..d67004d 100644
---- a/mmc_cmds.c
-+++ b/mmc_cmds.c
-@@ -302,6 +302,59 @@ int do_write_boot_en(int nargs, char **argv)
- 	return ret;
- }
- 
-+int do_write_partition_access(int nargs, char **argv)
-+{
-+	__u8 ext_csd[512];
-+	__u8 value = 0;
-+	int fd, ret;
-+	char *device;
-+	int partition;
-+
-+	CHECK(nargs != 3, "Usage: mmc partition access <partition_number> "
-+			  "</path/to/mmcblkX>\n", exit(1));
-+
-+	/*
-+	 * If <send_ack> is 1, the device will send acknowledgment
-+	 * pattern "010" to the host when boot operation begins.
-+	 * If <send_ack> is 0, it won't.
-+	 */
-+	partition = strtol(argv[1], NULL, 10);
-+	device = argv[2];
-+
-+	if (partition < 0 || partition > 7) {
-+		fprintf(stderr, "Cannot set access to partition %d "
-+			"range [0-7] \n", partition);
-+		exit(1);
-+	}
-+
-+	fd = open(device, O_RDWR);
-+	if (fd < 0) {
-+		perror("open");
-+		exit(1);
-+	}
-+
-+	ret = read_extcsd(fd, ext_csd);
-+	if (ret) {
-+		fprintf(stderr, "Could not read EXT_CSD from %s\n", device);
-+		exit(1);
-+	}
-+
-+	value = ext_csd[EXT_CSD_PART_CONFIG];
-+
-+	/* Sanitize and set the PARTITION_ACCESS bits */
-+	value &= 0xF8;
-+	value |= partition;
-+
-+	ret = write_extcsd_value(fd, EXT_CSD_PART_CONFIG, value);
-+	if (ret) {
-+		fprintf(stderr, "Could not write 0x%02x to "
-+			"EXT_CSD[%d] in %s\n",
-+			value, EXT_CSD_PART_CONFIG, device);
-+		exit(1);
-+	}
-+	return ret;
-+}
-+
- int do_hwreset(int value, int nargs, char **argv)
- {
- 	__u8 ext_csd[512];
-diff --git a/mmc_cmds.h b/mmc_cmds.h
-index f06cc10..3ba9660 100644
---- a/mmc_cmds.h
-+++ b/mmc_cmds.h
-@@ -21,6 +21,7 @@ int do_writeprotect_get(int nargs, char **argv);
- int do_writeprotect_set(int nargs, char **argv);
- int do_disable_512B_emulation(int nargs, char **argv);
- int do_write_boot_en(int nargs, char **argv);
-+int do_write_partition_access(int nargs, char **argv);
- int do_write_bkops_en(int nargs, char **argv);
- int do_hwreset_en(int nargs, char **argv);
- int do_hwreset_dis(int nargs, char **argv);
 -- 
-1.7.10.4
+Regards,
+
+Laurent Pinchart
 
