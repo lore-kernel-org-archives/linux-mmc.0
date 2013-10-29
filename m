@@ -1,175 +1,99 @@
-From: Felipe Balbi <balbi@ti.com>
-Subject: Re: [PATCH v3 2/4] mmc: omap_hsmmc: Enable SDIO IRQ.
-Date: Tue, 29 Oct 2013 12:22:29 -0500
-Message-ID: <20131029172229.GA12193@gimli>
-References: <1380971830-21492-1-git-send-email-afenkart@gmail.com>
- <1380971830-21492-3-git-send-email-afenkart@gmail.com>
- <20131008161131.GD13128@radagast>
- <CALtMJECWCqBy4UCtuSZ7WtXaizjmgdaxW7pn5uL0ymuXPn=61A@mail.gmail.com>
-Reply-To: <balbi@ti.com>
+From: Mark Brown <broonie-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH 00/19] Enable various Renesas drivers on all ARM platforms
+Date: Tue, 29 Oct 2013 10:23:31 -0700
+Message-ID: <20131029172331.GA20251@sirena.org.uk>
+References: <1383004027-25036-1-git-send-email-laurent.pinchart+renesas@ideasonboard.com>
+	<20131029060427.GF11580@verge.net.au>
+	<20131029160449.GD16686@sirena.org.uk> <1577821.Q7gttkPE2J@avalon>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="pf9I7BMVVzbSWLtt"
-Return-path: <linux-doc-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <CALtMJECWCqBy4UCtuSZ7WtXaizjmgdaxW7pn5uL0ymuXPn=61A@mail.gmail.com>
-Sender: linux-doc-owner@vger.kernel.org
-To: Andreas Fenkart <afenkart@gmail.com>
-Cc: Felipe Balbi <balbi@ti.com>, Chris Ball <cjb@laptop.org>, Tony Lindgren <tony@atomide.com>, Grant Likely <grant.likely@secretlab.ca>, Balaji T K <balajitk@ti.com>, Daniel Mack <zonque@gmail.com>, devicetree-discuss@lists.ozlabs.org, devicetree@vger.kernel.org, linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc <linux-mmc@vger.kernel.org>, linux-omap <linux-omap@vger.kernel.org>
+Content-Type: multipart/mixed; boundary="===============5400421835194494799=="
+Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+In-Reply-To: <1577821.Q7gttkPE2J@avalon>
+List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
+List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
+Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+To: Laurent Pinchart <laurent.pinchart-ryLnwIuWjnjg/C1BVhZhaw@public.gmane.org>
+Cc: linux-fbdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Wolfram Sang <wsa-z923LK4zBo2bacvFa/9K2g@public.gmane.org>, Linus Walleij <linus.walleij-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Guennadi Liakhovetski <g.liakhovetski+renesas-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Thierry Reding <thierry.reding-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-mtd-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Laurent Pinchart <laurent.pinchart+renesas-ryLnwIuWjnjg/C1BVhZhaw@public.gmane.org>, Vinod Koul <vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, linux-sh-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Magnus Damm <magnus.damm-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Eduardo Valentin <eduardo.valentin-l0cyMroinI0@public.gmane.org>, Tomi Valkeinen <tomi.valkeinen-l0cyMroinI0@public.gmane.org>, linux-serial-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-input-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Zhang Rui <rui.zhang-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, Jean-Christophe Plagniol-Villard <plagnioj-sclMFOaUSTBWk0Htik3J/w@public.gmane.org>, linux-media-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-pwm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Samuel Ortiz <samuel-jcdQHdrhKHMdnm+yROfE0A@public.gmane.org>, linux-pm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ian Molton <ian-zdned+2MO1+9FHfhHBbuYA@public.gmane.org>, Simon Horman <horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org>, linux-arm
 List-Id: linux-mmc@vger.kernel.org
 
---pf9I7BMVVzbSWLtt
+
+--===============5400421835194494799==
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="wac7ysb48OaltWcw"
+Content-Disposition: inline
+
+
+--wac7ysb48OaltWcw
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
 Content-Transfer-Encoding: quoted-printable
 
-Hi,
+On Tue, Oct 29, 2013 at 06:05:53PM +0100, Laurent Pinchart wrote:
 
-On Tue, Oct 29, 2013 at 04:06:58PM +0100, Andreas Fenkart wrote:
-> >> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsm=
-mc.c
-> >> index 94d6dc8..53beac4 100644
-> >> --- a/drivers/mmc/host/omap_hsmmc.c
-> >> +++ b/drivers/mmc/host/omap_hsmmc.c
-> >> @@ -130,6 +130,7 @@ static void apply_clk_hack(struct device *dev)
-> >>  #define TC_EN                        (1 << 1)
-> >>  #define BWR_EN                       (1 << 4)
-> >>  #define BRR_EN                       (1 << 5)
-> >> +#define CIRQ_EN                      (1 << 8)
-> >>  #define ERR_EN                       (1 << 15)
-> >>  #define CTO_EN                       (1 << 16)
-> >>  #define CCRC_EN                      (1 << 17)
-> >> @@ -210,6 +211,10 @@ struct omap_hsmmc_host {
-> >>       int                     reqs_blocked;
-> >>       int                     use_reg;
-> >>       int                     req_in_progress;
-> >> +     int                     flags;
-> >> +#define HSMMC_RUNTIME_SUSPENDED      (1 << 0)        /* Runtime suspe=
-nded */
-> >> +#define HSMMC_SDIO_IRQ_ENABLED       (1 << 1)        /* SDIO irq enab=
-led */
-> >> +
-> >>       struct omap_hsmmc_next  next_data;
-> >>       struct  omap_mmc_platform_data  *pdata;
-> >>  };
-> >> @@ -490,27 +495,40 @@ static void omap_hsmmc_stop_clock(struct omap_hs=
-mmc_host *host)
-> >>  static void omap_hsmmc_enable_irq(struct omap_hsmmc_host *host,
-> >>                                 struct mmc_command *cmd)
-> >>  {
-> >> -     unsigned int irq_mask;
-> >> +     u32 irq_mask =3D INT_EN_MASK;
-> >> +     unsigned long flags;
-> >>
-> >>       if (host->use_dma)
-> >> -             irq_mask =3D INT_EN_MASK & ~(BRR_EN | BWR_EN);
-> >> -     else
-> >> -             irq_mask =3D INT_EN_MASK;
-> >> +             irq_mask &=3D ~(BRR_EN | BWR_EN);
-> >
-> > is this a bugfix ? should it be sent as a separate patch ?
->=20
-> maybe the u32, but otherwise it's just shorter... shall I drop it.
+> The first one is that I can't compile-test all those drivers on all=20
+> architectures. The spi-sh-msiof driver, for instance, uses io(read|write)=
+(16|
 
-no, now I saw what you did ;-)
+Which architectures are these and is there not a symbol we can depend on
+for them?
 
-> >>
-> >>       /* Disable timeout for erases */
-> >>       if (cmd->opcode =3D=3D MMC_ERASE)
-> >>               irq_mask &=3D ~DTO_EN;
-> >>
-> >> +     spin_lock_irqsave(&host->irq_lock, flags);
-> >
-> > why do you need this new locking here ? register acesses are atomic,
-> > right ? If you really do need the locking, should it be a separate patch
-> > as well ?
->=20
-> because host->flags can be accessed from irq context as well
+> 32) which are not available on all architectures. There might be other si=
+milar=20
+> problems that I can't catch, and I don't want to introduce build breakage=
+s in=20
+> the kernel.
 
-fair point :-)
+This is easy enough to handle if we do run into issues, it seems better
+to get things available than try to step through architecture by
+architecture.
 
-> >>  static void omap_hsmmc_disable_irq(struct omap_hsmmc_host *host)
-> >>  {
-> >> -     OMAP_HSMMC_WRITE(host->base, ISE, 0);
-> >> -     OMAP_HSMMC_WRITE(host->base, IE, 0);
-> >> +     u32 irq_mask =3D 0;
-> >> +     unsigned long flags;
-> >> +
-> >> +     spin_lock_irqsave(&host->irq_lock, flags);
-> >> +     /* no transfer running, need to signal cirq if */
-> >
-> > if... ?
-> >
-> >> +     if (host->flags & HSMMC_SDIO_IRQ_ENABLED)
-> >> +             irq_mask |=3D CIRQ_EN;
-> >> +     OMAP_HSMMC_WRITE(host->base, ISE, irq_mask);
-> >
-> > the whole fiddling with STAT and ISE registers look very bogus to me
-> > (even on current state before this patch). We shouldn't be clearing
-> > pending IRQ events here, right ? We could miss IRQs due to that.
->=20
-> sdio_claim_host excludes multiple users and  typical users are using sync=
-hronous
-> communication, issue a transfer, wait till it's done, then release the ho=
-st.
-> Hence when we come here, the content of ISE/STAT is a leftover from
-> the previous transfer.
-> Probably the intent here is to reset the registers in defined state,
-> maybe it wasn't needed
-> but it doesn't hurt either.
->=20
-> It's conservative... I don't like to change it, along the side of my
-> sdio irq patches.
-> If I did lots of such changes, surely I would create a regression.
->=20
-> On the other side If I was up to optimize the driver, then I would do thi=
-s.
+> The second reason is that, as the IP cores have never been used on anythi=
+ng=20
+> but SuperH and ARM, I don't like the idea of clobbering the config proces=
+s=20
+> with drivers that are useless on the target architecture. Now that we hav=
+e a=20
+> COMPILE_TEST Kconfig option, my preference would thus go to SUPERH || ARM=
+ ||=20
+> COMPILE_TEST over no dependency at all.
 
-sure, that was an unrelated comment, just exposing some possible problem
-with that approach :-)
+That's not what you did, though - you're not adding COMPILE_TEST.
 
-> >> @@ -1067,8 +1085,12 @@ static irqreturn_t omap_hsmmc_irq(int irq, void=
- *dev_id)
-> >>       int status;
-> >>
-> >>       status =3D OMAP_HSMMC_READ(host->base, STAT);
-> >> -     while (status & INT_EN_MASK && host->req_in_progress) {
-> >> -             omap_hsmmc_do_irq(host, status);
-> >> +     while (status & (INT_EN_MASK | CIRQ_EN)) {
-> >
-> > why don't enable CIRQ_EN in INT_EN_MASK directly ?
->=20
-> INT_EN_MASK is also used when bootstrapping the card in
-> send_init_stream, but there
-> you don't want to enable sdio irqs. So I would have to mask it there,
-> so this is the smaller
-> change.
-
-true, fair enough.
-
---=20
-balbi
-
---pf9I7BMVVzbSWLtt
+--wac7ysb48OaltWcw
 Content-Type: application/pgp-signature; name="signature.asc"
 Content-Description: Digital signature
 
 -----BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.15 (GNU/Linux)
+Version: GnuPG v2.0.22 (GNU/Linux)
 
-iQIcBAEBAgAGBQJSb+7VAAoJEIaOsuA1yqRE3WMP/20QG0jXuDVKwm6DYI+w61Zd
-x6SLspLlHAE8xzNEr5eWxk9BUKCEdRZi5EWhykP2sEZiHyDrFABqJ3dEPfyNwoHm
-pWVtbN0Yew4b45TC/sR4SgLfSkcq/EsPemDxyEIvtpP7ERdGVMhM1yK1IrW833Ez
-Qld7iXLFDQCwsm8Lj9rgTV0yuE6ohB5G7sSy0TGDHYe5ufmb8uLwAUVj6EpTyh22
-W+vXOm8kcDYyRZqJbKQIcN4aS7RzWq9eLLtbYBy6kq33sUg6Cq8EQ/r1T12dQEXp
-ZlwXmkb7O2Oo6B8IZNPPqM+mbLUaKRas3iyviOUJLtOGev80AVhKF4j5KCrJ6Yw2
-cTGFSfvRfgmx5cgUpICeVPR6+OHYcUH1SKmdA5oXc7UECrlv4t2ZYfZU9CFRfe7U
-sU3C/tL+J0aiOOifbdzr2slV/by2kPTe2rBMU8SsuajBq0D81JpHsVaw+AzeBZmw
-8VXs9WNfzQv06mQFUf96FR0e0xt/6hojWQBm/1I4AEgRCimOnSfUQOemBmoSBn1k
-IiKdRo3YdeEsHqYJHZWApUaFK2jKiyhN+TNV144kP4AeArV6fTCxqbCCD6UTZuS6
-5P5isKy7N5ZKMRmkqpg/jUoRn8fUU4mxF1HSQWGst/PDq3ELBA8jzPRE5Hv8jU+p
-t2z4bFHgLVkW5XmH1MVv
-=NMMz
+iQIcBAEBAgAGBQJSb+8QAAoJELSic+t+oim9cO4P/0CNsXH4RTd+b7gkEaGIE5FB
+749OqmwnlVvQPjycW5R0GiBevc7Iw9QehjcuZlE4aviXL6IWaPDr3tAOsTEuf+RZ
+mVZ8NLpDCdPHzLG9/2LPPZ3JcsOAbayMDkjlLZL3Ozf0eimalO7f5Lkuj5qPHcop
+FP8gmnlApKD9xCWamFEm+XJy7NGEMdzhuUUdJcDiAQ64sMfc40YBpdkbBH8GR/jp
+OG07H8nOdyGWfL516EBO4yK5bHrP7oIJIBFL8KXrf5aQVx4gRoqouX7OjVvBl7uY
+qZlCpOZY8aow93HdJlC/skjiKCAR33kXFmVShNF6FgDpzCkWHwQ38oU2kH0KqL+L
+YbpZeZbZ6ZW2s6je9cwlq+KZG2ngYdVYPozN+a+jyLlLMDGXKjOaHU4Ctrf25jr8
+0WU70ZaDfARfn4kJ3pRs0CTmRmAZXezVlPQZkKp57IqAlogCgzDNkIvL17DbCy1C
+HkloKaMlvlUgOBJolYNvpas7V/cRz2BB132UXoIvSI94EkXCkQJ3vVvrLmXncbG3
+TNCyyLGe5uzBeC2z5CnIoGRTmX8rMjDVsmK81f0YCCoaLMWXUc/CG6V1pRurcmdN
+bNC9b0miP+ZLoxe6enERCPcqK8YM1m/d2pMv9EzDRw6kG6Htu8T1DjxQOpHWeOTG
+aWRAEtmK2IU5cZjenCxT
+=r5xl
 -----END PGP SIGNATURE-----
 
---pf9I7BMVVzbSWLtt--
+--wac7ysb48OaltWcw--
+
+--===============5400421835194494799==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+
+
+--===============5400421835194494799==--
