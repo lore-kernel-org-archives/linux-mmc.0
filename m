@@ -1,100 +1,76 @@
 From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: Re: [PATCH 07/12] mmc: sh_mmcif: Convert to clk_prepare/unprepare
-Date: Tue, 29 Oct 2013 09:10:24 +0100 (CET)
-Message-ID: <Pine.LNX.4.64.1310290910160.8404@axis700.grange>
-References: <1383000569-8916-1-git-send-email-laurent.pinchart+renesas@ideasonboard.com>
- <1383000569-8916-8-git-send-email-laurent.pinchart+renesas@ideasonboard.com>
+Subject: Re: [PATCH 08/19] mmc: sdhi: Enable the driver on all ARM platforms
+Date: Tue, 29 Oct 2013 10:07:29 +0100 (CET)
+Message-ID: <Pine.LNX.4.64.1310290919120.8404@axis700.grange>
+References: <1383004027-25036-1-git-send-email-laurent.pinchart+renesas@ideasonboard.com>
+ <1383004027-25036-9-git-send-email-laurent.pinchart+renesas@ideasonboard.com>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.17.9]:62574 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751485Ab3J2ILA (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 29 Oct 2013 04:11:00 -0400
-In-Reply-To: <1383000569-8916-8-git-send-email-laurent.pinchart+renesas@ideasonboard.com>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Return-path: <linux-sh-owner@vger.kernel.org>
+In-Reply-To: <1383004027-25036-9-git-send-email-laurent.pinchart+renesas@ideasonboard.com>
+Sender: linux-sh-owner@vger.kernel.org
 To: Laurent Pinchart <laurent.pinchart+renesas@ideasonboard.com>
-Cc: linux-arm-kernel@lists.infradead.org, linux-sh@vger.kernel.org, Mike Turquette <mturquette@linaro.org>, Chris Ball <cjb@laptop.org>, Guennadi Liakhovetski <g.liakhovetski+renesas@gmail.com>, linux-mmc@vger.kernel.org
+Cc: linux-sh@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 
-On Mon, 28 Oct 2013, Laurent Pinchart wrote:
+Hi Laurent
 
-> Turn clk_enable() and clk_disable() calls into clk_prepare_enable() and
-> clk_disable_unprepare() to get ready for the migration to the common
-> clock framework.
+On Tue, 29 Oct 2013, Laurent Pinchart wrote:
+
+> Renesas ARM platforms are transitioning from single-platform to
+> multi-platform kernels using the new ARCH_SHMOBILE_MULTI. Make the
+> driver available on all ARM platforms to enable it on both ARCH_SHMOBILE
+> and ARCH_SHMOBILE_MULTI and increase build testing coverage.
 > 
 > Cc: Chris Ball <cjb@laptop.org>
-> Cc: Guennadi Liakhovetski <g.liakhovetski+renesas@gmail.com>
+> Cc: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+> Cc: Ian Molton <ian@mnementh.co.uk>
 > Cc: linux-mmc@vger.kernel.org
 > Signed-off-by: Laurent Pinchart <laurent.pinchart+renesas@ideasonboard.com>
+> ---
+>  drivers/mmc/host/Kconfig        | 2 +-
+>  drivers/mmc/host/tmio_mmc_dma.c | 2 +-
+>  2 files changed, 2 insertions(+), 2 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+> index 7fc5099..51957d4 100644
+> --- a/drivers/mmc/host/Kconfig
+> +++ b/drivers/mmc/host/Kconfig
+> @@ -479,7 +479,7 @@ config MMC_TMIO
+>  
+>  config MMC_SDHI
+>  	tristate "SH-Mobile SDHI SD/SDIO controller support"
+> -	depends on SUPERH || ARCH_SHMOBILE
+> +	depends on SUPERH || ARM
+>  	select MMC_TMIO_CORE
+>  	help
+>  	  This provides support for the SDHI SD/SDIO controller found in
+> diff --git a/drivers/mmc/host/tmio_mmc_dma.c b/drivers/mmc/host/tmio_mmc_dma.c
+> index 65edb4a..535bc35 100644
+> --- a/drivers/mmc/host/tmio_mmc_dma.c
+> +++ b/drivers/mmc/host/tmio_mmc_dma.c
+> @@ -28,7 +28,7 @@ void tmio_mmc_enable_dma(struct tmio_mmc_host *host, bool enable)
+>  	if (!host->chan_tx || !host->chan_rx)
+>  		return;
+>  
+> -#if defined(CONFIG_SUPERH) || defined(CONFIG_ARCH_SHMOBILE)
+> +#if defined(CONFIG_SUPERH) || defined(CONFIG_ARM)
 
-Acked-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+I'm not sure about this one. In principle DMA so far is only used on SDHI 
+with TMIO. But this #if was for a theoretical case, when a TMIO MMC IP 
+inside an MFD is also used with DMA. Bus since I had no indormation about 
+whether the CTL_DMA_ENABLE register was SDHI specific or not, I put it 
+under an #if for the time being. In any case, I don't think making it 
+#ifdef CONFIG_ARM makes much sense. We can either remove the #if 
+completely, or keep it to limit the scope of this write to sh-mobile 
+arches.
 
 Thanks
 Guennadi
 
-> ---
->  drivers/mmc/host/sh_mmcif.c | 12 ++++++------
->  1 file changed, 6 insertions(+), 6 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
-> index 36629a0..37a6c57 100644
-> --- a/drivers/mmc/host/sh_mmcif.c
-> +++ b/drivers/mmc/host/sh_mmcif.c
-> @@ -964,7 +964,7 @@ static void sh_mmcif_request(struct mmc_host *mmc, struct mmc_request *mrq)
->  
->  static int sh_mmcif_clk_update(struct sh_mmcif_host *host)
->  {
-> -	int ret = clk_enable(host->hclk);
-> +	int ret = clk_prepare_enable(host->hclk);
->  
->  	if (!ret) {
->  		host->clk = clk_get_rate(host->hclk);
-> @@ -1018,7 +1018,7 @@ static void sh_mmcif_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
->  		}
->  		if (host->power) {
->  			pm_runtime_put_sync(&host->pd->dev);
-> -			clk_disable(host->hclk);
-> +			clk_disable_unprepare(host->hclk);
->  			host->power = false;
->  			if (ios->power_mode == MMC_POWER_OFF)
->  				sh_mmcif_set_power(host, ios);
-> @@ -1466,7 +1466,7 @@ static int sh_mmcif_probe(struct platform_device *pdev)
->  
->  	mutex_init(&host->thread_lock);
->  
-> -	clk_disable(host->hclk);
-> +	clk_disable_unprepare(host->hclk);
->  	ret = mmc_add_host(mmc);
->  	if (ret < 0)
->  		goto emmcaddh;
-> @@ -1487,7 +1487,7 @@ ereqirq1:
->  ereqirq0:
->  	pm_runtime_suspend(&pdev->dev);
->  eresume:
-> -	clk_disable(host->hclk);
-> +	clk_disable_unprepare(host->hclk);
->  eclkupdate:
->  	clk_put(host->hclk);
->  eclkget:
-> @@ -1505,7 +1505,7 @@ static int sh_mmcif_remove(struct platform_device *pdev)
->  	int irq[2];
->  
->  	host->dying = true;
-> -	clk_enable(host->hclk);
-> +	clk_prepare_enable(host->hclk);
->  	pm_runtime_get_sync(&pdev->dev);
->  
->  	dev_pm_qos_hide_latency_limit(&pdev->dev);
-> @@ -1530,7 +1530,7 @@ static int sh_mmcif_remove(struct platform_device *pdev)
->  	if (irq[1] >= 0)
->  		free_irq(irq[1], host);
->  
-> -	clk_disable(host->hclk);
-> +	clk_disable_unprepare(host->hclk);
->  	mmc_free_host(host->mmc);
->  	pm_runtime_put_sync(&pdev->dev);
->  	pm_runtime_disable(&pdev->dev);
+>  	/* Switch DMA mode on or off - SuperH specific? */
+>  	sd_ctrl_write16(host, CTL_DMA_ENABLE, enable ? 2 : 0);
+>  #endif
 > -- 
 > 1.8.1.5
 > 
