@@ -1,63 +1,87 @@
-From: Artem Bityutskiy <dedekind1@gmail.com>
-Subject: Re: [PATCH 00/19] Enable various Renesas drivers on all ARM platforms
-Date: Tue, 29 Oct 2013 15:06:20 +0200
-Message-ID: <1383051980.29619.33.camel@sauron.fi.intel.com>
-References: <1383004027-25036-1-git-send-email-laurent.pinchart+renesas@ideasonboard.com>
- <Pine.LNX.4.64.1310291009121.8404@axis700.grange>
-Reply-To: dedekind1@gmail.com
+From: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
+Subject: Re: [PATCH 08/19] mmc: sdhi: Enable the driver on all ARM platforms
+Date: Tue, 29 Oct 2013 14:15:36 +0100
+Message-ID: <172884142.S8DiPq9kQF@avalon>
+References: <1383004027-25036-1-git-send-email-laurent.pinchart+renesas@ideasonboard.com> <4906973.ikaOXXr4gP@avalon> <526FA641.9090300@cogentembedded.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <Pine.LNX.4.64.1310291009121.8404@axis700.grange>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Cc: linux-fbdev@vger.kernel.org, linux-sh@vger.kernel.org, Linus Walleij <linus.walleij@linaro.org>, Guennadi Liakhovetski <g.liakhovetski+renesas@gmail.com>, Thierry Reding <thierry.reding@gmail.com>, linux-mtd@lists.infradead.org, linux-i2c@vger.kernel.org, Laurent Pinchart <laurent.pinchart+renesas@ideasonboard.com>, Vinod Koul <vinod.koul@intel.com>, Joerg Roedel <joro@8bytes.org>, Wolfram Sang <wsa@the-dreams.de>, Magnus Damm <magnus.damm@gmail.com>, Eduardo Valentin <eduardo.valentin@ti.com>, Tomi Valkeinen <tomi.valkeinen@ti.com>, linux-serial@vger.kernel.org, linux-input@vger.kernel.org, Zhang Rui <rui.zhang@intel.com>, Chris Ball <cjb@laptop.org>, Jean-Christophe Plagniol-Villard <plagnioj@jcrosoft.com>, linux-media@vger.kernel.org, linux-pwm@vger.kernel.org, Samuel Ortiz <samuel@sortiz.org>, linux-pm@vger.kernel.org, Ian Molton <ian@mnementh.co.uk>Mark Brown <b>
+Content-Transfer-Encoding: 7Bit
+Return-path: <linux-sh-owner@vger.kernel.org>
+In-Reply-To: <526FA641.9090300@cogentembedded.com>
+Sender: linux-sh-owner@vger.kernel.org
+To: Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>
+Cc: Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Laurent Pinchart <laurent.pinchart+renesas@ideasonboard.com>, linux-sh@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Tue, 2013-10-29 at 10:12 +0100, Guennadi Liakhovetski wrote:
-> Hi Laurent
-> 
-> On Tue, 29 Oct 2013, Laurent Pinchart wrote:
-> 
-> > Hello,
-> > 
-> > This patch series, based on v3.12-rc7, prepares various Renesas drivers
-> > for migration to multiplatform kernels by enabling their compilation or
-> > otherwise fixing them on all ARM platforms. The patches are pretty
-> > straightforward and are described in their commit message.
-> > 
-> > I'd like to get all these patches merged in v3.14. As they will need to go
-> > through their respective subsystems' trees, I would appreciate if all
-> > maintainers involved could notify me when they merge patches from this series
-> > in their tree to help me tracking the merge status. I don't plan to send pull
-> > requests individually for these patches, and I will repost patches
-> > individually if changes are requested during review.
-> > 
-> > If you believe the issue should be solved in a different way (for instance by
-> > removing the architecture dependency completely) please reply to the cover
-> > letter to let other maintainers chime in.
-> 
-> Exactly this was my doubt. If we let these drivers build on all ARM 
-> platforms... Maybe we should just let them build everywhere? Unless there 
-> are real ARM dependencies. Maybe you could try to remove the restriction 
-> and try to build them all on x86?
+Hi Sergei,
 
-If they have never been used on anything but ARM, why would you remove
-ARM dependencies? Just for the sake of compile-checking?
+On Tuesday 29 October 2013 16:12:49 Sergei Shtylyov wrote:
+> On 29-10-2013 13:52, Laurent Pinchart wrote:
+> >>> Renesas ARM platforms are transitioning from single-platform to
+> >>> multi-platform kernels using the new ARCH_SHMOBILE_MULTI. Make the
+> >>> driver available on all ARM platforms to enable it on both ARCH_SHMOBILE
+> >>> and ARCH_SHMOBILE_MULTI and increase build testing coverage.
+> >>> 
+> >>> Cc: Chris Ball <cjb@laptop.org>
+> >>> Cc: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+> >>> Cc: Ian Molton <ian@mnementh.co.uk>
+> >>> Cc: linux-mmc@vger.kernel.org
+> >>> Signed-off-by: Laurent Pinchart
+> >>> <laurent.pinchart+renesas@ideasonboard.com>
+> 
+> [...]
+> 
+> >>> diff --git a/drivers/mmc/host/tmio_mmc_dma.c
+> >>> b/drivers/mmc/host/tmio_mmc_dma.c index 65edb4a..535bc35 100644
+> >>> --- a/drivers/mmc/host/tmio_mmc_dma.c
+> >>> +++ b/drivers/mmc/host/tmio_mmc_dma.c
+> >>> @@ -28,7 +28,7 @@ void tmio_mmc_enable_dma(struct tmio_mmc_host *host,
+> >>> bool enable)>
+> >>> 
+> >>>   	if (!host->chan_tx || !host->chan_rx)
+> >>>   	
+> >>>   		return;
+> >>> 
+> >>> -#if defined(CONFIG_SUPERH) || defined(CONFIG_ARCH_SHMOBILE)
+> >>> +#if defined(CONFIG_SUPERH) || defined(CONFIG_ARM)
+> >> 
+> >> I'm not sure about this one. In principle DMA so far is only used on SDHI
+> >> with TMIO. But this #if was for a theoretical case, when a TMIO MMC IP
+> >> inside an MFD is also used with DMA. Bus since I had no indormation about
+> >> whether the CTL_DMA_ENABLE register was SDHI specific or not, I put it
+> >> under an #if for the time being. In any case, I don't think making it
+> >> #ifdef CONFIG_ARM makes much sense. We can either remove the #if
+> >> completely, or keep it to limit the scope of this write to sh-mobile
+> >> arches.
+> > 
+> > SUPERH || ARCH_SHMOBILE covers all the platforms this driver currently
+> > builds on. Now that we're adding ARCH_SHMOBILE_MULTI the #if needs to
+> > cover that case as well. I'm fine with limiting the CTL_DMA_ENABLE write
+> > to SUPERH only (which would modify the driver's behaviour)
+> 
+> I'm afraid that would break the driver's ability to work in DMA mode on SH-
+> Mobile SoCs.
 
-Also, if ARM dependency is ever removed, all these should become 'n' by
-default in the Kconfig, in order to make sure they do not slip into
-defconfigs of different architectures.
+So can you confirm that writing the CTL_DMA_ENABLE register is required on all 
+Renesas ARM SoCs (including SH-Mobile, R-Mobile and R-Car) ?
+
+> > or enabling it unconditionally, but I don't think adding a
+> > defined(CONFIG_ARCH_SHMOBILE_MULTI) to the above #if makes sense, unless
+> > there's a plan to add support for DMA for non-SH (including both SUPERH
+> > and ARCH_SHMOBILE) platforms.
+> 
+> Not only the plan -- I have already posted the patches to do it for R8A777x,
+> and Simon has queued them for 3.13.
+
+Could you please point me to those patches ?
+
+> >>>   	/* Switch DMA mode on or off - SuperH specific? */
+> >>>   	sd_ctrl_write16(host, CTL_DMA_ENABLE, enable ? 2 : 0);
+> >>>   
+> >>>   #endif
 
 -- 
-Best Regards,
-Artem Bityutskiy
+Regards,
+
+Laurent Pinchart
+
