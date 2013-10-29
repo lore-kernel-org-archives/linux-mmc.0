@@ -1,100 +1,67 @@
-From: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
-Subject: Re: [PATCH 08/19] mmc: sdhi: Enable the driver on all ARM platforms
-Date: Tue, 29 Oct 2013 10:52:49 +0100
-Message-ID: <4906973.ikaOXXr4gP@avalon>
-References: <1383004027-25036-1-git-send-email-laurent.pinchart+renesas@ideasonboard.com> <1383004027-25036-9-git-send-email-laurent.pinchart+renesas@ideasonboard.com> <Pine.LNX.4.64.1310290919120.8404@axis700.grange>
+From: Peter Guo <peter.guo@bayhubtech.com>
+Subject: [PATCH] mmc:sdhci fix 2 tuning issues in sdchi_exectuing_tuning
+Date: Tue, 29 Oct 2013 10:56:48 +0000
+Message-ID: <d7e7d70b354e45179cbe182d7be18d93@BN1PR04MB091.namprd04.prod.outlook.com>
+References: <97254cf7c23548fdbb3ebc10170af6a8@BL2PR04MB083.namprd04.prod.outlook.com>
+ <20131016081532.GB3416@adam-laptop>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7Bit
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from perceval.ideasonboard.com ([95.142.166.194]:34505 "EHLO
-	perceval.ideasonboard.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751998Ab3J2JwY (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 29 Oct 2013 05:52:24 -0400
-In-Reply-To: <Pine.LNX.4.64.1310290919120.8404@axis700.grange>
+Received: from mail-by2lp0241.outbound.protection.outlook.com ([207.46.163.241]:1146
+	"EHLO na01-by2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1754290Ab3J2K4v convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 29 Oct 2013 06:56:51 -0400
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Cc: Laurent Pinchart <laurent.pinchart+renesas@ideasonboard.com>, linux-sh@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Cc: Samuel Guan <samuel.guan@bayhubtech.com>, Xiaoguang Yu <xiaoguang.yu@bayhubtech.com>, Shirley Her <shirley.her@bayhubtech.com>, Yuxiang Wan <yuxiang.wan@bayhubtech.com>, Adam Lee <adam.lee@canonical.com>
 
-Hi Guennadi,
 
-On Tuesday 29 October 2013 10:07:29 Guennadi Liakhovetski wrote:
-> Hi Laurent
-> 
-> On Tue, 29 Oct 2013, Laurent Pinchart wrote:
-> > Renesas ARM platforms are transitioning from single-platform to
-> > multi-platform kernels using the new ARCH_SHMOBILE_MULTI. Make the
-> > driver available on all ARM platforms to enable it on both ARCH_SHMOBILE
-> > and ARCH_SHMOBILE_MULTI and increase build testing coverage.
-> > 
-> > Cc: Chris Ball <cjb@laptop.org>
-> > Cc: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-> > Cc: Ian Molton <ian@mnementh.co.uk>
-> > Cc: linux-mmc@vger.kernel.org
-> > Signed-off-by: Laurent Pinchart
-> > <laurent.pinchart+renesas@ideasonboard.com>
-> > ---
-> > 
-> >  drivers/mmc/host/Kconfig        | 2 +-
-> >  drivers/mmc/host/tmio_mmc_dma.c | 2 +-
-> >  2 files changed, 2 insertions(+), 2 deletions(-)
-> > 
-> > diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-> > index 7fc5099..51957d4 100644
-> > --- a/drivers/mmc/host/Kconfig
-> > +++ b/drivers/mmc/host/Kconfig
-> > @@ -479,7 +479,7 @@ config MMC_TMIO
-> > 
-> >  config MMC_SDHI
-> >  
-> >  	tristate "SH-Mobile SDHI SD/SDIO controller support"
-> > 
-> > -	depends on SUPERH || ARCH_SHMOBILE
-> > +	depends on SUPERH || ARM
-> > 
-> >  	select MMC_TMIO_CORE
-> >  	help
-> >  	
-> >  	  This provides support for the SDHI SD/SDIO controller found in
-> > 
-> > diff --git a/drivers/mmc/host/tmio_mmc_dma.c
-> > b/drivers/mmc/host/tmio_mmc_dma.c index 65edb4a..535bc35 100644
-> > --- a/drivers/mmc/host/tmio_mmc_dma.c
-> > +++ b/drivers/mmc/host/tmio_mmc_dma.c
-> > @@ -28,7 +28,7 @@ void tmio_mmc_enable_dma(struct tmio_mmc_host *host,
-> > bool enable)> 
-> >  	if (!host->chan_tx || !host->chan_rx)
-> >  	
-> >  		return;
-> > 
-> > -#if defined(CONFIG_SUPERH) || defined(CONFIG_ARCH_SHMOBILE)
-> > +#if defined(CONFIG_SUPERH) || defined(CONFIG_ARM)
-> 
-> I'm not sure about this one. In principle DMA so far is only used on SDHI
-> with TMIO. But this #if was for a theoretical case, when a TMIO MMC IP
-> inside an MFD is also used with DMA. Bus since I had no indormation about
-> whether the CTL_DMA_ENABLE register was SDHI specific or not, I put it
-> under an #if for the time being. In any case, I don't think making it
-> #ifdef CONFIG_ARM makes much sense. We can either remove the #if
-> completely, or keep it to limit the scope of this write to sh-mobile
-> arches.
+1. Tuning success at 40th time should be ok, but current code take this as
+   failed.
+2. tuning_count equals to 0 means disable retuning function, but current
+   code still do retuning.
 
-SUPERH || ARCH_SHMOBILE covers all the platforms this driver currently builds 
-on. Now that we're adding ARCH_SHMOBILE_MULTI the #if needs to cover that case 
-as well. I'm fine with limiting the CTL_DMA_ENABLE write to SUPERH only (which 
-would modify the driver's behaviour) or enabling it unconditionally, but I 
-don't think adding a defined(CONFIG_ARCH_SHMOBILE_MULTI) to the above #if 
-makes sense, unless there's a plan to add support for DMA for non-SH 
-(including both SUPERH and ARCH_SHMOBILE) platforms.
+Signed-off-by: peter.guo <peter.guo@bayhubtech.com>
+---
+ drivers/mmc/host/sdhci.c |    7 ++++---
+ 1 file changed, 4 insertions(+), 3 deletions(-)
 
-> >  	/* Switch DMA mode on or off - SuperH specific? */
-> >  	sd_ctrl_write16(host, CTL_DMA_ENABLE, enable ? 2 : 0);
-> >  
-> >  #endif
-
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 68b3cac..9a35a5e 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -1900,7 +1900,7 @@ static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
+ 	 * Issue CMD19 repeatedly till Execute Tuning is set to 0 or the number
+ 	 * of loops reaches 40 times or a timeout of 150ms occurs.
+ 	 */
+-	timeout = jiffies + msecs_to_jiffies(150);
++z	timeout = jiffies + msecs_to_jiffies(150);
+ 	do {
+ 		struct mmc_command cmd = {0};
+ 		struct mmc_request mrq = {NULL};
+@@ -1983,7 +1983,7 @@ static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
+ 	 * The Host Driver has exhausted the maximum number of loops allowed,
+ 	 * so use fixed sampling frequency.
+ 	 */
+-	if (!tuning_loop_counter || time_after(jiffies, timeout)) {
++	if ((tuning_loop_counter < 0) || time_after(jiffies, timeout)) {
+ 		ctrl &= ~SDHCI_CTRL_TUNED_CLK;
+ 		sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
+ 		err = -EIO;
+@@ -2013,7 +2013,8 @@ out:
+ 	} else {
+ 		host->flags &= ~SDHCI_NEEDS_RETUNING;
+ 		/* Reload the new initial value for timeout workqueue */
+-		if (host->tuning_mode == SDHCI_TUNING_MODE_1)
++		if ((host->tuning_mode == SDHCI_TUNING_MODE_1) &&
++				(host->tuning_count))
+ 			schedule_delayed_work(&host->tuning_timeout_work,
+ 				host->tuning_count * HZ);
+ 	}
 -- 
-Regards,
-
-Laurent Pinchart
+1.7.9.5
 
