@@ -1,138 +1,166 @@
-From: Simon Horman <horms@verge.net.au>
-Subject: Re: [PATCH 00/19] Enable various Renesas drivers on all ARM platforms
-Date: Tue, 29 Oct 2013 15:04:27 +0900
-Message-ID: <20131029060427.GF11580@verge.net.au>
-References: <1383004027-25036-1-git-send-email-laurent.pinchart+renesas@ideasonboard.com>
+From: zhangfei gao <zhangfei.gao@gmail.com>
+Subject: Re: [PATCH 2/2] mmc: dw_mmc: add dw_mmc-k3 for k3 platform
+Date: Tue, 29 Oct 2013 00:02:25 -0700
+Message-ID: <CAMj5Bkhd1+JJV88ec7UNz2sK7DpugfK3MAgFxTiEgFx9FawTsw@mail.gmail.com>
+References: <1382339639-16764-3-git-send-email-zhangfei.gao@linaro.org>
+	<1382533396-6584-1-git-send-email-zhangfei.gao@linaro.org>
+	<0D287D95-C302-4A59-98AC-C654F5AC97B4@codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-Content-Disposition: inline
-In-Reply-To: <1383004027-25036-1-git-send-email-laurent.pinchart+renesas@ideasonboard.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Laurent Pinchart <laurent.pinchart+renesas@ideasonboard.com>
-Cc: linux-fbdev@vger.kernel.org, Wolfram Sang <wsa@the-dreams.de>, Linus Walleij <linus.walleij@linaro.org>, Guennadi Liakhovetski <g.liakhovetski+renesas@gmail.com>, Thierry Reding <thierry.reding@gmail.com>, linux-mtd@lists.infradead.org, linux-i2c@vger.kernel.org, Vinod Koul <vinod.koul@intel.com>, Joerg Roedel <joro@8bytes.org>, linux-sh@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>, Eduardo Valentin <eduardo.valentin@ti.com>, Tomi Valkeinen <tomi.valkeinen@ti.com>, linux-serial@vger.kernel.org, linux-input@vger.kernel.org, Zhang Rui <rui.zhang@intel.com>, Chris Ball <cjb@laptop.org>, Jean-Christophe Plagniol-Villard <plagnioj@jcrosoft.com>, linux-media@vger.kernel.org, linux-pwm@vger.kernel.org, Samuel Ortiz <samuel@sortiz.org>, linux-pm@vger.kernel.org, Ian Molton <ian@mnementh.co.uk>, Mark Brown <broonie@kernel.org>, linux-arm-kernel@lists.infradead.org, Ser
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-ee0-f44.google.com ([74.125.83.44]:42079 "EHLO
+	mail-ee0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751476Ab3J2HC0 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 29 Oct 2013 03:02:26 -0400
+In-Reply-To: <0D287D95-C302-4A59-98AC-C654F5AC97B4@codeaurora.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Kumar Gala <galak@codeaurora.org>
+Cc: Zhangfei Gao <zhangfei.gao@linaro.org>, devicetree@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Jaehoon Chung <jh80.chung@samsung.com>, Chris Ball <cjb@laptop.org>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>, Haojian Zhuang <haojian.zhuang@linaro.org>
 
-On Tue, Oct 29, 2013 at 12:46:48AM +0100, Laurent Pinchart wrote:
-> Hello,
-> 
-> This patch series, based on v3.12-rc7, prepares various Renesas drivers
-> for migration to multiplatform kernels by enabling their compilation or
-> otherwise fixing them on all ARM platforms. The patches are pretty
-> straightforward and are described in their commit message.
-> 
-> I'd like to get all these patches merged in v3.14. As they will need to go
-> through their respective subsystems' trees, I would appreciate if all
-> maintainers involved could notify me when they merge patches from this series
-> in their tree to help me tracking the merge status. I don't plan to send pull
-> requests individually for these patches, and I will repost patches
-> individually if changes are requested during review.
-> 
-> If you believe the issue should be solved in a different way (for instance by
-> removing the architecture dependency completely) please reply to the cover
-> letter to let other maintainers chime in.
+Dear Kumar
 
-I think this is a step in a good direction.
-However, I think it would be even better if the architecture dependency was
-removed completely.
+Thanks for the careful review.
 
-> 
-> Cc: Chris Ball <cjb@laptop.org>
-> Cc: "David S. Miller" <davem@davemloft.net>
-> Cc: David Woodhouse <dwmw2@infradead.org>
-> Cc: dmaengine@vger.kernel.org
-> Cc: Dmitry Torokhov <dmitry.torokhov@gmail.com>
-> Cc: Eduardo Valentin <eduardo.valentin@ti.com>
-> Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-> Cc: Guennadi Liakhovetski <g.liakhovetski+renesas@gmail.com>
-> Cc: Ian Molton <ian@mnementh.co.uk>
-> Cc: iommu@lists.linux-foundation.org
-> Cc: Jean-Christophe Plagniol-Villard <plagnioj@jcrosoft.com>
-> Cc: Joerg Roedel <joro@8bytes.org>
-> Cc: Linus Walleij <linus.walleij@linaro.org>
-> Cc: linux-fbdev@vger.kernel.org
-> Cc: linux-i2c@vger.kernel.org
-> Cc: linux-input@vger.kernel.org
-> Cc: linux-kernel@vger.kernel.org
-> Cc: linux-media@vger.kernel.org
-> Cc: linux-mmc@vger.kernel.org
-> Cc: linux-mtd@lists.infradead.org
-> Cc: linux-pm@vger.kernel.org
-> Cc: linux-pwm@vger.kernel.org
-> Cc: linux-serial@vger.kernel.org
-> Cc: linux-spi@vger.kernel.org
-> Cc: Magnus Damm <magnus.damm@gmail.com>
-> Cc: Mark Brown <broonie@kernel.org>
-> Cc: Mauro Carvalho Chehab <m.chehab@samsung.com>
-> Cc: netdev@vger.kernel.org
-> Cc: Samuel Ortiz <samuel@sortiz.org>
-> Cc: Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>
-> Cc: Thierry Reding <thierry.reding@gmail.com>
-> Cc: Tomi Valkeinen <tomi.valkeinen@ti.com>
-> Cc: Vinod Koul <vinod.koul@intel.com>
-> Cc: Wolfram Sang <wsa@the-dreams.de>
-> Cc: Zhang Rui <rui.zhang@intel.com>
-> 
-> Laurent Pinchart (19):
->   serial: sh-sci: Enable the driver on all ARM platforms
->   DMA: shdma: Enable the driver on all ARM platforms
->   i2c: sh_mobile: Enable the driver on all ARM platforms
->   input: sh_keysc: Enable the driver on all ARM platforms
->   iommu: shmobile: Enable the driver on all ARM platforms
->   i2c: rcar: Enable the driver on all ARM platforms
->   v4l: sh_vou: Enable the driver on all ARM platforms
->   mmc: sdhi: Enable the driver on all ARM platforms
->   mmc: sh_mmcif: Enable the driver on all ARM platforms
->   mtd: sh_flctl: Enable the driver on all ARM platforms
->   net: sh_eth: Set receive alignment correctly on all ARM platforms
->   irda: sh_irda: Enable the driver on all ARM platforms
->   pinctrl: sh-pfc: Enable the driver on all ARM platforms
->   pwm: pwm-renesas-tpu: Enable the driver on all ARM platforms
->   sh: intc: Enable the driver on all ARM platforms
->   spi: sh_msiof: Enable the driver on all ARM platforms
->   spi: sh_hspi: Enable the driver on all ARM platforms
->   thermal: rcar-thermal: Enable the driver on all ARM platforms
->   fbdev: sh-mobile-lcdcfb: Enable the driver on all ARM platforms
-> 
->  drivers/dma/sh/Kconfig                | 2 +-
->  drivers/dma/sh/shdmac.c               | 6 +++---
->  drivers/i2c/busses/Kconfig            | 4 ++--
->  drivers/input/keyboard/Kconfig        | 2 +-
->  drivers/iommu/Kconfig                 | 2 +-
->  drivers/media/platform/Kconfig        | 2 +-
->  drivers/mmc/host/Kconfig              | 4 ++--
->  drivers/mmc/host/tmio_mmc_dma.c       | 2 +-
->  drivers/mtd/nand/Kconfig              | 2 +-
->  drivers/net/ethernet/renesas/sh_eth.c | 2 +-
->  drivers/net/ethernet/renesas/sh_eth.h | 2 +-
->  drivers/net/irda/Kconfig              | 2 +-
->  drivers/pinctrl/Makefile              | 2 +-
->  drivers/pinctrl/sh-pfc/Kconfig        | 2 +-
->  drivers/pwm/Kconfig                   | 2 +-
->  drivers/sh/intc/Kconfig               | 2 +-
->  drivers/spi/Kconfig                   | 4 ++--
->  drivers/thermal/Kconfig               | 2 +-
->  drivers/tty/serial/Kconfig            | 2 +-
->  drivers/video/Kconfig                 | 6 +++---
->  20 files changed, 27 insertions(+), 27 deletions(-)
-> 
-> -- 
-> Regards,
-> 
-> Laurent Pinchart
-> 
-> 
-> _______________________________________________
-> linux-arm-kernel mailing list
-> linux-arm-kernel@lists.infradead.org
-> http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
-> 
+On Sun, Oct 27, 2013 at 11:29 PM, Kumar Gala <galak@codeaurora.org> wrote:
+>
+> On Oct 23, 2013, at 8:03 AM, Zhangfei Gao wrote:
+>
+
+>> +Required Properties:
+>> +
+>> +* compatible: should be
+>> +     - "hisilicon,hi4511-dw-mshc": for controllers with hi4511
+>> +       specific extentions.
+>> +* vmmc-supply: should be vmmc used in dwmmc
+>> +* fifo-depth: should be provided if register can not provide correct value
+>> +* clken-reg: should be clock enable register and offset
+>> +* drv-sel-reg: should be driver delay select register, offset and bits
+>> +* sam-sel-reg: should be sample delay select register, offset and bits
+>> +* div-reg: should be divider register, offset and bits
+>> +* tune-table: should be array of clock tune mmc controller
+>> +
+>
+> 1. These should have vendor prefixes
+However Olof and Mark once suggested not using prefix if vector is
+internally used.
+
+Example before:
+> + - #hisilicon,clkdiv-table-cells : the number of parameters after phandle in
+> +   hisilicon,clkdiv-table property.
+> + - hisilicon,clkdiv-table : list of value that are used to configure clock
+
+Olof:
+For a binding that is your own, you don't need to prefix the properties.
+Prefixes are mostly used when adding new vendor-specific attributes to a common
+binding.
+
+Mark:
+People seem to be *very* keen on adding them for all bindings for some
+reason.
+
+> 2. why do we need the *-reg properties
+> 3. for the *-reg properties its not clear what bits means?
+
+The silicon has some limitaiton to tune the clock timing according to
+working mode,
+including driver delay, sample delay, and divider.
+If not set even the host register may not read out.
+The register in PCTRL described below,
+And one register may contains sereral usage,
+for example
+mmc0: 0x1f8: bit 0 is clock en/dis, bit 1 ~ bit 3 controls div, bit
+4~7 controls drv-sel, bit 8 ~11 controls sam-sel
+mmc1: 0x1f8: bit 12 ~~
+register, offset and bits stands for 0x1f8, start bit and how many bits.
+Is this fine?
+
+
+> 4. tune-table is not well described, what does 'clock tune' mean, why an array?
+Will change to  "tuning-table"
+It is values used for computing these div, drv, sample register,
+Also contains system clock need to be set, and output clock output
+after PCTRL control.
+
+>
+>
+>> +Example:
+>> +
+>> +  The MSHC controller node can be split into two portions, SoC specific and
+>> +  board specific portions as listed below.
+>> +
+>
+> Does dtc merge this all into a single node?  Would probably be good to have comments
+> in the example stating both that the merge into one node, and which is board and which
+> is soc.
+OK, will add comments to distinguish dtsi for soc and dts for board.
+
+>
+>> +     dwmmc_0: dwmmc0@fcd03000 {
+>> +             compatible = "hisilicon,hi4511-dw-mshc";
+>> +             reg = <0xfcd03000 0x1000>;
+>> +             interrupts = <0 16 4>;
+>> +             #address-cells = <1>;
+>> +             #size-cells = <0>;
+>> +             clocks = <&clk_sd>, <&clk_ddrc_per>;
+>> +             clock-names = "ciu", "biu";
+>> +             clken-reg = <0x1f8 0>;
+>> +             drv-sel-reg = <0x1f8 4 4>;
+>> +             sam-sel-reg = <0x1f8 8 4>;
+>> +             div-reg = <0x1f8 1 3>;
+>> +             tune-table =
+>> +             <180000000 6 6 13 13 25000000>,
+>> +             <0 0 0 0 0 0>,
+>> +             <360000000 6 4 2 0 50000000>,
+>> +             <180000000 6 4 13 13 25000000>,
+>> +             <360000000 6 4 2 0 50000000>,
+>> +             <720000000 6 1 9 4 100000000>,
+>> +             <0 0 0 0 0 0>,
+>> +             <360000000 7 1 3 0 50000000>;
+>> +     };
+>> +     dwmmc0@fcd03000 {
+>> +             num-slots = <1>;
+>> +             vmmc-supply = <&ldo12>;
+>> +             fifo-depth = <0x100>;
+>> +             supports-highspeed;
+>> +             pinctrl-names = "default";
+>> +             pinctrl-0 = <&sd_pmx_pins &sd_cfg_func1 &sd_cfg_func2>;
+>> +             slot@0 {
+>> +                     reg = <0>;
+>> +                     bus-width = <4>;
+>> +                     disable-wp;
+>> +                     cd-gpios = <&gpio10 3 0>;
+>> +             };
+>> +     };
+>> +
+>> +PCTRL:
+>> +
+>
+> should have a description
+OK.
+
+>
+>> +Required Properties:
+>> +* compatible: should be
+>> +     - "hisilicon,pctrl": Peripheral control
+>> +
+>
+> Reg is not described as a required property.
+OK.
+
+>
+>> +Example:
+>> +
+>> +     pctrl: pctrl@fca09000 {
+>> +             compatible = "hisilicon,pctrl";
+>> +             reg = <0xfca09000 0x1000>;
+>> +     };
+>
+> This should be in its own binding document, and not part of the mmc binding
+bindings/arm/hisilicon/hisilicon.txt still not been merged in another
+patch, where
+we want to push such desc as well as other system binding.
+Is it OK adding this node desc twice in two files, since mmc need such node.
+or move this desc after hisilicon.txt get merged for saving conflict?
+
+Thanks
