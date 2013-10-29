@@ -1,39 +1,44 @@
-From: Sergey Senozhatsky <sergey.senozhatsky@gmail.com>
-Subject: [PATCH -next] mmc: MMC requires GPIOLIB to build
-Date: Tue, 29 Oct 2013 16:35:20 +0300
-Message-ID: <20131029133520.GB2180@swordfish.minsk.epam.com>
+From: Artem Bityutskiy <dedekind1@gmail.com>
+Subject: Re: [PATCH 00/19] Enable various Renesas drivers on all ARM platforms
+Date: Tue, 29 Oct 2013 15:54:27 +0200
+Message-ID: <1383054867.29619.34.camel@sauron.fi.intel.com>
+References: <1383004027-25036-1-git-send-email-laurent.pinchart+renesas@ideasonboard.com>
+ <Pine.LNX.4.64.1310291009121.8404@axis700.grange>
+ <1383051980.29619.33.camel@sauron.fi.intel.com> <1844190.ApyucSZX8W@avalon>
+Reply-To: dedekind1@gmail.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-Sender: linux-kernel-owner@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <1844190.ApyucSZX8W@avalon>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
+Cc: linux-fbdev@vger.kernel.org, linux-sh@vger.kernel.org, Linus Walleij <linus.walleij@linaro.org>, Guennadi Liakhovetski <g.liakhovetski+renesas@gmail.com>, Thierry Reding <thierry.reding@gmail.com>, linux-mtd@lists.infradead.org, linux-i2c@vger.kernel.org, Laurent Pinchart <laurent.pinchart+renesas@ideasonboard.com>, "David S. Miller" <davem@davemloft.net>, Vinod Koul <vinod.koul@intel.com>, Joerg Roedel <joro@8bytes.org>, Wolfram Sang <wsa@the-dreams.de>, Magnus Damm <magnus.damm@gmail.com>, Eduardo Valentin <eduardo.valentin@ti.com>, Tomi Valkeinen <tomi.valkeinen@ti.com>, linux-serial@vger.kernel.org, linux-input@vger.kernel.org, Zhang Rui <rui.zhang@intel.com>, Chris Ball <cjb@laptop.org>, Jean-Christophe Plagniol-Villard <plagnioj@jcrosoft.com>, linux-media@vger.kernel.org, linux-pwm@vger.kernel.org, Samuel Ortiz <samuel@sortiz.org>, linux-pm@vger.kernel.org, Ian
 List-Id: linux-mmc@vger.kernel.org
 
-MMC should select GPIOLIB to build:
+On Tue, 2013-10-29 at 14:22 +0100, Laurent Pinchart wrote:
+> > Also, if ARM dependency is ever removed, all these should become 'n' by
+> > default in the Kconfig, in order to make sure they do not slip into
+> > defconfigs of different architectures.
+> 
+> The idea is that, if ARM is neither a compile-time nor runtime dependency, it 
+> should not be specified in Kconfig. However, if the IP core has never been 
+> used on anything but SuperH and ARM, I don't think clobbering the config 
+> process with drivers that can't be used on the target architecture would be a 
+> really good idea, especially now that we have a COMPILE_TEST Kconfig option. 
+> My preference does goes to SUPERH || ARM || COMPILE_TEST over no dependency at 
+> all.
 
-ERROR: "devm_gpio_request_one" [drivers/mmc/core/mmc_core.ko] undefined!
-linux-next/scripts/Makefile.modpost:90: recipe for target '__modpost' failed
-make[1]: *** [__modpost] Error 1
-Makefile:955: recipe for target 'modules' failed
+Ah, OK, I missed the entire COMPILE_TEST story.
 
-Signed-off-by: Sergey Senozhatsky <sergey.senozhatsky@gmail.com>
-
----
-
- drivers/mmc/Kconfig | 1 +
- 1 file changed, 1 insertion(+)
-
-diff --git a/drivers/mmc/Kconfig b/drivers/mmc/Kconfig
-index f2eeb38..bf44002 100644
---- a/drivers/mmc/Kconfig
-+++ b/drivers/mmc/Kconfig
-@@ -5,6 +5,7 @@
- menuconfig MMC
- 	tristate "MMC/SD/SDIO card support"
- 	depends on HAS_IOMEM
-+	select GPIOLIB
- 	help
- 	  This selects MultiMediaCard, Secure Digital and Secure
- 	  Digital I/O support.
+-- 
+Best Regards,
+Artem Bityutskiy
