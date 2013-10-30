@@ -1,42 +1,55 @@
 From: Dong Aisheng <b29396@freescale.com>
-Subject: [PATCH 4/5] mmc: sdhci-esdhc-imx: fix runtime pm unblance issue
-Date: Wed, 30 Oct 2013 22:12:17 +0800
-Message-ID: <1383142338-25062-5-git-send-email-b29396@freescale.com>
+Subject: [PATCH 2/5] mmc: sdhci-esdhc-imx: tuning bits should not be cleared during reset
+Date: Wed, 30 Oct 2013 22:12:15 +0800
+Message-ID: <1383142338-25062-3-git-send-email-b29396@freescale.com>
 References: <1383142338-25062-1-git-send-email-b29396@freescale.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from co1ehsobe005.messaging.microsoft.com ([216.32.180.188]:57617
+Received: from co1ehsobe005.messaging.microsoft.com ([216.32.180.188]:11740
 	"EHLO co1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752899Ab3J3Ob2 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 30 Oct 2013 10:31:28 -0400
+	by vger.kernel.org with ESMTP id S1752738Ab3J3Ob1 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 30 Oct 2013 10:31:27 -0400
 In-Reply-To: <1383142338-25062-1-git-send-email-b29396@freescale.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 Cc: linux-arm-kernel@lists.infradead.org, cjb@laptop.org, shawn.guo@linaro.org, s.hauer@pengutronix.de, b29396@freescale.com, wsa@the-dreams.de
 
-Since we're using common esdhc_send_command for tuning commands and
-the core code will call pm_runtime_put after command is finished.
-So we add a pm_runtime_get_sync here to get the blance.
+We should not clear tuning bits during reset or the SD3.0/eMMC4.5 card
+working on UHS mode may not work after reset since the former tuning
+settings was lost.
 
 Signed-off-by: Dong Aisheng <b29396@freescale.com>
 ---
- drivers/mmc/host/sdhci-esdhc-imx.c |    1 +
- 1 files changed, 1 insertions(+), 0 deletions(-)
+ drivers/mmc/host/sdhci-esdhc-imx.c |    7 ++++++-
+ 1 files changed, 6 insertions(+), 1 deletions(-)
 
 diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-index 0bd99eb..da8026b 100644
+index 5816585..f5e1dcf 100644
 --- a/drivers/mmc/host/sdhci-esdhc-imx.c
 +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-@@ -698,6 +698,7 @@ static void esdhc_prepare_tuning(struct sdhci_host *host, u32 val)
- 	/* FIXME: delay a bit for card to be ready for next tuning due to errors */
- 	mdelay(1);
+@@ -45,6 +45,8 @@
+ #define  ESDHC_MIX_CTRL_FBCLK_SEL	(1 << 25)
+ /* Bits 3 and 6 are not SDHCI standard definitions */
+ #define  ESDHC_MIX_CTRL_SDHCI_MASK	0xb7
++/* Tuning bits */
++#define  ESDHC_MIX_CTRL_TUNING_MASK	0x03c00000
  
-+	pm_runtime_get_sync(host->mmc->parent);
- 	reg = readl(host->ioaddr + ESDHC_MIX_CTRL);
- 	reg |= ESDHC_MIX_CTRL_EXE_TUNE | ESDHC_MIX_CTRL_SMPCLK_SEL |
- 			ESDHC_MIX_CTRL_FBCLK_SEL;
+ /* dll control register */
+ #define ESDHC_DLL_CTRL			0x60
+@@ -562,7 +564,10 @@ static void esdhc_writeb_le(struct sdhci_host *host, u8 val, int reg)
+ 		 * Do it manually here.
+ 		 */
+ 		if (esdhc_is_usdhc(imx_data)) {
+-			writel(0, host->ioaddr + ESDHC_MIX_CTRL);
++			/* the tuning bits should be kept during reset */
++			new_val = readl(host->ioaddr + ESDHC_MIX_CTRL);
++			writel(new_val & ESDHC_MIX_CTRL_TUNING_MASK,
++					host->ioaddr + ESDHC_MIX_CTRL);
+ 			imx_data->is_ddr = 0;
+ 		}
+ 	}
 -- 
 1.7.2.rc3
 
