@@ -1,183 +1,177 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [PATCH] mmc: core: Use MMC_UNSAFE_RESUME as default behavior
-Date: Wed, 30 Oct 2013 01:36:43 +0100
-Message-ID: <1383093403-4508-1-git-send-email-ulf.hansson@linaro.org>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-oa0-f47.google.com ([209.85.219.47]:40689 "EHLO
-	mail-oa0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751470Ab3J3Agr (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 29 Oct 2013 20:36:47 -0400
-Received: by mail-oa0-f47.google.com with SMTP id i1so755452oag.20
-        for <linux-mmc@vger.kernel.org>; Tue, 29 Oct 2013 17:36:47 -0700 (PDT)
-Sender: linux-mmc-owner@vger.kernel.org
+From: micky <micky_ching@realsil.com.cn>
+Subject: Re: [PATCH] mmc: rtsx: change phase searching method
+Date: Wed, 30 Oct 2013 10:05:09 +0800
+Message-ID: <52706955.4030309@realsil.com.cn>
+References: <201310300158.r9U1w90R021102@rtits1.realtek.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"; Format="flowed"
+Content-Transfer-Encoding: 7bit
+Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
+In-Reply-To: <201310300158.r9U1w90R021102@rtits1.realtek.com>
+List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
+List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel>
+List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
+List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
+List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
+Errors-To: driverdev-devel-bounces@linuxdriverproject.org
+Sender: driverdev-devel-bounces@linuxdriverproject.org
+To: micky_ching@realsil.com.cn, cjb@laptop.org, sameo@linux.intel.com
+Cc: devel@linuxdriverproject.org, =?UTF-8?B?546L54Kc?= <wei_wang@realsil.com.cn>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, gregkh@linuxfoundation.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>
 
-The reason for inventing MMC_UNSAFE_RESUME does not stand any more.
-Entering suspend without using MMC_UNSAFE_RESUME triggered an
-ungraceful power cut of the card. For no reason the card device and
-the block device queue was then also removed from the system.
+Hi Chris:
 
-To improve the situation, it is better to suspend by gracefully trying
-to cut the power to the card and to keep the card device.
+Have you accepted this patch,  I'm waiting a long time for your reply.
 
-So in the end there are no reason for actually keeping the option to
-enable MMC_UNSAFE_RESUME so we remove it.
+Best Reagards.
+micky
 
-Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
----
- drivers/mmc/core/Kconfig |   15 ---------------
- drivers/mmc/core/core.c  |   17 -----------------
- drivers/mmc/core/mmc.c   |   18 +-----------------
- drivers/mmc/core/sd.c    |   18 +-----------------
- include/linux/mmc/host.h |    5 +----
- 5 files changed, 3 insertions(+), 70 deletions(-)
-
-diff --git a/drivers/mmc/core/Kconfig b/drivers/mmc/core/Kconfig
-index 269d072..9ebee72 100644
---- a/drivers/mmc/core/Kconfig
-+++ b/drivers/mmc/core/Kconfig
-@@ -2,21 +2,6 @@
- # MMC core configuration
- #
- 
--config MMC_UNSAFE_RESUME
--	bool "Assume MMC/SD cards are non-removable (DANGEROUS)"
--	help
--	  If you say Y here, the MMC layer will assume that all cards
--	  stayed in their respective slots during the suspend. The
--	  normal behaviour is to remove them at suspend and
--	  redetecting them at resume. Breaking this assumption will
--	  in most cases result in data corruption.
--
--	  This option is usually just for embedded systems which use
--	  a MMC/SD card for rootfs. Most people should say N here.
--
--	  This option sets a default which can be overridden by the
--	  module parameter "removable=0" or "removable=1".
--
- config MMC_CLKGATE
- 	bool "MMC host clock gating"
- 	help
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 57a2b40..704fc81 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -65,23 +65,6 @@ bool use_spi_crc = 1;
- module_param(use_spi_crc, bool, 0);
- 
- /*
-- * We normally treat cards as removed during suspend if they are not
-- * known to be on a non-removable bus, to avoid the risk of writing
-- * back data to a different card after resume.  Allow this to be
-- * overridden if necessary.
-- */
--#ifdef CONFIG_MMC_UNSAFE_RESUME
--bool mmc_assume_removable;
--#else
--bool mmc_assume_removable = 1;
--#endif
--EXPORT_SYMBOL(mmc_assume_removable);
--module_param_named(removable, mmc_assume_removable, bool, 0644);
--MODULE_PARM_DESC(
--	removable,
--	"MMC/SD cards are removable and may be removed during suspend");
--
--/*
-  * Internal function. Schedule delayed work in the MMC work queue.
-  */
- static int mmc_schedule_delayed_work(struct delayed_work *work,
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index f631f5a..afa9c1e 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -1640,16 +1640,6 @@ static int mmc_power_restore(struct mmc_host *host)
- static const struct mmc_bus_ops mmc_ops = {
- 	.remove = mmc_remove,
- 	.detect = mmc_detect,
--	.suspend = NULL,
--	.resume = NULL,
--	.power_restore = mmc_power_restore,
--	.alive = mmc_alive,
--	.shutdown = mmc_shutdown,
--};
--
--static const struct mmc_bus_ops mmc_ops_unsafe = {
--	.remove = mmc_remove,
--	.detect = mmc_detect,
- 	.suspend = mmc_suspend,
- 	.resume = mmc_resume,
- 	.runtime_suspend = mmc_runtime_suspend,
-@@ -1661,13 +1651,7 @@ static const struct mmc_bus_ops mmc_ops_unsafe = {
- 
- static void mmc_attach_bus_ops(struct mmc_host *host)
- {
--	const struct mmc_bus_ops *bus_ops;
--
--	if (!mmc_card_is_removable(host))
--		bus_ops = &mmc_ops_unsafe;
--	else
--		bus_ops = &mmc_ops;
--	mmc_attach_bus(host, bus_ops);
-+	mmc_attach_bus(host, &mmc_ops);
- }
- 
- /*
-diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
-index 6f42050..7346337 100644
---- a/drivers/mmc/core/sd.c
-+++ b/drivers/mmc/core/sd.c
-@@ -1202,16 +1202,6 @@ static int mmc_sd_power_restore(struct mmc_host *host)
- static const struct mmc_bus_ops mmc_sd_ops = {
- 	.remove = mmc_sd_remove,
- 	.detect = mmc_sd_detect,
--	.suspend = NULL,
--	.resume = NULL,
--	.power_restore = mmc_sd_power_restore,
--	.alive = mmc_sd_alive,
--	.shutdown = mmc_sd_suspend,
--};
--
--static const struct mmc_bus_ops mmc_sd_ops_unsafe = {
--	.remove = mmc_sd_remove,
--	.detect = mmc_sd_detect,
- 	.runtime_suspend = mmc_sd_runtime_suspend,
- 	.runtime_resume = mmc_sd_runtime_resume,
- 	.suspend = mmc_sd_suspend,
-@@ -1223,13 +1213,7 @@ static const struct mmc_bus_ops mmc_sd_ops_unsafe = {
- 
- static void mmc_sd_attach_bus_ops(struct mmc_host *host)
- {
--	const struct mmc_bus_ops *bus_ops;
--
--	if (!mmc_card_is_removable(host))
--		bus_ops = &mmc_sd_ops_unsafe;
--	else
--		bus_ops = &mmc_sd_ops;
--	mmc_attach_bus(host, bus_ops);
-+	mmc_attach_bus(host, &mmc_sd_ops);
- }
- 
- /*
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index 99f5709..2a139b2 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -424,12 +424,9 @@ static inline int mmc_regulator_get_supply(struct mmc_host *mmc)
- 
- int mmc_pm_notify(struct notifier_block *notify_block, unsigned long, void *);
- 
--/* Module parameter */
--extern bool mmc_assume_removable;
--
- static inline int mmc_card_is_removable(struct mmc_host *host)
- {
--	return !(host->caps & MMC_CAP_NONREMOVABLE) && mmc_assume_removable;
-+	return !(host->caps & MMC_CAP_NONREMOVABLE);
- }
- 
- static inline int mmc_card_keep_power(struct mmc_host *host)
--- 
-1.7.9.5
-
+On 09/02/2013 05:16 PM, micky_ching@realsil.com.cn wrote:
+> From: Micky Ching <micky_ching@realsil.com.cn>
+>
+> The new phase searching method is more concise, and makes the code
+> easier to understand.
+>
+> Signed-off-by: Micky Ching <micky_ching@realsil.com.cn>
+> ---
+>   drivers/mmc/host/rtsx_pci_sdmmc.c |  107 +++++++++++--------------------------
+>   1 file changed, 30 insertions(+), 77 deletions(-)
+>
+> diff --git a/drivers/mmc/host/rtsx_pci_sdmmc.c b/drivers/mmc/host/rtsx_pci_sdmmc.c
+> index f981f7d..299a27c 100644
+> --- a/drivers/mmc/host/rtsx_pci_sdmmc.c
+> +++ b/drivers/mmc/host/rtsx_pci_sdmmc.c
+> @@ -32,15 +32,6 @@
+>   #include <linux/mfd/rtsx_pci.h>
+>   #include <asm/unaligned.h>
+>   
+> -/* SD Tuning Data Structure
+> - * Record continuous timing phase path
+> - */
+> -struct timing_phase_path {
+> -	int start;
+> -	int end;
+> -	int mid;
+> -	int len;
+> -};
+>   
+>   struct realtek_pci_sdmmc {
+>   	struct platform_device	*pdev;
+> @@ -497,85 +488,47 @@ static int sd_change_phase(struct realtek_pci_sdmmc *host, u8 sample_point)
+>   	return 0;
+>   }
+>   
+> -static u8 sd_search_final_phase(struct realtek_pci_sdmmc *host, u32 phase_map)
+> +static inline u32 get_phase_point(u32 phase_map, unsigned int idx)
+>   {
+> -	struct timing_phase_path path[MAX_PHASE + 1];
+> -	int i, j, cont_path_cnt;
+> -	int new_block, max_len, final_path_idx;
+> -	u8 final_phase = 0xFF;
+> +	idx &= MAX_PHASE;
+> +	return phase_map & (1 << idx);
+> +}
+> +
+> +static int get_phase_len(u32 phase_map, unsigned int idx)
+> +{
+> +	int i;
+>   
+> -	/* Parse phase_map, take it as a bit-ring */
+> -	cont_path_cnt = 0;
+> -	new_block = 1;
+> -	j = 0;
+>   	for (i = 0; i < MAX_PHASE + 1; i++) {
+> -		if (phase_map & (1 << i)) {
+> -			if (new_block) {
+> -				new_block = 0;
+> -				j = cont_path_cnt++;
+> -				path[j].start = i;
+> -				path[j].end = i;
+> -			} else {
+> -				path[j].end = i;
+> -			}
+> -		} else {
+> -			new_block = 1;
+> -			if (cont_path_cnt) {
+> -				/* Calculate path length and middle point */
+> -				int idx = cont_path_cnt - 1;
+> -				path[idx].len =
+> -					path[idx].end - path[idx].start + 1;
+> -				path[idx].mid =
+> -					path[idx].start + path[idx].len / 2;
+> -			}
+> -		}
+> +		if (get_phase_point(phase_map, idx + i) == 0)
+> +			return i;
+>   	}
+> +	return MAX_PHASE + 1;
+> +}
+>   
+> -	if (cont_path_cnt == 0) {
+> -		dev_dbg(sdmmc_dev(host), "No continuous phase path\n");
+> -		goto finish;
+> -	} else {
+> -		/* Calculate last continuous path length and middle point */
+> -		int idx = cont_path_cnt - 1;
+> -		path[idx].len = path[idx].end - path[idx].start + 1;
+> -		path[idx].mid = path[idx].start + path[idx].len / 2;
+> -	}
+> +static u8 sd_search_final_phase(struct realtek_pci_sdmmc *host, u32 phase_map)
+> +{
+> +	int start = 0, len = 0;
+> +	int start_final = 0, len_final = 0;
+> +	u8 final_phase = 0xFF;
+>   
+> -	/* Connect the first and last continuous paths if they are adjacent */
+> -	if (!path[0].start && (path[cont_path_cnt - 1].end == MAX_PHASE)) {
+> -		/* Using negative index */
+> -		path[0].start = path[cont_path_cnt - 1].start - MAX_PHASE - 1;
+> -		path[0].len += path[cont_path_cnt - 1].len;
+> -		path[0].mid = path[0].start + path[0].len / 2;
+> -		/* Convert negative middle point index to positive one */
+> -		if (path[0].mid < 0)
+> -			path[0].mid += MAX_PHASE + 1;
+> -		cont_path_cnt--;
+> +	if (phase_map == 0) {
+> +		dev_dbg(sdmmc_dev(host), "Phase: [map:%x]\n", phase_map);
+> +		return final_phase;
+>   	}
+>   
+> -	/* Choose the longest continuous phase path */
+> -	max_len = 0;
+> -	final_phase = 0;
+> -	final_path_idx = 0;
+> -	for (i = 0; i < cont_path_cnt; i++) {
+> -		if (path[i].len > max_len) {
+> -			max_len = path[i].len;
+> -			final_phase = (u8)path[i].mid;
+> -			final_path_idx = i;
+> +	while (start < MAX_PHASE + 1) {
+> +		len = get_phase_len(phase_map, start);
+> +		if (len_final < len) {
+> +			start_final = start;
+> +			len_final = len;
+>   		}
+> -
+> -		dev_dbg(sdmmc_dev(host), "path[%d].start = %d\n",
+> -				i, path[i].start);
+> -		dev_dbg(sdmmc_dev(host), "path[%d].end = %d\n",
+> -				i, path[i].end);
+> -		dev_dbg(sdmmc_dev(host), "path[%d].len = %d\n",
+> -				i, path[i].len);
+> -		dev_dbg(sdmmc_dev(host), "path[%d].mid = %d\n",
+> -				i, path[i].mid);
+> +		start += len ? len : 1;
+>   	}
+>   
+> -finish:
+> -	dev_dbg(sdmmc_dev(host), "Final chosen phase: %d\n", final_phase);
+> +	final_phase = (start_final + len_final / 2) & MAX_PHASE;
+> +	dev_dbg(sdmmc_dev(host), "Phase: [map:%x] [maxlen:%d] [final:%d]\n",
+> +		phase_map, len_final, final_phase);
+> +
+>   	return final_phase;
+>   }
+>   
