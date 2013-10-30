@@ -1,52 +1,44 @@
 From: Sachin Kamat <sachin.kamat@linaro.org>
-Subject: [PATCH Resend 3/7] mmc: sdhci-spear: Fix NULL pointer dereference
-Date: Wed, 30 Oct 2013 17:13:46 +0530
-Message-ID: <1383133430-22079-3-git-send-email-sachin.kamat@linaro.org>
+Subject: [PATCH Resend 5/7] mmc: dw_mmc: Remove redundant of_match_ptr
+Date: Wed, 30 Oct 2013 17:13:48 +0530
+Message-ID: <1383133430-22079-5-git-send-email-sachin.kamat@linaro.org>
 References: <1383133430-22079-1-git-send-email-sachin.kamat@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pa0-f43.google.com ([209.85.220.43]:38542 "EHLO
-	mail-pa0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752374Ab3J3LpP (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 30 Oct 2013 07:45:15 -0400
-Received: by mail-pa0-f43.google.com with SMTP id hz1so819311pad.2
-        for <linux-mmc@vger.kernel.org>; Wed, 30 Oct 2013 04:45:15 -0700 (PDT)
+Received: from mail-pd0-f178.google.com ([209.85.192.178]:63811 "EHLO
+	mail-pd0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753811Ab3J3LpT (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 30 Oct 2013 07:45:19 -0400
+Received: by mail-pd0-f178.google.com with SMTP id x10so853945pdj.9
+        for <linux-mmc@vger.kernel.org>; Wed, 30 Oct 2013 04:45:19 -0700 (PDT)
 In-Reply-To: <1383133430-22079-1-git-send-email-sachin.kamat@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 Cc: cjb@laptop.org, sachin.kamat@linaro.org
 
-pdata could be NULL if cd_gpio = -1. Dereference pdata only
-if it is not NULL.
+The data structure of_match_ptr() protects is always compiled in.
+Hence of_match_ptr() is not needed.
 
 Signed-off-by: Sachin Kamat <sachin.kamat@linaro.org>
-Acked-by: Viresh Kumar <viresh.kumar@linaro.org>
+Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
+Acked-by: Seungwon Jeon <tgih.jun@samsung.com>
 ---
- drivers/mmc/host/sdhci-spear.c |    8 +++-----
- 1 file changed, 3 insertions(+), 5 deletions(-)
+ drivers/mmc/host/dw_mmc-pltfm.c |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/host/sdhci-spear.c b/drivers/mmc/host/sdhci-spear.c
-index 9b6459d..af3fe87 100644
---- a/drivers/mmc/host/sdhci-spear.c
-+++ b/drivers/mmc/host/sdhci-spear.c
-@@ -84,14 +84,12 @@ static struct sdhci_plat_data *sdhci_probe_config_dt(struct platform_device *pde
- 	/* If pdata is required */
- 	if (cd_gpio != -1) {
- 		pdata = devm_kzalloc(&pdev->dev, sizeof(*pdata), GFP_KERNEL);
--		if (!pdata) {
-+		if (!pdata)
- 			dev_err(&pdev->dev, "DT: kzalloc failed\n");
--			return ERR_PTR(-ENOMEM);
--		}
-+		else
-+			pdata->card_int_gpio = cd_gpio;
- 	}
- 
--	pdata->card_int_gpio = cd_gpio;
--
- 	return pdata;
- }
- #else
+diff --git a/drivers/mmc/host/dw_mmc-pltfm.c b/drivers/mmc/host/dw_mmc-pltfm.c
+index 5c49656..2553bfb 100644
+--- a/drivers/mmc/host/dw_mmc-pltfm.c
++++ b/drivers/mmc/host/dw_mmc-pltfm.c
+@@ -123,7 +123,7 @@ static struct platform_driver dw_mci_pltfm_driver = {
+ 	.remove		= dw_mci_pltfm_remove,
+ 	.driver		= {
+ 		.name		= "dw_mmc",
+-		.of_match_table	= of_match_ptr(dw_mci_pltfm_match),
++		.of_match_table	= dw_mci_pltfm_match,
+ 		.pm		= &dw_mci_pltfm_pmops,
+ 	},
+ };
 -- 
 1.7.9.5
 
