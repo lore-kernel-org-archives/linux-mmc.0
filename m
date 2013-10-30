@@ -1,44 +1,70 @@
 From: Dong Aisheng <b29396@freescale.com>
-Subject: [PATCH 0/5] mmc: sdhci-esdhc-imx: add runtime pm support
-Date: Wed, 30 Oct 2013 22:12:13 +0800
-Message-ID: <1383142338-25062-1-git-send-email-b29396@freescale.com>
+Subject: [PATCH 1/5] mmc: sdhci-pltfm: export pltfm suspend/resume api
+Date: Wed, 30 Oct 2013 22:12:14 +0800
+Message-ID: <1383142338-25062-2-git-send-email-b29396@freescale.com>
+References: <1383142338-25062-1-git-send-email-b29396@freescale.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-db8lp0189.outbound.messaging.microsoft.com ([213.199.154.189]:49892
-	"EHLO db8outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752899Ab3J3ObS (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 30 Oct 2013 10:31:18 -0400
+Received: from tx2ehsobe005.messaging.microsoft.com ([65.55.88.15]:54761 "EHLO
+	tx2outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752899Ab3J3ObU (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 30 Oct 2013 10:31:20 -0400
+In-Reply-To: <1383142338-25062-1-git-send-email-b29396@freescale.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 Cc: linux-arm-kernel@lists.infradead.org, cjb@laptop.org, shawn.guo@linaro.org, s.hauer@pengutronix.de, b29396@freescale.com, wsa@the-dreams.de
 
-We disable root clock in runtime pm to save power.
+It is helpful for platforms code to use to elimiate duplicated code.
 
-Patch 2~4 are some fixes needed for enable runtime pm or it may
-break the UHS cards(SD3.0/eMMC4.5).
+Signed-off-by: Dong Aisheng <b29396@freescale.com>
+---
+ drivers/mmc/host/sdhci-pltfm.c |    6 ++++--
+ drivers/mmc/host/sdhci-pltfm.h |    2 ++
+ 2 files changed, 6 insertions(+), 2 deletions(-)
 
-Below are some tests result i ran which passed mmc_test tool after enable rpm:
-SDHC UHS1 on imx6q sabreauto
-eMMC 4.5 on imx6sl evk
-SDXC UHS1 on imx6sl evk
-eMMC DDR on imx6q sabresd
-SDHC on imx6q sabresd
-
-Dong Aisheng (5):
-  mmc: sdhci-pltfm: export pltfm suspend/resume api
-  mmc: sdhci-esdhc-imx: tuning bits should not be cleared during reset
-  mmc: sdhci-esdhc-imx: clear SDHCI_CTRL_EXEC_TUNING should not affect
-    other bits
-  mmc: sdhci-esdhc-imx: fix runtime pm unblance issue
-  mmc: sdhci-esdhc-imx: add runtime pm support
-
- drivers/mmc/host/sdhci-esdhc-imx.c |   85 ++++++++++++++++++++++++++++++------
- drivers/mmc/host/sdhci-pltfm.c     |    6 ++-
- drivers/mmc/host/sdhci-pltfm.h     |    2 +
- 3 files changed, 77 insertions(+), 16 deletions(-)
-
+diff --git a/drivers/mmc/host/sdhci-pltfm.c b/drivers/mmc/host/sdhci-pltfm.c
+index e2065a4..bef250e 100644
+--- a/drivers/mmc/host/sdhci-pltfm.c
++++ b/drivers/mmc/host/sdhci-pltfm.c
+@@ -237,19 +237,21 @@ int sdhci_pltfm_unregister(struct platform_device *pdev)
+ EXPORT_SYMBOL_GPL(sdhci_pltfm_unregister);
+ 
+ #ifdef CONFIG_PM
+-static int sdhci_pltfm_suspend(struct device *dev)
++int sdhci_pltfm_suspend(struct device *dev)
+ {
+ 	struct sdhci_host *host = dev_get_drvdata(dev);
+ 
+ 	return sdhci_suspend_host(host);
+ }
++EXPORT_SYMBOL_GPL(sdhci_pltfm_suspend);
+ 
+-static int sdhci_pltfm_resume(struct device *dev)
++int sdhci_pltfm_resume(struct device *dev)
+ {
+ 	struct sdhci_host *host = dev_get_drvdata(dev);
+ 
+ 	return sdhci_resume_host(host);
+ }
++EXPORT_SYMBOL_GPL(sdhci_pltfm_resume);
+ 
+ const struct dev_pm_ops sdhci_pltfm_pmops = {
+ 	.suspend	= sdhci_pltfm_suspend,
+diff --git a/drivers/mmc/host/sdhci-pltfm.h b/drivers/mmc/host/sdhci-pltfm.h
+index e15ced79..04bc248 100644
+--- a/drivers/mmc/host/sdhci-pltfm.h
++++ b/drivers/mmc/host/sdhci-pltfm.h
+@@ -111,6 +111,8 @@ static inline void *sdhci_pltfm_priv(struct sdhci_pltfm_host *host)
+ }
+ 
+ #ifdef CONFIG_PM
++extern int sdhci_pltfm_suspend(struct device *dev);
++extern int sdhci_pltfm_resume(struct device *dev);
+ extern const struct dev_pm_ops sdhci_pltfm_pmops;
+ #define SDHCI_PLTFM_PMOPS (&sdhci_pltfm_pmops)
+ #else
 -- 
 1.7.2.rc3
 
