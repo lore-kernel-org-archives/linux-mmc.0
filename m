@@ -1,92 +1,65 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2 2/7] mmc: sh_mmcif: Convert to PM macros when defining dev_pm_ops
-Date: Wed, 30 Oct 2013 23:29:02 +0100
-Message-ID: <CAPDyKFo=QtTqZGg8XxOJc7vS2zQ5=UC5O2aXXv0OR_M1VR7ftg@mail.gmail.com>
-References: <1382450846-17144-1-git-send-email-ulf.hansson@linaro.org>
-	<1382450846-17144-3-git-send-email-ulf.hansson@linaro.org>
-	<Pine.LNX.4.64.1310302313270.25391@axis700.grange>
+Subject: Re: [PATCH v2 6/6] mmc: core: mmc DDR mode should not depend on UHS_DDR50
+Date: Wed, 30 Oct 2013 23:36:36 +0100
+Message-ID: <CAPDyKFpu-HEZ_YRX-2-g1vqww3v9-NObrBvg6pYnKbtn7ZyN8Q@mail.gmail.com>
+References: <1383142193-24950-1-git-send-email-b29396@freescale.com>
+	<1383142193-24950-7-git-send-email-b29396@freescale.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qa0-f45.google.com ([209.85.216.45]:43627 "EHLO
-	mail-qa0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751899Ab3J3W3E (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 30 Oct 2013 18:29:04 -0400
-Received: by mail-qa0-f45.google.com with SMTP id ii20so4106026qab.18
-        for <linux-mmc@vger.kernel.org>; Wed, 30 Oct 2013 15:29:03 -0700 (PDT)
-In-Reply-To: <Pine.LNX.4.64.1310302313270.25391@axis700.grange>
+Received: from mail-qc0-f169.google.com ([209.85.216.169]:40750 "EHLO
+	mail-qc0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751632Ab3J3Wgh (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 30 Oct 2013 18:36:37 -0400
+Received: by mail-qc0-f169.google.com with SMTP id x12so1221282qcv.14
+        for <linux-mmc@vger.kernel.org>; Wed, 30 Oct 2013 15:36:36 -0700 (PDT)
+In-Reply-To: <1383142193-24950-7-git-send-email-b29396@freescale.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>
+To: Dong Aisheng <b29396@freescale.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Chris Ball <cjb@laptop.org>, Shawn Guo <shawn.guo@linaro.org>, Sascha Hauer <s.hauer@pengutronix.de>, wsa@the-dreams.de
 
-On 30 October 2013 23:18, Guennadi Liakhovetski <g.liakhovetski@gmx.de> wrote:
-> Hi Ulf
+On 30 October 2013 15:09, Dong Aisheng <b29396@freescale.com> wrote:
+> The MMC_CAP_UHS_DDR50 must work on 1.8v.
+> However, the eMMC DDR mode can work on either 1.8v or 3.3v and
+> should not depend on UHS_DDR50.
+> So get rid of this limitation to let controller without 1.8v
+> signal voltage support can also work for eMMC DDR mode if it claims.
 >
-> On Tue, 22 Oct 2013, Ulf Hansson wrote:
->
->> Use SET_SYSTEM_SLEEP_PM_OPS to simplify code.
->>
->> Cc: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
->> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
->> ---
->>  drivers/mmc/host/sh_mmcif.c |   10 +++-------
->>  1 file changed, 3 insertions(+), 7 deletions(-)
->>
->> diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
->> index 6bffebe..32bc412 100644
->> --- a/drivers/mmc/host/sh_mmcif.c
->> +++ b/drivers/mmc/host/sh_mmcif.c
->> @@ -1538,7 +1538,7 @@ static int sh_mmcif_remove(struct platform_device *pdev)
->>       return 0;
->>  }
->>
->> -#ifdef CONFIG_PM
->> +#ifdef CONFIG_PM_SLEEP
->>  static int sh_mmcif_suspend(struct device *dev)
->>  {
->>       struct sh_mmcif_host *host = dev_get_drvdata(dev);
->> @@ -1552,10 +1552,7 @@ static int sh_mmcif_resume(struct device *dev)
->>  {
->>       return 0;
->>  }
->> -#else
->> -#define sh_mmcif_suspend     NULL
->> -#define sh_mmcif_resume              NULL
->> -#endif       /* CONFIG_PM */
->> +#endif
->>
->>  static const struct of_device_id mmcif_of_match[] = {
->>       { .compatible = "renesas,sh-mmcif" },
->> @@ -1564,8 +1561,7 @@ static const struct of_device_id mmcif_of_match[] = {
->>  MODULE_DEVICE_TABLE(of, mmcif_of_match);
->>
->>  static const struct dev_pm_ops sh_mmcif_dev_pm_ops = {
->> -     .suspend = sh_mmcif_suspend,
->> -     .resume = sh_mmcif_resume,
->> +     SET_SYSTEM_SLEEP_PM_OPS(sh_mmcif_suspend, sh_mmcif_resume)
->>  };
->
-> You could then even use SIMPLE_DEV_PM_OPS().
+> Signed-off-by: Dong Aisheng <b29396@freescale.com>
 
-Well, since a later patch in this patchset make use of
-"SET_RUNTIME_PM_OPS", using SIMPLE_DEV_PM_OPS is not meaningful I
-think.
+Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
 
-Kind regards
-Ulf Hansson
-
->
-> Thanks
-> Guennadi
->
->>
->>  static struct platform_driver sh_mmcif_driver = {
->> --
->> 1.7.9.5
->>
->
 > ---
-> Guennadi Liakhovetski, Ph.D.
-> Freelance Open-Source Software Developer
-> http://www.open-technology.de/
+>  drivers/mmc/core/mmc.c |    8 ++------
+>  1 files changed, 2 insertions(+), 6 deletions(-)
+>
+> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+> index f631f5a..98e9eb0 100644
+> --- a/drivers/mmc/core/mmc.c
+> +++ b/drivers/mmc/core/mmc.c
+> @@ -1119,14 +1119,10 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+>          */
+>         if (mmc_card_highspeed(card)) {
+>                 if ((card->ext_csd.card_type & EXT_CSD_CARD_TYPE_DDR_1_8V)
+> -                       && ((host->caps & (MMC_CAP_1_8V_DDR |
+> -                            MMC_CAP_UHS_DDR50))
+> -                               == (MMC_CAP_1_8V_DDR | MMC_CAP_UHS_DDR50)))
+> +                       && (host->caps & MMC_CAP_1_8V_DDR))
+>                                 ddr = MMC_1_8V_DDR_MODE;
+>                 else if ((card->ext_csd.card_type & EXT_CSD_CARD_TYPE_DDR_1_2V)
+> -                       && ((host->caps & (MMC_CAP_1_2V_DDR |
+> -                            MMC_CAP_UHS_DDR50))
+> -                               == (MMC_CAP_1_2V_DDR | MMC_CAP_UHS_DDR50)))
+> +                       && (host->caps & MMC_CAP_1_2V_DDR))
+>                                 ddr = MMC_1_2V_DDR_MODE;
+>         }
+>
+> --
+> 1.7.2.rc3
+>
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
