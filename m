@@ -1,81 +1,44 @@
-From: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
-Subject: Re: [PATCH] mmc: sdhi: Enable the driver on all ARM platforms
-Date: Wed, 30 Oct 2013 12:23:51 +0100
-Message-ID: <1385571.1fe3ciztcs@avalon>
-References: <1383086274-11049-9-git-send-email-laurent.pinchart+renesas@ideasonboard.com> <1383132190-5285-1-git-send-email-laurent.pinchart+renesas@ideasonboard.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7Bit
+From: Laurent Pinchart <laurent.pinchart+renesas@ideasonboard.com>
+Subject: [PATCH v3 2/3] mmc: sh_mmcif: Fix compilation warning on 64-bit platforms
+Date: Wed, 30 Oct 2013 12:34:52 +0100
+Message-ID: <1383132893-27008-2-git-send-email-laurent.pinchart+renesas@ideasonboard.com>
+References: <1383086274-11049-10-git-send-email-laurent.pinchart+renesas@ideasonboard.com>
+ <1383132893-27008-1-git-send-email-laurent.pinchart+renesas@ideasonboard.com>
 Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <1383132190-5285-1-git-send-email-laurent.pinchart+renesas@ideasonboard.com>
+In-Reply-To: <1383132893-27008-1-git-send-email-laurent.pinchart+renesas@ideasonboard.com>
 Sender: linux-sh-owner@vger.kernel.org
-To: Laurent Pinchart <laurent.pinchart+renesas@ideasonboard.com>
-Cc: linux-sh@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Chris Ball <cjb@laptop.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Ian Molton <ian@mnementh.co.uk>, linux-mmc@vger.kernel.org
+To: linux-sh@vger.kernel.org
+Cc: linux-arm-kernel@lists.infradead.org, Chris Ball <cjb@laptop.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-The subject line should have read 'PATCH v3', my bad.
+From: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
 
-On Wednesday 30 October 2013 12:23:10 Laurent Pinchart wrote:
-> Renesas ARM platforms are transitioning from single-platform to
-> multi-platform kernels using the new ARCH_SHMOBILE_MULTI. Make the
-> driver available on all ARM platforms to enable it on both ARCH_SHMOBILE
-> and ARCH_SHMOBILE_MULTI and increase build testing coverage.
-> 
-> Don't enable COMPILE_TEST support as the driver doesn't compile on x86
-> due (possibly among others) to missing readsw/writesw I/O accessors.
-> 
-> Whether the CTL_DMA_ENABLE register is part of the standard TMIO
-> controller or is Renesas-specific is unknown and impossible to test as
-> we have no current or planned TMIO DMA users other than SUPERH and
-> ARCH_SHMOBILE. Writing to the register is thus conditionally compiled
-> for SUPERH and ARCH_SHMOBILE only. Adding ARCH_SHMOBILE_MULTI to the
-> list would extend this to multiarch kernels, but would break the driver
-> for non-shmobile platforms if the register is Renesas-specific. We can
-> thus get rid of the conditional compilation completely without
-> introducing any further issue, and let future non-Renesas users deal
-> with the situation if it turns out to be a the problem.
-> 
-> Cc: Chris Ball <cjb@laptop.org>
-> Cc: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-> Cc: Ian Molton <ian@mnementh.co.uk>
-> Cc: linux-mmc@vger.kernel.org
-> Signed-off-by: Laurent Pinchart <laurent.pinchart+renesas@ideasonboard.com>
-> ---
->  drivers/mmc/host/Kconfig        | 2 +-
->  drivers/mmc/host/tmio_mmc_dma.c | 4 +---
->  2 files changed, 2 insertions(+), 4 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-> index 7fc5099..51957d4 100644
-> --- a/drivers/mmc/host/Kconfig
-> +++ b/drivers/mmc/host/Kconfig
-> @@ -479,7 +479,7 @@ config MMC_TMIO
-> 
->  config MMC_SDHI
->  	tristate "SH-Mobile SDHI SD/SDIO controller support"
-> -	depends on SUPERH || ARCH_SHMOBILE
-> +	depends on SUPERH || ARM
->  	select MMC_TMIO_CORE
->  	help
->  	  This provides support for the SDHI SD/SDIO controller found in
-> diff --git a/drivers/mmc/host/tmio_mmc_dma.c
-> b/drivers/mmc/host/tmio_mmc_dma.c index 65edb4a..8a4fd2d 100644
-> --- a/drivers/mmc/host/tmio_mmc_dma.c
-> +++ b/drivers/mmc/host/tmio_mmc_dma.c
-> @@ -28,10 +28,8 @@ void tmio_mmc_enable_dma(struct tmio_mmc_host *host, bool
-> enable) if (!host->chan_tx || !host->chan_rx)
->  		return;
-> 
-> -#if defined(CONFIG_SUPERH) || defined(CONFIG_ARCH_SHMOBILE)
-> -	/* Switch DMA mode on or off - SuperH specific? */
-> +	/* Switch DMA mode on or off. This might be Renesas-specific. */
->  	sd_ctrl_write16(host, CTL_DMA_ENABLE, enable ? 2 : 0);
-> -#endif
->  }
-> 
->  void tmio_mmc_abort_dma(struct tmio_mmc_host *host)
+Casting an integer to a void * generates a "cast to pointer from integer
+of different size" warning. Cast the integer to an unsigned long first
+to fix it.
+
+Signed-off-by: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
+---
+ drivers/mmc/host/sh_mmcif.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+I've kept this change separate from 1/3 to show why 1/3 and 2/3 are required
+to fix a compilation warning before applying 3/3. Feel free to squash 1/3 and
+2/3 if preferred.
+
+diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
+index 92b9273..1f1438f 100644
+--- a/drivers/mmc/host/sh_mmcif.c
++++ b/drivers/mmc/host/sh_mmcif.c
+@@ -403,7 +403,7 @@ sh_mmcif_request_dma_one(struct sh_mmcif_host *host,
+ 		slave_id = 0;
+ 
+ 	chan = dma_request_slave_channel_compat(mask, shdma_chan_filter,
+-				(void *)slave_id, &host->pd->dev,
++				(void *)(unsigned long)slave_id, &host->pd->dev,
+ 				direction == DMA_MEM_TO_DEV ? "tx" : "rx");
+ 
+ 	dev_dbg(&host->pd->dev, "%s: %s: got channel %p\n", __func__,
 -- 
-Regards,
-
-Laurent Pinchart
+1.8.1.5
 
