@@ -1,47 +1,44 @@
-From: Laurent Pinchart <laurent.pinchart+renesas@ideasonboard.com>
-Subject: [PATCH v3 3/3] mmc: sh_mmcif: Enable the driver on all ARM platforms
-Date: Wed, 30 Oct 2013 12:34:53 +0100
-Message-ID: <1383132893-27008-3-git-send-email-laurent.pinchart+renesas@ideasonboard.com>
-References: <1383086274-11049-10-git-send-email-laurent.pinchart+renesas@ideasonboard.com>
- <1383132893-27008-1-git-send-email-laurent.pinchart+renesas@ideasonboard.com>
+From: Sachin Kamat <sachin.kamat@linaro.org>
+Subject: [PATCH Resend 7/7] mmc: dw_mmc: Add missing description
+Date: Wed, 30 Oct 2013 17:13:50 +0530
+Message-ID: <1383133430-22079-7-git-send-email-sachin.kamat@linaro.org>
+References: <1383133430-22079-1-git-send-email-sachin.kamat@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from perceval.ideasonboard.com ([95.142.166.194]:42841 "EHLO
-	perceval.ideasonboard.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753613Ab3J3Lef (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 30 Oct 2013 07:34:35 -0400
-In-Reply-To: <1383132893-27008-1-git-send-email-laurent.pinchart+renesas@ideasonboard.com>
+Received: from mail-pb0-f42.google.com ([209.85.160.42]:40916 "EHLO
+	mail-pb0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753302Ab3J3LpY (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 30 Oct 2013 07:45:24 -0400
+Received: by mail-pb0-f42.google.com with SMTP id jt11so1274827pbb.1
+        for <linux-mmc@vger.kernel.org>; Wed, 30 Oct 2013 04:45:24 -0700 (PDT)
+In-Reply-To: <1383133430-22079-1-git-send-email-sachin.kamat@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-sh@vger.kernel.org
-Cc: linux-arm-kernel@lists.infradead.org, Chris Ball <cjb@laptop.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: cjb@laptop.org, sachin.kamat@linaro.org
 
-Renesas ARM platforms are transitioning from single-platform to
-multi-platform kernels using the new ARCH_SHMOBILE_MULTI. Make the
-driver available on all ARM platforms to enable it on both ARCH_SHMOBILE
-and ARCH_SHMOBILE_MULTI, and increase build testing coverage with
-COMPILE_TEST.
+Commit 0976f16d ("mmc: dw_mmc: add support tuning scheme") introduced
+the execute_tuning hook but did not add its description for kernel docs.
+Update the same.
 
-Cc: Chris Ball <cjb@laptop.org>
-Cc: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Cc: linux-mmc@vger.kernel.org
-Signed-off-by: Laurent Pinchart <laurent.pinchart+renesas@ideasonboard.com>
+Signed-off-by: Sachin Kamat <sachin.kamat@linaro.org>
+Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
+Acked-by: Seungwon Jeon <tgih.jun@samsung.com>
 ---
- drivers/mmc/host/Kconfig | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ drivers/mmc/host/dw_mmc.h |    1 +
+ 1 file changed, 1 insertion(+)
 
-diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-index 51957d4..4ba225f 100644
---- a/drivers/mmc/host/Kconfig
-+++ b/drivers/mmc/host/Kconfig
-@@ -588,7 +588,7 @@ config MMC_DW_PCI
- 
- config MMC_SH_MMCIF
- 	tristate "SuperH Internal MMCIF support"
--	depends on MMC_BLOCK && (SUPERH || ARCH_SHMOBILE)
-+	depends on MMC_BLOCK && (SUPERH || ARM || COMPILE_TEST)
- 	help
- 	  This selects the MMC Host Interface controller (MMCIF).
- 
+diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
+index 6bf24ab..306451f 100644
+--- a/drivers/mmc/host/dw_mmc.h
++++ b/drivers/mmc/host/dw_mmc.h
+@@ -244,6 +244,7 @@ struct dw_mci_tuning_data {
+  * @prepare_command: handle CMD register extensions.
+  * @set_ios: handle bus specific extensions.
+  * @parse_dt: parse implementation specific device tree properties.
++ * @execute_tuning: implementation specific tuning procedure.
+  *
+  * Provide controller implementation specific extensions. The usage of this
+  * data structure is fully optional and usage of each member in this structure
 -- 
-1.8.1.5
+1.7.9.5
 
