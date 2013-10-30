@@ -1,52 +1,52 @@
 From: Sachin Kamat <sachin.kamat@linaro.org>
-Subject: [PATCH Resend 2/7] mmc: wmt-sdmmc: Fix NULL pointer dereference
-Date: Wed, 30 Oct 2013 17:13:45 +0530
-Message-ID: <1383133430-22079-2-git-send-email-sachin.kamat@linaro.org>
+Subject: [PATCH Resend 3/7] mmc: sdhci-spear: Fix NULL pointer dereference
+Date: Wed, 30 Oct 2013 17:13:46 +0530
+Message-ID: <1383133430-22079-3-git-send-email-sachin.kamat@linaro.org>
 References: <1383133430-22079-1-git-send-email-sachin.kamat@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pb0-f51.google.com ([209.85.160.51]:54748 "EHLO
-	mail-pb0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752727Ab3J3LpN (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 30 Oct 2013 07:45:13 -0400
-Received: by mail-pb0-f51.google.com with SMTP id wz7so1254943pbc.38
-        for <linux-mmc@vger.kernel.org>; Wed, 30 Oct 2013 04:45:12 -0700 (PDT)
+Received: from mail-pa0-f43.google.com ([209.85.220.43]:38542 "EHLO
+	mail-pa0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752374Ab3J3LpP (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 30 Oct 2013 07:45:15 -0400
+Received: by mail-pa0-f43.google.com with SMTP id hz1so819311pad.2
+        for <linux-mmc@vger.kernel.org>; Wed, 30 Oct 2013 04:45:15 -0700 (PDT)
 In-Reply-To: <1383133430-22079-1-git-send-email-sachin.kamat@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 Cc: cjb@laptop.org, sachin.kamat@linaro.org
 
-'of_id' is dereferenced before NULL pointer check. Move it to
-after the check.
+pdata could be NULL if cd_gpio = -1. Dereference pdata only
+if it is not NULL.
 
 Signed-off-by: Sachin Kamat <sachin.kamat@linaro.org>
-Acked-by: Tony Prisk <linux@prisktech.co.nz>
+Acked-by: Viresh Kumar <viresh.kumar@linaro.org>
 ---
- drivers/mmc/host/wmt-sdmmc.c |    4 +++-
- 1 file changed, 3 insertions(+), 1 deletion(-)
+ drivers/mmc/host/sdhci-spear.c |    8 +++-----
+ 1 file changed, 3 insertions(+), 5 deletions(-)
 
-diff --git a/drivers/mmc/host/wmt-sdmmc.c b/drivers/mmc/host/wmt-sdmmc.c
-index e902ed7..498d1f7 100644
---- a/drivers/mmc/host/wmt-sdmmc.c
-+++ b/drivers/mmc/host/wmt-sdmmc.c
-@@ -757,7 +757,7 @@ static int wmt_mci_probe(struct platform_device *pdev)
- 	struct device_node *np = pdev->dev.of_node;
- 	const struct of_device_id *of_id =
- 		of_match_device(wmt_mci_dt_ids, &pdev->dev);
--	const struct wmt_mci_caps *wmt_caps = of_id->data;
-+	const struct wmt_mci_caps *wmt_caps;
- 	int ret;
- 	int regular_irq, dma_irq;
- 
-@@ -766,6 +766,8 @@ static int wmt_mci_probe(struct platform_device *pdev)
- 		return -EFAULT;
+diff --git a/drivers/mmc/host/sdhci-spear.c b/drivers/mmc/host/sdhci-spear.c
+index 9b6459d..af3fe87 100644
+--- a/drivers/mmc/host/sdhci-spear.c
++++ b/drivers/mmc/host/sdhci-spear.c
+@@ -84,14 +84,12 @@ static struct sdhci_plat_data *sdhci_probe_config_dt(struct platform_device *pde
+ 	/* If pdata is required */
+ 	if (cd_gpio != -1) {
+ 		pdata = devm_kzalloc(&pdev->dev, sizeof(*pdata), GFP_KERNEL);
+-		if (!pdata) {
++		if (!pdata)
+ 			dev_err(&pdev->dev, "DT: kzalloc failed\n");
+-			return ERR_PTR(-ENOMEM);
+-		}
++		else
++			pdata->card_int_gpio = cd_gpio;
  	}
  
-+	wmt_caps = of_id->data;
-+
- 	if (!np) {
- 		dev_err(&pdev->dev, "Missing SDMMC description in devicetree\n");
- 		return -EFAULT;
+-	pdata->card_int_gpio = cd_gpio;
+-
+ 	return pdata;
+ }
+ #else
 -- 
 1.7.9.5
 
