@@ -1,76 +1,100 @@
 From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: Re: [PATCH v2 2/7] mmc: sh_mmcif: Convert to PM macros when defining
- dev_pm_ops
-Date: Wed, 30 Oct 2013 23:18:16 +0100 (CET)
-Message-ID: <Pine.LNX.4.64.1310302313270.25391@axis700.grange>
+Subject: Re: [PATCH v2 3/7] mmc: sh_mmcif: Convert to clk_prepare|unprepare
+Date: Wed, 30 Oct 2013 23:21:10 +0100 (CET)
+Message-ID: <Pine.LNX.4.64.1310302319180.25391@axis700.grange>
 References: <1382450846-17144-1-git-send-email-ulf.hansson@linaro.org>
- <1382450846-17144-3-git-send-email-ulf.hansson@linaro.org>
+ <1382450846-17144-4-git-send-email-ulf.hansson@linaro.org>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.126.187]:56546 "EHLO
+Received: from moutng.kundenserver.de ([212.227.17.8]:61351 "EHLO
 	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753174Ab3J3WSU (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 30 Oct 2013 18:18:20 -0400
-In-Reply-To: <1382450846-17144-3-git-send-email-ulf.hansson@linaro.org>
+	with ESMTP id S1751306Ab3J3WVP (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 30 Oct 2013 18:21:15 -0400
+In-Reply-To: <1382450846-17144-4-git-send-email-ulf.hansson@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
-
-Hi Ulf
+Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Laurent Pinchart <laurent.pinchart@ideasonboard.com>
 
 On Tue, 22 Oct 2013, Ulf Hansson wrote:
 
-> Use SET_SYSTEM_SLEEP_PM_OPS to simplify code.
+> Previously only clk_enable|disable were being used. Adapt properly
+> to the clock API, by also using clk_prepare|unprepare.
 > 
 > Cc: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 > Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
-> ---
->  drivers/mmc/host/sh_mmcif.c |   10 +++-------
->  1 file changed, 3 insertions(+), 7 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
-> index 6bffebe..32bc412 100644
-> --- a/drivers/mmc/host/sh_mmcif.c
-> +++ b/drivers/mmc/host/sh_mmcif.c
-> @@ -1538,7 +1538,7 @@ static int sh_mmcif_remove(struct platform_device *pdev)
->  	return 0;
->  }
->  
-> -#ifdef CONFIG_PM
-> +#ifdef CONFIG_PM_SLEEP
->  static int sh_mmcif_suspend(struct device *dev)
->  {
->  	struct sh_mmcif_host *host = dev_get_drvdata(dev);
-> @@ -1552,10 +1552,7 @@ static int sh_mmcif_resume(struct device *dev)
->  {
->  	return 0;
->  }
-> -#else
-> -#define sh_mmcif_suspend	NULL
-> -#define sh_mmcif_resume		NULL
-> -#endif	/* CONFIG_PM */
-> +#endif
->  
->  static const struct of_device_id mmcif_of_match[] = {
->  	{ .compatible = "renesas,sh-mmcif" },
-> @@ -1564,8 +1561,7 @@ static const struct of_device_id mmcif_of_match[] = {
->  MODULE_DEVICE_TABLE(of, mmcif_of_match);
->  
->  static const struct dev_pm_ops sh_mmcif_dev_pm_ops = {
-> -	.suspend = sh_mmcif_suspend,
-> -	.resume = sh_mmcif_resume,
-> +	SET_SYSTEM_SLEEP_PM_OPS(sh_mmcif_suspend, sh_mmcif_resume)
->  };
 
-You could then even use SIMPLE_DEV_PM_OPS().
+Acked-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+
+Note, that Laurent has later submitted a (simingly) identical patch, but 
+since yours was the first one, we should use this one really.
 
 Thanks
 Guennadi
 
+> ---
+>  drivers/mmc/host/sh_mmcif.c |   12 ++++++------
+>  1 file changed, 6 insertions(+), 6 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
+> index 32bc412..d032b08 100644
+> --- a/drivers/mmc/host/sh_mmcif.c
+> +++ b/drivers/mmc/host/sh_mmcif.c
+> @@ -964,7 +964,7 @@ static void sh_mmcif_request(struct mmc_host *mmc, struct mmc_request *mrq)
 >  
->  static struct platform_driver sh_mmcif_driver = {
+>  static int sh_mmcif_clk_update(struct sh_mmcif_host *host)
+>  {
+> -	int ret = clk_enable(host->hclk);
+> +	int ret = clk_prepare_enable(host->hclk);
+>  
+>  	if (!ret) {
+>  		host->clk = clk_get_rate(host->hclk);
+> @@ -1018,7 +1018,7 @@ static void sh_mmcif_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+>  		}
+>  		if (host->power) {
+>  			pm_runtime_put_sync(&host->pd->dev);
+> -			clk_disable(host->hclk);
+> +			clk_disable_unprepare(host->hclk);
+>  			host->power = false;
+>  			if (ios->power_mode == MMC_POWER_OFF)
+>  				sh_mmcif_set_power(host, ios);
+> @@ -1466,7 +1466,7 @@ static int sh_mmcif_probe(struct platform_device *pdev)
+>  
+>  	mutex_init(&host->thread_lock);
+>  
+> -	clk_disable(host->hclk);
+> +	clk_disable_unprepare(host->hclk);
+>  	ret = mmc_add_host(mmc);
+>  	if (ret < 0)
+>  		goto emmcaddh;
+> @@ -1487,7 +1487,7 @@ ereqirq1:
+>  ereqirq0:
+>  	pm_runtime_suspend(&pdev->dev);
+>  eresume:
+> -	clk_disable(host->hclk);
+> +	clk_disable_unprepare(host->hclk);
+>  eclkupdate:
+>  	clk_put(host->hclk);
+>  eclkget:
+> @@ -1505,7 +1505,7 @@ static int sh_mmcif_remove(struct platform_device *pdev)
+>  	int irq[2];
+>  
+>  	host->dying = true;
+> -	clk_enable(host->hclk);
+> +	clk_prepare_enable(host->hclk);
+>  	pm_runtime_get_sync(&pdev->dev);
+>  
+>  	dev_pm_qos_hide_latency_limit(&pdev->dev);
+> @@ -1530,7 +1530,7 @@ static int sh_mmcif_remove(struct platform_device *pdev)
+>  	if (irq[1] >= 0)
+>  		free_irq(irq[1], host);
+>  
+> -	clk_disable(host->hclk);
+> +	clk_disable_unprepare(host->hclk);
+>  	mmc_free_host(host->mmc);
+>  	pm_runtime_put_sync(&pdev->dev);
+>  	pm_runtime_disable(&pdev->dev);
 > -- 
 > 1.7.9.5
 > 
