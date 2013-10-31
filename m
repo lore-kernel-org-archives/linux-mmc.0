@@ -1,88 +1,83 @@
-From: Magnus Damm <magnus.damm@gmail.com>
-Subject: Re: [PATCH] mmc: sdhi: Enable the driver on all ARM platforms
-Date: Thu, 31 Oct 2013 17:26:30 +0900
-Message-ID: <CANqRtoR3Aj-j00=riDuDdWW2+AZD4jrjL2xHLt88ri2kdUB=Eg@mail.gmail.com>
-References: <1383086274-11049-9-git-send-email-laurent.pinchart+renesas@ideasonboard.com>
-	<1383132190-5285-1-git-send-email-laurent.pinchart+renesas@ideasonboard.com>
+From: Mauro Carvalho Chehab <m.chehab-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
+Subject: Re: [PATCH 19/51] DMA-API: media: dt3155v4l: replace
+ dma_set_mask()+dma_set_coherent_mask() with new helper
+Date: Thu, 31 Oct 2013 09:46:40 -0200
+Message-ID: <20131031094640.205840a2@samsung.com>
+References: <20130919212235.GD12758@n2100.arm.linux.org.uk>
+ <E1VMm13-0007hO-9l@rmk-PC.arm.linux.org.uk> <5249673B.5020705@xs4all.nl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <1383132190-5285-1-git-send-email-laurent.pinchart+renesas@ideasonboard.com>
-Sender: linux-sh-owner@vger.kernel.org
-To: Laurent Pinchart <laurent.pinchart+renesas@ideasonboard.com>
-Cc: SH-Linux <linux-sh@vger.kernel.org>, Ian Molton <ian@mnementh.co.uk>, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-usb-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-reply-to: <5249673B.5020705-qWit8jRvyhVmR6Xm/wNWPw@public.gmane.org>
+Sender: linux-usb-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Hans Verkuil <hverkuil-qWit8jRvyhVmR6Xm/wNWPw@public.gmane.org>
+Cc: Russell King <rmk+kernel-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, alsa-devel-K7yf7f+aM1XWsZ/bQMPhNw@public.gmane.org, b43-dev-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, devel-gWbeCf7V1WCQmaza687I9mD2FQJk+8+b@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, dri-devel-PD4FTy7X32lNgt0PjOBp9y5qC8QIuHrW@public.gmane.org, e1000-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-crypto-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-fbdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-ide-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-media-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-nvme-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linuxppc-dev-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org, linux-samsung-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-scsi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-usb-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, netdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Solarflare linux maintainers <linux-net-drivers-s/n/eUQHGBpZroRs9YW3xA@public.gmane.org>, uclinux-dist-devel-ZG0+EudsQA8dtHy/vicBwGD2FQJk+8+b@public.gmane.org, Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, Russell King <rmk+kernel@ar>
 List-Id: linux-mmc@vger.kernel.org
 
-On Wed, Oct 30, 2013 at 8:23 PM, Laurent Pinchart
-<laurent.pinchart+renesas@ideasonboard.com> wrote:
-> Renesas ARM platforms are transitioning from single-platform to
-> multi-platform kernels using the new ARCH_SHMOBILE_MULTI. Make the
-> driver available on all ARM platforms to enable it on both ARCH_SHMOBILE
-> and ARCH_SHMOBILE_MULTI and increase build testing coverage.
->
-> Don't enable COMPILE_TEST support as the driver doesn't compile on x86
-> due (possibly among others) to missing readsw/writesw I/O accessors.
->
-> Whether the CTL_DMA_ENABLE register is part of the standard TMIO
-> controller or is Renesas-specific is unknown and impossible to test as
-> we have no current or planned TMIO DMA users other than SUPERH and
-> ARCH_SHMOBILE. Writing to the register is thus conditionally compiled
-> for SUPERH and ARCH_SHMOBILE only. Adding ARCH_SHMOBILE_MULTI to the
-> list would extend this to multiarch kernels, but would break the driver
-> for non-shmobile platforms if the register is Renesas-specific. We can
-> thus get rid of the conditional compilation completely without
-> introducing any further issue, and let future non-Renesas users deal
-> with the situation if it turns out to be a the problem.
->
-> Cc: Chris Ball <cjb@laptop.org>
-> Cc: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-> Cc: Ian Molton <ian@mnementh.co.uk>
-> Cc: linux-mmc@vger.kernel.org
-> Signed-off-by: Laurent Pinchart <laurent.pinchart+renesas@ideasonboard.com>
-> ---
->  drivers/mmc/host/Kconfig        | 2 +-
->  drivers/mmc/host/tmio_mmc_dma.c | 4 +---
->  2 files changed, 2 insertions(+), 4 deletions(-)
->
-> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-> index 7fc5099..51957d4 100644
-> --- a/drivers/mmc/host/Kconfig
-> +++ b/drivers/mmc/host/Kconfig
-> @@ -479,7 +479,7 @@ config MMC_TMIO
->
->  config MMC_SDHI
->         tristate "SH-Mobile SDHI SD/SDIO controller support"
-> -       depends on SUPERH || ARCH_SHMOBILE
-> +       depends on SUPERH || ARM
->         select MMC_TMIO_CORE
->         help
->           This provides support for the SDHI SD/SDIO controller found in
-> diff --git a/drivers/mmc/host/tmio_mmc_dma.c b/drivers/mmc/host/tmio_mmc_dma.c
-> index 65edb4a..8a4fd2d 100644
-> --- a/drivers/mmc/host/tmio_mmc_dma.c
-> +++ b/drivers/mmc/host/tmio_mmc_dma.c
-> @@ -28,10 +28,8 @@ void tmio_mmc_enable_dma(struct tmio_mmc_host *host, bool enable)
->         if (!host->chan_tx || !host->chan_rx)
->                 return;
->
-> -#if defined(CONFIG_SUPERH) || defined(CONFIG_ARCH_SHMOBILE)
-> -       /* Switch DMA mode on or off - SuperH specific? */
-> +       /* Switch DMA mode on or off. This might be Renesas-specific. */
->         sd_ctrl_write16(host, CTL_DMA_ENABLE, enable ? 2 : 0);
-> -#endif
+Hi Russell,
 
-Hi Laurent,
+Em Mon, 30 Sep 2013 13:57:47 +0200
+Hans Verkuil <hverkuil-qWit8jRvyhVmR6Xm/wNWPw@public.gmane.org> escreveu:
 
-Thanks for your efforts. Hate to slow things down, but this last hunk
-looks wrong to me. I believe the reason for the #ifdef is that
-non-Renesas IP may be using the tmio_mmc driver, at least they used
-to. Not sure if anyone is using DMA Engine though. If I were you I
-would play it safe and simply update the #ifdef with same kind of
-dependencies that the Kconfig bits have.
+> On 09/19/2013 11:44 PM, Russell King wrote:
+> > Replace the following sequence:
+> > 
+> > 	dma_set_mask(dev, mask);
+> > 	dma_set_coherent_mask(dev, mask);
+> > 
+> > with a call to the new helper dma_set_mask_and_coherent().
+> > 
+> > Signed-off-by: Russell King <rmk+kernel-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>
+> 
+> Acked-by: Hans Verkuil <hans.verkuil-FYB4Gu1CFyUAvxtiuMwx3w@public.gmane.org>
 
-Also, it would of course be nice to clean up the driver, perhaps with
-a feature flag for this special register or why not simply move the
-code to the sdhi file. But that's not really related to your
-multiplatform kconfig change, is it? =)
+Somehow, I lost your original post (I got unsubscribed on a few days 
+from all vger mailing lists at the end of september).
 
-/ magnus
+I suspect that you want to sent this via your tree, right?
+If so:
+
+Acked-by: Mauro Carvalho Chehab <m.chehab-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
+
+> 
+> Regards,
+> 
+> 	Hans
+> 
+> > ---
+> >  drivers/staging/media/dt3155v4l/dt3155v4l.c |    5 +----
+> >  1 files changed, 1 insertions(+), 4 deletions(-)
+> > 
+> > diff --git a/drivers/staging/media/dt3155v4l/dt3155v4l.c b/drivers/staging/media/dt3155v4l/dt3155v4l.c
+> > index 90d6ac4..081407b 100644
+> > --- a/drivers/staging/media/dt3155v4l/dt3155v4l.c
+> > +++ b/drivers/staging/media/dt3155v4l/dt3155v4l.c
+> > @@ -901,10 +901,7 @@ dt3155_probe(struct pci_dev *pdev, const struct pci_device_id *id)
+> >  	int err;
+> >  	struct dt3155_priv *pd;
+> >  
+> > -	err = dma_set_mask(&pdev->dev, DMA_BIT_MASK(32));
+> > -	if (err)
+> > -		return -ENODEV;
+> > -	err = dma_set_coherent_mask(&pdev->dev, DMA_BIT_MASK(32));
+> > +	err = dma_set_mask_and_coherent(&pdev->dev, DMA_BIT_MASK(32));
+> >  	if (err)
+> >  		return -ENODEV;
+> >  	pd = kzalloc(sizeof(*pd), GFP_KERNEL);
+> > 
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-media" in
+> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+
+-- 
+
+Cheers,
+Mauro
+--
+To unsubscribe from this list: send the line "unsubscribe linux-usb" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
