@@ -1,67 +1,130 @@
-From: Dirk Behme <dirk.behme@de.bosch.com>
-Subject: Re: [PATCH] mmc: sdhci-esdhc-imx: Write only 4 bit in case of TIMEOUT_CONTROL
-Date: Fri, 1 Nov 2013 07:31:34 +0100
-Message-ID: <52734AC6.6020101@de.bosch.com>
-References: <1373956571-25967-1-git-send-email-dirk.behme@de.bosch.com> <20130716073826.GH28375@S2101-09.ap.freescale.net>
+From: zhangfei gao <zhangfei.gao@gmail.com>
+Subject: Re: [PATCH 2/2] mmc: dw_mmc: add dw_mmc-k3 for k3 platform
+Date: Fri, 1 Nov 2013 00:13:37 -0700
+Message-ID: <CAMj5BkgHE6FwBv6hUi8Mth1Ox40ed2sot4p9LQBxOToN=Fu7Qg@mail.gmail.com>
+References: <1382339639-16764-3-git-send-email-zhangfei.gao@linaro.org>
+	<1382533396-6584-1-git-send-email-zhangfei.gao@linaro.org>
+	<001401ced6cb$04e2a330$0ea7e990$%jun@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp6-v.fe.bosch.de ([139.15.237.11]:11153 "EHLO
-	smtp6-v.fe.bosch.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751892Ab3KAGbm (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 1 Nov 2013 02:31:42 -0400
-In-Reply-To: <20130716073826.GH28375@S2101-09.ap.freescale.net>
+Received: from mail-ea0-f171.google.com ([209.85.215.171]:38456 "EHLO
+	mail-ea0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750834Ab3KAHNi (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 1 Nov 2013 03:13:38 -0400
+In-Reply-To: <001401ced6cb$04e2a330$0ea7e990$%jun@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Shawn Guo <shawn.guo@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>
+To: Seungwon Jeon <tgih.jun@samsung.com>
+Cc: Zhangfei Gao <zhangfei.gao@linaro.org>, Chris Ball <cjb@laptop.org>, Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, devicetree@vger.kernel.org, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>
 
-On 16.07.2013 09:38, Shawn Guo wrote:
-> Hi Dirk,
+Dear Seungwon
+
+Thanks for giving suggestion.
+
+On Thu, Oct 31, 2013 at 11:24 PM, Seungwon Jeon <tgih.jun@samsung.com> wrote:
+> Hi Zhangfei,
+
+>> +static void dw_mci_k3_set_ios(struct dw_mci *host, struct mmc_ios *ios)
+>> +{
+>> +     struct dw_mci_k3_priv_data *priv = host->priv;
+>> +
+>> +     if (priv->type == DW_MCI_TYPE_HI4511)
+> There are several checking controller type.
+> But now DW_MCI_TYPE_HI4511 is just introduced alone.
+> It seems like unnecessary.
+
+Yes, currently only K3V2 is added, and k3v3 code will be added soon.
+Do you think type is more suitable to add later?
+
+>> +static int dw_mci_k3_parse_dt(struct dw_mci *host)
+>> +{
+>> +     struct dw_mci_k3_priv_data *priv = host->priv;
+>> +     struct device_node *np = host->dev->of_node;
+>> +     u32 data[3];
+>> +     int ret;
+>> +
+>> +     if (priv->type == DW_MCI_TYPE_HI4511) {
+> Didn't you see Kernel panic here?
+> host->priv is not allocated yet, it's a invalid pointer dereference.
+> dw_mci_k3_parse_dt() is called prior to dw_mci_k3_priv_init().
+> You can check dw_mci_probe() sequence.
+
+It is no problem here
+dw_mci_pltfm_register -> drv_data->init(host) -> dw_mci_probe -> dw_mci_parse_dt
+
 >
-> On Tue, Jul 16, 2013 at 08:36:11AM +0200, Dirk Behme wrote:
->> In case of SDHCI_TIMEOUT_CONTROL write only 4 bits and not the
->> whole byte to avoid touching other unrelated bits in the i.MX6
->> SYS_CTRL register. E.g. IPP_RST_N shouldn't be touched accidently.
->>
->> Signed-off-by: Dirk Behme <dirk.behme@de.bosch.com>
->
-> Acked-by: Shawn Guo <shawn.guo@linaro.org>
+>> +             ret = of_property_read_u32_array(np,
+>> +                             "clken-reg", data, 2);
+>> +             if (!ret) {
+>> +                     priv->clken_reg = data[0];
+>> +                     priv->clken_bit = data[1];
+>> +             }
+>> +
+>> +             ret = of_property_read_u32_array(np,
+>> +                             "drv-sel-reg", data, 3);
+>> +             if (!ret) {
+>> +                     priv->drv_reg = data[0];
+>> +                     priv->drv_off = data[1];
+>> +                     priv->drv_bits = data[2];
+>> +             }
+>> +
+>> +             ret = of_property_read_u32_array(np,
+>> +                             "sam-sel-reg", data, 3);
+>> +             if (!ret) {
+>> +                     priv->sam_reg = data[0];
+>> +                     priv->sam_off = data[1];
+>> +                     priv->sam_bits = data[2];
+>> +             }
+>> +
+>> +             ret = of_property_read_u32_array(np,
+>> +                             "div-reg", data, 3);
+>> +             if (!ret) {
+>> +                     priv->div_reg = data[0];
+>> +                     priv->div_off = data[1];
+>> +                     priv->div_bits = data[2];
+>> +             }
+> Should these register information be got from dt?
+> It could be define in source code instead.
 
-What's the status of this? I can't find it e.g. in linux-next?
+There are many register from pctrl node instead of mmc controller.
+If set in code, we may read id and then switch id, set register, start
+bit, bits number,
+which is no rules for different controller, using defiine is not helpful.
+for example:
+ switch (idx) {
+        case 0:
+                clken_reg = 0x1F8;
+                clken_bit = 0;
+                drv_sel_reg = 0x1F8;
+                drv_sel_bit = 4;
+                sam_sel_reg = 0x1F8;
+                sam_sel_bit = 8;
+                div_reg = 0x1F8;
+                div_bit = 1;
+                break;
+        case 1:
+                clken_reg = 0x1F8;
+                clken_bit = 12;
+                drv_sel_reg = 0x1F8;
+                drv_sel_bit = 16;
+                sam_sel_reg = 0x1F8;
+                sam_sel_bit = 20;
+                div_reg = 0x1F8;
+                div_bit = 13;
+                break;
+        case 2:
+                clken_reg = 0x1F8;
+                clken_bit = 24;
+                drv_sel_reg = 0x1F8;
+                drv_sel_bit = 28;
+                sam_sel_reg = 0x1FC;
+                sam_sel_bit = 0;
+                div_reg = 0x1F8;
+                div_bit = 25;
+                break;
 
-Does anybody like to help to apply this?
+So define register offset, start bit and bits number in dts make it simplier.
+Is this acceptable?
 
-Many thanks and best regards
-
-Dirk
-
->> ---
->>   drivers/mmc/host/sdhci-esdhc-imx.c | 12 ++++++++++++
->>   1 file changed, 12 insertions(+)
->>
->> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
->> index 1dd5ba8..1af3a2a 100644
->> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
->> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
->> @@ -362,6 +362,18 @@ static void esdhc_writeb_le(struct sdhci_host *host, u8 val, int reg)
->>
->>   		esdhc_clrset_le(host, mask, new_val, reg);
->>   		return;
->> +	case SDHCI_TIMEOUT_CONTROL:
->> +		/*
->> +		 * On i.MX6 the timeout value DTOCV is 4 bit large. Touch only
->> +		 * these 4 bits (lower nibble of the byte), but not the upper
->> +		 * nibble of the byte. The upper nibble of the byte contains
->> +		 * IPP_RST_N which should keep the reset value, i.e. 1, and
->> +		 * shouldn't be touched here.
->> +		 */
->> +		if (is_imx6q_usdhc(imx_data)) {
->> +			esdhc_clrset_le(host, 0x0f, val, reg);
->> +			return;
->> +		}
->>   	}
->>   	esdhc_clrset_le(host, 0xff, val, reg);
->>
->> --
->> 1.8.2
+Thanks.
