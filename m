@@ -1,159 +1,154 @@
-From: Dong Aisheng <b29396@freescale.com>
-Subject: Re: [PATCH 5/5] mmc: sdhci-esdhc-imx: add runtime pm support
-Date: Fri, 1 Nov 2013 20:31:07 +0800
-Message-ID: <20131101123106.GA18102@b29396-Latitude-E6410>
-References: <1383142338-25062-1-git-send-email-b29396@freescale.com>
- <1383142338-25062-6-git-send-email-b29396@freescale.com>
- <CAPDyKFoRkdbmj3kkbaEhTsoRtHCZyYO+D-AOObhSFMZ9Zusb4Q@mail.gmail.com>
+From: zhangfei gao <zhangfei.gao@gmail.com>
+Subject: Re: [PATCH 2/2] mmc: dw_mmc: add dw_mmc-k3 for k3 platform
+Date: Fri, 1 Nov 2013 12:31:26 -0700
+Message-ID: <CAMj5BkhoBPxZOHPF5QJs6XqXd-m9hj1Ru=n9AztB3VTEM=W7+Q@mail.gmail.com>
+References: <1382339639-16764-3-git-send-email-zhangfei.gao@linaro.org>
+	<1382533396-6584-1-git-send-email-zhangfei.gao@linaro.org>
+	<001401ced6cb$04e2a330$0ea7e990$%jun@samsung.com>
+	<CAMj5BkgHE6FwBv6hUi8Mth1Ox40ed2sot4p9LQBxOToN=Fu7Qg@mail.gmail.com>
+	<001b01ced6db$4c31d840$e49588c0$%jun@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from va3ehsobe003.messaging.microsoft.com ([216.32.180.13]:49433
-	"EHLO va3outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751182Ab3KAMeG (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 1 Nov 2013 08:34:06 -0400
-Content-Disposition: inline
-In-Reply-To: <CAPDyKFoRkdbmj3kkbaEhTsoRtHCZyYO+D-AOObhSFMZ9Zusb4Q@mail.gmail.com>
+Received: from mail-ea0-f169.google.com ([209.85.215.169]:38041 "EHLO
+	mail-ea0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752691Ab3KATbb (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 1 Nov 2013 15:31:31 -0400
+In-Reply-To: <001b01ced6db$4c31d840$e49588c0$%jun@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Chris Ball <cjb@laptop.org>, Shawn Guo <shawn.guo@linaro.org>, Sascha Hauer <s.hauer@pengutronix.de>, wsa@the-dreams.de
+To: Seungwon Jeon <tgih.jun@samsung.com>
+Cc: Zhangfei Gao <zhangfei.gao@linaro.org>, Chris Ball <cjb@laptop.org>, Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, devicetree@vger.kernel.org, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>
 
-On Wed, Oct 30, 2013 at 11:49:19PM +0100, Ulf Hansson wrote:
-> On 30 October 2013 15:12, Dong Aisheng <b29396@freescale.com> wrote:
-> > The root clock will be disabled in runtime pm which can be used to save power.
-> >
-> > Signed-off-by: Dong Aisheng <b29396@freescale.com>
-> > ---
-> >  drivers/mmc/host/sdhci-esdhc-imx.c |   53 ++++++++++++++++++++++++++++++++++-
-> >  1 files changed, 51 insertions(+), 2 deletions(-)
-> >
-> > diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-> > index da8026b..60201fd 100644
-> > --- a/drivers/mmc/host/sdhci-esdhc-imx.c
-> > +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-> > @@ -27,6 +27,7 @@
-> >  #include <linux/of_gpio.h>
-> >  #include <linux/pinctrl/consumer.h>
-> >  #include <linux/platform_data/mmc-esdhc-imx.h>
-> > +#include <linux/pm_runtime.h>
-> >  #include "sdhci-pltfm.h"
-> >  #include "sdhci-esdhc.h"
-> >
-> > @@ -1117,9 +1118,17 @@ static int sdhci_esdhc_imx_probe(struct platform_device *pdev)
-> >                 host->quirks2 |= SDHCI_QUIRK2_NO_1_8_V;
-> >         }
-> >
-> 
-> Add:
-> pm_runtime_set_active
-> 
+On Fri, Nov 1, 2013 at 1:21 AM, Seungwon Jeon <tgih.jun@samsung.com> wrote:
+> On Fri, November 01, 2013, zhangfei gao wrote:
+>> Dear Seungwon
+>>
+>> Thanks for giving suggestion.
+>>
+>> On Thu, Oct 31, 2013 at 11:24 PM, Seungwon Jeon <tgih.jun@samsung.com> wrote:
+>> > Hi Zhangfei,
+>>
+>> >> +static void dw_mci_k3_set_ios(struct dw_mci *host, struct mmc_ios *ios)
+>> >> +{
+>> >> +     struct dw_mci_k3_priv_data *priv = host->priv;
+>> >> +
+>> >> +     if (priv->type == DW_MCI_TYPE_HI4511)
+>> > There are several checking controller type.
+>> > But now DW_MCI_TYPE_HI4511 is just introduced alone.
+>> > It seems like unnecessary.
+>>
+>> Yes, currently only K3V2 is added, and k3v3 code will be added soon.
+>> Do you think type is more suitable to add later?
+> Yes, it would be better.
+OK, got it.
 
-Right.
-Thanks for reminder.
+>
+>>
+>> >> +static int dw_mci_k3_parse_dt(struct dw_mci *host)
+>> >> +{
+>> >> +     struct dw_mci_k3_priv_data *priv = host->priv;
+>> >> +     struct device_node *np = host->dev->of_node;
+>> >> +     u32 data[3];
+>> >> +     int ret;
+>> >> +
+>> >> +     if (priv->type == DW_MCI_TYPE_HI4511) {
+>> > Didn't you see Kernel panic here?
+>> > host->priv is not allocated yet, it's a invalid pointer dereference.
+>> > dw_mci_k3_parse_dt() is called prior to dw_mci_k3_priv_init().
+>> > You can check dw_mci_probe() sequence.
+>>
+>> It is no problem here
+>> dw_mci_pltfm_register -> drv_data->init(host) -> dw_mci_probe -> dw_mci_parse_dt
+> I guess your base is not latest.
+> Can you check cjb's tree?
 
-BTW, it seems with adding pm_runtime_set_active, i need
-put pm_runtime_* related functions right behind sdhci_add_host
-since i observed that pm_runtime_set_autosuspend_delay would trigger a suspend
-automatically if the device initial state is ACTIVE and during this time,
-the host structure is still not initialized which will lead to a crash
-when access it in sdhci_runtime_suspend_host.
+Yes, thanks for the info.
+It is changed in 3.12-rc2
+While what we use is 3.12-rc1, will rebase.
 
-> > +       pm_runtime_enable(&pdev->dev);
-> > +       pm_runtime_set_autosuspend_delay(&pdev->dev, 50);
-> > +       pm_runtime_use_autosuspend(&pdev->dev);
-> > +       pm_suspend_ignore_children(&pdev->dev, 1);
-> > +
-> >         err = sdhci_add_host(host);
-> > -       if (err)
-> > +       if (err) {
-> > +               pm_runtime_forbid(&pdev->dev);
-> > +               pm_runtime_get_noresume(&pdev->dev);
-> >                 goto disable_clk;
-> > +       }
-> >
-> >         return 0;
-> >
-> > @@ -1141,6 +1150,9 @@ static int sdhci_esdhc_imx_remove(struct platform_device *pdev)
-> >
-> >         sdhci_remove_host(host, dead);
-> >
-> > +       pm_runtime_dont_use_autosuspend(&pdev->dev);
-> > +       pm_runtime_disable(&pdev->dev);
-> > +
-> >         clk_disable_unprepare(imx_data->clk_per);
-> >         clk_disable_unprepare(imx_data->clk_ipg);
-> >         clk_disable_unprepare(imx_data->clk_ahb);
-> > @@ -1150,12 +1162,49 @@ static int sdhci_esdhc_imx_remove(struct platform_device *pdev)
-> >         return 0;
-> >  }
-> >
-> > +#ifdef CONFIG_PM_RUNTIME
-> > +static int sdhci_esdhc_runtime_suspend(struct device *dev)
-> > +{
-> > +       struct sdhci_host *host = dev_get_drvdata(dev);
-> > +       struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> > +       struct pltfm_imx_data *imx_data = pltfm_host->priv;
-> > +       int ret;
-> > +
-> > +       ret = sdhci_runtime_suspend_host(host);
-> > +
-> > +       clk_disable_unprepare(imx_data->clk_per);
-> > +       clk_disable_unprepare(imx_data->clk_ipg);
-> > +       clk_disable_unprepare(imx_data->clk_ahb);
-> > +
-> > +       return ret;
-> > +}
-> > +
-> > +static int sdhci_esdhc_runtime_resume(struct device *dev)
-> > +{
-> > +       struct sdhci_host *host = dev_get_drvdata(dev);
-> > +       struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> > +       struct pltfm_imx_data *imx_data = pltfm_host->priv;
-> > +
-> > +       clk_prepare_enable(imx_data->clk_per);
-> > +       clk_prepare_enable(imx_data->clk_ipg);
-> > +       clk_prepare_enable(imx_data->clk_ahb);
-> > +
-> > +       return sdhci_runtime_resume_host(host);
-> > +}
-> > +#endif
-> > +
-> > +static const struct dev_pm_ops sdhci_esdhc_pmops = {
-> > +       SET_SYSTEM_SLEEP_PM_OPS(sdhci_pltfm_suspend, sdhci_pltfm_resume)
-> > +       SET_RUNTIME_PM_OPS(sdhci_esdhc_runtime_suspend,
-> > +                               sdhci_esdhc_runtime_resume, NULL)
-> > +};
-> > +
-> >  static struct platform_driver sdhci_esdhc_imx_driver = {
-> >         .driver         = {
-> >                 .name   = "sdhci-esdhc-imx",
-> >                 .owner  = THIS_MODULE,
-> >                 .of_match_table = imx_esdhc_dt_ids,
-> > -               .pm     = SDHCI_PLTFM_PMOPS,
-> > +               .pm     = &sdhci_esdhc_pmops,
-> >         },
-> >         .id_table       = imx_esdhc_devtype,
-> >         .probe          = sdhci_esdhc_imx_probe,
-> > --
-> > 1.7.2.rc3
-> 
-> Apart from the minor issue in the probe function, looks good to me.
-> 
-> Kind regards
-> Ulf Hansson
-> 
+>
+>>
+>> >
+>> >> +             ret = of_property_read_u32_array(np,
+>> >> +                             "clken-reg", data, 2);
+>> >> +             if (!ret) {
+>> >> +                     priv->clken_reg = data[0];
+>> >> +                     priv->clken_bit = data[1];
+>> >> +             }
+>> >> +
+>> >> +             ret = of_property_read_u32_array(np,
+>> >> +                             "drv-sel-reg", data, 3);
+>> >> +             if (!ret) {
+>> >> +                     priv->drv_reg = data[0];
+>> >> +                     priv->drv_off = data[1];
+>> >> +                     priv->drv_bits = data[2];
+>> >> +             }
+>> >> +
+>> >> +             ret = of_property_read_u32_array(np,
+>> >> +                             "sam-sel-reg", data, 3);
+>> >> +             if (!ret) {
+>> >> +                     priv->sam_reg = data[0];
+>> >> +                     priv->sam_off = data[1];
+>> >> +                     priv->sam_bits = data[2];
+>> >> +             }
+>> >> +
+>> >> +             ret = of_property_read_u32_array(np,
+>> >> +                             "div-reg", data, 3);
+>> >> +             if (!ret) {
+>> >> +                     priv->div_reg = data[0];
+>> >> +                     priv->div_off = data[1];
+>> >> +                     priv->div_bits = data[2];
+>> >> +             }
+>> > Should these register information be got from dt?
+>> > It could be define in source code instead.
+>>
+>> There are many register from pctrl node instead of mmc controller.
+>> If set in code, we may read id and then switch id, set register, start
+>> bit, bits number,
+>> which is no rules for different controller, using defiine is not helpful.
+>> for example:
+>>  switch (idx) {
+>>         case 0:
+>>                 clken_reg = 0x1F8;
+>>                 clken_bit = 0;
+>>                 drv_sel_reg = 0x1F8;
+>>                 drv_sel_bit = 4;
+>>                 sam_sel_reg = 0x1F8;
+>>                 sam_sel_bit = 8;
+>>                 div_reg = 0x1F8;
+>>                 div_bit = 1;
+>>                 break;
+>>         case 1:
+>>                 clken_reg = 0x1F8;
+>>                 clken_bit = 12;
+>>                 drv_sel_reg = 0x1F8;
+>>                 drv_sel_bit = 16;
+>>                 sam_sel_reg = 0x1F8;
+>>                 sam_sel_bit = 20;
+>>                 div_reg = 0x1F8;
+>>                 div_bit = 13;
+>>                 break;
+>>         case 2:
+>>                 clken_reg = 0x1F8;
+>>                 clken_bit = 24;
+>>                 drv_sel_reg = 0x1F8;
+>>                 drv_sel_bit = 28;
+>>                 sam_sel_reg = 0x1FC;
+>>                 sam_sel_bit = 0;
+>>                 div_reg = 0x1F8;
+>>                 div_bit = 25;
+>>                 break;
+>>
+>> So define register offset, start bit and bits number in dts make it simplier.
+>> Is this acceptable?
+> It's up to you. I think there will be better ways.
+> For example, some table for variable register can be used for each controller type.
+> Additionally, if you intend to use dt, error handling is needed.
+> dw_mci_k3_parse_dt always returns success although of_property_read_u32_array is failed.
 
-Thanks for the review.
-Will update it in v2.
+The reason is they are optional property.
+SD would fail if not setting the property, while emmc does not matter.
+So set for optional, dw_mci_k3_set_timing will check whether they exists.
 
-Regards
-Dong Aisheng
-> >
-> >
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-
+Thanks
