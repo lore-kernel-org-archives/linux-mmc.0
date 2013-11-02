@@ -1,154 +1,218 @@
-From: zhangfei gao <zhangfei.gao@gmail.com>
-Subject: Re: [PATCH 2/2] mmc: dw_mmc: add dw_mmc-k3 for k3 platform
-Date: Fri, 1 Nov 2013 12:31:26 -0700
-Message-ID: <CAMj5BkhoBPxZOHPF5QJs6XqXd-m9hj1Ru=n9AztB3VTEM=W7+Q@mail.gmail.com>
-References: <1382339639-16764-3-git-send-email-zhangfei.gao@linaro.org>
-	<1382533396-6584-1-git-send-email-zhangfei.gao@linaro.org>
-	<001401ced6cb$04e2a330$0ea7e990$%jun@samsung.com>
-	<CAMj5BkgHE6FwBv6hUi8Mth1Ox40ed2sot4p9LQBxOToN=Fu7Qg@mail.gmail.com>
-	<001b01ced6db$4c31d840$e49588c0$%jun@samsung.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ea0-f169.google.com ([209.85.215.169]:38041 "EHLO
-	mail-ea0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752691Ab3KATbb (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 1 Nov 2013 15:31:31 -0400
-In-Reply-To: <001b01ced6db$4c31d840$e49588c0$%jun@samsung.com>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Andreas Fenkart <afenkart@gmail.com>
+Subject: [PATCH 1/3] mmc: omap_hsmmc: Enable SDIO IRQ.
+Date: Sat,  2 Nov 2013 21:26:14 +0100
+Message-ID: <1383423976-24798-1-git-send-email-afenkart@gmail.com>
+Return-path: <linux-omap-owner@vger.kernel.org>
+Sender: linux-omap-owner@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>
+Cc: Tony Lindgren <tony@atomide.com>, Grant Likely <grant.likely@secretlab.ca>, Felipe Balbi <balbi@ti.com>, Balaji T K <balajitk@ti.com>, zonque@gmail.com, devicetree@vger.kernel.org, linux-doc@vger.kernel.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, Andreas Fenkart <andreas.fenkart@dev.digitalstrom.org>, Andreas Fenkart <afenkart@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Seungwon Jeon <tgih.jun@samsung.com>
-Cc: Zhangfei Gao <zhangfei.gao@linaro.org>, Chris Ball <cjb@laptop.org>, Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, devicetree@vger.kernel.org, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>
 
-On Fri, Nov 1, 2013 at 1:21 AM, Seungwon Jeon <tgih.jun@samsung.com> wrote:
-> On Fri, November 01, 2013, zhangfei gao wrote:
->> Dear Seungwon
->>
->> Thanks for giving suggestion.
->>
->> On Thu, Oct 31, 2013 at 11:24 PM, Seungwon Jeon <tgih.jun@samsung.com> wrote:
->> > Hi Zhangfei,
->>
->> >> +static void dw_mci_k3_set_ios(struct dw_mci *host, struct mmc_ios *ios)
->> >> +{
->> >> +     struct dw_mci_k3_priv_data *priv = host->priv;
->> >> +
->> >> +     if (priv->type == DW_MCI_TYPE_HI4511)
->> > There are several checking controller type.
->> > But now DW_MCI_TYPE_HI4511 is just introduced alone.
->> > It seems like unnecessary.
->>
->> Yes, currently only K3V2 is added, and k3v3 code will be added soon.
->> Do you think type is more suitable to add later?
-> Yes, it would be better.
-OK, got it.
+From: Andreas Fenkart <andreas.fenkart@dev.digitalstrom.org>
 
->
->>
->> >> +static int dw_mci_k3_parse_dt(struct dw_mci *host)
->> >> +{
->> >> +     struct dw_mci_k3_priv_data *priv = host->priv;
->> >> +     struct device_node *np = host->dev->of_node;
->> >> +     u32 data[3];
->> >> +     int ret;
->> >> +
->> >> +     if (priv->type == DW_MCI_TYPE_HI4511) {
->> > Didn't you see Kernel panic here?
->> > host->priv is not allocated yet, it's a invalid pointer dereference.
->> > dw_mci_k3_parse_dt() is called prior to dw_mci_k3_priv_init().
->> > You can check dw_mci_probe() sequence.
->>
->> It is no problem here
->> dw_mci_pltfm_register -> drv_data->init(host) -> dw_mci_probe -> dw_mci_parse_dt
-> I guess your base is not latest.
-> Can you check cjb's tree?
+For now, only support SDIO interrupt if we are booted with
+DT. This is because some platforms need special quirks. And
+we don't want to add new legacy mux platform init code
+callbacks any longer as we are moving to DT based booting
+anyways.
 
-Yes, thanks for the info.
-It is changed in 3.12-rc2
-While what we use is 3.12-rc1, will rebase.
+Broken hardware, missing the swakueup line, should fallback
+to polling, by setting 'ti,quirk-swakup-missing' in the
+device tree. Otherwise pending SDIO IRQ are not detected
+while in suspend. This affects am33xx processors.
 
->
->>
->> >
->> >> +             ret = of_property_read_u32_array(np,
->> >> +                             "clken-reg", data, 2);
->> >> +             if (!ret) {
->> >> +                     priv->clken_reg = data[0];
->> >> +                     priv->clken_bit = data[1];
->> >> +             }
->> >> +
->> >> +             ret = of_property_read_u32_array(np,
->> >> +                             "drv-sel-reg", data, 3);
->> >> +             if (!ret) {
->> >> +                     priv->drv_reg = data[0];
->> >> +                     priv->drv_off = data[1];
->> >> +                     priv->drv_bits = data[2];
->> >> +             }
->> >> +
->> >> +             ret = of_property_read_u32_array(np,
->> >> +                             "sam-sel-reg", data, 3);
->> >> +             if (!ret) {
->> >> +                     priv->sam_reg = data[0];
->> >> +                     priv->sam_off = data[1];
->> >> +                     priv->sam_bits = data[2];
->> >> +             }
->> >> +
->> >> +             ret = of_property_read_u32_array(np,
->> >> +                             "div-reg", data, 3);
->> >> +             if (!ret) {
->> >> +                     priv->div_reg = data[0];
->> >> +                     priv->div_off = data[1];
->> >> +                     priv->div_bits = data[2];
->> >> +             }
->> > Should these register information be got from dt?
->> > It could be define in source code instead.
->>
->> There are many register from pctrl node instead of mmc controller.
->> If set in code, we may read id and then switch id, set register, start
->> bit, bits number,
->> which is no rules for different controller, using defiine is not helpful.
->> for example:
->>  switch (idx) {
->>         case 0:
->>                 clken_reg = 0x1F8;
->>                 clken_bit = 0;
->>                 drv_sel_reg = 0x1F8;
->>                 drv_sel_bit = 4;
->>                 sam_sel_reg = 0x1F8;
->>                 sam_sel_bit = 8;
->>                 div_reg = 0x1F8;
->>                 div_bit = 1;
->>                 break;
->>         case 1:
->>                 clken_reg = 0x1F8;
->>                 clken_bit = 12;
->>                 drv_sel_reg = 0x1F8;
->>                 drv_sel_bit = 16;
->>                 sam_sel_reg = 0x1F8;
->>                 sam_sel_bit = 20;
->>                 div_reg = 0x1F8;
->>                 div_bit = 13;
->>                 break;
->>         case 2:
->>                 clken_reg = 0x1F8;
->>                 clken_bit = 24;
->>                 drv_sel_reg = 0x1F8;
->>                 drv_sel_bit = 28;
->>                 sam_sel_reg = 0x1FC;
->>                 sam_sel_bit = 0;
->>                 div_reg = 0x1F8;
->>                 div_bit = 25;
->>                 break;
->>
->> So define register offset, start bit and bits number in dts make it simplier.
->> Is this acceptable?
-> It's up to you. I think there will be better ways.
-> For example, some table for variable register can be used for each controller type.
-> Additionally, if you intend to use dt, error handling is needed.
-> dw_mci_k3_parse_dt always returns success although of_property_read_u32_array is failed.
+Reviewed-by: Grant Likely <grant.likely@secretlab.ca>
+For the DT-Binding portion:
+Acked-by: Kumar Gala <galak@codeaurora.org>
+Signed-off-by: Andreas Fenkart <afenkart@gmail.com>
+---
+ .../devicetree/bindings/mmc/ti-omap-hsmmc.txt      |   18 ++++
+ drivers/mmc/host/omap_hsmmc.c                      |   86 ++++++++++++++++++--
+ 2 files changed, 95 insertions(+), 9 deletions(-)
 
-The reason is they are optional property.
-SD would fail if not setting the property, while emmc does not matter.
-So set for optional, dw_mci_k3_set_timing will check whether they exists.
+diff --git a/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt b/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
+index ed271fc..1136e6b 100644
+--- a/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
++++ b/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
+@@ -20,6 +20,24 @@ ti,dual-volt: boolean, supports dual voltage cards
+ ti,non-removable: non-removable slot (like eMMC)
+ ti,needs-special-reset: Requires a special softreset sequence
+ ti,needs-special-hs-handling: HSMMC IP needs special setting for handling High Speed
++ti,quirk-swakup-missing: SOC missing the swakeup line, will not detect
++SDIO irq while in suspend. Fallback to polling. Affected chips are
++am335x,
++
++                            ------
++                            | PRCM |
++                             ------
++                              ^ |
++                      swakeup | | fclk
++                              | v
++      ------                -------               -----
++     | card | -- CIRQ -->  | hsmmc | -- IRQ -->  | CPU |
++      ------                -------               -----
++
++In suspend the fclk is off and the module is disfunctional. Even
++register reads will fail. A small logic in the host will request fclk
++restore, when an external event is detected. Once the clock is
++restored, the host detects the event normally.
+ 
+ Example:
+ 	mmc1: mmc@0x4809c000 {
+diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+index b392130..6b0ec55 100644
+--- a/drivers/mmc/host/omap_hsmmc.c
++++ b/drivers/mmc/host/omap_hsmmc.c
+@@ -130,6 +130,7 @@ static void apply_clk_hack(struct device *dev)
+ #define TC_EN			(1 << 1)
+ #define BWR_EN			(1 << 4)
+ #define BRR_EN			(1 << 5)
++#define CIRQ_EN			(1 << 8)
+ #define ERR_EN			(1 << 15)
+ #define CTO_EN			(1 << 16)
+ #define CCRC_EN			(1 << 17)
+@@ -210,6 +211,9 @@ struct omap_hsmmc_host {
+ 	int			reqs_blocked;
+ 	int			use_reg;
+ 	int			req_in_progress;
++	int                     flags;
++#define HSMMC_SDIO_IRQ_ENABLED	(1 << 0)        /* SDIO irq enabled */
++
+ 	struct omap_hsmmc_next	next_data;
+ 	struct	omap_mmc_platform_data	*pdata;
+ };
+@@ -490,27 +494,40 @@ static void omap_hsmmc_stop_clock(struct omap_hsmmc_host *host)
+ static void omap_hsmmc_enable_irq(struct omap_hsmmc_host *host,
+ 				  struct mmc_command *cmd)
+ {
+-	unsigned int irq_mask;
++	u32 irq_mask = INT_EN_MASK;
++	unsigned long flags;
+ 
+ 	if (host->use_dma)
+-		irq_mask = INT_EN_MASK & ~(BRR_EN | BWR_EN);
+-	else
+-		irq_mask = INT_EN_MASK;
++		irq_mask &= ~(BRR_EN | BWR_EN);
+ 
+ 	/* Disable timeout for erases */
+ 	if (cmd->opcode == MMC_ERASE)
+ 		irq_mask &= ~DTO_EN;
+ 
++	spin_lock_irqsave(&host->irq_lock, flags);
+ 	OMAP_HSMMC_WRITE(host->base, STAT, STAT_CLEAR);
+ 	OMAP_HSMMC_WRITE(host->base, ISE, irq_mask);
++
++	/* latch pending CIRQ, but don't signal */
++	if (host->flags & HSMMC_SDIO_IRQ_ENABLED)
++		irq_mask |= CIRQ_EN;
+ 	OMAP_HSMMC_WRITE(host->base, IE, irq_mask);
++	spin_unlock_irqrestore(&host->irq_lock, flags);
+ }
+ 
+ static void omap_hsmmc_disable_irq(struct omap_hsmmc_host *host)
+ {
+-	OMAP_HSMMC_WRITE(host->base, ISE, 0);
+-	OMAP_HSMMC_WRITE(host->base, IE, 0);
++	u32 irq_mask = 0;
++	unsigned long flags;
++
++	spin_lock_irqsave(&host->irq_lock, flags);
++	/* no transfer running, need to signal cirq if enabled */
++	if (host->flags & HSMMC_SDIO_IRQ_ENABLED)
++		irq_mask |= CIRQ_EN;
++	OMAP_HSMMC_WRITE(host->base, ISE, irq_mask);
++	OMAP_HSMMC_WRITE(host->base, IE, irq_mask);
+ 	OMAP_HSMMC_WRITE(host->base, STAT, STAT_CLEAR);
++	spin_unlock_irqrestore(&host->irq_lock, flags);
+ }
+ 
+ /* Calculate divisor for the given clock frequency */
+@@ -1067,8 +1084,12 @@ static irqreturn_t omap_hsmmc_irq(int irq, void *dev_id)
+ 	int status;
+ 
+ 	status = OMAP_HSMMC_READ(host->base, STAT);
+-	while (status & INT_EN_MASK && host->req_in_progress) {
+-		omap_hsmmc_do_irq(host, status);
++	while (status & (INT_EN_MASK | CIRQ_EN)) {
++		if (host->req_in_progress)
++			omap_hsmmc_do_irq(host, status);
++
++		if (status & CIRQ_EN)
++			mmc_signal_sdio_irq(host->mmc);
+ 
+ 		/* Flush posted write */
+ 		status = OMAP_HSMMC_READ(host->base, STAT);
+@@ -1583,6 +1604,37 @@ static void omap_hsmmc_init_card(struct mmc_host *mmc, struct mmc_card *card)
+ 		mmc_slot(host).init_card(card);
+ }
+ 
++static void omap_hsmmc_enable_sdio_irq(struct mmc_host *mmc, int enable)
++{
++	struct omap_hsmmc_host *host = mmc_priv(mmc);
++	u32 irq_mask;
++	unsigned long flags;
++
++	spin_lock_irqsave(&host->irq_lock, flags);
++
++	irq_mask = OMAP_HSMMC_READ(host->base, ISE);
++	if (enable) {
++		host->flags |= HSMMC_SDIO_IRQ_ENABLED;
++		irq_mask |= CIRQ_EN;
++	} else {
++		host->flags &= ~HSMMC_SDIO_IRQ_ENABLED;
++		irq_mask &= ~CIRQ_EN;
++	}
++	OMAP_HSMMC_WRITE(host->base, IE, irq_mask);
++
++	/*
++	 * if enable, piggy back detection on current request
++	 * but always disable immediately
++	 */
++	if (!host->req_in_progress || !enable)
++		OMAP_HSMMC_WRITE(host->base, ISE, irq_mask);
++
++	/* flush posted write */
++	OMAP_HSMMC_READ(host->base, IE);
++
++	spin_unlock_irqrestore(&host->irq_lock, flags);
++}
++
+ static void omap_hsmmc_conf_bus_power(struct omap_hsmmc_host *host)
+ {
+ 	u32 hctl, capa, value;
+@@ -1635,7 +1687,7 @@ static const struct mmc_host_ops omap_hsmmc_ops = {
+ 	.get_cd = omap_hsmmc_get_cd,
+ 	.get_ro = omap_hsmmc_get_ro,
+ 	.init_card = omap_hsmmc_init_card,
+-	/* NYET -- enable_sdio_irq */
++	.enable_sdio_irq = omap_hsmmc_enable_sdio_irq,
+ };
+ 
+ #ifdef CONFIG_DEBUG_FS
+@@ -2021,6 +2073,22 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
+ 		dev_warn(&pdev->dev,
+ 			"pins are not configured from the driver\n");
+ 
++	/*
++	 * For now, only support SDIO interrupt if we are booted with
++	 * DT. This is because some platforms need special quirks. And
++	 * we don't want to add new legacy mux platform init code
++	 * callbacks any longer as we are moving to DT based booting
++	 * anyways.
++	 */
++	if (pdev->dev.of_node) {
++		mmc->caps |= MMC_CAP_SDIO_IRQ;
++		if (of_find_property(host->dev->of_node,
++				     "ti,quirk-swakeup-missing", NULL)) {
++			/* no wakeup from deeper power states, use polling */
++			mmc->caps &= ~MMC_CAP_SDIO_IRQ;
++		}
++	}
++
+ 	omap_hsmmc_protect_card(host);
+ 
+ 	mmc_add_host(mmc);
+-- 
+1.7.10.4
 
-Thanks
