@@ -1,29 +1,72 @@
-From: "Luis R. Rodriguez" <mcgrof@do-not-panic.com>
-Subject: Re: mwifiex_sdio on chromebook
-Date: Mon, 4 Nov 2013 14:32:31 +0100
-Message-ID: <CAB=NE6UB=0Wpzog1vuwF2uR_aqrrs4G4BQ9zG-i6bTz5vvcGpg@mail.gmail.com>
-References: <5276491F.20207@mail.ru> <477F20668A386D41ADCC57781B1F70430F45757E63@SC-VEXCH1.marvell.com>
- <527703E6.8040504@mail.ru>
+From: Alexey Neyman <stilor@att.net>
+Subject: Avoid needless loop in sdhci_irq() for Card Interrupt
+Date: Mon, 04 Nov 2013 10:43:59 -0800
+Message-ID: <3478818.ZVgDgJjmfN@mistral>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: multipart/mixed; boundary="nextPart15375689.Pz1tcezmgv"
+Content-Transfer-Encoding: 7Bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-la0-f53.google.com ([209.85.215.53]:51659 "EHLO
-	mail-la0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751807Ab3KDNcz (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 4 Nov 2013 08:32:55 -0500
-In-Reply-To: <527703E6.8040504@mail.ru>
+Received: from nm18-vm3.access.bullet.mail.gq1.yahoo.com ([216.39.63.76]:21747
+	"EHLO nm18-vm3.access.bullet.mail.gq1.yahoo.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1750957Ab3KDSoA (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 4 Nov 2013 13:44:00 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Alexander Varnin <fenixk19@mail.ru>
-Cc: Bing Zhao <bzhao@marvell.com>, "linux-wireless@vger.kernel.org" <linux-wireless@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-On Mon, Nov 4, 2013 at 3:18 AM, Alexander Varnin <fenixk19@mail.ru> wrote:
->> What are you trying to do here? Are you trying to run a mainline kernel on your Chromebook?
->
-> Yes. I've got kernel 3.4 from Google Chrome OS. It works ok for
-> mwifiex_sdio. But I want to run mainline kernel. As of 3.11 it is able
-> to boot on Chromebook, but WiFi doesn't work.
+This is a multi-part message in MIME format.
 
-WTF.
+--nextPart15375689.Pz1tcezmgv
+Content-Transfer-Encoding: 7Bit
+Content-Type: text/plain; charset="us-ascii"
 
-  Luis
+[Patch ping #3: anyone interested in making sdhci_irq a bit faster?]
+
+Hi all,
+
+I've discovered that the sdhci_irq() function needlessly iterates re-reading 
+the interrupt status and doing nothing (until it runs out of max_loops) when 
+it handles the "Card Interrupt" status in the interrupt status register.
+
+The reason is that the "Card Interrupt" bit is not cleared until the 
+sdhci_irq() calls mmc_signal_sdio_irq(), so if Card Interrupt was asserted, 
+re-reading the interrupt status will find this bit set over and over, even if 
+no other bits are reported.
+
+The fix: ignore Card Interrupt bits in the interrupt status if we already know 
+that mmc_signal_sdio_irq() is going to be called at the end of sdhci_irq().
+
+Signed-off-by: Alexey Neyman <stilor@att.net>
+--nextPart15375689.Pz1tcezmgv
+Content-Disposition: attachment; filename="sdhci.c.diff"
+Content-Transfer-Encoding: 7Bit
+Content-Type: text/x-patch; charset="utf-8"; name="sdhci.c.diff"
+
+commit 7f23315b344ca51ddf22a78f326f88404fa8c81d
+Author: Alexey Neyman <stilor@att.net>
+Date:   Wed Oct 9 22:23:54 2013 -0700
+
+    Avoid a loop in sdhci.c.
+
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 7a7fb4f..a83cd1b 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -2491,6 +2491,14 @@ again:
+ 	result = IRQ_HANDLED;
+ 
+ 	intmask = sdhci_readl(host, SDHCI_INT_STATUS);
++
++	/*
++	 * If we know we'll call the driver to signal SDIO IRQ, disregard
++	 * further indications of Card Interrupt in the status to avoid a
++	 * needless loop.
++	 */
++	if (cardint)
++		intmask &= ~SDHCI_INT_CARD_INT;
+ 	if (intmask && --max_loops)
+ 		goto again;
+ out:
+
+--nextPart15375689.Pz1tcezmgv--
+
