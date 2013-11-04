@@ -1,15 +1,15 @@
 From: <dinguyen@altera.com>
-Subject: [PATCHv2 3/4] mmc: dw_mmc-socfpga: Clean up SOCFPGA platform specific functionality
-Date: Mon, 4 Nov 2013 14:36:04 -0600
-Message-ID: <1383597364-25613-4-git-send-email-dinguyen@altera.com>
+Subject: [PATCHv2 2/4] arm: dts: Add a system manager compatible property
+Date: Mon, 4 Nov 2013 14:36:03 -0600
+Message-ID: <1383597364-25613-3-git-send-email-dinguyen@altera.com>
 References: <1383597364-25613-1-git-send-email-dinguyen@altera.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from ch1ehsobe003.messaging.microsoft.com ([216.32.181.183]:46375
+Received: from ch1ehsobe002.messaging.microsoft.com ([216.32.181.182]:28549
 	"EHLO ch1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753359Ab3KDUg1 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 4 Nov 2013 15:36:27 -0500
+	by vger.kernel.org with ESMTP id S1753181Ab3KDUg0 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 4 Nov 2013 15:36:26 -0500
 In-Reply-To: <1383597364-25613-1-git-send-email-dinguyen@altera.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
@@ -18,13 +18,11 @@ Cc: Dinh Nguyen <dinguyen@altera.com>, Arnd Bergmann <arnd@arndb.de>, Mike Turqu
 
 From: Dinh Nguyen <dinguyen@altera.com>
 
-The SDR timing registers for the SD/MMC IP block for SOCFPGA is located
-in the system manager. This system manager IP block is located outside of
-the SD IP block itself. We can use the normal clock API to set the SDR
-settings.
+The "altr,sysmgr-sdmmc-sdr" compatible property is used for the SOCFPGA
+clk-sysmgr driver. This property represents the register inside the
+system manager that controls the clock phase of the SD/MMC driver.
 
-Also, there is no need for "altr,dw-mshc-ciu-div" as the driver can get
-the value of the CIU clock from the common clock API.
+Also add "syscon" to the system manager node.
 
 Signed-off-by: Dinh Nguyen <dinguyen@altera.com>
 CC: Arnd Bergmann <arnd@arndb.de>
@@ -42,121 +40,57 @@ Cc: devicetree@vger.kernel.org
 Cc: linux-mmc@vger.kernel.org
 CC: linux-arm-kernel@lists.infradead.org
 ---
- drivers/mmc/host/dw_mmc-socfpga.c |   80 +++++--------------------------------
- 1 file changed, 10 insertions(+), 70 deletions(-)
+ .../bindings/arm/altera/socfpga-system.txt         |   10 ++++++++++
+ arch/arm/boot/dts/socfpga.dtsi                     |   12 ++++++++++--
+ 2 files changed, 20 insertions(+), 2 deletions(-)
 
-diff --git a/drivers/mmc/host/dw_mmc-socfpga.c b/drivers/mmc/host/dw_mmc-socfpga.c
-index 14b5961..4999454 100644
---- a/drivers/mmc/host/dw_mmc-socfpga.c
-+++ b/drivers/mmc/host/dw_mmc-socfpga.c
-@@ -13,97 +13,37 @@
-  * Taken from dw_mmc-exynos.c
-  */
- #include <linux/clk.h>
--#include <linux/mfd/syscon.h>
- #include <linux/mmc/host.h>
- #include <linux/mmc/dw_mmc.h>
- #include <linux/module.h>
- #include <linux/of.h>
- #include <linux/platform_device.h>
--#include <linux/regmap.h>
+diff --git a/Documentation/devicetree/bindings/arm/altera/socfpga-system.txt b/Documentation/devicetree/bindings/arm/altera/socfpga-system.txt
+index f4d04a0..7a6c7ed 100644
+--- a/Documentation/devicetree/bindings/arm/altera/socfpga-system.txt
++++ b/Documentation/devicetree/bindings/arm/altera/socfpga-system.txt
+@@ -5,9 +5,19 @@ Required properties:
+ - reg : Should contain 1 register ranges(address and length)
+ - cpu1-start-addr : CPU1 start address in hex.
  
- #include "dw_mmc.h"
- #include "dw_mmc-pltfm.h"
- 
--#define SYSMGR_SDMMCGRP_CTRL_OFFSET		0x108
--#define DRV_CLK_PHASE_SHIFT_SEL_MASK	0x7
--#define SYSMGR_SDMMC_CTRL_SET(smplsel, drvsel)          \
--	((((smplsel) & 0x7) << 3) | (((drvsel) & 0x7) << 0))
--
--/* SOCFPGA implementation specific driver private data */
--struct dw_mci_socfpga_priv_data {
--	u8	ciu_div; /* card interface unit divisor */
--	u32	hs_timing; /* bitmask for CIU clock phase shift */
--	struct regmap   *sysreg; /* regmap for system manager register */
--};
--
--static int dw_mci_socfpga_priv_init(struct dw_mci *host)
--{
--	struct dw_mci_socfpga_priv_data *priv;
--
--	priv = devm_kzalloc(host->dev, sizeof(*priv), GFP_KERNEL);
--	if (!priv) {
--		dev_err(host->dev, "mem alloc failed for private data\n");
--		return -ENOMEM;
--	}
--
--	priv->sysreg = syscon_regmap_lookup_by_compatible("altr,sys-mgr");
--	if (IS_ERR(priv->sysreg)) {
--		dev_err(host->dev, "regmap for altr,sys-mgr lookup failed.\n");
--		return PTR_ERR(priv->sysreg);
--	}
--	host->priv = priv;
--
--	return 0;
--}
--
- static int dw_mci_socfpga_setup_clock(struct dw_mci *host)
- {
--	struct dw_mci_socfpga_priv_data *priv = host->priv;
--
--	clk_disable_unprepare(host->ciu_clk);
--	regmap_write(priv->sysreg, SYSMGR_SDMMCGRP_CTRL_OFFSET,
--		priv->hs_timing);
--	clk_prepare_enable(host->ciu_clk);
--
--	host->bus_hz /= (priv->ciu_div + 1);
-+	struct clk *sysmgr_clk = devm_clk_get(host->dev, "sysmgr-sdr-mmc");
++Optional properties:
++- compatible = "altr,sysmgr-sdmmc-sdr". This compatible property is used
++to represent the clock phase settings for the SD/MMC IP.
 +
-+	if (IS_ERR(sysmgr_clk))
-+		dev_err(host->dev, "sysmgr-sdr-mmc not available\n");
-+	else {
-+		clk_disable_unprepare(host->ciu_clk);
-+		clk_prepare_enable(sysmgr_clk);
-+		clk_prepare_enable(host->ciu_clk);
-+	}
- 	return 0;
- }
+ Example:
+ 	 sysmgr@ffd08000 {
+ 		compatible = "altr,sys-mgr";
+ 		reg = <0xffd08000 0x1000>;
+ 		cpu1-start-addr = <0xffd080c4>;
++
++		sysmgr_sdr_mmc: sysmgr_sdr_mmc {
++			#clock-cells = <0>;
++			compatible = "altr,sysmgr-sdmmc-sdr";
++			reg = <0x108 1>;
++		};
+ 	};
+diff --git a/arch/arm/boot/dts/socfpga.dtsi b/arch/arm/boot/dts/socfpga.dtsi
+index e273fa9..eb990d2 100644
+--- a/arch/arm/boot/dts/socfpga.dtsi
++++ b/arch/arm/boot/dts/socfpga.dtsi
+@@ -521,8 +521,16 @@
+ 			};
  
- static void dw_mci_socfpga_prepare_command(struct dw_mci *host, u32 *cmdr)
- {
--	struct dw_mci_socfpga_priv_data *priv = host->priv;
--
--	if (priv->hs_timing & DRV_CLK_PHASE_SHIFT_SEL_MASK)
--		*cmdr |= SDMMC_CMD_USE_HOLD_REG;
--}
--
--static int dw_mci_socfpga_parse_dt(struct dw_mci *host)
--{
--	struct dw_mci_socfpga_priv_data *priv = host->priv;
--	struct device_node *np = host->dev->of_node;
--	u32 timing[2];
--	u32 div = 0;
--	int ret;
--
--	ret = of_property_read_u32(np, "altr,dw-mshc-ciu-div", &div);
--	if (ret)
--		dev_info(host->dev, "No dw-mshc-ciu-div specified, assuming 1");
--	priv->ciu_div = div;
--
--	ret = of_property_read_u32_array(np,
--			"altr,dw-mshc-sdr-timing", timing, 2);
--	if (ret)
--		return ret;
--
--	priv->hs_timing = SYSMGR_SDMMC_CTRL_SET(timing[0], timing[1]);
--	return 0;
-+	*cmdr |= SDMMC_CMD_USE_HOLD_REG;
- }
- 
- static const struct dw_mci_drv_data socfpga_drv_data = {
--	.init			= dw_mci_socfpga_priv_init,
- 	.setup_clock		= dw_mci_socfpga_setup_clock,
- 	.prepare_command	= dw_mci_socfpga_prepare_command,
--	.parse_dt		= dw_mci_socfpga_parse_dt,
+ 		sysmgr@ffd08000 {
+-				compatible = "altr,sys-mgr";
+-				reg = <0xffd08000 0x4000>;
++			#address-cells = <1>;
++			#size-cells = <1>;
++			compatible = "altr,sys-mgr", "syscon";
++			reg = <0xffd08000 0x4000>;
++
++			sysmgr_sdr_mmc: sysmgr_sdr_mmc {
++				#clock-cells = <0>;
++				compatible = "altr,sysmgr-sdmmc-sdr";
++				reg = <0x108 1>;
+ 			};
++		};
+ 	};
  };
- 
- static const struct of_device_id dw_mci_socfpga_match[] = {
 -- 
 1.7.9.5
 
