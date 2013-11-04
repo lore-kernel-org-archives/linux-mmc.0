@@ -1,72 +1,49 @@
-From: Alexey Neyman <stilor@att.net>
-Subject: Avoid needless loop in sdhci_irq() for Card Interrupt
-Date: Mon, 04 Nov 2013 10:43:59 -0800
-Message-ID: <3478818.ZVgDgJjmfN@mistral>
+From: Bing Zhao <bzhao-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>
+Subject: RE: mwifiex_sdio on chromebook
+Date: Mon, 4 Nov 2013 11:46:19 -0800
+Message-ID: <477F20668A386D41ADCC57781B1F70430F45758053@SC-VEXCH1.marvell.com>
+References: <5276491F.20207@mail.ru>
+ <477F20668A386D41ADCC57781B1F70430F45757E63@SC-VEXCH1.marvell.com>
+ <527703E6.8040504@mail.ru>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="nextPart15375689.Pz1tcezmgv"
-Content-Transfer-Encoding: 7Bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from nm18-vm3.access.bullet.mail.gq1.yahoo.com ([216.39.63.76]:21747
-	"EHLO nm18-vm3.access.bullet.mail.gq1.yahoo.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1750957Ab3KDSoA (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 4 Nov 2013 13:44:00 -0500
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <527703E6.8040504-JGs/UdohzUI@public.gmane.org>
+Content-Language: en-US
+Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Alexander Varnin <fenixk19-JGs/UdohzUI@public.gmane.org>, "linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Cc: "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-This is a multi-part message in MIME format.
-
---nextPart15375689.Pz1tcezmgv
-Content-Transfer-Encoding: 7Bit
-Content-Type: text/plain; charset="us-ascii"
-
-[Patch ping #3: anyone interested in making sdhci_irq a bit faster?]
-
-Hi all,
-
-I've discovered that the sdhci_irq() function needlessly iterates re-reading 
-the interrupt status and doing nothing (until it runs out of max_loops) when 
-it handles the "Card Interrupt" status in the interrupt status register.
-
-The reason is that the "Card Interrupt" bit is not cleared until the 
-sdhci_irq() calls mmc_signal_sdio_irq(), so if Card Interrupt was asserted, 
-re-reading the interrupt status will find this bit set over and over, even if 
-no other bits are reported.
-
-The fix: ignore Card Interrupt bits in the interrupt status if we already know 
-that mmc_signal_sdio_irq() is going to be called at the end of sdhci_irq().
-
-Signed-off-by: Alexey Neyman <stilor@att.net>
---nextPart15375689.Pz1tcezmgv
-Content-Disposition: attachment; filename="sdhci.c.diff"
-Content-Transfer-Encoding: 7Bit
-Content-Type: text/x-patch; charset="utf-8"; name="sdhci.c.diff"
-
-commit 7f23315b344ca51ddf22a78f326f88404fa8c81d
-Author: Alexey Neyman <stilor@att.net>
-Date:   Wed Oct 9 22:23:54 2013 -0700
-
-    Avoid a loop in sdhci.c.
-
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 7a7fb4f..a83cd1b 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -2491,6 +2491,14 @@ again:
- 	result = IRQ_HANDLED;
- 
- 	intmask = sdhci_readl(host, SDHCI_INT_STATUS);
-+
-+	/*
-+	 * If we know we'll call the driver to signal SDIO IRQ, disregard
-+	 * further indications of Card Interrupt in the status to avoid a
-+	 * needless loop.
-+	 */
-+	if (cardint)
-+		intmask &= ~SDHCI_INT_CARD_INT;
- 	if (intmask && --max_loops)
- 		goto again;
- out:
-
---nextPart15375689.Pz1tcezmgv--
-
+SGkgQWxleGFuZGVyLA0KDQo+ID4gWW91ciBDaHJvbWVib29rIHN1cHBvcnRzIFNESU8gaGlnaCBz
+cGVlZCBtb2RlIChTRElPIDIuMCBzcGVjKS4gU28NCj4gPiA1ME1IeiBpcyBjb3JyZWN0Lg0KPiAN
+Cj4gT2ssIGJ1dCBtYWlubGluZSBrZXJuZWwgZG9lc24ndCB0cnkgdGhpcyBmcmVxdWVuY3kuIEl0
+IHRyaWVzIDQwMGtIeiBhdA0KPiBtb3N0Lg0KPiANCj4gPiBXaGF0IGFyZSB5b3UgdHJ5aW5nIHRv
+IGRvIGhlcmU/IEFyZSB5b3UgdHJ5aW5nIHRvIHJ1biBhIG1haW5saW5lIGtlcm5lbCBvbiB5b3Vy
+IENocm9tZWJvb2s/DQo+IA0KPiBZZXMuIEkndmUgZ290IGtlcm5lbCAzLjQgZnJvbSBHb29nbGUg
+Q2hyb21lIE9TLiBJdCB3b3JrcyBvayBmb3INCj4gbXdpZmlleF9zZGlvLiBCdXQgSSB3YW50IHRv
+IHJ1biBtYWlubGluZSBrZXJuZWwuIEFzIG9mIDMuMTEgaXQgaXMgYWJsZQ0KPiB0byBib290IG9u
+IENocm9tZWJvb2ssIGJ1dCBXaUZpIGRvZXNuJ3Qgd29yay4NCg0KSSBkb24ndCBrbm93IHdoeSB5
+b3Ugd2FudCB0byBkbyB0aGF0LCBidXQgdGhlIG1haW5saW5lIGtlcm5lbCB3b24ndCB3b3JrIG9u
+IHlvdXIgQ2hyb21lYm9vayB1bmxlc3MgeW91IHBvcnQgYWxsIHBsYXRmb3JtIHNwZWNpZmljIGNo
+YW5nZXMgb3ZlciBmcm9tIGNocm9tZW9zLTMuNCB0cmVlLg0KDQo+IA0KPiA+IFlvdSBzYWlkIG1t
+Y19hdHRhY2hfc2RpbyBmdW5jdGlvbiBmYWlscy4gVGhlIG13aWZpZXhfc2RpbyBkcml2ZXIgYW5k
+DQo+ID4gdGhlIGZpcm13YXJlIHdpbGwgbm90IGJlIGxvYWRlZCBhdCBhbGwuDQo+IA0KPiBPaywg
+dGhhdCBpcyBjbGVhci4NCj4gDQo+ID4gQ09ORklHX01NQ19ERUJVRz15LCBhbmQgY29sbGVjdCB0
+aGUgZGVidWcgbG9ncy4NCj4gDQo+IFRoaXMgd2F5IHNlZW1zIG5vdCB2ZXJ5IHVzZWZ1bCwgYmVj
+YXVzZSB0aGVyZSBpcyBhbHNvIGludGVybmFsIGFuZA0KPiBleHRlcm5hbCBzdG9yYWdlIG9uIG1t
+YyBidXMsIHNvIGxvZyBxdWlja2x5IGdldCBnYXJiYWdlZCB3aXRoIGl0LiBEbWVzZw0KPiBzZWVt
+cyB0byBiZSBvdmVyZmxvd2VkIGFuZCBmb3JnZXRzIGVhcmx5IGluaXRpYWxpemF0aW9uLiBJIGhh
+dmUgbWFkZSBhDQo+IGRpcnR5IGhhY2sgdG8gY29sbGVjdCBzb21lIHVzZWZ1bCBpbmZvIGFib3V0
+IGluaXRpYWxpemF0aW9uLiBJIGFtDQo+IGF0dGFjaGluZyBpdC4gUGxlYXNlIGNoZWNrLCBpZiBJ
+IG5lZWQgdG8gYWRkIHNvbWV0aGluZy4gV2lsbCBpdCBiZQ0KPiB1c2VmdWwgdGhpcyB3YXk/DQoN
+CkFzIHNhaWQgYWJvdmUsIHRoaXMgd29u4oCZdCB3b3JrIGJlY2F1c2UgdGhlIENocm9tZWJvb2sg
+c3BlY2lmaWMgY2hhbmdlcyBhcmVuJ3QgcHJlc2VudCBpbiBtYWlubGluZSBrZXJuZWwuIEFueXdh
+eSB5b3UgY2FuIHRha2UgYSBsb29rIGF0IHRoZSBjaHJvbWl1bSBPUyBkZXZlbG9wZXIgZ3VpZGUu
+DQoNCmh0dHA6Ly93d3cuY2hyb21pdW0ub3JnL2Nocm9taXVtLW9zL2RldmVsb3Blci1ndWlkZQ0K
+DQpUaGFua3MsDQpCaW5nDQoNCg==
+--
+To unsubscribe from this list: send the line "unsubscribe linux-wireless" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
