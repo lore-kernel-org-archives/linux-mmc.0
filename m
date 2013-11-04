@@ -1,50 +1,49 @@
-From: "Mrs.Nicole Marois" <nicolemarois0147@gmail.com>
-Subject: Personal Email (4th November 2013)
-Date: Sun, 03 Nov 2013 19:35:14 -1000
-Message-ID: <be39c2b4897113f2ff9edc5a5019e45c@mail.fstbm.ac.ma>
-Reply-To: <nicolemarois7410@gmail.com>
+From: Dong Aisheng <b29396@freescale.com>
+Subject: [PATCH v2 0/5] mmc: sdhci-esdhc-imx: add runtime pm support
+Date: Mon, 4 Nov 2013 16:38:24 +0800
+Message-ID: <1383554309-29065-1-git-send-email-b29396@freescale.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8;
- format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from [196.200.177.4] ([196.200.177.4]:54677 "EHLO
-	servmail.fstbm.ac.ma" rhost-flags-FAIL-FAIL-OK-FAIL)
-	by vger.kernel.org with ESMTP id S1750718Ab3KDHUF (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 4 Nov 2013 02:20:05 -0500
+Received: from mail-db9lp0251.outbound.messaging.microsoft.com ([213.199.154.251]:5602
+	"EHLO db9outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752315Ab3KDI6f (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 4 Nov 2013 03:58:35 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: linux-arm-kernel@lists.infradead.org, cjb@laptop.org, shawn.guo@linaro.org, s.hauer@pengutronix.de, b29396@freescale.com, ulf.hansson@linaro.org
 
-Dear Beloved Friend,
+We disable root clock in runtime pm to save power.
 
-     I am Mrs Nicole Marois Benoite, and i have been suffering from 
-ovarian cancer disease and the doctor says that i have just few days to 
-leave. I am from (Paris) France but based in Africa Burkina Faso since 
-eleven years ago as a business woman dealing with gold exportation.
+Patch 2~4 are some fixes needed for enable runtime pm or it may
+break the UHS cards(SD3.0/eMMC4.5).
 
-Now that i am about to end the race like this, without any family 
-members and no child. I have $3 Million US DOLLARS in Africa Development 
-Bank (ADB) Burkina Faso which i instructed the bank to give St Andrews 
-Missionary Home in Burkina Faso.But my mind is not at rest because i am 
-writing this letter now through the help of my computer beside my sick 
-bed.
+Below are some tests result i ran which passed mmc_test tool after enable rpm:
+SDHC UHS1 on imx6q sabreauto
+eMMC 4.5 on imx6sl evk
+SDXC UHS1 on imx6sl evk
+eMMC DDR on imx6q sabresd
+SDHC on imx6q sabresd
 
-I also have $4.5 Million US Dollars at Eco-Bank here in Burkina Faso 
-and i instructed the bank to transfer the fund to you as foreigner that 
-will apply to the bank after i have gone, that they should release the 
-fund to him/her,but you will assure me that you will take 50% of the 
-fund and give 50% to the orphanages home in your country for my heart to 
-rest.
+ChangeLog:
+v1->v2: only patch 5 changed. Add pm_runtime_set_active
+	based on Ulf's comments.
 
-Respond to me immediately  for further details since I have just few 
-days to end my life due to the ovarian cancer disease, hoping you will 
-understand my point.
+Dong Aisheng (5):
+  mmc: sdhci-pltfm: export pltfm suspend/resume api
+  mmc: sdhci-esdhc-imx: tuning bits should not be cleared during reset
+  mmc: sdhci-esdhc-imx: clear SDHCI_CTRL_EXEC_TUNING should not affect
+    other bits
+  mmc: sdhci-esdhc-imx: fix runtime pm unblance issue
+  mmc: sdhci-esdhc-imx: add runtime pm support
 
-Yours fairly friend,
-Mrs Nicole Marois Benoite
+ drivers/mmc/host/sdhci-esdhc-imx.c |   81 ++++++++++++++++++++++++++++++------
+ drivers/mmc/host/sdhci-pltfm.c     |    6 ++-
+ drivers/mmc/host/sdhci-pltfm.h     |    2 +
+ 3 files changed, 74 insertions(+), 15 deletions(-)
 
 -- 
-This message has been scanned for viruses and
-dangerous content by MailScanner, and is
-believed to be clean.
+1.7.2.rc3
+
 
