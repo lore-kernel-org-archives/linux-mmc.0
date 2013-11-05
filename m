@@ -1,70 +1,65 @@
-From: Chuansheng Liu <chuansheng.liu@intel.com>
-Subject: [PATCH] mmc: sdhci: Setting the host->mrq to NULL before executing
- tuning
-Date: Tue, 05 Nov 2013 14:52:45 +0800
-Message-ID: <1383634365.26153.100.camel@cliu38-desktop-build>
+From: Alexander Varnin <fenixk19-JGs/UdohzUI@public.gmane.org>
+Subject: Re: mwifiex_sdio on chromebook
+Date: Tue, 05 Nov 2013 12:38:38 +0400
+Message-ID: <5278AE8E.9060203@mail.ru>
+References: <5276491F.20207@mail.ru> <477F20668A386D41ADCC57781B1F70430F45757E63@SC-VEXCH1.marvell.com> <527703E6.8040504@mail.ru> <477F20668A386D41ADCC57781B1F70430F45758053@SC-VEXCH1.marvell.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga03.intel.com ([143.182.124.21]:44088 "EHLO mga03.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750704Ab3KEGwd (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 5 Nov 2013 01:52:33 -0500
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <477F20668A386D41ADCC57781B1F70430F45758053-r8ILAu4/owuHXkj8w7BxOhL4W9x8LtSr@public.gmane.org>
+Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Bing Zhao <bzhao-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, "linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Cc: "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: cjb@laptop.org
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, chuansheng.liu@intel.com, chuanxiao.dong@intel.com
 
+04.11.2013 23:46, Bing Zhao =D0=BF=D0=B8=D1=88=D0=B5=D1=82:
+> Hi Alexander,
+>
+>>> Your Chromebook supports SDIO high speed mode (SDIO 2.0 spec). So
+>>> 50MHz is correct.
+>> Ok, but mainline kernel doesn't try this frequency. It tries 400kHz =
+at
+>> most.
+>>
+>>> What are you trying to do here? Are you trying to run a mainline ke=
+rnel on your Chromebook?
+>> Yes. I've got kernel 3.4 from Google Chrome OS. It works ok for
+>> mwifiex_sdio. But I want to run mainline kernel. As of 3.11 it is ab=
+le
+>> to boot on Chromebook, but WiFi doesn't work.
+> I don't know why you want to do that, but the mainline kernel won't w=
+ork on your Chromebook unless you port all platform specific changes ov=
+er from chromeos-3.4 tree.
+>
+>>> You said mmc_attach_sdio function fails. The mwifiex_sdio driver an=
+d
+>>> the firmware will not be loaded at all.
+>> Ok, that is clear.
+>>
+>>> CONFIG_MMC_DEBUG=3Dy, and collect the debug logs.
+>> This way seems not very useful, because there is also internal and
+>> external storage on mmc bus, so log quickly get garbaged with it. Dm=
+esg
+>> seems to be overflowed and forgets early initialization. I have made=
+ a
+>> dirty hack to collect some useful info about initialization. I am
+>> attaching it. Please check, if I need to add something. Will it be
+>> useful this way?
+> As said above, this won=E2=80=99t work because the Chromebook specifi=
+c changes aren't present in mainline kernel. Anyway you can take a look=
+ at the chromium OS developer guide.
+>
+> http://www.chromium.org/chromium-os/developer-guide
+>
+> Thanks,
+> Bing
+>
 
-In function sdhci_request(), it is possible to do the tuning execution
-like below:
-
-sdhci_request() {
-	spin_lock_irqsave(&host->lock, flags);
-	host->mrq = mrq;
-	...
-	spin_unlock_irqrestore(&host->lock, flags);
-
-<=== Here it is possible one pending finish_tasklet get running
-     and it will operate the original mrq, and notified the mrq
-     is done, and causes memory corruption.
-
-	sdhci_execute_tuning(mmc, tuning_opcode);
-	spin_lock_irqsave(&host->lock, flags);
-	host->mrq = mrq;
-...
-}
-
-In the above race place, the original mrq should not be finished wrongly,
-so here before unlock the spinlock, we need to set the host->mrq to NULL
-to avoid this case.
-
-Signed-off-by: Liu, Chuansheng <chuansheng.liu@intel.com>
----
- drivers/mmc/host/sdhci.c |    7 +++++++
- 1 file changed, 7 insertions(+)
-
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 7a7fb4f..c7a001a 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -1391,6 +1391,13 @@ static void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
- 					mmc->card->type == MMC_TYPE_MMC ?
- 					MMC_SEND_TUNING_BLOCK_HS200 :
- 					MMC_SEND_TUNING_BLOCK;
-+
-+				/* Here we need to set the host->mrq to NULL,
-+				 * in case the penging finish_tasklet
-+				 * operates it wrongly.
-+				 */
-+				host->mrq = NULL;
-+
- 				spin_unlock_irqrestore(&host->lock, flags);
- 				sdhci_execute_tuning(mmc, tuning_opcode);
- 				spin_lock_irqsave(&host->lock, flags);
--- 
-1.7.9.5
-
-
-
+It is ported at most already and mainline kernel works good on
+Chromebook. It is just peripheral problem.
+--
+To unsubscribe from this list: send the line "unsubscribe linux-wireles=
+s" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
