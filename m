@@ -1,43 +1,133 @@
-From: Alexey Neyman <stilor@att.net>
-Subject: [PATCH] Avoid needless loop in sdhci_irq()
-Date: Tue,  5 Nov 2013 11:58:46 -0800
-Message-ID: <1383681526-5316-1-git-send-email-stilor@att.net>
-References: <CAA+hA=R=hZfr6Kx_5X8PQ1ck+1wD3C6LOiXyKNMN7yrqdA0YqA@mail.gmail.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAA+hA=R=hZfr6Kx_5X8PQ1ck+1wD3C6LOiXyKNMN7yrqdA0YqA@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>, "open list:SECURE DIGITAL HO..." <linux-mmc@vger.kernel.org>, open list <linux-kernel@vger.kernel.org>
-Cc: Alexey Neyman <stilor@att.net>
+From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Subject: Re: [PATCH 2/3] mmc: tmio_mmc: Convert from legacy to modern PM ops
+Date: Tue, 5 Nov 2013 23:24:27 +0100 (CET)
+Message-ID: <Pine.LNX.4.64.1311052320140.3700@axis700.grange>
+References: <1383653403-10049-1-git-send-email-ulf.hansson@linaro.org>
+ <1383653403-10049-3-git-send-email-ulf.hansson@linaro.org>
+Mime-Version: 1.0
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from moutng.kundenserver.de ([212.227.17.10]:58155 "EHLO
+	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755589Ab3KEWYb (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 5 Nov 2013 17:24:31 -0500
+In-Reply-To: <1383653403-10049-3-git-send-email-ulf.hansson@linaro.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Ian Molton <ian@mnementh.co.uk>
 
-Ignore Card Interrupt bit in the interrupt status if we already know that
-mmc_signal_sdio_irq() is going to be called at the end of sdhci_irq(). This
-avoids a needless loop in sdhci_irq() repeatedly reading interrupt status
-and doing nothing.
+Hi Ulf,
 
-Signed-off-by: Alexey Neyman <stilor@att.net>
+The patch looks good to me in general, just one possible optimisation:
+
+On Tue, 5 Nov 2013, Ulf Hansson wrote:
+
+> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+> ---
+>  drivers/mmc/host/tmio_mmc.c |   32 ++++++++++++++++++--------------
+>  1 file changed, 18 insertions(+), 14 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/tmio_mmc.c b/drivers/mmc/host/tmio_mmc.c
+> index 8860d4d..a56a3fe 100644
+> --- a/drivers/mmc/host/tmio_mmc.c
+> +++ b/drivers/mmc/host/tmio_mmc.c
+> @@ -23,38 +23,39 @@
+>  
+>  #include "tmio_mmc.h"
+>  
+> -#ifdef CONFIG_PM
+> -static int tmio_mmc_suspend(struct platform_device *dev, pm_message_t state)
+> +#ifdef CONFIG_PM_SLEEP
+> +static int tmio_mmc_suspend(struct device *dev)
+>  {
+> -	const struct mfd_cell *cell = mfd_get_cell(dev);
+> +	struct mmc_host *mmc = dev_get_drvdata(dev);
+> +	struct tmio_mmc_host *host = mmc_priv(mmc);
+> +	const struct mfd_cell *cell = mfd_get_cell(host->pdev);
+
+Wouldn't it be better to just add
+
++	struct platform_device *pdev = to_platform_device(dev);
+
+which would also simplify
+
+>  	int ret;
+>  
+> -	ret = tmio_mmc_host_suspend(&dev->dev);
+> +	ret = tmio_mmc_host_suspend(dev);
+>  
+>  	/* Tell MFD core it can disable us now.*/
+>  	if (!ret && cell->disable)
+> -		cell->disable(dev);
+> +		cell->disable(host->pdev);
+
+the above line to just
+
++		cell->disable(pdev);
+
+>  
+>  	return ret;
+>  }
+>  
+> -static int tmio_mmc_resume(struct platform_device *dev)
+> +static int tmio_mmc_resume(struct device *dev)
+>  {
+> -	const struct mfd_cell *cell = mfd_get_cell(dev);
+> +	struct mmc_host *mmc = dev_get_drvdata(dev);
+> +	struct tmio_mmc_host *host = mmc_priv(mmc);
+> +	const struct mfd_cell *cell = mfd_get_cell(host->pdev);
+>  	int ret = 0;
+>  
+>  	/* Tell the MFD core we are ready to be enabled */
+>  	if (cell->resume)
+> -		ret = cell->resume(dev);
+> +		ret = cell->resume(host->pdev);
+
+Ditto in this function.
+
+Thanks
+Guennadi
+
+>  
+>  	if (!ret)
+> -		ret = tmio_mmc_host_resume(&dev->dev);
+> +		ret = tmio_mmc_host_resume(dev);
+>  
+>  	return ret;
+>  }
+> -#else
+> -#define tmio_mmc_suspend NULL
+> -#define tmio_mmc_resume NULL
+>  #endif
+>  
+>  static int tmio_mmc_probe(struct platform_device *pdev)
+> @@ -125,15 +126,18 @@ static int tmio_mmc_remove(struct platform_device *pdev)
+>  
+>  /* ------------------- device registration ----------------------- */
+>  
+> +static const struct dev_pm_ops tmio_mmc_dev_pm_ops = {
+> +	SET_SYSTEM_SLEEP_PM_OPS(tmio_mmc_suspend, tmio_mmc_resume)
+> +};
+> +
+>  static struct platform_driver tmio_mmc_driver = {
+>  	.driver = {
+>  		.name = "tmio-mmc",
+>  		.owner = THIS_MODULE,
+> +		.pm = &tmio_mmc_dev_pm_ops,
+>  	},
+>  	.probe = tmio_mmc_probe,
+>  	.remove = tmio_mmc_remove,
+> -	.suspend = tmio_mmc_suspend,
+> -	.resume = tmio_mmc_resume,
+>  };
+>  
+>  module_platform_driver(tmio_mmc_driver);
+> -- 
+> 1.7.9.5
+> 
+
 ---
- drivers/mmc/host/sdhci.c | 8 ++++++++
- 1 file changed, 8 insertions(+)
-
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 7a7fb4f..a83cd1b 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -2491,6 +2491,14 @@ again:
- 	result = IRQ_HANDLED;
- 
- 	intmask = sdhci_readl(host, SDHCI_INT_STATUS);
-+
-+	/*
-+	 * If we know we'll call the driver to signal SDIO IRQ, disregard
-+	 * further indications of Card Interrupt in the status to avoid a
-+	 * needless loop.
-+	 */
-+	if (cardint)
-+		intmask &= ~SDHCI_INT_CARD_INT;
- 	if (intmask && --max_loops)
- 		goto again;
- out:
--- 
-1.8.4.1
+Guennadi Liakhovetski, Ph.D.
+Freelance Open-Source Software Developer
+http://www.open-technology.de/
