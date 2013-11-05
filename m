@@ -1,32 +1,45 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [PATCH 0/3] mmc: tmio: Use modern PM ops
-Date: Tue,  5 Nov 2013 13:10:00 +0100
-Message-ID: <1383653403-10049-1-git-send-email-ulf.hansson@linaro.org>
+Subject: [PATCH 1/3] mmc: sh_mobile_sdhi: Use modern PM macros to define pm callbacks
+Date: Tue,  5 Nov 2013 13:10:01 +0100
+Message-ID: <1383653403-10049-2-git-send-email-ulf.hansson@linaro.org>
+References: <1383653403-10049-1-git-send-email-ulf.hansson@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wi0-f182.google.com ([209.85.212.182]:61297 "EHLO
-	mail-wi0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753728Ab3KEMKK (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 5 Nov 2013 07:10:10 -0500
-Received: by mail-wi0-f182.google.com with SMTP id ez12so1951152wid.9
-        for <linux-mmc@vger.kernel.org>; Tue, 05 Nov 2013 04:10:09 -0800 (PST)
+Received: from mail-we0-f172.google.com ([74.125.82.172]:42237 "EHLO
+	mail-we0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753728Ab3KEMKM (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 5 Nov 2013 07:10:12 -0500
+Received: by mail-we0-f172.google.com with SMTP id q58so3387760wes.31
+        for <linux-mmc@vger.kernel.org>; Tue, 05 Nov 2013 04:10:10 -0800 (PST)
+In-Reply-To: <1383653403-10049-1-git-send-email-ulf.hansson@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Ian Molton <ian@mnementh.co.uk>
 Cc: Ulf Hansson <ulf.hansson@linaro.org>
 
-This patchset converts tmio and sh_mobile_sdhi to use the modern PM ops.
-
-Ulf Hansson (3):
-  mmc: sh_mobile_sdhi: Use modern PM macros to define pm callbacks
-  mmc: tmio_mmc: Convert from legacy to modern PM ops
-  mmc: tmio: Adapt to proper PM configs for exported functions
-
+Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+---
  drivers/mmc/host/sh_mobile_sdhi.c |    8 ++++----
- drivers/mmc/host/tmio_mmc.c       |   32 ++++++++++++++++++--------------
- drivers/mmc/host/tmio_mmc.h       |    7 +++----
- drivers/mmc/host/tmio_mmc_pio.c   |    7 ++++---
- 4 files changed, 29 insertions(+), 25 deletions(-)
+ 1 file changed, 4 insertions(+), 4 deletions(-)
 
+diff --git a/drivers/mmc/host/sh_mobile_sdhi.c b/drivers/mmc/host/sh_mobile_sdhi.c
+index 87ed3fb..2227a9f 100644
+--- a/drivers/mmc/host/sh_mobile_sdhi.c
++++ b/drivers/mmc/host/sh_mobile_sdhi.c
+@@ -297,10 +297,10 @@ static int sh_mobile_sdhi_remove(struct platform_device *pdev)
+ }
+ 
+ static const struct dev_pm_ops tmio_mmc_dev_pm_ops = {
+-	.suspend = tmio_mmc_host_suspend,
+-	.resume = tmio_mmc_host_resume,
+-	.runtime_suspend = tmio_mmc_host_runtime_suspend,
+-	.runtime_resume = tmio_mmc_host_runtime_resume,
++	SET_SYSTEM_SLEEP_PM_OPS(tmio_mmc_host_suspend, tmio_mmc_host_resume)
++	SET_RUNTIME_PM_OPS(tmio_mmc_host_runtime_suspend,
++			tmio_mmc_host_runtime_resume,
++			NULL)
+ };
+ 
+ static struct platform_driver sh_mobile_sdhi_driver = {
 -- 
 1.7.9.5
 
