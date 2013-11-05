@@ -1,97 +1,48 @@
-From: <dinguyen@altera.com>
-Subject: [PATCHv2 2/4] arm: dts: Add a system manager compatible property
-Date: Mon, 4 Nov 2013 14:36:03 -0600
-Message-ID: <1383597364-25613-3-git-send-email-dinguyen@altera.com>
-References: <1383597364-25613-1-git-send-email-dinguyen@altera.com>
+From: Shawn Guo <shawn.guo@linaro.org>
+Subject: Re: [PATCH v2 0/5] mmc: sdhci-esdhc-imx: add runtime pm support
+Date: Tue, 5 Nov 2013 10:03:37 +0800
+Message-ID: <20131105020335.GC19770@S2101-09.ap.freescale.net>
+References: <1383554309-29065-1-git-send-email-b29396@freescale.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset="us-ascii"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from ch1ehsobe002.messaging.microsoft.com ([216.32.181.182]:28549
-	"EHLO ch1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753181Ab3KDUg0 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 4 Nov 2013 15:36:26 -0500
-In-Reply-To: <1383597364-25613-1-git-send-email-dinguyen@altera.com>
+Received: from am1ehsobe005.messaging.microsoft.com ([213.199.154.208]:29531
+	"EHLO am1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1750798Ab3KECDF (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 4 Nov 2013 21:03:05 -0500
+Content-Disposition: inline
+In-Reply-To: <1383554309-29065-1-git-send-email-b29396@freescale.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: dinh.linux@gmail.com
-Cc: Dinh Nguyen <dinguyen@altera.com>, Arnd Bergmann <arnd@arndb.de>, Mike Turquette <mturquette@linaro.org>, Olof Johansson <olof@lixom.net>, Rob Herring <rob.herring@calxeda.com>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Stephen Warren <swarren@wwwdotorg.org>, Ian Campbell <ian.campbell@citrix.com>, Chris Ball <cjb@laptop.org>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+To: Dong Aisheng <b29396@freescale.com>
+Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, cjb@laptop.org, s.hauer@pengutronix.de, ulf.hansson@linaro.org
 
-From: Dinh Nguyen <dinguyen@altera.com>
+On Mon, Nov 04, 2013 at 04:38:24PM +0800, Dong Aisheng wrote:
+> We disable root clock in runtime pm to save power.
+> 
+> Patch 2~4 are some fixes needed for enable runtime pm or it may
+> break the UHS cards(SD3.0/eMMC4.5).
+> 
+> Below are some tests result i ran which passed mmc_test tool after enable rpm:
+> SDHC UHS1 on imx6q sabreauto
+> eMMC 4.5 on imx6sl evk
+> SDXC UHS1 on imx6sl evk
+> eMMC DDR on imx6q sabresd
+> SDHC on imx6q sabresd
+> 
+> ChangeLog:
+> v1->v2: only patch 5 changed. Add pm_runtime_set_active
+> 	based on Ulf's comments.
+> 
+> Dong Aisheng (5):
+>   mmc: sdhci-pltfm: export pltfm suspend/resume api
+>   mmc: sdhci-esdhc-imx: tuning bits should not be cleared during reset
+>   mmc: sdhci-esdhc-imx: clear SDHCI_CTRL_EXEC_TUNING should not affect
+>     other bits
+>   mmc: sdhci-esdhc-imx: fix runtime pm unblance issue
+>   mmc: sdhci-esdhc-imx: add runtime pm support
 
-The "altr,sysmgr-sdmmc-sdr" compatible property is used for the SOCFPGA
-clk-sysmgr driver. This property represents the register inside the
-system manager that controls the clock phase of the SD/MMC driver.
+For the series,
 
-Also add "syscon" to the system manager node.
-
-Signed-off-by: Dinh Nguyen <dinguyen@altera.com>
-CC: Arnd Bergmann <arnd@arndb.de>
-Cc: Mike Turquette <mturquette@linaro.org>
-CC: Olof Johansson <olof@lixom.net>
-Cc: Rob Herring <rob.herring@calxeda.com>
-Cc: Pawel Moll <pawel.moll@arm.com>
-Cc: Mark Rutland <mark.rutland@arm.com>
-Cc: Stephen Warren <swarren@wwwdotorg.org>
-Cc: Ian Campbell <ian.campbell@citrix.com>
-Cc: Chris Ball <cjb@laptop.org>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: Seungwon Jeon <tgih.jun@samsung.com>
-Cc: devicetree@vger.kernel.org
-Cc: linux-mmc@vger.kernel.org
-CC: linux-arm-kernel@lists.infradead.org
----
- .../bindings/arm/altera/socfpga-system.txt         |   10 ++++++++++
- arch/arm/boot/dts/socfpga.dtsi                     |   12 ++++++++++--
- 2 files changed, 20 insertions(+), 2 deletions(-)
-
-diff --git a/Documentation/devicetree/bindings/arm/altera/socfpga-system.txt b/Documentation/devicetree/bindings/arm/altera/socfpga-system.txt
-index f4d04a0..7a6c7ed 100644
---- a/Documentation/devicetree/bindings/arm/altera/socfpga-system.txt
-+++ b/Documentation/devicetree/bindings/arm/altera/socfpga-system.txt
-@@ -5,9 +5,19 @@ Required properties:
- - reg : Should contain 1 register ranges(address and length)
- - cpu1-start-addr : CPU1 start address in hex.
- 
-+Optional properties:
-+- compatible = "altr,sysmgr-sdmmc-sdr". This compatible property is used
-+to represent the clock phase settings for the SD/MMC IP.
-+
- Example:
- 	 sysmgr@ffd08000 {
- 		compatible = "altr,sys-mgr";
- 		reg = <0xffd08000 0x1000>;
- 		cpu1-start-addr = <0xffd080c4>;
-+
-+		sysmgr_sdr_mmc: sysmgr_sdr_mmc {
-+			#clock-cells = <0>;
-+			compatible = "altr,sysmgr-sdmmc-sdr";
-+			reg = <0x108 1>;
-+		};
- 	};
-diff --git a/arch/arm/boot/dts/socfpga.dtsi b/arch/arm/boot/dts/socfpga.dtsi
-index e273fa9..eb990d2 100644
---- a/arch/arm/boot/dts/socfpga.dtsi
-+++ b/arch/arm/boot/dts/socfpga.dtsi
-@@ -521,8 +521,16 @@
- 			};
- 
- 		sysmgr@ffd08000 {
--				compatible = "altr,sys-mgr";
--				reg = <0xffd08000 0x4000>;
-+			#address-cells = <1>;
-+			#size-cells = <1>;
-+			compatible = "altr,sys-mgr", "syscon";
-+			reg = <0xffd08000 0x4000>;
-+
-+			sysmgr_sdr_mmc: sysmgr_sdr_mmc {
-+				#clock-cells = <0>;
-+				compatible = "altr,sysmgr-sdmmc-sdr";
-+				reg = <0x108 1>;
- 			};
-+		};
- 	};
- };
--- 
-1.7.9.5
-
+Acked-by: Shawn Guo <shawn.guo@linaro.org>
 
