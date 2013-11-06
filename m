@@ -1,49 +1,253 @@
-From: Alexey Neyman <stilor@att.net>
-Subject: [PATCH] mmc: sdhci: Avoid needless loop while handling SDIO interrupts in sdhci_irq()
-Date: Tue,  5 Nov 2013 19:40:36 -0800
-Message-ID: <1383709236-26692-1-git-send-email-stilor@att.net>
-References: <CAA+hA=StthxfMWjQ+0fhdRiPuDDVWUGrrW9E71Q+E3RoF_QdHw@mail.gmail.com>
+From: "Shen, Jackey" <Jackey.Shen@amd.com>
+Subject: RE: [PATCH] mmc: sdhci: supporting PCI MSI
+Date: Wed, 6 Nov 2013 08:13:32 +0000
+Message-ID: <0C8FBB70FF40A94D98BE847F9C171A9803AD4A43@SCYBEXDAG04.amd.com>
+References: <1383299119-3952-1-git-send-email-Jackey.Shen@amd.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from asmtp.lnxw.com ([207.21.185.2]:48643 "EHLO asmtp.lnxw.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752916Ab3KFDjK (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 5 Nov 2013 22:39:10 -0500
-In-Reply-To: <CAA+hA=StthxfMWjQ+0fhdRiPuDDVWUGrrW9E71Q+E3RoF_QdHw@mail.gmail.com>
+Received: from ch1ehsobe004.messaging.microsoft.com ([216.32.181.184]:13969
+	"EHLO ch1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1750924Ab3KFINn convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 6 Nov 2013 03:13:43 -0500
+In-Reply-To: <1383299119-3952-1-git-send-email-Jackey.Shen@amd.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Dong Aisheng <dongas86@gmail.com>, Chris Ball <cjb@laptop.org>, "open list:SECURE DIGITAL HO..." <linux-mmc@vger.kernel.org>, open list <linux-kernel@vger.kernel.org>
-Cc: Alexey Neyman <stilor@att.net>
+To: "Shen, Jackey" <Jackey.Shen@amd.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Cc: "mcuos.com@gmail.com" <mcuos.com@gmail.com>, "Huang, Ray" <Ray.Huang@amd.com>
 
-Ignore Card Interrupt bit in the interrupt status if we already know that
-mmc_signal_sdio_irq() is going to be called at the end of sdhci_irq(). This
-avoids a needless loop in sdhci_irq() repeatedly reading interrupt status
-and doing nothing.
+Hi,
 
-Signed-off-by: Alexey Neyman <stilor@att.net>
-Acked-by: Dong Aisheng <b29396@freescale.com>
----
- drivers/mmc/host/sdhci.c | 8 ++++++++
- 1 file changed, 8 insertions(+)
+This patch is tested on HW platform and work fine.
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 7a7fb4f..a83cd1b 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -2491,6 +2491,14 @@ again:
- 	result = IRQ_HANDLED;
- 
- 	intmask = sdhci_readl(host, SDHCI_INT_STATUS);
-+
-+	/*
-+	 * If we know we'll call the driver to signal SDIO IRQ, disregard
-+	 * further indications of Card Interrupt in the status to avoid a
-+	 * needless loop.
-+	 */
-+	if (cardint)
-+		intmask &= ~SDHCI_INT_CARD_INT;
- 	if (intmask && --max_loops)
- 		goto again;
- out:
--- 
-1.8.4.1
+Thanks,
+Jackey
+
+> -----Original Message-----
+> From: Jackey Shen [mailto:Jackey.Shen@amd.com]
+> Sent: Friday, November 01, 2013 5:45 PM
+> To: linux-mmc@vger.kernel.org
+> Cc: mcuos.com@gmail.com; Huang, Ray; jackey.shen.bo@gmail.com; Shen, Jackey
+> Subject: [PATCH] mmc: sdhci: supporting PCI MSI
+> 
+> Enable MSI support in sdhci-pci driver and provide the mechanism
+> to fall back to Legacy Pin-based Interrupt if MSI register fails.
+> 
+> Signed-off-by: Jackey Shen <Jackey.Shen@amd.com>
+> Reviewed-by: Huang Rui <ray.huang@amd.com>
+> ---
+>  drivers/mmc/host/Kconfig  |  11 +++++
+>  drivers/mmc/host/sdhci.c  | 108 ++++++++++++++++++++++++++++++++++++++++-----
+> -
+>  include/linux/mmc/sdhci.h |   2 +
+>  3 files changed, 109 insertions(+), 12 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+> index 7fc5099..a56cf27 100644
+> --- a/drivers/mmc/host/Kconfig
+> +++ b/drivers/mmc/host/Kconfig
+> @@ -68,6 +68,17 @@ config MMC_SDHCI_PCI
+> 
+>  	  If unsure, say N.
+> 
+> +config MMC_SDHCI_PCI_MSI
+> +	bool "SDHCI support with MSI on PCI bus"
+> +	depends on MMC_SDHCI_PCI && PCI_MSI
+> +	help
+> +	  This enables PCI MSI (Message Signaled Interrupts) for Secure
+> +	  Digital Host Controller Interface.
+> +
+> +	  If you have a controller with this capability, say Y or M here.
+> +
+> +	  If unsure, say N.
+> +
+>  config MMC_RICOH_MMC
+>  	bool "Ricoh MMC Controller Disabler"
+>  	depends on MMC_SDHCI_PCI
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index 6785fb1..de509bc 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -13,6 +13,10 @@
+>   *     - JMicron (hardware and technical support)
+>   */
+> 
+> +#ifdef CONFIG_MMC_SDHCI_PCI_MSI
+> +#include <linux/pci.h>
+> +#endif
+> +
+>  #include <linux/delay.h>
+>  #include <linux/highmem.h>
+>  #include <linux/io.h>
+> @@ -2520,6 +2524,64 @@ out:
+>  	return result;
+>  }
+> 
+> +#ifdef CONFIG_MMC_SDHCI_PCI_MSI
+> +static int sdhci_setup_msi(struct sdhci_host *host)
+> +{
+> +	int ret;
+> +	struct pci_dev *pdev = to_pci_dev(host->mmc->parent);
+> +
+> +	host->msi_enabled = false;
+> +
+> +	ret = pci_enable_msi(pdev);
+> +	if (ret) {
+> +		pr_warn("%s: Failed to allocate MSI entry\n",
+> +			mmc_hostname(host->mmc));
+> +		return ret;
+> +	}
+> +
+> +	ret = request_irq(pdev->irq, sdhci_irq, 0,
+> +		mmc_hostname(host->mmc), host);
+> +	if (ret) {
+> +		pr_warn("%s: Failed to request MSI IRQ %d: %d\n",
+> +		       mmc_hostname(host->mmc), pdev->irq, ret);
+> +		pci_disable_msi(pdev);
+> +		return ret;
+> +	}
+> +
+> +	host->irq = pdev->irq;
+> +	host->msi_enabled = true;
+> +	return ret;
+> +}
+> +
+> +static int sdhci_try_enable_msi(struct sdhci_host *host)
+> +{
+> +	return sdhci_setup_msi(host);
+> +}
+> +
+> +static void sdhci_cleanup_msi(struct sdhci_host *host)
+> +{
+> +	struct pci_dev *pdev = to_pci_dev(host->mmc->parent);
+> +
+> +	free_irq(host->irq, host);
+> +	if (host->msi_enabled) {
+> +		pci_disable_msi(pdev);
+> +		host->msi_enabled = false;
+> +	}
+> +}
+> +
+> +#else
+> +
+> +static int sdhci_try_enable_msi(struct sdhci_host *host)
+> +{
+> +	return 0;
+> +}
+> +
+> +static void sdhci_cleanup_msi(struct sdhci_host *host)
+> +{
+> +	free_irq(host->irq, host);
+> +}
+> +#endif /* CONFIG_MMC_SDHCI_PCI_MSI */
+> +
+> 
+> /*****************************************************************************
+> \
+>   *
+> *
+>   * Suspend/resume
+> *
+> @@ -2569,7 +2631,8 @@ int sdhci_suspend_host(struct sdhci_host *host)
+> 
+>  	if (!device_may_wakeup(mmc_dev(host->mmc))) {
+>  		sdhci_mask_irqs(host, SDHCI_INT_ALL_MASK);
+> -		free_irq(host->irq, host);
+> +		/* free any IRQ and disable MSI */
+> +		sdhci_cleanup_msi(host);
+>  	} else {
+>  		sdhci_enable_irq_wakeups(host);
+>  		enable_irq_wake(host->irq);
+> @@ -2589,10 +2652,22 @@ int sdhci_resume_host(struct sdhci_host *host)
+>  	}
+> 
+>  	if (!device_may_wakeup(mmc_dev(host->mmc))) {
+> -		ret = request_irq(host->irq, sdhci_irq, IRQF_SHARED,
+> -				  mmc_hostname(host->mmc), host);
+> +		/* try to enable MSI */
+> +		ret = sdhci_try_enable_msi(host);
+>  		if (ret)
+> -			return ret;
+> +			pr_warn("%s: Fall back to Legacy Pin-based
+> Interrupt: %d\n",
+> +				mmc_hostname(host->mmc), ret);
+> +
+> +		if (!host->msi_enabled) {
+> +			/* fall back to legacy pin-based interrupt */
+> +			ret = request_irq(host->irq, sdhci_irq, IRQF_SHARED,
+> +					mmc_hostname(host->mmc), host);
+> +			if (ret) {
+> +				pr_err("%s: Failed to request IRQ %d: %d\n",
+> +					 mmc_hostname(host->mmc), host->irq, ret);
+> +				return ret;
+> +			}
+> +		}
+>  	} else {
+>  		sdhci_disable_irq_wakeups(host);
+>  		disable_irq_wake(host->irq);
+> @@ -3212,12 +3287,21 @@ int sdhci_add_host(struct sdhci_host *host)
+> 
+>  	sdhci_init(host, 0);
+> 
+> -	ret = request_irq(host->irq, sdhci_irq, IRQF_SHARED,
+> -		mmc_hostname(mmc), host);
+> -	if (ret) {
+> -		pr_err("%s: Failed to request IRQ %d: %d\n",
+> -		       mmc_hostname(mmc), host->irq, ret);
+> -		goto untasklet;
+> +	/* try to enable MSI */
+> +	ret = sdhci_try_enable_msi(host);
+> +	if (ret)
+> +		pr_warn("%s: Fall back to Legacy Pin-based Interrupt: %d\n",
+> +			mmc_hostname(host->mmc), ret);
+> +
+> +	if (!host->msi_enabled) {
+> +		/* fall back to legacy pin-based interrupt */
+> +		ret = request_irq(host->irq, sdhci_irq, IRQF_SHARED,
+> +				mmc_hostname(host->mmc), host);
+> +		if (ret) {
+> +			pr_err("%s: Failed to request IRQ %d: %d\n",
+> +				 mmc_hostname(host->mmc), host->irq, ret);
+> +			goto untasklet;
+> +		}
+>  	}
+> 
+>  #ifdef CONFIG_MMC_DEBUG
+> @@ -3257,7 +3341,7 @@ int sdhci_add_host(struct sdhci_host *host)
+>  reset:
+>  	sdhci_reset(host, SDHCI_RESET_ALL);
+>  	sdhci_mask_irqs(host, SDHCI_INT_ALL_MASK);
+> -	free_irq(host->irq, host);
+> +	sdhci_cleanup_msi(host);
+>  #endif
+>  untasklet:
+>  	tasklet_kill(&host->card_tasklet);
+> @@ -3300,7 +3384,7 @@ void sdhci_remove_host(struct sdhci_host *host, int dead)
+>  		sdhci_reset(host, SDHCI_RESET_ALL);
+> 
+>  	sdhci_mask_irqs(host, SDHCI_INT_ALL_MASK);
+> -	free_irq(host->irq, host);
+> +	sdhci_cleanup_msi(host);
+> 
+>  	del_timer_sync(&host->timer);
+> 
+> diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
+> index 3e781b8..3812479 100644
+> --- a/include/linux/mmc/sdhci.h
+> +++ b/include/linux/mmc/sdhci.h
+> @@ -99,6 +99,8 @@ struct sdhci_host {
+>  /* Controller has a non-standard host control register */
+>  #define SDHCI_QUIRK2_BROKEN_HOST_CONTROL		(1<<5)
+> 
+> +	bool msi_enabled;	/* SD host controller with PCI MSI enabled */
+> +
+>  	int irq;		/* Device IRQ */
+>  	void __iomem *ioaddr;	/* Mapped address */
+> 
+> --
+> 1.8.1.2
+
 
