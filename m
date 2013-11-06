@@ -1,59 +1,62 @@
 From: Dan Carpenter <dan.carpenter@oracle.com>
-Subject: re: DaVinci: MMC: MMC/SD controller driver for DaVinci family
-Date: Wed, 6 Nov 2013 19:15:03 +0300
-Message-ID: <20131106161503.GG15603@elgon.mountain>
+Subject: re: mmc: sh_mmcif: Terminate DMA transactions when detecting timeout
+ or error
+Date: Wed, 6 Nov 2013 19:15:29 +0300
+Message-ID: <20131106161529.GH15603@elgon.mountain>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from userp1040.oracle.com ([156.151.31.81]:17531 "EHLO
+Received: from userp1040.oracle.com ([156.151.31.81]:17874 "EHLO
 	userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750769Ab3KFQPO (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 6 Nov 2013 11:15:14 -0500
+	with ESMTP id S1755221Ab3KFQPl (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 6 Nov 2013 11:15:41 -0500
 Content-Disposition: inline
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: vipin.bhandari@ti.com
+To: teppei.kamijou.yb@renesas.com
 Cc: linux-mmc@vger.kernel.org
 
-Hello Vipin Bhandari,
+Hello Teppei Kamijou,
 
 This is a semi-automatic email about new static checker warnings.
 
-The patch b4cff4549b7a: "DaVinci: MMC: MMC/SD controller driver for 
-DaVinci family" from Dec 14, 2009, leads to the following Smatch 
-complaint:
+The patch eae309836509: "mmc: sh_mmcif: Terminate DMA transactions 
+when detecting timeout or error" from Dec 12, 2012, leads to the 
+following Smatch complaint:
 
-drivers/mmc/host/davinci_mmc.c:984 mmc_davinci_irq()
-	 error: we previously assumed 'data' could be null (see line 967)
+drivers/mmc/host/sh_mmcif.c:1122 sh_mmcif_end_cmd()
+	 error: we previously assumed 'host->chan_rx' could be null (see line 1105)
 
-drivers/mmc/host/davinci_mmc.c
-   966			/* All blocks sent/received, and CRC checks passed */
-   967			if (data != NULL) {
-                            ^^^^^^^^^^^^
-Check.
+drivers/mmc/host/sh_mmcif.c
+  1104		if (data->flags & MMC_DATA_READ) {
+  1105			if (host->chan_rx)
+                            ^^^^^^^^^^^^^
+Existing check.
 
-   968				if ((host->do_dma == 0) && (host->bytes_left > 0)) {
-   969					/* if datasize < rw_threshold
-   970					 * no RX ints are generated
-   971					 */
-   972					davinci_fifo_data_trans(host, host->bytes_left);
-   973				}
-   974				end_transfer = 1;
-   975				data->bytes_xfered = data->blocks * data->blksz;
-   976			} else {
-   977				dev_err(mmc_dev(host->mmc),
-   978						"DATDNE with no host->data\n");
-   979			}
-   980		}
-   981	
-   982		if (qstatus & MMCST0_TOUTRD) {
-   983			/* Read data timeout */
-   984			data->error = -ETIMEDOUT;
-                        ^^^^^^^^^^^^^^^^^^^^^^^^
-Unchecked dereference.
+  1106				sh_mmcif_start_dma_rx(host);
+  1107		} else {
+  1108			if (host->chan_tx)
+  1109				sh_mmcif_start_dma_tx(host);
+  1110		}
+  1111	
+  1112		if (!host->dma_active) {
+  1113			data->error = sh_mmcif_data_trans(host, host->mrq, cmd->opcode);
+  1114			return !data->error;
+  1115		}
+  1116	
+  1117		/* Running in the IRQ thread, can sleep */
+  1118		time = wait_for_completion_interruptible_timeout(&host->dma_complete,
+  1119								 host->timeout);
+  1120	
+  1121		if (data->flags & MMC_DATA_READ)
+  1122			dma_unmap_sg(host->chan_rx->device->dev,
+                                     ^^^^^^^^^^^^^^^^^^^^^^^^^
+Patch introduces new unchecked dereference.
 
-   985			end_transfer = 1;
-   986	
+Same thing for chan_tx as well.
+
+  1123				     data->sg, data->sg_len,
+  1124				     DMA_FROM_DEVICE);
 
 regards,
 dan carpenter
