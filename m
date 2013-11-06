@@ -1,62 +1,80 @@
 From: Dan Carpenter <dan.carpenter@oracle.com>
-Subject: re: mmc: sh_mmcif: Terminate DMA transactions when detecting timeout
- or error
-Date: Wed, 6 Nov 2013 19:15:29 +0300
-Message-ID: <20131106161529.GH15603@elgon.mountain>
+Subject: re: mmc: sh_mmcif: remove now superfluous sh_mmcif_host::data member
+Date: Wed, 6 Nov 2013 19:16:03 +0300
+Message-ID: <20131106161603.GI15603@elgon.mountain>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from userp1040.oracle.com ([156.151.31.81]:17874 "EHLO
-	userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755221Ab3KFQPl (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 6 Nov 2013 11:15:41 -0500
+Received: from aserp1040.oracle.com ([141.146.126.69]:35734 "EHLO
+	aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751223Ab3KFQQP (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 6 Nov 2013 11:16:15 -0500
 Content-Disposition: inline
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: teppei.kamijou.yb@renesas.com
+To: g.liakhovetski@gmx.de
 Cc: linux-mmc@vger.kernel.org
 
-Hello Teppei Kamijou,
+Hello Guennadi Liakhovetski,
 
 This is a semi-automatic email about new static checker warnings.
 
-The patch eae309836509: "mmc: sh_mmcif: Terminate DMA transactions 
-when detecting timeout or error" from Dec 12, 2012, leads to the 
-following Smatch complaint:
+The patch 699834045f1e: "mmc: sh_mmcif: remove now superfluous 
+sh_mmcif_host::data member" from Dec 26, 2011, leads to the following 
+Smatch complaint:
 
-drivers/mmc/host/sh_mmcif.c:1122 sh_mmcif_end_cmd()
-	 error: we previously assumed 'host->chan_rx' could be null (see line 1105)
+drivers/mmc/host/sh_mmcif.c:822 sh_mmcif_set_cmd()
+	 error: we previously assumed 'data' could be null (see line 787)
 
 drivers/mmc/host/sh_mmcif.c
-  1104		if (data->flags & MMC_DATA_READ) {
-  1105			if (host->chan_rx)
-                            ^^^^^^^^^^^^^
-Existing check.
+   786		/* WDAT / DATW */
+   787		if (data) {
+                    ^^^^
+Check.
 
-  1106				sh_mmcif_start_dma_rx(host);
-  1107		} else {
-  1108			if (host->chan_tx)
-  1109				sh_mmcif_start_dma_tx(host);
-  1110		}
-  1111	
-  1112		if (!host->dma_active) {
-  1113			data->error = sh_mmcif_data_trans(host, host->mrq, cmd->opcode);
-  1114			return !data->error;
-  1115		}
-  1116	
-  1117		/* Running in the IRQ thread, can sleep */
-  1118		time = wait_for_completion_interruptible_timeout(&host->dma_complete,
-  1119								 host->timeout);
-  1120	
-  1121		if (data->flags & MMC_DATA_READ)
-  1122			dma_unmap_sg(host->chan_rx->device->dev,
-                                     ^^^^^^^^^^^^^^^^^^^^^^^^^
-Patch introduces new unchecked dereference.
+   788			tmp |= CMD_SET_WDAT;
+   789			switch (host->bus_width) {
+   790			case MMC_BUS_WIDTH_1:
+   791				tmp |= CMD_SET_DATW_1;
+   792				break;
+   793			case MMC_BUS_WIDTH_4:
+   794				tmp |= CMD_SET_DATW_4;
+   795				break;
+   796			case MMC_BUS_WIDTH_8:
+   797				tmp |= CMD_SET_DATW_8;
+   798				break;
+   799			default:
+   800				dev_err(&host->pd->dev, "Unsupported bus width.\n");
+   801				break;
+   802			}
+   803			switch (host->timing) {
+   804			case MMC_TIMING_UHS_DDR50:
+   805				/*
+   806				 * MMC core will only set this timing, if the host
+   807				 * advertises the MMC_CAP_UHS_DDR50 capability. MMCIF
+   808				 * implementations with this capability, e.g. sh73a0,
+   809				 * will have to set it in their platform data.
+   810				 */
+   811				tmp |= CMD_SET_DARS;
+   812				break;
+   813			}
+   814		}
+   815		/* DWEN */
+   816		if (opc == MMC_WRITE_BLOCK || opc == MMC_WRITE_MULTIPLE_BLOCK)
+   817			tmp |= CMD_SET_DWEN;
+   818		/* CMLTE/CMD12EN */
+   819		if (opc == MMC_READ_MULTIPLE_BLOCK || opc == MMC_WRITE_MULTIPLE_BLOCK) {
+   820			tmp |= CMD_SET_CMLTE | CMD_SET_CMD12EN;
+   821			sh_mmcif_bitset(host, MMCIF_CE_BLOCK_SET,
+   822					data->blocks << 16);
+                                        ^^^^^^^^^^^^
+Dereference.
 
-Same thing for chan_tx as well.
+We used to assume that host->data might be NULL but that mrq->data was
+a valid pointer.  But now they are unified into one pointer.
 
-  1123				     data->sg, data->sg_len,
-  1124				     DMA_FROM_DEVICE);
+   823		}
+   824		/* RIDXC[1:0] check bits */
 
 regards,
 dan carpenter
