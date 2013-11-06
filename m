@@ -1,101 +1,69 @@
-From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: Re: [PATCH 3/3] mmc: tmio: Adapt to proper PM configs for exported
- functions
-Date: Tue, 5 Nov 2013 23:29:41 +0100 (CET)
-Message-ID: <Pine.LNX.4.64.1311052329270.3700@axis700.grange>
-References: <1383653403-10049-1-git-send-email-ulf.hansson@linaro.org>
- <1383653403-10049-4-git-send-email-ulf.hansson@linaro.org>
+From: Dong Aisheng <dongas86@gmail.com>
+Subject: Re: [PATCH] Avoid needless loop in sdhci_irq()
+Date: Wed, 6 Nov 2013 10:56:27 +0800
+Message-ID: <CAA+hA=StthxfMWjQ+0fhdRiPuDDVWUGrrW9E71Q+E3RoF_QdHw@mail.gmail.com>
+References: <CAA+hA=R=hZfr6Kx_5X8PQ1ck+1wD3C6LOiXyKNMN7yrqdA0YqA@mail.gmail.com>
+	<1383681526-5316-1-git-send-email-stilor@att.net>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.17.10]:54755 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755696Ab3KEW3o (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 5 Nov 2013 17:29:44 -0500
-In-Reply-To: <1383653403-10049-4-git-send-email-ulf.hansson@linaro.org>
+Received: from mail-qa0-f48.google.com ([209.85.216.48]:36566 "EHLO
+	mail-qa0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755880Ab3KFC42 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 5 Nov 2013 21:56:28 -0500
+In-Reply-To: <1383681526-5316-1-git-send-email-stilor@att.net>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Ian Molton <ian@mnementh.co.uk>
+To: Alexey Neyman <stilor@att.net>
+Cc: Chris Ball <cjb@laptop.org>, "open list:SECURE DIGITAL HO..." <linux-mmc@vger.kernel.org>, open list <linux-kernel@vger.kernel.org>
 
-On Tue, 5 Nov 2013, Ulf Hansson wrote:
+On Wed, Nov 6, 2013 at 3:58 AM, Alexey Neyman <stilor@att.net> wrote:
+> Ignore Card Interrupt bit in the interrupt status if we already know that
+> mmc_signal_sdio_irq() is going to be called at the end of sdhci_irq(). This
+> avoids a needless loop in sdhci_irq() repeatedly reading interrupt status
+> and doing nothing.
+>
+> Signed-off-by: Alexey Neyman <stilor@att.net>
 
-> Since the users of the exported PM functions are now using the modern
-> PM ops macros, we can convert to the proper corresponding PM configs.
-> 
-> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+You need improve the patch title a bit, like:
+mmc: sdhci: avoid needless loop for handle SDIO interrupts in sdhci_irq
 
-Acked-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Otherwise,
+Acked-by: Dong Aisheng <b29396@freescale.com>
 
-Thanks
-Guennadi
+You could resend with my ack.
+
+Regards
+Dong Aisheng
 
 > ---
->  drivers/mmc/host/tmio_mmc.h     |    7 +++----
->  drivers/mmc/host/tmio_mmc_pio.c |    7 ++++---
->  2 files changed, 7 insertions(+), 7 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/tmio_mmc.h b/drivers/mmc/host/tmio_mmc.h
-> index 86fd21e..6c5b45a 100644
-> --- a/drivers/mmc/host/tmio_mmc.h
-> +++ b/drivers/mmc/host/tmio_mmc.h
-> @@ -163,16 +163,15 @@ static inline void tmio_mmc_abort_dma(struct tmio_mmc_host *host)
->  }
->  #endif
->  
-> -#ifdef CONFIG_PM
-> +#ifdef CONFIG_PM_SLEEP
->  int tmio_mmc_host_suspend(struct device *dev);
->  int tmio_mmc_host_resume(struct device *dev);
-> -#else
-> -#define tmio_mmc_host_suspend NULL
-> -#define tmio_mmc_host_resume NULL
->  #endif
->  
-> +#ifdef CONFIG_PM_RUNTIME
->  int tmio_mmc_host_runtime_suspend(struct device *dev);
->  int tmio_mmc_host_runtime_resume(struct device *dev);
-> +#endif
->  
->  static inline u16 sd_ctrl_read16(struct tmio_mmc_host *host, int addr)
->  {
-> diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
-> index f3b2d8c..472e803 100644
-> --- a/drivers/mmc/host/tmio_mmc_pio.c
-> +++ b/drivers/mmc/host/tmio_mmc_pio.c
-> @@ -1140,7 +1140,7 @@ void tmio_mmc_host_remove(struct tmio_mmc_host *host)
->  }
->  EXPORT_SYMBOL(tmio_mmc_host_remove);
->  
-> -#ifdef CONFIG_PM
-> +#ifdef CONFIG_PM_SLEEP
->  int tmio_mmc_host_suspend(struct device *dev)
->  {
->  	struct mmc_host *mmc = dev_get_drvdata(dev);
-> @@ -1163,9 +1163,9 @@ int tmio_mmc_host_resume(struct device *dev)
->  	return 0;
->  }
->  EXPORT_SYMBOL(tmio_mmc_host_resume);
-> +#endif
->  
-> -#endif	/* CONFIG_PM */
-> -
-> +#ifdef CONFIG_PM_RUNTIME
->  int tmio_mmc_host_runtime_suspend(struct device *dev)
->  {
->  	return 0;
-> @@ -1182,5 +1182,6 @@ int tmio_mmc_host_runtime_resume(struct device *dev)
->  	return 0;
->  }
->  EXPORT_SYMBOL(tmio_mmc_host_runtime_resume);
-> +#endif
->  
->  MODULE_LICENSE("GPL v2");
-> -- 
-> 1.7.9.5
-> 
-
----
-Guennadi Liakhovetski, Ph.D.
-Freelance Open-Source Software Developer
-http://www.open-technology.de/
+>  drivers/mmc/host/sdhci.c | 8 ++++++++
+>  1 file changed, 8 insertions(+)
+>
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index 7a7fb4f..a83cd1b 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -2491,6 +2491,14 @@ again:
+>         result = IRQ_HANDLED;
+>
+>         intmask = sdhci_readl(host, SDHCI_INT_STATUS);
+> +
+> +       /*
+> +        * If we know we'll call the driver to signal SDIO IRQ, disregard
+> +        * further indications of Card Interrupt in the status to avoid a
+> +        * needless loop.
+> +        */
+> +       if (cardint)
+> +               intmask &= ~SDHCI_INT_CARD_INT;
+>         if (intmask && --max_loops)
+>                 goto again;
+>  out:
+> --
+> 1.8.4.1
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-kernel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> Please read the FAQ at  http://www.tux.org/lkml/
