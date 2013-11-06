@@ -1,59 +1,49 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH] mmc: trivial: fix the compiling warning
-Date: Wed, 06 Nov 2013 12:20:46 +0900
-Message-ID: <5279B58E.8040002@samsung.com>
-References: <1383653403-10049-1-git-send-email-ulf.hansson@linaro.org>
- <003201ceda2a$a1546f70$e3fd4e50$%jun@samsung.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+From: Alexey Neyman <stilor@att.net>
+Subject: [PATCH] mmc: sdhci: Avoid needless loop while handling SDIO interrupts in sdhci_irq()
+Date: Tue,  5 Nov 2013 19:40:36 -0800
+Message-ID: <1383709236-26692-1-git-send-email-stilor@att.net>
+References: <CAA+hA=StthxfMWjQ+0fhdRiPuDDVWUGrrW9E71Q+E3RoF_QdHw@mail.gmail.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout4.samsung.com ([203.254.224.34]:9108 "EHLO
-	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751050Ab3KFDUo (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 5 Nov 2013 22:20:44 -0500
-Received: from epcpsbgr5.samsung.com
- (u145.gpu120.samsung.co.kr [203.254.230.145])
- by mailout4.samsung.com (Oracle Communications Messaging Server 7u4-24.01
- (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTP id <0MVT00FVGNYJ3BA0@mailout4.samsung.com> for
- linux-mmc@vger.kernel.org; Wed, 06 Nov 2013 12:20:43 +0900 (KST)
-In-reply-to: <003201ceda2a$a1546f70$e3fd4e50$%jun@samsung.com>
+Received: from asmtp.lnxw.com ([207.21.185.2]:48643 "EHLO asmtp.lnxw.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752916Ab3KFDjK (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 5 Nov 2013 22:39:10 -0500
+In-Reply-To: <CAA+hA=StthxfMWjQ+0fhdRiPuDDVWUGrrW9E71Q+E3RoF_QdHw@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Seungwon Jeon <tgih.jun@samsung.com>, 'Chris Ball' <cjb@laptop.org>, 'Ulf Hansson' <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org
+To: Dong Aisheng <dongas86@gmail.com>, Chris Ball <cjb@laptop.org>, "open list:SECURE DIGITAL HO..." <linux-mmc@vger.kernel.org>, open list <linux-kernel@vger.kernel.org>
+Cc: Alexey Neyman <stilor@att.net>
 
-I known this patch is already included into Ulf's patchset.
+Ignore Card Interrupt bit in the interrupt status if we already know that
+mmc_signal_sdio_irq() is going to be called at the end of sdhci_irq(). This
+avoids a needless loop in sdhci_irq() repeatedly reading interrupt status
+and doing nothing.
 
-mmc: core: Silence compiler warning in __mmc_switch
+Signed-off-by: Alexey Neyman <stilor@att.net>
+Acked-by: Dong Aisheng <b29396@freescale.com>
+---
+ drivers/mmc/host/sdhci.c | 8 ++++++++
+ 1 file changed, 8 insertions(+)
 
-Best regards,
-Jaehoon Chung
-
-On 11/05/2013 10:26 PM, Seungwon Jeon wrote:
-> Fixed the following warning.
-> 
-> drivers/mmc/core/mmc_ops.c:484:11: warning: 'status' may be used
-> uninitialized in this function [-Wmaybe-uninitialized]
-> 
-> Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
-> ---
->  drivers/mmc/core/mmc_ops.c |    2 +-
->  1 files changed, 1 insertions(+), 1 deletions(-)
-> 
-> diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
-> index aae8d8b..e5b5eeb 100644
-> --- a/drivers/mmc/core/mmc_ops.c
-> +++ b/drivers/mmc/core/mmc_ops.c
-> @@ -414,7 +414,7 @@ int __mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
->  	int err;
->  	struct mmc_command cmd = {0};
->  	unsigned long timeout;
-> -	u32 status;
-> +	u32 status = 0;
->  	bool ignore_crc = false;
->  
->  	BUG_ON(!card);
-> 
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 7a7fb4f..a83cd1b 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -2491,6 +2491,14 @@ again:
+ 	result = IRQ_HANDLED;
+ 
+ 	intmask = sdhci_readl(host, SDHCI_INT_STATUS);
++
++	/*
++	 * If we know we'll call the driver to signal SDIO IRQ, disregard
++	 * further indications of Card Interrupt in the status to avoid a
++	 * needless loop.
++	 */
++	if (cardint)
++		intmask &= ~SDHCI_INT_CARD_INT;
+ 	if (intmask && --max_loops)
+ 		goto again;
+ out:
+-- 
+1.8.4.1
 
