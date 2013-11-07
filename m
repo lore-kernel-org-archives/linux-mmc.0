@@ -1,373 +1,236 @@
-From: =?utf-8?B?U8O2cmVu?= Brinkmann <soren.brinkmann@xilinx.com>
-Subject: Re: [PATCH v2 1/2] mmc: arasan: Add driver for Arasan SDHCI
-Date: Wed, 6 Nov 2013 13:41:25 -0800
-Message-ID: <b3f788b3-dfc3-422e-9a74-b796c0fd3207@DB8EHSMHS004.ehs.local>
-References: <1383151090-13885-1-git-send-email-soren.brinkmann@xilinx.com>
+From: Seungwon Jeon <tgih.jun@samsung.com>
+Subject: RE: [PATCH 2/3] mmc: correct some exclusive card state to clear
+Date: Thu, 07 Nov 2013 12:51:12 +0900
+Message-ID: <001d01cedb6c$9a16f5f0$ce44e1d0$%jun@samsung.com>
+References: <1383653403-10049-1-git-send-email-ulf.hansson@linaro.org>
+ <003501ceda2a$d7ae2980$870a7c80$%jun@samsung.com>
+ <CAPDyKFr2wWQFQbY0VmZj4T-aoH3uxFOnt5=xBt2JAh4kckS05Q@mail.gmail.com>
+ <001301cedad3$7de1fcc0$79a5f640$%jun@samsung.com>
+ <CAPDyKFpRWSNfz-2EUjxf32xZsAEGF_JnFSfmtN6t-g4FSQbnWg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-doc-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <1383151090-13885-1-git-send-email-soren.brinkmann@xilinx.com>
-Sender: linux-doc-owner@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, linux-doc@vger.kernel.org, devicetree@vger.kernel.org, Tomasz Figa <tomasz.figa@gmail.com>, Rob Herring <rob.herring@calxeda.com>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Stephen Warren <swarren@wwwdotorg.org>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Rob Landley <rob@landley.net>, Russell King <linux@arm.linux.org.uk>, Michal Simek <michal.simek@xilinx.com>, Grant Likely <grant.likely@linaro.org>
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout4.samsung.com ([203.254.224.34]:23930 "EHLO
+	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752686Ab3KGDvP (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 6 Nov 2013 22:51:15 -0500
+Received: from epcpsbgr3.samsung.com
+ (u143.gpu120.samsung.co.kr [203.254.230.143])
+ by mailout4.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+ (7.0.4.24.0) 64bit (built Nov 17 2011))
+ with ESMTP id <0MVV00MV5K1CH680@mailout4.samsung.com> for
+ linux-mmc@vger.kernel.org; Thu, 07 Nov 2013 12:51:13 +0900 (KST)
+In-reply-to: <CAPDyKFpRWSNfz-2EUjxf32xZsAEGF_JnFSfmtN6t-g4FSQbnWg@mail.gmail.com>
+Content-language: ko
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: 'Ulf Hansson' <ulf.hansson@linaro.org>
+Cc: 'Chris Ball' <cjb@laptop.org>, 'linux-mmc' <linux-mmc@vger.kernel.org>
 
-Hi Chris,
+On Wed, November 06, 2013, Ulf Hansson wrote:
+> On 6 November 2013 10:35, Seungwon Jeon <tgih.jun@samsung.com> wrote:
+> > On Tue, November 05, 2013, Ulf Hansson wrote:
+> >> Hi Seungwon,
+> >>
+> >>
+> >> On 5 November 2013 14:27, Seungwon Jeon <tgih.jun@samsung.com> wrote:
+> >> > Card state related to speed mode should be in non-overlapped.
+> >> > Consideration for all cases is required when being cleared.
+> >> > Also, MMC_STATE_PRESENT and MMC_STATE_REMOVED are same.
+> >> > It's exclusive state which cannot be set at the same time.
+> >> >
+> >> > Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
+> >> > ---
+> >> >  drivers/mmc/core/core.c  |    1 -
+> >> >  drivers/mmc/core/mmc.c   |    4 ++--
+> >> >  drivers/mmc/core/sd.c    |    5 +++--
+> >> >  drivers/mmc/core/sdio.c  |    5 ++++-
+> >> >  include/linux/mmc/card.h |   37 +++++++++++++++++++++++++++++++------
+> >> >  5 files changed, 40 insertions(+), 12 deletions(-)
+> >> >
+> >> > diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> >> > index 57a2b40..b183d56 100644
+> >> > --- a/drivers/mmc/core/core.c
+> >> > +++ b/drivers/mmc/core/core.c
+> >> > @@ -2281,7 +2281,6 @@ static int mmc_do_hw_reset(struct mmc_host *host, int check)
+> >> >                 }
+> >> >         }
+> >> >
+> >> > -       host->card->state &= ~(MMC_STATE_HIGHSPEED | MMC_STATE_HIGHSPEED_DDR);
+> >> >         if (mmc_host_is_spi(host)) {
+> >> >                 host->ios.chip_select = MMC_CS_HIGH;
+> >> >                 host->ios.bus_mode = MMC_BUSMODE_PUSHPULL;
+> >> > diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+> >> > index f4f8991..1668ea4 100644
+> >> > --- a/drivers/mmc/core/mmc.c
+> >> > +++ b/drivers/mmc/core/mmc.c
+> >> > @@ -1597,11 +1597,11 @@ static int _mmc_suspend(struct mmc_host *host, bool is_suspend)
+> >> >                 err = mmc_sleep(host);
+> >> >         else if (!mmc_host_is_spi(host))
+> >> >                 err = mmc_deselect_cards(host);
+> >> > -       host->card->state &= ~(MMC_STATE_HIGHSPEED | MMC_STATE_HIGHSPEED_200);
+> >> >
+> >> >         if (!err) {
+> >> >                 mmc_power_off(host);
+> >> >                 mmc_card_set_suspended(host->card);
+> >> > +               mmc_card_set_ds(host->card);
+> >> >         }
+> >> >  out:
+> >> >         mmc_release_host(host);
+> >> > @@ -1727,8 +1727,8 @@ static int mmc_power_restore(struct mmc_host *host)
+> >> >  {
+> >> >         int ret;
+> >> >
+> >> > -       host->card->state &= ~(MMC_STATE_HIGHSPEED | MMC_STATE_HIGHSPEED_200);
+> >> >         mmc_claim_host(host);
+> >> > +       mmc_card_set_ds(host->card);
+> >> >         ret = mmc_init_card(host, host->card->ocr, host->card);
+> >> >         mmc_release_host(host);
+> >> >
+> >> > diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
+> >> > index 6f42050..b19a8f4 100644
+> >> > --- a/drivers/mmc/core/sd.c
+> >> > +++ b/drivers/mmc/core/sd.c
+> >> > @@ -1082,10 +1082,11 @@ static int _mmc_sd_suspend(struct mmc_host *host)
+> >> >
+> >> >         if (!mmc_host_is_spi(host))
+> >> >                 err = mmc_deselect_cards(host);
+> >> > -       host->card->state &= ~MMC_STATE_HIGHSPEED;
+> >> > +
+> >> >         if (!err) {
+> >> >                 mmc_power_off(host);
+> >> >                 mmc_card_set_suspended(host->card);
+> >> > +               mmc_card_set_ds(host->card);
+> >> >         }
+> >> >
+> >> >  out:
+> >> > @@ -1191,8 +1192,8 @@ static int mmc_sd_power_restore(struct mmc_host *host)
+> >> >  {
+> >> >         int ret;
+> >> >
+> >> > -       host->card->state &= ~MMC_STATE_HIGHSPEED;
+> >> >         mmc_claim_host(host);
+> >> > +       mmc_card_set_ds(host->card);
+> >> >         ret = mmc_sd_init_card(host, host->card->ocr, host->card);
+> >> >         mmc_release_host(host);
+> >> >
+> >> > diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
+> >> > index 4d721c6..7c6c43c 100644
+> >> > --- a/drivers/mmc/core/sdio.c
+> >> > +++ b/drivers/mmc/core/sdio.c
+> >> > @@ -968,8 +968,10 @@ static int mmc_sdio_suspend(struct mmc_host *host)
+> >> >                 mmc_release_host(host);
+> >> >         }
+> >> >
+> >> > -       if (!err && !mmc_card_keep_power(host))
+> >> > +       if (!err && !mmc_card_keep_power(host)) {
+> >> >                 mmc_power_off(host);
+> >> > +               mmc_card_set_ds(host->card);
+> >> > +       }
+> >> >
+> >> >         return err;
+> >> >  }
+> >> > @@ -1075,6 +1077,7 @@ static int mmc_sdio_power_restore(struct mmc_host *host)
+> >> >         if (ret)
+> >> >                 goto out;
+> >> >
+> >> > +       mmc_card_set_ds(host->card);
+> >> >         ret = mmc_sdio_init_card(host, host->card->ocr, host->card,
+> >> >                                 mmc_card_keep_power(host));
+> >> >         if (!ret && host->sdio_irqs)
+> >> > diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+> >> > index c119735..f2c2620 100644
+> >> > --- a/include/linux/mmc/card.h
+> >> > +++ b/include/linux/mmc/card.h
+> >> > @@ -260,6 +260,11 @@ struct mmc_card {
+> >> >  #define MMC_STATE_HIGHSPEED_200        (1<<8)          /* card is in HS200 mode */
+> >> >  #define MMC_STATE_DOING_BKOPS  (1<<10)         /* card is doing BKOPS */
+> >> >  #define MMC_STATE_SUSPENDED    (1<<11)         /* card is suspended */
+> >> > +#define MMC_STATE_SPEED_MASK   (MMC_STATE_HIGHSPEED | \
+> >> > +                                MMC_STATE_HIGHSPEED_DDR | \
+> >> > +                                MMC_STATE_ULTRAHIGHSPEED | \
+> >> > +                                MMC_STATE_HIGHSPEED_200)
+> >> > +                                               /* Mask for default speed(DS) */
+> >> >         unsigned int            quirks;         /* card quirks */
+> >> >  #define MMC_QUIRK_LENIENT_FN0  (1<<0)          /* allow SDIO FN0 writes outside of the VS CCCR
+> range
+> >> */
+> >> >  #define MMC_QUIRK_BLKSZ_FOR_BYTE_MODE (1<<1)   /* use func->cur_blksize */
+> >> > @@ -431,19 +436,39 @@ static inline void __maybe_unused remove_quirk(struct mmc_card *card, int
+> data)
+> >> >  #define mmc_card_doing_bkops(c)        ((c)->state & MMC_STATE_DOING_BKOPS)
+> >> >  #define mmc_card_suspended(c)  ((c)->state & MMC_STATE_SUSPENDED)
+> >> >
+> >> > -#define mmc_card_set_present(c)        ((c)->state |= MMC_STATE_PRESENT)
+> >> > +
+> >> >  #define mmc_card_set_readonly(c) ((c)->state |= MMC_STATE_READONLY)
+> >> > -#define mmc_card_set_highspeed(c) ((c)->state |= MMC_STATE_HIGHSPEED)
+> >> > -#define mmc_card_set_hs200(c)  ((c)->state |= MMC_STATE_HIGHSPEED_200)
+> >> >  #define mmc_card_set_blockaddr(c) ((c)->state |= MMC_STATE_BLOCKADDR)
+> >> > -#define mmc_card_set_ddr_mode(c) ((c)->state |= MMC_STATE_HIGHSPEED_DDR)
+> >> > -#define mmc_card_set_uhs(c) ((c)->state |= MMC_STATE_ULTRAHIGHSPEED)
+> >> >  #define mmc_card_set_ext_capacity(c) ((c)->state |= MMC_CARD_SDXC)
+> >> > -#define mmc_card_set_removed(c) ((c)->state |= MMC_CARD_REMOVED)
+> >> >  #define mmc_card_set_doing_bkops(c)    ((c)->state |= MMC_STATE_DOING_BKOPS)
+> >> >  #define mmc_card_clr_doing_bkops(c)    ((c)->state &= ~MMC_STATE_DOING_BKOPS)
+> >> >  #define mmc_card_set_suspended(c) ((c)->state |= MMC_STATE_SUSPENDED)
+> >> >  #define mmc_card_clr_suspended(c) ((c)->state &= ~MMC_STATE_SUSPENDED)
+> >> > +#define mmc_card_set_highspeed(c) \
+> >> > +                       ((c)->state = \
+> >> > +                        ((c)->state & ~MMC_STATE_SPEED_MASK) | \
+> >> > +                        MMC_STATE_HIGHSPEED)
+> >> > +#define mmc_card_set_ddr_mode(c) \
+> >> > +                       ((c)->state = \
+> >> > +                        ((c)->state & ~MMC_STATE_SPEED_MASK) | \
+> >> > +                        MMC_STATE_HIGHSPEED_DDR)
+> >> > +#define mmc_card_set_hs200(c) \
+> >> > +                       ((c)->state = \
+> >> > +                        ((c)->state & ~MMC_STATE_SPEED_MASK) | \
+> >> > +                        MMC_STATE_HIGHSPEED_200)
+> >> > +#define mmc_card_set_uhs(c) \
+> >> > +                       ((c)->state = \
+> >> > +                        ((c)->state & ~MMC_STATE_SPEED_MASK) | \
+> >> > +                        MMC_STATE_ULTRAHIGHSPEED)
+> >> > +#define mmc_card_set_present(c) \
+> >> > +                       ((c)->state = \
+> >> > +                        ((c)->state & ~MMC_CARD_REMOVED) | \
+> >> > +                        MMC_STATE_PRESENT)
+> >> > +#define mmc_card_set_removed(c) \
+> >> > +                       ((c)->state = \
+> >> > +                        ((c)->state & ~MMC_STATE_PRESENT) | \
+> >> > +                        MMC_CARD_REMOVED)
+> >> > +#define mmc_card_set_ds(c)     ((c)->state &= ~MMC_STATE_SPEED_MASK)
+> >>
+> >> I have a feeling of that this "card->state" has become a container for
+> >> a lot of mixed stuff. So your clean up is definitely justified.
+> >>
+> >> I have a suggestion for how we can improve simplicity, how about
+> >> dividing the state into two variables instead:
+> >>
+> >> -> One part are actually used in the mmc core code to track a state
+> >> and to make certain decisions during execution, like
+> >> MMC_STATE_SUSPENDED, MMC_STATE_PRESENT, MMC_CARD_REMOVED.
+> >>
+> >> -> The other part is more to be considered as the current operational
+> >> state, for example the bus speed mode. The information in this "state
+> >> variable" will be re-negotiated as a part of mmc_sd|sdio_init_card and
+> >> can therefore always be reset in the beginning of these functions.
+> >>
+> >> Does it make sense?
+> > Thank you for suggestion. I also feel that.
+> > Hmm, but when considering there is no case we access 'card->sate' directly,
+> > splitting into two types of state doesn't seem to give much.
+> 
+> Actually, on a second thought, why are we even caching the bus speeds
+> in the card state? The bus speeds are already reflected in the
+> "ios->timing" struct, which moreover also is available through
+> debugfs. Can we remove the bus speeds entirely from the card state
+> instead?
+You point out redundancy of existing state for speed mode.
+Yes, I agree with you on that point. It could be replaced.
+I will consider for next.
 
-any comments from your side? Could you consider applying it to your
-tree, please?
-
-	Thanks,
-	S=C3=B6ren
-
-On Wed, Oct 30, 2013 at 09:38:09AM -0700, Soren Brinkmann wrote:
-> Add a driver for Arasan's SDHCI controller core.
->=20
-> Signed-off-by: Soren Brinkmann <soren.brinkmann@xilinx.com>
-> ---
-> v2:
->  - document 'interrupts' and 'interrupt-parent' properties in the dri=
-ver
->    bindings
->  - append '-8.9a' IP version specifier to comaptibility string
-> ---
->  .../devicetree/bindings/mmc/arasan,sdhci.txt       |  27 +++
->  MAINTAINERS                                        |   1 +
->  drivers/mmc/host/Kconfig                           |  12 ++
->  drivers/mmc/host/Makefile                          |   1 +
->  drivers/mmc/host/sdhci-of-arasan.c                 | 224 +++++++++++=
-++++++++++
->  5 files changed, 265 insertions(+)
->  create mode 100644 Documentation/devicetree/bindings/mmc/arasan,sdhc=
-i.txt
->  create mode 100644 drivers/mmc/host/sdhci-of-arasan.c
->=20
-> diff --git a/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt b=
-/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
-> new file mode 100644
-> index 000000000000..ef4c5ac753e8
-> --- /dev/null
-> +++ b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
-> @@ -0,0 +1,27 @@
-> +Device Tree Bindings for the Arasan SDCHI Controller
-> +
-> +  The bindings follow the mmc[1], clock[2] and interrupt[3] bindings=
-=2E Only
-> +  deviations are documented here.
-> +
-> +  [1] Documentation/devicetree/bindings/mmc/mmc.txt
-> +  [2] Documentation/devicetree/bindings/clock/clock-bindings.txt
-> +  [3] Documentation/devicetree/bindings/interrupt-controller/interru=
-pts.txt
-> +
-> +Required Properties:
-> +  - compatible: Compatibility string. Must be 'arasan,sdhci-8.9a'
-> +  - reg: From mmc bindings: Register location and length.
-> +  - clocks: From clock bindings: Handles to clock inputs.
-> +  - clock-names: From clock bindings: Tuple including "clk_xin" and =
-"clk_ahb"
-> +  - interrupts: Interrupt specifier
-> +  - interrupt-parent: Phandle for the interrupt controller that serv=
-ices
-> +		      interrupts for this device.
-> +
-> +Example:
-> +	sdhci@e0100000 {
-> +		compatible =3D "arasan,sdhci-8.9a";
-> +		reg =3D <0xe0100000 0x1000>;
-> +		clock-names =3D "clk_xin", "clk_ahb";
-> +		clocks =3D <&clkc 21>, <&clkc 32>;
-> +		interrupt-parent =3D <&gic>;
-> +		interrupts =3D <0 24 4>;
-> +	} ;
-> diff --git a/MAINTAINERS b/MAINTAINERS
-> index 3438384d270c..5ede7f722025 100644
-> --- a/MAINTAINERS
-> +++ b/MAINTAINERS
-> @@ -1357,6 +1357,7 @@ T:	git git://git.xilinx.com/linux-xlnx.git
->  S:	Supported
->  F:	arch/arm/mach-zynq/
->  F:	drivers/cpuidle/cpuidle-zynq.c
-> +F:	drivers/mmc/host/sdhci-of-arasan.c
-> =20
->  ARM SMMU DRIVER
->  M:	Will Deacon <will.deacon@arm.com>
-> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-> index 7fc5099e44b2..1eb090c187bb 100644
-> --- a/drivers/mmc/host/Kconfig
-> +++ b/drivers/mmc/host/Kconfig
-> @@ -104,6 +104,18 @@ config MMC_SDHCI_PLTFM
-> =20
->  	  If unsure, say N.
-> =20
-> +config MMC_SDHCI_OF_ARASAN
-> +	tristate "SDHCI OF support for the Arasan SDHCI controllers"
-> +	depends on MMC_SDHCI_PLTFM
-> +	depends on OF
-> +	help
-> +	  This selects the Arasan Secure Digital Host Controller Interface
-> +	  (SDHCI). This hardware is found e.g. in Xilinx' Zynq SoC.
-> +
-> +	  If you have a controller with this interface, say Y or M here.
-> +
-> +	  If unsure, say N.
-> +
->  config MMC_SDHCI_OF_ESDHC
->  	tristate "SDHCI OF support for the Freescale eSDHC controller"
->  	depends on MMC_SDHCI_PLTFM
-> diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
-> index c41d0c364509..f93617ec6548 100644
-> --- a/drivers/mmc/host/Makefile
-> +++ b/drivers/mmc/host/Makefile
-> @@ -57,6 +57,7 @@ obj-$(CONFIG_MMC_SDHCI_CNS3XXX)		+=3D sdhci-cns3xxx=
-=2Eo
->  obj-$(CONFIG_MMC_SDHCI_ESDHC_IMX)	+=3D sdhci-esdhc-imx.o
->  obj-$(CONFIG_MMC_SDHCI_DOVE)		+=3D sdhci-dove.o
->  obj-$(CONFIG_MMC_SDHCI_TEGRA)		+=3D sdhci-tegra.o
-> +obj-$(CONFIG_MMC_SDHCI_OF_ARASAN)	+=3D sdhci-of-arasan.o
->  obj-$(CONFIG_MMC_SDHCI_OF_ESDHC)	+=3D sdhci-of-esdhc.o
->  obj-$(CONFIG_MMC_SDHCI_OF_HLWD)		+=3D sdhci-of-hlwd.o
->  obj-$(CONFIG_MMC_SDHCI_BCM_KONA)	+=3D sdhci-bcm-kona.o
-> diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sd=
-hci-of-arasan.c
-> new file mode 100644
-> index 000000000000..98464bc732f6
-> --- /dev/null
-> +++ b/drivers/mmc/host/sdhci-of-arasan.c
-> @@ -0,0 +1,224 @@
-> +/*
-> + * Arasan Secure Digital Host Controller Interface.
-> + * Copyright (C) 2011 - 2012 Michal Simek <monstr@monstr.eu>
-> + * Copyright (c) 2012 Wind River Systems, Inc.
-> + * Copyright (C) 2013 Pengutronix e.K.
-> + * Copyright (C) 2013 Xilinx Inc.
-> + *
-> + * Based on sdhci-of-esdhc.c
-> + *
-> + * Copyright (c) 2007 Freescale Semiconductor, Inc.
-> + * Copyright (c) 2009 MontaVista Software, Inc.
-> + *
-> + * Authors: Xiaobo Xie <X.Xie@freescale.com>
-> + *	    Anton Vorontsov <avorontsov@ru.mvista.com>
-> + *
-> + * This program is free software; you can redistribute it and/or mod=
-ify
-> + * it under the terms of the GNU General Public License as published=
- by
-> + * the Free Software Foundation; either version 2 of the License, or=
- (at
-> + * your option) any later version.
-> + */
-> +
-> +#include <linux/module.h>
-> +#include "sdhci-pltfm.h"
-> +
-> +#define SDHCI_ARASAN_CLK_CTRL_OFFSET	0x2c
-> +
-> +#define CLK_CTRL_TIMEOUT_SHIFT		16
-> +#define CLK_CTRL_TIMEOUT_MASK		(0xf << CLK_CTRL_TIMEOUT_SHIFT)
-> +#define CLK_CTRL_TIMEOUT_MIN_EXP	13
-> +
-> +/**
-> + * struct sdhci_arasan_data
-> + * @clk_ahb:	Pointer to the AHB clock
-> + */
-> +struct sdhci_arasan_data {
-> +	struct clk	*clk_ahb;
-> +};
-> +
-> +static unsigned int sdhci_arasan_get_timeout_clock(struct sdhci_host=
- *host)
-> +{
-> +	u32 div;
-> +	unsigned long freq;
-> +	struct sdhci_pltfm_host *pltfm_host =3D sdhci_priv(host);
-> +
-> +	div =3D readl(host->ioaddr + SDHCI_ARASAN_CLK_CTRL_OFFSET);
-> +	div =3D (div & CLK_CTRL_TIMEOUT_MASK) >> CLK_CTRL_TIMEOUT_SHIFT;
-> +
-> +	freq =3D clk_get_rate(pltfm_host->clk);
-> +	freq /=3D 1 << (CLK_CTRL_TIMEOUT_MIN_EXP + div);
-> +
-> +	return freq;
-> +}
-> +
-> +static struct sdhci_ops sdhci_arasan_ops =3D {
-> +	.get_max_clock =3D sdhci_pltfm_clk_get_max_clock,
-> +	.get_timeout_clock =3D sdhci_arasan_get_timeout_clock,
-> +};
-> +
-> +static struct sdhci_pltfm_data sdhci_arasan_pdata =3D {
-> +	.ops =3D &sdhci_arasan_ops,
-> +};
-> +
-> +#ifdef CONFIG_PM_SLEEP
-> +/**
-> + * sdhci_arasan_suspend - Suspend method for the driver
-> + * @dev:	Address of the device structure
-> + * Returns 0 on success and error value on error
-> + *
-> + * Put the device in a low power state.
-> + */
-> +static int sdhci_arasan_suspend(struct device *dev)
-> +{
-> +	struct platform_device *pdev =3D to_platform_device(dev);
-> +	struct sdhci_host *host =3D platform_get_drvdata(pdev);
-> +	struct sdhci_pltfm_host *pltfm_host =3D sdhci_priv(host);
-> +	struct sdhci_arasan_data *sdhci_arasan =3D pltfm_host->priv;
-> +	int ret;
-> +
-> +	ret =3D sdhci_suspend_host(host);
-> +	if (ret)
-> +		return ret;
-> +
-> +	clk_disable(pltfm_host->clk);
-> +	clk_disable(sdhci_arasan->clk_ahb);
-> +
-> +	return 0;
-> +}
-> +
-> +/**
-> + * sdhci_arasan_resume - Resume method for the driver
-> + * @dev:	Address of the device structure
-> + * Returns 0 on success and error value on error
-> + *
-> + * Resume operation after suspend
-> + */
-> +static int sdhci_arasan_resume(struct device *dev)
-> +{
-> +	struct platform_device *pdev =3D to_platform_device(dev);
-> +	struct sdhci_host *host =3D platform_get_drvdata(pdev);
-> +	struct sdhci_pltfm_host *pltfm_host =3D sdhci_priv(host);
-> +	struct sdhci_arasan_data *sdhci_arasan =3D pltfm_host->priv;
-> +	int ret;
-> +
-> +	ret =3D clk_enable(sdhci_arasan->clk_ahb);
-> +	if (ret) {
-> +		dev_err(dev, "Cannot enable AHB clock.\n");
-> +		return ret;
-> +	}
-> +
-> +	ret =3D clk_enable(pltfm_host->clk);
-> +	if (ret) {
-> +		dev_err(dev, "Cannot enable SD clock.\n");
-> +		clk_disable(sdhci_arasan->clk_ahb);
-> +		return ret;
-> +	}
-> +
-> +	return sdhci_resume_host(host);
-> +}
-> +#endif /* ! CONFIG_PM_SLEEP */
-> +
-> +static SIMPLE_DEV_PM_OPS(sdhci_arasan_dev_pm_ops, sdhci_arasan_suspe=
-nd,
-> +			 sdhci_arasan_resume);
-> +
-> +static int sdhci_arasan_probe(struct platform_device *pdev)
-> +{
-> +	int ret;
-> +	struct clk *clk_xin;
-> +	struct sdhci_host *host;
-> +	struct sdhci_pltfm_host *pltfm_host;
-> +	struct sdhci_arasan_data *sdhci_arasan;
-> +
-> +	sdhci_arasan =3D devm_kzalloc(&pdev->dev, sizeof(*sdhci_arasan),
-> +			GFP_KERNEL);
-> +	if (!sdhci_arasan)
-> +		return -ENOMEM;
-> +
-> +	sdhci_arasan->clk_ahb =3D devm_clk_get(&pdev->dev, "clk_ahb");
-> +	if (IS_ERR(sdhci_arasan->clk_ahb)) {
-> +		dev_err(&pdev->dev, "clk_ahb clock not found.\n");
-> +		return PTR_ERR(sdhci_arasan->clk_ahb);
-> +	}
-> +
-> +	clk_xin =3D devm_clk_get(&pdev->dev, "clk_xin");
-> +	if (IS_ERR(clk_xin)) {
-> +		dev_err(&pdev->dev, "clk_xin clock not found.\n");
-> +		return PTR_ERR(clk_xin);
-> +	}
-> +
-> +	ret =3D clk_prepare_enable(sdhci_arasan->clk_ahb);
-> +	if (ret) {
-> +		dev_err(&pdev->dev, "Unable to enable AHB clock.\n");
-> +		return ret;
-> +	}
-> +
-> +	ret =3D clk_prepare_enable(clk_xin);
-> +	if (ret) {
-> +		dev_err(&pdev->dev, "Unable to enable SD clock.\n");
-> +		goto clk_dis_ahb;
-> +	}
-> +
-> +	host =3D sdhci_pltfm_init(pdev, &sdhci_arasan_pdata, 0);
-> +	if (IS_ERR(host)) {
-> +		ret =3D PTR_ERR(host);
-> +		dev_err(&pdev->dev, "platform init failed (%u)\n", ret);
-> +		goto clk_disable_all;
-> +	}
-> +
-> +	sdhci_get_of_property(pdev);
-> +	pltfm_host =3D sdhci_priv(host);
-> +	pltfm_host->priv =3D sdhci_arasan;
-> +	pltfm_host->clk =3D clk_xin;
-> +
-> +	ret =3D sdhci_add_host(host);
-> +	if (ret) {
-> +		dev_err(&pdev->dev, "platform register failed (%u)\n", ret);
-> +		goto err_pltfm_free;
-> +	}
-> +
-> +	return 0;
-> +
-> +err_pltfm_free:
-> +	sdhci_pltfm_free(pdev);
-> +clk_disable_all:
-> +	clk_disable_unprepare(clk_xin);
-> +clk_dis_ahb:
-> +	clk_disable_unprepare(sdhci_arasan->clk_ahb);
-> +
-> +	return ret;
-> +}
-> +
-> +static int sdhci_arasan_remove(struct platform_device *pdev)
-> +{
-> +	struct sdhci_host *host =3D platform_get_drvdata(pdev);
-> +	struct sdhci_pltfm_host *pltfm_host =3D sdhci_priv(host);
-> +	struct sdhci_arasan_data *sdhci_arasan =3D pltfm_host->priv;
-> +
-> +	clk_disable_unprepare(pltfm_host->clk);
-> +	clk_disable_unprepare(sdhci_arasan->clk_ahb);
-> +
-> +	return sdhci_pltfm_unregister(pdev);
-> +}
-> +
-> +static const struct of_device_id sdhci_arasan_of_match[] =3D {
-> +	{ .compatible =3D "arasan,sdhci-8.9a" },
-> +	{ }
-> +};
-> +MODULE_DEVICE_TABLE(of, sdhci_arasan_of_match);
-> +
-> +static struct platform_driver sdhci_arasan_driver =3D {
-> +	.driver =3D {
-> +		.name =3D "sdhci-arasan",
-> +		.owner =3D THIS_MODULE,
-> +		.of_match_table =3D sdhci_arasan_of_match,
-> +		.pm =3D &sdhci_arasan_dev_pm_ops,
-> +	},
-> +	.probe =3D sdhci_arasan_probe,
-> +	.remove =3D sdhci_arasan_remove,
-> +};
-> +
-> +module_platform_driver(sdhci_arasan_driver);
-> +
-> +MODULE_DESCRIPTION("Driver for the Arasan SDHCI Controller");
-> +MODULE_AUTHOR("Soeren Brinkmann <soren.brinkmann@xilinx.com");
-> +MODULE_LICENSE("GPL");
-> --=20
-> 1.8.4.1
->=20
->=20
+Thanks,
+Seungwon Jeon
 
