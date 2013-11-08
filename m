@@ -1,58 +1,43 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] mmc: sdhci: Avoid needless loop while handling SDIO interrupts in sdhci_irq()
-Date: Fri, 08 Nov 2013 14:14:54 -0500
-Message-ID: <87y54ywvrl.fsf@octavius.laptop.org>
-References: <CAA+hA=StthxfMWjQ+0fhdRiPuDDVWUGrrW9E71Q+E3RoF_QdHw@mail.gmail.com>
-	<1383709236-26692-1-git-send-email-stilor@att.net>
+Subject: Re: [PATCH] mmc: dw_mmc: exynos: Revert the sdr_timing assignment
+Date: Fri, 08 Nov 2013 14:29:24 -0500
+Message-ID: <87txfmwv3f.fsf@octavius.laptop.org>
+References: <1382433116-22180-1-git-send-email-yuvaraj.cd@samsung.com>
+	<871u37l9p0.fsf@octavius.laptop.org>
+	<CAKuRcOKti_ET=9gXGH-Jm8=TYnxag5Cu+wBZ9Hr8nMk=JDiKqA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:43460 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:33519 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1757272Ab3KHTPG (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 8 Nov 2013 14:15:06 -0500
-In-Reply-To: <1383709236-26692-1-git-send-email-stilor@att.net> (Alexey
-	Neyman's message of "Tue, 5 Nov 2013 19:40:36 -0800")
+	id S1757557Ab3KHT3g (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 8 Nov 2013 14:29:36 -0500
+In-Reply-To: <CAKuRcOKti_ET=9gXGH-Jm8=TYnxag5Cu+wBZ9Hr8nMk=JDiKqA@mail.gmail.com>
+	(Yuvaraj Kumar's message of "Mon, 28 Oct 2013 10:48:10 +0530")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Alexey Neyman <stilor@att.net>
-Cc: Dong Aisheng <dongas86@gmail.com>, "open list:SECURE DIGITAL HO..." <linux-mmc@vger.kernel.org>, open list <linux-kernel@vger.kernel.org>
+To: Yuvaraj Kumar <yuvaraj.cd@gmail.com>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, thomas.ab@samsung.com, Grant Grundler <grundler@chromium.org>, Doug Anderson <dianders@chromium.org>, Sonny Rao <sonnyrao@chromium.org>, Yuvaraj Kumar C D <yuvaraj.cd@samsung.com>
 
-Hi Alexey,
+Hi Yuvaraj,
 
-On Tue, Nov 05 2013, Alexey Neyman wrote:
-> Ignore Card Interrupt bit in the interrupt status if we already know that
-> mmc_signal_sdio_irq() is going to be called at the end of sdhci_irq(). This
-> avoids a needless loop in sdhci_irq() repeatedly reading interrupt status
-> and doing nothing.
->
-> Signed-off-by: Alexey Neyman <stilor@att.net>
-> Acked-by: Dong Aisheng <b29396@freescale.com>
-> ---
->  drivers/mmc/host/sdhci.c | 8 ++++++++
->  1 file changed, 8 insertions(+)
->
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 7a7fb4f..a83cd1b 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -2491,6 +2491,14 @@ again:
->  	result = IRQ_HANDLED;
->  
->  	intmask = sdhci_readl(host, SDHCI_INT_STATUS);
-> +
-> +	/*
-> +	 * If we know we'll call the driver to signal SDIO IRQ, disregard
-> +	 * further indications of Card Interrupt in the status to avoid a
-> +	 * needless loop.
-> +	 */
-> +	if (cardint)
-> +		intmask &= ~SDHCI_INT_CARD_INT;
->  	if (intmask && --max_loops)
->  		goto again;
->  out:
+On Mon, Oct 28 2013, Yuvaraj Kumar wrote:
+> On Sun, Oct 27, 2013 at 8:08 AM, Chris Ball <cjb@laptop.org> wrote:
+>> Hi Yuvaraj,
+>>
+>> On Tue, Oct 22 2013, Yuvaraj Kumar C D wrote:
+>>> commit 4ad602c9df1e3b04979c260b5612141b4b892257 was wrongly assigning
+>>> ddr_timing value to sdr_timing.This patch fix's this by reverting
+>>> the sdr_timing assignment statement to the earlier location.
+>>
+>> 4ad602c9df1e3 doesn't exist in mainline.  Do you mean e6c784eded7b3
+>> ("mmc: dw_mmc: exynos: move the exynos private init")?
+> Yes Chris, thats the one.
+> Do you want me to respin this patch with the updated commit message?
 
-Thanks, pushed to mmc-next for 3.13.
+No, that's okay, I fixed it and pushed to mmc-next for 3.13.
+
+Thanks,
 
 - Chris.
 -- 
