@@ -1,56 +1,48 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH] mmc: sdhci-s3c: Remove unused define for NUM_GPIOS
-Date: Fri, 08 Nov 2013 13:56:12 +0900
-Message-ID: <527C6EEC.8060404@samsung.com>
-References: <1380790750.30876.0.camel@phoenix>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+From: Zhangfei Gao <zhangfei.gao@linaro.org>
+Subject: [PATCH v3 0/2] mmc: dw_mmc: add dw_mmc-k3
+Date: Fri,  8 Nov 2013 13:38:45 +0800
+Message-ID: <1383889128-12540-1-git-send-email-zhangfei.gao@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout3.samsung.com ([203.254.224.33]:22726 "EHLO
-	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754111Ab3KHE4N (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 7 Nov 2013 23:56:13 -0500
-Received: from epcpsbgr4.samsung.com
- (u144.gpu120.samsung.co.kr [203.254.230.144])
- by mailout3.samsung.com (Oracle Communications Messaging Server 7u4-24.01
- (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTP id <0MVX00GPZHOYZML0@mailout3.samsung.com> for
- linux-mmc@vger.kernel.org; Fri, 08 Nov 2013 13:56:06 +0900 (KST)
-In-reply-to: <1380790750.30876.0.camel@phoenix>
+Received: from mail-pb0-f51.google.com ([209.85.160.51]:43546 "EHLO
+	mail-pb0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751015Ab3KHFjJ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 8 Nov 2013 00:39:09 -0500
+Received: by mail-pb0-f51.google.com with SMTP id xa7so1663447pbc.38
+        for <linux-mmc@vger.kernel.org>; Thu, 07 Nov 2013 21:39:08 -0800 (PST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Axel Lin <axel.lin@ingics.com>, Chris Ball <cjb@laptop.org>
-Cc: Thomas Abraham <thomas.abraham@linaro.org>, linux-mmc@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, Kumar Gala <galak@codeaurora.org>
+Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, devicetree@vger.kernel.org, Zhangfei Gao <zhangfei.gao@linaro.org>
 
-Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
+v3:
+0001: 
+Put set/clear_bit DW_MMC_CARD_PRESENT in dw_mci_get_cd, 
+Since dw_mci_request will check DW_MMC_CARD_PRESENT before sending cmd
 
-Best Regards,
-Jaehoon Chung
+0002:
+Follow suggestion from Chris, Kumar and Seungwon
+Sync to latest mmc-next, which is 3.12-rc2
+Remove enum dw_mci_k3_type etc
 
-On 10/03/2013 05:59 PM, Axel Lin wrote:
-> NUM_GPIOS is not used after commit e19499ae
-> "mmc: sdhci-s3c: let device core setup the default pin configuration".
-> Thus remove it.
-> 
-> Signed-off-by: Axel Lin <axel.lin@ingics.com>
-> ---
->  drivers/mmc/host/sdhci-s3c.c | 3 ---
->  1 file changed, 3 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
-> index 926aaf6..d0732d2 100644
-> --- a/drivers/mmc/host/sdhci-s3c.c
-> +++ b/drivers/mmc/host/sdhci-s3c.c
-> @@ -33,9 +33,6 @@
->  
->  #define MAX_BUS_CLK	(4)
->  
-> -/* Number of gpio's used is max data bus width + command and clock lines */
-> -#define NUM_GPIOS(x)	(x + 2)
-> -
->  /**
->   * struct sdhci_s3c - S3C SDHCI instance
->   * @host: The SDHCI host created
-> 
+v2:
+Follow Jaehoon's suggestion
+Use slot-gpio.c handle cd pin
+Move table out to dts
+other suggestion
+
+Zhangfei Gao (2):
+  mmc: dw_mmc: add dw_mci_of_get_cd_gpio to handle cd pin
+  mmc: dw_mmc: add dw_mmc-k3 for k3 platform
+
+ .../devicetree/bindings/mmc/k3-dw-mshc.txt         |   83 +++++++
+ drivers/mmc/host/Kconfig                           |   10 +
+ drivers/mmc/host/Makefile                          |    1 +
+ drivers/mmc/host/dw_mmc-k3.c                       |  247 ++++++++++++++++++++
+ drivers/mmc/host/dw_mmc.c                          |   52 +++--
+ 5 files changed, 380 insertions(+), 13 deletions(-)
+ create mode 100644 Documentation/devicetree/bindings/mmc/k3-dw-mshc.txt
+ create mode 100644 drivers/mmc/host/dw_mmc-k3.c
+
+-- 
+1.7.9.5
 
