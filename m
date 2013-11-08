@@ -1,38 +1,59 @@
-From: Adriano Martins <adrianomatosmartins@gmail.com>
-Subject: mmc/sd remove without umount
-Date: Fri, 8 Nov 2013 13:39:09 -0200
-Message-ID: <CAJRKTVophUmV5_Hbz9WmUBjgj87UVQxEGz9iyK+gZ-JCr8jXPw@mail.gmail.com>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH] mmc: sdhci: Avoid needless loop while handling SDIO interrupts in sdhci_irq()
+Date: Fri, 08 Nov 2013 14:14:54 -0500
+Message-ID: <87y54ywvrl.fsf@octavius.laptop.org>
+References: <CAA+hA=StthxfMWjQ+0fhdRiPuDDVWUGrrW9E71Q+E3RoF_QdHw@mail.gmail.com>
+	<1383709236-26692-1-git-send-email-stilor@att.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-we0-f170.google.com ([74.125.82.170]:57165 "EHLO
-	mail-we0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756797Ab3KHPjb (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 8 Nov 2013 10:39:31 -0500
-Received: by mail-we0-f170.google.com with SMTP id u57so2170444wes.1
-        for <linux-mmc@vger.kernel.org>; Fri, 08 Nov 2013 07:39:30 -0800 (PST)
+Received: from void.printf.net ([89.145.121.20]:43460 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1757272Ab3KHTPG (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 8 Nov 2013 14:15:06 -0500
+In-Reply-To: <1383709236-26692-1-git-send-email-stilor@att.net> (Alexey
+	Neyman's message of "Tue, 5 Nov 2013 19:40:36 -0800")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
+To: Alexey Neyman <stilor@att.net>
+Cc: Dong Aisheng <dongas86@gmail.com>, "open list:SECURE DIGITAL HO..." <linux-mmc@vger.kernel.org>, open list <linux-kernel@vger.kernel.org>
 
-Hi all,
+Hi Alexey,
 
-I have a issue when I remove the SD card without unmount before. I
-have linux-2.6.23 on powerpc processor that is used the mmc/SD in SPI
-mode.
+On Tue, Nov 05 2013, Alexey Neyman wrote:
+> Ignore Card Interrupt bit in the interrupt status if we already know that
+> mmc_signal_sdio_irq() is going to be called at the end of sdhci_irq(). This
+> avoids a needless loop in sdhci_irq() repeatedly reading interrupt status
+> and doing nothing.
+>
+> Signed-off-by: Alexey Neyman <stilor@att.net>
+> Acked-by: Dong Aisheng <b29396@freescale.com>
+> ---
+>  drivers/mmc/host/sdhci.c | 8 ++++++++
+>  1 file changed, 8 insertions(+)
+>
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index 7a7fb4f..a83cd1b 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -2491,6 +2491,14 @@ again:
+>  	result = IRQ_HANDLED;
+>  
+>  	intmask = sdhci_readl(host, SDHCI_INT_STATUS);
+> +
+> +	/*
+> +	 * If we know we'll call the driver to signal SDIO IRQ, disregard
+> +	 * further indications of Card Interrupt in the status to avoid a
+> +	 * needless loop.
+> +	 */
+> +	if (cardint)
+> +		intmask &= ~SDHCI_INT_CARD_INT;
+>  	if (intmask && --max_loops)
+>  		goto again;
+>  out:
 
-When I remove the card in a file transfer, and try to umount with -l,
-I face a problem if I insert it again. The mmc-block registers the
-card on a second device /dev/mmcblk1, where before was /dev/mmcblk0.
+Thanks, pushed to mmc-next for 3.13.
 
-
-I have worked in the kernel 3.0 and this issue do not happens.
-
-I already searched in the linux-mmc for answers, but I can't find. Is
-it a known issue?
-
-I see that when the problem occurs, the variable md->usage is not
-decremented to 0 in the mmc-block driver. Why it occurs?
-
-Regards
-Adriano Martins
+- Chris.
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
