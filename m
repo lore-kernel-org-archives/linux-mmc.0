@@ -1,78 +1,46 @@
-From: "Arend van Spriel" <arend@broadcom.com>
-Subject: Re: [PATCH] sdhci: do not program timer when tuning_count is
- zero
-Date: Fri, 8 Nov 2013 10:10:55 +0100
-Message-ID: <527CAA9F.5030907@broadcom.com>
-References: <1383821960-2533-1-git-send-email-arend@broadcom.com>
- <527C899C.3030506@intel.com>
+From: Dan Carpenter <dan.carpenter@oracle.com>
+Subject: re: mmc: SD/MMC Host Controller for Wondermedia WM8505/WM8650
+Date: Fri, 8 Nov 2013 13:03:50 +0300
+Message-ID: <20131108100350.GS27977@elgon.mountain>
 Mime-Version: 1.0
-Content-Type: text/plain;
- charset=utf-8;
- format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mms2.broadcom.com ([216.31.210.18]:1856 "EHLO mms2.broadcom.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752819Ab3KHJLG (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 8 Nov 2013 04:11:06 -0500
-In-Reply-To: <527C899C.3030506@intel.com>
+Received: from aserp1040.oracle.com ([141.146.126.69]:16672 "EHLO
+	aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752961Ab3KHKEB (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 8 Nov 2013 05:04:01 -0500
+Content-Disposition: inline
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Aaron Lu <aaron.lu@intel.com>, Chris Ball <cjb@laptop.org>
+To: linux@prisktech.co.nz
 Cc: linux-mmc@vger.kernel.org
 
-On 11/08/2013 07:50 AM, Aaron Lu wrote:
-> On 11/07/2013 06:59 PM, Arend van Spriel wrote:
->> When the host->tuning_count is zero it means that the
->
-> If the tuning_count is zero, then the retuning timer shouldn't be
-> started in the first place and not possible to run code there. Or is the
-> tuning_count dynamically changed?
+Hello Tony Prisk,
 
-Actually, the sdhci_execute_tuning() must run once to do the initial 
-tuning procedure. This is mandatory for SDR104. However, *re*tuning is 
-not and a zero tuning_count disables it.
+This is a semi-automatic email about new static checker warnings.
 
-The function is executed initially. The 'if' statement above the patched 
-'else' statement is actually responsible for programming the retuning 
-timer for the first time. However, it requires tuning_count to be 
-non-zero. The 'else' statement is actually for reloading the retuning 
-timer, which is not the case. Adding the non-zero check assures the 
-retuning timer is never started.
+The patch 3a96dff0f828: "mmc: SD/MMC Host Controller for Wondermedia 
+WM8505/WM8650" from Nov 18, 2012, leads to the following Smatch 
+complaint:
 
-I guess the fact that this needs explaining indicates that the commit 
-message should be updated. I will send a V2 for this.
+drivers/mmc/host/wmt-sdmmc.c:764 wmt_mci_probe()
+	 warn: variable dereferenced before check 'of_id' (see line 760)
 
-Regards,
-Arend
+drivers/mmc/host/wmt-sdmmc.c
+   759			of_match_device(wmt_mci_dt_ids, &pdev->dev);
+   760		const struct wmt_mci_caps *wmt_caps = of_id->data;
+                                                      ^^^^^^^^^^^
+Dereference.
 
-> Thanks,
-> Aaron
->
->> retuning is disabled. Doing a mod_timer() with a zero
->> tuning_count does something else.
->>
->> Signed-off-by: Arend van Spriel <arend@broadcom.com>
->> ---
->>   drivers/mmc/host/sdhci.c |    3 ++-
->>   1 file changed, 2 insertions(+), 1 deletion(-)
->>
->> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
->> index 7a7fb4f..9803e7a 100644
->> --- a/drivers/mmc/host/sdhci.c
->> +++ b/drivers/mmc/host/sdhci.c
->> @@ -2007,7 +2007,8 @@ out:
->>   	} else {
->>   		host->flags &= ~SDHCI_NEEDS_RETUNING;
->>   		/* Reload the new initial value for timer */
->> -		if (host->tuning_mode == SDHCI_TUNING_MODE_1)
->> +		if (host->tuning_count &&
->> +		    host->tuning_mode == SDHCI_TUNING_MODE_1)
->>   			mod_timer(&host->tuning_timer, jiffies +
->>   				host->tuning_count * HZ);
->>   	}
->>
->
->
+   761		int ret;
+   762		int regular_irq, dma_irq;
+   763	
+   764		if (!of_id || !of_id->data) {
+                     ^^^^^
+Check.
 
+   765			dev_err(&pdev->dev, "Controller capabilities data missing\n");
+   766			return -EFAULT;
 
+regards,
+dan carpenter
