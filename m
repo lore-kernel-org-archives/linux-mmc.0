@@ -1,52 +1,119 @@
-From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: Re: [PATCH 0/3] mmc: tmio: Use modern PM ops
-Date: Fri, 8 Nov 2013 13:16:56 +0100 (CET)
-Message-ID: <Pine.LNX.4.64.1311081309140.22449@axis700.grange>
-References: <1383653403-10049-1-git-send-email-ulf.hansson@linaro.org>
+From: Aaron Lu <aaron.lu@intel.com>
+Subject: Re: [PATCH] sdhci: do not program timer when tuning_count is zero
+Date: Fri, 08 Nov 2013 21:19:50 +0800
+Message-ID: <527CE4F6.4090801@intel.com>
+References: <1383821960-2533-1-git-send-email-arend@broadcom.com> <527C899C.3030506@intel.com> <527CAA9F.5030907@broadcom.com> <527CCFB1.5020906@intel.com> <527CD139.6050801@broadcom.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.17.9]:62615 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752683Ab3KHMQ7 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 8 Nov 2013 07:16:59 -0500
-In-Reply-To: <1383653403-10049-1-git-send-email-ulf.hansson@linaro.org>
+Received: from mga02.intel.com ([134.134.136.20]:61418 "EHLO mga02.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1756872Ab3KHNTE (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 8 Nov 2013 08:19:04 -0500
+In-Reply-To: <527CD139.6050801@broadcom.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Ian Molton <ian@mnementh.co.uk>
+To: Arend van Spriel <arend@broadcom.com>, Chris Ball <cjb@laptop.org>
+Cc: linux-mmc@vger.kernel.org
 
-Hi Ulf,
-
-A general question concerning this your effort just occurred to me: what 
-if runtime PM is disabled on a system? Will the clock(s) then at all be 
-enabled? Doesn't one need for such a case either a fall-back to statically 
-enable clock in .probe() and disable in .remove() or should such drivers 
-select PM_RUNTIME?
-
-Thanks
-Guennadi
-
-On Tue, 5 Nov 2013, Ulf Hansson wrote:
-
-> This patchset converts tmio and sh_mobile_sdhi to use the modern PM ops.
+On 11/08/2013 07:55 PM, Arend van Spriel wrote:
+> On 11/08/2013 12:49 PM, Aaron Lu wrote:
+>> On 11/08/2013 05:10 PM, Arend van Spriel wrote:
+>>> On 11/08/2013 07:50 AM, Aaron Lu wrote:
+>>>> On 11/07/2013 06:59 PM, Arend van Spriel wrote:
+>>>>> When the host->tuning_count is zero it means that the
+>>>>
+>>>> If the tuning_count is zero, then the retuning timer shouldn't be
+>>>> started in the first place and not possible to run code there. Or is the
+>>>> tuning_count dynamically changed?
+>>>
+>>> Actually, the sdhci_execute_tuning() must run once to do the initial
+>>> tuning procedure. This is mandatory for SDR104. However, *re*tuning is
+>>> not and a zero tuning_count disables it.
+>>
+>> So the host in question doesn't need do retuning while in SDR104 mode?
+>> It seems your host's retuning mode is mode_1.
+>>
+>>>
+>>> The function is executed initially. The 'if' statement above the patched
+>>> 'else' statement is actually responsible for programming the retuning
+>>> timer for the first time. However, it requires tuning_count to be
+>>> non-zero. The 'else' statement is actually for reloading the retuning
+>>> timer, which is not the case. Adding the non-zero check assures the
+>>> retuning timer is never started.
+>>
+>> OK, I see.
+>> The SDHCI_USING_RETUNING_TIMER flag is supposed to mean if the host is
+>> currently using retuning timer to do retuning, it could also be used to
+>> decide if retuning timer needs be re-programmed.
 > 
-> Ulf Hansson (3):
->   mmc: sh_mobile_sdhi: Use modern PM macros to define pm callbacks
->   mmc: tmio_mmc: Convert from legacy to modern PM ops
->   mmc: tmio: Adapt to proper PM configs for exported functions
+> True. I can go for that approach.
 > 
->  drivers/mmc/host/sh_mobile_sdhi.c |    8 ++++----
->  drivers/mmc/host/tmio_mmc.c       |   32 ++++++++++++++++++--------------
->  drivers/mmc/host/tmio_mmc.h       |    7 +++----
->  drivers/mmc/host/tmio_mmc_pio.c   |    7 ++++---
->  4 files changed, 29 insertions(+), 25 deletions(-)
+>> Anyway, a host in retuning mode 1 does not have tuning_count set seems a
+>> little odd to me...
 > 
-> -- 
-> 1.7.9.5
+> Looking at sdhci.h it actually seems sdhci code is missing support for 
+> the other modes:
+> 
+> 	unsigned int		tuning_count;	/* Timer count for re-tuning */
+> 	unsigned int		tuning_mode;	/* Re-tuning mode supported by host */
+> #define SDHCI_TUNING_MODE_1	0
+> 	struct timer_list	tuning_timer;	/* Timer for tuning */
+> 
+> At least the other modes are not defined here.
+
+Right, only retuning mode 1 is implemented currently.
+
+Thanks,
+Aaron
+
+> 
+> Regards,
+> Arend
+> 
+>> Thanks,
+>> Aaron
+>>
+>>>
+>>> I guess the fact that this needs explaining indicates that the commit
+>>> message should be updated. I will send a V2 for this.
+>>>
+>>> Regards,
+>>> Arend
+>>>
+>>>> Thanks,
+>>>> Aaron
+>>>>
+>>>>> retuning is disabled. Doing a mod_timer() with a zero
+>>>>> tuning_count does something else.
+>>>>>
+>>>>> Signed-off-by: Arend van Spriel <arend@broadcom.com>
+>>>>> ---
+>>>>>    drivers/mmc/host/sdhci.c |    3 ++-
+>>>>>    1 file changed, 2 insertions(+), 1 deletion(-)
+>>>>>
+>>>>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+>>>>> index 7a7fb4f..9803e7a 100644
+>>>>> --- a/drivers/mmc/host/sdhci.c
+>>>>> +++ b/drivers/mmc/host/sdhci.c
+>>>>> @@ -2007,7 +2007,8 @@ out:
+>>>>>    	} else {
+>>>>>    		host->flags &= ~SDHCI_NEEDS_RETUNING;
+>>>>>    		/* Reload the new initial value for timer */
+>>>>> -		if (host->tuning_mode == SDHCI_TUNING_MODE_1)
+>>>>> +		if (host->tuning_count &&
+>>>>> +		    host->tuning_mode == SDHCI_TUNING_MODE_1)
+>>>>>    			mod_timer(&host->tuning_timer, jiffies +
+>>>>>    				host->tuning_count * HZ);
+>>>>>    	}
+>>>>>
+>>>>
+>>>>
+>>>
+>>>
+>>
+>>
+> 
 > 
 
----
-Guennadi Liakhovetski, Ph.D.
-Freelance Open-Source Software Developer
-http://www.open-technology.de/
