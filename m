@@ -1,46 +1,47 @@
 From: Dan Carpenter <dan.carpenter@oracle.com>
-Subject: re: mmc: SD/MMC Host Controller for Wondermedia WM8505/WM8650
-Date: Fri, 8 Nov 2013 13:03:50 +0300
-Message-ID: <20131108100350.GS27977@elgon.mountain>
+Subject: re: mmc: sdhci-s3c: fix missing clock for gpio card-detect
+Date: Fri, 8 Nov 2013 13:04:27 +0300
+Message-ID: <20131108100427.GT27977@elgon.mountain>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from aserp1040.oracle.com ([141.146.126.69]:16672 "EHLO
+Received: from aserp1040.oracle.com ([141.146.126.69]:16947 "EHLO
 	aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752961Ab3KHKEB (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 8 Nov 2013 05:04:01 -0500
+	with ESMTP id S1752830Ab3KHKEn (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 8 Nov 2013 05:04:43 -0500
 Content-Disposition: inline
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux@prisktech.co.nz
+To: heiko@sntech.de
 Cc: linux-mmc@vger.kernel.org
 
-Hello Tony Prisk,
+Hello Heiko St=FCbner,
 
 This is a semi-automatic email about new static checker warnings.
 
-The patch 3a96dff0f828: "mmc: SD/MMC Host Controller for Wondermedia 
-WM8505/WM8650" from Nov 18, 2012, leads to the following Smatch 
+The patch fe007c02f965: "mmc: sdhci-s3c: fix missing clock for gpio=20
+card-detect" from Nov 18, 2012, leads to the following Smatch=20
 complaint:
 
-drivers/mmc/host/wmt-sdmmc.c:764 wmt_mci_probe()
-	 warn: variable dereferenced before check 'of_id' (see line 760)
+drivers/mmc/host/sdhci-s3c.c:381 sdhci_s3c_notify_change()
+	 warn: variable dereferenced before check 'host' (see line 377)
 
-drivers/mmc/host/wmt-sdmmc.c
-   759			of_match_device(wmt_mci_dt_ids, &pdev->dev);
-   760		const struct wmt_mci_caps *wmt_caps = of_id->data;
-                                                      ^^^^^^^^^^^
+drivers/mmc/host/sdhci-s3c.c
+   376	#ifdef CONFIG_PM_RUNTIME
+   377		struct sdhci_s3c *sc =3D sdhci_priv(host);
+                                       ^^^^^^^^^^^^^^^^
 Dereference.
 
-   761		int ret;
-   762		int regular_irq, dma_irq;
-   763	
-   764		if (!of_id || !of_id->data) {
-                     ^^^^^
+   378	#endif
+   379		unsigned long flags;
+   380=09
+   381		if (host) {
+                   ^^^^^
 Check.
 
-   765			dev_err(&pdev->dev, "Controller capabilities data missing\n");
-   766			return -EFAULT;
+   382			spin_lock_irqsave(&host->lock, flags);
+   383			if (state) {
 
 regards,
 dan carpenter
