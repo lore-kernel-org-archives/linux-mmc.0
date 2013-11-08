@@ -1,119 +1,38 @@
-From: Aaron Lu <aaron.lu@intel.com>
-Subject: Re: [PATCH] sdhci: do not program timer when tuning_count is zero
-Date: Fri, 08 Nov 2013 21:19:50 +0800
-Message-ID: <527CE4F6.4090801@intel.com>
-References: <1383821960-2533-1-git-send-email-arend@broadcom.com> <527C899C.3030506@intel.com> <527CAA9F.5030907@broadcom.com> <527CCFB1.5020906@intel.com> <527CD139.6050801@broadcom.com>
+From: Adriano Martins <adrianomatosmartins@gmail.com>
+Subject: mmc/sd remove without umount
+Date: Fri, 8 Nov 2013 13:39:09 -0200
+Message-ID: <CAJRKTVophUmV5_Hbz9WmUBjgj87UVQxEGz9iyK+gZ-JCr8jXPw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga02.intel.com ([134.134.136.20]:61418 "EHLO mga02.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1756872Ab3KHNTE (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 8 Nov 2013 08:19:04 -0500
-In-Reply-To: <527CD139.6050801@broadcom.com>
+Received: from mail-we0-f170.google.com ([74.125.82.170]:57165 "EHLO
+	mail-we0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756797Ab3KHPjb (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 8 Nov 2013 10:39:31 -0500
+Received: by mail-we0-f170.google.com with SMTP id u57so2170444wes.1
+        for <linux-mmc@vger.kernel.org>; Fri, 08 Nov 2013 07:39:30 -0800 (PST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Arend van Spriel <arend@broadcom.com>, Chris Ball <cjb@laptop.org>
-Cc: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
 
-On 11/08/2013 07:55 PM, Arend van Spriel wrote:
-> On 11/08/2013 12:49 PM, Aaron Lu wrote:
->> On 11/08/2013 05:10 PM, Arend van Spriel wrote:
->>> On 11/08/2013 07:50 AM, Aaron Lu wrote:
->>>> On 11/07/2013 06:59 PM, Arend van Spriel wrote:
->>>>> When the host->tuning_count is zero it means that the
->>>>
->>>> If the tuning_count is zero, then the retuning timer shouldn't be
->>>> started in the first place and not possible to run code there. Or is the
->>>> tuning_count dynamically changed?
->>>
->>> Actually, the sdhci_execute_tuning() must run once to do the initial
->>> tuning procedure. This is mandatory for SDR104. However, *re*tuning is
->>> not and a zero tuning_count disables it.
->>
->> So the host in question doesn't need do retuning while in SDR104 mode?
->> It seems your host's retuning mode is mode_1.
->>
->>>
->>> The function is executed initially. The 'if' statement above the patched
->>> 'else' statement is actually responsible for programming the retuning
->>> timer for the first time. However, it requires tuning_count to be
->>> non-zero. The 'else' statement is actually for reloading the retuning
->>> timer, which is not the case. Adding the non-zero check assures the
->>> retuning timer is never started.
->>
->> OK, I see.
->> The SDHCI_USING_RETUNING_TIMER flag is supposed to mean if the host is
->> currently using retuning timer to do retuning, it could also be used to
->> decide if retuning timer needs be re-programmed.
-> 
-> True. I can go for that approach.
-> 
->> Anyway, a host in retuning mode 1 does not have tuning_count set seems a
->> little odd to me...
-> 
-> Looking at sdhci.h it actually seems sdhci code is missing support for 
-> the other modes:
-> 
-> 	unsigned int		tuning_count;	/* Timer count for re-tuning */
-> 	unsigned int		tuning_mode;	/* Re-tuning mode supported by host */
-> #define SDHCI_TUNING_MODE_1	0
-> 	struct timer_list	tuning_timer;	/* Timer for tuning */
-> 
-> At least the other modes are not defined here.
+Hi all,
 
-Right, only retuning mode 1 is implemented currently.
+I have a issue when I remove the SD card without unmount before. I
+have linux-2.6.23 on powerpc processor that is used the mmc/SD in SPI
+mode.
 
-Thanks,
-Aaron
+When I remove the card in a file transfer, and try to umount with -l,
+I face a problem if I insert it again. The mmc-block registers the
+card on a second device /dev/mmcblk1, where before was /dev/mmcblk0.
 
-> 
-> Regards,
-> Arend
-> 
->> Thanks,
->> Aaron
->>
->>>
->>> I guess the fact that this needs explaining indicates that the commit
->>> message should be updated. I will send a V2 for this.
->>>
->>> Regards,
->>> Arend
->>>
->>>> Thanks,
->>>> Aaron
->>>>
->>>>> retuning is disabled. Doing a mod_timer() with a zero
->>>>> tuning_count does something else.
->>>>>
->>>>> Signed-off-by: Arend van Spriel <arend@broadcom.com>
->>>>> ---
->>>>>    drivers/mmc/host/sdhci.c |    3 ++-
->>>>>    1 file changed, 2 insertions(+), 1 deletion(-)
->>>>>
->>>>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
->>>>> index 7a7fb4f..9803e7a 100644
->>>>> --- a/drivers/mmc/host/sdhci.c
->>>>> +++ b/drivers/mmc/host/sdhci.c
->>>>> @@ -2007,7 +2007,8 @@ out:
->>>>>    	} else {
->>>>>    		host->flags &= ~SDHCI_NEEDS_RETUNING;
->>>>>    		/* Reload the new initial value for timer */
->>>>> -		if (host->tuning_mode == SDHCI_TUNING_MODE_1)
->>>>> +		if (host->tuning_count &&
->>>>> +		    host->tuning_mode == SDHCI_TUNING_MODE_1)
->>>>>    			mod_timer(&host->tuning_timer, jiffies +
->>>>>    				host->tuning_count * HZ);
->>>>>    	}
->>>>>
->>>>
->>>>
->>>
->>>
->>
->>
-> 
-> 
 
+I have worked in the kernel 3.0 and this issue do not happens.
+
+I already searched in the linux-mmc for answers, but I can't find. Is
+it a known issue?
+
+I see that when the problem occurs, the variable md->usage is not
+decremented to 0 in the mmc-block driver. Why it occurs?
+
+Regards
+Adriano Martins
