@@ -1,75 +1,65 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 0/3] mmc: tmio: Use modern PM ops
-Date: Mon, 11 Nov 2013 10:24:49 +0100
-Message-ID: <CAPDyKFp73ew81u48oXV2wHG8UB48da2YK87+JDF=kzb0sSnQdg@mail.gmail.com>
-References: <1383653403-10049-1-git-send-email-ulf.hansson@linaro.org>
-	<Pine.LNX.4.64.1311081309140.22449@axis700.grange>
+From: "Arend van Spriel" <arend@broadcom.com>
+Subject: [PATCH V2] sdhci: only reprogram retuning timer when flag is
+ set
+Date: Mon, 11 Nov 2013 10:49:55 +0100
+Message-ID: <1384163395-27038-1-git-send-email-arend@broadcom.com>
+References: <1383821960-2533-1-git-send-email-arend@broadcom.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qc0-f172.google.com ([209.85.216.172]:55612 "EHLO
-	mail-qc0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750872Ab3KKJYu (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 11 Nov 2013 04:24:50 -0500
-Received: by mail-qc0-f172.google.com with SMTP id c9so3931796qcz.3
-        for <linux-mmc@vger.kernel.org>; Mon, 11 Nov 2013 01:24:49 -0800 (PST)
-In-Reply-To: <Pine.LNX.4.64.1311081309140.22449@axis700.grange>
+Received: from mms1.broadcom.com ([216.31.210.17]:3408 "EHLO mms1.broadcom.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752743Ab3KKJuN (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 11 Nov 2013 04:50:13 -0500
+In-Reply-To: <1383821960-2533-1-git-send-email-arend@broadcom.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Ian Molton <ian@mnementh.co.uk>
+To: Chris Ball <cjb@laptop.org>
+Cc: linux-mmc@vger.kernel.org, Arend van Spriel <arend@broadcom.com>
 
-On 8 November 2013 13:16, Guennadi Liakhovetski <g.liakhovetski@gmx.de> wrote:
-> Hi Ulf,
->
-> A general question concerning this your effort just occurred to me: what
-> if runtime PM is disabled on a system? Will the clock(s) then at all be
-> enabled? Doesn't one need for such a case either a fall-back to statically
-> enable clock in .probe() and disable in .remove() or should such drivers
-> select PM_RUNTIME?
->
+When the host->tuning_count is zero it means that the
+retuning is disabled. This is checked on the first
+run of sdhci_execute_tuning() by the if statement below:
 
-That is a quite interesting question, I would suggest you post this
-one on linux-pm. :-)
+	if (!(host->flags & SDHCI_NEEDS_RETUNING) && host->tuning_count &&
+	    (host->tuning_mode == SDHCI_TUNING_MODE_1)) {
 
-Normally I would expect it to be convenient to enable clocks in .probe
-and then use pm_runtime_set_active. So that will then work for both
-scenarios.
+So only when tuning_count is non-zero it will set the host
+flag SDHCI_USING_RETUNING_TIMER. The else statement is only
+for re-programming the timer, which means that flag must be
+set. Because that is not checked the else statement is executed
+in the first run when tuning_count is zero.
 
-A bit more tricky is the .remove. To make it work in both scenarios
-you can do pm_runtime_get_sync, a then explicitly disable the clocks.
+This was seen on a host controller which indicated
+SDHCI_TUNING_MODE_1 (0) and tuning_count being zero. Suspect
+that (one of) these registers is not properly set.
 
-If the driver would select PM_RUNTIME, the code could likely be
-simplified. In best cases the .remove callback should not even need to
-exist since PM core will do it's best to put the device into
-"inactive" state.
+Signed-off-by: Arend van Spriel <arend@broadcom.com>
+---
+This patch applies to the mmc-next branch.
 
-Kind regards
-Uffe
+V2:
+- add more explanation to the commit message
+- check host flag SDHCI_USING_RETUNING_TIMER
+---
+ drivers/mmc/host/sdhci.c |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-> Thanks
-> Guennadi
->
-> On Tue, 5 Nov 2013, Ulf Hansson wrote:
->
->> This patchset converts tmio and sh_mobile_sdhi to use the modern PM ops.
->>
->> Ulf Hansson (3):
->>   mmc: sh_mobile_sdhi: Use modern PM macros to define pm callbacks
->>   mmc: tmio_mmc: Convert from legacy to modern PM ops
->>   mmc: tmio: Adapt to proper PM configs for exported functions
->>
->>  drivers/mmc/host/sh_mobile_sdhi.c |    8 ++++----
->>  drivers/mmc/host/tmio_mmc.c       |   32 ++++++++++++++++++--------------
->>  drivers/mmc/host/tmio_mmc.h       |    7 +++----
->>  drivers/mmc/host/tmio_mmc_pio.c   |    7 ++++---
->>  4 files changed, 29 insertions(+), 25 deletions(-)
->>
->> --
->> 1.7.9.5
->>
->
-> ---
-> Guennadi Liakhovetski, Ph.D.
-> Freelance Open-Source Software Developer
-> http://www.open-technology.de/
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index bd8a098..5974599 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -2014,7 +2014,7 @@ out:
+ 			host->tuning_count * HZ);
+ 		/* Tuning mode 1 limits the maximum data length to 4MB */
+ 		mmc->max_blk_count = (4 * 1024 * 1024) / mmc->max_blk_size;
+-	} else {
++	} else if (host->flags & SDHCI_USING_RETUNING_TIMER) {
+ 		host->flags &= ~SDHCI_NEEDS_RETUNING;
+ 		/* Reload the new initial value for timer */
+ 		if (host->tuning_mode == SDHCI_TUNING_MODE_1)
+-- 
+1.7.10.4
+
+
