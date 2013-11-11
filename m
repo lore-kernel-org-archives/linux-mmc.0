@@ -1,106 +1,30 @@
 From: Andreas Fenkart <afenkart@gmail.com>
-Subject: Re: [PATCH 3/3] mmc: omap_hsmmc: Extend debugfs for SDIO IRQ, GPIO
- and pinmux.
-Date: Mon, 11 Nov 2013 20:30:29 +0100
-Message-ID: <CALtMJEA0P5qyFQw7v=sBYoxfLu=JawvCP=0ZZry_acnp3_1z=Q@mail.gmail.com>
-References: <5281287f.01d50e0a.1189.74ea@mx.google.com>
-	<CAOf5uw=DB-saAsKXQ12Mry8jC=PsbOkkzj8JQBjJxeJYrfHEeg@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Subject: [PATCH 0/3] mmc: omap_hsmmc: Enable SDIO IRQ.
+Date: Mon, 11 Nov 2013 21:06:42 +0100
+Message-ID: <1384200405-8402-1-git-send-email-afenkart@gmail.com>
 Return-path: <linux-doc-owner@vger.kernel.org>
-In-Reply-To: <CAOf5uw=DB-saAsKXQ12Mry8jC=PsbOkkzj8JQBjJxeJYrfHEeg@mail.gmail.com>
 Sender: linux-doc-owner@vger.kernel.org
-To: Michael Trimarchi <michael@amarulasolutions.com>
-Cc: Chris Ball <cjb@laptop.org>, Tony Lindgren <tony@atomide.com>, Grant Likely <grant.likely@secretlab.ca>, Felipe Balbi <balbi@ti.com>, Balaji T K <balajitk@ti.com>, Daniel Mack <zonque@gmail.com>, devicetree@vger.kernel.org, linux-doc@vger.kernel.org, linux-mmc <linux-mmc@vger.kernel.org>, Linux OMAP Mailing List <linux-omap@vger.kernel.org>
+To: Chris Ball <cjb@laptop.org>
+Cc: Tony Lindgren <tony@atomide.com>, Grant Likely <grant.likely@secretlab.ca>, Felipe Balbi <balbi@ti.com>, Balaji T K <balajitk@ti.com>, zonque@gmail.com, devicetree@vger.kernel.org, linux-doc@vger.kernel.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, Andreas Fenkart <afenkart@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi,
+This a resend:
+- incorparated changes as suggested by reviewers
+- simplified workaround for am335x, gpio will now only wake
+  the module from runtime suspend, not handle the sdio irq
+  itself 
 
-2013/11/11 Michael Trimarchi <michael@amarulasolutions.com>:
-> Hi
->
-> On Mon, Nov 11, 2013 at 7:52 PM,  <afenkart@gmail.com> wrote:
->> From: Andreas Fenkart <afenkart@gmail.com>
->>
->> Add SDIO IRQ entries to debugfs entry. Note that PSTATE shows current
->> state of data lines, incl. SDIO IRQ pending
->>
->> Signed-off-by: Andreas Fenkart <afenkart@gmail.com>
->> ---
->>  drivers/mmc/host/omap_hsmmc.c |   22 +++++++++++++++++++++-
->>  1 file changed, 21 insertions(+), 1 deletion(-)
->>
->> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
->> index e880b44..34e2ee0 100644
->> --- a/drivers/mmc/host/omap_hsmmc.c
->> +++ b/drivers/mmc/host/omap_hsmmc.c
->> @@ -81,6 +81,7 @@ static void apply_clk_hack(struct device *dev)
->>  #define OMAP_HSMMC_RSP54       0x0118
->>  #define OMAP_HSMMC_RSP76       0x011C
->>  #define OMAP_HSMMC_DATA                0x0120
->> +#define OMAP_HSMMC_PSTATE      0x0124
->>  #define OMAP_HSMMC_HCTL                0x0128
->>  #define OMAP_HSMMC_SYSCTL      0x012C
->>  #define OMAP_HSMMC_STAT                0x0130
->> @@ -1800,6 +1801,23 @@ static int omap_hsmmc_regs_show(struct seq_file *s, void *data)
->>  {
->>         struct mmc_host *mmc = s->private;
->>         struct omap_hsmmc_host *host = mmc_priv(mmc);
->> +       unsigned long flags;
->> +       bool suspended;
->> +
->> +       spin_lock_irqsave(&host->irq_lock, flags);
->
-> Why do you need a spin_lock_irqsave just to print out the status?
->
->> +       seq_puts(s, "\n");
->> +       seq_printf(s, "sdio irq\t%s\n", ((host->flags & HSMMC_SDIO_IRQ_ENABLED)
->> +                                        ? "enabled" : "disabled"));
+Andreas Fenkart (3):
+  mmc: omap_hsmmc: Enable SDIO IRQ.
+  mmc: omap_hsmmc: Pin remux workaround to support SDIO interrupt on
+    AM335x.
+  mmc: omap_hsmmc: Extend debugfs for SDIO IRQ, GPIO and pinmux.
 
-initially, because the flags field could be changed by an irq.
-It's atomic and since the code path doesn't change, it's safe to remove
-the spinlock, thx
+ .../devicetree/bindings/mmc/ti-omap-hsmmc.txt      |   42 +++
+ drivers/mmc/host/omap_hsmmc.c                      |  299 ++++++++++++++++++--
+ include/linux/platform_data/mmc-omap.h             |    4 +
+ 3 files changed, 325 insertions(+), 20 deletions(-)
 
->> +       suspended = host->dev->power.runtime_status != RPM_ACTIVE;
->> +       if (host->flags & HSMMC_SWAKEUP_QUIRK) {
->> +               seq_printf(s, "pinmux config\t%s\n", (suspended ?
->> +                                                     "gpio" : "sdio"));
->> +               if (suspended)
->> +                       seq_printf(s, "sdio irq pin\t%s\n",
->> +                                  gpio_get_value(mmc_slot(host).gpio_cirq) ?
->> +                                  "high" : "low");
+-- 
+1.7.10.4
 
-This is more of an issue, the pinmux could have changed underneath, if we
-resumed meanwile. Reading the GPIO value read will not reflect the pin on the
-package.
-
-It has nothing to do with the spinlock though so will remove that.
-.
->> +       }
->> +       spin_unlock_irqrestore(&host->irq_lock, flags);
->>
->
-> Michael
->
->>         if (host->suspended) {
->>                 seq_printf(s, "host suspended, can't read registers\n");
->> @@ -1807,9 +1825,11 @@ static int omap_hsmmc_regs_show(struct seq_file *s, void *data)
->>         }
->>
->>         pm_runtime_get_sync(host->dev);
->> -
->> +       seq_puts(s, "\nregs:\n");
->>         seq_printf(s, "CON:\t\t0x%08x\n",
->>                         OMAP_HSMMC_READ(host->base, CON));
->> +       seq_printf(s, "PSTATE:\t\t0x%08x\n",
->> +                  OMAP_HSMMC_READ(host->base, PSTATE));
->>         seq_printf(s, "HCTL:\t\t0x%08x\n",
->>                         OMAP_HSMMC_READ(host->base, HCTL));
->>         seq_printf(s, "SYSCTL:\t\t0x%08x\n",
->> --
->> 1.7.10.4
->>
->> --
->> To unsubscribe from this list: send the line "unsubscribe linux-omap" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
