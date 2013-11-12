@@ -1,69 +1,133 @@
-From: Andreas Fenkart <afenkart@gmail.com>
-Subject: [PATCH 3/3] mmc: omap_hsmmc: Extend debugfs for SDIO IRQ, GPIO and pinmux.
-Date: Mon, 11 Nov 2013 21:06:45 +0100
-Message-ID: <1384200405-8402-4-git-send-email-afenkart@gmail.com>
-References: <1384200405-8402-1-git-send-email-afenkart@gmail.com>
-Return-path: <linux-doc-owner@vger.kernel.org>
-In-Reply-To: <1384200405-8402-1-git-send-email-afenkart@gmail.com>
-Sender: linux-doc-owner@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: Tony Lindgren <tony@atomide.com>, Grant Likely <grant.likely@secretlab.ca>, Felipe Balbi <balbi@ti.com>, Balaji T K <balajitk@ti.com>, zonque@gmail.com, devicetree@vger.kernel.org, linux-doc@vger.kernel.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, Andreas Fenkart <afenkart@gmail.com>
+From: Alim Akhtar <alim.akhtar@gmail.com>
+Subject: Re: Re: [PATCH] mmc: dw_mmc: Add hardware lock error (HLE) to the CMD
+ error flag
+Date: Tue, 12 Nov 2013 09:42:54 +0530
+Message-ID: <CAGOxZ51UrZ4aN8Y6J2d4Zjz_G_2uDmC9pzNqZ4Bf__iFYSRcxQ@mail.gmail.com>
+References: <32277109.227361381136426293.JavaMail.weblogic@epv6ml06> <CAGOxZ53PJTyXhcg20whXZYcRVVvy1+p0SA9xM_WFOAbYJ7riSQ@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-ve0-f174.google.com ([209.85.128.174]:33255 "EHLO
+	mail-ve0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751645Ab3KLENg (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 11 Nov 2013 23:13:36 -0500
+Received: by mail-ve0-f174.google.com with SMTP id cz12so1791177veb.19
+        for <linux-mmc@vger.kernel.org>; Mon, 11 Nov 2013 20:13:35 -0800 (PST)
+In-Reply-To: <CAGOxZ53PJTyXhcg20whXZYcRVVvy1+p0SA9xM_WFOAbYJ7riSQ@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Alim Akhtar <alim.akhtar@samsung.com>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Seungwon Jeon <tgih.jun@samsung.com>, "cjb@laptop.org" <cjb@laptop.org>, "dianders@chromium.org" <dianders@chromium.org>
 
-Add SDIO IRQ entries to debugfs entry. Note that PSTATE shows current
-state of data lines, incl. SDIO IRQ pending
+Hi Seungwon/ Jaehoon,
+I can see there are at least three patches which address HLE (Hardware
+Lock Error) in dw_mmc driver.
 
-Signed-off-by: Andreas Fenkart <afenkart@gmail.com>
----
- drivers/mmc/host/omap_hsmmc.c |   19 ++++++++++++++++++-
- 1 file changed, 18 insertions(+), 1 deletion(-)
+https://patchwork.kernel.org/patch/1814991/
+http://www.spinics.net/lists/linux-mmc/msg21459.html
+and third one is my patch
+http://news.gmane.org/gmane.linux.kernel.mmc/cutoff=23010
 
-diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index 5a7fb4b..c4f71d0 100644
---- a/drivers/mmc/host/omap_hsmmc.c
-+++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -81,6 +81,7 @@ static void apply_clk_hack(struct device *dev)
- #define OMAP_HSMMC_RSP54	0x0118
- #define OMAP_HSMMC_RSP76	0x011C
- #define OMAP_HSMMC_DATA		0x0120
-+#define OMAP_HSMMC_PSTATE	0x0124
- #define OMAP_HSMMC_HCTL		0x0128
- #define OMAP_HSMMC_SYSCTL	0x012C
- #define OMAP_HSMMC_STAT		0x0130
-@@ -1794,6 +1795,20 @@ static int omap_hsmmc_regs_show(struct seq_file *s, void *data)
- {
- 	struct mmc_host *mmc = s->private;
- 	struct omap_hsmmc_host *host = mmc_priv(mmc);
-+	bool suspended;
-+
-+	seq_puts(s, "\n");
-+	seq_printf(s, "sdio irq\t%s\n", ((host->flags & HSMMC_SDIO_IRQ_ENABLED)
-+					 ? "enabled" : "disabled"));
-+	suspended = host->dev->power.runtime_status != RPM_ACTIVE;
-+	if (host->flags & HSMMC_SWAKEUP_QUIRK) {
-+		seq_printf(s, "pinmux config\t%s\n", (suspended ?
-+						      "gpio" : "sdio"));
-+		if (suspended)
-+			seq_printf(s, "sdio irq pin\t%s\n",
-+				   gpio_get_value(mmc_slot(host).gpio_cirq) ?
-+				   "high" : "low");
-+	}
- 
- 	if (host->suspended) {
- 		seq_printf(s, "host suspended, can't read registers\n");
-@@ -1801,9 +1816,11 @@ static int omap_hsmmc_regs_show(struct seq_file *s, void *data)
- 	}
- 
- 	pm_runtime_get_sync(host->dev);
--
-+	seq_puts(s, "\nregs:\n");
- 	seq_printf(s, "CON:\t\t0x%08x\n",
- 			OMAP_HSMMC_READ(host->base, CON));
-+	seq_printf(s, "PSTATE:\t\t0x%08x\n",
-+		   OMAP_HSMMC_READ(host->base, PSTATE));
- 	seq_printf(s, "HCTL:\t\t0x%08x\n",
- 			OMAP_HSMMC_READ(host->base, HCTL));
- 	seq_printf(s, "SYSCTL:\t\t0x%08x\n",
+Can we have some conclusion about how to handle HLE?
+
+Thanks!!!
+
+On Thu, Oct 10, 2013 at 4:31 PM, Alim Akhtar <alim.akhtar@gmail.com> wrote:
+> Hi Jaeohoon,
+>
+> On Mon, Oct 7, 2013 at 2:00 AM, ALIM AKHTAR <alim.akhtar@samsung.com> wrote:
+>> Hi Jaeohoon,
+>> Thanks for quick review.
+>>>------- Original Message -------
+>>>Sender : Jaehoon Chung<jh80.chung@samsung.com> S4/Engineer/System S/W Lab./Samsung Electronics
+>>>Date : Oct 07, 2013 17:36 (GMT+09:00)
+>>>Title : Re: [PATCH] mmc: dw_mmc: Add hardware lock error (HLE) to the CMD error flag
+>>
+>>>Hi, Alim.
+>>
+>>>On 10/07/2013 05:21 PM, ALIM AKHTAR wrote:
+>>>>
+>>>>
+>>>>> ------- Original Message -------
+>>>>> Sender : Jaehoon Chung S4/Engineer/System S/W Lab./Samsung Electronics
+>>>>> Date : Oct 07, 2013 13:34 (GMT+09:00)
+>>>>> Title : Re: [PATCH] mmc: dw_mmc: Add hardware lock error (HLE) to the CMD error flag
+>>>>
+>>>>> On 10/07/2013 01:22 PM, ALIM AKHTAR wrote:
+>>>>>> Hi Jaehoon,
+>>>>>>
+>>>>>>> ------- Original Message -------
+>>>>>>> Sender : Jaehoon Chung S4/Engineer/System S/W Lab./Samsung Electronics
+>>>>>>> Date : Oct 06, 2013 17:28 (GMT+09:00)
+>>>>>> Title : Re: [PATCH] mmc: dw_mmc: Add hardware lock error (HLE) to the CMD error flag
+>>>>>
+>>>>>> Hi Alim,
+>>>>>
+>>>>>> On 10/03/2013 06:18 PM, alim akhtar wrote:
+>>>>>>> From: Alim Akhtar
+>>>>>>>
+>>>>>>> Hardware locked error set when the dw_mmc controller cannot load a
+>>>>>>> command issued by software. When software sets the start_cmd bit in the
+>>>>>>> CMD register, the controller tries to load the command. If the command
+>>>>>>> buffer is already filled with a command, this error is raised. Currently
+>>>>>>> driver does not handle HLE interrupt, which results in a system hang.
+>>>>>> When SDMMC_INT_HLE is set into CMD_ERROR_FLAGS,.then could driver handle the HLE interrupt?
+>>>>> Yes, this will be handled as a part of DW_MCI_CMD_ERROR_FLAGS error handling.
+>>>>> Could some command or data be lost?
+>>>> No, Data and command will not be lost as they are not send out.
+>>>Maybe it needs to discuss how recovery the command/data, when HLE interrupt is occured.
+>>>I want to know, do you have the recovery method when HLE interrupt is occured?
+>>>
+>>>As you mentioned, this patch controlled the HLE error and can't send the any command/data.
+>>>Patch like this had already posted at mailing list.
+>> Can you point to the link?
+>>>But we also need to control after occurred the HLE.
+>> Well, dw_mmc controller document just say "The software then has to reload the command" to recover from HLE.
+>>>In SD-card's case, card can be inserted/removed. but in case of eMMC, can't it.
+>>>It should be maintained the hardware lock status.
+>> HLE is independent of emmc/sd slot and handling should be the same.
+>> Insert/removal is one way to simulate HLE, this is how I found this.
+>> Are you suggesting to check for INT_STATUE for emmc and handle it in case of HLE?
+>
+> Let me know if you have any other comments/ suggestions on this.
+> Thanks!!
+>
+>>>>Best Regards,
+>>>>Jaehoon Chung
+>>
+>>>>>>
+>>>>>>> Best Regards,
+>>>>>>> Jaehoon Chung
+>>>>>>>
+>>>>>>> HLE can be simulated by quickly inserting and removing sd card in card
+>>>>>>> slot (30 ~ 40 times in say 20 secs)
+>>>>>>>
+>>>>>>> Reviewed-by: Doug Anderson
+>>>>>>> Signed-off-by: Alim Akhtar
+>>>>>>> ---
+>>>>>>>   drivers/mmc/host/dw_mmc.c | 2 +-
+>>>>>>>   1 file changed, 1 insertion(+), 1 deletion(-)
+>>>>>>>
+>>>>>>> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+>>>>>>> index 0a6a512..24b4a52 100644
+>>>>>>> --- a/drivers/mmc/host/dw_mmc.c
+>>>>>>> +++ b/drivers/mmc/host/dw_mmc.c
+>>>>>>> @@ -44,7 +44,7 @@
+>>>>>>>   SDMMC_INT_HTO | SDMMC_INT_SBE  | \
+>>>>>>>   SDMMC_INT_EBE)
+>>>>>>>   #define DW_MCI_CMD_ERROR_FLAGS (SDMMC_INT_RTO | SDMMC_INT_RCRC | \
+>>>>>>> - SDMMC_INT_RESP_ERR)
+>>>>>>> + SDMMC_INT_RESP_ERR | SDMMC_INT_HLE)
+>>>>>>>   #define DW_MCI_ERROR_FLAGS (DW_MCI_DATA_ERROR_FLAGS | \
+>>>>>>>   DW_MCI_CMD_ERROR_FLAGS  | SDMMC_INT_HLE)
+>>>>>>>   #define DW_MCI_SEND_STATUS 1
+>
+> --
+> Regards,
+> Alim
+
+
+
 -- 
-1.7.10.4
-
+Regards,
+Alim
