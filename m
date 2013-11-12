@@ -1,318 +1,237 @@
-From: Jackey Shen <jackey.shen@amd.com>
-Subject: Re: [PATCH V2] mmc: sdhci: supporting PCI MSI
-Date: Tue, 12 Nov 2013 18:35:19 +0800
-Message-ID: <20131112103518.GA7210@ubuntu.amd.com>
-References: <1384239413-7027-1-git-send-email-Jackey.Shen@amd.com>
- <5281DC68.3080606@intel.com>
- <20131112092716.GA7285@ubuntu.amd.com>
+From: Michael Trimarchi <michael-dyjBcgdgk7Pe9wHmmfpqLFaTQe2KTcn/@public.gmane.org>
+Subject: Re: [PATCH 1/3] mmc: omap_hsmmc: Enable SDIO IRQ.
+Date: Tue, 12 Nov 2013 12:23:28 +0100
+Message-ID: <CAOf5uwm9s2S4YxsAAa3h0fG3RyZgd4f9pqMu=thra1Wdzm8BNA@mail.gmail.com>
+References: <1384200405-8402-1-git-send-email-afenkart@gmail.com>
+	<1384200405-8402-2-git-send-email-afenkart@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from va3ehsobe005.messaging.microsoft.com ([216.32.180.31]:33458
-	"EHLO va3outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752508Ab3KLKgK (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 12 Nov 2013 05:36:10 -0500
-Content-Disposition: inline
-In-Reply-To: <20131112092716.GA7285@ubuntu.amd.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1384200405-8402-2-git-send-email-afenkart-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Andreas Fenkart <afenkart-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Grant Likely <grant.likely-s3s/WqlpOiPyB63q8FvJNQ@public.gmane.org>, Felipe Balbi <balbi-l0cyMroinI0@public.gmane.org>, Balaji T K <balajitk-l0cyMroinI0@public.gmane.org>, Daniel Mack <zonque-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Linux OMAP Mailing List <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Aaron Lu <aaron.lu@intel.com>
-Cc: alexander.stein@systec-electronic.com, manuel.lauss@googlemail.com, hanfi@spahan.ch, linux-mmc@vger.kernel.org, mcuos.com@gmail.com, Ray.Huang@amd.com
 
-On Tue, Nov 12, 2013 at 05:27:16PM +0800, Jackey Shen wrote:
-> On Tue, Nov 12, 2013 at 03:44:40PM +0800, Aaron Lu wrote:
-> > On 11/12/2013 02:56 PM, Jackey Shen wrote:
-> > > Enable MSI support in sdhci-pci driver and provide the mechanism
-> > > to fall back to Legacy Pin-based Interrupt if MSI register fails.
-> > > 
-> > > Tested with SD cards on AMD platform.
-> > > 
-> > 
-> > ->
-> > 
-> > > Change from V1:
-> > > - implement this PCI MSI feature in sdhci-pci.c instead of sdhci.c
-> > 
-> > Such words can be placed under the --- below so that it will not appear
-> > in git log.
-> > 
-> > > 
-> > > Signed-off-by: Jackey Shen <Jackey.Shen@amd.com>
-> > > Reviewed-by: Huang Rui <ray.huang@amd.com>
-> > > ---
-> > 
-> > ->
-> > Put change related info Here.
-> 
-> OK. I will update my patch.
-> 
-> > 
-> > >  drivers/mmc/host/Kconfig     | 11 +++++++++
-> > >  drivers/mmc/host/sdhci-pci.c | 58 ++++++++++++++++++++++++++++++++++++++++++++
-> > >  drivers/mmc/host/sdhci.c     | 42 ++++++++++++++++++++++++++------
-> > >  drivers/mmc/host/sdhci.h     |  2 ++
-> > >  include/linux/mmc/sdhci.h    |  2 ++
-> > >  5 files changed, 107 insertions(+), 8 deletions(-)
-> > > 
-> > > diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-> > > index 7fc5099..a56cf27 100644
-> > > --- a/drivers/mmc/host/Kconfig
-> > > +++ b/drivers/mmc/host/Kconfig
-> > > @@ -68,6 +68,17 @@ config MMC_SDHCI_PCI
-> > >  
-> > >  	  If unsure, say N.
-> > >  
-> > > +config MMC_SDHCI_PCI_MSI
-> > > +	bool "SDHCI support with MSI on PCI bus"
-> > > +	depends on MMC_SDHCI_PCI && PCI_MSI
-> > > +	help
-> > > +	  This enables PCI MSI (Message Signaled Interrupts) for Secure
-> > > +	  Digital Host Controller Interface.
-> > > +
-> > > +	  If you have a controller with this capability, say Y or M here.
-> > > +
-> > > +	  If unsure, say N.
-> > > +
-> > >  config MMC_RICOH_MMC
-> > >  	bool "Ricoh MMC Controller Disabler"
-> > >  	depends on MMC_SDHCI_PCI
-> > > diff --git a/drivers/mmc/host/sdhci-pci.c b/drivers/mmc/host/sdhci-pci.c
-> > > index 8f75381..2ca29c0 100644
-> > > --- a/drivers/mmc/host/sdhci-pci.c
-> > > +++ b/drivers/mmc/host/sdhci-pci.c
-> > > @@ -1143,10 +1143,68 @@ static void sdhci_pci_hw_reset(struct sdhci_host *host)
-> > >  		slot->hw_reset(host);
-> > >  }
-> > >  
-> > > +#ifdef CONFIG_MMC_SDHCI_PCI_MSI
-> > > +static int sdhci_pci_setup_msi(struct sdhci_host *host, irq_handler_t handler)
-> > > +{
-> > > +	int ret;
-> > > +	struct pci_dev *pdev = to_pci_dev(host->mmc->parent);
-> > > +
-> > > +	host->msi_enabled = false;
-> > > +
-> > > +	ret = pci_enable_msi(pdev);
-> > > +	if (ret) {
-> > > +		pr_warn("%s: Failed to allocate MSI entry\n",
-> > > +			mmc_hostname(host->mmc));
-> > > +		return ret;
-> > > +	}
-> > > +
-> > > +	ret = request_irq(pdev->irq, handler, 0,
-> > > +		mmc_hostname(host->mmc), host);
-> > > +	if (ret) {
-> > > +		pr_warn("%s: Failed to request MSI IRQ %d: %d\n",
-> > > +		       mmc_hostname(host->mmc), pdev->irq, ret);
-> > > +		pci_disable_msi(pdev);
-> > > +		return ret;
-> > > +	}
-> > > +
-> > > +	host->irq = pdev->irq;
-> > > +	host->msi_enabled = true;
-> > > +	return ret;
-> > > +}
-> > 
-> > What about we only call pci_enable_msi in sdhci-pci.c and then assign
-> > host->irq appropriately before calling sdhci_add_host, will that work?
-> > The only difference would be, request_irq will have SHARED flag, but I
-> > suppose that's not a problem.
-> > 
-> There are 2 points for this part:
-> 1. fall back to legacy interrupt right after MSI request fails;
-> 2. prompt user more information about where error/warning occur.
-> 
-> > > +
-> > > +static int sdhci_pci_enable_msi(struct sdhci_host *host, irq_handler_t handler)
-> > > +{
-> > > +	return sdhci_pci_setup_msi(host, handler);
-> > > +}
-> > > +
-> > > +static void sdhci_pci_disable_msi(struct sdhci_host *host)
-> > > +{
-> > > +	struct pci_dev *pdev = to_pci_dev(host->mmc->parent);
-> > > +
-> > > +	if (host->msi_enabled) {
-> > > +		pci_disable_msi(pdev);
-> > > +		host->msi_enabled = false;
-> > > +	}
-> > > +}
-> > > +
-> > > +#else
-> > > +
-> > > +static int sdhci_pci_enable_msi(struct sdhci_host *host, irq_handler_t handler)
-> > > +{
-> > > +	return 0;
-> > > +}
-> > > +
-> > > +static void sdhci_pci_disable_msi(struct sdhci_host *host)
-> > > +{
-> > > +}
-> > > +#endif /* CONFIG_MMC_SDHCI_PCI_MSI */
-> > > +
-> > >  static const struct sdhci_ops sdhci_pci_ops = {
-> > >  	.enable_dma	= sdhci_pci_enable_dma,
-> > >  	.platform_bus_width	= sdhci_pci_bus_width,
-> > >  	.hw_reset		= sdhci_pci_hw_reset,
-> > > +	.enable_msi		= sdhci_pci_enable_msi,
-> > > +	.disable_msi		= sdhci_pci_disable_msi,
-> > >  };
-> > >  
-> > >  /*****************************************************************************\
-> > > diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> > > index 6785fb1..4c2a1ac 100644
-> > > --- a/drivers/mmc/host/sdhci.c
-> > > +++ b/drivers/mmc/host/sdhci.c
-> > > @@ -2554,6 +2554,31 @@ void sdhci_disable_irq_wakeups(struct sdhci_host *host)
-> > >  }
-> > >  EXPORT_SYMBOL_GPL(sdhci_disable_irq_wakeups);
-> > >  
-> > > +static int sdhci_request_irq(struct sdhci_host *host)
-> > > +{
-> > > +	int ret = 0;
-> > > +
-> > > +	/* try to enable MSI */
-> > > +	if (host->ops->enable_msi) {
-> > > +		ret = host->ops->enable_msi(host, sdhci_irq);
-> > > +		if (ret)
-> > > +			pr_warn("%s: Fall back to Pin-based Interrupt: %d\n",
-> > > +				mmc_hostname(host->mmc), ret);
-> > > +	}
-> > > +
-> > > +	if (!host->msi_enabled) {
-> > > +		/* fall back to legacy pin-based interrupt */
-> > > +		ret = request_irq(host->irq, sdhci_irq, IRQF_SHARED,
-> > > +				mmc_hostname(host->mmc), host);
-> > > +		if (ret) {
-> > > +			pr_err("%s: Failed to request IRQ %d: %d\n",
-> > > +				 mmc_hostname(host->mmc), host->irq, ret);
-> > > +			return ret;
-> > > +		}
-> > > +	}
-> > > +
-> > > +	return ret;
-> > > +}
-> > >  int sdhci_suspend_host(struct sdhci_host *host)
-> > >  {
-> > >  	if (host->ops->platform_suspend)
-> > > @@ -2570,6 +2595,8 @@ int sdhci_suspend_host(struct sdhci_host *host)
-> > >  	if (!device_may_wakeup(mmc_dev(host->mmc))) {
-> > >  		sdhci_mask_irqs(host, SDHCI_INT_ALL_MASK);
-> > >  		free_irq(host->irq, host);
-> > > +		if (host->ops->disable_msi)
-> > > +			host->ops->disable_msi(host);
-> > 
-> > What would happen if we do not disable/enable msi in suspend/resume host?
-> > We have already masked all irqs with sdhci_mask_irqs anyway.
-> > 
-> We should also remove request|free_irq at the same time, right?
-> I will do some tests.
+Hi Andreas
 
-Hi Aaron,
+On Mon, Nov 11, 2013 at 9:06 PM, Andreas Fenkart <afenkart-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
+> For now, only support SDIO interrupt if we are booted with
+> DT. This is because some platforms need special quirks. And
+> we don't want to add new legacy mux platform init code
+> callbacks any longer as we are moving to DT based booting
+> anyways.
+>
+> Broken hardware, missing the swakueup line, should fallback
+> to polling, by setting 'ti,quirk-swakup-missing' in the
+> device tree. Otherwise pending SDIO IRQ are not detected
+> while in suspend. This affects am33xx processors.
+>
+> For the DT-Binding portion:
+> Reviewed-by: Grant Likely <grant.likely-s3s/WqlpOiPyB63q8FvJNQ@public.gmane.org>
+> Acked-by: Kumar Gala <galak-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+> Signed-off-by: Andreas Fenkart <afenkart-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+> ---
 
-I did some tests and find system works fine:
-1. remove disable/enable_msi in suspend/resume host
-2. remove free|request_irq in suspend/resume host
+I think that you should add patch revision, change log description.
 
-BTY, I find system also works fine if my patch is not used and
-item 2 above is adopted.
+Michael
 
-The IRQ number is reserved in suspend state and re-used in resume state.
-
-Thanks,
-Jackey
-
-> 
-> Thanks,
-> Jackey
-> 
-> > Thanks,
-> > Aaron
-> > 
-> > >  	} else {
-> > >  		sdhci_enable_irq_wakeups(host);
-> > >  		enable_irq_wake(host->irq);
-> > > @@ -2589,8 +2616,7 @@ int sdhci_resume_host(struct sdhci_host *host)
-> > >  	}
-> > >  
-> > >  	if (!device_may_wakeup(mmc_dev(host->mmc))) {
-> > > -		ret = request_irq(host->irq, sdhci_irq, IRQF_SHARED,
-> > > -				  mmc_hostname(host->mmc), host);
-> > > +		ret = sdhci_request_irq(host);
-> > >  		if (ret)
-> > >  			return ret;
-> > >  	} else {
-> > > @@ -3212,13 +3238,9 @@ int sdhci_add_host(struct sdhci_host *host)
-> > >  
-> > >  	sdhci_init(host, 0);
-> > >  
-> > > -	ret = request_irq(host->irq, sdhci_irq, IRQF_SHARED,
-> > > -		mmc_hostname(mmc), host);
-> > > -	if (ret) {
-> > > -		pr_err("%s: Failed to request IRQ %d: %d\n",
-> > > -		       mmc_hostname(mmc), host->irq, ret);
-> > > +	ret = sdhci_request_irq(host);
-> > > +	if (ret)
-> > >  		goto untasklet;
-> > > -	}
-> > >  
-> > >  #ifdef CONFIG_MMC_DEBUG
-> > >  	sdhci_dumpregs(host);
-> > > @@ -3258,6 +3280,8 @@ reset:
-> > >  	sdhci_reset(host, SDHCI_RESET_ALL);
-> > >  	sdhci_mask_irqs(host, SDHCI_INT_ALL_MASK);
-> > >  	free_irq(host->irq, host);
-> > > +	if (host->ops->disable_msi)
-> > > +		host->ops->disable_msi(host);
-> > >  #endif
-> > >  untasklet:
-> > >  	tasklet_kill(&host->card_tasklet);
-> > > @@ -3301,6 +3325,8 @@ void sdhci_remove_host(struct sdhci_host *host, int dead)
-> > >  
-> > >  	sdhci_mask_irqs(host, SDHCI_INT_ALL_MASK);
-> > >  	free_irq(host->irq, host);
-> > > +	if (host->ops->disable_msi)
-> > > +		host->ops->disable_msi(host);
-> > >  
-> > >  	del_timer_sync(&host->timer);
-> > >  
-> > > diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-> > > index 0a3ed01..cbee843 100644
-> > > --- a/drivers/mmc/host/sdhci.h
-> > > +++ b/drivers/mmc/host/sdhci.h
-> > > @@ -296,6 +296,8 @@ struct sdhci_ops {
-> > >  	void    (*adma_workaround)(struct sdhci_host *host, u32 intmask);
-> > >  	void	(*platform_init)(struct sdhci_host *host);
-> > >  	void    (*card_event)(struct sdhci_host *host);
-> > > +	int	(*enable_msi)(struct sdhci_host *host, irq_handler_t handler);
-> > > +	void	(*disable_msi)(struct sdhci_host *host);
-> > >  };
-> > >  
-> > >  #ifdef CONFIG_MMC_SDHCI_IO_ACCESSORS
-> > > diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
-> > > index 3e781b8..3812479 100644
-> > > --- a/include/linux/mmc/sdhci.h
-> > > +++ b/include/linux/mmc/sdhci.h
-> > > @@ -99,6 +99,8 @@ struct sdhci_host {
-> > >  /* Controller has a non-standard host control register */
-> > >  #define SDHCI_QUIRK2_BROKEN_HOST_CONTROL		(1<<5)
-> > >  
-> > > +	bool msi_enabled;	/* SD host controller with PCI MSI enabled */
-> > > +
-> > >  	int irq;		/* Device IRQ */
-> > >  	void __iomem *ioaddr;	/* Mapped address */
-> > >  
-> > > 
-> > 
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> > 
-> 
+>  .../devicetree/bindings/mmc/ti-omap-hsmmc.txt      |   18 ++++
+>  drivers/mmc/host/omap_hsmmc.c                      |   86 ++++++++++++++++++--
+>  2 files changed, 95 insertions(+), 9 deletions(-)
+>
+> diff --git a/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt b/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
+> index ed271fc..1136e6b 100644
+> --- a/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
+> +++ b/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
+> @@ -20,6 +20,24 @@ ti,dual-volt: boolean, supports dual voltage cards
+>  ti,non-removable: non-removable slot (like eMMC)
+>  ti,needs-special-reset: Requires a special softreset sequence
+>  ti,needs-special-hs-handling: HSMMC IP needs special setting for handling High Speed
+> +ti,quirk-swakup-missing: SOC missing the swakeup line, will not detect
+> +SDIO irq while in suspend. Fallback to polling. Affected chips are
+> +am335x,
+> +
+> +                            ------
+> +                            | PRCM |
+> +                             ------
+> +                              ^ |
+> +                      swakeup | | fclk
+> +                              | v
+> +      ------                -------               -----
+> +     | card | -- CIRQ -->  | hsmmc | -- IRQ -->  | CPU |
+> +      ------                -------               -----
+> +
+> +In suspend the fclk is off and the module is disfunctional. Even
+> +register reads will fail. A small logic in the host will request fclk
+> +restore, when an external event is detected. Once the clock is
+> +restored, the host detects the event normally.
+>
+>  Example:
+>         mmc1: mmc@0x4809c000 {
+> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+> index b392130..6b0ec55 100644
+> --- a/drivers/mmc/host/omap_hsmmc.c
+> +++ b/drivers/mmc/host/omap_hsmmc.c
+> @@ -130,6 +130,7 @@ static void apply_clk_hack(struct device *dev)
+>  #define TC_EN                  (1 << 1)
+>  #define BWR_EN                 (1 << 4)
+>  #define BRR_EN                 (1 << 5)
+> +#define CIRQ_EN                        (1 << 8)
+>  #define ERR_EN                 (1 << 15)
+>  #define CTO_EN                 (1 << 16)
+>  #define CCRC_EN                        (1 << 17)
+> @@ -210,6 +211,9 @@ struct omap_hsmmc_host {
+>         int                     reqs_blocked;
+>         int                     use_reg;
+>         int                     req_in_progress;
+> +       int                     flags;
+> +#define HSMMC_SDIO_IRQ_ENABLED (1 << 0)        /* SDIO irq enabled */
+> +
+>         struct omap_hsmmc_next  next_data;
+>         struct  omap_mmc_platform_data  *pdata;
+>  };
+> @@ -490,27 +494,40 @@ static void omap_hsmmc_stop_clock(struct omap_hsmmc_host *host)
+>  static void omap_hsmmc_enable_irq(struct omap_hsmmc_host *host,
+>                                   struct mmc_command *cmd)
+>  {
+> -       unsigned int irq_mask;
+> +       u32 irq_mask = INT_EN_MASK;
+> +       unsigned long flags;
+>
+>         if (host->use_dma)
+> -               irq_mask = INT_EN_MASK & ~(BRR_EN | BWR_EN);
+> -       else
+> -               irq_mask = INT_EN_MASK;
+> +               irq_mask &= ~(BRR_EN | BWR_EN);
+>
+>         /* Disable timeout for erases */
+>         if (cmd->opcode == MMC_ERASE)
+>                 irq_mask &= ~DTO_EN;
+>
+> +       spin_lock_irqsave(&host->irq_lock, flags);
+>         OMAP_HSMMC_WRITE(host->base, STAT, STAT_CLEAR);
+>         OMAP_HSMMC_WRITE(host->base, ISE, irq_mask);
+> +
+> +       /* latch pending CIRQ, but don't signal */
+> +       if (host->flags & HSMMC_SDIO_IRQ_ENABLED)
+> +               irq_mask |= CIRQ_EN;
+>         OMAP_HSMMC_WRITE(host->base, IE, irq_mask);
+> +       spin_unlock_irqrestore(&host->irq_lock, flags);
+>  }
+>
+>  static void omap_hsmmc_disable_irq(struct omap_hsmmc_host *host)
+>  {
+> -       OMAP_HSMMC_WRITE(host->base, ISE, 0);
+> -       OMAP_HSMMC_WRITE(host->base, IE, 0);
+> +       u32 irq_mask = 0;
+> +       unsigned long flags;
+> +
+> +       spin_lock_irqsave(&host->irq_lock, flags);
+> +       /* no transfer running, need to signal cirq if enabled */
+> +       if (host->flags & HSMMC_SDIO_IRQ_ENABLED)
+> +               irq_mask |= CIRQ_EN;
+> +       OMAP_HSMMC_WRITE(host->base, ISE, irq_mask);
+> +       OMAP_HSMMC_WRITE(host->base, IE, irq_mask);
+>         OMAP_HSMMC_WRITE(host->base, STAT, STAT_CLEAR);
+> +       spin_unlock_irqrestore(&host->irq_lock, flags);
+>  }
+>
+>  /* Calculate divisor for the given clock frequency */
+> @@ -1067,8 +1084,12 @@ static irqreturn_t omap_hsmmc_irq(int irq, void *dev_id)
+>         int status;
+>
+>         status = OMAP_HSMMC_READ(host->base, STAT);
+> -       while (status & INT_EN_MASK && host->req_in_progress) {
+> -               omap_hsmmc_do_irq(host, status);
+> +       while (status & (INT_EN_MASK | CIRQ_EN)) {
+> +               if (host->req_in_progress)
+> +                       omap_hsmmc_do_irq(host, status);
+> +
+> +               if (status & CIRQ_EN)
+> +                       mmc_signal_sdio_irq(host->mmc);
+>
+>                 /* Flush posted write */
+>                 status = OMAP_HSMMC_READ(host->base, STAT);
+> @@ -1583,6 +1604,37 @@ static void omap_hsmmc_init_card(struct mmc_host *mmc, struct mmc_card *card)
+>                 mmc_slot(host).init_card(card);
+>  }
+>
+> +static void omap_hsmmc_enable_sdio_irq(struct mmc_host *mmc, int enable)
+> +{
+> +       struct omap_hsmmc_host *host = mmc_priv(mmc);
+> +       u32 irq_mask;
+> +       unsigned long flags;
+> +
+> +       spin_lock_irqsave(&host->irq_lock, flags);
+> +
+> +       irq_mask = OMAP_HSMMC_READ(host->base, ISE);
+> +       if (enable) {
+> +               host->flags |= HSMMC_SDIO_IRQ_ENABLED;
+> +               irq_mask |= CIRQ_EN;
+> +       } else {
+> +               host->flags &= ~HSMMC_SDIO_IRQ_ENABLED;
+> +               irq_mask &= ~CIRQ_EN;
+> +       }
+> +       OMAP_HSMMC_WRITE(host->base, IE, irq_mask);
+> +
+> +       /*
+> +        * if enable, piggy back detection on current request
+> +        * but always disable immediately
+> +        */
+> +       if (!host->req_in_progress || !enable)
+> +               OMAP_HSMMC_WRITE(host->base, ISE, irq_mask);
+> +
+> +       /* flush posted write */
+> +       OMAP_HSMMC_READ(host->base, IE);
+> +
+> +       spin_unlock_irqrestore(&host->irq_lock, flags);
+> +}
+> +
+>  static void omap_hsmmc_conf_bus_power(struct omap_hsmmc_host *host)
+>  {
+>         u32 hctl, capa, value;
+> @@ -1635,7 +1687,7 @@ static const struct mmc_host_ops omap_hsmmc_ops = {
+>         .get_cd = omap_hsmmc_get_cd,
+>         .get_ro = omap_hsmmc_get_ro,
+>         .init_card = omap_hsmmc_init_card,
+> -       /* NYET -- enable_sdio_irq */
+> +       .enable_sdio_irq = omap_hsmmc_enable_sdio_irq,
+>  };
+>
+>  #ifdef CONFIG_DEBUG_FS
+> @@ -2021,6 +2073,22 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
+>                 dev_warn(&pdev->dev,
+>                         "pins are not configured from the driver\n");
+>
+> +       /*
+> +        * For now, only support SDIO interrupt if we are booted with
+> +        * DT. This is because some platforms need special quirks. And
+> +        * we don't want to add new legacy mux platform init code
+> +        * callbacks any longer as we are moving to DT based booting
+> +        * anyways.
+> +        */
+> +       if (pdev->dev.of_node) {
+> +               mmc->caps |= MMC_CAP_SDIO_IRQ;
+> +               if (of_find_property(host->dev->of_node,
+> +                                    "ti,quirk-swakeup-missing", NULL)) {
+> +                       /* no wakeup from deeper power states, use polling */
+> +                       mmc->caps &= ~MMC_CAP_SDIO_IRQ;
+> +               }
+> +       }
+> +
+>         omap_hsmmc_protect_card(host);
+>
+>         mmc_add_host(mmc);
 > --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
+> 1.7.10.4
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-omap" in
+> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
