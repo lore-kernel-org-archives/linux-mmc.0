@@ -1,184 +1,94 @@
-From: Aaron Lu <aaron.lwe@gmail.com>
-Subject: Re: [PATCH V2] sdhci: only reprogram retuning timer when flag is
- set
-Date: Wed, 13 Nov 2013 21:01:26 +0800
-Message-ID: <52837826.7060000@gmail.com>
-References: <1383821960-2533-1-git-send-email-arend@broadcom.com>	<1384163395-27038-1-git-send-email-arend@broadcom.com>	<CAA+hA=S37Ee3WhGh=k50V9EFvkd_NsnNH9vhie5z-gBfZT9NsQ@mail.gmail.com>	<528352AA.6000507@broadcom.com>	<CAA+hA=TkNji3iY1Dr-nAJ2gHhZddhg_iYTpNZaXi6aT6qDfBAQ@mail.gmail.com>	<52836004.8030404@broadcom.com> <CAA+hA=QELe=C852Xemh8JbvVjin75OiZM=a87y2kBRPtcpHbkw@mail.gmail.com>
+From: Aaron Lu <aaron.lu@intel.com>
+Subject: Re: [PATCH V2] mmc: sdhci: supporting PCI MSI
+Date: Wed, 13 Nov 2013 21:40:06 +0800
+Message-ID: <52838136.1090509@intel.com>
+References: <1384239413-7027-1-git-send-email-Jackey.Shen@amd.com> <5281DC68.3080606@intel.com> <20131112092716.GA7285@ubuntu.amd.com> <5282CDE2.60500@intel.com> <20131113055508.GA3755@ubuntu.amd.com> <20131113060011.GB3755@ubuntu.amd.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pa0-f50.google.com ([209.85.220.50]:38160 "EHLO
+Received: from mail-pa0-f50.google.com ([209.85.220.50]:61306 "EHLO
 	mail-pa0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751221Ab3KMNBo (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Nov 2013 08:01:44 -0500
-Received: by mail-pa0-f50.google.com with SMTP id hz1so387445pad.23
-        for <linux-mmc@vger.kernel.org>; Wed, 13 Nov 2013 05:01:44 -0800 (PST)
-In-Reply-To: <CAA+hA=QELe=C852Xemh8JbvVjin75OiZM=a87y2kBRPtcpHbkw@mail.gmail.com>
+	with ESMTP id S1757263Ab3KMNkR (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Nov 2013 08:40:17 -0500
+Received: by mail-pa0-f50.google.com with SMTP id hz1so431881pad.23
+        for <linux-mmc@vger.kernel.org>; Wed, 13 Nov 2013 05:40:16 -0800 (PST)
+In-Reply-To: <20131113060011.GB3755@ubuntu.amd.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Dong Aisheng <dongas86@gmail.com>, Arend van Spriel <arend@broadcom.com>
-Cc: Chris Ball <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Jackey Shen <jackey.shen@amd.com>
+Cc: alexander.stein@systec-electronic.com, manuel.lauss@googlemail.com, hanfi@spahan.ch, linux-mmc@vger.kernel.org, mcuos.com@gmail.com, Ray.Huang@amd.com
 
-On 11/13/2013 07:25 PM, Dong Aisheng wrote:
-> On Wed, Nov 13, 2013 at 7:18 PM, Arend van Spriel <arend@broadcom.com> wrote:
->> On 11/13/2013 12:12 PM, Dong Aisheng wrote:
+On 11/13/2013 02:00 PM, Jackey Shen wrote:
+> On Wed, Nov 13, 2013 at 01:55:08PM +0800, Jackey Shen wrote:
+>>>>> What about we only call pci_enable_msi in sdhci-pci.c and then assign
+>>>>> host->irq appropriately before calling sdhci_add_host, will that work?
+>>>>> The only difference would be, request_irq will have SHARED flag, but I
+>>>>> suppose that's not a problem.
+>>>>>
+>>>> There are 2 points for this part:
+>>>> 1. fall back to legacy interrupt right after MSI request fails;
 >>>
->>> Hi Arend,
+>>> If we call pci_enable_msi somewhere in sdhci_pci_probe_slot, then if it
+>>> failed, we can also fall back I suppose?
 >>>
->>> On Wed, Nov 13, 2013 at 6:21 PM, Arend van Spriel <arend@broadcom.com>
->>> wrote:
->>>>
->>>> On 11/13/2013 06:02 AM, Dong Aisheng wrote:
->>>>>
->>>>>
->>>>> Hi Arend,
->>>>>
->>>>> On Mon, Nov 11, 2013 at 5:49 PM, Arend van Spriel <arend@broadcom.com>
->>>>> wrote:
->>>>>>
->>>>>>
->>>>>> When the host->tuning_count is zero it means that the
->>>>>> retuning is disabled. This is checked on the first
->>>>>> run of sdhci_execute_tuning() by the if statement below:
->>>>>>
->>>>>>           if (!(host->flags & SDHCI_NEEDS_RETUNING) &&
->>>>>> host->tuning_count
->>>>>> &&
->>>>>>               (host->tuning_mode == SDHCI_TUNING_MODE_1)) {
->>>>>>
->>>>>> So only when tuning_count is non-zero it will set the host
->>>>>> flag SDHCI_USING_RETUNING_TIMER. The else statement is only
->>>>>> for re-programming the timer, which means that flag must be
->>>>>> set. Because that is not checked the else statement is executed
->>>>>> in the first run when tuning_count is zero.
->>>>>>
->>>>>> This was seen on a host controller which indicated
->>>>>> SDHCI_TUNING_MODE_1 (0) and tuning_count being zero. Suspect
->>>>>> that (one of) these registers is not properly set.
->>>>>>
->>>>>> Signed-off-by: Arend van Spriel <arend@broadcom.com>
->>>>>> ---
->>>>>> This patch applies to the mmc-next branch.
->>>>>>
->>>>>> V2:
->>>>>> - add more explanation to the commit message
->>>>>> - check host flag SDHCI_USING_RETUNING_TIMER
->>>>>> ---
->>>>>>    drivers/mmc/host/sdhci.c |    2 +-
->>>>>>    1 file changed, 1 insertion(+), 1 deletion(-)
->>>>>>
->>>>>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
->>>>>> index bd8a098..5974599 100644
->>>>>> --- a/drivers/mmc/host/sdhci.c
->>>>>> +++ b/drivers/mmc/host/sdhci.c
->>>>>> @@ -2014,7 +2014,7 @@ out:
->>>>>>                           host->tuning_count * HZ);
->>>>>>                   /* Tuning mode 1 limits the maximum data length to
->>>>>> 4MB
->>>>>> */
->>>>>>                   mmc->max_blk_count = (4 * 1024 * 1024) /
->>>>>> mmc->max_blk_size;
->>>>>> -       } else {
->>>>>> +       } else if (host->flags & SDHCI_USING_RETUNING_TIMER) {
->>>>>>                   host->flags &= ~SDHCI_NEEDS_RETUNING;
->>>>>>                   /* Reload the new initial value for timer */
->>>>>>                   if (host->tuning_mode == SDHCI_TUNING_MODE_1)
->>>>>
->>>>>
->>>>>
->>>>> I wonder if we could also remove this line?
->>>>> It looks to me it's not neccesary to check the tuning_mode again since
->>>>> we already check the flag
->>>>> above and SDHCI_TUNING_MODE_1 seems like the prerequisite of
->>>>> SDHCI_USING_RETUNING_TIMER.
->>>>
->>>>
->>>>
->>>> According the spec the other tuning modes also can use retuning timer.
->>>> Currently, the mmc stack in upstream linux only supports tuning mode 1.
->>>> When
->>>> adding the other modes this if statement will probably go.
->>>>
->>>
->>> For currently code, it looks like also not necessary to check it since
->>> SDHCI_USING_RETUNING_TIMER will only be set when tunning_mode is
->>> SDHCI_TUNING_MODE_1.
->>> And SDHCI_TUNING_MODE_1 just indicates the tuning mode while the flag
->>> SDHCI_USING_RETUNING_TIMER represents the retuning timer implementation.
->>> So check the flag to invoke the timer seems make more sense to me.
->>> do you agree?
->>
->>
->> The flag SDHCI_USING_RETUNING_TIMER is only set after the initial tuning run
->> so in the if-statement. So currently in the else-statement the fact that
->> SDHCI_USING_RETUNING_TIMER is set implies SDHCI_TUNING_MODE_1.
->>
+>> Yes, it is. 
+>> But, sdhci_pci_disable_msi should be kept since pci_disable_msi is
+>> pci bus releted and better not used in sdhci.c.
+>> So, enable msi and disable msi are NOT symmetric in style.
+>> What's your opinion?
 > 
-> Right, so that means we could remove the tuning_mode check in the
-> else-statement.
+> Sorry for missing word.
+> So, enable msi and disable msi are NOT symmetric in style.
+>
 
-I agree.
+I meant something like this:
 
--Aaron
+diff --git a/drivers/mmc/host/sdhci-pci.c b/drivers/mmc/host/sdhci-pci.c
+index d7d6bc8..96461a3 100644
+--- a/drivers/mmc/host/sdhci-pci.c
++++ b/drivers/mmc/host/sdhci-pci.c
+@@ -1339,12 +1339,17 @@ static struct sdhci_pci_slot *sdhci_pci_probe_slot(
+ 	host->quirks = chip->quirks;
+ 	host->quirks2 = chip->quirks2;
 
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 2d55e6a..b2928ef 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -2015,12 +2015,11 @@ out:
->                         host->tuning_count * HZ);
->                 /* Tuning mode 1 limits the maximum data length to 4MB */
->                 mmc->max_blk_count = (4 * 1024 * 1024) / mmc->max_blk_size;
-> -       } else {
-> +       } else if (host->flags & SDHCI_USING_RETUNING_TIMER) {
->                 host->flags &= ~SDHCI_NEEDS_RETUNING;
->                 /* Reload the new initial value for timeout workqueue */
-> -               if (host->tuning_mode == SDHCI_TUNING_MODE_1)
-> -                       schedule_delayed_work(&host->tuning_timeout_work,
-> -                               host->tuning_count * HZ);
-> +               schedule_delayed_work(&host->tuning_timeout_work,
-> +                       host->tuning_count * HZ);
->         }
-> 
->         /*
-> 
-> Regards
-> Dong Aisheng
-> 
->>
->> Regards,
->> Arend
->>
->>> Regards
->>> Dong Aisheng
->>>
->>>> Regards,
->>>> Arend
->>>>
->>>>
->>>>> Regards
->>>>> Dong Aisheng
->>>>>
->>>>>> --
->>>>>> 1.7.10.4
->>>>>>
->>>>>>
->>>>>> --
->>>>>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->>>>>> the body of a message to majordomo@vger.kernel.org
->>>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>>>
->>>>>
->>>>>
->>>>
->>>>
->>>
->>
->>
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
++	ret = pci_enable_msi(pdev);
++	if (ret) {
++		dev_err(&pdev->dev, "cannot enable msi\n");
++		goto cleanup;
++	}
+ 	host->irq = pdev->irq;
 
+ 	ret = pci_request_region(pdev, bar, mmc_hostname(host->mmc));
+ 	if (ret) {
+ 		dev_err(&pdev->dev, "cannot request region\n");
+-		goto cleanup;
++		goto disable_msi;
+ 	}
+
+ 	host->ioaddr = pci_ioremap_bar(pdev, bar);
+@@ -1396,6 +1401,9 @@ unmap:
+ release:
+ 	pci_release_region(pdev, bar);
+
++disable_msi:
++	pci_disable_msi(pdev);
++
+ cleanup:
+ 	if (slot->data && slot->data->cleanup)
+ 		slot->data->cleanup(slot->data);
+@@ -1431,6 +1439,8 @@ static void sdhci_pci_remove_slot(struct sdhci_pci_slot *slot)
+
+ 	pci_release_region(slot->chip->pdev, slot->pci_bar);
+
++	pci_disable_msi(slot->chip->pdev);
++
+ 	sdhci_free_host(slot->host);
+ }
+
+
+We can do all these MSI stuffs in sdhci-pci.c, but I'm not sure if this
+is correct.
+
+Thanks,
+Aaron
