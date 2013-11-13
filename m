@@ -1,64 +1,175 @@
 From: Dong Aisheng <dongas86@gmail.com>
-Subject: Re: [PATCH v2 0/5] mmc: sdhci-esdhc-imx: add runtime pm support
-Date: Wed, 13 Nov 2013 19:18:54 +0800
-Message-ID: <CAA+hA=R4JmfhP9kA55Baf_Hj-omh10avCb9iG_nVuMRaD_gD4g@mail.gmail.com>
-References: <1383554309-29065-1-git-send-email-b29396@freescale.com>
-	<20131105020335.GC19770@S2101-09.ap.freescale.net>
+Subject: Re: [PATCH V2] sdhci: only reprogram retuning timer when flag is set
+Date: Wed, 13 Nov 2013 19:25:54 +0800
+Message-ID: <CAA+hA=QELe=C852Xemh8JbvVjin75OiZM=a87y2kBRPtcpHbkw@mail.gmail.com>
+References: <1383821960-2533-1-git-send-email-arend@broadcom.com>
+	<1384163395-27038-1-git-send-email-arend@broadcom.com>
+	<CAA+hA=S37Ee3WhGh=k50V9EFvkd_NsnNH9vhie5z-gBfZT9NsQ@mail.gmail.com>
+	<528352AA.6000507@broadcom.com>
+	<CAA+hA=TkNji3iY1Dr-nAJ2gHhZddhg_iYTpNZaXi6aT6qDfBAQ@mail.gmail.com>
+	<52836004.8030404@broadcom.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qe0-f51.google.com ([209.85.128.51]:59016 "EHLO
-	mail-qe0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755681Ab3KMLSz (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Nov 2013 06:18:55 -0500
-Received: by mail-qe0-f51.google.com with SMTP id t7so133331qeb.10
-        for <linux-mmc@vger.kernel.org>; Wed, 13 Nov 2013 03:18:54 -0800 (PST)
-In-Reply-To: <20131105020335.GC19770@S2101-09.ap.freescale.net>
+Received: from mail-qe0-f53.google.com ([209.85.128.53]:48908 "EHLO
+	mail-qe0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1758744Ab3KMLZ4 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Nov 2013 06:25:56 -0500
+Received: by mail-qe0-f53.google.com with SMTP id cy11so132353qeb.12
+        for <linux-mmc@vger.kernel.org>; Wed, 13 Nov 2013 03:25:55 -0800 (PST)
+In-Reply-To: <52836004.8030404@broadcom.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Shawn Guo <shawn.guo@linaro.org>
-Cc: Dong Aisheng <b29396@freescale.com>, Sascha Hauer <s.hauer@pengutronix.de>, Chris Ball <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+To: Arend van Spriel <arend@broadcom.com>
+Cc: Chris Ball <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-Hi Chris,
+On Wed, Nov 13, 2013 at 7:18 PM, Arend van Spriel <arend@broadcom.com> wrote:
+> On 11/13/2013 12:12 PM, Dong Aisheng wrote:
+>>
+>> Hi Arend,
+>>
+>> On Wed, Nov 13, 2013 at 6:21 PM, Arend van Spriel <arend@broadcom.com>
+>> wrote:
+>>>
+>>> On 11/13/2013 06:02 AM, Dong Aisheng wrote:
+>>>>
+>>>>
+>>>> Hi Arend,
+>>>>
+>>>> On Mon, Nov 11, 2013 at 5:49 PM, Arend van Spriel <arend@broadcom.com>
+>>>> wrote:
+>>>>>
+>>>>>
+>>>>> When the host->tuning_count is zero it means that the
+>>>>> retuning is disabled. This is checked on the first
+>>>>> run of sdhci_execute_tuning() by the if statement below:
+>>>>>
+>>>>>           if (!(host->flags & SDHCI_NEEDS_RETUNING) &&
+>>>>> host->tuning_count
+>>>>> &&
+>>>>>               (host->tuning_mode == SDHCI_TUNING_MODE_1)) {
+>>>>>
+>>>>> So only when tuning_count is non-zero it will set the host
+>>>>> flag SDHCI_USING_RETUNING_TIMER. The else statement is only
+>>>>> for re-programming the timer, which means that flag must be
+>>>>> set. Because that is not checked the else statement is executed
+>>>>> in the first run when tuning_count is zero.
+>>>>>
+>>>>> This was seen on a host controller which indicated
+>>>>> SDHCI_TUNING_MODE_1 (0) and tuning_count being zero. Suspect
+>>>>> that (one of) these registers is not properly set.
+>>>>>
+>>>>> Signed-off-by: Arend van Spriel <arend@broadcom.com>
+>>>>> ---
+>>>>> This patch applies to the mmc-next branch.
+>>>>>
+>>>>> V2:
+>>>>> - add more explanation to the commit message
+>>>>> - check host flag SDHCI_USING_RETUNING_TIMER
+>>>>> ---
+>>>>>    drivers/mmc/host/sdhci.c |    2 +-
+>>>>>    1 file changed, 1 insertion(+), 1 deletion(-)
+>>>>>
+>>>>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+>>>>> index bd8a098..5974599 100644
+>>>>> --- a/drivers/mmc/host/sdhci.c
+>>>>> +++ b/drivers/mmc/host/sdhci.c
+>>>>> @@ -2014,7 +2014,7 @@ out:
+>>>>>                           host->tuning_count * HZ);
+>>>>>                   /* Tuning mode 1 limits the maximum data length to
+>>>>> 4MB
+>>>>> */
+>>>>>                   mmc->max_blk_count = (4 * 1024 * 1024) /
+>>>>> mmc->max_blk_size;
+>>>>> -       } else {
+>>>>> +       } else if (host->flags & SDHCI_USING_RETUNING_TIMER) {
+>>>>>                   host->flags &= ~SDHCI_NEEDS_RETUNING;
+>>>>>                   /* Reload the new initial value for timer */
+>>>>>                   if (host->tuning_mode == SDHCI_TUNING_MODE_1)
+>>>>
+>>>>
+>>>>
+>>>> I wonder if we could also remove this line?
+>>>> It looks to me it's not neccesary to check the tuning_mode again since
+>>>> we already check the flag
+>>>> above and SDHCI_TUNING_MODE_1 seems like the prerequisite of
+>>>> SDHCI_USING_RETUNING_TIMER.
+>>>
+>>>
+>>>
+>>> According the spec the other tuning modes also can use retuning timer.
+>>> Currently, the mmc stack in upstream linux only supports tuning mode 1.
+>>> When
+>>> adding the other modes this if statement will probably go.
+>>>
+>>
+>> For currently code, it looks like also not necessary to check it since
+>> SDHCI_USING_RETUNING_TIMER will only be set when tunning_mode is
+>> SDHCI_TUNING_MODE_1.
+>> And SDHCI_TUNING_MODE_1 just indicates the tuning mode while the flag
+>> SDHCI_USING_RETUNING_TIMER represents the retuning timer implementation.
+>> So check the flag to invoke the timer seems make more sense to me.
+>> do you agree?
+>
+>
+> The flag SDHCI_USING_RETUNING_TIMER is only set after the initial tuning run
+> so in the if-statement. So currently in the else-statement the fact that
+> SDHCI_USING_RETUNING_TIMER is set implies SDHCI_TUNING_MODE_1.
+>
 
-On Tue, Nov 5, 2013 at 10:03 AM, Shawn Guo <shawn.guo@linaro.org> wrote:
-> On Mon, Nov 04, 2013 at 04:38:24PM +0800, Dong Aisheng wrote:
->> We disable root clock in runtime pm to save power.
->>
->> Patch 2~4 are some fixes needed for enable runtime pm or it may
->> break the UHS cards(SD3.0/eMMC4.5).
->>
->> Below are some tests result i ran which passed mmc_test tool after enable rpm:
->> SDHC UHS1 on imx6q sabreauto
->> eMMC 4.5 on imx6sl evk
->> SDXC UHS1 on imx6sl evk
->> eMMC DDR on imx6q sabresd
->> SDHC on imx6q sabresd
->>
->> ChangeLog:
->> v1->v2: only patch 5 changed. Add pm_runtime_set_active
->>       based on Ulf's comments.
->>
->> Dong Aisheng (5):
->>   mmc: sdhci-pltfm: export pltfm suspend/resume api
->>   mmc: sdhci-esdhc-imx: tuning bits should not be cleared during reset
->>   mmc: sdhci-esdhc-imx: clear SDHCI_CTRL_EXEC_TUNING should not affect
->>     other bits
->>   mmc: sdhci-esdhc-imx: fix runtime pm unblance issue
->>   mmc: sdhci-esdhc-imx: add runtime pm support
->
-> For the series,
->
-> Acked-by: Shawn Guo <shawn.guo@linaro.org>
->
+Right, so that means we could remove the tuning_mode check in the
+else-statement.
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 2d55e6a..b2928ef 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -2015,12 +2015,11 @@ out:
+                        host->tuning_count * HZ);
+                /* Tuning mode 1 limits the maximum data length to 4MB */
+                mmc->max_blk_count = (4 * 1024 * 1024) / mmc->max_blk_size;
+-       } else {
++       } else if (host->flags & SDHCI_USING_RETUNING_TIMER) {
+                host->flags &= ~SDHCI_NEEDS_RETUNING;
+                /* Reload the new initial value for timeout workqueue */
+-               if (host->tuning_mode == SDHCI_TUNING_MODE_1)
+-                       schedule_delayed_work(&host->tuning_timeout_work,
+-                               host->tuning_count * HZ);
++               schedule_delayed_work(&host->tuning_timeout_work,
++                       host->tuning_count * HZ);
+        }
 
-Would you help pick this series with Ulf's ack?
+        /*
 
 Regards
 Dong Aisheng
 
 >
-> _______________________________________________
-> linux-arm-kernel mailing list
-> linux-arm-kernel@lists.infradead.org
-> http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
+> Regards,
+> Arend
+>
+>> Regards
+>> Dong Aisheng
+>>
+>>> Regards,
+>>> Arend
+>>>
+>>>
+>>>> Regards
+>>>> Dong Aisheng
+>>>>
+>>>>> --
+>>>>> 1.7.10.4
+>>>>>
+>>>>>
+>>>>> --
+>>>>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+>>>>> the body of a message to majordomo@vger.kernel.org
+>>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>>
+>>>>
+>>>>
+>>>
+>>>
+>>
+>
+>
