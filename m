@@ -1,46 +1,46 @@
-From: Neal Buckendahl <nealb001@gmail.com>
-Subject: [PATCH] mmc: host: sdhci: prevent mmcqd from becoming locked on mmc timeout
-Date: Wed, 13 Nov 2013 20:22:54 -0800
-Message-ID: <1384402974-4554-1-git-send-email-nealb001@gmail.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: [PATCH] mmc: sdhci: Allow for long command timeouts
+Date: Thu, 14 Nov 2013 10:16:20 +0200
+Message-ID: <1384416980-15850-1-git-send-email-adrian.hunter@intel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pd0-f178.google.com ([209.85.192.178]:38441 "EHLO
-	mail-pd0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750843Ab3KNEXj (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Nov 2013 23:23:39 -0500
+Received: from mga02.intel.com ([134.134.136.20]:28827 "EHLO mga02.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751181Ab3KNIJU (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 14 Nov 2013 03:09:20 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: nealb001@gmail.com, cjb@laptop.org, narayan.1979@gmail.com, prakity@nvidia.com
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>
+Cc: linux-mmc@vger.kernel.org, Adrian Hunter <adrian.hunter@intel.com>
 
-fixed a condition where device issues a status cmd to sdcard but no response
-comes from sdcard. The sdhci irq fires and we hit a timeout case which calls
-sdhci_finish_data(). sdhci_finish_data eventually attempt to reset controller
-and issues stop cmd. However mmcdq is wait_for_completion(&mrq->completion)
-in function mmc_wait_for_req_done which never occurs.
+The driver has a timer with a 10 second
+timeout to catch devices that stop responding.
+However it is possible for commands to take
+even longer than that.  Change the timer
+timeout to reflect the command timeout.
 
-Signed-off-by: Neal Buckendahl <nealb001@gmail.com>
-Signed-off-by: Narayanan Gopalakrishnan <narayan.1979@gmail.com>
-Signed-off-by: Philip Rakity <prakity@nvidia.com>
+Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
- drivers/mmc/host/sdhci.c |    5 +++++
- 1 file changed, 5 insertions(+)
+ drivers/mmc/host/sdhci.c | 7 ++++++-
+ 1 file changed, 6 insertions(+), 1 deletion(-)
 
 diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 6785fb1..21620d2 100644
+index bd8a098..614a34d 100644
 --- a/drivers/mmc/host/sdhci.c
 +++ b/drivers/mmc/host/sdhci.c
-@@ -973,6 +973,11 @@ static void sdhci_finish_data(struct sdhci_host *host)
- 		if (data->error) {
- 			sdhci_reset(host, SDHCI_RESET_CMD);
- 			sdhci_reset(host, SDHCI_RESET_DATA);
-+			if (data->error == -ETIMEDOUT) {
-+				host->mrq->cmd->error = -ETIMEDOUT;
-+				tasklet_schedule(&host->finish_tasklet);
-+				WARN_ON(1);
-+			}
- 		}
+@@ -1013,7 +1013,12 @@ void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
+ 		mdelay(1);
+ 	}
  
- 		sdhci_send_command(host, data->stop);
+-	mod_timer(&host->timer, jiffies + 10 * HZ);
++	timeout = jiffies;
++	if (!cmd->data && cmd->cmd_timeout_ms > 9000)
++		timeout += DIV_ROUND_UP(cmd->cmd_timeout_ms, 1000) * HZ + HZ;
++	else
++		timeout += 10 * HZ;
++	mod_timer(&host->timer, timeout);
+ 
+ 	host->cmd = cmd;
+ 
 -- 
-1.7.10.4
+1.7.11.7
 
