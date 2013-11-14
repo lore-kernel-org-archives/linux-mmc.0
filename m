@@ -1,13 +1,13 @@
 From: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
-Subject: Re: [PATCH 08/17] ARM: shmobile: sh73a0: fixup sdhi compatible name
-Date: Thu, 14 Nov 2013 14:39:19 +0100
-Message-ID: <2711716.VTEgd2Lufa@avalon>
-References: <87li0rz3to.wl%kuninori.morimoto.gx@renesas.com> <87bo1nz3c9.wl%kuninori.morimoto.gx@renesas.com> <877gcbz3a5.wl%kuninori.morimoto.gx@renesas.com>
+Subject: Re: [PATCH 01/16] gpio: rcar: use postcore_init()
+Date: Thu, 14 Nov 2013 14:42:35 +0100
+Message-ID: <2397666.YV2gHto7Bb@avalon>
+References: <87li0rz3to.wl%kuninori.morimoto.gx@renesas.com> <87k3gbz3pe.wl%kuninori.morimoto.gx@renesas.com> <87iovvz3nd.wl%kuninori.morimoto.gx@renesas.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7Bit
 Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <877gcbz3a5.wl%kuninori.morimoto.gx@renesas.com>
+In-Reply-To: <87iovvz3nd.wl%kuninori.morimoto.gx@renesas.com>
 Sender: linux-sh-owner@vger.kernel.org
 To: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
 Cc: Simon <horms@verge.net.au>, Chris Ball <cjb@laptop.org>, Magnus <magnus.damm@gmail.com>, Linux-SH <linux-sh@vger.kernel.org>, Kuninori Morimoto <kuninori.morimoto.gx@gmail.com>, linux-mmc@vger.kernel.org
@@ -17,48 +17,43 @@ Hi Morimoto-san,
 
 Thank you for the patch.
 
-On Thursday 14 November 2013 02:27:50 Kuninori Morimoto wrote:
-> sh73a0 != r8a7740
+On Thursday 14 November 2013 02:19:54 Kuninori Morimoto wrote:
+> Renesas GPIO is being interlocked with PFC, and GPIO is
+> very basic system for R-Car.
+> GPIO should be initialised in same timing as PFC.
+> The GPIO based system doesn't work correctly without this patch.
+
+Could you please describe the failure in a bit more details ?
+
 > 
 > Signed-off-by: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
-
-Acked-by: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
-
 > ---
->  arch/arm/boot/dts/sh73a0.dtsi |    6 +++---
->  1 file changed, 3 insertions(+), 3 deletions(-)
+>  drivers/gpio/gpio-rcar.c |   12 +++++++++++-
+>  1 file changed, 11 insertions(+), 1 deletion(-)
 > 
-> diff --git a/arch/arm/boot/dts/sh73a0.dtsi b/arch/arm/boot/dts/sh73a0.dtsi
-> index 78f7201a..6e23fb4 100644
-> --- a/arch/arm/boot/dts/sh73a0.dtsi
-> +++ b/arch/arm/boot/dts/sh73a0.dtsi
-> @@ -201,7 +201,7 @@
->  	};
+> diff --git a/drivers/gpio/gpio-rcar.c b/drivers/gpio/gpio-rcar.c
+> index 6038966..0a10325 100644
+> --- a/drivers/gpio/gpio-rcar.c
+> +++ b/drivers/gpio/gpio-rcar.c
+> @@ -454,7 +454,17 @@ static struct platform_driver gpio_rcar_device_driver =
+> { }
+>  };
 > 
->  	sdhi0: sd@ee100000 {
-> -		compatible = "renesas,sdhi-r8a7740";
-> +		compatible = "renesas,sdhi-sh73a0";
->  		reg = <0xee100000 0x100>;
->  		interrupt-parent = <&gic>;
->  		interrupts = <0 83 4
-> @@ -213,7 +213,7 @@
+> -module_platform_driver(gpio_rcar_device_driver);
+> +static int __init gpio_rcar_init(void)
+> +{
+> +	return platform_driver_register(&gpio_rcar_device_driver);
+> +}
+> +postcore_initcall(gpio_rcar_init);
+> +
+> +static void __exit gpio_rcar_exit(void)
+> +{
+> +	platform_driver_unregister(&gpio_rcar_device_driver);
+> +}
+> +module_exit(gpio_rcar_exit);
 > 
->  	/* SDHI1 and SDHI2 have no CD pins, no need for CD IRQ */
->  	sdhi1: sd@ee120000 {
-> -		compatible = "renesas,sdhi-r8a7740";
-> +		compatible = "renesas,sdhi-sh73a0";
->  		reg = <0xee120000 0x100>;
->  		interrupt-parent = <&gic>;
->  		interrupts = <0 88 4
-> @@ -224,7 +224,7 @@
->  	};
-> 
->  	sdhi2: sd@ee140000 {
-> -		compatible = "renesas,sdhi-r8a7740";
-> +		compatible = "renesas,sdhi-sh73a0";
->  		reg = <0xee140000 0x100>;
->  		interrupt-parent = <&gic>;
->  		interrupts = <0 104 4
+>  MODULE_AUTHOR("Magnus Damm");
+>  MODULE_DESCRIPTION("Renesas R-Car GPIO Driver");
 -- 
 Regards,
 
