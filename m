@@ -1,140 +1,59 @@
-From: "Tim Kryger" <tim.kryger-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH v3 1/8] ARM: dts: Declare clocks as fixed on bcm11351
-Date: Thu, 14 Nov 2013 11:10:36 -0800
-Message-ID: <1384456243-27053-2-git-send-email-tim.kryger@linaro.org>
+From: "Tim Kryger" <tim.kryger@linaro.org>
+Subject: [PATCH v3 6/8] Documentation: dt: kona-timer: Add clocks
+ property
+Date: Thu, 14 Nov 2013 11:10:41 -0800
+Message-ID: <1384456243-27053-7-git-send-email-tim.kryger@linaro.org>
 References: <1384456243-27053-1-git-send-email-tim.kryger@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain
 Content-Transfer-Encoding: 7bit
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1384456243-27053-1-git-send-email-tim.kryger-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Christian Daudt <bcm-xK7y4jjYLqYh9ZMKESR00Q@public.gmane.org>, Rob Herring <rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org>, Pawel Moll <pawel.moll-5wv7dgnIgG8@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>, Ian Campbell <ijc+devicetree-KcIKpvwj1kUDXYZnReoRVg@public.gmane.org>, Daniel Lezcano <daniel.lezcano-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>
-Cc: Tim Kryger <tim.kryger-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Device Tree List <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux ARM Kernel List <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linaro Patches List <patches-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mms2.broadcom.com ([216.31.210.18]:2694 "EHLO mms2.broadcom.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1755073Ab3KNTLK (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 14 Nov 2013 14:11:10 -0500
+In-Reply-To: <1384456243-27053-1-git-send-email-tim.kryger@linaro.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Christian Daudt <bcm@fixthebug.org>, Rob Herring <rob.herring@calxeda.com>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Stephen Warren <swarren@wwwdotorg.org>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Daniel Lezcano <daniel.lezcano@linaro.org>, Thomas Gleixner <tglx@linutronix.de>, Chris Ball <cjb@laptop.org>
+Cc: Tim Kryger <tim.kryger@linaro.org>, Device Tree List <devicetree@vger.kernel.org>, Linux ARM Kernel List <linux-arm-kernel@lists.infradead.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux MMC List <linux-mmc@vger.kernel.org>, Linaro Patches List <patches@linaro.org>
 
-Declare clocks that are enabled and configured by bootloaders as fixed
-rate clocks in the DTS such that device drivers may use standard clock
-function calls.
+The frequency for the Kona timer can either be specified through the
+device tree or determined by checking the rate of the clock specified
+in the device tree.  Update the documentation to reflect both ways.
 
-Signed-off-by: Tim Kryger <tim.kryger-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Reviewed-by: Markus Mayer <markus.mayer-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Reviewed-by: Matt Porter <matt.porter-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Signed-off-by: Tim Kryger <tim.kryger@linaro.org>
+Reviewed-by: Matt Porter <matt.porter@linaro.org>
 ---
- arch/arm/boot/dts/bcm11351.dtsi | 97 +++++++++++++++++++++++++++++++++++++++++
- 1 file changed, 97 insertions(+)
+ Documentation/devicetree/bindings/arm/bcm/kona-timer.txt | 8 +++++++-
+ 1 file changed, 7 insertions(+), 1 deletion(-)
 
-diff --git a/arch/arm/boot/dts/bcm11351.dtsi b/arch/arm/boot/dts/bcm11351.dtsi
-index b0c0610..eca6fbc 100644
---- a/arch/arm/boot/dts/bcm11351.dtsi
-+++ b/arch/arm/boot/dts/bcm11351.dtsi
-@@ -142,4 +142,101 @@
- 		status = "disabled";
+diff --git a/Documentation/devicetree/bindings/arm/bcm/kona-timer.txt b/Documentation/devicetree/bindings/arm/bcm/kona-timer.txt
+index 17d88b2..b84e184 100644
+--- a/Documentation/devicetree/bindings/arm/bcm/kona-timer.txt
++++ b/Documentation/devicetree/bindings/arm/bcm/kona-timer.txt
+@@ -8,13 +8,19 @@ Required properties:
+ - DEPRECATED: compatible : "bcm,kona-timer"
+ - reg : Register range for the timer
+ - interrupts : interrupt for the timer
++- clocks: clock specifier for the kona i2c external clock
+ - clock-frequency: frequency that the clock operates
+ 
++Only one of clocks or clock-frequency should be specified.
++
++Refer to clocks/clock-bindings.txt for generic clock consumer
++properties.
++
+ Example:
+ 	timer@35006000 {
+ 		compatible = "brcm,kona-timer";
+ 		reg = <0x35006000 0x1000>;
+ 		interrupts = <0x0 7 0x4>;
+-		clock-frequency = <32768>;
++		clocks = <&hub_timer_clk>;
  	};
  
-+	clocks {
-+		bsc1_clk: bsc1 {
-+			compatible = "fixed-clock";
-+			clock-frequency = <13000000>;
-+			#clock-cells = <0>;
-+		};
-+
-+		bsc2_clk: bsc2 {
-+			compatible = "fixed-clock";
-+			clock-frequency = <13000000>;
-+			#clock-cells = <0>;
-+		};
-+
-+		bsc3_clk: bsc3 {
-+			compatible = "fixed-clock";
-+			clock-frequency = <13000000>;
-+			#clock-cells = <0>;
-+		};
-+
-+		pmu_bsc_clk: pmu_bsc {
-+			compatible = "fixed-clock";
-+			clock-frequency = <13000000>;
-+			#clock-cells = <0>;
-+		};
-+
-+		hub_timer_clk: hub_timer {
-+			compatible = "fixed-clock";
-+			clock-frequency = <32768>;
-+			#clock-cells = <0>;
-+		};
-+
-+		pwm_clk: pwm {
-+			compatible = "fixed-clock";
-+			clock-frequency = <26000000>;
-+			#clock-cells = <0>;
-+		};
-+
-+		sdio1_clk: sdio1 {
-+			compatible = "fixed-clock";
-+			clock-frequency = <48000000>;
-+			#clock-cells = <0>;
-+		};
-+
-+		sdio2_clk: sdio2 {
-+			compatible = "fixed-clock";
-+			clock-frequency = <48000000>;
-+			#clock-cells = <0>;
-+		};
-+
-+		sdio3_clk: sdio3 {
-+			compatible = "fixed-clock";
-+			clock-frequency = <48000000>;
-+			#clock-cells = <0>;
-+		};
-+
-+		sdio4_clk: sdio4 {
-+			compatible = "fixed-clock";
-+			clock-frequency = <48000000>;
-+			#clock-cells = <0>;
-+		};
-+
-+		tmon_1m_clk: tmon_1m {
-+			compatible = "fixed-clock";
-+			clock-frequency = <1000000>;
-+			#clock-cells = <0>;
-+		};
-+
-+		uartb_clk: uartb {
-+			compatible = "fixed-clock";
-+			clock-frequency = <13000000>;
-+			#clock-cells = <0>;
-+		};
-+
-+		uartb2_clk: uartb2 {
-+			compatible = "fixed-clock";
-+			clock-frequency = <13000000>;
-+			#clock-cells = <0>;
-+		};
-+
-+		uartb3_clk: uartb3 {
-+			compatible = "fixed-clock";
-+			clock-frequency = <13000000>;
-+			#clock-cells = <0>;
-+		};
-+
-+		uartb4_clk: uartb4 {
-+			compatible = "fixed-clock";
-+			clock-frequency = <13000000>;
-+			#clock-cells = <0>;
-+		};
-+
-+		usb_otg_ahb_clk: usb_otg_ahb {
-+			compatible = "fixed-clock";
-+			clock-frequency = <52000000>;
-+			#clock-cells = <0>;
-+		};
-+	};
- };
 -- 
 1.8.0.1
 
 
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
