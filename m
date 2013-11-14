@@ -1,193 +1,67 @@
-From: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
-Subject: Re: [PATCH 17/17] ARM: shmobile: lager: use gpio/fixed regulator for SDHI
-Date: Thu, 14 Nov 2013 14:51:24 +0100
-Message-ID: <6658395.y4IG39SdVx@avalon>
-References: <87li0rz3to.wl%kuninori.morimoto.gx@renesas.com> <87txffxofc.wl%kuninori.morimoto.gx@renesas.com> <87r4ajxodj.wl%kuninori.morimoto.gx@renesas.com>
+From: Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>
+Subject: Re: [PATCH 11/17] mmc: SDHI: add SoC specific workaround via HW version
+Date: Thu, 14 Nov 2013 18:03:50 +0400
+Message-ID: <5284D846.60404@cogentembedded.com>
+References: <87li0rz3to.wl%kuninori.morimoto.gx@renesas.com>	<8761rvz37d.wl%kuninori.morimoto.gx@renesas.com> <871u2jz33t.wl%kuninori.morimoto.gx@renesas.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7Bit
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from perceval.ideasonboard.com ([95.142.166.194]:42054 "EHLO
-	perceval.ideasonboard.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753699Ab3KNNup (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 14 Nov 2013 08:50:45 -0500
-In-Reply-To: <87r4ajxodj.wl%kuninori.morimoto.gx@renesas.com>
+Received: from mail-la0-f49.google.com ([209.85.215.49]:37923 "EHLO
+	mail-la0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753293Ab3KNODp (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 14 Nov 2013 09:03:45 -0500
+Received: by mail-la0-f49.google.com with SMTP id er20so1600041lab.36
+        for <linux-mmc@vger.kernel.org>; Thu, 14 Nov 2013 06:03:42 -0800 (PST)
+In-Reply-To: <871u2jz33t.wl%kuninori.morimoto.gx@renesas.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
-Cc: Simon <horms@verge.net.au>, Chris Ball <cjb@laptop.org>, Magnus <magnus.damm@gmail.com>, Linux-SH <linux-sh@vger.kernel.org>, Kuninori Morimoto <kuninori.morimoto.gx@gmail.com>, linux-mmc@vger.kernel.org
+To: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>, Chris Ball <cjb@laptop.org>
+Cc: Simon <horms@verge.net.au>, Laurent <laurent.pinchart@ideasonboard.com>, Magnus <magnus.damm@gmail.com>, Linux-SH <linux-sh@vger.kernel.org>, Kuninori Morimoto <kuninori.morimoto.gx@gmail.com>, linux-mmc@vger.kernel.org
 
-Hi Morimoto-san,
+Hello.
 
-Thank you for the patch.
+On 14-11-2013 14:31, Kuninori Morimoto wrote:
 
-On Thursday 14 November 2013 02:35:08 Kuninori Morimoto wrote:
-> SDHI0/2 Vcc/Vccq can use gpio/fixed regulator driver
-> 
+> One of Renesas SDHI chip needs workaround to use it,
+> and, we can judge it based on chip version.
+> This patch adds very quick-hack workaround method,
+> since we still don't know how many chips
+> need workaround in the future.
+
 > Signed-off-by: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
 > ---
->  arch/arm/mach-shmobile/board-lager.c |   89 ++++++++++++++++++++++++++-----
->  1 file changed, 78 insertions(+), 11 deletions(-)
-> 
-> diff --git a/arch/arm/mach-shmobile/board-lager.c
-> b/arch/arm/mach-shmobile/board-lager.c index 2e529dc..7c77521 100644
-> --- a/arch/arm/mach-shmobile/board-lager.c
-> +++ b/arch/arm/mach-shmobile/board-lager.c
-> @@ -33,7 +33,9 @@
->  #include <linux/platform_data/rcar-du.h>
->  #include <linux/platform_device.h>
->  #include <linux/phy.h>
-> +#include <linux/regulator/driver.h>
->  #include <linux/regulator/fixed.h>
-> +#include <linux/regulator/gpio-regulator.h>
->  #include <linux/regulator/machine.h>
->  #include <linux/sh_eth.h>
->  #include <mach/common.h>
-> @@ -154,10 +156,6 @@ static const struct gpio_keys_platform_data
-> lager_keys_pdata __initconst = { static struct regulator_consumer_supply
-> fixed3v3_power_consumers[] = {
->  	REGULATOR_SUPPLY("vmmc", "sh_mmcif.1"),
-> -	REGULATOR_SUPPLY("vmmc", "sh_mobile_sdhi.0"),
-> -	REGULATOR_SUPPLY("vqmmc", "sh_mobile_sdhi.0"),
-> -	REGULATOR_SUPPLY("vmmc", "sh_mobile_sdhi.2"),
-> -	REGULATOR_SUPPLY("vqmmc", "sh_mobile_sdhi.2"),
->  };
-> 
->  /* MMCIF */
-> @@ -185,9 +183,67 @@ static const struct resource ether_resources[]
-> __initconst = { DEFINE_RES_IRQ(gic_spi(162)),
->  };
-> 
-> +/* SDHI regulator macro */
-> +#define SDHI_REGULATOR(idx, vdd_pin, vccq_pin)				\
-> +static struct regulator_consumer_supply vcc_sdhi##idx##_consumer =	\
-> +	REGULATOR_SUPPLY("vmmc", "sh_mobile_sdhi." #idx);		\
-> +									\
-> +static struct regulator_init_data vcc_sdhi##idx##_init_data = {		\
-> +	.constraints = {						\
-> +		.valid_ops_mask = REGULATOR_CHANGE_STATUS,		\
-> +	},								\
-> +	.consumer_supplies	= &vcc_sdhi##idx##_consumer,		\
-> +	.num_consumer_supplies	= 1,					\
-> +};									\
-> +									\
-> +static struct fixed_voltage_config vcc_sdhi##idx##_info = {		\
-> +	.supply_name	= "SDHI" #idx "Vcc",				\
-> +	.microvolts	= 3300000,					\
-> +	.gpio		= vdd_pin,					\
-> +	.enable_high	= 1,						\
-> +	.init_data	= &vcc_sdhi##idx##_init_data,			\
-> +};									\
-> +									\
-> +static struct regulator_consumer_supply vccq_sdhi##idx##_consumer=	\
-> +	REGULATOR_SUPPLY("vqmmc", "sh_mobile_sdhi." #idx);		\
-> +									\
-> +static struct regulator_init_data vccq_sdhi##idx##_init_data = {	\
-> +	.constraints = {						\
-> +		.input_uV	= 3300000,				\
-> +		.min_uV		= 1800000,				\
-> +		.max_uV		= 3300000,				\
-> +		.valid_ops_mask = REGULATOR_CHANGE_VOLTAGE |		\
-> +				  REGULATOR_CHANGE_STATUS,		\
-> +	},								\
-> +	.consumer_supplies	= &vccq_sdhi##idx##_consumer,		\
-> +	.num_consumer_supplies	= 1,					\
-> +};									\
-> +									\
-> +static struct gpio vccq_sdhi##idx##_gpio =				\
-> +	{ vccq_pin, GPIOF_OUT_INIT_HIGH, "vccq-sdhi" #idx };		\
-> +									\
-> +static struct gpio_regulator_state vccq_sdhi##idx##_states[] = {	\
-> +	{ .value = 1800000, .gpios = 0 },				\
-> +	{ .value = 3300000, .gpios = 1 },				\
-> +};									\
-> +									\
-> +static struct gpio_regulator_config vccq_sdhi##idx##_info = {		\
-> +	.supply_name	= "vqmmc",					\
-> +	.gpios		= &vccq_sdhi##idx##_gpio,			\
-> +	.nr_gpios	= 1,						\
-> +	.states		= vccq_sdhi##idx##_states,			\
-> +	.nr_states	= ARRAY_SIZE(vccq_sdhi##idx##_states),		\
-> +	.type		= REGULATOR_VOLTAGE,				\
-> +	.init_data	= &vccq_sdhi##idx##_init_data,			\
-> +};
-
-The vmmc regulator looks fine to me at first sight, but I'm less sure about 
-the vqmmc regulator. The vqmmc supplies are provided by the PMIC, we should 
-ideally use the existing da9063 mfd driver. As this might require a 
-significant amount of work I'm fine with this approach as a quick fix, but I'd 
-like a comment in the source code stating that vqmmc should be handled by the 
-da9063 driver.
-
-> +SDHI_REGULATOR(0, RCAR_GP_PIN(5, 24), RCAR_GP_PIN(5, 29));
-> +SDHI_REGULATOR(2, RCAR_GP_PIN(5, 25), RCAR_GP_PIN(5, 30));
+>   drivers/mmc/host/sh_mobile_sdhi.c |   11 +++++++++++
+>   include/linux/mmc/tmio.h          |    1 +
+>   2 files changed, 12 insertions(+)
+>
+> diff --git a/drivers/mmc/host/sh_mobile_sdhi.c b/drivers/mmc/host/sh_mobile_sdhi.c
+> index f1e35a7..d241d86 100644
+> --- a/drivers/mmc/host/sh_mobile_sdhi.c
+> +++ b/drivers/mmc/host/sh_mobile_sdhi.c
+> @@ -33,6 +33,8 @@
+>
+>   #include "tmio_mmc.h"
+>
+> +#define EXT_ACC           0xe4
 > +
->  /* SDHI0 */
->  static struct sh_mobile_sdhi_info sdhi0_info __initdata = {
-> -	.tmio_caps	= MMC_CAP_SD_HIGHSPEED | MMC_CAP_SDIO_IRQ,
-> +	.tmio_caps	= MMC_CAP_SD_HIGHSPEED | MMC_CAP_SDIO_IRQ |
-> +			  MMC_CAP_POWER_OFF_CARD,
->  	.tmio_caps2	= MMC_CAP2_NO_MULTI_READ,
->  	.tmio_flags	= TMIO_MMC_HAS_IDLE_WAIT |
->  			  TMIO_MMC_WRPROTECT_DISABLE,
-> @@ -200,7 +256,8 @@ static struct resource sdhi0_resources[] __initdata = {
-> 
->  /* SDHI2 */
->  static struct sh_mobile_sdhi_info sdhi2_info __initdata = {
-> -	.tmio_caps	= MMC_CAP_SD_HIGHSPEED | MMC_CAP_SDIO_IRQ,
-> +	.tmio_caps	= MMC_CAP_SD_HIGHSPEED | MMC_CAP_SDIO_IRQ |
-> +			  MMC_CAP_POWER_OFF_CARD,
->  	.tmio_caps2	= MMC_CAP2_NO_MULTI_READ,
->  	.tmio_flags	= TMIO_MMC_HAS_IDLE_WAIT |
->  			  TMIO_MMC_WRPROTECT_DISABLE,
-> @@ -259,6 +316,9 @@ static const struct pinctrl_map lager_pinctrl_map[] = {
-> 
->  static void __init lager_add_standard_devices(void)
->  {
-> +	int fixed_regulator_idx = 0;
-> +	int gpio_regulator_idx = 0;
-> +
->  	r8a7790_clock_init();
-> 
->  	pinctrl_register_mappings(lager_pinctrl_map,
-> @@ -272,7 +332,8 @@ static void __init lager_add_standard_devices(void)
->  	platform_device_register_data(&platform_bus, "gpio-keys", -1,
->  				      &lager_keys_pdata,
->  				      sizeof(lager_keys_pdata));
-> -	regulator_register_always_on(0, "fixed-3.3V", fixed3v3_power_consumers,
-> +	regulator_register_always_on(fixed_regulator_idx++,
-> +				     "fixed-3.3V", fixed3v3_power_consumers,
->  				     ARRAY_SIZE(fixed3v3_power_consumers), 3300000);
->  	platform_device_register_resndata(&platform_bus, "sh_mmcif", 1,
->  					  mmcif1_resources, ARRAY_SIZE(mmcif1_resources),
-> @@ -285,10 +346,16 @@ static void __init lager_add_standard_devices(void)
-> 
->  	lager_add_du_device();
-> 
-> -	gpio_request_one(RCAR_GP_PIN(5, 24), GPIOF_OUT_INIT_HIGH, NULL); /* SD0
-> VDD  3.3V */ -	gpio_request_one(RCAR_GP_PIN(5, 25), GPIOF_OUT_INIT_HIGH,
-> NULL); /* SD2 VDD  3.3V */ -	gpio_request_one(RCAR_GP_PIN(5, 29),
-> GPIOF_OUT_INIT_HIGH, NULL); /* SD0 VccQ 3.3V */
-> -	gpio_request_one(RCAR_GP_PIN(5, 30), GPIOF_OUT_INIT_HIGH, NULL); /* SD2
-> VccQ 3.3V */ +	platform_device_register_data(&platform_bus,
-> "reg-fixed-voltage", fixed_regulator_idx++, +				      
-&vcc_sdhi0_info,
-> sizeof(struct fixed_voltage_config));
-> +	platform_device_register_data(&platform_bus, "reg-fixed-voltage",
-> fixed_regulator_idx++, +				      &vcc_sdhi2_info, sizeof(struct
-> fixed_voltage_config));
-> +
-> +	platform_device_register_data(&platform_bus, "gpio-regulator",
-> gpio_regulator_idx++, +				      &vccq_sdhi0_info, sizeof(struct
-> gpio_regulator_config)); +	platform_device_register_data(&platform_bus,
-> "gpio-regulator", gpio_regulator_idx++, +				      
-&vccq_sdhi2_info,
-> sizeof(struct gpio_regulator_config)); +
->  	platform_device_register_resndata(&platform_bus, "sh_mobile_sdhi", 0,
->  					  sdhi0_resources, ARRAY_SIZE(sdhi0_resources),
->  					  &sdhi0_info, sizeof(struct sh_mobile_sdhi_info));
--- 
-Regards,
 
-Laurent Pinchart
+    Why not #define it in the tmio.h? It already contains SDHI specific 
+register, CTL_DMA_ENABLE...
+
+[...]
+> diff --git a/include/linux/mmc/tmio.h b/include/linux/mmc/tmio.h
+> index a1c1f32..84d9053 100644
+> --- a/include/linux/mmc/tmio.h
+> +++ b/include/linux/mmc/tmio.h
+> @@ -33,6 +33,7 @@
+>   #define CTL_SDIO_IRQ_MASK 0x38
+>   #define CTL_DMA_ENABLE 0xd8
+>   #define CTL_RESET_SD 0xe0
+> +#define CTL_VERSION 0xe2
+>   #define CTL_SDIO_REGS 0x100
+>   #define CTL_CLK_AND_WAIT_CTL 0x138
+>   #define CTL_RESET_SDIO 0x1e0
+
+WBR, Sergei
 
