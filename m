@@ -1,122 +1,107 @@
-From: Tony Lindgren <tony@atomide.com>
-Subject: Re: [PATCH 3/8] mmc: omap: Fix I2C dependency and make driver
- usable with device tree
-Date: Thu, 14 Nov 2013 09:25:27 -0800
-Message-ID: <20131114172527.GD10317@atomide.com>
-References: <1384396537-3486-1-git-send-email-tony@atomide.com>
- <1384396537-3486-4-git-send-email-tony@atomide.com>
- <20131114110533.GD16396@e106331-lin.cambridge.arm.com>
+From: "Tim Kryger" <tim.kryger@linaro.org>
+Subject: [PATCH v3 5/8] mmc: sdhci-bcm-kona: Add basic use of clocks
+Date: Thu, 14 Nov 2013 11:10:40 -0800
+Message-ID: <1384456243-27053-6-git-send-email-tim.kryger@linaro.org>
+References: <1384456243-27053-1-git-send-email-tim.kryger@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-omap-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20131114110533.GD16396@e106331-lin.cambridge.arm.com>
-Sender: linux-omap-owner@vger.kernel.org
-To: Mark Rutland <mark.rutland@arm.com>
-Cc: "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-omap@vger.kernel.org" <linux-omap@vger.kernel.org>, Chris Ball <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Content-Type: text/plain
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mms3.broadcom.com ([216.31.210.19]:2787 "EHLO mms3.broadcom.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753135Ab3KNTLI (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 14 Nov 2013 14:11:08 -0500
+In-Reply-To: <1384456243-27053-1-git-send-email-tim.kryger@linaro.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Christian Daudt <bcm@fixthebug.org>, Rob Herring <rob.herring@calxeda.com>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Stephen Warren <swarren@wwwdotorg.org>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Daniel Lezcano <daniel.lezcano@linaro.org>, Thomas Gleixner <tglx@linutronix.de>, Chris Ball <cjb@laptop.org>
+Cc: Tim Kryger <tim.kryger@linaro.org>, Device Tree List <devicetree@vger.kernel.org>, Linux ARM Kernel List <linux-arm-kernel@lists.infradead.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux MMC List <linux-mmc@vger.kernel.org>, Linaro Patches List <patches@linaro.org>
 
-* Mark Rutland <mark.rutland@arm.com> [131114 03:06]:
->
-> Missing binding document.
+Enable the external clock needed by the host controller during the
+probe and disable it during the remove.
 
-Here's this one updated with a minimal binding document. The
-ti,hwmods is still needed until we have removed the dependencies
-to hwmod code for omaps.
+Signed-off-by: Tim Kryger <tim.kryger@linaro.org>
+Reviewed-by: Markus Mayer <markus.mayer@linaro.org>
+Reviewed-by: Matt Porter <matt.porter@linaro.org>
+---
+ drivers/mmc/host/sdhci-bcm-kona.c | 28 +++++++++++++++++++++++++++-
+ 1 file changed, 27 insertions(+), 1 deletion(-)
 
-Regards,
-
-Tony
-
-
-From: Tony Lindgren <tony@atomide.com>
-Date: Wed, 13 Nov 2013 16:36:37 -0800
-Subject: [PATCH] mmc: omap: Fix I2C dependency and make driver usable with device tree
-
-Some features can be configured by the companion I2C chips,
-which may not be available at the probe time. Fix the issue
-by returning -EPROBE_DEFER when the MMC controller slots
-are not configured.
-
-While at it, let's also add minimal device tree support so
-omap24xx platforms can use this driver without legacy mode
-since we claim to support device tree for mach-omap2 based
-systems.
-
-Although adding the minimal device tree support is not strictly
-a fix, it does remove one of the last blockers for dropping a
-bunch of legacy platform data for mach-omap2.
-
-Cc: Chris Ball <cjb@laptop.org>
-Cc: linux-mmc@vger.kernel.org
-Signed-off-by: Tony Lindgren <tony@atomide.com>
-
-+++ b/Documentation/devicetree/bindings/mmc/ti-omap.txt
-@@ -0,0 +1,27 @@
-+* TI MMC host controller for OMAP1 and 2420
-+
-+The MMC Host Controller on TI OMAP1 and 2420 family provides
-+an interface for MMC, SD, and SDIO types of memory cards.
-+
-+This file documents differences between the core properties described
-+by mmc.txt and the properties used by the omap mmc driver.
-+
-+Note that this driver will not work with omap2430 or later omaps,
-+please see the omap hsmmc driver for the current omaps.
-+
-+Required properties:
-+- compatible: Must be "ti,omap2420-mmc", for OMAP2420 controllers
-+- ti,hwmods: For 2420, must be "msdi<n>", where n is controller
-+  instance starting 1
-+
-+Examples:
-+
-+	msdi1: mmc@4809c000 {
-+		compatible = "ti,omap2420-mmc";
-+		ti,hwmods = "msdi1";
-+		reg = <0x4809c000 0x80>;
-+		interrupts = <83>;
-+		dmas = <&sdma 61 &sdma 62>;
-+		dma-names = "tx", "rx";
-+	};
-+
---- a/drivers/mmc/host/omap.c
-+++ b/drivers/mmc/host/omap.c
-@@ -22,6 +22,7 @@
- #include <linux/delay.h>
- #include <linux/spinlock.h>
- #include <linux/timer.h>
-+#include <linux/of.h>
- #include <linux/omap-dma.h>
- #include <linux/mmc/host.h>
- #include <linux/mmc/card.h>
-@@ -1330,7 +1331,7 @@ static int mmc_omap_probe(struct platform_device *pdev)
- 	}
- 	if (pdata->nr_slots == 0) {
- 		dev_err(&pdev->dev, "no slots\n");
--		return -ENXIO;
-+		return -EPROBE_DEFER;
- 	}
+diff --git a/drivers/mmc/host/sdhci-bcm-kona.c b/drivers/mmc/host/sdhci-bcm-kona.c
+index 85472d3..bffbb40 100644
+--- a/drivers/mmc/host/sdhci-bcm-kona.c
++++ b/drivers/mmc/host/sdhci-bcm-kona.c
+@@ -54,6 +54,7 @@
  
- 	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
-@@ -1553,6 +1554,12 @@ static int mmc_omap_resume(struct platform_device *pdev)
- #define mmc_omap_resume		NULL
- #endif
- 
-+#if IS_BUILTIN(CONFIG_OF)
-+static const struct of_device_id mmc_omap_match[] = {
-+	{ .compatible = "ti,omap2420-mmc", },
-+	{ },
-+};
-+#endif
- static struct platform_driver mmc_omap_driver = {
- 	.probe		= mmc_omap_probe,
- 	.remove		= mmc_omap_remove,
-@@ -1561,6 +1568,7 @@ static struct platform_driver mmc_omap_driver = {
- 	.driver		= {
- 		.name	= DRIVER_NAME,
- 		.owner	= THIS_MODULE,
-+		.of_match_table = of_match_ptr(mmc_omap_match),
- 	},
+ struct sdhci_bcm_kona_dev {
+ 	struct mutex	write_lock; /* protect back to back writes */
++	struct clk	*external_clk;
  };
  
+ 
+@@ -257,6 +258,24 @@ static int sdhci_bcm_kona_probe(struct platform_device *pdev)
+ 		goto err_pltfm_free;
+ 	}
+ 
++	/* Get and enable the external clock */
++	kona_dev->external_clk = devm_clk_get(dev, NULL);
++	if (IS_ERR(kona_dev->external_clk)) {
++		dev_err(dev, "Failed to get external clock\n");
++		ret = PTR_ERR(kona_dev->external_clk);
++		goto err_pltfm_free;
++	}
++
++	if (clk_set_rate(kona_dev->external_clk, host->mmc->f_max) != 0) {
++		dev_err(dev, "Failed to set rate external clock\n");
++		goto err_pltfm_free;
++	}
++
++	if (clk_prepare_enable(kona_dev->external_clk) != 0) {
++		dev_err(dev, "Failed to enable external clock\n");
++		goto err_pltfm_free;
++	}
++
+ 	dev_dbg(dev, "non-removable=%c\n",
+ 		(host->mmc->caps & MMC_CAP_NONREMOVABLE) ? 'Y' : 'N');
+ 	dev_dbg(dev, "cd_gpio %c, wp_gpio %c\n",
+@@ -271,7 +290,7 @@ static int sdhci_bcm_kona_probe(struct platform_device *pdev)
+ 
+ 	ret = sdhci_bcm_kona_sd_reset(host);
+ 	if (ret)
+-		goto err_pltfm_free;
++		goto err_clk_disable;
+ 
+ 	sdhci_bcm_kona_sd_init(host);
+ 
+@@ -307,6 +326,9 @@ err_remove_host:
+ err_reset:
+ 	sdhci_bcm_kona_sd_reset(host);
+ 
++err_clk_disable:
++	clk_disable_unprepare(kona_dev->external_clk);
++
+ err_pltfm_free:
+ 	sdhci_pltfm_free(pdev);
+ 
+@@ -317,6 +339,8 @@ err_pltfm_free:
+ static int __exit sdhci_bcm_kona_remove(struct platform_device *pdev)
+ {
+ 	struct sdhci_host *host = platform_get_drvdata(pdev);
++	struct sdhci_pltfm_host *pltfm_priv = sdhci_priv(host);
++	struct sdhci_bcm_kona_dev *kona_dev = sdhci_pltfm_priv(pltfm_priv);
+ 	int dead;
+ 	u32 scratch;
+ 
+@@ -326,6 +350,8 @@ static int __exit sdhci_bcm_kona_remove(struct platform_device *pdev)
+ 		dead = 1;
+ 	sdhci_remove_host(host, dead);
+ 
++	clk_disable_unprepare(kona_dev->external_clk);
++
+ 	sdhci_free_host(host);
+ 
+ 	return 0;
+-- 
+1.8.0.1
+
+
