@@ -1,79 +1,106 @@
 From: Jarkko Nikula <jarkko.nikula@bitmer.com>
-Subject: [RESEND 8/8] mmc: omap: Add erase capability
-Date: Sat, 16 Nov 2013 17:53:14 +0200
-Message-ID: <1384617194-22126-8-git-send-email-jarkko.nikula@bitmer.com>
+Subject: [RESEND 5/8] mmc: omap: Convert to devm_ioremap_resource
+Date: Sat, 16 Nov 2013 17:53:11 +0200
+Message-ID: <1384617194-22126-5-git-send-email-jarkko.nikula@bitmer.com>
 References: <1381080978-29127-1-git-send-email-jarkko.nikula@bitmer.com>
  <1384617194-22126-1-git-send-email-jarkko.nikula@bitmer.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from bitmer.com ([213.157.87.50]:47029 "EHLO bitmer.com"
+Received: from bitmer.com ([213.157.87.50]:47027 "EHLO bitmer.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752480Ab3KPPxm (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sat, 16 Nov 2013 10:53:42 -0500
+	id S1751837Ab3KPPxl (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Sat, 16 Nov 2013 10:53:41 -0500
 In-Reply-To: <1384617194-22126-1-git-send-email-jarkko.nikula@bitmer.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 Cc: Chris Ball <cjb@laptop.org>, Jarkko Nikula <jarkko.nikula@bitmer.com>
 
-This patch adds the erase capability to OMAP1/OMAP2420 MMC driver. Idea is
-the same than in commit 93caf8e ("omap_hsmmc: add erase capability") that we
-disable the data timeout interrupt for erases.
+Simplify probe and cleanup code by using devm_ioremap_resource. This also
+makes probe code to follow more common allocate private struct followed by
+other initialization style.
 
 Signed-off-by: Jarkko Nikula <jarkko.nikula@bitmer.com>
 ---
- drivers/mmc/host/omap.c | 18 +++++++++++-------
- 1 file changed, 11 insertions(+), 7 deletions(-)
+ drivers/mmc/host/omap.c | 41 ++++++++++++-----------------------------
+ 1 file changed, 12 insertions(+), 29 deletions(-)
 
 diff --git a/drivers/mmc/host/omap.c b/drivers/mmc/host/omap.c
-index 24235f1..134885a 100644
+index 74990ef..c20c625 100644
 --- a/drivers/mmc/host/omap.c
 +++ b/drivers/mmc/host/omap.c
-@@ -25,6 +25,7 @@
- #include <linux/omap-dma.h>
- #include <linux/mmc/host.h>
- #include <linux/mmc/card.h>
-+#include <linux/mmc/mmc.h>
- #include <linux/clk.h>
- #include <linux/scatterlist.h>
- #include <linux/slab.h>
-@@ -335,6 +336,7 @@ mmc_omap_start_command(struct mmc_omap_host *host, struct mmc_command *cmd)
- 	u32 cmdreg;
- 	u32 resptype;
- 	u32 cmdtype;
-+	u16 irq_mask;
+@@ -1344,22 +1344,19 @@ static int mmc_omap_probe(struct platform_device *pdev)
+ 		return -ENXIO;
+ 	}
  
- 	host->cmd = cmd;
+-	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
++	host = devm_kzalloc(&pdev->dev, sizeof(struct mmc_omap_host),
++			    GFP_KERNEL);
++	if (host == NULL)
++		return -ENOMEM;
++
+ 	irq = platform_get_irq(pdev, 0);
+-	if (res == NULL || irq < 0)
++	if (irq < 0)
+ 		return -ENXIO;
  
-@@ -387,12 +389,14 @@ mmc_omap_start_command(struct mmc_omap_host *host, struct mmc_command *cmd)
- 	OMAP_MMC_WRITE(host, CTO, 200);
- 	OMAP_MMC_WRITE(host, ARGL, cmd->arg & 0xffff);
- 	OMAP_MMC_WRITE(host, ARGH, cmd->arg >> 16);
--	OMAP_MMC_WRITE(host, IE,
--		       OMAP_MMC_STAT_A_EMPTY    | OMAP_MMC_STAT_A_FULL    |
--		       OMAP_MMC_STAT_CMD_CRC    | OMAP_MMC_STAT_CMD_TOUT  |
--		       OMAP_MMC_STAT_DATA_CRC   | OMAP_MMC_STAT_DATA_TOUT |
--		       OMAP_MMC_STAT_END_OF_CMD | OMAP_MMC_STAT_CARD_ERR  |
--		       OMAP_MMC_STAT_END_OF_DATA);
-+	irq_mask = OMAP_MMC_STAT_A_EMPTY    | OMAP_MMC_STAT_A_FULL    |
-+		   OMAP_MMC_STAT_CMD_CRC    | OMAP_MMC_STAT_CMD_TOUT  |
-+		   OMAP_MMC_STAT_DATA_CRC   | OMAP_MMC_STAT_DATA_TOUT |
-+		   OMAP_MMC_STAT_END_OF_CMD | OMAP_MMC_STAT_CARD_ERR  |
-+		   OMAP_MMC_STAT_END_OF_DATA;
-+	if (cmd->opcode == MMC_ERASE)
-+		irq_mask &= ~OMAP_MMC_STAT_DATA_TOUT;
-+	OMAP_MMC_WRITE(host, IE, irq_mask);
- 	OMAP_MMC_WRITE(host, CMD, cmdreg);
+-	res = request_mem_region(res->start, resource_size(res),
+-				 pdev->name);
+-	if (res == NULL)
+-		return -EBUSY;
+-
+-	host = devm_kzalloc(&pdev->dev, sizeof(struct mmc_omap_host),
+-			    GFP_KERNEL);
+-	if (host == NULL) {
+-		ret = -ENOMEM;
+-		goto err_free_mem_region;
+-	}
++	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
++	host->virt_base = devm_ioremap_resource(&pdev->dev, res);
++	if (IS_ERR(host->virt_base))
++		return PTR_ERR(host->virt_base);
+ 
+ 	INIT_WORK(&host->slot_release_work, mmc_omap_slot_release_work);
+ 	INIT_WORK(&host->send_stop_work, mmc_omap_send_stop_work);
+@@ -1384,15 +1381,9 @@ static int mmc_omap_probe(struct platform_device *pdev)
+ 	host->irq = irq;
+ 	host->use_dma = 1;
+ 	host->phys_base = res->start;
+-	host->virt_base = ioremap(res->start, resource_size(res));
+-	if (!host->virt_base)
+-		goto err_ioremap;
+-
+ 	host->iclk = clk_get(&pdev->dev, "ick");
+-	if (IS_ERR(host->iclk)) {
+-		ret = PTR_ERR(host->iclk);
+-		goto err_free_mmc_host;
+-	}
++	if (IS_ERR(host->iclk))
++		return PTR_ERR(host->iclk);
+ 	clk_enable(host->iclk);
+ 
+ 	host->fclk = clk_get(&pdev->dev, "fck");
+@@ -1469,11 +1460,6 @@ err_free_dma:
+ err_free_iclk:
+ 	clk_disable(host->iclk);
+ 	clk_put(host->iclk);
+-err_free_mmc_host:
+-	iounmap(host->virt_base);
+-err_ioremap:
+-err_free_mem_region:
+-	release_mem_region(res->start, resource_size(res));
+ 	return ret;
  }
  
-@@ -1233,7 +1237,7 @@ static int mmc_omap_new_slot(struct mmc_omap_host *host, int id)
+@@ -1501,9 +1487,6 @@ static int mmc_omap_remove(struct platform_device *pdev)
+ 	if (host->dma_rx)
+ 		dma_release_channel(host->dma_rx);
  
- 	mmc->caps = 0;
- 	if (host->pdata->slots[id].wires >= 4)
--		mmc->caps |= MMC_CAP_4_BIT_DATA;
-+		mmc->caps |= MMC_CAP_4_BIT_DATA | MMC_CAP_ERASE;
+-	iounmap(host->virt_base);
+-	release_mem_region(pdev->resource[0].start,
+-			   pdev->resource[0].end - pdev->resource[0].start + 1);
+ 	destroy_workqueue(host->mmc_omap_wq);
  
- 	mmc->ops = &mmc_omap_ops;
- 	mmc->f_min = 400000;
+ 	return 0;
 -- 
 1.8.4.2
 
