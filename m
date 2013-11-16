@@ -1,65 +1,98 @@
-From: Taras Kondratiuk <taras.kondratiuk@linaro.org>
-Subject: [RFC 04/23] mmc: omap: raw read and write endian fix
-Date: Sat, 16 Nov 2013 02:01:07 +0200
-Message-ID: <1384560086-11994-5-git-send-email-taras.kondratiuk@linaro.org>
-References: <1384560086-11994-1-git-send-email-taras.kondratiuk@linaro.org>
+From: Olof Johansson <olof@lixom.net>
+Subject: Re: [PATCH] mmc: disable UHS on broadcom sdhci
+Date: Fri, 15 Nov 2013 23:34:54 -0800
+Message-ID: <20131116073454.GA20132@quad.lixom.net>
+References: <1384559782-7614-1-git-send-email-grundler@chromium.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1384560086-11994-1-git-send-email-taras.kondratiuk@linaro.org>
+Content-Disposition: inline
+In-Reply-To: <1384559782-7614-1-git-send-email-grundler@chromium.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: linux-omap@vger.kernel.org
-Cc: linaro-networking@linaro.org, Victor Kamensky <victor.kamensky@linaro.org>, Jarkko Lavinen <jarkko.lavinen@nokia.com>, Chris Ball <cjb@laptop.org>, Balaji T K <balajitk@ti.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Grant Grundler <grundler@chromium.org>
+Cc: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, Olof Johansson <olofj@chromium.org>, Stephen Hurd <shurd@broadcom.com>, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-From: Victor Kamensky <victor.kamensky@linaro.org>
+Hi,
 
-All OMAP IP blocks expect LE data, but CPU may operate in BE mode.
-Need to use endian neutral functions to read/write h/w registers.
-I.e instead of __raw_read[lw] and __raw_write[lw] functions code
-need to use read[lw]_relaxed and write[lw]_relaxed functions.
-If the first simply reads/writes register, the second will byteswap
-it if host operates in BE mode.
+On Fri, Nov 15, 2013 at 03:56:22PM -0800, Grant Grundler wrote:
+> From: Stephen Hurd <shurd@broadcom.com>
+> 
+> Add two new quirks needed by BCM57785 card reader:
+> SDHCI_QUIRK2_BROKEN_UHS:
+>     Disables all UHS modes.
 
-Changes are trivial sed like replacement of __raw_xxx functions
-with xxx_relaxed variant.
+This seems appropriate. You _could_ use SDHCI_QUIRK_MISSING_CAPS and
+hardcode them instead, but it doesn't seem to be an improvement really.
 
-Signed-off-by: Victor Kamensky <victor.kamensky@linaro.org>
-Signed-off-by: Taras Kondratiuk <taras.kondratiuk@linaro.org>
----
- drivers/mmc/host/omap.c       |    4 ++--
- drivers/mmc/host/omap_hsmmc.c |    4 ++--
- 2 files changed, 4 insertions(+), 4 deletions(-)
+> SDHCI_QUIRK2_BCM57785_CR:
+>     Bit twiddles some Broadcom-specific registers and supresses an error
+>     about the 64k bar0.
 
-diff --git a/drivers/mmc/host/omap.c b/drivers/mmc/host/omap.c
-index b94f38e..ef2d088 100644
---- a/drivers/mmc/host/omap.c
-+++ b/drivers/mmc/host/omap.c
-@@ -79,8 +79,8 @@
- #define mmc_omap2()	(!mmc_omap1())
- 
- #define OMAP_MMC_REG(host, reg)		(OMAP_MMC_REG_##reg << (host)->reg_shift)
--#define OMAP_MMC_READ(host, reg)	__raw_readw((host)->virt_base + OMAP_MMC_REG(host, reg))
--#define OMAP_MMC_WRITE(host, reg, val)	__raw_writew((val), (host)->virt_base + OMAP_MMC_REG(host, reg))
-+#define OMAP_MMC_READ(host, reg)        readw_relaxed((host)->virt_base + OMAP_MMC_REG(host, reg))
-+#define OMAP_MMC_WRITE(host, reg, val)	writew_relaxed((val), (host)->virt_base + OMAP_MMC_REG(host, reg))
- 
- /*
-  * Command types
-diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index 6ac63df..fbbbfc0 100644
---- a/drivers/mmc/host/omap_hsmmc.c
-+++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -135,10 +135,10 @@
-  * MMC Host controller read/write API's
-  */
- #define OMAP_HSMMC_READ(base, reg)	\
--	__raw_readl((base) + OMAP_HSMMC_##reg)
-+	readl_relaxed((base) + OMAP_HSMMC_##reg)
- 
- #define OMAP_HSMMC_WRITE(base, reg, val) \
--	__raw_writel((val), (base) + OMAP_HSMMC_##reg)
-+	writel_relaxed((val), (base) + OMAP_HSMMC_##reg)
- 
- struct omap_hsmmc_next {
- 	unsigned int	dma_len;
--- 
-1.7.9.5
+I think this can be done without spending a global SDHCI quirk bit. This
+is just a one-time setup that needs to be done, isn't it? It's hard
+to tell since there's no official errata described, but if it is, then
+overriding the probe function is the way to go instead, flipping these
+bits there and then call the regular probe.
+
+
+[...]
+
+> index 7a7fb4f..cf26c0f 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -1144,6 +1144,27 @@ static void sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
+>  			return;
+>  	}
+>  
+> +	if (host->quirks2 & SDHCI_QUIRK2_BCM57785_CR) {
+> +		u32 tmp;
+> +
+> +		/*
+> +		 * Register descriptions from:
+> +		 *     http://www.broadcom.com/collateral/pg/57785-PG103-R.pdf
+> +		 */
+
+That's a 661 page document, that unfortunately doesn't really help decode any
+of the bits below because they are all touching reserved or marked-internal
+bits of registers. :-)
+
+Still, good to see a doc link.
+
+> +		tmp = sdhci_readl(host, BCM57785_CR_MUX_CTL);
+> +		tmp &= ~0x3000;		/* bits 12:15 are reserved */
+> +		sdhci_writel(host, tmp, BCM57785_CR_MUX_CTL);
+> +		tmp = sdhci_readl(host, BCM57785_CR_CLK_CTL);
+> +		tmp &= ~(0x01a03f30);	/* Internal debug for SD3.0 */
+> +		tmp |= (0x00500000);
+> +
+> +		if ((sdhci_readw(host, SDHCI_HOST_CONTROL2) &
+> +			    SDHCI_CTRL_VDD_180) && (clock >= 200000000))
+> +			tmp |= (1<<24);
+> +		sdhci_writel(host, tmp, BCM57785_CR_CLK_CTL);
+> +	}
+> +
+>  	sdhci_writew(host, 0, SDHCI_CLOCK_CONTROL);
+>  
+>  	if (clock == 0)
+[...]
+> diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
+> index 3e781b8..664003a 100644
+> --- a/include/linux/mmc/sdhci.h
+> +++ b/include/linux/mmc/sdhci.h
+> @@ -98,6 +98,12 @@ struct sdhci_host {
+>  #define SDHCI_QUIRK2_CARD_ON_NEEDS_BUS_ON		(1<<4)
+>  /* Controller has a non-standard host control register */
+>  #define SDHCI_QUIRK2_BROKEN_HOST_CONTROL		(1<<5)
+> +/* UHS modes do not work */
+> +#define SDHCI_QUIRK2_BROKEN_UHS				(1<<6)
+> +/* hacks for Broadcom-specific card reader bugs */
+> +#define SDHCI_QUIRK2_BCM57785_CR			(1<<7)
+> +#define	  BCM57785_CR_MUX_CTL 0x198  /* Card Reader MUX control */
+> +#define	  BCM57785_CR_CLK_CTL 0x19c  /* Card Reader Clock Status/Ctl */
+
+These two defines should not be in a global include file; they should likely go
+in the c file instead.
+
+
+-Olof
