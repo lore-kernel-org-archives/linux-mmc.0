@@ -1,120 +1,148 @@
-From: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
-Subject: Re: [PATCH 01/16] gpio: rcar: use postcore_init()
-Date: Mon, 18 Nov 2013 15:00:39 +0100
-Message-ID: <1556705.9JOUK7Uj8L@avalon>
-References: <87li0rz3to.wl%kuninori.morimoto.gx@renesas.com> <2397666.YV2gHto7Bb@avalon> <87fvqyo6gl.wl%kuninori.morimoto.gx@renesas.com>
+From: Balaji T K <balajitk@ti.com>
+Subject: Re: [PATCH v3 2/3] mmc: omap_hsmmc: Pin remux workaround to support
+ SDIO interrupt on AM335x.
+Date: Mon, 18 Nov 2013 21:52:10 +0530
+Message-ID: <528A3EB2.1010103@ti.com>
+References: <1384761240-11005-1-git-send-email-afenkart@gmail.com> <1384761240-11005-3-git-send-email-afenkart@gmail.com> <CAOf5uw=9KJ312PVzMVEHX-Lj=iYpeZOYFduB8iOu9o+-863CYw@mail.gmail.com> <CALtMJEBfeww=ymGMXWtwjtZrpqpFrkRPEOti_uPrE63SBk3Dtw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7Bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from perceval.ideasonboard.com ([95.142.166.194]:42811 "EHLO
-	perceval.ideasonboard.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751341Ab3KRN75 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 18 Nov 2013 08:59:57 -0500
-In-Reply-To: <87fvqyo6gl.wl%kuninori.morimoto.gx@renesas.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-omap-owner@vger.kernel.org>
+In-Reply-To: <CALtMJEBfeww=ymGMXWtwjtZrpqpFrkRPEOti_uPrE63SBk3Dtw@mail.gmail.com>
+Sender: linux-omap-owner@vger.kernel.org
+To: Andreas Fenkart <afenkart@gmail.com>
+Cc: Michael Trimarchi <michael@amarulasolutions.com>, Chris Ball <cjb@laptop.org>, Tony Lindgren <tony@atomide.com>, Grant Likely <grant.likely@secretlab.ca>, Felipe Balbi <balbi@ti.com>, Daniel Mack <zonque@gmail.com>, linux-doc@vger.kernel.org, linux-mmc <linux-mmc@vger.kernel.org>, Linux OMAP Mailing List <linux-omap@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
-Cc: Simon <horms@verge.net.au>, Chris Ball <cjb@laptop.org>, Magnus <magnus.damm@gmail.com>, Linux-SH <linux-sh@vger.kernel.org>, Kuninori Morimoto <kuninori.morimoto.gx@gmail.com>, linux-mmc@vger.kernel.org, linus.walleij@linaro.org
 
-Hi Morimoto-san,
+On Monday 18 November 2013 05:45 PM, Andreas Fenkart wrote:
+> 2013/11/18 Michael Trimarchi <michael@amarulasolutions.com>:
+>> Hi Andreas
+>>
+>> On Mon, Nov 18, 2013 at 8:53 AM, Andreas Fenkart <afenkart@gmail.com> wrote:
+>>> The am335x can't detect pending cirq in PM runtime suspend.
+>>> This patch reconfigures dat1 as a GPIO before going to suspend.
+>>> SDIO interrupts are detected with the GPIO, the GPIO will only wake
+>>> the module from suspend, SDIO irq detection will still happen through the
+>>> IP block.
+>>>
+>>> Idea of remuxing the pins by Tony Lindgren as well as the implementation
+>>> of omap_hsmmc_pin_init.
+>>>
+>>> Signed-off-by: Andreas Fenkart <afenkart@gmail.com>
+>>>
+>>> diff --git a/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt b/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
+>>> index 1136e6b..146f3ad 100644
+>>> --- a/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
+>>> +++ b/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
+>>> @@ -21,8 +21,11 @@ ti,non-removable: non-removable slot (like eMMC)
+>>>   ti,needs-special-reset: Requires a special softreset sequence
+>>>   ti,needs-special-hs-handling: HSMMC IP needs special setting for handling High Speed
+>>>   ti,quirk-swakup-missing: SOC missing the swakeup line, will not detect
+>>> -SDIO irq while in suspend. Fallback to polling. Affected chips are
+>>> -am335x,
+>>> +SDIO irq while in suspend. The workaround is to reconfigure the dat1 line as a
+>>> +GPIO upon suspend. Beyond this option and the GPIO config, you also need to set
+>>> +named pinctrl states "default", "active" and "idle ", see example below.  The
+>>> +MMC driver will then then toggle between default and idle during the runtime
+>>> +Affected chips are am335x,
+>>>
+>>>                               ------
+>>>                               | PRCM |
+>>> @@ -49,3 +52,24 @@ Example:
+>>>                  vmmc-supply = <&vmmc>; /* phandle to regulator node */
+>>>                  ti,non-removable;
+>>>          };
+>>> +
+>>> +[am335x with with gpio for sdio irq]
+>>> +
+>>> +       mmc1_cirq_pin: pinmux_cirq_pin {
+>>> +               pinctrl-single,pins = <
+>>> +                       0x0f8 0x3f      /* MMC0_DAT1 as GPIO2_28 */
+>>> +               >;
+>>> +       };
+>>> +
+>>> +       mmc1: mmc@48060000 {
+>>> +               ti,non-removable;
+>>> +               bus-width = <4>;
+>>> +               vmmc-supply = <&ldo2_reg>;
+>>> +               vmmc_aux-supply = <&vmmc>;
+>>> +               ti,quirk-swakeup-missing;
+>>> +               pinctrl-names = "default", "active", "idle";
+>>> +               pinctrl-0 = <&mmc1_pins>;
+>>> +               pinctrl-1 = <&mmc1_pins>;
+>>> +               pinctrl-2 = <&mmc1_cirq_pin>;
+>>> +               ti,cirq-gpio = <&gpio3 28 0>;
+>>> +       };
+>>> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+>>> index 6b0ec55..b94ab08 100644
+>>> --- a/drivers/mmc/host/omap_hsmmc.c
+>>> +++ b/drivers/mmc/host/omap_hsmmc.c
+>>> @@ -36,6 +36,7 @@
+>>>   #include <linux/mmc/core.h>
+>>>   #include <linux/mmc/mmc.h>
+>>>   #include <linux/io.h>
+>>> +#include <linux/irq.h>
+>>>   #include <linux/gpio.h>
+>>>   #include <linux/regulator/consumer.h>
+>>>   #include <linux/pinctrl/consumer.h>
+>>> @@ -213,11 +214,32 @@ struct omap_hsmmc_host {
+>>>          int                     req_in_progress;
+>>>          int                     flags;
+>>>   #define HSMMC_SDIO_IRQ_ENABLED (1 << 0)        /* SDIO irq enabled */
+>>> +#define HSMMC_SWAKEUP_QUIRK    (1 << 1)
+>>> +#define HSMMC_CIRQ_GPIO_ENABLED (1 << 2)
+>>>
+>>>          struct omap_hsmmc_next  next_data;
+>>> +       struct pinctrl          *pinctrl;
+>>> +       struct pinctrl_state    *fixed, *active, *idle;
+>>>          struct  omap_mmc_platform_data  *pdata;
+>>>   };
+>>>
+>>> +static irqreturn_t omap_hsmmc_cirq(int irq, void *dev_id)
+>>> +{
+>>> +       struct omap_hsmmc_host *host = dev_id;
+>>> +       unsigned long flags;
+>>> +
+>>> +       spin_lock_irqsave(&host->irq_lock, flags);
+>>> +       if (host->flags & HSMMC_CIRQ_GPIO_ENABLED) {
+>>> +               disable_irq_nosync(mmc_slot(host).sdio_irq);
+>>> +               host->flags &= ~HSMMC_CIRQ_GPIO_ENABLED;
+>>> +       }
+>>> +       spin_unlock_irqrestore(&host->irq_lock, flags);
+>>> +
+>>> +       pm_request_resume(host->dev); /* no use counter */
+>>> +
+>>> +       return IRQ_HANDLED;
+>>> +}
+>>> +
+>>>   static int omap_hsmmc_card_detect(struct device *dev, int slot)
+>>>   {
+>>>          struct omap_hsmmc_host *host = dev_get_drvdata(dev);
+>>> @@ -452,10 +474,25 @@ static int omap_hsmmc_gpio_init(struct omap_mmc_platform_data *pdata)
+>>>          } else
+>>>                  pdata->slots[0].gpio_wp = -EINVAL;
+>>>
+>>> +       if (gpio_is_valid(pdata->slots[0].gpio_cirq)) {
+>>> +               pdata->slots[0].sdio_irq =
+>>> +                               gpio_to_irq(pdata->slots[0].gpio_cirq);
+>>
+>> What is this? re-assign the platform data?
+>
+> Seems like, I didn't pay attention to this.
+> Simply kept in line how the write protection/read only pins are managed.
+> I'd rather not change this part, or not changing it as part of adding
+> sdio IRQ support it.
+>
+> Maybe somebody else on the list can explain why the platform data
+> contains elements
+> that are modified during runtime.
+>
+> - set_power / get_ro function callbacks
+> - ocr_mask.
+>
+Hi,
 
-(CC'ing Linus Walleij)
-
-On Thursday 14 November 2013 16:26:53 Kuninori Morimoto wrote:
-> Hi Laurent
-> 
-> > > Renesas GPIO is being interlocked with PFC, and GPIO is
-> > > very basic system for R-Car.
-> > > GPIO should be initialised in same timing as PFC.
-> > > The GPIO based system doesn't work correctly without this patch.
-> > 
-> > Could you please describe the failure in a bit more details ?
-> 
-> Real kernel log is better than my explain :P
-> These series needs gpio-regulator.
-> *before* case, sh_mobile_sdhi can't use gpio-regulator because of timing
-> issue.
-> 
-> ----------------- before ---------------------
-> ...
-> sh-pfc pfc-r8a7790: r8a77900_pfc support registered
-> ...
-> SDHI0Vcc: Failed to request enable GPIO184: -517
-> reg-fixed-voltage reg-fixed-voltage.1: Failed to register regulator: -517
-> platform reg-fixed-voltage.1: Driver reg-fixed-voltage requests probe
-> deferral SDHI2Vcc: Failed to request enable GPIO185: -517
-> reg-fixed-voltage reg-fixed-voltage.2: Failed to register regulator: -517
-> platform reg-fixed-voltage.2: Driver reg-fixed-voltage requests probe
-> deferral gpio-regulator gpio-regulator.0: Could not obtain regulator
-> setting GPIOs: -517 platform gpio-regulator.0: Driver gpio-regulator
-> requests probe deferral gpio-regulator gpio-regulator.1: Could not obtain
-> regulator setting GPIOs: -517 platform gpio-regulator.1: Driver
-> gpio-regulator requests probe deferral ...
-
-Except for the verbosity of the error messages, this looks pretty sane to me. 
-Regulator probe gets deferred because the required GPIO isn't accessible yet, 
-and the device gets reprobed later on.
-
-I'm not against moving the gpio-rcar initialization to postcore or subsys 
-initcall, but in that case I believe we should standardize (or at least try 
-to) this across the GPIO drivers. We currently have
-
-$ cat drivers/gpio/gpio-*.c | grep _initcall | grep '^[a-z]' | sed 's/(.*//' | 
-sort | uniq -c
-      2 arch_initcall
-      1 core_initcall
-      1 device_initcall
-      1 late_initcall
-     11 postcore_initcall
-      2 pure_initcall
-     31 subsys_initcall
-
-$ cat drivers/gpio/gpio-*.c | grep 'module_.*_driver' | sed 's/(.*//' | sort | 
-uniq -c
-      3 module_i2c_driver
-      4 module_pci_driver
-     23 module_platform_driver
-      1 module_spi_driver
-
-Linus, do you have any guidelines on this ?
-
-> gpio_rcar gpio_rcar.0: driving 32 GPIOs
-> gpio_rcar gpio_rcar.1: driving 32 GPIOs
-> gpio_rcar gpio_rcar.2: driving 32 GPIOs
-> gpio_rcar gpio_rcar.3: driving 32 GPIOs
-> gpio_rcar gpio_rcar.4: driving 32 GPIOs
-> gpio_rcar gpio_rcar.5: driving 32 GPIOs
-> ...
-> sh_mobile_sdhi sh_mobile_sdhi.0: mmc0 base at 0xee100000 clock rate 97 MHz
-> sh_mobile_sdhi sh_mobile_sdhi.2: mmc1 base at 0xee140000 clock rate 48 MHz
-> ...
-> SDHI0Vcc: 3300 mV
-> SDHI2Vcc: 3300 mV
-> vqmmc: 1800 <--> 3300 mV at 3300 mV
-> vqmmc: 1800 <--> 3300 mV at 3300 mV
-> ...
-> 
-> ---------------- after ------------------
-> ...
-> sh-pfc pfc-r8a7790: r8a77900_pfc support registered
-> gpio_rcar gpio_rcar.0: driving 32 GPIOs
-> gpio_rcar gpio_rcar.1: driving 32 GPIOs
-> gpio_rcar gpio_rcar.2: driving 32 GPIOs
-> gpio_rcar gpio_rcar.3: driving 32 GPIOs
-> gpio_rcar gpio_rcar.4: driving 32 GPIOs
-> gpio_rcar gpio_rcar.5: driving 32 GPIOs
-> ...
-> SDHI0Vcc: 3300 mV
-> SDHI2Vcc: 3300 mV
-> vqmmc: 1800 <--> 3300 mV at 3300 mV
-> vqmmc: 1800 <--> 3300 mV at 3300 mV
-> ...
-> sh_mobile_sdhi sh_mobile_sdhi.0: mmc0 base at 0xee100000 clock rate 97 MHz
-> sh_mobile_sdhi sh_mobile_sdhi.2: mmc1 base at 0xee140000 clock rate 48 MHz
-
--- 
-Regards,
-
-Laurent Pinchart
+few params were passed via platform data in non-DT case and never cached
+in internal data structure, with non-dt support going away soon, I am
+planning to cleanup pdata usage in the driver when it gets to DT only support.
 
