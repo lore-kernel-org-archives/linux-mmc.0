@@ -1,198 +1,37 @@
-From: Heiko =?utf-8?q?St=C3=BCbner?= <heiko@sntech.de>
-Subject: Re: [PATCH v2] mmc: sdhci-s3c: Use mmc_gpio_request_cd fuction
-Date: Mon, 18 Nov 2013 21:03:17 +0100
-Message-ID: <201311182103.17626.heiko@sntech.de>
-References: <5278DB0C.8060702@samsung.com> <5289A257.7090506@samsung.com>
+From: "Stephen Hurd" <shurd@broadcom.com>
+Subject: RE: [PATCH] mmc: disable UHS on broadcom sdhci
+Date: Mon, 18 Nov 2013 20:09:10 +0000
+Message-ID: <156984479488CD49A184F5CAB4AF93460709F237@IRVEXCHMB14.corp.ad.broadcom.com>
+References: <1384559782-7614-1-git-send-email-grundler@chromium.org>
+ <20131116073454.GA20132@quad.lixom.net>
 Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="utf-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain;
+ charset=us-ascii
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from gloria.sntech.de ([95.129.55.99]:36374 "EHLO gloria.sntech.de"
+Received: from mms2.broadcom.com ([216.31.210.18]:2515 "EHLO mms2.broadcom.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751616Ab3KRUD2 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 18 Nov 2013 15:03:28 -0500
-In-Reply-To: <5289A257.7090506@samsung.com>
+	id S1751640Ab3KRUJO convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 18 Nov 2013 15:09:14 -0500
+In-Reply-To: <20131116073454.GA20132@quad.lixom.net>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: Beomho Seo <beomho.seo@samsung.com>, Chris Ball <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, myungjoo.ham@samsung.com
+To: Olof Johansson <olof@lixom.net>, Grant Grundler <grundler@chromium.org>
+Cc: Chris Ball <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Olof Johansson <olofj@chromium.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-Hi Jaehoon,
+> > SDHCI_QUIRK2_BCM57785_CR:
+> >     Bit twiddles some Broadcom-specific registers and supresses an error
+> >     about the 64k bar0.
 
-Am Montag, 18. November 2013, 06:15:03 schrieb Jaehoon Chung:
-> Didn't have Any other comment for this patch?
-> If don't have any other comment, i want this patch is submitted at
-> mmc-next.
-> 
-> We had tested this patch with exynos4 series.
-> 
-> CC'd Heiko.
+> I think this can be done without spending a global SDHCI quirk bit. This
+> is just a one-time setup that needs to be done, isn't it? It's hard
+> to tell since there's no official errata described, but if it is, then
+> overriding the probe function is the way to go instead, flipping these
+> bits there and then call the regular probe.
 
-I don't have access to my s3c2416 machine this week, so I'll be able to test 
-this next week at the earliest.
+My initial recollection is that this bit twiddling needs to be done any time the clock is touched, so it's not just one-time setup.  I'll ask the guys about it and get back to you.
 
-I also found a small spelling mistake below.
+The 64k bar0 suppression is just cosmetic, but I don't see anything in the public specs suggesting that there is a max limit on the size of the bar... not sure that it's appropriate to give a warning on it for *any* device, but it's absolutely incorrect for this device.
 
-
-Heiko
-
-
-
-> 
-> Best Regards,
-> Jaehoon Chung
-> 
-> On 11/05/2013 08:48 PM, Beomho Seo wrote:
-> > Hello all,
-> > 
-> > I have revised some issues of v1 revision.
-> > This patch used mmc_gpio_request_cd function for detect card from cd-gpio
-> > pin. Please give your feedback at that time.
-> > 
-> > Change from v2 to v1
-> > 
-> > 	- Remove "return ret;" from "err_req_cd:".
-> > 	- Revised sdhci_s3c_remove function.
-> > 
-> > Subject: [PATCH] mmc: sdhci-s3c: Use mmc_gpio_request_cd function
-> > 
-> > Include slot-gpio header file.
-> > Use mmc_gpio_request_cd function.
-> > Remove sehci_s3c_setup_card_detect_gpio/card_detect_thread functions.
-		      ^sdhci
-
-
-> > 
-> > Signed-off-by: Beomho Seo <beomho.seo@samsung.com>
-> > Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
-> > ---
-> > 
-> >  drivers/mmc/host/sdhci-s3c.c |   56
-> >  +++++++++++------------------------------- 1 file changed, 14
-> >  insertions(+), 42 deletions(-)
-> > 
-> > diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
-> > index 6debda9..d8696d2 100644
-> > --- a/drivers/mmc/host/sdhci-s3c.c
-> > +++ b/drivers/mmc/host/sdhci-s3c.c
-> > @@ -27,6 +27,7 @@
-> > 
-> >  #include <linux/pm_runtime.h>
-> >  
-> >  #include <linux/mmc/host.h>
-> > 
-> > +#include <linux/mmc/slot-gpio.h>
-> > 
-> >  #include "sdhci-s3c-regs.h"
-> >  #include "sdhci.h"
-> > 
-> > @@ -400,44 +401,6 @@ static void sdhci_s3c_notify_change(struct
-> > platform_device *dev, int state)
-> > 
-> >  	}
-> >  
-> >  }
-> > 
-> > -static irqreturn_t sdhci_s3c_gpio_card_detect_thread(int irq, void
-> > *dev_id) -{
-> > -	struct sdhci_s3c *sc = dev_id;
-> > -	int status = gpio_get_value(sc->ext_cd_gpio);
-> > -	if (sc->pdata->ext_cd_gpio_invert)
-> > -		status = !status;
-> > -	sdhci_s3c_notify_change(sc->pdev, status);
-> > -	return IRQ_HANDLED;
-> > -}
-> > -
-> > -static void sdhci_s3c_setup_card_detect_gpio(struct sdhci_s3c *sc)
-> > -{
-> > -	struct s3c_sdhci_platdata *pdata = sc->pdata;
-> > -	struct device *dev = &sc->pdev->dev;
-> > -
-> > -	if (devm_gpio_request(dev, pdata->ext_cd_gpio, "SDHCI EXT CD") == 0) 
-{
-> > -		sc->ext_cd_gpio = pdata->ext_cd_gpio;
-> > -		sc->ext_cd_irq = gpio_to_irq(pdata->ext_cd_gpio);
-> > -		if (sc->ext_cd_irq &&
-> > -		    request_threaded_irq(sc->ext_cd_irq, NULL,
-> > -					 sdhci_s3c_gpio_card_detect_thread,
-> > -					 IRQF_TRIGGER_RISING |
-> > -					 IRQF_TRIGGER_FALLING |
-> > -					 IRQF_ONESHOT,
-> > -					 dev_name(dev), sc) == 0) {
-> > -			int status = gpio_get_value(sc->ext_cd_gpio);
-> > -			if (pdata->ext_cd_gpio_invert)
-> > -				status = !status;
-> > -			sdhci_s3c_notify_change(sc->pdev, status);
-> > -		} else {
-> > -			dev_warn(dev, "cannot request irq for card detect\n");
-> > -			sc->ext_cd_irq = 0;
-> > -		}
-> > -	} else {
-> > -		dev_err(dev, "cannot request gpio for card detect\n");
-> > -	}
-> > -}
-> > -
-> > 
-> >  #ifdef CONFIG_OF
-> >  static int sdhci_s3c_parse_dt(struct device *dev,
-> >  
-> >  		struct sdhci_host *host, struct s3c_sdhci_platdata *pdata)
-> > 
-> > @@ -699,8 +662,14 @@ static int sdhci_s3c_probe(struct platform_device
-> > *pdev)
-> > 
-> >  	if (pdata->cd_type == S3C_SDHCI_CD_EXTERNAL && pdata->ext_cd_init)
-> >  	
-> >  		pdata->ext_cd_init(&sdhci_s3c_notify_change);
-> >  	
-> >  	if (pdata->cd_type == S3C_SDHCI_CD_GPIO &&
-> > 
-> > -	    gpio_is_valid(pdata->ext_cd_gpio))
-> > -		sdhci_s3c_setup_card_detect_gpio(sc);
-> > +	    gpio_is_valid(pdata->ext_cd_gpio)) {
-> > +		ret = mmc_gpio_request_cd(host->mmc, pdata->ext_cd_gpio, 0);
-> > +		if (ret) {
-> > +			dev_err(dev,
-> > +				"failed to request card detect gpio\n");
-> > +			goto err_req_cd;
-> > +		}
-> > +	}
-> > 
-> >  #ifdef CONFIG_PM_RUNTIME
-> >  
-> >  	if (pdata->cd_type != S3C_SDHCI_CD_INTERNAL)
-> > 
-> > @@ -708,6 +677,9 @@ static int sdhci_s3c_probe(struct platform_device
-> > *pdev)
-> > 
-> >  #endif
-> >  
-> >  	return 0;
-> > 
-> > + err_req_cd:
-> > +	mmc_gpio_free_cd(host->mmc);
-> > +
-> > 
-> >   err_req_regs:
-> >  #ifndef CONFIG_PM_RUNTIME
-> >  
-> >  	clk_disable_unprepare(sc->clk_bus[sc->cur_clk]);
-> > 
-> > @@ -731,8 +703,8 @@ static int sdhci_s3c_remove(struct platform_device
-> > *pdev)
-> > 
-> >  	if (pdata->cd_type == S3C_SDHCI_CD_EXTERNAL && pdata-
->ext_cd_cleanup)
-> >  	
-> >  		pdata->ext_cd_cleanup(&sdhci_s3c_notify_change);
-> > 
-> > -	if (sc->ext_cd_irq)
-> > -		free_irq(sc->ext_cd_irq, sc);
-> > +	if (pdata->ext_cd_gpio)
-> > +		mmc_gpio_free_cd(host->mmc);
-> > 
-> >  #ifdef CONFIG_PM_RUNTIME
-> >  
-> >  	if (pdata->cd_type != S3C_SDHCI_CD_INTERNAL)
 
