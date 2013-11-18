@@ -1,96 +1,181 @@
-From: Seungwon Jeon <tgih.jun@samsung.com>
-Subject: RE: [PATCH v2] mmc: fix host release issue after discard operation
-Date: Mon, 18 Nov 2013 20:24:14 +0900
-Message-ID: <001801cee450$b6648280$232d8780$%jun@samsung.com>
-References: <1382810624-17659-1-git-send-email-rjui@broadcom.com>
- <5277EA3A.4020001@broadcom.com>
+From: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
+Subject: Re: [PATCH 1/2 v2] ARM: shmobile: lager: add gpio/fixed regulator for SDHI
+Date: Mon, 18 Nov 2013 12:35:30 +0100
+Message-ID: <7870553.GWO3OgcztQ@avalon>
+References: <87li0rz3to.wl%kuninori.morimoto.gx@renesas.com> <87a9h6o2gi.wl%kuninori.morimoto.gx@renesas.com> <878uwqo2df.wl%kuninori.morimoto.gx@renesas.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=Windows-1252
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7Bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout3.samsung.com ([203.254.224.33]:37395 "EHLO
-	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751141Ab3KRLYQ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 18 Nov 2013 06:24:16 -0500
-In-reply-to: <5277EA3A.4020001@broadcom.com>
-Content-language: ko
+Received: from perceval.ideasonboard.com ([95.142.166.194]:42026 "EHLO
+	perceval.ideasonboard.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751965Ab3KRLer (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 18 Nov 2013 06:34:47 -0500
+In-Reply-To: <878uwqo2df.wl%kuninori.morimoto.gx@renesas.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: 'Ray Jui' <rjui@broadcom.com>, 'Chris Ball' <cjb@laptop.org>
-Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
+To: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
+Cc: Simon <horms@verge.net.au>, Chris Ball <cjb@laptop.org>, Magnus <magnus.damm@gmail.com>, Linux-SH <linux-sh@vger.kernel.org>, Kuninori Morimoto <kuninori.morimoto.gx@gmail.com>, linux-mmc@vger.kernel.org
 
-On Tue, November 05, 2013, Ray Jui wrote:
-> On 10/26/2013 11:03 AM, Ray Jui wrote:
-> > Under function mmc_blk_issue_rq, after an MMC discard operation,
-> > the MMC request data structure may be freed in memory. Later in
-> > the same function, the check of req->cmd_flags & MMC_REQ_SPECIAL_MASK
-> > is dangerous and invalid. It causes the MMC host not to be released
-> > when it should
-Is commit message cut here?
+Hi Morimoto-san,
 
+Thank you for the patch.
 
-> >
-> > This patch fixes the issue by marking the special request down before
-> > the discard/flush operation
-> >
-> > Reported by: Harold (SoonYeal) Yang <haroldsy@broadcom.com>
-> > Signed-off-by: Ray Jui <rjui@broadcom.com>
-> > Reviewed-by: Seungwon Jeon <tgih.jun@samsung.com>
-> > ---
-> >   drivers/mmc/card/block.c |    7 ++++---
-> >   1 file changed, 4 insertions(+), 3 deletions(-)
-> >
-> > diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-> > index 1a3163f..4e8212c 100644
-> > --- a/drivers/mmc/card/block.c
-> > +++ b/drivers/mmc/card/block.c
-> > @@ -1959,6 +1959,7 @@ static int mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
-> >   	struct mmc_card *card = md->queue.card;
-> >   	struct mmc_host *host = card->host;
-> >   	unsigned long flags;
-> > +	unsigned int cmd_flags = req ? req->cmd_flags : 0;
-> >
-> >   	if (req && !mq->mqrq_prev->req)
-> >   		/* claim host only for the first request */
-> > @@ -1974,7 +1975,7 @@ static int mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
-> >   	}
-> >
-> >   	mq->flags &= ~MMC_QUEUE_NEW_REQUEST;
-> > -	if (req && req->cmd_flags & REQ_DISCARD) {
-> > +	if (cmd_flags & REQ_DISCARD) {
-> >   		/* complete ongoing async transfer before issuing discard */
-> >   		if (card->host->areq)
-> >   			mmc_blk_issue_rw_rq(mq, NULL);
-> > @@ -1983,7 +1984,7 @@ static int mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
-> >   			ret = mmc_blk_issue_secdiscard_rq(mq, req);
-> >   		else
-> >   			ret = mmc_blk_issue_discard_rq(mq, req);
-> > -	} else if (req && req->cmd_flags & REQ_FLUSH) {
-> > +	} else if (cmd_flags & REQ_FLUSH) {
-> >   		/* complete ongoing async transfer before issuing flush */
-> >   		if (card->host->areq)
-> >   			mmc_blk_issue_rw_rq(mq, NULL);
-> > @@ -1999,7 +2000,7 @@ static int mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
-> >
-> >   out:
-> >   	if ((!req && !(mq->flags & MMC_QUEUE_NEW_REQUEST)) ||
-> > -	     (req && (req->cmd_flags & MMC_REQ_SPECIAL_MASK)))
-> > +	     (cmd_flags & MMC_REQ_SPECIAL_MASK))
-> >   		/*
-> >   		 * Release host when there are no more requests
-> >   		 * and after special request(discard, flush) is done.
-> >
-> Hi Seungwon/Chris,
+On Thursday 14 November 2013 17:55:12 Kuninori Morimoto wrote:
+> Fixed regulator is used for SDHI0/2 Vcc.
+> We should use da9063 driver for Vccq,
+> but, it doesn't have regulator support at this point.
+> This patch uses gpio-regulator for it as quick-hack.
 > 
-> Have you got a chance to review the MMC discard patch V2? The patch v2
-> makes changes from v1 based on Seungwon's review comments.
+> Signed-off-by: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
+> ---
+> v1 -> v2
+> 
+>  - 2/2 become 1/2
+>  - FIXME comment was added
+> 
+>  arch/arm/mach-shmobile/board-lager.c |   83 ++++++++++++++++++++++++++++++-
+>  1 file changed, 82 insertions(+), 1 deletion(-)
+> 
+> diff --git a/arch/arm/mach-shmobile/board-lager.c
+> b/arch/arm/mach-shmobile/board-lager.c index fcf06fd..3d1640f 100644
+> --- a/arch/arm/mach-shmobile/board-lager.c
+> +++ b/arch/arm/mach-shmobile/board-lager.c
+> @@ -31,7 +31,9 @@
+>  #include <linux/platform_data/rcar-du.h>
+>  #include <linux/platform_device.h>
+>  #include <linux/phy.h>
+> +#include <linux/regulator/driver.h>
 
-Adding linux-mmc. It has been omitted.
-(+linux-mmc)
+I might be mistaken, but is this header really needed ?
 
-CC: Stable <stable@kernel.org>
-Acked-by: Seungwon Jeon <tgih.jun@samsung.com>
+>  #include <linux/regulator/fixed.h>
+> +#include <linux/regulator/gpio-regulator.h>
+>  #include <linux/regulator/machine.h>
+>  #include <linux/sh_eth.h>
+>  #include <mach/common.h>
+> @@ -141,6 +143,71 @@ static struct regulator_consumer_supply
+> fixed3v3_power_consumers[] = REGULATOR_SUPPLY("vmmc", "sh_mmcif.1"),
+>  };
+> 
+> +/*
+> + * SDHI regulator macro
+> + *
+> + ** FIXME**
+> + * Lager board vqmmc is provided via DA9063 PMIC chip,
+> + * and we should use ${LINK}/drivers/mfd/da9063-* driver for it.
+> + * but, it doesn't have regulator support at this point.
+> + * It uses gpio-regulator for vqmmc as quick-hack.
+> + */
+> +#define SDHI_REGULATOR(idx, vdd_pin, vccq_pin)				\
+> +static struct regulator_consumer_supply vcc_sdhi##idx##_consumer =	\
+> +	REGULATOR_SUPPLY("vmmc", "sh_mobile_sdhi." #idx);		\
+> +									\
+> +static struct regulator_init_data vcc_sdhi##idx##_init_data = {		\
+> +	.constraints = {						\
+> +		.valid_ops_mask = REGULATOR_CHANGE_STATUS,		\
+> +	},								\
+> +	.consumer_supplies	= &vcc_sdhi##idx##_consumer,		\
+> +	.num_consumer_supplies	= 1,					\
+> +};									\
+> +									\
+> +static struct fixed_voltage_config vcc_sdhi##idx##_info = {		\
 
-Thanks,
-Seungwon Jeon
+You can make this structure const.
+
+> +	.supply_name	= "SDHI" #idx "Vcc",				\
+> +	.microvolts	= 3300000,					\
+> +	.gpio		= vdd_pin,					\
+> +	.enable_high	= 1,						\
+> +	.init_data	= &vcc_sdhi##idx##_init_data,			\
+> +};									\
+> +									\
+> +static struct regulator_consumer_supply vccq_sdhi##idx##_consumer=	\
+> +	REGULATOR_SUPPLY("vqmmc", "sh_mobile_sdhi." #idx);		\
+> +									\
+> +static struct regulator_init_data vccq_sdhi##idx##_init_data = {	\
+> +	.constraints = {						\
+> +		.input_uV	= 3300000,				\
+> +		.min_uV		= 1800000,				\
+> +		.max_uV		= 3300000,				\
+> +		.valid_ops_mask = REGULATOR_CHANGE_VOLTAGE |		\
+> +				  REGULATOR_CHANGE_STATUS,		\
+> +	},								\
+> +	.consumer_supplies	= &vccq_sdhi##idx##_consumer,		\
+> +	.num_consumer_supplies	= 1,					\
+> +};									\
+> +									\
+> +static struct gpio vccq_sdhi##idx##_gpio =				\
+> +	{ vccq_pin, GPIOF_OUT_INIT_HIGH, "vccq-sdhi" #idx };		\
+> +									\
+> +static struct gpio_regulator_state vccq_sdhi##idx##_states[] = {	\
+> +	{ .value = 1800000, .gpios = 0 },				\
+> +	{ .value = 3300000, .gpios = 1 },				\
+> +};									\
+> +									\
+> +static struct gpio_regulator_config vccq_sdhi##idx##_info = {		\
+
+You can make this structure const.
+
+> +	.supply_name	= "vqmmc",					\
+> +	.gpios		= &vccq_sdhi##idx##_gpio,			\
+> +	.nr_gpios	= 1,						\
+> +	.states		= vccq_sdhi##idx##_states,			\
+> +	.nr_states	= ARRAY_SIZE(vccq_sdhi##idx##_states),		\
+> +	.type		= REGULATOR_VOLTAGE,				\
+> +	.init_data	= &vccq_sdhi##idx##_init_data,			\
+> +};
+> +
+> +SDHI_REGULATOR(0, RCAR_GP_PIN(5, 24), RCAR_GP_PIN(5, 29));
+> +SDHI_REGULATOR(2, RCAR_GP_PIN(5, 25), RCAR_GP_PIN(5, 30));
+> +
+>  /* MMCIF */
+>  static const struct sh_mmcif_plat_data mmcif1_pdata __initconst = {
+>  	.caps		= MMC_CAP_8_BIT_DATA | MMC_CAP_NONREMOVABLE,
+> @@ -198,6 +265,9 @@ static const struct pinctrl_map lager_pinctrl_map[] = {
+> 
+>  static void __init lager_add_standard_devices(void)
+>  {
+> +	int fixed_regulator_idx = 0;
+> +	int gpio_regulator_idx = 0;
+> +
+>  	r8a7790_clock_init();
+> 
+>  	pinctrl_register_mappings(lager_pinctrl_map,
+> @@ -211,7 +281,8 @@ static void __init lager_add_standard_devices(void)
+>  	platform_device_register_data(&platform_bus, "gpio-keys", -1,
+>  				      &lager_keys_pdata,
+>  				      sizeof(lager_keys_pdata));
+> -	regulator_register_always_on(0, "fixed-3.3V", fixed3v3_power_consumers,
+> +	regulator_register_always_on(fixed_regulator_idx++,
+> +				     "fixed-3.3V", fixed3v3_power_consumers,
+>  				     ARRAY_SIZE(fixed3v3_power_consumers), 3300000);
+>  	platform_device_register_resndata(&platform_bus, "sh_mmcif", 1,
+>  					  mmcif1_resources, ARRAY_SIZE(mmcif1_resources),
+> @@ -223,6 +294,16 @@ static void __init lager_add_standard_devices(void)
+>  					  &ether_pdata, sizeof(ether_pdata));
+> 
+>  	lager_add_du_device();
+> +
+> +	platform_device_register_data(&platform_bus, "reg-fixed-voltage",
+> fixed_regulator_idx++,
+> +				      &vcc_sdhi0_info, sizeof(struct fixed_voltage_config));
+> +	platform_device_register_data(&platform_bus, "reg-fixed-voltage",
+> fixed_regulator_idx++,
+> +				      &vcc_sdhi2_info, sizeof(struct fixed_voltage_config));
+> +
+> +	platform_device_register_data(&platform_bus, "gpio-regulator",
+> gpio_regulator_idx++,
+> +				      &vccq_sdhi0_info, sizeof(struct
+> gpio_regulator_config));
+> +	platform_device_register_data(&platform_bus, "gpio-regulator",
+> gpio_regulator_idx++,
+> +				      &vccq_sdhi2_info, sizeof(struct
+> gpio_regulator_config)); }
+> 
+>  /*
+-- 
+Regards,
+
+Laurent Pinchart
 
