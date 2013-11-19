@@ -1,53 +1,69 @@
-From: Fabio Estevam <festevam@gmail.com>
-Subject: Re: [PATCH v2 1/6] mmc: sdhci: clear auto cmd setting bits for no
- data cmds
-Date: Tue, 19 Nov 2013 09:52:47 -0200
-Message-ID: <CAOMZO5ANNpai2LuQxrW82scFdZw6aPRLZOobna60SsoVVwKS9Q@mail.gmail.com>
-References: <1383142193-24950-1-git-send-email-b29396@freescale.com>
-	<1383142193-24950-2-git-send-email-b29396@freescale.com>
+From: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
+Subject: Re: [PATCH 01/16] gpio: rcar: use postcore_init()
+Date: Tue, 19 Nov 2013 13:36:55 +0100
+Message-ID: <2135069.aoIAqI8vgH@avalon>
+References: <87li0rz3to.wl%kuninori.morimoto.gx@renesas.com> <1556705.9JOUK7Uj8L@avalon> <CACRpkdZ9vGV+=m0kjxu4Apgy1+q5X2NfZ8SKJQZ=dUr3A997+g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ve0-f176.google.com ([209.85.128.176]:52919 "EHLO
-	mail-ve0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750823Ab3KSLws (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 19 Nov 2013 06:52:48 -0500
-Received: by mail-ve0-f176.google.com with SMTP id oz11so271806veb.35
-        for <linux-mmc@vger.kernel.org>; Tue, 19 Nov 2013 03:52:47 -0800 (PST)
-In-Reply-To: <1383142193-24950-2-git-send-email-b29396@freescale.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7Bit
+Return-path: <linux-sh-owner@vger.kernel.org>
+In-Reply-To: <CACRpkdZ9vGV+=m0kjxu4Apgy1+q5X2NfZ8SKJQZ=dUr3A997+g@mail.gmail.com>
+Sender: linux-sh-owner@vger.kernel.org
+To: Linus Walleij <linus.walleij@linaro.org>
+Cc: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>, Simon <horms@verge.net.au>, Chris Ball <cjb@laptop.org>, Magnus <magnus.damm@gmail.com>, Linux-SH <linux-sh@vger.kernel.org>, Kuninori Morimoto <kuninori.morimoto.gx@gmail.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Dong Aisheng <b29396@freescale.com>
-Cc: linux-mmc@vger.kernel.org, Shawn Guo <shawn.guo@linaro.org>, Wolfram Sang <wsa@the-dreams.de>, Sascha Hauer <s.hauer@pengutronix.de>, Chris Ball <cjb@laptop.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 
-On Wed, Oct 30, 2013 at 12:09 PM, Dong Aisheng <b29396@freescale.com> wrote:
-> The auto cmd settings bits should be cleared before sending new commands
-> or we may receive command timeout error for normal commands due to wrongly
-> pre-sent auto cmd.
->
-> e.g. we receive CMD13 timeout error due to ACMD23 is wrongly enabled
-> by former data commands.
->
-> mmc2: new high speed DDR MMC card at address 0001
-> mmcblk1: mmc2:0001 SEM08G 7.39 GiB
-> mmcblk1boot0: mmc2:0001 SEM08G partition 1 2.00 MiB
-> mmcblk1boot1: mmc2:0001 SEM08G partition 2 2.00 MiB
-> mmcblk1rpmb: mmc2:0001 SEM08G partition 3 128 KiB
->  mmcblk1: p1 p2 p3 p4 < p5 p6 p7 >
-> mmc2: Timeout waiting for hardware interrupt.
->  mmcblk1boot1: unknown partition table
-> mmc2: Timeout waiting for hardware interrupt.
->  mmcblk1boot0: unknown partition table
->
-> Signed-off-by: Dong Aisheng <b29396@freescale.com>
+Hi Linus,
 
-Thanks for the patch, Dong.
+On Tuesday 19 November 2013 10:57:43 Linus Walleij wrote:
+> On Mon, Nov 18, 2013 at 3:00 PM, Laurent Pinchart wrote:
+> > I'm not against moving the gpio-rcar initialization to postcore or subsys
+> > initcall, but in that case I believe we should standardize (or at least
+> > try
+> > to) this across the GPIO drivers. We currently have
+> > 
+> > $ cat drivers/gpio/gpio-*.c | grep _initcall | grep '^[a-z]' | sed
+> > 's/(.*//' | sort | uniq -c
+> >       2 arch_initcall
+> >       1 core_initcall
+> >       1 device_initcall
+> >       1 late_initcall
+> >      11 postcore_initcall
+> >       2 pure_initcall
+> >      31 subsys_initcall
+> > 
+> > $ cat drivers/gpio/gpio-*.c | grep 'module_.*_driver' | sed 's/(.*//' |
+> > sort | uniq -c
+> >       3 module_i2c_driver
+> >       4 module_pci_driver
+> >      23 module_platform_driver
+> >       1 module_spi_driver
+> > 
+> > Linus, do you have any guidelines on this ?
+> 
+> The general guideline, as everybody should be aware ;-) is that we
+> should always use module_init(), i.e. device_initcall() and let deferred
+> probe handle any dependencies.
 
-This fixes the eMMC interrupt timeout issue on mx6qsabresd.
+Thought so, good :-)
 
-I think we should mark it for stable. At least 3.11 and 3.12 have this
-issue and your patch fixes it.
+> The only exception would be things like timers and interrupt controllers...
 
+I wouldn't be against moving regulators and gpios one level up in the initcall 
+order, given that they provide resources used by a very large number of 
+drivers. That would be an optimization only though, and not a work around 
+broken probe deferral paths.
+
+> Usually not relying on deferred probe is a sign of bugs in the deferral
+> probe path.
+> 
+> I know "my" drivers have this problem too, I would prefer that we try to fix
+> the root issue instead of trying to shovel initcalls around.
+
+Sounds good to me.
+
+-- 
 Regards,
 
-Fabio Estevam
+Laurent Pinchart
+
