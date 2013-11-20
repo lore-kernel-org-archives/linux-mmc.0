@@ -1,15 +1,13 @@
-From: micky <micky_ching@realsil.com.cn>
-Subject: Re: [PATCH 2/2] mmc: rtsx: modify phase searching method for tunning
-Date: Wed, 20 Nov 2013 17:13:13 +0800
-Message-ID: <528C7D29.4040901@realsil.com.cn>
-References: <cover.1384858553.git.micky_ching@realsil.com.cn>
- <38cd1d9d7f10f6a65b4dc608f310ac3818da827f.1384858553.git.micky_ching@realsil.com.cn>
- <20131120081758.GX5302@mwanda>
+From: <micky_ching@realsil.com.cn>
+Subject: [PATCH v2 2/2] mmc: rtsx: modify phase searching method for tunning
+Date: Wed, 20 Nov 2013 17:48:55 +0800
+Message-ID: <87c2265dfb9078f8e6154042a31d51fa538a2fd3.1384940801.git.micky_ching@realsil.com.cn>
+References: <cover.1384940801.git.micky_ching@realsil.com.cn>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"; Format="flowed"
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
-In-Reply-To: <20131120081758.GX5302@mwanda>
+In-Reply-To: <cover.1384940801.git.micky_ching@realsil.com.cn>
 List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
  <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
 List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel>
@@ -19,60 +17,181 @@ List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driver
  <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
 Errors-To: driverdev-devel-bounces@linuxdriverproject.org
 Sender: driverdev-devel-bounces@linuxdriverproject.org
-To: Dan Carpenter <dan.carpenter@oracle.com>
-Cc: sameo@linux.intel.com, gregkh@linuxfoundation.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, wei_wang@realsil.com.cn, devel@linuxdriverproject.org, cjb@laptop.org
+To: cjb@laptop.org, sameo@linux.intel.com
+Cc: gregkh@linuxfoundation.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, wei_wang@realsil.com.cn, devel@linuxdriverproject.org
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Dan:
-On 11/20/2013 04:17 PM, Dan Carpenter wrote:
-> On Tue, Nov 19, 2013 at 07:10:35PM +0800, micky_ching@realsil.com.cn wrote:
->> -static u8 sd_search_final_phase(struct realtek_pci_sdmmc *host, u32 phase_map)
->> +static inline u32 sd_get_phase_point(u32 phase_map, unsigned int idx)
->>   {
->> -	struct timing_phase_path path[MAX_PHASE + 1];
->> -	int i, j, cont_path_cnt;
->> -	int new_block, max_len, final_path_idx;
->> -	u8 final_phase = 0xFF;
->> +	idx &= MAX_PHASE;
->> +	return phase_map & (1 << idx);
->> +}
->> +
-> This function is confusing....
->
-> MAX_PHASE is a terrible name.  It's in a global header but it doesn't
-> have a prefix.  It should be #define RTS_MAX_PHASE.  It's weird that we
-> are using it both as a number and as bit mask.  It's weird that we
-> always add a "+ 1" to MAX_PHASE.  It means the name is chosen poorly.
-> Maybe it should be:
->
-> #define RTS_MAX_PHASE  32
-> #define RTS_PHASE_MASK 0x1f
-That's good, I will modify and resend.
-> So this function takes a phase_map and an index and it wraps the index
-> by masking away the top bits then it tests to see if the wrapped index
-> bit is set?  The wrapping is very strange.
-We use this function to find whether the bit of index in the phase_map
-is 1. The index can be twice as MAX_PHASE(reach to 63), because we use
-a unidirectional search, start search continuous phase to found the
-max continuous length from 0, 1, ..., to 31. When we start from
-bit31, index 32 should wrap as 0. This function can be replaced by mod
-function(idx %= MAX_PHASE + 1).
-> The name of the function is sd_get_phase_point() but we only test to
-> see if it returns zero.  The name of the function is not helpful.
-> "sd" is a generic prefix.
-> "get" is misleading because we don't "get" anything it only returns zero
-> on success?
-> "phase_point" might be helpful but I don't know what a phase_point is.
-> Add a comment about that maybe.
-Yes, thank you for your suggestion, the function name is really not good.
-I want use test_phase_bit(u32 phase_map, unsigned int bit), is that ok?
-> regards,
-> dan carpenter
->
-> .
->
+From: Micky Ching <micky_ching@realsil.com.cn>
 
+The new phase searching method is more concise and easier to
+understand.
 
+Signed-off-by: Micky Ching <micky_ching@realsil.com.cn>
+---
+ drivers/mmc/host/rtsx_pci_sdmmc.c |  112 +++++++++++--------------------------
+ include/linux/mfd/rtsx_pci.h      |    3 +-
+ 2 files changed, 34 insertions(+), 81 deletions(-)
+
+diff --git a/drivers/mmc/host/rtsx_pci_sdmmc.c b/drivers/mmc/host/rtsx_pci_sdmmc.c
+index c9a7328..0f4acb8 100644
+--- a/drivers/mmc/host/rtsx_pci_sdmmc.c
++++ b/drivers/mmc/host/rtsx_pci_sdmmc.c
+@@ -31,16 +31,6 @@
+ #include <linux/mfd/rtsx_pci.h>
+ #include <asm/unaligned.h>
+ 
+-/* SD Tuning Data Structure
+- * Record continuous timing phase path
+- */
+-struct timing_phase_path {
+-	int start;
+-	int end;
+-	int mid;
+-	int len;
+-};
+-
+ struct realtek_pci_sdmmc {
+ 	struct platform_device	*pdev;
+ 	struct rtsx_pcr		*pcr;
+@@ -511,85 +501,47 @@ static int sd_change_phase(struct realtek_pci_sdmmc *host,
+ 	return 0;
+ }
+ 
+-static u8 sd_search_final_phase(struct realtek_pci_sdmmc *host, u32 phase_map)
++static inline u32 test_phase_bit(u32 phase_map, unsigned int bit)
+ {
+-	struct timing_phase_path path[MAX_PHASE + 1];
+-	int i, j, cont_path_cnt;
+-	int new_block, max_len, final_path_idx;
+-	u8 final_phase = 0xFF;
++	bit &= RTSX_PHASE_MASK;
++	return phase_map & (1 << bit);
++}
+ 
+-	/* Parse phase_map, take it as a bit-ring */
+-	cont_path_cnt = 0;
+-	new_block = 1;
+-	j = 0;
+-	for (i = 0; i < MAX_PHASE + 1; i++) {
+-		if (phase_map & (1 << i)) {
+-			if (new_block) {
+-				new_block = 0;
+-				j = cont_path_cnt++;
+-				path[j].start = i;
+-				path[j].end = i;
+-			} else {
+-				path[j].end = i;
+-			}
+-		} else {
+-			new_block = 1;
+-			if (cont_path_cnt) {
+-				/* Calculate path length and middle point */
+-				int idx = cont_path_cnt - 1;
+-				path[idx].len =
+-					path[idx].end - path[idx].start + 1;
+-				path[idx].mid =
+-					path[idx].start + path[idx].len / 2;
+-			}
+-		}
+-	}
++static int sd_get_phase_len(u32 phase_map, unsigned int start_bit)
++{
++	int i;
+ 
+-	if (cont_path_cnt == 0) {
+-		dev_dbg(sdmmc_dev(host), "No continuous phase path\n");
+-		goto finish;
+-	} else {
+-		/* Calculate last continuous path length and middle point */
+-		int idx = cont_path_cnt - 1;
+-		path[idx].len = path[idx].end - path[idx].start + 1;
+-		path[idx].mid = path[idx].start + path[idx].len / 2;
++	for (i = 0; i < RTSX_PHASE_MAX; i++) {
++		if (test_phase_bit(phase_map, start_bit + i) == 0)
++			return i;
+ 	}
++	return RTSX_PHASE_MAX;
++}
++
++static u8 sd_search_final_phase(struct realtek_pci_sdmmc *host, u32 phase_map)
++{
++	int start = 0, len = 0;
++	int start_final = 0, len_final = 0;
++	u8 final_phase = 0xFF;
+ 
+-	/* Connect the first and last continuous paths if they are adjacent */
+-	if (!path[0].start && (path[cont_path_cnt - 1].end == MAX_PHASE)) {
+-		/* Using negative index */
+-		path[0].start = path[cont_path_cnt - 1].start - MAX_PHASE - 1;
+-		path[0].len += path[cont_path_cnt - 1].len;
+-		path[0].mid = path[0].start + path[0].len / 2;
+-		/* Convert negative middle point index to positive one */
+-		if (path[0].mid < 0)
+-			path[0].mid += MAX_PHASE + 1;
+-		cont_path_cnt--;
++	if (phase_map == 0) {
++		dev_err(sdmmc_dev(host), "phase error: [map:%x]\n", phase_map);
++		return final_phase;
+ 	}
+ 
+-	/* Choose the longest continuous phase path */
+-	max_len = 0;
+-	final_phase = 0;
+-	final_path_idx = 0;
+-	for (i = 0; i < cont_path_cnt; i++) {
+-		if (path[i].len > max_len) {
+-			max_len = path[i].len;
+-			final_phase = (u8)path[i].mid;
+-			final_path_idx = i;
++	while (start < RTSX_PHASE_MAX) {
++		len = sd_get_phase_len(phase_map, start);
++		if (len_final < len) {
++			start_final = start;
++			len_final = len;
+ 		}
+-
+-		dev_dbg(sdmmc_dev(host), "path[%d].start = %d\n",
+-				i, path[i].start);
+-		dev_dbg(sdmmc_dev(host), "path[%d].end = %d\n",
+-				i, path[i].end);
+-		dev_dbg(sdmmc_dev(host), "path[%d].len = %d\n",
+-				i, path[i].len);
+-		dev_dbg(sdmmc_dev(host), "path[%d].mid = %d\n",
+-				i, path[i].mid);
++		start += len ? len : 1;
+ 	}
+ 
+-finish:
+-	dev_dbg(sdmmc_dev(host), "Final chosen phase: %d\n", final_phase);
++	final_phase = (start_final + len_final / 2) & RTSX_PHASE_MASK;
++	dev_dbg(sdmmc_dev(host), "phase: [map:%x] [maxlen:%d] [final:%d]\n",
++		phase_map, len_final, final_phase);
++
+ 	return final_phase;
+ }
+ 
+@@ -635,7 +587,7 @@ static int sd_tuning_phase(struct realtek_pci_sdmmc *host,
+ 	int err, i;
+ 	u32 raw_phase_map = 0;
+ 
+-	for (i = MAX_PHASE; i >= 0; i--) {
++	for (i = 0; i < RTSX_PHASE_MAX; i++) {
+ 		err = sd_tuning_rx_cmd(host, opcode, (u8)i);
+ 		if (err == 0)
+ 			raw_phase_map |= 1 << i;
+diff --git a/include/linux/mfd/rtsx_pci.h b/include/linux/mfd/rtsx_pci.h
+index 0ce7721..bdc79c5 100644
+--- a/include/linux/mfd/rtsx_pci.h
++++ b/include/linux/mfd/rtsx_pci.h
+@@ -144,7 +144,8 @@
+ #define HOST_TO_DEVICE		0
+ #define DEVICE_TO_HOST		1
+ 
+-#define MAX_PHASE		31
++#define RTSX_PHASE_MAX		32
++#define RTSX_PHASE_MASK		(RTSX_PHASE_MAX - 1)
+ #define RX_TUNING_CNT		3
+ 
+ /* SG descriptor */
 -- 
-Best Regards
-Micky.
+1.7.9.5
