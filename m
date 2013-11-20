@@ -1,54 +1,60 @@
-From: <micky_ching@realsil.com.cn>
-Subject: [PATCH v2 1/2] mmc: rtsx: fix card poweroff bug
-Date: Wed, 20 Nov 2013 17:48:54 +0800
-Message-ID: <fb17a994c87352b1d82c6fb4141aa47b0c1d7e56.1384940801.git.micky_ching@realsil.com.cn>
-References: <cover.1384940801.git.micky_ching@realsil.com.cn>
+From: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
+Subject: Re: [PATCH 1/2 v2] ARM: shmobile: lager: add gpio/fixed regulator for SDHI
+Date: Wed, 20 Nov 2013 11:57:11 +0100
+Message-ID: <1745725.K7bPWgBA4v@avalon>
+References: <87li0rz3to.wl%kuninori.morimoto.gx@renesas.com> <9182336.4KdqZZkpGQ@avalon> <87pppv8qx4.wl%kuninori.morimoto.gx@renesas.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from rtits2.realtek.com ([60.250.210.242]:47769 "EHLO
-	rtits2.realtek.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751108Ab3KTJvI (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 20 Nov 2013 04:51:08 -0500
-In-Reply-To: <cover.1384940801.git.micky_ching@realsil.com.cn>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7Bit
+Return-path: <linux-sh-owner@vger.kernel.org>
+In-Reply-To: <87pppv8qx4.wl%kuninori.morimoto.gx@renesas.com>
+Sender: linux-sh-owner@vger.kernel.org
+To: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
+Cc: Simon <horms@verge.net.au>, Chris Ball <cjb@laptop.org>, Magnus <magnus.damm@gmail.com>, Linux-SH <linux-sh@vger.kernel.org>, Kuninori Morimoto <kuninori.morimoto.gx@gmail.com>, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: cjb@laptop.org, sameo@linux.intel.com
-Cc: devel@linuxdriverproject.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, gregkh@linuxfoundation.org, wei_wang@realsil.com.cn, Micky Ching <micky_ching@realsil.com.cn>
 
-From: Micky Ching <micky_ching@realsil.com.cn>
+Hi Morimoto-san,
 
-If the host driver removed while card in the slot, the host will not
-power off card power correctly. This bug is produced because host
-eject flag set before the last mmc_set_ios callback, we should set the
-eject flag after power off.
+On Tuesday 19 November 2013 23:37:32 Kuninori Morimoto wrote:
+> Hi Laurent
+> 
+> > > > >  #include <linux/platform_data/rcar-du.h>
+> > > > >  #include <linux/platform_device.h>
+> > > > >  #include <linux/phy.h>
+> > > > > 
+> > > > > +#include <linux/regulator/driver.h>
+> > > > 
+> > > > I might be mistaken, but is this header really needed ?
+> > > 
+> > > Unfortunately, the compile will error without it.
+> > > regulator_xxx / REGULATOR_XXX need it
+> > 
+> > I believe you should include regulator/machine.h instead of
+> > regulator/driver.h.
+> 
+> This is the result.
+> What is your opinion ?
+> 
+> --- with regulator/machine.h --------
+>   CC      arch/arm/mach-shmobile/board-lager.o
+> In file included from
+> /opt/usr/src/WORK/morimoto/gitlinux/linux/arch/arm/mach-shmobile/board-lage
+> r.c:36:0:
+> /opt/usr/src/WORK/morimoto/gitlinux/linux/include/linux/regulator/gpio-regu
+> lator.h:83:22: error: field 'type' has incomplete type
+> /opt/usr/src/WORK/morimoto/gitlinux/linux/arch/arm/mach-shmobile/board-lage
+> r.c:208:1: error: 'REGULATOR_VOLTAGE' undeclared here (not in a function)
+> 
+> --- with regulator/driver.h ------
+>   CC      arch/arm/mach-shmobile/board-lager.o
+> (no error)
 
-Signed-off-by: Micky Ching <micky_ching@realsil.com.cn>
----
- drivers/mmc/host/rtsx_pci_sdmmc.c |    3 ++-
- 1 file changed, 2 insertions(+), 1 deletion(-)
+I believe the enum regulator_type definition should be moved out of 
+regulator/driver.h, but that's out of scope of this patch set, so I'm fine 
+with including regulator/driver.h for now.
 
-diff --git a/drivers/mmc/host/rtsx_pci_sdmmc.c b/drivers/mmc/host/rtsx_pci_sdmmc.c
-index 375a880e..c9a7328 100644
---- a/drivers/mmc/host/rtsx_pci_sdmmc.c
-+++ b/drivers/mmc/host/rtsx_pci_sdmmc.c
-@@ -1328,7 +1328,6 @@ static int rtsx_pci_sdmmc_drv_remove(struct platform_device *pdev)
- 	pcr->slots[RTSX_SD_CARD].p_dev = NULL;
- 	pcr->slots[RTSX_SD_CARD].card_event = NULL;
- 	mmc = host->mmc;
--	host->eject = true;
- 
- 	mutex_lock(&host->host_mutex);
- 	if (host->mrq) {
-@@ -1346,6 +1345,8 @@ static int rtsx_pci_sdmmc_drv_remove(struct platform_device *pdev)
- 	mutex_unlock(&host->host_mutex);
- 
- 	mmc_remove_host(mmc);
-+	host->eject = true;
-+
- 	mmc_free_host(mmc);
- 
- 	dev_dbg(&(pdev->dev),
 -- 
-1.7.9.5
+Regards,
+
+Laurent Pinchart
 
