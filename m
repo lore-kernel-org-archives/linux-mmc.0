@@ -1,60 +1,53 @@
-From: <ludovic.desroches@atmel.com>
-Subject: [PATCH] mmc: atmel-mci: fix timeout errors in SDIO mode when using DMA
-Date: Wed, 20 Nov 2013 16:01:11 +0100
-Message-ID: <1384959671-5646-1-git-send-email-ludovic.desroches@atmel.com>
+From: Ed Sutter <ed.sutter@alcatel-lucent.com>
+Subject: imx6 emmc issue
+Date: Wed, 20 Nov 2013 11:06:02 -0500
+Message-ID: <528CDDEA.1040500@alcatel-lucent.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eusmtp01.atmel.com ([212.144.249.242]:16555 "EHLO
-	eusmtp01.atmel.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751506Ab3KTPBd (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 20 Nov 2013 10:01:33 -0500
+Received: from ihemail2.lucent.com ([135.245.0.35]:34033 "EHLO
+	ihemail2.lucent.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754144Ab3KTQYM (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 20 Nov 2013 11:24:12 -0500
+Received: from usnavsmail3.ndc.alcatel-lucent.com (usnavsmail3.ndc.alcatel-lucent.com [135.3.39.11])
+	by ihemail2.lucent.com (8.13.8/IER-o) with ESMTP id rAKG73n5018064
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=FAIL)
+	for <linux-mmc@vger.kernel.org>; Wed, 20 Nov 2013 10:07:04 -0600 (CST)
+Received: from umail.lucent.com (umail.ndc.lucent.com [135.3.40.61])
+	by usnavsmail3.ndc.alcatel-lucent.com (8.14.3/8.14.3/GMO) with ESMTP id rAKG73aN027481
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=NOT)
+	for <linux-mmc@vger.kernel.org>; Wed, 20 Nov 2013 10:07:03 -0600
+Received: from [135.222.138.133] (Ed-PC.mh.lucent.com [135.222.138.133])
+	by umail.lucent.com (8.13.8/TPES) with ESMTP id rAKG72Jk010898
+	for <linux-mmc@vger.kernel.org>; Wed, 20 Nov 2013 10:07:03 -0600 (CST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org
-Cc: nicolas.ferre@atmel.com, cjb@laptop.org, Ludovic Desroches <ludovic.desroches@atmel.com>
+To: linux-mmc@vger.kernel.org
 
-From: Ludovic Desroches <ludovic.desroches@atmel.com>
+Dong,
+Hello, I am currently working on an Freescale iMX6 SABRE Board platform
+http://www.freescale.com/webapp/sps/site/prod_summary.jsp?code=RDIMX6SABREBRD
 
-With some SDIO devices, timeout errors can happen when reading data. To solve
-this issue the DMA transfer has to be activated before sending the command to
-the device. This order is incorrect in PDC mode. So we have to take care if we
-are using DMA or PDC to know when to send the MMC command.
+I'm trying to run with mainline kernel/uboot/buildroot just to be a bit more
+up-to-date than the LTIB distribution.  I am trying to setup a ROOTFS 
+directly
+on the eMMC device.  Referring to this thread on the freescale forum:
 
-Cc: <stable@vger.kernel.org> #3.2+
-Signed-off-by: Ludovic Desroches <ludovic.desroches@atmel.com>
----
- drivers/mmc/host/atmel-mci.c |   13 ++++++++++++-
- 1 file changed, 12 insertions(+), 1 deletion(-)
+https://community.freescale.com/message/363870?et=watches.email.thread#363870
 
-diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
-index b8dfe0d..289da71 100644
---- a/drivers/mmc/host/atmel-mci.c
-+++ b/drivers/mmc/host/atmel-mci.c
-@@ -1193,11 +1193,22 @@ static void atmci_start_request(struct atmel_mci *host,
- 	iflags |= ATMCI_CMDRDY;
- 	cmd = mrq->cmd;
- 	cmdflags = atmci_prepare_command(slot->mmc, cmd);
--	atmci_send_command(host, cmd, cmdflags);
-+
-+	/*
-+	 * DMA transfer should be started before sending the command to avoid
-+	 * unexpected errors especially for read operations in SDIO mode.
-+	 * Unfortunately, in PDC mode, command has to be sent before starting
-+	 * the transfer.
-+	 */
-+	if (host->submit_data != &atmci_submit_data_dma)
-+		atmci_send_command(host, cmd, cmdflags);
- 
- 	if (data)
- 		host->submit_data(host, data);
- 
-+	if (host->submit_data == &atmci_submit_data_dma)
-+		atmci_send_command(host, cmd, cmdflags);
-+
- 	if (mrq->stop) {
- 		host->stop_cmdr = atmci_prepare_command(slot->mmc, mrq->stop);
- 		host->stop_cmdr |= ATMCI_CMDR_STOP_XFER;
--- 
-1.7.9.5
+I'm working with linux-3.12 and patch-v3.12-next-20131119 and I've 
+applied these
+additional patches: http://comments.gmane.org/gmane.linux.kernel.mmc/23339
 
+I am able to access the emmc device from linux when using fdisk; however,
+when I attempt to run "mkfs.ext3 /dev/mmcblk0p1" the "Discarding device 
+blocks"
+step takes over an hour (80 minutes last time I tried it).
+
+Fabio Estevam (from freescale) suggested I report this to you.
+Are you aware of this issue?  Are you aware of anyone that's actually tried
+to do mkfs.ext3 on emmc with a recent kernel version for this board/SOC?
+
+Thanks in advance,
+Ed Sutter
