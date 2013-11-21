@@ -1,115 +1,364 @@
-From: Balaji T K <balajitk@ti.com>
-Subject: [RFC PATCH v3 2/8] mmc: omap_hsmmc: handle vcc and vcc_aux independently
-Date: Thu, 21 Nov 2013 19:50:21 +0530
-Message-ID: <1385043627-30439-3-git-send-email-balajitk@ti.com>
+From: Balaji T K <balajitk-l0cyMroinI0@public.gmane.org>
+Subject: [RFC PATCH v3 3/8] regulator: add pbias regulator support
+Date: Thu, 21 Nov 2013 19:50:22 +0530
+Message-ID: <1385043627-30439-4-git-send-email-balajitk@ti.com>
 References: <20130613174554.GB1403@sirena.org.uk>
  <1385043627-30439-1-git-send-email-balajitk@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <linux-omap-owner@vger.kernel.org>
-In-Reply-To: <1385043627-30439-1-git-send-email-balajitk@ti.com>
-Sender: linux-omap-owner@vger.kernel.org
-To: linux-omap@vger.kernel.org, bcousson@baylibre.com, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, cjb@laptop.org, broonie@kernel.org
-Cc: tony@atomide.com, Balaji T K <balajitk@ti.com>
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1385043627-30439-1-git-send-email-balajitk-l0cyMroinI0@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, bcousson-rdvid1DuHRBWk0Htik3J/w@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org, broonie-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org
+Cc: tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org, Balaji T K <balajitk-l0cyMroinI0@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-handle vcc and vcc_aux independently to reduce indent.
+pbias register controls internal power supply to sd card i/o pads
+in most OMAPs (OMAP2-5, DRA7).
+Control bits for selecting voltage level and
+enabling/disabling are in the same PBIAS register.
 
-Signed-off-by: Balaji T K <balajitk@ti.com>
+Signed-off-by: Balaji T K <balajitk-l0cyMroinI0@public.gmane.org>
 ---
- drivers/mmc/host/omap_hsmmc.c |   54 +++++++++++++++++++----------------------
- 1 files changed, 25 insertions(+), 29 deletions(-)
+ .../bindings/regulator/pbias-regulator.txt         |   21 ++
+ drivers/regulator/Kconfig                          |    7 +
+ drivers/regulator/Makefile                         |    1 +
+ drivers/regulator/pbias-regulator.c                |  264 ++++++++++++++++++++
+ 4 files changed, 293 insertions(+), 0 deletions(-)
+ create mode 100644 Documentation/devicetree/bindings/regulator/pbias-regulator.txt
+ create mode 100644 drivers/regulator/pbias-regulator.c
 
-diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index 1eb4350..342be25 100644
---- a/drivers/mmc/host/omap_hsmmc.c
-+++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -286,11 +286,12 @@ static int omap_hsmmc_set_power(struct device *dev, int slot, int power_on,
- 	 * chips/cards need an interface voltage rail too.
- 	 */
- 	if (power_on) {
--		ret = mmc_regulator_set_ocr(host->mmc, host->vcc, vdd);
-+		if (host->vcc)
-+			ret = mmc_regulator_set_ocr(host->mmc, host->vcc, vdd);
- 		/* Enable interface voltage rail, if needed */
- 		if (ret == 0 && host->vcc_aux) {
- 			ret = regulator_enable(host->vcc_aux);
--			if (ret < 0)
-+			if (ret < 0 && host->vcc)
- 				ret = mmc_regulator_set_ocr(host->mmc,
- 							host->vcc, 0);
- 		}
-@@ -298,7 +299,7 @@ static int omap_hsmmc_set_power(struct device *dev, int slot, int power_on,
- 		/* Shut down the rail */
- 		if (host->vcc_aux)
- 			ret = regulator_disable(host->vcc_aux);
--		if (!ret) {
-+		if (host->vcc) {
- 			/* Then proceed to shut down the local regulator */
- 			ret = mmc_regulator_set_ocr(host->mmc,
- 						host->vcc, 0);
-@@ -318,10 +319,10 @@ static int omap_hsmmc_reg_get(struct omap_hsmmc_host *host)
+diff --git a/Documentation/devicetree/bindings/regulator/pbias-regulator.txt b/Documentation/devicetree/bindings/regulator/pbias-regulator.txt
+new file mode 100644
+index 0000000..712fcd8
+--- /dev/null
++++ b/Documentation/devicetree/bindings/regulator/pbias-regulator.txt
+@@ -0,0 +1,21 @@
++PBIAS internal regulator for SD card i/o pads on OMAP SoCs.
++
++Required properties:
++- compatible:
++  - "regulator-pbias-omap2" for OMAP2
++  - "regulator-pbias-omap3" for OMAP3
++  - "regulator-pbias-omap4" for OMAP4
++  - "regulator-pbias-omap5" for OMAP5, DRA7
++- pbias-reg-offset: PBIAS control register offset from syscon base address
++
++Optional properties:
++- Any optional property defined in bindings/regulator/regulator.txt
++
++Example:
++
++		pbias_regulator: pbias_regulator {
++			pbias-reg-offset = <0>;
++			regulator-name = "pbias_regulator";
++			regulator-min-microvolt = <1800000>;
++			regulator-max-microvolt = <3000000>;
++	};
+diff --git a/drivers/regulator/Kconfig b/drivers/regulator/Kconfig
+index ce785f4..3177f45 100644
+--- a/drivers/regulator/Kconfig
++++ b/drivers/regulator/Kconfig
+@@ -369,6 +369,13 @@ config REGULATOR_PALMAS
+ 	  on the muxing. This is handled automatically in the driver by
+ 	  reading the mux info from OTP.
  
- 	reg = devm_regulator_get(host->dev, "vmmc");
- 	if (IS_ERR(reg)) {
--		dev_err(host->dev, "vmmc regulator missing\n");
-+		dev_err(host->dev, "unable to get vmmc regulator %ld\n",
-+			PTR_ERR(reg));
- 		return PTR_ERR(reg);
- 	} else {
--		mmc_slot(host).set_power = omap_hsmmc_set_power;
- 		host->vcc = reg;
- 		ocr_value = mmc_regulator_get_ocrmask(reg);
- 		if (!mmc_slot(host).ocr_mask) {
-@@ -334,31 +335,26 @@ static int omap_hsmmc_reg_get(struct omap_hsmmc_host *host)
- 				return -EINVAL;
- 			}
- 		}
++config REGULATOR_PBIAS
++	tristate "PBIAS OMAP regulator driver"
++	depends on ARCH_OMAP && MFD_SYSCON
++	help
++	 This driver provides support for OMAP pbias modelled
++	 regulators.
++
+ config REGULATOR_PCAP
+ 	tristate "Motorola PCAP2 regulator driver"
+ 	depends on EZX_PCAP
+diff --git a/drivers/regulator/Makefile b/drivers/regulator/Makefile
+index 01c597e..16000fa 100644
+--- a/drivers/regulator/Makefile
++++ b/drivers/regulator/Makefile
+@@ -52,6 +52,7 @@ obj-$(CONFIG_REGULATOR_MC13XXX_CORE) +=  mc13xxx-regulator-core.o
+ obj-$(CONFIG_REGULATOR_PALMAS) += palmas-regulator.o
+ obj-$(CONFIG_REGULATOR_PFUZE100) += pfuze100-regulator.o
+ obj-$(CONFIG_REGULATOR_TPS51632) += tps51632-regulator.o
++obj-$(CONFIG_REGULATOR_PBIAS) += pbias-regulator.o
+ obj-$(CONFIG_REGULATOR_PCAP) += pcap-regulator.o
+ obj-$(CONFIG_REGULATOR_PCF50633) += pcf50633-regulator.o
+ obj-$(CONFIG_REGULATOR_RC5T583)  += rc5t583-regulator.o
+diff --git a/drivers/regulator/pbias-regulator.c b/drivers/regulator/pbias-regulator.c
+new file mode 100644
+index 0000000..48fda88
+--- /dev/null
++++ b/drivers/regulator/pbias-regulator.c
+@@ -0,0 +1,264 @@
++/*
++ * pbias-regulator.c
++ *
++ * Copyright (C) 2011 Texas Instruments Incorporated - http://www.ti.com/
++ * Author: Balaji T K <balajitk-l0cyMroinI0@public.gmane.org>
++ *
++ * This program is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU General Public License as
++ * published by the Free Software Foundation version 2.
++ *
++ * This program is distributed "as is" WITHOUT ANY WARRANTY of any
++ * kind, whether express or implied; without even the implied warranty
++ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ */
++
++#include <linux/err.h>
++#include <linux/io.h>
++#include <linux/delay.h>
++#include <linux/mutex.h>
++#include <linux/module.h>
++#include <linux/mfd/syscon.h>
++#include <linux/platform_device.h>
++#include <linux/regulator/driver.h>
++#include <linux/regulator/machine.h>
++#include <linux/regulator/of_regulator.h>
++#include <linux/regmap.h>
++#include <linux/slab.h>
++#include <linux/of.h>
++#include <linux/of_device.h>
++
++struct pbias_bit_map {
++	u32 enable;
++	u32 enable_mask;
++	u32 vmode;
++};
++
++struct pbias_regulator_data {
++	struct regulator_desc desc;
++	void __iomem *pbias_addr;
++	unsigned int pbias_reg;
++	struct regulator_dev *dev;
++	struct regmap *syscon;
++
++
++	const struct pbias_bit_map *bmap;
++	int voltage;
++};
++
++static int pbias_regulator_set_voltage(struct regulator_dev *dev,
++			int min_uV, int max_uV, unsigned *selector)
++{
++	struct pbias_regulator_data *data = rdev_get_drvdata(dev);
++	const struct pbias_bit_map *bmap = data->bmap;
++	int ret, vmode;
++
++	if (min_uV <= 1800000)
++		vmode = 0;
++	else if (min_uV > 1800000)
++		vmode = bmap->vmode;
++
++	ret = regmap_update_bits(data->syscon, data->pbias_reg,
++						bmap->vmode, vmode);
++	data->voltage = min_uV;
++
++	return ret;
++}
++
++static int pbias_regulator_get_voltage(struct regulator_dev *rdev)
++{
++	struct pbias_regulator_data *data = rdev_get_drvdata(rdev);
++
++	return data->voltage;
++}
++
++static int pbias_regulator_enable(struct regulator_dev *rdev)
++{
++	struct pbias_regulator_data *data = rdev_get_drvdata(rdev);
++	const struct pbias_bit_map *bmap = data->bmap;
++	int ret;
++
++	ret = regmap_update_bits(data->syscon, data->pbias_reg,
++					bmap->enable_mask, bmap->enable);
++
++	return ret;
++}
++
++static int pbias_regulator_disable(struct regulator_dev *rdev)
++{
++	struct pbias_regulator_data *data = rdev_get_drvdata(rdev);
++	const struct pbias_bit_map *bmap = data->bmap;
++	int ret;
++
++	ret = regmap_update_bits(data->syscon, data->pbias_reg,
++						bmap->enable_mask, 0);
++	return ret;
++}
++
++static int pbias_regulator_is_enable(struct regulator_dev *rdev)
++{
++	struct pbias_regulator_data *data = rdev_get_drvdata(rdev);
++	const struct pbias_bit_map *bmap = data->bmap;
++	int value;
++
++	regmap_read(data->syscon, data->pbias_reg, &value);
++
++	return value & bmap->enable_mask;
++}
++
++static struct regulator_ops pbias_regulator_voltage_ops = {
++	.set_voltage	= pbias_regulator_set_voltage,
++	.get_voltage	= pbias_regulator_get_voltage,
++	.enable		= pbias_regulator_enable,
++	.disable	= pbias_regulator_disable,
++	.is_enabled	= pbias_regulator_is_enable,
++};
++
++#if CONFIG_OF
++static const struct pbias_bit_map pbias_omap3 = {
++	.enable = BIT(1),
++	.enable_mask = BIT(1),
++	.vmode = BIT(0),
++};
++
++static const struct pbias_bit_map pbias_omap4 = {
++	.enable = BIT(26) | BIT(22),
++	.enable_mask = BIT(26) | BIT(25) | BIT(22),
++	.vmode = BIT(21),
++};
++
++static const struct pbias_bit_map pbias_omap5 = {
++	.enable = BIT(27) | BIT(26),
++	.enable_mask = BIT(27) | BIT(25) | BIT(26),
++	.vmode = BIT(21),
++};
++
++static const struct of_device_id pbias_of_match[] = {
++	{ .compatible = "regulator-pbias-omap3", .data = &pbias_omap3},
++	{ .compatible = "regulator-pbias-omap4", .data = &pbias_omap4},
++	{ .compatible = "regulator-pbias-omap5", .data = &pbias_omap5},
++	{},
++};
++MODULE_DEVICE_TABLE(of, pbias_of_match);
++#endif
++
++static int pbias_regulator_probe(struct platform_device *pdev)
++{
++	struct device_node *np = pdev->dev.of_node;
++	struct device_node *syscon_np;
++	struct pbias_regulator_data *drvdata;
++	const struct of_device_id *id;
++	const char *supply_name;
++	struct regulator_init_data *initdata;
++	struct regulator_config cfg = { };
++	unsigned startup_delay;
++	int ret;
++
++	drvdata = devm_kzalloc(&pdev->dev, sizeof(struct pbias_regulator_data),
++			       GFP_KERNEL);
++	if (drvdata == NULL) {
++		dev_err(&pdev->dev, "Failed to allocate device data\n");
++		return -ENOMEM;
 +	}
-+	mmc_slot(host).set_power = omap_hsmmc_set_power;
- 
--		/* Allow an aux regulator */
--		reg = devm_regulator_get_optional(host->dev, "vmmc_aux");
--		host->vcc_aux = IS_ERR(reg) ? NULL : reg;
-+	/* Allow an aux regulator */
-+	reg = devm_regulator_get_optional(host->dev, "vmmc_aux");
-+	host->vcc_aux = IS_ERR(reg) ? NULL : reg;
- 
--		/* For eMMC do not power off when not in sleep state */
--		if (mmc_slot(host).no_regulator_off_init)
--			return 0;
--		/*
--		* UGLY HACK:  workaround regulator framework bugs.
--		* When the bootloader leaves a supply active, it's
--		* initialized with zero usecount ... and we can't
--		* disable it without first enabling it.  Until the
--		* framework is fixed, we need a workaround like this
--		* (which is safe for MMC, but not in general).
--		*/
--		if (regulator_is_enabled(host->vcc) > 0 ||
--		    (host->vcc_aux && regulator_is_enabled(host->vcc_aux))) {
--			int vdd = ffs(mmc_slot(host).ocr_mask) - 1;
-+	/* For eMMC do not power off when not in sleep state */
-+	if (mmc_slot(host).no_regulator_off_init)
-+		return 0;
-+	/*
-+	 * To disable boot_on regulator, enable regulator
-+	 * to increase usecount and then disable it.
-+	 */
-+	if ((host->vcc && regulator_is_enabled(host->vcc) > 0) ||
-+	    (host->vcc_aux && regulator_is_enabled(host->vcc_aux))) {
-+		int vdd = ffs(mmc_slot(host).ocr_mask) - 1;
- 
--			mmc_slot(host).set_power(host->dev, host->slot_id,
--						 1, vdd);
--			mmc_slot(host).set_power(host->dev, host->slot_id,
--						 0, 0);
--		}
-+		mmc_slot(host).set_power(host->dev, host->slot_id, 1, vdd);
-+		mmc_slot(host).set_power(host->dev, host->slot_id, 0, 0);
- 	}
- 
- 	return 0;
++
++	id = of_match_device(of_match_ptr(pbias_of_match), &pdev->dev);
++	if (!id)
++		return -ENODEV;
++
++	drvdata->bmap = id->data;
++	if (!drvdata->bmap)
++		return -ENODEV;
++
++	initdata = of_get_regulator_init_data(&pdev->dev, np);
++	if (!initdata)
++		return -EINVAL;
++
++	supply_name = initdata->constraints.name;
++
++	of_property_read_u32(np, "startup-delay-us", &startup_delay);
++	ret = of_property_read_u32(np, "pbias-reg-offset",
++				   &drvdata->pbias_reg);
++	if (ret) {
++		dev_err(&pdev->dev, "no pbias-reg-offset property set\n");
++		return ret;
++	}
++
++	syscon_np = of_get_parent(np);
++	if (!syscon_np)
++		return -ENODEV;
++
++	drvdata->syscon = syscon_node_to_regmap(syscon_np);
++	of_node_put(syscon_np);
++	if (IS_ERR(drvdata->syscon))
++		return PTR_ERR(drvdata->syscon);
++
++	drvdata->desc.name = kstrdup(supply_name, GFP_KERNEL);
++	if (drvdata->desc.name == NULL) {
++		dev_err(&pdev->dev, "Failed to allocate supply name\n");
++		return -ENOMEM;
++	}
++
++	drvdata->desc.owner = THIS_MODULE;
++	drvdata->desc.enable_time = startup_delay;
++	drvdata->desc.type = REGULATOR_VOLTAGE;
++	drvdata->desc.ops = &pbias_regulator_voltage_ops;
++	drvdata->desc.n_voltages = 3;
++
++	cfg.dev = &pdev->dev;
++	cfg.init_data = initdata;
++	cfg.driver_data = drvdata;
++	cfg.of_node = np;
++
++	drvdata->dev = devm_regulator_register(&pdev->dev, &drvdata->desc,
++									&cfg);
++	if (IS_ERR(drvdata->dev)) {
++		ret = PTR_ERR(drvdata->dev);
++		dev_err(&pdev->dev, "Failed to register regulator: %d\n", ret);
++		goto err_regulator;
++	}
++
++	platform_set_drvdata(pdev, drvdata);
++
++	return 0;
++
++err_regulator:
++	kfree(drvdata->desc.name);
++	return ret;
++}
++
++static int pbias_regulator_remove(struct platform_device *pdev)
++{
++	struct pbias_regulator_data *drvdata = platform_get_drvdata(pdev);
++
++	kfree(drvdata->desc.name);
++
++	return 0;
++}
++
++static struct platform_driver pbias_regulator_driver = {
++	.probe		= pbias_regulator_probe,
++	.remove		= pbias_regulator_remove,
++	.driver		= {
++		.name		= "pbias-regulator",
++		.owner		= THIS_MODULE,
++		.of_match_table = of_match_ptr(pbias_of_match),
++	},
++};
++
++static int __init pbias_regulator_init(void)
++{
++	return platform_driver_register(&pbias_regulator_driver);
++}
++subsys_initcall(pbias_regulator_init);
++
++static void __exit pbias_regulator_exit(void)
++{
++	platform_driver_unregister(&pbias_regulator_driver);
++}
++module_exit(pbias_regulator_exit);
++
++MODULE_AUTHOR("Balaji T K <balajitk-l0cyMroinI0@public.gmane.org>");
++MODULE_DESCRIPTION("pbias voltage regulator");
++MODULE_LICENSE("GPL");
++MODULE_ALIAS("platform:pbias-regulator");
 -- 
 1.7.5.4
 
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
