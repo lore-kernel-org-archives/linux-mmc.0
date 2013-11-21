@@ -1,80 +1,118 @@
-From: Balaji T K <balajitk@ti.com>
-Subject: Re: [PATCH v3 2/3] mmc: omap_hsmmc: Pin remux workaround to support
- SDIO interrupt on AM335x.
-Date: Thu, 21 Nov 2013 17:28:33 +0530
-Message-ID: <528DF569.4070501@ti.com>
-References: <1384761240-11005-1-git-send-email-afenkart@gmail.com> <1384761240-11005-3-git-send-email-afenkart@gmail.com> <CAOf5uw=9KJ312PVzMVEHX-Lj=iYpeZOYFduB8iOu9o+-863CYw@mail.gmail.com> <CALtMJEBfeww=ymGMXWtwjtZrpqpFrkRPEOti_uPrE63SBk3Dtw@mail.gmail.com> <528A3EB2.1010103@ti.com> <20131119154909.GD10317@atomide.com> <528B8ADA.6030703@ti.com> <20131119161932.GE10317@atomide.com> <CALtMJECrCxtPY_dfy832-EsgXCNB6u+mW0w_yVDnDWMo5Up-NQ@mail.gmail.com>
+From: Dong Aisheng <dongas86@gmail.com>
+Subject: Re: imx6 emmc issue
+Date: Thu, 21 Nov 2013 20:57:01 +0800
+Message-ID: <CAA+hA=R603Pj346PAA=t=w23siNTrW=-0vxFk3k8F3MkCTnKqw@mail.gmail.com>
+References: <528CDDEA.1040500@alcatel-lucent.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from arroyo.ext.ti.com ([192.94.94.40]:51308 "EHLO arroyo.ext.ti.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752241Ab3KUL6m (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 21 Nov 2013 06:58:42 -0500
-In-Reply-To: <CALtMJECrCxtPY_dfy832-EsgXCNB6u+mW0w_yVDnDWMo5Up-NQ@mail.gmail.com>
+Received: from mail-qc0-f176.google.com ([209.85.216.176]:55861 "EHLO
+	mail-qc0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754240Ab3KUM5C convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 21 Nov 2013 07:57:02 -0500
+Received: by mail-qc0-f176.google.com with SMTP id n9so1140422qcw.35
+        for <linux-mmc@vger.kernel.org>; Thu, 21 Nov 2013 04:57:01 -0800 (PST)
+In-Reply-To: <528CDDEA.1040500@alcatel-lucent.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Andreas Fenkart <afenkart@gmail.com>
-Cc: Tony Lindgren <tony@atomide.com>, Michael Trimarchi <michael@amarulasolutions.com>, Chris Ball <cjb@laptop.org>, Grant Likely <grant.likely@secretlab.ca>, Felipe Balbi <balbi@ti.com>, Daniel Mack <zonque@gmail.com>, linux-doc@vger.kernel.org, linux-mmc <linux-mmc@vger.kernel.org>, Linux OMAP Mailing List <linux-omap@vger.kernel.org>
+To: Ed Sutter <ed.sutter@alcatel-lucent.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-On Thursday 21 November 2013 05:07 PM, Andreas Fenkart wrote:
-> 2013/11/19 Tony Lindgren <tony@atomide.com>:
->> * Balaji T K <balajitk@ti.com> [131119 08:00]:
->>> On Tuesday 19 November 2013 09:19 PM, Tony Lindgren wrote:
->>>> * Balaji T K <balajitk@ti.com> [131118 08:23]:
->>>>>
->>>>> few params were passed via platform data in non-DT case and never cached
->>>>> in internal data structure, with non-dt support going away soon, I am
->>>>> planning to cleanup pdata usage in the driver when it gets to DT only support.
->>>>
->>>> The issue of pdata tinkering needs to be fixed first as it will cause nasty
->>>> issues when the module is reprobed.
->>>
->>> Agree that pdata usage needs to be fixed, but currently module
->>> reprobe is working fine.
->>
->> OK. The sdio_irq should be just set in struct omap_hsmmc_host instead.
+Hi Ed,
 
-agree, sdio_irq should be cached in struct omap_hsmmc_host
-
->>
->>>> Note that it's still possible to pass platform data in the device tree case
->>>> as auxdata. And we probably need to do that for the pbias register handling
->>>> until we have a driver for that.
->>>>
->>>> Talking of the pbias driver, any news on it?
->>>
->>> Almost there, will post the patches soon.
->>> Do you have a branch with updated board files, for me to base pbias patches on
->>> else I can base the patches on rc1 too.
->>
->> Great. How about make the pbias driver DT only? Let's not touch the board-*.c
->> files any longer as those will be going away for v3.14. We can probably keep
->> the old callback support in place also, and then remove it for v3.15.
+On Thu, Nov 21, 2013 at 12:06 AM, Ed Sutter
+<ed.sutter@alcatel-lucent.com> wrote:
+> Dong,
+> Hello, I am currently working on an Freescale iMX6 SABRE Board platform
+> http://www.freescale.com/webapp/sps/site/prod_summary.jsp?code=RDIMX6SABREBRD
 >
-> Is there a dependency on the patches from Balaji or can the SDIO IRQ patches
-> go in already?
+> I'm trying to run with mainline kernel/uboot/buildroot just to be a bit more
+> up-to-date than the LTIB distribution.  I am trying to setup a ROOTFS
+> directly
+> on the eMMC device.  Referring to this thread on the freescale forum:
 >
-Hi Andreas,
-
-I could get sdio interrupt working on AM335x, will do more testing and get back
-to you.
-
-Pbias shouldn't have create any dependency. Just add sdio_irq to
-struct omap_hsmmc_host as suggested by Tony.
-
-Thanks and Regards,
-Balaji T K
-
->>
->> And after that it would certainly make sense to rip out the platform data
->> fomr hsmmc driver just to get rid of the legacy support for multiplexing slots
->> that's not needed in this driver. That would allow replacing all mmc->slots[0]
->> accesses with something more standard.
->>
+> https://community.freescale.com/message/363870?et=watches.email.thread#363870
 >
+> I'm working with linux-3.12 and patch-v3.12-next-20131119 and I've applied
+> these
+> additional patches: http://comments.gmane.org/gmane.linux.kernel.mmc/23339
 >
-> rgds,
-> Andi
+> I am able to access the emmc device from linux when using fdisk; however,
+> when I attempt to run "mkfs.ext3 /dev/mmcblk0p1" the "Discarding device
+> blocks"
+> step takes over an hour (80 minutes last time I tried it).
 >
+> Fabio Estevam (from freescale) suggested I report this to you.
+> Are you aware of this issue?  Are you aware of anyone that's actually tried
+> to do mkfs.ext3 on emmc with a recent kernel version for this board/SOC?
+>
+
+Yes, i know about this issue.
+It seems to be caused by eMMC discard feature.
+root@imx6qdlsolo:/sys/block/mmcblk1/queue# cat discard_max_bytes
+512
+root@imx6qdlsolo:/sys/block/mmcblk1/queue# cat discard_zeroes_data
+1
+root@imx6qdlsolo:/sys/block/mmcblk1/queue# cat discard_granularity
+0
+
+The discard_max_bytes is to small.
+When we do mkfs.ext3 it will ease the whole eMMC card with one block each time
+which will cause huge time and looks like it hanged.
+
+>From the command arg in CMD35 and CMD36, they means the erase range,
+from and to.
+It only eases one block one time (see log at last).
+
+I still do not have time to check this issue detailedly, but quick
+looking the code, it seems the
+discard_max_bytes calculation is related to mmc->max_discard_to which
+is based on
+host->timeout_clk as
+
+if (host->quirks & SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK)
+        host->timeout_clk = mmc->f_max / 1000;
+mmc->max_discard_to = (1 << 27) / host->timeout_clk;
+
+For uSDHC, and f_max is 198Mhz and then the max_discard_to will be
+small, only 677 ms.
+
+Currently i'm not sure if this is a common code issue or host driver issue.
+Will look into it later when i've time.
+
+If anyone else know about this issue, please let us know.
+
+BTW, a quick workaround for this issue is do not use discard feature
+for eMMC devices by:
+mkfs.ext3 -E nodiscard, then it becomes very quick.
+
+root@imx6qdlsolo:~# mkfs.ext3 -E nodiscard
+/dev/mmcblk1p1/dev/mmcblk1p1/dev/mmcblk1p1
+mke2fs 1.42.8 (20-Jun-2013)
+mmc2: starting CMD35 arg 00000800 flags 00000095
+sdhci-esdhc-imx 219c000.usdhc: desired SD clock: 52000000, actual: 49500000
+sdhci-esdhc-imx 219c000.usdhc: change pinctrl state for uhs 7
+sdhci-esdhc-imx 219c000.usdhc: desired SD clock: 52000000, actual: 49500000
+sdhci [sdhci_irq()]: *** mmc2 got interrupt: 0x00000001
+mmc2: req done (CMD35): 0: 00000900 00000000 00000000 00000000
+mmc2: starting CMD36 arg 00000800 flags 00000095
+sdhci [sdhci_irq()]: *** mmc2 got interrupt: 0x00000001
+mmc2: req done (CMD36): 0: 00000900 00000000 00000000 00000000
+mmc2: starting CMD38 arg 00000001 flags 0000049d
+sdhci [sdhci_irq()]: *** mmc2 got interrupt: 0x00000001
+mmc2: req done (CMD38): 0: 00000800 00000000 00000000 00000000
+mmc2: starting CMD13 arg 00010000 flags 00000015
+sdhci [sdhci_irq()]: *** mmc2 got interrupt: 0x00000001
+mmc2: req done (CMD13): 0: 00000900 00000000 00000000 00000000
+................
+
+Regards
+Dong Aisheng
+
+> Thanks in advance,
+> Ed Sutter
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
