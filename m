@@ -1,77 +1,113 @@
-From: Balaji T K <balajitk@ti.com>
-Subject: [RFC PATCH v3 8/8] mmc: omap_hsmmc: remove pbias workaround
-Date: Thu, 21 Nov 2013 19:50:27 +0530
-Message-ID: <1385043627-30439-9-git-send-email-balajitk@ti.com>
-References: <20130613174554.GB1403@sirena.org.uk>
- <1385043627-30439-1-git-send-email-balajitk@ti.com>
+From: Mark Brown <broonie@kernel.org>
+Subject: Re: [RFC PATCH v3 3/8] regulator: add pbias regulator support
+Date: Thu, 21 Nov 2013 14:46:23 +0000
+Message-ID: <20131121144623.GA8120@sirena.org.uk>
+References: <1385043627-30439-4-git-send-email-balajitk@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="EeQfGwPcQSOJBaQU"
 Return-path: <linux-omap-owner@vger.kernel.org>
-In-Reply-To: <1385043627-30439-1-git-send-email-balajitk@ti.com>
+Content-Disposition: inline
+In-Reply-To: <1385043627-30439-4-git-send-email-balajitk@ti.com>
 Sender: linux-omap-owner@vger.kernel.org
-To: linux-omap@vger.kernel.org, bcousson@baylibre.com, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, cjb@laptop.org, broonie@kernel.org
-Cc: tony@atomide.com, Balaji T K <balajitk@ti.com>
+To: Balaji T K <balajitk@ti.com>
+Cc: linux-omap@vger.kernel.org, bcousson@baylibre.com, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, cjb@laptop.org, tony@atomide.com
 List-Id: linux-mmc@vger.kernel.org
 
-remove pbias workaround
 
-Signed-off-by: Balaji T K <balajitk@ti.com>
----
- drivers/mmc/host/omap_hsmmc.c |   20 +-------------------
- 1 files changed, 1 insertions(+), 19 deletions(-)
+--EeQfGwPcQSOJBaQU
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index 0a390f8..0f0aa5d 100644
---- a/drivers/mmc/host/omap_hsmmc.c
-+++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -170,7 +170,6 @@ struct omap_hsmmc_host {
- 	struct	regulator	*vcc_aux;
- 	struct	regulator	*pbias;
- 	bool			pbias_enabled;
--	int			pbias_disable;
- 	void	__iomem		*base;
- 	resource_size_t		mapbase;
- 	spinlock_t		irq_lock; /* Prevent races with irq handler */
-@@ -267,13 +266,6 @@ static int omap_hsmmc_set_power(struct device *dev, int slot, int power_on,
- 	 */
- 	if (!host->vcc)
- 		return 0;
--	/*
--	 * With DT, never turn OFF the regulator for MMC1. This is because
--	 * the pbias cell programming support is still missing when
--	 * booting with Device tree
--	 */
--	if (host->pbias_disable && !vdd)
--		return 0;
- 
- 	if (mmc_slot(host).before_set_reg)
- 		mmc_slot(host).before_set_reg(dev, slot, power_on, vdd);
-@@ -1541,13 +1533,7 @@ static void omap_hsmmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 		 * of external transceiver; but they all handle 1.8V.
- 		 */
- 		if ((OMAP_HSMMC_READ(host->base, HCTL) & SDVSDET) &&
--			(ios->vdd == DUAL_VOLT_OCR_BIT) &&
--			/*
--			 * With pbias cell programming missing, this
--			 * can't be allowed on MMC1 when booting with device
--			 * tree.
--			 */
--			!host->pbias_disable) {
-+			(ios->vdd == DUAL_VOLT_OCR_BIT)) {
- 				/*
- 				 * The mmc_select_voltage fn of the core does
- 				 * not seem to set the power_mode to
-@@ -1880,10 +1866,6 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
- 
- 	omap_hsmmc_context_save(host);
- 
--	/* This can be removed once we support PBIAS with DT */
--	if (host->dev->of_node && res->start == 0x4809c000)
--		host->pbias_disable = 1;
--
- 	host->dbclk = clk_get(&pdev->dev, "mmchsdb_fck");
- 	/*
- 	 * MMC can still work without debounce clock.
--- 
-1.7.5.4
+On Thu, Nov 21, 2013 at 07:50:22PM +0530, Balaji T K wrote:
 
+> +static int pbias_regulator_set_voltage(struct regulator_dev *dev,
+> +			int min_uV, int max_uV, unsigned *selector)
+> +{
+> +	struct pbias_regulator_data *data = rdev_get_drvdata(dev);
+> +	const struct pbias_bit_map *bmap = data->bmap;
+> +	int ret, vmode;
+> +
+> +	if (min_uV <= 1800000)
+> +		vmode = 0;
+> +	else if (min_uV > 1800000)
+> +		vmode = bmap->vmode;
+> +
+> +	ret = regmap_update_bits(data->syscon, data->pbias_reg,
+> +						bmap->vmode, vmode);
+> +	data->voltage = min_uV;
+
+> +static int pbias_regulator_get_voltage(struct regulator_dev *rdev)
+> +{
+> +	struct pbias_regulator_data *data = rdev_get_drvdata(rdev);
+> +
+> +	return data->voltage;
+> +}
+
+These don't match up with each other - the get and set voltage calls
+should reflect what the hardware state is, not what was requested by the
+caller.  You should be able to use the regmap helpers I think.
+
+> +static int pbias_regulator_enable(struct regulator_dev *rdev)
+> +{
+> +	struct pbias_regulator_data *data = rdev_get_drvdata(rdev);
+> +	const struct pbias_bit_map *bmap = data->bmap;
+> +	int ret;
+> +
+> +	ret = regmap_update_bits(data->syscon, data->pbias_reg,
+> +					bmap->enable_mask, bmap->enable);
+
+regulator_enable_regmap() and similarly for disable() and is_enabled().
+
+> +	supply_name = initdata->constraints.name;
+> +
+> +	of_property_read_u32(np, "startup-delay-us", &startup_delay);
+> +	ret = of_property_read_u32(np, "pbias-reg-offset",
+> +				   &drvdata->pbias_reg);
+> +	if (ret) {
+> +		dev_err(&pdev->dev, "no pbias-reg-offset property set\n");
+> +		return ret;
+> +	}
+
+This looks like it should be added as a standard property for overridig
+the regulator delay if it can't be set based on the compatible string
+alone due to board dependencies.  Do something like what's done for
+regulator-ramp-delay.
+
+> +err_regulator:
+> +	kfree(drvdata->desc.name);
+> +	return ret;
+
+devm_kzalloc().
+
+> +static int __init pbias_regulator_init(void)
+> +{
+> +	return platform_driver_register(&pbias_regulator_driver);
+> +}
+> +subsys_initcall(pbias_regulator_init);
+
+module_platform_driver().
+
+--EeQfGwPcQSOJBaQU
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+
+iQIcBAEBAgAGBQJSjhy8AAoJELSic+t+oim9FgAP/3DOgHLOu5/FReSkZ4DAWUDe
+2exoaRwlJ4FUtcpuN69vIcBWkONOZtwEhlVdsGOvHUTOuEP3g/jpaEHs5n2QhZir
+BHC79OtJ9Q14MaCTyJw3Qrflh8WkMi2bHiGrq8RxTCkRIO+8FQxiiWMHipMzvsM5
+ISmZXn6ipykCnl8dJwcJXhHpjkmxerimHQN4jfjhCggrpirxpw9h/mtwQNm22+lx
+Jd3EuoU14/3us+8rFsm+mGueiR/1hTHdrgEZk2KKAV27DuLfc/U9tQZECBhFDawW
+HKXj4BBdRTY55umLh+YvilBJdjXyUC+Dz2dzC7FIfrK3acOBzhHoh8cOkDHSiIdv
+vVMz/jRucHGZX5w/EJg3rsse5YDIpBZCzkK7YjWeNH24VZAkwylb18VMeQYGU7I/
+f0/hFbFmLml14+m9glD1yyJdSKogdE1Sg3/Yx617kveY9hHUEY/ql7FyP7i9r6BE
+fYEtJ7wiY4SSsrUXdKmKV1MtqvJaKUWpcdYKypLa+CM6ViAVGz2s+NncIY5lsBCB
+Mzy2/y9f5gLmpQgCmYTEHrSu1vTpk1rA9FEl2O7h7ja7TLvMA1HtogW8uhYwgTx+
+lsjq8jknhlZXCh2wZSpLr+tXCKeH8bAeqL0t6rBLQkMsZDG5yHq5our/6tJ+ACFS
+DNq9ZBTS64UgujKqmb26
+=bIz+
+-----END PGP SIGNATURE-----
+
+--EeQfGwPcQSOJBaQU--
