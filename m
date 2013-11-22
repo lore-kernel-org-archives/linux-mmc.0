@@ -1,89 +1,84 @@
-From: Alistair Popple <alistair@popple.id.au>
-Subject: =?UTF-8?q?=5BPATCH=202/8=5D=20IBM=20Akebono=3A=20Add=20a=20SDHCI=20platform=20driver?=
-Date: Fri, 22 Nov 2013 13:08:30 +1100
-Message-ID: <1385086116-10972-2-git-send-email-alistair@popple.id.au>
-References: <1385086057-10884-1-git-send-email-alistair@popple.id.au>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH] mmc: sdhci: don't limit discard timeout by data line
+ timeout
+Date: Fri, 22 Nov 2013 13:38:42 +0200
+Message-ID: <528F4242.8040408@intel.com>
+References: <1385046445-29711-1-git-send-email-vladimir_zapolskiy@mentor.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org>
-In-Reply-To: <1385086057-10884-1-git-send-email-alistair@popple.id.au>
-List-Unsubscribe: <https://lists.ozlabs.org/options/linuxppc-dev>,
- <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=unsubscribe>
-List-Archive: <http://lists.ozlabs.org/pipermail/linuxppc-dev/>
-List-Post: <mailto:linuxppc-dev@lists.ozlabs.org>
-List-Help: <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=help>
-List-Subscribe: <https://lists.ozlabs.org/listinfo/linuxppc-dev>,
- <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=subscribe>
-Errors-To: linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org
-Sender: "Linuxppc-dev"
- <linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org>
-To: benh@kernel.crashing.org
-Cc: linuxppc-dev@ozlabs.org, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, Alistair Popple <alistair@popple.id.au>
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga02.intel.com ([134.134.136.20]:41031 "EHLO mga02.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753064Ab3KVLbq (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 22 Nov 2013 06:31:46 -0500
+In-Reply-To: <1385046445-29711-1-git-send-email-vladimir_zapolskiy@mentor.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Vladimir Zapolskiy <vladimir_zapolskiy@mentor.com>
+Cc: linux-mmc@vger.kernel.org, Ed Sutter <ed.sutter@alcatel-lucent.com>, Chris Ball <cjb@laptop.org>
 
-VGhpcyBwYXRjaCBhZGRzIGEgU0RIQ0kgcGxhdGZvcm0gZHJpdmVyIGZvciB0aGUgbmV3IElCTSBQ
-UEM0NzZHVFIgU29DCndoaWNoIGlzIG9uIHRoZSBBa2Vib25vIGJvYXJkLgoKU2lnbmVkLW9mZi1i
-eTogQWxpc3RhaXIgUG9wcGxlIDxhbGlzdGFpckBwb3BwbGUuaWQuYXU+CkNjOiBDaHJpcyBCYWxs
-IDxjamJAbGFwdG9wLm9yZz4KQ2M6IGxpbnV4LW1tY0B2Z2VyLmtlcm5lbC5vcmcKLS0tCiBkcml2
-ZXJzL21tYy9ob3N0L0tjb25maWcgICAgICAgICAgIHwgICAxMiArKysrKysrKwogZHJpdmVycy9t
-bWMvaG9zdC9NYWtlZmlsZSAgICAgICAgICB8ICAgIDEgKwogZHJpdmVycy9tbWMvaG9zdC9zZGhj
-aS1vZi00NzZndHIuYyB8ICAgNjAgKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysr
-CiAzIGZpbGVzIGNoYW5nZWQsIDczIGluc2VydGlvbnMoKykKIGNyZWF0ZSBtb2RlIDEwMDY0NCBk
-cml2ZXJzL21tYy9ob3N0L3NkaGNpLW9mLTQ3Nmd0ci5jCgpkaWZmIC0tZ2l0IGEvZHJpdmVycy9t
-bWMvaG9zdC9LY29uZmlnIGIvZHJpdmVycy9tbWMvaG9zdC9LY29uZmlnCmluZGV4IDdmYzUwOTku
-LjE0MjEwZGYgMTAwNjQ0Ci0tLSBhL2RyaXZlcnMvbW1jL2hvc3QvS2NvbmZpZworKysgYi9kcml2
-ZXJzL21tYy9ob3N0L0tjb25maWcKQEAgLTEzMCw2ICsxMzAsMTggQEAgY29uZmlnIE1NQ19TREhD
-SV9PRl9ITFdECiAKIAkgIElmIHVuc3VyZSwgc2F5IE4uCiAKK2NvbmZpZyBNTUNfU0RIQ0lfT0Zf
-NDc2R1RSCisJdHJpc3RhdGUgIlNESENJIE9GIHN1cHBvcnQgZm9yIHRoZSBJQk0gUFBDNDc2R1RS
-IFNvQyIKKwlkZXBlbmRzIG9uIE1NQ19TREhDSV9QTFRGTQorCWRlcGVuZHMgb24gUFBDX09GCisJ
-aGVscAorCSAgVGhpcyBzZWxlY3RzIHRoZSBTZWN1cmUgRGlnaXRhbCBIb3N0IENvbnRyb2xsZXIg
-SW50ZXJmYWNlIChTREhDSSkKKwkgIGZvdW5kIG9uIHRoZSBQUEM0NzZHVFIgU29DLgorCisJICBJ
-ZiB5b3UgaGF2ZSBhIGNvbnRyb2xsZXIgd2l0aCB0aGlzIGludGVyZmFjZSwgc2F5IFkgb3IgTSBo
-ZXJlLgorCisJICBJZiB1bnN1cmUsIHNheSBOLgorCiBjb25maWcgTU1DX1NESENJX0NOUzNYWFgK
-IAl0cmlzdGF0ZSAiU0RIQ0kgc3VwcG9ydCBvbiB0aGUgQ2F2aXVtIE5ldHdvcmtzIENOUzN4eHgg
-U29DIgogCWRlcGVuZHMgb24gQVJDSF9DTlMzWFhYCmRpZmYgLS1naXQgYS9kcml2ZXJzL21tYy9o
-b3N0L01ha2VmaWxlIGIvZHJpdmVycy9tbWMvaG9zdC9NYWtlZmlsZQppbmRleCBjNDFkMGMzLi45
-MmJlZmYzIDEwMDY0NAotLS0gYS9kcml2ZXJzL21tYy9ob3N0L01ha2VmaWxlCisrKyBiL2RyaXZl
-cnMvbW1jL2hvc3QvTWFrZWZpbGUKQEAgLTU5LDYgKzU5LDcgQEAgb2JqLSQoQ09ORklHX01NQ19T
-REhDSV9ET1ZFKQkJKz0gc2RoY2ktZG92ZS5vCiBvYmotJChDT05GSUdfTU1DX1NESENJX1RFR1JB
-KQkJKz0gc2RoY2ktdGVncmEubwogb2JqLSQoQ09ORklHX01NQ19TREhDSV9PRl9FU0RIQykJKz0g
-c2RoY2ktb2YtZXNkaGMubwogb2JqLSQoQ09ORklHX01NQ19TREhDSV9PRl9ITFdEKQkJKz0gc2Ro
-Y2ktb2YtaGx3ZC5vCitvYmotJChDT05GSUdfTU1DX1NESENJX09GXzQ3NkdUUikJKz0gc2RoY2kt
-b2YtNDc2Z3RyLm8KIG9iai0kKENPTkZJR19NTUNfU0RIQ0lfQkNNX0tPTkEpCSs9IHNkaGNpLWJj
-bS1rb25hLm8KIG9iai0kKENPTkZJR19NTUNfU0RIQ0lfQkNNMjgzNSkJCSs9IHNkaGNpLWJjbTI4
-MzUubwogCmRpZmYgLS1naXQgYS9kcml2ZXJzL21tYy9ob3N0L3NkaGNpLW9mLTQ3Nmd0ci5jIGIv
-ZHJpdmVycy9tbWMvaG9zdC9zZGhjaS1vZi00NzZndHIuYwpuZXcgZmlsZSBtb2RlIDEwMDY0NApp
-bmRleCAwMDAwMDAwLi4xMzEwZjhjCi0tLSAvZGV2L251bGwKKysrIGIvZHJpdmVycy9tbWMvaG9z
-dC9zZGhjaS1vZi00NzZndHIuYwpAQCAtMCwwICsxLDYwIEBACisvKgorICogZHJpdmVycy9tbWMv
-aG9zdC9zZGhjaS1vZi00NzZndHIuYworICoKKyAqIENvcHlyaWdodCDCqSAyMDEzIEFsaXN0YWly
-IFBvcHBsZSA8YWxpc3RhaXJAcG9wcGxlLmlkLmF1PiBJQk0gQ29ycG9yYXRpb24KKyAqCisgKiBC
-YXNlZCBvbiBzZGhjaS1vZi1obHdkLmMKKyAqCisgKiBDb3B5cmlnaHQgKEMpIDIwMDkgVGhlIEdh
-bWVDdWJlIExpbnV4IFRlYW0KKyAqIENvcHlyaWdodCAoQykgMjAwOSBBbGJlcnQgSGVycmFuegor
-ICoKKyAqIFRoaXMgcHJvZ3JhbSBpcyBmcmVlIHNvZnR3YXJlOyB5b3UgY2FuIHJlZGlzdHJpYnV0
-ZSBpdCBhbmQvb3IgbW9kaWZ5CisgKiBpdCB1bmRlciB0aGUgdGVybXMgb2YgdGhlIEdOVSBHZW5l
-cmFsIFB1YmxpYyBMaWNlbnNlIGFzIHB1Ymxpc2hlZCBieQorICogdGhlIEZyZWUgU29mdHdhcmUg
-Rm91bmRhdGlvbjsgZWl0aGVyIHZlcnNpb24gMiBvZiB0aGUgTGljZW5zZSwgb3IgKGF0CisgKiB5
-b3VyIG9wdGlvbikgYW55IGxhdGVyIHZlcnNpb24uCisgKi8KKworI2luY2x1ZGUgPGxpbnV4L2Rl
-bGF5Lmg+CisjaW5jbHVkZSA8bGludXgvbW9kdWxlLmg+CisjaW5jbHVkZSA8bGludXgvbW1jL2hv
-c3QuaD4KKyNpbmNsdWRlICJzZGhjaS1wbHRmbS5oIgorCitzdGF0aWMgY29uc3Qgc3RydWN0IHNk
-aGNpX29wcyBzZGhjaV80NzZndHJfb3BzID0geworfTsKKworc3RhdGljIGNvbnN0IHN0cnVjdCBz
-ZGhjaV9wbHRmbV9kYXRhIHNkaGNpXzQ3Nmd0cl9wZGF0YSA9IHsKKwkub3BzID0gJnNkaGNpXzQ3
-Nmd0cl9vcHMsCit9OworCitzdGF0aWMgaW50IHNkaGNpXzQ3Nmd0cl9wcm9iZShzdHJ1Y3QgcGxh
-dGZvcm1fZGV2aWNlICpwZGV2KQoreworCXJldHVybiBzZGhjaV9wbHRmbV9yZWdpc3RlcihwZGV2
-LCAmc2RoY2lfNDc2Z3RyX3BkYXRhLCAwKTsKK30KKworc3RhdGljIGludCBzZGhjaV80NzZndHJf
-cmVtb3ZlKHN0cnVjdCBwbGF0Zm9ybV9kZXZpY2UgKnBkZXYpCit7CisJcmV0dXJuIHNkaGNpX3Bs
-dGZtX3VucmVnaXN0ZXIocGRldik7Cit9CisKK3N0YXRpYyBjb25zdCBzdHJ1Y3Qgb2ZfZGV2aWNl
-X2lkIHNkaGNpXzQ3Nmd0cl9vZl9tYXRjaFtdID0geworCXsgLmNvbXBhdGlibGUgPSAiaWJtLDQ3
-Nmd0ci1zZGhjaSIgfSwKKwl7IH0KK307CitNT0RVTEVfREVWSUNFX1RBQkxFKG9mLCBzZGhjaV80
-NzZndHJfb2ZfbWF0Y2gpOworCitzdGF0aWMgc3RydWN0IHBsYXRmb3JtX2RyaXZlciBzZGhjaV80
-NzZndHJfZHJpdmVyID0geworCS5kcml2ZXIgPSB7CisJCS5uYW1lID0gInNkaGNpLTQ3Nmd0ciIs
-CisJCS5vd25lciA9IFRISVNfTU9EVUxFLAorCQkub2ZfbWF0Y2hfdGFibGUgPSBzZGhjaV80NzZn
-dHJfb2ZfbWF0Y2gsCisJCS5wbSA9IFNESENJX1BMVEZNX1BNT1BTLAorCX0sCisJLnByb2JlID0g
-c2RoY2lfNDc2Z3RyX3Byb2JlLAorCS5yZW1vdmUgPSBzZGhjaV80NzZndHJfcmVtb3ZlLAorfTsK
-KworbW9kdWxlX3BsYXRmb3JtX2RyaXZlcihzZGhjaV80NzZndHJfZHJpdmVyKTsKKworTU9EVUxF
-X0RFU0NSSVBUSU9OKCJQUEM0NzZHVFIgU0RIQ0kgT0YgZHJpdmVyIik7CitNT0RVTEVfQVVUSE9S
-KCJBbGlzdGFpciBQb3BwbGUiKTsKK01PRFVMRV9MSUNFTlNFKCJHUEwgdjIiKTsKLS0gCjEuNy4x
-MC40CgpfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwpMaW51
-eHBwYy1kZXYgbWFpbGluZyBsaXN0CkxpbnV4cHBjLWRldkBsaXN0cy5vemxhYnMub3JnCmh0dHBz
-Oi8vbGlzdHMub3psYWJzLm9yZy9saXN0aW5mby9saW51eHBwYy1kZXY=
+On 21/11/13 17:07, Vladimir Zapolskiy wrote:
+> JEDEC specification defines quite high erase timeout value for 300ms
+> multiplied by erase group number, and SD Host Controller specification
+> data line timeout may be much less, e.g. 2^13 / 52MHz ~ 160us.
+> 
+>>From block layer and MMC perfromance perspective it is desirable that
+> millions of erase groups are discarded at once, so there is no much
+> sense to limit maximum erase timeout by data line timeout, if a
+> controller handles correctly erase operation without indication of
+> data line timeout.
+
+Would you explain that some more.  Do you mean that:
+	a) it does not have a timeout
+	b) it has a timeout which is less than the timeout specified by the
+standard but the operation nevertheless completes
+
+> 
+> Potentially the change may break some of the SDHCs on discard of mmc,
+> and for backward compatibility a new quirk is introduced, which is NOT
+> set by default.
+
+It sounds to me that what you want to do is not standard so the quirk should
+be the other way around.
+
+> 
+> Signed-off-by: Vladimir Zapolskiy <vladimir_zapolskiy@mentor.com>
+> Reported-by: Ed Sutter <ed.sutter@alcatel-lucent.com>
+> Cc: Chris Ball <cjb@laptop.org>
+> Cc: Adrian Hunter <adrian.hunter@intel.com>
+> ---
+>  drivers/mmc/host/sdhci.c  |    5 ++++-
+>  include/linux/mmc/sdhci.h |    1 +
+>  2 files changed, 5 insertions(+), 1 deletion(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index bd8a098..b1fdddb 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -2930,7 +2930,10 @@ int sdhci_add_host(struct sdhci_host *host)
+>  	if (host->quirks & SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK)
+>  		host->timeout_clk = mmc->f_max / 1000;
+>  
+> -	mmc->max_discard_to = (1 << 27) / host->timeout_clk;
+> +	if (host->quirks2 & SDHCI_QUIRK2_DATA_TIMEOUT_ON_DISCARD)
+> +		mmc->max_discard_to = (1 << 27) / host->timeout_clk;
+> +	else
+> +		mmc->max_discard_to = 0;
+>  
+>  	mmc->caps |= MMC_CAP_SDIO_IRQ | MMC_CAP_ERASE | MMC_CAP_CMD23;
+>  
+> diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
+> index 3e781b8..e7f6bd2 100644
+> --- a/include/linux/mmc/sdhci.h
+> +++ b/include/linux/mmc/sdhci.h
+> @@ -98,6 +98,7 @@ struct sdhci_host {
+>  #define SDHCI_QUIRK2_CARD_ON_NEEDS_BUS_ON		(1<<4)
+>  /* Controller has a non-standard host control register */
+>  #define SDHCI_QUIRK2_BROKEN_HOST_CONTROL		(1<<5)
+> +#define SDHCI_QUIRK2_DATA_TIMEOUT_ON_DISCARD		(1<<6)
+>  
+>  	int irq;		/* Device IRQ */
+>  	void __iomem *ioaddr;	/* Mapped address */
+> 
+
