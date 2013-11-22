@@ -1,11 +1,13 @@
 From: Alistair Popple <alistair@popple.id.au>
-Subject: [PATCH 0/8] IBM Akebono/PPC476GTR Support
-Date: Fri, 22 Nov 2013 13:07:37 +1100
-Message-ID: <1385086057-10884-1-git-send-email-alistair@popple.id.au>
+Subject: =?UTF-8?q?=5BPATCH=202/8=5D=20IBM=20Akebono=3A=20Add=20a=20SDHCI=20platform=20driver?=
+Date: Fri, 22 Nov 2013 13:08:30 +1100
+Message-ID: <1385086116-10972-2-git-send-email-alistair@popple.id.au>
+References: <1385086057-10884-1-git-send-email-alistair@popple.id.au>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org>
+In-Reply-To: <1385086057-10884-1-git-send-email-alistair@popple.id.au>
 List-Unsubscribe: <https://lists.ozlabs.org/options/linuxppc-dev>,
  <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=unsubscribe>
 List-Archive: <http://lists.ozlabs.org/pipermail/linuxppc-dev/>
@@ -17,79 +19,71 @@ Errors-To: linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozla
 Sender: "Linuxppc-dev"
  <linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org>
 To: benh@kernel.crashing.org
-Cc: netdev@vger.kernel.org, linux-usb@vger.kernel.org, linux-mmc@vger.kernel.org, linuxppc-dev@ozlabs.org, stern@rowland.harvard.edu, Alistair Popple <alistair@popple.id.au>, cjb@laptop.org, davem@davemloft.net
+Cc: linuxppc-dev@ozlabs.org, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, Alistair Popple <alistair@popple.id.au>
 List-Id: linux-mmc@vger.kernel.org
 
-The IBM Akebono board is a development board for the new PPC476GTR
-system on chip (SoC).
-
-Changes from V1:
- * Update device-tree compatible strings to reflect the name of the
-   SoC rather than the board when those components are integrated into
-   the SoC.
- * Updates to allow the new EMAC PHY interface to be compile tested.
- * Rather than adding a new compatible string for EHCI support
-   usb-ehci is used and the corresponding driver (ehci-ppc-of)
-   is merged into the generic EHCI platform driver.
- * A generic (usb-ohci) compatible string is used for OHCI.
- * PCI MSI support has been added via the HSTA module.
-
-Alistair Popple (8):
-  IBM Akebono: Add support to AHCI platform driver
-  IBM Akebono: Add a SDHCI platform driver
-  IBM Akebono: Add support for a new PHY interface to the IBM emac
-    driver
-  IBM Akebono: Add support to the OHCI platform driver for PPC476GTR
-  ECHI Platform: Merge ppc-of EHCI driver into the ehci-platform driver
-  IBM Currituck: Clean up board specific code before adding Akebono
-    code
-  IBM Akebono: Add the Akebono platform
-  powerpc: Added PCI MSI support using the HSTA module
-
- .../devicetree/bindings/powerpc/4xx/akebono.txt    |   54 +++
- .../devicetree/bindings/powerpc/4xx/emac.txt       |    9 +
- arch/powerpc/boot/Makefile                         |    3 +
- arch/powerpc/boot/dcr.h                            |    4 +
- arch/powerpc/boot/dts/akebono.dts                  |  415 ++++++++++++++++++++
- arch/powerpc/boot/treeboot-akebono.c               |  179 +++++++++
- arch/powerpc/boot/wrapper                          |    3 +
- arch/powerpc/configs/44x/akebono_defconfig         |  148 +++++++
- arch/powerpc/platforms/44x/Kconfig                 |   32 +-
- arch/powerpc/platforms/44x/Makefile                |    3 +-
- arch/powerpc/platforms/44x/currituck.c             |  233 -----------
- arch/powerpc/platforms/44x/ppc476.c                |  299 ++++++++++++++
- arch/powerpc/sysdev/Kconfig                        |    6 +
- arch/powerpc/sysdev/Makefile                       |    1 +
- arch/powerpc/sysdev/ppc4xx_hsta_msi.c              |  266 +++++++++++++
- arch/powerpc/sysdev/ppc4xx_pci.c                   |   41 +-
- arch/powerpc/sysdev/ppc4xx_pci.h                   |    4 +-
- drivers/ata/ahci_platform.c                        |    1 +
- drivers/mmc/host/Kconfig                           |   12 +
- drivers/mmc/host/Makefile                          |    1 +
- drivers/mmc/host/sdhci-of-476gtr.c                 |   60 +++
- drivers/net/ethernet/ibm/emac/Kconfig              |    4 +
- drivers/net/ethernet/ibm/emac/Makefile             |    1 +
- drivers/net/ethernet/ibm/emac/core.c               |   50 ++-
- drivers/net/ethernet/ibm/emac/core.h               |   12 +
- drivers/net/ethernet/ibm/emac/rgmii_wol.c          |  243 ++++++++++++
- drivers/net/ethernet/ibm/emac/rgmii_wol.h          |   62 +++
- drivers/usb/host/Kconfig                           |    7 +-
- drivers/usb/host/ehci-hcd.c                        |    5 -
- drivers/usb/host/ehci-platform.c                   |   86 +++-
- drivers/usb/host/ehci-ppc-of.c                     |  236 -----------
- drivers/usb/host/ohci-platform.c                   |   22 +-
- 32 files changed, 1992 insertions(+), 510 deletions(-)
- create mode 100644 Documentation/devicetree/bindings/powerpc/4xx/akebono.txt
- create mode 100644 arch/powerpc/boot/dts/akebono.dts
- create mode 100644 arch/powerpc/boot/treeboot-akebono.c
- create mode 100644 arch/powerpc/configs/44x/akebono_defconfig
- delete mode 100644 arch/powerpc/platforms/44x/currituck.c
- create mode 100644 arch/powerpc/platforms/44x/ppc476.c
- create mode 100644 arch/powerpc/sysdev/ppc4xx_hsta_msi.c
- create mode 100644 drivers/mmc/host/sdhci-of-476gtr.c
- create mode 100644 drivers/net/ethernet/ibm/emac/rgmii_wol.c
- create mode 100644 drivers/net/ethernet/ibm/emac/rgmii_wol.h
- delete mode 100644 drivers/usb/host/ehci-ppc-of.c
-
--- 
-1.7.10.4
+VGhpcyBwYXRjaCBhZGRzIGEgU0RIQ0kgcGxhdGZvcm0gZHJpdmVyIGZvciB0aGUgbmV3IElCTSBQ
+UEM0NzZHVFIgU29DCndoaWNoIGlzIG9uIHRoZSBBa2Vib25vIGJvYXJkLgoKU2lnbmVkLW9mZi1i
+eTogQWxpc3RhaXIgUG9wcGxlIDxhbGlzdGFpckBwb3BwbGUuaWQuYXU+CkNjOiBDaHJpcyBCYWxs
+IDxjamJAbGFwdG9wLm9yZz4KQ2M6IGxpbnV4LW1tY0B2Z2VyLmtlcm5lbC5vcmcKLS0tCiBkcml2
+ZXJzL21tYy9ob3N0L0tjb25maWcgICAgICAgICAgIHwgICAxMiArKysrKysrKwogZHJpdmVycy9t
+bWMvaG9zdC9NYWtlZmlsZSAgICAgICAgICB8ICAgIDEgKwogZHJpdmVycy9tbWMvaG9zdC9zZGhj
+aS1vZi00NzZndHIuYyB8ICAgNjAgKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysr
+CiAzIGZpbGVzIGNoYW5nZWQsIDczIGluc2VydGlvbnMoKykKIGNyZWF0ZSBtb2RlIDEwMDY0NCBk
+cml2ZXJzL21tYy9ob3N0L3NkaGNpLW9mLTQ3Nmd0ci5jCgpkaWZmIC0tZ2l0IGEvZHJpdmVycy9t
+bWMvaG9zdC9LY29uZmlnIGIvZHJpdmVycy9tbWMvaG9zdC9LY29uZmlnCmluZGV4IDdmYzUwOTku
+LjE0MjEwZGYgMTAwNjQ0Ci0tLSBhL2RyaXZlcnMvbW1jL2hvc3QvS2NvbmZpZworKysgYi9kcml2
+ZXJzL21tYy9ob3N0L0tjb25maWcKQEAgLTEzMCw2ICsxMzAsMTggQEAgY29uZmlnIE1NQ19TREhD
+SV9PRl9ITFdECiAKIAkgIElmIHVuc3VyZSwgc2F5IE4uCiAKK2NvbmZpZyBNTUNfU0RIQ0lfT0Zf
+NDc2R1RSCisJdHJpc3RhdGUgIlNESENJIE9GIHN1cHBvcnQgZm9yIHRoZSBJQk0gUFBDNDc2R1RS
+IFNvQyIKKwlkZXBlbmRzIG9uIE1NQ19TREhDSV9QTFRGTQorCWRlcGVuZHMgb24gUFBDX09GCisJ
+aGVscAorCSAgVGhpcyBzZWxlY3RzIHRoZSBTZWN1cmUgRGlnaXRhbCBIb3N0IENvbnRyb2xsZXIg
+SW50ZXJmYWNlIChTREhDSSkKKwkgIGZvdW5kIG9uIHRoZSBQUEM0NzZHVFIgU29DLgorCisJICBJ
+ZiB5b3UgaGF2ZSBhIGNvbnRyb2xsZXIgd2l0aCB0aGlzIGludGVyZmFjZSwgc2F5IFkgb3IgTSBo
+ZXJlLgorCisJICBJZiB1bnN1cmUsIHNheSBOLgorCiBjb25maWcgTU1DX1NESENJX0NOUzNYWFgK
+IAl0cmlzdGF0ZSAiU0RIQ0kgc3VwcG9ydCBvbiB0aGUgQ2F2aXVtIE5ldHdvcmtzIENOUzN4eHgg
+U29DIgogCWRlcGVuZHMgb24gQVJDSF9DTlMzWFhYCmRpZmYgLS1naXQgYS9kcml2ZXJzL21tYy9o
+b3N0L01ha2VmaWxlIGIvZHJpdmVycy9tbWMvaG9zdC9NYWtlZmlsZQppbmRleCBjNDFkMGMzLi45
+MmJlZmYzIDEwMDY0NAotLS0gYS9kcml2ZXJzL21tYy9ob3N0L01ha2VmaWxlCisrKyBiL2RyaXZl
+cnMvbW1jL2hvc3QvTWFrZWZpbGUKQEAgLTU5LDYgKzU5LDcgQEAgb2JqLSQoQ09ORklHX01NQ19T
+REhDSV9ET1ZFKQkJKz0gc2RoY2ktZG92ZS5vCiBvYmotJChDT05GSUdfTU1DX1NESENJX1RFR1JB
+KQkJKz0gc2RoY2ktdGVncmEubwogb2JqLSQoQ09ORklHX01NQ19TREhDSV9PRl9FU0RIQykJKz0g
+c2RoY2ktb2YtZXNkaGMubwogb2JqLSQoQ09ORklHX01NQ19TREhDSV9PRl9ITFdEKQkJKz0gc2Ro
+Y2ktb2YtaGx3ZC5vCitvYmotJChDT05GSUdfTU1DX1NESENJX09GXzQ3NkdUUikJKz0gc2RoY2kt
+b2YtNDc2Z3RyLm8KIG9iai0kKENPTkZJR19NTUNfU0RIQ0lfQkNNX0tPTkEpCSs9IHNkaGNpLWJj
+bS1rb25hLm8KIG9iai0kKENPTkZJR19NTUNfU0RIQ0lfQkNNMjgzNSkJCSs9IHNkaGNpLWJjbTI4
+MzUubwogCmRpZmYgLS1naXQgYS9kcml2ZXJzL21tYy9ob3N0L3NkaGNpLW9mLTQ3Nmd0ci5jIGIv
+ZHJpdmVycy9tbWMvaG9zdC9zZGhjaS1vZi00NzZndHIuYwpuZXcgZmlsZSBtb2RlIDEwMDY0NApp
+bmRleCAwMDAwMDAwLi4xMzEwZjhjCi0tLSAvZGV2L251bGwKKysrIGIvZHJpdmVycy9tbWMvaG9z
+dC9zZGhjaS1vZi00NzZndHIuYwpAQCAtMCwwICsxLDYwIEBACisvKgorICogZHJpdmVycy9tbWMv
+aG9zdC9zZGhjaS1vZi00NzZndHIuYworICoKKyAqIENvcHlyaWdodCDCqSAyMDEzIEFsaXN0YWly
+IFBvcHBsZSA8YWxpc3RhaXJAcG9wcGxlLmlkLmF1PiBJQk0gQ29ycG9yYXRpb24KKyAqCisgKiBC
+YXNlZCBvbiBzZGhjaS1vZi1obHdkLmMKKyAqCisgKiBDb3B5cmlnaHQgKEMpIDIwMDkgVGhlIEdh
+bWVDdWJlIExpbnV4IFRlYW0KKyAqIENvcHlyaWdodCAoQykgMjAwOSBBbGJlcnQgSGVycmFuegor
+ICoKKyAqIFRoaXMgcHJvZ3JhbSBpcyBmcmVlIHNvZnR3YXJlOyB5b3UgY2FuIHJlZGlzdHJpYnV0
+ZSBpdCBhbmQvb3IgbW9kaWZ5CisgKiBpdCB1bmRlciB0aGUgdGVybXMgb2YgdGhlIEdOVSBHZW5l
+cmFsIFB1YmxpYyBMaWNlbnNlIGFzIHB1Ymxpc2hlZCBieQorICogdGhlIEZyZWUgU29mdHdhcmUg
+Rm91bmRhdGlvbjsgZWl0aGVyIHZlcnNpb24gMiBvZiB0aGUgTGljZW5zZSwgb3IgKGF0CisgKiB5
+b3VyIG9wdGlvbikgYW55IGxhdGVyIHZlcnNpb24uCisgKi8KKworI2luY2x1ZGUgPGxpbnV4L2Rl
+bGF5Lmg+CisjaW5jbHVkZSA8bGludXgvbW9kdWxlLmg+CisjaW5jbHVkZSA8bGludXgvbW1jL2hv
+c3QuaD4KKyNpbmNsdWRlICJzZGhjaS1wbHRmbS5oIgorCitzdGF0aWMgY29uc3Qgc3RydWN0IHNk
+aGNpX29wcyBzZGhjaV80NzZndHJfb3BzID0geworfTsKKworc3RhdGljIGNvbnN0IHN0cnVjdCBz
+ZGhjaV9wbHRmbV9kYXRhIHNkaGNpXzQ3Nmd0cl9wZGF0YSA9IHsKKwkub3BzID0gJnNkaGNpXzQ3
+Nmd0cl9vcHMsCit9OworCitzdGF0aWMgaW50IHNkaGNpXzQ3Nmd0cl9wcm9iZShzdHJ1Y3QgcGxh
+dGZvcm1fZGV2aWNlICpwZGV2KQoreworCXJldHVybiBzZGhjaV9wbHRmbV9yZWdpc3RlcihwZGV2
+LCAmc2RoY2lfNDc2Z3RyX3BkYXRhLCAwKTsKK30KKworc3RhdGljIGludCBzZGhjaV80NzZndHJf
+cmVtb3ZlKHN0cnVjdCBwbGF0Zm9ybV9kZXZpY2UgKnBkZXYpCit7CisJcmV0dXJuIHNkaGNpX3Bs
+dGZtX3VucmVnaXN0ZXIocGRldik7Cit9CisKK3N0YXRpYyBjb25zdCBzdHJ1Y3Qgb2ZfZGV2aWNl
+X2lkIHNkaGNpXzQ3Nmd0cl9vZl9tYXRjaFtdID0geworCXsgLmNvbXBhdGlibGUgPSAiaWJtLDQ3
+Nmd0ci1zZGhjaSIgfSwKKwl7IH0KK307CitNT0RVTEVfREVWSUNFX1RBQkxFKG9mLCBzZGhjaV80
+NzZndHJfb2ZfbWF0Y2gpOworCitzdGF0aWMgc3RydWN0IHBsYXRmb3JtX2RyaXZlciBzZGhjaV80
+NzZndHJfZHJpdmVyID0geworCS5kcml2ZXIgPSB7CisJCS5uYW1lID0gInNkaGNpLTQ3Nmd0ciIs
+CisJCS5vd25lciA9IFRISVNfTU9EVUxFLAorCQkub2ZfbWF0Y2hfdGFibGUgPSBzZGhjaV80NzZn
+dHJfb2ZfbWF0Y2gsCisJCS5wbSA9IFNESENJX1BMVEZNX1BNT1BTLAorCX0sCisJLnByb2JlID0g
+c2RoY2lfNDc2Z3RyX3Byb2JlLAorCS5yZW1vdmUgPSBzZGhjaV80NzZndHJfcmVtb3ZlLAorfTsK
+KworbW9kdWxlX3BsYXRmb3JtX2RyaXZlcihzZGhjaV80NzZndHJfZHJpdmVyKTsKKworTU9EVUxF
+X0RFU0NSSVBUSU9OKCJQUEM0NzZHVFIgU0RIQ0kgT0YgZHJpdmVyIik7CitNT0RVTEVfQVVUSE9S
+KCJBbGlzdGFpciBQb3BwbGUiKTsKK01PRFVMRV9MSUNFTlNFKCJHUEwgdjIiKTsKLS0gCjEuNy4x
+MC40CgpfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwpMaW51
+eHBwYy1kZXYgbWFpbGluZyBsaXN0CkxpbnV4cHBjLWRldkBsaXN0cy5vemxhYnMub3JnCmh0dHBz
+Oi8vbGlzdHMub3psYWJzLm9yZy9saXN0aW5mby9saW51eHBwYy1kZXY=
