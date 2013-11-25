@@ -1,218 +1,114 @@
-From: Andreas Fenkart <afenkart@gmail.com>
-Subject: [PATCH v3 1/3] mmc: omap_hsmmc: Enable SDIO IRQ.
-Date: Mon, 25 Nov 2013 14:26:47 +0100
-Message-ID: <1385386009-14981-2-git-send-email-afenkart@gmail.com>
-References: <1385386009-14981-1-git-send-email-afenkart@gmail.com>
-Return-path: <linux-omap-owner@vger.kernel.org>
-In-Reply-To: <1385386009-14981-1-git-send-email-afenkart@gmail.com>
-Sender: linux-omap-owner@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: Tony Lindgren <tony@atomide.com>, Grant Likely <grant.likely@secretlab.ca>, Felipe Balbi <balbi@ti.com>, Balaji T K <balajitk@ti.com>, zonque@gmail.com, linux-doc@vger.kernel.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, Andreas Fenkart <afenkart@gmail.com>
+From: Ed Sutter <ed.sutter@alcatel-lucent.com>
+Subject: Re: [PATCH] mmc: sdhci: don't limit discard timeout by data line
+ timeout
+Date: Mon, 25 Nov 2013 13:20:15 -0500
+Message-ID: <529394DF.5080501@alcatel-lucent.com>
+References: <1385046445-29711-1-git-send-email-vladimir_zapolskiy@mentor.com> <528F4242.8040408@intel.com> <528F4D06.3080400@mentor.com> <528F5663.2050800@intel.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from ihemail4.lucent.com ([135.245.0.39]:51312 "EHLO
+	ihemail4.lucent.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755620Ab3KYSVi (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 25 Nov 2013 13:21:38 -0500
+In-Reply-To: <528F5663.2050800@intel.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@intel.com>, Vladimir Zapolskiy <vladimir_zapolskiy@mentor.com>
+Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
 
-For now, only support SDIO interrupt if we are booted with
-DT. This is because some platforms need special quirks. And
-we don't want to add new legacy mux platform init code
-callbacks any longer as we are moving to DT based booting
-anyways.
-
-Broken hardware, missing the swakueup line, should fallback
-to polling, by setting 'ti,quirk-swakup-missing' in the
-device tree. Otherwise pending SDIO IRQ are not detected
-while in suspend. This affects am33xx processors.
-
-For the DT-Binding portion:
-Reviewed-by: Grant Likely <grant.likely@secretlab.ca>
-Acked-by: Kumar Gala <galak@codeaurora.org>
-Signed-off-by: Andreas Fenkart <afenkart@gmail.com>
----
- .../devicetree/bindings/mmc/ti-omap-hsmmc.txt      |   18 ++++
- drivers/mmc/host/omap_hsmmc.c                      |   86 ++++++++++++++++++--
- 2 files changed, 95 insertions(+), 9 deletions(-)
-
-diff --git a/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt b/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
-index ed271fc..1136e6b 100644
---- a/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
-+++ b/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
-@@ -20,6 +20,24 @@ ti,dual-volt: boolean, supports dual voltage cards
- ti,non-removable: non-removable slot (like eMMC)
- ti,needs-special-reset: Requires a special softreset sequence
- ti,needs-special-hs-handling: HSMMC IP needs special setting for handling High Speed
-+ti,quirk-swakup-missing: SOC missing the swakeup line, will not detect
-+SDIO irq while in suspend. Fallback to polling. Affected chips are
-+am335x,
-+
-+                            ------
-+                            | PRCM |
-+                             ------
-+                              ^ |
-+                      swakeup | | fclk
-+                              | v
-+      ------                -------               -----
-+     | card | -- CIRQ -->  | hsmmc | -- IRQ -->  | CPU |
-+      ------                -------               -----
-+
-+In suspend the fclk is off and the module is disfunctional. Even
-+register reads will fail. A small logic in the host will request fclk
-+restore, when an external event is detected. Once the clock is
-+restored, the host detects the event normally.
- 
- Example:
- 	mmc1: mmc@0x4809c000 {
-diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index b392130..6b0ec55 100644
---- a/drivers/mmc/host/omap_hsmmc.c
-+++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -130,6 +130,7 @@ static void apply_clk_hack(struct device *dev)
- #define TC_EN			(1 << 1)
- #define BWR_EN			(1 << 4)
- #define BRR_EN			(1 << 5)
-+#define CIRQ_EN			(1 << 8)
- #define ERR_EN			(1 << 15)
- #define CTO_EN			(1 << 16)
- #define CCRC_EN			(1 << 17)
-@@ -210,6 +211,9 @@ struct omap_hsmmc_host {
- 	int			reqs_blocked;
- 	int			use_reg;
- 	int			req_in_progress;
-+	int                     flags;
-+#define HSMMC_SDIO_IRQ_ENABLED	(1 << 0)        /* SDIO irq enabled */
-+
- 	struct omap_hsmmc_next	next_data;
- 	struct	omap_mmc_platform_data	*pdata;
- };
-@@ -490,27 +494,40 @@ static void omap_hsmmc_stop_clock(struct omap_hsmmc_host *host)
- static void omap_hsmmc_enable_irq(struct omap_hsmmc_host *host,
- 				  struct mmc_command *cmd)
- {
--	unsigned int irq_mask;
-+	u32 irq_mask = INT_EN_MASK;
-+	unsigned long flags;
- 
- 	if (host->use_dma)
--		irq_mask = INT_EN_MASK & ~(BRR_EN | BWR_EN);
--	else
--		irq_mask = INT_EN_MASK;
-+		irq_mask &= ~(BRR_EN | BWR_EN);
- 
- 	/* Disable timeout for erases */
- 	if (cmd->opcode == MMC_ERASE)
- 		irq_mask &= ~DTO_EN;
- 
-+	spin_lock_irqsave(&host->irq_lock, flags);
- 	OMAP_HSMMC_WRITE(host->base, STAT, STAT_CLEAR);
- 	OMAP_HSMMC_WRITE(host->base, ISE, irq_mask);
-+
-+	/* latch pending CIRQ, but don't signal */
-+	if (host->flags & HSMMC_SDIO_IRQ_ENABLED)
-+		irq_mask |= CIRQ_EN;
- 	OMAP_HSMMC_WRITE(host->base, IE, irq_mask);
-+	spin_unlock_irqrestore(&host->irq_lock, flags);
- }
- 
- static void omap_hsmmc_disable_irq(struct omap_hsmmc_host *host)
- {
--	OMAP_HSMMC_WRITE(host->base, ISE, 0);
--	OMAP_HSMMC_WRITE(host->base, IE, 0);
-+	u32 irq_mask = 0;
-+	unsigned long flags;
-+
-+	spin_lock_irqsave(&host->irq_lock, flags);
-+	/* no transfer running, need to signal cirq if enabled */
-+	if (host->flags & HSMMC_SDIO_IRQ_ENABLED)
-+		irq_mask |= CIRQ_EN;
-+	OMAP_HSMMC_WRITE(host->base, ISE, irq_mask);
-+	OMAP_HSMMC_WRITE(host->base, IE, irq_mask);
- 	OMAP_HSMMC_WRITE(host->base, STAT, STAT_CLEAR);
-+	spin_unlock_irqrestore(&host->irq_lock, flags);
- }
- 
- /* Calculate divisor for the given clock frequency */
-@@ -1067,8 +1084,12 @@ static irqreturn_t omap_hsmmc_irq(int irq, void *dev_id)
- 	int status;
- 
- 	status = OMAP_HSMMC_READ(host->base, STAT);
--	while (status & INT_EN_MASK && host->req_in_progress) {
--		omap_hsmmc_do_irq(host, status);
-+	while (status & (INT_EN_MASK | CIRQ_EN)) {
-+		if (host->req_in_progress)
-+			omap_hsmmc_do_irq(host, status);
-+
-+		if (status & CIRQ_EN)
-+			mmc_signal_sdio_irq(host->mmc);
- 
- 		/* Flush posted write */
- 		status = OMAP_HSMMC_READ(host->base, STAT);
-@@ -1583,6 +1604,37 @@ static void omap_hsmmc_init_card(struct mmc_host *mmc, struct mmc_card *card)
- 		mmc_slot(host).init_card(card);
- }
- 
-+static void omap_hsmmc_enable_sdio_irq(struct mmc_host *mmc, int enable)
-+{
-+	struct omap_hsmmc_host *host = mmc_priv(mmc);
-+	u32 irq_mask;
-+	unsigned long flags;
-+
-+	spin_lock_irqsave(&host->irq_lock, flags);
-+
-+	irq_mask = OMAP_HSMMC_READ(host->base, ISE);
-+	if (enable) {
-+		host->flags |= HSMMC_SDIO_IRQ_ENABLED;
-+		irq_mask |= CIRQ_EN;
-+	} else {
-+		host->flags &= ~HSMMC_SDIO_IRQ_ENABLED;
-+		irq_mask &= ~CIRQ_EN;
-+	}
-+	OMAP_HSMMC_WRITE(host->base, IE, irq_mask);
-+
-+	/*
-+	 * if enable, piggy back detection on current request
-+	 * but always disable immediately
-+	 */
-+	if (!host->req_in_progress || !enable)
-+		OMAP_HSMMC_WRITE(host->base, ISE, irq_mask);
-+
-+	/* flush posted write */
-+	OMAP_HSMMC_READ(host->base, IE);
-+
-+	spin_unlock_irqrestore(&host->irq_lock, flags);
-+}
-+
- static void omap_hsmmc_conf_bus_power(struct omap_hsmmc_host *host)
- {
- 	u32 hctl, capa, value;
-@@ -1635,7 +1687,7 @@ static const struct mmc_host_ops omap_hsmmc_ops = {
- 	.get_cd = omap_hsmmc_get_cd,
- 	.get_ro = omap_hsmmc_get_ro,
- 	.init_card = omap_hsmmc_init_card,
--	/* NYET -- enable_sdio_irq */
-+	.enable_sdio_irq = omap_hsmmc_enable_sdio_irq,
- };
- 
- #ifdef CONFIG_DEBUG_FS
-@@ -2021,6 +2073,22 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
- 		dev_warn(&pdev->dev,
- 			"pins are not configured from the driver\n");
- 
-+	/*
-+	 * For now, only support SDIO interrupt if we are booted with
-+	 * DT. This is because some platforms need special quirks. And
-+	 * we don't want to add new legacy mux platform init code
-+	 * callbacks any longer as we are moving to DT based booting
-+	 * anyways.
-+	 */
-+	if (pdev->dev.of_node) {
-+		mmc->caps |= MMC_CAP_SDIO_IRQ;
-+		if (of_find_property(host->dev->of_node,
-+				     "ti,quirk-swakeup-missing", NULL)) {
-+			/* no wakeup from deeper power states, use polling */
-+			mmc->caps &= ~MMC_CAP_SDIO_IRQ;
-+		}
-+	}
-+
- 	omap_hsmmc_protect_card(host);
- 
- 	mmc_add_host(mmc);
--- 
-1.7.10.4
+For what its worth, I applied these two patches and the huge delay in 
+mkfs.ext3
+(when run on SABRESD-resident eMMC) is gone; however, based on the 
+discussion,
+it appears this isn't the *final* change, is that true?
+Thanks,
+Ed
+> On 22/11/13 14:24, Vladimir Zapolskiy wrote:
+>> On 22.11.2013 12:38, Adrian Hunter wrote:
+>>> On 21/11/13 17:07, Vladimir Zapolskiy wrote:
+>>>> JEDEC specification defines quite high erase timeout value for 300ms
+>>>> multiplied by erase group number, and SD Host Controller specification
+>>>> data line timeout may be much less, e.g. 2^13 / 52MHz ~ 160us.
+>>>>
+>>>>>  From block layer and MMC perfromance perspective it is desirable that
+>>>> millions of erase groups are discarded at once, so there is no much
+>>>> sense to limit maximum erase timeout by data line timeout, if a
+>>>> controller handles correctly erase operation without indication of
+>>>> data line timeout.
+>>> Would you explain that some more.  Do you mean that:
+>>>      a) it does not have a timeout
+>> JEDEC defines a timeout on erase/trim operations, also in
+>> drivers/mmc/core/core.c
+>> there is a reasonable enough 10 minutes limitation for discard operations.
+>>
+>>>      b) it has a timeout which is less than the timeout specified by the
+>>> standard but the operation nevertheless completes
+>> SDHC data line timeout is enormously less than erase group timeout, and
+>> trivial testing shows that those two timeouts are independent, probably
+>> except some particular cases of controllers not known before commits
+>> 58d1246db3 and e056a1b5b.
+>>
+>> According to the currently implemented logic, mmc_do_erase() commonly is
+>> instructed to discard 1-2 erase groups at maximum, however it tends to be
+>> capable to successfully discard millions of erase groups at once ignoring
+>> that SDHC data line timeout limitation.
+>>
+> You seem to be trying to say that the SDHCI spec. says that the host
+> controller does not timeout erase operations or uses a different timeout
+> than the one programmed in the "Timeout Control Register".  Where is that is
+> the SDHCI spec?
+>
+>>>> Potentially the change may break some of the SDHCs on discard of mmc,
+>>>> and for backward compatibility a new quirk is introduced, which is NOT
+>>>> set by default.
+>>> It sounds to me that what you want to do is not standard so the quirk should
+>>> be the other way around.
+>> Please take a look at commits 58d1246db3 and e056a1b5b, I'd be glad, if you
+>> could elaborate to which "some host controllers" the quirk in my definition
+>> applies, I believe all other host controllers present at that time in
+>> drivers/mmc/host/* are capable to discard without introduced limitation.
+> "some host controllers" == SDHCI i.e. to all of the ones you are applying
+> the change.
+>
+>>>> Signed-off-by: Vladimir Zapolskiy<vladimir_zapolskiy@mentor.com>
+>>>> Reported-by: Ed Sutter<ed.sutter@alcatel-lucent.com>
+>>>> Cc: Chris Ball<cjb@laptop.org>
+>>>> Cc: Adrian Hunter<adrian.hunter@intel.com>
+>>>> ---
+>>>>    drivers/mmc/host/sdhci.c  |    5 ++++-
+>>>>    include/linux/mmc/sdhci.h |    1 +
+>>>>    2 files changed, 5 insertions(+), 1 deletion(-)
+>>>>
+>>>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+>>>> index bd8a098..b1fdddb 100644
+>>>> --- a/drivers/mmc/host/sdhci.c
+>>>> +++ b/drivers/mmc/host/sdhci.c
+>>>> @@ -2930,7 +2930,10 @@ int sdhci_add_host(struct sdhci_host *host)
+>>>>        if (host->quirks&  SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK)
+>>>>            host->timeout_clk = mmc->f_max / 1000;
+>>>>
+>>>> -    mmc->max_discard_to = (1<<  27) / host->timeout_clk;
+>>>> +    if (host->quirks2&  SDHCI_QUIRK2_DATA_TIMEOUT_ON_DISCARD)
+>>>> +        mmc->max_discard_to = (1<<  27) / host->timeout_clk;
+>>>> +    else
+>>>> +        mmc->max_discard_to = 0;
+>>>>
+>>>>        mmc->caps |= MMC_CAP_SDIO_IRQ | MMC_CAP_ERASE | MMC_CAP_CMD23;
+>>>>
+>>>> diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
+>>>> index 3e781b8..e7f6bd2 100644
+>>>> --- a/include/linux/mmc/sdhci.h
+>>>> +++ b/include/linux/mmc/sdhci.h
+>>>> @@ -98,6 +98,7 @@ struct sdhci_host {
+>>>>    #define SDHCI_QUIRK2_CARD_ON_NEEDS_BUS_ON        (1<<4)
+>>>>    /* Controller has a non-standard host control register */
+>>>>    #define SDHCI_QUIRK2_BROKEN_HOST_CONTROL        (1<<5)
+>>>> +#define SDHCI_QUIRK2_DATA_TIMEOUT_ON_DISCARD        (1<<6)
+>>>>
+>>>>        int irq;        /* Device IRQ */
+>>>>        void __iomem *ioaddr;    /* Mapped address */
+>>>>
+>>
 
