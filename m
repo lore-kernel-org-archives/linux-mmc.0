@@ -1,140 +1,44 @@
-From: Vladimir Zapolskiy <vladimir_zapolskiy@mentor.com>
-Subject: Re: [PATCH] mmc: sdhci: don't limit discard timeout by data line
- timeout
-Date: Tue, 26 Nov 2013 00:06:02 +0200
-Message-ID: <5293C9CA.1000205@mentor.com>
-References: <1385046445-29711-1-git-send-email-vladimir_zapolskiy@mentor.com> <528F4242.8040408@intel.com> <528F4D06.3080400@mentor.com> <528F5663.2050800@intel.com> <529394DF.5080501@alcatel-lucent.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from relay1.mentorg.com ([192.94.38.131]:55305 "EHLO
-	relay1.mentorg.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752099Ab3KYWGP (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 25 Nov 2013 17:06:15 -0500
-In-Reply-To: <529394DF.5080501@alcatel-lucent.com>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>
+Subject: [PATCH] mmc: tegra: add support for Tegra124
+Date: Mon, 25 Nov 2013 15:19:53 -0700
+Message-ID: <1385417993-7848-1-git-send-email-swarren@wwwdotorg.org>
+Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>
+Cc: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Stephen Warren <swarren-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Ed Sutter <ed.sutter@alcatel-lucent.com>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
 
-Ed,
+From: Stephen Warren <swarren-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
 
-On 11/25/13 20:20, Ed Sutter wrote:
-> For what its worth, I applied these two patches and the huge delay in
-> mkfs.ext3
-> (when run on SABRESD-resident eMMC) is gone; however, based on the
-> discussion,
-> it appears this isn't the *final* change, is that true?
+Tegra124's MMC controller is very similar to earlier SoC generations,
+and can be supported by the same driver.
 
-that's correct. In spite of the change works well in your and my cases,
-I don't like it much, even reversing a quirk probably won't be good
-enough without performed deliberate testing with various eMMC/MMC.
+However, there are some non-backwards-compatible HW differences, and
+hence a new DT compatible value must be used to describe the HW. This
+patch updates the driver to support that new compatible value.
 
-I think more work is required to support proper timeout delay calculation
-accounting changes in SDHC clock frequency for
-SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK controllers and DAT counter value.
+That said, the HW differences are only relevant when enabling certain
+high-performance transfer modes. Since the driver is currently very
+simple and doesn't enable those modes, we don't actually need to address
+any of these HW differences in the code yet, hence the simple nature of
+this patch.
 
-I plan to do a reimplementation of DAT delay calculation, and then
-I'll publish an alternative change. However please feel free to use
-this quick hackish change, if it serves your purpose.
+Signed-off-by: Stephen Warren <swarren-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
+---
+ drivers/mmc/host/sdhci-tegra.c | 1 +
+ 1 file changed, 1 insertion(+)
 
-With best wishes,
-Vladimir
-
-> Thanks,
-> Ed
->> On 22/11/13 14:24, Vladimir Zapolskiy wrote:
->>> On 22.11.2013 12:38, Adrian Hunter wrote:
->>>> On 21/11/13 17:07, Vladimir Zapolskiy wrote:
->>>>> JEDEC specification defines quite high erase timeout value for 300ms
->>>>> multiplied by erase group number, and SD Host Controller specification
->>>>> data line timeout may be much less, e.g. 2^13 / 52MHz ~ 160us.
->>>>>
->>>>>> From block layer and MMC perfromance perspective it is desirable that
->>>>> millions of erase groups are discarded at once, so there is no much
->>>>> sense to limit maximum erase timeout by data line timeout, if a
->>>>> controller handles correctly erase operation without indication of
->>>>> data line timeout.
->>>> Would you explain that some more. Do you mean that:
->>>> a) it does not have a timeout
->>> JEDEC defines a timeout on erase/trim operations, also in
->>> drivers/mmc/core/core.c
->>> there is a reasonable enough 10 minutes limitation for discard
->>> operations.
->>>
->>>> b) it has a timeout which is less than the timeout specified by the
->>>> standard but the operation nevertheless completes
->>> SDHC data line timeout is enormously less than erase group timeout, and
->>> trivial testing shows that those two timeouts are independent, probably
->>> except some particular cases of controllers not known before commits
->>> 58d1246db3 and e056a1b5b.
->>>
->>> According to the currently implemented logic, mmc_do_erase() commonly is
->>> instructed to discard 1-2 erase groups at maximum, however it tends
->>> to be
->>> capable to successfully discard millions of erase groups at once
->>> ignoring
->>> that SDHC data line timeout limitation.
->>>
->> You seem to be trying to say that the SDHCI spec. says that the host
->> controller does not timeout erase operations or uses a different timeout
->> than the one programmed in the "Timeout Control Register". Where is
->> that is
->> the SDHCI spec?
->>
->>>>> Potentially the change may break some of the SDHCs on discard of mmc,
->>>>> and for backward compatibility a new quirk is introduced, which is NOT
->>>>> set by default.
->>>> It sounds to me that what you want to do is not standard so the
->>>> quirk should
->>>> be the other way around.
->>> Please take a look at commits 58d1246db3 and e056a1b5b, I'd be glad,
->>> if you
->>> could elaborate to which "some host controllers" the quirk in my
->>> definition
->>> applies, I believe all other host controllers present at that time in
->>> drivers/mmc/host/* are capable to discard without introduced limitation.
->> "some host controllers" == SDHCI i.e. to all of the ones you are applying
->> the change.
->>
->>>>> Signed-off-by: Vladimir Zapolskiy<vladimir_zapolskiy@mentor.com>
->>>>> Reported-by: Ed Sutter<ed.sutter@alcatel-lucent.com>
->>>>> Cc: Chris Ball<cjb@laptop.org>
->>>>> Cc: Adrian Hunter<adrian.hunter@intel.com>
->>>>> ---
->>>>> drivers/mmc/host/sdhci.c | 5 ++++-
->>>>> include/linux/mmc/sdhci.h | 1 +
->>>>> 2 files changed, 5 insertions(+), 1 deletion(-)
->>>>>
->>>>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
->>>>> index bd8a098..b1fdddb 100644
->>>>> --- a/drivers/mmc/host/sdhci.c
->>>>> +++ b/drivers/mmc/host/sdhci.c
->>>>> @@ -2930,7 +2930,10 @@ int sdhci_add_host(struct sdhci_host *host)
->>>>> if (host->quirks& SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK)
->>>>> host->timeout_clk = mmc->f_max / 1000;
->>>>>
->>>>> - mmc->max_discard_to = (1<< 27) / host->timeout_clk;
->>>>> + if (host->quirks2& SDHCI_QUIRK2_DATA_TIMEOUT_ON_DISCARD)
->>>>> + mmc->max_discard_to = (1<< 27) / host->timeout_clk;
->>>>> + else
->>>>> + mmc->max_discard_to = 0;
->>>>>
->>>>> mmc->caps |= MMC_CAP_SDIO_IRQ | MMC_CAP_ERASE | MMC_CAP_CMD23;
->>>>>
->>>>> diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
->>>>> index 3e781b8..e7f6bd2 100644
->>>>> --- a/include/linux/mmc/sdhci.h
->>>>> +++ b/include/linux/mmc/sdhci.h
->>>>> @@ -98,6 +98,7 @@ struct sdhci_host {
->>>>> #define SDHCI_QUIRK2_CARD_ON_NEEDS_BUS_ON (1<<4)
->>>>> /* Controller has a non-standard host control register */
->>>>> #define SDHCI_QUIRK2_BROKEN_HOST_CONTROL (1<<5)
->>>>> +#define SDHCI_QUIRK2_DATA_TIMEOUT_ON_DISCARD (1<<6)
->>>>>
->>>>> int irq; /* Device IRQ */
->>>>> void __iomem *ioaddr; /* Mapped address */
->>>>>
->>>
->
+diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
+index 5b7b2eba8a54..a835898a68dd 100644
+--- a/drivers/mmc/host/sdhci-tegra.c
++++ b/drivers/mmc/host/sdhci-tegra.c
+@@ -198,6 +198,7 @@ static struct sdhci_tegra_soc_data soc_data_tegra114 = {
+ };
+ 
+ static const struct of_device_id sdhci_tegra_dt_match[] = {
++	{ .compatible = "nvidia,tegra124-sdhci", .data = &soc_data_tegra114 },
+ 	{ .compatible = "nvidia,tegra114-sdhci", .data = &soc_data_tegra114 },
+ 	{ .compatible = "nvidia,tegra30-sdhci", .data = &soc_data_tegra30 },
+ 	{ .compatible = "nvidia,tegra20-sdhci", .data = &soc_data_tegra20 },
+-- 
+1.8.1.5
