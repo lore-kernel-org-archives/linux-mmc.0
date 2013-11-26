@@ -1,103 +1,115 @@
-From: Wolfram Sang <wsa@the-dreams.de>
-Subject: [PATCH] mmc: core: sd: implement proper support for sd3.0 au sizes
-Date: Tue, 26 Nov 2013 02:16:25 +0100
-Message-ID: <1385428585-17516-1-git-send-email-wsa@the-dreams.de>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from sauhun.de ([89.238.76.85]:46308 "EHLO pokefinder.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751679Ab3KZBQh (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 25 Nov 2013 20:16:37 -0500
-Sender: linux-mmc-owner@vger.kernel.org
+From: Felipe Balbi <balbi@ti.com>
+Subject: Re: [PATCH v3 2/3] mmc: omap_hsmmc: Pin remux workaround to support
+ SDIO interrupt on AM335x.
+Date: Mon, 25 Nov 2013 19:16:10 -0600
+Message-ID: <20131126011610.GB21580@saruman.home>
+References: <1385386009-14981-1-git-send-email-afenkart@gmail.com>
+ <1385386009-14981-3-git-send-email-afenkart@gmail.com>
+ <20131125224601.GX10023@atomide.com>
+Reply-To: <balbi@ti.com>
+Mime-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="lEGEL1/lMxI0MVQ2"
+Return-path: <linux-doc-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <20131125224601.GX10023@atomide.com>
+Sender: linux-doc-owner@vger.kernel.org
+To: Tony Lindgren <tony@atomide.com>
+Cc: Andreas Fenkart <afenkart@gmail.com>, Chris Ball <cjb@laptop.org>, Grant Likely <grant.likely@secretlab.ca>, Felipe Balbi <balbi@ti.com>, Balaji T K <balajitk@ti.com>, zonque@gmail.com, linux-doc@vger.kernel.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: Chris Ball <cjb@laptop.org>, Wolfram Sang <wsa@the-dreams.de>, Jaehoon Chung <jh80.chung@samsung.com>, Kyungmin Park <kyungmin.park@samsung.com>, H Hartley Sweeten <hartleys@visionengravers.com>
 
-This reverts and updates commit 77776fd0a4cc541b9a528eacc1d31ca47eb1ae7a
-("mmc: sd: fix the maximum au_size for SD3.0"). The au_size for SD3.0
-cannot be achieved by a simple bit shift, so this needs to be
-implemented differently. Also, don't print the warning in case of 0
-since 'not defined' is different from 'invalid'.
+--lEGEL1/lMxI0MVQ2
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-Signed-off-by: Wolfram Sang <wsa@the-dreams.de>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: Kyungmin Park <kyungmin.park@samsung.com>
-Cc: H Hartley Sweeten <hartleys@visionengravers.com>
+Hi,
 
----
+On Mon, Nov 25, 2013 at 02:46:02PM -0800, Tony Lindgren wrote:
+> * Andreas Fenkart <afenkart@gmail.com> [131125 05:30]:
+> > --- a/drivers/mmc/host/omap_hsmmc.c
+> > +++ b/drivers/mmc/host/omap_hsmmc.c
+> > @@ -452,10 +475,23 @@ static int omap_hsmmc_gpio_init(struct omap_mmc_p=
+latform_data *pdata)
+> >  	} else
+> >  		pdata->slots[0].gpio_wp =3D -EINVAL;
+> > =20
+> > +	if (gpio_is_valid(pdata->slots[0].gpio_cirq)) {
+> > +		ret =3D gpio_request_one(pdata->slots[0].gpio_cirq, GPIOF_DIR_IN,
+> > +				       "sdio_cirq");
+> > +		if (ret)
+> > +			goto err_free_ro;
+> > +
+> > +	} else {
+> > +		pdata->slots[0].gpio_cirq =3D -EINVAL;
+> > +	}
+> > +
+> > +
+> >  	return 0;
+> > =20
+> > +err_free_ro:
+> > +	if (gpio_is_valid(pdata->slots[0].gpio_wp))
+> >  err_free_wp:
+> > -	gpio_free(pdata->slots[0].gpio_wp);
+> > +		gpio_free(pdata->slots[0].gpio_wp);
+> >  err_free_cd:
+> >  	if (gpio_is_valid(pdata->slots[0].switch_pin))
+> >  err_free_sp:
+>=20
+> This patch we can now make a bit more generic with the recent addition
+> of interrupts-extended property that's now merged in mainline tree :)
+>=20
+> We can optionally pass two interrupts to omap_hsmmc.c where the second
+> interrupt is either the pinctrl-single wake-up interrupt, or the GPIO
+> interrupt.
+>=20
+> Both the iochain wake interrupt or the GPIO interrupt are available with
+> request_irq as long as configured in the .dts file. And can both use the
+> SDIO interrupt handler. The only difference is that the GPIO wake-up
+> still needs to do the dynamic remuxing of pins.
 
-Only tested with non SD3.0 cards (au = 0 and au = 9). Testers for 3.0 cards
-much appreciated.
+could that be done automatically if DTS provides "suspend" pinctrl
+state ?
 
- drivers/mmc/core/sd.c | 36 +++++++++++++++++++++---------------
- 1 file changed, 21 insertions(+), 15 deletions(-)
+Would that be done before or after driver's ->{runtime_,}suspend()
+methods ?
 
-diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
-index 6f42050..3b5ac4d 100644
---- a/drivers/mmc/core/sd.c
-+++ b/drivers/mmc/core/sd.c
-@@ -45,6 +45,13 @@ static const unsigned int tacc_mant[] = {
- 	35,	40,	45,	50,	55,	60,	70,	80,
- };
- 
-+static const unsigned int sd_au_size[] = {
-+	0,		SZ_16K / 512,		SZ_32K / 512,	SZ_64K / 512,
-+	SZ_128K / 512,	SZ_256K / 512,		SZ_512K / 512,	SZ_1M / 512,
-+	SZ_2M / 512,	SZ_4M / 512,		SZ_8M / 512,	(SZ_8M + SZ_4M) / 512,
-+	SZ_16M / 512,	(SZ_16M + SZ_8M) / 512,	SZ_32M / 512,	SZ_64M / 512,
-+};
-+
- #define UNSTUFF_BITS(resp,start,size)					\
- 	({								\
- 		const int __size = size;				\
-@@ -216,7 +223,7 @@ static int mmc_decode_scr(struct mmc_card *card)
- static int mmc_read_ssr(struct mmc_card *card)
- {
- 	unsigned int au, es, et, eo;
--	int err, i, max_au;
-+	int err, i;
- 	u32 *ssr;
- 
- 	if (!(card->csd.cmdclass & CCC_APP_SPEC)) {
-@@ -240,26 +247,25 @@ static int mmc_read_ssr(struct mmc_card *card)
- 	for (i = 0; i < 16; i++)
- 		ssr[i] = be32_to_cpu(ssr[i]);
- 
--	/* SD3.0 increases max AU size to 64MB (0xF) from 4MB (0x9) */
--	max_au = card->scr.sda_spec3 ? 0xF : 0x9;
--
- 	/*
- 	 * UNSTUFF_BITS only works with four u32s so we have to offset the
- 	 * bitfield positions accordingly.
- 	 */
- 	au = UNSTUFF_BITS(ssr, 428 - 384, 4);
--	if (au > 0 && au <= max_au) {
--		card->ssr.au = 1 << (au + 4);
--		es = UNSTUFF_BITS(ssr, 408 - 384, 16);
--		et = UNSTUFF_BITS(ssr, 402 - 384, 6);
--		eo = UNSTUFF_BITS(ssr, 400 - 384, 2);
--		if (es && et) {
--			card->ssr.erase_timeout = (et * 1000) / es;
--			card->ssr.erase_offset = eo * 1000;
-+	if (au) {
-+		if (au <= 9 || card->scr.sda_spec3) {
-+			card->ssr.au = sd_au_size[au];
-+			es = UNSTUFF_BITS(ssr, 408 - 384, 16);
-+			et = UNSTUFF_BITS(ssr, 402 - 384, 6);
-+			if (es && et) {
-+				eo = UNSTUFF_BITS(ssr, 400 - 384, 2);
-+				card->ssr.erase_timeout = (et * 1000) / es;
-+				card->ssr.erase_offset = eo * 1000;
-+			}
-+		} else {
-+			pr_warning("%s: SD Status: Invalid Allocation Unit size.\n",
-+				   mmc_hostname(card->host));
- 		}
--	} else {
--		pr_warning("%s: SD Status: Invalid Allocation Unit "
--			"size.\n", mmc_hostname(card->host));
- 	}
- out:
- 	kfree(ssr);
--- 
-1.8.4.2
+> mmc: mmc@4810abcd {
+> 	compatible =3D "ti,omap33xx-hsmmc";
 
+I would rather call it "ti,am33xx-hsmmc" just to make it match marketing
+name of the device.
+
+> Then the logic of enabling the dynamic remuxing can be done based
+> on the ti,omap33xx-hsmmc compatible flag if there are two interrupts
+> and the needed pin states are defined.
+
+or maybe dynamic remuxing can be done by calling pinctrl_select_state()
+with appropriate arguments ?
+
+--=20
+balbi
+
+--lEGEL1/lMxI0MVQ2
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.15 (GNU/Linux)
+
+iQIcBAEBAgAGBQJSk/ZaAAoJEIaOsuA1yqRE2g4QAJconHktsuECWWaQFvpbnM+2
+/wnFRYXPVib9OvN4gyP2n6r5jThe5pLxqOaWw/6EL61eRh7Wu18REaRBOdWaFQ9x
+hqWq9Nr7qVdHvshzDLpRz2wbIEOKbjgPTvjOxsqYVab3KhvI5nx6YVIAFCoZNQF8
+FkQ+CTmLoshCWpt1Bdbkx6iH8epvqH3hXVAYRScnO6wnVaAtmWnjI0LxcEboIjk9
+6erAgYUI7bv2gLN95zoABMzgmSbtfreGSt7tGVCu9oKz+Yu3AVOlzaXaa1D6PiNf
+r2o43gI9z2ujPum8XfmtAvI+pIytHWZ+/ArY5+pl002KiCE2QviW666J17NG91g0
+SRuL2uRPB1yDoTUMxxjAqHv1yd3WuheaNYder8NLFEXLxsLx1H8T/thsJbYqir9l
+7PwIV6+WBYsJEBYBtyrGmOLjK1Gp9+8Z5rz13RwGMcze7Z3oWK6d7MvTP7WYzeHC
+7biW1WwBLxskWYUnFlaVHsADkPCJE4HN0EkOWMkC02ejhfEr6erhg0UwlnmsnNVR
+2f9VQ5Q2W9Vl9Fm9qZ/uK1G8NIaeqacD6rRruRpa/UjHbTf431wa1B8zu3R4gcBg
+tMgo3XflH08YgmEGq1dgCTYKQFU9/NsfqAcb8V4K5Hv2ckBdXOcudqyqLgcvfwms
+IiuIiMUBS3utp9XvFXvu
+=OPU5
+-----END PGP SIGNATURE-----
+
+--lEGEL1/lMxI0MVQ2--
