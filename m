@@ -1,123 +1,149 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH] mmc: core: sd: implement proper support for sd3.0 au sizes
-Date: Tue, 26 Nov 2013 14:14:51 +0900
-Message-ID: <52942E4B.9010501@samsung.com>
-References: <1385428585-17516-1-git-send-email-wsa@the-dreams.de>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH] mmc/sdio: add a quirk for broken SDIO_CCCR_INTx polling
+Date: Tue, 26 Nov 2013 09:03:59 +0100
+Message-ID: <CAPDyKFr5G7DCxFjPcMRKZpAiUyky9L3KnTe4VT5NEepu6_n4oQ@mail.gmail.com>
+References: <1385423638-24791-1-git-send-email-bzhao@marvell.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout1.samsung.com ([203.254.224.24]:65038 "EHLO
-	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750995Ab3KZFOr (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 26 Nov 2013 00:14:47 -0500
-Received: from epcpsbgr2.samsung.com
- (u142.gpu120.samsung.co.kr [203.254.230.142])
- by mailout1.samsung.com (Oracle Communications Messaging Server 7u4-24.01
- (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTP id <0MWU00KPMUKLNFD0@mailout1.samsung.com> for
- linux-mmc@vger.kernel.org; Tue, 26 Nov 2013 14:14:45 +0900 (KST)
-In-reply-to: <1385428585-17516-1-git-send-email-wsa@the-dreams.de>
+Received: from mail-qe0-f46.google.com ([209.85.128.46]:43787 "EHLO
+	mail-qe0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751796Ab3KZIEA (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 26 Nov 2013 03:04:00 -0500
+Received: by mail-qe0-f46.google.com with SMTP id a11so5109455qen.5
+        for <linux-mmc@vger.kernel.org>; Tue, 26 Nov 2013 00:03:59 -0800 (PST)
+In-Reply-To: <1385423638-24791-1-git-send-email-bzhao@marvell.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Wolfram Sang <wsa@the-dreams.de>, linux-mmc@vger.kernel.org
-Cc: Chris Ball <cjb@laptop.org>, Jaehoon Chung <jh80.chung@samsung.com>, Kyungmin Park <kyungmin.park@samsung.com>, H Hartley Sweeten <hartleys@visionengravers.com>
+To: Bing Zhao <bzhao@marvell.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Paul Stewart <pstew@chromium.org>, Doug Anderson <dianders@chromium.org>
 
-Hi Wolfram,
-
-Good catch. It's right. Looks good to me.
-
-Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
-
-Best Regards,
-Jaehoon Chung
-
-On 11/26/2013 10:16 AM, Wolfram Sang wrote:
-> This reverts and updates commit 77776fd0a4cc541b9a528eacc1d31ca47eb1ae7a
-> ("mmc: sd: fix the maximum au_size for SD3.0"). The au_size for SD3.0
-> cannot be achieved by a simple bit shift, so this needs to be
-> implemented differently. Also, don't print the warning in case of 0
-> since 'not defined' is different from 'invalid'.
-> 
-> Signed-off-by: Wolfram Sang <wsa@the-dreams.de>
-> Cc: Jaehoon Chung <jh80.chung@samsung.com>
-> Cc: Kyungmin Park <kyungmin.park@samsung.com>
-> Cc: H Hartley Sweeten <hartleys@visionengravers.com>
-> 
+On 26 November 2013 00:53, Bing Zhao <bzhao@marvell.com> wrote:
+> Polling SDIO_CCCR_INTx could create a fake interrupt with Marvell
+> SD8797 card. Add a quirk to handle this case. The fixup here is
+> to issue a dummy CMD52 read to function 0 register 0xff, and this
+> dummy read must be right after SDIO_CCCR_INTx is read.
+>
+> Patch has been verified on a dw_mmc controller (Samsung Chromebook)
+> with MMC_CAP_SDIO_IRQ disabled.
+>
+> Reviewed-by: Paul Stewart <pstew@chromium.org>
+> Reviewed-by: Doug Anderson <dianders@chromium.org>
+> Signed-off-by: Bing Zhao <bzhao@marvell.com>
 > ---
-> 
-> Only tested with non SD3.0 cards (au = 0 and au = 9). Testers for 3.0 cards
-> much appreciated.
-> 
->  drivers/mmc/core/sd.c | 36 +++++++++++++++++++++---------------
->  1 file changed, 21 insertions(+), 15 deletions(-)
-> 
-> diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
-> index 6f42050..3b5ac4d 100644
-> --- a/drivers/mmc/core/sd.c
-> +++ b/drivers/mmc/core/sd.c
-> @@ -45,6 +45,13 @@ static const unsigned int tacc_mant[] = {
->  	35,	40,	45,	50,	55,	60,	70,	80,
->  };
->  
-> +static const unsigned int sd_au_size[] = {
-> +	0,		SZ_16K / 512,		SZ_32K / 512,	SZ_64K / 512,
-> +	SZ_128K / 512,	SZ_256K / 512,		SZ_512K / 512,	SZ_1M / 512,
-> +	SZ_2M / 512,	SZ_4M / 512,		SZ_8M / 512,	(SZ_8M + SZ_4M) / 512,
-> +	SZ_16M / 512,	(SZ_16M + SZ_8M) / 512,	SZ_32M / 512,	SZ_64M / 512,
-> +};
+>  drivers/mmc/core/quirks.c   | 21 +++++++++++++++++++++
+>  drivers/mmc/core/sdio_irq.c |  5 +++++
+>  include/linux/mmc/card.h    |  4 +++-
+>  3 files changed, 29 insertions(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/core/quirks.c b/drivers/mmc/core/quirks.c
+> index 06ee1ae..870bcc3 100644
+> --- a/drivers/mmc/core/quirks.c
+> +++ b/drivers/mmc/core/quirks.c
+> @@ -13,6 +13,9 @@
+>  #include <linux/kernel.h>
+>  #include <linux/export.h>
+>  #include <linux/mmc/card.h>
+> +#include <linux/mmc/sdio_ids.h>
 > +
->  #define UNSTUFF_BITS(resp,start,size)					\
->  	({								\
->  		const int __size = size;				\
-> @@ -216,7 +223,7 @@ static int mmc_decode_scr(struct mmc_card *card)
->  static int mmc_read_ssr(struct mmc_card *card)
->  {
->  	unsigned int au, es, et, eo;
-> -	int err, i, max_au;
-> +	int err, i;
->  	u32 *ssr;
->  
->  	if (!(card->csd.cmdclass & CCC_APP_SPEC)) {
-> @@ -240,26 +247,25 @@ static int mmc_read_ssr(struct mmc_card *card)
->  	for (i = 0; i < 16; i++)
->  		ssr[i] = be32_to_cpu(ssr[i]);
->  
-> -	/* SD3.0 increases max AU size to 64MB (0xF) from 4MB (0x9) */
-> -	max_au = card->scr.sda_spec3 ? 0xF : 0x9;
-> -
->  	/*
->  	 * UNSTUFF_BITS only works with four u32s so we have to offset the
->  	 * bitfield positions accordingly.
->  	 */
->  	au = UNSTUFF_BITS(ssr, 428 - 384, 4);
-> -	if (au > 0 && au <= max_au) {
-> -		card->ssr.au = 1 << (au + 4);
-> -		es = UNSTUFF_BITS(ssr, 408 - 384, 16);
-> -		et = UNSTUFF_BITS(ssr, 402 - 384, 6);
-> -		eo = UNSTUFF_BITS(ssr, 400 - 384, 2);
-> -		if (es && et) {
-> -			card->ssr.erase_timeout = (et * 1000) / es;
-> -			card->ssr.erase_offset = eo * 1000;
-> +	if (au) {
-> +		if (au <= 9 || card->scr.sda_spec3) {
-> +			card->ssr.au = sd_au_size[au];
-> +			es = UNSTUFF_BITS(ssr, 408 - 384, 16);
-> +			et = UNSTUFF_BITS(ssr, 402 - 384, 6);
-> +			if (es && et) {
-> +				eo = UNSTUFF_BITS(ssr, 400 - 384, 2);
-> +				card->ssr.erase_timeout = (et * 1000) / es;
-> +				card->ssr.erase_offset = eo * 1000;
-> +			}
-> +		} else {
-> +			pr_warning("%s: SD Status: Invalid Allocation Unit size.\n",
-> +				   mmc_hostname(card->host));
->  		}
-> -	} else {
-> -		pr_warning("%s: SD Status: Invalid Allocation Unit "
-> -			"size.\n", mmc_hostname(card->host));
->  	}
->  out:
->  	kfree(ssr);
-> 
+> +#include "sdio_ops.h"
+>
+>  #ifndef SDIO_VENDOR_ID_TI
+>  #define SDIO_VENDOR_ID_TI              0x0097
+> @@ -30,6 +33,10 @@
+>  #define SDIO_DEVICE_ID_STE_CW1200      0x2280
+>  #endif
+>
+> +#ifndef SDIO_DEVICE_ID_MARVELL_8797_F0
+> +#define SDIO_DEVICE_ID_MARVELL_8797_F0 0x9128
+> +#endif
+> +
+>  /*
+>   * This hook just adds a quirk for all sdio devices
+>   */
+> @@ -58,6 +65,9 @@ static const struct mmc_fixup mmc_fixup_methods[] = {
+>         SDIO_FIXUP(SDIO_VENDOR_ID_STE, SDIO_DEVICE_ID_STE_CW1200,
+>                    add_quirk, MMC_QUIRK_BROKEN_BYTE_MODE_512),
+>
+> +       SDIO_FIXUP(SDIO_VENDOR_ID_MARVELL, SDIO_DEVICE_ID_MARVELL_8797_F0,
+> +                  add_quirk, MMC_QUIRK_BROKEN_IRQ_POLLING),
+> +
+>         END_FIXUP
+>  };
+>
+> @@ -89,3 +99,14 @@ void mmc_fixup_device(struct mmc_card *card, const struct mmc_fixup *table)
+>         }
+>  }
+>  EXPORT_SYMBOL(mmc_fixup_device);
+> +
+> +void mmc_fixup_broken_irq_polling(struct mmc_card *card)
+> +{
+> +       unsigned char dummy;
+> +
+> +       /* A fake interrupt could be created when we poll SDIO_CCCR_INTx
+> +        * register with a Marvell SD8797 card. A dummy CMD52 read to
+> +        * function 0 register 0xff can aviod this.
+> +        */
+> +       mmc_io_rw_direct(card, 0, 0, 0xff, 0, &dummy);
+> +}
 
+I would suggest you follow how the other quirks has been implemented,
+thus I don't think you need a separate function just for invoking an
+extra mmc_io_rw_direct, do directly in sdio_irq.c instead.
+
+> diff --git a/drivers/mmc/core/sdio_irq.c b/drivers/mmc/core/sdio_irq.c
+> index 3d8ceb4..afb00e1 100644
+> --- a/drivers/mmc/core/sdio_irq.c
+> +++ b/drivers/mmc/core/sdio_irq.c
+> @@ -47,6 +47,11 @@ static int process_sdio_pending_irqs(struct mmc_host *host)
+>         }
+>
+>         ret = mmc_io_rw_direct(card, 0, 0, SDIO_CCCR_INTx, 0, &pending);
+> +
+> +       if (pending && (card->quirks & MMC_QUIRK_BROKEN_IRQ_POLLING) &&
+
+Suggest you add an mmc_card_broken_irq_poll(), in card.h. Like the
+other quirks are handled.
+
+> +           !(host->caps & MMC_CAP_SDIO_IRQ))
+> +               mmc_fixup_broken_irq_polling(card);
+> +
+>         if (ret) {
+>                 pr_debug("%s: error %d reading SDIO_CCCR_INTx\n",
+>                        mmc_card_id(card), ret);
+> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+> index 176fdf8..08a065b 100644
+> --- a/include/linux/mmc/card.h
+> +++ b/include/linux/mmc/card.h
+> @@ -271,9 +271,10 @@ struct mmc_card {
+>  #define MMC_QUIRK_INAND_CMD38  (1<<6)          /* iNAND devices have broken CMD38 */
+>  #define MMC_QUIRK_BLK_NO_CMD23 (1<<7)          /* Avoid CMD23 for regular multiblock */
+>  #define MMC_QUIRK_BROKEN_BYTE_MODE_512 (1<<8)  /* Avoid sending 512 bytes in */
+> +                                               /* byte mode */
+>  #define MMC_QUIRK_LONG_READ_TIME (1<<9)                /* Data read time > CSD says */
+>  #define MMC_QUIRK_SEC_ERASE_TRIM_BROKEN (1<<10)        /* Skip secure for erase/trim */
+> -                                               /* byte mode */
+> +#define MMC_QUIRK_BROKEN_IRQ_POLLING   (1<<11) /* Polling SDIO_CCCR_INTx could create a fake interrupt */
+>
+>         unsigned int            erase_size;     /* erase size in sectors */
+>         unsigned int            erase_shift;    /* if erase unit is power 2 */
+> @@ -531,5 +532,6 @@ extern void mmc_unregister_driver(struct mmc_driver *);
+>
+>  extern void mmc_fixup_device(struct mmc_card *card,
+>                              const struct mmc_fixup *table);
+> +extern void mmc_fixup_broken_irq_polling(struct mmc_card *card);
+>
+>  #endif /* LINUX_MMC_CARD_H */
+> --
+> 1.8.0
+>
+
+Otherwise, looks fine!
+
+Kind regards
+Ulf Hansson
+
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
