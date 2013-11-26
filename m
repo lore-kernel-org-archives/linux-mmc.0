@@ -1,44 +1,36 @@
-From: Bing Zhao <bzhao@marvell.com>
-Subject: RE: [PATCH v2] mmc/sdio: add a quirk for broken SDIO_CCCR_INTx
- polling
-Date: Tue, 26 Nov 2013 15:31:27 -0800
-Message-ID: <477F20668A386D41ADCC57781B1F70430F52C17A96@SC-VEXCH1.marvell.com>
-References: <1385496293-26365-1-git-send-email-bzhao@marvell.com>
- <CAPDyKFrrBpVw+J8zF8n8_9LGGvWET3WQ1vEqAS3hytKOapApJg@mail.gmail.com>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH 2/8] mmc: omap: Fix DMA configuration to not rely on device id
+Date: Tue, 26 Nov 2013 18:33:50 -0500
+Message-ID: <87ioveeo0x.fsf@octavius.laptop.org>
+References: <1384396537-3486-1-git-send-email-tony@atomide.com>
+	<1384396537-3486-3-git-send-email-tony@atomide.com>
+	<20131118184723.GR10317@atomide.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mx0b-0016f401.pphosted.com ([67.231.156.173]:60528 "EHLO
-	mx0b-0016f401.pphosted.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1755223Ab3KZXbi convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 26 Nov 2013 18:31:38 -0500
-In-Reply-To: <CAPDyKFrrBpVw+J8zF8n8_9LGGvWET3WQ1vEqAS3hytKOapApJg@mail.gmail.com>
-Content-Language: en-US
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain
+Return-path: <linux-omap-owner@vger.kernel.org>
+In-Reply-To: <20131118184723.GR10317@atomide.com> (Tony Lindgren's message of
+	"Mon, 18 Nov 2013 10:47:24 -0800")
+Sender: linux-omap-owner@vger.kernel.org
+To: Tony Lindgren <tony@atomide.com>
+Cc: linux-arm-kernel@lists.infradead.org, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Paul Stewart <pstew@chromium.org>, Doug Anderson <dianders@chromium.org>
 
-Hi Ulf,
+Hi Tony,
 
-> > diff --git a/drivers/mmc/core/quirks.c b/drivers/mmc/core/quirks.c
-> > index 06ee1ae..02c94b5 100644
-> > --- a/drivers/mmc/core/quirks.c
-> > +++ b/drivers/mmc/core/quirks.c
-> > @@ -13,6 +13,9 @@
-> >  #include <linux/kernel.h>
-> >  #include <linux/export.h>
-> >  #include <linux/mmc/card.h>
-> > +#include <linux/mmc/sdio_ids.h>
-> > +
-> > +#include "sdio_ops.h"
-> 
-> So these includes is not needed any more, I guess.
+On Mon, Nov 18 2013, Tony Lindgren wrote:
+> We are wrongly relying on device id for the DMA configuration
+> which can lead to wrong DMA channel being selected.
+>
+> Fix the issue by using the standard resources like we should.
+>
+> Cc: Chris Ball <cjb@laptop.org>
+> Cc: linux-mmc@vger.kernel.org
+> Signed-off-by: Tony Lindgren <tony@atomide.com>
 
-Yes, you are right. It will be fixed in v3.
+Feel free to merge via your tree:
 
-Thanks,
-Bing
+Acked-by: Chris Ball <cjb@laptop.org>
 
+- Chris.
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
