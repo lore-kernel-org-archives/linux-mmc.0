@@ -1,40 +1,49 @@
-From: Aaro Koskinen <aaro.koskinen@iki.fi>
-Subject: Re: 3.13-rc1: MMC & fixed regulator regression
-Date: Tue, 26 Nov 2013 23:04:34 +0200
-Message-ID: <20131126210433.GG24645@blackmetal.musicnaut.iki.fi>
-References: <20131126180325.GF24645@blackmetal.musicnaut.iki.fi>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH] mmc: sdhci-esdhc-imx: Write only 4 bit in case of TIMEOUT_CONTROL
+Date: Tue, 26 Nov 2013 16:22:37 -0500
+Message-ID: <87zjoqg8o2.fsf@octavius.laptop.org>
+References: <1373956571-25967-1-git-send-email-dirk.behme@de.bosch.com>
+	<20130716073826.GH28375@S2101-09.ap.freescale.net>
+	<52734AC6.6020101@de.bosch.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from filtteri2.pp.htv.fi ([213.243.153.185]:52629 "EHLO
-	filtteri2.pp.htv.fi" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932382Ab3KZVEl (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 26 Nov 2013 16:04:41 -0500
-Content-Disposition: inline
-In-Reply-To: <20131126180325.GF24645@blackmetal.musicnaut.iki.fi>
+Received: from void.printf.net ([89.145.121.20]:34058 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1755540Ab3KZVWu (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 26 Nov 2013 16:22:50 -0500
+In-Reply-To: <52734AC6.6020101@de.bosch.com> (Dirk Behme's message of "Fri, 1
+	Nov 2013 07:31:34 +0100")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>, Laxman Dewangan <ldewangan@nvidia.com>, Mark Brown <broonie@linaro.org>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Dirk Behme <dirk.behme@de.bosch.com>
+Cc: Shawn Guo <shawn.guo@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-Hi,
+Hi Dirk,
 
-On Tue, Nov 26, 2013 at 08:03:26PM +0200, Aaro Koskinen wrote:
-> On N950 with fixed vmmc regulator, MMC probe started to fail with
-> 3.13-rc1:
-> 
-> [    2.497406] mmc0: host doesn't support card's voltages
-> [    2.502899] mmc0: error -22 whilst initialising MMC card
-> 
-> I bisected this to c368e5fc2a190923b786f2de3e79430ea3566a25
-> (regulator: fixed: get rid of {get|list}_voltage()). With this commit
-> regulator_list_voltage() does not work anymore for a fixed regulator. MMC
-> code is using this in mmc_regulator_get_ocrmask().
+On Fri, Nov 01 2013, Dirk Behme wrote:
+> On 16.07.2013 09:38, Shawn Guo wrote:
+>> Hi Dirk,
+>>
+>> On Tue, Jul 16, 2013 at 08:36:11AM +0200, Dirk Behme wrote:
+>>> In case of SDHCI_TIMEOUT_CONTROL write only 4 bits and not the
+>>> whole byte to avoid touching other unrelated bits in the i.MX6
+>>> SYS_CTRL register. E.g. IPP_RST_N shouldn't be touched accidently.
+>>>
+>>> Signed-off-by: Dirk Behme <dirk.behme@de.bosch.com>
+>>
+>> Acked-by: Shawn Guo <shawn.guo@linaro.org>
+>
+> What's the status of this? I can't find it e.g. in linux-next?
+>
+> Does anybody like to help to apply this?
 
-This seems to be now fixed with f446043f1aa74c2d699db48ba4a7a075b88dc14d
-(regulator: fixed: fix regulator_list_voltage() for regression). For
-some reason, my searches missed this commit & reports on the list.
+Looks like you didn't answer Shawn's question yet, could you please?
 
-Sorry for the noise,
+>> I'm wondering if it fixes any issue in real life?
 
-A.
+Thanks,
+
+- Chris.
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
