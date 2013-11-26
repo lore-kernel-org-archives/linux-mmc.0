@@ -1,58 +1,56 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH] mmc: sdhci: Avoid needless loop while handling SDIO interrupts in sdhci_irq()
-Date: Tue, 26 Nov 2013 17:12:18 -0500
-Message-ID: <87bo16g6d9.fsf@octavius.laptop.org>
-References: <CAA+hA=StthxfMWjQ+0fhdRiPuDDVWUGrrW9E71Q+E3RoF_QdHw@mail.gmail.com>
-	<1383709236-26692-1-git-send-email-stilor@att.net>
+Subject: Re: [PATCH] mmc: tmio: don't overwrite caps2
+Date: Tue, 26 Nov 2013 17:21:48 -0500
+Message-ID: <877gbug5xf.fsf@octavius.laptop.org>
+References: <87mwkz8p4k.wl%kuninori.morimoto.gx@renesas.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:43911 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:33915 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752255Ab3KZWMe (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 26 Nov 2013 17:12:34 -0500
-In-Reply-To: <1383709236-26692-1-git-send-email-stilor@att.net> (Alexey
-	Neyman's message of "Tue, 5 Nov 2013 19:40:36 -0800")
+	id S1753636Ab3KZWV7 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 26 Nov 2013 17:21:59 -0500
+In-Reply-To: <87mwkz8p4k.wl%kuninori.morimoto.gx@renesas.com> (Kuninori
+	Morimoto's message of "Wed, 20 Nov 2013 00:16:14 -0800 (PST)")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Alexey Neyman <stilor@att.net>
-Cc: Dong Aisheng <dongas86@gmail.com>, "open list:SECURE DIGITAL HO..." <linux-mmc@vger.kernel.org>, open list <linux-kernel@vger.kernel.org>
+To: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
+Cc: Simon <horms@verge.net.au>, Kuninori Morimoto <kuninori.morimoto.gx@gmail.com>, linux-mmc@vger.kernel.org
 
-Hi Alexey,
+Hi,
 
-On Tue, Nov 05 2013, Alexey Neyman wrote:
-> Ignore Card Interrupt bit in the interrupt status if we already know that
-> mmc_signal_sdio_irq() is going to be called at the end of sdhci_irq(). This
-> avoids a needless loop in sdhci_irq() repeatedly reading interrupt status
-> and doing nothing.
+On Wed, Nov 20 2013, Kuninori Morimoto wrote:
+> 02cb3221d5bb351ad9f7469453dcca7594a0fabf
+> (mmc: tmio: support caps2 flags) added caps2 support
+> on tmio, but it overwrites mmc_of_parse() settings.
+> This patch fixes it up
 >
-> Signed-off-by: Alexey Neyman <stilor@att.net>
-> Acked-by: Dong Aisheng <b29396@freescale.com>
+> Acked-by: Laurent <laurent.pinchart@ideasonboard.com>
+> Signed-off-by: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
 > ---
->  drivers/mmc/host/sdhci.c | 8 ++++++++
->  1 file changed, 8 insertions(+)
+>>> Chris
 >
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 7a7fb4f..a83cd1b 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -2491,6 +2491,14 @@ again:
->  	result = IRQ_HANDLED;
+> This was part of "SDHI support for r8a7790" patch-set,
+> but was separated
+>
+>  drivers/mmc/host/tmio_mmc_pio.c |    2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
+> index 99f6d29..1f5f2ba 100644
+> --- a/drivers/mmc/host/tmio_mmc_pio.c
+> +++ b/drivers/mmc/host/tmio_mmc_pio.c
+> @@ -1021,7 +1021,7 @@ int tmio_mmc_host_probe(struct tmio_mmc_host **host,
 >  
->  	intmask = sdhci_readl(host, SDHCI_INT_STATUS);
-> +
-> +	/*
-> +	 * If we know we'll call the driver to signal SDIO IRQ, disregard
-> +	 * further indications of Card Interrupt in the status to avoid a
-> +	 * needless loop.
-> +	 */
-> +	if (cardint)
-> +		intmask &= ~SDHCI_INT_CARD_INT;
->  	if (intmask && --max_loops)
->  		goto again;
->  out:
+>  	mmc->ops = &tmio_mmc_ops;
+>  	mmc->caps |= MMC_CAP_4_BIT_DATA | pdata->capabilities;
+> -	mmc->caps2 = pdata->capabilities2;
+> +	mmc->caps2 |= pdata->capabilities2;
+>  	mmc->max_segs = 32;
+>  	mmc->max_blk_size = 512;
+>  	mmc->max_blk_count = (PAGE_CACHE_SIZE / mmc->max_blk_size) *
 
-Thanks, this was included in 3.13-rc1 via mmc-next.
+Thanks, pushed to mmc-next for 3.14.
 
 - Chris.
 -- 
