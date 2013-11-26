@@ -1,35 +1,58 @@
 From: Chris Ball <cjb@laptop.org>
-Subject: Re: [PATCH v2] mmc: fix host release issue after discard operation
-Date: Tue, 26 Nov 2013 17:06:06 -0500
-Message-ID: <87fvqig6nl.fsf@octavius.laptop.org>
-References: <1382810624-17659-1-git-send-email-rjui@broadcom.com>
+Subject: Re: [PATCH] mmc: sdhci: Avoid needless loop while handling SDIO interrupts in sdhci_irq()
+Date: Tue, 26 Nov 2013 17:12:18 -0500
+Message-ID: <87bo16g6d9.fsf@octavius.laptop.org>
+References: <CAA+hA=StthxfMWjQ+0fhdRiPuDDVWUGrrW9E71Q+E3RoF_QdHw@mail.gmail.com>
+	<1383709236-26692-1-git-send-email-stilor@att.net>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1382810624-17659-1-git-send-email-rjui@broadcom.com> (Ray Jui's
-	message of "Sat, 26 Oct 2013 11:03:44 -0700")
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ray Jui <rjui@broadcom.com>
-Cc: Seungwon Jeon <tgih.jun@samsung.com>, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from void.printf.net ([89.145.121.20]:43911 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752255Ab3KZWMe (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 26 Nov 2013 17:12:34 -0500
+In-Reply-To: <1383709236-26692-1-git-send-email-stilor@att.net> (Alexey
+	Neyman's message of "Tue, 5 Nov 2013 19:40:36 -0800")
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Alexey Neyman <stilor@att.net>
+Cc: Dong Aisheng <dongas86@gmail.com>, "open list:SECURE DIGITAL HO..." <linux-mmc@vger.kernel.org>, open list <linux-kernel@vger.kernel.org>
 
-Hi Ray,
+Hi Alexey,
 
-On Sat, Oct 26 2013, Ray Jui wrote:
-> Under function mmc_blk_issue_rq, after an MMC discard operation,
-> the MMC request data structure may be freed in memory. Later in
-> the same function, the check of req->cmd_flags & MMC_REQ_SPECIAL_MASK
-> is dangerous and invalid. It causes the MMC host not to be released
-> when it should
+On Tue, Nov 05 2013, Alexey Neyman wrote:
+> Ignore Card Interrupt bit in the interrupt status if we already know that
+> mmc_signal_sdio_irq() is going to be called at the end of sdhci_irq(). This
+> avoids a needless loop in sdhci_irq() repeatedly reading interrupt status
+> and doing nothing.
 >
-> This patch fixes the issue by marking the special request down before
-> the discard/flush operation
+> Signed-off-by: Alexey Neyman <stilor@att.net>
+> Acked-by: Dong Aisheng <b29396@freescale.com>
+> ---
+>  drivers/mmc/host/sdhci.c | 8 ++++++++
+>  1 file changed, 8 insertions(+)
 >
-> Reported by: Harold (SoonYeal) Yang <haroldsy@broadcom.com>
-> Signed-off-by: Ray Jui <rjui@broadcom.com>
-> Reviewed-by: Seungwon Jeon <tgih.jun@samsung.com>
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index 7a7fb4f..a83cd1b 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -2491,6 +2491,14 @@ again:
+>  	result = IRQ_HANDLED;
+>  
+>  	intmask = sdhci_readl(host, SDHCI_INT_STATUS);
+> +
+> +	/*
+> +	 * If we know we'll call the driver to signal SDIO IRQ, disregard
+> +	 * further indications of Card Interrupt in the status to avoid a
+> +	 * needless loop.
+> +	 */
+> +	if (cardint)
+> +		intmask &= ~SDHCI_INT_CARD_INT;
+>  	if (intmask && --max_loops)
+>  		goto again;
+>  out:
 
-Thanks, pushed to mmc-next for 3.14 and -stable.
+Thanks, this was included in 3.13-rc1 via mmc-next.
 
 - Chris.
 -- 
