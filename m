@@ -1,99 +1,74 @@
-From: Tony Lindgren <tony@atomide.com>
-Subject: Re: [PATCH v3 2/3] mmc: omap_hsmmc: Pin remux workaround to
- support SDIO interrupt on AM335x.
-Date: Tue, 26 Nov 2013 10:06:19 -0800
-Message-ID: <20131126180619.GH26766@atomide.com>
-References: <1385386009-14981-1-git-send-email-afenkart@gmail.com>
- <1385386009-14981-3-git-send-email-afenkart@gmail.com>
- <20131125224601.GX10023@atomide.com>
- <20131126011610.GB21580@saruman.home>
+From: Bing Zhao <bzhao@marvell.com>
+Subject: RE: [PATCH] mmc/sdio: add a quirk for broken SDIO_CCCR_INTx polling
+Date: Tue, 26 Nov 2013 11:50:38 -0800
+Message-ID: <477F20668A386D41ADCC57781B1F70430F52C179F9@SC-VEXCH1.marvell.com>
+References: <1385423638-24791-1-git-send-email-bzhao@marvell.com>
+ <CAPDyKFr5G7DCxFjPcMRKZpAiUyky9L3KnTe4VT5NEepu6_n4oQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-omap-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20131126011610.GB21580@saruman.home>
-Sender: linux-omap-owner@vger.kernel.org
-To: Felipe Balbi <balbi@ti.com>
-Cc: Andreas Fenkart <afenkart@gmail.com>, Chris Ball <cjb@laptop.org>, Grant Likely <grant.likely@secretlab.ca>, Balaji T K <balajitk@ti.com>, zonque@gmail.com, linux-doc@vger.kernel.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mx0a-0016f401.pphosted.com ([67.231.148.174]:45265 "EHLO
+	mx0a-0016f401.pphosted.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1753617Ab3KZTv1 convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 26 Nov 2013 14:51:27 -0500
+In-Reply-To: <CAPDyKFr5G7DCxFjPcMRKZpAiUyky9L3KnTe4VT5NEepu6_n4oQ@mail.gmail.com>
+Content-Language: en-US
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Paul Stewart <pstew@chromium.org>, Doug Anderson <dianders@chromium.org>
 
-* Felipe Balbi <balbi@ti.com> [131125 17:17]:
-> Hi,
+Hi Ulf,
+
+Thanks for your comments.
+
+> > @@ -89,3 +99,14 @@ void mmc_fixup_device(struct mmc_card *card, const struct mmc_fixup *table)
+> >         }
+> >  }
+> >  EXPORT_SYMBOL(mmc_fixup_device);
+> > +
+> > +void mmc_fixup_broken_irq_polling(struct mmc_card *card)
+> > +{
+> > +       unsigned char dummy;
+> > +
+> > +       /* A fake interrupt could be created when we poll SDIO_CCCR_INTx
+> > +        * register with a Marvell SD8797 card. A dummy CMD52 read to
+> > +        * function 0 register 0xff can aviod this.
+> > +        */
+> > +       mmc_io_rw_direct(card, 0, 0, 0xff, 0, &dummy);
+> > +}
 > 
-> On Mon, Nov 25, 2013 at 02:46:02PM -0800, Tony Lindgren wrote:
-> > * Andreas Fenkart <afenkart@gmail.com> [131125 05:30]:
-> > > --- a/drivers/mmc/host/omap_hsmmc.c
-> > > +++ b/drivers/mmc/host/omap_hsmmc.c
-> > > @@ -452,10 +475,23 @@ static int omap_hsmmc_gpio_init(struct omap_mmc_platform_data *pdata)
-> > >  	} else
-> > >  		pdata->slots[0].gpio_wp = -EINVAL;
-> > >  
-> > > +	if (gpio_is_valid(pdata->slots[0].gpio_cirq)) {
-> > > +		ret = gpio_request_one(pdata->slots[0].gpio_cirq, GPIOF_DIR_IN,
-> > > +				       "sdio_cirq");
-> > > +		if (ret)
-> > > +			goto err_free_ro;
-> > > +
-> > > +	} else {
-> > > +		pdata->slots[0].gpio_cirq = -EINVAL;
-> > > +	}
-> > > +
-> > > +
-> > >  	return 0;
-> > >  
-> > > +err_free_ro:
-> > > +	if (gpio_is_valid(pdata->slots[0].gpio_wp))
-> > >  err_free_wp:
-> > > -	gpio_free(pdata->slots[0].gpio_wp);
-> > > +		gpio_free(pdata->slots[0].gpio_wp);
-> > >  err_free_cd:
-> > >  	if (gpio_is_valid(pdata->slots[0].switch_pin))
-> > >  err_free_sp:
-> > 
-> > This patch we can now make a bit more generic with the recent addition
-> > of interrupts-extended property that's now merged in mainline tree :)
-> > 
-> > We can optionally pass two interrupts to omap_hsmmc.c where the second
-> > interrupt is either the pinctrl-single wake-up interrupt, or the GPIO
-> > interrupt.
-> > 
-> > Both the iochain wake interrupt or the GPIO interrupt are available with
-> > request_irq as long as configured in the .dts file. And can both use the
-> > SDIO interrupt handler. The only difference is that the GPIO wake-up
-> > still needs to do the dynamic remuxing of pins.
+> I would suggest you follow how the other quirks has been implemented,
+> thus I don't think you need a separate function just for invoking an
+> extra mmc_io_rw_direct, do directly in sdio_irq.c instead.
+
+Will make this change in v2.
+
+> > @@ -47,6 +47,11 @@ static int process_sdio_pending_irqs(struct mmc_host *host)
+> >         }
+> >
+> >         ret = mmc_io_rw_direct(card, 0, 0, SDIO_CCCR_INTx, 0, &pending);
+> > +
+> > +       if (pending && (card->quirks & MMC_QUIRK_BROKEN_IRQ_POLLING) &&
 > 
-> could that be done automatically if DTS provides "suspend" pinctrl
-> state ?
+> Suggest you add an mmc_card_broken_irq_poll(), in card.h. Like the
+> other quirks are handled.
 
-Yes based on the compatible flag and the provided named pin states.
- 
-> Would that be done before or after driver's ->{runtime_,}suspend()
-> methods ?
+Sure.
 
-Pins need to remuxed to GPIO input on 33xx in runtime suspend, and then
-back to SDIO dat1 in runtime resume. Possibly needs to be done also for
-34xx, but that's yet to be seen.
- 
-> > mmc: mmc@4810abcd {
-> > 	compatible = "ti,omap33xx-hsmmc";
 > 
-> I would rather call it "ti,am33xx-hsmmc" just to make it match marketing
-> name of the device.
+> > +           !(host->caps & MMC_CAP_SDIO_IRQ))
+> > +               mmc_fixup_broken_irq_polling(card);
+> > +
+> >         if (ret) {
+> >                 pr_debug("%s: error %d reading SDIO_CCCR_INTx\n",
+> >                        mmc_card_id(card), ret);
+> >                 return ret;
+> >         }
 
-Except you have both am33xx and dm33xx where the only difference is the
-DSP on dm33xx? Other than that, I'm fine with am33xx naming as long as
-it's clear to people and does not involve adding dm33xx stuff separately.
- 
-> > Then the logic of enabling the dynamic remuxing can be done based
-> > on the ti,omap33xx-hsmmc compatible flag if there are two interrupts
-> > and the needed pin states are defined.
-> 
-> or maybe dynamic remuxing can be done by calling pinctrl_select_state()
-> with appropriate arguments ?
+I will also move the quirk handling down here (after the 'ret' validation).
 
-Yes the way to do the remuxing is to call pinctrl_select_state() on the
-named state desired.
-
-Regards,
-
-Tony
+Thanks,
+Bing
