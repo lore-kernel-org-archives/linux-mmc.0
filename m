@@ -1,61 +1,179 @@
-From: Dirk Behme <dirk.behme@de.bosch.com>
-Subject: Re: [PATCH] mmc: sdhci-esdhc-imx: Write only 4 bit in case of TIMEOUT_CONTROL
-Date: Wed, 27 Nov 2013 07:47:39 +0100
-Message-ID: <5295958B.6050509@de.bosch.com>
-References: <1373956571-25967-1-git-send-email-dirk.behme@de.bosch.com>	<20130716073826.GH28375@S2101-09.ap.freescale.net>	<52734AC6.6020101@de.bosch.com> <87zjoqg8o2.fsf@octavius.laptop.org>
+From: Alim Akhtar <alim.akhtar@gmail.com>
+Subject: Re: [PATCH] mmc: dw_mmc: Add hardware lock error (HLE) to the CMD
+ error flag
+Date: Wed, 27 Nov 2013 13:00:39 +0530
+Message-ID: <CAGOxZ526f72JgfKA6G=fHJg=NC9aXiC1a+H=khyJ224YdaJZvw@mail.gmail.com>
+References: <32277109.227361381136426293.JavaMail.weblogic@epv6ml06>
+ <CAGOxZ53PJTyXhcg20whXZYcRVVvy1+p0SA9xM_WFOAbYJ7riSQ@mail.gmail.com>
+ <CAGOxZ51UrZ4aN8Y6J2d4Zjz_G_2uDmC9pzNqZ4Bf__iFYSRcxQ@mail.gmail.com>
+ <5286108F.4090601@samsung.com> <007a01cee201$e4c14880$ae43d980$%jun@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp6-v.fe.bosch.de ([139.15.237.11]:51722 "EHLO
-	smtp6-v.fe.bosch.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750842Ab3K0Gru (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 27 Nov 2013 01:47:50 -0500
-In-Reply-To: <87zjoqg8o2.fsf@octavius.laptop.org>
+Received: from mail-vb0-f48.google.com ([209.85.212.48]:56419 "EHLO
+	mail-vb0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752175Ab3K0HbU (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 27 Nov 2013 02:31:20 -0500
+Received: by mail-vb0-f48.google.com with SMTP id x16so4544124vbf.7
+        for <linux-mmc@vger.kernel.org>; Tue, 26 Nov 2013 23:31:19 -0800 (PST)
+In-Reply-To: <007a01cee201$e4c14880$ae43d980$%jun@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: Shawn Guo <shawn.guo@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Seungwon Jeon <tgih.jun@samsung.com>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, Alim Akhtar <alim.akhtar@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Douglas Anderson <dianders@chromium.org>
 
-On 26.11.2013 22:22, Chris Ball wrote:
-> Hi Dirk,
->
-> On Fri, Nov 01 2013, Dirk Behme wrote:
->> On 16.07.2013 09:38, Shawn Guo wrote:
->>> Hi Dirk,
->>>
->>> On Tue, Jul 16, 2013 at 08:36:11AM +0200, Dirk Behme wrote:
->>>> In case of SDHCI_TIMEOUT_CONTROL write only 4 bits and not the
->>>> whole byte to avoid touching other unrelated bits in the i.MX6
->>>> SYS_CTRL register. E.g. IPP_RST_N shouldn't be touched accidently.
->>>>
->>>> Signed-off-by: Dirk Behme <dirk.behme@de.bosch.com>
->>>
->>> Acked-by: Shawn Guo <shawn.guo@linaro.org>
+Hi Seungwon
+
+On Fri, Nov 15, 2013 at 6:24 PM, Seungwon Jeon <tgih.jun@samsung.com> wrote:
+> On Fri, November 15, 2013, Jaehoon Chung wrote:
+>> Dear, Alim,
 >>
->> What's the status of this? I can't find it e.g. in linux-next?
+>> Well, I'm not sure that this patch is correct.
+>> But as you mentioned, we need to decide how control the HLE.
 >>
->> Does anybody like to help to apply this?
+>> I will check the HLE on this weekend. Thanks for your effort.
 >
-> Looks like you didn't answer Shawn's question yet, could you please?
+> Thank you for remind.
+> HLE should be cleared at least although it needs to be handled more properly.
+> I agree on that now.
 >
->>> I'm wondering if it fixes any issue in real life?
+> Your patch is below?
+> https://patchwork.kernel.org/patch/2981661/
+Yes, this is the one I posted.
+>
+> I think it's simple and good way.
+> It would be better to add error message when happened.
+Do you mean check for HLE in interrupt handler and print error message?
+If so, do you want me to respin this patch?
 
-I wasn't aware that this questions blocks applying that patch. I think 
-I've answered Shawn's question in a private mail: Using RST_N doesn't 
-work if the controller's IPP_RST_N bit is touched accidentally, i.e. if 
-a reset is asserted if it shouldn't.
+>
+> Thanks,
+> Seungwon Jeon
+>
+>>
+>> Best Regards,
+>> Jaehoon Chung
+>>
+>> On 11/12/2013 01:12 PM, Alim Akhtar wrote:
+>> > Hi Seungwon/ Jaehoon,
+>> > I can see there are at least three patches which address HLE (Hardware
+>> > Lock Error) in dw_mmc driver.
+>> >
+>> > https://patchwork.kernel.org/patch/1814991/
+>> > http://www.spinics.net/lists/linux-mmc/msg21459.html
+>> > and third one is my patch
+>> > http://news.gmane.org/gmane.linux.kernel.mmc/cutoff=23010
+>> >
+>> > Can we have some conclusion about how to handle HLE?
+>> >
+>> > Thanks!!!
+>> >
+>> > On Thu, Oct 10, 2013 at 4:31 PM, Alim Akhtar <alim.akhtar@gmail.com> wrote:
+>> >> Hi Jaeohoon,
+>> >>
+>> >> On Mon, Oct 7, 2013 at 2:00 AM, ALIM AKHTAR <alim.akhtar@samsung.com> wrote:
+>> >>> Hi Jaeohoon,
+>> >>> Thanks for quick review.
+>> >>>> ------- Original Message -------
+>> >>>> Sender : Jaehoon Chung<jh80.chung@samsung.com> S4/Engineer/System S/W Lab./Samsung Electronics
+>> >>>> Date : Oct 07, 2013 17:36 (GMT+09:00)
+>> >>>> Title : Re: [PATCH] mmc: dw_mmc: Add hardware lock error (HLE) to the CMD error flag
+>> >>>
+>> >>>> Hi, Alim.
+>> >>>
+>> >>>> On 10/07/2013 05:21 PM, ALIM AKHTAR wrote:
+>> >>>>>
+>> >>>>>
+>> >>>>>> ------- Original Message -------
+>> >>>>>> Sender : Jaehoon Chung S4/Engineer/System S/W Lab./Samsung Electronics
+>> >>>>>> Date : Oct 07, 2013 13:34 (GMT+09:00)
+>> >>>>>> Title : Re: [PATCH] mmc: dw_mmc: Add hardware lock error (HLE) to the CMD error flag
+>> >>>>>
+>> >>>>>> On 10/07/2013 01:22 PM, ALIM AKHTAR wrote:
+>> >>>>>>> Hi Jaehoon,
+>> >>>>>>>
+>> >>>>>>>> ------- Original Message -------
+>> >>>>>>>> Sender : Jaehoon Chung S4/Engineer/System S/W Lab./Samsung Electronics
+>> >>>>>>>> Date : Oct 06, 2013 17:28 (GMT+09:00)
+>> >>>>>>> Title : Re: [PATCH] mmc: dw_mmc: Add hardware lock error (HLE) to the CMD error flag
+>> >>>>>>
+>> >>>>>>> Hi Alim,
+>> >>>>>>
+>> >>>>>>> On 10/03/2013 06:18 PM, alim akhtar wrote:
+>> >>>>>>>> From: Alim Akhtar
+>> >>>>>>>>
+>> >>>>>>>> Hardware locked error set when the dw_mmc controller cannot load a
+>> >>>>>>>> command issued by software. When software sets the start_cmd bit in the
+>> >>>>>>>> CMD register, the controller tries to load the command. If the command
+>> >>>>>>>> buffer is already filled with a command, this error is raised. Currently
+>> >>>>>>>> driver does not handle HLE interrupt, which results in a system hang.
+>> >>>>>>> When SDMMC_INT_HLE is set into CMD_ERROR_FLAGS,.then could driver handle the HLE interrupt?
+>> >>>>>> Yes, this will be handled as a part of DW_MCI_CMD_ERROR_FLAGS error handling.
+>> >>>>>> Could some command or data be lost?
+>> >>>>> No, Data and command will not be lost as they are not send out.
+>> >>>> Maybe it needs to discuss how recovery the command/data, when HLE interrupt is occured.
+>> >>>> I want to know, do you have the recovery method when HLE interrupt is occured?
+>> >>>>
+>> >>>> As you mentioned, this patch controlled the HLE error and can't send the any command/data.
+>> >>>> Patch like this had already posted at mailing list.
+>> >>> Can you point to the link?
+>> >>>> But we also need to control after occurred the HLE.
+>> >>> Well, dw_mmc controller document just say "The software then has to reload the command" to recover
+>> from HLE.
+>> >>>> In SD-card's case, card can be inserted/removed. but in case of eMMC, can't it.
+>> >>>> It should be maintained the hardware lock status.
+>> >>> HLE is independent of emmc/sd slot and handling should be the same.
+>> >>> Insert/removal is one way to simulate HLE, this is how I found this.
+>> >>> Are you suggesting to check for INT_STATUE for emmc and handle it in case of HLE?
+>> >>
+>> >> Let me know if you have any other comments/ suggestions on this.
+>> >> Thanks!!
+>> >>
+>> >>>>> Best Regards,
+>> >>>>> Jaehoon Chung
+>> >>>
+>> >>>>>>>
+>> >>>>>>>> Best Regards,
+>> >>>>>>>> Jaehoon Chung
+>> >>>>>>>>
+>> >>>>>>>> HLE can be simulated by quickly inserting and removing sd card in card
+>> >>>>>>>> slot (30 ~ 40 times in say 20 secs)
+>> >>>>>>>>
+>> >>>>>>>> Reviewed-by: Doug Anderson
+>> >>>>>>>> Signed-off-by: Alim Akhtar
+>> >>>>>>>> ---
+>> >>>>>>>>   drivers/mmc/host/dw_mmc.c | 2 +-
+>> >>>>>>>>   1 file changed, 1 insertion(+), 1 deletion(-)
+>> >>>>>>>>
+>> >>>>>>>> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+>> >>>>>>>> index 0a6a512..24b4a52 100644
+>> >>>>>>>> --- a/drivers/mmc/host/dw_mmc.c
+>> >>>>>>>> +++ b/drivers/mmc/host/dw_mmc.c
+>> >>>>>>>> @@ -44,7 +44,7 @@
+>> >>>>>>>>   SDMMC_INT_HTO | SDMMC_INT_SBE  | \
+>> >>>>>>>>   SDMMC_INT_EBE)
+>> >>>>>>>>   #define DW_MCI_CMD_ERROR_FLAGS (SDMMC_INT_RTO | SDMMC_INT_RCRC | \
+>> >>>>>>>> - SDMMC_INT_RESP_ERR)
+>> >>>>>>>> + SDMMC_INT_RESP_ERR | SDMMC_INT_HLE)
+>> >>>>>>>>   #define DW_MCI_ERROR_FLAGS (DW_MCI_DATA_ERROR_FLAGS | \
+>> >>>>>>>>   DW_MCI_CMD_ERROR_FLAGS  | SDMMC_INT_HLE)
+>> >>>>>>>>   #define DW_MCI_SEND_STATUS 1
+>> >>
+>> >> --
+>> >> Regards,
+>> >> Alim
+>> >
+>> >
+>> >
+>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
 
-Many thanks and best regards
-
-Dirk
 
 
-
-
-
-
-
-
-
-
+-- 
+Regards,
+Alim
