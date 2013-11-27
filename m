@@ -1,245 +1,122 @@
-From: Vladimir Zapolskiy <vladimir_zapolskiy@mentor.com>
-Subject: Re: [PATCH] mmc: sdhci: don't limit discard timeout by data line
- timeout
-Date: Wed, 27 Nov 2013 18:11:21 +0200
-Message-ID: <529619A9.7030607@mentor.com>
-References: <1385046445-29711-1-git-send-email-vladimir_zapolskiy@mentor.com> <528F4242.8040408@intel.com> <528F4D06.3080400@mentor.com> <528F5663.2050800@intel.com> <528F6113.2070009@mentor.com> <528F728D.3040004@intel.com> <528F7670.9040101@mentor.com> <52946412.6060001@intel.com> <5294CD6A.9000106@mentor.com> <5295AB97.4040907@intel.com> <52960860.8090807@mleia.com> <9C9E1381-F3A4-4831-8058-CC72CAF02D0E@nvidia.com>
+From: Balaji T K <balajitk@ti.com>
+Subject: Re: [PATCH v3 2/3] mmc: omap_hsmmc: Pin remux workaround to support
+ SDIO interrupt on AM335x.
+Date: Wed, 27 Nov 2013 22:29:28 +0530
+Message-ID: <529624F0.8040508@ti.com>
+References: <1385386009-14981-1-git-send-email-afenkart@gmail.com> <1385386009-14981-3-git-send-email-afenkart@gmail.com> <20131125224601.GX10023@atomide.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from relay1.mentorg.com ([192.94.38.131]:47796 "EHLO
-	relay1.mentorg.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751810Ab3K0QLx (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 27 Nov 2013 11:11:53 -0500
-In-Reply-To: <9C9E1381-F3A4-4831-8058-CC72CAF02D0E@nvidia.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-omap-owner@vger.kernel.org>
+In-Reply-To: <20131125224601.GX10023@atomide.com>
+Sender: linux-omap-owner@vger.kernel.org
+To: Tony Lindgren <tony@atomide.com>
+Cc: Andreas Fenkart <afenkart@gmail.com>, Chris Ball <cjb@laptop.org>, Grant Likely <grant.likely@secretlab.ca>, Felipe Balbi <balbi@ti.com>, zonque@gmail.com, linux-doc@vger.kernel.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Philip Rakity <prakity@nvidia.com>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Ed Sutter <ed.sutter@alcatel-lucent.com>, Chris Ball <cjb@laptop.org>
 
-On 11/27/13 17:48, Philip Rakity wrote:
-> On Nov 27, 2013, at 2:57 PM, Vladimir Zapolskiy<vz@mleia.com>  wrote:
->> On 11/27/13 10:21, Adrian Hunter wrote:
->>> On 26/11/13 18:33, Vladimir Zapolskiy wrote:
->>>> On 11/26/13 11:04, Adrian Hunter wrote:
->>>>> On 22/11/13 17:21, Vladimir Zapolskiy wrote:
->>>>>> On 22.11.2013 16:04, Adrian Hunter wrote:
->>>>>>> On 22/11/13 15:50, Vladimir Zapolskiy wrote:
->>>>>>>> On 22.11.2013 14:04, Adrian Hunter wrote:
->>>>>>>>> On 22/11/13 14:24, Vladimir Zapolskiy wrote:
->>>>>>>>>> On 22.11.2013 12:38, Adrian Hunter wrote:
->>>>>>>>>>> On 21/11/13 17:07, Vladimir Zapolskiy wrote:
->>>>>>>>>>>> JEDEC specification defines quite high erase timeout value for 300ms
->>>>>>>>>>>> multiplied by erase group number, and SD Host Controller specification
->>>>>>>>>>>> data line timeout may be much less, e.g. 2^13 / 52MHz ~ 160us.
->>>>>>>>>>>>
->>>>>>>>>>>>>         From block layer and MMC perfromance perspective it is desirable
->>>>>>>>>>>>> that
->>>>>>>>>>>> millions of erase groups are discarded at once, so there is no much
->>>>>>>>>>>> sense to limit maximum erase timeout by data line timeout, if a
->>>>>>>>>>>> controller handles correctly erase operation without indication of
->>>>>>>>>>>> data line timeout.
->>>>>>>>>>>
->>>>>>>>>>> Would you explain that some more.  Do you mean that:
->>>>>>>>>>>         a) it does not have a timeout
->>>>>>>>>>
->>>>>>>>>> JEDEC defines a timeout on erase/trim operations, also in
->>>>>>>>>> drivers/mmc/core/core.c
->>>>>>>>>> there is a reasonable enough 10 minutes limitation for discard
->>>>>>>>>> operations.
->>>>>>>>>>
->>>>>>>>>>>         b) it has a timeout which is less than the timeout specified
->>>>>>>>>>> by the
->>>>>>>>>>> standard but the operation nevertheless completes
->>>>>>>>>>
->>>>>>>>>> SDHC data line timeout is enormously less than erase group timeout, and
->>>>>>>>>> trivial testing shows that those two timeouts are independent, probably
->>>>>>>>>> except some particular cases of controllers not known before commits
->>>>>>>>>> 58d1246db3 and e056a1b5b.
->>>>>>>>>>
->>>>>>>>>> According to the currently implemented logic, mmc_do_erase() commonly is
->>>>>>>>>> instructed to discard 1-2 erase groups at maximum, however it tends
->>>>>>>>>> to be
->>>>>>>>>> capable to successfully discard millions of erase groups at once
->>>>>>>>>> ignoring
->>>>>>>>>> that SDHC data line timeout limitation.
->>>>>>>>>>
->>>>>>>>>
->>>>>>>>> You seem to be trying to say that the SDHCI spec. says that the host
->>>>>>>>> controller does not timeout erase operations or uses a different timeout
->>>>>>>>> than the one programmed in the "Timeout Control Register".  Where is
->>>>>>>>> that is
->>>>>>>>> the SDHCI spec?
->>>>>>>>
->>>>>>>> According to the spec a host controller timeouts erase operations like any
->>>>>>>> other R1B command.
->>>>>>>>
->>>>>>>> So in your opinion, should there be SDHCI_QUIRK_BROKEN_TIMEOUT_VAL instead
->>>>>>>> of the new quirk?
->>>>>>>
->>>>>>> I don't understand how SDHCI_QUIRK_BROKEN_TIMEOUT_VAL would help.  It just
->>>>>>> sets the timeout to maximum but max_discard_to is the maximum timeout.
->>>>>>
->>>>>> Here I meant to do something like:
->>>>>>
->>>>>>       if (host->quirks&    SDHCI_QUIRK_BROKEN_TIMEOUT_VAL)
->>>>>>           mmc->max_discard_to = 0;
->>>>>>
->>>>>> Again I'm not sure that this applies well to all
->>>>>> SDHCI_QUIRK_BROKEN_TIMEOUT_VAL
->>>>>> controllers, therefore a new quirk might be better.
->>>>>>
->>>>>>> As I understand it you don't want to limit the discard size, either because
->>>>>>> your controller does not timeout, or because you are happy that the maximum
->>>>>>> timeout is enough for your users and their use-cases.
->>>>>>>
->>>>>>> If that is the case then the original patch just needs the quirk the other
->>>>>>> way around. i.e.
->>>>>>>
->>>>>>>        if (host->quirks2&     SDHCI_QUIRK2_NO_DISCARD_LIMIT)
->>>>>>>            mmc->max_discard_to = 0;
->>>>>>>        else
->>>>>>>            mmc->max_discard_to = (1<<     27) / host->timeout_clk;
->>>>>>
->>>>>> This suits me fine, thanks for review, and I'll resend a change based on
->>>>>> this.
->>>>>>
->>>>>> Also I'd like to pay your attention to (1<<    27) / host->timeout_clk part of
->>>>>> calculation, following the spec it might be better to account the actual
->>>>>> value of Data Timeout Counter, otherwise a controller may get unintentional
->>>>>> Data Timeout Error pretty soon. Please correct me, if I'm mistaken here.
->>>>>
->>>>> Not sure what you mean.  max_discard_to is the maximum timeout (in
->>>>> milliseconds) that the host controller supports.  The intent is to limit
->>>>> erase operations to ones that have a timeout that is less than or equal to
->>>>> that.
->>>>
->>>> That's clear. But it's not obvious why do you prefer (1<<   27) numerator
->>>> instead
->>>> of secure (1<<   13) or (1<<   (13 + sdhci_readl(host, SDHCI_TIMEOUT_CONTROL))).
->>>
->>> The maximum value of "Data Timeout Counter Value" in "Timeout Control
->>> Register" is 14 and the maximum timeout is therefore (1<<   27).
+On Tuesday 26 November 2013 04:16 AM, Tony Lindgren wrote:
+> * Andreas Fenkart <afenkart@gmail.com> [131125 05:30]:
+>> --- a/drivers/mmc/host/omap_hsmmc.c
+>> +++ b/drivers/mmc/host/omap_hsmmc.c
+>> @@ -452,10 +475,23 @@ static int omap_hsmmc_gpio_init(struct omap_mmc_platform_data *pdata)
+>>   	} else
+>>   		pdata->slots[0].gpio_wp = -EINVAL;
 >>
->> So, from this perspective I assume this is a potential theoretical maximum
->> timeout for a controller, which may be 16384 times more than the maximum
->> guaranteed timeout before getting a DAT timeout. Why is the theoretical
->> maximum
->> supposed to be used in calculations of a guaranteed discard operation
->> timeout
->> instead of promised DAT timeout by a controller?
->
-> cards data is not always truthful is what I have found.  The timeout is rare so setting a
-> timeout little longer is better then timing out a transaction because the card data is
-> not right.
-
-I don't find this explanation as acceptable one for the following reasons:
-a) DAT0 busy state issued by a card, but data timeout is detected on 
-controller's
-    side based on controller's setting and should be independent on a card,
-b) drivers/mmc/host/sdhci.c should follow the spec, for "bad" controllers
-    there are quirks, also see Adrian's comment in this thread about it,
-c) it makes selected discard timeout limitation awkward, if we silently 
-agree
-    that 16384 times longer (eh, not so little, right?) timeout value is OK,
-    why MAX_UINT timeout is bad then?
-
+>> +	if (gpio_is_valid(pdata->slots[0].gpio_cirq)) {
+>> +		ret = gpio_request_one(pdata->slots[0].gpio_cirq, GPIOF_DIR_IN,
+>> +				       "sdio_cirq");
+>> +		if (ret)
+>> +			goto err_free_ro;
+>> +
+>> +	} else {
+>> +		pdata->slots[0].gpio_cirq = -EINVAL;
+>> +	}
+>> +
+>> +
+>>   	return 0;
 >>
->>>>
->>>>> Currently, the limit gets applied by the block layer before the mmc layer is
->>>>> involved so there is no possibility to take the actual timeout into account.
->>>>>    However if you have erase_group_def set, then it won't make any difference
->>>>> i.e. the limit will be the same.
->>>>>
->>>>>>
->>>>>>>>
->>>>>>>>>>>>
->>>>>>>>>>>> Potentially the change may break some of the SDHCs on discard of mmc,
->>>>>>>>>>>> and for backward compatibility a new quirk is introduced, which is NOT
->>>>>>>>>>>> set by default.
->>>>>>>>>>>
->>>>>>>>>>> It sounds to me that what you want to do is not standard so the quirk
->>>>>>>>>>> should
->>>>>>>>>>> be the other way around.
->>>>>>>>>>
->>>>>>>>>> Please take a look at commits 58d1246db3 and e056a1b5b, I'd be glad, if
->>>>>>>>>> you
->>>>>>>>>> could elaborate to which "some host controllers" the quirk in my
->>>>>>>>>> definition
->>>>>>>>>> applies, I believe all other host controllers present at that time in
->>>>>>>>>> drivers/mmc/host/* are capable to discard without introduced limitation.
->>>>>>>>>
->>>>>>>>> "some host controllers" == SDHCI i.e. to all of the ones you are applying
->>>>>>>>> the change.
->>>>>>>>>
->>>>>>>>>>
->>>>>>>>>>>>
->>>>>>>>>>>> Signed-off-by: Vladimir Zapolskiy<vladimir_zapolskiy@mentor.com>
->>>>>>>>>>>> Reported-by: Ed Sutter<ed.sutter@alcatel-lucent.com>
->>>>>>>>>>>> Cc: Chris Ball<cjb@laptop.org>
->>>>>>>>>>>> Cc: Adrian Hunter<adrian.hunter@intel.com>
->>>>>>>>>>>> ---
->>>>>>>>>>>>       drivers/mmc/host/sdhci.c  |    5 ++++-
->>>>>>>>>>>>       include/linux/mmc/sdhci.h |    1 +
->>>>>>>>>>>>       2 files changed, 5 insertions(+), 1 deletion(-)
->>>>>>>>>>>>
->>>>>>>>>>>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
->>>>>>>>>>>> index bd8a098..b1fdddb 100644
->>>>>>>>>>>> --- a/drivers/mmc/host/sdhci.c
->>>>>>>>>>>> +++ b/drivers/mmc/host/sdhci.c
->>>>>>>>>>>> @@ -2930,7 +2930,10 @@ int sdhci_add_host(struct sdhci_host *host)
->>>>>>>>>>>>           if (host->quirks&       SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK)
->>>>>>>>>>>>               host->timeout_clk = mmc->f_max / 1000;
->>>>>>>>>>>>
->>>>>>>>>>>> -    mmc->max_discard_to = (1<<       27) / host->timeout_clk;
->>>>>>>>>>>> +    if (host->quirks2&       SDHCI_QUIRK2_DATA_TIMEOUT_ON_DISCARD)
->>>>>>>>>>>> +        mmc->max_discard_to = (1<<       27) / host->timeout_clk;
->>>>>>>>>>>> +    else
->>>>>>>>>>>> +        mmc->max_discard_to = 0;
->>>>>>>>>>>>
->>>>>>>>>>>>           mmc->caps |= MMC_CAP_SDIO_IRQ | MMC_CAP_ERASE |
->>>>>>>>>>>> MMC_CAP_CMD23;
->>>>>>>>>>>>
->>>>>>>>>>>> diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
->>>>>>>>>>>> index 3e781b8..e7f6bd2 100644
->>>>>>>>>>>> --- a/include/linux/mmc/sdhci.h
->>>>>>>>>>>> +++ b/include/linux/mmc/sdhci.h
->>>>>>>>>>>> @@ -98,6 +98,7 @@ struct sdhci_host {
->>>>>>>>>>>>       #define SDHCI_QUIRK2_CARD_ON_NEEDS_BUS_ON        (1<<4)
->>>>>>>>>>>>       /* Controller has a non-standard host control register */
->>>>>>>>>>>>       #define SDHCI_QUIRK2_BROKEN_HOST_CONTROL        (1<<5)
->>>>>>>>>>>> +#define SDHCI_QUIRK2_DATA_TIMEOUT_ON_DISCARD        (1<<6)
->>>>>>>>>>>>
->>>>>>>>>>>>           int irq;        /* Device IRQ */
->>>>>>>>>>>>           void __iomem *ioaddr;    /* Mapped address */
->>>>>>>>>>>>
->>>>>>>>>>>
->>>>>>>>>>
->>>>>>>>>>
->>>>>>>>>
->>>>>>
->>>>>>
->>>>>
->>>>> --
->>>>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->>>>> the body of a message to majordomo@vger.kernel.org
->>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>>
->>>>
->>>
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->> --
->> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>> +err_free_ro:
+>> +	if (gpio_is_valid(pdata->slots[0].gpio_wp))
+>>   err_free_wp:
+>> -	gpio_free(pdata->slots[0].gpio_wp);
+>> +		gpio_free(pdata->slots[0].gpio_wp);
+>>   err_free_cd:
+>>   	if (gpio_is_valid(pdata->slots[0].switch_pin))
+>>   err_free_sp:
 >
-> -----------------------------------------------------------------------------------
-> This email message is for the sole use of the intended recipient(s) and may contain
-> confidential information.  Any unauthorized review, use, disclosure or distribution
-> is prohibited.  If you are not the intended recipient, please contact the sender by
-> reply email and destroy all copies of the original message.
-> -----------------------------------------------------------------------------------
+> This patch we can now make a bit more generic with the recent addition
+> of interrupts-extended property that's now merged in mainline tree :)
+>
+> We can optionally pass two interrupts to omap_hsmmc.c where the second
+> interrupt is either the pinctrl-single wake-up interrupt, or the GPIO
+> interrupt.
+>
+> Both the iochain wake interrupt or the GPIO interrupt are available with
+> request_irq as long as configured in the .dts file. And can both use the
+> SDIO interrupt handler. The only difference is that the GPIO wake-up
+> still needs to do the dynamic remuxing of pins.
+>
+> So omap3 can use:
+>
+> mmc: mmc@4800abcd {
+> 	compatible = "ti,omap3-hsmmc";
+> 	...
+> 	interrupts-extended = <&intc 83 &omap3_pmx_core 0x11a>;
+> 	...
+> };
+>
+> And am33xx can use:
+>
+> mmc: mmc@4810abcd {
+> 	compatible = "ti,omap33xx-hsmmc";
+> 	...
+> 	interrupts-extended = <&intc 64 &gpio3 28>;
+> 	...
+> };
+>
+Hi Tony,
+
+I made similar changes for omap4 panda-es as below, but get WARNING for no irq domain [1]
+omap3 beagle seems to be OK.
+
+  		mmc1: mmc@4809c000 {
+  			compatible = "ti,omap4-hsmmc";
+  			reg = <0x4809c000 0x400>;
++			interrupts-extended = <&gic GIC_SPI 83 IRQ_TYPE_LEVEL_HIGH &omap4_pmx_core 0xa8>;
+			ti,hwmods = "mmc1";
+
+[    0.338745] OMAP GPIO hardware version 0.1
+[    0.348266] omap-gpmc 50000000.gpmc: GPMC revision 6.0
+[    0.354339] irq: no irq domain found for /ocp/pinmux@4a100040 !
+[    0.354339] ------------[ cut here ]------------
+[    0.354370] WARNING: CPU: 1 PID: 1 at /home/a0393241/git/lo/drivers/of/platform.c:171 of_device_alloc+0x158/0x16c()
+[    0.354370] Modules linked in:
+[    0.354400] CPU: 1 PID: 1 Comm: swapper/0 Not tainted 3.13.0-rc1-00141-g8ae516a-dirty #36
+[    0.354431] [<c001520c>] (unwind_backtrace+0x0/0xf0) from [<c0011ef4>] (show_stack+0x10/0x14)
+[    0.354431] [<c0011ef4>] (show_stack+0x10/0x14) from [<c0521750>] (dump_stack+0x78/0x94)
+[    0.354461] [<c0521750>] (dump_stack+0x78/0x94) from [<c003e678>] (warn_slowpath_common+0x6c/0x90)
+[    0.354492] [<c003e678>] (warn_slowpath_common+0x6c/0x90) from [<c003e6b8>] (warn_slowpath_null+0x1c/0x24)
+[    0.354492] [<c003e6b8>] (warn_slowpath_null+0x1c/0x24) from [<c04460e4>] (of_device_alloc+0x158/0x16c)
+[    0.354522] [<c04460e4>] (of_device_alloc+0x158/0x16c) from [<c0446128>] (of_platform_device_create_pdata+0x30/0x94)
+[    0.354522] [<c0446128>] (of_platform_device_create_pdata+0x30/0x94) from [<c044626c>] (of_platform_bus_create+0xe0/0x164)
+[    0.354553] [<c044626c>] (of_platform_bus_create+0xe0/0x164) from [<c04462c8>] (of_platform_bus_create+0x13c/0x164)
+[    0.354553] [<c04462c8>] (of_platform_bus_create+0x13c/0x164) from [<c044634c>] (of_platform_populate+0x5c/0x9c)
+[    0.354583] [<c044634c>] (of_platform_populate+0x5c/0x9c) from [<c0785c38>] (pdata_quirks_init+0x28/0x70)
+[    0.354614] [<c0785c38>] (pdata_quirks_init+0x28/0x70) from [<c0777458>] (customize_machine+0x1c/0x40)
+[    0.354614] [<c0777458>] (customize_machine+0x1c/0x40) from [<c00088fc>] (do_one_initcall+0xec/0x150)
+[    0.354644] [<c00088fc>] (do_one_initcall+0xec/0x150) from [<c0774bfc>] (kernel_init_freeable+0xfc/0x1cc)
+[    0.354644] [<c0774bfc>] (kernel_init_freeable+0xfc/0x1cc) from [<c051c9ac>] (kernel_init+0x8/0x118)
+[    0.354675] [<c051c9ac>] (kernel_init+0x8/0x118) from [<c000e5e8>] (ret_from_fork+0x14/0x2c)
+[    0.354766] ---[ end trace 7067c7558a4cd015 ]---
+[    0.366607] platform 4b501000.aes: Cannot lookup hwmod 'aes'
+[    0.367034] platform 480a5000.des: Cannot lookup hwmod 'des'
+[    0.374481] No ATAGs?
+[    0.374511] hw-breakpoint: found 5 (+1 reserved) breakpoint and 1 watchpoint registers.
+[    0.374542] hw-breakpoint: maximum watchpoint size is 4 bytes.
+[    0.377502] OMAP DMA hardware revision 0.0
+[    0.415100] bio: create slab <bio-0> at 0
+[    0.417388] edma-dma-engine edma-dma-engine.0: Can't allocate PaRAM dummy slot
+[    0.417419] edma-dma-engine: probe of edma-dma-engine.0 failed with error -5
+[    0.460754] omap-dma-engine 4a056000.dma-controller: OMAP DMA engine driver
+[    0.462249] hsusb1_vbus: 3300 mV
+
