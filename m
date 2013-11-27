@@ -1,179 +1,203 @@
-From: Alim Akhtar <alim.akhtar@gmail.com>
-Subject: Re: [PATCH] mmc: dw_mmc: Add hardware lock error (HLE) to the CMD
- error flag
-Date: Wed, 27 Nov 2013 13:00:39 +0530
-Message-ID: <CAGOxZ526f72JgfKA6G=fHJg=NC9aXiC1a+H=khyJ224YdaJZvw@mail.gmail.com>
-References: <32277109.227361381136426293.JavaMail.weblogic@epv6ml06>
- <CAGOxZ53PJTyXhcg20whXZYcRVVvy1+p0SA9xM_WFOAbYJ7riSQ@mail.gmail.com>
- <CAGOxZ51UrZ4aN8Y6J2d4Zjz_G_2uDmC9pzNqZ4Bf__iFYSRcxQ@mail.gmail.com>
- <5286108F.4090601@samsung.com> <007a01cee201$e4c14880$ae43d980$%jun@samsung.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH] mmc: sdhci: don't limit discard timeout by data line
+ timeout
+Date: Wed, 27 Nov 2013 10:21:43 +0200
+Message-ID: <5295AB97.4040907@intel.com>
+References: <1385046445-29711-1-git-send-email-vladimir_zapolskiy@mentor.com> <528F4242.8040408@intel.com> <528F4D06.3080400@mentor.com> <528F5663.2050800@intel.com> <528F6113.2070009@mentor.com> <528F728D.3040004@intel.com> <528F7670.9040101@mentor.com> <52946412.6060001@intel.com> <5294CD6A.9000106@mentor.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-vb0-f48.google.com ([209.85.212.48]:56419 "EHLO
-	mail-vb0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752175Ab3K0HbU (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 27 Nov 2013 02:31:20 -0500
-Received: by mail-vb0-f48.google.com with SMTP id x16so4544124vbf.7
-        for <linux-mmc@vger.kernel.org>; Tue, 26 Nov 2013 23:31:19 -0800 (PST)
-In-Reply-To: <007a01cee201$e4c14880$ae43d980$%jun@samsung.com>
+Received: from mga09.intel.com ([134.134.136.24]:14259 "EHLO mga09.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753639Ab3K0IOR (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 27 Nov 2013 03:14:17 -0500
+In-Reply-To: <5294CD6A.9000106@mentor.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Seungwon Jeon <tgih.jun@samsung.com>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, Alim Akhtar <alim.akhtar@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Douglas Anderson <dianders@chromium.org>
+To: Vladimir Zapolskiy <vladimir_zapolskiy@mentor.com>
+Cc: linux-mmc@vger.kernel.org, Ed Sutter <ed.sutter@alcatel-lucent.com>, Chris Ball <cjb@laptop.org>
 
-Hi Seungwon
+On 26/11/13 18:33, Vladimir Zapolskiy wrote:
+> On 11/26/13 11:04, Adrian Hunter wrote:
+>> On 22/11/13 17:21, Vladimir Zapolskiy wrote:
+>>> On 22.11.2013 16:04, Adrian Hunter wrote:
+>>>> On 22/11/13 15:50, Vladimir Zapolskiy wrote:
+>>>>> On 22.11.2013 14:04, Adrian Hunter wrote:
+>>>>>> On 22/11/13 14:24, Vladimir Zapolskiy wrote:
+>>>>>>> On 22.11.2013 12:38, Adrian Hunter wrote:
+>>>>>>>> On 21/11/13 17:07, Vladimir Zapolskiy wrote:
+>>>>>>>>> JEDEC specification defines quite high erase timeout value for 300ms
+>>>>>>>>> multiplied by erase group number, and SD Host Controller specification
+>>>>>>>>> data line timeout may be much less, e.g. 2^13 / 52MHz ~ 160us.
+>>>>>>>>>
+>>>>>>>>>>      From block layer and MMC perfromance perspective it is desirable
+>>>>>>>>>> that
+>>>>>>>>> millions of erase groups are discarded at once, so there is no much
+>>>>>>>>> sense to limit maximum erase timeout by data line timeout, if a
+>>>>>>>>> controller handles correctly erase operation without indication of
+>>>>>>>>> data line timeout.
+>>>>>>>>
+>>>>>>>> Would you explain that some more.  Do you mean that:
+>>>>>>>>        a) it does not have a timeout
+>>>>>>>
+>>>>>>> JEDEC defines a timeout on erase/trim operations, also in
+>>>>>>> drivers/mmc/core/core.c
+>>>>>>> there is a reasonable enough 10 minutes limitation for discard
+>>>>>>> operations.
+>>>>>>>
+>>>>>>>>        b) it has a timeout which is less than the timeout specified
+>>>>>>>> by the
+>>>>>>>> standard but the operation nevertheless completes
+>>>>>>>
+>>>>>>> SDHC data line timeout is enormously less than erase group timeout, and
+>>>>>>> trivial testing shows that those two timeouts are independent, probably
+>>>>>>> except some particular cases of controllers not known before commits
+>>>>>>> 58d1246db3 and e056a1b5b.
+>>>>>>>
+>>>>>>> According to the currently implemented logic, mmc_do_erase() commonly is
+>>>>>>> instructed to discard 1-2 erase groups at maximum, however it tends
+>>>>>>> to be
+>>>>>>> capable to successfully discard millions of erase groups at once
+>>>>>>> ignoring
+>>>>>>> that SDHC data line timeout limitation.
+>>>>>>>
+>>>>>>
+>>>>>> You seem to be trying to say that the SDHCI spec. says that the host
+>>>>>> controller does not timeout erase operations or uses a different timeout
+>>>>>> than the one programmed in the "Timeout Control Register".  Where is
+>>>>>> that is
+>>>>>> the SDHCI spec?
+>>>>>
+>>>>> According to the spec a host controller timeouts erase operations like any
+>>>>> other R1B command.
+>>>>>
+>>>>> So in your opinion, should there be SDHCI_QUIRK_BROKEN_TIMEOUT_VAL instead
+>>>>> of the new quirk?
+>>>>
+>>>> I don't understand how SDHCI_QUIRK_BROKEN_TIMEOUT_VAL would help.  It just
+>>>> sets the timeout to maximum but max_discard_to is the maximum timeout.
+>>>
+>>> Here I meant to do something like:
+>>>
+>>>      if (host->quirks&  SDHCI_QUIRK_BROKEN_TIMEOUT_VAL)
+>>>          mmc->max_discard_to = 0;
+>>>
+>>> Again I'm not sure that this applies well to all
+>>> SDHCI_QUIRK_BROKEN_TIMEOUT_VAL
+>>> controllers, therefore a new quirk might be better.
+>>>
+>>>> As I understand it you don't want to limit the discard size, either because
+>>>> your controller does not timeout, or because you are happy that the maximum
+>>>> timeout is enough for your users and their use-cases.
+>>>>
+>>>> If that is the case then the original patch just needs the quirk the other
+>>>> way around. i.e.
+>>>>
+>>>>       if (host->quirks2&   SDHCI_QUIRK2_NO_DISCARD_LIMIT)
+>>>>           mmc->max_discard_to = 0;
+>>>>       else
+>>>>           mmc->max_discard_to = (1<<   27) / host->timeout_clk;
+>>>
+>>> This suits me fine, thanks for review, and I'll resend a change based on
+>>> this.
+>>>
+>>> Also I'd like to pay your attention to (1<<  27) / host->timeout_clk part of
+>>> calculation, following the spec it might be better to account the actual
+>>> value of Data Timeout Counter, otherwise a controller may get unintentional
+>>> Data Timeout Error pretty soon. Please correct me, if I'm mistaken here.
+>>
+>> Not sure what you mean.  max_discard_to is the maximum timeout (in
+>> milliseconds) that the host controller supports.  The intent is to limit
+>> erase operations to ones that have a timeout that is less than or equal to
+>> that.
+> 
+> That's clear. But it's not obvious why do you prefer (1 << 27) numerator
+> instead
+> of secure (1 << 13) or (1 << (13 + sdhci_readl(host, SDHCI_TIMEOUT_CONTROL))).
 
-On Fri, Nov 15, 2013 at 6:24 PM, Seungwon Jeon <tgih.jun@samsung.com> wrote:
-> On Fri, November 15, 2013, Jaehoon Chung wrote:
->> Dear, Alim,
->>
->> Well, I'm not sure that this patch is correct.
->> But as you mentioned, we need to decide how control the HLE.
->>
->> I will check the HLE on this weekend. Thanks for your effort.
->
-> Thank you for remind.
-> HLE should be cleared at least although it needs to be handled more properly.
-> I agree on that now.
->
-> Your patch is below?
-> https://patchwork.kernel.org/patch/2981661/
-Yes, this is the one I posted.
->
-> I think it's simple and good way.
-> It would be better to add error message when happened.
-Do you mean check for HLE in interrupt handler and print error message?
-If so, do you want me to respin this patch?
+The maximum value of "Data Timeout Counter Value" in "Timeout Control
+Register" is 14 and the maximum timeout is therefore (1 << 27).
 
->
-> Thanks,
-> Seungwon Jeon
->
+> 
+>> Currently, the limit gets applied by the block layer before the mmc layer is
+>> involved so there is no possibility to take the actual timeout into account.
+>>   However if you have erase_group_def set, then it won't make any difference
+>> i.e. the limit will be the same.
 >>
->> Best Regards,
->> Jaehoon Chung
+>>>
+>>>>>
+>>>>>>>>>
+>>>>>>>>> Potentially the change may break some of the SDHCs on discard of mmc,
+>>>>>>>>> and for backward compatibility a new quirk is introduced, which is NOT
+>>>>>>>>> set by default.
+>>>>>>>>
+>>>>>>>> It sounds to me that what you want to do is not standard so the quirk
+>>>>>>>> should
+>>>>>>>> be the other way around.
+>>>>>>>
+>>>>>>> Please take a look at commits 58d1246db3 and e056a1b5b, I'd be glad, if
+>>>>>>> you
+>>>>>>> could elaborate to which "some host controllers" the quirk in my
+>>>>>>> definition
+>>>>>>> applies, I believe all other host controllers present at that time in
+>>>>>>> drivers/mmc/host/* are capable to discard without introduced limitation.
+>>>>>>
+>>>>>> "some host controllers" == SDHCI i.e. to all of the ones you are applying
+>>>>>> the change.
+>>>>>>
+>>>>>>>
+>>>>>>>>>
+>>>>>>>>> Signed-off-by: Vladimir Zapolskiy<vladimir_zapolskiy@mentor.com>
+>>>>>>>>> Reported-by: Ed Sutter<ed.sutter@alcatel-lucent.com>
+>>>>>>>>> Cc: Chris Ball<cjb@laptop.org>
+>>>>>>>>> Cc: Adrian Hunter<adrian.hunter@intel.com>
+>>>>>>>>> ---
+>>>>>>>>>      drivers/mmc/host/sdhci.c  |    5 ++++-
+>>>>>>>>>      include/linux/mmc/sdhci.h |    1 +
+>>>>>>>>>      2 files changed, 5 insertions(+), 1 deletion(-)
+>>>>>>>>>
+>>>>>>>>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+>>>>>>>>> index bd8a098..b1fdddb 100644
+>>>>>>>>> --- a/drivers/mmc/host/sdhci.c
+>>>>>>>>> +++ b/drivers/mmc/host/sdhci.c
+>>>>>>>>> @@ -2930,7 +2930,10 @@ int sdhci_add_host(struct sdhci_host *host)
+>>>>>>>>>          if (host->quirks&     SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK)
+>>>>>>>>>              host->timeout_clk = mmc->f_max / 1000;
+>>>>>>>>>
+>>>>>>>>> -    mmc->max_discard_to = (1<<     27) / host->timeout_clk;
+>>>>>>>>> +    if (host->quirks2&     SDHCI_QUIRK2_DATA_TIMEOUT_ON_DISCARD)
+>>>>>>>>> +        mmc->max_discard_to = (1<<     27) / host->timeout_clk;
+>>>>>>>>> +    else
+>>>>>>>>> +        mmc->max_discard_to = 0;
+>>>>>>>>>
+>>>>>>>>>          mmc->caps |= MMC_CAP_SDIO_IRQ | MMC_CAP_ERASE |
+>>>>>>>>> MMC_CAP_CMD23;
+>>>>>>>>>
+>>>>>>>>> diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
+>>>>>>>>> index 3e781b8..e7f6bd2 100644
+>>>>>>>>> --- a/include/linux/mmc/sdhci.h
+>>>>>>>>> +++ b/include/linux/mmc/sdhci.h
+>>>>>>>>> @@ -98,6 +98,7 @@ struct sdhci_host {
+>>>>>>>>>      #define SDHCI_QUIRK2_CARD_ON_NEEDS_BUS_ON        (1<<4)
+>>>>>>>>>      /* Controller has a non-standard host control register */
+>>>>>>>>>      #define SDHCI_QUIRK2_BROKEN_HOST_CONTROL        (1<<5)
+>>>>>>>>> +#define SDHCI_QUIRK2_DATA_TIMEOUT_ON_DISCARD        (1<<6)
+>>>>>>>>>
+>>>>>>>>>          int irq;        /* Device IRQ */
+>>>>>>>>>          void __iomem *ioaddr;    /* Mapped address */
+>>>>>>>>>
+>>>>>>>>
+>>>>>>>
+>>>>>>>
+>>>>>>
+>>>
+>>>
 >>
->> On 11/12/2013 01:12 PM, Alim Akhtar wrote:
->> > Hi Seungwon/ Jaehoon,
->> > I can see there are at least three patches which address HLE (Hardware
->> > Lock Error) in dw_mmc driver.
->> >
->> > https://patchwork.kernel.org/patch/1814991/
->> > http://www.spinics.net/lists/linux-mmc/msg21459.html
->> > and third one is my patch
->> > http://news.gmane.org/gmane.linux.kernel.mmc/cutoff=23010
->> >
->> > Can we have some conclusion about how to handle HLE?
->> >
->> > Thanks!!!
->> >
->> > On Thu, Oct 10, 2013 at 4:31 PM, Alim Akhtar <alim.akhtar@gmail.com> wrote:
->> >> Hi Jaeohoon,
->> >>
->> >> On Mon, Oct 7, 2013 at 2:00 AM, ALIM AKHTAR <alim.akhtar@samsung.com> wrote:
->> >>> Hi Jaeohoon,
->> >>> Thanks for quick review.
->> >>>> ------- Original Message -------
->> >>>> Sender : Jaehoon Chung<jh80.chung@samsung.com> S4/Engineer/System S/W Lab./Samsung Electronics
->> >>>> Date : Oct 07, 2013 17:36 (GMT+09:00)
->> >>>> Title : Re: [PATCH] mmc: dw_mmc: Add hardware lock error (HLE) to the CMD error flag
->> >>>
->> >>>> Hi, Alim.
->> >>>
->> >>>> On 10/07/2013 05:21 PM, ALIM AKHTAR wrote:
->> >>>>>
->> >>>>>
->> >>>>>> ------- Original Message -------
->> >>>>>> Sender : Jaehoon Chung S4/Engineer/System S/W Lab./Samsung Electronics
->> >>>>>> Date : Oct 07, 2013 13:34 (GMT+09:00)
->> >>>>>> Title : Re: [PATCH] mmc: dw_mmc: Add hardware lock error (HLE) to the CMD error flag
->> >>>>>
->> >>>>>> On 10/07/2013 01:22 PM, ALIM AKHTAR wrote:
->> >>>>>>> Hi Jaehoon,
->> >>>>>>>
->> >>>>>>>> ------- Original Message -------
->> >>>>>>>> Sender : Jaehoon Chung S4/Engineer/System S/W Lab./Samsung Electronics
->> >>>>>>>> Date : Oct 06, 2013 17:28 (GMT+09:00)
->> >>>>>>> Title : Re: [PATCH] mmc: dw_mmc: Add hardware lock error (HLE) to the CMD error flag
->> >>>>>>
->> >>>>>>> Hi Alim,
->> >>>>>>
->> >>>>>>> On 10/03/2013 06:18 PM, alim akhtar wrote:
->> >>>>>>>> From: Alim Akhtar
->> >>>>>>>>
->> >>>>>>>> Hardware locked error set when the dw_mmc controller cannot load a
->> >>>>>>>> command issued by software. When software sets the start_cmd bit in the
->> >>>>>>>> CMD register, the controller tries to load the command. If the command
->> >>>>>>>> buffer is already filled with a command, this error is raised. Currently
->> >>>>>>>> driver does not handle HLE interrupt, which results in a system hang.
->> >>>>>>> When SDMMC_INT_HLE is set into CMD_ERROR_FLAGS,.then could driver handle the HLE interrupt?
->> >>>>>> Yes, this will be handled as a part of DW_MCI_CMD_ERROR_FLAGS error handling.
->> >>>>>> Could some command or data be lost?
->> >>>>> No, Data and command will not be lost as they are not send out.
->> >>>> Maybe it needs to discuss how recovery the command/data, when HLE interrupt is occured.
->> >>>> I want to know, do you have the recovery method when HLE interrupt is occured?
->> >>>>
->> >>>> As you mentioned, this patch controlled the HLE error and can't send the any command/data.
->> >>>> Patch like this had already posted at mailing list.
->> >>> Can you point to the link?
->> >>>> But we also need to control after occurred the HLE.
->> >>> Well, dw_mmc controller document just say "The software then has to reload the command" to recover
->> from HLE.
->> >>>> In SD-card's case, card can be inserted/removed. but in case of eMMC, can't it.
->> >>>> It should be maintained the hardware lock status.
->> >>> HLE is independent of emmc/sd slot and handling should be the same.
->> >>> Insert/removal is one way to simulate HLE, this is how I found this.
->> >>> Are you suggesting to check for INT_STATUE for emmc and handle it in case of HLE?
->> >>
->> >> Let me know if you have any other comments/ suggestions on this.
->> >> Thanks!!
->> >>
->> >>>>> Best Regards,
->> >>>>> Jaehoon Chung
->> >>>
->> >>>>>>>
->> >>>>>>>> Best Regards,
->> >>>>>>>> Jaehoon Chung
->> >>>>>>>>
->> >>>>>>>> HLE can be simulated by quickly inserting and removing sd card in card
->> >>>>>>>> slot (30 ~ 40 times in say 20 secs)
->> >>>>>>>>
->> >>>>>>>> Reviewed-by: Doug Anderson
->> >>>>>>>> Signed-off-by: Alim Akhtar
->> >>>>>>>> ---
->> >>>>>>>>   drivers/mmc/host/dw_mmc.c | 2 +-
->> >>>>>>>>   1 file changed, 1 insertion(+), 1 deletion(-)
->> >>>>>>>>
->> >>>>>>>> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
->> >>>>>>>> index 0a6a512..24b4a52 100644
->> >>>>>>>> --- a/drivers/mmc/host/dw_mmc.c
->> >>>>>>>> +++ b/drivers/mmc/host/dw_mmc.c
->> >>>>>>>> @@ -44,7 +44,7 @@
->> >>>>>>>>   SDMMC_INT_HTO | SDMMC_INT_SBE  | \
->> >>>>>>>>   SDMMC_INT_EBE)
->> >>>>>>>>   #define DW_MCI_CMD_ERROR_FLAGS (SDMMC_INT_RTO | SDMMC_INT_RCRC | \
->> >>>>>>>> - SDMMC_INT_RESP_ERR)
->> >>>>>>>> + SDMMC_INT_RESP_ERR | SDMMC_INT_HLE)
->> >>>>>>>>   #define DW_MCI_ERROR_FLAGS (DW_MCI_DATA_ERROR_FLAGS | \
->> >>>>>>>>   DW_MCI_CMD_ERROR_FLAGS  | SDMMC_INT_HLE)
->> >>>>>>>>   #define DW_MCI_SEND_STATUS 1
->> >>
->> >> --
->> >> Regards,
->> >> Alim
->> >
->> >
->> >
->>
->> --
+>> -- 
 >> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
 >> the body of a message to majordomo@vger.kernel.org
 >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
+> 
+> 
 
-
-
--- 
-Regards,
-Alim
