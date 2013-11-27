@@ -1,47 +1,48 @@
-From: Nicolas Ferre <nicolas.ferre@atmel.com>
-Subject: Re: [PATCH] mmc: atmel-mci: fix timeout errors in SDIO mode when
- using DMA
-Date: Wed, 27 Nov 2013 10:41:42 +0100
-Message-ID: <5295BE56.3060609@atmel.com>
-References: <1384959671-5646-1-git-send-email-ludovic.desroches@atmel.com>	<528E29D0.9080507@atmel.com> <87zjoqer82.fsf@octavius.laptop.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eusmtp01.atmel.com ([212.144.249.242]:56058 "EHLO
-	eusmtp01.atmel.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751793Ab3K0Jlu (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 27 Nov 2013 04:41:50 -0500
-In-Reply-To: <87zjoqer82.fsf@octavius.laptop.org>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Laurent Pinchart <laurent.pinchart+renesas@ideasonboard.com>
+Subject: [PATCH v2 2/2] mmc: sh_mmcif: Fix compilation warning on 64-bit platforms
+Date: Wed, 27 Nov 2013 11:16:44 +0100
+Message-ID: <1385547404-13703-1-git-send-email-laurent.pinchart+renesas@ideasonboard.com>
+References: <1385512480-10432-2-git-send-email-laurent.pinchart+renesas@ideasonboard.com>
+Return-path: <linux-sh-owner@vger.kernel.org>
+In-Reply-To: <1385512480-10432-2-git-send-email-laurent.pinchart+renesas@ideasonboard.com>
+Sender: linux-sh-owner@vger.kernel.org
+To: linux-sh@vger.kernel.org
+Cc: Chris Ball <cjb@laptop.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: ludovic.desroches@atmel.com, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org
 
-On 26/11/2013 23:24, Chris Ball :
-> Hi,
->
-> On Thu, Nov 21 2013, Nicolas Ferre wrote:
->> On 20/11/2013 16:01, ludovic.desroches@atmel.com :
->>> From: Ludovic Desroches <ludovic.desroches@atmel.com>
->>>
->>> With some SDIO devices, timeout errors can happen when reading data. To solve
->>> this issue the DMA transfer has to be activated before sending the command to
->>> the device. This order is incorrect in PDC mode. So we have to take care if we
->>> are using DMA or PDC to know when to send the MMC command.
->>>
->>> Cc: <stable@vger.kernel.org> #3.2+
->>> Signed-off-by: Ludovic Desroches <ludovic.desroches@atmel.com>
->>
->> Acked-by: Nicolas Ferre <nicolas.ferre@atmel.com>
->
-> Thanks, pushed to mmc-next for 3.14.
+From: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
 
-Nice, thank you Chris, but what about considering its inclusion in 3.13?
+Casting an integer to a void * generates a "cast to pointer from integer
+of different size" warning. Cast the integer to an uintptr_t first to
+fix it.
 
-I know that it will anyway hit the 3.13.y stable update but I do think 
-that it would be nice to have this fix sooner in official 3.13...
+Cc: Chris Ball <cjb@laptop.org>
+Cc: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Cc: linux-mmc@vger.kernel.org
+Signed-off-by: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
+---
+ drivers/mmc/host/sh_mmcif.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-Bye,
+Changes compared to v1:
+
+- Cast to uintptr_t instead of unsigned long
+
+Patch 1/2 hasn't been changed.
+
+diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
+index bebf2fe..dff55da 100644
+--- a/drivers/mmc/host/sh_mmcif.c
++++ b/drivers/mmc/host/sh_mmcif.c
+@@ -403,7 +403,7 @@ sh_mmcif_request_dma_one(struct sh_mmcif_host *host,
+ 		slave_id = 0;
+ 
+ 	chan = dma_request_slave_channel_compat(mask, shdma_chan_filter,
+-				(void *)slave_id, &host->pd->dev,
++				(void *)(uintptr_t)slave_id, &host->pd->dev,
+ 				direction == DMA_MEM_TO_DEV ? "tx" : "rx");
+ 
+ 	dev_dbg(&host->pd->dev, "%s: %s: got channel %p\n", __func__,
 -- 
-Nicolas Ferre
+1.8.3.2
+
