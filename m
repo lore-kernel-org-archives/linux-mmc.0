@@ -1,282 +1,52 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH] mmc: sdhci: don't limit discard timeout by data line
- timeout
-Date: Thu, 28 Nov 2013 15:06:18 +0200
-Message-ID: <52973FCA.8000901@intel.com>
-References: <1385046445-29711-1-git-send-email-vladimir_zapolskiy@mentor.com> <528F4242.8040408@intel.com> <528F4D06.3080400@mentor.com> <528F5663.2050800@intel.com> <528F6113.2070009@mentor.com> <528F728D.3040004@intel.com> <528F7670.9040101@mentor.com> <52946412.6060001@intel.com> <5294CD6A.9000106@mentor.com> <5295AB97.4040907@intel.com> <52960860.8090807@mleia.com> <5296ECED.9060106@intel.com> <52972D9E.8020907@mentor.com>
+From: Romain Izard <romain.izard.pro@gmail.com>
+Subject: =?UTF-8?Q?e=E2=8B=85MMC_forward_compatibility?=
+Date: Thu, 28 Nov 2013 15:01:49 +0100
+Message-ID: <CAGkQfmOjUeKYMq8aosZTyco4Sna4yM_20zGWUG2nWRyX_gwyhw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga11.intel.com ([192.55.52.93]:34759 "EHLO mga11.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751102Ab3K1M6m (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 28 Nov 2013 07:58:42 -0500
-In-Reply-To: <52972D9E.8020907@mentor.com>
+Received: from mail-oa0-f41.google.com ([209.85.219.41]:44543 "EHLO
+	mail-oa0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751271Ab3K1OCL convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 28 Nov 2013 09:02:11 -0500
+Received: by mail-oa0-f41.google.com with SMTP id j17so9300803oag.0
+        for <linux-mmc@vger.kernel.org>; Thu, 28 Nov 2013 06:02:10 -0800 (PST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Vladimir Zapolskiy <vladimir_zapolskiy@mentor.com>
-Cc: linux-mmc@vger.kernel.org, Ed Sutter <ed.sutter@alcatel-lucent.com>, Chris Ball <cjb@laptop.org>
+To: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org
 
-On 28/11/13 13:48, Vladimir Zapolskiy wrote:
-> On 11/28/13 09:12, Adrian Hunter wrote:
->> On 27/11/13 16:57, Vladimir Zapolskiy wrote:
->>> On 11/27/13 10:21, Adrian Hunter wrote:
->>>> On 26/11/13 18:33, Vladimir Zapolskiy wrote:
->>>>> On 11/26/13 11:04, Adrian Hunter wrote:
->>>>>> On 22/11/13 17:21, Vladimir Zapolskiy wrote:
->>>>>>> On 22.11.2013 16:04, Adrian Hunter wrote:
->>>>>>>> On 22/11/13 15:50, Vladimir Zapolskiy wrote:
->>>>>>>>> On 22.11.2013 14:04, Adrian Hunter wrote:
->>>>>>>>>> On 22/11/13 14:24, Vladimir Zapolskiy wrote:
->>>>>>>>>>> On 22.11.2013 12:38, Adrian Hunter wrote:
->>>>>>>>>>>> On 21/11/13 17:07, Vladimir Zapolskiy wrote:
->>>>>>>>>>>>> JEDEC specification defines quite high erase timeout value for
->>>>>>>>>>>>> 300ms
->>>>>>>>>>>>> multiplied by erase group number, and SD Host Controller
->>>>>>>>>>>>> specification
->>>>>>>>>>>>> data line timeout may be much less, e.g. 2^13 / 52MHz ~ 160us.
->>>>>>>>>>>>>
->>>>>>>>>>>>>>          From block layer and MMC perfromance perspective it is
->>>>>>>>>>>>>> desirable
->>>>>>>>>>>>>> that
->>>>>>>>>>>>> millions of erase groups are discarded at once, so there is no
->>>>>>>>>>>>> much
->>>>>>>>>>>>> sense to limit maximum erase timeout by data line timeout, if a
->>>>>>>>>>>>> controller handles correctly erase operation without indication of
->>>>>>>>>>>>> data line timeout.
->>>>>>>>>>>>
->>>>>>>>>>>> Would you explain that some more.  Do you mean that:
->>>>>>>>>>>>          a) it does not have a timeout
->>>>>>>>>>>
->>>>>>>>>>> JEDEC defines a timeout on erase/trim operations, also in
->>>>>>>>>>> drivers/mmc/core/core.c
->>>>>>>>>>> there is a reasonable enough 10 minutes limitation for discard
->>>>>>>>>>> operations.
->>>>>>>>>>>
->>>>>>>>>>>>          b) it has a timeout which is less than the timeout
->>>>>>>>>>>> specified
->>>>>>>>>>>> by the
->>>>>>>>>>>> standard but the operation nevertheless completes
->>>>>>>>>>>
->>>>>>>>>>> SDHC data line timeout is enormously less than erase group timeout,
->>>>>>>>>>> and
->>>>>>>>>>> trivial testing shows that those two timeouts are independent,
->>>>>>>>>>> probably
->>>>>>>>>>> except some particular cases of controllers not known before commits
->>>>>>>>>>> 58d1246db3 and e056a1b5b.
->>>>>>>>>>>
->>>>>>>>>>> According to the currently implemented logic, mmc_do_erase()
->>>>>>>>>>> commonly is
->>>>>>>>>>> instructed to discard 1-2 erase groups at maximum, however it tends
->>>>>>>>>>> to be
->>>>>>>>>>> capable to successfully discard millions of erase groups at once
->>>>>>>>>>> ignoring
->>>>>>>>>>> that SDHC data line timeout limitation.
->>>>>>>>>>>
->>>>>>>>>>
->>>>>>>>>> You seem to be trying to say that the SDHCI spec. says that the host
->>>>>>>>>> controller does not timeout erase operations or uses a different
->>>>>>>>>> timeout
->>>>>>>>>> than the one programmed in the "Timeout Control Register".  Where is
->>>>>>>>>> that is
->>>>>>>>>> the SDHCI spec?
->>>>>>>>>
->>>>>>>>> According to the spec a host controller timeouts erase operations
->>>>>>>>> like any
->>>>>>>>> other R1B command.
->>>>>>>>>
->>>>>>>>> So in your opinion, should there be SDHCI_QUIRK_BROKEN_TIMEOUT_VAL
->>>>>>>>> instead
->>>>>>>>> of the new quirk?
->>>>>>>>
->>>>>>>> I don't understand how SDHCI_QUIRK_BROKEN_TIMEOUT_VAL would help.  It
->>>>>>>> just
->>>>>>>> sets the timeout to maximum but max_discard_to is the maximum timeout.
->>>>>>>
->>>>>>> Here I meant to do something like:
->>>>>>>
->>>>>>>        if (host->quirks&    SDHCI_QUIRK_BROKEN_TIMEOUT_VAL)
->>>>>>>            mmc->max_discard_to = 0;
->>>>>>>
->>>>>>> Again I'm not sure that this applies well to all
->>>>>>> SDHCI_QUIRK_BROKEN_TIMEOUT_VAL
->>>>>>> controllers, therefore a new quirk might be better.
->>>>>>>
->>>>>>>> As I understand it you don't want to limit the discard size, either
->>>>>>>> because
->>>>>>>> your controller does not timeout, or because you are happy that the
->>>>>>>> maximum
->>>>>>>> timeout is enough for your users and their use-cases.
->>>>>>>>
->>>>>>>> If that is the case then the original patch just needs the quirk the
->>>>>>>> other
->>>>>>>> way around. i.e.
->>>>>>>>
->>>>>>>>         if (host->quirks2&     SDHCI_QUIRK2_NO_DISCARD_LIMIT)
->>>>>>>>             mmc->max_discard_to = 0;
->>>>>>>>         else
->>>>>>>>             mmc->max_discard_to = (1<<     27) / host->timeout_clk;
->>>>>>>
->>>>>>> This suits me fine, thanks for review, and I'll resend a change based on
->>>>>>> this.
->>>>>>>
->>>>>>> Also I'd like to pay your attention to (1<<    27) / host->timeout_clk
->>>>>>> part of
->>>>>>> calculation, following the spec it might be better to account the actual
->>>>>>> value of Data Timeout Counter, otherwise a controller may get
->>>>>>> unintentional
->>>>>>> Data Timeout Error pretty soon. Please correct me, if I'm mistaken here.
->>>>>>
->>>>>> Not sure what you mean.  max_discard_to is the maximum timeout (in
->>>>>> milliseconds) that the host controller supports.  The intent is to limit
->>>>>> erase operations to ones that have a timeout that is less than or
->>>>>> equal to
->>>>>> that.
->>>>>
->>>>> That's clear. But it's not obvious why do you prefer (1<<   27) numerator
->>>>> instead
->>>>> of secure (1<<   13) or (1<<   (13 + sdhci_readl(host,
->>>>> SDHCI_TIMEOUT_CONTROL))).
->>>>
->>>> The maximum value of "Data Timeout Counter Value" in "Timeout Control
->>>> Register" is 14 and the maximum timeout is therefore (1<<   27).
->>>
->>> So, from this perspective I assume this is a potential theoretical maximum
->>> timeout for a controller, which may be 16384 times more than the maximum
->>> guaranteed timeout before getting a DAT timeout. Why is the theoretical
->>> maximum
->>
->> Where do you get the notion of "maximum guaranteed timeout"?  The timeout is
->> what is programmed in "Data Timeout Counter Value".
-> 
-> And exactly this "Data Timeout Counter Value" is not used in your code to
-> predict controller's data line timeout.
-> 
->>> supposed to be used in calculations of a guaranteed discard operation
->>> timeout
->>> instead of promised DAT timeout by a controller?
->>
->> What is "promised DAT timeout"?
-> 
-> This is a timeout with respect to "Data Timeout Counter Value".
-> 
-> According to your words max_discard_to is the maximum timeout that the host
-> controller supports, but such a parameter is useless, because nobody sets
-> the host controller SDHCI_TIMEOUT_CONTROL register to maximum supported value,
+Hello,
 
-sdhci_prepare_data() -> sdhci_calc_timeout() sets the timeout based on what
-the upper layers specify, up to and including the maximum value.
+The e=E2=8B=85MMC 5.0 specification has been published by JEDEC on Sept=
+ember
+2013 [1], and contains a note in section B.8, which says: "A host
+system should work properly considering future eMMC version. For
+example, a host system is expected not to exit only due to the
+EXT_CSD_REV[192] value greater than 7 which will be used for next
+e=E2=80=A2MMC revision."
 
-So what max_discard_to does is to limit the erase size so that when
-sdhci_calc_timeout() is called it won't exceed the maximum.
+Right now, the kernel controls the value of both fields 192 and 194,
+and rejects any device where CSD_STRUCTURE > 2 or EXT_CSD_REV > 7.
 
-> so there is a probability that you greatly overestimate Data Timeout value,
-> and therefore block layer or other subsystem can't rely on it. Please correct
-> me here.
-> 
->>>
->>>>>
->>>>>> Currently, the limit gets applied by the block layer before the mmc
->>>>>> layer is
->>>>>> involved so there is no possibility to take the actual timeout into
->>>>>> account.
->>>>>>     However if you have erase_group_def set, then it won't make any
->>>>>> difference
->>>>>> i.e. the limit will be the same.
->>>>>>
->>>>>>>
->>>>>>>>>
->>>>>>>>>>>>>
->>>>>>>>>>>>> Potentially the change may break some of the SDHCs on discard of
->>>>>>>>>>>>> mmc,
->>>>>>>>>>>>> and for backward compatibility a new quirk is introduced, which
->>>>>>>>>>>>> is NOT
->>>>>>>>>>>>> set by default.
->>>>>>>>>>>>
->>>>>>>>>>>> It sounds to me that what you want to do is not standard so the
->>>>>>>>>>>> quirk
->>>>>>>>>>>> should
->>>>>>>>>>>> be the other way around.
->>>>>>>>>>>
->>>>>>>>>>> Please take a look at commits 58d1246db3 and e056a1b5b, I'd be
->>>>>>>>>>> glad, if
->>>>>>>>>>> you
->>>>>>>>>>> could elaborate to which "some host controllers" the quirk in my
->>>>>>>>>>> definition
->>>>>>>>>>> applies, I believe all other host controllers present at that
->>>>>>>>>>> time in
->>>>>>>>>>> drivers/mmc/host/* are capable to discard without introduced
->>>>>>>>>>> limitation.
->>>>>>>>>>
->>>>>>>>>> "some host controllers" == SDHCI i.e. to all of the ones you are
->>>>>>>>>> applying
->>>>>>>>>> the change.
->>>>>>>>>>
->>>>>>>>>>>
->>>>>>>>>>>>>
->>>>>>>>>>>>> Signed-off-by: Vladimir Zapolskiy<vladimir_zapolskiy@mentor.com>
->>>>>>>>>>>>> Reported-by: Ed Sutter<ed.sutter@alcatel-lucent.com>
->>>>>>>>>>>>> Cc: Chris Ball<cjb@laptop.org>
->>>>>>>>>>>>> Cc: Adrian Hunter<adrian.hunter@intel.com>
->>>>>>>>>>>>> ---
->>>>>>>>>>>>>        drivers/mmc/host/sdhci.c  |    5 ++++-
->>>>>>>>>>>>>        include/linux/mmc/sdhci.h |    1 +
->>>>>>>>>>>>>        2 files changed, 5 insertions(+), 1 deletion(-)
->>>>>>>>>>>>>
->>>>>>>>>>>>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
->>>>>>>>>>>>> index bd8a098..b1fdddb 100644
->>>>>>>>>>>>> --- a/drivers/mmc/host/sdhci.c
->>>>>>>>>>>>> +++ b/drivers/mmc/host/sdhci.c
->>>>>>>>>>>>> @@ -2930,7 +2930,10 @@ int sdhci_add_host(struct sdhci_host *host)
->>>>>>>>>>>>>            if (host->quirks&
->>>>>>>>>>>>> SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK)
->>>>>>>>>>>>>                host->timeout_clk = mmc->f_max / 1000;
->>>>>>>>>>>>>
->>>>>>>>>>>>> -    mmc->max_discard_to = (1<<       27) / host->timeout_clk;
->>>>>>>>>>>>> +    if (host->quirks2&      
->>>>>>>>>>>>> SDHCI_QUIRK2_DATA_TIMEOUT_ON_DISCARD)
->>>>>>>>>>>>> +        mmc->max_discard_to = (1<<       27) / host->timeout_clk;
->>>>>>>>>>>>> +    else
->>>>>>>>>>>>> +        mmc->max_discard_to = 0;
->>>>>>>>>>>>>
->>>>>>>>>>>>>            mmc->caps |= MMC_CAP_SDIO_IRQ | MMC_CAP_ERASE |
->>>>>>>>>>>>> MMC_CAP_CMD23;
->>>>>>>>>>>>>
->>>>>>>>>>>>> diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
->>>>>>>>>>>>> index 3e781b8..e7f6bd2 100644
->>>>>>>>>>>>> --- a/include/linux/mmc/sdhci.h
->>>>>>>>>>>>> +++ b/include/linux/mmc/sdhci.h
->>>>>>>>>>>>> @@ -98,6 +98,7 @@ struct sdhci_host {
->>>>>>>>>>>>>        #define SDHCI_QUIRK2_CARD_ON_NEEDS_BUS_ON        (1<<4)
->>>>>>>>>>>>>        /* Controller has a non-standard host control register */
->>>>>>>>>>>>>        #define SDHCI_QUIRK2_BROKEN_HOST_CONTROL        (1<<5)
->>>>>>>>>>>>> +#define SDHCI_QUIRK2_DATA_TIMEOUT_ON_DISCARD        (1<<6)
->>>>>>>>>>>>>
->>>>>>>>>>>>>            int irq;        /* Device IRQ */
->>>>>>>>>>>>>            void __iomem *ioaddr;    /* Mapped address */
->>>>>>>>>>>>>
->>>>>>>>>>>>
->>>>>>>>>>>
->>>>>>>>>>>
->>>>>>>>>>
->>>>>>>
->>>>>>>
->>>>>>
->>>>>> -- 
->>>>>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->>>>>> the body of a message to majordomo@vger.kernel.org
->>>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>>>
->>>>>
->>>>
->>>> -- 
->>>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->>>> the body of a message to majordomo@vger.kernel.org
->>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>
->>>
->>
-> 
-> 
+During the updates to the specification, JEDEC has maintained forward
+compatibility, setting reserved bits in the EXT_CSD register to
+describe new mandatory and optional features. If the specification
+changes in an incompatible way, it is expected that the value in
+CSD_STRUCTURE will change. As a result, I believe it would not be an
+issue to remove the control on EXT_CSD_REV.
 
+I propose this change because e=E2=8B=85MMC manufacturers are rapidly c=
+hanging
+available references, and products with a long production life can
+encounter the situation where the kernel image, frozen at the
+beginning of the production, cannot support newer chips only because
+of this rule.
+
+
+[1] http://www.jedec.org/standards-documents/docs/jesd84-b50 (Free
+registration required)
+
+Best regards,
+--=20
+Romain Izard
