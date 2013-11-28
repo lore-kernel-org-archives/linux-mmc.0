@@ -1,249 +1,133 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH] mmc: sdhci: don't limit discard timeout by data line
- timeout
-Date: Thu, 28 Nov 2013 09:12:45 +0200
-Message-ID: <5296ECED.9060106@intel.com>
-References: <1385046445-29711-1-git-send-email-vladimir_zapolskiy@mentor.com> <528F4242.8040408@intel.com> <528F4D06.3080400@mentor.com> <528F5663.2050800@intel.com> <528F6113.2070009@mentor.com> <528F728D.3040004@intel.com> <528F7670.9040101@mentor.com> <52946412.6060001@intel.com> <5294CD6A.9000106@mentor.com> <5295AB97.4040907@intel.com> <52960860.8090807@mleia.com>
+From: Beomho Seo <beomho.seo@samsung.com>
+Subject: [PATCH Resend 1/2] mmc: sdhci-s3c: Use mmc_gpio_request_cd function
+Date: Thu, 28 Nov 2013 20:24:19 +0900
+Message-ID: <529727E3.4070803@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga11.intel.com ([192.55.52.93]:35481 "EHLO mga11.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751129Ab3K1HFJ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 28 Nov 2013 02:05:09 -0500
-In-Reply-To: <52960860.8090807@mleia.com>
+Received: from mailout2.samsung.com ([203.254.224.25]:41226 "EHLO
+	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751579Ab3K1LYV (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 28 Nov 2013 06:24:21 -0500
+Received: from epcpsbgr5.samsung.com
+ (u145.gpu120.samsung.co.kr [203.254.230.145])
+ by mailout2.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+ (7.0.4.24.0) 64bit (built Nov 17 2011))
+ with ESMTP id <0MWZ007ZA10JSR20@mailout2.samsung.com> for
+ linux-mmc@vger.kernel.org; Thu, 28 Nov 2013 20:24:19 +0900 (KST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Vladimir Zapolskiy <vz@mleia.com>
-Cc: Vladimir Zapolskiy <vladimir_zapolskiy@mentor.com>, linux-mmc@vger.kernel.org, Ed Sutter <ed.sutter@alcatel-lucent.com>, Chris Ball <cjb@laptop.org>
+To: cjb@laptop.org
+Cc: linux-mmc@vger.kernel.org, myungjoo.ham@samsung.com, jh80.chung@samsung.com, heiko@sntech.de
 
-On 27/11/13 16:57, Vladimir Zapolskiy wrote:
-> On 11/27/13 10:21, Adrian Hunter wrote:
->> On 26/11/13 18:33, Vladimir Zapolskiy wrote:
->>> On 11/26/13 11:04, Adrian Hunter wrote:
->>>> On 22/11/13 17:21, Vladimir Zapolskiy wrote:
->>>>> On 22.11.2013 16:04, Adrian Hunter wrote:
->>>>>> On 22/11/13 15:50, Vladimir Zapolskiy wrote:
->>>>>>> On 22.11.2013 14:04, Adrian Hunter wrote:
->>>>>>>> On 22/11/13 14:24, Vladimir Zapolskiy wrote:
->>>>>>>>> On 22.11.2013 12:38, Adrian Hunter wrote:
->>>>>>>>>> On 21/11/13 17:07, Vladimir Zapolskiy wrote:
->>>>>>>>>>> JEDEC specification defines quite high erase timeout value for 300ms
->>>>>>>>>>> multiplied by erase group number, and SD Host Controller
->>>>>>>>>>> specification
->>>>>>>>>>> data line timeout may be much less, e.g. 2^13 / 52MHz ~ 160us.
->>>>>>>>>>>
->>>>>>>>>>>>        From block layer and MMC perfromance perspective it is
->>>>>>>>>>>> desirable
->>>>>>>>>>>> that
->>>>>>>>>>> millions of erase groups are discarded at once, so there is no much
->>>>>>>>>>> sense to limit maximum erase timeout by data line timeout, if a
->>>>>>>>>>> controller handles correctly erase operation without indication of
->>>>>>>>>>> data line timeout.
->>>>>>>>>>
->>>>>>>>>> Would you explain that some more.  Do you mean that:
->>>>>>>>>>         a) it does not have a timeout
->>>>>>>>>
->>>>>>>>> JEDEC defines a timeout on erase/trim operations, also in
->>>>>>>>> drivers/mmc/core/core.c
->>>>>>>>> there is a reasonable enough 10 minutes limitation for discard
->>>>>>>>> operations.
->>>>>>>>>
->>>>>>>>>>         b) it has a timeout which is less than the timeout specified
->>>>>>>>>> by the
->>>>>>>>>> standard but the operation nevertheless completes
->>>>>>>>>
->>>>>>>>> SDHC data line timeout is enormously less than erase group timeout,
->>>>>>>>> and
->>>>>>>>> trivial testing shows that those two timeouts are independent,
->>>>>>>>> probably
->>>>>>>>> except some particular cases of controllers not known before commits
->>>>>>>>> 58d1246db3 and e056a1b5b.
->>>>>>>>>
->>>>>>>>> According to the currently implemented logic, mmc_do_erase()
->>>>>>>>> commonly is
->>>>>>>>> instructed to discard 1-2 erase groups at maximum, however it tends
->>>>>>>>> to be
->>>>>>>>> capable to successfully discard millions of erase groups at once
->>>>>>>>> ignoring
->>>>>>>>> that SDHC data line timeout limitation.
->>>>>>>>>
->>>>>>>>
->>>>>>>> You seem to be trying to say that the SDHCI spec. says that the host
->>>>>>>> controller does not timeout erase operations or uses a different
->>>>>>>> timeout
->>>>>>>> than the one programmed in the "Timeout Control Register".  Where is
->>>>>>>> that is
->>>>>>>> the SDHCI spec?
->>>>>>>
->>>>>>> According to the spec a host controller timeouts erase operations
->>>>>>> like any
->>>>>>> other R1B command.
->>>>>>>
->>>>>>> So in your opinion, should there be SDHCI_QUIRK_BROKEN_TIMEOUT_VAL
->>>>>>> instead
->>>>>>> of the new quirk?
->>>>>>
->>>>>> I don't understand how SDHCI_QUIRK_BROKEN_TIMEOUT_VAL would help.  It
->>>>>> just
->>>>>> sets the timeout to maximum but max_discard_to is the maximum timeout.
->>>>>
->>>>> Here I meant to do something like:
->>>>>
->>>>>       if (host->quirks&   SDHCI_QUIRK_BROKEN_TIMEOUT_VAL)
->>>>>           mmc->max_discard_to = 0;
->>>>>
->>>>> Again I'm not sure that this applies well to all
->>>>> SDHCI_QUIRK_BROKEN_TIMEOUT_VAL
->>>>> controllers, therefore a new quirk might be better.
->>>>>
->>>>>> As I understand it you don't want to limit the discard size, either
->>>>>> because
->>>>>> your controller does not timeout, or because you are happy that the
->>>>>> maximum
->>>>>> timeout is enough for your users and their use-cases.
->>>>>>
->>>>>> If that is the case then the original patch just needs the quirk the
->>>>>> other
->>>>>> way around. i.e.
->>>>>>
->>>>>>        if (host->quirks2&    SDHCI_QUIRK2_NO_DISCARD_LIMIT)
->>>>>>            mmc->max_discard_to = 0;
->>>>>>        else
->>>>>>            mmc->max_discard_to = (1<<    27) / host->timeout_clk;
->>>>>
->>>>> This suits me fine, thanks for review, and I'll resend a change based on
->>>>> this.
->>>>>
->>>>> Also I'd like to pay your attention to (1<<   27) / host->timeout_clk
->>>>> part of
->>>>> calculation, following the spec it might be better to account the actual
->>>>> value of Data Timeout Counter, otherwise a controller may get
->>>>> unintentional
->>>>> Data Timeout Error pretty soon. Please correct me, if I'm mistaken here.
->>>>
->>>> Not sure what you mean.  max_discard_to is the maximum timeout (in
->>>> milliseconds) that the host controller supports.  The intent is to limit
->>>> erase operations to ones that have a timeout that is less than or equal to
->>>> that.
->>>
->>> That's clear. But it's not obvious why do you prefer (1<<  27) numerator
->>> instead
->>> of secure (1<<  13) or (1<<  (13 + sdhci_readl(host,
->>> SDHCI_TIMEOUT_CONTROL))).
->>
->> The maximum value of "Data Timeout Counter Value" in "Timeout Control
->> Register" is 14 and the maximum timeout is therefore (1<<  27).
-> 
-> So, from this perspective I assume this is a potential theoretical maximum
-> timeout for a controller, which may be 16384 times more than the maximum
-> guaranteed timeout before getting a DAT timeout. Why is the theoretical maximum
+This patch use mmc_gpio_request_cd function.
 
-Where do you get the notion of "maximum guaranteed timeout"?  The timeout is
-what is programmed in "Data Timeout Counter Value".
+Signed-off-by: Beomho Seo <beomho.seo@samsung.com>
+Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+---
+ drivers/mmc/host/sdhci-s3c.c |   56 +++++++++++-------------------------------
+ 1 file changed, 14 insertions(+), 42 deletions(-)
 
-> supposed to be used in calculations of a guaranteed discard operation timeout
-> instead of promised DAT timeout by a controller?
+diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
+index 6debda9..180371a 100644
+--- a/drivers/mmc/host/sdhci-s3c.c
++++ b/drivers/mmc/host/sdhci-s3c.c
+@@ -27,6 +27,7 @@
+ #include <linux/pm_runtime.h>
 
-What is "promised DAT timeout"?
+ #include <linux/mmc/host.h>
++#include <linux/mmc/slot-gpio.h>
 
-> 
->>>
->>>> Currently, the limit gets applied by the block layer before the mmc
->>>> layer is
->>>> involved so there is no possibility to take the actual timeout into
->>>> account.
->>>>    However if you have erase_group_def set, then it won't make any
->>>> difference
->>>> i.e. the limit will be the same.
->>>>
->>>>>
->>>>>>>
->>>>>>>>>>>
->>>>>>>>>>> Potentially the change may break some of the SDHCs on discard of
->>>>>>>>>>> mmc,
->>>>>>>>>>> and for backward compatibility a new quirk is introduced, which
->>>>>>>>>>> is NOT
->>>>>>>>>>> set by default.
->>>>>>>>>>
->>>>>>>>>> It sounds to me that what you want to do is not standard so the quirk
->>>>>>>>>> should
->>>>>>>>>> be the other way around.
->>>>>>>>>
->>>>>>>>> Please take a look at commits 58d1246db3 and e056a1b5b, I'd be
->>>>>>>>> glad, if
->>>>>>>>> you
->>>>>>>>> could elaborate to which "some host controllers" the quirk in my
->>>>>>>>> definition
->>>>>>>>> applies, I believe all other host controllers present at that time in
->>>>>>>>> drivers/mmc/host/* are capable to discard without introduced
->>>>>>>>> limitation.
->>>>>>>>
->>>>>>>> "some host controllers" == SDHCI i.e. to all of the ones you are
->>>>>>>> applying
->>>>>>>> the change.
->>>>>>>>
->>>>>>>>>
->>>>>>>>>>>
->>>>>>>>>>> Signed-off-by: Vladimir Zapolskiy<vladimir_zapolskiy@mentor.com>
->>>>>>>>>>> Reported-by: Ed Sutter<ed.sutter@alcatel-lucent.com>
->>>>>>>>>>> Cc: Chris Ball<cjb@laptop.org>
->>>>>>>>>>> Cc: Adrian Hunter<adrian.hunter@intel.com>
->>>>>>>>>>> ---
->>>>>>>>>>>       drivers/mmc/host/sdhci.c  |    5 ++++-
->>>>>>>>>>>       include/linux/mmc/sdhci.h |    1 +
->>>>>>>>>>>       2 files changed, 5 insertions(+), 1 deletion(-)
->>>>>>>>>>>
->>>>>>>>>>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
->>>>>>>>>>> index bd8a098..b1fdddb 100644
->>>>>>>>>>> --- a/drivers/mmc/host/sdhci.c
->>>>>>>>>>> +++ b/drivers/mmc/host/sdhci.c
->>>>>>>>>>> @@ -2930,7 +2930,10 @@ int sdhci_add_host(struct sdhci_host *host)
->>>>>>>>>>>           if (host->quirks&     
->>>>>>>>>>> SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK)
->>>>>>>>>>>               host->timeout_clk = mmc->f_max / 1000;
->>>>>>>>>>>
->>>>>>>>>>> -    mmc->max_discard_to = (1<<      27) / host->timeout_clk;
->>>>>>>>>>> +    if (host->quirks2&      SDHCI_QUIRK2_DATA_TIMEOUT_ON_DISCARD)
->>>>>>>>>>> +        mmc->max_discard_to = (1<<      27) / host->timeout_clk;
->>>>>>>>>>> +    else
->>>>>>>>>>> +        mmc->max_discard_to = 0;
->>>>>>>>>>>
->>>>>>>>>>>           mmc->caps |= MMC_CAP_SDIO_IRQ | MMC_CAP_ERASE |
->>>>>>>>>>> MMC_CAP_CMD23;
->>>>>>>>>>>
->>>>>>>>>>> diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
->>>>>>>>>>> index 3e781b8..e7f6bd2 100644
->>>>>>>>>>> --- a/include/linux/mmc/sdhci.h
->>>>>>>>>>> +++ b/include/linux/mmc/sdhci.h
->>>>>>>>>>> @@ -98,6 +98,7 @@ struct sdhci_host {
->>>>>>>>>>>       #define SDHCI_QUIRK2_CARD_ON_NEEDS_BUS_ON        (1<<4)
->>>>>>>>>>>       /* Controller has a non-standard host control register */
->>>>>>>>>>>       #define SDHCI_QUIRK2_BROKEN_HOST_CONTROL        (1<<5)
->>>>>>>>>>> +#define SDHCI_QUIRK2_DATA_TIMEOUT_ON_DISCARD        (1<<6)
->>>>>>>>>>>
->>>>>>>>>>>           int irq;        /* Device IRQ */
->>>>>>>>>>>           void __iomem *ioaddr;    /* Mapped address */
->>>>>>>>>>>
->>>>>>>>>>
->>>>>>>>>
->>>>>>>>>
->>>>>>>>
->>>>>
->>>>>
->>>>
->>>> -- 
->>>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->>>> the body of a message to majordomo@vger.kernel.org
->>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>
->>>
->>
->> -- 
->> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+ #include "sdhci-s3c-regs.h"
+ #include "sdhci.h"
+@@ -400,44 +401,6 @@ static void sdhci_s3c_notify_change(struct platform_device *dev, int state)
+ 	}
+ }
 
+-static irqreturn_t sdhci_s3c_gpio_card_detect_thread(int irq, void *dev_id)
+-{
+-	struct sdhci_s3c *sc = dev_id;
+-	int status = gpio_get_value(sc->ext_cd_gpio);
+-	if (sc->pdata->ext_cd_gpio_invert)
+-		status = !status;
+-	sdhci_s3c_notify_change(sc->pdev, status);
+-	return IRQ_HANDLED;
+-}
+-
+-static void sdhci_s3c_setup_card_detect_gpio(struct sdhci_s3c *sc)
+-{
+-	struct s3c_sdhci_platdata *pdata = sc->pdata;
+-	struct device *dev = &sc->pdev->dev;
+-
+-	if (devm_gpio_request(dev, pdata->ext_cd_gpio, "SDHCI EXT CD") == 0) {
+-		sc->ext_cd_gpio = pdata->ext_cd_gpio;
+-		sc->ext_cd_irq = gpio_to_irq(pdata->ext_cd_gpio);
+-		if (sc->ext_cd_irq &&
+-		    request_threaded_irq(sc->ext_cd_irq, NULL,
+-					 sdhci_s3c_gpio_card_detect_thread,
+-					 IRQF_TRIGGER_RISING |
+-					 IRQF_TRIGGER_FALLING |
+-					 IRQF_ONESHOT,
+-					 dev_name(dev), sc) == 0) {
+-			int status = gpio_get_value(sc->ext_cd_gpio);
+-			if (pdata->ext_cd_gpio_invert)
+-				status = !status;
+-			sdhci_s3c_notify_change(sc->pdev, status);
+-		} else {
+-			dev_warn(dev, "cannot request irq for card detect\n");
+-			sc->ext_cd_irq = 0;
+-		}
+-	} else {
+-		dev_err(dev, "cannot request gpio for card detect\n");
+-	}
+-}
+-
+ #ifdef CONFIG_OF
+ static int sdhci_s3c_parse_dt(struct device *dev,
+ 		struct sdhci_host *host, struct s3c_sdhci_platdata *pdata)
+@@ -699,8 +662,14 @@ static int sdhci_s3c_probe(struct platform_device *pdev)
+ 	if (pdata->cd_type == S3C_SDHCI_CD_EXTERNAL && pdata->ext_cd_init)
+ 		pdata->ext_cd_init(&sdhci_s3c_notify_change);
+ 	if (pdata->cd_type == S3C_SDHCI_CD_GPIO &&
+-	    gpio_is_valid(pdata->ext_cd_gpio))
+-		sdhci_s3c_setup_card_detect_gpio(sc);
++	    gpio_is_valid(pdata->ext_cd_gpio)) {
++		ret = mmc_gpio_request_cd(host->mmc, pdata->ext_cd_gpio, 0);
++		if (ret) {
++			dev_err(dev,
++				"failed to reqeust card detect gpio\n");
++			goto err_req_cd;
++		}
++	}
+
+ #ifdef CONFIG_PM_RUNTIME
+ 	if (pdata->cd_type != S3C_SDHCI_CD_INTERNAL)
+@@ -708,6 +677,9 @@ static int sdhci_s3c_probe(struct platform_device *pdev)
+ #endif
+ 	return 0;
+
++ err_req_cd:
++	mmc_gpio_free_cd(host->mmc);
++
+  err_req_regs:
+ #ifndef CONFIG_PM_RUNTIME
+ 	clk_disable_unprepare(sc->clk_bus[sc->cur_clk]);
+@@ -731,8 +703,8 @@ static int sdhci_s3c_remove(struct platform_device *pdev)
+ 	if (pdata->cd_type == S3C_SDHCI_CD_EXTERNAL && pdata->ext_cd_cleanup)
+ 		pdata->ext_cd_cleanup(&sdhci_s3c_notify_change);
+
+-	if (sc->ext_cd_irq)
+-		free_irq(sc->ext_cd_irq, sc);
++	if (pdata->ext_cd_gpio)
++		mmc_gpio_free_cd(host->mmc);
+
+ #ifdef CONFIG_PM_RUNTIME
+ 	if (pdata->cd_type != S3C_SDHCI_CD_INTERNAL)
+-- 
+1.7.9.5
+
+-- 
+Best Regards,
+
+Beomho Seo
