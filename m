@@ -1,44 +1,66 @@
 From: Tony Lindgren <tony@atomide.com>
 Subject: Re: [PATCH 2/8] mmc: omap: Fix DMA configuration to not rely on
  device id
-Date: Fri, 29 Nov 2013 08:34:24 -0800
-Message-ID: <20131129163424.GK31534@atomide.com>
+Date: Fri, 29 Nov 2013 09:13:55 -0800
+Message-ID: <20131129171354.GO31534@atomide.com>
 References: <1384396537-3486-1-git-send-email-tony@atomide.com>
  <1384396537-3486-3-git-send-email-tony@atomide.com>
  <20131118184723.GR10317@atomide.com>
  <87ioveeo0x.fsf@octavius.laptop.org>
  <20131127225704.208445df2aa7fc5fc6cb5faa@bitmer.com>
- <20131127213726.GB26766@atomide.com>
- <52977711.6030806@bitmer.com>
+ <86fvqhjz4q.fsf@void.printf.net>
+ <20131127215918.GD26766@atomide.com>
+ <52976BA4.1000700@bitmer.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mho-02-ewr.mailhop.org ([204.13.248.72]:51760 "EHLO
-	mho-02-ewr.mailhop.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751718Ab3K2Qef (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 29 Nov 2013 11:34:35 -0500
+Return-path: <linux-omap-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <52977711.6030806@bitmer.com>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+In-Reply-To: <52976BA4.1000700@bitmer.com>
+Sender: linux-omap-owner@vger.kernel.org
 To: Jarkko Nikula <jarkko.nikula@bitmer.com>
-Cc: Chris Ball <cjb@laptop.org>, linux-arm-kernel@lists.infradead.org, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, Aaro Koskinen <aaro.koskinen@iki.fi>
+Cc: Chris Ball <cjb@laptop.org>, linux-arm-kernel@lists.infradead.org, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, Jarkko Lavinen <j.lavinen@samsung.com>
+List-Id: linux-mmc@vger.kernel.org
 
-* Jarkko Nikula <jarkko.nikula@bitmer.com> [131128 09:03]:
+* Jarkko Nikula <jarkko.nikula@bitmer.com> [131128 08:14]:
 > Hi
 > 
-> On 11/27/2013 11:37 PM, Tony Lindgren wrote:
-> > * Jarkko Nikula <jarkko.nikula@bitmer.com> [131127 12:55]:
-> > Bummer, sounds like some duplicate work could have been avoided :(
-> > I suggest resend to Chris and linux-mmc one more time as Chris should
-> > pick up the MMC patches in general.
+> On 11/27/2013 11:59 PM, Tony Lindgren wrote:
+> > * Chris Ball <cjb@laptop.org> [131127 13:48]:
+> >> Hi,
+> >>
+> >> On Wed, Nov 27 2013, Jarkko Nikula wrote:
+> >>> Can you enlighten me what's the proper way to get patches to mmc since
+> >>> I cannot figure out working methodology from MAINTAINERS file?
+> >>
+> >> Sorry about this, Jarkko.
+> >>
+> >> Since I don't have omap.c hardware, I'm generally going to wait for
+> >> a Tested-by/Acked-by from someone else on patches like these.  We
+> >> actually have a maintainer already listed for the driver, Jarkko
+> >> Lavinen <jarkko.lavinen@nokia.com>.
+> >>
+> >> So, maybe the MAINTAINERS section for drivers/mmc/host/omap.c needs
+> >> an update?  Feel free to send me patches to it.  Either way, I'll
+> >> start treating Aaro and Jarkko (Nikula) as maintainers for this
+> >> driver.
 > > 
-> Before that should Chris merge your 2 patches in order to avoid couple
-> trivial merge conflicts with my set when linux-omap and mmc are merged?
+> Oh, I see. I even didn't check ./scripts/get_maintainer.pl nor check
+> MAINTAINERS file further than main MMC entry as I knew Jarkko L. is not
+> working anymore for Nokia. Sorry, we should have noticed that.
+> 
+> > Hmm looks like here's a reasonably recent update that we've missed
+> > from Jarkko Lavinen to update his email address:
+> > 
+> > http://lkml.org/lkml/2013/10/4/142
+> > 
+> > I've updated Jarkko Lavinen's address in this mail, we should
+> > probably also patch the MAINTAINERS file for that, and then see if
+> > Aaro and Jarkko Nikula are interested to be listed there as well.
+> > 
+> I can volunteer. Not that I know much about mmc but I like to keep my
+> legacy hw still running :-)
 
-Those are already queued to arm-soc/fixes branch and should hit the
-mainline tree within next few days, hopefully before -rc2 so it's probably
-to wait for that for that for further fixes.
+Sounds good to me, good to hear :)
 
 Regards,
 
