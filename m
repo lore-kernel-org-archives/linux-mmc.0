@@ -1,67 +1,45 @@
-From: Thierry Reding <thierry.reding-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: [PATCH] mmc: tegra: add support for Tegra124
-Date: Fri, 29 Nov 2013 16:55:17 +0100
-Message-ID: <20131129155516.GP9712@ulmo.nvidia.com>
-References: <1385417993-7848-1-git-send-email-swarren@wwwdotorg.org>
+From: Tony Lindgren <tony@atomide.com>
+Subject: Re: [PATCH 2/8] mmc: omap: Fix DMA configuration to not rely on
+ device id
+Date: Fri, 29 Nov 2013 08:34:24 -0800
+Message-ID: <20131129163424.GK31534@atomide.com>
+References: <1384396537-3486-1-git-send-email-tony@atomide.com>
+ <1384396537-3486-3-git-send-email-tony@atomide.com>
+ <20131118184723.GR10317@atomide.com>
+ <87ioveeo0x.fsf@octavius.laptop.org>
+ <20131127225704.208445df2aa7fc5fc6cb5faa@bitmer.com>
+ <20131127213726.GB26766@atomide.com>
+ <52977711.6030806@bitmer.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="vzUQzca511KWT6Hk"
-Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <1385417993-7848-1-git-send-email-swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>
-Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>
-Cc: Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Stephen Warren <swarren-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
-List-Id: linux-mmc@vger.kernel.org
-
-
---vzUQzca511KWT6Hk
 Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mho-02-ewr.mailhop.org ([204.13.248.72]:51760 "EHLO
+	mho-02-ewr.mailhop.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751718Ab3K2Qef (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 29 Nov 2013 11:34:35 -0500
 Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+In-Reply-To: <52977711.6030806@bitmer.com>
+Sender: linux-mmc-owner@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
+To: Jarkko Nikula <jarkko.nikula@bitmer.com>
+Cc: Chris Ball <cjb@laptop.org>, linux-arm-kernel@lists.infradead.org, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, Aaro Koskinen <aaro.koskinen@iki.fi>
 
-On Mon, Nov 25, 2013 at 03:19:53PM -0700, Stephen Warren wrote:
-> From: Stephen Warren <swarren-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
->=20
-> Tegra124's MMC controller is very similar to earlier SoC generations,
-> and can be supported by the same driver.
->=20
-> However, there are some non-backwards-compatible HW differences, and
-> hence a new DT compatible value must be used to describe the HW. This
-> patch updates the driver to support that new compatible value.
->=20
-> That said, the HW differences are only relevant when enabling certain
-> high-performance transfer modes. Since the driver is currently very
-> simple and doesn't enable those modes, we don't actually need to address
-> any of these HW differences in the code yet, hence the simple nature of
-> this patch.
->=20
-> Signed-off-by: Stephen Warren <swarren-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
-> ---
->  drivers/mmc/host/sdhci-tegra.c | 1 +
->  1 file changed, 1 insertion(+)
+* Jarkko Nikula <jarkko.nikula@bitmer.com> [131128 09:03]:
+> Hi
+> 
+> On 11/27/2013 11:37 PM, Tony Lindgren wrote:
+> > * Jarkko Nikula <jarkko.nikula@bitmer.com> [131127 12:55]:
+> > Bummer, sounds like some duplicate work could have been avoided :(
+> > I suggest resend to Chris and linux-mmc one more time as Chris should
+> > pick up the MMC patches in general.
+> > 
+> Before that should Chris merge your 2 patches in order to avoid couple
+> trivial merge conflicts with my set when linux-omap and mmc are merged?
 
-Reviewed-by: Thierry Reding <treding-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
+Those are already queued to arm-soc/fixes branch and should hit the
+mainline tree within next few days, hopefully before -rc2 so it's probably
+to wait for that for that for further fixes.
 
---vzUQzca511KWT6Hk
-Content-Type: application/pgp-signature
+Regards,
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-
-iQIcBAEBAgAGBQJSmLjkAAoJEN0jrNd/PrOhcUMQALqD797ScvWFjBQalIr8zacR
-FIDVM/QVAEckSoEIFp9ZUGSMQTONsAuxTxA5adyKcSqXJPoUAWgPQO9EjQwSk9yV
-1qXqhVciwYoaVeqimOM5gNDJIz/uHS83s0VZz8zM1NFOrUOrihYhh9ChnzRttwmZ
-p/P7hOGw5FWfUlMydqG5FW7yz7rAUoRZ1l5USRnj1Au9rNa/xQBgvtJzjKohdv+o
-MxIdSODny+t+PVix1Dz8yxDVGQo+P5MIamtZXbTV0kg8c79CBJge5fIU+uk1RLRa
-B6DJVpW9tBisTA93mFsfS60nz+I+YMzZEtm0G5XskKowDPqkFRPDoM8xQeiqG8kz
-iwnyEw0d4n0cE0AciT2BkHHsuaZaIvDKgkS/G++uXbkeG+pWdwTZeEbdriNUnWhG
-zKvvM5IZGQwlnWLySeE/lfqhnY/KGUzsopoF2ovlkj8TMGjXaEGaxSpxQq3vT0Xy
-9Fd4NfQ1qZVvHQA0FShhAweMUxGFz4IvZzok9B0MTdmi4XYg5JQrHzr+dQP62Eg1
-ieIKHpC/tLycEVLk5zNujDoHFWwwmUCMvvO4RZItAfz9LSmRdNFhad+m0i8s4w/3
-oAeKJX6KyJR5DHgBm6zE8Hn/IsZpebIJWA+a7z0br7buCxpRQFMZW4jLHTiNcPkT
-ghBIk+keBXqjykYPaYTl
-=JG0e
------END PGP SIGNATURE-----
-
---vzUQzca511KWT6Hk--
+Tony
