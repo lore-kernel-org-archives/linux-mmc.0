@@ -1,98 +1,73 @@
-From: Martin Steigerwald <Martin@lichtvoll.de>
-Subject: [REGRESSION] 3.13-rc2: locks up hard on trying to transfer a file to mmc based internal SD card slot
-Date: Sat, 30 Nov 2013 14:53:51 +0100
-Message-ID: <4578341.ZjSDW1Al5s@merkaba>
+From: Tony Lindgren <tony@atomide.com>
+Subject: Re: [PATCH 2/8] mmc: omap: Fix DMA configuration to not rely on
+ device id
+Date: Sat, 30 Nov 2013 09:33:18 -0800
+Message-ID: <20131130173317.GG23334@atomide.com>
+References: <1384396537-3486-1-git-send-email-tony@atomide.com>
+ <1384396537-3486-3-git-send-email-tony@atomide.com>
+ <5299339C.2040102@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-omap-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <5299339C.2040102@ti.com>
+Sender: linux-omap-owner@vger.kernel.org
+To: Joel Fernandes <joelf@ti.com>
+Cc: linux-arm-kernel@lists.infradead.org, linux-omap@vger.kernel.org, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-Just added linux-mmc. And I might git-bisect that at some time, but I d=
-o not=20
-intend to do it during my precious weekend. The chances of me bisecting=
- it=20
-increase with workable suggestions on how to cut down the amount of ite=
-rations=20
-needed and avoid testing highly experimental between 3.12 and 3.13-rc1 =
-kernels=20
-on a production laptop. I may be willing to test a patch or two. As I s=
-ee=20
-there seem to have been quite some changes in MMC subsystem.
+* Joel Fernandes <joelf@ti.com> [131129 16:39]:
+> On 11/13/2013 08:35 PM, Tony Lindgren wrote:
+> > --- a/drivers/mmc/host/omap.c
+> > +++ b/drivers/mmc/host/omap.c
+> > @@ -90,17 +90,6 @@
+> >  #define OMAP_MMC_CMDTYPE_AC	2
+> >  #define OMAP_MMC_CMDTYPE_ADTC	3
+> >  
+> > -#define OMAP_DMA_MMC_TX		21
+> > -#define OMAP_DMA_MMC_RX		22
+> > -#define OMAP_DMA_MMC2_TX	54
+> > -#define OMAP_DMA_MMC2_RX	55
+> > -
+> > -#define OMAP24XX_DMA_MMC2_TX	47
+> > -#define OMAP24XX_DMA_MMC2_RX	48
+> > -#define OMAP24XX_DMA_MMC1_TX	61
+> > -#define OMAP24XX_DMA_MMC1_RX	62
+> > -
+> > -
+> >  #define DRIVER_NAME "mmci-omap"
+> >  
+> >  /* Specifies how often in millisecs to poll for card status changes
+> > @@ -1408,19 +1397,20 @@ static int mmc_omap_probe(struct platform_device *pdev)
+> >  	host->dma_tx_burst = -1;
+> >  	host->dma_rx_burst = -1;
+> >  
+> > -	if (mmc_omap2())
+> > -		sig = host->id == 0 ? OMAP24XX_DMA_MMC1_TX : OMAP24XX_DMA_MMC2_TX;
+> > -	else
+> > -		sig = host->id == 0 ? OMAP_DMA_MMC_TX : OMAP_DMA_MMC2_TX;
+> > -	host->dma_tx = dma_request_channel(mask, omap_dma_filter_fn, &sig);
+> > +	res = platform_get_resource_byname(pdev, IORESOURCE_DMA, "tx");
+> > +	if (res)
+> > +		sig = res->start;
+> > +	host->dma_tx = dma_request_slave_channel_compat(mask,
+> > +				omap_dma_filter_fn, &sig, &pdev->dev, "tx");
+> 
+> Minor comment, since we're moving to DT-only for platforms using this driver
+> (hope I'm right about that), why not just do:
+> 	dma_request_slave_channel_(&pdev->dev, "tx");
+> 
+> IORESOURCE_DMA is not created by OF layer so I guess no need to call
+> platform_get_resource either.
 
+Well this is not the omap_hsmmc.c driver, this is the one for earlier hardware
+that's available on omap1 and 2420. All the later ones use the omap_hsmmc.c
+driver instead. So this one we cannot make DT only unless we make mach-omap1
+DT only, which is doable, but may never happen because of the effort needed.
 
+Most of the effort would be quite trivial, except for the conversion to use
+the common clock framework.
 
+Regards,
 
-Hi!
-
-Just does that on a ThinkPad T520 with:
-
-merkaba:~> lspci -nn | grep MMC
-0d:00.0 System peripheral [0880]: Ricoh Co Ltd PCIe SDXC/MMC Host Contr=
-oller=20
-[1180:e823] (rev 08)
-
-Mouse pointer freezes, no Ctrl-Alt-F1.
-
-
-merkaba:~> fdisk -l /dev/mmcblk0
-
-Disk /dev/mmcblk0: 31.4 GB, 31439454208 bytes
-255 heads, 63 sectors/track, 3822 cylinders, total 61405184 sectors
-Units =3D sectors of 1 * 512 =3D 512 bytes
-Sector size (logical/physical): 512 bytes / 512 bytes
-I/O size (minimum/optimal): 512 bytes / 512 bytes
-Disk identifier: 0x00000000
-
-        Device Boot      Start         End      Blocks   Id  System
-/dev/mmcblk0p1            8192    61405183    30698496    c  W95 FAT32 =
-(LBA
-
-
-merkaba:/sys/block/mmcblk0#2> grep . * 2>/dev/null
-alignment_offset:0
-capability:10
-dev:179:0
-discard_alignment:0
-ext_range:8
-force_ro:0
-inflight:       0        0
-range:8
-removable:0
-ro:0
-size:61405184
-stat:     176       33     1672      102        0        0        0    =
-    0       =20
-0      102      102
-uevent:MAJOR=3D179
-uevent:MINOR=3D0
-uevent:DEVNAME=3Dmmcblk0
-uevent:DEVTYPE=3Ddisk
-
-
-I do not want to take the time to diagnose this further, especially as =
-its one=20
-of those nasty "I just lock up and I don=B4t tell you what went wrong" =
-kind of=20
-bugs. Thats just not a nice way to tell that there has been an error.
-
-
-If there is any five or ten minute information gathering task, I am wil=
-ling to=20
-provide more information, but right now there is no chance on Earth tha=
-t I=20
-will be bisecting while having a long list of more interesting things t=
-o do=20
-than that.
-
-
-Thus for now I just use 3.12 kernel again. Maybe I will try with some r=
-c5 or=20
-so again.
-
-Ciao,
---=20
-Martin 'Helios' Steigerwald - http://www.Lichtvoll.de
-GPG: 03B0 0D6C 0040 0710 4AFA  B82F 991B EAAC A599 84C7
+Tony
