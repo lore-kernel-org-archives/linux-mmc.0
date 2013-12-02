@@ -1,82 +1,149 @@
-From: Axel Lin <axel.lin@ingics.com>
-Subject: [PATCH] mmc: Convert to use ATTRIBUTE_GROUPS
-Date: Mon, 02 Dec 2013 10:37:58 +0800
-Message-ID: <1385951878.30717.3.camel@phoenix>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+From: Zhangfei Gao <zhangfei.gao@linaro.org>
+Subject: [PATCH 1/2] mmc: dw_mmc: add dw_mci_of_get_cd_gpio to handle cd pin
+Date: Mon,  2 Dec 2013 16:05:52 +0800
+Message-ID: <1385971552-31009-1-git-send-email-zhangfei.gao@linaro.org>
+References: <1383889128-12540-2-git-send-email-zhangfei.gao@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pd0-f170.google.com ([209.85.192.170]:61528 "EHLO
-	mail-pd0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752630Ab3LBCiD (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 1 Dec 2013 21:38:03 -0500
-Received: by mail-pd0-f170.google.com with SMTP id g10so17152358pdj.29
-        for <linux-mmc@vger.kernel.org>; Sun, 01 Dec 2013 18:38:02 -0800 (PST)
+Received: from mail-wi0-f175.google.com ([209.85.212.175]:47471 "EHLO
+	mail-wi0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752522Ab3LBIGH (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 2 Dec 2013 03:06:07 -0500
+Received: by mail-wi0-f175.google.com with SMTP id hi5so4346658wib.14
+        for <linux-mmc@vger.kernel.org>; Mon, 02 Dec 2013 00:06:06 -0800 (PST)
+In-Reply-To: <1383889128-12540-2-git-send-email-zhangfei.gao@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: linux-mmc@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>
+Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Zhangfei Gao <zhangfei.gao@linaro.org>
 
-Use new ATTRIBUTE_GROUPS macro to declare attribute groups.
+Change function dw_mci_of_get_cd_gpio type to void suggested by Jaehoon
+And check any other comments
 
-Signed-off-by: Axel Lin <axel.lin@ingics.com>
+Thanks
+
+Add function dw_mci_of_get_cd_gpio to check "cd-gpios" from dts.
+mmc_gpio_request_cd and mmc_gpio_get_cd are used to handle cd pin
+
+Signed-off-by: Zhangfei Gao <zhangfei.gao@linaro.org>
+CC: Jaehoon Chung <jh80.chung@samsung.com>
 ---
- drivers/mmc/core/mmc.c | 12 ++----------
- drivers/mmc/core/sd.c  | 12 ++----------
- 2 files changed, 4 insertions(+), 20 deletions(-)
+ drivers/mmc/host/dw_mmc.c |   48 +++++++++++++++++++++++++++++++++------------
+ 1 file changed, 35 insertions(+), 13 deletions(-)
 
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index f631f5a..db0f250 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -694,18 +694,10 @@ static struct attribute *mmc_std_attrs[] = {
- 	&dev_attr_rel_sectors.attr,
- 	NULL,
- };
--
--static struct attribute_group mmc_std_attr_group = {
--	.attrs = mmc_std_attrs,
--};
--
--static const struct attribute_group *mmc_attr_groups[] = {
--	&mmc_std_attr_group,
--	NULL,
--};
-+ATTRIBUTE_GROUPS(mmc_std);
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index 4bce0de..a776f24 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -36,6 +36,7 @@
+ #include <linux/workqueue.h>
+ #include <linux/of.h>
+ #include <linux/of_gpio.h>
++#include <linux/mmc/slot-gpio.h>
  
- static struct device_type mmc_type = {
--	.groups = mmc_attr_groups,
-+	.groups = mmc_std_groups,
- };
+ #include "dw_mmc.h"
  
- /*
-diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
-index 6f42050..c52cb77 100644
---- a/drivers/mmc/core/sd.c
-+++ b/drivers/mmc/core/sd.c
-@@ -700,18 +700,10 @@ static struct attribute *sd_std_attrs[] = {
- 	&dev_attr_serial.attr,
- 	NULL,
- };
+@@ -1032,20 +1033,26 @@ static int dw_mci_get_cd(struct mmc_host *mmc)
+ 	int present;
+ 	struct dw_mci_slot *slot = mmc_priv(mmc);
+ 	struct dw_mci_board *brd = slot->host->pdata;
++	int gpio_cd = !mmc_gpio_get_cd(mmc);
+ 
+ 	/* Use platform get_cd function, else try onboard card detect */
+ 	if (brd->quirks & DW_MCI_QUIRK_BROKEN_CARD_DETECTION)
+ 		present = 1;
+ 	else if (brd->get_cd)
+ 		present = !brd->get_cd(slot->id);
++	else if (!IS_ERR_VALUE(gpio_cd))
++		present = !!gpio_cd;
+ 	else
+ 		present = (mci_readl(slot->host, CDETECT) & (1 << slot->id))
+ 			== 0 ? 1 : 0;
+ 
+-	if (present)
++	if (present) {
++		set_bit(DW_MMC_CARD_PRESENT, &slot->flags);
+ 		dev_dbg(&mmc->class_dev, "card is present\n");
+-	else
++	} else {
++		clear_bit(DW_MMC_CARD_PRESENT, &slot->flags);
+ 		dev_dbg(&mmc->class_dev, "card is not present\n");
++	}
+ 
+ 	return present;
+ }
+@@ -1926,10 +1933,6 @@ static void dw_mci_work_routine_card(struct work_struct *work)
+ 			/* Card change detected */
+ 			slot->last_detect_state = present;
+ 
+-			/* Mark card as present if applicable */
+-			if (present != 0)
+-				set_bit(DW_MMC_CARD_PRESENT, &slot->flags);
 -
--static struct attribute_group sd_std_attr_group = {
--	.attrs = sd_std_attrs,
--};
+ 			/* Clean up queue if present */
+ 			mrq = slot->mrq;
+ 			if (mrq) {
+@@ -1977,8 +1980,6 @@ static void dw_mci_work_routine_card(struct work_struct *work)
+ 
+ 			/* Power down slot */
+ 			if (present == 0) {
+-				clear_bit(DW_MMC_CARD_PRESENT, &slot->flags);
 -
--static const struct attribute_group *sd_attr_groups[] = {
--	&sd_std_attr_group,
--	NULL,
--};
-+ATTRIBUTE_GROUPS(sd_std);
+ 				/* Clear down the FIFO */
+ 				dw_mci_fifo_reset(host);
+ #ifdef CONFIG_MMC_DW_IDMAC
+@@ -2079,6 +2080,26 @@ static int dw_mci_of_get_wp_gpio(struct device *dev, u8 slot)
  
- struct device_type sd_type = {
--	.groups = sd_attr_groups,
-+	.groups = sd_std_groups,
- };
+ 	return gpio;
+ }
++
++/* find the cd gpio for a given slot; or -1 if none specified */
++static void dw_mci_of_get_cd_gpio(struct device *dev, u8 slot,
++					struct mmc_host *mmc)
++{
++	struct device_node *np = dw_mci_of_find_slot_node(dev, slot);
++	int gpio;
++
++	if (!np)
++		return;
++
++	gpio = of_get_named_gpio(np, "cd-gpios", 0);
++
++	/* Having a missing entry is valid; return silently */
++	if (!gpio_is_valid(gpio))
++		return;
++
++	if (mmc_gpio_request_cd(mmc, gpio, 0))
++		dev_warn(dev, "gpio [%d] request failed\n", gpio);
++}
+ #else /* CONFIG_OF */
+ static int dw_mci_of_get_slot_quirks(struct device *dev, u8 slot)
+ {
+@@ -2096,6 +2117,11 @@ static int dw_mci_of_get_wp_gpio(struct device *dev, u8 slot)
+ {
+ 	return -EINVAL;
+ }
++static void dw_mci_of_get_cd_gpio(struct device *dev, u8 slot,
++					struct mmc_host *mmc)
++{
++	return;
++}
+ #endif /* CONFIG_OF */
  
- /*
+ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
+@@ -2197,12 +2223,8 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
+ #endif /* CONFIG_MMC_DW_IDMAC */
+ 	}
+ 
+-	if (dw_mci_get_cd(mmc))
+-		set_bit(DW_MMC_CARD_PRESENT, &slot->flags);
+-	else
+-		clear_bit(DW_MMC_CARD_PRESENT, &slot->flags);
+-
+ 	slot->wp_gpio = dw_mci_of_get_wp_gpio(host->dev, slot->id);
++	dw_mci_of_get_cd_gpio(host->dev, slot->id, mmc);
+ 
+ 	ret = mmc_add_host(mmc);
+ 	if (ret)
 -- 
-1.8.1.2
-
-
+1.7.9.5
 
