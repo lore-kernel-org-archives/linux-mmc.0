@@ -1,85 +1,38 @@
-From: Steffen Trumtrar <s.trumtrar@pengutronix.de>
-Subject: Re: [BUG/RFC] SDHCI_QUIRK_NO_MULTIBLOCK for i.MX35/25
-Date: Mon, 2 Dec 2013 09:58:06 +0100
-Message-ID: <20131202085806.GF25308@pengutronix.de>
-References: <20131115091537.GF28658@pengutronix.de>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from metis.ext.pengutronix.de ([92.198.50.35]:52906 "EHLO
-	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751170Ab3LBI6J (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 2 Dec 2013 03:58:09 -0500
-Content-Disposition: inline
-In-Reply-To: <20131115091537.GF28658@pengutronix.de>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Andreas Fenkart <afenkart@gmail.com>
+Subject: [PATCH v4 0/3] mmc: omap_hsmmc: Enable SDIO IRQ.
+Date: Mon,  2 Dec 2013 17:52:37 +0100
+Message-ID: <1386003160-23733-1-git-send-email-afenkart@gmail.com>
+Return-path: <linux-doc-owner@vger.kernel.org>
+Sender: linux-doc-owner@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>
+Cc: Tony Lindgren <tony@atomide.com>, Grant Likely <grant.likely@secretlab.ca>, Felipe Balbi <balbi@ti.com>, Balaji T K <balajitk@ti.com>, zonque@gmail.com, galak@codeaurora.org, linux-doc@vger.kernel.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, Andreas Fenkart <afenkart@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: Chris Ball <cjb@laptop.org>
 
-On Fri, Nov 15, 2013 at 10:15:37AM +0100, Steffen Trumtrar wrote:
-> Hi!
-> 
-> 
-> 1 Actual Use-Case
-> =================
-> 
->   I have a SDIO card with a Marvell 8787, that works fine on an i.MX53
->   with the drivers/net/wireless/mwifiex/sdio.c driver. On an i.MX35
->   however the loading of the firmware errors out on the very first
->   single-block transfer with 1024 bytes payload.
-> 
-> 
-> 2 Reason for failure
-> ====================
-> 
->   sdhci defines SDHCI_QUIRK_NO_MULTIBLOCK to completely disable
->   multi-block transfers for a host. The max_blk_count is simply set to 1
->   to achieve this. Currently only i.MX35 and i.MX25 seem to be the only
->   users of that quirk.  The quirk is used to fix an errata on these
->   SoCs, that says, that "CMD12 abort operation does not abort data
->   transfer on AHB". (ENGcm07207)
-> 
->   So, this is a problem regarding only SD and not SDIO.  On this special
->   SDIO card, it looks like multi-block transfer has to be used for
->   anything >16 bytes. Removing the quirk fixes the firmware loading
->   error. The device is detected successfully after loading and can
->   connect to an AP.
-> 
-> 
-> 3 Question
-> ==========
-> 
->   And here comes the question: What would be the correct approach to fix
->   that and differentiate those two cases, so that we can use multi-block
->   transfers with CMD53 but not with CMD25(?!) ?
-> 
->   1a. As I see no other users of that quirk, it might be okay to rename
->       it, to better reflect the actual problem it fixes (broken CMD12 or
->       something).
-> 
->   1b. When the host knows with what it deals with (SDIO or SD) set the
->       max_blk_count according to the quirk. And only in the SD case, that is.
-> 
->   or
-> 
->   2. Introduce a max_blk_count_sd and max_blk_count_sdio and use them
->      everywhere. Seems rather invasive and over the top.
-> 
->   or
-> 
->   3. something better.
-> 
-> 
+v4:
+- switch to interrupts-extended format
+- drop ti,swakeup-missing flag convert to comaptible section
 
-Ping...
+v3:
+- removed gpio_irq from platform_data
 
-Regards,
-Steffen
+v2:
+- incorparated changes as suggested by reviewers
+- simplified workaround for am335x, gpio will now only wake
+  the module from runtime suspend, not handle the sdio irq
+  itself 
 
+
+Andreas Fenkart (3):
+  mmc: omap_hsmmc: Enable SDIO IRQ.
+  mmc: omap_hsmmc: Pin remux workaround to support SDIO interrupt on
+    AM335x.
+  mmc: omap_hsmmc: Extend debugfs for SDIO IRQ, GPIO and pinmux.
+
+ .../devicetree/bindings/mmc/ti-omap-hsmmc.txt      |   50 ++++
+ drivers/mmc/host/omap_hsmmc.c                      |  298 ++++++++++++++++++--
+ include/linux/platform_data/mmc-omap.h             |    1 +
+ 3 files changed, 326 insertions(+), 23 deletions(-)
 
 -- 
-Pengutronix e.K.                           |                             |
-Industrial Linux Solutions                 | http://www.pengutronix.de/  |
-Peiner Str. 6-8, 31137 Hildesheim, Germany | Phone: +49-5121-206917-0    |
-Amtsgericht Hildesheim, HRA 2686           | Fax:   +49-5121-206917-5555 |
+1.7.10.4
+
