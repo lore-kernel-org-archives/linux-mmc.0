@@ -1,50 +1,83 @@
-From: Tony Lindgren <tony@atomide.com>
-Subject: [PATCH] mmc: omap: Fix error introduced by fix to
- release_mem_region() path
-Date: Mon, 2 Dec 2013 11:34:59 -0800
-Message-ID: <20131202193459.GL26766@atomide.com>
+From: Michal Simek <monstr@monstr.eu>
+Subject: Re: [PATCH v3 1/2] mmc: arasan: Add driver for Arasan SDHCI
+Date: Mon, 02 Dec 2013 20:42:56 +0100
+Message-ID: <529CE2C0.5070401@monstr.eu>
+References: <1386007357-11956-1-git-send-email-soren.brinkmann@xilinx.com>
+Reply-To: monstr@monstr.eu
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-omap-owner@vger.kernel.org>
-Content-Disposition: inline
-Sender: linux-omap-owner@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, Dan Carpenter <dan.carpenter@oracle.com>, Jarkko Nikula <jarkko.nikula@bitmer.com>, Aaro Koskinen <aaro.koskinen@iki.fi>, Jarkko Lavinen <j.lavinen@samsung.com>
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="3nr2BQRAj1aUNcgnhQemdqKOLhiO9SMsc"
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1386007357-11956-1-git-send-email-soren.brinkmann@xilinx.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Soren Brinkmann <soren.brinkmann@xilinx.com>
+Cc: Rob Herring <rob.herring@calxeda.com>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Stephen Warren <swarren@wwwdotorg.org>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Rob Landley <rob@landley.net>, Russell King <linux@arm.linux.org.uk>, Chris Ball <cjb@laptop.org>, Michal Simek <michal.simek@xilinx.com>, Grant Likely <grant.likely@linaro.org>, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, linux-doc@vger.kernel.org, devicetree@vger.kernel.org, Tomasz Figa <tomasz.figa@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Commit 31ee9181eb92: (mmc: omap: Fix DMA configuration to not rely
-on device id) fixed getting of the DMA resources when booted with
-device tree. This patch however changed the handling of the
-free_mem_region() error path by reusing the struct resource *res
-for the DMA resources.
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--3nr2BQRAj1aUNcgnhQemdqKOLhiO9SMsc
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
 
-Fix the error the same way omap_hsmmc.c driver handles it, which
-is to restore the resource before using the values to call
-release_mem_region().
+On 12/02/2013 07:02 PM, Soren Brinkmann wrote:
+> Add a driver for Arasan's SDHCI controller core.
+>=20
+> Signed-off-by: Soren Brinkmann <soren.brinkmann@xilinx.com>
+> Acked-by: Rob Herring <rob.herring@calxeda.com> [binding]
+> ---
+> As discussed, I left binding and license header as is and fixed the typ=
+os.
+>=20
+> v3:
+>  - fix typo in binding documentation
+>  - add missing '>' in MODULE_AUTHOR string
+> v2:
+>  - document 'interrupts' and 'interrupt-parent' properties in the drive=
+r
+>    bindings
+>  - append '-8.9a' IP version specifier to comaptibility string
+>=20
+>    	Thanks,
+> 	S=C3=B6ren
+>=20
+>  .../devicetree/bindings/mmc/arasan,sdhci.txt       |  27 +++
+>  MAINTAINERS                                        |   1 +
+>  drivers/mmc/host/Kconfig                           |  12 ++
+>  drivers/mmc/host/Makefile                          |   1 +
+>  drivers/mmc/host/sdhci-of-arasan.c                 | 224 +++++++++++++=
+++++++++
+>  5 files changed, 265 insertions(+)
+>  create mode 100644 Documentation/devicetree/bindings/mmc/arasan,sdhci.=
+txt
+>  create mode 100644 drivers/mmc/host/sdhci-of-arasan.c
 
-Reported-by: Dan Carpenter <dan.carpenter@oracle.com>
-Signed-off-by: Tony Lindgren <tony@atomide.com>
+Acked-by: Michal Simek <monstr@monstr.eu>
 
----
+Thanks,
+Michal
 
-Chris, looks like the patch introducing this error is queued in
-arm-soc fixes branch.. Care to ack this one too and I'll merge it
-via arm-soc as well?
+--=20
+Michal Simek, Ing. (M.Eng), OpenPGP -> KeyID: FE3D1F91
+w: www.monstr.eu p: +42-0-721842854
+Maintainer of Linux kernel - Microblaze cpu - http://www.monstr.eu/fdt/
+Maintainer of Linux kernel - Xilinx Zynq ARM architecture
+Microblaze U-BOOT custodian and responsible for u-boot arm zynq platform
 
-After that, no need for me to patch this driver for my mach-omap2
-device tree conversion I hope :)
 
---- a/drivers/mmc/host/omap.c
-+++ b/drivers/mmc/host/omap.c
-@@ -1465,7 +1465,10 @@ err_free_mmc_host:
- err_ioremap:
- 	kfree(host);
- err_free_mem_region:
--	release_mem_region(res->start, resource_size(res));
-+	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
-+	if (res)
-+		release_mem_region(res->start, resource_size(res));
-+
- 	return ret;
- }
- 
+
+--3nr2BQRAj1aUNcgnhQemdqKOLhiO9SMsc
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.10 (GNU/Linux)
+Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
+
+iEYEARECAAYFAlKc4sAACgkQykllyylKDCGZZwCeO0pTc5NWVETFcJOPE+pdARFH
+iCkAn39R+KL/403QXOpoKti5oo/HNqQS
+=QuoN
+-----END PGP SIGNATURE-----
+
+--3nr2BQRAj1aUNcgnhQemdqKOLhiO9SMsc--
