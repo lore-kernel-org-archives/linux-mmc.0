@@ -1,149 +1,85 @@
-From: Zhangfei Gao <zhangfei.gao@linaro.org>
-Subject: [PATCH 1/2] mmc: dw_mmc: add dw_mci_of_get_cd_gpio to handle cd pin
-Date: Mon,  2 Dec 2013 16:05:52 +0800
-Message-ID: <1385971552-31009-1-git-send-email-zhangfei.gao@linaro.org>
-References: <1383889128-12540-2-git-send-email-zhangfei.gao@linaro.org>
+From: Steffen Trumtrar <s.trumtrar@pengutronix.de>
+Subject: Re: [BUG/RFC] SDHCI_QUIRK_NO_MULTIBLOCK for i.MX35/25
+Date: Mon, 2 Dec 2013 09:58:06 +0100
+Message-ID: <20131202085806.GF25308@pengutronix.de>
+References: <20131115091537.GF28658@pengutronix.de>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wi0-f175.google.com ([209.85.212.175]:47471 "EHLO
-	mail-wi0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752522Ab3LBIGH (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 2 Dec 2013 03:06:07 -0500
-Received: by mail-wi0-f175.google.com with SMTP id hi5so4346658wib.14
-        for <linux-mmc@vger.kernel.org>; Mon, 02 Dec 2013 00:06:06 -0800 (PST)
-In-Reply-To: <1383889128-12540-2-git-send-email-zhangfei.gao@linaro.org>
+Received: from metis.ext.pengutronix.de ([92.198.50.35]:52906 "EHLO
+	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751170Ab3LBI6J (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 2 Dec 2013 03:58:09 -0500
+Content-Disposition: inline
+In-Reply-To: <20131115091537.GF28658@pengutronix.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>
-Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Zhangfei Gao <zhangfei.gao@linaro.org>
+To: linux-mmc@vger.kernel.org
+Cc: Chris Ball <cjb@laptop.org>
 
-Change function dw_mci_of_get_cd_gpio type to void suggested by Jaehoon
-And check any other comments
+On Fri, Nov 15, 2013 at 10:15:37AM +0100, Steffen Trumtrar wrote:
+> Hi!
+> 
+> 
+> 1 Actual Use-Case
+> =================
+> 
+>   I have a SDIO card with a Marvell 8787, that works fine on an i.MX53
+>   with the drivers/net/wireless/mwifiex/sdio.c driver. On an i.MX35
+>   however the loading of the firmware errors out on the very first
+>   single-block transfer with 1024 bytes payload.
+> 
+> 
+> 2 Reason for failure
+> ====================
+> 
+>   sdhci defines SDHCI_QUIRK_NO_MULTIBLOCK to completely disable
+>   multi-block transfers for a host. The max_blk_count is simply set to 1
+>   to achieve this. Currently only i.MX35 and i.MX25 seem to be the only
+>   users of that quirk.  The quirk is used to fix an errata on these
+>   SoCs, that says, that "CMD12 abort operation does not abort data
+>   transfer on AHB". (ENGcm07207)
+> 
+>   So, this is a problem regarding only SD and not SDIO.  On this special
+>   SDIO card, it looks like multi-block transfer has to be used for
+>   anything >16 bytes. Removing the quirk fixes the firmware loading
+>   error. The device is detected successfully after loading and can
+>   connect to an AP.
+> 
+> 
+> 3 Question
+> ==========
+> 
+>   And here comes the question: What would be the correct approach to fix
+>   that and differentiate those two cases, so that we can use multi-block
+>   transfers with CMD53 but not with CMD25(?!) ?
+> 
+>   1a. As I see no other users of that quirk, it might be okay to rename
+>       it, to better reflect the actual problem it fixes (broken CMD12 or
+>       something).
+> 
+>   1b. When the host knows with what it deals with (SDIO or SD) set the
+>       max_blk_count according to the quirk. And only in the SD case, that is.
+> 
+>   or
+> 
+>   2. Introduce a max_blk_count_sd and max_blk_count_sdio and use them
+>      everywhere. Seems rather invasive and over the top.
+> 
+>   or
+> 
+>   3. something better.
+> 
+> 
 
-Thanks
+Ping...
 
-Add function dw_mci_of_get_cd_gpio to check "cd-gpios" from dts.
-mmc_gpio_request_cd and mmc_gpio_get_cd are used to handle cd pin
+Regards,
+Steffen
 
-Signed-off-by: Zhangfei Gao <zhangfei.gao@linaro.org>
-CC: Jaehoon Chung <jh80.chung@samsung.com>
----
- drivers/mmc/host/dw_mmc.c |   48 +++++++++++++++++++++++++++++++++------------
- 1 file changed, 35 insertions(+), 13 deletions(-)
 
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 4bce0de..a776f24 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -36,6 +36,7 @@
- #include <linux/workqueue.h>
- #include <linux/of.h>
- #include <linux/of_gpio.h>
-+#include <linux/mmc/slot-gpio.h>
- 
- #include "dw_mmc.h"
- 
-@@ -1032,20 +1033,26 @@ static int dw_mci_get_cd(struct mmc_host *mmc)
- 	int present;
- 	struct dw_mci_slot *slot = mmc_priv(mmc);
- 	struct dw_mci_board *brd = slot->host->pdata;
-+	int gpio_cd = !mmc_gpio_get_cd(mmc);
- 
- 	/* Use platform get_cd function, else try onboard card detect */
- 	if (brd->quirks & DW_MCI_QUIRK_BROKEN_CARD_DETECTION)
- 		present = 1;
- 	else if (brd->get_cd)
- 		present = !brd->get_cd(slot->id);
-+	else if (!IS_ERR_VALUE(gpio_cd))
-+		present = !!gpio_cd;
- 	else
- 		present = (mci_readl(slot->host, CDETECT) & (1 << slot->id))
- 			== 0 ? 1 : 0;
- 
--	if (present)
-+	if (present) {
-+		set_bit(DW_MMC_CARD_PRESENT, &slot->flags);
- 		dev_dbg(&mmc->class_dev, "card is present\n");
--	else
-+	} else {
-+		clear_bit(DW_MMC_CARD_PRESENT, &slot->flags);
- 		dev_dbg(&mmc->class_dev, "card is not present\n");
-+	}
- 
- 	return present;
- }
-@@ -1926,10 +1933,6 @@ static void dw_mci_work_routine_card(struct work_struct *work)
- 			/* Card change detected */
- 			slot->last_detect_state = present;
- 
--			/* Mark card as present if applicable */
--			if (present != 0)
--				set_bit(DW_MMC_CARD_PRESENT, &slot->flags);
--
- 			/* Clean up queue if present */
- 			mrq = slot->mrq;
- 			if (mrq) {
-@@ -1977,8 +1980,6 @@ static void dw_mci_work_routine_card(struct work_struct *work)
- 
- 			/* Power down slot */
- 			if (present == 0) {
--				clear_bit(DW_MMC_CARD_PRESENT, &slot->flags);
--
- 				/* Clear down the FIFO */
- 				dw_mci_fifo_reset(host);
- #ifdef CONFIG_MMC_DW_IDMAC
-@@ -2079,6 +2080,26 @@ static int dw_mci_of_get_wp_gpio(struct device *dev, u8 slot)
- 
- 	return gpio;
- }
-+
-+/* find the cd gpio for a given slot; or -1 if none specified */
-+static void dw_mci_of_get_cd_gpio(struct device *dev, u8 slot,
-+					struct mmc_host *mmc)
-+{
-+	struct device_node *np = dw_mci_of_find_slot_node(dev, slot);
-+	int gpio;
-+
-+	if (!np)
-+		return;
-+
-+	gpio = of_get_named_gpio(np, "cd-gpios", 0);
-+
-+	/* Having a missing entry is valid; return silently */
-+	if (!gpio_is_valid(gpio))
-+		return;
-+
-+	if (mmc_gpio_request_cd(mmc, gpio, 0))
-+		dev_warn(dev, "gpio [%d] request failed\n", gpio);
-+}
- #else /* CONFIG_OF */
- static int dw_mci_of_get_slot_quirks(struct device *dev, u8 slot)
- {
-@@ -2096,6 +2117,11 @@ static int dw_mci_of_get_wp_gpio(struct device *dev, u8 slot)
- {
- 	return -EINVAL;
- }
-+static void dw_mci_of_get_cd_gpio(struct device *dev, u8 slot,
-+					struct mmc_host *mmc)
-+{
-+	return;
-+}
- #endif /* CONFIG_OF */
- 
- static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
-@@ -2197,12 +2223,8 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
- #endif /* CONFIG_MMC_DW_IDMAC */
- 	}
- 
--	if (dw_mci_get_cd(mmc))
--		set_bit(DW_MMC_CARD_PRESENT, &slot->flags);
--	else
--		clear_bit(DW_MMC_CARD_PRESENT, &slot->flags);
--
- 	slot->wp_gpio = dw_mci_of_get_wp_gpio(host->dev, slot->id);
-+	dw_mci_of_get_cd_gpio(host->dev, slot->id, mmc);
- 
- 	ret = mmc_add_host(mmc);
- 	if (ret)
 -- 
-1.7.9.5
-
+Pengutronix e.K.                           |                             |
+Industrial Linux Solutions                 | http://www.pengutronix.de/  |
+Peiner Str. 6-8, 31137 Hildesheim, Germany | Phone: +49-5121-206917-0    |
+Amtsgericht Hildesheim, HRA 2686           | Fax:   +49-5121-206917-5555 |
