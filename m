@@ -1,63 +1,45 @@
-From: Mark Brown <broonie@kernel.org>
-Subject: Re: [RFC PATCH v3 3/8] regulator: add pbias regulator support
-Date: Tue, 3 Dec 2013 16:06:43 +0000
-Message-ID: <20131203160643.GE27568@sirena.org.uk>
-References: <1385043627-30439-4-git-send-email-balajitk@ti.com>
- <20131121144623.GA8120@sirena.org.uk>
- <529DFEA7.9010707@ti.com>
+From: Jarkko Nikula <jarkko.nikula@bitmer.com>
+Subject: Re: [PATCH] mmc: omap: Fix error introduced by fix to release_mem_region()
+ path
+Date: Tue, 03 Dec 2013 18:16:59 +0000
+Message-ID: <529E201B.6030306@bitmer.com>
+References: <20131202193459.GL26766@atomide.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="dYpzLy1CJFIhs6l3"
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from cassiel.sirena.org.uk ([80.68.93.111]:47152 "EHLO
-	cassiel.sirena.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753653Ab3LCQHE (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 3 Dec 2013 11:07:04 -0500
-Content-Disposition: inline
-In-Reply-To: <529DFEA7.9010707@ti.com>
+Received: from bitmer.com ([213.157.87.50]:48174 "EHLO bitmer.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753815Ab3LCQRH (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 3 Dec 2013 11:17:07 -0500
+In-Reply-To: <20131202193459.GL26766@atomide.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Balaji T K <balajitk@ti.com>
-Cc: linux-omap@vger.kernel.org, bcousson@baylibre.com, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, cjb@laptop.org, tony@atomide.com
+To: Tony Lindgren <tony@atomide.com>
+Cc: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, Dan Carpenter <dan.carpenter@oracle.com>, Aaro Koskinen <aaro.koskinen@iki.fi>, Jarkko Lavinen <j.lavinen@samsung.com>
 
+On 12/02/2013 07:34 PM, Tony Lindgren wrote:
+> Commit 31ee9181eb92: (mmc: omap: Fix DMA configuration to not rely
+> on device id) fixed getting of the DMA resources when booted with
+> device tree. This patch however changed the handling of the
+> free_mem_region() error path by reusing the struct resource *res
+> for the DMA resources.
+> 
+> Fix the error the same way omap_hsmmc.c driver handles it, which
+> is to restore the resource before using the values to call
+> release_mem_region().
+> 
+> Reported-by: Dan Carpenter <dan.carpenter@oracle.com>
+> Signed-off-by: Tony Lindgren <tony@atomide.com>
+> 
+I guess my devm_ioremap conversion would have fixed this?
 
---dYpzLy1CJFIhs6l3
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+http://www.spinics.net/lists/linux-mmc/msg23317.html
 
-On Tue, Dec 03, 2013 at 09:24:15PM +0530, Balaji T K wrote:
-> On Thursday 21 November 2013 08:16 PM, Mark Brown wrote:
+Does not help now but I'm thinking if queuing some of those my patches
+(3-5) on top of yours as a fix? Especially fix to NULL pointer dereference:
 
-> >These don't match up with each other - the get and set voltage calls
-> >should reflect what the hardware state is, not what was requested by the
-> >caller.  You should be able to use the regmap helpers I think.
+http://www.spinics.net/lists/linux-mmc/msg23320.html
 
-> get_voltage returns the min_uV, saved in set_voltage since pbias
-> only need to programmed if the voltage supply in for pbias cell is less than
-> or greater than 1.8V, so vmode bit will be set for 3V and also for 3.3V too.
-
-That's the problem...
-
---dYpzLy1CJFIhs6l3
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-
-iQIcBAEBAgAGBQJSngGQAAoJELSic+t+oim9i2UP/jVT/vtYhwqY/R3vaiABy/Eh
-aShe9wqIJ5NR2ECzdZaJJUyoW9Dwyo3dH0d9MCaC1SGo0zEU7UFgGPJkHNiG6TS6
-ppNGHgAa7fMkTOfGPlQ1jd/V4xQjP7utJLY7REjs7+jteUxGTL8BA7uYLwhkp0DM
-NUU6CQg45hIicc2sgpTVR3UDiEBHYEySYTV8gh3vjKFTyKKhvHfQDCxoAXHLW0Us
-S5v8sh6/7+vBOhLdou4KAlF+thbp9zCeHV3t4UOtmbwpkoeXa1ACKZznP5t61LV6
-ieoq72ISLw8eKYEtTbX3UOmhjFjX5hKY2s6OizHpWmYvfP+3GBtoJuhYxCBVA6wN
-ujTL9EpsAy64vEwXUj6SED4GdHm6n5RBq+g/ogZrWoEp8P//ohgtQ74xG4n4dJ+R
-BURztzMMz+kP6D0RfhON9/s7fq5BND4ERde4cg9CyqQplLVABU7iq9dof4SkDiwG
-mBpy/KnKT5Ojy9llktf1F9ITeB7tDPfbUV9o0ib2jgoZGfG45j/KngZ1XvwHa1MA
-jv0KNdPUJ4opR2cMtMinQrvYqZYTiplAUm2EOBs1jmzvRG7BbpT7iJY+YZ6DYOmd
-3CpDeOZfqY6evlHbNvh40hnzqc7SvrVjRUVAudCP4VvddU9vnY86JKwb4LtvZws1
-BVIx+q0bSl6BrDWtYp0+
-=PIqp
------END PGP SIGNATURE-----
-
---dYpzLy1CJFIhs6l3--
+-- 
+Jarkko
