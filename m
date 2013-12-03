@@ -1,196 +1,128 @@
-From: <micky_ching@realsil.com.cn>
-Subject: [PATCH v3 2/2] mmc: rtsx: modify phase searching method for tuning
-Date: Tue, 3 Dec 2013 10:34:13 +0800
-Message-ID: <83e5f85df34724c6be6ee9276cb23de140d223cc.1385947736.git.micky_ching@realsil.com.cn>
-References: <cover.1385947736.git.micky_ching@realsil.com.cn>
+From: John Tobias <john.tobias.ph@gmail.com>
+Subject: *** DEADLOCK ***
+Date: Mon, 2 Dec 2013 18:51:44 -0800
+Message-ID: <CACUGKYOFTw78WTAQyy6g6Z1e8k7YnQiXT8LyVhtSNE8di+zEcw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
-In-Reply-To: <cover.1385947736.git.micky_ching@realsil.com.cn>
-List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
-List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel>
-List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
-List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
-List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
-Errors-To: driverdev-devel-bounces@linuxdriverproject.org
-Sender: driverdev-devel-bounces@linuxdriverproject.org
-To: cjb@laptop.org, sameo@linux.intel.com
-Cc: gregkh@linuxfoundation.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, wei_wang@realsil.com.cn, devel@linuxdriverproject.org
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-ob0-f181.google.com ([209.85.214.181]:60590 "EHLO
+	mail-ob0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751982Ab3LCCvp (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 2 Dec 2013 21:51:45 -0500
+Received: by mail-ob0-f181.google.com with SMTP id uy5so13565220obc.26
+        for <linux-mmc@vger.kernel.org>; Mon, 02 Dec 2013 18:51:45 -0800 (PST)
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, Dong Aisheng <b29396@freescale.com>, Shawn Guo <shawn.guo@linaro.org>, Fabio Estevam <festevam@gmail.com>
 
-From: Micky Ching <micky_ching@realsil.com.cn>
+Hello all,
 
-The new phase searching method is more concise and easier to
-understand.
+I am using 3.13-rc1 kernel for iMX6SL. I got these errors when I
+enable my wifi device, the wifi driver is not loaded when the errors
+occurred.
 
-Signed-off-by: Micky Ching <micky_ching@realsil.com.cn>
----
- drivers/mmc/host/rtsx_pci_sdmmc.c |  112 +++++++++++--------------------------
- include/linux/mfd/rtsx_pci.h      |    2 +-
- 2 files changed, 33 insertions(+), 81 deletions(-)
+Do you guys have any patches that I can grab?.
 
-diff --git a/drivers/mmc/host/rtsx_pci_sdmmc.c b/drivers/mmc/host/rtsx_pci_sdmmc.c
-index c9a7328..7da270b 100644
---- a/drivers/mmc/host/rtsx_pci_sdmmc.c
-+++ b/drivers/mmc/host/rtsx_pci_sdmmc.c
-@@ -31,16 +31,6 @@
- #include <linux/mfd/rtsx_pci.h>
- #include <asm/unaligned.h>
- 
--/* SD Tuning Data Structure
-- * Record continuous timing phase path
-- */
--struct timing_phase_path {
--	int start;
--	int end;
--	int mid;
--	int len;
--};
--
- struct realtek_pci_sdmmc {
- 	struct platform_device	*pdev;
- 	struct rtsx_pcr		*pcr;
-@@ -511,85 +501,47 @@ static int sd_change_phase(struct realtek_pci_sdmmc *host,
- 	return 0;
- }
- 
--static u8 sd_search_final_phase(struct realtek_pci_sdmmc *host, u32 phase_map)
-+static inline u32 test_phase_bit(u32 phase_map, unsigned int bit)
- {
--	struct timing_phase_path path[MAX_PHASE + 1];
--	int i, j, cont_path_cnt;
--	int new_block, max_len, final_path_idx;
--	u8 final_phase = 0xFF;
-+	bit %= RTSX_PHASE_MAX;
-+	return phase_map & (1 << bit);
-+}
- 
--	/* Parse phase_map, take it as a bit-ring */
--	cont_path_cnt = 0;
--	new_block = 1;
--	j = 0;
--	for (i = 0; i < MAX_PHASE + 1; i++) {
--		if (phase_map & (1 << i)) {
--			if (new_block) {
--				new_block = 0;
--				j = cont_path_cnt++;
--				path[j].start = i;
--				path[j].end = i;
--			} else {
--				path[j].end = i;
--			}
--		} else {
--			new_block = 1;
--			if (cont_path_cnt) {
--				/* Calculate path length and middle point */
--				int idx = cont_path_cnt - 1;
--				path[idx].len =
--					path[idx].end - path[idx].start + 1;
--				path[idx].mid =
--					path[idx].start + path[idx].len / 2;
--			}
--		}
--	}
-+static int sd_get_phase_len(u32 phase_map, unsigned int start_bit)
-+{
-+	int i;
- 
--	if (cont_path_cnt == 0) {
--		dev_dbg(sdmmc_dev(host), "No continuous phase path\n");
--		goto finish;
--	} else {
--		/* Calculate last continuous path length and middle point */
--		int idx = cont_path_cnt - 1;
--		path[idx].len = path[idx].end - path[idx].start + 1;
--		path[idx].mid = path[idx].start + path[idx].len / 2;
-+	for (i = 0; i < RTSX_PHASE_MAX; i++) {
-+		if (test_phase_bit(phase_map, start_bit + i) == 0)
-+			return i;
- 	}
-+	return RTSX_PHASE_MAX;
-+}
-+
-+static u8 sd_search_final_phase(struct realtek_pci_sdmmc *host, u32 phase_map)
-+{
-+	int start = 0, len = 0;
-+	int start_final = 0, len_final = 0;
-+	u8 final_phase = 0xFF;
- 
--	/* Connect the first and last continuous paths if they are adjacent */
--	if (!path[0].start && (path[cont_path_cnt - 1].end == MAX_PHASE)) {
--		/* Using negative index */
--		path[0].start = path[cont_path_cnt - 1].start - MAX_PHASE - 1;
--		path[0].len += path[cont_path_cnt - 1].len;
--		path[0].mid = path[0].start + path[0].len / 2;
--		/* Convert negative middle point index to positive one */
--		if (path[0].mid < 0)
--			path[0].mid += MAX_PHASE + 1;
--		cont_path_cnt--;
-+	if (phase_map == 0) {
-+		dev_err(sdmmc_dev(host), "phase error: [map:%x]\n", phase_map);
-+		return final_phase;
- 	}
- 
--	/* Choose the longest continuous phase path */
--	max_len = 0;
--	final_phase = 0;
--	final_path_idx = 0;
--	for (i = 0; i < cont_path_cnt; i++) {
--		if (path[i].len > max_len) {
--			max_len = path[i].len;
--			final_phase = (u8)path[i].mid;
--			final_path_idx = i;
-+	while (start < RTSX_PHASE_MAX) {
-+		len = sd_get_phase_len(phase_map, start);
-+		if (len_final < len) {
-+			start_final = start;
-+			len_final = len;
- 		}
--
--		dev_dbg(sdmmc_dev(host), "path[%d].start = %d\n",
--				i, path[i].start);
--		dev_dbg(sdmmc_dev(host), "path[%d].end = %d\n",
--				i, path[i].end);
--		dev_dbg(sdmmc_dev(host), "path[%d].len = %d\n",
--				i, path[i].len);
--		dev_dbg(sdmmc_dev(host), "path[%d].mid = %d\n",
--				i, path[i].mid);
-+		start += len ? len : 1;
- 	}
- 
--finish:
--	dev_dbg(sdmmc_dev(host), "Final chosen phase: %d\n", final_phase);
-+	final_phase = (start_final + len_final / 2) % RTSX_PHASE_MAX;
-+	dev_dbg(sdmmc_dev(host), "phase: [map:%x] [maxlen:%d] [final:%d]\n",
-+		phase_map, len_final, final_phase);
-+
- 	return final_phase;
- }
- 
-@@ -635,7 +587,7 @@ static int sd_tuning_phase(struct realtek_pci_sdmmc *host,
- 	int err, i;
- 	u32 raw_phase_map = 0;
- 
--	for (i = MAX_PHASE; i >= 0; i--) {
-+	for (i = 0; i < RTSX_PHASE_MAX; i++) {
- 		err = sd_tuning_rx_cmd(host, opcode, (u8)i);
- 		if (err == 0)
- 			raw_phase_map |= 1 << i;
-diff --git a/include/linux/mfd/rtsx_pci.h b/include/linux/mfd/rtsx_pci.h
-index 0ce7721..a383597 100644
---- a/include/linux/mfd/rtsx_pci.h
-+++ b/include/linux/mfd/rtsx_pci.h
-@@ -144,7 +144,7 @@
- #define HOST_TO_DEVICE		0
- #define DEVICE_TO_HOST		1
- 
--#define MAX_PHASE		31
-+#define RTSX_PHASE_MAX		32
- #define RX_TUNING_CNT		3
- 
- /* SG descriptor */
--- 
-1.7.9.5
+Regards,
+
+john
+
+
+
+[ INFO: inconsistent lock state ]
+3.13.0-rc1 #1 Not tainted
+---------------------------------
+inconsistent {IN-HARDIRQ-W} -> {HARDIRQ-ON-W} usage.
+kworker/u2:1/13 [HC0[0]:SC0[0]:HE1:SE1] takes:
+ (&(&host->lock)->rlock#2){?.-...}, at: [<80309f14>]
+sdhci_execute_tuning+0x3c/0x720
+{IN-HARDIRQ-W} state was registered at:
+  [<8004c228>] mark_lock+0x140/0x66c
+  [<8004d21c>] __lock_acquire+0xac8/0x1b84
+  [<8004e7a4>] lock_acquire+0x68/0x7c
+  [<8047b938>] _raw_spin_lock+0x30/0x40
+  [<8030ade0>] sdhci_irq+0x24/0xa1c
+  [<8005789c>] handle_irq_event_percpu+0x54/0x1c0
+  [<80057a4c>] handle_irq_event+0x44/0x64
+  [<8005a3ec>] handle_fasteoi_irq+0x80/0x13c
+  [<80057144>] generic_handle_irq+0x28/0x38
+  [<8000f0c0>] handle_IRQ+0x38/0x8c
+  [<8000852c>] gic_handle_irq+0x30/0x5c
+  [<800122a4>] __irq_svc+0x44/0x5c
+  [<80243a64>] pin_get_from_name+0x58/0x80
+  [<80245a90>] pinconf_map_to_setting+0x44/0xb0
+  [<80243358>] pinctrl_get+0x26c/0x3e8
+  [<8024392c>] devm_pinctrl_get+0x34/0x68
+  [<80295224>] pinctrl_bind_pins+0x34/0x100
+  [<802813a4>] driver_probe_device+0x60/0x234
+  [<80281614>] __driver_attach+0x9c/0xa0
+  [<8027fa20>] bus_for_each_dev+0x5c/0x90
+  [<80280f58>] driver_attach+0x20/0x28
+  [<80280b54>] bus_add_driver+0xdc/0x1dc
+  [<80281ccc>] driver_register+0x80/0xfc
+  [<8028298c>] __platform_driver_register+0x50/0x64
+  [<805f4bcc>] sdhci_esdhc_imx_driver_init+0x18/0x20
+  [<80008790>] do_one_initcall+0xfc/0x160
+  [<805d8be0>] kernel_init_freeable+0xf0/0x1bc
+  [<80471468>] kernel_init+0x10/0x120
+  [<8000e888>] ret_from_fork+0x14/0x2c
+irq event stamp: 25267
+hardirqs last  enabled at (25267): [<8047bf9c>]
+_raw_spin_unlock_irqrestore+0x38/0x4c
+hardirqs last disabled at (25266): [<8047b9f0>] _raw_spin_lock_irqsave+0x24/0x54
+softirqs last  enabled at (23976): [<80024f80>] __do_softirq+0x178/0x234
+softirqs last disabled at (23969): [<800253ec>] irq_exit+0xac/0x104
+
+other info that might help us debug this:
+ Possible unsafe locking scenario:
+
+       CPU0
+       ----
+  lock(&(&host->lock)->rlock#2);
+  <Interrupt>
+    lock(&(&host->lock)->rlock#2);
+
+ *** DEADLOCK ***
+
+2 locks held by kworker/u2:1/13:
+ #0:  (kmmcd){.+.+.+}, at: [<80036310>] process_one_work+0x12c/0x434
+ #1:  ((&(&host->detect)->work)){+.+.+.}, at: [<80036310>]
+process_one_work+0x12c/0x434
+
+stack backtrace:
+CPU: 0 PID: 13 Comm: kworker/u2:1 Not tainted 3.13.0-rc1 #1
+Workqueue: kmmcd mmc_rescan
+Backtrace:
+[<800115d0>] (dump_backtrace+0x0/0x10c) from [<8001176c>] (show_stack+0x18/0x1c)
+ r6:00000000 r5:806f1004 r4:bf866600 r3:bf866600
+[<80011754>] (show_stack+0x0/0x1c) from [<80476118>] (dump_stack+0x20/0x28)
+[<804760f8>] (dump_stack+0x0/0x28) from [<80474368>]
+(print_usage_bug.part.25+0x224/0x28c)
+[<80474144>] (print_usage_bug.part.25+0x0/0x28c) from [<8004c378>]
+(mark_lock+0x290/0x66c)
+ r8:00000000 r7:bf866600 r6:00000001 r5:bf866970 r4:00000002
+[<8004c0e8>] (mark_lock+0x0/0x66c) from [<8004cd40>]
+(__lock_acquire+0x5ec/0x1b84)
+[<8004c754>] (__lock_acquire+0x0/0x1b84) from [<8004e7a4>]
+(lock_acquire+0x68/0x7c)
+[<8004e73c>] (lock_acquire+0x0/0x7c) from [<8047b938>]
+(_raw_spin_lock+0x30/0x40)
+ r7:bf9ad440 r6:bf9ad568 r5:bf0e4000 r4:bf9ad568
+[<8047b908>] (_raw_spin_lock+0x0/0x40) from [<80309f14>]
+(sdhci_execute_tuning+0x3c/0x720)
+ r4:bf9ad000
+[<80309ed8>] (sdhci_execute_tuning+0x0/0x720) from [<802ffa1c>]
+(mmc_sdio_init_card+0xa0c/0xa70)
+[<802ff010>] (mmc_sdio_init_card+0x0/0xa70) from [<802fff44>]
+(mmc_attach_sdio+0x88/0x370)
+[<802ffebc>] (mmc_attach_sdio+0x0/0x370) from [<802f856c>]
+(mmc_rescan+0x230/0x2c0)
+[<802f833c>] (mmc_rescan+0x0/0x2c0) from [<8003638c>]
+(process_one_work+0x1a8/0x434)
+ r8:00000000 r7:bf94dea8 r6:bf84e800 r5:bf9ad2f8 r4:bf916900
+r3:802f833c
+[<800361e4>] (process_one_work+0x0/0x434) from [<800369f8>]
+(worker_thread+0x124/0x394)
+[<800368d4>] (worker_thread+0x0/0x394) from [<8003cebc>] (kthread+0xc4/0xe0)
+[<8003cdf8>] (kthread+0x0/0xe0) from [<8000e888>] (ret_from_fork+0x14/0x2c)
+ r7:00000000 r6:00000000 r5:8003cdf8 r4:bf919000
