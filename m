@@ -1,159 +1,75 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH 1/2] mmc: dw_mmc: add dw_mci_of_get_cd_gpio to handle cd pin
-Date: Tue, 03 Dec 2013 15:00:43 +0900
-Message-ID: <529D738B.8010609@samsung.com>
-References: <1383889128-12540-2-git-send-email-zhangfei.gao@linaro.org>
- <1385971552-31009-1-git-send-email-zhangfei.gao@linaro.org>
+From: Olivier Sobrie <olivier@sobrie.be>
+Subject: at91sam9263 sdio + wlan ti wl1271
+Date: Tue, 3 Dec 2013 10:59:28 +0100
+Message-ID: <20131203095652.GA1329@hposo>
+Reply-To: Olivier Sobrie <olivier@sobrie.be>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout3.samsung.com ([203.254.224.33]:41328 "EHLO
-	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750998Ab3LCGAp (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 3 Dec 2013 01:00:45 -0500
-Received: from epcpsbgr3.samsung.com
- (u143.gpu120.samsung.co.kr [203.254.230.143])
- by mailout3.samsung.com (Oracle Communications Messaging Server 7u4-24.01
- (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTP id <0MX7002H7VD78B80@mailout3.samsung.com> for
- linux-mmc@vger.kernel.org; Tue, 03 Dec 2013 15:00:43 +0900 (KST)
-In-reply-to: <1385971552-31009-1-git-send-email-zhangfei.gao@linaro.org>
+Received: from mail-ea0-f182.google.com ([209.85.215.182]:43581 "EHLO
+	mail-ea0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752301Ab3LCJ7j (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 3 Dec 2013 04:59:39 -0500
+Received: by mail-ea0-f182.google.com with SMTP id o10so13168819eaj.13
+        for <linux-mmc@vger.kernel.org>; Tue, 03 Dec 2013 01:59:38 -0800 (PST)
+Content-Disposition: inline
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Zhangfei Gao <zhangfei.gao@linaro.org>, Chris Ball <cjb@laptop.org>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>
-Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+To: Ludovic Desroches <ludovic.desroches@atmel.com>
+Cc: linux-mmc@vger.kernel.org
 
-Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
+Hi Ludovic,
 
-On 12/02/2013 05:05 PM, Zhangfei Gao wrote:
-> Change function dw_mci_of_get_cd_gpio type to void suggested by Jaehoon
-> And check any other comments
-> 
-> Thanks
-> 
-> Add function dw_mci_of_get_cd_gpio to check "cd-gpios" from dts.
-> mmc_gpio_request_cd and mmc_gpio_get_cd are used to handle cd pin
-> 
-> Signed-off-by: Zhangfei Gao <zhangfei.gao@linaro.org>
-> CC: Jaehoon Chung <jh80.chung@samsung.com>
-> ---
->  drivers/mmc/host/dw_mmc.c |   48 +++++++++++++++++++++++++++++++++------------
->  1 file changed, 35 insertions(+), 13 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> index 4bce0de..a776f24 100644
-> --- a/drivers/mmc/host/dw_mmc.c
-> +++ b/drivers/mmc/host/dw_mmc.c
-> @@ -36,6 +36,7 @@
->  #include <linux/workqueue.h>
->  #include <linux/of.h>
->  #include <linux/of_gpio.h>
-> +#include <linux/mmc/slot-gpio.h>
->  
->  #include "dw_mmc.h"
->  
-> @@ -1032,20 +1033,26 @@ static int dw_mci_get_cd(struct mmc_host *mmc)
->  	int present;
->  	struct dw_mci_slot *slot = mmc_priv(mmc);
->  	struct dw_mci_board *brd = slot->host->pdata;
-> +	int gpio_cd = !mmc_gpio_get_cd(mmc);
->  
->  	/* Use platform get_cd function, else try onboard card detect */
->  	if (brd->quirks & DW_MCI_QUIRK_BROKEN_CARD_DETECTION)
->  		present = 1;
->  	else if (brd->get_cd)
->  		present = !brd->get_cd(slot->id);
-> +	else if (!IS_ERR_VALUE(gpio_cd))
-> +		present = !!gpio_cd;
->  	else
->  		present = (mci_readl(slot->host, CDETECT) & (1 << slot->id))
->  			== 0 ? 1 : 0;
->  
-> -	if (present)
-> +	if (present) {
-> +		set_bit(DW_MMC_CARD_PRESENT, &slot->flags);
->  		dev_dbg(&mmc->class_dev, "card is present\n");
-> -	else
-> +	} else {
-> +		clear_bit(DW_MMC_CARD_PRESENT, &slot->flags);
->  		dev_dbg(&mmc->class_dev, "card is not present\n");
-> +	}
->  
->  	return present;
->  }
-> @@ -1926,10 +1933,6 @@ static void dw_mci_work_routine_card(struct work_struct *work)
->  			/* Card change detected */
->  			slot->last_detect_state = present;
->  
-> -			/* Mark card as present if applicable */
-> -			if (present != 0)
-> -				set_bit(DW_MMC_CARD_PRESENT, &slot->flags);
-> -
->  			/* Clean up queue if present */
->  			mrq = slot->mrq;
->  			if (mrq) {
-> @@ -1977,8 +1980,6 @@ static void dw_mci_work_routine_card(struct work_struct *work)
->  
->  			/* Power down slot */
->  			if (present == 0) {
-> -				clear_bit(DW_MMC_CARD_PRESENT, &slot->flags);
-> -
->  				/* Clear down the FIFO */
->  				dw_mci_fifo_reset(host);
->  #ifdef CONFIG_MMC_DW_IDMAC
-> @@ -2079,6 +2080,26 @@ static int dw_mci_of_get_wp_gpio(struct device *dev, u8 slot)
->  
->  	return gpio;
->  }
-> +
-> +/* find the cd gpio for a given slot; or -1 if none specified */
-> +static void dw_mci_of_get_cd_gpio(struct device *dev, u8 slot,
-> +					struct mmc_host *mmc)
-> +{
-> +	struct device_node *np = dw_mci_of_find_slot_node(dev, slot);
-> +	int gpio;
-> +
-> +	if (!np)
-> +		return;
-> +
-> +	gpio = of_get_named_gpio(np, "cd-gpios", 0);
-> +
-> +	/* Having a missing entry is valid; return silently */
-> +	if (!gpio_is_valid(gpio))
-> +		return;
-> +
-> +	if (mmc_gpio_request_cd(mmc, gpio, 0))
-> +		dev_warn(dev, "gpio [%d] request failed\n", gpio);
-> +}
->  #else /* CONFIG_OF */
->  static int dw_mci_of_get_slot_quirks(struct device *dev, u8 slot)
->  {
-> @@ -2096,6 +2117,11 @@ static int dw_mci_of_get_wp_gpio(struct device *dev, u8 slot)
->  {
->  	return -EINVAL;
->  }
-> +static void dw_mci_of_get_cd_gpio(struct device *dev, u8 slot,
-> +					struct mmc_host *mmc)
-> +{
-> +	return;
-> +}
->  #endif /* CONFIG_OF */
->  
->  static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
-> @@ -2197,12 +2223,8 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
->  #endif /* CONFIG_MMC_DW_IDMAC */
->  	}
->  
-> -	if (dw_mci_get_cd(mmc))
-> -		set_bit(DW_MMC_CARD_PRESENT, &slot->flags);
-> -	else
-> -		clear_bit(DW_MMC_CARD_PRESENT, &slot->flags);
-> -
->  	slot->wp_gpio = dw_mci_of_get_wp_gpio(host->dev, slot->id);
-> +	dw_mci_of_get_cd_gpio(host->dev, slot->id, mmc);
->  
->  	ret = mmc_add_host(mmc);
->  	if (ret)
-> 
+I'm trying to use a wlan sdio TI wl1271 module with an at91sam9263
+processor. The wlan card is correctly recognized by the kernel but
+once the driver tries to initialize the card, then I observe sdio
+timeouts.
 
+I enabled the traces in the atmel-mci driver and here is what I see
+when the problem occurs (kernel v3.11):
+
+[   31.690000] atmel_mci fff84000.mmc: FSM: state=0
+[   31.900000] atmel_mci fff84000.mmc: MRQ: cmd 53
+[   31.900000] atmel_mci fff84000.mmc: start request: cmd 53
+[   31.900000] atmel_mci fff84000.mmc: IRQ: tx buffer empty
+[   31.900000] atmel_mci fff84000.mmc: (atmci_pdc_complete) set pending xfer complete
+[   31.900000] atmel_mci fff84000.mmc: IRQ: cmd ready
+[   31.900000] atmel_mci fff84000.mmc: set pending cmd rdy
+[   31.900000] atmel_mci fff84000.mmc: FSM: state=1
+[   31.900000] atmel_mci fff84000.mmc: FSM: cmd ready?
+[   31.900000] atmel_mci fff84000.mmc: set completed cmd ready
+[   31.900000] atmel_mci fff84000.mmc: command with data transfer
+[   31.900000] atmel_mci fff84000.mmc: FSM: state=2
+[   31.900000] atmel_mci fff84000.mmc: FSM: xfer complete?
+[   31.900000] atmel_mci fff84000.mmc: (atmci_tasklet_func) set completed xfer complete
+[   31.900000] atmel_mci fff84000.mmc: FSM: state=3
+[   31.900000] atmel_mci fff84000.mmc: FSM: not busy?
+[   33.900000] atmel_mci fff84000.mmc: software timeout
+[   33.900000] atmel_mci fff84000.mmc: FSM: state=5
+[   33.900000] atmel_mci fff84000.mmc: FSM: state=0
+
+The driver uses PDC mode to perform the transfers, the chip version is
+0x210. The data transferred in cmd53 is 4 bytes long.
+
+It looks like the chip never sets the 'ATMCI_BLKE' flag.
+After the problem occured I observe this trace:
+[   37.650000] mmc_host mmc0: WARNING: IMR=0x00000008
+
+The same wlan module on an at91sam9g45 (mci version: 0x410) in DMA mode
+works without problem.
+
+I also tested a Marvell 8385 (which uses the libertas driver) on
+at91sam9263 and it looks to work, I don't see any SDIO timeout.
+For this chip, the datasize sent is always >= 16 bytes.
+
+I'm wondering if the Errata "MMC data write operation with less than 12
+bytes is impossible.", mentionned in the sources (see function
+atmci_prepare_data()), also applies for this version of the chip?
+I didn't find this errata in the at91sam9263 datasheet...
+
+If anyone has info or suggestions to make it work, please let me know.
+
+Thanks,
+
+-- 
+Olivier
