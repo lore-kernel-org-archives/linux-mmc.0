@@ -1,66 +1,40 @@
-From: Andreas Fenkart <afenkart@gmail.com>
-Subject: [PATCH v5 3/3] mmc: omap_hsmmc: Extend debugfs for SDIO IRQ, GPIO and pinmux.
-Date: Tue,  3 Dec 2013 00:21:52 +0100
-Message-ID: <1386026512-23446-4-git-send-email-afenkart@gmail.com>
-References: <1386026512-23446-1-git-send-email-afenkart@gmail.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ee0-f53.google.com ([74.125.83.53]:55621 "EHLO
-	mail-ee0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753894Ab3LBXZV (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 2 Dec 2013 18:25:21 -0500
-In-Reply-To: <1386026512-23446-1-git-send-email-afenkart@gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+From: <micky_ching@realsil.com.cn>
+Subject: [PATCH v3 0/2] fix sd power bug and modify phase-searching method
+Date: Tue, 3 Dec 2013 10:34:11 +0800
+Message-ID: <cover.1385947736.git.micky_ching@realsil.com.cn>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
+List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
+List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel>
+List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
+List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
+List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
+Errors-To: driverdev-devel-bounces@linuxdriverproject.org
+Sender: driverdev-devel-bounces@linuxdriverproject.org
+To: cjb@laptop.org, sameo@linux.intel.com
+Cc: gregkh@linuxfoundation.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, wei_wang@realsil.com.cn, devel@linuxdriverproject.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: Tony Lindgren <tony@atomide.com>, Grant Likely <grant.likely@secretlab.ca>, Felipe Balbi <balbi@ti.com>, Balaji T K <balajitk@ti.com>, zonque@gmail.com, galak@codeaurora.org, linux-doc@vger.kernel.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, Andreas Fenkart <afenkart@gmail.com>
 
-Add SDIO IRQ entries to debugfs entry. Note that PSTATE shows current
-state of data lines, incl. SDIO IRQ pending
+From: Micky Ching <micky_ching@realsil.com.cn>
 
-Signed-off-by: Andreas Fenkart <afenkart@gmail.com>
----
- drivers/mmc/host/omap_hsmmc.c |   14 +++++++++++++-
- 1 file changed, 13 insertions(+), 1 deletion(-)
+If the driver removed while sd card still in the slot, the card power
+will not power down correctly, if we insert the driver module again,
+UHS card will not switch to UHS mode. This bug is fix in this patch.
 
-diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index 2c14171..5fe3f24 100644
---- a/drivers/mmc/host/omap_hsmmc.c
-+++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -82,6 +82,7 @@ static void apply_clk_hack(struct device *dev)
- #define OMAP_HSMMC_RSP54	0x0118
- #define OMAP_HSMMC_RSP76	0x011C
- #define OMAP_HSMMC_DATA		0x0120
-+#define OMAP_HSMMC_PSTATE	0x0124
- #define OMAP_HSMMC_HCTL		0x0128
- #define OMAP_HSMMC_SYSCTL	0x012C
- #define OMAP_HSMMC_STAT		0x0130
-@@ -1789,14 +1790,25 @@ static int omap_hsmmc_regs_show(struct seq_file *s, void *data)
- {
- 	struct mmc_host *mmc = s->private;
- 	struct omap_hsmmc_host *host = mmc_priv(mmc);
-+	bool suspended;
-+
-+	seq_puts(s, "\n");
-+	seq_printf(s, "sdio irq\t%s\n", ((host->flags & HSMMC_SDIO_IRQ_ENABLED)
-+					 ? "enabled" : "disabled"));
-+	suspended = host->dev->power.runtime_status != RPM_ACTIVE;
-+	if (host->flags & HSMMC_SWAKEUP_QUIRK)
-+		seq_printf(s, "pinmux config\t%s\n", (suspended ?
-+						      "gpio" : "sdio"));
- 
- 	seq_printf(s, "mmc%d:\n ctx_loss:\t%d\n\nregs:\n",
- 			mmc->index, host->context_loss);
- 
- 	pm_runtime_get_sync(host->dev);
--
-+	seq_puts(s, "\nregs:\n");
- 	seq_printf(s, "CON:\t\t0x%08x\n",
- 			OMAP_HSMMC_READ(host->base, CON));
-+	seq_printf(s, "PSTATE:\t\t0x%08x\n",
-+		   OMAP_HSMMC_READ(host->base, PSTATE));
- 	seq_printf(s, "HCTL:\t\t0x%08x\n",
- 			OMAP_HSMMC_READ(host->base, HCTL));
- 	seq_printf(s, "SYSCTL:\t\t0x%08x\n",
--- 
-1.7.10.4
+We use another phase search method for tuning, which looks more
+simple, and reduce some source code.
 
+Micky Ching (2):
+  mmc: rtsx: fix card poweroff bug
+  mmc: rtsx: modify phase searching method for tuning
+
+ drivers/mmc/host/rtsx_pci_sdmmc.c |  115 +++++++++++--------------------------
+ include/linux/mfd/rtsx_pci.h      |    2 +-
+ 2 files changed, 35 insertions(+), 82 deletions(-)
+
+--
+1.7.9.5
