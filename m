@@ -1,178 +1,105 @@
-From: John Tobias <john.tobias.ph@gmail.com>
-Subject: [PATCH] mmc: sdhci: Resolved DEADLOCK
-Date: Tue, 3 Dec 2013 18:48:28 -0800
-Message-ID: <CACUGKYN_opWiGY+GvZPYQSddWMYQAMKvv9qMutD5OL3R2grK-Q@mail.gmail.com>
+From: Chris Ruehl <chris.ruehl@gtsys.com.hk>
+Subject: mxcmci_request() oops on idle system
+Date: Wed, 04 Dec 2013 11:08:34 +0800
+Message-ID: <529E9CB2.1090403@gtsys.com.hk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ob0-f173.google.com ([209.85.214.173]:52837 "EHLO
-	mail-ob0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754888Ab3LDCs3 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 3 Dec 2013 21:48:29 -0500
-Received: by mail-ob0-f173.google.com with SMTP id gq1so15366847obb.4
-        for <linux-mmc@vger.kernel.org>; Tue, 03 Dec 2013 18:48:28 -0800 (PST)
+Received: from mail.fpasia.hk ([202.130.89.98]:50616 "EHLO fpa01n0.fpasia.hk"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753830Ab3LDDIo (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 3 Dec 2013 22:08:44 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, Shawn Guo <shawn.guo@linaro.org>, Fabio Estevam <festevam@gmail.com>, Dong Aisheng <b29396@freescale.com>, Chris Ball <cjb@laptop.org>, Markus.Niebel@tqs.de, Ulf Hansson <ulf.hansson@linaro.org>
+To: cjb@laptop.org
+Cc: linux-mmc@vger.kernel.org
 
-From: John Tobias <john.tobias.ph@gmail.com>
+Hi Chris,
 
-Remove the locking inside sdhci_execute_tuning to avoid the following
-warnings when an SDIO device is connected / enabled.
+I had this oops pop up a while after boot the
+Freescale IMX27 custom board with one 8G Flashcard running.
+The system was idle, suddenly the oops show up.
 
-=================================
-[ INFO: inconsistent lock state ]
-3.13.0-rc1 #12 Not tainted
----------------------------------
-inconsistent {IN-HARDIRQ-W} -> {HARDIRQ-ON-W} usage.
-kworker/u2:1/13 [HC0[0]:SC0[0]:HE1:SE1] takes:
- (&(&host->lock)->rlock#2){?.-...}, at: [<80315ffc>]
-sdhci_execute_tuning+0x4c/0x710
-{IN-HARDIRQ-W} state was registered at:
-  [<8004d2f4>] mark_lock+0x170/0x684
-  [<8004e8d8>] __lock_acquire+0xafc/0x1bc4
-  [<80050140>] lock_acquire+0x70/0x84
-  [<8048a198>] _raw_spin_lock+0x30/0x40
-  [<80316dfc>] sdhci_irq+0x24/0xa74
-  [<80058c5c>] handle_irq_event_percpu+0x38/0x1a0
-  [<80058e08>] handle_irq_event+0x44/0x64
-  [<8005b7d0>] handle_fasteoi_irq+0x80/0x14c
-  [<80058468>] generic_handle_irq+0x30/0x44
-  [<8000ed60>] handle_IRQ+0x38/0x8c
-  [<80008534>] gic_handle_irq+0x30/0x5c
-  [<800127e4>] __irq_svc+0x44/0x5c
-  [<8024801c>] pin_get_from_name+0x58/0x80
-  [<8024a0d8>] pinconf_map_to_setting+0x70/0xb0
-  [<80247884>] pinctrl_get+0x210/0x43c
-  [<80247ae0>] devm_pinctrl_get+0x30/0x70
-  [<8029aa6c>] pinctrl_bind_pins+0x34/0x100
-  [<802867cc>] driver_probe_device+0x60/0x234
-  [<80286a88>] __driver_attach+0x9c/0xa0
-  [<80284c94>] bus_for_each_dev+0x68/0x9c
-  [<8028633c>] driver_attach+0x20/0x28
-  [<80285fc0>] bus_add_driver+0x148/0x1f4
-  [<802870d8>] driver_register+0x80/0x100
-  [<8028824c>] __platform_driver_register+0x50/0x64
-  [<80606f04>] sdhci_esdhc_imx_driver_init+0x18/0x20
-  [<800087a4>] do_one_initcall+0x108/0x16c
-  [<805eabe8>] kernel_init_freeable+0xf8/0x1b8
-  [<80480144>] kernel_init+0x10/0x120
-  [<8000e528>] ret_from_fork+0x14/0x2c
-irq event stamp: 366717
-hardirqs last  enabled at (366717): [<8048a40c>]
-_raw_spin_unlock_irqrestore+0x38/0x4c
-hardirqs last disabled at (366716): [<8048a298>]
-_raw_spin_lock_irqsave+0x24/0x54
-softirqs last  enabled at (365438): [<80025880>] __do_softirq+0x194/0x258
-softirqs last disabled at (365431): [<80025d20>] irq_exit+0xb0/0x108
+Here is the dump:
+[  516.783407] Unable to handle kernel NULL pointer dereference at virtual 
+address 00000004
+[  516.791639] pgd = c0004000
+[  516.794445] [00000004] *pgd=00000000
+[  516.798088] Internal error: Oops: 17 [#1] ARM
+[  516.802472] Modules linked in:
+[  516.805593] CPU: 0 PID: 569 Comm: mmcqd/0 Not tainted 
+3.13.0-rc1-next-20131125-00006-g5f6bb77-dirty #66
+[  516.815027] task: cfb8a2a0 ti: cfb88000 task.ti: cfb88000
+[  516.820484] PC is at mxcmci_request+0xd0/0x2f8
+[  516.824974] LR is at mxcmci_request+0xf8/0x2f8
+[  516.829466] pc : [<c02b6048>]    lr : [<c02b6070>]    psr: 00000013
+[  516.829466] sp : cfb89dd0  ip : cfb89dd0  fp : cfb89e1c
+[  516.840988] r10: 000001ff  r9 : 00000002  r8 : cfa10620
+[  516.846250] r7 : 00000200  r6 : cfa0f02c  r5 : cfa0f0ec  r4 : cfa10400
+[  516.852812] r3 : a0000013  r2 : cfa0f410  r1 : 00040000  r0 : 00000000
+[  516.859376] Flags: nzcv  IRQs on  FIQs on  Mode SVC_32  ISA ARM  Segment kernel
+[  516.866723] Control: 0005317f  Table: afa74000  DAC: 00000017
+[  516.872503] Process mmcqd/0 (pid: 569, stack limit = 0xcfb881c0)
+[  516.878543] Stack: (0xcfb89dd0 to 0xcfb8a000)
+[  516.882951] 9dc0:                                     c02bf7a4 cfbff530 
+cfbfd0cc 000000ff
+[  516.891199] 9de0: cfb89dfc cfb89df0 c02beb3c c02bf7b4 cfb89e1c cfa0f02c 
+cfa10400 cfa0f12c
+[  516.899444] 9e00: cfb89ebc cfa0f240 00000001 00000001 cfb89e34 cfb89e20 
+c02a51c8 c02b5f88
+[  516.907688] 9e20: cfa10400 00000000 cfb89e7c cfb89e38 c02a69b4 c02a50f8 
+cfb89e5c 00000000
+[  516.915933] 9e40: cfb8a2a0 c003a858 cfb89e48 cfb89e48 c00431d0 cfa0f028 
+cfa0f004 cfa10c00
+[  516.924180] 9e60: ce5a9c40 ce5a9c40 cfa10400 cfa0f000 cfb89eec cfb89e80 
+c02b3784 c02a675c
+[  516.932423] 9e80: cfb89f24 cf9bf950 cfb89eac cfb89e98 c001b774 c00464b8 
+00000110 0000001a
+[  516.940664] 9ea0: cfa0f02c 00000000 00000000 c001b6b8 cfa0f000 00000000 
+cfb89ef0 0000ffff
+[  516.948909] 9ec0: cfb89eec ce5a9c40 cfa10c00 cfa0f004 cfb88000 cfa0f000 
+cfa10400 cfa0f000
+[  516.957154] 9ee0: cfb89f34 cfb89ef0 c02b3e88 c02b33b0 ce5a9c40 ce5a9c40 
+cf9bf954 60000013
+[  516.965400] 9f00: cfa0f004 cfa0f00c cfb88038 cfa0f004 cfa0f00c cfb88038 
+cfb88000 cf9bf950
+[  516.973644] 9f20: 00000001 322e800e cfb89f64 cfb89f38 c02b4874 c02b3d84 
+cfb8a2a0 cfbfdf20
+[  516.981885] 9f40: 00000000 cfa0f004 c02b47c4 00000000 00000000 00000000 
+cfb89fac cfb89f68
+[  516.990126] 9f60: c0030010 c02b47d4 00000000 00000000 cfb89f9c cfa0f004 
+00000000 cfb89f7c
+[  516.998367] 9f80: cfb89f7c 00000000 cfb89f88 cfb89f88 cfbfdf20 c002ff38 
+00000000 00000000
+[  517.006605] 9fa0: 00000000 cfb89fb0 c00094b0 c002ff48 00000000 00000000 
+00000000 00000000
+[  517.014840] 9fc0: 00000000 00000000 00000000 00000000 00000000 00000000 
+00000000 00000000
+[  517.023078] 9fe0: 00000000 00000000 00000000 00000000 00000013 00000000 
+fffeffff fffdffff
+[  517.031275] Backtrace:
+[  517.033816] [<c02b5f78>] (mxcmci_request+0x0/0x2f8) from [<c02a51c8>] 
+(mmc_start_request+0xe0/0xe8)
+[  517.042938] [<c02a50e8>] (mmc_start_request+0x0/0xe8) from [<c02a69b4>] 
+(mmc_start_req+0x268/0x2f8)
+[  517.052011]  r5:00000000 r4:cfa10400
+[  517.055697] [<c02a674c>] (mmc_start_req+0x0/0x2f8) from [<c02b3784>] 
+(mmc_blk_issue_rw_rq+0x3e4/0x9d4)
+[  517.065079] [<c02b33a0>] (mmc_blk_issue_rw_rq+0x0/0x9d4) from [<c02b3e88>] 
+(mmc_blk_issue_rq+0x114/0x460)
+[  517.074718] [<c02b3d74>] (mmc_blk_issue_rq+0x0/0x460) from [<c02b4874>] 
+(mmc_queue_thread+0xb0/0x138)
+[  517.084009] [<c02b47c4>] (mmc_queue_thread+0x0/0x138) from [<c0030010>] 
+(kthread+0xd8/0xec)
+[  517.092427] [<c002ff38>] (kthread+0x0/0xec) from [<c00094b0>] 
+(ret_from_fork+0x14/0x24)
+[  517.100457]  r7:00000000 r6:00000000 r5:c002ff38 r4:cfbfdf20
+[  517.106251] Code: e59fa220 e5953024 e1590003 2a00000a (e5903004)
+[  517.112530] ---[ end trace 593b33fe81686cf7 ]---
 
-other info that might help us debug this:
- Possible unsafe locking scenario:
+With kind regards
+Chris
 
-       CPU0
-       ----
-  lock(&(&host->lock)->rlock#2);
-  <Interrupt>
-    lock(&(&host->lock)->rlock#2);
-
- *** DEADLOCK ***
-
-2 locks held by kworker/u2:1/13:
- #0:  (kmmcd){.+.+.+}, at: [<80036f64>] process_one_work+0x124/0x444
- #1:  ((&(&host->detect)->work)){+.+.+.}, at: [<80036f64>]
-process_one_work+0x124/0x444
-
-stack backtrace:
-CPU: 0 PID: 13 Comm: kworker/u2:1 Not tainted 3.13.0-rc1 #12
-Workqueue: kmmcd mmc_rescan
-Backtrace:
-[<8001197c>] (dump_backtrace+0x0/0x10c) from [<80011c54>] (show_stack+0x18/0x1c)
- r6:00000000 r5:807041a4 r4:bf866600 r3:bf866600
-[<80011c3c>] (show_stack+0x0/0x1c) from [<80484758>] (dump_stack+0x20/0x28)
-[<80484738>] (dump_stack+0x0/0x28) from [<80482900>]
-(print_usage_bug.part.34+0x224/0x28c)
-[<804826dc>] (print_usage_bug.part.34+0x0/0x28c) from [<8004d380>]
-(mark_lock+0x1fc/0x684)
- r8:807041a4 r7:8062bc08 r6:bf866600 r5:bf866970 r4:00000002
-[<8004d184>] (mark_lock+0x0/0x684) from [<8004e3cc>]
-(__lock_acquire+0x5f0/0x1bc4)
-[<8004dddc>] (__lock_acquire+0x0/0x1bc4) from [<80050140>]
-(lock_acquire+0x70/0x84)
-[<800500d0>] (lock_acquire+0x0/0x84) from [<8048a198>]
-(_raw_spin_lock+0x30/0x40)
- r7:00000004 r6:00000005 r5:bf34c000 r4:bf9ad568
-[<8048a168>] (_raw_spin_lock+0x0/0x40) from [<80315ffc>]
-(sdhci_execute_tuning+0x4c/0x710)
- r4:bf9ad000
-[<80315fb0>] (sdhci_execute_tuning+0x0/0x710) from [<8030badc>]
-(mmc_sdio_init_card+0xa74/0xab4)
-[<8030b068>] (mmc_sdio_init_card+0x0/0xab4) from [<8030be44>]
-(mmc_attach_sdio+0x80/0x364)
-[<8030bdc4>] (mmc_attach_sdio+0x0/0x364) from [<80304388>]
-(mmc_rescan+0x23c/0x2e4)
-[<8030414c>] (mmc_rescan+0x0/0x2e4) from [<80036fe0>]
-(process_one_work+0x1a0/0x444)
- r8:00000000 r7:bf94deb0 r6:bf84e800 r5:bf9ad2f8 r4:bf916900
-r3:8030414c
-[<80036e40>] (process_one_work+0x0/0x444) from [<80037f08>]
-(worker_thread+0x118/0x3e0)
-[<80037df0>] (worker_thread+0x0/0x3e0) from [<8003da34>] (kthread+0xcc/0xe8)
-[<8003d968>] (kthread+0x0/0xe8) from [<8000e528>] (ret_from_fork+0x14/0x2c)
- r7:00000000 r6:00000000 r5:8003d968 r4:bf919200
-
-
-diff --git a/linux-3.13-rc1/drivers/mmc/host/sdhci.c
-b/linux-3.13-rc1/drivers/mmc/host/sdhci.c
-index 6c06e61..02827ed 100644
---- a/linux-3.13-rc1/drivers/mmc/host/sdhci.c
-+++ b/linux-3.13-rc1/drivers/mmc/host/sdhci.c
-@@ -1846,7 +1846,6 @@ static int sdhci_execute_tuning(struct mmc_host
-*mmc, u32 opcode)
-
-        sdhci_runtime_pm_get(host);
-        disable_irq(host->irq);
--       spin_lock(&host->lock);
-
-        ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
-
-@@ -1873,13 +1872,13 @@ static int sdhci_execute_tuning(struct
-mmc_host *mmc, u32 opcode)
-        }
-
-        if (host->ops->platform_execute_tuning) {
--               spin_unlock(&host->lock);
-                enable_irq(host->irq);
-                err = host->ops->platform_execute_tuning(host, opcode);
-                sdhci_runtime_pm_put(host);
-                return err;
-        }
-
-+
-        sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
-
-        /*
-@@ -1947,7 +1946,6 @@ static int sdhci_execute_tuning(struct mmc_host
-*mmc, u32 opcode)
-                host->cmd = NULL;
-                host->mrq = NULL;
-
--               spin_unlock(&host->lock);
-                enable_irq(host->irq);
-
-                /* Wait for Buffer Read Ready interrupt */
-@@ -1955,7 +1953,6 @@ static int sdhci_execute_tuning(struct mmc_host
-*mmc, u32 opcode)
-                                        (host->tuning_done == 1),
-                                        msecs_to_jiffies(50));
-                disable_irq(host->irq);
--               spin_lock(&host->lock);
-
-                if (!host->tuning_done) {
-                        pr_info(DRIVER_NAME ": Timeout waiting for "
-@@ -2030,7 +2027,6 @@ out:
-                err = 0;
-
-        sdhci_clear_set_irqs(host, SDHCI_INT_DATA_AVAIL, ier);
--       spin_unlock(&host->lock);
-        enable_irq(host->irq);
-        sdhci_runtime_pm_put(host);
+Reported-by: <chris.ruehl@gtsys.com.hk>
+--
