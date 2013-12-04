@@ -1,53 +1,56 @@
 From: Jarkko Nikula <jarkko.nikula@bitmer.com>
-Subject: [PATCH 4/7] mmc: omap: Remove mem_res field from struct mmc_omap_host
-Date: Wed,  4 Dec 2013 21:14:11 +0000
-Message-ID: <1386191654-7686-5-git-send-email-jarkko.nikula@bitmer.com>
+Subject: [PATCH 2/7] mmc: omap: Convert to devm_kzalloc
+Date: Wed,  4 Dec 2013 21:14:09 +0000
+Message-ID: <1386191654-7686-3-git-send-email-jarkko.nikula@bitmer.com>
 References: <20131202193459.GL26766@atomide.com>
  <1386191654-7686-1-git-send-email-jarkko.nikula@bitmer.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from bitmer.com ([213.157.87.50]:48194 "EHLO bitmer.com"
+Received: from bitmer.com ([213.157.87.50]:48207 "EHLO bitmer.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1756010Ab3LDTOc (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 4 Dec 2013 14:14:32 -0500
+	id S1756023Ab3LDTOf (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 4 Dec 2013 14:14:35 -0500
 In-Reply-To: <1386191654-7686-1-git-send-email-jarkko.nikula@bitmer.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Chris Ball <cjb@laptop.org>
 Cc: linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, Tony Lindgren <tony@atomide.com>, Dan Carpenter <dan.carpenter@oracle.com>, Aaro Koskinen <aaro.koskinen@iki.fi>, Jarkko Lavinen <j.lavinen@samsung.com>, Jarkko Nikula <jarkko.nikula@bitmer.com>
 
-Field mem_res in struct mmc_omap_host is used only once in mmc_omap_probe
-when setting the phys_base field so we may just se the phys_base straight
-and remove needless mem_res.
-
 Signed-off-by: Jarkko Nikula <jarkko.nikula@bitmer.com>
 ---
- drivers/mmc/host/omap.c | 4 +---
- 1 file changed, 1 insertion(+), 3 deletions(-)
+ drivers/mmc/host/omap.c | 6 ++----
+ 1 file changed, 2 insertions(+), 4 deletions(-)
 
 diff --git a/drivers/mmc/host/omap.c b/drivers/mmc/host/omap.c
-index b438f0a..0d669cf 100644
+index 42b665d..927ed24 100644
 --- a/drivers/mmc/host/omap.c
 +++ b/drivers/mmc/host/omap.c
-@@ -130,7 +130,6 @@ struct mmc_omap_host {
- 	u32			dma_rx_burst;
- 	struct dma_chan		*dma_tx;
- 	u32			dma_tx_burst;
--	struct resource		*mem_res;
- 	void __iomem		*virt_base;
- 	unsigned int		phys_base;
- 	int			irq;
-@@ -1372,10 +1371,9 @@ static int mmc_omap_probe(struct platform_device *pdev)
- 	platform_set_drvdata(pdev, host);
+@@ -1345,7 +1345,8 @@ static int mmc_omap_probe(struct platform_device *pdev)
+ 	if (res == NULL)
+ 		return -EBUSY;
  
- 	host->id = pdev->id;
--	host->mem_res = res;
- 	host->irq = irq;
- 	host->use_dma = 1;
--	host->phys_base = host->mem_res->start;
-+	host->phys_base = res->start;
- 	host->virt_base = ioremap(res->start, resource_size(res));
- 	if (!host->virt_base)
- 		goto err_ioremap;
+-	host = kzalloc(sizeof(struct mmc_omap_host), GFP_KERNEL);
++	host = devm_kzalloc(&pdev->dev, sizeof(struct mmc_omap_host),
++			    GFP_KERNEL);
+ 	if (host == NULL) {
+ 		ret = -ENOMEM;
+ 		goto err_free_mem_region;
+@@ -1465,7 +1466,6 @@ err_free_iclk:
+ err_free_mmc_host:
+ 	iounmap(host->virt_base);
+ err_ioremap:
+-	kfree(host);
+ err_free_mem_region:
+ 	release_mem_region(res->start, resource_size(res));
+ 	return ret;
+@@ -1500,8 +1500,6 @@ static int mmc_omap_remove(struct platform_device *pdev)
+ 			   pdev->resource[0].end - pdev->resource[0].start + 1);
+ 	destroy_workqueue(host->mmc_omap_wq);
+ 
+-	kfree(host);
+-
+ 	return 0;
+ }
+ 
 -- 
 1.8.4.3
 
