@@ -1,76 +1,104 @@
 From: Jarkko Nikula <jarkko.nikula@bitmer.com>
-Subject: [PATCH 6/7] mmc: omap: Remove always set use_dma flag from struct mmc_omap_host
-Date: Wed,  4 Dec 2013 21:14:13 +0000
-Message-ID: <1386191654-7686-7-git-send-email-jarkko.nikula@bitmer.com>
+Subject: [PATCH 1/7] mmc: omap: Fix NULL pointer dereference due uninitialized cover_tasklet
+Date: Wed,  4 Dec 2013 21:14:08 +0000
+Message-ID: <1386191654-7686-2-git-send-email-jarkko.nikula@bitmer.com>
 References: <20131202193459.GL26766@atomide.com>
  <1386191654-7686-1-git-send-email-jarkko.nikula@bitmer.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from bitmer.com ([213.157.87.50]:48181 "EHLO bitmer.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1756007Ab3LDTO3 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 4 Dec 2013 14:14:29 -0500
+Return-path: <linux-omap-owner@vger.kernel.org>
 In-Reply-To: <1386191654-7686-1-git-send-email-jarkko.nikula@bitmer.com>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Sender: linux-omap-owner@vger.kernel.org
 To: Chris Ball <cjb@laptop.org>
 Cc: linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, Tony Lindgren <tony@atomide.com>, Dan Carpenter <dan.carpenter@oracle.com>, Aaro Koskinen <aaro.koskinen@iki.fi>, Jarkko Lavinen <j.lavinen@samsung.com>, Jarkko Nikula <jarkko.nikula@bitmer.com>
+List-Id: linux-mmc@vger.kernel.org
 
-Because use_dma is set only in mmc_omap_probe and unset nowhere there is no
-need to carry that flag in struct mmc_omap_host for mmc_omap_prepare_data
-function.
+Omap MMC driver initialization can cause a NULL pointer dereference in
+tasklet_hi_action on Nokia N810 if its miniSD cover is open during driver
+initialization.
+
+[    1.070000] Unable to handle kernel NULL pointer dereference at virtual address 00000000
+[    1.080000] pgd = c0004000
+[    1.080000] [00000000] *pgd=00000000
+[    1.080000] Internal error: Oops: 80000005 [#1] PREEMPT ARM
+[    1.080000] Modules linked in:
+[    1.080000] CPU: 0 PID: 24 Comm: kworker/0:1 Not tainted 3.13.0-rc2+ #95
+[    1.080000] Workqueue: events menelaus_work
+[    1.080000] task: c7863340 ti: c7878000 task.ti: c7878000
+[    1.080000] PC is at 0x0
+[    1.080000] LR is at tasklet_hi_action+0x68/0xa4
+...
+[    1.080000] [<c003543c>] (tasklet_hi_action+0x68/0xa4) from [<c0034dd0>] (__do_softirq+0xbc/0x208)
+[    1.080000] [<c0034dd0>] (__do_softirq+0xbc/0x208) from [<c003521c>] (irq_exit+0x84/0xac)
+[    1.080000] [<c003521c>] (irq_exit+0x84/0xac) from [<c00135cc>] (handle_IRQ+0x64/0x84)
+[    1.080000] [<c00135cc>] (handle_IRQ+0x64/0x84) from [<c000859c>] (omap2_intc_handle_irq+0x54/0x68)
+[    1.080000] [<c000859c>] (omap2_intc_handle_irq+0x54/0x68) from [<c0015be0>] (__irq_svc+0x40/0x74)
+[    1.080000] Exception stack(0xc7879d70 to 0xc7879db8)
+[    1.080000] 9d60:                                     000003f1 0000000a 00000009 0000001c
+[    1.080000] 9d80: c7879e70 c780bc10 c780bc10 00000000 00000001 00008603 c780bc78 c7879e4e
+[    1.080000] 9da0: 00000002 c7879db8 c00343b0 c0160c9c 20000113 ffffffff
+[    1.080000] [<c0015be0>] (__irq_svc+0x40/0x74) from [<c0160c9c>] (__aeabi_uidiv+0x20/0x9c)
+[    1.080000] [<c0160c9c>] (__aeabi_uidiv+0x20/0x9c) from [<c00343b0>] (msecs_to_jiffies+0x18/0x24)
+[    1.080000] [<c00343b0>] (msecs_to_jiffies+0x18/0x24) from [<c01ec3ec>] (omap_i2c_xfer+0x30c/0x458)
+[    1.080000] [<c01ec3ec>] (omap_i2c_xfer+0x30c/0x458) from [<c01e9724>] (__i2c_transfer+0x3c/0x74)
+[    1.080000] [<c01e9724>] (__i2c_transfer+0x3c/0x74) from [<c01eac4c>] (i2c_transfer+0x78/0x94)
+[    1.080000] [<c01eac4c>] (i2c_transfer+0x78/0x94) from [<c01eb0bc>] (i2c_smbus_xfer+0x3c0/0x4f8)
+[    1.080000] [<c01eb0bc>] (i2c_smbus_xfer+0x3c0/0x4f8) from [<c01eb414>] (i2c_smbus_write_byte_data+0x34/0x3c)
+[    1.080000] [<c01eb414>] (i2c_smbus_write_byte_data+0x34/0x3c) from [<c01bb308>] (menelaus_write_reg+0x1c/0x40)
+[    1.080000] [<c01bb308>] (menelaus_write_reg+0x1c/0x40) from [<c01bb904>] (menelaus_work+0xa0/0xc4)
+[    1.080000] [<c01bb904>] (menelaus_work+0xa0/0xc4) from [<c00439c4>] (process_one_work+0x1fc/0x334)
+[    1.080000] [<c00439c4>] (process_one_work+0x1fc/0x334) from [<c0043d6c>] (worker_thread+0x244/0x380)
+[    1.080000] [<c0043d6c>] (worker_thread+0x244/0x380) from [<c0049d04>] (kthread+0xc0/0xd4)
+[    1.080000] [<c0049d04>] (kthread+0xc0/0xd4) from [<c0012758>] (ret_from_fork+0x14/0x3c)
+[    1.080000] Code: bad PC value
+[    1.090000] ---[ end trace 7bc2fc7cd14f1d95 ]---
+[    1.100000] Kernel panic - not syncing: Fatal exception in interrupt
+
+Reason for this is that omap_notify_cover_event which calls
+tasklet_hi_schedule gets called before struct cover_tasklet is initialized.
+
+Call to omap_notify_cover_event on Nokia N810 happens from menelaus.c PMIC
+driver via board-n8x0.c during execution of mmc_add_host in case of open
+miniSD cover.
+
+Fix this by moving cover_timer and cover_tasklet initialization before
+mmc_add_host call in mmc_omap_new_slot.
 
 Signed-off-by: Jarkko Nikula <jarkko.nikula@bitmer.com>
 ---
- drivers/mmc/host/omap.c | 15 +++++----------
- 1 file changed, 5 insertions(+), 10 deletions(-)
+v2: a snip of stack dump added to commit log
+---
+ drivers/mmc/host/omap.c | 12 +++++++-----
+ 1 file changed, 7 insertions(+), 5 deletions(-)
 
 diff --git a/drivers/mmc/host/omap.c b/drivers/mmc/host/omap.c
-index e4c7a03..42175cd 100644
+index 98b6b6e..42b665d 100644
 --- a/drivers/mmc/host/omap.c
 +++ b/drivers/mmc/host/omap.c
-@@ -152,7 +152,6 @@ struct mmc_omap_host {
- 	u32			total_bytes_left;
+@@ -1262,6 +1262,13 @@ static int mmc_omap_new_slot(struct mmc_omap_host *host, int id)
+ 	mmc->max_req_size = mmc->max_blk_size * mmc->max_blk_count;
+ 	mmc->max_seg_size = mmc->max_req_size;
  
- 	unsigned		features;
--	unsigned		use_dma:1;
- 	unsigned		brs_received:1, dma_done:1;
- 	unsigned		dma_in_use:1;
- 	spinlock_t		dma_lock;
-@@ -944,7 +943,7 @@ static void
- mmc_omap_prepare_data(struct mmc_omap_host *host, struct mmc_request *req)
- {
- 	struct mmc_data *data = req->data;
--	int i, use_dma, block_size;
-+	int i, use_dma = 1, block_size;
- 	unsigned sg_len;
- 
- 	host->data = data;
-@@ -969,13 +968,10 @@ mmc_omap_prepare_data(struct mmc_omap_host *host, struct mmc_request *req)
- 	sg_len = (data->blocks == 1) ? 1 : data->sg_len;
- 
- 	/* Only do DMA for entire blocks */
--	use_dma = host->use_dma;
--	if (use_dma) {
--		for (i = 0; i < sg_len; i++) {
--			if ((data->sg[i].length % block_size) != 0) {
--				use_dma = 0;
--				break;
--			}
-+	for (i = 0; i < sg_len; i++) {
-+		if ((data->sg[i].length % block_size) != 0) {
-+			use_dma = 0;
-+			break;
- 		}
++	if (slot->pdata->get_cover_state != NULL) {
++		setup_timer(&slot->cover_timer, mmc_omap_cover_timer,
++			    (unsigned long)slot);
++		tasklet_init(&slot->cover_tasklet, mmc_omap_cover_handler,
++			     (unsigned long)slot);
++	}
++
+ 	r = mmc_add_host(mmc);
+ 	if (r < 0)
+ 		goto err_remove_host;
+@@ -1278,11 +1285,6 @@ static int mmc_omap_new_slot(struct mmc_omap_host *host, int id)
+ 					&dev_attr_cover_switch);
+ 		if (r < 0)
+ 			goto err_remove_slot_name;
+-
+-		setup_timer(&slot->cover_timer, mmc_omap_cover_timer,
+-			    (unsigned long)slot);
+-		tasklet_init(&slot->cover_tasklet, mmc_omap_cover_handler,
+-			     (unsigned long)slot);
+ 		tasklet_schedule(&slot->cover_tasklet);
  	}
  
-@@ -1369,7 +1365,6 @@ static int mmc_omap_probe(struct platform_device *pdev)
- 
- 	host->id = pdev->id;
- 	host->irq = irq;
--	host->use_dma = 1;
- 	host->phys_base = res->start;
- 	host->iclk = clk_get(&pdev->dev, "ick");
- 	if (IS_ERR(host->iclk))
 -- 
 1.8.4.3
 
