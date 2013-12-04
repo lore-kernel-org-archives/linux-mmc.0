@@ -1,35 +1,52 @@
-From: Dan Carpenter <dan.carpenter@oracle.com>
-Subject: Re: *** GMX Spamverdacht ***  re: mmc: sh_mmcif: remove now
- superfluous sh_mmcif_host::data member
-Date: Wed, 4 Dec 2013 10:55:04 +0300
-Message-ID: <20131204075504.GQ5443@mwanda>
-References: <20131106161603.GI15603@elgon.mountain>
- <Pine.LNX.4.64.1312032246450.22366@axis700.grange>
+From: Jackey Shen <jackey.shen@amd.com>
+Subject: Re: [PATCH] mmc-utils: add the revision for eMMC5.0
+Date: Wed, 4 Dec 2013 16:02:38 +0800
+Message-ID: <20131204080238.GA2764@ubuntu.amd.com>
+References: <529E775B.5000308@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="us-ascii"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from aserp1040.oracle.com ([141.146.126.69]:22780 "EHLO
-	aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753516Ab3LDHzN (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 4 Dec 2013 02:55:13 -0500
+Received: from tx2ehsobe004.messaging.microsoft.com ([65.55.88.14]:33296 "EHLO
+	tx2outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1753394Ab3LDIAg (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 4 Dec 2013 03:00:36 -0500
 Content-Disposition: inline
-In-Reply-To: <Pine.LNX.4.64.1312032246450.22366@axis700.grange>
+In-Reply-To: <529E775B.5000308@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Cc: linux-mmc@vger.kernel.org
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, 'Chris Ball' <cjb@laptop.org>
 
-On Tue, Dec 03, 2013 at 10:48:58PM +0100, Guennadi Liakhovetski wrote:
-> > 
-> > We used to assume that host->data might be NULL but that mrq->data was
-> > a valid pointer.  But now they are unified into one pointer.
+On Wed, Dec 04, 2013 at 09:29:15AM +0900, Jaehoon Chung wrote:
+> To know whether eMMC card is version5.0 or not, add the check point.
 > 
-> Yes, formally this isn't correct, but in practice this is valid, because 
-> for those two opcodes, handled in this "if" data cannot be NULL.
+> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+
+Reviewed-by: Jackey Shen <Jackey.Shen@amd.com>
+
+> ---
+>  mmc_cmds.c |    3 +++
+>  1 file changed, 3 insertions(+)
+> 
+> diff --git a/mmc_cmds.c b/mmc_cmds.c
+> index b8afa74..5edf42b 100644
+> --- a/mmc_cmds.c
+> +++ b/mmc_cmds.c
+> @@ -722,6 +722,9 @@ int do_read_extcsd(int nargs, char **argv)
+>  	ext_csd_rev = ext_csd[192];
+>  
+>  	switch (ext_csd_rev) {
+> +	case 7:
+> +		str = "5.0";
+> +		break;
+>  	case 6:
+>  		str = "4.5";
+>  		break;
+> -- 
+> 1.7.9.5
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 > 
 
-Fine fine.  I suspected it might be something like that.  We only send
-the warning messages one time so no worries.
-
-regards,
-dan carpenter
