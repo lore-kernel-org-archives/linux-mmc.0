@@ -1,53 +1,70 @@
-From: Tony Lindgren <tony@atomide.com>
-Subject: Re: [PATCH 0/7] mmc: omap: Fixes, cleanup and add ERASE capability
-Date: Thu, 5 Dec 2013 10:18:32 -0800
-Message-ID: <20131205181831.GD26766@atomide.com>
-References: <20131202193459.GL26766@atomide.com>
- <1386191654-7686-1-git-send-email-jarkko.nikula@bitmer.com>
+From: Tim Kryger <tim.kryger@linaro.org>
+Subject: [PATCH v4 4/8] ARM: dts: Specify clocks for SDHCIs on bcm11351
+Date: Thu, 5 Dec 2013 11:20:40 -0800
+Message-ID: <1386271244-3927-5-git-send-email-tim.kryger@linaro.org>
+References: <1386271244-3927-1-git-send-email-tim.kryger@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-omap-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <1386191654-7686-1-git-send-email-jarkko.nikula@bitmer.com>
-Sender: linux-omap-owner@vger.kernel.org
-To: Jarkko Nikula <jarkko.nikula@bitmer.com>
-Cc: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, Dan Carpenter <dan.carpenter@oracle.com>, Aaro Koskinen <aaro.koskinen@iki.fi>, Jarkko Lavinen <j.lavinen@samsung.com>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <1386271244-3927-1-git-send-email-tim.kryger@linaro.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Christian Daudt <bcm@fixthebug.org>, Rob Herring <rob.herring@calxeda.com>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Stephen Warren <swarren@wwwdotorg.org>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Daniel Lezcano <daniel.lezcano@linaro.org>, Thomas Gleixner <tglx@linutronix.de>, Chris Ball <cjb@laptop.org>, Axel Lin <axel.lin@ingics.com>
+Cc: Device Tree List <devicetree@vger.kernel.org>, Linaro Patches List <patches@linaro.org>, Tim Kryger <tim.kryger@linaro.org>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux ARM Kernel List <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
 
-* Jarkko Nikula <jarkko.nikula@bitmer.com> [131204 11:15]:
-> Hi
-> 
-> I've sent these patches earlier to linux-mmc list. This time set is one
-> patch smaller since commit 31ee9181eb92
-> ("mmc: omap: Fix DMA configuration to not rely on device id") does
-> practically same what one of my patch did.
-> 
-> Patch 1 is an obvious fix. 2-4 are preparing for 5 which also should fix
-> the error introduced by 31ee9181eb92:
-> http://www.spinics.net/lists/linux-omap/msg100790.html
-> 
-> Patch 6 continue cleanup and 7 adds the ERASE capability to the driver so
-> one could utilize discards with mkfs, mount option or with the fstrim.
-> 
-> Set goes on top of v3.13-rc2-208-g8ecffd791448.
+Specify the external clock label in each SDHCI node.
 
-Great they look good to me:
+Signed-off-by: Tim Kryger <tim.kryger@linaro.org>
+Reviewed-by: Markus Mayer <markus.mayer@linaro.org>
+Reviewed-by: Matt Porter <matt.porter@linaro.org>
+---
+ arch/arm/boot/dts/bcm11351.dtsi | 4 ++++
+ 1 file changed, 4 insertions(+)
 
-Acked-by: Tony Lindgren <tony@atomide.com>
+diff --git a/arch/arm/boot/dts/bcm11351.dtsi b/arch/arm/boot/dts/bcm11351.dtsi
+index 9b99c52..25ca128 100644
+--- a/arch/arm/boot/dts/bcm11351.dtsi
++++ b/arch/arm/boot/dts/bcm11351.dtsi
+@@ -118,6 +118,7 @@
+ 		compatible = "brcm,kona-sdhci";
+ 		reg = <0x3f180000 0x10000>;
+ 		interrupts = <GIC_SPI 77 IRQ_TYPE_LEVEL_HIGH>;
++		clocks = <&sdio1_clk>;
+ 		status = "disabled";
+ 	};
  
-> Jarkko Nikula (7):
->   mmc: omap: Fix NULL pointer dereference due uninitialized
->     cover_tasklet
->   mmc: omap: Convert to devm_kzalloc
->   mmc: omap: Remove duplicate host->irq assignment
->   mmc: omap: Remove mem_res field from struct mmc_omap_host
->   mmc: omap: Convert to devm_ioremap_resource
->   mmc: omap: Remove always set use_dma flag from struct mmc_omap_host
->   mmc: omap: Add erase capability
-> 
->  drivers/mmc/host/omap.c | 93 +++++++++++++++++++------------------------------
->  1 file changed, 36 insertions(+), 57 deletions(-)
-> 
-> -- 
-> 1.8.4.3
-> 
+@@ -125,6 +126,7 @@
+ 		compatible = "brcm,kona-sdhci";
+ 		reg = <0x3f190000 0x10000>;
+ 		interrupts = <GIC_SPI 76 IRQ_TYPE_LEVEL_HIGH>;
++		clocks = <&sdio2_clk>;
+ 		status = "disabled";
+ 	};
+ 
+@@ -132,6 +134,7 @@
+ 		compatible = "brcm,kona-sdhci";
+ 		reg = <0x3f1a0000 0x10000>;
+ 		interrupts = <GIC_SPI 74 IRQ_TYPE_LEVEL_HIGH>;
++		clocks = <&sdio3_clk>;
+ 		status = "disabled";
+ 	};
+ 
+@@ -139,6 +142,7 @@
+ 		compatible = "brcm,kona-sdhci";
+ 		reg = <0x3f1b0000 0x10000>;
+ 		interrupts = <GIC_SPI 73 IRQ_TYPE_LEVEL_HIGH>;
++		clocks = <&sdio4_clk>;
+ 		status = "disabled";
+ 	};
+ 
+-- 
+1.8.0.1
