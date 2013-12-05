@@ -1,150 +1,136 @@
-From: <dinguyen@altera.com>
-Subject: [PATCHv3 4/4] arm: dts: Add support for SD/MMC on SOCFPGA
-Date: Wed, 4 Dec 2013 16:52:56 -0600
-Message-ID: <1386197576-3825-5-git-send-email-dinguyen@altera.com>
-References: <1386197576-3825-1-git-send-email-dinguyen@altera.com>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: [PATCHv3 1/4] clk: socfpga: Add a clock driver for SOCFPGA's system manager
+Date: Thu, 5 Dec 2013 04:00:39 +0100
+Message-ID: <201312050400.40427.arnd@arndb.de>
+References: <1386197576-3825-1-git-send-email-dinguyen@altera.com> <1386197576-3825-2-git-send-email-dinguyen@altera.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: Text/Plain;
+  charset="iso-8859-15"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from tx2ehsobe004.messaging.microsoft.com ([65.55.88.14]:49293 "EHLO
-	tx2outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1755146Ab3LDWy7 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 4 Dec 2013 17:54:59 -0500
-In-Reply-To: <1386197576-3825-1-git-send-email-dinguyen@altera.com>
+Received: from moutng.kundenserver.de ([212.227.126.171]:64833 "EHLO
+	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756382Ab3LEDBQ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 4 Dec 2013 22:01:16 -0500
+In-Reply-To: <1386197576-3825-2-git-send-email-dinguyen@altera.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: dinh.linux@gmail.com, arnd@arndb.de, mturquette@linaro.org, rob.herring@calxeda.com, pawel.moll@arm.com, mark.rutland@arm.com, ian.campbell@citrix.com, cjb@laptop.org, jh80.chung@samsung.com, tgih.jun@samsung.com
-Cc: devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Dinh Nguyen <dinguyen@altera.com>
+To: dinguyen@altera.com
+Cc: dinh.linux@gmail.com, mturquette@linaro.org, rob.herring@calxeda.com, pawel.moll@arm.com, mark.rutland@arm.com, ian.campbell@citrix.com, cjb@laptop.org, jh80.chung@samsung.com, tgih.jun@samsung.com, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 
-From: Dinh Nguyen <dinguyen@altera.com>
+On Wednesday 04 December 2013, dinguyen@altera.com wrote:
+> From: Dinh Nguyen <dinguyen@altera.com>
+> 
+> The system manager is an IP block on the SOCFPGA platform. The system manager
+> contains registers that control other IPs on the platform. One of the IPs that
+> the system manager has control over is the SD/MMC, by way of controlling the
+> clock phase on the SD/MMC Card Interface Unit.
+> 
+> This patch adds a clock driver that the SD/MMC driver can use by calling
+> the common clock API in order to set the appropriate register in the
+> system manager by way of a syscon driver.
+> 
+> This clock driver can also be re-used for other IPs that need to poke the system
+> manager.
+> 
+> Signed-off-by: Dinh Nguyen <dinguyen@altera.com>
 
-Add new bindings that support SD/MMC on Altera's SOCFPGA platform.
+I think this still gets things wrong on multiple levels.
 
-Signed-off-by: Dinh Nguyen <dinguyen@altera.com>
----
-v3: none
-v2: none
----
- .../devicetree/bindings/mmc/socfpga-dw-mshc.txt    |   38 ++++++++++++++++++++
- arch/arm/boot/dts/socfpga.dtsi                     |   11 ++++++
- arch/arm/boot/dts/socfpga_cyclone5.dtsi            |   12 +++++++
- arch/arm/boot/dts/socfpga_vt.dts                   |   12 +++++++
- 4 files changed, 73 insertions(+)
- create mode 100644 Documentation/devicetree/bindings/mmc/socfpga-dw-mshc.txt
+> ---
+> v3: Not use the syscon driver because as of 3.13-rc1, the syscon driver
+> is loaded after the clock driver.
+> 
+> v2: Use the syscon driver
 
-diff --git a/Documentation/devicetree/bindings/mmc/socfpga-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/socfpga-dw-mshc.txt
-new file mode 100644
-index 0000000..c408e74
---- /dev/null
-+++ b/Documentation/devicetree/bindings/mmc/socfpga-dw-mshc.txt
-@@ -0,0 +1,38 @@
-+* Altera SOCFPGA specific extensions to the Synopsys Designware Mobile
-+  Storage Host Controller
-+
-+The Synopsys designware mobile storage host controller is used to interface
-+a SoC with storage medium such as eMMC or SD/MMC cards. This file documents
-+differences between the core Synopsys dw mshc controller properties described
-+by synopsys-dw-mshc.txt and the properties used by the SOCFPGA specific
-+extensions to the Synopsys Designware Mobile Storage Host Controller.
-+
-+Required Properties:
-+
-+* compatible: should be
-+        - "altr,socfpga-dw-mshc": for controllers with Altera SOCFPGA
-+          specific extensions.
-+
-+* samsung,dw-mshc-sdr-timing: See exynos-dw-mshc.txt for more information about
-+	this property.
-+
-+Example:
-+	dwmmc0@ff704000 {
-+		compatible = "altr,socfpga-dw-mshc", "snps,dw-mshc";
-+		reg = <0xff704000 0x1000>;
-+		interrupts = <0 139 4>;
-+		fifo-depth = <0x400>;
-+		#address-cells = <1>;
-+		#size-cells = <0>;
-+		clocks = <&l4_mp_clk>, <&sdmmc_clk>, <&sysmgr_sdr_mmc>;
-+		clock-names = "biu", "ciu", "sysmgr-sdr-mmc";
-+		num-slots = <1>;
-+		supports-highspeed;
-+		broken-cd;
-+		samsung,dw-mshc-sdr-timing = <3 0>;
-+
-+		slot@0 {
-+			reg = <0>;
-+			bus-width = <4>;
-+		};
-+	};
-diff --git a/arch/arm/boot/dts/socfpga.dtsi b/arch/arm/boot/dts/socfpga.dtsi
-index a6a13b3..5023e25 100644
---- a/arch/arm/boot/dts/socfpga.dtsi
-+++ b/arch/arm/boot/dts/socfpga.dtsi
-@@ -469,6 +469,17 @@
- 			cache-level = <2>;
- 		};
- 
-+		mmc: dwmmc0@ff704000 {
-+			compatible = "altr,socfpga-dw-mshc";
-+			reg = <0xff704000 0x1000>;
-+			interrupts = <0 139 4>;
-+			fifo-depth = <0x400>;
-+			#address-cells = <1>;
-+			#size-cells = <0>;
-+			clocks = <&l4_mp_clk>, <&sdmmc_clk>, <&sysmgr_sdr_mmc>;
-+			clock-names = "biu", "ciu", "sysmgr-sdr-mmc";
-+		};
-+
- 		/* Local timer */
- 		timer@fffec600 {
- 			compatible = "arm,cortex-a9-twd-timer";
-diff --git a/arch/arm/boot/dts/socfpga_cyclone5.dtsi b/arch/arm/boot/dts/socfpga_cyclone5.dtsi
-index a8716f6..4ef4fa4 100644
---- a/arch/arm/boot/dts/socfpga_cyclone5.dtsi
-+++ b/arch/arm/boot/dts/socfpga_cyclone5.dtsi
-@@ -28,6 +28,18 @@
- 			};
- 		};
- 
-+		dwmmc0@ff704000 {
-+			num-slots = <1>;
-+			supports-highspeed;
-+			broken-cd;
-+			samsung,dw-mshc-sdr-timing = <3 0>;
-+
-+			slot@0 {
-+				reg = <0>;
-+				bus-width = <4>;
-+			};
-+		};
-+
- 		ethernet@ff702000 {
- 			phy-mode = "rgmii";
- 			phy-addr = <0xffffffff>; /* probe for phy addr */
-diff --git a/arch/arm/boot/dts/socfpga_vt.dts b/arch/arm/boot/dts/socfpga_vt.dts
-index d1ec0ca..25b2653 100644
---- a/arch/arm/boot/dts/socfpga_vt.dts
-+++ b/arch/arm/boot/dts/socfpga_vt.dts
-@@ -41,6 +41,18 @@
- 			};
- 		};
- 
-+		dwmmc0@ff704000 {
-+			num-slots = <1>;
-+			supports-highspeed;
-+			broken-cd;
-+			samsung,dw-mshc-sdr-timing = <3 0>;
-+
-+			slot@0 {
-+				reg = <0>;
-+				bus-width = <4>;
-+			};
-+		};
-+
- 		ethernet@ff700000 {
- 			phy-mode = "gmii";
- 			status = "okay";
--- 
-1.7.9.5
+Can't you reference the syscon driver just from the set_rate function?
+When you do that, you won't need to care if it's available until the clock
+is actually used by the sd card driver.
 
+> +
+> +#include <linux/slab.h>
+> +#include <linux/clk-provider.h>
+> +#include <linux/of.h>
+> +#include <linux/of_platform.h>
+> +
+> +/* SDMMC Group for System Manager defines */
+> +#define SYSMGR_SDMMC_CTRL_SET(smplsel, drvsel)          \
+> +	((((smplsel) & 0x7) << 3) | (((drvsel) & 0x7) << 0))
+> +
+> +extern void __iomem *sys_manager_base_addr;
 
+You definitely cannot put "extern" variable declarations into driver files.
+This is always a bug.
+
+> +static int sysmgr_set_dwmmc_drvsel_smpsel(struct clk_hw *hwclk)
+> +{
+> +	struct device_node *np;
+> +	struct socfpga_sysmgr *socfpga_sysmgr = to_sysmgr_clk(hwclk);
+> +	u32 timing[2];
+> +	u32 hs_timing;
+> +
+> +	np = of_find_compatible_node(NULL, NULL, "altr,socfpga-dw-mshc");
+> +	of_property_read_u32_array(np, "samsung,dw-mshc-sdr-timing", timing, 2);
+> +	hs_timing = SYSMGR_SDMMC_CTRL_SET(timing[1], timing[0]);
+> +	writel(hs_timing, sys_manager_base_addr + socfpga_sysmgr->reg);
+> +	return 0;
+> +}
+
+The clock driver has absolutely no business looking into the
+"samsung,dw-mshc-sdr-timing" property, that is a layering violation.
+The SD card driver should pass the frequency to the clock driver
+instead.
+
+> +static void __init socfpga_sysmgr_init(struct device_node *node, const struct clk_ops *ops)
+> +{
+> +	u32 reg;
+> +	struct clk *clk;
+> +	struct socfpga_sysmgr *socfpga_sysmgr;
+> +	const char *clk_name = node->name;
+> +	struct clk_init_data init;
+> +	int rc;
+> +
+> +	socfpga_sysmgr = kzalloc(sizeof(*socfpga_sysmgr), GFP_KERNEL);
+> +	if (WARN_ON(!socfpga_sysmgr))
+> +		return;
+> +
+> +	rc = of_property_read_u32(node, "reg", &reg);
+> +	if (WARN_ON(rc))
+> +		return;
+
+This feels wrong: drivers should not manually interpret the standard "reg"
+property. I'll let Mike comment on this, but I think what you want instead
+is to use an index into the sysmgr in the clock reference. This assumes
+that sysmgr contains a set of identical clock register blocks that can
+be indexed in a simple way.
+
+> +	socfpga_sysmgr->reg = reg;
+> +
+> +	init.name = clk_name;
+> +	init.ops = ops;
+> +	init.flags = 0;
+> +	init.num_parents = 0;
+> +
+> +	socfpga_sysmgr->hw.init = &init;
+> +	clk = clk_register(NULL, &socfpga_sysmgr->hw);
+> +	if (WARN_ON(IS_ERR(clk))) {
+> +		kfree(socfpga_sysmgr);
+> +		return;
+> +	}
+> +	rc = of_clk_add_provider(node, of_clk_src_simple_get, clk);
+> +	if (WARN_ON(rc))
+> +		return;
+> +}
+> +
+> +static void __init sysmgr_init(struct device_node *node)
+> +{
+> +	socfpga_sysmgr_init(node, &clk_sysmgr_sdmmc_ops);
+> +}
+> +CLK_OF_DECLARE(sysmgr, "altr,sysmgr-sdmmc-sdr", sysmgr_init);
+
+Along the same lines: the "altr,sysmgr-sdmmc-sdr" string doesn't make
+sense here, it should be a name given to the clock register layout
+of the sysmgr, which is presumably identical for a number of clocks,
+and cannot contain "sdmmc-sdr" in the name.
+
+	Arnd
