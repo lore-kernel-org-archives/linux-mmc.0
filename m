@@ -1,112 +1,100 @@
-From: Mark Rutland <mark.rutland@arm.com>
-Subject: Re: [PATCH v7 1/2] mmc: sdhci-msm: Initial SDHCI MSM driver
- documentation
-Date: Thu, 5 Dec 2013 09:52:18 +0000
-Message-ID: <20131205095218.GH29200@e106331-lin.cambridge.arm.com>
-References: <1383753405-23631-1-git-send-email-gdjakov@mm-sol.com>
- <1383753405-23631-2-git-send-email-gdjakov@mm-sol.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <1383753405-23631-2-git-send-email-gdjakov@mm-sol.com>
-Sender: linux-arm-msm-owner@vger.kernel.org
-To: Georgi Djakov <gdjakov@mm-sol.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "cjb@laptop.org" <cjb@laptop.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "grant.likely@linaro.org" <grant.likely@linaro.org>, "rob.herring@calxeda.com" <rob.herring@calxeda.com>, Pawel Moll <Pawel.Moll@arm.com>, "swarren@wwwdotorg.org" <swarren@wwwdotorg.org>, "ijc+devicetree@hellion.org.uk" <ijc+devicetree@hellion.org.uk>, "galak@codeaurora.org" <galak@codeaurora.org>, "rob@landley.net" <rob@landley.net>, "linux-doc@vger.kernel.org" <linux-doc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-msm@vger.kernel.org" <linux-arm-msm@vger.kernel.org>, "subhashj@codeaurora.org" <subhashj@codeaurora.org>
+From: Olivier Sobrie <olivier@sobrie.be>
+Subject: [PATCH] atmel-mci: fix transfers < 16 bytes problem in PDC mode
+Date: Thu,  5 Dec 2013 10:45:16 +0100
+Message-ID: <1386236716-25163-1-git-send-email-olivier@sobrie.be>
+References: <20131204080943.GK3582@odulo-laptop>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-ee0-f49.google.com ([74.125.83.49]:49559 "EHLO
+	mail-ee0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751926Ab3LEJ7Q (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 5 Dec 2013 04:59:16 -0500
+Received: by mail-ee0-f49.google.com with SMTP id c41so2909002eek.8
+        for <linux-mmc@vger.kernel.org>; Thu, 05 Dec 2013 01:59:15 -0800 (PST)
+In-Reply-To: <20131204080943.GK3582@odulo-laptop>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ludovic Desroches <ludovic.desroches@atmel.com>
+Cc: linux-mmc@vger.kernel.org, Olivier Sobrie <olivier@sobrie.be>
 
-Hi,
+This patch attempts to fix a problem when trying to transfer
+small data.
 
-Apologies for the late reply.
+Without the patch, when there is a transfer of less than 16 bytes,
+it hangs. Here is what I observed for a transfer of 4 bytes with
+the traces enabled in the driver:
 
-On Wed, Nov 06, 2013 at 03:56:44PM +0000, Georgi Djakov wrote:
-> This patch adds documentation for Qualcomm SDHCI MSM driver.
-> It contains the differences between the core properties in mmc.txt
-> and the properties used by the sdhci-msm driver.
+[   31.690000] atmel_mci fff84000.mmc: FSM: state=0
+[   31.900000] atmel_mci fff84000.mmc: MRQ: cmd 53
+[   31.900000] atmel_mci fff84000.mmc: start request: cmd 53
+[   31.900000] atmel_mci fff84000.mmc: IRQ: tx buffer empty
+[   31.900000] atmel_mci fff84000.mmc: (atmci_pdc_complete) set pending xfer complete
+[   31.900000] atmel_mci fff84000.mmc: IRQ: cmd ready
+[   31.900000] atmel_mci fff84000.mmc: set pending cmd rdy
+[   31.900000] atmel_mci fff84000.mmc: FSM: state=1
+[   31.900000] atmel_mci fff84000.mmc: FSM: cmd ready?
+[   31.900000] atmel_mci fff84000.mmc: set completed cmd ready
+[   31.900000] atmel_mci fff84000.mmc: command with data transfer
+[   31.900000] atmel_mci fff84000.mmc: FSM: state=2
+[   31.900000] atmel_mci fff84000.mmc: FSM: xfer complete?
+[   31.900000] atmel_mci fff84000.mmc: (atmci_tasklet_func) set completed xfer complete
+[   31.900000] atmel_mci fff84000.mmc: FSM: state=3
+[   31.900000] atmel_mci fff84000.mmc: FSM: not busy?
+[   33.900000] atmel_mci fff84000.mmc: software timeout
+[   33.900000] atmel_mci fff84000.mmc: FSM: state=5
+[   33.900000] atmel_mci fff84000.mmc: FSM: state=0
 
-Nit, but this is documentation of the binding, not the driver.
+The BLKE bit is never set by the hardware.
 
-> 
-> Signed-off-by: Georgi Djakov <gdjakov@mm-sol.com>
-> ---
->  .../devicetree/bindings/mmc/sdhci-msm.txt          |   92 ++++++++++++++++++++
->  1 file changed, 92 insertions(+)
->  create mode 100644 Documentation/devicetree/bindings/mmc/sdhci-msm.txt
-> 
-> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
-> new file mode 100644
-> index 0000000..8f1a52d
-> --- /dev/null
-> +++ b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
-> @@ -0,0 +1,92 @@
-> +* Qualcomm SDHCI controller (sdhci-msm)
-> +
-> +This file documents differences between the core properties in mmc.txt
-> +and the properties used by the sdhci-msm driver.
-> +
-> +Required properties:
-> +- compatible: should contain "qcom,sdhci-msm"
-> +- reg: should contain SDHC, SD Core register map
+By setting the ATMEL_PDC_TCR register with a value equals to 4 when the
+datasize sent is smaller than 16 bytes, it looks to solve the problem.
 
-As this seems to depend on reg-names, it would be nice to write this in
-terms of reg-names (as with clocks and clock-names).
+Note that in the old at91_mci driver, the value was set to 3 but in my
+case it doesn't work...
+http://lxr.free-electrons.com/source/drivers/mmc/host/at91_mci.c?v=3.7#L580
+So I made the assumption that the transfer size should be >= 16 bytes.
 
+This patch has been tested with a TI wl1271 sdio module.
 
-> +- reg-names: indicates various resources passed to driver (via reg proptery) by name
-> +	"reg-names" examples are "hc_mem" and "core_mem"
+Signed-off-by: Olivier Sobrie <olivier@sobrie.be>
+---
 
-Either there are a fixed set of names you expect (and therefore these
-aren't examples but rather a definition), or this property is useless.
-Please either define the set of names or remove this property.
+Hi Ludovic,
 
-> +- interrupts: should contain SDHC interrupts
-> +- interrupt-names: indicates interrupts passed to driver (via interrupts property) by name
-> +	"interrupt-names" examples are "hc_irq" and "pwr_irq"
+With this patch I'm able to use the wlan sdio module wl1271.
+When you've time, it would be nice to validate or fix this
+patch.
 
-Likewise for both points.
+Thanks for your help,
 
-> +- vdd-supply: phandle to the regulator for the vdd (flash core voltage) supply.
-> +- vddio-supply: phandle to the regulator for the vdd-io (i/o voltage) supply.
-> +- pinctrl-names: Should contain only one value - "default".
-> +- pinctrl-0: Should specify pin control groups used for this controller.
-> +- clocks: A list of phandle + clock-specifier pairs for the clocks listed in clock-names
-> +- clock-names: Should contain the following:
-> +	"iface" - Main peripheral bus clock (PCLK/HCLK - AHB Bus clock) (required)
-> +	"core"	- SDC MMC clock (MCLK) (required)
-> +	"bus"	- SDCC bus voter clock (optional)
+Olivier
 
-This looks good :)
+ drivers/mmc/host/atmel-mci.c |    6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
 
-> +
-> +Optional properties:
-> +- qcom,bus-speed-mode: specifies the supported bus speed modes by host
-> +	The supported bus speed modes are:
-> +	"HS200_1p8v" - indicates that host can support HS200 at 1.8v
-> +	"HS200_1p2v" - indicates that host can support HS200 at 1.2v
-> +	"DDR_1p8v" - indicates that host can support DDR mode at 1.8v
-> +	"DDR_1p2v" - indicates that host can support DDR mode at 1.2v
+diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
+index b86b482..c599731 100644
+--- a/drivers/mmc/host/atmel-mci.c
++++ b/drivers/mmc/host/atmel-mci.c
+@@ -45,6 +45,7 @@
+ 
+ #define ATMCI_DATA_ERROR_FLAGS	(ATMCI_DCRCE | ATMCI_DTOE | ATMCI_OVRE | ATMCI_UNRE)
+ #define ATMCI_DMA_THRESHOLD	16
++#define ATMCI_PDC_MIN_DATASIZE	16
+ 
+ enum {
+ 	EVENT_CMD_RDY = 0,
+@@ -765,7 +766,10 @@ static void atmci_pdc_set_single_buf(struct atmel_mci *host,
+ 	}
+ 
+ 	if (host->data_size <= buf_size) {
+-		if (host->data_size & 0x3) {
++		if ((host->data_size < ATMCI_PDC_MIN_DATASIZE) &&
++		    (dir == XFER_TRANSMIT)) {
++			atmci_writel(host, counter_reg, 4);
++		} else if (host->data_size & 0x3) {
+ 			/* If size is different from modulo 4, transfer bytes */
+ 			atmci_writel(host, counter_reg, host->data_size);
+ 			atmci_writel(host, ATMCI_MR, host->mode_reg | ATMCI_MR_PDCFBYTE);
+-- 
+1.7.9.5
 
-Is this a list of strings, or does the unit only support one of these?
-
-This could be a set of boolean properties instead, is this likely to
-expand in future?
-
-> +
-> +- qcom,{vdd,vdd-io}-lpm-sup - specifies whether the supply can be kept in low power mode.
-
-Boolean? Please specify types on properties.
-
-Can you elaborate on what this means? When can a supply not be kept in
-low power mode?
-
-> +- qcom,{vdd,vdd-io}-voltage-level - specifies voltage levels for the supply.
-> +	Should be specified in pairs (min, max), units uV.
-> +- qcom,{vdd,vdd-io}-current-level - specifies load levels for the supply in lpm
-> +	or high power mode (hpm). Should be specified in pairs (lpm, hpm), units uA.
-
-Can you not query these from the regulator framework?
-
-If these are configuration, why are they necessary?
-
-Thanks,
-Mark.
