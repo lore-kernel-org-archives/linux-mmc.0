@@ -1,7 +1,7 @@
 From: Tim Kryger <tim.kryger@linaro.org>
-Subject: [PATCH v4 4/8] ARM: dts: Specify clocks for SDHCIs on bcm11351
-Date: Thu, 5 Dec 2013 11:20:40 -0800
-Message-ID: <1386271244-3927-5-git-send-email-tim.kryger@linaro.org>
+Subject: [PATCH v4 2/8] ARM: dts: Specify clocks for UARTs on bcm11351
+Date: Thu, 5 Dec 2013 11:20:38 -0800
+Message-ID: <1386271244-3927-3-git-send-email-tim.kryger@linaro.org>
 References: <1386271244-3927-1-git-send-email-tim.kryger@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -21,50 +21,60 @@ To: Christian Daudt <bcm@fixthebug.org>, Rob Herring <rob.herring@calxeda.com>, 
 Cc: Device Tree List <devicetree@vger.kernel.org>, Linaro Patches List <patches@linaro.org>, Tim Kryger <tim.kryger@linaro.org>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux ARM Kernel List <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Specify the external clock label in each SDHCI node.
+The frequency property in "snps,dw-apb-uart" entries are no longer
+required if the rate of the external clock can be determined using the
+clk api (see e302cd9 serial: 8250_dw: add support for clk api).
+
+This patch replaces the frequency property in the UART nodes of
+bcm11351.dtsi with references to the relevant clocks following the
+common clock binding.
 
 Signed-off-by: Tim Kryger <tim.kryger@linaro.org>
 Reviewed-by: Markus Mayer <markus.mayer@linaro.org>
 Reviewed-by: Matt Porter <matt.porter@linaro.org>
 ---
- arch/arm/boot/dts/bcm11351.dtsi | 4 ++++
- 1 file changed, 4 insertions(+)
+ arch/arm/boot/dts/bcm11351.dtsi | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
 
 diff --git a/arch/arm/boot/dts/bcm11351.dtsi b/arch/arm/boot/dts/bcm11351.dtsi
-index 9b99c52..25ca128 100644
+index eca6fbc..9b99c52 100644
 --- a/arch/arm/boot/dts/bcm11351.dtsi
 +++ b/arch/arm/boot/dts/bcm11351.dtsi
-@@ -118,6 +118,7 @@
- 		compatible = "brcm,kona-sdhci";
- 		reg = <0x3f180000 0x10000>;
- 		interrupts = <GIC_SPI 77 IRQ_TYPE_LEVEL_HIGH>;
-+		clocks = <&sdio1_clk>;
+@@ -43,7 +43,7 @@
+ 		compatible = "brcm,bcm11351-dw-apb-uart", "snps,dw-apb-uart";
  		status = "disabled";
- 	};
- 
-@@ -125,6 +126,7 @@
- 		compatible = "brcm,kona-sdhci";
- 		reg = <0x3f190000 0x10000>;
- 		interrupts = <GIC_SPI 76 IRQ_TYPE_LEVEL_HIGH>;
-+		clocks = <&sdio2_clk>;
+ 		reg = <0x3e000000 0x1000>;
+-		clock-frequency = <13000000>;
++		clocks = <&uartb_clk>;
+ 		interrupts = <GIC_SPI 67 IRQ_TYPE_LEVEL_HIGH>;
+ 		reg-shift = <2>;
+ 		reg-io-width = <4>;
+@@ -53,7 +53,7 @@
+ 		compatible = "brcm,bcm11351-dw-apb-uart", "snps,dw-apb-uart";
  		status = "disabled";
- 	};
- 
-@@ -132,6 +134,7 @@
- 		compatible = "brcm,kona-sdhci";
- 		reg = <0x3f1a0000 0x10000>;
- 		interrupts = <GIC_SPI 74 IRQ_TYPE_LEVEL_HIGH>;
-+		clocks = <&sdio3_clk>;
+ 		reg = <0x3e001000 0x1000>;
+-		clock-frequency = <13000000>;
++		clocks = <&uartb2_clk>;
+ 		interrupts = <GIC_SPI 66 IRQ_TYPE_LEVEL_HIGH>;
+ 		reg-shift = <2>;
+ 		reg-io-width = <4>;
+@@ -63,7 +63,7 @@
+ 		compatible = "brcm,bcm11351-dw-apb-uart", "snps,dw-apb-uart";
  		status = "disabled";
- 	};
- 
-@@ -139,6 +142,7 @@
- 		compatible = "brcm,kona-sdhci";
- 		reg = <0x3f1b0000 0x10000>;
- 		interrupts = <GIC_SPI 73 IRQ_TYPE_LEVEL_HIGH>;
-+		clocks = <&sdio4_clk>;
+ 		reg = <0x3e002000 0x1000>;
+-		clock-frequency = <13000000>;
++		clocks = <&uartb3_clk>;
+ 		interrupts = <GIC_SPI 65 IRQ_TYPE_LEVEL_HIGH>;
+ 		reg-shift = <2>;
+ 		reg-io-width = <4>;
+@@ -73,7 +73,7 @@
+ 		compatible = "brcm,bcm11351-dw-apb-uart", "snps,dw-apb-uart";
  		status = "disabled";
- 	};
- 
+ 		reg = <0x3e003000 0x1000>;
+-		clock-frequency = <13000000>;
++		clocks = <&uartb4_clk>;
+ 		interrupts = <GIC_SPI 64 IRQ_TYPE_LEVEL_HIGH>;
+ 		reg-shift = <2>;
+ 		reg-io-width = <4>;
 -- 
 1.8.0.1
