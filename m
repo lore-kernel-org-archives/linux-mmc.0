@@ -1,71 +1,66 @@
-From: Balaji T K <balajitk@ti.com>
-Subject: Re: [RFC PATCH v3 1/8] mmc: omap_hsmmc: use devm_regulator API
-Date: Thu, 5 Dec 2013 20:59:15 +0530
-Message-ID: <52A09BCB.4080409@ti.com>
-References: <20130613174554.GB1403@sirena.org.uk> <1385043627-30439-1-git-send-email-balajitk@ti.com> <1385043627-30439-2-git-send-email-balajitk@ti.com> <CAPDyKFoS3i3eMKy817emRWoZ5OMKr7LgP3mjj2ePBBGcN5ZB2w@mail.gmail.com>
+From: Dinh Nguyen <dinguyen@altera.com>
+Subject: Re: [PATCHv3 4/4] arm: dts: Add support for SD/MMC on SOCFPGA
+Date: Thu, 5 Dec 2013 10:14:41 -0600
+Message-ID: <1386260081.3783.0.camel@linux-builds1>
+References: <1386197576-3825-1-git-send-email-dinguyen@altera.com>
+	 <1386197576-3825-5-git-send-email-dinguyen@altera.com>
+	 <201312050407.50385.arnd@arndb.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
+Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from comal.ext.ti.com ([198.47.26.152]:54788 "EHLO comal.ext.ti.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752250Ab3LEP3Y (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 5 Dec 2013 10:29:24 -0500
-In-Reply-To: <CAPDyKFoS3i3eMKy817emRWoZ5OMKr7LgP3mjj2ePBBGcN5ZB2w@mail.gmail.com>
+Received: from mail-db9lp0252.outbound.messaging.microsoft.com ([213.199.154.252]:30623
+	"EHLO db9outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1756832Ab3LEQQT (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 5 Dec 2013 11:16:19 -0500
+In-Reply-To: <201312050407.50385.arnd@arndb.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-omap <linux-omap@vger.kernel.org>, bcousson@baylibre.com, devicetree@vger.kernel.org, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Mark Brown <broonie@kernel.org>, Tony Lindgren <tony@atomide.com>
+To: Arnd Bergmann <arnd@arndb.de>
+Cc: dinh.linux@gmail.com, mturquette@linaro.org, rob.herring@calxeda.com, pawel.moll@arm.com, mark.rutland@arm.com, ian.campbell@citrix.com, cjb@laptop.org, jh80.chung@samsung.com, tgih.jun@samsung.com, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 
-On Thursday 21 November 2013 08:38 PM, Ulf Hansson wrote:
-> On 21 November 2013 15:20, Balaji T K <balajitk@ti.com> wrote:
->> Use devm_regulator API, while at it use
->> devm_regulator_get_optional for optional vmmc_aux supply
->>
->> Signed-off-by: Balaji T K <balajitk@ti.com>
->> ---
->>   drivers/mmc/host/omap_hsmmc.c |    6 ++----
->>   1 files changed, 2 insertions(+), 4 deletions(-)
->>
->> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
->> index dbd32ad..1eb4350 100644
->> --- a/drivers/mmc/host/omap_hsmmc.c
->> +++ b/drivers/mmc/host/omap_hsmmc.c
->> @@ -316,7 +316,7 @@ static int omap_hsmmc_reg_get(struct omap_hsmmc_host *host)
->>          struct regulator *reg;
->>          int ocr_value = 0;
->>
->> -       reg = regulator_get(host->dev, "vmmc");
->> +       reg = devm_regulator_get(host->dev, "vmmc");
->>          if (IS_ERR(reg)) {
->>                  dev_err(host->dev, "vmmc regulator missing\n");
->>                  return PTR_ERR(reg);
->> @@ -336,7 +336,7 @@ static int omap_hsmmc_reg_get(struct omap_hsmmc_host *host)
->>                  }
->>
->>                  /* Allow an aux regulator */
->> -               reg = regulator_get(host->dev, "vmmc_aux");
->> +               reg = devm_regulator_get_optional(host->dev, "vmmc_aux");
->>                  host->vcc_aux = IS_ERR(reg) ? NULL : reg;
->>
->>                  /* For eMMC do not power off when not in sleep state */
->> @@ -366,8 +366,6 @@ static int omap_hsmmc_reg_get(struct omap_hsmmc_host *host)
->>
->>   static void omap_hsmmc_reg_put(struct omap_hsmmc_host *host)
->>   {
->> -       regulator_put(host->vcc);
->> -       regulator_put(host->vcc_aux);
->>          mmc_slot(host).set_power = NULL;
->>   }
->
-> While you are touching this code I would suggest to convert to
-> mmc_regulator_get_supply instead. That mean the vmmc_aux change name
-> to vqmmc though, so you need to adapt for this as well then.
->
+On Thu, 2013-12-05 at 04:07 +0100, Arnd Bergmann wrote:
+> On Wednesday 04 December 2013, dinguyen@altera.com wrote:
+> 
+> > +
+> > +* compatible: should be
+> > +        - "altr,socfpga-dw-mshc": for controllers with Altera SOCFPGA
+> > +          specific extensions.
+> > +
+> > +* samsung,dw-mshc-sdr-timing: See exynos-dw-mshc.txt for more information about
+> > +	this property.
+> > +
+> > +Example:
+> > +	dwmmc0@ff704000 {
+> > +		compatible = "altr,socfpga-dw-mshc", "snps,dw-mshc";
+> > +		reg = <0xff704000 0x1000>;
+> > +		interrupts = <0 139 4>;
+> > +		fifo-depth = <0x400>;
+> > +		#address-cells = <1>;
+> > +		#size-cells = <0>;
+> > +		clocks = <&l4_mp_clk>, <&sdmmc_clk>, <&sysmgr_sdr_mmc>;
+> > +		clock-names = "biu", "ciu", "sysmgr-sdr-mmc";
+> 
+> You add a "sysmgr-sdr-mmc" clock here without documenting it. I think what you
+> actually mean here is
+> 
+> > +		clocks = <&l4_mp_clk>, <&sysmgr_sdr_mmc>;
+> > +		clock-names = "biu", "ciu";
+> 
+> i.e. the <&sysmgr_sdr_mmc> clock is actually your "ciu". If I understand your
+> code correctly, the dw-mshc has exactly two clock inputs, biu and ciu, and
+> you use sysmgr to provide ciu. The driver code already contains logic to
+> set the rate of the ciu clock, and you just need to hook into that.
 
-Hi Ulf,
+Ah yes! This is fantastic. I can definitely just re-use the ciu-clk
+hook.
 
-Thanks for the comments, I will address it on separate series.
+Thanks!
 
-Thanks and Regards,
-Balaji T K
+Dinh
+> 
+> 	Arnd
+> 
+
+
+
