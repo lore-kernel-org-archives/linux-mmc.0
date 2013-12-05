@@ -1,100 +1,111 @@
-From: Olivier Sobrie <olivier@sobrie.be>
-Subject: [PATCH] atmel-mci: fix transfers < 16 bytes problem in PDC mode
-Date: Thu,  5 Dec 2013 10:45:16 +0100
-Message-ID: <1386236716-25163-1-git-send-email-olivier@sobrie.be>
-References: <20131204080943.GK3582@odulo-laptop>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ee0-f49.google.com ([74.125.83.49]:49559 "EHLO
-	mail-ee0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751926Ab3LEJ7Q (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 5 Dec 2013 04:59:16 -0500
-Received: by mail-ee0-f49.google.com with SMTP id c41so2909002eek.8
-        for <linux-mmc@vger.kernel.org>; Thu, 05 Dec 2013 01:59:15 -0800 (PST)
-In-Reply-To: <20131204080943.GK3582@odulo-laptop>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Mark Rutland <mark.rutland@arm.com>
+Subject: Re: [PATCH v7 2/2] mmc: sdhci-msm: Initial support for MSM chipsets
+Date: Thu, 5 Dec 2013 10:27:40 +0000
+Message-ID: <20131205102740.GI29200@e106331-lin.cambridge.arm.com>
+References: <1383753405-23631-1-git-send-email-gdjakov@mm-sol.com>
+ <1383753405-23631-3-git-send-email-gdjakov@mm-sol.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <1383753405-23631-3-git-send-email-gdjakov@mm-sol.com>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: Georgi Djakov <gdjakov@mm-sol.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "cjb@laptop.org" <cjb@laptop.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "grant.likely@linaro.org" <grant.likely@linaro.org>, "rob.herring@calxeda.com" <rob.herring@calxeda.com>, Pawel Moll <Pawel.Moll@arm.com>, "swarren@wwwdotorg.org" <swarren@wwwdotorg.org>, "ijc+devicetree@hellion.org.uk" <ijc+devicetree@hellion.org.uk>, "galak@codeaurora.org" <galak@codeaurora.org>, "rob@landley.net" <rob@landley.net>, "linux-doc@vger.kernel.org" <linux-doc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-msm@vger.kernel.org" <linux-arm-msm@vger.kernel.org>, "subhashj@codeaurora.org" <subhashj@codeaurora.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Ludovic Desroches <ludovic.desroches@atmel.com>
-Cc: linux-mmc@vger.kernel.org, Olivier Sobrie <olivier@sobrie.be>
 
-This patch attempts to fix a problem when trying to transfer
-small data.
+On Wed, Nov 06, 2013 at 03:56:45PM +0000, Georgi Djakov wrote:
+> This platform driver adds the initial support of Secure
+> Digital Host Controller Interface compliant controller
+> found in Qualcomm MSM chipsets.
+> 
+> Signed-off-by: Georgi Djakov <gdjakov@mm-sol.com>
+> ---
+>  drivers/mmc/host/Kconfig     |   13 +
+>  drivers/mmc/host/Makefile    |    1 +
+>  drivers/mmc/host/sdhci-msm.c |  651 ++++++++++++++++++++++++++++++++++++++++++
+>  3 files changed, 665 insertions(+)
+>  create mode 100644 drivers/mmc/host/sdhci-msm.c
 
-Without the patch, when there is a transfer of less than 16 bytes,
-it hangs. Here is what I observed for a transfer of 4 bytes with
-the traces enabled in the driver:
+[...]
 
-[   31.690000] atmel_mci fff84000.mmc: FSM: state=0
-[   31.900000] atmel_mci fff84000.mmc: MRQ: cmd 53
-[   31.900000] atmel_mci fff84000.mmc: start request: cmd 53
-[   31.900000] atmel_mci fff84000.mmc: IRQ: tx buffer empty
-[   31.900000] atmel_mci fff84000.mmc: (atmci_pdc_complete) set pending xfer complete
-[   31.900000] atmel_mci fff84000.mmc: IRQ: cmd ready
-[   31.900000] atmel_mci fff84000.mmc: set pending cmd rdy
-[   31.900000] atmel_mci fff84000.mmc: FSM: state=1
-[   31.900000] atmel_mci fff84000.mmc: FSM: cmd ready?
-[   31.900000] atmel_mci fff84000.mmc: set completed cmd ready
-[   31.900000] atmel_mci fff84000.mmc: command with data transfer
-[   31.900000] atmel_mci fff84000.mmc: FSM: state=2
-[   31.900000] atmel_mci fff84000.mmc: FSM: xfer complete?
-[   31.900000] atmel_mci fff84000.mmc: (atmci_tasklet_func) set completed xfer complete
-[   31.900000] atmel_mci fff84000.mmc: FSM: state=3
-[   31.900000] atmel_mci fff84000.mmc: FSM: not busy?
-[   33.900000] atmel_mci fff84000.mmc: software timeout
-[   33.900000] atmel_mci fff84000.mmc: FSM: state=5
-[   33.900000] atmel_mci fff84000.mmc: FSM: state=0
+> +static int sdhci_msm_dt_parse_vreg_info(struct device *dev,
+> +                                       struct sdhci_msm_reg_data *vreg,
+> +                                       const char *vreg_name)
+> +{
+> +       int len;
+> +       const __be32 *prop;
 
-The BLKE bit is never set by the hardware.
+Seeing raw property handling in drivers worries me. If there's a reason
+to touch the raw DTB we should add helpers to do it rather than leaking
+binary format issues into drivers.
 
-By setting the ATMEL_PDC_TCR register with a value equals to 4 when the
-datasize sent is smaller than 16 bytes, it looks to solve the problem.
+> +       char prop_name[MAX_PROP_SIZE];
+> +       struct device_node *np = dev->of_node;
+> +
+> +       snprintf(prop_name, MAX_PROP_SIZE, "%s-supply", vreg_name);
+> +       if (!of_parse_phandle(np, prop_name, 0)) {
+> +               dev_info(dev, "No vreg data found for %s\n", vreg_name);
+> +               return -EINVAL;
+> +       }
+> +
+> +       vreg->name = vreg_name;
+> +
+> +       snprintf(prop_name, MAX_PROP_SIZE, "qcom,%s-lpm-sup", vreg_name);
+> +       if (of_get_property(np, prop_name, NULL))
+> +               vreg->lpm_sup = true;
+> +
+> +       snprintf(prop_name, MAX_PROP_SIZE, "qcom,%s-voltage-level", vreg_name);
+> +       prop = of_get_property(np, prop_name, &len);
+> +       if (!prop || (len != (2 * sizeof(__be32)))) {
+> +               dev_warn(dev, "%s %s property\n",
+> +               prop ? "invalid format" : "no", prop_name);
+> +       } else {
+> +               vreg->low_vol_level = be32_to_cpup(&prop[0]);
+> +               vreg->high_vol_level = be32_to_cpup(&prop[1]);
+> +       }
 
-Note that in the old at91_mci driver, the value was set to 3 but in my
-case it doesn't work...
-http://lxr.free-electrons.com/source/drivers/mmc/host/at91_mci.c?v=3.7#L580
-So I made the assumption that the transfer size should be >= 16 bytes.
+You can use of_property_read_u32_array here.
 
-This patch has been tested with a TI wl1271 sdio module.
+> +
+> +       snprintf(prop_name, MAX_PROP_SIZE, "qcom,%s-current-level", vreg_name);
+> +       prop = of_get_property(np, prop_name, &len);
+> +       if (!prop || (len != (2 * sizeof(__be32)))) {
+> +               dev_warn(dev, "%s %s property\n",
+> +                        prop ? "invalid format" : "no", prop_name);
+> +       } else {
+> +               vreg->lpm_uA = be32_to_cpup(&prop[0]);
+> +               vreg->hpm_uA = be32_to_cpup(&prop[1]);
+> +       }
 
-Signed-off-by: Olivier Sobrie <olivier@sobrie.be>
----
+Likewise.
 
-Hi Ludovic,
+[...]
 
-With this patch I'm able to use the wlan sdio module wl1271.
-When you've time, it would be nice to validate or fix this
-patch.
+> +       /*
+> +        * CORE_SW_RST above may trigger power irq if previous status of PWRCTL
+> +        * was either BUS_ON or IO_HIGH_V. So before we enable the power irq
+> +        * interrupt in GIC (by registering the interrupt handler), we need to
+> +        * ensure that any pending power irq interrupt status is acknowledged
+> +        * otherwise power irq interrupt handler would be fired prematurely.
+> +        */
+> +       irq_status = readl_relaxed(msm_host->core_mem + CORE_PWRCTL_STATUS);
+> +       writel_relaxed(irq_status, (msm_host->core_mem + CORE_PWRCTL_CLEAR));
+> +       irq_ctl = readl_relaxed(msm_host->core_mem + CORE_PWRCTL_CTL);
+> +       if (irq_status & (CORE_PWRCTL_BUS_ON | CORE_PWRCTL_BUS_OFF))
+> +               irq_ctl |= CORE_PWRCTL_BUS_SUCCESS;
+> +       if (irq_status & (CORE_PWRCTL_IO_HIGH | CORE_PWRCTL_IO_LOW))
+> +               irq_ctl |= CORE_PWRCTL_IO_SUCCESS;
+> +       writel_relaxed(irq_ctl, (msm_host->core_mem + CORE_PWRCTL_CTL));
+> +       /*
+> +        * Ensure that above writes are propogated before interrupt enablement
+> +        * in GIC.
+> +        */
+> +       mb();
 
-Thanks for your help,
+Does this guarantee that the device has finished responding to the write
+and deasserted the interrupt line (i.e. does the device only acknowledge
+the write once that is true)?
 
-Olivier
-
- drivers/mmc/host/atmel-mci.c |    6 +++++-
- 1 file changed, 5 insertions(+), 1 deletion(-)
-
-diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
-index b86b482..c599731 100644
---- a/drivers/mmc/host/atmel-mci.c
-+++ b/drivers/mmc/host/atmel-mci.c
-@@ -45,6 +45,7 @@
- 
- #define ATMCI_DATA_ERROR_FLAGS	(ATMCI_DCRCE | ATMCI_DTOE | ATMCI_OVRE | ATMCI_UNRE)
- #define ATMCI_DMA_THRESHOLD	16
-+#define ATMCI_PDC_MIN_DATASIZE	16
- 
- enum {
- 	EVENT_CMD_RDY = 0,
-@@ -765,7 +766,10 @@ static void atmci_pdc_set_single_buf(struct atmel_mci *host,
- 	}
- 
- 	if (host->data_size <= buf_size) {
--		if (host->data_size & 0x3) {
-+		if ((host->data_size < ATMCI_PDC_MIN_DATASIZE) &&
-+		    (dir == XFER_TRANSMIT)) {
-+			atmci_writel(host, counter_reg, 4);
-+		} else if (host->data_size & 0x3) {
- 			/* If size is different from modulo 4, transfer bytes */
- 			atmci_writel(host, counter_reg, host->data_size);
- 			atmci_writel(host, ATMCI_MR, host->mode_reg | ATMCI_MR_PDCFBYTE);
--- 
-1.7.9.5
-
+Thanks,
+Mark.
