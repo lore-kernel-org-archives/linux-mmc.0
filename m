@@ -1,53 +1,112 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [PATCHv3 4/4] arm: dts: Add support for SD/MMC on SOCFPGA
-Date: Thu, 5 Dec 2013 04:07:49 +0100
-Message-ID: <201312050407.50385.arnd@arndb.de>
-References: <1386197576-3825-1-git-send-email-dinguyen@altera.com> <1386197576-3825-5-git-send-email-dinguyen@altera.com>
+From: Mark Rutland <mark.rutland@arm.com>
+Subject: Re: [PATCH v7 1/2] mmc: sdhci-msm: Initial SDHCI MSM driver
+ documentation
+Date: Thu, 5 Dec 2013 09:52:18 +0000
+Message-ID: <20131205095218.GH29200@e106331-lin.cambridge.arm.com>
+References: <1383753405-23631-1-git-send-email-gdjakov@mm-sol.com>
+ <1383753405-23631-2-git-send-email-gdjakov@mm-sol.com>
 Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="iso-8859-15"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.17.8]:63966 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750881Ab3LEDIK (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 4 Dec 2013 22:08:10 -0500
-In-Reply-To: <1386197576-3825-5-git-send-email-dinguyen@altera.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <1383753405-23631-2-git-send-email-gdjakov@mm-sol.com>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: Georgi Djakov <gdjakov@mm-sol.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "cjb@laptop.org" <cjb@laptop.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "grant.likely@linaro.org" <grant.likely@linaro.org>, "rob.herring@calxeda.com" <rob.herring@calxeda.com>, Pawel Moll <Pawel.Moll@arm.com>, "swarren@wwwdotorg.org" <swarren@wwwdotorg.org>, "ijc+devicetree@hellion.org.uk" <ijc+devicetree@hellion.org.uk>, "galak@codeaurora.org" <galak@codeaurora.org>, "rob@landley.net" <rob@landley.net>, "linux-doc@vger.kernel.org" <linux-doc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-msm@vger.kernel.org" <linux-arm-msm@vger.kernel.org>, "subhashj@codeaurora.org" <subhashj@codeaurora.org>
 List-Id: linux-mmc@vger.kernel.org
-To: dinguyen@altera.com
-Cc: dinh.linux@gmail.com, mturquette@linaro.org, rob.herring@calxeda.com, pawel.moll@arm.com, mark.rutland@arm.com, ian.campbell@citrix.com, cjb@laptop.org, jh80.chung@samsung.com, tgih.jun@samsung.com, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 
-On Wednesday 04 December 2013, dinguyen@altera.com wrote:
+Hi,
+
+Apologies for the late reply.
+
+On Wed, Nov 06, 2013 at 03:56:44PM +0000, Georgi Djakov wrote:
+> This patch adds documentation for Qualcomm SDHCI MSM driver.
+> It contains the differences between the core properties in mmc.txt
+> and the properties used by the sdhci-msm driver.
+
+Nit, but this is documentation of the binding, not the driver.
+
+> 
+> Signed-off-by: Georgi Djakov <gdjakov@mm-sol.com>
+> ---
+>  .../devicetree/bindings/mmc/sdhci-msm.txt          |   92 ++++++++++++++++++++
+>  1 file changed, 92 insertions(+)
+>  create mode 100644 Documentation/devicetree/bindings/mmc/sdhci-msm.txt
+> 
+> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
+> new file mode 100644
+> index 0000000..8f1a52d
+> --- /dev/null
+> +++ b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
+> @@ -0,0 +1,92 @@
+> +* Qualcomm SDHCI controller (sdhci-msm)
+> +
+> +This file documents differences between the core properties in mmc.txt
+> +and the properties used by the sdhci-msm driver.
+> +
+> +Required properties:
+> +- compatible: should contain "qcom,sdhci-msm"
+> +- reg: should contain SDHC, SD Core register map
+
+As this seems to depend on reg-names, it would be nice to write this in
+terms of reg-names (as with clocks and clock-names).
+
+
+> +- reg-names: indicates various resources passed to driver (via reg proptery) by name
+> +	"reg-names" examples are "hc_mem" and "core_mem"
+
+Either there are a fixed set of names you expect (and therefore these
+aren't examples but rather a definition), or this property is useless.
+Please either define the set of names or remove this property.
+
+> +- interrupts: should contain SDHC interrupts
+> +- interrupt-names: indicates interrupts passed to driver (via interrupts property) by name
+> +	"interrupt-names" examples are "hc_irq" and "pwr_irq"
+
+Likewise for both points.
+
+> +- vdd-supply: phandle to the regulator for the vdd (flash core voltage) supply.
+> +- vddio-supply: phandle to the regulator for the vdd-io (i/o voltage) supply.
+> +- pinctrl-names: Should contain only one value - "default".
+> +- pinctrl-0: Should specify pin control groups used for this controller.
+> +- clocks: A list of phandle + clock-specifier pairs for the clocks listed in clock-names
+> +- clock-names: Should contain the following:
+> +	"iface" - Main peripheral bus clock (PCLK/HCLK - AHB Bus clock) (required)
+> +	"core"	- SDC MMC clock (MCLK) (required)
+> +	"bus"	- SDCC bus voter clock (optional)
+
+This looks good :)
 
 > +
-> +* compatible: should be
-> +        - "altr,socfpga-dw-mshc": for controllers with Altera SOCFPGA
-> +          specific extensions.
+> +Optional properties:
+> +- qcom,bus-speed-mode: specifies the supported bus speed modes by host
+> +	The supported bus speed modes are:
+> +	"HS200_1p8v" - indicates that host can support HS200 at 1.8v
+> +	"HS200_1p2v" - indicates that host can support HS200 at 1.2v
+> +	"DDR_1p8v" - indicates that host can support DDR mode at 1.8v
+> +	"DDR_1p2v" - indicates that host can support DDR mode at 1.2v
+
+Is this a list of strings, or does the unit only support one of these?
+
+This could be a set of boolean properties instead, is this likely to
+expand in future?
+
 > +
-> +* samsung,dw-mshc-sdr-timing: See exynos-dw-mshc.txt for more information about
-> +	this property.
-> +
-> +Example:
-> +	dwmmc0@ff704000 {
-> +		compatible = "altr,socfpga-dw-mshc", "snps,dw-mshc";
-> +		reg = <0xff704000 0x1000>;
-> +		interrupts = <0 139 4>;
-> +		fifo-depth = <0x400>;
-> +		#address-cells = <1>;
-> +		#size-cells = <0>;
-> +		clocks = <&l4_mp_clk>, <&sdmmc_clk>, <&sysmgr_sdr_mmc>;
-> +		clock-names = "biu", "ciu", "sysmgr-sdr-mmc";
+> +- qcom,{vdd,vdd-io}-lpm-sup - specifies whether the supply can be kept in low power mode.
 
-You add a "sysmgr-sdr-mmc" clock here without documenting it. I think what you
-actually mean here is
+Boolean? Please specify types on properties.
 
-> +		clocks = <&l4_mp_clk>, <&sysmgr_sdr_mmc>;
-> +		clock-names = "biu", "ciu";
+Can you elaborate on what this means? When can a supply not be kept in
+low power mode?
 
-i.e. the <&sysmgr_sdr_mmc> clock is actually your "ciu". If I understand your
-code correctly, the dw-mshc has exactly two clock inputs, biu and ciu, and
-you use sysmgr to provide ciu. The driver code already contains logic to
-set the rate of the ciu clock, and you just need to hook into that.
+> +- qcom,{vdd,vdd-io}-voltage-level - specifies voltage levels for the supply.
+> +	Should be specified in pairs (min, max), units uV.
+> +- qcom,{vdd,vdd-io}-current-level - specifies load levels for the supply in lpm
+> +	or high power mode (hpm). Should be specified in pairs (lpm, hpm), units uA.
 
-	Arnd
+Can you not query these from the regulator framework?
+
+If these are configuration, why are they necessary?
+
+Thanks,
+Mark.
