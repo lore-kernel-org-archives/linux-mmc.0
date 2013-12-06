@@ -1,88 +1,45 @@
-From: <dinguyen@altera.com>
-Subject: [PATCH 1/2] mmc: dw_mmc: Enable the hold reg for certain speed modes
-Date: Fri, 6 Dec 2013 10:10:22 -0600
-Message-ID: <1386346223-18464-2-git-send-email-dinguyen@altera.com>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: [PATCH 0/2] mmc: dw_mmc: Make the use of the hold reg generic
+Date: Fri, 6 Dec 2013 18:36:26 +0100
+Message-ID: <201312061836.26251.arnd@arndb.de>
 References: <1386346223-18464-1-git-send-email-dinguyen@altera.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: Text/Plain;
+  charset="iso-8859-15"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from va3ehsobe005.messaging.microsoft.com ([216.32.180.31]:14267
-	"EHLO va3outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753168Ab3LFQMO (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 6 Dec 2013 11:12:14 -0500
+Received: from moutng.kundenserver.de ([212.227.17.10]:61156 "EHLO
+	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756767Ab3LFRgq (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 6 Dec 2013 12:36:46 -0500
 In-Reply-To: <1386346223-18464-1-git-send-email-dinguyen@altera.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: dinh.linux@gmail.com, arnd@arndb.de, cjb@laptop.org, jh80.chung@samsung.com, tgih.jun@samsung.com, heiko@sntech.de, dianders@chromium.org, alim.akhtar@samsung.com, bzhao@marvell.com
-Cc: linux-mmc@vger.kernel.org, Dinh Nguyen <dinguyen@altera.com>
+To: dinguyen@altera.com
+Cc: dinh.linux@gmail.com, cjb@laptop.org, jh80.chung@samsung.com, tgih.jun@samsung.com, heiko@sntech.de, dianders@chromium.org, alim.akhtar@samsung.com, bzhao@marvell.com, linux-mmc@vger.kernel.org
 
-From: Dinh Nguyen <dinguyen@altera.com>
-
-This patch will enable the SDMMC_CMD_USE_HOLD_REG bit when the slot is
-operating all timing modes, except for SDR50, DDR50, SDR104, and MMC_HS200.
-
-According to the Synopsys databook :"To meet the relatively high Input Hold
-Time requirement for SDR12, SDR25, and other MMC speed modes, you should
-program bit[29]use_hold_Reg of the CMD register to 1'b1;"..."However, for
-the higher speed modes of SDR104, SDR50 and DDR50, you can meet the much
-smaller Input Hold Time requirement of 0.8ns by bypassing the Hold Register
-(Path A in Figure 10-8, programming CMD.use_hold_reg = 1'b0) and then adding
-delay elements on the output path as indicated."
-
-This information is taking from the v2.50a of the Synopsys Designware Cores
-Mobile Storage Host Databook.
-
-Signed-off-by: Dinh Nguyen <dinguyen@altera.com>
----
- drivers/mmc/host/dw_mmc.c  |   14 ++++++++++++++
- include/linux/mmc/dw_mmc.h |    1 +
- 2 files changed, 15 insertions(+)
-
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 4bce0de..7075248 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -279,6 +279,9 @@ static u32 dw_mci_prepare_command(struct mmc_host *mmc, struct mmc_command *cmd)
- 			cmdr |= SDMMC_CMD_DAT_WR;
- 	}
- 
-+	if (slot->host->use_hold_reg)
-+		cmdr |= SDMMC_CMD_USE_HOLD_REG;
-+
- 	if (drv_data && drv_data->prepare_command)
- 		drv_data->prepare_command(slot->host, &cmdr);
- 
-@@ -969,6 +972,17 @@ static void dw_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 	mci_writel(slot->host, UHS_REG, regs);
- 	slot->host->timing = ios->timing;
- 
-+	switch (slot->host->timing) {
-+	case MMC_TIMING_UHS_SDR50:
-+	case MMC_TIMING_UHS_SDR104:
-+	case MMC_TIMING_UHS_DDR50:
-+	case MMC_TIMING_MMC_HS200:
-+		slot->host->use_hold_reg = 0;
-+		break;
-+	default:
-+		slot->host->use_hold_reg = 1;
-+	}
-+
- 	/*
- 	 * Use mirror of ios->clock to prevent race with mmc
- 	 * core ios update when finding the minimum.
-diff --git a/include/linux/mmc/dw_mmc.h b/include/linux/mmc/dw_mmc.h
-index 6ce7d2c..b9bf3b8 100644
---- a/include/linux/mmc/dw_mmc.h
-+++ b/include/linux/mmc/dw_mmc.h
-@@ -191,6 +191,7 @@ struct dw_mci {
- 	struct regulator	*vmmc;	/* Power regulator */
- 	unsigned long		irq_flags; /* IRQ flags */
- 	int			irq;
-+	bool			use_hold_reg;
- };
- 
- /* DMA ops for Internal/External DMAC interface */
--- 
-1.7.9.5
+On Friday 06 December 2013, dinguyen@altera.com wrote:
+> From: Dinh Nguyen <dinguyen@altera.com>
+> 
+> Hi,
+> 
+> This patch series makes the setting of the SDMMC_CMD_USE_HOLD_REG bit generic
+> for all platforms that requires it. According the Synopsys spec on the dw_mmc,
+> setting the SDMMC_CMD_USE_HOLD_REG should be done for all speeds except for the
+> following higher speed modes: SDR104, SDR50, DDR50. I am also include MMC_HS200
+> speed as not needing the SDMMC_CMD_USE_HOLD_REG bit set as well.
+> 
+> Currently, Rockchip and SOCFPGA's variant of the dw_mmc requires that the
+> SDMMC_CMD_USE_HOLD_REG be set. For SOCFPGA, the dw_mmc is operating at 
+> MMC_TIMING_SD_HS mode. I don't know Rockchip's variant is operating at.
+> 
 
 
+Very nice, thanks for implementing this!
+
+Acked-by: Arnd Bergmann <arnd@arndb.de>
+
+Obviously this needs to be tested on at least the rockchips variant, but
+ideally on most others too.
+
+	Arnd
