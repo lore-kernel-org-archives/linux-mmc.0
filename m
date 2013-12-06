@@ -1,75 +1,147 @@
-From: Ludovic Desroches <ludovic.desroches@atmel.com>
-Subject: Re: [PATCH] atmel-mci: fix transfers < 16 bytes problem in PDC mode
-Date: Fri, 6 Dec 2013 12:10:38 +0100
-Message-ID: <20131206111038.GZ3582@odulo-laptop>
-References: <20131204080943.GK3582@odulo-laptop>
- <1386236716-25163-1-git-send-email-olivier@sobrie.be>
+From: Georgi Djakov <gdjakov@mm-sol.com>
+Subject: Re: [PATCH v7 1/2] mmc: sdhci-msm: Initial SDHCI MSM driver documentation
+Date: Fri, 06 Dec 2013 13:59:46 +0200
+Message-ID: <52A1BC32.6060600@mm-sol.com>
+References: <1383753405-23631-1-git-send-email-gdjakov@mm-sol.com> <1383753405-23631-2-git-send-email-gdjakov@mm-sol.com> <20131205095218.GH29200@e106331-lin.cambridge.arm.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eusmtp01.atmel.com ([212.144.249.242]:45476 "EHLO
-	eusmtp01.atmel.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752661Ab3LFLKe (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 6 Dec 2013 06:10:34 -0500
-Content-Disposition: inline
-In-Reply-To: <1386236716-25163-1-git-send-email-olivier@sobrie.be>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: <20131205095218.GH29200@e106331-lin.cambridge.arm.com>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: Mark Rutland <mark.rutland@arm.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "cjb@laptop.org" <cjb@laptop.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "grant.likely@linaro.org" <grant.likely@linaro.org>, "rob.herring@calxeda.com" <rob.herring@calxeda.com>, Pawel Moll <Pawel.Moll@arm.com>, "swarren@wwwdotorg.org" <swarren@wwwdotorg.org>, "ijc+devicetree@hellion.org.uk" <ijc+devicetree@hellion.org.uk>, "galak@codeaurora.org" <galak@codeaurora.org>, "rob@landley.net" <rob@landley.net>, "linux-doc@vger.kernel.org" <linux-doc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-msm@vger.kernel.org" <linux-arm-msm@vger.kernel.org>, "subhashj@codeaurora.org" <subhashj@codeaurora.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Olivier Sobrie <olivier@sobrie.be>
-Cc: linux-mmc@vger.kernel.org, Ludovic Desroches <ludovic.desroches@atmel.com>
 
-Hi Olivier,
+On 12/05/2013 11:52 AM, Mark Rutland wrote:
+> Hi,
+>
+> Apologies for the late reply.
 
-On Thu, Dec 05, 2013 at 10:45:16AM +0100, Olivier Sobrie wrote:
+Hi Mark, thanks for the review!
 
-[...]
+>
+> On Wed, Nov 06, 2013 at 03:56:44PM +0000, Georgi Djakov wrote:
+>> This patch adds documentation for Qualcomm SDHCI MSM driver.
+>> It contains the differences between the core properties in mmc.txt
+>> and the properties used by the sdhci-msm driver.
+>
+> Nit, but this is documentation of the binding, not the driver.
+>
 
-> 
-> Hi Ludovic,
-> 
-> With this patch I'm able to use the wlan sdio module wl1271.
-> When you've time, it would be nice to validate or fix this
-> patch.
+Ok, sure!
 
-Thanks for your patch, before giving my ack I would like to test it on
-other devices. I hope I could manage that next week.
+>>
+>> Signed-off-by: Georgi Djakov <gdjakov@mm-sol.com>
+>> ---
+>>   .../devicetree/bindings/mmc/sdhci-msm.txt          |   92 ++++++++++++++++++++
+>>   1 file changed, 92 insertions(+)
+>>   create mode 100644 Documentation/devicetree/bindings/mmc/sdhci-msm.txt
+>>
+>> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
+>> new file mode 100644
+>> index 0000000..8f1a52d
+>> --- /dev/null
+>> +++ b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
+>> @@ -0,0 +1,92 @@
+>> +* Qualcomm SDHCI controller (sdhci-msm)
+>> +
+>> +This file documents differences between the core properties in mmc.txt
+>> +and the properties used by the sdhci-msm driver.
+>> +
+>> +Required properties:
+>> +- compatible: should contain "qcom,sdhci-msm"
+>> +- reg: should contain SDHC, SD Core register map
+>
+> As this seems to depend on reg-names, it would be nice to write this in
+> terms of reg-names (as with clocks and clock-names).
+>
+>
 
-Regards
+Ok, thanks!
 
-Ludovic
+>> +- reg-names: indicates various resources passed to driver (via reg proptery) by name
+>> +	"reg-names" examples are "hc_mem" and "core_mem"
+>
+> Either there are a fixed set of names you expect (and therefore these
+> aren't examples but rather a definition), or this property is useless.
+> Please either define the set of names or remove this property.
+>
+>> +- interrupts: should contain SDHC interrupts
+>> +- interrupt-names: indicates interrupts passed to driver (via interrupts property) by name
+>> +	"interrupt-names" examples are "hc_irq" and "pwr_irq"
+>
+> Likewise for both points.
+>
 
-> 
-> Thanks for your help,
-> 
-> Olivier
-> 
->  drivers/mmc/host/atmel-mci.c |    6 +++++-
->  1 file changed, 5 insertions(+), 1 deletion(-)
-> 
-> diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
-> index b86b482..c599731 100644
-> --- a/drivers/mmc/host/atmel-mci.c
-> +++ b/drivers/mmc/host/atmel-mci.c
-> @@ -45,6 +45,7 @@
->  
->  #define ATMCI_DATA_ERROR_FLAGS	(ATMCI_DCRCE | ATMCI_DTOE | ATMCI_OVRE | ATMCI_UNRE)
->  #define ATMCI_DMA_THRESHOLD	16
-> +#define ATMCI_PDC_MIN_DATASIZE	16
->  
->  enum {
->  	EVENT_CMD_RDY = 0,
-> @@ -765,7 +766,10 @@ static void atmci_pdc_set_single_buf(struct atmel_mci *host,
->  	}
->  
->  	if (host->data_size <= buf_size) {
-> -		if (host->data_size & 0x3) {
-> +		if ((host->data_size < ATMCI_PDC_MIN_DATASIZE) &&
-> +		    (dir == XFER_TRANSMIT)) {
-> +			atmci_writel(host, counter_reg, 4);
-> +		} else if (host->data_size & 0x3) {
->  			/* If size is different from modulo 4, transfer bytes */
->  			atmci_writel(host, counter_reg, host->data_size);
->  			atmci_writel(host, ATMCI_MR, host->mode_reg | ATMCI_MR_PDCFBYTE);
-> -- 
-> 1.7.9.5
-> 
+Ok!
+
+>> +- vdd-supply: phandle to the regulator for the vdd (flash core voltage) supply.
+>> +- vddio-supply: phandle to the regulator for the vdd-io (i/o voltage) supply.
+>> +- pinctrl-names: Should contain only one value - "default".
+>> +- pinctrl-0: Should specify pin control groups used for this controller.
+>> +- clocks: A list of phandle + clock-specifier pairs for the clocks listed in clock-names
+>> +- clock-names: Should contain the following:
+>> +	"iface" - Main peripheral bus clock (PCLK/HCLK - AHB Bus clock) (required)
+>> +	"core"	- SDC MMC clock (MCLK) (required)
+>> +	"bus"	- SDCC bus voter clock (optional)
+>
+> This looks good :)
+>
+>> +
+>> +Optional properties:
+>> +- qcom,bus-speed-mode: specifies the supported bus speed modes by host
+>> +	The supported bus speed modes are:
+>> +	"HS200_1p8v" - indicates that host can support HS200 at 1.8v
+>> +	"HS200_1p2v" - indicates that host can support HS200 at 1.2v
+>> +	"DDR_1p8v" - indicates that host can support DDR mode at 1.8v
+>> +	"DDR_1p2v" - indicates that host can support DDR mode at 1.2v
+>
+> Is this a list of strings, or does the unit only support one of these?
+>
+> This could be a set of boolean properties instead, is this likely to
+> expand in future?
+>
+
+It is meant to be list of strings, and many can be supported. But i will 
+drop this property from this initial version, and maybe add it later as 
+boolean properties! Thanks!
+
+>> +
+>> +- qcom,{vdd,vdd-io}-lpm-sup - specifies whether the supply can be kept in low power mode.
+>
+> Boolean? Please specify types on properties.
+
+Yes, it is boolean. I'll note it in the documentation. Thanks!
+
+>
+> Can you elaborate on what this means? When can a supply not be kept in
+> low power mode?
+
+The vdd-io for example is a regulator that is always-on and may be 
+shared with multiple other peripherals as well. It should not be 
+disabled by the driver, but instead put in low power mode when unused.
+
+>
+>> +- qcom,{vdd,vdd-io}-voltage-level - specifies voltage levels for the supply.
+>> +	Should be specified in pairs (min, max), units uV.
+>> +- qcom,{vdd,vdd-io}-current-level - specifies load levels for the supply in lpm
+>> +	or high power mode (hpm). Should be specified in pairs (lpm, hpm), units uA.
+>
+> Can you not query these from the regulator framework?
+>
+> If these are configuration, why are they necessary?
+>
+
+As some regulators are shared and can have multiple consumers, these 
+properties can be used for voltage and load current aggregation.
+The voltage-level is the "supported voltage" by the controller, that 
+also (at least on my platform) matches the corresponding regulator 
+voltage. I probably can drop the voltage-level property and get voltage 
+via the regulator framework helper functions, but the load current 
+values are different for each sdhc.
+ From the very limited documentation that i have, i think this is 
+describing the hardware configuration and should be in the device-tree.
+
+Thanks,
+Georgi
