@@ -1,45 +1,32 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [PATCH 0/2] mmc: dw_mmc: Make the use of the hold reg generic
-Date: Fri, 6 Dec 2013 18:36:26 +0100
-Message-ID: <201312061836.26251.arnd@arndb.de>
-References: <1386346223-18464-1-git-send-email-dinguyen@altera.com>
+From: Jarkko Nikula <jarkko.nikula@bitmer.com>
+Subject: Re: [PATCH 0/7] mmc: omap: Fixes, cleanup and add ERASE capability
+Date: Fri, 06 Dec 2013 19:54:14 +0000
+Message-ID: <52A22B66.8030402@bitmer.com>
+References: <20131202193459.GL26766@atomide.com> <1386191654-7686-1-git-send-email-jarkko.nikula@bitmer.com> <20131206134104.GJ30823@blackmetal.musicnaut.iki.fi>
 Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="iso-8859-15"
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.17.10]:61156 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756767Ab3LFRgq (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 6 Dec 2013 12:36:46 -0500
-In-Reply-To: <1386346223-18464-1-git-send-email-dinguyen@altera.com>
+Received: from bitmer.com ([213.157.87.50]:48231 "EHLO bitmer.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1758525Ab3LFRyY (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 6 Dec 2013 12:54:24 -0500
+In-Reply-To: <20131206134104.GJ30823@blackmetal.musicnaut.iki.fi>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: dinguyen@altera.com
-Cc: dinh.linux@gmail.com, cjb@laptop.org, jh80.chung@samsung.com, tgih.jun@samsung.com, heiko@sntech.de, dianders@chromium.org, alim.akhtar@samsung.com, bzhao@marvell.com, linux-mmc@vger.kernel.org
+To: Aaro Koskinen <aaro.koskinen@iki.fi>
+Cc: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, Tony Lindgren <tony@atomide.com>, Dan Carpenter <dan.carpenter@oracle.com>, Jarkko Lavinen <j.lavinen@samsung.com>
 
-On Friday 06 December 2013, dinguyen@altera.com wrote:
-> From: Dinh Nguyen <dinguyen@altera.com>
+On 12/06/2013 01:41 PM, Aaro Koskinen wrote:
+>> Set goes on top of v3.13-rc2-208-g8ecffd791448.
 > 
-> Hi,
+> Patch 5 had some fuzz with plain 3.13-rc2. Otherwise these look fine.
+> I tested these on 770 and N800, so for all patches:
 > 
-> This patch series makes the setting of the SDMMC_CMD_USE_HOLD_REG bit generic
-> for all platforms that requires it. According the Synopsys spec on the dw_mmc,
-> setting the SDMMC_CMD_USE_HOLD_REG should be done for all speeds except for the
-> following higher speed modes: SDR104, SDR50, DDR50. I am also include MMC_HS200
-> speed as not needing the SDMMC_CMD_USE_HOLD_REG bit set as well.
+> Tested-by: Aaro Koskinen <aaro.koskinen@iki.fi>
 > 
-> Currently, Rockchip and SOCFPGA's variant of the dw_mmc requires that the
-> SDMMC_CMD_USE_HOLD_REG be set. For SOCFPGA, the dw_mmc is operating at 
-> MMC_TIMING_SD_HS mode. I don't know Rockchip's variant is operating at.
-> 
+Yes, reason for your fuzz observation is that 3.13-rc2 don't have those
+two patches from Tony but 8ecffd791448 had.
 
-
-Very nice, thanks for implementing this!
-
-Acked-by: Arnd Bergmann <arnd@arndb.de>
-
-Obviously this needs to be tested on at least the rockchips variant, but
-ideally on most others too.
-
-	Arnd
+-- 
+Jarkko
