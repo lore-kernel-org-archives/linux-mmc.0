@@ -1,40 +1,53 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [PATCH 2/2] mmc: dw_mmc: add dw_mmc-k3 for k3 platform
-Date: Fri, 6 Dec 2013 02:39:14 +0100
-Message-ID: <201312060239.14832.arnd@arndb.de>
-References: <1383889128-12540-1-git-send-email-zhangfei.gao@linaro.org>
- <1383889128-12540-3-git-send-email-zhangfei.gao@linaro.org>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH 1/6] mmc: Do not call get_cd for non removable cards
+Date: Fri, 6 Dec 2013 09:31:00 +0100
+Message-ID: <CAPDyKFqn=tZPEz2SWrRRvDGkkZb_OUv7aA_F_NhzQfW_=J2x6Q@mail.gmail.com>
+References: <1386250491-4708-1-git-send-email-s.hauer@pengutronix.de>
+	<1386250491-4708-2-git-send-email-s.hauer@pengutronix.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <1383889128-12540-3-git-send-email-zhangfei.gao@linaro.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: linux-arm-kernel@lists.infradead.org
-Cc: devicetree@vger.kernel.org, Seungwon Jeon <tgih.jun@samsung.com>, linux-mmc@vger.kernel.org, Jaehoon Chung <jh80.chung@samsung.com>, Kumar Gala <galak@codeaurora.org>, Zhangfei Gao <zhangfei.gao@linaro.org>, Chris Ball <cjb@laptop.org>, Dinh Nguyen <dinguyen@altera.com>
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qe0-f51.google.com ([209.85.128.51]:62202 "EHLO
+	mail-qe0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751654Ab3LFIbA (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 6 Dec 2013 03:31:00 -0500
+Received: by mail-qe0-f51.google.com with SMTP id 1so261801qee.24
+        for <linux-mmc@vger.kernel.org>; Fri, 06 Dec 2013 00:31:00 -0800 (PST)
+In-Reply-To: <1386250491-4708-2-git-send-email-s.hauer@pengutronix.de>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Sascha Hauer <s.hauer@pengutronix.de>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 
-On Friday 08 November 2013, Zhangfei Gao wrote:
-> Add dw_mmc-k3.c for k3v2, support sd/emmc
-> 
-> Signed-off-by: Zhangfei Gao <zhangfei.gao@linaro.org>
-> Tested-by: Zhigang Wang <brooke.wangzhigang@huawei.com>
+On 5 December 2013 14:34, Sascha Hauer <s.hauer@pengutronix.de> wrote:
+> Non removable cards are always present, so do not call get_cd for them.
+>
+> Signed-off-by: Sascha Hauer <s.hauer@pengutronix.de>
 
-We are currently having the exact same discussion problem on the altera
-version of dw_mmc: It seems that all this driver does in addition to the
-common code is to have a custom way to set up the card clocks.
+Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
 
-In both cases, there is a custom piece of IP logic providing this clock
-(here it is in the "hisilicon,pctrl" node). IMHO that should be a proper
-clock driver so you can use the existing call to clk_set_rate to set
-it up and not need a special platform driver at all.
-
-	Arnd
+> ---
+>  drivers/mmc/core/core.c | 3 ++-
+>  1 file changed, 2 insertions(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> index 57a2b40..098374b 100644
+> --- a/drivers/mmc/core/core.c
+> +++ b/drivers/mmc/core/core.c
+> @@ -2460,7 +2460,8 @@ void mmc_rescan(struct work_struct *work)
+>          */
+>         mmc_bus_put(host);
+>
+> -       if (host->ops->get_cd && host->ops->get_cd(host) == 0) {
+> +       if (!(host->caps & MMC_CAP_NONREMOVABLE) && host->ops->get_cd &&
+> +                       host->ops->get_cd(host) == 0) {
+>                 mmc_claim_host(host);
+>                 mmc_power_off(host);
+>                 mmc_release_host(host);
+> --
+> 1.8.4.3
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
