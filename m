@@ -1,14 +1,14 @@
 From: <dinguyen@altera.com>
-Subject: [PATCHv2 1/3] mmc: dw_mmc: Enable the hold reg for certain speed modes
-Date: Fri, 6 Dec 2013 21:20:22 -0600
-Message-ID: <1386386424-859-2-git-send-email-dinguyen@altera.com>
+Subject: [PATCHv2 2/3] mmc: dw_mmc-pltm: Remove Rockchip's custom dw_mmc driver structure
+Date: Fri, 6 Dec 2013 21:20:23 -0600
+Message-ID: <1386386424-859-3-git-send-email-dinguyen@altera.com>
 References: <1386386424-859-1-git-send-email-dinguyen@altera.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-db8lp0184.outbound.messaging.microsoft.com ([213.199.154.184]:46244
+Received: from mail-db8lp0184.outbound.messaging.microsoft.com ([213.199.154.184]:54233
 	"EHLO db8outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751441Ab3LGDWM (ORCPT
+	by vger.kernel.org with ESMTP id S1752227Ab3LGDWM (ORCPT
 	<rfc822;linux-mmc@vger.kernel.org>); Fri, 6 Dec 2013 22:22:12 -0500
 In-Reply-To: <1386386424-859-1-git-send-email-dinguyen@altera.com>
 Sender: linux-mmc-owner@vger.kernel.org
@@ -18,136 +18,48 @@ Cc: linux-mmc@vger.kernel.org, Dinh Nguyen <dinguyen@altera.com>
 
 From: Dinh Nguyen <dinguyen@altera.com>
 
-This patch will enable the SDMMC_CMD_USE_HOLD_REG bit when the slot is
-operating all timing modes, except for SDR50, DDR50, SDR104, and MMC_HS200.
-
-According to the Synopsys databook :"To meet the relatively high Input Hold
-Time requirement for SDR12, SDR25, and other MMC speed modes, you should
-program bit[29]use_hold_Reg of the CMD register to 1'b1;"..."However, for
-the higher speed modes of SDR104, SDR50 and DDR50, you can meet the much
-smaller Input Hold Time requirement of 0.8ns by bypassing the Hold Register
-(Path A in Figure 10-8, programming CMD.use_hold_reg = 1'b0) and then adding
-delay elements on the output path as indicated.
-
-Also, "Never set CMD.use_hold_reg = 1 and cclk_in_drv phase shift to 0 at the
-same time. This would add an extra one-cycle delay on the output path, resulting
-in incorrect behavior."
-
-This information is taking from the v2.50a of the Synopsys Designware Cores
-Mobile Storage Host Databook.
+Rockchip's implementation of the dw_mmc controller only requires the setting
+of the SDMMC_CMD_USE_HOLD_REG on every command. With the patch to set the
+SDMMC_CMD_USE_HOLD_REG by checking the slot's speed mode, this Rockchip
+custom driver structure is no longer necessary.
 
 Signed-off-by: Dinh Nguyen <dinguyen@altera.com>
 ---
-v2: Add check for cclk_in_drv phase shift in conjunction with use_hold_reg.
+v2: none
 ---
- drivers/mmc/host/dw_mmc.c  |   44 ++++++++++++++++++++++++++++++++++++++++++++
- include/linux/mmc/dw_mmc.h |    3 +++
- 2 files changed, 47 insertions(+)
+ drivers/mmc/host/dw_mmc-pltfm.c |   12 +-----------
+ 1 file changed, 1 insertion(+), 11 deletions(-)
 
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 4bce0de..9f5492b 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -279,6 +279,9 @@ static u32 dw_mci_prepare_command(struct mmc_host *mmc, struct mmc_command *cmd)
- 			cmdr |= SDMMC_CMD_DAT_WR;
- 	}
+diff --git a/drivers/mmc/host/dw_mmc-pltfm.c b/drivers/mmc/host/dw_mmc-pltfm.c
+index 5c49656..8f15d05 100644
+--- a/drivers/mmc/host/dw_mmc-pltfm.c
++++ b/drivers/mmc/host/dw_mmc-pltfm.c
+@@ -25,15 +25,6 @@
+ #include "dw_mmc.h"
+ #include "dw_mmc-pltfm.h"
  
-+	if (slot->host->use_hold_reg)
-+		cmdr |= SDMMC_CMD_USE_HOLD_REG;
-+
- 	if (drv_data && drv_data->prepare_command)
- 		drv_data->prepare_command(slot->host, &cmdr);
+-static void dw_mci_rockchip_prepare_command(struct dw_mci *host, u32 *cmdr)
+-{
+-	*cmdr |= SDMMC_CMD_USE_HOLD_REG;
+-}
+-
+-static const struct dw_mci_drv_data rockchip_drv_data = {
+-	.prepare_command	= dw_mci_rockchip_prepare_command,
+-};
+-
+ int dw_mci_pltfm_register(struct platform_device *pdev,
+ 			  const struct dw_mci_drv_data *drv_data)
+ {
+@@ -90,8 +81,7 @@ EXPORT_SYMBOL_GPL(dw_mci_pltfm_pmops);
  
-@@ -969,6 +972,24 @@ static void dw_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 	mci_writel(slot->host, UHS_REG, regs);
- 	slot->host->timing = ios->timing;
- 
-+	/* Per Synopsys spec, use_hold_reg should be set for all modes except for
-+	 * high-speed SDR50, DDR50, SDR104, and MMC_HS200. However, use_hold_reg
-+	 * should be cleared if the cclk_in_drv is 0.
-+	 */
-+	switch (slot->host->timing) {
-+	case MMC_TIMING_UHS_SDR50:
-+	case MMC_TIMING_UHS_SDR104:
-+	case MMC_TIMING_UHS_DDR50:
-+	case MMC_TIMING_MMC_HS200:
-+		slot->host->use_hold_reg = 0;
-+		break;
-+	default:
-+		slot->host->use_hold_reg = 1;
-+	}
-+
-+	if (slot->host->cclk_in_drv == 0)
-+		slot->host->use_hold_reg = 0;
-+
- 	/*
- 	 * Use mirror of ios->clock to prevent race with mmc
- 	 * core ios update when finding the minimum.
-@@ -2339,6 +2360,8 @@ static struct dw_mci_board *dw_mci_parse_dt(struct dw_mci *host)
- 	const struct dw_mci_drv_data *drv_data = host->drv_data;
- 	int idx, ret;
- 	u32 clock_frequency;
-+	int sdr_timing[2];
-+	int ddr_timing[2];
- 
- 	pdata = devm_kzalloc(dev, sizeof(*pdata), GFP_KERNEL);
- 	if (!pdata) {
-@@ -2389,6 +2412,25 @@ static struct dw_mci_board *dw_mci_parse_dt(struct dw_mci *host)
- 	if (of_find_property(np, "caps2-mmc-hs200-1_2v", NULL))
- 		pdata->caps2 |= MMC_CAP2_HS200_1_2V_SDR;
- 
-+	/* Check for the "samsung,dw-mshc-sdr-timing" and the
-+	 * "samsung,dw-mshc-ddr-timing" bindings as this will tell us if we
-+	 * can safely set the SDMMC_CMD_USE_HOLD_REG bit. The second paramater
-+	 * in these 2 bindings is the value of the cclk_in_drv. If cclk_in_drv
-+	 * is 0, we cannot set the SDMMC_CMD_USE_HOLD_REG bit. The default
-+	 * behavior will be to set cclk_in_drv, as some platforms do not have
-+	 * to set the sdr or ddr timing parameters.
-+	 */
-+	sdr_timing[1] = ddr_timing[1] = 1;
-+	of_property_read_u32_array(np,
-+			"samsung,dw-mshc-sdr-timing", sdr_timing, 2);
-+
-+	of_property_read_u32_array(np,
-+			"samsung,dw-mshc-ddr-timing", ddr_timing, 2);
-+
-+	pdata->cclk_in_drv = 1;
-+	if ((sdr_timing[1] == 0) || (ddr_timing[1] == 0))
-+		pdata->cclk_in_drv = 0;
-+
- 	return pdata;
- }
- 
-@@ -2495,6 +2537,8 @@ int dw_mci_probe(struct dw_mci *host)
- 		goto err_regulator;
- 	}
- 
-+	host->cclk_in_drv = host->pdata->cclk_in_drv;
-+
- 	host->quirks = host->pdata->quirks;
- 
- 	spin_lock_init(&host->lock);
-diff --git a/include/linux/mmc/dw_mmc.h b/include/linux/mmc/dw_mmc.h
-index 6ce7d2c..1da20ce 100644
---- a/include/linux/mmc/dw_mmc.h
-+++ b/include/linux/mmc/dw_mmc.h
-@@ -191,6 +191,8 @@ struct dw_mci {
- 	struct regulator	*vmmc;	/* Power regulator */
- 	unsigned long		irq_flags; /* IRQ flags */
- 	int			irq;
-+	bool			cclk_in_drv;
-+	bool			use_hold_reg;
+ static const struct of_device_id dw_mci_pltfm_match[] = {
+ 	{ .compatible = "snps,dw-mshc", },
+-	{ .compatible = "rockchip,rk2928-dw-mshc",
+-		.data = &rockchip_drv_data },
++	{ .compatible = "rockchip,rk2928-dw-mshc", },
+ 	{},
  };
- 
- /* DMA ops for Internal/External DMAC interface */
-@@ -238,6 +240,7 @@ struct dw_mci_board {
- 	u32 caps;	/* Capabilities */
- 	u32 caps2;	/* More capabilities */
- 	u32 pm_caps;	/* PM capabilities */
-+	bool cclk_in_drv;	/*cclk_in_drv phase shift */
- 	/*
- 	 * Override fifo depth. If 0, autodetect it from the FIFOTH register,
- 	 * but note that this may not be reliable after a bootloader has used
+ MODULE_DEVICE_TABLE(of, dw_mci_pltfm_match);
 -- 
 1.7.9.5
 
