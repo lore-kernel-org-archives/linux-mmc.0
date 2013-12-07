@@ -1,40 +1,48 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [PATCHv2 3/3] mmc: dw_mmc-exynos: Remove Exynos' custom prepare_command function
-Date: Sat, 7 Dec 2013 05:12:55 +0100
-Message-ID: <201312070512.55712.arnd@arndb.de>
-References: <1386386424-859-1-git-send-email-dinguyen@altera.com> <1386386424-859-4-git-send-email-dinguyen@altera.com>
+From: Heiko =?iso-8859-15?q?St=FCbner?= <heiko@sntech.de>
+Subject: Re: [PATCHv2 1/3] mmc: dw_mmc: Enable the hold reg for certain speed modes
+Date: Sat, 7 Dec 2013 13:50:38 +0100
+Message-ID: <201312071350.39158.heiko@sntech.de>
+References: <1386386424-859-1-git-send-email-dinguyen@altera.com> <1386386424-859-2-git-send-email-dinguyen@altera.com>
 Mime-Version: 1.0
 Content-Type: Text/Plain;
   charset="iso-8859-15"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.17.10]:63813 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753834Ab3LGENH (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 6 Dec 2013 23:13:07 -0500
-In-Reply-To: <1386386424-859-4-git-send-email-dinguyen@altera.com>
+Received: from gloria.sntech.de ([95.129.55.99]:48107 "EHLO gloria.sntech.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754237Ab3LGMus (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Sat, 7 Dec 2013 07:50:48 -0500
+In-Reply-To: <1386386424-859-2-git-send-email-dinguyen@altera.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: dinguyen@altera.com
-Cc: dinh.linux@gmail.com, cjb@laptop.org, jh80.chung@samsung.com, tgih.jun@samsung.com, heiko@sntech.de, dianders@chromium.org, alim.akhtar@samsung.com, bzhao@marvell.com, linux-mmc@vger.kernel.org
+Cc: dinh.linux@gmail.com, arnd@arndb.de, cjb@laptop.org, jh80.chung@samsung.com, tgih.jun@samsung.com, dianders@chromium.org, alim.akhtar@samsung.com, bzhao@marvell.com, linux-mmc@vger.kernel.org
 
-On Saturday 07 December 2013, dinguyen@altera.com wrote:
-> -static void dw_mci_exynos_prepare_command(struct dw_mci *host, u32 *cmdr)
-> -{
-> -       /*
-> -        * Exynos4412 and Exynos5250 extends the use of CMD register with the
-> -        * use of bit 29 (which is reserved on standard MSHC controllers) for
-> -        * optionally bypassing the HOLD register for command and data. The
-> -        * HOLD register should be bypassed in case there is no phase shift
-> -        * applied on CMD/DATA that is sent to the card.
-> -        */
-> -       if (SDMMC_CLKSEL_GET_DRV_WD3(mci_readl(host, CLKSEL)))
-> -               *cmdr |= SDMMC_CMD_USE_HOLD_REG;
-> -}
+Am Samstag, 7. Dezember 2013, 04:20:22 schrieb dinguyen@altera.com:
+> From: Dinh Nguyen <dinguyen@altera.com>
+> 
+> This patch will enable the SDMMC_CMD_USE_HOLD_REG bit when the slot is
+> operating all timing modes, except for SDR50, DDR50, SDR104, and MMC_HS200.
+> 
+> According to the Synopsys databook :"To meet the relatively high Input Hold
+> Time requirement for SDR12, SDR25, and other MMC speed modes, you should
+> program bit[29]use_hold_Reg of the CMD register to 1'b1;"..."However, for
+> the higher speed modes of SDR104, SDR50 and DDR50, you can meet the much
+> smaller Input Hold Time requirement of 0.8ns by bypassing the Hold Register
+> (Path A in Figure 10-8, programming CMD.use_hold_reg = 1'b0) and then
+> adding delay elements on the output path as indicated.
+> 
+> Also, "Never set CMD.use_hold_reg = 1 and cclk_in_drv phase shift to 0 at
+> the same time. This would add an extra one-cycle delay on the output path,
+> resulting in incorrect behavior."
+> 
+> This information is taking from the v2.50a of the Synopsys Designware Cores
+> Mobile Storage Host Databook.
+> 
+> Signed-off-by: Dinh Nguyen <dinguyen@altera.com>
+> ---
 
-Hmm, according to the comment that gets deleted here, it seems that older
-versions of this controller don't support that function, right?
-If that's true, we may have to also check the version of the MSHC before
-setting this.
+Acked-by: Heiko Stuebner <heiko@sntech.de>
 
-	Arnd
+on a rockchip,rk3066 (dw_mmc 10214000.dwmmc: Version ID is 240a)
+Tested-by: Heiko Stuebner <heiko@sntech.de>
