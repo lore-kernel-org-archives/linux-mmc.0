@@ -1,61 +1,131 @@
-From: Heiko =?iso-8859-15?q?St=FCbner?= <heiko@sntech.de>
-Subject: Re: [PATCHv3 1/3] mmc: dw_mmc: Enable the hold reg for certain speed modes
-Date: Mon, 9 Dec 2013 10:56:41 +0100
-Message-ID: <201312091056.42790.heiko@sntech.de>
-References: <1386564668-24738-1-git-send-email-dinguyen@altera.com> <1386564668-24738-2-git-send-email-dinguyen@altera.com>
+From: <dinguyen@altera.com>
+Subject: [PATCHv5 1/4] arm: dts: Add support for SD/MMC on SOCFPGA
+Date: Mon, 9 Dec 2013 07:57:39 -0600
+Message-ID: <1386597462-29471-2-git-send-email-dinguyen@altera.com>
+References: <1386597462-29471-1-git-send-email-dinguyen@altera.com>
 Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="iso-8859-15"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from gloria.sntech.de ([95.129.55.99]:39183 "EHLO gloria.sntech.de"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932303Ab3LIJ4w (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 9 Dec 2013 04:56:52 -0500
-In-Reply-To: <1386564668-24738-2-git-send-email-dinguyen@altera.com>
+Received: from va3ehsobe010.messaging.microsoft.com ([216.32.180.30]:9080 "EHLO
+	va3outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S933522Ab3LIN7c (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 9 Dec 2013 08:59:32 -0500
+In-Reply-To: <1386597462-29471-1-git-send-email-dinguyen@altera.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: dinguyen@altera.com
-Cc: dinh.linux@gmail.com, arnd@arndb.de, cjb@laptop.org, jh80.chung@samsung.com, tgih.jun@samsung.com, dianders@chromium.org, alim.akhtar@samsung.com, bzhao@marvell.com, linux-mmc@vger.kernel.org
+To: dinh.linux@gmail.com, arnd@arndb.de, mturquette@linaro.org, cjb@laptop.org, jh80.chung@samsung.com, tgih.jun@samsung.com
+Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Dinh Nguyen <dinguyen@altera.com>
 
-Hi,
+From: Dinh Nguyen <dinguyen@altera.com>
 
-Am Montag, 9. Dezember 2013, 05:51:06 schrieb dinguyen@altera.com:
-> From: Dinh Nguyen <dinguyen@altera.com>
-> 
-> This patch will enable the SDMMC_CMD_USE_HOLD_REG bit when the slot is
-> operating all timing modes, except for SDR50, DDR50, SDR104, and MMC_HS200.
-> 
-> According to the Synopsys databook :"To meet the relatively high Input Hold
-> Time requirement for SDR12, SDR25, and other MMC speed modes, you should
-> program bit[29]use_hold_Reg of the CMD register to 1'b1;"..."However, for
-> the higher speed modes of SDR104, SDR50 and DDR50, you can meet the much
-> smaller Input Hold Time requirement of 0.8ns by bypassing the Hold Register
-> (Path A in Figure 10-8, programming CMD.use_hold_reg = 1'b0) and then
-> adding delay elements on the output path as indicated.
-> 
-> Also, "Never set CMD.use_hold_reg = 1 and cclk_in_drv phase shift to 0 at
-> the same time. This would add an extra one-cycle delay on the output path,
-> resulting in incorrect behavior."
-> 
-> This patch also checks the IHR(Implement Hold Register) in the HCON
-> register.
-> 
-> This information is taking from the v2.50a of the Synopsys Designware Cores
-> Mobile Storage Host Databook.
-> 
-> Signed-off-by: Dinh Nguyen <dinguyen@altera.com>
-> Acked-by: Heiko Stuebner <heiko@sntech.de>
-> Tested-by: Heiko Stuebner <heiko@sntech.de>
-> ---
-> v3: Read the IHR(Implement Hold Register) in the HCON
-> v2: Add check for cclk_in_drv phase shift in conjunction with use_hold_reg.
+Use the standard "snps,dw-mshc" binding that will support SD/MMC on
+Altera's SOCFPGA platform.
 
-just to say it still works with the v3 changes.
+Signed-off-by: Dinh Nguyen <dinguyen@altera.com>
+---
+v5: Use the standard "snps,dw-mshc" binding
+v4: Re-use "rockchip,rk2928-dw-mshc" binding
+v3: none
+v2: none
+---
+ arch/arm/boot/dts/socfpga.dtsi          |   11 +++++++++++
+ arch/arm/boot/dts/socfpga_arria5.dtsi   |   12 ++++++++++++
+ arch/arm/boot/dts/socfpga_cyclone5.dtsi |   12 ++++++++++++
+ arch/arm/boot/dts/socfpga_vt.dts        |   12 ++++++++++++
+ 4 files changed, 47 insertions(+)
 
-Interestingly, the rockchip manual does not specify the hcon register at all, 
-but reading it, I get a value of 0x4c534c1 - letting BIT(22) be the required 
-one.
+diff --git a/arch/arm/boot/dts/socfpga.dtsi b/arch/arm/boot/dts/socfpga.dtsi
+index f936476..9e78c1d 100644
+--- a/arch/arm/boot/dts/socfpga.dtsi
++++ b/arch/arm/boot/dts/socfpga.dtsi
+@@ -469,6 +469,17 @@
+ 			cache-level = <2>;
+ 		};
+ 
++		mmc: dwmmc0@ff704000 {
++			compatible = "snps,dw-mshc";
++			reg = <0xff704000 0x1000>;
++			interrupts = <0 139 4>;
++			fifo-depth = <0x400>;
++			#address-cells = <1>;
++			#size-cells = <0>;
++			clocks = <&l4_mp_clk>, <&sdmmc_clk>;
++			clock-names = "biu", "ciu";
++		};
++
+ 		/* Local timer */
+ 		timer@fffec600 {
+ 			compatible = "arm,cortex-a9-twd-timer";
+diff --git a/arch/arm/boot/dts/socfpga_arria5.dtsi b/arch/arm/boot/dts/socfpga_arria5.dtsi
+index a85b404..112b7e2 100644
+--- a/arch/arm/boot/dts/socfpga_arria5.dtsi
++++ b/arch/arm/boot/dts/socfpga_arria5.dtsi
+@@ -27,6 +27,18 @@
+ 			};
+ 		};
+ 
++		dwmmc0@ff704000 {
++			num-slots = <1>;
++			supports-highspeed;
++			broken-cd;
++			samsung,dw-mshc-sdr-timing = <0 3>;
++
++			slot@0 {
++				reg = <0>;
++				bus-width = <4>;
++			};
++		};
++
+ 		serial0@ffc02000 {
+ 			clock-frequency = <100000000>;
+ 		};
+diff --git a/arch/arm/boot/dts/socfpga_cyclone5.dtsi b/arch/arm/boot/dts/socfpga_cyclone5.dtsi
+index a8716f6..52b1501 100644
+--- a/arch/arm/boot/dts/socfpga_cyclone5.dtsi
++++ b/arch/arm/boot/dts/socfpga_cyclone5.dtsi
+@@ -28,6 +28,18 @@
+ 			};
+ 		};
+ 
++		dwmmc0@ff704000 {
++			num-slots = <1>;
++			supports-highspeed;
++			broken-cd;
++			samsung,dw-mshc-sdr-timing = <0 3>;
++
++			slot@0 {
++				reg = <0>;
++				bus-width = <4>;
++			};
++		};
++
+ 		ethernet@ff702000 {
+ 			phy-mode = "rgmii";
+ 			phy-addr = <0xffffffff>; /* probe for phy addr */
+diff --git a/arch/arm/boot/dts/socfpga_vt.dts b/arch/arm/boot/dts/socfpga_vt.dts
+index d1ec0ca..7dc709b 100644
+--- a/arch/arm/boot/dts/socfpga_vt.dts
++++ b/arch/arm/boot/dts/socfpga_vt.dts
+@@ -41,6 +41,18 @@
+ 			};
+ 		};
+ 
++		dwmmc0@ff704000 {
++			num-slots = <1>;
++			supports-highspeed;
++			broken-cd;
++			samsung,dw-mshc-sdr-timing = <0 3>;
++
++			slot@0 {
++				reg = <0>;
++				bus-width = <4>;
++			};
++		};
++
+ 		ethernet@ff700000 {
+ 			phy-mode = "gmii";
+ 			status = "okay";
+-- 
+1.7.9.5
 
 
-Heiko
