@@ -1,182 +1,178 @@
-From: <dinguyen@altera.com>
-Subject: [PATCHv3 1/3] mmc: dw_mmc: Enable the hold reg for certain speed modes
-Date: Sun, 8 Dec 2013 22:51:06 -0600
-Message-ID: <1386564668-24738-2-git-send-email-dinguyen@altera.com>
-References: <1386564668-24738-1-git-send-email-dinguyen@altera.com>
+From: Mark Rutland <mark.rutland@arm.com>
+Subject: Re: [PATCH v7 1/2] mmc: sdhci-msm: Initial SDHCI MSM driver
+ documentation
+Date: Mon, 9 Dec 2013 09:38:43 +0000
+Message-ID: <20131209093843.GB28379@e106331-lin.cambridge.arm.com>
+References: <1383753405-23631-1-git-send-email-gdjakov@mm-sol.com>
+ <1383753405-23631-2-git-send-email-gdjakov@mm-sol.com>
+ <20131205095218.GH29200@e106331-lin.cambridge.arm.com>
+ <52A1BC32.6060600@mm-sol.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from [207.46.163.24] ([207.46.163.24]:4851 "EHLO
-	co9outboundpool.messaging.microsoft.com" rhost-flags-FAIL-FAIL-OK-OK)
-	by vger.kernel.org with ESMTP id S1760403Ab3LIEyK (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 8 Dec 2013 23:54:10 -0500
-In-Reply-To: <1386564668-24738-1-git-send-email-dinguyen@altera.com>
+Received: from cam-admin0.cambridge.arm.com ([217.140.96.50]:37522 "EHLO
+	cam-admin0.cambridge.arm.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1761039Ab3LIJiu (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 9 Dec 2013 04:38:50 -0500
+Content-Disposition: inline
+In-Reply-To: <52A1BC32.6060600@mm-sol.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: dinh.linux@gmail.com, arnd@arndb.de, cjb@laptop.org, jh80.chung@samsung.com, tgih.jun@samsung.com, heiko@sntech.de, dianders@chromium.org, alim.akhtar@samsung.com, bzhao@marvell.com
-Cc: linux-mmc@vger.kernel.org, Dinh Nguyen <dinguyen@altera.com>
+To: Georgi Djakov <gdjakov@mm-sol.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "cjb@laptop.org" <cjb@laptop.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "grant.likely@linaro.org" <grant.likely@linaro.org>, "rob.herring@calxeda.com" <rob.herring@calxeda.com>, Pawel Moll <Pawel.Moll@arm.com>, "swarren@wwwdotorg.org" <swarren@wwwdotorg.org>, "ijc+devicetree@hellion.org.uk" <ijc+devicetree@hellion.org.uk>, "galak@codeaurora.org" <galak@codeaurora.org>, "rob@landley.net" <rob@landley.net>, "linux-doc@vger.kernel.org" <linux-doc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-msm@vger.kernel.org" <linux-arm-msm@vger.kernel.org>, "subhashj@codeaurora.org" <subhashj@codeaurora.org>
 
-From: Dinh Nguyen <dinguyen@altera.com>
+On Fri, Dec 06, 2013 at 11:59:46AM +0000, Georgi Djakov wrote:
+> On 12/05/2013 11:52 AM, Mark Rutland wrote:
+> > Hi,
+> >
+> > Apologies for the late reply.
+> 
+> Hi Mark, thanks for the review!
+> 
+> >
+> > On Wed, Nov 06, 2013 at 03:56:44PM +0000, Georgi Djakov wrote:
+> >> This patch adds documentation for Qualcomm SDHCI MSM driver.
+> >> It contains the differences between the core properties in mmc.txt
+> >> and the properties used by the sdhci-msm driver.
+> >
+> > Nit, but this is documentation of the binding, not the driver.
+> >
+> 
+> Ok, sure!
+> 
+> >>
+> >> Signed-off-by: Georgi Djakov <gdjakov@mm-sol.com>
+> >> ---
+> >>   .../devicetree/bindings/mmc/sdhci-msm.txt          |   92 ++++++++++++++++++++
+> >>   1 file changed, 92 insertions(+)
+> >>   create mode 100644 Documentation/devicetree/bindings/mmc/sdhci-msm.txt
+> >>
+> >> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
+> >> new file mode 100644
+> >> index 0000000..8f1a52d
+> >> --- /dev/null
+> >> +++ b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
+> >> @@ -0,0 +1,92 @@
+> >> +* Qualcomm SDHCI controller (sdhci-msm)
+> >> +
+> >> +This file documents differences between the core properties in mmc.txt
+> >> +and the properties used by the sdhci-msm driver.
+> >> +
+> >> +Required properties:
+> >> +- compatible: should contain "qcom,sdhci-msm"
+> >> +- reg: should contain SDHC, SD Core register map
+> >
+> > As this seems to depend on reg-names, it would be nice to write this in
+> > terms of reg-names (as with clocks and clock-names).
+> >
+> >
+> 
+> Ok, thanks!
+> 
+> >> +- reg-names: indicates various resources passed to driver (via reg proptery) by name
+> >> +	"reg-names" examples are "hc_mem" and "core_mem"
+> >
+> > Either there are a fixed set of names you expect (and therefore these
+> > aren't examples but rather a definition), or this property is useless.
+> > Please either define the set of names or remove this property.
+> >
+> >> +- interrupts: should contain SDHC interrupts
+> >> +- interrupt-names: indicates interrupts passed to driver (via interrupts property) by name
+> >> +	"interrupt-names" examples are "hc_irq" and "pwr_irq"
+> >
+> > Likewise for both points.
+> >
+> 
+> Ok!
+> 
+> >> +- vdd-supply: phandle to the regulator for the vdd (flash core voltage) supply.
+> >> +- vddio-supply: phandle to the regulator for the vdd-io (i/o voltage) supply.
+> >> +- pinctrl-names: Should contain only one value - "default".
+> >> +- pinctrl-0: Should specify pin control groups used for this controller.
+> >> +- clocks: A list of phandle + clock-specifier pairs for the clocks listed in clock-names
+> >> +- clock-names: Should contain the following:
+> >> +	"iface" - Main peripheral bus clock (PCLK/HCLK - AHB Bus clock) (required)
+> >> +	"core"	- SDC MMC clock (MCLK) (required)
+> >> +	"bus"	- SDCC bus voter clock (optional)
+> >
+> > This looks good :)
+> >
+> >> +
+> >> +Optional properties:
+> >> +- qcom,bus-speed-mode: specifies the supported bus speed modes by host
+> >> +	The supported bus speed modes are:
+> >> +	"HS200_1p8v" - indicates that host can support HS200 at 1.8v
+> >> +	"HS200_1p2v" - indicates that host can support HS200 at 1.2v
+> >> +	"DDR_1p8v" - indicates that host can support DDR mode at 1.8v
+> >> +	"DDR_1p2v" - indicates that host can support DDR mode at 1.2v
+> >
+> > Is this a list of strings, or does the unit only support one of these?
+> >
+> > This could be a set of boolean properties instead, is this likely to
+> > expand in future?
+> >
+> 
+> It is meant to be list of strings, and many can be supported. But i will 
+> drop this property from this initial version, and maybe add it later as 
+> boolean properties! Thanks!
+> 
 
-This patch will enable the SDMMC_CMD_USE_HOLD_REG bit when the slot is
-operating all timing modes, except for SDR50, DDR50, SDR104, and MMC_HS200.
+[...]
 
-According to the Synopsys databook :"To meet the relatively high Input Hold
-Time requirement for SDR12, SDR25, and other MMC speed modes, you should
-program bit[29]use_hold_Reg of the CMD register to 1'b1;"..."However, for
-the higher speed modes of SDR104, SDR50 and DDR50, you can meet the much
-smaller Input Hold Time requirement of 0.8ns by bypassing the Hold Register
-(Path A in Figure 10-8, programming CMD.use_hold_reg = 1'b0) and then adding
-delay elements on the output path as indicated.
+> >> +
+> >> +- qcom,{vdd,vdd-io}-lpm-sup - specifies whether the supply can be kept in low power mode.
+> >
+> > Boolean? Please specify types on properties.
+> 
+> Yes, it is boolean. I'll note it in the documentation. Thanks!
+> 
+> >
+> > Can you elaborate on what this means? When can a supply not be kept in
+> > low power mode?
+> 
+> The vdd-io for example is a regulator that is always-on and may be 
+> shared with multiple other peripherals as well. It should not be 
+> disabled by the driver, but instead put in low power mode when unused.
 
-Also, "Never set CMD.use_hold_reg = 1 and cclk_in_drv phase shift to 0 at the
-same time. This would add an extra one-cycle delay on the output path, resulting
-in incorrect behavior."
+The fact that the regulator is driving other peripherals doesn't seem
+like a property of the SDHCI to me. What are these other peripherals?
 
-This patch also checks the IHR(Implement Hold Register) in the HCON register.
+When you say should not be disabled by the driver, do you mean that
+another peripheral's driver shouldn't be able to disable the regulator
+feeding the SDHCI, or the SDHCI driver shouldn't be able to disable a
+regulator in use by another peripheral?
 
-This information is taking from the v2.50a of the Synopsys Designware Cores
-Mobile Storage Host Databook.
+When in low power mode, is the SDHCI functional?
 
-Signed-off-by: Dinh Nguyen <dinguyen@altera.com>
-Acked-by: Heiko Stuebner <heiko@sntech.de>
-Tested-by: Heiko Stuebner <heiko@sntech.de>
----
-v3: Read the IHR(Implement Hold Register) in the HCON
-v2: Add check for cclk_in_drv phase shift in conjunction with use_hold_reg.
----
- drivers/mmc/host/dw_mmc.c  |   51 ++++++++++++++++++++++++++++++++++++++++++++
- drivers/mmc/host/dw_mmc.h  |    4 ++++
- include/linux/mmc/dw_mmc.h |    3 +++
- 3 files changed, 58 insertions(+)
+> 
+> >
+> >> +- qcom,{vdd,vdd-io}-voltage-level - specifies voltage levels for the supply.
+> >> +	Should be specified in pairs (min, max), units uV.
+> >> +- qcom,{vdd,vdd-io}-current-level - specifies load levels for the supply in lpm
+> >> +	or high power mode (hpm). Should be specified in pairs (lpm, hpm), units uA.
+> >
+> > Can you not query these from the regulator framework?
+> >
+> > If these are configuration, why are they necessary?
+> >
+> 
+> As some regulators are shared and can have multiple consumers, these 
+> properties can be used for voltage and load current aggregation.
+> The voltage-level is the "supported voltage" by the controller, that 
+> also (at least on my platform) matches the corresponding regulator 
+> voltage. I probably can drop the voltage-level property and get voltage 
+> via the regulator framework helper functions, but the load current 
+> values are different for each sdhc.
+>  From the very limited documentation that i have, i think this is 
+> describing the hardware configuration and should be in the device-tree.
 
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 4bce0de..480dafe 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -279,6 +279,9 @@ static u32 dw_mci_prepare_command(struct mmc_host *mmc, struct mmc_command *cmd)
- 			cmdr |= SDMMC_CMD_DAT_WR;
- 	}
- 
-+	if (slot->host->use_hold_reg)
-+		cmdr |= SDMMC_CMD_USE_HOLD_REG;
-+
- 	if (drv_data && drv_data->prepare_command)
- 		drv_data->prepare_command(slot->host, &cmdr);
- 
-@@ -969,6 +972,24 @@ static void dw_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 	mci_writel(slot->host, UHS_REG, regs);
- 	slot->host->timing = ios->timing;
- 
-+	/* Per Synopsys spec, use_hold_reg should be set for all modes except for
-+	 * high-speed SDR50, DDR50, SDR104, and MMC_HS200. However, use_hold_reg
-+	 * should be cleared if the cclk_in_drv is 0.
-+	 */
-+	switch (slot->host->timing) {
-+	case MMC_TIMING_UHS_SDR50:
-+	case MMC_TIMING_UHS_SDR104:
-+	case MMC_TIMING_UHS_DDR50:
-+	case MMC_TIMING_MMC_HS200:
-+		slot->host->use_hold_reg = 0;
-+		break;
-+	default:
-+		slot->host->use_hold_reg = 1;
-+	}
-+
-+	if (slot->host->can_use_hold_reg == 0)
-+		slot->host->use_hold_reg = 0;
-+
- 	/*
- 	 * Use mirror of ios->clock to prevent race with mmc
- 	 * core ios update when finding the minimum.
-@@ -2339,6 +2360,8 @@ static struct dw_mci_board *dw_mci_parse_dt(struct dw_mci *host)
- 	const struct dw_mci_drv_data *drv_data = host->drv_data;
- 	int idx, ret;
- 	u32 clock_frequency;
-+	int sdr_timing[2];
-+	int ddr_timing[2];
- 
- 	pdata = devm_kzalloc(dev, sizeof(*pdata), GFP_KERNEL);
- 	if (!pdata) {
-@@ -2389,6 +2412,25 @@ static struct dw_mci_board *dw_mci_parse_dt(struct dw_mci *host)
- 	if (of_find_property(np, "caps2-mmc-hs200-1_2v", NULL))
- 		pdata->caps2 |= MMC_CAP2_HS200_1_2V_SDR;
- 
-+	/* Check for the "samsung,dw-mshc-sdr-timing" and the
-+	 * "samsung,dw-mshc-ddr-timing" bindings as this will tell us if we
-+	 * can safely set the SDMMC_CMD_USE_HOLD_REG bit. The second paramater
-+	 * in these 2 bindings is the value of the cclk_in_drv. If cclk_in_drv
-+	 * is 0, we cannot set the SDMMC_CMD_USE_HOLD_REG bit. The default
-+	 * behavior will be to set cclk_in_drv, as some platforms do not have
-+	 * to set the sdr or ddr timing parameters.
-+	 */
-+	sdr_timing[1] = ddr_timing[1] = 1;
-+	of_property_read_u32_array(np,
-+			"samsung,dw-mshc-sdr-timing", sdr_timing, 2);
-+
-+	of_property_read_u32_array(np,
-+			"samsung,dw-mshc-ddr-timing", ddr_timing, 2);
-+
-+	pdata->cclk_in_drv = 1;
-+	if ((sdr_timing[1] == 0) || (ddr_timing[1] == 0))
-+		pdata->cclk_in_drv = 0;
-+
- 	return pdata;
- }
- 
-@@ -2495,6 +2537,15 @@ int dw_mci_probe(struct dw_mci *host)
- 		goto err_regulator;
- 	}
- 
-+	/* Check to see if the HOLD REG is implemented. */
-+	host->can_use_hold_reg = (mci_readl(host, HCON) & SDMMC_HCON_IHR) >> 22;
-+
-+	/* Can only use the HOLD REG is both conditions are true:
-+	 * Hardware has implemented HOLD_REG and
-+	 * cclk_in_drv is non-zero.
-+	 */
-+	host->can_use_hold_reg &= host->pdata->cclk_in_drv;
-+
- 	host->quirks = host->pdata->quirks;
- 
- 	spin_lock_init(&host->lock);
-diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
-index 6bf24ab..dfd05c9 100644
---- a/drivers/mmc/host/dw_mmc.h
-+++ b/drivers/mmc/host/dw_mmc.h
-@@ -145,6 +145,10 @@
- #define SDMMC_IDMAC_ENABLE		BIT(7)
- #define SDMMC_IDMAC_FB			BIT(1)
- #define SDMMC_IDMAC_SWRESET		BIT(0)
-+
-+/* Hardware Configuration(HCON) register */
-+#define SDMMC_HCON_IHR			BIT(22)
-+
- /* Version ID register define */
- #define SDMMC_GET_VERID(x)		((x) & 0xFFFF)
- /* Card read threshold */
-diff --git a/include/linux/mmc/dw_mmc.h b/include/linux/mmc/dw_mmc.h
-index 6ce7d2c..2b5b8bf 100644
---- a/include/linux/mmc/dw_mmc.h
-+++ b/include/linux/mmc/dw_mmc.h
-@@ -191,6 +191,8 @@ struct dw_mci {
- 	struct regulator	*vmmc;	/* Power regulator */
- 	unsigned long		irq_flags; /* IRQ flags */
- 	int			irq;
-+	u32			can_use_hold_reg;
-+	bool			use_hold_reg;
- };
- 
- /* DMA ops for Internal/External DMAC interface */
-@@ -238,6 +240,7 @@ struct dw_mci_board {
- 	u32 caps;	/* Capabilities */
- 	u32 caps2;	/* More capabilities */
- 	u32 pm_caps;	/* PM capabilities */
-+	u32 cclk_in_drv;	/*cclk_in_drv phase shift */
- 	/*
- 	 * Override fifo depth. If 0, autodetect it from the FIFOTH register,
- 	 * but note that this may not be reliable after a bootloader has used
--- 
-1.7.9.5
+If these are the voltages / currents supported by the SDHCI, then that
+seems like it makes sense to have in DT, if they're likely to be
+variable in practice. How variable do you expect these to be?
 
+Also, I'd recommend splitting them in to separate -min and -max
+properties, it makes it far clearer what they're actually for.
 
+Thanks
+Mark.
