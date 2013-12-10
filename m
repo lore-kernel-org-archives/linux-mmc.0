@@ -1,45 +1,81 @@
-From: Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>
-Subject: [PATCH REPOST] mmc: tegra: add support for Tegra124
-Date: Tue, 10 Dec 2013 11:31:10 -0700
-Message-ID: <1386700270-13829-1-git-send-email-swarren@wwwdotorg.org>
-Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>
-Cc: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Stephen Warren <swarren-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
+From: Tony Lindgren <tony@atomide.com>
+Subject: Re: [PATCH v5 3/7] regulator: add pbias regulator support
+Date: Tue, 10 Dec 2013 10:33:30 -0800
+Message-ID: <20131210183330.GK13171@atomide.com>
+References: <20131210104005.GB29268@sirena.org.uk>
+ <1386686098-7779-1-git-send-email-balajitk@ti.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-omap-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <1386686098-7779-1-git-send-email-balajitk@ti.com>
+Sender: linux-omap-owner@vger.kernel.org
+To: Balaji T K <balajitk@ti.com>
+Cc: linux-omap@vger.kernel.org, bcousson@baylibre.com, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, cjb@laptop.org, broonie@kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-From: Stephen Warren <swarren-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
+* Balaji T K <balajitk@ti.com> [131210 06:36]:
+> pbias register controls internal power supply to sd card i/o pads
+> in most OMAPs (OMAP2-5, DRA7).
+> Control bits for selecting voltage level and
+> enabling/disabling are in the same PBIAS register.
 
-Tegra124's MMC controller is very similar to earlier SoC generations,
-and can be supported by the same driver.
+Good to see this, few comments below.
 
-However, there are some non-backwards-compatible HW differences, and
-hence a new DT compatible value must be used to describe the HW. This
-patch updates the driver to support that new compatible value.
+> +++ lo/Documentation/devicetree/bindings/regulator/pbias-regulator.txt	2013-12-10 16:58:28.907927745 +0530
+> @@ -0,0 +1,21 @@
+> +PBIAS internal regulator for SD card i/o pads on OMAP SoCs.
+> +
+> +Required properties:
+> +- compatible:
+> +  - "regulator-pbias-omap2" for OMAP2
+> +  - "regulator-pbias-omap3" for OMAP3
+> +  - "regulator-pbias-omap4" for OMAP4
+> +  - "regulator-pbias-omap5" for OMAP5, DRA7
+> +- pbias-reg-offset: PBIAS control register offset from syscon base address
+> +
+> +Optional properties:
+> +- Any optional property defined in bindings/regulator/regulator.txt
+> +
+> +Example:
+> +
+> +		pbias_regulator: pbias_regulator {
+> +			pbias-reg-offset = <0>;
+> +			regulator-name = "pbias_regulator";
+> +			regulator-min-microvolt = <1800000>;
+> +			regulator-max-microvolt = <3000000>;
+> +	};
 
-That said, the HW differences are only relevant when enabling certain
-high-performance transfer modes. Since the driver is currently very
-simple and doesn't enable those modes, we don't actually need to address
-any of these HW differences in the code yet, hence the simple nature of
-this patch.
+This does not seem to support the other PBIAS controls the same
+register has?
 
-Signed-off-by: Stephen Warren <swarren-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
-Reviewed-by: Thierry Reding <treding-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
----
- drivers/mmc/host/sdhci-tegra.c | 1 +
- 1 file changed, 1 insertion(+)
+> @@ -369,6 +369,15 @@ config REGULATOR_PALMAS
+>  	  on the muxing. This is handled automatically in the driver by
+>  	  reading the mux info from OTP.
+>  
+> +config REGULATOR_PBIAS
+> +	tristate "PBIAS OMAP regulator driver"
+> +	depends on (ARCH_OMAP || COMPILE_TEST) && MFD_SYSCON
+> +	help
+> +	 Say y here to support pbias regulator for mmc1:SD card i/o
+> +	 on OMAP SoCs.
+> +	 This driver provides support for OMAP pbias modelled
+> +	 regulators.
+> +
 
-diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
-index 5b7b2eba8a54..a835898a68dd 100644
---- a/drivers/mmc/host/sdhci-tegra.c
-+++ b/drivers/mmc/host/sdhci-tegra.c
-@@ -198,6 +198,7 @@ static struct sdhci_tegra_soc_data soc_data_tegra114 = {
- };
- 
- static const struct of_device_id sdhci_tegra_dt_match[] = {
-+	{ .compatible = "nvidia,tegra124-sdhci", .data = &soc_data_tegra114 },
- 	{ .compatible = "nvidia,tegra114-sdhci", .data = &soc_data_tegra114 },
- 	{ .compatible = "nvidia,tegra30-sdhci", .data = &soc_data_tegra30 },
- 	{ .compatible = "nvidia,tegra20-sdhci", .data = &soc_data_tegra20 },
--- 
-1.8.1.5
+The PBIAS register is not just for MMC. Depending on the SoC revision,
+you may also have 2 - 3 PBIAS devices in the same register. Please check
+the 2430 TRM, it has also I2C secondary pulls in this same register. And
+on 3430, there PBIAS register has also SIM voltage bits.
+
+Certainly nothing stops from intially implementing the MMC pieces
+as those are needed badly, but it should be done in a way where adding
+support for the other PBIAS bits can be done easily.
+
+You're also missing the PBIAS interrupts, so it might be worth checking
+the code from that point of view also to make sure adding the support
+for interrupts won't require massive changes to the driver.
+
+Regards,
+
+Tony
