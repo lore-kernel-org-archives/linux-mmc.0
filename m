@@ -1,61 +1,88 @@
 From: Dong Aisheng <b29396@freescale.com>
-Subject: [PATCH 4/6] mmc: sdhci-esdhc-imx: set the correct max timeout value for uSDHC
-Date: Tue, 10 Dec 2013 20:56:06 +0800
-Message-ID: <1386680168-5227-5-git-send-email-b29396@freescale.com>
+Subject: [PATCH 3/6] mmc: sdhci: add platform set_timeout hook
+Date: Tue, 10 Dec 2013 20:56:05 +0800
+Message-ID: <1386680168-5227-4-git-send-email-b29396@freescale.com>
 References: <1386680168-5227-1-git-send-email-b29396@freescale.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from tx2ehsobe001.messaging.microsoft.com ([65.55.88.11]:25786 "EHLO
-	tx2outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752778Ab3LJNYM (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 10 Dec 2013 08:24:12 -0500
+Received: from ch1ehsobe005.messaging.microsoft.com ([216.32.181.185]:48105
+	"EHLO ch1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752376Ab3LJNYN (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 10 Dec 2013 08:24:13 -0500
 In-Reply-To: <1386680168-5227-1-git-send-email-b29396@freescale.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 Cc: linux-arm-kernel@lists.infradead.org, cjb@laptop.org, shawn.guo@linaro.org, s.hauer@pengutronix.de, b29396@freescale.com, ulf.hansson@linaro.org, adrian.hunter@intel.com, vladimir_zapolskiy@mentor.com, ed.sutter@alcatel-lucent.com
 
-The default sdhci driver write 0xE into timeout counter register to
-set the maximum timeout. The value is not correct for uSDHC since the
-max counter value for uSDHC is 0xF.
-Instead of using common timeout code in sdhci, we implement esdhc_set_timeout
-to handle the difference between eSDHC and uSDHC.
+Currently the common code assume 0xE is the maximum timeout counter
+value and use it to write into the timeout counter register.
+However, it's fairly possible that the different SoCs may have
+different register layout on the timeout counter register.
+That means 0xE may not be the correct maximum timeout value, then
+the 0xE becomes meaningless.
+
+To be flexible, this patch provides another approach for platforms
+to set the correct timeout on their way.
 
 Signed-off-by: Dong Aisheng <b29396@freescale.com>
 ---
- drivers/mmc/host/sdhci-esdhc-imx.c |   11 +++++++++++
- 1 files changed, 11 insertions(+), 0 deletions(-)
+ drivers/mmc/host/sdhci.c |   19 ++++++++++++++-----
+ drivers/mmc/host/sdhci.h |    2 ++
+ 2 files changed, 16 insertions(+), 5 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-index 97b35e1..c24cb23 100644
---- a/drivers/mmc/host/sdhci-esdhc-imx.c
-+++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-@@ -868,6 +868,16 @@ unsigned int esdhc_get_max_timeout(struct sdhci_host *host)
- 	return max_to / (esdhc_pltfm_get_max_clock(host) / 1000);
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 464d42c..4cc3bd6 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -726,19 +726,28 @@ static void sdhci_set_transfer_irqs(struct sdhci_host *host)
+ 		sdhci_clear_set_irqs(host, dma_irqs, pio_irqs);
  }
  
-+void esdhc_set_timeout(struct sdhci_host *host, struct mmc_command *cmd)
-+{
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct pltfm_imx_data *imx_data = pltfm_host->priv;
+-static void sdhci_prepare_data(struct sdhci_host *host, struct mmc_command *cmd)
++static void sdhci_set_timeout(struct sdhci_host *host, struct mmc_command *cmd)
+ {
+ 	u8 count;
 +
-+	/* use maximum timeout counter */
-+	sdhci_writeb(host, esdhc_is_usdhc(imx_data) ? 0xF : 0xE,
-+			SDHCI_TIMEOUT_CONTROL);
++	if (host->ops->set_timeout) {
++		host->ops->set_timeout(host, cmd);
++	} else {
++		count = sdhci_calc_timeout(host, cmd);
++		sdhci_writeb(host, count, SDHCI_TIMEOUT_CONTROL);
++	}
 +}
 +
- static struct sdhci_ops sdhci_esdhc_ops = {
- 	.read_l = esdhc_readl_le,
- 	.read_w = esdhc_readw_le,
-@@ -881,6 +891,7 @@ static struct sdhci_ops sdhci_esdhc_ops = {
- 	.platform_bus_width = esdhc_pltfm_bus_width,
- 	.set_uhs_signaling = esdhc_set_uhs_signaling,
- 	.get_max_timeout = esdhc_get_max_timeout,
-+	.set_timeout = esdhc_set_timeout,
- };
++static void sdhci_prepare_data(struct sdhci_host *host, struct mmc_command *cmd)
++{
+ 	u8 ctrl;
+ 	struct mmc_data *data = cmd->data;
+ 	int ret;
  
- static const struct sdhci_pltfm_data sdhci_esdhc_imx_pdata = {
+ 	WARN_ON(host->data);
+ 
+-	if (data || (cmd->flags & MMC_RSP_BUSY)) {
+-		count = sdhci_calc_timeout(host, cmd);
+-		sdhci_writeb(host, count, SDHCI_TIMEOUT_CONTROL);
+-	}
++	if (data || (cmd->flags & MMC_RSP_BUSY))
++		sdhci_set_timeout(host, cmd);
+ 
+ 	if (!data)
+ 		return;
+diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+index 1591cbb..a4851a0 100644
+--- a/drivers/mmc/host/sdhci.h
++++ b/drivers/mmc/host/sdhci.h
+@@ -282,6 +282,8 @@ struct sdhci_ops {
+ 	unsigned int	(*get_min_clock)(struct sdhci_host *host);
+ 	unsigned int	(*get_timeout_clock)(struct sdhci_host *host);
+ 	unsigned int	(*get_max_timeout)(struct sdhci_host *host);
++	void		(*set_timeout)(struct sdhci_host *host,
++						struct mmc_command *cmd);
+ 	int		(*platform_bus_width)(struct sdhci_host *host,
+ 					       int width);
+ 	void (*platform_send_init_74_clocks)(struct sdhci_host *host,
 -- 
 1.7.2.rc3
 
