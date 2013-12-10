@@ -1,88 +1,177 @@
-From: Balaji T K <balajitk@ti.com>
-Subject: Re: [PATCH v4 3/7] regulator: add pbias regulator support
-Date: Tue, 10 Dec 2013 17:52:06 +0530
-Message-ID: <52A7076E.3000505@ti.com>
-References: <1385043627-30439-1-git-send-email-balajitk@ti.com> <1386670577-3530-1-git-send-email-balajitk@ti.com> <1386670577-3530-4-git-send-email-balajitk@ti.com> <20131210104005.GB29268@sirena.org.uk>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
-Content-Transfer-Encoding: 7bit
+From: Abbas Raza <abbas_raza@mentor.com>
+Subject: [PATCH] mmc: core: Update ext_csd if touched by ioctl
+Date: Tue, 10 Dec 2013 17:58:17 +0500
+Message-ID: <1386680297-21695-1-git-send-email-abbas_raza@mentor.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from bear.ext.ti.com ([192.94.94.41]:45707 "EHLO bear.ext.ti.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751215Ab3LJMWQ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 10 Dec 2013 07:22:16 -0500
-In-Reply-To: <20131210104005.GB29268@sirena.org.uk>
+Received: from relay1.mentorg.com ([192.94.38.131]:54032 "EHLO
+	relay1.mentorg.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752331Ab3LJM6b (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 10 Dec 2013 07:58:31 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Mark Brown <broonie@kernel.org>
-Cc: linux-omap@vger.kernel.org, bcousson@baylibre.com, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, cjb@laptop.org, tony@atomide.com
+To: linux-mmc@vger.kernel.org
+Cc: Abbas Raza <Abbas_Raza@mentor.com>, Chris Ball <cjb@laptop.org>, Dirk Behme <dirk.behme@gmail.com>
 
-On Tuesday 10 December 2013 04:10 PM, Mark Brown wrote:
-> On Tue, Dec 10, 2013 at 03:46:13PM +0530, Balaji T K wrote:
->
->> +config REGULATOR_PBIAS
->> +	tristate "PBIAS OMAP regulator driver"
->> +	depends on ARCH_OMAP && MFD_SYSCON
->
-> That should be (ARCH_OMAP || COMPILE_TEST) && MFD_SYSCON
->
+From: Abbas Raza <Abbas_Raza@mentor.com>
 
-Ok
+In case an ioctl changes an EXT_CSD register, update the internal ext_csd
+data structure, too. Else the driver's internal ext_csd data structure and
+the EXT_CSD register content doesn't match any more. In this case additional
+ioctls changing the ext_csd would revert the initial one due to the old data
+in the driver's internal ext_csd data.
 
->> +static int pbias_regulator_set_voltage(struct regulator_dev *dev,
->> +			int min_uV, int max_uV, unsigned *selector)
->> +{
->> +	struct pbias_regulator_data *data = rdev_get_drvdata(dev);
->> +	const struct pbias_reg_info *info = data->info;
->> +	int ret, vmode;
->> +
->> +	if (min_uV <= 1800000)
->> +		vmode = 0;
->> +	else if (min_uV > 1800000)
->> +		vmode = info->vmode;
->> +
->> +	ret = regmap_update_bits(data->syscon, data->pbias_reg,
->> +						info->vmode, vmode);
->> +	data->voltage = min_uV;
->
-> This is exactly the same as it was the first time it was posted and is
-> still buggy.  To repeat the get and set voltage functions should reflect
-> the actual voltage set in the hardware.
->
+E.g. using the mmc utils utility to enable the bootpart
 
-my bad, will fix it.
+mmc bootpart enable 1 0 /dev/mmcblk1
 
->> +static int pbias_regulator_is_enable(struct regulator_dev *rdev)
->> +{
->> +	struct pbias_regulator_data *data = rdev_get_drvdata(rdev);
->> +	const struct pbias_reg_info *info = data->info;
->> +	int value;
->> +
->> +	regmap_read(data->syscon, data->pbias_reg, &value);
->> +
->> +	return value & info->enable_mask;
->> +}
->
-> If the enable mask really can have multiple bits this won't do the right
-> thing - it'll return true if any bits are set.  It needs to make sure
-> all the bits are set.
->
+correctly writes to the EXT_CSD structure of the device, but
+doesn't update
 
-True, will fix it.
+card->ext_csd.part_config
 
->> +#if CONFIG_OF
->
-> Why?
+Issuing additional MMC_SWITCH commands afterwards use the then (wrong)
+card->ext_csd.part_config. Resulting in an undo of the initial mmc bootpart
+enable.
 
-Driver is DT only, Will remove it.
+Fix this by updating the ext_csd in case of an EXT_CSD update ioctl.
 
->
->> +	drvdata->desc.n_voltages = 3;
->
-> This doesn't match your implementation which can only set two voltages.
->
+Cc: Chris Ball <cjb@laptop.org>
+Cc: Dirk Behme <dirk.behme@gmail.com>
+Signed-off-by: Dirk Behme <dirk.behme@gmail.com>
+Signed-off-by: Abbas Raza <Abbas_Raza@mentor.com>
+---
+ drivers/mmc/card/block.c | 12 ++++++++++++
+ drivers/mmc/core/mmc.c   | 31 +++++++++++++++++++++++++------
+ include/linux/mmc/mmc.h  |  4 ++++
+ 3 files changed, 41 insertions(+), 6 deletions(-)
 
-I considered power-off too, will make it 2 then.
+diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+index b3f4cfe..a376ad1 100644
+--- a/drivers/mmc/card/block.c
++++ b/drivers/mmc/card/block.c
+@@ -543,6 +543,18 @@ static int mmc_blk_ioctl_cmd(struct block_device *bdev,
+ 					__func__, status, err);
+ 	}
+ 
++	if ((cmd.opcode == MMC_SWITCH) && ((cmd.arg >> 24) & 0x3)) {
++		/*
++		 * In case the IOCTL has modified the EXT_CSD,
++		 * update it, i.e. re-read the EXT_CSD.
++		 */
++		err = mmc_update_ext_csd(card);
++		if (err)
++			dev_err(mmc_dev(card->host),
++				"%s: EXT_CSD update failed, error %d\n",
++					__func__, err);
++	}
++
+ cmd_rel_host:
+ 	mmc_release_host(card->host);
+ 
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index 810860b..023ff85 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -15,7 +15,6 @@
+ #include <linux/stat.h>
+ 
+ #include <linux/mmc/host.h>
+-#include <linux/mmc/card.h>
+ #include <linux/mmc/mmc.h>
+ 
+ #include "core.h"
+@@ -268,7 +267,7 @@ static void mmc_select_card_type(struct mmc_card *card)
+ /*
+  * Decode extended CSD.
+  */
+-static int mmc_read_ext_csd(struct mmc_card *card, u8 *ext_csd)
++static int mmc_read_ext_csd(struct mmc_card *card, u8 *ext_csd, bool update)
+ {
+ 	int err = 0, idx;
+ 	unsigned int part_size;
+@@ -347,7 +346,9 @@ static int mmc_read_ext_csd(struct mmc_card *card, u8 *ext_csd)
+ 		 * There are two boot regions of equal size, defined in
+ 		 * multiples of 128K.
+ 		 */
+-		if (ext_csd[EXT_CSD_BOOT_MULT] && mmc_boot_partition_access(card->host)) {
++		if (ext_csd[EXT_CSD_BOOT_MULT] &&
++				mmc_boot_partition_access(card->host) &&
++				!update) {
+ 			for (idx = 0; idx < MMC_NUM_BOOT_PARTITION; idx++) {
+ 				part_size = ext_csd[EXT_CSD_BOOT_MULT] << 17;
+ 				mmc_part_add(card, part_size,
+@@ -425,7 +426,8 @@ static int mmc_read_ext_csd(struct mmc_card *card, u8 *ext_csd)
+ 				card->ext_csd.enhanced_area_en = 1;
+ 			}
+ 
+-			for (idx = 0; idx < MMC_NUM_GP_PARTITION; idx++) {
++			for (idx = 0; !update && idx < MMC_NUM_GP_PARTITION;
++					idx++) {
+ 				if (!ext_csd[EXT_CSD_GP_SIZE_MULT + idx * 3] &&
+ 				!ext_csd[EXT_CSD_GP_SIZE_MULT + idx * 3 + 1] &&
+ 				!ext_csd[EXT_CSD_GP_SIZE_MULT + idx * 3 + 2])
+@@ -509,7 +511,8 @@ static int mmc_read_ext_csd(struct mmc_card *card, u8 *ext_csd)
+ 		 * RPMB regions are defined in multiples of 128K.
+ 		 */
+ 		card->ext_csd.raw_rpmb_size_mult = ext_csd[EXT_CSD_RPMB_MULT];
+-		if (ext_csd[EXT_CSD_RPMB_MULT] && mmc_host_cmd23(card->host)) {
++		if (ext_csd[EXT_CSD_RPMB_MULT] && mmc_host_cmd23(card->host) &&
++		    !update) {
+ 			mmc_part_add(card, ext_csd[EXT_CSD_RPMB_MULT] << 17,
+ 				EXT_CSD_PART_CONFIG_ACC_RPMB,
+ 				"rpmb", 0, false,
+@@ -960,7 +963,7 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+ 		err = mmc_get_ext_csd(card, &ext_csd);
+ 		if (err)
+ 			goto free_card;
+-		err = mmc_read_ext_csd(card, ext_csd);
++		err = mmc_read_ext_csd(card, ext_csd, 0);
+ 		if (err)
+ 			goto free_card;
+ 
+@@ -1503,6 +1506,22 @@ static void mmc_attach_bus_ops(struct mmc_host *host)
+ 	mmc_attach_bus(host, bus_ops);
+ }
+ 
++int mmc_update_ext_csd(struct mmc_card *card)
++{
++	u8 *new_ext_csd;
++	int err;
++
++	err = mmc_get_ext_csd(card, &new_ext_csd);
++	if (err || new_ext_csd == NULL)
++		goto out;
++
++	err = mmc_read_ext_csd(card, new_ext_csd, 1);
++
++out:
++	mmc_free_ext_csd(new_ext_csd);
++	return err;
++}
++
+ /*
+  * Starting point for MMC card init.
+  */
+diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
+index 94d532e..8494772 100644
+--- a/include/linux/mmc/mmc.h
++++ b/include/linux/mmc/mmc.h
+@@ -24,6 +24,8 @@
+ #ifndef LINUX_MMC_MMC_H
+ #define LINUX_MMC_MMC_H
+ 
++#include <linux/mmc/card.h>
++
+ /* Standard MMC commands (4.1)           type  argument     response */
+    /* class 1 */
+ #define MMC_GO_IDLE_STATE         0   /* bc                          */
+@@ -407,4 +409,6 @@ struct _mmc_csd {
+ #define MMC_SWITCH_MODE_CLEAR_BITS	0x02	/* Clear bits which are 1 in value */
+ #define MMC_SWITCH_MODE_WRITE_BYTE	0x03	/* Set target to value */
+ 
++int mmc_update_ext_csd(struct mmc_card *card);
++
+ #endif /* LINUX_MMC_MMC_H */
+-- 
+1.8.3.2
 
-Thanks and Regards,
-Balaji T K
