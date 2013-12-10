@@ -1,101 +1,134 @@
-From: Mark Brown <broonie@kernel.org>
-Subject: Re: [PATCH v4 3/7] regulator: add pbias regulator support
-Date: Tue, 10 Dec 2013 10:40:05 +0000
-Message-ID: <20131210104005.GB29268@sirena.org.uk>
-References: <1385043627-30439-1-git-send-email-balajitk@ti.com>
- <1386670577-3530-1-git-send-email-balajitk@ti.com>
- <1386670577-3530-4-git-send-email-balajitk@ti.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [RFC PATCH v3 2/8] mmc: omap_hsmmc: handle vcc and vcc_aux independently
+Date: Tue, 10 Dec 2013 12:09:46 +0100
+Message-ID: <CAPDyKFqAT+Zd4LmAJ91g603LXx2rAfoRhF1UK4XNzSUVNS0X9w@mail.gmail.com>
+References: <20130613174554.GB1403@sirena.org.uk>
+	<1385043627-30439-1-git-send-email-balajitk@ti.com>
+	<1385043627-30439-3-git-send-email-balajitk@ti.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="Y6v6BlSmAeeSvrQk"
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from cassiel.sirena.org.uk ([80.68.93.111]:46034 "EHLO
-	cassiel.sirena.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750852Ab3LJKkJ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 10 Dec 2013 05:40:09 -0500
-Content-Disposition: inline
-In-Reply-To: <1386670577-3530-4-git-send-email-balajitk@ti.com>
+Received: from mail-qa0-f52.google.com ([209.85.216.52]:57328 "EHLO
+	mail-qa0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751058Ab3LJLJs (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 10 Dec 2013 06:09:48 -0500
+Received: by mail-qa0-f52.google.com with SMTP id cm18so1919567qab.11
+        for <linux-mmc@vger.kernel.org>; Tue, 10 Dec 2013 03:09:47 -0800 (PST)
+In-Reply-To: <1385043627-30439-3-git-send-email-balajitk@ti.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Balaji T K <balajitk@ti.com>
-Cc: linux-omap@vger.kernel.org, bcousson@baylibre.com, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, cjb@laptop.org, tony@atomide.com
+Cc: linux-omap <linux-omap@vger.kernel.org>, Benoit Cousson <bcousson@baylibre.com>, devicetree@vger.kernel.org, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Mark Brown <broonie@kernel.org>, Tony Lindgren <tony@atomide.com>
 
+On 21 November 2013 15:20, Balaji T K <balajitk@ti.com> wrote:
+> handle vcc and vcc_aux independently to reduce indent.
+>
+> Signed-off-by: Balaji T K <balajitk@ti.com>
+> ---
+>  drivers/mmc/host/omap_hsmmc.c |   54 +++++++++++++++++++----------------------
+>  1 files changed, 25 insertions(+), 29 deletions(-)
+>
+> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+> index 1eb4350..342be25 100644
+> --- a/drivers/mmc/host/omap_hsmmc.c
+> +++ b/drivers/mmc/host/omap_hsmmc.c
+> @@ -286,11 +286,12 @@ static int omap_hsmmc_set_power(struct device *dev, int slot, int power_on,
+>          * chips/cards need an interface voltage rail too.
+>          */
+>         if (power_on) {
+> -               ret = mmc_regulator_set_ocr(host->mmc, host->vcc, vdd);
+> +               if (host->vcc)
+> +                       ret = mmc_regulator_set_ocr(host->mmc, host->vcc, vdd);
+>                 /* Enable interface voltage rail, if needed */
+>                 if (ret == 0 && host->vcc_aux) {
+>                         ret = regulator_enable(host->vcc_aux);
+> -                       if (ret < 0)
+> +                       if (ret < 0 && host->vcc)
+>                                 ret = mmc_regulator_set_ocr(host->mmc,
+>                                                         host->vcc, 0);
+>                 }
+> @@ -298,7 +299,7 @@ static int omap_hsmmc_set_power(struct device *dev, int slot, int power_on,
+>                 /* Shut down the rail */
+>                 if (host->vcc_aux)
+>                         ret = regulator_disable(host->vcc_aux);
+> -               if (!ret) {
+> +               if (host->vcc) {
+>                         /* Then proceed to shut down the local regulator */
+>                         ret = mmc_regulator_set_ocr(host->mmc,
+>                                                 host->vcc, 0);
+> @@ -318,10 +319,10 @@ static int omap_hsmmc_reg_get(struct omap_hsmmc_host *host)
+>
+>         reg = devm_regulator_get(host->dev, "vmmc");
+>         if (IS_ERR(reg)) {
+> -               dev_err(host->dev, "vmmc regulator missing\n");
+> +               dev_err(host->dev, "unable to get vmmc regulator %ld\n",
+> +                       PTR_ERR(reg));
+>                 return PTR_ERR(reg);
+>         } else {
+> -               mmc_slot(host).set_power = omap_hsmmc_set_power;
+>                 host->vcc = reg;
+>                 ocr_value = mmc_regulator_get_ocrmask(reg);
+>                 if (!mmc_slot(host).ocr_mask) {
+> @@ -334,31 +335,26 @@ static int omap_hsmmc_reg_get(struct omap_hsmmc_host *host)
+>                                 return -EINVAL;
+>                         }
+>                 }
+> +       }
+> +       mmc_slot(host).set_power = omap_hsmmc_set_power;
+>
+> -               /* Allow an aux regulator */
+> -               reg = devm_regulator_get_optional(host->dev, "vmmc_aux");
+> -               host->vcc_aux = IS_ERR(reg) ? NULL : reg;
+> +       /* Allow an aux regulator */
+> +       reg = devm_regulator_get_optional(host->dev, "vmmc_aux");
+> +       host->vcc_aux = IS_ERR(reg) ? NULL : reg;
+>
+> -               /* For eMMC do not power off when not in sleep state */
+> -               if (mmc_slot(host).no_regulator_off_init)
+> -                       return 0;
+> -               /*
+> -               * UGLY HACK:  workaround regulator framework bugs.
+> -               * When the bootloader leaves a supply active, it's
+> -               * initialized with zero usecount ... and we can't
+> -               * disable it without first enabling it.  Until the
+> -               * framework is fixed, we need a workaround like this
+> -               * (which is safe for MMC, but not in general).
+> -               */
 
---Y6v6BlSmAeeSvrQk
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+The above problem is handled by the mmc core layer. I certainly think
+you shall adopt your code to it.
 
-On Tue, Dec 10, 2013 at 03:46:13PM +0530, Balaji T K wrote:
+Kind regards
+Ulf Hansson
 
-> +config REGULATOR_PBIAS
-> +	tristate "PBIAS OMAP regulator driver"
-> +	depends on ARCH_OMAP && MFD_SYSCON
-
-That should be (ARCH_OMAP || COMPILE_TEST) && MFD_SYSCON
-
-> +static int pbias_regulator_set_voltage(struct regulator_dev *dev,
-> +			int min_uV, int max_uV, unsigned *selector)
-> +{
-> +	struct pbias_regulator_data *data = rdev_get_drvdata(dev);
-> +	const struct pbias_reg_info *info = data->info;
-> +	int ret, vmode;
-> +
-> +	if (min_uV <= 1800000)
-> +		vmode = 0;
-> +	else if (min_uV > 1800000)
-> +		vmode = info->vmode;
-> +
-> +	ret = regmap_update_bits(data->syscon, data->pbias_reg,
-> +						info->vmode, vmode);
-> +	data->voltage = min_uV;
-
-This is exactly the same as it was the first time it was posted and is
-still buggy.  To repeat the get and set voltage functions should reflect
-the actual voltage set in the hardware.
-
-> +static int pbias_regulator_is_enable(struct regulator_dev *rdev)
-> +{
-> +	struct pbias_regulator_data *data = rdev_get_drvdata(rdev);
-> +	const struct pbias_reg_info *info = data->info;
-> +	int value;
-> +
-> +	regmap_read(data->syscon, data->pbias_reg, &value);
-> +
-> +	return value & info->enable_mask;
-> +}
-
-If the enable mask really can have multiple bits this won't do the right
-thing - it'll return true if any bits are set.  It needs to make sure
-all the bits are set.
-
-> +#if CONFIG_OF
-
-Why?
-
-> +	drvdata->desc.n_voltages = 3;
-
-This doesn't match your implementation which can only set two voltages.
-
---Y6v6BlSmAeeSvrQk
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-
-iQIcBAEBAgAGBQJSpu+BAAoJELSic+t+oim93y4QAIOSQ/XtYlTWEtImzEqZHmXX
-oLQJPpcslbp+Qam0Um2hZe5WVg4131HhhH2vQl3TplcW/JU1oxUUEbn2rH7Stguz
-5aC7uY9493Ue9mdrh39u90MIl2/u6c2aP2RU5K1RS6qkSFdLl5pSaWeGVBfwh2Rg
-x38c11SQkjEbXHg0w05xTjoNz+C7Y2wWdkYlKLkObmCiBZLC4SvNMFXepK7E8HYC
-UuUJf8XNpjOBCS3qWxiwvORZLQGO24pipfooVTa2ynCOKy6YcVEIw3mLxiyYdAg6
-BG+O9+M+y9urKyRVQhlgevJTMYycEQq5E0cOJIp0v/UkO0XZCspf7dyOpFwMN0mJ
-f1/G8MjHdVsKoxSa/uR/M/YKoyVq4B8vFCVu+HWXcQ+cpT8PZ6polY31VY2CS9W7
-Mu7EJitTgElg08FOipjqy6w7HRcEkM9lfWMPPL2CS71DGvobfb6mfoWNkLm7EVd5
-gp3prrauF49GusHWRelmZUkNSqS5WKp/hxK3OzsgapYfGvI0JWRq4mXeuMf0p6IJ
-miPl5p89bv3ElURzDqF6AB+ofXAYklX63w36QS9BFUw/rW8Jp3/0rs3oR25l9abp
-NFS57wYzJAzh9HuRvcMtDvkNJBB/jeoV8FlT4Aktz7H67C4axJX84pa6XMC7X6MZ
-klrc5uOYJR/8sWkOGcQb
-=witk
------END PGP SIGNATURE-----
-
---Y6v6BlSmAeeSvrQk--
+> -               if (regulator_is_enabled(host->vcc) > 0 ||
+> -                   (host->vcc_aux && regulator_is_enabled(host->vcc_aux))) {
+> -                       int vdd = ffs(mmc_slot(host).ocr_mask) - 1;
+> +       /* For eMMC do not power off when not in sleep state */
+> +       if (mmc_slot(host).no_regulator_off_init)
+> +               return 0;
+> +       /*
+> +        * To disable boot_on regulator, enable regulator
+> +        * to increase usecount and then disable it.
+> +        */
+> +       if ((host->vcc && regulator_is_enabled(host->vcc) > 0) ||
+> +           (host->vcc_aux && regulator_is_enabled(host->vcc_aux))) {
+> +               int vdd = ffs(mmc_slot(host).ocr_mask) - 1;
+>
+> -                       mmc_slot(host).set_power(host->dev, host->slot_id,
+> -                                                1, vdd);
+> -                       mmc_slot(host).set_power(host->dev, host->slot_id,
+> -                                                0, 0);
+> -               }
+> +               mmc_slot(host).set_power(host->dev, host->slot_id, 1, vdd);
+> +               mmc_slot(host).set_power(host->dev, host->slot_id, 0, 0);
+>         }
+>
+>         return 0;
+> --
+> 1.7.5.4
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
