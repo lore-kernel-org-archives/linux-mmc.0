@@ -1,81 +1,52 @@
-From: Tony Lindgren <tony@atomide.com>
-Subject: Re: [PATCH v5 3/7] regulator: add pbias regulator support
-Date: Tue, 10 Dec 2013 10:33:30 -0800
-Message-ID: <20131210183330.GK13171@atomide.com>
-References: <20131210104005.GB29268@sirena.org.uk>
- <1386686098-7779-1-git-send-email-balajitk@ti.com>
+From: Ondrej Zary <linux@rainbow-software.org>
+Subject: Toshiba TC6371AF PCI SD card controller (SD TypA) driver
+Date: Tue, 10 Dec 2013 19:52:04 +0100
+Message-ID: <201312101952.05713.linux@rainbow-software.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-omap-owner@vger.kernel.org>
+Content-Type: Text/Plain;
+  charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <1386686098-7779-1-git-send-email-balajitk@ti.com>
-Sender: linux-omap-owner@vger.kernel.org
-To: Balaji T K <balajitk@ti.com>
-Cc: linux-omap@vger.kernel.org, bcousson@baylibre.com, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, cjb@laptop.org, broonie@kernel.org
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: Kernel development list <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-* Balaji T K <balajitk@ti.com> [131210 06:36]:
-> pbias register controls internal power supply to sd card i/o pads
-> in most OMAPs (OMAP2-5, DRA7).
-> Control bits for selecting voltage level and
-> enabling/disabling are in the same PBIAS register.
+Hello,
+I have a nice small Toshiba Portege R100 laptop with this unsupported SD card
+controller:
 
-Good to see this, few comments below.
+02:0d.0 System peripheral [0880]: Toshiba America Info Systems SD TypA Controller [1179:0805] (rev 05)
+        Subsystem: Toshiba America Info Systems Unknown device [1179:0001]
+        Control: I/O- Mem- BusMaster- SpecCycle- MemWINV- VGASnoop- ParErr- Stepping- SERR- FastB2B-
+        Status: Cap+ 66MHz- UDF- FastB2B- ParErr- DEVSEL=medium >TAbort- <TAbort- <MAbort- >SERR- <PERR-
+        Interrupt: pin A routed to IRQ 255
+        Region 0: Memory at dfd01000 (32-bit, non-prefetchable) [disabled] [size=512]
+        Capabilities: [80] Power Management version 2
+                Flags: PMEClk- DSI- D1+ D2+ AuxCurrent=0mA PME(D0+,D1+,D2+,D3hot+,D3cold+)
+                Status: D0 PME-Enable- DSel=0 DScale=0 PME+
 
-> +++ lo/Documentation/devicetree/bindings/regulator/pbias-regulator.txt	2013-12-10 16:58:28.907927745 +0530
-> @@ -0,0 +1,21 @@
-> +PBIAS internal regulator for SD card i/o pads on OMAP SoCs.
-> +
-> +Required properties:
-> +- compatible:
-> +  - "regulator-pbias-omap2" for OMAP2
-> +  - "regulator-pbias-omap3" for OMAP3
-> +  - "regulator-pbias-omap4" for OMAP4
-> +  - "regulator-pbias-omap5" for OMAP5, DRA7
-> +- pbias-reg-offset: PBIAS control register offset from syscon base address
-> +
-> +Optional properties:
-> +- Any optional property defined in bindings/regulator/regulator.txt
-> +
-> +Example:
-> +
-> +		pbias_regulator: pbias_regulator {
-> +			pbias-reg-offset = <0>;
-> +			regulator-name = "pbias_regulator";
-> +			regulator-min-microvolt = <1800000>;
-> +			regulator-max-microvolt = <3000000>;
-> +	};
 
-This does not seem to support the other PBIAS controls the same
-register has?
+Richard Betts posted a non-working driver for this chip at:
+http://osdir.com/ml/linux.drivers.sdhci.devel/2008-07/msg00002.html
 
-> @@ -369,6 +369,15 @@ config REGULATOR_PALMAS
->  	  on the muxing. This is handled automatically in the driver by
->  	  reading the mux info from OTP.
->  
-> +config REGULATOR_PBIAS
-> +	tristate "PBIAS OMAP regulator driver"
-> +	depends on (ARCH_OMAP || COMPILE_TEST) && MFD_SYSCON
-> +	help
-> +	 Say y here to support pbias regulator for mmc1:SD card i/o
-> +	 on OMAP SoCs.
-> +	 This driver provides support for OMAP pbias modelled
-> +	 regulators.
-> +
+I've installed old Debian (etch) and compiled the toshsd driver with old 
+kernel 2.6.20 - and it really does not work - as promised :)
 
-The PBIAS register is not just for MMC. Depending on the SoC revision,
-you may also have 2 - 3 PBIAS devices in the same register. Please check
-the 2430 TRM, it has also I2C secondary pulls in this same register. And
-on 3430, there PBIAS register has also SIM voltage bits.
+The comments are useful - seems that the chip internals are same as in ASIC3, 
+now supported by tmio_mmc driver. But it's a MFD, not a PCI driver. I wonder 
+how hard would be to modify tmio_mmc driver to use with a new "glue" PCI 
+driver for this chip.
 
-Certainly nothing stops from intially implementing the MMC pieces
-as those are needed badly, but it should be done in a way where adding
-support for the other PBIAS bits can be done easily.
+The registers in toshsd.h seem to match TC6371AF chip - datasheet is available 
+e.g. at:
+http://www.alldatasheet.com/datasheet-pdf/pdf/169239/TOSHIBA/TC6371AF.html
+Only the PCI ID is a bit different (0x0805 instead of 0x0803).
 
-You're also missing the PBIAS interrupts, so it might be worth checking
-the code from that point of view also to make sure adding the support
-for interrupts won't require massive changes to the driver.
+More registers are described in TC6380AF datasheet, although it's not a PCI 
+device:
+http://www.datasheetarchive.com/dl/Datasheet-029/DSA00512912.pdf
 
-Regards,
-
-Tony
+-- 
+Ondrej Zary
