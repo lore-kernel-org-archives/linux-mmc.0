@@ -1,177 +1,66 @@
-From: Abbas Raza <abbas_raza@mentor.com>
-Subject: [PATCH] mmc: core: Update ext_csd if touched by ioctl
-Date: Tue, 10 Dec 2013 17:58:17 +0500
-Message-ID: <1386680297-21695-1-git-send-email-abbas_raza@mentor.com>
+From: Dong Aisheng <b29396@freescale.com>
+Subject: [PATCH 1/6] mmc: sdhci: add platfrom get_max_timeout hook
+Date: Tue, 10 Dec 2013 20:56:03 +0800
+Message-ID: <1386680168-5227-2-git-send-email-b29396@freescale.com>
+References: <1386680168-5227-1-git-send-email-b29396@freescale.com>
+Mime-Version: 1.0
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from relay1.mentorg.com ([192.94.38.131]:54032 "EHLO
-	relay1.mentorg.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752331Ab3LJM6b (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 10 Dec 2013 07:58:31 -0500
+Received: from ch1ehsobe001.messaging.microsoft.com ([216.32.181.181]:46761
+	"EHLO ch1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752222Ab3LJNYH (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 10 Dec 2013 08:24:07 -0500
+In-Reply-To: <1386680168-5227-1-git-send-email-b29396@freescale.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
-Cc: Abbas Raza <Abbas_Raza@mentor.com>, Chris Ball <cjb@laptop.org>, Dirk Behme <dirk.behme@gmail.com>
+Cc: linux-arm-kernel@lists.infradead.org, cjb@laptop.org, shawn.guo@linaro.org, s.hauer@pengutronix.de, b29396@freescale.com, ulf.hansson@linaro.org, adrian.hunter@intel.com, vladimir_zapolskiy@mentor.com, ed.sutter@alcatel-lucent.com
 
-From: Abbas Raza <Abbas_Raza@mentor.com>
+Currently the max_discard_to is simply got by (1 << 27) / host->timeout_clk
+which is assumed to be the maximum timeout value, however, some platforms
+maximum timeout counter may not be 1 << 27, e.g. i.MX uSDHC is 1 << 28.
+Thus 1 << 27 may not be correct for such platforms.
 
-In case an ioctl changes an EXT_CSD register, update the internal ext_csd
-data structure, too. Else the driver's internal ext_csd data structure and
-the EXT_CSD register content doesn't match any more. In this case additional
-ioctls changing the ext_csd would revert the initial one due to the old data
-in the driver's internal ext_csd data.
+It is also possible that other platforms may have different problems.
+To be flexible, we add a get_max_timeout hook to get the correct
+maximum timeout value for these platforms.
 
-E.g. using the mmc utils utility to enable the bootpart
-
-mmc bootpart enable 1 0 /dev/mmcblk1
-
-correctly writes to the EXT_CSD structure of the device, but
-doesn't update
-
-card->ext_csd.part_config
-
-Issuing additional MMC_SWITCH commands afterwards use the then (wrong)
-card->ext_csd.part_config. Resulting in an undo of the initial mmc bootpart
-enable.
-
-Fix this by updating the ext_csd in case of an EXT_CSD update ioctl.
-
-Cc: Chris Ball <cjb@laptop.org>
-Cc: Dirk Behme <dirk.behme@gmail.com>
-Signed-off-by: Dirk Behme <dirk.behme@gmail.com>
-Signed-off-by: Abbas Raza <Abbas_Raza@mentor.com>
+Signed-off-by: Dong Aisheng <b29396@freescale.com>
+Reported-by: Ed Sutter <ed.sutter@alcatel-lucent.com>
 ---
- drivers/mmc/card/block.c | 12 ++++++++++++
- drivers/mmc/core/mmc.c   | 31 +++++++++++++++++++++++++------
- include/linux/mmc/mmc.h  |  4 ++++
- 3 files changed, 41 insertions(+), 6 deletions(-)
+ drivers/mmc/host/sdhci.c |    5 ++++-
+ drivers/mmc/host/sdhci.h |    1 +
+ 2 files changed, 5 insertions(+), 1 deletions(-)
 
-diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-index b3f4cfe..a376ad1 100644
---- a/drivers/mmc/card/block.c
-+++ b/drivers/mmc/card/block.c
-@@ -543,6 +543,18 @@ static int mmc_blk_ioctl_cmd(struct block_device *bdev,
- 					__func__, status, err);
- 	}
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index bd8a098..464d42c 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -2930,7 +2930,10 @@ int sdhci_add_host(struct sdhci_host *host)
+ 	if (host->quirks & SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK)
+ 		host->timeout_clk = mmc->f_max / 1000;
  
-+	if ((cmd.opcode == MMC_SWITCH) && ((cmd.arg >> 24) & 0x3)) {
-+		/*
-+		 * In case the IOCTL has modified the EXT_CSD,
-+		 * update it, i.e. re-read the EXT_CSD.
-+		 */
-+		err = mmc_update_ext_csd(card);
-+		if (err)
-+			dev_err(mmc_dev(card->host),
-+				"%s: EXT_CSD update failed, error %d\n",
-+					__func__, err);
-+	}
-+
- cmd_rel_host:
- 	mmc_release_host(card->host);
+-	mmc->max_discard_to = (1 << 27) / host->timeout_clk;
++	if (host->ops->get_max_timeout)
++		mmc->max_discard_to = host->ops->get_max_timeout(host);
++	else
++		mmc->max_discard_to = (1 << 27) / host->timeout_clk;
  
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index 810860b..023ff85 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -15,7 +15,6 @@
- #include <linux/stat.h>
+ 	mmc->caps |= MMC_CAP_SDIO_IRQ | MMC_CAP_ERASE | MMC_CAP_CMD23;
  
- #include <linux/mmc/host.h>
--#include <linux/mmc/card.h>
- #include <linux/mmc/mmc.h>
- 
- #include "core.h"
-@@ -268,7 +267,7 @@ static void mmc_select_card_type(struct mmc_card *card)
- /*
-  * Decode extended CSD.
-  */
--static int mmc_read_ext_csd(struct mmc_card *card, u8 *ext_csd)
-+static int mmc_read_ext_csd(struct mmc_card *card, u8 *ext_csd, bool update)
- {
- 	int err = 0, idx;
- 	unsigned int part_size;
-@@ -347,7 +346,9 @@ static int mmc_read_ext_csd(struct mmc_card *card, u8 *ext_csd)
- 		 * There are two boot regions of equal size, defined in
- 		 * multiples of 128K.
- 		 */
--		if (ext_csd[EXT_CSD_BOOT_MULT] && mmc_boot_partition_access(card->host)) {
-+		if (ext_csd[EXT_CSD_BOOT_MULT] &&
-+				mmc_boot_partition_access(card->host) &&
-+				!update) {
- 			for (idx = 0; idx < MMC_NUM_BOOT_PARTITION; idx++) {
- 				part_size = ext_csd[EXT_CSD_BOOT_MULT] << 17;
- 				mmc_part_add(card, part_size,
-@@ -425,7 +426,8 @@ static int mmc_read_ext_csd(struct mmc_card *card, u8 *ext_csd)
- 				card->ext_csd.enhanced_area_en = 1;
- 			}
- 
--			for (idx = 0; idx < MMC_NUM_GP_PARTITION; idx++) {
-+			for (idx = 0; !update && idx < MMC_NUM_GP_PARTITION;
-+					idx++) {
- 				if (!ext_csd[EXT_CSD_GP_SIZE_MULT + idx * 3] &&
- 				!ext_csd[EXT_CSD_GP_SIZE_MULT + idx * 3 + 1] &&
- 				!ext_csd[EXT_CSD_GP_SIZE_MULT + idx * 3 + 2])
-@@ -509,7 +511,8 @@ static int mmc_read_ext_csd(struct mmc_card *card, u8 *ext_csd)
- 		 * RPMB regions are defined in multiples of 128K.
- 		 */
- 		card->ext_csd.raw_rpmb_size_mult = ext_csd[EXT_CSD_RPMB_MULT];
--		if (ext_csd[EXT_CSD_RPMB_MULT] && mmc_host_cmd23(card->host)) {
-+		if (ext_csd[EXT_CSD_RPMB_MULT] && mmc_host_cmd23(card->host) &&
-+		    !update) {
- 			mmc_part_add(card, ext_csd[EXT_CSD_RPMB_MULT] << 17,
- 				EXT_CSD_PART_CONFIG_ACC_RPMB,
- 				"rpmb", 0, false,
-@@ -960,7 +963,7 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
- 		err = mmc_get_ext_csd(card, &ext_csd);
- 		if (err)
- 			goto free_card;
--		err = mmc_read_ext_csd(card, ext_csd);
-+		err = mmc_read_ext_csd(card, ext_csd, 0);
- 		if (err)
- 			goto free_card;
- 
-@@ -1503,6 +1506,22 @@ static void mmc_attach_bus_ops(struct mmc_host *host)
- 	mmc_attach_bus(host, bus_ops);
- }
- 
-+int mmc_update_ext_csd(struct mmc_card *card)
-+{
-+	u8 *new_ext_csd;
-+	int err;
-+
-+	err = mmc_get_ext_csd(card, &new_ext_csd);
-+	if (err || new_ext_csd == NULL)
-+		goto out;
-+
-+	err = mmc_read_ext_csd(card, new_ext_csd, 1);
-+
-+out:
-+	mmc_free_ext_csd(new_ext_csd);
-+	return err;
-+}
-+
- /*
-  * Starting point for MMC card init.
-  */
-diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
-index 94d532e..8494772 100644
---- a/include/linux/mmc/mmc.h
-+++ b/include/linux/mmc/mmc.h
-@@ -24,6 +24,8 @@
- #ifndef LINUX_MMC_MMC_H
- #define LINUX_MMC_MMC_H
- 
-+#include <linux/mmc/card.h>
-+
- /* Standard MMC commands (4.1)           type  argument     response */
-    /* class 1 */
- #define MMC_GO_IDLE_STATE         0   /* bc                          */
-@@ -407,4 +409,6 @@ struct _mmc_csd {
- #define MMC_SWITCH_MODE_CLEAR_BITS	0x02	/* Clear bits which are 1 in value */
- #define MMC_SWITCH_MODE_WRITE_BYTE	0x03	/* Set target to value */
- 
-+int mmc_update_ext_csd(struct mmc_card *card);
-+
- #endif /* LINUX_MMC_MMC_H */
+diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+index 0a3ed01..1591cbb 100644
+--- a/drivers/mmc/host/sdhci.h
++++ b/drivers/mmc/host/sdhci.h
+@@ -281,6 +281,7 @@ struct sdhci_ops {
+ 	unsigned int	(*get_max_clock)(struct sdhci_host *host);
+ 	unsigned int	(*get_min_clock)(struct sdhci_host *host);
+ 	unsigned int	(*get_timeout_clock)(struct sdhci_host *host);
++	unsigned int	(*get_max_timeout)(struct sdhci_host *host);
+ 	int		(*platform_bus_width)(struct sdhci_host *host,
+ 					       int width);
+ 	void (*platform_send_init_74_clocks)(struct sdhci_host *host,
 -- 
-1.8.3.2
+1.7.2.rc3
+
 
