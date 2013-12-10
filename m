@@ -1,57 +1,119 @@
 From: Balaji T K <balajitk@ti.com>
-Subject: [PATCH v4 1/7] mmc: omap_hsmmc: use devm_regulator API
-Date: Tue, 10 Dec 2013 15:46:11 +0530
-Message-ID: <1386670577-3530-2-git-send-email-balajitk@ti.com>
+Subject: [PATCH v4 2/7] mmc: omap_hsmmc: handle vcc and vcc_aux independently
+Date: Tue, 10 Dec 2013 15:46:12 +0530
+Message-ID: <1386670577-3530-3-git-send-email-balajitk@ti.com>
 References: <1385043627-30439-1-git-send-email-balajitk@ti.com>
  <1386670577-3530-1-git-send-email-balajitk@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <linux-omap-owner@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from comal.ext.ti.com ([198.47.26.152]:37190 "EHLO comal.ext.ti.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751522Ab3LJKQc (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 10 Dec 2013 05:16:32 -0500
 In-Reply-To: <1386670577-3530-1-git-send-email-balajitk@ti.com>
-Sender: linux-omap-owner@vger.kernel.org
+Sender: linux-mmc-owner@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 To: linux-omap@vger.kernel.org, bcousson@baylibre.com, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, cjb@laptop.org, broonie@kernel.org
 Cc: tony@atomide.com, Balaji T K <balajitk@ti.com>
-List-Id: linux-mmc@vger.kernel.org
 
-Use devm_regulator API, while at it use
-devm_regulator_get_optional for optional vmmc_aux supply
+handle vcc and vcc_aux independently to reduce indent.
 
 Signed-off-by: Balaji T K <balajitk@ti.com>
 ---
- drivers/mmc/host/omap_hsmmc.c |    6 ++----
- 1 files changed, 2 insertions(+), 4 deletions(-)
+ drivers/mmc/host/omap_hsmmc.c |   54 +++++++++++++++++++----------------------
+ 1 files changed, 25 insertions(+), 29 deletions(-)
 
 diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index dbd32ad..1eb4350 100644
+index 1eb4350..342be25 100644
 --- a/drivers/mmc/host/omap_hsmmc.c
 +++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -316,7 +316,7 @@ static int omap_hsmmc_reg_get(struct omap_hsmmc_host *host)
- 	struct regulator *reg;
- 	int ocr_value = 0;
- 
--	reg = regulator_get(host->dev, "vmmc");
-+	reg = devm_regulator_get(host->dev, "vmmc");
- 	if (IS_ERR(reg)) {
- 		dev_err(host->dev, "vmmc regulator missing\n");
- 		return PTR_ERR(reg);
-@@ -336,7 +336,7 @@ static int omap_hsmmc_reg_get(struct omap_hsmmc_host *host)
+@@ -286,11 +286,12 @@ static int omap_hsmmc_set_power(struct device *dev, int slot, int power_on,
+ 	 * chips/cards need an interface voltage rail too.
+ 	 */
+ 	if (power_on) {
+-		ret = mmc_regulator_set_ocr(host->mmc, host->vcc, vdd);
++		if (host->vcc)
++			ret = mmc_regulator_set_ocr(host->mmc, host->vcc, vdd);
+ 		/* Enable interface voltage rail, if needed */
+ 		if (ret == 0 && host->vcc_aux) {
+ 			ret = regulator_enable(host->vcc_aux);
+-			if (ret < 0)
++			if (ret < 0 && host->vcc)
+ 				ret = mmc_regulator_set_ocr(host->mmc,
+ 							host->vcc, 0);
  		}
+@@ -298,7 +299,7 @@ static int omap_hsmmc_set_power(struct device *dev, int slot, int power_on,
+ 		/* Shut down the rail */
+ 		if (host->vcc_aux)
+ 			ret = regulator_disable(host->vcc_aux);
+-		if (!ret) {
++		if (host->vcc) {
+ 			/* Then proceed to shut down the local regulator */
+ 			ret = mmc_regulator_set_ocr(host->mmc,
+ 						host->vcc, 0);
+@@ -318,10 +319,10 @@ static int omap_hsmmc_reg_get(struct omap_hsmmc_host *host)
  
- 		/* Allow an aux regulator */
--		reg = regulator_get(host->dev, "vmmc_aux");
-+		reg = devm_regulator_get_optional(host->dev, "vmmc_aux");
- 		host->vcc_aux = IS_ERR(reg) ? NULL : reg;
+ 	reg = devm_regulator_get(host->dev, "vmmc");
+ 	if (IS_ERR(reg)) {
+-		dev_err(host->dev, "vmmc regulator missing\n");
++		dev_err(host->dev, "unable to get vmmc regulator %ld\n",
++			PTR_ERR(reg));
+ 		return PTR_ERR(reg);
+ 	} else {
+-		mmc_slot(host).set_power = omap_hsmmc_set_power;
+ 		host->vcc = reg;
+ 		ocr_value = mmc_regulator_get_ocrmask(reg);
+ 		if (!mmc_slot(host).ocr_mask) {
+@@ -334,31 +335,26 @@ static int omap_hsmmc_reg_get(struct omap_hsmmc_host *host)
+ 				return -EINVAL;
+ 			}
+ 		}
++	}
++	mmc_slot(host).set_power = omap_hsmmc_set_power;
  
- 		/* For eMMC do not power off when not in sleep state */
-@@ -366,8 +366,6 @@ static int omap_hsmmc_reg_get(struct omap_hsmmc_host *host)
+-		/* Allow an aux regulator */
+-		reg = devm_regulator_get_optional(host->dev, "vmmc_aux");
+-		host->vcc_aux = IS_ERR(reg) ? NULL : reg;
++	/* Allow an aux regulator */
++	reg = devm_regulator_get_optional(host->dev, "vmmc_aux");
++	host->vcc_aux = IS_ERR(reg) ? NULL : reg;
  
- static void omap_hsmmc_reg_put(struct omap_hsmmc_host *host)
- {
--	regulator_put(host->vcc);
--	regulator_put(host->vcc_aux);
- 	mmc_slot(host).set_power = NULL;
- }
+-		/* For eMMC do not power off when not in sleep state */
+-		if (mmc_slot(host).no_regulator_off_init)
+-			return 0;
+-		/*
+-		* UGLY HACK:  workaround regulator framework bugs.
+-		* When the bootloader leaves a supply active, it's
+-		* initialized with zero usecount ... and we can't
+-		* disable it without first enabling it.  Until the
+-		* framework is fixed, we need a workaround like this
+-		* (which is safe for MMC, but not in general).
+-		*/
+-		if (regulator_is_enabled(host->vcc) > 0 ||
+-		    (host->vcc_aux && regulator_is_enabled(host->vcc_aux))) {
+-			int vdd = ffs(mmc_slot(host).ocr_mask) - 1;
++	/* For eMMC do not power off when not in sleep state */
++	if (mmc_slot(host).no_regulator_off_init)
++		return 0;
++	/*
++	 * To disable boot_on regulator, enable regulator
++	 * to increase usecount and then disable it.
++	 */
++	if ((host->vcc && regulator_is_enabled(host->vcc) > 0) ||
++	    (host->vcc_aux && regulator_is_enabled(host->vcc_aux))) {
++		int vdd = ffs(mmc_slot(host).ocr_mask) - 1;
  
+-			mmc_slot(host).set_power(host->dev, host->slot_id,
+-						 1, vdd);
+-			mmc_slot(host).set_power(host->dev, host->slot_id,
+-						 0, 0);
+-		}
++		mmc_slot(host).set_power(host->dev, host->slot_id, 1, vdd);
++		mmc_slot(host).set_power(host->dev, host->slot_id, 0, 0);
+ 	}
+ 
+ 	return 0;
 -- 
 1.7.5.4
 
