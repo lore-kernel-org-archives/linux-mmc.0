@@ -1,138 +1,88 @@
 From: Balaji T K <balajitk@ti.com>
-Subject: Re: [RFC PATCH v3 2/8] mmc: omap_hsmmc: handle vcc and vcc_aux independently
-Date: Tue, 10 Dec 2013 17:18:20 +0530
-Message-ID: <52A6FF84.40901@ti.com>
-References: <20130613174554.GB1403@sirena.org.uk> <1385043627-30439-1-git-send-email-balajitk@ti.com> <1385043627-30439-3-git-send-email-balajitk@ti.com> <CAPDyKFqAT+Zd4LmAJ91g603LXx2rAfoRhF1UK4XNzSUVNS0X9w@mail.gmail.com>
+Subject: Re: [PATCH v4 3/7] regulator: add pbias regulator support
+Date: Tue, 10 Dec 2013 17:52:06 +0530
+Message-ID: <52A7076E.3000505@ti.com>
+References: <1385043627-30439-1-git-send-email-balajitk@ti.com> <1386670577-3530-1-git-send-email-balajitk@ti.com> <1386670577-3530-4-git-send-email-balajitk@ti.com> <20131210104005.GB29268@sirena.org.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from bear.ext.ti.com ([192.94.94.41]:44758 "EHLO bear.ext.ti.com"
+Received: from bear.ext.ti.com ([192.94.94.41]:45707 "EHLO bear.ext.ti.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752590Ab3LJLsa (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 10 Dec 2013 06:48:30 -0500
-In-Reply-To: <CAPDyKFqAT+Zd4LmAJ91g603LXx2rAfoRhF1UK4XNzSUVNS0X9w@mail.gmail.com>
+	id S1751215Ab3LJMWQ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 10 Dec 2013 07:22:16 -0500
+In-Reply-To: <20131210104005.GB29268@sirena.org.uk>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-omap <linux-omap@vger.kernel.org>, Benoit Cousson <bcousson@baylibre.com>, devicetree@vger.kernel.org, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Mark Brown <broonie@kernel.org>, Tony Lindgren <tony@atomide.com>
+To: Mark Brown <broonie@kernel.org>
+Cc: linux-omap@vger.kernel.org, bcousson@baylibre.com, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, cjb@laptop.org, tony@atomide.com
 
-On Tuesday 10 December 2013 04:39 PM, Ulf Hansson wrote:
-> On 21 November 2013 15:20, Balaji T K <balajitk@ti.com> wrote:
->> handle vcc and vcc_aux independently to reduce indent.
->>
->> Signed-off-by: Balaji T K <balajitk@ti.com>
->> ---
->>   drivers/mmc/host/omap_hsmmc.c |   54 +++++++++++++++++++----------------------
->>   1 files changed, 25 insertions(+), 29 deletions(-)
->>
->> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
->> index 1eb4350..342be25 100644
->> --- a/drivers/mmc/host/omap_hsmmc.c
->> +++ b/drivers/mmc/host/omap_hsmmc.c
->> @@ -286,11 +286,12 @@ static int omap_hsmmc_set_power(struct device *dev, int slot, int power_on,
->>           * chips/cards need an interface voltage rail too.
->>           */
->>          if (power_on) {
->> -               ret = mmc_regulator_set_ocr(host->mmc, host->vcc, vdd);
->> +               if (host->vcc)
->> +                       ret = mmc_regulator_set_ocr(host->mmc, host->vcc, vdd);
->>                  /* Enable interface voltage rail, if needed */
->>                  if (ret == 0 && host->vcc_aux) {
->>                          ret = regulator_enable(host->vcc_aux);
->> -                       if (ret < 0)
->> +                       if (ret < 0 && host->vcc)
->>                                  ret = mmc_regulator_set_ocr(host->mmc,
->>                                                          host->vcc, 0);
->>                  }
->> @@ -298,7 +299,7 @@ static int omap_hsmmc_set_power(struct device *dev, int slot, int power_on,
->>                  /* Shut down the rail */
->>                  if (host->vcc_aux)
->>                          ret = regulator_disable(host->vcc_aux);
->> -               if (!ret) {
->> +               if (host->vcc) {
->>                          /* Then proceed to shut down the local regulator */
->>                          ret = mmc_regulator_set_ocr(host->mmc,
->>                                                  host->vcc, 0);
->> @@ -318,10 +319,10 @@ static int omap_hsmmc_reg_get(struct omap_hsmmc_host *host)
->>
->>          reg = devm_regulator_get(host->dev, "vmmc");
->>          if (IS_ERR(reg)) {
->> -               dev_err(host->dev, "vmmc regulator missing\n");
->> +               dev_err(host->dev, "unable to get vmmc regulator %ld\n",
->> +                       PTR_ERR(reg));
->>                  return PTR_ERR(reg);
->>          } else {
->> -               mmc_slot(host).set_power = omap_hsmmc_set_power;
->>                  host->vcc = reg;
->>                  ocr_value = mmc_regulator_get_ocrmask(reg);
->>                  if (!mmc_slot(host).ocr_mask) {
->> @@ -334,31 +335,26 @@ static int omap_hsmmc_reg_get(struct omap_hsmmc_host *host)
->>                                  return -EINVAL;
->>                          }
->>                  }
->> +       }
->> +       mmc_slot(host).set_power = omap_hsmmc_set_power;
->>
->> -               /* Allow an aux regulator */
->> -               reg = devm_regulator_get_optional(host->dev, "vmmc_aux");
->> -               host->vcc_aux = IS_ERR(reg) ? NULL : reg;
->> +       /* Allow an aux regulator */
->> +       reg = devm_regulator_get_optional(host->dev, "vmmc_aux");
->> +       host->vcc_aux = IS_ERR(reg) ? NULL : reg;
->>
->> -               /* For eMMC do not power off when not in sleep state */
->> -               if (mmc_slot(host).no_regulator_off_init)
->> -                       return 0;
->> -               /*
->> -               * UGLY HACK:  workaround regulator framework bugs.
->> -               * When the bootloader leaves a supply active, it's
->> -               * initialized with zero usecount ... and we can't
->> -               * disable it without first enabling it.  Until the
->> -               * framework is fixed, we need a workaround like this
->> -               * (which is safe for MMC, but not in general).
->> -               */
+On Tuesday 10 December 2013 04:10 PM, Mark Brown wrote:
+> On Tue, Dec 10, 2013 at 03:46:13PM +0530, Balaji T K wrote:
 >
-> The above problem is handled by the mmc core layer. I certainly think
-> you shall adopt your code to it.
-Hi Ulf,
+>> +config REGULATOR_PBIAS
+>> +	tristate "PBIAS OMAP regulator driver"
+>> +	depends on ARCH_OMAP && MFD_SYSCON
+>
+> That should be (ARCH_OMAP || COMPILE_TEST) && MFD_SYSCON
+>
 
-how about optional vqmmc, omap_hsmmc does call mmc_regulator_set_ocr for vmmc
-Am I missing something?
+Ok
+
+>> +static int pbias_regulator_set_voltage(struct regulator_dev *dev,
+>> +			int min_uV, int max_uV, unsigned *selector)
+>> +{
+>> +	struct pbias_regulator_data *data = rdev_get_drvdata(dev);
+>> +	const struct pbias_reg_info *info = data->info;
+>> +	int ret, vmode;
+>> +
+>> +	if (min_uV <= 1800000)
+>> +		vmode = 0;
+>> +	else if (min_uV > 1800000)
+>> +		vmode = info->vmode;
+>> +
+>> +	ret = regmap_update_bits(data->syscon, data->pbias_reg,
+>> +						info->vmode, vmode);
+>> +	data->voltage = min_uV;
+>
+> This is exactly the same as it was the first time it was posted and is
+> still buggy.  To repeat the get and set voltage functions should reflect
+> the actual voltage set in the hardware.
+>
+
+my bad, will fix it.
+
+>> +static int pbias_regulator_is_enable(struct regulator_dev *rdev)
+>> +{
+>> +	struct pbias_regulator_data *data = rdev_get_drvdata(rdev);
+>> +	const struct pbias_reg_info *info = data->info;
+>> +	int value;
+>> +
+>> +	regmap_read(data->syscon, data->pbias_reg, &value);
+>> +
+>> +	return value & info->enable_mask;
+>> +}
+>
+> If the enable mask really can have multiple bits this won't do the right
+> thing - it'll return true if any bits are set.  It needs to make sure
+> all the bits are set.
+>
+
+True, will fix it.
+
+>> +#if CONFIG_OF
+>
+> Why?
+
+Driver is DT only, Will remove it.
 
 >
-> Kind regards
-> Ulf Hansson
+>> +	drvdata->desc.n_voltages = 3;
 >
->> -               if (regulator_is_enabled(host->vcc) > 0 ||
->> -                   (host->vcc_aux && regulator_is_enabled(host->vcc_aux))) {
->> -                       int vdd = ffs(mmc_slot(host).ocr_mask) - 1;
->> +       /* For eMMC do not power off when not in sleep state */
->> +       if (mmc_slot(host).no_regulator_off_init)
->> +               return 0;
->> +       /*
->> +        * To disable boot_on regulator, enable regulator
->> +        * to increase usecount and then disable it.
->> +        */
->> +       if ((host->vcc && regulator_is_enabled(host->vcc) > 0) ||
->> +           (host->vcc_aux && regulator_is_enabled(host->vcc_aux))) {
->> +               int vdd = ffs(mmc_slot(host).ocr_mask) - 1;
->>
->> -                       mmc_slot(host).set_power(host->dev, host->slot_id,
->> -                                                1, vdd);
->> -                       mmc_slot(host).set_power(host->dev, host->slot_id,
->> -                                                0, 0);
->> -               }
->> +               mmc_slot(host).set_power(host->dev, host->slot_id, 1, vdd);
->> +               mmc_slot(host).set_power(host->dev, host->slot_id, 0, 0);
->>          }
->>
->>          return 0;
->> --
->> 1.7.5.4
->>
->> --
->> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> This doesn't match your implementation which can only set two voltages.
+>
 
+I considered power-off too, will make it 2 then.
+
+Thanks and Regards,
+Balaji T K
