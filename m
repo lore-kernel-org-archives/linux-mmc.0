@@ -1,31 +1,61 @@
-From: Tim Kryger <tim.kryger@linaro.org>
-Subject: Re: [PATCH v4 1/8] ARM: dts: Declare clocks as fixed on bcm11351
-Date: Tue, 10 Dec 2013 12:26:45 -0800
-Message-ID: <CAAYSxhp3MsnaX80tF7iCzUfjfjyQnOoZbTrtBKs_nAk4SUYReQ@mail.gmail.com>
-References: <1386271244-3927-1-git-send-email-tim.kryger@linaro.org>
-	<1386271244-3927-2-git-send-email-tim.kryger@linaro.org>
-	<CAEPRUYrw_owwBYEmmXO3=OG9pXrKPrJTwF+jPVm4+-Vvf0Xorw@mail.gmail.com>
+From: Tony Lindgren <tony@atomide.com>
+Subject: Re: [PATCH v5 3/7] regulator: add pbias regulator support
+Date: Tue, 10 Dec 2013 14:39:32 -0800
+Message-ID: <20131210223932.GW13171@atomide.com>
+References: <20131210104005.GB29268@sirena.org.uk>
+ <1386686098-7779-1-git-send-email-balajitk@ti.com>
+ <20131210183330.GK13171@atomide.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-oa0-f44.google.com ([209.85.219.44]:45447 "EHLO
-	mail-oa0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750976Ab3LJU0r (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 10 Dec 2013 15:26:47 -0500
-Received: by mail-oa0-f44.google.com with SMTP id m1so6212102oag.31
-        for <linux-mmc@vger.kernel.org>; Tue, 10 Dec 2013 12:26:46 -0800 (PST)
-In-Reply-To: <CAEPRUYrw_owwBYEmmXO3=OG9pXrKPrJTwF+jPVm4+-Vvf0Xorw@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-omap-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <20131210183330.GK13171@atomide.com>
+Sender: linux-omap-owner@vger.kernel.org
+To: Balaji T K <balajitk@ti.com>
+Cc: linux-omap@vger.kernel.org, bcousson@baylibre.com, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, cjb@laptop.org, broonie@kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Christian Daudt <bcm@fixthebug.org>
-Cc: Rob Herring <rob.herring@calxeda.com>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Stephen Warren <swarren@wwwdotorg.org>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Daniel Lezcano <daniel.lezcano@linaro.org>, Thomas Gleixner <tglx@linutronix.de>, Chris Ball <cjb@laptop.org>, Axel Lin <axel.lin@ingics.com>, Device Tree List <devicetree@vger.kernel.org>, Linux ARM Kernel List <linux-arm-kernel@lists.infradead.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux MMC List <linux-mmc@vger.kernel.org>, Linaro Patches List <patches@linaro.org>
 
-On Mon, Dec 9, 2013 at 11:18 PM, Christian Daudt <bcm@fixthebug.org> wrote:
-> Applied to armsoc/for-3.14/dt
+* Tony Lindgren <tony@atomide.com> [131210 10:34]:
+> * Balaji T K <balajitk@ti.com> [131210 06:36]:
+> > pbias register controls internal power supply to sd card i/o pads
+> > in most OMAPs (OMAP2-5, DRA7).
+> > Control bits for selecting voltage level and
+> > enabling/disabling are in the same PBIAS register.
+> 
+> Good to see this, few comments below.
+> 
+> > +++ lo/Documentation/devicetree/bindings/regulator/pbias-regulator.txt	2013-12-10 16:58:28.907927745 +0530
+> > @@ -0,0 +1,21 @@
+> > +PBIAS internal regulator for SD card i/o pads on OMAP SoCs.
+> > +
+> > +Required properties:
+> > +- compatible:
+> > +  - "regulator-pbias-omap2" for OMAP2
+> > +  - "regulator-pbias-omap3" for OMAP3
+> > +  - "regulator-pbias-omap4" for OMAP4
+> > +  - "regulator-pbias-omap5" for OMAP5, DRA7
+> > +- pbias-reg-offset: PBIAS control register offset from syscon base address
+> > +
+> > +Optional properties:
+> > +- Any optional property defined in bindings/regulator/regulator.txt
+> > +
+> > +Example:
+> > +
+> > +		pbias_regulator: pbias_regulator {
 
-Could you wait till other maintainers provide their acks and then take
-the entire series into a branch that feeds into the arm-soc
-drivers-for-linus branch?
+Hmm one more comment. This should containe the standard property:
+			reg = <0x02b0 0x4>;
 
-Thanks,
-Tim Kryger
+And the parent SCM driver should claim the whole SCM GENERAL register
+area as defined in "Table 13-68. GENERAL Register Summary" for omap3
+for example. So that would be the following for the parent:
+
+			reg = <0x48002270 xxx>;
+
+The size needs to be checked and it may need multiple regions or instances
+defined. That way we can use the drivers/mfd/syscon.c SCM driver for all
+the misc registers without having to redo the bindings.
+
+Regards,
+
+Tony
