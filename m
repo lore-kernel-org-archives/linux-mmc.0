@@ -1,106 +1,122 @@
-From: Dong Aisheng <dongas86@gmail.com>
-Subject: Re: [PATCH 1/6] mmc: sdhci: add platfrom get_max_timeout hook
-Date: Wed, 11 Dec 2013 11:00:03 +0800
-Message-ID: <CAA+hA=ST0fAa2__PaeJqxj2yDWUAr6iaNO4Dj7ABiEWqnYp6Vw@mail.gmail.com>
+From: Shawn Guo <shawn.guo@linaro.org>
+Subject: Re: [PATCH 5/6] mmc: sdhci: calculate max_discard_to dynamically for
+ SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK
+Date: Wed, 11 Dec 2013 11:01:49 +0800
+Message-ID: <20131211030147.GE18380@S2101-09.ap.freescale.net>
 References: <1386680168-5227-1-git-send-email-b29396@freescale.com>
-	<1386680168-5227-2-git-send-email-b29396@freescale.com>
-	<20131211015640.GA18380@S2101-09.ap.freescale.net>
+ <1386680168-5227-6-git-send-email-b29396@freescale.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset="us-ascii"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qc0-f173.google.com ([209.85.216.173]:44500 "EHLO
-	mail-qc0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751451Ab3LKDAE (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 10 Dec 2013 22:00:04 -0500
-Received: by mail-qc0-f173.google.com with SMTP id m20so4661377qcx.18
-        for <linux-mmc@vger.kernel.org>; Tue, 10 Dec 2013 19:00:03 -0800 (PST)
-In-Reply-To: <20131211015640.GA18380@S2101-09.ap.freescale.net>
+Received: from tx2ehsobe002.messaging.microsoft.com ([65.55.88.12]:55212 "EHLO
+	tx2outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751446Ab3LKDB2 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 10 Dec 2013 22:01:28 -0500
+Content-Disposition: inline
+In-Reply-To: <1386680168-5227-6-git-send-email-b29396@freescale.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Shawn Guo <shawn.guo@linaro.org>
-Cc: Dong Aisheng <b29396@freescale.com>, Ulf Hansson <ulf.hansson@linaro.org>, Ed Sutter <ed.sutter@alcatel-lucent.com>, Sascha Hauer <s.hauer@pengutronix.de>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, adrian.hunter@intel.com, vladimir_zapolskiy@mentor.com, Chris Ball <cjb@laptop.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+To: Dong Aisheng <b29396@freescale.com>
+Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, cjb@laptop.org, s.hauer@pengutronix.de, ulf.hansson@linaro.org, adrian.hunter@intel.com, vladimir_zapolskiy@mentor.com, ed.sutter@alcatel-lucent.com
 
-On Wed, Dec 11, 2013 at 9:56 AM, Shawn Guo <shawn.guo@linaro.org> wrote:
-> On Tue, Dec 10, 2013 at 08:56:03PM +0800, Dong Aisheng wrote:
->> Currently the max_discard_to is simply got by (1 << 27) / host->timeout_clk
->> which is assumed to be the maximum timeout value, however, some platforms
->> maximum timeout counter may not be 1 << 27, e.g. i.MX uSDHC is 1 << 28.
->> Thus 1 << 27 may not be correct for such platforms.
->>
->> It is also possible that other platforms may have different problems.
->> To be flexible, we add a get_max_timeout hook to get the correct
->> maximum timeout value for these platforms.
->>
->> Signed-off-by: Dong Aisheng <b29396@freescale.com>
->> Reported-by: Ed Sutter <ed.sutter@alcatel-lucent.com>
->> ---
->>  drivers/mmc/host/sdhci.c |    5 ++++-
->>  drivers/mmc/host/sdhci.h |    1 +
->>  2 files changed, 5 insertions(+), 1 deletions(-)
->>
->> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
->> index bd8a098..464d42c 100644
->> --- a/drivers/mmc/host/sdhci.c
->> +++ b/drivers/mmc/host/sdhci.c
->> @@ -2930,7 +2930,10 @@ int sdhci_add_host(struct sdhci_host *host)
->>       if (host->quirks & SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK)
->>               host->timeout_clk = mmc->f_max / 1000;
->>
->> -     mmc->max_discard_to = (1 << 27) / host->timeout_clk;
->> +     if (host->ops->get_max_timeout)
->> +             mmc->max_discard_to = host->ops->get_max_timeout(host);
->
-> Does "timeout" conceptually equals to "discard_to"?  If not, we might
-> want to write it in the either form below to avoid messing these two
-> concepts.
->
+On Tue, Dec 10, 2013 at 08:56:07PM +0800, Dong Aisheng wrote:
+> For host controllers using SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK, since the card
+> clock is changed dynamically for different cards, it does not make sense
+> to use the maximum host clock to calculate max_discard_to which may lead
+> the max_discard_to to be much smaller than its capbility and affect the card
+> discard performance a lot.
+> e.g. the host clock is 200Mhz, but the card is working on 50Mhz. Then the
+> max_discard_to is only 1/4 of its real capbility.
+> 
+> In this patch, it uses the actual_clock to calculate the max_discard_to
+> dynamically as long as a new clock speed is set.
+> 
+> Tested with a high speed SDHC card shows:
+> Originally:
+> mmc1: new high speed SDHC card at address aaaa
+> mmc1: calculated max. discard sectors 49152 for timeout 1355 ms
+> Now:
+> mmc1: new high speed SDHC card at address aaaa
+> mmc1: calculated max. discard sectors 712704 for timeout 5422 ms
+> The max_discard_sectors will increase a lot which will also improve discard
+> performance a lot.
+> 
+> The one known limitation of this approach is that it does not cover the special
+> case for user changes the clock via sysfs, since the max_discard_to is only
+> initialised for one time during the mmc queue init.
+> 
+> Signed-off-by: Dong Aisheng <b29396@freescale.com>
+> ---
+>  drivers/mmc/host/sdhci.c |   27 +++++++++++++++++++++------
+>  1 files changed, 21 insertions(+), 6 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index 4cc3bd6..9be8a79 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -1143,14 +1143,14 @@ static void sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
+>  	unsigned long timeout;
+>  
+>  	if (clock && clock == host->clock)
+> -		return;
+> +		goto out;
 
-No, they're two concepts but the max_discard_to equals to the max timeout value
-the host supports.
+I do not quite understand this change.  Why do we need to recalculate
+max_discard_to if the clock does not change since the last time that
+the function is called?
 
->         mmc->max_discard_to = host->ops->get_max_timeout(host) / host->timeout_clk;
->
-> or
->
->         mmc->max_discard_to = host->ops->get_max_discard_to(host);
->
-> I guess you may want to go for the second one.
->
+Shawn
 
-The original way looks ok to me.
-Platform host driver does not need to know detail about discard,
-just tell the max timeout value it supports is ok.
-Common sdhci driver will handle it well.
+>  
+>  	host->mmc->actual_clock = 0;
+>  
+>  	if (host->ops->set_clock) {
+>  		host->ops->set_clock(host, clock);
+>  		if (host->quirks & SDHCI_QUIRK_NONSTANDARD_CLOCK)
+> -			return;
+> +			goto out;
+>  	}
+>  
+>  	sdhci_writew(host, 0, SDHCI_CLOCK_CONTROL);
+> @@ -1249,6 +1249,19 @@ clock_set:
+>  
+>  out:
+>  	host->clock = clock;
+> +
+> +	/* update timeout_clk and max_discard_to once the SDCLK is changed */
+> +	if (host->quirks & SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK && clock) {
+> +		host->timeout_clk = host->mmc->actual_clock ?
+> +					host->mmc->actual_clock / 1000 :
+> +					host->clock / 1000;
+> +		if (host->ops->get_max_timeout)
+> +			host->mmc->max_discard_to =
+> +					host->ops->get_max_timeout(host);
+> +		else
+> +			host->mmc->max_discard_to = (1 << 27) /
+> +					host->timeout_clk;
+> +	}
+>  }
+>  
+>  static inline void sdhci_update_clock(struct sdhci_host *host)
+> @@ -2939,10 +2952,12 @@ int sdhci_add_host(struct sdhci_host *host)
+>  	if (host->quirks & SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK)
+>  		host->timeout_clk = mmc->f_max / 1000;
+>  
+> -	if (host->ops->get_max_timeout)
+> -		mmc->max_discard_to = host->ops->get_max_timeout(host);
+> -	else
+> -		mmc->max_discard_to = (1 << 27) / host->timeout_clk;
+> +	if (!(host->quirks & SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK)) {
+> +		if (host->ops->get_max_timeout)
+> +			mmc->max_discard_to = host->ops->get_max_timeout(host);
+> +		else
+> +			mmc->max_discard_to = (1 << 27) / host->timeout_clk;
+> +	}
+>  
+>  	mmc->caps |= MMC_CAP_SDIO_IRQ | MMC_CAP_ERASE | MMC_CAP_CMD23;
+>  
+> -- 
+> 1.7.2.rc3
+> 
+> 
 
-Regards
-Dong Aisheng
-
-> Shawn
->
->> +     else
->> +             mmc->max_discard_to = (1 << 27) / host->timeout_clk;
->>
->>       mmc->caps |= MMC_CAP_SDIO_IRQ | MMC_CAP_ERASE | MMC_CAP_CMD23;
->>
->> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
->> index 0a3ed01..1591cbb 100644
->> --- a/drivers/mmc/host/sdhci.h
->> +++ b/drivers/mmc/host/sdhci.h
->> @@ -281,6 +281,7 @@ struct sdhci_ops {
->>       unsigned int    (*get_max_clock)(struct sdhci_host *host);
->>       unsigned int    (*get_min_clock)(struct sdhci_host *host);
->>       unsigned int    (*get_timeout_clock)(struct sdhci_host *host);
->> +     unsigned int    (*get_max_timeout)(struct sdhci_host *host);
->>       int             (*platform_bus_width)(struct sdhci_host *host,
->>                                              int width);
->>       void (*platform_send_init_74_clocks)(struct sdhci_host *host,
->> --
->> 1.7.2.rc3
->>
->>
->
->
-> _______________________________________________
-> linux-arm-kernel mailing list
-> linux-arm-kernel@lists.infradead.org
-> http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
