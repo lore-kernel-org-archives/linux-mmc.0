@@ -1,43 +1,45 @@
-From: Zhangfei Gao <zhangfei.gao@gmail.com>
-Subject: Re: [PATCH 2/2] mmc: dw_mmc: add dw_mmc-k3 for k3 platform
-Date: Wed, 11 Dec 2013 13:47:16 +0800
-Message-ID: <CAMj5Bkgwzq5+aewF2vOJq3aDMk0yy8WVQOzdboCmMtrx1vi4nQ@mail.gmail.com>
-References: <1383889128-12540-1-git-send-email-zhangfei.gao@linaro.org>
-	<1383889128-12540-3-git-send-email-zhangfei.gao@linaro.org>
-	<001f01cef1c2$6bd0ab70$43720250$%jun@samsung.com>
+From: Beomho Seo <beomho.seo@samsung.com>
+Subject: [PATCH v2 0/1] mmc: sdhci-s3c: Use mmc_gpio_request_cd function
+Date: Wed, 11 Dec 2013 14:51:24 +0900
+Message-ID: <52A7FD5C.80408@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ea0-f176.google.com ([209.85.215.176]:47437 "EHLO
-	mail-ea0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750719Ab3LKFrS (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 11 Dec 2013 00:47:18 -0500
-In-Reply-To: <001f01cef1c2$6bd0ab70$43720250$%jun@samsung.com>
+Received: from mailout3.samsung.com ([203.254.224.33]:61061 "EHLO
+	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750736Ab3LKFvb (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 11 Dec 2013 00:51:31 -0500
+Received: from epcpsbgr1.samsung.com
+ (u141.gpu120.samsung.co.kr [203.254.230.141])
+ by mailout3.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+ (7.0.4.24.0) 64bit (built Nov 17 2011))
+ with ESMTP id <0MXM004J5O9OYY10@mailout3.samsung.com> for
+ linux-mmc@vger.kernel.org; Wed, 11 Dec 2013 14:51:24 +0900 (KST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Seungwon Jeon <tgih.jun@samsung.com>
-Cc: Zhangfei Gao <zhangfei.gao@linaro.org>, Chris Ball <cjb@laptop.org>, Jaehoon Chung <jh80.chung@samsung.com>, Kumar Gala <galak@codeaurora.org>, devicetree@vger.kernel.org, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>
+To: Chris Ball <cjb@laptop.org>
+Cc: linux-mmc@vger.kernel.org, Myungjoo Ham <myungjoo.ham@samsung.com>, Joonyoung Shim <jy0922.shim@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, =?ISO-8859-1?Q?Heiko_St=FCbner?= <heiko@sntech.de>
 
-Dear Seungwon
+Hello,
 
-On Thu, Dec 5, 2013 at 10:00 PM, Seungwon Jeon <tgih.jun@samsung.com> wrote:
+I have fixed patch.
 
->> +static DEFINE_SPINLOCK(mmc_tuning_lock);
-> Can the above variables be involved in dw_mci_k3_priv_data instead of global declaration?
->
-Unfortunately, this can be be put in priv_data, which is different
-instance for different controller.
-Here need protect register shared by different controllers
+Change from v2 to v1
+	- Fix "err_req_cd:".
+	- Remove mmc_gpio_free_cd() and then, use sdhci_remove_host()
 
+Beomho Seo (1):
+  mmc: sdhci-s3c: Use mmc_gpio_request_cd function
 
->> +static int dw_mci_k3_setup_clock(struct dw_mci *host)
->> +{
->> +     dw_mci_k3_tun(host, MMC_TIMING_LEGACY);
-> Is it necessary here?
-> When card-init, MMC_TIMING_LEGACY will be passed via dw_mci_k3_set_ios().
+ drivers/mmc/host/sdhci-s3c.c |   56 +++++++++++-------------------------------
+ 1 file changed, 14 insertions(+), 42 deletions(-)
 
-Read register will fail if not set these register earlier, and set_ios
-is too late.
-Same reason for resume.
+-- 
+1.7.9.5
 
-Thanks
+-- 
+Best Regards,
+
+Beomho Seo, Assistant Engineer
+System S/W Lab., Software Center, Samsung Electronics
