@@ -1,68 +1,66 @@
-From: Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>
-Subject: Re: [PATCH 07/15] mmc: sdhi: Enable driver compilation with COMPILE_TEST
-Date: Wed, 11 Dec 2013 22:22:19 +0400
-Message-ID: <52A8AD5B.70601@cogentembedded.com>
-References: <1385515117-23664-1-git-send-email-laurent.pinchart+renesas@ideasonboard.com> <1385515117-23664-8-git-send-email-laurent.pinchart+renesas@ideasonboard.com> <52A8A891.40302@cogentembedded.com> <1488247.0AdahCZr3G@avalon>
+From: Dinh Nguyen <dinguyen@altera.com>
+Subject: Re: [PATCH 2/2] mmc: dw_mmc: add dw_mmc-k3 for k3 platform
+Date: Wed, 11 Dec 2013 12:48:10 -0600
+Message-ID: <1386787690.20516.10.camel@linux-builds1>
+References: <1383889128-12540-1-git-send-email-zhangfei.gao@linaro.org>
+	 <201312060239.14832.arnd@arndb.de>
+	 <CAMj5BkhyiJ7Uc-GiRZP3TNMq3NvHW-MVuPT6t+7FN8KBWAJR5A@mail.gmail.com>
+	 <201312110445.54336.arnd@arndb.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <1488247.0AdahCZr3G@avalon>
-Sender: linux-sh-owner@vger.kernel.org
-To: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
-Cc: Laurent Pinchart <laurent.pinchart+renesas@ideasonboard.com>, linux-sh@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Chris Ball <cjb@laptop.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Ian Molton <ian@mnementh.co.uk>, linux-mmc@vger.kernel.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from co1ehsobe001.messaging.microsoft.com ([216.32.180.184]:26079
+	"EHLO co1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1750800Ab3LKStv (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 11 Dec 2013 13:49:51 -0500
+In-Reply-To: <201312110445.54336.arnd@arndb.de>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Arnd Bergmann <arnd@arndb.de>
+Cc: Zhangfei Gao <zhangfei.gao@gmail.com>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>, devicetree@vger.kernel.org, Seungwon Jeon <tgih.jun@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Jaehoon Chung <jh80.chung@samsung.com>, Kumar Gala <galak@codeaurora.org>, Zhangfei Gao <zhangfei.gao@linaro.org>, Chris Ball <cjb@laptop.org>, heiko@sntech.de
 
-On 11-12-2013 22:06, Laurent Pinchart wrote:
+On Wed, 2013-12-11 at 04:45 +0100, Arnd Bergmann wrote:
+> On Wednesday 11 December 2013, Zhangfei Gao wrote:
+> > Thanks for the good suggestion, it can be abstracted to clock.
+> > 
+> > The issue for this version's ip is there are some registers need to be
+> > set, including fixed factor and phase, which may be required to be
+> > tuned, however it can be hide in clock.
+> > 
+> > Double checked next version's ip, it is more intelligent and only
+> > fixed factor is required, more like a clock, and all these register
+> > accessing are NOT required.
+> > 
+> > Will update new version to abstract these chip depended registers to clock.
+> 
+> Ok, please stay in contact with Dinh Nguyen over this, since his side
+> is work-in-progress and we are still evaluating how to best encode
+> the phase setting in DT in a generic form.
 
->>> This helps increasing build testing coverage.
+Will the bindings "samsung,dw-mshc-sdr-timing" and
+"samsung,dw-mshc-ddr-timing" also work for the k3 platform as well? I
+think they should work, but just wanted to verify.
 
->>> The driver doesn't compile on (at least) x86 due (possibly among others)
->>> to missing readsw/writesw I/O accessors, restrict compilation to SUPERH
->>> or ARM.
+Heiko, on the rockchip platform, can you check to see if you have these
+cclk_in_drv and cclk_sample settings for the phase shift of the clocks?
+The SD/MMC IP version(2.40a) on Rockchip is the same version that is on
+SOCFPGA, so I think these settings are there. They can be located in
+some other "system" register block like SOCFPGA. The possible reason
+that you have not need to set them in the Rockchip code could be that
+the bootloader/firmware has already set them if you are booting from the
+SD/MMC source. You may need to set the clock phase settings if you boot
+from a non-SD source.
 
->>> Whether the CTL_DMA_ENABLE register is part of the standard TMIO
->>> controller or is Renesas-specific is unknown and impossible to test as
->>> we have no current or planned TMIO DMA users other than SUPERH and
->>> ARCH_SHMOBILE. Writing to the register is thus conditionally compiled
->>> for SUPERH and ARCH_SHMOBILE only. Adding ARCH_SHMOBILE_MULTI to the
->>> list would extend this to multiarch kernels, but would break the driver
->>> for non-shmobile platforms if the register is Renesas-specific. We can
->>> thus get rid of the conditional compilation completely without
->>> introducing any further issue, and let future non-Renesas users deal
->>> with the situation if it turns out to be a the problem.
+I think the reading of the "samsung,dw-mshc-ddr-timing" and
+"samsung,dw-msh-sdr-timing" bindings can also be moved into the generic
+dw_mmc driver if the above 2 conditions are correct.
 
->>> Cc: Chris Ball <cjb@laptop.org>
->>> Cc: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
->>> Cc: Ian Molton <ian@mnementh.co.uk>
->>> Cc: linux-mmc@vger.kernel.org
->>> Signed-off-by: Laurent Pinchart
->>> <laurent.pinchart+renesas@ideasonboard.com>
->>> Acked-by: Simon Horman <horms@verge.net.au>
-[...]
+Thanks,
+Din
+> 
+> 	Arnd
+> 
 
->>> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
->>> index 7fc5099..ca1315e 100644
->>> --- a/drivers/mmc/host/Kconfig
->>> +++ b/drivers/mmc/host/Kconfig
->>> @@ -479,7 +479,8 @@ config MMC_TMIO
->>>
->>>    config MMC_SDHI
->>>
->>>    	tristate "SH-Mobile SDHI SD/SDIO controller support"
->>>
->>> -	depends on SUPERH || ARCH_SHMOBILE
->>> +	depends on SUPERH || ARM
->>> +	depends on SUPERH || ARCH_SHMOBILE || COMPILE_TEST
 
->>      Hm, why 2 "depends" lines with SUPERH in both?
-
-> The first line means "this driver requires SUPERH || ARM to be compiled",
-
-    Then COMPILE_TEST should be there, no?
-
-> while the second line means "devices supported by this driver are only found
-> on SUPERH || ARCH_SHMOBILE platforms".
-
-WBR, Sergei
 
