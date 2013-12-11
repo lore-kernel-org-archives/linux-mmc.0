@@ -1,87 +1,66 @@
-From: Dong Aisheng <dongas86@gmail.com>
-Subject: Re: [PATCH 4/6] mmc: sdhci-esdhc-imx: set the correct max timeout
- value for uSDHC
-Date: Wed, 11 Dec 2013 11:08:46 +0800
-Message-ID: <CAA+hA=TU+73qY1wHTfTYvKUzQpu8xOSbC+MJJsOYT5RE4Wdz0w@mail.gmail.com>
+From: Shawn Guo <shawn.guo@linaro.org>
+Subject: Re: [PATCH 1/6] mmc: sdhci: add platfrom get_max_timeout hook
+Date: Wed, 11 Dec 2013 11:12:56 +0800
+Message-ID: <20131211031254.GF18380@S2101-09.ap.freescale.net>
 References: <1386680168-5227-1-git-send-email-b29396@freescale.com>
-	<1386680168-5227-5-git-send-email-b29396@freescale.com>
-	<20131211021715.GD18380@S2101-09.ap.freescale.net>
+ <1386680168-5227-2-git-send-email-b29396@freescale.com>
+ <20131211015640.GA18380@S2101-09.ap.freescale.net>
+ <CAA+hA=ST0fAa2__PaeJqxj2yDWUAr6iaNO4Dj7ABiEWqnYp6Vw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset="us-ascii"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qe0-f48.google.com ([209.85.128.48]:55386 "EHLO
-	mail-qe0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751108Ab3LKDIr (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 10 Dec 2013 22:08:47 -0500
-Received: by mail-qe0-f48.google.com with SMTP id gc15so4770557qeb.21
-        for <linux-mmc@vger.kernel.org>; Tue, 10 Dec 2013 19:08:46 -0800 (PST)
-In-Reply-To: <20131211021715.GD18380@S2101-09.ap.freescale.net>
+Received: from va3ehsobe010.messaging.microsoft.com ([216.32.180.30]:46556
+	"EHLO va3outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1750942Ab3LKDMf (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 10 Dec 2013 22:12:35 -0500
+Content-Disposition: inline
+In-Reply-To: <CAA+hA=ST0fAa2__PaeJqxj2yDWUAr6iaNO4Dj7ABiEWqnYp6Vw@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Shawn Guo <shawn.guo@linaro.org>
+To: Dong Aisheng <dongas86@gmail.com>
 Cc: Dong Aisheng <b29396@freescale.com>, Ulf Hansson <ulf.hansson@linaro.org>, Ed Sutter <ed.sutter@alcatel-lucent.com>, Sascha Hauer <s.hauer@pengutronix.de>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, adrian.hunter@intel.com, vladimir_zapolskiy@mentor.com, Chris Ball <cjb@laptop.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 
-On Wed, Dec 11, 2013 at 10:17 AM, Shawn Guo <shawn.guo@linaro.org> wrote:
-> On Tue, Dec 10, 2013 at 08:56:06PM +0800, Dong Aisheng wrote:
->> The default sdhci driver write 0xE into timeout counter register to
->> set the maximum timeout. The value is not correct for uSDHC since the
->> max counter value for uSDHC is 0xF.
->> Instead of using common timeout code in sdhci, we implement esdhc_set_timeout
->> to handle the difference between eSDHC and uSDHC.
->>
->> Signed-off-by: Dong Aisheng <b29396@freescale.com>
->> ---
->>  drivers/mmc/host/sdhci-esdhc-imx.c |   11 +++++++++++
->>  1 files changed, 11 insertions(+), 0 deletions(-)
->>
->> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
->> index 97b35e1..c24cb23 100644
->> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
->> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
->> @@ -868,6 +868,16 @@ unsigned int esdhc_get_max_timeout(struct sdhci_host *host)
->>       return max_to / (esdhc_pltfm_get_max_clock(host) / 1000);
->>  }
->>
->> +void esdhc_set_timeout(struct sdhci_host *host, struct mmc_command *cmd)
->
-> static?
->
+On Wed, Dec 11, 2013 at 11:00:03AM +0800, Dong Aisheng wrote:
+> >> @@ -2930,7 +2930,10 @@ int sdhci_add_host(struct sdhci_host *host)
+> >>       if (host->quirks & SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK)
+> >>               host->timeout_clk = mmc->f_max / 1000;
+> >>
+> >> -     mmc->max_discard_to = (1 << 27) / host->timeout_clk;
+> >> +     if (host->ops->get_max_timeout)
+> >> +             mmc->max_discard_to = host->ops->get_max_timeout(host);
+> >
+> > Does "timeout" conceptually equals to "discard_to"?  If not, we might
+> > want to write it in the either form below to avoid messing these two
+> > concepts.
+> >
+> 
+> No, they're two concepts but the max_discard_to equals to the max timeout value
+> the host supports.
 
-Sorry, i missed it when do copy&paste.
-Will update it in v2 with another same issue you pointed.
+Does it?  Shouldn't max_discard_to equals to max_timeout_value / timeout_clk?
 
-Regards
-Dong Aisheng
+> 
+> >         mmc->max_discard_to = host->ops->get_max_timeout(host) / host->timeout_clk;
+> >
+> > or
+> >
+> >         mmc->max_discard_to = host->ops->get_max_discard_to(host);
+> >
+> > I guess you may want to go for the second one.
+> >
+> 
+> The original way looks ok to me.
+> Platform host driver does not need to know detail about discard,
+> just tell the max timeout value it supports is ok.
+> Common sdhci driver will handle it well.
 
-> Shawn
->
->> +{
->> +     struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
->> +     struct pltfm_imx_data *imx_data = pltfm_host->priv;
->> +
->> +     /* use maximum timeout counter */
->> +     sdhci_writeb(host, esdhc_is_usdhc(imx_data) ? 0xF : 0xE,
->> +                     SDHCI_TIMEOUT_CONTROL);
->> +}
->> +
->>  static struct sdhci_ops sdhci_esdhc_ops = {
->>       .read_l = esdhc_readl_le,
->>       .read_w = esdhc_readw_le,
->> @@ -881,6 +891,7 @@ static struct sdhci_ops sdhci_esdhc_ops = {
->>       .platform_bus_width = esdhc_pltfm_bus_width,
->>       .set_uhs_signaling = esdhc_set_uhs_signaling,
->>       .get_max_timeout = esdhc_get_max_timeout,
->> +     .set_timeout = esdhc_set_timeout,
->>  };
->>
->>  static const struct sdhci_pltfm_data sdhci_esdhc_imx_pdata = {
->> --
->> 1.7.2.rc3
->>
->>
->
->
-> _______________________________________________
-> linux-arm-kernel mailing list
-> linux-arm-kernel@lists.infradead.org
-> http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
+Well, looking at the patch #2, esdhc_get_max_timeout() returns
+
+  max_to / (esdhc_pltfm_get_max_clock(host) / 1000)
+
+not just the max timeout value - max_to, so your platform host driver
+is knowing and handling the details about discard_ro, i.e. the
+discard_ro has to be max_timeout_value / timeout_clk.
+
+Shawn
+
