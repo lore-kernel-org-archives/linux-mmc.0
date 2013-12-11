@@ -1,19 +1,19 @@
 From: zhangfei <zhangfei.gao@linaro.org>
-Subject: Re: [PATCH 3/3] clk: hisilicon: add hi3620_mmc_clks
-Date: Wed, 11 Dec 2013 23:40:39 +0800
-Message-ID: <52A88777.9030502@linaro.org>
-References: <1386770541-15056-1-git-send-email-zhangfei.gao@linaro.org> <1386770541-15056-4-git-send-email-zhangfei.gao@linaro.org> <201312111544.47519.arnd@arndb.de>
+Subject: Re: [PATCH 2/3] mmc: dw_mmc: add dw_mmc-k3 for k3 platform
+Date: Wed, 11 Dec 2013 23:53:13 +0800
+Message-ID: <52A88A69.6040102@linaro.org>
+References: <1386770541-15056-1-git-send-email-zhangfei.gao@linaro.org> <1386770541-15056-3-git-send-email-zhangfei.gao@linaro.org> <201312111549.14017.arnd@arndb.de> <52A8868A.3000105@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-15; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pb0-f46.google.com ([209.85.160.46]:40176 "EHLO
-	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751508Ab3LKPkv (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 11 Dec 2013 10:40:51 -0500
-Received: by mail-pb0-f46.google.com with SMTP id md12so10131341pbc.19
-        for <linux-mmc@vger.kernel.org>; Wed, 11 Dec 2013 07:40:51 -0800 (PST)
-In-Reply-To: <201312111544.47519.arnd@arndb.de>
+Received: from mail-pd0-f177.google.com ([209.85.192.177]:37754 "EHLO
+	mail-pd0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751344Ab3LKPx1 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 11 Dec 2013 10:53:27 -0500
+Received: by mail-pd0-f177.google.com with SMTP id q10so9641125pdj.8
+        for <linux-mmc@vger.kernel.org>; Wed, 11 Dec 2013 07:53:27 -0800 (PST)
+In-Reply-To: <52A8868A.3000105@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Arnd Bergmann <arnd@arndb.de>
@@ -21,38 +21,47 @@ Cc: Chris Ball <cjb@laptop.org>, Mike Turquette <mturquette@linaro.org>, Rob Her
 
 
 
-On 12/11/2013 10:44 PM, Arnd Bergmann wrote:
-> On Wednesday 11 December 2013, Zhangfei Gao wrote:
->> +PCTRL: Peripheral misc control register
->> +
->> +Required Properties:
->> +- compatible: "hisilicon,pctrl"
->> +- reg: Address and size of pctrl.
->> +
->> +Example:
->> +
->> +       /* for Hi3620 */
->> +       pctrl: pctrl@fca09000 {
->> +               compatible = "hisilicon,pctrl";
->> +               reg = <0xfca09000 0x1000>;
->> +       };
+On 12/11/2013 11:36 PM, zhangfei wrote:
 >
-> It seems you are missing the clock specific parts of the binding:
-> You should document the required value of #clock-cells as well as
-> the possible values for the clock specifier.
 >
+> On 12/11/2013 10:49 PM, Arnd Bergmann wrote:
+>> On Wednesday 11 December 2013, Zhangfei Gao wrote:
+>
+>>> +Required Properties:
+>>> +
+>>> +* compatible: should be one of the following.
+>>> +  - "hisilicon,hi4511-dw-mshc": for controllers with hi4511 specific
+>>> extentions.
+>>> +* clk-table-num: should be number of clks in clk-table required by
+>>> each mmc timing
+>>> +* clk-table: should clock list required by each mmc timing
+>>
+>> I have not seen "clk-table" and "clk-table-num" before. Are these
+>> standard
+>> properties? What are the units that are used here, what does the index
+>> mean?
+>>
+>
+> "clk-table" and "clk-table-num" are private properties.
+> Instead simply on/off, the ip need different ciu clock for each timing
+> mode.
+> Take emmc as example,
+> clk-table-num = <8>;
+> clk-table =
 
-It is reuse Documentation/devicetree/bindings/clock/hi3620-clock.txt via 
-adding hisilicon,hi3620-mmc-clock"
+My bad, this is for sd.
+> <13000000 50000000 0 0 13000000 50000000 0 100000000>;
 
-- compatible: should be one of the following.
-   - "hisilicon,hi3620-clock" - controller compatible with Hi3620 SoC.
-+  - "hisilicon,hi3620-mmc-clock" - controller specific for Hi3620 mmc.
-
-- reg: physical base address of the controller and length of memory mapped
-   region.
-
-- #clock-cells: should be 1.
-
-Thanks
-
+<25000000 0 50000000 25000000 50000000 100000000 0 50000000>;
+> MMC_TIMING_LEGACY mode, 25M should be set with parent clock 180M,
+> MMC_TIMING_MMC_HS mode, 50M is required with parent clock 360M
+>
+> "clk-table" list all clocks to be set in all supported timing one by one.
+> "clk-table-num" is the table number, since not find function getting
+> table number.
+> For example, next version will support MMC_TIMING_MMC_HS200 mode, the
+> clk-table-num = <9> with 9 clocks in the "clk-table"
+>
+> Thanks
+>
+>
