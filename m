@@ -1,67 +1,68 @@
-From: zhangfei <zhangfei.gao@linaro.org>
-Subject: Re: [PATCH 2/3] mmc: dw_mmc: add dw_mmc-k3 for k3 platform
-Date: Wed, 11 Dec 2013 23:53:13 +0800
-Message-ID: <52A88A69.6040102@linaro.org>
-References: <1386770541-15056-1-git-send-email-zhangfei.gao@linaro.org> <1386770541-15056-3-git-send-email-zhangfei.gao@linaro.org> <201312111549.14017.arnd@arndb.de> <52A8868A.3000105@linaro.org>
+From: Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>
+Subject: Re: [PATCH 07/15] mmc: sdhi: Enable driver compilation with COMPILE_TEST
+Date: Wed, 11 Dec 2013 22:01:53 +0400
+Message-ID: <52A8A891.40302@cogentembedded.com>
+References: <1385515117-23664-1-git-send-email-laurent.pinchart+renesas@ideasonboard.com> <1385515117-23664-8-git-send-email-laurent.pinchart+renesas@ideasonboard.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-15; format=flowed
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pd0-f177.google.com ([209.85.192.177]:37754 "EHLO
-	mail-pd0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751344Ab3LKPx1 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 11 Dec 2013 10:53:27 -0500
-Received: by mail-pd0-f177.google.com with SMTP id q10so9641125pdj.8
-        for <linux-mmc@vger.kernel.org>; Wed, 11 Dec 2013 07:53:27 -0800 (PST)
-In-Reply-To: <52A8868A.3000105@linaro.org>
+Received: from mail-bk0-f50.google.com ([209.85.214.50]:51561 "EHLO
+	mail-bk0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751948Ab3LKSBz (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 11 Dec 2013 13:01:55 -0500
+Received: by mail-bk0-f50.google.com with SMTP id e11so460795bkh.37
+        for <linux-mmc@vger.kernel.org>; Wed, 11 Dec 2013 10:01:54 -0800 (PST)
+In-Reply-To: <1385515117-23664-8-git-send-email-laurent.pinchart+renesas@ideasonboard.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: Chris Ball <cjb@laptop.org>, Mike Turquette <mturquette@linaro.org>, Rob Herring <robherring2@gmail.com>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, Kumar Gala <galak@codeaurora.org>, Haojian Zhuang <haojian.zhuang@linaro.org>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, patches@linaro.org, devicetree@vger.kernel.org
+To: Laurent Pinchart <laurent.pinchart+renesas@ideasonboard.com>, linux-sh@vger.kernel.org
+Cc: linux-arm-kernel@lists.infradead.org, Chris Ball <cjb@laptop.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Ian Molton <ian@mnementh.co.uk>, linux-mmc@vger.kernel.org
 
+Hello.
 
+On 27-11-2013 5:18, Laurent Pinchart wrote:
 
-On 12/11/2013 11:36 PM, zhangfei wrote:
->
->
-> On 12/11/2013 10:49 PM, Arnd Bergmann wrote:
->> On Wednesday 11 December 2013, Zhangfei Gao wrote:
->
->>> +Required Properties:
->>> +
->>> +* compatible: should be one of the following.
->>> +  - "hisilicon,hi4511-dw-mshc": for controllers with hi4511 specific
->>> extentions.
->>> +* clk-table-num: should be number of clks in clk-table required by
->>> each mmc timing
->>> +* clk-table: should clock list required by each mmc timing
->>
->> I have not seen "clk-table" and "clk-table-num" before. Are these
->> standard
->> properties? What are the units that are used here, what does the index
->> mean?
->>
->
-> "clk-table" and "clk-table-num" are private properties.
-> Instead simply on/off, the ip need different ciu clock for each timing
-> mode.
-> Take emmc as example,
-> clk-table-num = <8>;
-> clk-table =
+> This helps increasing build testing coverage.
 
-My bad, this is for sd.
-> <13000000 50000000 0 0 13000000 50000000 0 100000000>;
+> The driver doesn't compile on (at least) x86 due (possibly among others)
+> to missing readsw/writesw I/O accessors, restrict compilation to SUPERH
+> or ARM.
 
-<25000000 0 50000000 25000000 50000000 100000000 0 50000000>;
-> MMC_TIMING_LEGACY mode, 25M should be set with parent clock 180M,
-> MMC_TIMING_MMC_HS mode, 50M is required with parent clock 360M
+> Whether the CTL_DMA_ENABLE register is part of the standard TMIO
+> controller or is Renesas-specific is unknown and impossible to test as
+> we have no current or planned TMIO DMA users other than SUPERH and
+> ARCH_SHMOBILE. Writing to the register is thus conditionally compiled
+> for SUPERH and ARCH_SHMOBILE only. Adding ARCH_SHMOBILE_MULTI to the
+> list would extend this to multiarch kernels, but would break the driver
+> for non-shmobile platforms if the register is Renesas-specific. We can
+> thus get rid of the conditional compilation completely without
+> introducing any further issue, and let future non-Renesas users deal
+> with the situation if it turns out to be a the problem.
+
+> Cc: Chris Ball <cjb@laptop.org>
+> Cc: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+> Cc: Ian Molton <ian@mnementh.co.uk>
+> Cc: linux-mmc@vger.kernel.org
+> Signed-off-by: Laurent Pinchart <laurent.pinchart+renesas@ideasonboard.com>
+> Acked-by: Simon Horman <horms@verge.net.au>
+> ---
+>   drivers/mmc/host/Kconfig | 3 ++-
+>   1 file changed, 2 insertions(+), 1 deletion(-)
+
+> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+> index 7fc5099..ca1315e 100644
+> --- a/drivers/mmc/host/Kconfig
+> +++ b/drivers/mmc/host/Kconfig
+> @@ -479,7 +479,8 @@ config MMC_TMIO
 >
-> "clk-table" list all clocks to be set in all supported timing one by one.
-> "clk-table-num" is the table number, since not find function getting
-> table number.
-> For example, next version will support MMC_TIMING_MMC_HS200 mode, the
-> clk-table-num = <9> with 9 clocks in the "clk-table"
->
-> Thanks
->
->
+>   config MMC_SDHI
+>   	tristate "SH-Mobile SDHI SD/SDIO controller support"
+> -	depends on SUPERH || ARCH_SHMOBILE
+> +	depends on SUPERH || ARM
+> +	depends on SUPERH || ARCH_SHMOBILE || COMPILE_TEST
+
+    Hm, why 2 "depends" lines with SUPERH in both?
+
+WBR, Sergei
+
