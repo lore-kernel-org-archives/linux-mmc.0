@@ -1,85 +1,71 @@
-From: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
-Subject: Re: [PATCH 07/15] mmc: sdhi: Enable driver compilation with COMPILE_TEST
-Date: Thu, 12 Dec 2013 00:05:36 +0100
-Message-ID: <13209501.ngs8HJ5G2p@avalon>
-References: <1385515117-23664-1-git-send-email-laurent.pinchart+renesas@ideasonboard.com> <1488247.0AdahCZr3G@avalon> <52A8AD5B.70601@cogentembedded.com>
+From: Heiko =?utf-8?q?St=C3=BCbner?= <heiko@sntech.de>
+Subject: Re: [PATCH 2/2] mmc: dw_mmc: add dw_mmc-k3 for k3 platform
+Date: Thu, 12 Dec 2013 00:40:58 +0100
+Message-ID: <201312120040.59345.heiko@sntech.de>
+References: <1383889128-12540-1-git-send-email-zhangfei.gao@linaro.org> <201312110445.54336.arnd@arndb.de> <1386787690.20516.10.camel@linux-builds1>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7Bit
+Content-Type: Text/Plain;
+  charset="utf-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from perceval.ideasonboard.com ([95.142.166.194]:46204 "EHLO
-	perceval.ideasonboard.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751028Ab3LKXFY (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 11 Dec 2013 18:05:24 -0500
-In-Reply-To: <52A8AD5B.70601@cogentembedded.com>
+Received: from gloria.sntech.de ([95.129.55.99]:45660 "EHLO gloria.sntech.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751889Ab3LKXlH (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 11 Dec 2013 18:41:07 -0500
+In-Reply-To: <1386787690.20516.10.camel@linux-builds1>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>
-Cc: Laurent Pinchart <laurent.pinchart+renesas@ideasonboard.com>, linux-sh@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Chris Ball <cjb@laptop.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Ian Molton <ian@mnementh.co.uk>, linux-mmc@vger.kernel.org
+To: Dinh Nguyen <dinguyen@altera.com>
+Cc: Arnd Bergmann <arnd@arndb.de>, Zhangfei Gao <zhangfei.gao@gmail.com>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>, devicetree@vger.kernel.org, Seungwon Jeon <tgih.jun@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Jaehoon Chung <jh80.chung@samsung.com>, Kumar Gala <galak@codeaurora.org>, Zhangfei Gao <zhangfei.gao@linaro.org>, Chris Ball <cjb@laptop.org>
 
-Hi Sergei,
-
-On Wednesday 11 December 2013 22:22:19 Sergei Shtylyov wrote:
-> On 11-12-2013 22:06, Laurent Pinchart wrote:
-> >>> This helps increasing build testing coverage.
-> >>> 
-> >>> The driver doesn't compile on (at least) x86 due (possibly among others)
-> >>> to missing readsw/writesw I/O accessors, restrict compilation to SUPERH
-> >>> or ARM.
-> >>> 
-> >>> Whether the CTL_DMA_ENABLE register is part of the standard TMIO
-> >>> controller or is Renesas-specific is unknown and impossible to test as
-> >>> we have no current or planned TMIO DMA users other than SUPERH and
-> >>> ARCH_SHMOBILE. Writing to the register is thus conditionally compiled
-> >>> for SUPERH and ARCH_SHMOBILE only. Adding ARCH_SHMOBILE_MULTI to the
-> >>> list would extend this to multiarch kernels, but would break the driver
-> >>> for non-shmobile platforms if the register is Renesas-specific. We can
-> >>> thus get rid of the conditional compilation completely without
-> >>> introducing any further issue, and let future non-Renesas users deal
-> >>> with the situation if it turns out to be a the problem.
-> >>> 
-> >>> Cc: Chris Ball <cjb@laptop.org>
-> >>> Cc: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-> >>> Cc: Ian Molton <ian@mnementh.co.uk>
-> >>> Cc: linux-mmc@vger.kernel.org
-> >>> Signed-off-by: Laurent Pinchart
-> >>> <laurent.pinchart+renesas@ideasonboard.com>
-> >>> Acked-by: Simon Horman <horms@verge.net.au>
-> 
-> [...]
-> 
-> >>> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-> >>> index 7fc5099..ca1315e 100644
-> >>> --- a/drivers/mmc/host/Kconfig
-> >>> +++ b/drivers/mmc/host/Kconfig
-> >>> @@ -479,7 +479,8 @@ config MMC_TMIO
-> >>> 
-> >>>    config MMC_SDHI
-> >>>    	tristate "SH-Mobile SDHI SD/SDIO controller support"
-> >>> -	depends on SUPERH || ARCH_SHMOBILE
-> >>> +	depends on SUPERH || ARM
-> >>> +	depends on SUPERH || ARCH_SHMOBILE || COMPILE_TEST
-> >>> 
-> >>      Hm, why 2 "depends" lines with SUPERH in both?
+Am Mittwoch, 11. Dezember 2013, 19:48:10 schrieb Dinh Nguyen:
+> On Wed, 2013-12-11 at 04:45 +0100, Arnd Bergmann wrote:
+> > On Wednesday 11 December 2013, Zhangfei Gao wrote:
+> > > Thanks for the good suggestion, it can be abstracted to clock.
+> > > 
+> > > The issue for this version's ip is there are some registers need to be
+> > > set, including fixed factor and phase, which may be required to be
+> > > tuned, however it can be hide in clock.
+> > > 
+> > > Double checked next version's ip, it is more intelligent and only
+> > > fixed factor is required, more like a clock, and all these register
+> > > accessing are NOT required.
+> > > 
+> > > Will update new version to abstract these chip depended registers to
+> > > clock.
 > > 
-> > The first line means "this driver requires SUPERH || ARM to be compiled",
+> > Ok, please stay in contact with Dinh Nguyen over this, since his side
+> > is work-in-progress and we are still evaluating how to best encode
+> > the phase setting in DT in a generic form.
 > 
->     Then COMPILE_TEST should be there, no?
+> Will the bindings "samsung,dw-mshc-sdr-timing" and
+> "samsung,dw-mshc-ddr-timing" also work for the k3 platform as well? I
+> think they should work, but just wanted to verify.
+> 
+> Heiko, on the rockchip platform, can you check to see if you have these
+> cclk_in_drv and cclk_sample settings for the phase shift of the clocks?
+> The SD/MMC IP version(2.40a) on Rockchip is the same version that is on
+> SOCFPGA, so I think these settings are there. They can be located in
+> some other "system" register block like SOCFPGA. The possible reason
+> that you have not need to set them in the Rockchip code could be that
+> the bootloader/firmware has already set them if you are booting from the
+> SD/MMC source. You may need to set the clock phase settings if you boot
+> from a non-SD source.
+> 
+> I think the reading of the "samsung,dw-mshc-ddr-timing" and
+> "samsung,dw-msh-sdr-timing" bindings can also be moved into the generic
+> dw_mmc driver if the above 2 conditions are correct.
 
-No, because the first line says that the driver is known *not* to compile on 
-platforms other than ARM and SUPERH. Adding || COMPILE_TEST there would break 
-compilation with allyesconfig and randconfig on those other platforms.
+The mmc-controller part of the rk-manual that is flying around the net, 
+mentions these cclk_in_drv and cclk_in_sample as coming from somewhere, but 
+sadly never where to get/set/access them.
 
-Stated differently, the first line restricts the driver from being compiled on 
-architectures where it doesn't compile, regardless of COMPILE_TEST, and the 
-second line restricts it to platform where hardware is known to exists, with 
-COMPILE_TEST to optionally extend build coverage.
+The doc of the USE_HOLD_REG bit also mention the required settings of these 
+cclk_in_* but nowhere is a word about the where to be found.
 
-> > while the second line means "devices supported by this driver are only
-> > found on SUPERH || ARCH_SHMOBILE platforms".
+And the manual is notable for lacking all information related to the clock 
+controller. And I also wasn't able to find any other indication where this 
+might be set.
 
--- 
-Regards,
 
-Laurent Pinchart
-
+Heiko
