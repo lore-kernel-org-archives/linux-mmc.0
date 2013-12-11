@@ -1,67 +1,85 @@
-From: Tony Lindgren <tony@atomide.com>
-Subject: Re: [PATCH v4 5/7] ARM: dts: add pbias dt node
-Date: Tue, 10 Dec 2013 14:42:53 -0800
-Message-ID: <20131210224252.GX13171@atomide.com>
-References: <1385043627-30439-1-git-send-email-balajitk@ti.com>
- <1386670577-3530-1-git-send-email-balajitk@ti.com>
- <1386670577-3530-6-git-send-email-balajitk@ti.com>
+From: Shawn Guo <shawn.guo@linaro.org>
+Subject: Re: [PATCH 1/6] mmc: sdhci: add platfrom get_max_timeout hook
+Date: Wed, 11 Dec 2013 09:56:43 +0800
+Message-ID: <20131211015640.GA18380@S2101-09.ap.freescale.net>
+References: <1386680168-5227-1-git-send-email-b29396@freescale.com>
+ <1386680168-5227-2-git-send-email-b29396@freescale.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="us-ascii"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mho-02-ewr.mailhop.org ([204.13.248.72]:34607 "EHLO
-	mho-02-ewr.mailhop.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750776Ab3LJWm4 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 10 Dec 2013 17:42:56 -0500
+Received: from co1ehsobe001.messaging.microsoft.com ([216.32.180.184]:51709
+	"EHLO co1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1750829Ab3LKB4W (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 10 Dec 2013 20:56:22 -0500
 Content-Disposition: inline
-In-Reply-To: <1386670577-3530-6-git-send-email-balajitk@ti.com>
+In-Reply-To: <1386680168-5227-2-git-send-email-b29396@freescale.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Balaji T K <balajitk@ti.com>
-Cc: linux-omap@vger.kernel.org, bcousson@baylibre.com, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, cjb@laptop.org, broonie@kernel.org
+To: Dong Aisheng <b29396@freescale.com>
+Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, cjb@laptop.org, s.hauer@pengutronix.de, ulf.hansson@linaro.org, adrian.hunter@intel.com, vladimir_zapolskiy@mentor.com, ed.sutter@alcatel-lucent.com
 
-* Balaji T K <balajitk@ti.com> [131210 02:17]:
-> Add pbias regulator node as a child of system control
-> module - syscon.
+On Tue, Dec 10, 2013 at 08:56:03PM +0800, Dong Aisheng wrote:
+> Currently the max_discard_to is simply got by (1 << 27) / host->timeout_clk
+> which is assumed to be the maximum timeout value, however, some platforms
+> maximum timeout counter may not be 1 << 27, e.g. i.MX uSDHC is 1 << 28.
+> Thus 1 << 27 may not be correct for such platforms.
 > 
-> Signed-off-by: Balaji T K <balajitk@ti.com>
+> It is also possible that other platforms may have different problems.
+> To be flexible, we add a get_max_timeout hook to get the correct
+> maximum timeout value for these platforms.
+> 
+> Signed-off-by: Dong Aisheng <b29396@freescale.com>
+> Reported-by: Ed Sutter <ed.sutter@alcatel-lucent.com>
 > ---
->  arch/arm/boot/dts/dra7.dtsi     |   14 ++++++++++++++
->  arch/arm/boot/dts/omap2430.dtsi |   14 ++++++++++++++
->  arch/arm/boot/dts/omap3.dtsi    |   14 ++++++++++++++
->  arch/arm/boot/dts/omap4.dtsi    |   14 ++++++++++++++
->  arch/arm/boot/dts/omap5.dtsi    |   14 ++++++++++++++
->  5 files changed, 70 insertions(+), 0 deletions(-)
+>  drivers/mmc/host/sdhci.c |    5 ++++-
+>  drivers/mmc/host/sdhci.h |    1 +
+>  2 files changed, 5 insertions(+), 1 deletions(-)
 > 
-> diff --git a/arch/arm/boot/dts/dra7.dtsi b/arch/arm/boot/dts/dra7.dtsi
-> index d0df4c4..1a52676 100644
-> --- a/arch/arm/boot/dts/dra7.dtsi
-> +++ b/arch/arm/boot/dts/dra7.dtsi
-> @@ -119,6 +119,19 @@
->  			pinctrl-single,function-mask = <0x3fffffff>;
->  		};
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index bd8a098..464d42c 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -2930,7 +2930,10 @@ int sdhci_add_host(struct sdhci_host *host)
+>  	if (host->quirks & SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK)
+>  		host->timeout_clk = mmc->f_max / 1000;
 >  
-> +		tisyscon: tisyscon@4A100600 {
-> +			compatible = "ti,control-syscon", "syscon", "simple-bus";
-> +			reg = <0x4A002E00 0x4>;
+> -	mmc->max_discard_to = (1 << 27) / host->timeout_clk;
+> +	if (host->ops->get_max_timeout)
+> +		mmc->max_discard_to = host->ops->get_max_timeout(host);
 
-This should map the whole GENERAL area of the SCM register space instead
-in one or multiple sections or driver instances. This way the same driver
-can be used for the misc SCM registers from other drivers.
+Does "timeout" conceptually equals to "discard_to"?  If not, we might
+want to write it in the either form below to avoid messing these two
+concepts.
 
-If you don't define it that way now, you'll end up with broken child driver
-offsets in the .dts files later on.
+	mmc->max_discard_to = host->ops->get_max_timeout(host) / host->timeout_clk;
 
-> +				pbias_regulator: pbias_regulator {
-> +					compatible = "regulator-pbias-omap5";
-> +					pbias-reg-offset = <0>;
-> +					regulator-name = "pbias_regulator";
-> +					regulator-min-microvolt = <1800000>;
-> +					regulator-max-microvolt = <3000000>;
-> +					regulator-enable-ramp-delay = <10>;
+or
 
-Then the pbias_regulator needs to have the standard reg property as an
-offset from the SCM GENERAL base address.
+	mmc->max_discard_to = host->ops->get_max_discard_to(host);
 
-Regards,
+I guess you may want to go for the second one.
 
-Tony
+Shawn
+
+> +	else
+> +		mmc->max_discard_to = (1 << 27) / host->timeout_clk;
+>  
+>  	mmc->caps |= MMC_CAP_SDIO_IRQ | MMC_CAP_ERASE | MMC_CAP_CMD23;
+>  
+> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+> index 0a3ed01..1591cbb 100644
+> --- a/drivers/mmc/host/sdhci.h
+> +++ b/drivers/mmc/host/sdhci.h
+> @@ -281,6 +281,7 @@ struct sdhci_ops {
+>  	unsigned int	(*get_max_clock)(struct sdhci_host *host);
+>  	unsigned int	(*get_min_clock)(struct sdhci_host *host);
+>  	unsigned int	(*get_timeout_clock)(struct sdhci_host *host);
+> +	unsigned int	(*get_max_timeout)(struct sdhci_host *host);
+>  	int		(*platform_bus_width)(struct sdhci_host *host,
+>  					       int width);
+>  	void (*platform_send_init_74_clocks)(struct sdhci_host *host,
+> -- 
+> 1.7.2.rc3
+> 
+> 
+
