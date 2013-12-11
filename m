@@ -1,89 +1,71 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH RESEND] mmc: sdhci-pci: Fix BYT sd card getting stuck
- in runtime suspend
-Date: Wed, 11 Dec 2013 14:43:38 +0200
-Message-ID: <52A85DFA.4080505@intel.com>
-References: <1386764492-26444-1-git-send-email-adrian.hunter@intel.com>
+From: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
+Subject: Re: [PATCH 07/15] mmc: sdhi: Enable driver compilation with COMPILE_TEST
+Date: Wed, 11 Dec 2013 13:53:21 +0100
+Message-ID: <2090378.13zHUAnprd@avalon>
+References: <1385515117-23664-1-git-send-email-laurent.pinchart+renesas@ideasonboard.com> <1385515117-23664-8-git-send-email-laurent.pinchart+renesas@ideasonboard.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
-Return-path: <stable-owner@vger.kernel.org>
-In-Reply-To: <1386764492-26444-1-git-send-email-adrian.hunter@intel.com>
-Sender: stable-owner@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, stable <stable@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7Bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from perceval.ideasonboard.com ([95.142.166.194]:43013 "EHLO
+	perceval.ideasonboard.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753152Ab3LKMxJ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 11 Dec 2013 07:53:09 -0500
+In-Reply-To: <1385515117-23664-8-git-send-email-laurent.pinchart+renesas@ideasonboard.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>
+Cc: linux-sh@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Ian Molton <ian@mnementh.co.uk>, linux-mmc@vger.kernel.org
 
-Hi
+Hi Chris,
 
-For some reason this email doesn't seem to get
-onto the mailing lists.  I am trying to figure out
-why.
+Could you please pick this patch (and patch 08/15 in the same series) up for 
+v3.14 ?
 
-
-On 11/12/13 14:21, Adrian Hunter wrote:
-> A host controller for a SD card may need a GPIO
-> for card detect in order to wake up from runtime
-> suspend when a card is inserted.  If that GPIO is
-> not configured, then the host controller will not
-> wake up.  Fix that for the affected devices by not
-> enabling runtime PM unless the GPIO is successfully
-> set up.
+On Wednesday 27 November 2013 02:18:29 Laurent Pinchart wrote:
+> This helps increasing build testing coverage.
 > 
-> This affects BYT sd card host controller which had
-> runtime PM enabled from v3.11.  For completeness,
-> the MFD sd card host controller is flagged also.
+> The driver doesn't compile on (at least) x86 due (possibly among others)
+> to missing readsw/writesw I/O accessors, restrict compilation to SUPERH
+> or ARM.
 > 
-> Tested on v3.11.10 and v3.12.4 although the patch
-> applies with some offsets and fuzz.
+> Whether the CTL_DMA_ENABLE register is part of the standard TMIO
+> controller or is Renesas-specific is unknown and impossible to test as
+> we have no current or planned TMIO DMA users other than SUPERH and
+> ARCH_SHMOBILE. Writing to the register is thus conditionally compiled
+> for SUPERH and ARCH_SHMOBILE only. Adding ARCH_SHMOBILE_MULTI to the
+> list would extend this to multiarch kernels, but would break the driver
+> for non-shmobile platforms if the register is Renesas-specific. We can
+> thus get rid of the conditional compilation completely without
+> introducing any further issue, and let future non-Renesas users deal
+> with the situation if it turns out to be a the problem.
 > 
-> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
-> Cc: stable <stable@vger.kernel.org> # 3.11+
+> Cc: Chris Ball <cjb@laptop.org>
+> Cc: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+> Cc: Ian Molton <ian@mnementh.co.uk>
+> Cc: linux-mmc@vger.kernel.org
+> Signed-off-by: Laurent Pinchart <laurent.pinchart+renesas@ideasonboard.com>
+> Acked-by: Simon Horman <horms@verge.net.au>
 > ---
->  drivers/mmc/host/sdhci-pci.c | 11 +++++++++++
->  1 file changed, 11 insertions(+)
+>  drivers/mmc/host/Kconfig | 3 ++-
+>  1 file changed, 2 insertions(+), 1 deletion(-)
 > 
-> diff --git a/drivers/mmc/host/sdhci-pci.c b/drivers/mmc/host/sdhci-pci.c
-> index 8f75381..7b930e6 100644
-> --- a/drivers/mmc/host/sdhci-pci.c
-> +++ b/drivers/mmc/host/sdhci-pci.c
-> @@ -65,6 +65,7 @@ struct sdhci_pci_fixes {
->  	unsigned int		quirks;
->  	unsigned int		quirks2;
->  	bool			allow_runtime_pm;
-> +	bool			own_cd_for_runtime_pm;
->  
->  	int			(*probe) (struct sdhci_pci_chip *);
->  
-> @@ -296,6 +297,7 @@ static const struct sdhci_pci_fixes sdhci_intel_mrst_hc1_hc2 = {
->  static const struct sdhci_pci_fixes sdhci_intel_mfd_sd = {
->  	.quirks		= SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC,
->  	.allow_runtime_pm = true,
-> +	.own_cd_for_runtime_pm = true,
->  };
->  
->  static const struct sdhci_pci_fixes sdhci_intel_mfd_sdio = {
-> @@ -360,6 +362,7 @@ static const struct sdhci_pci_fixes sdhci_intel_byt_sdio = {
->  static const struct sdhci_pci_fixes sdhci_intel_byt_sd = {
->  	.quirks2	= SDHCI_QUIRK2_CARD_ON_NEEDS_BUS_ON,
->  	.allow_runtime_pm = true,
-> +	.own_cd_for_runtime_pm = true,
->  };
->  
->  /* Define Host controllers for Intel Merrifield platform */
-> @@ -1457,6 +1460,14 @@ static struct sdhci_pci_slot *sdhci_pci_probe_slot(
->  
->  	sdhci_pci_add_own_cd(slot);
->  
-> +	/*
-> +	 * Check if the chip needs a separate GPIO for card detect to wake up
-> +	 * from runtime suspend.  If it is not there, don't allow runtime PM.
-> +	 * Note sdhci_pci_add_own_cd() sets slot->cd_gpio to -EINVAL on failure.
-> +	 */
-> +	if (chip->fixes->own_cd_for_runtime_pm && !gpio_is_valid(slot->cd_gpio))
-> +		chip->allow_runtime_pm = false;
-> +
->  	return slot;
->  
->  remove:
+> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+> index 7fc5099..ca1315e 100644
+> --- a/drivers/mmc/host/Kconfig
+> +++ b/drivers/mmc/host/Kconfig
+> @@ -479,7 +479,8 @@ config MMC_TMIO
 > 
+>  config MMC_SDHI
+>  	tristate "SH-Mobile SDHI SD/SDIO controller support"
+> -	depends on SUPERH || ARCH_SHMOBILE
+> +	depends on SUPERH || ARM
+> +	depends on SUPERH || ARCH_SHMOBILE || COMPILE_TEST
+>  	select MMC_TMIO_CORE
+>  	help
+>  	  This provides support for the SDHI SD/SDIO controller found in
+-- 
+Regards,
+
+Laurent Pinchart
+
