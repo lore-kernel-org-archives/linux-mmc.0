@@ -1,80 +1,145 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH RESEND] mmc: sdhci-pci: Fix BYT sd card getting stuck in runtime suspend
-Date: Wed, 11 Dec 2013 15:03:34 +0200
-Message-ID: <1386767014-27434-1-git-send-email-adrian.hunter@intel.com>
+From: Zhangfei Gao <zhangfei.gao@linaro.org>
+Subject: [PATCH 1/3] mmc: dw_mmc: use slot-gpio to handle cd pin
+Date: Wed, 11 Dec 2013 22:02:19 +0800
+Message-ID: <1386770541-15056-2-git-send-email-zhangfei.gao@linaro.org>
+References: <1386770541-15056-1-git-send-email-zhangfei.gao@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga09.intel.com ([134.134.136.24]:16436 "EHLO mga09.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751116Ab3LKNDl (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 11 Dec 2013 08:03:41 -0500
+Received: from mail-we0-f178.google.com ([74.125.82.178]:60954 "EHLO
+	mail-we0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751351Ab3LKOC6 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 11 Dec 2013 09:02:58 -0500
+Received: by mail-we0-f178.google.com with SMTP id u57so6597970wes.9
+        for <linux-mmc@vger.kernel.org>; Wed, 11 Dec 2013 06:02:57 -0800 (PST)
+In-Reply-To: <1386770541-15056-1-git-send-email-zhangfei.gao@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc <linux-mmc@vger.kernel.org>
-Cc: Adrian Hunter <adrian.hunter@intel.com>
+To: Chris Ball <cjb@laptop.org>, Arnd Bergmann <arnd@arndb.de>, Mike Turquette <mturquette@linaro.org>, Rob Herring <robherring2@gmail.com>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, Kumar Gala <galak@codeaurora.org>, Haojian Zhuang <haojian.zhuang@linaro.org>
+Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, patches@linaro.org, devicetree@vger.kernel.org, Zhangfei Gao <zhangfei.gao@linaro.org>
 
-A host controller for a SD card may need a GPIO
-for card detect in order to wake up from runtime
-suspend when a card is inserted.  If that GPIO is
-not configured, then the host controller will not
-wake up.  Fix that for the affected devices by not
-enabling runtime PM unless the GPIO is successfully
-set up.
+Suggested by Jaehoon: Use slot-gpio to handle cd-gpio
+Add function dw_mci_of_get_cd_gpio to check "cd-gpios" from dts.
+mmc_gpio_request_cd and mmc_gpio_get_cd are used to handle cd pin
 
-This affects BYT sd card host controller which had
-runtime PM enabled from v3.11.  For completeness,
-the MFD sd card host controller is flagged also.
-
-Tested on v3.11.10 and v3.12.4 although the patch
-applies with some offsets and fuzz.
-
-Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+Signed-off-by: Zhangfei Gao <zhangfei.gao@linaro.org>
+Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
 ---
- drivers/mmc/host/sdhci-pci.c | 11 +++++++++++
- 1 file changed, 11 insertions(+)
+ drivers/mmc/host/dw_mmc.c |   48 +++++++++++++++++++++++++++++++++------------
+ 1 file changed, 35 insertions(+), 13 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-pci.c b/drivers/mmc/host/sdhci-pci.c
-index 8f75381..7b930e6 100644
---- a/drivers/mmc/host/sdhci-pci.c
-+++ b/drivers/mmc/host/sdhci-pci.c
-@@ -65,6 +65,7 @@ struct sdhci_pci_fixes {
- 	unsigned int		quirks;
- 	unsigned int		quirks2;
- 	bool			allow_runtime_pm;
-+	bool			own_cd_for_runtime_pm;
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index 4bce0deec362..a776f24f4311 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -36,6 +36,7 @@
+ #include <linux/workqueue.h>
+ #include <linux/of.h>
+ #include <linux/of_gpio.h>
++#include <linux/mmc/slot-gpio.h>
  
- 	int			(*probe) (struct sdhci_pci_chip *);
+ #include "dw_mmc.h"
  
-@@ -296,6 +297,7 @@ static const struct sdhci_pci_fixes sdhci_intel_mrst_hc1_hc2 = {
- static const struct sdhci_pci_fixes sdhci_intel_mfd_sd = {
- 	.quirks		= SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC,
- 	.allow_runtime_pm = true,
-+	.own_cd_for_runtime_pm = true,
- };
+@@ -1032,20 +1033,26 @@ static int dw_mci_get_cd(struct mmc_host *mmc)
+ 	int present;
+ 	struct dw_mci_slot *slot = mmc_priv(mmc);
+ 	struct dw_mci_board *brd = slot->host->pdata;
++	int gpio_cd = !mmc_gpio_get_cd(mmc);
  
- static const struct sdhci_pci_fixes sdhci_intel_mfd_sdio = {
-@@ -360,6 +362,7 @@ static const struct sdhci_pci_fixes sdhci_intel_byt_sdio = {
- static const struct sdhci_pci_fixes sdhci_intel_byt_sd = {
- 	.quirks2	= SDHCI_QUIRK2_CARD_ON_NEEDS_BUS_ON,
- 	.allow_runtime_pm = true,
-+	.own_cd_for_runtime_pm = true,
- };
+ 	/* Use platform get_cd function, else try onboard card detect */
+ 	if (brd->quirks & DW_MCI_QUIRK_BROKEN_CARD_DETECTION)
+ 		present = 1;
+ 	else if (brd->get_cd)
+ 		present = !brd->get_cd(slot->id);
++	else if (!IS_ERR_VALUE(gpio_cd))
++		present = !!gpio_cd;
+ 	else
+ 		present = (mci_readl(slot->host, CDETECT) & (1 << slot->id))
+ 			== 0 ? 1 : 0;
  
- /* Define Host controllers for Intel Merrifield platform */
-@@ -1457,6 +1460,14 @@ static struct sdhci_pci_slot *sdhci_pci_probe_slot(
+-	if (present)
++	if (present) {
++		set_bit(DW_MMC_CARD_PRESENT, &slot->flags);
+ 		dev_dbg(&mmc->class_dev, "card is present\n");
+-	else
++	} else {
++		clear_bit(DW_MMC_CARD_PRESENT, &slot->flags);
+ 		dev_dbg(&mmc->class_dev, "card is not present\n");
++	}
  
- 	sdhci_pci_add_own_cd(slot);
+ 	return present;
+ }
+@@ -1926,10 +1933,6 @@ static void dw_mci_work_routine_card(struct work_struct *work)
+ 			/* Card change detected */
+ 			slot->last_detect_state = present;
  
-+	/*
-+	 * Check if the chip needs a separate GPIO for card detect to wake up
-+	 * from runtime suspend.  If it is not there, don't allow runtime PM.
-+	 * Note sdhci_pci_add_own_cd() sets slot->cd_gpio to -EINVAL on failure.
-+	 */
-+	if (chip->fixes->own_cd_for_runtime_pm && !gpio_is_valid(slot->cd_gpio))
-+		chip->allow_runtime_pm = false;
+-			/* Mark card as present if applicable */
+-			if (present != 0)
+-				set_bit(DW_MMC_CARD_PRESENT, &slot->flags);
+-
+ 			/* Clean up queue if present */
+ 			mrq = slot->mrq;
+ 			if (mrq) {
+@@ -1977,8 +1980,6 @@ static void dw_mci_work_routine_card(struct work_struct *work)
+ 
+ 			/* Power down slot */
+ 			if (present == 0) {
+-				clear_bit(DW_MMC_CARD_PRESENT, &slot->flags);
+-
+ 				/* Clear down the FIFO */
+ 				dw_mci_fifo_reset(host);
+ #ifdef CONFIG_MMC_DW_IDMAC
+@@ -2079,6 +2080,26 @@ static int dw_mci_of_get_wp_gpio(struct device *dev, u8 slot)
+ 
+ 	return gpio;
+ }
 +
- 	return slot;
++/* find the cd gpio for a given slot; or -1 if none specified */
++static void dw_mci_of_get_cd_gpio(struct device *dev, u8 slot,
++					struct mmc_host *mmc)
++{
++	struct device_node *np = dw_mci_of_find_slot_node(dev, slot);
++	int gpio;
++
++	if (!np)
++		return;
++
++	gpio = of_get_named_gpio(np, "cd-gpios", 0);
++
++	/* Having a missing entry is valid; return silently */
++	if (!gpio_is_valid(gpio))
++		return;
++
++	if (mmc_gpio_request_cd(mmc, gpio, 0))
++		dev_warn(dev, "gpio [%d] request failed\n", gpio);
++}
+ #else /* CONFIG_OF */
+ static int dw_mci_of_get_slot_quirks(struct device *dev, u8 slot)
+ {
+@@ -2096,6 +2117,11 @@ static int dw_mci_of_get_wp_gpio(struct device *dev, u8 slot)
+ {
+ 	return -EINVAL;
+ }
++static void dw_mci_of_get_cd_gpio(struct device *dev, u8 slot,
++					struct mmc_host *mmc)
++{
++	return;
++}
+ #endif /* CONFIG_OF */
  
- remove:
+ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
+@@ -2197,12 +2223,8 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
+ #endif /* CONFIG_MMC_DW_IDMAC */
+ 	}
+ 
+-	if (dw_mci_get_cd(mmc))
+-		set_bit(DW_MMC_CARD_PRESENT, &slot->flags);
+-	else
+-		clear_bit(DW_MMC_CARD_PRESENT, &slot->flags);
+-
+ 	slot->wp_gpio = dw_mci_of_get_wp_gpio(host->dev, slot->id);
++	dw_mci_of_get_cd_gpio(host->dev, slot->id, mmc);
+ 
+ 	ret = mmc_add_host(mmc);
+ 	if (ret)
 -- 
-1.7.11.7
+1.7.9.5
 
