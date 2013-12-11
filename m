@@ -1,66 +1,64 @@
-From: Dinh Nguyen <dinguyen@altera.com>
-Subject: Re: [PATCH 2/2] mmc: dw_mmc: add dw_mmc-k3 for k3 platform
-Date: Wed, 11 Dec 2013 12:48:10 -0600
-Message-ID: <1386787690.20516.10.camel@linux-builds1>
-References: <1383889128-12540-1-git-send-email-zhangfei.gao@linaro.org>
-	 <201312060239.14832.arnd@arndb.de>
-	 <CAMj5BkhyiJ7Uc-GiRZP3TNMq3NvHW-MVuPT6t+7FN8KBWAJR5A@mail.gmail.com>
-	 <201312110445.54336.arnd@arndb.de>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: [PATCH 2/3] mmc: dw_mmc: add dw_mmc-k3 for k3 platform
+Date: Wed, 11 Dec 2013 21:12:52 +0100
+Message-ID: <201312112112.52746.arnd@arndb.de>
+References: <1386770541-15056-1-git-send-email-zhangfei.gao@linaro.org> <201312111549.14017.arnd@arndb.de> <52A8868A.3000105@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: Text/Plain;
+  charset="iso-8859-15"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from co1ehsobe001.messaging.microsoft.com ([216.32.180.184]:26079
-	"EHLO co1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1750800Ab3LKStv (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 11 Dec 2013 13:49:51 -0500
-In-Reply-To: <201312110445.54336.arnd@arndb.de>
+Received: from moutng.kundenserver.de ([212.227.17.9]:60461 "EHLO
+	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751203Ab3LKUND (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 11 Dec 2013 15:13:03 -0500
+In-Reply-To: <52A8868A.3000105@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: Zhangfei Gao <zhangfei.gao@gmail.com>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>, devicetree@vger.kernel.org, Seungwon Jeon <tgih.jun@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Jaehoon Chung <jh80.chung@samsung.com>, Kumar Gala <galak@codeaurora.org>, Zhangfei Gao <zhangfei.gao@linaro.org>, Chris Ball <cjb@laptop.org>, heiko@sntech.de
+To: zhangfei <zhangfei.gao@linaro.org>
+Cc: Chris Ball <cjb@laptop.org>, Mike Turquette <mturquette@linaro.org>, Rob Herring <robherring2@gmail.com>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, Kumar Gala <galak@codeaurora.org>, Haojian Zhuang <haojian.zhuang@linaro.org>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, patches@linaro.org, devicetree@vger.kernel.org
 
-On Wed, 2013-12-11 at 04:45 +0100, Arnd Bergmann wrote:
-> On Wednesday 11 December 2013, Zhangfei Gao wrote:
-> > Thanks for the good suggestion, it can be abstracted to clock.
-> > 
-> > The issue for this version's ip is there are some registers need to be
-> > set, including fixed factor and phase, which may be required to be
-> > tuned, however it can be hide in clock.
-> > 
-> > Double checked next version's ip, it is more intelligent and only
-> > fixed factor is required, more like a clock, and all these register
-> > accessing are NOT required.
-> > 
-> > Will update new version to abstract these chip depended registers to clock.
+On Wednesday 11 December 2013, zhangfei wrote:
+> >
+> > I have not seen "clk-table" and "clk-table-num" before. Are these standard
+> > properties? What are the units that are used here, what does the index mean?
+> >
 > 
-> Ok, please stay in contact with Dinh Nguyen over this, since his side
-> is work-in-progress and we are still evaluating how to best encode
-> the phase setting in DT in a generic form.
+> "clk-table" and "clk-table-num" are private properties.
+> Instead simply on/off, the ip need different ciu clock for each timing mode.
 
-Will the bindings "samsung,dw-mshc-sdr-timing" and
-"samsung,dw-mshc-ddr-timing" also work for the k3 platform as well? I
-think they should work, but just wanted to verify.
+But aren't the times fixed for each mode? Why do you need to specify them in
+the DT? I would expect that the clock rates for each mode are set in the
+MMC and SD specifications. When you call clk_set_rate(), it should normally
+be enough to ask for the clock you actually want and let the clk subsystem
+figure out how to set up the parents and multipliers on the way.
 
-Heiko, on the rockchip platform, can you check to see if you have these
-cclk_in_drv and cclk_sample settings for the phase shift of the clocks?
-The SD/MMC IP version(2.40a) on Rockchip is the same version that is on
-SOCFPGA, so I think these settings are there. They can be located in
-some other "system" register block like SOCFPGA. The possible reason
-that you have not need to set them in the Rockchip code could be that
-the bootloader/firmware has already set them if you are booting from the
-SD/MMC source. You may need to set the clock phase settings if you boot
-from a non-SD source.
-
-I think the reading of the "samsung,dw-mshc-ddr-timing" and
-"samsung,dw-msh-sdr-timing" bindings can also be moved into the generic
-dw_mmc driver if the above 2 conditions are correct.
-
-Thanks,
-Din
+> Take emmc as example,
+> clk-table-num = <8>;
+> clk-table =
+> <13000000 50000000 0 0 13000000 50000000 0 100000000>;
+> MMC_TIMING_LEGACY mode, 25M should be set with parent clock 180M,
+> MMC_TIMING_MMC_HS mode, 50M is required with parent clock 360M
 > 
-> 	Arnd
-> 
+> "clk-table" list all clocks to be set in all supported timing one by one.
+> "clk-table-num" is the table number, since not find function getting 
+> table number.
+> For example, next version will support MMC_TIMING_MMC_HS200 mode, the 
+> clk-table-num = <9> with 9 clocks in the "clk-table"
 
+If you have a property with an array, you can use of_find_property()
+to get to the 'struct property' and then read the 'length' member
+of that struct, or you can use of_property_for_each_u32() to iterate
+through each value.
 
+While I still hope that you don't even need this array as per the reasoning
+above, if you actually need it, you should specify exactly what each
+value means, such as
 
+1. CIU clock rate in HZ for 20MHz SPI mode operation 
+2. CIU clock rate in HZ for 25MHz SD card operation
+3. CIU clock rate in HZ for 26MHz MMC card operation
+4. CIU clock rate in HZ for 50MHz SD card operation
+...
+
+	Arnd
