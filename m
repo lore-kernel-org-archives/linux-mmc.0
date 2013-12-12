@@ -1,73 +1,65 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [PATCH 2/3] mmc: dw_mmc: add dw_mmc-k3 for k3 platform
-Date: Thu, 12 Dec 2013 21:40:08 +0100
-Message-ID: <201312122140.08566.arnd@arndb.de>
-References: <1386770541-15056-1-git-send-email-zhangfei.gao@linaro.org> <201312112112.52746.arnd@arndb.de> <52A9B9B4.3080105@linaro.org>
+From: <dinguyen@altera.com>
+Subject: [PATCHv6 0/5] socfpga: Enable SD/MMC support
+Date: Thu, 12 Dec 2013 14:30:40 -0600
+Message-ID: <1386880245-10192-1-git-send-email-dinguyen@altera.com>
 Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="iso-8859-15"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.17.10]:51943 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751512Ab3LLUkT (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 12 Dec 2013 15:40:19 -0500
-In-Reply-To: <52A9B9B4.3080105@linaro.org>
+Received: from va3ehsobe005.messaging.microsoft.com ([216.32.180.31]:48621
+	"EHLO va3outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751870Ab3LLVG4 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 12 Dec 2013 16:06:56 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: zhangfei <zhangfei.gao@linaro.org>
-Cc: Chris Ball <cjb@laptop.org>, Mike Turquette <mturquette@linaro.org>, Rob Herring <robherring2@gmail.com>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, Kumar Gala <galak@codeaurora.org>, Haojian Zhuang <haojian.zhuang@linaro.org>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, patches@linaro.org, devicetree@vger.kernel.org, Heiko Stuebner <heiko@sntech.de>, Dinh Nguyen <dinguyen@altera.com>
+To: dinh.linux@gmail.com, arnd@arndb.de, cjb@laptop.org, jh80.chung@samsung.com, tgih.jun@samsung.com, heiko@sntech.de, dianders@chromium.org, alim.akhtar@samsung.com, bzhao@marvell.com, rob.herring@calxeda.com, pawel.moll@arm.com, mark.rutland@arm.com, ian.campbell@citrix.com, mturquette@linaro.org
+Cc: zhangfei.gao@linaro.org, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Dinh Nguyen <dinguyen@altera.com>
 
-On Thursday 12 December 2013, zhangfei wrote:
-> On 12/12/2013 04:12 AM, Arnd Bergmann wrote:
-> > On Wednesday 11 December 2013, zhangfei wrote:
-> >
-> > But aren't the times fixed for each mode? Why do you need to specify them in
-> > the DT? I would expect that the clock rates for each mode are set in the
-> > MMC and SD specifications. When you call clk_set_rate(), it should normally
-> > be enough to ask for the clock you actually want and let the clk subsystem
-> > figure out how to set up the parents and multipliers on the way.
-> 
-> Yes. that's will be perfect.
->
-> However, currently this ip still has no such capability.
->  Input rate for init are diferent for different controller, not the 
-> init 400K, some are 13M, others are 25M, since different clock source.
-> This can be easily solved by clock-freq-init = <25000000>
-> 2. There is maxmum limit, also can be easily solved by define CLK_MAX.
-> 3. However some mode can not use the max speed from ios->clock
-> for example UHS_SDR104_MAX_DTR 208000000 can not be used, only half may 
-> be reached, at least currently.
+From: Dinh Nguyen <dinguyen@altera.com>
 
-I don't fully understand the explanation, but if some of the other
-people with interest in dw-mmc (I've added some more to Cc now) think
-this makes sense, I'm fine with it too. 
+Hi,
 
-> How about this desc
-> 
-> * clock-freq-table: should be the frequency (in Hz) array of the ciu 
-> clock
->          in each supported timing. 
-> 
->          1. CIU clock rate in HZ for MMC_TIMING_LEGACY mode 
-> 
->          2. CIU clock rate in HZ for MMC_TIMING_MMC_HS mode
->          3. CIU clock rate in HZ for MMC_TIMING_SD_HS mode
->          4. CIU clock rate in HZ for MMC_TIMING_UHS_SDR12 mode 
-> 
->          5. CIU clock rate in HZ for MMC_TIMING_UHS_SDR25 mode 
-> 
->          6. CIU clock rate in HZ for MMC_TIMING_UHS_SDR50 mode 
-> 
->          7. CIU clock rate in HZ for MMC_TIMING_UHS_SDR104 mode 
-> 
->          8. CIU clock rate in HZ for MMC_TIMING_SD_HS mode 
-> 
->          9. CIU clock rate in HZ for MMC_TIMING_MMC_HS200 mode 
-> 
+This is v6 of the patch series to enable SD/MMC on the SOCFPGA platform.
 
-Yes, that is much better. but please avoid using Linux internal
-identifiers (e.g. MMC_TIMING_LEGACY) and instead use the terminology from
-the MMC and SD specs. Also 'Hz' is the official symbol for Hertz, not 'HZ'.
+V6 differences from V5:
 
-	Arnd
+* Adds a new patch to the series.
+  [mmc: dw_mmc: Add support to set the SDR and DDR timing through clock framework]
+  This patch enables the setting for the SDR and DDR setting through the common
+  clock framework. This patch can be independently applied on its own. I lumped
+  it into this series to show how the SOCFPGA can make use of it.
+
+* Add a new clock type "altr,socfpga-sdmmc-sdr-clk" to the SOCFPGA clock driver.
+  This clock type implements the clk_set_rate function which can set the SD/MMC's
+  clock phase settings. Can now use the syscon driver in the set_rate function.
+
+* Will have to CC DTS Maintainers as I am adding a new binding to the clock
+  driver.
+
+Thanks,
+
+Dinh Nguyen (5):
+  mmc: dw_mmc: Add support to set the SDR and DDR timing through clock
+    framework
+  clk: socfpga: Add a clock type for the SD/MMC driver
+  dts: socfpga: Add support for SD/MMC on the SOCFPGA platform
+  mmc: dw_mmc-socfpga: Remove the SOCFPGA specific platform for dw_mmc
+  ARM: socfpga_defconfig: enable SD/MMC support
+
+ .../devicetree/bindings/clock/altr_socfpga.txt     |   11 +-
+ arch/arm/boot/dts/socfpga.dtsi                     |   19 ++-
+ arch/arm/boot/dts/socfpga_arria5.dtsi              |   12 ++
+ arch/arm/boot/dts/socfpga_cyclone5.dtsi            |   12 ++
+ arch/arm/boot/dts/socfpga_vt.dts                   |   12 ++
+ arch/arm/configs/socfpga_defconfig                 |    2 +
+ drivers/clk/socfpga/clk.c                          |   86 ++++++++++++
+ drivers/mmc/host/Kconfig                           |    8 --
+ drivers/mmc/host/dw_mmc-socfpga.c                  |  138 --------------------
+ drivers/mmc/host/dw_mmc.c                          |   23 ++++
+ include/linux/mmc/dw_mmc.h                         |    6 +
+ 11 files changed, 180 insertions(+), 149 deletions(-)
+ delete mode 100644 drivers/mmc/host/dw_mmc-socfpga.c
+
+-- 
+1.7.9.5
+
+
