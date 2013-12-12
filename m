@@ -1,31 +1,73 @@
-From: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Subject: Re: possible regression on 3.13 when calling flush_dcache_page
-Date: Thu, 12 Dec 2013 17:13:22 +0000
-Message-ID: <20131212171322.GT4360@n2100.arm.linux.org.uk>
-References: <20131212143149.GI12099@ldesroches-Latitude-E6320>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: [PATCH 2/3] mmc: dw_mmc: add dw_mmc-k3 for k3 platform
+Date: Thu, 12 Dec 2013 21:40:08 +0100
+Message-ID: <201312122140.08566.arnd@arndb.de>
+References: <1386770541-15056-1-git-send-email-zhangfei.gao@linaro.org> <201312112112.52746.arnd@arndb.de> <52A9B9B4.3080105@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <owner-linux-mm@kvack.org>
-Content-Disposition: inline
-In-Reply-To: <20131212143149.GI12099@ldesroches-Latitude-E6320>
-Sender: owner-linux-mm@kvack.org
-To: Ludovic Desroches <ludovic.desroches@atmel.com>
-Cc: linux-mm@kvack.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, iamjoonsoo.kim@lge.com
+Content-Type: Text/Plain;
+  charset="iso-8859-15"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from moutng.kundenserver.de ([212.227.17.10]:51943 "EHLO
+	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751512Ab3LLUkT (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 12 Dec 2013 15:40:19 -0500
+In-Reply-To: <52A9B9B4.3080105@linaro.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: zhangfei <zhangfei.gao@linaro.org>
+Cc: Chris Ball <cjb@laptop.org>, Mike Turquette <mturquette@linaro.org>, Rob Herring <robherring2@gmail.com>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, Kumar Gala <galak@codeaurora.org>, Haojian Zhuang <haojian.zhuang@linaro.org>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, patches@linaro.org, devicetree@vger.kernel.org, Heiko Stuebner <heiko@sntech.de>, Dinh Nguyen <dinguyen@altera.com>
 
-On Thu, Dec 12, 2013 at 03:31:50PM +0100, Ludovic Desroches wrote:
-> I'll investigate on atmel-mci driver side but if someone has also this
-> issue or see what is wrong in the driver, please tell me all about it.
+On Thursday 12 December 2013, zhangfei wrote:
+> On 12/12/2013 04:12 AM, Arnd Bergmann wrote:
+> > On Wednesday 11 December 2013, zhangfei wrote:
+> >
+> > But aren't the times fixed for each mode? Why do you need to specify them in
+> > the DT? I would expect that the clock rates for each mode are set in the
+> > MMC and SD specifications. When you call clk_set_rate(), it should normally
+> > be enough to ask for the clock you actually want and let the clk subsystem
+> > figure out how to set up the parents and multipliers on the way.
+> 
+> Yes. that's will be perfect.
+>
+> However, currently this ip still has no such capability.
+>  Input rate for init are diferent for different controller, not the 
+> init 400K, some are 13M, others are 25M, since different clock source.
+> This can be easily solved by clock-freq-init = <25000000>
+> 2. There is maxmum limit, also can be easily solved by define CLK_MAX.
+> 3. However some mode can not use the max speed from ios->clock
+> for example UHS_SDR104_MAX_DTR 208000000 can not be used, only half may 
+> be reached, at least currently.
 
-I'm not entirely sure what's causing this, but calling flush_dcache_page()
-from an IRQ isn't the best idea, as one of its side effects will be to
-unmask IRQs at the CPU.
+I don't fully understand the explanation, but if some of the other
+people with interest in dw-mmc (I've added some more to Cc now) think
+this makes sense, I'm fine with it too. 
 
-BTW, the faulting function seems to have been removed in more recent
-kernels.
+> How about this desc
+> 
+> * clock-freq-table: should be the frequency (in Hz) array of the ciu 
+> clock
+>          in each supported timing. 
+> 
+>          1. CIU clock rate in HZ for MMC_TIMING_LEGACY mode 
+> 
+>          2. CIU clock rate in HZ for MMC_TIMING_MMC_HS mode
+>          3. CIU clock rate in HZ for MMC_TIMING_SD_HS mode
+>          4. CIU clock rate in HZ for MMC_TIMING_UHS_SDR12 mode 
+> 
+>          5. CIU clock rate in HZ for MMC_TIMING_UHS_SDR25 mode 
+> 
+>          6. CIU clock rate in HZ for MMC_TIMING_UHS_SDR50 mode 
+> 
+>          7. CIU clock rate in HZ for MMC_TIMING_UHS_SDR104 mode 
+> 
+>          8. CIU clock rate in HZ for MMC_TIMING_SD_HS mode 
+> 
+>          9. CIU clock rate in HZ for MMC_TIMING_MMC_HS200 mode 
+> 
 
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+Yes, that is much better. but please avoid using Linux internal
+identifiers (e.g. MMC_TIMING_LEGACY) and instead use the terminology from
+the MMC and SD specs. Also 'Hz' is the official symbol for Hertz, not 'HZ'.
+
+	Arnd
