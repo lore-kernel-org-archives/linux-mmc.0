@@ -1,41 +1,54 @@
-From: Heiko =?iso-8859-1?q?St=FCbner?= <heiko@sntech.de>
-Subject: Re: [PATCH v2 1/1] mmc: sdhci-s3c: Use mmc_gpio_request_cd function
-Date: Thu, 12 Dec 2013 11:02:11 +0100
-Message-ID: <201312121102.12303.heiko@sntech.de>
-References: <52A7FD6B.6090406@samsung.com>
-Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="iso-8859-1"
-Content-Transfer-Encoding: 7bit
+From: Mark Brown <broonie@kernel.org>
+Subject: [PATCH] mmc: sdhci-s3c: Check if clk_set_rate() succeeds
+Date: Thu, 12 Dec 2013 11:21:06 +0000
+Message-ID: <1386847266-2131-1-git-send-email-broonie@kernel.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from gloria.sntech.de ([95.129.55.99]:51077 "EHLO gloria.sntech.de"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751406Ab3LLKZb (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 12 Dec 2013 05:25:31 -0500
-In-Reply-To: <52A7FD6B.6090406@samsung.com>
+Received: from cassiel.sirena.org.uk ([80.68.93.111]:33561 "EHLO
+	cassiel.sirena.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751371Ab3LLLVc (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 12 Dec 2013 06:21:32 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Beomho Seo <beomho.seo@samsung.com>
-Cc: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, Myungjoo Ham <myungjoo.ham@samsung.com>, Joonyoung Shim <jy0922.shim@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>
+To: Chris Ball <cjb@laptop.org>
+Cc: linux-mmc@vger.kernel.org, linaro-kernel@lists.linaro.org, linux-samsung-soc@vger.kernel.org, Mark Brown <broonie@linaro.org>
 
-Am Mittwoch, 11. Dezember 2013, 06:51:39 schrieb Beomho Seo:
-> This patch use mmc_gpio_request_cd function.
-> 
-> Signed-off-by: Beomho Seo <beomho.seo@samsung.com>
-> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
-> ---
->  drivers/mmc/host/sdhci-s3c.c |   56
-> +++++++++++------------------------------- 1 file changed, 14
-> insertions(+), 42 deletions(-)
-> 
+From: Mark Brown <broonie@linaro.org>
 
-Acked-by: Heiko Stuebner <heiko@sntech.de>
-on a s3c2416
-Tested-by: Heiko Stuebner <heiko@sntech.de>
+It is possible that we may fail to set the clock rate, if we do so then
+log the failure and don't bother reprogramming the IP.
 
+Signed-off-by: Mark Brown <broonie@linaro.org>
+Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
+---
+ drivers/mmc/host/sdhci-s3c.c | 8 +++++++-
+ 1 file changed, 7 insertions(+), 1 deletion(-)
 
-But it may be good to also include the linux-samsung list
-(linux-samsung-soc@vger.kernel.org) in future submissions.
+diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
+index 6debda952155..5c20f827d828 100644
+--- a/drivers/mmc/host/sdhci-s3c.c
++++ b/drivers/mmc/host/sdhci-s3c.c
+@@ -295,6 +295,7 @@ static void sdhci_cmu_set_clock(struct sdhci_host *host, unsigned int clock)
+ 	struct device *dev = &ourhost->pdev->dev;
+ 	unsigned long timeout;
+ 	u16 clk = 0;
++	int ret;
+ 
+ 	/* If the clock is going off, set to 0 at clock control register */
+ 	if (clock == 0) {
+@@ -305,7 +306,12 @@ static void sdhci_cmu_set_clock(struct sdhci_host *host, unsigned int clock)
+ 
+ 	sdhci_s3c_set_clock(host, clock);
+ 
+-	clk_set_rate(ourhost->clk_bus[ourhost->cur_clk], clock);
++	ret = clk_set_rate(ourhost->clk_bus[ourhost->cur_clk], clock);
++	if (ret != 0) {
++		dev_err(dev, "%s: failed to set clock rate %uHz\n",
++			mmc_hostname(host->mmc), clock);
++		return;
++	}
+ 
+ 	host->clock = clock;
+ 
+-- 
+1.8.5.1
 
-
-Heiko
