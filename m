@@ -1,166 +1,114 @@
-From: <dinguyen-EIB2kfCEclfQT0dZR+AlfA@public.gmane.org>
-Subject: [PATCHv6 2/5] clk: socfpga: Add a clock type for the SD/MMC driver
-Date: Thu, 12 Dec 2013 14:30:42 -0600
-Message-ID: <1386880245-10192-3-git-send-email-dinguyen@altera.com>
-References: <1386880245-10192-1-git-send-email-dinguyen@altera.com>
+From: Dinh Nguyen <dinh.linux@gmail.com>
+Subject: Re: [PATCHv4 2/4] clk: socfpga: Add a hook for SD/MMC driver to control
+ CIU clock settings
+Date: Thu, 12 Dec 2013 15:45:40 -0600
+Message-ID: <52AA2E84.2000701@gmail.com>
+References: <1386263677-7733-1-git-send-email-dinguyen@altera.com> <201312052157.37538.arnd@arndb.de> <52A7206C.4040500@gmail.com> <201312101915.47648.arnd@arndb.de>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1386880245-10192-1-git-send-email-dinguyen-EIB2kfCEclfQT0dZR+AlfA@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: dinh.linux-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, arnd-r2nGTMty4D4@public.gmane.org, cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org, jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org, tgih.jun-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org, heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org, dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org, alim.akhtar-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org, bzhao-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org, rob.herring-bsGFqQB8/DxBDgjK7y7TUQ@public.gmane.org, pawel.moll-5wv7dgnIgG8@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, ian.campbell-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, mturquette-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
-Cc: zhangfei.gao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Dinh Nguyen <dinguyen-EIB2kfCEclfQT0dZR+AlfA@public.gmane.org>, Dinh Nguyen <dinguyen-E5Uy0aZIfLoAvxtiuMwx3w@public.gmane.org>
+Content-Type: text/plain; charset=ISO-8859-15
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-ob0-f175.google.com ([209.85.214.175]:41513 "EHLO
+	mail-ob0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751550Ab3LLVpp (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 12 Dec 2013 16:45:45 -0500
+In-Reply-To: <201312101915.47648.arnd@arndb.de>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-
-From: Dinh Nguyen <dinguyen-EIB2kfCEclfQT0dZR+AlfA@public.gmane.org>
-
-Add a "altr,socfpga-sdmmc-sdr-clk" clock type in the SOCFPGA clock driver. This
-clock type is not really a "clock" for say, but a mechanism to set the phase
-shift of the clock that is used to feed the SD/MMC CIU's clock. This clock does
-not have parent so it is designated as a CLK_IS_ROOT.
-
-This clock implements the set_clk_rate method that is meant to receive the SDR
-settings that is designated by the "samsung,dw-mshc-sdr-timing" binding. The
-SD/MMC driver passes this clock phase information into the clock driver to use.
-
-This enables the SD/MMC driver to touch registers that are located outside of
-the SD/MMC IP, which helps make the core SD/MMC driver generic.
-
-Signed-off-by: Dinh Nguyen <dinguyen-E5Uy0aZIfLoAvxtiuMwx3w@public.gmane.org>
----
-v6: Add a new clock type "altr,socfpga-sdmmc-sdr-clk" that will be used to
-set the phase shift settings.
-v5: Use the "snps,dw-mshc" binding
-v4: Use the sdmmc_clk prepare function to set the phase shift settings
-v3: Not use the syscon driver because as of 3.13-rc1, the syscon driver is
-loaded after the clock driver.
-v2: Use the syscon driver
----
- drivers/clk/socfpga/clk.c |   86 +++++++++++++++++++++++++++++++++++++++++++++
- 1 file changed, 86 insertions(+)
-
-diff --git a/drivers/clk/socfpga/clk.c b/drivers/clk/socfpga/clk.c
-index 280c983..f4c983e 100644
---- a/drivers/clk/socfpga/clk.c
-+++ b/drivers/clk/socfpga/clk.c
-@@ -21,8 +21,10 @@
- #include <linux/clkdev.h>
- #include <linux/clk-provider.h>
- #include <linux/io.h>
-+#include <linux/mfd/syscon.h>
- #include <linux/of.h>
- #include <linux/of_address.h>
-+#include <linux/regmap.h>
- 
- /* Clock Manager offsets */
- #define CLKMGR_CTRL	0x0
-@@ -69,6 +71,84 @@ struct socfpga_clk {
- };
- #define to_socfpga_clk(p) container_of(p, struct socfpga_clk, hw.hw)
- 
-+/* SDMMC Group for System Manager defines */
-+#define SYSMGR_SDMMC_CTRL_SET(smplsel, drvsel)          \
-+	((((smplsel) & 0x7) << 3) | (((drvsel) & 0x7) << 0))
-+struct sdmmc_sdr_clk {
-+	struct clk_hw	hw;
-+	u32	reg;
-+};
-+#define to_sdmmc_sdr_clk(p) container_of(p, struct sdmmc_sdr_clk, hw)
-+
-+static int sdr_clk_set_rate(struct clk_hw *hwclk, unsigned long rate,
-+					unsigned long parent_rate)
-+{
-+	struct sdmmc_sdr_clk *sdmmc_sdr_clk = to_sdmmc_sdr_clk(hwclk);
-+	struct regmap *sys_mgr_base_addr;
-+	u32 hs_timing;
-+
-+	sys_mgr_base_addr = syscon_regmap_lookup_by_compatible("altr,sys-mgr");
-+	if (IS_ERR(sys_mgr_base_addr)) {
-+		pr_err("%s: failed to find altr,sys-mgr regmap!\n", __func__);
-+		return -EINVAL;
-+	}
-+	hs_timing = SYSMGR_SDMMC_CTRL_SET(((rate > 4) & 0xf), (rate & 0xf));
-+	regmap_write(sys_mgr_base_addr, sdmmc_sdr_clk->reg, hs_timing);
-+	return 0;
-+}
-+
-+static unsigned long sdr_clk_recalc_rate(struct clk_hw *hwclk,
-+						unsigned long parent_rate)
-+{
-+	return parent_rate;
-+}
-+
-+static long sdr_clk_round_rate(struct clk_hw *hwclk, unsigned long rate,
-+						unsigned long *parent_rate)
-+{
-+	return rate;
-+}
-+
-+static const struct clk_ops sdmmc_sdr_clk_ops = {
-+	.recalc_rate = sdr_clk_recalc_rate,
-+	.round_rate = sdr_clk_round_rate,
-+	.set_rate = sdr_clk_set_rate,
-+};
-+
-+static __init struct clk *socfpga_sdmmc_sdr_clk_init(struct device_node *node,
-+						const struct clk_ops *ops)
-+{
-+	u32 reg;
-+	struct clk *clk;
-+	struct sdmmc_sdr_clk *sdmmc_sdr_clk;
-+	const char *clk_name = node->name;
-+	struct clk_init_data init;
-+	int rc;
-+
-+	rc = of_property_read_u32(node, "reg", &reg);
-+
-+	sdmmc_sdr_clk = kzalloc(sizeof(*sdmmc_sdr_clk), GFP_KERNEL);
-+	if (WARN_ON(!sdmmc_sdr_clk))
-+		return NULL;
-+
-+	sdmmc_sdr_clk->reg = reg;
-+	of_property_read_string(node, "clock-output-names", &clk_name);
-+
-+	init.name = clk_name;
-+	init.ops = ops;
-+	init.flags = CLK_IS_ROOT;
-+	init.num_parents = 0;
-+	sdmmc_sdr_clk->hw.init = &init;
-+
-+	clk = clk_register(NULL, &sdmmc_sdr_clk->hw);
-+	if (WARN_ON(IS_ERR(clk))) {
-+		kfree(sdmmc_sdr_clk);
-+		return NULL;
-+	}
-+	rc = of_clk_add_provider(node, of_clk_src_simple_get, clk);
-+	return clk;
-+}
-+
- static unsigned long clk_pll_recalc_rate(struct clk_hw *hwclk,
- 					 unsigned long parent_rate)
- {
-@@ -332,10 +412,16 @@ static void __init socfpga_gate_init(struct device_node *node)
- 	socfpga_gate_clk_init(node, &gateclk_ops);
- }
- 
-+static void __init socfpga_sdmmc_init(struct device_node *node)
-+{
-+	socfpga_sdmmc_sdr_clk_init(node, &sdmmc_sdr_clk_ops);
-+}
-+
- static struct of_device_id socfpga_child_clocks[] = {
- 	{ .compatible = "altr,socfpga-pll-clock", socfpga_pll_init, },
- 	{ .compatible = "altr,socfpga-perip-clk", socfpga_periph_init, },
- 	{ .compatible = "altr,socfpga-gate-clk", socfpga_gate_init, },
-+	{ .compatible = "altr,socfpga-sdmmc-sdr-clk", socfpga_sdmmc_init, },
- 	{},
- };
- 
--- 
-1.7.9.5
+To: Arnd Bergmann <arnd@arndb.de>
+Cc: dinguyen@altera.com, mturquette@linaro.org, rob.herring@calxeda.com, pawel.moll@arm.com, mark.rutland@arm.com, ian.campbell@citrix.com, cjb@laptop.org, jh80.chung@samsung.com, tgih.jun@samsung.com, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 
 
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+On 12/10/13 12:15 PM, Arnd Bergmann wrote:
+> On Tuesday 10 December 2013, Dinh Nguyen wrote:
+>> On 12/5/13 2:57 PM, Arnd Bergmann wrote:
+>>> And in now way should the clock provider code look into the DT properties of the
+>>> clock consumer. From what I can tell, the dw-mshc code already interprets the
+>>> "samsung,dw-mshc-sdr-timing" property and uses the data to pass the correct
+>>> clock rate using 'clk_set_rate()'. The clock code should only use the data passed
+>>> in the argument to that function to set up the registers and not need to know
+>>> at all who is setting it.
+>> You're right, the dw-mshc code interprets "samsung,dw-mshc-sdr-timing",
+>> but it is
+>> currently doing it in the platform specific code(dw_mmc-exynos and
+>> dw_mmc-socfpga).
+>> I was thinking I can remove the platform specific for SOCFPGA. But
+>> perhaps now that
+>> patch "mmc: dw_mmc: Make the use of the hold reg generic" is
+>> progressing, and
+>> that patch reads "samsung,dw-mshc-sdr-timing" in the generic dw_mmc
+>> code, I can now
+>> pass it through the clk_set_rate call.
+> Ok, good.
+>
+>> My initial thought to read "samsung,dw-mshc-sdr-timing" in the socfpga clock
+>> driver's was that the SOCFPGA's sdmmc_clk only role in life is to feed
+>> the sdmmc block. So
+>> reading the phase shift bits that adjust this clock does seem weird, but
+>> a straightforward way
+>> of doing it. I stuck it in the function in .prepare function because the
+>> setting of the clock's phase
+>> shift also requires that CIU clock be turned off while the bits are
+>> toggled, so the prepare function
+>> seems to work perfectly. So I think you're only concern is that I should
+>> figure out a way to pass
+>> the values of "samsung,dw-mshc-sdr-timing" from the dw_mmc driver to the
+>> clock driver, correct?
+>>
+>> Yes, I can read the "samsung,dw-mshc-sdr-timing" in the dw_mmc code and
+>> pass it to the clock
+>> driver using clk_set_rate(), but this method seems more cumbersome, as
+>> this clk_set_rate does not
+>> have anything to do with setting the rate, but only the phase shift
+>> settings of the clock.
+> I see, that does indeed sound a bit strange and is probably not the
+> best API. I'm not that familiar with what is actually going on at the
+> hardware level. Can you explain in a little more detail what the phase
+> setting is about? What are the possible values here and what units
+> are being used?
+The phase shift settings for this clock is a way for the IP block to
+meet the delay and hold
+timing requirements for the different data modes of the SD. For example
+by shifting the input
+clock that is feeding the CIU by 90 degrees in SDR25 mode, the minimum
+hold/delay time of 2ns
+is achieved.
+
+The values can be:
+0  -> 0 degrees
+0x1 -> 45 degrees
+0x2 -> 90 degrees
+0x3 -> 135 degrees
+0x4 -> 180 degrees
+0x5 -> 225 degrees
+0x6 -> 270 degrees
+0x7 -> 315 degrees
+>
+>>> I am a little confused though what the SYSMGR_SDMMCGRP_CTRL_OFFSET register actually
+>>> does. It looks like this is just a clock divider, which should be represented as
+>>> a separate clock node (as you had in v3) and compute the correct factor from the
+>>> requested clock rate and the parent clock rate.
+>> The SYSMGR_SDMMCGRP_CTRL_OFFSET is just putting the 2 values of
+>> "samsung,dw-mshc-sdr-timing"
+>> into a a single u32 value to be written to the register.
+>> "samsung,dw-mshc-sdr-timing" has 2 values that
+>> controls the phase shift of 2 clocks, the drive clock and the sample clock.
+> Do other clocks ever have the same requirement? Would it make sense to have
+> a generic clk_set_phase interface for this?
+I am not aware of any other clocks that need these phase adjustments.
+> If not, could the values alternatively (i.e. departing from the samsung
+> method) be encoded in the clock specifier? That would come down to setting
+> #clock-cells = <2> for this clock and using a complex clock in the mshc
+> node to point at it using
+>
+> 	<&phandle $phase1 $phase2>
+Hmm..this could also be done. I just sent out a V6 that uses the
+clk_set_rate API. I believe
+that there can be other platforms that can use this approach.
+
+Thanks,
+Dinh
+> 	Arnd
+>
+> 	Arnd
+
