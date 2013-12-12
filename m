@@ -1,71 +1,36 @@
-From: Heiko =?utf-8?q?St=C3=BCbner?= <heiko@sntech.de>
-Subject: Re: [PATCH 2/2] mmc: dw_mmc: add dw_mmc-k3 for k3 platform
-Date: Thu, 12 Dec 2013 00:40:58 +0100
-Message-ID: <201312120040.59345.heiko@sntech.de>
-References: <1383889128-12540-1-git-send-email-zhangfei.gao@linaro.org> <201312110445.54336.arnd@arndb.de> <1386787690.20516.10.camel@linux-builds1>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH 1/3] mmc:sdhci-esdhc-imx: Use NULL instead of zero
+Date: Wed, 11 Dec 2013 20:19:27 -0500
+Message-ID: <87iouu7tnk.fsf@octavius.laptop.org>
+References: <1380938365-7769-1-git-send-email-festevam@gmail.com>
 Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="utf-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from gloria.sntech.de ([95.129.55.99]:45660 "EHLO gloria.sntech.de"
+Received: from void.printf.net ([89.145.121.20]:40736 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751889Ab3LKXlH (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 11 Dec 2013 18:41:07 -0500
-In-Reply-To: <1386787690.20516.10.camel@linux-builds1>
+	id S1751013Ab3LLBTe (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 11 Dec 2013 20:19:34 -0500
+In-Reply-To: <1380938365-7769-1-git-send-email-festevam@gmail.com> (Fabio
+	Estevam's message of "Fri, 4 Oct 2013 22:59:23 -0300")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Dinh Nguyen <dinguyen@altera.com>
-Cc: Arnd Bergmann <arnd@arndb.de>, Zhangfei Gao <zhangfei.gao@gmail.com>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>, devicetree@vger.kernel.org, Seungwon Jeon <tgih.jun@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Jaehoon Chung <jh80.chung@samsung.com>, Kumar Gala <galak@codeaurora.org>, Zhangfei Gao <zhangfei.gao@linaro.org>, Chris Ball <cjb@laptop.org>
+To: Fabio Estevam <festevam@gmail.com>
+Cc: linux-mmc@vger.kernel.org, Fabio Estevam <fabio.estevam@freescale.com>, Shawn Guo <shawn.guo@linaro.org>
 
-Am Mittwoch, 11. Dezember 2013, 19:48:10 schrieb Dinh Nguyen:
-> On Wed, 2013-12-11 at 04:45 +0100, Arnd Bergmann wrote:
-> > On Wednesday 11 December 2013, Zhangfei Gao wrote:
-> > > Thanks for the good suggestion, it can be abstracted to clock.
-> > > 
-> > > The issue for this version's ip is there are some registers need to be
-> > > set, including fixed factor and phase, which may be required to be
-> > > tuned, however it can be hide in clock.
-> > > 
-> > > Double checked next version's ip, it is more intelligent and only
-> > > fixed factor is required, more like a clock, and all these register
-> > > accessing are NOT required.
-> > > 
-> > > Will update new version to abstract these chip depended registers to
-> > > clock.
-> > 
-> > Ok, please stay in contact with Dinh Nguyen over this, since his side
-> > is work-in-progress and we are still evaluating how to best encode
-> > the phase setting in DT in a generic form.
-> 
-> Will the bindings "samsung,dw-mshc-sdr-timing" and
-> "samsung,dw-mshc-ddr-timing" also work for the k3 platform as well? I
-> think they should work, but just wanted to verify.
-> 
-> Heiko, on the rockchip platform, can you check to see if you have these
-> cclk_in_drv and cclk_sample settings for the phase shift of the clocks?
-> The SD/MMC IP version(2.40a) on Rockchip is the same version that is on
-> SOCFPGA, so I think these settings are there. They can be located in
-> some other "system" register block like SOCFPGA. The possible reason
-> that you have not need to set them in the Rockchip code could be that
-> the bootloader/firmware has already set them if you are booting from the
-> SD/MMC source. You may need to set the clock phase settings if you boot
-> from a non-SD source.
-> 
-> I think the reading of the "samsung,dw-mshc-ddr-timing" and
-> "samsung,dw-msh-sdr-timing" bindings can also be moved into the generic
-> dw_mmc driver if the above 2 conditions are correct.
+Hi Fabio,
 
-The mmc-controller part of the rk-manual that is flying around the net, 
-mentions these cclk_in_drv and cclk_in_sample as coming from somewhere, but 
-sadly never where to get/set/access them.
+On Fri, Oct 04 2013, Fabio Estevam wrote:
+> From: Fabio Estevam <fabio.estevam@freescale.com>
+>
+> Fix the following sparse warning:
+>
+> drivers/mmc/host/sdhci-esdhc-imx.c:617:35: warning: Using plain integer as NULL pointer
+>
+> Cc: Shawn Guo <shawn.guo@linaro.org>
+> Signed-off-by: Fabio Estevam <fabio.estevam@freescale.com>
 
-The doc of the USE_HOLD_REG bit also mention the required settings of these 
-cclk_in_* but nowhere is a word about the where to be found.
+Thanks, pushed to mmc-next for 3.14.
 
-And the manual is notable for lacking all information related to the clock 
-controller. And I also wasn't able to find any other indication where this 
-might be set.
-
-
-Heiko
+- Chris.
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
