@@ -1,266 +1,154 @@
-From: Zhangfei Gao <zhangfei.gao@linaro.org>
-Subject: [PATCH 2/3] mmc: dw_mmc: add dw_mmc-k3 for k3 platform
-Date: Thu, 12 Dec 2013 22:13:11 +0800
-Message-ID: <1386857591-22507-1-git-send-email-zhangfei.gao@linaro.org>
-References: <52A9B9B4.3080105@linaro.org>
+From: Ludovic Desroches <ludovic.desroches@atmel.com>
+Subject: Re: possible regression on 3.13 when calling flush_dcache_page
+Date: Thu, 12 Dec 2013 15:36:19 +0100
+Message-ID: <20131212143618.GJ12099@ldesroches-Latitude-E6320>
+References: <20131212143149.GI12099@ldesroches-Latitude-E6320>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wg0-f46.google.com ([74.125.82.46]:49051 "EHLO
-	mail-wg0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751461Ab3LLONe (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 12 Dec 2013 09:13:34 -0500
-Received: by mail-wg0-f46.google.com with SMTP id m15so480008wgh.25
-        for <linux-mmc@vger.kernel.org>; Thu, 12 Dec 2013 06:13:32 -0800 (PST)
-In-Reply-To: <52A9B9B4.3080105@linaro.org>
+Received: from eusmtp01.atmel.com ([212.144.249.243]:5793 "EHLO
+	eusmtp01.atmel.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751395Ab3LLOgV (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 12 Dec 2013 09:36:21 -0500
+Content-Disposition: inline
+In-Reply-To: <20131212143149.GI12099@ldesroches-Latitude-E6320>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>, Arnd Bergmann <arnd@arndb.de>, Mike Turquette <mturquette@linaro.org>, Rob Herring <robherring2@gmail.com>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, Kumar Gala <galak@codeaurora.org>, Haojian Zhuang <haojian.zhuang@linaro.org>
-Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, patches@linaro.org, devicetree@vger.kernel.org, Zhangfei Gao <zhangfei.gao@linaro.org>, Zhigang Wang <brooke.wangzhigang@huawei.com>
+To: linux-mm@kvack.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, iamjoonsoo.kim@lge.com
+Cc: Ludovic Desroches <ludovic.desroches@atmel.com>
 
-Add dw_mmc-k3.c for k3v2, support sd/emmc
+fix mmc mailing list address error
 
-Signed-off-by: Zhangfei Gao <zhangfei.gao@linaro.org>
-Signed-off-by: Zhigang Wang <brooke.wangzhigang@huawei.com>
----
- .../devicetree/bindings/mmc/k3-dw-mshc.txt         |   59 +++++++++
- drivers/mmc/host/Kconfig                           |   10 ++
- drivers/mmc/host/Makefile                          |    1 +
- drivers/mmc/host/dw_mmc-k3.c                       |  128 ++++++++++++++++++++
- 4 files changed, 198 insertions(+)
- create mode 100644 Documentation/devicetree/bindings/mmc/k3-dw-mshc.txt
- create mode 100644 drivers/mmc/host/dw_mmc-k3.c
-
-diff --git a/Documentation/devicetree/bindings/mmc/k3-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/k3-dw-mshc.txt
-new file mode 100644
-index 000000000000..5501c7c1138f
---- /dev/null
-+++ b/Documentation/devicetree/bindings/mmc/k3-dw-mshc.txt
-@@ -0,0 +1,59 @@
-+* Hisilicon specific extensions to the Synopsys Designware Mobile
-+  Storage Host Controller
-+
-+Read synopsys-dw-mshc.txt for more details
-+
-+The Synopsys designware mobile storage host controller is used to interface
-+a SoC with storage medium such as eMMC or SD/MMC cards. This file documents
-+differences between the core Synopsys dw mshc controller properties described
-+by synopsys-dw-mshc.txt and the properties used by the Hisilicon specific
-+extensions to the Synopsys Designware Mobile Storage Host Controller.
-+
-+Required Properties:
-+
-+* compatible: should be one of the following.
-+  - "hisilicon,hi4511-dw-mshc": for controllers with hi4511 specific extentions.
-+* clock-freq-table: should be the frequency (in Hz) array of the ciu clock
-+	in each	supported timing mode.
-+	1. CIU clock rate in HZ for MMC_TIMING_LEGACY mode
-+	2. CIU clock rate in HZ for MMC_TIMING_MMC_HS mode
-+	3. CIU clock rate in HZ for MMC_TIMING_SD_HS mode
-+	4. CIU clock rate in HZ for MMC_TIMING_UHS_SDR12 mode
-+	5. CIU clock rate in HZ for MMC_TIMING_UHS_SDR25 mode
-+	6. CIU clock rate in HZ for MMC_TIMING_UHS_SDR50 mode
-+	7. CIU clock rate in HZ for MMC_TIMING_UHS_SDR104 mode
-+	8. CIU clock rate in HZ for MMC_TIMING_SD_HS mode
-+	9. CIU clock rate in HZ for MMC_TIMING_MMC_HS200 mode
-+
-+Example:
-+
-+	/* for Hi3620 */
-+
-+	/* SoC portion */
-+	dwmmc_0: dwmmc0@fcd03000 {
-+		compatible = "hisilicon,hi4511-dw-mshc";
-+		reg = <0xfcd03000 0x1000>;
-+		interrupts = <0 16 4>;
-+		#address-cells = <1>;
-+		#size-cells = <0>;
-+		clocks = <&mmc_clock HI3620_SD_CIUCLK>, <&clock HI3620_DDRC_PER_CLK>;
-+		clock-names = "ciu", "biu";
-+		clk-table =
-+		<25000000 0 50000000 25000000 50000000 100000000 0 50000000>;
-+	};
-+
-+	/* Board portion */
-+	dwmmc0@fcd03000 {
-+		num-slots = <1>;
-+		vmmc-supply = <&ldo12>;
-+		fifo-depth = <0x100>;
-+		supports-highspeed;
-+		pinctrl-names = "default";
-+		pinctrl-0 = <&sd_pmx_pins &sd_cfg_func1 &sd_cfg_func2>;
-+		slot@0 {
-+			reg = <0>;
-+			bus-width = <4>;
-+			disable-wp;
-+			cd-gpios = <&gpio10 3 0>;
-+		};
-+	};
-diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-index 7fc5099e44b2..45aaa2de0f58 100644
---- a/drivers/mmc/host/Kconfig
-+++ b/drivers/mmc/host/Kconfig
-@@ -575,6 +575,16 @@ config MMC_DW_SOCFPGA
- 	  This selects support for Altera SoCFPGA specific extensions to the
- 	  Synopsys DesignWare Memory Card Interface driver.
- 
-+config MMC_DW_K3
-+	tristate "K3 specific extensions for Synopsys DW Memory Card Interface"
-+	depends on MMC_DW
-+	select MMC_DW_PLTFM
-+	select MMC_DW_IDMAC
-+	help
-+	  This selects support for Hisilicon K3 SoC specific extensions to the
-+	  Synopsys DesignWare Memory Card Interface driver. Select this option
-+	  for platforms based on Hisilicon K3 SoC's.
-+
- config MMC_DW_PCI
- 	tristate "Synopsys Designware MCI support on PCI bus"
- 	depends on MMC_DW && PCI
-diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
-index c41d0c364509..64f5f8d35839 100644
---- a/drivers/mmc/host/Makefile
-+++ b/drivers/mmc/host/Makefile
-@@ -43,6 +43,7 @@ obj-$(CONFIG_MMC_DW)		+= dw_mmc.o
- obj-$(CONFIG_MMC_DW_PLTFM)	+= dw_mmc-pltfm.o
- obj-$(CONFIG_MMC_DW_EXYNOS)	+= dw_mmc-exynos.o
- obj-$(CONFIG_MMC_DW_SOCFPGA)	+= dw_mmc-socfpga.o
-+obj-$(CONFIG_MMC_DW_K3)		+= dw_mmc-k3.o
- obj-$(CONFIG_MMC_DW_PCI)	+= dw_mmc-pci.o
- obj-$(CONFIG_MMC_SH_MMCIF)	+= sh_mmcif.o
- obj-$(CONFIG_MMC_JZ4740)	+= jz4740_mmc.o
-diff --git a/drivers/mmc/host/dw_mmc-k3.c b/drivers/mmc/host/dw_mmc-k3.c
-new file mode 100644
-index 000000000000..54b2503b211f
---- /dev/null
-+++ b/drivers/mmc/host/dw_mmc-k3.c
-@@ -0,0 +1,128 @@
-+/*
-+ * Copyright (c) 2013 Linaro Ltd.
-+ * Copyright (c) 2013 Hisilicon Limited.
-+ *
-+ * This program is free software; you can redistribute it and/or modify
-+ * it under the terms of the GNU General Public License as published by
-+ * the Free Software Foundation; either version 2 of the License, or
-+ * (at your option) any later version.
-+ */
-+
-+#include <linux/module.h>
-+#include <linux/platform_device.h>
-+#include <linux/clk.h>
-+#include <linux/mmc/host.h>
-+#include <linux/mmc/dw_mmc.h>
-+#include <linux/of_address.h>
-+
-+#include "dw_mmc.h"
-+#include "dw_mmc-pltfm.h"
-+
-+#define MAX_NUMS	10
-+struct dw_mci_k3_priv_data {
-+	u32	clk_table[MAX_NUMS];
-+};
-+
-+static void dw_mci_k3_set_ios(struct dw_mci *host, struct mmc_ios *ios)
-+{
-+	struct dw_mci_k3_priv_data *priv = host->priv;
-+
-+	clk_set_rate(host->ciu_clk, priv->clk_table[ios->timing]);
-+	host->bus_hz = clk_get_rate(host->ciu_clk);
-+}
-+
-+static int dw_mci_k3_parse_dt(struct dw_mci *host)
-+{
-+	struct dw_mci_k3_priv_data *priv;
-+	struct device_node *node = host->dev->of_node;
-+	struct property *prop;
-+	const __be32 *cur;
-+	u32 val, num = 0;
-+
-+	priv = devm_kzalloc(host->dev, sizeof(*priv), GFP_KERNEL);
-+	if (!priv) {
-+		dev_err(host->dev, "mem alloc failed for private data\n");
-+		return -ENOMEM;
-+	}
-+	host->priv = priv;
-+
-+	of_property_for_each_u32(node, "clock-freq-table", prop, cur, val) {
-+		if (num >= MAX_NUMS)
-+			break;
-+		priv->clk_table[num++] = val;
-+	}
-+	return 0;
-+}
-+
-+static unsigned long k3_dwmmc_caps[4] = {
-+	MMC_CAP_4_BIT_DATA | MMC_CAP_SD_HIGHSPEED,
-+	MMC_CAP_8_BIT_DATA | MMC_CAP_MMC_HIGHSPEED,
-+	0,
-+	0,
-+};
-+
-+static const struct dw_mci_drv_data k3_drv_data = {
-+	.caps			= k3_dwmmc_caps,
-+	.set_ios		= dw_mci_k3_set_ios,
-+	.parse_dt		= dw_mci_k3_parse_dt,
-+};
-+
-+static const struct of_device_id dw_mci_k3_match[] = {
-+	{ .compatible = "hisilicon,hi4511-dw-mshc",
-+			.data = &k3_drv_data, },
-+	{},
-+};
-+MODULE_DEVICE_TABLE(of, dw_mci_k3_match);
-+
-+static int dw_mci_k3_probe(struct platform_device *pdev)
-+{
-+	const struct dw_mci_drv_data *drv_data;
-+	const struct of_device_id *match;
-+
-+	match = of_match_node(dw_mci_k3_match, pdev->dev.of_node);
-+	drv_data = match->data;
-+
-+	return dw_mci_pltfm_register(pdev, drv_data);
-+}
-+
-+static int dw_mci_k3_suspend(struct device *dev)
-+{
-+	struct dw_mci *host = dev_get_drvdata(dev);
-+
-+	if (!IS_ERR(host->ciu_clk))
-+		clk_disable_unprepare(host->ciu_clk);
-+
-+	return dw_mci_suspend(host);
-+}
-+
-+static int dw_mci_k3_resume(struct device *dev)
-+{
-+	struct dw_mci *host = dev_get_drvdata(dev);
-+	int ret = 0;
-+
-+	ret = clk_prepare_enable(host->ciu_clk);
-+	if (ret) {
-+		dev_err(host->dev, "failed to enable ciu clock\n");
-+		return ret;
-+	}
-+
-+	return dw_mci_resume(host);
-+}
-+
-+SIMPLE_DEV_PM_OPS(dw_mci_k3_pmops, dw_mci_k3_suspend, dw_mci_k3_resume);
-+
-+static struct platform_driver dw_mci_k3_pltfm_driver = {
-+	.probe		= dw_mci_k3_probe,
-+	.remove		= dw_mci_pltfm_remove,
-+	.driver		= {
-+		.name		= "dwmmc_k3",
-+		.of_match_table	= dw_mci_k3_match,
-+		.pm		= &dw_mci_k3_pmops,
-+	},
-+};
-+
-+module_platform_driver(dw_mci_k3_pltfm_driver);
-+
-+MODULE_DESCRIPTION("K3 Specific DW-MSHC Driver Extension");
-+MODULE_LICENSE("GPL v2");
-+MODULE_ALIAS("platform:dwmmc-k3");
--- 
-1.7.9.5
-
+On Thu, Dec 12, 2013 at 03:31:50PM +0100, Ludovic Desroches wrote:
+> Hi,
+> 
+> With v3.13-rc3 I have an error when the atmel-mci driver calls
+> flush_dcache_page (log at the end of the message).
+> 
+> Since I didn't have it before, I did a git bisect and the commit introducing
+> the error is the following one:
+> 
+> 106a74e slab: replace free and inuse in struct slab with newly introduced active
+> 
+> I don't know if this commit has introduced a bug or if it has revealed a bug
+> in the atmel-mci driver.
+> 
+> I'll investigate on atmel-mci driver side but if someone has also this issue or
+> see what is wrong in the driver, please tell me all about it.
+> 
+> Thanks
+> 
+> Regards
+> 
+> Ludovic
+> 
+> 
+> # mmc0: mmc_rescan_try_freq: trying to init card at 400000 Hz
+> mmc0: queuing unknown CIS tuple 0x01 (3 bytes)
+> mmc0: queuing unknown CIS tuple 0x1a (5 bytes)
+> mmc0: queuing unknown CIS tuple 0x1b (8 bytes)
+> mmc0: queuing unknown CIS tuple 0x14 (0 bytes)
+> mmc0: queuing unknown CIS tuple 0x80 (1 bytes)
+> mmc0: queuing unknown CIS tuple 0x81 (1 bytes)
+> mmc0: queuing unknown CIS tuple 0x82 (1 bytes)
+> mmc0: new SDIO card at address 0001
+> Unable to handle kernel paging request at virtual address 0a00000c
+> pgd = c0004000
+> [0a00000c] *pgd=00000000
+> Internal error: Oops: 5 [#1] ARM
+> Modules linked in:
+> CPU: 0 PID: 9 Comm: kworker/u2:1 Not tainted 3.11.0+ #68
+> Workqueue: kmmcd mmc_rescan
+> task: c384e800 ti: c385e000 task.ti: c385e000
+> PC is at vma_interval_tree_subtree_search+0x18/0x74
+> LR is at flush_dcache_page+0x90/0x12c
+> pc : [<c0064a50>]    lr : [<c000f00c>]    psr: 20000093
+> sp : c385fab8  ip : 00000000  fp : c10ca400
+> r10: c385fc64  r9 : c12f92fc  r8 : 00000000
+> r7 : c2ace640  r6 : c0cc5be0  r5 : c0cd0000  r4 : c1323a00
+> r3 : 0a000000  r2 : c0cc5be0  r1 : c0cc5be0  r0 : c034ae48
+> Flags: nzCv  IRQs off  FIQs on  Mode SVC_32  ISA ARM  Segment kernel
+> Control: 0005317f  Table: 22b7c000  DAC: 00000017
+> Process kworker/u2:1 (pid: 9, stack limit = 0xc385e1b8)
+> Stack: (0xc385fab8 to 0xc3860000)
+> faa0:                                                       c1323a00 c000f00c
+> fac0: c0cd02d0 c2b0cb40 c385fc30 00000003 00000004 c0281380 44006d72 43495645
+> fae0: 0000c0ef 00000000 3a6d726f 00000000 30303038 c2b42ec0 c3868b80 0000001e
+> fb00: 00000000 00000000 c10f26ed 00000200 0008a000 c0049d3c c3868b80 c2b42ec0
+> fb20: c3868b80 00000000 ffffffff c385fb9c c0cd02d0 1408a004 00000200 c0049ed8
+> fb40: c3868b80 c004c384 0000001e c0049718 0000001e c0009cc8 c10f2a60 c001d7ec
+> fb60: 20000013 c000bf20 c10f3900 c2b0cbd8 0000184a a0000013 c2b0cbd8 ffff824a
+> fb80: c10f30e0 00000000 c0cd02d0 1408a004 00000200 0008a000 ffff814a c385fbb0
+> fba0: c001d560 c001d7ec 20000013 ffffffff c2b0cbd8 a0000013 f7cedc96 c2b07400
+> fbc0: c2b0cb40 c385fc40 00000001 c028207c c385fc40 c2b07400 00000004 c0270e28
+> fbe0: 00000200 000003e8 00000000 61666666 30303038 c2b07400 c385fc50 c385fc40
+> fc00: 00001000 c027100c c1323a02 00000004 c2b48000 00000001 00001000 c027a06c
+> fc20: 00000015 c38f2800 c2ace7c0 c002f804 c1323a02 000002d0 00000004 00000000
+> fc40: 00000000 c385fc94 c385fc64 00000000 00000000 c385fc54 c385fc54 c0270c3c
+> fc60: 00000000 3b9aca00 00000000 00000004 00000001 ffffff8d 00000200 00000000
+> fc80: 00000000 c385fc40 00000001 c385fc30 00000000 00000035 1408a004 00000000
+> fca0: 00000000 00000000 00000000 000001b5 00000000 ffffff8d 00000000 00000000
+> fcc0: c385fc64 c385fc40 00000007 00000004 c2bfb400 c0cd02d0 00000450 00000001
+> fce0: 00000000 00000004 000001ff c027af0c 00000001 c0cd02d0 00000000 00000004
+> fd00: 00000000 00000000 c10cf4f0 00000450 00000004 c2bfb400 c0cd02d0 00000251
+> fd20: 00000450 c0cd02d0 00000251 c027b010 c0cd02d0 00000004 00000450 c022d0e8
+> fd40: c0cd02d0 c3859000 00000004 00000251 00000000 c022d6ac 00000004 00000450
+> fd60: c0cd02c0 c10ce7e8 c0cd02d0 00000004 c385fdb4 c10ce7e8 ffff81c9 c022da4c
+> fd80: 00000251 c385fdb4 00000004 c385fddc 00000000 c0cd02c0 c03b5ccc 00000001
+> fda0: 00000000 c2b48008 c2bfb400 c021bb1c c0cd02c0 00000008 c385fd84 c0cd02c0
+> fdc0: 00000000 00000000 c03b5ccc c022c37c 00000000 c0476909 00000000 00000000
+> fde0: 00000000 c385fd7c c3859000 c0cd02c0 00000000 c022e010 c022de8c c2bfb400
+> fe00: 00000000 c10e18f0 c03b5ccc c027a32c c027a2d4 c2bfb408 00000000 c10e18f0
+> fe20: c01cafc8 c01cadf4 00000000 c385fe38 c2bfb408 c01c966c c38d7a1c c2ad6f34
+> fe40: c2bfb408 c2bfb408 c2bfb43c c2bfb408 00000000 c01cad10 c2bfb408 c10eb49c
+> fe60: c2bfb408 c01ca398 c2bfb408 00000000 c2bfb410 c01c898c c2bfb410 00000000
+> fe80: 00000000 c01818b0 00000001 c2bfb400 c2bfb408 c2bfb400 c2bfb408 00000000
+> fea0: c2b48000 00000001 00000000 c385fed3 c2bfb400 c027a4c4 c2b48000 c2b07400
+> fec0: 00000000 c0279b8c 00000000 c385fed3 00000000 10ffff00 00000000 c2b0757c
+> fee0: c2b07400 00000000 00061a80 c03b9d90 00000000 00000000 00000089 c0272fb8
+> ff00: c385df60 c2b0757c c3817200 c10f26b5 c3849c00 c00270e0 c385df60 c2b0757c
+> ff20: 00000081 c385df60 c3817200 c385e000 c10f26b5 c385df78 c3817200 c3817210
+> ff40: 00000089 c00276d0 c384e800 c384debc 00000000 c385df60 c00274c0 00000000
+> ff60: 00000000 00000000 00000000 c002c130 00000000 00000000 00000000 c385df60
+> ff80: 00000000 c385ff84 c385ff84 00000000 c385ff90 c385ff90 c385ffac c384debc
+> ffa0: c002c090 00000000 00000000 c00094b0 00000000 00000000 00000000 00000000
+> ffc0: 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000
+> ffe0: 00000000 00000000 00000000 00000000 00000013 00000000 00000000 00000000
+> [<c0064a50>] (vma_interval_tree_subtree_search+0x18/0x74) from [<c000f00c>] (flush_dcache_page+0x90/0x12c)
+> [<c000f00c>] (flush_dcache_page+0x90/0x12c) from [<c0281380>] (atmci_interrupt+0x3cc/0x900)
+> [<c0281380>] (atmci_interrupt+0x3cc/0x900) from [<c0049d3c>] (handle_irq_event_percpu+0x2c/0x1a0)
+> [<c0049d3c>] (handle_irq_event_percpu+0x2c/0x1a0) from [<c0049ed8>] (handle_irq_event+0x28/0x38)
+> [<c0049ed8>] (handle_irq_event+0x28/0x38) from [<c004c384>] (handle_fasteoi_irq+0xa4/0xe4)
+> [<c004c384>] (handle_fasteoi_irq+0xa4/0xe4) from [<c0049718>] (generic_handle_irq+0x20/0x30)
+> [<c0049718>] (generic_handle_irq+0x20/0x30) from [<c0009cc8>] (handle_IRQ+0x60/0x84)
+> [<c0009cc8>] (handle_IRQ+0x60/0x84) from [<c000bf20>] (__irq_svc+0x40/0x4c)
+> [<c000bf20>] (__irq_svc+0x40/0x4c) from [<c001d7ec>] (mod_timer+0xf8/0x110)
+> [<c001d7ec>] (mod_timer+0xf8/0x110) from [<c028207c>] (atmci_request+0xd0/0x120)
+> [<c028207c>] (atmci_request+0xd0/0x120) from [<c0270e28>] (mmc_start_request+0x1e4/0x204)
+> [<c0270e28>] (mmc_start_request+0x1e4/0x204) from [<c027100c>] (mmc_wait_for_req+0x6c/0x16c)
+> [<c027100c>] (mmc_wait_for_req+0x6c/0x16c) from [<c027a06c>] (mmc_io_rw_extended+0x214/0x290)
+> [<c027a06c>] (mmc_io_rw_extended+0x214/0x290) from [<c027af0c>] (sdio_io_rw_ext_helper+0x160/0x1a0)
+> [<c027af0c>] (sdio_io_rw_ext_helper+0x160/0x1a0) from [<c027b010>] (sdio_memcpy_fromio+0x14/0x18)
+> [<c027b010>] (sdio_memcpy_fromio+0x14/0x18) from [<c022d0e8>] (ath6kl_sdio_io+0x88/0x9c)
+> [<c022d0e8>] (ath6kl_sdio_io+0x88/0x9c) from [<c022d6ac>] (ath6kl_sdio_read_write_sync+0xb0/0x100)
+> [<c022d6ac>] (ath6kl_sdio_read_write_sync+0xb0/0x100) from [<c022da4c>] (ath6kl_sdio_bmi_write+0x54/0xf8)
+> [<c022da4c>] (ath6kl_sdio_bmi_write+0x54/0xf8) from [<c021bb1c>] (ath6kl_bmi_get_target_info+0x44/0x190)
+> [<c021bb1c>] (ath6kl_bmi_get_target_info+0x44/0x190) from [<c022c37c>] (ath6kl_core_init+0xa4/0x404)
+> [<c022c37c>] (ath6kl_core_init+0xa4/0x404) from [<c022e010>] (ath6kl_sdio_probe+0x184/0x1ec)
+> [<c022e010>] (ath6kl_sdio_probe+0x184/0x1ec) from [<c027a32c>] (sdio_bus_probe+0x58/0x6c)
+> [<c027a32c>] (sdio_bus_probe+0x58/0x6c) from [<c01cadf4>] (driver_probe_device+0xac/0x1f4)
+> [<c01cadf4>] (driver_probe_device+0xac/0x1f4) from [<c01c966c>] (bus_for_each_drv+0x48/0x8c)
+> [<c01c966c>] (bus_for_each_drv+0x48/0x8c) from [<c01cad10>] (device_attach+0x68/0x80)
+> [<c01cad10>] (device_attach+0x68/0x80) from [<c01ca398>] (bus_probe_device+0x28/0x98)
+> [<c01ca398>] (bus_probe_device+0x28/0x98) from [<c01c898c>] (device_add+0x424/0x5fc)
+> [<c01c898c>] (device_add+0x424/0x5fc) from [<c027a4c4>] (sdio_add_func+0x34/0x4c)
+> [<c027a4c4>] (sdio_add_func+0x34/0x4c) from [<c0279b8c>] (mmc_attach_sdio+0x260/0x314)
+> [<c0279b8c>] (mmc_attach_sdio+0x260/0x314) from [<c0272fb8>] (mmc_rescan+0x22c/0x2b4)
+> [<c0272fb8>] (mmc_rescan+0x22c/0x2b4) from [<c00270e0>] (process_one_work+0x1f4/0x348)
+> [<c00270e0>] (process_one_work+0x1f4/0x348) from [<c00276d0>] (worker_thread+0x210/0x36c)
+> [<c00276d0>] (worker_thread+0x210/0x36c) from [<c002c130>] (kthread+0xa0/0xb0)
+> [<c002c130>] (kthread+0xa0/0xb0) from [<c00094b0>] (ret_from_fork+0x14/0x24)
+> Code: e243002c e5903034 e3530000 0a000002 (e593c00c) 
+> ---[ end trace 3f7f9bc3f451e9c9 ]---
+> Kernel panic - not syncing: Fatal exception in interrupt
+> 
