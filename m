@@ -1,67 +1,43 @@
 From: Mike Frysinger <vapier@gentoo.org>
-Subject: [PATCH [mmc-utils] 1/2] fix make handling
-Date: Thu, 12 Dec 2013 19:17:15 -0500
-Message-ID: <1386893836-16833-1-git-send-email-vapier@gentoo.org>
+Subject: [PATCH [mmc-utils] 2/2] start a README
+Date: Thu, 12 Dec 2013 19:17:16 -0500
+Message-ID: <1386893836-16833-2-git-send-email-vapier@gentoo.org>
+References: <1386893836-16833-1-git-send-email-vapier@gentoo.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp.gentoo.org ([140.211.166.183]:38628 "EHLO smtp.gentoo.org"
+Received: from smtp.gentoo.org ([140.211.166.183]:38630 "EHLO smtp.gentoo.org"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751717Ab3LMARR (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 12 Dec 2013 19:17:17 -0500
+	id S1751717Ab3LMARS (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 12 Dec 2013 19:17:18 -0500
+In-Reply-To: <1386893836-16833-1-git-send-email-vapier@gentoo.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
-Cc: cjb@laptop.org, Mike Frysinger <vapier@chromium.org>
+Cc: cjb@laptop.org
 
-From: Mike Frysinger <vapier@chromium.org>
-
-Fix the recurisve make targets by using $(MAKE).  Otherwise we get lots of
-warnings and issues with parallel builds.
-
-Fix the install target -- the man subdir was missing a dummy target.
-
-Add proper .PHONY markings.
-
-Signed-off-by: Mike Frysinger <vapier@chromium.org>
+Signed-off-by: Mike Frysinger <vapier@gentoo.org>
 ---
- Makefile     | 8 +++++---
- man/Makefile | 3 +++
- 2 files changed, 8 insertions(+), 3 deletions(-)
+ README | 12 ++++++++++++
+ 1 file changed, 12 insertions(+)
+ create mode 100644 README
 
-diff --git a/Makefile b/Makefile
-index ae846e2..91cfc35 100644
---- a/Makefile
-+++ b/Makefile
-@@ -34,15 +34,17 @@ mmc: $(objects)
- 	$(CC) $(CFLAGS) -o $@ $(objects) $(LDFLAGS) $(LIBS)
- 
- manpages:
--	cd man && make
-+	$(MAKE) -C man
- 
- install-man:
--	cd man && make install
-+	$(MAKE) -C man install
- 
- clean:
- 	rm -f $(progs) $(objects)
--	cd man && make clean
-+	$(MAKE) -C man clean
- 
- install: $(progs) install-man
- 	$(INSTALL) -m755 -d $(DESTDIR)$(bindir)
- 	$(INSTALL) $(progs) $(DESTDIR)$(bindir)
+diff --git a/README b/README
+new file mode 100644
+index 0000000..e7d5210
+--- /dev/null
++++ b/README
+@@ -0,0 +1,12 @@
++Userspace tools for MMC/SD devices
 +
-+.PHONY: all clean install manpages install-man
-diff --git a/man/Makefile b/man/Makefile
-index c8957f6..da79a50 100644
---- a/man/Makefile
-+++ b/man/Makefile
-@@ -1,2 +1,5 @@
- all: 
- clean: 
-+install:
++Useful for doing things like updating firmware or poking registers in the
++MMC/SD card itself.
 +
-+.PHONY: all clean install
++Upstream git repo:
++	https://git.kernel.org/cgit/linux/kernel/git/cjb/mmc-utils.git/
++	git://git.kernel.org/pub/scm/linux/kernel/git/cjb/mmc-utils.git
++
++Mailing list:
++	linux-mmc@vger.kernel.org
++	http://vger.kernel.org/vger-lists.html#linux-mmc
 -- 
 1.8.4.3
 
