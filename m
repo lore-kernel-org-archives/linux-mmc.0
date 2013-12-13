@@ -1,58 +1,82 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH] mmc: sdhci: Allow for long command timeouts
-Date: Fri, 13 Dec 2013 12:45:21 +0200
-Message-ID: <52AAE541.6090606@intel.com>
-References: <1384416980-15850-1-git-send-email-adrian.hunter@intel.com>
+From: Ludovic Desroches <ludovic.desroches@atmel.com>
+Subject: Re: [PATCH] atmel-mci: fix transfers < 16 bytes problem in PDC mode
+Date: Fri, 13 Dec 2013 12:09:13 +0100
+Message-ID: <20131213110913.GB2138@ldesroches-Latitude-E6320>
+References: <20131204080943.GK3582@odulo-laptop>
+ <1386236716-25163-1-git-send-email-olivier@sobrie.be>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="us-ascii"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga09.intel.com ([134.134.136.24]:14530 "EHLO mga09.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752269Ab3LMKpV (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 13 Dec 2013 05:45:21 -0500
-In-Reply-To: <1384416980-15850-1-git-send-email-adrian.hunter@intel.com>
+Received: from eusmtp01.atmel.com ([212.144.249.243]:45165 "EHLO
+	eusmtp01.atmel.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752450Ab3LMLJP (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 13 Dec 2013 06:09:15 -0500
+Content-Disposition: inline
+In-Reply-To: <1386236716-25163-1-git-send-email-olivier@sobrie.be>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org
+To: Olivier Sobrie <olivier@sobrie.be>
+Cc: linux-mmc@vger.kernel.org, Ludovic Desroches <ludovic.desroches@atmel.com>
 
-Hi Chris
+Hi Olivier,
 
-What about this one?
+On Thu, Dec 05, 2013 at 10:45:16AM +0100, Olivier Sobrie wrote:
 
-Regards
-Adrian
+[...]
 
-On 14/11/13 10:16, Adrian Hunter wrote:
-> The driver has a timer with a 10 second
-> timeout to catch devices that stop responding.
-> However it is possible for commands to take
-> even longer than that.  Change the timer
-> timeout to reflect the command timeout.
+> With this patch I'm able to use the wlan sdio module wl1271.
+> When you've time, it would be nice to validate or fix this
+> patch.
+
+I have tested it and it doesn't solve issue I have with Atheros module.
+ 
+> Thanks for your help,
 > 
-> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
-> ---
->  drivers/mmc/host/sdhci.c | 7 ++++++-
->  1 file changed, 6 insertions(+), 1 deletion(-)
+> Olivier
 > 
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index bd8a098..614a34d 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -1013,7 +1013,12 @@ void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
->  		mdelay(1);
+>  drivers/mmc/host/atmel-mci.c |    6 +++++-
+>  1 file changed, 5 insertions(+), 1 deletion(-)
+> 
+> diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
+> index b86b482..c599731 100644
+> --- a/drivers/mmc/host/atmel-mci.c
+> +++ b/drivers/mmc/host/atmel-mci.c
+> @@ -45,6 +45,7 @@
+>  
+>  #define ATMCI_DATA_ERROR_FLAGS	(ATMCI_DCRCE | ATMCI_DTOE | ATMCI_OVRE | ATMCI_UNRE)
+>  #define ATMCI_DMA_THRESHOLD	16
+> +#define ATMCI_PDC_MIN_DATASIZE	16
+>  
+>  enum {
+>  	EVENT_CMD_RDY = 0,
+> @@ -765,7 +766,10 @@ static void atmci_pdc_set_single_buf(struct atmel_mci *host,
 >  	}
 >  
-> -	mod_timer(&host->timer, jiffies + 10 * HZ);
-> +	timeout = jiffies;
-> +	if (!cmd->data && cmd->cmd_timeout_ms > 9000)
-> +		timeout += DIV_ROUND_UP(cmd->cmd_timeout_ms, 1000) * HZ + HZ;
-> +	else
-> +		timeout += 10 * HZ;
-> +	mod_timer(&host->timer, timeout);
->  
->  	host->cmd = cmd;
->  
-> 
+>  	if (host->data_size <= buf_size) {
+> -		if (host->data_size & 0x3) {
+> +		if ((host->data_size < ATMCI_PDC_MIN_DATASIZE) &&
+> +		    (dir == XFER_TRANSMIT)) {
+> +			atmci_writel(host, counter_reg, 4);
+> +		} else if (host->data_size & 0x3) {
 
+I have feedback from people who have issue with atmel-mci driver but not
+with at91-mci which has been removed unfortunately (it seems I had the
+only sdio wifi module working with atmel-mci driver in pdc mode...). So I
+think the 12 bytes value in the errata is correct.
+
+Moreover I am afraid that this patch could cause some other bugs. I mean the
+transfer size is 4 bytes, the sg length is 4 bytes too and we will ask
+PDC to perform a bigger transfer... With the previous driver it was not a
+problem because we didn't use sg directly, they were copied into another
+buffer.
+
+Regards
+
+Ludovic
+
+>  			/* If size is different from modulo 4, transfer bytes */
+>  			atmci_writel(host, counter_reg, host->data_size);
+>  			atmci_writel(host, ATMCI_MR, host->mode_reg | ATMCI_MR_PDCFBYTE);
+> -- 
+> 1.7.9.5
+> 
