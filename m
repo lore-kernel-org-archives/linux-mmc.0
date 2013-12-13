@@ -1,169 +1,100 @@
-From: Sergei Ianovich <ynvich@gmail.com>
-Subject: [PATCH v2 03/16] ARM: dts: provide DMA config to pxamci
-Date: Fri, 13 Dec 2013 06:27:12 +0400
-Message-ID: <1386901645-28895-4-git-send-email-ynvich@gmail.com>
-References: <1386543229-1542-1-git-send-email-ynvich@gmail.com>
- <1386901645-28895-1-git-send-email-ynvich@gmail.com>
-Return-path: <linux-doc-owner@vger.kernel.org>
-In-Reply-To: <1386901645-28895-1-git-send-email-ynvich@gmail.com>
-Sender: linux-doc-owner@vger.kernel.org
-To: linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
-Cc: Sergei Ianovich <ynvich@gmail.com>, Daniel Mack <zonque@gmail.com>, Arnd Bergmann <arnd@arndb.de>, Rob Herring <rob.herring@calxeda.com>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Stephen Warren <swarren@wwwdotorg.org>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Rob Landley <rob@landley.net>, Russell King <linux@arm.linux.org.uk>, Chris Ball <cjb@laptop.org>, Viresh Kumar <viresh.kumar@linaro.org>, Shawn Guo <shawn.guo@linaro.org>, Haojian Zhuang <haojian.zhuang@gmail.com>, "open list:OPEN FIRMWARE AND..." <devicetree@vger.kernel.org>, "open list:DOCUMENTATION" <linux-doc@vger.kernel.org>, linux-mmc@vger.kernel.org
+From: zhangfei <zhangfei.gao@linaro.org>
+Subject: Re: [PATCH 2/3] mmc: dw_mmc: add dw_mmc-k3 for k3 platform
+Date: Fri, 13 Dec 2013 10:57:47 +0800
+Message-ID: <52AA77AB.9030203@linaro.org>
+References: <1386770541-15056-1-git-send-email-zhangfei.gao@linaro.org> <201312112112.52746.arnd@arndb.de> <52A9B9B4.3080105@linaro.org> <201312122140.08566.arnd@arndb.de>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-15; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wg0-f42.google.com ([74.125.82.42]:55251 "EHLO
+	mail-wg0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751829Ab3LMC57 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 12 Dec 2013 21:57:59 -0500
+Received: by mail-wg0-f42.google.com with SMTP id a1so1414542wgh.1
+        for <linux-mmc@vger.kernel.org>; Thu, 12 Dec 2013 18:57:58 -0800 (PST)
+In-Reply-To: <201312122140.08566.arnd@arndb.de>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Arnd Bergmann <arnd@arndb.de>
+Cc: Chris Ball <cjb@laptop.org>, Mike Turquette <mturquette@linaro.org>, Rob Herring <robherring2@gmail.com>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, Kumar Gala <galak@codeaurora.org>, Haojian Zhuang <haojian.zhuang@linaro.org>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, patches@linaro.org, devicetree@vger.kernel.org, Heiko Stuebner <heiko@sntech.de>, Dinh Nguyen <dinguyen@altera.com>
 
-Non-dts implementation supply required DMA channel numbers as
-IORESOURCE_DMA. However, there is was no way to get them from
-device tree.
 
-Signed-off-by: Sergei Ianovich <ynvich@gmail.com>
-CC: Daniel Mack <zonque@gmail.com>
-CC: Arnd Bergmann <arnd@arndb.de>
----
-   v1..v2
-   * add binding for next-gen dma controller
-   * use correct dma declararion
-   * number changed from 5 to 3
 
- Documentation/devicetree/bindings/mmc/pxa-mmc.txt |  5 ++
- arch/arm/boot/dts/pxa27x.dtsi                     | 14 ++++++
- drivers/mmc/host/pxamci.c                         | 59 ++++++++++++++++++-----
- 3 files changed, 67 insertions(+), 11 deletions(-)
+On 12/13/2013 04:40 AM, Arnd Bergmann wrote:
+> On Thursday 12 December 2013, zhangfei wrote:
+>> On 12/12/2013 04:12 AM, Arnd Bergmann wrote:
+>>> On Wednesday 11 December 2013, zhangfei wrote:
+>>>
+>>> But aren't the times fixed for each mode? Why do you need to specify them in
+>>> the DT? I would expect that the clock rates for each mode are set in the
+>>> MMC and SD specifications. When you call clk_set_rate(), it should normally
+>>> be enough to ask for the clock you actually want and let the clk subsystem
+>>> figure out how to set up the parents and multipliers on the way.
+>>
+>> Yes. that's will be perfect.
+>>
+>> However, currently this ip still has no such capability.
+>>   Input rate for init are diferent for different controller, not the
+>> init 400K, some are 13M, others are 25M, since different clock source.
+>> This can be easily solved by clock-freq-init = <25000000>
+>> 2. There is maxmum limit, also can be easily solved by define CLK_MAX.
+>> 3. However some mode can not use the max speed from ios->clock
+>> for example UHS_SDR104_MAX_DTR 208000000 can not be used, only half may
+>> be reached, at least currently.
+>
+> I don't fully understand the explanation,
 
-diff --git a/Documentation/devicetree/bindings/mmc/pxa-mmc.txt b/Documentation/devicetree/bindings/mmc/pxa-mmc.txt
-index b7025de..9f54c69 100644
---- a/Documentation/devicetree/bindings/mmc/pxa-mmc.txt
-+++ b/Documentation/devicetree/bindings/mmc/pxa-mmc.txt
-@@ -5,6 +5,8 @@ Driver bindings for the PXA MCI (MMC/SDIO) interfaces
- Required properties:
- - compatible: Should be "marvell,pxa-mmc".
- - vmmc-supply: A regulator for VMMC
-+- dmas: Should be DMA specifiers for RX and TX
-+- dma-names: Should be "rx" and "tx"
- 
- Optional properties:
- - marvell,detect-delay-ms: sets the detection delay timeout in ms.
-@@ -21,5 +23,8 @@ mmc0: mmc@41100000 {
- 	interrupts = <23>;
- 	cd-gpios = <&gpio 23 0>;
- 	wp-gpios = <&gpio 24 0>;
-+	dmas = <&dma 21
-+		&dma 22>;
-+	dma-names = "rx", "tx";
- };
- 
-diff --git a/arch/arm/boot/dts/pxa27x.dtsi b/arch/arm/boot/dts/pxa27x.dtsi
-index 44df554..c2a90c5 100644
---- a/arch/arm/boot/dts/pxa27x.dtsi
-+++ b/arch/arm/boot/dts/pxa27x.dtsi
-@@ -11,10 +11,24 @@
- 			marvell,intc-nr-irqs = <34>;
- 		};
- 
-+		dma: dma-controller@40000000 {
-+			compatible = "marvell,pdma-1.0";
-+			reg = <0x40000000 0x10000>;
-+			interrupts = <25>;
-+			#dma-cells = <1>;
-+			dma-channels = <32>;
-+		};
-+
- 		gpio: gpio@40e00000 {
- 			compatible = "intel,pxa27x-gpio";
- 			interrupts = <8>, <9>, <10>;
- 			interrupt-names = "gpio0", "gpio1", "gpio_mux";
- 		};
-+
-+		mmc@41100000 {
-+			dmas = <&dma 21
-+				&dma 22>;
-+			dma-names = "rx", "tx";
-+		};
- 	};
- };
-diff --git a/drivers/mmc/host/pxamci.c b/drivers/mmc/host/pxamci.c
-index 32fe113..6b67764 100644
---- a/drivers/mmc/host/pxamci.c
-+++ b/drivers/mmc/host/pxamci.c
-@@ -613,11 +613,46 @@ static int pxamci_of_init(struct platform_device *pdev)
- 
-         return 0;
- }
-+
-+static int pxamci_of_init_dma(struct platform_device *pdev,
-+		struct pxamci_host *host)
-+{
-+	struct device_node *np = pdev->dev.of_node;
-+	u32 tmp;
-+	int i;
-+	int ret;
-+
-+	i = of_property_match_string(np, "dma-names", "rx");
-+	if (i < 0)
-+		return i;
-+
-+	ret = of_property_read_u32_index(np, "dmas", 2 * i + 1, &tmp);
-+	if (ret < 0)
-+		return ret;
-+	host->dma_drcmrrx = tmp;
-+
-+	i = of_property_match_string(np, "dma-names", "tx");
-+	if (i < 0)
-+		return i;
-+
-+	ret = of_property_read_u32_index(np, "dmas", 2 * i + 1, &tmp);
-+	if (ret < 0)
-+		return ret;
-+	host->dma_drcmrtx = tmp;
-+
-+	return 0;
-+}
- #else
- static int pxamci_of_init(struct platform_device *pdev)
- {
-         return 0;
- }
-+
-+static int pxamci_of_init_dma(struct platform_device *pdev,
-+		struct pxamci_host *host)
-+{
-+	return -ENODATA;
-+}
- #endif
- 
- static int pxamci_probe(struct platform_device *pdev)
-@@ -741,19 +776,21 @@ static int pxamci_probe(struct platform_device *pdev)
- 
- 	platform_set_drvdata(pdev, mmc);
- 
--	dmarx = platform_get_resource(pdev, IORESOURCE_DMA, 0);
--	if (!dmarx) {
--		ret = -ENXIO;
--		goto out;
--	}
--	host->dma_drcmrrx = dmarx->start;
-+	if (pxamci_of_init_dma(pdev, host) < 0) {
-+		dmarx = platform_get_resource(pdev, IORESOURCE_DMA, 0);
-+		if (!dmarx) {
-+			ret = -ENXIO;
-+			goto out;
-+		}
-+		host->dma_drcmrrx = dmarx->start;
- 
--	dmatx = platform_get_resource(pdev, IORESOURCE_DMA, 1);
--	if (!dmatx) {
--		ret = -ENXIO;
--		goto out;
-+		dmatx = platform_get_resource(pdev, IORESOURCE_DMA, 1);
-+		if (!dmatx) {
-+			ret = -ENXIO;
-+			goto out;
-+		}
-+		host->dma_drcmrtx = dmatx->start;
- 	}
--	host->dma_drcmrtx = dmatx->start;
- 
- 	if (host->pdata) {
- 		gpio_cd = host->pdata->gpio_card_detect;
--- 
-1.8.4.3
+This is the ip's limitation currently, that some mode can only operate 
+at limited freq, rather than the max freq from spec.
+Will upgrade to use ios->clock once the limitation is solved.
 
+but if some of the other
+> people with interest in dw-mmc (I've added some more to Cc now) think
+> this makes sense, I'm fine with it too.
+>
+Could I treat this as Ack or Partially Ack for the next version :)
+
+>> How about this desc
+>>
+>> * clock-freq-table: should be the frequency (in Hz) array of the ciu
+>> clock
+>>           in each supported timing.
+>>
+>>           1. CIU clock rate in HZ for MMC_TIMING_LEGACY mode
+>>
+>>           2. CIU clock rate in HZ for MMC_TIMING_MMC_HS mode
+>>           3. CIU clock rate in HZ for MMC_TIMING_SD_HS mode
+>>           4. CIU clock rate in HZ for MMC_TIMING_UHS_SDR12 mode
+>>
+>>           5. CIU clock rate in HZ for MMC_TIMING_UHS_SDR25 mode
+>>
+>>           6. CIU clock rate in HZ for MMC_TIMING_UHS_SDR50 mode
+>>
+>>           7. CIU clock rate in HZ for MMC_TIMING_UHS_SDR104 mode
+>>
+>>           8. CIU clock rate in HZ for MMC_TIMING_SD_HS mode
+>>
+>>           9. CIU clock rate in HZ for MMC_TIMING_MMC_HS200 mode
+>>
+>
+> Yes, that is much better. but please avoid using Linux internal
+> identifiers (e.g. MMC_TIMING_LEGACY) and instead use the terminology from
+> the MMC and SD specs. Also 'Hz' is the official symbol for Hertz, not 'HZ'.
+>
+
+Update to
+
+* clock-freq-table: should be the frequency (in Hz) array of the ciu clock
+         in each supported mode.
+         0. CIU clock rate in Hz for DS mode
+         1. CIU clock rate in Hz for MMC HS mode
+         2. CIU clock rate in Hz for SD HS mode
+         3. CIU clock rate in Hz for SDR12 mode
+         4. CIU clock rate in Hz for SDR25 mode
+         5. CIU clock rate in Hz for SDR50 mode
+         6. CIU clock rate in Hz for SDR104 mode
+         7. CIU clock rate in Hz for DDR50 mode
+         8. CIU clock rate in Hz for HS200 mode
+
+Thanks
