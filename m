@@ -1,54 +1,67 @@
-From: Simon Horman <horms@verge.net.au>
-Subject: Re: [PATCH 0/4] mmc: tmio/SDHI fixup patches
-Date: Fri, 13 Dec 2013 09:11:09 +0900
-Message-ID: <20131213001104.GA32101@verge.net.au>
-References: <87iovn8ohs.wl%kuninori.morimoto.gx@renesas.com>
- <87txee6dvk.fsf@octavius.laptop.org>
- <871u1ifpa8.wl%kuninori.morimoto.gx@gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-sh-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <871u1ifpa8.wl%kuninori.morimoto.gx@gmail.com>
-Sender: linux-sh-owner@vger.kernel.org
-To: Kuninori Morimoto <kuninori.morimoto.gx@gmail.com>
-Cc: Chris Ball <cjb@laptop.org>, Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>, Magnus <magnus.damm@gmail.com>, Linux-SH <linux-sh@vger.kernel.org>, linux-mmc@vger.kernel.org
+From: Mike Frysinger <vapier@gentoo.org>
+Subject: [PATCH [mmc-utils] 1/2] fix make handling
+Date: Thu, 12 Dec 2013 19:17:15 -0500
+Message-ID: <1386893836-16833-1-git-send-email-vapier@gentoo.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from smtp.gentoo.org ([140.211.166.183]:38628 "EHLO smtp.gentoo.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751717Ab3LMARR (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 12 Dec 2013 19:17:17 -0500
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: cjb@laptop.org, Mike Frysinger <vapier@chromium.org>
 
-On Thu, Dec 12, 2013 at 12:26:42AM -0800, Kuninori Morimoto wrote:
-> 
-> Hi Chris, Simon
-> 
-> > > Now, our new board would like to use sh_mobile_sdhi driver,
-> > > then, it is expecting sh_mobile_sdhi use regulator.
-> > > But, this regulator is based on GPIO driver,
-> > > and GPIO driver probe timing is after sh_mobile_sdhi.
-> > > So, sh_mobile_sdhi (= tmio_mmc_pio) use default ocr_avail,
-> > > and it doesn't work for us.
-> > > #1 patch returns -EPROBE_DEFER in such case.
-> > > it changes tmio_mmc_host_probe() behavior, but
-> > > in my check, tmio_mmc_pio driver user is sh_mobile_sdhi/tmio-mmc only,
-> > > and, current user has no conflict by this patch.
-> > >
-> > > sh_mobile_sdhi/tmio-mmc is very similar, but, have some difference.
-> > > #2 - #4 cares such case.
-> > >
-> > > These were part of "SDHI support for r8a7790" patch set,
-> > > but was separated
-> > 
-> > Sorry for the delay, I've pushed all four patches to mmc-next for
-> > 3.14.  Thanks,
-> 
-> Chris
-> Thank you for your hard work about this.
-> 
-> Simon
-> Lager SDHI needs these patches.
-> Can you use this branch ?
-> If yes, I can re-send patches.
+From: Mike Frysinger <vapier@chromium.org>
 
-Hi Chris,
+Fix the recurisve make targets by using $(MAKE).  Otherwise we get lots of
+warnings and issues with parallel builds.
 
-is it possible for you to provide a branch with stable git commit ids
-that I can use as a base? I'm happy to use mmc-next if you think
-it is appropriate.
+Fix the install target -- the man subdir was missing a dummy target.
+
+Add proper .PHONY markings.
+
+Signed-off-by: Mike Frysinger <vapier@chromium.org>
+---
+ Makefile     | 8 +++++---
+ man/Makefile | 3 +++
+ 2 files changed, 8 insertions(+), 3 deletions(-)
+
+diff --git a/Makefile b/Makefile
+index ae846e2..91cfc35 100644
+--- a/Makefile
++++ b/Makefile
+@@ -34,15 +34,17 @@ mmc: $(objects)
+ 	$(CC) $(CFLAGS) -o $@ $(objects) $(LDFLAGS) $(LIBS)
+ 
+ manpages:
+-	cd man && make
++	$(MAKE) -C man
+ 
+ install-man:
+-	cd man && make install
++	$(MAKE) -C man install
+ 
+ clean:
+ 	rm -f $(progs) $(objects)
+-	cd man && make clean
++	$(MAKE) -C man clean
+ 
+ install: $(progs) install-man
+ 	$(INSTALL) -m755 -d $(DESTDIR)$(bindir)
+ 	$(INSTALL) $(progs) $(DESTDIR)$(bindir)
++
++.PHONY: all clean install manpages install-man
+diff --git a/man/Makefile b/man/Makefile
+index c8957f6..da79a50 100644
+--- a/man/Makefile
++++ b/man/Makefile
+@@ -1,2 +1,5 @@
+ all: 
+ clean: 
++install:
++
++.PHONY: all clean install
+-- 
+1.8.4.3
+
