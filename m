@@ -1,59 +1,62 @@
-From: Josh Triplett <josh@joshtriplett.org>
-Subject: Re: [PATCH] drivers: mmc: Mark the function
- sdhci_disable_irq_wakeups() as static in sdhci.c
-Date: Sat, 14 Dec 2013 13:00:24 -0800
-Message-ID: <20131214210024.GV17601@leaf>
-References: <20131214131631.GA8543@rashika>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: [PATCHv6 2/5] clk: socfpga: Add a clock type for the SD/MMC driver
+Date: Sat, 14 Dec 2013 22:33:26 +0100
+Message-ID: <201312142233.27143.arnd@arndb.de>
+References: <1386880245-10192-1-git-send-email-dinguyen@altera.com> <1386880245-10192-3-git-send-email-dinguyen@altera.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20131214131631.GA8543@rashika>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Rashika Kheria <rashika.kheria@gmail.com>
-Cc: linux-kernel@vger.kernel.org, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org
+Content-Type: Text/Plain;
+  charset="iso-8859-15"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from moutng.kundenserver.de ([212.227.126.186]:50196 "EHLO
+	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751568Ab3LNVdp (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 14 Dec 2013 16:33:45 -0500
+In-Reply-To: <1386880245-10192-3-git-send-email-dinguyen@altera.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: dinguyen@altera.com
+Cc: dinh.linux@gmail.com, cjb@laptop.org, jh80.chung@samsung.com, tgih.jun@samsung.com, heiko@sntech.de, dianders@chromium.org, alim.akhtar@samsung.com, bzhao@marvell.com, rob.herring@calxeda.com, pawel.moll@arm.com, mark.rutland@arm.com, ian.campbell@citrix.com, mturquette@linaro.org, zhangfei.gao@linaro.org, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 
-On Sat, Dec 14, 2013 at 06:46:31PM +0530, Rashika Kheria wrote:
-> This patch marks the function sdhci_disable_irq_wakeups() as static i=
-n
-> host/sdhci.c because it is not used outside this file.
->=20
-> Thus, it also eliminates the following warning in host/sdhci.c:
-> drivers/mmc/host/sdhci.c:2553:6: warning: no previous prototype for =E2=
-=80=98sdhci_disable_irq_wakeups=E2=80=99 [-Wmissing-prototypes]
->=20
-> Signed-off-by: Rashika Kheria <rashika.kheria@gmail.com>
+On Thursday 12 December 2013, dinguyen@altera.com wrote:
+> From: Dinh Nguyen <dinguyen@altera.com>
+> 
+> Add a "altr,socfpga-sdmmc-sdr-clk" clock type in the SOCFPGA clock driver. This
+> clock type is not really a "clock" for say, but a mechanism to set the phase
+> shift of the clock that is used to feed the SD/MMC CIU's clock. This clock does
+> not have parent so it is designated as a CLK_IS_ROOT.
+> 
+> This clock implements the set_clk_rate method that is meant to receive the SDR
+> settings that is designated by the "samsung,dw-mshc-sdr-timing" binding. The
+> SD/MMC driver passes this clock phase information into the clock driver to use.
+> 
+> This enables the SD/MMC driver to touch registers that are located outside of
+> the SD/MMC IP, which helps make the core SD/MMC driver generic.
+> 
+> Signed-off-by: Dinh Nguyen <dinguyen@alter.com>
 
-This function has an EXPORT_SYMBOL_GPL, making it available for use
-elsewhere in the kernel.  However, nothing in the kernel actually
-*calls* this function, other than the one internal call in
-sdhci_resume_host.  Thus, I'd suggest making this function static as yo=
-u
-have in this patch, and additionally deleting the EXPORT_SYMBOL_GPL for
-it.
+Ok, this looks like it will work, but we haven't concluded if this is the
+best way to do it. I'm looking for guidance from Mike here.
 
-With that change:
-Reviewed-by: Josh Triplett <josh@joshtriplett.org>
+The alternatives I can see for this particular problem are:
 
->  drivers/mmc/host/sdhci.c |    2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
->=20
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index bd8a098..8de50e8 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -2550,7 +2550,7 @@ void sdhci_enable_irq_wakeups(struct sdhci_host=
- *host)
->  }
->  EXPORT_SYMBOL_GPL(sdhci_enable_irq_wakeups);
-> =20
-> -void sdhci_disable_irq_wakeups(struct sdhci_host *host)
-> +static void sdhci_disable_irq_wakeups(struct sdhci_host *host)
->  {
->  	u8 val;
->  	u8 mask =3D SDHCI_WAKE_ON_INSERT | SDHCI_WAKE_ON_REMOVE
-> --=20
-> 1.7.9.5
->=20
+1. fake a clock and use the 'clk_set_rate' callback to set the phase
+   rather than the clock frequency (as you do in this patch).
+2. extend the common clock API to provide a 'clk_set_phase' interface
+   that you can call on the CIU clock to set this, so you don't have
+   to fake anything. This seems to be the nicest interface if we have
+   the same problem in more drivers.
+3. make the phase setting private to whichever clock is used for CIU
+   (as one of your previous patches did, which I did not like).
+4. make the phase an additional argument to the clock specifier,
+   so you would have <&mmcclock 12345 5678> rather than just <&mmcclock>
+   in the mmc host device node to specify the two possible phases.
+
+I would also like to get buy-in from Zhangfei Gao, since he is working
+on the same thing. Please coordinate with him to make sure whatever
+one of you comes up with works for the other one too. At the moment,
+patches are flying so fast without much discussion inbetween that I'd
+prefer Chris to hold off from merging either one until you have both
+revieved and Acked each other's patches.
+
+	Arnd
