@@ -1,62 +1,51 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [PATCHv6 2/5] clk: socfpga: Add a clock type for the SD/MMC driver
-Date: Sat, 14 Dec 2013 22:33:26 +0100
-Message-ID: <201312142233.27143.arnd@arndb.de>
-References: <1386880245-10192-1-git-send-email-dinguyen@altera.com> <1386880245-10192-3-git-send-email-dinguyen@altera.com>
+From: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: [PATCH 0/5] ARM: sunxi: Add driver for SD/MMC hosts
+ found on allwinner sunxi SOCs
+Date: Sat, 14 Dec 2013 22:58:10 +0100
+Message-ID: <1387058295-20641-1-git-send-email-hdegoede@redhat.com>
+Reply-To: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
 Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="iso-8859-15"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.126.186]:50196 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751568Ab3LNVdp (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 14 Dec 2013 16:33:45 -0500
-In-Reply-To: <1386880245-10192-3-git-send-email-dinguyen@altera.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
+Return-path: <linux-sunxi+bncBDL4X2GMZUKRB7VIWOKQKGQEQO3ZLVI-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Post: <http://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Help: <http://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Archive: <http://groups.google.com/group/linux-sunxi>
+Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+List-Subscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Unsubscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+To: Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
+Cc: =?UTF-8?q?David=20Lanzend=C3=B6rfer?= <david.lanzendoerfer-Z7Kmv9EsliU@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: dinguyen@altera.com
-Cc: dinh.linux@gmail.com, cjb@laptop.org, jh80.chung@samsung.com, tgih.jun@samsung.com, heiko@sntech.de, dianders@chromium.org, alim.akhtar@samsung.com, bzhao@marvell.com, rob.herring@calxeda.com, pawel.moll@arm.com, mark.rutland@arm.com, ian.campbell@citrix.com, mturquette@linaro.org, zhangfei.gao@linaro.org, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 
-On Thursday 12 December 2013, dinguyen@altera.com wrote:
-> From: Dinh Nguyen <dinguyen@altera.com>
-> 
-> Add a "altr,socfpga-sdmmc-sdr-clk" clock type in the SOCFPGA clock driver. This
-> clock type is not really a "clock" for say, but a mechanism to set the phase
-> shift of the clock that is used to feed the SD/MMC CIU's clock. This clock does
-> not have parent so it is designated as a CLK_IS_ROOT.
-> 
-> This clock implements the set_clk_rate method that is meant to receive the SDR
-> settings that is designated by the "samsung,dw-mshc-sdr-timing" binding. The
-> SD/MMC driver passes this clock phase information into the clock driver to use.
-> 
-> This enables the SD/MMC driver to touch registers that are located outside of
-> the SD/MMC IP, which helps make the core SD/MMC driver generic.
-> 
-> Signed-off-by: Dinh Nguyen <dinguyen@alter.com>
+Hi All,
 
-Ok, this looks like it will work, but we haven't concluded if this is the
-best way to do it. I'm looking for guidance from Mike here.
+This patchset adds support for the SD/MMC hosts found on sun4i, sun5i and
+sun7i SOCs. It is based on the driver Allwinner ships in their Android kern=
+el
+sources.
 
-The alternatives I can see for this particular problem are:
+Initial porting to upstream kernels done by David Lanzend=F6rfer.
 
-1. fake a clock and use the 'clk_set_rate' callback to set the phase
-   rather than the clock frequency (as you do in this patch).
-2. extend the common clock API to provide a 'clk_set_phase' interface
-   that you can call on the CIU clock to set this, so you don't have
-   to fake anything. This seems to be the nicest interface if we have
-   the same problem in more drivers.
-3. make the phase setting private to whichever clock is used for CIU
-   (as one of your previous patches did, which I did not like).
-4. make the phase an additional argument to the clock specifier,
-   so you would have <&mmcclock 12345 5678> rather than just <&mmcclock>
-   in the mmc host device node to specify the two possible phases.
+I've spend a lot of time cleaning this up, so hopefuly it is ready to go
+upstream now, please review.
 
-I would also like to get buy-in from Zhangfei Gao, since he is working
-on the same thing. Please coordinate with him to make sure whatever
-one of you comes up with works for the other one too. At the moment,
-patches are flying so fast without much discussion inbetween that I'd
-prefer Chris to hold off from merging either one until you have both
-revieved and Acked each other's patches.
+Note David Lanzend=F6rfer will maintain this driver in the future. I jumped=
+ into
+the process of creating this driver to iron out a few blocker bugs and ende=
+d
+up also doing a lot of cleanup as David was busy. David should have time to
+work on this again now, so if a v2 of the patch-set is needed, he will like=
+ly
+post it.
 
-	Arnd
+Thanks & Regards,
+
+Hans
+
+--=20
+You received this message because you are subscribed to the Google Groups "=
+linux-sunxi" group.
+To unsubscribe from this group and stop receiving emails from it, send an e=
+mail to linux-sunxi+unsubscribe-/JYPxA39Uh5TLH3MbocFF+G/Ez6ZCGd0@public.gmane.org
+For more options, visit https://groups.google.com/groups/opt_out.
