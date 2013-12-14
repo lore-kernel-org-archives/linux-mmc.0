@@ -1,38 +1,48 @@
-From: Christian Daudt <bcm@fixthebug.org>
-Subject: Re: [PATCH v4 7/8] clocksource: kona: Add basic use of external clock
-Date: Sat, 14 Dec 2013 00:26:00 -0800
-Message-ID: <CAEPRUYqg2hzwudwLq+MyBfY119e22HzBe5H+03vGA4VVrL9rYw@mail.gmail.com>
-References: <1386271244-3927-1-git-send-email-tim.kryger@linaro.org>
-	<1386271244-3927-8-git-send-email-tim.kryger@linaro.org>
+From: Rashika Kheria <rashika.kheria@gmail.com>
+Subject: [PATCH] drivers: mmc: Mark the function sdhci_disable_irq_wakeups()
+ as static in sdhci.c
+Date: Sat, 14 Dec 2013 18:46:31 +0530
+Message-ID: <20131214131631.GA8543@rashika>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ee0-f42.google.com ([74.125.83.42]:55334 "EHLO
-	mail-ee0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751979Ab3LNI0C (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 14 Dec 2013 03:26:02 -0500
-Received: by mail-ee0-f42.google.com with SMTP id e53so1240262eek.15
-        for <linux-mmc@vger.kernel.org>; Sat, 14 Dec 2013 00:26:00 -0800 (PST)
-In-Reply-To: <1386271244-3927-8-git-send-email-tim.kryger@linaro.org>
+Received: from mail-pb0-f41.google.com ([209.85.160.41]:63034 "EHLO
+	mail-pb0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753393Ab3LNNQj (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 14 Dec 2013 08:16:39 -0500
+Content-Disposition: inline
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Tim Kryger <tim.kryger@linaro.org>, Daniel Lezcano <daniel.lezcano@linaro.org>
-Cc: Rob Herring <rob.herring@calxeda.com>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Stephen Warren <swarren@wwwdotorg.org>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Thomas Gleixner <tglx@linutronix.de>, Chris Ball <cjb@laptop.org>, Axel Lin <axel.lin@ingics.com>, Device Tree List <devicetree@vger.kernel.org>, Linux ARM Kernel List <linux-arm-kernel@lists.infradead.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux MMC List <linux-mmc@vger.kernel.org>, Linaro Patches List <patches@linaro.org>
+To: linux-kernel@vger.kernel.org
+Cc: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, josh@joshtriplett.org
 
-On Thu, Dec 5, 2013 at 11:20 AM, Tim Kryger <tim.kryger@linaro.org> wrote:
-> When an clock is specified in the device tree, enable it and use it to
-> determine the external clock frequency.
->
-> Signed-off-by: Tim Kryger <tim.kryger@linaro.org>
-> Reviewed-by: Markus Mayer <markus.mayer@linaro.org>
-> Reviewed-by: Matt Porter <matt.porter@linaro.org>
-> ---
+This patch marks the function sdhci_disable_irq_wakeups() as static in
+host/sdhci.c because it is not used outside this file.
 
-Reviewed-by: Christian Daudt <bcm@fixthebug.org>
+Thus, it also eliminates the following warning in host/sdhci.c:
+drivers/mmc/host/sdhci.c:2553:6: warning: no previous prototype for =E2=
+=80=98sdhci_disable_irq_wakeups=E2=80=99 [-Wmissing-prototypes]
 
-Daniel,
- Are you ok with me pulling this patch in with the rest of the
-patchset into the bcm tree ?
+Signed-off-by: Rashika Kheria <rashika.kheria@gmail.com>
+---
+ drivers/mmc/host/sdhci.c |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
- Thanks,
-   csd
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index bd8a098..8de50e8 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -2550,7 +2550,7 @@ void sdhci_enable_irq_wakeups(struct sdhci_host *=
+host)
+ }
+ EXPORT_SYMBOL_GPL(sdhci_enable_irq_wakeups);
+=20
+-void sdhci_disable_irq_wakeups(struct sdhci_host *host)
++static void sdhci_disable_irq_wakeups(struct sdhci_host *host)
+ {
+ 	u8 val;
+ 	u8 mask =3D SDHCI_WAKE_ON_INSERT | SDHCI_WAKE_ON_REMOVE
+--=20
+1.7.9.5
+
