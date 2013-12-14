@@ -1,52 +1,59 @@
-From: Sergei Ianovich <ynvich@gmail.com>
-Subject: Re: [PATCH v2 03/16] ARM: dts: provide DMA config to pxamci
-Date: Sat, 14 Dec 2013 23:34:20 +0400
-Message-ID: <1387049660.7152.317.camel@host5.omatika.ru>
-References: <1386543229-1542-1-git-send-email-ynvich@gmail.com>
-	 <1386901645-28895-1-git-send-email-ynvich@gmail.com>
-	 <1386901645-28895-4-git-send-email-ynvich@gmail.com>
-	 <201312142006.26979.arnd@arndb.de>
+From: Josh Triplett <josh@joshtriplett.org>
+Subject: Re: [PATCH] drivers: mmc: Mark the function
+ sdhci_disable_irq_wakeups() as static in sdhci.c
+Date: Sat, 14 Dec 2013 13:00:24 -0800
+Message-ID: <20131214210024.GV17601@leaf>
+References: <20131214131631.GA8543@rashika>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-doc-owner@vger.kernel.org>
-In-Reply-To: <201312142006.26979.arnd@arndb.de>
-Sender: linux-doc-owner@vger.kernel.org
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Daniel Mack <zonque@gmail.com>, Rob Herring <rob.herring@calxeda.com>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Stephen Warren <swarren@wwwdotorg.org>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Rob Landley <rob@landley.net>, Russell King <linux@arm.linux.org.uk>, Chris Ball <cjb@laptop.org>, Viresh Kumar <viresh.kumar@linaro.org>, Shawn Guo <shawn.guo@linaro.org>, Haojian Zhuang <haojian.zhuang@gmail.com>, "open list:OPEN FIRMWARE AND..." <devicetree@vger.kernel.org>, "open list:DOCUMENTATION" <linux-doc@vger.kernel.org>, linux-mmc@vger.kernel.org
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <20131214131631.GA8543@rashika>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Rashika Kheria <rashika.kheria@gmail.com>
+Cc: linux-kernel@vger.kernel.org, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Sat, 2013-12-14 at 20:06 +0100, Arnd Bergmann wrote:
-> On Friday 13 December 2013, Sergei Ianovich wrote:
-> > Non-dts implementation supply required DMA channel numbers as
-> > IORESOURCE_DMA. However, there is was no way to get them from
-> > device tree.
-> 
-> Please update this changeset comment, I think it still refers to
-> the earlier version.
+On Sat, Dec 14, 2013 at 06:46:31PM +0530, Rashika Kheria wrote:
+> This patch marks the function sdhci_disable_irq_wakeups() as static i=
+n
+> host/sdhci.c because it is not used outside this file.
+>=20
+> Thus, it also eliminates the following warning in host/sdhci.c:
+> drivers/mmc/host/sdhci.c:2553:6: warning: no previous prototype for =E2=
+=80=98sdhci_disable_irq_wakeups=E2=80=99 [-Wmissing-prototypes]
+>=20
+> Signed-off-by: Rashika Kheria <rashika.kheria@gmail.com>
 
----
-Non-dts implementation supply required DMA channel numbers as
-IORESOURCE_DMA. We can also get them from the device tree, if it
-is present.
----
+This function has an EXPORT_SYMBOL_GPL, making it available for use
+elsewhere in the kernel.  However, nothing in the kernel actually
+*calls* this function, other than the one internal call in
+sdhci_resume_host.  Thus, I'd suggest making this function static as yo=
+u
+have in this patch, and additionally deleting the EXPORT_SYMBOL_GPL for
+it.
 
-Is this fine?
+With that change:
+Reviewed-by: Josh Triplett <josh@joshtriplett.org>
 
-Should I post v3, if so? 
-
-> > Signed-off-by: Sergei Ianovich <ynvich@gmail.com>
-> > CC: Daniel Mack <zonque@gmail.com>
-> > CC: Arnd Bergmann <arnd@arndb.de>
-> 
-> The patch looks ok in case we are merging your patches for 3.14
-> and Daniel's patches later than that. If they end up in the
-> same merge window however, we'd have to be care to resolve
-> the obvious conflict in a proper way.
-
-The most recently published Daniel's patch (Aug 2013) wraps
-IORESOURCE_DMA handling on DT presence in a similar way, but doesn't do
-any actual DT processing. So there is no conflict at the moment. Daniel
-can comment better on this, though.
-
-
+>  drivers/mmc/host/sdhci.c |    2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+>=20
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index bd8a098..8de50e8 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -2550,7 +2550,7 @@ void sdhci_enable_irq_wakeups(struct sdhci_host=
+ *host)
+>  }
+>  EXPORT_SYMBOL_GPL(sdhci_enable_irq_wakeups);
+> =20
+> -void sdhci_disable_irq_wakeups(struct sdhci_host *host)
+> +static void sdhci_disable_irq_wakeups(struct sdhci_host *host)
+>  {
+>  	u8 val;
+>  	u8 mask =3D SDHCI_WAKE_ON_INSERT | SDHCI_WAKE_ON_REMOVE
+> --=20
+> 1.7.9.5
+>=20
