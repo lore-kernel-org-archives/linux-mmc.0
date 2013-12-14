@@ -1,13 +1,12 @@
 From: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: [PATCH 3/5] ARM: dts: sun5i: Add new
- sun5i-a13-olinuxino-micro board
-Date: Sat, 14 Dec 2013 22:58:13 +0100
-Message-ID: <1387058295-20641-4-git-send-email-hdegoede@redhat.com>
+Subject: [PATCH 4/5] ARM: dts: sun5i: add mmc support
+Date: Sat, 14 Dec 2013 22:58:14 +0100
+Message-ID: <1387058295-20641-5-git-send-email-hdegoede@redhat.com>
 References: <1387058295-20641-1-git-send-email-hdegoede@redhat.com>
 Reply-To: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-sunxi+bncBDL4X2GMZUKRBBFJWOKQKGQE5NI4WSY-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+Return-path: <linux-sunxi+bncBDL4X2GMZUKRBBVJWOKQKGQE2QCJDGY-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
 In-Reply-To: <1387058295-20641-1-git-send-email-hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Post: <http://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
 List-Help: <http://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
@@ -21,94 +20,199 @@ List-Id: linux-mmc@vger.kernel.org
 
 Signed-off-by: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 ---
- arch/arm/boot/dts/Makefile                      |  1 +
- arch/arm/boot/dts/sun5i-a13-olinuxino-micro.dts | 66 +++++++++++++++++++++++++
- 2 files changed, 67 insertions(+)
- create mode 100644 arch/arm/boot/dts/sun5i-a13-olinuxino-micro.dts
+ arch/arm/boot/dts/sun5i-a10s-olinuxino-micro.dts | 32 ++++++++++++++++++++++
+ arch/arm/boot/dts/sun5i-a10s.dtsi                | 34 ++++++++++++++++++++++++
+ arch/arm/boot/dts/sun5i-a13-olinuxino-micro.dts  | 16 +++++++++++
+ arch/arm/boot/dts/sun5i-a13-olinuxino.dts        | 16 +++++++++++
+ arch/arm/boot/dts/sun5i-a13.dtsi                 | 17 ++++++++++++
+ 5 files changed, 115 insertions(+)
 
-diff --git a/arch/arm/boot/dts/Makefile b/arch/arm/boot/dts/Makefile
-index d57c1a6..b663ed7 100644
---- a/arch/arm/boot/dts/Makefile
-+++ b/arch/arm/boot/dts/Makefile
-@@ -255,6 +255,7 @@ dtb-$(CONFIG_ARCH_SUNXI) += \
- 	sun4i-a10-hackberry.dtb \
- 	sun5i-a10s-olinuxino-micro.dtb \
- 	sun5i-a13-olinuxino.dtb \
-+	sun5i-a13-olinuxino-micro.dtb \
- 	sun6i-a31-colombus.dtb \
- 	sun7i-a20-cubieboard2.dtb \
- 	sun7i-a20-cubietruck.dtb \
-diff --git a/arch/arm/boot/dts/sun5i-a13-olinuxino-micro.dts b/arch/arm/boot/dts/sun5i-a13-olinuxino-micro.dts
-new file mode 100644
-index 0000000..26df7e8
---- /dev/null
-+++ b/arch/arm/boot/dts/sun5i-a13-olinuxino-micro.dts
-@@ -0,0 +1,66 @@
-+/*
-+ * Copyright 2012 Maxime Ripard
-+ *
-+ * Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
-+ *
-+ * The code contained herein is licensed under the GNU General Public
-+ * License. You may obtain a copy of the GNU General Public License
-+ * Version 2 or later at the following locations:
-+ *
-+ * http://www.opensource.org/licenses/gpl-license.html
-+ * http://www.gnu.org/copyleft/gpl.html
-+ */
+diff --git a/arch/arm/boot/dts/sun5i-a10s-olinuxino-micro.dts b/arch/arm/boot/dts/sun5i-a10s-olinuxino-micro.dts
+index 3c9f8b3..e53fb12 100644
+--- a/arch/arm/boot/dts/sun5i-a10s-olinuxino-micro.dts
++++ b/arch/arm/boot/dts/sun5i-a10s-olinuxino-micro.dts
+@@ -34,7 +34,39 @@
+ 			};
+ 		};
+ 
++		sdc0: sdc@01c0f000 {
++			pinctrl-names = "default";
++			pinctrl-0 = <&sdc0_pins_a>;
++			pinctrl-1 = <&mmc0_cd_pin_olinuxino_micro>;
++			cd-gpios = <&pio 6 1 0>; /* PG1 */
++			cd-mode = <1>;
++			status = "okay";
++		};
 +
-+/dts-v1/;
-+/include/ "sun5i-a13.dtsi"
++		sdc1: sdc@01c10000 {
++			pinctrl-names = "default";
++			pinctrl-0 = <&sdc1_pins_a>;
++			pinctrl-1 = <&mmc1_cd_pin_olinuxino_micro>;
++			cd-gpios = <&pio 6 13 0>; /* PG13 */
++			cd-mode = <1>;
++			status = "okay";
++		};
 +
-+/ {
-+	model = "Olimex A13-Olinuxino Micro";
-+	compatible = "olimex,a13-olinuxino-micro", "allwinner,sun5i-a13";
-+
-+	soc@01c00000 {
-+		pinctrl@01c20800 {
-+			led_pins_olinuxinom: led_pins@0 {
-+				allwinner,pins = "PG9";
-+				allwinner,function = "gpio_out";
-+				allwinner,drive = <1>;
+ 		pinctrl@01c20800 {
++			mmc0_cd_pin_olinuxino_micro: mmc0_cd_pin@0 {
++				allwinner,pins = "PG1";
++				allwinner,function = "gpio_in";
++				allwinner,drive = <0>;
 +				allwinner,pull = <0>;
 +			};
++
++			mmc1_cd_pin_olinuxino_micro: mmc1_cd_pin@0 {
++				allwinner,pins = "PG13";
++				allwinner,function = "gpio_in";
++				allwinner,drive = <0>;
++				allwinner,pull = <0>;
++			};
++
+ 			led_pins_olinuxino: led_pins@0 {
+ 				allwinner,pins = "PE3";
+ 				allwinner,function = "gpio_out";
+diff --git a/arch/arm/boot/dts/sun5i-a10s.dtsi b/arch/arm/boot/dts/sun5i-a10s.dtsi
+index 83e183c..fdbc290 100644
+--- a/arch/arm/boot/dts/sun5i-a10s.dtsi
++++ b/arch/arm/boot/dts/sun5i-a10s.dtsi
+@@ -274,6 +274,26 @@
+ 			#size-cells = <0>;
+ 		};
+ 
++		sdc0: sdc@01c0f000 {
++			compatible = "allwinner,sun5i-mmc";
++			reg = <0x01c0f000 0x1000>;
++			clocks = <&ahb_gates 8>, <&mmc0>;
++			clock-names = "ahb", "mod";
++			interrupts = <32>;
++			bus-width = <4>;
++			status = "disabled";
 +		};
 +
-+		uart1: serial@01c28400 {
++		sdc1: sdc@01c10000 {
++			compatible = "allwinner,sun5i-mmc";
++			reg = <0x01c10000 0x1000>;
++			clocks = <&ahb_gates 9>, <&mmc1>;
++			clock-names = "ahb", "mod";
++			interrupts = <33>;
++			bus-width = <4>;
++			status = "disabled";
++		};
++
+ 		intc: interrupt-controller@01c20400 {
+ 			compatible = "allwinner,sun4i-ic";
+ 			reg = <0x01c20400 0x400>;
+@@ -344,6 +364,20 @@
+ 				allwinner,drive = <0>;
+ 				allwinner,pull = <0>;
+ 			};
++
++			sdc0_pins_a: sdc0@0 {
++				allwinner,pins = "PF0","PF1","PF2","PF3","PF4","PF5";
++				allwinner,function = "mmc0";
++				allwinner,drive = <3>;
++				allwinner,pull = <1>;
++			};
++
++			sdc1_pins_a: sdc1@0 {
++				allwinner,pins = "PG3","PG4","PG5","PG6","PG7","PG8";
++				allwinner,function = "mmc1";
++				allwinner,drive = <3>;
++				allwinner,pull = <1>;
++			};
+ 		};
+ 
+ 		timer@01c20c00 {
+diff --git a/arch/arm/boot/dts/sun5i-a13-olinuxino-micro.dts b/arch/arm/boot/dts/sun5i-a13-olinuxino-micro.dts
+index 26df7e8..247cd79 100644
+--- a/arch/arm/boot/dts/sun5i-a13-olinuxino-micro.dts
++++ b/arch/arm/boot/dts/sun5i-a13-olinuxino-micro.dts
+@@ -19,7 +19,23 @@
+ 	compatible = "olimex,a13-olinuxino-micro", "allwinner,sun5i-a13";
+ 
+ 	soc@01c00000 {
++		sdc0: sdc@01c0f000 {
 +			pinctrl-names = "default";
-+			pinctrl-0 = <&uart1_pins_b>;
++			pinctrl-0 = <&sdc0_pins_a>;
++			pinctrl-1 = <&mmc0_cd_pin_olinuxinom>;
++			cd-gpios = <&pio 6 0 0>; /* PG0 */
++			cd-mode = <1>;
 +			status = "okay";
 +		};
 +
-+		i2c0: i2c@01c2ac00 {
+ 		pinctrl@01c20800 {
++			mmc0_cd_pin_olinuxinom: mmc0_cd_pin@0 {
++				allwinner,pins = "PG0";
++				allwinner,function = "gpio_in";
++				allwinner,drive = <0>;
++				allwinner,pull = <0>;
++			};
++
+ 			led_pins_olinuxinom: led_pins@0 {
+ 				allwinner,pins = "PG9";
+ 				allwinner,function = "gpio_out";
+diff --git a/arch/arm/boot/dts/sun5i-a13-olinuxino.dts b/arch/arm/boot/dts/sun5i-a13-olinuxino.dts
+index 9e508dc..ce22c81 100644
+--- a/arch/arm/boot/dts/sun5i-a13-olinuxino.dts
++++ b/arch/arm/boot/dts/sun5i-a13-olinuxino.dts
+@@ -23,7 +23,23 @@
+ 	};
+ 
+ 	soc@01c00000 {
++		sdc0: sdc@01c0f000 {
 +			pinctrl-names = "default";
-+			pinctrl-0 = <&i2c0_pins_a>;
++			pinctrl-0 = <&sdc0_pins_a>;
++			pinctrl-1 = <&mmc0_cd_pin_olinuxino>;
++			cd-gpios = <&pio 6 0 0>; /* PG0 */
++			cd-mode = <1>;
 +			status = "okay";
 +		};
 +
-+		i2c1: i2c@01c2b000 {
-+			pinctrl-names = "default";
-+			pinctrl-0 = <&i2c1_pins_a>;
-+			status = "okay";
+ 		pinctrl@01c20800 {
++			mmc0_cd_pin_olinuxino: mmc0_cd_pin@0 {
++				allwinner,pins = "PG0";
++				allwinner,function = "gpio_in";
++				allwinner,drive = <0>;
++				allwinner,pull = <0>;
++			};
++
+ 			led_pins_olinuxino: led_pins@0 {
+ 				allwinner,pins = "PG9";
+ 				allwinner,function = "gpio_out";
+diff --git a/arch/arm/boot/dts/sun5i-a13.dtsi b/arch/arm/boot/dts/sun5i-a13.dtsi
+index 0bb4300..0ca0819 100644
+--- a/arch/arm/boot/dts/sun5i-a13.dtsi
++++ b/arch/arm/boot/dts/sun5i-a13.dtsi
+@@ -255,6 +255,16 @@
+ 		#size-cells = <1>;
+ 		ranges;
+ 
++		sdc0: sdc@01c0f000 {
++			compatible = "allwinner,sun5i-mmc";
++			reg = <0x01c0f000 0x1000>;
++			clocks = <&ahb_gates 8>, <&mmc0>;
++			clock-names = "ahb", "mod";
++			interrupts = <32>;
++			bus-width = <4>;
++			status = "disabled";
 +		};
 +
-+		i2c2: i2c@01c2b400 {
-+			pinctrl-names = "default";
-+			pinctrl-0 = <&i2c2_pins_a>;
-+			status = "okay";
-+		};
-+	};
+ 		intc: interrupt-controller@01c20400 {
+ 			compatible = "allwinner,sun4i-ic";
+ 			reg = <0x01c20400 0x400>;
+@@ -307,6 +317,13 @@
+ 				allwinner,drive = <0>;
+ 				allwinner,pull = <0>;
+ 			};
 +
-+	leds {
-+		compatible = "gpio-leds";
-+		pinctrl-names = "default";
-+		pinctrl-0 = <&led_pins_olinuxinom>;
-+
-+		power {
-+			gpios = <&pio 6 9 0>;
-+			default-state = "on";
-+		};
-+	};
-+};
++			sdc0_pins_a: sdc0@0 {
++				allwinner,pins = "PF0","PF1","PF2","PF3","PF4","PF5";
++				allwinner,function = "mmc0";
++				allwinner,drive = <3>;
++				allwinner,pull = <1>;
++			};
+ 		};
+ 
+ 		timer@01c20c00 {
 -- 
 1.8.4.2
