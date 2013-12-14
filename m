@@ -1,48 +1,43 @@
-From: Rashika Kheria <rashika.kheria@gmail.com>
-Subject: [PATCH] drivers: mmc: Mark the function sdhci_disable_irq_wakeups()
- as static in sdhci.c
-Date: Sat, 14 Dec 2013 18:46:31 +0530
-Message-ID: <20131214131631.GA8543@rashika>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: [PATCH v2 03/16] ARM: dts: provide DMA config to pxamci
+Date: Sat, 14 Dec 2013 20:06:26 +0100
+Message-ID: <201312142006.26979.arnd@arndb.de>
+References: <1386543229-1542-1-git-send-email-ynvich@gmail.com>
+ <1386901645-28895-1-git-send-email-ynvich@gmail.com>
+ <1386901645-28895-4-git-send-email-ynvich@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pb0-f41.google.com ([209.85.160.41]:63034 "EHLO
-	mail-pb0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753393Ab3LNNQj (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 14 Dec 2013 08:16:39 -0500
-Content-Disposition: inline
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <1386901645-28895-4-git-send-email-ynvich@gmail.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Sergei Ianovich <ynvich@gmail.com>
+Cc: Mark Rutland <mark.rutland@arm.com>, "open list:OPEN FIRMWARE AND..." <devicetree@vger.kernel.org>, Shawn Guo <shawn.guo@linaro.org>, Russell King <linux@arm.linux.org.uk>, Pawel Moll <pawel.moll@arm.com>, Stephen Warren <swarren@wwwdotorg.org>, Viresh Kumar <viresh.kumar@linaro.org>, Ian Campbell <ijc+devicetree@hellion.org.uk>, "open list:DOCUMENTATION" <linux-doc@vger.kernel.org>, linux-kernel@vger.kernel.org, Rob Herring <rob.herring@calxeda.com>, Daniel Mack <zonque@gmail.com>, Haojian Zhuang <haojian.zhuang@gmail.com>, Rob Landley <rob@landley.net>, linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-kernel@vger.kernel.org
-Cc: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, josh@joshtriplett.org
 
-This patch marks the function sdhci_disable_irq_wakeups() as static in
-host/sdhci.c because it is not used outside this file.
+On Friday 13 December 2013, Sergei Ianovich wrote:
+> Non-dts implementation supply required DMA channel numbers as
+> IORESOURCE_DMA. However, there is was no way to get them from
+> device tree.
 
-Thus, it also eliminates the following warning in host/sdhci.c:
-drivers/mmc/host/sdhci.c:2553:6: warning: no previous prototype for =E2=
-=80=98sdhci_disable_irq_wakeups=E2=80=99 [-Wmissing-prototypes]
+Please update this changeset comment, I think it still refers to
+the earlier version.
+ 
+> Signed-off-by: Sergei Ianovich <ynvich@gmail.com>
+> CC: Daniel Mack <zonque@gmail.com>
+> CC: Arnd Bergmann <arnd@arndb.de>
 
-Signed-off-by: Rashika Kheria <rashika.kheria@gmail.com>
----
- drivers/mmc/host/sdhci.c |    2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+The patch looks ok in case we are merging your patches for 3.14
+and Daniel's patches later than that. If they end up in the
+same merge window however, we'd have to be care to resolve
+the obvious conflict in a proper way.
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index bd8a098..8de50e8 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -2550,7 +2550,7 @@ void sdhci_enable_irq_wakeups(struct sdhci_host *=
-host)
- }
- EXPORT_SYMBOL_GPL(sdhci_enable_irq_wakeups);
-=20
--void sdhci_disable_irq_wakeups(struct sdhci_host *host)
-+static void sdhci_disable_irq_wakeups(struct sdhci_host *host)
- {
- 	u8 val;
- 	u8 mask =3D SDHCI_WAKE_ON_INSERT | SDHCI_WAKE_ON_REMOVE
---=20
-1.7.9.5
-
+	Arnd
