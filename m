@@ -1,54 +1,38 @@
 From: Christian Daudt <bcm@fixthebug.org>
-Subject: Re: [PATCH v4 6/8] Documentation: dt: kona-timer: Add clocks property
-Date: Sat, 14 Dec 2013 00:19:08 -0800
-Message-ID: <CAEPRUYo+7G2KT_87bA9sY-97MmiNFVdgGHQo2o4cSX=kGf2hfg@mail.gmail.com>
+Subject: Re: [PATCH v4 7/8] clocksource: kona: Add basic use of external clock
+Date: Sat, 14 Dec 2013 00:26:00 -0800
+Message-ID: <CAEPRUYqg2hzwudwLq+MyBfY119e22HzBe5H+03vGA4VVrL9rYw@mail.gmail.com>
 References: <1386271244-3927-1-git-send-email-tim.kryger@linaro.org>
-	<1386271244-3927-7-git-send-email-tim.kryger@linaro.org>
+	<1386271244-3927-8-git-send-email-tim.kryger@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1386271244-3927-7-git-send-email-tim.kryger@linaro.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Tim Kryger <tim.kryger@linaro.org>
-Cc: Rob Herring <rob.herring@calxeda.com>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Stephen Warren <swarren@wwwdotorg.org>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Daniel Lezcano <daniel.lezcano@linaro.org>, Thomas Gleixner <tglx@linutronix.de>, Chris Ball <cjb@laptop.org>, Axel Lin <axel.lin@ingics.com>, Device Tree List <devicetree@vger.kernel.org>, Linux ARM Kernel List <linux-arm-kernel@lists.infradead.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux MMC List <linux-mmc@vger.kernel.org>, Linaro Patches List <patches@linaro.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-ee0-f42.google.com ([74.125.83.42]:55334 "EHLO
+	mail-ee0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751979Ab3LNI0C (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 14 Dec 2013 03:26:02 -0500
+Received: by mail-ee0-f42.google.com with SMTP id e53so1240262eek.15
+        for <linux-mmc@vger.kernel.org>; Sat, 14 Dec 2013 00:26:00 -0800 (PST)
+In-Reply-To: <1386271244-3927-8-git-send-email-tim.kryger@linaro.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Tim Kryger <tim.kryger@linaro.org>, Daniel Lezcano <daniel.lezcano@linaro.org>
+Cc: Rob Herring <rob.herring@calxeda.com>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Stephen Warren <swarren@wwwdotorg.org>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Thomas Gleixner <tglx@linutronix.de>, Chris Ball <cjb@laptop.org>, Axel Lin <axel.lin@ingics.com>, Device Tree List <devicetree@vger.kernel.org>, Linux ARM Kernel List <linux-arm-kernel@lists.infradead.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux MMC List <linux-mmc@vger.kernel.org>, Linaro Patches List <patches@linaro.org>
 
 On Thu, Dec 5, 2013 at 11:20 AM, Tim Kryger <tim.kryger@linaro.org> wrote:
-> The frequency for the Kona timer can either be specified through the
-> device tree or determined by checking the rate of the clock specified
-> in the device tree.  Update the documentation to reflect both ways.
+> When an clock is specified in the device tree, enable it and use it to
+> determine the external clock frequency.
 >
 > Signed-off-by: Tim Kryger <tim.kryger@linaro.org>
+> Reviewed-by: Markus Mayer <markus.mayer@linaro.org>
 > Reviewed-by: Matt Porter <matt.porter@linaro.org>
 > ---
->  Documentation/devicetree/bindings/arm/bcm/kona-timer.txt | 7 ++++++-
->  1 file changed, 6 insertions(+), 1 deletion(-)
->
-> diff --git a/Documentation/devicetree/bindings/arm/bcm/kona-timer.txt b/Documentation/devicetree/bindings/arm/bcm/kona-timer.txt
-> index 17d88b2..39adf54 100644
-> --- a/Documentation/devicetree/bindings/arm/bcm/kona-timer.txt
-> +++ b/Documentation/devicetree/bindings/arm/bcm/kona-timer.txt
-> @@ -8,13 +8,18 @@ Required properties:
->  - DEPRECATED: compatible : "bcm,kona-timer"
->  - reg : Register range for the timer
->  - interrupts : interrupt for the timer
-> +- clocks: phandle + clock specifier pair of the external clock
->  - clock-frequency: frequency that the clock operates
->
-> +Only one of clocks or clock-frequency should be specified.
-> +
-> +Refer to clocks/clock-bindings.txt for generic clock consumer properties.
-> +
->  Example:
->         timer@35006000 {
->                 compatible = "brcm,kona-timer";
->                 reg = <0x35006000 0x1000>;
->                 interrupts = <0x0 7 0x4>;
-> -               clock-frequency = <32768>;
-> +               clocks = <&hub_timer_clk>;
->         };
->
-> --
-> 1.8.0.1
->
+
 Reviewed-by: Christian Daudt <bcm@fixthebug.org>
+
+Daniel,
+ Are you ok with me pulling this patch in with the rest of the
+patchset into the bcm tree ?
+
+ Thanks,
+   csd
