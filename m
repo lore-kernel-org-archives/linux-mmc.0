@@ -1,272 +1,353 @@
 From: Zhangfei Gao <zhangfei.gao@linaro.org>
-Subject: [PATCH 2/3] mmc: dw_mmc: add dw_mmc-k3 for k3 platform
-Date: Sat, 14 Dec 2013 10:12:53 +0800
-Message-ID: <1386987174-1788-3-git-send-email-zhangfei.gao@linaro.org>
+Subject: [PATCH 3/3] clk: hisilicon: add hi3620_mmc_clks
+Date: Sat, 14 Dec 2013 10:12:54 +0800
+Message-ID: <1386987174-1788-4-git-send-email-zhangfei.gao@linaro.org>
 References: <1386987174-1788-1-git-send-email-zhangfei.gao@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ob0-f173.google.com ([209.85.214.173]:42119 "EHLO
-	mail-ob0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753187Ab3LNCNR (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 13 Dec 2013 21:13:17 -0500
-Received: by mail-ob0-f173.google.com with SMTP id gq1so2774175obb.18
-        for <linux-mmc@vger.kernel.org>; Fri, 13 Dec 2013 18:13:17 -0800 (PST)
+Received: from mail-oa0-f44.google.com ([209.85.219.44]:64548 "EHLO
+	mail-oa0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753187Ab3LNCNW (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 13 Dec 2013 21:13:22 -0500
+Received: by mail-oa0-f44.google.com with SMTP id m1so2951461oag.31
+        for <linux-mmc@vger.kernel.org>; Fri, 13 Dec 2013 18:13:22 -0800 (PST)
 In-Reply-To: <1386987174-1788-1-git-send-email-zhangfei.gao@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Chris Ball <cjb@laptop.org>, Arnd Bergmann <arnd@arndb.de>, Mike Turquette <mturquette@linaro.org>, Rob Herring <robherring2@gmail.com>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, Kumar Gala <galak@codeaurora.org>, Haojian Zhuang <haojian.zhuang@linaro.org>
-Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, patches@linaro.org, devicetree@vger.kernel.org, Zhangfei Gao <zhangfei.gao@linaro.org>, Zhigang Wang <brooke.wangzhigang@huawei.com>
+Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, patches@linaro.org, devicetree@vger.kernel.org, Zhangfei Gao <zhangfei.gao@linaro.org>
 
-Add dw_mmc-k3.c for k3v2, support sd/emmc
+Suggest by Arnd: abstract mmc tuning as clock behavior,
+also because different soc have different tuning method and registers.
+hi3620_mmc_clks is added to handle mmc clock specifically on hi3620.
 
 Signed-off-by: Zhangfei Gao <zhangfei.gao@linaro.org>
-Signed-off-by: Zhigang Wang <brooke.wangzhigang@huawei.com>
 ---
- .../devicetree/bindings/mmc/k3-dw-mshc.txt         |   60 +++++++++
- drivers/mmc/host/Kconfig                           |   10 ++
- drivers/mmc/host/Makefile                          |    1 +
- drivers/mmc/host/dw_mmc-k3.c                       |  133 ++++++++++++++++++++
- 4 files changed, 204 insertions(+)
- create mode 100644 Documentation/devicetree/bindings/mmc/k3-dw-mshc.txt
- create mode 100644 drivers/mmc/host/dw_mmc-k3.c
+ .../bindings/arm/hisilicon/hisilicon.txt           |   14 ++
+ .../devicetree/bindings/clock/hi3620-clock.txt     |    1 +
+ drivers/clk/hisilicon/clk-hi3620.c                 |  262 ++++++++++++++++++++
+ include/dt-bindings/clock/hi3620-clock.h           |    5 +
+ 4 files changed, 282 insertions(+)
 
-diff --git a/Documentation/devicetree/bindings/mmc/k3-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/k3-dw-mshc.txt
-new file mode 100644
-index 000000000000..d7e2d7f159bb
---- /dev/null
-+++ b/Documentation/devicetree/bindings/mmc/k3-dw-mshc.txt
-@@ -0,0 +1,60 @@
-+* Hisilicon specific extensions to the Synopsys Designware Mobile
-+  Storage Host Controller
+diff --git a/Documentation/devicetree/bindings/arm/hisilicon/hisilicon.txt b/Documentation/devicetree/bindings/arm/hisilicon/hisilicon.txt
+index 8c7a4653508d..df0a452b8526 100644
+--- a/Documentation/devicetree/bindings/arm/hisilicon/hisilicon.txt
++++ b/Documentation/devicetree/bindings/arm/hisilicon/hisilicon.txt
+@@ -30,3 +30,17 @@ Example:
+ 		resume-offset = <0x308>;
+ 		reboot-offset = <0x4>;
+ 	};
 +
-+Read synopsys-dw-mshc.txt for more details
-+
-+The Synopsys designware mobile storage host controller is used to interface
-+a SoC with storage medium such as eMMC or SD/MMC cards. This file documents
-+differences between the core Synopsys dw mshc controller properties described
-+by synopsys-dw-mshc.txt and the properties used by the Hisilicon specific
-+extensions to the Synopsys Designware Mobile Storage Host Controller.
++PCTRL: Peripheral misc control register
 +
 +Required Properties:
-+
-+* compatible: should be one of the following.
-+  - "hisilicon,hi4511-dw-mshc": for controllers with hi4511 specific extentions.
-+
-+* clock-freq-table: should be the frequency (in Hz) array of the ciu clock
-+	in each	supported mode.
-+	0. CIU clock rate in Hz for DS mode
-+	1. CIU clock rate in Hz for MMC HS mode
-+	2. CIU clock rate in Hz for SD HS mode
-+	3. CIU clock rate in Hz for SDR12 mode
-+	4. CIU clock rate in Hz for SDR25 mode
-+	5. CIU clock rate in Hz for SDR50 mode
-+	6. CIU clock rate in Hz for SDR104 mode
-+	7. CIU clock rate in Hz for DDR50 mode
-+	8. CIU clock rate in Hz for HS200 mode
++- compatible: "hisilicon,pctrl"
++- reg: Address and size of pctrl.
 +
 +Example:
 +
 +	/* for Hi3620 */
-+
-+	/* SoC portion */
-+	dwmmc_0: dwmmc0@fcd03000 {
-+		compatible = "hisilicon,hi4511-dw-mshc";
-+		reg = <0xfcd03000 0x1000>;
-+		interrupts = <0 16 4>;
-+		#address-cells = <1>;
-+		#size-cells = <0>;
-+		clocks = <&mmc_clock HI3620_SD_CIUCLK>, <&clock HI3620_DDRC_PER_CLK>;
-+		clock-names = "ciu", "biu";
-+		clock-freq-table =
-+		<25000000 0 50000000 25000000 50000000 100000000 0 50000000>;
++	pctrl: pctrl@fca09000 {
++		compatible = "hisilicon,pctrl";
++		reg = <0xfca09000 0x1000>;
 +	};
-+
-+	/* Board portion */
-+	dwmmc0@fcd03000 {
-+		num-slots = <1>;
-+		vmmc-supply = <&ldo12>;
-+		fifo-depth = <0x100>;
-+		supports-highspeed;
-+		pinctrl-names = "default";
-+		pinctrl-0 = <&sd_pmx_pins &sd_cfg_func1 &sd_cfg_func2>;
-+		slot@0 {
-+			reg = <0>;
-+			bus-width = <4>;
-+			disable-wp;
-+			cd-gpios = <&gpio10 3 0>;
-+		};
-+	};
-diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-index 7fc5099e44b2..45aaa2de0f58 100644
---- a/drivers/mmc/host/Kconfig
-+++ b/drivers/mmc/host/Kconfig
-@@ -575,6 +575,16 @@ config MMC_DW_SOCFPGA
- 	  This selects support for Altera SoCFPGA specific extensions to the
- 	  Synopsys DesignWare Memory Card Interface driver.
+diff --git a/Documentation/devicetree/bindings/clock/hi3620-clock.txt b/Documentation/devicetree/bindings/clock/hi3620-clock.txt
+index 4b71ab41be53..dad6269f52c5 100644
+--- a/Documentation/devicetree/bindings/clock/hi3620-clock.txt
++++ b/Documentation/devicetree/bindings/clock/hi3620-clock.txt
+@@ -7,6 +7,7 @@ Required Properties:
  
-+config MMC_DW_K3
-+	tristate "K3 specific extensions for Synopsys DW Memory Card Interface"
-+	depends on MMC_DW
-+	select MMC_DW_PLTFM
-+	select MMC_DW_IDMAC
-+	help
-+	  This selects support for Hisilicon K3 SoC specific extensions to the
-+	  Synopsys DesignWare Memory Card Interface driver. Select this option
-+	  for platforms based on Hisilicon K3 SoC's.
+ - compatible: should be one of the following.
+   - "hisilicon,hi3620-clock" - controller compatible with Hi3620 SoC.
++  - "hisilicon,hi3620-mmc-clock" - controller specific for Hi3620 mmc.
+ 
+ - reg: physical base address of the controller and length of memory mapped
+   region.
+diff --git a/drivers/clk/hisilicon/clk-hi3620.c b/drivers/clk/hisilicon/clk-hi3620.c
+index f24ad6a3a797..e47a4a659df7 100644
+--- a/drivers/clk/hisilicon/clk-hi3620.c
++++ b/drivers/clk/hisilicon/clk-hi3620.c
+@@ -240,3 +240,265 @@ static void __init hi3620_clk_init(struct device_node *np)
+ 				   base);
+ }
+ CLK_OF_DECLARE(hi3620_clk, "hisilicon,hi3620-clock", hi3620_clk_init);
 +
- config MMC_DW_PCI
- 	tristate "Synopsys Designware MCI support on PCI bus"
- 	depends on MMC_DW && PCI
-diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
-index c41d0c364509..64f5f8d35839 100644
---- a/drivers/mmc/host/Makefile
-+++ b/drivers/mmc/host/Makefile
-@@ -43,6 +43,7 @@ obj-$(CONFIG_MMC_DW)		+= dw_mmc.o
- obj-$(CONFIG_MMC_DW_PLTFM)	+= dw_mmc-pltfm.o
- obj-$(CONFIG_MMC_DW_EXYNOS)	+= dw_mmc-exynos.o
- obj-$(CONFIG_MMC_DW_SOCFPGA)	+= dw_mmc-socfpga.o
-+obj-$(CONFIG_MMC_DW_K3)		+= dw_mmc-k3.o
- obj-$(CONFIG_MMC_DW_PCI)	+= dw_mmc-pci.o
- obj-$(CONFIG_MMC_SH_MMCIF)	+= sh_mmcif.o
- obj-$(CONFIG_MMC_JZ4740)	+= jz4740_mmc.o
-diff --git a/drivers/mmc/host/dw_mmc-k3.c b/drivers/mmc/host/dw_mmc-k3.c
-new file mode 100644
-index 000000000000..90ebee0ce5ef
---- /dev/null
-+++ b/drivers/mmc/host/dw_mmc-k3.c
-@@ -0,0 +1,133 @@
-+/*
-+ * Copyright (c) 2013 Linaro Ltd.
-+ * Copyright (c) 2013 Hisilicon Limited.
-+ *
-+ * This program is free software; you can redistribute it and/or modify
-+ * it under the terms of the GNU General Public License as published by
-+ * the Free Software Foundation; either version 2 of the License, or
-+ * (at your option) any later version.
-+ */
-+
-+#include <linux/module.h>
-+#include <linux/platform_device.h>
-+#include <linux/clk.h>
-+#include <linux/mmc/host.h>
-+#include <linux/mmc/dw_mmc.h>
-+#include <linux/of_address.h>
-+
-+#include "dw_mmc.h"
-+#include "dw_mmc-pltfm.h"
-+
-+#define MAX_NUMS	10
-+struct dw_mci_k3_priv_data {
-+	u32	clk_table[MAX_NUMS];
++struct hisi_mmc_clock {
++	unsigned int		id;
++	const char		*name;
++	const char		*parent_name;
++	unsigned long		flags;
++	u32			clken_reg;
++	u32			clken_bit;
++	u32			div_reg;
++	u32			div_off;
++	u32			div_bits;
++	u32			drv_reg;
++	u32			drv_off;
++	u32			drv_bits;
++	u32			sam_reg;
++	u32			sam_off;
++	u32			sam_bits;
 +};
 +
-+static void dw_mci_k3_set_ios(struct dw_mci *host, struct mmc_ios *ios)
++struct clk_mmc {
++	struct clk_hw	hw;
++	u32		id;
++	void __iomem	*clken_reg;
++	u32		clken_bit;
++	void __iomem	*div_reg;
++	u32		div_off;
++	u32		div_bits;
++	void __iomem	*drv_reg;
++	u32		drv_off;
++	u32		drv_bits;
++	void __iomem	*sam_reg;
++	u32		sam_off;
++	u32		sam_bits;
++};
++
++#define to_mmc(_hw) container_of(_hw, struct clk_mmc, hw)
++
++static struct hisi_mmc_clock hi3620_mmc_clks[] __initdata = {
++	{ HI3620_SD_CIUCLK,	"sd_bclk1", "sd_clk", CLK_SET_RATE_PARENT, 0x1f8, 0, 0x1f8, 1, 3, 0x1f8, 4, 4, 0x1f8, 8, 4},
++	{ HI3620_MMC_CIUCLK1,   "mmc_bclk1", "mmc_clk1", CLK_SET_RATE_PARENT, 0x1f8, 12, 0x1f8, 13, 3, 0x1f8, 16, 4, 0x1f8, 20, 4},
++	{ HI3620_MMC_CIUCLK2,   "mmc_bclk2", "mmc_clk2", CLK_SET_RATE_PARENT, 0x1f8, 24, 0x1f8, 25, 3, 0x1f8, 28, 4, 0x1fc, 0, 4},
++	{ HI3620_MMC_CIUCLK3,   "mmc_bclk3", "mmc_clk3", CLK_SET_RATE_PARENT, 0x1fc, 4, 0x1fc, 5, 3, 0x1fc, 8, 4, 0x1fc, 12, 4},
++};
++
++static unsigned long mmc_clk_recalc_rate(struct clk_hw *hw,
++		       unsigned long parent_rate)
 +{
-+	struct dw_mci_k3_priv_data *priv = host->priv;
-+	u32 rate = priv->clk_table[ios->timing];
-+	int ret;
-+
-+	ret = clk_set_rate(host->ciu_clk, rate);
-+	if (ret)
-+		dev_warn(host->dev, "failed to set clock rate %uHz\n", rate);
-+
-+	host->bus_hz = clk_get_rate(host->ciu_clk);
++	switch (parent_rate) {
++	case 26000000:
++		return 13000000;
++	case 180000000:
++		return 25000000;
++	case 360000000:
++		return 50000000;
++	case 720000000:
++		return 100000000;
++	default:
++		return parent_rate;
++	}
 +}
 +
-+static int dw_mci_k3_parse_dt(struct dw_mci *host)
++static long mmc_clk_determine_rate(struct clk_hw *hw, unsigned long rate,
++			      unsigned long *best_parent_rate,
++			      struct clk **best_parent_p)
 +{
-+	struct dw_mci_k3_priv_data *priv;
-+	struct device_node *node = host->dev->of_node;
-+	struct property *prop;
-+	const __be32 *cur;
-+	u32 val, num = 0;
++	unsigned long best = 0;
 +
-+	priv = devm_kzalloc(host->dev, sizeof(*priv), GFP_KERNEL);
-+	if (!priv) {
-+		dev_err(host->dev, "mem alloc failed for private data\n");
-+		return -ENOMEM;
++	if (rate <= 13000000) {
++		rate = 13000000;
++		best = 26000000;
++	} else if (rate <= 26000000) {
++		rate = 25000000;
++		best = 180000000;
++	} else if (rate <= 52000000) {
++		rate = 50000000;
++		best = 360000000;
++	} else if (rate <= 100000000) {
++		rate = 100000000;
++		best = 720000000;
 +	}
-+	host->priv = priv;
++	*best_parent_rate = best;
++	return rate;
++}
 +
-+	of_property_for_each_u32(node, "clock-freq-table", prop, cur, val) {
-+		if (num >= MAX_NUMS)
-+			break;
-+		priv->clk_table[num++] = val;
++static u32 mmc_clk_delay(u32 val, u32 para, u32 off, u32 len)
++{
++	u32 i;
++
++	if (para >= 0) {
++		for (i = 0; i < len; i++) {
++			if (para % 2)
++				val |= 1 << (off + i);
++			else
++				val &= ~(1 << (off + i));
++			para = para >> 1;
++		}
 +	}
++	return val;
++}
++
++static int mmc_clk_set_timing(struct clk_hw *hw, unsigned long rate)
++{
++	struct clk_mmc *mclk = to_mmc(hw);
++	unsigned long flags;
++	u32 sam, drv, div, val;
++	static DEFINE_SPINLOCK(mmc_clk_lock);
++
++	switch (rate) {
++	case 13000000:
++		sam = 3;
++		drv = 1;
++		div = 1;
++		break;
++	case 25000000:
++		sam = 13;
++		drv = 6;
++		div = 6;
++		break;
++	case 50000000:
++		sam = 3;
++		drv = 6;
++		div = 6;
++		break;
++	case 100000000:
++		sam = 6;
++		drv = 4;
++		div = 6;
++		break;
++	default:
++		return -EINVAL;
++	}
++
++	spin_lock_irqsave(&mmc_clk_lock, flags);
++
++	val = readl_relaxed(mclk->clken_reg);
++	val &= ~(1 << mclk->clken_bit);
++	writel_relaxed(val, mclk->clken_reg);
++
++	val = readl_relaxed(mclk->sam_reg);
++	val = mmc_clk_delay(val, sam, mclk->sam_off, mclk->sam_bits);
++	writel_relaxed(val, mclk->sam_reg);
++
++	val = readl_relaxed(mclk->drv_reg);
++	val = mmc_clk_delay(val, drv, mclk->drv_off, mclk->drv_bits);
++	writel_relaxed(val, mclk->drv_reg);
++
++	val = readl_relaxed(mclk->div_reg);
++	val = mmc_clk_delay(val, div, mclk->div_off, mclk->div_bits);
++	writel_relaxed(val, mclk->div_reg);
++
++	val = readl_relaxed(mclk->clken_reg);
++	val |= 1 << mclk->clken_bit;
++	writel_relaxed(val, mclk->clken_reg);
++
++	spin_unlock_irqrestore(&mmc_clk_lock, flags);
++
 +	return 0;
 +}
 +
-+static unsigned long k3_dwmmc_caps[4] = {
-+	MMC_CAP_4_BIT_DATA | MMC_CAP_SD_HIGHSPEED,
-+	MMC_CAP_8_BIT_DATA | MMC_CAP_MMC_HIGHSPEED,
-+	0,
-+	0,
-+};
-+
-+static const struct dw_mci_drv_data k3_drv_data = {
-+	.caps			= k3_dwmmc_caps,
-+	.set_ios		= dw_mci_k3_set_ios,
-+	.parse_dt		= dw_mci_k3_parse_dt,
-+};
-+
-+static const struct of_device_id dw_mci_k3_match[] = {
-+	{ .compatible = "hisilicon,hi4511-dw-mshc",
-+			.data = &k3_drv_data, },
-+	{},
-+};
-+MODULE_DEVICE_TABLE(of, dw_mci_k3_match);
-+
-+static int dw_mci_k3_probe(struct platform_device *pdev)
++static int mmc_clk_prepare(struct clk_hw *hw)
 +{
-+	const struct dw_mci_drv_data *drv_data;
-+	const struct of_device_id *match;
++	struct clk_mmc *mclk = to_mmc(hw);
++	unsigned long rate;
 +
-+	match = of_match_node(dw_mci_k3_match, pdev->dev.of_node);
-+	drv_data = match->data;
++	if (mclk->id == HI3620_SD_CIUCLK)
++		rate = 13000000;
++	else
++		rate = 25000000;
 +
-+	return dw_mci_pltfm_register(pdev, drv_data);
++	return mmc_clk_set_timing(hw, rate);
 +}
 +
-+static int dw_mci_k3_suspend(struct device *dev)
++static int mmc_clk_set_rate(struct clk_hw *hw, unsigned long rate,
++			     unsigned long parent_rate)
 +{
-+	struct dw_mci *host = dev_get_drvdata(dev);
-+
-+	if (!IS_ERR(host->ciu_clk))
-+		clk_disable_unprepare(host->ciu_clk);
-+
-+	return dw_mci_suspend(host);
++	return mmc_clk_set_timing(hw, rate);
 +}
 +
-+static int dw_mci_k3_resume(struct device *dev)
-+{
-+	struct dw_mci *host = dev_get_drvdata(dev);
-+	int ret = 0;
++static struct clk_ops clk_mmc_ops = {
++	.prepare = mmc_clk_prepare,
++	.determine_rate = mmc_clk_determine_rate,
++	.set_rate = mmc_clk_set_rate,
++	.recalc_rate = mmc_clk_recalc_rate,
++};
 +
-+	ret = clk_prepare_enable(host->ciu_clk);
-+	if (ret) {
-+		dev_err(host->dev, "failed to enable ciu clock\n");
-+		return ret;
++static struct clk *hisi_register_clk_mmc(struct hisi_mmc_clock *mmc_clk,
++			void __iomem *base, struct device_node *np)
++{
++	struct clk_mmc *mclk;
++	struct clk *clk;
++	struct clk_init_data init;
++
++	mclk = kzalloc(sizeof(*mclk), GFP_KERNEL);
++	if (!mclk) {
++		pr_err("%s: fail to allocate mmc clk\n", __func__);
++		return ERR_PTR(-ENOMEM);
 +	}
 +
-+	return dw_mci_resume(host);
++	init.name = mmc_clk->name;
++	init.ops = &clk_mmc_ops;
++	init.flags = mmc_clk->flags | CLK_IS_BASIC;
++	init.parent_names = (mmc_clk->parent_name ? &mmc_clk->parent_name : NULL);
++	init.num_parents = (mmc_clk->parent_name ? 1 : 0);
++	mclk->hw.init = &init;
++
++	mclk->id = mmc_clk->id;
++	mclk->clken_reg = base + mmc_clk->clken_reg;
++	mclk->clken_bit = mmc_clk->clken_bit;
++	mclk->div_reg = base + mmc_clk->div_reg;
++	mclk->div_off = mmc_clk->div_off;
++	mclk->div_bits = mmc_clk->div_bits;
++	mclk->drv_reg = base + mmc_clk->drv_reg;
++	mclk->drv_off = mmc_clk->drv_off;
++	mclk->drv_bits = mmc_clk->drv_bits;
++	mclk->sam_reg = base + mmc_clk->sam_reg;
++	mclk->sam_off = mmc_clk->sam_off;
++	mclk->sam_bits = mmc_clk->sam_bits;
++
++	clk = clk_register(NULL, &mclk->hw);
++	if (WARN_ON(IS_ERR(clk)))
++		kfree(mclk);
++	return clk;
 +}
 +
-+SIMPLE_DEV_PM_OPS(dw_mci_k3_pmops, dw_mci_k3_suspend, dw_mci_k3_resume);
++static void __init hi3620_mmc_clk_init(struct device_node *node)
++{
++	void __iomem *base;
++	int i, num = ARRAY_SIZE(hi3620_mmc_clks);
++	struct clk_onecell_data *clk_data;
 +
-+static struct platform_driver dw_mci_k3_pltfm_driver = {
-+	.probe		= dw_mci_k3_probe,
-+	.remove		= dw_mci_pltfm_remove,
-+	.driver		= {
-+		.name		= "dwmmc_k3",
-+		.of_match_table	= dw_mci_k3_match,
-+		.pm		= &dw_mci_k3_pmops,
-+	},
-+};
++	if (!node) {
++		pr_err("failed to find pctrl node in DTS\n");
++		return;
++	}
 +
-+module_platform_driver(dw_mci_k3_pltfm_driver);
++	base = of_iomap(node, 0);
++	if (!base) {
++		pr_err("failed to map pctrl\n");
++		return;
++	}
 +
-+MODULE_DESCRIPTION("K3 Specific DW-MSHC Driver Extension");
-+MODULE_LICENSE("GPL v2");
-+MODULE_ALIAS("platform:dwmmc-k3");
++	clk_data = kzalloc(sizeof(*clk_data), GFP_KERNEL);
++	if (WARN_ON(!clk_data))
++		return;
++
++	clk_data->clks = kzalloc(sizeof(struct clk *) * num, GFP_KERNEL);
++	if (!clk_data->clks) {
++		pr_err("%s: fail to allocate mmc clk\n", __func__);
++		return;
++	}
++
++	for (i = 0; i < num; i++) {
++		struct hisi_mmc_clock *mmc_clk = &hi3620_mmc_clks[i];
++		clk_data->clks[mmc_clk->id] =
++			hisi_register_clk_mmc(mmc_clk, base, node);
++	}
++
++	clk_data->clk_num = num;
++	of_clk_add_provider(node, of_clk_src_onecell_get, clk_data);
++}
++
++CLK_OF_DECLARE(hi3620_mmc_clk, "hisilicon,hi3620-mmc-clock", hi3620_mmc_clk_init);
+diff --git a/include/dt-bindings/clock/hi3620-clock.h b/include/dt-bindings/clock/hi3620-clock.h
+index 6eaa6a45e110..21b9d0e2eb0c 100644
+--- a/include/dt-bindings/clock/hi3620-clock.h
++++ b/include/dt-bindings/clock/hi3620-clock.h
+@@ -147,6 +147,11 @@
+ #define HI3620_MMC_CLK3		217
+ #define HI3620_MCU_CLK		218
+ 
++#define HI3620_SD_CIUCLK	0
++#define HI3620_MMC_CIUCLK1	1
++#define HI3620_MMC_CIUCLK2	2
++#define HI3620_MMC_CIUCLK3	3
++
+ #define HI3620_NR_CLKS		219
+ 
+ #endif	/* __DTS_HI3620_CLOCK_H */
 -- 
 1.7.9.5
 
