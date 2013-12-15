@@ -1,87 +1,154 @@
-From: zhangfei <zhangfei.gao@linaro.org>
-Subject: Re: [PATCHv6 2/5] clk: socfpga: Add a clock type for the SD/MMC driver
-Date: Sun, 15 Dec 2013 10:18:45 +0800
-Message-ID: <52AD1185.6090501@linaro.org>
-References: <1386880245-10192-1-git-send-email-dinguyen@altera.com> <1386880245-10192-3-git-send-email-dinguyen@altera.com> <201312142233.27143.arnd@arndb.de>
+From: Dinh Nguyen <dinh.linux@gmail.com>
+Subject: Re: [PATCHv6 1/5] mmc: dw_mmc: Add support to set the SDR and DDR
+ timing through clock framework
+Date: Sat, 14 Dec 2013 21:16:39 -0600
+Message-ID: <52AD1F17.5040708@gmail.com>
+References: <1386880245-10192-1-git-send-email-dinguyen@altera.com> <1386880245-10192-2-git-send-email-dinguyen@altera.com> <52AD0E7A.50208@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-15; format=flowed
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pa0-f41.google.com ([209.85.220.41]:62542 "EHLO
-	mail-pa0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753460Ab3LOCSx (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 14 Dec 2013 21:18:53 -0500
-Received: by mail-pa0-f41.google.com with SMTP id lf10so1549725pab.28
-        for <linux-mmc@vger.kernel.org>; Sat, 14 Dec 2013 18:18:52 -0800 (PST)
-In-Reply-To: <201312142233.27143.arnd@arndb.de>
+Received: from mail-oa0-f45.google.com ([209.85.219.45]:60581 "EHLO
+	mail-oa0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753575Ab3LODQg (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 14 Dec 2013 22:16:36 -0500
+In-Reply-To: <52AD0E7A.50208@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Arnd Bergmann <arnd@arndb.de>, dinguyen@altera.com
-Cc: dinh.linux@gmail.com, cjb@laptop.org, jh80.chung@samsung.com, tgih.jun@samsung.com, heiko@sntech.de, dianders@chromium.org, alim.akhtar@samsung.com, bzhao@marvell.com, rob.herring@calxeda.com, pawel.moll@arm.com, mark.rutland@arm.com, ian.campbell@citrix.com, mturquette@linaro.org, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+To: zhangfei <zhangfei.gao@linaro.org>, dinguyen@altera.com, arnd@arndb.de, cjb@laptop.org, jh80.chung@samsung.com, tgih.jun@samsung.com, heiko@sntech.de, dianders@chromium.org, alim.akhtar@samsung.com, bzhao@marvell.com, rob.herring@calxeda.com, pawel.moll@arm.com, mark.rutland@arm.com, ian.campbell@citrix.com, mturquette@linaro.org
+Cc: devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 
-Dear Arnd
+Hi Zhangfei,
 
-On 12/15/2013 05:33 AM, Arnd Bergmann wrote:
-> On Thursday 12 December 2013, dinguyen@altera.com wrote:
+On 12/14/13 8:05 PM, zhangfei wrote:
+> Dear Dinh
+>
+> On 12/13/2013 04:30 AM, dinguyen@altera.com wrote:
 >> From: Dinh Nguyen <dinguyen@altera.com>
 >>
->> Add a "altr,socfpga-sdmmc-sdr-clk" clock type in the SOCFPGA clock driver. This
->> clock type is not really a "clock" for say, but a mechanism to set the phase
->> shift of the clock that is used to feed the SD/MMC CIU's clock. This clock does
->> not have parent so it is designated as a CLK_IS_ROOT.
+>> All implementations of the Synopsys DW SD/MMC IP have settings to
+>> control
+>> the phase shift of the CIU clk. These phase shift settings are
+>> necessary for
+>> the SD/MMC to correctly clock the card. All variants of the dw_mmc
+>> will need
+>> these settings, but how they are implemented can vastly vary.
 >>
->> This clock implements the set_clk_rate method that is meant to receive the SDR
->> settings that is designated by the "samsung,dw-mshc-sdr-timing" binding. The
->> SD/MMC driver passes this clock phase information into the clock driver to use.
+>> This patch enables the setting for the SDR and/or DDR settings
+>> through the
+>> common clock framework.
 >>
->> This enables the SD/MMC driver to touch registers that are located outside of
->> the SD/MMC IP, which helps make the core SD/MMC driver generic.
+>> Depends on the patch "mmc: dw_mmc: Enable the hold reg for certain
+>> speed modes",
+>> that is already reading the "samsung,dw-mshc-sdr-timing" and
+>> "samsung,dw-mshc-ddr-timing" bindings, this patch saves those values
+>> into a
+>> u32 bitmask that can be passed to the clock framework to use.
 >>
->> Signed-off-by: Dinh Nguyen <dinguyen@alter.com>
+>> Signed-off-by: Dinh Nguyen <dinguyen@altera.com>
+>> ---
+>> v6: Add this patch
+>> v5: none
+>> v4: none
+>> v3: none
+>> v2: none
+>> ---
+>>   drivers/mmc/host/dw_mmc.c  |   23 +++++++++++++++++++++++
+>>   include/linux/mmc/dw_mmc.h |    6 ++++++
+>>   2 files changed, 29 insertions(+)
+>>
+>> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+>> index 480dafe..1fb5cff 100644
+>> --- a/drivers/mmc/host/dw_mmc.c
+>> +++ b/drivers/mmc/host/dw_mmc.c
+>> @@ -2431,6 +2431,8 @@ static struct dw_mci_board
+>> *dw_mci_parse_dt(struct dw_mci *host)
+>>       if ((sdr_timing[1] == 0) || (ddr_timing[1] == 0))
+>>           pdata->cclk_in_drv = 0;
+>>
+>> +    pdata->sdr_timing = (sdr_timing[1] | (sdr_timing[0] << 4));
+>> +    pdata->ddr_timing = (ddr_timing[1] | (ddr_timing[0] << 4));
+>>       return pdata;
+>>   }
+>>
+>> @@ -2478,6 +2480,27 @@ int dw_mci_probe(struct dw_mci *host)
+>>           dev_dbg(host->dev, "ciu clock not available\n");
+>>           host->bus_hz = host->pdata->bus_hz;
+>>       } else {
+>> +        /* If the CIU clk is available, we check for SDR and DDR
+>> +         * timing phase shift settings. But not all platforms
+>> +         * may have populated these settings, the driver will not fail
+>> +         * if these settings are not specified.
+>> +         */
+>> +        if (host->pdata->sdr_timing) {
+>> +            host->sdr_clk = devm_clk_get(host->dev, "sdr_mmc_clk");
+>> +            if (IS_ERR(host->sdr_clk))
+>> +                dev_dbg(host->dev, "sdr_mmc clock not available\n");
+>> +            else
+>> +                clk_set_rate(host->sdr_clk, host->pdata->sdr_timing);
+>> +        }
+>> +
+>> +        if (host->pdata->ddr_timing) {
+>> +            host->ddr_clk = devm_clk_get(host->dev, "ddr_mmc_clk");
+>> +            if (IS_ERR(host->ddr_clk))
+>> +                dev_dbg(host->dev, "ddr_mmc clock not available\n");
+>> +            else
+>> +                clk_set_rate(host->ddr_clk, host->pdata->ddr_timing);
+>> +        }
+>> +
 >
-> Ok, this looks like it will work, but we haven't concluded if this is the
-> best way to do it. I'm looking for guidance from Mike here.
+> Just curious, does pdata->sdr_timing and pdata->ddr_timing are fixed,
+> fixed as each controller, or different with different board.
+Yes, they are fixed for each controller per SoC.
+> In case they are fixed, or fixed in each controller, and only required
+> to be set in probe only once, maybe they can be hide in
+> clk_mmc_ops.prepare
+> And the clock can be used as ciu_clock, or parent of ciu_clock, which
+> is called in dw_mmc.c, maybe these code can be ignored.
 >
-> The alternatives I can see for this particular problem are:
+Please see v5 of this patch: https://patchwork.kernel.org/patch/3311121/
+The issue with V5 was that there is no way for the dw_mmc driver to pass
+the clock phase settings
+in the clk_mmc_ops.prepare function.
 >
-> 1. fake a clock and use the 'clk_set_rate' callback to set the phase
->     rather than the clock frequency (as you do in this patch).
-> 2. extend the common clock API to provide a 'clk_set_phase' interface
->     that you can call on the CIU clock to set this, so you don't have
->     to fake anything. This seems to be the nicest interface if we have
->     the same problem in more drivers.
-> 3. make the phase setting private to whichever clock is used for CIU
->     (as one of your previous patches did, which I did not like).
-> 4. make the phase an additional argument to the clock specifier,
->     so you would have <&mmcclock 12345 5678> rather than just <&mmcclock>
->     in the mmc host device node to specify the two possible phases.
 >
-> I would also like to get buy-in from Zhangfei Gao, since he is working
-> on the same thing. Please coordinate with him to make sure whatever
-> one of you comes up with works for the other one too. At the moment,
-> patches are flying so fast without much discussion inbetween that I'd
-> prefer Chris to hold off from merging either one until you have both
-> revieved and Acked each other's patches.
+>>           ret = clk_prepare_enable(host->ciu_clk);
+>>           if (ret) {
+>>               dev_err(host->dev, "failed to enable ciu clock\n");
+>> diff --git a/include/linux/mmc/dw_mmc.h b/include/linux/mmc/dw_mmc.h
+>> index 2b5b8bf..ad90ad1 100644
+>> --- a/include/linux/mmc/dw_mmc.h
+>> +++ b/include/linux/mmc/dw_mmc.h
+>> @@ -83,6 +83,8 @@ struct mmc_data;
+>>    * @priv: Implementation defined private data.
+>>    * @biu_clk: Pointer to bus interface unit clock instance.
+>>    * @ciu_clk: Pointer to card interface unit clock instance.
+>> + * @sdr_clk: Pointer to the SDR clock instance.
+>> + * @ddr_clk: Pointer to the DDR clock instance.
+>>    * @slot: Slots sharing this MMC controller.
+>>    * @fifo_depth: depth of FIFO.
+>>    * @data_shift: log2 of FIFO item size.
+>> @@ -170,6 +172,8 @@ struct dw_mci {
+>>       void            *priv;
+>>       struct clk        *biu_clk;
+>>       struct clk        *ciu_clk;
+>> +    struct clk        *sdr_clk;
+>> +    struct clk        *ddr_clk;
+>>       struct dw_mci_slot    *slot[MAX_MCI_SLOTS];
+>>
+>>       /* FIFO push and pull */
+>> @@ -241,6 +245,8 @@ struct dw_mci_board {
+>>       u32 caps2;    /* More capabilities */
+>>       u32 pm_caps;    /* PM capabilities */
+>>       u32 cclk_in_drv;    /*cclk_in_drv phase shift */
+>> +    u32 sdr_timing;    /* Single data rate timing setting. */
+>> +    u32 ddr_timing;    /* Double data rate timing setting. */
 >
+> Are they fixed or not?
+They are fixed values that is represented in the DTS bindings.
 
-This is our case
-In this version ip, supported now.
-Only several mode (LEGACY, HS) are supported in the code, where fixed 
-div and sample is need to be set, so we can hide them in clock.
-And each controller have different value & register, so different 
-controller use different clock.
-These clock can be ciu_clock, whose parent are original clock input.
-
-In next version ip, which still not in hand.
-HS200 and other mode have to be supported, tuning process have to be 
-included, good example is drivers/mmc/host/dw_mmc-exynos.c
-.execute_tuning         = dw_mci_exynos_execute_tuning,
-It have to choose the best point during the tuning process.
-Some other mode may still need tuning, which is special in our case.
-
-Zhangfei
-
-
-
-
+Dinh
+>
+> Thanks
+> Zhangfei
 
