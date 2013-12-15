@@ -1,36 +1,50 @@
-From: Henrik =?ISO-8859-1?Q?Nordstr=F6m?= <henrik@henriknordstrom.net>
-Subject: Re: [linux-sunxi] Re: [PATCH 2/5] ARM: dts: sun4i: Add support for mmc
-Date: Sun, 15 Dec 2013 22:44:14 +0100
-Message-ID: <1387143854.1559.1.camel@localhost>
+From: Michal Suchanek <hramrach-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: Re: Re: [PATCH 1/5] ARM: sunxi: Add driver for SD/MMC
+ hosts found on Allwinner sunxi SoCs
+Date: Sun, 15 Dec 2013 23:01:17 +0100
+Message-ID: <CAOMqctRspBPmNsyXye_gpfwGoZ=gMcCzEjM+hD3g+ZfQix7G6Q@mail.gmail.com>
 References: <1387058295-20641-1-git-send-email-hdegoede@redhat.com>
- <1387058295-20641-3-git-send-email-hdegoede@redhat.com>
- <20131215135854.GF3651@lukather> <52ADBD41.4050104@redhat.com>
+ <1387058295-20641-2-git-send-email-hdegoede@redhat.com> <20131215134415.GE3651@lukather>
+Reply-To: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <52ADBD41.4050104@redhat.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: linux-sunxi@googlegroups.com
-Cc: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, David =?ISO-8859-1?Q?Lanzend=F6rfer?= <david.lanzendoerfer@o2s.ch>, linux-arm-kernel@lists.infradead.org, devicetree@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-sunxi+bncBCQMLUOX54MBBVONXCKQKGQEOTLIU5Y-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+In-Reply-To: <20131215134415.GE3651@lukather>
+List-Post: <http://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Help: <http://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Archive: <http://groups.google.com/group/linux-sunxi>
+Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+List-Subscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Unsubscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+To: linux-sunxi <linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+Cc: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, =?UTF-8?Q?David_Lanzend=C3=B6rfer?= <david.lanzendoerfer-Z7Kmv9EsliU@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-c8O2biAyMDEzLTEyLTE1IGtsb2NrYW4gMTU6MzEgKzAxMDAgc2tyZXYgSGFucyBkZSBHb2VkZToK
-Cj4gWWVzIGFuZCBuby4gVGhlIHB1bGx1cHMgYXJlIGVuYWJsZWQgYnkgdWJvb3QgYW5kIHRoZSBh
-bGx3aW5uZXIKPiBzb3VyY2VzLCBtb3N0IG9mIG15IHRlc3RpbmcgaGFzIGJlZW4gZG9uZSB3aXRo
-b3V0IHRoZW0sIHdoaWNoCj4gc2VlbXMgdG8gd29yayBmaW5lLiBJJ3ZlIGVuYWJsZWQgdGhlbSB0
-byBiZSBjb25zaXN0ZW4gd2l0aCB0aGUKPiBhbGx3aW5uZXIgc291cmNlcyBhbmQgdS1ib290LgoK
-TWFueSBib2FyZHMgaGF2ZSBleHRlcm5hbCBwdWxsdXBzIHdoZXJlIG5lZWRlZCBmb3IgdGhlIE1N
-QyBidXMuIE9uIHN1Y2gKYm9hcmRzIGl0J3MgbGlrZWx5IG5vdCBhIGdvb2QgaWRlYSB0byBlbmFi
-bGUgaW50ZXJuYWwgcHVsbHVwcy4KClJlZ2FyZHMKSGVucmlrCgoKX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX18KbGludXgtYXJtLWtlcm5lbCBtYWlsaW5nIGxp
-c3QKbGludXgtYXJtLWtlcm5lbEBsaXN0cy5pbmZyYWRlYWQub3JnCmh0dHA6Ly9saXN0cy5pbmZy
-YWRlYWQub3JnL21haWxtYW4vbGlzdGluZm8vbGludXgtYXJtLWtlcm5lbAo=
+On 15 December 2013 14:44, Maxime Ripard
+<maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org> wrote:
+>> --- a/drivers/mmc/host/Kconfig
+>> +++ b/drivers/mmc/host/Kconfig
+>> @@ -665,3 +665,11 @@ config MMC_REALTEK_PCI
+>>       help
+>>         Say Y here to include driver code to support SD/MMC card interface
+>>         of Realtek PCI-E card reader
+>> +
+>> +config MMC_SUNXI
+>> +     tristate "Allwinner sunxi SD/MMC Host Controller support"
+>> +     depends on ARCH_SUNXI
+>> +     default y
+>
+> I'm not that fond of these "default y" patterns. It forces the driver
+> down to every user of the multiplatform kernels. I'd suggest removing
+> the default and adding the driver to the defconfigs we have.
+
+And why would you build support for sunxi without building support for
+sunxi mmc?
+
+Like 90%+ sunxi devices actually have a SD slot or an eMMC or a SDIO
+card connected so what's the point of supporting sunxi without sunxi
+mmc?
+
+Thanks
+
+Michal
