@@ -1,16 +1,17 @@
 From: Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
-Subject: Re: [PATCH 2/5] ARM: dts: sun4i: Add support for mmc
-Date: Sun, 15 Dec 2013 14:58:54 +0100
-Message-ID: <20131215135854.GF3651@lukather>
+Subject: Re: [PATCH 3/5] ARM: dts: sun5i: Add new
+ sun5i-a13-olinuxino-micro board
+Date: Sun, 15 Dec 2013 15:04:57 +0100
+Message-ID: <20131215140457.GG3651@lukather>
 References: <1387058295-20641-1-git-send-email-hdegoede@redhat.com>
- <1387058295-20641-3-git-send-email-hdegoede@redhat.com>
+ <1387058295-20641-4-git-send-email-hdegoede@redhat.com>
 Reply-To: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
 Mime-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="je2i5r69C8+2chMc"
-Return-path: <linux-sunxi+bncBD2ZNBF5VYJRB3XLW2KQKGQEVFDMMUI-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+	protocol="application/pgp-signature"; boundary="U5yJ31ax00IavOwq"
+Return-path: <linux-sunxi+bncBD2ZNBF5VYJRBG7OW2KQKGQEN6YLNCA-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <1387058295-20641-3-git-send-email-hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+In-Reply-To: <1387058295-20641-4-git-send-email-hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Post: <http://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
 List-Help: <http://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
 List-Archive: <http://groups.google.com/group/linux-sunxi>
@@ -22,103 +23,126 @@ Cc: Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, David =?iso-8859-1
 List-Id: linux-mmc@vger.kernel.org
 
 
---je2i5r69C8+2chMc
+--U5yJ31ax00IavOwq
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
 Content-Transfer-Encoding: quoted-printable
 
-Hi Hans,
-
-On Sat, Dec 14, 2013 at 10:58:12PM +0100, Hans de Goede wrote:
+On Sat, Dec 14, 2013 at 10:58:13PM +0100, Hans de Goede wrote:
 > Signed-off-by: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 
-Commit-log :)
+Commit log :)
+
+Please detail what the board is, what features it has, etc.
+
+Other than that, I'm mostly ok with this patch (except that you can
+also probably add your copyright, but that's your call :))
+
+Could you send it as a single patch, separate from this serie (since
+it's not really related in the end).
+
+Thanks!
+Maxime
 
 > ---
->  arch/arm/boot/dts/sun4i-a10-cubieboard.dts | 16 ++++++++++++++++
->  arch/arm/boot/dts/sun4i-a10.dtsi           | 16 ++++++++++++++++
->  2 files changed, 32 insertions(+)
+>  arch/arm/boot/dts/Makefile                      |  1 +
+>  arch/arm/boot/dts/sun5i-a13-olinuxino-micro.dts | 66 +++++++++++++++++++=
+++++++
+>  2 files changed, 67 insertions(+)
+>  create mode 100644 arch/arm/boot/dts/sun5i-a13-olinuxino-micro.dts
 >=20
-> diff --git a/arch/arm/boot/dts/sun4i-a10-cubieboard.dts b/arch/arm/boot/d=
-ts/sun4i-a10-cubieboard.dts
-> index 425a7db..d193937 100644
-> --- a/arch/arm/boot/dts/sun4i-a10-cubieboard.dts
-> +++ b/arch/arm/boot/dts/sun4i-a10-cubieboard.dts
-> @@ -42,7 +42,23 @@
->  			};
->  		};
-> =20
-> +		sdc0: sdc@01c0f000 {
+> diff --git a/arch/arm/boot/dts/Makefile b/arch/arm/boot/dts/Makefile
+> index d57c1a6..b663ed7 100644
+> --- a/arch/arm/boot/dts/Makefile
+> +++ b/arch/arm/boot/dts/Makefile
+> @@ -255,6 +255,7 @@ dtb-$(CONFIG_ARCH_SUNXI) +=3D \
+>  	sun4i-a10-hackberry.dtb \
+>  	sun5i-a10s-olinuxino-micro.dtb \
+>  	sun5i-a13-olinuxino.dtb \
+> +	sun5i-a13-olinuxino-micro.dtb \
+>  	sun6i-a31-colombus.dtb \
+>  	sun7i-a20-cubieboard2.dtb \
+>  	sun7i-a20-cubietruck.dtb \
+> diff --git a/arch/arm/boot/dts/sun5i-a13-olinuxino-micro.dts b/arch/arm/b=
+oot/dts/sun5i-a13-olinuxino-micro.dts
+> new file mode 100644
+> index 0000000..26df7e8
+> --- /dev/null
+> +++ b/arch/arm/boot/dts/sun5i-a13-olinuxino-micro.dts
+> @@ -0,0 +1,66 @@
+> +/*
+> + * Copyright 2012 Maxime Ripard
+> + *
+> + * Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
+> + *
+> + * The code contained herein is licensed under the GNU General Public
+> + * License. You may obtain a copy of the GNU General Public License
+> + * Version 2 or later at the following locations:
+> + *
+> + * http://www.opensource.org/licenses/gpl-license.html
+> + * http://www.gnu.org/copyleft/gpl.html
+> + */
+> +
+> +/dts-v1/;
+> +/include/ "sun5i-a13.dtsi"
+> +
+> +/ {
+> +	model =3D "Olimex A13-Olinuxino Micro";
+> +	compatible =3D "olimex,a13-olinuxino-micro", "allwinner,sun5i-a13";
+> +
+> +	soc@01c00000 {
+> +		pinctrl@01c20800 {
+> +			led_pins_olinuxinom: led_pins@0 {
+> +				allwinner,pins =3D "PG9";
+> +				allwinner,function =3D "gpio_out";
+> +				allwinner,drive =3D <1>;
+> +				allwinner,pull =3D <0>;
+> +			};
+> +		};
+> +
+> +		uart1: serial@01c28400 {
 > +			pinctrl-names =3D "default";
-> +			pinctrl-0 =3D <&sdc0_pins_a>;
-> +			pinctrl-1 =3D <&mmc0_cd_pin_cubieboard>;
-> +			cd-gpios =3D <&pio 7 1 0>; /* PH1 */
-> +			cd-mode =3D <1>;
+> +			pinctrl-0 =3D <&uart1_pins_b>;
 > +			status =3D "okay";
 > +		};
 > +
->  		pinctrl@01c20800 {
-> +			mmc0_cd_pin_cubieboard: mmc0_cd_pin@0 {
-> +				allwinner,pins =3D "PH1";
-> +				allwinner,function =3D "gpio_in";
-> +				allwinner,drive =3D <0>;
-> +				allwinner,pull =3D <0>;
-> +			};
-> +
-
-You seem to be using mmc and sdc without any real distinction. Please
-try to be consistent and use only one of the two (and I have a slight
-preference for mmc :))
-
->  			led_pins_cubieboard: led_pins@0 {
->  				allwinner,pins =3D "PH20", "PH21";
->  				allwinner,function =3D "gpio_out";
-> diff --git a/arch/arm/boot/dts/sun4i-a10.dtsi b/arch/arm/boot/dts/sun4i-a=
-10.dtsi
-> index 4dccdb0..13bccd5 100644
-> --- a/arch/arm/boot/dts/sun4i-a10.dtsi
-> +++ b/arch/arm/boot/dts/sun4i-a10.dtsi
-> @@ -306,6 +306,15 @@
->  			#size-cells =3D <0>;
->  		};
-> =20
-> +		sdc0: sdc@01c0f000 {
-> +			compatible =3D "allwinner,sun4i-mmc";
-> +			reg =3D <0x01c0f000 0x1000>;
-> +			clocks =3D <&ahb_gates 8>, <&mmc0>;
-> +			interrupts =3D <32>;
-> +			bus-width =3D <4>;
-> +			status =3D "disabled";
+> +		i2c0: i2c@01c2ac00 {
+> +			pinctrl-names =3D "default";
+> +			pinctrl-0 =3D <&i2c0_pins_a>;
+> +			status =3D "okay";
 > +		};
 > +
-
-The A10 has much more mmc controller doesn't it?
-
-Could you add all of them in the DT ?
-
->  		intc: interrupt-controller@01c20400 {
->  			compatible =3D "allwinner,sun4i-ic";
->  			reg =3D <0x01c20400 0x400>;
-> @@ -376,6 +385,13 @@
->  				allwinner,drive =3D <0>;
->  				allwinner,pull =3D <0>;
->  			};
+> +		i2c1: i2c@01c2b000 {
+> +			pinctrl-names =3D "default";
+> +			pinctrl-0 =3D <&i2c1_pins_a>;
+> +			status =3D "okay";
+> +		};
 > +
-> +			sdc0_pins_a: sdc0@0 {
-> +				allwinner,pins =3D "PF0","PF1","PF2","PF3","PF4","PF5";
-> +				allwinner,function =3D "mmc0";
-> +				allwinner,drive =3D <3>;
-> +				allwinner,pull =3D <1>;
+> +		i2c2: i2c@01c2b400 {
+> +			pinctrl-names =3D "default";
+> +			pinctrl-0 =3D <&i2c2_pins_a>;
+> +			status =3D "okay";
+> +		};
+> +	};
+> +
+> +	leds {
+> +		compatible =3D "gpio-leds";
+> +		pinctrl-names =3D "default";
+> +		pinctrl-0 =3D <&led_pins_olinuxinom>;
+> +
+> +		power {
 
-Wow, you need both the pullups and a 40mA output?
+Could you add a label here?
 
-Ideally, I'd like this patch to be splitted into three:
-  - One that adds the MMC controller nodes to the DTSI
-  - One that adds the muxing options you need to the pinctrl node
-  - One that enables the controller on the boards
+Something like a13-olinuxino-micro:green:power ?
 
-Thanks,
+> +			gpios =3D <&pio 6 9 0>;
+> +			default-state =3D "on";
+> +		};
+> +	};
+> +};
 
+Thanks!
 Maxime
 
 --=20
@@ -126,26 +150,26 @@ Maxime Ripard, Free Electrons
 Embedded Linux, Kernel and Android engineering
 http://free-electrons.com
 
---je2i5r69C8+2chMc
+--U5yJ31ax00IavOwq
 Content-Type: application/pgp-signature; name="signature.asc"
 Content-Description: Digital signature
 
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v1.4.14 (GNU/Linux)
 
-iQIcBAEBAgAGBQJSrbWeAAoJEBx+YmzsjxAgSnQP/3wsuAgOMU/dXLNJB3X5yX5w
-3W3UJdATUflBsHJJQjUSitRl4Cl1N0fKDI7qmNodOurWy1s6WnadwPurnIUFr6gE
-wl9t2ENvvYMYr9dqqQc2zO4ky9lMHBGUlHI5MfueDeZ0LXIfnr1F1j4uNCsJWwrz
-lTNtwf81/wrGKVsi4bhyMp7Pnxw2NGTbN+XcIP+DbzVrSCPOAEqZGxSK9wedy8fQ
-RieQK/Q6lu3bCIBW/mJHUGrmOtr3d2EfDdRwKbqwvtqJ/Ym4WA/MZIDKVw1gjaGP
-VDiZsw67U1Vjpthy+b1rCip12B0Y8jGQlzXJUgxiVwddQFJ3xpH4vgGbw/UL+c3w
-swp4+jyaljd2kc8okDDBWtYlMkDtIqZdxjIMy0DQBNw3W9Auy4uVTuTGkMfBq909
-HM8V/I+6uDQN3g/kSMpmAWs2aDzO7dphAIfsNyPLTQvBTbOz1lXnCF1B6wbJ92M3
-CHVY7kOabbCvDLBD57AomZotIpbaYnrEN7+u/kO81Jqv8ESZqEG5NcpibrOxZ6vk
-L/OkbhIJMWF9MAUJwJ+zFw/f0w3zjqD38+ypD6FqEz8OSvsZF0Enp1ND4fYTScWc
-hIz262l1cXpwRcXAcVx+pmvLuEqrpQYJ63T7XXrT13viYxr5RqFhP8S7n4dPFIjr
-h9PU6HB7roVYpvfp1ouF
-=M8Ew
+iQIcBAEBAgAGBQJSrbcJAAoJEBx+YmzsjxAgCj8P/jPwluzCPU5XUTuVKMMzdZcB
+e6tDSjjMb6Kvab0Imdbqvt/0zsKP5tTOoVfadUAd+MSkz7Tgb7eglon/k93woTl8
+sVrWrj0WHu71JZ72SOpME4YS9Pt26uZ65sBmuZ+HMU6AA4l+b+ILUYBxPpemCOe6
+LNURNCYpfo4118tPydf11TW5auvOmjHgZM+dzT8v0YWKQWawKmFPYvv9dDln16Gt
+3b6xFPGdI6Q7i76zFmaixShd7hUVzBU9J1CluPjaLzUiq4xggojfYp46rXcnf2l7
+9wW9It7S1wmyemrUWncNvfy58HZDnPdsnmqkVUAh1UnPhpstkVtC7EYko3CkzDdv
+AsESd6SZHLv0FrCAOQxgVWbrj0PAyNQ1Pe9EP20wlfDp1FrY8+0rlzRbg4ZikJ1k
+51RcRHdZuPey4287Pm5+pboMfN0gRQAXM+ZimcXTk1wpKqGAUCKqZTEig98yjkcN
+t+9ilYTOQ5cHEEPbiCP1T1W4n1cl1WFq7yugfEm+68kC7bhnXnq1oEqHkODU+iq4
++u6FRs4fNQ1v++iaif9p2v70uLWGKmSgTBxMEIjqjeS8grsXH1NzjehvR5qmXIBu
+eTeLEsNtUndwBhEzGGUMMmSgUzn//pB3YRzWilA/awcSmmPiPhhztMrH4AEqBfqu
+tzr4wMOGbMUaE31A4hB0
+=eyhR
 -----END PGP SIGNATURE-----
 
---je2i5r69C8+2chMc--
+--U5yJ31ax00IavOwq--
