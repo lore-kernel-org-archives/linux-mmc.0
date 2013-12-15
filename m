@@ -1,59 +1,69 @@
-From: Rashika Kheria <rashika.kheria@gmail.com>
-Subject: =?UTF-8?q?=5BPATCH=20v2=5D=20drivers=3A=20mmc=3A=20Mark=20the=20function=20sdhci=5Fdisable=5Firq=5Fwakeups=28=29=20as=20static=20in=20sdhci=2Ec?=
-Date: Mon, 16 Dec 2013 00:59:16 +0530
-Message-ID: <1387135756-27057-1-git-send-email-rashika.kheria@gmail.com>
-References: <20131214131631.GA8543@rashika>
+From: David =?ISO-8859-1?Q?Lanzend=F6rfer?= <david.lanzendoerfer-Z7Kmv9EsliU@public.gmane.org>
+Subject: Re: Re: [PATCH 1/5] ARM: sunxi: Add driver for SD/MMC
+ hosts found on Allwinner sunxi SoCs
+Date: Sun, 15 Dec 2013 20:35:17 +0100
+Message-ID: <2378731.6b9MyH8v8A@dizzy-6.site>
+References: <1387058295-20641-1-git-send-email-hdegoede@redhat.com> <20131215162109.GI3651@lukather> <52ADF7D8.2010900@redhat.com>
+Reply-To: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pb0-f43.google.com ([209.85.160.43]:60028 "EHLO
-	mail-pb0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751631Ab3LOT31 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 15 Dec 2013 14:29:27 -0500
-In-Reply-To: <20131214131631.GA8543@rashika>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: multipart/signed; boundary="nextPart2739466.6b5a1m7l26"; micalg="pgp-sha1"; protocol="application/pgp-signature"
+Return-path: <linux-sunxi+bncBD2JL37LXEKRB7MIXCKQKGQEDIXEV3Q-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+In-Reply-To: <52ADF7D8.2010900-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+List-Post: <http://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Help: <http://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Archive: <http://groups.google.com/group/linux-sunxi>
+Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+List-Subscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Unsubscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+To: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-kernel@vger.kernel.org, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, josh@joshtriplett.org
 
-This patch marks the function sdhci_disable_irq_wakeups() as static in
-host/sdhci.c because it is not used outside this file. It also removes
-the EXPORT_SYMBOL_GPL because no other file in kernel uses this
-function.
 
-Thus, it also eliminates the following warning in host/sdhci.c:
-drivers/mmc/host/sdhci.c:2553:6: warning: no previous prototype for =E2=
-=80=98sdhci_disable_irq_wakeups=E2=80=99 [-Wmissing-prototypes]
+--nextPart2739466.6b5a1m7l26
+Content-Transfer-Encoding: 7Bit
+Content-Type: text/plain; charset="us-ascii"
 
-Signed-off-by: Rashika Kheria <rashika.kheria@gmail.com>
-Reviewed-by: Josh Triplett <josh@joshtriplett.org>
----
- drivers/mmc/host/sdhci.c |    3 +--
- 1 file changed, 1 insertion(+), 2 deletions(-)
+Hi
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index bd8a098..5fcf200 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -2550,7 +2550,7 @@ void sdhci_enable_irq_wakeups(struct sdhci_host *=
-host)
- }
- EXPORT_SYMBOL_GPL(sdhci_enable_irq_wakeups);
-=20
--void sdhci_disable_irq_wakeups(struct sdhci_host *host)
-+static void sdhci_disable_irq_wakeups(struct sdhci_host *host)
- {
- 	u8 val;
- 	u8 mask =3D SDHCI_WAKE_ON_INSERT | SDHCI_WAKE_ON_REMOVE
-@@ -2560,7 +2560,6 @@ void sdhci_disable_irq_wakeups(struct sdhci_host =
-*host)
- 	val &=3D ~mask;
- 	sdhci_writeb(host, val, SDHCI_WAKE_UP_CONTROL);
- }
--EXPORT_SYMBOL_GPL(sdhci_disable_irq_wakeups);
-=20
- int sdhci_suspend_host(struct sdhci_host *host)
- {
---=20
-1.7.9.5
+> >>>> [...]
+> >>>> +	mmc->f_max		= 50000000;
+> >>>> [...]
+> >> [...]
+> >> in case of sdc3 they are putting 200000000 in f_max (as that is often
+> >> used for sdio cards) but then later in set_ios they clamp the passed
+> >> in clock to 47000000 Mhz, so I seriously doubt that 200Mhz has actually
+> >> worked. Hence I've simply gone for a safe range for now. If someone has
+> >> cards capable of doing 200 MHz we could certainly run various tests and
+> >> try to improve this, but for now this seems a sane range to start with.
+> > That's probably something that you should mention in your comment then :)
+> Good point, David ?
+Yes.
+a) We should mention any reason why we did what.
+b) If there is room for optimization we should mention that as well since:
+	i) we won't remember every single detail in half a year
+	ii) someone else might need to follow our considerations
 
+> Right, my bad, sorry. I was so happy I was finally ready to send the patch
+> upstream (I finally had fixed everything on my todo list), I rushed the
+> cover letter a bit. I was planning on putting things like this in there,
+> as well as why we didn't try to extend the mmc-dw driver, but I forgot.
+Do you have something like this in mind? -> drivers/mmc/host/dw_mmc-exynos.c
+Might actually be working if it actually is the same IDMAC controller.
+
+cheers
+David
+--nextPart2739466.6b5a1m7l26
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: This is a digitally signed message part.
+Content-Transfer-Encoding: 7Bit
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+
+iEYEABECAAYFAlKuBH8ACgkQAeZw77btGjo5CQCeJI0cqd3EkDzEfTc2BNNTaZq9
+X4EAoIv2OVrXUVYK3Jy9egK5q3xFuogy
+=kH4X
+-----END PGP SIGNATURE-----
+
+--nextPart2739466.6b5a1m7l26--
