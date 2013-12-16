@@ -1,76 +1,234 @@
-From: Ludovic Desroches <ludovic.desroches@atmel.com>
-Subject: Re: possible regression on 3.13 when calling flush_dcache_page
-Date: Mon, 16 Dec 2013 15:43:43 +0100
-Message-ID: <20131216144343.GD9627@ldesroches-Latitude-E6320>
-References: <20131212143149.GI12099@ldesroches-Latitude-E6320>
- <20131212143618.GJ12099@ldesroches-Latitude-E6320>
- <20131213015909.GA8845@lge.com>
+From: Dinh Nguyen <dinguyen@altera.com>
+Subject: RE: [PATCHv3 1/3] mmc: dw_mmc: Enable the hold reg for certain
+ speed modes
+Date: Mon, 16 Dec 2013 10:38:33 -0600
+Message-ID: <1387211913.18636.3.camel@linux-builds1>
+References: <1386564668-24738-1-git-send-email-dinguyen@altera.com>
+	 <1386564668-24738-2-git-send-email-dinguyen@altera.com>
+	 <000201cefa16$a0e7bf90$e2b73eb0$%jun@samsung.com>
+	 <52AE853F.2020300@gmail.com>
+	 <003801cefa2f$4b3ae180$e1b0a480$%jun@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Return-path: <owner-linux-mm@kvack.org>
-Content-Disposition: inline
-In-Reply-To: <20131213015909.GA8845@lge.com>
-Sender: owner-linux-mm@kvack.org
-To: Joonsoo Kim <iamjoonsoo.kim@lge.com>
-Cc: linux-mm@kvack.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Ludovic Desroches <ludovic.desroches@atmel.com>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-db9lp0251.outbound.messaging.microsoft.com ([213.199.154.251]:53060
+	"EHLO db9outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1754466Ab3LPQkP (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 16 Dec 2013 11:40:15 -0500
+In-Reply-To: <003801cefa2f$4b3ae180$e1b0a480$%jun@samsung.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Seungwon Jeon <tgih.jun@samsung.com>
+Cc: 'Dinh Nguyen' <dinh.linux@gmail.com>, arnd@arndb.de, cjb@laptop.org, jh80.chung@samsung.com, heiko@sntech.de, dianders@chromium.org, alim.akhtar@samsung.com, bzhao@marvell.com, linux-mmc@vger.kernel.org
 
-Hello,
+On Mon, 2013-12-16 at 16:20 +0900, Seungwon Jeon wrote:
+> On Mon, December 16, 2013, Dinh Nguyen wrote:
+> > On 12/15/13 10:23 PM, Seungwon Jeon wrote:
+> > > On Mon, December 09, 2013, Dinh Nguyen wrote:
+> > >> From: Dinh Nguyen <dinguyen@altera.com>
+> > >>
+> > >> This patch will enable the SDMMC_CMD_USE_HOLD_REG bit when the slot is
+> > >> operating all timing modes, except for SDR50, DDR50, SDR104, and MMC_HS200.
+> > >>
+> > >> According to the Synopsys databook :"To meet the relatively high Input Hold
+> > >> Time requirement for SDR12, SDR25, and other MMC speed modes, you should
+> > >> program bit[29]use_hold_Reg of the CMD register to 1'b1;"..."However, for
+> > >> the higher speed modes of SDR104, SDR50 and DDR50, you can meet the much
+> > >> smaller Input Hold Time requirement of 0.8ns by bypassing the Hold Register
+> > >> (Path A in Figure 10-8, programming CMD.use_hold_reg = 1'b0) and then adding
+> > >> delay elements on the output path as indicated.
+> > >>
+> > >> Also, "Never set CMD.use_hold_reg = 1 and cclk_in_drv phase shift to 0 at the
+> > >> same time. This would add an extra one-cycle delay on the output path, resulting
+> > >> in incorrect behavior."
+> > >>
+> > >> This patch also checks the IHR(Implement Hold Register) in the HCON register.
+> > >>
+> > >> This information is taking from the v2.50a of the Synopsys Designware Cores
+> > >> Mobile Storage Host Databook.
+> > > If cclk_in_drv has non-zero, hold_reg_bit should be 1'b1 for SDR50, DDR50, SDR104, and MMC_HS200
+> > mode.
+> > > Can you check it?
+> > The code is already doing that. By default, use_hold_reg is 1'b1.
+> > use_hold_reg gets cleared to 1'b0 only if
+> > cclk_in_drv is zero.
+> I'm seeing that your change is always set 'use_hold_reg = 0'
+> in case of SDR50, DDR50, SDR104, and MMC_HS200 mode.
 
-On Fri, Dec 13, 2013 at 10:59:09AM +0900, Joonsoo Kim wrote:
-> On Thu, Dec 12, 2013 at 03:36:19PM +0100, Ludovic Desroches wrote:
-> > fix mmc mailing list address error
+Ah ok...I will add a check in v4.
+
+Thanks,
+Dinh
+> 
+> Thanks,
+> Seungwon Jeon
+> 
+> > >
+> > > And samsung,dw-mshc-sdr(ddr)-timing property is still specific for Exynos.
+> > > It will be modified with adding new cell element soon.
+> > That's fine, I think that the K3 and SOCFPGA can get put the clock phase
+> > information in the
+> > clock binding.
 > > 
-> > On Thu, Dec 12, 2013 at 03:31:50PM +0100, Ludovic Desroches wrote:
-> > > Hi,
-> > > 
-> > > With v3.13-rc3 I have an error when the atmel-mci driver calls
-> > > flush_dcache_page (log at the end of the message).
-> > > 
-> > > Since I didn't have it before, I did a git bisect and the commit introducing
-> > > the error is the following one:
-> > > 
-> > > 106a74e slab: replace free and inuse in struct slab with newly introduced active
-> > > 
-> > > I don't know if this commit has introduced a bug or if it has revealed a bug
-> > > in the atmel-mci driver.
+> > Dinh
+> > >
+> > > Thanks,
+> > > Seungwon Jeon
+> > >
+> > >> Signed-off-by: Dinh Nguyen <dinguyen@altera.com>
+> > >> Acked-by: Heiko Stuebner <heiko@sntech.de>
+> > >> Tested-by: Heiko Stuebner <heiko@sntech.de>
+> > >> ---
+> > >> v3: Read the IHR(Implement Hold Register) in the HCON
+> > >> v2: Add check for cclk_in_drv phase shift in conjunction with use_hold_reg.
+> > >> ---
+> > >>  drivers/mmc/host/dw_mmc.c  |   51 ++++++++++++++++++++++++++++++++++++++++++++
+> > >>  drivers/mmc/host/dw_mmc.h  |    4 ++++
+> > >>  include/linux/mmc/dw_mmc.h |    3 +++
+> > >>  3 files changed, 58 insertions(+)
+> > >>
+> > >> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> > >> index 4bce0de..480dafe 100644
+> > >> --- a/drivers/mmc/host/dw_mmc.c
+> > >> +++ b/drivers/mmc/host/dw_mmc.c
+> > >> @@ -279,6 +279,9 @@ static u32 dw_mci_prepare_command(struct mmc_host *mmc, struct mmc_command *cmd)
+> > >>  			cmdr |= SDMMC_CMD_DAT_WR;
+> > >>  	}
+> > >>
+> > >> +	if (slot->host->use_hold_reg)
+> > >> +		cmdr |= SDMMC_CMD_USE_HOLD_REG;
+> > >> +
+> > >>  	if (drv_data && drv_data->prepare_command)
+> > >>  		drv_data->prepare_command(slot->host, &cmdr);
+> > >>
+> > >> @@ -969,6 +972,24 @@ static void dw_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+> > >>  	mci_writel(slot->host, UHS_REG, regs);
+> > >>  	slot->host->timing = ios->timing;
+> > >>
+> > >> +	/* Per Synopsys spec, use_hold_reg should be set for all modes except for
+> > >> +	 * high-speed SDR50, DDR50, SDR104, and MMC_HS200. However, use_hold_reg
+> > >> +	 * should be cleared if the cclk_in_drv is 0.
+> > >> +	 */
+> > >> +	switch (slot->host->timing) {
+> > >> +	case MMC_TIMING_UHS_SDR50:
+> > >> +	case MMC_TIMING_UHS_SDR104:
+> > >> +	case MMC_TIMING_UHS_DDR50:
+> > >> +	case MMC_TIMING_MMC_HS200:
+> > >> +		slot->host->use_hold_reg = 0;
+> > >> +		break;
+> > >> +	default:
+> > >> +		slot->host->use_hold_reg = 1;
+> > >> +	}
+> > >> +
+> > >> +	if (slot->host->can_use_hold_reg == 0)
+> > >> +		slot->host->use_hold_reg = 0;
+> > >> +
+> > >>  	/*
+> > >>  	 * Use mirror of ios->clock to prevent race with mmc
+> > >>  	 * core ios update when finding the minimum.
+> > >> @@ -2339,6 +2360,8 @@ static struct dw_mci_board *dw_mci_parse_dt(struct dw_mci *host)
+> > >>  	const struct dw_mci_drv_data *drv_data = host->drv_data;
+> > >>  	int idx, ret;
+> > >>  	u32 clock_frequency;
+> > >> +	int sdr_timing[2];
+> > >> +	int ddr_timing[2];
+> > >>
+> > >>  	pdata = devm_kzalloc(dev, sizeof(*pdata), GFP_KERNEL);
+> > >>  	if (!pdata) {
+> > >> @@ -2389,6 +2412,25 @@ static struct dw_mci_board *dw_mci_parse_dt(struct dw_mci *host)
+> > >>  	if (of_find_property(np, "caps2-mmc-hs200-1_2v", NULL))
+> > >>  		pdata->caps2 |= MMC_CAP2_HS200_1_2V_SDR;
+> > >>
+> > >> +	/* Check for the "samsung,dw-mshc-sdr-timing" and the
+> > >> +	 * "samsung,dw-mshc-ddr-timing" bindings as this will tell us if we
+> > >> +	 * can safely set the SDMMC_CMD_USE_HOLD_REG bit. The second paramater
+> > >> +	 * in these 2 bindings is the value of the cclk_in_drv. If cclk_in_drv
+> > >> +	 * is 0, we cannot set the SDMMC_CMD_USE_HOLD_REG bit. The default
+> > >> +	 * behavior will be to set cclk_in_drv, as some platforms do not have
+> > >> +	 * to set the sdr or ddr timing parameters.
+> > >> +	 */
+> > >> +	sdr_timing[1] = ddr_timing[1] = 1;
+> > >> +	of_property_read_u32_array(np,
+> > >> +			"samsung,dw-mshc-sdr-timing", sdr_timing, 2);
+> > >> +
+> > >> +	of_property_read_u32_array(np,
+> > >> +			"samsung,dw-mshc-ddr-timing", ddr_timing, 2);
+> > >> +
+> > >> +	pdata->cclk_in_drv = 1;
+> > >> +	if ((sdr_timing[1] == 0) || (ddr_timing[1] == 0))
+> > >> +		pdata->cclk_in_drv = 0;
+> > >> +
+> > >>  	return pdata;
+> > >>  }
+> > >>
+> > >> @@ -2495,6 +2537,15 @@ int dw_mci_probe(struct dw_mci *host)
+> > >>  		goto err_regulator;
+> > >>  	}
+> > >>
+> > >> +	/* Check to see if the HOLD REG is implemented. */
+> > >> +	host->can_use_hold_reg = (mci_readl(host, HCON) & SDMMC_HCON_IHR) >> 22;
+> > >> +
+> > >> +	/* Can only use the HOLD REG is both conditions are true:
+> > >> +	 * Hardware has implemented HOLD_REG and
+> > >> +	 * cclk_in_drv is non-zero.
+> > >> +	 */
+> > >> +	host->can_use_hold_reg &= host->pdata->cclk_in_drv;
+> > >> +
+> > >>  	host->quirks = host->pdata->quirks;
+> > >>
+> > >>  	spin_lock_init(&host->lock);
+> > >> diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
+> > >> index 6bf24ab..dfd05c9 100644
+> > >> --- a/drivers/mmc/host/dw_mmc.h
+> > >> +++ b/drivers/mmc/host/dw_mmc.h
+> > >> @@ -145,6 +145,10 @@
+> > >>  #define SDMMC_IDMAC_ENABLE		BIT(7)
+> > >>  #define SDMMC_IDMAC_FB			BIT(1)
+> > >>  #define SDMMC_IDMAC_SWRESET		BIT(0)
+> > >> +
+> > >> +/* Hardware Configuration(HCON) register */
+> > >> +#define SDMMC_HCON_IHR			BIT(22)
+> > >> +
+> > >>  /* Version ID register define */
+> > >>  #define SDMMC_GET_VERID(x)		((x) & 0xFFFF)
+> > >>  /* Card read threshold */
+> > >> diff --git a/include/linux/mmc/dw_mmc.h b/include/linux/mmc/dw_mmc.h
+> > >> index 6ce7d2c..2b5b8bf 100644
+> > >> --- a/include/linux/mmc/dw_mmc.h
+> > >> +++ b/include/linux/mmc/dw_mmc.h
+> > >> @@ -191,6 +191,8 @@ struct dw_mci {
+> > >>  	struct regulator	*vmmc;	/* Power regulator */
+> > >>  	unsigned long		irq_flags; /* IRQ flags */
+> > >>  	int			irq;
+> > >> +	u32			can_use_hold_reg;
+> > >> +	bool			use_hold_reg;
+> > >>  };
+> > >>
+> > >>  /* DMA ops for Internal/External DMAC interface */
+> > >> @@ -238,6 +240,7 @@ struct dw_mci_board {
+> > >>  	u32 caps;	/* Capabilities */
+> > >>  	u32 caps2;	/* More capabilities */
+> > >>  	u32 pm_caps;	/* PM capabilities */
+> > >> +	u32 cclk_in_drv;	/*cclk_in_drv phase shift */
+> > >>  	/*
+> > >>  	 * Override fifo depth. If 0, autodetect it from the FIFOTH register,
+> > >>  	 * but note that this may not be reliable after a bootloader has used
+> > >> --
+> > >> 1.7.9.5
+> > >>
+> > >>
+> > >> --
+> > >> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> > >> the body of a message to majordomo@vger.kernel.org
+> > >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> > 
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
 > 
-> Hello,
-> 
-> I think that this commit may not introduce a bug. This patch remove one
-> variable on slab management structure and replace variable name. So there
-> is no functional change.
 > 
 
-If I have reverted this patch and other ones you did on top of it and
-the issue disappear.
-
-> I doubt that side-effect of this patch reveals a bug in other place.
-> Side-effect is reduced memory usage for slab management structure. It would
-> makes some slabs have more objects with more density since slab management
-> structure is sometimes on the page for objects. So if it diminishes, more
-> objects can be in the page.
-> 
-> Anyway, I will look at it more. If you have any progress, please let me know.
-
-No progress at the moment.
 
 
-Regards
-
-Ludovic
-
-> 
-> Thanks.
-> 
-> --
-> To unsubscribe, send a message with 'unsubscribe linux-mm' in
-> the body to majordomo@kvack.org.  For more info on Linux MM,
-> see: http://www.linux-mm.org/ .
-> Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
-
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
