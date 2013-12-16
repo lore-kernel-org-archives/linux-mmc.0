@@ -1,96 +1,84 @@
-From: Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
-Subject: Re: Re: [PATCH 1/5] ARM: sunxi: Add driver for SD/MMC
- hosts found on Allwinner sunxi SoCs
-Date: Mon, 16 Dec 2013 11:05:51 +0100
-Message-ID: <20131216100551.GD3037@lukather>
-References: <1387058295-20641-1-git-send-email-hdegoede@redhat.com>
- <1387058295-20641-2-git-send-email-hdegoede@redhat.com>
- <20131215134415.GE3651@lukather>
- <CAOMqctRspBPmNsyXye_gpfwGoZ=gMcCzEjM+hD3g+ZfQix7G6Q@mail.gmail.com>
-Reply-To: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+From: Daniel Lezcano <daniel.lezcano@linaro.org>
+Subject: Re: [PATCH v4 7/8] clocksource: kona: Add basic use of external clock
+Date: Mon, 16 Dec 2013 11:34:38 +0100
+Message-ID: <52AED73E.5090507@linaro.org>
+References: <1386271244-3927-1-git-send-email-tim.kryger@linaro.org> <1386271244-3927-8-git-send-email-tim.kryger@linaro.org>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="VV4b6MQE+OnNyhkM"
-Return-path: <linux-sunxi+bncBD2ZNBF5VYJRB6VCXOKQKGQEJ2TI5NY-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <CAOMqctRspBPmNsyXye_gpfwGoZ=gMcCzEjM+hD3g+ZfQix7G6Q-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Post: <http://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Help: <http://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Archive: <http://groups.google.com/group/linux-sunxi>
-Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
-List-Subscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Unsubscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-To: Michal Suchanek <hramrach-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: linux-sunxi <linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>, Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, David =?iso-8859-1?Q?Lanzend=F6rfer?= <david.lanzendoerfer-Z7Kmv9EsliU@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+Content-Type: text/plain; charset=UTF-8;
+	format=flowed
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wi0-f179.google.com ([209.85.212.179]:53384 "EHLO
+	mail-wi0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753145Ab3LPKel (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 16 Dec 2013 05:34:41 -0500
+Received: by mail-wi0-f179.google.com with SMTP id z2so1893702wiv.0
+        for <linux-mmc@vger.kernel.org>; Mon, 16 Dec 2013 02:34:39 -0800 (PST)
+In-Reply-To: <1386271244-3927-8-git-send-email-tim.kryger@linaro.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Tim Kryger <tim.kryger@linaro.org>, Christian Daudt <bcm@fixthebug.org>, Rob Herring <rob.herring@calxeda.com>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Stephen Warren <swarren@wwwdotorg.org>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Thomas Gleixner <tglx@linutronix.de>, Chris Ball <cjb@laptop.org>, Axel Lin <axel.lin@ingics.com>
+Cc: Device Tree List <devicetree@vger.kernel.org>, Linux ARM Kernel List <linux-arm-kernel@lists.infradead.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux MMC List <linux-mmc@vger.kernel.org>, Linaro Patches List <patches@linaro.org>
 
+On 12/05/2013 08:20 PM, Tim Kryger wrote:
+> When an clock is specified in the device tree, enable it and use it t=
+o
+> determine the external clock frequency.
+>
+> Signed-off-by: Tim Kryger <tim.kryger@linaro.org>
+> Reviewed-by: Markus Mayer <markus.mayer@linaro.org>
+> Reviewed-by: Matt Porter <matt.porter@linaro.org>
 
---VV4b6MQE+OnNyhkM
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+Acked-by: Daniel Lezcano <daniel.lezcano@linaro.org>
 
-On Sun, Dec 15, 2013 at 11:01:17PM +0100, Michal Suchanek wrote:
-> On 15 December 2013 14:44, Maxime Ripard
-> <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org> wrote:
-> >> --- a/drivers/mmc/host/Kconfig
-> >> +++ b/drivers/mmc/host/Kconfig
-> >> @@ -665,3 +665,11 @@ config MMC_REALTEK_PCI
-> >>       help
-> >>         Say Y here to include driver code to support SD/MMC card inter=
-face
-> >>         of Realtek PCI-E card reader
-> >> +
-> >> +config MMC_SUNXI
-> >> +     tristate "Allwinner sunxi SD/MMC Host Controller support"
-> >> +     depends on ARCH_SUNXI
-> >> +     default y
-> >
-> > I'm not that fond of these "default y" patterns. It forces the driver
-> > down to every user of the multiplatform kernels. I'd suggest removing
-> > the default and adding the driver to the defconfigs we have.
->=20
-> And why would you build support for sunxi without building support for
-> sunxi mmc?
+> ---
+>   drivers/clocksource/bcm_kona_timer.c | 14 +++++++++++---
+>   1 file changed, 11 insertions(+), 3 deletions(-)
+>
+> diff --git a/drivers/clocksource/bcm_kona_timer.c b/drivers/clocksour=
+ce/bcm_kona_timer.c
+> index 0d7d8c3..8a4ab36 100644
+> --- a/drivers/clocksource/bcm_kona_timer.c
+> +++ b/drivers/clocksource/bcm_kona_timer.c
+> @@ -17,6 +17,7 @@
+>   #include <linux/jiffies.h>
+>   #include <linux/clockchips.h>
+>   #include <linux/types.h>
+> +#include <linux/clk.h>
+>
+>   #include <linux/io.h>
+>   #include <asm/mach/time.h>
+> @@ -107,11 +108,18 @@ static const struct of_device_id bcm_timer_ids[=
+] __initconst =3D {
+>   static void __init kona_timers_init(struct device_node *node)
+>   {
+>   	u32 freq;
+> +	struct clk *external_clk;
+>
+> -	if (!of_property_read_u32(node, "clock-frequency", &freq))
+> +	external_clk =3D of_clk_get_by_name(node, NULL);
+> +
+> +	if (!IS_ERR(external_clk)) {
+> +		arch_timer_rate =3D clk_get_rate(external_clk);
+> +		clk_prepare_enable(external_clk);
+> +	} else if (!of_property_read_u32(node, "clock-frequency", &freq)) {
+>   		arch_timer_rate =3D freq;
+> -	else
+> -		panic("clock-frequency not set in the .dts file");
+> +	} else {
+> +		panic("unable to determine clock-frequency");
+> +	}
+>
+>   	/* Setup IRQ numbers */
+>   	timers.tmr_irq =3D irq_of_parse_and_map(node, 0);
+>
 
-Because you can?
-
-And where am I actually suggesting to do so?
-
-> Like 90%+ sunxi devices actually have a SD slot or an eMMC or a SDIO
-> card connected so what's the point of supporting sunxi without sunxi
-> mmc?
-
-And does your assumption still stand if you take into account all the
-other ARM boards?
-
-Maxime
 
 --=20
-Maxime Ripard, Free Electrons
-Embedded Linux, Kernel and Android engineering
-http://free-electrons.com
+  <http://www.linaro.org/> Linaro.org =E2=94=82 Open source software fo=
+r ARM SoCs
 
---VV4b6MQE+OnNyhkM
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
+=46ollow Linaro:  <http://www.facebook.com/pages/Linaro> Facebook |
+<http://twitter.com/#!/linaroorg> Twitter |
+<http://www.linaro.org/linaro-blog/> Blog
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.14 (GNU/Linux)
-
-iQIcBAEBAgAGBQJSrtB/AAoJEBx+YmzsjxAgWdUP/jBtbfyr3jKpfTu2i3Siis+l
-GUztVtwYR8YwABongvJ5KbimwwyhT4Hd6VDsXaFRECDhfFqEymQQEjooswvhd8ZT
-PoykxSfNvfFibIUQ9Z0rGfrHBseZVrqwDfmhvIUVznNtfqEbEpVwtiaVJEY61Tgs
-RExuaz7nwMIYZFnhe/npyGmEf9iv8a6C6vywBzbgOcRU/VHv7ZccMB/9jKOBLvZJ
-uuQ12mNlQHC82DQ7Mgu4/KQUDtLZMwRzumHQRXNSC7jAv5cQH/vizjNHst2IA6T2
-Te8EfWkcUSjbEw0GJCucogBym3EOFc8bNxyv/tIPKVwVTIgsdj7UEon4mDxNpVyt
-ZlthAyirdqtoD3JqaYglogAYca3AAIMsIv0hkUMoiwJwt2Pmn3pkuXzSWumKRMH8
-5q5g7NIcFAgtKVi61b+75gA/OAiM5VaBOYz2HsyjlG4t2ODnyNhr5OduRkRZKYsg
-SuXPpNz3PdOq5zJsASMc/pzPmyf8RZYL8Gv07UOQ4V6atQq6An6jGAWQJ3+QeQlV
-pdJEc+22DuuGKRnQcda8gPcNUY3u45Q9QkL7dHOARQW3XIN9etQgVSix8//LPWMu
-QvfUZV8kCJzjB6TSzIGR/ksWf+fQotYtTS5nZ7q7mycsiYEDON2vi78fZQTB/0Cg
-3edb2jI59sX/Cxz1d2UA
-=zUru
------END PGP SIGNATURE-----
-
---VV4b6MQE+OnNyhkM--
