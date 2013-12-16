@@ -1,84 +1,42 @@
-From: Daniel Lezcano <daniel.lezcano@linaro.org>
-Subject: Re: [PATCH v4 7/8] clocksource: kona: Add basic use of external clock
-Date: Mon, 16 Dec 2013 11:34:38 +0100
-Message-ID: <52AED73E.5090507@linaro.org>
-References: <1386271244-3927-1-git-send-email-tim.kryger@linaro.org> <1386271244-3927-8-git-send-email-tim.kryger@linaro.org>
+From: Ludovic Desroches <ludovic.desroches@atmel.com>
+Subject: Re: possible regression on 3.13 when calling flush_dcache_page
+Date: Mon, 16 Dec 2013 11:49:27 +0100
+Message-ID: <20131216104927.GA9627@ldesroches-Latitude-E6320>
+References: <20131212143149.GI12099@ldesroches-Latitude-E6320>
+ <20131212171322.GT4360@n2100.arm.linux.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wi0-f179.google.com ([209.85.212.179]:53384 "EHLO
-	mail-wi0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753145Ab3LPKel (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 16 Dec 2013 05:34:41 -0500
-Received: by mail-wi0-f179.google.com with SMTP id z2so1893702wiv.0
-        for <linux-mmc@vger.kernel.org>; Mon, 16 Dec 2013 02:34:39 -0800 (PST)
-In-Reply-To: <1386271244-3927-8-git-send-email-tim.kryger@linaro.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Return-path: <owner-linux-mm@kvack.org>
+Content-Disposition: inline
+In-Reply-To: <20131212171322.GT4360@n2100.arm.linux.org.uk>
+Sender: owner-linux-mm@kvack.org
+To: Russell King - ARM Linux <linux@arm.linux.org.uk>
+Cc: linux-mm@kvack.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, iamjoonsoo.kim@lge.com, Ludovic Desroches <ludovic.desroches@atmel.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Tim Kryger <tim.kryger@linaro.org>, Christian Daudt <bcm@fixthebug.org>, Rob Herring <rob.herring@calxeda.com>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Stephen Warren <swarren@wwwdotorg.org>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Thomas Gleixner <tglx@linutronix.de>, Chris Ball <cjb@laptop.org>, Axel Lin <axel.lin@ingics.com>
-Cc: Device Tree List <devicetree@vger.kernel.org>, Linux ARM Kernel List <linux-arm-kernel@lists.infradead.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux MMC List <linux-mmc@vger.kernel.org>, Linaro Patches List <patches@linaro.org>
 
-On 12/05/2013 08:20 PM, Tim Kryger wrote:
-> When an clock is specified in the device tree, enable it and use it t=
-o
-> determine the external clock frequency.
->
-> Signed-off-by: Tim Kryger <tim.kryger@linaro.org>
-> Reviewed-by: Markus Mayer <markus.mayer@linaro.org>
-> Reviewed-by: Matt Porter <matt.porter@linaro.org>
+On Thu, Dec 12, 2013 at 05:13:22PM +0000, Russell King - ARM Linux wrote:
+> On Thu, Dec 12, 2013 at 03:31:50PM +0100, Ludovic Desroches wrote:
+> > I'll investigate on atmel-mci driver side but if someone has also this
+> > issue or see what is wrong in the driver, please tell me all about it.
+> 
+> I'm not entirely sure what's causing this, but calling flush_dcache_page()
+> from an IRQ isn't the best idea, as one of its side effects will be to
+> unmask IRQs at the CPU.
+> 
 
-Acked-by: Daniel Lezcano <daniel.lezcano@linaro.org>
+Thans for pointing this point. Having a look to other mmc drivers, it
+seems flush_dcache_page() is also called from an IRQ. Not sure that
+deferring it is the way to go.
 
-> ---
->   drivers/clocksource/bcm_kona_timer.c | 14 +++++++++++---
->   1 file changed, 11 insertions(+), 3 deletions(-)
->
-> diff --git a/drivers/clocksource/bcm_kona_timer.c b/drivers/clocksour=
-ce/bcm_kona_timer.c
-> index 0d7d8c3..8a4ab36 100644
-> --- a/drivers/clocksource/bcm_kona_timer.c
-> +++ b/drivers/clocksource/bcm_kona_timer.c
-> @@ -17,6 +17,7 @@
->   #include <linux/jiffies.h>
->   #include <linux/clockchips.h>
->   #include <linux/types.h>
-> +#include <linux/clk.h>
->
->   #include <linux/io.h>
->   #include <asm/mach/time.h>
-> @@ -107,11 +108,18 @@ static const struct of_device_id bcm_timer_ids[=
-] __initconst =3D {
->   static void __init kona_timers_init(struct device_node *node)
->   {
->   	u32 freq;
-> +	struct clk *external_clk;
->
-> -	if (!of_property_read_u32(node, "clock-frequency", &freq))
-> +	external_clk =3D of_clk_get_by_name(node, NULL);
-> +
-> +	if (!IS_ERR(external_clk)) {
-> +		arch_timer_rate =3D clk_get_rate(external_clk);
-> +		clk_prepare_enable(external_clk);
-> +	} else if (!of_property_read_u32(node, "clock-frequency", &freq)) {
->   		arch_timer_rate =3D freq;
-> -	else
-> -		panic("clock-frequency not set in the .dts file");
-> +	} else {
-> +		panic("unable to determine clock-frequency");
-> +	}
->
->   	/* Setup IRQ numbers */
->   	timers.tmr_irq =3D irq_of_parse_and_map(node, 0);
->
+What should be the most proper solution?
 
+> BTW, the faulting function seems to have been removed in more recent
+> kernels.
 
---=20
-  <http://www.linaro.org/> Linaro.org =E2=94=82 Open source software fo=
-r ARM SoCs
+Same error with rc4 and linux-next.
 
-=46ollow Linaro:  <http://www.facebook.com/pages/Linaro> Facebook |
-<http://twitter.com/#!/linaroorg> Twitter |
-<http://www.linaro.org/linaro-blog/> Blog
-
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
