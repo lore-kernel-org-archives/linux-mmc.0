@@ -1,100 +1,273 @@
-From: Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
-Subject: Re: Re: [PATCH 1/5] ARM: sunxi: Add driver for SD/MMC
- hosts found on Allwinner sunxi SoCs
-Date: Mon, 16 Dec 2013 13:53:06 +0100
-Message-ID: <20131216125306.GK3037@lukather>
-References: <1387058295-20641-1-git-send-email-hdegoede@redhat.com>
- <1387058295-20641-2-git-send-email-hdegoede@redhat.com>
- <20131215134415.GE3651@lukather>
- <CAOMqctRspBPmNsyXye_gpfwGoZ=gMcCzEjM+hD3g+ZfQix7G6Q@mail.gmail.com>
- <20131216100551.GD3037@lukather>
- <CAOMqctTdasLxJki0xu4aq_sEgujDt3Jdu=BXy9WvQeji282_Rg@mail.gmail.com>
-Reply-To: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
-Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="+HmK7y6O+lKZIGkr"
-Return-path: <linux-sunxi+bncBD2ZNBF5VYJRBJ7QXOKQKGQEJ34RTMI-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <CAOMqctTdasLxJki0xu4aq_sEgujDt3Jdu=BXy9WvQeji282_Rg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Post: <http://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Help: <http://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Archive: <http://groups.google.com/group/linux-sunxi>
-Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
-List-Subscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Unsubscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-To: Michal Suchanek <hramrach-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: linux-sunxi <linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>, Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, David =?iso-8859-1?Q?Lanzend=F6rfer?= <david.lanzendoerfer-Z7Kmv9EsliU@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, devicetree <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+From: Zhangfei Gao <zhangfei.gao@linaro.org>
+Subject: [PATCH 2/3] mmc: dw_mmc: add dw_mmc-k3 for k3 platform
+Date: Mon, 16 Dec 2013 21:12:16 +0800
+Message-ID: <1387199536-7053-1-git-send-email-zhangfei.gao@linaro.org>
+References: <1386987174-1788-3-git-send-email-zhangfei.gao@linaro.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-pd0-f179.google.com ([209.85.192.179]:39311 "EHLO
+	mail-pd0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753823Ab3LPNMn (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 16 Dec 2013 08:12:43 -0500
+Received: by mail-pd0-f179.google.com with SMTP id r10so5336393pdi.38
+        for <linux-mmc@vger.kernel.org>; Mon, 16 Dec 2013 05:12:43 -0800 (PST)
+In-Reply-To: <1386987174-1788-3-git-send-email-zhangfei.gao@linaro.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>, Arnd Bergmann <arnd@arndb.de>, Mike Turquette <mturquette@linaro.org>, Rob Herring <robherring2@gmail.com>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, Kumar Gala <galak@codeaurora.org>, Haojian Zhuang <haojian.zhuang@linaro.org>
+Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, patches@linaro.org, devicetree@vger.kernel.org, Zhangfei Gao <zhangfei.gao@linaro.org>, Zhigang Wang <brooke.wangzhigang@huawei.com>
 
+Add dw_mmc-k3.c for k3v2, support sd/emmc
 
---+HmK7y6O+lKZIGkr
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+Signed-off-by: Zhangfei Gao <zhangfei.gao@linaro.org>
+Signed-off-by: Zhigang Wang <brooke.wangzhigang@huawei.com>
+---
+ .../devicetree/bindings/mmc/k3-dw-mshc.txt         |   60 +++++++++
+ drivers/mmc/host/Kconfig                           |   10 ++
+ drivers/mmc/host/Makefile                          |    1 +
+ drivers/mmc/host/dw_mmc-k3.c                       |  134 ++++++++++++++++++++
+ 4 files changed, 205 insertions(+)
+ create mode 100644 Documentation/devicetree/bindings/mmc/k3-dw-mshc.txt
+ create mode 100644 drivers/mmc/host/dw_mmc-k3.c
 
-On Mon, Dec 16, 2013 at 12:59:31PM +0100, Michal Suchanek wrote:
-> On 16 December 2013 11:05, Maxime Ripard
-> <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org> wrote:
-> > On Sun, Dec 15, 2013 at 11:01:17PM +0100, Michal Suchanek wrote:
-> >> On 15 December 2013 14:44, Maxime Ripard
-> >> <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org> wrote:
-> >> >> --- a/drivers/mmc/host/Kconfig
-> >> >> +++ b/drivers/mmc/host/Kconfig
-> >> >> @@ -665,3 +665,11 @@ config MMC_REALTEK_PCI
-> >> >>       help
-> >> >>         Say Y here to include driver code to support SD/MMC card in=
-terface
-> >> >>         of Realtek PCI-E card reader
-> >> >> +
-> >> >> +config MMC_SUNXI
-> >> >> +     tristate "Allwinner sunxi SD/MMC Host Controller support"
-> >> >> +     depends on ARCH_SUNXI
-> >> >> +     default y
-> >> >
-> >> > I'm not that fond of these "default y" patterns. It forces the driver
-> >> > down to every user of the multiplatform kernels. I'd suggest removing
-> >> > the default and adding the driver to the defconfigs we have.
-> >>
-> >> And why would you build support for sunxi without building support for
-> >> sunxi mmc?
-> >
-> > Because you can?
->=20
-> But does that need to be the default? And is that sane default?
->=20
-> >
-> > And where am I actually suggesting to do so?
->=20
-> Just a few lines above. You suggest it should not be built by default.
+diff --git a/Documentation/devicetree/bindings/mmc/k3-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/k3-dw-mshc.txt
+new file mode 100644
+index 000000000000..d7e2d7f159bb
+--- /dev/null
++++ b/Documentation/devicetree/bindings/mmc/k3-dw-mshc.txt
+@@ -0,0 +1,60 @@
++* Hisilicon specific extensions to the Synopsys Designware Mobile
++  Storage Host Controller
++
++Read synopsys-dw-mshc.txt for more details
++
++The Synopsys designware mobile storage host controller is used to interface
++a SoC with storage medium such as eMMC or SD/MMC cards. This file documents
++differences between the core Synopsys dw mshc controller properties described
++by synopsys-dw-mshc.txt and the properties used by the Hisilicon specific
++extensions to the Synopsys Designware Mobile Storage Host Controller.
++
++Required Properties:
++
++* compatible: should be one of the following.
++  - "hisilicon,hi4511-dw-mshc": for controllers with hi4511 specific extentions.
++
++* clock-freq-table: should be the frequency (in Hz) array of the ciu clock
++	in each	supported mode.
++	0. CIU clock rate in Hz for DS mode
++	1. CIU clock rate in Hz for MMC HS mode
++	2. CIU clock rate in Hz for SD HS mode
++	3. CIU clock rate in Hz for SDR12 mode
++	4. CIU clock rate in Hz for SDR25 mode
++	5. CIU clock rate in Hz for SDR50 mode
++	6. CIU clock rate in Hz for SDR104 mode
++	7. CIU clock rate in Hz for DDR50 mode
++	8. CIU clock rate in Hz for HS200 mode
++
++Example:
++
++	/* for Hi3620 */
++
++	/* SoC portion */
++	dwmmc_0: dwmmc0@fcd03000 {
++		compatible = "hisilicon,hi4511-dw-mshc";
++		reg = <0xfcd03000 0x1000>;
++		interrupts = <0 16 4>;
++		#address-cells = <1>;
++		#size-cells = <0>;
++		clocks = <&mmc_clock HI3620_SD_CIUCLK>, <&clock HI3620_DDRC_PER_CLK>;
++		clock-names = "ciu", "biu";
++		clock-freq-table =
++		<25000000 0 50000000 25000000 50000000 100000000 0 50000000>;
++	};
++
++	/* Board portion */
++	dwmmc0@fcd03000 {
++		num-slots = <1>;
++		vmmc-supply = <&ldo12>;
++		fifo-depth = <0x100>;
++		supports-highspeed;
++		pinctrl-names = "default";
++		pinctrl-0 = <&sd_pmx_pins &sd_cfg_func1 &sd_cfg_func2>;
++		slot@0 {
++			reg = <0>;
++			bus-width = <4>;
++			disable-wp;
++			cd-gpios = <&gpio10 3 0>;
++		};
++	};
+diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+index 7fc5099e44b2..45aaa2de0f58 100644
+--- a/drivers/mmc/host/Kconfig
++++ b/drivers/mmc/host/Kconfig
+@@ -575,6 +575,16 @@ config MMC_DW_SOCFPGA
+ 	  This selects support for Altera SoCFPGA specific extensions to the
+ 	  Synopsys DesignWare Memory Card Interface driver.
+ 
++config MMC_DW_K3
++	tristate "K3 specific extensions for Synopsys DW Memory Card Interface"
++	depends on MMC_DW
++	select MMC_DW_PLTFM
++	select MMC_DW_IDMAC
++	help
++	  This selects support for Hisilicon K3 SoC specific extensions to the
++	  Synopsys DesignWare Memory Card Interface driver. Select this option
++	  for platforms based on Hisilicon K3 SoC's.
++
+ config MMC_DW_PCI
+ 	tristate "Synopsys Designware MCI support on PCI bus"
+ 	depends on MMC_DW && PCI
+diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
+index c41d0c364509..64f5f8d35839 100644
+--- a/drivers/mmc/host/Makefile
++++ b/drivers/mmc/host/Makefile
+@@ -43,6 +43,7 @@ obj-$(CONFIG_MMC_DW)		+= dw_mmc.o
+ obj-$(CONFIG_MMC_DW_PLTFM)	+= dw_mmc-pltfm.o
+ obj-$(CONFIG_MMC_DW_EXYNOS)	+= dw_mmc-exynos.o
+ obj-$(CONFIG_MMC_DW_SOCFPGA)	+= dw_mmc-socfpga.o
++obj-$(CONFIG_MMC_DW_K3)		+= dw_mmc-k3.o
+ obj-$(CONFIG_MMC_DW_PCI)	+= dw_mmc-pci.o
+ obj-$(CONFIG_MMC_SH_MMCIF)	+= sh_mmcif.o
+ obj-$(CONFIG_MMC_JZ4740)	+= jz4740_mmc.o
+diff --git a/drivers/mmc/host/dw_mmc-k3.c b/drivers/mmc/host/dw_mmc-k3.c
+new file mode 100644
+index 000000000000..e3eea2883ae7
+--- /dev/null
++++ b/drivers/mmc/host/dw_mmc-k3.c
+@@ -0,0 +1,134 @@
++/*
++ * Copyright (c) 2013 Linaro Ltd.
++ * Copyright (c) 2013 Hisilicon Limited.
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation; either version 2 of the License, or
++ * (at your option) any later version.
++ */
++
++#include <linux/module.h>
++#include <linux/platform_device.h>
++#include <linux/clk.h>
++#include <linux/mmc/host.h>
++#include <linux/mmc/dw_mmc.h>
++#include <linux/of_address.h>
++
++#include "dw_mmc.h"
++#include "dw_mmc-pltfm.h"
++
++#define MAX_NUMS	10
++struct dw_mci_k3_priv_data {
++	u32	clk_table[MAX_NUMS];
++};
++
++static void dw_mci_k3_set_ios(struct dw_mci *host, struct mmc_ios *ios)
++{
++	struct dw_mci_k3_priv_data *priv = host->priv;
++	u32 rate = priv->clk_table[ios->timing];
++	int ret;
++
++	ret = clk_set_rate(host->ciu_clk, rate);
++	if (ret)
++		dev_warn(host->dev, "failed to set clock rate %uHz\n", rate);
++
++	host->bus_hz = clk_get_rate(host->ciu_clk);
++}
++
++static int dw_mci_k3_parse_dt(struct dw_mci *host)
++{
++	struct dw_mci_k3_priv_data *priv;
++	struct device_node *node = host->dev->of_node;
++	struct property *prop;
++	const __be32 *cur;
++	u32 val, num = 0;
++
++	priv = devm_kzalloc(host->dev, sizeof(*priv), GFP_KERNEL);
++	if (!priv) {
++		dev_err(host->dev, "mem alloc failed for private data\n");
++		return -ENOMEM;
++	}
++	host->priv = priv;
++
++	of_property_for_each_u32(node, "clock-freq-table", prop, cur, val) {
++		if (num >= MAX_NUMS)
++			break;
++		priv->clk_table[num++] = val;
++	}
++	return 0;
++}
++
++static unsigned long k3_dwmmc_caps[4] = {
++	MMC_CAP_4_BIT_DATA | MMC_CAP_SD_HIGHSPEED,
++	MMC_CAP_8_BIT_DATA | MMC_CAP_MMC_HIGHSPEED,
++	0,
++	0,
++};
++
++static const struct dw_mci_drv_data k3_drv_data = {
++	.caps			= k3_dwmmc_caps,
++	.set_ios		= dw_mci_k3_set_ios,
++	.parse_dt		= dw_mci_k3_parse_dt,
++};
++
++static const struct of_device_id dw_mci_k3_match[] = {
++	{ .compatible = "hisilicon,hi4511-dw-mshc", .data = &k3_drv_data, },
++	{},
++};
++MODULE_DEVICE_TABLE(of, dw_mci_k3_match);
++
++static int dw_mci_k3_probe(struct platform_device *pdev)
++{
++	const struct dw_mci_drv_data *drv_data;
++	const struct of_device_id *match;
++
++	match = of_match_node(dw_mci_k3_match, pdev->dev.of_node);
++	drv_data = match->data;
++
++	return dw_mci_pltfm_register(pdev, drv_data);
++}
++
++static int dw_mci_k3_suspend(struct device *dev)
++{
++	struct dw_mci *host = dev_get_drvdata(dev);
++	int ret = 0;
++
++	ret = dw_mci_suspend(host);
++	if (!ret)
++		clk_disable_unprepare(host->ciu_clk);
++
++	return ret;
++}
++
++static int dw_mci_k3_resume(struct device *dev)
++{
++	struct dw_mci *host = dev_get_drvdata(dev);
++	int ret = 0;
++
++	ret = clk_prepare_enable(host->ciu_clk);
++	if (ret) {
++		dev_err(host->dev, "failed to enable ciu clock\n");
++		return ret;
++	}
++
++	return dw_mci_resume(host);
++}
++
++SIMPLE_DEV_PM_OPS(dw_mci_k3_pmops, dw_mci_k3_suspend, dw_mci_k3_resume);
++
++static struct platform_driver dw_mci_k3_pltfm_driver = {
++	.probe		= dw_mci_k3_probe,
++	.remove		= dw_mci_pltfm_remove,
++	.driver		= {
++		.name		= "dwmmc_k3",
++		.of_match_table	= dw_mci_k3_match,
++		.pm		= &dw_mci_k3_pmops,
++	},
++};
++
++module_platform_driver(dw_mci_k3_pltfm_driver);
++
++MODULE_DESCRIPTION("K3 Specific DW-MSHC Driver Extension");
++MODULE_LICENSE("GPL v2");
++MODULE_ALIAS("platform:dwmmc-k3");
+-- 
+1.7.9.5
 
-No, this is not what I'm saying. I'm saying that this default should
-be enforced at the defconfig level, and not at the Kconfig level.
-
---=20
-Maxime Ripard, Free Electrons
-Embedded Linux, Kernel and Android engineering
-http://free-electrons.com
-
---+HmK7y6O+lKZIGkr
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.14 (GNU/Linux)
-
-iQIcBAEBAgAGBQJSrveyAAoJEBx+YmzsjxAgaRwQAKKM/pzblJzmEEihsRBm918W
-X+Ntbatzaeox1JWsnYChf7YM/rgpZpeFMSe7nFQPmSSCCT0fMcarojGPEWdnVU/R
-bejwaagYRAGWXa1B2dH7asqomlCOXdVs6GcgjceH55aNdKJ0lPT/V4ez8lbE0Drd
-YggaJucXKjwOCQn2Yi6FHrm8KxjhUBfuigpaZjzBIyHV4jslkb23+ANiXdkCL5IJ
-Q3MrLGNGvPQOzRwx6fSoTpXTrZleA3CJqpBO+eueJBJP2CNwtIN1aprTFeIl1MAw
-8ibrNo03Tm52n7bmM5HVdEVjl5DYAVCWuRqPb0uHmrNha64zJjuBqR4uNUhNh/fV
-8Tlx5hJfRtil+ox7LPtgC81CiVArbu59PuiMRemX9fYAnPrxPHI2GGsmUnCl4oz/
-NdxB0Tcg05EAiFJ4VwjTbhY9fHrg9rDrqddvEpaL5GYjzFEeGtslj6Y8/GPEtKjp
-BzVchPsZN0kyZpgjGrtYUVl8DHkAMTsfuXHailR3I+9G+QYOx0vGXXaVmGaYt2dH
-MWvrH937n8uTJgl9mWfI6OsZ3171RoxDsaq9p2zrpkX2xXs/OMz7jWImaU3+cV4W
-QjhOp9qS9YESy2ZNGLs+LMIPQ+buq3Ac0SWu/unW1m+munD4yTqngFi/lXV7tp6p
-StdhQzQJCuK0RzAvUL1/
-=7Hvp
------END PGP SIGNATURE-----
-
---+HmK7y6O+lKZIGkr--
