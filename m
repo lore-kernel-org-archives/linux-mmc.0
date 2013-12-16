@@ -1,121 +1,87 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [PATCH 2/2] mmc: core: Remove unnecessary validations for bus_ops callbacks
-Date: Mon, 16 Dec 2013 13:31:48 +0100
-Message-ID: <1387197108-24040-2-git-send-email-ulf.hansson@linaro.org>
-References: <1387197108-24040-1-git-send-email-ulf.hansson@linaro.org>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bk0-f48.google.com ([209.85.214.48]:40490 "EHLO
-	mail-bk0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753345Ab3LPMb6 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 16 Dec 2013 07:31:58 -0500
-Received: by mail-bk0-f48.google.com with SMTP id r7so2281947bkg.21
-        for <linux-mmc@vger.kernel.org>; Mon, 16 Dec 2013 04:31:57 -0800 (PST)
-In-Reply-To: <1387197108-24040-1-git-send-email-ulf.hansson@linaro.org>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: Re: [PATCH 2/5] ARM: dts: sun4i: Add support for mmc
+Date: Mon, 16 Dec 2013 13:32:12 +0100
+Message-ID: <52AEF2CC.7010901@redhat.com>
+References: <1387058295-20641-1-git-send-email-hdegoede@redhat.com> <20131215135854.GF3651@lukather> <52ADBD41.4050104@redhat.com> <11015171.YHkHMOrD9M@pagira.o2s.ch>
+Reply-To: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: quoted-printable
+Return-path: <linux-sunxi+bncBDL4X2GMZUKRBUPFXOKQKGQEJGEQBCI-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+In-Reply-To: <11015171.YHkHMOrD9M-pgFh0Jf6HD9Xzn/AsuzBOg@public.gmane.org>
+List-Post: <http://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Help: <http://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Archive: <http://groups.google.com/group/linux-sunxi>
+Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+List-Subscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Unsubscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+To: =?ISO-8859-1?Q?David_Lanzend=F6rfer?= <david.lanzendoerfer-Z7Kmv9EsliU@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+Cc: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>
 
-Due to the removal of the Kconfig option MMC_UNSAFE_RESUME, several
-validations of a present bus_ops callback became redundant. Let's
-remove these.
+Hi,
 
-Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
----
- drivers/mmc/core/bus.c  |   12 ++----------
- drivers/mmc/core/core.c |   13 +++++--------
- 2 files changed, 7 insertions(+), 18 deletions(-)
+On 12/16/2013 10:04 AM, David Lanzend=F6rfer wrote:
 
-diff --git a/drivers/mmc/core/bus.c b/drivers/mmc/core/bus.c
-index 64145a3..8246448 100644
---- a/drivers/mmc/core/bus.c
-+++ b/drivers/mmc/core/bus.c
-@@ -185,24 +185,16 @@ static int mmc_runtime_suspend(struct device *dev)
- {
- 	struct mmc_card *card = mmc_dev_to_card(dev);
- 	struct mmc_host *host = card->host;
--	int ret = 0;
- 
--	if (host->bus_ops->runtime_suspend)
--		ret = host->bus_ops->runtime_suspend(host);
--
--	return ret;
-+	return host->bus_ops->runtime_suspend(host);
- }
- 
- static int mmc_runtime_resume(struct device *dev)
- {
- 	struct mmc_card *card = mmc_dev_to_card(dev);
- 	struct mmc_host *host = card->host;
--	int ret = 0;
- 
--	if (host->bus_ops->runtime_resume)
--		ret = host->bus_ops->runtime_resume(host);
--
--	return ret;
-+	return host->bus_ops->runtime_resume(host);
- }
- 
- static int mmc_runtime_idle(struct device *dev)
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 10856ec..22427c6 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -2231,9 +2231,6 @@ static int mmc_do_hw_reset(struct mmc_host *host, int check)
- {
- 	struct mmc_card *card = host->card;
- 
--	if (!host->bus_ops->power_restore)
--		return -EOPNOTSUPP;
--
- 	if (!(host->caps & MMC_CAP_HW_RESET) || !host->ops->hw_reset)
- 		return -EOPNOTSUPP;
- 
-@@ -2335,7 +2332,7 @@ int _mmc_detect_card_removed(struct mmc_host *host)
- {
- 	int ret;
- 
--	if ((host->caps & MMC_CAP_NONREMOVABLE) || !host->bus_ops->alive)
-+	if (host->caps & MMC_CAP_NONREMOVABLE)
- 		return 0;
- 
- 	if (!host->card || mmc_card_removed(host->card))
-@@ -2418,7 +2415,7 @@ void mmc_rescan(struct work_struct *work)
- 	 * if there is a _removable_ card registered, check whether it is
- 	 * still present
- 	 */
--	if (host->bus_ops && host->bus_ops->detect && !host->bus_dead
-+	if (host->bus_ops && !host->bus_dead
- 	    && !(host->caps & MMC_CAP_NONREMOVABLE))
- 		host->bus_ops->detect(host);
- 
-@@ -2520,7 +2517,7 @@ int mmc_power_save_host(struct mmc_host *host)
- 
- 	mmc_bus_get(host);
- 
--	if (!host->bus_ops || host->bus_dead || !host->bus_ops->power_restore) {
-+	if (!host->bus_ops || host->bus_dead) {
- 		mmc_bus_put(host);
- 		return -EINVAL;
- 	}
-@@ -2546,7 +2543,7 @@ int mmc_power_restore_host(struct mmc_host *host)
- 
- 	mmc_bus_get(host);
- 
--	if (!host->bus_ops || host->bus_dead || !host->bus_ops->power_restore) {
-+	if (!host->bus_ops || host->bus_dead) {
- 		mmc_bus_put(host);
- 		return -EINVAL;
- 	}
-@@ -2651,7 +2648,7 @@ int mmc_pm_notify(struct notifier_block *notify_block,
- 		/* Validate prerequisites for suspend */
- 		if (host->bus_ops->pre_suspend)
- 			err = host->bus_ops->pre_suspend(host);
--		if (!err && host->bus_ops->suspend)
-+		if (!err)
- 			break;
- 
- 		/* Calling bus_ops->remove() with a claimed host can deadlock */
--- 
-1.7.9.5
+<snip>
 
+>> Yes and no. The pullups are enabled by uboot and the allwinner
+>> sources, most of my testing has been done without them, which
+>> seems to work fine. I've enabled them to be consisten with the
+>> allwinner sources and u-boot.
+> Ok
+>
+>> As for drive =3D <3>, we need drive =3D <2> for normal modes,
+>> and drive =3D <3> for ddr mode. I simply picked <3> to keep
+>> things KISS. It should not matter much in power usage, as
+>> it will only make the flanks of the signal more steep. Once the
+>> desired output level is reached the current will drop off. It will
+>> use more current when changing the level, but for half the time,
+>> so the effective power usage (current * time) is the same.
+> In this case lets implement a switch which enables the pull ups for DDR
+> mode and lets disable it by default in turn.
+
+I assume you mean enable drive =3D <3> mode and use drive =3D <2> mode
+by default? Changing drive level at runtime, rather the at dts configure
+time seems to be non trivial.
+
+Also see Maxime's mail further down in this thread where he says he
+is fine with keeping drive level at <3> but suggest disabling
+the pull-ups by default. I'm fine with disabling the pull-ups by
+default, so lets disable the pull-ups and keep the drive level at 3.
+
+> This way we can make sure that we don't have doubled pull up,
+> since this could actually mess up some circuitry.
+>
+>>> Ideally, I'd like this patch to be splitted into three:
+>>>     - One that adds the MMC controller nodes to the DTSI
+>>>     - One that adds the muxing options you need to the pinctrl node
+>>>     - One that enables the controller on the boards
+>> Sounds like a good job for David. Note I've a lot more boards for
+>> which I would like to add mmc support or dts files in general
+>> (will do so as time permits).
+> Ok. I will work on it this evening.
+>
+>> For those boards which already have a dts I'll send mmc adding dts
+>> patches to David for now so he can add the changes to the patch-set.
+> Ok. I will create another branch and will incorporate your DTS files.
+>
+>> How do you want to deal with new boards ? Send the addition of the
+>> base board to you (and CC David as he will need them in his tree too),
+>> and then send a patch to add mmc to the dts to David ?
+> Sounds good to me...
+
+In Maxime's reply I was talking about above he suggests to simply
+send complete dts files with the new mmc node present to him, so I'll do
+that instead if / when I add dts files for new boards.
+
+Regards,
+
+Hans
+
+--=20
+You received this message because you are subscribed to the Google Groups "=
+linux-sunxi" group.
+To unsubscribe from this group and stop receiving emails from it, send an e=
+mail to linux-sunxi+unsubscribe-/JYPxA39Uh5TLH3MbocFF+G/Ez6ZCGd0@public.gmane.org
+For more options, visit https://groups.google.com/groups/opt_out.
