@@ -1,142 +1,45 @@
-From: <dinguyen@altera.com>
-Subject: [RESEND LIST PATCHv7 2/4] dts: socfpga: Add support for SD/MMC on the SOCFPGA platform
-Date: Mon, 16 Dec 2013 11:04:34 -0600
-Message-ID: <1387213476-22122-3-git-send-email-dinguyen@altera.com>
-References: <1387213476-22122-1-git-send-email-dinguyen@altera.com>
-Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-db9lp0251.outbound.messaging.microsoft.com ([213.199.154.251]:30616
-	"EHLO db9outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1754594Ab3LPRGf (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 16 Dec 2013 12:06:35 -0500
-In-Reply-To: <1387213476-22122-1-git-send-email-dinguyen@altera.com>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>
+Subject: [PATCH REPOST2] mmc: tegra: add support for Tegra124
+Date: Mon, 16 Dec 2013 10:39:23 -0700
+Message-ID: <1387215563-20425-1-git-send-email-swarren@wwwdotorg.org>
+Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>
+Cc: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Stephen Warren <swarren-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: dinh.linux@gmail.com, arnd@arndb.de, cjb@laptop.org, jh80.chung@samsung.com, tgih.jun@samsung.com, heiko@sntech.de, dianders@chromium.org, alim.akhtar@samsung.com, bzhao@marvell.com, mturquette@linaro.org
-Cc: zhangfei.gao@linaro.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, devicetree@vger.kernel.org, Dinh Nguyen <dinguyen@altera.com>
 
-From: Dinh Nguyen <dinguyen@altera.com>
+From: Stephen Warren <swarren-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
 
-Use the "snps,dw-mshc" binding to enable the dw_mmc driver.
-Add the "syscon" binding to the "altr,sys-mgr" node. The clock
-driver can use the syscon driver to toggle the register for the SD/MMC
-clock phase shift settings.
+Tegra124's MMC controller is very similar to earlier SoC generations,
+and can be supported by the same driver.
 
-Signed-off-by: Dinh Nguyen <dinguyen@altera.com>
+However, there are some non-backwards-compatible HW differences, and
+hence a new DT compatible value must be used to describe the HW. This
+patch updates the driver to support that new compatible value.
+
+That said, the HW differences are only relevant when enabling certain
+high-performance transfer modes. Since the driver is currently very
+simple and doesn't enable those modes, we don't actually need to address
+any of these HW differences in the code yet, hence the simple nature of
+this patch.
+
+Signed-off-by: Stephen Warren <swarren-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
+Reviewed-by: Thierry Reding <treding-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
 ---
-v7: Use the standard "snps,dw-mshc" binding. Remove "altr,socfpga-sdmmc-sdr-clk".
-v6: Add documentation for "altr,socfpga-sdmmc-sdr-clk". Add "syscon" to the
-sysmgr binding.
-v5: Use the "snps,dw-mshc" binding
-v4: Re-use "rockchip,rk2928-dw-mshc" binding
-v3: none
-v2: none
----
- arch/arm/boot/dts/socfpga.dtsi          |   13 ++++++++++++-
- arch/arm/boot/dts/socfpga_arria5.dtsi   |   11 +++++++++++
- arch/arm/boot/dts/socfpga_cyclone5.dtsi |   11 +++++++++++
- arch/arm/boot/dts/socfpga_vt.dts        |   11 +++++++++++
- 4 files changed, 45 insertions(+), 1 deletion(-)
+ drivers/mmc/host/sdhci-tegra.c | 1 +
+ 1 file changed, 1 insertion(+)
 
-diff --git a/arch/arm/boot/dts/socfpga.dtsi b/arch/arm/boot/dts/socfpga.dtsi
-index 616d9ee..3b1c0fc 100644
---- a/arch/arm/boot/dts/socfpga.dtsi
-+++ b/arch/arm/boot/dts/socfpga.dtsi
-@@ -470,6 +470,17 @@
- 			cache-level = <2>;
- 		};
+diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
+index 5b7b2eba8a54..a835898a68dd 100644
+--- a/drivers/mmc/host/sdhci-tegra.c
++++ b/drivers/mmc/host/sdhci-tegra.c
+@@ -198,6 +198,7 @@ static struct sdhci_tegra_soc_data soc_data_tegra114 = {
+ };
  
-+		mmc: dwmmc0@ff704000 {
-+			compatible = "snps,dw-mshc";
-+			reg = <0xff704000 0x1000>;
-+			interrupts = <0 139 4>;
-+			fifo-depth = <0x400>;
-+			#address-cells = <1>;
-+			#size-cells = <0>;
-+			clocks = <&l4_mp_clk>, <&sdmmc_clk>;
-+			clock-names = "biu", "ciu";
-+		};
-+
- 		/* Local timer */
- 		timer@fffec600 {
- 			compatible = "arm,cortex-a9-twd-timer";
-@@ -524,7 +535,7 @@
- 		};
- 
- 		sysmgr@ffd08000 {
--				compatible = "altr,sys-mgr";
-+				compatible = "altr,sys-mgr", "syscon";
- 				reg = <0xffd08000 0x4000>;
- 			};
- 	};
-diff --git a/arch/arm/boot/dts/socfpga_arria5.dtsi b/arch/arm/boot/dts/socfpga_arria5.dtsi
-index a85b404..6c87b70 100644
---- a/arch/arm/boot/dts/socfpga_arria5.dtsi
-+++ b/arch/arm/boot/dts/socfpga_arria5.dtsi
-@@ -27,6 +27,17 @@
- 			};
- 		};
- 
-+		dwmmc0@ff704000 {
-+			num-slots = <1>;
-+			supports-highspeed;
-+			broken-cd;
-+
-+			slot@0 {
-+				reg = <0>;
-+				bus-width = <4>;
-+			};
-+		};
-+
- 		serial0@ffc02000 {
- 			clock-frequency = <100000000>;
- 		};
-diff --git a/arch/arm/boot/dts/socfpga_cyclone5.dtsi b/arch/arm/boot/dts/socfpga_cyclone5.dtsi
-index a8716f6..ca41b0e 100644
---- a/arch/arm/boot/dts/socfpga_cyclone5.dtsi
-+++ b/arch/arm/boot/dts/socfpga_cyclone5.dtsi
-@@ -28,6 +28,17 @@
- 			};
- 		};
- 
-+		dwmmc0@ff704000 {
-+			num-slots = <1>;
-+			supports-highspeed;
-+			broken-cd;
-+
-+			slot@0 {
-+				reg = <0>;
-+				bus-width = <4>;
-+			};
-+		};
-+
- 		ethernet@ff702000 {
- 			phy-mode = "rgmii";
- 			phy-addr = <0xffffffff>; /* probe for phy addr */
-diff --git a/arch/arm/boot/dts/socfpga_vt.dts b/arch/arm/boot/dts/socfpga_vt.dts
-index d1ec0ca..222313f 100644
---- a/arch/arm/boot/dts/socfpga_vt.dts
-+++ b/arch/arm/boot/dts/socfpga_vt.dts
-@@ -41,6 +41,17 @@
- 			};
- 		};
- 
-+		dwmmc0@ff704000 {
-+			num-slots = <1>;
-+			supports-highspeed;
-+			broken-cd;
-+
-+			slot@0 {
-+				reg = <0>;
-+				bus-width = <4>;
-+			};
-+		};
-+
- 		ethernet@ff700000 {
- 			phy-mode = "gmii";
- 			status = "okay";
+ static const struct of_device_id sdhci_tegra_dt_match[] = {
++	{ .compatible = "nvidia,tegra124-sdhci", .data = &soc_data_tegra114 },
+ 	{ .compatible = "nvidia,tegra114-sdhci", .data = &soc_data_tegra114 },
+ 	{ .compatible = "nvidia,tegra30-sdhci", .data = &soc_data_tegra30 },
+ 	{ .compatible = "nvidia,tegra20-sdhci", .data = &soc_data_tegra20 },
 -- 
-1.7.9.5
-
-
+1.8.1.5
