@@ -1,132 +1,199 @@
 From: Seungwon Jeon <tgih.jun@samsung.com>
-Subject: RE: [PATCHv6 1/5] mmc: dw_mmc: Add support to set the SDR and DDR
- timing through clock framework
-Date: Mon, 16 Dec 2013 13:20:20 +0900
-Message-ID: <000101cefa16$21c7a680$6556f380$%jun@samsung.com>
-References: <1386880245-10192-1-git-send-email-dinguyen@altera.com>
- <1386880245-10192-2-git-send-email-dinguyen@altera.com>
+Subject: RE: [PATCHv3 1/3] mmc: dw_mmc: Enable the hold reg for certain speed
+ modes
+Date: Mon, 16 Dec 2013 13:23:53 +0900
+Message-ID: <000201cefa16$a0e7bf90$e2b73eb0$%jun@samsung.com>
+References: <1386564668-24738-1-git-send-email-dinguyen@altera.com>
+ <1386564668-24738-2-git-send-email-dinguyen@altera.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ks_c_5601-1987
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout2.samsung.com ([203.254.224.25]:48974 "EHLO
+Received: from mailout2.samsung.com ([203.254.224.25]:49627 "EHLO
 	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752260Ab3LPEUY (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 15 Dec 2013 23:20:24 -0500
-In-reply-to: <1386880245-10192-2-git-send-email-dinguyen@altera.com>
+	with ESMTP id S1752179Ab3LPEYN (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 15 Dec 2013 23:24:13 -0500
+Received: from epcpsbgr5.samsung.com
+ (u145.gpu120.samsung.co.kr [203.254.230.145])
+ by mailout2.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+ (7.0.4.24.0) 64bit (built Nov 17 2011))
+ with ESMTP id <0MXV00EIATJU9WE0@mailout2.samsung.com> for
+ linux-mmc@vger.kernel.org; Mon, 16 Dec 2013 13:23:54 +0900 (KST)
+In-reply-to: <1386564668-24738-2-git-send-email-dinguyen@altera.com>
 Content-language: ko
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: dinguyen@altera.com, dinh.linux@gmail.com, arnd@arndb.de, cjb@laptop.org, jh80.chung@samsung.com, heiko@sntech.de, dianders@chromium.org, alim.akhtar@samsung.com, bzhao@marvell.com, rob.herring@calxeda.com, pawel.moll@arm.com, mark.rutland@arm.com, ian.campbell@citrix.com, mturquette@linaro.org
-Cc: zhangfei.gao@linaro.org, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+To: dinguyen@altera.com, dinh.linux@gmail.com, arnd@arndb.de, cjb@laptop.org, jh80.chung@samsung.com, heiko@sntech.de, dianders@chromium.org, alim.akhtar@samsung.com, bzhao@marvell.com
+Cc: linux-mmc@vger.kernel.org
 
-On Friday, December 13, 2013, Dinh Nguyen wrote:
+On Mon, December 09, 2013, Dinh Nguyen wrote:
 > From: Dinh Nguyen <dinguyen@altera.com>
 > 
-> All implementations of the Synopsys DW SD/MMC IP have settings to control
-> the phase shift of the CIU clk. These phase shift settings are necessary for
-> the SD/MMC to correctly clock the card. All variants of the dw_mmc will need
-> these settings, but how they are implemented can vastly vary.
+> This patch will enable the SDMMC_CMD_USE_HOLD_REG bit when the slot is
+> operating all timing modes, except for SDR50, DDR50, SDR104, and MMC_HS200.
 > 
-> This patch enables the setting for the SDR and/or DDR settings through the
-> common clock framework.
+> According to the Synopsys databook :"To meet the relatively high Input Hold
+> Time requirement for SDR12, SDR25, and other MMC speed modes, you should
+> program bit[29]use_hold_Reg of the CMD register to 1'b1;"..."However, for
+> the higher speed modes of SDR104, SDR50 and DDR50, you can meet the much
+> smaller Input Hold Time requirement of 0.8ns by bypassing the Hold Register
+> (Path A in Figure 10-8, programming CMD.use_hold_reg = 1'b0) and then adding
+> delay elements on the output path as indicated.
 > 
-> Depends on the patch "mmc: dw_mmc: Enable the hold reg for certain speed modes",
-> that is already reading the "samsung,dw-mshc-sdr-timing" and
-> "samsung,dw-mshc-ddr-timing" bindings, this patch saves those values into a
-> u32 bitmask that can be passed to the clock framework to use.
+> Also, "Never set CMD.use_hold_reg = 1 and cclk_in_drv phase shift to 0 at the
+> same time. This would add an extra one-cycle delay on the output path, resulting
+> in incorrect behavior."
+> 
+> This patch also checks the IHR(Implement Hold Register) in the HCON register.
+> 
+> This information is taking from the v2.50a of the Synopsys Designware Cores
+> Mobile Storage Host Databook.
 
-I didn't understand this patch.
-As you mentioned, clock implementation can be different each SOC.
-And what is the difference with existing ciu clock?
+If cclk_in_drv has non-zero, hold_reg_bit should be 1'b1 for SDR50, DDR50, SDR104, and MMC_HS200 mode.
+Can you check it?
+
+And samsung,dw-mshc-sdr(ddr)-timing property is still specific for Exynos.
+It will be modified with adding new cell element soon.
+
+Thanks,
+Seungwon Jeon
 
 > 
 > Signed-off-by: Dinh Nguyen <dinguyen@altera.com>
+> Acked-by: Heiko Stuebner <heiko@sntech.de>
+> Tested-by: Heiko Stuebner <heiko@sntech.de>
 > ---
-> v6: Add this patch
-> v5: none
-> v4: none
-> v3: none
-> v2: none
+> v3: Read the IHR(Implement Hold Register) in the HCON
+> v2: Add check for cclk_in_drv phase shift in conjunction with use_hold_reg.
 > ---
->  drivers/mmc/host/dw_mmc.c  |   23 +++++++++++++++++++++++
->  include/linux/mmc/dw_mmc.h |    6 ++++++
->  2 files changed, 29 insertions(+)
+>  drivers/mmc/host/dw_mmc.c  |   51 ++++++++++++++++++++++++++++++++++++++++++++
+>  drivers/mmc/host/dw_mmc.h  |    4 ++++
+>  include/linux/mmc/dw_mmc.h |    3 +++
+>  3 files changed, 58 insertions(+)
 > 
 > diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> index 480dafe..1fb5cff 100644
+> index 4bce0de..480dafe 100644
 > --- a/drivers/mmc/host/dw_mmc.c
 > +++ b/drivers/mmc/host/dw_mmc.c
-> @@ -2431,6 +2431,8 @@ static struct dw_mci_board *dw_mci_parse_dt(struct dw_mci *host)
->  	if ((sdr_timing[1] == 0) || (ddr_timing[1] == 0))
->  		pdata->cclk_in_drv = 0;
+> @@ -279,6 +279,9 @@ static u32 dw_mci_prepare_command(struct mmc_host *mmc, struct mmc_command *cmd)
+>  			cmdr |= SDMMC_CMD_DAT_WR;
+>  	}
 > 
-> +	pdata->sdr_timing = (sdr_timing[1] | (sdr_timing[0] << 4));
-> +	pdata->ddr_timing = (ddr_timing[1] | (ddr_timing[0] << 4));
-Can you explain what it is for?
-
-Thanks,
-Seungwon
-
+> +	if (slot->host->use_hold_reg)
+> +		cmdr |= SDMMC_CMD_USE_HOLD_REG;
+> +
+>  	if (drv_data && drv_data->prepare_command)
+>  		drv_data->prepare_command(slot->host, &cmdr);
+> 
+> @@ -969,6 +972,24 @@ static void dw_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+>  	mci_writel(slot->host, UHS_REG, regs);
+>  	slot->host->timing = ios->timing;
+> 
+> +	/* Per Synopsys spec, use_hold_reg should be set for all modes except for
+> +	 * high-speed SDR50, DDR50, SDR104, and MMC_HS200. However, use_hold_reg
+> +	 * should be cleared if the cclk_in_drv is 0.
+> +	 */
+> +	switch (slot->host->timing) {
+> +	case MMC_TIMING_UHS_SDR50:
+> +	case MMC_TIMING_UHS_SDR104:
+> +	case MMC_TIMING_UHS_DDR50:
+> +	case MMC_TIMING_MMC_HS200:
+> +		slot->host->use_hold_reg = 0;
+> +		break;
+> +	default:
+> +		slot->host->use_hold_reg = 1;
+> +	}
+> +
+> +	if (slot->host->can_use_hold_reg == 0)
+> +		slot->host->use_hold_reg = 0;
+> +
+>  	/*
+>  	 * Use mirror of ios->clock to prevent race with mmc
+>  	 * core ios update when finding the minimum.
+> @@ -2339,6 +2360,8 @@ static struct dw_mci_board *dw_mci_parse_dt(struct dw_mci *host)
+>  	const struct dw_mci_drv_data *drv_data = host->drv_data;
+>  	int idx, ret;
+>  	u32 clock_frequency;
+> +	int sdr_timing[2];
+> +	int ddr_timing[2];
+> 
+>  	pdata = devm_kzalloc(dev, sizeof(*pdata), GFP_KERNEL);
+>  	if (!pdata) {
+> @@ -2389,6 +2412,25 @@ static struct dw_mci_board *dw_mci_parse_dt(struct dw_mci *host)
+>  	if (of_find_property(np, "caps2-mmc-hs200-1_2v", NULL))
+>  		pdata->caps2 |= MMC_CAP2_HS200_1_2V_SDR;
+> 
+> +	/* Check for the "samsung,dw-mshc-sdr-timing" and the
+> +	 * "samsung,dw-mshc-ddr-timing" bindings as this will tell us if we
+> +	 * can safely set the SDMMC_CMD_USE_HOLD_REG bit. The second paramater
+> +	 * in these 2 bindings is the value of the cclk_in_drv. If cclk_in_drv
+> +	 * is 0, we cannot set the SDMMC_CMD_USE_HOLD_REG bit. The default
+> +	 * behavior will be to set cclk_in_drv, as some platforms do not have
+> +	 * to set the sdr or ddr timing parameters.
+> +	 */
+> +	sdr_timing[1] = ddr_timing[1] = 1;
+> +	of_property_read_u32_array(np,
+> +			"samsung,dw-mshc-sdr-timing", sdr_timing, 2);
+> +
+> +	of_property_read_u32_array(np,
+> +			"samsung,dw-mshc-ddr-timing", ddr_timing, 2);
+> +
+> +	pdata->cclk_in_drv = 1;
+> +	if ((sdr_timing[1] == 0) || (ddr_timing[1] == 0))
+> +		pdata->cclk_in_drv = 0;
+> +
 >  	return pdata;
 >  }
 > 
-> @@ -2478,6 +2480,27 @@ int dw_mci_probe(struct dw_mci *host)
->  		dev_dbg(host->dev, "ciu clock not available\n");
->  		host->bus_hz = host->pdata->bus_hz;
->  	} else {
-> +		/* If the CIU clk is available, we check for SDR and DDR
-> +		 * timing phase shift settings. But not all platforms
-> +		 * may have populated these settings, the driver will not fail
-> +		 * if these settings are not specified.
-> +		 */
-> +		if (host->pdata->sdr_timing) {
-> +			host->sdr_clk = devm_clk_get(host->dev, "sdr_mmc_clk");
-> +			if (IS_ERR(host->sdr_clk))
-> +				dev_dbg(host->dev, "sdr_mmc clock not available\n");
-> +			else
-> +				clk_set_rate(host->sdr_clk, host->pdata->sdr_timing);
-> +		}
+> @@ -2495,6 +2537,15 @@ int dw_mci_probe(struct dw_mci *host)
+>  		goto err_regulator;
+>  	}
+> 
+> +	/* Check to see if the HOLD REG is implemented. */
+> +	host->can_use_hold_reg = (mci_readl(host, HCON) & SDMMC_HCON_IHR) >> 22;
 > +
-> +		if (host->pdata->ddr_timing) {
-> +			host->ddr_clk = devm_clk_get(host->dev, "ddr_mmc_clk");
-> +			if (IS_ERR(host->ddr_clk))
-> +				dev_dbg(host->dev, "ddr_mmc clock not available\n");
-> +			else
-> +				clk_set_rate(host->ddr_clk, host->pdata->ddr_timing);
-> +		}
+> +	/* Can only use the HOLD REG is both conditions are true:
+> +	 * Hardware has implemented HOLD_REG and
+> +	 * cclk_in_drv is non-zero.
+> +	 */
+> +	host->can_use_hold_reg &= host->pdata->cclk_in_drv;
 > +
->  		ret = clk_prepare_enable(host->ciu_clk);
->  		if (ret) {
->  			dev_err(host->dev, "failed to enable ciu clock\n");
+>  	host->quirks = host->pdata->quirks;
+> 
+>  	spin_lock_init(&host->lock);
+> diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
+> index 6bf24ab..dfd05c9 100644
+> --- a/drivers/mmc/host/dw_mmc.h
+> +++ b/drivers/mmc/host/dw_mmc.h
+> @@ -145,6 +145,10 @@
+>  #define SDMMC_IDMAC_ENABLE		BIT(7)
+>  #define SDMMC_IDMAC_FB			BIT(1)
+>  #define SDMMC_IDMAC_SWRESET		BIT(0)
+> +
+> +/* Hardware Configuration(HCON) register */
+> +#define SDMMC_HCON_IHR			BIT(22)
+> +
+>  /* Version ID register define */
+>  #define SDMMC_GET_VERID(x)		((x) & 0xFFFF)
+>  /* Card read threshold */
 > diff --git a/include/linux/mmc/dw_mmc.h b/include/linux/mmc/dw_mmc.h
-> index 2b5b8bf..ad90ad1 100644
+> index 6ce7d2c..2b5b8bf 100644
 > --- a/include/linux/mmc/dw_mmc.h
 > +++ b/include/linux/mmc/dw_mmc.h
-> @@ -83,6 +83,8 @@ struct mmc_data;
->   * @priv: Implementation defined private data.
->   * @biu_clk: Pointer to bus interface unit clock instance.
->   * @ciu_clk: Pointer to card interface unit clock instance.
-> + * @sdr_clk: Pointer to the SDR clock instance.
-> + * @ddr_clk: Pointer to the DDR clock instance.
->   * @slot: Slots sharing this MMC controller.
->   * @fifo_depth: depth of FIFO.
->   * @data_shift: log2 of FIFO item size.
-> @@ -170,6 +172,8 @@ struct dw_mci {
->  	void			*priv;
->  	struct clk		*biu_clk;
->  	struct clk		*ciu_clk;
-> +	struct clk		*sdr_clk;
-> +	struct clk		*ddr_clk;
->  	struct dw_mci_slot	*slot[MAX_MCI_SLOTS];
+> @@ -191,6 +191,8 @@ struct dw_mci {
+>  	struct regulator	*vmmc;	/* Power regulator */
+>  	unsigned long		irq_flags; /* IRQ flags */
+>  	int			irq;
+> +	u32			can_use_hold_reg;
+> +	bool			use_hold_reg;
+>  };
 > 
->  	/* FIFO push and pull */
-> @@ -241,6 +245,8 @@ struct dw_mci_board {
+>  /* DMA ops for Internal/External DMAC interface */
+> @@ -238,6 +240,7 @@ struct dw_mci_board {
+>  	u32 caps;	/* Capabilities */
 >  	u32 caps2;	/* More capabilities */
 >  	u32 pm_caps;	/* PM capabilities */
->  	u32 cclk_in_drv;	/*cclk_in_drv phase shift */
-> +	u32 sdr_timing;	/* Single data rate timing setting. */
-> +	u32 ddr_timing;	/* Double data rate timing setting. */
+> +	u32 cclk_in_drv;	/*cclk_in_drv phase shift */
 >  	/*
 >  	 * Override fifo depth. If 0, autodetect it from the FIFOTH register,
 >  	 * but note that this may not be reliable after a bootloader has used
