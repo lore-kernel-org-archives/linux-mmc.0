@@ -1,45 +1,26 @@
-From: Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>
-Subject: [PATCH REPOST2] mmc: tegra: add support for Tegra124
-Date: Mon, 16 Dec 2013 10:39:23 -0700
-Message-ID: <1387215563-20425-1-git-send-email-swarren@wwwdotorg.org>
-Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>
-Cc: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Stephen Warren <swarren-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
+From: John Tobias <john.tobias.ph@gmail.com>
+Subject: sdhci-esdhc-imx - power management supported
+Date: Mon, 16 Dec 2013 11:11:23 -0800
+Message-ID: <CACUGKYNj3hBaDfzO7o2VuoFLCvQZdutFV=Q5QrzLcBF8Y2cfRQ@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-ob0-f180.google.com ([209.85.214.180]:48278 "EHLO
+	mail-ob0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754782Ab3LPTLY (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 16 Dec 2013 14:11:24 -0500
+Received: by mail-ob0-f180.google.com with SMTP id wo20so5158835obc.25
+        for <linux-mmc@vger.kernel.org>; Mon, 16 Dec 2013 11:11:24 -0800 (PST)
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Dong Aisheng <b29396@freescale.com>, Fabio Estevam <festevam@gmail.com>, linux-mmc@vger.kernel.org, Shawn Guo <shawn.guo@linaro.org>, linux-arm-kernel@lists.infradead.org
 
-From: Stephen Warren <swarren-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
+Hi Dong,
 
-Tegra124's MMC controller is very similar to earlier SoC generations,
-and can be supported by the same driver.
+I saw your sdhci-esdhc-imx driver supported the power management. I am
+assuming you have a working power management on your kernel. I would
+like to know which kernel has a working power management for iMX6?.
 
-However, there are some non-backwards-compatible HW differences, and
-hence a new DT compatible value must be used to describe the HW. This
-patch updates the driver to support that new compatible value.
+Regards,
 
-That said, the HW differences are only relevant when enabling certain
-high-performance transfer modes. Since the driver is currently very
-simple and doesn't enable those modes, we don't actually need to address
-any of these HW differences in the code yet, hence the simple nature of
-this patch.
-
-Signed-off-by: Stephen Warren <swarren-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
-Reviewed-by: Thierry Reding <treding-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
----
- drivers/mmc/host/sdhci-tegra.c | 1 +
- 1 file changed, 1 insertion(+)
-
-diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
-index 5b7b2eba8a54..a835898a68dd 100644
---- a/drivers/mmc/host/sdhci-tegra.c
-+++ b/drivers/mmc/host/sdhci-tegra.c
-@@ -198,6 +198,7 @@ static struct sdhci_tegra_soc_data soc_data_tegra114 = {
- };
- 
- static const struct of_device_id sdhci_tegra_dt_match[] = {
-+	{ .compatible = "nvidia,tegra124-sdhci", .data = &soc_data_tegra114 },
- 	{ .compatible = "nvidia,tegra114-sdhci", .data = &soc_data_tegra114 },
- 	{ .compatible = "nvidia,tegra30-sdhci", .data = &soc_data_tegra30 },
- 	{ .compatible = "nvidia,tegra20-sdhci", .data = &soc_data_tegra20 },
--- 
-1.8.1.5
+john
