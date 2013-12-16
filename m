@@ -1,112 +1,112 @@
-From: Seungwon Jeon <tgih.jun@samsung.com>
-Subject: RE: [PATCH 2/3] mmc: dw_mmc: add dw_mmc-k3 for k3 platform
-Date: Mon, 16 Dec 2013 18:18:04 +0900
-Message-ID: <004c01cefa3f$b9afe880$2d0fb980$%jun@samsung.com>
-References: <1386987174-1788-1-git-send-email-zhangfei.gao@linaro.org>
- <1386987174-1788-3-git-send-email-zhangfei.gao@linaro.org>
- <000001cefa11$eb02f270$c108d750$%jun@samsung.com>
- <52AE8A0E.2050005@linaro.org>
- <003901cefa30$93c3cce0$bb4b66a0$%jun@samsung.com> <52AEB4FD.4070707@linaro.org>
+From: Paul Bolle <pebolle@tiscali.nl>
+Subject: Re: [PATCH] mmc: sdhci-pci: mention DMA mode only once
+Date: Mon, 16 Dec 2013 10:19:28 +0100
+Message-ID: <1387185568.9255.4.camel@x41.thuisdomein>
+References: <1374875545.1941.26.camel@x61.thuisdomein>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ks_c_5601-1987
+Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout4.samsung.com ([203.254.224.34]:35775 "EHLO
-	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751810Ab3LPJSL (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 16 Dec 2013 04:18:11 -0500
-In-reply-to: <52AEB4FD.4070707@linaro.org>
-Content-language: ko
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1374875545.1941.26.camel@x61.thuisdomein>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: 'zhangfei' <zhangfei.gao@linaro.org>, 'Chris Ball' <cjb@laptop.org>, 'Arnd Bergmann' <arnd@arndb.de>, 'Mike Turquette' <mturquette@linaro.org>, 'Rob Herring' <robherring2@gmail.com>, 'Jaehoon Chung' <jh80.chung@samsung.com>, 'Kumar Gala' <galak@codeaurora.org>, 'Haojian Zhuang' <haojian.zhuang@linaro.org>
-Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, patches@linaro.org, devicetree@vger.kernel.org, 'Zhigang Wang' <brooke.wangzhigang@huawei.com>
 
-On Mon, December 16, 2013, Zhangfei Gao wrote:
-> On 12/16/2013 03:29 PM, Seungwon Jeon wrote:
-> > On Mon, December 16, 2013, Zhangfei Gao wrote:
-> >> Dear Seungwon
-> >>
-> >> On 12/16/2013 11:50 AM, Seungwon Jeon wrote:
-> >>> On Sat, December 14, 2013, Zhangfei Gao wrote:
-> >>
-> >>>> +	/* SoC portion */
-> >>>> +	dwmmc_0: dwmmc0@fcd03000 {
-> >>>> +		compatible = "hisilicon,hi4511-dw-mshc";
-> >>>> +		reg = <0xfcd03000 0x1000>;
-> >>>> +		interrupts = <0 16 4>;
-> >>>> +		#address-cells = <1>;
-> >>>> +		#size-cells = <0>;
-> >>>> +		clocks = <&mmc_clock HI3620_SD_CIUCLK>, <&clock HI3620_DDRC_PER_CLK>;
-> >>>> +		clock-names = "ciu", "biu";
-> >>>> +		clock-freq-table =
-> >>>> +		<25000000 0 50000000 25000000 50000000 100000000 0 50000000>;
-> >>> I think it could be solved with mmc->f_min and mmc->f_max(from clock-freq-min-max property)
-> >>> if there is no limitation per each speed mode. As seeing described table, it looks that.
-> >>
-> >> Have tried them before, but unfortunately, they are different.
-> >>
-> >> The controller can not generate clock itself, while depending on the
-> >> outside clock generator, which may require to change clock source in
-> >> differnt mode.
-> >>
-> >> The value we want is set the capacibility of the clock input and the max
-> >> clock freq where mmc works stable in that mode, which may be different
-> >> in different mode.
-> >>
-> >> clock-freq-min-max will set the value for set_ios.
-> >> For example, we use 25M as clock capability when init, which can not be
-> >> set as freq-min, and used as set_ios, where 400K should be used,
-> >> otherwise init definitely fail.
-> > Can you check 'f_init' within 'drivers/mmc/core/core.c' file?
-> > If you set 'f_min = 25000000' for init-sequence, mmc_set_ios() will pass that rate through
-> 'ios.clock'
-> > Then, dw_mmc-k3 can do clk_set_rate() with 25MHz at dw_mci_k3_set_ios().
+On Fri, 2013-07-26 at 23:52 +0200, Paul Bolle wrote:
+> A laptop I use prints a warning twice at every boot and every resume:
+>     sdhci-pci 0000:05:00.2: Will use DMA mode even though HW doesn't fully claim to support it.
+>     sdhci-pci 0000:05:00.2: Will use DMA mode even though HW doesn't fully claim to support it.
 > 
-> This means controller directly use 25M init emmc and sd card, it will fail.
-> We still need 400K init freq, while the input clock source is 25M,
-> divided by the controller.
+> These warnings are always printed in pairs.
 > 
-> > And other required speeds for each mode seem not specific compared with standard spec.
-> > Also clk_set_rate() would be possible with 'ios.clock' instead of specific table.
-> > I just referred your example's clock-freq-table above.
-> There also some controller limitation currently.
-> In some mode, the controller only works well in the limited freq.
-> For example UHS_SDR104_MAX_DTR 208000000 can not be used, only half may
-> be reached, at least currently
-Ok. I see your condition. I misunderstood a little bit.
-I wonder whether limitation is only max frequency(SDR104 or HS200) except for init-freq.
-How about other mode? Working is fine with normal clock rate(from clock-freq-table)?
+> This message shouldn't be a warning, but a notice, as there's little the
+> user is able to do about the choice for DMA mode. The only way to
+> overrule it seems to be the use of (undocumented) debug quirks for the
+> sdhci module.
+> 
+> And, furthermore, this notice needs only be printed once. Everything here
+> depends on the hardware of the SD host controller used, which can't
+> change.
+> 
+> Signed-off-by: Paul Bolle <pebolle@tiscali.nl>
+> ---
+> 0) Tested on v3.10.3. Compile tested for v3.11-rc2.
 
-Thanks,
-Seungwon Jeon
+Did anyone have a look at this patch? It compiles cleanly on top of
+v3.13-rc4. It also does what it claims to do when running v3.13-rc4.
 
+> 1) Note that this warning is printed twice at boot (or module load)
+> because the call chain is:
+>     sdhci_add_host()
+>         host->ops->enable_dma() = sdhci_pci_enable_dma()
+>         sdhci_init()
+>             sdhci_reset()
+>                 host->ops->enable_dma() = sdhci_pci_enable_dma()
 > 
-> >
-> >>
-> >>>> +static int dw_mci_k3_suspend(struct device *dev)
-> >>>> +{
-> >>>> +	struct dw_mci *host = dev_get_drvdata(dev);
-> >>>> +
-> >>>> +	if (!IS_ERR(host->ciu_clk))
-> >>>> +		clk_disable_unprepare(host->ciu_clk);
-> >>>> +
-> >>>> +	return dw_mci_suspend(host);
-> >>> If k3 needs clk_disable here, dw_mci_suspend()is expected to be called prior to
-> >> clk_disable_unprepare()?
-> >>> Of course, it's ok at present though.
-> >>>
-> >>
-> >> Sure, it can be switched, though dw_mci_suspend does nothing related
-> >> with clock now.
-> > Yes, but if some works with ciu_clk is added in dw_mci_suspend(), it will affect.
-> >
-> Sorry for the misunderstood, I mean it make sense and will change.
-> Thanks the advice.
+> (And, if I understand the code correctly, for non-quirky host
+> controllers it can even print the warning three times!)
 > 
+> The call chain at resume is:
+>     sdhci_resume_host()
+>         host->ops->enable_dma() = sdhci_pci_enable_dma()
+>         sdhci_init()
+>             sdhci_reset()
+>                 host->ops->enable_dma() = sdhci_pci_enable_dma()
 > 
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 2) Note that the patch would be simpler if it's OK to print this message
+> once per _module_ and not, as this patch does, once per _host
+> controller_. Are there systems that use more than one SD host
+> controller, both with different (advertised) DMA capabilities? 
+> 
+>  drivers/mmc/host/sdhci-pci.c | 14 ++++++++++----
+>  1 file changed, 10 insertions(+), 4 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci-pci.c b/drivers/mmc/host/sdhci-pci.c
+> index d7d6bc8..69fc509 100644
+> --- a/drivers/mmc/host/sdhci-pci.c
+> +++ b/drivers/mmc/host/sdhci-pci.c
+> @@ -88,6 +88,7 @@ struct sdhci_pci_chip {
+>  	unsigned int		quirks;
+>  	unsigned int		quirks2;
+>  	bool			allow_runtime_pm;
+> +	bool			use_sdma_notified;
+>  	const struct sdhci_pci_fixes *fixes;
+>  
+>  	int			num_slots;	/* Slots on controller */
+> @@ -997,17 +998,21 @@ MODULE_DEVICE_TABLE(pci, pci_ids);
+>  static int sdhci_pci_enable_dma(struct sdhci_host *host)
+>  {
+>  	struct sdhci_pci_slot *slot;
+> +	struct sdhci_pci_chip *chip;
+>  	struct pci_dev *pdev;
+>  	int ret;
+>  
+>  	slot = sdhci_priv(host);
+> -	pdev = slot->chip->pdev;
+> +	chip = slot->chip;
+> +	pdev = chip->pdev;
+>  
+>  	if (((pdev->class & 0xFFFF00) == (PCI_CLASS_SYSTEM_SDHCI << 8)) &&
+>  		((pdev->class & 0x0000FF) != PCI_SDHCI_IFDMA) &&
+> -		(host->flags & SDHCI_USE_SDMA)) {
+> -		dev_warn(&pdev->dev, "Will use DMA mode even though HW "
+> -			"doesn't fully claim to support it.\n");
+> +		(host->flags & SDHCI_USE_SDMA) &&
+> +		(chip->use_sdma_notified == false)) {
+> +		dev_notice(&pdev->dev, "Will use DMA mode even though HW "
+> +			   "doesn't fully claim to support it.\n");
+> +		chip->use_sdma_notified = true;
+>  	}
+>  
+>  	ret = pci_set_dma_mask(pdev, DMA_BIT_MASK(32));
+> @@ -1504,6 +1509,7 @@ static int sdhci_pci_probe(struct pci_dev *pdev,
+>  		chip->allow_runtime_pm = chip->fixes->allow_runtime_pm;
+>  	}
+>  	chip->num_slots = slots;
+> +	chip->use_sdma_notified = false;
+>  
+>  	pci_set_drvdata(pdev, chip);
+>  
 
+Paul Bolle
