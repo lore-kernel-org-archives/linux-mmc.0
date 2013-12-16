@@ -1,90 +1,112 @@
-From: David =?ISO-8859-1?Q?Lanzend=F6rfer?= <david.lanzendoerfer-Z7Kmv9EsliU@public.gmane.org>
-Subject: Re: Re: [PATCH 2/5] ARM: dts: sun4i: Add support for mmc
-Date: Mon, 16 Dec 2013 10:04:38 +0100
-Message-ID: <11015171.YHkHMOrD9M@pagira.o2s.ch>
-References: <1387058295-20641-1-git-send-email-hdegoede@redhat.com> <20131215135854.GF3651@lukather> <52ADBD41.4050104@redhat.com>
-Reply-To: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+From: Seungwon Jeon <tgih.jun@samsung.com>
+Subject: RE: [PATCH 2/3] mmc: dw_mmc: add dw_mmc-k3 for k3 platform
+Date: Mon, 16 Dec 2013 18:18:04 +0900
+Message-ID: <004c01cefa3f$b9afe880$2d0fb980$%jun@samsung.com>
+References: <1386987174-1788-1-git-send-email-zhangfei.gao@linaro.org>
+ <1386987174-1788-3-git-send-email-zhangfei.gao@linaro.org>
+ <000001cefa11$eb02f270$c108d750$%jun@samsung.com>
+ <52AE8A0E.2050005@linaro.org>
+ <003901cefa30$93c3cce0$bb4b66a0$%jun@samsung.com> <52AEB4FD.4070707@linaro.org>
 Mime-Version: 1.0
-Content-Type: multipart/signed; boundary="nextPart5341094.LaRy0sOPBI"; micalg="pgp-sha1"; protocol="application/pgp-signature"
-Return-path: <linux-sunxi+bncBD2JL37LXEKRB3MEXOKQKGQEVI3TFDY-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-In-Reply-To: <52ADBD41.4050104-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-List-Post: <http://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Help: <http://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Archive: <http://groups.google.com/group/linux-sunxi>
-Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
-List-Subscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Unsubscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-To: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-Cc: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Content-Type: text/plain; charset=ks_c_5601-1987
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout4.samsung.com ([203.254.224.34]:35775 "EHLO
+	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751810Ab3LPJSL (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 16 Dec 2013 04:18:11 -0500
+In-reply-to: <52AEB4FD.4070707@linaro.org>
+Content-language: ko
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: 'zhangfei' <zhangfei.gao@linaro.org>, 'Chris Ball' <cjb@laptop.org>, 'Arnd Bergmann' <arnd@arndb.de>, 'Mike Turquette' <mturquette@linaro.org>, 'Rob Herring' <robherring2@gmail.com>, 'Jaehoon Chung' <jh80.chung@samsung.com>, 'Kumar Gala' <galak@codeaurora.org>, 'Haojian Zhuang' <haojian.zhuang@linaro.org>
+Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, patches@linaro.org, devicetree@vger.kernel.org, 'Zhigang Wang' <brooke.wangzhigang@huawei.com>
 
+On Mon, December 16, 2013, Zhangfei Gao wrote:
+> On 12/16/2013 03:29 PM, Seungwon Jeon wrote:
+> > On Mon, December 16, 2013, Zhangfei Gao wrote:
+> >> Dear Seungwon
+> >>
+> >> On 12/16/2013 11:50 AM, Seungwon Jeon wrote:
+> >>> On Sat, December 14, 2013, Zhangfei Gao wrote:
+> >>
+> >>>> +	/* SoC portion */
+> >>>> +	dwmmc_0: dwmmc0@fcd03000 {
+> >>>> +		compatible = "hisilicon,hi4511-dw-mshc";
+> >>>> +		reg = <0xfcd03000 0x1000>;
+> >>>> +		interrupts = <0 16 4>;
+> >>>> +		#address-cells = <1>;
+> >>>> +		#size-cells = <0>;
+> >>>> +		clocks = <&mmc_clock HI3620_SD_CIUCLK>, <&clock HI3620_DDRC_PER_CLK>;
+> >>>> +		clock-names = "ciu", "biu";
+> >>>> +		clock-freq-table =
+> >>>> +		<25000000 0 50000000 25000000 50000000 100000000 0 50000000>;
+> >>> I think it could be solved with mmc->f_min and mmc->f_max(from clock-freq-min-max property)
+> >>> if there is no limitation per each speed mode. As seeing described table, it looks that.
+> >>
+> >> Have tried them before, but unfortunately, they are different.
+> >>
+> >> The controller can not generate clock itself, while depending on the
+> >> outside clock generator, which may require to change clock source in
+> >> differnt mode.
+> >>
+> >> The value we want is set the capacibility of the clock input and the max
+> >> clock freq where mmc works stable in that mode, which may be different
+> >> in different mode.
+> >>
+> >> clock-freq-min-max will set the value for set_ios.
+> >> For example, we use 25M as clock capability when init, which can not be
+> >> set as freq-min, and used as set_ios, where 400K should be used,
+> >> otherwise init definitely fail.
+> > Can you check 'f_init' within 'drivers/mmc/core/core.c' file?
+> > If you set 'f_min = 25000000' for init-sequence, mmc_set_ios() will pass that rate through
+> 'ios.clock'
+> > Then, dw_mmc-k3 can do clk_set_rate() with 25MHz at dw_mci_k3_set_ios().
+> 
+> This means controller directly use 25M init emmc and sd card, it will fail.
+> We still need 400K init freq, while the input clock source is 25M,
+> divided by the controller.
+> 
+> > And other required speeds for each mode seem not specific compared with standard spec.
+> > Also clk_set_rate() would be possible with 'ios.clock' instead of specific table.
+> > I just referred your example's clock-freq-table above.
+> There also some controller limitation currently.
+> In some mode, the controller only works well in the limited freq.
+> For example UHS_SDR104_MAX_DTR 208000000 can not be used, only half may
+> be reached, at least currently
+Ok. I see your condition. I misunderstood a little bit.
+I wonder whether limitation is only max frequency(SDR104 or HS200) except for init-freq.
+How about other mode? Working is fine with normal clock rate(from clock-freq-table)?
 
---nextPart5341094.LaRy0sOPBI
-Content-Transfer-Encoding: 7Bit
-Content-Type: text/plain; charset="us-ascii"
+Thanks,
+Seungwon Jeon
 
-Hi
-> Note as said before I expect David to take things from here.
-I will start working on it this evening.
+> 
+> >
+> >>
+> >>>> +static int dw_mci_k3_suspend(struct device *dev)
+> >>>> +{
+> >>>> +	struct dw_mci *host = dev_get_drvdata(dev);
+> >>>> +
+> >>>> +	if (!IS_ERR(host->ciu_clk))
+> >>>> +		clk_disable_unprepare(host->ciu_clk);
+> >>>> +
+> >>>> +	return dw_mci_suspend(host);
+> >>> If k3 needs clk_disable here, dw_mci_suspend()is expected to be called prior to
+> >> clk_disable_unprepare()?
+> >>> Of course, it's ok at present though.
+> >>>
+> >>
+> >> Sure, it can be switched, though dw_mci_suspend does nothing related
+> >> with clock now.
+> > Yes, but if some works with ciu_clk is added in dw_mci_suspend(), it will affect.
+> >
+> Sorry for the misunderstood, I mean it make sense and will change.
+> Thanks the advice.
+> 
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
-> I just took what David was using. I agree picking one and staying with
-> it would be better.
-There is a reason why my working branch was called "plsdsif"
-(short for "Please don't shout at me in Finnish")
-
-> Yes and no. The pullups are enabled by uboot and the allwinner
-> sources, most of my testing has been done without them, which
-> seems to work fine. I've enabled them to be consisten with the
-> allwinner sources and u-boot.
-Ok
-
-> As for drive = <3>, we need drive = <2> for normal modes,
-> and drive = <3> for ddr mode. I simply picked <3> to keep
-> things KISS. It should not matter much in power usage, as
-> it will only make the flanks of the signal more steep. Once the
-> desired output level is reached the current will drop off. It will
-> use more current when changing the level, but for half the time,
-> so the effective power usage (current * time) is the same.
-In this case lets implement a switch which enables the pull ups for DDR
-mode and lets disable it by default in turn.
-This way we can make sure that we don't have doubled pull up,
-since this could actually mess up some circuitry.
-
-> > Ideally, I'd like this patch to be splitted into three:
-> >    - One that adds the MMC controller nodes to the DTSI
-> >    - One that adds the muxing options you need to the pinctrl node
-> >    - One that enables the controller on the boards
-> Sounds like a good job for David. Note I've a lot more boards for
-> which I would like to add mmc support or dts files in general
-> (will do so as time permits).
-Ok. I will work on it this evening.
-
-> For those boards which already have a dts I'll send mmc adding dts
-> patches to David for now so he can add the changes to the patch-set.
-Ok. I will create another branch and will incorporate your DTS files.
-
-> How do you want to deal with new boards ? Send the addition of the
-> base board to you (and CC David as he will need them in his tree too),
-> and then send a patch to add mmc to the dts to David ?
-Sounds good to me...
- 
-> Or should I simply make it one big patch including mmc in the initial
-> commit ?
-I imagine that a messy approach. Especially if I'm supposed to refactor
-the patchset into a new one...
-
-cheers
---nextPart5341094.LaRy0sOPBI
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: This is a digitally signed message part.
-Content-Transfer-Encoding: 7Bit
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-
-iEYEABECAAYFAlKuwi8ACgkQAeZw77btGjqV4gCdG0t15fd7mckR9+MnhrFAcFCl
-ZQIAn0PUy6PeynkdEsQ9WKvTElBxhCOR
-=oofX
------END PGP SIGNATURE-----
-
---nextPart5341094.LaRy0sOPBI--
