@@ -1,29 +1,62 @@
-From: Sergei Ianovich <ynvich@gmail.com>
-Subject: Re: [PATCH v2 03/16] ARM: dts: provide DMA config to pxamci
-Date: Mon, 16 Dec 2013 16:03:56 +0400
-Message-ID: <1387195436.13062.139.camel@host5.omatika.ru>
-References: <1386543229-1542-1-git-send-email-ynvich@gmail.com>
-	 	 <1386901645-28895-1-git-send-email-ynvich@gmail.com>
-	 	 <1386901645-28895-4-git-send-email-ynvich@gmail.com>
-	 	 <201312142006.26979.arnd@arndb.de>
-	  <1387049660.7152.317.camel@host5.omatika.ru> <52AECEB2.4070807@gmail.com>
-	 <1387194450.13062.134.camel@host5.omatika.ru> <52AEEAF4.3010703@metafoo.de>
+From: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: Re: [PATCH 1/5] ARM: sunxi: Add driver for SD/MMC
+ hosts found on Allwinner sunxi SoCs
+Date: Mon, 16 Dec 2013 13:21:52 +0100
+Message-ID: <52AEF060.6000405@redhat.com>
+References: <1387058295-20641-1-git-send-email-hdegoede@redhat.com> <2378731.6b9MyH8v8A@dizzy-6.site> <52AE0E87.2040304@redhat.com> <1743952.noztKtcF2Y@dizzy-6.site>
+Reply-To: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-doc-owner@vger.kernel.org>
-In-Reply-To: <52AEEAF4.3010703@metafoo.de>
-Sender: linux-doc-owner@vger.kernel.org
-To: Lars-Peter Clausen <lars@metafoo.de>
-Cc: Daniel Mack <zonque@gmail.com>, Arnd Bergmann <arnd@arndb.de>, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Rob Herring <rob.herring@calxeda.com>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Stephen Warren <swarren@wwwdotorg.org>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Rob Landley <rob@landley.net>, Russell King <linux@arm.linux.org.uk>, Chris Ball <cjb@laptop.org>, Viresh Kumar <viresh.kumar@linaro.org>, Shawn Guo <shawn.guo@linaro.org>, Haojian Zhuang <haojian.zhuang@gmail.com>, "open list:OPEN FIRMWARE AND..." <devicetree@vger.kernel.org>, DOCUMENTATION <linux-doc@vger.kernel.org>, linux-mmc@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: quoted-printable
+Return-path: <linux-sunxi+bncBDL4X2GMZUKRB2PAXOKQKGQEWF4KAQI-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+In-Reply-To: <1743952.noztKtcF2Y-GPtPHOohwlnjSbz6xCtQhw@public.gmane.org>
+List-Post: <http://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Help: <http://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Archive: <http://groups.google.com/group/linux-sunxi>
+Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+List-Subscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Unsubscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+To: =?ISO-8859-1?Q?David_Lanzend=F6rfer?= <david.lanzendoerfer-Z7Kmv9EsliU@public.gmane.org>
+Cc: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Mon, 2013-12-16 at 12:58 +0100, Lars-Peter Clausen wrote:
-> Btw. any driver that parses the dmas property manually should be considered
-> broken. This is a classical layering violation. The layout of the dma
-> specifier is DMA controller specific and should be completely transparent to
-> the device driver.
+Hi,
 
-PXA as a whole is broken in this respect at the moment. The problem is
-how to move to a "fixed" state without breaking things which work now.
+On 12/15/2013 10:19 PM, David Lanzend=F6rfer wrote:
+>>> [...]
+>>> Do you have something like this in mind? ->
+>>> drivers/mmc/host/dw_mmc-exynos.c
+>> No, as explained in my previous mail the idmac being shared seemed to be=
+ the
+>> only 2 things the dw-mmc controller and the sunxi-mmc controller have in
+>> common.
+> Ok.
+>
+>> Looking at dw_mmc-exynos.c it still pretty much is the classic dw-mmc
+>> controller with some extra bits, where as the sunxi controller is
+>> significantly different (which allows us to write a significant simpler
+>> driver).
+> Do you have an outline for such a driver as you imagine it?
+> I'd be interested into some "experiments".
+> Maybe you have a repository where you could push a dedicated tree
+> for some colaboration on this?
 
+I think that we're miss-communicating a bit here. What I'm trying to say
+is that trying to extend the dw_mmc driver to support sunxi is a bad
+idea because the sunxi hardware is quite different. And that the
+sunxi hardware having autostop allows the existing sunxi-mci driver to
+be much simpler then the dw-mmc driver.
+
+IOW the much simpler driver already exists and it is the sunxi-mci
+driver.
+
+Regards,
+
+Hans
+
+--=20
+You received this message because you are subscribed to the Google Groups "=
+linux-sunxi" group.
+To unsubscribe from this group and stop receiving emails from it, send an e=
+mail to linux-sunxi+unsubscribe-/JYPxA39Uh5TLH3MbocFF+G/Ez6ZCGd0@public.gmane.org
+For more options, visit https://groups.google.com/groups/opt_out.
