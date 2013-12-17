@@ -1,38 +1,54 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [PATCH 2/3] mmc: core: Remove unused host cap MMC_CAP2_BROKEN_VOLTAGE
-Date: Tue, 17 Dec 2013 15:04:17 +0100
-Message-ID: <1387289058-19755-2-git-send-email-ulf.hansson@linaro.org>
-References: <1387289058-19755-1-git-send-email-ulf.hansson@linaro.org>
+Subject: [PATCH 1/3] mmc: card: Remove host cap MMC_CAP2_SANITIZE
+Date: Tue, 17 Dec 2013 15:04:16 +0100
+Message-ID: <1387289058-19755-1-git-send-email-ulf.hansson@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-lb0-f176.google.com ([209.85.217.176]:65283 "EHLO
-	mail-lb0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753798Ab3LQOEa (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 17 Dec 2013 09:04:30 -0500
-Received: by mail-lb0-f176.google.com with SMTP id l4so1435079lbv.7
-        for <linux-mmc@vger.kernel.org>; Tue, 17 Dec 2013 06:04:28 -0800 (PST)
-In-Reply-To: <1387289058-19755-1-git-send-email-ulf.hansson@linaro.org>
+Received: from mail-lb0-f182.google.com ([209.85.217.182]:45528 "EHLO
+	mail-lb0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753798Ab3LQOE2 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 17 Dec 2013 09:04:28 -0500
+Received: by mail-lb0-f182.google.com with SMTP id l4so1439021lbv.41
+        for <linux-mmc@vger.kernel.org>; Tue, 17 Dec 2013 06:04:27 -0800 (PST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
 Cc: Ulf Hansson <ulf.hansson@linaro.org>
 
+There is no need for keeping a host cap for MMC_CAP2_SANITIZE, instead
+we just make the feature default available.
+
 Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 ---
+ drivers/mmc/card/block.c |    3 +--
  include/linux/mmc/host.h |    1 -
- 1 file changed, 1 deletion(-)
+ 2 files changed, 1 insertion(+), 3 deletions(-)
 
+diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+index 7b5424f..c2187d5 100644
+--- a/drivers/mmc/card/block.c
++++ b/drivers/mmc/card/block.c
+@@ -415,8 +415,7 @@ static int ioctl_do_sanitize(struct mmc_card *card)
+ {
+ 	int err;
+ 
+-	if (!(mmc_can_sanitize(card) &&
+-	      (card->host->caps2 & MMC_CAP2_SANITIZE))) {
++	if (!mmc_can_sanitize(card)) {
+ 			pr_warn("%s: %s - SANITIZE is not supported\n",
+ 				mmc_hostname(card->host), __func__);
+ 			err = -EOPNOTSUPP;
 diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index 47fcc5d..a76993c 100644
+index 99f5709..47fcc5d 100644
 --- a/include/linux/mmc/host.h
 +++ b/include/linux/mmc/host.h
-@@ -272,7 +272,6 @@ struct mmc_host {
- #define MMC_CAP2_HS200_1_2V_SDR	(1 << 6)        /* can support */
- #define MMC_CAP2_HS200		(MMC_CAP2_HS200_1_8V_SDR | \
- 				 MMC_CAP2_HS200_1_2V_SDR)
--#define MMC_CAP2_BROKEN_VOLTAGE	(1 << 7)	/* Use the broken voltage */
- #define MMC_CAP2_HC_ERASE_SZ	(1 << 9)	/* High-capacity erase size */
- #define MMC_CAP2_CD_ACTIVE_HIGH	(1 << 10)	/* Card-detect signal active high */
- #define MMC_CAP2_RO_ACTIVE_HIGH	(1 << 11)	/* Write-protect signal active high */
+@@ -281,7 +281,6 @@ struct mmc_host {
+ #define MMC_CAP2_PACKED_CMD	(MMC_CAP2_PACKED_RD | \
+ 				 MMC_CAP2_PACKED_WR)
+ #define MMC_CAP2_NO_PRESCAN_POWERUP (1 << 14)	/* Don't power up before scan */
+-#define MMC_CAP2_SANITIZE	(1 << 15)		/* Support Sanitize */
+ 
+ 	mmc_pm_flag_t		pm_caps;	/* supported pm features */
+ 
 -- 
 1.7.9.5
 
