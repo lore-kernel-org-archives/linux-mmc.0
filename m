@@ -1,64 +1,92 @@
-From: Mark Brown <broonie@kernel.org>
-Subject: Re: [PATCH 1/5] ARM: sunxi: Add driver for SD/MMC hosts found on
- Allwinner sunxi SoCs
-Date: Tue, 17 Dec 2013 13:43:19 +0000
-Message-ID: <20131217134319.GC3185@sirena.org.uk>
-References: <1387058295-20641-1-git-send-email-hdegoede@redhat.com>
- <1387058295-20641-2-git-send-email-hdegoede@redhat.com>
+From: Dinh Nguyen <dinh.linux@gmail.com>
+Subject: Re: [RESEND LIST PATCHv7 1/4] clk: socfpga: Add a clk-phase property
+ to the "altr,socfpga-gate-clk"
+Date: Tue, 17 Dec 2013 07:44:47 -0600
+Message-ID: <52B0554F.1080509@gmail.com>
+References: <1387213476-22122-1-git-send-email-dinguyen@altera.com> <1387213476-22122-2-git-send-email-dinguyen@altera.com> <52B00167.4010903@linaro.org>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="AE3cR03RMyqqQrte"
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from cassiel.sirena.org.uk ([80.68.93.111]:59888 "EHLO
-	cassiel.sirena.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753006Ab3LQNnZ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 17 Dec 2013 08:43:25 -0500
-Content-Disposition: inline
-In-Reply-To: <1387058295-20641-2-git-send-email-hdegoede@redhat.com>
+Received: from mail-oa0-f49.google.com ([209.85.219.49]:42447 "EHLO
+	mail-oa0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753733Ab3LQNoh (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 17 Dec 2013 08:44:37 -0500
+In-Reply-To: <52B00167.4010903@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Hans de Goede <hdegoede@redhat.com>
-Cc: Chris Ball <cjb@laptop.org>, Maxime Ripard <maxime.ripard@free-electrons.com>, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, linux-sunxi@googlegroups.com, David =?iso-8859-1?Q?Lanzend=F6rfer?= <david.lanzendoerfer@o2s.ch>, linux-arm-kernel@lists.infradead.org
+To: zhangfei <zhangfei.gao@linaro.org>, dinguyen@altera.com, arnd@arndb.de, cjb@laptop.org, jh80.chung@samsung.com, tgih.jun@samsung.com, heiko@sntech.de, dianders@chromium.org, alim.akhtar@samsung.com, bzhao@marvell.com, mturquette@linaro.org
+Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, devicetree@vger.kernel.org
 
+Hi Zhangfei,
 
---AE3cR03RMyqqQrte
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+On 12/17/13 1:46 AM, zhangfei wrote:
+>
+>
+> On 12/17/2013 01:04 AM, dinguyen@altera.com wrote:
+>> From: Dinh Nguyen <dinguyen@altera.com>
+>
+>> +static int socfpga_clk_prepare(struct clk_hw *hwclk)
+>> +{
+>> +    struct socfpga_clk *socfpgaclk = to_socfpga_clk(hwclk);
+>> +    struct regmap *sys_mgr_base_addr;
+>> +    u32 hs_timing;
+>> +
+>> +    if (socfpgaclk->clk_phase[0] || socfpgaclk->clk_phase[1]) {
+>> +        sys_mgr_base_addr =
+>> syscon_regmap_lookup_by_compatible("altr,sys-mgr");
+>> +        if (IS_ERR(sys_mgr_base_addr)) {
+>> +            pr_err("%s: failed to find altr,sys-mgr regmap!\n",
+>> __func__);
+>> +            return -EINVAL;
+>> +        }
+>> +        hs_timing = SYSMGR_SDMMC_CTRL_SET(socfpgaclk->clk_phase[0],
+>> +                        socfpgaclk->clk_phase[1]);
+>> +        regmap_write(sys_mgr_base_addr, SYSMGR_SDMMCGRP_CTRL_OFFSET,
+>> +                        hs_timing);
+>> +    }
+>> +    return 0;
+>> +}
+>
+> So reusing gate-clk here and check the node of "altr,sys-mgr".
+> I think it is good and simple.
+> Also can define new clock combined with node "altr,sys-mgr" with
+> parent of sdmmc_clk.
+>
+> Thanks for the update, it is fine to me.
+Thanks, can I get an Ack from you for this version?
 
-On Sat, Dec 14, 2013 at 10:58:11PM +0100, Hans de Goede wrote:
+Thanks,
+Dinh
+>
+>> +
+>>   static struct clk_ops gateclk_ops = {
+>> +    .prepare = socfpga_clk_prepare,
+>>       .recalc_rate = socfpga_clk_recalc_rate,
+>>       .get_parent = socfpga_clk_get_parent,
+>>       .set_parent = socfpga_clk_set_parent,
+>> @@ -254,6 +283,7 @@ static void __init socfpga_gate_clk_init(struct
+>> device_node *node,
+>>   {
+>>       u32 clk_gate[2];
+>>       u32 div_reg[3];
+>> +    u32 clk_phase[2];
+>>       u32 fixed_div;
+>>       struct clk *clk;
+>>       struct socfpga_clk *socfpga_clk;
+>> @@ -294,6 +324,12 @@ static void __init socfpga_gate_clk_init(struct
+>> device_node *node,
+>>           socfpga_clk->div_reg = 0;
+>>       }
+>>
+>> +    rc = of_property_read_u32_array(node, "clk-phase", clk_phase, 2);
+>> +    if (!rc) {
+>> +        socfpga_clk->clk_phase[0] = clk_phase[0];
+>> +        socfpga_clk->clk_phase[1] = clk_phase[1];
+>> +    }
+>> +
+>>       of_property_read_string(node, "clock-output-names", &clk_name);
+>>
+>>       init.name = clk_name;
+>>
 
-> +config MMC_SUNXI
-> +	tristate "Allwinner sunxi SD/MMC Host Controller support"
-> +	depends on ARCH_SUNXI
-
-This should be ARCH_SUNXI || COMPILE_TEST to increase build coverage
-especially for people doing subsystem or kernel global work.
-
-> +	default y
-
-As others pointed out this shouldn't be here, consider multiplatform
-kernels.
-
---AE3cR03RMyqqQrte
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-
-iQIcBAEBAgAGBQJSsFT0AAoJELSic+t+oim9zREQAJPU7/wIWH3IrbxKlTg1Yja6
-v9pIjdQIsrCx9Syt3g+dYzuqAdsD/iC1J+oin2Gwjy0EprgWZBOxa6QebBx+pcIx
-5IAo7vrDBtRYneLYxu8wP4ykFW1TBhNrhh2JR44f28rWhy+rBhCn6FrtC3ZhH1Fg
-7AzLB71n6NVKJT7EsSXJsOmrVQJcjLSvl8m6y3bMcNCx55Q3GU5BE5SmUs0TZGuS
-ik6/7E8CVmuWq+AHwtbpH6iexyqk46M7f1vs7OHavOm5ONPK60P+z7vn7uoGh6Qp
-xnhikgooGBg9heM7mbBBafXzCVIouJCHS0TBNyqVxmIaZiEcfkMiO/6cUqRYvZK3
-O1p7aE4fV11iEyL85v47SY7GL9kGpU3yin2nZMbpKWwr51qEQQa2x1sPMYqs1VyP
-gmLfXyZzvrpe8RXdaoL7SlVJu3eZq6Z2cwen/hZ2+h70FB9IKjD6bhfLegzsIhOR
-vMVBmT+kQlBvdGqh2/jOA5F9C8+cx0TW7V+3JrFJVaUjHxmSjaOA9M27zSKltDZ8
-ODn/p7m1XfplnQuQuPwMADY/b/RSTRn1RhE/RgkDjzHSawJz6551B6A3BrD8xNsf
-7SitnWR4z+j9SLtORjOp84W8IPceYMMXOcN+C9fe4t15v1mAAxpsZy4d08DZbEab
-U7BZRiUgpSiaRPs+sjLe
-=9wdG
------END PGP SIGNATURE-----
-
---AE3cR03RMyqqQrte--
