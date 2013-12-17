@@ -1,136 +1,141 @@
-From: Vladimir Zapolskiy <vz@mleia.com>
-Subject: Re: max_discard anomaly on certain Sandisk eMMC
-Date: Tue, 17 Dec 2013 10:45:56 +0100
-Message-ID: <52B01D54.8010204@mleia.com>
-References: <52AB8DA2.9000001@wwwdotorg.org> <52AF8A30.9050700@wwwdotorg.org> <52B008AB.7060909@intel.com> <CAA+hA=RR2JirHR_1c=PR9qBjakD-Wdo+xMMRw5x2Run7yFQ6Ow@mail.gmail.com>
+From: Vladimir Zapolskiy <vladimir_zapolskiy@mentor.com>
+Subject: [PATCH RFC] mmc: add an option to unlimit erase group count
+Date: Tue, 17 Dec 2013 10:46:26 +0100
+Message-ID: <1387273586-6839-1-git-send-email-vladimir_zapolskiy@mentor.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from li271-223.members.linode.com ([178.79.152.223]:46662 "EHLO
-	mail.mleia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750839Ab3LQJqB (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 17 Dec 2013 04:46:01 -0500
-In-Reply-To: <CAA+hA=RR2JirHR_1c=PR9qBjakD-Wdo+xMMRw5x2Run7yFQ6Ow@mail.gmail.com>
+Received: from relay1.mentorg.com ([192.94.38.131]:46266 "EHLO
+	relay1.mentorg.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751332Ab3LQJqn (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 17 Dec 2013 04:46:43 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Dong Aisheng <dongas86@gmail.com>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, Stephen Warren <swarren@wwwdotorg.org>, Chris Ball <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-tegra@vger.kernel.org" <linux-tegra@vger.kernel.org>
+To: linux-mmc@vger.kernel.org
+Cc: Adrian Hunter <adrian.hunter@intel.com>
 
-On 12/17/13 10:40, Dong Aisheng wrote:
-> On Tue, Dec 17, 2013 at 4:17 PM, Adrian Hunter<adrian.hunter@intel.com>  wrote:
->> On 17/12/13 01:18, Stephen Warren wrote:
->>> On 12/13/2013 03:43 PM, Stephen Warren wrote:
->>>> On one of my eMMC devices, I see the following results from calling
->>>> mmc_do_calc_max_discard() with various parameters:
->>>>
->>>> [    3.057263] MMC_DISCARD_ARG max_discard 1
->>>> [    3.057266] MMC_ERASE_ARG   max_discard 4096
->>>> [    3.057267] MMC_TRIM_ARG    max_discard 1
->>>>
->>>> This causes mmc_calc_max_discard() to return 1, which makes the discard
->>>> IOCTL extremely slow.
->>>
->>> Further investigation shows that if I make a few hacks that essentially
->>> revert e056a1b5b67b "mmc: queue: let host controllers specify maximum
->>> discard timeout":
->>>
->>> diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
->>> index 357bbc54fe4b..e66af930d0e3 100644
->>> --- a/drivers/mmc/card/queue.c
->>> +++ b/drivers/mmc/card/queue.c
->>> @@ -167,13 +167,15 @@ static void mmc_queue_setup_discard(struct
->>> request_queue *q,
->>>                return;
->>>
->>>        queue_flag_set_unlocked(QUEUE_FLAG_DISCARD, q);
->>> -     q->limits.max_discard_sectors = max_discard;
->>> +     q->limits.max_discard_sectors = UINT_MAX;
->>>        if (card->erased_byte == 0&&  !mmc_can_discard(card))
->>>                q->limits.discard_zeroes_data = 1;
->>>        q->limits.discard_granularity = card->pref_erase<<  9;
->>>        /* granularity must not be greater than max. discard */
->>> +#if 0
->>>        if (card->pref_erase>  max_discard)
->>>                q->limits.discard_granularity = 0;
->>> +#endif
->>>        if (mmc_can_secure_erase_trim(card))
->>>                queue_flag_set_unlocked(QUEUE_FLAG_SECDISCARD, q);
->>>   }
->>>
->>> I end up with:
->>>
->>> $ cat /sys/.../block/mmcblk1/queue# cat discard_granularity
->>> 2097152
->>> $ cat /sys/.../block/mmcblk1/queue# cat discard_max_bytes
->>> 2199023255040
->>> $ cat /sys/.../block/mmcblk1/queue# cat discard_zeroes_data
->>> 1
->>>
->>> With those values, mke2fs is fast, and I validated that "blkdiscard"
->>> works; I filled a large partition with /dev/urandom, executed
->>> "blkdiscard" on the 4M at the start, and saw zeroes when reading the
->>> discarded part back.
->>>
->>> This implies that the issue is simply the operation of
->>> mmc_calc_max_discard(), rather than the eMMC device mis-reporting its
->>> discard abilities, doesn't it?
->>
->> No.
->>
->> The underlying problem is a combination of:
->>          a) JEDEC specified very large timeouts for erase operations e.g. can be
->> minutes for large erases
->>          b) SDHCI controllers have been implemented with high frequency timeout
->> clocks which limit the maximum timeout to a few seconds
->
-> Right, especially for controllers using SDCLK as timeout clock.
-> I'm a bit suspect the timeout supported by host whether is designed
-> for erase operation
-> since they have huge gap.
-> For IMX, when running on 198Mhz for a SD3.0 cards, the max_discard_to is 1355ms.
-> However, i have one Toshiba SDHC U1 card which ERASE_OFFSET is 2s.
-> That means our host has no chance to support discard for such card.
->
-> Now, i'm think for those host controller with limited timeout time, if we should
-> use CMD13 to polling the status instead of using HW timeout machanism.
-> And actuall the mmc core already has some base code to support it.
-> The timeout is 10 seconds.
+This change adds an option to overcome a hardcoded calculation of
+maximum erase groups to be used for erase/trim/discard operations.
+This calculation is plainly based on JEDEC spec, which defines
+too high erase timeout delays in comparison to SDHC data line timeout.
 
-That's my point also. I presume JEDEC specifies maximum safe timeout for 
-erase
-operations, but since it is so huge (if properly calculated it may reach 
-hours
-for multiple erase groups) and erase operations are so fast, I don't think
-we should care much of data line timeout on controller's side during
-erase/trim/discard.
+JEDEC specification defines quite high erase timeout value for 300ms
+multiplied by erase group number, and SD Host Controller specification
+data line timeout may be much less, e.g. (1 << 13) / 52Mhz ~ 160ms.
 
-> See mmc_do_erase function and
-> /* If the device is not responding */
-> #define MMC_CORE_TIMEOUT_MS     (10 * 60 * 1000) /* 10 minute timeout */
->
-> Regards
-> Dong Aisheng
->
->>          c) It is not possible to disable the timeout on SDHCI
->>
->> What a) means is that you can get away with much larger erases than you can
->> specify the timeout for - which is what you have discovered.
->>
->> To understand the timeouts, you should manually do the calculations.
->>
->> Also note, that using HC Erase Size may help (MMC_CAP2_HC_ERASE_SZ), but
->> beware of the partitioning implications of changing that.
->>
->> The best solution is to change the hardware to use the lowest possible
->> frequency timeout clock e.g. a 1KHz timeout clock could support timeouts of
->> up to 36 hours.
->>
->> --
->> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>From perfromance perspective it is desirable that thousands of erase
+groups are discarded at once, so there is no much sense to limit
+maximum erase timeout by data line timeout, if a controller handles
+correctly erase operation without indication of data line timeout.
+
+In addition setting of this option allows to erase/trim/discard MMC
+cards, for which previously it was reported that ioctl(BLKDISCARD) is
+not supported, because the currently implemented logic assumes that
+erase/trim/discard is supported only if data line timeout can be set
+higher than the erase timeout of one erase group.
+
+Note, it is possible to change mmc_core.limit_erase_groups after
+kernel load, but it will have no effect, because mmc block queue
+setup and timeout calculations are done only once during mmc_core
+initialization.
+
+Signed-off-by: Vladimir Zapolskiy <vladimir_zapolskiy@mentor.com>
+Cc: Adrian Hunter <adrian.hunter@intel.com>
+---
+ drivers/mmc/core/Kconfig |   14 ++++++++++++++
+ drivers/mmc/core/core.c  |   11 +++++++++++
+ drivers/mmc/host/sdhci.c |   14 +++++++++++---
+ include/linux/mmc/host.h |    1 +
+ 4 files changed, 37 insertions(+), 3 deletions(-)
+
+diff --git a/drivers/mmc/core/Kconfig b/drivers/mmc/core/Kconfig
+index 269d072..9ecdde1 100644
+--- a/drivers/mmc/core/Kconfig
++++ b/drivers/mmc/core/Kconfig
+@@ -26,3 +26,17 @@ config MMC_CLKGATE
+ 	  support handling this in order for it to be of any use.
+ 
+ 	  If unsure, say N.
++
++config MMC_UNLIMIT_ERASE_GROUPS
++	bool "Assume fast erase/trim/discard operation (EXPERIMENTAL)"
++	depends on EXPERIMENTAL
++	help
++	  This option will disable limitation on maximum quantity of
++	  erase groups to be erased/trimmed/discarded safely without
++	  getting a timeout on DAT0 line. On old cards enabling of
++	  this option may be unsafe, but modern eMMC cards are capable
++	  to complete the operations in reasonable time regardless of
++	  extremely overestimated timeout for the operations specified
++	  by JEDEC standard.
++
++	  If unsure, say N.
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 57a2b40..40db797 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -81,6 +81,17 @@ MODULE_PARM_DESC(
+ 	removable,
+ 	"MMC/SD cards are removable and may be removed during suspend");
+ 
++#ifdef MMC_UNLIMIT_ERASE_GROUPS
++bool mmc_limit_erase_groups;
++#else
++bool mmc_limit_erase_groups = 1;
++#endif
++EXPORT_SYMBOL(mmc_limit_erase_groups);
++module_param_named(limit_erase_groups, mmc_limit_erase_groups, bool, 0644);
++MODULE_PARM_DESC(
++	limit_erase_groups,
++	"Erase group limitation is calculated from host's data line timeout");
++
+ /*
+  * Internal function. Schedule delayed work in the MMC work queue.
+  */
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index bd8a098..541e9af 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -736,8 +736,13 @@ static void sdhci_prepare_data(struct sdhci_host *host, struct mmc_command *cmd)
+ 	WARN_ON(host->data);
+ 
+ 	if (data || (cmd->flags & MMC_RSP_BUSY)) {
+-		count = sdhci_calc_timeout(host, cmd);
+-		sdhci_writeb(host, count, SDHCI_TIMEOUT_CONTROL);
++		if (cmd->opcode == MMC_ERASE && !mmc_limit_erase_groups) {
++			sdhci_mask_irqs(host, SDHCI_INT_TIMEOUT);
++		} else {
++			sdhci_unmask_irqs(host, SDHCI_INT_TIMEOUT);
++			count = sdhci_calc_timeout(host, cmd);
++			sdhci_writeb(host, count, SDHCI_TIMEOUT_CONTROL);
++		}
+ 	}
+ 
+ 	if (!data)
+@@ -2930,7 +2935,10 @@ int sdhci_add_host(struct sdhci_host *host)
+ 	if (host->quirks & SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK)
+ 		host->timeout_clk = mmc->f_max / 1000;
+ 
+-	mmc->max_discard_to = (1 << 27) / host->timeout_clk;
++	if (mmc_limit_erase_groups)
++		mmc->max_discard_to = (1 << 27) / host->timeout_clk;
++	else
++		mmc->max_discard_to = 0;
+ 
+ 	mmc->caps |= MMC_CAP_SDIO_IRQ | MMC_CAP_ERASE | MMC_CAP_CMD23;
+ 
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index 99f5709..7c93bb8 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -426,6 +426,7 @@ int mmc_pm_notify(struct notifier_block *notify_block, unsigned long, void *);
+ 
+ /* Module parameter */
+ extern bool mmc_assume_removable;
++extern bool mmc_limit_erase_groups;
+ 
+ static inline int mmc_card_is_removable(struct mmc_host *host)
+ {
+-- 
+1.7.10.4
+
