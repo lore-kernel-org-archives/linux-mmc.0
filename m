@@ -1,47 +1,89 @@
-From: Chen-Yu Tsai <wens@csie.org>
-Subject: Re: [PATCHv6 2/5] clk: socfpga: Add a clock type for the SD/MMC driver
-Date: Tue, 17 Dec 2013 10:17:26 +0800
-Message-ID: <CAGb2v67dud7XQSOy4eABX3SZX9pRkm366dodke5-AzdcGuje5A@mail.gmail.com>
-References: <1386880245-10192-1-git-send-email-dinguyen@altera.com>
- <1386880245-10192-3-git-send-email-dinguyen@altera.com> <201312142233.27143.arnd@arndb.de>
- <52AD1185.6090501@linaro.org> <20131215045116.23538.4@quantum> <52AF68DB.7090105@elopez.com.ar>
+From: John Tobias <john.tobias.ph@gmail.com>
+Subject: Re: [PATCH 1/3]: Support cpu frequency scaling and power management
+ for iMX6SL
+Date: Mon, 16 Dec 2013 18:37:14 -0800
+Message-ID: <CACUGKYN_b0x4xg_Me3TXQGKEvz61SDZk4CFk5YHFnVCWT_6GPg@mail.gmail.com>
+References: <CACUGKYPLSdih0_+Dt5LP2E1JACfU7NbAvtCibWftKbzTf6R8FA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pa0-f50.google.com ([209.85.220.50]:45566 "EHLO
-	mail-pa0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752190Ab3LQCRr convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 16 Dec 2013 21:17:47 -0500
-In-Reply-To: <52AF68DB.7090105@elopez.com.ar>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <CACUGKYPLSdih0_+Dt5LP2E1JACfU7NbAvtCibWftKbzTf6R8FA@mail.gmail.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, Shawn Guo <shawn.guo@linaro.org>, Fabio Estevam <festevam@gmail.com>, Chris Ball <cjb@laptop.org>
 List-Id: linux-mmc@vger.kernel.org
-To: =?ISO-8859-1?Q?Emilio_L=F3pez?= <emilio@elopez.com.ar>
-Cc: Mike Turquette <mturquette@linaro.org>, zhangfei <zhangfei.gao@linaro.org>, Arnd Bergmann <arnd@arndb.de>, dinguyen@altera.com, mark.rutland@arm.com, devicetree <devicetree@vger.kernel.org>, dinh.linux@gmail.com, heiko@sntech.de, pawel.moll@arm.com, bzhao@marvell.com, tgih.jun@samsung.com, Peter De Schrijver <pdeschrijver@nvidia.com>, linux-mmc@vger.kernel.org, dianders@chromium.org, Rob Herring <rob.herring@calxeda.com>, jh80.chung@samsung.com, alim.akhtar@samsung.com, cjb@laptop.org, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>, ian.campbell@citrix.com, Hans de Goede <hdegoede@redhat.com>, =?ISO-8859-1?Q?David_Lanzend=F6rfer?= <david.lanzendoerfer@o2s.ch>
 
-Hi,
+Need some correction:
 
-On Tue, Dec 17, 2013 at 4:55 AM, Emilio L=F3pez <emilio@elopez.com.ar> =
-wrote:
-> I also saw a similar requirement from the gmac people (on cc too), wh=
-o
-> needed to set the phy type (or something like that) on one of the clo=
-ck
+From: John Tobias <john.tobias.ph@gmail.com>
 
-The GMAC clock register controls the tx clock source (a mux) and the
-interface type, which is most likely a gate to control the direction
-of the tx clock.
 
-So I modeled it as a composite clock source for now.
-I'm open to other options.
+diff --git a/arch/arm/boot/dts/imx6sl.dtsi b/arch/arm/boot/dts/imx6sl.dtsi
+index 28558f1..6035e7e 100644
+--- a/arch/arm/boot/dts/imx6sl.dtsi
++++ b/arch/arm/boot/dts/imx6sl.dtsi
+@@ -38,6 +38,21 @@
+                        device_type = "cpu";
+                        reg = <0x0>;
+                        next-level-cache = <&L2>;
++                       operating-points = <
++                               /* kHz    uV */
++                               1000000 1275000
++                               996000  1250000
++                               792000  1150000
++                               396000  950000
++                       >;
++                       clock-latency = <61036>; /* two CLK32 periods */
++                       clocks = <&clks IMX6SL_CLK_ARM>, <&clks
+IMX6SL_CLK_PLL2_PFD2>, <&clks IMX6SL_CLK_STEP>,
++                                <&clks IMX6SL_CLK_PLL1_SW>, <&clks
+IMX6SL_CLK_PLL1_SYS>;
++                       clock-names = "arm", "pll2_pfd2_396m", "step",
++                                     "pll1_sw", "pll1_sys";
++                       arm-supply = <&reg_arm>;
++                       pu-supply = <&reg_pu>;
++                       soc-supply = <&reg_soc>;
+                };
+        };
 
-> registers; so I'm thinking maybe a generic "tune something" approach =
-that
-> lets users configure some clock-dependent, arbitrary aspect of the cl=
-ock is
-> the way forward. Otherwise, we're going to end up bloating the clock
-> framework with a lot of callback pointers that are going to be used i=
-n one
-> or two clocks out of potentially hundreds on the whole system.
 
-ChenYu
+On Mon, Dec 16, 2013 at 5:40 PM, John Tobias <john.tobias.ph@gmail.com> wrote:
+> iMX6SL device tree doesn't have a configuration settings to enable the
+> frequency scaling and power management.
+>
+> From: John Tobias <john.tobias.ph@gmail.com>
+>
+>
+> diff --git a/arch/arm/boot/dts/imx6sl.dtsi b/arch/arm/boot/dts/imx6sl.dtsi
+> index 28558f1..0ad2f6a 100644
+> --- a/arch/arm/boot/dts/imx6sl.dtsi
+> +++ b/arch/arm/boot/dts/imx6sl.dtsi
+> @@ -38,6 +38,19 @@
+>                         device_type = "cpu";
+>                         reg = <0x0>;
+>                         next-level-cache = <&L2>;
+> +                       operating-points = <
+> +                               /* kHz    uV */
+> +                               1000000 1275000
+> +                               792000  1150000
+> +                       >;
+> +                       clock-latency = <61036>; /* two CLK32 periods */
+> +                       clocks = <&clks IMX6SL_CLK_ARM>, <&clks
+> IMX6SL_CLK_PLL2_PFD2>, <&clks IMX6SL_CLK_STEP>,
+> +                                <&clks IMX6SL_CLK_PLL1_SW>, <&clks
+> IMX6SL_CLK_PLL1_SYS>;
+> +                       clock-names = "arm", "pll2_pfd2_396m", "step",
+> +                                     "pll1_sw", "pll1_sys";
+> +                       arm-supply = <&reg_arm>;
+> +                       pu-supply = <&reg_pu>;
+> +                       soc-supply = <&reg_soc>;
+>                 };
+>         };
