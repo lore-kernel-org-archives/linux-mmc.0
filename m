@@ -1,45 +1,47 @@
-From: John Tobias <john.tobias.ph@gmail.com>
-Subject: [PATCH 3/3]: Support cpu frequency scaling and power management for iMX6SL
-Date: Mon, 16 Dec 2013 17:40:20 -0800
-Message-ID: <CACUGKYOKEk9RUVS52gGc=CUNFYm1q+zT6rURnB4hwPkC0GCC1g@mail.gmail.com>
+From: Chen-Yu Tsai <wens@csie.org>
+Subject: Re: [PATCHv6 2/5] clk: socfpga: Add a clock type for the SD/MMC driver
+Date: Tue, 17 Dec 2013 10:17:26 +0800
+Message-ID: <CAGb2v67dud7XQSOy4eABX3SZX9pRkm366dodke5-AzdcGuje5A@mail.gmail.com>
+References: <1386880245-10192-1-git-send-email-dinguyen@altera.com>
+ <1386880245-10192-3-git-send-email-dinguyen@altera.com> <201312142233.27143.arnd@arndb.de>
+ <52AD1185.6090501@linaro.org> <20131215045116.23538.4@quantum> <52AF68DB.7090105@elopez.com.ar>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ob0-f177.google.com ([209.85.214.177]:33706 "EHLO
-	mail-ob0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751019Ab3LQBkU (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 16 Dec 2013 20:40:20 -0500
-Received: by mail-ob0-f177.google.com with SMTP id vb8so5578333obc.8
-        for <linux-mmc@vger.kernel.org>; Mon, 16 Dec 2013 17:40:20 -0800 (PST)
+Received: from mail-pa0-f50.google.com ([209.85.220.50]:45566 "EHLO
+	mail-pa0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752190Ab3LQCRr convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 16 Dec 2013 21:17:47 -0500
+In-Reply-To: <52AF68DB.7090105@elopez.com.ar>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, Shawn Guo <shawn.guo@linaro.org>, Fabio Estevam <festevam@gmail.com>, Chris Ball <cjb@laptop.org>
+To: =?ISO-8859-1?Q?Emilio_L=F3pez?= <emilio@elopez.com.ar>
+Cc: Mike Turquette <mturquette@linaro.org>, zhangfei <zhangfei.gao@linaro.org>, Arnd Bergmann <arnd@arndb.de>, dinguyen@altera.com, mark.rutland@arm.com, devicetree <devicetree@vger.kernel.org>, dinh.linux@gmail.com, heiko@sntech.de, pawel.moll@arm.com, bzhao@marvell.com, tgih.jun@samsung.com, Peter De Schrijver <pdeschrijver@nvidia.com>, linux-mmc@vger.kernel.org, dianders@chromium.org, Rob Herring <rob.herring@calxeda.com>, jh80.chung@samsung.com, alim.akhtar@samsung.com, cjb@laptop.org, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>, ian.campbell@citrix.com, Hans de Goede <hdegoede@redhat.com>, =?ISO-8859-1?Q?David_Lanzend=F6rfer?= <david.lanzendoerfer@o2s.ch>
 
-Enable cpu frequency on imx6 config
+Hi,
 
-From: John Tobias <john.tobias.ph@gmail.com>
+On Tue, Dec 17, 2013 at 4:55 AM, Emilio L=F3pez <emilio@elopez.com.ar> =
+wrote:
+> I also saw a similar requirement from the gmac people (on cc too), wh=
+o
+> needed to set the phy type (or something like that) on one of the clo=
+ck
 
+The GMAC clock register controls the tx clock source (a mux) and the
+interface type, which is most likely a gate to control the direction
+of the tx clock.
 
-diff --git a/arch/arm/configs/imx_v6_v7_defconfig
-b/arch/arm/configs/imx_v6_v7_defconfig
-index 8d0c5a0..a56cb2c 100644
---- a/arch/arm/configs/imx_v6_v7_defconfig
-+++ b/arch/arm/configs/imx_v6_v7_defconfig
-@@ -43,6 +43,17 @@ CONFIG_PREEMPT_VOLUNTARY=y
- CONFIG_AEABI=y
- # CONFIG_OABI_COMPAT is not set
- CONFIG_CMDLINE="noinitrd console=ttymxc0,115200"
-+CONFIG_CPU_FREQ=y
-+CONFIG_CPU_FREQ_GOV_COMMON=y
-+CONFIG_CPU_FREQ_STAT=y
-+CONFIG_CPU_FREQ_DEFAULT_GOV_PERFORMANCE=y
-+CONFIG_CPU_FREQ_GOV_PERFORMANCE=y
-+CONFIG_CPU_FREQ_GOV_POWERSAVE=y
-+CONFIG_CPU_FREQ_GOV_USERSPACE=y
-+CONFIG_CPU_FREQ_GOV_ONDEMAND=y
-+CONFIG_CPU_FREQ_GOV_CONSERVATIVE=y
-+CONFIG_GENERIC_CPUFREQ_CPU0=y
-+CONFIG_ARM_IMX6Q_CPUFREQ=y
- CONFIG_VFP=y
- CONFIG_NEON=y
- CONFIG_BINFMT_MISC=m
+So I modeled it as a composite clock source for now.
+I'm open to other options.
+
+> registers; so I'm thinking maybe a generic "tune something" approach =
+that
+> lets users configure some clock-dependent, arbitrary aspect of the cl=
+ock is
+> the way forward. Otherwise, we're going to end up bloating the clock
+> framework with a lot of callback pointers that are going to be used i=
+n one
+> or two clocks out of potentially hundreds on the whole system.
+
+ChenYu
