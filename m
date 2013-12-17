@@ -1,97 +1,72 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: max_discard anomaly on certain Sandisk eMMC
-Date: Tue, 17 Dec 2013 10:17:47 +0200
-Message-ID: <52B008AB.7060909@intel.com>
-References: <52AB8DA2.9000001@wwwdotorg.org> <52AF8A30.9050700@wwwdotorg.org>
+From: Dong Aisheng <b29396@freescale.com>
+Subject: [PATCH v2 0/5] mmc: sdhci: a few fixes on timeout and max_discard_to
+Date: Tue, 17 Dec 2013 16:16:26 +0800
+Message-ID: <1387268191-19859-1-git-send-email-b29396@freescale.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga01.intel.com ([192.55.52.88]:34922 "EHLO mga01.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751356Ab3LQIUZ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 17 Dec 2013 03:20:25 -0500
-In-Reply-To: <52AF8A30.9050700@wwwdotorg.org>
+Received: from co9ehsobe001.messaging.microsoft.com ([207.46.163.24]:46993
+	"EHLO co9outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751072Ab3LQIpx (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 17 Dec 2013 03:45:53 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Stephen Warren <swarren@wwwdotorg.org>
-Cc: Chris Ball <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-tegra@vger.kernel.org" <linux-tegra@vger.kernel.org>
+To: linux-mmc@vger.kernel.org
+Cc: linux-arm-kernel@lists.infradead.org, cjb@laptop.org, shawn.guo@linaro.org, s.hauer@pengutronix.de, b29396@freescale.com, ulf.hansson@linaro.org, adrian.hunter@intel.com, vladimir_zapolskiy@mentor.com, ed.sutter@alcatel-lucent.com
 
-On 17/12/13 01:18, Stephen Warren wrote:
-> On 12/13/2013 03:43 PM, Stephen Warren wrote:
->> On one of my eMMC devices, I see the following results from calling
->> mmc_do_calc_max_discard() with various parameters:
->>
->> [    3.057263] MMC_DISCARD_ARG max_discard 1
->> [    3.057266] MMC_ERASE_ARG   max_discard 4096
->> [    3.057267] MMC_TRIM_ARG    max_discard 1
->>
->> This causes mmc_calc_max_discard() to return 1, which makes the discard
->> IOCTL extremely slow.
-> 
-> Further investigation shows that if I make a few hacks that essentially
-> revert e056a1b5b67b "mmc: queue: let host controllers specify maximum
-> discard timeout":
-> 
-> diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
-> index 357bbc54fe4b..e66af930d0e3 100644
-> --- a/drivers/mmc/card/queue.c
-> +++ b/drivers/mmc/card/queue.c
-> @@ -167,13 +167,15 @@ static void mmc_queue_setup_discard(struct
-> request_queue *q,
->  		return;
-> 
->  	queue_flag_set_unlocked(QUEUE_FLAG_DISCARD, q);
-> -	q->limits.max_discard_sectors = max_discard;
-> +	q->limits.max_discard_sectors = UINT_MAX;
->  	if (card->erased_byte == 0 && !mmc_can_discard(card))
->  		q->limits.discard_zeroes_data = 1;
->  	q->limits.discard_granularity = card->pref_erase << 9;
->  	/* granularity must not be greater than max. discard */
-> +#if 0
->  	if (card->pref_erase > max_discard)
->  		q->limits.discard_granularity = 0;
-> +#endif
->  	if (mmc_can_secure_erase_trim(card))
->  		queue_flag_set_unlocked(QUEUE_FLAG_SECDISCARD, q);
->  }
-> 
-> I end up with:
-> 
-> $ cat /sys/.../block/mmcblk1/queue# cat discard_granularity
-> 2097152
-> $ cat /sys/.../block/mmcblk1/queue# cat discard_max_bytes
-> 2199023255040
-> $ cat /sys/.../block/mmcblk1/queue# cat discard_zeroes_data
-> 1
-> 
-> With those values, mke2fs is fast, and I validated that "blkdiscard"
-> works; I filled a large partition with /dev/urandom, executed
-> "blkdiscard" on the 4M at the start, and saw zeroes when reading the
-> discarded part back.
-> 
-> This implies that the issue is simply the operation of
-> mmc_calc_max_discard(), rather than the eMMC device mis-reporting its
-> discard abilities, doesn't it?
+Patch 1~4 mainly fixes the issue that the max timeout counter for uSDHC is
+1 << 28 rather than 1 << 27. 1~2 fix getting the max timeout counter
+while 3~4 fix setting the max timeout.
+Thus it introduces two new platform hook: get_max_timeout_count and set_timeout
+for those platform which have different timeout setting.
 
-No.
+This issue is firstly reported here by Ed Sutter:
+http://www.spinics.net/lists/linux-mmc/msg23375.html
+The root cause is the max_discard_to got from uSDHC is too small, only 677ms,
+which cause the max_discard_bytes for eMMC is only 512, then the discard operation
+of mkfs.ext3 for an eMMC card is too slow, just like dead.
+With above patches, the issue can be fixed.
 
-The underlying problem is a combination of:
-	a) JEDEC specified very large timeouts for erase operations e.g. can be
-minutes for large erases
-	b) SDHCI controllers have been implemented with high frequency timeout
-clocks which limit the maximum timeout to a few seconds
-	c) It is not possible to disable the timeout on SDHCI
+Patch 5 adds the capability to calcalute the max_discard_to dynamically
+for SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK.
 
-What a) means is that you can get away with much larger erases than you can
-specify the timeout for - which is what you have discovered.
+Originally the max_discard_to for a high speed sdhc card may be:
+mmc1: new high speed SDHC card at address aaaa
+mmc1: calculated max. discard sectors 49152 for timeout 1355 ms
+After fix:
+mmc1: new high speed SDHC card at address aaaa
+mmc1: calculated max. discard sectors 712704 for timeout 5422 ms
 
-To understand the timeouts, you should manually do the calculations.
+It also improves the card discard performance a lot due to max_discard_sectors
+increase a lot.
 
-Also note, that using HC Erase Size may help (MMC_CAP2_HC_ERASE_SZ), but
-beware of the partitioning implications of changing that.
+There's also discussion about remove max_discard_to limit here:
+http://www.spinics.net/lists/linux-mmc/msg23395.html
+But it does not help for uSDHC since we can observe data timeout
+on a Toshiba SD3.0 cards if we do not disable data timeout interrupt.
 
-The best solution is to change the hardware to use the lowest possible
-frequency timeout clock e.g. a 1KHz timeout clock could support timeouts of
-up to 36 hours.
+ChangeLog:
+v1->v2:
+ 1. change .get_max_timeout to .get_max_timeout_count to reuse some code
+ 2. some other minor changes based on Shawn's comment.
+ 3. patch 6 in v1 is dropped since not need anymore after change 1
+
+
+
+Dong Aisheng (5):
+  mmc: sdhci: add platfrom get_max_timeout_count hook
+  mmc: sdhci-esdhc-imx: fix incorrect max_discard_to for uSDHC
+  mmc: sdhci: add platform set_timeout hook
+  mmc: sdhci-esdhc-imx: set the correct max timeout value for uSDHC
+  mmc: sdhci: calculate max_discard_to dynamically for
+    SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK
+
+ drivers/mmc/host/sdhci-esdhc-imx.c |   20 +++++++++++
+ drivers/mmc/host/sdhci.c           |   66 +++++++++++++++++++++++------------
+ drivers/mmc/host/sdhci.h           |    3 ++
+ 3 files changed, 66 insertions(+), 23 deletions(-)
+
+-- 
+1.7.2.rc3
+
 
