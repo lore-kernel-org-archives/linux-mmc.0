@@ -1,87 +1,128 @@
-From: Alexandre Belloni <alexandre.belloni@free-electrons.com>
-Subject: Re: [PATCHv3] mmc: atmel-mci: add vmmc-supply support
-Date: Tue, 17 Dec 2013 20:03:12 +0100
-Message-ID: <52B09FF0.4070200@free-electrons.com>
-References: <1382006808-22728-1-git-send-email-alexandre.belloni@free-electrons.com> <CAPDyKFoiWOE47DWrUHNWVPyihL=uCidpd52TV1vgUbq1aMNvbw@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from top.free-electrons.com ([176.31.233.9]:50593 "EHLO
-	mail.free-electrons.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1751210Ab3LQTDP (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 17 Dec 2013 14:03:15 -0500
-In-Reply-To: <CAPDyKFoiWOE47DWrUHNWVPyihL=uCidpd52TV1vgUbq1aMNvbw@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Sergei Ianovich <ynvich@gmail.com>
+Subject: [PATCH v3 07/21] ARM: dts: parse DMA config in pxamci
+Date: Tue, 17 Dec 2013 23:37:37 +0400
+Message-ID: <1387309071-22382-8-git-send-email-ynvich@gmail.com>
+References: <1386901645-28895-1-git-send-email-ynvich@gmail.com>
+ <1387309071-22382-1-git-send-email-ynvich@gmail.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1387309071-22382-1-git-send-email-ynvich@gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Cc: Sergei Ianovich <ynvich@gmail.com>, Daniel Mack <zonque@gmail.com>, Arnd Bergmann <arnd@arndb.de>, Chris Ball <cjb@laptop.org>, Mark Brown <broonie@linaro.org>, Ulf Hansson <ulf.hansson@linaro.org>, Jingoo Han <jg1.han@samsung.com>, Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Ludovic Desroches <ludovic.desroches@atmel.com>, Chris Ball <cjb@laptop.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-Hi,
+The existing PXA MMC driver cannot get DMA channels in a proper
+way from the respective device tree binding.
 
-It seems that patch never made it to the mainline. Is it still missing
-something ?
+This patch provides temporary workaround which allows using the
+existing driver in DT machines by pointing to the proper
+dmaengine-based "marvell,pdma-1.0" DMA.
 
-Regards,
+Even though the new DMA provider is not present we can parse device node
+attributes manually and use channel numbers to acquire DMA channel
+from the existing non-dmaengine provider.
 
-On 17/10/2013 15:56, Ulf Hansson wrote:
-> On 17 October 2013 12:46, Alexandre Belloni
-> <alexandre.belloni@free-electrons.com> wrote:
->> Other MMC hosts handle a regulator named vmmc-supply that allows to power the
->> MMC card or SDIO device before communicating on the bus.
->>
->> Signed-off-by: Alexandre Belloni <alexandre.belloni@free-electrons.com>
-> Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
->
->> ---
->>
->> Changes in v2:
->>  - use mmc_regulator_get_supply instead of devm_regulator_get
->>
->> Changes in v3:
->>  - en/disable the regulator in .set_ios using mmc_regulator_set_ocr
->>
->>  drivers/mmc/host/atmel-mci.c | 7 +++++++
->>  1 file changed, 7 insertions(+)
->>
->> diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
->> index 69e438e..a9e1ba6 100644
->> --- a/drivers/mmc/host/atmel-mci.c
->> +++ b/drivers/mmc/host/atmel-mci.c
->> @@ -1385,8 +1385,14 @@ static void atmci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
->>                 clk_unprepare(host->mck);
->>
->>         switch (ios->power_mode) {
->> +       case MMC_POWER_OFF:
->> +               if (!IS_ERR(mmc->supply.vmmc))
->> +                       mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, 0);
->> +               break;
->>         case MMC_POWER_UP:
->>                 set_bit(ATMCI_CARD_NEED_INIT, &slot->flags);
->> +               if (!IS_ERR(mmc->supply.vmmc))
->> +                       mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, ios->vdd);
->>                 break;
->>         default:
->>                 /*
->> @@ -2196,6 +2202,7 @@ static int __init atmci_init_slot(struct atmel_mci *host,
->>         }
->>
->>         host->slot[id] = slot;
->> +       mmc_regulator_get_supply(mmc);
->>         mmc_add_host(mmc);
->>
->>         if (gpio_is_valid(slot->detect_pin)) {
->> --
->> 1.8.1.2
->>
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+When Daniel's DMA series is merged there will be no need to manually
+parse for "dmas" and this patch can be safely reverted.
 
+Signed-off-by: Sergei Ianovich <ynvich@gmail.com>
+CC: Daniel Mack <zonque@gmail.com>
+CC: Arnd Bergmann <arnd@arndb.de>
+---
+   v2..v3
+   * split into good (PATCH 07/21) and temporary (this one) parts
 
+   v1..v2
+   * add binding for next-gen dma controller
+   * use correct dma declararion
+   * number changed from 5 to 3
+
+ drivers/mmc/host/pxamci.c | 59 ++++++++++++++++++++++++++++++++++++++---------
+ 1 file changed, 48 insertions(+), 11 deletions(-)
+
+diff --git a/drivers/mmc/host/pxamci.c b/drivers/mmc/host/pxamci.c
+index 32fe113..6b67764 100644
+--- a/drivers/mmc/host/pxamci.c
++++ b/drivers/mmc/host/pxamci.c
+@@ -613,11 +613,46 @@ static int pxamci_of_init(struct platform_device *pdev)
+ 
+         return 0;
+ }
++
++static int pxamci_of_init_dma(struct platform_device *pdev,
++		struct pxamci_host *host)
++{
++	struct device_node *np = pdev->dev.of_node;
++	u32 tmp;
++	int i;
++	int ret;
++
++	i = of_property_match_string(np, "dma-names", "rx");
++	if (i < 0)
++		return i;
++
++	ret = of_property_read_u32_index(np, "dmas", 2 * i + 1, &tmp);
++	if (ret < 0)
++		return ret;
++	host->dma_drcmrrx = tmp;
++
++	i = of_property_match_string(np, "dma-names", "tx");
++	if (i < 0)
++		return i;
++
++	ret = of_property_read_u32_index(np, "dmas", 2 * i + 1, &tmp);
++	if (ret < 0)
++		return ret;
++	host->dma_drcmrtx = tmp;
++
++	return 0;
++}
+ #else
+ static int pxamci_of_init(struct platform_device *pdev)
+ {
+         return 0;
+ }
++
++static int pxamci_of_init_dma(struct platform_device *pdev,
++		struct pxamci_host *host)
++{
++	return -ENODATA;
++}
+ #endif
+ 
+ static int pxamci_probe(struct platform_device *pdev)
+@@ -741,19 +776,21 @@ static int pxamci_probe(struct platform_device *pdev)
+ 
+ 	platform_set_drvdata(pdev, mmc);
+ 
+-	dmarx = platform_get_resource(pdev, IORESOURCE_DMA, 0);
+-	if (!dmarx) {
+-		ret = -ENXIO;
+-		goto out;
+-	}
+-	host->dma_drcmrrx = dmarx->start;
++	if (pxamci_of_init_dma(pdev, host) < 0) {
++		dmarx = platform_get_resource(pdev, IORESOURCE_DMA, 0);
++		if (!dmarx) {
++			ret = -ENXIO;
++			goto out;
++		}
++		host->dma_drcmrrx = dmarx->start;
+ 
+-	dmatx = platform_get_resource(pdev, IORESOURCE_DMA, 1);
+-	if (!dmatx) {
+-		ret = -ENXIO;
+-		goto out;
++		dmatx = platform_get_resource(pdev, IORESOURCE_DMA, 1);
++		if (!dmatx) {
++			ret = -ENXIO;
++			goto out;
++		}
++		host->dma_drcmrtx = dmatx->start;
+ 	}
+-	host->dma_drcmrtx = dmatx->start;
+ 
+ 	if (host->pdata) {
+ 		gpio_cd = host->pdata->gpio_card_detect;
 -- 
-Alexandre Belloni, Free Electrons
-Embedded Linux, Kernel and Android engineering
-http://free-electrons.com
-
+1.8.4.2
