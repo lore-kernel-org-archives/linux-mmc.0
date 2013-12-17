@@ -1,63 +1,87 @@
-From: Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>
-Subject: [PATCH] mmc: core: don't decrement qty when calculating max_discard
-Date: Tue, 17 Dec 2013 11:02:24 -0700
-Message-ID: <1387303344-11802-1-git-send-email-swarren@wwwdotorg.org>
-Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>
-Cc: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Stephen Warren <swarren-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Dong Aisheng <dongas86-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Vladimir Zapolskiy <vz-ChpfBGZJDbMAvxtiuMwx3w@public.gmane.org>
+From: Alexandre Belloni <alexandre.belloni@free-electrons.com>
+Subject: Re: [PATCHv3] mmc: atmel-mci: add vmmc-supply support
+Date: Tue, 17 Dec 2013 20:03:12 +0100
+Message-ID: <52B09FF0.4070200@free-electrons.com>
+References: <1382006808-22728-1-git-send-email-alexandre.belloni@free-electrons.com> <CAPDyKFoiWOE47DWrUHNWVPyihL=uCidpd52TV1vgUbq1aMNvbw@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from top.free-electrons.com ([176.31.233.9]:50593 "EHLO
+	mail.free-electrons.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1751210Ab3LQTDP (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 17 Dec 2013 14:03:15 -0500
+In-Reply-To: <CAPDyKFoiWOE47DWrUHNWVPyihL=uCidpd52TV1vgUbq1aMNvbw@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Ludovic Desroches <ludovic.desroches@atmel.com>, Chris Ball <cjb@laptop.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-From: Stephen Warren <swarren-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
+Hi,
 
-In mmc_do_calc_max_discard(), if any value has been assigned to qty,
-that value must have passed the timeout checks in the loop. Hence,
-qty is the maximum number of erase blocks that fit within the timeout,
-not the first value that does not fit into the timeout. In turn, this
-means we don't need any special case for (qty == 1); any value of qty
-needs to be multiplied by the card's erase shift, and we don't need to
-decrement qty before doing so.
+It seems that patch never made it to the mainline. Is it still missing
+something ?
 
-Without this patch, on the NVIDIA Tegra Cardhu board, the loops result
-in qty == 1, which is immediately returned. This causes discard to
-operate a single sector at a time, which is chronically slow. With this
-patch in place, discard operates a single erase block at a time, which
-is reasonably fast.
+Regards,
 
-Cc: Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Cc: Dong Aisheng <dongas86-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Vladimir Zapolskiy <vz-ChpfBGZJDbMAvxtiuMwx3w@public.gmane.org>
-Fixes: e056a1b5b67b "(mmc: queue: let host controllers specify maximum discard timeout")
-Signed-off-by: Stephen Warren <swarren-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
----
-If this makes sense, I wonder if it should be Cc: stable?
----
- drivers/mmc/core/core.c | 7 ++-----
- 1 file changed, 2 insertions(+), 5 deletions(-)
+On 17/10/2013 15:56, Ulf Hansson wrote:
+> On 17 October 2013 12:46, Alexandre Belloni
+> <alexandre.belloni@free-electrons.com> wrote:
+>> Other MMC hosts handle a regulator named vmmc-supply that allows to power the
+>> MMC card or SDIO device before communicating on the bus.
+>>
+>> Signed-off-by: Alexandre Belloni <alexandre.belloni@free-electrons.com>
+> Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
+>
+>> ---
+>>
+>> Changes in v2:
+>>  - use mmc_regulator_get_supply instead of devm_regulator_get
+>>
+>> Changes in v3:
+>>  - en/disable the regulator in .set_ios using mmc_regulator_set_ocr
+>>
+>>  drivers/mmc/host/atmel-mci.c | 7 +++++++
+>>  1 file changed, 7 insertions(+)
+>>
+>> diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
+>> index 69e438e..a9e1ba6 100644
+>> --- a/drivers/mmc/host/atmel-mci.c
+>> +++ b/drivers/mmc/host/atmel-mci.c
+>> @@ -1385,8 +1385,14 @@ static void atmci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+>>                 clk_unprepare(host->mck);
+>>
+>>         switch (ios->power_mode) {
+>> +       case MMC_POWER_OFF:
+>> +               if (!IS_ERR(mmc->supply.vmmc))
+>> +                       mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, 0);
+>> +               break;
+>>         case MMC_POWER_UP:
+>>                 set_bit(ATMCI_CARD_NEED_INIT, &slot->flags);
+>> +               if (!IS_ERR(mmc->supply.vmmc))
+>> +                       mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, ios->vdd);
+>>                 break;
+>>         default:
+>>                 /*
+>> @@ -2196,6 +2202,7 @@ static int __init atmci_init_slot(struct atmel_mci *host,
+>>         }
+>>
+>>         host->slot[id] = slot;
+>> +       mmc_regulator_get_supply(mmc);
+>>         mmc_add_host(mmc);
+>>
+>>         if (gpio_is_valid(slot->detect_pin)) {
+>> --
+>> 1.8.1.2
+>>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 57a2b403bf8e..dd793cf4ef46 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -2150,16 +2150,13 @@ static unsigned int mmc_do_calc_max_discard(struct mmc_card *card,
- 	if (!qty)
- 		return 0;
- 
--	if (qty == 1)
--		return 1;
--
- 	/* Convert qty to sectors */
- 	if (card->erase_shift)
--		max_discard = --qty << card->erase_shift;
-+		max_discard = qty << card->erase_shift;
- 	else if (mmc_card_sd(card))
- 		max_discard = qty;
- 	else
--		max_discard = --qty * card->erase_size;
-+		max_discard = qty * card->erase_size;
- 
- 	return max_discard;
- }
+
 -- 
-1.8.1.5
+Alexandre Belloni, Free Electrons
+Embedded Linux, Kernel and Android engineering
+http://free-electrons.com
+
