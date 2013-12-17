@@ -1,105 +1,97 @@
-From: zhangfei <zhangfei.gao@linaro.org>
-Subject: Re: [PATCHv4] mmc: dw_mmc: Enable the hold reg for certain speed
- modes
-Date: Tue, 17 Dec 2013 16:11:35 +0800
-Message-ID: <52B00737.6050701@linaro.org>
-References: <1387213279-22020-1-git-send-email-dinguyen@altera.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: max_discard anomaly on certain Sandisk eMMC
+Date: Tue, 17 Dec 2013 10:17:47 +0200
+Message-ID: <52B008AB.7060909@intel.com>
+References: <52AB8DA2.9000001@wwwdotorg.org> <52AF8A30.9050700@wwwdotorg.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pa0-f54.google.com ([209.85.220.54]:59423 "EHLO
-	mail-pa0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752660Ab3LQILm (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 17 Dec 2013 03:11:42 -0500
-Received: by mail-pa0-f54.google.com with SMTP id rd3so4175373pab.27
-        for <linux-mmc@vger.kernel.org>; Tue, 17 Dec 2013 00:11:42 -0800 (PST)
-In-Reply-To: <1387213279-22020-1-git-send-email-dinguyen@altera.com>
+Received: from mga01.intel.com ([192.55.52.88]:34922 "EHLO mga01.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751356Ab3LQIUZ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 17 Dec 2013 03:20:25 -0500
+In-Reply-To: <52AF8A30.9050700@wwwdotorg.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: dinguyen@altera.com, dinh.linux@gmail.com, arnd@arndb.de, cjb@laptop.org, jh80.chung@samsung.com, tgih.jun@samsung.com, heiko@sntech.de, dianders@chromium.org, alim.akhtar@samsung.com, bzhao@marvell.com
-Cc: linux-mmc@vger.kernel.org
+To: Stephen Warren <swarren@wwwdotorg.org>
+Cc: Chris Ball <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-tegra@vger.kernel.org" <linux-tegra@vger.kernel.org>
 
+On 17/12/13 01:18, Stephen Warren wrote:
+> On 12/13/2013 03:43 PM, Stephen Warren wrote:
+>> On one of my eMMC devices, I see the following results from calling
+>> mmc_do_calc_max_discard() with various parameters:
+>>
+>> [    3.057263] MMC_DISCARD_ARG max_discard 1
+>> [    3.057266] MMC_ERASE_ARG   max_discard 4096
+>> [    3.057267] MMC_TRIM_ARG    max_discard 1
+>>
+>> This causes mmc_calc_max_discard() to return 1, which makes the discard
+>> IOCTL extremely slow.
+> 
+> Further investigation shows that if I make a few hacks that essentially
+> revert e056a1b5b67b "mmc: queue: let host controllers specify maximum
+> discard timeout":
+> 
+> diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
+> index 357bbc54fe4b..e66af930d0e3 100644
+> --- a/drivers/mmc/card/queue.c
+> +++ b/drivers/mmc/card/queue.c
+> @@ -167,13 +167,15 @@ static void mmc_queue_setup_discard(struct
+> request_queue *q,
+>  		return;
+> 
+>  	queue_flag_set_unlocked(QUEUE_FLAG_DISCARD, q);
+> -	q->limits.max_discard_sectors = max_discard;
+> +	q->limits.max_discard_sectors = UINT_MAX;
+>  	if (card->erased_byte == 0 && !mmc_can_discard(card))
+>  		q->limits.discard_zeroes_data = 1;
+>  	q->limits.discard_granularity = card->pref_erase << 9;
+>  	/* granularity must not be greater than max. discard */
+> +#if 0
+>  	if (card->pref_erase > max_discard)
+>  		q->limits.discard_granularity = 0;
+> +#endif
+>  	if (mmc_can_secure_erase_trim(card))
+>  		queue_flag_set_unlocked(QUEUE_FLAG_SECDISCARD, q);
+>  }
+> 
+> I end up with:
+> 
+> $ cat /sys/.../block/mmcblk1/queue# cat discard_granularity
+> 2097152
+> $ cat /sys/.../block/mmcblk1/queue# cat discard_max_bytes
+> 2199023255040
+> $ cat /sys/.../block/mmcblk1/queue# cat discard_zeroes_data
+> 1
+> 
+> With those values, mke2fs is fast, and I validated that "blkdiscard"
+> works; I filled a large partition with /dev/urandom, executed
+> "blkdiscard" on the 4M at the start, and saw zeroes when reading the
+> discarded part back.
+> 
+> This implies that the issue is simply the operation of
+> mmc_calc_max_discard(), rather than the eMMC device mis-reporting its
+> discard abilities, doesn't it?
 
+No.
 
-On 12/17/2013 01:01 AM, dinguyen@altera.com wrote:
-> From: Dinh Nguyen <dinguyen@altera.com>
->
-> This patch will enable the SDMMC_CMD_USE_HOLD_REG bit when the slot is
-> operating all timing modes, except for SDR50, DDR50, SDR104, and MMC_HS200.
->
-> According to the Synopsys databook :"To meet the relatively high Input Hold
-> Time requirement for SDR12, SDR25, and other MMC speed modes, you should
-> program bit[29]use_hold_Reg of the CMD register to 1'b1;"..."However, for
-> the higher speed modes of SDR104, SDR50 and DDR50, you can meet the much
-> smaller Input Hold Time requirement of 0.8ns by bypassing the Hold Register
-> (Path A in Figure 10-8, programming CMD.use_hold_reg = 1'b0) and then adding
-> delay elements on the output path as indicated.
->
-> Also, "Never set CMD.use_hold_reg = 1 and cclk_in_drv phase shift to 0 at the
-> same time. This would add an extra one-cycle delay on the output path, resulting
-> in incorrect behavior."
->
-> This patch also checks the IHR(Implement Hold Register) in the HCON register.
->
-> This information is taking from the v2.50a of the Synopsys Designware Cores
-> Mobile Storage Host Databook.
->
-> Signed-off-by: Dinh Nguyen <dinguyen@altera.com>
-> Acked-by: Arnd Bergmann <arnd@arndb.de>
-> Acked-by: Heiko Stuebner <heiko@sntech.de>
-> Tested-by: Heiko Stuebner <heiko@sntech.de>
-> ---
-> v4: use_hold_reg should be set for all modes when cclk_in_drv is non-zero.
-> v3: Read the IHR(Implement Hold Register) in the HCON
-> v2: Add check for cclk_in_drv phase shift in conjunction with use_hold_reg.
-> ---
->   drivers/mmc/host/dw_mmc.c  |   52 ++++++++++++++++++++++++++++++++++++++++++++
->   drivers/mmc/host/dw_mmc.h  |    4 ++++
->   include/linux/mmc/dw_mmc.h |    3 +++
->   3 files changed, 59 insertions(+)
->
-> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
->   	/*
->   	 * Use mirror of ios->clock to prevent race with mmc
->   	 * core ios update when finding the minimum.
-> @@ -2339,6 +2361,8 @@ static struct dw_mci_board *dw_mci_parse_dt(struct dw_mci *host)
->   	const struct dw_mci_drv_data *drv_data = host->drv_data;
->   	int idx, ret;
->   	u32 clock_frequency;
-> +	int sdr_timing[2];
-> +	int ddr_timing[2];
->
->   	pdata = devm_kzalloc(dev, sizeof(*pdata), GFP_KERNEL);
->   	if (!pdata) {
-> @@ -2389,6 +2413,25 @@ static struct dw_mci_board *dw_mci_parse_dt(struct dw_mci *host)
->   	if (of_find_property(np, "caps2-mmc-hs200-1_2v", NULL))
->   		pdata->caps2 |= MMC_CAP2_HS200_1_2V_SDR;
->
-> +	/* Check for the "samsung,dw-mshc-sdr-timing" and the
-> +	 * "samsung,dw-mshc-ddr-timing" bindings as this will tell us if we
-> +	 * can safely set the SDMMC_CMD_USE_HOLD_REG bit. The second paramater
-> +	 * in these 2 bindings is the value of the cclk_in_drv. If cclk_in_drv
-> +	 * is 0, we cannot set the SDMMC_CMD_USE_HOLD_REG bit. The default
-> +	 * behavior will be to set cclk_in_drv, as some platforms do not have
-> +	 * to set the sdr or ddr timing parameters.
-> +	 */
-> +	sdr_timing[1] = ddr_timing[1] = 1;
-> +	of_property_read_u32_array(np,
-> +			"samsung,dw-mshc-sdr-timing", sdr_timing, 2);
-> +
-> +	of_property_read_u32_array(np,
-> +			"samsung,dw-mshc-ddr-timing", ddr_timing, 2);
-> +
-> +	pdata->cclk_in_drv = 1;
-> +	if ((sdr_timing[1] == 0) || (ddr_timing[1] == 0))
-> +		pdata->cclk_in_drv = 0;
-> +
+The underlying problem is a combination of:
+	a) JEDEC specified very large timeouts for erase operations e.g. can be
+minutes for large erases
+	b) SDHCI controllers have been implemented with high frequency timeout
+clocks which limit the maximum timeout to a few seconds
+	c) It is not possible to disable the timeout on SDHCI
 
-Have some concern about whether it is suitable putting "samsung,~" 
-property in dw_mmc.c, is it supposed to be platform related?
-Any conflict with drivers/mmc/host/dw_mmc-exynos.c?
-If they are really commonly used, how about change name and define in 
-Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt?
+What a) means is that you can get away with much larger erases than you can
+specify the timeout for - which is what you have discovered.
 
-Thanks
+To understand the timeouts, you should manually do the calculations.
+
+Also note, that using HC Erase Size may help (MMC_CAP2_HC_ERASE_SZ), but
+beware of the partitioning implications of changing that.
+
+The best solution is to change the hardware to use the lowest possible
+frequency timeout clock e.g. a 1KHz timeout clock could support timeouts of
+up to 36 hours.
+
