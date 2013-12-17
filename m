@@ -1,60 +1,38 @@
-From: Shawn Guo <shawn.guo@linaro.org>
-Subject: Re: [PATCH 1/3]: Support cpu frequency scaling and power management
- for iMX6SL
-Date: Tue, 17 Dec 2013 22:04:58 +0800
-Message-ID: <20131217140448.GU6691@S2101-09.ap.freescale.net>
-References: <CACUGKYPLSdih0_+Dt5LP2E1JACfU7NbAvtCibWftKbzTf6R8FA@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: [PATCH 2/3] mmc: core: Remove unused host cap MMC_CAP2_BROKEN_VOLTAGE
+Date: Tue, 17 Dec 2013 15:04:17 +0100
+Message-ID: <1387289058-19755-2-git-send-email-ulf.hansson@linaro.org>
+References: <1387289058-19755-1-git-send-email-ulf.hansson@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from tx2ehsobe002.messaging.microsoft.com ([65.55.88.12]:40487 "EHLO
-	tx2outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752958Ab3LQOD7 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 17 Dec 2013 09:03:59 -0500
-Content-Disposition: inline
-In-Reply-To: <CACUGKYPLSdih0_+Dt5LP2E1JACfU7NbAvtCibWftKbzTf6R8FA@mail.gmail.com>
+Received: from mail-lb0-f176.google.com ([209.85.217.176]:65283 "EHLO
+	mail-lb0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753798Ab3LQOEa (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 17 Dec 2013 09:04:30 -0500
+Received: by mail-lb0-f176.google.com with SMTP id l4so1435079lbv.7
+        for <linux-mmc@vger.kernel.org>; Tue, 17 Dec 2013 06:04:28 -0800 (PST)
+In-Reply-To: <1387289058-19755-1-git-send-email-ulf.hansson@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: John Tobias <john.tobias.ph@gmail.com>
-Cc: linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, Fabio Estevam <festevam@gmail.com>, Chris Ball <cjb@laptop.org>
+To: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>
 
-On Mon, Dec 16, 2013 at 05:40:15PM -0800, John Tobias wrote:
-> iMX6SL device tree doesn't have a configuration settings to enable the
-> frequency scaling and power management.
-> 
-> From: John Tobias <john.tobias.ph@gmail.com>
+Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+---
+ include/linux/mmc/host.h |    1 -
+ 1 file changed, 1 deletion(-)
 
-Please use 'git format-patch' and 'git send-email'.  Also, it's never
-been a good idea to use the exactly same patch subject for 3 different
-changes.
-
-Shawn
-
-> 
-> 
-> diff --git a/arch/arm/boot/dts/imx6sl.dtsi b/arch/arm/boot/dts/imx6sl.dtsi
-> index 28558f1..0ad2f6a 100644
-> --- a/arch/arm/boot/dts/imx6sl.dtsi
-> +++ b/arch/arm/boot/dts/imx6sl.dtsi
-> @@ -38,6 +38,19 @@
->                         device_type = "cpu";
->                         reg = <0x0>;
->                         next-level-cache = <&L2>;
-> +                       operating-points = <
-> +                               /* kHz    uV */
-> +                               1000000 1275000
-> +                               792000  1150000
-> +                       >;
-> +                       clock-latency = <61036>; /* two CLK32 periods */
-> +                       clocks = <&clks IMX6SL_CLK_ARM>, <&clks
-> IMX6SL_CLK_PLL2_PFD2>, <&clks IMX6SL_CLK_STEP>,
-> +                                <&clks IMX6SL_CLK_PLL1_SW>, <&clks
-> IMX6SL_CLK_PLL1_SYS>;
-> +                       clock-names = "arm", "pll2_pfd2_396m", "step",
-> +                                     "pll1_sw", "pll1_sys";
-> +                       arm-supply = <&reg_arm>;
-> +                       pu-supply = <&reg_pu>;
-> +                       soc-supply = <&reg_soc>;
->                 };
->         };
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index 47fcc5d..a76993c 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -272,7 +272,6 @@ struct mmc_host {
+ #define MMC_CAP2_HS200_1_2V_SDR	(1 << 6)        /* can support */
+ #define MMC_CAP2_HS200		(MMC_CAP2_HS200_1_8V_SDR | \
+ 				 MMC_CAP2_HS200_1_2V_SDR)
+-#define MMC_CAP2_BROKEN_VOLTAGE	(1 << 7)	/* Use the broken voltage */
+ #define MMC_CAP2_HC_ERASE_SZ	(1 << 9)	/* High-capacity erase size */
+ #define MMC_CAP2_CD_ACTIVE_HIGH	(1 << 10)	/* Card-detect signal active high */
+ #define MMC_CAP2_RO_ACTIVE_HIGH	(1 << 11)	/* Write-protect signal active high */
+-- 
+1.7.9.5
 
