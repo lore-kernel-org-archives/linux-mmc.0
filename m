@@ -1,140 +1,61 @@
-From: zhangfei <zhangfei.gao@linaro.org>
-Subject: Re: [PATCHv4] mmc: dw_mmc: Enable the hold reg for certain speed
- modes
-Date: Tue, 17 Dec 2013 22:54:42 +0800
-Message-ID: <52B065B2.6010703@linaro.org>
-References: <1387213279-22020-1-git-send-email-dinguyen@altera.com> <52B00737.6050701@linaro.org> <52B059A1.1000306@gmail.com>
+From: Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>
+Subject: Re: max_discard anomaly on certain Sandisk eMMC
+Date: Tue, 17 Dec 2013 10:27:23 -0700
+Message-ID: <52B0897B.5010700@wwwdotorg.org>
+References: <52AB8DA2.9000001@wwwdotorg.org> <CAA+hA=R3wnbuJrJQhfG9PQEHrwE9nrwg_+xSpyXryOeM2Wtwcw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pd0-f181.google.com ([209.85.192.181]:50006 "EHLO
-	mail-pd0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754175Ab3LQOys (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 17 Dec 2013 09:54:48 -0500
-Received: by mail-pd0-f181.google.com with SMTP id p10so6860063pdj.40
-        for <linux-mmc@vger.kernel.org>; Tue, 17 Dec 2013 06:54:48 -0800 (PST)
-In-Reply-To: <52B059A1.1000306@gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <CAA+hA=R3wnbuJrJQhfG9PQEHrwE9nrwg_+xSpyXryOeM2Wtwcw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Dong Aisheng <dongas86-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Dinh Nguyen <dinh.linux@gmail.com>, dinguyen@altera.com, arnd@arndb.de, cjb@laptop.org, jh80.chung@samsung.com, tgih.jun@samsung.com, heiko@sntech.de, dianders@chromium.org, alim.akhtar@samsung.com, bzhao@marvell.com
-Cc: linux-mmc@vger.kernel.org
 
-
-
-On 12/17/2013 10:03 PM, Dinh Nguyen wrote:
-> Hi Zhangfei,
->
-> On 12/17/13 2:11 AM, zhangfei wrote:
+On 12/17/2013 02:25 AM, Dong Aisheng wrote:
+> Hi Stephen,
+> 
+> On Sat, Dec 14, 2013 at 6:43 AM, Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org> wrote:
+>> On one of my eMMC devices, I see the following results from calling
+>> mmc_do_calc_max_discard() with various parameters:
 >>
+>> [    3.057263] MMC_DISCARD_ARG max_discard 1
+>> [    3.057266] MMC_ERASE_ARG   max_discard 4096
+>> [    3.057267] MMC_TRIM_ARG    max_discard 1
 >>
->> On 12/17/2013 01:01 AM, dinguyen@altera.com wrote:
->>> From: Dinh Nguyen <dinguyen@altera.com>
->>>
->>> This patch will enable the SDMMC_CMD_USE_HOLD_REG bit when the slot is
->>> operating all timing modes, except for SDR50, DDR50, SDR104, and
->>> MMC_HS200.
->>>
->>> According to the Synopsys databook :"To meet the relatively high
->>> Input Hold
->>> Time requirement for SDR12, SDR25, and other MMC speed modes, you should
->>> program bit[29]use_hold_Reg of the CMD register to 1'b1;"..."However,
->>> for
->>> the higher speed modes of SDR104, SDR50 and DDR50, you can meet the much
->>> smaller Input Hold Time requirement of 0.8ns by bypassing the Hold
->>> Register
->>> (Path A in Figure 10-8, programming CMD.use_hold_reg = 1'b0) and then
->>> adding
->>> delay elements on the output path as indicated.
->>>
->>> Also, "Never set CMD.use_hold_reg = 1 and cclk_in_drv phase shift to
->>> 0 at the
->>> same time. This would add an extra one-cycle delay on the output
->>> path, resulting
->>> in incorrect behavior."
->>>
->>> This patch also checks the IHR(Implement Hold Register) in the HCON
->>> register.
->>>
->>> This information is taking from the v2.50a of the Synopsys Designware
->>> Cores
->>> Mobile Storage Host Databook.
->>>
->>> Signed-off-by: Dinh Nguyen <dinguyen@altera.com>
->>> Acked-by: Arnd Bergmann <arnd@arndb.de>
->>> Acked-by: Heiko Stuebner <heiko@sntech.de>
->>> Tested-by: Heiko Stuebner <heiko@sntech.de>
->>> ---
->>> v4: use_hold_reg should be set for all modes when cclk_in_drv is
->>> non-zero.
->>> v3: Read the IHR(Implement Hold Register) in the HCON
->>> v2: Add check for cclk_in_drv phase shift in conjunction with
->>> use_hold_reg.
->>> ---
->>>    drivers/mmc/host/dw_mmc.c  |   52
->>> ++++++++++++++++++++++++++++++++++++++++++++
->>>    drivers/mmc/host/dw_mmc.h  |    4 ++++
->>>    include/linux/mmc/dw_mmc.h |    3 +++
->>>    3 files changed, 59 insertions(+)
->>>
->>> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
->>>        /*
->>>         * Use mirror of ios->clock to prevent race with mmc
->>>         * core ios update when finding the minimum.
->>> @@ -2339,6 +2361,8 @@ static struct dw_mci_board
->>> *dw_mci_parse_dt(struct dw_mci *host)
->>>        const struct dw_mci_drv_data *drv_data = host->drv_data;
->>>        int idx, ret;
->>>        u32 clock_frequency;
->>> +    int sdr_timing[2];
->>> +    int ddr_timing[2];
->>>
->>>        pdata = devm_kzalloc(dev, sizeof(*pdata), GFP_KERNEL);
->>>        if (!pdata) {
->>> @@ -2389,6 +2413,25 @@ static struct dw_mci_board
->>> *dw_mci_parse_dt(struct dw_mci *host)
->>>        if (of_find_property(np, "caps2-mmc-hs200-1_2v", NULL))
->>>            pdata->caps2 |= MMC_CAP2_HS200_1_2V_SDR;
->>>
->>> +    /* Check for the "samsung,dw-mshc-sdr-timing" and the
->>> +     * "samsung,dw-mshc-ddr-timing" bindings as this will tell us if we
->>> +     * can safely set the SDMMC_CMD_USE_HOLD_REG bit. The second
->>> paramater
->>> +     * in these 2 bindings is the value of the cclk_in_drv. If
->>> cclk_in_drv
->>> +     * is 0, we cannot set the SDMMC_CMD_USE_HOLD_REG bit. The default
->>> +     * behavior will be to set cclk_in_drv, as some platforms do not
->>> have
->>> +     * to set the sdr or ddr timing parameters.
->>> +     */
->>> +    sdr_timing[1] = ddr_timing[1] = 1;
->>> +    of_property_read_u32_array(np,
->>> +            "samsung,dw-mshc-sdr-timing", sdr_timing, 2);
->>> +
->>> +    of_property_read_u32_array(np,
->>> +            "samsung,dw-mshc-ddr-timing", ddr_timing, 2);
->>> +
->>> +    pdata->cclk_in_drv = 1;
->>> +    if ((sdr_timing[1] == 0) || (ddr_timing[1] == 0))
->>> +        pdata->cclk_in_drv = 0;
->>> +
+>> This causes mmc_calc_max_discard() to return 1, which makes the discard
+>> IOCTL extremely slow.
 >>
->> Have some concern about whether it is suitable putting "samsung,~"
->> property in dw_mmc.c, is it supposed to be platform related?
->> Any conflict with drivers/mmc/host/dw_mmc-exynos.c?
->> If they are really commonly used, how about change name and define in
->> Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt?
-> I had submitted a patch to make this a common binding before:
->
-> http://www.spinics.net/lists/devicetree/msg00638.html
->
-> I think the ultimate conclusion to that thread was that its perfectly
-> acceptable to re-use bindings from other
-> platforms.
->
+> 
+> IMX met the similar issue.
+> http://www.spinics.net/lists/linux-mmc/msg23375.html
+> It's caused by the max_discard_to supported by host is too small.
+> 
+> I submitted the fix patches:
+> http://www.spinics.net/lists/arm-kernel/msg294924.html
+> Please see if it helps for you, especially patch #5.
+> It could increase the max_discard_to if Tegra has same problem.
 
-Hmm, ususally I may look for the properties of dw_mmc.c in 
-synopsys-dw-mshc.txt.
-If this is the conclusion before, then just ignore this noise.
+Thanks for the pointer!
 
-Thanks
+Yes, Tegra has SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK set, and has a max
+clock of 208MHz specified in HW, yet we only run the HW at 48MHz
+upstream, since we haven't actually implemented any of the
+advanced/faster transfer rates yet. Hence that patch does avoid/solve
+the issue on 2 of my boards.
+
+However, the patch doesn't solve the problem on 2 other boards, since
+the eMMC device on those boards specifies a much larger timeout, which
+still causes max_discard to be set to 0. It sounds like the real
+solution is what was discussed elsewhere in this thread; to use command
+polling for erases?
+
+Even on the boards where your patch solves the problem, isn't it just a
+temporary measure; as soon as we upstream the changes to enable the
+faster transfer modes, we'll have a faster SDCLK, and hence again be
+limited in the discard size, perhaps down to a single sector again.
+
+(Incidentally, I think the code should be limiting to a single erase
+block, not a single sector. I'll send a separate patch to fix that, and
+Cc everyone here).
