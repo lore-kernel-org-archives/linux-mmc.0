@@ -1,116 +1,41 @@
-From: John Tobias <john.tobias.ph@gmail.com>
-Subject: Re: [PATCH 3/4] Removing imx6q_opp_init
-Date: Wed, 18 Dec 2013 08:25:33 -0800
-Message-ID: <CACUGKYMfoCRv=0T0TWfmzBcb3xVn348bOvMiCT89qdZH+x_wAQ@mail.gmail.com>
-References: <1387329451-17480-1-git-send-email-john.tobias.ph@gmail.com>
-	<1387329451-17480-3-git-send-email-john.tobias.ph@gmail.com>
-	<20131218074926.GI6691@S2101-09.ap.freescale.net>
+From: Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>
+Subject: Re: [PATCH] mmc: core: don't decrement qty when calculating max_discard
+Date: Wed, 18 Dec 2013 09:36:23 -0700
+Message-ID: <52B1CF07.7050907@wwwdotorg.org>
+References: <1387303344-11802-1-git-send-email-swarren@wwwdotorg.org> <52B1822F.8080404@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-oa0-f47.google.com ([209.85.219.47]:33988 "EHLO
-	mail-oa0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751896Ab3LRQZe (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 18 Dec 2013 11:25:34 -0500
-Received: by mail-oa0-f47.google.com with SMTP id k1so8460336oag.6
-        for <linux-mmc@vger.kernel.org>; Wed, 18 Dec 2013 08:25:33 -0800 (PST)
-In-Reply-To: <20131218074926.GI6691@S2101-09.ap.freescale.net>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <52B1822F.8080404-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Cc: Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Stephen Warren <swarren-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>, Dong Aisheng <dongas86-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Vladimir Zapolskiy <vz-ChpfBGZJDbMAvxtiuMwx3w@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Shawn Guo <shawn.guo@linaro.org>
-Cc: linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, Fabio Estevam <festevam@gmail.com>, Chris Ball <cjb@laptop.org>
 
-Got it.
+On 12/18/2013 04:08 AM, Adrian Hunter wrote:
+> On 17/12/13 20:02, Stephen Warren wrote:
+>> From: Stephen Warren <swarren-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
+>>
+>> In mmc_do_calc_max_discard(), if any value has been assigned to qty,
+>> that value must have passed the timeout checks in the loop. Hence,
+>> qty is the maximum number of erase blocks that fit within the timeout,
+>> not the first value that does not fit into the timeout. In turn, this
+>> means we don't need any special case for (qty == 1); any value of qty
+>> needs to be multiplied by the card's erase shift, and we don't need to
+>> decrement qty before doing so.
+>>
+>> Without this patch, on the NVIDIA Tegra Cardhu board, the loops result
+>> in qty == 1, which is immediately returned. This causes discard to
+>> operate a single sector at a time, which is chronically slow. With this
+>> patch in place, discard operates a single erase block at a time, which
+>> is reasonably fast.
+...
+> The quantity is decreased by 1 to account for the fact that the erase can
+> cross the boundary between 1 erase block and another. i.e. even though the
+> size is 1 erase block it touches 2 erase blocks.
 
-thanks
+Don't erases have to be aligned to the erase block alignment; surely
+that's what the eMMC's preferred erase alignment is all about?
 
-john
-
-On Tue, Dec 17, 2013 at 11:49 PM, Shawn Guo <shawn.guo@linaro.org> wrote:
-> On Tue, Dec 17, 2013 at 05:17:30PM -0800, John Tobias wrote:
->>     Since of_init_opp_table is in imx6q-cpufreq.c, the imx6q_opp_init is no longer needed anymore.
->>     The only question right now is the imx6q_opp_check_1p2ghz function.
->>
->>     Is the function below are acceptible under imx6q_init_late?.
->>
->>     if (!cpu_dev)
->>         imx6q_opp_check_1p2ghz(cpu_dev);
->>
->>     If not, what is the better way to impelement because the said function is board specific?.
->>
->> Signed-off-by: John Tobias <john.tobias.ph@gmail.com>
->> ---
->>  arch/arm/mach-imx/mach-imx6q.c | 30 ++++--------------------------
->>  1 file changed, 4 insertions(+), 26 deletions(-)
->>
->> diff --git a/arch/arm/mach-imx/mach-imx6q.c b/arch/arm/mach-imx/mach-imx6q.c
->> index d0cfb22..f5d9e04 100644
->> --- a/arch/arm/mach-imx/mach-imx6q.c
->> +++ b/arch/arm/mach-imx/mach-imx6q.c
->> @@ -183,31 +183,6 @@ put_node:
->>       of_node_put(np);
->>  }
->>
->> -static void __init imx6q_opp_init(void)
->> -{
->> -     struct device_node *np;
->> -     struct device *cpu_dev = get_cpu_device(0);
->> -
->> -     if (!cpu_dev) {
->> -             pr_warn("failed to get cpu0 device\n");
->> -             return;
->> -     }
->> -     np = of_node_get(cpu_dev->of_node);
->> -     if (!np) {
->> -             pr_warn("failed to find cpu0 node\n");
->> -             return;
->> -     }
->> -
->> -     if (of_init_opp_table(cpu_dev)) {
->> -             pr_warn("failed to init OPP table\n");
->> -             goto put_node;
->> -     }
->> -
->> -     imx6q_opp_check_1p2ghz(cpu_dev);
->> -
->> -put_node:
->> -     of_node_put(np);
->> -}
->>
->>  static struct platform_device imx6q_cpufreq_pdev = {
->>       .name = "imx6q-cpufreq",
->> @@ -215,6 +190,7 @@ static struct platform_device imx6q_cpufreq_pdev = {
->>
->>  static void __init imx6q_init_late(void)
->>  {
->> +     struct device *cpu_dev = get_cpu_device(0);
->>       /*
->>        * WAIT mode is broken on TO 1.0 and 1.1, so there is no point
->>        * to run cpuidle on them.
->> @@ -223,8 +199,10 @@ static void __init imx6q_init_late(void)
->>               imx6q_cpuidle_init();
->>
->>       if (IS_ENABLED(CONFIG_ARM_IMX6Q_CPUFREQ)) {
->> -             imx6q_opp_init();
->>               platform_device_register(&imx6q_cpufreq_pdev);
->> +
->> +             if (!cpu_dev)
->> +                     imx6q_opp_check_1p2ghz(cpu_dev);
->
-> imx6q_opp_check_1p2ghz() only works after of_init_opp_table() is called.
-> So you shouldn't make these changes in mach-imx6q.c, but in cpufreq
-> driver check if platform already supplies an opp table, and only calls
-> of_init_opp_table() in driver in case that platform hasn't.  Then, for
-> imx6q case where opp table is supplied by platform, driver will skip
-> of_init_opp_table() call, while for imx6sl case where platform does not
-> handle opp table, driver will just call of_init_opp_table().
->
-> Shawn
->
->>       }
->>  }
->>
->> --
->> 1.8.3.2
->>
->
+If that isn't the case, a comment in the code would be extremely useful...
