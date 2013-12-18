@@ -1,87 +1,103 @@
-From: Dong Aisheng <dongas86-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: max_discard anomaly on certain Sandisk eMMC
-Date: Wed, 18 Dec 2013 11:32:03 +0800
-Message-ID: <CAA+hA=Rm1b_ah1uTyps71BLjturJXDHKyWTgiU+z2ELYZKSAWw@mail.gmail.com>
-References: <52AB8DA2.9000001@wwwdotorg.org>
-	<CAA+hA=R3wnbuJrJQhfG9PQEHrwE9nrwg_+xSpyXryOeM2Wtwcw@mail.gmail.com>
-	<52B0897B.5010700@wwwdotorg.org>
+From: Dinh Nguyen <dinh.linux@gmail.com>
+Subject: Re: [RESEND LIST PATCHv7 1/4] clk: socfpga: Add a clk-phase property
+ to the "altr, socfpga-gate-clk"
+Date: Tue, 17 Dec 2013 22:06:03 -0600
+Message-ID: <52B11F2B.5000507@gmail.com>
+References: <1387213476-22122-1-git-send-email-dinguyen@altera.com> <1387213476-22122-2-git-send-email-dinguyen@altera.com> <52B00167.4010903@linaro.org> <52B0554F.1080509@gmail.com> <20131217235557.23538.22672@quantum>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <52B0897B.5010700-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>
-Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>
-Cc: Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-ob0-f169.google.com ([209.85.214.169]:43571 "EHLO
+	mail-ob0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751945Ab3LREGI (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 17 Dec 2013 23:06:08 -0500
+In-Reply-To: <20131217235557.23538.22672@quantum>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Mike Turquette <mturquette@linaro.org>, zhangfei <zhangfei.gao@linaro.org>, dinguyen@altera.com, arnd@arndb.de, cjb@laptop.org, jh80.chung@samsung.com, tgih.jun@samsung.com, heiko@sntech.de, dianders@chromium.org, alim.akhtar@samsung.com, bzhao@marvell.com
+Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, devicetree@vger.kernel.org
 
-On Wed, Dec 18, 2013 at 1:27 AM, Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org> wrote:
-> On 12/17/2013 02:25 AM, Dong Aisheng wrote:
->> Hi Stephen,
+Hi Mike,
+
+On 12/17/13 5:55 PM, Mike Turquette wrote:
+> Quoting Dinh Nguyen (2013-12-17 05:44:47)
+>> Hi Zhangfei,
 >>
->> On Sat, Dec 14, 2013 at 6:43 AM, Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org> wrote:
->>> On one of my eMMC devices, I see the following results from calling
->>> mmc_do_calc_max_discard() with various parameters:
+>> On 12/17/13 1:46 AM, zhangfei wrote:
 >>>
->>> [    3.057263] MMC_DISCARD_ARG max_discard 1
->>> [    3.057266] MMC_ERASE_ARG   max_discard 4096
->>> [    3.057267] MMC_TRIM_ARG    max_discard 1
+>>> On 12/17/2013 01:04 AM, dinguyen@altera.com wrote:
+>>>> From: Dinh Nguyen <dinguyen@altera.com>
+>>>> +static int socfpga_clk_prepare(struct clk_hw *hwclk)
+>>>> +{
+>>>> +    struct socfpga_clk *socfpgaclk = to_socfpga_clk(hwclk);
+>>>> +    struct regmap *sys_mgr_base_addr;
+>>>> +    u32 hs_timing;
+>>>> +
+>>>> +    if (socfpgaclk->clk_phase[0] || socfpgaclk->clk_phase[1]) {
+>>>> +        sys_mgr_base_addr =
+>>>> syscon_regmap_lookup_by_compatible("altr,sys-mgr");
+>>>> +        if (IS_ERR(sys_mgr_base_addr)) {
+>>>> +            pr_err("%s: failed to find altr,sys-mgr regmap!\n",
+>>>> __func__);
+>>>> +            return -EINVAL;
+>>>> +        }
+>>>> +        hs_timing = SYSMGR_SDMMC_CTRL_SET(socfpgaclk->clk_phase[0],
+>>>> +                        socfpgaclk->clk_phase[1]);
+>>>> +        regmap_write(sys_mgr_base_addr, SYSMGR_SDMMCGRP_CTRL_OFFSET,
+>>>> +                        hs_timing);
+>>>> +    }
+>>>> +    return 0;
+>>>> +}
+>>> So reusing gate-clk here and check the node of "altr,sys-mgr".
+>>> I think it is good and simple.
+>>> Also can define new clock combined with node "altr,sys-mgr" with
+>>> parent of sdmmc_clk.
 >>>
->>> This causes mmc_calc_max_discard() to return 1, which makes the discard
->>> IOCTL extremely slow.
->>>
->>
->> IMX met the similar issue.
->> http://www.spinics.net/lists/linux-mmc/msg23375.html
->> It's caused by the max_discard_to supported by host is too small.
->>
->> I submitted the fix patches:
->> http://www.spinics.net/lists/arm-kernel/msg294924.html
->> Please see if it helps for you, especially patch #5.
->> It could increase the max_discard_to if Tegra has same problem.
+>>> Thanks for the update, it is fine to me.
+>> Thanks, can I get an Ack from you for this version?
+> Dinh,
 >
-> Thanks for the pointer!
->
-> Yes, Tegra has SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK set, and has a max
-> clock of 208MHz specified in HW, yet we only run the HW at 48MHz
-> upstream, since we haven't actually implemented any of the
-> advanced/faster transfer rates yet. Hence that patch does avoid/solve
-> the issue on 2 of my boards.
->
-> However, the patch doesn't solve the problem on 2 other boards, since
-> the eMMC device on those boards specifies a much larger timeout, which
-> still causes max_discard to be set to 0. It sounds like the real
-> solution is what was discussed elsewhere in this thread; to use command
-> polling for erases?
->
-> Even on the boards where your patch solves the problem, isn't it just a
-> temporary measure; as soon as we upstream the changes to enable the
-> faster transfer modes, we'll have a faster SDCLK, and hence again be
-> limited in the discard size, perhaps down to a single sector again.
->
+> Will you be spinning another version of this patch? If not I can go
+> ahead and take this into clk-next.
+If you are OK with the patch, then yes, can you please apply it to clk-next?
 
-Actually my patch is intend to fix 1) IMX incorrect max timeout issue
-2) should not use max_clock
-to calculate max_discard_to issue for using SDCLK as timeout clock.
-The issue discussed here is a different issue that the card timeout
-may still be bigger than
-the host capability and how to use discard for such case.
-So your problem may exist if you meet some more big timeout cards.
-For IMX, when running at 50Mhz, the max timeout is more than 5s.
-It looks bigger enough currently and i tested many eMMC cards(Samsung,
-Toshiba, Sandisk, Hynix)
-and all they worked well with discard after fix.
-I don't know which eMMC cards you meet the issue and don't know what
-is Tegra max timeout.
-Just for SD3.0 cards working on 200Mhz, i observed one Toshiba
-SDHC U1 card could not do discard, since its AU erase timeout is 2s+
-which exceeds the host
-capability 1335ms. Thus discard is automatically disabled.
-But another Sandisk SDXC can still work well since it has small
-ERASE_OFFSET as 1s.
+Thanks,
+Dinh
+>
+> Regards,
+> Mike
+>
+>> Thanks,
+>> Dinh
+>>>> +
+>>>>   static struct clk_ops gateclk_ops = {
+>>>> +    .prepare = socfpga_clk_prepare,
+>>>>       .recalc_rate = socfpga_clk_recalc_rate,
+>>>>       .get_parent = socfpga_clk_get_parent,
+>>>>       .set_parent = socfpga_clk_set_parent,
+>>>> @@ -254,6 +283,7 @@ static void __init socfpga_gate_clk_init(struct
+>>>> device_node *node,
+>>>>   {
+>>>>       u32 clk_gate[2];
+>>>>       u32 div_reg[3];
+>>>> +    u32 clk_phase[2];
+>>>>       u32 fixed_div;
+>>>>       struct clk *clk;
+>>>>       struct socfpga_clk *socfpga_clk;
+>>>> @@ -294,6 +324,12 @@ static void __init socfpga_gate_clk_init(struct
+>>>> device_node *node,
+>>>>           socfpga_clk->div_reg = 0;
+>>>>       }
+>>>>
+>>>> +    rc = of_property_read_u32_array(node, "clk-phase", clk_phase, 2);
+>>>> +    if (!rc) {
+>>>> +        socfpga_clk->clk_phase[0] = clk_phase[0];
+>>>> +        socfpga_clk->clk_phase[1] = clk_phase[1];
+>>>> +    }
+>>>> +
+>>>>       of_property_read_string(node, "clock-output-names", &clk_name);
+>>>>
+>>>>       init.name = clk_name;
+>>>>
 
-Regards
-Dong Aisheng
-
-> (Incidentally, I think the code should be limiting to a single erase
-> block, not a single sector. I'll send a separate patch to fix that, and
-> Cc everyone here).
