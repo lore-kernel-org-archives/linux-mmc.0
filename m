@@ -1,71 +1,81 @@
-From: Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>
-Subject: Re: max_discard anomaly on certain Sandisk eMMC
-Date: Wed, 18 Dec 2013 11:42:29 -0700
-Message-ID: <52B1EC95.7070008@wwwdotorg.org>
-References: <52AB8DA2.9000001@wwwdotorg.org>	<CAA+hA=R3wnbuJrJQhfG9PQEHrwE9nrwg_+xSpyXryOeM2Wtwcw@mail.gmail.com>	<52B0897B.5010700@wwwdotorg.org> <CAA+hA=Rm1b_ah1uTyps71BLjturJXDHKyWTgiU+z2ELYZKSAWw@mail.gmail.com>
+From: Mike Turquette <mturquette@linaro.org>
+Subject: Re: [PATCHv6 2/5] clk: socfpga: Add a clock type for the SD/MMC driver
+Date: Wed, 18 Dec 2013 12:10:35 -0800
+Message-ID: <20131218201035.23538.60602@quantum>
+References: <1386880245-10192-1-git-send-email-dinguyen@altera.com>
+ <20131215045116.23538.4@quantum> <52AF68DB.7090105@elopez.com.ar>
+ <2899559.jbTzDM2qtE@dizzy-6.site>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <CAA+hA=Rm1b_ah1uTyps71BLjturJXDHKyWTgiU+z2ELYZKSAWw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Dong Aisheng <dongas86-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-yh0-f49.google.com ([209.85.213.49]:40033 "EHLO
+	mail-yh0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750872Ab3LRUKl convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 18 Dec 2013 15:10:41 -0500
+Received: by mail-yh0-f49.google.com with SMTP id z20so72235yhz.36
+        for <linux-mmc@vger.kernel.org>; Wed, 18 Dec 2013 12:10:40 -0800 (PST)
+In-Reply-To: <2899559.jbTzDM2qtE@dizzy-6.site>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: =?utf-8?q?David_Lanzend=C3=B6rfer?= <david.lanzendoerfer@o2s.ch>, =?utf-8?q?Emilio_L=C3=B3pez?= <emilio@elopez.com.ar>
+Cc: zhangfei <zhangfei.gao@linaro.org>, Arnd Bergmann <arnd@arndb.de>, dinguyen@altera.com, mark.rutland@arm.com, devicetree@vger.kernel.org, dinh.linux@gmail.com, heiko@sntech.de, pawel.moll@arm.com, bzhao@marvell.com, tgih.jun@samsung.com, Peter De Schrijver <pdeschrijver@nvidia.com>, linux-mmc@vger.kernel.org, dianders@chromium.org, rob.herring@calxeda.com, jh80.chung@samsung.com, alim.akhtar@samsung.com, cjb@laptop.org, linux-arm-kernel@lists.infradead.org, ian.campbell@citrix.com, Hans de Goede <hdegoede@redhat.com>, Chen-Yu Tsai <wens@csie.org>
 
-On 12/17/2013 08:32 PM, Dong Aisheng wrote:
-> On Wed, Dec 18, 2013 at 1:27 AM, Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org> wrote:
->> On 12/17/2013 02:25 AM, Dong Aisheng wrote:
->>> Hi Stephen,
->>>
->>> On Sat, Dec 14, 2013 at 6:43 AM, Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org> wrote:
->>>> On one of my eMMC devices, I see the following results from calling
->>>> mmc_do_calc_max_discard() with various parameters:
->>>>
->>>> [    3.057263] MMC_DISCARD_ARG max_discard 1
->>>> [    3.057266] MMC_ERASE_ARG   max_discard 4096
->>>> [    3.057267] MMC_TRIM_ARG    max_discard 1
->>>>
->>>> This causes mmc_calc_max_discard() to return 1, which makes the discard
->>>> IOCTL extremely slow.
->>>>
->>>
->>> IMX met the similar issue.
->>> http://www.spinics.net/lists/linux-mmc/msg23375.html
->>> It's caused by the max_discard_to supported by host is too small.
->>>
->>> I submitted the fix patches:
->>> http://www.spinics.net/lists/arm-kernel/msg294924.html
->>> Please see if it helps for you, especially patch #5.
->>> It could increase the max_discard_to if Tegra has same problem.
->>
-...
->> Even on the boards where your patch solves the problem, isn't it just a
->> temporary measure; as soon as we upstream the changes to enable the
->> faster transfer modes, we'll have a faster SDCLK, and hence again be
->> limited in the discard size, perhaps down to a single sector again.
-> 
-> Actually my patch is intend to fix 1) IMX incorrect max timeout issue
-> 2) should not use max_clock
-> to calculate max_discard_to issue for using SDCLK as timeout clock.
-> The issue discussed here is a different issue that the card timeout
-> may still be bigger than
-> the host capability and how to use discard for such case.
-> So your problem may exist if you meet some more big timeout cards.
-> For IMX, when running at 50Mhz, the max timeout is more than 5s.
-> It looks bigger enough currently and i tested many eMMC cards(Samsung,
-> Toshiba, Sandisk, Hynix)
-> and all they worked well with discard after fix.
-> I don't know which eMMC cards you meet the issue and don't know what
-> is Tegra max timeout.
-> Just for SD3.0 cards working on 200Mhz, i observed one Toshiba
-> SDHC U1 card could not do discard, since its AU erase timeout is 2s+
-> which exceeds the host
-> capability 1335ms. Thus discard is automatically disabled.
-> But another Sandisk SDXC can still work well since it has small
-> ERASE_OFFSET as 1s.
+Quoting David Lanzend=C3=B6rfer (2013-12-16 13:54:21)
+> Hi
+> > that takes the MMC clock (and only the MMC clock) and does the setu=
+p
+> > (it's basically configuring two values, "sample" and "output", into=
+ the
+> > clock register). I really don't know what does this do/why is it
+> > required/when is it used; I'm cc'ing Hans and David who can hopeful=
+ly
+> > explain that part.
+> Since the read/write operations have to happen asynchronously and in =
+a manner
+> so that the data provided by the SD-Card can be fetched on time, a sp=
+ecific
+> clock phase shift is required as you can see in the linked picture[1]=
+=2E
+> That's what the function is doing: It accesses the special registers =
+of the
+> MMC clock device and configures this phase offset.
 
-On the more recent Tegra boards, the eMMC devices appear to have an
-erase timeout of 4200ms for a single erase block! That's more than the
-~2600ms max controller timeout at 48MHz on Tegra:-( (that is unless
-Tegra also supports more than 27 bits of timeout register)
+Yeah, clock phase is a fairly common thing to tune but there are two
+things to consider when crafting a new api like clk_set_phase(...):
+
+1) are we adjusting the phase of the clock signal or the phase of
+something else related to the clock rate? This is just something to
+think about. Sometimes it would be better to have
+video_signal_set_phase() instead of clk_set_phase().
+
+2) what is the input parameter to clk_set_phase? I guess the two best
+options are degrees (zero to 359), or a fraction of the clock period
+(1/4, 1/2, etc).
+
+Any thoughts?
+
+Regards,
+Mike
+
+>=20
+> > I also saw a similar requirement from the gmac people (on cc too), =
+who
+> > needed to set the phy type (or something like that) on one of the c=
+lock
+> > registers; so I'm thinking maybe a generic "tune something" approac=
+h
+> > that lets users configure some clock-dependent, arbitrary aspect of=
+ the
+> > clock is the way forward. Otherwise, we're going to end up bloating=
+ the
+> > clock framework with a lot of callback pointers that are going to b=
+e
+> > used in one or two clocks out of potentially hundreds on the whole =
+system.
+> It totally makes sense, since GMAC will be doing asynchrous
+> operations as well.
+>=20
+> -David
+>=20
+> [1] http://www.chipestimate.com/techtalk/images/11022010_fig2_3.JPG
