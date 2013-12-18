@@ -1,586 +1,207 @@
-From: Adam Lee <adam.lee@canonical.com>
-Subject: [PATCH 2/2] mmc: sdhci-pci: add support of O2Mirco/BayHubTech SD hosts
-Date: Wed, 18 Dec 2013 22:23:39 +0800
-Message-ID: <1387376619-8050-3-git-send-email-adam.lee@canonical.com>
-References: <1387376619-8050-1-git-send-email-adam.lee@canonical.com>
+From: Balaji T K <balajitk@ti.com>
+Subject: Re: [RFC PATCH v3 2/8] mmc: omap_hsmmc: handle vcc and vcc_aux independently
+Date: Wed, 18 Dec 2013 20:22:51 +0530
+Message-ID: <52B1B6C3.4040806@ti.com>
+References: <20130613174554.GB1403@sirena.org.uk> <1385043627-30439-1-git-send-email-balajitk@ti.com> <1385043627-30439-3-git-send-email-balajitk@ti.com> <CAPDyKFqAT+Zd4LmAJ91g603LXx2rAfoRhF1UK4XNzSUVNS0X9w@mail.gmail.com> <52A6FF84.40901@ti.com> <CAPDyKFpERuDx_9qdbuC5z7NGbt-BEydR=qxiPrS2Qdvapd-0pw@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pd0-f177.google.com ([209.85.192.177]:43079 "EHLO
-	mail-pd0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753663Ab3LROYF (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 18 Dec 2013 09:24:05 -0500
-Received: by mail-pd0-f177.google.com with SMTP id q10so8157779pdj.8
-        for <linux-mmc@vger.kernel.org>; Wed, 18 Dec 2013 06:24:05 -0800 (PST)
-In-Reply-To: <1387376619-8050-1-git-send-email-adam.lee@canonical.com>
+Received: from bear.ext.ti.com ([192.94.94.41]:56171 "EHLO bear.ext.ti.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754712Ab3LROxD (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 18 Dec 2013 09:53:03 -0500
+In-Reply-To: <CAPDyKFpERuDx_9qdbuC5z7NGbt-BEydR=qxiPrS2Qdvapd-0pw@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: Chris Ball <cjb@laptop.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Adrian Hunter <adrian.hunter@intel.com>, Shawn Guo <shawn.guo@linaro.org>, Stephen Warren <swarren@wwwdotorg.org>, Peter Guo <peter.guo@bayhubtech.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-omap <linux-omap@vger.kernel.org>, Benoit Cousson <bcousson@baylibre.com>, devicetree@vger.kernel.org, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Mark Brown <broonie@kernel.org>, Tony Lindgren <tony@atomide.com>
 
-Add O2Micro/BayHubTech SD Host DeviceId 8520 support.
-Add O2Micro/BayHubTech SD Host DeviceId 8420 & 8421 support.
-Add O2Micro/BayHubTech SD Host DeviceId 8620 & 8621 support.
+On Wednesday 11 December 2013 04:51 PM, Ulf Hansson wrote:
+> On 10 December 2013 12:48, Balaji T K <balajitk@ti.com> wrote:
+>> On Tuesday 10 December 2013 04:39 PM, Ulf Hansson wrote:
+>>>
+>>> On 21 November 2013 15:20, Balaji T K <balajitk@ti.com> wrote:
+>>>>
+>>>> handle vcc and vcc_aux independently to reduce indent.
+>>>>
+>>>> Signed-off-by: Balaji T K <balajitk@ti.com>
+>>>> ---
+>>>>    drivers/mmc/host/omap_hsmmc.c |   54
+>>>> +++++++++++++++++++----------------------
+>>>>    1 files changed, 25 insertions(+), 29 deletions(-)
+>>>>
+>>>> diff --git a/drivers/mmc/host/omap_hsmmc.c
+>>>> b/drivers/mmc/host/omap_hsmmc.c
+>>>> index 1eb4350..342be25 100644
+>>>> --- a/drivers/mmc/host/omap_hsmmc.c
+>>>> +++ b/drivers/mmc/host/omap_hsmmc.c
+>>>> @@ -286,11 +286,12 @@ static int omap_hsmmc_set_power(struct device *dev,
+>>>> int slot, int power_on,
+>>>>            * chips/cards need an interface voltage rail too.
+>>>>            */
+>>>>           if (power_on) {
+>>>> -               ret = mmc_regulator_set_ocr(host->mmc, host->vcc, vdd);
+>>>> +               if (host->vcc)
+>>>> +                       ret = mmc_regulator_set_ocr(host->mmc, host->vcc,
+>>>> vdd);
+>>>>                   /* Enable interface voltage rail, if needed */
+>>>>                   if (ret == 0 && host->vcc_aux) {
+>>>>                           ret = regulator_enable(host->vcc_aux);
+>>>> -                       if (ret < 0)
+>>>> +                       if (ret < 0 && host->vcc)
+>>>>                                   ret = mmc_regulator_set_ocr(host->mmc,
+>>>>                                                           host->vcc, 0);
+>>>>                   }
+>>>> @@ -298,7 +299,7 @@ static int omap_hsmmc_set_power(struct device *dev,
+>>>> int slot, int power_on,
+>>>>                   /* Shut down the rail */
+>>>>                   if (host->vcc_aux)
+>>>>                           ret = regulator_disable(host->vcc_aux);
+>>>> -               if (!ret) {
+>>>> +               if (host->vcc) {
+>>>>                           /* Then proceed to shut down the local regulator
+>>>> */
+>>>>                           ret = mmc_regulator_set_ocr(host->mmc,
+>>>>                                                   host->vcc, 0);
+>>>> @@ -318,10 +319,10 @@ static int omap_hsmmc_reg_get(struct
+>>>> omap_hsmmc_host *host)
+>>>>
+>>>>           reg = devm_regulator_get(host->dev, "vmmc");
+>>>>           if (IS_ERR(reg)) {
+>>>> -               dev_err(host->dev, "vmmc regulator missing\n");
+>>>> +               dev_err(host->dev, "unable to get vmmc regulator %ld\n",
+>>>> +                       PTR_ERR(reg));
+>>>>                   return PTR_ERR(reg);
+>>>>           } else {
+>>>> -               mmc_slot(host).set_power = omap_hsmmc_set_power;
+>>>>                   host->vcc = reg;
+>>>>                   ocr_value = mmc_regulator_get_ocrmask(reg);
+>>>>                   if (!mmc_slot(host).ocr_mask) {
+>>>> @@ -334,31 +335,26 @@ static int omap_hsmmc_reg_get(struct
+>>>> omap_hsmmc_host *host)
+>>>>                                   return -EINVAL;
+>>>>                           }
+>>>>                   }
+>>>> +       }
+>>>> +       mmc_slot(host).set_power = omap_hsmmc_set_power;
+>>>>
+>>>> -               /* Allow an aux regulator */
+>>>> -               reg = devm_regulator_get_optional(host->dev, "vmmc_aux");
+>>>> -               host->vcc_aux = IS_ERR(reg) ? NULL : reg;
+>>>> +       /* Allow an aux regulator */
+>>>> +       reg = devm_regulator_get_optional(host->dev, "vmmc_aux");
+>>>> +       host->vcc_aux = IS_ERR(reg) ? NULL : reg;
+>>>>
+>>>> -               /* For eMMC do not power off when not in sleep state */
+>>>> -               if (mmc_slot(host).no_regulator_off_init)
+>>>> -                       return 0;
+>>>> -               /*
+>>>> -               * UGLY HACK:  workaround regulator framework bugs.
+>>>> -               * When the bootloader leaves a supply active, it's
+>>>> -               * initialized with zero usecount ... and we can't
+>>>> -               * disable it without first enabling it.  Until the
+>>>> -               * framework is fixed, we need a workaround like this
+>>>> -               * (which is safe for MMC, but not in general).
+>>>> -               */
+>>>
+>>>
+>>> The above problem is handled by the mmc core layer. I certainly think
+>>> you shall adopt your code to it.
+>>
+>> Hi Ulf,
+>>
+>> how about optional vqmmc, omap_hsmmc does call mmc_regulator_set_ocr for
+>> vmmc
+>> Am I missing something?
+>
+> Hi Balaji,
+>
+> Sorry for being to vague, let me elaborate.
+>
+> 1. Before omap_hsmmc_probe returns, it invokes mmc_add_host().
+>
+> 2. mmc_add_host() -> mmc_start_host() -> > mmc_power_up().
+>
+> 3. mmc_power_up() invokes the host driver's .set_ios() callback, to
+> makes sure boot-on regulators are kept enabled. Otherwise the
+> late_initcall, regulator_init_complete() will potentially cut power
+> for unused regulators.
+>
+> This is important because there are SoCs that are only capable of
+> power cycling the VCC regulator but not VCCQ. According to the eMMC
+> spec, we must not cut VCC without sending the SLEEP cmd first.
+> Obviously, since we prevent VCC from being cut, we need to prevent
+> VCCQ from being cut as well.
+>
+> Normally a .set_ios() function's invokes mmc_regulator_set_ocr() for
+> the VCC regulator. VCCQ ("vmmc_aux") is handled by directly using the
+> regulator API (I guess we could invent an API similar to
+> mmc_regulator_set_ocr() but for VCCQ, but that is a future task).
+>
+> So, from a host driver perspective you could add a local variable to
+> cache the "enabled" state of the VCCQ regulator. By leaving the
+> default state to "disabled", you will trigger it to be enabled once
+> mmc_power_up() invokes your .set_ios() callback. Vice verse will then
+> happen when mmc_power_off gets invoked.
+>
+> Finally, don't forget to enable MMC_CAP2_FULL_PWR_CYCLE, if your SoC
+> can cut both VCC and VCCQ for your eMMC slots. For SD cards only VCC
+> should be needed to enable MMC_CAP2_FULL_PWR_CYCLE.
+>
 
-Signed-off-by: Peter Guo <peter.guo@bayhubtech.com>
-Signed-off-by: Adam Lee <adam.lee@canonical.com>
----
- drivers/mmc/host/Makefile            |   1 +
- drivers/mmc/host/sdhci-pci-o2micro.c | 317 +++++++++++++++++++++++++++++++++++
- drivers/mmc/host/sdhci-pci-o2micro.h |  72 ++++++++
- drivers/mmc/host/sdhci-pci.c         | 105 +++++-------
- 4 files changed, 435 insertions(+), 60 deletions(-)
- create mode 100644 drivers/mmc/host/sdhci-pci-o2micro.c
- create mode 100644 drivers/mmc/host/sdhci-pci-o2micro.h
+Hi Ulf,
 
-diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
-index c41d0c3..5dd3de9 100644
---- a/drivers/mmc/host/Makefile
-+++ b/drivers/mmc/host/Makefile
-@@ -9,6 +9,7 @@ obj-$(CONFIG_MMC_MXS)		+= mxs-mmc.o
- obj-$(CONFIG_MMC_SDHCI)		+= sdhci.o
- obj-$(CONFIG_MMC_SDHCI_PCI)	+= sdhci-pci.o
- obj-$(subst m,y,$(CONFIG_MMC_SDHCI_PCI))	+= sdhci-pci-data.o
-+obj-$(subst m,y,$(CONFIG_MMC_SDHCI_PCI))	+= sdhci-pci-o2micro.o
- obj-$(CONFIG_MMC_SDHCI_ACPI)	+= sdhci-acpi.o
- obj-$(CONFIG_MMC_SDHCI_PXAV3)	+= sdhci-pxav3.o
- obj-$(CONFIG_MMC_SDHCI_PXAV2)	+= sdhci-pxav2.o
-diff --git a/drivers/mmc/host/sdhci-pci-o2micro.c b/drivers/mmc/host/sdhci-pci-o2micro.c
-new file mode 100644
-index 0000000..de210e7
---- /dev/null
-+++ b/drivers/mmc/host/sdhci-pci-o2micro.c
-@@ -0,0 +1,317 @@
-+/*
-+ * Copyright (C) 2013 BayHub Technology Ltd.
-+ *
-+ * Authors: Peter Guo <peter.guo@bayhubtech.com>
-+ *          Adam Lee <adam.lee@canonical.com>
-+ *
-+ * This software is licensed under the terms of the GNU General Public
-+ * License version 2, as published by the Free Software Foundation, and
-+ * may be copied, distributed, and modified under those terms.
-+ *
-+ * This program is distributed in the hope that it will be useful,
-+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
-+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+ * GNU General Public License for more details.
-+ *
-+ */
-+
-+#include <linux/pci.h>
-+
-+#include "sdhci.h"
-+#include "sdhci-pci.h"
-+#include "sdhci-pci-o2micro.h"
-+
-+void sdhci_pci_o2_fujin2_pci_init(struct sdhci_pci_chip *chip)
-+{
-+	u32 scratch_32;
-+	int ret;
-+	/* Improve write performance for SD3.0 */
-+	ret = pci_read_config_dword(chip->pdev, O2_SD_DEV_CTRL, &scratch_32);
-+	if (ret)
-+		return;
-+	scratch_32 &= ~((1 << 12) | (1 << 13) | (1 << 14));
-+	pci_write_config_dword(chip->pdev, O2_SD_DEV_CTRL, scratch_32);
-+
-+	/* Enable Link abnormal reset generating Reset */
-+	ret = pci_read_config_dword(chip->pdev, O2_SD_MISC_REG5, &scratch_32);
-+	if (ret)
-+		return;
-+	scratch_32 &= ~((1 << 19) | (1 << 11));
-+	scratch_32 |= (1 << 10);
-+	pci_write_config_dword(chip->pdev, O2_SD_MISC_REG5, scratch_32);
-+
-+	/* set card power over current protection */
-+	ret = pci_read_config_dword(chip->pdev, O2_SD_TEST_REG, &scratch_32);
-+	if (ret)
-+		return;
-+	scratch_32 |= (1 << 4);
-+	pci_write_config_dword(chip->pdev, O2_SD_TEST_REG, scratch_32);
-+
-+	/* adjust the output delay for SD mode */
-+	pci_write_config_dword(chip->pdev, O2_SD_DELAY_CTRL, 0x00002492);
-+
-+	/* Set the output voltage setting of Aux 1.2v LDO */
-+	ret = pci_read_config_dword(chip->pdev, O2_SD_LD0_CTRL, &scratch_32);
-+	if (ret)
-+		return;
-+	scratch_32 &= ~(3 << 12);
-+	pci_write_config_dword(chip->pdev, O2_SD_LD0_CTRL, scratch_32);
-+
-+	/* Set Max power supply capability of SD host */
-+	ret = pci_read_config_dword(chip->pdev, O2_SD_CAP_REG0, &scratch_32);
-+	if (ret)
-+		return;
-+	scratch_32 &= ~(0x01FE);
-+	scratch_32 |= 0x00CC;
-+	pci_write_config_dword(chip->pdev, O2_SD_CAP_REG0, scratch_32);
-+	/* Set DLL Tuning Window */
-+	ret = pci_read_config_dword(chip->pdev,
-+				    O2_SD_TUNING_CTRL, &scratch_32);
-+	if (ret)
-+		return;
-+	scratch_32 &= ~(0x000000FF);
-+	scratch_32 |= 0x00000066;
-+	pci_write_config_dword(chip->pdev, O2_SD_TUNING_CTRL, scratch_32);
-+
-+	/* Set UHS2 T_EIDLE */
-+	ret = pci_read_config_dword(chip->pdev,
-+				    O2_SD_UHS2_L1_CTRL, &scratch_32);
-+	if (ret)
-+		return;
-+	scratch_32 &= ~(0x000000FC);
-+	scratch_32 |= 0x00000084;
-+	pci_write_config_dword(chip->pdev, O2_SD_UHS2_L1_CTRL, scratch_32);
-+
-+	/* Set UHS2 Termination */
-+	ret = pci_read_config_dword(chip->pdev, O2_SD_FUNC_REG3, &scratch_32);
-+	if (ret)
-+		return;
-+	scratch_32 &= ~((1 << 21) | (1 << 30));
-+
-+	/* Set RTD3 function disabled */
-+	scratch_32 |= ((1 << 29) | (1 << 28));
-+	pci_write_config_dword(chip->pdev, O2_SD_FUNC_REG3, scratch_32);
-+
-+	/* Set L1 Entrance Timer */
-+	ret = pci_read_config_dword(chip->pdev, O2_SD_CAPS, &scratch_32);
-+	if (ret)
-+		return;
-+	scratch_32 &= ~(0xf0000000);
-+	scratch_32 |= 0x30000000;
-+	pci_write_config_dword(chip->pdev, O2_SD_CAPS, scratch_32);
-+
-+	ret = pci_read_config_dword(chip->pdev,
-+				    O2_SD_MISC_CTRL4, &scratch_32);
-+	if (ret)
-+		return;
-+	scratch_32 &= ~(0x000f0000);
-+	scratch_32 |= 0x00080000;
-+	pci_write_config_dword(chip->pdev, O2_SD_MISC_CTRL4, scratch_32);
-+}
-+
-+int sdhci_pci_o2_probe_slot(struct sdhci_pci_slot *slot)
-+{
-+	struct sdhci_pci_chip *chip;
-+	struct sdhci_host *host;
-+	u32 reg;
-+
-+	chip = slot->chip;
-+	host = slot->host;
-+	switch (chip->pdev->device) {
-+	case PCI_DEVICE_ID_O2_SDS0:
-+	case PCI_DEVICE_ID_O2_SEABIRD0:
-+	case PCI_DEVICE_ID_O2_SEABIRD1:
-+	case PCI_DEVICE_ID_O2_SDS1:
-+	case PCI_DEVICE_ID_O2_FUJIN2:
-+		reg = sdhci_readl(host, O2_SD_VENDOR_SETTING);
-+		if (reg & 0x1)
-+			host->quirks |= SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12;
-+
-+		if (chip->pdev->device != PCI_DEVICE_ID_O2_FUJIN2)
-+			break;
-+		/* set dll watch dog timer */
-+		reg = sdhci_readl(host, O2_SD_VENDOR_SETTING2);
-+		reg |= (1 << 12);
-+		sdhci_writel(host, reg, O2_SD_VENDOR_SETTING2);
-+
-+		break;
-+	default:
-+		break;
-+	}
-+
-+	return 0;
-+}
-+
-+int sdhci_pci_o2_probe(struct sdhci_pci_chip *chip)
-+{
-+	int ret;
-+	u8 scratch;
-+	u32 scratch_32;
-+
-+	switch (chip->pdev->device) {
-+	case PCI_DEVICE_ID_O2_8220:
-+	case PCI_DEVICE_ID_O2_8221:
-+	case PCI_DEVICE_ID_O2_8320:
-+	case PCI_DEVICE_ID_O2_8321:
-+		/* This extra setup is required due to broken ADMA. */
-+		ret = pci_read_config_byte(chip->pdev,
-+				O2_SD_LOCK_WP, &scratch);
-+		if (ret)
-+			return ret;
-+		scratch &= 0x7f;
-+		pci_write_config_byte(chip->pdev, O2_SD_LOCK_WP, scratch);
-+
-+		/* Set Multi 3 to VCC3V# */
-+		pci_write_config_byte(chip->pdev, O2_SD_MULTI_VCC3V, 0x08);
-+
-+		/* Disable CLK_REQ# support after media DET */
-+		ret = pci_read_config_byte(chip->pdev,
-+				O2_SD_CLKREQ, &scratch);
-+		if (ret)
-+			return ret;
-+		scratch |= 0x20;
-+		pci_write_config_byte(chip->pdev, O2_SD_CLKREQ, scratch);
-+
-+		/* Choose capabilities, enable SDMA.  We have to write 0x01
-+		 * to the capabilities register first to unlock it.
-+		 */
-+		ret = pci_read_config_byte(chip->pdev, O2_SD_CAPS, &scratch);
-+		if (ret)
-+			return ret;
-+		scratch |= 0x01;
-+		pci_write_config_byte(chip->pdev, O2_SD_CAPS, scratch);
-+		pci_write_config_byte(chip->pdev, O2_SD_CAPS, 0x73);
-+
-+		/* Disable ADMA1/2 */
-+		pci_write_config_byte(chip->pdev, O2_SD_ADMA1, 0x39);
-+		pci_write_config_byte(chip->pdev, O2_SD_ADMA2, 0x08);
-+
-+		/* Disable the infinite transfer mode */
-+		ret = pci_read_config_byte(chip->pdev,
-+				O2_SD_INF_MOD, &scratch);
-+		if (ret)
-+			return ret;
-+		scratch |= 0x08;
-+		pci_write_config_byte(chip->pdev, O2_SD_INF_MOD, scratch);
-+
-+		/* Lock WP */
-+		ret = pci_read_config_byte(chip->pdev,
-+				O2_SD_LOCK_WP, &scratch);
-+		if (ret)
-+			return ret;
-+		scratch |= 0x80;
-+		pci_write_config_byte(chip->pdev, O2_SD_LOCK_WP, scratch);
-+		break;
-+	case PCI_DEVICE_ID_O2_SDS0:
-+	case PCI_DEVICE_ID_O2_SDS1:
-+	case PCI_DEVICE_ID_O2_FUJIN2:
-+		/* UnLock WP */
-+		ret = pci_read_config_byte(chip->pdev,
-+				O2_SD_LOCK_WP, &scratch);
-+		if (ret)
-+			return ret;
-+
-+		scratch &= 0x7f;
-+		pci_write_config_byte(chip->pdev, O2_SD_LOCK_WP, scratch);
-+
-+		/* Set timeout CLK */
-+		ret = pci_read_config_dword(chip->pdev,
-+					    O2_SD_CLK_SETTING, &scratch_32);
-+		if (ret)
-+			return ret;
-+
-+		scratch_32 &= ~(0xFF00);
-+		scratch_32 |= 0x07E0C800;
-+		pci_write_config_dword(chip->pdev,
-+				       O2_SD_CLK_SETTING, scratch_32);
-+
-+		ret = pci_read_config_dword(chip->pdev,
-+					    O2_SD_CLKREQ, &scratch_32);
-+		if (ret)
-+			return ret;
-+		scratch_32 |= 0x3;
-+		pci_write_config_dword(chip->pdev, O2_SD_CLKREQ, scratch_32);
-+
-+		ret = pci_read_config_dword(chip->pdev,
-+					    O2_SD_PLL_SETTING, &scratch_32);
-+		if (ret)
-+			return ret;
-+
-+		scratch_32 &= ~(0x1F3F070E);
-+		scratch_32 |= 0x18270106;
-+		pci_write_config_dword(chip->pdev,
-+				       O2_SD_PLL_SETTING, scratch_32);
-+
-+		/* Disable UHS1 funciton */
-+		ret = pci_read_config_dword(chip->pdev,
-+					    O2_SD_CAP_REG2, &scratch_32);
-+		if (ret)
-+			return ret;
-+		scratch_32 &= ~(0xE0);
-+		pci_write_config_dword(chip->pdev,
-+				       O2_SD_CAP_REG2, scratch_32);
-+
-+		if (chip->pdev->device == PCI_DEVICE_ID_O2_FUJIN2)
-+			sdhci_pci_o2_fujin2_pci_init(chip);
-+
-+		/* Lock WP */
-+		ret = pci_read_config_byte(chip->pdev,
-+					   O2_SD_LOCK_WP, &scratch);
-+		if (ret)
-+			return ret;
-+		scratch |= 0x80;
-+		pci_write_config_byte(chip->pdev, O2_SD_LOCK_WP, scratch);
-+		break;
-+	case PCI_DEVICE_ID_O2_SEABIRD0:
-+	case PCI_DEVICE_ID_O2_SEABIRD1:
-+		/* UnLock WP */
-+		ret = pci_read_config_byte(chip->pdev,
-+				O2_SD_LOCK_WP, &scratch);
-+		if (ret)
-+			return ret;
-+
-+		scratch &= 0x7f;
-+		pci_write_config_byte(chip->pdev, O2_SD_LOCK_WP, scratch);
-+
-+		ret = pci_read_config_dword(chip->pdev,
-+					    O2_SD_FUNC_REG0, &scratch_32);
-+
-+		if ((scratch_32 & 0xff000000) == 0x01000000) {
-+			scratch_32 &= 0x0000FFFF;
-+			scratch_32 |= 0x1F340000;
-+
-+			pci_write_config_dword(chip->pdev,
-+					       O2_SD_PLL_SETTING, scratch_32);
-+		} else {
-+			scratch_32 &= 0x0000FFFF;
-+			scratch_32 |= 0x2c280000;
-+
-+			pci_write_config_dword(chip->pdev,
-+					       O2_SD_PLL_SETTING, scratch_32);
-+
-+			ret = pci_read_config_dword(chip->pdev,
-+						    O2_SD_FUNC_REG4,
-+						    &scratch_32);
-+			scratch_32 |= (1 << 22);
-+			pci_write_config_dword(chip->pdev,
-+					       O2_SD_FUNC_REG4, scratch_32);
-+		}
-+
-+		/* Lock WP */
-+		ret = pci_read_config_byte(chip->pdev,
-+					   O2_SD_LOCK_WP, &scratch);
-+		if (ret)
-+			return ret;
-+		scratch |= 0x80;
-+		pci_write_config_byte(chip->pdev, O2_SD_LOCK_WP, scratch);
-+		break;
-+	}
-+
-+	return 0;
-+}
-+
-+int sdhci_pci_o2_resume(struct sdhci_pci_chip *chip)
-+{
-+	sdhci_pci_o2_probe(chip);
-+	return 0;
-+}
-diff --git a/drivers/mmc/host/sdhci-pci-o2micro.h b/drivers/mmc/host/sdhci-pci-o2micro.h
-new file mode 100644
-index 0000000..1f16d13
---- /dev/null
-+++ b/drivers/mmc/host/sdhci-pci-o2micro.h
-@@ -0,0 +1,72 @@
-+/*
-+ * Copyright (C) 2013 BayHub Technology Ltd.
-+ *
-+ * Authors: Peter Guo <peter.guo@bayhubtech.com>
-+ *          Adam Lee <adam.lee@canonical.com>
-+ *
-+ * This software is licensed under the terms of the GNU General Public
-+ * License version 2, as published by the Free Software Foundation, and
-+ * may be copied, distributed, and modified under those terms.
-+ *
-+ * This program is distributed in the hope that it will be useful,
-+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
-+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+ * GNU General Public License for more details.
-+ *
-+ */
-+
-+#ifndef __SDHCI_PCI_O2MICRO_H
-+#define __SDHCI_PCI_O2MICRO_H
-+
-+#include "sdhci-pci.h"
-+
-+/*
-+ * O2Micro device IDs
-+ */
-+
-+#define PCI_DEVICE_ID_O2_SDS0		0x8420
-+#define PCI_DEVICE_ID_O2_SDS1		0x8421
-+#define PCI_DEVICE_ID_O2_FUJIN2		0x8520
-+#define PCI_DEVICE_ID_O2_SEABIRD0	0x8620
-+#define PCI_DEVICE_ID_O2_SEABIRD1	0x8621
-+
-+/*
-+ * O2Micro device registers
-+ */
-+
-+#define O2_SD_MISC_REG5		0x64
-+#define O2_SD_LD0_CTRL		0x68
-+#define O2_SD_DEV_CTRL		0x88
-+#define O2_SD_LOCK_WP		0xD3
-+#define O2_SD_TEST_REG		0xD4
-+#define O2_SD_FUNC_REG0		0xDC
-+#define O2_SD_MULTI_VCC3V	0xEE
-+#define O2_SD_CLKREQ		0xEC
-+#define O2_SD_CAPS		0xE0
-+#define O2_SD_ADMA1		0xE2
-+#define O2_SD_ADMA2		0xE7
-+#define O2_SD_INF_MOD		0xF1
-+#define O2_SD_MISC_CTRL4	0xFC
-+#define O2_SD_TUNING_CTRL	0x300
-+#define O2_SD_PLL_SETTING	0x304
-+#define O2_SD_CLK_SETTING	0x328
-+#define O2_SD_CAP_REG2		0x330
-+#define O2_SD_CAP_REG0		0x334
-+#define O2_SD_UHS1_CAP_SETTING	0x33C
-+#define O2_SD_DELAY_CTRL	0x350
-+#define O2_SD_UHS2_L1_CTRL	0x35C
-+#define O2_SD_FUNC_REG3		0x3E0
-+#define O2_SD_FUNC_REG4		0x3E4
-+
-+#define O2_SD_VENDOR_SETTING	0x110
-+#define O2_SD_VENDOR_SETTING2	0x1C8
-+
-+void sdhci_pci_o2_fujin2_pci_init(struct sdhci_pci_chip *chip);
-+
-+int sdhci_pci_o2_probe_slot(struct sdhci_pci_slot *slot);
-+
-+int sdhci_pci_o2_probe(struct sdhci_pci_chip *chip);
-+
-+int sdhci_pci_o2_resume(struct sdhci_pci_chip *chip);
-+
-+#endif /* __SDHCI_PCI_O2MICRO_H */
-diff --git a/drivers/mmc/host/sdhci-pci.c b/drivers/mmc/host/sdhci-pci.c
-index af44659..c1a7f31 100644
---- a/drivers/mmc/host/sdhci-pci.c
-+++ b/drivers/mmc/host/sdhci-pci.c
-@@ -28,6 +28,7 @@
- 
- #include "sdhci.h"
- #include "sdhci-pci.h"
-+#include "sdhci-pci-o2micro.h"
- 
- /*****************************************************************************\
-  *                                                                           *
-@@ -321,65 +322,6 @@ static const struct sdhci_pci_fixes sdhci_intel_mrfl_mmc = {
- #define O2_SD_ADMA2		0xE7
- #define O2_SD_INF_MOD		0xF1
- 
--static int o2_probe(struct sdhci_pci_chip *chip)
--{
--	int ret;
--	u8 scratch;
--
--	switch (chip->pdev->device) {
--	case PCI_DEVICE_ID_O2_8220:
--	case PCI_DEVICE_ID_O2_8221:
--	case PCI_DEVICE_ID_O2_8320:
--	case PCI_DEVICE_ID_O2_8321:
--		/* This extra setup is required due to broken ADMA. */
--		ret = pci_read_config_byte(chip->pdev, O2_SD_LOCK_WP, &scratch);
--		if (ret)
--			return ret;
--		scratch &= 0x7f;
--		pci_write_config_byte(chip->pdev, O2_SD_LOCK_WP, scratch);
--
--		/* Set Multi 3 to VCC3V# */
--		pci_write_config_byte(chip->pdev, O2_SD_MULTI_VCC3V, 0x08);
--
--		/* Disable CLK_REQ# support after media DET */
--		ret = pci_read_config_byte(chip->pdev, O2_SD_CLKREQ, &scratch);
--		if (ret)
--			return ret;
--		scratch |= 0x20;
--		pci_write_config_byte(chip->pdev, O2_SD_CLKREQ, scratch);
--
--		/* Choose capabilities, enable SDMA.  We have to write 0x01
--		 * to the capabilities register first to unlock it.
--		 */
--		ret = pci_read_config_byte(chip->pdev, O2_SD_CAPS, &scratch);
--		if (ret)
--			return ret;
--		scratch |= 0x01;
--		pci_write_config_byte(chip->pdev, O2_SD_CAPS, scratch);
--		pci_write_config_byte(chip->pdev, O2_SD_CAPS, 0x73);
--
--		/* Disable ADMA1/2 */
--		pci_write_config_byte(chip->pdev, O2_SD_ADMA1, 0x39);
--		pci_write_config_byte(chip->pdev, O2_SD_ADMA2, 0x08);
--
--		/* Disable the infinite transfer mode */
--		ret = pci_read_config_byte(chip->pdev, O2_SD_INF_MOD, &scratch);
--		if (ret)
--			return ret;
--		scratch |= 0x08;
--		pci_write_config_byte(chip->pdev, O2_SD_INF_MOD, scratch);
--
--		/* Lock WP */
--		ret = pci_read_config_byte(chip->pdev, O2_SD_LOCK_WP, &scratch);
--		if (ret)
--			return ret;
--		scratch |= 0x80;
--		pci_write_config_byte(chip->pdev, O2_SD_LOCK_WP, scratch);
--	}
--
--	return 0;
--}
--
- static int jmicron_pmos(struct sdhci_pci_chip *chip, int on)
- {
- 	u8 scratch;
-@@ -570,7 +512,10 @@ static int jmicron_resume(struct sdhci_pci_chip *chip)
- }
- 
- static const struct sdhci_pci_fixes sdhci_o2 = {
--	.probe		= o2_probe,
-+	.probe = sdhci_pci_o2_probe,
-+	.quirks = SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC,
-+	.probe_slot = sdhci_pci_o2_probe_slot,
-+	.resume = sdhci_pci_o2_resume,
- };
- 
- static const struct sdhci_pci_fixes sdhci_jmicron = {
-@@ -983,6 +928,46 @@ static const struct pci_device_id pci_ids[] = {
- 		.driver_data	= (kernel_ulong_t)&sdhci_o2,
- 	},
- 
-+	{
-+		.vendor		= PCI_VENDOR_ID_O2,
-+		.device		= PCI_DEVICE_ID_O2_FUJIN2,
-+		.subvendor	= PCI_ANY_ID,
-+		.subdevice	= PCI_ANY_ID,
-+		.driver_data	= (kernel_ulong_t)&sdhci_o2,
-+	},
-+
-+	{
-+		.vendor		= PCI_VENDOR_ID_O2,
-+		.device		= PCI_DEVICE_ID_O2_SDS0,
-+		.subvendor	= PCI_ANY_ID,
-+		.subdevice	= PCI_ANY_ID,
-+		.driver_data	= (kernel_ulong_t)&sdhci_o2,
-+	},
-+
-+	{
-+		.vendor		= PCI_VENDOR_ID_O2,
-+		.device		= PCI_DEVICE_ID_O2_SDS1,
-+		.subvendor	= PCI_ANY_ID,
-+		.subdevice	= PCI_ANY_ID,
-+		.driver_data	= (kernel_ulong_t)&sdhci_o2,
-+	},
-+
-+	{
-+		.vendor		= PCI_VENDOR_ID_O2,
-+		.device		= PCI_DEVICE_ID_O2_SEABIRD0,
-+		.subvendor	= PCI_ANY_ID,
-+		.subdevice	= PCI_ANY_ID,
-+		.driver_data	= (kernel_ulong_t)&sdhci_o2,
-+	},
-+
-+	{
-+		.vendor		= PCI_VENDOR_ID_O2,
-+		.device		= PCI_DEVICE_ID_O2_SEABIRD1,
-+		.subvendor	= PCI_ANY_ID,
-+		.subdevice	= PCI_ANY_ID,
-+		.driver_data	= (kernel_ulong_t)&sdhci_o2,
-+	},
-+
- 	{	/* Generic SD host controller */
- 		PCI_DEVICE_CLASS((PCI_CLASS_SYSTEM_SDHCI << 8), 0xFFFF00)
- 	},
--- 
-1.8.5.2
+Thanks for the explanation. I need to check if the Work around (power ON
+and then power OFF) are there for legacy reason or needed for TI SDIO
+detection on soft reset, if it is latter need to figure out a way to
+fix TI SDIO before removing it.
+
+> Kind regards
+> Ulf Hansson
+>
+>
+>>
+>>
+>>>
+>>> Kind regards
+>>> Ulf Hansson
+>>>
+>>>> -               if (regulator_is_enabled(host->vcc) > 0 ||
+>>>> -                   (host->vcc_aux &&
+>>>> regulator_is_enabled(host->vcc_aux))) {
+>>>> -                       int vdd = ffs(mmc_slot(host).ocr_mask) - 1;
+>>>> +       /* For eMMC do not power off when not in sleep state */
+>>>> +       if (mmc_slot(host).no_regulator_off_init)
+>>>> +               return 0;
+>>>> +       /*
+>>>> +        * To disable boot_on regulator, enable regulator
+>>>> +        * to increase usecount and then disable it.
+>>>> +        */
+>>>> +       if ((host->vcc && regulator_is_enabled(host->vcc) > 0) ||
+>>>> +           (host->vcc_aux && regulator_is_enabled(host->vcc_aux))) {
+>>>> +               int vdd = ffs(mmc_slot(host).ocr_mask) - 1;
+>>>>
+>>>> -                       mmc_slot(host).set_power(host->dev,
+>>>> host->slot_id,
+>>>> -                                                1, vdd);
+>>>> -                       mmc_slot(host).set_power(host->dev,
+>>>> host->slot_id,
+>>>> -                                                0, 0);
+>>>> -               }
+>>>> +               mmc_slot(host).set_power(host->dev, host->slot_id, 1,
+>>>> vdd);
+>>>> +               mmc_slot(host).set_power(host->dev, host->slot_id, 0, 0);
+>>>>           }
+>>>>
+>>>>           return 0;
+>>>> --
+>>>> 1.7.5.4
+>>>>
+>>>> --
+>>>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+>>>> the body of a message to majordomo@vger.kernel.org
+>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
+>>
 
