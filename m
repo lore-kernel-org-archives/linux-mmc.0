@@ -1,88 +1,78 @@
-From: Joonsoo Kim <iamjoonsoo.kim@lge.com>
-Subject: Re: possible regression on 3.13 when calling flush_dcache_page
-Date: Wed, 18 Dec 2013 16:21:17 +0900
-Message-ID: <20131218072117.GA2383@lge.com>
-References: <20131212143149.GI12099@ldesroches-Latitude-E6320>
- <20131212143618.GJ12099@ldesroches-Latitude-E6320>
- <20131213015909.GA8845@lge.com>
- <20131216144343.GD9627@ldesroches-Latitude-E6320>
+From: Shawn Guo <shawn.guo@linaro.org>
+Subject: Re: [PATCH 1/4] iMX6SL frequency table
+Date: Wed, 18 Dec 2013 15:37:57 +0800
+Message-ID: <20131218073755.GG6691@S2101-09.ap.freescale.net>
+References: <1387329451-17480-1-git-send-email-john.tobias.ph@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="us-ascii"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lgeamrelo02.lge.com ([156.147.1.126]:49301 "EHLO
-	LGEAMRELO02.lge.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751072Ab3LRHVU (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 18 Dec 2013 02:21:20 -0500
+Received: from co9ehsobe003.messaging.microsoft.com ([207.46.163.26]:9227 "EHLO
+	co9outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751149Ab3LRHgv (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 18 Dec 2013 02:36:51 -0500
 Content-Disposition: inline
-In-Reply-To: <20131216144343.GD9627@ldesroches-Latitude-E6320>
+In-Reply-To: <1387329451-17480-1-git-send-email-john.tobias.ph@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mm@kvack.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+To: John Tobias <john.tobias.ph@gmail.com>
+Cc: linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, festevam@gmail.com, cjb@laptop.org
 
-On Mon, Dec 16, 2013 at 03:43:43PM +0100, Ludovic Desroches wrote:
-> Hello,
-> 
-> On Fri, Dec 13, 2013 at 10:59:09AM +0900, Joonsoo Kim wrote:
-> > On Thu, Dec 12, 2013 at 03:36:19PM +0100, Ludovic Desroches wrote:
-> > > fix mmc mailing list address error
-> > > 
-> > > On Thu, Dec 12, 2013 at 03:31:50PM +0100, Ludovic Desroches wrote:
-> > > > Hi,
-> > > > 
-> > > > With v3.13-rc3 I have an error when the atmel-mci driver calls
-> > > > flush_dcache_page (log at the end of the message).
-> > > > 
-> > > > Since I didn't have it before, I did a git bisect and the commit introducing
-> > > > the error is the following one:
-> > > > 
-> > > > 106a74e slab: replace free and inuse in struct slab with newly introduced active
-> > > > 
-> > > > I don't know if this commit has introduced a bug or if it has revealed a bug
-> > > > in the atmel-mci driver.
-> > 
-> > Hello,
-> > 
-> > I think that this commit may not introduce a bug. This patch remove one
-> > variable on slab management structure and replace variable name. So there
-> > is no functional change.
-> > 
-> 
-> If I have reverted this patch and other ones you did on top of it and
-> the issue disappear.
+On Tue, Dec 17, 2013 at 05:17:28PM -0800, John Tobias wrote:
+>     Device tree for iMX6SL doesn't have an existing cpu frequency table.
 
-Hello,
-
-Could you give me your '/proc/slabinfo' before/after this commit (106a74e)?
-
-And how about testing with artificially increasing size of struct slab on
-top of this commit (106a74e)?
-
-I really wonder why the problem happens, because this doesn't cause any
-functional change as far as I know. Only side-effect from this patch is
-decreasing size of struct slab.
-
-Thanks.
-
-diff --git a/mm/slab.c b/mm/slab.c
-index 2ec2336..d2240fd 100644
---- a/mm/slab.c
-+++ b/mm/slab.c
-@@ -174,6 +174,7 @@ struct slab {
-        struct {
-                struct list_head list;
-                void *s_mem;            /* including colour offset */
-+               unsigned int x;
-                unsigned int active;    /* num of objs active in slab */
-        };
- };
+Drop these leading spaces.
 
 > 
-> > I doubt that side-effect of this patch reveals a bug in other place.
-> > Side-effect is reduced memory usage for slab management structure. It would
-> > makes some slabs have more objects with more density since slab management
-> > structure is sometimes on the page for objects. So if it diminishes, more
-> > objects can be in the page.
-> > 
-> > Anyway, I will look at it more. If you have any progress, please let me know.
+> Signed-off-by: John Tobias <john.tobias.ph@gmail.com>
+> ---
+>  arch/arm/boot/dts/imx6sl.dtsi | 14 ++++++++++++++
+>  1 file changed, 14 insertions(+)
+
+For such imx6sl dts changes, please put a prefix 'ARM: dts: imx6sl: ...'
+on the patch subject.
+
 > 
-> No progress at the moment.
+> diff --git a/arch/arm/boot/dts/imx6sl.dtsi b/arch/arm/boot/dts/imx6sl.dtsi
+> index 28558f1..0a2c73c 100644
+> --- a/arch/arm/boot/dts/imx6sl.dtsi
+> +++ b/arch/arm/boot/dts/imx6sl.dtsi
+> @@ -38,6 +38,20 @@
+>  			device_type = "cpu";
+>  			reg = <0x0>;
+>  			next-level-cache = <&L2>;
+> +			operating-points = <
+> +				/* kHz    uV */
+> +				996000  1250000 /* for consumer grade only */
+> +				792000  1150000
+> +				396000  1050000
+
+Please see my reply to your previous patch.
+
+> +			>;
+> +			clock-latency = <61036>; /* two CLK32 periods */
+> +			clocks = <&clks IMX6SL_CLK_ARM>, <&clks IMX6SL_CLK_PLL2_PFD2>, <&clks IMX6SL_CLK_STEP>,
+> +				 <&clks IMX6SL_CLK_PLL1_SW>, <&clks IMX6SL_CLK_PLL1_SYS>;
+
+The lines are somehow too long.  The following one might be easier to
+read.
+
+			clocks = <&clks IMX6SL_CLK_ARM>,
+				 <&clks IMX6SL_CLK_PLL2_PFD2>,
+				 <&clks IMX6SL_CLK_STEP>,
+				 <&clks IMX6SL_CLK_PLL1_SW>,
+				 <&clks IMX6SL_CLK_PLL1_SYS>;
+
+Shawn
+
+> +			clock-names = "arm", "pll2_pfd2_396m", "step",
+> +				      "pll1_sw", "pll1_sys";
+> +			arm-supply = <&reg_arm>;
+> +			pu-supply = <&reg_pu>;
+> +			soc-supply = <&reg_soc>;
+>  		};
+>  	};
+>  
+> -- 
+> 1.8.3.2
+> 
+
