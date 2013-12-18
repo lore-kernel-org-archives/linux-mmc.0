@@ -1,65 +1,41 @@
-From: Wolfram Sang <wsa@the-dreams.de>
-Subject: Re: [PATCH] mmc: core: sd: implement proper support for sd3.0 au
- sizes
-Date: Wed, 18 Dec 2013 13:30:32 +0100
-Message-ID: <20131218123032.GF3314@katana>
-References: <1385428585-17516-1-git-send-email-wsa@the-dreams.de>
-Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="aYDVKSzuImP48n7V"
+From: Adam Lee <adam.lee@canonical.com>
+Subject: [PATCH 0/2] add support of O2Mirco/BayHubTech SD hosts
+Date: Wed, 18 Dec 2013 22:23:37 +0800
+Message-ID: <1387376619-8050-1-git-send-email-adam.lee@canonical.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from sauhun.de ([89.238.76.85]:57693 "EHLO pokefinder.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753865Ab3LRMaj (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 18 Dec 2013 07:30:39 -0500
-Content-Disposition: inline
-In-Reply-To: <1385428585-17516-1-git-send-email-wsa@the-dreams.de>
+Received: from mail-pd0-f171.google.com ([209.85.192.171]:60518 "EHLO
+	mail-pd0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753663Ab3LROXv (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 18 Dec 2013 09:23:51 -0500
+Received: by mail-pd0-f171.google.com with SMTP id z10so8240117pdj.16
+        for <linux-mmc@vger.kernel.org>; Wed, 18 Dec 2013 06:23:51 -0800 (PST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
-Cc: Chris Ball <cjb@laptop.org>, Jaehoon Chung <jh80.chung@samsung.com>, Kyungmin Park <kyungmin.park@samsung.com>, H Hartley Sweeten <hartleys@visionengravers.com>
+Cc: Chris Ball <cjb@laptop.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Adrian Hunter <adrian.hunter@intel.com>, Shawn Guo <shawn.guo@linaro.org>, Stephen Warren <swarren@wwwdotorg.org>, Peter Guo <peter.guo@bayhubtech.com>
 
+BugLink: http://bugs.launchpad.net/bugs/1239938
 
---aYDVKSzuImP48n7V
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+Card readers on Lenovo ThinkPad W540, Dell Latitude E5440 and Dell Latitude
+E6540 don't work without this patch.
 
-On Tue, Nov 26, 2013 at 02:16:25AM +0100, Wolfram Sang wrote:
-> This reverts and updates commit 77776fd0a4cc541b9a528eacc1d31ca47eb1ae7a
-> ("mmc: sd: fix the maximum au_size for SD3.0"). The au_size for SD3.0
-> cannot be achieved by a simple bit shift, so this needs to be
-> implemented differently. Also, don't print the warning in case of 0
-> since 'not defined' is different from 'invalid'.
->=20
-> Signed-off-by: Wolfram Sang <wsa@the-dreams.de>
-> Cc: Jaehoon Chung <jh80.chung@samsung.com>
-> Cc: Kyungmin Park <kyungmin.park@samsung.com>
-> Cc: H Hartley Sweeten <hartleys@visionengravers.com>
+Thanks to Chris Ball's suggestion, I create new files but not add hundreds
+lines of code into the main source file.
 
-Ping.
+Adam Lee (2):
+  mmc: sdhci-pci: break out definitions to header file
+  mmc: sdhci-pci: add support of O2Mirco/BayHubTech SD hosts
 
+ drivers/mmc/host/Makefile            |   1 +
+ drivers/mmc/host/sdhci-pci-o2micro.c | 317 +++++++++++++++++++++++++++++++++++
+ drivers/mmc/host/sdhci-pci-o2micro.h |  72 ++++++++
+ drivers/mmc/host/sdhci-pci.c         | 179 +++++---------------
+ drivers/mmc/host/sdhci-pci.h         |  77 +++++++++
+ 5 files changed, 513 insertions(+), 133 deletions(-)
+ create mode 100644 drivers/mmc/host/sdhci-pci-o2micro.c
+ create mode 100644 drivers/mmc/host/sdhci-pci-o2micro.h
+ create mode 100644 drivers/mmc/host/sdhci-pci.h
 
---aYDVKSzuImP48n7V
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
+-- 
+1.8.5.2
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.15 (GNU/Linux)
-
-iQIcBAEBAgAGBQJSsZVoAAoJEBQN5MwUoCm27akP/3ycMGPScEGZAVCS4HBSIPRZ
-agkX4yxaBhOsslV1/CGXWdcYe1M4ve/9jqhlmPMEqAYzGTbYWILU8hujxpPv+r7N
-OkUUOHR3TgpxfyCuSdno04CMrja6XSbgvwqx0o5pH1Bw34k9pwRcaakhhXC2qbGt
-/j+peLrO9iFvGeYn3cSjQOPis8GXoZI0anug6fM6sVnQWYJQfdEwLT0zoootxJvF
-jAV5+qewyQy3AUsAfe/3AOvOoe45ICX7Q+MIpsfVihi59yGglK+7rwXDZxau33+h
-XVBiRvfrIjdFRzuhf1+dL/92ytkTzvbWraLfo6P3pA+aD2awl7gO6ZqJoG+dn9Vr
-A+GnHtFHDOqOtamMhNP71L55c2OZMC13yucjlbAClVqfY2GGrHg2l/7po0E9kqso
-Oz/xcDPSRWSa6JLMpZzREFtZMkD/Y3UVP+EK9SlVxjjw2SolCS6/mcoK3gX0t71C
-O7Z7Nex3f1Fvd2JYBqF/9uIKPsfRoM9axE8PRx3rjeeeIPNAnvJKyLP+8hZZC5pa
-IC6P+UJFJXEpqF876mrJS8QdJN6W7iXDatzftnFtJnu8QBMKmbbhbX13KzVvvxzp
-azlxEqGsjNPaO8BgDpK9yJGDWH3FLS9J5tfBUS5tUY5leyogmL/gAAU9rApJbMTR
-sC+8c/xS4VwhMJC6ReHy
-=ItKk
------END PGP SIGNATURE-----
-
---aYDVKSzuImP48n7V--
