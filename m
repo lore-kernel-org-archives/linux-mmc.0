@@ -1,103 +1,114 @@
-From: Ludovic Desroches <ludovic.desroches@atmel.com>
-Subject: Re: [PATCHv3] mmc: atmel-mci: add vmmc-supply support
-Date: Wed, 18 Dec 2013 09:16:45 +0100
-Message-ID: <20131218081645.GA4268@ldesroches-Latitude-E6320>
-References: <1382006808-22728-1-git-send-email-alexandre.belloni@free-electrons.com>
- <CAPDyKFoiWOE47DWrUHNWVPyihL=uCidpd52TV1vgUbq1aMNvbw@mail.gmail.com>
- <52B09FF0.4070200@free-electrons.com>
+From: Michal Simek <monstr@monstr.eu>
+Subject: [GIT PULL] Xilinx Zynq mmc changes for v3.14
+Date: Wed, 18 Dec 2013 10:42:29 +0100
+Message-ID: <52B16E05.5080404@monstr.eu>
+Reply-To: monstr@monstr.eu
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="CLTDATHIDmIKjPAMhIkUftalAJIpWT7ia"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eusmtp01.atmel.com ([212.144.249.243]:52167 "EHLO
-	eusmtp01.atmel.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750933Ab3LRIQs (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 18 Dec 2013 03:16:48 -0500
-Content-Disposition: inline
-In-Reply-To: <52B09FF0.4070200@free-electrons.com>
+Received: from mail-ea0-f170.google.com ([209.85.215.170]:59716 "EHLO
+	mail-ea0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751016Ab3LRJmd (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 18 Dec 2013 04:42:33 -0500
+Received: by mail-ea0-f170.google.com with SMTP id k10so3437951eaj.1
+        for <linux-mmc@vger.kernel.org>; Wed, 18 Dec 2013 01:42:32 -0800 (PST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Alexandre Belloni <alexandre.belloni@free-electrons.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <cjb@laptop.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Ludovic Desroches <ludovic.desroches@atmel.com>
+To: Chris Ball <cjb@laptop.org>
+Cc: =?ISO-8859-1?Q?S=F6ren_Brinkmann?= <soren.brinkmann@xilinx.com>, linux-mmc@vger.kernel.org, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, LKML <linux-kernel@vger.kernel.org>
 
-Hi Alexandre,
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--CLTDATHIDmIKjPAMhIkUftalAJIpWT7ia
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
 
-On Tue, Dec 17, 2013 at 08:03:12PM +0100, Alexandre Belloni wrote:
-> Hi,
-> 
-> It seems that patch never made it to the mainline. Is it still missing
-> something ?
+Hi Chris,
 
-No reason on my side, maybe because my ack is missing but I thought I
-gave it on a previous version, maybe I am wrong.
+Soren and I are trying to reach you regarding Arasan driver we sent to ma=
+iling list
+for review. There are no complains about this version 3 that's why I have=
+ added
+to our repo and sending you this pull request.
 
-So Acked-by: Ludovic Desroches <ludovic.desroches@atmel.com>
+Patches:
+http://lkml.org/lkml/2013/12/2/413
+http://lkml.org/lkml/2013/12/2/424
+
+Thanks for pulling these changes to your tree.
+
+This driver was also requested to add LTSI that's why I am CC'ing Greg.
+
+Thanks,
+Michal
 
 
-Regards
+The following changes since commit dc1ccc48159d63eca5089e507c82c7d22ef608=
+39:
 
-Ludovic
+  Linux 3.13-rc2 (2013-11-29 12:57:14 -0800)
 
-> 
-> Regards,
-> 
-> On 17/10/2013 15:56, Ulf Hansson wrote:
-> > On 17 October 2013 12:46, Alexandre Belloni
-> > <alexandre.belloni@free-electrons.com> wrote:
-> >> Other MMC hosts handle a regulator named vmmc-supply that allows to power the
-> >> MMC card or SDIO device before communicating on the bus.
-> >>
-> >> Signed-off-by: Alexandre Belloni <alexandre.belloni@free-electrons.com>
-> > Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
-> >
-> >> ---
-> >>
-> >> Changes in v2:
-> >>  - use mmc_regulator_get_supply instead of devm_regulator_get
-> >>
-> >> Changes in v3:
-> >>  - en/disable the regulator in .set_ios using mmc_regulator_set_ocr
-> >>
-> >>  drivers/mmc/host/atmel-mci.c | 7 +++++++
-> >>  1 file changed, 7 insertions(+)
-> >>
-> >> diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
-> >> index 69e438e..a9e1ba6 100644
-> >> --- a/drivers/mmc/host/atmel-mci.c
-> >> +++ b/drivers/mmc/host/atmel-mci.c
-> >> @@ -1385,8 +1385,14 @@ static void atmci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
-> >>                 clk_unprepare(host->mck);
-> >>
-> >>         switch (ios->power_mode) {
-> >> +       case MMC_POWER_OFF:
-> >> +               if (!IS_ERR(mmc->supply.vmmc))
-> >> +                       mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, 0);
-> >> +               break;
-> >>         case MMC_POWER_UP:
-> >>                 set_bit(ATMCI_CARD_NEED_INIT, &slot->flags);
-> >> +               if (!IS_ERR(mmc->supply.vmmc))
-> >> +                       mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, ios->vdd);
-> >>                 break;
-> >>         default:
-> >>                 /*
-> >> @@ -2196,6 +2202,7 @@ static int __init atmci_init_slot(struct atmel_mci *host,
-> >>         }
-> >>
-> >>         host->slot[id] = slot;
-> >> +       mmc_regulator_get_supply(mmc);
-> >>         mmc_add_host(mmc);
-> >>
-> >>         if (gpio_is_valid(slot->detect_pin)) {
-> >> --
-> >> 1.8.1.2
-> >>
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
-> -- 
-> Alexandre Belloni, Free Electrons
-> Embedded Linux, Kernel and Android engineering
-> http://free-electrons.com
-> 
+are available in the git repository at:
+
+  git://git.xilinx.com/linux-xlnx.git tags/zynq-mmc-for-3.14
+
+for you to fetch changes up to da48f3cfb6d5dc0859dc4b77a145df5c749d2ea4:
+
+  arm: dt: zynq: Add SDHCI nodes (2013-12-18 10:27:50 +0100)
+
+----------------------------------------------------------------
+arm: Xilinx Zynq mmc patches for v3.14
+
+- Add support for Arasan SDHCI
+- Add nodes to DTS files
+
+----------------------------------------------------------------
+Soren Brinkmann (2):
+      mmc: arasan: Add driver for Arasan SDHCI
+      arm: dt: zynq: Add SDHCI nodes
+
+ Documentation/devicetree/bindings/mmc/arasan,sdhci.txt |  27 +++++++++++=
+++++++++++
+ MAINTAINERS                                            |   1 +
+ arch/arm/boot/dts/zynq-7000.dtsi                       |  20 +++++++++++=
++++++
+ arch/arm/boot/dts/zynq-zc702.dts                       |   4 ++++
+ arch/arm/boot/dts/zynq-zc706.dts                       |   4 ++++
+ arch/arm/boot/dts/zynq-zed.dts                         |   4 ++++
+ drivers/mmc/host/Kconfig                               |  12 ++++++++++
+ drivers/mmc/host/Makefile                              |   1 +
+ drivers/mmc/host/sdhci-of-arasan.c                     | 224 +++++++++++=
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++=
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++=
++++++++++++++++++
+ 9 files changed, 297 insertions(+)
+ create mode 100644 Documentation/devicetree/bindings/mmc/arasan,sdhci.tx=
+t
+ create mode 100644 drivers/mmc/host/sdhci-of-arasan.c
+
+
+--=20
+Michal Simek, Ing. (M.Eng), OpenPGP -> KeyID: FE3D1F91
+w: www.monstr.eu p: +42-0-721842854
+Maintainer of Linux kernel - Microblaze cpu - http://www.monstr.eu/fdt/
+Maintainer of Linux kernel - Xilinx Zynq ARM architecture
+Microblaze U-BOOT custodian and responsible for u-boot arm zynq platform
+
+
+
+--CLTDATHIDmIKjPAMhIkUftalAJIpWT7ia
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.10 (GNU/Linux)
+Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
+
+iEYEARECAAYFAlKxbgUACgkQykllyylKDCGQmwCfeLeKLq8xVkQNCPvISzr0F8n3
+vscAnjT2RG4ylk1IYt4TSDliMvVFeXri
+=PU3Y
+-----END PGP SIGNATURE-----
+
+--CLTDATHIDmIKjPAMhIkUftalAJIpWT7ia--
