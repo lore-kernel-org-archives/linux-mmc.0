@@ -1,199 +1,586 @@
 From: Adam Lee <adam.lee@canonical.com>
-Subject: [PATCH 1/2] mmc: sdhci-pci: break out definitions to header file
-Date: Wed, 18 Dec 2013 22:23:38 +0800
-Message-ID: <1387376619-8050-2-git-send-email-adam.lee@canonical.com>
+Subject: [PATCH 2/2] mmc: sdhci-pci: add support of O2Mirco/BayHubTech SD hosts
+Date: Wed, 18 Dec 2013 22:23:39 +0800
+Message-ID: <1387376619-8050-3-git-send-email-adam.lee@canonical.com>
 References: <1387376619-8050-1-git-send-email-adam.lee@canonical.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pb0-f44.google.com ([209.85.160.44]:63577 "EHLO
-	mail-pb0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753663Ab3LROX7 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 18 Dec 2013 09:23:59 -0500
-Received: by mail-pb0-f44.google.com with SMTP id rq2so8525785pbb.3
-        for <linux-mmc@vger.kernel.org>; Wed, 18 Dec 2013 06:23:58 -0800 (PST)
+Received: from mail-pd0-f177.google.com ([209.85.192.177]:43079 "EHLO
+	mail-pd0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753663Ab3LROYF (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 18 Dec 2013 09:24:05 -0500
+Received: by mail-pd0-f177.google.com with SMTP id q10so8157779pdj.8
+        for <linux-mmc@vger.kernel.org>; Wed, 18 Dec 2013 06:24:05 -0800 (PST)
 In-Reply-To: <1387376619-8050-1-git-send-email-adam.lee@canonical.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 Cc: Chris Ball <cjb@laptop.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Adrian Hunter <adrian.hunter@intel.com>, Shawn Guo <shawn.guo@linaro.org>, Stephen Warren <swarren@wwwdotorg.org>, Peter Guo <peter.guo@bayhubtech.com>
 
-Break out definitions in sdhci-pci.c to sdhci-pci.h, for introducing
-module files like sdhci-pci-xxx.c
+Add O2Micro/BayHubTech SD Host DeviceId 8520 support.
+Add O2Micro/BayHubTech SD Host DeviceId 8420 & 8421 support.
+Add O2Micro/BayHubTech SD Host DeviceId 8620 & 8621 support.
 
+Signed-off-by: Peter Guo <peter.guo@bayhubtech.com>
 Signed-off-by: Adam Lee <adam.lee@canonical.com>
 ---
- drivers/mmc/host/sdhci-pci.c | 74 +-----------------------------------------
- drivers/mmc/host/sdhci-pci.h | 77 ++++++++++++++++++++++++++++++++++++++++++++
- 2 files changed, 78 insertions(+), 73 deletions(-)
- create mode 100644 drivers/mmc/host/sdhci-pci.h
+ drivers/mmc/host/Makefile            |   1 +
+ drivers/mmc/host/sdhci-pci-o2micro.c | 317 +++++++++++++++++++++++++++++++++++
+ drivers/mmc/host/sdhci-pci-o2micro.h |  72 ++++++++
+ drivers/mmc/host/sdhci-pci.c         | 105 +++++-------
+ 4 files changed, 435 insertions(+), 60 deletions(-)
+ create mode 100644 drivers/mmc/host/sdhci-pci-o2micro.c
+ create mode 100644 drivers/mmc/host/sdhci-pci-o2micro.h
 
+diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
+index c41d0c3..5dd3de9 100644
+--- a/drivers/mmc/host/Makefile
++++ b/drivers/mmc/host/Makefile
+@@ -9,6 +9,7 @@ obj-$(CONFIG_MMC_MXS)		+= mxs-mmc.o
+ obj-$(CONFIG_MMC_SDHCI)		+= sdhci.o
+ obj-$(CONFIG_MMC_SDHCI_PCI)	+= sdhci-pci.o
+ obj-$(subst m,y,$(CONFIG_MMC_SDHCI_PCI))	+= sdhci-pci-data.o
++obj-$(subst m,y,$(CONFIG_MMC_SDHCI_PCI))	+= sdhci-pci-o2micro.o
+ obj-$(CONFIG_MMC_SDHCI_ACPI)	+= sdhci-acpi.o
+ obj-$(CONFIG_MMC_SDHCI_PXAV3)	+= sdhci-pxav3.o
+ obj-$(CONFIG_MMC_SDHCI_PXAV2)	+= sdhci-pxav2.o
+diff --git a/drivers/mmc/host/sdhci-pci-o2micro.c b/drivers/mmc/host/sdhci-pci-o2micro.c
+new file mode 100644
+index 0000000..de210e7
+--- /dev/null
++++ b/drivers/mmc/host/sdhci-pci-o2micro.c
+@@ -0,0 +1,317 @@
++/*
++ * Copyright (C) 2013 BayHub Technology Ltd.
++ *
++ * Authors: Peter Guo <peter.guo@bayhubtech.com>
++ *          Adam Lee <adam.lee@canonical.com>
++ *
++ * This software is licensed under the terms of the GNU General Public
++ * License version 2, as published by the Free Software Foundation, and
++ * may be copied, distributed, and modified under those terms.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ */
++
++#include <linux/pci.h>
++
++#include "sdhci.h"
++#include "sdhci-pci.h"
++#include "sdhci-pci-o2micro.h"
++
++void sdhci_pci_o2_fujin2_pci_init(struct sdhci_pci_chip *chip)
++{
++	u32 scratch_32;
++	int ret;
++	/* Improve write performance for SD3.0 */
++	ret = pci_read_config_dword(chip->pdev, O2_SD_DEV_CTRL, &scratch_32);
++	if (ret)
++		return;
++	scratch_32 &= ~((1 << 12) | (1 << 13) | (1 << 14));
++	pci_write_config_dword(chip->pdev, O2_SD_DEV_CTRL, scratch_32);
++
++	/* Enable Link abnormal reset generating Reset */
++	ret = pci_read_config_dword(chip->pdev, O2_SD_MISC_REG5, &scratch_32);
++	if (ret)
++		return;
++	scratch_32 &= ~((1 << 19) | (1 << 11));
++	scratch_32 |= (1 << 10);
++	pci_write_config_dword(chip->pdev, O2_SD_MISC_REG5, scratch_32);
++
++	/* set card power over current protection */
++	ret = pci_read_config_dword(chip->pdev, O2_SD_TEST_REG, &scratch_32);
++	if (ret)
++		return;
++	scratch_32 |= (1 << 4);
++	pci_write_config_dword(chip->pdev, O2_SD_TEST_REG, scratch_32);
++
++	/* adjust the output delay for SD mode */
++	pci_write_config_dword(chip->pdev, O2_SD_DELAY_CTRL, 0x00002492);
++
++	/* Set the output voltage setting of Aux 1.2v LDO */
++	ret = pci_read_config_dword(chip->pdev, O2_SD_LD0_CTRL, &scratch_32);
++	if (ret)
++		return;
++	scratch_32 &= ~(3 << 12);
++	pci_write_config_dword(chip->pdev, O2_SD_LD0_CTRL, scratch_32);
++
++	/* Set Max power supply capability of SD host */
++	ret = pci_read_config_dword(chip->pdev, O2_SD_CAP_REG0, &scratch_32);
++	if (ret)
++		return;
++	scratch_32 &= ~(0x01FE);
++	scratch_32 |= 0x00CC;
++	pci_write_config_dword(chip->pdev, O2_SD_CAP_REG0, scratch_32);
++	/* Set DLL Tuning Window */
++	ret = pci_read_config_dword(chip->pdev,
++				    O2_SD_TUNING_CTRL, &scratch_32);
++	if (ret)
++		return;
++	scratch_32 &= ~(0x000000FF);
++	scratch_32 |= 0x00000066;
++	pci_write_config_dword(chip->pdev, O2_SD_TUNING_CTRL, scratch_32);
++
++	/* Set UHS2 T_EIDLE */
++	ret = pci_read_config_dword(chip->pdev,
++				    O2_SD_UHS2_L1_CTRL, &scratch_32);
++	if (ret)
++		return;
++	scratch_32 &= ~(0x000000FC);
++	scratch_32 |= 0x00000084;
++	pci_write_config_dword(chip->pdev, O2_SD_UHS2_L1_CTRL, scratch_32);
++
++	/* Set UHS2 Termination */
++	ret = pci_read_config_dword(chip->pdev, O2_SD_FUNC_REG3, &scratch_32);
++	if (ret)
++		return;
++	scratch_32 &= ~((1 << 21) | (1 << 30));
++
++	/* Set RTD3 function disabled */
++	scratch_32 |= ((1 << 29) | (1 << 28));
++	pci_write_config_dword(chip->pdev, O2_SD_FUNC_REG3, scratch_32);
++
++	/* Set L1 Entrance Timer */
++	ret = pci_read_config_dword(chip->pdev, O2_SD_CAPS, &scratch_32);
++	if (ret)
++		return;
++	scratch_32 &= ~(0xf0000000);
++	scratch_32 |= 0x30000000;
++	pci_write_config_dword(chip->pdev, O2_SD_CAPS, scratch_32);
++
++	ret = pci_read_config_dword(chip->pdev,
++				    O2_SD_MISC_CTRL4, &scratch_32);
++	if (ret)
++		return;
++	scratch_32 &= ~(0x000f0000);
++	scratch_32 |= 0x00080000;
++	pci_write_config_dword(chip->pdev, O2_SD_MISC_CTRL4, scratch_32);
++}
++
++int sdhci_pci_o2_probe_slot(struct sdhci_pci_slot *slot)
++{
++	struct sdhci_pci_chip *chip;
++	struct sdhci_host *host;
++	u32 reg;
++
++	chip = slot->chip;
++	host = slot->host;
++	switch (chip->pdev->device) {
++	case PCI_DEVICE_ID_O2_SDS0:
++	case PCI_DEVICE_ID_O2_SEABIRD0:
++	case PCI_DEVICE_ID_O2_SEABIRD1:
++	case PCI_DEVICE_ID_O2_SDS1:
++	case PCI_DEVICE_ID_O2_FUJIN2:
++		reg = sdhci_readl(host, O2_SD_VENDOR_SETTING);
++		if (reg & 0x1)
++			host->quirks |= SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12;
++
++		if (chip->pdev->device != PCI_DEVICE_ID_O2_FUJIN2)
++			break;
++		/* set dll watch dog timer */
++		reg = sdhci_readl(host, O2_SD_VENDOR_SETTING2);
++		reg |= (1 << 12);
++		sdhci_writel(host, reg, O2_SD_VENDOR_SETTING2);
++
++		break;
++	default:
++		break;
++	}
++
++	return 0;
++}
++
++int sdhci_pci_o2_probe(struct sdhci_pci_chip *chip)
++{
++	int ret;
++	u8 scratch;
++	u32 scratch_32;
++
++	switch (chip->pdev->device) {
++	case PCI_DEVICE_ID_O2_8220:
++	case PCI_DEVICE_ID_O2_8221:
++	case PCI_DEVICE_ID_O2_8320:
++	case PCI_DEVICE_ID_O2_8321:
++		/* This extra setup is required due to broken ADMA. */
++		ret = pci_read_config_byte(chip->pdev,
++				O2_SD_LOCK_WP, &scratch);
++		if (ret)
++			return ret;
++		scratch &= 0x7f;
++		pci_write_config_byte(chip->pdev, O2_SD_LOCK_WP, scratch);
++
++		/* Set Multi 3 to VCC3V# */
++		pci_write_config_byte(chip->pdev, O2_SD_MULTI_VCC3V, 0x08);
++
++		/* Disable CLK_REQ# support after media DET */
++		ret = pci_read_config_byte(chip->pdev,
++				O2_SD_CLKREQ, &scratch);
++		if (ret)
++			return ret;
++		scratch |= 0x20;
++		pci_write_config_byte(chip->pdev, O2_SD_CLKREQ, scratch);
++
++		/* Choose capabilities, enable SDMA.  We have to write 0x01
++		 * to the capabilities register first to unlock it.
++		 */
++		ret = pci_read_config_byte(chip->pdev, O2_SD_CAPS, &scratch);
++		if (ret)
++			return ret;
++		scratch |= 0x01;
++		pci_write_config_byte(chip->pdev, O2_SD_CAPS, scratch);
++		pci_write_config_byte(chip->pdev, O2_SD_CAPS, 0x73);
++
++		/* Disable ADMA1/2 */
++		pci_write_config_byte(chip->pdev, O2_SD_ADMA1, 0x39);
++		pci_write_config_byte(chip->pdev, O2_SD_ADMA2, 0x08);
++
++		/* Disable the infinite transfer mode */
++		ret = pci_read_config_byte(chip->pdev,
++				O2_SD_INF_MOD, &scratch);
++		if (ret)
++			return ret;
++		scratch |= 0x08;
++		pci_write_config_byte(chip->pdev, O2_SD_INF_MOD, scratch);
++
++		/* Lock WP */
++		ret = pci_read_config_byte(chip->pdev,
++				O2_SD_LOCK_WP, &scratch);
++		if (ret)
++			return ret;
++		scratch |= 0x80;
++		pci_write_config_byte(chip->pdev, O2_SD_LOCK_WP, scratch);
++		break;
++	case PCI_DEVICE_ID_O2_SDS0:
++	case PCI_DEVICE_ID_O2_SDS1:
++	case PCI_DEVICE_ID_O2_FUJIN2:
++		/* UnLock WP */
++		ret = pci_read_config_byte(chip->pdev,
++				O2_SD_LOCK_WP, &scratch);
++		if (ret)
++			return ret;
++
++		scratch &= 0x7f;
++		pci_write_config_byte(chip->pdev, O2_SD_LOCK_WP, scratch);
++
++		/* Set timeout CLK */
++		ret = pci_read_config_dword(chip->pdev,
++					    O2_SD_CLK_SETTING, &scratch_32);
++		if (ret)
++			return ret;
++
++		scratch_32 &= ~(0xFF00);
++		scratch_32 |= 0x07E0C800;
++		pci_write_config_dword(chip->pdev,
++				       O2_SD_CLK_SETTING, scratch_32);
++
++		ret = pci_read_config_dword(chip->pdev,
++					    O2_SD_CLKREQ, &scratch_32);
++		if (ret)
++			return ret;
++		scratch_32 |= 0x3;
++		pci_write_config_dword(chip->pdev, O2_SD_CLKREQ, scratch_32);
++
++		ret = pci_read_config_dword(chip->pdev,
++					    O2_SD_PLL_SETTING, &scratch_32);
++		if (ret)
++			return ret;
++
++		scratch_32 &= ~(0x1F3F070E);
++		scratch_32 |= 0x18270106;
++		pci_write_config_dword(chip->pdev,
++				       O2_SD_PLL_SETTING, scratch_32);
++
++		/* Disable UHS1 funciton */
++		ret = pci_read_config_dword(chip->pdev,
++					    O2_SD_CAP_REG2, &scratch_32);
++		if (ret)
++			return ret;
++		scratch_32 &= ~(0xE0);
++		pci_write_config_dword(chip->pdev,
++				       O2_SD_CAP_REG2, scratch_32);
++
++		if (chip->pdev->device == PCI_DEVICE_ID_O2_FUJIN2)
++			sdhci_pci_o2_fujin2_pci_init(chip);
++
++		/* Lock WP */
++		ret = pci_read_config_byte(chip->pdev,
++					   O2_SD_LOCK_WP, &scratch);
++		if (ret)
++			return ret;
++		scratch |= 0x80;
++		pci_write_config_byte(chip->pdev, O2_SD_LOCK_WP, scratch);
++		break;
++	case PCI_DEVICE_ID_O2_SEABIRD0:
++	case PCI_DEVICE_ID_O2_SEABIRD1:
++		/* UnLock WP */
++		ret = pci_read_config_byte(chip->pdev,
++				O2_SD_LOCK_WP, &scratch);
++		if (ret)
++			return ret;
++
++		scratch &= 0x7f;
++		pci_write_config_byte(chip->pdev, O2_SD_LOCK_WP, scratch);
++
++		ret = pci_read_config_dword(chip->pdev,
++					    O2_SD_FUNC_REG0, &scratch_32);
++
++		if ((scratch_32 & 0xff000000) == 0x01000000) {
++			scratch_32 &= 0x0000FFFF;
++			scratch_32 |= 0x1F340000;
++
++			pci_write_config_dword(chip->pdev,
++					       O2_SD_PLL_SETTING, scratch_32);
++		} else {
++			scratch_32 &= 0x0000FFFF;
++			scratch_32 |= 0x2c280000;
++
++			pci_write_config_dword(chip->pdev,
++					       O2_SD_PLL_SETTING, scratch_32);
++
++			ret = pci_read_config_dword(chip->pdev,
++						    O2_SD_FUNC_REG4,
++						    &scratch_32);
++			scratch_32 |= (1 << 22);
++			pci_write_config_dword(chip->pdev,
++					       O2_SD_FUNC_REG4, scratch_32);
++		}
++
++		/* Lock WP */
++		ret = pci_read_config_byte(chip->pdev,
++					   O2_SD_LOCK_WP, &scratch);
++		if (ret)
++			return ret;
++		scratch |= 0x80;
++		pci_write_config_byte(chip->pdev, O2_SD_LOCK_WP, scratch);
++		break;
++	}
++
++	return 0;
++}
++
++int sdhci_pci_o2_resume(struct sdhci_pci_chip *chip)
++{
++	sdhci_pci_o2_probe(chip);
++	return 0;
++}
+diff --git a/drivers/mmc/host/sdhci-pci-o2micro.h b/drivers/mmc/host/sdhci-pci-o2micro.h
+new file mode 100644
+index 0000000..1f16d13
+--- /dev/null
++++ b/drivers/mmc/host/sdhci-pci-o2micro.h
+@@ -0,0 +1,72 @@
++/*
++ * Copyright (C) 2013 BayHub Technology Ltd.
++ *
++ * Authors: Peter Guo <peter.guo@bayhubtech.com>
++ *          Adam Lee <adam.lee@canonical.com>
++ *
++ * This software is licensed under the terms of the GNU General Public
++ * License version 2, as published by the Free Software Foundation, and
++ * may be copied, distributed, and modified under those terms.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ */
++
++#ifndef __SDHCI_PCI_O2MICRO_H
++#define __SDHCI_PCI_O2MICRO_H
++
++#include "sdhci-pci.h"
++
++/*
++ * O2Micro device IDs
++ */
++
++#define PCI_DEVICE_ID_O2_SDS0		0x8420
++#define PCI_DEVICE_ID_O2_SDS1		0x8421
++#define PCI_DEVICE_ID_O2_FUJIN2		0x8520
++#define PCI_DEVICE_ID_O2_SEABIRD0	0x8620
++#define PCI_DEVICE_ID_O2_SEABIRD1	0x8621
++
++/*
++ * O2Micro device registers
++ */
++
++#define O2_SD_MISC_REG5		0x64
++#define O2_SD_LD0_CTRL		0x68
++#define O2_SD_DEV_CTRL		0x88
++#define O2_SD_LOCK_WP		0xD3
++#define O2_SD_TEST_REG		0xD4
++#define O2_SD_FUNC_REG0		0xDC
++#define O2_SD_MULTI_VCC3V	0xEE
++#define O2_SD_CLKREQ		0xEC
++#define O2_SD_CAPS		0xE0
++#define O2_SD_ADMA1		0xE2
++#define O2_SD_ADMA2		0xE7
++#define O2_SD_INF_MOD		0xF1
++#define O2_SD_MISC_CTRL4	0xFC
++#define O2_SD_TUNING_CTRL	0x300
++#define O2_SD_PLL_SETTING	0x304
++#define O2_SD_CLK_SETTING	0x328
++#define O2_SD_CAP_REG2		0x330
++#define O2_SD_CAP_REG0		0x334
++#define O2_SD_UHS1_CAP_SETTING	0x33C
++#define O2_SD_DELAY_CTRL	0x350
++#define O2_SD_UHS2_L1_CTRL	0x35C
++#define O2_SD_FUNC_REG3		0x3E0
++#define O2_SD_FUNC_REG4		0x3E4
++
++#define O2_SD_VENDOR_SETTING	0x110
++#define O2_SD_VENDOR_SETTING2	0x1C8
++
++void sdhci_pci_o2_fujin2_pci_init(struct sdhci_pci_chip *chip);
++
++int sdhci_pci_o2_probe_slot(struct sdhci_pci_slot *slot);
++
++int sdhci_pci_o2_probe(struct sdhci_pci_chip *chip);
++
++int sdhci_pci_o2_resume(struct sdhci_pci_chip *chip);
++
++#endif /* __SDHCI_PCI_O2MICRO_H */
 diff --git a/drivers/mmc/host/sdhci-pci.c b/drivers/mmc/host/sdhci-pci.c
-index 8f75381..af44659 100644
+index af44659..c1a7f31 100644
 --- a/drivers/mmc/host/sdhci-pci.c
 +++ b/drivers/mmc/host/sdhci-pci.c
-@@ -27,79 +27,7 @@
- #include <linux/mmc/sdhci-pci-data.h>
+@@ -28,6 +28,7 @@
  
  #include "sdhci.h"
--
--/*
-- * PCI device IDs
-- */
--#define PCI_DEVICE_ID_INTEL_PCH_SDIO0	0x8809
--#define PCI_DEVICE_ID_INTEL_PCH_SDIO1	0x880a
--#define PCI_DEVICE_ID_INTEL_BYT_EMMC	0x0f14
--#define PCI_DEVICE_ID_INTEL_BYT_SDIO	0x0f15
--#define PCI_DEVICE_ID_INTEL_BYT_SD	0x0f16
--#define PCI_DEVICE_ID_INTEL_BYT_EMMC2	0x0f50
--#define PCI_DEVICE_ID_INTEL_MRFL_MMC	0x1190
--#define PCI_DEVICE_ID_INTEL_CLV_SDIO0	0x08f9
--#define PCI_DEVICE_ID_INTEL_CLV_SDIO1	0x08fa
--#define PCI_DEVICE_ID_INTEL_CLV_SDIO2	0x08fb
--#define PCI_DEVICE_ID_INTEL_CLV_EMMC0	0x08e5
--#define PCI_DEVICE_ID_INTEL_CLV_EMMC1	0x08e6
--
--/*
-- * PCI registers
-- */
--
--#define PCI_SDHCI_IFPIO			0x00
--#define PCI_SDHCI_IFDMA			0x01
--#define PCI_SDHCI_IFVENDOR		0x02
--
--#define PCI_SLOT_INFO			0x40	/* 8 bits */
--#define  PCI_SLOT_INFO_SLOTS(x)		((x >> 4) & 7)
--#define  PCI_SLOT_INFO_FIRST_BAR_MASK	0x07
--
--#define MAX_SLOTS			8
--
--struct sdhci_pci_chip;
--struct sdhci_pci_slot;
--
--struct sdhci_pci_fixes {
--	unsigned int		quirks;
--	unsigned int		quirks2;
--	bool			allow_runtime_pm;
--
--	int			(*probe) (struct sdhci_pci_chip *);
--
--	int			(*probe_slot) (struct sdhci_pci_slot *);
--	void			(*remove_slot) (struct sdhci_pci_slot *, int);
--
--	int			(*suspend) (struct sdhci_pci_chip *);
--	int			(*resume) (struct sdhci_pci_chip *);
--};
--
--struct sdhci_pci_slot {
--	struct sdhci_pci_chip	*chip;
--	struct sdhci_host	*host;
--	struct sdhci_pci_data	*data;
--
--	int			pci_bar;
--	int			rst_n_gpio;
--	int			cd_gpio;
--	int			cd_irq;
--
--	void (*hw_reset)(struct sdhci_host *host);
--};
--
--struct sdhci_pci_chip {
--	struct pci_dev		*pdev;
--
--	unsigned int		quirks;
--	unsigned int		quirks2;
--	bool			allow_runtime_pm;
--	const struct sdhci_pci_fixes *fixes;
--
--	int			num_slots;	/* Slots on controller */
--	struct sdhci_pci_slot	*slots[MAX_SLOTS]; /* Pointers to host slots */
--};
--
-+#include "sdhci-pci.h"
+ #include "sdhci-pci.h"
++#include "sdhci-pci-o2micro.h"
  
  /*****************************************************************************\
   *                                                                           *
-diff --git a/drivers/mmc/host/sdhci-pci.h b/drivers/mmc/host/sdhci-pci.h
-new file mode 100644
-index 0000000..0347804
---- /dev/null
-+++ b/drivers/mmc/host/sdhci-pci.h
-@@ -0,0 +1,77 @@
-+#ifndef __SDHCI_PCI_H
-+#define __SDHCI_PCI_H
+@@ -321,65 +322,6 @@ static const struct sdhci_pci_fixes sdhci_intel_mrfl_mmc = {
+ #define O2_SD_ADMA2		0xE7
+ #define O2_SD_INF_MOD		0xF1
+ 
+-static int o2_probe(struct sdhci_pci_chip *chip)
+-{
+-	int ret;
+-	u8 scratch;
+-
+-	switch (chip->pdev->device) {
+-	case PCI_DEVICE_ID_O2_8220:
+-	case PCI_DEVICE_ID_O2_8221:
+-	case PCI_DEVICE_ID_O2_8320:
+-	case PCI_DEVICE_ID_O2_8321:
+-		/* This extra setup is required due to broken ADMA. */
+-		ret = pci_read_config_byte(chip->pdev, O2_SD_LOCK_WP, &scratch);
+-		if (ret)
+-			return ret;
+-		scratch &= 0x7f;
+-		pci_write_config_byte(chip->pdev, O2_SD_LOCK_WP, scratch);
+-
+-		/* Set Multi 3 to VCC3V# */
+-		pci_write_config_byte(chip->pdev, O2_SD_MULTI_VCC3V, 0x08);
+-
+-		/* Disable CLK_REQ# support after media DET */
+-		ret = pci_read_config_byte(chip->pdev, O2_SD_CLKREQ, &scratch);
+-		if (ret)
+-			return ret;
+-		scratch |= 0x20;
+-		pci_write_config_byte(chip->pdev, O2_SD_CLKREQ, scratch);
+-
+-		/* Choose capabilities, enable SDMA.  We have to write 0x01
+-		 * to the capabilities register first to unlock it.
+-		 */
+-		ret = pci_read_config_byte(chip->pdev, O2_SD_CAPS, &scratch);
+-		if (ret)
+-			return ret;
+-		scratch |= 0x01;
+-		pci_write_config_byte(chip->pdev, O2_SD_CAPS, scratch);
+-		pci_write_config_byte(chip->pdev, O2_SD_CAPS, 0x73);
+-
+-		/* Disable ADMA1/2 */
+-		pci_write_config_byte(chip->pdev, O2_SD_ADMA1, 0x39);
+-		pci_write_config_byte(chip->pdev, O2_SD_ADMA2, 0x08);
+-
+-		/* Disable the infinite transfer mode */
+-		ret = pci_read_config_byte(chip->pdev, O2_SD_INF_MOD, &scratch);
+-		if (ret)
+-			return ret;
+-		scratch |= 0x08;
+-		pci_write_config_byte(chip->pdev, O2_SD_INF_MOD, scratch);
+-
+-		/* Lock WP */
+-		ret = pci_read_config_byte(chip->pdev, O2_SD_LOCK_WP, &scratch);
+-		if (ret)
+-			return ret;
+-		scratch |= 0x80;
+-		pci_write_config_byte(chip->pdev, O2_SD_LOCK_WP, scratch);
+-	}
+-
+-	return 0;
+-}
+-
+ static int jmicron_pmos(struct sdhci_pci_chip *chip, int on)
+ {
+ 	u8 scratch;
+@@ -570,7 +512,10 @@ static int jmicron_resume(struct sdhci_pci_chip *chip)
+ }
+ 
+ static const struct sdhci_pci_fixes sdhci_o2 = {
+-	.probe		= o2_probe,
++	.probe = sdhci_pci_o2_probe,
++	.quirks = SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC,
++	.probe_slot = sdhci_pci_o2_probe_slot,
++	.resume = sdhci_pci_o2_resume,
+ };
+ 
+ static const struct sdhci_pci_fixes sdhci_jmicron = {
+@@ -983,6 +928,46 @@ static const struct pci_device_id pci_ids[] = {
+ 		.driver_data	= (kernel_ulong_t)&sdhci_o2,
+ 	},
+ 
++	{
++		.vendor		= PCI_VENDOR_ID_O2,
++		.device		= PCI_DEVICE_ID_O2_FUJIN2,
++		.subvendor	= PCI_ANY_ID,
++		.subdevice	= PCI_ANY_ID,
++		.driver_data	= (kernel_ulong_t)&sdhci_o2,
++	},
 +
-+/*
-+ * PCI device IDs
-+ */
++	{
++		.vendor		= PCI_VENDOR_ID_O2,
++		.device		= PCI_DEVICE_ID_O2_SDS0,
++		.subvendor	= PCI_ANY_ID,
++		.subdevice	= PCI_ANY_ID,
++		.driver_data	= (kernel_ulong_t)&sdhci_o2,
++	},
 +
-+#define PCI_DEVICE_ID_INTEL_PCH_SDIO0	0x8809
-+#define PCI_DEVICE_ID_INTEL_PCH_SDIO1	0x880a
-+#define PCI_DEVICE_ID_INTEL_BYT_EMMC	0x0f14
-+#define PCI_DEVICE_ID_INTEL_BYT_SDIO	0x0f15
-+#define PCI_DEVICE_ID_INTEL_BYT_SD	0x0f16
-+#define PCI_DEVICE_ID_INTEL_BYT_EMMC2	0x0f50
-+#define PCI_DEVICE_ID_INTEL_MRFL_MMC	0x1190
-+#define PCI_DEVICE_ID_INTEL_CLV_SDIO0	0x08f9
-+#define PCI_DEVICE_ID_INTEL_CLV_SDIO1	0x08fa
-+#define PCI_DEVICE_ID_INTEL_CLV_SDIO2	0x08fb
-+#define PCI_DEVICE_ID_INTEL_CLV_EMMC0	0x08e5
-+#define PCI_DEVICE_ID_INTEL_CLV_EMMC1	0x08e6
++	{
++		.vendor		= PCI_VENDOR_ID_O2,
++		.device		= PCI_DEVICE_ID_O2_SDS1,
++		.subvendor	= PCI_ANY_ID,
++		.subdevice	= PCI_ANY_ID,
++		.driver_data	= (kernel_ulong_t)&sdhci_o2,
++	},
 +
-+/*
-+ * PCI registers
-+ */
++	{
++		.vendor		= PCI_VENDOR_ID_O2,
++		.device		= PCI_DEVICE_ID_O2_SEABIRD0,
++		.subvendor	= PCI_ANY_ID,
++		.subdevice	= PCI_ANY_ID,
++		.driver_data	= (kernel_ulong_t)&sdhci_o2,
++	},
 +
-+#define PCI_SDHCI_IFPIO			0x00
-+#define PCI_SDHCI_IFDMA			0x01
-+#define PCI_SDHCI_IFVENDOR		0x02
++	{
++		.vendor		= PCI_VENDOR_ID_O2,
++		.device		= PCI_DEVICE_ID_O2_SEABIRD1,
++		.subvendor	= PCI_ANY_ID,
++		.subdevice	= PCI_ANY_ID,
++		.driver_data	= (kernel_ulong_t)&sdhci_o2,
++	},
 +
-+#define PCI_SLOT_INFO			0x40	/* 8 bits */
-+#define  PCI_SLOT_INFO_SLOTS(x)		((x >> 4) & 7)
-+#define  PCI_SLOT_INFO_FIRST_BAR_MASK	0x07
-+
-+#define MAX_SLOTS			8
-+
-+struct sdhci_pci_chip;
-+struct sdhci_pci_slot;
-+
-+struct sdhci_pci_fixes {
-+	unsigned int		quirks;
-+	unsigned int		quirks2;
-+	bool			allow_runtime_pm;
-+
-+	int			(*probe) (struct sdhci_pci_chip *);
-+
-+	int			(*probe_slot) (struct sdhci_pci_slot *);
-+	void			(*remove_slot) (struct sdhci_pci_slot *, int);
-+
-+	int			(*suspend) (struct sdhci_pci_chip *);
-+	int			(*resume) (struct sdhci_pci_chip *);
-+};
-+
-+struct sdhci_pci_slot {
-+	struct sdhci_pci_chip	*chip;
-+	struct sdhci_host	*host;
-+	struct sdhci_pci_data	*data;
-+
-+	int			pci_bar;
-+	int			rst_n_gpio;
-+	int			cd_gpio;
-+	int			cd_irq;
-+
-+	void (*hw_reset)(struct sdhci_host *host);
-+};
-+
-+struct sdhci_pci_chip {
-+	struct pci_dev		*pdev;
-+
-+	unsigned int		quirks;
-+	unsigned int		quirks2;
-+	bool			allow_runtime_pm;
-+	const struct sdhci_pci_fixes *fixes;
-+
-+	int			num_slots;	/* Slots on controller */
-+	struct sdhci_pci_slot	*slots[MAX_SLOTS]; /* Pointers to host slots */
-+};
-+
-+#endif /* __SDHCI_PCI_H */
+ 	{	/* Generic SD host controller */
+ 		PCI_DEVICE_CLASS((PCI_CLASS_SYSTEM_SDHCI << 8), 0xFFFF00)
+ 	},
 -- 
 1.8.5.2
 
