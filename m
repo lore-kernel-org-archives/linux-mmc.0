@@ -1,72 +1,65 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [PATCH 2/2] mmc: core: Enable MMC_CAP2_CACHE_CTRL as default
-Date: Wed, 18 Dec 2013 12:09:21 +0100
-Message-ID: <1387364961-15464-2-git-send-email-ulf.hansson@linaro.org>
-References: <1387364961-15464-1-git-send-email-ulf.hansson@linaro.org>
+From: Wolfram Sang <wsa@the-dreams.de>
+Subject: Re: [PATCH] mmc: core: sd: implement proper support for sd3.0 au
+ sizes
+Date: Wed, 18 Dec 2013 13:30:32 +0100
+Message-ID: <20131218123032.GF3314@katana>
+References: <1385428585-17516-1-git-send-email-wsa@the-dreams.de>
+Mime-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="aYDVKSzuImP48n7V"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-la0-f45.google.com ([209.85.215.45]:35316 "EHLO
-	mail-la0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753435Ab3LRLJ3 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 18 Dec 2013 06:09:29 -0500
-Received: by mail-la0-f45.google.com with SMTP id eh20so3796150lab.4
-        for <linux-mmc@vger.kernel.org>; Wed, 18 Dec 2013 03:09:28 -0800 (PST)
-In-Reply-To: <1387364961-15464-1-git-send-email-ulf.hansson@linaro.org>
+Received: from sauhun.de ([89.238.76.85]:57693 "EHLO pokefinder.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753865Ab3LRMaj (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 18 Dec 2013 07:30:39 -0500
+Content-Disposition: inline
+In-Reply-To: <1385428585-17516-1-git-send-email-wsa@the-dreams.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>
+To: linux-mmc@vger.kernel.org
+Cc: Chris Ball <cjb@laptop.org>, Jaehoon Chung <jh80.chung@samsung.com>, Kyungmin Park <kyungmin.park@samsung.com>, H Hartley Sweeten <hartleys@visionengravers.com>
 
-There are no reason to why the use of a non-volatile internal eMMC
-cache should be controlled by a host cap. Instead let's just enable it
-if the eMMC card supports it.
 
-Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
----
- drivers/mmc/core/core.c  |    3 ---
- drivers/mmc/core/mmc.c   |    3 +--
- include/linux/mmc/host.h |    1 -
- 3 files changed, 1 insertion(+), 6 deletions(-)
+--aYDVKSzuImP48n7V
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index df591a9..66ec347 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -2585,9 +2585,6 @@ int mmc_flush_cache(struct mmc_card *card)
- 	struct mmc_host *host = card->host;
- 	int err = 0;
- 
--	if (!(host->caps2 & MMC_CAP2_CACHE_CTRL))
--		return err;
--
- 	if (mmc_card_mmc(card) &&
- 			(card->ext_csd.cache_size > 0) &&
- 			(card->ext_csd.cache_ctrl & 1)) {
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index ef1cc73..7ab3e9c 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -1287,8 +1287,7 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
- 	 * If cache size is higher than 0, this indicates
- 	 * the existence of cache and it can be turned on.
- 	 */
--	if ((host->caps2 & MMC_CAP2_CACHE_CTRL) &&
--			card->ext_csd.cache_size > 0) {
-+	if (card->ext_csd.cache_size > 0) {
- 		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
- 				EXT_CSD_CACHE_CTRL, 1,
- 				card->ext_csd.generic_cmd6_time);
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index f539bc7..8383e3f 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -264,7 +264,6 @@ struct mmc_host {
- 	u32			caps2;		/* More host capabilities */
- 
- #define MMC_CAP2_BOOTPART_NOACC	(1 << 0)	/* Boot partition no access */
--#define MMC_CAP2_CACHE_CTRL	(1 << 1)	/* Allow cache control */
- #define MMC_CAP2_FULL_PWR_CYCLE	(1 << 2)	/* Can do full power cycle */
- #define MMC_CAP2_NO_MULTI_READ	(1 << 3)	/* Multiblock reads don't work */
- #define MMC_CAP2_NO_SLEEP_CMD	(1 << 4)	/* Don't allow sleep command */
--- 
-1.7.9.5
+On Tue, Nov 26, 2013 at 02:16:25AM +0100, Wolfram Sang wrote:
+> This reverts and updates commit 77776fd0a4cc541b9a528eacc1d31ca47eb1ae7a
+> ("mmc: sd: fix the maximum au_size for SD3.0"). The au_size for SD3.0
+> cannot be achieved by a simple bit shift, so this needs to be
+> implemented differently. Also, don't print the warning in case of 0
+> since 'not defined' is different from 'invalid'.
+>=20
+> Signed-off-by: Wolfram Sang <wsa@the-dreams.de>
+> Cc: Jaehoon Chung <jh80.chung@samsung.com>
+> Cc: Kyungmin Park <kyungmin.park@samsung.com>
+> Cc: H Hartley Sweeten <hartleys@visionengravers.com>
 
+Ping.
+
+
+--aYDVKSzuImP48n7V
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.15 (GNU/Linux)
+
+iQIcBAEBAgAGBQJSsZVoAAoJEBQN5MwUoCm27akP/3ycMGPScEGZAVCS4HBSIPRZ
+agkX4yxaBhOsslV1/CGXWdcYe1M4ve/9jqhlmPMEqAYzGTbYWILU8hujxpPv+r7N
+OkUUOHR3TgpxfyCuSdno04CMrja6XSbgvwqx0o5pH1Bw34k9pwRcaakhhXC2qbGt
+/j+peLrO9iFvGeYn3cSjQOPis8GXoZI0anug6fM6sVnQWYJQfdEwLT0zoootxJvF
+jAV5+qewyQy3AUsAfe/3AOvOoe45ICX7Q+MIpsfVihi59yGglK+7rwXDZxau33+h
+XVBiRvfrIjdFRzuhf1+dL/92ytkTzvbWraLfo6P3pA+aD2awl7gO6ZqJoG+dn9Vr
+A+GnHtFHDOqOtamMhNP71L55c2OZMC13yucjlbAClVqfY2GGrHg2l/7po0E9kqso
+Oz/xcDPSRWSa6JLMpZzREFtZMkD/Y3UVP+EK9SlVxjjw2SolCS6/mcoK3gX0t71C
+O7Z7Nex3f1Fvd2JYBqF/9uIKPsfRoM9axE8PRx3rjeeeIPNAnvJKyLP+8hZZC5pa
+IC6P+UJFJXEpqF876mrJS8QdJN6W7iXDatzftnFtJnu8QBMKmbbhbX13KzVvvxzp
+azlxEqGsjNPaO8BgDpK9yJGDWH3FLS9J5tfBUS5tUY5leyogmL/gAAU9rApJbMTR
+sC+8c/xS4VwhMJC6ReHy
+=ItKk
+-----END PGP SIGNATURE-----
+
+--aYDVKSzuImP48n7V--
