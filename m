@@ -1,92 +1,179 @@
-From: John Tobias <john.tobias.ph@gmail.com>
-Subject: [PATCH 3/4] Removing imx6q_opp_init
-Date: Tue, 17 Dec 2013 17:17:30 -0800
-Message-ID: <1387329451-17480-3-git-send-email-john.tobias.ph@gmail.com>
-References: <1387329451-17480-1-git-send-email-john.tobias.ph@gmail.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pa0-f49.google.com ([209.85.220.49]:34317 "EHLO
-	mail-pa0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751293Ab3LRBRl (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 17 Dec 2013 20:17:41 -0500
-Received: by mail-pa0-f49.google.com with SMTP id kx10so5219374pab.36
-        for <linux-mmc@vger.kernel.org>; Tue, 17 Dec 2013 17:17:40 -0800 (PST)
-In-Reply-To: <1387329451-17480-1-git-send-email-john.tobias.ph@gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Dong Aisheng <dongas86-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: Re: max_discard anomaly on certain Sandisk eMMC
+Date: Wed, 18 Dec 2013 11:11:00 +0800
+Message-ID: <CAA+hA=QLviTfm5h8P4RyzrQsCUWWVga66BgZB6yiXwMZUAMkqQ@mail.gmail.com>
+References: <52AB8DA2.9000001@wwwdotorg.org>
+	<52AF8A30.9050700@wwwdotorg.org>
+	<52B008AB.7060909@intel.com>
+	<CAPDyKFooKY7nyOdLxQS-u9oC_pZL3V8pH5kixLgQpUkPG=kqKw@mail.gmail.com>
+	<CAA+hA=RL6f5-Z1T0ahWMn6TNtKvjQhy6CiHORYEUn6KXSC2oXg@mail.gmail.com>
+	<CAPDyKFpGpWJRz6AFNqb2AqQMoTuywwZz5Ekq5rc9kboYTGFg7A@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <CAPDyKFpGpWJRz6AFNqb2AqQMoTuywwZz5Ekq5rc9kboYTGFg7A-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, shawn.guo@linaro.org, festevam@gmail.com, cjb@laptop.org
-Cc: John Tobias <john.tobias.ph@gmail.com>
 
-    Since of_init_opp_table is in imx6q-cpufreq.c, the imx6q_opp_init is no longer needed anymore.
-    The only question right now is the imx6q_opp_check_1p2ghz function.
+On Tue, Dec 17, 2013 at 8:33 PM, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
+> On 17 December 2013 12:05, Dong Aisheng <dongas86-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
+>> On Tue, Dec 17, 2013 at 6:04 PM, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
+>>> On 17 December 2013 09:17, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org> wrote:
+>>>> On 17/12/13 01:18, Stephen Warren wrote:
+>>>>> On 12/13/2013 03:43 PM, Stephen Warren wrote:
+>>>>>> On one of my eMMC devices, I see the following results from calling
+>>>>>> mmc_do_calc_max_discard() with various parameters:
+>>>>>>
+>>>>>> [    3.057263] MMC_DISCARD_ARG max_discard 1
+>>>>>> [    3.057266] MMC_ERASE_ARG   max_discard 4096
+>>>>>> [    3.057267] MMC_TRIM_ARG    max_discard 1
+>>>>>>
+>>>>>> This causes mmc_calc_max_discard() to return 1, which makes the discard
+>>>>>> IOCTL extremely slow.
+>>>>>
+>>>>> Further investigation shows that if I make a few hacks that essentially
+>>>>> revert e056a1b5b67b "mmc: queue: let host controllers specify maximum
+>>>>> discard timeout":
+>>>>>
+>>>>> diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
+>>>>> index 357bbc54fe4b..e66af930d0e3 100644
+>>>>> --- a/drivers/mmc/card/queue.c
+>>>>> +++ b/drivers/mmc/card/queue.c
+>>>>> @@ -167,13 +167,15 @@ static void mmc_queue_setup_discard(struct
+>>>>> request_queue *q,
+>>>>>               return;
+>>>>>
+>>>>>       queue_flag_set_unlocked(QUEUE_FLAG_DISCARD, q);
+>>>>> -     q->limits.max_discard_sectors = max_discard;
+>>>>> +     q->limits.max_discard_sectors = UINT_MAX;
+>>>>>       if (card->erased_byte == 0 && !mmc_can_discard(card))
+>>>>>               q->limits.discard_zeroes_data = 1;
+>>>>>       q->limits.discard_granularity = card->pref_erase << 9;
+>>>>>       /* granularity must not be greater than max. discard */
+>>>>> +#if 0
+>>>>>       if (card->pref_erase > max_discard)
+>>>>>               q->limits.discard_granularity = 0;
+>>>>> +#endif
+>>>>>       if (mmc_can_secure_erase_trim(card))
+>>>>>               queue_flag_set_unlocked(QUEUE_FLAG_SECDISCARD, q);
+>>>>>  }
+>>>>>
+>>>>> I end up with:
+>>>>>
+>>>>> $ cat /sys/.../block/mmcblk1/queue# cat discard_granularity
+>>>>> 2097152
+>>>>> $ cat /sys/.../block/mmcblk1/queue# cat discard_max_bytes
+>>>>> 2199023255040
+>>>>> $ cat /sys/.../block/mmcblk1/queue# cat discard_zeroes_data
+>>>>> 1
+>>>>>
+>>>>> With those values, mke2fs is fast, and I validated that "blkdiscard"
+>>>>> works; I filled a large partition with /dev/urandom, executed
+>>>>> "blkdiscard" on the 4M at the start, and saw zeroes when reading the
+>>>>> discarded part back.
+>>>>>
+>>>>> This implies that the issue is simply the operation of
+>>>>> mmc_calc_max_discard(), rather than the eMMC device mis-reporting its
+>>>>> discard abilities, doesn't it?
+>>>>
+>>>> No.
+>>>>
+>>>> The underlying problem is a combination of:
+>>>>         a) JEDEC specified very large timeouts for erase operations e.g. can be
+>>>> minutes for large erases
+>>>>         b) SDHCI controllers have been implemented with high frequency timeout
+>>>> clocks which limit the maximum timeout to a few seconds
+>>>>         c) It is not possible to disable the timeout on SDHCI
+>>>>
+>>>> What a) means is that you can get away with much larger erases than you can
+>>>> specify the timeout for - which is what you have discovered.
+>>>>
+>>>> To understand the timeouts, you should manually do the calculations.
+>>>>
+>>>> Also note, that using HC Erase Size may help (MMC_CAP2_HC_ERASE_SZ), but
+>>>> beware of the partitioning implications of changing that.
+>>>>
+>>>> The best solution is to change the hardware to use the lowest possible
+>>>> frequency timeout clock e.g. a 1KHz timeout clock could support timeouts of
+>>>> up to 36 hours.
+>>>
+>>> Don't know the details about the limitations for SDHCI, but I guess
+>>> similar exists for other controllers as well.
+>>>
+>>> I do get the impression that we have got a problem in the mmc
+>>> core/block layer for how erase/trim/discard timeouts are being
+>>> handled.
+>>>
+>>> I don't think the mmc hw-controller should be waiting for the R1B
+>>> response from the CMD38 as long as this "timeout" we are discussing
+>>> here. According to the spec, at least how I interpret it, the card
+>>> should respond rather quickly to CMD38, then it will assert the DAT0
+>>> line to indicate busy.
+>>>
+>>
+>> For IMX, CMD38 responds very quick since it does not wait for TC interrupt
+>> when DAT0 de-assertion due to IP limitation.
+>>
+>>> The total time the card is allowed to stay busy, that is what the
+>>> timeout specifies. We may either use a mmc hw-controller busy
+>>> detection mechanism or send CMD13 to poll for status. The latter is
+>>> somewhat already being handled in mmc_do_erase(), but we are using
+>>> "MMC_CORE_TIMEOUT_MS" instead of the correct timeout.
+>>>
+>>
+>> Maybe one better way may be using polling for status if erase timeout
+>> is bigger than
+>> host capability, else still prefer to use hw timeout mechanism instead
+>> to save CPU.
+>
+> Nope, this wont work.
+>
+> Just because we get the R1B response within some chosen timeout that
+> does not mean the card has completed it's operation.
+>
 
-    Is the function below are acceptible under imx6q_init_late?.
+I mean do not wait for R1B busy signal, IOW replace R1b with R1.
+Then using polling way to check card's busy status.
 
-    if (!cpu_dev)
-        imx6q_opp_check_1p2ghz(cpu_dev);
+Regards
+Dong Aisheng
 
-    If not, what is the better way to impelement because the said function is board specific?.
-
-Signed-off-by: John Tobias <john.tobias.ph@gmail.com>
----
- arch/arm/mach-imx/mach-imx6q.c | 30 ++++--------------------------
- 1 file changed, 4 insertions(+), 26 deletions(-)
-
-diff --git a/arch/arm/mach-imx/mach-imx6q.c b/arch/arm/mach-imx/mach-imx6q.c
-index d0cfb22..f5d9e04 100644
---- a/arch/arm/mach-imx/mach-imx6q.c
-+++ b/arch/arm/mach-imx/mach-imx6q.c
-@@ -183,31 +183,6 @@ put_node:
- 	of_node_put(np);
- }
- 
--static void __init imx6q_opp_init(void)
--{
--	struct device_node *np;
--	struct device *cpu_dev = get_cpu_device(0);
--
--	if (!cpu_dev) {
--		pr_warn("failed to get cpu0 device\n");
--		return;
--	}
--	np = of_node_get(cpu_dev->of_node);
--	if (!np) {
--		pr_warn("failed to find cpu0 node\n");
--		return;
--	}
--
--	if (of_init_opp_table(cpu_dev)) {
--		pr_warn("failed to init OPP table\n");
--		goto put_node;
--	}
--
--	imx6q_opp_check_1p2ghz(cpu_dev);
--
--put_node:
--	of_node_put(np);
--}
- 
- static struct platform_device imx6q_cpufreq_pdev = {
- 	.name = "imx6q-cpufreq",
-@@ -215,6 +190,7 @@ static struct platform_device imx6q_cpufreq_pdev = {
- 
- static void __init imx6q_init_late(void)
- {
-+	struct device *cpu_dev = get_cpu_device(0);
- 	/*
- 	 * WAIT mode is broken on TO 1.0 and 1.1, so there is no point
- 	 * to run cpuidle on them.
-@@ -223,8 +199,10 @@ static void __init imx6q_init_late(void)
- 		imx6q_cpuidle_init();
- 
- 	if (IS_ENABLED(CONFIG_ARM_IMX6Q_CPUFREQ)) {
--		imx6q_opp_init();
- 		platform_device_register(&imx6q_cpufreq_pdev);
-+		
-+		if (!cpu_dev)
-+			imx6q_opp_check_1p2ghz(cpu_dev);
- 	}
- }
- 
--- 
-1.8.3.2
-
+> We need to monitor if the card is signalling busy, after the R1B
+> response has been received to know. Thus polling with CMD13 will be
+> needed, no matter how.
+>
+> Kind regards
+> Ulf Hansson
+>
+>> However, then we have two issues:
+>> 1) not waiting for R1B seems a bit violation with standard spec.
+>> Also it increase complexity on handling the R1B of the same command
+>> for two different
+>> cases: using hw timeout or polling status for CMD38.
+>>
+>> 2) In current implementation, the data size to erase will not exceed
+>> the max_discard_bytes
+>> which is calculated based on max_discard_to of host.
+>> Then how do we specify max_discard_to if want to use polling? UNIT_MAX?
+>> Will it be too long to affect other activities in the same system?
+>
+>
+>
+>>
+>> Regards
+>> Dong Aisheng
+>>
+>>> Kind regards
+>>> Ulf Hansson
+>>>
+>>>>
+>>>> --
+>>>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+>>>> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+>>> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
