@@ -1,72 +1,71 @@
-From: John Tobias <john.tobias.ph@gmail.com>
-Subject: Re: [PATCH 2/4] Moving of_init_opp_table
-Date: Wed, 18 Dec 2013 08:41:52 -0800
-Message-ID: <CACUGKYN+fJFONMr5Mv9NwSkCeW88QkFOsxu1YsUhFwV6EOMPbA@mail.gmail.com>
-References: <1387329451-17480-1-git-send-email-john.tobias.ph@gmail.com>
-	<1387329451-17480-2-git-send-email-john.tobias.ph@gmail.com>
-	<20131218074315.GH6691@S2101-09.ap.freescale.net>
+From: Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>
+Subject: Re: max_discard anomaly on certain Sandisk eMMC
+Date: Wed, 18 Dec 2013 11:42:29 -0700
+Message-ID: <52B1EC95.7070008@wwwdotorg.org>
+References: <52AB8DA2.9000001@wwwdotorg.org>	<CAA+hA=R3wnbuJrJQhfG9PQEHrwE9nrwg_+xSpyXryOeM2Wtwcw@mail.gmail.com>	<52B0897B.5010700@wwwdotorg.org> <CAA+hA=Rm1b_ah1uTyps71BLjturJXDHKyWTgiU+z2ELYZKSAWw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-oa0-f46.google.com ([209.85.219.46]:51780 "EHLO
-	mail-oa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752583Ab3LRQlx (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 18 Dec 2013 11:41:53 -0500
-Received: by mail-oa0-f46.google.com with SMTP id o6so8448270oag.19
-        for <linux-mmc@vger.kernel.org>; Wed, 18 Dec 2013 08:41:52 -0800 (PST)
-In-Reply-To: <20131218074315.GH6691@S2101-09.ap.freescale.net>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <CAA+hA=Rm1b_ah1uTyps71BLjturJXDHKyWTgiU+z2ELYZKSAWw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Dong Aisheng <dongas86-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Shawn Guo <shawn.guo@linaro.org>
-Cc: linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, Fabio Estevam <festevam@gmail.com>, Chris Ball <cjb@laptop.org>
 
-Ahh ok I think I got what you mean here..
+On 12/17/2013 08:32 PM, Dong Aisheng wrote:
+> On Wed, Dec 18, 2013 at 1:27 AM, Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org> wrote:
+>> On 12/17/2013 02:25 AM, Dong Aisheng wrote:
+>>> Hi Stephen,
+>>>
+>>> On Sat, Dec 14, 2013 at 6:43 AM, Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org> wrote:
+>>>> On one of my eMMC devices, I see the following results from calling
+>>>> mmc_do_calc_max_discard() with various parameters:
+>>>>
+>>>> [    3.057263] MMC_DISCARD_ARG max_discard 1
+>>>> [    3.057266] MMC_ERASE_ARG   max_discard 4096
+>>>> [    3.057267] MMC_TRIM_ARG    max_discard 1
+>>>>
+>>>> This causes mmc_calc_max_discard() to return 1, which makes the discard
+>>>> IOCTL extremely slow.
+>>>>
+>>>
+>>> IMX met the similar issue.
+>>> http://www.spinics.net/lists/linux-mmc/msg23375.html
+>>> It's caused by the max_discard_to supported by host is too small.
+>>>
+>>> I submitted the fix patches:
+>>> http://www.spinics.net/lists/arm-kernel/msg294924.html
+>>> Please see if it helps for you, especially patch #5.
+>>> It could increase the max_discard_to if Tegra has same problem.
+>>
+...
+>> Even on the boards where your patch solves the problem, isn't it just a
+>> temporary measure; as soon as we upstream the changes to enable the
+>> faster transfer modes, we'll have a faster SDCLK, and hence again be
+>> limited in the discard size, perhaps down to a single sector again.
+> 
+> Actually my patch is intend to fix 1) IMX incorrect max timeout issue
+> 2) should not use max_clock
+> to calculate max_discard_to issue for using SDCLK as timeout clock.
+> The issue discussed here is a different issue that the card timeout
+> may still be bigger than
+> the host capability and how to use discard for such case.
+> So your problem may exist if you meet some more big timeout cards.
+> For IMX, when running at 50Mhz, the max timeout is more than 5s.
+> It looks bigger enough currently and i tested many eMMC cards(Samsung,
+> Toshiba, Sandisk, Hynix)
+> and all they worked well with discard after fix.
+> I don't know which eMMC cards you meet the issue and don't know what
+> is Tegra max timeout.
+> Just for SD3.0 cards working on 200Mhz, i observed one Toshiba
+> SDHC U1 card could not do discard, since its AU erase timeout is 2s+
+> which exceeds the host
+> capability 1335ms. Thus discard is automatically disabled.
+> But another Sandisk SDXC can still work well since it has small
+> ERASE_OFFSET as 1s.
 
-I should call opp_get_opp_count(cpu_dev) to check if the platform
-supplied it. If not, call the of_init_opp_table.
-
-
-On Tue, Dec 17, 2013 at 11:43 PM, Shawn Guo <shawn.guo@linaro.org> wrote:
-> On Tue, Dec 17, 2013 at 05:17:29PM -0800, John Tobias wrote:
->>     Moving of_init_opp_table from mach-imx6q.c to imx6q-cpufreq.c in order to avoid adding it to mach-imx6sl.c.
->>     Just incase the cpu frequency scaling is enabled on iMX6SL.
->
-> Drop the leading spaces and wrap the lines around 72 column.
->
->>
->> Signed-off-by: John Tobias <john.tobias.ph@gmail.com>
->> ---
->>  drivers/cpufreq/imx6q-cpufreq.c | 5 +++++
->
-> For this patch, a proper patch subject prefix would be 'cpufreq: imx6q: '
-> You can use 'git log' to find out what a proper prefix for a file/patch
-> should be.
->
->>  1 file changed, 5 insertions(+)
->>
->> diff --git a/drivers/cpufreq/imx6q-cpufreq.c b/drivers/cpufreq/imx6q-cpufreq.c
->> index 4b3f18e..2eea3d9 100644
->> --- a/drivers/cpufreq/imx6q-cpufreq.c
->> +++ b/drivers/cpufreq/imx6q-cpufreq.c
->> @@ -166,6 +166,11 @@ static int imx6q_cpufreq_probe(struct platform_device *pdev)
->>               return -ENOENT;
->>       }
->>
->> +     if (of_init_opp_table(cpu_dev)) {
->> +             dev_err(cpu_dev,"failed to init OPP table\n");
->> +             return -ENODEV;
->> +     }
->> +
->
-> Before doing that in the driver, you should check and make sure that
-> platform hasn't supply a opp table.
->
-> Shawn
->
->>       arm_clk = devm_clk_get(cpu_dev, "arm");
->>       pll1_sys_clk = devm_clk_get(cpu_dev, "pll1_sys");
->>       pll1_sw_clk = devm_clk_get(cpu_dev, "pll1_sw");
->> --
->> 1.8.3.2
->>
->
+On the more recent Tegra boards, the eMMC devices appear to have an
+erase timeout of 4200ms for a single erase block! That's more than the
+~2600ms max controller timeout at 48MHz on Tegra:-( (that is unless
+Tegra also supports more than 27 bits of timeout register)
