@@ -1,92 +1,103 @@
-From: Olivier Sobrie <olivier@sobrie.be>
-Subject: Re: [PATCH] atmel-mci: fix transfers < 16 bytes problem in PDC mode
-Date: Wed, 18 Dec 2013 09:09:41 +0100
-Message-ID: <20131218080925.GA26149@hposo>
-References: <20131204080943.GK3582@odulo-laptop>
- <1386236716-25163-1-git-send-email-olivier@sobrie.be>
- <20131213110913.GB2138@ldesroches-Latitude-E6320>
-Reply-To: Olivier Sobrie <olivier@sobrie.be>
+From: Ludovic Desroches <ludovic.desroches@atmel.com>
+Subject: Re: [PATCHv3] mmc: atmel-mci: add vmmc-supply support
+Date: Wed, 18 Dec 2013 09:16:45 +0100
+Message-ID: <20131218081645.GA4268@ldesroches-Latitude-E6320>
+References: <1382006808-22728-1-git-send-email-alexandre.belloni@free-electrons.com>
+ <CAPDyKFoiWOE47DWrUHNWVPyihL=uCidpd52TV1vgUbq1aMNvbw@mail.gmail.com>
+ <52B09FF0.4070200@free-electrons.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="us-ascii"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ee0-f44.google.com ([74.125.83.44]:49723 "EHLO
-	mail-ee0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751405Ab3LRIJs (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 18 Dec 2013 03:09:48 -0500
-Received: by mail-ee0-f44.google.com with SMTP id b57so3336567eek.17
-        for <linux-mmc@vger.kernel.org>; Wed, 18 Dec 2013 00:09:46 -0800 (PST)
+Received: from eusmtp01.atmel.com ([212.144.249.243]:52167 "EHLO
+	eusmtp01.atmel.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750933Ab3LRIQs (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 18 Dec 2013 03:16:48 -0500
 Content-Disposition: inline
-In-Reply-To: <20131213110913.GB2138@ldesroches-Latitude-E6320>
+In-Reply-To: <52B09FF0.4070200@free-electrons.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ludovic Desroches <ludovic.desroches@atmel.com>
-Cc: linux-mmc@vger.kernel.org
+To: Alexandre Belloni <alexandre.belloni@free-electrons.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <cjb@laptop.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Ludovic Desroches <ludovic.desroches@atmel.com>
 
-Hi Ludovic,
+Hi Alexandre,
 
-On Fri, Dec 13, 2013 at 12:09:13PM +0100, Ludovic Desroches wrote:
-> Hi Olivier,
+On Tue, Dec 17, 2013 at 08:03:12PM +0100, Alexandre Belloni wrote:
+> Hi,
 > 
-> On Thu, Dec 05, 2013 at 10:45:16AM +0100, Olivier Sobrie wrote:
-> 
-> [...]
-> 
-> > With this patch I'm able to use the wlan sdio module wl1271.
-> > When you've time, it would be nice to validate or fix this
-> > patch.
-> 
-> I have tested it and it doesn't solve issue I have with Atheros module.
+> It seems that patch never made it to the mainline. Is it still missing
+> something ?
 
-What kind of errors do you see with this module?
-Timeouts on some SDIO commands with small datasize?
+No reason on my side, maybe because my ack is missing but I thought I
+gave it on a previous version, maybe I am wrong.
 
->  
-> > Thanks for your help,
-> > 
-> > Olivier
-> > 
-> >  drivers/mmc/host/atmel-mci.c |    6 +++++-
-> >  1 file changed, 5 insertions(+), 1 deletion(-)
-> > 
-> > diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
-> > index b86b482..c599731 100644
-> > --- a/drivers/mmc/host/atmel-mci.c
-> > +++ b/drivers/mmc/host/atmel-mci.c
-> > @@ -45,6 +45,7 @@
-> >  
-> >  #define ATMCI_DATA_ERROR_FLAGS	(ATMCI_DCRCE | ATMCI_DTOE | ATMCI_OVRE | ATMCI_UNRE)
-> >  #define ATMCI_DMA_THRESHOLD	16
-> > +#define ATMCI_PDC_MIN_DATASIZE	16
-> >  
-> >  enum {
-> >  	EVENT_CMD_RDY = 0,
-> > @@ -765,7 +766,10 @@ static void atmci_pdc_set_single_buf(struct atmel_mci *host,
-> >  	}
-> >  
-> >  	if (host->data_size <= buf_size) {
-> > -		if (host->data_size & 0x3) {
-> > +		if ((host->data_size < ATMCI_PDC_MIN_DATASIZE) &&
-> > +		    (dir == XFER_TRANSMIT)) {
-> > +			atmci_writel(host, counter_reg, 4);
-> > +		} else if (host->data_size & 0x3) {
-> 
-> I have feedback from people who have issue with atmel-mci driver but not
-> with at91-mci which has been removed unfortunately (it seems I had the
-> only sdio wifi module working with atmel-mci driver in pdc mode...). So I
-> think the 12 bytes value in the errata is correct.
+So Acked-by: Ludovic Desroches <ludovic.desroches@atmel.com>
 
-Does the atheros module work with the at91-mci driver ?
+
+Regards
+
+Ludovic
 
 > 
-> Moreover I am afraid that this patch could cause some other bugs. I mean the
-> transfer size is 4 bytes, the sg length is 4 bytes too and we will ask
-> PDC to perform a bigger transfer... With the previous driver it was not a
-> problem because we didn't use sg directly, they were copied into another
-> buffer.
-
-Ok. I'll have a look at the old at91-mci driver.
-
-Thanks,
-
--- 
-Olivier
+> Regards,
+> 
+> On 17/10/2013 15:56, Ulf Hansson wrote:
+> > On 17 October 2013 12:46, Alexandre Belloni
+> > <alexandre.belloni@free-electrons.com> wrote:
+> >> Other MMC hosts handle a regulator named vmmc-supply that allows to power the
+> >> MMC card or SDIO device before communicating on the bus.
+> >>
+> >> Signed-off-by: Alexandre Belloni <alexandre.belloni@free-electrons.com>
+> > Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
+> >
+> >> ---
+> >>
+> >> Changes in v2:
+> >>  - use mmc_regulator_get_supply instead of devm_regulator_get
+> >>
+> >> Changes in v3:
+> >>  - en/disable the regulator in .set_ios using mmc_regulator_set_ocr
+> >>
+> >>  drivers/mmc/host/atmel-mci.c | 7 +++++++
+> >>  1 file changed, 7 insertions(+)
+> >>
+> >> diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
+> >> index 69e438e..a9e1ba6 100644
+> >> --- a/drivers/mmc/host/atmel-mci.c
+> >> +++ b/drivers/mmc/host/atmel-mci.c
+> >> @@ -1385,8 +1385,14 @@ static void atmci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+> >>                 clk_unprepare(host->mck);
+> >>
+> >>         switch (ios->power_mode) {
+> >> +       case MMC_POWER_OFF:
+> >> +               if (!IS_ERR(mmc->supply.vmmc))
+> >> +                       mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, 0);
+> >> +               break;
+> >>         case MMC_POWER_UP:
+> >>                 set_bit(ATMCI_CARD_NEED_INIT, &slot->flags);
+> >> +               if (!IS_ERR(mmc->supply.vmmc))
+> >> +                       mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, ios->vdd);
+> >>                 break;
+> >>         default:
+> >>                 /*
+> >> @@ -2196,6 +2202,7 @@ static int __init atmci_init_slot(struct atmel_mci *host,
+> >>         }
+> >>
+> >>         host->slot[id] = slot;
+> >> +       mmc_regulator_get_supply(mmc);
+> >>         mmc_add_host(mmc);
+> >>
+> >>         if (gpio_is_valid(slot->detect_pin)) {
+> >> --
+> >> 1.8.1.2
+> >>
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
+> -- 
+> Alexandre Belloni, Free Electrons
+> Embedded Linux, Kernel and Android engineering
+> http://free-electrons.com
+> 
