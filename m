@@ -1,41 +1,72 @@
-From: Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>
-Subject: Re: [PATCH] mmc: core: don't decrement qty when calculating max_discard
-Date: Wed, 18 Dec 2013 09:36:23 -0700
-Message-ID: <52B1CF07.7050907@wwwdotorg.org>
-References: <1387303344-11802-1-git-send-email-swarren@wwwdotorg.org> <52B1822F.8080404@intel.com>
+From: John Tobias <john.tobias.ph@gmail.com>
+Subject: Re: [PATCH 2/4] Moving of_init_opp_table
+Date: Wed, 18 Dec 2013 08:41:52 -0800
+Message-ID: <CACUGKYN+fJFONMr5Mv9NwSkCeW88QkFOsxu1YsUhFwV6EOMPbA@mail.gmail.com>
+References: <1387329451-17480-1-git-send-email-john.tobias.ph@gmail.com>
+	<1387329451-17480-2-git-send-email-john.tobias.ph@gmail.com>
+	<20131218074315.GH6691@S2101-09.ap.freescale.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <52B1822F.8080404-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Cc: Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Stephen Warren <swarren-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>, Dong Aisheng <dongas86-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Vladimir Zapolskiy <vz-ChpfBGZJDbMAvxtiuMwx3w@public.gmane.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-oa0-f46.google.com ([209.85.219.46]:51780 "EHLO
+	mail-oa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752583Ab3LRQlx (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 18 Dec 2013 11:41:53 -0500
+Received: by mail-oa0-f46.google.com with SMTP id o6so8448270oag.19
+        for <linux-mmc@vger.kernel.org>; Wed, 18 Dec 2013 08:41:52 -0800 (PST)
+In-Reply-To: <20131218074315.GH6691@S2101-09.ap.freescale.net>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Shawn Guo <shawn.guo@linaro.org>
+Cc: linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, Fabio Estevam <festevam@gmail.com>, Chris Ball <cjb@laptop.org>
 
-On 12/18/2013 04:08 AM, Adrian Hunter wrote:
-> On 17/12/13 20:02, Stephen Warren wrote:
->> From: Stephen Warren <swarren-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
+Ahh ok I think I got what you mean here..
+
+I should call opp_get_opp_count(cpu_dev) to check if the platform
+supplied it. If not, call the of_init_opp_table.
+
+
+On Tue, Dec 17, 2013 at 11:43 PM, Shawn Guo <shawn.guo@linaro.org> wrote:
+> On Tue, Dec 17, 2013 at 05:17:29PM -0800, John Tobias wrote:
+>>     Moving of_init_opp_table from mach-imx6q.c to imx6q-cpufreq.c in order to avoid adding it to mach-imx6sl.c.
+>>     Just incase the cpu frequency scaling is enabled on iMX6SL.
+>
+> Drop the leading spaces and wrap the lines around 72 column.
+>
 >>
->> In mmc_do_calc_max_discard(), if any value has been assigned to qty,
->> that value must have passed the timeout checks in the loop. Hence,
->> qty is the maximum number of erase blocks that fit within the timeout,
->> not the first value that does not fit into the timeout. In turn, this
->> means we don't need any special case for (qty == 1); any value of qty
->> needs to be multiplied by the card's erase shift, and we don't need to
->> decrement qty before doing so.
+>> Signed-off-by: John Tobias <john.tobias.ph@gmail.com>
+>> ---
+>>  drivers/cpufreq/imx6q-cpufreq.c | 5 +++++
+>
+> For this patch, a proper patch subject prefix would be 'cpufreq: imx6q: '
+> You can use 'git log' to find out what a proper prefix for a file/patch
+> should be.
+>
+>>  1 file changed, 5 insertions(+)
 >>
->> Without this patch, on the NVIDIA Tegra Cardhu board, the loops result
->> in qty == 1, which is immediately returned. This causes discard to
->> operate a single sector at a time, which is chronically slow. With this
->> patch in place, discard operates a single erase block at a time, which
->> is reasonably fast.
-...
-> The quantity is decreased by 1 to account for the fact that the erase can
-> cross the boundary between 1 erase block and another. i.e. even though the
-> size is 1 erase block it touches 2 erase blocks.
-
-Don't erases have to be aligned to the erase block alignment; surely
-that's what the eMMC's preferred erase alignment is all about?
-
-If that isn't the case, a comment in the code would be extremely useful...
+>> diff --git a/drivers/cpufreq/imx6q-cpufreq.c b/drivers/cpufreq/imx6q-cpufreq.c
+>> index 4b3f18e..2eea3d9 100644
+>> --- a/drivers/cpufreq/imx6q-cpufreq.c
+>> +++ b/drivers/cpufreq/imx6q-cpufreq.c
+>> @@ -166,6 +166,11 @@ static int imx6q_cpufreq_probe(struct platform_device *pdev)
+>>               return -ENOENT;
+>>       }
+>>
+>> +     if (of_init_opp_table(cpu_dev)) {
+>> +             dev_err(cpu_dev,"failed to init OPP table\n");
+>> +             return -ENODEV;
+>> +     }
+>> +
+>
+> Before doing that in the driver, you should check and make sure that
+> platform hasn't supply a opp table.
+>
+> Shawn
+>
+>>       arm_clk = devm_clk_get(cpu_dev, "arm");
+>>       pll1_sys_clk = devm_clk_get(cpu_dev, "pll1_sys");
+>>       pll1_sw_clk = devm_clk_get(cpu_dev, "pll1_sw");
+>> --
+>> 1.8.3.2
+>>
+>
