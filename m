@@ -1,57 +1,55 @@
-From: Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>
-Subject: Re: [PATCH] mmc: core: don't return 1 for max_discard
-Date: Wed, 18 Dec 2013 16:00:22 -0700
-Message-ID: <52B22906.4010704@wwwdotorg.org>
-References: <1387405663-14253-1-git-send-email-swarren@wwwdotorg.org>
+From: Sergei Ianovich <ynvich@gmail.com>
+Subject: Re: [PATCH v3 07/21] ARM: dts: parse DMA config in pxamci
+Date: Thu, 19 Dec 2013 04:50:41 +0400
+Message-ID: <1387414241.31516.19.camel@host5.omatika.ru>
+References: <1386901645-28895-1-git-send-email-ynvich@gmail.com>
+	 <1387309071-22382-1-git-send-email-ynvich@gmail.com>
+	 <1387309071-22382-8-git-send-email-ynvich@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1387405663-14253-1-git-send-email-swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>
-Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>
-Cc: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Stephen Warren <swarren-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Dong Aisheng <dongas86-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Vladimir Zapolskiy <vz-ChpfBGZJDbMAvxtiuMwx3w@public.gmane.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-lb0-f175.google.com ([209.85.217.175]:60718 "EHLO
+	mail-lb0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751996Ab3LSAuq (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 18 Dec 2013 19:50:46 -0500
+In-Reply-To: <1387309071-22382-8-git-send-email-ynvich@gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-kernel@vger.kernel.org
+Cc: linux-arm-kernel@lists.infradead.org, Daniel Mack <zonque@gmail.com>, Arnd Bergmann <arnd@arndb.de>, Chris Ball <cjb@laptop.org>, Mark Brown <broonie@linaro.org>, Ulf Hansson <ulf.hansson@linaro.org>, Jingoo Han <jg1.han@samsung.com>, Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org
 
-On 12/18/2013 03:27 PM, Stephen Warren wrote:
-> From: Stephen Warren <swarren-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
+Daniel,
+
+On Tue, 2013-12-17 at 23:37 +0400, Sergei Ianovich wrote:
+> The existing PXA MMC driver cannot get DMA channels in a proper
+> way from the respective device tree binding.
 > 
-> In mmc_do_calc_max_discard(), if only a single erase block can be
-> discarded within the host controller's timeout, don't allow discard
-> operations at all.
+> This patch provides temporary workaround which allows using the
+> existing driver in DT machines by pointing to the proper
+> dmaengine-based "marvell,pdma-1.0" DMA.
 > 
-> Previously, the code allowed sector-at-a-time discard (rather than
-> erase-block-at-a-time), which was chronically slow.
+> Even though the new DMA provider is not present we can parse device node
+> attributes manually and use channel numbers to acquire DMA channel
+> from the existing non-dmaengine provider.
 > 
-> Without this patch, on the NVIDIA Tegra Cardhu board, the loops result
-> in qty == 1, which is immediately returned. This causes discard to
-> operate a single sector at a time, which is chronically slow. With this
-> patch in place, discard operates a single erase block at a time, which
-> is reasonably fast.
+> When Daniel's DMA series is merged there will be no need to manually
+> parse for "dmas" and this patch can be safely reverted.
+> 
+> Signed-off-by: Sergei Ianovich <ynvich@gmail.com>
+> CC: Daniel Mack <zonque@gmail.com>
+> CC: Arnd Bergmann <arnd@arndb.de>
+> ---
+>    v2..v3
+>    * split into good (PATCH 07/21) and temporary (this one) parts
+> 
+>    v1..v2
+>    * add binding for next-gen dma controller
+>    * use correct dma declararion
+>    * number changed from 5 to 3
 
-Alternatively, is the real fix a revert of e056a1b5b67b "mmc: queue: let
-host controllers specify maximum discard timeout", followed by:
+Could you please comment on this solution for PXA DMA?
 
-> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> index 050eb262485c..35c5b5d86c99 100644
-> --- a/drivers/mmc/core/core.c
-> +++ b/drivers/mmc/core/core.c
-> @@ -1950,7 +1950,6 @@ static int mmc_do_erase(struct mmc_card *card, unsigned int from,
->         cmd.opcode = MMC_ERASE;
->         cmd.arg = arg;
->         cmd.flags = MMC_RSP_SPI_R1B | MMC_RSP_R1B | MMC_CMD_AC;
-> -       cmd.cmd_timeout_ms = mmc_erase_timeout(card, arg, qty);
->         err = mmc_wait_for_cmd(card->host, &cmd, 0);
->         if (err) {
->                 pr_err("mmc_erase: erase error %d, status %#x\n",
-> @@ -1962,7 +1961,7 @@ static int mmc_do_erase(struct mmc_card *card, unsigned int from,
->         if (mmc_host_is_spi(card->host))
->                 goto out;
->  
-> -       timeout = jiffies + msecs_to_jiffies(MMC_CORE_TIMEOUT_MS);
-> +       timeout = jiffies + msecs_to_jiffies(mmc_erase_timeout(card, arg, qty));
->         do {
->                 memset(&cmd, 0, sizeof(struct mmc_command));
->                 cmd.opcode = MMC_SEND_STATUS;
+There may appear new, but it remains the last open review comment for
+the series at the moment.
 
-That certainly also seems to solve the problem on my board...
