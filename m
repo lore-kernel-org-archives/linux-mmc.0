@@ -1,218 +1,119 @@
 From: Balaji T K <balajitk@ti.com>
-Subject: [PATCH v6 5/7] ARM: dts: add pbias dt node
-Date: Thu, 19 Dec 2013 18:08:38 +0530
-Message-ID: <1387456720-7202-6-git-send-email-balajitk@ti.com>
+Subject: [PATCH v6 2/7] mmc: omap_hsmmc: handle vcc and vcc_aux independently
+Date: Thu, 19 Dec 2013 18:08:35 +0530
+Message-ID: <1387456720-7202-3-git-send-email-balajitk@ti.com>
 References: <1386670577-3530-1-git-send-email-balajitk@ti.com>
  <1387456720-7202-1-git-send-email-balajitk@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <linux-omap-owner@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from bear.ext.ti.com ([192.94.94.41]:52141 "EHLO bear.ext.ti.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S932089Ab3LSMjA (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 19 Dec 2013 07:39:00 -0500
 In-Reply-To: <1387456720-7202-1-git-send-email-balajitk@ti.com>
-Sender: linux-omap-owner@vger.kernel.org
+Sender: linux-mmc-owner@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 To: linux-omap@vger.kernel.org, bcousson@baylibre.com, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, cjb@laptop.org, broonie@kernel.org
 Cc: tony@atomide.com, Balaji T K <balajitk@ti.com>
-List-Id: linux-mmc@vger.kernel.org
 
-Add pbias regulator node as a child of system control
-module - syscon.
+handle vcc and vcc_aux independently to reduce indent.
 
 Signed-off-by: Balaji T K <balajitk@ti.com>
 ---
-Added control module region which has pbias register.
-remaining control module region for syscon can be added later when needed.
+ drivers/mmc/host/omap_hsmmc.c |   54 +++++++++++++++++++----------------------
+ 1 files changed, 25 insertions(+), 29 deletions(-)
 
- arch/arm/boot/dts/dra7.dtsi     |   19 +++++++++++++++++++
- arch/arm/boot/dts/omap2430.dtsi |   19 +++++++++++++++++++
- arch/arm/boot/dts/omap3.dtsi    |   19 +++++++++++++++++++
- arch/arm/boot/dts/omap4.dtsi    |   19 +++++++++++++++++++
- arch/arm/boot/dts/omap5.dtsi    |   19 +++++++++++++++++++
- 5 files changed, 95 insertions(+), 0 deletions(-)
-
-diff --git a/arch/arm/boot/dts/dra7.dtsi b/arch/arm/boot/dts/dra7.dtsi
-index d0df4c4..a599cae 100644
---- a/arch/arm/boot/dts/dra7.dtsi
-+++ b/arch/arm/boot/dts/dra7.dtsi
-@@ -110,6 +110,24 @@
- 			ti,hwmods = "counter_32k";
- 		};
+diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+index 1eb4350..342be25 100644
+--- a/drivers/mmc/host/omap_hsmmc.c
++++ b/drivers/mmc/host/omap_hsmmc.c
+@@ -286,11 +286,12 @@ static int omap_hsmmc_set_power(struct device *dev, int slot, int power_on,
+ 	 * chips/cards need an interface voltage rail too.
+ 	 */
+ 	if (power_on) {
+-		ret = mmc_regulator_set_ocr(host->mmc, host->vcc, vdd);
++		if (host->vcc)
++			ret = mmc_regulator_set_ocr(host->mmc, host->vcc, vdd);
+ 		/* Enable interface voltage rail, if needed */
+ 		if (ret == 0 && host->vcc_aux) {
+ 			ret = regulator_enable(host->vcc_aux);
+-			if (ret < 0)
++			if (ret < 0 && host->vcc)
+ 				ret = mmc_regulator_set_ocr(host->mmc,
+ 							host->vcc, 0);
+ 		}
+@@ -298,7 +299,7 @@ static int omap_hsmmc_set_power(struct device *dev, int slot, int power_on,
+ 		/* Shut down the rail */
+ 		if (host->vcc_aux)
+ 			ret = regulator_disable(host->vcc_aux);
+-		if (!ret) {
++		if (host->vcc) {
+ 			/* Then proceed to shut down the local regulator */
+ 			ret = mmc_regulator_set_ocr(host->mmc,
+ 						host->vcc, 0);
+@@ -318,10 +319,10 @@ static int omap_hsmmc_reg_get(struct omap_hsmmc_host *host)
  
-+		dra7_ctrl_general: tisyscon@4a002e00 {
-+			compatible = "ti,control-syscon", "syscon", "simple-bus";
-+			reg = <0x4a002e00 0x7c>;
-+			#address-cells = <1>;
-+			#size-cells = <1>;
-+			ranges;
-+			pbias_regulator: pbias_regulator {
-+				compatible = "ti,pbias-omap";
-+				reg = <0 0x4>;
-+				pbias_mmc_reg: pbias_mmc_omap5 {
-+					regulator-name = "pbias_mmc_omap5";
-+					regulator-min-microvolt = <1800000>;
-+					regulator-max-microvolt = <3000000>;
-+					regulator-enable-ramp-delay = <100>;
-+				};
-+			};
-+		};
-+
- 		dra7_pmx_core: pinmux@4a003400 {
- 			compatible = "pinctrl-single";
- 			reg = <0x4a003400 0x0464>;
-@@ -485,6 +503,7 @@
- 			dmas = <&sdma 61>, <&sdma 62>;
- 			dma-names = "tx", "rx";
- 			status = "disabled";
-+			pbias-supply = <&pbias_mmc_reg>;
- 		};
+ 	reg = devm_regulator_get(host->dev, "vmmc");
+ 	if (IS_ERR(reg)) {
+-		dev_err(host->dev, "vmmc regulator missing\n");
++		dev_err(host->dev, "unable to get vmmc regulator %ld\n",
++			PTR_ERR(reg));
+ 		return PTR_ERR(reg);
+ 	} else {
+-		mmc_slot(host).set_power = omap_hsmmc_set_power;
+ 		host->vcc = reg;
+ 		ocr_value = mmc_regulator_get_ocrmask(reg);
+ 		if (!mmc_slot(host).ocr_mask) {
+@@ -334,31 +335,26 @@ static int omap_hsmmc_reg_get(struct omap_hsmmc_host *host)
+ 				return -EINVAL;
+ 			}
+ 		}
++	}
++	mmc_slot(host).set_power = omap_hsmmc_set_power;
  
- 		mmc2: mmc@480b4000 {
-diff --git a/arch/arm/boot/dts/omap2430.dtsi b/arch/arm/boot/dts/omap2430.dtsi
-index d624345..f127901 100644
---- a/arch/arm/boot/dts/omap2430.dtsi
-+++ b/arch/arm/boot/dts/omap2430.dtsi
-@@ -29,6 +29,24 @@
- 			pinctrl-single,function-mask = <0x3f>;
- 		};
+-		/* Allow an aux regulator */
+-		reg = devm_regulator_get_optional(host->dev, "vmmc_aux");
+-		host->vcc_aux = IS_ERR(reg) ? NULL : reg;
++	/* Allow an aux regulator */
++	reg = devm_regulator_get_optional(host->dev, "vmmc_aux");
++	host->vcc_aux = IS_ERR(reg) ? NULL : reg;
  
-+		omap2_scm_general: tisyscon@49002270 {
-+			compatible = "ti,control-syscon", "syscon", "simple-bus";
-+			reg = <0x49002270 0x240>;
-+			#address-cells = <1>;
-+			#size-cells = <1>;
-+			ranges;
-+			pbias_regulator: pbias_regulator {
-+				compatible = "ti,pbias-omap";
-+				reg = <0x230 0x4>;
-+				pbias_mmc_reg: pbias_mmc_omap3 {
-+					regulator-name = "pbias_mmc_omap3";
-+					regulator-min-microvolt = <1800000>;
-+					regulator-max-microvolt = <3000000>;
-+					regulator-enable-ramp-delay = <100>;
-+				};
-+			};
-+		};
-+
- 		gpio1: gpio@4900c000 {
- 			compatible = "ti,omap2-gpio";
- 			reg = <0x4900c000 0x200>;
-@@ -183,6 +201,7 @@
- 			ti,dual-volt;
- 			dmas = <&sdma 61>, <&sdma 62>;
- 			dma-names = "tx", "rx";
-+			pbias-supply = <&pbias_mmc_reg>;
- 		};
+-		/* For eMMC do not power off when not in sleep state */
+-		if (mmc_slot(host).no_regulator_off_init)
+-			return 0;
+-		/*
+-		* UGLY HACK:  workaround regulator framework bugs.
+-		* When the bootloader leaves a supply active, it's
+-		* initialized with zero usecount ... and we can't
+-		* disable it without first enabling it.  Until the
+-		* framework is fixed, we need a workaround like this
+-		* (which is safe for MMC, but not in general).
+-		*/
+-		if (regulator_is_enabled(host->vcc) > 0 ||
+-		    (host->vcc_aux && regulator_is_enabled(host->vcc_aux))) {
+-			int vdd = ffs(mmc_slot(host).ocr_mask) - 1;
++	/* For eMMC do not power off when not in sleep state */
++	if (mmc_slot(host).no_regulator_off_init)
++		return 0;
++	/*
++	 * To disable boot_on regulator, enable regulator
++	 * to increase usecount and then disable it.
++	 */
++	if ((host->vcc && regulator_is_enabled(host->vcc) > 0) ||
++	    (host->vcc_aux && regulator_is_enabled(host->vcc_aux))) {
++		int vdd = ffs(mmc_slot(host).ocr_mask) - 1;
  
- 		mmc2: mmc@480b4000 {
-diff --git a/arch/arm/boot/dts/omap3.dtsi b/arch/arm/boot/dts/omap3.dtsi
-index daabf99..380a4c4 100644
---- a/arch/arm/boot/dts/omap3.dtsi
-+++ b/arch/arm/boot/dts/omap3.dtsi
-@@ -137,6 +137,24 @@
- 			pinctrl-single,function-mask = <0xff1f>;
- 		};
+-			mmc_slot(host).set_power(host->dev, host->slot_id,
+-						 1, vdd);
+-			mmc_slot(host).set_power(host->dev, host->slot_id,
+-						 0, 0);
+-		}
++		mmc_slot(host).set_power(host->dev, host->slot_id, 1, vdd);
++		mmc_slot(host).set_power(host->dev, host->slot_id, 0, 0);
+ 	}
  
-+		omap3_scm_general: tisyscon@48002270 {
-+			compatible = "ti,control-syscon", "syscon", "simple-bus";
-+			reg = <0x48002270 0x2f0>;
-+			#address-cells = <1>;
-+			#size-cells = <1>;
-+			ranges;
-+			pbias_regulator: pbias_regulator {
-+				compatible = "ti,pbias-omap";
-+				reg = <0x2b0 0x4>;
-+				pbias_mmc_reg: pbias_mmc_omap3 {
-+					regulator-name = "pbias_mmc_omap3";
-+					regulator-min-microvolt = <1800000>;
-+					regulator-max-microvolt = <3000000>;
-+					regulator-enable-ramp-delay = <100>;
-+				};
-+			};
-+		};
-+
- 		gpio1: gpio@48310000 {
- 			compatible = "ti,omap3-gpio";
- 			reg = <0x48310000 0x200>;
-@@ -351,6 +369,7 @@
- 			ti,dual-volt;
- 			dmas = <&sdma 61>, <&sdma 62>;
- 			dma-names = "tx", "rx";
-+			pbias-supply = <&pbias_mmc_reg>;
- 		};
- 
- 		mmc2: mmc@480b4000 {
-diff --git a/arch/arm/boot/dts/omap4.dtsi b/arch/arm/boot/dts/omap4.dtsi
-index a1e0585..938b596 100644
---- a/arch/arm/boot/dts/omap4.dtsi
-+++ b/arch/arm/boot/dts/omap4.dtsi
-@@ -134,6 +134,24 @@
- 			pinctrl-single,function-mask = <0x7fff>;
- 		};
- 
-+		omap4_padconf_global: tisyscon@4a1005a0 {
-+			compatible = "ti,control-syscon", "syscon", "simple-bus";
-+			reg = <0x4a1005a0 0x170>;
-+			#address-cells = <1>;
-+			#size-cells = <1>;
-+			ranges;
-+			pbias_regulator: pbias_regulator {
-+				compatible = "ti,pbias-omap";
-+				reg = <0x60 0x4>;
-+				pbias_mmc_reg: pbias_mmc_omap4 {
-+					regulator-name = "pbias_mmc_omap4";
-+					regulator-min-microvolt = <1800000>;
-+					regulator-max-microvolt = <3000000>;
-+					regulator-enable-ramp-delay = <10>;
-+				};
-+			};
-+		};
-+
- 		sdma: dma-controller@4a056000 {
- 			compatible = "ti,omap4430-sdma";
- 			reg = <0x4a056000 0x1000>;
-@@ -367,6 +385,7 @@
- 			ti,needs-special-reset;
- 			dmas = <&sdma 61>, <&sdma 62>;
- 			dma-names = "tx", "rx";
-+			pbias-supply = <&pbias_mmc_reg>;
- 		};
- 
- 		mmc2: mmc@480b4000 {
-diff --git a/arch/arm/boot/dts/omap5.dtsi b/arch/arm/boot/dts/omap5.dtsi
-index fc3fad5..2df4862 100644
---- a/arch/arm/boot/dts/omap5.dtsi
-+++ b/arch/arm/boot/dts/omap5.dtsi
-@@ -130,6 +130,24 @@
- 			pinctrl-single,function-mask = <0x7fff>;
- 		};
- 
-+		omap5_padconf_global: tisyscon@4a002da0 {
-+			compatible = "ti,control-syscon", "syscon", "simple-bus";
-+			reg = <0x4A002da0 0xec>;
-+			#address-cells = <1>;
-+			#size-cells = <1>;
-+			ranges;
-+			pbias_regulator: pbias_regulator {
-+				compatible = "ti,pbias-omap";
-+				reg = <0x60 0x4>;
-+				pbias_mmc_reg: pbias_mmc_omap5 {
-+					regulator-name = "pbias_mmc_omap5";
-+					regulator-min-microvolt = <1800000>;
-+					regulator-max-microvolt = <3000000>;
-+					regulator-enable-ramp-delay = <100>;
-+				};
-+			};
-+		};
-+
- 		sdma: dma-controller@4a056000 {
- 			compatible = "ti,omap4430-sdma";
- 			reg = <0x4a056000 0x1000>;
-@@ -409,6 +427,7 @@
- 			ti,needs-special-reset;
- 			dmas = <&sdma 61>, <&sdma 62>;
- 			dma-names = "tx", "rx";
-+			pbias-supply = <&pbias_mmc_reg>;
- 		};
- 
- 		mmc2: mmc@480b4000 {
+ 	return 0;
 -- 
 1.7.5.4
 
