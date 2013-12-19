@@ -1,157 +1,98 @@
-From: Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Subject: Re: [PATCH] mmc: core: don't return 1 for max_discard
-Date: Thu, 19 Dec 2013 15:49:46 +0200
-Message-ID: <52B2F97A.7020501@intel.com>
-References: <1387405663-14253-1-git-send-email-swarren@wwwdotorg.org> <52B22906.4010704@wwwdotorg.org> <52B2B5DF.1020702@intel.com> <52B2B8F7.1000905@mentor.com> <52B2BF95.302@intel.com> <CAPDyKFoiGzspgrtRwXruPqOODxbfKA4AAZHj_VF8H7rpwm7eTQ@mail.gmail.com> <52B2E67E.2000607@intel.com> <CAPDyKFp1B6r+WyAO9PocL13LvzjsZDJ3HOUbXwJ+uTQ2Ayv-ug@mail.gmail.com>
+From: Seungwon Jeon <tgih.jun@samsung.com>
+Subject: RE: [PATCH 2/2] mmc: core: Enable MMC_CAP2_CACHE_CTRL as default
+Date: Thu, 19 Dec 2013 23:43:41 +0900
+Message-ID: <002b01cefcc8$b6168130$22438390$%jun@samsung.com>
+References: <1387364961-15464-1-git-send-email-ulf.hansson@linaro.org>
+ <1387364961-15464-2-git-send-email-ulf.hansson@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=ks_c_5601-1987
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <CAPDyKFp1B6r+WyAO9PocL13LvzjsZDJ3HOUbXwJ+uTQ2Ayv-ug-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Vladimir Zapolskiy <vladimir_zapolskiy-nmGgyN9QBj3QT0dZR+AlfA@public.gmane.org>, Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Stephen Warren <swarren-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>, Dong Aisheng <dongas86-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Vladimir Zapolskiy <vz-ChpfBGZJDbMAvxtiuMwx3w@public.gmane.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout4.samsung.com ([203.254.224.34]:12360 "EHLO
+	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751267Ab3LSOno (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 19 Dec 2013 09:43:44 -0500
+Received: from epcpsbgr1.samsung.com
+ (u141.gpu120.samsung.co.kr [203.254.230.141])
+ by mailout4.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+ (7.0.4.24.0) 64bit (built Nov 17 2011))
+ with ESMTP id <0MY200DUB68UOG10@mailout4.samsung.com> for
+ linux-mmc@vger.kernel.org; Thu, 19 Dec 2013 23:43:43 +0900 (KST)
+In-reply-to: <1387364961-15464-2-git-send-email-ulf.hansson@linaro.org>
+Content-language: ko
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: 'Ulf Hansson' <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, 'Chris Ball' <cjb@laptop.org>
 
-On 19/12/13 15:29, Ulf Hansson wrote:
-> On 19 December 2013 13:28, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org> wrote:
->> On 19/12/13 12:26, Ulf Hansson wrote:
->>> On 19 December 2013 10:42, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org> wrote:
->>>> On 19/12/13 11:14, Vladimir Zapolskiy wrote:
->>>>> On 12/19/13 10:01, Adrian Hunter wrote:
->>>>>> On 19/12/13 01:00, Stephen Warren wrote:
->>>>>>> On 12/18/2013 03:27 PM, Stephen Warren wrote:
->>>>>>>> From: Stephen Warren<swarren-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
->>>>>>>>
->>>>>>>> In mmc_do_calc_max_discard(), if only a single erase block can be
->>>>>>>> discarded within the host controller's timeout, don't allow discard
->>>>>>>> operations at all.
->>>>>>>>
->>>>>>>> Previously, the code allowed sector-at-a-time discard (rather than
->>>>>>>> erase-block-at-a-time), which was chronically slow.
->>>>>>>>
->>>>>>>> Without this patch, on the NVIDIA Tegra Cardhu board, the loops result
->>>>>>>> in qty == 1, which is immediately returned. This causes discard to
->>>>>>>> operate a single sector at a time, which is chronically slow. With this
->>>>>>>> patch in place, discard operates a single erase block at a time, which
->>>>>>>> is reasonably fast.
->>>>>>>
->>>>>>> Alternatively, is the real fix a revert of e056a1b5b67b "mmc: queue: let
->>>>>>> host controllers specify maximum discard timeout", followed by:
->>>>>>>
->>>>>>>> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
->>>>>>>> index 050eb262485c..35c5b5d86c99 100644
->>>>>>>> --- a/drivers/mmc/core/core.c
->>>>>>>> +++ b/drivers/mmc/core/core.c
->>>>>>>> @@ -1950,7 +1950,6 @@ static int mmc_do_erase(struct mmc_card *card,
->>>>>>>> unsigned int from,
->>>>>>>>          cmd.opcode = MMC_ERASE;
->>>>>>>>          cmd.arg = arg;
->>>>>>>>          cmd.flags = MMC_RSP_SPI_R1B | MMC_RSP_R1B | MMC_CMD_AC;
->>>>>>>> -       cmd.cmd_timeout_ms = mmc_erase_timeout(card, arg, qty);
->>>>>>>>          err = mmc_wait_for_cmd(card->host,&cmd, 0);
->>>>>>>>          if (err) {
->>>>>>>>                  pr_err("mmc_erase: erase error %d, status %#x\n",
->>>>>>>> @@ -1962,7 +1961,7 @@ static int mmc_do_erase(struct mmc_card *card,
->>>>>>>> unsigned int from,
->>>>>>>>          if (mmc_host_is_spi(card->host))
->>>>>>>>                  goto out;
->>>>>>>>
->>>>>>>> -       timeout = jiffies + msecs_to_jiffies(MMC_CORE_TIMEOUT_MS);
->>>>>>>> +       timeout = jiffies + msecs_to_jiffies(mmc_erase_timeout(card,
->>>>>>>> arg, qty));
->>>>>>>>          do {
->>>>>>>>                  memset(&cmd, 0, sizeof(struct mmc_command));
->>>>>>>>                  cmd.opcode = MMC_SEND_STATUS;
->>>>>>>
->>>>>>> That certainly also seems to solve the problem on my board...
->>>>>>
->>>>>> But large erases will timeout when they should have been split into smaller
->>>>>> chunks.
->>>>>>
->>>>>> A generic solution needs to be able to explain what happens when the host
->>>>>> controller *does* timeout.
->>>>>
->>>>> Please correct me, but if Data Timeout Error is disabled, then this is not
->>>>> an issue for most of the host controllers.
->>>>
->>>> That is a very good point.  My experience with SDHCI was that masking the
->>>> "Data Timeout Error Status Enable" and "Data Timeout Error Signal Enable
->>>> " bits did not disable the timeout i.e. the host controller would not
->>>> deliver a TC interrupt if the erase exceeded the timeout.
->>>>
->>>> What happens on your board?
->>>>
->>>
->>> I posted a response yesterday for "[PATCH] mmc: core: don't decrement
->>> qty when calculating max_discard", related to this. Please have a
->>> look.
->>>
->>> I think the interesting case to consider here is how we can handle
->>> busy detection timeouts that is bigger than what the host hw can
->>> support.
->>>
->>> Option 1)
->>> Should we tell the host to disable the timeout in this case? That
->>> potentially means hanging forever - if the card misbehaves. Like
->>> omap_hsmmc does for erase commands. Maybe that is an okay limitation?
->>
->> sdhci anyway has a 10 second timer to catch unresponsive host controllers.
->> I recently sent a patch to use the cmd_timeout_ms if it is bigger than 10
->> seconds.
->>
->>         http://permalink.gmane.org/gmane.linux.kernel.mmc/23557
->>
+On Wed, December 18, 2013 Ulf Hansson wrote: 
+> There are no reason to why the use of a non-volatile internal eMMC
+> cache should be controlled by a host cap. Instead let's just enable it
+> if the eMMC card supports it.
 > 
-> I see the reason behind your patch. Somehow, I don't like that host
-> drivers need to care about such things for specific commands.
+> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 
-It is not for a specific command - the timer is used for all commands.
+When cache feature was introduced for the first time, there was stability issue in some devices.
+So host should have decided whether to select that feature.
+Now, your change makes sense. But just check minor one below.
 
-> 
-> The host driver should only tell it's maximum supported busy detection
-> timeout (max_discard_to) to the core layer, which should be needed
-> only of it supports MMC_CAP_WAIT_WHILE_BUSY.
-> 
-> Then the core layer should decide what to do depending on current
-> needed timeout.
-> 
-> BTW, do you know why sdhci haven't enabled MMC_CAP_WAIT_WHILE_BUSY. It
-> seems like it should be?
+Acked-by: Seungwon Jeon <tgih.jun@samsung.com>
 
-Yes it should be.  Just an oversight.
+> ---
+>  drivers/mmc/core/core.c  |    3 ---
+>  drivers/mmc/core/mmc.c   |    3 +--
+>  include/linux/mmc/host.h |    1 -
+>  3 files changed, 1 insertion(+), 6 deletions(-)
+> 
+> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> index df591a9..66ec347 100644
+> --- a/drivers/mmc/core/core.c
+> +++ b/drivers/mmc/core/core.c
+> @@ -2585,9 +2585,6 @@ int mmc_flush_cache(struct mmc_card *card)
+>  	struct mmc_host *host = card->host;
+Also, 'host' can be removed.  No use.
 
+Thanks,
+Seungwon Jeon
+
+>  	int err = 0;
 > 
->>>
->>> Option 2)
->>> Use a R1 response instead if R1B to prevent the host from doing busy
->>> detection. Then rely on the CMD13 to poll for completion instead.
->>> Obviously we can then stop polling after some selected timeout is the
->>> card don't complete it's operations.
->>
->> It would be nice to avoid polling when the timeout can be supported. Also
->> the polling should be periodic.
+> -	if (!(host->caps2 & MMC_CAP2_CACHE_CTRL))
+> -		return err;
+> -
+>  	if (mmc_card_mmc(card) &&
+>  			(card->ext_csd.cache_size > 0) &&
+>  			(card->ext_csd.cache_ctrl & 1)) {
+> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+> index ef1cc73..7ab3e9c 100644
+> --- a/drivers/mmc/core/mmc.c
+> +++ b/drivers/mmc/core/mmc.c
+> @@ -1287,8 +1287,7 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+>  	 * If cache size is higher than 0, this indicates
+>  	 * the existence of cache and it can be turned on.
+>  	 */
+> -	if ((host->caps2 & MMC_CAP2_CACHE_CTRL) &&
+> -			card->ext_csd.cache_size > 0) {
+> +	if (card->ext_csd.cache_size > 0) {
+>  		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+>  				EXT_CSD_CACHE_CTRL, 1,
+>  				card->ext_csd.generic_cmd6_time);
+> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+> index f539bc7..8383e3f 100644
+> --- a/include/linux/mmc/host.h
+> +++ b/include/linux/mmc/host.h
+> @@ -264,7 +264,6 @@ struct mmc_host {
+>  	u32			caps2;		/* More host capabilities */
 > 
-> Agree!
+>  #define MMC_CAP2_BOOTPART_NOACC	(1 << 0)	/* Boot partition no access */
+> -#define MMC_CAP2_CACHE_CTRL	(1 << 1)	/* Allow cache control */
+>  #define MMC_CAP2_FULL_PWR_CYCLE	(1 << 2)	/* Can do full power cycle */
+>  #define MMC_CAP2_NO_MULTI_READ	(1 << 3)	/* Multiblock reads don't work */
+>  #define MMC_CAP2_NO_SLEEP_CMD	(1 << 4)	/* Don't allow sleep command */
+> --
+> 1.7.9.5
 > 
->>
->>>
->>> Would be very interesting to know what option you prefer!?
->>
->> At least 1 of the host controllers I have seen does not support disabling
->> the timeout - so option 1) might not work in all cases.  Although it is the
->> nicer option i.e. replace the hardware timeout with a software timeout.
->>
->> So I would probably allow both options to co-exist.
-> 
-> Thanks for input Adrian!
-> 
->>
->>>
->>> Kind regards
->>> Uffe
->>>
->>>
->>
-> 
-> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
