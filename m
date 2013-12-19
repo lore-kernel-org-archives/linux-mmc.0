@@ -1,65 +1,83 @@
-From: Tony Lindgren <tony@atomide.com>
-Subject: Re: [PATCH v6 5/7] ARM: dts: add pbias dt node
-Date: Thu, 19 Dec 2013 08:33:56 -0800
-Message-ID: <20131219163356.GL27438@atomide.com>
-References: <1386670577-3530-1-git-send-email-balajitk@ti.com>
- <1387456720-7202-1-git-send-email-balajitk@ti.com>
- <1387456720-7202-6-git-send-email-balajitk@ti.com>
+From: Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>
+Subject: Re: [PATCH] mmc: core: don't return 1 for max_discard
+Date: Thu, 19 Dec 2013 12:08:10 -0700
+Message-ID: <52B3441A.6080006@wwwdotorg.org>
+References: <1387405663-14253-1-git-send-email-swarren@wwwdotorg.org> <CAA+hA=StHAna46_356Gfpaa+4Y3yt6KO15W6E7dS8uoz8TPqxg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mho-03-ewr.mailhop.org ([204.13.248.66]:32136 "EHLO
-	mho-01-ewr.mailhop.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1754002Ab3LSQeB (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 19 Dec 2013 11:34:01 -0500
-Content-Disposition: inline
-In-Reply-To: <1387456720-7202-6-git-send-email-balajitk@ti.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <CAA+hA=StHAna46_356Gfpaa+4Y3yt6KO15W6E7dS8uoz8TPqxg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Dong Aisheng <dongas86-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Stephen Warren <swarren-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Vladimir Zapolskiy <vz-ChpfBGZJDbMAvxtiuMwx3w@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Balaji T K <balajitk@ti.com>
-Cc: linux-omap@vger.kernel.org, bcousson@baylibre.com, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, cjb@laptop.org, broonie@kernel.org
 
-* Balaji T K <balajitk@ti.com> [131219 04:40]:
-> @@ -485,6 +503,7 @@
->  			dmas = <&sdma 61>, <&sdma 62>;
->  			dma-names = "tx", "rx";
->  			status = "disabled";
-> +			pbias-supply = <&pbias_mmc_reg>;
->  		};
->  
->  		mmc2: mmc@480b4000 {
-> diff --git a/arch/arm/boot/dts/omap2430.dtsi b/arch/arm/boot/dts/omap2430.dtsi
-> index d624345..f127901 100644
-> --- a/arch/arm/boot/dts/omap2430.dtsi
-> +++ b/arch/arm/boot/dts/omap2430.dtsi
-> @@ -29,6 +29,24 @@
->  			pinctrl-single,function-mask = <0x3f>;
->  		};
->  
-> +		omap2_scm_general: tisyscon@49002270 {
-> +			compatible = "ti,control-syscon", "syscon", "simple-bus";
-> +			reg = <0x49002270 0x240>;
-> +			#address-cells = <1>;
-> +			#size-cells = <1>;
-> +			ranges;
-> +			pbias_regulator: pbias_regulator {
-> +				compatible = "ti,pbias-omap";
-> +				reg = <0x230 0x4>;
-> +				pbias_mmc_reg: pbias_mmc_omap3 {
-> +					regulator-name = "pbias_mmc_omap3";
-> +					regulator-min-microvolt = <1800000>;
-> +					regulator-max-microvolt = <3000000>;
-> +					regulator-enable-ramp-delay = <100>;
-> +				};
-> +			};
-> +		};
-> +
->  		gpio1: gpio@4900c000 {
->  			compatible = "ti,omap2-gpio";
->  			reg = <0x4900c000 0x200>;
+On 12/19/2013 01:39 AM, Dong Aisheng wrote:
+> On Thu, Dec 19, 2013 at 6:27 AM, Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org> wrote:
+>> From: Stephen Warren <swarren-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
+>>
+>> In mmc_do_calc_max_discard(), if only a single erase block can be
+>> discarded within the host controller's timeout, don't allow discard
+>> operations at all.
+>>
+>> Previously, the code allowed sector-at-a-time discard (rather than
+>> erase-block-at-a-time), which was chronically slow.
+>>
+>> Without this patch, on the NVIDIA Tegra Cardhu board, the loops result
+>> in qty == 1, which is immediately returned. This causes discard to
+>> operate a single sector at a time, which is chronically slow. With this
+>> patch in place, discard operates a single erase block at a time, which
+>> is reasonably fast.
+>>
+>> Cc: Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+>> Cc: Dong Aisheng <dongas86-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+>> Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+>> Cc: Vladimir Zapolskiy <vz-ChpfBGZJDbMAvxtiuMwx3w@public.gmane.org>
+>> Fixes: e056a1b5b67b "(mmc: queue: let host controllers specify maximum discard timeout")
+>> Signed-off-by: Stephen Warren <swarren-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
+>> ---
+>>  drivers/mmc/core/core.c | 21 +++++++++++++++++++--
+>>  1 file changed, 19 insertions(+), 2 deletions(-)
+>>
+>> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+>> index 57a2b403bf8e..eb952ca634ea 100644
+>> --- a/drivers/mmc/core/core.c
+>> +++ b/drivers/mmc/core/core.c
+>> @@ -2150,8 +2150,25 @@ static unsigned int mmc_do_calc_max_discard(struct mmc_card *card,
+>>         if (!qty)
+>>                 return 0;
+>>
+>> -       if (qty == 1)
+>> -               return 1;
+>> +       /*
+>> +        * Discard operations may not be aligned to an erase block. In an
+>> +        * unaligned case, we need to issue 1 more discard operation to HW
+>> +        * than strictly calculated by:
+>> +        *     sectors_to_erase / sectors_per_discard_operation
+>> +        *
+>> +        * To account for this in the timeout calculations, we assume we can
+>> +        * actually discard one less erase block than fits into the HW
+>> +        * timeout. This explains the --qty below.
+>> +        *
+>> +        * When only a single discard block operation fits into the timeout,
+>> +        * disallow any discard operations at all. For example, discarding one
+>> +        * sector at a time is so chronically slow as to be useless. However,
+>> +        * make an exception for SD cards without an erase shift, since qty
+>> +        * isn't multiplied up by an erase block size in the code below for
+>> +        * that case.
+>> +        */
+>> +       if (qty == 1 && !(!card->erase_shift && mmc_card_sd(card)))
+>> +               return 0;
+>>
+> 
+> How about when qty == 2?
+> Erase 2 sectors may have no much difference from 1 sector per one time
+> for a SD card,
+> it may still chronically slow, i guess.
+> So i wonder it may not sovle the issues totally.
 
-Here too you may need to set up pbias_mmc_omap2430?
-
-Regards,
-
-Tony
+When qty==2, the number of sectors gets multiplied by the number of
+sectors in an erase block, so it isn't chronically slow. It's only slow
+with qty==1 because without this patch, the multiplication gets skipped
+and "1" returned rather then "1 << card->erase_shift".
