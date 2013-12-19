@@ -1,66 +1,75 @@
-From: Dong Aisheng <dongas86-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+From: Vladimir Zapolskiy <vladimir_zapolskiy@mentor.com>
 Subject: Re: [PATCH] mmc: core: don't return 1 for max_discard
-Date: Thu, 19 Dec 2013 17:05:23 +0800
-Message-ID: <CAA+hA=RdsVCWpNMrC18EpccszABToStVjLBV6ZmOiRZjNMC1zw@mail.gmail.com>
-References: <1387405663-14253-1-git-send-email-swarren@wwwdotorg.org>
-	<52B22906.4010704@wwwdotorg.org>
+Date: Thu, 19 Dec 2013 10:14:31 +0100
+Message-ID: <52B2B8F7.1000905@mentor.com>
+References: <1387405663-14253-1-git-send-email-swarren@wwwdotorg.org> <52B22906.4010704@wwwdotorg.org> <52B2B5DF.1020702@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <52B22906.4010704-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>
-Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>
-Cc: Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Stephen Warren <swarren-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Vladimir Zapolskiy <vz-ChpfBGZJDbMAvxtiuMwx3w@public.gmane.org>
+Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from relay1.mentorg.com ([192.94.38.131]:53635 "EHLO
+	relay1.mentorg.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752168Ab3LSJOs (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 19 Dec 2013 04:14:48 -0500
+In-Reply-To: <52B2B5DF.1020702@intel.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: Stephen Warren <swarren@wwwdotorg.org>, Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, linux-tegra@vger.kernel.org, Stephen Warren <swarren@nvidia.com>, Dong Aisheng <dongas86@gmail.com>, Ulf Hansson <ulf.hansson@linaro.org>, Vladimir Zapolskiy <vz@mleia.com>
 
-On Thu, Dec 19, 2013 at 7:00 AM, Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org> wrote:
-> On 12/18/2013 03:27 PM, Stephen Warren wrote:
->> From: Stephen Warren <swarren-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
+On 12/19/13 10:01, Adrian Hunter wrote:
+> On 19/12/13 01:00, Stephen Warren wrote:
+>> On 12/18/2013 03:27 PM, Stephen Warren wrote:
+>>> From: Stephen Warren<swarren@nvidia.com>
+>>>
+>>> In mmc_do_calc_max_discard(), if only a single erase block can be
+>>> discarded within the host controller's timeout, don't allow discard
+>>> operations at all.
+>>>
+>>> Previously, the code allowed sector-at-a-time discard (rather than
+>>> erase-block-at-a-time), which was chronically slow.
+>>>
+>>> Without this patch, on the NVIDIA Tegra Cardhu board, the loops result
+>>> in qty == 1, which is immediately returned. This causes discard to
+>>> operate a single sector at a time, which is chronically slow. With this
+>>> patch in place, discard operates a single erase block at a time, which
+>>> is reasonably fast.
 >>
->> In mmc_do_calc_max_discard(), if only a single erase block can be
->> discarded within the host controller's timeout, don't allow discard
->> operations at all.
+>> Alternatively, is the real fix a revert of e056a1b5b67b "mmc: queue: let
+>> host controllers specify maximum discard timeout", followed by:
 >>
->> Previously, the code allowed sector-at-a-time discard (rather than
->> erase-block-at-a-time), which was chronically slow.
+>>> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+>>> index 050eb262485c..35c5b5d86c99 100644
+>>> --- a/drivers/mmc/core/core.c
+>>> +++ b/drivers/mmc/core/core.c
+>>> @@ -1950,7 +1950,6 @@ static int mmc_do_erase(struct mmc_card *card, unsigned int from,
+>>>          cmd.opcode = MMC_ERASE;
+>>>          cmd.arg = arg;
+>>>          cmd.flags = MMC_RSP_SPI_R1B | MMC_RSP_R1B | MMC_CMD_AC;
+>>> -       cmd.cmd_timeout_ms = mmc_erase_timeout(card, arg, qty);
+>>>          err = mmc_wait_for_cmd(card->host,&cmd, 0);
+>>>          if (err) {
+>>>                  pr_err("mmc_erase: erase error %d, status %#x\n",
+>>> @@ -1962,7 +1961,7 @@ static int mmc_do_erase(struct mmc_card *card, unsigned int from,
+>>>          if (mmc_host_is_spi(card->host))
+>>>                  goto out;
+>>>
+>>> -       timeout = jiffies + msecs_to_jiffies(MMC_CORE_TIMEOUT_MS);
+>>> +       timeout = jiffies + msecs_to_jiffies(mmc_erase_timeout(card, arg, qty));
+>>>          do {
+>>>                  memset(&cmd, 0, sizeof(struct mmc_command));
+>>>                  cmd.opcode = MMC_SEND_STATUS;
 >>
->> Without this patch, on the NVIDIA Tegra Cardhu board, the loops result
->> in qty == 1, which is immediately returned. This causes discard to
->> operate a single sector at a time, which is chronically slow. With this
->> patch in place, discard operates a single erase block at a time, which
->> is reasonably fast.
+>> That certainly also seems to solve the problem on my board...
 >
-> Alternatively, is the real fix a revert of e056a1b5b67b "mmc: queue: let
-> host controllers specify maximum discard timeout", followed by:
+> But large erases will timeout when they should have been split into smaller
+> chunks.
 >
->> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
->> index 050eb262485c..35c5b5d86c99 100644
->> --- a/drivers/mmc/core/core.c
->> +++ b/drivers/mmc/core/core.c
->> @@ -1950,7 +1950,6 @@ static int mmc_do_erase(struct mmc_card *card, unsigned int from,
->>         cmd.opcode = MMC_ERASE;
->>         cmd.arg = arg;
->>         cmd.flags = MMC_RSP_SPI_R1B | MMC_RSP_R1B | MMC_CMD_AC;
->> -       cmd.cmd_timeout_ms = mmc_erase_timeout(card, arg, qty);
->>         err = mmc_wait_for_cmd(card->host, &cmd, 0);
->>         if (err) {
->>                 pr_err("mmc_erase: erase error %d, status %#x\n",
->> @@ -1962,7 +1961,7 @@ static int mmc_do_erase(struct mmc_card *card, unsigned int from,
->>         if (mmc_host_is_spi(card->host))
->>                 goto out;
->>
->> -       timeout = jiffies + msecs_to_jiffies(MMC_CORE_TIMEOUT_MS);
->> +       timeout = jiffies + msecs_to_jiffies(mmc_erase_timeout(card, arg, qty));
->>         do {
->>                 memset(&cmd, 0, sizeof(struct mmc_command));
->>                 cmd.opcode = MMC_SEND_STATUS;
->
-> That certainly also seems to solve the problem on my board...
+> A generic solution needs to be able to explain what happens when the host
+> controller *does* timeout.
 
-Is the change you mean here only include above 3 lines changes?
-If yes, it's strange to me how does this solve your issue?
-It actually does not change the max_discard_to/max_discard_bytes.
-It still discards only one sector one time if it does as before....
+Please correct me, but if Data Timeout Error is disabled, then this is not
+an issue for most of the host controllers.
 
-Regards
-Dong Aisheng
+With best wishes,
+Vladimir
