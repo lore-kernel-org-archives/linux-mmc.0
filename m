@@ -1,109 +1,105 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [PATCH V2 1/2] mmc: core: Use mmc_flush_cache() during mmc suspend
-Date: Thu, 19 Dec 2013 21:04:20 +0100
-Message-ID: <1387483461-6317-1-git-send-email-ulf.hansson@linaro.org>
+From: Ludovic Desroches <ludovic.desroches@atmel.com>
+Subject: Re: [PATCH] atmel-mci: fix transfers < 16 bytes problem in PDC mode
+Date: Thu, 19 Dec 2013 21:48:26 +0100
+Message-ID: <20131219204826.GA16592@ldesroches-Latitude-E6320>
+References: <20131204080943.GK3582@odulo-laptop>
+ <1386236716-25163-1-git-send-email-olivier@sobrie.be>
+ <20131213110913.GB2138@ldesroches-Latitude-E6320>
+ <20131218080925.GA26149@hposo>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-la0-f53.google.com ([209.85.215.53]:40442 "EHLO
-	mail-la0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755380Ab3LSUE4 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 19 Dec 2013 15:04:56 -0500
-Received: by mail-la0-f53.google.com with SMTP id mc6so679786lab.26
-        for <linux-mmc@vger.kernel.org>; Thu, 19 Dec 2013 12:04:54 -0800 (PST)
+Received: from eusmtp01.atmel.com ([212.144.249.242]:53774 "EHLO
+	eusmtp01.atmel.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756537Ab3LSUsa (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 19 Dec 2013 15:48:30 -0500
+Content-Disposition: inline
+In-Reply-To: <20131218080925.GA26149@hposo>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>
+To: Olivier Sobrie <olivier@sobrie.be>
+Cc: linux-mmc@vger.kernel.org, Ludovic Desroches <ludovic.desroches@atmel.com>
 
-Earlier we disabled the cache during suspend, which meant a flush was
-internally at the eMMC performed as well.
+Hi Olivier,
 
-To simplify code we can make use of the mmc_flush_cache(), during mmc
-suspend, which makes the mmc_cache_ctrl() redundant so then we can
-remove it.
+On Wed, Dec 18, 2013 at 09:09:41AM +0100, Olivier Sobrie wrote:
+> Hi Ludovic,
+> 
+> On Fri, Dec 13, 2013 at 12:09:13PM +0100, Ludovic Desroches wrote:
+> > Hi Olivier,
+> > 
+> > On Thu, Dec 05, 2013 at 10:45:16AM +0100, Olivier Sobrie wrote:
+> > 
+> > [...]
+> > 
+> > > With this patch I'm able to use the wlan sdio module wl1271.
+> > > When you've time, it would be nice to validate or fix this
+> > > patch.
+> > 
+> > I have tested it and it doesn't solve issue I have with Atheros module.
+> 
+> What kind of errors do you see with this module?
+> Timeouts on some SDIO commands with small datasize?
 
-Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
-Acked-by: Seungwon Jeon <tgih.jun@samsung.com>
----
- drivers/mmc/core/core.c  |   38 --------------------------------------
- drivers/mmc/core/mmc.c   |    2 +-
- include/linux/mmc/host.h |    2 --
- 3 files changed, 1 insertion(+), 41 deletions(-)
+Yes so same kind of errors than yours but your patch doesn't solve the
+issue. The one I have done based on yours is not better in my case...
 
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 098374b..df591a9 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -2602,44 +2602,6 @@ int mmc_flush_cache(struct mmc_card *card)
- }
- EXPORT_SYMBOL(mmc_flush_cache);
- 
--/*
-- * Turn the cache ON/OFF.
-- * Turning the cache OFF shall trigger flushing of the data
-- * to the non-volatile storage.
-- * This function should be called with host claimed
-- */
--int mmc_cache_ctrl(struct mmc_host *host, u8 enable)
--{
--	struct mmc_card *card = host->card;
--	unsigned int timeout;
--	int err = 0;
--
--	if (!(host->caps2 & MMC_CAP2_CACHE_CTRL) ||
--			mmc_card_is_removable(host))
--		return err;
--
--	if (card && mmc_card_mmc(card) &&
--			(card->ext_csd.cache_size > 0)) {
--		enable = !!enable;
--
--		if (card->ext_csd.cache_ctrl ^ enable) {
--			timeout = enable ? card->ext_csd.generic_cmd6_time : 0;
--			err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
--					EXT_CSD_CACHE_CTRL, enable, timeout);
--			if (err)
--				pr_err("%s: cache %s error %d\n",
--						mmc_hostname(card->host),
--						enable ? "on" : "off",
--						err);
--			else
--				card->ext_csd.cache_ctrl = enable;
--		}
--	}
--
--	return err;
--}
--EXPORT_SYMBOL(mmc_cache_ctrl);
--
- #ifdef CONFIG_PM
- 
- /* Do the card removal on suspend if card is assumed removeable
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index 98e9eb0..ef1cc73 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -1484,7 +1484,7 @@ static int _mmc_suspend(struct mmc_host *host, bool is_suspend)
- 			goto out;
- 	}
- 
--	err = mmc_cache_ctrl(host, 0);
-+	err = mmc_flush_cache(host->card);
- 	if (err)
- 		goto out;
- 
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index 99f5709..f539bc7 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -388,8 +388,6 @@ int mmc_power_restore_host(struct mmc_host *host);
- void mmc_detect_change(struct mmc_host *, unsigned long delay);
- void mmc_request_done(struct mmc_host *, struct mmc_request *);
- 
--int mmc_cache_ctrl(struct mmc_host *, u8);
--
- static inline void mmc_signal_sdio_irq(struct mmc_host *host)
- {
- 	host->ops->enable_sdio_irq(host, 0);
--- 
-1.7.9.5
+> 
+> >  
+> > > Thanks for your help,
+> > > 
+> > > Olivier
+> > > 
+> > >  drivers/mmc/host/atmel-mci.c |    6 +++++-
+> > >  1 file changed, 5 insertions(+), 1 deletion(-)
+> > > 
+> > > diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
+> > > index b86b482..c599731 100644
+> > > --- a/drivers/mmc/host/atmel-mci.c
+> > > +++ b/drivers/mmc/host/atmel-mci.c
+> > > @@ -45,6 +45,7 @@
+> > >  
+> > >  #define ATMCI_DATA_ERROR_FLAGS	(ATMCI_DCRCE | ATMCI_DTOE | ATMCI_OVRE | ATMCI_UNRE)
+> > >  #define ATMCI_DMA_THRESHOLD	16
+> > > +#define ATMCI_PDC_MIN_DATASIZE	16
+> > >  
+> > >  enum {
+> > >  	EVENT_CMD_RDY = 0,
+> > > @@ -765,7 +766,10 @@ static void atmci_pdc_set_single_buf(struct atmel_mci *host,
+> > >  	}
+> > >  
+> > >  	if (host->data_size <= buf_size) {
+> > > -		if (host->data_size & 0x3) {
+> > > +		if ((host->data_size < ATMCI_PDC_MIN_DATASIZE) &&
+> > > +		    (dir == XFER_TRANSMIT)) {
+> > > +			atmci_writel(host, counter_reg, 4);
+> > > +		} else if (host->data_size & 0x3) {
+> > 
+> > I have feedback from people who have issue with atmel-mci driver but not
+> > with at91-mci which has been removed unfortunately (it seems I had the
+> > only sdio wifi module working with atmel-mci driver in pdc mode...). So I
+> > think the 12 bytes value in the errata is correct.
+> 
+> Does the atheros module work with the at91-mci driver ?
 
+Yes. State machine is not exactly the same. I thought I have found one
+compatible with all mci versions but it seems it's not the case with
+some sdio modules.
+
+> 
+> > 
+> > Moreover I am afraid that this patch could cause some other bugs. I mean the
+> > transfer size is 4 bytes, the sg length is 4 bytes too and we will ask
+> > PDC to perform a bigger transfer... With the previous driver it was not a
+> > problem because we didn't use sg directly, they were copied into another
+> > buffer.
+> 
+> Ok. I'll have a look at the old at91-mci driver.
+
+If you can, use it. I have tried to find small workaround but it seems
+it's not possible. I'll have to rework state machine so it will be a bit
+long.
+
+Regards
+
+Ludovic
