@@ -1,126 +1,352 @@
-From: Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Subject: Re: [PATCH] mmc: core: don't return 1 for max_discard
-Date: Thu, 19 Dec 2013 14:28:46 +0200
-Message-ID: <52B2E67E.2000607@intel.com>
-References: <1387405663-14253-1-git-send-email-swarren@wwwdotorg.org> <52B22906.4010704@wwwdotorg.org> <52B2B5DF.1020702@intel.com> <52B2B8F7.1000905@mentor.com> <52B2BF95.302@intel.com> <CAPDyKFoiGzspgrtRwXruPqOODxbfKA4AAZHj_VF8H7rpwm7eTQ@mail.gmail.com>
+From: Balaji T K <balajitk@ti.com>
+Subject: [PATCH v6 3/7] regulator: add pbias regulator support
+Date: Thu, 19 Dec 2013 18:08:36 +0530
+Message-ID: <1387456720-7202-4-git-send-email-balajitk@ti.com>
+References: <1386670577-3530-1-git-send-email-balajitk@ti.com>
+ <1387456720-7202-1-git-send-email-balajitk@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <CAPDyKFoiGzspgrtRwXruPqOODxbfKA4AAZHj_VF8H7rpwm7eTQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Vladimir Zapolskiy <vladimir_zapolskiy-nmGgyN9QBj3QT0dZR+AlfA@public.gmane.org>, Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>, Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Stephen Warren <swarren-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>, Dong Aisheng <dongas86-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Vladimir Zapolskiy <vz-ChpfBGZJDbMAvxtiuMwx3w@public.gmane.org>
+Content-Type: text/plain
+Return-path: <linux-omap-owner@vger.kernel.org>
+In-Reply-To: <1387456720-7202-1-git-send-email-balajitk@ti.com>
+Sender: linux-omap-owner@vger.kernel.org
+To: linux-omap@vger.kernel.org, bcousson@baylibre.com, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, cjb@laptop.org, broonie@kernel.org
+Cc: tony@atomide.com, Balaji T K <balajitk@ti.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On 19/12/13 12:26, Ulf Hansson wrote:
-> On 19 December 2013 10:42, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org> wrote:
->> On 19/12/13 11:14, Vladimir Zapolskiy wrote:
->>> On 12/19/13 10:01, Adrian Hunter wrote:
->>>> On 19/12/13 01:00, Stephen Warren wrote:
->>>>> On 12/18/2013 03:27 PM, Stephen Warren wrote:
->>>>>> From: Stephen Warren<swarren-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
->>>>>>
->>>>>> In mmc_do_calc_max_discard(), if only a single erase block can be
->>>>>> discarded within the host controller's timeout, don't allow discard
->>>>>> operations at all.
->>>>>>
->>>>>> Previously, the code allowed sector-at-a-time discard (rather than
->>>>>> erase-block-at-a-time), which was chronically slow.
->>>>>>
->>>>>> Without this patch, on the NVIDIA Tegra Cardhu board, the loops result
->>>>>> in qty == 1, which is immediately returned. This causes discard to
->>>>>> operate a single sector at a time, which is chronically slow. With this
->>>>>> patch in place, discard operates a single erase block at a time, which
->>>>>> is reasonably fast.
->>>>>
->>>>> Alternatively, is the real fix a revert of e056a1b5b67b "mmc: queue: let
->>>>> host controllers specify maximum discard timeout", followed by:
->>>>>
->>>>>> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
->>>>>> index 050eb262485c..35c5b5d86c99 100644
->>>>>> --- a/drivers/mmc/core/core.c
->>>>>> +++ b/drivers/mmc/core/core.c
->>>>>> @@ -1950,7 +1950,6 @@ static int mmc_do_erase(struct mmc_card *card,
->>>>>> unsigned int from,
->>>>>>          cmd.opcode = MMC_ERASE;
->>>>>>          cmd.arg = arg;
->>>>>>          cmd.flags = MMC_RSP_SPI_R1B | MMC_RSP_R1B | MMC_CMD_AC;
->>>>>> -       cmd.cmd_timeout_ms = mmc_erase_timeout(card, arg, qty);
->>>>>>          err = mmc_wait_for_cmd(card->host,&cmd, 0);
->>>>>>          if (err) {
->>>>>>                  pr_err("mmc_erase: erase error %d, status %#x\n",
->>>>>> @@ -1962,7 +1961,7 @@ static int mmc_do_erase(struct mmc_card *card,
->>>>>> unsigned int from,
->>>>>>          if (mmc_host_is_spi(card->host))
->>>>>>                  goto out;
->>>>>>
->>>>>> -       timeout = jiffies + msecs_to_jiffies(MMC_CORE_TIMEOUT_MS);
->>>>>> +       timeout = jiffies + msecs_to_jiffies(mmc_erase_timeout(card,
->>>>>> arg, qty));
->>>>>>          do {
->>>>>>                  memset(&cmd, 0, sizeof(struct mmc_command));
->>>>>>                  cmd.opcode = MMC_SEND_STATUS;
->>>>>
->>>>> That certainly also seems to solve the problem on my board...
->>>>
->>>> But large erases will timeout when they should have been split into smaller
->>>> chunks.
->>>>
->>>> A generic solution needs to be able to explain what happens when the host
->>>> controller *does* timeout.
->>>
->>> Please correct me, but if Data Timeout Error is disabled, then this is not
->>> an issue for most of the host controllers.
->>
->> That is a very good point.  My experience with SDHCI was that masking the
->> "Data Timeout Error Status Enable" and "Data Timeout Error Signal Enable
->> " bits did not disable the timeout i.e. the host controller would not
->> deliver a TC interrupt if the erase exceeded the timeout.
->>
->> What happens on your board?
->>
-> 
-> I posted a response yesterday for "[PATCH] mmc: core: don't decrement
-> qty when calculating max_discard", related to this. Please have a
-> look.
-> 
-> I think the interesting case to consider here is how we can handle
-> busy detection timeouts that is bigger than what the host hw can
-> support.
-> 
-> Option 1)
-> Should we tell the host to disable the timeout in this case? That
-> potentially means hanging forever - if the card misbehaves. Like
-> omap_hsmmc does for erase commands. Maybe that is an okay limitation?
+pbias register controls internal power supply to sd card i/o pads
+in most OMAPs (OMAP2-5, DRA7).
+Control bits for selecting voltage level and
+enabling/disabling are in the same PBIAS register.
 
-sdhci anyway has a 10 second timer to catch unresponsive host controllers.
-I recently sent a patch to use the cmd_timeout_ms if it is bigger than 10
-seconds.
+Signed-off-by: Balaji T K <balajitk@ti.com>
+---
+Add support for sim pbias and get pbias register offset via
+standard reg property
 
-	http://permalink.gmane.org/gmane.linux.kernel.mmc/23557
+ .../bindings/regulator/pbias-regulator.txt         |   17 ++
+ drivers/regulator/Kconfig                          |    9 +
+ drivers/regulator/Makefile                         |    1 +
+ drivers/regulator/pbias-regulator.c                |  255 ++++++++++++++++++++
+ 4 files changed, 282 insertions(+), 0 deletions(-)
+ create mode 100644 Documentation/devicetree/bindings/regulator/pbias-regulator.txt
+ create mode 100644 drivers/regulator/pbias-regulator.c
 
-> 
-> Option 2)
-> Use a R1 response instead if R1B to prevent the host from doing busy
-> detection. Then rely on the CMD13 to poll for completion instead.
-> Obviously we can then stop polling after some selected timeout is the
-> card don't complete it's operations.
+diff --git a/Documentation/devicetree/bindings/regulator/pbias-regulator.txt b/Documentation/devicetree/bindings/regulator/pbias-regulator.txt
+new file mode 100644
+index 0000000..64352c1
+--- /dev/null
++++ b/Documentation/devicetree/bindings/regulator/pbias-regulator.txt
+@@ -0,0 +1,17 @@
++PBIAS internal regulator for SD card dual voltage i/o pads on OMAP SoCs.
++
++Required properties:
++- compatible:
++  - "ti,pbias-omap" for OMAP2, OMAP3, OMAP4, OMAP5, DRA7
++
++Optional properties:
++- Any optional property defined in bindings/regulator/regulator.txt
++
++Example:
++
++		pbias_regulator: pbias_regulator {
++			regulator-name = "pbias_mmc_omap4";
++			regulator-min-microvolt = <1800000>;
++			regulator-max-microvolt = <3000000>;
++			regulator-enable-ramp-delay = <100>;
++	};
+diff --git a/drivers/regulator/Kconfig b/drivers/regulator/Kconfig
+index ce785f4..741e8fb 100644
+--- a/drivers/regulator/Kconfig
++++ b/drivers/regulator/Kconfig
+@@ -369,6 +369,15 @@ config REGULATOR_PALMAS
+ 	  on the muxing. This is handled automatically in the driver by
+ 	  reading the mux info from OTP.
+ 
++config REGULATOR_PBIAS
++	tristate "PBIAS OMAP regulator driver"
++	depends on (ARCH_OMAP || COMPILE_TEST) && MFD_SYSCON
++	help
++	 Say y here to support pbias regulator for mmc1:SD card i/o
++	 on OMAP SoCs.
++	 This driver provides support for OMAP pbias modelled
++	 regulators.
++
+ config REGULATOR_PCAP
+ 	tristate "Motorola PCAP2 regulator driver"
+ 	depends on EZX_PCAP
+diff --git a/drivers/regulator/Makefile b/drivers/regulator/Makefile
+index 01c597e..16000fa 100644
+--- a/drivers/regulator/Makefile
++++ b/drivers/regulator/Makefile
+@@ -52,6 +52,7 @@ obj-$(CONFIG_REGULATOR_MC13XXX_CORE) +=  mc13xxx-regulator-core.o
+ obj-$(CONFIG_REGULATOR_PALMAS) += palmas-regulator.o
+ obj-$(CONFIG_REGULATOR_PFUZE100) += pfuze100-regulator.o
+ obj-$(CONFIG_REGULATOR_TPS51632) += tps51632-regulator.o
++obj-$(CONFIG_REGULATOR_PBIAS) += pbias-regulator.o
+ obj-$(CONFIG_REGULATOR_PCAP) += pcap-regulator.o
+ obj-$(CONFIG_REGULATOR_PCF50633) += pcf50633-regulator.o
+ obj-$(CONFIG_REGULATOR_RC5T583)  += rc5t583-regulator.o
+diff --git a/drivers/regulator/pbias-regulator.c b/drivers/regulator/pbias-regulator.c
+new file mode 100644
+index 0000000..42883a0
+--- /dev/null
++++ b/drivers/regulator/pbias-regulator.c
+@@ -0,0 +1,255 @@
++/*
++ * pbias-regulator.c
++ *
++ * Copyright (C) 2011 Texas Instruments Incorporated - http://www.ti.com/
++ * Author: Balaji T K <balajitk@ti.com>
++ *
++ * This program is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU General Public License as
++ * published by the Free Software Foundation version 2.
++ *
++ * This program is distributed "as is" WITHOUT ANY WARRANTY of any
++ * kind, whether express or implied; without even the implied warranty
++ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ */
++
++#include <linux/err.h>
++#include <linux/io.h>
++#include <linux/module.h>
++#include <linux/mfd/syscon.h>
++#include <linux/platform_device.h>
++#include <linux/regulator/driver.h>
++#include <linux/regulator/machine.h>
++#include <linux/regulator/of_regulator.h>
++#include <linux/regmap.h>
++#include <linux/slab.h>
++#include <linux/of.h>
++#include <linux/of_device.h>
++
++struct pbias_reg_info {
++	u32 enable;
++	u32 enable_mask;
++	u32 vmode;
++	char *name;
++};
++
++struct pbias_regulator_data {
++	struct regulator_desc desc;
++	void __iomem *pbias_addr;
++	unsigned int pbias_reg;
++	struct regulator_dev *dev;
++	struct regmap *syscon;
++	const struct pbias_reg_info *info;
++	int voltage;
++};
++
++static int pbias_regulator_set_voltage(struct regulator_dev *dev,
++			int min_uV, int max_uV, unsigned *selector)
++{
++	struct pbias_regulator_data *data = rdev_get_drvdata(dev);
++	const struct pbias_reg_info *info = data->info;
++	int ret, vmode;
++
++	if (min_uV <= 1800000)
++		vmode = 0;
++	else if (min_uV > 1800000)
++		vmode = info->vmode;
++
++	ret = regmap_update_bits(data->syscon, data->pbias_reg,
++						info->vmode, vmode);
++
++	return ret;
++}
++
++static int pbias_regulator_get_voltage(struct regulator_dev *rdev)
++{
++	struct pbias_regulator_data *data = rdev_get_drvdata(rdev);
++	const struct pbias_reg_info *info = data->info;
++	int value, voltage;
++
++	regmap_read(data->syscon, data->pbias_reg, &value);
++	value &= info->vmode;
++
++	voltage = value ? 3000000 : 1800000;
++
++	return voltage;
++}
++
++static int pbias_regulator_enable(struct regulator_dev *rdev)
++{
++	struct pbias_regulator_data *data = rdev_get_drvdata(rdev);
++	const struct pbias_reg_info *info = data->info;
++	int ret;
++
++	ret = regmap_update_bits(data->syscon, data->pbias_reg,
++					info->enable_mask, info->enable);
++
++	return ret;
++}
++
++static int pbias_regulator_disable(struct regulator_dev *rdev)
++{
++	struct pbias_regulator_data *data = rdev_get_drvdata(rdev);
++	const struct pbias_reg_info *info = data->info;
++	int ret;
++
++	ret = regmap_update_bits(data->syscon, data->pbias_reg,
++						info->enable_mask, 0);
++	return ret;
++}
++
++static int pbias_regulator_is_enable(struct regulator_dev *rdev)
++{
++	struct pbias_regulator_data *data = rdev_get_drvdata(rdev);
++	const struct pbias_reg_info *info = data->info;
++	int value;
++
++	regmap_read(data->syscon, data->pbias_reg, &value);
++
++	return (value & info->enable_mask) == info->enable_mask;
++}
++
++static struct regulator_ops pbias_regulator_voltage_ops = {
++	.set_voltage	= pbias_regulator_set_voltage,
++	.get_voltage	= pbias_regulator_get_voltage,
++	.enable		= pbias_regulator_enable,
++	.disable	= pbias_regulator_disable,
++	.is_enabled	= pbias_regulator_is_enable,
++};
++
++static const struct pbias_reg_info pbias_mmc_omap3 = {
++	.enable = BIT(1),
++	.enable_mask = BIT(1),
++	.vmode = BIT(0),
++	.name = "pbias_mmc_omap3"
++};
++
++static const struct pbias_reg_info pbias_sim_omap3 = {
++	.enable = BIT(9),
++	.enable_mask = BIT(9),
++	.vmode = BIT(8),
++	.name = "pbias_sim_omap3"
++};
++
++static const struct pbias_reg_info pbias_mmc_omap4 = {
++	.enable = BIT(26) | BIT(22),
++	.enable_mask = BIT(26) | BIT(25) | BIT(22),
++	.vmode = BIT(21),
++	.name = "pbias_mmc_omap4"
++};
++
++static const struct pbias_reg_info pbias_mmc_omap5 = {
++	.enable = BIT(27) | BIT(26),
++	.enable_mask = BIT(27) | BIT(25) | BIT(26),
++	.vmode = BIT(21),
++	.name = "pbias_mmc_omap5"
++};
++
++static struct of_regulator_match pbias_matches[] = {
++	{ .name = "pbias_mmc_omap3", .driver_data = (void *)&pbias_mmc_omap3},
++	{ .name = "pbias_sim_omap3", .driver_data = (void *)&pbias_sim_omap3},
++	{ .name = "pbias_mmc_omap4", .driver_data = (void *)&pbias_mmc_omap4},
++	{ .name = "pbias_mmc_omap5", .driver_data = (void *)&pbias_mmc_omap5},
++};
++#define PBIAS_NUM_REGS	ARRAY_SIZE(pbias_matches)
++
++static const struct of_device_id pbias_of_match[] = {
++	{ .compatible = "ti,pbias-omap", },
++	{},
++};
++MODULE_DEVICE_TABLE(of, pbias_of_match);
++
++static int pbias_regulator_probe(struct platform_device *pdev)
++{
++	struct device_node *np = pdev->dev.of_node;
++	struct device_node *dev_node;
++	struct pbias_regulator_data *drvdata;
++	struct resource *res;
++	struct regulator_config cfg = { };
++	struct regmap *syscon;
++	const struct pbias_reg_info *info;
++	int ret = 0;
++	int count, idx, data_idx = 0;
++
++	count = of_regulator_match(&pdev->dev, np, pbias_matches,
++						PBIAS_NUM_REGS);
++	if (count < 0)
++		return count;
++
++	drvdata = devm_kzalloc(&pdev->dev, sizeof(struct pbias_regulator_data)
++			       * count, GFP_KERNEL);
++	if (drvdata == NULL) {
++		dev_err(&pdev->dev, "Failed to allocate device data\n");
++		return -ENOMEM;
++	}
++
++	dev_node = of_get_parent(np);
++	if (!dev_node)
++		return -ENODEV;
++
++	syscon = syscon_node_to_regmap(dev_node);
++	of_node_put(dev_node);
++	if (IS_ERR(syscon))
++		return PTR_ERR(syscon);
++
++	cfg.dev = &pdev->dev;
++
++	for (idx = 0; idx < PBIAS_NUM_REGS, data_idx < count; idx++) {
++		if (!pbias_matches[idx].init_data ||
++			!pbias_matches[idx].of_node)
++			continue;
++
++		info = pbias_matches[idx].driver_data;
++		if (!info)
++			return -ENODEV;
++
++		res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
++		if (!res)
++			return -EINVAL;
++
++		drvdata[data_idx].pbias_reg = res->start;
++		drvdata[data_idx].syscon = syscon;
++		drvdata[data_idx].info = info;
++		drvdata[data_idx].desc.name = info->name;
++		drvdata[data_idx].desc.owner = THIS_MODULE;
++		drvdata[data_idx].desc.type = REGULATOR_VOLTAGE;
++		drvdata[data_idx].desc.ops = &pbias_regulator_voltage_ops;
++		drvdata[data_idx].desc.n_voltages = 2;
++
++		cfg.init_data = pbias_matches[idx].init_data;
++		cfg.driver_data = &drvdata[data_idx];
++		cfg.of_node = pbias_matches[idx].of_node;
++
++		drvdata[data_idx].dev = devm_regulator_register(&pdev->dev,
++					&drvdata[data_idx].desc, &cfg);
++		if (IS_ERR(drvdata[data_idx].dev)) {
++			ret = PTR_ERR(drvdata[data_idx].dev);
++			dev_err(&pdev->dev,
++				"Failed to register regulator: %d\n", ret);
++			goto err_regulator;
++		}
++		data_idx++;
++	}
++
++	platform_set_drvdata(pdev, drvdata);
++
++err_regulator:
++	return ret;
++}
++
++static struct platform_driver pbias_regulator_driver = {
++	.probe		= pbias_regulator_probe,
++	.driver		= {
++		.name		= "pbias-regulator",
++		.owner		= THIS_MODULE,
++		.of_match_table = of_match_ptr(pbias_of_match),
++	},
++};
++
++module_platform_driver(pbias_regulator_driver);
++
++MODULE_AUTHOR("Balaji T K <balajitk@ti.com>");
++MODULE_DESCRIPTION("pbias voltage regulator");
++MODULE_LICENSE("GPL");
++MODULE_ALIAS("platform:pbias-regulator");
+-- 
+1.7.5.4
 
-It would be nice to avoid polling when the timeout can be supported. Also
-the polling should be periodic.
-
-> 
-> Would be very interesting to know what option you prefer!?
-
-At least 1 of the host controllers I have seen does not support disabling
-the timeout - so option 1) might not work in all cases.  Although it is the
-nicer option i.e. replace the hardware timeout with a software timeout.
-
-So I would probably allow both options to co-exist.
-
-> 
-> Kind regards
-> Uffe
-> 
-> 
