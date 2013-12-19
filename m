@@ -1,31 +1,31 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
 Subject: Re: [PATCH] mmc: core: don't return 1 for max_discard
-Date: Thu, 19 Dec 2013 14:04:14 +0100
-Message-ID: <CAPDyKFphPggYj1oghSC0uHus1E+kBvYfgzVC=2mcztW_JYfRgA@mail.gmail.com>
+Date: Thu, 19 Dec 2013 14:29:27 +0100
+Message-ID: <CAPDyKFp1B6r+WyAO9PocL13LvzjsZDJ3HOUbXwJ+uTQ2Ayv-ug@mail.gmail.com>
 References: <1387405663-14253-1-git-send-email-swarren@wwwdotorg.org>
 	<52B22906.4010704@wwwdotorg.org>
 	<52B2B5DF.1020702@intel.com>
 	<52B2B8F7.1000905@mentor.com>
 	<52B2BF95.302@intel.com>
 	<CAPDyKFoiGzspgrtRwXruPqOODxbfKA4AAZHj_VF8H7rpwm7eTQ@mail.gmail.com>
-	<CAA+hA=RBy=3zn-yBJ8SRbmZXZL5X-eUag9+kJ7JODbLYn+rVbQ@mail.gmail.com>
+	<52B2E67E.2000607@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qe0-f42.google.com ([209.85.128.42]:38938 "EHLO
-	mail-qe0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757342Ab3LSNEP (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 19 Dec 2013 08:04:15 -0500
-Received: by mail-qe0-f42.google.com with SMTP id b4so899366qen.29
-        for <linux-mmc@vger.kernel.org>; Thu, 19 Dec 2013 05:04:15 -0800 (PST)
-In-Reply-To: <CAA+hA=RBy=3zn-yBJ8SRbmZXZL5X-eUag9+kJ7JODbLYn+rVbQ@mail.gmail.com>
+Received: from mail-qc0-f176.google.com ([209.85.216.176]:65493 "EHLO
+	mail-qc0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754309Ab3LSN32 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 19 Dec 2013 08:29:28 -0500
+Received: by mail-qc0-f176.google.com with SMTP id i8so883113qcq.35
+        for <linux-mmc@vger.kernel.org>; Thu, 19 Dec 2013 05:29:27 -0800 (PST)
+In-Reply-To: <52B2E67E.2000607@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Dong Aisheng <dongas86@gmail.com>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, Vladimir Zapolskiy <vladimir_zapolskiy@mentor.com>, Stephen Warren <swarren@wwwdotorg.org>, Chris Ball <cjb@laptop.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-tegra@vger.kernel.org" <linux-tegra@vger.kernel.org>, Stephen Warren <swarren@nvidia.com>, Vladimir Zapolskiy <vz@mleia.com>
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: Vladimir Zapolskiy <vladimir_zapolskiy@mentor.com>, Stephen Warren <swarren@wwwdotorg.org>, Chris Ball <cjb@laptop.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-tegra@vger.kernel.org" <linux-tegra@vger.kernel.org>, Stephen Warren <swarren@nvidia.com>, Dong Aisheng <dongas86@gmail.com>, Vladimir Zapolskiy <vz@mleia.com>
 
-On 19 December 2013 12:18, Dong Aisheng <dongas86@gmail.com> wrote:
-> On Thu, Dec 19, 2013 at 6:26 PM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+On 19 December 2013 13:28, Adrian Hunter <adrian.hunter@intel.com> wrote:
+> On 19/12/13 12:26, Ulf Hansson wrote:
 >> On 19 December 2013 10:42, Adrian Hunter <adrian.hunter@intel.com> wrote:
 >>> On 19/12/13 11:14, Vladimir Zapolskiy wrote:
 >>>> On 12/19/13 10:01, Adrian Hunter wrote:
@@ -105,65 +105,55 @@ On 19 December 2013 12:18, Dong Aisheng <dongas86@gmail.com> wrote:
 >> Should we tell the host to disable the timeout in this case? That
 >> potentially means hanging forever - if the card misbehaves. Like
 >> omap_hsmmc does for erase commands. Maybe that is an okay limitation?
+>
+> sdhci anyway has a 10 second timer to catch unresponsive host controllers.
+> I recently sent a patch to use the cmd_timeout_ms if it is bigger than 10
+> seconds.
+>
+>         http://permalink.gmane.org/gmane.linux.kernel.mmc/23557
+>
+
+I see the reason behind your patch. Somehow, I don't like that host
+drivers need to care about such things for specific commands.
+
+The host driver should only tell it's maximum supported busy detection
+timeout (max_discard_to) to the core layer, which should be needed
+only of it supports MMC_CAP_WAIT_WHILE_BUSY.
+
+Then the core layer should decide what to do depending on current
+needed timeout.
+
+BTW, do you know why sdhci haven't enabled MMC_CAP_WAIT_WHILE_BUSY. It
+seems like it should be?
+
 >>
 >> Option 2)
 >> Use a R1 response instead if R1B to prevent the host from doing busy
 >> detection. Then rely on the CMD13 to poll for completion instead.
 >> Obviously we can then stop polling after some selected timeout is the
 >> card don't complete it's operations.
+>
+> It would be nice to avoid polling when the timeout can be supported. Also
+> the polling should be periodic.
+
+Agree!
+
+>
 >>
->
-> I proposed the same way before:
-> https://www.mail-archive.com/linux-mmc@vger.kernel.org/msg23757.html
-> Two concerns remain:
->
-> "1) not waiting for R1B seems a bit violation with standard spec.
-
-R1B is the same as R1 but with _optional_ busy detection on DAT0. So I
-don't think we will be violating the spec by only using CMD13.
-
-> Also it increase complexity on handling the R1B of the same command
-> for two different
-> cases: using hw timeout or polling status for CMD38.
-
-I have started to craft to together a patch for how __mmc_switch()
-would be changed in this respect.
-
-I don't think it will become that complicated, and more importantly -
-for the ERASE commands, it will be simplifier since there are not the
-special case were CMD13 is _not_ allowed, which is the case for
-SWITCH.
-
->
-> 2) In current implementation, the data size to erase will not exceed
-> the max_discard_bytes
-> which is calculated based on max_discard_to of host.
-
-I suggest we should move away from using max_discard_to to calculate
-max_discard. This just don't work smoothly since we can end up in
-cases were we get too few blocks or not any at all. Like what happen
-for Stephen in the Tegra case.
-
-> Then how do we specify max_discard_to if want to use polling? UNIT_MAX?
-> Will it be too long to affect other activities in the same system?"
-
-I would prefer if we could select a fixed number of max
-blocks/eraseblocks, then calculate the timeout based on that.
-
->
-> That means we should erase a proper size of data in case it affects the system
-> a lot(e.g. two partitions on the same card, discard one partition may
-> cause the code
-> on another partition has no chance to run, it may be serious if the
-> file system is in it.).
-
-So maybe the fixed numer of max blocks/eraseblocks should be just a few ones?
-
->
-> Regards
-> Dong Aisheng
->
 >> Would be very interesting to know what option you prefer!?
+>
+> At least 1 of the host controllers I have seen does not support disabling
+> the timeout - so option 1) might not work in all cases.  Although it is the
+> nicer option i.e. replace the hardware timeout with a software timeout.
+>
+> So I would probably allow both options to co-exist.
+
+Thanks for input Adrian!
+
+>
 >>
 >> Kind regards
 >> Uffe
+>>
+>>
+>
