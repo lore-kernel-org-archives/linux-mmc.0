@@ -1,79 +1,67 @@
-From: Abbas Raza <abbas_raza@mentor.com>
-Subject: [RFC PATCH] mmc: card: Skip regular block io operations for RPMB partitions
-Date: Thu, 19 Dec 2013 08:50:07 +0500
-Message-ID: <1387425007-31919-1-git-send-email-abbas_raza@mentor.com>
+From: Dinh Nguyen <dinh.linux@gmail.com>
+Subject: Re: [RESEND LIST PATCHv7 1/4] clk: socfpga: Add a clk-phase property
+ to the "altr, socfpga-gate-clk"
+Date: Wed, 18 Dec 2013 22:04:10 -0600
+Message-ID: <52B2703A.8090001@gmail.com>
+References: <1387213476-22122-1-git-send-email-dinguyen@altera.com> <1387213476-22122-2-git-send-email-dinguyen@altera.com> <20131218205636.23538.50735@quantum> <201312182221.46506.arnd@arndb.de>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from relay1.mentorg.com ([192.94.38.131]:63192 "EHLO
-	relay1.mentorg.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751987Ab3LSDuT (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 18 Dec 2013 22:50:19 -0500
+Received: from mail-oa0-f53.google.com ([209.85.219.53]:36529 "EHLO
+	mail-oa0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752415Ab3LSEER (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 18 Dec 2013 23:04:17 -0500
+In-Reply-To: <201312182221.46506.arnd@arndb.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: Abbas Raza <Abbas_Raza@mentor.com>, Loic Pallardy <loic.pallardy@stericsson.com>, Chris Ball <cjb@laptop.org>
+To: Arnd Bergmann <arnd@arndb.de>, Mike Turquette <mturquette@linaro.org>
+Cc: dinguyen@altera.com, cjb@laptop.org, jh80.chung@samsung.com, tgih.jun@samsung.com, heiko@sntech.de, dianders@chromium.org, alim.akhtar@samsung.com, bzhao@marvell.com, zhangfei.gao@linaro.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, devicetree@vger.kernel.org
 
-From: Abbas Raza <Abbas_Raza@mentor.com>
 
-Idea behind this patch is to skip all the regular block io operations
-for RPMB partitions because these are not regular partitions and require
-a different command sequence for reading and writing. RPMB partitions
-should only be accessed via ioctl. Without this patch we see following
-issues with some eMMC devices
+On 12/18/13 3:21 PM, Arnd Bergmann wrote:
+> On Wednesday 18 December 2013, Mike Turquette wrote:
+>>> diff --git a/arch/arm/boot/dts/socfpga.dtsi b/arch/arm/boot/dts/socfpga.dtsi
+>>> index f936476..616d9ee 100644
+>>> --- a/arch/arm/boot/dts/socfpga.dtsi
+>>> +++ b/arch/arm/boot/dts/socfpga.dtsi
+>>> @@ -413,6 +413,7 @@
+>>>                                                 compatible = "altr,socfpga-gate-clk";
+>>>                                                 clocks = <&f2s_periph_ref_clk>, <&main_nand_sdmmc_clk>, <&per_nand_mmc_clk>;
+>>>                                                 clk-gate = <0xa0 8>;
+>>> +                                               clk-phase = <0 3>;
+>> Looking at this again, I have a hard time understanding the values in
+>> the clk-phase property. You reference some functions in the property
+>> definition above, but they are not obvious to me.
+>>
+>> Additionally I wonder if the binding would better if the clock-phase
+>> property was simply the value in degrees. E.g:
+>>
+>>         clk-phase = <315>;    // 315 degrees
+> I would definitely prefer using degrees over an arbitrary enumeration that
+> might work on some platforms but not on others.
+>
+> I'm also a bit skeptical about the idea of putting the phase into the clock
+> provider rather than the consumer, given the comments about the
+> clk_set_phase() interface earlier. Generally we try to avoid having
+> consumer-specific settings in a provider node (for any DT binding,
+> not just clocks). Can't you have the same numbers in the dw-mshc
+> node instead and let the mmc driver call clk_set_phase instead?
+> If every clock has a fixed phase for a given piece of hardware, it
+> could even be set automatically by making the common clk code read
+> the clk-phase attribute at the time a driver calls clk_get.
 
-dd if=/dev/mmcblk1rpmb of=/dev/null bs=1 count=1
-[  124.185513] mmcblk1rpmb: error -110 transferring data, sector 0, nr 32, cmd response 0x900, card status 0xb00
-[  124.195506] mmcblk1rpmb: retrying using single block read
-[  124.201035] mmcblk1rpmb: timed out sending r/w cmd command, card status 0x400900
-[  124.208559] mmcblk1rpmb: timed out sending r/w cmd command, card status 0x400900
-[  124.216049] mmcblk1rpmb: timed out sending r/w cmd command, card status 0x400900
-[  124.223567] mmcblk1rpmb: timed out sending r/w cmd command, card status 0x400900
-[  124.231087] mmcblk1rpmb: timed out sending r/w cmd command, card status 0x400900
-[  124.238600] mmcblk1rpmb: timed out sending r/w cmd command, card status 0x400900
-[  124.246012] end_request: I/O error, dev mmcblk1rpmb, sector 0
-[  124.251773] Buffer I/O error on device mmcblk1rpmb, logical block 0
-[  124.258065] end_request: I/O error, dev mmcblk1rpmb, sector 8
-[  124.263822] Buffer I/O error on device mmcblk1rpmb, logical block 1
-[  124.270102] end_request: I/O error, dev mmcblk1rpmb, sector 16
-[  124.275944] Buffer I/O error on device mmcblk1rpmb, logical block 2
-[  124.282222] end_request: I/O error, dev mmcblk1rpmb, sector 24
-[  124.288064] Buffer I/O error on device mmcblk1rpmb, logical block 3
-[  129.717711] mmcblk1rpmb: error -110 transferring data, sector 0, nr 8, cmd response 0x900, card status 0xb00
-[  129.727590] mmcblk1rpmb: retrying using single block read
-[  129.733088] mmcblk1rpmb: timed out sending r/w cmd command, card status 0x400900
-[  129.740605] mmcblk1rpmb: timed out sending r/w cmd command, card status 0x400900
-[  129.748121] mmcblk1rpmb: timed out sending r/w cmd command, card status 0x400900
-[  129.755612] mmcblk1rpmb: timed out sending r/w cmd command, card status 0x400900
-[  129.763125] mmcblk1rpmb: timed out sending r/w cmd command, card status 0x400900
-[  129.770639] mmcblk1rpmb: timed out sending r/w cmd command, card status 0x400900
-[  129.778073] end_request: I/O error, dev mmcblk1rpmb, sector 0
-[  129.783834] Buffer I/O error on device mmcblk1rpmb, logical block 0
-dd: /dev/mmcblk1rpmb: Input/output error
+So I think this is what you're suggesting:
+clocks = <&sdmmc_clk 0 135>, this would specify 0 and 135 degrees phase.
 
-Cc: Loic Pallardy <loic.pallardy@stericsson.com>
-Cc: Chris Ball <cjb@laptop.org>
-Signed-off-by: Abbas Raza <Abbas_Raza@mentor.com>
----
- drivers/mmc/card/block.c | 7 +++++++
- 1 file changed, 7 insertions(+)
+The clock-bindings document is stating that the integer in the clocks
+property is
+specifying the output number of the clock. Would this approach cause a
+conflict and would
+need an update to that document/approach?
 
-diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-index a376ad1..93fbe66 100644
---- a/drivers/mmc/card/block.c
-+++ b/drivers/mmc/card/block.c
-@@ -1489,6 +1489,13 @@ static int mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
- 		/* claim host only for the first request */
- 		mmc_claim_host(card->host);
- 
-+	if (md->area_type & MMC_BLK_DATA_AREA_RPMB) {
-+		if (req)
-+			blk_end_request_all(req, 0);
-+		ret = 0;
-+		goto out;
-+	}
-+
- 	ret = mmc_blk_part_switch(card, md);
- 	if (ret) {
- 		if (req) {
--- 
-1.8.3.2
+Dinh
+
+>
+> 	Arnd
 
