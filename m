@@ -1,93 +1,124 @@
 From: Seungwon Jeon <tgih.jun@samsung.com>
-Subject: RE: [PATCH 2/2] mmc: core: Enable MMC_CAP2_CACHE_CTRL as default
-Date: Thu, 19 Dec 2013 23:43:41 +0900
-Message-ID: <002b01cefcc8$b6168130$22438390$%jun@samsung.com>
+Subject: RE: [PATCH 1/2] mmc: core: Use mmc_flush_cache() during mmc suspend
+Date: Thu, 19 Dec 2013 23:46:17 +0900
+Message-ID: <002c01cefcc9$131cbe80$39563b80$%jun@samsung.com>
 References: <1387364961-15464-1-git-send-email-ulf.hansson@linaro.org>
- <1387364961-15464-2-git-send-email-ulf.hansson@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ks_c_5601-1987
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout4.samsung.com ([203.254.224.34]:12360 "EHLO
-	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751267Ab3LSOno (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 19 Dec 2013 09:43:44 -0500
-Received: from epcpsbgr1.samsung.com
- (u141.gpu120.samsung.co.kr [203.254.230.141])
- by mailout4.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+Received: from mailout3.samsung.com ([203.254.224.33]:56520 "EHLO
+	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750895Ab3LSOqU (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 19 Dec 2013 09:46:20 -0500
+Received: from epcpsbgr4.samsung.com
+ (u144.gpu120.samsung.co.kr [203.254.230.144])
+ by mailout3.samsung.com (Oracle Communications Messaging Server 7u4-24.01
  (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTP id <0MY200DUB68UOG10@mailout4.samsung.com> for
- linux-mmc@vger.kernel.org; Thu, 19 Dec 2013 23:43:43 +0900 (KST)
-In-reply-to: <1387364961-15464-2-git-send-email-ulf.hansson@linaro.org>
+ with ESMTP id <0MY200FUI6D6N510@mailout3.samsung.com> for
+ linux-mmc@vger.kernel.org; Thu, 19 Dec 2013 23:46:18 +0900 (KST)
+In-reply-to: <1387364961-15464-1-git-send-email-ulf.hansson@linaro.org>
 Content-language: ko
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: 'Ulf Hansson' <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, 'Chris Ball' <cjb@laptop.org>
 
-On Wed, December 18, 2013 Ulf Hansson wrote: 
-> There are no reason to why the use of a non-volatile internal eMMC
-> cache should be controlled by a host cap. Instead let's just enable it
-> if the eMMC card supports it.
+On Wed, December 18, 2013 Ulf Hansson wrote:
+> Earlier we disabled the cache during suspend, which meant a flush was
+> internally at the eMMC performed as well.
+> 
+> To simplify code we can make use of the mmc_flush_cache(), during mmc
+> suspend, which makes the mmc_cache_ctrl() redundant so then we can
+> remove it.
 > 
 > Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 
-When cache feature was introduced for the first time, there was stability issue in some devices.
-So host should have decided whether to select that feature.
-Now, your change makes sense. But just check minor one below.
-
 Acked-by: Seungwon Jeon <tgih.jun@samsung.com>
-
-> ---
->  drivers/mmc/core/core.c  |    3 ---
->  drivers/mmc/core/mmc.c   |    3 +--
->  include/linux/mmc/host.h |    1 -
->  3 files changed, 1 insertion(+), 6 deletions(-)
-> 
-> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> index df591a9..66ec347 100644
-> --- a/drivers/mmc/core/core.c
-> +++ b/drivers/mmc/core/core.c
-> @@ -2585,9 +2585,6 @@ int mmc_flush_cache(struct mmc_card *card)
->  	struct mmc_host *host = card->host;
-Also, 'host' can be removed.  No use.
 
 Thanks,
 Seungwon Jeon
 
->  	int err = 0;
+> ---
+>  drivers/mmc/core/core.c  |   38 --------------------------------------
+>  drivers/mmc/core/mmc.c   |    2 +-
+>  include/linux/mmc/host.h |    2 --
+>  3 files changed, 1 insertion(+), 41 deletions(-)
 > 
-> -	if (!(host->caps2 & MMC_CAP2_CACHE_CTRL))
+> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> index 098374b..df591a9 100644
+> --- a/drivers/mmc/core/core.c
+> +++ b/drivers/mmc/core/core.c
+> @@ -2602,44 +2602,6 @@ int mmc_flush_cache(struct mmc_card *card)
+>  }
+>  EXPORT_SYMBOL(mmc_flush_cache);
+> 
+> -/*
+> - * Turn the cache ON/OFF.
+> - * Turning the cache OFF shall trigger flushing of the data
+> - * to the non-volatile storage.
+> - * This function should be called with host claimed
+> - */
+> -int mmc_cache_ctrl(struct mmc_host *host, u8 enable)
+> -{
+> -	struct mmc_card *card = host->card;
+> -	unsigned int timeout;
+> -	int err = 0;
+> -
+> -	if (!(host->caps2 & MMC_CAP2_CACHE_CTRL) ||
+> -			mmc_card_is_removable(host))
 > -		return err;
 > -
->  	if (mmc_card_mmc(card) &&
->  			(card->ext_csd.cache_size > 0) &&
->  			(card->ext_csd.cache_ctrl & 1)) {
+> -	if (card && mmc_card_mmc(card) &&
+> -			(card->ext_csd.cache_size > 0)) {
+> -		enable = !!enable;
+> -
+> -		if (card->ext_csd.cache_ctrl ^ enable) {
+> -			timeout = enable ? card->ext_csd.generic_cmd6_time : 0;
+> -			err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+> -					EXT_CSD_CACHE_CTRL, enable, timeout);
+> -			if (err)
+> -				pr_err("%s: cache %s error %d\n",
+> -						mmc_hostname(card->host),
+> -						enable ? "on" : "off",
+> -						err);
+> -			else
+> -				card->ext_csd.cache_ctrl = enable;
+> -		}
+> -	}
+> -
+> -	return err;
+> -}
+> -EXPORT_SYMBOL(mmc_cache_ctrl);
+> -
+>  #ifdef CONFIG_PM
+> 
+>  /* Do the card removal on suspend if card is assumed removeable
 > diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-> index ef1cc73..7ab3e9c 100644
+> index 98e9eb0..ef1cc73 100644
 > --- a/drivers/mmc/core/mmc.c
 > +++ b/drivers/mmc/core/mmc.c
-> @@ -1287,8 +1287,7 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
->  	 * If cache size is higher than 0, this indicates
->  	 * the existence of cache and it can be turned on.
->  	 */
-> -	if ((host->caps2 & MMC_CAP2_CACHE_CTRL) &&
-> -			card->ext_csd.cache_size > 0) {
-> +	if (card->ext_csd.cache_size > 0) {
->  		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
->  				EXT_CSD_CACHE_CTRL, 1,
->  				card->ext_csd.generic_cmd6_time);
+> @@ -1484,7 +1484,7 @@ static int _mmc_suspend(struct mmc_host *host, bool is_suspend)
+>  			goto out;
+>  	}
+> 
+> -	err = mmc_cache_ctrl(host, 0);
+> +	err = mmc_flush_cache(host->card);
+>  	if (err)
+>  		goto out;
+> 
 > diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-> index f539bc7..8383e3f 100644
+> index 99f5709..f539bc7 100644
 > --- a/include/linux/mmc/host.h
 > +++ b/include/linux/mmc/host.h
-> @@ -264,7 +264,6 @@ struct mmc_host {
->  	u32			caps2;		/* More host capabilities */
+> @@ -388,8 +388,6 @@ int mmc_power_restore_host(struct mmc_host *host);
+>  void mmc_detect_change(struct mmc_host *, unsigned long delay);
+>  void mmc_request_done(struct mmc_host *, struct mmc_request *);
 > 
->  #define MMC_CAP2_BOOTPART_NOACC	(1 << 0)	/* Boot partition no access */
-> -#define MMC_CAP2_CACHE_CTRL	(1 << 1)	/* Allow cache control */
->  #define MMC_CAP2_FULL_PWR_CYCLE	(1 << 2)	/* Can do full power cycle */
->  #define MMC_CAP2_NO_MULTI_READ	(1 << 3)	/* Multiblock reads don't work */
->  #define MMC_CAP2_NO_SLEEP_CMD	(1 << 4)	/* Don't allow sleep command */
+> -int mmc_cache_ctrl(struct mmc_host *, u8);
+> -
+>  static inline void mmc_signal_sdio_irq(struct mmc_host *host)
+>  {
+>  	host->ops->enable_sdio_irq(host, 0);
 > --
 > 1.7.9.5
 > 
