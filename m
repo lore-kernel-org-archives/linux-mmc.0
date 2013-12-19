@@ -1,74 +1,101 @@
-From: Stephen Warren <swarren@wwwdotorg.org>
-Subject: Re: [PATCH] mmc: core: don't return 1 for max_discard
-Date: Thu, 19 Dec 2013 12:15:43 -0700
-Message-ID: <52B345DF.1040304@wwwdotorg.org>
-References: <1387405663-14253-1-git-send-email-swarren@wwwdotorg.org>	<52B22906.4010704@wwwdotorg.org> <CAA+hA=RdsVCWpNMrC18EpccszABToStVjLBV6ZmOiRZjNMC1zw@mail.gmail.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH 2/2] mmc: core: Enable MMC_CAP2_CACHE_CTRL as default
+Date: Thu, 19 Dec 2013 20:55:04 +0100
+Message-ID: <CAPDyKFro4xrNfZu5hxa_WgDD1LrgDkovGEvZtnb_ZLSC-e-5XQ@mail.gmail.com>
+References: <1387364961-15464-1-git-send-email-ulf.hansson@linaro.org>
+	<1387364961-15464-2-git-send-email-ulf.hansson@linaro.org>
+	<002b01cefcc8$b6168130$22438390$%jun@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from avon.wwwdotorg.org ([70.85.31.133]:60223 "EHLO
-	avon.wwwdotorg.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754124Ab3LSTPs (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 19 Dec 2013 14:15:48 -0500
-In-Reply-To: <CAA+hA=RdsVCWpNMrC18EpccszABToStVjLBV6ZmOiRZjNMC1zw@mail.gmail.com>
+Received: from mail-qa0-f47.google.com ([209.85.216.47]:47303 "EHLO
+	mail-qa0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756259Ab3LSTzF (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 19 Dec 2013 14:55:05 -0500
+Received: by mail-qa0-f47.google.com with SMTP id w5so5174861qac.6
+        for <linux-mmc@vger.kernel.org>; Thu, 19 Dec 2013 11:55:05 -0800 (PST)
+In-Reply-To: <002b01cefcc8$b6168130$22438390$%jun@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Dong Aisheng <dongas86@gmail.com>
-Cc: Chris Ball <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-tegra@vger.kernel.org" <linux-tegra@vger.kernel.org>, Stephen Warren <swarren@nvidia.com>, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, Vladimir Zapolskiy <vz@mleia.com>
+To: Seungwon Jeon <tgih.jun@samsung.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>
 
-On 12/19/2013 02:05 AM, Dong Aisheng wrote:
-> On Thu, Dec 19, 2013 at 7:00 AM, Stephen Warren <swarren@wwwdotorg.org> wrote:
->> On 12/18/2013 03:27 PM, Stephen Warren wrote:
->>> From: Stephen Warren <swarren@nvidia.com>
->>>
->>> In mmc_do_calc_max_discard(), if only a single erase block can be
->>> discarded within the host controller's timeout, don't allow discard
->>> operations at all.
->>>
->>> Previously, the code allowed sector-at-a-time discard (rather than
->>> erase-block-at-a-time), which was chronically slow.
->>>
->>> Without this patch, on the NVIDIA Tegra Cardhu board, the loops result
->>> in qty == 1, which is immediately returned. This causes discard to
->>> operate a single sector at a time, which is chronically slow. With this
->>> patch in place, discard operates a single erase block at a time, which
->>> is reasonably fast.
+On 19 December 2013 15:43, Seungwon Jeon <tgih.jun@samsung.com> wrote:
+> On Wed, December 18, 2013 Ulf Hansson wrote:
+>> There are no reason to why the use of a non-volatile internal eMMC
+>> cache should be controlled by a host cap. Instead let's just enable it
+>> if the eMMC card supports it.
 >>
->> Alternatively, is the real fix a revert of e056a1b5b67b "mmc: queue: let
->> host controllers specify maximum discard timeout", followed by:
+>> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+>
+> When cache feature was introduced for the first time, there was stability issue in some devices.
+> So host should have decided whether to select that feature.
+> Now, your change makes sense. But just check minor one below.
+>
+> Acked-by: Seungwon Jeon <tgih.jun@samsung.com>
+>
+>> ---
+>>  drivers/mmc/core/core.c  |    3 ---
+>>  drivers/mmc/core/mmc.c   |    3 +--
+>>  include/linux/mmc/host.h |    1 -
+>>  3 files changed, 1 insertion(+), 6 deletions(-)
 >>
->>> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
->>> index 050eb262485c..35c5b5d86c99 100644
->>> --- a/drivers/mmc/core/core.c
->>> +++ b/drivers/mmc/core/core.c
->>> @@ -1950,7 +1950,6 @@ static int mmc_do_erase(struct mmc_card *card, unsigned int from,
->>>         cmd.opcode = MMC_ERASE;
->>>         cmd.arg = arg;
->>>         cmd.flags = MMC_RSP_SPI_R1B | MMC_RSP_R1B | MMC_CMD_AC;
->>> -       cmd.cmd_timeout_ms = mmc_erase_timeout(card, arg, qty);
->>>         err = mmc_wait_for_cmd(card->host, &cmd, 0);
->>>         if (err) {
->>>                 pr_err("mmc_erase: erase error %d, status %#x\n",
->>> @@ -1962,7 +1961,7 @@ static int mmc_do_erase(struct mmc_card *card, unsigned int from,
->>>         if (mmc_host_is_spi(card->host))
->>>                 goto out;
->>>
->>> -       timeout = jiffies + msecs_to_jiffies(MMC_CORE_TIMEOUT_MS);
->>> +       timeout = jiffies + msecs_to_jiffies(mmc_erase_timeout(card, arg, qty));
->>>         do {
->>>                 memset(&cmd, 0, sizeof(struct mmc_command));
->>>                 cmd.opcode = MMC_SEND_STATUS;
->>
->> That certainly also seems to solve the problem on my board...
-> 
-> Is the change you mean here only include above 3 lines changes?
-> If yes, it's strange to me how does this solve your issue?
-> It actually does not change the max_discard_to/max_discard_bytes.
-> It still discards only one sector one time if it does as before....
+>> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+>> index df591a9..66ec347 100644
+>> --- a/drivers/mmc/core/core.c
+>> +++ b/drivers/mmc/core/core.c
+>> @@ -2585,9 +2585,6 @@ int mmc_flush_cache(struct mmc_card *card)
+>>       struct mmc_host *host = card->host;
+> Also, 'host' can be removed.  No use.
 
-It's a revert of the patch which introduced max_discard_to, so all that
-logic goes away completely, *then* the 3 lines above, which move the
-timeout away from command submission (which is what I believe is
-implemented by the controller's timeout HW) and to the CMD13 polling
-operation (where we can implement whatever timeout we want, in the kernel).
+Thanks for your review! Will fix in v2 and add your ack.
+
+Kind regards
+Ulf Hansson
+
+>
+> Thanks,
+> Seungwon Jeon
+>
+>>       int err = 0;
+>>
+>> -     if (!(host->caps2 & MMC_CAP2_CACHE_CTRL))
+>> -             return err;
+>> -
+>>       if (mmc_card_mmc(card) &&
+>>                       (card->ext_csd.cache_size > 0) &&
+>>                       (card->ext_csd.cache_ctrl & 1)) {
+>> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+>> index ef1cc73..7ab3e9c 100644
+>> --- a/drivers/mmc/core/mmc.c
+>> +++ b/drivers/mmc/core/mmc.c
+>> @@ -1287,8 +1287,7 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+>>        * If cache size is higher than 0, this indicates
+>>        * the existence of cache and it can be turned on.
+>>        */
+>> -     if ((host->caps2 & MMC_CAP2_CACHE_CTRL) &&
+>> -                     card->ext_csd.cache_size > 0) {
+>> +     if (card->ext_csd.cache_size > 0) {
+>>               err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+>>                               EXT_CSD_CACHE_CTRL, 1,
+>>                               card->ext_csd.generic_cmd6_time);
+>> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+>> index f539bc7..8383e3f 100644
+>> --- a/include/linux/mmc/host.h
+>> +++ b/include/linux/mmc/host.h
+>> @@ -264,7 +264,6 @@ struct mmc_host {
+>>       u32                     caps2;          /* More host capabilities */
+>>
+>>  #define MMC_CAP2_BOOTPART_NOACC      (1 << 0)        /* Boot partition no access */
+>> -#define MMC_CAP2_CACHE_CTRL  (1 << 1)        /* Allow cache control */
+>>  #define MMC_CAP2_FULL_PWR_CYCLE      (1 << 2)        /* Can do full power cycle */
+>>  #define MMC_CAP2_NO_MULTI_READ       (1 << 3)        /* Multiblock reads don't work */
+>>  #define MMC_CAP2_NO_SLEEP_CMD        (1 << 4)        /* Don't allow sleep command */
+>> --
+>> 1.7.9.5
+>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
