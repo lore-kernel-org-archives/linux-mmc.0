@@ -1,19 +1,19 @@
-From: Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+From: Dong Aisheng <dongas86-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
 Subject: Re: [PATCH] mmc: core: don't return 1 for max_discard
-Date: Thu, 19 Dec 2013 11:01:19 +0200
-Message-ID: <52B2B5DF.1020702@intel.com>
-References: <1387405663-14253-1-git-send-email-swarren@wwwdotorg.org> <52B22906.4010704@wwwdotorg.org>
+Date: Thu, 19 Dec 2013 17:05:23 +0800
+Message-ID: <CAA+hA=RdsVCWpNMrC18EpccszABToStVjLBV6ZmOiRZjNMC1zw@mail.gmail.com>
+References: <1387405663-14253-1-git-send-email-swarren@wwwdotorg.org>
+	<52B22906.4010704@wwwdotorg.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
 Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 In-Reply-To: <52B22906.4010704-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>
 Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 To: Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>
-Cc: Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Stephen Warren <swarren-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>, Dong Aisheng <dongas86-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Vladimir Zapolskiy <vz-ChpfBGZJDbMAvxtiuMwx3w@public.gmane.org>
+Cc: Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Stephen Warren <swarren-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Vladimir Zapolskiy <vz-ChpfBGZJDbMAvxtiuMwx3w@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 19/12/13 01:00, Stephen Warren wrote:
+On Thu, Dec 19, 2013 at 7:00 AM, Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org> wrote:
 > On 12/18/2013 03:27 PM, Stephen Warren wrote:
 >> From: Stephen Warren <swarren-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
 >>
@@ -29,10 +29,10 @@ On 19/12/13 01:00, Stephen Warren wrote:
 >> operate a single sector at a time, which is chronically slow. With this
 >> patch in place, discard operates a single erase block at a time, which
 >> is reasonably fast.
-> 
+>
 > Alternatively, is the real fix a revert of e056a1b5b67b "mmc: queue: let
 > host controllers specify maximum discard timeout", followed by:
-> 
+>
 >> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
 >> index 050eb262485c..35c5b5d86c99 100644
 >> --- a/drivers/mmc/core/core.c
@@ -48,17 +48,19 @@ On 19/12/13 01:00, Stephen Warren wrote:
 >> @@ -1962,7 +1961,7 @@ static int mmc_do_erase(struct mmc_card *card, unsigned int from,
 >>         if (mmc_host_is_spi(card->host))
 >>                 goto out;
->>  
+>>
 >> -       timeout = jiffies + msecs_to_jiffies(MMC_CORE_TIMEOUT_MS);
 >> +       timeout = jiffies + msecs_to_jiffies(mmc_erase_timeout(card, arg, qty));
 >>         do {
 >>                 memset(&cmd, 0, sizeof(struct mmc_command));
 >>                 cmd.opcode = MMC_SEND_STATUS;
-> 
+>
 > That certainly also seems to solve the problem on my board...
 
-But large erases will timeout when they should have been split into smaller
-chunks.
+Is the change you mean here only include above 3 lines changes?
+If yes, it's strange to me how does this solve your issue?
+It actually does not change the max_discard_to/max_discard_bytes.
+It still discards only one sector one time if it does as before....
 
-A generic solution needs to be able to explain what happens when the host
-controller *does* timeout.
+Regards
+Dong Aisheng
