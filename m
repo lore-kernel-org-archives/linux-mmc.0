@@ -1,67 +1,95 @@
-From: Dinh Nguyen <dinh.linux@gmail.com>
-Subject: Re: [RESEND LIST PATCHv7 1/4] clk: socfpga: Add a clk-phase property
- to the "altr, socfpga-gate-clk"
-Date: Wed, 18 Dec 2013 22:04:10 -0600
-Message-ID: <52B2703A.8090001@gmail.com>
-References: <1387213476-22122-1-git-send-email-dinguyen@altera.com> <1387213476-22122-2-git-send-email-dinguyen@altera.com> <20131218205636.23538.50735@quantum> <201312182221.46506.arnd@arndb.de>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: [RESEND LIST PATCHv7 1/4] clk: socfpga: Add a clk-phase property to the "altr, socfpga-gate-clk"
+Date: Thu, 19 Dec 2013 06:50:17 +0100
+Message-ID: <201312190650.17806.arnd@arndb.de>
+References: <1387213476-22122-1-git-send-email-dinguyen@altera.com> <201312182221.46506.arnd@arndb.de> <52B2703A.8090001@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: Text/Plain;
+  charset="utf-8"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-oa0-f53.google.com ([209.85.219.53]:36529 "EHLO
-	mail-oa0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752415Ab3LSEER (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 18 Dec 2013 23:04:17 -0500
-In-Reply-To: <201312182221.46506.arnd@arndb.de>
+Received: from moutng.kundenserver.de ([212.227.17.9]:50865 "EHLO
+	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751712Ab3LSFus (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 19 Dec 2013 00:50:48 -0500
+In-Reply-To: <52B2703A.8090001@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Arnd Bergmann <arnd@arndb.de>, Mike Turquette <mturquette@linaro.org>
-Cc: dinguyen@altera.com, cjb@laptop.org, jh80.chung@samsung.com, tgih.jun@samsung.com, heiko@sntech.de, dianders@chromium.org, alim.akhtar@samsung.com, bzhao@marvell.com, zhangfei.gao@linaro.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, devicetree@vger.kernel.org
+To: Dinh Nguyen <dinh.linux@gmail.com>
+Cc: Mike Turquette <mturquette@linaro.org>, dinguyen@altera.com, cjb@laptop.org, jh80.chung@samsung.com, tgih.jun@samsung.com, heiko@sntech.de, dianders@chromium.org, alim.akhtar@samsung.com, bzhao@marvell.com, zhangfei.gao@linaro.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, devicetree@vger.kernel.org
 
+On Thursday 19 December 2013, Dinh Nguyen wrote:
+> On 12/18/13 3:21 PM, Arnd Bergmann wrote:
+> > On Wednesday 18 December 2013, Mike Turquette wrote:
+> > I would definitely prefer using degrees over an arbitrary enumeration that
+> > might work on some platforms but not on others.
+> >
+> > I'm also a bit skeptical about the idea of putting the phase into the clock
+> > provider rather than the consumer, given the comments about the
+> > clk_set_phase() interface earlier. Generally we try to avoid having
+> > consumer-specific settings in a provider node (for any DT binding,
+> > not just clocks). Can't you have the same numbers in the dw-mshc
+> > node instead and let the mmc driver call clk_set_phase instead?
+> > If every clock has a fixed phase for a given piece of hardware, it
+> > could even be set automatically by making the common clk code read
+> > the clk-phase attribute at the time a driver calls clk_get.
+> 
+> So I think this is what you're suggesting:
+> clocks = <&sdmmc_clk 0 135>, this would specify 0 and 135 degrees phase.
 
-On 12/18/13 3:21 PM, Arnd Bergmann wrote:
-> On Wednesday 18 December 2013, Mike Turquette wrote:
->>> diff --git a/arch/arm/boot/dts/socfpga.dtsi b/arch/arm/boot/dts/socfpga.dtsi
->>> index f936476..616d9ee 100644
->>> --- a/arch/arm/boot/dts/socfpga.dtsi
->>> +++ b/arch/arm/boot/dts/socfpga.dtsi
->>> @@ -413,6 +413,7 @@
->>>                                                 compatible = "altr,socfpga-gate-clk";
->>>                                                 clocks = <&f2s_periph_ref_clk>, <&main_nand_sdmmc_clk>, <&per_nand_mmc_clk>;
->>>                                                 clk-gate = <0xa0 8>;
->>> +                                               clk-phase = <0 3>;
->> Looking at this again, I have a hard time understanding the values in
->> the clk-phase property. You reference some functions in the property
->> definition above, but they are not obvious to me.
->>
->> Additionally I wonder if the binding would better if the clock-phase
->> property was simply the value in degrees. E.g:
->>
->>         clk-phase = <315>;    // 315 degrees
-> I would definitely prefer using degrees over an arbitrary enumeration that
-> might work on some platforms but not on others.
->
-> I'm also a bit skeptical about the idea of putting the phase into the clock
-> provider rather than the consumer, given the comments about the
-> clk_set_phase() interface earlier. Generally we try to avoid having
-> consumer-specific settings in a provider node (for any DT binding,
-> not just clocks). Can't you have the same numbers in the dw-mshc
-> node instead and let the mmc driver call clk_set_phase instead?
-> If every clock has a fixed phase for a given piece of hardware, it
-> could even be set automatically by making the common clk code read
-> the clk-phase attribute at the time a driver calls clk_get.
+It's not what I meant in the paragraph above, but I have suggested this
+method in the past, and I think that would solve the problem very nicely
+as well, if Mike agrees. 
 
-So I think this is what you're suggesting:
-clocks = <&sdmmc_clk 0 135>, this would specify 0 and 135 degrees phase.
+> The clock-bindings document is stating that the integer in the clocks
+> property is
+> specifying the output number of the clock. Would this approach cause a
+> conflict and would
+> need an update to that document/approach?
 
-The clock-bindings document is stating that the integer in the clocks
-property is
-specifying the output number of the clock. Would this approach cause a
-conflict and would
-need an update to that document/approach?
+I don't think we have to change the common binding. While it lists the
+use of the integer for multiple clock outputs, that's not necessarily
+the only possible use, and specific bindings can always override the
+generic ones in a compatible way.
 
-Dinh
+You would certainly have to update the binding of your clock controller
+to do this, in particular because #clock-cells is now <1>. You will
+probably need to add a new "compatible" string for a clock that has
+a phase setting rather than just a gate, and document what the argument
+is for. If possible, try to model the hardware the way it actually
+is implemented. If the clock controller supports both the gate and
+the phase in the same block, then make it one clock device node, but
+if you have one block generating the clock and another one to shift the
+phase, it may be best to model that second clock in a separate node
+so you can split the driver code according to the registers, like
 
->
-> 	Arnd
+	mmcclock-shifted {
+		compatible = "altr,socfpga-clk-shift";
+		reg = <0xabcd>;
+		clocks = <&mmcclock>;
+		#clock-cells = <1>
+	};
 
+	mshc {
+		...
+		clocks = <&/clocks/mmcclock-shifted 135>;
+		clock-names = "ciu";
+	};
+
+Coming back to what I actually tried to suggest above was 
+
+	mshc {
+		...
+		clocks = <&/clocks/mmcclock>;
+		clock-names = "ciu";
+		clock-phases = <135>;
+	};
+
+This would keep the phase setting out of the specific binding and
+move it to the generic clock binding. In Linux we could implement
+this either by making the mshc driver read the phase value and
+call clock_set_phase() on it, or the common clock code could look
+up the clock-phases property at the same time it looks up clock-names
+and clocks, and set this behind the back of the driver.
+
+	Arnd
