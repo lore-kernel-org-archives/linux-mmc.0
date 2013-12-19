@@ -1,24 +1,24 @@
 From: Stephen Warren <swarren@wwwdotorg.org>
 Subject: Re: [PATCH] mmc: core: don't return 1 for max_discard
-Date: Thu, 19 Dec 2013 12:11:28 -0700
-Message-ID: <52B344E0.5080009@wwwdotorg.org>
-References: <1387405663-14253-1-git-send-email-swarren@wwwdotorg.org> <52B22906.4010704@wwwdotorg.org> <52B2B5DF.1020702@intel.com>
+Date: Thu, 19 Dec 2013 12:15:43 -0700
+Message-ID: <52B345DF.1040304@wwwdotorg.org>
+References: <1387405663-14253-1-git-send-email-swarren@wwwdotorg.org>	<52B22906.4010704@wwwdotorg.org> <CAA+hA=RdsVCWpNMrC18EpccszABToStVjLBV6ZmOiRZjNMC1zw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from avon.wwwdotorg.org ([70.85.31.133]:40946 "EHLO
+Received: from avon.wwwdotorg.org ([70.85.31.133]:60223 "EHLO
 	avon.wwwdotorg.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753631Ab3LSTLd (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 19 Dec 2013 14:11:33 -0500
-In-Reply-To: <52B2B5DF.1020702@intel.com>
+	with ESMTP id S1754124Ab3LSTPs (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 19 Dec 2013 14:15:48 -0500
+In-Reply-To: <CAA+hA=RdsVCWpNMrC18EpccszABToStVjLBV6ZmOiRZjNMC1zw@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, linux-tegra@vger.kernel.org, Stephen Warren <swarren@nvidia.com>, Dong Aisheng <dongas86@gmail.com>, Ulf Hansson <ulf.hansson@linaro.org>, Vladimir Zapolskiy <vz@mleia.com>
+To: Dong Aisheng <dongas86@gmail.com>
+Cc: Chris Ball <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-tegra@vger.kernel.org" <linux-tegra@vger.kernel.org>, Stephen Warren <swarren@nvidia.com>, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, Vladimir Zapolskiy <vz@mleia.com>
 
-On 12/19/2013 02:01 AM, Adrian Hunter wrote:
-> On 19/12/13 01:00, Stephen Warren wrote:
+On 12/19/2013 02:05 AM, Dong Aisheng wrote:
+> On Thu, Dec 19, 2013 at 7:00 AM, Stephen Warren <swarren@wwwdotorg.org> wrote:
 >> On 12/18/2013 03:27 PM, Stephen Warren wrote:
 >>> From: Stephen Warren <swarren@nvidia.com>
 >>>
@@ -53,7 +53,7 @@ On 12/19/2013 02:01 AM, Adrian Hunter wrote:
 >>> @@ -1962,7 +1961,7 @@ static int mmc_do_erase(struct mmc_card *card, unsigned int from,
 >>>         if (mmc_host_is_spi(card->host))
 >>>                 goto out;
->>>  
+>>>
 >>> -       timeout = jiffies + msecs_to_jiffies(MMC_CORE_TIMEOUT_MS);
 >>> +       timeout = jiffies + msecs_to_jiffies(mmc_erase_timeout(card, arg, qty));
 >>>         do {
@@ -62,15 +62,13 @@ On 12/19/2013 02:01 AM, Adrian Hunter wrote:
 >>
 >> That certainly also seems to solve the problem on my board...
 > 
-> But large erases will timeout when they should have been split into smaller
-> chunks.
-> 
-> A generic solution needs to be able to explain what happens when the host
-> controller *does* timeout.
+> Is the change you mean here only include above 3 lines changes?
+> If yes, it's strange to me how does this solve your issue?
+> It actually does not change the max_discard_to/max_discard_bytes.
+> It still discards only one sector one time if it does as before....
 
-I thought the whole point of this discussion was that the timeout in the
-first code segment above only applies to command submission, whereas
-completion of the erase operation itself was determined by polling using
-CMD13, which still uses mmc_erase_timeout(). As such, I don't /think/
-that "large erases will timeout" here, unless I'm significantly
-misunderstanding something?
+It's a revert of the patch which introduced max_discard_to, so all that
+logic goes away completely, *then* the 3 lines above, which move the
+timeout away from command submission (which is what I believe is
+implemented by the controller's timeout HW) and to the CMD13 polling
+operation (where we can implement whatever timeout we want, in the kernel).
