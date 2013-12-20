@@ -1,7 +1,7 @@
 From: Balaji T K <balajitk@ti.com>
-Subject: [PATCH v7 2/7] mmc: omap_hsmmc: handle vcc and vcc_aux independently
-Date: Fri, 20 Dec 2013 23:05:50 +0530
-Message-ID: <1387560955-6547-3-git-send-email-balajitk@ti.com>
+Subject: [PATCH v7 6/7] ARM: OMAP: enable SYSCON and REGULATOR_PBIAS in omap2plus_defconfig
+Date: Fri, 20 Dec 2013 23:05:54 +0530
+Message-ID: <1387560955-6547-7-git-send-email-balajitk@ti.com>
 References: <1387560955-6547-1-git-send-email-balajitk@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -12,103 +12,33 @@ To: linux-omap@vger.kernel.org, bcousson@baylibre.com, devicetree@vger.kernel.or
 Cc: Balaji T K <balajitk@ti.com>
 List-Id: linux-mmc@vger.kernel.org
 
-handle vcc and vcc_aux independently to reduce indent.
+Enable REGULATOR_PBIAS needed for SD card on most OMAPs.
 
 Signed-off-by: Balaji T K <balajitk@ti.com>
 ---
- drivers/mmc/host/omap_hsmmc.c |   54 +++++++++++++++++++----------------------
- 1 files changed, 25 insertions(+), 29 deletions(-)
+ arch/arm/configs/omap2plus_defconfig |    2 ++
+ 1 files changed, 2 insertions(+), 0 deletions(-)
 
-diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index 1eb4350..342be25 100644
---- a/drivers/mmc/host/omap_hsmmc.c
-+++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -286,11 +286,12 @@ static int omap_hsmmc_set_power(struct device *dev, int slot, int power_on,
- 	 * chips/cards need an interface voltage rail too.
- 	 */
- 	if (power_on) {
--		ret = mmc_regulator_set_ocr(host->mmc, host->vcc, vdd);
-+		if (host->vcc)
-+			ret = mmc_regulator_set_ocr(host->mmc, host->vcc, vdd);
- 		/* Enable interface voltage rail, if needed */
- 		if (ret == 0 && host->vcc_aux) {
- 			ret = regulator_enable(host->vcc_aux);
--			if (ret < 0)
-+			if (ret < 0 && host->vcc)
- 				ret = mmc_regulator_set_ocr(host->mmc,
- 							host->vcc, 0);
- 		}
-@@ -298,7 +299,7 @@ static int omap_hsmmc_set_power(struct device *dev, int slot, int power_on,
- 		/* Shut down the rail */
- 		if (host->vcc_aux)
- 			ret = regulator_disable(host->vcc_aux);
--		if (!ret) {
-+		if (host->vcc) {
- 			/* Then proceed to shut down the local regulator */
- 			ret = mmc_regulator_set_ocr(host->mmc,
- 						host->vcc, 0);
-@@ -318,10 +319,10 @@ static int omap_hsmmc_reg_get(struct omap_hsmmc_host *host)
- 
- 	reg = devm_regulator_get(host->dev, "vmmc");
- 	if (IS_ERR(reg)) {
--		dev_err(host->dev, "vmmc regulator missing\n");
-+		dev_err(host->dev, "unable to get vmmc regulator %ld\n",
-+			PTR_ERR(reg));
- 		return PTR_ERR(reg);
- 	} else {
--		mmc_slot(host).set_power = omap_hsmmc_set_power;
- 		host->vcc = reg;
- 		ocr_value = mmc_regulator_get_ocrmask(reg);
- 		if (!mmc_slot(host).ocr_mask) {
-@@ -334,31 +335,26 @@ static int omap_hsmmc_reg_get(struct omap_hsmmc_host *host)
- 				return -EINVAL;
- 			}
- 		}
-+	}
-+	mmc_slot(host).set_power = omap_hsmmc_set_power;
- 
--		/* Allow an aux regulator */
--		reg = devm_regulator_get_optional(host->dev, "vmmc_aux");
--		host->vcc_aux = IS_ERR(reg) ? NULL : reg;
-+	/* Allow an aux regulator */
-+	reg = devm_regulator_get_optional(host->dev, "vmmc_aux");
-+	host->vcc_aux = IS_ERR(reg) ? NULL : reg;
- 
--		/* For eMMC do not power off when not in sleep state */
--		if (mmc_slot(host).no_regulator_off_init)
--			return 0;
--		/*
--		* UGLY HACK:  workaround regulator framework bugs.
--		* When the bootloader leaves a supply active, it's
--		* initialized with zero usecount ... and we can't
--		* disable it without first enabling it.  Until the
--		* framework is fixed, we need a workaround like this
--		* (which is safe for MMC, but not in general).
--		*/
--		if (regulator_is_enabled(host->vcc) > 0 ||
--		    (host->vcc_aux && regulator_is_enabled(host->vcc_aux))) {
--			int vdd = ffs(mmc_slot(host).ocr_mask) - 1;
-+	/* For eMMC do not power off when not in sleep state */
-+	if (mmc_slot(host).no_regulator_off_init)
-+		return 0;
-+	/*
-+	 * To disable boot_on regulator, enable regulator
-+	 * to increase usecount and then disable it.
-+	 */
-+	if ((host->vcc && regulator_is_enabled(host->vcc) > 0) ||
-+	    (host->vcc_aux && regulator_is_enabled(host->vcc_aux))) {
-+		int vdd = ffs(mmc_slot(host).ocr_mask) - 1;
- 
--			mmc_slot(host).set_power(host->dev, host->slot_id,
--						 1, vdd);
--			mmc_slot(host).set_power(host->dev, host->slot_id,
--						 0, 0);
--		}
-+		mmc_slot(host).set_power(host->dev, host->slot_id, 1, vdd);
-+		mmc_slot(host).set_power(host->dev, host->slot_id, 0, 0);
- 	}
- 
- 	return 0;
+diff --git a/arch/arm/configs/omap2plus_defconfig b/arch/arm/configs/omap2plus_defconfig
+index bfa80a1..f67baa9 100644
+--- a/arch/arm/configs/omap2plus_defconfig
++++ b/arch/arm/configs/omap2plus_defconfig
+@@ -169,6 +169,7 @@ CONFIG_DRA752_THERMAL=y
+ CONFIG_WATCHDOG=y
+ CONFIG_OMAP_WATCHDOG=y
+ CONFIG_TWL4030_WATCHDOG=y
++CONFIG_MFD_SYSCON=y
+ CONFIG_MFD_PALMAS=y
+ CONFIG_MFD_TPS65217=y
+ CONFIG_MFD_TPS65910=y
+@@ -180,6 +181,7 @@ CONFIG_REGULATOR_TPS6507X=y
+ CONFIG_REGULATOR_TPS65217=y
+ CONFIG_REGULATOR_TPS65910=y
+ CONFIG_REGULATOR_TWL4030=y
++CONFIG_REGULATOR_PBIAS=y
+ CONFIG_FB=y
+ CONFIG_FIRMWARE_EDID=y
+ CONFIG_FB_MODE_HELPERS=y
 -- 
 1.7.5.4
 
