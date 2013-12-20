@@ -1,94 +1,108 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH] mmc: sdhci-pci: Fix BYT sd card getting stuck in runtime
- suspend
-Date: Fri, 20 Dec 2013 09:30:43 +0200
-Message-ID: <52B3F223.8000505@intel.com>
-References: <1386669558-30356-1-git-send-email-adrian.hunter@intel.com>
+From: Ludovic Desroches <ludovic.desroches@atmel.com>
+Subject: Re: possible regression on 3.13 when calling flush_dcache_page
+Date: Fri, 20 Dec 2013 09:08:51 +0100
+Message-ID: <20131220080851.GC16592@ldesroches-Latitude-E6320>
+References: <20131212143149.GI12099@ldesroches-Latitude-E6320>
+ <20131212143618.GJ12099@ldesroches-Latitude-E6320>
+ <20131213015909.GA8845@lge.com>
+ <20131216144343.GD9627@ldesroches-Latitude-E6320>
+ <20131218072117.GA2383@lge.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="us-ascii"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga09.intel.com ([134.134.136.24]:49585 "EHLO mga09.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754218Ab3LTHad (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 20 Dec 2013 02:30:33 -0500
-In-Reply-To: <1386669558-30356-1-git-send-email-adrian.hunter@intel.com>
+Received: from eusmtp01.atmel.com ([212.144.249.243]:19854 "EHLO
+	eusmtp01.atmel.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752233Ab3LTIIy (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 20 Dec 2013 03:08:54 -0500
+Content-Disposition: inline
+In-Reply-To: <20131218072117.GA2383@lge.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org
+To: Joonsoo Kim <iamjoonsoo.kim@lge.com>
+Cc: linux-mm@kvack.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Ludovic Desroches <ludovic.desroches@atmel.com>
 
-Hi Chris
+Hello,
 
-Please don't forget this one, it is wanted for LTSI.
+On Wed, Dec 18, 2013 at 04:21:17PM +0900, Joonsoo Kim wrote:
+> On Mon, Dec 16, 2013 at 03:43:43PM +0100, Ludovic Desroches wrote:
+> > Hello,
+> > 
+> > On Fri, Dec 13, 2013 at 10:59:09AM +0900, Joonsoo Kim wrote:
+> > > On Thu, Dec 12, 2013 at 03:36:19PM +0100, Ludovic Desroches wrote:
+> > > > fix mmc mailing list address error
+> > > > 
+> > > > On Thu, Dec 12, 2013 at 03:31:50PM +0100, Ludovic Desroches wrote:
+> > > > > Hi,
+> > > > > 
+> > > > > With v3.13-rc3 I have an error when the atmel-mci driver calls
+> > > > > flush_dcache_page (log at the end of the message).
+> > > > > 
+> > > > > Since I didn't have it before, I did a git bisect and the commit introducing
+> > > > > the error is the following one:
+> > > > > 
+> > > > > 106a74e slab: replace free and inuse in struct slab with newly introduced active
+> > > > > 
+> > > > > I don't know if this commit has introduced a bug or if it has revealed a bug
+> > > > > in the atmel-mci driver.
+> > > 
+> > > Hello,
+> > > 
+> > > I think that this commit may not introduce a bug. This patch remove one
+> > > variable on slab management structure and replace variable name. So there
+> > > is no functional change.
+> > > 
+> > 
+> > If I have reverted this patch and other ones you did on top of it and
+> > the issue disappear.
+> 
+> Hello,
+> 
+> Could you give me your '/proc/slabinfo' before/after this commit (106a74e)?
+> 
+> And how about testing with artificially increasing size of struct slab on
+> top of this commit (106a74e)?
+> 
+> I really wonder why the problem happens, because this doesn't cause any
+> functional change as far as I know. Only side-effect from this patch is
+> decreasing size of struct slab.
+
+Sorry I am not at the office, I have tried to reproduce it with a
+different device and a different sdcard but without success. I'll test
+it on Monday.
 
 Regards
-Adrian
 
-On 10/12/13 11:59, Adrian Hunter wrote:
-> A host controller for a SD card may need a GPIO
-> for card detect in order to wake up from runtime
-> suspend when a card is inserted.  If that GPIO is
-> not configured, then the host controller will not
-> wake up.  Fix that for the affected devices by not
-> enabling runtime PM unless the GPIO is successfully
-> set up.
-> 
-> This affects BYT sd card host controller which had
-> runtime PM enabled from v3.11.  For completeness,
-> the MFD sd card host controller is flagged also.
-> 
-> Tested on v3.11.10 and v3.12.4 although the patch
-> applies with some offsets and fuzz.
-> 
-> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
-> Cc: <stable@vger.kernel.org> # 3.11+
-> ---
->  drivers/mmc/host/sdhci-pci.c | 11 +++++++++++
->  1 file changed, 11 insertions(+)
-> 
-> diff --git a/drivers/mmc/host/sdhci-pci.c b/drivers/mmc/host/sdhci-pci.c
-> index 8f75381..7b930e6 100644
-> --- a/drivers/mmc/host/sdhci-pci.c
-> +++ b/drivers/mmc/host/sdhci-pci.c
-> @@ -65,6 +65,7 @@ struct sdhci_pci_fixes {
->  	unsigned int		quirks;
->  	unsigned int		quirks2;
->  	bool			allow_runtime_pm;
-> +	bool			own_cd_for_runtime_pm;
->  
->  	int			(*probe) (struct sdhci_pci_chip *);
->  
-> @@ -296,6 +297,7 @@ static const struct sdhci_pci_fixes sdhci_intel_mrst_hc1_hc2 = {
->  static const struct sdhci_pci_fixes sdhci_intel_mfd_sd = {
->  	.quirks		= SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC,
->  	.allow_runtime_pm = true,
-> +	.own_cd_for_runtime_pm = true,
->  };
->  
->  static const struct sdhci_pci_fixes sdhci_intel_mfd_sdio = {
-> @@ -360,6 +362,7 @@ static const struct sdhci_pci_fixes sdhci_intel_byt_sdio = {
->  static const struct sdhci_pci_fixes sdhci_intel_byt_sd = {
->  	.quirks2	= SDHCI_QUIRK2_CARD_ON_NEEDS_BUS_ON,
->  	.allow_runtime_pm = true,
-> +	.own_cd_for_runtime_pm = true,
->  };
->  
->  /* Define Host controllers for Intel Merrifield platform */
-> @@ -1457,6 +1460,14 @@ static struct sdhci_pci_slot *sdhci_pci_probe_slot(
->  
->  	sdhci_pci_add_own_cd(slot);
->  
-> +	/*
-> +	 * Check if the chip needs a separate GPIO for card detect to wake up
-> +	 * from runtime suspend.  If it is not there, don't allow runtime PM.
-> +	 * Note sdhci_pci_add_own_cd() sets slot->cd_gpio to -EINVAL on failure.
-> +	 */
-> +	if (chip->fixes->own_cd_for_runtime_pm && !gpio_is_valid(slot->cd_gpio))
-> +		chip->allow_runtime_pm = false;
-> +
->  	return slot;
->  
->  remove:
-> 
+Ludovic
 
+> 
+> Thanks.
+> 
+> diff --git a/mm/slab.c b/mm/slab.c
+> index 2ec2336..d2240fd 100644
+> --- a/mm/slab.c
+> +++ b/mm/slab.c
+> @@ -174,6 +174,7 @@ struct slab {
+>         struct {
+>                 struct list_head list;
+>                 void *s_mem;            /* including colour offset */
+> +               unsigned int x;
+>                 unsigned int active;    /* num of objs active in slab */
+>         };
+>  };
+> 
+> > 
+> > > I doubt that side-effect of this patch reveals a bug in other place.
+> > > Side-effect is reduced memory usage for slab management structure. It would
+> > > makes some slabs have more objects with more density since slab management
+> > > structure is sometimes on the page for objects. So if it diminishes, more
+> > > objects can be in the page.
+> > > 
+> > > Anyway, I will look at it more. If you have any progress, please let me know.
+> > 
+> > No progress at the moment.
+> 
+> --
+> To unsubscribe, send a message with 'unsubscribe linux-mm' in
+> the body to majordomo@kvack.org.  For more info on Linux MM,
+> see: http://www.linux-mm.org/ .
+> Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
