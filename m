@@ -1,41 +1,70 @@
-From: zhangfei <zhangfei.gao@linaro.org>
-Subject: Re: [PATCH 2/3] mmc: dw_mmc: add dw_mmc-k3 for k3 platform
-Date: Fri, 20 Dec 2013 10:31:07 +0800
-Message-ID: <52B3ABEB.2010502@linaro.org>
-References: <1386987174-1788-3-git-send-email-zhangfei.gao@linaro.org> <1387199536-7053-1-git-send-email-zhangfei.gao@linaro.org>
+From: Dong Aisheng <dongas86@gmail.com>
+Subject: Re: [RFC/PATCH 0/2] mmc: sdhci: Workaround Intel Merrifield issue for HS200
+Date: Fri, 20 Dec 2013 11:00:23 +0800
+Message-ID: <CAA+hA=SuhppL9Ejm1NSRrNmYZ_sE3Xnzf2gLSVYkFf7msEZNHw@mail.gmail.com>
+References: <1383069507-27574-1-git-send-email-david.a.cohen@linux.intel.com>
+	<5282A255.5090904@linux.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pd0-f174.google.com ([209.85.192.174]:37950 "EHLO
-	mail-pd0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754228Ab3LTCbQ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 19 Dec 2013 21:31:16 -0500
-Received: by mail-pd0-f174.google.com with SMTP id x10so1902620pdj.19
-        for <linux-mmc@vger.kernel.org>; Thu, 19 Dec 2013 18:31:16 -0800 (PST)
-In-Reply-To: <1387199536-7053-1-git-send-email-zhangfei.gao@linaro.org>
+Received: from mail-qa0-f41.google.com ([209.85.216.41]:37142 "EHLO
+	mail-qa0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751204Ab3LTDAY (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 19 Dec 2013 22:00:24 -0500
+In-Reply-To: <5282A255.5090904@linux.intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Zhangfei Gao <zhangfei.gao@linaro.org>, Chris Ball <cjb@laptop.org>, Arnd Bergmann <arnd@arndb.de>, Mike Turquette <mturquette@linaro.org>, Rob Herring <robherring2@gmail.com>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, Kumar Gala <galak@codeaurora.org>, Haojian Zhuang <haojian.zhuang@linaro.org>
-Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, patches@linaro.org, devicetree@vger.kernel.org, Zhigang Wang <brooke.wangzhigang@huawei.com>
+To: David Cohen <david.a.cohen@linux.intel.com>
+Cc: Chris Ball <cjb@laptop.org>, Adrian Hunter <adrian.hunter@intel.com>, gregkh@linuxfoundation.org, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, chuanxiao.dong@intel.com
 
-
-
-On 12/16/2013 09:12 PM, Zhangfei Gao wrote:
-> Add dw_mmc-k3.c for k3v2, support sd/emmc
+On Wed, Nov 13, 2013 at 5:49 AM, David Cohen
+<david.a.cohen@linux.intel.com> wrote:
+> On 10/29/2013 10:58 AM, David Cohen wrote:
+>>
+>> Hi,
+>>
+>> SDHCI used to work well on Intel Merrifield until this patch was applied:
+>>
+>> commit 156e14b126ffb6f040bc6f1aff3c51077e42a744
+>> Author: Giuseppe CAVALLARO <peppe.cavallaro@st.com>
+>> Date:   Wed Jun 12 08:16:38 2013 +0200
+>>
+>>      mmc: sdhci: fix caps2 for HS200
+>>
+>>      Although the HC supports HS200 (eMMC) the caps2 are always zero; this
+>>      means there's no way to use the super speed mode (when init the
+>> card).
+>>
+>>      If the HC support SDR104, for SD3.0, so it also supports HS200 for
+>> eMMC
+>>      and this patch just sets the MMC_CAP2_HS200 in the host caps2 field.
+>>
+>> Looks like there is a hw issue with unknown root cause so far.
+>>
+>> Is it acceptable to have the quirk I'm proposing to workaround the issue?
 >
-> Signed-off-by: Zhangfei Gao <zhangfei.gao@linaro.org>
-> Signed-off-by: Zhigang Wang <brooke.wangzhigang@huawei.com>
-> ---
->   .../devicetree/bindings/mmc/k3-dw-mshc.txt         |   60 +++++++++
->   drivers/mmc/host/Kconfig                           |   10 ++
->   drivers/mmc/host/Makefile                          |    1 +
->   drivers/mmc/host/dw_mmc-k3.c                       |  134 ++++++++++++++++++++
->   4 files changed, 205 insertions(+)
->   create mode 100644 Documentation/devicetree/bindings/mmc/k3-dw-mshc.txt
->   create mode 100644 drivers/mmc/host/dw_mmc-k3.c
+>
+> Ping. Any comments here?
 >
 
-Any comments?
+Chris,
+Can you pick this one?
+IMX also needs this quirk for imx6q/dl since it can not meet HS200
+timing requirement.
 
-Thanks
+
+David,
+Is the unkonwn hw issue in your patch #2 resolved now?
+If yes, you may not need this quirk.
+I could resend it with your sign-off with IMX patches.
+
+Regards
+Dong Aisheng
+
+> Br, David Cohen
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-kernel" in
+>
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> Please read the FAQ at  http://www.tux.org/lkml/
