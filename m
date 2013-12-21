@@ -1,26 +1,26 @@
 From: Tony Lindgren <tony@atomide.com>
-Subject: Re: [PATCH v7 7/7] mmc: omap_hsmmc: remove pbias workaround
-Date: Fri, 20 Dec 2013 16:33:43 -0800
-Message-ID: <20131221003342.GG26054@atomide.com>
-References: <1387560955-6547-1-git-send-email-balajitk@ti.com>
- <1387560955-6547-8-git-send-email-balajitk@ti.com>
+Subject: Re: [PATCH v6 1/3] mmc: omap_hsmmc: Enable SDIO IRQ.
+Date: Fri, 20 Dec 2013 16:53:59 -0800
+Message-ID: <20131221005359.GI26054@atomide.com>
+References: <1387193091-23218-1-git-send-email-afenkart@gmail.com>
+ <1387193091-23218-2-git-send-email-afenkart@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mho-03-ewr.mailhop.org ([204.13.248.66]:16236 "EHLO
-	mho-01-ewr.mailhop.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1752571Ab3LUAdr (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 20 Dec 2013 19:33:47 -0500
+Return-path: <linux-doc-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <1387560955-6547-8-git-send-email-balajitk@ti.com>
-Sender: linux-mmc-owner@vger.kernel.org
+In-Reply-To: <1387193091-23218-2-git-send-email-afenkart@gmail.com>
+Sender: linux-doc-owner@vger.kernel.org
+To: Andreas Fenkart <afenkart@gmail.com>
+Cc: Chris Ball <cjb@laptop.org>, Grant Likely <grant.likely@secretlab.ca>, Felipe Balbi <balbi@ti.com>, Balaji T K <balajitk@ti.com>, zonque@gmail.com, galak@codeaurora.org, linux-doc@vger.kernel.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Balaji T K <balajitk@ti.com>
-Cc: linux-omap@vger.kernel.org, bcousson@baylibre.com, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, cjb@laptop.org, broonie@kernel.org
 
-* Balaji T K <balajitk@ti.com> [131220 09:37]:
-> remove pbias workaround
+* Andreas Fenkart <afenkart@gmail.com> [131216 03:29]:
+> For now, only support SDIO interrupt if we are booted with
+> DT. This is because some platforms need special quirks. And
+> we don't want to add new legacy mux platform init code
+> callbacks any longer as we are moving to DT based booting
+> anyways.
 > 
-> Signed-off-by: Balaji T K <balajitk@ti.com>
+> Signed-off-by: Andreas Fenkart <afenkart@gmail.com>
 
 Acked-by: Tony Lindgren <tony@atomide.com>
