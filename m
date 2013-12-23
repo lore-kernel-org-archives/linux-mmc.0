@@ -1,67 +1,60 @@
-From: Barry Song <21cnbao@gmail.com>
-Subject: [PATCH] mmc: sdhci: use time_after to replace mdelay-loop for timeout
-Date: Mon, 23 Dec 2013 21:50:08 +0800
-Message-ID: <1387806608-3467-1-git-send-email-21cnbao@gmail.com>
+From: Shawn Guo <shawn.guo@linaro.org>
+Subject: Re: [PATCH 2/2] mmc: sdhci-esdhc-imx: fix warning during module
+ remove function
+Date: Mon, 23 Dec 2013 22:06:15 +0800
+Message-ID: <20131223140613.GL26070@S2101-09.ap.freescale.net>
+References: <1387796544-18209-1-git-send-email-b29396@freescale.com>
+ <1387796544-18209-2-git-send-email-b29396@freescale.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pd0-f169.google.com ([209.85.192.169]:37682 "EHLO
-	mail-pd0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757446Ab3LWNuf (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 23 Dec 2013 08:50:35 -0500
-Received: by mail-pd0-f169.google.com with SMTP id v10so5155925pde.14
-        for <linux-mmc@vger.kernel.org>; Mon, 23 Dec 2013 05:50:34 -0800 (PST)
+Received: from co9ehsobe005.messaging.microsoft.com ([207.46.163.28]:32069
+	"EHLO co9outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1757357Ab3LWOEo (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 23 Dec 2013 09:04:44 -0500
+Content-Disposition: inline
+In-Reply-To: <1387796544-18209-2-git-send-email-b29396@freescale.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: cjb@laptop.org
-Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, workgroup.linux@csr.com, Barry Song <Barry.Song@csr.com>, Bin Shi <Bin.Shi@csr.com>
+To: Dong Aisheng <b29396@freescale.com>
+Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, cjb@laptop.org, s.hauer@pengutronix.de, fabio.estevam@freescale.com
 
-From: Barry Song <Barry.Song@csr.com>
+On Mon, Dec 23, 2013 at 07:02:24PM +0800, Dong Aisheng wrote:
+> @@ -1160,8 +1160,6 @@ free_sdhci:
+>  static int sdhci_esdhc_imx_remove(struct platform_device *pdev)
+>  {
+>  	struct sdhci_host *host = platform_get_drvdata(pdev);
+> -	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> -	struct pltfm_imx_data *imx_data = pltfm_host->priv;
+>  	int dead = (readl(host->ioaddr + SDHCI_INT_STATUS) == 0xffffffff);
+>  
+>  	sdhci_remove_host(host, dead);
+> @@ -1169,10 +1167,6 @@ static int sdhci_esdhc_imx_remove(struct platform_device *pdev)
+>  	pm_runtime_dont_use_autosuspend(&pdev->dev);
+>  	pm_runtime_disable(&pdev->dev);
+>  
+> -	clk_disable_unprepare(imx_data->clk_per);
+> -	clk_disable_unprepare(imx_data->clk_ipg);
+> -	clk_disable_unprepare(imx_data->clk_ahb);
 
-1ms busy-loop might be wasted when the condition "if(sdhci_readl(host,
-SDHCI_PRESENT_STATE) & mask)" becomes false just after the if().
-here we use time_after which will have no redundant busy-wait loop.
+It's obviously a bad change to me.  We should definitely have these
+clk_disable_unprepare() calls in sdhci_esdhc_imx_remove() to match the
+clk_prepare_enable() calls in sdhci_esdhc_imx_probe().  Otherwise, at
+least for !CONFIG_PM_RUNTIME build, it's broken.
 
-Signed-off-by: Barry Song <Barry.Song@csr.com>
-Cc: Bin Shi <Bin.Shi@csr.com>
----
- drivers/mmc/host/sdhci.c |   10 ++++------
- 1 files changed, 4 insertions(+), 6 deletions(-)
+I'm looking at sdhci-pxav3 driver.  Why can it call
+clk_disable_unprepare(pltfm_host->clk) in .remove() with runtime PM
+support in there?  Is there anything about runtime PM not being done
+correctly for our driver?
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index aac92bd..52f5289 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -1036,9 +1036,6 @@ void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
- 
- 	WARN_ON(host->cmd);
- 
--	/* Wait max 10 ms */
--	timeout = 10;
--
- 	mask = SDHCI_CMD_INHIBIT;
- 	if ((cmd->data != NULL) || (cmd->flags & MMC_RSP_BUSY))
- 		mask |= SDHCI_DATA_INHIBIT;
-@@ -1048,8 +1045,11 @@ void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
- 	if (host->mrq->data && (cmd == host->mrq->data->stop))
- 		mask &= ~SDHCI_DATA_INHIBIT;
- 
-+	/* Wait max 10 ms */
-+	timeout = jiffies + msecs_to_jiffies(10);
-+
- 	while (sdhci_readl(host, SDHCI_PRESENT_STATE) & mask) {
--		if (timeout == 0) {
-+		if (time_after(jiffies, timeout)) {
- 			pr_err("%s: Controller never released "
- 				"inhibit bit(s).\n", mmc_hostname(host->mmc));
- 			sdhci_dumpregs(host);
-@@ -1057,8 +1057,6 @@ void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
- 			tasklet_schedule(&host->finish_tasklet);
- 			return;
- 		}
--		timeout--;
--		mdelay(1);
- 	}
- 
- 	mod_timer(&host->timer, jiffies + 10 * HZ);
--- 
-1.7.5.4
+Shawn
+
+> -
+>  	sdhci_pltfm_free(pdev);
+>  
+>  	return 0;
+> -- 
+> 1.7.2.rc3
+> 
+> 
 
