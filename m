@@ -1,35 +1,41 @@
 From: Shawn Guo <shawn.guo@linaro.org>
-Subject: Re: [PATCH 1/1] mmc: sdhci: fix lockdep error on tunning routine
-Date: Mon, 23 Dec 2013 20:23:17 +0800
-Message-ID: <20131223122315.GJ26070@S2101-09.ap.freescale.net>
-References: <1387797184-18958-1-git-send-email-b29396@freescale.com>
+Subject: Re: [PATCH 1/2] mmc: sdhci-esdhc-imx: fix access hardirq-unsafe lock
+ in atomic context
+Date: Mon, 23 Dec 2013 20:47:01 +0800
+Message-ID: <20131223124659.GK26070@S2101-09.ap.freescale.net>
+References: <1387796544-18209-1-git-send-email-b29396@freescale.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from tx2ehsobe001.messaging.microsoft.com ([65.55.88.11]:56587 "EHLO
-	tx2outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751314Ab3LWMVo (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 23 Dec 2013 07:21:44 -0500
+Received: from mail-db8lp0184.outbound.messaging.microsoft.com ([213.199.154.184]:2596
+	"EHLO db8outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751509Ab3LWMpc (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 23 Dec 2013 07:45:32 -0500
 Content-Disposition: inline
-In-Reply-To: <1387797184-18958-1-git-send-email-b29396@freescale.com>
+In-Reply-To: <1387796544-18209-1-git-send-email-b29396@freescale.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Dong Aisheng <b29396@freescale.com>
-Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, cjb@laptop.org, s.hauer@pengutronix.de, peterz@infradead.org
+Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, cjb@laptop.org, s.hauer@pengutronix.de, fabio.estevam@freescale.com
 
-On Mon, Dec 23, 2013 at 07:13:04PM +0800, Dong Aisheng wrote:
-> It's strange that this issue did not happen on kernel 3.10.17 with the same
-> code.
+On Mon, Dec 23, 2013 at 07:02:23PM +0800, Dong Aisheng wrote:
+> Sometimes we may meet the following lockdep issue.
+> The root cause is .set_clock callback is executed with spin_lock_irqsave
+> in sdhci_do_set_ios. However, the IMX set_clock callback will try to access
+> clk_get_rate which is using a mutex lock.
+> 
+> The fix avoids access mutex in .set_clock callback by initializing the
+> pltfm_host->clock at probe time and use it later instead of calling
+> clk_get_rate again in atomic context.
 
-Probably just because you did not turn on CONFIG_PROVE_LOCKING on your
-3.10.17 kennel.
+While I agree this is the way less intrusive, I'm also wondering why
+sdhci_do_set_ios() needs a spinlock at all, or at least it's
+questionable if the lock should necessarily be held for such a long
+running section.
+
+Nevertheless, as long as we can guarantee that the rate of
+pltfm_host->clk does not change after the driver is probed, I'm fine
+with the patch.
 
 Shawn
-
-> And looking at the code, before call spin_lock we already disable the mmc
-> controller irq, per on my understanding, the deadlock given by lockdep may not
-> be able to happen(pls fix me if wrong).
-> May the lockdep not track the specific irq disable?
-> Copy lockdep guy to comment.
-> ---
 
