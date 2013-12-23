@@ -1,53 +1,47 @@
-From: micky <micky_ching@realsil.com.cn>
-Subject: Re: [PATCH v3 0/2] fix sd power bug and modify phase-searching method
-Date: Mon, 23 Dec 2013 13:46:08 +0800
-Message-ID: <52B7CE20.5000507@realsil.com.cn>
-References: <cover.1385947736.git.micky_ching@realsil.com.cn>
+From: Christian Daudt <bcm@fixthebug.org>
+Subject: Re: [PATCH v4 5/8] mmc: sdhci-bcm-kona: Add basic use of clocks
+Date: Mon, 23 Dec 2013 00:26:01 -0800
+Message-ID: <CAEPRUYphct9jJkB7kT=vqmGKX86AQMaZvhxEqChGzizGCS6d1A@mail.gmail.com>
+References: <1386271244-3927-1-git-send-email-tim.kryger@linaro.org>
+	<1386271244-3927-6-git-send-email-tim.kryger@linaro.org>
+	<CAEPRUYrPXf7QNzput0bz_UPfytRy1eYgyOJYnH5v2v4DCEKSNA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from rtits2.realtek.com ([60.250.210.242]:40897 "EHLO
-	rtits2.realtek.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750711Ab3LWFra (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 23 Dec 2013 00:47:30 -0500
-In-Reply-To: <cover.1385947736.git.micky_ching@realsil.com.cn>
+Received: from mail-ee0-f54.google.com ([74.125.83.54]:35335 "EHLO
+	mail-ee0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750877Ab3LWI0D (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 23 Dec 2013 03:26:03 -0500
+Received: by mail-ee0-f54.google.com with SMTP id e51so1848025eek.41
+        for <linux-mmc@vger.kernel.org>; Mon, 23 Dec 2013 00:26:01 -0800 (PST)
+In-Reply-To: <CAEPRUYrPXf7QNzput0bz_UPfytRy1eYgyOJYnH5v2v4DCEKSNA@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: cjb@laptop.org, sameo@linux.intel.com
-Cc: devel@linuxdriverproject.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, gregkh@linuxfoundation.org, wei_wang@realsil.com.cn, Micky Ching <micky_ching@realsil.com.cn>
+To: Tim Kryger <tim.kryger@linaro.org>, Chris Ball <cjb@laptop.org>
+Cc: Rob Herring <rob.herring@calxeda.com>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Stephen Warren <swarren@wwwdotorg.org>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Daniel Lezcano <daniel.lezcano@linaro.org>, Thomas Gleixner <tglx@linutronix.de>, Axel Lin <axel.lin@ingics.com>, Device Tree List <devicetree@vger.kernel.org>, Linux ARM Kernel List <linux-arm-kernel@lists.infradead.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux MMC List <linux-mmc@vger.kernel.org>, Linaro Patches List <patches@linaro.org>
 
-Hi,
+On Sat, Dec 14, 2013 at 12:14 AM, Christian Daudt <bcm@fixthebug.org> wrote:
+> On Thu, Dec 5, 2013 at 11:20 AM, Tim Kryger <tim.kryger@linaro.org> wrote:
+>> Enable the external clock needed by the host controller during the
+>> probe and disable it during the remove.
+>>
+>> Signed-off-by: Tim Kryger <tim.kryger@linaro.org>
+>> Reviewed-by: Markus Mayer <markus.mayer@linaro.org>
+>> Reviewed-by: Matt Porter <matt.porter@linaro.org>
+>
+> Reviewed-by: Christian Daudt <bcm@fixthebug.org>
+>
+> Chris,
+>  Are you ok with me pulling this patch along with the rest of the
+> patchset into the bcm tree?
+>
+>  Thanks,
+>    csd
+Hi Chris,
+ I'm hoping to get this patchset and "rename ARCH_BCM to
+ARCH_BCM_MOBILE (mmc)" patch into 3.14 still, and these 2 patches are
+waiting for your ack and confirmation that you're ok with me pulling
+them through armsoc. Can you pls review them ?
 
-Is there anything wrong with this patch? It seems a long time, but I 
-didn't got any reply.
-
-On 12/03/2013 10:34 AM, micky_ching@realsil.com.cn wrote:
-> From: Micky Ching <micky_ching@realsil.com.cn>
->
-> If the driver removed while sd card still in the slot, the card power
-> will not power down correctly, if we insert the driver module again,
-> UHS card will not switch to UHS mode. This bug is fix in this patch.
->
-> We use another phase search method for tuning, which looks more
-> simple, and reduce some source code.
->
-> Micky Ching (2):
->    mmc: rtsx: fix card poweroff bug
->    mmc: rtsx: modify phase searching method for tuning
->
->   drivers/mmc/host/rtsx_pci_sdmmc.c |  115 +++++++++++--------------------------
->   include/linux/mfd/rtsx_pci.h      |    2 +-
->   2 files changed, 35 insertions(+), 82 deletions(-)
->
-> --
-> 1.7.9.5
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-kernel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> Please read the FAQ at  http://www.tux.org/lkml/
->
->
->
-
+ Thanks,
+  csd
