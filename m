@@ -1,47 +1,54 @@
-From: Christian Daudt <bcm@fixthebug.org>
-Subject: Re: [PATCH v4 5/8] mmc: sdhci-bcm-kona: Add basic use of clocks
-Date: Mon, 23 Dec 2013 00:26:01 -0800
-Message-ID: <CAEPRUYphct9jJkB7kT=vqmGKX86AQMaZvhxEqChGzizGCS6d1A@mail.gmail.com>
-References: <1386271244-3927-1-git-send-email-tim.kryger@linaro.org>
-	<1386271244-3927-6-git-send-email-tim.kryger@linaro.org>
-	<CAEPRUYrPXf7QNzput0bz_UPfytRy1eYgyOJYnH5v2v4DCEKSNA@mail.gmail.com>
+From: <rogerable@realtek.com>
+Subject: [PATCH 0/3] Add modules for realtek USB card reader
+Date: Mon, 23 Dec 2013 17:52:04 +0800
+Message-ID: <1387792327-2511-1-git-send-email-rogerable@realtek.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ee0-f54.google.com ([74.125.83.54]:35335 "EHLO
-	mail-ee0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750877Ab3LWI0D (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 23 Dec 2013 03:26:03 -0500
-Received: by mail-ee0-f54.google.com with SMTP id e51so1848025eek.41
-        for <linux-mmc@vger.kernel.org>; Mon, 23 Dec 2013 00:26:01 -0800 (PST)
-In-Reply-To: <CAEPRUYrPXf7QNzput0bz_UPfytRy1eYgyOJYnH5v2v4DCEKSNA@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
+List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
+List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel>
+List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
+List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
+List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
+Errors-To: driverdev-devel-bounces@linuxdriverproject.org
+Sender: driverdev-devel-bounces@linuxdriverproject.org
+To: Samuel Ortiz <sameo@linux.intel.com>, Lee Jones <lee.jones@linaro.org>, Chris Ball <cjb@laptop.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Maxim Levitsky <maximlevitsky@gmail.com>, Alex Dubov <oakad@yahoo.com>
+Cc: driverdev-devel@linuxdriverproject.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, wei_wang@realsil.com.cn, rogerable@realtek.com
 List-Id: linux-mmc@vger.kernel.org
-To: Tim Kryger <tim.kryger@linaro.org>, Chris Ball <cjb@laptop.org>
-Cc: Rob Herring <rob.herring@calxeda.com>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Stephen Warren <swarren@wwwdotorg.org>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Daniel Lezcano <daniel.lezcano@linaro.org>, Thomas Gleixner <tglx@linutronix.de>, Axel Lin <axel.lin@ingics.com>, Device Tree List <devicetree@vger.kernel.org>, Linux ARM Kernel List <linux-arm-kernel@lists.infradead.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux MMC List <linux-mmc@vger.kernel.org>, Linaro Patches List <patches@linaro.org>
 
-On Sat, Dec 14, 2013 at 12:14 AM, Christian Daudt <bcm@fixthebug.org> wrote:
-> On Thu, Dec 5, 2013 at 11:20 AM, Tim Kryger <tim.kryger@linaro.org> wrote:
->> Enable the external clock needed by the host controller during the
->> probe and disable it during the remove.
->>
->> Signed-off-by: Tim Kryger <tim.kryger@linaro.org>
->> Reviewed-by: Markus Mayer <markus.mayer@linaro.org>
->> Reviewed-by: Matt Porter <matt.porter@linaro.org>
->
-> Reviewed-by: Christian Daudt <bcm@fixthebug.org>
->
-> Chris,
->  Are you ok with me pulling this patch along with the rest of the
-> patchset into the bcm tree?
->
->  Thanks,
->    csd
-Hi Chris,
- I'm hoping to get this patchset and "rename ARCH_BCM to
-ARCH_BCM_MOBILE (mmc)" patch into 3.14 still, and these 2 patches are
-waiting for your ack and confirmation that you're ok with me pulling
-them through armsoc. Can you pls review them ?
+From: Roger Tseng <rogerable@realtek.com>
 
- Thanks,
-  csd
+This patchset adds modules to support Realtek USB vendor specific class flash
+card reader: one base module in MFD subsystem and two host modules in both mmc
+and memstick subsystems. The architecture is similar to rtsx_pci.
+
+This work is done primarily to replace the staging driver: staging/rts5139,
+which doesn't utilize mmc nor memstick subsystems. Once the patchset or its
+revision is applied, we may need Greg's help to remove the staging one.
+
+Roger Tseng (3):
+  mfd: Add realtek USB card reader driver
+  mmc: Add realtek USB sdmmc host driver
+  memstick: Add realtek USB memstick host driver
+
+ drivers/memstick/host/Kconfig       |   10 +
+ drivers/memstick/host/Makefile      |    1 +
+ drivers/memstick/host/rtsx_usb_ms.c |  856 ++++++++++++++++++++
+ drivers/mfd/Kconfig                 |   10 +
+ drivers/mfd/Makefile                |    1 +
+ drivers/mfd/rtsx_usb.c              |  794 ++++++++++++++++++
+ drivers/mmc/host/Kconfig            |    7 +
+ drivers/mmc/host/Makefile           |    1 +
+ drivers/mmc/host/rtsx_usb_sdmmc.c   | 1511 +++++++++++++++++++++++++++++++++++
+ include/linux/mfd/rtsx_usb.h        |  609 ++++++++++++++
+ 10 files changed, 3800 insertions(+)
+ create mode 100644 drivers/memstick/host/rtsx_usb_ms.c
+ create mode 100644 drivers/mfd/rtsx_usb.c
+ create mode 100644 drivers/mmc/host/rtsx_usb_sdmmc.c
+ create mode 100644 include/linux/mfd/rtsx_usb.h
+
+-- 
+1.8.2
