@@ -1,104 +1,118 @@
-From: Arend van Spriel <arend@broadcom.com>
-Subject: [PATCH] mmc: add SDIO identifiers for Broadcom WLAN devices
-Date: Mon, 23 Dec 2013 22:37:01 +0100
-Message-ID: <1387834621-4813-1-git-send-email-arend@broadcom.com>
+From: Ludovic Desroches <ludovic.desroches@atmel.com>
+Subject: Re: possible regression on 3.13 when calling flush_dcache_page
+Date: Mon, 23 Dec 2013 23:44:35 +0100
+Message-ID: <20131223224435.GD16592@ldesroches-Latitude-E6320>
+References: <20131212143149.GI12099@ldesroches-Latitude-E6320>
+ <20131212143618.GJ12099@ldesroches-Latitude-E6320>
+ <20131213015909.GA8845@lge.com>
+ <20131216144343.GD9627@ldesroches-Latitude-E6320>
+ <20131218072117.GA2383@lge.com>
+ <20131220080851.GC16592@ldesroches-Latitude-E6320>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-gw3-out.broadcom.com ([216.31.210.64]:28540 "EHLO
-	mail-gw3-out.broadcom.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757898Ab3LWVhF (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 23 Dec 2013 16:37:05 -0500
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Return-path: <owner-linux-mm@kvack.org>
+Content-Disposition: inline
+In-Reply-To: <20131220080851.GC16592@ldesroches-Latitude-E6320>
+Sender: owner-linux-mm@kvack.org
+To: Joonsoo Kim <iamjoonsoo.kim@lge.com>, linux-mm@kvack.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Cc: Ludovic Desroches <ludovic.desroches@atmel.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: linux-mmc@vger.kernel.org, Arend van Spriel <arend@broadcom.com>
 
-The SDIO identifier for Broadcom WLAN devices were defined in the
-brcmfmac SDIO driver. Moving the definitions in MMC header file
-seems common sense.
+On Fri, Dec 20, 2013 at 09:08:51AM +0100, Ludovic Desroches wrote:
+> Hello,
+> 
+> On Wed, Dec 18, 2013 at 04:21:17PM +0900, Joonsoo Kim wrote:
+> > On Mon, Dec 16, 2013 at 03:43:43PM +0100, Ludovic Desroches wrote:
+> > > Hello,
+> > > 
+> > > On Fri, Dec 13, 2013 at 10:59:09AM +0900, Joonsoo Kim wrote:
+> > > > On Thu, Dec 12, 2013 at 03:36:19PM +0100, Ludovic Desroches wrote:
+> > > > > fix mmc mailing list address error
+> > > > > 
+> > > > > On Thu, Dec 12, 2013 at 03:31:50PM +0100, Ludovic Desroches wrote:
+> > > > > > Hi,
+> > > > > > 
+> > > > > > With v3.13-rc3 I have an error when the atmel-mci driver calls
+> > > > > > flush_dcache_page (log at the end of the message).
+> > > > > > 
+> > > > > > Since I didn't have it before, I did a git bisect and the commit introducing
+> > > > > > the error is the following one:
+> > > > > > 
+> > > > > > 106a74e slab: replace free and inuse in struct slab with newly introduced active
+> > > > > > 
+> > > > > > I don't know if this commit has introduced a bug or if it has revealed a bug
+> > > > > > in the atmel-mci driver.
+> > > > 
+> > > > Hello,
+> > > > 
+> > > > I think that this commit may not introduce a bug. This patch remove one
+> > > > variable on slab management structure and replace variable name. So there
+> > > > is no functional change.
+> > > > 
+> > > 
+> > > If I have reverted this patch and other ones you did on top of it and
+> > > the issue disappear.
+> > 
+> > Hello,
+> > 
+> > Could you give me your '/proc/slabinfo' before/after this commit (106a74e)?
+> > 
+> > And how about testing with artificially increasing size of struct slab on
+> > top of this commit (106a74e)?
+> > 
+> > I really wonder why the problem happens, because this doesn't cause any
+> > functional change as far as I know. Only side-effect from this patch is
+> > decreasing size of struct slab.
+> 
+> Sorry I am not at the office, I have tried to reproduce it with a
+> different device and a different sdcard but without success. I'll test
+> it on Monday.
 
-Reviewed-by: Hante Meuleman <meuleman@broadcom.com>
-Reviewed-by: Pieter-Paul Giesberts <pieterpg@broadcom.com>
-Signed-off-by: Arend van Spriel <arend@broadcom.com>
----
-Moved vendor and device definitions in sdio_ids.h. Can split up in
-two patches but they are clearly related.
+I am still not at the office but I get the same device and the same
+sdcard and I don't reproduce it. I am not totally in the same
+conditions. It seems there is an extra parameter causing this bug but I
+don't figure out which one at the moment.
 
-Regards,
-Arend
----
- drivers/net/wireless/brcm80211/brcmfmac/bcmsdh_sdmmc.c |    2 --
- drivers/net/wireless/brcm80211/brcmfmac/sdio_chip.c    |    1 +
- drivers/net/wireless/brcm80211/brcmfmac/sdio_chip.h    |    8 --------
- include/linux/mmc/sdio_ids.h                           |   10 ++++++++++
- 4 files changed, 11 insertions(+), 10 deletions(-)
+> 
+> Regards
+> 
+> Ludovic
+> 
+> > 
+> > Thanks.
+> > 
+> > diff --git a/mm/slab.c b/mm/slab.c
+> > index 2ec2336..d2240fd 100644
+> > --- a/mm/slab.c
+> > +++ b/mm/slab.c
+> > @@ -174,6 +174,7 @@ struct slab {
+> >         struct {
+> >                 struct list_head list;
+> >                 void *s_mem;            /* including colour offset */
+> > +               unsigned int x;
+> >                 unsigned int active;    /* num of objs active in slab */
+> >         };
+> >  };
+> > 
+> > > 
+> > > > I doubt that side-effect of this patch reveals a bug in other place.
+> > > > Side-effect is reduced memory usage for slab management structure. It would
+> > > > makes some slabs have more objects with more density since slab management
+> > > > structure is sometimes on the page for objects. So if it diminishes, more
+> > > > objects can be in the page.
+> > > > 
+> > > > Anyway, I will look at it more. If you have any progress, please let me know.
+> > > 
+> > > No progress at the moment.
+> > 
+> > --
+> > To unsubscribe, send a message with 'unsubscribe linux-mm' in
+> > the body to majordomo@kvack.org.  For more info on Linux MM,
+> > see: http://www.linux-mm.org/ .
+> > Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
 
-diff --git a/drivers/net/wireless/brcm80211/brcmfmac/bcmsdh_sdmmc.c b/drivers/net/wireless/brcm80211/brcmfmac/bcmsdh_sdmmc.c
-index 905704e..2274c64 100644
---- a/drivers/net/wireless/brcm80211/brcmfmac/bcmsdh_sdmmc.c
-+++ b/drivers/net/wireless/brcm80211/brcmfmac/bcmsdh_sdmmc.c
-@@ -39,8 +39,6 @@
- #include "dhd_dbg.h"
- #include "dhd_bus.h"
- 
--#define SDIO_VENDOR_ID_BROADCOM		0x02d0
--
- #define DMA_ALIGN_MASK	0x03
- 
- #define SDIO_FUNC1_BLOCKSIZE		64
-diff --git a/drivers/net/wireless/brcm80211/brcmfmac/sdio_chip.c b/drivers/net/wireless/brcm80211/brcmfmac/sdio_chip.c
-index 2096a14..a119808 100644
---- a/drivers/net/wireless/brcm80211/brcmfmac/sdio_chip.c
-+++ b/drivers/net/wireless/brcm80211/brcmfmac/sdio_chip.c
-@@ -19,6 +19,7 @@
- #include <linux/netdevice.h>
- #include <linux/mmc/card.h>
- #include <linux/mmc/sdio_func.h>
-+#include <linux/mmc/sdio_ids.h>
- #include <linux/ssb/ssb_regs.h>
- #include <linux/bcma/bcma.h>
- 
-diff --git a/drivers/net/wireless/brcm80211/brcmfmac/sdio_chip.h b/drivers/net/wireless/brcm80211/brcmfmac/sdio_chip.h
-index 507c61c..f0780ee 100644
---- a/drivers/net/wireless/brcm80211/brcmfmac/sdio_chip.h
-+++ b/drivers/net/wireless/brcm80211/brcmfmac/sdio_chip.h
-@@ -54,14 +54,6 @@
- 
- #define BRCMF_MAX_CORENUM	6
- 
--/* SDIO device ID */
--#define SDIO_DEVICE_ID_BROADCOM_43143		43143
--#define SDIO_DEVICE_ID_BROADCOM_43241		0x4324
--#define SDIO_DEVICE_ID_BROADCOM_4329		0x4329
--#define SDIO_DEVICE_ID_BROADCOM_4330		0x4330
--#define SDIO_DEVICE_ID_BROADCOM_4334		0x4334
--#define SDIO_DEVICE_ID_BROADCOM_4335_4339	0x4335
--
- struct chip_core_info {
- 	u16 id;
- 	u16 rev;
-diff --git a/include/linux/mmc/sdio_ids.h b/include/linux/mmc/sdio_ids.h
-index 9f03fee..0f01fe0 100644
---- a/include/linux/mmc/sdio_ids.h
-+++ b/include/linux/mmc/sdio_ids.h
-@@ -23,6 +23,16 @@
- /*
-  * Vendors and devices.  Sort key: vendor first, device next.
-  */
-+#define SDIO_VENDOR_ID_BROADCOM			0x02d0
-+#define SDIO_DEVICE_ID_BROADCOM_43143		43143
-+#define SDIO_DEVICE_ID_BROADCOM_43241		0x4324
-+#define SDIO_DEVICE_ID_BROADCOM_4329		0x4329
-+#define SDIO_DEVICE_ID_BROADCOM_4330		0x4330
-+#define SDIO_DEVICE_ID_BROADCOM_4334		0x4334
-+#define SDIO_DEVICE_ID_BROADCOM_4335_4339	0x4335
-+#define SDIO_DEVICE_ID_BROADCOM_43362		43362
-+#define SDIO_DEVICE_ID_BROADCOM_4354		0x4354
-+
- #define SDIO_VENDOR_ID_INTEL			0x0089
- #define SDIO_DEVICE_ID_INTEL_IWMC3200WIMAX	0x1402
- #define SDIO_DEVICE_ID_INTEL_IWMC3200WIFI	0x1403
--- 
-1.7.10.4
-
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
