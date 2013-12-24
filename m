@@ -1,118 +1,44 @@
-From: Ludovic Desroches <ludovic.desroches@atmel.com>
-Subject: Re: possible regression on 3.13 when calling flush_dcache_page
-Date: Mon, 23 Dec 2013 23:44:35 +0100
-Message-ID: <20131223224435.GD16592@ldesroches-Latitude-E6320>
-References: <20131212143149.GI12099@ldesroches-Latitude-E6320>
- <20131212143618.GJ12099@ldesroches-Latitude-E6320>
- <20131213015909.GA8845@lge.com>
- <20131216144343.GD9627@ldesroches-Latitude-E6320>
- <20131218072117.GA2383@lge.com>
- <20131220080851.GC16592@ldesroches-Latitude-E6320>
+From: Dong Aisheng <b29396@freescale.com>
+Subject: Re: [PATCH 1/1] mmc: sdhci: fix lockdep error on tunning routine
+Date: Tue, 24 Dec 2013 10:05:24 +0800
+Message-ID: <20131224020521.GA23230@shlinux2.ap.freescale.net>
+References: <1387797184-18958-1-git-send-email-b29396@freescale.com>
+ <20131223122315.GJ26070@S2101-09.ap.freescale.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
-Return-path: <owner-linux-mm@kvack.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from tx2ehsobe001.messaging.microsoft.com ([65.55.88.11]:59380 "EHLO
+	tx2outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752817Ab3LXCgH (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 23 Dec 2013 21:36:07 -0500
 Content-Disposition: inline
-In-Reply-To: <20131220080851.GC16592@ldesroches-Latitude-E6320>
-Sender: owner-linux-mm@kvack.org
-To: Joonsoo Kim <iamjoonsoo.kim@lge.com>, linux-mm@kvack.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
-Cc: Ludovic Desroches <ludovic.desroches@atmel.com>
+In-Reply-To: <20131223122315.GJ26070@S2101-09.ap.freescale.net>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Shawn Guo <shawn.guo@linaro.org>
+Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, cjb@laptop.org, s.hauer@pengutronix.de, peterz@infradead.org
 
-On Fri, Dec 20, 2013 at 09:08:51AM +0100, Ludovic Desroches wrote:
-> Hello,
+On Mon, Dec 23, 2013 at 08:23:17PM +0800, Shawn Guo wrote:
+> On Mon, Dec 23, 2013 at 07:13:04PM +0800, Dong Aisheng wrote:
+> > It's strange that this issue did not happen on kernel 3.10.17 with the same
+> > code.
 > 
-> On Wed, Dec 18, 2013 at 04:21:17PM +0900, Joonsoo Kim wrote:
-> > On Mon, Dec 16, 2013 at 03:43:43PM +0100, Ludovic Desroches wrote:
-> > > Hello,
-> > > 
-> > > On Fri, Dec 13, 2013 at 10:59:09AM +0900, Joonsoo Kim wrote:
-> > > > On Thu, Dec 12, 2013 at 03:36:19PM +0100, Ludovic Desroches wrote:
-> > > > > fix mmc mailing list address error
-> > > > > 
-> > > > > On Thu, Dec 12, 2013 at 03:31:50PM +0100, Ludovic Desroches wrote:
-> > > > > > Hi,
-> > > > > > 
-> > > > > > With v3.13-rc3 I have an error when the atmel-mci driver calls
-> > > > > > flush_dcache_page (log at the end of the message).
-> > > > > > 
-> > > > > > Since I didn't have it before, I did a git bisect and the commit introducing
-> > > > > > the error is the following one:
-> > > > > > 
-> > > > > > 106a74e slab: replace free and inuse in struct slab with newly introduced active
-> > > > > > 
-> > > > > > I don't know if this commit has introduced a bug or if it has revealed a bug
-> > > > > > in the atmel-mci driver.
-> > > > 
-> > > > Hello,
-> > > > 
-> > > > I think that this commit may not introduce a bug. This patch remove one
-> > > > variable on slab management structure and replace variable name. So there
-> > > > is no functional change.
-> > > > 
-> > > 
-> > > If I have reverted this patch and other ones you did on top of it and
-> > > the issue disappear.
-> > 
-> > Hello,
-> > 
-> > Could you give me your '/proc/slabinfo' before/after this commit (106a74e)?
-> > 
-> > And how about testing with artificially increasing size of struct slab on
-> > top of this commit (106a74e)?
-> > 
-> > I really wonder why the problem happens, because this doesn't cause any
-> > functional change as far as I know. Only side-effect from this patch is
-> > decreasing size of struct slab.
+> Probably just because you did not turn on CONFIG_PROVE_LOCKING on your
+> 3.10.17 kennel.
 > 
-> Sorry I am not at the office, I have tried to reproduce it with a
-> different device and a different sdcard but without success. I'll test
-> it on Monday.
 
-I am still not at the office but I get the same device and the same
-sdcard and I don't reproduce it. I am not totally in the same
-conditions. It seems there is an extra parameter causing this bug but I
-don't figure out which one at the moment.
+I did turn it on for the test.
 
-> 
-> Regards
-> 
-> Ludovic
-> 
-> > 
-> > Thanks.
-> > 
-> > diff --git a/mm/slab.c b/mm/slab.c
-> > index 2ec2336..d2240fd 100644
-> > --- a/mm/slab.c
-> > +++ b/mm/slab.c
-> > @@ -174,6 +174,7 @@ struct slab {
-> >         struct {
-> >                 struct list_head list;
-> >                 void *s_mem;            /* including colour offset */
-> > +               unsigned int x;
-> >                 unsigned int active;    /* num of objs active in slab */
-> >         };
-> >  };
-> > 
-> > > 
-> > > > I doubt that side-effect of this patch reveals a bug in other place.
-> > > > Side-effect is reduced memory usage for slab management structure. It would
-> > > > makes some slabs have more objects with more density since slab management
-> > > > structure is sometimes on the page for objects. So if it diminishes, more
-> > > > objects can be in the page.
-> > > > 
-> > > > Anyway, I will look at it more. If you have any progress, please let me know.
-> > > 
-> > > No progress at the moment.
-> > 
-> > --
-> > To unsubscribe, send a message with 'unsubscribe linux-mm' in
-> > the body to majordomo@kvack.org.  For more info on Linux MM,
-> > see: http://www.linux-mm.org/ .
-> > Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+Regards
+Dong Aisheng
 
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+> Shawn
+> 
+> > And looking at the code, before call spin_lock we already disable the mmc
+> > controller irq, per on my understanding, the deadlock given by lockdep may not
+> > be able to happen(pls fix me if wrong).
+> > May the lockdep not track the specific irq disable?
+> > Copy lockdep guy to comment.
+> > ---
+> 
+
