@@ -1,73 +1,85 @@
-From: Dong Aisheng <dongas86@gmail.com>
-Subject: Re: [PATCH 2/2] mmc: sdhci-esdhc-imx: fix warning during module
- remove function
-Date: Tue, 24 Dec 2013 11:29:29 +0800
-Message-ID: <CAA+hA=QoVSPW3msrhBUvJVg6JFQqPFn8UuZNLdr7AYg0Akiy+A@mail.gmail.com>
-References: <1387796544-18209-1-git-send-email-b29396@freescale.com>
-	<1387796544-18209-2-git-send-email-b29396@freescale.com>
-	<20131223140613.GL26070@S2101-09.ap.freescale.net>
-	<20131224023412.GC23230@shlinux2.ap.freescale.net>
-	<20131224031607.GB3872@S2101-09.ap.freescale.net>
-	<20131224032925.GA4166@S2101-09.ap.freescale.net>
+From: Joonsoo Kim <iamjoonsoo.kim@lge.com>
+Subject: Re: possible regression on 3.13 when calling flush_dcache_page
+Date: Tue, 24 Dec 2013 15:38:37 +0900
+Message-ID: <20131224063837.GA27156@lge.com>
+References: <20131212143149.GI12099@ldesroches-Latitude-E6320>
+ <20131212143618.GJ12099@ldesroches-Latitude-E6320>
+ <20131213015909.GA8845@lge.com>
+ <20131216144343.GD9627@ldesroches-Latitude-E6320>
+ <20131218072117.GA2383@lge.com>
+ <20131220080851.GC16592@ldesroches-Latitude-E6320>
+ <20131223224435.GD16592@ldesroches-Latitude-E6320>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qc0-f173.google.com ([209.85.216.173]:41930 "EHLO
-	mail-qc0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757714Ab3LXD3a (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 23 Dec 2013 22:29:30 -0500
-Received: by mail-qc0-f173.google.com with SMTP id m20so5550347qcx.4
-        for <linux-mmc@vger.kernel.org>; Mon, 23 Dec 2013 19:29:29 -0800 (PST)
-In-Reply-To: <20131224032925.GA4166@S2101-09.ap.freescale.net>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <owner-linux-mm@kvack.org>
+Content-Disposition: inline
+In-Reply-To: <20131223224435.GD16592@ldesroches-Latitude-E6320>
+Sender: owner-linux-mm@kvack.org
+To: linux-mm@kvack.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
-To: Shawn Guo <shawn.guo@linaro.org>
-Cc: Dong Aisheng <b29396@freescale.com>, Fabio Estevam <fabio.estevam@freescale.com>, Sascha Hauer <s.hauer@pengutronix.de>, Chris Ball <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 
-On Tue, Dec 24, 2013 at 11:29 AM, Shawn Guo <shawn.guo@linaro.org> wrote:
-> On Tue, Dec 24, 2013 at 11:16:09AM +0800, Shawn Guo wrote:
->> On Tue, Dec 24, 2013 at 10:34:13AM +0800, Dong Aisheng wrote:
->> > > > @@ -1169,10 +1167,6 @@ static int sdhci_esdhc_imx_remove(struct platform_device *pdev)
->> > > >         pm_runtime_dont_use_autosuspend(&pdev->dev);
->> > > >         pm_runtime_disable(&pdev->dev);
->> > > >
->> > > > -       clk_disable_unprepare(imx_data->clk_per);
->> > > > -       clk_disable_unprepare(imx_data->clk_ipg);
->> > > > -       clk_disable_unprepare(imx_data->clk_ahb);
->> > >
->> > > It's obviously a bad change to me.  We should definitely have these
->> > > clk_disable_unprepare() calls in sdhci_esdhc_imx_remove() to match the
->> > > clk_prepare_enable() calls in sdhci_esdhc_imx_probe().  Otherwise, at
->> > > least for !CONFIG_PM_RUNTIME build, it's broken.
->> > >
->> >
->> > How about add the !CONFIG_RUMTIME_PM precondition for these code to avoid
->> > break non runtime pm case?
->> >
->> > #ifndef CONFIG_PM_RUNTIME
->> >     clk_disable_unprepare(imx_data->clk_per);
->> >     clk_disable_unprepare(imx_data->clk_ipg);
->> >     clk_disable_unprepare(imx_data->clk_ahb);
->> > #endif
->>
->> It's quite ugly.  But well, if we do not have anything better, we have
->> to live with it.
->
-> To make it look less ugly, we may want to use something like the
-> following.
->
->         if (!IS_ENABLED(CONFIG_PM_RUNTIME)
->
+On Mon, Dec 23, 2013 at 11:44:35PM +0100, Ludovic Desroches wrote:
+> On Fri, Dec 20, 2013 at 09:08:51AM +0100, Ludovic Desroches wrote:
+> > Hello,
+> > 
+> > On Wed, Dec 18, 2013 at 04:21:17PM +0900, Joonsoo Kim wrote:
+> > > On Mon, Dec 16, 2013 at 03:43:43PM +0100, Ludovic Desroches wrote:
+> > > > Hello,
+> > > > 
+> > > > On Fri, Dec 13, 2013 at 10:59:09AM +0900, Joonsoo Kim wrote:
+> > > > > On Thu, Dec 12, 2013 at 03:36:19PM +0100, Ludovic Desroches wrote:
+> > > > > > fix mmc mailing list address error
+> > > > > > 
+> > > > > > On Thu, Dec 12, 2013 at 03:31:50PM +0100, Ludovic Desroches wrote:
+> > > > > > > Hi,
+> > > > > > > 
+> > > > > > > With v3.13-rc3 I have an error when the atmel-mci driver calls
+> > > > > > > flush_dcache_page (log at the end of the message).
+> > > > > > > 
+> > > > > > > Since I didn't have it before, I did a git bisect and the commit introducing
+> > > > > > > the error is the following one:
+> > > > > > > 
+> > > > > > > 106a74e slab: replace free and inuse in struct slab with newly introduced active
+> > > > > > > 
+> > > > > > > I don't know if this commit has introduced a bug or if it has revealed a bug
+> > > > > > > in the atmel-mci driver.
+> > > > > 
+> > > > > Hello,
+> > > > > 
+> > > > > I think that this commit may not introduce a bug. This patch remove one
+> > > > > variable on slab management structure and replace variable name. So there
+> > > > > is no functional change.
+> > > > > 
+> > > > 
+> > > > If I have reverted this patch and other ones you did on top of it and
+> > > > the issue disappear.
+> > > 
+> > > Hello,
+> > > 
+> > > Could you give me your '/proc/slabinfo' before/after this commit (106a74e)?
+> > > 
+> > > And how about testing with artificially increasing size of struct slab on
+> > > top of this commit (106a74e)?
+> > > 
+> > > I really wonder why the problem happens, because this doesn't cause any
+> > > functional change as far as I know. Only side-effect from this patch is
+> > > decreasing size of struct slab.
+> > 
+> > Sorry I am not at the office, I have tried to reproduce it with a
+> > different device and a different sdcard but without success. I'll test
+> > it on Monday.
+> 
+> I am still not at the office but I get the same device and the same
+> sdcard and I don't reproduce it. I am not totally in the same
+> conditions. It seems there is an extra parameter causing this bug but I
+> don't figure out which one at the moment.
 
-I'm ok with it.
+Okay. I will wait for you!
 
-Regards
-Dong Aisheng
+Thanks for informing progress.
 
-> Shawn
->
->
-> _______________________________________________
-> linux-arm-kernel mailing list
-> linux-arm-kernel@lists.infradead.org
-> http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
