@@ -1,64 +1,155 @@
-From: Balaji T K <balajitk@ti.com>
-Subject: Re: [PATCH v7 3/7] regulator: add pbias regulator support
-Date: Tue, 24 Dec 2013 21:41:13 +0530
-Message-ID: <52B9B221.40004@ti.com>
-References: <1387560955-6547-1-git-send-email-balajitk@ti.com> <1387560955-6547-4-git-send-email-balajitk@ti.com> <20131220184451.GD26054@atomide.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCHv4] mmc: dw_mmc: Enable the hold reg for certain speed modes
+Date: Thu, 26 Dec 2013 11:57:37 +0900
+Message-ID: <52BB9B21.7010101@samsung.com>
+References: <1387213279-22020-1-git-send-email-dinguyen@altera.com>
+ <52B00737.6050701@linaro.org> <52B059A1.1000306@gmail.com>
+ <52B065B2.6010703@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from bear.ext.ti.com ([192.94.94.41]:53974 "EHLO bear.ext.ti.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752039Ab3LXQLY (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 24 Dec 2013 11:11:24 -0500
-In-Reply-To: <20131220184451.GD26054@atomide.com>
+Received: from mailout3.samsung.com ([203.254.224.33]:24163 "EHLO
+	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752477Ab3LZC5k (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 25 Dec 2013 21:57:40 -0500
+Received: from epcpsbgr4.samsung.com
+ (u144.gpu120.samsung.co.kr [203.254.230.144])
+ by mailout3.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+ (7.0.4.24.0) 64bit (built Nov 17 2011))
+ with ESMTP id <0MYE002OZ8828R30@mailout3.samsung.com> for
+ linux-mmc@vger.kernel.org; Thu, 26 Dec 2013 11:57:38 +0900 (KST)
+In-reply-to: <52B065B2.6010703@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Tony Lindgren <tony@atomide.com>
-Cc: linux-omap@vger.kernel.org, bcousson@baylibre.com, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, cjb@laptop.org, broonie@kernel.org
+To: zhangfei <zhangfei.gao@linaro.org>, Dinh Nguyen <dinh.linux@gmail.com>, dinguyen@altera.com, arnd@arndb.de, cjb@laptop.org, tgih.jun@samsung.com, heiko@sntech.de, dianders@chromium.org, alim.akhtar@samsung.com, bzhao@marvell.com
+Cc: linux-mmc@vger.kernel.org
 
-On Saturday 21 December 2013 05:09 AM, Tony Lindgren wrote:
-> * Balaji T K <balajitk@ti.com> [131220 09:37]:
->> +static const struct pbias_reg_info pbias_mmc_omap2430 = {
->> +	.enable = BIT(1),
->> +	.enable_mask = BIT(1),
->> +	.vmode = BIT(0),
->> +	.enable_time = 100,
->> +	.name = "pbias_mmc_omap2430"
->> +};
->> +
->> +static const struct pbias_reg_info pbias_sim_omap3 = {
->> +	.enable = BIT(9),
->> +	.enable_mask = BIT(9),
->> +	.vmode = BIT(8),
->> +	.enable_time = 100,
->> +	.name = "pbias_sim_omap3"
->> +};
->> +
->> +static const struct pbias_reg_info pbias_mmc_omap4 = {
->> +	.enable = BIT(26) | BIT(22),
->> +	.enable_mask = BIT(26) | BIT(25) | BIT(22),
->> +	.vmode = BIT(21),
->> +	.enable_time = 10,
->> +	.name = "pbias_mmc_omap4"
->> +};
->> +
->> +static const struct pbias_reg_info pbias_mmc_omap5 = {
->> +	.enable = BIT(27) | BIT(26),
->> +	.enable_mask = BIT(27) | BIT(25) | BIT(26),
->> +	.vmode = BIT(21),
->> +	.enable_time = 100,
->> +	.name = "pbias_mmc_omap5"
->> +};
->
-> Should the enable_time be 100 for omap4 like for the others?
->
+On 12/17/2013 11:54 PM, zhangfei wrote:
+> 
+> 
+> On 12/17/2013 10:03 PM, Dinh Nguyen wrote:
+>> Hi Zhangfei,
+>>
+>> On 12/17/13 2:11 AM, zhangfei wrote:
+>>>
+>>>
+>>> On 12/17/2013 01:01 AM, dinguyen@altera.com wrote:
+>>>> From: Dinh Nguyen <dinguyen@altera.com>
+>>>>
+>>>> This patch will enable the SDMMC_CMD_USE_HOLD_REG bit when the slot is
+>>>> operating all timing modes, except for SDR50, DDR50, SDR104, and
+>>>> MMC_HS200.
+>>>>
+>>>> According to the Synopsys databook :"To meet the relatively high
+>>>> Input Hold
+>>>> Time requirement for SDR12, SDR25, and other MMC speed modes, you should
+>>>> program bit[29]use_hold_Reg of the CMD register to 1'b1;"..."However,
+>>>> for
+>>>> the higher speed modes of SDR104, SDR50 and DDR50, you can meet the much
+>>>> smaller Input Hold Time requirement of 0.8ns by bypassing the Hold
+>>>> Register
+>>>> (Path A in Figure 10-8, programming CMD.use_hold_reg = 1'b0) and then
+>>>> adding
+>>>> delay elements on the output path as indicated.
+>>>>
+>>>> Also, "Never set CMD.use_hold_reg = 1 and cclk_in_drv phase shift to
+>>>> 0 at the
+>>>> same time. This would add an extra one-cycle delay on the output
+>>>> path, resulting
+>>>> in incorrect behavior."
+>>>>
+>>>> This patch also checks the IHR(Implement Hold Register) in the HCON
+>>>> register.
+>>>>
+>>>> This information is taking from the v2.50a of the Synopsys Designware
+>>>> Cores
+>>>> Mobile Storage Host Databook.
+>>>>
+>>>> Signed-off-by: Dinh Nguyen <dinguyen@altera.com>
+>>>> Acked-by: Arnd Bergmann <arnd@arndb.de>
+>>>> Acked-by: Heiko Stuebner <heiko@sntech.de>
+>>>> Tested-by: Heiko Stuebner <heiko@sntech.de>
+>>>> ---
+>>>> v4: use_hold_reg should be set for all modes when cclk_in_drv is
+>>>> non-zero.
+>>>> v3: Read the IHR(Implement Hold Register) in the HCON
+>>>> v2: Add check for cclk_in_drv phase shift in conjunction with
+>>>> use_hold_reg.
+>>>> ---
+>>>>    drivers/mmc/host/dw_mmc.c  |   52
+>>>> ++++++++++++++++++++++++++++++++++++++++++++
+>>>>    drivers/mmc/host/dw_mmc.h  |    4 ++++
+>>>>    include/linux/mmc/dw_mmc.h |    3 +++
+>>>>    3 files changed, 59 insertions(+)
+>>>>
+>>>> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+>>>>        /*
+>>>>         * Use mirror of ios->clock to prevent race with mmc
+>>>>         * core ios update when finding the minimum.
+>>>> @@ -2339,6 +2361,8 @@ static struct dw_mci_board
+>>>> *dw_mci_parse_dt(struct dw_mci *host)
+>>>>        const struct dw_mci_drv_data *drv_data = host->drv_data;
+>>>>        int idx, ret;
+>>>>        u32 clock_frequency;
+>>>> +    int sdr_timing[2];
+>>>> +    int ddr_timing[2];
+>>>>
+>>>>        pdata = devm_kzalloc(dev, sizeof(*pdata), GFP_KERNEL);
+>>>>        if (!pdata) {
+>>>> @@ -2389,6 +2413,25 @@ static struct dw_mci_board
+>>>> *dw_mci_parse_dt(struct dw_mci *host)
+>>>>        if (of_find_property(np, "caps2-mmc-hs200-1_2v", NULL))
+>>>>            pdata->caps2 |= MMC_CAP2_HS200_1_2V_SDR;
+>>>>
+>>>> +    /* Check for the "samsung,dw-mshc-sdr-timing" and the
+>>>> +     * "samsung,dw-mshc-ddr-timing" bindings as this will tell us if we
+>>>> +     * can safely set the SDMMC_CMD_USE_HOLD_REG bit. The second
+>>>> paramater
+>>>> +     * in these 2 bindings is the value of the cclk_in_drv. If
+>>>> cclk_in_drv
+>>>> +     * is 0, we cannot set the SDMMC_CMD_USE_HOLD_REG bit. The default
+>>>> +     * behavior will be to set cclk_in_drv, as some platforms do not
+>>>> have
+>>>> +     * to set the sdr or ddr timing parameters.
+>>>> +     */
+>>>> +    sdr_timing[1] = ddr_timing[1] = 1;
+>>>> +    of_property_read_u32_array(np,
+>>>> +            "samsung,dw-mshc-sdr-timing", sdr_timing, 2);
+>>>> +
+>>>> +    of_property_read_u32_array(np,
+>>>> +            "samsung,dw-mshc-ddr-timing", ddr_timing, 2);
+>>>> +
+>>>> +    pdata->cclk_in_drv = 1;
+>>>> +    if ((sdr_timing[1] == 0) || (ddr_timing[1] == 0))
+>>>> +        pdata->cclk_in_drv = 0;
+>>>> +
+>>>
+>>> Have some concern about whether it is suitable putting "samsung,~"
+>>> property in dw_mmc.c, is it supposed to be platform related?
+>>> Any conflict with drivers/mmc/host/dw_mmc-exynos.c?
+>>> If they are really commonly used, how about change name and define in
+>>> Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt?
+>> I had submitted a patch to make this a common binding before:
+>>
+>> http://www.spinics.net/lists/devicetree/msg00638.html
+>>
+>> I think the ultimate conclusion to that thread was that its perfectly
+>> acceptable to re-use bindings from other
+>> platforms.
+>>
+> 
+> Hmm, ususally I may look for the properties of dw_mmc.c in synopsys-dw-mshc.txt.
+> If this is the conclusion before, then just ignore this noise.
+If can be removed the samsung property, then i think property of clock timing can be used into dw-mmc.c
+But if samsung property is used, well. I think right that it's used into dw_mmc-exynos.c.
+Dw-mmc.c is general driver..so we don't want to include any SoC specific code.
 
-enable_time of 10 is fine for omap4
+If i missed something, then let me know, plz.
 
-> Other than that:
->
-> Acked-by: Tony Lindgren <tony@atomide.com>
->
+Best Regards,
+Jaehoon Chung
+> 
+> Thanks
+> 
 
-Thanks Tony
