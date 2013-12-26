@@ -1,155 +1,290 @@
 From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCHv4] mmc: dw_mmc: Enable the hold reg for certain speed modes
-Date: Thu, 26 Dec 2013 11:57:37 +0900
-Message-ID: <52BB9B21.7010101@samsung.com>
-References: <1387213279-22020-1-git-send-email-dinguyen@altera.com>
- <52B00737.6050701@linaro.org> <52B059A1.1000306@gmail.com>
- <52B065B2.6010703@linaro.org>
+Subject: Re: [PATCH 2/3] mmc: dw_mmc: add dw_mmc-k3 for k3 platform
+Date: Thu, 26 Dec 2013 13:33:52 +0900
+Message-ID: <52BBB1B0.8040907@samsung.com>
+References: <1386987174-1788-3-git-send-email-zhangfei.gao@linaro.org>
+ <1387199536-7053-1-git-send-email-zhangfei.gao@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout3.samsung.com ([203.254.224.33]:24163 "EHLO
+Received: from mailout3.samsung.com ([203.254.224.33]:39093 "EHLO
 	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752477Ab3LZC5k (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 25 Dec 2013 21:57:40 -0500
-Received: from epcpsbgr4.samsung.com
- (u144.gpu120.samsung.co.kr [203.254.230.144])
- by mailout3.samsung.com (Oracle Communications Messaging Server 7u4-24.01
- (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTP id <0MYE002OZ8828R30@mailout3.samsung.com> for
- linux-mmc@vger.kernel.org; Thu, 26 Dec 2013 11:57:38 +0900 (KST)
-In-reply-to: <52B065B2.6010703@linaro.org>
+	with ESMTP id S1752477Ab3LZEdz (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 25 Dec 2013 23:33:55 -0500
+In-reply-to: <1387199536-7053-1-git-send-email-zhangfei.gao@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: zhangfei <zhangfei.gao@linaro.org>, Dinh Nguyen <dinh.linux@gmail.com>, dinguyen@altera.com, arnd@arndb.de, cjb@laptop.org, tgih.jun@samsung.com, heiko@sntech.de, dianders@chromium.org, alim.akhtar@samsung.com, bzhao@marvell.com
-Cc: linux-mmc@vger.kernel.org
+To: Zhangfei Gao <zhangfei.gao@linaro.org>, Chris Ball <cjb@laptop.org>, Arnd Bergmann <arnd@arndb.de>, Mike Turquette <mturquette@linaro.org>, Rob Herring <robherring2@gmail.com>, Seungwon Jeon <tgih.jun@samsung.com>, Kumar Gala <galak@codeaurora.org>, Haojian Zhuang <haojian.zhuang@linaro.org>
+Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, patches@linaro.org, devicetree@vger.kernel.org, Zhigang Wang <brooke.wangzhigang@huawei.com>, cpgs@samsung.com
 
-On 12/17/2013 11:54 PM, zhangfei wrote:
-> 
-> 
-> On 12/17/2013 10:03 PM, Dinh Nguyen wrote:
->> Hi Zhangfei,
->>
->> On 12/17/13 2:11 AM, zhangfei wrote:
->>>
->>>
->>> On 12/17/2013 01:01 AM, dinguyen@altera.com wrote:
->>>> From: Dinh Nguyen <dinguyen@altera.com>
->>>>
->>>> This patch will enable the SDMMC_CMD_USE_HOLD_REG bit when the slot is
->>>> operating all timing modes, except for SDR50, DDR50, SDR104, and
->>>> MMC_HS200.
->>>>
->>>> According to the Synopsys databook :"To meet the relatively high
->>>> Input Hold
->>>> Time requirement for SDR12, SDR25, and other MMC speed modes, you should
->>>> program bit[29]use_hold_Reg of the CMD register to 1'b1;"..."However,
->>>> for
->>>> the higher speed modes of SDR104, SDR50 and DDR50, you can meet the much
->>>> smaller Input Hold Time requirement of 0.8ns by bypassing the Hold
->>>> Register
->>>> (Path A in Figure 10-8, programming CMD.use_hold_reg = 1'b0) and then
->>>> adding
->>>> delay elements on the output path as indicated.
->>>>
->>>> Also, "Never set CMD.use_hold_reg = 1 and cclk_in_drv phase shift to
->>>> 0 at the
->>>> same time. This would add an extra one-cycle delay on the output
->>>> path, resulting
->>>> in incorrect behavior."
->>>>
->>>> This patch also checks the IHR(Implement Hold Register) in the HCON
->>>> register.
->>>>
->>>> This information is taking from the v2.50a of the Synopsys Designware
->>>> Cores
->>>> Mobile Storage Host Databook.
->>>>
->>>> Signed-off-by: Dinh Nguyen <dinguyen@altera.com>
->>>> Acked-by: Arnd Bergmann <arnd@arndb.de>
->>>> Acked-by: Heiko Stuebner <heiko@sntech.de>
->>>> Tested-by: Heiko Stuebner <heiko@sntech.de>
->>>> ---
->>>> v4: use_hold_reg should be set for all modes when cclk_in_drv is
->>>> non-zero.
->>>> v3: Read the IHR(Implement Hold Register) in the HCON
->>>> v2: Add check for cclk_in_drv phase shift in conjunction with
->>>> use_hold_reg.
->>>> ---
->>>>    drivers/mmc/host/dw_mmc.c  |   52
->>>> ++++++++++++++++++++++++++++++++++++++++++++
->>>>    drivers/mmc/host/dw_mmc.h  |    4 ++++
->>>>    include/linux/mmc/dw_mmc.h |    3 +++
->>>>    3 files changed, 59 insertions(+)
->>>>
->>>> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
->>>>        /*
->>>>         * Use mirror of ios->clock to prevent race with mmc
->>>>         * core ios update when finding the minimum.
->>>> @@ -2339,6 +2361,8 @@ static struct dw_mci_board
->>>> *dw_mci_parse_dt(struct dw_mci *host)
->>>>        const struct dw_mci_drv_data *drv_data = host->drv_data;
->>>>        int idx, ret;
->>>>        u32 clock_frequency;
->>>> +    int sdr_timing[2];
->>>> +    int ddr_timing[2];
->>>>
->>>>        pdata = devm_kzalloc(dev, sizeof(*pdata), GFP_KERNEL);
->>>>        if (!pdata) {
->>>> @@ -2389,6 +2413,25 @@ static struct dw_mci_board
->>>> *dw_mci_parse_dt(struct dw_mci *host)
->>>>        if (of_find_property(np, "caps2-mmc-hs200-1_2v", NULL))
->>>>            pdata->caps2 |= MMC_CAP2_HS200_1_2V_SDR;
->>>>
->>>> +    /* Check for the "samsung,dw-mshc-sdr-timing" and the
->>>> +     * "samsung,dw-mshc-ddr-timing" bindings as this will tell us if we
->>>> +     * can safely set the SDMMC_CMD_USE_HOLD_REG bit. The second
->>>> paramater
->>>> +     * in these 2 bindings is the value of the cclk_in_drv. If
->>>> cclk_in_drv
->>>> +     * is 0, we cannot set the SDMMC_CMD_USE_HOLD_REG bit. The default
->>>> +     * behavior will be to set cclk_in_drv, as some platforms do not
->>>> have
->>>> +     * to set the sdr or ddr timing parameters.
->>>> +     */
->>>> +    sdr_timing[1] = ddr_timing[1] = 1;
->>>> +    of_property_read_u32_array(np,
->>>> +            "samsung,dw-mshc-sdr-timing", sdr_timing, 2);
->>>> +
->>>> +    of_property_read_u32_array(np,
->>>> +            "samsung,dw-mshc-ddr-timing", ddr_timing, 2);
->>>> +
->>>> +    pdata->cclk_in_drv = 1;
->>>> +    if ((sdr_timing[1] == 0) || (ddr_timing[1] == 0))
->>>> +        pdata->cclk_in_drv = 0;
->>>> +
->>>
->>> Have some concern about whether it is suitable putting "samsung,~"
->>> property in dw_mmc.c, is it supposed to be platform related?
->>> Any conflict with drivers/mmc/host/dw_mmc-exynos.c?
->>> If they are really commonly used, how about change name and define in
->>> Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt?
->> I had submitted a patch to make this a common binding before:
->>
->> http://www.spinics.net/lists/devicetree/msg00638.html
->>
->> I think the ultimate conclusion to that thread was that its perfectly
->> acceptable to re-use bindings from other
->> platforms.
->>
-> 
-> Hmm, ususally I may look for the properties of dw_mmc.c in synopsys-dw-mshc.txt.
-> If this is the conclusion before, then just ignore this noise.
-If can be removed the samsung property, then i think property of clock timing can be used into dw-mmc.c
-But if samsung property is used, well. I think right that it's used into dw_mmc-exynos.c.
-Dw-mmc.c is general driver..so we don't want to include any SoC specific code.
+Hi, Zhangfei,
 
-If i missed something, then let me know, plz.
+On 12/16/2013 10:12 PM, Zhangfei Gao wrote:
+> Add dw_mmc-k3.c for k3v2, support sd/emmc
+> 
+> Signed-off-by: Zhangfei Gao <zhangfei.gao@linaro.org>
+> Signed-off-by: Zhigang Wang <brooke.wangzhigang@huawei.com>
+> ---
+>  .../devicetree/bindings/mmc/k3-dw-mshc.txt         |   60 +++++++++
+>  drivers/mmc/host/Kconfig                           |   10 ++
+>  drivers/mmc/host/Makefile                          |    1 +
+>  drivers/mmc/host/dw_mmc-k3.c                       |  134 ++++++++++++++++++++
+>  4 files changed, 205 insertions(+)
+>  create mode 100644 Documentation/devicetree/bindings/mmc/k3-dw-mshc.txt
+>  create mode 100644 drivers/mmc/host/dw_mmc-k3.c
+> 
+> diff --git a/Documentation/devicetree/bindings/mmc/k3-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/k3-dw-mshc.txt
+> new file mode 100644
+> index 000000000000..d7e2d7f159bb
+> --- /dev/null
+> +++ b/Documentation/devicetree/bindings/mmc/k3-dw-mshc.txt
+> @@ -0,0 +1,60 @@
+> +* Hisilicon specific extensions to the Synopsys Designware Mobile
+> +  Storage Host Controller
+> +
+> +Read synopsys-dw-mshc.txt for more details
+> +
+> +The Synopsys designware mobile storage host controller is used to interface
+> +a SoC with storage medium such as eMMC or SD/MMC cards. This file documents
+> +differences between the core Synopsys dw mshc controller properties described
+> +by synopsys-dw-mshc.txt and the properties used by the Hisilicon specific
+> +extensions to the Synopsys Designware Mobile Storage Host Controller.
+> +
+> +Required Properties:
+> +
+> +* compatible: should be one of the following.
+> +  - "hisilicon,hi4511-dw-mshc": for controllers with hi4511 specific extentions.
+> +
+> +* clock-freq-table: should be the frequency (in Hz) array of the ciu clock
+> +	in each	supported mode.
+> +	0. CIU clock rate in Hz for DS mode
+> +	1. CIU clock rate in Hz for MMC HS mode
+> +	2. CIU clock rate in Hz for SD HS mode
+> +	3. CIU clock rate in Hz for SDR12 mode
+> +	4. CIU clock rate in Hz for SDR25 mode
+> +	5. CIU clock rate in Hz for SDR50 mode
+> +	6. CIU clock rate in Hz for SDR104 mode
+> +	7. CIU clock rate in Hz for DDR50 mode
+> +	8. CIU clock rate in Hz for HS200 mode
+> +
+> +Example:
+> +
+> +	/* for Hi3620 */
+> +
+> +	/* SoC portion */
+> +	dwmmc_0: dwmmc0@fcd03000 {
+> +		compatible = "hisilicon,hi4511-dw-mshc";
+> +		reg = <0xfcd03000 0x1000>;
+> +		interrupts = <0 16 4>;
+> +		#address-cells = <1>;
+> +		#size-cells = <0>;
+> +		clocks = <&mmc_clock HI3620_SD_CIUCLK>, <&clock HI3620_DDRC_PER_CLK>;
+> +		clock-names = "ciu", "biu";
+> +		clock-freq-table =
+> +		<25000000 0 50000000 25000000 50000000 100000000 0 50000000>;
+> +	};
+> +
+> +	/* Board portion */
+> +	dwmmc0@fcd03000 {
+> +		num-slots = <1>;
+> +		vmmc-supply = <&ldo12>;
+> +		fifo-depth = <0x100>;
+> +		supports-highspeed;
+> +		pinctrl-names = "default";
+> +		pinctrl-0 = <&sd_pmx_pins &sd_cfg_func1 &sd_cfg_func2>;
+> +		slot@0 {
+> +			reg = <0>;
+> +			bus-width = <4>;
+> +			disable-wp;
+> +			cd-gpios = <&gpio10 3 0>;
+> +		};
+> +	};
+> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+> index 7fc5099e44b2..45aaa2de0f58 100644
+> --- a/drivers/mmc/host/Kconfig
+> +++ b/drivers/mmc/host/Kconfig
+> @@ -575,6 +575,16 @@ config MMC_DW_SOCFPGA
+>  	  This selects support for Altera SoCFPGA specific extensions to the
+>  	  Synopsys DesignWare Memory Card Interface driver.
+>  
+> +config MMC_DW_K3
+> +	tristate "K3 specific extensions for Synopsys DW Memory Card Interface"
+> +	depends on MMC_DW
+> +	select MMC_DW_PLTFM
+> +	select MMC_DW_IDMAC
+
+Only use the IDMAC?
+
+> +	help
+> +	  This selects support for Hisilicon K3 SoC specific extensions to the
+> +	  Synopsys DesignWare Memory Card Interface driver. Select this option
+> +	  for platforms based on Hisilicon K3 SoC's.
+> +
+>  config MMC_DW_PCI
+>  	tristate "Synopsys Designware MCI support on PCI bus"
+>  	depends on MMC_DW && PCI
+> diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
+> index c41d0c364509..64f5f8d35839 100644
+> --- a/drivers/mmc/host/Makefile
+> +++ b/drivers/mmc/host/Makefile
+> @@ -43,6 +43,7 @@ obj-$(CONFIG_MMC_DW)		+= dw_mmc.o
+>  obj-$(CONFIG_MMC_DW_PLTFM)	+= dw_mmc-pltfm.o
+>  obj-$(CONFIG_MMC_DW_EXYNOS)	+= dw_mmc-exynos.o
+>  obj-$(CONFIG_MMC_DW_SOCFPGA)	+= dw_mmc-socfpga.o
+> +obj-$(CONFIG_MMC_DW_K3)		+= dw_mmc-k3.o
+>  obj-$(CONFIG_MMC_DW_PCI)	+= dw_mmc-pci.o
+>  obj-$(CONFIG_MMC_SH_MMCIF)	+= sh_mmcif.o
+>  obj-$(CONFIG_MMC_JZ4740)	+= jz4740_mmc.o
+> diff --git a/drivers/mmc/host/dw_mmc-k3.c b/drivers/mmc/host/dw_mmc-k3.c
+> new file mode 100644
+> index 000000000000..e3eea2883ae7
+> --- /dev/null
+> +++ b/drivers/mmc/host/dw_mmc-k3.c
+> @@ -0,0 +1,134 @@
+> +/*
+> + * Copyright (c) 2013 Linaro Ltd.
+> + * Copyright (c) 2013 Hisilicon Limited.
+> + *
+> + * This program is free software; you can redistribute it and/or modify
+> + * it under the terms of the GNU General Public License as published by
+> + * the Free Software Foundation; either version 2 of the License, or
+> + * (at your option) any later version.
+> + */
+> +
+> +#include <linux/module.h>
+> +#include <linux/platform_device.h>
+> +#include <linux/clk.h>
+> +#include <linux/mmc/host.h>
+> +#include <linux/mmc/dw_mmc.h>
+> +#include <linux/of_address.h>
+> +
+> +#include "dw_mmc.h"
+> +#include "dw_mmc-pltfm.h"
+> +
+> +#define MAX_NUMS	10
+> +struct dw_mci_k3_priv_data {
+> +	u32	clk_table[MAX_NUMS];
+> +};
+> +
+> +static void dw_mci_k3_set_ios(struct dw_mci *host, struct mmc_ios *ios)
+> +{
+> +	struct dw_mci_k3_priv_data *priv = host->priv;
+> +	u32 rate = priv->clk_table[ios->timing];
+> +	int ret;
+> +
+> +	ret = clk_set_rate(host->ciu_clk, rate);
+> +	if (ret)
+> +		dev_warn(host->dev, "failed to set clock rate %uHz\n", rate);
+> +
+> +	host->bus_hz = clk_get_rate(host->ciu_clk);
+> +}
+> +
+> +static int dw_mci_k3_parse_dt(struct dw_mci *host)
+> +{
+> +	struct dw_mci_k3_priv_data *priv;
+> +	struct device_node *node = host->dev->of_node;
+> +	struct property *prop;
+> +	const __be32 *cur;
+> +	u32 val, num = 0;
+> +
+> +	priv = devm_kzalloc(host->dev, sizeof(*priv), GFP_KERNEL);
+> +	if (!priv) {
+> +		dev_err(host->dev, "mem alloc failed for private data\n");
+> +		return -ENOMEM;
+> +	}
+> +	host->priv = priv;
+> +
+> +	of_property_for_each_u32(node, "clock-freq-table", prop, cur, val) {
+> +		if (num >= MAX_NUMS)
+> +			break;
+> +		priv->clk_table[num++] = val;
+> +	}
+> +	return 0;
+> +}
+> +
+> +static unsigned long k3_dwmmc_caps[4] = {
+> +	MMC_CAP_4_BIT_DATA | MMC_CAP_SD_HIGHSPEED,
+> +	MMC_CAP_8_BIT_DATA | MMC_CAP_MMC_HIGHSPEED,
+> +	0,
+> +	0,
+> +};
+
+If supports-highspeed is defined at dt-file,
+then MMC_CAP_SD_HIGHSEEPD and MMC_CAP_MMC_HIGHSPEED should set in dw-mmc.c 
+
+> +
+> +static const struct dw_mci_drv_data k3_drv_data = {
+> +	.caps			= k3_dwmmc_caps,
+> +	.set_ios		= dw_mci_k3_set_ios,
+> +	.parse_dt		= dw_mci_k3_parse_dt,
+> +};
+> +
+> +static const struct of_device_id dw_mci_k3_match[] = {
+> +	{ .compatible = "hisilicon,hi4511-dw-mshc", .data = &k3_drv_data, },
+> +	{},
+> +};
+> +MODULE_DEVICE_TABLE(of, dw_mci_k3_match);
+> +
+> +static int dw_mci_k3_probe(struct platform_device *pdev)
+> +{
+> +	const struct dw_mci_drv_data *drv_data;
+> +	const struct of_device_id *match;
+> +
+> +	match = of_match_node(dw_mci_k3_match, pdev->dev.of_node);
+> +	drv_data = match->data;
+> +
+> +	return dw_mci_pltfm_register(pdev, drv_data);
+> +}
+> +
+> +static int dw_mci_k3_suspend(struct device *dev)
+> +{
+> +	struct dw_mci *host = dev_get_drvdata(dev);
+> +	int ret = 0;
+> +
+> +	ret = dw_mci_suspend(host);
+> +	if (!ret)
+> +		clk_disable_unprepare(host->ciu_clk);
+> +
+> +	return ret;
+> +}
+> +
+> +static int dw_mci_k3_resume(struct device *dev)
+> +{
+> +	struct dw_mci *host = dev_get_drvdata(dev);
+> +	int ret = 0;
+> +
+> +	ret = clk_prepare_enable(host->ciu_clk);
+> +	if (ret) {
+> +		dev_err(host->dev, "failed to enable ciu clock\n");
+> +		return ret;
+> +	}
+> +
+> +	return dw_mci_resume(host);
+> +}
+
+Clock control need in suspend/resume? ciu-clk is used into dw-mmc.c.
 
 Best Regards,
 Jaehoon Chung
-> 
-> Thanks
+
+> +
+> +SIMPLE_DEV_PM_OPS(dw_mci_k3_pmops, dw_mci_k3_suspend, dw_mci_k3_resume);
+> +
+> +static struct platform_driver dw_mci_k3_pltfm_driver = {
+> +	.probe		= dw_mci_k3_probe,
+> +	.remove		= dw_mci_pltfm_remove,
+> +	.driver		= {
+> +		.name		= "dwmmc_k3",
+> +		.of_match_table	= dw_mci_k3_match,
+> +		.pm		= &dw_mci_k3_pmops,
+> +	},
+> +};
+> +
+> +module_platform_driver(dw_mci_k3_pltfm_driver);
+> +
+> +MODULE_DESCRIPTION("K3 Specific DW-MSHC Driver Extension");
+> +MODULE_LICENSE("GPL v2");
+> +MODULE_ALIAS("platform:dwmmc-k3");
 > 
 
