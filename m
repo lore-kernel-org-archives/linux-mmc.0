@@ -1,97 +1,220 @@
-From: Dong Aisheng <b29396@freescale.com>
-Subject: [PATCH V2 2/2] mmc: sdhci-esdhc-imx: fix warning during module remove function
-Date: Thu, 26 Dec 2013 15:23:54 +0800
-Message-ID: <1388042634-17281-2-git-send-email-b29396@freescale.com>
-References: <1388042634-17281-1-git-send-email-b29396@freescale.com>
+From: Dong Aisheng <dongas86@gmail.com>
+Subject: Re: [PATCH 1/1] mmc: sdhci: fix lockdep error on tunning routine
+Date: Thu, 26 Dec 2013 15:58:20 +0800
+Message-ID: <CAA+hA=TRQP7hS3+iXyHg3FuNQKA=chJi7Ne47Ew_4RJcQ6yong@mail.gmail.com>
+References: <1387797184-18958-1-git-send-email-b29396@freescale.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-db8lp0189.outbound.messaging.microsoft.com ([213.199.154.189]:9568
-	"EHLO db8outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751025Ab3LZHzP (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 26 Dec 2013 02:55:15 -0500
-In-Reply-To: <1388042634-17281-1-git-send-email-b29396@freescale.com>
+Received: from mail-qe0-f44.google.com ([209.85.128.44]:42042 "EHLO
+	mail-qe0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751381Ab3LZH6V (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 26 Dec 2013 02:58:21 -0500
+Received: by mail-qe0-f44.google.com with SMTP id nd7so7731676qeb.17
+        for <linux-mmc@vger.kernel.org>; Wed, 25 Dec 2013 23:58:20 -0800 (PST)
+In-Reply-To: <1387797184-18958-1-git-send-email-b29396@freescale.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: linux-arm-kernel@lists.infradead.org, cjb@laptop.org, shawn.guo@linaro.org, s.hauer@pengutronix.de, b29396@freescale.com
+To: Dong Aisheng <b29396@freescale.com>, peterz@infradead.org
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Shawn Guo <shawn.guo@linaro.org>, Sascha Hauer <s.hauer@pengutronix.de>, Chris Ball <cjb@laptop.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 
-Since the clock is managed by runtime pm currently, we do not need
-disable it again during driver remove function, or it will cause
-clock disable count mismatch issue since the clocks have already been disabled.
+Hi Peter,
 
-The issue can be simply reproduced by unbind the devices via sysfs.
-mx6slevk:/sys/bus/platform/drivers/sdhci-esdhc-imx# echo 2194000.usdhc > unbind
-mmc1: card aaaa removed
-------------[ cut here ]------------
-WARNING: CPU: 0 PID: 657 at drivers/clk/clk.c:842 __clk_disable+0x68/0x88()
-Modules linked in:
-CPU: 0 PID: 657 Comm: sh Not tainted 3.13.0-rc1+ #285
-Backtrace:
-[<80012160>] (dump_backtrace+0x0/0x10c) from [<80012438>] (show_stack+0x18/0x1c)
- r6:80481370 r5:00000000 r4:8088ecc8 r3:00000000
-[<80012420>] (show_stack+0x0/0x1c) from [<80616b14>] (dump_stack+0x84/0x9c)
-[<80616a90>] (dump_stack+0x0/0x9c) from [<80027158>] (warn_slowpath_common+0x70/0x94)
- r5:00000009 r4:00000000
-[<800270e8>] (warn_slowpath_common+0x0/0x94) from [<80027220>] (warn_slowpath_null+0x24/0x2c)
- r8:bec4ff78 r7:0000000e r6:bf91d800 r5:bf81d080 r4:bf81d080
-[<800271fc>] (warn_slowpath_null+0x0/0x2c) from [<80481370>] (__clk_disable+0x68/0x88)
-[<80481308>] (__clk_disable+0x0/0x88) from [<8048148c>] (clk_disable+0x20/0x2c)
- r4:200f0113 r3:bf95ec00
-[<8048146c>] (clk_disable+0x0/0x2c) from [<80463bd8>] (sdhci_esdhc_imx_remove+0x64/0xa4)
- r5:bf81d080 r4:bfabb010
-[<80463b74>] (sdhci_esdhc_imx_remove+0x0/0xa4) from [<8032e82c>] (platform_drv_remove+0x20/0x24)
- r6:808ae0e0 r5:808ae0e0 r4:bf91d810 r3:80463b74
-[<8032e80c>] (platform_drv_remove+0x0/0x24) from [<8032d010>] (__device_release_driver+0x78/0xd0)
-[<8032cf98>] (__device_release_driver+0x0/0xd0) from [<8032d090>] (device_release_driver+0x28/0x34)
- r5:bf91d810 r4:bf91d844
-[<8032d068>] (device_release_driver+0x0/0x34) from [<8032c0c8>] (unbind_store+0x80/0xc4)
- r5:bf91d810 r4:80899ba0
-[<8032c048>] (unbind_store+0x0/0xc4) from [<8032b648>] (drv_attr_store+0x28/0x34)
- r7:bed73100 r6:0000000e r5:00000000 r4:8032b620
-[<8032b620>] (drv_attr_store+0x0/0x34) from [<80140580>] (sysfs_write_file+0x1b0/0x1e4)
-[<801403d0>] (sysfs_write_file+0x0/0x1e4) from [<800dcda0>] (vfs_write+0xb4/0x190)
-[<800dccec>] (vfs_write+0x0/0x190) from [<800dd3e4>] (SyS_write+0x44/0x80)
- r9:0000000e r8:00000000 r7:01a00408 r6:bf3b1c00 r5:00000000
-r4:00000000
-[<800dd3a0>] (SyS_write+0x0/0x80) from [<8000e900>] (ret_fast_syscall+0x0/0x48)
- r9:bec4e000 r8:8000eac4 r7:00000004 r6:76f5fb40 r5:01a00408
-r4:0000000e
----[ end trace a0897d268e6233b2 ]---
+On Mon, Dec 23, 2013 at 7:13 PM, Dong Aisheng <b29396@freescale.com> wrote:
+> The sdhci_execute_tuning routine gets lock separately by
+> disable_irq(host->irq);
+> spin_lock(&host->lock);
+> It will cause the following lockdep error message since the &host->lock
+> could also be got in irq context.
+> Use spin_lock_irqsave/spin_unlock_restore instead to get rid of
+> this error message.
+>
+> [ INFO: inconsistent lock state ]
+> 3.13.0-rc1+ #287 Not tainted
+> ---------------------------------
+> inconsistent {IN-HARDIRQ-W} -> {HARDIRQ-ON-W} usage.
+> kworker/u2:1/33 [HC0[0]:SC0[0]:HE1:SE1] takes:
+>  (&(&host->lock)->rlock){?.-...}, at: [<8045f7f4>] sdhci_execute_tuning+0x4c/0x710
+> {IN-HARDIRQ-W} state was registered at:
+>   [<8005f030>] mark_lock+0x140/0x6ac
+>   [<80060760>] __lock_acquire+0xb30/0x1cbc
+>   [<800620d0>] lock_acquire+0x70/0x84
+>   [<8061d1c8>] _raw_spin_lock+0x30/0x40
+>   [<804605cc>] sdhci_irq+0x24/0xa68
+>   [<8006b1d4>] handle_irq_event_percpu+0x54/0x18c
+>   [<8006b350>] handle_irq_event+0x44/0x64
+>   [<8006e50c>] handle_fasteoi_irq+0xa0/0x170
+>   [<8006a8f0>] generic_handle_irq+0x30/0x44
+>   [<8000f238>] handle_IRQ+0x54/0xbc
+>   [<8000864c>] gic_handle_irq+0x30/0x64
+>   [<80013024>] __irq_svc+0x44/0x5c
+>   [<80329bf4>] dev_vprintk_emit+0x50/0x58
+>   [<80329c24>] dev_printk_emit+0x28/0x30
+>   [<80329fec>] __dev_printk+0x4c/0x90
+>   [<8032a180>] dev_err+0x3c/0x48
+>   [<802dd4f0>] _regulator_get+0x158/0x1cc
+>   [<802dd5b4>] regulator_get_optional+0x18/0x1c
+>   [<80461df4>] sdhci_add_host+0x42c/0xbd8
+>   [<80464820>] sdhci_esdhc_imx_probe+0x378/0x67c
+>   [<8032ee88>] platform_drv_probe+0x20/0x50
+>   [<8032d48c>] driver_probe_device+0x118/0x234
+>   [<8032d690>] __driver_attach+0x9c/0xa0
+>   [<8032b89c>] bus_for_each_dev+0x68/0x9c
+>   [<8032cf44>] driver_attach+0x20/0x28
+>   [<8032cbc8>] bus_add_driver+0x148/0x1f4
+>   [<8032dce0>] driver_register+0x80/0x100
+>   [<8032ee54>] __platform_driver_register+0x50/0x64
+>   [<8084b094>] sdhci_esdhc_imx_driver_init+0x18/0x20
+>   [<80008980>] do_one_initcall+0x108/0x16c
+>   [<8081cca4>] kernel_init_freeable+0x10c/0x1d0
+>   [<80611b28>] kernel_init+0x10/0x120
+>   [<8000e9c8>] ret_from_fork+0x14/0x2c
+> irq event stamp: 805
+> hardirqs last  enabled at (805): [<8061d43c>] _raw_spin_unlock_irqrestore+0x38/0x4c
+> hardirqs last disabled at (804): [<8061d2c8>] _raw_spin_lock_irqsave+0x24/0x54
+> softirqs last  enabled at (570): [<8002b824>] __do_softirq+0x1c4/0x290
+> softirqs last disabled at (561): [<8002bcf4>] irq_exit+0xb4/0x10c
+>
+> other info that might help us debug this:
+>  Possible unsafe locking scenario:
+>
+>        CPU0
+>        ----
+>   lock(&(&host->lock)->rlock);
+>   <Interrupt>
+>     lock(&(&host->lock)->rlock);
+>
+>  *** DEADLOCK ***
+>
+> 2 locks held by kworker/u2:1/33:
+>  #0:  (kmmcd){.+.+..}, at: [<8003db18>] process_one_work+0x128/0x468
+>  #1:  ((&(&host->detect)->work)){+.+...}, at: [<8003db18>] process_one_work+0x128/0x468
+>
+> stack backtrace:
+> CPU: 0 PID: 33 Comm: kworker/u2:1 Not tainted 3.13.0-rc1+ #287
+> Workqueue: kmmcd mmc_rescan
+> Backtrace:
+> [<80012160>] (dump_backtrace+0x0/0x10c) from [<80012438>] (show_stack+0x18/0x1c)
+>  r6:bfad0900 r5:00000000 r4:8088ecc8 r3:bfad0900
+> [<80012420>] (show_stack+0x0/0x1c) from [<806169ec>] (dump_stack+0x84/0x9c)
+> [<80616968>] (dump_stack+0x0/0x9c) from [<806147b4>] (print_usage_bug+0x260/0x2d0)
+>  r5:8076ba88 r4:80977410
+> [<80614554>] (print_usage_bug+0x0/0x2d0) from [<8005f0d0>] (mark_lock+0x1e0/0x6ac)
+>  r9:8005e678 r8:00000000 r7:bfad0900 r6:00001015 r5:bfad0cd0
+> r4:00000002
+> [<8005eef0>] (mark_lock+0x0/0x6ac) from [<80060234>] (__lock_acquire+0x604/0x1cbc)
+> [<8005fc30>] (__lock_acquire+0x0/0x1cbc) from [<800620d0>] (lock_acquire+0x70/0x84)
+> [<80062060>] (lock_acquire+0x0/0x84) from [<8061d1c8>] (_raw_spin_lock+0x30/0x40)
+>  r7:00000000 r6:bfb63000 r5:00000000 r4:bfb60568
+> [<8061d198>] (_raw_spin_lock+0x0/0x40) from [<8045f7f4>] (sdhci_execute_tuning+0x4c/0x710)
+>  r4:bfb60000
+> [<8045f7a8>] (sdhci_execute_tuning+0x0/0x710) from [<80453454>] (mmc_sd_init_card+0x5f8/0x660)
+> [<80452e5c>] (mmc_sd_init_card+0x0/0x660) from [<80453748>] (mmc_attach_sd+0xb4/0x180)
+>  r9:bf92d400 r8:8065f364 r7:00061a80 r6:bfb60000 r5:8065f358
+> r4:bfb60000
+> [<80453694>] (mmc_attach_sd+0x0/0x180) from [<8044d9f8>] (mmc_rescan+0x284/0x2f0)
+>  r5:8065f358 r4:bfb602f8
+> [<8044d774>] (mmc_rescan+0x0/0x2f0) from [<8003db94>] (process_one_work+0x1a4/0x468)
+>  r8:00000000 r7:bfb55eb0 r6:bf80dc00 r5:bfb602f8 r4:bfb35980
+> r3:8044d774
+> [<8003d9f0>] (process_one_work+0x0/0x468) from [<8003e850>] (worker_thread+0x118/0x3e0)
+> [<8003e738>] (worker_thread+0x0/0x3e0) from [<80044de0>] (kthread+0xd4/0xf0)
+> [<80044d0c>] (kthread+0x0/0xf0) from [<8000e9c8>] (ret_from_fork+0x14/0x2c)
+>  r7:00000000 r6:00000000 r5:80044d0c r4:bfb37b40
+>
+> Cc: Peter Zijlstra <peterz@infradead.org>
+> Cc: Chris Ball <cjb@laptop.org>
+> Cc: Shawn Guo <shawn.guo@linaro.org>
+> Signed-off-by: Dong Aisheng <b29396@freescale.com>
+>
+> ---
+> It's strange that this issue did not happen on kernel 3.10.17 with the same
+> code. And looking at the code, before call spin_lock we already disable the mmc
+> controller irq, per on my understanding, the deadlock given by lockdep may not
+> be able to happen(pls fix me if wrong).
+> May the lockdep not track the specific irq disable?
+> Copy lockdep guy to comment.
 
-If without runtime pm, we just run as before to match the clock enable
-in probe function.
+Any comments for it?
 
-Cc: Chris Ball <cjb@laptop.org>
-Cc: Shawn Guo <shawn.guo@linaro.org>
-Signed-off-by: Dong Aisheng <b29396@freescale.com>
----
-ChangeLog:
-v1->v2: cover the !CONFIG_PM_RUNTIME case as suggested by Shawn
----
- drivers/mmc/host/sdhci-esdhc-imx.c |    8 +++++---
- 1 files changed, 5 insertions(+), 3 deletions(-)
+Regards
+Dong Aisheng
 
-diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-index 745ee1e..452171f 100644
---- a/drivers/mmc/host/sdhci-esdhc-imx.c
-+++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-@@ -1169,9 +1169,11 @@ static int sdhci_esdhc_imx_remove(struct platform_device *pdev)
- 	pm_runtime_dont_use_autosuspend(&pdev->dev);
- 	pm_runtime_disable(&pdev->dev);
- 
--	clk_disable_unprepare(imx_data->clk_per);
--	clk_disable_unprepare(imx_data->clk_ipg);
--	clk_disable_unprepare(imx_data->clk_ahb);
-+	if (!IS_ENABLED(CONFIG_PM_RUNTIME)) {
-+		clk_disable_unprepare(imx_data->clk_per);
-+		clk_disable_unprepare(imx_data->clk_ipg);
-+		clk_disable_unprepare(imx_data->clk_ahb);
-+	}
- 
- 	sdhci_pltfm_free(pdev);
- 
--- 
-1.7.2.rc3
-
-
+> ---
+>  drivers/mmc/host/sdhci.c |   20 +++++++-------------
+>  1 files changed, 7 insertions(+), 13 deletions(-)
+>
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index a104bb1..c5d5f53 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -1876,12 +1876,12 @@ static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
+>         unsigned long timeout;
+>         int err = 0;
+>         bool requires_tuning_nonuhs = false;
+> +       unsigned long flags;
+>
+>         host = mmc_priv(mmc);
+>
+>         sdhci_runtime_pm_get(host);
+> -       disable_irq(host->irq);
+> -       spin_lock(&host->lock);
+> +       spin_lock_irqsave(&host->lock, flags);
+>
+>         ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
+>
+> @@ -1901,15 +1901,13 @@ static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
+>             requires_tuning_nonuhs)
+>                 ctrl |= SDHCI_CTRL_EXEC_TUNING;
+>         else {
+> -               spin_unlock(&host->lock);
+> -               enable_irq(host->irq);
+> +               spin_unlock_irqrestore(&host->lock, flags);
+>                 sdhci_runtime_pm_put(host);
+>                 return 0;
+>         }
+>
+>         if (host->ops->platform_execute_tuning) {
+> -               spin_unlock(&host->lock);
+> -               enable_irq(host->irq);
+> +               spin_unlock_irqrestore(&host->lock, flags);
+>                 err = host->ops->platform_execute_tuning(host, opcode);
+>                 sdhci_runtime_pm_put(host);
+>                 return err;
+> @@ -1982,15 +1980,12 @@ static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
+>                 host->cmd = NULL;
+>                 host->mrq = NULL;
+>
+> -               spin_unlock(&host->lock);
+> -               enable_irq(host->irq);
+> -
+> +               spin_unlock_irqrestore(&host->lock, flags);
+>                 /* Wait for Buffer Read Ready interrupt */
+>                 wait_event_interruptible_timeout(host->buf_ready_int,
+>                                         (host->tuning_done == 1),
+>                                         msecs_to_jiffies(50));
+> -               disable_irq(host->irq);
+> -               spin_lock(&host->lock);
+> +               spin_lock_irqsave(&host->lock, flags);
+>
+>                 if (!host->tuning_done) {
+>                         pr_info(DRIVER_NAME ": Timeout waiting for "
+> @@ -2065,8 +2060,7 @@ out:
+>                 err = 0;
+>
+>         sdhci_clear_set_irqs(host, SDHCI_INT_DATA_AVAIL, ier);
+> -       spin_unlock(&host->lock);
+> -       enable_irq(host->irq);
+> +       spin_unlock_irqrestore(&host->lock, flags);
+>         sdhci_runtime_pm_put(host);
+>
+>         return err;
+> --
+> 1.7.2.rc3
+>
+>
+>
+> _______________________________________________
+> linux-arm-kernel mailing list
+> linux-arm-kernel@lists.infradead.org
+> http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
