@@ -1,290 +1,383 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH 2/3] mmc: dw_mmc: add dw_mmc-k3 for k3 platform
-Date: Thu, 26 Dec 2013 13:33:52 +0900
-Message-ID: <52BBB1B0.8040907@samsung.com>
-References: <1386987174-1788-3-git-send-email-zhangfei.gao@linaro.org>
- <1387199536-7053-1-git-send-email-zhangfei.gao@linaro.org>
+From: Dong Aisheng <b29396@freescale.com>
+Subject: [PATCH V2 1/2] mmc: sdhci-esdhc-imx: fix access hardirq-unsafe lock in atomic context
+Date: Thu, 26 Dec 2013 15:23:53 +0800
+Message-ID: <1388042634-17281-1-git-send-email-b29396@freescale.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout3.samsung.com ([203.254.224.33]:39093 "EHLO
-	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752477Ab3LZEdz (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 25 Dec 2013 23:33:55 -0500
-In-reply-to: <1387199536-7053-1-git-send-email-zhangfei.gao@linaro.org>
+Received: from co1ehsobe004.messaging.microsoft.com ([216.32.180.187]:37540
+	"EHLO co1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751025Ab3LZHzM (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 26 Dec 2013 02:55:12 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Zhangfei Gao <zhangfei.gao@linaro.org>, Chris Ball <cjb@laptop.org>, Arnd Bergmann <arnd@arndb.de>, Mike Turquette <mturquette@linaro.org>, Rob Herring <robherring2@gmail.com>, Seungwon Jeon <tgih.jun@samsung.com>, Kumar Gala <galak@codeaurora.org>, Haojian Zhuang <haojian.zhuang@linaro.org>
-Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, patches@linaro.org, devicetree@vger.kernel.org, Zhigang Wang <brooke.wangzhigang@huawei.com>, cpgs@samsung.com
+To: linux-mmc@vger.kernel.org
+Cc: linux-arm-kernel@lists.infradead.org, cjb@laptop.org, shawn.guo@linaro.org, s.hauer@pengutronix.de, b29396@freescale.com
 
-Hi, Zhangfei,
+Sometimes we may meet the following lockdep issue.
+The root cause is .set_clock callback is executed with spin_lock_irqsave
+in sdhci_do_set_ios. However, the IMX set_clock callback will try to access
+clk_get_rate which is using a mutex lock.
 
-On 12/16/2013 10:12 PM, Zhangfei Gao wrote:
-> Add dw_mmc-k3.c for k3v2, support sd/emmc
-> 
-> Signed-off-by: Zhangfei Gao <zhangfei.gao@linaro.org>
-> Signed-off-by: Zhigang Wang <brooke.wangzhigang@huawei.com>
-> ---
->  .../devicetree/bindings/mmc/k3-dw-mshc.txt         |   60 +++++++++
->  drivers/mmc/host/Kconfig                           |   10 ++
->  drivers/mmc/host/Makefile                          |    1 +
->  drivers/mmc/host/dw_mmc-k3.c                       |  134 ++++++++++++++++++++
->  4 files changed, 205 insertions(+)
->  create mode 100644 Documentation/devicetree/bindings/mmc/k3-dw-mshc.txt
->  create mode 100644 drivers/mmc/host/dw_mmc-k3.c
-> 
-> diff --git a/Documentation/devicetree/bindings/mmc/k3-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/k3-dw-mshc.txt
-> new file mode 100644
-> index 000000000000..d7e2d7f159bb
-> --- /dev/null
-> +++ b/Documentation/devicetree/bindings/mmc/k3-dw-mshc.txt
-> @@ -0,0 +1,60 @@
-> +* Hisilicon specific extensions to the Synopsys Designware Mobile
-> +  Storage Host Controller
-> +
-> +Read synopsys-dw-mshc.txt for more details
-> +
-> +The Synopsys designware mobile storage host controller is used to interface
-> +a SoC with storage medium such as eMMC or SD/MMC cards. This file documents
-> +differences between the core Synopsys dw mshc controller properties described
-> +by synopsys-dw-mshc.txt and the properties used by the Hisilicon specific
-> +extensions to the Synopsys Designware Mobile Storage Host Controller.
-> +
-> +Required Properties:
-> +
-> +* compatible: should be one of the following.
-> +  - "hisilicon,hi4511-dw-mshc": for controllers with hi4511 specific extentions.
-> +
-> +* clock-freq-table: should be the frequency (in Hz) array of the ciu clock
-> +	in each	supported mode.
-> +	0. CIU clock rate in Hz for DS mode
-> +	1. CIU clock rate in Hz for MMC HS mode
-> +	2. CIU clock rate in Hz for SD HS mode
-> +	3. CIU clock rate in Hz for SDR12 mode
-> +	4. CIU clock rate in Hz for SDR25 mode
-> +	5. CIU clock rate in Hz for SDR50 mode
-> +	6. CIU clock rate in Hz for SDR104 mode
-> +	7. CIU clock rate in Hz for DDR50 mode
-> +	8. CIU clock rate in Hz for HS200 mode
-> +
-> +Example:
-> +
-> +	/* for Hi3620 */
-> +
-> +	/* SoC portion */
-> +	dwmmc_0: dwmmc0@fcd03000 {
-> +		compatible = "hisilicon,hi4511-dw-mshc";
-> +		reg = <0xfcd03000 0x1000>;
-> +		interrupts = <0 16 4>;
-> +		#address-cells = <1>;
-> +		#size-cells = <0>;
-> +		clocks = <&mmc_clock HI3620_SD_CIUCLK>, <&clock HI3620_DDRC_PER_CLK>;
-> +		clock-names = "ciu", "biu";
-> +		clock-freq-table =
-> +		<25000000 0 50000000 25000000 50000000 100000000 0 50000000>;
-> +	};
-> +
-> +	/* Board portion */
-> +	dwmmc0@fcd03000 {
-> +		num-slots = <1>;
-> +		vmmc-supply = <&ldo12>;
-> +		fifo-depth = <0x100>;
-> +		supports-highspeed;
-> +		pinctrl-names = "default";
-> +		pinctrl-0 = <&sd_pmx_pins &sd_cfg_func1 &sd_cfg_func2>;
-> +		slot@0 {
-> +			reg = <0>;
-> +			bus-width = <4>;
-> +			disable-wp;
-> +			cd-gpios = <&gpio10 3 0>;
-> +		};
-> +	};
-> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-> index 7fc5099e44b2..45aaa2de0f58 100644
-> --- a/drivers/mmc/host/Kconfig
-> +++ b/drivers/mmc/host/Kconfig
-> @@ -575,6 +575,16 @@ config MMC_DW_SOCFPGA
->  	  This selects support for Altera SoCFPGA specific extensions to the
->  	  Synopsys DesignWare Memory Card Interface driver.
->  
-> +config MMC_DW_K3
-> +	tristate "K3 specific extensions for Synopsys DW Memory Card Interface"
-> +	depends on MMC_DW
-> +	select MMC_DW_PLTFM
-> +	select MMC_DW_IDMAC
+The fix avoids access mutex in .set_clock callback by initializing the
+pltfm_host->clock at probe time and use it later instead of calling
+clk_get_rate again in atomic context.
 
-Only use the IDMAC?
+[ INFO: HARDIRQ-safe -> HARDIRQ-unsafe lock order detected ]
+3.13.0-rc1+ #285 Not tainted
+------------------------------------------------------
+kworker/u8:1/29 [HC0[0]:SC0[0]:HE0:SE1] is trying to acquire:
+ (prepare_lock){+.+...}, at: [<80480b08>] clk_prepare_lock+0x44/0xe4
 
-> +	help
-> +	  This selects support for Hisilicon K3 SoC specific extensions to the
-> +	  Synopsys DesignWare Memory Card Interface driver. Select this option
-> +	  for platforms based on Hisilicon K3 SoC's.
-> +
->  config MMC_DW_PCI
->  	tristate "Synopsys Designware MCI support on PCI bus"
->  	depends on MMC_DW && PCI
-> diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
-> index c41d0c364509..64f5f8d35839 100644
-> --- a/drivers/mmc/host/Makefile
-> +++ b/drivers/mmc/host/Makefile
-> @@ -43,6 +43,7 @@ obj-$(CONFIG_MMC_DW)		+= dw_mmc.o
->  obj-$(CONFIG_MMC_DW_PLTFM)	+= dw_mmc-pltfm.o
->  obj-$(CONFIG_MMC_DW_EXYNOS)	+= dw_mmc-exynos.o
->  obj-$(CONFIG_MMC_DW_SOCFPGA)	+= dw_mmc-socfpga.o
-> +obj-$(CONFIG_MMC_DW_K3)		+= dw_mmc-k3.o
->  obj-$(CONFIG_MMC_DW_PCI)	+= dw_mmc-pci.o
->  obj-$(CONFIG_MMC_SH_MMCIF)	+= sh_mmcif.o
->  obj-$(CONFIG_MMC_JZ4740)	+= jz4740_mmc.o
-> diff --git a/drivers/mmc/host/dw_mmc-k3.c b/drivers/mmc/host/dw_mmc-k3.c
-> new file mode 100644
-> index 000000000000..e3eea2883ae7
-> --- /dev/null
-> +++ b/drivers/mmc/host/dw_mmc-k3.c
-> @@ -0,0 +1,134 @@
-> +/*
-> + * Copyright (c) 2013 Linaro Ltd.
-> + * Copyright (c) 2013 Hisilicon Limited.
-> + *
-> + * This program is free software; you can redistribute it and/or modify
-> + * it under the terms of the GNU General Public License as published by
-> + * the Free Software Foundation; either version 2 of the License, or
-> + * (at your option) any later version.
-> + */
-> +
-> +#include <linux/module.h>
-> +#include <linux/platform_device.h>
-> +#include <linux/clk.h>
-> +#include <linux/mmc/host.h>
-> +#include <linux/mmc/dw_mmc.h>
-> +#include <linux/of_address.h>
-> +
-> +#include "dw_mmc.h"
-> +#include "dw_mmc-pltfm.h"
-> +
-> +#define MAX_NUMS	10
-> +struct dw_mci_k3_priv_data {
-> +	u32	clk_table[MAX_NUMS];
-> +};
-> +
-> +static void dw_mci_k3_set_ios(struct dw_mci *host, struct mmc_ios *ios)
-> +{
-> +	struct dw_mci_k3_priv_data *priv = host->priv;
-> +	u32 rate = priv->clk_table[ios->timing];
-> +	int ret;
-> +
-> +	ret = clk_set_rate(host->ciu_clk, rate);
-> +	if (ret)
-> +		dev_warn(host->dev, "failed to set clock rate %uHz\n", rate);
-> +
-> +	host->bus_hz = clk_get_rate(host->ciu_clk);
-> +}
-> +
-> +static int dw_mci_k3_parse_dt(struct dw_mci *host)
-> +{
-> +	struct dw_mci_k3_priv_data *priv;
-> +	struct device_node *node = host->dev->of_node;
-> +	struct property *prop;
-> +	const __be32 *cur;
-> +	u32 val, num = 0;
-> +
-> +	priv = devm_kzalloc(host->dev, sizeof(*priv), GFP_KERNEL);
-> +	if (!priv) {
-> +		dev_err(host->dev, "mem alloc failed for private data\n");
-> +		return -ENOMEM;
-> +	}
-> +	host->priv = priv;
-> +
-> +	of_property_for_each_u32(node, "clock-freq-table", prop, cur, val) {
-> +		if (num >= MAX_NUMS)
-> +			break;
-> +		priv->clk_table[num++] = val;
-> +	}
-> +	return 0;
-> +}
-> +
-> +static unsigned long k3_dwmmc_caps[4] = {
-> +	MMC_CAP_4_BIT_DATA | MMC_CAP_SD_HIGHSPEED,
-> +	MMC_CAP_8_BIT_DATA | MMC_CAP_MMC_HIGHSPEED,
-> +	0,
-> +	0,
-> +};
+and this task is already holding:
+ (&(&host->lock)->rlock#2){-.-...}, at: [<804611f4>] sdhci_do_set_ios+0x20/0x720
+which would create a new lock dependency:
+ (&(&host->lock)->rlock#2){-.-...} -> (prepare_lock){+.+...}
 
-If supports-highspeed is defined at dt-file,
-then MMC_CAP_SD_HIGHSEEPD and MMC_CAP_MMC_HIGHSPEED should set in dw-mmc.c 
+but this new dependency connects a HARDIRQ-irq-safe lock:
+ (&(&host->lock)->rlock#2){-.-...}
+... which became HARDIRQ-irq-safe at:
+  [<8005f030>] mark_lock+0x140/0x6ac
+  [<80060760>] __lock_acquire+0xb30/0x1cbc
+  [<800620d0>] lock_acquire+0x70/0x84
+  [<8061d2f0>] _raw_spin_lock+0x30/0x40
+  [<80460668>] sdhci_irq+0x24/0xa68
+  [<8006b1d4>] handle_irq_event_percpu+0x54/0x18c
+  [<8006b350>] handle_irq_event+0x44/0x64
+  [<8006e50c>] handle_fasteoi_irq+0xa0/0x170
+  [<8006a8f0>] generic_handle_irq+0x30/0x44
+  [<8000f238>] handle_IRQ+0x54/0xbc
+  [<8000864c>] gic_handle_irq+0x30/0x64
+  [<80013024>] __irq_svc+0x44/0x5c
+  [<80614c58>] printk+0x38/0x40
+  [<804622a8>] sdhci_add_host+0x844/0xbcc
+  [<80464948>] sdhci_esdhc_imx_probe+0x378/0x67c
+  [<8032ee88>] platform_drv_probe+0x20/0x50
+  [<8032d48c>] driver_probe_device+0x118/0x234
+  [<8032d690>] __driver_attach+0x9c/0xa0
+  [<8032b89c>] bus_for_each_dev+0x68/0x9c
+  [<8032cf44>] driver_attach+0x20/0x28
+  [<8032cbc8>] bus_add_driver+0x148/0x1f4
+  [<8032dce0>] driver_register+0x80/0x100
+  [<8032ee54>] __platform_driver_register+0x50/0x64
+  [<8084b094>] sdhci_esdhc_imx_driver_init+0x18/0x20
+  [<80008980>] do_one_initcall+0x108/0x16c
+  [<8081cca4>] kernel_init_freeable+0x10c/0x1d0
+  [<80611c50>] kernel_init+0x10/0x120
+  [<8000e9c8>] ret_from_fork+0x14/0x2c
 
-> +
-> +static const struct dw_mci_drv_data k3_drv_data = {
-> +	.caps			= k3_dwmmc_caps,
-> +	.set_ios		= dw_mci_k3_set_ios,
-> +	.parse_dt		= dw_mci_k3_parse_dt,
-> +};
-> +
-> +static const struct of_device_id dw_mci_k3_match[] = {
-> +	{ .compatible = "hisilicon,hi4511-dw-mshc", .data = &k3_drv_data, },
-> +	{},
-> +};
-> +MODULE_DEVICE_TABLE(of, dw_mci_k3_match);
-> +
-> +static int dw_mci_k3_probe(struct platform_device *pdev)
-> +{
-> +	const struct dw_mci_drv_data *drv_data;
-> +	const struct of_device_id *match;
-> +
-> +	match = of_match_node(dw_mci_k3_match, pdev->dev.of_node);
-> +	drv_data = match->data;
-> +
-> +	return dw_mci_pltfm_register(pdev, drv_data);
-> +}
-> +
-> +static int dw_mci_k3_suspend(struct device *dev)
-> +{
-> +	struct dw_mci *host = dev_get_drvdata(dev);
-> +	int ret = 0;
-> +
-> +	ret = dw_mci_suspend(host);
-> +	if (!ret)
-> +		clk_disable_unprepare(host->ciu_clk);
-> +
-> +	return ret;
-> +}
-> +
-> +static int dw_mci_k3_resume(struct device *dev)
-> +{
-> +	struct dw_mci *host = dev_get_drvdata(dev);
-> +	int ret = 0;
-> +
-> +	ret = clk_prepare_enable(host->ciu_clk);
-> +	if (ret) {
-> +		dev_err(host->dev, "failed to enable ciu clock\n");
-> +		return ret;
-> +	}
-> +
-> +	return dw_mci_resume(host);
-> +}
+to a HARDIRQ-irq-unsafe lock:
+ (prepare_lock){+.+...}
+... which became HARDIRQ-irq-unsafe at:
+...  [<8005f030>] mark_lock+0x140/0x6ac
+  [<8005f604>] mark_held_locks+0x68/0x12c
+  [<8005f780>] trace_hardirqs_on_caller+0xb8/0x1d8
+  [<8005f8b4>] trace_hardirqs_on+0x14/0x18
+  [<8061a130>] mutex_trylock+0x180/0x20c
+  [<80480ad8>] clk_prepare_lock+0x14/0xe4
+  [<804816a4>] clk_notifier_register+0x28/0xf0
+  [<80015120>] twd_clk_init+0x50/0x68
+  [<80008980>] do_one_initcall+0x108/0x16c
+  [<8081cca4>] kernel_init_freeable+0x10c/0x1d0
+  [<80611c50>] kernel_init+0x10/0x120
+  [<8000e9c8>] ret_from_fork+0x14/0x2c
 
-Clock control need in suspend/resume? ciu-clk is used into dw-mmc.c.
+other info that might help us debug this:
 
-Best Regards,
-Jaehoon Chung
+ Possible interrupt unsafe locking scenario:
 
-> +
-> +SIMPLE_DEV_PM_OPS(dw_mci_k3_pmops, dw_mci_k3_suspend, dw_mci_k3_resume);
-> +
-> +static struct platform_driver dw_mci_k3_pltfm_driver = {
-> +	.probe		= dw_mci_k3_probe,
-> +	.remove		= dw_mci_pltfm_remove,
-> +	.driver		= {
-> +		.name		= "dwmmc_k3",
-> +		.of_match_table	= dw_mci_k3_match,
-> +		.pm		= &dw_mci_k3_pmops,
-> +	},
-> +};
-> +
-> +module_platform_driver(dw_mci_k3_pltfm_driver);
-> +
-> +MODULE_DESCRIPTION("K3 Specific DW-MSHC Driver Extension");
-> +MODULE_LICENSE("GPL v2");
-> +MODULE_ALIAS("platform:dwmmc-k3");
-> 
+       CPU0                    CPU1
+       ----                    ----
+  lock(prepare_lock);
+                               local_irq_disable();
+                               lock(&(&host->lock)->rlock#2);
+                               lock(prepare_lock);
+  <Interrupt>
+    lock(&(&host->lock)->rlock#2);
+
+ *** DEADLOCK ***
+
+3 locks held by kworker/u8:1/29:
+ #0:  (kmmcd){.+.+.+}, at: [<8003db18>] process_one_work+0x128/0x468
+ #1:  ((&(&host->detect)->work)){+.+.+.}, at: [<8003db18>] process_one_work+0x128/0x468
+ #2:  (&(&host->lock)->rlock#2){-.-...}, at: [<804611f4>] sdhci_do_set_ios+0x20/0x720
+
+the dependencies between HARDIRQ-irq-safe lock and the holding lock:
+-> (&(&host->lock)->rlock#2){-.-...} ops: 330 {
+   IN-HARDIRQ-W at:
+                    [<8005f030>] mark_lock+0x140/0x6ac
+                    [<80060760>] __lock_acquire+0xb30/0x1cbc
+                    [<800620d0>] lock_acquire+0x70/0x84
+                    [<8061d2f0>] _raw_spin_lock+0x30/0x40
+                    [<80460668>] sdhci_irq+0x24/0xa68
+                    [<8006b1d4>] handle_irq_event_percpu+0x54/0x18c
+                    [<8006b350>] handle_irq_event+0x44/0x64
+                    [<8006e50c>] handle_fasteoi_irq+0xa0/0x170
+                    [<8006a8f0>] generic_handle_irq+0x30/0x44
+                    [<8000f238>] handle_IRQ+0x54/0xbc
+                    [<8000864c>] gic_handle_irq+0x30/0x64
+                    [<80013024>] __irq_svc+0x44/0x5c
+                    [<80614c58>] printk+0x38/0x40
+                    [<804622a8>] sdhci_add_host+0x844/0xbcc
+                    [<80464948>] sdhci_esdhc_imx_probe+0x378/0x67c
+                    [<8032ee88>] platform_drv_probe+0x20/0x50
+                    [<8032d48c>] driver_probe_device+0x118/0x234
+                    [<8032d690>] __driver_attach+0x9c/0xa0
+                    [<8032b89c>] bus_for_each_dev+0x68/0x9c
+                    [<8032cf44>] driver_attach+0x20/0x28
+                    [<8032cbc8>] bus_add_driver+0x148/0x1f4
+                    [<8032dce0>] driver_register+0x80/0x100
+                    [<8032ee54>] __platform_driver_register+0x50/0x64
+                    [<8084b094>] sdhci_esdhc_imx_driver_init+0x18/0x20
+                    [<80008980>] do_one_initcall+0x108/0x16c
+                    [<8081cca4>] kernel_init_freeable+0x10c/0x1d0
+                    [<80611c50>] kernel_init+0x10/0x120
+                    [<8000e9c8>] ret_from_fork+0x14/0x2c
+   IN-SOFTIRQ-W at:
+                    [<8005f030>] mark_lock+0x140/0x6ac
+                    [<80060204>] __lock_acquire+0x5d4/0x1cbc
+                    [<800620d0>] lock_acquire+0x70/0x84
+                    [<8061d40c>] _raw_spin_lock_irqsave+0x40/0x54
+                    [<8045e4a4>] sdhci_tasklet_finish+0x1c/0x120
+                    [<8002b538>] tasklet_action+0xa0/0x15c
+                    [<8002b778>] __do_softirq+0x118/0x290
+                    [<8002bcf4>] irq_exit+0xb4/0x10c
+                    [<8000f240>] handle_IRQ+0x5c/0xbc
+                    [<8000864c>] gic_handle_irq+0x30/0x64
+                    [<80013024>] __irq_svc+0x44/0x5c
+                    [<80614c58>] printk+0x38/0x40
+                    [<804622a8>] sdhci_add_host+0x844/0xbcc
+                    [<80464948>] sdhci_esdhc_imx_probe+0x378/0x67c
+                    [<8032ee88>] platform_drv_probe+0x20/0x50
+                    [<8032d48c>] driver_probe_device+0x118/0x234
+                    [<8032d690>] __driver_attach+0x9c/0xa0
+                    [<8032b89c>] bus_for_each_dev+0x68/0x9c
+                    [<8032cf44>] driver_attach+0x20/0x28
+                    [<8032cbc8>] bus_add_driver+0x148/0x1f4
+                    [<8032dce0>] driver_register+0x80/0x100
+                    [<8032ee54>] __platform_driver_register+0x50/0x64
+                    [<8084b094>] sdhci_esdhc_imx_driver_init+0x18/0x20
+                    [<80008980>] do_one_initcall+0x108/0x16c
+                    [<8081cca4>] kernel_init_freeable+0x10c/0x1d0
+                    [<80611c50>] kernel_init+0x10/0x120
+                    [<8000e9c8>] ret_from_fork+0x14/0x2c
+   INITIAL USE at:
+                   [<8005f030>] mark_lock+0x140/0x6ac
+                   [<8005ff0c>] __lock_acquire+0x2dc/0x1cbc
+                   [<800620d0>] lock_acquire+0x70/0x84
+                   [<8061d40c>] _raw_spin_lock_irqsave+0x40/0x54
+                   [<804611f4>] sdhci_do_set_ios+0x20/0x720
+                   [<80461924>] sdhci_set_ios+0x30/0x3c
+                   [<8044cea0>] mmc_power_up+0x6c/0xd0
+                   [<8044dac4>] mmc_start_host+0x60/0x70
+                   [<8044eb3c>] mmc_add_host+0x60/0x88
+                   [<8046225c>] sdhci_add_host+0x7f8/0xbcc
+                   [<80464948>] sdhci_esdhc_imx_probe+0x378/0x67c
+                   [<8032ee88>] platform_drv_probe+0x20/0x50
+                   [<8032d48c>] driver_probe_device+0x118/0x234
+                   [<8032d690>] __driver_attach+0x9c/0xa0
+                   [<8032b89c>] bus_for_each_dev+0x68/0x9c
+                   [<8032cf44>] driver_attach+0x20/0x28
+                   [<8032cbc8>] bus_add_driver+0x148/0x1f4
+                   [<8032dce0>] driver_register+0x80/0x100
+                   [<8032ee54>] __platform_driver_register+0x50/0x64
+                   [<8084b094>] sdhci_esdhc_imx_driver_init+0x18/0x20
+                   [<80008980>] do_one_initcall+0x108/0x16c
+                   [<8081cca4>] kernel_init_freeable+0x10c/0x1d0
+                   [<80611c50>] kernel_init+0x10/0x120
+                   [<8000e9c8>] ret_from_fork+0x14/0x2c
+ }
+ ... key      at: [<80e040e8>] __key.26952+0x0/0x8
+ ... acquired at:
+   [<8005eb60>] check_usage+0x3d0/0x5c0
+   [<8005edac>] check_irq_usage+0x5c/0xb8
+   [<80060d38>] __lock_acquire+0x1108/0x1cbc
+   [<800620d0>] lock_acquire+0x70/0x84
+   [<8061a210>] mutex_lock_nested+0x54/0x3c0
+   [<80480b08>] clk_prepare_lock+0x44/0xe4
+   [<8048188c>] clk_get_rate+0x14/0x64
+   [<8046374c>] esdhc_pltfm_set_clock+0x20/0x2a4
+   [<8045d70c>] sdhci_set_clock+0x4c/0x498
+   [<80461518>] sdhci_do_set_ios+0x344/0x720
+   [<80461924>] sdhci_set_ios+0x30/0x3c
+   [<8044c390>] __mmc_set_clock+0x44/0x60
+   [<8044cd4c>] mmc_set_clock+0x10/0x14
+   [<8044f8f4>] mmc_init_card+0x1b4/0x1520
+   [<80450f00>] mmc_attach_mmc+0xb4/0x194
+   [<8044da08>] mmc_rescan+0x294/0x2f0
+   [<8003db94>] process_one_work+0x1a4/0x468
+   [<8003e850>] worker_thread+0x118/0x3e0
+   [<80044de0>] kthread+0xd4/0xf0
+   [<8000e9c8>] ret_from_fork+0x14/0x2c
+
+the dependencies between the lock to be acquired and HARDIRQ-irq-unsafe lock:
+-> (prepare_lock){+.+...} ops: 395 {
+   HARDIRQ-ON-W at:
+                    [<8005f030>] mark_lock+0x140/0x6ac
+                    [<8005f604>] mark_held_locks+0x68/0x12c
+                    [<8005f780>] trace_hardirqs_on_caller+0xb8/0x1d8
+                    [<8005f8b4>] trace_hardirqs_on+0x14/0x18
+                    [<8061a130>] mutex_trylock+0x180/0x20c
+                    [<80480ad8>] clk_prepare_lock+0x14/0xe4
+                    [<804816a4>] clk_notifier_register+0x28/0xf0
+                    [<80015120>] twd_clk_init+0x50/0x68
+                    [<80008980>] do_one_initcall+0x108/0x16c
+                    [<8081cca4>] kernel_init_freeable+0x10c/0x1d0
+                    [<80611c50>] kernel_init+0x10/0x120
+                    [<8000e9c8>] ret_from_fork+0x14/0x2c
+   SOFTIRQ-ON-W at:
+                    [<8005f030>] mark_lock+0x140/0x6ac
+                    [<8005f604>] mark_held_locks+0x68/0x12c
+                    [<8005f7c8>] trace_hardirqs_on_caller+0x100/0x1d8
+                    [<8005f8b4>] trace_hardirqs_on+0x14/0x18
+                    [<8061a130>] mutex_trylock+0x180/0x20c
+                    [<80480ad8>] clk_prepare_lock+0x14/0xe4
+                    [<804816a4>] clk_notifier_register+0x28/0xf0
+                    [<80015120>] twd_clk_init+0x50/0x68
+                    [<80008980>] do_one_initcall+0x108/0x16c
+                    [<8081cca4>] kernel_init_freeable+0x10c/0x1d0
+                    [<80611c50>] kernel_init+0x10/0x120
+                    [<8000e9c8>] ret_from_fork+0x14/0x2c
+   INITIAL USE at:
+                   [<8005f030>] mark_lock+0x140/0x6ac
+                   [<8005ff0c>] __lock_acquire+0x2dc/0x1cbc
+                   [<800620d0>] lock_acquire+0x70/0x84
+                   [<8061a0c8>] mutex_trylock+0x118/0x20c
+                   [<80480ad8>] clk_prepare_lock+0x14/0xe4
+                   [<80482af8>] __clk_init+0x1c/0x45c
+                   [<8048306c>] _clk_register+0xd0/0x170
+                   [<80483148>] clk_register+0x3c/0x7c
+                   [<80483b4c>] clk_register_fixed_rate+0x88/0xd8
+                   [<80483c04>] of_fixed_clk_setup+0x68/0x94
+                   [<8084c6fc>] of_clk_init+0x44/0x68
+                   [<808202b0>] time_init+0x2c/0x38
+                   [<8081ca14>] start_kernel+0x1e4/0x368
+                   [<10008074>] 0x10008074
+ }
+ ... key      at: [<808afebc>] prepare_lock+0x38/0x48
+ ... acquired at:
+   [<8005eb94>] check_usage+0x404/0x5c0
+   [<8005edac>] check_irq_usage+0x5c/0xb8
+   [<80060d38>] __lock_acquire+0x1108/0x1cbc
+   [<800620d0>] lock_acquire+0x70/0x84
+   [<8061a210>] mutex_lock_nested+0x54/0x3c0
+   [<80480b08>] clk_prepare_lock+0x44/0xe4
+   [<8048188c>] clk_get_rate+0x14/0x64
+   [<8046374c>] esdhc_pltfm_set_clock+0x20/0x2a4
+   [<8045d70c>] sdhci_set_clock+0x4c/0x498
+   [<80461518>] sdhci_do_set_ios+0x344/0x720
+   [<80461924>] sdhci_set_ios+0x30/0x3c
+   [<8044c390>] __mmc_set_clock+0x44/0x60
+   [<8044cd4c>] mmc_set_clock+0x10/0x14
+   [<8044f8f4>] mmc_init_card+0x1b4/0x1520
+   [<80450f00>] mmc_attach_mmc+0xb4/0x194
+   [<8044da08>] mmc_rescan+0x294/0x2f0
+   [<8003db94>] process_one_work+0x1a4/0x468
+   [<8003e850>] worker_thread+0x118/0x3e0
+   [<80044de0>] kthread+0xd4/0xf0
+   [<8000e9c8>] ret_from_fork+0x14/0x2c
+
+stack backtrace:
+CPU: 2 PID: 29 Comm: kworker/u8:1 Not tainted 3.13.0-rc1+ #285
+Workqueue: kmmcd mmc_rescan
+Backtrace:
+[<80012160>] (dump_backtrace+0x0/0x10c) from [<80012438>] (show_stack+0x18/0x1c)
+ r6:00000000 r5:00000000 r4:8088ecc8 r3:bfa11200
+[<80012420>] (show_stack+0x0/0x1c) from [<80616b14>] (dump_stack+0x84/0x9c)
+[<80616a90>] (dump_stack+0x0/0x9c) from [<8005ebb4>] (check_usage+0x424/0x5c0)
+ r5:80979940 r4:bfa29b44
+[<8005e790>] (check_usage+0x0/0x5c0) from [<8005edac>] (check_irq_usage+0x5c/0xb8)
+[<8005ed50>] (check_irq_usage+0x0/0xb8) from [<80060d38>] (__lock_acquire+0x1108/0x1cbc)
+ r8:bfa115e8 r7:80df9884 r6:80dafa9c r5:00000003 r4:bfa115d0
+[<8005fc30>] (__lock_acquire+0x0/0x1cbc) from [<800620d0>] (lock_acquire+0x70/0x84)
+[<80062060>] (lock_acquire+0x0/0x84) from [<8061a210>] (mutex_lock_nested+0x54/0x3c0)
+ r7:bfa11200 r6:80dafa9c r5:00000000 r4:80480b08
+[<8061a1bc>] (mutex_lock_nested+0x0/0x3c0) from [<80480b08>] (clk_prepare_lock+0x44/0xe4)
+[<80480ac4>] (clk_prepare_lock+0x0/0xe4) from [<8048188c>] (clk_get_rate+0x14/0x64)
+ r6:03197500 r5:bf0e9aa8 r4:bf827400 r3:808ae128
+[<80481878>] (clk_get_rate+0x0/0x64) from [<8046374c>] (esdhc_pltfm_set_clock+0x20/0x2a4)
+ r5:bf0e9aa8 r4:bf0e9c40
+[<8046372c>] (esdhc_pltfm_set_clock+0x0/0x2a4) from [<8045d70c>] (sdhci_set_clock+0x4c/0x498)
+[<8045d6c0>] (sdhci_set_clock+0x0/0x498) from [<80461518>] (sdhci_do_set_ios+0x344/0x720)
+ r8:0000003b r7:20000113 r6:bf0e9d68 r5:bf0e9aa8 r4:bf0e9c40
+r3:00000000
+[<804611d4>] (sdhci_do_set_ios+0x0/0x720) from [<80461924>] (sdhci_set_ios+0x30/0x3c)
+ r9:00000004 r8:bf131000 r7:bf131048 r6:00000000 r5:bf0e9aa8
+r4:bf0e9800
+[<804618f4>] (sdhci_set_ios+0x0/0x3c) from [<8044c390>] (__mmc_set_clock+0x44/0x60)
+ r5:03197500 r4:bf0e9800
+[<8044c34c>] (__mmc_set_clock+0x0/0x60) from [<8044cd4c>] (mmc_set_clock+0x10/0x14)
+ r5:00000000 r4:bf0e9800
+[<8044cd3c>] (mmc_set_clock+0x0/0x14) from [<8044f8f4>] (mmc_init_card+0x1b4/0x1520)
+[<8044f740>] (mmc_init_card+0x0/0x1520) from [<80450f00>] (mmc_attach_mmc+0xb4/0x194)
+[<80450e4c>] (mmc_attach_mmc+0x0/0x194) from [<8044da08>] (mmc_rescan+0x294/0x2f0)
+ r5:8065f358 r4:bf0e9af8
+[<8044d774>] (mmc_rescan+0x0/0x2f0) from [<8003db94>] (process_one_work+0x1a4/0x468)
+ r8:00000000 r7:bfa29eb0 r6:bf80dc00 r5:bf0e9af8 r4:bf9e3f00
+r3:8044d774
+[<8003d9f0>] (process_one_work+0x0/0x468) from [<8003e850>] (worker_thread+0x118/0x3e0)
+[<8003e738>] (worker_thread+0x0/0x3e0) from [<80044de0>] (kthread+0xd4/0xf0)
+[<80044d0c>] (kthread+0x0/0xf0) from [<8000e9c8>] (ret_from_fork+0x14/0x2c)
+ r7:00000000 r6:00000000 r5:80044d0c r4:bf9e7f00
+
+Cc: Chris Ball <cjb@laptop.org>
+Cc: Fabio Estevam <fabio.estevam@freescale.com>
+Cc: Shawn Guo <shawn.guo@linaro.org>
+Fixes: 0ddf03c mmc: esdhc-imx: parse max-frequency from devicetree
+Signed-off-by: Dong Aisheng <b29396@freescale.com>
+---
+ChangeLog:
+no changes
+---
+ drivers/mmc/host/sdhci-esdhc-imx.c |   12 +++++-------
+ 1 files changed, 5 insertions(+), 7 deletions(-)
+
+diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+index 2a04847..745ee1e 100644
+--- a/drivers/mmc/host/sdhci-esdhc-imx.c
++++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+@@ -576,19 +576,17 @@ static unsigned int esdhc_pltfm_get_max_clock(struct sdhci_host *host)
+ 	struct pltfm_imx_data *imx_data = pltfm_host->priv;
+ 	struct esdhc_platform_data *boarddata = &imx_data->boarddata;
+ 
+-	u32 f_host = clk_get_rate(pltfm_host->clk);
+-
+-	if (boarddata->f_max && (boarddata->f_max < f_host))
++	if (boarddata->f_max && (boarddata->f_max < pltfm_host->clock))
+ 		return boarddata->f_max;
+ 	else
+-		return f_host;
++		return pltfm_host->clock;
+ }
+ 
+ static unsigned int esdhc_pltfm_get_min_clock(struct sdhci_host *host)
+ {
+ 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+ 
+-	return clk_get_rate(pltfm_host->clk) / 256 / 16;
++	return pltfm_host->clock / 256 / 16;
+ }
+ 
+ static inline void esdhc_pltfm_set_clock(struct sdhci_host *host,
+@@ -596,7 +594,7 @@ static inline void esdhc_pltfm_set_clock(struct sdhci_host *host,
+ {
+ 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+ 	struct pltfm_imx_data *imx_data = pltfm_host->priv;
+-	unsigned int host_clock = clk_get_rate(pltfm_host->clk);
++	unsigned int host_clock = pltfm_host->clock;
+ 	int pre_div = 2;
+ 	int div = 1;
+ 	u32 temp, val;
+@@ -1017,7 +1015,7 @@ static int sdhci_esdhc_imx_probe(struct platform_device *pdev)
+ 	}
+ 
+ 	pltfm_host->clk = imx_data->clk_per;
+-
++	pltfm_host->clock = clk_get_rate(pltfm_host->clk);
+ 	clk_prepare_enable(imx_data->clk_per);
+ 	clk_prepare_enable(imx_data->clk_ipg);
+ 	clk_prepare_enable(imx_data->clk_ahb);
+-- 
+1.7.2.rc3
+
 
