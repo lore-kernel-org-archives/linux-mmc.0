@@ -1,220 +1,153 @@
-From: Dong Aisheng <dongas86@gmail.com>
-Subject: Re: [PATCH 1/1] mmc: sdhci: fix lockdep error on tunning routine
-Date: Thu, 26 Dec 2013 15:58:20 +0800
-Message-ID: <CAA+hA=TRQP7hS3+iXyHg3FuNQKA=chJi7Ne47Ew_4RJcQ6yong@mail.gmail.com>
-References: <1387797184-18958-1-git-send-email-b29396@freescale.com>
+From: Dinh Nguyen <dinh.linux@gmail.com>
+Subject: Re: [PATCHv4] mmc: dw_mmc: Enable the hold reg for certain speed
+ modes
+Date: Thu, 26 Dec 2013 11:26:25 -0600
+Message-ID: <52BC66C1.9070501@gmail.com>
+References: <1387213279-22020-1-git-send-email-dinguyen@altera.com> <52B00737.6050701@linaro.org> <52B059A1.1000306@gmail.com> <52B065B2.6010703@linaro.org> <52BB9B21.7010101@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qe0-f44.google.com ([209.85.128.44]:42042 "EHLO
-	mail-qe0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751381Ab3LZH6V (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 26 Dec 2013 02:58:21 -0500
-Received: by mail-qe0-f44.google.com with SMTP id nd7so7731676qeb.17
-        for <linux-mmc@vger.kernel.org>; Wed, 25 Dec 2013 23:58:20 -0800 (PST)
-In-Reply-To: <1387797184-18958-1-git-send-email-b29396@freescale.com>
+Received: from mail-ig0-f178.google.com ([209.85.213.178]:55267 "EHLO
+	mail-ig0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753470Ab3LZRdJ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 26 Dec 2013 12:33:09 -0500
+Received: by mail-ig0-f178.google.com with SMTP id ut6so19990338igb.5
+        for <linux-mmc@vger.kernel.org>; Thu, 26 Dec 2013 09:33:08 -0800 (PST)
+In-Reply-To: <52BB9B21.7010101@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Dong Aisheng <b29396@freescale.com>, peterz@infradead.org
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Shawn Guo <shawn.guo@linaro.org>, Sascha Hauer <s.hauer@pengutronix.de>, Chris Ball <cjb@laptop.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+To: Jaehoon Chung <jh80.chung@samsung.com>, zhangfei <zhangfei.gao@linaro.org>, dinguyen@altera.com, arnd@arndb.de, cjb@laptop.org, tgih.jun@samsung.com, heiko@sntech.de, dianders@chromium.org, alim.akhtar@samsung.com, bzhao@marvell.com
+Cc: linux-mmc@vger.kernel.org
 
-Hi Peter,
+Hi Jaehoon,
 
-On Mon, Dec 23, 2013 at 7:13 PM, Dong Aisheng <b29396@freescale.com> wrote:
-> The sdhci_execute_tuning routine gets lock separately by
-> disable_irq(host->irq);
-> spin_lock(&host->lock);
-> It will cause the following lockdep error message since the &host->lock
-> could also be got in irq context.
-> Use spin_lock_irqsave/spin_unlock_restore instead to get rid of
-> this error message.
->
-> [ INFO: inconsistent lock state ]
-> 3.13.0-rc1+ #287 Not tainted
-> ---------------------------------
-> inconsistent {IN-HARDIRQ-W} -> {HARDIRQ-ON-W} usage.
-> kworker/u2:1/33 [HC0[0]:SC0[0]:HE1:SE1] takes:
->  (&(&host->lock)->rlock){?.-...}, at: [<8045f7f4>] sdhci_execute_tuning+0x4c/0x710
-> {IN-HARDIRQ-W} state was registered at:
->   [<8005f030>] mark_lock+0x140/0x6ac
->   [<80060760>] __lock_acquire+0xb30/0x1cbc
->   [<800620d0>] lock_acquire+0x70/0x84
->   [<8061d1c8>] _raw_spin_lock+0x30/0x40
->   [<804605cc>] sdhci_irq+0x24/0xa68
->   [<8006b1d4>] handle_irq_event_percpu+0x54/0x18c
->   [<8006b350>] handle_irq_event+0x44/0x64
->   [<8006e50c>] handle_fasteoi_irq+0xa0/0x170
->   [<8006a8f0>] generic_handle_irq+0x30/0x44
->   [<8000f238>] handle_IRQ+0x54/0xbc
->   [<8000864c>] gic_handle_irq+0x30/0x64
->   [<80013024>] __irq_svc+0x44/0x5c
->   [<80329bf4>] dev_vprintk_emit+0x50/0x58
->   [<80329c24>] dev_printk_emit+0x28/0x30
->   [<80329fec>] __dev_printk+0x4c/0x90
->   [<8032a180>] dev_err+0x3c/0x48
->   [<802dd4f0>] _regulator_get+0x158/0x1cc
->   [<802dd5b4>] regulator_get_optional+0x18/0x1c
->   [<80461df4>] sdhci_add_host+0x42c/0xbd8
->   [<80464820>] sdhci_esdhc_imx_probe+0x378/0x67c
->   [<8032ee88>] platform_drv_probe+0x20/0x50
->   [<8032d48c>] driver_probe_device+0x118/0x234
->   [<8032d690>] __driver_attach+0x9c/0xa0
->   [<8032b89c>] bus_for_each_dev+0x68/0x9c
->   [<8032cf44>] driver_attach+0x20/0x28
->   [<8032cbc8>] bus_add_driver+0x148/0x1f4
->   [<8032dce0>] driver_register+0x80/0x100
->   [<8032ee54>] __platform_driver_register+0x50/0x64
->   [<8084b094>] sdhci_esdhc_imx_driver_init+0x18/0x20
->   [<80008980>] do_one_initcall+0x108/0x16c
->   [<8081cca4>] kernel_init_freeable+0x10c/0x1d0
->   [<80611b28>] kernel_init+0x10/0x120
->   [<8000e9c8>] ret_from_fork+0x14/0x2c
-> irq event stamp: 805
-> hardirqs last  enabled at (805): [<8061d43c>] _raw_spin_unlock_irqrestore+0x38/0x4c
-> hardirqs last disabled at (804): [<8061d2c8>] _raw_spin_lock_irqsave+0x24/0x54
-> softirqs last  enabled at (570): [<8002b824>] __do_softirq+0x1c4/0x290
-> softirqs last disabled at (561): [<8002bcf4>] irq_exit+0xb4/0x10c
->
-> other info that might help us debug this:
->  Possible unsafe locking scenario:
->
->        CPU0
->        ----
->   lock(&(&host->lock)->rlock);
->   <Interrupt>
->     lock(&(&host->lock)->rlock);
->
->  *** DEADLOCK ***
->
-> 2 locks held by kworker/u2:1/33:
->  #0:  (kmmcd){.+.+..}, at: [<8003db18>] process_one_work+0x128/0x468
->  #1:  ((&(&host->detect)->work)){+.+...}, at: [<8003db18>] process_one_work+0x128/0x468
->
-> stack backtrace:
-> CPU: 0 PID: 33 Comm: kworker/u2:1 Not tainted 3.13.0-rc1+ #287
-> Workqueue: kmmcd mmc_rescan
-> Backtrace:
-> [<80012160>] (dump_backtrace+0x0/0x10c) from [<80012438>] (show_stack+0x18/0x1c)
->  r6:bfad0900 r5:00000000 r4:8088ecc8 r3:bfad0900
-> [<80012420>] (show_stack+0x0/0x1c) from [<806169ec>] (dump_stack+0x84/0x9c)
-> [<80616968>] (dump_stack+0x0/0x9c) from [<806147b4>] (print_usage_bug+0x260/0x2d0)
->  r5:8076ba88 r4:80977410
-> [<80614554>] (print_usage_bug+0x0/0x2d0) from [<8005f0d0>] (mark_lock+0x1e0/0x6ac)
->  r9:8005e678 r8:00000000 r7:bfad0900 r6:00001015 r5:bfad0cd0
-> r4:00000002
-> [<8005eef0>] (mark_lock+0x0/0x6ac) from [<80060234>] (__lock_acquire+0x604/0x1cbc)
-> [<8005fc30>] (__lock_acquire+0x0/0x1cbc) from [<800620d0>] (lock_acquire+0x70/0x84)
-> [<80062060>] (lock_acquire+0x0/0x84) from [<8061d1c8>] (_raw_spin_lock+0x30/0x40)
->  r7:00000000 r6:bfb63000 r5:00000000 r4:bfb60568
-> [<8061d198>] (_raw_spin_lock+0x0/0x40) from [<8045f7f4>] (sdhci_execute_tuning+0x4c/0x710)
->  r4:bfb60000
-> [<8045f7a8>] (sdhci_execute_tuning+0x0/0x710) from [<80453454>] (mmc_sd_init_card+0x5f8/0x660)
-> [<80452e5c>] (mmc_sd_init_card+0x0/0x660) from [<80453748>] (mmc_attach_sd+0xb4/0x180)
->  r9:bf92d400 r8:8065f364 r7:00061a80 r6:bfb60000 r5:8065f358
-> r4:bfb60000
-> [<80453694>] (mmc_attach_sd+0x0/0x180) from [<8044d9f8>] (mmc_rescan+0x284/0x2f0)
->  r5:8065f358 r4:bfb602f8
-> [<8044d774>] (mmc_rescan+0x0/0x2f0) from [<8003db94>] (process_one_work+0x1a4/0x468)
->  r8:00000000 r7:bfb55eb0 r6:bf80dc00 r5:bfb602f8 r4:bfb35980
-> r3:8044d774
-> [<8003d9f0>] (process_one_work+0x0/0x468) from [<8003e850>] (worker_thread+0x118/0x3e0)
-> [<8003e738>] (worker_thread+0x0/0x3e0) from [<80044de0>] (kthread+0xd4/0xf0)
-> [<80044d0c>] (kthread+0x0/0xf0) from [<8000e9c8>] (ret_from_fork+0x14/0x2c)
->  r7:00000000 r6:00000000 r5:80044d0c r4:bfb37b40
->
-> Cc: Peter Zijlstra <peterz@infradead.org>
-> Cc: Chris Ball <cjb@laptop.org>
-> Cc: Shawn Guo <shawn.guo@linaro.org>
-> Signed-off-by: Dong Aisheng <b29396@freescale.com>
->
-> ---
-> It's strange that this issue did not happen on kernel 3.10.17 with the same
-> code. And looking at the code, before call spin_lock we already disable the mmc
-> controller irq, per on my understanding, the deadlock given by lockdep may not
-> be able to happen(pls fix me if wrong).
-> May the lockdep not track the specific irq disable?
-> Copy lockdep guy to comment.
+On 12/25/13 8:57 PM, Jaehoon Chung wrote:
+> On 12/17/2013 11:54 PM, zhangfei wrote:
+>>
+>> On 12/17/2013 10:03 PM, Dinh Nguyen wrote:
+>>> Hi Zhangfei,
+>>>
+>>> On 12/17/13 2:11 AM, zhangfei wrote:
+>>>>
+>>>> On 12/17/2013 01:01 AM, dinguyen@altera.com wrote:
+>>>>> From: Dinh Nguyen <dinguyen@altera.com>
+>>>>>
+>>>>> This patch will enable the SDMMC_CMD_USE_HOLD_REG bit when the slot is
+>>>>> operating all timing modes, except for SDR50, DDR50, SDR104, and
+>>>>> MMC_HS200.
+>>>>>
+>>>>> According to the Synopsys databook :"To meet the relatively high
+>>>>> Input Hold
+>>>>> Time requirement for SDR12, SDR25, and other MMC speed modes, you should
+>>>>> program bit[29]use_hold_Reg of the CMD register to 1'b1;"..."However,
+>>>>> for
+>>>>> the higher speed modes of SDR104, SDR50 and DDR50, you can meet the much
+>>>>> smaller Input Hold Time requirement of 0.8ns by bypassing the Hold
+>>>>> Register
+>>>>> (Path A in Figure 10-8, programming CMD.use_hold_reg = 1'b0) and then
+>>>>> adding
+>>>>> delay elements on the output path as indicated.
+>>>>>
+>>>>> Also, "Never set CMD.use_hold_reg = 1 and cclk_in_drv phase shift to
+>>>>> 0 at the
+>>>>> same time. This would add an extra one-cycle delay on the output
+>>>>> path, resulting
+>>>>> in incorrect behavior."
+>>>>>
+>>>>> This patch also checks the IHR(Implement Hold Register) in the HCON
+>>>>> register.
+>>>>>
+>>>>> This information is taking from the v2.50a of the Synopsys Designware
+>>>>> Cores
+>>>>> Mobile Storage Host Databook.
+>>>>>
+>>>>> Signed-off-by: Dinh Nguyen <dinguyen@altera.com>
+>>>>> Acked-by: Arnd Bergmann <arnd@arndb.de>
+>>>>> Acked-by: Heiko Stuebner <heiko@sntech.de>
+>>>>> Tested-by: Heiko Stuebner <heiko@sntech.de>
+>>>>> ---
+>>>>> v4: use_hold_reg should be set for all modes when cclk_in_drv is
+>>>>> non-zero.
+>>>>> v3: Read the IHR(Implement Hold Register) in the HCON
+>>>>> v2: Add check for cclk_in_drv phase shift in conjunction with
+>>>>> use_hold_reg.
+>>>>> ---
+>>>>>    drivers/mmc/host/dw_mmc.c  |   52
+>>>>> ++++++++++++++++++++++++++++++++++++++++++++
+>>>>>    drivers/mmc/host/dw_mmc.h  |    4 ++++
+>>>>>    include/linux/mmc/dw_mmc.h |    3 +++
+>>>>>    3 files changed, 59 insertions(+)
+>>>>>
+>>>>> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+>>>>>        /*
+>>>>>         * Use mirror of ios->clock to prevent race with mmc
+>>>>>         * core ios update when finding the minimum.
+>>>>> @@ -2339,6 +2361,8 @@ static struct dw_mci_board
+>>>>> *dw_mci_parse_dt(struct dw_mci *host)
+>>>>>        const struct dw_mci_drv_data *drv_data = host->drv_data;
+>>>>>        int idx, ret;
+>>>>>        u32 clock_frequency;
+>>>>> +    int sdr_timing[2];
+>>>>> +    int ddr_timing[2];
+>>>>>
+>>>>>        pdata = devm_kzalloc(dev, sizeof(*pdata), GFP_KERNEL);
+>>>>>        if (!pdata) {
+>>>>> @@ -2389,6 +2413,25 @@ static struct dw_mci_board
+>>>>> *dw_mci_parse_dt(struct dw_mci *host)
+>>>>>        if (of_find_property(np, "caps2-mmc-hs200-1_2v", NULL))
+>>>>>            pdata->caps2 |= MMC_CAP2_HS200_1_2V_SDR;
+>>>>>
+>>>>> +    /* Check for the "samsung,dw-mshc-sdr-timing" and the
+>>>>> +     * "samsung,dw-mshc-ddr-timing" bindings as this will tell us if we
+>>>>> +     * can safely set the SDMMC_CMD_USE_HOLD_REG bit. The second
+>>>>> paramater
+>>>>> +     * in these 2 bindings is the value of the cclk_in_drv. If
+>>>>> cclk_in_drv
+>>>>> +     * is 0, we cannot set the SDMMC_CMD_USE_HOLD_REG bit. The default
+>>>>> +     * behavior will be to set cclk_in_drv, as some platforms do not
+>>>>> have
+>>>>> +     * to set the sdr or ddr timing parameters.
+>>>>> +     */
+>>>>> +    sdr_timing[1] = ddr_timing[1] = 1;
+>>>>> +    of_property_read_u32_array(np,
+>>>>> +            "samsung,dw-mshc-sdr-timing", sdr_timing, 2);
+>>>>> +
+>>>>> +    of_property_read_u32_array(np,
+>>>>> +            "samsung,dw-mshc-ddr-timing", ddr_timing, 2);
+>>>>> +
+>>>>> +    pdata->cclk_in_drv = 1;
+>>>>> +    if ((sdr_timing[1] == 0) || (ddr_timing[1] == 0))
+>>>>> +        pdata->cclk_in_drv = 0;
+>>>>> +
+>>>> Have some concern about whether it is suitable putting "samsung,~"
+>>>> property in dw_mmc.c, is it supposed to be platform related?
+>>>> Any conflict with drivers/mmc/host/dw_mmc-exynos.c?
+>>>> If they are really commonly used, how about change name and define in
+>>>> Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt?
+>>> I had submitted a patch to make this a common binding before:
+>>>
+>>> http://www.spinics.net/lists/devicetree/msg00638.html
+>>>
+>>> I think the ultimate conclusion to that thread was that its perfectly
+>>> acceptable to re-use bindings from other
+>>> platforms.
+>>>
+>> Hmm, ususally I may look for the properties of dw_mmc.c in synopsys-dw-mshc.txt.
+>> If this is the conclusion before, then just ignore this noise.
+> If can be removed the samsung property, then i think property of clock timing can be used into dw-mmc.c
+> But if samsung property is used, well. I think right that it's used into dw_mmc-exynos.c.
+> Dw-mmc.c is general driver..so we don't want to include any SoC specific code.
+Then do you suggest I go forward with an attempt to add a new generic
+"snps,dw-mshc-sdr-timing"
+binding?
 
-Any comments for it?
+Dinh
+>
+> If i missed something, then let me know, plz.
+>
+> Best Regards,
+> Jaehoon Chung
+>> Thanks
+>>
 
-Regards
-Dong Aisheng
-
-> ---
->  drivers/mmc/host/sdhci.c |   20 +++++++-------------
->  1 files changed, 7 insertions(+), 13 deletions(-)
->
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index a104bb1..c5d5f53 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -1876,12 +1876,12 @@ static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
->         unsigned long timeout;
->         int err = 0;
->         bool requires_tuning_nonuhs = false;
-> +       unsigned long flags;
->
->         host = mmc_priv(mmc);
->
->         sdhci_runtime_pm_get(host);
-> -       disable_irq(host->irq);
-> -       spin_lock(&host->lock);
-> +       spin_lock_irqsave(&host->lock, flags);
->
->         ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
->
-> @@ -1901,15 +1901,13 @@ static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
->             requires_tuning_nonuhs)
->                 ctrl |= SDHCI_CTRL_EXEC_TUNING;
->         else {
-> -               spin_unlock(&host->lock);
-> -               enable_irq(host->irq);
-> +               spin_unlock_irqrestore(&host->lock, flags);
->                 sdhci_runtime_pm_put(host);
->                 return 0;
->         }
->
->         if (host->ops->platform_execute_tuning) {
-> -               spin_unlock(&host->lock);
-> -               enable_irq(host->irq);
-> +               spin_unlock_irqrestore(&host->lock, flags);
->                 err = host->ops->platform_execute_tuning(host, opcode);
->                 sdhci_runtime_pm_put(host);
->                 return err;
-> @@ -1982,15 +1980,12 @@ static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
->                 host->cmd = NULL;
->                 host->mrq = NULL;
->
-> -               spin_unlock(&host->lock);
-> -               enable_irq(host->irq);
-> -
-> +               spin_unlock_irqrestore(&host->lock, flags);
->                 /* Wait for Buffer Read Ready interrupt */
->                 wait_event_interruptible_timeout(host->buf_ready_int,
->                                         (host->tuning_done == 1),
->                                         msecs_to_jiffies(50));
-> -               disable_irq(host->irq);
-> -               spin_lock(&host->lock);
-> +               spin_lock_irqsave(&host->lock, flags);
->
->                 if (!host->tuning_done) {
->                         pr_info(DRIVER_NAME ": Timeout waiting for "
-> @@ -2065,8 +2060,7 @@ out:
->                 err = 0;
->
->         sdhci_clear_set_irqs(host, SDHCI_INT_DATA_AVAIL, ier);
-> -       spin_unlock(&host->lock);
-> -       enable_irq(host->irq);
-> +       spin_unlock_irqrestore(&host->lock, flags);
->         sdhci_runtime_pm_put(host);
->
->         return err;
-> --
-> 1.7.2.rc3
->
->
->
-> _______________________________________________
-> linux-arm-kernel mailing list
-> linux-arm-kernel@lists.infradead.org
-> http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
