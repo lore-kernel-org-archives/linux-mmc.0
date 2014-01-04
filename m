@@ -1,72 +1,116 @@
 From: Arend van Spriel <arend@broadcom.com>
-Subject: [PATCH V3] sdhci: only reprogram retuning timer when flag is set
-Date: Sat, 4 Jan 2014 13:51:26 +0100
-Message-ID: <1388839886-18657-1-git-send-email-arend@broadcom.com>
+Subject: Re: [PATCH] mmc: add SDIO identifiers for Broadcom WLAN devices
+Date: Sat, 4 Jan 2014 13:55:34 +0100
+Message-ID: <52C804C6.7010203@broadcom.com>
+References: <1387834621-4813-1-git-send-email-arend@broadcom.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-gw2-out.broadcom.com ([216.31.210.63]:34456 "EHLO
+Received: from mail-gw2-out.broadcom.com ([216.31.210.63]:56444 "EHLO
 	mail-gw2-out.broadcom.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753367AbaADMv3 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 4 Jan 2014 07:51:29 -0500
+	with ESMTP id S1752110AbaADMzg (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 4 Jan 2014 07:55:36 -0500
+In-Reply-To: <1387834621-4813-1-git-send-email-arend@broadcom.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Chris Ball <cjb@laptop.org>
-Cc: linux-mmc@vger.kernel.org, Arend van Spriel <arend@broadcom.com>
+Cc: linux-mmc@vger.kernel.org, "John W. Linville" <linville@tuxdriver.com>
 
-When the host->tuning_count is zero it means that the
-retuning is disabled. This is checked on the first
-run of sdhci_execute_tuning() by the if statement below:
+On 12/23/13 22:37, Arend van Spriel wrote:
+> The SDIO identifier for Broadcom WLAN devices were defined in the
+> brcmfmac SDIO driver. Moving the definitions in MMC header file
+> seems common sense.
+>
+> Reviewed-by: Hante Meuleman<meuleman@broadcom.com>
+> Reviewed-by: Pieter-Paul Giesberts<pieterpg@broadcom.com>
+> Signed-off-by: Arend van Spriel<arend@broadcom.com>
+> ---
+> Moved vendor and device definitions in sdio_ids.h. Can split up in
+> two patches but they are clearly related.
 
-	if (!(host->flags & SDHCI_NEEDS_RETUNING) && host->tuning_count &&
-	    (host->tuning_mode == SDHCI_TUNING_MODE_1)) {
+Hi Chris,
 
-So only when tuning_count is non-zero it will set the host
-flag SDHCI_USING_RETUNING_TIMER. The else statement is only
-for re-programming the timer, which means that flag must be
-set. Because that is not checked the else statement is executed
-in the first run when tuning_count is zero.
+Not sure whether you applied this one already, but I realized it might 
+be better to move this one through the wireless tree to avoid merge 
+conflicts. So please let me know if that is ok and I consider the patch 
+dropped on your side.
 
-This was seen on a host controller which indicated
-SDHCI_TUNING_MODE_1 (0) and tuning_count being zero. Suspect
-that (one of) these registers is not properly set.
+Regards,
+Arend
 
-Signed-off-by: Arend van Spriel <arend@broadcom.com>
----
-It has been a while looking at this, but I believe I never sent
-a V3 of this patch so here it is. This patch applies to the
-mmc-next branch.
-
-V3:
-- remote tuning mode check for retuning timer reload
-
-V2:
-- add more explanation to the commit message
-- check host flag SDHCI_USING_RETUNING_TIMER
----
- drivers/mmc/host/sdhci.c | 7 +++----
- 1 file changed, 3 insertions(+), 4 deletions(-)
-
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index cc00bed..058b7de 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -2026,12 +2026,11 @@ out:
- 			host->tuning_count * HZ);
- 		/* Tuning mode 1 limits the maximum data length to 4MB */
- 		mmc->max_blk_count = (4 * 1024 * 1024) / mmc->max_blk_size;
--	} else {
-+	} else if (host->flags & SDHCI_USING_RETUNING_TIMER) {
- 		host->flags &= ~SDHCI_NEEDS_RETUNING;
- 		/* Reload the new initial value for timer */
--		if (host->tuning_mode == SDHCI_TUNING_MODE_1)
--			mod_timer(&host->tuning_timer, jiffies +
--				host->tuning_count * HZ);
-+		mod_timer(&host->tuning_timer, jiffies +
-+			  host->tuning_count * HZ);
- 	}
- 
- 	/*
--- 
-1.8.1.3
+> Regards,
+> Arend
+> ---
+>   drivers/net/wireless/brcm80211/brcmfmac/bcmsdh_sdmmc.c |    2 --
+>   drivers/net/wireless/brcm80211/brcmfmac/sdio_chip.c    |    1 +
+>   drivers/net/wireless/brcm80211/brcmfmac/sdio_chip.h    |    8 --------
+>   include/linux/mmc/sdio_ids.h                           |   10 ++++++++++
+>   4 files changed, 11 insertions(+), 10 deletions(-)
+>
+> diff --git a/drivers/net/wireless/brcm80211/brcmfmac/bcmsdh_sdmmc.c b/drivers/net/wireless/brcm80211/brcmfmac/bcmsdh_sdmmc.c
+> index 905704e..2274c64 100644
+> --- a/drivers/net/wireless/brcm80211/brcmfmac/bcmsdh_sdmmc.c
+> +++ b/drivers/net/wireless/brcm80211/brcmfmac/bcmsdh_sdmmc.c
+> @@ -39,8 +39,6 @@
+>   #include "dhd_dbg.h"
+>   #include "dhd_bus.h"
+>
+> -#define SDIO_VENDOR_ID_BROADCOM		0x02d0
+> -
+>   #define DMA_ALIGN_MASK	0x03
+>
+>   #define SDIO_FUNC1_BLOCKSIZE		64
+> diff --git a/drivers/net/wireless/brcm80211/brcmfmac/sdio_chip.c b/drivers/net/wireless/brcm80211/brcmfmac/sdio_chip.c
+> index 2096a14..a119808 100644
+> --- a/drivers/net/wireless/brcm80211/brcmfmac/sdio_chip.c
+> +++ b/drivers/net/wireless/brcm80211/brcmfmac/sdio_chip.c
+> @@ -19,6 +19,7 @@
+>   #include<linux/netdevice.h>
+>   #include<linux/mmc/card.h>
+>   #include<linux/mmc/sdio_func.h>
+> +#include<linux/mmc/sdio_ids.h>
+>   #include<linux/ssb/ssb_regs.h>
+>   #include<linux/bcma/bcma.h>
+>
+> diff --git a/drivers/net/wireless/brcm80211/brcmfmac/sdio_chip.h b/drivers/net/wireless/brcm80211/brcmfmac/sdio_chip.h
+> index 507c61c..f0780ee 100644
+> --- a/drivers/net/wireless/brcm80211/brcmfmac/sdio_chip.h
+> +++ b/drivers/net/wireless/brcm80211/brcmfmac/sdio_chip.h
+> @@ -54,14 +54,6 @@
+>
+>   #define BRCMF_MAX_CORENUM	6
+>
+> -/* SDIO device ID */
+> -#define SDIO_DEVICE_ID_BROADCOM_43143		43143
+> -#define SDIO_DEVICE_ID_BROADCOM_43241		0x4324
+> -#define SDIO_DEVICE_ID_BROADCOM_4329		0x4329
+> -#define SDIO_DEVICE_ID_BROADCOM_4330		0x4330
+> -#define SDIO_DEVICE_ID_BROADCOM_4334		0x4334
+> -#define SDIO_DEVICE_ID_BROADCOM_4335_4339	0x4335
+> -
+>   struct chip_core_info {
+>   	u16 id;
+>   	u16 rev;
+> diff --git a/include/linux/mmc/sdio_ids.h b/include/linux/mmc/sdio_ids.h
+> index 9f03fee..0f01fe0 100644
+> --- a/include/linux/mmc/sdio_ids.h
+> +++ b/include/linux/mmc/sdio_ids.h
+> @@ -23,6 +23,16 @@
+>   /*
+>    * Vendors and devices.  Sort key: vendor first, device next.
+>    */
+> +#define SDIO_VENDOR_ID_BROADCOM			0x02d0
+> +#define SDIO_DEVICE_ID_BROADCOM_43143		43143
+> +#define SDIO_DEVICE_ID_BROADCOM_43241		0x4324
+> +#define SDIO_DEVICE_ID_BROADCOM_4329		0x4329
+> +#define SDIO_DEVICE_ID_BROADCOM_4330		0x4330
+> +#define SDIO_DEVICE_ID_BROADCOM_4334		0x4334
+> +#define SDIO_DEVICE_ID_BROADCOM_4335_4339	0x4335
+> +#define SDIO_DEVICE_ID_BROADCOM_43362		43362
+> +#define SDIO_DEVICE_ID_BROADCOM_4354		0x4354
+> +
+>   #define SDIO_VENDOR_ID_INTEL			0x0089
+>   #define SDIO_DEVICE_ID_INTEL_IWMC3200WIMAX	0x1402
+>   #define SDIO_DEVICE_ID_INTEL_IWMC3200WIFI	0x1403
 
