@@ -1,129 +1,45 @@
-From: Mark Rutland <mark.rutland@arm.com>
-Subject: Re: [PATCH v7 3/7] regulator: add pbias regulator support
-Date: Mon, 6 Jan 2014 18:16:47 +0000
-Message-ID: <20140106181647.GJ24664@e106331-lin.cambridge.arm.com>
-References: <1387560955-6547-1-git-send-email-balajitk@ti.com>
- <1387560955-6547-4-git-send-email-balajitk@ti.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-omap-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <1387560955-6547-4-git-send-email-balajitk@ti.com>
-Content-Language: en-US
-Sender: linux-omap-owner@vger.kernel.org
-To: Balaji T K <balajitk@ti.com>
-Cc: "linux-omap@vger.kernel.org" <linux-omap@vger.kernel.org>, "bcousson@baylibre.com" <bcousson@baylibre.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "cjb@laptop.org" <cjb@laptop.org>, "broonie@kernel.org" <broonie@kernel.org>, "tony@atomide.com" <tony@atomide.com>
+From: Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>
+Subject: [PATCH REPOST3] mmc: tegra: add support for Tegra124
+Date: Mon,  6 Jan 2014 11:17:47 -0700
+Message-ID: <1389032267-2567-1-git-send-email-swarren@wwwdotorg.org>
+Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>
+Cc: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Stephen Warren <swarren-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Fri, Dec 20, 2013 at 05:35:51PM +0000, Balaji T K wrote:
-> pbias register controls internal power supply to sd card i/o pads
-> in most OMAPs (OMAP2-5, DRA7).
-> Control bits for selecting voltage level and
-> enabling/disabling are in the same PBIAS register.
-> 
-> Signed-off-by: Balaji T K <balajitk@ti.com>
-> ---
->  .../bindings/regulator/pbias-regulator.txt         |   16 ++
->  drivers/regulator/Kconfig                          |    9 +
->  drivers/regulator/Makefile                         |    1 +
->  drivers/regulator/pbias-regulator.c                |  261 ++++++++++++++++++++
->  4 files changed, 287 insertions(+), 0 deletions(-)
->  create mode 100644 Documentation/devicetree/bindings/regulator/pbias-regulator.txt
->  create mode 100644 drivers/regulator/pbias-regulator.c
-> 
-> diff --git a/Documentation/devicetree/bindings/regulator/pbias-regulator.txt b/Documentation/devicetree/bindings/regulator/pbias-regulator.txt
-> new file mode 100644
-> index 0000000..359d3f9
-> --- /dev/null
-> +++ b/Documentation/devicetree/bindings/regulator/pbias-regulator.txt
-> @@ -0,0 +1,16 @@
-> +PBIAS internal regulator for SD card dual voltage i/o pads on OMAP SoCs.
-> +
-> +Required properties:
-> +- compatible:
-> +  - "ti,pbias-omap" for OMAP2, OMAP3, OMAP4, OMAP5, DRA7
-> +
-> +Optional properties:
-> +- Any optional property defined in bindings/regulator/regulator.txt
-> +
-> +Example:
-> +
-> +		pbias_regulator: pbias_regulator {
-> +			regulator-name = "pbias_mmc_omap4";
-> +			regulator-min-microvolt = <1800000>;
-> +			regulator-max-microvolt = <3000000>;
-> +	};
+From: Stephen Warren <swarren-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
 
-This doesn't look like a full example. I don't see the required
-compatible string.
+Tegra124's MMC controller is very similar to earlier SoC generations,
+and can be supported by the same driver.
 
-[...]
+However, there are some non-backwards-compatible HW differences, and
+hence a new DT compatible value must be used to describe the HW. This
+patch updates the driver to support that new compatible value.
 
-> +static struct of_regulator_match pbias_matches[] = {
-> +	{ .name = "pbias_mmc_omap2430", .driver_data = (void *)&pbias_mmc_omap2430},
-> +	{ .name = "pbias_sim_omap3", .driver_data = (void *)&pbias_sim_omap3},
-> +	{ .name = "pbias_mmc_omap4", .driver_data = (void *)&pbias_mmc_omap4},
-> +	{ .name = "pbias_mmc_omap5", .driver_data = (void *)&pbias_mmc_omap5},
-> +};
+That said, the HW differences are only relevant when enabling certain
+high-performance transfer modes. Since the driver is currently very
+simple and doesn't enable those modes, we don't actually need to address
+any of these HW differences in the code yet, hence the simple nature of
+this patch.
 
-These weren't documented.
+Signed-off-by: Stephen Warren <swarren-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
+Reviewed-by: Thierry Reding <treding-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
+---
+ drivers/mmc/host/sdhci-tegra.c | 1 +
+ 1 file changed, 1 insertion(+)
 
-[...]
-
-> +static int pbias_regulator_probe(struct platform_device *pdev)
-> +{
-> +	struct device_node *np = pdev->dev.of_node;
-> +	struct device_node *dev_node;
-> +	struct pbias_regulator_data *drvdata;
-> +	struct resource *res;
-> +	struct regulator_config cfg = { };
-> +	struct regmap *syscon;
-> +	const struct pbias_reg_info *info;
-> +	int ret = 0;
-> +	int count, idx, data_idx = 0;
-> +
-> +	count = of_regulator_match(&pdev->dev, np, pbias_matches,
-> +						PBIAS_NUM_REGS);
-> +	if (count < 0)
-> +		return count;
-> +
-> +	drvdata = devm_kzalloc(&pdev->dev, sizeof(struct pbias_regulator_data)
-> +			       * count, GFP_KERNEL);
-> +	if (drvdata == NULL) {
-> +		dev_err(&pdev->dev, "Failed to allocate device data\n");
-> +		return -ENOMEM;
-> +	}
-> +
-> +	dev_node = of_get_parent(np);
-> +	if (!dev_node)
-> +		return -ENODEV;
-> +
-> +	syscon = syscon_node_to_regmap(dev_node);
-
-If we're relying on a particular parent node, that _must_ be described
-in the binding.
-
-> +	of_node_put(dev_node);
-> +	if (IS_ERR(syscon))
-> +		return PTR_ERR(syscon);
-> +
-> +	cfg.dev = &pdev->dev;
-> +
-> +	for (idx = 0; idx < PBIAS_NUM_REGS, data_idx < count; idx++) {
-> +		if (!pbias_matches[idx].init_data ||
-> +			!pbias_matches[idx].of_node)
-> +			continue;
-> +
-> +		info = pbias_matches[idx].driver_data;
-> +		if (!info)
-> +			return -ENODEV;
-> +
-> +		res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
-
-A reg entry was not mentioned in the binding.
-
-Why is this inside the loop? It's grabbing the reg from the parent, not
-each of the children it's walking over.
-
-Thanks,
-Mark.
+diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
+index 5b7b2eba8a54..a835898a68dd 100644
+--- a/drivers/mmc/host/sdhci-tegra.c
++++ b/drivers/mmc/host/sdhci-tegra.c
+@@ -198,6 +198,7 @@ static struct sdhci_tegra_soc_data soc_data_tegra114 = {
+ };
+ 
+ static const struct of_device_id sdhci_tegra_dt_match[] = {
++	{ .compatible = "nvidia,tegra124-sdhci", .data = &soc_data_tegra114 },
+ 	{ .compatible = "nvidia,tegra114-sdhci", .data = &soc_data_tegra114 },
+ 	{ .compatible = "nvidia,tegra30-sdhci", .data = &soc_data_tegra30 },
+ 	{ .compatible = "nvidia,tegra20-sdhci", .data = &soc_data_tegra20 },
+-- 
+1.8.1.5
