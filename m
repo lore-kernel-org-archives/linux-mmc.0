@@ -1,95 +1,80 @@
-From: Ludovic Desroches <ludovic.desroches@atmel.com>
-Subject: Re: possible regression on 3.13 when calling flush_dcache_page
-Date: Mon, 6 Jan 2014 10:34:09 +0100
-Message-ID: <20140106093408.GA2816@ldesroches-Latitude-E6320>
-References: <20131212143149.GI12099@ldesroches-Latitude-E6320>
- <20131212143618.GJ12099@ldesroches-Latitude-E6320>
- <20131213015909.GA8845@lge.com>
- <20131216144343.GD9627@ldesroches-Latitude-E6320>
- <20131218072117.GA2383@lge.com>
- <20131220080851.GC16592@ldesroches-Latitude-E6320>
- <20131223224435.GD16592@ldesroches-Latitude-E6320>
- <20131224063837.GA27156@lge.com>
- <20140103145404.GC18002@ldesroches-Latitude-E6320>
- <20140106002648.GC696@lge.com>
+From: Michal Simek <monstr@monstr.eu>
+Subject: Re: [PATCH v3 2/2] arm: dt: zynq: Add SDHCI nodes
+Date: Mon, 06 Jan 2014 12:18:27 +0100
+Message-ID: <52CA9103.6060803@monstr.eu>
+References: <1386007357-11956-1-git-send-email-soren.brinkmann@xilinx.com> <1386007357-11956-2-git-send-email-soren.brinkmann@xilinx.com> <529CE36C.4020707@monstr.eu>
+Reply-To: monstr@monstr.eu
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eusmtp01.atmel.com ([212.144.249.242]:65415 "EHLO
-	eusmtp01.atmel.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752708AbaAFJeB (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 6 Jan 2014 04:34:01 -0500
-Content-Disposition: inline
-In-Reply-To: <20140106002648.GC696@lge.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="0w2N76OdxlLSISqPG4hw1IM9m0L9FhK0T"
+Return-path: <linux-doc-owner@vger.kernel.org>
+In-Reply-To: <529CE36C.4020707@monstr.eu>
+Sender: linux-doc-owner@vger.kernel.org
+To: monstr@monstr.eu
+Cc: Soren Brinkmann <soren.brinkmann@xilinx.com>, Rob Herring <rob.herring@calxeda.com>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Stephen Warren <swarren@wwwdotorg.org>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Rob Landley <rob@landley.net>, Russell King <linux@arm.linux.org.uk>, Chris Ball <cjb@laptop.org>, Michal Simek <michal.simek@xilinx.com>, Grant Likely <grant.likely@linaro.org>, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, linux-doc@vger.kernel.org, devicetree@vger.kernel.org, Tomasz Figa <tomasz.figa@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Joonsoo Kim <iamjoonsoo.kim@lge.com>
-Cc: linux-mm@kvack.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Christoph Lameter <cl@linux.com>, Pekka Enberg <penberg@kernel.org>, Ludovic Desroches <ludovic.desroches@atmel.com>
 
-On Mon, Jan 06, 2014 at 09:26:48AM +0900, Joonsoo Kim wrote:
-> On Fri, Jan 03, 2014 at 03:54:04PM +0100, Ludovic Desroches wrote:
-> > Hi,
-> > 
-> > On Tue, Dec 24, 2013 at 03:38:37PM +0900, Joonsoo Kim wrote:
-> > 
-> > [...]
-> > 
-> > > > > > > > I think that this commit may not introduce a bug. This patch remove one
-> > > > > > > > variable on slab management structure and replace variable name. So there
-> > > > > > > > is no functional change.
-> > 
-> > You are right, the commit given by git bisect was not the good one...
-> > Since I removed other patches done on top of it, I thought it really was
-> > this one but in fact it is 8456a64.
-> 
-> Okay. It seems more reasonable to me.
-> I guess that this is the same issue with following link.
-> http://lkml.org/lkml/2014/1/4/81
-> 
-> And, perhaps, that patch solves your problem. But I'm not sure that it is the
-> best solution for this problem. I should discuss with slab maintainers.
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--0w2N76OdxlLSISqPG4hw1IM9m0L9FhK0T
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
 
-Yes this patch solves my problem.
+On 12/02/2013 08:45 PM, Michal Simek wrote:
+> On 12/02/2013 07:02 PM, Soren Brinkmann wrote:
+>> Add nodes for the Arasan SDHCI controller to Zynq dts files.
+>>
+>> Signed-off-by: Soren Brinkmann <soren.brinkmann@xilinx.com>
+>> ---
+>> v2:
+>>  - update compatibilty string according to changes in 1/2 (append
+>>    '-8.9a' IP version string)
+>> ---
+>>  arch/arm/boot/dts/zynq-7000.dtsi | 20 ++++++++++++++++++++
+>>  arch/arm/boot/dts/zynq-zc702.dts |  4 ++++
+>>  arch/arm/boot/dts/zynq-zc706.dts |  4 ++++
+>>  arch/arm/boot/dts/zynq-zed.dts   |  4 ++++
+>>  4 files changed, 32 insertions(+)
+>=20
+> Chris: It is up to you if you want to take this through your tree
+> or just let me to take it through my tree. It is adding new nodes
+> to DTS file that's why it shouldn't be any problem to apply it
+> separately.
+>=20
+> Anyway please let me know what you think.
+> If you want to add it to your tree here is my
+>=20
+> Acked-by: Michal Simek <monstr@monstr.eu>
 
-> 
-> I will think about this problem more deeply and report the solution to you
-> as soon as possible.
+I have added this patch to my zynq/dt branch.
+We discussed this in other patch and these dt changes should go through
+arm-soc tree.
 
-Ok thanks.
+Thanks,
+Michal
 
-> 
-> Thanks.
-> 
-> > 
-> >  dd0f774  Fri Jan 3 12:33:55 2014 +0100  Revert "slab: remove useless
-> > statement for checking pfmemalloc"  Ludovic Desroches 
-> >  ff7487d  Fri Jan 3 12:32:33 2014 +0100  Revert "slab: rename
-> > slab_bufctl to slab_freelist"  Ludovic Desroches 
-> >  b963564  Fri Jan 3 12:32:13 2014 +0100  Revert "slab: fix to calm down
-> > kmemleak warning"  Ludovic Desroches 
-> >  3fcfe50  Fri Jan 3 12:30:32 2014 +0100  Revert "slab: replace
-> > non-existing 'struct freelist *' with 'void *'"  Ludovic Desroches 
-> >  750a795  Fri Jan 3 12:30:16 2014 +0100  Revert "memcg, kmem: rename
-> > cache_from_memcg to cache_from_memcg_idx"  Ludovic Desroches 
-> >  7e2de8a  Fri Jan 3 12:30:10 2014 +0100  mmc: atmel-mci: disable pdc
-> > Ludovic Desroches
-> > 
-> > In this case I have the kernel oops. If I revert 8456a64 too, it
-> > disappears.
-> > 
-> > I will try to test it on other devices because I couldn't reproduce it
-> > with newer ones (but it's not the same ARM architecture so I would like
-> > to see if it's also related to the device itself).
-> > 
-> > In attachment, there are the results of /proc/slabinfo before inserted the
-> > sdio wifi module causing the oops.
-> > 
-> > Regards
-> > 
-> > Ludovic
-> 
-> --
-> To unsubscribe, send a message with 'unsubscribe linux-mm' in
-> the body to majordomo@kvack.org.  For more info on Linux MM,
-> see: http://www.linux-mm.org/ .
-> Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+
+--=20
+Michal Simek, Ing. (M.Eng), OpenPGP -> KeyID: FE3D1F91
+w: www.monstr.eu p: +42-0-721842854
+Maintainer of Linux kernel - Microblaze cpu - http://www.monstr.eu/fdt/
+Maintainer of Linux kernel - Xilinx Zynq ARM architecture
+Microblaze U-BOOT custodian and responsible for u-boot arm zynq platform
+
+
+
+--0w2N76OdxlLSISqPG4hw1IM9m0L9FhK0T
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.10 (GNU/Linux)
+Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
+
+iEYEARECAAYFAlLKkQMACgkQykllyylKDCGPEQCgk4jgaBt/TlnGXYrkIPIIHSWV
+qIgAoIyErAbINWkBamuZz+uXcXQIn/Lm
+=qSUk
+-----END PGP SIGNATURE-----
+
+--0w2N76OdxlLSISqPG4hw1IM9m0L9FhK0T--
