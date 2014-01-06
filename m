@@ -1,116 +1,83 @@
-From: Arend van Spriel <arend@broadcom.com>
-Subject: Re: [PATCH] mmc: add SDIO identifiers for Broadcom WLAN devices
-Date: Sat, 4 Jan 2014 13:55:34 +0100
-Message-ID: <52C804C6.7010203@broadcom.com>
-References: <1387834621-4813-1-git-send-email-arend@broadcom.com>
+From: Joonsoo Kim <iamjoonsoo.kim@lge.com>
+Subject: Re: possible regression on 3.13 when calling flush_dcache_page
+Date: Mon, 6 Jan 2014 09:26:48 +0900
+Message-ID: <20140106002648.GC696@lge.com>
+References: <20131212143149.GI12099@ldesroches-Latitude-E6320>
+ <20131212143618.GJ12099@ldesroches-Latitude-E6320>
+ <20131213015909.GA8845@lge.com>
+ <20131216144343.GD9627@ldesroches-Latitude-E6320>
+ <20131218072117.GA2383@lge.com>
+ <20131220080851.GC16592@ldesroches-Latitude-E6320>
+ <20131223224435.GD16592@ldesroches-Latitude-E6320>
+ <20131224063837.GA27156@lge.com>
+ <20140103145404.GC18002@ldesroches-Latitude-E6320>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-gw2-out.broadcom.com ([216.31.210.63]:56444 "EHLO
-	mail-gw2-out.broadcom.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752110AbaADMzg (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 4 Jan 2014 07:55:36 -0500
-In-Reply-To: <1387834621-4813-1-git-send-email-arend@broadcom.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <owner-linux-mm@kvack.org>
+Content-Disposition: inline
+In-Reply-To: <20140103145404.GC18002@ldesroches-Latitude-E6320>
+Sender: owner-linux-mm@kvack.org
+To: linux-mm@kvack.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Cc: Christoph Lameter <cl@linux.com>, Pekka Enberg <penberg@kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: linux-mmc@vger.kernel.org, "John W. Linville" <linville@tuxdriver.com>
 
-On 12/23/13 22:37, Arend van Spriel wrote:
-> The SDIO identifier for Broadcom WLAN devices were defined in the
-> brcmfmac SDIO driver. Moving the definitions in MMC header file
-> seems common sense.
->
-> Reviewed-by: Hante Meuleman<meuleman@broadcom.com>
-> Reviewed-by: Pieter-Paul Giesberts<pieterpg@broadcom.com>
-> Signed-off-by: Arend van Spriel<arend@broadcom.com>
-> ---
-> Moved vendor and device definitions in sdio_ids.h. Can split up in
-> two patches but they are clearly related.
+On Fri, Jan 03, 2014 at 03:54:04PM +0100, Ludovic Desroches wrote:
+> Hi,
+> 
+> On Tue, Dec 24, 2013 at 03:38:37PM +0900, Joonsoo Kim wrote:
+> 
+> [...]
+> 
+> > > > > > > I think that this commit may not introduce a bug. This patch remove one
+> > > > > > > variable on slab management structure and replace variable name. So there
+> > > > > > > is no functional change.
+> 
+> You are right, the commit given by git bisect was not the good one...
+> Since I removed other patches done on top of it, I thought it really was
+> this one but in fact it is 8456a64.
 
-Hi Chris,
+Okay. It seems more reasonable to me.
+I guess that this is the same issue with following link.
+http://lkml.org/lkml/2014/1/4/81
 
-Not sure whether you applied this one already, but I realized it might 
-be better to move this one through the wireless tree to avoid merge 
-conflicts. So please let me know if that is ok and I consider the patch 
-dropped on your side.
+And, perhaps, that patch solves your problem. But I'm not sure that it is the
+best solution for this problem. I should discuss with slab maintainers.
 
-Regards,
-Arend
+I will think about this problem more deeply and report the solution to you
+as soon as possible.
 
-> Regards,
-> Arend
-> ---
->   drivers/net/wireless/brcm80211/brcmfmac/bcmsdh_sdmmc.c |    2 --
->   drivers/net/wireless/brcm80211/brcmfmac/sdio_chip.c    |    1 +
->   drivers/net/wireless/brcm80211/brcmfmac/sdio_chip.h    |    8 --------
->   include/linux/mmc/sdio_ids.h                           |   10 ++++++++++
->   4 files changed, 11 insertions(+), 10 deletions(-)
->
-> diff --git a/drivers/net/wireless/brcm80211/brcmfmac/bcmsdh_sdmmc.c b/drivers/net/wireless/brcm80211/brcmfmac/bcmsdh_sdmmc.c
-> index 905704e..2274c64 100644
-> --- a/drivers/net/wireless/brcm80211/brcmfmac/bcmsdh_sdmmc.c
-> +++ b/drivers/net/wireless/brcm80211/brcmfmac/bcmsdh_sdmmc.c
-> @@ -39,8 +39,6 @@
->   #include "dhd_dbg.h"
->   #include "dhd_bus.h"
->
-> -#define SDIO_VENDOR_ID_BROADCOM		0x02d0
-> -
->   #define DMA_ALIGN_MASK	0x03
->
->   #define SDIO_FUNC1_BLOCKSIZE		64
-> diff --git a/drivers/net/wireless/brcm80211/brcmfmac/sdio_chip.c b/drivers/net/wireless/brcm80211/brcmfmac/sdio_chip.c
-> index 2096a14..a119808 100644
-> --- a/drivers/net/wireless/brcm80211/brcmfmac/sdio_chip.c
-> +++ b/drivers/net/wireless/brcm80211/brcmfmac/sdio_chip.c
-> @@ -19,6 +19,7 @@
->   #include<linux/netdevice.h>
->   #include<linux/mmc/card.h>
->   #include<linux/mmc/sdio_func.h>
-> +#include<linux/mmc/sdio_ids.h>
->   #include<linux/ssb/ssb_regs.h>
->   #include<linux/bcma/bcma.h>
->
-> diff --git a/drivers/net/wireless/brcm80211/brcmfmac/sdio_chip.h b/drivers/net/wireless/brcm80211/brcmfmac/sdio_chip.h
-> index 507c61c..f0780ee 100644
-> --- a/drivers/net/wireless/brcm80211/brcmfmac/sdio_chip.h
-> +++ b/drivers/net/wireless/brcm80211/brcmfmac/sdio_chip.h
-> @@ -54,14 +54,6 @@
->
->   #define BRCMF_MAX_CORENUM	6
->
-> -/* SDIO device ID */
-> -#define SDIO_DEVICE_ID_BROADCOM_43143		43143
-> -#define SDIO_DEVICE_ID_BROADCOM_43241		0x4324
-> -#define SDIO_DEVICE_ID_BROADCOM_4329		0x4329
-> -#define SDIO_DEVICE_ID_BROADCOM_4330		0x4330
-> -#define SDIO_DEVICE_ID_BROADCOM_4334		0x4334
-> -#define SDIO_DEVICE_ID_BROADCOM_4335_4339	0x4335
-> -
->   struct chip_core_info {
->   	u16 id;
->   	u16 rev;
-> diff --git a/include/linux/mmc/sdio_ids.h b/include/linux/mmc/sdio_ids.h
-> index 9f03fee..0f01fe0 100644
-> --- a/include/linux/mmc/sdio_ids.h
-> +++ b/include/linux/mmc/sdio_ids.h
-> @@ -23,6 +23,16 @@
->   /*
->    * Vendors and devices.  Sort key: vendor first, device next.
->    */
-> +#define SDIO_VENDOR_ID_BROADCOM			0x02d0
-> +#define SDIO_DEVICE_ID_BROADCOM_43143		43143
-> +#define SDIO_DEVICE_ID_BROADCOM_43241		0x4324
-> +#define SDIO_DEVICE_ID_BROADCOM_4329		0x4329
-> +#define SDIO_DEVICE_ID_BROADCOM_4330		0x4330
-> +#define SDIO_DEVICE_ID_BROADCOM_4334		0x4334
-> +#define SDIO_DEVICE_ID_BROADCOM_4335_4339	0x4335
-> +#define SDIO_DEVICE_ID_BROADCOM_43362		43362
-> +#define SDIO_DEVICE_ID_BROADCOM_4354		0x4354
-> +
->   #define SDIO_VENDOR_ID_INTEL			0x0089
->   #define SDIO_DEVICE_ID_INTEL_IWMC3200WIMAX	0x1402
->   #define SDIO_DEVICE_ID_INTEL_IWMC3200WIFI	0x1403
+Thanks.
 
+> 
+>  dd0f774  Fri Jan 3 12:33:55 2014 +0100  Revert "slab: remove useless
+> statement for checking pfmemalloc"  Ludovic Desroches 
+>  ff7487d  Fri Jan 3 12:32:33 2014 +0100  Revert "slab: rename
+> slab_bufctl to slab_freelist"  Ludovic Desroches 
+>  b963564  Fri Jan 3 12:32:13 2014 +0100  Revert "slab: fix to calm down
+> kmemleak warning"  Ludovic Desroches 
+>  3fcfe50  Fri Jan 3 12:30:32 2014 +0100  Revert "slab: replace
+> non-existing 'struct freelist *' with 'void *'"  Ludovic Desroches 
+>  750a795  Fri Jan 3 12:30:16 2014 +0100  Revert "memcg, kmem: rename
+> cache_from_memcg to cache_from_memcg_idx"  Ludovic Desroches 
+>  7e2de8a  Fri Jan 3 12:30:10 2014 +0100  mmc: atmel-mci: disable pdc
+> Ludovic Desroches
+> 
+> In this case I have the kernel oops. If I revert 8456a64 too, it
+> disappears.
+> 
+> I will try to test it on other devices because I couldn't reproduce it
+> with newer ones (but it's not the same ARM architecture so I would like
+> to see if it's also related to the device itself).
+> 
+> In attachment, there are the results of /proc/slabinfo before inserted the
+> sdio wifi module causing the oops.
+> 
+> Regards
+> 
+> Ludovic
+
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
