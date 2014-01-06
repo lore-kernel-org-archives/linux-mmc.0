@@ -1,62 +1,183 @@
-From: Mark Rutland <mark.rutland@arm.com>
-Subject: Re: [PATCH v7 5/7] ARM: dts: add pbias dt node
-Date: Mon, 6 Jan 2014 18:19:28 +0000
-Message-ID: <20140106181928.GK24664@e106331-lin.cambridge.arm.com>
-References: <1387560955-6547-1-git-send-email-balajitk@ti.com>
- <1387560955-6547-6-git-send-email-balajitk@ti.com>
+From: <dinguyen@altera.com>
+Subject: [RESEND PATCHv8 1/4] clk: socfpga: Add a clk-phase property to the "altr,socfpga-gate-clk"
+Date: Mon, 6 Jan 2014 13:32:31 -0600
+Message-ID: <1389036754-7249-2-git-send-email-dinguyen@altera.com>
+References: <1389036754-7249-1-git-send-email-dinguyen@altera.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-omap-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <1387560955-6547-6-git-send-email-balajitk@ti.com>
-Sender: linux-omap-owner@vger.kernel.org
-To: Balaji T K <balajitk@ti.com>
-Cc: "linux-omap@vger.kernel.org" <linux-omap@vger.kernel.org>, "bcousson@baylibre.com" <bcousson@baylibre.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "cjb@laptop.org" <cjb@laptop.org>, "broonie@kernel.org" <broonie@kernel.org>, "tony@atomide.com" <tony@atomide.com>
+Content-Type: text/plain
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from va3ehsobe003.messaging.microsoft.com ([216.32.180.13]:14998
+	"EHLO va3outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1755921AbaAFTer (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 6 Jan 2014 14:34:47 -0500
+In-Reply-To: <1389036754-7249-1-git-send-email-dinguyen@altera.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: dinh.linux@gmail.com, arnd@arndb.de, cjb@laptop.org, jh80.chung@samsung.com, tgih.jun@samsung.com, heiko@sntech.de, dianders@chromium.org, alim.akhtar@samsung.com, bzhao@marvell.com, mturquette@linaro.org
+Cc: zhangfei.gao@linaro.org, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Dinh Nguyen <dinguyen@altera.com>
 
-On Fri, Dec 20, 2013 at 05:35:53PM +0000, Balaji T K wrote:
-> Add pbias regulator node as a child of system control
-> module - syscon.
-> 
-> Signed-off-by: Balaji T K <balajitk@ti.com>
-> ---
->  arch/arm/boot/dts/dra7.dtsi     |   18 ++++++++++++++++++
->  arch/arm/boot/dts/omap2430.dtsi |   18 ++++++++++++++++++
->  arch/arm/boot/dts/omap3.dtsi    |   18 ++++++++++++++++++
->  arch/arm/boot/dts/omap4.dtsi    |   18 ++++++++++++++++++
->  arch/arm/boot/dts/omap5.dtsi    |   18 ++++++++++++++++++
->  5 files changed, 90 insertions(+), 0 deletions(-)
-> 
-> diff --git a/arch/arm/boot/dts/dra7.dtsi b/arch/arm/boot/dts/dra7.dtsi
-> index d0df4c4..4e68df1 100644
-> --- a/arch/arm/boot/dts/dra7.dtsi
-> +++ b/arch/arm/boot/dts/dra7.dtsi
-> @@ -110,6 +110,23 @@
->  			ti,hwmods = "counter_32k";
->  		};
->  
-> +		dra7_ctrl_general: tisyscon@4a002e00 {
-> +			compatible = "ti,control-syscon", "syscon", "simple-bus";
+From: Dinh Nguyen <dinguyen@altera.com>
 
-Please, don't use simple-bus like that. The components below this node
-depend on it. It is _NOT_ a simple bus. Make the ti,control-syscon
-driver probe it's children.
+The clk-phase property is used to represent the 2 clock phase values that is
+needed for the SD/MMC driver. Add a prepare function to the clk_ops, that will
+use the syscon driver to set sdmmc_clk's phase shift that is located in the
+system manager.
 
-> +			reg = <0x4a002e00 0x7c>;
-> +			#address-cells = <1>;
-> +			#size-cells = <1>;
-> +			ranges;
-> +			pbias_regulator: pbias_regulator {
-> +				compatible = "ti,pbias-omap";
-> +				reg = <0 0x4>;
-> +				pbias_mmc_reg: pbias_mmc_omap5 {
-> +					regulator-name = "pbias_mmc_omap5";
-> +					regulator-min-microvolt = <1800000>;
-> +					regulator-max-microvolt = <3000000>;
-> +				};
-> +			};
-> +		};
-> +
+Signed-off-by: Dinh Nguyen <dinguyen@altera.com>
+Acked-by: Zhangfei Gao <zhangfei.gao@linaro.org>
+---
+v8: Use degrees in the clk-phase binding property
+v7: Add dts property to represent the clk phase of the sdmmc_clk. Add a
+    prepare function to the gate clk that will toggle clock phase setting.
+    Remove the "altr,socfpga-sdmmc-sdr-clk" clock type.
+v6: Add a new clock type "altr,socfpga-sdmmc-sdr-clk" that will be used to
+    set the phase shift settings.
+v5: Use the "snps,dw-mshc" binding
+v4: Use the sdmmc_clk prepare function to set the phase shift settings
+v3: Not use the syscon driver because as of 3.13-rc1, the syscon driver is
+    loaded after the clock driver.
+v2: Use the syscon driver
+---
+ .../devicetree/bindings/clock/altr_socfpga.txt     |    5 ++
+ arch/arm/boot/dts/socfpga.dtsi                     |    1 +
+ drivers/clk/socfpga/clk-gate.c                     |   68 ++++++++++++++++++++
+ 3 files changed, 74 insertions(+)
 
-Thanks,
-Mark.
+diff --git a/Documentation/devicetree/bindings/clock/altr_socfpga.txt b/Documentation/devicetree/bindings/clock/altr_socfpga.txt
+index 0045433..5dfd145 100644
+--- a/Documentation/devicetree/bindings/clock/altr_socfpga.txt
++++ b/Documentation/devicetree/bindings/clock/altr_socfpga.txt
+@@ -23,3 +23,8 @@ Optional properties:
+         and the bit index.
+ - div-reg : For "socfpga-gate-clk", div-reg contains the divider register, bit shift,
+         and width.
++- clk-phase : For the sdmmc_clk, contains the value of the clock phase that controls
++	the SDMMC CIU clock. The first value is the clk_sample(smpsel), and the second
++	value is the cclk_in_drv(drvsel). The clk-phase is used to enable the correct
++	hold/delay times that is needed for the SD/MMC CIU clock. The values of both
++	can be 0-315 degrees, in 45 degree increments.
+diff --git a/arch/arm/boot/dts/socfpga.dtsi b/arch/arm/boot/dts/socfpga.dtsi
+index f936476..e776512 100644
+--- a/arch/arm/boot/dts/socfpga.dtsi
++++ b/arch/arm/boot/dts/socfpga.dtsi
+@@ -413,6 +413,7 @@
+ 						compatible = "altr,socfpga-gate-clk";
+ 						clocks = <&f2s_periph_ref_clk>, <&main_nand_sdmmc_clk>, <&per_nand_mmc_clk>;
+ 						clk-gate = <0xa0 8>;
++						clk-phase = <0 135>;
+ 					};
+ 
+ 					nand_x_clk: nand_x_clk {
+diff --git a/drivers/clk/socfpga/clk-gate.c b/drivers/clk/socfpga/clk-gate.c
+index 4efcf4e..501d513 100644
+--- a/drivers/clk/socfpga/clk-gate.c
++++ b/drivers/clk/socfpga/clk-gate.c
+@@ -19,7 +19,9 @@
+ #include <linux/clkdev.h>
+ #include <linux/clk-provider.h>
+ #include <linux/io.h>
++#include <linux/mfd/syscon.h>
+ #include <linux/of.h>
++#include <linux/regmap.h>
+ 
+ #include "clk.h"
+ 
+@@ -35,6 +37,11 @@
+ 
+ #define to_socfpga_gate_clk(p) container_of(p, struct socfpga_gate_clk, hw.hw)
+ 
++/* SDMMC Group for System Manager defines */
++#define SYSMGR_SDMMCGRP_CTRL_OFFSET    0x108
++#define SYSMGR_SDMMC_CTRL_SET(smplsel, drvsel) \
++	((((smplsel) & 0x7) << 3) | (((drvsel) & 0x7) << 0))
++
+ static u8 socfpga_clk_get_parent(struct clk_hw *hwclk)
+ {
+ 	u32 l4_src;
+@@ -115,7 +122,61 @@ static unsigned long socfpga_clk_recalc_rate(struct clk_hw *hwclk,
+ 	return parent_rate / div;
+ }
+ 
++static int socfpga_clk_prepare(struct clk_hw *hwclk)
++{
++	struct socfpga_gate_clk *socfpgaclk = to_socfpga_gate_clk(hwclk);
++	struct regmap *sys_mgr_base_addr;
++	int i;
++	u32 hs_timing;
++	u32 clk_phase[2];
++
++	if (socfpgaclk->clk_phase[0] || socfpgaclk->clk_phase[1]) {
++		sys_mgr_base_addr = syscon_regmap_lookup_by_compatible("altr,sys-mgr");
++		if (IS_ERR(sys_mgr_base_addr)) {
++			pr_err("%s: failed to find altr,sys-mgr regmap!\n", __func__);
++			return -EINVAL;
++		}
++
++		for (i = 0; i < 2; i++) {
++			switch (socfpgaclk->clk_phase[i]) {
++			case 0:
++				clk_phase[i] = 0;
++				break;
++			case 45:
++				clk_phase[i] = 1;
++				break;
++			case 90:
++				clk_phase[i] = 2;
++				break;
++			case 135:
++				clk_phase[i] = 3;
++				break;
++			case 180:
++				clk_phase[i] = 4;
++				break;
++			case 225:
++				clk_phase[i] = 5;
++				break;
++			case 270:
++				clk_phase[i] = 6;
++				break;
++			case 315:
++				clk_phase[i] = 7;
++				break;
++			default:
++				clk_phase[i] = 0;
++				break;
++			}
++		}
++		hs_timing = SYSMGR_SDMMC_CTRL_SET(clk_phase[0], clk_phase[1]);
++		regmap_write(sys_mgr_base_addr, SYSMGR_SDMMCGRP_CTRL_OFFSET,
++			hs_timing);
++	}
++	return 0;
++}
++
+ static struct clk_ops gateclk_ops = {
++	.prepare = socfpga_clk_prepare,
+ 	.recalc_rate = socfpga_clk_recalc_rate,
+ 	.get_parent = socfpga_clk_get_parent,
+ 	.set_parent = socfpga_clk_set_parent,
+@@ -126,6 +187,7 @@ static void __init __socfpga_gate_init(struct device_node *node,
+ {
+ 	u32 clk_gate[2];
+ 	u32 div_reg[3];
++	u32 clk_phase[2];
+ 	u32 fixed_div;
+ 	struct clk *clk;
+ 	struct socfpga_gate_clk *socfpga_clk;
+@@ -166,6 +228,12 @@ static void __init __socfpga_gate_init(struct device_node *node,
+ 		socfpga_clk->div_reg = 0;
+ 	}
+ 
++	rc = of_property_read_u32_array(node, "clk-phase", clk_phase, 2);
++	if (!rc) {
++		socfpga_clk->clk_phase[0] = clk_phase[0];
++		socfpga_clk->clk_phase[1] = clk_phase[1];
++	}
++
+ 	of_property_read_string(node, "clock-output-names", &clk_name);
+ 
+ 	init.name = clk_name;
+-- 
+1.7.9.5
+
+
