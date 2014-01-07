@@ -1,34 +1,48 @@
-From: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
-Subject: Re: [PATCH 07/15] mmc: sdhi: Enable driver compilation with COMPILE_TEST
-Date: Tue, 07 Jan 2014 17:13:58 +0100
-Message-ID: <2027886.JWMjoveTXm@avalon>
-References: <1385515117-23664-1-git-send-email-laurent.pinchart+renesas@ideasonboard.com> <1526599.nZ6xaI3TN3@avalon> <86d2k37puy.fsf@void.printf.net>
+From: Franky Lin <frankyl@broadcom.com>
+Subject: [PATCH] mmc: sdhci: only invoke clock re-tuning for adtc type commands
+Date: Tue, 7 Jan 2014 10:37:39 -0800
+Message-ID: <1389119859-28955-1-git-send-email-frankyl@broadcom.com>
+References: <1389119511-26228-1-git-send-email-frankyl@broadcom.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7Bit
-Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <86d2k37puy.fsf@void.printf.net>
-Sender: linux-sh-owner@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: linux-sh@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Ian Molton <ian@mnementh.co.uk>, linux-mmc@vger.kernel.org
+Content-Type: text/plain
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-gw2-out.broadcom.com ([216.31.210.63]:24949 "EHLO
+	mail-gw2-out.broadcom.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752349AbaAGShl (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 7 Jan 2014 13:37:41 -0500
+In-Reply-To: <1389119511-26228-1-git-send-email-frankyl@broadcom.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: chris@printf.net
+Cc: linux-mmc@vger.kernel.org
 
-On Tuesday 07 January 2014 15:50:45 Chris Ball wrote:
-> On Tue, Jan 07 2014, Laurent Pinchart wrote:
-> > On Wednesday 11 December 2013 13:53:21 Laurent Pinchart wrote:
-> >> Hi Chris,
-> >> 
-> >> Could you please pick this patch (and patch 08/15 in the same series) up
-> >> for v3.14 ?
-> > 
-> > Ping ?
-> 
-> Thanks, both pushed to mmc-next for 3.14, sorry for the delay.
+For high clock frequency modes, ie. SDR104 and possibly SDR50, the data
+window on the CMD and DAT lines needs to be tuned. Once tuned to a
+sample clock rate, a re-tuning might required because of drifted signal
+on different lines. This re-tuning is needed and only necessary for
+commands using the DAT lines, ie. adtc type commands. This patch is an
+optimization by adding the condition of the requested command being adtc
+type in order to execute the re-tuning procedure.
 
-No worries, thank you.
+Signed-off-by: Franky Lin <frankyl@broadcom.com>
+---
+ drivers/mmc/host/sdhci.c |    3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
 
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index cc00bed..f301cd6 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -1389,7 +1389,8 @@ static void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
+ 		 * tuning procedure before sending command.
+ 		 */
+ 		if ((host->flags & SDHCI_NEEDS_RETUNING) &&
+-		    !(present_state & (SDHCI_DOING_WRITE | SDHCI_DOING_READ))) {
++		    !(present_state & (SDHCI_DOING_WRITE | SDHCI_DOING_READ)) &&
++		    mmc_cmd_type(mrq->cmd) == MMC_CMD_ADTC) {
+ 			if (mmc->card) {
+ 				/* eMMC uses cmd21 but sd and sdio use cmd19 */
+ 				tuning_opcode =
 -- 
-Regards,
-
-Laurent Pinchart
+1.7.9.5
 
