@@ -1,51 +1,41 @@
-From: <dinguyen@altera.com>
-Subject: [RESEND PATCHv8 0/4] socfpga: Enable SD/MMC support
-Date: Mon, 6 Jan 2014 13:32:30 -0600
-Message-ID: <1389036754-7249-1-git-send-email-dinguyen@altera.com>
+From: Chris Ball <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH REPOST3] mmc: tegra: add support for Tegra124
+Date: Tue, 07 Jan 2014 03:05:44 +0000
+Message-ID: <86lhys7apj.fsf@void.printf.net>
+References: <1389032267-2567-1-git-send-email-swarren@wwwdotorg.org>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from va3ehsobe004.messaging.microsoft.com ([216.32.180.14]:50862
-	"EHLO va3outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1755786AbaAFTer (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 6 Jan 2014 14:34:47 -0500
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1389032267-2567-1-git-send-email-swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org> (Stephen
+	Warren's message of "Mon, 6 Jan 2014 11:17:47 -0700")
+Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>
+Cc: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Stephen Warren <swarren-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: dinh.linux@gmail.com, arnd@arndb.de, cjb@laptop.org, jh80.chung@samsung.com, tgih.jun@samsung.com, heiko@sntech.de, dianders@chromium.org, alim.akhtar@samsung.com, bzhao@marvell.com, mturquette@linaro.org
-Cc: zhangfei.gao@linaro.org, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Dinh Nguyen <dinguyen@altera.com>
 
-From: Dinh Nguyen <dinguyen@altera.com>
+Hi Stephen,
 
-RESEND: Apologies, resending to all appropriate ml's.
+On Mon, Jan 06 2014, Stephen Warren wrote:
+> From: Stephen Warren <swarren-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
+>
+> Tegra124's MMC controller is very similar to earlier SoC generations,
+> and can be supported by the same driver.
+>
+> However, there are some non-backwards-compatible HW differences, and
+> hence a new DT compatible value must be used to describe the HW. This
+> patch updates the driver to support that new compatible value.
+>
+> That said, the HW differences are only relevant when enabling certain
+> high-performance transfer modes. Since the driver is currently very
+> simple and doesn't enable those modes, we don't actually need to address
+> any of these HW differences in the code yet, hence the simple nature of
+> this patch.
+>
+> Signed-off-by: Stephen Warren <swarren-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
+> Reviewed-by: Thierry Reding <treding-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
 
-Hi,
+Thanks, pushed to mmc-next for 3.14; sorry for the delay.
 
-This is v8 of the patch series to enable SD/MMC on the SOCFPGA platform.
-
-V8 differences from v7:
-
-* For the sdmmc_clk's clk-phase binding property, use the actually degree
-for the clock's phase shift.
-
-Dinh Nguyen (4):
-  clk: socfpga: Add a clk-phase property to the "altr,socfpga-gate-clk"
-  dts: socfpga: Add support for SD/MMC on the SOCFPGA platform
-  mmc: dw_mmc-socfpga: Remove the SOCFPGA specific platform for dw_mmc
-  ARM: socfpga_defconfig: enable SD/MMC support
-
- .../devicetree/bindings/clock/altr_socfpga.txt     |    5 +
- arch/arm/boot/dts/socfpga.dtsi                     |   14 +-
- arch/arm/boot/dts/socfpga_arria5.dtsi              |   11 ++
- arch/arm/boot/dts/socfpga_cyclone5.dtsi            |   11 ++
- arch/arm/boot/dts/socfpga_vt.dts                   |   11 ++
- arch/arm/configs/socfpga_defconfig                 |    2 +
- drivers/clk/socfpga/clk-gate.c                     |   69 ++++++++++
- drivers/mmc/host/Kconfig                           |    8 --
- drivers/mmc/host/dw_mmc-socfpga.c                  |  138 --------------------
- 9 files changed, 122 insertions(+), 147 deletions(-)
- delete mode 100644 drivers/mmc/host/dw_mmc-socfpga.c
-
+- Chris.
 -- 
-1.7.9.5
-
-
+Chris Ball   <cjb-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>   <http://printf.net/>
