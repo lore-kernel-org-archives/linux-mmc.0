@@ -1,150 +1,73 @@
 From: Balaji T K <balajitk@ti.com>
-Subject: Re: [PATCH v7 3/7] regulator: add pbias regulator support
-Date: Tue, 7 Jan 2014 15:39:29 +0530
-Message-ID: <52CBD259.90804@ti.com>
-References: <1387560955-6547-1-git-send-email-balajitk@ti.com> <1387560955-6547-4-git-send-email-balajitk@ti.com> <20140106181647.GJ24664@e106331-lin.cambridge.arm.com>
+Subject: Re: [PATCH v7 5/7] ARM: dts: add pbias dt node
+Date: Tue, 7 Jan 2014 15:48:15 +0530
+Message-ID: <52CBD467.6060909@ti.com>
+References: <1387560955-6547-1-git-send-email-balajitk@ti.com> <1387560955-6547-6-git-send-email-balajitk@ti.com> <20140106181928.GK24664@e106331-lin.cambridge.arm.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from comal.ext.ti.com ([198.47.26.152]:33878 "EHLO comal.ext.ti.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755977AbaAGKJq (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 7 Jan 2014 05:09:46 -0500
-In-Reply-To: <20140106181647.GJ24664@e106331-lin.cambridge.arm.com>
+Received: from devils.ext.ti.com ([198.47.26.153]:34134 "EHLO
+	devils.ext.ti.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752059AbaAGKS2 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 7 Jan 2014 05:18:28 -0500
+In-Reply-To: <20140106181928.GK24664@e106331-lin.cambridge.arm.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Mark Rutland <mark.rutland@arm.com>
 Cc: "linux-omap@vger.kernel.org" <linux-omap@vger.kernel.org>, "bcousson@baylibre.com" <bcousson@baylibre.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "cjb@laptop.org" <cjb@laptop.org>, "broonie@kernel.org" <broonie@kernel.org>, "tony@atomide.com" <tony@atomide.com>
 
-On Monday 06 January 2014 11:46 PM, Mark Rutland wrote:
-> On Fri, Dec 20, 2013 at 05:35:51PM +0000, Balaji T K wrote:
->> pbias register controls internal power supply to sd card i/o pads
->> in most OMAPs (OMAP2-5, DRA7).
->> Control bits for selecting voltage level and
->> enabling/disabling are in the same PBIAS register.
+On Monday 06 January 2014 11:49 PM, Mark Rutland wrote:
+> On Fri, Dec 20, 2013 at 05:35:53PM +0000, Balaji T K wrote:
+>> Add pbias regulator node as a child of system control
+>> module - syscon.
 >>
 >> Signed-off-by: Balaji T K <balajitk@ti.com>
 >> ---
->>   .../bindings/regulator/pbias-regulator.txt         |   16 ++
->>   drivers/regulator/Kconfig                          |    9 +
->>   drivers/regulator/Makefile                         |    1 +
->>   drivers/regulator/pbias-regulator.c                |  261 ++++++++++++++++++++
->>   4 files changed, 287 insertions(+), 0 deletions(-)
->>   create mode 100644 Documentation/devicetree/bindings/regulator/pbias-regulator.txt
->>   create mode 100644 drivers/regulator/pbias-regulator.c
+>>   arch/arm/boot/dts/dra7.dtsi     |   18 ++++++++++++++++++
+>>   arch/arm/boot/dts/omap2430.dtsi |   18 ++++++++++++++++++
+>>   arch/arm/boot/dts/omap3.dtsi    |   18 ++++++++++++++++++
+>>   arch/arm/boot/dts/omap4.dtsi    |   18 ++++++++++++++++++
+>>   arch/arm/boot/dts/omap5.dtsi    |   18 ++++++++++++++++++
+>>   5 files changed, 90 insertions(+), 0 deletions(-)
 >>
->> diff --git a/Documentation/devicetree/bindings/regulator/pbias-regulator.txt b/Documentation/devicetree/bindings/regulator/pbias-regulator.txt
->> new file mode 100644
->> index 0000000..359d3f9
->> --- /dev/null
->> +++ b/Documentation/devicetree/bindings/regulator/pbias-regulator.txt
->> @@ -0,0 +1,16 @@
->> +PBIAS internal regulator for SD card dual voltage i/o pads on OMAP SoCs.
->> +
->> +Required properties:
->> +- compatible:
->> +  - "ti,pbias-omap" for OMAP2, OMAP3, OMAP4, OMAP5, DRA7
->> +
->> +Optional properties:
->> +- Any optional property defined in bindings/regulator/regulator.txt
->> +
->> +Example:
->> +
->> +		pbias_regulator: pbias_regulator {
->> +			regulator-name = "pbias_mmc_omap4";
->> +			regulator-min-microvolt = <1800000>;
->> +			regulator-max-microvolt = <3000000>;
->> +	};
+>> diff --git a/arch/arm/boot/dts/dra7.dtsi b/arch/arm/boot/dts/dra7.dtsi
+>> index d0df4c4..4e68df1 100644
+>> --- a/arch/arm/boot/dts/dra7.dtsi
+>> +++ b/arch/arm/boot/dts/dra7.dtsi
+>> @@ -110,6 +110,23 @@
+>>   			ti,hwmods = "counter_32k";
+>>   		};
+>>
+>> +		dra7_ctrl_general: tisyscon@4a002e00 {
+>> +			compatible = "ti,control-syscon", "syscon", "simple-bus";
 >
-> This doesn't look like a full example. I don't see the required
-> compatible string.
->
+> Please, don't use simple-bus like that. The components below this node
+> depend on it. It is _NOT_ a simple bus. Make the ti,control-syscon
+> driver probe it's children.
 
-Thanks for pointing, I missed it, will add to example.
+Hi Mark,
 
-> [...]
->
->> +static struct of_regulator_match pbias_matches[] = {
->> +	{ .name = "pbias_mmc_omap2430", .driver_data = (void *)&pbias_mmc_omap2430},
->> +	{ .name = "pbias_sim_omap3", .driver_data = (void *)&pbias_sim_omap3},
->> +	{ .name = "pbias_mmc_omap4", .driver_data = (void *)&pbias_mmc_omap4},
->> +	{ .name = "pbias_mmc_omap5", .driver_data = (void *)&pbias_mmc_omap5},
->> +};
->
-> These weren't documented.
-
-Ok, will add it
+Actually ti,control-syscon driver does not exist, so I can remove it,
+and simple-bus is needed for child creation.
 
 >
-> [...]
+>> +			reg = <0x4a002e00 0x7c>;
+>> +			#address-cells = <1>;
+>> +			#size-cells = <1>;
+>> +			ranges;
+>> +			pbias_regulator: pbias_regulator {
+>> +				compatible = "ti,pbias-omap";
+>> +				reg = <0 0x4>;
+>> +				pbias_mmc_reg: pbias_mmc_omap5 {
+>> +					regulator-name = "pbias_mmc_omap5";
+>> +					regulator-min-microvolt = <1800000>;
+>> +					regulator-max-microvolt = <3000000>;
+>> +				};
+>> +			};
+>> +		};
+>> +
 >
->> +static int pbias_regulator_probe(struct platform_device *pdev)
->> +{
->> +	struct device_node *np = pdev->dev.of_node;
->> +	struct device_node *dev_node;
->> +	struct pbias_regulator_data *drvdata;
->> +	struct resource *res;
->> +	struct regulator_config cfg = { };
->> +	struct regmap *syscon;
->> +	const struct pbias_reg_info *info;
->> +	int ret = 0;
->> +	int count, idx, data_idx = 0;
->> +
->> +	count = of_regulator_match(&pdev->dev, np, pbias_matches,
->> +						PBIAS_NUM_REGS);
->> +	if (count < 0)
->> +		return count;
->> +
->> +	drvdata = devm_kzalloc(&pdev->dev, sizeof(struct pbias_regulator_data)
->> +			       * count, GFP_KERNEL);
->> +	if (drvdata == NULL) {
->> +		dev_err(&pdev->dev, "Failed to allocate device data\n");
->> +		return -ENOMEM;
->> +	}
->> +
->> +	dev_node = of_get_parent(np);
->> +	if (!dev_node)
->> +		return -ENODEV;
->> +
->> +	syscon = syscon_node_to_regmap(dev_node);
->
-> If we're relying on a particular parent node, that _must_ be described
-> in the binding.
-
-Ok
->
->> +	of_node_put(dev_node);
->> +	if (IS_ERR(syscon))
->> +		return PTR_ERR(syscon);
->> +
->> +	cfg.dev = &pdev->dev;
->> +
->> +	for (idx = 0; idx < PBIAS_NUM_REGS, data_idx < count; idx++) {
->> +		if (!pbias_matches[idx].init_data ||
->> +			!pbias_matches[idx].of_node)
->> +			continue;
->> +
->> +		info = pbias_matches[idx].driver_data;
->> +		if (!info)
->> +			return -ENODEV;
->> +
->> +		res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
->
-> A reg entry was not mentioned in the binding.
-
-Ok, will add it
-
->
-> Why is this inside the loop? It's grabbing the reg from the parent, not
-> each of the children it's walking over.
->
-
-The reg property is same for each children and is needed for each regulator.
-It is for the case where a single register can control 2
-regulators as in OMAP3 (mmc and sim). In other SoCs, only one regulator
-of "ti,pbias-omap" compatible exists in the pbias register.
-
 > Thanks,
 > Mark.
 >
