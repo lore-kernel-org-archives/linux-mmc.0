@@ -1,63 +1,54 @@
-From: Simon Horman <horms@verge.net.au>
-Subject: Re: [PATCH] mmc: tmio: fixup compile error
-Date: Wed, 8 Jan 2014 13:47:50 +0900
-Message-ID: <20140108044748.GI15891@verge.net.au>
-References: <87iovn8ohs.wl%kuninori.morimoto.gx@renesas.com>
- <87fvqr8ogb.wl%kuninori.morimoto.gx@renesas.com>
- <201401071440.28355.arnd@arndb.de>
- <87fvozxnnn.wl%kuninori.morimoto.gx@gmail.com>
+From: Roger Tseng <rogerable@realtek.com>
+Subject: RE: [PATCH 1/3] mfd: Add realtek USB card reader driver
+Date: Wed, 8 Jan 2014 15:56:05 +0800
+Message-ID: <1121E117AD4ECE49880A389A396215BB939A5BD715@rtitmbs7.realtek.com.tw>
+References: <1387792327-2511-1-git-send-email-rogerable@realtek.com>
+ <1387792327-2511-2-git-send-email-rogerable@realtek.com>,
+ <20140102094750.GZ28413@mwanda>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-sh-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <87fvozxnnn.wl%kuninori.morimoto.gx@gmail.com>
-Sender: linux-sh-owner@vger.kernel.org
-To: Kuninori Morimoto <kuninori.morimoto.gx@gmail.com>
-Cc: Arnd Bergmann <arnd@arndb.de>, Chris Ball <cjb@laptop.org>, Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>, Magnus <magnus.damm@gmail.com>, Linux-SH <linux-sh@vger.kernel.org>, linux-mmc@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
+In-Reply-To: <20140102094750.GZ28413@mwanda>
+Content-Language: en-US
+List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
+List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel>
+List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
+List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
+List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
+Errors-To: driverdev-devel-bounces@linuxdriverproject.org
+Sender: driverdev-devel-bounces@linuxdriverproject.org
+To: Dan Carpenter <dan.carpenter@oracle.com>
+Cc: Samuel Ortiz <sameo@linux.intel.com>, Alex Dubov <oakad@yahoo.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, "driverdev-devel@linuxdriverproject.org" <driverdev-devel@linuxdriverproject.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Wei_wang <wei_wang@realsil.com.cn>, Chris Ball <cjb@laptop.org>, Lee Jones <lee.jones@linaro.org>, Maxim Levitsky <maximlevitsky@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On Tue, Jan 07, 2014 at 05:33:51PM -0800, Kuninori Morimoto wrote:
-> From: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
-> 
-> This patch fixup below compile error
-> 
-> ${LINUX}/drivers/mmc/host/tmio_mmc.c: In function 'tmio_mmc_probe':
-> ${LINUX}/drivers/mmc/host/tmio_mmc.c:93:35: \
-> 	error: 'res_ctl' undeclared (first use in this function)
-> ${LINUX}/drivers/mmc/host/tmio_mmc.c:93:35: \
-> 	note: each undeclared identifier is reported only \
-> 	once for each function it appears in
-> 
-> Reported-by: Arnd Bergmann <arnd@arndb.de>
-> Signed-off-by: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
+Hi Dan,
 
-Acked-by: Simon Horman <horms+renesas@verge.net.au>
+>> +int rtsx_usb_ep0_write_register(struct rtsx_ucr *ucr, u16 addr,
+>> +             u8 mask, u8 data)
+>> +{
+>> +     u16 value = 0, index = 0;
+>> +
+>> +     value |= (u16)(3 & 0x03) << 14;
+>> +     value |= (u16)(addr & 0x3FFF);
+>
+>Don't do pointless things:
+>
+>        value |= 0x03 << 14;
+>        value |= addr & 0x3FFF;
+>
+>> +     value = ((value << 8) & 0xFF00) | ((value >> 8) & 0x00FF);
+>
+>This is an endian conversion?  It is buggy.  Use the kernel endian
+>conversion functions cpu_to_le16().
 
-> ---
-> >> Chris
-> This is needed on mmc-next branch.
-> 
->  drivers/mmc/host/tmio_mmc.c |    2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
-> 
-> diff --git a/drivers/mmc/host/tmio_mmc.c b/drivers/mmc/host/tmio_mmc.c
-> index 8a781e2..1900abb 100644
-> --- a/drivers/mmc/host/tmio_mmc.c
-> +++ b/drivers/mmc/host/tmio_mmc.c
-> @@ -90,7 +90,7 @@ static int tmio_mmc_probe(struct platform_device *pdev)
->  		return -EINVAL;
->  
->  	/* SD control register space size is 0x200, 0x400 for bus_shift=1 */
-> -	pdata->bus_shift = resource_size(res_ctl) >> 10;
-> +	pdata->bus_shift = resource_size(res) >> 10;
->  	pdata->flags |= TMIO_MMC_HAVE_HIGH_REG;
->  
->  	ret = tmio_mmc_host_probe(&host, pdev, pdata);
-> -- 
-> 1.7.9.5
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-sh" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
+This is not a conversion for endianess with respect to CPU but for command format  of the device. It should always be performed regardless of platform.
+
+In other words, it could be equivalent to:
+        value |= 0x03 << 6; // lower byte
+        value |= (addr & 0x3F00) >> 8; // lower byte
+        value |= (addr & 0xFF) << 8; //higher byte
+
+We think the previous form is easier to read. Should we keep it or change to the later one?
