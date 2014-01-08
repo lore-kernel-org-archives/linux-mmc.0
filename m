@@ -1,114 +1,102 @@
-From: Dinh Nguyen <dinh.linux@gmail.com>
-Subject: Re: [PATCHv4] mmc: dw_mmc: Enable the hold reg for certain speed
- modes
-Date: Wed, 08 Jan 2014 08:12:52 -0600
-Message-ID: <52CD5CE4.7050108@gmail.com>
-References: <1387213279-22020-1-git-send-email-dinguyen@altera.com> <52B00737.6050701@linaro.org> <52B059A1.1000306@gmail.com> <52B065B2.6010703@linaro.org> <52BB9B21.7010101@samsung.com> <52BC66C1.9070501@gmail.com> <1389140338.26863.2.camel@linux-builds1> <52CC9DC7.8000400@samsung.com>
+From: Balaji T K <balajitk@ti.com>
+Subject: Re: [PATCH v7 5/7] ARM: dts: add pbias dt node
+Date: Wed, 8 Jan 2014 20:21:46 +0530
+Message-ID: <52CD6602.7040603@ti.com>
+References: <1387560955-6547-1-git-send-email-balajitk@ti.com> <1387560955-6547-6-git-send-email-balajitk@ti.com> <20140106181928.GK24664@e106331-lin.cambridge.arm.com> <52CBD467.6060909@ti.com> <20140107105738.GA4180@e106331-lin.cambridge.arm.com> <52CBF1CF.4040706@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-oa0-f48.google.com ([209.85.219.48]:48965 "EHLO
-	mail-oa0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756154AbaAHOMn (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 8 Jan 2014 09:12:43 -0500
-Received: by mail-oa0-f48.google.com with SMTP id k1so1798324oag.21
-        for <linux-mmc@vger.kernel.org>; Wed, 08 Jan 2014 06:12:42 -0800 (PST)
-In-Reply-To: <52CC9DC7.8000400@samsung.com>
+Received: from bear.ext.ti.com ([192.94.94.41]:43065 "EHLO bear.ext.ti.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1755416AbaAHOwL (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 8 Jan 2014 09:52:11 -0500
+In-Reply-To: <52CBF1CF.4040706@ti.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>, Dinh Nguyen <dinguyen@altera.com>
-Cc: zhangfei <zhangfei.gao@linaro.org>, arnd@arndb.de, cjb@laptop.org, tgih.jun@samsung.com, heiko@sntech.de, dianders@chromium.org, alim.akhtar@samsung.com, bzhao@marvell.com, linux-mmc@vger.kernel.org
+To: Mark Rutland <mark.rutland@arm.com>
+Cc: "linux-omap@vger.kernel.org" <linux-omap@vger.kernel.org>, "bcousson@baylibre.com" <bcousson@baylibre.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "cjb@laptop.org" <cjb@laptop.org>, "broonie@kernel.org" <broonie@kernel.org>, "tony@atomide.com" <tony@atomide.com>
 
-
-On 1/7/14 6:37 PM, Jaehoon Chung wrote:
-> Hi, Dinh.
->
-> Sorry for replying too late.
->
-> ..[snip]..
->>>>>>>> +    sdr_timing[1] = ddr_timing[1] = 1;
->>>>>>>> +    of_property_read_u32_array(np,
->>>>>>>> +            "samsung,dw-mshc-sdr-timing", sdr_timing, 2);
->>>>>>>> +
->>>>>>>> +    of_property_read_u32_array(np,
->>>>>>>> +            "samsung,dw-mshc-ddr-timing", ddr_timing, 2);
->>>>>>>> +
->>>>>>>> +    pdata->cclk_in_drv = 1;
->>>>>>>> +    if ((sdr_timing[1] == 0) || (ddr_timing[1] == 0))
->>>>>>>> +        pdata->cclk_in_drv = 0;
->>>>>>>> +
->>>>>>> Have some concern about whether it is suitable putting "samsung,~"
->>>>>>> property in dw_mmc.c, is it supposed to be platform related?
->>>>>>> Any conflict with drivers/mmc/host/dw_mmc-exynos.c?
->>>>>>> If they are really commonly used, how about change name and define in
->>>>>>> Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt?
->>>>>> I had submitted a patch to make this a common binding before:
->>>>>>
->>>>>> http://www.spinics.net/lists/devicetree/msg00638.html
->>>>>>
->>>>>> I think the ultimate conclusion to that thread was that its perfectly
->>>>>> acceptable to re-use bindings from other
->>>>>> platforms.
->>>>>>
->>>>> Hmm, ususally I may look for the properties of dw_mmc.c in synopsys-dw-mshc.txt.
->>>>> If this is the conclusion before, then just ignore this noise.
->>>> If can be removed the samsung property, then i think property of clock timing can be used into dw-mmc.c
->>>> But if samsung property is used, well. I think right that it's used into dw_mmc-exynos.c.
->>>> Dw-mmc.c is general driver..so we don't want to include any SoC specific code.
->>> Then do you suggest I go forward with an attempt to add a new generic
->>> "snps,dw-mshc-sdr-timing"
->>> binding?
->> Ping Jaehoon?
->>
->> Do you think I need to add a generic "snps,dw-mshc-sdr-timing" and
->> "snps,dw-mshc-ddr-timing" bindings then?
-> Well, i think it's also something wrong. ddr/sdr-timing is exynos specific value, not synopsys value.
-> If synopsys use the sdr/ddr timing, then it's right that "snps, dw-mshc-sdr/ddr-timing" is used.
-I went through the databook and I think that the timing values are
-mentioned throughout the spec. It
-just does not explicitly mentions ddr/sdr timing, but it is mentioned as
-cclk_in_drv(aka drvsel), and
-cclk_in_sample(aka smpsel). Even the macro in dw_mmc-exynos,
-SDMMC_CLKSEL_CCLK_DRIVE() and
-SDMMC_CLKSEL_CCLK_SAMPLE() is stating this.
-
-So I do not believe that "samsung, dw-mshc-sdr-timing" and
-"samsung,dw-mshc-ddr-timing" are not
-exclusive to only the exynos platform. Just the fact that the SOCFPGA
-platform can re-use the same
-"samsung,dw-mshc-sdr-timing" property proves that this is not just an
-exynos specific value.
-> But i didn't see sdr/ddr timing in synopsys DoC.
-> I know you want to control the hold-reg bit. 
-> But this approach is not good.
-
-The spec has a table on when to use the hold-reg bit. The conditions for
-using the hold-reg bit is
-only dependent the hold-reg hw implementation and the value of
-cclk_in_drv. The value of cclk_in_drv
-is specified by the 2nd parameter of "samsung,dw-mshc-sdr-timing".
-
-So I don't understand why you think this approach is "not good"?
-
-Thanks,
-Dinh
-> Rather, how about using the callback function for exynos specific value.
-> Then other SoC can also use it.
->
-> Best Regards,
-> Jaehoon Chung
->
->> Dinh
->>> Dinh
->>>> If i missed something, then let me know, plz.
->>>>
->>>> Best Regards,
->>>> Jaehoon Chung
->>>>> Thanks
+On Tuesday 07 January 2014 05:53 PM, Balaji T K wrote:
+> On Tuesday 07 January 2014 04:27 PM, Mark Rutland wrote:
+>> On Tue, Jan 07, 2014 at 10:18:15AM +0000, Balaji T K wrote:
+>>> On Monday 06 January 2014 11:49 PM, Mark Rutland wrote:
+>>>> On Fri, Dec 20, 2013 at 05:35:53PM +0000, Balaji T K wrote:
+>>>>> Add pbias regulator node as a child of system control
+>>>>> module - syscon.
 >>>>>
+>>>>> Signed-off-by: Balaji T K <balajitk@ti.com>
+>>>>> ---
+>>>>>    arch/arm/boot/dts/dra7.dtsi     |   18 ++++++++++++++++++
+>>>>>    arch/arm/boot/dts/omap2430.dtsi |   18 ++++++++++++++++++
+>>>>>    arch/arm/boot/dts/omap3.dtsi    |   18 ++++++++++++++++++
+>>>>>    arch/arm/boot/dts/omap4.dtsi    |   18 ++++++++++++++++++
+>>>>>    arch/arm/boot/dts/omap5.dtsi    |   18 ++++++++++++++++++
+>>>>>    5 files changed, 90 insertions(+), 0 deletions(-)
+>>>>>
+>>>>> diff --git a/arch/arm/boot/dts/dra7.dtsi b/arch/arm/boot/dts/dra7.dtsi
+>>>>> index d0df4c4..4e68df1 100644
+>>>>> --- a/arch/arm/boot/dts/dra7.dtsi
+>>>>> +++ b/arch/arm/boot/dts/dra7.dtsi
+>>>>> @@ -110,6 +110,23 @@
+>>>>>                ti,hwmods = "counter_32k";
+>>>>>            };
+>>>>>
+>>>>> +        dra7_ctrl_general: tisyscon@4a002e00 {
+>>>>> +            compatible = "ti,control-syscon", "syscon", "simple-bus";
+>>>>
+>>>> Please, don't use simple-bus like that. The components below this node
+>>>> depend on it. It is _NOT_ a simple bus. Make the ti,control-syscon
+>>>> driver probe it's children.
 >>>
+>>> Hi Mark,
+>>>
+>>> Actually ti,control-syscon driver does not exist, so I can remove it,
+>>> and simple-bus is needed for child creation.
 >>
+>> This still shows up as a syscon node, with a reg property, and syscon is
+>> not an extension of simple-bus.
 >>
+>> There are properties in the parent node that children depend on, and
+>> that makes me wary of describing it as a simple bus. I'd expect to be
+>> able to move child nodes out of a simple-bus if ranges provided an
+>> idmap, and I can't do that here.
 >>
+> Hi Mark,
+>
+> Not sure if I am understanding here, can you please add more info.
+>
+Hi Mark,
+
+ From Documentation/devicetree/bindings.. , I could get below info about simple-bus
+- "simple-bus" compatible value (to ensure creation of the children)
+	compatible = "simple-bus";
+
+>
+>> Thanks,
+>> Mark.
+>>
+>>>
+>>>>
+>>>>> +            reg = <0x4a002e00 0x7c>;
+>>>>> +            #address-cells = <1>;
+>>>>> +            #size-cells = <1>;
+>>>>> +            ranges;
+>>>>> +            pbias_regulator: pbias_regulator {
+>>>>> +                compatible = "ti,pbias-omap";
+>>>>> +                reg = <0 0x4>;
+>>>>> +                pbias_mmc_reg: pbias_mmc_omap5 {
+>>>>> +                    regulator-name = "pbias_mmc_omap5";
+>>>>> +                    regulator-min-microvolt = <1800000>;
+>>>>> +                    regulator-max-microvolt = <3000000>;
+>>>>> +                };
+>>>>> +            };
+>>>>> +        };
+>>>>> +
+>>>>
+>>>> Thanks,
+>>>> Mark.
+>>>>
+>>>
+>
 
