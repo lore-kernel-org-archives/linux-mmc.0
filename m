@@ -1,51 +1,58 @@
-From: "Dr. Musa Hamed" <drmusahamed01@gmail.com>
-Subject: I have a very lucrative Business
-Date: Wed, 8 Jan 2014 21:47:31 +0100
-Message-ID: <CALS90i9nMs6jMoH2O5S68sPF=juYOV2sfMAwaBekL8ccz3eSOQ__12588.4973830127$1389215586$gmane$org@mail.gmail.com>
+From: <micky_ching@realsil.com.cn>
+Subject: [PATCH 1/3] mmc: rtsx: fix card poweroff bug
+Date: Thu, 9 Jan 2014 09:40:46 +0800
+Message-ID: <a60360da28682ac2029f6fbe5165356def007db0.1389230226.git.micky_ching@realsil.com.cn>
+References: <cover.1389230226.git.micky_ching@realsil.com.cn>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-we0-f193.google.com ([74.125.82.193]:61802 "EHLO
-	mail-we0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932207AbaAHVMy (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 8 Jan 2014 16:12:54 -0500
-Received: by mail-we0-f193.google.com with SMTP id q58so451487wes.4
-        for <linux-mmc@vger.kernel.org>; Wed, 08 Jan 2014 13:12:53 -0800 (PST)
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
+In-Reply-To: <cover.1389230226.git.micky_ching@realsil.com.cn>
+List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
+List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel>
+List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
+List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
+List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
+Errors-To: driverdev-devel-bounces@linuxdriverproject.org
+Sender: driverdev-devel-bounces@linuxdriverproject.org
+To: cjb@laptop.org, sameo@linux.intel.com
+Cc: gregkh@linuxfoundation.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, wei_wang@realsil.com.cn, rogerable@realtek.com, devel@linuxdriverproject.org
 List-Id: linux-mmc@vger.kernel.org
 
-ATTN: Dear,
+From: Micky Ching <micky_ching@realsil.com.cn>
 
-I am Dr. Musa Hamed Executive Director of the Bank of Africa
-Plc B.O.A,Cotonou Benin Rep. I have a very lucrative Business proposal
-worth of 21,500,000.00 USD.
+If the host driver removed while card in the slot, the host will not
+power off card power correctly. This bug is produced because host
+eject flag set before the last mmc_set_ios callback, we should set the
+eject flag after power off.
 
-An Iraqi named Hamadi Hashem a business man made a fixed deposit of
-21,500,000.00 USD . Upon maturity several notices was sent to him,
-even during the war,eleven years ago (2003) up till this date. Again
-after the war another notification was sent and still no response came
-from him. it has been found out that Hamadi Hashem and his family had
-been killed during the war in bomb blast that hit their home at
-Mukaradeeb where his personal oil well was. I am prepared to split the
-funds with you 50%:50%.By placing you as the NEXT OF KIN to his
-deposit.
+Signed-off-by: Micky Ching <micky_ching@realsil.com.cn>
+---
+ drivers/mmc/host/rtsx_pci_sdmmc.c |    3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
 
-Should you be interested in doing this deal with me, please send me
-the following information:
-
-(1) Your Name
-(2) Resident Address
-(3) Your Occupation
-(4) Your Phone Number
-(5) Date of Birth
-(6) Resident Country
-
-And I will prefer you to reach me privately and securely on my personal
-email address: dr.musahamed30@yahoo.fr
-Tel: +229-988-400-97
-
-I will provide you with further information as soon as I hear
-positively from you.
-
-Regards,
-Dr. Musa Hamed
+diff --git a/drivers/mmc/host/rtsx_pci_sdmmc.c b/drivers/mmc/host/rtsx_pci_sdmmc.c
+index 375a880e..c9a7328 100644
+--- a/drivers/mmc/host/rtsx_pci_sdmmc.c
++++ b/drivers/mmc/host/rtsx_pci_sdmmc.c
+@@ -1328,7 +1328,6 @@ static int rtsx_pci_sdmmc_drv_remove(struct platform_device *pdev)
+ 	pcr->slots[RTSX_SD_CARD].p_dev = NULL;
+ 	pcr->slots[RTSX_SD_CARD].card_event = NULL;
+ 	mmc = host->mmc;
+-	host->eject = true;
+ 
+ 	mutex_lock(&host->host_mutex);
+ 	if (host->mrq) {
+@@ -1346,6 +1345,8 @@ static int rtsx_pci_sdmmc_drv_remove(struct platform_device *pdev)
+ 	mutex_unlock(&host->host_mutex);
+ 
+ 	mmc_remove_host(mmc);
++	host->eject = true;
++
+ 	mmc_free_host(mmc);
+ 
+ 	dev_dbg(&(pdev->dev),
+-- 
+1.7.9.5
