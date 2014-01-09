@@ -1,31 +1,49 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [PATCH 2/3] mmc: dw_mmc: add dw_mmc-k3 for k3 platform
-Date: Thu, 9 Jan 2014 15:45:16 +0100
-Message-ID: <201401091545.16671.arnd@arndb.de>
-References: <1389278112-7099-1-git-send-email-zhangfei.gao@linaro.org> <1389278112-7099-3-git-send-email-zhangfei.gao@linaro.org>
+From: Balaji T K <balajitk@ti.com>
+Subject: [PATCH v8 0/7] mmc: omap_hsmmc: pbias dt and cleanup
+Date: Thu, 9 Jan 2014 20:20:55 +0530
+Message-ID: <1389279062-32291-1-git-send-email-balajitk@ti.com>
+References: <1387560955-6547-1-git-send-email-balajitk@ti.com>
 Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="iso-8859-15"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.126.171]:63337 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751137AbaAIOpi (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 9 Jan 2014 09:45:38 -0500
-In-Reply-To: <1389278112-7099-3-git-send-email-zhangfei.gao@linaro.org>
+Received: from arroyo.ext.ti.com ([192.94.94.40]:49150 "EHLO arroyo.ext.ti.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751367AbaAIOvY (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 9 Jan 2014 09:51:24 -0500
+In-Reply-To: <1387560955-6547-1-git-send-email-balajitk@ti.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Zhangfei Gao <zhangfei.gao@linaro.org>
-Cc: Chris Ball <cjb@laptop.org>, Mike Turquette <mturquette@linaro.org>, Rob Herring <robherring2@gmail.com>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, Kumar Gala <galak@codeaurora.org>, Haojian Zhuang <haojian.zhuang@linaro.org>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, patches@linaro.org, devicetree@vger.kernel.org, Zhigang Wang <brooke.wangzhigang@huawei.com>
+To: linux-omap@vger.kernel.org, bcousson@baylibre.com, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, chris@printf.net, broonie@kernel.org, tony@atomide.com
+Cc: mark.rutland@arm.com, Balaji T K <balajitk@ti.com>
 
-On Thursday 09 January 2014, Zhangfei Gao wrote:
-> Add dw_mmc-k3.c for k3v2, support sd/emmc
-> 
-> Signed-off-by: Zhangfei Gao <zhangfei.gao@linaro.org>
-> Signed-off-by: Zhigang Wang <brooke.wangzhigang@huawei.com>
+Few cleanups to reduce code indent,
+Add pbias_regulator support and adapt omap_hsmmc to use pbias regulator
+to configure required voltage on mmc1 pad(SD card) i/o rails on OMAP SoCs.
 
-This looks basically, sorry for taking so long for the review.
-I thought there were a couple of tricky bugs in there, but
-discussing them on IRC showed that I was wrong about all of them.
+Balaji T K (7):
+  mmc: omap_hsmmc: use devm_regulator API
+  mmc: omap_hsmmc: handle vcc and vcc_aux independently
+  regulator: add pbias regulator support
+  mmc: omap_hsmmc: adapt hsmmc to use pbias regulator
+  ARM: dts: add pbias dt node
+  ARM: OMAP: enable SYSCON and REGULATOR_PBIAS in omap2plus_defconfig
+  mmc: omap_hsmmc: remove pbias workaround
 
-Acked-by: Arnd Bergmann <arnd@arndb.de>
+ .../bindings/regulator/pbias-regulator.txt         |   27 ++
+ arch/arm/boot/dts/dra7.dtsi                        |   18 ++
+ arch/arm/boot/dts/omap2430.dtsi                    |   18 ++
+ arch/arm/boot/dts/omap3.dtsi                       |   18 ++
+ arch/arm/boot/dts/omap4.dtsi                       |   18 ++
+ arch/arm/boot/dts/omap5.dtsi                       |   18 ++
+ arch/arm/configs/omap2plus_defconfig               |    2 +
+ drivers/mmc/host/omap_hsmmc.c                      |  113 +++++----
+ drivers/regulator/Kconfig                          |    9 +
+ drivers/regulator/Makefile                         |    1 +
+ drivers/regulator/pbias-regulator.c                |  261 ++++++++++++++++++++
+ 11 files changed, 454 insertions(+), 49 deletions(-)
+ create mode 100644 Documentation/devicetree/bindings/regulator/pbias-regulator.txt
+ create mode 100644 drivers/regulator/pbias-regulator.c
+
+-- 
+1.7.5.4
+
