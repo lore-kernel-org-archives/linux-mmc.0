@@ -1,99 +1,179 @@
-From: Felipe Balbi <balbi@ti.com>
-Subject: Re: [PATCH v8 1/7] mmc: omap_hsmmc: use devm_regulator API
-Date: Thu, 9 Jan 2014 09:18:44 -0600
-Message-ID: <20140109151844.GB2417@saruman.home>
-References: <1387560955-6547-1-git-send-email-balajitk@ti.com>
- <1389279062-32291-1-git-send-email-balajitk@ti.com>
- <1389279062-32291-2-git-send-email-balajitk@ti.com>
-Reply-To: <balbi@ti.com>
+From: Dinh Nguyen <dinguyen@altera.com>
+Subject: Re: [PATCHv4] mmc: dw_mmc: Enable the hold reg for certain speed
+ modes
+Date: Thu, 9 Jan 2014 10:15:59 -0600
+Message-ID: <1389284159.13556.25.camel@linux-builds1>
+References: <1387213279-22020-1-git-send-email-dinguyen@altera.com>
+	 <52B00737.6050701@linaro.org> <52B059A1.1000306@gmail.com>
+	 <52B065B2.6010703@linaro.org> <52BB9B21.7010101@samsung.com>
+	 <52BC66C1.9070501@gmail.com> <1389140338.26863.2.camel@linux-builds1>
+	 <52CC9DC7.8000400@samsung.com> <52CD5CE4.7050108@gmail.com>
+	 <52CE1A74.4090005@samsung.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="b5gNqxB1S1yM7hjW"
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from comal.ext.ti.com ([198.47.26.152]:41265 "EHLO comal.ext.ti.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751472AbaAIPTy (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 9 Jan 2014 10:19:54 -0500
-Content-Disposition: inline
-In-Reply-To: <1389279062-32291-2-git-send-email-balajitk@ti.com>
+Received: from mail-db9lp0249.outbound.messaging.microsoft.com ([213.199.154.249]:7774
+	"EHLO db9outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751973AbaAIQR6 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 9 Jan 2014 11:17:58 -0500
+In-Reply-To: <52CE1A74.4090005@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Balaji T K <balajitk@ti.com>
-Cc: linux-omap@vger.kernel.org, bcousson@baylibre.com, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, chris@printf.net, broonie@kernel.org, tony@atomide.com, mark.rutland@arm.com
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: Dinh Nguyen <dinh.linux@gmail.com>, zhangfei <zhangfei.gao@linaro.org>, arnd@arndb.de, cjb@laptop.org, tgih.jun@samsung.com, heiko@sntech.de, dianders@chromium.org, alim.akhtar@samsung.com, bzhao@marvell.com, linux-mmc@vger.kernel.org
 
---b5gNqxB1S1yM7hjW
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+On Thu, 2014-01-09 at 12:41 +0900, Jaehoon Chung wrote:
+> Dear, Dinh
+> 
+> On 01/08/2014 11:12 PM, Dinh Nguyen wrote:
+> > 
+> > On 1/7/14 6:37 PM, Jaehoon Chung wrote:
+> >> Hi, Dinh.
+> >>
+> >> Sorry for replying too late.
+> >>
+> >> ..[snip]..
+> >>>>>>>>> +    sdr_timing[1] = ddr_timing[1] = 1;
+> >>>>>>>>> +    of_property_read_u32_array(np,
+> >>>>>>>>> +            "samsung,dw-mshc-sdr-timing", sdr_timing, 2);
+> >>>>>>>>> +
+> >>>>>>>>> +    of_property_read_u32_array(np,
+> >>>>>>>>> +            "samsung,dw-mshc-ddr-timing", ddr_timing, 2);
+> >>>>>>>>> +
+> >>>>>>>>> +    pdata->cclk_in_drv = 1;
+> >>>>>>>>> +    if ((sdr_timing[1] == 0) || (ddr_timing[1] == 0))
+> >>>>>>>>> +        pdata->cclk_in_drv = 0;
+> >>>>>>>>> +
+> >>>>>>>> Have some concern about whether it is suitable putting "samsung,~"
+> >>>>>>>> property in dw_mmc.c, is it supposed to be platform related?
+> >>>>>>>> Any conflict with drivers/mmc/host/dw_mmc-exynos.c?
+> >>>>>>>> If they are really commonly used, how about change name and define in
+> >>>>>>>> Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt?
+> >>>>>>> I had submitted a patch to make this a common binding before:
+> >>>>>>>
+> >>>>>>> http://www.spinics.net/lists/devicetree/msg00638.html
+> >>>>>>>
+> >>>>>>> I think the ultimate conclusion to that thread was that its perfectly
+> >>>>>>> acceptable to re-use bindings from other
+> >>>>>>> platforms.
+> >>>>>>>
+> >>>>>> Hmm, ususally I may look for the properties of dw_mmc.c in synopsys-dw-mshc.txt.
+> >>>>>> If this is the conclusion before, then just ignore this noise.
+> >>>>> If can be removed the samsung property, then i think property of clock timing can be used into dw-mmc.c
+> >>>>> But if samsung property is used, well. I think right that it's used into dw_mmc-exynos.c.
+> >>>>> Dw-mmc.c is general driver..so we don't want to include any SoC specific code.
+> >>>> Then do you suggest I go forward with an attempt to add a new generic
+> >>>> "snps,dw-mshc-sdr-timing"
+> >>>> binding?
+> >>> Ping Jaehoon?
+> >>>
+> >>> Do you think I need to add a generic "snps,dw-mshc-sdr-timing" and
+> >>> "snps,dw-mshc-ddr-timing" bindings then?
+> >> Well, i think it's also something wrong. ddr/sdr-timing is exynos specific value, not synopsys value.
+> >> If synopsys use the sdr/ddr timing, then it's right that "snps, dw-mshc-sdr/ddr-timing" is used.
+> > I went through the databook and I think that the timing values are
+> > mentioned throughout the spec. It
+> > just does not explicitly mentions ddr/sdr timing, but it is mentioned as
+> > cclk_in_drv(aka drvsel), and
+> > cclk_in_sample(aka smpsel). Even the macro in dw_mmc-exynos,
+> > SDMMC_CLKSEL_CCLK_DRIVE() and
+> > SDMMC_CLKSEL_CCLK_SAMPLE() is stating this.
+> > 
+> > So I do not believe that "samsung, dw-mshc-sdr-timing" and
+> > "samsung,dw-mshc-ddr-timing" are not
+> > exclusive to only the exynos platform. Just the fact that the SOCFPGA
+> > platform can re-use the same
+> > "samsung,dw-mshc-sdr-timing" property proves that this is not just an
+> > exynos specific value.
+> 
+> i didn't see the register that the sdr/ddr timing is used at Synopsys DoC file.
+> Even if SOCFPGA platform can reuse the samsung property, it's not general property, isn't?
 
-Hi,
+I think the Rockchip platform can also use it, but it hasn't been
+clearly documented yet.
 
-On Thu, Jan 09, 2014 at 08:20:56PM +0530, Balaji T K wrote:
-> Use devm_regulator API, while at it use
-> devm_regulator_get_optional for optional vmmc_aux supply
->=20
-> Signed-off-by: Balaji T K <balajitk@ti.com>
-> Acked-by: Tony Lindgren <tony@atomide.com>
-> ---
->  drivers/mmc/host/omap_hsmmc.c |    6 ++----
->  1 files changed, 2 insertions(+), 4 deletions(-)
->=20
-> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-> index dbd32ad..1eb4350 100644
-> --- a/drivers/mmc/host/omap_hsmmc.c
-> +++ b/drivers/mmc/host/omap_hsmmc.c
-> @@ -316,7 +316,7 @@ static int omap_hsmmc_reg_get(struct omap_hsmmc_host =
-*host)
->  	struct regulator *reg;
->  	int ocr_value =3D 0;
-> =20
-> -	reg =3D regulator_get(host->dev, "vmmc");
-> +	reg =3D devm_regulator_get(host->dev, "vmmc");
->  	if (IS_ERR(reg)) {
->  		dev_err(host->dev, "vmmc regulator missing\n");
->  		return PTR_ERR(reg);
-> @@ -336,7 +336,7 @@ static int omap_hsmmc_reg_get(struct omap_hsmmc_host =
-*host)
->  		}
-> =20
->  		/* Allow an aux regulator */
-> -		reg =3D regulator_get(host->dev, "vmmc_aux");
-> +		reg =3D devm_regulator_get_optional(host->dev, "vmmc_aux");
->  		host->vcc_aux =3D IS_ERR(reg) ? NULL : reg;
-> =20
->  		/* For eMMC do not power off when not in sleep state */
-> @@ -366,8 +366,6 @@ static int omap_hsmmc_reg_get(struct omap_hsmmc_host =
-*host)
-> =20
->  static void omap_hsmmc_reg_put(struct omap_hsmmc_host *host)
+> Under SoC.. cclk_in_drv can be implemented differently.
 
-since this function does nothing now, you could pretty much remove it
-and move set_power assignment to ->remove() directly. No strong feelings
-though.
+Yes, agreed. Clearly the cclk_in_drv and cclk_in_sample methods to shift
+the phase of the CIU clock is implemented differently. The exynos'
+implementation is not getting touched at all.
 
---=20
-balbi
+> We have just known that sdr/ddr timing is used at exynos/socfpga board.
+> 
+> I just found clk_drv/smpl_phase_ctrl at UHS register, I think this isn't ddr/sdr timing.
 
---b5gNqxB1S1yM7hjW
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.15 (GNU/Linux)
+But let's take a look at what are the possible values ddr/sdr timings
+can take? From Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt:
 
-iQIcBAEBAgAGBQJSzr3UAAoJEIaOsuA1yqREx9MQAIQnh+MUCUUoX01fRIVr+MlT
-DNW9f0eIJpMWK3MhASSgGXQlwUxEzU3i9MkaIMU8Z0XZnE+Q45s5g0DDrKUoQbl+
-OYd3SoeJ7SfrspqOtJ5y+steNzO8rsVBL3dnBaFuV+jYbR6bKcir+7OiB8gIJAc4
-OqqoaDj6XL5XKnY7TOgnzHETW+TrHLcun3EMSZu0TaV2coOvE9yOD4Z/2lnxcftO
-zJ9uRV6wn8ymSuJ246v3pHnO0Wg/ucFBn5ZpM6zMNxi5zTzFFvxRBWupoTNZMsv+
-H3s6PSiacPukCL3aLsUl83F1gbPljhNesIy4WVmYWgY6AE4jfoPLH4SV6bMwwrlY
-yQ0axGpt8KiHK6JGxT4amz2G79a0H3zz/DZatXzb/VwwCVMl/bFu/6ZaioEFEwMP
-pHONj7iIuIuUGUVkthdri0zjPF8HNqGgGWaclh+FmtIXaQ1OCLWaT26sQiIajiXy
-uHWR5hYQEqPwe6fVdsDAfYaieDc5Mr7OWqj50dFfNqDYuo0eZ4XV9ZPGUj+sb26P
-ku2exs6YdVi0KW0+BH7SlSSB6pnojb3z9OZFjJNRvOkFbq1Nz9IWEWNesnKeEpQY
-eotO6VbmKe4rJB9aJjyGnW8Lg5Yn6nV3zAXRSE1zZP1rsUiuLtfqEzDTXvwigFBT
-RvtfXM3T7KektEV71EtZ
-=Yl1l
------END PGP SIGNATURE-----
+"Valid values for SDR and DDR CIU clock timing for Exynos5250:
+      - valid value for tx phase shift and rx phase shift is 0 to 7."
 
---b5gNqxB1S1yM7hjW--
+For socfpga, 0 = 45 degrees shift, 1 = 90 degrees shift,...[n++] and 7 =
+315 degrees shift. If my guess is correct, it should also be the same
+for exynos.
+
+
+> 
+> >> But i didn't see sdr/ddr timing in synopsys DoC.
+> >> I know you want to control the hold-reg bit. 
+> >> But this approach is not good.
+> > 
+> > The spec has a table on when to use the hold-reg bit. The conditions for
+> > using the hold-reg bit is
+> > only dependent the hold-reg hw implementation and the value of
+> > cclk_in_drv. The value of cclk_in_drv
+> > is specified by the 2nd parameter of "samsung,dw-mshc-sdr-timing".
+> 
+> Right, the spec is mentioned when hold-reg bit could be used.
+> But that's not that ddr/sdr timing is general value.
+
+Do you agree that the 2nd value of sdr/ddr timing is representing the
+cclk_in_drv? Looking at the code dw_mmc-exynos.c, this is indeed what
+the 2nd value in sdr/ddr timing is representing.
+
+
+So we can come up with a more generic DTS binding that the generic
+dw_mmc driver can use to set the hold-reg, but that binding still needs
+to pass in the cclk_in_drv somehow, as cclk_in_drv is the only external
+variable that is needed to determine when to set hold-reg.
+
+And if sdr/ddr timing is already representing cclk_in_drv, doesn't it
+make sense to re-use that binding?
+
+Thanks,
+Dinh
+> 
+> Best Regards,
+> Jaehoon Chung
+> > 
+> > So I don't understand why you think this approach is "not good"?
+> > 
+> > Thanks,
+> > Dinh
+> >> Rather, how about using the callback function for exynos specific value.
+> >> Then other SoC can also use it.
+> >>
+> >> Best Regards,
+> >> Jaehoon Chung
+> >>
+> >>> Dinh
+> >>>> Dinh
+> >>>>> If i missed something, then let me know, plz.
+> >>>>>
+> >>>>> Best Regards,
+> >>>>> Jaehoon Chung
+> >>>>>> Thanks
+> >>>>>>
+> >>>>
+> >>>
+> >>>
+> >>>
+> > 
+> > 
+> 
+> 
+
+
+
