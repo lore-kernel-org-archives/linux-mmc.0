@@ -1,94 +1,48 @@
 From: Balaji T K <balajitk@ti.com>
-Subject: Re: [PATCH v7 5/7] ARM: dts: add pbias dt node
-Date: Fri, 10 Jan 2014 22:30:39 +0530
-Message-ID: <52D02737.6060609@ti.com>
-References: <1387560955-6547-1-git-send-email-balajitk@ti.com> <1387560955-6547-6-git-send-email-balajitk@ti.com> <20140106181928.GK24664@e106331-lin.cambridge.arm.com> <52CBD467.6060909@ti.com> <20140107105738.GA4180@e106331-lin.cambridge.arm.com> <52CBF1CF.4040706@ti.com> <52CD6602.7040603@ti.com> <20140110113234.GA25741@e106331-lin.cambridge.arm.com>
+Subject: [PATCH v9 0/7] mmc: omap_hsmmc: pbias dt and cleanup
+Date: Fri, 10 Jan 2014 23:00:41 +0530
+Message-ID: <1389375049-5248-1-git-send-email-balajitk@ti.com>
+References: <1389279062-32291-1-git-send-email-balajitk@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from comal.ext.ti.com ([198.47.26.152]:42665 "EHLO comal.ext.ti.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1757967AbaAJRAw (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 10 Jan 2014 12:00:52 -0500
-In-Reply-To: <20140110113234.GA25741@e106331-lin.cambridge.arm.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain
+Return-path: <linux-omap-owner@vger.kernel.org>
+In-Reply-To: <1389279062-32291-1-git-send-email-balajitk@ti.com>
+Sender: linux-omap-owner@vger.kernel.org
+To: linux-omap@vger.kernel.org, bcousson@baylibre.com, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, chris@printf.net, broonie@kernel.org, tony@atomide.com
+Cc: mark.rutland@arm.com, Balaji T K <balajitk@ti.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Mark Rutland <mark.rutland@arm.com>
-Cc: "linux-omap@vger.kernel.org" <linux-omap@vger.kernel.org>, "bcousson@baylibre.com" <bcousson@baylibre.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "cjb@laptop.org" <cjb@laptop.org>, "broonie@kernel.org" <broonie@kernel.org>, "tony@atomide.com" <tony@atomide.com>
 
-On Friday 10 January 2014 05:02 PM, Mark Rutland wrote:
-> On Wed, Jan 08, 2014 at 02:51:46PM +0000, Balaji T K wrote:
->> On Tuesday 07 January 2014 05:53 PM, Balaji T K wrote:
->>> On Tuesday 07 January 2014 04:27 PM, Mark Rutland wrote:
->>>> On Tue, Jan 07, 2014 at 10:18:15AM +0000, Balaji T K wrote:
->>>>> On Monday 06 January 2014 11:49 PM, Mark Rutland wrote:
->>>>>> On Fri, Dec 20, 2013 at 05:35:53PM +0000, Balaji T K wrote:
->>>>>>> Add pbias regulator node as a child of system control
->>>>>>> module - syscon.
->>>>>>>
->>>>>>> Signed-off-by: Balaji T K <balajitk@ti.com>
->>>>>>> ---
->>>>>>>     arch/arm/boot/dts/dra7.dtsi     |   18 ++++++++++++++++++
->>>>>>>     arch/arm/boot/dts/omap2430.dtsi |   18 ++++++++++++++++++
->>>>>>>     arch/arm/boot/dts/omap3.dtsi    |   18 ++++++++++++++++++
->>>>>>>     arch/arm/boot/dts/omap4.dtsi    |   18 ++++++++++++++++++
->>>>>>>     arch/arm/boot/dts/omap5.dtsi    |   18 ++++++++++++++++++
->>>>>>>     5 files changed, 90 insertions(+), 0 deletions(-)
->>>>>>>
->>>>>>> diff --git a/arch/arm/boot/dts/dra7.dtsi b/arch/arm/boot/dts/dra7.dtsi
->>>>>>> index d0df4c4..4e68df1 100644
->>>>>>> --- a/arch/arm/boot/dts/dra7.dtsi
->>>>>>> +++ b/arch/arm/boot/dts/dra7.dtsi
->>>>>>> @@ -110,6 +110,23 @@
->>>>>>>                 ti,hwmods = "counter_32k";
->>>>>>>             };
->>>>>>>
->>>>>>> +        dra7_ctrl_general: tisyscon@4a002e00 {
->>>>>>> +            compatible = "ti,control-syscon", "syscon", "simple-bus";
->>>>>>
->>>>>> Please, don't use simple-bus like that. The components below this node
->>>>>> depend on it. It is _NOT_ a simple bus. Make the ti,control-syscon
->>>>>> driver probe it's children.
->>>>>
->>>>> Hi Mark,
->>>>>
->>>>> Actually ti,control-syscon driver does not exist, so I can remove it,
->>>>> and simple-bus is needed for child creation.
->>>>
->>>> This still shows up as a syscon node, with a reg property, and syscon is
->>>> not an extension of simple-bus.
->>>>
->>>> There are properties in the parent node that children depend on, and
->>>> that makes me wary of describing it as a simple bus. I'd expect to be
->>>> able to move child nodes out of a simple-bus if ranges provided an
->>>> idmap, and I can't do that here.
->>>>
->>> Hi Mark,
->>>
->>> Not sure if I am understanding here, can you please add more info.
->
-> A node's compatible string list describes the set of devices (or rather
-> descriptions of devices) with which it is compatible. The list goes from
-> most specific to least specific. The idea is that an OS reads through
-> the list until it finds a string it knows how to handle, then treats the
-> node as that.
->
-> Ignoring "ti,control-syscon", the node has both "syscon" and
-> "simple-bus". Given you expect the OS to recognise "syscon", you should
-> _not_ expect it to also treat the node as "simple-bus". Doing so is an
-> abuse of the property and current Linux implementation details.
->
-> The "syscon" binding is not a more specific version of "simple-bus".
-> They imply completely different things.
->
-> Either make a ti,control-syscon driver that probes the child nodes, or
-> move the child nodes out and give them a phandle to the
-> dra7_ctrl_general node that they can parse. I'd prefer the latter as
-> relies on fewer topology details, is as easy to implement as your
-> current parent node parsing, and is easier to extend in future.
->
+Few cleanups to reduce code indent,
+Add pbias_regulator support and adapt omap_hsmmc to use pbias regulator
+to configure required voltage on mmc1 pad(SD card) i/o rails on OMAP SoCs.
 
-Thanks Mark,
-phandle to syscon is fine for me.
+v9 changes:
+remove simple-bus, add phandle for syscon in dt node
+
+Balaji T K (7):
+  mmc: omap_hsmmc: use devm_regulator API
+  mmc: omap_hsmmc: handle vcc and vcc_aux independently
+  regulator: add pbias regulator support
+  mmc: omap_hsmmc: adapt hsmmc to use pbias regulator
+  ARM: dts: add pbias dt node
+  ARM: OMAP: enable SYSCON and REGULATOR_PBIAS in omap2plus_defconfig
+  mmc: omap_hsmmc: remove pbias workaround
+
+ .../bindings/regulator/pbias-regulator.txt         |   27 ++
+ arch/arm/boot/dts/dra7.dtsi                        |   17 ++
+ arch/arm/boot/dts/omap2430.dtsi                    |   17 ++
+ arch/arm/boot/dts/omap3.dtsi                       |   17 ++
+ arch/arm/boot/dts/omap4.dtsi                       |   17 ++
+ arch/arm/boot/dts/omap5.dtsi                       |   17 ++
+ arch/arm/configs/omap2plus_defconfig               |    2 +
+ drivers/mmc/host/omap_hsmmc.c                      |  113 +++++----
+ drivers/regulator/Kconfig                          |    9 +
+ drivers/regulator/Makefile                         |    1 +
+ drivers/regulator/pbias-regulator.c                |  255 ++++++++++++++++++++
+ 11 files changed, 443 insertions(+), 49 deletions(-)
+ create mode 100644 Documentation/devicetree/bindings/regulator/pbias-regulator.txt
+ create mode 100644 drivers/regulator/pbias-regulator.c
+
+-- 
+1.7.5.4
 
