@@ -1,19 +1,19 @@
 From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCHv9 1/4] clk: socfpga: Add a clk-phase property to the
- "altr, socfpga-gate-clk"
-Date: Fri, 10 Jan 2014 12:47:51 +0900
-Message-ID: <52CF6D67.1000803@samsung.com>
+Subject: Re: [PATCHv9 2/4] dts: socfpga: Add support for SD/MMC on the SOCFPGA
+ platform
+Date: Fri, 10 Jan 2014 12:48:18 +0900
+Message-ID: <52CF6D82.6020007@samsung.com>
 References: <1389303079-19808-1-git-send-email-dinguyen@altera.com>
- <1389303079-19808-2-git-send-email-dinguyen@altera.com>
+ <1389303079-19808-3-git-send-email-dinguyen@altera.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout3.samsung.com ([203.254.224.33]:54642 "EHLO
+Received: from mailout3.samsung.com ([203.254.224.33]:54783 "EHLO
 	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750800AbaAJDrj (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 9 Jan 2014 22:47:39 -0500
-In-reply-to: <1389303079-19808-2-git-send-email-dinguyen@altera.com>
+	with ESMTP id S1752274AbaAJDsT (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 9 Jan 2014 22:48:19 -0500
+In-reply-to: <1389303079-19808-3-git-send-email-dinguyen@altera.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: dinguyen@altera.com, dinh.linux@gmail.com, arnd@arndb.de, cjb@laptop.org, jh80.chung@samsung.com, tgih.jun@samsung.com, heiko@sntech.de, dianders@chromium.org, alim.akhtar@samsung.com, bzhao@marvell.com, mturquette@linaro.org
@@ -24,165 +24,125 @@ Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
 On 01/10/2014 06:31 AM, dinguyen@altera.com wrote:
 > From: Dinh Nguyen <dinguyen@altera.com>
 > 
-> The clk-phase property is used to represent the 2 clock phase values that is
-> needed for the SD/MMC driver. Add a prepare function to the clk_ops, that will
-> use the syscon driver to set sdmmc_clk's phase shift that is located in the
-> system manager.
+> Use the "snps,dw-mshc" binding to enable the dw_mmc driver.
+> Add the "syscon" binding to the "altr,sys-mgr" node. The clock
+> driver can use the syscon driver to toggle the register for the SD/MMC
+> clock phase shift settings.
 > 
 > Signed-off-by: Dinh Nguyen <dinguyen@altera.com>
-> Acked-by: Zhangfei Gao <zhangfei.gao@linaro.org>
 > ---
 > v9: none
-> v8: Use degrees in the clk-phase binding property
-> v7: Add dts property to represent the clk phase of the sdmmc_clk. Add a
->     prepare function to the gate clk that will toggle clock phase setting.
->     Remove the "altr,socfpga-sdmmc-sdr-clk" clock type.
-> v6: Add a new clock type "altr,socfpga-sdmmc-sdr-clk" that will be used to
->     set the phase shift settings.
+> v8: none
+> v7: Use the standard "snps,dw-mshc" binding. Remove "altr,socfpga-sdmmc-sdr-clk".
+> v6: Add documentation for "altr,socfpga-sdmmc-sdr-clk". Add "syscon" to the
+> sysmgr binding.
 > v5: Use the "snps,dw-mshc" binding
-> v4: Use the sdmmc_clk prepare function to set the phase shift settings
-> v3: Not use the syscon driver because as of 3.13-rc1, the syscon driver is
->     loaded after the clock driver.
-> v2: Use the syscon driver
+> v4: Re-use "rockchip,rk2928-dw-mshc" binding
+> v3: none
+> v2: none
 > ---
->  .../devicetree/bindings/clock/altr_socfpga.txt     |    5 ++
->  arch/arm/boot/dts/socfpga.dtsi                     |    1 +
->  drivers/clk/socfpga/clk-gate.c                     |   68 ++++++++++++++++++++
->  3 files changed, 74 insertions(+)
+>  arch/arm/boot/dts/socfpga.dtsi          |   13 ++++++++++++-
+>  arch/arm/boot/dts/socfpga_arria5.dtsi   |   11 +++++++++++
+>  arch/arm/boot/dts/socfpga_cyclone5.dtsi |   11 +++++++++++
+>  arch/arm/boot/dts/socfpga_vt.dts        |   11 +++++++++++
+>  4 files changed, 45 insertions(+), 1 deletion(-)
 > 
-> diff --git a/Documentation/devicetree/bindings/clock/altr_socfpga.txt b/Documentation/devicetree/bindings/clock/altr_socfpga.txt
-> index 0045433..5dfd145 100644
-> --- a/Documentation/devicetree/bindings/clock/altr_socfpga.txt
-> +++ b/Documentation/devicetree/bindings/clock/altr_socfpga.txt
-> @@ -23,3 +23,8 @@ Optional properties:
->          and the bit index.
->  - div-reg : For "socfpga-gate-clk", div-reg contains the divider register, bit shift,
->          and width.
-> +- clk-phase : For the sdmmc_clk, contains the value of the clock phase that controls
-> +	the SDMMC CIU clock. The first value is the clk_sample(smpsel), and the second
-> +	value is the cclk_in_drv(drvsel). The clk-phase is used to enable the correct
-> +	hold/delay times that is needed for the SD/MMC CIU clock. The values of both
-> +	can be 0-315 degrees, in 45 degree increments.
 > diff --git a/arch/arm/boot/dts/socfpga.dtsi b/arch/arm/boot/dts/socfpga.dtsi
-> index f936476..e776512 100644
+> index e776512..433bfbc 100644
 > --- a/arch/arm/boot/dts/socfpga.dtsi
 > +++ b/arch/arm/boot/dts/socfpga.dtsi
-> @@ -413,6 +413,7 @@
->  						compatible = "altr,socfpga-gate-clk";
->  						clocks = <&f2s_periph_ref_clk>, <&main_nand_sdmmc_clk>, <&per_nand_mmc_clk>;
->  						clk-gate = <0xa0 8>;
-> +						clk-phase = <0 135>;
->  					};
+> @@ -470,6 +470,17 @@
+>  			cache-level = <2>;
+>  		};
 >  
->  					nand_x_clk: nand_x_clk {
-> diff --git a/drivers/clk/socfpga/clk-gate.c b/drivers/clk/socfpga/clk-gate.c
-> index 4efcf4e..501d513 100644
-> --- a/drivers/clk/socfpga/clk-gate.c
-> +++ b/drivers/clk/socfpga/clk-gate.c
-> @@ -19,7 +19,9 @@
->  #include <linux/clkdev.h>
->  #include <linux/clk-provider.h>
->  #include <linux/io.h>
-> +#include <linux/mfd/syscon.h>
->  #include <linux/of.h>
-> +#include <linux/regmap.h>
->  
->  #include "clk.h"
->  
-> @@ -35,6 +37,11 @@
->  
->  #define to_socfpga_gate_clk(p) container_of(p, struct socfpga_gate_clk, hw.hw)
->  
-> +/* SDMMC Group for System Manager defines */
-> +#define SYSMGR_SDMMCGRP_CTRL_OFFSET    0x108
-> +#define SYSMGR_SDMMC_CTRL_SET(smplsel, drvsel) \
-> +	((((smplsel) & 0x7) << 3) | (((drvsel) & 0x7) << 0))
+> +		mmc: dwmmc0@ff704000 {
+> +			compatible = "snps,dw-mshc";
+> +			reg = <0xff704000 0x1000>;
+> +			interrupts = <0 139 4>;
+> +			fifo-depth = <0x400>;
+> +			#address-cells = <1>;
+> +			#size-cells = <0>;
+> +			clocks = <&l4_mp_clk>, <&sdmmc_clk>;
+> +			clock-names = "biu", "ciu";
+> +		};
 > +
->  static u8 socfpga_clk_get_parent(struct clk_hw *hwclk)
->  {
->  	u32 l4_src;
-> @@ -115,7 +122,61 @@ static unsigned long socfpga_clk_recalc_rate(struct clk_hw *hwclk,
->  	return parent_rate / div;
->  }
+>  		/* Local timer */
+>  		timer@fffec600 {
+>  			compatible = "arm,cortex-a9-twd-timer";
+> @@ -524,7 +535,7 @@
+>  		};
 >  
-> +static int socfpga_clk_prepare(struct clk_hw *hwclk)
-> +{
-> +	struct socfpga_gate_clk *socfpgaclk = to_socfpga_gate_clk(hwclk);
-> +	struct regmap *sys_mgr_base_addr;
-> +	int i;
-> +	u32 hs_timing;
-> +	u32 clk_phase[2];
-> +
-> +	if (socfpgaclk->clk_phase[0] || socfpgaclk->clk_phase[1]) {
-> +		sys_mgr_base_addr = syscon_regmap_lookup_by_compatible("altr,sys-mgr");
-> +		if (IS_ERR(sys_mgr_base_addr)) {
-> +			pr_err("%s: failed to find altr,sys-mgr regmap!\n", __func__);
-> +			return -EINVAL;
-> +		}
-> +
-> +		for (i = 0; i < 2; i++) {
-> +			switch (socfpgaclk->clk_phase[i]) {
-> +			case 0:
-> +				clk_phase[i] = 0;
-> +				break;
-> +			case 45:
-> +				clk_phase[i] = 1;
-> +				break;
-> +			case 90:
-> +				clk_phase[i] = 2;
-> +				break;
-> +			case 135:
-> +				clk_phase[i] = 3;
-> +				break;
-> +			case 180:
-> +				clk_phase[i] = 4;
-> +				break;
-> +			case 225:
-> +				clk_phase[i] = 5;
-> +				break;
-> +			case 270:
-> +				clk_phase[i] = 6;
-> +				break;
-> +			case 315:
-> +				clk_phase[i] = 7;
-> +				break;
-> +			default:
-> +				clk_phase[i] = 0;
-> +				break;
-> +			}
-> +		}
-> +		hs_timing = SYSMGR_SDMMC_CTRL_SET(clk_phase[0], clk_phase[1]);
-> +		regmap_write(sys_mgr_base_addr, SYSMGR_SDMMCGRP_CTRL_OFFSET,
-> +			hs_timing);
-> +	}
-> +	return 0;
-> +}
-> +
->  static struct clk_ops gateclk_ops = {
-> +	.prepare = socfpga_clk_prepare,
->  	.recalc_rate = socfpga_clk_recalc_rate,
->  	.get_parent = socfpga_clk_get_parent,
->  	.set_parent = socfpga_clk_set_parent,
-> @@ -126,6 +187,7 @@ static void __init __socfpga_gate_init(struct device_node *node,
->  {
->  	u32 clk_gate[2];
->  	u32 div_reg[3];
-> +	u32 clk_phase[2];
->  	u32 fixed_div;
->  	struct clk *clk;
->  	struct socfpga_gate_clk *socfpga_clk;
-> @@ -166,6 +228,12 @@ static void __init __socfpga_gate_init(struct device_node *node,
->  		socfpga_clk->div_reg = 0;
->  	}
+>  		sysmgr@ffd08000 {
+> -				compatible = "altr,sys-mgr";
+> +				compatible = "altr,sys-mgr", "syscon";
+>  				reg = <0xffd08000 0x4000>;
+>  			};
+>  	};
+> diff --git a/arch/arm/boot/dts/socfpga_arria5.dtsi b/arch/arm/boot/dts/socfpga_arria5.dtsi
+> index a85b404..6c87b70 100644
+> --- a/arch/arm/boot/dts/socfpga_arria5.dtsi
+> +++ b/arch/arm/boot/dts/socfpga_arria5.dtsi
+> @@ -27,6 +27,17 @@
+>  			};
+>  		};
 >  
-> +	rc = of_property_read_u32_array(node, "clk-phase", clk_phase, 2);
-> +	if (!rc) {
-> +		socfpga_clk->clk_phase[0] = clk_phase[0];
-> +		socfpga_clk->clk_phase[1] = clk_phase[1];
-> +	}
+> +		dwmmc0@ff704000 {
+> +			num-slots = <1>;
+> +			supports-highspeed;
+> +			broken-cd;
 > +
->  	of_property_read_string(node, "clock-output-names", &clk_name);
+> +			slot@0 {
+> +				reg = <0>;
+> +				bus-width = <4>;
+> +			};
+> +		};
+> +
+>  		serial0@ffc02000 {
+>  			clock-frequency = <100000000>;
+>  		};
+> diff --git a/arch/arm/boot/dts/socfpga_cyclone5.dtsi b/arch/arm/boot/dts/socfpga_cyclone5.dtsi
+> index a8716f6..ca41b0e 100644
+> --- a/arch/arm/boot/dts/socfpga_cyclone5.dtsi
+> +++ b/arch/arm/boot/dts/socfpga_cyclone5.dtsi
+> @@ -28,6 +28,17 @@
+>  			};
+>  		};
 >  
->  	init.name = clk_name;
+> +		dwmmc0@ff704000 {
+> +			num-slots = <1>;
+> +			supports-highspeed;
+> +			broken-cd;
+> +
+> +			slot@0 {
+> +				reg = <0>;
+> +				bus-width = <4>;
+> +			};
+> +		};
+> +
+>  		ethernet@ff702000 {
+>  			phy-mode = "rgmii";
+>  			phy-addr = <0xffffffff>; /* probe for phy addr */
+> diff --git a/arch/arm/boot/dts/socfpga_vt.dts b/arch/arm/boot/dts/socfpga_vt.dts
+> index d1ec0ca..222313f 100644
+> --- a/arch/arm/boot/dts/socfpga_vt.dts
+> +++ b/arch/arm/boot/dts/socfpga_vt.dts
+> @@ -41,6 +41,17 @@
+>  			};
+>  		};
+>  
+> +		dwmmc0@ff704000 {
+> +			num-slots = <1>;
+> +			supports-highspeed;
+> +			broken-cd;
+> +
+> +			slot@0 {
+> +				reg = <0>;
+> +				bus-width = <4>;
+> +			};
+> +		};
+> +
+>  		ethernet@ff700000 {
+>  			phy-mode = "gmii";
+>  			status = "okay";
 > 
 
