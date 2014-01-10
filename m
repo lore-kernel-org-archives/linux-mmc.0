@@ -1,114 +1,59 @@
-From: Mark Rutland <mark.rutland@arm.com>
-Subject: Re: [PATCH v7 5/7] ARM: dts: add pbias dt node
-Date: Fri, 10 Jan 2014 11:32:34 +0000
-Message-ID: <20140110113234.GA25741@e106331-lin.cambridge.arm.com>
-References: <1387560955-6547-1-git-send-email-balajitk@ti.com>
- <1387560955-6547-6-git-send-email-balajitk@ti.com>
- <20140106181928.GK24664@e106331-lin.cambridge.arm.com>
- <52CBD467.6060909@ti.com>
- <20140107105738.GA4180@e106331-lin.cambridge.arm.com>
- <52CBF1CF.4040706@ti.com>
- <52CD6602.7040603@ti.com>
+From: franklinbuthelezi1@yahoo.com
+Subject: =?UTF-8?Q?DiePresse.com_Mein_Freund,_der_Fahrradh=C3=A4ndler?=
+Date: Fri, 10 Jan 2014 13:33:07 +0100 (CET)
+Message-ID: <327901184.1389357188209.JavaMail.root@dpoportal4.diepresse.apa.net>
+Reply-To: franklinbuthelezi1@yahoo.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from cam-admin0.cambridge.arm.com ([217.140.96.50]:37228 "EHLO
-	cam-admin0.cambridge.arm.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1750793AbaAJLc7 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 10 Jan 2014 06:32:59 -0500
-Content-Disposition: inline
-In-Reply-To: <52CD6602.7040603@ti.com>
+Received: from dpocron.diepresse.apa.net ([194.232.102.6]:41756 "EHLO
+	dpocron.diepresse.apa.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752897AbaAJMjv convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 10 Jan 2014 07:39:51 -0500
+Received: from dpoportal4.diepresse.apa.net (dpoportal4.diepresse.local [192.168.0.20])
+	by dpocron.diepresse.apa.net (Postfix) with ESMTP id 3601444544
+	for <linux-mmc@vger.kernel.org>; Fri, 10 Jan 2014 13:33:08 +0100 (CET)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Balaji T K <balajitk@ti.com>
-Cc: "linux-omap@vger.kernel.org" <linux-omap@vger.kernel.org>, "bcousson@baylibre.com" <bcousson@baylibre.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "cjb@laptop.org" <cjb@laptop.org>, "broonie@kernel.org" <broonie@kernel.org>, "tony@atomide.com" <tony@atomide.com>
+To: linux-mmc@vger.kernel.org
 
-On Wed, Jan 08, 2014 at 02:51:46PM +0000, Balaji T K wrote:
-> On Tuesday 07 January 2014 05:53 PM, Balaji T K wrote:
-> > On Tuesday 07 January 2014 04:27 PM, Mark Rutland wrote:
-> >> On Tue, Jan 07, 2014 at 10:18:15AM +0000, Balaji T K wrote:
-> >>> On Monday 06 January 2014 11:49 PM, Mark Rutland wrote:
-> >>>> On Fri, Dec 20, 2013 at 05:35:53PM +0000, Balaji T K wrote:
-> >>>>> Add pbias regulator node as a child of system control
-> >>>>> module - syscon.
-> >>>>>
-> >>>>> Signed-off-by: Balaji T K <balajitk@ti.com>
-> >>>>> ---
-> >>>>>    arch/arm/boot/dts/dra7.dtsi     |   18 ++++++++++++++++++
-> >>>>>    arch/arm/boot/dts/omap2430.dtsi |   18 ++++++++++++++++++
-> >>>>>    arch/arm/boot/dts/omap3.dtsi    |   18 ++++++++++++++++++
-> >>>>>    arch/arm/boot/dts/omap4.dtsi    |   18 ++++++++++++++++++
-> >>>>>    arch/arm/boot/dts/omap5.dtsi    |   18 ++++++++++++++++++
-> >>>>>    5 files changed, 90 insertions(+), 0 deletions(-)
-> >>>>>
-> >>>>> diff --git a/arch/arm/boot/dts/dra7.dtsi b/arch/arm/boot/dts/dra7.dtsi
-> >>>>> index d0df4c4..4e68df1 100644
-> >>>>> --- a/arch/arm/boot/dts/dra7.dtsi
-> >>>>> +++ b/arch/arm/boot/dts/dra7.dtsi
-> >>>>> @@ -110,6 +110,23 @@
-> >>>>>                ti,hwmods = "counter_32k";
-> >>>>>            };
-> >>>>>
-> >>>>> +        dra7_ctrl_general: tisyscon@4a002e00 {
-> >>>>> +            compatible = "ti,control-syscon", "syscon", "simple-bus";
-> >>>>
-> >>>> Please, don't use simple-bus like that. The components below this node
-> >>>> depend on it. It is _NOT_ a simple bus. Make the ti,control-syscon
-> >>>> driver probe it's children.
-> >>>
-> >>> Hi Mark,
-> >>>
-> >>> Actually ti,control-syscon driver does not exist, so I can remove it,
-> >>> and simple-bus is needed for child creation.
-> >>
-> >> This still shows up as a syscon node, with a reg property, and syscon is
-> >> not an extension of simple-bus.
-> >>
-> >> There are properties in the parent node that children depend on, and
-> >> that makes me wary of describing it as a simple bus. I'd expect to be
-> >> able to move child nodes out of a simple-bus if ranges provided an
-> >> idmap, and I can't do that here.
-> >>
-> > Hi Mark,
-> >
-> > Not sure if I am understanding here, can you please add more info.
+=46olgender Artikel auf http://diepresse.com wird Ihnen von Franklin Bu=
+thelezi empfohlen:
 
-A node's compatible string list describes the set of devices (or rather
-descriptions of devices) with which it is compatible. The list goes from
-most specific to least specific. The idea is that an OS reads through
-the list until it finds a string it knows how to handle, then treats the
-node as that.
+Mein Freund, der Fahrradh=C3=A4ndler
+Manche Dinge ver=C3=A4ndern sich =C3=BCber die langen Wintermonate hinw=
+eg.=20
 
-Ignoring "ti,control-syscon", the node has both "syscon" and
-"simple-bus". Given you expect the OS to recognise "syscon", you should
-_not_ expect it to also treat the node as "simple-bus". Doing so is an
-abuse of the property and current Linux implementation details.
+http://diepresse.com/home/leben/mode/kolumnezumtag/548717/index.do
 
-The "syscon" binding is not a more specific version of "simple-bus".
-They imply completely different things.
+Notiz:
+Dear friend,
+=20
+I am the international operations manager of ABSA bank South Africa. My=
+ name is Franklin Buthelezi. I have a sensitive and private offer from =
+the top executive to seek your partnership in re-profiling some offshor=
+e investment funds worth 11.5M U.S.D (Eleven Million five hundred thous=
+and United States Dollars) I am constrained however to withhold most of=
+ the details for now. This is a legitimate transaction.=20
+=20
+If we agree on the terms you will be given 15% of the total funds, if y=
+ou are interested please write back via email providing me your persona=
+l details and phone number for further directives.
+=20
+If you are interested and willing to render your assistance please resp=
+ond via my private email address stated below.
+=20
+I look forward to your response.
+=20
+Best regards
+=46ranklin Buthelezi
+Email: franklinbuthelezi1@yahoo.com
 
-Either make a ti,control-syscon driver that probes the child nodes, or
-move the child nodes out and give them a phandle to the
-dra7_ctrl_general node that they can parse. I'd prefer the latter as
-relies on fewer topology details, is as easy to implement as your
-current parent node parsing, and is easier to extend in future.
 
-> >
-> Hi Mark,
-> 
->  From Documentation/devicetree/bindings.. , I could get below info about simple-bus
-> - "simple-bus" compatible value (to ensure creation of the children)
-> 	compatible = "simple-bus";
+------------------------------------
+DiePresse.com =C3=BCbernimmt keine Haftung f=C3=BCr den Inhalt der pers=
+=C3=B6nlichen Nachricht.
 
-That's from the vexpress binding description of the smb node?
+=C2=A9 DiePresse.com - http://diepresse.com
 
-In that case, the smb node _is_ a simple-bus. It has no nonstandard
-properties, and the child nodes aren't reading arbitrary properties out
-of the smb node.
-
-There the simple-bus is used to remap addresses of child nodes via
-ranges. It does represent a simple bus, and that's all the OS is
-expected to know.
-
-Thanks,
-Mark.
