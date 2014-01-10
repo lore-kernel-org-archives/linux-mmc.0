@@ -1,47 +1,217 @@
-From: zhangfei <zhangfei.gao@linaro.org>
-Subject: Re: [PATCH 2/3] mmc: dw_mmc: add dw_mmc-k3 for k3 platform
-Date: Fri, 10 Jan 2014 22:12:42 +0800
-Message-ID: <52CFFFDA.8050108@linaro.org>
-References: <1389278112-7099-1-git-send-email-zhangfei.gao@linaro.org> <1389278112-7099-3-git-send-email-zhangfei.gao@linaro.org> <003601cf0e09$5fb07c90$1f1175b0$%jun@samsung.com>
+From: Dinh Nguyen <dinguyen@altera.com>
+Subject: RE: [PATCHv9 1/4] clk: socfpga: Add a clk-phase property to the
+ "altr,socfpga-gate-clk"
+Date: Fri, 10 Jan 2014 09:51:51 -0600
+Message-ID: <1389369111.13556.29.camel@linux-builds1>
+References: <1389303079-19808-1-git-send-email-dinguyen@altera.com>
+	 <1389303079-19808-2-git-send-email-dinguyen@altera.com>
+	 <003501cf0e06$9c194c50$d44be4f0$%jun@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=EUC-KR
+Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pb0-f48.google.com ([209.85.160.48]:60700 "EHLO
-	mail-pb0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751151AbaAJONJ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 10 Jan 2014 09:13:09 -0500
-Received: by mail-pb0-f48.google.com with SMTP id md12so4497591pbc.35
-        for <linux-mmc@vger.kernel.org>; Fri, 10 Jan 2014 06:13:08 -0800 (PST)
-In-Reply-To: <003601cf0e09$5fb07c90$1f1175b0$%jun@samsung.com>
+Received: from am1ehsobe006.messaging.microsoft.com ([213.199.154.209]:35226
+	"EHLO am1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1750944AbaAJPxp (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 10 Jan 2014 10:53:45 -0500
+In-Reply-To: <003501cf0e06$9c194c50$d44be4f0$%jun@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Seungwon Jeon <tgih.jun@samsung.com>, 'Chris Ball' <cjb@laptop.org>, 'Arnd Bergmann' <arnd@arndb.de>, 'Mike Turquette' <mturquette@linaro.org>, 'Rob Herring' <robherring2@gmail.com>, 'Jaehoon Chung' <jh80.chung@samsung.com>, 'Kumar Gala' <galak@codeaurora.org>, 'Haojian Zhuang' <haojian.zhuang@linaro.org>
-Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, patches@linaro.org, devicetree@vger.kernel.org, 'Zhigang Wang' <brooke.wangzhigang@huawei.com>
+To: Seungwon Jeon <tgih.jun@samsung.com>
+Cc: dinh.linux@gmail.com, arnd@arndb.de, cjb@laptop.org, jh80.chung@samsung.com, heiko@sntech.de, dianders@chromium.org, alim.akhtar@samsung.com, bzhao@marvell.com, mturquette@linaro.org, zhangfei.gao@linaro.org, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 
+Hi Seungwong,
 
-
-On 01/10/2014 09:39 PM, Seungwon Jeon wrote:
->> +static void dw_mci_k3_set_ios(struct dw_mci *host, struct mmc_ios *ios)
->> +{
->> +	struct dw_mci_k3_priv_data *priv = host->priv;
->> +	u32 rate = priv->clk_table[ios->timing];
+On Fri, 2014-01-10 at 22:19 +0900, Seungwon Jeon wrote:
+> Hi Dinh,
 > 
-> First, sorry for quick review even though your effort.
-> But I still worry about this change.
-> Currently k3 host's clock table depends on value number of SD/MMC mode value.
-> It seems close to identifier for eachg mode. I think it's not good way to use as table's index.
-> Can you modify to mmc_clk_determine_rate() in your another patch-set?
-> I guess required actual target rate could be determined depending on ios->clock.
+> On Fri, January 10, 2014, Dinh Nguyen wrote:
+> > From: Dinh Nguyen <dinguyen@altera.com>
+> > 
+> > The clk-phase property is used to represent the 2 clock phase values that is
+> > needed for the SD/MMC driver. Add a prepare function to the clk_ops, that will
+> > use the syscon driver to set sdmmc_clk's phase shift that is located in the
+> > system manager.
+> > 
+> > Signed-off-by: Dinh Nguyen <dinguyen@altera.com>
+> > Acked-by: Zhangfei Gao <zhangfei.gao@linaro.org>
+> > ---
+> > v9: none
+> > v8: Use degrees in the clk-phase binding property
+> > v7: Add dts property to represent the clk phase of the sdmmc_clk. Add a
+> >     prepare function to the gate clk that will toggle clock phase setting.
+> >     Remove the "altr,socfpga-sdmmc-sdr-clk" clock type.
+> > v6: Add a new clock type "altr,socfpga-sdmmc-sdr-clk" that will be used to
+> >     set the phase shift settings.
+> > v5: Use the "snps,dw-mshc" binding
+> > v4: Use the sdmmc_clk prepare function to set the phase shift settings
+> > v3: Not use the syscon driver because as of 3.13-rc1, the syscon driver is
+> >     loaded after the clock driver.
+> > v2: Use the syscon driver
+> > ---
+> >  .../devicetree/bindings/clock/altr_socfpga.txt     |    5 ++
+> >  arch/arm/boot/dts/socfpga.dtsi                     |    1 +
+> >  drivers/clk/socfpga/clk-gate.c                     |   68 ++++++++++++++++++++
+> >  3 files changed, 74 insertions(+)
+> > 
+> > diff --git a/Documentation/devicetree/bindings/clock/altr_socfpga.txt
+> > b/Documentation/devicetree/bindings/clock/altr_socfpga.txt
+> > index 0045433..5dfd145 100644
+> > --- a/Documentation/devicetree/bindings/clock/altr_socfpga.txt
+> > +++ b/Documentation/devicetree/bindings/clock/altr_socfpga.txt
+> > @@ -23,3 +23,8 @@ Optional properties:
+> >          and the bit index.
+> >  - div-reg : For "socfpga-gate-clk", div-reg contains the divider register, bit shift,
+> >          and width.
+> > +- clk-phase : For the sdmmc_clk, contains the value of the clock phase that controls
+> > +	the SDMMC CIU clock. The first value is the clk_sample(smpsel), and the second
+> > +	value is the cclk_in_drv(drvsel). The clk-phase is used to enable the correct
+> > +	hold/delay times that is needed for the SD/MMC CIU clock. The values of both
+> > +	can be 0-315 degrees, in 45 degree increments.
+> > diff --git a/arch/arm/boot/dts/socfpga.dtsi b/arch/arm/boot/dts/socfpga.dtsi
+> > index f936476..e776512 100644
+> > --- a/arch/arm/boot/dts/socfpga.dtsi
+> > +++ b/arch/arm/boot/dts/socfpga.dtsi
+> > @@ -413,6 +413,7 @@
+> >  						compatible = "altr,socfpga-gate-clk";
+> >  						clocks = <&f2s_periph_ref_clk>, <&main_nand_sdmmc_clk>,
+> > <&per_nand_mmc_clk>;
+> >  						clk-gate = <0xa0 8>;
+> > +						clk-phase = <0 135>;
+> 
+> Can clk-phase be applicable commonly for various board?
+> Isn't specific timing values?
+
+No, the clock-phase does not change for various board. It is a
+SoC-specific property.
+
+Thanks,
+Dinh
+> 
+> Thanks,
+> Seungwon Jeon
+> >  					};
+> > 
+> >  					nand_x_clk: nand_x_clk {
+> > diff --git a/drivers/clk/socfpga/clk-gate.c b/drivers/clk/socfpga/clk-gate.c
+> > index 4efcf4e..501d513 100644
+> > --- a/drivers/clk/socfpga/clk-gate.c
+> > +++ b/drivers/clk/socfpga/clk-gate.c
+> > @@ -19,7 +19,9 @@
+> >  #include <linux/clkdev.h>
+> >  #include <linux/clk-provider.h>
+> >  #include <linux/io.h>
+> > +#include <linux/mfd/syscon.h>
+> >  #include <linux/of.h>
+> > +#include <linux/regmap.h>
+> > 
+> >  #include "clk.h"
+> > 
+> > @@ -35,6 +37,11 @@
+> > 
+> >  #define to_socfpga_gate_clk(p) container_of(p, struct socfpga_gate_clk, hw.hw)
+> > 
+> > +/* SDMMC Group for System Manager defines */
+> > +#define SYSMGR_SDMMCGRP_CTRL_OFFSET    0x108
+> > +#define SYSMGR_SDMMC_CTRL_SET(smplsel, drvsel) \
+> > +	((((smplsel) & 0x7) << 3) | (((drvsel) & 0x7) << 0))
+> > +
+> >  static u8 socfpga_clk_get_parent(struct clk_hw *hwclk)
+> >  {
+> >  	u32 l4_src;
+> > @@ -115,7 +122,61 @@ static unsigned long socfpga_clk_recalc_rate(struct clk_hw *hwclk,
+> >  	return parent_rate / div;
+> >  }
+> > 
+> > +static int socfpga_clk_prepare(struct clk_hw *hwclk)
+> > +{
+> > +	struct socfpga_gate_clk *socfpgaclk = to_socfpga_gate_clk(hwclk);
+> > +	struct regmap *sys_mgr_base_addr;
+> > +	int i;
+> > +	u32 hs_timing;
+> > +	u32 clk_phase[2];
+> > +
+> > +	if (socfpgaclk->clk_phase[0] || socfpgaclk->clk_phase[1]) {
+> > +		sys_mgr_base_addr = syscon_regmap_lookup_by_compatible("altr,sys-mgr");
+> > +		if (IS_ERR(sys_mgr_base_addr)) {
+> > +			pr_err("%s: failed to find altr,sys-mgr regmap!\n", __func__);
+> > +			return -EINVAL;
+> > +		}
+> > +
+> > +		for (i = 0; i < 2; i++) {
+> > +			switch (socfpgaclk->clk_phase[i]) {
+> > +			case 0:
+> > +				clk_phase[i] = 0;
+> > +				break;
+> > +			case 45:
+> > +				clk_phase[i] = 1;
+> > +				break;
+> > +			case 90:
+> > +				clk_phase[i] = 2;
+> > +				break;
+> > +			case 135:
+> > +				clk_phase[i] = 3;
+> > +				break;
+> > +			case 180:
+> > +				clk_phase[i] = 4;
+> > +				break;
+> > +			case 225:
+> > +				clk_phase[i] = 5;
+> > +				break;
+> > +			case 270:
+> > +				clk_phase[i] = 6;
+> > +				break;
+> > +			case 315:
+> > +				clk_phase[i] = 7;
+> > +				break;
+> > +			default:
+> > +				clk_phase[i] = 0;
+> > +				break;
+> > +			}
+> > +		}
+> > +		hs_timing = SYSMGR_SDMMC_CTRL_SET(clk_phase[0], clk_phase[1]);
+> > +		regmap_write(sys_mgr_base_addr, SYSMGR_SDMMCGRP_CTRL_OFFSET,
+> > +			hs_timing);
+> > +	}
+> > +	return 0;
+> > +}
+> > +
+> >  static struct clk_ops gateclk_ops = {
+> > +	.prepare = socfpga_clk_prepare,
+> >  	.recalc_rate = socfpga_clk_recalc_rate,
+> >  	.get_parent = socfpga_clk_get_parent,
+> >  	.set_parent = socfpga_clk_set_parent,
+> > @@ -126,6 +187,7 @@ static void __init __socfpga_gate_init(struct device_node *node,
+> >  {
+> >  	u32 clk_gate[2];
+> >  	u32 div_reg[3];
+> > +	u32 clk_phase[2];
+> >  	u32 fixed_div;
+> >  	struct clk *clk;
+> >  	struct socfpga_gate_clk *socfpga_clk;
+> > @@ -166,6 +228,12 @@ static void __init __socfpga_gate_init(struct device_node *node,
+> >  		socfpga_clk->div_reg = 0;
+> >  	}
+> > 
+> > +	rc = of_property_read_u32_array(node, "clk-phase", clk_phase, 2);
+> > +	if (!rc) {
+> > +		socfpga_clk->clk_phase[0] = clk_phase[0];
+> > +		socfpga_clk->clk_phase[1] = clk_phase[1];
+> > +	}
+> > +
+> >  	of_property_read_string(node, "clock-output-names", &clk_name);
+> > 
+> >  	init.name = clk_name;
+> > --
+> > 1.7.9.5
+> > 
+> > 
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
 > 
 
-No, it can not get input clock source rate simply from ios->clock, also
-requied info like which controller, which mode etc.
-Here is setting clock source rate, not the working clock rate.
 
-For example, emmc init clock source rate is 13M, while sd init clock
-source is 25M, it can not simply get such info from ios->clock.
-And for HS200, emmc may have to set clock source rate to 104M since the
-controller limitation and can not work stable as 208M.
 
-Thanks
