@@ -1,114 +1,94 @@
-From: Felipe Balbi <balbi@ti.com>
-Subject: Re: [PATCH v8 1/7] mmc: omap_hsmmc: use devm_regulator API
-Date: Fri, 10 Jan 2014 09:58:02 -0600
-Message-ID: <20140110155802.GF6665@saruman.home>
-References: <1387560955-6547-1-git-send-email-balajitk@ti.com>
- <1389279062-32291-1-git-send-email-balajitk@ti.com>
- <1389279062-32291-2-git-send-email-balajitk@ti.com>
- <20140109151844.GB2417@saruman.home>
- <52D017E8.7000308@ti.com>
-Reply-To: <balbi@ti.com>
+From: Balaji T K <balajitk@ti.com>
+Subject: Re: [PATCH v7 5/7] ARM: dts: add pbias dt node
+Date: Fri, 10 Jan 2014 22:30:39 +0530
+Message-ID: <52D02737.6060609@ti.com>
+References: <1387560955-6547-1-git-send-email-balajitk@ti.com> <1387560955-6547-6-git-send-email-balajitk@ti.com> <20140106181928.GK24664@e106331-lin.cambridge.arm.com> <52CBD467.6060909@ti.com> <20140107105738.GA4180@e106331-lin.cambridge.arm.com> <52CBF1CF.4040706@ti.com> <52CD6602.7040603@ti.com> <20140110113234.GA25741@e106331-lin.cambridge.arm.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="8JPrznbw0YAQ/KXy"
+Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from comal.ext.ti.com ([198.47.26.152]:39928 "EHLO comal.ext.ti.com"
+Received: from comal.ext.ti.com ([198.47.26.152]:42665 "EHLO comal.ext.ti.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750877AbaAJP7P (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 10 Jan 2014 10:59:15 -0500
-Content-Disposition: inline
-In-Reply-To: <52D017E8.7000308@ti.com>
+	id S1757967AbaAJRAw (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 10 Jan 2014 12:00:52 -0500
+In-Reply-To: <20140110113234.GA25741@e106331-lin.cambridge.arm.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Balaji T K <balajitk@ti.com>
-Cc: balbi@ti.com, linux-omap@vger.kernel.org, bcousson@baylibre.com, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, chris@printf.net, broonie@kernel.org, tony@atomide.com, mark.rutland@arm.com
+To: Mark Rutland <mark.rutland@arm.com>
+Cc: "linux-omap@vger.kernel.org" <linux-omap@vger.kernel.org>, "bcousson@baylibre.com" <bcousson@baylibre.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "cjb@laptop.org" <cjb@laptop.org>, "broonie@kernel.org" <broonie@kernel.org>, "tony@atomide.com" <tony@atomide.com>
 
---8JPrznbw0YAQ/KXy
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+On Friday 10 January 2014 05:02 PM, Mark Rutland wrote:
+> On Wed, Jan 08, 2014 at 02:51:46PM +0000, Balaji T K wrote:
+>> On Tuesday 07 January 2014 05:53 PM, Balaji T K wrote:
+>>> On Tuesday 07 January 2014 04:27 PM, Mark Rutland wrote:
+>>>> On Tue, Jan 07, 2014 at 10:18:15AM +0000, Balaji T K wrote:
+>>>>> On Monday 06 January 2014 11:49 PM, Mark Rutland wrote:
+>>>>>> On Fri, Dec 20, 2013 at 05:35:53PM +0000, Balaji T K wrote:
+>>>>>>> Add pbias regulator node as a child of system control
+>>>>>>> module - syscon.
+>>>>>>>
+>>>>>>> Signed-off-by: Balaji T K <balajitk@ti.com>
+>>>>>>> ---
+>>>>>>>     arch/arm/boot/dts/dra7.dtsi     |   18 ++++++++++++++++++
+>>>>>>>     arch/arm/boot/dts/omap2430.dtsi |   18 ++++++++++++++++++
+>>>>>>>     arch/arm/boot/dts/omap3.dtsi    |   18 ++++++++++++++++++
+>>>>>>>     arch/arm/boot/dts/omap4.dtsi    |   18 ++++++++++++++++++
+>>>>>>>     arch/arm/boot/dts/omap5.dtsi    |   18 ++++++++++++++++++
+>>>>>>>     5 files changed, 90 insertions(+), 0 deletions(-)
+>>>>>>>
+>>>>>>> diff --git a/arch/arm/boot/dts/dra7.dtsi b/arch/arm/boot/dts/dra7.dtsi
+>>>>>>> index d0df4c4..4e68df1 100644
+>>>>>>> --- a/arch/arm/boot/dts/dra7.dtsi
+>>>>>>> +++ b/arch/arm/boot/dts/dra7.dtsi
+>>>>>>> @@ -110,6 +110,23 @@
+>>>>>>>                 ti,hwmods = "counter_32k";
+>>>>>>>             };
+>>>>>>>
+>>>>>>> +        dra7_ctrl_general: tisyscon@4a002e00 {
+>>>>>>> +            compatible = "ti,control-syscon", "syscon", "simple-bus";
+>>>>>>
+>>>>>> Please, don't use simple-bus like that. The components below this node
+>>>>>> depend on it. It is _NOT_ a simple bus. Make the ti,control-syscon
+>>>>>> driver probe it's children.
+>>>>>
+>>>>> Hi Mark,
+>>>>>
+>>>>> Actually ti,control-syscon driver does not exist, so I can remove it,
+>>>>> and simple-bus is needed for child creation.
+>>>>
+>>>> This still shows up as a syscon node, with a reg property, and syscon is
+>>>> not an extension of simple-bus.
+>>>>
+>>>> There are properties in the parent node that children depend on, and
+>>>> that makes me wary of describing it as a simple bus. I'd expect to be
+>>>> able to move child nodes out of a simple-bus if ranges provided an
+>>>> idmap, and I can't do that here.
+>>>>
+>>> Hi Mark,
+>>>
+>>> Not sure if I am understanding here, can you please add more info.
+>
+> A node's compatible string list describes the set of devices (or rather
+> descriptions of devices) with which it is compatible. The list goes from
+> most specific to least specific. The idea is that an OS reads through
+> the list until it finds a string it knows how to handle, then treats the
+> node as that.
+>
+> Ignoring "ti,control-syscon", the node has both "syscon" and
+> "simple-bus". Given you expect the OS to recognise "syscon", you should
+> _not_ expect it to also treat the node as "simple-bus". Doing so is an
+> abuse of the property and current Linux implementation details.
+>
+> The "syscon" binding is not a more specific version of "simple-bus".
+> They imply completely different things.
+>
+> Either make a ti,control-syscon driver that probes the child nodes, or
+> move the child nodes out and give them a phandle to the
+> dra7_ctrl_general node that they can parse. I'd prefer the latter as
+> relies on fewer topology details, is as easy to implement as your
+> current parent node parsing, and is easier to extend in future.
+>
 
-hi,
+Thanks Mark,
+phandle to syscon is fine for me.
 
-On Fri, Jan 10, 2014 at 09:25:20PM +0530, Balaji T K wrote:
-> On Thursday 09 January 2014 08:48 PM, Felipe Balbi wrote:
-> >Hi,
-> >
-> >On Thu, Jan 09, 2014 at 08:20:56PM +0530, Balaji T K wrote:
-> >>Use devm_regulator API, while at it use
-> >>devm_regulator_get_optional for optional vmmc_aux supply
-> >>
-> >>Signed-off-by: Balaji T K <balajitk@ti.com>
-> >>Acked-by: Tony Lindgren <tony@atomide.com>
-> >>---
-> >>  drivers/mmc/host/omap_hsmmc.c |    6 ++----
-> >>  1 files changed, 2 insertions(+), 4 deletions(-)
-> >>
-> >>diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmm=
-c.c
-> >>index dbd32ad..1eb4350 100644
-> >>--- a/drivers/mmc/host/omap_hsmmc.c
-> >>+++ b/drivers/mmc/host/omap_hsmmc.c
-> >>@@ -316,7 +316,7 @@ static int omap_hsmmc_reg_get(struct omap_hsmmc_hos=
-t *host)
-> >>  	struct regulator *reg;
-> >>  	int ocr_value =3D 0;
-> >>
-> >>-	reg =3D regulator_get(host->dev, "vmmc");
-> >>+	reg =3D devm_regulator_get(host->dev, "vmmc");
-> >>  	if (IS_ERR(reg)) {
-> >>  		dev_err(host->dev, "vmmc regulator missing\n");
-> >>  		return PTR_ERR(reg);
-> >>@@ -336,7 +336,7 @@ static int omap_hsmmc_reg_get(struct omap_hsmmc_hos=
-t *host)
-> >>  		}
-> >>
-> >>  		/* Allow an aux regulator */
-> >>-		reg =3D regulator_get(host->dev, "vmmc_aux");
-> >>+		reg =3D devm_regulator_get_optional(host->dev, "vmmc_aux");
-> >>  		host->vcc_aux =3D IS_ERR(reg) ? NULL : reg;
-> >>
-> >>  		/* For eMMC do not power off when not in sleep state */
-> >>@@ -366,8 +366,6 @@ static int omap_hsmmc_reg_get(struct omap_hsmmc_hos=
-t *host)
-> >>
-> >>  static void omap_hsmmc_reg_put(struct omap_hsmmc_host *host)
-> >
-> >since this function does nothing now, you could pretty much remove it
-> >and move set_power assignment to ->remove() directly. No strong feelings
-> >though.
-> >
-> Hi Felipe,
->=20
-> omap_hsmmc_reg_put is used in probe error handling path in addition to .r=
-emove(),
-> so I would keep it for now to balance omap_hsmmc_reg_get.
-
-right, but it does nothing but setting set_power to NULL ;-)
-
---=20
-balbi
-
---8JPrznbw0YAQ/KXy
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.15 (GNU/Linux)
-
-iQIbBAEBAgAGBQJS0BiKAAoJEIaOsuA1yqREqXgP91XDLMGCRn0oYrxyDaIqF4Du
-duubMXZ/fZRdSYqNJNtg0FPd7uKM3M4EJiUt9z0QJI55wLq/oNgInbBhVWvnNSie
-9T9T2rEl/SzFwYyLzW8maHO0A+RIzUzmkHtnwqsu9CjWJAbIDfplrTvMuwSvyQq9
-cpbpUrdzy/L0FuxQsXaelF2KhMkU0KGnKK/JOVwD3532hX8ALTaMGO+b0VGsCPPR
-x1nM/ey766HUE6u6pOj9NiXQdcIgwUs3P9zXj7LzpT09mXlefkzy15RphRSjL2fO
-NyDS+irsBigEUYO6UduP0ziNr8H5kcHEdQCPtPXz6K5ig3DPVHOppcjwt4h2LRD0
-MIsWDsF/OalyWnkUR5r+na5tOcP5GT5pgLe9OWeGxO8a6/JhwFA7pFxwtBfDkUHZ
-g7uQ4ToOUsX94gi5bmcBlyIozuBckBTg0lyJdXcrl13OVMScK46zUOodj4ikvFWI
-rGK66hTxlRASmCRWV49H4saGxfmz2sVppQvznIZp+TIPH58p6vvHqGOQfJMlSTPq
-ApeEaiiGJz8JtPdeygt9TFpYzLKFu9a0i1tgyi6yNpSQYfqmfn6Nlr9RhuB59FBJ
-/iZLFi5yrmAJPn7LVwOzXoIY5lLRa9COG5Ndo1TlnabozOgw+JQ4zywD5sobGSr3
-woY1ygcahoBacXtc3sU=
-=y67j
------END PGP SIGNATURE-----
-
---8JPrznbw0YAQ/KXy--
