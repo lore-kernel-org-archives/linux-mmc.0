@@ -1,52 +1,67 @@
-From: Dinh Nguyen <dinh.linux@gmail.com>
-Subject: Re: [PATCHv9 1/4] clk: socfpga: Add a clk-phase property to the "altr,socfpga-gate-clk"
-Date: Fri, 10 Jan 2014 15:26:05 -0600
-Message-ID: <52D0656D.6010307@gmail.com>
-References: <1389303079-19808-1-git-send-email-dinguyen@altera.com> <003501cf0e06$9c194c50$d44be4f0$%jun@samsung.com> <1389369111.13556.29.camel@linux-builds1> <201401102000.25484.arnd@arndb.de>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-oa0-f51.google.com ([209.85.219.51]:35709 "EHLO
-	mail-oa0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751466AbaAJVZv (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 10 Jan 2014 16:25:51 -0500
-In-Reply-To: <201401102000.25484.arnd@arndb.de>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Tomasz Figa <tomasz.figa@gmail.com>
+Subject: [PATCH 0/6] mmc: sdhci-s3c: Fix base clock source management
+Date: Sat, 11 Jan 2014 22:39:00 +0100
+Message-ID: <1389476346-20396-1-git-send-email-tomasz.figa@gmail.com>
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: linux-samsung-soc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Ben Dooks <ben-linux@fluff.org>, Chris Ball <chris@printf.net>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, Marek Szyprowski <m.szyprowski@samsung.com>, Tomasz Figa <tomasz.figa@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Arnd Bergmann <arnd@arndb.de>, Dinh Nguyen <dinguyen@altera.com>
-Cc: Seungwon Jeon <tgih.jun@samsung.com>, cjb@laptop.org, jh80.chung@samsung.com, heiko@sntech.de, dianders@chromium.org, alim.akhtar@samsung.com, bzhao@marvell.com, mturquette@linaro.org, zhangfei.gao@linaro.org, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 
-Hi Arnd,
+On platforms prior to Exynos the SDHCI block used internal clock
+divider controlled by SELFREQ field of CLKCON register to divide base
+clock selected from several external clocks fed to the block by
+SELBASECLK bitfield of CONTROL2 register. Depending on wanted clock
+frequency, different external clock may be the best choice and so
+the driver needs to switch the SELBASECLK mux on the fly.
 
-On 1/10/14 1:00 PM, Arnd Bergmann wrote:
-> On Friday 10 January 2014, Dinh Nguyen wrote:
->>>> diff --git a/arch/arm/boot/dts/socfpga.dtsi b/arch/arm/boot/dts/socfpga.dtsi
->>>> index f936476..e776512 100644
->>>> --- a/arch/arm/boot/dts/socfpga.dtsi
->>>> +++ b/arch/arm/boot/dts/socfpga.dtsi
->>>> @@ -413,6 +413,7 @@
->>>>                                             compatible = "altr,socfpga-gate-clk";
->>>>                                             clocks = <&f2s_periph_ref_clk>, <&main_nand_sdmmc_clk>,
->>>> <&per_nand_mmc_clk>;
->>>>                                             clk-gate = <0xa0 8>;
->>>> +                                           clk-phase = <0 135>;
->>> Can clk-phase be applicable commonly for various board?
->>> Isn't specific timing values?
->> No, the clock-phase does not change for various board. It is a
->> SoC-specific property.
-> I'm curious about this: If the setting is fixed per soc, why is it even
-> configurable, rather than hardwired to the correct setting, or set up
-> by the boot loader?
-Yes, I guess it can be hardwired, but currently it is not and the values
-all default
-to 0. The bootloader does set it up, but only when the system is booting
-from
-the SD/MMC source. When booting from other flash medium(i.e. NAND,
-QSPI), these SD/MMC settings are not set, so they must be set by the OS
-if SD/MMC is to work correctly.
+However the selection logic has been broken for quite some time leaving
+the controller using always clock 0, which is not always the right
+source and leading to suboptimal performance of the SDHCI block on
+affected platforms.
 
-Dinh
->
-> 	Arnd
+This series intends to fix the problems mentioned above and also clean-up
+clock management code slightly.
 
+Tested on S3C6410-based Mini6410 board, with following performance
+figures:
+
+* Before this series (133 MHz HCLK always selected, leading to at most
+  33 MHz card clock):
+
+root@tiny6410:~# hdparm -t /dev/mmcblk0
+
+/dev/mmcblk0:
+ Timing buffered disk reads:  42 MB in  3.10 seconds =  13.54 MB/sec
+root@tiny6410:~# hdparm -t /dev/mmcblk0
+
+/dev/mmcblk0:
+ Timing buffered disk reads:  44 MB in  3.11 seconds =  14.14 MB/sec
+root@tiny6410:~#
+
+* After this series (48 MHz EPLL clock selected, leading to 48 MHz card
+  clock):
+
+root@tiny6410:~# hdparm -t /dev/mmcblk0 
+
+/dev/mmcblk0:
+ Timing buffered disk reads:  56 MB in  3.04 seconds =  18.41 MB/sec
+root@tiny6410:~# hdparm -t /dev/mmcblk0
+
+/dev/mmcblk0:
+ Timing buffered disk reads:  60 MB in  3.06 seconds =  19.63 MB/sec
+root@tiny6410:~#
+
+Tomasz Figa (6):
+  mmc: sdhci-s3c: Use shifts to divide by powers of two
+  mmc: sdhci-s3c: Cache bus clock rates
+  mmc: sdhci-s3c: Use correct condition to check for clock presence
+  mmc: sdhci-s3c: Simplify min/max clock calculation
+  mmc: sdhci-s3c: Fix handling of bus clock switching
+  mmc: sdhci-s3c: Do not allow frequencies higher than requested
+
+ drivers/mmc/host/sdhci-s3c.c | 170 ++++++++++++++++++++-----------------------
+ 1 file changed, 77 insertions(+), 93 deletions(-)
+
+-- 
+1.8.5.2
