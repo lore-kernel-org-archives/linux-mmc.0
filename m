@@ -1,28 +1,54 @@
-From: Chris Ball <chris@printf.net>
-Subject: Re: [PATCH v3 1/2] mmc: arasan: Add driver for Arasan SDHCI
-Date: Sun, 12 Jan 2014 18:06:32 +0000
-Message-ID: <861u0ddqhj.fsf@void.printf.net>
-References: <1386007357-11956-1-git-send-email-soren.brinkmann@xilinx.com>
+From: Heiko =?ISO-8859-1?Q?St=FCbner?= <heiko@sntech.de>
+Subject: Re: [PATCH 0/6] mmc: sdhci-s3c: Fix base clock source management
+Date: Sun, 12 Jan 2014 22:18 +0100
+Message-ID: <1704043.sYrCOYas4N@phil>
+References: <1389476346-20396-1-git-send-email-tomasz.figa@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-doc-owner@vger.kernel.org>
-In-Reply-To: <1386007357-11956-1-git-send-email-soren.brinkmann@xilinx.com>
-	(Soren Brinkmann's message of "Mon, 2 Dec 2013 10:02:36 -0800")
-Sender: linux-doc-owner@vger.kernel.org
-To: Soren Brinkmann <soren.brinkmann@xilinx.com>
-Cc: Rob Herring <rob.herring@calxeda.com>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Stephen Warren <swarren@wwwdotorg.org>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Rob Landley <rob@landley.net>, Russell King <linux@arm.linux.org.uk>, Michal Simek <michal.simek@xilinx.com>, Grant Likely <grant.likely@linaro.org>, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, linux-doc@vger.kernel.org, devicetree@vger.kernel.org, Tomasz Figa <tomasz.figa@gmail.com>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7Bit
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-Reply-To: <1389476346-20396-1-git-send-email-tomasz.figa@gmail.com>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: Tomasz Figa <tomasz.figa@gmail.com>
+Cc: linux-mmc@vger.kernel.org, linux-samsung-soc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Ben Dooks <ben-linux@fluff.org>, Chris Ball <chris@printf.net>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, Marek Szyprowski <m.szyprowski@samsung.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Soren,
-
-On Mon, Dec 02 2013, Soren Brinkmann wrote:
-> Add a driver for Arasan's SDHCI controller core.
+Am Samstag, 11. Januar 2014, 22:39:00 schrieb Tomasz Figa:
+> Tested on S3C6410-based Mini6410 board, with following performance
+> figures:
+> 
+> * Before this series (133 MHz HCLK always selected, leading to at most
+>   33 MHz card clock):
 >
-> Signed-off-by: Soren Brinkmann <soren.brinkmann@xilinx.com>
-> Acked-by: Rob Herring <rob.herring@calxeda.com> [binding]
+> root@tiny6410:~# hdparm -t /dev/mmcblk0
+> 
+> /dev/mmcblk0:
+>  Timing buffered disk reads:  42 MB in  3.10 seconds =  13.54 MB/sec
 
-Thanks, pushed patch 1/2 to mmc-next for 3.14.
+# hdparm -t /dev/mmcblk0
 
-- Chris.
--- 
-Chris Ball   <chris@printf.net>   <http://printf.net/>
+/dev/mmcblk0:
+ Timing buffered disk reads: 44 MB in  3.12 seconds =  14.11 MB/sec
+
+
+> * After this series (48 MHz EPLL clock selected, leading to 48 MHz card
+>   clock):
+>
+> root@tiny6410:~# hdparm -t /dev/mmcblk0
+> 
+> /dev/mmcblk0:
+>  Timing buffered disk reads:  56 MB in  3.04 seconds =  18.41 MB/sec
+
+# hdparm -t /dev/mmcblk0
+
+/dev/mmcblk0:
+ Timing buffered disk reads: 48 MB in  3.01 seconds =  15.94 MB/sec
+
+
+So on a s3c2416:
+Tested-by: Heiko Stuebner <heiko@sntech.de>
+Acked-by: Heiko Stuebner <heiko@sntech.de>
+
+
+Thanks for the added bandwidth :-)
+Heiko
