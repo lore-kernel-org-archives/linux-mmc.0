@@ -1,29 +1,27 @@
 From: Chris Ball <chris@printf.net>
-Subject: Re: [PATCH v7 0/3] mmc: dw_mmc: add dw_mmc-k3
-Date: Sun, 12 Jan 2014 16:35:25 +0000
-Message-ID: <86iotpdupe.fsf@void.printf.net>
-References: <1389278112-7099-1-git-send-email-zhangfei.gao@linaro.org>
+Subject: Re: [PATCH v3 1/2] mmc: arasan: Add driver for Arasan SDHCI
+Date: Sun, 12 Jan 2014 18:06:32 +0000
+Message-ID: <861u0ddqhj.fsf@void.printf.net>
+References: <1386007357-11956-1-git-send-email-soren.brinkmann@xilinx.com>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:45071 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750954AbaALQfi (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sun, 12 Jan 2014 11:35:38 -0500
-In-Reply-To: <1389278112-7099-1-git-send-email-zhangfei.gao@linaro.org>
-	(Zhangfei Gao's message of "Thu, 9 Jan 2014 22:35:09 +0800")
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-doc-owner@vger.kernel.org>
+In-Reply-To: <1386007357-11956-1-git-send-email-soren.brinkmann@xilinx.com>
+	(Soren Brinkmann's message of "Mon, 2 Dec 2013 10:02:36 -0800")
+Sender: linux-doc-owner@vger.kernel.org
+To: Soren Brinkmann <soren.brinkmann@xilinx.com>
+Cc: Rob Herring <rob.herring@calxeda.com>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Stephen Warren <swarren@wwwdotorg.org>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Rob Landley <rob@landley.net>, Russell King <linux@arm.linux.org.uk>, Michal Simek <michal.simek@xilinx.com>, Grant Likely <grant.likely@linaro.org>, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, linux-doc@vger.kernel.org, devicetree@vger.kernel.org, Tomasz Figa <tomasz.figa@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Zhangfei Gao <zhangfei.gao@linaro.org>
-Cc: Chris Ball <cjb@laptop.org>, Arnd Bergmann <arnd@arndb.de>, Mike Turquette <mturquette@linaro.org>, Rob Herring <robherring2@gmail.com>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, Kumar Gala <galak@codeaurora.org>, Haojian Zhuang <haojian.zhuang@linaro.org>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, patches@linaro.org, devicetree@vger.kernel.org
 
-Hi,
+Hi Soren,
 
-I've pushed patches 1 and 2 to mmc-next for 3.14, with Arnd and
-Jaehoon's ACK -- since patch 3 depends on files that aren't in my
-tree, please can you push that one through arm-soc?
+On Mon, Dec 02 2013, Soren Brinkmann wrote:
+> Add a driver for Arasan's SDHCI controller core.
+>
+> Signed-off-by: Soren Brinkmann <soren.brinkmann@xilinx.com>
+> Acked-by: Rob Herring <rob.herring@calxeda.com> [binding]
 
-Thanks,
+Thanks, pushed patch 1/2 to mmc-next for 3.14.
 
 - Chris.
 -- 
