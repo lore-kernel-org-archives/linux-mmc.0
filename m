@@ -1,43 +1,34 @@
 From: Chris Ball <chris@printf.net>
-Subject: Re: [PATCH] mmc: tmio: fixup compile error
-Date: Sun, 12 Jan 2014 16:22:05 +0000
-Message-ID: <861u0df9w2.fsf@void.printf.net>
-References: <87iovn8ohs.wl%kuninori.morimoto.gx@renesas.com>
-	<87fvqr8ogb.wl%kuninori.morimoto.gx@renesas.com>
-	<201401071440.28355.arnd@arndb.de>
-	<87fvozxnnn.wl%kuninori.morimoto.gx@gmail.com>
-	<20140108044748.GI15891@verge.net.au>
+Subject: Re: [PATCH 0/2] add support of O2Mirco/BayHubTech SD hosts
+Date: Sun, 12 Jan 2014 16:28:24 +0000
+Message-ID: <86wqi5dv13.fsf@void.printf.net>
+References: <1387376619-8050-1-git-send-email-adam.lee@canonical.com>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <20140108044748.GI15891@verge.net.au> (Simon Horman's message of
-	"Wed, 8 Jan 2014 13:47:50 +0900")
-Sender: linux-sh-owner@vger.kernel.org
-To: Simon Horman <horms@verge.net.au>
-Cc: Kuninori Morimoto <kuninori.morimoto.gx@gmail.com>, Arnd Bergmann <arnd@arndb.de>, Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>, Magnus <magnus.damm@gmail.com>, Linux-SH <linux-sh@vger.kernel.org>, linux-mmc@vger.kernel.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from void.printf.net ([89.145.121.20]:57924 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750954AbaALQ2a (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Sun, 12 Jan 2014 11:28:30 -0500
+In-Reply-To: <1387376619-8050-1-git-send-email-adam.lee@canonical.com> (Adam
+	Lee's message of "Wed, 18 Dec 2013 22:23:37 +0800")
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Adam Lee <adam.lee@canonical.com>
+Cc: linux-mmc@vger.kernel.org, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Adrian Hunter <adrian.hunter@intel.com>, Shawn Guo <shawn.guo@linaro.org>, Stephen Warren <swarren@wwwdotorg.org>, Peter Guo <peter.guo@bayhubtech.com>
 
-Hi,
+Hi, thanks for doing this,
 
-On Wed, Jan 08 2014, Simon Horman wrote:
-> On Tue, Jan 07, 2014 at 05:33:51PM -0800, Kuninori Morimoto wrote:
->> From: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
->> 
->> This patch fixup below compile error
->> 
->> ${LINUX}/drivers/mmc/host/tmio_mmc.c: In function 'tmio_mmc_probe':
->> ${LINUX}/drivers/mmc/host/tmio_mmc.c:93:35: \
->> 	error: 'res_ctl' undeclared (first use in this function)
->> ${LINUX}/drivers/mmc/host/tmio_mmc.c:93:35: \
->> 	note: each undeclared identifier is reported only \
->> 	once for each function it appears in
->> 
->> Reported-by: Arnd Bergmann <arnd@arndb.de>
->> Signed-off-by: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
+On Wed, Dec 18 2013, Adam Lee wrote:
+> BugLink: http://bugs.launchpad.net/bugs/1239938
 >
-> Acked-by: Simon Horman <horms+renesas@verge.net.au>
+> Card readers on Lenovo ThinkPad W540, Dell Latitude E5440 and Dell Latitude
+> E6540 don't work without this patch.
+>
+> Thanks to Chris Ball's suggestion, I create new files but not add hundreds
+> lines of code into the main source file.
 
-Thanks, pushed to mmc-next for 3.14.
+Pushed to mmc-next for 3.14, thanks.
 
 - Chris.
 -- 
