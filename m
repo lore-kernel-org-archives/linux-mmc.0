@@ -1,35 +1,119 @@
-From: =?utf-8?B?U8O2cmVu?= Brinkmann <soren.brinkmann@xilinx.com>
-Subject: Re: [PATCH v3 1/2] mmc: arasan: Add driver for Arasan SDHCI
-Date: Mon, 13 Jan 2014 09:14:40 -0800
-Message-ID: <e2dfd9c0-ed36-4400-8dc4-58a14a318242@CO9EHSMHS006.ehs.local>
-References: <1386007357-11956-1-git-send-email-soren.brinkmann@xilinx.com>
- <861u0ddqhj.fsf@void.printf.net>
+From: Alexandre Belloni <alexandre.belloni@free-electrons.com>
+Subject: Re: [PATCHv3] mmc: atmel-mci: add vmmc-supply support
+Date: Mon, 13 Jan 2014 18:43:43 +0100
+Message-ID: <52D425CF.9050507@free-electrons.com>
+References: <1382006808-22728-1-git-send-email-alexandre.belloni@free-electrons.com> <CAPDyKFoiWOE47DWrUHNWVPyihL=uCidpd52TV1vgUbq1aMNvbw@mail.gmail.com> <52B09FF0.4070200@free-electrons.com> <20131218081645.GA4268@ldesroches-Latitude-E6320>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-Content-Disposition: inline
-In-Reply-To: <861u0ddqhj.fsf@void.printf.net>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Chris Ball <chris@printf.net>
-Cc: Mark Rutland <mark.rutland@arm.com>, devicetree@vger.kernel.org, Russell King <linux@arm.linux.org.uk>, linux-doc@vger.kernel.org, Pawel Moll <pawel.moll@arm.com>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Stephen Warren <swarren@wwwdotorg.org>, linux-mmc@vger.kernel.org, Michal Simek <michal.simek@xilinx.com>, Rob Herring <rob.herring@calxeda.com>, linux-kernel@vger.kernel.org, Rob Landley <rob@landley.net>, Grant Likely <grant.likely@linaro.org>, Tomasz Figa <tomasz.figa@gmail.com>, linux-arm-kernel@lists.infradead.org
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from top.free-electrons.com ([176.31.233.9]:35046 "EHLO
+	mail.free-electrons.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1752380AbaAMRnq (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 13 Jan 2014 12:43:46 -0500
+In-Reply-To: <20131218081645.GA4268@ldesroches-Latitude-E6320>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <cjb@laptop.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-T24gU3VuLCBKYW4gMTIsIDIwMTQgYXQgMDY6MDY6MzJQTSArMDAwMCwgQ2hyaXMgQmFsbCB3cm90
-ZToKPiBIaSBTb3JlbiwKPiAKPiBPbiBNb24sIERlYyAwMiAyMDEzLCBTb3JlbiBCcmlua21hbm4g
-d3JvdGU6Cj4gPiBBZGQgYSBkcml2ZXIgZm9yIEFyYXNhbidzIFNESENJIGNvbnRyb2xsZXIgY29y
-ZS4KPiA+Cj4gPiBTaWduZWQtb2ZmLWJ5OiBTb3JlbiBCcmlua21hbm4gPHNvcmVuLmJyaW5rbWFu
-bkB4aWxpbnguY29tPgo+ID4gQWNrZWQtYnk6IFJvYiBIZXJyaW5nIDxyb2IuaGVycmluZ0BjYWx4
-ZWRhLmNvbT4gW2JpbmRpbmddCj4gCj4gVGhhbmtzLCBwdXNoZWQgcGF0Y2ggMS8yIHRvIG1tYy1u
-ZXh0IGZvciAzLjE0LgoKVGhhbmsgeW91LgoKCVPDtnJlbgoKCgpfX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fXwpsaW51eC1hcm0ta2VybmVsIG1haWxpbmcgbGlz
-dApsaW51eC1hcm0ta2VybmVsQGxpc3RzLmluZnJhZGVhZC5vcmcKaHR0cDovL2xpc3RzLmluZnJh
-ZGVhZC5vcmcvbWFpbG1hbi9saXN0aW5mby9saW51eC1hcm0ta2VybmVsCg==
+Hi,
+
+I still don't see that on mmc.git, Any issue with that patch ? I would
+prefer not missing the 3.14 merge window.
+
+Regards
+
+On 18/12/2013 09:16, Ludovic Desroches wrote:
+> Hi Alexandre,
+> 
+> On Tue, Dec 17, 2013 at 08:03:12PM +0100, Alexandre Belloni wrote:
+>> Hi,
+>>
+>> It seems that patch never made it to the mainline. Is it still missing
+>> something ?
+> 
+> No reason on my side, maybe because my ack is missing but I thought I
+> gave it on a previous version, maybe I am wrong.
+> 
+> So Acked-by: Ludovic Desroches <ludovic.desroches@atmel.com>
+> 
+> 
+> Regards
+> 
+> Ludovic
+> 
+>>
+>> Regards,
+>>
+>> On 17/10/2013 15:56, Ulf Hansson wrote:
+>>> On 17 October 2013 12:46, Alexandre Belloni
+>>> <alexandre.belloni@free-electrons.com> wrote:
+>>>> Other MMC hosts handle a regulator named vmmc-supply that allows to power the
+>>>> MMC card or SDIO device before communicating on the bus.
+>>>>
+>>>> Signed-off-by: Alexandre Belloni <alexandre.belloni@free-electrons.com>
+>>> Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
+>>>
+>>>> ---
+>>>>
+>>>> Changes in v2:
+>>>>  - use mmc_regulator_get_supply instead of devm_regulator_get
+>>>>
+>>>> Changes in v3:
+>>>>  - en/disable the regulator in .set_ios using mmc_regulator_set_ocr
+>>>>
+>>>>  drivers/mmc/host/atmel-mci.c | 7 +++++++
+>>>>  1 file changed, 7 insertions(+)
+>>>>
+>>>> diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
+>>>> index 69e438e..a9e1ba6 100644
+>>>> --- a/drivers/mmc/host/atmel-mci.c
+>>>> +++ b/drivers/mmc/host/atmel-mci.c
+>>>> @@ -1385,8 +1385,14 @@ static void atmci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+>>>>                 clk_unprepare(host->mck);
+>>>>
+>>>>         switch (ios->power_mode) {
+>>>> +       case MMC_POWER_OFF:
+>>>> +               if (!IS_ERR(mmc->supply.vmmc))
+>>>> +                       mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, 0);
+>>>> +               break;
+>>>>         case MMC_POWER_UP:
+>>>>                 set_bit(ATMCI_CARD_NEED_INIT, &slot->flags);
+>>>> +               if (!IS_ERR(mmc->supply.vmmc))
+>>>> +                       mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, ios->vdd);
+>>>>                 break;
+>>>>         default:
+>>>>                 /*
+>>>> @@ -2196,6 +2202,7 @@ static int __init atmci_init_slot(struct atmel_mci *host,
+>>>>         }
+>>>>
+>>>>         host->slot[id] = slot;
+>>>> +       mmc_regulator_get_supply(mmc);
+>>>>         mmc_add_host(mmc);
+>>>>
+>>>>         if (gpio_is_valid(slot->detect_pin)) {
+>>>> --
+>>>> 1.8.1.2
+>>>>
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+>>> the body of a message to majordomo@vger.kernel.org
+>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
+>>
+>> -- 
+>> Alexandre Belloni, Free Electrons
+>> Embedded Linux, Kernel and Android engineering
+>> http://free-electrons.com
+>>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+
+
+-- 
+Alexandre Belloni, Free Electrons
+Embedded Linux, Kernel and Android engineering
+http://free-electrons.com
