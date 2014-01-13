@@ -1,49 +1,82 @@
 From: Balaji T K <balajitk@ti.com>
-Subject: [PATCH v10 6/7] ARM: OMAP: enable SYSCON and REGULATOR_PBIAS in omap2plus_defconfig
-Date: Mon, 13 Jan 2014 21:06:14 +0530
-Message-ID: <1389627375-9107-7-git-send-email-balajitk@ti.com>
+Subject: [PATCH v10 7/7] mmc: omap_hsmmc: remove pbias workaround
+Date: Mon, 13 Jan 2014 21:06:15 +0530
+Message-ID: <1389627375-9107-8-git-send-email-balajitk@ti.com>
 References: <1389279062-32291-1-git-send-email-balajitk@ti.com>
  <1389627375-9107-1-git-send-email-balajitk@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from bear.ext.ti.com ([192.94.94.41]:40960 "EHLO bear.ext.ti.com"
+Received: from comal.ext.ti.com ([198.47.26.152]:39828 "EHLO comal.ext.ti.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751948AbaAMPgt (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 13 Jan 2014 10:36:49 -0500
+	id S1751890AbaAMPgr (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 13 Jan 2014 10:36:47 -0500
 In-Reply-To: <1389627375-9107-1-git-send-email-balajitk@ti.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-omap@vger.kernel.org, bcousson@baylibre.com, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, chris@printf.net, broonie@kernel.org, tony@atomide.com
 Cc: Balaji T K <balajitk@ti.com>
 
-Enable REGULATOR_PBIAS needed for SD card on most OMAPs.
+remove pbias workaround
 
 Signed-off-by: Balaji T K <balajitk@ti.com>
+Acked-by: Tony Lindgren <tony@atomide.com>
 ---
- arch/arm/configs/omap2plus_defconfig |    2 ++
- 1 files changed, 2 insertions(+), 0 deletions(-)
+ drivers/mmc/host/omap_hsmmc.c |   20 +-------------------
+ 1 files changed, 1 insertions(+), 19 deletions(-)
 
-diff --git a/arch/arm/configs/omap2plus_defconfig b/arch/arm/configs/omap2plus_defconfig
-index bfa80a1..f67baa9 100644
---- a/arch/arm/configs/omap2plus_defconfig
-+++ b/arch/arm/configs/omap2plus_defconfig
-@@ -169,6 +169,7 @@ CONFIG_DRA752_THERMAL=y
- CONFIG_WATCHDOG=y
- CONFIG_OMAP_WATCHDOG=y
- CONFIG_TWL4030_WATCHDOG=y
-+CONFIG_MFD_SYSCON=y
- CONFIG_MFD_PALMAS=y
- CONFIG_MFD_TPS65217=y
- CONFIG_MFD_TPS65910=y
-@@ -180,6 +181,7 @@ CONFIG_REGULATOR_TPS6507X=y
- CONFIG_REGULATOR_TPS65217=y
- CONFIG_REGULATOR_TPS65910=y
- CONFIG_REGULATOR_TWL4030=y
-+CONFIG_REGULATOR_PBIAS=y
- CONFIG_FB=y
- CONFIG_FIRMWARE_EDID=y
- CONFIG_FB_MODE_HELPERS=y
+diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+index 2287bda..014bfe5 100644
+--- a/drivers/mmc/host/omap_hsmmc.c
++++ b/drivers/mmc/host/omap_hsmmc.c
+@@ -170,7 +170,6 @@ struct omap_hsmmc_host {
+ 	struct	regulator	*vcc_aux;
+ 	struct	regulator	*pbias;
+ 	bool			pbias_enabled;
+-	int			pbias_disable;
+ 	void	__iomem		*base;
+ 	resource_size_t		mapbase;
+ 	spinlock_t		irq_lock; /* Prevent races with irq handler */
+@@ -267,13 +266,6 @@ static int omap_hsmmc_set_power(struct device *dev, int slot, int power_on,
+ 	 */
+ 	if (!host->vcc)
+ 		return 0;
+-	/*
+-	 * With DT, never turn OFF the regulator for MMC1. This is because
+-	 * the pbias cell programming support is still missing when
+-	 * booting with Device tree
+-	 */
+-	if (host->pbias_disable && !vdd)
+-		return 0;
+ 
+ 	if (mmc_slot(host).before_set_reg)
+ 		mmc_slot(host).before_set_reg(dev, slot, power_on, vdd);
+@@ -1539,13 +1531,7 @@ static void omap_hsmmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 		 * of external transceiver; but they all handle 1.8V.
+ 		 */
+ 		if ((OMAP_HSMMC_READ(host->base, HCTL) & SDVSDET) &&
+-			(ios->vdd == DUAL_VOLT_OCR_BIT) &&
+-			/*
+-			 * With pbias cell programming missing, this
+-			 * can't be allowed on MMC1 when booting with device
+-			 * tree.
+-			 */
+-			!host->pbias_disable) {
++			(ios->vdd == DUAL_VOLT_OCR_BIT)) {
+ 				/*
+ 				 * The mmc_select_voltage fn of the core does
+ 				 * not seem to set the power_mode to
+@@ -1878,10 +1864,6 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
+ 
+ 	omap_hsmmc_context_save(host);
+ 
+-	/* This can be removed once we support PBIAS with DT */
+-	if (host->dev->of_node && res->start == 0x4809c000)
+-		host->pbias_disable = 1;
+-
+ 	host->dbclk = clk_get(&pdev->dev, "mmchsdb_fck");
+ 	/*
+ 	 * MMC can still work without debounce clock.
 -- 
 1.7.5.4
 
