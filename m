@@ -1,49 +1,62 @@
 From: Balaji T K <balajitk@ti.com>
-Subject: [PATCH v10 0/7] mmc: omap_hsmmc: pbias dt and cleanup
-Date: Mon, 13 Jan 2014 21:06:08 +0530
-Message-ID: <1389627375-9107-1-git-send-email-balajitk@ti.com>
+Subject: [PATCH v10 1/7] mmc: omap_hsmmc: use devm_regulator API
+Date: Mon, 13 Jan 2014 21:06:09 +0530
+Message-ID: <1389627375-9107-2-git-send-email-balajitk@ti.com>
 References: <1389279062-32291-1-git-send-email-balajitk@ti.com>
+ <1389627375-9107-1-git-send-email-balajitk@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from bear.ext.ti.com ([192.94.94.41]:40926 "EHLO bear.ext.ti.com"
+Received: from bear.ext.ti.com ([192.94.94.41]:40945 "EHLO bear.ext.ti.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751289AbaAMPg3 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 13 Jan 2014 10:36:29 -0500
-In-Reply-To: <1389279062-32291-1-git-send-email-balajitk@ti.com>
+	id S1751534AbaAMPgf (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 13 Jan 2014 10:36:35 -0500
+In-Reply-To: <1389627375-9107-1-git-send-email-balajitk@ti.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-omap@vger.kernel.org, bcousson@baylibre.com, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, chris@printf.net, broonie@kernel.org, tony@atomide.com
 Cc: Balaji T K <balajitk@ti.com>
 
-Few cleanups to reduce code indent,
-Add pbias_regulator support and adapt omap_hsmmc to use pbias regulator
-to configure required voltage on mmc1 pad(SD card) i/o rails on OMAP SoCs.
+Use devm_regulator API, while at it use
+devm_regulator_get_optional for optional vmmc_aux supply
 
-Balaji T K (7):
-  mmc: omap_hsmmc: use devm_regulator API
-  mmc: omap_hsmmc: handle vcc and vcc_aux independently
-  regulator: add pbias regulator support
-  mmc: omap_hsmmc: adapt hsmmc to use pbias regulator
-  ARM: dts: add pbias dt node
-  ARM: OMAP: enable SYSCON and REGULATOR_PBIAS in omap2plus_defconfig
-  mmc: omap_hsmmc: remove pbias workaround
+Signed-off-by: Balaji T K <balajitk@ti.com>
+Acked-by: Tony Lindgren <tony@atomide.com>
+---
+ drivers/mmc/host/omap_hsmmc.c |    6 ++----
+ 1 files changed, 2 insertions(+), 4 deletions(-)
 
- .../bindings/regulator/pbias-regulator.txt         |   27 ++
- arch/arm/boot/dts/dra7.dtsi                        |   17 ++
- arch/arm/boot/dts/omap2430.dtsi                    |   17 ++
- arch/arm/boot/dts/omap3.dtsi                       |   17 ++
- arch/arm/boot/dts/omap4.dtsi                       |   17 ++
- arch/arm/boot/dts/omap5.dtsi                       |   17 ++
- arch/arm/configs/omap2plus_defconfig               |    2 +
- drivers/mmc/host/omap_hsmmc.c                      |  111 +++++----
- drivers/regulator/Kconfig                          |    9 +
- drivers/regulator/Makefile                         |    1 +
- drivers/regulator/pbias-regulator.c                |  255 ++++++++++++++++++++
- 11 files changed, 441 insertions(+), 49 deletions(-)
- create mode 100644 Documentation/devicetree/bindings/regulator/pbias-regulator.txt
- create mode 100644 drivers/regulator/pbias-regulator.c
-
+diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+index dbd32ad..1eb4350 100644
+--- a/drivers/mmc/host/omap_hsmmc.c
++++ b/drivers/mmc/host/omap_hsmmc.c
+@@ -316,7 +316,7 @@ static int omap_hsmmc_reg_get(struct omap_hsmmc_host *host)
+ 	struct regulator *reg;
+ 	int ocr_value = 0;
+ 
+-	reg = regulator_get(host->dev, "vmmc");
++	reg = devm_regulator_get(host->dev, "vmmc");
+ 	if (IS_ERR(reg)) {
+ 		dev_err(host->dev, "vmmc regulator missing\n");
+ 		return PTR_ERR(reg);
+@@ -336,7 +336,7 @@ static int omap_hsmmc_reg_get(struct omap_hsmmc_host *host)
+ 		}
+ 
+ 		/* Allow an aux regulator */
+-		reg = regulator_get(host->dev, "vmmc_aux");
++		reg = devm_regulator_get_optional(host->dev, "vmmc_aux");
+ 		host->vcc_aux = IS_ERR(reg) ? NULL : reg;
+ 
+ 		/* For eMMC do not power off when not in sleep state */
+@@ -366,8 +366,6 @@ static int omap_hsmmc_reg_get(struct omap_hsmmc_host *host)
+ 
+ static void omap_hsmmc_reg_put(struct omap_hsmmc_host *host)
+ {
+-	regulator_put(host->vcc);
+-	regulator_put(host->vcc_aux);
+ 	mmc_slot(host).set_power = NULL;
+ }
+ 
 -- 
 1.7.5.4
 
