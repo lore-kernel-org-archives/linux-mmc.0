@@ -1,95 +1,146 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2 0/5] mmc: sdhci: a few fixes on timeout and max_discard_to
-Date: Mon, 13 Jan 2014 14:01:56 +0100
-Message-ID: <CAPDyKFo1qe5tbCRvXtAV=nc9Bg6=ajWosnQudXvixw5134wscw@mail.gmail.com>
-References: <1387268191-19859-1-git-send-email-b29396@freescale.com>
+From: Balaji T K <balajitk@ti.com>
+Subject: Re: [PATCH v9 4/7] mmc: omap_hsmmc: adapt hsmmc to use pbias regulator
+Date: Mon, 13 Jan 2014 18:59:09 +0530
+Message-ID: <52D3EA25.5020508@ti.com>
+References: <1389279062-32291-1-git-send-email-balajitk@ti.com> <1389375049-5248-1-git-send-email-balajitk@ti.com> <1389375049-5248-5-git-send-email-balajitk@ti.com> <CAOf5uwkVsPA4_kuf4G0JBB9ewb1=HGD5vGMr9pttKuWmAzF1VQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qa0-f53.google.com ([209.85.216.53]:50164 "EHLO
-	mail-qa0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751280AbaAMNB5 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 13 Jan 2014 08:01:57 -0500
-Received: by mail-qa0-f53.google.com with SMTP id cm18so5726799qab.40
-        for <linux-mmc@vger.kernel.org>; Mon, 13 Jan 2014 05:01:56 -0800 (PST)
-In-Reply-To: <1387268191-19859-1-git-send-email-b29396@freescale.com>
+Received: from arroyo.ext.ti.com ([192.94.94.40]:55740 "EHLO arroyo.ext.ti.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751629AbaAMN3l (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 13 Jan 2014 08:29:41 -0500
+In-Reply-To: <CAOf5uwkVsPA4_kuf4G0JBB9ewb1=HGD5vGMr9pttKuWmAzF1VQ@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Dong Aisheng <b29396@freescale.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Chris Ball <cjb@laptop.org>, Shawn Guo <shawn.guo@linaro.org>, Sascha Hauer <s.hauer@pengutronix.de>, Adrian Hunter <adrian.hunter@intel.com>, Vladimir Zapolskiy <vladimir_zapolskiy@mentor.com>, ed.sutter@alcatel-lucent.com
+To: Michael Trimarchi <michael@amarulasolutions.com>
+Cc: Linux OMAP Mailing List <linux-omap@vger.kernel.org>, Benoit Cousson <bcousson@baylibre.com>, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, chris@printf.net, Mark Brown <broonie@kernel.org>, Tony Lindgren <tony@atomide.com>, mark.rutland@arm.com
 
-On 17 December 2013 09:16, Dong Aisheng <b29396@freescale.com> wrote:
-> Patch 1~4 mainly fixes the issue that the max timeout counter for uSDHC is
-> 1 << 28 rather than 1 << 27. 1~2 fix getting the max timeout counter
-> while 3~4 fix setting the max timeout.
-> Thus it introduces two new platform hook: get_max_timeout_count and set_timeout
-> for those platform which have different timeout setting.
+On Friday 10 January 2014 11:51 PM, Michael Trimarchi wrote:
+> Hi
 >
-> This issue is firstly reported here by Ed Sutter:
-> http://www.spinics.net/lists/linux-mmc/msg23375.html
-> The root cause is the max_discard_to got from uSDHC is too small, only 677ms,
-> which cause the max_discard_bytes for eMMC is only 512, then the discard operation
-> of mkfs.ext3 for an eMMC card is too slow, just like dead.
-> With above patches, the issue can be fixed.
+> On Fri, Jan 10, 2014 at 6:30 PM, Balaji T K <balajitk@ti.com> wrote:
+>> In DT case, PBAIS registers are programmed via regulator,
+>> use regulator APIs to control PBIAS.
+>>
+>> Signed-off-by: Balaji T K <balajitk@ti.com>
+>> ---
+>>   drivers/mmc/host/omap_hsmmc.c |   39 +++++++++++++++++++++++++++++++++++++++
+>>   1 files changed, 39 insertions(+), 0 deletions(-)
+>>
+>> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+>> index 342be25..0a390f8 100644
+>> --- a/drivers/mmc/host/omap_hsmmc.c
+>> +++ b/drivers/mmc/host/omap_hsmmc.c
+>> @@ -126,6 +126,10 @@
+>>   #define OMAP_MMC_MAX_CLOCK     52000000
+>>   #define DRIVER_NAME            "omap_hsmmc"
+>>
+>> +#define VDD_1V8                        1800000         /* 180000 uV */
+>> +#define VDD_3V0                        3000000         /* 300000 uV */
+>> +#define VDD_165_195            (ffs(MMC_VDD_165_195) - 1)
+>> +
+>>   /*
+>>    * One controller can have multiple slots, like on some omap boards using
+>>    * omap.c controller driver. Luckily this is not currently done on any known
+>> @@ -164,6 +168,8 @@ struct omap_hsmmc_host {
+>>           */
+>>          struct  regulator       *vcc;
+>>          struct  regulator       *vcc_aux;
+>> +       struct  regulator       *pbias;
+>> +       bool                    pbias_enabled;
+>>          int                     pbias_disable;
+>>          void    __iomem         *base;
+>>          resource_size_t         mapbase;
+>> @@ -272,6 +278,15 @@ static int omap_hsmmc_set_power(struct device *dev, int slot, int power_on,
+>>          if (mmc_slot(host).before_set_reg)
+>>                  mmc_slot(host).before_set_reg(dev, slot, power_on, vdd);
+>>
+>> +       if (host->pbias) {
+>> +               if (host->pbias_enabled == 1) {
+>> +                       ret = regulator_disable(host->pbias);
+>> +                       if (!ret)
+>> +                               host->pbias_enabled = 0;
+>> +               }
+>> +               regulator_set_voltage(host->pbias, VDD_3V0, VDD_3V0);
+>> +       }
+>> +
+>>          /*
+>>           * Assume Vcc regulator is used only to power the card ... OMAP
+>>           * VDDS is used to power the pins, optionally with a transceiver to
+>> @@ -306,9 +321,29 @@ static int omap_hsmmc_set_power(struct device *dev, int slot, int power_on,
+>>                  }
+>>          }
+>>
+>> +       if (host->pbias) {
+>> +               if (vdd <= VDD_165_195)
+>> +                       ret = regulator_set_voltage(host->pbias, VDD_1V8,
+>> +                                                               VDD_1V8);
+>> +               else
+>> +                       ret = regulator_set_voltage(host->pbias, VDD_3V0,
+>> +                                                               VDD_3V0);
+>> +               if (ret < 0)
+>> +                       goto error_set_power;
+>> +
+>> +               if (host->pbias_enabled == 0) {
+>> +                       ret = regulator_enable(host->pbias);
+>> +                       if (!ret) {
+>> +                               host->pbias_enabled = 1;
+>> +                               goto error_set_power;
 >
-> Patch 5 adds the capability to calcalute the max_discard_to dynamically
-> for SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK.
->
-> Originally the max_discard_to for a high speed sdhc card may be:
-> mmc1: new high speed SDHC card at address aaaa
-> mmc1: calculated max. discard sectors 49152 for timeout 1355 ms
-> After fix:
-> mmc1: new high speed SDHC card at address aaaa
-> mmc1: calculated max. discard sectors 712704 for timeout 5422 ms
->
-> It also improves the card discard performance a lot due to max_discard_sectors
-> increase a lot.
->
-> There's also discussion about remove max_discard_to limit here:
-> http://www.spinics.net/lists/linux-mmc/msg23395.html
-> But it does not help for uSDHC since we can observe data timeout
-> on a Toshiba SD3.0 cards if we do not disable data timeout interrupt.
+> why you a goto to error_set_power if the regulator enable was a succes?
+Hi,
 
-Just some more input to this discussion.
+My bad
+yes, goto error_set_power is not needed when regulator got enabled.
+will remove it.
 
-As you probably know, I am working on a solution which in principle
-means we will fall back to use R1 responses instead of R1B.
-Particularly in those cases were the host driver supports
-MMC_CAP_WAIT_WHILE_BUSY and when it can't support the requested busy
-detection timeout. In other words, we will fall back to use poll with
-CMD13 instead, which is what happens already for those not supporting
-MMC_CAP_WAIT_WHILE_BUSY.
 
-Kind regards
-Ulf Hansson
+> and if pbias_enabled is used for verify if is already enabled. Is the
+> same to use
+> regulator_is_enabled?
+>
 
+pbias_enabled is used to verify if it already enabled or not
+and it is used to balance regulator_enable/disable.
+
+> Michael
 >
-> ChangeLog:
-> v1->v2:
->  1. change .get_max_timeout to .get_max_timeout_count to reuse some code
->  2. some other minor changes based on Shawn's comment.
->  3. patch 6 in v1 is dropped since not need anymore after change 1
->
->
->
-> Dong Aisheng (5):
->   mmc: sdhci: add platfrom get_max_timeout_count hook
->   mmc: sdhci-esdhc-imx: fix incorrect max_discard_to for uSDHC
->   mmc: sdhci: add platform set_timeout hook
->   mmc: sdhci-esdhc-imx: set the correct max timeout value for uSDHC
->   mmc: sdhci: calculate max_discard_to dynamically for
->     SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK
->
->  drivers/mmc/host/sdhci-esdhc-imx.c |   20 +++++++++++
->  drivers/mmc/host/sdhci.c           |   66 +++++++++++++++++++++++------------
->  drivers/mmc/host/sdhci.h           |    3 ++
->  3 files changed, 66 insertions(+), 23 deletions(-)
->
-> --
-> 1.7.2.rc3
->
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>> +                       }
+>> +               }
+>> +       }
+>> +
+>>          if (mmc_slot(host).after_set_reg)
+>>                  mmc_slot(host).after_set_reg(dev, slot, power_on, vdd);
+>>
+>> +error_set_power:
+>>          return ret;
+>>   }
+>>
+>> @@ -342,6 +377,9 @@ static int omap_hsmmc_reg_get(struct omap_hsmmc_host *host)
+>>          reg = devm_regulator_get_optional(host->dev, "vmmc_aux");
+>>          host->vcc_aux = IS_ERR(reg) ? NULL : reg;
+>>
+>> +       reg = devm_regulator_get_optional(host->dev, "pbias");
+>> +       host->pbias = IS_ERR(reg) ? NULL : reg;
+>> +
+>>          /* For eMMC do not power off when not in sleep state */
+>>          if (mmc_slot(host).no_regulator_off_init)
+>>                  return 0;
+>> @@ -1808,6 +1846,7 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
+>>          host->base      = ioremap(host->mapbase, SZ_4K);
+>>          host->power_mode = MMC_POWER_OFF;
+>>          host->next_data.cookie = 1;
+>> +       host->pbias_enabled = 0;
+>>
+>>          platform_set_drvdata(pdev, host);
+>>
+>> --
+>> 1.7.5.4
+>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe linux-omap" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
