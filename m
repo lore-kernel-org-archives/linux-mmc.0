@@ -1,21 +1,22 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH V2 mmc: sdhci-pci: Fix BYT sd card getting stuck in runtime
+Subject: [PATCH V3] mmc: sdhci-pci: Fix BYT sd card getting stuck in runtime
  suspend
-Date: Mon, 13 Jan 2014 09:32:20 +0200
-Message-ID: <52D39684.2020608@intel.com>
-References: <1386764492-26444-1-git-send-email-adrian.hunter@intel.com>
+Date: Mon, 13 Jan 2014 09:49:16 +0200
+Message-ID: <52D39A7C.4070002@intel.com>
+References: <1386764492-26444-1-git-send-email-adrian.hunter@intel.com> <52D39684.2020608@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga03.intel.com ([143.182.124.21]:22327 "EHLO mga03.intel.com"
+Received: from mga11.intel.com ([192.55.52.93]:52127 "EHLO mga11.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751370AbaAMHbK (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 13 Jan 2014 02:31:10 -0500
-In-Reply-To: <1386764492-26444-1-git-send-email-adrian.hunter@intel.com>
+	id S1750771AbaAMHsG (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 13 Jan 2014 02:48:06 -0500
+In-Reply-To: <52D39684.2020608@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-Cc: Chris Ball <cjb@laptop.org>, linux-mmc <linux-mmc@vger.kernel.org>
+To: Chris Ball <cjb@laptop.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>
 
 A host controller for a SD card may need a GPIO
 for card detect in order to wake up from runtime
@@ -29,15 +30,21 @@ This affects BYT sd card host controller which had
 runtime PM enabled from v3.11.  For completeness,
 the MFD sd card host controller is flagged also.
 
-Tested on v3.11.10 and v3.12.4 although the patch
-applies with some offsets and fuzz.
+The original patch before rebasing (see link below)
+was tested on v3.11.10 and v3.12.4 although the
+patch applied with some offsets and fuzz.  The
+original patch is here:
+
+    http://marc.info/?l=linux-mmc&m=138676702327057) was tested on v3.11.10 and v3.12.4
 
 Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
-Cc: stable <stable@vger.kernel.org> # 3.11+
 ---
 
-V2: Rebased
+V3: Update comments to reflect that the original patch
+applies to stable trees whereas the rebased patch does
+not.
 
+V2: Rebased
 
  drivers/mmc/host/sdhci-pci.c | 10 ++++++++++
  drivers/mmc/host/sdhci-pci.h |  1 +
