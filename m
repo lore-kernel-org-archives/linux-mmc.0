@@ -1,7 +1,7 @@
 From: Balaji T K <balajitk@ti.com>
-Subject: [PATCH v10 2/7] mmc: omap_hsmmc: handle vcc and vcc_aux independently
-Date: Mon, 13 Jan 2014 21:06:10 +0530
-Message-ID: <1389627375-9107-3-git-send-email-balajitk@ti.com>
+Subject: [PATCH v10 4/7] mmc: omap_hsmmc: adapt hsmmc to use pbias regulator
+Date: Mon, 13 Jan 2014 21:06:12 +0530
+Message-ID: <1389627375-9107-5-git-send-email-balajitk@ti.com>
 References: <1389279062-32291-1-git-send-email-balajitk@ti.com>
  <1389627375-9107-1-git-send-email-balajitk@ti.com>
 Mime-Version: 1.0
@@ -13,104 +13,100 @@ To: linux-omap@vger.kernel.org, bcousson@baylibre.com, devicetree@vger.kernel.or
 Cc: Balaji T K <balajitk@ti.com>
 List-Id: linux-mmc@vger.kernel.org
 
-handle vcc and vcc_aux independently to reduce indent.
+In DT case, PBAIS registers are programmed via regulator,
+use regulator APIs to control PBIAS.
 
 Signed-off-by: Balaji T K <balajitk@ti.com>
-Acked-by: Tony Lindgren <tony@atomide.com>
 ---
- drivers/mmc/host/omap_hsmmc.c |   54 +++++++++++++++++++----------------------
- 1 files changed, 25 insertions(+), 29 deletions(-)
+ drivers/mmc/host/omap_hsmmc.c |   37 +++++++++++++++++++++++++++++++++++++
+ 1 files changed, 37 insertions(+), 0 deletions(-)
 
 diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index 1eb4350..342be25 100644
+index 342be25..2287bda 100644
 --- a/drivers/mmc/host/omap_hsmmc.c
 +++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -286,11 +286,12 @@ static int omap_hsmmc_set_power(struct device *dev, int slot, int power_on,
- 	 * chips/cards need an interface voltage rail too.
+@@ -126,6 +126,10 @@
+ #define OMAP_MMC_MAX_CLOCK	52000000
+ #define DRIVER_NAME		"omap_hsmmc"
+ 
++#define VDD_1V8			1800000		/* 180000 uV */
++#define VDD_3V0			3000000		/* 300000 uV */
++#define VDD_165_195		(ffs(MMC_VDD_165_195) - 1)
++
+ /*
+  * One controller can have multiple slots, like on some omap boards using
+  * omap.c controller driver. Luckily this is not currently done on any known
+@@ -164,6 +168,8 @@ struct omap_hsmmc_host {
  	 */
- 	if (power_on) {
--		ret = mmc_regulator_set_ocr(host->mmc, host->vcc, vdd);
-+		if (host->vcc)
-+			ret = mmc_regulator_set_ocr(host->mmc, host->vcc, vdd);
- 		/* Enable interface voltage rail, if needed */
- 		if (ret == 0 && host->vcc_aux) {
- 			ret = regulator_enable(host->vcc_aux);
--			if (ret < 0)
-+			if (ret < 0 && host->vcc)
- 				ret = mmc_regulator_set_ocr(host->mmc,
- 							host->vcc, 0);
- 		}
-@@ -298,7 +299,7 @@ static int omap_hsmmc_set_power(struct device *dev, int slot, int power_on,
- 		/* Shut down the rail */
- 		if (host->vcc_aux)
- 			ret = regulator_disable(host->vcc_aux);
--		if (!ret) {
-+		if (host->vcc) {
- 			/* Then proceed to shut down the local regulator */
- 			ret = mmc_regulator_set_ocr(host->mmc,
- 						host->vcc, 0);
-@@ -318,10 +319,10 @@ static int omap_hsmmc_reg_get(struct omap_hsmmc_host *host)
+ 	struct	regulator	*vcc;
+ 	struct	regulator	*vcc_aux;
++	struct	regulator	*pbias;
++	bool			pbias_enabled;
+ 	int			pbias_disable;
+ 	void	__iomem		*base;
+ 	resource_size_t		mapbase;
+@@ -272,6 +278,15 @@ static int omap_hsmmc_set_power(struct device *dev, int slot, int power_on,
+ 	if (mmc_slot(host).before_set_reg)
+ 		mmc_slot(host).before_set_reg(dev, slot, power_on, vdd);
  
- 	reg = devm_regulator_get(host->dev, "vmmc");
- 	if (IS_ERR(reg)) {
--		dev_err(host->dev, "vmmc regulator missing\n");
-+		dev_err(host->dev, "unable to get vmmc regulator %ld\n",
-+			PTR_ERR(reg));
- 		return PTR_ERR(reg);
- 	} else {
--		mmc_slot(host).set_power = omap_hsmmc_set_power;
- 		host->vcc = reg;
- 		ocr_value = mmc_regulator_get_ocrmask(reg);
- 		if (!mmc_slot(host).ocr_mask) {
-@@ -334,31 +335,26 @@ static int omap_hsmmc_reg_get(struct omap_hsmmc_host *host)
- 				return -EINVAL;
- 			}
- 		}
++	if (host->pbias) {
++		if (host->pbias_enabled == 1) {
++			ret = regulator_disable(host->pbias);
++			if (!ret)
++				host->pbias_enabled = 0;
++		}
++		regulator_set_voltage(host->pbias, VDD_3V0, VDD_3V0);
 +	}
-+	mmc_slot(host).set_power = omap_hsmmc_set_power;
- 
--		/* Allow an aux regulator */
--		reg = devm_regulator_get_optional(host->dev, "vmmc_aux");
--		host->vcc_aux = IS_ERR(reg) ? NULL : reg;
-+	/* Allow an aux regulator */
-+	reg = devm_regulator_get_optional(host->dev, "vmmc_aux");
-+	host->vcc_aux = IS_ERR(reg) ? NULL : reg;
- 
--		/* For eMMC do not power off when not in sleep state */
--		if (mmc_slot(host).no_regulator_off_init)
--			return 0;
--		/*
--		* UGLY HACK:  workaround regulator framework bugs.
--		* When the bootloader leaves a supply active, it's
--		* initialized with zero usecount ... and we can't
--		* disable it without first enabling it.  Until the
--		* framework is fixed, we need a workaround like this
--		* (which is safe for MMC, but not in general).
--		*/
--		if (regulator_is_enabled(host->vcc) > 0 ||
--		    (host->vcc_aux && regulator_is_enabled(host->vcc_aux))) {
--			int vdd = ffs(mmc_slot(host).ocr_mask) - 1;
-+	/* For eMMC do not power off when not in sleep state */
-+	if (mmc_slot(host).no_regulator_off_init)
-+		return 0;
-+	/*
-+	 * To disable boot_on regulator, enable regulator
-+	 * to increase usecount and then disable it.
-+	 */
-+	if ((host->vcc && regulator_is_enabled(host->vcc) > 0) ||
-+	    (host->vcc_aux && regulator_is_enabled(host->vcc_aux))) {
-+		int vdd = ffs(mmc_slot(host).ocr_mask) - 1;
- 
--			mmc_slot(host).set_power(host->dev, host->slot_id,
--						 1, vdd);
--			mmc_slot(host).set_power(host->dev, host->slot_id,
--						 0, 0);
--		}
-+		mmc_slot(host).set_power(host->dev, host->slot_id, 1, vdd);
-+		mmc_slot(host).set_power(host->dev, host->slot_id, 0, 0);
++
+ 	/*
+ 	 * Assume Vcc regulator is used only to power the card ... OMAP
+ 	 * VDDS is used to power the pins, optionally with a transceiver to
+@@ -306,9 +321,27 @@ static int omap_hsmmc_set_power(struct device *dev, int slot, int power_on,
+ 		}
  	}
  
- 	return 0;
++	if (host->pbias) {
++		if (vdd <= VDD_165_195)
++			ret = regulator_set_voltage(host->pbias, VDD_1V8,
++								VDD_1V8);
++		else
++			ret = regulator_set_voltage(host->pbias, VDD_3V0,
++								VDD_3V0);
++		if (ret < 0)
++			goto error_set_power;
++
++		if (host->pbias_enabled == 0) {
++			ret = regulator_enable(host->pbias);
++			if (!ret)
++				host->pbias_enabled = 1;
++		}
++	}
++
+ 	if (mmc_slot(host).after_set_reg)
+ 		mmc_slot(host).after_set_reg(dev, slot, power_on, vdd);
+ 
++error_set_power:
+ 	return ret;
+ }
+ 
+@@ -342,6 +375,9 @@ static int omap_hsmmc_reg_get(struct omap_hsmmc_host *host)
+ 	reg = devm_regulator_get_optional(host->dev, "vmmc_aux");
+ 	host->vcc_aux = IS_ERR(reg) ? NULL : reg;
+ 
++	reg = devm_regulator_get_optional(host->dev, "pbias");
++	host->pbias = IS_ERR(reg) ? NULL : reg;
++
+ 	/* For eMMC do not power off when not in sleep state */
+ 	if (mmc_slot(host).no_regulator_off_init)
+ 		return 0;
+@@ -1808,6 +1844,7 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
+ 	host->base	= ioremap(host->mapbase, SZ_4K);
+ 	host->power_mode = MMC_POWER_OFF;
+ 	host->next_data.cookie = 1;
++	host->pbias_enabled = 0;
+ 
+ 	platform_set_drvdata(pdev, host);
+ 
 -- 
 1.7.5.4
 
