@@ -1,206 +1,35 @@
-From: Balaji T K <balajitk@ti.com>
-Subject: [PATCH v10 5/7] ARM: dts: add pbias dt node
-Date: Mon, 13 Jan 2014 21:06:13 +0530
-Message-ID: <1389627375-9107-6-git-send-email-balajitk@ti.com>
-References: <1389279062-32291-1-git-send-email-balajitk@ti.com>
- <1389627375-9107-1-git-send-email-balajitk@ti.com>
+From: =?utf-8?B?U8O2cmVu?= Brinkmann <soren.brinkmann@xilinx.com>
+Subject: Re: [PATCH v3 1/2] mmc: arasan: Add driver for Arasan SDHCI
+Date: Mon, 13 Jan 2014 09:14:40 -0800
+Message-ID: <e2dfd9c0-ed36-4400-8dc4-58a14a318242@CO9EHSMHS006.ehs.local>
+References: <1386007357-11956-1-git-send-email-soren.brinkmann@xilinx.com>
+ <861u0ddqhj.fsf@void.printf.net>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-omap-owner@vger.kernel.org>
-In-Reply-To: <1389627375-9107-1-git-send-email-balajitk@ti.com>
-Sender: linux-omap-owner@vger.kernel.org
-To: linux-omap@vger.kernel.org, bcousson@baylibre.com, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, chris@printf.net, broonie@kernel.org, tony@atomide.com
-Cc: Balaji T K <balajitk@ti.com>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+Content-Disposition: inline
+In-Reply-To: <861u0ddqhj.fsf@void.printf.net>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Chris Ball <chris@printf.net>
+Cc: Mark Rutland <mark.rutland@arm.com>, devicetree@vger.kernel.org, Russell King <linux@arm.linux.org.uk>, linux-doc@vger.kernel.org, Pawel Moll <pawel.moll@arm.com>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Stephen Warren <swarren@wwwdotorg.org>, linux-mmc@vger.kernel.org, Michal Simek <michal.simek@xilinx.com>, Rob Herring <rob.herring@calxeda.com>, linux-kernel@vger.kernel.org, Rob Landley <rob@landley.net>, Grant Likely <grant.likely@linaro.org>, Tomasz Figa <tomasz.figa@gmail.com>, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-Add pbias regulator node as a child of system control
-module - syscon.
-
-Signed-off-by: Balaji T K <balajitk@ti.com>
-Acked-by: Tony Lindgren <tony@atomide.com>
----
- arch/arm/boot/dts/dra7.dtsi     |   17 +++++++++++++++++
- arch/arm/boot/dts/omap2430.dtsi |   17 +++++++++++++++++
- arch/arm/boot/dts/omap3.dtsi    |   17 +++++++++++++++++
- arch/arm/boot/dts/omap4.dtsi    |   17 +++++++++++++++++
- arch/arm/boot/dts/omap5.dtsi    |   17 +++++++++++++++++
- 5 files changed, 85 insertions(+), 0 deletions(-)
-
-diff --git a/arch/arm/boot/dts/dra7.dtsi b/arch/arm/boot/dts/dra7.dtsi
-index d0df4c4..876c9b8 100644
---- a/arch/arm/boot/dts/dra7.dtsi
-+++ b/arch/arm/boot/dts/dra7.dtsi
-@@ -110,6 +110,22 @@
- 			ti,hwmods = "counter_32k";
- 		};
- 
-+		dra7_ctrl_general: tisyscon@4a002e00 {
-+			compatible = "syscon", "simple-bus";
-+			reg = <0x4a002e00 0x7c>;
-+		};
-+
-+		pbias_regulator: pbias_regulator {
-+			compatible = "ti,pbias-omap";
-+			reg = <0 0x4>;
-+			syscon = <&dra7_ctrl_general>;
-+			pbias_mmc_reg: pbias_mmc_omap5 {
-+				regulator-name = "pbias_mmc_omap5";
-+				regulator-min-microvolt = <1800000>;
-+				regulator-max-microvolt = <3000000>;
-+			};
-+		};
-+
- 		dra7_pmx_core: pinmux@4a003400 {
- 			compatible = "pinctrl-single";
- 			reg = <0x4a003400 0x0464>;
-@@ -485,6 +501,7 @@
- 			dmas = <&sdma 61>, <&sdma 62>;
- 			dma-names = "tx", "rx";
- 			status = "disabled";
-+			pbias-supply = <&pbias_mmc_reg>;
- 		};
- 
- 		mmc2: mmc@480b4000 {
-diff --git a/arch/arm/boot/dts/omap2430.dtsi b/arch/arm/boot/dts/omap2430.dtsi
-index d624345..af71eb0 100644
---- a/arch/arm/boot/dts/omap2430.dtsi
-+++ b/arch/arm/boot/dts/omap2430.dtsi
-@@ -29,6 +29,22 @@
- 			pinctrl-single,function-mask = <0x3f>;
- 		};
- 
-+		omap2_scm_general: tisyscon@49002270 {
-+			compatible = "syscon", "simple-bus";
-+			reg = <0x49002270 0x240>;
-+		};
-+
-+		pbias_regulator: pbias_regulator {
-+			compatible = "ti,pbias-omap";
-+			reg = <0x230 0x4>;
-+			syscon = <&omap2_scm_general>;
-+			pbias_mmc_reg: pbias_mmc_omap2430 {
-+				regulator-name = "pbias_mmc_omap2430";
-+				regulator-min-microvolt = <1800000>;
-+				regulator-max-microvolt = <3000000>;
-+			};
-+		};
-+
- 		gpio1: gpio@4900c000 {
- 			compatible = "ti,omap2-gpio";
- 			reg = <0x4900c000 0x200>;
-@@ -183,6 +199,7 @@
- 			ti,dual-volt;
- 			dmas = <&sdma 61>, <&sdma 62>;
- 			dma-names = "tx", "rx";
-+			pbias-supply = <&pbias_mmc_reg>;
- 		};
- 
- 		mmc2: mmc@480b4000 {
-diff --git a/arch/arm/boot/dts/omap3.dtsi b/arch/arm/boot/dts/omap3.dtsi
-index daabf99..b7828da 100644
---- a/arch/arm/boot/dts/omap3.dtsi
-+++ b/arch/arm/boot/dts/omap3.dtsi
-@@ -137,6 +137,22 @@
- 			pinctrl-single,function-mask = <0xff1f>;
- 		};
- 
-+		omap3_scm_general: tisyscon@48002270 {
-+			compatible = "syscon", "simple-bus";
-+			reg = <0x48002270 0x2f0>;
-+		};
-+
-+		pbias_regulator: pbias_regulator {
-+			compatible = "ti,pbias-omap";
-+			reg = <0x2b0 0x4>;
-+			syscon = <&omap3_scm_general>;
-+			pbias_mmc_reg: pbias_mmc_omap2430 {
-+				regulator-name = "pbias_mmc_omap2430";
-+				regulator-min-microvolt = <1800000>;
-+				regulator-max-microvolt = <3000000>;
-+			};
-+		};
-+
- 		gpio1: gpio@48310000 {
- 			compatible = "ti,omap3-gpio";
- 			reg = <0x48310000 0x200>;
-@@ -351,6 +367,7 @@
- 			ti,dual-volt;
- 			dmas = <&sdma 61>, <&sdma 62>;
- 			dma-names = "tx", "rx";
-+			pbias-supply = <&pbias_mmc_reg>;
- 		};
- 
- 		mmc2: mmc@480b4000 {
-diff --git a/arch/arm/boot/dts/omap4.dtsi b/arch/arm/boot/dts/omap4.dtsi
-index a1e0585..9e19363 100644
---- a/arch/arm/boot/dts/omap4.dtsi
-+++ b/arch/arm/boot/dts/omap4.dtsi
-@@ -134,6 +134,22 @@
- 			pinctrl-single,function-mask = <0x7fff>;
- 		};
- 
-+		omap4_padconf_global: tisyscon@4a1005a0 {
-+			compatible = "syscon", "simple-bus";
-+			reg = <0x4a1005a0 0x170>;
-+		};
-+
-+		pbias_regulator: pbias_regulator {
-+			compatible = "ti,pbias-omap";
-+			reg = <0x60 0x4>;
-+			syscon = <&omap4_padconf_global>;
-+			pbias_mmc_reg: pbias_mmc_omap4 {
-+				regulator-name = "pbias_mmc_omap4";
-+				regulator-min-microvolt = <1800000>;
-+				regulator-max-microvolt = <3000000>;
-+			};
-+		};
-+
- 		sdma: dma-controller@4a056000 {
- 			compatible = "ti,omap4430-sdma";
- 			reg = <0x4a056000 0x1000>;
-@@ -367,6 +383,7 @@
- 			ti,needs-special-reset;
- 			dmas = <&sdma 61>, <&sdma 62>;
- 			dma-names = "tx", "rx";
-+			pbias-supply = <&pbias_mmc_reg>;
- 		};
- 
- 		mmc2: mmc@480b4000 {
-diff --git a/arch/arm/boot/dts/omap5.dtsi b/arch/arm/boot/dts/omap5.dtsi
-index fc3fad5..f178899 100644
---- a/arch/arm/boot/dts/omap5.dtsi
-+++ b/arch/arm/boot/dts/omap5.dtsi
-@@ -130,6 +130,22 @@
- 			pinctrl-single,function-mask = <0x7fff>;
- 		};
- 
-+		omap5_padconf_global: tisyscon@4a002da0 {
-+			compatible = "syscon";
-+			reg = <0x4A002da0 0xec>;
-+		};
-+
-+		pbias_regulator: pbias_regulator {
-+			compatible = "ti,pbias-omap";
-+			reg = <0x60 0x4>;
-+			syscon = <&omap5_padconf_global>;
-+			pbias_mmc_reg: pbias_mmc_omap5 {
-+				regulator-name = "pbias_mmc_omap5";
-+				regulator-min-microvolt = <1800000>;
-+				regulator-max-microvolt = <3000000>;
-+			};
-+		};
-+
- 		sdma: dma-controller@4a056000 {
- 			compatible = "ti,omap4430-sdma";
- 			reg = <0x4a056000 0x1000>;
-@@ -409,6 +425,7 @@
- 			ti,needs-special-reset;
- 			dmas = <&sdma 61>, <&sdma 62>;
- 			dma-names = "tx", "rx";
-+			pbias-supply = <&pbias_mmc_reg>;
- 		};
- 
- 		mmc2: mmc@480b4000 {
--- 
-1.7.5.4
-
+T24gU3VuLCBKYW4gMTIsIDIwMTQgYXQgMDY6MDY6MzJQTSArMDAwMCwgQ2hyaXMgQmFsbCB3cm90
+ZToKPiBIaSBTb3JlbiwKPiAKPiBPbiBNb24sIERlYyAwMiAyMDEzLCBTb3JlbiBCcmlua21hbm4g
+d3JvdGU6Cj4gPiBBZGQgYSBkcml2ZXIgZm9yIEFyYXNhbidzIFNESENJIGNvbnRyb2xsZXIgY29y
+ZS4KPiA+Cj4gPiBTaWduZWQtb2ZmLWJ5OiBTb3JlbiBCcmlua21hbm4gPHNvcmVuLmJyaW5rbWFu
+bkB4aWxpbnguY29tPgo+ID4gQWNrZWQtYnk6IFJvYiBIZXJyaW5nIDxyb2IuaGVycmluZ0BjYWx4
+ZWRhLmNvbT4gW2JpbmRpbmddCj4gCj4gVGhhbmtzLCBwdXNoZWQgcGF0Y2ggMS8yIHRvIG1tYy1u
+ZXh0IGZvciAzLjE0LgoKVGhhbmsgeW91LgoKCVPDtnJlbgoKCgpfX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fXwpsaW51eC1hcm0ta2VybmVsIG1haWxpbmcgbGlz
+dApsaW51eC1hcm0ta2VybmVsQGxpc3RzLmluZnJhZGVhZC5vcmcKaHR0cDovL2xpc3RzLmluZnJh
+ZGVhZC5vcmcvbWFpbG1hbi9saXN0aW5mby9saW51eC1hcm0ta2VybmVsCg==
