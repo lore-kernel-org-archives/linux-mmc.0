@@ -1,125 +1,78 @@
-From: Zhangfei Gao <zhangfei.gao@linaro.org>
-Subject: [PATCH 2/2] mmc: dw_mmc: k3: remove clk_table
-Date: Mon, 13 Jan 2014 17:14:29 +0800
-Message-ID: <1389604469-8064-3-git-send-email-zhangfei.gao@linaro.org>
-References: <1389604469-8064-1-git-send-email-zhangfei.gao@linaro.org>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pd0-f176.google.com ([209.85.192.176]:43721 "EHLO
-	mail-pd0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751362AbaAMJOt (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 13 Jan 2014 04:14:49 -0500
-Received: by mail-pd0-f176.google.com with SMTP id r10so3164741pdi.35
-        for <linux-mmc@vger.kernel.org>; Mon, 13 Jan 2014 01:14:48 -0800 (PST)
-In-Reply-To: <1389604469-8064-1-git-send-email-zhangfei.gao@linaro.org>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Philippe De Muyter <phdm@macq.eu>
+Subject: mmc patch needed for 3.13 [was Re: ARM,sdhci_esdhc_imx: INFO:
+	HARDIRQ-safe -> HARDIRQ-unsafe lock order detected]
+Date: Mon, 13 Jan 2014 10:25:43 +0100
+Message-ID: <20140113092543.GA7829@frolo.macqel>
+References: <20131212144925.GA14995@frolo.macqel> <20131213133430.GW18380@S2101-09.ap.freescale.net> <20131213221425.GA32189@frolo.macqel> <20131214121613.GA16177@S2101-09.ap.freescale.net> <20140107092253.GA364@frolo.macqel> <20140107090527.GA5973@shlinux2.ap.freescale.net>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <20140107090527.GA5973@shlinux2.ap.freescale.net>
+Sender: linux-kernel-owner@vger.kernel.org
+To: cjb@laptop.org, Shawn Guo <shawn.guo@linaro.org>
+Cc: linux-kernel@vger.kernel.org, Fabio Estevam <fabio.estevam@freescale.com>, Dong Aisheng <b29396@freescale.com>, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>, Arnd Bergmann <arnd@arndb.de>, Mike Turquette <mturquette@linaro.org>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, Haojian Zhuang <haojian.zhuang@linaro.org>, brooke.wangzhigang@huawei.com
-Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, patches@linaro.org, devicetree@vger.kernel.org, Zhangfei Gao <zhangfei.gao@linaro.org>
 
-Remove clk_table and directly use ios->clock as clock source rate.
-Abstract init clock rate and max clock limitation in clk.c
+Hi Chris & Shawn,
 
-Signed-off-by: Zhangfei Gao <zhangfei.gao@linaro.org>
----
- .../devicetree/bindings/mmc/k3-dw-mshc.txt         |   14 -------
- drivers/mmc/host/dw_mmc-k3.c                       |   41 +-------------------
- 2 files changed, 2 insertions(+), 53 deletions(-)
+The patch http://thread.gmane.org/gmane.linux.kernel.mmc/24371, that fixes
+a bug introduced in 3.13-rc1, is not in 3.13-rc8.  Any chance to get it in
+3.13 final ?
 
-diff --git a/Documentation/devicetree/bindings/mmc/k3-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/k3-dw-mshc.txt
-index d7e2d7f159bb..b8653ea97957 100644
---- a/Documentation/devicetree/bindings/mmc/k3-dw-mshc.txt
-+++ b/Documentation/devicetree/bindings/mmc/k3-dw-mshc.txt
-@@ -14,18 +14,6 @@ Required Properties:
- * compatible: should be one of the following.
-   - "hisilicon,hi4511-dw-mshc": for controllers with hi4511 specific extentions.
- 
--* clock-freq-table: should be the frequency (in Hz) array of the ciu clock
--	in each	supported mode.
--	0. CIU clock rate in Hz for DS mode
--	1. CIU clock rate in Hz for MMC HS mode
--	2. CIU clock rate in Hz for SD HS mode
--	3. CIU clock rate in Hz for SDR12 mode
--	4. CIU clock rate in Hz for SDR25 mode
--	5. CIU clock rate in Hz for SDR50 mode
--	6. CIU clock rate in Hz for SDR104 mode
--	7. CIU clock rate in Hz for DDR50 mode
--	8. CIU clock rate in Hz for HS200 mode
--
- Example:
- 
- 	/* for Hi3620 */
-@@ -39,8 +27,6 @@ Example:
- 		#size-cells = <0>;
- 		clocks = <&mmc_clock HI3620_SD_CIUCLK>, <&clock HI3620_DDRC_PER_CLK>;
- 		clock-names = "ciu", "biu";
--		clock-freq-table =
--		<25000000 0 50000000 25000000 50000000 100000000 0 50000000>;
- 	};
- 
- 	/* Board portion */
-diff --git a/drivers/mmc/host/dw_mmc-k3.c b/drivers/mmc/host/dw_mmc-k3.c
-index 68e5e428e8f6..84e1a670f8c7 100644
---- a/drivers/mmc/host/dw_mmc-k3.c
-+++ b/drivers/mmc/host/dw_mmc-k3.c
-@@ -18,56 +18,19 @@
- #include "dw_mmc.h"
- #include "dw_mmc-pltfm.h"
- 
--#define MAX_NUMS	10
--struct dw_mci_k3_priv_data {
--	u32	clk_table[MAX_NUMS];
--};
--
- static void dw_mci_k3_set_ios(struct dw_mci *host, struct mmc_ios *ios)
- {
--	struct dw_mci_k3_priv_data *priv = host->priv;
--	u32 rate = priv->clk_table[ios->timing];
- 	int ret;
- 
--	if (!rate) {
--		dev_warn(host->dev,
--			"no specified rate in timing %u\n", ios->timing);
--		return;
--	}
--
--	ret = clk_set_rate(host->ciu_clk, rate);
-+	ret = clk_set_rate(host->ciu_clk, ios->clock);
- 	if (ret)
--		dev_warn(host->dev, "failed to set clock rate %uHz\n", rate);
-+		dev_warn(host->dev, "failed to set rate %uHz\n", ios->clock);
- 
- 	host->bus_hz = clk_get_rate(host->ciu_clk);
- }
- 
--static int dw_mci_k3_parse_dt(struct dw_mci *host)
--{
--	struct dw_mci_k3_priv_data *priv;
--	struct device_node *node = host->dev->of_node;
--	struct property *prop;
--	const __be32 *cur;
--	u32 val, num = 0;
--
--	priv = devm_kzalloc(host->dev, sizeof(*priv), GFP_KERNEL);
--	if (!priv) {
--		dev_err(host->dev, "mem alloc failed for private data\n");
--		return -ENOMEM;
--	}
--	host->priv = priv;
--
--	of_property_for_each_u32(node, "clock-freq-table", prop, cur, val) {
--		if (num >= MAX_NUMS)
--			break;
--		priv->clk_table[num++] = val;
--	}
--	return 0;
--}
--
- static const struct dw_mci_drv_data k3_drv_data = {
- 	.set_ios		= dw_mci_k3_set_ios,
--	.parse_dt		= dw_mci_k3_parse_dt,
- };
- 
- static const struct of_device_id dw_mci_k3_match[] = {
+Tested-by: Philippe De Muyter <phdm@macqel.be>
+
+TIA
+
+Philippe
+
+On Tue, Jan 07, 2014 at 05:05:29PM +0800, Dong Aisheng wrote:
+> On Tue, Jan 07, 2014 at 10:22:54AM +0100, Philippe De Muyter wrote:
+> > Hi Shawn & Dong,
+> > 
+> > On Sat, Dec 14, 2013 at 08:16:15PM +0800, Shawn Guo wrote:
+> > > On Fri, Dec 13, 2013 at 11:14:25PM +0100, Philippe De Muyter wrote:
+> > > > Hi Shawn,
+> > > > 
+> > > > On Fri, Dec 13, 2013 at 09:34:32PM +0800, Shawn Guo wrote:
+> > > > > Hi Philippe,
+> > > > > 
+> > > > > On Thu, Dec 12, 2013 at 03:49:25PM +0100, Philippe De Muyter wrote:
+> > > > > > Hello,
+> > > > > > 
+> > > > > > I have just booted 3.13-rc3 on my i.MX6DL board, done nothing but watch
+> > > > > > it start, and I have got this!
+> > > > > 
+> > > > > There is a patch [1] from Fabio for this issue.
+> > > > > 
+> > > > > Shawn
+> > > > > 
+> > > > > [1] http://thread.gmane.org/gmane.linux.kernel.mmc/23786
+> > > > > 
+> > > > > > ======================================================
+> > > > > > [ INFO: HARDIRQ-safe -> HARDIRQ-unsafe lock order detected ]
+> > > > ...
+> > > > 
+> > > > Thanks.  That fixed the problem.  Will that go to 3.13 final ?
+> > > 
+> > > That's a question for Chris.
+> > 
+> > It seems that it has now been superseded by http://thread.gmane.org/gmane.linux.kernel.mmc/24371
+> > 
+> > Will those ones go in 3.13-rc8 and final ?
+> > 
+> 
+> I think patch 1 in that series is better to go in 3.13 final since the issue exists
+> since 3.13 rc1.
+> 
+> Patch 2 in that series is the fix for sdhci-esdhc-imx runtime pm which is
+> newly added in chris/mmc-next and seems target for 3.14.
+> 
+> Chris,
+> Can we make it?
+> 
+> Regards
+> Dong Aisheng
+
 -- 
-1.7.9.5
-
+Philippe De Muyter +32 2 6101532 Macq SA rue de l'Aeronef 2 B-1140 Bruxelles
