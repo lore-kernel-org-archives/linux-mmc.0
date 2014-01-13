@@ -1,205 +1,64 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCHv4] mmc: dw_mmc: Enable the hold reg for certain speed modes
-Date: Mon, 13 Jan 2014 15:27:16 +0900
-Message-ID: <52D38744.6070702@samsung.com>
-References: <1387213279-22020-1-git-send-email-dinguyen@altera.com>
- <52B00737.6050701@linaro.org> <52B059A1.1000306@gmail.com>
- <52B065B2.6010703@linaro.org> <52BB9B21.7010101@samsung.com>
- <52BC66C1.9070501@gmail.com> <1389140338.26863.2.camel@linux-builds1>
- <52CC9DC7.8000400@samsung.com> <52CD5CE4.7050108@gmail.com>
- <52CE1A74.4090005@samsung.com> <1389284159.13556.25.camel@linux-builds1>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH] mmc: sdhci: Allow for long command timeouts
+Date: Mon, 13 Jan 2014 09:06:01 +0200
+Message-ID: <52D39059.5080504@intel.com>
+References: <1384416980-15850-1-git-send-email-adrian.hunter@intel.com> <52AAE541.6090606@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout4.samsung.com ([203.254.224.34]:52791 "EHLO
-	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750792AbaAMG1G (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 13 Jan 2014 01:27:06 -0500
-Received: from epcpsbgr4.samsung.com
- (u144.gpu120.samsung.co.kr [203.254.230.144])
- by mailout4.samsung.com (Oracle Communications Messaging Server 7u4-24.01
- (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTP id <0MZB00MKUTX0TV00@mailout4.samsung.com> for
- linux-mmc@vger.kernel.org; Mon, 13 Jan 2014 15:27:00 +0900 (KST)
-In-reply-to: <1389284159.13556.25.camel@linux-builds1>
+Received: from mga03.intel.com ([143.182.124.21]:21917 "EHLO mga03.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751020AbaAMHFF (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 13 Jan 2014 02:05:05 -0500
+In-Reply-To: <52AAE541.6090606@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Dinh Nguyen <dinguyen@altera.com>
-Cc: Dinh Nguyen <dinh.linux@gmail.com>, zhangfei <zhangfei.gao@linaro.org>, arnd@arndb.de, cjb@laptop.org, tgih.jun@samsung.com, heiko@sntech.de, dianders@chromium.org, alim.akhtar@samsung.com, bzhao@marvell.com, linux-mmc@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org
 
-Hi Dinh,
+Ping?
 
-On 01/10/2014 01:15 AM, Dinh Nguyen wrote:
-> On Thu, 2014-01-09 at 12:41 +0900, Jaehoon Chung wrote:
->> Dear, Dinh
+
+On 13/12/13 12:45, Adrian Hunter wrote:
+> Hi Chris
+> 
+> What about this one?
+> 
+> Regards
+> Adrian
+> 
+> On 14/11/13 10:16, Adrian Hunter wrote:
+>> The driver has a timer with a 10 second
+>> timeout to catch devices that stop responding.
+>> However it is possible for commands to take
+>> even longer than that.  Change the timer
+>> timeout to reflect the command timeout.
 >>
->> On 01/08/2014 11:12 PM, Dinh Nguyen wrote:
->>>
->>> On 1/7/14 6:37 PM, Jaehoon Chung wrote:
->>>> Hi, Dinh.
->>>>
->>>> Sorry for replying too late.
->>>>
->>>> ..[snip]..
->>>>>>>>>>> +    sdr_timing[1] = ddr_timing[1] = 1;
->>>>>>>>>>> +    of_property_read_u32_array(np,
->>>>>>>>>>> +            "samsung,dw-mshc-sdr-timing", sdr_timing, 2);
->>>>>>>>>>> +
->>>>>>>>>>> +    of_property_read_u32_array(np,
->>>>>>>>>>> +            "samsung,dw-mshc-ddr-timing", ddr_timing, 2);
->>>>>>>>>>> +
->>>>>>>>>>> +    pdata->cclk_in_drv = 1;
->>>>>>>>>>> +    if ((sdr_timing[1] == 0) || (ddr_timing[1] == 0))
->>>>>>>>>>> +        pdata->cclk_in_drv = 0;
->>>>>>>>>>> +
->>>>>>>>>> Have some concern about whether it is suitable putting "samsung,~"
->>>>>>>>>> property in dw_mmc.c, is it supposed to be platform related?
->>>>>>>>>> Any conflict with drivers/mmc/host/dw_mmc-exynos.c?
->>>>>>>>>> If they are really commonly used, how about change name and define in
->>>>>>>>>> Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt?
->>>>>>>>> I had submitted a patch to make this a common binding before:
->>>>>>>>>
->>>>>>>>> http://www.spinics.net/lists/devicetree/msg00638.html
->>>>>>>>>
->>>>>>>>> I think the ultimate conclusion to that thread was that its perfectly
->>>>>>>>> acceptable to re-use bindings from other
->>>>>>>>> platforms.
->>>>>>>>>
->>>>>>>> Hmm, ususally I may look for the properties of dw_mmc.c in synopsys-dw-mshc.txt.
->>>>>>>> If this is the conclusion before, then just ignore this noise.
->>>>>>> If can be removed the samsung property, then i think property of clock timing can be used into dw-mmc.c
->>>>>>> But if samsung property is used, well. I think right that it's used into dw_mmc-exynos.c.
->>>>>>> Dw-mmc.c is general driver..so we don't want to include any SoC specific code.
->>>>>> Then do you suggest I go forward with an attempt to add a new generic
->>>>>> "snps,dw-mshc-sdr-timing"
->>>>>> binding?
->>>>> Ping Jaehoon?
->>>>>
->>>>> Do you think I need to add a generic "snps,dw-mshc-sdr-timing" and
->>>>> "snps,dw-mshc-ddr-timing" bindings then?
->>>> Well, i think it's also something wrong. ddr/sdr-timing is exynos specific value, not synopsys value.
->>>> If synopsys use the sdr/ddr timing, then it's right that "snps, dw-mshc-sdr/ddr-timing" is used.
->>> I went through the databook and I think that the timing values are
->>> mentioned throughout the spec. It
->>> just does not explicitly mentions ddr/sdr timing, but it is mentioned as
->>> cclk_in_drv(aka drvsel), and
->>> cclk_in_sample(aka smpsel). Even the macro in dw_mmc-exynos,
->>> SDMMC_CLKSEL_CCLK_DRIVE() and
->>> SDMMC_CLKSEL_CCLK_SAMPLE() is stating this.
->>>
->>> So I do not believe that "samsung, dw-mshc-sdr-timing" and
->>> "samsung,dw-mshc-ddr-timing" are not
->>> exclusive to only the exynos platform. Just the fact that the SOCFPGA
->>> platform can re-use the same
->>> "samsung,dw-mshc-sdr-timing" property proves that this is not just an
->>> exynos specific value.
+>> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+>> ---
+>>  drivers/mmc/host/sdhci.c | 7 ++++++-
+>>  1 file changed, 6 insertions(+), 1 deletion(-)
 >>
->> i didn't see the register that the sdr/ddr timing is used at Synopsys DoC file.
->> Even if SOCFPGA platform can reuse the samsung property, it's not general property, isn't?
-> 
-> I think the Rockchip platform can also use it, but it hasn't been
-> clearly documented yet.
-> 
->> Under SoC.. cclk_in_drv can be implemented differently.
-> 
-> Yes, agreed. Clearly the cclk_in_drv and cclk_in_sample methods to shift
-> the phase of the CIU clock is implemented differently. The exynos'
-> implementation is not getting touched at all.
-> 
->> We have just known that sdr/ddr timing is used at exynos/socfpga board.
+>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+>> index bd8a098..614a34d 100644
+>> --- a/drivers/mmc/host/sdhci.c
+>> +++ b/drivers/mmc/host/sdhci.c
+>> @@ -1013,7 +1013,12 @@ void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
+>>  		mdelay(1);
+>>  	}
+>>  
+>> -	mod_timer(&host->timer, jiffies + 10 * HZ);
+>> +	timeout = jiffies;
+>> +	if (!cmd->data && cmd->cmd_timeout_ms > 9000)
+>> +		timeout += DIV_ROUND_UP(cmd->cmd_timeout_ms, 1000) * HZ + HZ;
+>> +	else
+>> +		timeout += 10 * HZ;
+>> +	mod_timer(&host->timer, timeout);
+>>  
+>>  	host->cmd = cmd;
+>>  
 >>
->> I just found clk_drv/smpl_phase_ctrl at UHS register, I think this isn't ddr/sdr timing.
-> 
-> 
-> But let's take a look at what are the possible values ddr/sdr timings
-> can take? From Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt:
-> 
-> "Valid values for SDR and DDR CIU clock timing for Exynos5250:
->       - valid value for tx phase shift and rx phase shift is 0 to 7."
-> 
-> For socfpga, 0 = 45 degrees shift, 1 = 90 degrees shift,...[n++] and 7 =
-> 315 degrees shift. If my guess is correct, it should also be the same
-> for exynos.
-
-Right, socfpga is used with similar timing value.
-But All SoC should not be same with exynos.
-
-> 
-> 
->>
->>>> But i didn't see sdr/ddr timing in synopsys DoC.
->>>> I know you want to control the hold-reg bit. 
->>>> But this approach is not good.
->>>
->>> The spec has a table on when to use the hold-reg bit. The conditions for
->>> using the hold-reg bit is
->>> only dependent the hold-reg hw implementation and the value of
->>> cclk_in_drv. The value of cclk_in_drv
->>> is specified by the 2nd parameter of "samsung,dw-mshc-sdr-timing".
->>
->> Right, the spec is mentioned when hold-reg bit could be used.
->> But that's not that ddr/sdr timing is general value.
-> 
-> Do you agree that the 2nd value of sdr/ddr timing is representing the
-> cclk_in_drv? Looking at the code dw_mmc-exynos.c, this is indeed what
-> the 2nd value in sdr/ddr timing is representing.
-
-Agreed it. did you think that cclk_in_drv and DDR/SDR timing value is same?
-Right..it's same meaning. Using Hold_REG is affected with presence of sdr/ddr timing.
-
-> 
-> 
-> So we can come up with a more generic DTS binding that the generic
-> dw_mmc driver can use to set the hold-reg, but that binding still needs
-> to pass in the cclk_in_drv somehow, as cclk_in_drv is the only external
-> variable that is needed to determine when to set hold-reg.
-> 
-> And if sdr/ddr timing is already representing cclk_in_drv, doesn't it
-> make sense to re-use that binding?
-
-I didn't know exactly which soc is used with sdr/ddr timing.
-As socfpga and exynos is used, it's not become the general property.
-
-Well, I understood your opinion. So i will consider more about this.
-
-Best Regards,
-Jaehoon Chung
-
-> 
-> Thanks,
-> Dinh
->>
->> Best Regards,
->> Jaehoon Chung
->>>
->>> So I don't understand why you think this approach is "not good"?
->>>
->>> Thanks,
->>> Dinh
->>>> Rather, how about using the callback function for exynos specific value.
->>>> Then other SoC can also use it.
->>>>
->>>> Best Regards,
->>>> Jaehoon Chung
->>>>
->>>>> Dinh
->>>>>> Dinh
->>>>>>> If i missed something, then let me know, plz.
->>>>>>>
->>>>>>> Best Regards,
->>>>>>> Jaehoon Chung
->>>>>>>> Thanks
->>>>>>>>
->>>>>>
->>>>>
->>>>>
->>>>>
->>>
->>>
->>
->>
-> 
 > 
 > 
 > 
