@@ -1,54 +1,30 @@
-From: Heiko =?ISO-8859-1?Q?St=FCbner?= <heiko@sntech.de>
-Subject: Re: [PATCH 0/6] mmc: sdhci-s3c: Fix base clock source management
-Date: Sun, 12 Jan 2014 22:18 +0100
-Message-ID: <1704043.sYrCOYas4N@phil>
-References: <1389476346-20396-1-git-send-email-tomasz.figa@gmail.com>
+From: Zhangfei Gao <zhangfei.gao@gmail.com>
+Subject: Re: [PATCH v7 0/3] mmc: dw_mmc: add dw_mmc-k3
+Date: Mon, 13 Jan 2014 09:00:32 +0800
+Message-ID: <CAMj5BkjfQ2gfMgUNLMpgpU159+NcUDUAUm=g8kk0oEW-Ym4p-w@mail.gmail.com>
+References: <1389278112-7099-1-git-send-email-zhangfei.gao@linaro.org>
+	<86iotpdupe.fsf@void.printf.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7Bit
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-Reply-To: <1389476346-20396-1-git-send-email-tomasz.figa@gmail.com>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Tomasz Figa <tomasz.figa@gmail.com>
-Cc: linux-mmc@vger.kernel.org, linux-samsung-soc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Ben Dooks <ben-linux@fluff.org>, Chris Ball <chris@printf.net>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, Marek Szyprowski <m.szyprowski@samsung.com>
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-ea0-f177.google.com ([209.85.215.177]:62413 "EHLO
+	mail-ea0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750899AbaAMBAd (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 12 Jan 2014 20:00:33 -0500
+In-Reply-To: <86iotpdupe.fsf@void.printf.net>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Chris Ball <chris@printf.net>
+Cc: Zhangfei Gao <zhangfei.gao@linaro.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Mike Turquette <mturquette@linaro.org>, Arnd Bergmann <arnd@arndb.de>, patches@linaro.org, Seungwon Jeon <tgih.jun@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Jaehoon Chung <jh80.chung@samsung.com>, Haojian Zhuang <haojian.zhuang@linaro.org>, Kumar Gala <galak@codeaurora.org>, Chris Ball <cjb@laptop.org>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>
 
-Am Samstag, 11. Januar 2014, 22:39:00 schrieb Tomasz Figa:
-> Tested on S3C6410-based Mini6410 board, with following performance
-> figures:
-> 
-> * Before this series (133 MHz HCLK always selected, leading to at most
->   33 MHz card clock):
+On Mon, Jan 13, 2014 at 12:35 AM, Chris Ball <chris@printf.net> wrote:
+> Hi,
 >
-> root@tiny6410:~# hdparm -t /dev/mmcblk0
-> 
-> /dev/mmcblk0:
->  Timing buffered disk reads:  42 MB in  3.10 seconds =  13.54 MB/sec
+> I've pushed patches 1 and 2 to mmc-next for 3.14, with Arnd and
+> Jaehoon's ACK -- since patch 3 depends on files that aren't in my
+> tree, please can you push that one through arm-soc?
 
-# hdparm -t /dev/mmcblk0
+Great, thanks Chris.
+The 3rd patch may need go to Mike's tree, will search Mike's help.
 
-/dev/mmcblk0:
- Timing buffered disk reads: 44 MB in  3.12 seconds =  14.11 MB/sec
-
-
-> * After this series (48 MHz EPLL clock selected, leading to 48 MHz card
->   clock):
->
-> root@tiny6410:~# hdparm -t /dev/mmcblk0
-> 
-> /dev/mmcblk0:
->  Timing buffered disk reads:  56 MB in  3.04 seconds =  18.41 MB/sec
-
-# hdparm -t /dev/mmcblk0
-
-/dev/mmcblk0:
- Timing buffered disk reads: 48 MB in  3.01 seconds =  15.94 MB/sec
-
-
-So on a s3c2416:
-Tested-by: Heiko Stuebner <heiko@sntech.de>
-Acked-by: Heiko Stuebner <heiko@sntech.de>
-
-
-Thanks for the added bandwidth :-)
-Heiko
+Thanks.
