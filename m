@@ -1,76 +1,103 @@
-From: Lee Jones <lee.jones@linaro.org>
+From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
 Subject: Re: [PATCH 1/3] mfd: Add realtek USB card reader driver
-Date: Tue, 14 Jan 2014 14:15:23 +0000
-Message-ID: <20140114141523.GC11820@lee--X1>
+Date: Tue, 14 Jan 2014 07:20:48 -0800
+Message-ID: <20140114152048.GB6512@kroah.com>
 References: <1389685656-880-1-git-send-email-rogerable@realtek.com>
  <1389685656-880-2-git-send-email-rogerable@realtek.com>
- <20140114130409.GB11820@lee--X1> <20140114134634.GM7444@mwanda>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail.linuxfoundation.org ([140.211.169.12]:59504 "EHLO
+	mail.linuxfoundation.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751342AbaANPUg (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 14 Jan 2014 10:20:36 -0500
 Content-Disposition: inline
-In-Reply-To: <20140114134634.GM7444@mwanda>
-List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
-List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel>
-List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
-List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
-List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
-Errors-To: driverdev-devel-bounces@linuxdriverproject.org
-Sender: driverdev-devel-bounces@linuxdriverproject.org
-To: Dan Carpenter <dan.carpenter@oracle.com>
-Cc: Samuel Ortiz <sameo@linux.intel.com>, Alex Dubov <oakad@yahoo.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, driverdev-devel@linuxdriverproject.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, wei_wang@realsil.com.cn, rogerable@realtek.com, Chris Ball <cjb@laptop.org>, Maxim Levitsky <maximlevitsky@gmail.com>
+In-Reply-To: <1389685656-880-2-git-send-email-rogerable@realtek.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: rogerable@realtek.com
+Cc: Samuel Ortiz <sameo@linux.intel.com>, Lee Jones <lee.jones@linaro.org>, Chris Ball <cjb@laptop.org>, Maxim Levitsky <maximlevitsky@gmail.com>, Alex Dubov <oakad@yahoo.com>, Dan Carpenter <dan.carpenter@oracle.com>, driverdev-devel@linuxdriverproject.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, wei_wang@realsil.com.cn
 
-PiBbIFNvcnJ5LCBJIGFtIGNvbWluZyBkb3duIHdpdGggdGhlIGZsdSB0b2RheSBzbyBJJ20gZG9p
-bmcgZG9ya3kgdGhpbmdzCj4gICBsaWtlIHJldmlld2luZyByZXZpZXcgY29tbWVudHMuICBJJ20g
-bm90IHN1cmUgaG93IGNvaGVyZW50IEkgYW0uICBdCgpBbHdheXMgd2VsY29tZS4KCk5COiBJIGRp
-ZCB0aGlzIHJldmlldyBpbiBkb3VibGUtcXVpY2sgdGltZSwgd2hpY2ggbWF5IGFjY291bnQgZm9y
-IHNvbWUKb2YgdGhlIHdlaXJkIHRob3VnaHQgcHJvY2Vzc2VzIChvciBsYWNrIHRoZXJlIG9mKS4K
-Cj4gPiA+ICtzdGF0aWMgdm9pZCBydHN4X3VzYl9zZ190aW1lZF9vdXQodW5zaWduZWQgbG9uZyBk
-YXRhKQo+ID4gPiArewo+ID4gPiArCXN0cnVjdCBydHN4X3VjciAqdWNyID0gKHN0cnVjdCBydHN4
-X3VjciAqKWRhdGE7Cj4gPiAKPiA+IFdoYXQncyBnb2luZyB0byBoYXBwZW4gd2hlbiB5b3VyIGRl
-dmljZSBydW5zIDY0Yml0Pwo+ID4gCj4gCj4gSSdtIG5vdCBzdXJlIEkgdW5kZXJzdGFuZCB3aGF0
-IHlvdSBtZWFuIGhlcmUuICBPbiBsaW51eCBzaXplb2YobG9uZykgaXMKPiBhbHdheXMgdGhlIHNh
-bWUgYXMgc2l6ZW9mKHZvaWQgKikuCgpJIGhhZCBhbiBvZGQgbW9tZW50IHdoZXJlIEkgdGhvdWdo
-dCB3ZSdkIG5lZWQgbG9uZyBsb25nIGZvciA2NGJpdC4KCk5ldmVybWluZC4KCj4gPiA+ICsJaWYg
-KGNtZF9sZW4gPiBJT0JVRl9TSVpFKQo+ID4gPiArCQlyZXR1cm4gLUVJTlZBTDsKPiA+ID4gKwo+
-ID4gPiArCWlmIChjbWRfbGVuICUgNCkKPiA+ID4gKwkJY21kX2xlbiArPSAoNCAtIGNtZF9sZW4g
-JSA0KTsKPiA+IAo+ID4gUGxlYXNlIGRvY3VtZW50IGluIGEgY29tbWVudC4KPiAKPiBUaGVyZSBp
-cyBhIGtlcm5lbCBtYWNybyBmb3IgdGhpczoKPiAKPiAJY21kX2xlbiA9IEFMSUdOKGNtZF9sZW4s
-IDQpOwo+IAo+IAlpZiAoY21kX2xlbiA+IElPQlVGX1NJWkUpCj4gCQlyZXR1cm4gLUVJTlZBTDsK
-CkkgaGFkIGEgZmVlbGluZyB0aGlzIHdhcyB0aGUgaW50ZW50aW9uLCBoZW5jZSB3aHkgSSB3YXMg
-YXNraW5nIGZvciBhCmNvbW1lbnQuIEJ1dCB5ZXMsIGlmIGFsbCB0aGlzIGlzIGRvaW5nIGlzIGFs
-aWdubWVudCB0aGVuIHRoZSBrZXJuZWwKbWFjcm8gaXMgcHJlZmVycmVkLgoKPiA+ID4gKwo+ID4g
-PiArCj4gPiAKPiA+IEV4dHJhICcvbicKPiA+IAo+IAo+IEl0IHdlaXJkcyBtZSBvdXQgd2hlbiB5
-b3UgbWl4IHVwICdcbicgYW5kIC9uJy4KClR5cG9zIGhhcHBlbiBvbiBvY2Nhc2lvbi4uLgoKPiA+
-ID4gK2ludCBydHN4X3VzYl9lcDBfd3JpdGVfcmVnaXN0ZXIoc3RydWN0IHJ0c3hfdWNyICp1Y3Is
-IHUxNiBhZGRyLAo+ID4gPiArCQl1OCBtYXNrLCB1OCBkYXRhKQo+ID4gPiArewo+ID4gPiArCXUx
-NiB2YWx1ZSA9IDAsIGluZGV4ID0gMDsKPiA+ID4gKwo+ID4gPiArCXZhbHVlIHw9IDB4MDMgPDwg
-MTQ7Cj4gPiA+ICsJdmFsdWUgfD0gYWRkciAmIDB4M0ZGRjsKPiA+ID4gKwl2YWx1ZSA9ICgodmFs
-dWUgPDwgOCkgJiAweEZGMDApIHwgKCh2YWx1ZSA+PiA4KSAmIDB4MDBGRik7Cj4gPiA+ICsJaW5k
-ZXggfD0gKHUxNiltYXNrOwo+ID4gPiArCWluZGV4IHw9ICh1MTYpZGF0YSA8PCA4Owo+ID4gCj4g
-PiBMb3RzIG9mIHJhbmRvbSBudW1iZXJzIGhlcmUsIHBsZWFzZSAjZGVmaW5lIGZvciBjbGFyaXR5
-IGFuZCBlYXNlIG9mCj4gPiByZWFkaW5nLgo+ID4gCj4gCj4gVGhlIG9ubHkgcmVhbGx5IHJhbmRv
-bSBudW1iZXIgaXMgdGhlIDB4MDMsIGJ1dCB5ZWFoLCBpdCB3b3VsZCBoZWxwIGlmCj4gdGhhdCB3
-ZSBhIGRlZmluZS4KClNlZSAtLS1eCgpBcyBJIHNheSwgSSBqdXN0IGdsb3NzZWQgb3ZlciB0aGUg
-Y29kZSwgdGh1cyBkaWRuJ3Qgc3BlbmQgdGhlIHRpbWUgdG8Kd29yayBvdXQgdGhlIGFyaXRobWV0
-aWMuIE5vdyBJIGRvLCBtb3N0IG9mIGl0IGlzIHByZXR0eSBzZWxmCmV4cGxhbmF0b3J5LiBJIHdv
-dWxkIGFsc28gbGlrZSB0byBzZWUgdGhlIFNISUZUICNkZWZpbmVkLCBhbHRob3VnaAp0aGlzIG1h
-eSBiZWNvbWUgc3VwZXJmbHVvdXMgb25jZSB0aGUgMHgwMyBpcyBjbGFyaWZpZWQuCgo+IAlhZGRy
-IHw9IDB4MDMgPDwgMTQ7Cj4gCj4gCXZhbHVlID0gX19zd2FiMTYoYWRkcik7Cj4gCWluZGV4ID0g
-bWFzayB8IChkYXRhIDw8IDgpOwoKVGhpcyBpcyAxMDAlIGJldHRlci9jbGVhcmVyLgoKPiA+ID4g
-Kwo+ID4gPiArCWRldl9kYmcoJmludGYtPmRldiwKPiA+ID4gKwkJIjogUmVhbHRlayBVU0IgQ2Fy
-ZCBSZWFkZXIgZm91bmQgYXQgYnVzICUwM2QgYWRkcmVzcyAlMDNkXG4iLAo+ID4gPiArCQkgdXNi
-X2Rldi0+YnVzLT5idXNudW0sIHVzYl9kZXYtPmRldm51bSk7Cj4gPiA+ICsKPiA+ID4gKwl1Y3Ig
-PSBremFsbG9jKHNpemVvZihzdHJ1Y3QgcnRzeF91Y3IpLCBHRlBfS0VSTkVMKTsKPiA+IAo+ID4g
-cy9zdHJ1Y3QgcnRzeF91Y3IvKnVjci8KPiA+IAo+ID4gQW55IHJlYXNvbiBmb3Igbm90IHVzaW5n
-IG1hbmFnZWQgcmVzb3VyY2VzPwo+ID4gCj4gUm9nZXIsIGhlIG1lYW5zIHRoZSBkZXZtX2t6YWxs
-b2MoKS4KClRoYXQgSSBkby4KCi0tIApMZWUgSm9uZXMKTGluYXJvIFNUTWljcm9lbGVjdHJvbmlj
-cyBMYW5kaW5nIFRlYW0gTGVhZApMaW5hcm8ub3JnIOKUgiBPcGVuIHNvdXJjZSBzb2Z0d2FyZSBm
-b3IgQVJNIFNvQ3MKRm9sbG93IExpbmFybzogRmFjZWJvb2sgfCBUd2l0dGVyIHwgQmxvZwpfX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwpkZXZlbCBtYWlsaW5n
-IGxpc3QKZGV2ZWxAbGludXhkcml2ZXJwcm9qZWN0Lm9yZwpodHRwOi8vZHJpdmVyZGV2LmxpbnV4
-ZHJpdmVycHJvamVjdC5vcmcvbWFpbG1hbi9saXN0aW5mby9kcml2ZXJkZXYtZGV2ZWwK
+On Tue, Jan 14, 2014 at 03:47:34PM +0800, rogerable@realtek.com wrote:
+> From: Roger Tseng <rogerable@realtek.com>
+> 
+> Realtek USB card reader provides a channel to transfer command or data to flash
+> memory cards. This driver exports host instances for mmc and memstick subsystems
+> and handles basic works.
+> 
+> Signed-off-by: Roger Tseng <rogerable@realtek.com>
+> ---
+>  drivers/mfd/Kconfig          |  10 +
+>  drivers/mfd/Makefile         |   1 +
+>  drivers/mfd/rtsx_usb.c       | 788 +++++++++++++++++++++++++++++++++++++++++++
+>  include/linux/mfd/rtsx_usb.h | 619 +++++++++++++++++++++++++++++++++
+>  4 files changed, 1418 insertions(+)
+>  create mode 100644 drivers/mfd/rtsx_usb.c
+>  create mode 100644 include/linux/mfd/rtsx_usb.h
+> 
+> diff --git a/drivers/mfd/Kconfig b/drivers/mfd/Kconfig
+> index b7c74a7..4c99ebd 100644
+> --- a/drivers/mfd/Kconfig
+> +++ b/drivers/mfd/Kconfig
+> @@ -507,6 +507,16 @@ config MFD_RTSX_PCI
+>  	  types of memory cards, such as Memory Stick, Memory Stick Pro,
+>  	  Secure Digital and MultiMediaCard.
+>  
+> +config MFD_RTSX_USB
+> +	tristate "Realtek USB card reader"
+> +	depends on USB
+> +	select MFD_CORE
+> +	help
+> +	Select this option to get support for Realtek USB 2.0 card readers
+> +	including RTS5129, RTS5139, RTS5179 and RTS5170.
+> +	Realtek card reader supports access to many types of memory cards,
+> +	such as Memory Stick Pro, Secure Digital and MultiMediaCard.
+> +
+>  config MFD_RC5T583
+>  	bool "Ricoh RC5T583 Power Management system device"
+>  	depends on I2C=y
+> diff --git a/drivers/mfd/Makefile b/drivers/mfd/Makefile
+> index 8a28dc9..33b8de6 100644
+> --- a/drivers/mfd/Makefile
+> +++ b/drivers/mfd/Makefile
+> @@ -14,6 +14,7 @@ obj-$(CONFIG_MFD_CROS_EC_SPI)	+= cros_ec_spi.o
+>  
+>  rtsx_pci-objs			:= rtsx_pcr.o rts5209.o rts5229.o rtl8411.o rts5227.o rts5249.o
+>  obj-$(CONFIG_MFD_RTSX_PCI)	+= rtsx_pci.o
+> +obj-$(CONFIG_MFD_RTSX_USB)	+= rtsx_usb.o
+>  
+>  obj-$(CONFIG_HTC_EGPIO)		+= htc-egpio.o
+>  obj-$(CONFIG_HTC_PASIC3)	+= htc-pasic3.o
+> diff --git a/drivers/mfd/rtsx_usb.c b/drivers/mfd/rtsx_usb.c
+> new file mode 100644
+> index 0000000..905ec8d
+> --- /dev/null
+> +++ b/drivers/mfd/rtsx_usb.c
+> @@ -0,0 +1,788 @@
+> +/* Driver for Realtek USB card reader
+> + *
+> + * Copyright(c) 2009-2013 Realtek Semiconductor Corp. All rights reserved.
+> + *
+> + * This program is free software; you can redistribute it and/or modify it
+> + * under the terms of the GNU General Public License as published by the
+> + * Free Software Foundation; either version 2, or (at your option) any
+> + * later version.
+
+Do you really mean "any later version"?  (sorry, I have to ask.)
+
+Same goes for the other files you add with this specific license
+wording.
+
+> +#include <linux/module.h>
+> +#include <linux/slab.h>
+> +#include <linux/mutex.h>
+> +#include <linux/usb.h>
+> +#include <linux/platform_device.h>
+> +#include <linux/mfd/core.h>
+> +#include <asm/unaligned.h>
+
+Why is this file neded?
+
+thanks,
+
+greg k-h
