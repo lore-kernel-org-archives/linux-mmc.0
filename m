@@ -1,32 +1,34 @@
-From: zhangfei <zhangfei.gao@linaro.org>
-Subject: Re: [PATCH -next] mmc: dw_mmc: fix sparse non static symbol warning
-Date: Tue, 14 Jan 2014 10:09:22 +0800
-Message-ID: <52D49C52.203@linaro.org>
-References: <CAPgLHd8yJdkvVh6AkifxVMeudyA5bYF-QrEOzJrn1K_q8Mfm1A@mail.gmail.com>
+From: Chao Xu <caesarxuchao@gmail.com>
+Subject: wl1271: sdio: is fine-grained runtime_pm possible?
+Date: Mon, 13 Jan 2014 20:58:02 -0600
+Message-ID: <CAKZq+rdaCivZTFSTGt9_Q+3KFE9Ft0XfmWZ=1Vr7QcDDs9=Muw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pa0-f42.google.com ([209.85.220.42]:53921 "EHLO
-	mail-pa0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751203AbaANCJe (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 13 Jan 2014 21:09:34 -0500
-Received: by mail-pa0-f42.google.com with SMTP id kl14so785292pab.15
-        for <linux-mmc@vger.kernel.org>; Mon, 13 Jan 2014 18:09:33 -0800 (PST)
-In-Reply-To: <CAPgLHd8yJdkvVh6AkifxVMeudyA5bYF-QrEOzJrn1K_q8Mfm1A@mail.gmail.com>
+Received: from mail-qe0-f50.google.com ([209.85.128.50]:39273 "EHLO
+	mail-qe0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751384AbaANC6E (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 13 Jan 2014 21:58:04 -0500
+Received: by mail-qe0-f50.google.com with SMTP id 1so8025328qec.23
+        for <linux-mmc@vger.kernel.org>; Mon, 13 Jan 2014 18:58:02 -0800 (PST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Wei Yongjun <weiyj.lk@gmail.com>, tgih.jun@samsung.com, jh80.chung@samsung.com, chris@printf.net, grant.likely@linaro.org, robh+dt@kernel.org
-Cc: yongjun_wei@trendmicro.com.cn, linux-mmc@vger.kernel.org
+To: Luciano Coelho <luciano.coelho@intel.com>, chris@printf.net, ohad@wizery.com, linux-mmc@vger.kernel.org
 
+Hi,
 
-
-On 01/14/2014 10:03 AM, Wei Yongjun wrote:
-> From: Wei Yongjun <yongjun_wei@trendmicro.com.cn>
->
-> Fixes the following sparse warning:
->
-> drivers/mmc/host/dw_mmc-k3.c:116:1: warning:
->   symbol 'dw_mci_k3_pmops' was not declared. Should it be static?
-
-Thanks for catching up, my mistake.
+The patch "SDIO Runtime PM Support" implements the pm for wl12xx
+driver this way: the power for sdio is on whenever the WLAN interface
+is on, and the power is down only when the interface is down.
+Is it possible to do pm in a more fine-grained way, such as only
+turning on the power when reading/writing through sdio? An example is
+the mmc_blk_issue_rq() in drivers/mmc/card/block.c, where the host is
+released when there are no more requests. And in turn the host driver,
+such as omap_hsmmc.c, calls pm_runtime_put_autosuspend().
+Is there any fundamental argument against doing fine-grained runtime
+pm for sdio? Or is it just too much trouble for too little power
+saved?
+Thank you!
+-- 
+Regards,
+Chao Xu
