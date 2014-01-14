@@ -1,13 +1,13 @@
-From: Dan Carpenter <dan.carpenter@oracle.com>
+From: Lee Jones <lee.jones@linaro.org>
 Subject: Re: [PATCH 1/3] mfd: Add realtek USB card reader driver
-Date: Tue, 14 Jan 2014 16:55:51 +0300
-Message-ID: <20140114135551.GN7444@mwanda>
+Date: Tue, 14 Jan 2014 14:15:23 +0000
+Message-ID: <20140114141523.GC11820@lee--X1>
 References: <1389685656-880-1-git-send-email-rogerable@realtek.com>
  <1389685656-880-2-git-send-email-rogerable@realtek.com>
  <20140114130409.GB11820@lee--X1> <20140114134634.GM7444@mwanda>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
 Content-Disposition: inline
 In-Reply-To: <20140114134634.GM7444@mwanda>
@@ -20,42 +20,57 @@ List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driver
  <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
 Errors-To: driverdev-devel-bounces@linuxdriverproject.org
 Sender: driverdev-devel-bounces@linuxdriverproject.org
-To: Lee Jones <lee.jones@linaro.org>
+To: Dan Carpenter <dan.carpenter@oracle.com>
 Cc: Samuel Ortiz <sameo@linux.intel.com>, Alex Dubov <oakad@yahoo.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, driverdev-devel@linuxdriverproject.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, wei_wang@realsil.com.cn, rogerable@realtek.com, Chris Ball <cjb@laptop.org>, Maxim Levitsky <maximlevitsky@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On Tue, Jan 14, 2014 at 04:46:34PM +0300, Dan Carpenter wrote:
-> [ Sorry, I am coming down with the flu today so I'm doing dorky things
->   like reviewing review comments.  I'm not sure how coherent I am.  ]
-> 
-> On Tue, Jan 14, 2014 at 01:04:09PM +0000, Lee Jones wrote:
->  
-> > > +static void rtsx_usb_sg_timed_out(unsigned long data)
-> > > +{
-> > > +	struct rtsx_ucr *ucr = (struct rtsx_ucr *)data;
-> > 
-> > What's going to happen when your device runs 64bit?
-> > 
-> 
-> I'm not sure I understand what you mean here.  On linux sizeof(long) is
-> always the same as sizeof(void *).
-> 
-> 
-> > > +	if (cmd_len > IOBUF_SIZE)
-> > > +		return -EINVAL;
-> > > +
-> > > +	if (cmd_len % 4)
-> > > +		cmd_len += (4 - cmd_len % 4);
-> > 
-> > Please document in a comment.
-> 
-> There is a kernel macro for this:
-> 
-> 	cmd_len = ALIGN(cmd_len, 4);
-> 
-
-Btw, what's the difference between ALIGN(cmd_len, 4) and
-round_up(cmd_len, 4)?  Maybe round_up() is better.
-
-regards,
-dan carpenter
+PiBbIFNvcnJ5LCBJIGFtIGNvbWluZyBkb3duIHdpdGggdGhlIGZsdSB0b2RheSBzbyBJJ20gZG9p
+bmcgZG9ya3kgdGhpbmdzCj4gICBsaWtlIHJldmlld2luZyByZXZpZXcgY29tbWVudHMuICBJJ20g
+bm90IHN1cmUgaG93IGNvaGVyZW50IEkgYW0uICBdCgpBbHdheXMgd2VsY29tZS4KCk5COiBJIGRp
+ZCB0aGlzIHJldmlldyBpbiBkb3VibGUtcXVpY2sgdGltZSwgd2hpY2ggbWF5IGFjY291bnQgZm9y
+IHNvbWUKb2YgdGhlIHdlaXJkIHRob3VnaHQgcHJvY2Vzc2VzIChvciBsYWNrIHRoZXJlIG9mKS4K
+Cj4gPiA+ICtzdGF0aWMgdm9pZCBydHN4X3VzYl9zZ190aW1lZF9vdXQodW5zaWduZWQgbG9uZyBk
+YXRhKQo+ID4gPiArewo+ID4gPiArCXN0cnVjdCBydHN4X3VjciAqdWNyID0gKHN0cnVjdCBydHN4
+X3VjciAqKWRhdGE7Cj4gPiAKPiA+IFdoYXQncyBnb2luZyB0byBoYXBwZW4gd2hlbiB5b3VyIGRl
+dmljZSBydW5zIDY0Yml0Pwo+ID4gCj4gCj4gSSdtIG5vdCBzdXJlIEkgdW5kZXJzdGFuZCB3aGF0
+IHlvdSBtZWFuIGhlcmUuICBPbiBsaW51eCBzaXplb2YobG9uZykgaXMKPiBhbHdheXMgdGhlIHNh
+bWUgYXMgc2l6ZW9mKHZvaWQgKikuCgpJIGhhZCBhbiBvZGQgbW9tZW50IHdoZXJlIEkgdGhvdWdo
+dCB3ZSdkIG5lZWQgbG9uZyBsb25nIGZvciA2NGJpdC4KCk5ldmVybWluZC4KCj4gPiA+ICsJaWYg
+KGNtZF9sZW4gPiBJT0JVRl9TSVpFKQo+ID4gPiArCQlyZXR1cm4gLUVJTlZBTDsKPiA+ID4gKwo+
+ID4gPiArCWlmIChjbWRfbGVuICUgNCkKPiA+ID4gKwkJY21kX2xlbiArPSAoNCAtIGNtZF9sZW4g
+JSA0KTsKPiA+IAo+ID4gUGxlYXNlIGRvY3VtZW50IGluIGEgY29tbWVudC4KPiAKPiBUaGVyZSBp
+cyBhIGtlcm5lbCBtYWNybyBmb3IgdGhpczoKPiAKPiAJY21kX2xlbiA9IEFMSUdOKGNtZF9sZW4s
+IDQpOwo+IAo+IAlpZiAoY21kX2xlbiA+IElPQlVGX1NJWkUpCj4gCQlyZXR1cm4gLUVJTlZBTDsK
+CkkgaGFkIGEgZmVlbGluZyB0aGlzIHdhcyB0aGUgaW50ZW50aW9uLCBoZW5jZSB3aHkgSSB3YXMg
+YXNraW5nIGZvciBhCmNvbW1lbnQuIEJ1dCB5ZXMsIGlmIGFsbCB0aGlzIGlzIGRvaW5nIGlzIGFs
+aWdubWVudCB0aGVuIHRoZSBrZXJuZWwKbWFjcm8gaXMgcHJlZmVycmVkLgoKPiA+ID4gKwo+ID4g
+PiArCj4gPiAKPiA+IEV4dHJhICcvbicKPiA+IAo+IAo+IEl0IHdlaXJkcyBtZSBvdXQgd2hlbiB5
+b3UgbWl4IHVwICdcbicgYW5kIC9uJy4KClR5cG9zIGhhcHBlbiBvbiBvY2Nhc2lvbi4uLgoKPiA+
+ID4gK2ludCBydHN4X3VzYl9lcDBfd3JpdGVfcmVnaXN0ZXIoc3RydWN0IHJ0c3hfdWNyICp1Y3Is
+IHUxNiBhZGRyLAo+ID4gPiArCQl1OCBtYXNrLCB1OCBkYXRhKQo+ID4gPiArewo+ID4gPiArCXUx
+NiB2YWx1ZSA9IDAsIGluZGV4ID0gMDsKPiA+ID4gKwo+ID4gPiArCXZhbHVlIHw9IDB4MDMgPDwg
+MTQ7Cj4gPiA+ICsJdmFsdWUgfD0gYWRkciAmIDB4M0ZGRjsKPiA+ID4gKwl2YWx1ZSA9ICgodmFs
+dWUgPDwgOCkgJiAweEZGMDApIHwgKCh2YWx1ZSA+PiA4KSAmIDB4MDBGRik7Cj4gPiA+ICsJaW5k
+ZXggfD0gKHUxNiltYXNrOwo+ID4gPiArCWluZGV4IHw9ICh1MTYpZGF0YSA8PCA4Owo+ID4gCj4g
+PiBMb3RzIG9mIHJhbmRvbSBudW1iZXJzIGhlcmUsIHBsZWFzZSAjZGVmaW5lIGZvciBjbGFyaXR5
+IGFuZCBlYXNlIG9mCj4gPiByZWFkaW5nLgo+ID4gCj4gCj4gVGhlIG9ubHkgcmVhbGx5IHJhbmRv
+bSBudW1iZXIgaXMgdGhlIDB4MDMsIGJ1dCB5ZWFoLCBpdCB3b3VsZCBoZWxwIGlmCj4gdGhhdCB3
+ZSBhIGRlZmluZS4KClNlZSAtLS1eCgpBcyBJIHNheSwgSSBqdXN0IGdsb3NzZWQgb3ZlciB0aGUg
+Y29kZSwgdGh1cyBkaWRuJ3Qgc3BlbmQgdGhlIHRpbWUgdG8Kd29yayBvdXQgdGhlIGFyaXRobWV0
+aWMuIE5vdyBJIGRvLCBtb3N0IG9mIGl0IGlzIHByZXR0eSBzZWxmCmV4cGxhbmF0b3J5LiBJIHdv
+dWxkIGFsc28gbGlrZSB0byBzZWUgdGhlIFNISUZUICNkZWZpbmVkLCBhbHRob3VnaAp0aGlzIG1h
+eSBiZWNvbWUgc3VwZXJmbHVvdXMgb25jZSB0aGUgMHgwMyBpcyBjbGFyaWZpZWQuCgo+IAlhZGRy
+IHw9IDB4MDMgPDwgMTQ7Cj4gCj4gCXZhbHVlID0gX19zd2FiMTYoYWRkcik7Cj4gCWluZGV4ID0g
+bWFzayB8IChkYXRhIDw8IDgpOwoKVGhpcyBpcyAxMDAlIGJldHRlci9jbGVhcmVyLgoKPiA+ID4g
+Kwo+ID4gPiArCWRldl9kYmcoJmludGYtPmRldiwKPiA+ID4gKwkJIjogUmVhbHRlayBVU0IgQ2Fy
+ZCBSZWFkZXIgZm91bmQgYXQgYnVzICUwM2QgYWRkcmVzcyAlMDNkXG4iLAo+ID4gPiArCQkgdXNi
+X2Rldi0+YnVzLT5idXNudW0sIHVzYl9kZXYtPmRldm51bSk7Cj4gPiA+ICsKPiA+ID4gKwl1Y3Ig
+PSBremFsbG9jKHNpemVvZihzdHJ1Y3QgcnRzeF91Y3IpLCBHRlBfS0VSTkVMKTsKPiA+IAo+ID4g
+cy9zdHJ1Y3QgcnRzeF91Y3IvKnVjci8KPiA+IAo+ID4gQW55IHJlYXNvbiBmb3Igbm90IHVzaW5n
+IG1hbmFnZWQgcmVzb3VyY2VzPwo+ID4gCj4gUm9nZXIsIGhlIG1lYW5zIHRoZSBkZXZtX2t6YWxs
+b2MoKS4KClRoYXQgSSBkby4KCi0tIApMZWUgSm9uZXMKTGluYXJvIFNUTWljcm9lbGVjdHJvbmlj
+cyBMYW5kaW5nIFRlYW0gTGVhZApMaW5hcm8ub3JnIOKUgiBPcGVuIHNvdXJjZSBzb2Z0d2FyZSBm
+b3IgQVJNIFNvQ3MKRm9sbG93IExpbmFybzogRmFjZWJvb2sgfCBUd2l0dGVyIHwgQmxvZwpfX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwpkZXZlbCBtYWlsaW5n
+IGxpc3QKZGV2ZWxAbGludXhkcml2ZXJwcm9qZWN0Lm9yZwpodHRwOi8vZHJpdmVyZGV2LmxpbnV4
+ZHJpdmVycHJvamVjdC5vcmcvbWFpbG1hbi9saXN0aW5mby9kcml2ZXJkZXYtZGV2ZWwK
