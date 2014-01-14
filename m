@@ -1,76 +1,74 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [GIT PULL] MMC updates for mmc-next for 3.14, take 1
-Date: Tue, 14 Jan 2014 09:40:50 +0100
-Message-ID: <CAPDyKFrY8NaTSOT9BTWFWqCbwtcqMJoXAkt5bDvRLRf1==bN9g@mail.gmail.com>
-References: <CAPDyKFpNgZ1ExXMbz7q4QqMNnCrFFPxrVtzB3cX1D3C96e0HLQ@mail.gmail.com>
+From: Seungwon Jeon <tgih.jun@samsung.com>
+Subject: RE: [PATCH 2/3] mmc: dw_mmc: add dw_mmc-k3 for k3 platform
+Date: Tue, 14 Jan 2014 18:38:58 +0900
+Message-ID: <002801cf110c$731fd720$595f8560$%jun@samsung.com>
+References: <1389278112-7099-1-git-send-email-zhangfei.gao@linaro.org>
+ <1389278112-7099-3-git-send-email-zhangfei.gao@linaro.org>
+ <003601cf0e09$5fb07c90$1f1175b0$%jun@samsung.com>
+ <52CFFFDA.8050108@linaro.org>
+ <001501cf1004$7b1f34b0$715d9e10$%jun@samsung.com>
+ <52D3515B.7040008@linaro.org>
+ <001c01cf1020$e3e1aed0$aba50c70$%jun@samsung.com> <52D3A43B.4030909@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=ks_c_5601-1987
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qe0-f41.google.com ([209.85.128.41]:45369 "EHLO
-	mail-qe0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751318AbaANIku (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 14 Jan 2014 03:40:50 -0500
-Received: by mail-qe0-f41.google.com with SMTP id gh4so8322597qeb.28
-        for <linux-mmc@vger.kernel.org>; Tue, 14 Jan 2014 00:40:50 -0800 (PST)
-In-Reply-To: <CAPDyKFpNgZ1ExXMbz7q4QqMNnCrFFPxrVtzB3cX1D3C96e0HLQ@mail.gmail.com>
+Received: from mailout2.samsung.com ([203.254.224.25]:60061 "EHLO
+	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751042AbaANJjA (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 14 Jan 2014 04:39:00 -0500
+In-reply-to: <52D3A43B.4030909@linaro.org>
+Content-language: ko
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>, linux-mmc <linux-mmc@vger.kernel.org>
+To: 'zhangfei' <zhangfei.gao@linaro.org>, 'Chris Ball' <cjb@laptop.org>, 'Arnd Bergmann' <arnd@arndb.de>, 'Mike Turquette' <mturquette@linaro.org>, 'Rob Herring' <robherring2@gmail.com>, 'Jaehoon Chung' <jh80.chung@samsung.com>, 'Kumar Gala' <galak@codeaurora.org>, 'Haojian Zhuang' <haojian.zhuang@linaro.org>
+Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, patches@linaro.org, devicetree@vger.kernel.org, 'Zhigang Wang' <brooke.wangzhigang@huawei.com>
 
-On 20 December 2013 09:39, Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> Hi Chris,
->
-> Here is a collection of patches you might want to pull in for your
-> mmc-next branch for 3.14.
->
-> Kind regards
-> Ulf Hansson
+On Mon, January 13, 2014, Zhangfei Gao wrote:
+> Dear Seungwon
+> 
+> On 01/13/2014 01:32 PM, Seungwon Jeon wrote:
+> >>>>>> +static void dw_mci_k3_set_ios(struct dw_mci *host, struct mmc_ios *ios)
+> >>>>>> +{
+> >>>>>> +	struct dw_mci_k3_priv_data *priv = host->priv;
+> >>>>>> +	u32 rate = priv->clk_table[ios->timing];
+> >>>>>
+> 
+> >>
+> >> The function mmc_clk_determine_rate() will need the info which
+> >> controller it is, what's the init clock rate, what's the max clock rate,
+> >> and what's the limitation, which may be different as different soc, and
+> >> can not be hardcoded.
+> >> The limitation may in HS200 and SDR104 mode.
+> >>
+> >> The plan is only input init rate and max rate instead of the table,
+> >> while others directly use ios->clock, only if the the limitation resolved.
+> >
+> > Handling mmc clock for hi3620 is in drivers/clk/hisilicon/clk-hi3620.c, right?
+> > Currently only hi3620 has been introduced.
+> > If hi3620's host has a limitation, clk-hi3620.c can handle clock range(init, max) for source clock
+> enough.
+> > I feel like clock table is redundant.
+> > Ok. It's just my suggestion.  But I still point dependency of mode index number.
+> > K3's clock table refers and depends mode definition value from include/linux/mmc/host.h
+> > If new mode is added or modified, it should be considered and also may make complicated.
+> >
+> 
+> Looks like you dislike the clk_table very much :)
+Oh, I just want to remove dependency as I mentioned.
 
-Hi Chris,
+> 
+> Double checked with the silicon guy, currently it is said the limitation
+> in HS200 and SDR104 can be replaced by the max_rate, so clk_table can be
+> replaced with ios->clock directly, though they have concern it is not so
+> convinent when removing clk_table in case limitation rate is not equal
+> to max_rate again in future.
+I guess specific clock handling(clk-hi3620.c) can adjust required source clock rate.
 
-Any thoughts on this pull request?
+> 
+> Will update accordingly, thanks for the suggestion.
+Thank you for consideration.
 
-Kind regards
-Ulf Hansson
+Thanks,
+Seungwon Jeon
 
-
->
->
-> The following changes since commit 82793a517714c53e874dd54c94c3965cc118f689:
->
->   mmc: sh_mmcif: Fix compilation warning on 64-bit platforms
-> (2013-12-11 21:20:59 -0500)
->
-> are available in the git repository at:
->
->   git://git.linaro.org/people/ulfh/mmc.git mmc-next_for_chris
->
-> for you to fetch changes up to 435c4fe59617b7439fa4a59f656b8499771002da:
->
->   mmc: core: Enable MMC_CAP2_CACHE_CTRL as default (2013-12-20 09:14:13 +0100)
->
-> ----------------------------------------------------------------
-> Ulf Hansson (10):
->       mmc: sh_mobile_sdhi: Use modern PM macros to define pm callbacks
->       mmc: tmio_mmc: Convert from legacy to modern PM ops
->       mmc: tmio: Adapt to proper PM configs for exported functions
->       mmc: core: Use MMC_UNSAFE_RESUME as default behavior
->       mmc: core: Remove unnecessary validations for bus_ops callbacks
->       mmc: card: Remove host cap MMC_CAP2_SANITIZE
->       mmc: core: Remove unused host cap MMC_CAP2_BROKEN_VOLTAGE
->       mmc: core: Remove support for MMC_CAP2_NO_SLEEP_CMD
->       mmc: core: Use mmc_flush_cache() during mmc suspend
->       mmc: core: Enable MMC_CAP2_CACHE_CTRL as default
->
->  drivers/mmc/card/block.c          |    3 +-
->  drivers/mmc/core/Kconfig          |   15 --------
->  drivers/mmc/core/bus.c            |   12 ++-----
->  drivers/mmc/core/core.c           |   72 +++----------------------------------
->  drivers/mmc/core/mmc.c            |   31 ++--------------
->  drivers/mmc/core/sd.c             |   23 +-----------
->  drivers/mmc/host/sh_mobile_sdhi.c |    8 ++---
->  drivers/mmc/host/tmio_mmc.c       |   30 ++++++++--------
->  drivers/mmc/host/tmio_mmc.h       |    7 ++--
->  drivers/mmc/host/tmio_mmc_pio.c   |    7 ++--
->  include/linux/mmc/host.h          |   11 +-----
->  11 files changed, 40 insertions(+), 179 deletions(-)
