@@ -1,42 +1,83 @@
-From: zhangfei <zhangfei.gao@linaro.org>
-Subject: Re: [PATCH 2/3] mmc: dw_mmc: add dw_mmc-k3 for k3 platform
-Date: Tue, 14 Jan 2014 17:47:57 +0800
-Message-ID: <52D507CD.8040900@linaro.org>
-References: <1389278112-7099-1-git-send-email-zhangfei.gao@linaro.org> <1389278112-7099-3-git-send-email-zhangfei.gao@linaro.org> <003601cf0e09$5fb07c90$1f1175b0$%jun@samsung.com> <52CFFFDA.8050108@linaro.org> <001501cf1004$7b1f34b0$715d9e10$%jun@samsung.com> <52D3515B.7040008@linaro.org> <001c01cf1020$e3e1aed0$aba50c70$%jun@samsung.com> <52D3A43B.4030909@linaro.org> <002801cf110c$731fd720$595f8560$%jun@samsung.com>
+From: Zhangfei Gao <zhangfei.gao@gmail.com>
+Subject: Re: [PATCH 1/2] clk: hisilicon: add hi3620_mmc_clks
+Date: Tue, 14 Jan 2014 18:04:55 +0800
+Message-ID: <CAMj5BkgCzg-Nqm-FX_36-1ShGsL9x1HALmtywm-0sHtp53wR5A@mail.gmail.com>
+References: <1389604469-8064-1-git-send-email-zhangfei.gao@linaro.org>
+	<1389604469-8064-2-git-send-email-zhangfei.gao@linaro.org>
+	<002901cf110d$993b4880$cbb1d980$%jun@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=EUC-KR
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pa0-f54.google.com ([209.85.220.54]:49287 "EHLO
-	mail-pa0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751042AbaANJs1 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 14 Jan 2014 04:48:27 -0500
-Received: by mail-pa0-f54.google.com with SMTP id fa1so1945996pad.27
-        for <linux-mmc@vger.kernel.org>; Tue, 14 Jan 2014 01:48:27 -0800 (PST)
-In-Reply-To: <002801cf110c$731fd720$595f8560$%jun@samsung.com>
+Received: from mail-ee0-f54.google.com ([74.125.83.54]:52891 "EHLO
+	mail-ee0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751306AbaANKE4 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 14 Jan 2014 05:04:56 -0500
+In-Reply-To: <002901cf110d$993b4880$cbb1d980$%jun@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Seungwon Jeon <tgih.jun@samsung.com>, 'Chris Ball' <cjb@laptop.org>, 'Arnd Bergmann' <arnd@arndb.de>, 'Mike Turquette' <mturquette@linaro.org>, 'Rob Herring' <robherring2@gmail.com>, 'Jaehoon Chung' <jh80.chung@samsung.com>, 'Kumar Gala' <galak@codeaurora.org>, 'Haojian Zhuang' <haojian.zhuang@linaro.org>
-Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, patches@linaro.org, devicetree@vger.kernel.org, 'Zhigang Wang' <brooke.wangzhigang@huawei.com>
+To: Seungwon Jeon <tgih.jun@samsung.com>
+Cc: Zhangfei Gao <zhangfei.gao@linaro.org>, Chris Ball <cjb@laptop.org>, Arnd Bergmann <arnd@arndb.de>, Mike Turquette <mturquette@linaro.org>, Jaehoon Chung <jh80.chung@samsung.com>, Haojian Zhuang <haojian.zhuang@linaro.org>, Zhigang Wang <brooke.wangzhigang@huawei.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>, patches@linaro.org
 
-Dear Seungwon
+>> +static long mmc_clk_determine_rate(struct clk_hw *hw, unsigned long rate,
+>> +                           unsigned long *best_parent_rate,
+>> +                           struct clk **best_parent_p)
+>> +{
+>> +     struct clk_mmc *mclk = to_mmc(hw);
+>> +     unsigned long best = 0;
+>> +
+>> +     if ((rate <= 13000000) && (mclk->id == HI3620_MMC_CIUCLK1)) {
+> No need to check HI3620_MMC_CIUCLK2 and HI3620_MMC_CIUCLK3?
 
-On 01/14/2014 05:38 PM, Seungwon Jeon wrote:
+Yes, only emmc, id=HI3620_MMC_CIUCLK1, using init clk 13M, while
+others use init clock 25M.
+Add this to handle init mmc init clk 400K and return source clock rate
+13M, from your suggestion in fact.
 
->> Looks like you dislike the clk_table very much :)
-> Oh, I just want to remove dependency as I mentioned.
-> 
->>
->> Double checked with the silicon guy, currently it is said the limitation
->> in HS200 and SDR104 can be replaced by the max_rate, so clk_table can be
->> replaced with ios->clock directly, though they have concern it is not so
->> convinent when removing clk_table in case limitation rate is not equal
->> to max_rate again in future.
-> I guess specific clock handling(clk-hi3620.c) can adjust required source clock rate.
-> 
-It is doable now since the soc has been updated with the limitation,
-which can reuse max_rate now.
-The patch "mmc: dw_mmc: k3 remove clk_table" has been updated, and have
-modified clk-hi3620.c accordingly.
+>
+>> +             rate = 13000000;
+>> +             best = 26000000;
+>> +     } else if (rate <= 26000000) {
+>> +             rate = 25000000;
+>> +             best = 180000000;
+>> +     } else if (rate <= 52000000) {
+>> +             rate = 50000000;
+>> +             best = 360000000;
+>> +     } else if (rate <= 100000000) {
+>> +             rate = 100000000;
+>> +             best = 720000000;
+>> +     } else {
+>> +             /* max is 180M */
+>> +             rate = 180000000;
+>> +             best = 1440000000;
+>> +     }
+>> +     *best_parent_rate = best;
+>> +     return rate;
+>> +}
+
+>> +static int mmc_clk_prepare(struct clk_hw *hw)
+>> +{
+>> +     struct clk_mmc *mclk = to_mmc(hw);
+>> +     unsigned long rate;
+>> +
+>> +     if (mclk->id == HI3620_MMC_CIUCLK1)
+> HI3620_SD_CIUCLK was used in previous version.
+Yes, fixed, though it can work on the dev board.
+
+> Is it fixed with HI3620_MMC_CIUCLK1?
+> And, please clarify in case of HI3620_MMC_CIUCLK2 and HI3620_MMC_CIUCLK3 as well.
+
+Only HI3620_MMC_CIUCLK1 use 13M for init, all others use 25M on hi3620.
+
+>
+> Thanks,
+> Seungwon Jeon
+>
+>> +             rate = 13000000;
+>> +     else
+>> +             rate = 25000000;
+>> +
+>> +     return mmc_clk_set_timing(hw, rate);
+>> +}
+>> +
 
 Thanks
