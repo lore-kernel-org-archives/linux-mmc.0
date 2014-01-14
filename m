@@ -1,103 +1,36 @@
-From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Subject: Re: [PATCH 1/3] mfd: Add realtek USB card reader driver
-Date: Tue, 14 Jan 2014 07:20:48 -0800
-Message-ID: <20140114152048.GB6512@kroah.com>
-References: <1389685656-880-1-git-send-email-rogerable@realtek.com>
- <1389685656-880-2-git-send-email-rogerable@realtek.com>
+From: Kevin Hilman <khilman@linaro.org>
+Subject: Re: [PATCH 1/3] mmc: dw_mmc: use slot-gpio to handle cd pin
+Date: Tue, 14 Jan 2014 07:58:13 -0800
+Message-ID: <CAGa+x85awFYsrU9Gggirpaip3vggtSqu5GinVzss=nfNcp4nww@mail.gmail.com>
+References: <1389278112-7099-1-git-send-email-zhangfei.gao@linaro.org>
+	<1389278112-7099-2-git-send-email-zhangfei.gao@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail.linuxfoundation.org ([140.211.169.12]:59504 "EHLO
-	mail.linuxfoundation.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751342AbaANPUg (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 14 Jan 2014 10:20:36 -0500
-Content-Disposition: inline
-In-Reply-To: <1389685656-880-2-git-send-email-rogerable@realtek.com>
+Received: from mail-qa0-f54.google.com ([209.85.216.54]:60588 "EHLO
+	mail-qa0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751413AbaANP6O (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 14 Jan 2014 10:58:14 -0500
+Received: by mail-qa0-f54.google.com with SMTP id i13so2888782qae.41
+        for <linux-mmc@vger.kernel.org>; Tue, 14 Jan 2014 07:58:13 -0800 (PST)
+In-Reply-To: <1389278112-7099-2-git-send-email-zhangfei.gao@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: rogerable@realtek.com
-Cc: Samuel Ortiz <sameo@linux.intel.com>, Lee Jones <lee.jones@linaro.org>, Chris Ball <cjb@laptop.org>, Maxim Levitsky <maximlevitsky@gmail.com>, Alex Dubov <oakad@yahoo.com>, Dan Carpenter <dan.carpenter@oracle.com>, driverdev-devel@linuxdriverproject.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, wei_wang@realsil.com.cn
+To: Zhangfei Gao <zhangfei.gao@linaro.org>
+Cc: Chris Ball <cjb@laptop.org>, Arnd Bergmann <arnd@arndb.de>, Mike Turquette <mturquette@linaro.org>, Rob Herring <robherring2@gmail.com>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, Kumar Gala <galak@codeaurora.org>, Haojian Zhuang <haojian.zhuang@linaro.org>, linux-mmc@vger.kernel.org, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>, Patch Tracking <patches@linaro.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Olof Johansson <olof@lixom.net>, Tomasz Figa <tomasz.figa@gmail.com>
 
-On Tue, Jan 14, 2014 at 03:47:34PM +0800, rogerable@realtek.com wrote:
-> From: Roger Tseng <rogerable@realtek.com>
-> 
-> Realtek USB card reader provides a channel to transfer command or data to flash
-> memory cards. This driver exports host instances for mmc and memstick subsystems
-> and handles basic works.
-> 
-> Signed-off-by: Roger Tseng <rogerable@realtek.com>
-> ---
->  drivers/mfd/Kconfig          |  10 +
->  drivers/mfd/Makefile         |   1 +
->  drivers/mfd/rtsx_usb.c       | 788 +++++++++++++++++++++++++++++++++++++++++++
->  include/linux/mfd/rtsx_usb.h | 619 +++++++++++++++++++++++++++++++++
->  4 files changed, 1418 insertions(+)
->  create mode 100644 drivers/mfd/rtsx_usb.c
->  create mode 100644 include/linux/mfd/rtsx_usb.h
-> 
-> diff --git a/drivers/mfd/Kconfig b/drivers/mfd/Kconfig
-> index b7c74a7..4c99ebd 100644
-> --- a/drivers/mfd/Kconfig
-> +++ b/drivers/mfd/Kconfig
-> @@ -507,6 +507,16 @@ config MFD_RTSX_PCI
->  	  types of memory cards, such as Memory Stick, Memory Stick Pro,
->  	  Secure Digital and MultiMediaCard.
->  
-> +config MFD_RTSX_USB
-> +	tristate "Realtek USB card reader"
-> +	depends on USB
-> +	select MFD_CORE
-> +	help
-> +	Select this option to get support for Realtek USB 2.0 card readers
-> +	including RTS5129, RTS5139, RTS5179 and RTS5170.
-> +	Realtek card reader supports access to many types of memory cards,
-> +	such as Memory Stick Pro, Secure Digital and MultiMediaCard.
-> +
->  config MFD_RC5T583
->  	bool "Ricoh RC5T583 Power Management system device"
->  	depends on I2C=y
-> diff --git a/drivers/mfd/Makefile b/drivers/mfd/Makefile
-> index 8a28dc9..33b8de6 100644
-> --- a/drivers/mfd/Makefile
-> +++ b/drivers/mfd/Makefile
-> @@ -14,6 +14,7 @@ obj-$(CONFIG_MFD_CROS_EC_SPI)	+= cros_ec_spi.o
->  
->  rtsx_pci-objs			:= rtsx_pcr.o rts5209.o rts5229.o rtl8411.o rts5227.o rts5249.o
->  obj-$(CONFIG_MFD_RTSX_PCI)	+= rtsx_pci.o
-> +obj-$(CONFIG_MFD_RTSX_USB)	+= rtsx_usb.o
->  
->  obj-$(CONFIG_HTC_EGPIO)		+= htc-egpio.o
->  obj-$(CONFIG_HTC_PASIC3)	+= htc-pasic3.o
-> diff --git a/drivers/mfd/rtsx_usb.c b/drivers/mfd/rtsx_usb.c
-> new file mode 100644
-> index 0000000..905ec8d
-> --- /dev/null
-> +++ b/drivers/mfd/rtsx_usb.c
-> @@ -0,0 +1,788 @@
-> +/* Driver for Realtek USB card reader
-> + *
-> + * Copyright(c) 2009-2013 Realtek Semiconductor Corp. All rights reserved.
-> + *
-> + * This program is free software; you can redistribute it and/or modify it
-> + * under the terms of the GNU General Public License as published by the
-> + * Free Software Foundation; either version 2, or (at your option) any
-> + * later version.
+On Thu, Jan 9, 2014 at 6:35 AM, Zhangfei Gao <zhangfei.gao@linaro.org> wrote:
+> Suggested by Jaehoon: Use slot-gpio to handle cd-gpio
+> Add function dw_mci_of_get_cd_gpio to check "cd-gpios" from dts.
+> mmc_gpio_request_cd and mmc_gpio_get_cd are used to handle cd pin
+>
+> Signed-off-by: Zhangfei Gao <zhangfei.gao@linaro.org>
+> Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
 
-Do you really mean "any later version"?  (sorry, I have to ask.)
+The Samsung Arndale board started failing boot from MMC root tests
+starting with next-20140113 and I bisected it down to this patch.
+Reverting this patch on top of next-20140114 gets Arndale booting
+again from MMC.  Is there some supporting DT data that's missing for
+Arndale?
 
-Same goes for the other files you add with this specific license
-wording.
-
-> +#include <linux/module.h>
-> +#include <linux/slab.h>
-> +#include <linux/mutex.h>
-> +#include <linux/usb.h>
-> +#include <linux/platform_device.h>
-> +#include <linux/mfd/core.h>
-> +#include <asm/unaligned.h>
-
-Why is this file neded?
-
-thanks,
-
-greg k-h
+Kevin
