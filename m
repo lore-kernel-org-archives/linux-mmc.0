@@ -1,74 +1,59 @@
-From: Chao Xu <caesarxuchao@gmail.com>
-Subject: Re: wl1271: sdio: is fine-grained runtime_pm possible?
-Date: Mon, 13 Jan 2014 22:46:01 -0600
-Message-ID: <CAKZq+rf8HAhtjNw3CHPp2C0a2mv0d-zgN6VgdqC5rt4ysOkcpQ@mail.gmail.com>
-References: <CAKZq+rdaCivZTFSTGt9_Q+3KFE9Ft0XfmWZ=1Vr7QcDDs9=Muw@mail.gmail.com>
-	<867ga39raz.fsf@void.printf.net>
+From: <rogerable@realtek.com>
+Subject: [PATCH v2 0/3] Add modules for realtek USB card reader
+Date: Tue, 14 Jan 2014 15:47:33 +0800
+Message-ID: <1389685656-880-1-git-send-email-rogerable@realtek.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qa0-f52.google.com ([209.85.216.52]:63850 "EHLO
-	mail-qa0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751678AbaANEqC (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 13 Jan 2014 23:46:02 -0500
-Received: by mail-qa0-f52.google.com with SMTP id j15so6571260qaq.25
-        for <linux-mmc@vger.kernel.org>; Mon, 13 Jan 2014 20:46:01 -0800 (PST)
-In-Reply-To: <867ga39raz.fsf@void.printf.net>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
+List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
+List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel>
+List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
+List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
+List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
+Errors-To: driverdev-devel-bounces@linuxdriverproject.org
+Sender: driverdev-devel-bounces@linuxdriverproject.org
+To: Samuel Ortiz <sameo@linux.intel.com>, Lee Jones <lee.jones@linaro.org>, Chris Ball <cjb@laptop.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Maxim Levitsky <maximlevitsky@gmail.com>, Alex Dubov <oakad@yahoo.com>, Dan Carpenter <dan.carpenter@oracle.com>
+Cc: driverdev-devel@linuxdriverproject.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, wei_wang@realsil.com.cn, rogerable@realtek.com
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <chris@printf.net>
-Cc: Luciano Coelho <luciano.coelho@intel.com>, Ohad Ben-Cohen <ohad@wizery.com>, linux-mmc@vger.kernel.org
 
-Hi Chris,
+From: Roger Tseng <rogerable@realtek.com>
 
-Thank you for your comments!
+This patchset adds modules to support Realtek USB vendor specific class flash
+card reader: one base module in MFD subsystem and two host modules in both mmc
+and memstick subsystems. The architecture is similar to rtsx_pci.
 
-I'm only familiar with OMAP4 chip. I can't speak for other devices.
-AFAIK, if configured properly, even after pm_runtiem_put() is called,
-sdio on OMAP4 can generate wake-up events when interrupts occur, so
-that CPU _will_ receive the interrupts. So everything should work as
-long as the driver calls pm_runtime_get() before handling the IRQ,
-which involves reading/writing registers.
+This work is done primarily to replace the staging driver: staging/rts5139,
+which doesn't utilize mmc nor memstick subsystems. Once the patchset or its
+revision is applied, we may need Greg's help to remove the staging one.
 
-I'm not an expert about WLAN devices. But my understanding is wl1271
-merely uses sdio as the way to talk to cpu. So turning off sdio
-doesn't mean turning off the entire WLAN device, am I right? What I'm
-suggesting here is turning off sdio when it's not used, not the entire
-WLAN device.
+v2:
+1. Fix potential buffer overflow in rtsx_usb_seq_write_register()
+2. Remove unnecessary casting and messages
+2. Revise coding style and white spaces
 
-Thanks again.
+Roger Tseng (3):
+  mfd: Add realtek USB card reader driver
+  mmc: Add realtek USB sdmmc host driver
+  memstick: Add realtek USB memstick host driver
 
-On Mon, Jan 13, 2014 at 9:27 PM, Chris Ball <chris@printf.net> wrote:
-> Hi,
->
-> On Tue, Jan 14 2014, Chao Xu wrote:
->> The patch "SDIO Runtime PM Support" implements the pm for wl12xx
->> driver this way: the power for sdio is on whenever the WLAN interface
->> is on, and the power is down only when the interface is down.
->> Is it possible to do pm in a more fine-grained way, such as only
->> turning on the power when reading/writing through sdio? An example is
->> the mmc_blk_issue_rq() in drivers/mmc/card/block.c, where the host is
->> released when there are no more requests. And in turn the host driver,
->> such as omap_hsmmc.c, calls pm_runtime_put_autosuspend().
->> Is there any fundamental argument against doing fine-grained runtime
->> pm for sdio? Or is it just too much trouble for too little power
->> saved?
->> Thank you!
->
-> I feel like I must be missing something, but:
->
-> Network devices generate interrupts when you have new network activity
-> to process, and to generate an interrupt they need to be turned on.
->
-> How would you avoid having the WLAN device be unpowered while someone
-> is trying to talk to you?
->
-> - Chris.
-> --
-> Chris Ball   <chris@printf.net>   <http://printf.net/>
-
-
+ drivers/memstick/host/Kconfig       |   10 +
+ drivers/memstick/host/Makefile      |    1 +
+ drivers/memstick/host/rtsx_usb_ms.c |  855 ++++++++++++++++++++
+ drivers/mfd/Kconfig                 |   10 +
+ drivers/mfd/Makefile                |    1 +
+ drivers/mfd/rtsx_usb.c              |  788 ++++++++++++++++++
+ drivers/mmc/host/Kconfig            |    7 +
+ drivers/mmc/host/Makefile           |    1 +
+ drivers/mmc/host/rtsx_usb_sdmmc.c   | 1509 +++++++++++++++++++++++++++++++++++
+ include/linux/mfd/rtsx_usb.h        |  619 ++++++++++++++
+ 10 files changed, 3801 insertions(+)
+ create mode 100644 drivers/memstick/host/rtsx_usb_ms.c
+ create mode 100644 drivers/mfd/rtsx_usb.c
+ create mode 100644 drivers/mmc/host/rtsx_usb_sdmmc.c
+ create mode 100644 include/linux/mfd/rtsx_usb.h
 
 -- 
-Regards,
-Chao Xu
+1.8.2
