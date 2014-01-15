@@ -1,194 +1,81 @@
-From: Dinh Nguyen <dinh.linux@gmail.com>
-Subject: Re: [PATCHv9 1/4] clk: socfpga: Add a clk-phase property to the "altr,
- socfpga-gate-clk"
-Date: Wed, 15 Jan 2014 06:36:52 -0600
-Message-ID: <52D680E4.6090608@gmail.com>
-References: <1389303079-19808-1-git-send-email-dinguyen@altera.com> <1389303079-19808-2-git-send-email-dinguyen@altera.com> <52CF6D67.1000803@samsung.com>
+From: zhangfei <zhangfei.gao@linaro.org>
+Subject: Re: [PATCH] mmc: dw_mmc: fix dw_mci_get_cd
+Date: Wed, 15 Jan 2014 21:56:26 +0800
+Message-ID: <52D6938A.9050806@linaro.org>
+References: <1389770159-21125-1-git-send-email-zhangfei.gao@linaro.org> <1389780469-32633-1-git-send-email-zhangfei.gao@linaro.org> <001701cf11e9$25b5fe50$7121faf0$%jun@samsung.com> <52D67A9B.4090607@linaro.org> <001c01cf11ed$039b6270$0ad22750$%jun@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=EUC-KR
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-oa0-f48.google.com ([209.85.219.48]:54503 "EHLO
-	mail-oa0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751362AbaAOMgW (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Jan 2014 07:36:22 -0500
-In-Reply-To: <52CF6D67.1000803@samsung.com>
+Received: from mail-pa0-f46.google.com ([209.85.220.46]:58389 "EHLO
+	mail-pa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751037AbaAON4q (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Jan 2014 08:56:46 -0500
+Received: by mail-pa0-f46.google.com with SMTP id rd3so1176593pab.33
+        for <linux-mmc@vger.kernel.org>; Wed, 15 Jan 2014 05:56:46 -0800 (PST)
+In-Reply-To: <001c01cf11ed$039b6270$0ad22750$%jun@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>, dinguyen@altera.com, arnd@arndb.de, cjb@laptop.org, tgih.jun@samsung.com, heiko@sntech.de, dianders@chromium.org, alim.akhtar@samsung.com, bzhao@marvell.com, mturquette@linaro.org
-Cc: zhangfei.gao@linaro.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, devicetree@vger.kernel.org
+To: Seungwon Jeon <tgih.jun@samsung.com>, 'Kevin Hilman' <khilman@linaro.org>, 'Sachin Kamat' <sachin.kamat@linaro.org>, 'Chris Ball' <cjb@laptop.org>, 'Arnd Bergmann' <arnd@arndb.de>, 'Mike Turquette' <mturquette@linaro.org>, 'Jaehoon Chung' <jh80.chung@samsung.com>
+Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, patches@linaro.org
 
-Hi Mike,
 
-On 1/9/14 9:47 PM, Jaehoon Chung wrote:
-> Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
->
-> On 01/10/2014 06:31 AM, dinguyen@altera.com wrote:
->> From: Dinh Nguyen <dinguyen@altera.com>
->>
->> The clk-phase property is used to represent the 2 clock phase values that is
->> needed for the SD/MMC driver. Add a prepare function to the clk_ops, that will
->> use the syscon driver to set sdmmc_clk's phase shift that is located in the
->> system manager.
->>
->> Signed-off-by: Dinh Nguyen <dinguyen@altera.com>
->> Acked-by: Zhangfei Gao <zhangfei.gao@linaro.org>
->> ---
->> v9: none
->> v8: Use degrees in the clk-phase binding property
->> v7: Add dts property to represent the clk phase of the sdmmc_clk. Add a
->>     prepare function to the gate clk that will toggle clock phase setting.
->>     Remove the "altr,socfpga-sdmmc-sdr-clk" clock type.
->> v6: Add a new clock type "altr,socfpga-sdmmc-sdr-clk" that will be used to
->>     set the phase shift settings.
->> v5: Use the "snps,dw-mshc" binding
->> v4: Use the sdmmc_clk prepare function to set the phase shift settings
->> v3: Not use the syscon driver because as of 3.13-rc1, the syscon driver is
->>     loaded after the clock driver.
->> v2: Use the syscon driver
->> ---
->>  .../devicetree/bindings/clock/altr_socfpga.txt     |    5 ++
->>  arch/arm/boot/dts/socfpga.dtsi                     |    1 +
->>  drivers/clk/socfpga/clk-gate.c                     |   68 ++++++++++++++++++++
->>  3 files changed, 74 insertions(+)
->>
->> diff --git a/Documentation/devicetree/bindings/clock/altr_socfpga.txt b/Documentation/devicetree/bindings/clock/altr_socfpga.txt
->> index 0045433..5dfd145 100644
->> --- a/Documentation/devicetree/bindings/clock/altr_socfpga.txt
->> +++ b/Documentation/devicetree/bindings/clock/altr_socfpga.txt
->> @@ -23,3 +23,8 @@ Optional properties:
->>          and the bit index.
->>  - div-reg : For "socfpga-gate-clk", div-reg contains the divider register, bit shift,
->>          and width.
->> +- clk-phase : For the sdmmc_clk, contains the value of the clock phase that controls
->> +	the SDMMC CIU clock. The first value is the clk_sample(smpsel), and the second
->> +	value is the cclk_in_drv(drvsel). The clk-phase is used to enable the correct
->> +	hold/delay times that is needed for the SD/MMC CIU clock. The values of both
->> +	can be 0-315 degrees, in 45 degree increments.
->> diff --git a/arch/arm/boot/dts/socfpga.dtsi b/arch/arm/boot/dts/socfpga.dtsi
->> index f936476..e776512 100644
->> --- a/arch/arm/boot/dts/socfpga.dtsi
->> +++ b/arch/arm/boot/dts/socfpga.dtsi
->> @@ -413,6 +413,7 @@
->>  						compatible = "altr,socfpga-gate-clk";
->>  						clocks = <&f2s_periph_ref_clk>, <&main_nand_sdmmc_clk>, <&per_nand_mmc_clk>;
->>  						clk-gate = <0xa0 8>;
->> +						clk-phase = <0 135>;
->>  					};
->>  
->>  					nand_x_clk: nand_x_clk {
->> diff --git a/drivers/clk/socfpga/clk-gate.c b/drivers/clk/socfpga/clk-gate.c
->> index 4efcf4e..501d513 100644
->> --- a/drivers/clk/socfpga/clk-gate.c
->> +++ b/drivers/clk/socfpga/clk-gate.c
->> @@ -19,7 +19,9 @@
->>  #include <linux/clkdev.h>
->>  #include <linux/clk-provider.h>
->>  #include <linux/io.h>
->> +#include <linux/mfd/syscon.h>
->>  #include <linux/of.h>
->> +#include <linux/regmap.h>
->>  
->>  #include "clk.h"
->>  
->> @@ -35,6 +37,11 @@
->>  
->>  #define to_socfpga_gate_clk(p) container_of(p, struct socfpga_gate_clk, hw.hw)
->>  
->> +/* SDMMC Group for System Manager defines */
->> +#define SYSMGR_SDMMCGRP_CTRL_OFFSET    0x108
->> +#define SYSMGR_SDMMC_CTRL_SET(smplsel, drvsel) \
->> +	((((smplsel) & 0x7) << 3) | (((drvsel) & 0x7) << 0))
->> +
->>  static u8 socfpga_clk_get_parent(struct clk_hw *hwclk)
->>  {
->>  	u32 l4_src;
->> @@ -115,7 +122,61 @@ static unsigned long socfpga_clk_recalc_rate(struct clk_hw *hwclk,
->>  	return parent_rate / div;
->>  }
->>  
->> +static int socfpga_clk_prepare(struct clk_hw *hwclk)
->> +{
->> +	struct socfpga_gate_clk *socfpgaclk = to_socfpga_gate_clk(hwclk);
->> +	struct regmap *sys_mgr_base_addr;
->> +	int i;
->> +	u32 hs_timing;
->> +	u32 clk_phase[2];
->> +
->> +	if (socfpgaclk->clk_phase[0] || socfpgaclk->clk_phase[1]) {
->> +		sys_mgr_base_addr = syscon_regmap_lookup_by_compatible("altr,sys-mgr");
->> +		if (IS_ERR(sys_mgr_base_addr)) {
->> +			pr_err("%s: failed to find altr,sys-mgr regmap!\n", __func__);
->> +			return -EINVAL;
->> +		}
->> +
->> +		for (i = 0; i < 2; i++) {
->> +			switch (socfpgaclk->clk_phase[i]) {
->> +			case 0:
->> +				clk_phase[i] = 0;
->> +				break;
->> +			case 45:
->> +				clk_phase[i] = 1;
->> +				break;
->> +			case 90:
->> +				clk_phase[i] = 2;
->> +				break;
->> +			case 135:
->> +				clk_phase[i] = 3;
->> +				break;
->> +			case 180:
->> +				clk_phase[i] = 4;
->> +				break;
->> +			case 225:
->> +				clk_phase[i] = 5;
->> +				break;
->> +			case 270:
->> +				clk_phase[i] = 6;
->> +				break;
->> +			case 315:
->> +				clk_phase[i] = 7;
->> +				break;
->> +			default:
->> +				clk_phase[i] = 0;
->> +				break;
->> +			}
->> +		}
->> +		hs_timing = SYSMGR_SDMMC_CTRL_SET(clk_phase[0], clk_phase[1]);
->> +		regmap_write(sys_mgr_base_addr, SYSMGR_SDMMCGRP_CTRL_OFFSET,
->> +			hs_timing);
->> +	}
->> +	return 0;
->> +}
->> +
->>  static struct clk_ops gateclk_ops = {
->> +	.prepare = socfpga_clk_prepare,
->>  	.recalc_rate = socfpga_clk_recalc_rate,
->>  	.get_parent = socfpga_clk_get_parent,
->>  	.set_parent = socfpga_clk_set_parent,
->> @@ -126,6 +187,7 @@ static void __init __socfpga_gate_init(struct device_node *node,
->>  {
->>  	u32 clk_gate[2];
->>  	u32 div_reg[3];
->> +	u32 clk_phase[2];
->>  	u32 fixed_div;
->>  	struct clk *clk;
->>  	struct socfpga_gate_clk *socfpga_clk;
->> @@ -166,6 +228,12 @@ static void __init __socfpga_gate_init(struct device_node *node,
->>  		socfpga_clk->div_reg = 0;
->>  	}
->>  
->> +	rc = of_property_read_u32_array(node, "clk-phase", clk_phase, 2);
->> +	if (!rc) {
->> +		socfpga_clk->clk_phase[0] = clk_phase[0];
->> +		socfpga_clk->clk_phase[1] = clk_phase[1];
->> +	}
->> +
->>  	of_property_read_string(node, "clock-output-names", &clk_name);
->>  
->>  	init.name = clk_name;
->>
-Can you apply this to your clk tree?
 
-Thanks,
-Dinh
+On 01/15/2014 08:26 PM, Seungwon Jeon wrote:
 
+>>>> @@ -1033,7 +1033,8 @@ static int dw_mci_get_cd(struct mmc_host *mmc)
+>>>>    	int present;
+>>>>    	struct dw_mci_slot *slot = mmc_priv(mmc);
+>>>>    	struct dw_mci_board *brd = slot->host->pdata;
+>>>> -	int gpio_cd = !mmc_gpio_get_cd(mmc);
+>>>> +	struct dw_mci *host = slot->host;
+>>>> +	int gpio_cd = mmc_gpio_get_cd(mmc);
+>>>>
+>>>>    	/* Use platform get_cd function, else try onboard card detect */
+>>>>    	if (brd->quirks & DW_MCI_QUIRK_BROKEN_CARD_DETECTION)
+>>>> @@ -1041,11 +1042,12 @@ static int dw_mci_get_cd(struct mmc_host *mmc)
+>>>>    	else if (brd->get_cd)
+>>>>    		present = !brd->get_cd(slot->id);
+>>>>    	else if (!IS_ERR_VALUE(gpio_cd))
+>>>> -		present = !!gpio_cd;
+>>>> +		present = !gpio_cd;
+>>> !!gpio_cd or gpio_cd is correct, isn't it?
+>>>
+>>
+>> No, mmc_gpio_get_cd(mmc) has to revert.
+> I'm missing something?
+> If card is detected, mmc_gpio_get_cd() returns non-zero, right?
+> I guess gpio_cd should be kept.
+> 
+
+Hmm, looks you are right.
+Though not see clearly mmc_gpio_get_cd declaratoin, other drivers
+directly set get_cd as mmc_gpio_get_cd.
+.get_cd	= mmc_gpio_get_cd
+
+However, in our board cd =0 when card is deteced while cd=1 when card is
+removed.
+In order to mmc_gpio_get_cd return 1, MMC_CAP2_CD_ACTIVE_HIGH has to be
+set, as well as new property "caps2-mmc-cd-active-low".
+
+--- a/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt
++++ b/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt
+@@ -73,6 +73,8 @@ Optional properties:
++* caps2-mmc-cd-active-low: cd pin is low when card active
++
+
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
++       if (of_find_property(np, "caps2-mmc-cd-active-low", NULL))
++               pdata->caps2 |= MMC_CAP2_CD_ACTIVE_HIGH;
++
+
+But it looks strange "cd-active-low" describing "CD_ACTIVE_HIGH" flag.
+When card active, cd = 0, and ACTIVE_HIGH is required to make
+mmc_gpio_get_cd return 1.
+int mmc_gpio_get_cd(struct mmc_host *host)
+{
+        return !gpio_get_value_cansleep(ctx->cd_gpio) ^
+                !!(host->caps2 & MMC_CAP2_CD_ACTIVE_HIGH);
+}
+
+Thanks
