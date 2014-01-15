@@ -1,46 +1,33 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [PATCH] mmc: dw_mmc: fix dw_mci_get_cd
-Date: Wed, 15 Jan 2014 15:20:16 +0100
-Message-ID: <9483154.XYFILpUqYN@wuerfel>
-References: <1389770159-21125-1-git-send-email-zhangfei.gao@linaro.org> <52D6938A.9050806@linaro.org> <3154671.7LPLgq8X4K@wuerfel>
+From: Chris Ball <chris@printf.net>
+Subject: Re: [GIT PULL] MMC updates for mmc-next for 3.14, take 1
+Date: Wed, 15 Jan 2014 14:28:20 +0000
+Message-ID: <86vbxl8gl7.fsf@void.printf.net>
+References: <CAPDyKFpNgZ1ExXMbz7q4QqMNnCrFFPxrVtzB3cX1D3C96e0HLQ@mail.gmail.com>
+	<CAPDyKFrY8NaTSOT9BTWFWqCbwtcqMJoXAkt5bDvRLRf1==bN9g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7Bit
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.17.9]:64756 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751725AbaAOOUX (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Jan 2014 09:20:23 -0500
-In-Reply-To: <3154671.7LPLgq8X4K@wuerfel>
+Received: from void.printf.net ([89.145.121.20]:54222 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751774AbaAOO2W (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 15 Jan 2014 09:28:22 -0500
+In-Reply-To: <CAPDyKFrY8NaTSOT9BTWFWqCbwtcqMJoXAkt5bDvRLRf1==bN9g@mail.gmail.com>
+	(Ulf Hansson's message of "Tue, 14 Jan 2014 09:40:50 +0100")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: zhangfei <zhangfei.gao@linaro.org>
-Cc: Seungwon Jeon <tgih.jun@samsung.com>, 'Kevin Hilman' <khilman@linaro.org>, 'Sachin Kamat' <sachin.kamat@linaro.org>, 'Chris Ball' <cjb@laptop.org>, 'Mike Turquette' <mturquette@linaro.org>, 'Jaehoon Chung' <jh80.chung@samsung.com>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, patches@linaro.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>
 
-On Wednesday 15 January 2014 14:59:59 Arnd Bergmann wrote:
-> On Wednesday 15 January 2014 21:56:26 zhangfei wrote:
-> > However, in our board cd =0 when card is deteced while cd=1 when card is
-> > removed.
-> > In order to mmc_gpio_get_cd return 1, MMC_CAP2_CD_ACTIVE_HIGH has to be
-> > set, as well as new property "caps2-mmc-cd-active-low".
-> > 
-> > --- a/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt
-> > +++ b/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt
-> > @@ -73,6 +73,8 @@ Optional properties:
-> > +* caps2-mmc-cd-active-low: cd pin is low when card active
-> > +
-> > 
-> > diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> > +       if (of_find_property(np, "caps2-mmc-cd-active-low", NULL))
-> > +               pdata->caps2 |= MMC_CAP2_CD_ACTIVE_HIGH;
-> > +
-> 
-> The MMC_CAP2_CD_ACTIVE_HIGH flag should only be required for
-> legacy platforms. With DT parsing, you can normally specify
-> the polarity of the GPIO line in the GPIO specifier in DT.
+Hi Ulf,
 
-I missed the fact that we already have a "cd-inverted" property
-as specified in bindings/mmc/mmc.txt. If your GPIO controller
-does not handle polarity, you can use that.
+On Tue, Jan 14 2014, Ulf Hansson wrote:
+> Any thoughts on this pull request?
 
-	Arnd
+Sorry for the delay -- I'm a little worried about these and would like
+lots of testing, so I think the best time to merge them to linux-next
+will be immediately after 3.14-rc1 is released.  Hope that's okay,
+thanks.
+
+- Chris.
+-- 
+Chris Ball   <chris@printf.net>   <http://printf.net/>
