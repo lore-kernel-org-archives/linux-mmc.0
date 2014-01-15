@@ -1,51 +1,82 @@
-From: Arnd Bergmann <arnd@arndb.de>
+From: Russell King - ARM Linux <linux@arm.linux.org.uk>
 Subject: Re: [PATCH] mmc: dw_mmc: fix dw_mci_get_cd
-Date: Wed, 15 Jan 2014 16:54:31 +0100
-Message-ID: <201401151654.31843.arnd@arndb.de>
-References: <1389770159-21125-1-git-send-email-zhangfei.gao@linaro.org> <002c01cf11ff$6790a8a0$36b1f9e0$%jun@samsung.com> <52D6A9FF.3000603@linaro.org>
+Date: Wed, 15 Jan 2014 15:59:19 +0000
+Message-ID: <20140115155919.GN15937@n2100.arm.linux.org.uk>
+References: <52D6A9FF.3000603@linaro.org> <1389801061-6023-1-git-send-email-zhangfei.gao@linaro.org>
 Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="euc-kr"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.17.9]:56090 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751962AbaAOPyq (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Jan 2014 10:54:46 -0500
-In-Reply-To: <52D6A9FF.3000603@linaro.org>
+Received: from gw-1.arm.linux.org.uk ([78.32.30.217]:37672 "EHLO
+	pandora.arm.linux.org.uk" rhost-flags-OK-OK-OK-FAIL)
+	by vger.kernel.org with ESMTP id S1752298AbaAOP7d (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Jan 2014 10:59:33 -0500
+Content-Disposition: inline
+In-Reply-To: <1389801061-6023-1-git-send-email-zhangfei.gao@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: zhangfei <zhangfei.gao@linaro.org>
-Cc: Seungwon Jeon <tgih.jun@samsung.com>, 'Kevin Hilman' <khilman@linaro.org>, 'Sachin Kamat' <sachin.kamat@linaro.org>, 'Chris Ball' <cjb@laptop.org>, 'Mike Turquette' <mturquette@linaro.org>, 'Jaehoon Chung' <jh80.chung@samsung.com>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, patches@linaro.org
+To: Zhangfei Gao <zhangfei.gao@linaro.org>
+Cc: Kevin Hilman <khilman@linaro.org>, Sachin Kamat <sachin.kamat@linaro.org>, Chris Ball <cjb@laptop.org>, Arnd Bergmann <arnd@arndb.de>, Mike Turquette <mturquette@linaro.org>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, patches@linaro.org
 
-On Wednesday 15 January 2014, zhangfei wrote:
+On Wed, Jan 15, 2014 at 11:51:01PM +0800, Zhangfei Gao wrote:
+> Introduced from commit bf626e5550f24aec24975a0e85ad8e572ca76a6b
+> CDETECT is ignored since negated return value of mmc_gpio_get_cd(mmc)
+> can not be checked by IS_ERR_VALUE.
+> Add spin_lock_bh(&host->lock) for atomic accessing DW_MMC_CARD_PRESENT,
+> otherwise sd detect may occasionally fail.
 > 
-> On 01/15/2014 10:38 PM, Seungwon Jeon wrote:
-> >> Hmm, looks you are right.
-> >> Though not see clearly mmc_gpio_get_cd declaratoin, other drivers
-> >> directly set get_cd as mmc_gpio_get_cd.
-> >> .get_cd	= mmc_gpio_get_cd
-> >>
-> >> However, in our board cd =0 when card is deteced while cd=1 when card is
-> >> removed.
-> >> In order to mmc_gpio_get_cd return 1, MMC_CAP2_CD_ACTIVE_HIGH has to be
-> >> set, as well as new property "caps2-mmc-cd-active-low".
-> > 
-> > Ok, you could do more.
-> > mmc_gpio_get_cd() is expected to return non-zero if card is detection.
+> Signed-off-by: Zhangfei Gao <zhangfei.gao@linaro.org>
+> Reported-by: Kevin Hilman <khilman@linaro.org>
+> Reviewed-by: Sachin Kamat <sachin.kamat@linaro.org>
+> Tested-by: Sachin Kamat <sachin.kamat@linaro.org>
+> ---
+>  drivers/mmc/host/dw_mmc.c  |   12 +++++++++---
+>  include/linux/mmc/dw_mmc.h |    1 +
+>  2 files changed, 10 insertions(+), 3 deletions(-)
 > 
-> > I think your board seems not to use pull-up on GPIO line for card detection.
-> > So, MMC_CAP2_CD_ACTIVE_HIGH would be needed.
-> 
-> Unfortunately, the specific cd pin can not be configured.
-> Suspect on our board the cd =1 when card is inserted, can not measure as
-> no clear resister and need check with hardware guy tomorrow.
-> 
-> "cd-inverted" may be required as mentioned by Arnd.
-> Will update the patch as following if no problem.
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index a776f24f4311..8326e54b96a8 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -1033,7 +1033,8 @@ static int dw_mci_get_cd(struct mmc_host *mmc)
+>  	int present;
+>  	struct dw_mci_slot *slot = mmc_priv(mmc);
+>  	struct dw_mci_board *brd = slot->host->pdata;
+> -	int gpio_cd = !mmc_gpio_get_cd(mmc);
+> +	struct dw_mci *host = slot->host;
+> +	int gpio_cd = mmc_gpio_get_cd(mmc);
+>  
+>  	/* Use platform get_cd function, else try onboard card detect */
+>  	if (brd->quirks & DW_MCI_QUIRK_BROKEN_CARD_DETECTION)
+> @@ -1041,11 +1042,12 @@ static int dw_mci_get_cd(struct mmc_host *mmc)
+>  	else if (brd->get_cd)
+>  		present = !brd->get_cd(slot->id);
+>  	else if (!IS_ERR_VALUE(gpio_cd))
+> -		present = !!gpio_cd;
+> +		present = gpio_cd ^ brd->cd_inverted;
 
-The patch looks right, but I wonder if a better longer-term
-solution would be to just the common mmc_of_parse() function
-rather than duplicating it in dw_mmc.
+I assume you haven't read the contents of mmc_gpio_get_cd()?
 
-	Arnd
+int mmc_gpio_get_cd(struct mmc_host *host)
+{
+        struct mmc_gpio *ctx = host->slot.handler_priv;
+
+        if (!ctx || !gpio_is_valid(ctx->cd_gpio))
+                return -ENOSYS;
+
+        return !gpio_get_value_cansleep(ctx->cd_gpio) ^
+                !!(host->caps2 & MMC_CAP2_CD_ACTIVE_HIGH);
+}
+EXPORT_SYMBOL(mmc_gpio_get_cd);
+
+What facility does host->caps2 give you here?  Yes, you don't need
+your own cd_inverted stuff.  You should check that you're interpreting
+this correctly.  When this returns true, there is a card present.
+
+When MMC_CAP2_CD_ACTIVE_HIGH is set, gpio_get_value_cansleep() must
+return non-zero when a card is inserted.  When it isn't set,
+gpio_get_value_cansleep must return zero when a card is inserted.
+
+-- 
+FTTC broadband for 0.8mile line: 5.8Mbps down 500kbps up.  Estimation
+in database were 13.1 to 19Mbit for a good line, about 7.5+ for a bad.
+Estimate before purchase was "up to 13.2Mbit".
