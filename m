@@ -1,63 +1,78 @@
-From: Lothar =?UTF-8?B?V2HDn21hbm4=?= <LW@KARO-electronics.de>
-Subject: Re: [PATCH 1/1] mmc: sdhci: fix lockdep error on tunning routine
-Date: Wed, 15 Jan 2014 08:46:53 +0100
-Message-ID: <20140115084653.4f6aece8@ipc1.ka-ro>
-References: <1387797184-18958-1-git-send-email-b29396@freescale.com>
-	<CAA+hA=TRQP7hS3+iXyHg3FuNQKA=chJi7Ne47Ew_4RJcQ6yong@mail.gmail.com>
-	<20140113120435.GQ31570@twins.programming.kicks-ass.net>
-	<CAA+hA=Sb+Ve2xyto9v6YirqcXnePK2aHzJgjGZOhEQJK5Z0jqQ@mail.gmail.com>
+From: Mike Turquette <mturquette@linaro.org>
+Subject: Re: [PATCH 1/2] clk: hisilicon: add hi3620_mmc_clks
+Date: Wed, 15 Jan 2014 00:29:08 -0800
+Message-ID: <20140115082908.4167.34040@quantum>
+References: <1389604469-8064-1-git-send-email-zhangfei.gao@linaro.org>
+ <1389604469-8064-2-git-send-email-zhangfei.gao@linaro.org>
+ <20140114201740.4167.52076@quantum> <52D5E709.7040105@linaro.org>
+ <20140115035339.4167.51194@quantum> <52D623CC.50009@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail.karo-electronics.de ([81.173.242.67]:63183 "EHLO
-	mail.karo-electronics.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751344AbaAOHry convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Jan 2014 02:47:54 -0500
-In-Reply-To: <CAA+hA=Sb+Ve2xyto9v6YirqcXnePK2aHzJgjGZOhEQJK5Z0jqQ@mail.gmail.com>
+Received: from mail-yh0-f52.google.com ([209.85.213.52]:43053 "EHLO
+	mail-yh0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751520AbaAOI3Q convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Jan 2014 03:29:16 -0500
+Received: by mail-yh0-f52.google.com with SMTP id v1so444612yhn.25
+        for <linux-mmc@vger.kernel.org>; Wed, 15 Jan 2014 00:29:16 -0800 (PST)
+In-Reply-To: <52D623CC.50009@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Dong Aisheng <dongas86@gmail.com>
-Cc: Peter Zijlstra <peterz@infradead.org>, Chris Ball <cjb@laptop.org>, Sascha Hauer <s.hauer@pengutronix.de>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Shawn Guo <shawn.guo@linaro.org>, Dong Aisheng <b29396@freescale.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+To: Haojian Zhuang <haojian.zhuang@linaro.org>, zhangfei <zhangfei.gao@linaro.org>, Chris Ball <cjb@laptop.org>, Arnd Bergmann <arnd@arndb.de>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, brooke.wangzhigang@huawei.com
+Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, patches@linaro.org, devicetree@vger.kernel.org, Kevin Hilman <khilman@linaro.org>
 
-Hi,
-
-Dong Aisheng wrote:
-> On Mon, Jan 13, 2014 at 8:04 PM, Peter Zijlstra <peterz@infradead.org=
-> wrote:
-> > On Thu, Dec 26, 2013 at 03:58:20PM +0800, Dong Aisheng wrote:
-> >> > It's strange that this issue did not happen on kernel 3.10.17 wi=
-th the same
-> >> > code. And looking at the code, before call spin_lock we already =
-disable the mmc
-> >> > controller irq, per on my understanding, the deadlock given by l=
-ockdep may not
-> >> > be able to happen(pls fix me if wrong).
-> >> > May the lockdep not track the specific irq disable?
-> >> > Copy lockdep guy to comment.
+Quoting Haojian Zhuang (2014-01-14 21:59:40)
+> 
+> On 01/15/2014 11:53 AM, Mike Turquette wrote:
+> > Quoting zhangfei (2014-01-14 17:40:25)
+> >> Dear Mike
+> >>
+> >> On 01/15/2014 04:17 AM, Mike Turquette wrote:
+> >>> Quoting Zhangfei Gao (2014-01-13 01:14:28)
+> >>>> Suggest by Arnd: abstract mmc tuning as clock behavior,
+> >>>> also because different soc have different tuning method and registers.
+> >>>> hi3620_mmc_clks is added to handle mmc clock specifically on hi3620.
+> >>>>
+> >>>> Signed-off-by: Zhangfei Gao <zhangfei.gao@linaro.org>
+> >>>> Acked-by: Arnd Bergmann <arnd@arndb.de>
+> >>>> Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
+> >>> Patch looks good to me with one exception. I do not have
+> >>> Documentation/devicetree/bindings/arm/hisilicon/hisilicon.txt in the
+> >>> clk-next branch. Is there a stable branch I can pull in as a dependency?
+> >> Mach-hisi just have been uploaeded.
+> >> Have tried next-20140114, the patch can be applied successfully.
+> >> While v3.13-rc8 still can not.
+> >>
+> >> Is this fine?
+> > Can you give me a link to the branch that introduces
+> > Documentation/devicetree/bindings/arm/hisilicon/hisilicon.txt?
 > >
-> > No, lockdep also doesn't know only that one line can take this lock=
-=2E
-> > Lockdep only knows a lock is taken from IRQ context, and disabling =
-one
-> > line still allows IRQs to happen and therefore it yells.
->=20
-> Okay, thanks for the information.
-> If that, kernel 3.10.17 has the same code, do you know why it does no=
-t trigger
-> such lockdep error?
->=20
-compiled with CONFIG_LOCKDEP disabled?
+> > I guess the patch introducing it is going through arm-soc. Is this going
+> > in for 3.14? If so then perhaps the clk tree and the arm-soc tree can
+> > share a stable branch that introduces it.
+> >
+> > Regards,
+> > Mike
+> >
+> Some patches are merged into arm-soc, and others are in clk tree.
+> If sharing a stable branch between arm-soc and clk tree, it only means
+> that we need to revert all commits that are in arm-soc and clk tree.
+> I think it's too complex.
 
+I'm suggesting reverting any patches that are applied to arm-soc. I'm
+only suggesting that there might be a common branch that both the clk
+and arm-soc trees can depend on to fix this problem.
 
-Lothar Wa=C3=9Fmann
---=20
-___________________________________________________________
+> 
+> How about split the patch? The patch on document should enter in arm-soc.
 
-Ka-Ro electronics GmbH | Pascalstra=C3=9Fe 22 | D - 52076 Aachen
-Phone: +49 2408 1402-0 | Fax: +49 2408 1402-10
-Gesch=C3=A4ftsf=C3=BChrer: Matthias Kaussen
-Handelsregistereintrag: Amtsgericht Aachen, HRB 4996
+That is one approach. You might want to run it past the arm-soc folks
+first to see if they will take in the binding definition for 3.14.
 
-www.karo-electronics.de | info@karo-electronics.de
-___________________________________________________________
+Regards,
+Mike
+
+> 
+> Regards
+> Haojian
