@@ -1,53 +1,51 @@
-From: One Thousand Gnomes <gnomes@lxorguk.ukuu.org.uk>
-Subject: Re: [RFC PATCH] mmc: add Toshiba PCI SD controller driver
-Date: Wed, 15 Jan 2014 00:08:32 +0000
-Message-ID: <20140115000832.56c62878@alan.etchedpixels.co.uk>
-References: <201401142238.21879.linux@rainbow-software.org>
+From: zhangfei <zhangfei.gao@linaro.org>
+Subject: Re: [PATCH 1/3] mmc: dw_mmc: use slot-gpio to handle cd pin
+Date: Wed, 15 Jan 2014 09:09:09 +0800
+Message-ID: <52D5DFB5.7@linaro.org>
+References: <1389278112-7099-1-git-send-email-zhangfei.gao@linaro.org>	<1389278112-7099-2-git-send-email-zhangfei.gao@linaro.org>	<CAGa+x85awFYsrU9Gggirpaip3vggtSqu5GinVzss=nfNcp4nww@mail.gmail.com> <CAOesGMi5bK6siLQ2dVkR7P30+5zQa8qsyxa3UsWj0Kw9OEXCPw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lxorguk.ukuu.org.uk ([81.2.110.251]:51278 "EHLO
-	lxorguk.ukuu.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751662AbaAOAIp (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 14 Jan 2014 19:08:45 -0500
-In-Reply-To: <201401142238.21879.linux@rainbow-software.org>
+Received: from mail-pa0-f44.google.com ([209.85.220.44]:48063 "EHLO
+	mail-pa0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750928AbaAOBJb (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 14 Jan 2014 20:09:31 -0500
+Received: by mail-pa0-f44.google.com with SMTP id kq14so412165pab.3
+        for <linux-mmc@vger.kernel.org>; Tue, 14 Jan 2014 17:09:31 -0800 (PST)
+In-Reply-To: <CAOesGMi5bK6siLQ2dVkR7P30+5zQa8qsyxa3UsWj0Kw9OEXCPw@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ondrej Zary <linux@rainbow-software.org>
-Cc: linux-mmc@vger.kernel.org, Kernel development list <linux-kernel@vger.kernel.org>
+To: Olof Johansson <olof@lixom.net>, Kevin Hilman <khilman@linaro.org>
+Cc: Chris Ball <cjb@laptop.org>, Arnd Bergmann <arnd@arndb.de>, Mike Turquette <mturquette@linaro.org>, Rob Herring <robherring2@gmail.com>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, Kumar Gala <galak@codeaurora.org>, Haojian Zhuang <haojian.zhuang@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>, Patch Tracking <patches@linaro.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Tomasz Figa <tomasz.figa@gmail.com>
 
 
-> +	pr_debug("Command IRQ complete %d %d %x\n", cmd->opcode, cmd->error,
-> +	    cmd->flags);
 
-dev_dbg... (and a few other places)
+On 01/15/2014 01:23 AM, Olof Johansson wrote:
+> On Tue, Jan 14, 2014 at 7:58 AM, Kevin Hilman <khilman@linaro.org> wrote:
+>> On Thu, Jan 9, 2014 at 6:35 AM, Zhangfei Gao <zhangfei.gao@linaro.org> wrote:
+>>> Suggested by Jaehoon: Use slot-gpio to handle cd-gpio
+>>> Add function dw_mci_of_get_cd_gpio to check "cd-gpios" from dts.
+>>> mmc_gpio_request_cd and mmc_gpio_get_cd are used to handle cd pin
+>>>
+>>> Signed-off-by: Zhangfei Gao <zhangfei.gao@linaro.org>
+>>> Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
+>>
+>> The Samsung Arndale board started failing boot from MMC root tests
+>> starting with next-20140113 and I bisected it down to this patch.
+>> Reverting this patch on top of next-20140114 gets Arndale booting
+>> again from MMC.  Is there some supporting DT data that's missing for
+>> Arndale?
+>
+> Rather, it looks like this patch changes behaviour and no longer uses
+> dw_mci_get_cd() to find out if there's a card attached -- it switches
+> to rely only on GPIO (see the last chunk in the patch). That seems
+> broken?
+>
+Oops,
+Change using dw_mci_get_cd set flag DW_MMC_CARD_PRESENT.
+And dw_mci_get_cd is called from mmc_rescan, a litter later than 
+dw_mci_probe.
+Is that too late?
 
-
-> +/* Set MMC clock / power.
-> + * Note: This controller uses a simple divider scheme therefore it cannot run
-> + * SD/MMC cards at full speed (24/20MHz). HCLK (=33MHz PCI clock?) is too high
-> + * and the next slowest is 16MHz (div=2).
-> + */
-> +static void toshsd_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
-
-This has some very long delays with interrupts off from the
-spin_lock_irqsave. I guess thats hardly #1 priority though nor a killer.
-
-
-> +	/* reset */
-> +	toshsd_writew(host, SD_SOFTWARERESET, 0); /* assert */
-> +	mdelay(2);
-> +	toshsd_writew(host, SD_SOFTWARERESET, 1); /* deassert */
-> +	mdelay(2);
-
-This doesn't do quite what you might think - if the device is mmio mapped
-then the write can be posted so the mdelay(2) may not be 2mS. I guess if
-the old driver didn't do it then it was already plenty long enough...
-
-
-> +	base = pci_resource_start(pdev, 0);
-> +	dev_info(&pdev->dev, "MMIO %pa, IRQ %d\n", &base, pdev->irq);
-
-dbg
-
+Thanks
