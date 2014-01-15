@@ -1,64 +1,41 @@
-From: Sachin Kamat <sachin.kamat@linaro.org>
-Subject: Re: [PATCH 1/1] mmc: dw_mmc: Fix card detection regression
-Date: Wed, 15 Jan 2014 15:24:05 +0530
-Message-ID: <CAK9yfHwCxc2X4Q+xHFd_Xy3cQjMzNdxVrvgbpVjYijaOad+GBw@mail.gmail.com>
-References: <1389774667-18309-1-git-send-email-sachin.kamat@linaro.org>
-	<52D649C3.4020003@linaro.org>
-	<CAK9yfHzZo82oN5+UiXzo47190JKiVwwEh8ikTfz_==_A1PdNLA@mail.gmail.com>
-	<52D6584E.2020606@linaro.org>
+From: Peter Zijlstra <peterz@infradead.org>
+Subject: Re: [PATCH 1/1] mmc: sdhci: fix lockdep error on tunning routine
+Date: Wed, 15 Jan 2014 11:09:04 +0100
+Message-ID: <20140115100904.GX31570@twins.programming.kicks-ass.net>
+References: <1387797184-18958-1-git-send-email-b29396@freescale.com>
+ <CAA+hA=TRQP7hS3+iXyHg3FuNQKA=chJi7Ne47Ew_4RJcQ6yong@mail.gmail.com>
+ <20140113120435.GQ31570@twins.programming.kicks-ass.net>
+ <CAA+hA=Sb+Ve2xyto9v6YirqcXnePK2aHzJgjGZOhEQJK5Z0jqQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ob0-f170.google.com ([209.85.214.170]:50192 "EHLO
-	mail-ob0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751436AbaAOJyH (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Jan 2014 04:54:07 -0500
-Received: by mail-ob0-f170.google.com with SMTP id uy5so898807obc.15
-        for <linux-mmc@vger.kernel.org>; Wed, 15 Jan 2014 01:54:05 -0800 (PST)
-In-Reply-To: <52D6584E.2020606@linaro.org>
+Received: from merlin.infradead.org ([205.233.59.134]:60554 "EHLO
+	merlin.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751253AbaAOKJZ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Jan 2014 05:09:25 -0500
+Content-Disposition: inline
+In-Reply-To: <CAA+hA=Sb+Ve2xyto9v6YirqcXnePK2aHzJgjGZOhEQJK5Z0jqQ@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: zhangfei <zhangfei.gao@linaro.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, chris@printf.net, Seungwon Jeon <tgih.jun@samsung.com>, Patch Tracking <patches@linaro.org>, Jaehoon Chung <jh80.chung@samsung.com>, Arnd Bergmann <arnd@arndb.de>
+To: Dong Aisheng <dongas86@gmail.com>
+Cc: Dong Aisheng <b29396@freescale.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Shawn Guo <shawn.guo@linaro.org>, Sascha Hauer <s.hauer@pengutronix.de>, Chris Ball <cjb@laptop.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 
-On 15 January 2014 15:13, zhangfei <zhangfei.gao@linaro.org> wrote:
->
->
-> On 01/15/2014 05:39 PM, Sachin Kamat wrote:
->>>
->>> Thanks for the patch
->>> I just submitted one patch to fix the issue, in case you missed it.
->>
->>
->> Yes I did as I am not subscribed to mmc list.
->>
->>> Also spin_lock is required for atomic accessing DW_MMC_CARD_PRESENT.
->>> Otherwise sd detect may be failed sometimes.
->>>
->>> Could you help take a look.
->>
->>
->> I looked at and tested your patch [1] (which is similar to mine except
->> for the locking part).
->>
->> Since I do not have your patch in my mailbox, FWIW,
->>
->> Reviewed-by: Sachin Kamat <sachin.kamat@linaro.org>
->> Tested-by: Sachin Kamat <sachin.kamat@linaro.org>
->
->
-> Thanks Sachin,  that's great it works, all my mistake.
-> Then I resumit the patch with this and cc you.
+On Wed, Jan 15, 2014 at 03:19:27PM +0800, Dong Aisheng wrote:
+> On Mon, Jan 13, 2014 at 8:04 PM, Peter Zijlstra <peterz@infradead.org> wrote:
+> > On Thu, Dec 26, 2013 at 03:58:20PM +0800, Dong Aisheng wrote:
+> >> > It's strange that this issue did not happen on kernel 3.10.17 with the same
+> >> > code. And looking at the code, before call spin_lock we already disable the mmc
+> >> > controller irq, per on my understanding, the deadlock given by lockdep may not
+> >> > be able to happen(pls fix me if wrong).
+> >> > May the lockdep not track the specific irq disable?
+> >> > Copy lockdep guy to comment.
+> >
+> > No, lockdep also doesn't know only that one line can take this lock.
+> > Lockdep only knows a lock is taken from IRQ context, and disabling one
+> > line still allows IRQs to happen and therefore it yells.
+> 
+> Okay, thanks for the information.
+> If that, kernel 3.10.17 has the same code, do you know why it does not trigger
+> such lockdep error?
 
-If you are planning to re-submit, then you may please consider
-revising the commit message as follows:
-
-s/Introdeced/Introduced
-Please provide patch title after the commit Id in braces ("<patch title>").
-s/ingored/ignored
-
-You may also elaborate on why IS_ERR_VALUE(!mmc_gpio_get_cd(mmc)) does not work.
-
--- 
-With warm regards,
-Sachin
+No idea; there haven't really been big lockdep changes recently.
