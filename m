@@ -1,53 +1,41 @@
-From: Dong Aisheng <dongas86@gmail.com>
-Subject: Re: [PATCH 1/1] mmc: sdhci: fix lockdep error on tunning routine
-Date: Wed, 15 Jan 2014 18:27:49 +0800
-Message-ID: <CAA+hA=R=rYe=y0AFw1SBAA8CgSfiio=J3qWBUmwputC681FakA@mail.gmail.com>
-References: <1387797184-18958-1-git-send-email-b29396@freescale.com>
-	<CAA+hA=TRQP7hS3+iXyHg3FuNQKA=chJi7Ne47Ew_4RJcQ6yong@mail.gmail.com>
-	<20140113120435.GQ31570@twins.programming.kicks-ass.net>
-	<CAA+hA=Sb+Ve2xyto9v6YirqcXnePK2aHzJgjGZOhEQJK5Z0jqQ@mail.gmail.com>
-	<20140115100904.GX31570@twins.programming.kicks-ass.net>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+From: Sachin Kamat <sachin.kamat@linaro.org>
+Subject: [PATCH 1/1] mmc: dw_mmc: Fix NULL pointer dereference
+Date: Wed, 15 Jan 2014 15:59:13 +0530
+Message-ID: <1389781753-28217-1-git-send-email-sachin.kamat@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qc0-f181.google.com ([209.85.216.181]:53706 "EHLO
-	mail-qc0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751524AbaAOK1u (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Jan 2014 05:27:50 -0500
-Received: by mail-qc0-f181.google.com with SMTP id e9so779216qcy.12
-        for <linux-mmc@vger.kernel.org>; Wed, 15 Jan 2014 02:27:49 -0800 (PST)
-In-Reply-To: <20140115100904.GX31570@twins.programming.kicks-ass.net>
+Received: from mail-pb0-f44.google.com ([209.85.160.44]:56879 "EHLO
+	mail-pb0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750883AbaAOKda (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Jan 2014 05:33:30 -0500
+Received: by mail-pb0-f44.google.com with SMTP id rq2so952675pbb.17
+        for <linux-mmc@vger.kernel.org>; Wed, 15 Jan 2014 02:33:30 -0800 (PST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Peter Zijlstra <peterz@infradead.org>, Chris Ball <cjb@laptop.org>
-Cc: Dong Aisheng <b29396@freescale.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Shawn Guo <shawn.guo@linaro.org>, Sascha Hauer <s.hauer@pengutronix.de>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+To: linux-mmc@vger.kernel.org
+Cc: chris@printf.net, tgih.jun@samsung.com, jh80.chung@samsung.com, sachin.kamat@linaro.org, patches@linaro.org
 
-On Wed, Jan 15, 2014 at 6:09 PM, Peter Zijlstra <peterz@infradead.org> wrote:
-> On Wed, Jan 15, 2014 at 03:19:27PM +0800, Dong Aisheng wrote:
->> On Mon, Jan 13, 2014 at 8:04 PM, Peter Zijlstra <peterz@infradead.org> wrote:
->> > On Thu, Dec 26, 2013 at 03:58:20PM +0800, Dong Aisheng wrote:
->> >> > It's strange that this issue did not happen on kernel 3.10.17 with the same
->> >> > code. And looking at the code, before call spin_lock we already disable the mmc
->> >> > controller irq, per on my understanding, the deadlock given by lockdep may not
->> >> > be able to happen(pls fix me if wrong).
->> >> > May the lockdep not track the specific irq disable?
->> >> > Copy lockdep guy to comment.
->> >
->> > No, lockdep also doesn't know only that one line can take this lock.
->> > Lockdep only knows a lock is taken from IRQ context, and disabling one
->> > line still allows IRQs to happen and therefore it yells.
->>
->> Okay, thanks for the information.
->> If that, kernel 3.10.17 has the same code, do you know why it does not trigger
->> such lockdep error?
->
-> No idea; there haven't really been big lockdep changes recently.
+If mrq->sbc is not NULL but data->stop happens to be NULL,
+it will lead to NULL pointer dereferencing. Avoid this by
+having a NULL check for data->stop.
 
-Okay, thanks.
-Anyway, this patch fix should be needed to avoid the lockdep error.
+Signed-off-by: Sachin Kamat <sachin.kamat@linaro.org>
+---
+ drivers/mmc/host/dw_mmc.c |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-Chirs,
-Can you pick it up?
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index 9ded62c8225e..8b3e58a5f9ed 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -1345,7 +1345,7 @@ static void dw_mci_tasklet_func(unsigned long priv)
+ 
+ 			if (!err) {
+ 				if (!data->stop || mrq->sbc) {
+-					if (mrq->sbc)
++					if (mrq->sbc && data->stop)
+ 						data->stop->error = 0;
+ 					dw_mci_request_end(host, mrq);
+ 					goto unlock;
+-- 
+1.7.9.5
 
-Regards
-Dong Aisheng
