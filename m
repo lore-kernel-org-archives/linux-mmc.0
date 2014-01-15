@@ -1,109 +1,100 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: wl1271: sdio: is fine-grained runtime_pm possible?
-Date: Wed, 15 Jan 2014 11:46:42 +0100
-Message-ID: <CAPDyKFqDG-s6AVYQ4bP4CE_w1a6EyjQCD_ha_p0PV=2Hun6vFw@mail.gmail.com>
-References: <CAKZq+rdaCivZTFSTGt9_Q+3KFE9Ft0XfmWZ=1Vr7QcDDs9=Muw@mail.gmail.com>
-	<867ga39raz.fsf@void.printf.net>
-	<CAKZq+rf8HAhtjNw3CHPp2C0a2mv0d-zgN6VgdqC5rt4ysOkcpQ@mail.gmail.com>
-	<CAPDyKFoyn=PChen-1daxjrH=k+Wuju0T9r5a3HQz5ytch0-LZg@mail.gmail.com>
-	<CAKZq+rc5Tg+L02-x8hEWUEYoyXmtPg=Mg7scp8bj79u=fqqYcg@mail.gmail.com>
+From: Seungwon Jeon <tgih.jun@samsung.com>
+Subject: RE: [PATCH] mmc: dw_mmc: fix dw_mci_get_cd
+Date: Wed, 15 Jan 2014 20:58:47 +0900
+Message-ID: <001701cf11e9$25b5fe50$7121faf0$%jun@samsung.com>
+References: <1389770159-21125-1-git-send-email-zhangfei.gao@linaro.org>
+ <1389780469-32633-1-git-send-email-zhangfei.gao@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=ks_c_5601-1987
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qa0-f52.google.com ([209.85.216.52]:40075 "EHLO
-	mail-qa0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751004AbaAOKqn (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Jan 2014 05:46:43 -0500
-Received: by mail-qa0-f52.google.com with SMTP id j15so735411qaq.11
-        for <linux-mmc@vger.kernel.org>; Wed, 15 Jan 2014 02:46:42 -0800 (PST)
-In-Reply-To: <CAKZq+rc5Tg+L02-x8hEWUEYoyXmtPg=Mg7scp8bj79u=fqqYcg@mail.gmail.com>
+Received: from mailout2.samsung.com ([203.254.224.25]:45948 "EHLO
+	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751047AbaAOL6t (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Jan 2014 06:58:49 -0500
+Received: from epcpsbgr1.samsung.com
+ (u141.gpu120.samsung.co.kr [203.254.230.141])
+ by mailout2.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+ (7.0.4.24.0) 64bit (built Nov 17 2011))
+ with ESMTP id <0MZF009HSYLZ9W10@mailout2.samsung.com> for
+ linux-mmc@vger.kernel.org; Wed, 15 Jan 2014 20:58:47 +0900 (KST)
+In-reply-to: <1389780469-32633-1-git-send-email-zhangfei.gao@linaro.org>
+Content-language: ko
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chao Xu <caesarxuchao@gmail.com>
-Cc: Chris Ball <chris@printf.net>, Luciano Coelho <luciano.coelho@intel.com>, Ohad Ben-Cohen <ohad@wizery.com>, linux-mmc <linux-mmc@vger.kernel.org>
+To: 'Zhangfei Gao' <zhangfei.gao@linaro.org>, 'Kevin Hilman' <khilman@linaro.org>, 'Sachin Kamat' <sachin.kamat@linaro.org>, 'Chris Ball' <cjb@laptop.org>, 'Arnd Bergmann' <arnd@arndb.de>, 'Mike Turquette' <mturquette@linaro.org>, 'Jaehoon Chung' <jh80.chung@samsung.com>
+Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, patches@linaro.org
 
->> So, then it would be interesting to understand how the WLAN chip is
->> being powered? Can you tell us?
->>
-> I check the Pandaboard datasheet (Figure13. PandaBoard WLAN/Bluetooth
-> Interface Block Diagram). On the WLAN chip there is a WLAN_EN pin,
-> which is connected to a gpio. As long as that gpio pin is high, the
-> WLAN chip is powered on. So IMHO, powering up the WLAN chip is a
-> separate issue from powering up the sdio.
+On Wed, January 15, 2014, Zhangfei Gao wrote:
+> Introduced from commit bf626e5550f24aec24975a0e85ad8e572ca76a6b
+> CDETECT is ignored since negated return value of mmc_gpio_get_cd(mmc)
+> can not be checked by IS_ERR_VALUE.
+> Add spin_lock_bh(&host->lock) for atomic accessing DW_MMC_CARD_PRESENT,
+> otherwise sd detect may occasionally fail.
+> 
+> Signed-off-by: Zhangfei Gao <zhangfei.gao@linaro.org>
+> Reported-by: Kevin Hilman <khilman@linaro.org>
+> Reviewed-by: Sachin Kamat <sachin.kamat@linaro.org>
+> Tested-by: Sachin Kamat <sachin.kamat@linaro.org>
+> ---
+>  drivers/mmc/host/dw_mmc.c |    9 ++++++---
+>  1 file changed, 6 insertions(+), 3 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index a776f24f4311..9ded62c8225e 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -1033,7 +1033,8 @@ static int dw_mci_get_cd(struct mmc_host *mmc)
+>  	int present;
+>  	struct dw_mci_slot *slot = mmc_priv(mmc);
+>  	struct dw_mci_board *brd = slot->host->pdata;
+> -	int gpio_cd = !mmc_gpio_get_cd(mmc);
+> +	struct dw_mci *host = slot->host;
+> +	int gpio_cd = mmc_gpio_get_cd(mmc);
+> 
+>  	/* Use platform get_cd function, else try onboard card detect */
+>  	if (brd->quirks & DW_MCI_QUIRK_BROKEN_CARD_DETECTION)
+> @@ -1041,11 +1042,12 @@ static int dw_mci_get_cd(struct mmc_host *mmc)
+>  	else if (brd->get_cd)
+>  		present = !brd->get_cd(slot->id);
+>  	else if (!IS_ERR_VALUE(gpio_cd))
+> -		present = !!gpio_cd;
+> +		present = !gpio_cd;
+!!gpio_cd or gpio_cd is correct, isn't it?
 
-No, I don't think so. Or, well it depends on what you mean with sdio. :-)
+Thanks,
+Seungwon Jeon
 
-In this case, I think the WLAN_EN pin should be converted to a gpio
-regulator. The regulator should then be handled from omap_hsmmc's
-->set_ios callback.
+>  	else
+>  		present = (mci_readl(slot->host, CDETECT) & (1 << slot->id))
+>  			== 0 ? 1 : 0;
+> 
+> +	spin_lock_bh(&host->lock);
+>  	if (present) {
+>  		set_bit(DW_MMC_CARD_PRESENT, &slot->flags);
+>  		dev_dbg(&mmc->class_dev, "card is present\n");
+> @@ -1053,6 +1055,7 @@ static int dw_mci_get_cd(struct mmc_host *mmc)
+>  		clear_bit(DW_MMC_CARD_PRESENT, &slot->flags);
+>  		dev_dbg(&mmc->class_dev, "card is not present\n");
+>  	}
+> +	spin_unlock_bh(&host->lock);
+> 
+>  	return present;
+>  }
+> @@ -2081,7 +2084,7 @@ static int dw_mci_of_get_wp_gpio(struct device *dev, u8 slot)
+>  	return gpio;
+>  }
+> 
+> -/* find the cd gpio for a given slot; or -1 if none specified */
+> +/* find the cd gpio for a given slot */
+>  static void dw_mci_of_get_cd_gpio(struct device *dev, u8 slot,
+>  					struct mmc_host *mmc)
+>  {
+> --
+> 1.7.9.5
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
-This will then mean, once the SDIO func driver drops is runtime PM
-reference the power will be cut to the WLAN chip. I guess this is
-handled internally by the SDIO func driver as of today, right?
-
->> I would guess you have three entities of where runtime PM can be
->> interesting in these scenarios.
->>
->> 1. The sdio core layer uses runtime PM to let SDIO func drivers decide
->> whether the WLAN chip shall be powered or not.
->> mmc_sdio_runtime_suspend() and mmc_sdio_runtime_resume() are doing the
->> actual work for cutting and restoring the power.
->>
->> 2. The mmc host driver. Depending on hardware design; but very likely
->> you are able to handle runtime PM separate from the sdio core. The
->> important part is how you implement SDIO irqs. Since once your host
->> driver has put it's device into runtime suspend state, you can not
->> trust the controller to fetch the SDIO irqs. Some has solved this by
->> re-routing SDIO irq line (DAT1) to a GPIO irq while entering
->> runtime_suspend state, some have a complete separate line for SDIO irq
->> so the mmc controller don't need to bother about SDIO irqs at all.
->>
-> OMAP4's spec also mentions that one should use GPIO to monitor the
-> state of DAT1 pin if the power domain is off. So my takeaway is that
-> through various tricks, SDIO irqs can be fetched when it's in runtime
-> suspend state. And thus we can enable fine-grain runtime PM in mmc
-> host driver, at least for omap_hsmmc.
-
-Agree. Just to be clear, we have two separate devices being controlled
-with runtime PM.
-
-The sdio/mmc/sd controller device owned by omap_hsmmc, which resides
-in a power domain.
-
-The card device which represents the WLAN-chip/SDIO card, controlled
-by the mmc core and the SDIO func driver.
-
->> For omap_hsmmc, I think runtime PM could be decoupled from the
->> host_ops->enable|disable, and instead use an autosuspend timeout,
->> similar how mmci is doing. Additionally, omap_hsmmc could likely do
->> clock gating in it ->runtime_suspend and ungating in it's
->> ->runtime_resume, to save more power when inactive.
-> I take a quick look at mmci.c. Its runtime PM is what I think
-> fine-grain. But I get confused. Why doesn't mmci worry about missing
-> irq when it's powered off? Does it have a seperate sdio irq line as
-> you mentioned above?
-
-cw1200 is a WLAN chip connected on the ux500 boards, which uses mmci.
-The cw1200 chip has in this case a separate SDIO irq line. Since this
-is outside the SDIO spec, it makes more sense to handle this from the
-SDIO func driver.
-
-That is also why we never added SDIO irq support for mmci.
-
->> 3. If the WLAN chip supports some kind of low power mode, those shall
->> be handled from the SDIO func driver. Depending on what mode it
->> supports it might be feasible to use runtime PM.
->>
-> Per Figure13 in Pandaboard datasheet, wl1271 uses GPIO53 as the
-> WLAN_IRQ. So it doesn't use sdio to interrupt cpu. So I think when
-> running on Pandaboard, the func driver can safely disable the sdio
-> when it's not reading/writing through sdio.
-
-Does it mean that DAT1 can be re-routed to GPIO53 or does it mean that
-the WLAN chip has a separate line for SDIO irqs?
-
-I am not sure what you mean by disable sdio here? Could you elaborate?
-Maybe use the word "device" instead?
-
-KInd regards
-Ulf Hansson
