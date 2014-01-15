@@ -1,86 +1,31 @@
-From: Dong Aisheng <dongas86@gmail.com>
-Subject: Re: [PATCH 1/1] mmc: sdhci: fix lockdep error on tunning routine
-Date: Wed, 15 Jan 2014 16:44:03 +0800
-Message-ID: <CAA+hA=TdWSFX7phF-HdL6aYreuTBQdmhvP1f1W_CoT0j5G1rag@mail.gmail.com>
-References: <1387797184-18958-1-git-send-email-b29396@freescale.com>
-	<CAA+hA=TRQP7hS3+iXyHg3FuNQKA=chJi7Ne47Ew_4RJcQ6yong@mail.gmail.com>
-	<20140113120435.GQ31570@twins.programming.kicks-ass.net>
-	<CAA+hA=Sb+Ve2xyto9v6YirqcXnePK2aHzJgjGZOhEQJK5Z0jqQ@mail.gmail.com>
-	<20140115084653.4f6aece8@ipc1.ka-ro>
+From: Clemens Eisserer <linuxhippy@gmail.com>
+Subject: Re: Fstrim fails on raspberry pi / SD-card
+Date: Wed, 15 Jan 2014 09:50:44 +0100
+Message-ID: <CAFvQSYT8fDApmhxr2mSXS53dYVp9Aw7dc2=z77T_gCd+YBGqhA@mail.gmail.com>
+References: <CAFvQSYSG-JBqpgs_YjS6JmP-u-tkEH-4QXcRVPr2TaRhorSBJA@mail.gmail.com>
+	<CAPDyKFrMYQkSvsiUeyN9FUPg4WOs=Fu1frVFvA9MkoyZzD+r=A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qc0-f177.google.com ([209.85.216.177]:48767 "EHLO
-	mail-qc0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750754AbaAOIoE convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Jan 2014 03:44:04 -0500
-Received: by mail-qc0-f177.google.com with SMTP id i8so684365qcq.22
-        for <linux-mmc@vger.kernel.org>; Wed, 15 Jan 2014 00:44:03 -0800 (PST)
-In-Reply-To: <20140115084653.4f6aece8@ipc1.ka-ro>
+Received: from mail-oa0-f45.google.com ([209.85.219.45]:62229 "EHLO
+	mail-oa0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751010AbaAOIup (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Jan 2014 03:50:45 -0500
+Received: by mail-oa0-f45.google.com with SMTP id j17so874660oag.18
+        for <linux-mmc@vger.kernel.org>; Wed, 15 Jan 2014 00:50:45 -0800 (PST)
+In-Reply-To: <CAPDyKFrMYQkSvsiUeyN9FUPg4WOs=Fu1frVFvA9MkoyZzD+r=A@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: =?ISO-8859-1?Q?Lothar_Wa=DFmann?= <LW@karo-electronics.de>
-Cc: Peter Zijlstra <peterz@infradead.org>, Chris Ball <cjb@laptop.org>, Sascha Hauer <s.hauer@pengutronix.de>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Shawn Guo <shawn.guo@linaro.org>, Dong Aisheng <b29396@freescale.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+To: linux-mmc@vger.kernel.org
 
-On Wed, Jan 15, 2014 at 3:46 PM, Lothar Wa=DFmann <LW@karo-electronics.=
-de> wrote:
-> Hi,
->
-> Dong Aisheng wrote:
->> On Mon, Jan 13, 2014 at 8:04 PM, Peter Zijlstra <peterz@infradead.or=
-g> wrote:
->> > On Thu, Dec 26, 2013 at 03:58:20PM +0800, Dong Aisheng wrote:
->> >> > It's strange that this issue did not happen on kernel 3.10.17 w=
-ith the same
->> >> > code. And looking at the code, before call spin_lock we already=
- disable the mmc
->> >> > controller irq, per on my understanding, the deadlock given by =
-lockdep may not
->> >> > be able to happen(pls fix me if wrong).
->> >> > May the lockdep not track the specific irq disable?
->> >> > Copy lockdep guy to comment.
->> >
->> > No, lockdep also doesn't know only that one line can take this loc=
-k.
->> > Lockdep only knows a lock is taken from IRQ context, and disabling=
- one
->> > line still allows IRQs to happen and therefore it yells.
->>
->> Okay, thanks for the information.
->> If that, kernel 3.10.17 has the same code, do you know why it does n=
-ot trigger
->> such lockdep error?
->>
-> compiled with CONFIG_LOCKDEP disabled?
->
+Hi Ulf,
 
-I did compile with LOCKDEP enabled.
-See below for a part of my .config
-CONFIG_DEBUG_SPINLOCK=3Dy
-CONFIG_DEBUG_MUTEXES=3Dy
-CONFIG_DEBUG_LOCK_ALLOC=3Dy
-CONFIG_PROVE_LOCKING=3Dy
-CONFIG_LOCKDEP=3Dy
-# CONFIG_LOCK_STAT is not set
-# CONFIG_DEBUG_LOCKDEP is not set
-CONFIG_TRACE_IRQFLAGS=3Dy
-CONFIG_DEBUG_ATOMIC_SLEEP=3Dy
+> Have the mmc host driver setup MMC_CAP_ERASE? That is needed,
+> otherwise the block queue wont be supporting DISCARD operations.
 
-That's why i think it's strange.
+Thanks a lot for your reply. Indeed it seems MMC_CAP_ERASE is not
+supported by the raspberry pi driver.
+Just to be curious: Is the erease command also supported on SD cards
+or only on eMMC?
 
-Regards
-Dong Aisheng
-
->
-> Lothar Wa=DFmann
-> --
-> ___________________________________________________________
->
-> Ka-Ro electronics GmbH | Pascalstra=DFe 22 | D - 52076 Aachen
-> Phone: +49 2408 1402-0 | Fax: +49 2408 1402-10
-> Gesch=E4ftsf=FChrer: Matthias Kaussen
-> Handelsregistereintrag: Amtsgericht Aachen, HRB 4996
->
-> www.karo-electronics.de | info@karo-electronics.de
-> ___________________________________________________________
+Thanks, Clemens
