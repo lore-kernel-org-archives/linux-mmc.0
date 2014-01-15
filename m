@@ -1,41 +1,80 @@
-From: Peter Zijlstra <peterz@infradead.org>
-Subject: Re: [PATCH 1/1] mmc: sdhci: fix lockdep error on tunning routine
-Date: Wed, 15 Jan 2014 11:09:04 +0100
-Message-ID: <20140115100904.GX31570@twins.programming.kicks-ass.net>
-References: <1387797184-18958-1-git-send-email-b29396@freescale.com>
- <CAA+hA=TRQP7hS3+iXyHg3FuNQKA=chJi7Ne47Ew_4RJcQ6yong@mail.gmail.com>
- <20140113120435.GQ31570@twins.programming.kicks-ass.net>
- <CAA+hA=Sb+Ve2xyto9v6YirqcXnePK2aHzJgjGZOhEQJK5Z0jqQ@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+From: Zhangfei Gao <zhangfei.gao@linaro.org>
+Subject: [PATCH] mmc: dw_mmc: fix dw_mci_get_cd
+Date: Wed, 15 Jan 2014 18:07:49 +0800
+Message-ID: <1389780469-32633-1-git-send-email-zhangfei.gao@linaro.org>
+References: <1389770159-21125-1-git-send-email-zhangfei.gao@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from merlin.infradead.org ([205.233.59.134]:60554 "EHLO
-	merlin.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751253AbaAOKJZ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Jan 2014 05:09:25 -0500
-Content-Disposition: inline
-In-Reply-To: <CAA+hA=Sb+Ve2xyto9v6YirqcXnePK2aHzJgjGZOhEQJK5Z0jqQ@mail.gmail.com>
+Received: from mail-pd0-f175.google.com ([209.85.192.175]:51646 "EHLO
+	mail-pd0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751511AbaAOKKO (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Jan 2014 05:10:14 -0500
+Received: by mail-pd0-f175.google.com with SMTP id r10so915920pdi.20
+        for <linux-mmc@vger.kernel.org>; Wed, 15 Jan 2014 02:10:12 -0800 (PST)
+In-Reply-To: <1389770159-21125-1-git-send-email-zhangfei.gao@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Dong Aisheng <dongas86@gmail.com>
-Cc: Dong Aisheng <b29396@freescale.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Shawn Guo <shawn.guo@linaro.org>, Sascha Hauer <s.hauer@pengutronix.de>, Chris Ball <cjb@laptop.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+To: Kevin Hilman <khilman@linaro.org>, Sachin Kamat <sachin.kamat@linaro.org>, Chris Ball <cjb@laptop.org>, Arnd Bergmann <arnd@arndb.de>, Mike Turquette <mturquette@linaro.org>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>
+Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, patches@linaro.org, Zhangfei Gao <zhangfei.gao@linaro.org>
 
-On Wed, Jan 15, 2014 at 03:19:27PM +0800, Dong Aisheng wrote:
-> On Mon, Jan 13, 2014 at 8:04 PM, Peter Zijlstra <peterz@infradead.org> wrote:
-> > On Thu, Dec 26, 2013 at 03:58:20PM +0800, Dong Aisheng wrote:
-> >> > It's strange that this issue did not happen on kernel 3.10.17 with the same
-> >> > code. And looking at the code, before call spin_lock we already disable the mmc
-> >> > controller irq, per on my understanding, the deadlock given by lockdep may not
-> >> > be able to happen(pls fix me if wrong).
-> >> > May the lockdep not track the specific irq disable?
-> >> > Copy lockdep guy to comment.
-> >
-> > No, lockdep also doesn't know only that one line can take this lock.
-> > Lockdep only knows a lock is taken from IRQ context, and disabling one
-> > line still allows IRQs to happen and therefore it yells.
-> 
-> Okay, thanks for the information.
-> If that, kernel 3.10.17 has the same code, do you know why it does not trigger
-> such lockdep error?
+Introduced from commit bf626e5550f24aec24975a0e85ad8e572ca76a6b
+CDETECT is ignored since negated return value of mmc_gpio_get_cd(mmc)
+can not be checked by IS_ERR_VALUE.
+Add spin_lock_bh(&host->lock) for atomic accessing DW_MMC_CARD_PRESENT,
+otherwise sd detect may occasionally fail.
 
-No idea; there haven't really been big lockdep changes recently.
+Signed-off-by: Zhangfei Gao <zhangfei.gao@linaro.org>
+Reported-by: Kevin Hilman <khilman@linaro.org>
+Reviewed-by: Sachin Kamat <sachin.kamat@linaro.org>
+Tested-by: Sachin Kamat <sachin.kamat@linaro.org>
+---
+ drivers/mmc/host/dw_mmc.c |    9 ++++++---
+ 1 file changed, 6 insertions(+), 3 deletions(-)
+
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index a776f24f4311..9ded62c8225e 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -1033,7 +1033,8 @@ static int dw_mci_get_cd(struct mmc_host *mmc)
+ 	int present;
+ 	struct dw_mci_slot *slot = mmc_priv(mmc);
+ 	struct dw_mci_board *brd = slot->host->pdata;
+-	int gpio_cd = !mmc_gpio_get_cd(mmc);
++	struct dw_mci *host = slot->host;
++	int gpio_cd = mmc_gpio_get_cd(mmc);
+ 
+ 	/* Use platform get_cd function, else try onboard card detect */
+ 	if (brd->quirks & DW_MCI_QUIRK_BROKEN_CARD_DETECTION)
+@@ -1041,11 +1042,12 @@ static int dw_mci_get_cd(struct mmc_host *mmc)
+ 	else if (brd->get_cd)
+ 		present = !brd->get_cd(slot->id);
+ 	else if (!IS_ERR_VALUE(gpio_cd))
+-		present = !!gpio_cd;
++		present = !gpio_cd;
+ 	else
+ 		present = (mci_readl(slot->host, CDETECT) & (1 << slot->id))
+ 			== 0 ? 1 : 0;
+ 
++	spin_lock_bh(&host->lock);
+ 	if (present) {
+ 		set_bit(DW_MMC_CARD_PRESENT, &slot->flags);
+ 		dev_dbg(&mmc->class_dev, "card is present\n");
+@@ -1053,6 +1055,7 @@ static int dw_mci_get_cd(struct mmc_host *mmc)
+ 		clear_bit(DW_MMC_CARD_PRESENT, &slot->flags);
+ 		dev_dbg(&mmc->class_dev, "card is not present\n");
+ 	}
++	spin_unlock_bh(&host->lock);
+ 
+ 	return present;
+ }
+@@ -2081,7 +2084,7 @@ static int dw_mci_of_get_wp_gpio(struct device *dev, u8 slot)
+ 	return gpio;
+ }
+ 
+-/* find the cd gpio for a given slot; or -1 if none specified */
++/* find the cd gpio for a given slot */
+ static void dw_mci_of_get_cd_gpio(struct device *dev, u8 slot,
+ 					struct mmc_host *mmc)
+ {
+-- 
+1.7.9.5
+
