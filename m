@@ -1,42 +1,52 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [PATCH] mmc: dw_mmc: fix dw_mci_get_cd
-Date: Wed, 15 Jan 2014 14:59:59 +0100
-Message-ID: <3154671.7LPLgq8X4K@wuerfel>
-References: <1389770159-21125-1-git-send-email-zhangfei.gao@linaro.org> <001c01cf11ed$039b6270$0ad22750$%jun@samsung.com> <52D6938A.9050806@linaro.org>
+From: Seungwon Jeon <tgih.jun@samsung.com>
+Subject: [PATCH 0/7] mmc: distinguish DDR timing mode for eMMC/UHS
+Date: Wed, 15 Jan 2014 23:10:24 +0900
+Message-ID: <001e01cf11fb$88a9b300$99fd1900$%jun@samsung.com>
+References: <1383653403-10049-1-git-send-email-ulf.hansson@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7Bit
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.126.186]:51931 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751037AbaAOOAU (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Jan 2014 09:00:20 -0500
-In-Reply-To: <52D6938A.9050806@linaro.org>
+Received: from mailout1.samsung.com ([203.254.224.24]:56021 "EHLO
+	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751735AbaAOOKZ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Jan 2014 09:10:25 -0500
+Received: from epcpsbgr1.samsung.com
+ (u141.gpu120.samsung.co.kr [203.254.230.141])
+ by mailout1.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+ (7.0.4.24.0) 64bit (built Nov 17 2011))
+ with ESMTP id <0MZG0005U4PCDJ70@mailout1.samsung.com> for
+ linux-mmc@vger.kernel.org; Wed, 15 Jan 2014 23:10:24 +0900 (KST)
+In-reply-to: 
+Content-language: ko
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: zhangfei <zhangfei.gao@linaro.org>
-Cc: Seungwon Jeon <tgih.jun@samsung.com>, 'Kevin Hilman' <khilman@linaro.org>, 'Sachin Kamat' <sachin.kamat@linaro.org>, 'Chris Ball' <cjb@laptop.org>, 'Mike Turquette' <mturquette@linaro.org>, 'Jaehoon Chung' <jh80.chung@samsung.com>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, patches@linaro.org
+To: 'Chris Ball' <chris@printf.net>, 'Ulf Hansson' <ulf.hansson@linaro.org>, rickard.andersson@stericsson.com, linux@arm.linux.org.uk, balajitk@ti.com, g.liakhovetski@gmx.de, wei_wang@realsil.com.cn, sameo@linux.intel.com, jh80.chung@samsung.com
+Cc: linux-mmc@vger.kernel.org
 
-On Wednesday 15 January 2014 21:56:26 zhangfei wrote:
-> However, in our board cd =0 when card is deteced while cd=1 when card is
-> removed.
-> In order to mmc_gpio_get_cd return 1, MMC_CAP2_CD_ACTIVE_HIGH has to be
-> set, as well as new property "caps2-mmc-cd-active-low".
-> 
-> --- a/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt
-> +++ b/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt
-> @@ -73,6 +73,8 @@ Optional properties:
-> +* caps2-mmc-cd-active-low: cd pin is low when card active
-> +
-> 
-> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> +       if (of_find_property(np, "caps2-mmc-cd-active-low", NULL))
-> +               pdata->caps2 |= MMC_CAP2_CD_ACTIVE_HIGH;
-> +
+These changes intend to distinguish two DDR timing modes related to eMMC & UHS.
+Even though two modes are different actually, UHS_DDR50 is used as eMMC DDR mode.
+MMC_TIMING_MMC_DDR52 mode is added.
 
-The MMC_CAP2_CD_ACTIVE_HIGH flag should only be required for
-legacy platforms. With DT parsing, you can normally specify
-the polarity of the GPIO line in the GPIO specifier in DT.
+Seungwon Jeon (7):
+  mmc: clarify DDR timing mode between SD-UHS and eMMC
+  mmc: mmci: clarify DDR timing mode between SD-UHS and eMMC
+  mmc: omap: clarify DDR timing mode between SD-UHS and eMMC
+  mmc: sh_mmcif: clarify DDR timing mode between SD-UHS and eMMC
+  mmc: rtsx: clarify DDR timing mode between SD-UHS and eMMC
+  mmc: dw_mmc: clarify DDR timing mode between SD-UHS and eMMC
+  mmc: sdhci: clarify DDR timing mode between SD-UHS and eMMC
+
+ drivers/mmc/core/debugfs.c        |    3 +++
+ drivers/mmc/core/mmc.c            |    2 +-
+ drivers/mmc/host/dw_mmc-exynos.c  |    3 +--
+ drivers/mmc/host/dw_mmc.c         |    2 +-
+ drivers/mmc/host/mmci.c           |    4 ++--
+ drivers/mmc/host/omap_hsmmc.c     |    4 ++--
+ drivers/mmc/host/rtsx_pci_sdmmc.c |    2 ++
+ drivers/mmc/host/sdhci.c          |    4 +++-
+ drivers/mmc/host/sh_mmcif.c       |    9 +++++----
+ include/linux/mmc/host.h          |    3 ++-
+ 10 files changed, 22 insertions(+), 14 deletions(-)
 
 
-	Arnd
