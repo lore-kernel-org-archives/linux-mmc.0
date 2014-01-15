@@ -1,80 +1,44 @@
-From: Zhangfei Gao <zhangfei.gao@linaro.org>
-Subject: [PATCH] mmc: dw_mmc: fix dw_mci_get_cd
-Date: Wed, 15 Jan 2014 18:07:49 +0800
-Message-ID: <1389780469-32633-1-git-send-email-zhangfei.gao@linaro.org>
-References: <1389770159-21125-1-git-send-email-zhangfei.gao@linaro.org>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: Fstrim fails on raspberry pi / SD-card
+Date: Wed, 15 Jan 2014 11:20:09 +0100
+Message-ID: <CAPDyKFp26f-2p4+ce1+wh1WXH9knJK+ZjTnnu2ai=3vyMQecpg@mail.gmail.com>
+References: <CAFvQSYSG-JBqpgs_YjS6JmP-u-tkEH-4QXcRVPr2TaRhorSBJA@mail.gmail.com>
+	<CAPDyKFrMYQkSvsiUeyN9FUPg4WOs=Fu1frVFvA9MkoyZzD+r=A@mail.gmail.com>
+	<CAFvQSYT8fDApmhxr2mSXS53dYVp9Aw7dc2=z77T_gCd+YBGqhA@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pd0-f175.google.com ([209.85.192.175]:51646 "EHLO
-	mail-pd0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751511AbaAOKKO (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Jan 2014 05:10:14 -0500
-Received: by mail-pd0-f175.google.com with SMTP id r10so915920pdi.20
-        for <linux-mmc@vger.kernel.org>; Wed, 15 Jan 2014 02:10:12 -0800 (PST)
-In-Reply-To: <1389770159-21125-1-git-send-email-zhangfei.gao@linaro.org>
+Received: from mail-qe0-f46.google.com ([209.85.128.46]:38779 "EHLO
+	mail-qe0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751904AbaAOKUJ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Jan 2014 05:20:09 -0500
+Received: by mail-qe0-f46.google.com with SMTP id 8so797901qea.5
+        for <linux-mmc@vger.kernel.org>; Wed, 15 Jan 2014 02:20:09 -0800 (PST)
+In-Reply-To: <CAFvQSYT8fDApmhxr2mSXS53dYVp9Aw7dc2=z77T_gCd+YBGqhA@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Kevin Hilman <khilman@linaro.org>, Sachin Kamat <sachin.kamat@linaro.org>, Chris Ball <cjb@laptop.org>, Arnd Bergmann <arnd@arndb.de>, Mike Turquette <mturquette@linaro.org>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>
-Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, patches@linaro.org, Zhangfei Gao <zhangfei.gao@linaro.org>
+To: Clemens Eisserer <linuxhippy@gmail.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>
 
-Introduced from commit bf626e5550f24aec24975a0e85ad8e572ca76a6b
-CDETECT is ignored since negated return value of mmc_gpio_get_cd(mmc)
-can not be checked by IS_ERR_VALUE.
-Add spin_lock_bh(&host->lock) for atomic accessing DW_MMC_CARD_PRESENT,
-otherwise sd detect may occasionally fail.
+On 15 January 2014 09:50, Clemens Eisserer <linuxhippy@gmail.com> wrote:
+> Hi Ulf,
+>
+>> Have the mmc host driver setup MMC_CAP_ERASE? That is needed,
+>> otherwise the block queue wont be supporting DISCARD operations.
+>
+> Thanks a lot for your reply. Indeed it seems MMC_CAP_ERASE is not
+> supported by the raspberry pi driver.
+> Just to be curious: Is the erease command also supported on SD cards
+> or only on eMMC?
 
-Signed-off-by: Zhangfei Gao <zhangfei.gao@linaro.org>
-Reported-by: Kevin Hilman <khilman@linaro.org>
-Reviewed-by: Sachin Kamat <sachin.kamat@linaro.org>
-Tested-by: Sachin Kamat <sachin.kamat@linaro.org>
----
- drivers/mmc/host/dw_mmc.c |    9 ++++++---
- 1 file changed, 6 insertions(+), 3 deletions(-)
+Both SD cards and eMMC supports it.
 
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index a776f24f4311..9ded62c8225e 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -1033,7 +1033,8 @@ static int dw_mci_get_cd(struct mmc_host *mmc)
- 	int present;
- 	struct dw_mci_slot *slot = mmc_priv(mmc);
- 	struct dw_mci_board *brd = slot->host->pdata;
--	int gpio_cd = !mmc_gpio_get_cd(mmc);
-+	struct dw_mci *host = slot->host;
-+	int gpio_cd = mmc_gpio_get_cd(mmc);
- 
- 	/* Use platform get_cd function, else try onboard card detect */
- 	if (brd->quirks & DW_MCI_QUIRK_BROKEN_CARD_DETECTION)
-@@ -1041,11 +1042,12 @@ static int dw_mci_get_cd(struct mmc_host *mmc)
- 	else if (brd->get_cd)
- 		present = !brd->get_cd(slot->id);
- 	else if (!IS_ERR_VALUE(gpio_cd))
--		present = !!gpio_cd;
-+		present = !gpio_cd;
- 	else
- 		present = (mci_readl(slot->host, CDETECT) & (1 << slot->id))
- 			== 0 ? 1 : 0;
- 
-+	spin_lock_bh(&host->lock);
- 	if (present) {
- 		set_bit(DW_MMC_CARD_PRESENT, &slot->flags);
- 		dev_dbg(&mmc->class_dev, "card is present\n");
-@@ -1053,6 +1055,7 @@ static int dw_mci_get_cd(struct mmc_host *mmc)
- 		clear_bit(DW_MMC_CARD_PRESENT, &slot->flags);
- 		dev_dbg(&mmc->class_dev, "card is not present\n");
- 	}
-+	spin_unlock_bh(&host->lock);
- 
- 	return present;
- }
-@@ -2081,7 +2084,7 @@ static int dw_mci_of_get_wp_gpio(struct device *dev, u8 slot)
- 	return gpio;
- }
- 
--/* find the cd gpio for a given slot; or -1 if none specified */
-+/* find the cd gpio for a given slot */
- static void dw_mci_of_get_cd_gpio(struct device *dev, u8 slot,
- 					struct mmc_host *mmc)
- {
--- 
-1.7.9.5
+Kind regards
+Ulf Hansson
 
+>
+> Thanks, Clemens
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
