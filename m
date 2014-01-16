@@ -1,92 +1,70 @@
-From: Lee Jones <lee.jones@linaro.org>
-Subject: Re: [PATCH 1/3] mfd: Add realtek USB card reader driver
-Date: Thu, 16 Jan 2014 09:35:06 +0000
-Message-ID: <20140116093506.GI11820@lee--X1>
-References: <1389685656-880-1-git-send-email-rogerable@realtek.com>
- <1389685656-880-2-git-send-email-rogerable@realtek.com>
- <20140114130409.GB11820@lee--X1> <52D79E31.6000300@realtek.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH 2/7] mmc: mmci: clarify DDR timing mode between SD-UHS and eMMC
+Date: Thu, 16 Jan 2014 11:20:28 +0100
+Message-ID: <CAPDyKFouGffRSikRbynES+euCuwCKbQXjspdq8oYq3Bg__pKEA@mail.gmail.com>
+References: <1383653403-10049-1-git-send-email-ulf.hansson@linaro.org>
+	<002001cf11fb$b7217380$25645a80$%jun@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
-Content-Disposition: inline
-In-Reply-To: <52D79E31.6000300@realtek.com>
-List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
-List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel>
-List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
-List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
-List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
-Errors-To: driverdev-devel-bounces@linuxdriverproject.org
-Sender: driverdev-devel-bounces@linuxdriverproject.org
-To: Roger <rogerable@realtek.com>
-Cc: Samuel Ortiz <sameo@linux.intel.com>, Alex Dubov <oakad@yahoo.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, "driverdev-devel@linuxdriverproject.org" <driverdev-devel@linuxdriverproject.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Wei_wang <wei_wang@realsil.com.cn>, Chris Ball <cjb@laptop.org>, Dan Carpenter <dan.carpenter@oracle.com>, Maxim Levitsky <maximlevitsky@gmail.com>
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qc0-f176.google.com ([209.85.216.176]:54715 "EHLO
+	mail-qc0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751948AbaAPKU2 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 16 Jan 2014 05:20:28 -0500
+Received: by mail-qc0-f176.google.com with SMTP id e16so2071874qcx.21
+        for <linux-mmc@vger.kernel.org>; Thu, 16 Jan 2014 02:20:28 -0800 (PST)
+In-Reply-To: <002001cf11fb$b7217380$25645a80$%jun@samsung.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Seungwon Jeon <tgih.jun@samsung.com>
+Cc: Chris Ball <chris@printf.net>, Rickard Andersson <rickard.andersson@stericsson.com>, Russell King <linux@arm.linux.org.uk>, linux-mmc <linux-mmc@vger.kernel.org>
 
-PiA+PitzdGF0aWMgaW50IHJ0c3hfdXNiX2J1bGtfdHJhbnNmZXJfc2dsaXN0KHN0cnVjdCBydHN4
-X3VjciAqdWNyLAo+ID4+KyAgICAgICAgICAgICB1bnNpZ25lZCBpbnQgcGlwZSwgc3RydWN0IHNj
-YXR0ZXJsaXN0ICpzZywgaW50IG51bV9zZywKPiA+PisgICAgICAgICAgICAgdW5zaWduZWQgaW50
-IGxlbmd0aCwgdW5zaWduZWQgaW50ICphY3RfbGVuLCBpbnQgdGltZW91dCkKPiA+Pit7Cj4gPj4r
-ICAgICBpbnQgcmV0Owo+ID4+Kwo+ID4+KyAgICAgZGV2X2RiZygmdWNyLT5wdXNiX2ludGYtPmRl
-diwgIiVzOiB4ZmVyICV1IGJ5dGVzLCAlZCBlbnRyaWVzXG4iLAo+ID4+KyAgICAgICAgICAgICAg
-ICAgICAgIF9fZnVuY19fLCBsZW5ndGgsIG51bV9zZyk7Cj4gPj4rICAgICByZXQgPSB1c2Jfc2df
-aW5pdCgmdWNyLT5jdXJyZW50X3NnLCB1Y3ItPnB1c2JfZGV2LCBwaXBlLCAwLAo+ID4+KyAgICAg
-ICAgICAgICAgICAgICAgIHNnLCBudW1fc2csIGxlbmd0aCwgR0ZQX05PSU8pOwo+ID4+KyAgICAg
-aWYgKHJldCkKPiA+PisgICAgICAgICAgICAgcmV0dXJuIHJldDsKPiA+PisKPiA+PisgICAgIHVj
-ci0+c2dfdGltZXIuZXhwaXJlcyA9IGppZmZpZXMgKyBtc2Vjc190b19qaWZmaWVzKHRpbWVvdXQp
-Owo+ID4+KyAgICAgYWRkX3RpbWVyKCZ1Y3ItPnNnX3RpbWVyKTsKPiA+PisgICAgIHVzYl9zZ193
-YWl0KCZ1Y3ItPmN1cnJlbnRfc2cpOwo+ID4+KyAgICAgZGVsX3RpbWVyKCZ1Y3ItPnNnX3RpbWVy
-KTsKPiA+PisKPiA+PisgICAgIGlmIChhY3RfbGVuKQo+ID4+KyAgICAgICAgICAgICAqYWN0X2xl
-biA9IHVjci0+Y3VycmVudF9zZy5ieXRlczsKPiA+PisKPiA+PisgICAgIHJldHVybiB1Y3ItPmN1
-cnJlbnRfc2cuc3RhdHVzOwo+ID4+K30KPiA+Cj4gPkNvZGUgbG9va3MgZmluZSwgYnV0IHNob3Vs
-ZG4ndCB0aGlzIGxpdmUgaW4gYSBVU0IgZHJpdmVyPwo+ID4KPiBXZSBoYXZlIHN0dWRpZWQgZHJp
-dmVycyBpbiB1c2Ivc3RvcmFnZSwgdGhlIHBsYWNlIHRoYXQgbW9zdCBsaWtlbHkKPiB0byBwdXQg
-dGhlIGRyaXZlci4gQWxsIG9mIHRoZW0gYXJlIGZvciBTVEFOREFSRCB1c2IgbWFzcyBzdG9yYWdl
-Cj4gY2xhc3Moc29tZXRoaW5nIGxpa2UgVVNCX0NMQVNTX01BU1NfU1RPUkFHRSkuIEJ1dCB0aGlz
-IGlzIG5vdCB0aGUKPiBzYW1lIGNhc2UuIFRoaXMgZHJpdmVyIGlzIGZvciBvdXIgdmVuZG9yLWNs
-YXNzIGRldmljZSB3aXRoCj4gY29tcGxldGVseSBkaWZmZXJlbnQgcHJvdG9jb2wuIEl0IGlzIHJl
-YWxseSBhbiBVU0IgaW50ZXJmYWNlZCBmbGFzaAo+IGNhcmQgY29tbWFuZCBjb252ZXJ0ZXIob3Ig
-Y2hhbm5lbCkgZGV2aWNlIHJhdGhlciB0aGFuIGEgcmVhbAo+IHN0b3JhZ2UuIEl0IGFsc28gaGFz
-IHR3byBkZXJpdmVkIG1vZHVsZXMocnRzeF91c2Jfc2RtbWMsCj4gcnRzeF91c2JfbWVtc3RpY2sp
-IGZvciBvdGhlciB0d28gc3Vic3lzdGVtcy4KPiAKPiBXZSBhbHNvIGhhdmUgYW5vdGhlciBkcml2
-ZXI6IHJ0c3hfcGNyLmMgcmVzaWRlbnQgaW4gbWZkLyBmb3Igc2ltaWxhcgo+IGRldmljZXMgYnV0
-IG9mIFBDSWUgaW50ZXJmYWNlLiBJdCBpcyBuYXR1cmUgZm9yIHVzIHRvIGNob29zZSB0aGUKPiBz
-YW1lIHBsYWNlIGZvciB0aGlzIHZhcmlhbnQuCgpWZXJ5IHdlbGwsIGFzIGxvbmcgYXMgaXQgdHJ1
-bHkgZG9lcyBub3QgZml0IGluIGRyaXZlcnMvdXNiLiBJdCB3b3VsZApiZSBnb29kIHRvIGhhdmUg
-b25lIG9mIHRoZSBVU0IgZm9sayBnaXZlIHRoZSBub2QgdGhvdWdoLgoKPiA+PisgICAgIH0KPiA+
-PisKPiA+PisgICAgIC8qIHNldCBVU0IgaW50ZXJmYWNlIGRhdGEgKi8KPiA+PisgICAgIHVzYl9z
-ZXRfaW50ZmRhdGEoaW50ZiwgdWNyKTsKPiA+PisKPiA+PisgICAgIHVjci0+dmVuZG9yX2lkID0g
-aWQtPmlkVmVuZG9yOwo+ID4+KyAgICAgdWNyLT5wcm9kdWN0X2lkID0gaWQtPmlkUHJvZHVjdDsK
-PiA+PisgICAgIHVjci0+Y21kX2J1ZiA9IHVjci0+cnNwX2J1ZiA9IHVjci0+aW9idWY7Cj4gPj4r
-Cj4gPj4rICAgICBtdXRleF9pbml0KCZ1Y3ItPmRldl9tdXRleCk7Cj4gPj4rCj4gPj4rICAgICB1
-Y3ItPnB1c2JfaW50ZiA9IGludGY7Cj4gPj4rCj4gPj4rICAgICAvKiBpbml0aWFsaXplICovCj4g
-Pj4rICAgICByZXQgPSBydHN4X3VzYl9pbml0X2NoaXAodWNyKTsKPiA+PisgICAgIGlmIChyZXQp
-Cj4gPj4rICAgICAgICAgICAgIGdvdG8gb3V0X2luaXRfZmFpbDsKPiA+PisKPiA+PisgICAgIGZv
-ciAoaSA9IDA7IGkgPCBBUlJBWV9TSVpFKHJ0c3hfdXNiX2NlbGxzKTsgaSsrKSB7Cj4gPj4rICAg
-ICAgICAgICAgIHJ0c3hfdXNiX2NlbGxzW2ldLnBsYXRmb3JtX2RhdGEgPSAmdWNyOwo+ID4KPiA+
-WW91J3ZlIGFscmVhZHkgcHV0IHRoaXMgaW4geW91ciBkcnZkYXRhIChvciBudGZkYXRhLCBhcyBp
-dCdzIGNhbGxlZAo+ID5oZXJlKS4gV2h5IGRvIHlvdSBhbHNvIG5lZWQgaXQgaW4gcGxhdGZvcm1f
-ZGF0YT8KPiAKPiBEZXJpdmVkIG1vZHVsZXMgcnRzeF91c2Jfc2RtbWMgYW5kIHJ0c3hfdXNiX21l
-bXN0aWNrIHdpbGwgcmV0cmlldmUKPiB0aGlzIGZyb20gcGxhdGZvcm1fZGF0YS4gVGhleSB3aWxs
-IG5vdCBiZSBhd2FyZSBvZiB1c2IgaW50ZXJmYWNlCj4gc3RydWN0LgoKVGhleSBkb24ndCBuZWVk
-IHRvLiBJZiB0aGUgTU1DIG9yIE1lbXN0aWNrIHN1YnN5c3RlbXMgZG8gbm90IGhhdmUKdGhlaXIg
-b3duIGhlbHBlcnMgeW91IGNhbiBqdXN0IHVzZSBzb21ldGhpbmcgbGlrZToKCiAgc3RydWN0IHJ0
-c3hfdWNyICp1Y3IgPSBkZXZfZ2V0X2RydmRhdGEocGRldi0+ZGV2LnBhcmVudCk7CgpOYXR1cmFs
-bHkgdGhpcyBpcyB1bnRlc3RlZCBjb2RlIGFuZCBtaWdodCBub3Qgd29yayBvZmYgdGhlIGJhdCwg
-YnV0IGl0CmRvZXMgZ2l2ZSB5b3Ugc29tZSBpZGVhIG9mIHdoYXQgeW91IGNhbiBkbyB3aXRob3V0
-IGl0ZXJhdGluZyB0aHJvdWdoCmFuZCBwb3B1bGF0aW5nIGVhY2ggc3ViLWRldmljZSdzIHBsYXRm
-b3JtIGRhdGEuCgo+ID4+KyNkZWZpbmUgRFJWX05BTUVfUlRTWF9VU0IgICAgICAgICAgICAicnRz
-eF91c2IiCj4gPj4rI2RlZmluZSBEUlZfTkFNRV9SVFNYX1VTQl9TRE1NQyAgICAgICAgICAgICAg
-InJ0c3hfdXNiX3NkbW1jIgo+ID4+KyNkZWZpbmUgRFJWX05BTUVfUlRTWF9VU0JfTVMgICAgICAg
-ICAicnRzeF91c2JfbXMiCj4gPgo+ID5DYW4geW91IGp1c3QgcHV0IHRoZSBuYW1lcyBpbiB0aGUg
-Y29ycmVjdCBwbGFjZXMgcGxlYXNlPwo+ID4KPiBEbyB5b3UgbWVhbiBqdXN0IHJlbW92ZSB0aGVz
-ZSBkZWZpbml0aW9ucyBhbmQgZmlsbCB0aGUgc3RyaW5nCj4gZGlyZWN0bHkgYXQgdGhlIHVzaW5n
-IHBsYWNlPwoKSSBkby4KCkkgZmluZCB0aGVzZSB0eXBlcyBvZiBkZWZpbmVzIHVuaGVscGZ1bCBh
-bmQgc29tZXdoYXQgb2JmdXNjYXRpbmcuCgotLSAKTGVlIEpvbmVzCkxpbmFybyBTVE1pY3JvZWxl
-Y3Ryb25pY3MgTGFuZGluZyBUZWFtIExlYWQKTGluYXJvLm9yZyDilIIgT3BlbiBzb3VyY2Ugc29m
-dHdhcmUgZm9yIEFSTSBTb0NzCkZvbGxvdyBMaW5hcm86IEZhY2Vib29rIHwgVHdpdHRlciB8IEJs
-b2cKX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KZGV2ZWwg
-bWFpbGluZyBsaXN0CmRldmVsQGxpbnV4ZHJpdmVycHJvamVjdC5vcmcKaHR0cDovL2RyaXZlcmRl
-di5saW51eGRyaXZlcnByb2plY3Qub3JnL21haWxtYW4vbGlzdGluZm8vZHJpdmVyZGV2LWRldmVs
-Cg==
+On 15 January 2014 15:11, Seungwon Jeon <tgih.jun@samsung.com> wrote:
+> Replaced UHS_DDR50 with MMC_DDR52.
+>
+> CC: Russell King <linux@arm.linux.org.uk>
+> Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
+> ---
+>  drivers/mmc/host/mmci.c |    4 ++--
+>  1 files changed, 2 insertions(+), 2 deletions(-)
+>
+> diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+> index f320579..c348427 100644
+> --- a/drivers/mmc/host/mmci.c
+> +++ b/drivers/mmc/host/mmci.c
+> @@ -299,7 +299,7 @@ static void mmci_set_clkreg(struct mmci_host *host, unsigned int desired)
+>         if (host->mmc->ios.bus_width == MMC_BUS_WIDTH_8)
+>                 clk |= MCI_ST_8BIT_BUS;
+>
+> -       if (host->mmc->ios.timing == MMC_TIMING_UHS_DDR50)
+> +       if (host->mmc->ios.timing == MMC_TIMING_MMC_DDR52)
+
+This will break DDR mode for UHS SD-cards.
+
+>                 clk |= MCI_ST_UX500_NEG_EDGE;
+>
+>         mmci_write_clkreg(host, clk);
+> @@ -784,7 +784,7 @@ static void mmci_start_data(struct mmci_host *host, struct mmc_data *data)
+>                         mmci_write_clkreg(host, clk);
+>                 }
+>
+> -       if (host->mmc->ios.timing == MMC_TIMING_UHS_DDR50)
+> +       if (host->mmc->ios.timing == MMC_TIMING_MMC_DDR52)
+>                 datactrl |= MCI_ST_DPSM_DDRMODE;
+
+This will break DDR mode for UHS SD-cards.
+
+Kind regards
+Ulf Hansson
+
+
+>
+>         /*
+> --
+> 1.7.0.4
+>
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
