@@ -1,42 +1,58 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [GIT PULL] MMC updates for mmc-next for 3.14, take 1
-Date: Thu, 16 Jan 2014 11:55:39 +0100
-Message-ID: <CAPDyKFpbf5NZoNEsOMa=NkAs3EC-tD1=d4vReTrMjmOrg0nbmQ@mail.gmail.com>
-References: <CAPDyKFpNgZ1ExXMbz7q4QqMNnCrFFPxrVtzB3cX1D3C96e0HLQ@mail.gmail.com>
-	<CAPDyKFrY8NaTSOT9BTWFWqCbwtcqMJoXAkt5bDvRLRf1==bN9g@mail.gmail.com>
-	<86vbxl8gl7.fsf@void.printf.net>
+From: Balaji T K <balajitk@ti.com>
+Subject: Re: [PATCH 3/7] mmc: omap: clarify DDR timing mode between SD-UHS
+ and eMMC
+Date: Thu, 16 Jan 2014 16:31:35 +0530
+Message-ID: <52D7BC0F.20007@ti.com>
+References: <1383653403-10049-1-git-send-email-ulf.hansson@linaro.org> <002101cf11fb$bf5c6280$3e152780$%jun@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset="UTF-8"; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qe0-f48.google.com ([209.85.128.48]:35665 "EHLO
-	mail-qe0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752456AbaAPKzk (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 16 Jan 2014 05:55:40 -0500
-Received: by mail-qe0-f48.google.com with SMTP id ne12so473366qeb.7
-        for <linux-mmc@vger.kernel.org>; Thu, 16 Jan 2014 02:55:40 -0800 (PST)
-In-Reply-To: <86vbxl8gl7.fsf@void.printf.net>
+Received: from devils.ext.ti.com ([198.47.26.153]:51978 "EHLO
+	devils.ext.ti.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751714AbaAPLBt (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 16 Jan 2014 06:01:49 -0500
+In-Reply-To: <002101cf11fb$bf5c6280$3e152780$%jun@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <chris@printf.net>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>
+To: Seungwon Jeon <tgih.jun@samsung.com>
+Cc: 'Chris Ball' <chris@printf.net>, linux-mmc@vger.kernel.org
 
-On 15 January 2014 15:28, Chris Ball <chris@printf.net> wrote:
-> Hi Ulf,
+On Wednesday 15 January 2014 07:41 PM, Seungwon Jeon wrote:
+> Replaced UHS_DDR50 with MMC_DDR52.
 >
-> On Tue, Jan 14 2014, Ulf Hansson wrote:
->> Any thoughts on this pull request?
+> CC: Balaji T K <balajitk@ti.com>
+> Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
+
+Looks good to me
+
+Acked-by: Balaji T K <balajitk@ti.com>
+
+> ---
+>   drivers/mmc/host/omap_hsmmc.c |    4 ++--
+>   1 files changed, 2 insertions(+), 2 deletions(-)
 >
-> Sorry for the delay -- I'm a little worried about these and would like
-> lots of testing, so I think the best time to merge them to linux-next
-> will be immediately after 3.14-rc1 is released.  Hope that's okay,
-> thanks.
-
-No worries, I agree it makes sense to queue them for 3.15 instead.
-
-Kind regards
-Ulf Hansson
-
+> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+> index dbd32ad..cca397e 100644
+> --- a/drivers/mmc/host/omap_hsmmc.c
+> +++ b/drivers/mmc/host/omap_hsmmc.c
+> @@ -540,7 +540,7 @@ static void omap_hsmmc_set_clock(struct omap_hsmmc_host *host)
+>   	 *	- MMC/SD clock coming out of controller > 25MHz
+>   	 */
+>   	if ((mmc_slot(host).features & HSMMC_HAS_HSPE_SUPPORT) &&
+> -	    (ios->timing != MMC_TIMING_UHS_DDR50) &&
+> +	    (ios->timing != MMC_TIMING_MMC_DDR52) &&
+>   	    ((OMAP_HSMMC_READ(host->base, CAPA) & HSS) == HSS)) {
+>   		regval = OMAP_HSMMC_READ(host->base, HCTL);
+>   		if (clkdiv && (clk_get_rate(host->fclk)/clkdiv) > 25000000)
+> @@ -560,7 +560,7 @@ static void omap_hsmmc_set_bus_width(struct omap_hsmmc_host *host)
+>   	u32 con;
 >
-> - Chris.
-> --
-> Chris Ball   <chris@printf.net>   <http://printf.net/>
+>   	con = OMAP_HSMMC_READ(host->base, CON);
+> -	if (ios->timing == MMC_TIMING_UHS_DDR50)
+> +	if (ios->timing == MMC_TIMING_MMC_DDR52)
+>   		con |= DDR;	/* configure in DDR mode */
+>   	else
+>   		con &= ~DDR;
+>
+
