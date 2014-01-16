@@ -1,70 +1,63 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 2/7] mmc: mmci: clarify DDR timing mode between SD-UHS and eMMC
-Date: Thu, 16 Jan 2014 11:20:28 +0100
-Message-ID: <CAPDyKFouGffRSikRbynES+euCuwCKbQXjspdq8oYq3Bg__pKEA@mail.gmail.com>
+Subject: Re: [PATCH 4/7] mmc: sh_mmcif: clarify DDR timing mode between SD-UHS
+ and eMMC
+Date: Thu, 16 Jan 2014 11:22:29 +0100
+Message-ID: <CAPDyKFoA9P8ggVx3EkFUpKotMHdvWO7GWe5QrBi89VkGXS7tEw@mail.gmail.com>
 References: <1383653403-10049-1-git-send-email-ulf.hansson@linaro.org>
-	<002001cf11fb$b7217380$25645a80$%jun@samsung.com>
+	<002201cf11fb$c63ffee0$52bffca0$%jun@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qc0-f176.google.com ([209.85.216.176]:54715 "EHLO
-	mail-qc0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751948AbaAPKU2 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 16 Jan 2014 05:20:28 -0500
-Received: by mail-qc0-f176.google.com with SMTP id e16so2071874qcx.21
-        for <linux-mmc@vger.kernel.org>; Thu, 16 Jan 2014 02:20:28 -0800 (PST)
-In-Reply-To: <002001cf11fb$b7217380$25645a80$%jun@samsung.com>
+Received: from mail-qe0-f46.google.com ([209.85.128.46]:59973 "EHLO
+	mail-qe0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751123AbaAPKWa (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 16 Jan 2014 05:22:30 -0500
+Received: by mail-qe0-f46.google.com with SMTP id 8so2300809qea.33
+        for <linux-mmc@vger.kernel.org>; Thu, 16 Jan 2014 02:22:30 -0800 (PST)
+In-Reply-To: <002201cf11fb$c63ffee0$52bffca0$%jun@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Seungwon Jeon <tgih.jun@samsung.com>
-Cc: Chris Ball <chris@printf.net>, Rickard Andersson <rickard.andersson@stericsson.com>, Russell King <linux@arm.linux.org.uk>, linux-mmc <linux-mmc@vger.kernel.org>
+Cc: Chris Ball <chris@printf.net>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, linux-mmc <linux-mmc@vger.kernel.org>
 
-On 15 January 2014 15:11, Seungwon Jeon <tgih.jun@samsung.com> wrote:
+On 15 January 2014 15:12, Seungwon Jeon <tgih.jun@samsung.com> wrote:
 > Replaced UHS_DDR50 with MMC_DDR52.
 >
-> CC: Russell King <linux@arm.linux.org.uk>
+> CC: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 > Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
 > ---
->  drivers/mmc/host/mmci.c |    4 ++--
->  1 files changed, 2 insertions(+), 2 deletions(-)
+>  drivers/mmc/host/sh_mmcif.c |    9 +++++----
+>  1 files changed, 5 insertions(+), 4 deletions(-)
 >
-> diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-> index f320579..c348427 100644
-> --- a/drivers/mmc/host/mmci.c
-> +++ b/drivers/mmc/host/mmci.c
-> @@ -299,7 +299,7 @@ static void mmci_set_clkreg(struct mmci_host *host, unsigned int desired)
->         if (host->mmc->ios.bus_width == MMC_BUS_WIDTH_8)
->                 clk |= MCI_ST_8BIT_BUS;
->
-> -       if (host->mmc->ios.timing == MMC_TIMING_UHS_DDR50)
-> +       if (host->mmc->ios.timing == MMC_TIMING_MMC_DDR52)
-
-This will break DDR mode for UHS SD-cards.
-
->                 clk |= MCI_ST_UX500_NEG_EDGE;
->
->         mmci_write_clkreg(host, clk);
-> @@ -784,7 +784,7 @@ static void mmci_start_data(struct mmci_host *host, struct mmc_data *data)
->                         mmci_write_clkreg(host, clk);
+> diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
+> index 54730f4..656fbba 100644
+> --- a/drivers/mmc/host/sh_mmcif.c
+> +++ b/drivers/mmc/host/sh_mmcif.c
+> @@ -803,12 +803,13 @@ static u32 sh_mmcif_set_cmd(struct sh_mmcif_host *host,
+>                         break;
 >                 }
->
-> -       if (host->mmc->ios.timing == MMC_TIMING_UHS_DDR50)
-> +       if (host->mmc->ios.timing == MMC_TIMING_MMC_DDR52)
->                 datactrl |= MCI_ST_DPSM_DDRMODE;
+>                 switch (host->timing) {
+> -               case MMC_TIMING_UHS_DDR50:
+> +               case MMC_TIMING_MMC_DDR52:
 
-This will break DDR mode for UHS SD-cards.
+What about UHS SD cards?
 
 Kind regards
 Ulf Hansson
 
-
->
->         /*
+>                         /*
+>                          * MMC core will only set this timing, if the host
+> -                        * advertises the MMC_CAP_UHS_DDR50 capability. MMCIF
+> -                        * implementations with this capability, e.g. sh73a0,
+> -                        * will have to set it in their platform data.
+> +                        * advertises the MMC_CAP_1_8V_DDR/MMC_CAP_1_2V_DDR
+> +                        * capability. MMCIF implementations with this
+> +                        * capability, e.g. sh73a0, will have to set it
+> +                        * in their platform data.
+>                          */
+>                         tmp |= CMD_SET_DARS;
+>                         break;
 > --
 > 1.7.0.4
 >
 >
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
