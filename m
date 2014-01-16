@@ -1,41 +1,35 @@
-From: Kevin Hilman <khilman@linaro.org>
-Subject: Re: [PATCH] mmc: dw_mmc: fix dw_mci_get_cd
-Date: Thu, 16 Jan 2014 10:29:40 -0800
-Message-ID: <87y52fok4r.fsf@linaro.org>
-References: <1389839502-13046-1-git-send-email-zhangfei.gao@linaro.org>
-	<1389876527-13498-1-git-send-email-zhangfei.gao@linaro.org>
+From: Russell King - ARM Linux <linux@arm.linux.org.uk>
+Subject: Re: How to support SDIO wifi/bt in DT
+Date: Thu, 16 Jan 2014 19:58:20 +0000
+Message-ID: <20140116195819.GY15937@n2100.arm.linux.org.uk>
+References: <20140116133649.GV15937@n2100.arm.linux.org.uk> <3215037.8HVCjAeS8g@wuerfel> <CAOesGMgzi5Buduo2pd0PP8CvKVir69yZ-jjX0Gbda871GiD8rg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pb0-f51.google.com ([209.85.160.51]:43113 "EHLO
-	mail-pb0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751832AbaAPS3p (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 16 Jan 2014 13:29:45 -0500
-Received: by mail-pb0-f51.google.com with SMTP id rp16so2996867pbb.24
-        for <linux-mmc@vger.kernel.org>; Thu, 16 Jan 2014 10:29:43 -0800 (PST)
-In-Reply-To: <1389876527-13498-1-git-send-email-zhangfei.gao@linaro.org>
-	(Zhangfei Gao's message of "Thu, 16 Jan 2014 20:48:47 +0800")
+Received: from gw-1.arm.linux.org.uk ([78.32.30.217]:39410 "EHLO
+	pandora.arm.linux.org.uk" rhost-flags-OK-OK-OK-FAIL)
+	by vger.kernel.org with ESMTP id S1751046AbaAPT6c (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 16 Jan 2014 14:58:32 -0500
+Content-Disposition: inline
+In-Reply-To: <CAOesGMgzi5Buduo2pd0PP8CvKVir69yZ-jjX0Gbda871GiD8rg@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Zhangfei Gao <zhangfei.gao@linaro.org>
-Cc: Russell King - ARM Linux <linux@arm.linux.org.uk>, Sachin Kamat <sachin.kamat@linaro.org>, Chris Ball <cjb@laptop.org>, Arnd Bergmann <arnd@arndb.de>, Mike Turquette <mturquette@linaro.org>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, patches@linaro.org
+To: Olof Johansson <olof@lixom.net>
+Cc: Arnd Bergmann <arnd@arndb.de>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-Zhangfei Gao <zhangfei.gao@linaro.org> writes:
+On Thu, Jan 16, 2014 at 09:15:17AM -0800, Olof Johansson wrote:
+> We've dealt with it with local code in our tree for Chrome OS, and I
+> suspect everyone else has too. It's definitely time to solve
+> generically.
 
-> Introduced from commit bf626e5550f24aec24975a0e85ad8e572ca76a6b
-> CDETECT is ignored since negated return value of mmc_gpio_get_cd(mmc)
-> can not be checked by IS_ERR_VALUE.
-> Add spin_lock_bh(&host->lock) for atomic accessing DW_MMC_CARD_PRESENT,
-> otherwise sd detect may occasionally fail.
->
-> Signed-off-by: Zhangfei Gao <zhangfei.gao@linaro.org>
-> Reported-by: Kevin Hilman <khilman@linaro.org>
-> Reviewed-by: Sachin Kamat <sachin.kamat@linaro.org>
-> Tested-by: Sachin Kamat <sachin.kamat@linaro.org>
+As there's no code for any Cubox-i or Hummingboard (they're both purely
+DT), what this means is that the answer to Wifi/BT support in mainline is
+that this is "impossible at the moment"...
 
-I didn't look at the patch in detail, but can at least confirm that
-Arndale boots again in -next with this patch applied.
+I guess this is becoming a higher priority issue which really needs to be
+solved somehow. :)
 
-Tested-by: Kevin Hilman <khilman@linaro.org>
-
-Kevin
+-- 
+FTTC broadband for 0.8mile line: 5.8Mbps down 500kbps up.  Estimation
+in database were 13.1 to 19Mbit for a good line, about 7.5+ for a bad.
+Estimate before purchase was "up to 13.2Mbit".
