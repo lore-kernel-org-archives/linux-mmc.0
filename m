@@ -1,70 +1,62 @@
-From: Chris Ruehl <chris.ruehl@gtsys.com.hk>
-Subject: [PATCH 2/2] mxcmmc: Internal error: Oops: 17 [#1] ARM from sg->offset
-Date: Thu, 16 Jan 2014 09:42:48 +0800
-Message-ID: <1389836568-14864-1-git-send-email-chris.ruehl@gtsys.com.hk>
+From: zhangfei <zhangfei.gao@linaro.org>
+Subject: Re: [PATCH] mmc: dw_mmc: fix dw_mci_get_cd
+Date: Thu, 16 Jan 2014 10:10:05 +0800
+Message-ID: <52D73F7D.60302@linaro.org>
+References: <1389770159-21125-1-git-send-email-zhangfei.gao@linaro.org> <3154671.7LPLgq8X4K@wuerfel> <20140115160146.GO15937@n2100.arm.linux.org.uk> <15344443.B6eHZOpkXH@wuerfel> <20140115162210.GP15937@n2100.arm.linux.org.uk>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail.fpasia.hk ([202.130.89.98]:44961 "EHLO fpa01n0.fpasia.hk"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751314AbaAPBmp (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 15 Jan 2014 20:42:45 -0500
+Received: from mail-pa0-f43.google.com ([209.85.220.43]:43805 "EHLO
+	mail-pa0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751634AbaAPCKS (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Jan 2014 21:10:18 -0500
+Received: by mail-pa0-f43.google.com with SMTP id rd3so1986110pab.30
+        for <linux-mmc@vger.kernel.org>; Wed, 15 Jan 2014 18:10:18 -0800 (PST)
+In-Reply-To: <20140115162210.GP15937@n2100.arm.linux.org.uk>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: cjb@laptop.org
-Cc: s.hauer@pengutronix.de, agust@denx.de, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Chris Ruehl <chris.ruehl@gtsys.com.hk>
+To: Russell King - ARM Linux <linux@arm.linux.org.uk>, Arnd Bergmann <arnd@arndb.de>
+Cc: 'Kevin Hilman' <khilman@linaro.org>, 'Mike Turquette' <mturquette@linaro.org>, patches@linaro.org, Seungwon Jeon <tgih.jun@samsung.com>, linux-mmc@vger.kernel.org, 'Jaehoon Chung' <jh80.chung@samsung.com>, 'Sachin Kamat' <sachin.kamat@linaro.org>, 'Chris Ball' <cjb@laptop.org>, linux-arm-kernel@lists.infradead.org
 
-Function mxcmci_request() throw an exception on a imx27 cpu.
-This patch fix the problem by test the pointer before access it.
 
-[  516.783407] Unable to handle kernel NULL pointer dereference at virtual address 00000004
-[  516.791639] pgd = c0004000
-[  516.794445] [00000004] *pgd=00000000
-[  516.798088] Internal error: Oops: 17 [#1] ARM
-[  516.802472] Modules linked in:
-[  516.805593] CPU: 0 PID: 569 Comm: mmcqd/0 Not tainted 3.13.0-rc1-next-20131125-00006-g5f6bb77-dirty #66
-[  516.815027] task: cfb8a2a0 ti: cfb88000 task.ti: cfb88000
-[  516.820484] PC is at mxcmci_request+0xd0/0x2f8
-[  516.824974] LR is at mxcmci_request+0xf8/0x2f8
-[  516.829466] pc : [<c02b6048>]    lr : [<c02b6070>]    psr: 00000013
-[  516.829466] sp : cfb89dd0  ip : cfb89dd0  fp : cfb89e1c
-[  516.840988] r10: 000001ff  r9 : 00000002  r8 : cfa10620
-[  516.846250] r7 : 00000200  r6 : cfa0f02c  r5 : cfa0f0ec  r4 : cfa10400
-[  516.852812] r3 : a0000013  r2 : cfa0f410  r1 : 00040000  r0 : 00000000
-[  516.859376] Flags: nzcv  IRQs on  FIQs on  Mode SVC_32  ISA ARM  Segment kernel
-[  516.866723] Control: 0005317f  Table: afa74000  DAC: 00000017
-[  516.872503] Process mmcqd/0 (pid: 569, stack limit = 0xcfb881c0)
-[  516.878543] Stack: (0xcfb89dd0 to 0xcfb8a000)
 
-(gdb) list *(mxcmci_request+0xd0)
-0xcac is at drivers/mmc/host/mxcmmc.c:350.
-345
-346        if (!mxcmci_use_dma(host))
-347            return 0;
-348
-349        for_each_sg(data->sg, sg, data->sg_len, i) {
-350            if (sg->offset & 3 || sg->length & 3 || sg->length < 512) {
-351                host->do_dma = 0;
-352                return 0;
-353            }
-354        }
+On 01/16/2014 12:22 AM, Russell King - ARM Linux wrote:
 
-Signed-off-by: Chris Ruehl <chris.ruehl@gtsys.com.hk>
----
- drivers/mmc/host/mxcmmc.c |    2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+> Well, having this in the gpio level as well as in subsystems like MMC
+> is going to create confusion - and from the results of this patch _IS_
+> causing confusion.  You've just encouraged one implementation to have
+> things setup such that mmc_gpio_get_cd() returns false when a card is
+> inserted, rather than it correctly returning true.
+>
+> The issue here is that we'll potentially now end up with _three_
+> inversions.  One in the GPIO layers.  One in mmc_gpio_get_cd(), and
+> another in every driver which uses the GPIO layer inversion.  This
+> is hardly the right approach as it leads to multiple points where
+> confusion about the inverted status can occur.
+>
 
-diff --git a/drivers/mmc/host/mxcmmc.c b/drivers/mmc/host/mxcmmc.c
-index f7199c8..8645d6a 100644
---- a/drivers/mmc/host/mxcmmc.c
-+++ b/drivers/mmc/host/mxcmmc.c
-@@ -347,7 +347,7 @@ static int mxcmci_setup_data(struct mxcmci_host *host, struct mmc_data *data)
- 		return 0;
- 
- 	for_each_sg(data->sg, sg, data->sg_len, i) {
--		if (sg->offset & 3 || sg->length & 3 || sg->length < 512) {
-+		if (sg && (sg->offset & 3 || sg->length & 3 || sg->length < 512)) {
- 			host->do_dma = 0;
- 			return 0;
- 		}
--- 
-1.7.10.4
+Thanks Russell, make sense.
 
+Double checked with the hardware guy, cd pin is high when card inserted 
+on the board.
+The cd pin is originally connected to vout via a resister, and 
+internally short to gound, which is broken when card inserted.
+
+Then Optional properties "caps2-mmc-cd-active-high" has to be added.
+
+--- a/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt
++++ b/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt
+
++* caps2-mmc-cd-active-high: cd pin is high when card present
+
+@@ -2411,6 +2414,9 @@ static struct dw_mci_board *dw_mci_parse_dt(struct 
+dw_mci *host)
+         if (of_find_property(np, "caps2-mmc-hs200-1_2v", NULL))
+                 pdata->caps2 |= MMC_CAP2_HS200_1_2V_SDR;
+
++       if (of_find_property(np, "caps2-mmc-cd-active-high", NULL))
++               pdata->caps2 |= MMC_CAP2_CD_ACTIVE_HIGH;
++
+
+Thanks
