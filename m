@@ -1,23 +1,20 @@
-From: Andrew Bresticker <abrestic@chromium.org>
+From: John Tobias <john.tobias.ph@gmail.com>
 Subject: Re: [PATCH] mmc: sdhci: fix possible scheduling while atomic
-Date: Fri, 17 Jan 2014 15:10:22 -0800
-Message-ID: <CAL1qeaGuC+pEw207LOb2A2NaVZfFmrCgKLXJG-YRFa6=6LyC+g@mail.gmail.com>
+Date: Fri, 17 Jan 2014 15:11:59 -0800
+Message-ID: <CACUGKYOojQ9XHj6ixrByuaEgPSqZNxr2Ls6pS4r_6nGVdLz52g@mail.gmail.com>
 References: <1389988630-9481-1-git-send-email-abrestic@chromium.org>
 	<0D8B1718-0A9D-467A-AFC5-108A868DE3BB@nvidia.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bk0-f42.google.com ([209.85.214.42]:56223 "EHLO
-	mail-bk0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751812AbaAQXKY (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 17 Jan 2014 18:10:24 -0500
-Received: by mail-bk0-f42.google.com with SMTP id my12so1852402bkb.15
-        for <linux-mmc@vger.kernel.org>; Fri, 17 Jan 2014 15:10:23 -0800 (PST)
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <0D8B1718-0A9D-467A-AFC5-108A868DE3BB@nvidia.com>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Sender: linux-kernel-owner@vger.kernel.org
 To: Philip Rakity <prakity@nvidia.com>
-Cc: Chris Ball <chris@printf.net>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Cc: Andrew Bresticker <abrestic@chromium.org>, Chris Ball <chris@printf.net>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+List-Id: linux-mmc@vger.kernel.org
+
+There's an existing patch for that...
+http://www.spinics.net/lists/arm-kernel/msg296596.html
 
 On Fri, Jan 17, 2014 at 2:58 PM, Philip Rakity <prakity@nvidia.com> wrote:
 >
@@ -51,46 +48,7 @@ On Fri, Jan 17, 2014 at 2:58 PM, Philip Rakity <prakity@nvidia.com> wrote:
 >
 >
 > The disable_irq() call stops the controller from doing interrupts.
-
-Right, but it does not disable other IRQ sources that could cause us
-to schedule.
-
 > Please explain what problem you are seeing
-
-The issue we were seeing was that a card-detect interrupt was
-triggered (*not* the controller interrupt), causing the card-detect
-irq thread to recurse on host->lock:
-
-[   60.962218] BUG: spinlock cpu recursion on CPU#0, irq/362-700b040/89
-[   60.975253]  lock: 0xee210c80, .magic: dead4ead, .owner:
-kworker/u8:1/33, .owner_cpu: 0
-[   60.991638] CPU: 0 PID: 89 Comm: irq/362-700b040 Not tainted 3.10.18 #2
-[   61.005199] [<800153cc>] (unwind_backtrace+0x0/0x118) from
-[<800124e4>] (show_stack+0x20/0x24)
-[   61.022824] [<800124e4>] (show_stack+0x20/0x24) from [<8053d584>]
-(dump_stack+0x20/0x28)
-[   61.039389] [<8053d584>] (dump_stack+0x20/0x28) from [<8021d508>]
-(spin_dump+0x80/0x94)
-[   61.055773] [<8021d508>] (spin_dump+0x80/0x94) from [<8021d548>]
-(spin_bug+0x2c/0x30)
-[   61.071803] [<8021d548>] (spin_bug+0x2c/0x30) from [<8021d61c>]
-(do_raw_spin_lock+0x70/0x15c)
-[   61.089250] [<8021d61c>] (do_raw_spin_lock+0x70/0x15c) from
-[<8054098c>] (_raw_spin_lock_irqsave+0x20/0x28)
-[   61.109175] [<8054098c>] (_raw_spin_lock_irqsave+0x20/0x28) from
-[<803e2af0>] (sdhci_card_event+0x28/0xfc)
-[   61.128922] [<803e2af0>] (sdhci_card_event+0x28/0xfc) from
-[<803dc880>] (mmc_gpio_cd_irqt+0x30/0x4c)
-[   61.147609] [<803dc880>] (mmc_gpio_cd_irqt+0x30/0x4c) from
-[<80091858>] (irq_thread+0xf0/0x224)
-[   61.165412] [<80091858>] (irq_thread+0xf0/0x224) from [<80050db4>]
-(kthread+0xc8/0xd8)
-[   61.181623] [<80050db4>] (kthread+0xc8/0xd8) from [<8000e4d8>]
-(ret_from_fork+0x14/0x20)
-
-Thanks,
-Andrew
-
 >
 >>
 >>       ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
@@ -147,3 +105,8 @@ Andrew
 >> the body of a message to majordomo@vger.kernel.org
 >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 >
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-kernel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> Please read the FAQ at  http://www.tux.org/lkml/
