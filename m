@@ -1,42 +1,44 @@
-From: Seungwon Jeon <essuuj@gmail.com>
-Subject: Re: [PATCH 2/2] mmc: dw_mmc: k3: remove clk_table
-Date: Sat, 18 Jan 2014 01:10:23 +0900
-Message-ID: <CAFt19AB2Yk4U06-R9rMqFgEHFjN_L-pnc1wR35SQUjX28j7tZQ@mail.gmail.com>
-References: <1389604469-8064-1-git-send-email-zhangfei.gao@linaro.org>
-	<1389604469-8064-3-git-send-email-zhangfei.gao@linaro.org>
-	<002b01cf1115$4cdfe240$e69fa6c0$%jun@samsung.com>
-	<86sism7iuz.fsf@void.printf.net>
+From: Nicolas Pitre <nico@fluxnic.net>
+Subject: Re: How to support SDIO wifi/bt in DT
+Date: Fri, 17 Jan 2014 11:58:52 -0500 (EST)
+Message-ID: <alpine.LFD.2.10.1401171157340.28907@knanqh.ubzr>
+References: <20140116133649.GV15937@n2100.arm.linux.org.uk>
+ <3215037.8HVCjAeS8g@wuerfel>
+ <CAOesGMgzi5Buduo2pd0PP8CvKVir69yZ-jjX0Gbda871GiD8rg@mail.gmail.com>
+ <alpine.LFD.2.10.1401162204560.28907@knanqh.ubzr>
+ <CAL_JsqKX2RT2E6uk3d35m+TWW7iuPFFiuZzOwd0xA9zMgqAZRw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: TEXT/PLAIN; CHARSET=US-ASCII
+Content-Transfer-Encoding: 7BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pb0-f52.google.com ([209.85.160.52]:64047 "EHLO
-	mail-pb0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751354AbaAQQKY (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 17 Jan 2014 11:10:24 -0500
-In-Reply-To: <86sism7iuz.fsf@void.printf.net>
+Received: from relais.videotron.ca ([24.201.245.36]:52756 "EHLO
+	relais.videotron.ca" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751951AbaAQQ6y (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 17 Jan 2014 11:58:54 -0500
+In-reply-to: <CAL_JsqKX2RT2E6uk3d35m+TWW7iuPFFiuZzOwd0xA9zMgqAZRw@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <chris@printf.net>
-Cc: Seungwon Jeon <tgih.jun@samsung.com>, Zhangfei Gao <zhangfei.gao@linaro.org>, Arnd Bergmann <arnd@arndb.de>, Mike Turquette <mturquette@linaro.org>, Jaehoon Chung <jh80.chung@samsung.com>, Haojian Zhuang <haojian.zhuang@linaro.org>, brooke.wangzhigang@huawei.com, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, patches@linaro.org, devicetree@vger.kernel.org
+To: Rob Herring <robherring2@gmail.com>
+Cc: Olof Johansson <olof@lixom.net>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Russell King - ARM Linux <linux@arm.linux.org.uk>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Arnd Bergmann <arnd@arndb.de>
 
-On Sat, Jan 18, 2014 at 12:01 AM, Chris Ball <chris@printf.net> wrote:
->
-> Hi,
->
-> On Tue, Jan 14 2014, Seungwon Jeon wrote:
-> > On Monday, January 13, 2014, Zhangfei Gao wrote:
-> >> Remove clk_table and directly use ios->clock as clock source rate.
-> >> Abstract init clock rate and max clock limitation in clk.c
-> >>
-> >> Signed-off-by: Zhangfei Gao <zhangfei.gao@linaro.org>
+On Fri, 17 Jan 2014, Rob Herring wrote:
+
+> On Thu, Jan 16, 2014 at 9:08 PM, Nicolas Pitre <nico@fluxnic.net> wrote:
+> > On Thu, 16 Jan 2014, Olof Johansson wrote:
 > >
-> > Acked-by: Seungwon Jeon <tgih.jun@samsung.com>
->
-> It looks like patch 1/2 did not make 3.14.  Do you want me to take
-> this patch for 3.14 anyway?  (Why?)
-Yes, I hope that it would be merged this time.
-I think that this change should have been applied to (036f29: mmc:
-dw_mmc: add dw_mmc-k3 for k3 platform) originally.
+> >> "for SDIO slots" is somewhat misleading; nearly all controllers only
+> >> do one slot/device per controller. The designware controller can do
+> >> multiple slots, and that adds a bit of driver and binding complexity
+> >> for something that seemingly not a single vendor has actually
+> >> implemented.
+> >
+> > The Marvell 8688, just to name one, does both WIFI and BlueTooth over
+> > the same SDIO controller using separate functions/slots.
+> 
+> But that is logical functions within a chip, not multiple discrete
+> chips (i.e. slots) with their own reset, regulators, etc.
 
-Thanks,
-sw-j
+OK.  If that's the definition of a slot in this context then I agree.
+
+
+Nicolas
