@@ -1,39 +1,38 @@
-From: Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>
-Subject: Re: [PATCH 2/2] mmc: dw_mmc: k3: remove clk_table
-Date: Fri, 17 Jan 2014 15:01:24 +0000
-Message-ID: <86sism7iuz.fsf@void.printf.net>
-References: <1389604469-8064-1-git-send-email-zhangfei.gao@linaro.org>
-	<1389604469-8064-3-git-send-email-zhangfei.gao@linaro.org>
-	<002b01cf1115$4cdfe240$e69fa6c0$%jun@samsung.com>
+From: Rob Herring <robherring2-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: Re: How to support SDIO wifi/bt in DT
+Date: Fri, 17 Jan 2014 09:14:47 -0600
+Message-ID: <CAL_JsqKX2RT2E6uk3d35m+TWW7iuPFFiuZzOwd0xA9zMgqAZRw@mail.gmail.com>
+References: <20140116133649.GV15937@n2100.arm.linux.org.uk>
+	<3215037.8HVCjAeS8g@wuerfel>
+	<CAOesGMgzi5Buduo2pd0PP8CvKVir69yZ-jjX0Gbda871GiD8rg@mail.gmail.com>
+	<alpine.LFD.2.10.1401162204560.28907@knanqh.ubzr>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <002b01cf1115$4cdfe240$e69fa6c0$%jun-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org> (Seungwon
-	Jeon's message of "Tue, 14 Jan 2014 19:42:19 +0900")
+In-Reply-To: <alpine.LFD.2.10.1401162204560.28907-fMhRO7WWcppj+hNMo8g0rg@public.gmane.org>
 Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Seungwon Jeon <tgih.jun-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
-Cc: 'Zhangfei Gao' <zhangfei.gao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, 'Arnd Bergmann' <arnd-r2nGTMty4D4@public.gmane.org>, 'Mike Turquette' <mturquette-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, 'Jaehoon Chung' <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, 'Haojian Zhuang' <haojian.zhuang-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, brooke.wangzhigang-hv44wF8Li93QT0dZR+AlfA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, patches-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Nicolas Pitre <nico-vtqb6HGKxmzR7s880joybQ@public.gmane.org>
+Cc: Olof Johansson <olof-nZhT3qVonbNeoWH0uzbU5w@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Russell King - ARM Linux <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi,
-
-On Tue, Jan 14 2014, Seungwon Jeon wrote:
-> On Monday, January 13, 2014, Zhangfei Gao wrote:
->> Remove clk_table and directly use ios->clock as clock source rate.
->> Abstract init clock rate and max clock limitation in clk.c
->> 
->> Signed-off-by: Zhangfei Gao <zhangfei.gao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+On Thu, Jan 16, 2014 at 9:08 PM, Nicolas Pitre <nico-vtqb6HGKxmzR7s880joybQ@public.gmane.org> wrote:
+> On Thu, 16 Jan 2014, Olof Johansson wrote:
 >
-> Acked-by: Seungwon Jeon <tgih.jun-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
+>> "for SDIO slots" is somewhat misleading; nearly all controllers only
+>> do one slot/device per controller. The designware controller can do
+>> multiple slots, and that adds a bit of driver and binding complexity
+>> for something that seemingly not a single vendor has actually
+>> implemented.
+>
+> The Marvell 8688, just to name one, does both WIFI and BlueTooth over
+> the same SDIO controller using separate functions/slots.
 
-It looks like patch 1/2 did not make 3.14.  Do you want me to take
-this patch for 3.14 anyway?  (Why?)
+But that is logical functions within a chip, not multiple discrete
+chips (i.e. slots) with their own reset, regulators, etc. There would
+still be a single set of external controls per host controller I
+think.
 
-Thanks,
-
-- Chris.
--- 
-Chris Ball   <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>   <http://printf.net/>
+Rob
 --
 To unsubscribe from this list: send the line "unsubscribe devicetree" in
 the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
