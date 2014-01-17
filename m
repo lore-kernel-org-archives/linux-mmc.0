@@ -1,90 +1,56 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 1/7] mmc: clarify DDR timing mode between SD-UHS and eMMC
-Date: Fri, 17 Jan 2014 22:22:24 +0100
-Message-ID: <CAPDyKFoeHNmcVTtcR6cVvb3SY0LqjE2nyC+vPBOEVOshNcUswQ@mail.gmail.com>
-References: <1383653403-10049-1-git-send-email-ulf.hansson@linaro.org>
-	<001f01cf11fb$93d188c0$bb749a40$%jun@samsung.com>
-	<CAPDyKFpzxoMJYhWWsnnJdHRbHd3+efTyz5PMtoqDtBa2O3pkeg@mail.gmail.com>
+From: Mike Turquette <mturquette@linaro.org>
+Subject: Re: [PATCH 2/2] mmc: dw_mmc: k3: remove clk_table
+Date: Fri, 17 Jan 2014 14:56:31 -0800
+Message-ID: <20140117225631.4167.47840@quantum>
+References: <1389604469-8064-1-git-send-email-zhangfei.gao@linaro.org>
+ <1389604469-8064-3-git-send-email-zhangfei.gao@linaro.org>
+ <002b01cf1115$4cdfe240$e69fa6c0$%jun@samsung.com>
+ <86sism7iuz.fsf@void.printf.net>
+ <CAFt19AB2Yk4U06-R9rMqFgEHFjN_L-pnc1wR35SQUjX28j7tZQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qe0-f41.google.com ([209.85.128.41]:60977 "EHLO
-	mail-qe0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753124AbaAQVWZ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 17 Jan 2014 16:22:25 -0500
-Received: by mail-qe0-f41.google.com with SMTP id gc15so1191179qeb.28
-        for <linux-mmc@vger.kernel.org>; Fri, 17 Jan 2014 13:22:24 -0800 (PST)
-In-Reply-To: <CAPDyKFpzxoMJYhWWsnnJdHRbHd3+efTyz5PMtoqDtBa2O3pkeg@mail.gmail.com>
+Received: from mail-yh0-f44.google.com ([209.85.213.44]:54657 "EHLO
+	mail-yh0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751892AbaAQW4n convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 17 Jan 2014 17:56:43 -0500
+Received: by mail-yh0-f44.google.com with SMTP id f73so673798yha.31
+        for <linux-mmc@vger.kernel.org>; Fri, 17 Jan 2014 14:56:40 -0800 (PST)
+In-Reply-To: <CAFt19AB2Yk4U06-R9rMqFgEHFjN_L-pnc1wR35SQUjX28j7tZQ@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Seungwon Jeon <tgih.jun@samsung.com>
-Cc: Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>
+To: Seungwon Jeon <essuuj@gmail.com>, Chris Ball <chris@printf.net>
+Cc: Seungwon Jeon <tgih.jun@samsung.com>, Zhangfei Gao <zhangfei.gao@linaro.org>, Arnd Bergmann <arnd@arndb.de>, Jaehoon Chung <jh80.chung@samsung.com>, Haojian Zhuang <haojian.zhuang@linaro.org>, brooke.wangzhigang@huawei.com, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, patches@linaro.org, devicetree@vger.kernel.org
 
-On 16 January 2014 11:50, Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> On 15 January 2014 15:10, Seungwon Jeon <tgih.jun@samsung.com> wrote:
->> This change distinguishes DDR timing mode of current
->> mixed usage to clarify device type.
->>
->> Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
->
-> Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
->
->> ---
->>  drivers/mmc/core/debugfs.c |    3 +++
->>  drivers/mmc/core/mmc.c     |    2 +-
->>  include/linux/mmc/host.h   |    3 ++-
->>  3 files changed, 6 insertions(+), 2 deletions(-)
->>
->> diff --git a/drivers/mmc/core/debugfs.c b/drivers/mmc/core/debugfs.c
->> index 54829c0..509229b 100644
->> --- a/drivers/mmc/core/debugfs.c
->> +++ b/drivers/mmc/core/debugfs.c
->> @@ -135,6 +135,9 @@ static int mmc_ios_show(struct seq_file *s, void *data)
->>         case MMC_TIMING_UHS_DDR50:
->>                 str = "sd uhs DDR50";
->>                 break;
->> +       case MMC_TIMING_MMC_DDR52:
->> +               str = "mmc DDR52";
+Quoting Seungwon Jeon (2014-01-17 08:10:23)
+> On Sat, Jan 18, 2014 at 12:01 AM, Chris Ball <chris@printf.net> wrote:
+> >
+> > Hi,
+> >
+> > On Tue, Jan 14 2014, Seungwon Jeon wrote:
+> > > On Monday, January 13, 2014, Zhangfei Gao wrote:
+> > >> Remove clk_table and directly use ios->clock as clock source rate.
+> > >> Abstract init clock rate and max clock limitation in clk.c
+> > >>
+> > >> Signed-off-by: Zhangfei Gao <zhangfei.gao@linaro.org>
+> > >
+> > > Acked-by: Seungwon Jeon <tgih.jun@samsung.com>
+> >
+> > It looks like patch 1/2 did not make 3.14.  Do you want me to take
+> > this patch for 3.14 anyway?  (Why?)
+> Yes, I hope that it would be merged this time.
+> I think that this change should have been applied to (036f29: mmc:
+> dw_mmc: add dw_mmc-k3 for k3 platform) originally.
 
-Just a minor thought. In the eMMC spec there are no such thing as
-DDR52 mode. Only DDR is mentioned, should we maybe change to
-"MMC_TIMING_MMC_DDR" to better reflect the spec?
+Oops, I just read this mail. I have taken in patch #1 through the clk
+tree but have not yet pushed it out to my public mirror.
 
-Kind regards
-Ulf Hansson
+Chris, I'm happy to take it if you haven't yet.
 
->> +               break;
->>         case MMC_TIMING_MMC_HS200:
->>                 str = "mmc high-speed SDR200";
->>                 break;
->> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
->> index 98e9eb0..6d91ff7 100644
->> --- a/drivers/mmc/core/mmc.c
->> +++ b/drivers/mmc/core/mmc.c
->> @@ -1261,7 +1261,7 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
->>                                         goto err;
->>                         }
->>                         mmc_card_set_ddr_mode(card);
->> -                       mmc_set_timing(card->host, MMC_TIMING_UHS_DDR50);
->> +                       mmc_set_timing(card->host, MMC_TIMING_MMC_DDR52);
->>                         mmc_set_bus_width(card->host, bus_width);
->>                 }
->>         }
->> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
->> index 99f5709..87b1f4f 100644
->> --- a/include/linux/mmc/host.h
->> +++ b/include/linux/mmc/host.h
->> @@ -58,7 +58,8 @@ struct mmc_ios {
->>  #define MMC_TIMING_UHS_SDR50   5
->>  #define MMC_TIMING_UHS_SDR104  6
->>  #define MMC_TIMING_UHS_DDR50   7
->> -#define MMC_TIMING_MMC_HS200   8
->> +#define MMC_TIMING_MMC_DDR52   8
->> +#define MMC_TIMING_MMC_HS200   9
->>
->>  #define MMC_SDR_MODE           0
->>  #define MMC_1_2V_DDR_MODE      1
->> --
->> 1.7.0.4
->>
->>
+Regards,
+Mike
+
+> 
+> Thanks,
+> sw-j
