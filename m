@@ -1,84 +1,90 @@
-From: Andrew Bresticker <abrestic@chromium.org>
-Subject: [PATCH] mmc: sdhci: fix possible scheduling while atomic
-Date: Fri, 17 Jan 2014 11:57:10 -0800
-Message-ID: <1389988630-9481-1-git-send-email-abrestic@chromium.org>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Chris Ball <chris@printf.net>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Andrew Bresticker <abrestic@chromium.org>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH 1/7] mmc: clarify DDR timing mode between SD-UHS and eMMC
+Date: Fri, 17 Jan 2014 22:22:24 +0100
+Message-ID: <CAPDyKFoeHNmcVTtcR6cVvb3SY0LqjE2nyC+vPBOEVOshNcUswQ@mail.gmail.com>
+References: <1383653403-10049-1-git-send-email-ulf.hansson@linaro.org>
+	<001f01cf11fb$93d188c0$bb749a40$%jun@samsung.com>
+	<CAPDyKFpzxoMJYhWWsnnJdHRbHd3+efTyz5PMtoqDtBa2O3pkeg@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qe0-f41.google.com ([209.85.128.41]:60977 "EHLO
+	mail-qe0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753124AbaAQVWZ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 17 Jan 2014 16:22:25 -0500
+Received: by mail-qe0-f41.google.com with SMTP id gc15so1191179qeb.28
+        for <linux-mmc@vger.kernel.org>; Fri, 17 Jan 2014 13:22:24 -0800 (PST)
+In-Reply-To: <CAPDyKFpzxoMJYhWWsnnJdHRbHd3+efTyz5PMtoqDtBa2O3pkeg@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Seungwon Jeon <tgih.jun@samsung.com>
+Cc: Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>
 
-sdhci_execute_tuning() takes host->lock without disabling interrupts.
-Use spin_lock_irq{save,restore} instead so that we avoid taking an
-interrupt and scheduling while holding host->lock.
+On 16 January 2014 11:50, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> On 15 January 2014 15:10, Seungwon Jeon <tgih.jun@samsung.com> wrote:
+>> This change distinguishes DDR timing mode of current
+>> mixed usage to clarify device type.
+>>
+>> Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
+>
+> Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
+>
+>> ---
+>>  drivers/mmc/core/debugfs.c |    3 +++
+>>  drivers/mmc/core/mmc.c     |    2 +-
+>>  include/linux/mmc/host.h   |    3 ++-
+>>  3 files changed, 6 insertions(+), 2 deletions(-)
+>>
+>> diff --git a/drivers/mmc/core/debugfs.c b/drivers/mmc/core/debugfs.c
+>> index 54829c0..509229b 100644
+>> --- a/drivers/mmc/core/debugfs.c
+>> +++ b/drivers/mmc/core/debugfs.c
+>> @@ -135,6 +135,9 @@ static int mmc_ios_show(struct seq_file *s, void *data)
+>>         case MMC_TIMING_UHS_DDR50:
+>>                 str = "sd uhs DDR50";
+>>                 break;
+>> +       case MMC_TIMING_MMC_DDR52:
+>> +               str = "mmc DDR52";
 
-Signed-off-by: Andrew Bresticker <abrestic@chromium.org>
----
- drivers/mmc/host/sdhci.c | 13 +++++++------
- 1 file changed, 7 insertions(+), 6 deletions(-)
+Just a minor thought. In the eMMC spec there are no such thing as
+DDR52 mode. Only DDR is mentioned, should we maybe change to
+"MMC_TIMING_MMC_DDR" to better reflect the spec?
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index ec3eb30..84c80e7 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -1857,12 +1857,13 @@ static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
- 	unsigned long timeout;
- 	int err = 0;
- 	bool requires_tuning_nonuhs = false;
-+	unsigned long flags;
- 
- 	host = mmc_priv(mmc);
- 
- 	sdhci_runtime_pm_get(host);
- 	disable_irq(host->irq);
--	spin_lock(&host->lock);
-+	spin_lock_irqsave(&host->lock, flags);
- 
- 	ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
- 
-@@ -1882,14 +1883,14 @@ static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
- 	    requires_tuning_nonuhs)
- 		ctrl |= SDHCI_CTRL_EXEC_TUNING;
- 	else {
--		spin_unlock(&host->lock);
-+		spin_unlock_irqrestore(&host->lock, flags);
- 		enable_irq(host->irq);
- 		sdhci_runtime_pm_put(host);
- 		return 0;
- 	}
- 
- 	if (host->ops->platform_execute_tuning) {
--		spin_unlock(&host->lock);
-+		spin_unlock_irqrestore(&host->lock, flags);
- 		enable_irq(host->irq);
- 		err = host->ops->platform_execute_tuning(host, opcode);
- 		sdhci_runtime_pm_put(host);
-@@ -1963,7 +1964,7 @@ static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
- 		host->cmd = NULL;
- 		host->mrq = NULL;
- 
--		spin_unlock(&host->lock);
-+		spin_unlock_irqrestore(&host->lock, flags);
- 		enable_irq(host->irq);
- 
- 		/* Wait for Buffer Read Ready interrupt */
-@@ -1971,7 +1972,7 @@ static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
- 					(host->tuning_done == 1),
- 					msecs_to_jiffies(50));
- 		disable_irq(host->irq);
--		spin_lock(&host->lock);
-+		spin_lock_irqsave(&host->lock, flags);
- 
- 		if (!host->tuning_done) {
- 			pr_info(DRIVER_NAME ": Timeout waiting for "
-@@ -2046,7 +2047,7 @@ out:
- 		err = 0;
- 
- 	sdhci_clear_set_irqs(host, SDHCI_INT_DATA_AVAIL, ier);
--	spin_unlock(&host->lock);
-+	spin_unlock_irqrestore(&host->lock, flags);
- 	enable_irq(host->irq);
- 	sdhci_runtime_pm_put(host);
- 
--- 
-1.8.5.2
+Kind regards
+Ulf Hansson
+
+>> +               break;
+>>         case MMC_TIMING_MMC_HS200:
+>>                 str = "mmc high-speed SDR200";
+>>                 break;
+>> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+>> index 98e9eb0..6d91ff7 100644
+>> --- a/drivers/mmc/core/mmc.c
+>> +++ b/drivers/mmc/core/mmc.c
+>> @@ -1261,7 +1261,7 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+>>                                         goto err;
+>>                         }
+>>                         mmc_card_set_ddr_mode(card);
+>> -                       mmc_set_timing(card->host, MMC_TIMING_UHS_DDR50);
+>> +                       mmc_set_timing(card->host, MMC_TIMING_MMC_DDR52);
+>>                         mmc_set_bus_width(card->host, bus_width);
+>>                 }
+>>         }
+>> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+>> index 99f5709..87b1f4f 100644
+>> --- a/include/linux/mmc/host.h
+>> +++ b/include/linux/mmc/host.h
+>> @@ -58,7 +58,8 @@ struct mmc_ios {
+>>  #define MMC_TIMING_UHS_SDR50   5
+>>  #define MMC_TIMING_UHS_SDR104  6
+>>  #define MMC_TIMING_UHS_DDR50   7
+>> -#define MMC_TIMING_MMC_HS200   8
+>> +#define MMC_TIMING_MMC_DDR52   8
+>> +#define MMC_TIMING_MMC_HS200   9
+>>
+>>  #define MMC_SDR_MODE           0
+>>  #define MMC_1_2V_DDR_MODE      1
+>> --
+>> 1.7.0.4
+>>
+>>
