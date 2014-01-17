@@ -1,65 +1,40 @@
-From: Seungwon Jeon <tgih.jun@samsung.com>
-Subject: [PATCH v2 2/7] mmc: mmci: clarify DDR timing mode between SD-UHS and
- eMMC
-Date: Fri, 17 Jan 2014 23:50:32 +0900
-Message-ID: <000701cf1393$78d551c0$6a7ff540$%jun@samsung.com>
-References: <1383653403-10049-1-git-send-email-ulf.hansson@linaro.org>
- <002001cf11fb$b7217380$25645a80$%jun@samsung.com>
- <CAPDyKFouGffRSikRbynES+euCuwCKbQXjspdq8oYq3Bg__pKEA@mail.gmail.com>
+From: Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>
+Subject: Re: [PATCH 2/2] mmc: dw_mmc: k3: remove clk_table
+Date: Fri, 17 Jan 2014 15:01:24 +0000
+Message-ID: <86sism7iuz.fsf@void.printf.net>
+References: <1389604469-8064-1-git-send-email-zhangfei.gao@linaro.org>
+	<1389604469-8064-3-git-send-email-zhangfei.gao@linaro.org>
+	<002b01cf1115$4cdfe240$e69fa6c0$%jun@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=Windows-1252
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout1.samsung.com ([203.254.224.24]:26179 "EHLO
-	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751094AbaAQOue (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 17 Jan 2014 09:50:34 -0500
-Received: from epcpsbgr4.samsung.com
- (u144.gpu120.samsung.co.kr [203.254.230.144])
- by mailout1.samsung.com (Oracle Communications Messaging Server 7u4-24.01
- (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTP id <0MZJ002C4VW9DF20@mailout1.samsung.com> for
- linux-mmc@vger.kernel.org; Fri, 17 Jan 2014 23:50:33 +0900 (KST)
-In-reply-to: 
-Content-language: ko
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <002b01cf1115$4cdfe240$e69fa6c0$%jun-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org> (Seungwon
+	Jeon's message of "Tue, 14 Jan 2014 19:42:19 +0900")
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Seungwon Jeon <tgih.jun-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
+Cc: 'Zhangfei Gao' <zhangfei.gao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, 'Arnd Bergmann' <arnd-r2nGTMty4D4@public.gmane.org>, 'Mike Turquette' <mturquette-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, 'Jaehoon Chung' <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, 'Haojian Zhuang' <haojian.zhuang-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, brooke.wangzhigang-hv44wF8Li93QT0dZR+AlfA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, patches-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: 'linux-mmc' <linux-mmc@vger.kernel.org>
-Cc: 'Chris Ball' <chris@printf.net>, 'Rickard Andersson' <rickard.andersson@stericsson.com>, 'Russell King' <linux@arm.linux.org.uk>, 'Ulf Hansson' <ulf.hansson@linaro.org>
 
-Added MMC_DDR52 as eMMC's DDR mode distinguished from SD-UHS.
+Hi,
 
-CC: Russell King <linux@arm.linux.org.uk>
-Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
----
- drivers/mmc/host/mmci.c |    6 ++++--
- 1 files changed, 4 insertions(+), 2 deletions(-)
+On Tue, Jan 14 2014, Seungwon Jeon wrote:
+> On Monday, January 13, 2014, Zhangfei Gao wrote:
+>> Remove clk_table and directly use ios->clock as clock source rate.
+>> Abstract init clock rate and max clock limitation in clk.c
+>> 
+>> Signed-off-by: Zhangfei Gao <zhangfei.gao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+>
+> Acked-by: Seungwon Jeon <tgih.jun-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
 
-diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index f320579..92d40be 100644
---- a/drivers/mmc/host/mmci.c
-+++ b/drivers/mmc/host/mmci.c
-@@ -299,7 +299,8 @@ static void mmci_set_clkreg(struct mmci_host *host, unsigned int desired)
- 	if (host->mmc->ios.bus_width == MMC_BUS_WIDTH_8)
- 		clk |= MCI_ST_8BIT_BUS;
- 
--	if (host->mmc->ios.timing == MMC_TIMING_UHS_DDR50)
-+	if (host->mmc->ios.timing == MMC_TIMING_UHS_DDR50 ||
-+	    host->mmc->ios.timing == MMC_TIMING_MMC_DDR52)
- 		clk |= MCI_ST_UX500_NEG_EDGE;
- 
- 	mmci_write_clkreg(host, clk);
-@@ -784,7 +785,8 @@ static void mmci_start_data(struct mmci_host *host, struct mmc_data *data)
- 			mmci_write_clkreg(host, clk);
- 		}
- 
--	if (host->mmc->ios.timing == MMC_TIMING_UHS_DDR50)
-+	if (host->mmc->ios.timing == MMC_TIMING_UHS_DDR50 ||
-+	    host->mmc->ios.timing == MMC_TIMING_MMC_DDR52)
- 		datactrl |= MCI_ST_DPSM_DDRMODE;
- 
- 	/*
+It looks like patch 1/2 did not make 3.14.  Do you want me to take
+this patch for 3.14 anyway?  (Why?)
+
+Thanks,
+
+- Chris.
 -- 
-1.7.0.4
-
-
+Chris Ball   <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>   <http://printf.net/>
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
