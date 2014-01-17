@@ -1,85 +1,116 @@
-From: Seungwon Jeon <tgih.jun@samsung.com>
-Subject: RE: [PATCH 4/7] mmc: sh_mmcif: clarify DDR timing mode between SD-UHS
- and eMMC
-Date: Fri, 17 Jan 2014 23:36:46 +0900
-Message-ID: <000501cf1391$8cb40f30$a61c2d90$%jun@samsung.com>
-References: <1383653403-10049-1-git-send-email-ulf.hansson@linaro.org>
- <002201cf11fb$c63ffee0$52bffca0$%jun@samsung.com>
- <CAPDyKFoA9P8ggVx3EkFUpKotMHdvWO7GWe5QrBi89VkGXS7tEw@mail.gmail.com>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: [PATCH v6] mmc: sdhci-moxart: Add MOXA ART SDHCI driver
+Date: Fri, 17 Jan 2014 15:40:55 +0100
+Message-ID: <201401171540.55948.arnd@arndb.de>
+References: <1386763426-10158-1-git-send-email-jonas.jensen@gmail.com> <1389951825-14884-1-git-send-email-jonas.jensen@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=Windows-1252
+Content-Type: Text/Plain;
+  charset="iso-8859-15"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout2.samsung.com ([203.254.224.25]:48971 "EHLO
-	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752456AbaAQOgt (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 17 Jan 2014 09:36:49 -0500
-Received: from epcpsbgr1.samsung.com
- (u141.gpu120.samsung.co.kr [203.254.230.141])
- by mailout2.samsung.com (Oracle Communications Messaging Server 7u4-24.01
- (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTP id <0MZJ00M8JV9BLV10@mailout2.samsung.com> for
- linux-mmc@vger.kernel.org; Fri, 17 Jan 2014 23:36:47 +0900 (KST)
-In-reply-to: <CAPDyKFoA9P8ggVx3EkFUpKotMHdvWO7GWe5QrBi89VkGXS7tEw@mail.gmail.com>
-Content-language: ko
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1389951825-14884-1-git-send-email-jonas.jensen@gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Jonas Jensen <jonas.jensen@gmail.com>
+Cc: chris@printf.net, linux-mmc@vger.kernel.org, cjb@laptop.org, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, arm@kernel.org, mark.rutland@arm.com
 List-Id: linux-mmc@vger.kernel.org
-To: 'Ulf Hansson' <ulf.hansson@linaro.org>
-Cc: 'Chris Ball' <chris@printf.net>, 'Guennadi Liakhovetski' <g.liakhovetski@gmx.de>, 'linux-mmc' <linux-mmc@vger.kernel.org>
 
-On Thu, January 16, 2014, Ulf Hansson wrote:
-> On 15 January 2014 15:12, Seungwon Jeon <tgih.jun@samsung.com> wrote:
-> > Replaced UHS_DDR50 with MMC_DDR52.
-> >
-> > CC: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-> > Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
-> > ---
-> >  drivers/mmc/host/sh_mmcif.c |    9 +++++----
-> >  1 files changed, 5 insertions(+), 4 deletions(-)
-> >
-> > diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
-> > index 54730f4..656fbba 100644
-> > --- a/drivers/mmc/host/sh_mmcif.c
-> > +++ b/drivers/mmc/host/sh_mmcif.c
-> > @@ -803,12 +803,13 @@ static u32 sh_mmcif_set_cmd(struct sh_mmcif_host *host,
-> >                         break;
-> >                 }
-> >                 switch (host->timing) {
-> > -               case MMC_TIMING_UHS_DDR50:
-> > +               case MMC_TIMING_MMC_DDR52:
+On Friday 17 January 2014, Jonas Jensen wrote:
+> Add SDHCI driver for MOXA ART SoCs.
 > 
-> What about UHS SD cards?
-I guess that there is no implementation related to voltage switch for UHS support.
-MMC_TIMING_UHS_DDR50 looks like pointing eMMC's DDR.
+> Signed-off-by: Jonas Jensen <jonas.jensen@gmail.com>
 
-Guennadi,
-Can you check this more?
+I think this should be renamed to something other than SDHCI, since that
+implies a specific register layout and would use the sdhci.c driver.
 
-Thanks,
-Seungwon Jeon
+Maybe moxart-mmc?
 
-> 
-> Kind regards
-> Ulf Hansson
-> 
-> >                         /*
-> >                          * MMC core will only set this timing, if the host
-> > -                        * advertises the MMC_CAP_UHS_DDR50 capability. MMCIF
-> > -                        * implementations with this capability, e.g. sh73a0,
-> > -                        * will have to set it in their platform data.
-> > +                        * advertises the MMC_CAP_1_8V_DDR/MMC_CAP_1_2V_DDR
-> > +                        * capability. MMCIF implementations with this
-> > +                        * capability, e.g. sh73a0, will have to set it
-> > +                        * in their platform data.
-> >                          */
-> >                         tmp |= CMD_SET_DARS;
-> >                         break;
-> > --
-> > 1.7.0.4
-> >
-> >
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> diff --git a/Documentation/devicetree/bindings/mmc/moxa,moxart-sdhci.txt b/Documentation/devicetree/bindings/mmc/moxa,moxart-sdhci.txt
+> new file mode 100644
+> index 0000000..020b13e
+> --- /dev/null
+> +++ b/Documentation/devicetree/bindings/mmc/moxa,moxart-sdhci.txt
+> @@ -0,0 +1,28 @@
+> +MOXA ART SD Host Controller Interface
+> +
+> +Required properties:
+> +
+> +- compatible :	Must be "moxa,moxart-sdhci"
+> +- reg :		Should contain registers location and length
+> +- interrupts :	Should contain the interrupt number
+> +- clocks :	Should contain phandle for the clock feeding the SDHCI controller
+> +
+> +Optional properties:
+> +
+> +These are optional but required to enable DMA transfer mode:
+> +
+> +- dmas :	Should contain two DMA channels, line request number must be 5 for
+> +		both channels
+> +- dma-names :	Must be "tx", "rx"
 
+I think you should add a reference to bindings/mmc/mmc.txt here.
+
+> +#define MSD_CMD_REG		0
+> +#define MSD_ARG_REG		4
+> +#define MSD_RESP0_REG		8
+> +#define MSD_RESP1_REG		0x0c
+> +#define MSD_RESP2_REG		0x10
+> +#define MSD_RESP3_REG		0x14
+> +#define MSD_RESP_CMD_REG	0x18
+> +#define MSD_DATA_CTRL_REG	0x1c
+> +#define MSD_DATA_TIMER_REG	0x20
+> +#define MSD_DATA_LEN_REG	0x24
+> +#define MSD_STATUS_REG		0x28
+> +#define MSD_CLEAR_REG		0x2c
+> +#define MSD_INT_MASK_REG	0x30
+> +#define MSD_POWER_CTRL_REG	0x34
+> +#define MSD_CLOCK_CTRL_REG	0x38
+> +#define MSD_BUS_WIDTH_REG	0x3c
+> +#define MSD_DATA_WIN_REG	0x40
+> +#define MSD_FEATURE_REG		0x44
+> +#define MSD_REVISION_REG	0x48
+> +
+> +#define MMC_RSP_SHORT		1
+> +#define MMC_RSP_LONG		2
+> +#define MMC_RSP_MASK		3
+> +#define MMC_ERR_NONE		0
+> +#define MMC_ERR_TIMEOUT		1
+> +#define MMC_MODE_MMC		0
+> +#define MMC_MODE_SD		1
+> +#define MMC_ERR_BADCRC		2
+> +#define MMC_VDD_360		23
+> +
+> +#define MSD_RETRY_COUNT		10
+> +
+> +#define REG_COMMAND		0
+> +#define REG_ARGUMENT		4
+> +#define REG_RESPONSE0		8
+> +#define REG_RESPONSE1		12
+> +#define REG_RESPONSE2		16
+> +#define REG_RESPONSE3		20
+> +#define REG_RESPONSE_COMMAND	24
+> +#define REG_DATA_CONTROL	28
+> +#define REG_DATA_TIMER		32
+> +#define REG_DATA_LENGTH		36
+> +#define REG_STATUS		40
+> +#define REG_CLEAR		44
+> +#define REG_INTERRUPT_MASK	48
+> +#define REG_POWER_CONTROL	52
+> +#define REG_CLOCK_CONTROL	56
+> +#define REG_BUS_WIDTH		60
+> +#define REG_DATA_WINDOW		64
+> +#define REG_FEATURE		68
+> +#define REG_REVISION		72
+
+The lists seem duplicated here, there is an MSD_foo_REG for each REG_foo.
+
+> +	/*
+> +	 * hardware does not support MMC_CAP_SD_HIGHSPEED
+> +	 * CMD6 will timeout and make things not work
+> +	 */
+> +	mmc->caps = MMC_CAP_4_BIT_DATA;
+
+Better get the bus-width from DT by calling the mmc_of_parse
+function. Some boards might connect only one data bit, or in
+fact 8 if it's an eMMC.
+
+	Arnd
