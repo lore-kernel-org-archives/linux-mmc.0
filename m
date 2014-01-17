@@ -1,44 +1,84 @@
-From: Nicolas Pitre <nico@fluxnic.net>
-Subject: Re: How to support SDIO wifi/bt in DT
-Date: Fri, 17 Jan 2014 11:58:52 -0500 (EST)
-Message-ID: <alpine.LFD.2.10.1401171157340.28907@knanqh.ubzr>
-References: <20140116133649.GV15937@n2100.arm.linux.org.uk>
- <3215037.8HVCjAeS8g@wuerfel>
- <CAOesGMgzi5Buduo2pd0PP8CvKVir69yZ-jjX0Gbda871GiD8rg@mail.gmail.com>
- <alpine.LFD.2.10.1401162204560.28907@knanqh.ubzr>
- <CAL_JsqKX2RT2E6uk3d35m+TWW7iuPFFiuZzOwd0xA9zMgqAZRw@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; CHARSET=US-ASCII
-Content-Transfer-Encoding: 7BIT
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from relais.videotron.ca ([24.201.245.36]:52756 "EHLO
-	relais.videotron.ca" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751951AbaAQQ6y (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 17 Jan 2014 11:58:54 -0500
-In-reply-to: <CAL_JsqKX2RT2E6uk3d35m+TWW7iuPFFiuZzOwd0xA9zMgqAZRw@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Andrew Bresticker <abrestic@chromium.org>
+Subject: [PATCH] mmc: sdhci: fix possible scheduling while atomic
+Date: Fri, 17 Jan 2014 11:57:10 -0800
+Message-ID: <1389988630-9481-1-git-send-email-abrestic@chromium.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Chris Ball <chris@printf.net>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Andrew Bresticker <abrestic@chromium.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Rob Herring <robherring2@gmail.com>
-Cc: Olof Johansson <olof@lixom.net>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Russell King - ARM Linux <linux@arm.linux.org.uk>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Arnd Bergmann <arnd@arndb.de>
 
-On Fri, 17 Jan 2014, Rob Herring wrote:
+sdhci_execute_tuning() takes host->lock without disabling interrupts.
+Use spin_lock_irq{save,restore} instead so that we avoid taking an
+interrupt and scheduling while holding host->lock.
 
-> On Thu, Jan 16, 2014 at 9:08 PM, Nicolas Pitre <nico@fluxnic.net> wrote:
-> > On Thu, 16 Jan 2014, Olof Johansson wrote:
-> >
-> >> "for SDIO slots" is somewhat misleading; nearly all controllers only
-> >> do one slot/device per controller. The designware controller can do
-> >> multiple slots, and that adds a bit of driver and binding complexity
-> >> for something that seemingly not a single vendor has actually
-> >> implemented.
-> >
-> > The Marvell 8688, just to name one, does both WIFI and BlueTooth over
-> > the same SDIO controller using separate functions/slots.
-> 
-> But that is logical functions within a chip, not multiple discrete
-> chips (i.e. slots) with their own reset, regulators, etc.
+Signed-off-by: Andrew Bresticker <abrestic@chromium.org>
+---
+ drivers/mmc/host/sdhci.c | 13 +++++++------
+ 1 file changed, 7 insertions(+), 6 deletions(-)
 
-OK.  If that's the definition of a slot in this context then I agree.
-
-
-Nicolas
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index ec3eb30..84c80e7 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -1857,12 +1857,13 @@ static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
+ 	unsigned long timeout;
+ 	int err = 0;
+ 	bool requires_tuning_nonuhs = false;
++	unsigned long flags;
+ 
+ 	host = mmc_priv(mmc);
+ 
+ 	sdhci_runtime_pm_get(host);
+ 	disable_irq(host->irq);
+-	spin_lock(&host->lock);
++	spin_lock_irqsave(&host->lock, flags);
+ 
+ 	ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
+ 
+@@ -1882,14 +1883,14 @@ static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
+ 	    requires_tuning_nonuhs)
+ 		ctrl |= SDHCI_CTRL_EXEC_TUNING;
+ 	else {
+-		spin_unlock(&host->lock);
++		spin_unlock_irqrestore(&host->lock, flags);
+ 		enable_irq(host->irq);
+ 		sdhci_runtime_pm_put(host);
+ 		return 0;
+ 	}
+ 
+ 	if (host->ops->platform_execute_tuning) {
+-		spin_unlock(&host->lock);
++		spin_unlock_irqrestore(&host->lock, flags);
+ 		enable_irq(host->irq);
+ 		err = host->ops->platform_execute_tuning(host, opcode);
+ 		sdhci_runtime_pm_put(host);
+@@ -1963,7 +1964,7 @@ static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
+ 		host->cmd = NULL;
+ 		host->mrq = NULL;
+ 
+-		spin_unlock(&host->lock);
++		spin_unlock_irqrestore(&host->lock, flags);
+ 		enable_irq(host->irq);
+ 
+ 		/* Wait for Buffer Read Ready interrupt */
+@@ -1971,7 +1972,7 @@ static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
+ 					(host->tuning_done == 1),
+ 					msecs_to_jiffies(50));
+ 		disable_irq(host->irq);
+-		spin_lock(&host->lock);
++		spin_lock_irqsave(&host->lock, flags);
+ 
+ 		if (!host->tuning_done) {
+ 			pr_info(DRIVER_NAME ": Timeout waiting for "
+@@ -2046,7 +2047,7 @@ out:
+ 		err = 0;
+ 
+ 	sdhci_clear_set_irqs(host, SDHCI_INT_DATA_AVAIL, ier);
+-	spin_unlock(&host->lock);
++	spin_unlock_irqrestore(&host->lock, flags);
+ 	enable_irq(host->irq);
+ 	sdhci_runtime_pm_put(host);
+ 
+-- 
+1.8.5.2
