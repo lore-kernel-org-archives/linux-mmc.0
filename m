@@ -1,62 +1,56 @@
-From: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Subject: Re: [PATCH] mmc: omap_hsmmc: Restrict compilation to ARM
-Date: Sun, 19 Jan 2014 10:02:35 +0000
-Message-ID: <20140119100235.GN27282@n2100.arm.linux.org.uk>
-References: <1390123794-26401-1-git-send-email-geert@linux-m68k.org>
+From: Olof Johansson <olof@lixom.net>
+Subject: Re: How to support SDIO wifi/bt in DT
+Date: Sun, 19 Jan 2014 11:29:55 -0800
+Message-ID: <CAOesGMjVpTEku+UJntewi3FXoeEPe9rJP4BBmbSesfFMtY9hnA@mail.gmail.com>
+References: <20140116133649.GV15937@n2100.arm.linux.org.uk>
+	<3215037.8HVCjAeS8g@wuerfel>
+	<CAOesGMgzi5Buduo2pd0PP8CvKVir69yZ-jjX0Gbda871GiD8rg@mail.gmail.com>
+	<alpine.LFD.2.10.1401162204560.28907@knanqh.ubzr>
+	<CAL_JsqKX2RT2E6uk3d35m+TWW7iuPFFiuZzOwd0xA9zMgqAZRw@mail.gmail.com>
+	<alpine.LFD.2.10.1401171157340.28907@knanqh.ubzr>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-Content-Disposition: inline
-In-Reply-To: <1390123794-26401-1-git-send-email-geert@linux-m68k.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Geert Uytterhoeven <geert@linux-m68k.org>
-Cc: linux-omap@vger.kernel.org, Balaji T K <balajitk@ti.com>, linux-sh@vger.kernel.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, uclinux-dist-devel@blackfin.uclinux.org, Chris Ball <cjb@laptop.org>, linux-arm-kernel@lists.infradead.org, Amarinder Bindra <a-bindra@ti.com>
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wg0-f53.google.com ([74.125.82.53]:34111 "EHLO
+	mail-wg0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751727AbaAST34 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 19 Jan 2014 14:29:56 -0500
+Received: by mail-wg0-f53.google.com with SMTP id y10so6340774wgg.32
+        for <linux-mmc@vger.kernel.org>; Sun, 19 Jan 2014 11:29:55 -0800 (PST)
+In-Reply-To: <alpine.LFD.2.10.1401171157340.28907@knanqh.ubzr>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Nicolas Pitre <nico@fluxnic.net>
+Cc: Rob Herring <robherring2@gmail.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Russell King - ARM Linux <linux@arm.linux.org.uk>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Arnd Bergmann <arnd@arndb.de>
 
-On Sun, Jan 19, 2014 at 10:29:54AM +0100, Geert Uytterhoeven wrote:
-> commit bcf24e1daa94f4c52ef7a3f657e43cc6bc50d46b ("mmc: omap_hsmmc: use the
-> generic config for omap2plus devices"), enabled the build for other
-> platforms for compile testing.
-> 
-> sh-allmodconfig now fails with:
-> 
->     include/linux/omap-dma.h:171:8: error: expected identifier before numeric constant
->     make[4]: *** [drivers/mmc/host/omap_hsmmc.o] Error 1
-> 
-> This happens because sh #defines "CCR", which is one of the enum values in
-> include/linux/omap-dma.h.
-> 
-> I expect a similar failure on blackfin, which also has #define CCR.
-> 
-> Restrict the build to ARM to fix this.
+On Fri, Jan 17, 2014 at 8:58 AM, Nicolas Pitre <nico@fluxnic.net> wrote:
+> On Fri, 17 Jan 2014, Rob Herring wrote:
+>
+>> On Thu, Jan 16, 2014 at 9:08 PM, Nicolas Pitre <nico@fluxnic.net> wrote:
+>> > On Thu, 16 Jan 2014, Olof Johansson wrote:
+>> >
+>> >> "for SDIO slots" is somewhat misleading; nearly all controllers only
+>> >> do one slot/device per controller. The designware controller can do
+>> >> multiple slots, and that adds a bit of driver and binding complexity
+>> >> for something that seemingly not a single vendor has actually
+>> >> implemented.
+>> >
+>> > The Marvell 8688, just to name one, does both WIFI and BlueTooth over
+>> > the same SDIO controller using separate functions/slots.
+>>
+>> But that is logical functions within a chip, not multiple discrete
+>> chips (i.e. slots) with their own reset, regulators, etc.
+>
+> OK.  If that's the definition of a slot in this context then I agree.
 
-This isn't the right fix.  When this has happened on ARM in the past, we've
-had a lot of pressure to change the definition since it's far too generic.
+Correct -- the device that I've been doing the work in is actually the
+combined wifi/bluetooth module on the Samsung Chromebook, which is a
+Marvell 8797. It has multiple functions which still work well.
 
-"CCR" should only be used for stuff which is restricted to (eg) one driver,
-and not in some system wide header file included by lots of files.
+The "multi-slot" concept I was talking about was one host controller
+for several physical slots. Seems like at91 implements _and_ uses this
+but nobody else. However, it seems that they allocate one mmc host per
+slot, so the same model still works.
 
-In the case of OMAP, the unfortunate thing is that include/linux/omap-dma.h
-was moved lock stock and barrel out of the ARM-private includes.  It
-really needs splitting up in two - one which drivers are expected to
-include, and the other for shared definitions between arch/arm/*omap*/dma.c
-and drivers/dma/omap-dma.c.
 
-Even so, "CCR" will still exist - but will be localised to the compilation
-units which need it.  The same should happen with SH.
-
-So, as for this patch, that's a NAK.
-
--- 
-FTTC broadband for 0.8mile line: 5.8Mbps down 500kbps up.  Estimation
-in database were 13.1 to 19Mbit for a good line, about 7.5+ for a bad.
-Estimate before purchase was "up to 13.2Mbit".
+-Olof
