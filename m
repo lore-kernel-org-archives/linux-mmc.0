@@ -1,45 +1,55 @@
 From: Olof Johansson <olof@lixom.net>
 Subject: Re: How to support SDIO wifi/bt in DT
-Date: Sun, 19 Jan 2014 15:26:42 -0800
-Message-ID: <20140119232642.GA4775@quad.lixom.net>
+Date: Sun, 19 Jan 2014 15:30:08 -0800
+Message-ID: <20140119233008.GA4867@quad.lixom.net>
 References: <20140116133649.GV15937@n2100.arm.linux.org.uk>
+ <3215037.8HVCjAeS8g@wuerfel>
+ <CAOesGMgzi5Buduo2pd0PP8CvKVir69yZ-jjX0Gbda871GiD8rg@mail.gmail.com>
+ <alpine.LFD.2.10.1401162204560.28907@knanqh.ubzr>
+ <CAL_JsqKX2RT2E6uk3d35m+TWW7iuPFFiuZzOwd0xA9zMgqAZRw@mail.gmail.com>
  <alpine.LFD.2.10.1401171157340.28907@knanqh.ubzr>
  <CAOesGMjVpTEku+UJntewi3FXoeEPe9rJP4BBmbSesfFMtY9hnA@mail.gmail.com>
- <201401192128.54413.arnd@arndb.de>
+ <20140119230924.GB8154@piout.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pb0-f45.google.com ([209.85.160.45]:54987 "EHLO
-	mail-pb0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752503AbaASX2k (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 19 Jan 2014 18:28:40 -0500
-Received: by mail-pb0-f45.google.com with SMTP id un15so2571293pbc.4
-        for <linux-mmc@vger.kernel.org>; Sun, 19 Jan 2014 15:28:39 -0800 (PST)
+Received: from mail-pb0-f53.google.com ([209.85.160.53]:44526 "EHLO
+	mail-pb0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752245AbaASXcG (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 19 Jan 2014 18:32:06 -0500
+Received: by mail-pb0-f53.google.com with SMTP id md12so1233656pbc.40
+        for <linux-mmc@vger.kernel.org>; Sun, 19 Jan 2014 15:32:05 -0800 (PST)
 Content-Disposition: inline
-In-Reply-To: <201401192128.54413.arnd@arndb.de>
+In-Reply-To: <20140119230924.GB8154@piout.net>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: Nicolas Pitre <nico@fluxnic.net>, Rob Herring <robherring2@gmail.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Russell King - ARM Linux <linux@arm.linux.org.uk>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+To: Alexandre Belloni <alexandre.belloni@free-electrons.com>
+Cc: Nicolas Pitre <nico@fluxnic.net>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Russell King - ARM Linux <linux@arm.linux.org.uk>, Arnd Bergmann <arnd@arndb.de>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 
-On Sun, Jan 19, 2014 at 09:28:53PM +0100, Arnd Bergmann wrote:
-> On Sunday 19 January 2014, Olof Johansson wrote:
+On Mon, Jan 20, 2014 at 12:09:25AM +0100, Alexandre Belloni wrote:
+> On Sun, Jan 19, 2014 at 11:29:55AM -0800, Olof Johansson wrote :
 > > The "multi-slot" concept I was talking about was one host controller
-> > for several physical slots. Seems like at91 implements and uses this
+> > for several physical slots. Seems like at91 implements _and_ uses this
 > > but nobody else. However, it seems that they allocate one mmc host per
 > > slot, so the same model still works.
 > > 
 > 
-> IIRC dw-mci also has multiple slots, and it's a common host controller
-> in a number of SoCs. I don't know how many of them actually support
-> multiple slots rather than a simplified single-slot version of
-> that controller.
+> I think we need to be extra careful about the DT bindings then because
+> adding a property in a slot is requiring handling that in the at91
+> driver whereas adding a common property for the various mmc hosts can be
+> done in the core code.
+> 
+> From what I remember, it would be really good to put the DT parsing for
+> the slots in the core code but I only had a really quick look at that.
 
-Right, that's the main one i had in mind -- the binding, and the driver, allow
-for multiple slots but we've been searching high and low for an actual SoC that
-implements that, and none seem to do it. So the additional overhead is just
-wasted, and there's been talk of bringing the binding more in line with
-a single-slot driver instead. It makes a lot of sense to do.
+The patches I have here do it all in the core per host with common
+bindings. I hope to post them tonight. They should fit the at91 model
+just fine as well, since they do each slot as a mmc_host, not as a separate
+slot with a shared host controller.
+
+(Some drivers don't seem to call mmc_of_parse(), which they will need to do to
+take advantage of the common implementation. But that can be addressed driver
+by driver as someone has a chance to test it).
 
 
 -Olof
