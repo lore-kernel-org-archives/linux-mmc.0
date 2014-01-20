@@ -1,51 +1,113 @@
-From: Dong Aisheng <dongas86@gmail.com>
-Subject: Re: [PATCH v2 0/5] mmc: sdhci: a few fixes on timeout and max_discard_to
-Date: Mon, 20 Jan 2014 10:42:05 +0800
-Message-ID: <CAA+hA=Q_p8bLpEA+04cqRhZOCNJQ=i-cgshxQbP8n-fEbu89rQ@mail.gmail.com>
-References: <1387268191-19859-1-git-send-email-b29396@freescale.com>
-	<20131217143025.GX6691@S2101-09.ap.freescale.net>
-	<CAA+hA=QgPvTXWbKjpd9e0H3MacGqu8=zz_PpCRAB0NGu_drVtw@mail.gmail.com>
+From: Seungwon Jeon <tgih.jun@samsung.com>
+Subject: RE: [PATCH 1/7] mmc: clarify DDR timing mode between SD-UHS and eMMC
+Date: Mon, 20 Jan 2014 12:55:51 +0900
+Message-ID: <001201cf1593$82b7c090$882741b0$%jun@samsung.com>
+References: <1383653403-10049-1-git-send-email-ulf.hansson@linaro.org>
+ <001f01cf11fb$93d188c0$bb749a40$%jun@samsung.com>
+ <CAPDyKFpzxoMJYhWWsnnJdHRbHd3+efTyz5PMtoqDtBa2O3pkeg@mail.gmail.com>
+ <CAPDyKFoeHNmcVTtcR6cVvb3SY0LqjE2nyC+vPBOEVOshNcUswQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=Windows-1252
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qa0-f52.google.com ([209.85.216.52]:58822 "EHLO
-	mail-qa0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752518AbaATCmG (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 19 Jan 2014 21:42:06 -0500
-Received: by mail-qa0-f52.google.com with SMTP id j15so5214951qaq.11
-        for <linux-mmc@vger.kernel.org>; Sun, 19 Jan 2014 18:42:05 -0800 (PST)
-In-Reply-To: <CAA+hA=QgPvTXWbKjpd9e0H3MacGqu8=zz_PpCRAB0NGu_drVtw@mail.gmail.com>
+Received: from mailout2.samsung.com ([203.254.224.25]:16312 "EHLO
+	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752166AbaATDzx (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 19 Jan 2014 22:55:53 -0500
+Received: from epcpsbgr5.samsung.com
+ (u145.gpu120.samsung.co.kr [203.254.230.145])
+ by mailout2.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+ (7.0.4.24.0) 64bit (built Nov 17 2011))
+ with ESMTP id <0MZO005RRLL4XO70@mailout2.samsung.com> for
+ linux-mmc@vger.kernel.org; Mon, 20 Jan 2014 12:55:52 +0900 (KST)
+In-reply-to: <CAPDyKFoeHNmcVTtcR6cVvb3SY0LqjE2nyC+vPBOEVOshNcUswQ@mail.gmail.com>
+Content-language: ko
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Shawn Guo <shawn.guo@linaro.org>
-Cc: Dong Aisheng <b29396@freescale.com>, Ulf Hansson <ulf.hansson@linaro.org>, Ed Sutter <ed.sutter@alcatel-lucent.com>, Sascha Hauer <s.hauer@pengutronix.de>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Vladimir Zapolskiy <vladimir_zapolskiy@mentor.com>, Chris Ball <cjb@laptop.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+To: 'Ulf Hansson' <ulf.hansson@linaro.org>
+Cc: 'Chris Ball' <chris@printf.net>, 'linux-mmc' <linux-mmc@vger.kernel.org>
 
-Ping...
+Hi Ulf,
 
-On Mon, Jan 13, 2014 at 6:55 PM, Dong Aisheng <dongas86@gmail.com> wrote:
-> Hi Chris,
->
-> On Tue, Dec 17, 2013 at 10:30 PM, Shawn Guo <shawn.guo@linaro.org> wrote:
->> On Tue, Dec 17, 2013 at 04:16:26PM +0800, Dong Aisheng wrote:
->>> Dong Aisheng (5):
->>>   mmc: sdhci: add platfrom get_max_timeout_count hook
->>>   mmc: sdhci-esdhc-imx: fix incorrect max_discard_to for uSDHC
->>>   mmc: sdhci: add platform set_timeout hook
->>>   mmc: sdhci-esdhc-imx: set the correct max timeout value for uSDHC
->>>   mmc: sdhci: calculate max_discard_to dynamically for
->>>     SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK
->>
->> For all,
->>
->> Reviewed-by: Shawn Guo <shawn.guo@linaro.org>
->>
->
-> Can you pick this series?
->
-> Regards
-> Dong Aisheng
->
->> _______________________________________________
->> linux-arm-kernel mailing list
->> linux-arm-kernel@lists.infradead.org
->> http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
+On Sat, January 18, 2014, Ulf Hansson wrote:
+> On 16 January 2014 11:50, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> > On 15 January 2014 15:10, Seungwon Jeon <tgih.jun@samsung.com> wrote:
+> >> This change distinguishes DDR timing mode of current
+> >> mixed usage to clarify device type.
+> >>
+> >> Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
+> >
+> > Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
+> >
+> >> ---
+> >>  drivers/mmc/core/debugfs.c |    3 +++
+> >>  drivers/mmc/core/mmc.c     |    2 +-
+> >>  include/linux/mmc/host.h   |    3 ++-
+> >>  3 files changed, 6 insertions(+), 2 deletions(-)
+> >>
+> >> diff --git a/drivers/mmc/core/debugfs.c b/drivers/mmc/core/debugfs.c
+> >> index 54829c0..509229b 100644
+> >> --- a/drivers/mmc/core/debugfs.c
+> >> +++ b/drivers/mmc/core/debugfs.c
+> >> @@ -135,6 +135,9 @@ static int mmc_ios_show(struct seq_file *s, void *data)
+> >>         case MMC_TIMING_UHS_DDR50:
+> >>                 str = "sd uhs DDR50";
+> >>                 break;
+> >> +       case MMC_TIMING_MMC_DDR52:
+> >> +               str = "mmc DDR52";
+> 
+> Just a minor thought. In the eMMC spec there are no such thing as
+> DDR52 mode. Only DDR is mentioned, should we maybe change to
+> "MMC_TIMING_MMC_DDR" to better reflect the spec?
+In eMMC spec, DDR mode for high speed is up to 52MHz unlike SD.
+Actually DDR52 is appeared in spec. And it helps to ensure the meaning.
+Also, for distinguishing from HS200's DDR mode(HS400), it would be not bad to keep it.
+It makes sense?
+
+Thanks,
+Seungwon Jeon
+
+> 
+> Kind regards
+> Ulf Hansson
+> 
+> >> +               break;
+> >>         case MMC_TIMING_MMC_HS200:
+> >>                 str = "mmc high-speed SDR200";
+> >>                 break;
+> >> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+> >> index 98e9eb0..6d91ff7 100644
+> >> --- a/drivers/mmc/core/mmc.c
+> >> +++ b/drivers/mmc/core/mmc.c
+> >> @@ -1261,7 +1261,7 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+> >>                                         goto err;
+> >>                         }
+> >>                         mmc_card_set_ddr_mode(card);
+> >> -                       mmc_set_timing(card->host, MMC_TIMING_UHS_DDR50);
+> >> +                       mmc_set_timing(card->host, MMC_TIMING_MMC_DDR52);
+> >>                         mmc_set_bus_width(card->host, bus_width);
+> >>                 }
+> >>         }
+> >> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+> >> index 99f5709..87b1f4f 100644
+> >> --- a/include/linux/mmc/host.h
+> >> +++ b/include/linux/mmc/host.h
+> >> @@ -58,7 +58,8 @@ struct mmc_ios {
+> >>  #define MMC_TIMING_UHS_SDR50   5
+> >>  #define MMC_TIMING_UHS_SDR104  6
+> >>  #define MMC_TIMING_UHS_DDR50   7
+> >> -#define MMC_TIMING_MMC_HS200   8
+> >> +#define MMC_TIMING_MMC_DDR52   8
+> >> +#define MMC_TIMING_MMC_HS200   9
+> >>
+> >>  #define MMC_SDR_MODE           0
+> >>  #define MMC_1_2V_DDR_MODE      1
+> >> --
+> >> 1.7.0.4
+> >>
+> >>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
