@@ -1,165 +1,35 @@
-From: Philip Rakity <prakity@nvidia.com>
-Subject: Re: [PATCH] mmc: sdhci: fix possible scheduling while atomic
-Date: Mon, 20 Jan 2014 16:03:48 +0100
-Message-ID: <EEBFEDF8-5DC8-4DFC-B98B-F434DC323B9E@nvidia.com>
-References: <A623A9FE-1971-47A9-B05E-C48BA438EA43@nvidia.com>
+From: Chris Ball <chris@printf.net>
+Subject: Re: [PATCH] mmc: sdhci: Allow for long command timeouts
+Date: Mon, 20 Jan 2014 15:36:09 +0000
+Message-ID: <86iote4qdy.fsf@void.printf.net>
+References: <1384416980-15850-1-git-send-email-adrian.hunter@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from hqemgate15.nvidia.com ([216.228.121.64]:12937 "EHLO
-	hqemgate15.nvidia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751740AbaATPD6 convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 20 Jan 2014 10:03:58 -0500
-In-Reply-To: <A623A9FE-1971-47A9-B05E-C48BA438EA43@nvidia.com>
-Content-Language: en-US
+Received: from void.printf.net ([89.145.121.20]:58249 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750807AbaATPgN (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 20 Jan 2014 10:36:13 -0500
+In-Reply-To: <1384416980-15850-1-git-send-email-adrian.hunter@intel.com>
+	(Adrian Hunter's message of "Thu, 14 Nov 2013 10:16:20 +0200")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <chris@printf.net>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: linux-mmc@vger.kernel.org
 
+Hi Adrian,
 
-I have no way to test this problem but I was thinking along the lines of
+On Thu, Nov 14 2013, Adrian Hunter wrote:
+> The driver has a timer with a 10 second
+> timeout to catch devices that stop responding.
+> However it is possible for commands to take
+> even longer than that.  Change the timer
+> timeout to reflect the command timeout.
+>
+> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -1862,6 +1862,7 @@ static int sdhci_execute_tuning(struct mmc_host *mmc, u32 
- 
-        sdhci_runtime_pm_get(host);
-        disable_irq(host->irq);
-+       sdhci_disable_card_detection(host);
-        spin_lock(&host->lock);
- 
-        ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
-@@ -1883,6 +1884,7 @@ static int sdhci_execute_tuning(struct mmc_host *mmc, u32 
-                ctrl |= SDHCI_CTRL_EXEC_TUNING;
-        else {
-                spin_unlock(&host->lock);
-+               sdhci_enable_card_detection(host);
-                enable_irq(host->irq);
-                sdhci_runtime_pm_put(host);
-                return 0;
-@@ -1890,6 +1892,7 @@ static int sdhci_execute_tuning(struct mmc_host *mmc, u32 
- 
-        if (host->ops->platform_execute_tuning) {
-                spin_unlock(&host->lock);
-+               sdhci_enable_card_detection(host);
-                enable_irq(host->irq);
-                err = host->ops->platform_execute_tuning(host, opcode);
-                sdhci_runtime_pm_put(host);
-@@ -2047,6 +2050,7 @@ out:
- 
-        sdhci_clear_set_irqs(host, SDHCI_INT_DATA_AVAIL, ier);
-        spin_unlock(&host->lock);
-+       sdhci_enable_card_detection(host);
-        enable_irq(host->irq);
-        sdhci_runtime_pm_put(host);
- 
+Thanks, pushed to mmc-next for 3.14, sorry for the delay.
 
-regards,
-
-Philip
-
-On Jan 20, 2014, at 9:51 AM, Philip Rakity <prakity@nvidia.com> wrote:
-
-> 
-> Chris,
-> 
-> The suggested fix can lock out interrupts for up to 150ms.  There needs to be another way.
-> So, I would strongly recommend we find another solution.
-> 
-> Philip
-> 
-> On Jan 17, 2014, at 7:57 PM, Andrew Bresticker <abrestic@chromium.org> wrote:
-> 
->> sdhci_execute_tuning() takes host->lock without disabling interrupts.
->> Use spin_lock_irq{save,restore} instead so that we avoid taking an
->> interrupt and scheduling while holding host->lock.
->> 
->> Signed-off-by: Andrew Bresticker <abrestic@chromium.org>
->> ---
->> drivers/mmc/host/sdhci.c | 13 +++++++------
->> 1 file changed, 7 insertions(+), 6 deletions(-)
->> 
->> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
->> index ec3eb30..84c80e7 100644
->> --- a/drivers/mmc/host/sdhci.c
->> +++ b/drivers/mmc/host/sdhci.c
->> @@ -1857,12 +1857,13 @@ static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
->> 	unsigned long timeout;
->> 	int err = 0;
->> 	bool requires_tuning_nonuhs = false;
->> +	unsigned long flags;
->> 
->> 	host = mmc_priv(mmc);
->> 
->> 	sdhci_runtime_pm_get(host);
->> 	disable_irq(host->irq);
->> -	spin_lock(&host->lock);
->> +	spin_lock_irqsave(&host->lock, flags);
-> 
-> 
-> The disable_irq() call stops the controller from doing interrupts.  
-> Please explain what problem you are seeing
-> 
->> 
->> 	ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
->> 
->> @@ -1882,14 +1883,14 @@ static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
->> 	    requires_tuning_nonuhs)
->> 		ctrl |= SDHCI_CTRL_EXEC_TUNING;
->> 	else {
->> -		spin_unlock(&host->lock);
->> +		spin_unlock_irqrestore(&host->lock, flags);
->> 		enable_irq(host->irq);
->> 		sdhci_runtime_pm_put(host);
->> 		return 0;
->> 	}
->> 
->> 	if (host->ops->platform_execute_tuning) {
->> -		spin_unlock(&host->lock);
->> +		spin_unlock_irqrestore(&host->lock, flags);
->> 		enable_irq(host->irq);
->> 		err = host->ops->platform_execute_tuning(host, opcode);
->> 		sdhci_runtime_pm_put(host);
->> @@ -1963,7 +1964,7 @@ static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
->> 		host->cmd = NULL;
->> 		host->mrq = NULL;
->> 
->> -		spin_unlock(&host->lock);
->> +		spin_unlock_irqrestore(&host->lock, flags);
->> 		enable_irq(host->irq);
->> 
->> 		/* Wait for Buffer Read Ready interrupt */
->> @@ -1971,7 +1972,7 @@ static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
->> 					(host->tuning_done == 1),
->> 					msecs_to_jiffies(50));
->> 		disable_irq(host->irq);
->> -		spin_lock(&host->lock);
->> +		spin_lock_irqsave(&host->lock, flags);
->> 
->> 		if (!host->tuning_done) {
->> 			pr_info(DRIVER_NAME ": Timeout waiting for "
->> @@ -2046,7 +2047,7 @@ out:
->> 		err = 0;
->> 
->> 	sdhci_clear_set_irqs(host, SDHCI_INT_DATA_AVAIL, ier);
->> -	spin_unlock(&host->lock);
->> +	spin_unlock_irqrestore(&host->lock, flags);
->> 	enable_irq(host->irq);
->> 	sdhci_runtime_pm_put(host);
->> 
->> -- 
->> 1.8.5.2
->> 
->> --
->> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
------------------------------------------------------------------------------------
-This email message is for the sole use of the intended recipient(s) and may contain
-confidential information.  Any unauthorized review, use, disclosure or distribution
-is prohibited.  If you are not the intended recipient, please contact the sender by
-reply email and destroy all copies of the original message.
------------------------------------------------------------------------------------
+- Chris.
+-- 
+Chris Ball   <chris@printf.net>   <http://printf.net/>
