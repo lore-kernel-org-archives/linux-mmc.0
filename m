@@ -1,76 +1,63 @@
-From: Mark Brown <broonie@kernel.org>
+From: Russell King - ARM Linux <linux@arm.linux.org.uk>
 Subject: Re: [PATCH 1/3] mmc: add support for power-on sequencing through DT
-Date: Mon, 20 Jan 2014 16:36:27 +0000
-Message-ID: <20140120163627.GT17314@sirena.org.uk>
-References: <1390190215-22700-1-git-send-email-olof@lixom.net>
- <1390190215-22700-2-git-send-email-olof@lixom.net>
+Date: Mon, 20 Jan 2014 16:48:59 +0000
+Message-ID: <20140120164859.GF15937@n2100.arm.linux.org.uk>
+References: <1390190215-22700-1-git-send-email-olof@lixom.net> <1390190215-22700-2-git-send-email-olof@lixom.net>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="xt4oM5y0t/70YhQj"
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mezzanine.sirena.org.uk ([106.187.55.193]:57205 "EHLO
-	mezzanine.sirena.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751669AbaATQgo (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 20 Jan 2014 11:36:44 -0500
+Received: from gw-1.arm.linux.org.uk ([78.32.30.217]:43000 "EHLO
+	pandora.arm.linux.org.uk" rhost-flags-OK-OK-OK-FAIL)
+	by vger.kernel.org with ESMTP id S1754190AbaATQtH (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 20 Jan 2014 11:49:07 -0500
 Content-Disposition: inline
 In-Reply-To: <1390190215-22700-2-git-send-email-olof@lixom.net>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Olof Johansson <olof@lixom.net>
-Cc: linux-mmc@vger.kernel.org, mark.rutland@arm.com, devicetree@vger.kernel.org, linux@arm.linux.org.uk, pawel.moll@arm.com, chris@printf.net, robh+dt@kernel.org, ijc+devicetree@hellion.org.ok, galak@codeaurora.org, linux-arm-kernel@lists.infradead.org
-
-
---xt4oM5y0t/70YhQj
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, robh+dt@kernel.org, mark.rutland@arm.com, pawel.moll@arm.com, ijc+devicetree@hellion.org.ok, galak@codeaurora.org, chris@printf.net
 
 On Sun, Jan 19, 2014 at 07:56:53PM -0800, Olof Johansson wrote:
-
-> +	if (host->card_regulator) {
-
-NULL is a potentially valid regulator; use IS_ERR().  Also see below...
-
-> +		dev_dbg(host->parent, "Enabling external regulator");
-> +		if (regulator_enable(host->card_regulator))
-> +			dev_err(host->parent, "Failed to enable external regulator");
-
-You should really log the error code here.
-
-> +	host->card_regulator = regulator_get(host->parent, "card-external-vcc");
+> diff --git a/Documentation/devicetree/bindings/mmc/mmc.txt b/Documentation/devicetree/bindings/mmc/mmc.txt
+> index 458b57f..962e0ee 100644
+> --- a/Documentation/devicetree/bindings/mmc/mmc.txt
+> +++ b/Documentation/devicetree/bindings/mmc/mmc.txt
+> @@ -5,6 +5,8 @@ these definitions.
+>  Interpreted by the OF core:
+>  - reg: Registers location and length.
+>  - interrupts: Interrupts used by the MMC controller.
+> +- clocks: Clocks needed for the host controller, if any.
+> +- clock-names: Goes with clocks above.
+>  
+>  Card detection:
+>  If no property below is supplied, host native card detect is used.
+> @@ -30,6 +32,15 @@ Optional properties:
+>  - cap-sdio-irq: enable SDIO IRQ signalling on this interface
+>  - full-pwr-cycle: full power cycle of the card is supported
+>  
+> +Card power and reset control:
+> +The following properties can be specified for cases where the MMC
+> +peripheral needs additional reset, regulator and clock lines. It is for
+> +example common for WiFi/BT adapters to have these separate from the main
+> +MMC bus:
+> +  - card-reset-gpios: Specify GPIOs for card reset (reset active low)
+> +  - card-external-vcc-supply: Regulator to drive (independent) card VCC
+> +  - clock with name "card_ext_clock": External clock provided to the card
 > +
 
-...this won't handle probe deferral or other errors.  Given what this is
-for it should probably be using regulator_get_optional(), the driver is
-happy to carry on if a supply isn't available.  On the other hand it
-just enables and disables so it's probably easier to just ignore that
-and let the stub regulator get used anyway.
+This looks good.  I can connect the wifi/bt power control to a regulator,
+and give that as the card-external-vcc-supply property.  I can specify
+the WIFI/BT resets for card-reset-gpios.
 
-I have to say I do worry what happens if the device has multiple
-supplies that need to be managed (which is common enough, for example
-analogue and digital supplies tend to be decoupled) or if the device can
-do useful things with the supplies.  In the case of SDIO it's *probably*
-less relevant though I have seen applications where it might be.
+So far so good.  Now, what about this external oscillator which has its
+own separate power control.  My immediate thought is that this can be
+specified via card_ext_clock - I would simply need to declare a fixed-rate
+clock with either a regulator (power switch) controlled via a gpio (which
+would probably be closer to the hardware) or a gpio as an enable... ah,
+that requires me to write a common clock driver for that bit since this
+is currently not modelled by CCF...
 
---xt4oM5y0t/70YhQj
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-
-iQIcBAEBAgAGBQJS3VCIAAoJELSic+t+oim9hAcQAI6jHQjZbpCVKAuy5QCEgfQO
-qalfUkwCgNERZgm8KhmL3HjyY6/5Qi2bj21gC/qqWWT3KwSvct+HC+WflxpdO+/F
-p5y0UeJciAS6XF5sUPaTgpXkcl3w/NOvJClaOJputDUDF3og2IAa9cGnXcwvNp8X
-5zg40avldTr1lsdYw5GZPyUov+3F+Vkv9aJpmXnQF5liP1RlIMthdP1ai/CpO7y7
-ELLbS5KVGN7mqzZpSTkEp0K8LkZbATQ51g9Zb1bQni5CrjqSSyApvQTvQ1B0jDjV
-DVJTb8lxUFWwTHXw3yd+LYpdx0NcnoRV4dAdcEs3r4ktHg8rfcq8rEAFCsK23sg8
-Mgq12bnW75f/jJy/a1QnFD56+u7dveu80kIfnu/+XZ3Mz93ZcOQ7dmczOe47uSDX
-1hm33vnulJbelWFZMDwsPlaG7QxQF33ccOoGSlZtyAd8vOnk0PPGWhMC8R6NeGEm
-P1BiqMb2I/JpYC6Me/MkxG61mOQCRV/LW8fNKDFn3L3DSsZ6nWRZoMOwirqNU5+M
-fW5YYBJD71JWHc1a2VQUpOgAoMasBGme2eYNW7p7WP+Nz7iyR5xbpQ9IaEBDlT9k
-P1GkUYTOLNLsDeFoUYjZJruxOQDfS8jGGHLxO22h4BMKxeRCbiuXpZs8GR9y0nk3
-ayYJ4u+LmhV6oyHy5pCV
-=fX3X
------END PGP SIGNATURE-----
-
---xt4oM5y0t/70YhQj--
+-- 
+FTTC broadband for 0.8mile line: 5.8Mbps down 500kbps up.  Estimation
+in database were 13.1 to 19Mbit for a good line, about 7.5+ for a bad.
+Estimate before purchase was "up to 13.2Mbit".
