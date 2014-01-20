@@ -1,55 +1,51 @@
-From: Olof Johansson <olof@lixom.net>
-Subject: Re: How to support SDIO wifi/bt in DT
-Date: Sun, 19 Jan 2014 15:30:08 -0800
-Message-ID: <20140119233008.GA4867@quad.lixom.net>
-References: <20140116133649.GV15937@n2100.arm.linux.org.uk>
- <3215037.8HVCjAeS8g@wuerfel>
- <CAOesGMgzi5Buduo2pd0PP8CvKVir69yZ-jjX0Gbda871GiD8rg@mail.gmail.com>
- <alpine.LFD.2.10.1401162204560.28907@knanqh.ubzr>
- <CAL_JsqKX2RT2E6uk3d35m+TWW7iuPFFiuZzOwd0xA9zMgqAZRw@mail.gmail.com>
- <alpine.LFD.2.10.1401171157340.28907@knanqh.ubzr>
- <CAOesGMjVpTEku+UJntewi3FXoeEPe9rJP4BBmbSesfFMtY9hnA@mail.gmail.com>
- <20140119230924.GB8154@piout.net>
+From: Dong Aisheng <dongas86@gmail.com>
+Subject: Re: [PATCH v2 0/5] mmc: sdhci: a few fixes on timeout and max_discard_to
+Date: Mon, 20 Jan 2014 10:42:05 +0800
+Message-ID: <CAA+hA=Q_p8bLpEA+04cqRhZOCNJQ=i-cgshxQbP8n-fEbu89rQ@mail.gmail.com>
+References: <1387268191-19859-1-git-send-email-b29396@freescale.com>
+	<20131217143025.GX6691@S2101-09.ap.freescale.net>
+	<CAA+hA=QgPvTXWbKjpd9e0H3MacGqu8=zz_PpCRAB0NGu_drVtw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pb0-f53.google.com ([209.85.160.53]:44526 "EHLO
-	mail-pb0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752245AbaASXcG (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 19 Jan 2014 18:32:06 -0500
-Received: by mail-pb0-f53.google.com with SMTP id md12so1233656pbc.40
-        for <linux-mmc@vger.kernel.org>; Sun, 19 Jan 2014 15:32:05 -0800 (PST)
-Content-Disposition: inline
-In-Reply-To: <20140119230924.GB8154@piout.net>
+Received: from mail-qa0-f52.google.com ([209.85.216.52]:58822 "EHLO
+	mail-qa0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752518AbaATCmG (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 19 Jan 2014 21:42:06 -0500
+Received: by mail-qa0-f52.google.com with SMTP id j15so5214951qaq.11
+        for <linux-mmc@vger.kernel.org>; Sun, 19 Jan 2014 18:42:05 -0800 (PST)
+In-Reply-To: <CAA+hA=QgPvTXWbKjpd9e0H3MacGqu8=zz_PpCRAB0NGu_drVtw@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Alexandre Belloni <alexandre.belloni@free-electrons.com>
-Cc: Nicolas Pitre <nico@fluxnic.net>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Russell King - ARM Linux <linux@arm.linux.org.uk>, Arnd Bergmann <arnd@arndb.de>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+To: Shawn Guo <shawn.guo@linaro.org>
+Cc: Dong Aisheng <b29396@freescale.com>, Ulf Hansson <ulf.hansson@linaro.org>, Ed Sutter <ed.sutter@alcatel-lucent.com>, Sascha Hauer <s.hauer@pengutronix.de>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Vladimir Zapolskiy <vladimir_zapolskiy@mentor.com>, Chris Ball <cjb@laptop.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 
-On Mon, Jan 20, 2014 at 12:09:25AM +0100, Alexandre Belloni wrote:
-> On Sun, Jan 19, 2014 at 11:29:55AM -0800, Olof Johansson wrote :
-> > The "multi-slot" concept I was talking about was one host controller
-> > for several physical slots. Seems like at91 implements _and_ uses this
-> > but nobody else. However, it seems that they allocate one mmc host per
-> > slot, so the same model still works.
-> > 
-> 
-> I think we need to be extra careful about the DT bindings then because
-> adding a property in a slot is requiring handling that in the at91
-> driver whereas adding a common property for the various mmc hosts can be
-> done in the core code.
-> 
-> From what I remember, it would be really good to put the DT parsing for
-> the slots in the core code but I only had a really quick look at that.
+Ping...
 
-The patches I have here do it all in the core per host with common
-bindings. I hope to post them tonight. They should fit the at91 model
-just fine as well, since they do each slot as a mmc_host, not as a separate
-slot with a shared host controller.
-
-(Some drivers don't seem to call mmc_of_parse(), which they will need to do to
-take advantage of the common implementation. But that can be addressed driver
-by driver as someone has a chance to test it).
-
-
--Olof
+On Mon, Jan 13, 2014 at 6:55 PM, Dong Aisheng <dongas86@gmail.com> wrote:
+> Hi Chris,
+>
+> On Tue, Dec 17, 2013 at 10:30 PM, Shawn Guo <shawn.guo@linaro.org> wrote:
+>> On Tue, Dec 17, 2013 at 04:16:26PM +0800, Dong Aisheng wrote:
+>>> Dong Aisheng (5):
+>>>   mmc: sdhci: add platfrom get_max_timeout_count hook
+>>>   mmc: sdhci-esdhc-imx: fix incorrect max_discard_to for uSDHC
+>>>   mmc: sdhci: add platform set_timeout hook
+>>>   mmc: sdhci-esdhc-imx: set the correct max timeout value for uSDHC
+>>>   mmc: sdhci: calculate max_discard_to dynamically for
+>>>     SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK
+>>
+>> For all,
+>>
+>> Reviewed-by: Shawn Guo <shawn.guo@linaro.org>
+>>
+>
+> Can you pick this series?
+>
+> Regards
+> Dong Aisheng
+>
+>> _______________________________________________
+>> linux-arm-kernel mailing list
+>> linux-arm-kernel@lists.infradead.org
+>> http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
