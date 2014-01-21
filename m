@@ -1,59 +1,50 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: [PATCH 6/7] mmc: dw_mmc: remove the unnecessary function.
-Date: Tue, 21 Jan 2014 19:16:59 +0900
-Message-ID: <52DE491B.2070101@samsung.com>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: [PATCH 1/7] mmc: core add the property for hs200
+Date: Tue, 21 Jan 2014 11:30:29 +0100
+Message-ID: <3339329.LQJLrAHSHx@wuerfel>
+References: <52DE4916.4090603@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7Bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout2.samsung.com ([203.254.224.25]:65505 "EHLO
-	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754179AbaAUKQf (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 21 Jan 2014 05:16:35 -0500
-Received: from epcpsbgr4.samsung.com
- (u144.gpu120.samsung.co.kr [203.254.230.144])
- by mailout2.samsung.com (Oracle Communications Messaging Server 7u4-24.01
- (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTP id <0MZQ00K9QXVMDE20@mailout2.samsung.com> for
- linux-mmc@vger.kernel.org; Tue, 21 Jan 2014 19:16:34 +0900 (KST)
+Received: from moutng.kundenserver.de ([212.227.17.9]:59888 "EHLO
+	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754021AbaAUKad (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 21 Jan 2014 05:30:33 -0500
+In-Reply-To: <52DE4916.4090603@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Cc: Chris Ball <chris@printf.net>, Seungwon Jeon <tgih.jun@samsung.com>
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Seungwon Jeon <tgih.jun@samsung.com>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 
-Remove unnecessary function.
-This function didn't re-use anywhere.
+On Tuesday 21 January 2014 19:16:54 Jaehoon Chung wrote:
+> caps2-mmc-hs200-1.8v and caps2-mmc-hs200-1.2v can be used to the general capability.
+> 
+> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+> ---
+>  drivers/mmc/core/host.c |    4 ++++
+>  1 file changed, 4 insertions(+)
+> 
+> diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+> index 49bc403..96ac4c1 100644
+> --- a/drivers/mmc/core/host.c
+> +++ b/drivers/mmc/core/host.c
+> @@ -429,6 +429,10 @@ int mmc_of_parse(struct mmc_host *host)
+>                 host->pm_caps |= MMC_PM_KEEP_POWER;
+>         if (of_find_property(np, "enable-sdio-wakeup", &len))
+>                 host->pm_caps |= MMC_PM_WAKE_SDIO_IRQ;
+> +       if (of_find_property(np, "caps2-mmc-hs200-1_8v", NULL))
+> +               host->caps2 |= MMC_CAP2_HS200_1_8V_SDR;
+> +       if (of_find_property(np, "caps2-mmc-hs200-1_2v", NULL))
+> +               host->caps2 |= MMC_CAP2_HS200_1_2V_SDR;
+>  
+>         return 0;
 
-Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
----
- drivers/mmc/host/dw_mmc.c |    8 +-------
- 1 file changed, 1 insertion(+), 7 deletions(-)
+If we do this, the strings also need to be documented in 
+bindings/mmc/mmc.txt.
 
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index ac16308..1418d33 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -235,12 +235,6 @@ err:
- }
- #endif /* defined(CONFIG_DEBUG_FS) */
- 
--static void dw_mci_set_timeout(struct dw_mci *host)
--{
--	/* timeout (maximum) */
--	mci_writel(host, TMOUT, 0xffffffff);
--}
--
- static u32 dw_mci_prepare_command(struct mmc_host *mmc, struct mmc_command *cmd)
- {
- 	struct mmc_data	*data;
-@@ -861,7 +855,7 @@ static void __dw_mci_start_request(struct dw_mci *host,
- 
- 	data = cmd->data;
- 	if (data) {
--		dw_mci_set_timeout(host);
-+		mci_writel(host, TMOUT, 0xFFFFFFFF);
- 		mci_writel(host, BYTCNT, data->blksz*data->blocks);
- 		mci_writel(host, BLKSIZ, data->blksz);
- 	}
--- 
-1.7.9.5
+Unfortunately, the names are not particularly intuitive (the caps2
+part in particular), but it's probably better to stick with that
+now.
+
+	Arnd
