@@ -1,47 +1,39 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [PATCH 1/7] mmc: core add the property for hs200
-Date: Tue, 21 Jan 2014 14:36:12 +0100
-Message-ID: <201401211436.12279.arnd@arndb.de>
-References: <52DE4916.4090603@samsung.com> <CAPDyKFpV4pSxQEHrvqXyQEL2Q6hB2a0ryXgL+nwU16=2Y5brLQ@mail.gmail.com> <52DE6610.4030702@samsung.com>
+From: Balaji T K <balajitk@ti.com>
+Subject: [PATCH 2/5] mmc: omap_hsmmc: fix request done for sbc error case
+Date: Tue, 21 Jan 2014 19:54:39 +0530
+Message-ID: <1390314282-20520-3-git-send-email-balajitk@ti.com>
+References: <1390314282-20520-1-git-send-email-balajitk@ti.com>
 Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="iso-8859-1"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.126.186]:53464 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754707AbaAUNg2 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 21 Jan 2014 08:36:28 -0500
-In-Reply-To: <52DE6610.4030702@samsung.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain
+Return-path: <linux-omap-owner@vger.kernel.org>
+In-Reply-To: <1390314282-20520-1-git-send-email-balajitk@ti.com>
+Sender: linux-omap-owner@vger.kernel.org
+To: linux-mmc@vger.kernel.org, chris@printf.net
+Cc: linux-omap@vger.kernel.org, Balaji T K <balajitk@ti.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Seungwon Jeon <tgih.jun@samsung.com>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 
-On Tuesday 21 January 2014, Jaehoon Chung wrote:
-> On 01/21/2014 09:12 PM, Ulf Hansson wrote:
-> > On 21 January 2014 11:30, Arnd Bergmann <arnd@arndb.de> wrote:
-> >> On Tuesday 21 January 2014 19:16:54 Jaehoon Chung wrote:
-> >>
-> >> Unfortunately, the names are not particularly intuitive (the caps2
-> >> part in particular), but it's probably better to stick with that
-> >> now.
-> > 
-> > I would prefer to remove "caps2" from the property name.
-> > 
-> > Going forward and cleaning up all the non needed caps flags, could
-> > mean we may want to move caps2 flags into caps flags, I guess. This
-> > would not be suitable if we decide to name the property as above.
-> 
-> Agreed,caps2 flags can be changed in future.
-> I will remove the "caps2" from name.
-> And i will add the document in binding/mmc/mmc.txt at next patch.
-> 
+mrq is not populated for set block count(cmd23) command.
+Use block read/write mmc_commond pointer for request done and
+avoid NULL pointer access in error case for sbc (cmd23).
 
-In general, we have to be very careful changing these things, so we don't
-break existing dts files booting with newer kernels.
+Signed-off-by: Balaji T K <balajitk@ti.com>
+---
+ drivers/mmc/host/omap_hsmmc.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
 
-In this particular case, I think we're fine, since the hs200 properties
-are fairly new and haven't made it into any dts files so far.
+diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+index 8d0048d..d3774b8 100644
+--- a/drivers/mmc/host/omap_hsmmc.c
++++ b/drivers/mmc/host/omap_hsmmc.c
+@@ -893,7 +893,7 @@ omap_hsmmc_cmd_done(struct omap_hsmmc_host *host, struct mmc_command *cmd)
+ 		}
+ 	}
+ 	if ((host->data == NULL && !host->response_busy) || cmd->error)
+-		omap_hsmmc_request_done(host, cmd->mrq);
++		omap_hsmmc_request_done(host, host->mrq);
+ }
+ 
+ /*
+-- 
+1.7.5.4
 
-	Arnd
