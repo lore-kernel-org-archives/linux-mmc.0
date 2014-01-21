@@ -1,51 +1,59 @@
 From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: [PATCH 5/7] mmc: dw-mmc: fix minor coding style.
-Date: Tue, 21 Jan 2014 19:16:58 +0900
-Message-ID: <52DE491A.1060401@samsung.com>
+Subject: [PATCH 6/7] mmc: dw_mmc: remove the unnecessary function.
+Date: Tue, 21 Jan 2014 19:16:59 +0900
+Message-ID: <52DE491B.2070101@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout1.samsung.com ([203.254.224.24]:60294 "EHLO
-	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754031AbaAUKQf (ORCPT
+Received: from mailout2.samsung.com ([203.254.224.25]:65505 "EHLO
+	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754179AbaAUKQf (ORCPT
 	<rfc822;linux-mmc@vger.kernel.org>); Tue, 21 Jan 2014 05:16:35 -0500
-Received: from epcpsbgr2.samsung.com
- (u142.gpu120.samsung.co.kr [203.254.230.142])
- by mailout1.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+Received: from epcpsbgr4.samsung.com
+ (u144.gpu120.samsung.co.kr [203.254.230.144])
+ by mailout2.samsung.com (Oracle Communications Messaging Server 7u4-24.01
  (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTP id <0MZQ006H1XVLFEE0@mailout1.samsung.com> for
- linux-mmc@vger.kernel.org; Tue, 21 Jan 2014 19:16:33 +0900 (KST)
-Received: from [10.252.81.186] by mmp1.samsung.com
- (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
- 17 2011)) with ESMTPA id <0MZQ00HTYXVLU4F0@mmp1.samsung.com> for
- linux-mmc@vger.kernel.org; Tue, 21 Jan 2014 19:16:33 +0900 (KST)
+ with ESMTP id <0MZQ00K9QXVMDE20@mailout2.samsung.com> for
+ linux-mmc@vger.kernel.org; Tue, 21 Jan 2014 19:16:34 +0900 (KST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Cc: Chris Ball <chris@printf.net>, Seungwon Jeon <tgih.jun@samsung.com>
 
-Fixed the coding style.
+Remove unnecessary function.
+This function didn't re-use anywhere.
 
 Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
 ---
- drivers/mmc/host/dw_mmc.c |    5 ++---
- 1 file changed, 2 insertions(+), 3 deletions(-)
+ drivers/mmc/host/dw_mmc.c |    8 +-------
+ 1 file changed, 1 insertion(+), 7 deletions(-)
 
 diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 9bac3ed..ac16308 100644
+index ac16308..1418d33 100644
 --- a/drivers/mmc/host/dw_mmc.c
 +++ b/drivers/mmc/host/dw_mmc.c
-@@ -257,9 +257,8 @@ static u32 dw_mci_prepare_command(struct mmc_host *mmc, struct mmc_command *cmd)
- 	    (cmd->opcode == SD_IO_RW_DIRECT &&
- 	     ((cmd->arg >> 9) & 0x1FFFF) == SDIO_CCCR_ABORT))
- 		cmdr |= SDMMC_CMD_STOP;
--	else
--		if (cmd->opcode != MMC_SEND_STATUS && cmd->data)
--			cmdr |= SDMMC_CMD_PRV_DAT_WAIT;
-+	else if (cmd->opcode != MMC_SEND_STATUS && cmd->data)
-+		cmdr |= SDMMC_CMD_PRV_DAT_WAIT;
+@@ -235,12 +235,6 @@ err:
+ }
+ #endif /* defined(CONFIG_DEBUG_FS) */
  
- 	if (cmd->flags & MMC_RSP_PRESENT) {
- 		/* We expect a response, so set this bit */
+-static void dw_mci_set_timeout(struct dw_mci *host)
+-{
+-	/* timeout (maximum) */
+-	mci_writel(host, TMOUT, 0xffffffff);
+-}
+-
+ static u32 dw_mci_prepare_command(struct mmc_host *mmc, struct mmc_command *cmd)
+ {
+ 	struct mmc_data	*data;
+@@ -861,7 +855,7 @@ static void __dw_mci_start_request(struct dw_mci *host,
+ 
+ 	data = cmd->data;
+ 	if (data) {
+-		dw_mci_set_timeout(host);
++		mci_writel(host, TMOUT, 0xFFFFFFFF);
+ 		mci_writel(host, BYTCNT, data->blksz*data->blocks);
+ 		mci_writel(host, BLKSIZ, data->blksz);
+ 	}
 -- 
 1.7.9.5
