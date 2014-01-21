@@ -1,84 +1,51 @@
 From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: [PATCH 7/7] mmc: dw_mmc: remove the dw_mci_of_cd_gpio()
-Date: Tue, 21 Jan 2014 19:16:59 +0900
-Message-ID: <52DE491B.9070007@samsung.com>
+Subject: [PATCH 5/7] mmc: dw-mmc: fix minor coding style.
+Date: Tue, 21 Jan 2014 19:16:58 +0900
+Message-ID: <52DE491A.1060401@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout4.samsung.com ([203.254.224.34]:12988 "EHLO
-	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754122AbaAUKQg (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 21 Jan 2014 05:16:36 -0500
-Received: from epcpsbgr3.samsung.com
- (u143.gpu120.samsung.co.kr [203.254.230.143])
- by mailout4.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+Received: from mailout1.samsung.com ([203.254.224.24]:60294 "EHLO
+	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754031AbaAUKQf (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 21 Jan 2014 05:16:35 -0500
+Received: from epcpsbgr2.samsung.com
+ (u142.gpu120.samsung.co.kr [203.254.230.142])
+ by mailout1.samsung.com (Oracle Communications Messaging Server 7u4-24.01
  (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTP id <0MZQ00K3VXVNK980@mailout4.samsung.com> for
- linux-mmc@vger.kernel.org; Tue, 21 Jan 2014 19:16:35 +0900 (KST)
+ with ESMTP id <0MZQ006H1XVLFEE0@mailout1.samsung.com> for
+ linux-mmc@vger.kernel.org; Tue, 21 Jan 2014 19:16:33 +0900 (KST)
+Received: from [10.252.81.186] by mmp1.samsung.com
+ (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
+ 17 2011)) with ESMTPA id <0MZQ00HTYXVLU4F0@mmp1.samsung.com> for
+ linux-mmc@vger.kernel.org; Tue, 21 Jan 2014 19:16:33 +0900 (KST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Cc: Chris Ball <chris@printf.net>, Seungwon Jeon <tgih.jun@samsung.com>
 
-If mmc_of_parse() is used, dw_mci_of_get_cd_gpio didn't need.
-Already implemented into mmc_of_parse().
+Fixed the coding style.
 
 Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
 ---
- drivers/mmc/host/dw_mmc.c |   26 --------------------------
- 1 file changed, 26 deletions(-)
+ drivers/mmc/host/dw_mmc.c |    5 ++---
+ 1 file changed, 2 insertions(+), 3 deletions(-)
 
 diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 1418d33..e776fdd 100644
+index 9bac3ed..ac16308 100644
 --- a/drivers/mmc/host/dw_mmc.c
 +++ b/drivers/mmc/host/dw_mmc.c
-@@ -2048,26 +2048,6 @@ static int dw_mci_of_get_wp_gpio(struct device *dev, u8 slot)
+@@ -257,9 +257,8 @@ static u32 dw_mci_prepare_command(struct mmc_host *mmc, struct mmc_command *cmd)
+ 	    (cmd->opcode == SD_IO_RW_DIRECT &&
+ 	     ((cmd->arg >> 9) & 0x1FFFF) == SDIO_CCCR_ABORT))
+ 		cmdr |= SDMMC_CMD_STOP;
+-	else
+-		if (cmd->opcode != MMC_SEND_STATUS && cmd->data)
+-			cmdr |= SDMMC_CMD_PRV_DAT_WAIT;
++	else if (cmd->opcode != MMC_SEND_STATUS && cmd->data)
++		cmdr |= SDMMC_CMD_PRV_DAT_WAIT;
  
- 	return gpio;
- }
--
--/* find the cd gpio for a given slot */
--static void dw_mci_of_get_cd_gpio(struct device *dev, u8 slot,
--					struct mmc_host *mmc)
--{
--	struct device_node *np = dw_mci_of_find_slot_node(dev, slot);
--	int gpio;
--
--	if (!np)
--		return;
--
--	gpio = of_get_named_gpio(np, "cd-gpios", 0);
--
--	/* Having a missing entry is valid; return silently */
--	if (!gpio_is_valid(gpio))
--		return;
--
--	if (mmc_gpio_request_cd(mmc, gpio, 0))
--		dev_warn(dev, "gpio [%d] request failed\n", gpio);
--}
- #else /* CONFIG_OF */
- static int dw_mci_of_get_slot_quirks(struct device *dev, u8 slot)
- {
-@@ -2081,11 +2061,6 @@ static int dw_mci_of_get_wp_gpio(struct device *dev, u8 slot)
- {
- 	return -EINVAL;
- }
--static void dw_mci_of_get_cd_gpio(struct device *dev, u8 slot,
--					struct mmc_host *mmc)
--{
--	return;
--}
- #endif /* CONFIG_OF */
- 
- static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
-@@ -2165,7 +2140,6 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
- 	}
- 
- 	slot->wp_gpio = dw_mci_of_get_wp_gpio(host->dev, slot->id);
--	dw_mci_of_get_cd_gpio(host->dev, slot->id, mmc);
- 
- 	ret = mmc_add_host(mmc);
- 	if (ret)
+ 	if (cmd->flags & MMC_RSP_PRESENT) {
+ 		/* We expect a response, so set this bit */
 -- 
 1.7.9.5
