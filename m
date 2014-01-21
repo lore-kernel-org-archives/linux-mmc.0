@@ -1,85 +1,85 @@
-From: Felipe Balbi <balbi@ti.com>
-Subject: Re: [PATCH] mmc: omap_hsmmc: Add support for Erratum 2.1.1.128 in
- device tree boot
-Date: Mon, 20 Jan 2014 17:39:41 -0600
-Message-ID: <20140120233941.GG6516@saruman.home>
-References: <1390260542-22213-1-git-send-email-nm@ti.com>
-Reply-To: balbi@ti.com
+From: Sascha Hauer <s.hauer@pengutronix.de>
+Subject: Re: [PATCH 1/3] mmc: add support for power-on sequencing through DT
+Date: Tue, 21 Jan 2014 08:24:47 +0100
+Message-ID: <20140121072447.GC19940@pengutronix.de>
+References: <1390190215-22700-1-git-send-email-olof@lixom.net>
+ <1390190215-22700-2-git-send-email-olof@lixom.net>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============4958116812461598747=="
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <1390260542-22213-1-git-send-email-nm@ti.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Nishanth Menon <nm@ti.com>
-Cc: devicetree@vger.kernel.org, Balaji T K <balajitk@ti.com>, Tony Lindgren <tony@atomide.com>, linux-mmc@vger.kernel.org, Chris Ball <chris@printf.net>, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org
-List-Id: linux-mmc@vger.kernel.org
-
---===============4958116812461598747==
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="w/VI3ydZO+RcZ3Ux"
-Content-Disposition: inline
-
---w/VI3ydZO+RcZ3Ux
 Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from metis.ext.pengutronix.de ([92.198.50.35]:55227 "EHLO
+	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750869AbaAUHYx (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 21 Jan 2014 02:24:53 -0500
 Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+In-Reply-To: <1390190215-22700-2-git-send-email-olof@lixom.net>
+Sender: linux-mmc-owner@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
+To: Olof Johansson <olof@lixom.net>
+Cc: linux-mmc@vger.kernel.org, mark.rutland@arm.com, devicetree@vger.kernel.org, linux@arm.linux.org.uk, pawel.moll@arm.com, chris@printf.net, robh+dt@kernel.org, ijc+devicetree@hellion.org.ok, galak@codeaurora.org, linux-arm-kernel@lists.infradead.org
 
-On Mon, Jan 20, 2014 at 05:29:02PM -0600, Nishanth Menon wrote:
-> When device is booted using devicetree, platforms impacted by
-> Erratum 2.1.1.128 is not detected easily in the mmc driver. This erratum
-> indicates that the module cannot do multi-block transfers.
->=20
-> Handle this by providing a boolean flag to indicate to driver that it is
-> working on a hardware with mentioned limitation.
+On Sun, Jan 19, 2014 at 07:56:53PM -0800, Olof Johansson wrote:
+> This patch enables support for power-on sequencing of SDIO peripherals through DT.
+> 
+> In general, it's quite common that wifi modules and other similar
+> peripherals have several signals in addition to the SDIO interface that
+> needs wiggling before the module will power on. It's common to have a
+> reference clock, one or several power rails and one or several lines
+> for reset/enable type functions.
+> 
+> The binding as written today introduces a number of reset gpios,
+> a regulator and a clock specifier. The code will handle up to 2 gpio
+> reset lines, but it's trivial to increase to more than that if needed
+> at some point.
+> 
+> Implementation-wise, the MMC core has been changed to handle this during
+> host power up, before the host interface is powered on. I have not yet
+> implemented the power-down side, I wanted people to have a chance for
+> reporting back w.r.t. issues (or comments on the bindings) first.
+> 
+> I have not tested the regulator portion, since the system and module
+> I'm working on doesn't need one (Samsung Chromebook with Marvell
+> 8797-based wifi). Testing of those portions (and reporting back) would
+> be appreciated.
+> 
+> Signed-off-by: Olof Johansson <olof@lixom.net>
+> ---
+>  Documentation/devicetree/bindings/mmc/mmc.txt |   11 +++++++
+>  drivers/mmc/core/core.c                       |   42 +++++++++++++++++++++++++
+>  drivers/mmc/core/host.c                       |   30 +++++++++++++++++-
+>  include/linux/mmc/host.h                      |    5 +++
+>  4 files changed, 87 insertions(+), 1 deletion(-)
+> 
+> diff --git a/Documentation/devicetree/bindings/mmc/mmc.txt b/Documentation/devicetree/bindings/mmc/mmc.txt
+> index 458b57f..962e0ee 100644
+> --- a/Documentation/devicetree/bindings/mmc/mmc.txt
+> +++ b/Documentation/devicetree/bindings/mmc/mmc.txt
+> @@ -5,6 +5,8 @@ these definitions.
+>  Interpreted by the OF core:
+>  - reg: Registers location and length.
+>  - interrupts: Interrupts used by the MMC controller.
+> +- clocks: Clocks needed for the host controller, if any.
+> +- clock-names: Goes with clocks above.
+>  
+>  Card detection:
+>  If no property below is supplied, host native card detect is used.
+> @@ -30,6 +32,15 @@ Optional properties:
+>  - cap-sdio-irq: enable SDIO IRQ signalling on this interface
+>  - full-pwr-cycle: full power cycle of the card is supported
+>  
+> +Card power and reset control:
+> +The following properties can be specified for cases where the MMC
+> +peripheral needs additional reset, regulator and clock lines. It is for
+> +example common for WiFi/BT adapters to have these separate from the main
+> +MMC bus:
+> +  - card-reset-gpios: Specify GPIOs for card reset (reset active low)
 
-sure there's no way of reading the revision register to figure this one
-out without having to add a new DT attribute ?
+We have GPIO_ACTIVE_LOW/HIGH. No need to hardcode this.
 
---=20
-balbi
+Sascha
 
---w/VI3ydZO+RcZ3Ux
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1
-
-iQIcBAEBAgAGBQJS3bO9AAoJEIaOsuA1yqREG3EP/05CRV54qvIN3Yxoea81Yshf
-WtufQ4v6Q6McZZOz3UXUQjh+ZuHRdP+eNylhUD2etI8mUY7PS7yVC8Cm+TdOPeg5
-sjrqiPxcIJbEC1+IhIrxHDaAFynArxQwXNg8ltF9sSNfNPamh9i8toSL7h/r17Ql
-N6jGVdJ/rLNCTSvQwgpqFdZwSYibV+toIO8CvSrp3mWlNApCeG/d9YvTyYTL8Cqa
-0+p3tqzsQLcSayXd3QZc83cMnYLNqDCytZVvGGRVL6AzM2sDsJXew9Ce8DCUkLfE
-Tv/HeLOwzgnESzf2ZB8g/YPhtlKrdo/PvmXye5DF/05tY/tpWvHLsB/hTTY+5qUY
-3se5l5moG+hjI4VbyMvOZmfZDmKxEobZeI3edTeMIN/1z/Z+6oXIsuCA1Lo4gxsI
-yx/KyoFap7CRpC404lB+m6oYlVBoQJz724Il2ZiaLPJgZ9V8Mpe0sydikrfuZzFO
-8c6fHFru7ZRQd1WykXeHuSk59v2cNLtXZI5HXe3J4wyyBlsRMhAdyFSRadVAzmoi
-T6Y4WrdfysAxx18Zz+r9Ia1VRPZa9Gq+dfOYAATmRUOKoqpVKQAUZ6XZo328lUmW
-/eLjPOTneDtHV7VyEzRDmSdC7uoV1ZGMdiRvI5XT3t26stzUes70nlPCz2dvHI+J
-FAQORV2TlKF+LkBILihz
-=j9gs
------END PGP SIGNATURE-----
-
---w/VI3ydZO+RcZ3Ux--
-
-
---===============4958116812461598747==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
-
-_______________________________________________
-linux-arm-kernel mailing list
-linux-arm-kernel@lists.infradead.org
-http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
-
---===============4958116812461598747==--
+-- 
+Pengutronix e.K.                           |                             |
+Industrial Linux Solutions                 | http://www.pengutronix.de/  |
+Peiner Str. 6-8, 31137 Hildesheim, Germany | Phone: +49-5121-206917-0    |
+Amtsgericht Hildesheim, HRA 2686           | Fax:   +49-5121-206917-5555 |
