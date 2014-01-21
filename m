@@ -1,116 +1,84 @@
 From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: [PATCH 2/7] mmc: dw_mmc: use the mmc_of_parse() instead of local parser
-Date: Tue, 21 Jan 2014 19:16:55 +0900
-Message-ID: <52DE4917.6010002@samsung.com>
+Subject: [PATCH 7/7] mmc: dw_mmc: remove the dw_mci_of_cd_gpio()
+Date: Tue, 21 Jan 2014 19:16:59 +0900
+Message-ID: <52DE491B.9070007@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout1.samsung.com ([203.254.224.24]:60294 "EHLO
-	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753900AbaAUKQc (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 21 Jan 2014 05:16:32 -0500
-Received: from epcpsbgr4.samsung.com
- (u144.gpu120.samsung.co.kr [203.254.230.144])
- by mailout1.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+Received: from mailout4.samsung.com ([203.254.224.34]:12988 "EHLO
+	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754122AbaAUKQg (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 21 Jan 2014 05:16:36 -0500
+Received: from epcpsbgr3.samsung.com
+ (u143.gpu120.samsung.co.kr [203.254.230.143])
+ by mailout4.samsung.com (Oracle Communications Messaging Server 7u4-24.01
  (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTP id <0MZQ006GUXVJFEE0@mailout1.samsung.com> for
- linux-mmc@vger.kernel.org; Tue, 21 Jan 2014 19:16:31 +0900 (KST)
+ with ESMTP id <0MZQ00K3VXVNK980@mailout4.samsung.com> for
+ linux-mmc@vger.kernel.org; Tue, 21 Jan 2014 19:16:35 +0900 (KST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Cc: Chris Ball <chris@printf.net>, Seungwon Jeon <tgih.jun@samsung.com>, Olof Johansson <olof@lixom.net>
+Cc: Chris Ball <chris@printf.net>, Seungwon Jeon <tgih.jun@samsung.com>
 
-mmc_of_parse() have been already parsed the general capability.
-Didn't need to use the local parser.
+If mmc_of_parse() is used, dw_mci_of_get_cd_gpio didn't need.
+Already implemented into mmc_of_parse().
 
 Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
 ---
- drivers/mmc/host/dw_mmc.c |   48 +--------------------------------------------
- 1 file changed, 1 insertion(+), 47 deletions(-)
+ drivers/mmc/host/dw_mmc.c |   26 --------------------------
+ 1 file changed, 26 deletions(-)
 
 diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 55cd110..c915293 100644
+index 1418d33..e776fdd 100644
 --- a/drivers/mmc/host/dw_mmc.c
 +++ b/drivers/mmc/host/dw_mmc.c
-@@ -2046,21 +2046,6 @@ static int dw_mci_of_get_slot_quirks(struct device *dev, u8 slot)
- 	return quirks;
- }
+@@ -2048,26 +2048,6 @@ static int dw_mci_of_get_wp_gpio(struct device *dev, u8 slot)
  
--/* find out bus-width for a given slot */
--static u32 dw_mci_of_get_bus_wd(struct device *dev, u8 slot)
+ 	return gpio;
+ }
+-
+-/* find the cd gpio for a given slot */
+-static void dw_mci_of_get_cd_gpio(struct device *dev, u8 slot,
+-					struct mmc_host *mmc)
 -{
 -	struct device_node *np = dw_mci_of_find_slot_node(dev, slot);
--	u32 bus_wd = 1;
+-	int gpio;
 -
 -	if (!np)
--		return 1;
+-		return;
 -
--	if (of_property_read_u32(np, "bus-width", &bus_wd))
--		dev_err(dev, "bus-width property not found, assuming width"
--			       " as 1\n");
--	return bus_wd;
+-	gpio = of_get_named_gpio(np, "cd-gpios", 0);
+-
+-	/* Having a missing entry is valid; return silently */
+-	if (!gpio_is_valid(gpio))
+-		return;
+-
+-	if (mmc_gpio_request_cd(mmc, gpio, 0))
+-		dev_warn(dev, "gpio [%d] request failed\n", gpio);
 -}
--
- /* find the write protect gpio for a given slot; or -1 if none specified */
- static int dw_mci_of_get_wp_gpio(struct device *dev, u8 slot)
+ #else /* CONFIG_OF */
+ static int dw_mci_of_get_slot_quirks(struct device *dev, u8 slot)
  {
-@@ -2108,10 +2093,6 @@ static int dw_mci_of_get_slot_quirks(struct device *dev, u8 slot)
+@@ -2081,11 +2061,6 @@ static int dw_mci_of_get_wp_gpio(struct device *dev, u8 slot)
  {
- 	return 0;
+ 	return -EINVAL;
  }
--static u32 dw_mci_of_get_bus_wd(struct device *dev, u8 slot)
+-static void dw_mci_of_get_cd_gpio(struct device *dev, u8 slot,
+-					struct mmc_host *mmc)
 -{
--	return 1;
+-	return;
 -}
- static struct device_node *dw_mci_of_find_slot_node(struct device *dev, u8 slot)
- {
- 	return NULL;
-@@ -2189,19 +2170,7 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
- 	if (host->pdata->caps2)
- 		mmc->caps2 = host->pdata->caps2;
+ #endif /* CONFIG_OF */
  
--	if (host->pdata->get_bus_wd)
--		bus_width = host->pdata->get_bus_wd(slot->id);
--	else if (host->dev->of_node)
--		bus_width = dw_mci_of_get_bus_wd(host->dev, slot->id);
--	else
--		bus_width = 1;
--
--	switch (bus_width) {
--	case 8:
--		mmc->caps |= MMC_CAP_8_BIT_DATA;
--	case 4:
--		mmc->caps |= MMC_CAP_4_BIT_DATA;
--	}
-+	mmc_of_parse(mmc);
- 
- 	if (host->pdata->blk_settings) {
- 		mmc->max_segs = host->pdata->blk_settings->max_segs;
-@@ -2399,24 +2368,9 @@ static struct dw_mci_board *dw_mci_parse_dt(struct dw_mci *host)
- 			return ERR_PTR(ret);
+ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
+@@ -2165,7 +2140,6 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
  	}
  
--	if (of_find_property(np, "keep-power-in-suspend", NULL))
--		pdata->pm_caps |= MMC_PM_KEEP_POWER;
--
--	if (of_find_property(np, "enable-sdio-wakeup", NULL))
--		pdata->pm_caps |= MMC_PM_WAKE_SDIO_IRQ;
--
- 	if (of_find_property(np, "supports-highspeed", NULL))
- 		pdata->caps |= MMC_CAP_SD_HIGHSPEED | MMC_CAP_MMC_HIGHSPEED;
+ 	slot->wp_gpio = dw_mci_of_get_wp_gpio(host->dev, slot->id);
+-	dw_mci_of_get_cd_gpio(host->dev, slot->id, mmc);
  
--	if (of_find_property(np, "caps2-mmc-hs200-1_8v", NULL))
--		pdata->caps2 |= MMC_CAP2_HS200_1_8V_SDR;
--
--	if (of_find_property(np, "caps2-mmc-hs200-1_2v", NULL))
--		pdata->caps2 |= MMC_CAP2_HS200_1_2V_SDR;
--
--	if (of_get_property(np, "cd-inverted", NULL))
--		pdata->caps2 |= MMC_CAP2_CD_ACTIVE_HIGH;
--
- 	return pdata;
- }
- 
+ 	ret = mmc_add_host(mmc);
+ 	if (ret)
 -- 
 1.7.9.5
