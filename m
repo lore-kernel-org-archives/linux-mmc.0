@@ -1,102 +1,79 @@
-From: Felipe Balbi <balbi@ti.com>
-Subject: Re: [PATCH] mmc: omap_hsmmc: Add support for Erratum 2.1.1.128 in
- device tree boot
-Date: Tue, 21 Jan 2014 12:05:49 -0600
-Message-ID: <20140121180549.GS30451@saruman.home>
-References: <1390260542-22213-1-git-send-email-nm@ti.com>
- <20140120233941.GG6516@saruman.home>
- <52DEB078.5030005@ti.com>
-Reply-To: <balbi@ti.com>
+From: Olof Johansson <olof@lixom.net>
+Subject: Re: [PATCH 1/3] mmc: add support for power-on sequencing through DT
+Date: Tue, 21 Jan 2014 10:14:49 -0800
+Message-ID: <CAOesGMi9puZSzdDJ-sur5ks7VcDH+XV_MbuA0xeidLgp=uJacg@mail.gmail.com>
+References: <1390190215-22700-1-git-send-email-olof@lixom.net>
+	<1390190215-22700-2-git-send-email-olof@lixom.net>
+	<CAPDyKFoywt_LcWXdWJCWMU8-GT2vLW27eiuF0WEyjHJV+96HpA@mail.gmail.com>
+	<20140120191302.GA32178@quad.lixom.net>
+	<CAPDyKFpfrs=e3bDvdFRpnD3RkmD8ZvAJgFi6XvCRAOocqAKkKw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="U2mKMzaWgYxzMy3/"
-Return-path: <linux-omap-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <52DEB078.5030005@ti.com>
-Sender: linux-omap-owner@vger.kernel.org
-To: Nishanth Menon <nm@ti.com>
-Cc: balbi@ti.com, Balaji T K <balajitk@ti.com>, Chris Ball <chris@printf.net>, Tony Lindgren <tony@atomide.com>, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qa0-f42.google.com ([209.85.216.42]:64066 "EHLO
+	mail-qa0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755017AbaAUSOt (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 21 Jan 2014 13:14:49 -0500
+Received: by mail-qa0-f42.google.com with SMTP id k4so6945637qaq.15
+        for <linux-mmc@vger.kernel.org>; Tue, 21 Jan 2014 10:14:49 -0800 (PST)
+In-Reply-To: <CAPDyKFpfrs=e3bDvdFRpnD3RkmD8ZvAJgFi6XvCRAOocqAKkKw@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Russell King - ARM Linux <linux@arm.linux.org.uk>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Pawel Moll <pawel.moll@arm.com>, ijc+devicetree@hellion.org.ok, Kumar Gala <galak@codeaurora.org>, Chris Ball <chris@printf.net>
 
---U2mKMzaWgYxzMy3/
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+On Tue, Jan 21, 2014 at 12:55 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+[pruning quotes a bit]
+>>> Is the above regulator related to host->ocr_avail mask? Could the
+>>> above regulator be replaced by vmmc?
+>>
+>> I have to admit that I don't know MMC as well as I could, but OCR seems to be
+>> something that's between the driver/controller/device, not related to external
+>> power control in this case?
+>
+> This is related to the power of the card, typically external
+> regulators controlled by the host driver.
+>
+> Both the card and the host supports a voltage range. This range is
+> exactly what the OCR mask describes. At initialization of the card,
+> the host ocr is validated against the card ocr.
 
-Hi,
+Ok, so they specify the voltage needed, but there's no way to
+determine what regulator is wired up to control. So that information
+is still needed (possibly through vmmc though).
 
-On Tue, Jan 21, 2014 at 11:38:00AM -0600, Nishanth Menon wrote:
-> On 01/20/2014 05:39 PM, Felipe Balbi wrote:
-> > On Mon, Jan 20, 2014 at 05:29:02PM -0600, Nishanth Menon wrote:
-> >> When device is booted using devicetree, platforms impacted by
-> >> Erratum 2.1.1.128 is not detected easily in the mmc driver. This errat=
-um
-> >> indicates that the module cannot do multi-block transfers.
-> >>
-> >> Handle this by providing a boolean flag to indicate to driver that it =
-is
-> >> working on a hardware with mentioned limitation.
-> >=20
-> > sure there's no way of reading the revision register to figure this one
-> > out without having to add a new DT attribute ?
-> >=20
-> I did a quick patch to read the Module revision register:
-> http://slexy.org/view/s21TKvlWlR
->=20
-> sdp2430: Revision: 1.2, Spec: 0.0, normal interrupt
->=20
-> OMAP3430-ldp: (ES2.1): Revision: 2.6, Spec: 0.0, normal interrupt
-> SDP3430:(ES3.0) Revision: 2.6, Spec: 0.0, normal interrupt
-> AM3517-evm: (ES1.1): Revision: 2.6, Spec: 0.0, normal interrupt
-> AM3517-crane:(ES1.1): Revision: 2.6, Spec: 0.0, normal interrupt
->=20
-> AM37x-evm: (ES1.2) Revision: 2.6, Spec: 0.0, normal interrupt
-> OMAP3630-beag-xm (ES1.2): Revision: 2.6, Spec: 0.0, normal interrupt
->=20
-> am335x-evm:(ES1.0): Revision: 3.1, Spec: 0.1, normal interrupt
-> am335x-sk: (ES2.1): Revision: 3.1, Spec: 0.1, normal interrupt
-> am335x-beaglebone-black:(ES2.0): Revision: 3.1, Spec: 0.1, normal
-> interrupt
->=20
-> sdp4430.txt: (ES2.2): Revision: 3.1, Spec: 0.1, normal interrupt
->=20
-> OMAP4460-panda-es (ES1.1): Revision: 3.1, Spec: 0.1, normal interrupt
->=20
-> OMAP5uevm:(ES2.0): Revision: 3.3, Spec: 0.2, normal interrupt
-> dra7-evm (es1.1): Revision: 3.3, Spec: 0.2, normal interrupt
->=20
->=20
-> OMAP3430-ldp seems to be the only one impacted with module revision
-> 2.6 -> so using revision information is not really helpful here. Hence
-> the usage of a flag in dt attribute to indicate hardware impacted by
-> erratum.
 
-alright, that's too bad. Seems like revision in this module isn't very
-useful :-(
+>>> At the moment host drivers uses mmc_regulator_get_supply(), which
+>>> fetches regulators called "vmmc" and "vqmmc". It is also common to
+>>> have these defined in DT like "vmmc-supply". This has not been
+>>> properly documented for most host cases, and we should fix that. I
+>>> also think it would make sense to include these in the documentation
+>>> for the common mmc bindings, instead of host specific bindings.
+>>
+>> Hm, I had been of the impression that the vmmc stuff is to control
+>> power/voltage on the signal lines, not for external card power. Still, even in
+>> that case there's need for the reset line handling and clock control.
+>
+> vmmc: the power to the card.
+> vqmmc: the I/O voltage levels (for the signal lines).
 
---=20
-balbi
+Ah, ok. So vmmc seems like it's the same then. I'll try to get some
+cycles to look at it today.
 
---U2mKMzaWgYxzMy3/
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1
+> Regarding reset, I agree, those seems to be needed.
+>
+> Regarding clock control. I suppose you are referring to separate
+> external clocks, not affecting the SDIO/SD/MMC interface speed!?
+>
+> That could make sense, but still I wonder how those shall be handled
+> in a fine grained power management setup. In other words, when shall
+> those be gated/ungated? Is the mmc core able to take the correct
+> decision about these?
 
-iQIcBAEBAgAGBQJS3rb9AAoJEIaOsuA1yqREMNQP+wS3w/GDoF7wWzNiiN0cd3om
-QEIXQzVbegQTPZ4A1eOX1BhR5NJHU9040e0WicTMaHwSoW0OrxLufp6Kq8dLvwn9
-07Vli+l7qhBKhdWanMuaMwgt77AC56N4/TZy5RNWv66HXLsCUGtaEzrcv4fYMUor
-Hscxctejdm9HAVU/ZpJKju1cXtea85gVCRdzaEU6fHt5xfmag6++vpuu2asopkru
-618OKGh5vMWco7H1S44Rwn7F1EuxA1xv5wGJ8kGd/KKLfLZ8iJP42P9QQ+XBW6nf
-NmBVb6omPRPNCgDT5LH+45meqdUNGhF4xkEoNDVnP3paJdgzndagVc0FwEAiHIhL
-dXWq+J7UUgxtaLyR+0zZtzerfNvIpnly8NvVYFZDDyLylYI0hvOpswmKcxPAlUpy
-bzXdS+ixmIf6qw+U44SqDIvUvY6Fe8G6YEsfbWawCqPdtgtdfHU59BL31y5V25zt
-chX60CImNvcPODgexy+FUJN38FVxbwP6CfcFq85Q13u/bXgmL1sVeWS8xevnkMjv
-gX57yV4zzYkTa2gsHyVAMlhJli5AtkKCwxKZWVqEITkJCRUyuV0Mqmz5vsupgrmY
-KIPzhyrQ82cQSbyI5YP9l7U4EWjY1cW/eY4xVFr062ttsRqgx8DgzbMK1cPX1sMz
-KpJjDJ/nZIe5moqj629t
-=7mFc
------END PGP SIGNATURE-----
+The reference clock is in most cases I've seen 32kHz, and not
+something that's under fine-grained power management. So it's not used
+to regulate interface speed, etc.
 
---U2mKMzaWgYxzMy3/--
+
+-Olof
