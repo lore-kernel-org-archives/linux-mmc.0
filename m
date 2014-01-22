@@ -1,16 +1,16 @@
 From: Chris Ruehl <chris.ruehl@gtsys.com.hk>
 Subject: Re: [PATCH] mxcmmc: Internal error: Oops: 17 [#1] ARM from sg->offset
-Date: Wed, 22 Jan 2014 15:47:24 +0800
-Message-ID: <52DF778C.108@gtsys.com.hk>
+Date: Wed, 22 Jan 2014 16:32:16 +0800
+Message-ID: <52DF8210.4010400@gtsys.com.hk>
 References: <1390365159-29239-1-git-send-email-chris.ruehl@gtsys.com.hk> <20140122064231.GZ16215@pengutronix.de> <52DF7114.9070609@gtsys.com.hk> <20140122072358.GE16215@pengutronix.de>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail.fpasia.hk ([202.130.89.98]:55010 "EHLO fpa01n0.fpasia.hk"
+Received: from mail.fpasia.hk ([202.130.89.98]:52098 "EHLO fpa01n0.fpasia.hk"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750781AbaAVHpy (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 22 Jan 2014 02:45:54 -0500
+	id S1750850AbaAVIaq (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 22 Jan 2014 03:30:46 -0500
 In-Reply-To: <20140122072358.GE16215@pengutronix.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
@@ -42,6 +42,7 @@ On Wednesday, January 22, 2014 03:23 PM, Sascha Hauer wrote:
 >> before - In an earlier post
 >> I ask for help but no-one returned so I quick fixed it.  Maybe now
 >> the bell is loud enough ;-)
+>
 > Please try to track it further down. Does this happen every time you are
 > in this function or does it happen only every once in a while? Does it
 > happen in the first iteration of the loop? is it an SDIO card or regular
@@ -49,14 +50,18 @@ On Wednesday, January 22, 2014 03:23 PM, Sascha Hauer wrote:
 >
 > Sascha
 >
-Its happened once in a while unexpected. I used a Kingston MicroSD HC 
-Class 4
-4/8GB and Samsung HC Class 10 16GB.
-I was not able to debug it online, my boards are mounted in RFID reader. 
-All I had was
-the OOPS in the Serial output. After it happen I cannot access the board 
-any more - doomed
+
+I add this temporarily to see where the loop counter is
+   else {
+       if (!sg) {
+             dev_err(mmc_dev(host->mmc),
+                  "%s: bad sg, loop:%d len:%d \n",
+                   i, data->sg_len
+                   __func__,
+               );
+       }
+   }
+
+we will see.
 
 Chris
-
-
