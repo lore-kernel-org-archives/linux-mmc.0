@@ -1,236 +1,123 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 04/10] mmc: core: Fixup busy detection for mmc switch operations
-Date: Thu, 23 Jan 2014 15:11:23 +0100
-Message-ID: <CAPDyKFqKSEPPTnXo=TA3LrW_BCHYma8BvAaYd+Ovgg_QsnV-Xg@mail.gmail.com>
+Subject: Re: [PATCH 06/10] mmc: core: Respect host's max_busy_timeout when
+ sending sleep cmd
+Date: Thu, 23 Jan 2014 15:26:50 +0100
+Message-ID: <CAPDyKFqDZjyY+=mO_qMY-Bo=Kpq5Ls7mvH20E+pWmGtAw+YAXA@mail.gmail.com>
 References: <1390402824-9850-1-git-send-email-ulf.hansson@linaro.org>
-	<1390402824-9850-5-git-send-email-ulf.hansson@linaro.org>
-	<52E0EA96.4030702@intel.com>
+	<1390402824-9850-7-git-send-email-ulf.hansson@linaro.org>
+	<52E0EDAA.7040703@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qa0-f53.google.com ([209.85.216.53]:52072 "EHLO
-	mail-qa0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752826AbaAWOLZ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 23 Jan 2014 09:11:25 -0500
-Received: by mail-qa0-f53.google.com with SMTP id cm18so2185636qab.26
-        for <linux-mmc@vger.kernel.org>; Thu, 23 Jan 2014 06:11:24 -0800 (PST)
-In-Reply-To: <52E0EA96.4030702@intel.com>
+Received: from mail-qa0-f46.google.com ([209.85.216.46]:49996 "EHLO
+	mail-qa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753250AbaAWO0w (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 23 Jan 2014 09:26:52 -0500
+Received: by mail-qa0-f46.google.com with SMTP id ii20so2234855qab.33
+        for <linux-mmc@vger.kernel.org>; Thu, 23 Jan 2014 06:26:51 -0800 (PST)
+In-Reply-To: <52E0EDAA.7040703@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Adrian Hunter <adrian.hunter@intel.com>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Dong Aisheng <b29396@freescale.com>, Stephen Warren <swarren@nvidia.com>, Vladimir Zapolskiy <vladimir_zapolskiy@mentor.com>
 
-On 23 January 2014 11:10, Adrian Hunter <adrian.hunter@intel.com> wrote:
+On 23 January 2014 11:23, Adrian Hunter <adrian.hunter@intel.com> wrote:
 > On 22/01/14 17:00, Ulf Hansson wrote:
->> If the host controller supports busy detection in HW, we expect the
->> MMC_CAP_WAIT_WHILE_BUSY to be set. Likewise the corresponding
->> host->max_busy_timeout shall reflect the maximum busy detection timeout
->> supported by the host. A timeout set to zero, is interpreted as the
->> host supports whatever timeout the mmc core provides it with.
+>> When sending the sleep command for host drivers supporting
+>> MMC_CAP_WAIT_WHILE_BUSY, we need to confirm that max_busy_timeout is
+>> big enough comparing to the sleep timeout specified from card's
+>> EXT_CSD. If this isn't case, we use a R1 response instead of R1B and
+>> fallback to use a delay instead.
 >>
->> Previously we expected a host that supported MMC_CAP_WAIT_WHILE_BUSY to
->> cope with any timeout, which just isn't feasible due to HW limitations.
->>
->> For most switch operations, R1B responses are expected and thus we need
->> to check for busy detection completion. To cope with cases where the
->> requested busy detection timeout is greater than what the host are able
->> to support, we fallback to use a R1 response instead. This will prevent
->> the host from doing HW busy detection.
->>
->> In those cases busy detection completion is handled by polling the for
->> the card's status using CMD13, which is the same mechanism used when
->> the host doesn't support MMC_CAP_WAIT_WHILE_BUSY.
+>> Do note that a max_busy_timeout set to zero by the host, is interpreted
+>> as it can cope with whatever timeout the mmc core provides it with.
 >>
 >> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 >> ---
->>  drivers/mmc/core/mmc_ops.c |   53 ++++++++++++++++++++++++++++++--------------
->>  1 file changed, 36 insertions(+), 17 deletions(-)
+>>  drivers/mmc/core/mmc.c |   19 ++++++++++++++++---
+>>  1 file changed, 16 insertions(+), 3 deletions(-)
 >>
->> diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
->> index 5e1a2cb..2e0cccb 100644
->> --- a/drivers/mmc/core/mmc_ops.c
->> +++ b/drivers/mmc/core/mmc_ops.c
->> @@ -413,13 +413,31 @@ int __mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
->>               unsigned int timeout_ms, bool use_busy_signal, bool send_status,
->>               bool ignore_crc)
+>> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+>> index 897fdd1..32e1546 100644
+>> --- a/drivers/mmc/core/mmc.c
+>> +++ b/drivers/mmc/core/mmc.c
+>> @@ -1359,6 +1359,8 @@ static int mmc_sleep(struct mmc_host *host)
 >>  {
->> +     struct mmc_host *host;
->
-> It would be nicer if the addition of 'host' was a separate patch.  You
-> should remove the unnecessary BUG_ONs (it will oops anyway) at the same
-> time and then just do:
->
->         struct mmc_host *host = card->host;
-
-Sure, make sense!
-
->
->>       int err;
 >>       struct mmc_command cmd = {0};
->>       unsigned long timeout;
+>>       struct mmc_card *card = host->card;
+>> +     unsigned int timeout_ms = DIV_ROUND_UP(card->ext_csd.sa_timeout, 10000);
 >> +     unsigned int max_busy_timeout;
->>       u32 status = 0;
->> +     bool use_r1b_resp = true;
->
-> This is a little confusing.  Why not:
->
->         bool use_r1b_resp = use_busy_signal;
->
-> Although 'use_busy_signal' actually means 'wait_while_busy'.
-
-Right, that should simplify code a bit. I will update in a v2.
-
->
+>>       int err;
 >>
->>       BUG_ON(!card);
->>       BUG_ON(!card->host);
->> +     host = card->host;
->> +
->> +     /* Once all callers provides a timeout, remove this fallback. */
->> +     if (!timeout_ms)
->> +             timeout_ms = MMC_OPS_TIMEOUT_MS;
->
-> A timeout of zero does not mean a very long timeout.  It means an unknown timeout.
-
-I guess this is a matter of definition.
-
-For those hosts that don't have a hw timeout, but maybe implements a
-software timeout, I thought this was more convenient. We likely then
-also need to define a "MAX_BUSY_TIMEOUT", which host drivers could
-use.
-
-Additionally, since as of today only sdhci specifies the
-max_discard_to (renamed to max_busy_timeout), I thought it make sense
-to not force other hosts to specify the timeout to keep the existing
-behaviour.
-
->
->> +
+>>       if (host->caps2 & MMC_CAP2_NO_SLEEP_CMD)
+>> @@ -1372,7 +1374,18 @@ static int mmc_sleep(struct mmc_host *host)
+>>       cmd.arg = card->rca << 16;
+>>       cmd.arg |= 1 << 15;
+>>
+>> -     cmd.flags = MMC_RSP_R1B | MMC_CMD_AC;
 >> +     /* We interpret unspecified timeouts as the host can cope with all. */
 >> +     max_busy_timeout = host->max_busy_timeout ?
 >> +                     host->max_busy_timeout : timeout_ms;
 >> +
->> +     if (use_busy_signal && (host->caps & MMC_CAP_WAIT_WHILE_BUSY) &&
->> +             (timeout_ms > max_busy_timeout))
->> +                     use_r1b_resp = false;
->> +     else if (!use_busy_signal)
->> +             use_r1b_resp = false;
->
-> Why not just check what you know:
->
->         if (timeout_ms && host->max_busy_timeout && timeout_ms > host->max_busy_timeout)
->                 use_r1b_resp = false;
->
-
-I wanted to maintain the R1B response for hosts that don't support
-MMC_CAP_WAIT_WHILE_BUSY. With your proposal this will not be done.
-
-Given this a second thought. I think it would make sense to adapt to
-your proposal. I will update in v2.
-
->>
->>       cmd.opcode = MMC_SWITCH;
->>       cmd.arg = (MMC_SWITCH_MODE_WRITE_BYTE << 24) |
->> @@ -427,17 +445,25 @@ int __mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
->>                 (value << 8) |
->>                 set;
->>       cmd.flags = MMC_CMD_AC;
->> -     if (use_busy_signal)
->> +     if (use_r1b_resp)
->>               cmd.flags |= MMC_RSP_SPI_R1B | MMC_RSP_R1B;
->>       else
->>               cmd.flags |= MMC_RSP_SPI_R1 | MMC_RSP_R1;
->>
->> +     if ((host->caps & MMC_CAP_WAIT_WHILE_BUSY) && use_r1b_resp) {
->> +             /* Tell the host what busy detection timeout to use. */
+>> +     if ((host->caps & MMC_CAP_WAIT_WHILE_BUSY) &&
+>> +             (timeout_ms <= max_busy_timeout)) {
+>> +             cmd.flags = MMC_RSP_R1B | MMC_CMD_AC;
 >> +             cmd.busy_timeout = timeout_ms;
->> +             /*
->> +              * CRC errors shall only be ignored in cases were CMD13 is used
->> +              * to poll to detect busy completion.
->> +              */
->> +             ignore_crc = false;
+>> +     } else {
+>> +             cmd.flags = MMC_RSP_R1 | MMC_CMD_AC;
 >> +     }
->>
->> -     cmd.busy_timeout = timeout_ms;
 >
-> The busy_timeout should be provided for R1B i.e. this should be:
+> I do not see why this is related to MMC_CAP_WAIT_WHILE_BUSY.
+> Why not just:
+
+Before I do any update, we need to decide what host->max_busy_timeout
+of zero means. Please see the response in the other patch in this
+patchset.
+
+I see that my patch for the mmc_switch function, maintain the R1B for
+host not supporting MMC_CAP_WAIT_WHILE_BUSY, but this one for sleep
+doesn't. :-) We should align the behaviour.
+
+
 >
->         if (use_r1b_resp)
+>         if (host->max_busy_timeout && timeout_ms > host->max_busy_timeout) {
+>                 cmd.flags = MMC_RSP_R1 | MMC_CMD_AC;
+>         } else {
+>                 cmd.flags = MMC_RSP_R1B | MMC_CMD_AC;
 >                 cmd.busy_timeout = timeout_ms;
+>         }
+
+So here your suggestion will mean you would like to keep R1B for hosts
+not supporting MMC_CAP_WAIT_WHILE_BUSY. This opposite of what you
+proposed for the mmc_switch. :-)
+
+I suggest that we only use R1B when the host are able to handle busy
+detection in hw. If you think that is bad idea, please let me know.
+
 >
-
-Will fix in v2, given you still think this is good approach according
-to my comment just above.
-
->>       if (index == EXT_CSD_SANITIZE_START)
->>               cmd.sanitize_busy = true;
->>
->> -     err = mmc_wait_for_cmd(card->host, &cmd, MMC_CMD_RETRIES);
->> +     err = mmc_wait_for_cmd(host, &cmd, MMC_CMD_RETRIES);
+>> +
+>>       err = mmc_wait_for_cmd(host, &cmd, 0);
 >>       if (err)
 >>               return err;
->>
->> @@ -445,24 +471,17 @@ int __mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
->>       if (!use_busy_signal)
->>               return 0;
->>
->> -     /*
->> -      * CRC errors shall only be ignored in cases were CMD13 is used to poll
->> -      * to detect busy completion.
->> -      */
->> -     if (card->host->caps & MMC_CAP_WAIT_WHILE_BUSY)
->> -             ignore_crc = false;
->> -
->>       /* Must check status to be sure of no errors. */
->> -     timeout = jiffies + msecs_to_jiffies(MMC_OPS_TIMEOUT_MS);
+>> @@ -1383,8 +1396,8 @@ static int mmc_sleep(struct mmc_host *host)
+>>        * SEND_STATUS command to poll the status because that command (and most
+>>        * others) is invalid while the card sleeps.
+>>        */
+>> -     if (!(host->caps & MMC_CAP_WAIT_WHILE_BUSY))
+>> -             mmc_delay(DIV_ROUND_UP(card->ext_csd.sa_timeout, 10000));
+>> +     if (!cmd.busy_timeout)
+>> +             mmc_delay(timeout_ms);
 >
-> This is the place to set the default timeout for the loop.
+> And this becomes:
 >
->         if (!timeout_ms)
->                 timeout_ms = MMC_OPS_TIMEOUT_MS
+>         if (!cmd.busy_timeout || !(host->caps & MMC_CAP_WAIT_WHILE_BUSY))
+>                 mmc_delay(timeout_ms);
 >
->> +     timeout = jiffies + msecs_to_jiffies(timeout_ms);
->>       do {
->>               if (send_status) {
->>                       err = __mmc_send_status(card, &status, ignore_crc);
->>                       if (err)
->>                               return err;
->>               }
->> -             if (card->host->caps & MMC_CAP_WAIT_WHILE_BUSY)
->> +             if ((host->caps & MMC_CAP_WAIT_WHILE_BUSY) && use_r1b_resp)
->>                       break;
->> -             if (mmc_host_is_spi(card->host))
->> +             if (mmc_host_is_spi(host))
->>                       break;
 >>
->>               /*
->> @@ -478,18 +497,18 @@ int __mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
->>               /* Timeout if the device never leaves the program state. */
->>               if (time_after(jiffies, timeout)) {
->>                       pr_err("%s: Card stuck in programming state! %s\n",
->> -                             mmc_hostname(card->host), __func__);
->> +                             mmc_hostname(host), __func__);
->>                       return -ETIMEDOUT;
->>               }
->>       } while (R1_CURRENT_STATE(status) == R1_STATE_PRG);
->>
->> -     if (mmc_host_is_spi(card->host)) {
->> +     if (mmc_host_is_spi(host)) {
->>               if (status & R1_SPI_ILLEGAL_COMMAND)
->>                       return -EBADMSG;
->>       } else {
->>               if (status & 0xFDFFA000)
->> -                     pr_warning("%s: unexpected status %#x after "
->> -                            "switch", mmc_hostname(card->host), status);
->> +                     pr_warn("%s: unexpected status %#x after switch\n",
->> +                             mmc_hostname(host), status);
->>               if (status & R1_SWITCH_ERROR)
->>                       return -EBADMSG;
->>       }
+>>       return err;
+>>  }
 >>
 >
-
-Adrian, thanks for reviewing!
 
 Kind regards
 Uffe
