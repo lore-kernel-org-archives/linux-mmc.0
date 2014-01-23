@@ -1,99 +1,217 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH 08/10] mmc: card: Use R1 response for the stop cmd at
- recovery path
-Date: Thu, 23 Jan 2014 16:29:33 +0200
-Message-ID: <52E1274D.3050200@intel.com>
-References: <1390402824-9850-1-git-send-email-ulf.hansson@linaro.org> <1390402824-9850-9-git-send-email-ulf.hansson@linaro.org> <52E0EA70.9010308@intel.com> <CAPDyKFpB4CUqzLsDE1NyGuWX4nMLRL7HwtPpcKp82vP1VGhJmg@mail.gmail.com>
+From: "Wang, Yalin" <Yalin.Wang@sonymobile.com>
+Subject: RE: FW: bug fix for mmc  queue.c
+Date: Thu, 23 Jan 2014 22:34:00 +0800
+Message-ID: <35FD53F367049845BC99AC72306C23D1023A478B1AF3@CNBJMBX05.corpusers.net>
+References: <35FD53F367049845BC99AC72306C23D1023A478B1AF0@CNBJMBX05.corpusers.net>
+ <20140123140049.GB2355@mudshark.cambridge.arm.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga02.intel.com ([134.134.136.20]:26376 "EHLO mga02.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752353AbaAWO17 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 23 Jan 2014 09:27:59 -0500
-In-Reply-To: <CAPDyKFpB4CUqzLsDE1NyGuWX4nMLRL7HwtPpcKp82vP1VGhJmg@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20140123140049.GB2355@mudshark.cambridge.arm.com>
+Content-Language: en-US
+Sender: linux-kernel-owner@vger.kernel.org
+To: 'Will Deacon' <will.deacon@arm.com>
+Cc: "'linux-mmc@vger.kernel.org'" <linux-mmc@vger.kernel.org>, "'cjb@laptop.org'" <cjb@laptop.org>, "'tgih.jun@samsung.com'" <tgih.jun@samsung.com>, "'kdorfman@codeaurora.org'" <kdorfman@codeaurora.org>, "'linux-kernel@vger.kernel.org'" <linux-kernel@vger.kernel.org>"'kdorfman@codeaurora.org'" <kdorfman@codeaurora.org>, "'linkinjeon@gmail.com'" <linkinjeon@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Dong Aisheng <b29396@freescale.com>, Stephen Warren <swarren@nvidia.com>, Vladimir Zapolskiy <vladimir_zapolskiy@mentor.com>
 
-On 23/01/14 15:21, Ulf Hansson wrote:
-> On 23 January 2014 11:09, Adrian Hunter <adrian.hunter@intel.com> wrote:
->> On 22/01/14 17:00, Ulf Hansson wrote:
->>> Hosts supporting MMC_CAP_WAIT_WHILE_BUSY shall not be waiting for busy
->>> detection completion in the recovery path, which were the case when
->>> using R1B response.
->>>
->>> Start using R1 as response instead to align behavior, no matter if
->>> MMC_CAP_WAIT_WHILE_BUSY is supported or not.
->>
->> This does not make sense to me.  If you are sending a STOP command you
->> should use the correct response type.  R1B should be OK here because the
->> card should release the busy signal in any case except failure.
-> 
-> For those hosts not supporting MMC_CAP_WAIT_WHILE_BUSY a R1B is
-> assumed to be treated same as an R1, which means there are no busy
-> detection handled in the host.
+Hi  Will,
 
-That is not entirely true.  For hosts that do not set
-MMC_CAP_WAIT_WHILE_BUSY we don't know if they wait or not.  I imagine most
-do because it is more efficient, but the kernel has always been programmed
-to poll the status anyway so you can't tell from the code.
+Wow ,  Thank you very much for your kindly help to me .
+I think the suggestions you mentioned are very very important and useful to me ,
+I am really a freshman in Linux Opensource Community .
 
-MMC_CAP_WAIT_WHILE_BUSY was one of my inventions I am afraid.  If I recall
-correctly it was mainly due to the SLEEP command because you can't poll in
-that case and you don't want to delay the system from sleeping - if you are
-certain that the controller has waited for busy to de-assert (i.e.
-MMC_CAP_WAIT_WHILE_BUSY) then you can exit immediately.
+As for the patch ,
+The reason why use PAGE_SIZE to decide to use vmalloc or kmalloc is that
+If the request size is more than a PAGE_SIZE, use vmalloc will be more efficient and will
+Not must use physical continuous memory .
+  
+Kmalloc is more useful for small objects allocation .
+I just refer to this function to use like this:
 
-> 
-> mmc_blk_cmd_recovery() is the only caller of the send_stop() function.
-> Additionally it does not care about to handle busy detection with
-> CDM13 polling.
-> 
-> Now, since most hosts don't support MMC_CAP_WAIT_WHILE_BUSY which
-> means there no busy detection done, I wanted to align to this
-> behaviour - no matter if the host can do HW busy detection or not.
-> 
-> I am not saying this is how it must be done, just trying to provide
-> you with some more reasons to why I wanted to change.
-> 
-> If we instead decide keep the R1B for send_stop(), we should implement
-> CMD 13 polling to meet the same behaviour for hosts not supporting
-> MMC_CAP_WAIT_WHILE_BUSY. In this scenario, we need to set a select a
-> busy timeout, do you have any suggestion of what would be a reasonable
-> value for it?
+struct xt_table_info *xt_alloc_table_info(unsigned int size) 
+{
+	...
+}
 
-It is hard to tell if waiting is ever going to help more than hinder, so I
-would not change this.
 
-> 
-> Kind regards
-> Ulf Hansson
-> 
->>
->>>
->>> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
->>> ---
->>>  drivers/mmc/card/block.c |    2 +-
->>>  1 file changed, 1 insertion(+), 1 deletion(-)
->>>
->>> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
->>> index 87cd2b0..74169fa 100644
->>> --- a/drivers/mmc/card/block.c
->>> +++ b/drivers/mmc/card/block.c
->>> @@ -728,7 +728,7 @@ static int send_stop(struct mmc_card *card, u32 *status)
->>>       int err;
->>>
->>>       cmd.opcode = MMC_STOP_TRANSMISSION;
->>> -     cmd.flags = MMC_RSP_SPI_R1B | MMC_RSP_R1B | MMC_CMD_AC;
->>> +     cmd.flags = MMC_RSP_SPI_R1 | MMC_RSP_R1 | MMC_CMD_AC;
->>>       err = mmc_wait_for_cmd(card->host, &cmd, 5);
->>>       if (err == 0)
->>>               *status = cmd.resp[0];
->>>
->>
-> 
-> 
+The vmalloc used here are just used for allocating struct scatterlist objects,
+These objects are just used by software to manage physical pages,
+They will not be used by DMA, so I think it is safe to use vmalloc if possible .
 
+Sometimes this allocation will fail, if we need allocate lots of scatterlist objects:
+
+mmc1: new high speed SD card at address 1234
+kworker/u:29: page allocation failure: order:5, mode:0x40d0
+[<c010c514>] (unwind_backtrace+0x0/0x11c) from [<c0217e78>] (warn_alloc_failed+0x104/0x130)
+[<c0217e78>] (warn_alloc_failed+0x104/0x130) from [<c021b39c>] (__alloc_pages_nodemask+0x7d4/0x8f4)
+[<c021b39c>] (__alloc_pages_nodemask+0x7d4/0x8f4) from [<c021b510>] (__get_free_pages+0x10/0x24)
+[<c021b510>] (__get_free_pages+0x10/0x24) from [<c0246630>] (kmalloc_order_trace+0x20/0xe0)
+[<c0246630>] (kmalloc_order_trace+0x20/0xe0) from [<c0249550>] (__kmalloc+0x30/0x270)
+[<c0249550>] (__kmalloc+0x30/0x270) from [<c061cdbc>] (mmc_alloc_sg+0x18/0x40)
+[<c061cdbc>] (mmc_alloc_sg+0x18/0x40) from [<c061d524>] (mmc_init_queue+0x418/0x4fc)
+[<c061d524>] (mmc_init_queue+0x418/0x4fc) from [<c06195a0>] (mmc_blk_alloc_req+0x18c/0x3d0)
+[<c06195a0>] (mmc_blk_alloc_req+0x18c/0x3d0) from [<c061b2a8>] (mmc_blk_probe+0x74/0x2c0)
+[<c061b2a8>] (mmc_blk_probe+0x74/0x2c0) from [<c060d68c>] (mmc_bus_probe+0x14/0x18)
+[<c060d68c>] (mmc_bus_probe+0x14/0x18) from [<c045a928>] (driver_probe_device+0x134/0x334)
+[<c045a928>] (driver_probe_device+0x134/0x334) from [<c0458e0c>] (bus_for_each_drv+0x48/0x8c)
+[<c0458e0c>] (bus_for_each_drv+0x48/0x8c) from [<c045a77c>] (device_attach+0x7c/0xa0)
+[<c045a77c>] (device_attach+0x7c/0xa0) from [<c0459ca0>] (bus_probe_device+0x28/0x98)
+[<c0459ca0>] (bus_probe_device+0x28/0x98) from [<c04583f0>] (device_add+0x3f4/0x5a8)
+[<c04583f0>] (device_add+0x3f4/0x5a8) from [<c060dd7c>] (mmc_add_card+0x1f0/0x2e8)
+[<c060dd7c>] (mmc_add_card+0x1f0/0x2e8) from [<c0613990>] (mmc_attach_sd+0x234/0x278)
+[<c0613990>] (mmc_attach_sd+0x234/0x278) from [<c060cab8>] (mmc_rescan+0x24c/0x2cc)
+[<c060cab8>] (mmc_rescan+0x24c/0x2cc) from [<c01a2a40>] (process_one_work+0x200/0x400)
+[<c01a2a40>] (process_one_work+0x200/0x400) from [<c01a2df0>] (worker_thread+0x184/0x2a4)
+[<c01a2df0>] (worker_thread+0x184/0x2a4) from [<c01a74ac>] (kthread+0x80/0x90)
+[<c01a74ac>] (kthread+0x80/0x90) from [<c0106aec>] (kernel_thread_exit+0x0/0x8)
+
+In this case, it will allocate 32*4kB = 128KB for scatterlist allocation and failed,
+Especially on platforms which has memory less than 1GB .
+
+I Add the patch here in case someone need to see it :
+
+------------------------------------------->
+
+diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
+index cef1a41..839b506 100644
+--- a/drivers/mmc/card/queue.c
++++ b/drivers/mmc/card/queue.c
+@@ -15,6 +15,7 @@
+ #include <linux/freezer.h>
+ #include <linux/kthread.h>
+ #include <linux/scatterlist.h>
++#include <linux/vmalloc.h>
+ 
+ #include <linux/mmc/card.h>
+ #include <linux/mmc/host.h>
+@@ -198,8 +199,13 @@ static void mmc_urgent_request(struct request_queue *q)
+ static struct scatterlist *mmc_alloc_sg(int sg_len, int *err)
+ {
+ 	struct scatterlist *sg;
++	size_t size = sizeof(struct scatterlist)*sg_len;
++
++	if (size >= PAGE_SIZE)
++		sg = vmalloc(size);
++	else
++		sg = kmalloc(size, GFP_KERNEL);
+ 
+-	sg = kmalloc(sizeof(struct scatterlist)*sg_len, GFP_KERNEL);
+ 	if (!sg)
+ 		*err = -ENOMEM;
+ 	else {
+@@ -210,6 +216,14 @@ static struct scatterlist *mmc_alloc_sg(int sg_len, int *err)
+ 	return sg;
+ }
+ 
++static void mmc_alloc_free(const void *addr)
++{
++	if (is_vmalloc_addr(addr))
++		vfree(addr);
++	else
++		kfree(addr);
++}
++
+ static void mmc_queue_setup_discard(struct request_queue *q,
+ 				    struct mmc_card *card)
+ {
+@@ -397,20 +411,20 @@ success:
+ 
+ 	return 0;
+  free_bounce_sg:
+-	kfree(mqrq_cur->bounce_sg);
++	mmc_alloc_free(mqrq_cur->bounce_sg);
+ 	mqrq_cur->bounce_sg = NULL;
+-	kfree(mqrq_prev->bounce_sg);
++	mmc_alloc_free(mqrq_prev->bounce_sg);
+ 	mqrq_prev->bounce_sg = NULL;
+ 
+  cleanup_queue:
+-	kfree(mqrq_cur->sg);
++	mmc_alloc_free(mqrq_cur->sg);
+ 	mqrq_cur->sg = NULL;
+-	kfree(mqrq_cur->bounce_buf);
++	mmc_alloc_free(mqrq_cur->bounce_buf);
+ 	mqrq_cur->bounce_buf = NULL;
+ 
+-	kfree(mqrq_prev->sg);
++	mmc_alloc_free(mqrq_prev->sg);
+ 	mqrq_prev->sg = NULL;
+-	kfree(mqrq_prev->bounce_buf);
++	mmc_alloc_free(mqrq_prev->bounce_buf);
+ 	mqrq_prev->bounce_buf = NULL;
+ 
+ 	blk_cleanup_queue(mq->queue);
+@@ -436,22 +450,22 @@ void mmc_cleanup_queue(struct mmc_queue *mq)
+ 	blk_start_queue(q);
+ 	spin_unlock_irqrestore(q->queue_lock, flags);
+ 
+-	kfree(mqrq_cur->bounce_sg);
++	mmc_alloc_free(mqrq_cur->bounce_sg);
+ 	mqrq_cur->bounce_sg = NULL;
+ 
+-	kfree(mqrq_cur->sg);
++	mmc_alloc_free(mqrq_cur->sg);
+ 	mqrq_cur->sg = NULL;
+ 
+-	kfree(mqrq_cur->bounce_buf);
++	mmc_alloc_free(mqrq_cur->bounce_buf);
+ 	mqrq_cur->bounce_buf = NULL;
+ 
+-	kfree(mqrq_prev->bounce_sg);
++	mmc_alloc_free(mqrq_prev->bounce_sg);
+ 	mqrq_prev->bounce_sg = NULL;
+ 
+-	kfree(mqrq_prev->sg);
++	mmc_alloc_free(mqrq_prev->sg);
+ 	mqrq_prev->sg = NULL;
+ 
+-	kfree(mqrq_prev->bounce_buf);
++	mmc_alloc_free(mqrq_prev->bounce_buf);
+ 	mqrq_prev->bounce_buf = NULL;
+ 
+ 	mq->card = NULL;
+
+--------------------------------------->
+
+
+-----Original Message-----
+From: Will Deacon [mailto:will.deacon@arm.com] 
+Sent: Thursday, January 23, 2014 10:01 PM
+To: Wang, Yalin
+Subject: Re: FW: bug fix for mmc queue.c
+
+On Thu, Jan 23, 2014 at 08:14:56AM +0000, Wang, Yalin wrote:
+> Hi  Will,
+
+Hello,
+
+> I am not sure if you have received this mail, I have send it to linux 
+> mail list , But seems no one reply to me ,
+
+Hmm, I didn't see the mail, but you could do a few things in future to make it more likely that people will reply:
+
+  (1) Make sure you put the maintainers on CC. For example:
+
+    $ ./scripts/get_maintainer.pl < /tmp/patch.diff
+    Chris Ball <cjb@laptop.org> (maintainer:MULTIMEDIA CARD (...,commit_signer:7/8=88%)
+    Seungwon Jeon <tgih.jun@samsung.com> (commit_signer:6/8=75%)
+    Konstantin Dorfman <kdorfman@codeaurora.org> (commit_signer:4/8=50%)
+    Maya Erez <merez@codeaurora.org> (commit_signer:2/8=25%)
+    Namjae Jeon <linkinjeon@gmail.com> (commit_signer:1/8=12%)
+    linux-mmc@vger.kernel.org (open list:MULTIMEDIA CARD (...)
+    linux-kernel@vger.kernel.org (open list)
+
+  (2) Make sure your lines are wrapped at 80 chars in your email.
+
+  (3) Don't include your patch as an attachment. Instead, include it inline
+      after the email. (You can add a --->8 symbol to mark the end of the
+      email and the start of the patch).
+
+As for your patch, MMC isn't my area of expertise but I immediately have a few questions:
+
+  - Why is PAGE_SIZE the right limit to decide between kmalloc and vmalloc?
+  - vmalloc doesn't return physically-contiguous pages. Is this always safe
+    for the sg DMA (can you have segments bigger than a page?).
+
+Will
