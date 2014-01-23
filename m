@@ -1,124 +1,53 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 1/7] mmc: clarify DDR timing mode between SD-UHS and eMMC
-Date: Thu, 23 Jan 2014 10:06:46 +0100
-Message-ID: <CAPDyKFoNErg1hPM=P-RFLtOFd2CCGVd-1wae_iBKC1B22TuWHw@mail.gmail.com>
-References: <1383653403-10049-1-git-send-email-ulf.hansson@linaro.org>
-	<001f01cf11fb$93d188c0$bb749a40$%jun@samsung.com>
-	<CAPDyKFpzxoMJYhWWsnnJdHRbHd3+efTyz5PMtoqDtBa2O3pkeg@mail.gmail.com>
-	<CAPDyKFoeHNmcVTtcR6cVvb3SY0LqjE2nyC+vPBOEVOshNcUswQ@mail.gmail.com>
-	<001201cf1593$82b7c090$882741b0$%jun@samsung.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH 08/10] mmc: card: Use R1 response for the stop cmd at
+ recovery path
+Date: Thu, 23 Jan 2014 12:09:52 +0200
+Message-ID: <52E0EA70.9010308@intel.com>
+References: <1390402824-9850-1-git-send-email-ulf.hansson@linaro.org> <1390402824-9850-9-git-send-email-ulf.hansson@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qa0-f42.google.com ([209.85.216.42]:49746 "EHLO
-	mail-qa0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751790AbaAWJGr (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 23 Jan 2014 04:06:47 -0500
-Received: by mail-qa0-f42.google.com with SMTP id k4so1897755qaq.29
-        for <linux-mmc@vger.kernel.org>; Thu, 23 Jan 2014 01:06:46 -0800 (PST)
-In-Reply-To: <001201cf1593$82b7c090$882741b0$%jun@samsung.com>
+Received: from mga09.intel.com ([134.134.136.24]:1626 "EHLO mga09.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751993AbaAWKIT (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 23 Jan 2014 05:08:19 -0500
+In-Reply-To: <1390402824-9850-9-git-send-email-ulf.hansson@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Seungwon Jeon <tgih.jun@samsung.com>
-Cc: Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org, Chris Ball <chris@printf.net>, Dong Aisheng <b29396@freescale.com>, Stephen Warren <swarren@nvidia.com>, Vladimir Zapolskiy <vladimir_zapolskiy@mentor.com>
 
-On 20 January 2014 04:55, Seungwon Jeon <tgih.jun@samsung.com> wrote:
-> Hi Ulf,
->
-> On Sat, January 18, 2014, Ulf Hansson wrote:
->> On 16 January 2014 11:50, Ulf Hansson <ulf.hansson@linaro.org> wrote:
->> > On 15 January 2014 15:10, Seungwon Jeon <tgih.jun@samsung.com> wrote:
->> >> This change distinguishes DDR timing mode of current
->> >> mixed usage to clarify device type.
->> >>
->> >> Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
->> >
->> > Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
->> >
->> >> ---
->> >>  drivers/mmc/core/debugfs.c |    3 +++
->> >>  drivers/mmc/core/mmc.c     |    2 +-
->> >>  include/linux/mmc/host.h   |    3 ++-
->> >>  3 files changed, 6 insertions(+), 2 deletions(-)
->> >>
->> >> diff --git a/drivers/mmc/core/debugfs.c b/drivers/mmc/core/debugfs.c
->> >> index 54829c0..509229b 100644
->> >> --- a/drivers/mmc/core/debugfs.c
->> >> +++ b/drivers/mmc/core/debugfs.c
->> >> @@ -135,6 +135,9 @@ static int mmc_ios_show(struct seq_file *s, void *data)
->> >>         case MMC_TIMING_UHS_DDR50:
->> >>                 str = "sd uhs DDR50";
->> >>                 break;
->> >> +       case MMC_TIMING_MMC_DDR52:
->> >> +               str = "mmc DDR52";
->>
->> Just a minor thought. In the eMMC spec there are no such thing as
->> DDR52 mode. Only DDR is mentioned, should we maybe change to
->> "MMC_TIMING_MMC_DDR" to better reflect the spec?
-> In eMMC spec, DDR mode for high speed is up to 52MHz unlike SD.
-> Actually DDR52 is appeared in spec. And it helps to ensure the meaning.
-> Also, for distinguishing from HS200's DDR mode(HS400), it would be not bad to keep it.
-> It makes sense?
->
+On 22/01/14 17:00, Ulf Hansson wrote:
+> Hosts supporting MMC_CAP_WAIT_WHILE_BUSY shall not be waiting for busy
+> detection completion in the recovery path, which were the case when
+> using R1B response.
+> 
+> Start using R1 as response instead to align behavior, no matter if
+> MMC_CAP_WAIT_WHILE_BUSY is supported or not.
 
-Diving a bit deeper into the eMMC spec 5.0.
+This does not make sense to me.  If you are sending a STOP command you
+should use the correct response type.  R1B should be OK here because the
+card should release the busy signal in any case except failure.
 
-DDR52 is mentioned, you are correct, but it is not listed as a bus
-speed mode. Have a look at chapter 5.3.2 Bus Speed Modes, there you
-find the more correct name. "High Speed DDR".
+> 
+> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+> ---
+>  drivers/mmc/card/block.c |    2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+> 
+> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+> index 87cd2b0..74169fa 100644
+> --- a/drivers/mmc/card/block.c
+> +++ b/drivers/mmc/card/block.c
+> @@ -728,7 +728,7 @@ static int send_stop(struct mmc_card *card, u32 *status)
+>  	int err;
+>  
+>  	cmd.opcode = MMC_STOP_TRANSMISSION;
+> -	cmd.flags = MMC_RSP_SPI_R1B | MMC_RSP_R1B | MMC_CMD_AC;
+> +	cmd.flags = MMC_RSP_SPI_R1 | MMC_RSP_R1 | MMC_CMD_AC;
+>  	err = mmc_wait_for_cmd(card->host, &cmd, 5);
+>  	if (err == 0)
+>  		*status = cmd.resp[0];
+> 
 
-"High Speed" indicates the interface can run up to 52 MHz. So maybe
-the most proper name for this would be "MMC_TIMING_MMC_HS_DDR"? Still
-I have no strong opinion, so if you favor MMC_TIMING_MMC_DDR52, I am
-fine with it.
-
-Kind regards
-Ulf Hansson
-
-> Thanks,
-> Seungwon Jeon
->
->>
->> Kind regards
->> Ulf Hansson
->>
->> >> +               break;
->> >>         case MMC_TIMING_MMC_HS200:
->> >>                 str = "mmc high-speed SDR200";
->> >>                 break;
->> >> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
->> >> index 98e9eb0..6d91ff7 100644
->> >> --- a/drivers/mmc/core/mmc.c
->> >> +++ b/drivers/mmc/core/mmc.c
->> >> @@ -1261,7 +1261,7 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
->> >>                                         goto err;
->> >>                         }
->> >>                         mmc_card_set_ddr_mode(card);
->> >> -                       mmc_set_timing(card->host, MMC_TIMING_UHS_DDR50);
->> >> +                       mmc_set_timing(card->host, MMC_TIMING_MMC_DDR52);
->> >>                         mmc_set_bus_width(card->host, bus_width);
->> >>                 }
->> >>         }
->> >> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
->> >> index 99f5709..87b1f4f 100644
->> >> --- a/include/linux/mmc/host.h
->> >> +++ b/include/linux/mmc/host.h
->> >> @@ -58,7 +58,8 @@ struct mmc_ios {
->> >>  #define MMC_TIMING_UHS_SDR50   5
->> >>  #define MMC_TIMING_UHS_SDR104  6
->> >>  #define MMC_TIMING_UHS_DDR50   7
->> >> -#define MMC_TIMING_MMC_HS200   8
->> >> +#define MMC_TIMING_MMC_DDR52   8
->> >> +#define MMC_TIMING_MMC_HS200   9
->> >>
->> >>  #define MMC_SDR_MODE           0
->> >>  #define MMC_1_2V_DDR_MODE      1
->> >> --
->> >> 1.7.0.4
->> >>
->> >>
->> --
->> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
