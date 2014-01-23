@@ -1,65 +1,124 @@
-From: Chris Ruehl <chris.ruehl@gtsys.com.hk>
-Subject: Re: [PATCH] mxcmmc: Internal error: Oops: 17 [#1] ARM from sg->offset
-Date: Thu, 23 Jan 2014 17:01:49 +0800
-Message-ID: <52E0DA7D.7060309@gtsys.com.hk>
-References: <1390365159-29239-1-git-send-email-chris.ruehl@gtsys.com.hk> <20140122064231.GZ16215@pengutronix.de> <52DF7114.9070609@gtsys.com.hk> <20140122072358.GE16215@pengutronix.de>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH 1/7] mmc: clarify DDR timing mode between SD-UHS and eMMC
+Date: Thu, 23 Jan 2014 10:06:46 +0100
+Message-ID: <CAPDyKFoNErg1hPM=P-RFLtOFd2CCGVd-1wae_iBKC1B22TuWHw@mail.gmail.com>
+References: <1383653403-10049-1-git-send-email-ulf.hansson@linaro.org>
+	<001f01cf11fb$93d188c0$bb749a40$%jun@samsung.com>
+	<CAPDyKFpzxoMJYhWWsnnJdHRbHd3+efTyz5PMtoqDtBa2O3pkeg@mail.gmail.com>
+	<CAPDyKFoeHNmcVTtcR6cVvb3SY0LqjE2nyC+vPBOEVOshNcUswQ@mail.gmail.com>
+	<001201cf1593$82b7c090$882741b0$%jun@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail.fpasia.hk ([202.130.89.98]:42163 "EHLO fpa01n0.fpasia.hk"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751686AbaAWJAU (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 23 Jan 2014 04:00:20 -0500
-In-Reply-To: <20140122072358.GE16215@pengutronix.de>
+Received: from mail-qa0-f42.google.com ([209.85.216.42]:49746 "EHLO
+	mail-qa0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751790AbaAWJGr (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 23 Jan 2014 04:06:47 -0500
+Received: by mail-qa0-f42.google.com with SMTP id k4so1897755qaq.29
+        for <linux-mmc@vger.kernel.org>; Thu, 23 Jan 2014 01:06:46 -0800 (PST)
+In-Reply-To: <001201cf1593$82b7c090$882741b0$%jun@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Sascha Hauer <s.hauer@pengutronix.de>
-Cc: mpa@pengutronix.de, linux-mmc@vger.kernel.org, linux-arm@lists.infradead.org
+To: Seungwon Jeon <tgih.jun@samsung.com>
+Cc: Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>
 
-On Wednesday, January 22, 2014 03:23 PM, Sascha Hauer wrote:
-> On Wed, Jan 22, 2014 at 03:19:48PM +0800, Chris Ruehl wrote:
->> On Wednesday, January 22, 2014 02:42 PM, Sascha Hauer wrote:
->>> On Wed, Jan 22, 2014 at 12:32:39PM +0800, Chris Ruehl wrote:
->>>> Function mxcmci_request() throw an exception on a imx27 cpu.
->>>> This patch fix the problem by test the pointer before access it.
->>>>
->>>> diff --git a/drivers/mmc/host/mxcmmc.c b/drivers/mmc/host/mxcmmc.c
->>>> index f7199c8..8645d6a 100644
->>>> --- a/drivers/mmc/host/mxcmmc.c
->>>> +++ b/drivers/mmc/host/mxcmmc.c
->>>> @@ -347,7 +347,7 @@ static int mxcmci_setup_data(struct mxcmci_host *host, struct mmc_data *data)
->>>>   		return 0;
->>>>   	for_each_sg(data->sg, sg, data->sg_len, i) {
->>>> -		if (sg->offset & 3 || sg->length & 3 || sg->length < 512) {
->>>> +		if (sg && (sg->offset & 3 || sg->length & 3 || sg->length < 512)) {
->>> The question is why sg is NULL. I think this shouldn't happen.
->>>
->>> Sascha
->>>
->> Thats was my idea too. But had no time to debug it out.
->> As for_each_sg() iterate over the sg-list may its not set properly
->> before - In an earlier post
->> I ask for help but no-one returned so I quick fixed it.  Maybe now
->> the bell is loud enough ;-)
-> Please try to track it further down. Does this happen every time you are
-> in this function or does it happen only every once in a while? Does it
-> happen in the first iteration of the loop? is it an SDIO card or regular
-> SD card?
+On 20 January 2014 04:55, Seungwon Jeon <tgih.jun@samsung.com> wrote:
+> Hi Ulf,
 >
-> Sascha
+> On Sat, January 18, 2014, Ulf Hansson wrote:
+>> On 16 January 2014 11:50, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>> > On 15 January 2014 15:10, Seungwon Jeon <tgih.jun@samsung.com> wrote:
+>> >> This change distinguishes DDR timing mode of current
+>> >> mixed usage to clarify device type.
+>> >>
+>> >> Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
+>> >
+>> > Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
+>> >
+>> >> ---
+>> >>  drivers/mmc/core/debugfs.c |    3 +++
+>> >>  drivers/mmc/core/mmc.c     |    2 +-
+>> >>  include/linux/mmc/host.h   |    3 ++-
+>> >>  3 files changed, 6 insertions(+), 2 deletions(-)
+>> >>
+>> >> diff --git a/drivers/mmc/core/debugfs.c b/drivers/mmc/core/debugfs.c
+>> >> index 54829c0..509229b 100644
+>> >> --- a/drivers/mmc/core/debugfs.c
+>> >> +++ b/drivers/mmc/core/debugfs.c
+>> >> @@ -135,6 +135,9 @@ static int mmc_ios_show(struct seq_file *s, void *data)
+>> >>         case MMC_TIMING_UHS_DDR50:
+>> >>                 str = "sd uhs DDR50";
+>> >>                 break;
+>> >> +       case MMC_TIMING_MMC_DDR52:
+>> >> +               str = "mmc DDR52";
+>>
+>> Just a minor thought. In the eMMC spec there are no such thing as
+>> DDR52 mode. Only DDR is mentioned, should we maybe change to
+>> "MMC_TIMING_MMC_DDR" to better reflect the spec?
+> In eMMC spec, DDR mode for high speed is up to 52MHz unlike SD.
+> Actually DDR52 is appeared in spec. And it helps to ensure the meaning.
+> Also, for distinguishing from HS200's DDR mode(HS400), it would be not bad to keep it.
+> It makes sense?
 >
-Sascha,
 
-there was a fix for a race condition:
+Diving a bit deeper into the eMMC spec 5.0.
 
-commit 70aa6109597ea6955a93f16430b588b5ee5ba547
-mmc: mxcmmc: fix race conditions for host->req and host->data access
+DDR52 is mentioned, you are correct, but it is not listed as a bus
+speed mode. Have a look at chapter 5.3.2 Bus Speed Modes, there you
+find the more correct name. "High Speed DDR".
 
-do you think its possible that the current oops is kind of race?
+"High Speed" indicates the interface can run up to 52 MHz. So maybe
+the most proper name for this would be "MMC_TIMING_MMC_HS_DDR"? Still
+I have no strong opinion, so if you favor MMC_TIMING_MMC_DDR52, I am
+fine with it.
 
+Kind regards
+Ulf Hansson
 
-Regards
-Chris
-
-
+> Thanks,
+> Seungwon Jeon
+>
+>>
+>> Kind regards
+>> Ulf Hansson
+>>
+>> >> +               break;
+>> >>         case MMC_TIMING_MMC_HS200:
+>> >>                 str = "mmc high-speed SDR200";
+>> >>                 break;
+>> >> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+>> >> index 98e9eb0..6d91ff7 100644
+>> >> --- a/drivers/mmc/core/mmc.c
+>> >> +++ b/drivers/mmc/core/mmc.c
+>> >> @@ -1261,7 +1261,7 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+>> >>                                         goto err;
+>> >>                         }
+>> >>                         mmc_card_set_ddr_mode(card);
+>> >> -                       mmc_set_timing(card->host, MMC_TIMING_UHS_DDR50);
+>> >> +                       mmc_set_timing(card->host, MMC_TIMING_MMC_DDR52);
+>> >>                         mmc_set_bus_width(card->host, bus_width);
+>> >>                 }
+>> >>         }
+>> >> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+>> >> index 99f5709..87b1f4f 100644
+>> >> --- a/include/linux/mmc/host.h
+>> >> +++ b/include/linux/mmc/host.h
+>> >> @@ -58,7 +58,8 @@ struct mmc_ios {
+>> >>  #define MMC_TIMING_UHS_SDR50   5
+>> >>  #define MMC_TIMING_UHS_SDR104  6
+>> >>  #define MMC_TIMING_UHS_DDR50   7
+>> >> -#define MMC_TIMING_MMC_HS200   8
+>> >> +#define MMC_TIMING_MMC_DDR52   8
+>> >> +#define MMC_TIMING_MMC_HS200   9
+>> >>
+>> >>  #define MMC_SDR_MODE           0
+>> >>  #define MMC_1_2V_DDR_MODE      1
+>> >> --
+>> >> 1.7.0.4
+>> >>
+>> >>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
