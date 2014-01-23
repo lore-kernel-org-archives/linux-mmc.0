@@ -1,109 +1,82 @@
-From: Philippe De Muyter <phdm@macqel.be>
-Subject: [PATCH] mmc: sdhci: Remove useless string-split's
-Date: Thu, 23 Jan 2014 11:55:56 +0100
-Message-ID: <1390474556-4157-1-git-send-email-phdm@macqel.be>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH 08/10] mmc: card: Use R1 response for the stop cmd at
+ recovery path
+Date: Thu, 23 Jan 2014 14:21:34 +0100
+Message-ID: <CAPDyKFpB4CUqzLsDE1NyGuWX4nMLRL7HwtPpcKp82vP1VGhJmg@mail.gmail.com>
+References: <1390402824-9850-1-git-send-email-ulf.hansson@linaro.org>
+	<1390402824-9850-9-git-send-email-ulf.hansson@linaro.org>
+	<52E0EA70.9010308@intel.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp2.macqel.be ([109.135.2.61]:60369 "EHLO smtp2.macqel.be"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751650AbaAWK4n (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 23 Jan 2014 05:56:43 -0500
+Received: from mail-qa0-f46.google.com ([209.85.216.46]:46450 "EHLO
+	mail-qa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751935AbaAWNVe (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 23 Jan 2014 08:21:34 -0500
+Received: by mail-qa0-f46.google.com with SMTP id ii20so2087662qab.5
+        for <linux-mmc@vger.kernel.org>; Thu, 23 Jan 2014 05:21:34 -0800 (PST)
+In-Reply-To: <52E0EA70.9010308@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: cjb@laptop.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc: Philippe De Muyter <phdm@macqel.be>
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Dong Aisheng <b29396@freescale.com>, Stephen Warren <swarren@nvidia.com>, Vladimir Zapolskiy <vladimir_zapolskiy@mentor.com>
 
-Some error or warning messages that appear on one line in the kernel
-log are split on two lines in sdhci.c although they are not too long
-to fit on one 80-characters line.
-This impairs grep'ping for them, so unsplit them.
+On 23 January 2014 11:09, Adrian Hunter <adrian.hunter@intel.com> wrote:
+> On 22/01/14 17:00, Ulf Hansson wrote:
+>> Hosts supporting MMC_CAP_WAIT_WHILE_BUSY shall not be waiting for busy
+>> detection completion in the recovery path, which were the case when
+>> using R1B response.
+>>
+>> Start using R1 as response instead to align behavior, no matter if
+>> MMC_CAP_WAIT_WHILE_BUSY is supported or not.
+>
+> This does not make sense to me.  If you are sending a STOP command you
+> should use the correct response type.  R1B should be OK here because the
+> card should release the busy signal in any case except failure.
 
-Signed-off-by: Philippe De Muyter <phdm@macqel.be>
----
- drivers/mmc/host/sdhci.c |   29 ++++++++++++++---------------
- 1 files changed, 14 insertions(+), 15 deletions(-)
+For those hosts not supporting MMC_CAP_WAIT_WHILE_BUSY a R1B is
+assumed to be treated same as an R1, which means there are no busy
+detection handled in the host.
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index bd8a098..9aa6483 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -1226,8 +1226,8 @@ clock_set:
- 	while (!((clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL))
- 		& SDHCI_CLOCK_INT_STABLE)) {
- 		if (timeout == 0) {
--			pr_err("%s: Internal clock never "
--				"stabilised.\n", mmc_hostname(host->mmc));
-+			pr_err("%s: Internal clock never stabilised.\n",
-+				mmc_hostname(host->mmc));
- 			sdhci_dumpregs(host);
- 			return;
- 		}
-@@ -1993,9 +1993,8 @@ static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
- 		err = -EIO;
- 	} else {
- 		if (!(ctrl & SDHCI_CTRL_TUNED_CLK)) {
--			pr_info(DRIVER_NAME ": Tuning procedure"
--				" failed, falling back to fixed sampling"
--				" clock\n");
-+			pr_info(DRIVER_NAME ": Tuning procedure failed,"
-+				" falling back to fixed sampling clock\n");
- 			err = -EIO;
- 		}
- 	}
-@@ -2192,8 +2191,8 @@ static void sdhci_timeout_timer(unsigned long data)
- 	spin_lock_irqsave(&host->lock, flags);
- 
- 	if (host->mrq) {
--		pr_err("%s: Timeout waiting for hardware "
--			"interrupt.\n", mmc_hostname(host->mmc));
-+		pr_err("%s: Timeout waiting for hardware interrupt.\n",
-+			mmc_hostname(host->mmc));
- 		sdhci_dumpregs(host);
- 
- 		if (host->data) {
-@@ -2825,8 +2824,8 @@ int sdhci_add_host(struct sdhci_host *host)
- 	if (host->flags & (SDHCI_USE_SDMA | SDHCI_USE_ADMA)) {
- 		if (host->ops->enable_dma) {
- 			if (host->ops->enable_dma(host)) {
--				pr_warning("%s: No suitable DMA "
--					"available. Falling back to PIO.\n",
-+				pr_warn("%s: No suitable DMA available."
-+					" Falling back to PIO.\n",
- 					mmc_hostname(mmc));
- 				host->flags &=
- 					~(SDHCI_USE_SDMA | SDHCI_USE_ADMA);
-@@ -2845,8 +2844,8 @@ int sdhci_add_host(struct sdhci_host *host)
- 		if (!host->adma_desc || !host->align_buffer) {
- 			kfree(host->adma_desc);
- 			kfree(host->align_buffer);
--			pr_warning("%s: Unable to allocate ADMA "
--				"buffers. Falling back to standard DMA.\n",
-+			pr_warn("%s: Unable to allocate ADMA buffers."
-+				" Falling back to standard DMA.\n",
- 				mmc_hostname(mmc));
- 			host->flags &= ~SDHCI_USE_ADMA;
- 		}
-@@ -3138,8 +3137,8 @@ int sdhci_add_host(struct sdhci_host *host)
- 		mmc->ocr_avail_mmc &= host->ocr_avail_mmc;
- 
- 	if (mmc->ocr_avail == 0) {
--		pr_err("%s: Hardware doesn't report any "
--			"support voltages.\n", mmc_hostname(mmc));
-+		pr_err("%s: Hardware doesn't report any support voltages.\n",
-+			mmc_hostname(mmc));
- 		return -ENODEV;
- 	}
- 
-@@ -3286,8 +3285,8 @@ void sdhci_remove_host(struct sdhci_host *host, int dead)
- 		host->flags |= SDHCI_DEVICE_DEAD;
- 
- 		if (host->mrq) {
--			pr_err("%s: Controller removed during "
--				" transfer!\n", mmc_hostname(host->mmc));
-+			pr_err("%s: Controller removed during transfer!\n",
-+				mmc_hostname(host->mmc));
- 
- 			host->mrq->cmd->error = -ENOMEDIUM;
- 			tasklet_schedule(&host->finish_tasklet);
--- 
-1.7.5.3
+mmc_blk_cmd_recovery() is the only caller of the send_stop() function.
+Additionally it does not care about to handle busy detection with
+CDM13 polling.
 
+Now, since most hosts don't support MMC_CAP_WAIT_WHILE_BUSY which
+means there no busy detection done, I wanted to align to this
+behaviour - no matter if the host can do HW busy detection or not.
+
+I am not saying this is how it must be done, just trying to provide
+you with some more reasons to why I wanted to change.
+
+If we instead decide keep the R1B for send_stop(), we should implement
+CMD 13 polling to meet the same behaviour for hosts not supporting
+MMC_CAP_WAIT_WHILE_BUSY. In this scenario, we need to set a select a
+busy timeout, do you have any suggestion of what would be a reasonable
+value for it?
+
+Kind regards
+Ulf Hansson
+
+>
+>>
+>> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+>> ---
+>>  drivers/mmc/card/block.c |    2 +-
+>>  1 file changed, 1 insertion(+), 1 deletion(-)
+>>
+>> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+>> index 87cd2b0..74169fa 100644
+>> --- a/drivers/mmc/card/block.c
+>> +++ b/drivers/mmc/card/block.c
+>> @@ -728,7 +728,7 @@ static int send_stop(struct mmc_card *card, u32 *status)
+>>       int err;
+>>
+>>       cmd.opcode = MMC_STOP_TRANSMISSION;
+>> -     cmd.flags = MMC_RSP_SPI_R1B | MMC_RSP_R1B | MMC_CMD_AC;
+>> +     cmd.flags = MMC_RSP_SPI_R1 | MMC_RSP_R1 | MMC_CMD_AC;
+>>       err = mmc_wait_for_cmd(card->host, &cmd, 5);
+>>       if (err == 0)
+>>               *status = cmd.resp[0];
+>>
+>
