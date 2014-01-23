@@ -1,55 +1,40 @@
 From: Grant Grundler <grundler@chromium.org>
 Subject: Re: [PATCH] mmc-utils: add eMMC 5.0 FFU support
-Date: Thu, 23 Jan 2014 11:20:46 -0800
-Message-ID: <CANEJEGvpr3TB4PyfSOViy1D6avZQuKL7Km0DhnA5BiXDkYPV1w@mail.gmail.com>
+Date: Thu, 23 Jan 2014 11:26:54 -0800
+Message-ID: <CANEJEGsE1N=zzCDODz+4xUNZf3Ti9_FOthe8b+SM+5qv9fh2LQ@mail.gmail.com>
 References: <1390501260-8730-1-git-send-email-grundler@chromium.org>
-	<86ob321qw0.fsf@void.printf.net>
+	<86k3dq1qqx.fsf@void.printf.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-oa0-f43.google.com ([209.85.219.43]:58586 "EHLO
-	mail-oa0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751594AbaAWTUr (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 23 Jan 2014 14:20:47 -0500
-Received: by mail-oa0-f43.google.com with SMTP id h16so2642540oag.16
-        for <linux-mmc@vger.kernel.org>; Thu, 23 Jan 2014 11:20:47 -0800 (PST)
-In-Reply-To: <86ob321qw0.fsf@void.printf.net>
+Received: from mail-oa0-f50.google.com ([209.85.219.50]:64132 "EHLO
+	mail-oa0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754294AbaAWT0z (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 23 Jan 2014 14:26:55 -0500
+Received: by mail-oa0-f50.google.com with SMTP id n16so2694555oag.9
+        for <linux-mmc@vger.kernel.org>; Thu, 23 Jan 2014 11:26:55 -0800 (PST)
+In-Reply-To: <86k3dq1qqx.fsf@void.printf.net>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Chris Ball <chris@printf.net>
 Cc: Grant Grundler <grundler@chromium.org>, linux-mmc <linux-mmc@vger.kernel.org>, Puthikorn Voravootivat <puthik@chromium.org>, Gwendal Grignou <gwendal@chromium.org>
 
-On Thu, Jan 23, 2014 at 10:42 AM, Chris Ball <chris@printf.net> wrote:
-> Hi Grant,
+On Thu, Jan 23, 2014 at 10:45 AM, Chris Ball <chris@printf.net> wrote:
+> Hi,
 >
 > On Thu, Jan 23 2014, Grant Grundler wrote:
->> --- a/Makefile
->> +++ b/Makefile
->> @@ -1,7 +1,7 @@
->>  CC ?= gcc
->>  AM_CFLAGS = -D_FILE_OFFSET_BITS=64 -D_FORTIFY_SOURCE=2
->>  CFLAGS ?= -g -O2
->> -objects = mmc.o mmc_cmds.o
->> +objects = mmc.o mmc_cmds.o mmc_cmds-emmc5.o
->>
->>  CHECKFLAGS = -Wall -Werror -Wuninitialized -Wundef
->>
->> @@ -44,7 +44,7 @@ clean:
->>       $(MAKE) -C man clean
+>> +     cid[13] = 0;    /* make sure string is NULL terminated */
 >
-> The patch looks good, but doesn't apply because "$(MAKE) -C man clean"
-> does not exist in mainline mmc-utils and never has.  Could you check
-> for local patches (and ideally push them up to me too)?
+> Ah, and if you're respinning the patch anyway, would you object to
+> using '\0' here?  Just a style preference, either way is okay.
 
-Thanks Chris!
+Hi Chris!
+Adjusting the coding style is no problem. But I'd prefer to wait a day
+or two before respinning this patch.
 
-Yes - we have a  local Makefile patch. Do you mind pulling it directly
-from our git repo since this is independent of the FFU support
-changes?
-
-You can directly pull into a local branch/review with:
-    git fetch https://chromium.googlesource.com/chromiumos/third_party/mmc-utils
-refs/changes/21/179621/2 && git cherry-pick FETCH_HEAD
+I want to see if anyone can commit to testing this code first.
+Prodding people off-list now that the patch is posted and I can point
+them at this forum.
 
 cheers,
 grant
