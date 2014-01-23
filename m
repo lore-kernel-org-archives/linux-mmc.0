@@ -1,98 +1,109 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH 06/10] mmc: core: Respect host's max_busy_timeout when
- sending sleep cmd
-Date: Thu, 23 Jan 2014 12:23:38 +0200
-Message-ID: <52E0EDAA.7040703@intel.com>
-References: <1390402824-9850-1-git-send-email-ulf.hansson@linaro.org> <1390402824-9850-7-git-send-email-ulf.hansson@linaro.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+From: Philippe De Muyter <phdm@macqel.be>
+Subject: [PATCH] mmc: sdhci: Remove useless string-split's
+Date: Thu, 23 Jan 2014 11:55:56 +0100
+Message-ID: <1390474556-4157-1-git-send-email-phdm@macqel.be>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga01.intel.com ([192.55.52.88]:11468 "EHLO mga01.intel.com"
+Received: from smtp2.macqel.be ([109.135.2.61]:60369 "EHLO smtp2.macqel.be"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753055AbaAWKWG (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 23 Jan 2014 05:22:06 -0500
-In-Reply-To: <1390402824-9850-7-git-send-email-ulf.hansson@linaro.org>
+	id S1751650AbaAWK4n (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 23 Jan 2014 05:56:43 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org, Chris Ball <chris@printf.net>, Dong Aisheng <b29396@freescale.com>, Stephen Warren <swarren@nvidia.com>, Vladimir Zapolskiy <vladimir_zapolskiy@mentor.com>
+To: cjb@laptop.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc: Philippe De Muyter <phdm@macqel.be>
 
-On 22/01/14 17:00, Ulf Hansson wrote:
-> When sending the sleep command for host drivers supporting
-> MMC_CAP_WAIT_WHILE_BUSY, we need to confirm that max_busy_timeout is
-> big enough comparing to the sleep timeout specified from card's
-> EXT_CSD. If this isn't case, we use a R1 response instead of R1B and
-> fallback to use a delay instead.
-> 
-> Do note that a max_busy_timeout set to zero by the host, is interpreted
-> as it can cope with whatever timeout the mmc core provides it with.
-> 
-> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
-> ---
->  drivers/mmc/core/mmc.c |   19 ++++++++++++++++---
->  1 file changed, 16 insertions(+), 3 deletions(-)
-> 
-> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-> index 897fdd1..32e1546 100644
-> --- a/drivers/mmc/core/mmc.c
-> +++ b/drivers/mmc/core/mmc.c
-> @@ -1359,6 +1359,8 @@ static int mmc_sleep(struct mmc_host *host)
->  {
->  	struct mmc_command cmd = {0};
->  	struct mmc_card *card = host->card;
-> +	unsigned int timeout_ms = DIV_ROUND_UP(card->ext_csd.sa_timeout, 10000);
-> +	unsigned int max_busy_timeout;
->  	int err;
->  
->  	if (host->caps2 & MMC_CAP2_NO_SLEEP_CMD)
-> @@ -1372,7 +1374,18 @@ static int mmc_sleep(struct mmc_host *host)
->  	cmd.arg = card->rca << 16;
->  	cmd.arg |= 1 << 15;
->  
-> -	cmd.flags = MMC_RSP_R1B | MMC_CMD_AC;
-> +	/* We interpret unspecified timeouts as the host can cope with all. */
-> +	max_busy_timeout = host->max_busy_timeout ?
-> +			host->max_busy_timeout : timeout_ms;
-> +
-> +	if ((host->caps & MMC_CAP_WAIT_WHILE_BUSY) &&
-> +		(timeout_ms <= max_busy_timeout)) {
-> +		cmd.flags = MMC_RSP_R1B | MMC_CMD_AC;
-> +		cmd.busy_timeout = timeout_ms;
-> +	} else {
-> +		cmd.flags = MMC_RSP_R1 | MMC_CMD_AC;
-> +	}
+Some error or warning messages that appear on one line in the kernel
+log are split on two lines in sdhci.c although they are not too long
+to fit on one 80-characters line.
+This impairs grep'ping for them, so unsplit them.
 
-I do not see why this is related to MMC_CAP_WAIT_WHILE_BUSY.
-Why not just:
+Signed-off-by: Philippe De Muyter <phdm@macqel.be>
+---
+ drivers/mmc/host/sdhci.c |   29 ++++++++++++++---------------
+ 1 files changed, 14 insertions(+), 15 deletions(-)
 
-	if (host->max_busy_timeout && timeout_ms > host->max_busy_timeout) {
-		cmd.flags = MMC_RSP_R1 | MMC_CMD_AC;
-	} else {
-		cmd.flags = MMC_RSP_R1B | MMC_CMD_AC;
-		cmd.busy_timeout = timeout_ms;
-	}
-
-> +
->  	err = mmc_wait_for_cmd(host, &cmd, 0);
->  	if (err)
->  		return err;
-> @@ -1383,8 +1396,8 @@ static int mmc_sleep(struct mmc_host *host)
->  	 * SEND_STATUS command to poll the status because that command (and most
->  	 * others) is invalid while the card sleeps.
->  	 */
-> -	if (!(host->caps & MMC_CAP_WAIT_WHILE_BUSY))
-> -		mmc_delay(DIV_ROUND_UP(card->ext_csd.sa_timeout, 10000));
-> +	if (!cmd.busy_timeout)
-> +		mmc_delay(timeout_ms);
-
-And this becomes:
-
-	if (!cmd.busy_timeout || !(host->caps & MMC_CAP_WAIT_WHILE_BUSY))
-		mmc_delay(timeout_ms);
-
->  
->  	return err;
->  }
-> 
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index bd8a098..9aa6483 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -1226,8 +1226,8 @@ clock_set:
+ 	while (!((clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL))
+ 		& SDHCI_CLOCK_INT_STABLE)) {
+ 		if (timeout == 0) {
+-			pr_err("%s: Internal clock never "
+-				"stabilised.\n", mmc_hostname(host->mmc));
++			pr_err("%s: Internal clock never stabilised.\n",
++				mmc_hostname(host->mmc));
+ 			sdhci_dumpregs(host);
+ 			return;
+ 		}
+@@ -1993,9 +1993,8 @@ static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
+ 		err = -EIO;
+ 	} else {
+ 		if (!(ctrl & SDHCI_CTRL_TUNED_CLK)) {
+-			pr_info(DRIVER_NAME ": Tuning procedure"
+-				" failed, falling back to fixed sampling"
+-				" clock\n");
++			pr_info(DRIVER_NAME ": Tuning procedure failed,"
++				" falling back to fixed sampling clock\n");
+ 			err = -EIO;
+ 		}
+ 	}
+@@ -2192,8 +2191,8 @@ static void sdhci_timeout_timer(unsigned long data)
+ 	spin_lock_irqsave(&host->lock, flags);
+ 
+ 	if (host->mrq) {
+-		pr_err("%s: Timeout waiting for hardware "
+-			"interrupt.\n", mmc_hostname(host->mmc));
++		pr_err("%s: Timeout waiting for hardware interrupt.\n",
++			mmc_hostname(host->mmc));
+ 		sdhci_dumpregs(host);
+ 
+ 		if (host->data) {
+@@ -2825,8 +2824,8 @@ int sdhci_add_host(struct sdhci_host *host)
+ 	if (host->flags & (SDHCI_USE_SDMA | SDHCI_USE_ADMA)) {
+ 		if (host->ops->enable_dma) {
+ 			if (host->ops->enable_dma(host)) {
+-				pr_warning("%s: No suitable DMA "
+-					"available. Falling back to PIO.\n",
++				pr_warn("%s: No suitable DMA available."
++					" Falling back to PIO.\n",
+ 					mmc_hostname(mmc));
+ 				host->flags &=
+ 					~(SDHCI_USE_SDMA | SDHCI_USE_ADMA);
+@@ -2845,8 +2844,8 @@ int sdhci_add_host(struct sdhci_host *host)
+ 		if (!host->adma_desc || !host->align_buffer) {
+ 			kfree(host->adma_desc);
+ 			kfree(host->align_buffer);
+-			pr_warning("%s: Unable to allocate ADMA "
+-				"buffers. Falling back to standard DMA.\n",
++			pr_warn("%s: Unable to allocate ADMA buffers."
++				" Falling back to standard DMA.\n",
+ 				mmc_hostname(mmc));
+ 			host->flags &= ~SDHCI_USE_ADMA;
+ 		}
+@@ -3138,8 +3137,8 @@ int sdhci_add_host(struct sdhci_host *host)
+ 		mmc->ocr_avail_mmc &= host->ocr_avail_mmc;
+ 
+ 	if (mmc->ocr_avail == 0) {
+-		pr_err("%s: Hardware doesn't report any "
+-			"support voltages.\n", mmc_hostname(mmc));
++		pr_err("%s: Hardware doesn't report any support voltages.\n",
++			mmc_hostname(mmc));
+ 		return -ENODEV;
+ 	}
+ 
+@@ -3286,8 +3285,8 @@ void sdhci_remove_host(struct sdhci_host *host, int dead)
+ 		host->flags |= SDHCI_DEVICE_DEAD;
+ 
+ 		if (host->mrq) {
+-			pr_err("%s: Controller removed during "
+-				" transfer!\n", mmc_hostname(host->mmc));
++			pr_err("%s: Controller removed during transfer!\n",
++				mmc_hostname(host->mmc));
+ 
+ 			host->mrq->cmd->error = -ENOMEDIUM;
+ 			tasklet_schedule(&host->finish_tasklet);
+-- 
+1.7.5.3
 
