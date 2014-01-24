@@ -1,73 +1,76 @@
-From: John Tobias <john.tobias.ph@gmail.com>
-Subject: Re: iMX6SL Suspend mode (S3)
-Date: Fri, 24 Jan 2014 13:31:58 -0800
-Message-ID: <CACUGKYNmCn_PGq1bX_rLA1veaZN21RMx+tG4=tfVk7hjQGR-ig@mail.gmail.com>
-References: <CACUGKYMxozVYUZ1neX9iRqRoaTCTOOY8VV92UAtcwUa_1f0XSw@mail.gmail.com>
-	<20140124212410.GH15937@n2100.arm.linux.org.uk>
+From: Sascha Hauer <s.hauer@pengutronix.de>
+Subject: Re: [PATCH] mxcmmc: Internal error: Oops: 17 [#1] ARM from sg->offset
+Date: Fri, 24 Jan 2014 22:52:50 +0100
+Message-ID: <20140124215249.GK16215@pengutronix.de>
+References: <1390365159-29239-1-git-send-email-chris.ruehl@gtsys.com.hk>
+ <20140122064231.GZ16215@pengutronix.de>
+ <52DF7114.9070609@gtsys.com.hk>
+ <20140122072358.GE16215@pengutronix.de>
+ <52E0DA7D.7060309@gtsys.com.hk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-la0-f42.google.com ([209.85.215.42]:39147 "EHLO
-	mail-la0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752608AbaAXVcA (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 24 Jan 2014 16:32:00 -0500
-Received: by mail-la0-f42.google.com with SMTP id hr13so3024128lab.1
-        for <linux-mmc@vger.kernel.org>; Fri, 24 Jan 2014 13:31:58 -0800 (PST)
-In-Reply-To: <20140124212410.GH15937@n2100.arm.linux.org.uk>
+Received: from metis.ext.pengutronix.de ([92.198.50.35]:33602 "EHLO
+	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751633AbaAXVwy (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 24 Jan 2014 16:52:54 -0500
+Content-Disposition: inline
+In-Reply-To: <52E0DA7D.7060309@gtsys.com.hk>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Cc: "<linux-arm-kernel@lists.infradead.org>" <linux-arm-kernel@lists.infradead.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Fabio Estevam <festevam@gmail.com>, "Anson.Huang@freescale.com" <Anson.Huang@freescale.com>, Dong Aisheng <b29396@freescale.com>
+To: Chris Ruehl <chris.ruehl@gtsys.com.hk>
+Cc: mpa@pengutronix.de, linux-mmc@vger.kernel.org, linux-arm@lists.infradead.org
 
-Thanks Russell. Got it working.
+On Thu, Jan 23, 2014 at 05:01:49PM +0800, Chris Ruehl wrote:
+> On Wednesday, January 22, 2014 03:23 PM, Sascha Hauer wrote:
+> >On Wed, Jan 22, 2014 at 03:19:48PM +0800, Chris Ruehl wrote:
+> >>On Wednesday, January 22, 2014 02:42 PM, Sascha Hauer wrote:
+> >>>On Wed, Jan 22, 2014 at 12:32:39PM +0800, Chris Ruehl wrote:
+> >>>>Function mxcmci_request() throw an exception on a imx27 cpu.
+> >>>>This patch fix the problem by test the pointer before access it.
+> >>>>
+> >>>>diff --git a/drivers/mmc/host/mxcmmc.c b/drivers/mmc/host/mxcmmc.c
+> >>>>index f7199c8..8645d6a 100644
+> >>>>--- a/drivers/mmc/host/mxcmmc.c
+> >>>>+++ b/drivers/mmc/host/mxcmmc.c
+> >>>>@@ -347,7 +347,7 @@ static int mxcmci_setup_data(struct mxcmci_host *host, struct mmc_data *data)
+> >>>>  		return 0;
+> >>>>  	for_each_sg(data->sg, sg, data->sg_len, i) {
+> >>>>-		if (sg->offset & 3 || sg->length & 3 || sg->length < 512) {
+> >>>>+		if (sg && (sg->offset & 3 || sg->length & 3 || sg->length < 512)) {
+> >>>The question is why sg is NULL. I think this shouldn't happen.
+> >>>
+> >>>Sascha
+> >>>
+> >>Thats was my idea too. But had no time to debug it out.
+> >>As for_each_sg() iterate over the sg-list may its not set properly
+> >>before - In an earlier post
+> >>I ask for help but no-one returned so I quick fixed it.  Maybe now
+> >>the bell is loud enough ;-)
+> >Please try to track it further down. Does this happen every time you are
+> >in this function or does it happen only every once in a while? Does it
+> >happen in the first iteration of the loop? is it an SDIO card or regular
+> >SD card?
+> >
+> >Sascha
+> >
+> Sascha,
+> 
+> there was a fix for a race condition:
+> 
+> commit 70aa6109597ea6955a93f16430b588b5ee5ba547
+> mmc: mxcmmc: fix race conditions for host->req and host->data access
+> 
+> do you think its possible that the current oops is kind of race?
 
-Regards,
+Could be, yes. I remember problems that the dma completion interrupt and
+the data transfer interrupt came in the wrong (or better: unexpected)
+order. Maybe this is not completely solved.
 
-john
+Sascha
 
-On Fri, Jan 24, 2014 at 1:24 PM, Russell King - ARM Linux
-<linux@arm.linux.org.uk> wrote:
-> On Fri, Jan 24, 2014 at 01:14:08PM -0800, John Tobias wrote:
->> Hello all,
->>
->> I am testing the suspend mode (S3) for my custom board with iMX6SL and
->> the iMX6SL EVK as well. I am using 3.13 kernel, eMMC and MMC for the
->> storage and systemd to control the OS. If I put my device in S3 mode,
->> I got the following messages:
->>
->> [   27.949393] PM: Syncing filesystems ... done.
->> [   27.972392] mmc0: card 0001 removed
->> [   28.033613] end_request: I/O error, dev mmcblk0, sector 0
->> [   28.063493] end_request: I/O error, dev mmcblk0, sector 0
->> [   28.107933] end_request: I/O error, dev mmcblk0, sector 0
->> [   28.131456] end_request: I/O error, dev mmcblk0, sector 0
->> [   28.153651] end_request: I/O error, dev mmcblk0, sector 0
->> [   28.215530] Freezing user space processes ... (elapsed 0.001 seconds) done.
->> [   28.224284] Freezing remaining freezable tasks ... (elapsed 0.001
->> seconds) done.
->> [   28.233658] Suspending console(s) (use no_console_suspend to debug)
->>
->> If I press any key, it will wake up. But, I got the following errors:
->>
->> [   17.815008] mmc0: new high speed DDR MMC card at address 0001
->> [   17.828024] mmcblk0: mmc0:0001 SEM04G 3.68 GiB
->> [   17.833522] mmcblk0boot0: mmc0:0001 SEM04G partition 1 2.00 MiB
->> [   17.839699] mmcblk0boot1: mmc0:0001 SEM04G partition 2 2.00 MiB
->> [   17.847150] mmcblk0rpmb: mmc0:0001 SEM04G partition 3 2.00 MiB
->> [   17.860116]  mmcblk0: p1 p2 p3 p4 < p5 p6 >
->> [   17.883550]  mmcblk0boot1: unknown partition table
->> [   17.899549]  mmcblk0boot0: unknown partition table
->
-> This is because MMC insists that when you suspend, the card will be
-> ejected, and when you resume, it will be re-inserted - it's effectively
-> the same as if you pulled the card out and then plugged it back in
-> without shutting the system down.
->
-> This is the default for the MMC subsystem, unless MMC_UNSAFE_RESUME
-> is set - and you can't have rootfs in MMC and suspend/resume unless
-> that's set.
->
-> --
-> FTTC broadband for 0.8mile line: 5.8Mbps down 500kbps up.  Estimation
-> in database were 13.1 to 19Mbit for a good line, about 7.5+ for a bad.
-> Estimate before purchase was "up to 13.2Mbit".
+-- 
+Pengutronix e.K.                           |                             |
+Industrial Linux Solutions                 | http://www.pengutronix.de/  |
+Peiner Str. 6-8, 31137 Hildesheim, Germany | Phone: +49-5121-206917-0    |
+Amtsgericht Hildesheim, HRA 2686           | Fax:   +49-5121-206917-5555 |
