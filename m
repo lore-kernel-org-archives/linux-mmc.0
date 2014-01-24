@@ -1,56 +1,37 @@
-From: Tim Kryger <tim.kryger@linaro.org>
-Subject: Re: [PATCH v4 5/8] mmc: sdhci-bcm-kona: Add basic use of clocks
-Date: Fri, 24 Jan 2014 09:07:24 -0800
-Message-ID: <CAAYSxhrBSv8_Z1SfB-b3iGgq218Gttny4FEgYJnLtSFhJd2UFg@mail.gmail.com>
-References: <1386271244-3927-1-git-send-email-tim.kryger@linaro.org>
-	<1386271244-3927-6-git-send-email-tim.kryger@linaro.org>
-	<CAEPRUYrPXf7QNzput0bz_UPfytRy1eYgyOJYnH5v2v4DCEKSNA@mail.gmail.com>
-	<CAAYSxhoCrveHd5Wkc7Z0qzpGr41qG6-neYSSsuHQuC7AcuJmZQ@mail.gmail.com>
+From: Fabio Estevam <festevam@gmail.com>
+Subject: Re: [PATCH 1/3] mmc: add support for power-on sequencing through DT
+Date: Fri, 24 Jan 2014 15:35:23 -0200
+Message-ID: <CAOMZO5DdTP0gimwdsBUZK3wXrnUd2FN3w-FszLQkvCwM8gvPpg@mail.gmail.com>
+References: <1390190215-22700-1-git-send-email-olof@lixom.net>
+	<1390190215-22700-2-git-send-email-olof@lixom.net>
+	<20140120164859.GF15937@n2100.arm.linux.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAAYSxhoCrveHd5Wkc7Z0qzpGr41qG6-neYSSsuHQuC7AcuJmZQ@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Christian Daudt <bcm@fixthebug.org>, Chris Ball <cjb@laptop.org>
-Cc: Rob Herring <rob.herring@calxeda.com>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Stephen Warren <swarren@wwwdotorg.org>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Daniel Lezcano <daniel.lezcano@linaro.org>, Thomas Gleixner <tglx@linutronix.de>, Axel Lin <axel.lin@ingics.com>, Device Tree List <devicetree@vger.kernel.org>, Linux ARM Kernel List <linux-arm-kernel@lists.infradead.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux MMC List <linux-mmc@vger.kernel.org>, Linaro Patches List <patches@linaro.org>, Ulf Hansson <ulf.hansson@linaro.org>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-vb0-f45.google.com ([209.85.212.45]:60645 "EHLO
+	mail-vb0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750997AbaAXRfY (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 24 Jan 2014 12:35:24 -0500
+In-Reply-To: <20140120164859.GF15937@n2100.arm.linux.org.uk>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Russell King - ARM Linux <linux@arm.linux.org.uk>, jsarha@ti.com
+Cc: Olof Johansson <olof@lixom.net>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, robh+dt@kernel.org, Mark Rutland <mark.rutland@arm.com>, Pawel Moll <pawel.moll@arm.com>, ijc+devicetree@hellion.org.ok, Kumar Gala <galak@codeaurora.org>, chris@printf.net
 
-On Tue, Jan 7, 2014 at 11:37 AM, Tim Kryger <tim.kryger@linaro.org> wrote:
-> On Sat, Dec 14, 2013 at 12:14 AM, Christian Daudt <bcm@fixthebug.org> wrote:
->> On Thu, Dec 5, 2013 at 11:20 AM, Tim Kryger <tim.kryger@linaro.org> wrote:
->>> Enable the external clock needed by the host controller during the
->>> probe and disable it during the remove.
->>>
->>> Signed-off-by: Tim Kryger <tim.kryger@linaro.org>
->>> Reviewed-by: Markus Mayer <markus.mayer@linaro.org>
->>> Reviewed-by: Matt Porter <matt.porter@linaro.org>
->>
->> Reviewed-by: Christian Daudt <bcm@fixthebug.org>
->>
->> Chris,
->>  Are you ok with me pulling this patch along with the rest of the
->> patchset into the bcm tree?
->>
->>  Thanks,
->>    csd
->
-> Chris,
->
-> Can you please provide an answer to csd?
->
-> Thanks,
-> Tim Kryger
+On Mon, Jan 20, 2014 at 2:48 PM, Russell King - ARM Linux
+<linux@arm.linux.org.uk> wrote:
 
-Chris,
+> So far so good.  Now, what about this external oscillator which has its
+> own separate power control.  My immediate thought is that this can be
+> specified via card_ext_clock - I would simply need to declare a fixed-rate
+> clock with either a regulator (power switch) controlled via a gpio (which
+> would probably be closer to the hardware) or a gpio as an enable... ah,
+> that requires me to write a common clock driver for that bit since this
+> is currently not modelled by CCF...
 
-I haven't heard back so this patch has been dropped for 3.14 to allow
-the remaining patches in the series to move forward.   As such, I will
-be re-posting this patch for 3.15.  It is essential for the
-bcm28155_ap board to transition away from fake fixed clocks to the
-real clock driver.  This is because the bcm281xx clock driver does not
-set the CLK_IGNORE_UNUSED flag for the SDHCI peripheral clocks and the
-common clock code will shut them off in late init unless the SDHCI
-driver has asked for them to be enabled.
+Jiry Sarha posted a gpio controlled clock proposal:
+http://www.spinics.net/lists/devicetree/msg16651.html
 
-Thanks,
-Tim
+Regards,
+
+Fabio Estevam
