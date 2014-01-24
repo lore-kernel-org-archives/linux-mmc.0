@@ -1,76 +1,116 @@
-From: Sascha Hauer <s.hauer@pengutronix.de>
-Subject: Re: [PATCH] mxcmmc: Internal error: Oops: 17 [#1] ARM from sg->offset
-Date: Fri, 24 Jan 2014 22:52:50 +0100
-Message-ID: <20140124215249.GK16215@pengutronix.de>
-References: <1390365159-29239-1-git-send-email-chris.ruehl@gtsys.com.hk>
- <20140122064231.GZ16215@pengutronix.de>
- <52DF7114.9070609@gtsys.com.hk>
- <20140122072358.GE16215@pengutronix.de>
- <52E0DA7D.7060309@gtsys.com.hk>
+From: Tim Kryger <tim.kryger@linaro.org>
+Subject: [PATCH] mmc: sdhci-bcm-kona: Add basic use of clocks
+Date: Fri, 24 Jan 2014 14:28:34 -0800
+Message-ID: <1390602514-2843-1-git-send-email-tim.kryger@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from metis.ext.pengutronix.de ([92.198.50.35]:33602 "EHLO
-	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751633AbaAXVwy (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 24 Jan 2014 16:52:54 -0500
-Content-Disposition: inline
-In-Reply-To: <52E0DA7D.7060309@gtsys.com.hk>
+Received: from mail-gw1-out.broadcom.com ([216.31.210.62]:9997 "EHLO
+	mail-gw1-out.broadcom.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751927AbaAXWeR (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 24 Jan 2014 17:34:17 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ruehl <chris.ruehl@gtsys.com.hk>
-Cc: mpa@pengutronix.de, linux-mmc@vger.kernel.org, linux-arm@lists.infradead.org
+To: Chris Ball <cjb@laptop.org>, Christian Daudt <bcm@fixthebug.org>, Ulf Hansson <ulf.hansson@linaro.org>, Axel Lin <axel.lin@ingics.com>
+Cc: Tim Kryger <tim.kryger@linaro.org>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux Kernel List <linux-kernel@vger.kernel.org>, Linaro Patches List <patches@linaro.org>
 
-On Thu, Jan 23, 2014 at 05:01:49PM +0800, Chris Ruehl wrote:
-> On Wednesday, January 22, 2014 03:23 PM, Sascha Hauer wrote:
-> >On Wed, Jan 22, 2014 at 03:19:48PM +0800, Chris Ruehl wrote:
-> >>On Wednesday, January 22, 2014 02:42 PM, Sascha Hauer wrote:
-> >>>On Wed, Jan 22, 2014 at 12:32:39PM +0800, Chris Ruehl wrote:
-> >>>>Function mxcmci_request() throw an exception on a imx27 cpu.
-> >>>>This patch fix the problem by test the pointer before access it.
-> >>>>
-> >>>>diff --git a/drivers/mmc/host/mxcmmc.c b/drivers/mmc/host/mxcmmc.c
-> >>>>index f7199c8..8645d6a 100644
-> >>>>--- a/drivers/mmc/host/mxcmmc.c
-> >>>>+++ b/drivers/mmc/host/mxcmmc.c
-> >>>>@@ -347,7 +347,7 @@ static int mxcmci_setup_data(struct mxcmci_host *host, struct mmc_data *data)
-> >>>>  		return 0;
-> >>>>  	for_each_sg(data->sg, sg, data->sg_len, i) {
-> >>>>-		if (sg->offset & 3 || sg->length & 3 || sg->length < 512) {
-> >>>>+		if (sg && (sg->offset & 3 || sg->length & 3 || sg->length < 512)) {
-> >>>The question is why sg is NULL. I think this shouldn't happen.
-> >>>
-> >>>Sascha
-> >>>
-> >>Thats was my idea too. But had no time to debug it out.
-> >>As for_each_sg() iterate over the sg-list may its not set properly
-> >>before - In an earlier post
-> >>I ask for help but no-one returned so I quick fixed it.  Maybe now
-> >>the bell is loud enough ;-)
-> >Please try to track it further down. Does this happen every time you are
-> >in this function or does it happen only every once in a while? Does it
-> >happen in the first iteration of the loop? is it an SDIO card or regular
-> >SD card?
-> >
-> >Sascha
-> >
-> Sascha,
-> 
-> there was a fix for a race condition:
-> 
-> commit 70aa6109597ea6955a93f16430b588b5ee5ba547
-> mmc: mxcmmc: fix race conditions for host->req and host->data access
-> 
-> do you think its possible that the current oops is kind of race?
+Enable the external clock needed by the host controller during the
+probe and disable it during the remove.
 
-Could be, yes. I remember problems that the dma completion interrupt and
-the data transfer interrupt came in the wrong (or better: unexpected)
-order. Maybe this is not completely solved.
+Signed-off-by: Tim Kryger <tim.kryger@linaro.org>
+Reviewed-by: Markus Mayer <markus.mayer@linaro.org>
+Reviewed-by: Matt Porter <matt.porter@linaro.org>
+Reviewed-by: Christian Daudt <bcm@fixthebug.org>
+---
 
-Sascha
+This was dropped from "Update Kona drivers to use clocks" series so the
+remaining patches could get into v3.14:
 
+https://lkml.org/lkml/2014/1/24/286
+
+Without this change the bcm28155_ap board can not be configured to use
+the bcm281xx clock driver since unused clocks will be disabled during
+late init.
+
+ drivers/mmc/host/sdhci-bcm-kona.c | 37 +++++++++++++++++++++++++++++++++++--
+ 1 file changed, 35 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/mmc/host/sdhci-bcm-kona.c b/drivers/mmc/host/sdhci-bcm-kona.c
+index 7a190fe..923eefa 100644
+--- a/drivers/mmc/host/sdhci-bcm-kona.c
++++ b/drivers/mmc/host/sdhci-bcm-kona.c
+@@ -54,6 +54,7 @@
+ 
+ struct sdhci_bcm_kona_dev {
+ 	struct mutex	write_lock; /* protect back to back writes */
++	struct clk	*external_clk;
+ };
+ 
+ 
+@@ -257,6 +258,24 @@ static int sdhci_bcm_kona_probe(struct platform_device *pdev)
+ 		goto err_pltfm_free;
+ 	}
+ 
++	/* Get and enable the external clock */
++	kona_dev->external_clk = devm_clk_get(dev, NULL);
++	if (IS_ERR(kona_dev->external_clk)) {
++		dev_err(dev, "Failed to get external clock\n");
++		ret = PTR_ERR(kona_dev->external_clk);
++		goto err_pltfm_free;
++	}
++
++	if (clk_set_rate(kona_dev->external_clk, host->mmc->f_max) != 0) {
++		dev_err(dev, "Failed to set rate external clock\n");
++		goto err_pltfm_free;
++	}
++
++	if (clk_prepare_enable(kona_dev->external_clk) != 0) {
++		dev_err(dev, "Failed to enable external clock\n");
++		goto err_pltfm_free;
++	}
++
+ 	dev_dbg(dev, "non-removable=%c\n",
+ 		(host->mmc->caps & MMC_CAP_NONREMOVABLE) ? 'Y' : 'N');
+ 	dev_dbg(dev, "cd_gpio %c, wp_gpio %c\n",
+@@ -271,7 +290,7 @@ static int sdhci_bcm_kona_probe(struct platform_device *pdev)
+ 
+ 	ret = sdhci_bcm_kona_sd_reset(host);
+ 	if (ret)
+-		goto err_pltfm_free;
++		goto err_clk_disable;
+ 
+ 	sdhci_bcm_kona_sd_init(host);
+ 
+@@ -307,6 +326,9 @@ err_remove_host:
+ err_reset:
+ 	sdhci_bcm_kona_sd_reset(host);
+ 
++err_clk_disable:
++	clk_disable_unprepare(kona_dev->external_clk);
++
+ err_pltfm_free:
+ 	sdhci_pltfm_free(pdev);
+ 
+@@ -316,7 +338,18 @@ err_pltfm_free:
+ 
+ static int __exit sdhci_bcm_kona_remove(struct platform_device *pdev)
+ {
+-	return sdhci_pltfm_unregister(pdev);
++	struct sdhci_host *host = platform_get_drvdata(pdev);
++	struct sdhci_pltfm_host *pltfm_priv = sdhci_priv(host);
++	struct sdhci_bcm_kona_dev *kona_dev = sdhci_pltfm_priv(pltfm_priv);
++	int dead = (readl(host->ioaddr + SDHCI_INT_STATUS) == 0xffffffff);
++
++	sdhci_remove_host(host, dead);
++
++	clk_disable_unprepare(kona_dev->external_clk);
++
++	sdhci_pltfm_free(pdev);
++
++	return 0;
+ }
+ 
+ static struct platform_driver sdhci_bcm_kona_driver = {
 -- 
-Pengutronix e.K.                           |                             |
-Industrial Linux Solutions                 | http://www.pengutronix.de/  |
-Peiner Str. 6-8, 31137 Hildesheim, Germany | Phone: +49-5121-206917-0    |
-Amtsgericht Hildesheim, HRA 2686           | Fax:   +49-5121-206917-5555 |
+1.8.0.1
+
