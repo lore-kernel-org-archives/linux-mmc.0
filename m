@@ -1,112 +1,56 @@
-From: Balaji T K <balajitk@ti.com>
-Subject: Re: [PATCH/RFC] dmaengine: omap-dma: split header file
-Date: Fri, 24 Jan 2014 22:23:39 +0530
-Message-ID: <52E29A93.7020205@ti.com>
-References: <20140119100235.GN27282@n2100.arm.linux.org.uk>
- <1390582316-4765-1-git-send-email-balajitk@ti.com>
+From: Tim Kryger <tim.kryger@linaro.org>
+Subject: Re: [PATCH v4 5/8] mmc: sdhci-bcm-kona: Add basic use of clocks
+Date: Fri, 24 Jan 2014 09:07:24 -0800
+Message-ID: <CAAYSxhrBSv8_Z1SfB-b3iGgq218Gttny4FEgYJnLtSFhJd2UFg@mail.gmail.com>
+References: <1386271244-3927-1-git-send-email-tim.kryger@linaro.org>
+	<1386271244-3927-6-git-send-email-tim.kryger@linaro.org>
+	<CAEPRUYrPXf7QNzput0bz_UPfytRy1eYgyOJYnH5v2v4DCEKSNA@mail.gmail.com>
+	<CAAYSxhoCrveHd5Wkc7Z0qzpGr41qG6-neYSSsuHQuC7AcuJmZQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"; Format="flowed"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <1390582316-4765-1-git-send-email-balajitk@ti.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Balaji T K <balajitk@ti.com>
-Cc: linux@arm.linux.org.uk, linux-sh@vger.kernel.org, linux-mmc@vger.kernel.org, chris@printf.net, linux-kernel@vger.kernel.org, geert@linux-m68k.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, a-bindra@ti.com
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CAAYSxhoCrveHd5Wkc7Z0qzpGr41qG6-neYSSsuHQuC7AcuJmZQ@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Christian Daudt <bcm@fixthebug.org>, Chris Ball <cjb@laptop.org>
+Cc: Rob Herring <rob.herring@calxeda.com>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Stephen Warren <swarren@wwwdotorg.org>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Daniel Lezcano <daniel.lezcano@linaro.org>, Thomas Gleixner <tglx@linutronix.de>, Axel Lin <axel.lin@ingics.com>, Device Tree List <devicetree@vger.kernel.org>, Linux ARM Kernel List <linux-arm-kernel@lists.infradead.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux MMC List <linux-mmc@vger.kernel.org>, Linaro Patches List <patches@linaro.org>, Ulf Hansson <ulf.hansson@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Friday 24 January 2014 10:21 PM, Balaji T K wrote:
-> To Resolve build failure seen with sh-allmodconfig:
->      include/linux/omap-dma.h:171:8: error: expected identifier before numeric constant
->      make[4]: *** [drivers/mmc/host/omap_hsmmc.o] Error 1
-> due to CCR redefinition, move dmaengine consumer specific function to omap-dmaengine.h
+On Tue, Jan 7, 2014 at 11:37 AM, Tim Kryger <tim.kryger@linaro.org> wrote:
+> On Sat, Dec 14, 2013 at 12:14 AM, Christian Daudt <bcm@fixthebug.org> wrote:
+>> On Thu, Dec 5, 2013 at 11:20 AM, Tim Kryger <tim.kryger@linaro.org> wrote:
+>>> Enable the external clock needed by the host controller during the
+>>> probe and disable it during the remove.
+>>>
+>>> Signed-off-by: Tim Kryger <tim.kryger@linaro.org>
+>>> Reviewed-by: Markus Mayer <markus.mayer@linaro.org>
+>>> Reviewed-by: Matt Porter <matt.porter@linaro.org>
+>>
+>> Reviewed-by: Christian Daudt <bcm@fixthebug.org>
+>>
+>> Chris,
+>>  Are you ok with me pulling this patch along with the rest of the
+>> patchset into the bcm tree?
+>>
+>>  Thanks,
+>>    csd
 >
-> Tested-by: Geert Uytterhoeven <geert@linux-m68k.org>
+> Chris,
+>
+> Can you please provide an answer to csd?
+>
+> Thanks,
+> Tim Kryger
 
-s/Tested-by/Reported-by
+Chris,
 
-> Signed-off-by: Balaji T K <balajitk@ti.com>
-> ---
->   drivers/mmc/host/omap_hsmmc.c  |    2 +-
->   include/linux/omap-dma.h       |   19 +------------------
->   include/linux/omap-dmaengine.h |   21 +++++++++++++++++++++
->   3 files changed, 23 insertions(+), 19 deletions(-)
->   create mode 100644 include/linux/omap-dmaengine.h
->
-> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-> index dbd32ad..2f57e36 100644
-> --- a/drivers/mmc/host/omap_hsmmc.c
-> +++ b/drivers/mmc/host/omap_hsmmc.c
-> @@ -31,7 +31,7 @@
->   #include <linux/of.h>
->   #include <linux/of_gpio.h>
->   #include <linux/of_device.h>
-> -#include <linux/omap-dma.h>
-> +#include <linux/omap-dmaengine.h>
->   #include <linux/mmc/host.h>
->   #include <linux/mmc/core.h>
->   #include <linux/mmc/mmc.h>
-> diff --git a/include/linux/omap-dma.h b/include/linux/omap-dma.h
-> index 7af25a9..6aa97e5 100644
-> --- a/include/linux/omap-dma.h
-> +++ b/include/linux/omap-dma.h
-> @@ -1,23 +1,6 @@
-> -/*
-> - * OMAP DMA Engine support
-> - *
-> - * This program is free software; you can redistribute it and/or modify
-> - * it under the terms of the GNU General Public License version 2 as
-> - * published by the Free Software Foundation.
-> - */
->   #ifndef __LINUX_OMAP_DMA_H
->   #define __LINUX_OMAP_DMA_H
-> -
-> -struct dma_chan;
-> -
-> -#if defined(CONFIG_DMA_OMAP) || defined(CONFIG_DMA_OMAP_MODULE)
-> -bool omap_dma_filter_fn(struct dma_chan *, void *);
-> -#else
-> -static inline bool omap_dma_filter_fn(struct dma_chan *c, void *d)
-> -{
-> -	return false;
-> -}
-> -#endif
-> +#include <linux/omap-dmaengine.h>
->
->   /*
->    *  Legacy OMAP DMA handling defines and functions
-> diff --git a/include/linux/omap-dmaengine.h b/include/linux/omap-dmaengine.h
-> new file mode 100644
-> index 0000000..2b0b6aa
-> --- /dev/null
-> +++ b/include/linux/omap-dmaengine.h
-> @@ -0,0 +1,21 @@
-> +/*
-> + * OMAP DMA Engine support
-> + *
-> + * This program is free software; you can redistribute it and/or modify
-> + * it under the terms of the GNU General Public License version 2 as
-> + * published by the Free Software Foundation.
-> + */
-> +#ifndef __LINUX_OMAP_DMAENGINE_H
-> +#define __LINUX_OMAP_DMAENGINE_H
-> +
-> +struct dma_chan;
-> +
-> +#if defined(CONFIG_DMA_OMAP) || defined(CONFIG_DMA_OMAP_MODULE)
-> +bool omap_dma_filter_fn(struct dma_chan *, void *);
-> +#else
-> +static inline bool omap_dma_filter_fn(struct dma_chan *c, void *d)
-> +{
-> +	return false;
-> +}
-> +#endif
-> +#endif /* __LINUX_OMAP_DMAENGINE_H */
->
+I haven't heard back so this patch has been dropped for 3.14 to allow
+the remaining patches in the series to move forward.   As such, I will
+be re-posting this patch for 3.15.  It is essential for the
+bcm28155_ap board to transition away from fake fixed clocks to the
+real clock driver.  This is because the bcm281xx clock driver does not
+set the CLK_IGNORE_UNUSED flag for the SDHCI peripheral clocks and the
+common clock code will shut them off in late init unless the SDHCI
+driver has asked for them to be enabled.
+
+Thanks,
+Tim
