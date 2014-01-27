@@ -1,180 +1,247 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 1/3] mmc: add support for power-on sequencing through DT
-Date: Mon, 27 Jan 2014 11:19:16 +0100
-Message-ID: <CAPDyKFqpOLZiUSDvxVtYrBM8DtrZDLE27LKzyoWaf29Ni2vcFQ@mail.gmail.com>
-References: <1390190215-22700-1-git-send-email-olof@lixom.net>
-	<1390190215-22700-2-git-send-email-olof@lixom.net>
-	<52DEBDA7.7030200@samsung.com>
-	<52E54540.8080304@gmail.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH 04/10] mmc: core: Fixup busy detection for mmc switch
+ operations
+Date: Mon, 27 Jan 2014 12:40:26 +0200
+Message-ID: <52E6379A.7070107@intel.com>
+References: <1390402824-9850-1-git-send-email-ulf.hansson@linaro.org> <1390402824-9850-5-git-send-email-ulf.hansson@linaro.org> <52E0EA96.4030702@intel.com> <CAPDyKFqKSEPPTnXo=TA3LrW_BCHYma8BvAaYd+Ovgg_QsnV-Xg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qc0-f173.google.com ([209.85.216.173]:62625 "EHLO
-	mail-qc0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753263AbaA0KTR (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 27 Jan 2014 05:19:17 -0500
-Received: by mail-qc0-f173.google.com with SMTP id i8so7489841qcq.4
-        for <linux-mmc@vger.kernel.org>; Mon, 27 Jan 2014 02:19:16 -0800 (PST)
-In-Reply-To: <52E54540.8080304@gmail.com>
+Received: from mga09.intel.com ([134.134.136.24]:4573 "EHLO mga09.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751508AbaA0Kin (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 27 Jan 2014 05:38:43 -0500
+In-Reply-To: <CAPDyKFqKSEPPTnXo=TA3LrW_BCHYma8BvAaYd+Ovgg_QsnV-Xg@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Tomasz Figa <tomasz.figa@gmail.com>
-Cc: Tomasz Figa <t.figa@samsung.com>, Olof Johansson <olof@lixom.net>, linux-mmc <linux-mmc@vger.kernel.org>, devicetree@vger.kernel.org, Russell King - ARM Linux <linux@arm.linux.org.uk>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, robh+dt@kernel.org, mark.rutland@arm.com, Pawel Moll <pawel.moll@arm.com>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Kumar Gala <galak@codeaurora.org>, Chris Ball <chris@printf.net>, Sascha Hauer <s.hauer@pengutronix.de>, Fabio Estevam <festevam@gmail.com>, Arnd Bergmann <arnd@arndb.de>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Dong Aisheng <b29396@freescale.com>, Stephen Warren <swarren@nvidia.com>, Vladimir Zapolskiy <vladimir_zapolskiy@mentor.com>
 
-On 26 January 2014 18:26, Tomasz Figa <tomasz.figa@gmail.com> wrote:
-> On 21.01.2014 19:34, Tomasz Figa wrote:
->>
->> Hi,
->>
->> On 20.01.2014 04:56, Olof Johansson wrote:
+On 23/01/14 16:11, Ulf Hansson wrote:
+> On 23 January 2014 11:10, Adrian Hunter <adrian.hunter@intel.com> wrote:
+>> On 22/01/14 17:00, Ulf Hansson wrote:
+>>> If the host controller supports busy detection in HW, we expect the
+>>> MMC_CAP_WAIT_WHILE_BUSY to be set. Likewise the corresponding
+>>> host->max_busy_timeout shall reflect the maximum busy detection timeout
+>>> supported by the host. A timeout set to zero, is interpreted as the
+>>> host supports whatever timeout the mmc core provides it with.
 >>>
->>> This patch enables support for power-on sequencing of SDIO peripherals
->>> through DT.
+>>> Previously we expected a host that supported MMC_CAP_WAIT_WHILE_BUSY to
+>>> cope with any timeout, which just isn't feasible due to HW limitations.
 >>>
->>> In general, it's quite common that wifi modules and other similar
->>> peripherals have several signals in addition to the SDIO interface that
->>> needs wiggling before the module will power on. It's common to have a
->>> reference clock, one or several power rails and one or several lines
->>> for reset/enable type functions.
+>>> For most switch operations, R1B responses are expected and thus we need
+>>> to check for busy detection completion. To cope with cases where the
+>>> requested busy detection timeout is greater than what the host are able
+>>> to support, we fallback to use a R1 response instead. This will prevent
+>>> the host from doing HW busy detection.
 >>>
->>> The binding as written today introduces a number of reset gpios,
->>> a regulator and a clock specifier. The code will handle up to 2 gpio
->>> reset lines, but it's trivial to increase to more than that if needed
->>> at some point.
+>>> In those cases busy detection completion is handled by polling the for
+>>> the card's status using CMD13, which is the same mechanism used when
+>>> the host doesn't support MMC_CAP_WAIT_WHILE_BUSY.
 >>>
->>> Implementation-wise, the MMC core has been changed to handle this during
->>> host power up, before the host interface is powered on. I have not yet
->>> implemented the power-down side, I wanted people to have a chance for
->>> reporting back w.r.t. issues (or comments on the bindings) first.
+>>> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+>>> ---
+>>>  drivers/mmc/core/mmc_ops.c |   53 ++++++++++++++++++++++++++++++--------------
+>>>  1 file changed, 36 insertions(+), 17 deletions(-)
 >>>
->>> I have not tested the regulator portion, since the system and module
->>> I'm working on doesn't need one (Samsung Chromebook with Marvell
->>> 8797-based wifi). Testing of those portions (and reporting back) would
->>> be appreciated.
+>>> diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
+>>> index 5e1a2cb..2e0cccb 100644
+>>> --- a/drivers/mmc/core/mmc_ops.c
+>>> +++ b/drivers/mmc/core/mmc_ops.c
+>>> @@ -413,13 +413,31 @@ int __mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
+>>>               unsigned int timeout_ms, bool use_busy_signal, bool send_status,
+>>>               bool ignore_crc)
+>>>  {
+>>> +     struct mmc_host *host;
 >>
+>> It would be nicer if the addition of 'host' was a separate patch.  You
+>> should remove the unnecessary BUG_ONs (it will oops anyway) at the same
+>> time and then just do:
 >>
->> While I fully agree that this is an important problem that needs to be
->> solved, I really don't think this is the right way, because:
+>>         struct mmc_host *host = card->host;
+> 
+> Sure, make sense!
+> 
 >>
->> a) power-up sequence is really specific to the MMC device and often it's
->> not simply a matter of switching on one regulator or one clock, e.g.
->> specific time constraints need to be met.
+>>>       int err;
+>>>       struct mmc_command cmd = {0};
+>>>       unsigned long timeout;
+>>> +     unsigned int max_busy_timeout;
+>>>       u32 status = 0;
+>>> +     bool use_r1b_resp = true;
 >>
->> b) you can have WLAN chips in which SDIO is just one of the options to
->> use as host interface, which may be also HSIC, I2C or UART. Really. See
->> [1].
+>> This is a little confusing.  Why not:
 >>
->> c) this is leaking device specific details to generic host code, which
->> isn't really elegant.
+>>         bool use_r1b_resp = use_busy_signal;
 >>
->> Now, to make this a bit more constructive, [2] is a solution that I came
->> up with (not perfect either), which simply adds a separate platform
->> device for the low level part of the chip. I believe this is a better
->> solution because:
+>> Although 'use_busy_signal' actually means 'wait_while_busy'.
+> 
+> Right, that should simplify code a bit. I will update in a v2.
+> 
 >>
->> a) you can often see such WLAN/BT combo chip as a set of separate
->> devices, e.g. SDIO WLAN, UART BT and a simple PMIC or management IC,
->> which provides power/reset control, out of band signalling and etc. for
->> the first two, so it isn't that bad to have a separate device node for
->> the last one,
+>>>
+>>>       BUG_ON(!card);
+>>>       BUG_ON(!card->host);
+>>> +     host = card->host;
+>>> +
+>>> +     /* Once all callers provides a timeout, remove this fallback. */
+>>> +     if (!timeout_ms)
+>>> +             timeout_ms = MMC_OPS_TIMEOUT_MS;
 >>
->> b) you have full freedom of defining your DT binding with whatever data
->> you need, any number of clocks, regulators, GPIOs and even out of band
->> interrupts (IMHO the most important one).
+>> A timeout of zero does not mean a very long timeout.  It means an unknown timeout.
+> 
+> I guess this is a matter of definition.
+
+JEDEC did not define GENERIC_CMD6_TIME until v4.5 so before that the timeout
+is unknown.  It is reasonable for the host controller drivers to select a
+value that suits them rather than constrain them to some arbitrarily large
+timeout.
+
+> 
+> For those hosts that don't have a hw timeout, but maybe implements a
+> software timeout, I thought this was more convenient. We likely then
+> also need to define a "MAX_BUSY_TIMEOUT", which host drivers could
+> use.
+> 
+> Additionally, since as of today only sdhci specifies the
+> max_discard_to (renamed to max_busy_timeout), I thought it make sense
+> to not force other hosts to specify the timeout to keep the existing
+> behaviour.
+
+Yes max_busy_timeout of zero again means unknown.
+
+> 
 >>
->> c) you can implement power-on, power-off sequences as needed for your
->> particular device,
+>>> +
+>>> +     /* We interpret unspecified timeouts as the host can cope with all. */
+>>> +     max_busy_timeout = host->max_busy_timeout ?
+>>> +                     host->max_busy_timeout : timeout_ms;
+>>> +
+>>> +     if (use_busy_signal && (host->caps & MMC_CAP_WAIT_WHILE_BUSY) &&
+>>> +             (timeout_ms > max_busy_timeout))
+>>> +                     use_r1b_resp = false;
+>>> +     else if (!use_busy_signal)
+>>> +             use_r1b_resp = false;
 >>
->> d) you have full separation of device-specific data from MMC core (or
->> any other subsystem simply used as a way to perform I/O to the chip).
+>> Why not just check what you know:
 >>
->> Now what's missing there is a way to signal the MMC core or any other
->> transport that a device showed up and the controller should be woken up
->> out of standby and scan of the bus initialized. This could be done by
->> explicitly specifying the device as a subnode of the
->> MMC/UART/USB(HSIC)/I2C or whatever with a link (phandle) to the power
->> controller of the chip or the other way around - a link to the
->> MMC/UART/... controller from the power controller node.
->
->
-> I've looked a bit around MMC core code and got some basic idea how things
-> look. I will definitely need some guidance, or at least some opinions, from
-> MMC guys, as some MMC core changes are unavoidable.
->
-> Now, the device-specific code is not really an issue, existing drivers
-> usually already have their ways of powering the chips on and off, based on
-> platform data. Everything needed here is to retrieve needed resources
-> (GPIOs, clocks, regulators) using DT, which should be trivial.
->
-> The worse part is the interaction between MMC and power controller driver
-> (the platform driver part of WLAN driver, if you look at brcmfmac as an
-> example). I believe that we need following things:
->
-> a) A way to tell the MMC controller that there is no card detection
-> mechanism available on given slot and it also should not be polling the slot
-> to check card presence. Something like a "manual card detect" that would be
-> triggered by another kernel entity that controls whether the MMC device is
-> present (i.e. WLAN driver). We already have "broken-cd" property, but it
-> only implies the former, wasting time on needless polling.
+>>         if (timeout_ms && host->max_busy_timeout && timeout_ms > host->max_busy_timeout)
+>>                 use_r1b_resp = false;
+>>
+> 
+> I wanted to maintain the R1B response for hosts that don't support
+> MMC_CAP_WAIT_WHILE_BUSY. With your proposal this will not be done.
+> 
+> Given this a second thought. I think it would make sense to adapt to
+> your proposal. I will update in v2.
+> 
+>>>
+>>>       cmd.opcode = MMC_SWITCH;
+>>>       cmd.arg = (MMC_SWITCH_MODE_WRITE_BYTE << 24) |
+>>> @@ -427,17 +445,25 @@ int __mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
+>>>                 (value << 8) |
+>>>                 set;
+>>>       cmd.flags = MMC_CMD_AC;
+>>> -     if (use_busy_signal)
+>>> +     if (use_r1b_resp)
+>>>               cmd.flags |= MMC_RSP_SPI_R1B | MMC_RSP_R1B;
+>>>       else
+>>>               cmd.flags |= MMC_RSP_SPI_R1 | MMC_RSP_R1;
+>>>
+>>> +     if ((host->caps & MMC_CAP_WAIT_WHILE_BUSY) && use_r1b_resp) {
+>>> +             /* Tell the host what busy detection timeout to use. */
+>>> +             cmd.busy_timeout = timeout_ms;
+>>> +             /*
+>>> +              * CRC errors shall only be ignored in cases were CMD13 is used
+>>> +              * to poll to detect busy completion.
+>>> +              */
+>>> +             ignore_crc = false;
+>>> +     }
+>>>
+>>> -     cmd.busy_timeout = timeout_ms;
+>>
+>> The busy_timeout should be provided for R1B i.e. this should be:
+>>
+>>         if (use_r1b_resp)
+>>                 cmd.busy_timeout = timeout_ms;
+>>
+> 
+> Will fix in v2, given you still think this is good approach according
+> to my comment just above.
+> 
+>>>       if (index == EXT_CSD_SANITIZE_START)
+>>>               cmd.sanitize_busy = true;
+>>>
+>>> -     err = mmc_wait_for_cmd(card->host, &cmd, MMC_CMD_RETRIES);
+>>> +     err = mmc_wait_for_cmd(host, &cmd, MMC_CMD_RETRIES);
+>>>       if (err)
+>>>               return err;
+>>>
+>>> @@ -445,24 +471,17 @@ int __mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
+>>>       if (!use_busy_signal)
+>>>               return 0;
+>>>
+>>> -     /*
+>>> -      * CRC errors shall only be ignored in cases were CMD13 is used to poll
+>>> -      * to detect busy completion.
+>>> -      */
+>>> -     if (card->host->caps & MMC_CAP_WAIT_WHILE_BUSY)
+>>> -             ignore_crc = false;
+>>> -
+>>>       /* Must check status to be sure of no errors. */
+>>> -     timeout = jiffies + msecs_to_jiffies(MMC_OPS_TIMEOUT_MS);
+>>
+>> This is the place to set the default timeout for the loop.
+>>
+>>         if (!timeout_ms)
+>>                 timeout_ms = MMC_OPS_TIMEOUT_MS
+>>
+>>> +     timeout = jiffies + msecs_to_jiffies(timeout_ms);
+>>>       do {
+>>>               if (send_status) {
+>>>                       err = __mmc_send_status(card, &status, ignore_crc);
+>>>                       if (err)
+>>>                               return err;
+>>>               }
+>>> -             if (card->host->caps & MMC_CAP_WAIT_WHILE_BUSY)
+>>> +             if ((host->caps & MMC_CAP_WAIT_WHILE_BUSY) && use_r1b_resp)
+>>>                       break;
+>>> -             if (mmc_host_is_spi(card->host))
+>>> +             if (mmc_host_is_spi(host))
+>>>                       break;
+>>>
+>>>               /*
+>>> @@ -478,18 +497,18 @@ int __mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
+>>>               /* Timeout if the device never leaves the program state. */
+>>>               if (time_after(jiffies, timeout)) {
+>>>                       pr_err("%s: Card stuck in programming state! %s\n",
+>>> -                             mmc_hostname(card->host), __func__);
+>>> +                             mmc_hostname(host), __func__);
+>>>                       return -ETIMEDOUT;
+>>>               }
+>>>       } while (R1_CURRENT_STATE(status) == R1_STATE_PRG);
+>>>
+>>> -     if (mmc_host_is_spi(card->host)) {
+>>> +     if (mmc_host_is_spi(host)) {
+>>>               if (status & R1_SPI_ILLEGAL_COMMAND)
+>>>                       return -EBADMSG;
+>>>       } else {
+>>>               if (status & 0xFDFFA000)
+>>> -                     pr_warning("%s: unexpected status %#x after "
+>>> -                            "switch", mmc_hostname(card->host), status);
+>>> +                     pr_warn("%s: unexpected status %#x after switch\n",
+>>> +                             mmc_hostname(host), status);
+>>>               if (status & R1_SWITCH_ERROR)
+>>>                       return -EBADMSG;
+>>>       }
+>>>
+>>
+> 
+> Adrian, thanks for reviewing!
+> 
+> Kind regards
+> Uffe
+> 
+> 
 
-There is already a host capability that I think we could use to handle
-this. MMC_CAP_NONREMOVABLE, the corresponding DT binding string is
-"non-removable", and it may be set per host device.
-
-Using this cap means the mmc_rescan process that runs to detect new
-cards, will only be executed once and during boot. So, we need to make
-sure all resources and powers are provided to the card at this point.
-Otherwise the card will not be detected.
-
-In the SDIO case, to save power, the SDIO func driver may use runtime
-PM to tell the mmc core power about whether the card needs to be
-powered. Typically from the WLAN driver's probe() and "interface
-up/down" the runtime PM reference for the SDIO func device, should be
-adjusted with pm_runtime_get|put.
-
->
-> b) A mechanism to bind the power controller to used MMC slot. Something like
-> "mmc-bus = <&mmc2>;" property in device node of the power controller and a
-> function like of_find_mmc_controller_by_node(), which would be an MMC
-> counterpart of I2C's of_find_i2c_adapter_by_node(). To avoid races, it
-> should probably take a reference on MMC host that would have to be dropped
-> explicitly whenever it is not needed anymore.
-
-I suppose an "MMC slot" can be translated to "MMC host"?
-
-What I am trying to understand is how the mmc core (or if we push it
-to be handled from the mmc host's .set_ios callback) shall be able to
-tell the power controller driver to enable/disable it's resources.
-Somehow we need the struct device available to handle that. Then I
-guess operating on it using runtime PM would be a solution that would
-be quite nice!?
-
->
-> c) A method to notify the MMC subsystem that card presence has changed. We
-> already have something like this in drivers/mmc/core/slot-gpio.c, but used
-> for a simple GPIO-based card detection. If the main part of
-> mmc_gpio_cd_irqt() could be turned into an exported helper, e.g.
-> mmc_force_card_detect(host) then basically we would have everything needed.
-
-I am not sure I understand why this is needed. I think it would be
-more convenient to use MMC_CAP_NONREMOVABLE instead as stated earlier.
-But please elaborate, I might have missed something.
-
->
-> Unfortunately, I don't have more time left for today to create patches and
-> test them, so for now, I'd like to hear opinion of MMC maintainers about
-> this approach. Do you find this acceptable?
->
-> By the way, it seems like slot-gpio.c could replace a lot of custom GPIO
-> card detection code used in MMC host drivers, e.g. sdhci-s3c. Is there any
-> reason why it couldn't?
-
-I suppose most host driver's should convert to the slot-gpio API, it's
-is just a matter of someone to send the patches. :-)
-
-Kind regards
-Ulf Hansson
-
->
-> Best regards,
-> Tomasz
