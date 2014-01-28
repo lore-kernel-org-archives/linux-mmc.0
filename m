@@ -1,90 +1,88 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH v2 1/8] mmc: core add the property for hs200
-Date: Tue, 28 Jan 2014 19:30:08 +0900
-Message-ID: <52E786B0.3010104@samsung.com>
-References: <52E76954.1020507@samsung.com>
- <CAPDyKFoSWOknN10v-Tc2NX9LynS8vddRp92XFvZtJ0=nrLaw1A@mail.gmail.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v2 8/8] mmc: core: use the broken-cd for non-removable card
+Date: Tue, 28 Jan 2014 11:32:09 +0100
+Message-ID: <CAPDyKFoXS5BMzHem3ahOVkdgC8YBrQXcQGyavSeLhn9zVvfNag@mail.gmail.com>
+References: <52E7695B.2050504@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout4.samsung.com ([203.254.224.34]:49171 "EHLO
-	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754684AbaA1K3k (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 28 Jan 2014 05:29:40 -0500
-Received: from epcpsbgr3.samsung.com
- (u143.gpu120.samsung.co.kr [203.254.230.143])
- by mailout4.samsung.com (Oracle Communications Messaging Server 7u4-24.01
- (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTP id <0N0300FS0X5EXR90@mailout4.samsung.com> for
- linux-mmc@vger.kernel.org; Tue, 28 Jan 2014 19:29:38 +0900 (KST)
-In-reply-to: <CAPDyKFoSWOknN10v-Tc2NX9LynS8vddRp92XFvZtJ0=nrLaw1A@mail.gmail.com>
+Received: from mail-qa0-f50.google.com ([209.85.216.50]:64996 "EHLO
+	mail-qa0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754471AbaA1KcK (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 28 Jan 2014 05:32:10 -0500
+Received: by mail-qa0-f50.google.com with SMTP id cm18so201482qab.23
+        for <linux-mmc@vger.kernel.org>; Tue, 28 Jan 2014 02:32:09 -0800 (PST)
+In-Reply-To: <52E7695B.2050504@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Jaehoon Chung <jh80.chung@samsung.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Seungwon Jeon <tgih.jun@samsung.com>, Arnd Bergmann <arnd@arndb.de>
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Arnd Bergmann <arnd@arndb.de>, Seungwon Jeon <tgih.jun@samsung.com>
 
-Dear, Ulf.
+On 28 January 2014 09:24, Jaehoon Chung <jh80.chung@samsung.com> wrote:
+> Some SoC is used the broken card-detection.
+> And it should be also used the "non-removable".
+> Even if card is "non-removable", it didn't always use the cd-gpio.
+>
+> If it's used only broken-cd, then card-detect interrupt is polling.
+>
+> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+> ---
+>  drivers/mmc/core/core.c |    4 ++--
+>  drivers/mmc/core/host.c |    6 +++---
+>  2 files changed, 5 insertions(+), 5 deletions(-)
+>
+> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> index 098374b..df732aa 100644
+> --- a/drivers/mmc/core/core.c
+> +++ b/drivers/mmc/core/core.c
+> @@ -2460,8 +2460,8 @@ void mmc_rescan(struct work_struct *work)
+>          */
+>         mmc_bus_put(host);
+>
+> -       if (!(host->caps & MMC_CAP_NONREMOVABLE) && host->ops->get_cd &&
+> -                       host->ops->get_cd(host) == 0) {
+> +       if (host->ops->get_cd && host->ops->get_cd(host) == 0 &&
+> +                       !(host->caps & MMC_CAP_NONREMOVABLE)) {
 
-On 01/28/2014 07:17 PM, Ulf Hansson wrote:
-> On 28 January 2014 09:24, Jaehoon Chung <jh80.chung@samsung.com> wrote:
->> mmc-hs200-1.8v and mmc-hs200-1.2v can be used to the general capability.
->>
->> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
->> ---
->> Changelog V2:
->>         - Rename the mmc-hs200-1_8v/1_2v instead of "_caps2_"
->>         - Add the properties into Documentation/devicetree/bindings/mmc/mmc.txt
->>
->>  Documentation/devicetree/bindings/mmc/mmc.txt |    2 ++
->>  drivers/mmc/core/host.c                       |    4 ++++
->>  2 files changed, 6 insertions(+)
->>
->> diff --git a/Documentation/devicetree/bindings/mmc/mmc.txt b/Documentation/devicetree/bindings/mmc/mmc.txt
->> index 458b57f..4bb3894 100644
->> --- a/Documentation/devicetree/bindings/mmc/mmc.txt
->> +++ b/Documentation/devicetree/bindings/mmc/mmc.txt
->> @@ -29,6 +29,8 @@ Optional properties:
->>  - cap-power-off-card: powering off the card is safe
->>  - cap-sdio-irq: enable SDIO IRQ signalling on this interface
->>  - full-pwr-cycle: full power cycle of the card is supported
-> 
-> Why remove above? I guess a typo? :-)
-It's not removed. Just symbol in front of sentence. :)
+What's the difference here?
 
-Best Regards,
-Jaehoon Chung
-> 
->> +- mmc-hs200-1_8v: HS200 mode(1.8V I/O) is supported
->> +- mmc-hs200-1_2v: HS200 mode(1.2V I/O) is supported
->>
->>  *NOTE* on CD and WP polarity. To use common for all SD/MMC host controllers line
->>  polarity properties, we have to fix the meaning of the "normal" and "inverted"
->> diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
->> index 49bc403..5a82e81 100644
->> --- a/drivers/mmc/core/host.c
->> +++ b/drivers/mmc/core/host.c
->> @@ -429,6 +429,10 @@ int mmc_of_parse(struct mmc_host *host)
->>                 host->pm_caps |= MMC_PM_KEEP_POWER;
->>         if (of_find_property(np, "enable-sdio-wakeup", &len))
->>                 host->pm_caps |= MMC_PM_WAKE_SDIO_IRQ;
->> +       if (of_find_property(np, "mmc-hs200-1_8v", NULL))
->> +               host->caps2 |= MMC_CAP2_HS200_1_8V_SDR;
->> +       if (of_find_property(np, "mmc-hs200-1_2v", NULL))
->> +               host->caps2 |= MMC_CAP2_HS200_1_2V_SDR;
->>
->>         return 0;
->>
->> --
->> 1.7.9.5
-> 
-> Once you fixed the above; you have my ack.
-> 
-> Kind regards
-> Uffe
+>                 mmc_claim_host(host);
+>                 mmc_power_off(host);
+>                 mmc_release_host(host);
+> diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+> index 4b81c93..52a64fe 100644
+> --- a/drivers/mmc/core/host.c
+> +++ b/drivers/mmc/core/host.c
+> @@ -356,6 +356,9 @@ int mmc_of_parse(struct mmc_host *host)
+>          * configuration is performed.
+>          */
+>
+> +       if (of_find_property(np, "broken-cd", &len))
+> +               host->caps |= MMC_CAP_NEEDS_POLL;
+> +
+
+No. There are no meaning in using MMC_CAP_NEEDS_POLL in conjunction
+with MMC_CAP_NONREMOVABLE.
+
+Using MMC_CAP_NONREMOVABLE, will allow mmc_rescan to detect a card  -
+only for one iteration. Thus MMC_CAP_NEEDS_POLL will have no effect.
+
+Kind regards
+Uffe
+
+
+>         /* Parse Card Detection */
+>         if (of_find_property(np, "non-removable", &len)) {
+>                 host->caps |= MMC_CAP_NONREMOVABLE;
+> @@ -364,9 +367,6 @@ int mmc_of_parse(struct mmc_host *host)
+>
+>                 explicit_inv_cd = of_property_read_bool(np, "cd-inverted");
+>
+> -               if (of_find_property(np, "broken-cd", &len))
+> -                       host->caps |= MMC_CAP_NEEDS_POLL;
+> -
+>                 gpio = of_get_named_gpio_flags(np, "cd-gpios", 0, &flags);
+>                 if (gpio == -EPROBE_DEFER)
+>                         return gpio;
 > --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-
+> 1.7.9.5
