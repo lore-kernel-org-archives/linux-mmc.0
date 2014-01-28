@@ -1,150 +1,81 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 06/10] mmc: core: Respect host's max_busy_timeout when
- sending sleep cmd
-Date: Tue, 28 Jan 2014 13:43:04 +0100
-Message-ID: <CAPDyKFo05XC=61Jy_3Vx_6ORGwai7OdxuXyzBL07Q_zdu4aEhg@mail.gmail.com>
-References: <1390402824-9850-1-git-send-email-ulf.hansson@linaro.org>
-	<1390402824-9850-7-git-send-email-ulf.hansson@linaro.org>
-	<52E0EDAA.7040703@intel.com>
-	<CAPDyKFqDZjyY+=mO_qMY-Bo=Kpq5Ls7mvH20E+pWmGtAw+YAXA@mail.gmail.com>
-	<52E638EC.1040402@intel.com>
+From: Seungwon Jeon <tgih.jun@samsung.com>
+Subject: RE: [PATCH v2 1/8] mmc: core add the property for hs200
+Date: Tue, 28 Jan 2014 21:52:56 +0900
+Message-ID: <000501cf1c27$ddf42120$99dc6360$%jun@samsung.com>
+References: <52E76954.1020507@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=Windows-1252
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qc0-f182.google.com ([209.85.216.182]:39622 "EHLO
-	mail-qc0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750816AbaA1MnF (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 28 Jan 2014 07:43:05 -0500
-Received: by mail-qc0-f182.google.com with SMTP id c9so402229qcz.41
-        for <linux-mmc@vger.kernel.org>; Tue, 28 Jan 2014 04:43:04 -0800 (PST)
-In-Reply-To: <52E638EC.1040402@intel.com>
+Received: from mailout2.samsung.com ([203.254.224.25]:46197 "EHLO
+	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751569AbaA1Mw7 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 28 Jan 2014 07:52:59 -0500
+Received: from epcpsbgr4.samsung.com
+ (u144.gpu120.samsung.co.kr [203.254.230.144])
+ by mailout2.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+ (7.0.4.24.0) 64bit (built Nov 17 2011))
+ with ESMTP id <0N0400BYJ3S9E750@mailout2.samsung.com> for
+ linux-mmc@vger.kernel.org; Tue, 28 Jan 2014 21:52:57 +0900 (KST)
+In-reply-to: <52E76954.1020507@samsung.com>
+Content-language: ko
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Dong Aisheng <b29396@freescale.com>, Stephen Warren <swarren@nvidia.com>, Vladimir Zapolskiy <vladimir_zapolskiy@mentor.com>
+To: 'Jaehoon Chung' <jh80.chung@samsung.com>, linux-mmc@vger.kernel.org
+Cc: 'Chris Ball' <chris@printf.net>, 'Arnd Bergmann' <arnd@arndb.de>, 'Ulf Hansson' <ulf.hansson@linaro.org>
 
-On 27 January 2014 11:46, Adrian Hunter <adrian.hunter@intel.com> wrote:
-> On 23/01/14 16:26, Ulf Hansson wrote:
->> On 23 January 2014 11:23, Adrian Hunter <adrian.hunter@intel.com> wrote:
->>> On 22/01/14 17:00, Ulf Hansson wrote:
->>>> When sending the sleep command for host drivers supporting
->>>> MMC_CAP_WAIT_WHILE_BUSY, we need to confirm that max_busy_timeout is
->>>> big enough comparing to the sleep timeout specified from card's
->>>> EXT_CSD. If this isn't case, we use a R1 response instead of R1B and
->>>> fallback to use a delay instead.
->>>>
->>>> Do note that a max_busy_timeout set to zero by the host, is interpreted
->>>> as it can cope with whatever timeout the mmc core provides it with.
->>>>
->>>> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
->>>> ---
->>>>  drivers/mmc/core/mmc.c |   19 ++++++++++++++++---
->>>>  1 file changed, 16 insertions(+), 3 deletions(-)
->>>>
->>>> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
->>>> index 897fdd1..32e1546 100644
->>>> --- a/drivers/mmc/core/mmc.c
->>>> +++ b/drivers/mmc/core/mmc.c
->>>> @@ -1359,6 +1359,8 @@ static int mmc_sleep(struct mmc_host *host)
->>>>  {
->>>>       struct mmc_command cmd = {0};
->>>>       struct mmc_card *card = host->card;
->>>> +     unsigned int timeout_ms = DIV_ROUND_UP(card->ext_csd.sa_timeout, 10000);
->>>> +     unsigned int max_busy_timeout;
->>>>       int err;
->>>>
->>>>       if (host->caps2 & MMC_CAP2_NO_SLEEP_CMD)
->>>> @@ -1372,7 +1374,18 @@ static int mmc_sleep(struct mmc_host *host)
->>>>       cmd.arg = card->rca << 16;
->>>>       cmd.arg |= 1 << 15;
->>>>
->>>> -     cmd.flags = MMC_RSP_R1B | MMC_CMD_AC;
->>>> +     /* We interpret unspecified timeouts as the host can cope with all. */
->>>> +     max_busy_timeout = host->max_busy_timeout ?
->>>> +                     host->max_busy_timeout : timeout_ms;
->>>> +
->>>> +     if ((host->caps & MMC_CAP_WAIT_WHILE_BUSY) &&
->>>> +             (timeout_ms <= max_busy_timeout)) {
->>>> +             cmd.flags = MMC_RSP_R1B | MMC_CMD_AC;
->>>> +             cmd.busy_timeout = timeout_ms;
->>>> +     } else {
->>>> +             cmd.flags = MMC_RSP_R1 | MMC_CMD_AC;
->>>> +     }
->>>
->>> I do not see why this is related to MMC_CAP_WAIT_WHILE_BUSY.
->>> Why not just:
->>
->> Before I do any update, we need to decide what host->max_busy_timeout
->> of zero means. Please see the response in the other patch in this
->> patchset.
->
-> Unless you want to change all the host controller drivers, zero means
-> don't know.
->
+On Tuesday, January 28, 2014, Jaehoon Chung wrote:
+> mmc-hs200-1.8v and mmc-hs200-1.2v can be used to the general capability.
+> 
+> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+> ---
+> Changelog V2:
+> 	- Rename the mmc-hs200-1_8v/1_2v instead of "_caps2_"
+> 	- Add the properties into Documentation/devicetree/bindings/mmc/mmc.txt
+> 
+>  Documentation/devicetree/bindings/mmc/mmc.txt |    2 ++
+>  drivers/mmc/core/host.c                       |    4 ++++
+>  2 files changed, 6 insertions(+)
+> 
+> diff --git a/Documentation/devicetree/bindings/mmc/mmc.txt
+> b/Documentation/devicetree/bindings/mmc/mmc.txt
+> index 458b57f..4bb3894 100644
+> --- a/Documentation/devicetree/bindings/mmc/mmc.txt
+> +++ b/Documentation/devicetree/bindings/mmc/mmc.txt
+> @@ -29,6 +29,8 @@ Optional properties:
+>  - cap-power-off-card: powering off the card is safe
+>  - cap-sdio-irq: enable SDIO IRQ signalling on this interface
+>  - full-pwr-cycle: full power cycle of the card is supported
+> +- mmc-hs200-1_8v: HS200 mode(1.8V I/O) is supported
+> +- mmc-hs200-1_2v: HS200 mode(1.2V I/O) is supported
+> 
+>  *NOTE* on CD and WP polarity. To use common for all SD/MMC host controllers line
+>  polarity properties, we have to fix the meaning of the "normal" and "inverted"
+> diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+> index 49bc403..5a82e81 100644
+> --- a/drivers/mmc/core/host.c
+> +++ b/drivers/mmc/core/host.c
+> @@ -429,6 +429,10 @@ int mmc_of_parse(struct mmc_host *host)
+>  		host->pm_caps |= MMC_PM_KEEP_POWER;
+>  	if (of_find_property(np, "enable-sdio-wakeup", &len))
+>  		host->pm_caps |= MMC_PM_WAKE_SDIO_IRQ;
+> +	if (of_find_property(np, "mmc-hs200-1_8v", NULL))
+> +		host->caps2 |= MMC_CAP2_HS200_1_8V_SDR;
+> +	if (of_find_property(np, "mmc-hs200-1_2v", NULL))
+> +		host->caps2 |= MMC_CAP2_HS200_1_2V_SDR;
+3rd argument(NULL) is replaced with 'len' at patch 2/8.
+Can be done here.
 
-Agree!
+Thanks,
+Seungwon Jeon
 
->>
->> I see that my patch for the mmc_switch function, maintain the R1B for
->> host not supporting MMC_CAP_WAIT_WHILE_BUSY, but this one for sleep
->> doesn't. :-) We should align the behaviour.
->>
->>
->>>
->>>         if (host->max_busy_timeout && timeout_ms > host->max_busy_timeout) {
->>>                 cmd.flags = MMC_RSP_R1 | MMC_CMD_AC;
->>>         } else {
->>>                 cmd.flags = MMC_RSP_R1B | MMC_CMD_AC;
->>>                 cmd.busy_timeout = timeout_ms;
->>>         }
->>
->> So here your suggestion will mean you would like to keep R1B for hosts
->> not supporting MMC_CAP_WAIT_WHILE_BUSY. This opposite of what you
->> proposed for the mmc_switch. :-)
->
-> I suggested:
->
->         if (timeout_ms && host->max_busy_timeout && timeout_ms > host->max_busy_timeout)
->                 use_r1b_resp = false;
->
-> (without modifying timeout_ms) which wasn't related to MMC_CAP_WAIT_WHILE_BUSY
-> i.e. keeps R1B for hosts not supporting MMC_CAP_WAIT_WHILE_BUSY
+> 
+>  	return 0;
+> 
+> --
+> 1.7.9.5
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
-Will fix in v2, thanks!
-
-
->
->>
->> I suggest that we only use R1B when the host are able to handle busy
->> detection in hw. If you think that is bad idea, please let me know.
->>
->>>
->>>> +
->>>>       err = mmc_wait_for_cmd(host, &cmd, 0);
->>>>       if (err)
->>>>               return err;
->>>> @@ -1383,8 +1396,8 @@ static int mmc_sleep(struct mmc_host *host)
->>>>        * SEND_STATUS command to poll the status because that command (and most
->>>>        * others) is invalid while the card sleeps.
->>>>        */
->>>> -     if (!(host->caps & MMC_CAP_WAIT_WHILE_BUSY))
->>>> -             mmc_delay(DIV_ROUND_UP(card->ext_csd.sa_timeout, 10000));
->>>> +     if (!cmd.busy_timeout)
->>>> +             mmc_delay(timeout_ms);
->>>
->>> And this becomes:
->>>
->>>         if (!cmd.busy_timeout || !(host->caps & MMC_CAP_WAIT_WHILE_BUSY))
->>>                 mmc_delay(timeout_ms);
->>>
->>>>
->>>>       return err;
->>>>  }
->>>>
->>>
->>
->> Kind regards
->> Uffe
->>
->>
->
