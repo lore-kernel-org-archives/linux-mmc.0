@@ -1,155 +1,137 @@
 From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH v2 3/8] mmc: dw_mmc: replace the bus_hz checking point
-Date: Wed, 29 Jan 2014 08:54:40 +0900
-Message-ID: <52E84340.6050505@samsung.com>
-References: <52E76956.1090107@samsung.com>
- <000701cf1c28$1cf0b3c0$56d21b40$%jun@samsung.com>
+Subject: Re: [PATCH v2 8/8] mmc: core: use the broken-cd for non-removable card
+Date: Wed, 29 Jan 2014 08:56:25 +0900
+Message-ID: <52E843A9.1070301@samsung.com>
+References: <52E7695B.2050504@samsung.com>
+ <CAPDyKFoXS5BMzHem3ahOVkdgC8YBrQXcQGyavSeLhn9zVvfNag@mail.gmail.com>
+ <52E78BC9.9010209@samsung.com>
+ <CAPDyKFp-Q1u_YLwc7ELLCaf44umF1bE2jd0X5e3bf0+yEPyB5Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout4.samsung.com ([203.254.224.34]:54386 "EHLO
+Received: from mailout4.samsung.com ([203.254.224.34]:54707 "EHLO
 	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754026AbaA1XyM (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 28 Jan 2014 18:54:12 -0500
-Received: from epcpsbgr1.samsung.com
- (u141.gpu120.samsung.co.kr [203.254.230.141])
+	with ESMTP id S1755971AbaA1Xzz (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 28 Jan 2014 18:55:55 -0500
+Received: from epcpsbgr3.samsung.com
+ (u143.gpu120.samsung.co.kr [203.254.230.143])
  by mailout4.samsung.com (Oracle Communications Messaging Server 7u4-24.01
  (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTP id <0N0400DZJYE9ND40@mailout4.samsung.com> for
- linux-mmc@vger.kernel.org; Wed, 29 Jan 2014 08:54:09 +0900 (KST)
-In-reply-to: <000701cf1c28$1cf0b3c0$56d21b40$%jun@samsung.com>
+ with ESMTP id <0N0400LM6YH5ER00@mailout4.samsung.com> for
+ linux-mmc@vger.kernel.org; Wed, 29 Jan 2014 08:55:53 +0900 (KST)
+In-reply-to: <CAPDyKFp-Q1u_YLwc7ELLCaf44umF1bE2jd0X5e3bf0+yEPyB5Q@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Seungwon Jeon <tgih.jun@samsung.com>, linux-mmc@vger.kernel.org
-Cc: 'Chris Ball' <chris@printf.net>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Arnd Bergmann <arnd@arndb.de>, Seungwon Jeon <tgih.jun@samsung.com>
 
-Hi Seungwon,
-
-Thanks for review.
-
-On 01/28/2014 09:54 PM, Seungwon Jeon wrote:
-> On Tue, January 28, 2014, Jaehoon Chung wrote:
->> It's right that check immediately whether host->bus_hz is assigned or not.
->> If drv_data->setup_clock is presented, then host->bus_hz should be set at there.
->> When setup_clock didn't present, assigned to value with clk_get_rate().
+On 01/28/2014 08:21 PM, Ulf Hansson wrote:
+> On 28 January 2014 11:51, Jaehoon Chung <jh80.chung@samsung.com> wrote:
+>> Dear, Ulf.
 >>
->> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
->> ---
->> Changelog V2:
->> 	- When drv_data->setup_clock is present, set to bus_hz with it.
+>> On 01/28/2014 07:32 PM, Ulf Hansson wrote:
+>>> On 28 January 2014 09:24, Jaehoon Chung <jh80.chung@samsung.com> wrote:
+>>>> Some SoC is used the broken card-detection.
+>>>> And it should be also used the "non-removable".
+>>>> Even if card is "non-removable", it didn't always use the cd-gpio.
+>>>>
+>>>> If it's used only broken-cd, then card-detect interrupt is polling.
+>>>>
+>>>> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+>>>> ---
+>>>>  drivers/mmc/core/core.c |    4 ++--
+>>>>  drivers/mmc/core/host.c |    6 +++---
+>>>>  2 files changed, 5 insertions(+), 5 deletions(-)
+>>>>
+>>>> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+>>>> index 098374b..df732aa 100644
+>>>> --- a/drivers/mmc/core/core.c
+>>>> +++ b/drivers/mmc/core/core.c
+>>>> @@ -2460,8 +2460,8 @@ void mmc_rescan(struct work_struct *work)
+>>>>          */
+>>>>         mmc_bus_put(host);
+>>>>
+>>>> -       if (!(host->caps & MMC_CAP_NONREMOVABLE) && host->ops->get_cd &&
+>>>> -                       host->ops->get_cd(host) == 0) {
+>>>> +       if (host->ops->get_cd && host->ops->get_cd(host) == 0 &&
+>>>> +                       !(host->caps & MMC_CAP_NONREMOVABLE)) {
+>>>
+>>> What's the difference here?
 >>
->>  drivers/mmc/host/dw_mmc.c |   39 +++++++++++++++++++--------------------
->>  1 file changed, 19 insertions(+), 20 deletions(-)
->>
->> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
->> index 8193e21..ead2998 100644
->> --- a/drivers/mmc/host/dw_mmc.c
->> +++ b/drivers/mmc/host/dw_mmc.c
->> @@ -2427,10 +2427,27 @@ int dw_mci_probe(struct dw_mci *host)
->>  			ret = clk_set_rate(host->ciu_clk, host->pdata->bus_hz);
->>  			if (ret)
->>  				dev_warn(host->dev,
->> -					 "Unable to set bus rate to %ul\n",
->> +					 "Unable to set bus rate to %uHz\n",
->>  					 host->pdata->bus_hz);
->>  		}
->> -		host->bus_hz = clk_get_rate(host->ciu_clk);
->> +
->> +		if (drv_data && drv_data->setup_clock) {
->> +			ret = drv_data->setup_clock(host);
->> +			if (ret) {
->> +				dev_err(host->dev, "implementation specific \"
->> +					"clock setup failed\n");
->> +				goto err_clk_ciu;
->> +			}
->> +		} else {
->> +			host->bus_hz = clk_get_rate(host->ciu_clk);
-> host->bus_hz certainly should be touched at drv_data->setup_clock()?
-> I think origin would be better.
-> The others is good to me.
+>> eMMC is non-removable card. So i added the "non-removable" property at dt file.
+>> Then first checking !(host->caps & MMC_CAP_NONREMOVABLE), and didn't call get_cd().
+>> In case of dw-mmc.c, after calling get_cd(), CARD_PRESENT bit is set at dw_mci_get_cd().
+>> I didn't check other driver how it work.
+>> If you didn't this change, i will change the dw-mmc controller.
+> 
+> Thanks for the clarification.
+> 
+> I would then suggest you to change in dw-mmc instead, since I think
+> using the MMC_CAP_NONREMOVABLE flag, indicates that the .get_cd
+> callback is not needed.
 
-I understood what you mean. Maybe We can change the code at dw_mmc-exynos.c.
-It's refered to host->ci_clk at dw_mmc-exynos.c.
-But If ciu_clk didn't assign, clk's rate didn't get.
-How about this? host->bus_hz was already assigned in dw_mmc.c.
+It's reasonable. I will consider to change this into dw_mmc.c.
 
---- a/drivers/mmc/host/dw_mmc-exynos.c
-+++ b/drivers/mmc/host/dw_mmc-exynos.c
-@@ -117,9 +117,8 @@ static int dw_mci_exynos_priv_init(struct dw_mci *host)
- static int dw_mci_exynos_setup_clock(struct dw_mci *host)
- {
- 	struct dw_mci_exynos_priv_data *priv = host->priv;
--	unsigned long rate = clk_get_rate(host->ciu_clk);
- 
--	host->bus_hz = rate / (priv->ciu_div + 1);
-+	host->bus_hz /= (priv->ciu_div + 1);
- 	return 0;
- }
- 
 Best Regards,
 Jaehoon Chung
 
 > 
-> Thanks,
-> Seungwon Jeon
+> Kind regards
+> Ulf Hansson
 > 
->> +		}
->> +	}
->> +
->> +	if (!host->bus_hz) {
->> +		dev_err(host->dev,
->> +			"Platform data must supply bus speed\n");
->> +		ret = -ENODEV;
->> +		goto err_clk_ciu;
->>  	}
 >>
->>  	if (drv_data && drv_data->init) {
->> @@ -2442,15 +2459,6 @@ int dw_mci_probe(struct dw_mci *host)
->>  		}
->>  	}
+>>>
+>>>>                 mmc_claim_host(host);
+>>>>                 mmc_power_off(host);
+>>>>                 mmc_release_host(host);
+>>>> diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+>>>> index 4b81c93..52a64fe 100644
+>>>> --- a/drivers/mmc/core/host.c
+>>>> +++ b/drivers/mmc/core/host.c
+>>>> @@ -356,6 +356,9 @@ int mmc_of_parse(struct mmc_host *host)
+>>>>          * configuration is performed.
+>>>>          */
+>>>>
+>>>> +       if (of_find_property(np, "broken-cd", &len))
+>>>> +               host->caps |= MMC_CAP_NEEDS_POLL;
+>>>> +
+>>>
+>>> No. There are no meaning in using MMC_CAP_NEEDS_POLL in conjunction
+>>> with MMC_CAP_NONREMOVABLE.
+>>>
+>>> Using MMC_CAP_NONREMOVABLE, will allow mmc_rescan to detect a card  -
+>>> only for one iteration. Thus MMC_CAP_NEEDS_POLL will have no effect.
 >>
->> -	if (drv_data && drv_data->setup_clock) {
->> -		ret = drv_data->setup_clock(host);
->> -		if (ret) {
->> -			dev_err(host->dev,
->> -				"implementation specific clock setup failed\n");
->> -			goto err_clk_ciu;
->> -		}
->> -	}
->> -
->>  	host->vmmc = devm_regulator_get_optional(host->dev, "vmmc");
->>  	if (IS_ERR(host->vmmc)) {
->>  		ret = PTR_ERR(host->vmmc);
->> @@ -2469,13 +2477,6 @@ int dw_mci_probe(struct dw_mci *host)
->>  		}
->>  	}
+>> Sorry. You're right. It's no meaning. I will maintain the original code.
 >>
->> -	if (!host->bus_hz) {
->> -		dev_err(host->dev,
->> -			"Platform data must supply bus speed\n");
->> -		ret = -ENODEV;
->> -		goto err_regulator;
->> -	}
->> -
->>  	host->quirks = host->pdata->quirks;
+>> Best Regards,
+>> Jaehoon Chung
+>>>
+>>> Kind regards
+>>> Uffe
+>>>
+>>>
+>>>>         /* Parse Card Detection */
+>>>>         if (of_find_property(np, "non-removable", &len)) {
+>>>>                 host->caps |= MMC_CAP_NONREMOVABLE;
+>>>> @@ -364,9 +367,6 @@ int mmc_of_parse(struct mmc_host *host)
+>>>>
+>>>>                 explicit_inv_cd = of_property_read_bool(np, "cd-inverted");
+>>>>
+>>>> -               if (of_find_property(np, "broken-cd", &len))
+>>>> -                       host->caps |= MMC_CAP_NEEDS_POLL;
+>>>> -
+>>>>                 gpio = of_get_named_gpio_flags(np, "cd-gpios", 0, &flags);
+>>>>                 if (gpio == -EPROBE_DEFER)
+>>>>                         return gpio;
+>>>> --
+>>>> 1.7.9.5
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+>>> the body of a message to majordomo@vger.kernel.org
+>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>
 >>
->>  	spin_lock_init(&host->lock);
->> @@ -2619,8 +2620,6 @@ err_workqueue:
->>  err_dmaunmap:
->>  	if (host->use_dma && host->dma_ops->exit)
->>  		host->dma_ops->exit(host);
->> -
->> -err_regulator:
->>  	if (host->vmmc)
->>  		regulator_disable(host->vmmc);
->>
->> --
->> 1.7.9.5
->> --
->> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
 > 
 
