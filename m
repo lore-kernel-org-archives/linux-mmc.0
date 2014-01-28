@@ -1,76 +1,63 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: [PATCH v2 8/8] mmc: core: use the broken-cd for non-removable card
-Date: Tue, 28 Jan 2014 17:24:59 +0900
-Message-ID: <52E7695B.2050504@samsung.com>
+From: Romain Izard <romain.izard.pro@gmail.com>
+Subject: [PATCH RESEND] =?UTF-8?q?mmc:=20Allow=20forward=20compatibility?= =?UTF-8?q?=20for=20e=E2=8B=85MMC?=
+Date: Tue, 28 Jan 2014 09:40:02 +0100
+Message-ID: <1390898402-16174-1-git-send-email-romain.izard.pro@gmail.com>
+References: <1385714317-28911-1-git-send-email-romain.izard.pro@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout2.samsung.com ([203.254.224.25]:61891 "EHLO
-	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754651AbaA1IY3 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 28 Jan 2014 03:24:29 -0500
-Received: from epcpsbgr1.samsung.com
- (u141.gpu120.samsung.co.kr [203.254.230.141])
- by mailout2.samsung.com (Oracle Communications Messaging Server 7u4-24.01
- (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTP id <0N0300LUGRCT6320@mailout2.samsung.com> for
- linux-mmc@vger.kernel.org; Tue, 28 Jan 2014 17:24:29 +0900 (KST)
+Received: from mail-wg0-f50.google.com ([74.125.82.50]:41362 "EHLO
+	mail-wg0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754987AbaA1Ik7 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 28 Jan 2014 03:40:59 -0500
+Received: by mail-wg0-f50.google.com with SMTP id l18so163277wgh.17
+        for <linux-mmc@vger.kernel.org>; Tue, 28 Jan 2014 00:40:56 -0800 (PST)
+In-Reply-To: <1385714317-28911-1-git-send-email-romain.izard.pro@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Cc: Chris Ball <chris@printf.net>, Arnd Bergmann <arnd@arndb.de>, Ulf Hansson <ulf.hansson@linaro.org>, Seungwon Jeon <tgih.jun@samsung.com>
+To: Chris Ball <chris@printf.net>
+Cc: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Romain Izard <romain.izard.pro@gmail.com>
 
-Some SoC is used the broken card-detection.
-And it should be also used the "non-removable".
-Even if card is "non-removable", it didn't always use the cd-gpio.
+As stated by the e=E2=8B=85MMC 5.0 specification, a chip should not be =
+rejected
+only because of the revision stated in the EXT_CSD_REV field of the
+EXT_CSD register.
 
-If it's used only broken-cd, then card-detect interrupt is polling.
+Remove the control on this value, the control of the CSD_STRUCTURE fiel=
+d
+should be sufficient to reject future incompatible changes.
 
-Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
+Signed-off-by: Romain Izard <romain.izard.pro@gmail.com>
 ---
- drivers/mmc/core/core.c |    4 ++--
- drivers/mmc/core/host.c |    6 +++---
- 2 files changed, 5 insertions(+), 5 deletions(-)
+ drivers/mmc/core/mmc.c | 11 +++++------
+ 1 file changed, 5 insertions(+), 6 deletions(-)
 
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 098374b..df732aa 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -2460,8 +2460,8 @@ void mmc_rescan(struct work_struct *work)
- 	 */
- 	mmc_bus_put(host);
- 
--	if (!(host->caps & MMC_CAP_NONREMOVABLE) && host->ops->get_cd &&
--			host->ops->get_cd(host) == 0) {
-+	if (host->ops->get_cd && host->ops->get_cd(host) == 0 &&
-+			!(host->caps & MMC_CAP_NONREMOVABLE)) {
- 		mmc_claim_host(host);
- 		mmc_power_off(host);
- 		mmc_release_host(host);
-diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
-index 4b81c93..52a64fe 100644
---- a/drivers/mmc/core/host.c
-+++ b/drivers/mmc/core/host.c
-@@ -356,6 +356,9 @@ int mmc_of_parse(struct mmc_host *host)
- 	 * configuration is performed.
- 	 */
- 
-+	if (of_find_property(np, "broken-cd", &len))
-+		host->caps |= MMC_CAP_NEEDS_POLL;
-+
- 	/* Parse Card Detection */
- 	if (of_find_property(np, "non-removable", &len)) {
- 		host->caps |= MMC_CAP_NONREMOVABLE;
-@@ -364,9 +367,6 @@ int mmc_of_parse(struct mmc_host *host)
- 
- 		explicit_inv_cd = of_property_read_bool(np, "cd-inverted");
- 
--		if (of_find_property(np, "broken-cd", &len))
--			host->caps |= MMC_CAP_NEEDS_POLL;
--
- 		gpio = of_get_named_gpio_flags(np, "cd-gpios", 0, &flags);
- 		if (gpio == -EPROBE_DEFER)
- 			return gpio;
--- 
-1.7.9.5
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index 98e9eb0f6643..81c23e4db704 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -293,13 +293,12 @@ static int mmc_read_ext_csd(struct mmc_card *card=
+, u8 *ext_csd)
+ 		}
+ 	}
+=20
++	/*
++	 * The EXT_CSD format is meant to be forward compatible. As long
++	 * as CSD_STRUCTURE does not change, all values for EXT_CSD_REV
++	 * are authorized, see JEDEC JESD84-B50 section B.8.
++	 */
+ 	card->ext_csd.rev =3D ext_csd[EXT_CSD_REV];
+-	if (card->ext_csd.rev > 7) {
+-		pr_err("%s: unrecognised EXT_CSD revision %d\n",
+-			mmc_hostname(card->host), card->ext_csd.rev);
+-		err =3D -EINVAL;
+-		goto out;
+-	}
+=20
+ 	card->ext_csd.raw_sectors[0] =3D ext_csd[EXT_CSD_SEC_CNT + 0];
+ 	card->ext_csd.raw_sectors[1] =3D ext_csd[EXT_CSD_SEC_CNT + 1];
+--=20
+1.8.3.2
+
