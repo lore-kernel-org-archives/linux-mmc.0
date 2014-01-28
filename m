@@ -1,159 +1,148 @@
 From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH v2 2/8] mmc: dw_mmc: use the mmc_of_parse() instead of
- local parser
-Date: Wed, 29 Jan 2014 08:47:15 +0900
-Message-ID: <52E84183.6060508@samsung.com>
-References: <52E76955.2030701@samsung.com>
- <000601cf1c28$0246aed0$06d40c70$%jun@samsung.com>
+Subject: Re: [PATCH v2 3/8] mmc: dw_mmc: replace the bus_hz checking point
+Date: Wed, 29 Jan 2014 08:54:40 +0900
+Message-ID: <52E84340.6050505@samsung.com>
+References: <52E76956.1090107@samsung.com>
+ <000701cf1c28$1cf0b3c0$56d21b40$%jun@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=windows-1252
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout1.samsung.com ([203.254.224.24]:14721 "EHLO
-	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755884AbaA1Xqq (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 28 Jan 2014 18:46:46 -0500
-Received: from epcpsbgr5.samsung.com
- (u145.gpu120.samsung.co.kr [203.254.230.145])
- by mailout1.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+Received: from mailout4.samsung.com ([203.254.224.34]:54386 "EHLO
+	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754026AbaA1XyM (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 28 Jan 2014 18:54:12 -0500
+Received: from epcpsbgr1.samsung.com
+ (u141.gpu120.samsung.co.kr [203.254.230.141])
+ by mailout4.samsung.com (Oracle Communications Messaging Server 7u4-24.01
  (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTP id <0N0400IZ4Y1WA0B0@mailout1.samsung.com> for
- linux-mmc@vger.kernel.org; Wed, 29 Jan 2014 08:46:44 +0900 (KST)
-In-reply-to: <000601cf1c28$0246aed0$06d40c70$%jun@samsung.com>
+ with ESMTP id <0N0400DZJYE9ND40@mailout4.samsung.com> for
+ linux-mmc@vger.kernel.org; Wed, 29 Jan 2014 08:54:09 +0900 (KST)
+In-reply-to: <000701cf1c28$1cf0b3c0$56d21b40$%jun@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Seungwon Jeon <tgih.jun@samsung.com>, linux-mmc@vger.kernel.org
-Cc: 'Chris Ball' <cjb@laptop.org>, 'Olof Johansson' <olof@lixom.net>
+Cc: 'Chris Ball' <chris@printf.net>
 
-On 01/28/2014 09:53 PM, Seungwon Jeon wrote:
+Hi Seungwon,
+
+Thanks for review.
+
+On 01/28/2014 09:54 PM, Seungwon Jeon wrote:
 > On Tue, January 28, 2014, Jaehoon Chung wrote:
->> mmc_of_parse() have been already parsed the general capability.
->> Didn't need to use the local parser.
+>> It's right that check immediately whether host->bus_hz is assigned or not.
+>> If drv_data->setup_clock is presented, then host->bus_hz should be set at there.
+>> When setup_clock didn't present, assigned to value with clk_get_rate().
 >>
 >> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
 >> ---
 >> Changelog V2:
->> 	- None
+>> 	- When drv_data->setup_clock is present, set to bus_hz with it.
 >>
->>  drivers/mmc/core/host.c   |    4 ++--
->>  drivers/mmc/host/dw_mmc.c |   49 +--------------------------------------------
->>  2 files changed, 3 insertions(+), 50 deletions(-)
+>>  drivers/mmc/host/dw_mmc.c |   39 +++++++++++++++++++--------------------
+>>  1 file changed, 19 insertions(+), 20 deletions(-)
 >>
->> diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
->> index 5a82e81..4b81c93 100644
->> --- a/drivers/mmc/core/host.c
->> +++ b/drivers/mmc/core/host.c
->> @@ -429,9 +429,9 @@ int mmc_of_parse(struct mmc_host *host)
->>  		host->pm_caps |= MMC_PM_KEEP_POWER;
->>  	if (of_find_property(np, "enable-sdio-wakeup", &len))
->>  		host->pm_caps |= MMC_PM_WAKE_SDIO_IRQ;
->> -	if (of_find_property(np, "mmc-hs200-1_8v", NULL))
->> +	if (of_find_property(np, "mmc-hs200-1_8v", &len))
->>  		host->caps2 |= MMC_CAP2_HS200_1_8V_SDR;
->> -	if (of_find_property(np, "mmc-hs200-1_2v", NULL))
->> +	if (of_find_property(np, "mmc-hs200-1_2v", &len))
->>  		host->caps2 |= MMC_CAP2_HS200_1_2V_SDR;
->>
->>  	return 0;
 >> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
->> index 55cd110..8193e21 100644
+>> index 8193e21..ead2998 100644
 >> --- a/drivers/mmc/host/dw_mmc.c
 >> +++ b/drivers/mmc/host/dw_mmc.c
->> @@ -2046,21 +2046,6 @@ static int dw_mci_of_get_slot_quirks(struct device *dev, u8 slot)
->>  	return quirks;
->>  }
->>
->> -/* find out bus-width for a given slot */
->> -static u32 dw_mci_of_get_bus_wd(struct device *dev, u8 slot)
->> -{
->> -	struct device_node *np = dw_mci_of_find_slot_node(dev, slot);
->> -	u32 bus_wd = 1;
->> -
->> -	if (!np)
->> -		return 1;
->> -
->> -	if (of_property_read_u32(np, "bus-width", &bus_wd))
->> -		dev_err(dev, "bus-width property not found, assuming width"
->> -			       " as 1\n");
->> -	return bus_wd;
->> -}
->> -
->>  /* find the write protect gpio for a given slot; or -1 if none specified */
->>  static int dw_mci_of_get_wp_gpio(struct device *dev, u8 slot)
->>  {
->> @@ -2108,10 +2093,6 @@ static int dw_mci_of_get_slot_quirks(struct device *dev, u8 slot)
->>  {
->>  	return 0;
->>  }
->> -static u32 dw_mci_of_get_bus_wd(struct device *dev, u8 slot)
->> -{
->> -	return 1;
->> -}
->>  static struct device_node *dw_mci_of_find_slot_node(struct device *dev, u8 slot)
->>  {
->>  	return NULL;
->> @@ -2134,7 +2115,6 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
->>  	const struct dw_mci_drv_data *drv_data = host->drv_data;
->>  	int ctrl_id, ret;
->>  	u32 freq[2];
->> -	u8 bus_width;
->>
->>  	mmc = mmc_alloc_host(sizeof(struct dw_mci_slot), host->dev);
->>  	if (!mmc)
->> @@ -2189,19 +2169,7 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
->>  	if (host->pdata->caps2)
->>  		mmc->caps2 = host->pdata->caps2;
->>
->> -	if (host->pdata->get_bus_wd)
->> -		bus_width = host->pdata->get_bus_wd(slot->id);
->> -	else if (host->dev->of_node)
->> -		bus_width = dw_mci_of_get_bus_wd(host->dev, slot->id);
->> -	else
->> -		bus_width = 1;
->> -
->> -	switch (bus_width) {
->> -	case 8:
->> -		mmc->caps |= MMC_CAP_8_BIT_DATA;
->> -	case 4:
->> -		mmc->caps |= MMC_CAP_4_BIT_DATA;
->> -	}
->> +	mmc_of_parse(mmc);
->>
->>  	if (host->pdata->blk_settings) {
->>  		mmc->max_segs = host->pdata->blk_settings->max_segs;
->> @@ -2399,24 +2367,9 @@ static struct dw_mci_board *dw_mci_parse_dt(struct dw_mci *host)
->>  			return ERR_PTR(ret);
->>  	}
->>
->> -	if (of_find_property(np, "keep-power-in-suspend", NULL))
->> -		pdata->pm_caps |= MMC_PM_KEEP_POWER;
->> -
->> -	if (of_find_property(np, "enable-sdio-wakeup", NULL))
->> -		pdata->pm_caps |= MMC_PM_WAKE_SDIO_IRQ;
->> -
->>  	if (of_find_property(np, "supports-highspeed", NULL))
->>  		pdata->caps |= MMC_CAP_SD_HIGHSPEED | MMC_CAP_MMC_HIGHSPEED;
->>
->> -	if (of_find_property(np, "caps2-mmc-hs200-1_8v", NULL))
->> -		pdata->caps2 |= MMC_CAP2_HS200_1_8V_SDR;
->> -
->> -	if (of_find_property(np, "caps2-mmc-hs200-1_2v", NULL))
->> -		pdata->caps2 |= MMC_CAP2_HS200_1_2V_SDR;
-> Can you remove caps2-mmc-hs200-1_8v and caps2-mmc-hs200-1_2v in Documentation(synopsys-dw-mshc.txt)?
+>> @@ -2427,10 +2427,27 @@ int dw_mci_probe(struct dw_mci *host)
+>>  			ret = clk_set_rate(host->ciu_clk, host->pdata->bus_hz);
+>>  			if (ret)
+>>  				dev_warn(host->dev,
+>> -					 "Unable to set bus rate to %ul\n",
+>> +					 "Unable to set bus rate to %uHz\n",
+>>  					 host->pdata->bus_hz);
+>>  		}
+>> -		host->bus_hz = clk_get_rate(host->ciu_clk);
+>> +
+>> +		if (drv_data && drv_data->setup_clock) {
+>> +			ret = drv_data->setup_clock(host);
+>> +			if (ret) {
+>> +				dev_err(host->dev, "implementation specific \"
+>> +					"clock setup failed\n");
+>> +				goto err_clk_ciu;
+>> +			}
+>> +		} else {
+>> +			host->bus_hz = clk_get_rate(host->ciu_clk);
+> host->bus_hz certainly should be touched at drv_data->setup_clock()?
+> I think origin would be better.
+> The others is good to me.
 
-Sure, I will remove that.
+I understood what you mean. Maybe We can change the code at dw_mmc-exynos.c.
+It's refered to host->ci_clk at dw_mmc-exynos.c.
+But If ciu_clk didn't assign, clk's rate didn't get.
+How about this? host->bus_hz was already assigned in dw_mmc.c.
 
+--- a/drivers/mmc/host/dw_mmc-exynos.c
++++ b/drivers/mmc/host/dw_mmc-exynos.c
+@@ -117,9 +117,8 @@ static int dw_mci_exynos_priv_init(struct dw_mci *host)
+ static int dw_mci_exynos_setup_clock(struct dw_mci *host)
+ {
+ 	struct dw_mci_exynos_priv_data *priv = host->priv;
+-	unsigned long rate = clk_get_rate(host->ciu_clk);
+ 
+-	host->bus_hz = rate / (priv->ciu_div + 1);
++	host->bus_hz /= (priv->ciu_div + 1);
+ 	return 0;
+ }
+ 
 Best Regards,
 Jaehoon Chung
+
 > 
 > Thanks,
 > Seungwon Jeon
+> 
+>> +		}
+>> +	}
+>> +
+>> +	if (!host->bus_hz) {
+>> +		dev_err(host->dev,
+>> +			"Platform data must supply bus speed\n");
+>> +		ret = -ENODEV;
+>> +		goto err_clk_ciu;
+>>  	}
+>>
+>>  	if (drv_data && drv_data->init) {
+>> @@ -2442,15 +2459,6 @@ int dw_mci_probe(struct dw_mci *host)
+>>  		}
+>>  	}
+>>
+>> -	if (drv_data && drv_data->setup_clock) {
+>> -		ret = drv_data->setup_clock(host);
+>> -		if (ret) {
+>> -			dev_err(host->dev,
+>> -				"implementation specific clock setup failed\n");
+>> -			goto err_clk_ciu;
+>> -		}
+>> -	}
 >> -
->> -	if (of_get_property(np, "cd-inverted", NULL))
->> -		pdata->caps2 |= MMC_CAP2_CD_ACTIVE_HIGH;
+>>  	host->vmmc = devm_regulator_get_optional(host->dev, "vmmc");
+>>  	if (IS_ERR(host->vmmc)) {
+>>  		ret = PTR_ERR(host->vmmc);
+>> @@ -2469,13 +2477,6 @@ int dw_mci_probe(struct dw_mci *host)
+>>  		}
+>>  	}
+>>
+>> -	if (!host->bus_hz) {
+>> -		dev_err(host->dev,
+>> -			"Platform data must supply bus speed\n");
+>> -		ret = -ENODEV;
+>> -		goto err_regulator;
+>> -	}
 >> -
->>  	return pdata;
->>  }
+>>  	host->quirks = host->pdata->quirks;
+>>
+>>  	spin_lock_init(&host->lock);
+>> @@ -2619,8 +2620,6 @@ err_workqueue:
+>>  err_dmaunmap:
+>>  	if (host->use_dma && host->dma_ops->exit)
+>>  		host->dma_ops->exit(host);
+>> -
+>> -err_regulator:
+>>  	if (host->vmmc)
+>>  		regulator_disable(host->vmmc);
 >>
 >> --
 >> 1.7.9.5
