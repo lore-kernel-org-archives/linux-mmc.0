@@ -1,51 +1,51 @@
-From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: Re: [Q] block / zynq: DMA bouncing
-Date: Mon, 27 Jan 2014 23:34:46 +0100 (CET)
-Message-ID: <Pine.LNX.4.64.1401272329160.30523@axis700.grange>
-References: <Pine.LNX.4.64.1401271549280.23931@axis700.grange>
- <20140127170230.GQ15937@n2100.arm.linux.org.uk> <52E69B4E.5010604@monstr.eu>
- <20140127175231.GU15937@n2100.arm.linux.org.uk> <52E69E1E.3020202@monstr.eu>
+From: Grant Grundler <grundler@chromium.org>
+Subject: Re: [PATCH] mmc-utils: add eMMC 5.0 FFU support
+Date: Mon, 27 Jan 2014 16:38:31 -0800
+Message-ID: <CANEJEGuT+ZJHcJpZpB0DvV0V1C=kNzHZ+yi9_PVHjvmyyCdzHw@mail.gmail.com>
+References: <1390501260-8730-1-git-send-email-grundler@chromium.org>
+	<86ob321qw0.fsf@void.printf.net>
+	<CANEJEGvpr3TB4PyfSOViy1D6avZQuKL7Km0DhnA5BiXDkYPV1w@mail.gmail.com>
+	<86fvoe1ose.fsf@void.printf.net>
+	<CANEJEGsYEF7pyWDHf2014hmJhEjJCYEfe1k+xso26tPY9cocEg@mail.gmail.com>
+	<CANEJEGvTDtTG-VLD6=Lu0oz3BX-wq9y9zg96DYNGgTHEUgfVgg@mail.gmail.com>
+	<86bnyz1pl0.fsf@void.printf.net>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.126.186]:63686 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753757AbaA0We5 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 27 Jan 2014 17:34:57 -0500
-In-Reply-To: <52E69E1E.3020202@monstr.eu>
+Received: from mail-ob0-f175.google.com ([209.85.214.175]:49323 "EHLO
+	mail-ob0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752812AbaA1Aib (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 27 Jan 2014 19:38:31 -0500
+Received: by mail-ob0-f175.google.com with SMTP id wn1so7340316obc.34
+        for <linux-mmc@vger.kernel.org>; Mon, 27 Jan 2014 16:38:31 -0800 (PST)
+In-Reply-To: <86bnyz1pl0.fsf@void.printf.net>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Michal Simek <monstr@monstr.eu>
-Cc: Russell King - ARM Linux <linux@arm.linux.org.uk>, linux-kernel@vger.kernel.org, dmaengine@vger.kernel.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+To: Chris Ball <chris@printf.net>
+Cc: Grant Grundler <grundler@chromium.org>, linux-mmc <linux-mmc@vger.kernel.org>, Puthikorn Voravootivat <puthik@chromium.org>, Gwendal Grignou <gwendal@chromium.org>
 
-Hi Michal, Russell,
+On Sat, Jan 25, 2014 at 5:47 PM, Chris Ball <chris@printf.net> wrote:
+> Hi Grant,
+>
+> On Thu, Jan 23 2014, Grant Grundler wrote:
+>> respin sent with "v2" in subject line and includes the '\0' assignment change.
+>>
+>> Apologies again.
+>
+> Thanks, no worries.  Would you like me to take this now, or wait for
+> testing?
 
-On Mon, 27 Jan 2014, Michal Simek wrote:
+Hi Chris!
+If you are happy with the command line option, take it now.
 
-> On 01/27/2014 06:52 PM, Russell King - ARM Linux wrote:
-> > On Mon, Jan 27, 2014 at 06:45:50PM +0100, Michal Simek wrote:
-> >> Why 0x4000? IRC Linux for ARM is using space for any purpose.
-> >> Russell knows this much better than I.
-> > 
-> > Probably because as the kernel is loaded at 0x8000, it will place the
-> > swapper page table at 0x4000, thus covering from 0x4000 upwards.
-> 
-> Ah yeah swapper.
-> 
-> > 
-> > Thus, the majority of your un-DMA-able memory will be kernel text or
-> > swapper page tables.
-> 
-> Yes, exactly.
-> 0x0 - 0x4000 - reserving not to be used by DMA
-> 0x4000 - 0x8000 swapper page table
-> 0x8000 - 0x80000 kernel text + up
+We can fix up vendor specific stuff as vendors publish that
+information. I am encumbered with NDAs through my employer.
 
-Good, thanks for the explanations and examples, we'll do the same then!
+I have asked the HW vendors to respond publicly with technical details
+describing which FFU options need to be set for the update to work
+with their parts. So I expect we will need some sort of vendor
+id/model look up to select those options as those details become
+available.
 
-Thanks
-Guennadi
----
-Guennadi Liakhovetski, Ph.D.
-Freelance Open-Source Software Developer
-http://www.open-technology.de/
+cheers
+grant
