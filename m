@@ -1,122 +1,79 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [PATCH 05/13] mmc: core: Fixup busy detection for mmc switch operations
-Date: Wed, 29 Jan 2014 23:37:57 +0100
-Message-ID: <1391035085-2747-6-git-send-email-ulf.hansson@linaro.org>
+Subject: [PATCH 07/13] mmc: core: Respect host's max_busy_timeout when sending sleep cmd
+Date: Wed, 29 Jan 2014 23:37:59 +0100
+Message-ID: <1391035085-2747-8-git-send-email-ulf.hansson@linaro.org>
 References: <1391035085-2747-1-git-send-email-ulf.hansson@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-la0-f43.google.com ([209.85.215.43]:45377 "EHLO
-	mail-la0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751398AbaA2WiX (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 29 Jan 2014 17:38:23 -0500
-Received: by mail-la0-f43.google.com with SMTP id pv20so1973674lab.2
-        for <linux-mmc@vger.kernel.org>; Wed, 29 Jan 2014 14:38:21 -0800 (PST)
+Received: from mail-la0-f48.google.com ([209.85.215.48]:57413 "EHLO
+	mail-la0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751398AbaA2Wi1 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 29 Jan 2014 17:38:27 -0500
+Received: by mail-la0-f48.google.com with SMTP id mc6so1983390lab.35
+        for <linux-mmc@vger.kernel.org>; Wed, 29 Jan 2014 14:38:25 -0800 (PST)
 In-Reply-To: <1391035085-2747-1-git-send-email-ulf.hansson@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org, Chris Ball <chris@printf.net>
 Cc: Dong Aisheng <b29396@freescale.com>, Stephen Warren <swarren@nvidia.com>, Vladimir Zapolskiy <vladimir_zapolskiy@mentor.com>, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
 
-If the host controller supports busy detection in HW, we expect the
-MMC_CAP_WAIT_WHILE_BUSY to be set. Likewise the corresponding
-host->max_busy_timeout should reflect the maximum busy detection
-timeout supported by the host.
+When sending the sleep command for host drivers supporting
+MMC_CAP_WAIT_WHILE_BUSY, we need to confirm that max_busy_timeout is
+big enough comparing to the sleep timeout specified from card's
+EXT_CSD. If this isn't case, we use a R1 response instead of R1B and
+fallback to use a delay instead.
 
-Previously we expected a host that supported MMC_CAP_WAIT_WHILE_BUSY to
-cope with any timeout, which just isn't feasible due to HW limitations.
-
-For most switch operations, R1B responses are expected and thus we need
-to check for busy detection completion. To cope with cases where the
-requested busy detection timeout is greater than what the host are able
-to support, we fallback to use a R1 response instead. This will prevent
-the host from doing HW busy detection.
-
-In those cases, busy detection completion is handled by polling the for
-the card's status using CMD13. This is the same mechanism used when the
-host doesn't support MMC_CAP_WAIT_WHILE_BUSY.
-
-Do note, a host->max_busy_timeout set to zero, is interpreted by the
-mmc core as it don't know what the host supports. It will then provide
-the host with whatever timeout the mmc core finds suitable.
-
-For some cases the mmc core has unfurtunate no clue of what timeout to
-use. In these cases we provide the host with a timeout value of zero,
-which the host may interpret as use whatever timeout it finds suitable.
+Do note that a max_busy_timeout set to zero by the host, is interpreted
+as it can cope with whatever timeout the mmc core provides it with.
 
 Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 ---
- drivers/mmc/core/mmc_ops.c |   33 ++++++++++++++++++++++++++-------
- 1 file changed, 26 insertions(+), 7 deletions(-)
+ drivers/mmc/core/mmc.c |   19 ++++++++++++++++---
+ 1 file changed, 16 insertions(+), 3 deletions(-)
 
-diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
-index 04ecdb9..f51b5ba 100644
---- a/drivers/mmc/core/mmc_ops.c
-+++ b/drivers/mmc/core/mmc_ops.c
-@@ -418,6 +418,17 @@ int __mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index 897fdd1..d641590 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -1359,6 +1359,7 @@ static int mmc_sleep(struct mmc_host *host)
+ {
  	struct mmc_command cmd = {0};
- 	unsigned long timeout;
- 	u32 status = 0;
-+	bool use_r1b_resp = use_busy_signal;
-+
+ 	struct mmc_card *card = host->card;
++	unsigned int timeout_ms = DIV_ROUND_UP(card->ext_csd.sa_timeout, 10000);
+ 	int err;
+ 
+ 	if (host->caps2 & MMC_CAP2_NO_SLEEP_CMD)
+@@ -1372,7 +1373,19 @@ static int mmc_sleep(struct mmc_host *host)
+ 	cmd.arg = card->rca << 16;
+ 	cmd.arg |= 1 << 15;
+ 
+-	cmd.flags = MMC_RSP_R1B | MMC_CMD_AC;
 +	/*
-+	 * If the cmd timeout and the max_busy_timeout of the host are both
-+	 * specified, let's validate them. A failure means we need to prevent
-+	 * the host from doing hw busy detection, which is done by converting
-+	 * to a R1 response instead of a R1B.
++	 * If the max_busy_timeout of the host is specified, validate it against
++	 * the sleep cmd timeout. A failure means we need to prevent the host
++	 * from doing hw busy detection, which is done by converting to a R1
++	 * response instead of a R1B.
 +	 */
-+	if (timeout_ms && host->max_busy_timeout &&
-+		(timeout_ms > host->max_busy_timeout))
-+		use_r1b_resp = false;
- 
- 	cmd.opcode = MMC_SWITCH;
- 	cmd.arg = (MMC_SWITCH_MODE_WRITE_BYTE << 24) |
-@@ -425,13 +436,17 @@ int __mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
- 		  (value << 8) |
- 		  set;
- 	cmd.flags = MMC_CMD_AC;
--	if (use_busy_signal)
-+	if (use_r1b_resp) {
- 		cmd.flags |= MMC_RSP_SPI_R1B | MMC_RSP_R1B;
--	else
-+		/*
-+		 * A busy_timeout of zero means the host can decide to use
-+		 * whatever value it finds suitable.
-+		 */
-+		cmd.busy_timeout = timeout_ms;
++	if (host->max_busy_timeout && (timeout_ms > host->max_busy_timeout)) {
++		cmd.flags = MMC_RSP_R1 | MMC_CMD_AC;
 +	} else {
- 		cmd.flags |= MMC_RSP_SPI_R1 | MMC_RSP_R1;
++		cmd.flags = MMC_RSP_R1B | MMC_CMD_AC;
++		cmd.busy_timeout = timeout_ms;
 +	}
- 
--
--	cmd.busy_timeout = timeout_ms;
- 	if (index == EXT_CSD_SANITIZE_START)
- 		cmd.sanitize_busy = true;
- 
-@@ -447,18 +462,22 @@ int __mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
- 	 * CRC errors shall only be ignored in cases were CMD13 is used to poll
- 	 * to detect busy completion.
- 	 */
--	if (host->caps & MMC_CAP_WAIT_WHILE_BUSY)
-+	if ((host->caps & MMC_CAP_WAIT_WHILE_BUSY) && use_r1b_resp)
- 		ignore_crc = false;
- 
-+	/* We have an unspecified cmd timeout, use the fallback value. */
-+	if (!timeout_ms)
-+		timeout_ms = MMC_OPS_TIMEOUT_MS;
 +
- 	/* Must check status to be sure of no errors. */
--	timeout = jiffies + msecs_to_jiffies(MMC_OPS_TIMEOUT_MS);
-+	timeout = jiffies + msecs_to_jiffies(timeout_ms);
- 	do {
- 		if (send_status) {
- 			err = __mmc_send_status(card, &status, ignore_crc);
- 			if (err)
- 				return err;
- 		}
--		if (host->caps & MMC_CAP_WAIT_WHILE_BUSY)
-+		if ((host->caps & MMC_CAP_WAIT_WHILE_BUSY) && use_r1b_resp)
- 			break;
- 		if (mmc_host_is_spi(host))
- 			break;
+ 	err = mmc_wait_for_cmd(host, &cmd, 0);
+ 	if (err)
+ 		return err;
+@@ -1383,8 +1396,8 @@ static int mmc_sleep(struct mmc_host *host)
+ 	 * SEND_STATUS command to poll the status because that command (and most
+ 	 * others) is invalid while the card sleeps.
+ 	 */
+-	if (!(host->caps & MMC_CAP_WAIT_WHILE_BUSY))
+-		mmc_delay(DIV_ROUND_UP(card->ext_csd.sa_timeout, 10000));
++	if (!cmd.busy_timeout || !(host->caps & MMC_CAP_WAIT_WHILE_BUSY))
++		mmc_delay(timeout_ms);
+ 
+ 	return err;
+ }
 -- 
 1.7.9.5
 
