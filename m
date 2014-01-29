@@ -1,100 +1,152 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [PATCH 02/13] mmc: core: Rename cmd_timeout_ms to busy_timeout
-Date: Wed, 29 Jan 2014 23:37:54 +0100
-Message-ID: <1391035085-2747-3-git-send-email-ulf.hansson@linaro.org>
+Subject: [PATCH 03/13] mmc: core: Add ignore_crc flag to __mmc_switch
+Date: Wed, 29 Jan 2014 23:37:55 +0100
+Message-ID: <1391035085-2747-4-git-send-email-ulf.hansson@linaro.org>
 References: <1391035085-2747-1-git-send-email-ulf.hansson@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-lb0-f177.google.com ([209.85.217.177]:48734 "EHLO
-	mail-lb0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751335AbaA2WiS (ORCPT
+Received: from mail-lb0-f181.google.com ([209.85.217.181]:59396 "EHLO
+	mail-lb0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751116AbaA2WiS (ORCPT
 	<rfc822;linux-mmc@vger.kernel.org>); Wed, 29 Jan 2014 17:38:18 -0500
-Received: by mail-lb0-f177.google.com with SMTP id z5so1966882lbh.36
-        for <linux-mmc@vger.kernel.org>; Wed, 29 Jan 2014 14:38:14 -0800 (PST)
+Received: by mail-lb0-f181.google.com with SMTP id z5so1988822lbh.12
+        for <linux-mmc@vger.kernel.org>; Wed, 29 Jan 2014 14:38:17 -0800 (PST)
 In-Reply-To: <1391035085-2747-1-git-send-email-ulf.hansson@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org, Chris Ball <chris@printf.net>
 Cc: Dong Aisheng <b29396@freescale.com>, Stephen Warren <swarren@nvidia.com>, Vladimir Zapolskiy <vladimir_zapolskiy@mentor.com>, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
 
-To better reflect that the cmd_timeout_ms is directly related to the
-busy detection timeout, let's rename it.
+Instead of handle specific adaptations, releated to certain switch
+operations, inside __mmc_switch, push this to be handled by the caller
+instead.
 
 Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 ---
- drivers/mmc/core/core.c    |    2 +-
- drivers/mmc/core/mmc_ops.c |    2 +-
- drivers/mmc/host/sdhci.c   |    8 ++++----
+ drivers/mmc/core/core.c    |    3 ++-
+ drivers/mmc/core/mmc.c     |   13 +++++++------
+ drivers/mmc/core/mmc_ops.c |   19 ++++++++++---------
  include/linux/mmc/core.h   |    2 +-
- 4 files changed, 7 insertions(+), 7 deletions(-)
+ 4 files changed, 20 insertions(+), 17 deletions(-)
 
 diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index a81d754..90de094 100644
+index 90de094..75ce01d 100644
 --- a/drivers/mmc/core/core.c
 +++ b/drivers/mmc/core/core.c
-@@ -1950,7 +1950,7 @@ static int mmc_do_erase(struct mmc_card *card, unsigned int from,
- 	cmd.opcode = MMC_ERASE;
- 	cmd.arg = arg;
- 	cmd.flags = MMC_RSP_SPI_R1B | MMC_RSP_R1B | MMC_CMD_AC;
--	cmd.cmd_timeout_ms = mmc_erase_timeout(card, arg, qty);
-+	cmd.busy_timeout = mmc_erase_timeout(card, arg, qty);
- 	err = mmc_wait_for_cmd(card->host, &cmd, 0);
- 	if (err) {
- 		pr_err("mmc_erase: erase error %d, status %#x\n",
-diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
-index e5b5eeb..3377bbf 100644
---- a/drivers/mmc/core/mmc_ops.c
-+++ b/drivers/mmc/core/mmc_ops.c
-@@ -432,7 +432,7 @@ int __mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
- 		cmd.flags |= MMC_RSP_SPI_R1 | MMC_RSP_R1;
- 
- 
--	cmd.cmd_timeout_ms = timeout_ms;
-+	cmd.busy_timeout = timeout_ms;
- 	if (index == EXT_CSD_SANITIZE_START)
- 		cmd.sanitize_busy = true;
- 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index ec57c6c..1853255 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -675,12 +675,12 @@ static u8 sdhci_calc_timeout(struct sdhci_host *host, struct mmc_command *cmd)
- 		return 0xE;
- 
- 	/* Unspecified timeout, assume max */
--	if (!data && !cmd->cmd_timeout_ms)
-+	if (!data && !cmd->busy_timeout)
- 		return 0xE;
- 
- 	/* timeout in us */
- 	if (!data)
--		target_timeout = cmd->cmd_timeout_ms * 1000;
-+		target_timeout = cmd->busy_timeout * 1000;
- 	else {
- 		target_timeout = data->timeout_ns / 1000;
- 		if (host->clock)
-@@ -1019,8 +1019,8 @@ void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
+@@ -302,7 +302,8 @@ void mmc_start_bkops(struct mmc_card *card, bool from_exception)
  	}
  
- 	timeout = jiffies;
--	if (!cmd->data && cmd->cmd_timeout_ms > 9000)
--		timeout += DIV_ROUND_UP(cmd->cmd_timeout_ms, 1000) * HZ + HZ;
-+	if (!cmd->data && cmd->busy_timeout > 9000)
-+		timeout += DIV_ROUND_UP(cmd->busy_timeout, 1000) * HZ + HZ;
- 	else
- 		timeout += 10 * HZ;
- 	mod_timer(&host->timer, timeout);
+ 	err = __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+-			EXT_CSD_BKOPS_START, 1, timeout, use_busy_signal, true);
++			EXT_CSD_BKOPS_START, 1, timeout,
++			use_busy_signal, true, false);
+ 	if (err) {
+ 		pr_warn("%s: Error %d starting bkops\n",
+ 			mmc_hostname(card->host), err);
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index 98e9eb0..ae3489a 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -856,8 +856,8 @@ static int mmc_select_hs200(struct mmc_card *card)
+ 
+ 	/* switch to HS200 mode if bus width set successfully */
+ 	if (!err)
+-		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+-				 EXT_CSD_HS_TIMING, 2, 0);
++		err = __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
++				EXT_CSD_HS_TIMING, 2, 0, true, true, true);
+ err:
+ 	return err;
+ }
+@@ -1074,9 +1074,10 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+ 		    host->caps2 & MMC_CAP2_HS200)
+ 			err = mmc_select_hs200(card);
+ 		else if	(host->caps & MMC_CAP_MMC_HIGHSPEED)
+-			err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+-					 EXT_CSD_HS_TIMING, 1,
+-					 card->ext_csd.generic_cmd6_time);
++			err = __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
++					EXT_CSD_HS_TIMING, 1,
++					card->ext_csd.generic_cmd6_time,
++					true, true, true);
+ 
+ 		if (err && err != -EBADMSG)
+ 			goto free_card;
+@@ -1404,7 +1405,7 @@ static int mmc_poweroff_notify(struct mmc_card *card, unsigned int notify_type)
+ 
+ 	err = __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+ 			EXT_CSD_POWER_OFF_NOTIFICATION,
+-			notify_type, timeout, true, false);
++			notify_type, timeout, true, false, false);
+ 	if (err)
+ 		pr_err("%s: Power Off Notification timed out, %u\n",
+ 		       mmc_hostname(card->host), timeout);
+diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
+index 3377bbf..5e1a2cb 100644
+--- a/drivers/mmc/core/mmc_ops.c
++++ b/drivers/mmc/core/mmc_ops.c
+@@ -405,17 +405,18 @@ int mmc_spi_set_crc(struct mmc_host *host, int use_crc)
+  *                   timeout of zero implies maximum possible timeout
+  *	@use_busy_signal: use the busy signal as response type
+  *	@send_status: send status cmd to poll for busy
++ *	@ignore_crc: ignore CRC errors when sending status cmd to poll for busy
+  *
+  *	Modifies the EXT_CSD register for selected card.
+  */
+ int __mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
+-		unsigned int timeout_ms, bool use_busy_signal, bool send_status)
++		unsigned int timeout_ms, bool use_busy_signal, bool send_status,
++		bool ignore_crc)
+ {
+ 	int err;
+ 	struct mmc_command cmd = {0};
+ 	unsigned long timeout;
+ 	u32 status = 0;
+-	bool ignore_crc = false;
+ 
+ 	BUG_ON(!card);
+ 	BUG_ON(!card->host);
+@@ -445,14 +446,13 @@ int __mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
+ 		return 0;
+ 
+ 	/*
+-	 * Must check status to be sure of no errors
+-	 * If CMD13 is to check the busy completion of the timing change,
+-	 * disable the check of CRC error.
++	 * CRC errors shall only be ignored in cases were CMD13 is used to poll
++	 * to detect busy completion.
+ 	 */
+-	if (index == EXT_CSD_HS_TIMING &&
+-	    !(card->host->caps & MMC_CAP_WAIT_WHILE_BUSY))
+-		ignore_crc = true;
++	if (card->host->caps & MMC_CAP_WAIT_WHILE_BUSY)
++		ignore_crc = false;
+ 
++	/* Must check status to be sure of no errors. */
+ 	timeout = jiffies + msecs_to_jiffies(MMC_OPS_TIMEOUT_MS);
+ 	do {
+ 		if (send_status) {
+@@ -501,7 +501,8 @@ EXPORT_SYMBOL_GPL(__mmc_switch);
+ int mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
+ 		unsigned int timeout_ms)
+ {
+-	return __mmc_switch(card, set, index, value, timeout_ms, true, true);
++	return __mmc_switch(card, set, index, value, timeout_ms, true, true,
++				false);
+ }
+ EXPORT_SYMBOL_GPL(mmc_switch);
+ 
 diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
-index 87079fc..b276996 100644
+index b276996..f206e29 100644
 --- a/include/linux/mmc/core.h
 +++ b/include/linux/mmc/core.h
-@@ -95,7 +95,7 @@ struct mmc_command {
-  *              actively failing requests
-  */
- 
--	unsigned int		cmd_timeout_ms;	/* in milliseconds */
-+	unsigned int		busy_timeout;	/* busy detect timeout in ms */
- 	/* Set this flag only for blocking sanitize request */
- 	bool			sanitize_busy;
+@@ -152,7 +152,7 @@ extern int mmc_wait_for_app_cmd(struct mmc_host *, struct mmc_card *,
+ 	struct mmc_command *, int);
+ extern void mmc_start_bkops(struct mmc_card *card, bool from_exception);
+ extern int __mmc_switch(struct mmc_card *, u8, u8, u8, unsigned int, bool,
+-			bool);
++			bool, bool);
+ extern int mmc_switch(struct mmc_card *, u8, u8, u8, unsigned int);
+ extern int mmc_send_ext_csd(struct mmc_card *card, u8 *ext_csd);
  
 -- 
 1.7.9.5
