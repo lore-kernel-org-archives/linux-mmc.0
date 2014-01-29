@@ -1,58 +1,69 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [PATCH 08/13] mmc: block: Use R1 responses for stop cmds for read requests
-Date: Wed, 29 Jan 2014 23:38:00 +0100
-Message-ID: <1391035085-2747-9-git-send-email-ulf.hansson@linaro.org>
+Subject: [PATCH 10/13] mmc: block: Respect hw busy detection in card_busy_detect()
+Date: Wed, 29 Jan 2014 23:38:02 +0100
+Message-ID: <1391035085-2747-11-git-send-email-ulf.hansson@linaro.org>
 References: <1391035085-2747-1-git-send-email-ulf.hansson@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-lb0-f170.google.com ([209.85.217.170]:41204 "EHLO
+Received: from mail-lb0-f170.google.com ([209.85.217.170]:46084 "EHLO
 	mail-lb0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751398AbaA2Wi2 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 29 Jan 2014 17:38:28 -0500
-Received: by mail-lb0-f170.google.com with SMTP id u14so1961357lbd.15
-        for <linux-mmc@vger.kernel.org>; Wed, 29 Jan 2014 14:38:27 -0800 (PST)
+	with ESMTP id S1751744AbaA2Wic (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 29 Jan 2014 17:38:32 -0500
+Received: by mail-lb0-f170.google.com with SMTP id u14so1961393lbd.15
+        for <linux-mmc@vger.kernel.org>; Wed, 29 Jan 2014 14:38:31 -0800 (PST)
 In-Reply-To: <1391035085-2747-1-git-send-email-ulf.hansson@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org, Chris Ball <chris@printf.net>
 Cc: Dong Aisheng <b29396@freescale.com>, Stephen Warren <swarren@nvidia.com>, Vladimir Zapolskiy <vladimir_zapolskiy@mentor.com>, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
 
-While using open ended transmission and thus ending the transfer by
-sending a stop command, we shall use R1B only for writes and R1 shall
-be used for reads. Previously R1B were used in both cases.
+Currently for write request we don't trust the hw busy detection to be
+fully handled by host, thus we also poll the card's status until we see
+it's gets out of the busy state.
+
+Still there are scenarios where it will a benefit to trust the hw busy
+detection done by the host, since no additional polling is needed.
+Let's prepare card_busy_detect() to be able to handle this.
 
 Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 ---
- drivers/mmc/card/block.c |    7 ++++++-
- 1 file changed, 6 insertions(+), 1 deletion(-)
+ drivers/mmc/card/block.c |   10 ++++++++--
+ 1 file changed, 8 insertions(+), 2 deletions(-)
 
 diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-index 7b5424f..87cd2b0 100644
+index 9568999..fec5e98 100644
 --- a/drivers/mmc/card/block.c
 +++ b/drivers/mmc/card/block.c
-@@ -1335,7 +1335,6 @@ static void mmc_blk_rw_rq_prep(struct mmc_queue_req *mqrq,
- 	brq->data.blksz = 512;
- 	brq->stop.opcode = MMC_STOP_TRANSMISSION;
- 	brq->stop.arg = 0;
--	brq->stop.flags = MMC_RSP_SPI_R1B | MMC_RSP_R1B | MMC_CMD_AC;
- 	brq->data.blocks = blk_rq_sectors(req);
+@@ -751,7 +751,7 @@ static int get_card_status(struct mmc_card *card, u32 *status, int retries)
+ }
  
- 	/*
-@@ -1378,9 +1377,15 @@ static void mmc_blk_rw_rq_prep(struct mmc_queue_req *mqrq,
- 	if (rq_data_dir(req) == READ) {
- 		brq->cmd.opcode = readcmd;
- 		brq->data.flags |= MMC_DATA_READ;
-+		if (brq->mrq.stop)
-+			brq->stop.flags = MMC_RSP_SPI_R1 | MMC_RSP_R1 |
-+					MMC_CMD_AC;
- 	} else {
- 		brq->cmd.opcode = writecmd;
- 		brq->data.flags |= MMC_DATA_WRITE;
-+		if (brq->mrq.stop)
-+			brq->stop.flags = MMC_RSP_SPI_R1B | MMC_RSP_R1B |
-+					MMC_CMD_AC;
+ static int card_busy_detect(struct mmc_card *card, unsigned int timeout_ms,
+-		struct request *req, int *gen_err)
++		bool hw_busy_detect, struct request *req, int *gen_err)
+ {
+ 	unsigned long timeout = jiffies + msecs_to_jiffies(timeout_ms);
+ 	int err = 0;
+@@ -771,6 +771,11 @@ static int card_busy_detect(struct mmc_card *card, unsigned int timeout_ms,
+ 			*gen_err = 1;
+ 		}
+ 
++		/* We may rely on the host hw to handle busy detection.*/
++		if ((card->host->caps & MMC_CAP_WAIT_WHILE_BUSY) &&
++			hw_busy_detect)
++			break;
++
+ 		/*
+ 		 * Timeout if the device never becomes ready for data and never
+ 		 * leaves the program state.
+@@ -1210,7 +1215,8 @@ static int mmc_blk_err_check(struct mmc_card *card,
+ 			gen_err = 1;
+ 		}
+ 
+-		err = card_busy_detect(card, MMC_BLK_TIMEOUT_MS, req, &gen_err);
++		err = card_busy_detect(card, MMC_BLK_TIMEOUT_MS, false, req,
++					&gen_err);
+ 		if (err)
+ 			return MMC_BLK_CMD_ERR;
  	}
- 
- 	if (do_rel_wr)
 -- 
 1.7.9.5
 
