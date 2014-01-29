@@ -1,44 +1,58 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [PATCH 06/13] mmc: core: Use generic CMD6 time while switching to eMMC HS200 mode
-Date: Wed, 29 Jan 2014 23:37:58 +0100
-Message-ID: <1391035085-2747-7-git-send-email-ulf.hansson@linaro.org>
+Subject: [PATCH 08/13] mmc: block: Use R1 responses for stop cmds for read requests
+Date: Wed, 29 Jan 2014 23:38:00 +0100
+Message-ID: <1391035085-2747-9-git-send-email-ulf.hansson@linaro.org>
 References: <1391035085-2747-1-git-send-email-ulf.hansson@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-la0-f42.google.com ([209.85.215.42]:46823 "EHLO
-	mail-la0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751398AbaA2WiZ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 29 Jan 2014 17:38:25 -0500
-Received: by mail-la0-f42.google.com with SMTP id hr13so2025193lab.1
-        for <linux-mmc@vger.kernel.org>; Wed, 29 Jan 2014 14:38:23 -0800 (PST)
+Received: from mail-lb0-f170.google.com ([209.85.217.170]:41204 "EHLO
+	mail-lb0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751398AbaA2Wi2 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 29 Jan 2014 17:38:28 -0500
+Received: by mail-lb0-f170.google.com with SMTP id u14so1961357lbd.15
+        for <linux-mmc@vger.kernel.org>; Wed, 29 Jan 2014 14:38:27 -0800 (PST)
 In-Reply-To: <1391035085-2747-1-git-send-email-ulf.hansson@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org, Chris Ball <chris@printf.net>
 Cc: Dong Aisheng <b29396@freescale.com>, Stephen Warren <swarren@nvidia.com>, Vladimir Zapolskiy <vladimir_zapolskiy@mentor.com>, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
 
-Conform to the eMMC spec and use the CMD6 generic timeout from the
-EXT_CSD register, when switching to HS200 mode.
+While using open ended transmission and thus ending the transfer by
+sending a stop command, we shall use R1B only for writes and R1 shall
+be used for reads. Previously R1B were used in both cases.
 
 Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 ---
- drivers/mmc/core/mmc.c |    4 +++-
- 1 file changed, 3 insertions(+), 1 deletion(-)
+ drivers/mmc/card/block.c |    7 ++++++-
+ 1 file changed, 6 insertions(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index ae3489a..897fdd1 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -857,7 +857,9 @@ static int mmc_select_hs200(struct mmc_card *card)
- 	/* switch to HS200 mode if bus width set successfully */
- 	if (!err)
- 		err = __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
--				EXT_CSD_HS_TIMING, 2, 0, true, true, true);
-+				EXT_CSD_HS_TIMING, 2,
-+				card->ext_csd.generic_cmd6_time,
-+				true, true, true);
- err:
- 	return err;
- }
+diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+index 7b5424f..87cd2b0 100644
+--- a/drivers/mmc/card/block.c
++++ b/drivers/mmc/card/block.c
+@@ -1335,7 +1335,6 @@ static void mmc_blk_rw_rq_prep(struct mmc_queue_req *mqrq,
+ 	brq->data.blksz = 512;
+ 	brq->stop.opcode = MMC_STOP_TRANSMISSION;
+ 	brq->stop.arg = 0;
+-	brq->stop.flags = MMC_RSP_SPI_R1B | MMC_RSP_R1B | MMC_CMD_AC;
+ 	brq->data.blocks = blk_rq_sectors(req);
+ 
+ 	/*
+@@ -1378,9 +1377,15 @@ static void mmc_blk_rw_rq_prep(struct mmc_queue_req *mqrq,
+ 	if (rq_data_dir(req) == READ) {
+ 		brq->cmd.opcode = readcmd;
+ 		brq->data.flags |= MMC_DATA_READ;
++		if (brq->mrq.stop)
++			brq->stop.flags = MMC_RSP_SPI_R1 | MMC_RSP_R1 |
++					MMC_CMD_AC;
+ 	} else {
+ 		brq->cmd.opcode = writecmd;
+ 		brq->data.flags |= MMC_DATA_WRITE;
++		if (brq->mrq.stop)
++			brq->stop.flags = MMC_RSP_SPI_R1B | MMC_RSP_R1B |
++					MMC_CMD_AC;
+ 	}
+ 
+ 	if (do_rel_wr)
 -- 
 1.7.9.5
 
