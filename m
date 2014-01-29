@@ -1,153 +1,155 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [PATCH 11/13] mmc: block: Fixup busy detection while invoking stop cmd at recovery
-Date: Wed, 29 Jan 2014 23:38:03 +0100
-Message-ID: <1391035085-2747-12-git-send-email-ulf.hansson@linaro.org>
+Subject: [PATCH 13/13] mmc: mmci: Enable support for busy detection for ux500 variant
+Date: Wed, 29 Jan 2014 23:38:05 +0100
+Message-ID: <1391035085-2747-14-git-send-email-ulf.hansson@linaro.org>
 References: <1391035085-2747-1-git-send-email-ulf.hansson@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-la0-f42.google.com ([209.85.215.42]:49106 "EHLO
-	mail-la0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751744AbaA2Wie (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 29 Jan 2014 17:38:34 -0500
-Received: by mail-la0-f42.google.com with SMTP id hr13so2017307lab.29
-        for <linux-mmc@vger.kernel.org>; Wed, 29 Jan 2014 14:38:33 -0800 (PST)
+Received: from mail-lb0-f172.google.com ([209.85.217.172]:48273 "EHLO
+	mail-lb0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751744AbaA2Wii (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 29 Jan 2014 17:38:38 -0500
+Received: by mail-lb0-f172.google.com with SMTP id c11so1971551lbj.17
+        for <linux-mmc@vger.kernel.org>; Wed, 29 Jan 2014 14:38:37 -0800 (PST)
 In-Reply-To: <1391035085-2747-1-git-send-email-ulf.hansson@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org, Chris Ball <chris@printf.net>
-Cc: Dong Aisheng <b29396@freescale.com>, Stephen Warren <swarren@nvidia.com>, Vladimir Zapolskiy <vladimir_zapolskiy@mentor.com>, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Dong Aisheng <b29396@freescale.com>, Stephen Warren <swarren@nvidia.com>, Vladimir Zapolskiy <vladimir_zapolskiy@mentor.com>, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, Russell King <linux@arm.linux.org.uk>, Johan Rudholm <jrudholm@gmail.com>
 
-When sending a stop command at the recovery path, use a R1B response
-when the failing data request are a WRITE. Thus we also care about the
-busy detection completion in this case.
+The ux500 variants have HW busy detection support, which is indicated
+by the busy_detect flag. For these variants let's enable the
+MMC_CAP_WAIT_WHILE_BUSY flag and add the support for it.
 
-For a failing READ request, we use a R1 response for the stop command,
-since we don't need to care about busy detection in this case.
+The mmc core will provide the RSP_BUSY command flag for those requests
+we should care about busy detection. Regarding the max_busy_timeout,
+the HW don't support busy detection timeouts so at this initial step
+let's make it simple and set it to zero to indicate we are able to
+support any timeout.
 
-To align behavior between hosts supporting MMC_CAP_WAIT_WHILE_BUSY and
-those who are not, we add a CMD13 polling method for the card's status.
-
-We also respect whether the host has specified the max_busy_timeout,
-which means we may fallback to CMD13 polling if the timeout is greater
-than what the host are able to support.
-
+Cc: Russell King <linux@arm.linux.org.uk>
+Cc: Johan Rudholm <jrudholm@gmail.com>
 Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 ---
- drivers/mmc/card/block.c |   83 ++++++++++++++++++++++++++++++----------------
- 1 file changed, 55 insertions(+), 28 deletions(-)
+ drivers/mmc/host/mmci.c |   51 +++++++++++++++++++++++++++++++++++++++--------
+ drivers/mmc/host/mmci.h |    2 ++
+ 2 files changed, 45 insertions(+), 8 deletions(-)
 
-diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-index fec5e98..17cd0fc 100644
---- a/drivers/mmc/card/block.c
-+++ b/drivers/mmc/card/block.c
-@@ -722,19 +722,6 @@ static u32 mmc_sd_num_wr_blocks(struct mmc_card *card)
- 	return result;
- }
- 
--static int send_stop(struct mmc_card *card, u32 *status)
--{
--	struct mmc_command cmd = {0};
--	int err;
--
--	cmd.opcode = MMC_STOP_TRANSMISSION;
--	cmd.flags = MMC_RSP_SPI_R1B | MMC_RSP_R1B | MMC_CMD_AC;
--	err = mmc_wait_for_cmd(card->host, &cmd, 5);
--	if (err == 0)
--		*status = cmd.resp[0];
--	return err;
--}
--
- static int get_card_status(struct mmc_card *card, u32 *status, int retries)
+diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+index 1a4b153..9976a90 100644
+--- a/drivers/mmc/host/mmci.c
++++ b/drivers/mmc/host/mmci.c
+@@ -921,6 +921,29 @@ mmci_cmd_irq(struct mmci_host *host, struct mmc_command *cmd,
  {
- 	struct mmc_command cmd = {0};
-@@ -798,6 +785,51 @@ static int card_busy_detect(struct mmc_card *card, unsigned int timeout_ms,
- 	return err;
- }
+ 	void __iomem *base = host->base;
+ 	bool sbc = (cmd == host->mrq->sbc);
++	bool busy_resp = host->variant->busy_detect &&
++			(cmd->flags & MMC_RSP_BUSY);
++
++	/* Check if we need to wait for busy completion. */
++	if (host->busy_status && (status & MCI_ST_CARDBUSY))
++		return;
++
++	/* Enable busy completion if needed and supported. */
++	if (!host->busy_status && busy_resp &&
++		!(status & (MCI_CMDCRCFAIL|MCI_CMDTIMEOUT)) &&
++		(readl(base + MMCISTATUS) & MCI_ST_CARDBUSY)) {
++		writel(readl(base + MMCIMASK0) | MCI_ST_BUSYEND,
++			base + MMCIMASK0);
++		host->busy_status = status & (MCI_CMDSENT|MCI_CMDRESPEND);
++		return;
++	}
++
++	/* At busy completion, mask the IRQ and complete the request. */
++	if (host->busy_status) {
++		writel(readl(base + MMCIMASK0) & ~MCI_ST_BUSYEND,
++			base + MMCIMASK0);
++		host->busy_status = 0;
++	}
  
-+static int send_stop(struct mmc_card *card, unsigned int timeout_ms,
-+		struct request *req, int *gen_err, u32 *stop_status)
-+{
-+	struct mmc_host *host = card->host;
-+	struct mmc_command cmd = {0};
-+	int err;
-+	bool use_r1b_resp = rq_data_dir(req) == WRITE;
+ 	host->cmd = NULL;
+ 
+@@ -1139,14 +1162,19 @@ static irqreturn_t mmci_irq(int irq, void *dev_id)
+ 			status &= ~MCI_IRQ1MASK;
+ 		}
+ 
++		/*
++		 * We intentionally clear the MCI_ST_CARDBUSY IRQ here (if it's
++		 * enabled) since the HW seems to be triggering the IRQ on both
++		 * edges while monitoring DAT0 for busy completion.
++		 */
+ 		status &= readl(host->base + MMCIMASK0);
+ 		writel(status, host->base + MMCICLEAR);
+ 
+ 		dev_dbg(mmc_dev(host->mmc), "irq0 (data+cmd) %08x\n", status);
+ 
+ 		cmd = host->cmd;
+-		if (status & (MCI_CMDCRCFAIL|MCI_CMDTIMEOUT|MCI_CMDSENT|
+-			      MCI_CMDRESPEND) && cmd)
++		if ((status|host->busy_status) & (MCI_CMDCRCFAIL|MCI_CMDTIMEOUT|
++			MCI_CMDSENT|MCI_CMDRESPEND) && cmd)
+ 			mmci_cmd_irq(host, cmd, status);
+ 
+ 		data = host->data;
+@@ -1155,6 +1183,10 @@ static irqreturn_t mmci_irq(int irq, void *dev_id)
+ 			      MCI_DATABLOCKEND) && data)
+ 			mmci_data_irq(host, data, status);
+ 
++		/* Don't poll for busy completion in irq context. */
++		if (host->busy_status)
++			status &= ~MCI_ST_CARDBUSY;
 +
-+	/*
-+	 * Normally we use R1B responses for WRITE, but in cases where the host
-+	 * has specified a max_busy_timeout we need to validate it. A failure
-+	 * means we need to prevent the host from doing hw busy detection, which
-+	 * is done by converting to a R1 response instead.
-+	 */
-+	if (host->max_busy_timeout && (timeout_ms > host->max_busy_timeout))
-+		use_r1b_resp = false;
-+
-+	cmd.opcode = MMC_STOP_TRANSMISSION;
-+	if (use_r1b_resp) {
-+		cmd.flags = MMC_RSP_SPI_R1B | MMC_RSP_R1B | MMC_CMD_AC;
-+		cmd.busy_timeout = timeout_ms;
-+	} else {
-+		cmd.flags = MMC_RSP_SPI_R1 | MMC_RSP_R1 | MMC_CMD_AC;
-+	}
-+
-+	err = mmc_wait_for_cmd(host, &cmd, 5);
-+	if (err)
-+		return err;
-+
-+	*stop_status = cmd.resp[0];
-+
-+	/* No need to check card status in case of READ. */
-+	if (rq_data_dir(req) == READ)
-+		return 0;
-+
-+	if (!mmc_host_is_spi(host) &&
-+		(*stop_status & R1_ERROR)) {
-+		pr_err("%s: %s: general error sending stop command, resp %#x\n",
-+			req->rq_disk->disk_name, __func__, *stop_status);
-+		*gen_err = 1;
-+	}
-+
-+	return card_busy_detect(card, timeout_ms, use_r1b_resp, req, gen_err);
-+}
-+
- #define ERR_NOMEDIUM	3
- #define ERR_RETRY	2
- #define ERR_ABORT	1
-@@ -914,26 +946,21 @@ static int mmc_blk_cmd_recovery(struct mmc_card *card, struct request *req,
- 	 */
- 	if (R1_CURRENT_STATE(status) == R1_STATE_DATA ||
- 	    R1_CURRENT_STATE(status) == R1_STATE_RCV) {
--		err = send_stop(card, &stop_status);
--		if (err)
-+		err = send_stop(card,
-+			DIV_ROUND_UP(brq->data.timeout_ns, 1000000),
-+			req, gen_err, &stop_status);
-+		if (err) {
- 			pr_err("%s: error %d sending stop command\n",
- 			       req->rq_disk->disk_name, err);
--
--		/*
--		 * If the stop cmd also timed out, the card is probably
--		 * not present, so abort.  Other errors are bad news too.
--		 */
--		if (err)
-+			/*
-+			 * If the stop cmd also timed out, the card is probably
-+			 * not present, so abort. Other errors are bad news too.
-+			 */
- 			return ERR_ABORT;
-+		}
-+
- 		if (stop_status & R1_CARD_ECC_FAILED)
- 			*ecc_err = 1;
--		if (!mmc_host_is_spi(card->host) && rq_data_dir(req) != READ)
--			if (stop_status & R1_ERROR) {
--				pr_err("%s: %s: general error sending stop command, stop cmd response %#x\n",
--				       req->rq_disk->disk_name, __func__,
--				       stop_status);
--				*gen_err = 1;
--			}
+ 		ret = 1;
+ 	} while (status);
+ 
+@@ -1504,12 +1536,6 @@ static int mmci_probe(struct amba_device *dev,
+ 		goto clk_disable;
  	}
  
- 	/* Check for set block count errors */
+-	if (variant->busy_detect) {
+-		mmci_ops.card_busy = mmci_card_busy;
+-		mmci_write_datactrlreg(host, MCI_ST_DPSM_BUSYMODE);
+-	}
+-
+-	mmc->ops = &mmci_ops;
+ 	/*
+ 	 * The ARM and ST versions of the block have slightly different
+ 	 * clock divider equations which means that the minimum divider
+@@ -1543,6 +1569,15 @@ static int mmci_probe(struct amba_device *dev,
+ 	mmc->caps = plat->capabilities;
+ 	mmc->caps2 = plat->capabilities2;
+ 
++	if (variant->busy_detect) {
++		mmci_ops.card_busy = mmci_card_busy;
++		mmci_write_datactrlreg(host, MCI_ST_DPSM_BUSYMODE);
++		mmc->caps |= MMC_CAP_WAIT_WHILE_BUSY;
++		mmc->max_busy_timeout = 0;
++	}
++
++	mmc->ops = &mmci_ops;
++
+ 	/* We support these PM capabilities. */
+ 	mmc->pm_caps = MMC_PM_KEEP_POWER;
+ 
+diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
+index 168bc72..b008ace 100644
+--- a/drivers/mmc/host/mmci.h
++++ b/drivers/mmc/host/mmci.h
+@@ -139,6 +139,7 @@
+ /* Extended status bits for the ST Micro variants */
+ #define MCI_ST_SDIOITMASK	(1 << 22)
+ #define MCI_ST_CEATAENDMASK	(1 << 23)
++#define MCI_ST_BUSYEND		(1 << 24)
+ 
+ #define MMCIMASK1		0x040
+ #define MMCIFIFOCNT		0x048
+@@ -186,6 +187,7 @@ struct mmci_host {
+ 	u32			pwr_reg;
+ 	u32			clk_reg;
+ 	u32			datactrl_reg;
++	u32			busy_status;
+ 	bool			vqmmc_enabled;
+ 	struct mmci_platform_data *plat;
+ 	struct variant_data	*variant;
 -- 
 1.7.9.5
 
