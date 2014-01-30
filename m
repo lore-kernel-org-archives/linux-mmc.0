@@ -1,103 +1,51 @@
-From: Georgi Djakov <gdjakov@mm-sol.com>
-Subject: [PATCH v8 0/3] mmc: sdhci-msm: Add support for Qualcomm chipsets
-Date: Thu, 30 Jan 2014 20:45:04 +0200
-Message-ID: <1391107507-17321-1-git-send-email-gdjakov@mm-sol.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-mmc@vger.kernel.org, cjb@laptop.org, devicetree@vger.kernel.org, grant.likely@linaro.org, rob.herring@calxeda.com, pawel.moll@arm.com, mark.rutland@arm.com, swarren@wwwdotorg.org, ijc+devicetree@hellion.org.uk, galak@codeaurora.org, rob@landley.net, linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc: linux-arm-msm@vger.kernel.org, Georgi Djakov <gdjakov@mm-sol.com>
+From: Russell King - ARM Linux <linux@arm.linux.org.uk>
+Subject: Re: [PATCH 0/3] RFC/RFT: Powering on MMC Wifi/BT modules in MMC
+	core
+Date: Thu, 30 Jan 2014 21:49:17 +0000
+Message-ID: <20140130214917.GE15937@n2100.arm.linux.org.uk>
+References: <1390190215-22700-1-git-send-email-olof@lixom.net>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from gw-1.arm.linux.org.uk ([78.32.30.217]:53351 "EHLO
+	pandora.arm.linux.org.uk" rhost-flags-OK-OK-OK-FAIL)
+	by vger.kernel.org with ESMTP id S1753814AbaA3Vt0 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 30 Jan 2014 16:49:26 -0500
+Content-Disposition: inline
+In-Reply-To: <1390190215-22700-1-git-send-email-olof@lixom.net>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Olof Johansson <olof@lixom.net>, Chris Ball <chris@printf.net>
+Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, robh+dt@kernel.org, mark.rutland@arm.com, pawel.moll@arm.com, ijc+devicetree@hellion.org.ok, galak@codeaurora.org
 
-This patchset adds basic support of the Secure Digital Host Controller
-Interface compliant controller found in Qualcomm chipsets.
+On Sun, Jan 19, 2014 at 07:56:52PM -0800, Olof Johansson wrote:
+> This is a small series enhancing the MMC core code to power on modules
+> before the host in cases where needed, and the corresponding DT bindings
+> changes.
+> 
+> I've got some other issues to debug on the Chromebook, i.e. the interface
+> doens't actually work. So far it seems unrelated to this patch set so
+> it's worth posting this and get things going since others need the same
+> functionality (i.e Cubox-i).
+> 
+> As mentioned in the patch in the series, I haven't implemented power-down
+> yet, I wanted to make sure that the power-on side will be adequate for
+> those who are looking to use it right away.
+> 
+> Comments/test reports/etc welcome.
 
-Tested with eMMC and various micro SD cards on APQ8074 Dragonboard.
+So, I thought I'd give this a go on the Cubox-i4, and... it doesn't work
+there.  It's not your patches, it's down to sdhci-esdhc-imx.c not using
+mmc_of_parse() at all, so those new properties have no way to be used
+there.
 
-Changes from v7:
-- Added call to sdhci_get_of_property().
-- Refactored sdhci_msm_dt_parse_vreg_info().
-- Fixed possible ERR_PTR() dereferencing.
-- Updated DT binding documentation.
-- Removed lpm and currents from DT.
-- Removed bus-speed-mode from DT.
-- Updated and moved the sanity checks.
-- Various typo and coding style fixes.
-- Added platform_execute_tunning implementation.
-
-Changes from v6:
-- Fixed wrong pointer in sdhci_msm_pwr_irq().
-- Added platform_execute_tuning() callback as the MSM SDHC does not
-  support tuning as in SDHC 3.0 spec and will need custom implementation
-  in order to support SDR104, HS200 and HS400.
-- Removed the always-on devicetree property - if the regulator is
-  configured as always-on, it will not be disabled anyway.
-- Removed devm_pinctrl_get_select_default() - the default pins are 
-  already set from the device core.
-- Removed wrapper function sdhci_msm_set_vdd_io_vol() and enum
-  vdd_io_level and now calling regulator_set_voltage() directly.
-- Converted #defines to use BIT() macro.
-- Added IS_ERR(vreg->reg) check at the beginning of sdhci_msm_vreg
-  functions.
-- Do not print errors when regulators init return -EPROBE_DEFER as the
-  deffered init is not an actual error.
-- Handle each power irq status bit separately in sdhci_msm_pwr_irq().
-- Ensure that any pending power irq is acknowledged before enabling it,
-  otherwise the irq handler will be fired prematurely.
-- Minor changes.
-
-Changes from v5:
-- Driver is split into multiple patches
-- Do not initialize variables that are assigned later in code
-- Remove some useless comments
-- Use shorter variable names
-- Change pr_err() to dev_err()
-- Optimized sdhci_msm_setup_vreg()
-- Some code alignment fixes
-- Improved DT values sanity check
-- Added dev_dbg print for sdhci controller version in probe()
-- Added usleep_range() after SW reset - it can take some time
-- Added SDHCI_QUIRK_SINGLE_POWER_WRITE - power handled by PMIC
-- Renamed DT property vdd-io to vddio
-
-Changes from v4:
-- Simplified sdhci_msm_vreg_disable() and sdhci_msm_set_vdd_io_vol()
-- Use devm_ioremap_resource() instead of devm_ioremap()
-- Converted IS_ERR_OR_NULL to IS_ERR
-- Disable regulators in sdhci_msm_remove()
-- Check for DT node at the beginning in sdhci_msm_probe()
-- Removed more redundant code
-- Changes in some error messages
-- Minor fixes
-
-Changes from v3:
-- Allocate memory for all required structs at once
-- Added termination entry in sdhci_msm_dt_match[]
-- Fixed a missing sdhci_pltfm_free() in probe()
-- Removed redundant of_match_ptr
-- Removed the unneeded function sdhci_msm_vreg_reset()
-
-Changes from v2:
-- Added DT bindings for clocks
-- Moved voltage regulators data to platform data
-- Removed unneeded includes
-- Removed obsolete and wrapper functions
-- Removed error checking where unnecessary
-- Removed redundant _clk suffix from clock names
-- Just return instead of goto where possible
-- Minor fixes
-
-Georgi Djakov (3):
-  mmc: sdhci-msm: Qualcomm SDHCI binding documentation
-  mmc: sdhci-msm: Initial support for Qualcomm chipsets
-  mmc: sdhci-msm: Add platform_execute_tunning implementation
-
- .../devicetree/bindings/mmc/sdhci-msm.txt          |   83 ++
- drivers/mmc/host/Kconfig                           |   13 +
- drivers/mmc/host/Makefile                          |    1 +
- drivers/mmc/host/sdhci-msm.c                       |  938 ++++++++++++++++++++
- 4 files changed, 1035 insertions(+)
- create mode 100644 Documentation/devicetree/bindings/mmc/sdhci-msm.txt
- create mode 100644 drivers/mmc/host/sdhci-msm.c
+It doesn't look like it could in its current form use mmc_of_parse(),
+as the imx code manually parses some of the generic properties to hand
+them into the sdhci layer.  This looks icky, and it looks like something
+that should be fixed - why should drivers be parsing the core attributes
+themselves?
 
 -- 
-1.7.9.5
+FTTC broadband for 0.8mile line: 5.8Mbps down 500kbps up.  Estimation
+in database were 13.1 to 19Mbit for a good line, about 7.5+ for a bad.
+Estimate before purchase was "up to 13.2Mbit".
