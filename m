@@ -1,51 +1,34 @@
 From: Dan Carpenter <dan.carpenter@oracle.com>
-Subject: Re: [patch] mmc: omap_hsmmc: precedence bug in
- omap_hsmmc_context_restore()
-Date: Thu, 30 Jan 2014 15:15:26 +0300
-Message-ID: <20140130121526.GO4815@mwanda>
-References: <20130822125613.GB2543@elgon.mountain>
- <52162444.1050908@ti.com>
+Subject: [patch 2/2] mmc: omap_hsmmc: checking for ERR_PTR instead of NULL
+Date: Thu, 30 Jan 2014 15:15:49 +0300
+Message-ID: <20140130121548.GB10368@elgon.mountain>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-omap-owner@vger.kernel.org>
+Return-path: <kernel-janitors-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <52162444.1050908@ti.com>
-Sender: linux-omap-owner@vger.kernel.org
+Sender: kernel-janitors-owner@vger.kernel.org
 To: Balaji T K <balajitk@ti.com>
-Cc: Chris Ball <cjb@laptop.org>, Grant Likely <grant.likely@linaro.org>, Rob Herring <rob.herring@calxeda.com>, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, devicetree@vger.kernel.org, kernel-janitors@vger.kernel.org
+Cc: Chris Ball <chris@printf.net>, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, kernel-janitors@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Thu, Aug 22, 2013 at 08:16:28PM +0530, Balaji T K wrote:
-> On Thursday 22 August 2013 06:26 PM, Dan Carpenter wrote:
-> >'!' has higher precedence than '&' so this doesn't work as intended
-> >although since RESETDONE is 1 it would work if none of the other bits
-> >are set.
-> >
-> Hi Dan,
-> 
-> Thanks for the patch, Indeed other bits are reserved.
-> however ...
-> 
-> >Signed-off-by: Dan Carpenter <dan.carpenter@oracle.com>
-> >---
-> >Untested.
-> >
-> >diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-> >index 1865321..7346b15 100644
-> >--- a/drivers/mmc/host/omap_hsmmc.c
-> >+++ b/drivers/mmc/host/omap_hsmmc.c
-> >@@ -612,7 +612,7 @@ static int omap_hsmmc_context_restore(struct omap_hsmmc_host *host)
-> >  	if (host->context_loss == context_loss)
-> >  		return 1;
-> >
-> >-	if (!OMAP_HSMMC_READ(host->base, SYSSTATUS) & RESETDONE)
-> >+	if (!(OMAP_HSMMC_READ(host->base, SYSSTATUS) & RESETDONE))
-> >  		return 1;
-> 
-> This check is unnecessary, will send a patch to remove this.
+The of_get_hsmmc_pdata() function returns NULL on error, it doesn't
+return ERR_PTRs.
 
-What happened with this?
+Signed-off-by: Dan Carpenter <dan.carpenter@oracle.com>
 
-regards,
-dan carpenter
-
+diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+index bfb0dbd052c0..76dbc7b759c2 100644
+--- a/drivers/mmc/host/omap_hsmmc.c
++++ b/drivers/mmc/host/omap_hsmmc.c
+@@ -1761,9 +1761,8 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
+ 	match = of_match_device(of_match_ptr(omap_mmc_of_match), &pdev->dev);
+ 	if (match) {
+ 		pdata = of_get_hsmmc_pdata(&pdev->dev);
+-
+-		if (IS_ERR(pdata))
+-			return PTR_ERR(pdata);
++		if (!pdata)
++			return -ENOMEM;
+ 
+ 		if (match->data) {
+ 			const u16 *offsetp = match->data;
