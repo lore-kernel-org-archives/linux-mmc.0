@@ -1,186 +1,114 @@
 From: Georgi Djakov <gdjakov@mm-sol.com>
-Subject: Re: [PATCH v7 2/2] mmc: sdhci-msm: Initial support for MSM chipsets
-Date: Thu, 30 Jan 2014 19:21:11 +0200
-Message-ID: <52EA8A07.6080008@mm-sol.com>
-References: <1383753405-23631-1-git-send-email-gdjakov@mm-sol.com> <1383753405-23631-3-git-send-email-gdjakov@mm-sol.com> <20131209170002.GA15223@sonymobile.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-doc-owner@vger.kernel.org>
-In-Reply-To: <20131209170002.GA15223@sonymobile.com>
-Sender: linux-doc-owner@vger.kernel.org
-To: Courtney Cavin <courtney.cavin@sonymobile.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "cjb@laptop.org" <cjb@laptop.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "grant.likely@linaro.org" <grant.likely@linaro.org>, "rob.herring@calxeda.com" <rob.herring@calxeda.com>, "pawel.moll@arm.com" <pawel.moll@arm.com>, "mark.rutland@arm.com" <mark.rutland@arm.com>, "swarren@wwwdotorg.org" <swarren@wwwdotorg.org>, "ijc+devicetree@hellion.org.uk" <ijc+devicetree@hellion.org.uk>, "galak@codeaurora.org" <galak@codeaurora.org>, "rob@landley.net" <rob@landley.net>, "linux-doc@vger.kernel.org" <linux-doc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-msm@vger.kernel.org" <linux-arm-msm@vger.kernel.org>, "subhashj@codeaurora.org" <subhashj@codeaurora.org>
+Subject: [PATCH v8 1/3] mmc: sdhci-msm: Qualcomm SDHCI binding documentation
+Date: Thu, 30 Jan 2014 20:45:05 +0200
+Message-ID: <1391107507-17321-2-git-send-email-gdjakov@mm-sol.com>
+References: <1391107507-17321-1-git-send-email-gdjakov@mm-sol.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1391107507-17321-1-git-send-email-gdjakov@mm-sol.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-mmc@vger.kernel.org, cjb@laptop.org, devicetree@vger.kernel.org, grant.likely@linaro.org, rob.herring@calxeda.com, pawel.moll@arm.com, mark.rutland@arm.com, swarren@wwwdotorg.org, ijc+devicetree@hellion.org.uk, galak@codeaurora.org, rob@landley.net, linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc: linux-arm-msm@vger.kernel.org, Georgi Djakov <gdjakov@mm-sol.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi,
+This patch adds the device-tree binding documentation for
+Qualcomm SDHCI driver. It contains the differences between
+the core properties in mmc.txt and the properties used by
+the sdhci-msm driver.
 
-Apologies for the delayed reply.
+Signed-off-by: Georgi Djakov <gdjakov@mm-sol.com>
+---
+ .../devicetree/bindings/mmc/sdhci-msm.txt          |   83 ++++++++++++++++++++
+ 1 file changed, 83 insertions(+)
+ create mode 100644 Documentation/devicetree/bindings/mmc/sdhci-msm.txt
 
-On 12/09/2013 07:00 PM, Courtney Cavin wrote:
-> On Wed, Nov 06, 2013 at 04:56:45PM +0100, Georgi Djakov wrote:
->> This platform driver adds the initial support of Secure
->> Digital Host Controller Interface compliant controller
->> found in Qualcomm MSM chipsets.
->>
->> Signed-off-by: Georgi Djakov <gdjakov@mm-sol.com>
-> [...]
->> +static int sdhci_msm_probe(struct platform_device *pdev)
->> +{
->> +       struct sdhci_host *host;
->> +       struct sdhci_pltfm_host *pltfm_host;
->> +       struct sdhci_msm_host *msm_host;
->> +       struct resource *core_memres = NULL;
->> +       int ret, dead;
->> +       u16 host_version;
->> +       u32 irq_status, irq_ctl;
->> +
->> +       if (!pdev->dev.of_node) {
->> +               dev_err(&pdev->dev, "No device tree data\n");
->> +               return -ENOENT;
->> +       }
->> +
->> +       msm_host = devm_kzalloc(&pdev->dev, sizeof(*msm_host), GFP_KERNEL);
->> +       if (!msm_host)
->> +               return -ENOMEM;
->> +
->> +       msm_host->sdhci_msm_pdata.ops = &sdhci_msm_ops;
->> +       host = sdhci_pltfm_init(pdev, &msm_host->sdhci_msm_pdata, 0);
->> +       if (IS_ERR(host)) {
->> +               dev_err(mmc_dev(host->mmc), "sdhci_pltfm_init error\n");
->> +               return PTR_ERR(host);
->> +       }
->> +
->> +       pltfm_host = sdhci_priv(host);
->> +       pltfm_host->priv = msm_host;
->> +       msm_host->mmc = host->mmc;
->> +       msm_host->pdev = pdev;
->> +
->> +       ret = mmc_of_parse(host->mmc);
->
-> Can we please add a call to sdhci_get_of_property(pdev) somewhere around
-> here too?
->
-
-Thanks, I have added it to v8.
-
->> +       if (ret) {
->> +               dev_err(&pdev->dev, "failed parsing mmc device tree\n");
->> +               goto pltfm_free;
->> +       }
->> +
->> +       ret = sdhci_msm_populate_pdata(&pdev->dev, &msm_host->pdata);
->> +       if (ret) {
->> +               dev_err(&pdev->dev, "DT parsing error\n");
->> +               goto pltfm_free;
->> +       }
->> +
->> +       /* Setup SDCC bus voter clock. */
->> +       msm_host->bus_clk = devm_clk_get(&pdev->dev, "bus");
->> +       if (!IS_ERR(msm_host->bus_clk)) {
->> +               /* Vote for max. clk rate for max. performance */
->> +               ret = clk_set_rate(msm_host->bus_clk, INT_MAX);
->> +               if (ret)
->> +                       goto pltfm_free;
->> +               ret = clk_prepare_enable(msm_host->bus_clk);
->> +               if (ret)
->> +                       goto pltfm_free;
->> +       }
->> +
->> +       /* Setup main peripheral bus clock */
->> +       msm_host->pclk = devm_clk_get(&pdev->dev, "iface");
->> +       if (!IS_ERR(msm_host->pclk)) {
->> +               ret = clk_prepare_enable(msm_host->pclk);
->> +               if (ret) {
->> +                       dev_err(&pdev->dev,
->> +                               "Main peripheral clock setup fail (%d)\n",
->> +                               ret);
->> +                       goto bus_clk_disable;
->> +               }
->> +       }
->> +
->> +       /* Setup SDC MMC clock */
->> +       msm_host->clk = devm_clk_get(&pdev->dev, "core");
->> +       if (IS_ERR(msm_host->clk)) {
->> +               ret = PTR_ERR(msm_host->clk);
->> +               dev_err(&pdev->dev, "SDC MMC clock setup fail (%d)\n", ret);
->> +               goto pclk_disable;
->> +       }
->> +
->> +       ret = clk_prepare_enable(msm_host->clk);
->> +       if (ret)
->> +               goto pclk_disable;
->> +
->> +       /* Setup regulators */
->> +       ret = sdhci_msm_vreg_init(&pdev->dev, &msm_host->pdata);
->> +       if (ret) {
->> +               if (ret != -EPROBE_DEFER)
->> +                       dev_err(&pdev->dev, "Regulator setup fail (%d)\n", ret);
->> +               goto clk_disable;
->> +       }
->> +
->> +       core_memres = platform_get_resource_byname(pdev,
->> +                                                  IORESOURCE_MEM, "core_mem");
->> +       msm_host->core_mem = devm_ioremap_resource(&pdev->dev, core_memres);
->> +
->> +       if (IS_ERR(msm_host->core_mem)) {
->> +               dev_err(&pdev->dev, "Failed to remap registers\n");
->> +               ret = PTR_ERR(msm_host->core_mem);
->> +               goto vreg_disable;
->> +       }
->> +
->> +       /* Reset the core and Enable SDHC mode */
->> +       writel_relaxed(readl_relaxed(msm_host->core_mem + CORE_POWER) |
->> +                       CORE_SW_RST, msm_host->core_mem + CORE_POWER);
->> +
->> +       /* SW reset can take upto 10HCLK + 15MCLK cycles. (min 40us) */
->> +       usleep_range(1000, 5000);
->> +       if (readl(msm_host->core_mem + CORE_POWER) & CORE_SW_RST) {
->> +               dev_err(&pdev->dev, "Stuck in reset\n");
->> +               ret = -ETIMEDOUT;
->> +               goto vreg_disable;
->> +       }
->> +
->> +       /* Set HC_MODE_EN bit in HC_MODE register */
->> +       writel_relaxed(HC_MODE_EN, (msm_host->core_mem + CORE_HC_MODE));
->> +
->> +       /*
->> +        * CORE_SW_RST above may trigger power irq if previous status of PWRCTL
->> +        * was either BUS_ON or IO_HIGH_V. So before we enable the power irq
->> +        * interrupt in GIC (by registering the interrupt handler), we need to
->> +        * ensure that any pending power irq interrupt status is acknowledged
->> +        * otherwise power irq interrupt handler would be fired prematurely.
->> +        */
->> +       irq_status = readl_relaxed(msm_host->core_mem + CORE_PWRCTL_STATUS);
->> +       writel_relaxed(irq_status, (msm_host->core_mem + CORE_PWRCTL_CLEAR));
->> +       irq_ctl = readl_relaxed(msm_host->core_mem + CORE_PWRCTL_CTL);
->> +       if (irq_status & (CORE_PWRCTL_BUS_ON | CORE_PWRCTL_BUS_OFF))
->> +               irq_ctl |= CORE_PWRCTL_BUS_SUCCESS;
->> +       if (irq_status & (CORE_PWRCTL_IO_HIGH | CORE_PWRCTL_IO_LOW))
->> +               irq_ctl |= CORE_PWRCTL_IO_SUCCESS;
->> +       writel_relaxed(irq_ctl, (msm_host->core_mem + CORE_PWRCTL_CTL));
->> +       /*
->> +        * Ensure that above writes are propogated before interrupt enablement
->> +        * in GIC.
->> +        */
->> +       mb();
->> +
->> +       /*
->> +        * Following are the deviations from SDHC spec v3.0 -
->> +        * 1. Card detection is handled using separate GPIO.
->> +        * 2. Bus power control is handled by interacting with PMIC.
->> +        */
->> +       host->quirks |= SDHCI_QUIRK_BROKEN_CARD_DETECTION;
->> +       host->quirks |= SDHCI_QUIRK_SINGLE_POWER_WRITE;
->
-> I couldn't get v6 running without the 5 quirks you submitted in [1].
-> Aren't these also attributes of the controller itself? If so, shouldn't they
-> be part of this patch series, and included here?
->
-
-Most of the quirks are for older hardware revisions. On what board/chip 
-are you trying to run it? I will post v8 shortly. Could you try with it 
-please?
-
-Thanks,
-Georgi
+diff --git a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
+new file mode 100644
+index 0000000..c26d335
+--- /dev/null
++++ b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
+@@ -0,0 +1,83 @@
++* Qualcomm SDHCI controller (sdhci-msm)
++
++This file documents differences between the core properties in mmc.txt
++and the properties used by the sdhci-msm driver.
++
++Required properties:
++- compatible: Should contain "qcom,sdhci-msm".
++- reg: Base address and length of the register set listed in reg-names.
++- reg-names: Should contain the following:
++	"hc_mem"   - Host controller register map
++	"core_mem" - SD Core register map
++- interrupts: Should contain an interrupt-specifiers for the interrupts listed in interrupt-names.
++- interrupt-names: Should contain the following:
++	"hc_irq"     - Host controller interrupt
++	"pwr_irq"    - PMIC interrupt
++- vdd-supply: Phandle to the regulator for the vdd (core voltage) supply.
++- vdd-io-supply: Phandle to the regulator for the vdd-io (i/o voltage) supply.
++- pinctrl-names: Should contain only one value - "default".
++- pinctrl-0: Should specify pin control groups used for this controller.
++- clocks: A list of phandle + clock-specifier pairs for the clocks listed in clock-names.
++- clock-names: Should contain the following:
++	"iface" - Main peripheral bus clock (PCLK/HCLK - AHB Bus clock) (required)
++	"core"	- SDC MMC clock (MCLK) (required)
++	"bus"	- SDCC bus voter clock (optional)
++
++Optional properties:
++
++- qcom,vdd-voltage-min - Specifies the minimum core voltage supported by the device in microvolts.
++- qcom,vdd-voltage-max - Specifies the maximum core voltage supported by the device in microvolts.
++- qcom,vdd-io-voltage-min - Specifies the minimum i/o voltage supported by the device in microvolts.
++- qcom,vdd-io-voltage-max - Specifies the maximum i/o voltage supported by the device in microvolts.
++
++Example:
++
++	sdhc_1: sdhci@f9824900 {
++		compatible = "qcom,sdhci-msm";
++		reg = <0xf9824900 0x11c>, <0xf9824000 0x800>;
++		reg-names = "hc_mem", "core_mem";
++		interrupts = <0 123 0>, <0 138 0>;
++		interrupt-names = "hc_irq", "pwr_irq";
++		bus-width = <8>;
++		non-removable;
++
++		vdd-supply = <&pm8941_l20>;
++		vdd-io-supply = <&pm8941_s3>;
++
++		qcom,vdd-voltage-min = <2950000>;
++		qcom,vdd-voltage-max = <2950000>;
++		qcom,vdd-io-voltage-min = <1800000>;
++		qcom,vdd-io-voltage-max = <1800000>;
++
++		pinctrl-names = "default";
++		pinctrl-0 = <&sdc1_clk &sdc1_cmd &sdc1_data>;
++
++		clocks = <&gcc GCC_SDCC1_APPS_CLK>, <&gcc GCC_SDCC1_AHB_CLK>;
++		clock-names = "core", "iface";
++	};
++
++	sdhc_2: sdhci@f98a4900 {
++		compatible = "qcom,sdhci-msm";
++		reg = <0xf98a4900 0x11c>, <0xf98a4000 0x800>;
++		reg-names = "hc_mem", "core_mem";
++		interrupts = <0 1 2>;
++		#interrupt-cells = <1>;
++		interrupt-map = <0 &intc 0 125 0
++			1 &intc 0 221 0>;
++		interrupt-names = "hc_irq", "pwr_irq";
++		bus-width = <4>;
++
++		vdd-supply = <&pm8941_l21>;
++		vdd-io-supply = <&pm8941_l13>;
++
++		qcom,vdd-voltage-min = <2950000>;
++		qcom,vdd-voltage-max = <2950000>;
++		qcom,vdd-io-voltage-min = <1800000>;
++		qcom,vdd-io-voltage-max = <2950000>;
++
++		pinctrl-names = "default";
++		pinctrl-0 = <&sdc2_clk &sdc2_cmd &sdc2_data>;
++
++		clocks = <&gcc GCC_SDCC2_APPS_CLK>, <&gcc GCC_SDCC2_AHB_CLK>;
++		clock-names = "core", "iface";
++	};
+-- 
+1.7.9.5
