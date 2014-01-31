@@ -1,80 +1,43 @@
-From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: [PATCH 3/3] mmc: mxcmmc: add DMA SG synchronisation
-Date: Fri, 31 Jan 2014 12:54:42 +0100 (CET)
-Message-ID: <Pine.LNX.4.64.1401311249390.3234@axis700.grange>
-References: <Pine.LNX.4.64.1401311237080.3234@axis700.grange>
+From: Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>
+Subject: Re: [PATCH 3/4] mmc: SDHI: update sh_mobile_sdhi_of_data for r8a7779
+Date: Fri, 31 Jan 2014 16:46:26 +0400
+Message-ID: <52EB9B22.4050703@cogentembedded.com>
+References: <87lhy090m0.wl%kuninori.morimoto.gx@gmail.com>	<87d2j87m6u.wl%kuninori.morimoto.gx@gmail.com> <878utw7m3z.wl%kuninori.morimoto.gx@gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.126.171]:52992 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932143AbaAaLyy (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 31 Jan 2014 06:54:54 -0500
-In-Reply-To: <Pine.LNX.4.64.1401311237080.3234@axis700.grange>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-sh-owner@vger.kernel.org>
+In-Reply-To: <878utw7m3z.wl%kuninori.morimoto.gx@gmail.com>
+Sender: linux-sh-owner@vger.kernel.org
+To: Kuninori Morimoto <kuninori.morimoto.gx@gmail.com>, Simon <horms@verge.net.au>, Chris Ball <cjb@laptop.org>
+Cc: Magnus <magnus.damm@gmail.com>, Linux-SH <linux-sh@vger.kernel.org>, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: Chris Ball <cjb@laptop.org>, Sascha Hauer <kernel@pengutronix.de>, linux-arm-kernel@lists.infradead.org
 
-According to the DMA API data has to be synchronised before starting
-a DMA transfer to device and after completing a DMA transfer from device.
+Hello.
 
-Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
----
- drivers/mmc/host/mxcmmc.c |   18 ++++++++++++------
- 1 files changed, 12 insertions(+), 6 deletions(-)
+On 31-01-2014 9:32, Kuninori Morimoto wrote:
 
-diff --git a/drivers/mmc/host/mxcmmc.c b/drivers/mmc/host/mxcmmc.c
-index f7199c8..31dfc7b 100644
---- a/drivers/mmc/host/mxcmmc.c
-+++ b/drivers/mmc/host/mxcmmc.c
-@@ -326,6 +326,7 @@ static inline void mxcmci_swap_buffers(struct mmc_data *data) {}
- 
- static int mxcmci_setup_data(struct mxcmci_host *host, struct mmc_data *data)
- {
-+	struct device *dev = host->dma->device->dev;
- 	unsigned int nob = data->blocks;
- 	unsigned int blksz = data->blksz;
- 	unsigned int datasize = nob * blksz;
-@@ -363,18 +364,20 @@ static int mxcmci_setup_data(struct mxcmci_host *host, struct mmc_data *data)
- 		mxcmci_swap_buffers(data);
- 	}
- 
--	nents = dma_map_sg(host->dma->device->dev, data->sg,
--				     data->sg_len,  host->dma_dir);
-+	nents = dma_map_sg(dev, data->sg, data->sg_len,  host->dma_dir);
- 	if (nents != data->sg_len)
- 		return -EINVAL;
- 
-+	if (data->flags & MMC_DATA_WRITE)
-+		dma_sync_sg_for_device(dev, data->sg, data->sg_len,
-+				       host->dma_dir);
-+
- 	host->desc = dmaengine_prep_slave_sg(host->dma,
- 		data->sg, data->sg_len, slave_dirn,
- 		DMA_PREP_INTERRUPT | DMA_CTRL_ACK);
- 
- 	if (!host->desc) {
--		dma_unmap_sg(host->dma->device->dev, data->sg, data->sg_len,
--				host->dma_dir);
-+		dma_unmap_sg(dev, data->sg, data->sg_len, host->dma_dir);
- 		host->do_dma = 0;
- 		return 0; /* Fall back to PIO */
- 	}
-@@ -487,8 +490,11 @@ static int mxcmci_finish_data(struct mxcmci_host *host, unsigned int stat)
- 	int data_error;
- 
- 	if (mxcmci_use_dma(host)) {
--		dma_unmap_sg(host->dma->device->dev, data->sg, data->sg_len,
--				host->dma_dir);
-+		struct device *dev = host->dma->device->dev;
-+		dma_unmap_sg(dev, data->sg, data->sg_len, host->dma_dir);
-+		if (host->dma_dir == DMA_FROM_DEVICE)
-+			dma_sync_sg_for_cpu(dev, data->sg, data->sg_len,
-+					    host->dma_dir);
- 		mxcmci_swap_buffers(data);
- 	}
- 
--- 
-1.7.2.5
+> From: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
+
+> This patch updates r8a7779 DT data to have SoC specific settings.
+
+> Signed-off-by: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
+> ---
+>   drivers/mmc/host/sh_mobile_sdhi.c |    2 +-
+>   1 file changed, 1 insertion(+), 1 deletion(-)
+
+> diff --git a/drivers/mmc/host/sh_mobile_sdhi.c b/drivers/mmc/host/sh_mobile_sdhi.c
+> index 6442286..322cd35 100644
+> --- a/drivers/mmc/host/sh_mobile_sdhi.c
+> +++ b/drivers/mmc/host/sh_mobile_sdhi.c
+> @@ -58,7 +58,7 @@ static const struct of_device_id sh_mobile_sdhi_of_match[] = {
+>   	{ .compatible = "renesas,sdhi-r8a73a4", .data = &sh_mobile_sdhi_of_cfg[0], },
+>   	{ .compatible = "renesas,sdhi-r8a7740", .data = &sh_mobile_sdhi_of_cfg[0], },
+>   	{ .compatible = "renesas,sdhi-r8a7778", .data = &of_rcar_gen1_compatible, },
+> -	{ .compatible = "renesas,sdhi-r8a7779", .data = &sh_mobile_sdhi_of_cfg[0], },
+> +	{ .compatible = "renesas,sdhi-r8a7779", .data = &of_rcar_gen1_compatible, },
+
+    I'd merge this to the previous patch.
+
+WBR, Sergei
 
