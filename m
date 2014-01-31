@@ -1,7 +1,7 @@
 From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: [PATCH 1/3] mmc: tmio-mmc: add DMA SG synchronisation
-Date: Fri, 31 Jan 2014 12:54:19 +0100 (CET)
-Message-ID: <Pine.LNX.4.64.1401311248320.3234@axis700.grange>
+Subject: [PATCH 2/3] mmc: sh-mmcif: add DMA SG synchronisation
+Date: Fri, 31 Jan 2014 12:54:29 +0100 (CET)
+Message-ID: <Pine.LNX.4.64.1401311249070.3234@axis700.grange>
 References: <Pine.LNX.4.64.1401311237080.3234@axis700.grange>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
@@ -17,50 +17,45 @@ a DMA transfer to device and after completing a DMA transfer from device.
 
 Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 ---
- drivers/mmc/host/tmio_mmc_dma.c |   21 ++++++++++++---------
- 1 files changed, 12 insertions(+), 9 deletions(-)
+ drivers/mmc/host/sh_mmcif.c |   18 ++++++++++--------
+ 1 files changed, 10 insertions(+), 8 deletions(-)
 
-diff --git a/drivers/mmc/host/tmio_mmc_dma.c b/drivers/mmc/host/tmio_mmc_dma.c
-index 65edb4a..a997b94 100644
---- a/drivers/mmc/host/tmio_mmc_dma.c
-+++ b/drivers/mmc/host/tmio_mmc_dma.c
-@@ -168,9 +168,12 @@ static void tmio_mmc_start_dma_tx(struct tmio_mmc_host *host)
- 	}
- 
- 	ret = dma_map_sg(chan->device->dev, sg, host->sg_len, DMA_TO_DEVICE);
--	if (ret > 0)
-+	if (ret > 0) {
-+		dma_sync_sg_for_device(chan->device->dev, sg, host->sg_len,
+diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
+index d032b08..902780c 100644
+--- a/drivers/mmc/host/sh_mmcif.c
++++ b/drivers/mmc/host/sh_mmcif.c
+@@ -345,6 +345,8 @@ static void sh_mmcif_start_dma_tx(struct sh_mmcif_host *host)
+ 			 DMA_TO_DEVICE);
+ 	if (ret > 0) {
+ 		host->dma_active = true;
++		dma_sync_sg_for_device(chan->device->dev, sg, data->sg_len,
 +				       DMA_TO_DEVICE);
  		desc = dmaengine_prep_slave_sg(chan, sg, ret,
- 			DMA_MEM_TO_DEV, DMA_CTRL_ACK);
-+	}
+ 			DMA_MEM_TO_DEV, DMA_PREP_INTERRUPT | DMA_CTRL_ACK);
+ 	}
+@@ -1118,14 +1120,14 @@ static bool sh_mmcif_end_cmd(struct sh_mmcif_host *host)
+ 	time = wait_for_completion_interruptible_timeout(&host->dma_complete,
+ 							 host->timeout);
  
- 	if (desc) {
- 		cookie = dmaengine_submit(desc);
-@@ -247,14 +250,14 @@ static void tmio_mmc_tasklet_fn(unsigned long arg)
- 	if (!host->data)
- 		goto out;
- 
--	if (host->data->flags & MMC_DATA_READ)
+-	if (data->flags & MMC_DATA_READ)
 -		dma_unmap_sg(host->chan_rx->device->dev,
--			     host->sg_ptr, host->sg_len,
+-			     data->sg, data->sg_len,
 -			     DMA_FROM_DEVICE);
 -	else
 -		dma_unmap_sg(host->chan_tx->device->dev,
--			     host->sg_ptr, host->sg_len,
+-			     data->sg, data->sg_len,
 -			     DMA_TO_DEVICE);
-+	if (host->data->flags & MMC_DATA_READ) {
++	if (data->flags & MMC_DATA_READ) {
 +		struct device *dev = host->chan_rx->device->dev;
-+		dma_unmap_sg(dev, host->sg_ptr, host->sg_len, DMA_FROM_DEVICE);
-+		dma_sync_sg_for_cpu(dev, host->sg_ptr, host->sg_len, DMA_FROM_DEVICE);
++		dma_unmap_sg(dev, data->sg, data->sg_len, DMA_FROM_DEVICE);
++		dma_sync_sg_for_cpu(dev, data->sg, data->sg_len, DMA_FROM_DEVICE);
 +	} else {
 +		struct device *dev = host->chan_tx->device->dev;
-+		dma_unmap_sg(dev, host->sg_ptr, host->sg_len, DMA_TO_DEVICE);
++		dma_unmap_sg(dev, data->sg, data->sg_len, DMA_TO_DEVICE);
 +	}
  
- 	tmio_mmc_do_data_irq(host);
- out:
+ 	if (host->sd_error) {
+ 		dev_err(host->mmc->parent,
 -- 
 1.7.2.5
 
