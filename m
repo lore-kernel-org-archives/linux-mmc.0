@@ -1,41 +1,53 @@
-From: Simon Horman <horms@verge.net.au>
-Subject: Re: mmc: sh_mobile_sdhi: DT update for R-Car
-Date: Mon, 3 Feb 2014 15:41:59 +0900
-Message-ID: <20140203064156.GE30047@verge.net.au>
-References: <87lhy090m0.wl%kuninori.morimoto.gx@gmail.com>
- <87d2j87m6u.wl%kuninori.morimoto.gx@gmail.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: [PATCH v3 0/8] mmc: dw_mmc: minor code cleanup
+Date: Mon, 03 Feb 2014 20:15:34 +0900
+Message-ID: <52EF7A56.2060707@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from kirsty.vergenet.net ([202.4.237.240]:39358 "EHLO
-	kirsty.vergenet.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752765AbaBCGmB (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 3 Feb 2014 01:42:01 -0500
-Content-Disposition: inline
-In-Reply-To: <87d2j87m6u.wl%kuninori.morimoto.gx@gmail.com>
+Received: from mailout3.samsung.com ([203.254.224.33]:9422 "EHLO
+	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750764AbaBCLPh (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 3 Feb 2014 06:15:37 -0500
+Received: from epcpsbgr2.samsung.com
+ (u142.gpu120.samsung.co.kr [203.254.230.142])
+ by mailout3.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+ (7.0.4.24.0) 64bit (built Nov 17 2011))
+ with ESMTP id <0N0F001B339YP080@mailout3.samsung.com> for
+ linux-mmc@vger.kernel.org; Mon, 03 Feb 2014 20:15:34 +0900 (KST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Kuninori Morimoto <kuninori.morimoto.gx@gmail.com>
-Cc: Chris Ball <cjb@laptop.org>, Magnus <magnus.damm@gmail.com>, Linux-SH <linux-sh@vger.kernel.org>, linux-mmc@vger.kernel.org
+To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Cc: Chris Ball <chris@printf.net>, Seungwon Jeon <tgih.jun@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, Olof Johansson <olof@lixom.net>
 
-On Thu, Jan 30, 2014 at 09:30:20PM -0800, Kuninori Morimoto wrote:
-> Hi Chris, Simon
-> 
-> These are v2 of updates code for R-Car.
-> I separated v1 patches into for mmc, and for SH-ARM.
-> This is "mmc" part patches.
-> 
-> Kuninori Morimoto (4):
->       mmc: SDHI: tidyup sh_mobile_sdhi_of_match position
->       mmc: SDHI: update sh_mobile_sdhi_of_data for r8a7778
->       mmc: SDHI: update sh_mobile_sdhi_of_data for r8a7779
->       mmc: SDHI: update sh_mobile_sdhi_of_data for r8a7790
-> 
->  drivers/mmc/host/sh_mobile_sdhi.c |   41 +++++++++++++++++++++++++------------
+This patch-set is minor code cleanup.
 
-I agree with Sergei that patches 2 and 3 could be consolidated,
-but I also don't feel strongly about it, so please use your best judgement
-there.
+Change-log V3:
+	- Maintained original code for non-removable checking.
+	- Add patch (mmc: dw_mmc: fix the checking whether card is present or not)
 
-Acked-by: Simon Horman <horms+renesas@verge.net.au>
+Change-log V2:
+	- Add the new patch(mmc: core use the broken-cd for non-removable card
+	- Change the name of hs200 property.
+	- Based on latest mmc-next.
 
+Jaehoon Chung (8):
+  mmc: core: add the property for hs200
+  mmc: dw_mmc: use the mmc_of_parse() instead of localparse
+  mmc: dw_mmc: replace the bus_hz checking point
+  mmc: dw_mmc: remove unused member variable.
+  mmc: dw_mmc: fix minor coding style.
+  mmc: dw_mmc: remove the unnecessary function.
+  mmc: dw_mmc: remove the dw_mci_of_cd_gpio()
+  mmc: dw_mmc: fix the checking whether card is present or not
+
+ Documentation/devicetree/bindings/mmc/mmc.txt      |    2 +
+ .../devicetree/bindings/mmc/synopsys-dw-mshc.txt   |    5 -
+ drivers/mmc/core/host.c                            |    4 +
+ drivers/mmc/host/dw_mmc.c                          |  147 +++-----------------
+ include/linux/mmc/dw_mmc.h                         |   14 --
+ 5 files changed, 26 insertions(+), 146 deletions(-)
+
+-- 
+1.7.9.5
