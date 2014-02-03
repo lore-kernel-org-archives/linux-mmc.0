@@ -1,35 +1,71 @@
 From: Simon Horman <horms@verge.net.au>
-Subject: Re: mmc: sh_mobile_sdhi: DT update for R-Car
-Date: Mon, 3 Feb 2014 15:34:28 +0900
-Message-ID: <20140203063425.GC30047@verge.net.au>
+Subject: Re: [PATCH] ARM: shmobile: bockw: use wp-gpios instead of WP pin
+Date: Mon, 3 Feb 2014 15:35:51 +0900
+Message-ID: <20140203063549.GD30047@verge.net.au>
 References: <87lhy090m0.wl%kuninori.morimoto.gx@gmail.com>
- <8761p07lx8.wl%kuninori.morimoto.gx@gmail.com>
+ <87zjmc676u.wl%kuninori.morimoto.gx@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from kirsty.vergenet.net ([202.4.237.240]:35916 "EHLO
-	kirsty.vergenet.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750946AbaBCGea (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 3 Feb 2014 01:34:30 -0500
+Return-path: <linux-sh-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <8761p07lx8.wl%kuninori.morimoto.gx@gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+In-Reply-To: <87zjmc676u.wl%kuninori.morimoto.gx@gmail.com>
+Sender: linux-sh-owner@vger.kernel.org
 To: Kuninori Morimoto <kuninori.morimoto.gx@gmail.com>
-Cc: Chris Ball <cjb@laptop.org>, Magnus <magnus.damm@gmail.com>, Linux-SH <linux-sh@vger.kernel.org>, linux-mmc@vger.kernel.org
+Cc: Magnus <magnus.damm@gmail.com>, Linux-SH <linux-sh@vger.kernel.org>, linux-mmc@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 
-On Thu, Jan 30, 2014 at 09:36:06PM -0800, Kuninori Morimoto wrote:
-> Hi Simon
+On Thu, Jan 30, 2014 at 09:39:40PM -0800, Kuninori Morimoto wrote:
+> From: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
 > 
-> These are v2 of updates code for R-Car.
-> I separated v1 patches into for mmc, and for SH-ARM.
-> This is "SH-ARM" part patches.
+> Latest Renesas Chip has some SDHI channels and the WP pin
+> availability depends on its channel or HW implementation.
+> Thus, this patch decides new policy whch indicates
+> WP is disabled as default.
+> But, we can use wp-gpios property to enable it as
+> other method.
 > 
-> These need my previous mmc part patches.
+> Signed-off-by: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
+> ---
+> Simon
+> 
+> This was included on v1 patch series,
+> but no relationship with mmc part patches.
 
-Thanks Morimoto-san,
+So I could take this patch into the renesas tree now?
 
-could you please repost these patches once the driver
-patches are present in an rc release?
-
-Thanks
+> 
+>  arch/arm/boot/dts/r8a7778-bockw-reference.dts |    4 +++-
+>  1 file changed, 3 insertions(+), 1 deletion(-)
+> 
+> diff --git a/arch/arm/boot/dts/r8a7778-bockw-reference.dts b/arch/arm/boot/dts/r8a7778-bockw-reference.dts
+> index bb62c7a..06cda19 100644
+> --- a/arch/arm/boot/dts/r8a7778-bockw-reference.dts
+> +++ b/arch/arm/boot/dts/r8a7778-bockw-reference.dts
+> @@ -17,6 +17,7 @@
+>  /dts-v1/;
+>  #include "r8a7778.dtsi"
+>  #include <dt-bindings/interrupt-controller/irq.h>
+> +#include <dt-bindings/gpio/gpio.h>
+>  
+>  / {
+>  	model = "bockw";
+> @@ -84,7 +85,7 @@
+>  
+>  	sdhi0_pins: sd0 {
+>  		renesas,groups = "sdhi0_data4", "sdhi0_ctrl",
+> -				  "sdhi0_cd", "sdhi0_wp";
+> +				  "sdhi0_cd";
+>  		renesas,function = "sdhi0";
+>  	};
+>  
+> @@ -101,6 +102,7 @@
+>  	vmmc-supply = <&fixedregulator3v3>;
+>  	bus-width = <4>;
+>  	status = "okay";
+> +	wp-gpios = <&gpio3 18 GPIO_ACTIVE_HIGH>;
+>  };
+>  
+>  &hspi0 {
+> -- 
+> 1.7.9.5
+> 
