@@ -1,88 +1,41 @@
-From: Chanho Min <chanho.min@lge.com>
-Subject: [PATCH] mmc:sdhci: handle busy-end interrupt during command
-Date: Mon,  3 Feb 2014 15:40:24 +0900
-Message-ID: <1391409624-6234-1-git-send-email-chanho.min@lge.com>
+From: Simon Horman <horms@verge.net.au>
+Subject: Re: mmc: sh_mobile_sdhi: DT update for R-Car
+Date: Mon, 3 Feb 2014 15:41:59 +0900
+Message-ID: <20140203064156.GE30047@verge.net.au>
+References: <87lhy090m0.wl%kuninori.morimoto.gx@gmail.com>
+ <87d2j87m6u.wl%kuninori.morimoto.gx@gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lgeamrelo02.lge.com ([156.147.1.126]:61240 "EHLO
-	LGEAMRELO02.lge.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750836AbaBCGks (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 3 Feb 2014 01:40:48 -0500
+Received: from kirsty.vergenet.net ([202.4.237.240]:39358 "EHLO
+	kirsty.vergenet.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752765AbaBCGmB (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 3 Feb 2014 01:42:01 -0500
+Content-Disposition: inline
+In-Reply-To: <87d2j87m6u.wl%kuninori.morimoto.gx@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>
-Cc: Hankyung Yu <hankyung.yu@lge.com>, Pierre Ossman <drzeus@drzeus.cx>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, HyoJun Im <hyojun.im@lge.com>, Chanho Min <chanho.min@lge.com>
+To: Kuninori Morimoto <kuninori.morimoto.gx@gmail.com>
+Cc: Chris Ball <cjb@laptop.org>, Magnus <magnus.damm@gmail.com>, Linux-SH <linux-sh@vger.kernel.org>, linux-mmc@vger.kernel.org
 
-It is fully legal for a controller to start handling busy-end interrupt
-before it has signaled that the command has completed. So make sure
-we do things in the proper order, Or it results that command interrupt
-is ignored so it can cause unexpected operations. This is founded at some
-toshiba emmc with the bellow warning.
+On Thu, Jan 30, 2014 at 09:30:20PM -0800, Kuninori Morimoto wrote:
+> Hi Chris, Simon
+> 
+> These are v2 of updates code for R-Car.
+> I separated v1 patches into for mmc, and for SH-ARM.
+> This is "mmc" part patches.
+> 
+> Kuninori Morimoto (4):
+>       mmc: SDHI: tidyup sh_mobile_sdhi_of_match position
+>       mmc: SDHI: update sh_mobile_sdhi_of_data for r8a7778
+>       mmc: SDHI: update sh_mobile_sdhi_of_data for r8a7779
+>       mmc: SDHI: update sh_mobile_sdhi_of_data for r8a7790
+> 
+>  drivers/mmc/host/sh_mobile_sdhi.c |   41 +++++++++++++++++++++++++------------
 
-"mmc0: Got command interrupt 0x00000001 even though
-no command operation was in progress."
+I agree with Sergei that patches 2 and 3 could be consolidated,
+but I also don't feel strongly about it, so please use your best judgement
+there.
 
-Signed-off-by: Hankyung Yu <hankyung.yu@lge.com>
-Signed-off-by: Chanho Min <chanho.min@lge.com>
----
- drivers/mmc/host/sdhci.c  |   17 +++++++++++++++--
- include/linux/mmc/sdhci.h |    1 +
- 2 files changed, 16 insertions(+), 2 deletions(-)
-
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index bd8a098..21f98e7 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -1016,6 +1016,7 @@ void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
- 	mod_timer(&host->timer, jiffies + 10 * HZ);
- 
- 	host->cmd = cmd;
-+	host->busy_handle = 0;
- 
- 	sdhci_prepare_data(host, cmd);
- 
-@@ -2271,8 +2272,12 @@ static void sdhci_cmd_irq(struct sdhci_host *host, u32 intmask)
- 		if (host->cmd->data)
- 			DBG("Cannot wait for busy signal when also "
- 				"doing a data transfer");
--		else if (!(host->quirks & SDHCI_QUIRK_NO_BUSY_IRQ))
-+		else if (!(host->quirks & SDHCI_QUIRK_NO_BUSY_IRQ)
-+				&& !host->busy_handle) {
-+			/* Mark that command complete before busy is ended */
-+			host->busy_handle = 1;
- 			return;
-+		}
- 
- 		/* The controller does not support the end-of-busy IRQ,
- 		 * fall through and take the SDHCI_INT_RESPONSE */
-@@ -2335,7 +2340,15 @@ static void sdhci_data_irq(struct sdhci_host *host, u32 intmask)
- 		 */
- 		if (host->cmd && (host->cmd->flags & MMC_RSP_BUSY)) {
- 			if (intmask & SDHCI_INT_DATA_END) {
--				sdhci_finish_command(host);
-+				/*
-+				 * Some cards handle busy-end interrupt
-+				 * before the command completed, so make
-+				 * sure we do things in the proper order.
-+				 */
-+				if (host->busy_handle)
-+					sdhci_finish_command(host);
-+				else
-+					host->busy_handle = 1;
- 				return;
- 			}
- 		}
-diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
-index 3e781b8..0118020 100644
---- a/include/linux/mmc/sdhci.h
-+++ b/include/linux/mmc/sdhci.h
-@@ -148,6 +148,7 @@ struct sdhci_host {
- 	struct mmc_command *cmd;	/* Current command */
- 	struct mmc_data *data;	/* Current data request */
- 	unsigned int data_early:1;	/* Data finished before cmd */
-+	unsigned int busy_handle:1;	/* Handling the order of Busy-end */
- 
- 	struct sg_mapping_iter sg_miter;	/* SG state for PIO */
- 	unsigned int blocks;	/* remaining PIO blocks */
--- 
-1.7.9.5
+Acked-by: Simon Horman <horms+renesas@verge.net.au>
 
