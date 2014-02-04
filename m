@@ -1,112 +1,81 @@
-From: Kevin Hilman <khilman-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH 05/17] mmc: mmci: Put the device into low power state at system suspend
-Date: Tue, 04 Feb 2014 11:22:42 -0800
-Message-ID: <8738jyu1h9.fsf@paris.lan>
-References: <1391529538-21685-1-git-send-email-ulf.hansson@linaro.org>
-	<1391529538-21685-6-git-send-email-ulf.hansson@linaro.org>
+From: David =?utf-8?q?Lanzend=C3=B6rfer?= <david.lanzendoerfer-Z7Kmv9EsliU@public.gmane.org>
+Subject: [PATCH v2 0/6] ARM: sunxi: Add driver for SD/MMC hosts
+ found on allwinner sunxi SOCs
+Date: Tue, 04 Feb 2014 20:24:13 +0100
+Message-ID: <20140204191648.29809.14611.stgit@dizzy-6.o2s.ch>
+Reply-To: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-spi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1391529538-21685-6-git-send-email-ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> (Ulf
-	Hansson's message of "Tue, 4 Feb 2014 16:58:46 +0100")
-Sender: linux-spi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Alessandro Rubini <rubini-9wsNiZum9E8@public.gmane.org>, Linus Walleij <linus.walleij-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Wolfram Sang <wsa-z923LK4zBo2bacvFa/9K2g@public.gmane.org>, Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, Mark Brown <broonie-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-spi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
+Return-path: <linux-sunxi+bncBD2JL37LXEKRB374YSLQKGQECRTHIAA-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Post: <http://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Help: <http://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Archive: <http://groups.google.com/group/linux-sunxi>
+Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+List-Subscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Unsubscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+To: devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Laurent Pinchart <laurent.pinchart+renesas-ryLnwIuWjnjg/C1BVhZhaw@public.gmane.org>, Simon Baatz <gmbnomis-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, H Hartley Sweeten <hsweeten-3FF4nKcrg1dE2c76skzGb0EOCMrvLtNR@public.gmane.org>, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, Tejun Heo <tj-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, Guennadi Liakhovetski <g.liakhovetski-Mmb7MZpHnFY@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> writes:
+Hello
+The following patchset adds support for the SD/MMC host found in the Allwin=
+ner SoCs.
+It contains all the necessary modifications for clock environment and also =
+the device
+tree script modification which add it to all the boards using it.
+The clock environment function needed for phase offset configuration has
+been proposed and implemented by Emilio.
+This patchset is the second attempt to send this driver upstream.
+I'm looking forward to the acceptance of this patchset into mainline.
 
-> Due to the available runtime PM callbacks, we are now able to put our
-> device into low power state at system suspend.
->
-> Earlier we could not accomplish this without trusting a power domain
-> for the device to take care of it. Now we are able to cope with
-> scenarios both with and without a power domain.
->
-> Cc: Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>
-> Signed-off-by: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-> ---
->  drivers/mmc/host/mmci.c |   45 +++++++++++++++++++++++++--------------------
->  1 file changed, 25 insertions(+), 20 deletions(-)
->
-> diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-> index c88da1c..074e0cb 100644
-> --- a/drivers/mmc/host/mmci.c
-> +++ b/drivers/mmc/host/mmci.c
-> @@ -1723,33 +1723,38 @@ static int mmci_remove(struct amba_device *dev)
->  	return 0;
->  }
->  
-> -#ifdef CONFIG_SUSPEND
-> -static int mmci_suspend(struct device *dev)
-> +#ifdef CONFIG_PM_SLEEP
-> +static int mmci_suspend_late(struct device *dev)
->  {
-> -	struct amba_device *adev = to_amba_device(dev);
-> -	struct mmc_host *mmc = amba_get_drvdata(adev);
-> +	int ret = 0;
->  
-> -	if (mmc) {
-> -		struct mmci_host *host = mmc_priv(mmc);
-> -		pm_runtime_get_sync(dev);
-> -		writel(0, host->base + MMCIMASK0);
-> -	}
-> +	if (pm_runtime_status_suspended(dev))
-> +		return 0;
->  
-> -	return 0;
-> +	if (dev->pm_domain && dev->pm_domain->ops.runtime_suspend)
-> +		ret = dev->pm_domain->ops.runtime_suspend(dev);
-> +	else
-> +		ret = dev->bus->pm->runtime_suspend(dev);
-> +
-> +	if (!ret)
-> +		pm_runtime_set_suspended(dev);
+best regards
+David
 
-Isn't this basically open-coding pm_runtime_suspend()...
+---
 
-> +	return ret;
->  }
->  
-> -static int mmci_resume(struct device *dev)
-> +static int mmci_resume_early(struct device *dev)
->  {
-> -	struct amba_device *adev = to_amba_device(dev);
-> -	struct mmc_host *mmc = amba_get_drvdata(adev);
-> +	int ret = 0;
->  
-> -	if (mmc) {
-> -		struct mmci_host *host = mmc_priv(mmc);
-> -		writel(MCI_IRQENABLE, host->base + MMCIMASK0);
-> -		pm_runtime_put(dev);
-> -	}
-> +	if (pm_runtime_status_suspended(dev))
-> +		return 0;
->  
-> -	return 0;
-> +	if (dev->pm_domain && dev->pm_domain->ops.runtime_resume)
-> +		ret = dev->pm_domain->ops.runtime_resume(dev);
-> +	else
-> +		ret = dev->bus->pm->runtime_resume(dev);
-> +
-> +	return ret;
+David Lanzend=C3=B6rfer (4):
+      ARM: sunxi: Add driver for SD/MMC hosts found on Allwinner sunxi SoCs
+      ARM: dts: sun7i: Add support for mmc
+      ARM: dts: sun4i: Add support for mmc
+      ARM: dts: sun5i: Add support for mmc
 
-...and this is pm_runtime_resume()? (though both terribly simplified.)
+Emilio L=C3=B3pez (1):
+      clk: sunxi: Implement MMC phase control
 
-This is starting to show that building with PM_SLEEP but not PM_RUNTIME
-is going to force open-coding a lot of stuff that the runtime PM
-framework already provides.  So either we need some helper functions so
-we're not sprinkling manual calls to bus/pm_domain callbacks all over
-the place, or maybe where we need to go is have a way for platforms that
-really are "runtime PM centric" to declare that even PM_SLEEP depends on
-PM_RUNTIME.  
+Hans de Goede (1):
+      ARM: sunxi: clk: export clk_sunxi_mmc_phase_control
 
-I'm trying to thing of a good reason to not make PM_SLEEP depend on
-PM_RUNTIME for platforms like this.
 
-Kevin
+ arch/arm/boot/dts/sun4i-a10-a1000.dts            |    8=20
+ arch/arm/boot/dts/sun4i-a10-cubieboard.dts       |    8=20
+ arch/arm/boot/dts/sun4i-a10.dtsi                 |   54 +
+ arch/arm/boot/dts/sun5i-a10s-olinuxino-micro.dts |   30 +
+ arch/arm/boot/dts/sun5i-a10s.dtsi                |   44 +
+ arch/arm/boot/dts/sun5i-a13-olinuxino-micro.dts  |   15=20
+ arch/arm/boot/dts/sun5i-a13-olinuxino.dts        |   15=20
+ arch/arm/boot/dts/sun5i-a13.dtsi                 |   37 +
+ arch/arm/boot/dts/sun7i-a20-cubieboard2.dts      |    8=20
+ arch/arm/boot/dts/sun7i-a20-cubietruck.dts       |    8=20
+ arch/arm/boot/dts/sun7i-a20-olinuxino-micro.dts  |   23 +
+ arch/arm/boot/dts/sun7i-a20.dtsi                 |   61 ++
+ drivers/clk/sunxi/clk-sunxi.c                    |   35 +
+ drivers/mmc/host/Kconfig                         |    8=20
+ drivers/mmc/host/Makefile                        |    2=20
+ drivers/mmc/host/sunxi-mci.c                     |  848 ++++++++++++++++++=
+++++
+ drivers/mmc/host/sunxi-mci.h                     |  239 ++++++
+ include/linux/clk/sunxi.h                        |   22 +
+ 18 files changed, 1465 insertions(+)
+ create mode 100644 drivers/mmc/host/sunxi-mci.c
+ create mode 100644 drivers/mmc/host/sunxi-mci.h
+ create mode 100644 include/linux/clk/sunxi.h
 
---
-To unsubscribe from this list: send the line "unsubscribe linux-spi" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+--=20
+Signature
+
+--=20
+You received this message because you are subscribed to the Google Groups "=
+linux-sunxi" group.
+To unsubscribe from this group and stop receiving emails from it, send an e=
+mail to linux-sunxi+unsubscribe-/JYPxA39Uh5TLH3MbocFF+G/Ez6ZCGd0@public.gmane.org
+For more options, visit https://groups.google.com/groups/opt_out.
