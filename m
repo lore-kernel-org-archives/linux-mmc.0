@@ -1,87 +1,59 @@
 From: Mark Brown <broonie@kernel.org>
-Subject: Re: [PATCH 07/17] spi: pl022: Don't ignore power domain and amba bus
- at system suspend
-Date: Tue, 4 Feb 2014 19:16:09 +0000
-Message-ID: <20140204191609.GU22609@sirena.org.uk>
+Subject: Re: [PATCH 09/17] spi: pl022: Simplify clock handling
+Date: Tue, 4 Feb 2014 19:19:47 +0000
+Message-ID: <20140204191947.GV22609@sirena.org.uk>
 References: <1391529538-21685-1-git-send-email-ulf.hansson@linaro.org>
- <1391529538-21685-8-git-send-email-ulf.hansson@linaro.org>
+ <1391529538-21685-10-git-send-email-ulf.hansson@linaro.org>
 Mime-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="ZkPsHaVllGm+sYrn"
+	protocol="application/pgp-signature"; boundary="MPRXw8klpfH35tNR"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mezzanine.sirena.org.uk ([106.187.55.193]:35454 "EHLO
+Received: from mezzanine.sirena.org.uk ([106.187.55.193]:35463 "EHLO
 	mezzanine.sirena.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754719AbaBDTQh (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 4 Feb 2014 14:16:37 -0500
+	with ESMTP id S932079AbaBDTUL (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 4 Feb 2014 14:20:11 -0500
 Content-Disposition: inline
-In-Reply-To: <1391529538-21685-8-git-send-email-ulf.hansson@linaro.org>
+In-Reply-To: <1391529538-21685-10-git-send-email-ulf.hansson@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: Russell King <linux@arm.linux.org.uk>, linux-arm-kernel@lists.infradead.org, Alessandro Rubini <rubini@unipv.it>, Linus Walleij <linus.walleij@linaro.org>, Wolfram Sang <wsa@the-dreams.de>, Chris Ball <chris@printf.net>, linux-kernel@vger.kernel.org, linux-i2c@vger.kernel.org, linux-spi@vger.kernel.org, linux-mmc@vger.kernel.org
 
 
---ZkPsHaVllGm+sYrn
+--MPRXw8klpfH35tNR
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
 
-On Tue, Feb 04, 2014 at 04:58:48PM +0100, Ulf Hansson wrote:
+On Tue, Feb 04, 2014 at 04:58:50PM +0100, Ulf Hansson wrote:
+> Make use of clk_prepare_enable and clk_disable_unprepare to simplify
+> code. No functional change.
 
-> @@ -2328,8 +2300,23 @@ static int pl022_suspend(struct device *dev)
->  		return ret;
->  	}
-> =20
-> -	pm_runtime_get_sync(dev);
-> -	pl022_suspend_resources(pl022, false);
-> +	pm_runtime_disable(dev);
-> +
-> +	if (!pm_runtime_status_suspended(dev)) {
-> +		if (dev->pm_domain && dev->pm_domain->ops.runtime_suspend)
-> +			ret =3D dev->pm_domain->ops.runtime_suspend(dev);
-> +		else
-> +			ret =3D dev->bus->pm->runtime_suspend(dev);
-> +
-> +		if (ret) {
-> +			pm_runtime_enable(dev);
-> +			return ret;
-> +		}
-> +
-> +		pm_runtime_set_suspended(dev);
-> +	}
+I went ahead and applied this since it looks good and seems like an
+unrelated cleanup to the runtime PM stuff which seems to be where the
+interdependencies are - thanks!  It's on a separate branch with the
+already applied change so if it does need to be cross merged we can do
+that easily or even drop the branch.
 
-This seems like a fairly hideous thing to be having to open code in an
-individual driver, it all looks generic and like something that most if
-not all devices ought to be doing and it looks very vulnerable to being
-broken by changes in the core.  At the very least I would expect this to
-be done in a helper function, though it would be even nicer if the
-driver core were figuring this stuff out for us based on the device
-level callback so that drivers didn't need to worry about being in power
-domains or manually calling bus level callbacks. =20
-
-Putting it in a helper would at least mean that it's easier for the
-mechanics to be transferred to the core proper later on.
-
---ZkPsHaVllGm+sYrn
+--MPRXw8klpfH35tNR
 Content-Type: application/pgp-signature; name="signature.asc"
 Content-Description: Digital signature
 
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v2.0.22 (GNU/Linux)
 
-iQIcBAEBAgAGBQJS8Tx1AAoJELSic+t+oim9OKcP/2vZiGXoxlTK/RIMPmzZDsIf
-3W2NciL8THJsv2d7cGHy76k3K+9G5yVo3a3IUMai37P3j7gadPbdOfClbD0A4izk
-wKJ+R8tr6zFpeMclY70KdYlDtQmI5mO/tfM3x//gCWbYyLBhN8f6p5Zyeaq95Sz6
-kmwPVYhNUKqH5V0dCdOURHRdFges54AMh8Pbt2jsOPPr2cMuwuD1gB5dIkN+Pz6J
-8cYf3I4cW5L/am9qBISbBlNWUKrBnHkmitk9S/PcI0Yr97k5cyYx9xyUb2r8wA83
-sJpZWFDDsu9Sxm0rwQTkFPtQMVcbc2ZB5ekbKR7D/gkLGH4JQ+BlysE/NDvTB8E5
-VdhFSYSQJOoHeOkffmttovOM2bmzbbgBzRanbYzBxFiJAAayc1Bww87ewBw3QNnf
-cQSngwjzCTJjNPQqZMUufHTh58SiuiOBTZI9ZRsmyMQLWoZ3NxFcOBXePS51xmMq
-S3RsBJy2WXcKciOHnFIlQwZQtUkCU87FKcfX2wSJTeaCpoj1rlL56cU5lz6+i5Bc
-f4idZuVzPo9NPfDuxQoUwIKWKjRyYx+6uCpt6uLRmA82/pG2BBil5QGAWYWA2XEo
-G9Go3qegjcus4lD/3Rix2hRqc52Aq8HzxvMDQHeB8TPYwxOKmR2iNmZyUkocmOf8
-Ngiu/RRStOQt4XNdVDow
-=4UiI
+iQIcBAEBAgAGBQJS8T1QAAoJELSic+t+oim9k/EP/jun2k08R/PDUwQfKQMs+6t1
+CQWJS80GC/9KPA9n+VqvK6XKB1Ld7kLcHDYgnwD7v2OlxtntgLSGuA9NR1p+H1Kn
+YUBKC/pyOhTzbyof28TZF3sO2uM+bNmXdCKX9YtBy7mukVmGPjTmKD2WXWnz+/I6
+xdddNac7ORKoVRwIFAIUGoSr4wHYxBSlN5emUEjWd0ARZPaQja3olmhcLN/CImx/
+QBkRSe+pue4V+mx2OHMOLMdXBxGr3KGHQe6IQ4WJGZrzwpKF3mIXwgWKNaPGQQj3
+2Hy97H6t2naaJMryCwZnunTUX2/YIXryV9qY0mKvO4UTJ/P6hjICdNQXHWsaJicH
+TspgDBE0DX5Wf5jVvNMB+7Bc8E66ew1Ec4VHy0X56xmQ+NsgmweXmgsZZn9Li00L
+iRUc0ozMfxvyewymM1Ma5KzZeywMuKuf+Xu14ZAI/NEqGUpWrX9UV4jCpwTNJqXO
+t28WSZzCkJmwvuQfoK0mKepV1JQBcVgUzh2Xr9uRdd3fvqFAH1e9lURpiSfyvHha
+vlo4iPtTyl7PpMbc79AZ0OPqF3eIjDZqDM+9pPkqazx8ec/tK8Gz7HxQMGSkgiYJ
+pTT9QQ0PsyGLl8EGYzM8HBFBX4Kl8JEus6hAoXnDwyxM1x/ll2Jmc3TUTUDaATOC
+MsQgnFyceoLVnKmXe98p
+=y8go
 -----END PGP SIGNATURE-----
 
---ZkPsHaVllGm+sYrn--
+--MPRXw8klpfH35tNR--
