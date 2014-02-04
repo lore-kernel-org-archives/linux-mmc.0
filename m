@@ -1,96 +1,58 @@
-From: Chris Ruehl <chris.ruehl@gtsys.com.hk>
-Subject: Re: [PATCH] mxcmmc: Internal error: Oops: 17 [#1] ARM from sg->offset
-Date: Tue, 04 Feb 2014 15:03:33 +0800
-Message-ID: <52F090C5.3070300@gtsys.com.hk>
-References: <1390365159-29239-1-git-send-email-chris.ruehl@gtsys.com.hk> <20140122101137.GX15937@n2100.arm.linux.org.uk>
+From: Balaji T K <balajitk@ti.com>
+Subject: Re: [PATCH v10 0/7] mmc: omap_hsmmc: pbias dt and cleanup
+Date: Tue, 4 Feb 2014 14:02:35 +0530
+Message-ID: <52F0A5A3.4020304@ti.com>
+References: <1389279062-32291-1-git-send-email-balajitk@ti.com> <1389627375-9107-1-git-send-email-balajitk@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail.fpasia.hk ([202.130.89.98]:37419 "EHLO fpa01n0.fpasia.hk"
+Received: from comal.ext.ti.com ([198.47.26.152]:47007 "EHLO comal.ext.ti.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751354AbaBDHCC (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 4 Feb 2014 02:02:02 -0500
-In-Reply-To: <20140122101137.GX15937@n2100.arm.linux.org.uk>
+	id S1750780AbaBDIcv (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 4 Feb 2014 03:32:51 -0500
+In-Reply-To: <1389627375-9107-1-git-send-email-balajitk@ti.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Cc: mpa@pengutronix.de, s.hauer@pengutronix.de, linux-mmc@vger.kernel.org, linux-arm@lists.infradead.org
+To: Balaji T K <balajitk@ti.com>, chris@printf.net, tony@atomide.com
+Cc: linux-omap@vger.kernel.org, bcousson@baylibre.com, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, broonie@kernel.org
 
-On Wednesday, January 22, 2014 06:11 PM, Russell King - ARM Linux wrote:
-> On Wed, Jan 22, 2014 at 12:32:39PM +0800, Chris Ruehl wrote:
->> diff --git a/drivers/mmc/host/mxcmmc.c b/drivers/mmc/host/mxcmmc.c
->> index f7199c8..8645d6a 100644
->> --- a/drivers/mmc/host/mxcmmc.c
->> +++ b/drivers/mmc/host/mxcmmc.c
->> @@ -347,7 +347,7 @@ static int mxcmci_setup_data(struct mxcmci_host *host, struct mmc_data *data)
->>   		return 0;
->>   
->>   	for_each_sg(data->sg, sg, data->sg_len, i) {
->> -		if (sg->offset & 3 || sg->length & 3 || sg->length < 512) {
->> +		if (sg && (sg->offset & 3 || sg->length & 3 || sg->length < 512)) {
-> sg should never be NULL here - so this is probably papering over a bug.
+On Monday 13 January 2014 09:06 PM, Balaji T K wrote:
+> Few cleanups to reduce code indent,
+> Add pbias_regulator support and adapt omap_hsmmc to use pbias regulator
+> to configure required voltage on mmc1 pad(SD card) i/o rails on OMAP SoCs.
 >
 
-I'd had some time and look into the meaning of the sg->xx & 0x3 and 
-understand this
-check validate the alignment of the data. If failed the dma handling is 
-canceled and a fall-back to pio is done.
+Hi Tony,
 
-In a earlier patch for the unexpected dma & interrupts are synchronized 
-using the spinlock. I pickup this
-idea and protect the setup-data using a look. Until now the oops are gone.
+Considering the dependencies with regulator, defconfig, mmc and device tree,
+Is it possible for you to pick this series.
 
-PLEASE comment!
+Thanks and Regards,
+Balaji T K
 
-diff --git a/drivers/mmc/host/mxcmmc.c b/drivers/mmc/host/mxcmmc.c
-index 8645d6a..b11d3c4 100644
---- a/drivers/mmc/host/mxcmmc.c
-+++ b/drivers/mmc/host/mxcmmc.c
-@@ -347,7 +347,7 @@ static int mxcmci_setup_data(struct mxcmci_host 
-*host, struct mmc_data *data)
-                 return 0;
-
-         for_each_sg(data->sg, sg, data->sg_len, i) {
--               if (sg && (sg->offset & 3 || sg->length & 3 || 
-sg->length < 512)) {
-+               if (sg->offset & 3 || sg->length & 3 || sg->length < 512) {
-                         host->do_dma = 0;
-                         return 0;
-                 }
-@@ -800,9 +800,12 @@ static void mxcmci_request(struct mmc_host *mmc, 
-struct mmc_request *req)
-         struct mxcmci_host *host = mmc_priv(mmc);
-         unsigned int cmdat = host->cmdat;
-         int error;
-+       unsigned long flags;
-
-         WARN_ON(host->req != NULL);
-
-+       spin_lock_irqsave(&host->lock, flags);
-+
-         host->req = req;
-         host->cmdat &= ~CMD_DAT_CONT_INIT;
-
-@@ -813,6 +816,7 @@ static void mxcmci_request(struct mmc_host *mmc, 
-struct mmc_request *req)
-                 error = mxcmci_setup_data(host, req->data);
-                 if (error) {
-                         req->cmd->error = error;
-+                       spin_unlock_irqrestore(&host->lock, flags);
-                         goto out;
-                 }
-
-@@ -823,6 +827,8 @@ static void mxcmci_request(struct mmc_host *mmc, 
-struct mmc_request *req)
-                         cmdat |= CMD_DAT_CONT_WRITE;
-         }
-
-+       spin_unlock_irqrestore(&host->lock, flags);
-
-
-
-With kind regards
-Chris
-
+> Balaji T K (7):
+>    mmc: omap_hsmmc: use devm_regulator API
+>    mmc: omap_hsmmc: handle vcc and vcc_aux independently
+>    regulator: add pbias regulator support
+>    mmc: omap_hsmmc: adapt hsmmc to use pbias regulator
+>    ARM: dts: add pbias dt node
+>    ARM: OMAP: enable SYSCON and REGULATOR_PBIAS in omap2plus_defconfig
+>    mmc: omap_hsmmc: remove pbias workaround
+>
+>   .../bindings/regulator/pbias-regulator.txt         |   27 ++
+>   arch/arm/boot/dts/dra7.dtsi                        |   17 ++
+>   arch/arm/boot/dts/omap2430.dtsi                    |   17 ++
+>   arch/arm/boot/dts/omap3.dtsi                       |   17 ++
+>   arch/arm/boot/dts/omap4.dtsi                       |   17 ++
+>   arch/arm/boot/dts/omap5.dtsi                       |   17 ++
+>   arch/arm/configs/omap2plus_defconfig               |    2 +
+>   drivers/mmc/host/omap_hsmmc.c                      |  111 +++++----
+>   drivers/regulator/Kconfig                          |    9 +
+>   drivers/regulator/Makefile                         |    1 +
+>   drivers/regulator/pbias-regulator.c                |  255 ++++++++++++++++++++
+>   11 files changed, 441 insertions(+), 49 deletions(-)
+>   create mode 100644 Documentation/devicetree/bindings/regulator/pbias-regulator.txt
+>   create mode 100644 drivers/regulator/pbias-regulator.c
+>
 
