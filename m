@@ -1,117 +1,78 @@
 From: Balaji T K <balajitk@ti.com>
-Subject: Re: [PATCH/RFC] dmaengine: omap-dma: split header file
-Date: Tue, 4 Feb 2014 18:06:47 +0530
-Message-ID: <52F0DEDF.1080704@ti.com>
-References: <20140119100235.GN27282@n2100.arm.linux.org.uk>
- <1390582316-4765-1-git-send-email-balajitk@ti.com>
+Subject: Re: [PATCH] mmc: omap_hsmmc: Add support for Erratum 2.1.1.128 in
+ device tree boot
+Date: Tue, 4 Feb 2014 18:14:08 +0530
+Message-ID: <52F0E098.3050404@ti.com>
+References: <1390260542-22213-1-git-send-email-nm@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"; Format="flowed"
+Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <1390582316-4765-1-git-send-email-balajitk@ti.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Tony Lindgren <tony@atomide.com>, linux@arm.linux.org.uk
-Cc: linux-sh@vger.kernel.org, linux-mmc@vger.kernel.org, chris@printf.net, linux-kernel@vger.kernel.org, geert@linux-m68k.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, a-bindra@ti.com
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from bear.ext.ti.com ([192.94.94.41]:47684 "EHLO bear.ext.ti.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751079AbaBDMon (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 4 Feb 2014 07:44:43 -0500
+In-Reply-To: <1390260542-22213-1-git-send-email-nm@ti.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Nishanth Menon <nm@ti.com>
+Cc: Chris Ball <chris@printf.net>, Tony Lindgren <tony@atomide.com>, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 
-On Friday 24 January 2014 10:21 PM, Balaji T K wrote:
-> To Resolve build failure seen with sh-allmodconfig:
->      include/linux/omap-dma.h:171:8: error: expected identifier before numeric constant
->      make[4]: *** [drivers/mmc/host/omap_hsmmc.o] Error 1
-> due to CCR redefinition, move dmaengine consumer specific function to omap-dmaengine.h
+On Tuesday 21 January 2014 04:59 AM, Nishanth Menon wrote:
+> When device is booted using devicetree, platforms impacted by
+> Erratum 2.1.1.128 is not detected easily in the mmc driver. This erratum
+> indicates that the module cannot do multi-block transfers.
 >
-> Tested-by: Geert Uytterhoeven <geert@linux-m68k.org>
-> Signed-off-by: Balaji T K <balajitk@ti.com>
-Hi Russell,
-
-Ping,
-If this patch looks OK, I can drop RFC and post as Patch, let me know.
-
-Thanks and Regards,
-Balaji T K
-
+> Handle this by providing a boolean flag to indicate to driver that it is
+> working on a hardware with mentioned limitation.
+>
+> Signed-off-by: Nishanth Menon <nm@ti.com>
 > ---
->   drivers/mmc/host/omap_hsmmc.c  |    2 +-
->   include/linux/omap-dma.h       |   19 +------------------
->   include/linux/omap-dmaengine.h |   21 +++++++++++++++++++++
->   3 files changed, 23 insertions(+), 19 deletions(-)
->   create mode 100644 include/linux/omap-dmaengine.h
+>
+> This explains the logs I see:
+> OMAP3430 LDP (ES2.2):
+> 	uImage only boot:  http://slexy.org/raw/s2YrbMAi7c
+> 	uImage+dtb concatenated boot: http://slexy.org/raw/s20qVg17T0
+>
+> With the following flag set, device is now able to consistently boot with
+> device tree supported uImage+dtb concat boot.
+>
+>   .../devicetree/bindings/mmc/ti-omap-hsmmc.txt      |    2 ++
+>   drivers/mmc/host/omap_hsmmc.c                      |    3 +++
+>   2 files changed, 5 insertions(+)
+>
+> diff --git a/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt b/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
+> index 8c8908a..ab36f8b 100644
+> --- a/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
+> +++ b/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
+> @@ -26,6 +26,8 @@ specifier is required.
+>   dma-names: List of DMA request names. These strings correspond
+>   1:1 with the DMA specifiers listed in dmas. The string naming is
+>   to be "rx" and "tx" for RX and TX DMA requests, respectively.
+> +ti,erratum-2.1.1.128: boolean, for OMAP3430/OMAP35xx platforms with broken
+> +multiblock reads
+
+Rather than ti,errata.. specific property, something like
+caps no/disable multiblock read is more readable in my opinion, Otherwise
+
+Acked-by: Balaji T K <balajitk@ti.com>
+
+>
+>   Examples:
 >
 > diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-> index dbd32ad..2f57e36 100644
+> index 014bfe5..f2d5940 100644
 > --- a/drivers/mmc/host/omap_hsmmc.c
 > +++ b/drivers/mmc/host/omap_hsmmc.c
-> @@ -31,7 +31,7 @@
->   #include <linux/of.h>
->   #include <linux/of_gpio.h>
->   #include <linux/of_device.h>
-> -#include <linux/omap-dma.h>
-> +#include <linux/omap-dmaengine.h>
->   #include <linux/mmc/host.h>
->   #include <linux/mmc/core.h>
->   #include <linux/mmc/mmc.h>
-> diff --git a/include/linux/omap-dma.h b/include/linux/omap-dma.h
-> index 7af25a9..6aa97e5 100644
-> --- a/include/linux/omap-dma.h
-> +++ b/include/linux/omap-dma.h
-> @@ -1,23 +1,6 @@
-> -/*
-> - * OMAP DMA Engine support
-> - *
-> - * This program is free software; you can redistribute it and/or modify
-> - * it under the terms of the GNU General Public License version 2 as
-> - * published by the Free Software Foundation.
-> - */
->   #ifndef __LINUX_OMAP_DMA_H
->   #define __LINUX_OMAP_DMA_H
-> -
-> -struct dma_chan;
-> -
-> -#if defined(CONFIG_DMA_OMAP) || defined(CONFIG_DMA_OMAP_MODULE)
-> -bool omap_dma_filter_fn(struct dma_chan *, void *);
-> -#else
-> -static inline bool omap_dma_filter_fn(struct dma_chan *c, void *d)
-> -{
-> -	return false;
-> -}
-> -#endif
-> +#include <linux/omap-dmaengine.h>
+> @@ -1730,6 +1730,9 @@ static struct omap_mmc_platform_data *of_get_hsmmc_pdata(struct device *dev)
+>   	if (of_find_property(np, "ti,dual-volt", NULL))
+>   		pdata->controller_flags |= OMAP_HSMMC_SUPPORTS_DUAL_VOLT;
 >
->   /*
->    *  Legacy OMAP DMA handling defines and functions
-> diff --git a/include/linux/omap-dmaengine.h b/include/linux/omap-dmaengine.h
-> new file mode 100644
-> index 0000000..2b0b6aa
-> --- /dev/null
-> +++ b/include/linux/omap-dmaengine.h
-> @@ -0,0 +1,21 @@
-> +/*
-> + * OMAP DMA Engine support
-> + *
-> + * This program is free software; you can redistribute it and/or modify
-> + * it under the terms of the GNU General Public License version 2 as
-> + * published by the Free Software Foundation.
-> + */
-> +#ifndef __LINUX_OMAP_DMAENGINE_H
-> +#define __LINUX_OMAP_DMAENGINE_H
+> +	if (of_find_property(np, "ti,erratum-2.1.1.128", NULL))
+> +		pdata->controller_flags |= OMAP_HSMMC_BROKEN_MULTIBLOCK_READ;
 > +
-> +struct dma_chan;
-> +
-> +#if defined(CONFIG_DMA_OMAP) || defined(CONFIG_DMA_OMAP_MODULE)
-> +bool omap_dma_filter_fn(struct dma_chan *, void *);
-> +#else
-> +static inline bool omap_dma_filter_fn(struct dma_chan *c, void *d)
-> +{
-> +	return false;
-> +}
-> +#endif
-> +#endif /* __LINUX_OMAP_DMAENGINE_H */
+>   	/* This driver only supports 1 slot */
+>   	pdata->nr_slots = 1;
+>   	pdata->slots[0].switch_pin = cd_gpio;
 >
+
