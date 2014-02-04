@@ -1,92 +1,54 @@
-From: Nishanth Menon <nm@ti.com>
-Subject: Re: [PATCH] mmc: omap_hsmmc: Add support for Erratum 2.1.1.128 in
- device tree boot
-Date: Tue, 4 Feb 2014 09:18:15 -0600
-Message-ID: <52F104B7.6040606@ti.com>
-References: <1390260542-22213-1-git-send-email-nm@ti.com> <52F0E098.3050404@ti.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from bear.ext.ti.com ([192.94.94.41]:54754 "EHLO bear.ext.ti.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751214AbaBDPSn (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 4 Feb 2014 10:18:43 -0500
-In-Reply-To: <52F0E098.3050404@ti.com>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: [PATCH 00/17] amba: PM fixups for amba bus and some amba drivers
+Date: Tue,  4 Feb 2014 16:58:41 +0100
+Message-ID: <1391529538-21685-1-git-send-email-ulf.hansson@linaro.org>
+Return-path: <linux-spi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: linux-spi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+Cc: Alessandro Rubini <rubini-9wsNiZum9E8@public.gmane.org>, Linus Walleij <linus.walleij-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Wolfram Sang <wsa-z923LK4zBo2bacvFa/9K2g@public.gmane.org>, Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, Mark Brown <broonie-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-spi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Balaji T K <balajitk@ti.com>
-Cc: Chris Ball <chris@printf.net>, Tony Lindgren <tony@atomide.com>, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 
-On 02/04/2014 06:44 AM, Balaji T K wrote:
-> On Tuesday 21 January 2014 04:59 AM, Nishanth Menon wrote:
->> When device is booted using devicetree, platforms impacted by
->> Erratum 2.1.1.128 is not detected easily in the mmc driver. This erratum
->> indicates that the module cannot do multi-block transfers.
->>
->> Handle this by providing a boolean flag to indicate to driver that it is
->> working on a hardware with mentioned limitation.
->>
->> Signed-off-by: Nishanth Menon <nm@ti.com>
->> ---
->>
->> This explains the logs I see:
->> OMAP3430 LDP (ES2.2):
->> 	uImage only boot:  http://slexy.org/raw/s2YrbMAi7c
->> 	uImage+dtb concatenated boot: http://slexy.org/raw/s20qVg17T0
->>
->> With the following flag set, device is now able to consistently boot with
->> device tree supported uImage+dtb concat boot.
->>
->>   .../devicetree/bindings/mmc/ti-omap-hsmmc.txt      |    2 ++
->>   drivers/mmc/host/omap_hsmmc.c                      |    3 +++
->>   2 files changed, 5 insertions(+)
->>
->> diff --git a/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt b/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
->> index 8c8908a..ab36f8b 100644
->> --- a/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
->> +++ b/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
->> @@ -26,6 +26,8 @@ specifier is required.
->>   dma-names: List of DMA request names. These strings correspond
->>   1:1 with the DMA specifiers listed in dmas. The string naming is
->>   to be "rx" and "tx" for RX and TX DMA requests, respectively.
->> +ti,erratum-2.1.1.128: boolean, for OMAP3430/OMAP35xx platforms with broken
->> +multiblock reads
-> 
-> Rather than ti,errata.. specific property, something like
-> caps no/disable multiblock read is more readable in my opinion, Otherwise
+This patchset fixes the PM problems you yet when combining CONFIG_PM_SLEEP and
+CONFIG_PM_RUNTIME. In principle these drivers did not manage to put it's devices
+into low power state at system suspend, which then this patchset intend to fix.
 
-Is'nt the better definition to state i have quirk X and allow the
-driver to do the necessary thing/things needed to handle quirk X? in
-this case, there is just one thing to do: broken multi_block_read, in
-the case of other quirks, there might be more than 1 thing to do.. let
-driver figure that out, dts just states the h/w capabilty or in this
-case, the quirk capability.
+Both the drivers and the amba bus converts to the new SET_PM_RUNTIME_PM_OPS
+macro while setting up the runtime PM callbacks, which is intended to be used
+for solving these kind of issues.
 
-> 
-> Acked-by: Balaji T K <balajitk@ti.com>
-> 
->>
->>   Examples:
->>
->> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
->> index 014bfe5..f2d5940 100644
->> --- a/drivers/mmc/host/omap_hsmmc.c
->> +++ b/drivers/mmc/host/omap_hsmmc.c
->> @@ -1730,6 +1730,9 @@ static struct omap_mmc_platform_data *of_get_hsmmc_pdata(struct device *dev)
->>   	if (of_find_property(np, "ti,dual-volt", NULL))
->>   		pdata->controller_flags |= OMAP_HSMMC_SUPPORTS_DUAL_VOLT;
->>
->> +	if (of_find_property(np, "ti,erratum-2.1.1.128", NULL))
->> +		pdata->controller_flags |= OMAP_HSMMC_BROKEN_MULTIBLOCK_READ;
->> +
->>   	/* This driver only supports 1 slot */
->>   	pdata->nr_slots = 1;
->>   	pdata->slots[0].switch_pin = cd_gpio;
->>
-> 
+The fixes for the amba bus needs to be merged prior to the other, thus I think
+it could make sense to merge this complete patchset through Russell's tree,
+if he and the other maintainers think this is okay.
 
+Ulf Hansson (17):
+  amba: Let runtime PM callbacks be available for CONFIG_PM
+  amba: Add late and early PM callbacks
+  mmc: mmci: Mask IRQs for all variants during runtime suspend
+  mmc: mmci: Let runtime PM callbacks be available for CONFIG_PM
+  mmc: mmci: Put the device into low power state at system suspend
+  spi: pl022: Let runtime PM callbacks be available for CONFIG_PM
+  spi: pl022: Don't ignore power domain and amba bus at system suspend
+  spi: pl022: Fully gate clocks at request inactivity
+  spi: pl022: Simplify clock handling
+  spi: pl022: Remove redundant pinctrl to default state in probe
+  i2c: nomadik: Convert to devm functions
+  i2c: nomadik: Remove redundant call to pm_runtime_disable
+  i2c: nomadik: Leave probe with the device in active state
+  i2c: nomadik: Fixup deployment of runtime PM
+  i2c: nomadik: Convert to late and early system PM callbacks
+  i2c: nomadik: Remove busy check for transfers at suspend late
+  i2c: nomadik: Fixup system suspend
+
+ drivers/amba/bus.c               |   10 ++-
+ drivers/i2c/busses/i2c-nomadik.c |  146 ++++++++++++++++++--------------------
+ drivers/mmc/host/mmci.c          |   72 ++++++++++---------
+ drivers/spi/spi-pl022.c          |   95 +++++++++++--------------
+ 4 files changed, 159 insertions(+), 164 deletions(-)
 
 -- 
-Regards,
-Nishanth Menon
+1.7.9.5
+
+--
+To unsubscribe from this list: send the line "unsubscribe linux-spi" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
