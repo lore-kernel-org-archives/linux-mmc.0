@@ -1,53 +1,59 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [PATCH 08/17] spi: pl022: Fully gate clocks at request inactivity
-Date: Tue,  4 Feb 2014 16:58:49 +0100
-Message-ID: <1391529538-21685-9-git-send-email-ulf.hansson@linaro.org>
+Subject: [PATCH 01/17] amba: Let runtime PM callbacks be available for
+ CONFIG_PM
+Date: Tue,  4 Feb 2014 16:58:42 +0100
+Message-ID: <1391529538-21685-2-git-send-email-ulf.hansson@linaro.org>
 References: <1391529538-21685-1-git-send-email-ulf.hansson@linaro.org>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-la0-f54.google.com ([209.85.215.54]:46293 "EHLO
-	mail-la0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754672AbaBDP7k (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 4 Feb 2014 10:59:40 -0500
-Received: by mail-la0-f54.google.com with SMTP id y1so6725713lam.13
-        for <linux-mmc@vger.kernel.org>; Tue, 04 Feb 2014 07:59:39 -0800 (PST)
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
 In-Reply-To: <1391529538-21685-1-git-send-email-ulf.hansson@linaro.org>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
 To: Russell King <linux@arm.linux.org.uk>, linux-arm-kernel@lists.infradead.org
-Cc: Alessandro Rubini <rubini@unipv.it>, Linus Walleij <linus.walleij@linaro.org>, Wolfram Sang <wsa@the-dreams.de>, Chris Ball <chris@printf.net>, Mark Brown <broonie@kernel.org>, linux-kernel@vger.kernel.org, linux-i2c@vger.kernel.org, linux-spi@vger.kernel.org, linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Wolfram Sang <wsa@the-dreams.de>, Linus Walleij <linus.walleij@linaro.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Chris Ball <chris@printf.net>, Mark Brown <broonie@kernel.org>, linux-i2c@vger.kernel.org, linux-spi@vger.kernel.org, Alessandro Rubini <rubini@unipv.it>
+List-Id: linux-mmc@vger.kernel.org
 
-Use clk_disable_unprepare and clk_prepare_enable from the runtime PM
-callbacks, to fully gate|ungate clocks. Potentially this will save more
-power, depending on the clock tree for the current SOC.
+Convert to the SET_PM_RUNTIME_PM macro while defining the runtime PM
+callbacks. This means the callbacks becomes available for both
+CONFIG_PM_SLEEP and CONFIG_PM_RUNTIME, which is needed by drivers and
+power domains.
 
-Cc: Mark Brown <broonie@kernel.org>
+Cc: Russell King <linux@arm.linux.org.uk>
 Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 ---
- drivers/spi/spi-pl022.c |    4 ++--
+ drivers/amba/bus.c |    4 ++--
  1 file changed, 2 insertions(+), 2 deletions(-)
 
-diff --git a/drivers/spi/spi-pl022.c b/drivers/spi/spi-pl022.c
-index db829a1..2bb238f 100644
---- a/drivers/spi/spi-pl022.c
-+++ b/drivers/spi/spi-pl022.c
-@@ -2355,7 +2355,7 @@ static int pl022_runtime_suspend(struct device *dev)
- {
- 	struct pl022 *pl022 = dev_get_drvdata(dev);
+diff --git a/drivers/amba/bus.c b/drivers/amba/bus.c
+index 9e60291..3cf61a1 100644
+--- a/drivers/amba/bus.c
++++ b/drivers/amba/bus.c
+@@ -83,7 +83,7 @@ static struct device_attribute amba_dev_attrs[] = {
+ 	__ATTR_NULL,
+ };
  
--	clk_disable(pl022->clk);
-+	clk_disable_unprepare(pl022->clk);
- 	pinctrl_pm_select_idle_state(dev);
- 
- 	return 0;
-@@ -2366,7 +2366,7 @@ static int pl022_runtime_resume(struct device *dev)
- 	struct pl022 *pl022 = dev_get_drvdata(dev);
- 
- 	pinctrl_pm_select_default_state(dev);
--	clk_enable(pl022->clk);
-+	clk_prepare_enable(pl022->clk);
- 
- 	return 0;
- }
+-#ifdef CONFIG_PM_RUNTIME
++#ifdef CONFIG_PM
+ /*
+  * Hooks to provide runtime PM of the pclk (bus clock).  It is safe to
+  * enable/disable the bus clock at runtime PM suspend/resume as this
+@@ -123,7 +123,7 @@ static const struct dev_pm_ops amba_pm = {
+ 	.thaw		= pm_generic_thaw,
+ 	.poweroff	= pm_generic_poweroff,
+ 	.restore	= pm_generic_restore,
+-	SET_RUNTIME_PM_OPS(
++	SET_PM_RUNTIME_PM_OPS(
+ 		amba_pm_runtime_suspend,
+ 		amba_pm_runtime_resume,
+ 		NULL
 -- 
 1.7.9.5
-
