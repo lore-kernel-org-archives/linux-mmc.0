@@ -1,53 +1,87 @@
-From: Mark Brown <broonie-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH 00/17] amba: PM fixups for amba bus and some amba drivers
-Date: Tue, 4 Feb 2014 18:49:09 +0000
-Message-ID: <20140204184909.GT22609@sirena.org.uk>
+From: Mark Brown <broonie@kernel.org>
+Subject: Re: [PATCH 07/17] spi: pl022: Don't ignore power domain and amba bus
+ at system suspend
+Date: Tue, 4 Feb 2014 19:16:09 +0000
+Message-ID: <20140204191609.GU22609@sirena.org.uk>
 References: <1391529538-21685-1-git-send-email-ulf.hansson@linaro.org>
+ <1391529538-21685-8-git-send-email-ulf.hansson@linaro.org>
 Mime-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="9LnWyBss4uQTlezA"
-Return-path: <linux-i2c-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+	protocol="application/pgp-signature"; boundary="ZkPsHaVllGm+sYrn"
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mezzanine.sirena.org.uk ([106.187.55.193]:35454 "EHLO
+	mezzanine.sirena.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754719AbaBDTQh (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 4 Feb 2014 14:16:37 -0500
 Content-Disposition: inline
-In-Reply-To: <1391529538-21685-1-git-send-email-ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Sender: linux-i2c-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Alessandro Rubini <rubini-9wsNiZum9E8@public.gmane.org>, Linus Walleij <linus.walleij-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Wolfram Sang <wsa-z923LK4zBo2bacvFa/9K2g@public.gmane.org>, Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-spi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+In-Reply-To: <1391529538-21685-8-git-send-email-ulf.hansson@linaro.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Russell King <linux@arm.linux.org.uk>, linux-arm-kernel@lists.infradead.org, Alessandro Rubini <rubini@unipv.it>, Linus Walleij <linus.walleij@linaro.org>, Wolfram Sang <wsa@the-dreams.de>, Chris Ball <chris@printf.net>, linux-kernel@vger.kernel.org, linux-i2c@vger.kernel.org, linux-spi@vger.kernel.org, linux-mmc@vger.kernel.org
 
 
---9LnWyBss4uQTlezA
+--ZkPsHaVllGm+sYrn
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-On Tue, Feb 04, 2014 at 04:58:41PM +0100, Ulf Hansson wrote:
+On Tue, Feb 04, 2014 at 04:58:48PM +0100, Ulf Hansson wrote:
 
-> The fixes for the amba bus needs to be merged prior to the other, thus I think
-> it could make sense to merge this complete patchset through Russell's tree,
-> if he and the other maintainers think this is okay.
+> @@ -2328,8 +2300,23 @@ static int pl022_suspend(struct device *dev)
+>  		return ret;
+>  	}
+> =20
+> -	pm_runtime_get_sync(dev);
+> -	pl022_suspend_resources(pl022, false);
+> +	pm_runtime_disable(dev);
+> +
+> +	if (!pm_runtime_status_suspended(dev)) {
+> +		if (dev->pm_domain && dev->pm_domain->ops.runtime_suspend)
+> +			ret =3D dev->pm_domain->ops.runtime_suspend(dev);
+> +		else
+> +			ret =3D dev->bus->pm->runtime_suspend(dev);
+> +
+> +		if (ret) {
+> +			pm_runtime_enable(dev);
+> +			return ret;
+> +		}
+> +
+> +		pm_runtime_set_suspended(dev);
+> +	}
 
-What are the actual dependencies for the SPI bit?  AFAICT it's probably
-the first patch needs the bus updating?
+This seems like a fairly hideous thing to be having to open code in an
+individual driver, it all looks generic and like something that most if
+not all devices ought to be doing and it looks very vulnerable to being
+broken by changes in the core.  At the very least I would expect this to
+be done in a helper function, though it would be even nicer if the
+driver core were figuring this stuff out for us based on the device
+level callback so that drivers didn't need to worry about being in power
+domains or manually calling bus level callbacks. =20
 
---9LnWyBss4uQTlezA
+Putting it in a helper would at least mean that it's easier for the
+mechanics to be transferred to the core proper later on.
+
+--ZkPsHaVllGm+sYrn
 Content-Type: application/pgp-signature; name="signature.asc"
 Content-Description: Digital signature
 
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v2.0.22 (GNU/Linux)
 
-iQIcBAEBAgAGBQJS8TYiAAoJELSic+t+oim9pVoP/R8rI+1Ffz2UfTaJ72AcKLgz
-gZxsn12hQIOOKoB/RXI2qF6zJj09JIsO5u47CkjJ5IaDAmCY1s5sJxqo1o1shwle
-pTWRflDp7esLDdQeitkPlfyzfELmqteUN4flCZHq19bBjN7+lAkgFoAuctJPqN8N
-QsY3qv1K35SkQ4lV6JRUpX7YS5tB6rTqOkUMct30wuDYgDqRGqt8gASl2FT/CIrG
-9kC5teiCunSstqb5zF2jEury7HdeqovRXJA2bAk5jV3ephlyKYboNsDQ+cpRBhrO
-lVzYRJ15g+8GZO1RXikum18YyRyfKPeD4RfQt5BV8ID5Z7S0JcqgmD+6vbBOJo7a
-CRv2OFO+l1czH50UjVyAA3/RUGjiRvScnd6ARLfEqdyb3sXxwltbnxn2Ja71ZRXx
-iYaGu6CKNmjhXL24JBDCDqs3biMwbGiYek8hLh4JSMapsdDnN1DhRV5JDOrHwGuK
-Ug8rflPflwBitCS1fH476MUTT9FDVg93D/RnyvN8t/HTyFj8m8az/6ojurBUK745
-t3UUUGZNvAsIQ/19yLG1Uf2WdUsVD7sLs3cvv95oYJCEd3cklR5eoBB5jqKX48aR
-Saibmy7zsYn7awBLv6NUZBkTkhSbA/h4aAmhafAdLnP7pH8SKhzgCoDPh63LFCZc
-phCnP+GmtkNuvKjagVW1
-=xvOJ
+iQIcBAEBAgAGBQJS8Tx1AAoJELSic+t+oim9OKcP/2vZiGXoxlTK/RIMPmzZDsIf
+3W2NciL8THJsv2d7cGHy76k3K+9G5yVo3a3IUMai37P3j7gadPbdOfClbD0A4izk
+wKJ+R8tr6zFpeMclY70KdYlDtQmI5mO/tfM3x//gCWbYyLBhN8f6p5Zyeaq95Sz6
+kmwPVYhNUKqH5V0dCdOURHRdFges54AMh8Pbt2jsOPPr2cMuwuD1gB5dIkN+Pz6J
+8cYf3I4cW5L/am9qBISbBlNWUKrBnHkmitk9S/PcI0Yr97k5cyYx9xyUb2r8wA83
+sJpZWFDDsu9Sxm0rwQTkFPtQMVcbc2ZB5ekbKR7D/gkLGH4JQ+BlysE/NDvTB8E5
+VdhFSYSQJOoHeOkffmttovOM2bmzbbgBzRanbYzBxFiJAAayc1Bww87ewBw3QNnf
+cQSngwjzCTJjNPQqZMUufHTh58SiuiOBTZI9ZRsmyMQLWoZ3NxFcOBXePS51xmMq
+S3RsBJy2WXcKciOHnFIlQwZQtUkCU87FKcfX2wSJTeaCpoj1rlL56cU5lz6+i5Bc
+f4idZuVzPo9NPfDuxQoUwIKWKjRyYx+6uCpt6uLRmA82/pG2BBil5QGAWYWA2XEo
+G9Go3qegjcus4lD/3Rix2hRqc52Aq8HzxvMDQHeB8TPYwxOKmR2iNmZyUkocmOf8
+Ngiu/RRStOQt4XNdVDow
+=4UiI
 -----END PGP SIGNATURE-----
 
---9LnWyBss4uQTlezA--
+--ZkPsHaVllGm+sYrn--
