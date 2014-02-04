@@ -1,105 +1,151 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [PATCH 05/17] mmc: mmci: Put the device into low power state at system suspend
-Date: Tue,  4 Feb 2014 16:58:46 +0100
-Message-ID: <1391529538-21685-6-git-send-email-ulf.hansson@linaro.org>
+Subject: [PATCH 07/17] spi: pl022: Don't ignore power domain and amba bus at system suspend
+Date: Tue,  4 Feb 2014 16:58:48 +0100
+Message-ID: <1391529538-21685-8-git-send-email-ulf.hansson@linaro.org>
 References: <1391529538-21685-1-git-send-email-ulf.hansson@linaro.org>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-lb0-f179.google.com ([209.85.217.179]:40867 "EHLO
-	mail-lb0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754617AbaBDP7c (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 4 Feb 2014 10:59:32 -0500
-Received: by mail-lb0-f179.google.com with SMTP id l4so6559447lbv.38
-        for <linux-mmc@vger.kernel.org>; Tue, 04 Feb 2014 07:59:31 -0800 (PST)
+Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1391529538-21685-1-git-send-email-ulf.hansson@linaro.org>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Sender: linux-kernel-owner@vger.kernel.org
 To: Russell King <linux@arm.linux.org.uk>, linux-arm-kernel@lists.infradead.org
 Cc: Alessandro Rubini <rubini@unipv.it>, Linus Walleij <linus.walleij@linaro.org>, Wolfram Sang <wsa@the-dreams.de>, Chris Ball <chris@printf.net>, Mark Brown <broonie@kernel.org>, linux-kernel@vger.kernel.org, linux-i2c@vger.kernel.org, linux-spi@vger.kernel.org, linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+List-Id: linux-mmc@vger.kernel.org
 
-Due to the available runtime PM callbacks, we are now able to put our
-device into low power state at system suspend.
+Due to the available runtime PM callbacks for CONFIG_PM, we are now
+able to put the device into complete low power state at system suspend.
 
-Earlier we could not accomplish this without trusting a power domain
-for the device to take care of it. Now we are able to cope with
-scenarios both with and without a power domain.
+Previously only the resources controlled by the driver were put into
+low power state at system suspend. Both the amba bus and a potential
+power domain were ignored, which now isn't the case any more.
 
-Cc: Russell King <linux@arm.linux.org.uk>
+Moreover, putting the device into low power state couldn't be done
+without first bringing it back to full power. This constraint don't
+exists any more.
+
+Cc: Mark Brown <broonie@kernel.org>
 Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 ---
- drivers/mmc/host/mmci.c |   45 +++++++++++++++++++++++++--------------------
- 1 file changed, 25 insertions(+), 20 deletions(-)
+ drivers/spi/spi-pl022.c |   74 +++++++++++++++++++++++------------------------
+ 1 file changed, 37 insertions(+), 37 deletions(-)
 
-diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index c88da1c..074e0cb 100644
---- a/drivers/mmc/host/mmci.c
-+++ b/drivers/mmc/host/mmci.c
-@@ -1723,33 +1723,38 @@ static int mmci_remove(struct amba_device *dev)
+diff --git a/drivers/spi/spi-pl022.c b/drivers/spi/spi-pl022.c
+index 70fa907..db829a1 100644
+--- a/drivers/spi/spi-pl022.c
++++ b/drivers/spi/spi-pl022.c
+@@ -2288,35 +2288,7 @@ pl022_remove(struct amba_device *adev)
  	return 0;
  }
  
+-#ifdef CONFIG_PM
+-/*
+- * These two functions are used from both suspend/resume and
+- * the runtime counterparts to handle external resources like
+- * clocks, pins and regulators when going to sleep.
+- */
+-static void pl022_suspend_resources(struct pl022 *pl022, bool runtime)
+-{
+-	clk_disable(pl022->clk);
+-
+-	if (runtime)
+-		pinctrl_pm_select_idle_state(&pl022->adev->dev);
+-	else
+-		pinctrl_pm_select_sleep_state(&pl022->adev->dev);
+-}
+-
+-static void pl022_resume_resources(struct pl022 *pl022, bool runtime)
+-{
+-	/* First go to the default state */
+-	pinctrl_pm_select_default_state(&pl022->adev->dev);
+-	if (!runtime)
+-		/* Then let's idle the pins until the next transfer happens */
+-		pinctrl_pm_select_idle_state(&pl022->adev->dev);
+-
+-	clk_enable(pl022->clk);
+-}
+-#endif
+-
 -#ifdef CONFIG_SUSPEND
--static int mmci_suspend(struct device *dev)
 +#ifdef CONFIG_PM_SLEEP
-+static int mmci_suspend_late(struct device *dev)
+ static int pl022_suspend(struct device *dev)
  {
--	struct amba_device *adev = to_amba_device(dev);
--	struct mmc_host *mmc = amba_get_drvdata(adev);
-+	int ret = 0;
+ 	struct pl022 *pl022 = dev_get_drvdata(dev);
+@@ -2328,8 +2300,23 @@ static int pl022_suspend(struct device *dev)
+ 		return ret;
+ 	}
  
--	if (mmc) {
--		struct mmci_host *host = mmc_priv(mmc);
--		pm_runtime_get_sync(dev);
--		writel(0, host->base + MMCIMASK0);
--	}
-+	if (pm_runtime_status_suspended(dev))
-+		return 0;
- 
--	return 0;
-+	if (dev->pm_domain && dev->pm_domain->ops.runtime_suspend)
-+		ret = dev->pm_domain->ops.runtime_suspend(dev);
-+	else
-+		ret = dev->bus->pm->runtime_suspend(dev);
+-	pm_runtime_get_sync(dev);
+-	pl022_suspend_resources(pl022, false);
++	pm_runtime_disable(dev);
 +
-+	if (!ret)
++	if (!pm_runtime_status_suspended(dev)) {
++		if (dev->pm_domain && dev->pm_domain->ops.runtime_suspend)
++			ret = dev->pm_domain->ops.runtime_suspend(dev);
++		else
++			ret = dev->bus->pm->runtime_suspend(dev);
++
++		if (ret) {
++			pm_runtime_enable(dev);
++			return ret;
++		}
++
 +		pm_runtime_set_suspended(dev);
++	}
 +
-+	return ret;
- }
++	pinctrl_pm_select_sleep_state(dev);
  
--static int mmci_resume(struct device *dev)
-+static int mmci_resume_early(struct device *dev)
+ 	dev_dbg(dev, "suspended\n");
+ 	return 0;
+@@ -2338,10 +2325,19 @@ static int pl022_suspend(struct device *dev)
+ static int pl022_resume(struct device *dev)
  {
--	struct amba_device *adev = to_amba_device(dev);
--	struct mmc_host *mmc = amba_get_drvdata(adev);
+ 	struct pl022 *pl022 = dev_get_drvdata(dev);
+-	int ret;
 +	int ret = 0;
  
--	if (mmc) {
--		struct mmci_host *host = mmc_priv(mmc);
--		writel(MCI_IRQENABLE, host->base + MMCIMASK0);
--		pm_runtime_put(dev);
--	}
-+	if (pm_runtime_status_suspended(dev))
-+		return 0;
- 
--	return 0;
+-	pl022_resume_resources(pl022, false);
+-	pm_runtime_put(dev);
 +	if (dev->pm_domain && dev->pm_domain->ops.runtime_resume)
 +		ret = dev->pm_domain->ops.runtime_resume(dev);
 +	else
 +		ret = dev->bus->pm->runtime_resume(dev);
 +
-+	return ret;
++	if (ret)
++		dev_err(dev, "problem resuming\n");
++	else
++		pm_runtime_set_active(dev);
++
++	pm_runtime_enable(dev);
+ 
+ 	/* Start the queue running */
+ 	ret = spi_master_resume(pl022->master);
+@@ -2352,14 +2348,16 @@ static int pl022_resume(struct device *dev)
+ 
+ 	return ret;
+ }
+-#endif	/* CONFIG_PM */
++#endif
+ 
+ #ifdef CONFIG_PM
+ static int pl022_runtime_suspend(struct device *dev)
+ {
+ 	struct pl022 *pl022 = dev_get_drvdata(dev);
+ 
+-	pl022_suspend_resources(pl022, true);
++	clk_disable(pl022->clk);
++	pinctrl_pm_select_idle_state(dev);
++
+ 	return 0;
+ }
+ 
+@@ -2367,7 +2365,9 @@ static int pl022_runtime_resume(struct device *dev)
+ {
+ 	struct pl022 *pl022 = dev_get_drvdata(dev);
+ 
+-	pl022_resume_resources(pl022, true);
++	pinctrl_pm_select_default_state(dev);
++	clk_enable(pl022->clk);
++
+ 	return 0;
  }
  #endif
- 
-@@ -1820,7 +1825,7 @@ static int mmci_runtime_resume(struct device *dev)
- #endif
- 
- static const struct dev_pm_ops mmci_dev_pm_ops = {
--	SET_SYSTEM_SLEEP_PM_OPS(mmci_suspend, mmci_resume)
-+	SET_LATE_SYSTEM_SLEEP_PM_OPS(mmci_suspend_late, mmci_resume_early)
- 	SET_PM_RUNTIME_PM_OPS(mmci_runtime_suspend, mmci_runtime_resume, NULL)
- };
- 
 -- 
 1.7.9.5
-
