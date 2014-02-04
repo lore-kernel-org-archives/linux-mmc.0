@@ -1,89 +1,36 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [PATCH 03/17] mmc: mmci: Mask IRQs for all variants during runtime
- suspend
-Date: Tue,  4 Feb 2014 16:58:44 +0100
-Message-ID: <1391529538-21685-4-git-send-email-ulf.hansson@linaro.org>
+From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: [PATCH 10/17] spi: pl022: Remove redundant pinctrl to default state in probe
+Date: Tue,  4 Feb 2014 16:58:51 +0100
+Message-ID: <1391529538-21685-11-git-send-email-ulf.hansson@linaro.org>
 References: <1391529538-21685-1-git-send-email-ulf.hansson@linaro.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <1391529538-21685-1-git-send-email-ulf.hansson@linaro.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Russell King <linux@arm.linux.org.uk>, linux-arm-kernel@lists.infradead.org
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Wolfram Sang <wsa@the-dreams.de>, Linus Walleij <linus.walleij@linaro.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Chris Ball <chris@printf.net>, Mark Brown <broonie@kernel.org>, linux-i2c@vger.kernel.org, linux-spi@vger.kernel.org, Alessandro Rubini <rubini@unipv.it>
+Return-path: <linux-i2c-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1391529538-21685-1-git-send-email-ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Sender: linux-i2c-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+Cc: Alessandro Rubini <rubini-9wsNiZum9E8@public.gmane.org>, Linus Walleij <linus.walleij-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Wolfram Sang <wsa-z923LK4zBo2bacvFa/9K2g@public.gmane.org>, Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, Mark Brown <broonie-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-spi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-In runtime suspended state, we are not expecting IRQs and thus we can
-safely mask them, not only for pwrreg_nopower variants but for all.
+The driver core is now taking care of putting our pins into default
+state at probe. Thus we can remove the redundant call for it in probe.
 
-Obviously we then also need to make sure we restore the IRQ mask while
-becoming runtime resumed.
-
-Cc: Russell King <linux@arm.linux.org.uk>
-Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Mark Brown <broonie-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Signed-off-by: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 ---
- drivers/mmc/host/mmci.c |   23 +++++++++++------------
- 1 file changed, 11 insertions(+), 12 deletions(-)
+ drivers/spi/spi-pl022.c |    2 --
+ 1 file changed, 2 deletions(-)
 
-diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index b931226..178868a 100644
---- a/drivers/mmc/host/mmci.c
-+++ b/drivers/mmc/host/mmci.c
-@@ -1758,35 +1758,34 @@ static void mmci_save(struct mmci_host *host)
- {
- 	unsigned long flags;
+diff --git a/drivers/spi/spi-pl022.c b/drivers/spi/spi-pl022.c
+index 2f44c81..3ddd8da 100644
+--- a/drivers/spi/spi-pl022.c
++++ b/drivers/spi/spi-pl022.c
+@@ -2109,8 +2109,6 @@ static int pl022_probe(struct amba_device *adev, const struct amba_id *id)
+ 	pl022->chipselects = devm_kzalloc(dev, num_cs * sizeof(int),
+ 					  GFP_KERNEL);
  
--	if (host->variant->pwrreg_nopower) {
--		spin_lock_irqsave(&host->lock, flags);
-+	spin_lock_irqsave(&host->lock, flags);
- 
--		writel(0, host->base + MMCIMASK0);
-+	writel(0, host->base + MMCIMASK0);
-+	if (host->variant->pwrreg_nopower) {
- 		writel(0, host->base + MMCIDATACTRL);
- 		writel(0, host->base + MMCIPOWER);
- 		writel(0, host->base + MMCICLOCK);
--		mmci_reg_delay(host);
+-	pinctrl_pm_select_default_state(dev);
 -
--		spin_unlock_irqrestore(&host->lock, flags);
- 	}
-+	mmci_reg_delay(host);
- 
-+	spin_unlock_irqrestore(&host->lock, flags);
- }
- 
- static void mmci_restore(struct mmci_host *host)
- {
- 	unsigned long flags;
- 
--	if (host->variant->pwrreg_nopower) {
--		spin_lock_irqsave(&host->lock, flags);
-+	spin_lock_irqsave(&host->lock, flags);
- 
-+	if (host->variant->pwrreg_nopower) {
- 		writel(host->clk_reg, host->base + MMCICLOCK);
- 		writel(host->datactrl_reg, host->base + MMCIDATACTRL);
- 		writel(host->pwr_reg, host->base + MMCIPOWER);
--		writel(MCI_IRQENABLE, host->base + MMCIMASK0);
--		mmci_reg_delay(host);
--
--		spin_unlock_irqrestore(&host->lock, flags);
- 	}
-+	writel(MCI_IRQENABLE, host->base + MMCIMASK0);
-+	mmci_reg_delay(host);
-+
-+	spin_unlock_irqrestore(&host->lock, flags);
- }
- 
- static int mmci_runtime_suspend(struct device *dev)
+ 	/*
+ 	 * Bus Number Which has been Assigned to this SSP controller
+ 	 * on this board
 -- 
 1.7.9.5
