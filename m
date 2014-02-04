@@ -1,59 +1,91 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [PATCH 01/17] amba: Let runtime PM callbacks be available for
- CONFIG_PM
-Date: Tue,  4 Feb 2014 16:58:42 +0100
-Message-ID: <1391529538-21685-2-git-send-email-ulf.hansson@linaro.org>
+Subject: [PATCH 13/17] i2c: nomadik: Leave probe with the device in active state
+Date: Tue,  4 Feb 2014 16:58:54 +0100
+Message-ID: <1391529538-21685-14-git-send-email-ulf.hansson@linaro.org>
 References: <1391529538-21685-1-git-send-email-ulf.hansson@linaro.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-lb0-f177.google.com ([209.85.217.177]:45581 "EHLO
+	mail-lb0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932213AbaBDP7y (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 4 Feb 2014 10:59:54 -0500
+Received: by mail-lb0-f177.google.com with SMTP id z5so6580889lbh.36
+        for <linux-mmc@vger.kernel.org>; Tue, 04 Feb 2014 07:59:53 -0800 (PST)
 In-Reply-To: <1391529538-21685-1-git-send-email-ulf.hansson@linaro.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Russell King <linux@arm.linux.org.uk>, linux-arm-kernel@lists.infradead.org
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Wolfram Sang <wsa@the-dreams.de>, Linus Walleij <linus.walleij@linaro.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Chris Ball <chris@printf.net>, Mark Brown <broonie@kernel.org>, linux-i2c@vger.kernel.org, linux-spi@vger.kernel.org, Alessandro Rubini <rubini@unipv.it>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Russell King <linux@arm.linux.org.uk>, linux-arm-kernel@lists.infradead.org
+Cc: Alessandro Rubini <rubini@unipv.it>, Linus Walleij <linus.walleij@linaro.org>, Wolfram Sang <wsa@the-dreams.de>, Chris Ball <chris@printf.net>, Mark Brown <broonie@kernel.org>, linux-kernel@vger.kernel.org, linux-i2c@vger.kernel.org, linux-spi@vger.kernel.org, linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
 
-Convert to the SET_PM_RUNTIME_PM macro while defining the runtime PM
-callbacks. This means the callbacks becomes available for both
-CONFIG_PM_SLEEP and CONFIG_PM_RUNTIME, which is needed by drivers and
-power domains.
+Since the runtime PM state is expected to be active according to the
+amba bus, we must align our behaviour while probing to it.
 
-Cc: Russell King <linux@arm.linux.org.uk>
+Moreover, this is needed to be able to have the driver fully functional
+without depending on CONFIG_RUNTIME_PM.
+
+Cc: Alessandro Rubini <rubini@unipv.it>
+Cc: Linus Walleij <linus.walleij@linaro.org>
+Cc: Wolfram Sang <wsa@the-dreams.de>
 Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 ---
- drivers/amba/bus.c |    4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+ drivers/i2c/busses/i2c-nomadik.c |   18 ++++++++++++------
+ 1 file changed, 12 insertions(+), 6 deletions(-)
 
-diff --git a/drivers/amba/bus.c b/drivers/amba/bus.c
-index 9e60291..3cf61a1 100644
---- a/drivers/amba/bus.c
-+++ b/drivers/amba/bus.c
-@@ -83,7 +83,7 @@ static struct device_attribute amba_dev_attrs[] = {
- 	__ATTR_NULL,
- };
+diff --git a/drivers/i2c/busses/i2c-nomadik.c b/drivers/i2c/busses/i2c-nomadik.c
+index 42c9e51..0caa8ea 100644
+--- a/drivers/i2c/busses/i2c-nomadik.c
++++ b/drivers/i2c/busses/i2c-nomadik.c
+@@ -1026,11 +1026,6 @@ static int nmk_i2c_probe(struct amba_device *adev, const struct amba_id *id)
+ 	dev->adev = adev;
+ 	amba_set_drvdata(adev, dev);
  
--#ifdef CONFIG_PM_RUNTIME
-+#ifdef CONFIG_PM
- /*
-  * Hooks to provide runtime PM of the pclk (bus clock).  It is safe to
-  * enable/disable the bus clock at runtime PM suspend/resume as this
-@@ -123,7 +123,7 @@ static const struct dev_pm_ops amba_pm = {
- 	.thaw		= pm_generic_thaw,
- 	.poweroff	= pm_generic_poweroff,
- 	.restore	= pm_generic_restore,
--	SET_RUNTIME_PM_OPS(
-+	SET_PM_RUNTIME_PM_OPS(
- 		amba_pm_runtime_suspend,
- 		amba_pm_runtime_resume,
- 		NULL
+-	/* Select default pin state */
+-	pinctrl_pm_select_default_state(&adev->dev);
+-	/* If possible, let's go to idle until the first transfer */
+-	pinctrl_pm_select_idle_state(&adev->dev);
+-
+ 	dev->virtbase = devm_ioremap(&adev->dev, adev->res.start,
+ 				resource_size(&adev->res));
+ 	if (!dev->virtbase) {
+@@ -1055,6 +1050,14 @@ static int nmk_i2c_probe(struct amba_device *adev, const struct amba_id *id)
+ 		goto err_no_mem;
+ 	}
+ 
++	ret = clk_prepare_enable(dev->clk);
++	if (ret) {
++		dev_err(&adev->dev, "can't prepare_enable clock\n");
++		goto err_no_mem;
++	}
++
++	init_hw(dev);
++
+ 	adap = &dev->adap;
+ 	adap->dev.of_node = np;
+ 	adap->dev.parent = &adev->dev;
+@@ -1080,13 +1083,15 @@ static int nmk_i2c_probe(struct amba_device *adev, const struct amba_id *id)
+ 	ret = i2c_add_adapter(adap);
+ 	if (ret) {
+ 		dev_err(&adev->dev, "failed to add adapter\n");
+-		goto err_no_mem;
++		goto err_no_adap;
+ 	}
+ 
+ 	pm_runtime_put(&adev->dev);
+ 
+ 	return 0;
+ 
++ err_no_adap:
++	clk_disable_unprepare(dev->clk);
+  err_no_mem:
+ 
+ 	return ret;
+@@ -1103,6 +1108,7 @@ static int nmk_i2c_remove(struct amba_device *adev)
+ 	clear_all_interrupts(dev);
+ 	/* disable the controller */
+ 	i2c_clr_bit(dev->virtbase + I2C_CR, I2C_CR_PE);
++	clk_disable_unprepare(dev->clk);
+ 	if (res)
+ 		release_mem_region(res->start, resource_size(res));
+ 
 -- 
 1.7.9.5
+
