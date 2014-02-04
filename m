@@ -1,78 +1,192 @@
-From: Balaji T K <balajitk@ti.com>
-Subject: Re: [PATCH] mmc: omap_hsmmc: Add support for Erratum 2.1.1.128 in
- device tree boot
-Date: Tue, 4 Feb 2014 18:14:08 +0530
-Message-ID: <52F0E098.3050404@ti.com>
-References: <1390260542-22213-1-git-send-email-nm@ti.com>
+From: Seungwon Jeon <tgih.jun@samsung.com>
+Subject: RE: [PATCH V2 2/2] mmc: core: Enable MMC_CAP2_CACHE_CTRL as default
+Date: Tue, 04 Feb 2014 21:51:34 +0900
+Message-ID: <000301cf21a7$d5bc5ba0$813512e0$%jun@samsung.com>
+References: <1387483461-6317-1-git-send-email-ulf.hansson@linaro.org>
+ <1387483461-6317-2-git-send-email-ulf.hansson@linaro.org>
+ <CAGOxZ50eMD-nFSj8PWvx2fAbO+uHm2UZgR=MxtpjH1+TDrEp4g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
+Content-Type: text/plain; charset=Windows-1252
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from bear.ext.ti.com ([192.94.94.41]:47684 "EHLO bear.ext.ti.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751079AbaBDMon (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 4 Feb 2014 07:44:43 -0500
-In-Reply-To: <1390260542-22213-1-git-send-email-nm@ti.com>
+Received: from mailout1.samsung.com ([203.254.224.24]:63417 "EHLO
+	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753133AbaBDMvg (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 4 Feb 2014 07:51:36 -0500
+Received: from epcpsbgr1.samsung.com
+ (u141.gpu120.samsung.co.kr [203.254.230.141])
+ by mailout1.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+ (7.0.4.24.0) 64bit (built Nov 17 2011))
+ with ESMTP id <0N0H00MXG2DZBE40@mailout1.samsung.com> for
+ linux-mmc@vger.kernel.org; Tue, 04 Feb 2014 21:51:35 +0900 (KST)
+In-reply-to: <CAGOxZ50eMD-nFSj8PWvx2fAbO+uHm2UZgR=MxtpjH1+TDrEp4g@mail.gmail.com>
+Content-language: ko
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Nishanth Menon <nm@ti.com>
-Cc: Chris Ball <chris@printf.net>, Tony Lindgren <tony@atomide.com>, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+To: 'Alim Akhtar' <alim.akhtar@gmail.com>, 'Ulf Hansson' <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org, 'Chris Ball' <cjb@laptop.org>
 
-On Tuesday 21 January 2014 04:59 AM, Nishanth Menon wrote:
-> When device is booted using devicetree, platforms impacted by
-> Erratum 2.1.1.128 is not detected easily in the mmc driver. This erratum
-> indicates that the module cannot do multi-block transfers.
->
-> Handle this by providing a boolean flag to indicate to driver that it is
-> working on a hardware with mentioned limitation.
->
-> Signed-off-by: Nishanth Menon <nm@ti.com>
-> ---
->
-> This explains the logs I see:
-> OMAP3430 LDP (ES2.2):
-> 	uImage only boot:  http://slexy.org/raw/s2YrbMAi7c
-> 	uImage+dtb concatenated boot: http://slexy.org/raw/s20qVg17T0
->
-> With the following flag set, device is now able to consistently boot with
-> device tree supported uImage+dtb concat boot.
->
->   .../devicetree/bindings/mmc/ti-omap-hsmmc.txt      |    2 ++
->   drivers/mmc/host/omap_hsmmc.c                      |    3 +++
->   2 files changed, 5 insertions(+)
->
-> diff --git a/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt b/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
-> index 8c8908a..ab36f8b 100644
-> --- a/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
-> +++ b/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
-> @@ -26,6 +26,8 @@ specifier is required.
->   dma-names: List of DMA request names. These strings correspond
->   1:1 with the DMA specifiers listed in dmas. The string naming is
->   to be "rx" and "tx" for RX and TX DMA requests, respectively.
-> +ti,erratum-2.1.1.128: boolean, for OMAP3430/OMAP35xx platforms with broken
-> +multiblock reads
+Hi Alim,
 
-Rather than ti,errata.. specific property, something like
-caps no/disable multiblock read is more readable in my opinion, Otherwise
+On Mon, February 03, 2014, Alim Akhtar wrote:
+> Hi Ulf
+> 
+> On Thu, Dec 19, 2013 at 12:04 PM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> > There are no reason to why the use of a non-volatile internal eMMC
+> > cache should be controlled by a host cap. Instead let's just enable it
+> > if the eMMC card supports it.
+> >
+> > Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+> > Acked-by: Seungwon Jeon <tgih.jun@samsung.com>
+> > ---
+> >  drivers/mmc/core/core.c  |    4 ----
+> >  drivers/mmc/core/mmc.c   |    3 +--
+> >  include/linux/mmc/host.h |    1 -
+> >  3 files changed, 1 insertion(+), 7 deletions(-)
+> >
+> > diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> > index df591a9..1228a59 100644
+> > --- a/drivers/mmc/core/core.c
+> > +++ b/drivers/mmc/core/core.c
+> > @@ -2582,12 +2582,8 @@ EXPORT_SYMBOL(mmc_power_restore_host);
+> >   */
+> >  int mmc_flush_cache(struct mmc_card *card)
+> >  {
+> > -       struct mmc_host *host = card->host;
+> >         int err = 0;
+> >
+> > -       if (!(host->caps2 & MMC_CAP2_CACHE_CTRL))
+> > -               return err;
+> > -
+> 
+> I have back port this patch to a 3.8 based kernel and was  testing
+> cache_ctrl feature of emmc device.
+> It gives below kernel panic with a suspend/resume cycle.
+> 
+> ========
+> 
+> 26.084474] Unable to handle kernel NULL pointer dereference at virtual
+>  address 000001bc
+>  [   26.092203] pgd = eabb4000
+>  [   26.100593] [000001bc] *pgd=00000000
+>  [   26.104157] Internal error: Oops: 5 [#1] SMP ARM
+>  [   26.138663] CPU: 0    Tainted: G         C    (3.8.11 #164)
+>  [   26.144221] PC is at mmc_flush_cache+0x18/0xd4
+>  [   26.148640] LR is at mmc_suspend_host+0x34/0x188
+>  [   26.153238] pc : [<c03b2bd4>]    lr : [<c03b3e54>]    psr: 60000013
+>  [   26.153238] sp : edf73d60  ip : edf73d88  fp : edf73d84
+>  [   26.164687] r10: 00000002  r9 : c07d8b2c  r8 : c07a6bc8
+>  [   26.169892] r7 : ef2d5244  r6 : ede09818  r5 : ede09818  r4 :
+>  edddb400
+>  [   26.176399] r3 : 271ae517  r2 : 271ae517  r1 : 60000013  r0 :
+>  00000000
+>  [   26.182906] Flags: nZCv  IRQs on  FIQs on  Mode SVC_32  ISA ARM
+>  Segment user
+>  [   26.190019] Control: 10c5387d  Table: 4abb406a  DAC: 00000015
+>  [   26.195744] Process cat (pid: 7087, stack limit = 0xedf72240)
+>  [   26.377050] Backtrace:
+>  [   26.379401] [<c03b2bd4>] (mmc_flush_cache+0x18/0xd4) from
+>  [<c03b3e54>] (mmc_suspend_host+0x34/0x188)
+>  [   26.388506] [<c03b3e54>] (mmc_suspend_host+0x34/0x188) from
+>  [<c03c7e24>] (dw_mci_suspend+0x40/0x88)
+>  [   26.397528] [<c03c7e24>] (dw_mci_suspend+0x40/0x88) from
+>  [<c03ca278>] (dw_mci_exynos_suspend+0x1c/0x20)
+>  [   26.406898] [<c03ca278>] (dw_mci_exynos_suspend+0x1c/0x20) from
+>  [<c02d0a04>] (platform_pm_suspend+0x3c/0x64)
+>  [   26.416701] [<c02d0a04>] (platform_pm_suspend+0x3c/0x64) from
+>  [<c02d594c>] (dpm_run_callback.isra.5+0x24/0x4c)
+>  [   26.426677] [<c02d594c>] (dpm_run_callback.isra.5+0x24/0x4c) from
+>  [<c02d6564>] (__device_suspend+0x188/0x214)
+>  [   26.436565] [<c02d6564>] (__device_suspend+0x188/0x214) from
+>  [<c02d6e44>] (dpm_suspend+0xbc/0x218)
+>  [   26.445501] [<c02d6e44>] (dpm_suspend+0xbc/0x218) from [<c02d7200>]
+>  (dpm_suspend_start+0x6c/0x74)
+>  [   26.454352] [<c02d7200>] (dpm_suspend_start+0x6c/0x74) from
+>  [<c006c944>] (suspend_devices_and_enter+0x8c/0x294)
+>  [   26.464414] [<c006c944>] (suspend_devices_and_enter+0x8c/0x294) from
+>  [<c006cbfc>] (pm_suspend+0xb0/0x19c)
+>  [   26.473955] [<c006cbfc>] (pm_suspend+0xb0/0x19c) from [<c006bd68>]
+>  (state_store+0xbc/0xd0)
+>  [   26.482197] [<c006bd68>] (state_store+0xbc/0xd0) from [<c020ea20>]
+>  (kobj_attr_store+0x1c/0x28)
+>  [   26.490787] [<c020ea20>] (kobj_attr_store+0x1c/0x28) from
+>  [<c015cfd0>] (sysfs_write_file+0x114/0x158)
+>  [   26.499980] [<c015cfd0>] (sysfs_write_file+0x114/0x158) from
+>  [<c00fff08>] (vfs_write+0xbc/0x14c)
+>  [   26.508741] [<c00fff08>] (vfs_write+0xbc/0x14c) from [<c0100098>]
+>  (sys_write+0x5c/0xa4)
+>  [   26.516723] [<c0100098>] (sys_write+0x5c/0xa4) from [<c000e2c0>]
+>  (ret_fast_syscall+0x0/0x30)
+>  [   26.525137] Code: e24cb004 e24dd00c e92d4000 e8bd4000 (e59011bc)
+>  [   26.531276] ---[ end trace 04c2942721bcd221 ]---
+>  [   26.537224] Kernel panic - not syncing: Fatal exception
+> 
+> ========
+> Looks like mmc_flush_cache() is called for even SD cards,
+> and probably since SD cards does not have ext_csd register, and it is
+> trying to access the same below, its give kernel panic.
+> As my kernel is still 3.8, so I am not sure if I missed any other
+> patch which is/are needed and already taking care of such crashes.
+> By adding a check for card->type does make this crash goes away.
+When you test, sd card slot is empty?
+If right, 'card' can be NULL in kernel panic?
+The reason mmc_flush_cache() is called for even SD cards that mmc_suspend_host()
+is calling mmc_flush_cache(). 
+There has been some changes related to cache feature before Ulf's patch.
+mmc_cache_ctrl() has been moved to 'mmc.c' from 'core.c' and now Ulf replaces it with mmc_flush_cache().
+I guess mmc_flush_cache() should not be called in mmc_suspend_host().
+That means it's not applicable to your 3.8 kernel.
 
-Acked-by: Balaji T K <balajitk@ti.com>
-
->
->   Examples:
->
-> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-> index 014bfe5..f2d5940 100644
-> --- a/drivers/mmc/host/omap_hsmmc.c
-> +++ b/drivers/mmc/host/omap_hsmmc.c
-> @@ -1730,6 +1730,9 @@ static struct omap_mmc_platform_data *of_get_hsmmc_pdata(struct device *dev)
->   	if (of_find_property(np, "ti,dual-volt", NULL))
->   		pdata->controller_flags |= OMAP_HSMMC_SUPPORTS_DUAL_VOLT;
->
-> +	if (of_find_property(np, "ti,erratum-2.1.1.128", NULL))
-> +		pdata->controller_flags |= OMAP_HSMMC_BROKEN_MULTIBLOCK_READ;
-> +
->   	/* This driver only supports 1 slot */
->   	pdata->nr_slots = 1;
->   	pdata->slots[0].switch_pin = cd_gpio;
->
+Thanks,
+Seungwon Jeon
+> 
+> + if (mmc_card_mmc(card) != MMC_TYPE_MMC)
+> +              return err;
+> 
+> Do you know if this is the right thing to do?
+> 
+> >         if (mmc_card_mmc(card) &&
+> >                         (card->ext_csd.cache_size > 0) &&
+> >                         (card->ext_csd.cache_ctrl & 1)) {
+> > diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+> > index ef1cc73..7ab3e9c 100644
+> > --- a/drivers/mmc/core/mmc.c
+> > +++ b/drivers/mmc/core/mmc.c
+> > @@ -1287,8 +1287,7 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+> >          * If cache size is higher than 0, this indicates
+> >          * the existence of cache and it can be turned on.
+> >          */
+> > -       if ((host->caps2 & MMC_CAP2_CACHE_CTRL) &&
+> > -                       card->ext_csd.cache_size > 0) {
+> > +       if (card->ext_csd.cache_size > 0) {
+> >                 err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+> >                                 EXT_CSD_CACHE_CTRL, 1,
+> >                                 card->ext_csd.generic_cmd6_time);
+> > diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+> > index f539bc7..8383e3f 100644
+> > --- a/include/linux/mmc/host.h
+> > +++ b/include/linux/mmc/host.h
+> > @@ -264,7 +264,6 @@ struct mmc_host {
+> >         u32                     caps2;          /* More host capabilities */
+> >
+> >  #define MMC_CAP2_BOOTPART_NOACC        (1 << 0)        /* Boot partition no access */
+> > -#define MMC_CAP2_CACHE_CTRL    (1 << 1)        /* Allow cache control */
+> >  #define MMC_CAP2_FULL_PWR_CYCLE        (1 << 2)        /* Can do full power cycle */
+> >  #define MMC_CAP2_NO_MULTI_READ (1 << 3)        /* Multiblock reads don't work */
+> >  #define MMC_CAP2_NO_SLEEP_CMD  (1 << 4)        /* Don't allow sleep command */
+> > --
+> > 1.7.9.5
+> >
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> --
+> Regards,
+> Alim
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
