@@ -1,54 +1,105 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [PATCH 04/17] mmc: mmci: Let runtime PM callbacks be available for CONFIG_PM
-Date: Tue,  4 Feb 2014 16:58:45 +0100
-Message-ID: <1391529538-21685-5-git-send-email-ulf.hansson@linaro.org>
+Subject: [PATCH 05/17] mmc: mmci: Put the device into low power state at system suspend
+Date: Tue,  4 Feb 2014 16:58:46 +0100
+Message-ID: <1391529538-21685-6-git-send-email-ulf.hansson@linaro.org>
 References: <1391529538-21685-1-git-send-email-ulf.hansson@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-lb0-f176.google.com ([209.85.217.176]:32805 "EHLO
-	mail-lb0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932071AbaBDP7a (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 4 Feb 2014 10:59:30 -0500
-Received: by mail-lb0-f176.google.com with SMTP id w7so6482837lbi.21
-        for <linux-mmc@vger.kernel.org>; Tue, 04 Feb 2014 07:59:28 -0800 (PST)
+Received: from mail-lb0-f179.google.com ([209.85.217.179]:40867 "EHLO
+	mail-lb0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754617AbaBDP7c (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 4 Feb 2014 10:59:32 -0500
+Received: by mail-lb0-f179.google.com with SMTP id l4so6559447lbv.38
+        for <linux-mmc@vger.kernel.org>; Tue, 04 Feb 2014 07:59:31 -0800 (PST)
 In-Reply-To: <1391529538-21685-1-git-send-email-ulf.hansson@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Russell King <linux@arm.linux.org.uk>, linux-arm-kernel@lists.infradead.org
 Cc: Alessandro Rubini <rubini@unipv.it>, Linus Walleij <linus.walleij@linaro.org>, Wolfram Sang <wsa@the-dreams.de>, Chris Ball <chris@printf.net>, Mark Brown <broonie@kernel.org>, linux-kernel@vger.kernel.org, linux-i2c@vger.kernel.org, linux-spi@vger.kernel.org, linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
 
-Convert to the SET_PM_RUNTIME_PM macro while defining the runtime PM
-callbacks. This means the callbacks becomes available for both
-CONFIG_PM_SLEEP and CONFIG_PM_RUNTIME, which is needed to handle the
-combinations of these scenarios.
+Due to the available runtime PM callbacks, we are now able to put our
+device into low power state at system suspend.
+
+Earlier we could not accomplish this without trusting a power domain
+for the device to take care of it. Now we are able to cope with
+scenarios both with and without a power domain.
 
 Cc: Russell King <linux@arm.linux.org.uk>
 Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 ---
- drivers/mmc/host/mmci.c |    4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+ drivers/mmc/host/mmci.c |   45 +++++++++++++++++++++++++--------------------
+ 1 file changed, 25 insertions(+), 20 deletions(-)
 
 diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index 178868a..c88da1c 100644
+index c88da1c..074e0cb 100644
 --- a/drivers/mmc/host/mmci.c
 +++ b/drivers/mmc/host/mmci.c
-@@ -1753,7 +1753,7 @@ static int mmci_resume(struct device *dev)
+@@ -1723,33 +1723,38 @@ static int mmci_remove(struct amba_device *dev)
+ 	return 0;
+ }
+ 
+-#ifdef CONFIG_SUSPEND
+-static int mmci_suspend(struct device *dev)
++#ifdef CONFIG_PM_SLEEP
++static int mmci_suspend_late(struct device *dev)
+ {
+-	struct amba_device *adev = to_amba_device(dev);
+-	struct mmc_host *mmc = amba_get_drvdata(adev);
++	int ret = 0;
+ 
+-	if (mmc) {
+-		struct mmci_host *host = mmc_priv(mmc);
+-		pm_runtime_get_sync(dev);
+-		writel(0, host->base + MMCIMASK0);
+-	}
++	if (pm_runtime_status_suspended(dev))
++		return 0;
+ 
+-	return 0;
++	if (dev->pm_domain && dev->pm_domain->ops.runtime_suspend)
++		ret = dev->pm_domain->ops.runtime_suspend(dev);
++	else
++		ret = dev->bus->pm->runtime_suspend(dev);
++
++	if (!ret)
++		pm_runtime_set_suspended(dev);
++
++	return ret;
+ }
+ 
+-static int mmci_resume(struct device *dev)
++static int mmci_resume_early(struct device *dev)
+ {
+-	struct amba_device *adev = to_amba_device(dev);
+-	struct mmc_host *mmc = amba_get_drvdata(adev);
++	int ret = 0;
+ 
+-	if (mmc) {
+-		struct mmci_host *host = mmc_priv(mmc);
+-		writel(MCI_IRQENABLE, host->base + MMCIMASK0);
+-		pm_runtime_put(dev);
+-	}
++	if (pm_runtime_status_suspended(dev))
++		return 0;
+ 
+-	return 0;
++	if (dev->pm_domain && dev->pm_domain->ops.runtime_resume)
++		ret = dev->pm_domain->ops.runtime_resume(dev);
++	else
++		ret = dev->bus->pm->runtime_resume(dev);
++
++	return ret;
  }
  #endif
  
--#ifdef CONFIG_PM_RUNTIME
-+#ifdef CONFIG_PM
- static void mmci_save(struct mmci_host *host)
- {
- 	unsigned long flags;
-@@ -1821,7 +1821,7 @@ static int mmci_runtime_resume(struct device *dev)
+@@ -1820,7 +1825,7 @@ static int mmci_runtime_resume(struct device *dev)
+ #endif
  
  static const struct dev_pm_ops mmci_dev_pm_ops = {
- 	SET_SYSTEM_SLEEP_PM_OPS(mmci_suspend, mmci_resume)
--	SET_RUNTIME_PM_OPS(mmci_runtime_suspend, mmci_runtime_resume, NULL)
-+	SET_PM_RUNTIME_PM_OPS(mmci_runtime_suspend, mmci_runtime_resume, NULL)
+-	SET_SYSTEM_SLEEP_PM_OPS(mmci_suspend, mmci_resume)
++	SET_LATE_SYSTEM_SLEEP_PM_OPS(mmci_suspend_late, mmci_resume_early)
+ 	SET_PM_RUNTIME_PM_OPS(mmci_runtime_suspend, mmci_runtime_resume, NULL)
  };
  
- static struct amba_id mmci_ids[] = {
 -- 
 1.7.9.5
 
