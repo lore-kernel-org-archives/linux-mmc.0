@@ -1,115 +1,77 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [PATCH 14/17] i2c: nomadik: Fixup deployment of runtime PM
-Date: Tue,  4 Feb 2014 16:58:55 +0100
-Message-ID: <1391529538-21685-15-git-send-email-ulf.hansson@linaro.org>
+From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: [PATCH 15/17] i2c: nomadik: Convert to late and early system PM callbacks
+Date: Tue,  4 Feb 2014 16:58:56 +0100
+Message-ID: <1391529538-21685-16-git-send-email-ulf.hansson@linaro.org>
 References: <1391529538-21685-1-git-send-email-ulf.hansson@linaro.org>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1391529538-21685-1-git-send-email-ulf.hansson@linaro.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Russell King <linux@arm.linux.org.uk>, linux-arm-kernel@lists.infradead.org
-Cc: Alessandro Rubini <rubini@unipv.it>, Linus Walleij <linus.walleij@linaro.org>, Wolfram Sang <wsa@the-dreams.de>, Chris Ball <chris@printf.net>, Mark Brown <broonie@kernel.org>, linux-kernel@vger.kernel.org, linux-i2c@vger.kernel.org, linux-spi@vger.kernel.org, linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+Return-path: <linux-i2c-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1391529538-21685-1-git-send-email-ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Sender: linux-i2c-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+Cc: Alessandro Rubini <rubini-9wsNiZum9E8@public.gmane.org>, Linus Walleij <linus.walleij-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Wolfram Sang <wsa-z923LK4zBo2bacvFa/9K2g@public.gmane.org>, Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, Mark Brown <broonie-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-spi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Since the device is active while a successful probe has been completed,
-the reference counting for the clock will be screwed up and never reach
-zero.
+At system suspend_late, runtime PM has been disabled by the PM core
+which means we can safely operate on these resources. Consequentially
+we no longer have to wait until the noirq phase of the system suspend.
 
-The issue is resolved by implementing runtime PM callbacks and let them
-handle the resources accordingly, including the clock.
-
-Cc: Alessandro Rubini <rubini@unipv.it>
-Cc: Linus Walleij <linus.walleij@linaro.org>
-Cc: Wolfram Sang <wsa@the-dreams.de>
-Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Alessandro Rubini <rubini-9wsNiZum9E8@public.gmane.org>
+Cc: Linus Walleij <linus.walleij-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Wolfram Sang <wsa-z923LK4zBo2bacvFa/9K2g@public.gmane.org>
+Signed-off-by: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 ---
- drivers/i2c/busses/i2c-nomadik.c |   47 ++++++++++++++++++++++----------------
- 1 file changed, 27 insertions(+), 20 deletions(-)
+ drivers/i2c/busses/i2c-nomadik.c |   18 ++++--------------
+ 1 file changed, 4 insertions(+), 14 deletions(-)
 
 diff --git a/drivers/i2c/busses/i2c-nomadik.c b/drivers/i2c/busses/i2c-nomadik.c
-index 0caa8ea..2d7dbc9 100644
+index 2d7dbc9..eda4f0d 100644
 --- a/drivers/i2c/busses/i2c-nomadik.c
 +++ b/drivers/i2c/busses/i2c-nomadik.c
-@@ -674,7 +674,7 @@ static int nmk_i2c_xfer_one(struct nmk_i2c_dev *dev, u16 flags)
- static int nmk_i2c_xfer(struct i2c_adapter *i2c_adap,
- 		struct i2c_msg msgs[], int num_msgs)
+@@ -890,9 +890,8 @@ static irqreturn_t i2c_irq_handler(int irq, void *arg)
+ 	return IRQ_HANDLED;
+ }
+ 
+-
+-#ifdef CONFIG_PM
+-static int nmk_i2c_suspend(struct device *dev)
++#ifdef CONFIG_PM_SLEEP
++static int nmk_i2c_suspend_late(struct device *dev)
  {
--	int status;
-+	int status = 0;
- 	int i;
- 	struct nmk_i2c_dev *dev = i2c_get_adapdata(i2c_adap);
- 	int j;
-@@ -683,19 +683,6 @@ static int nmk_i2c_xfer(struct i2c_adapter *i2c_adap,
+ 	struct amba_device *adev = to_amba_device(dev);
+ 	struct nmk_i2c_dev *nmk_i2c = amba_get_drvdata(adev);
+@@ -905,7 +904,7 @@ static int nmk_i2c_suspend(struct device *dev)
+ 	return 0;
+ }
  
- 	pm_runtime_get_sync(&dev->adev->dev);
+-static int nmk_i2c_resume(struct device *dev)
++static int nmk_i2c_resume_early(struct device *dev)
+ {
+ 	/* First go to the default state */
+ 	pinctrl_pm_select_default_state(dev);
+@@ -914,9 +913,6 @@ static int nmk_i2c_resume(struct device *dev)
  
--	status = clk_prepare_enable(dev->clk);
--	if (status) {
--		dev_err(&dev->adev->dev, "can't prepare_enable clock\n");
--		goto out_clk;
--	}
--
--	/* Optionaly enable pins to be muxed in and configured */
--	pinctrl_pm_select_default_state(&dev->adev->dev);
--
--	status = init_hw(dev);
--	if (status)
--		goto out;
--
- 	/* Attempt three times to send the message queue */
- 	for (j = 0; j < 3; j++) {
- 		/* setup the i2c controller */
-@@ -716,12 +703,6 @@ static int nmk_i2c_xfer(struct i2c_adapter *i2c_adap,
- 			break;
- 	}
- 
--out:
--	clk_disable_unprepare(dev->clk);
--out_clk:
--	/* Optionally let pins go into idle state */
--	pinctrl_pm_select_idle_state(&dev->adev->dev);
--
- 	pm_runtime_put_sync(&dev->adev->dev);
- 
- 	dev->busy = false;
-@@ -938,6 +919,29 @@ static int nmk_i2c_resume(struct device *dev)
- #define nmk_i2c_resume	NULL
+ 	return 0;
+ }
+-#else
+-#define nmk_i2c_suspend	NULL
+-#define nmk_i2c_resume	NULL
  #endif
  
-+#if CONFIG_PM
-+static int nmk_i2c_runtime_suspend(struct device *dev)
-+{
-+	struct amba_device *adev = to_amba_device(dev);
-+	struct nmk_i2c_dev *nmk_i2c = amba_get_drvdata(adev);
-+
-+	clk_disable_unprepare(nmk_i2c->clk);
-+	pinctrl_pm_select_idle_state(dev);
-+	return 0;
-+}
-+
-+static int nmk_i2c_runtime_resume(struct device *dev)
-+{
-+	struct amba_device *adev = to_amba_device(dev);
-+	struct nmk_i2c_dev *nmk_i2c = amba_get_drvdata(adev);
-+
-+	clk_prepare_enable(nmk_i2c->clk);
-+	pinctrl_pm_select_default_state(dev);
-+	init_hw(nmk_i2c);
-+	return 0;
-+}
-+#endif
-+
- /*
-  * We use noirq so that we suspend late and resume before the wakeup interrupt
-  * to ensure that we do the !pm_runtime_suspended() check in resume before
-@@ -946,6 +950,9 @@ static int nmk_i2c_resume(struct device *dev)
- static const struct dev_pm_ops nmk_i2c_pm = {
- 	.suspend_noirq	= nmk_i2c_suspend,
- 	.resume_noirq	= nmk_i2c_resume,
-+	SET_PM_RUNTIME_PM_OPS(nmk_i2c_runtime_suspend,
-+			nmk_i2c_runtime_resume,
-+			NULL)
- };
+ #if CONFIG_PM
+@@ -942,14 +938,8 @@ static int nmk_i2c_runtime_resume(struct device *dev)
+ }
+ #endif
  
- static unsigned int nmk_i2c_functionality(struct i2c_adapter *adap)
+-/*
+- * We use noirq so that we suspend late and resume before the wakeup interrupt
+- * to ensure that we do the !pm_runtime_suspended() check in resume before
+- * there has been a regular pm runtime resume (via pm_runtime_get_sync()).
+- */
+ static const struct dev_pm_ops nmk_i2c_pm = {
+-	.suspend_noirq	= nmk_i2c_suspend,
+-	.resume_noirq	= nmk_i2c_resume,
++	SET_LATE_SYSTEM_SLEEP_PM_OPS(nmk_i2c_suspend_late, nmk_i2c_resume_early)
+ 	SET_PM_RUNTIME_PM_OPS(nmk_i2c_runtime_suspend,
+ 			nmk_i2c_runtime_resume,
+ 			NULL)
 -- 
 1.7.9.5
