@@ -1,183 +1,116 @@
-From: <dinguyen@altera.com>
-Subject: [RESEND PATCHv4] mmc: dw_mmc: Enable the hold reg for certain speed modes
-Date: Tue, 4 Feb 2014 17:20:20 -0600
-Message-ID: <1391556020-8628-1-git-send-email-dinguyen@altera.com>
+From: Tim Kryger <tim.kryger@linaro.org>
+Subject: [PATCH RESEND] mmc: sdhci-bcm-kona: Add basic use of clocks
+Date: Tue, 4 Feb 2014 16:24:14 -0800
+Message-ID: <1391559854-28004-1-git-send-email-tim.kryger@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bn1bon0134.outbound.protection.outlook.com ([157.56.111.134]:64979
-	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S932618AbaBDX5u (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 4 Feb 2014 18:57:50 -0500
+Received: from mail-gw3-out.broadcom.com ([216.31.210.64]:1629 "EHLO
+	mail-gw3-out.broadcom.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750946AbaBEAYb (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 4 Feb 2014 19:24:31 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: dinh.linux@gmail.com, cjb@laptop.org, jh80.chung@samsung.com, tgih.jun@samsung.com, linux-mmc@vger.kernel.org
-Cc: arnd@arndb.de, zhangfei.gao@linaro.org, heiko@sntech.de, Dinh Nguyen <dinguyen@altera.com>
+To: Chris Ball <cjb@laptop.org>, Christian Daudt <bcm@fixthebug.org>, Ulf Hansson <ulf.hansson@linaro.org>, Axel Lin <axel.lin@ingics.com>
+Cc: Tim Kryger <tim.kryger@linaro.org>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux Kernel List <linux-kernel@vger.kernel.org>, Linaro Patches List <patches@linaro.org>
 
-From: Dinh Nguyen <dinguyen@altera.com>
+Enable the external clock needed by the host controller during the
+probe and disable it during the remove.
 
-This patch will enable the SDMMC_CMD_USE_HOLD_REG bit when the slot is
-operating all timing modes, except for SDR50, DDR50, SDR104, and MMC_HS200.
-
-According to the Synopsys databook :"To meet the relatively high Input Hold
-Time requirement for SDR12, SDR25, and other MMC speed modes, you should
-program bit[29]use_hold_Reg of the CMD register to 1'b1;"..."However, for
-the higher speed modes of SDR104, SDR50 and DDR50, you can meet the much
-smaller Input Hold Time requirement of 0.8ns by bypassing the Hold Register
-(Path A in Figure 10-8, programming CMD.use_hold_reg = 1'b0) and then adding
-delay elements on the output path as indicated.
-
-Also, "Never set CMD.use_hold_reg = 1 and cclk_in_drv phase shift to 0 at the
-same time. This would add an extra one-cycle delay on the output path, resulting
-in incorrect behavior."
-
-This patch also checks the IHR(Implement Hold Register) in the HCON register.
-
-This information is taking from the v2.50a of the Synopsys Designware Cores
-Mobile Storage Host Databook.
-
-Signed-off-by: Dinh Nguyen <dinguyen@altera.com>
-Acked-by: Arnd Bergmann <arnd@arndb.de>
-Acked-by: Heiko Stuebner <heiko@sntech.de>
-Tested-by: Heiko Stuebner <heiko@sntech.de>
+Signed-off-by: Tim Kryger <tim.kryger@linaro.org>
+Reviewed-by: Markus Mayer <markus.mayer@linaro.org>
+Reviewed-by: Matt Porter <matt.porter@linaro.org>
+Reviewed-by: Christian Daudt <bcm@fixthebug.org>
 ---
-v4: use_hold_reg should be set for all modes when cclk_in_drv is non-zero.
-v3: Read the IHR(Implement Hold Register) in the HCON
-v2: Add check for cclk_in_drv phase shift in conjunction with use_hold_reg.
----
- drivers/mmc/host/dw_mmc.c  |   52 ++++++++++++++++++++++++++++++++++++++++++++
- drivers/mmc/host/dw_mmc.h  |    4 ++++
- include/linux/mmc/dw_mmc.h |    3 +++
- 3 files changed, 59 insertions(+)
 
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 55cd110..3614667 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -280,6 +280,9 @@ static u32 dw_mci_prepare_command(struct mmc_host *mmc, struct mmc_command *cmd)
- 			cmdr |= SDMMC_CMD_DAT_WR;
- 	}
+This was dropped from "Update Kona drivers to use clocks" series so the
+remaining patches could get into v3.14:
+
+https://lkml.org/lkml/2014/1/24/286
+
+Without this change the bcm28155_ap board can not be configured to use
+the bcm281xx clock driver since unused clocks will be disabled during
+late init.
+
+ drivers/mmc/host/sdhci-bcm-kona.c | 37 +++++++++++++++++++++++++++++++++++--
+ 1 file changed, 35 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/mmc/host/sdhci-bcm-kona.c b/drivers/mmc/host/sdhci-bcm-kona.c
+index 7a190fe..923eefa 100644
+--- a/drivers/mmc/host/sdhci-bcm-kona.c
++++ b/drivers/mmc/host/sdhci-bcm-kona.c
+@@ -54,6 +54,7 @@
  
-+	if (slot->host->use_hold_reg)
-+		cmdr |= SDMMC_CMD_USE_HOLD_REG;
-+
- 	if (drv_data && drv_data->prepare_command)
- 		drv_data->prepare_command(slot->host, &cmdr);
- 
-@@ -970,6 +973,25 @@ static void dw_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 	mci_writel(slot->host, UHS_REG, regs);
- 	slot->host->timing = ios->timing;
- 
-+	/* Per Synopsys spec, use_hold_reg should be set for all modes except for
-+	 * high-speed SDR50, DDR50, SDR104, and MMC_HS200. However, use_hold_reg
-+	 * should be cleared if the cclk_in_drv is 0. use_hold_reg should be set
-+	 * for all modes if cclk_in_drv is set.
-+	 */
-+	slot->host->use_hold_reg = 1;
-+	switch (slot->host->timing) {
-+	case MMC_TIMING_UHS_SDR50:
-+	case MMC_TIMING_UHS_SDR104:
-+	case MMC_TIMING_UHS_DDR50:
-+	case MMC_TIMING_MMC_HS200:
-+		if (slot->host->pdata->cclk_in_drv == 0)
-+			slot->host->use_hold_reg = 0;
-+		break;
-+	}
-+
-+	if (slot->host->can_use_hold_reg == 0)
-+		slot->host->use_hold_reg = 0;
-+
- 	/*
- 	 * Use mirror of ios->clock to prevent race with mmc
- 	 * core ios update when finding the minimum.
-@@ -2364,6 +2386,8 @@ static struct dw_mci_board *dw_mci_parse_dt(struct dw_mci *host)
- 	const struct dw_mci_drv_data *drv_data = host->drv_data;
- 	int idx, ret;
- 	u32 clock_frequency;
-+	int sdr_timing[2];
-+	int ddr_timing[2];
- 
- 	pdata = devm_kzalloc(dev, sizeof(*pdata), GFP_KERNEL);
- 	if (!pdata) {
-@@ -2417,6 +2441,25 @@ static struct dw_mci_board *dw_mci_parse_dt(struct dw_mci *host)
- 	if (of_get_property(np, "cd-inverted", NULL))
- 		pdata->caps2 |= MMC_CAP2_CD_ACTIVE_HIGH;
- 
-+	/* Check for the "samsung,dw-mshc-sdr-timing" and the
-+	 * "samsung,dw-mshc-ddr-timing" bindings as this will tell us if we
-+	 * can safely set the SDMMC_CMD_USE_HOLD_REG bit. The second paramater
-+	 * in these 2 bindings is the value of the cclk_in_drv. If cclk_in_drv
-+	 * is 0, we cannot set the SDMMC_CMD_USE_HOLD_REG bit. The default
-+	 * behavior will be to set cclk_in_drv, as some platforms do not have
-+	 * to set the sdr or ddr timing parameters.
-+	 */
-+	sdr_timing[1] = ddr_timing[1] = 1;
-+	of_property_read_u32_array(np,
-+			"samsung,dw-mshc-sdr-timing", sdr_timing, 2);
-+
-+	of_property_read_u32_array(np,
-+			"samsung,dw-mshc-ddr-timing", ddr_timing, 2);
-+
-+	pdata->cclk_in_drv = 1;
-+	if ((sdr_timing[1] == 0) || (ddr_timing[1] == 0))
-+		pdata->cclk_in_drv = 0;
-+
- 	return pdata;
- }
- 
-@@ -2523,6 +2566,15 @@ int dw_mci_probe(struct dw_mci *host)
- 		goto err_regulator;
- 	}
- 
-+	/* Check to see if the HOLD REG is implemented. */
-+	host->can_use_hold_reg = (mci_readl(host, HCON) & SDMMC_HCON_IHR) >> 22;
-+
-+	/* Can only use the HOLD REG is both conditions are true:
-+	 * Hardware has implemented HOLD_REG and
-+	 * cclk_in_drv is non-zero.
-+	 */
-+	host->can_use_hold_reg &= host->pdata->cclk_in_drv;
-+
- 	host->quirks = host->pdata->quirks;
- 
- 	spin_lock_init(&host->lock);
-diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
-index 6bf24ab..dfd05c9 100644
---- a/drivers/mmc/host/dw_mmc.h
-+++ b/drivers/mmc/host/dw_mmc.h
-@@ -145,6 +145,10 @@
- #define SDMMC_IDMAC_ENABLE		BIT(7)
- #define SDMMC_IDMAC_FB			BIT(1)
- #define SDMMC_IDMAC_SWRESET		BIT(0)
-+
-+/* Hardware Configuration(HCON) register */
-+#define SDMMC_HCON_IHR			BIT(22)
-+
- /* Version ID register define */
- #define SDMMC_GET_VERID(x)		((x) & 0xFFFF)
- /* Card read threshold */
-diff --git a/include/linux/mmc/dw_mmc.h b/include/linux/mmc/dw_mmc.h
-index 6ce7d2c..2b5b8bf 100644
---- a/include/linux/mmc/dw_mmc.h
-+++ b/include/linux/mmc/dw_mmc.h
-@@ -191,6 +191,8 @@ struct dw_mci {
- 	struct regulator	*vmmc;	/* Power regulator */
- 	unsigned long		irq_flags; /* IRQ flags */
- 	int			irq;
-+	u32			can_use_hold_reg;
-+	bool			use_hold_reg;
+ struct sdhci_bcm_kona_dev {
+ 	struct mutex	write_lock; /* protect back to back writes */
++	struct clk	*external_clk;
  };
  
- /* DMA ops for Internal/External DMAC interface */
-@@ -238,6 +240,7 @@ struct dw_mci_board {
- 	u32 caps;	/* Capabilities */
- 	u32 caps2;	/* More capabilities */
- 	u32 pm_caps;	/* PM capabilities */
-+	u32 cclk_in_drv;	/*cclk_in_drv phase shift */
- 	/*
- 	 * Override fifo depth. If 0, autodetect it from the FIFOTH register,
- 	 * but note that this may not be reliable after a bootloader has used
+ 
+@@ -257,6 +258,24 @@ static int sdhci_bcm_kona_probe(struct platform_device *pdev)
+ 		goto err_pltfm_free;
+ 	}
+ 
++	/* Get and enable the external clock */
++	kona_dev->external_clk = devm_clk_get(dev, NULL);
++	if (IS_ERR(kona_dev->external_clk)) {
++		dev_err(dev, "Failed to get external clock\n");
++		ret = PTR_ERR(kona_dev->external_clk);
++		goto err_pltfm_free;
++	}
++
++	if (clk_set_rate(kona_dev->external_clk, host->mmc->f_max) != 0) {
++		dev_err(dev, "Failed to set rate external clock\n");
++		goto err_pltfm_free;
++	}
++
++	if (clk_prepare_enable(kona_dev->external_clk) != 0) {
++		dev_err(dev, "Failed to enable external clock\n");
++		goto err_pltfm_free;
++	}
++
+ 	dev_dbg(dev, "non-removable=%c\n",
+ 		(host->mmc->caps & MMC_CAP_NONREMOVABLE) ? 'Y' : 'N');
+ 	dev_dbg(dev, "cd_gpio %c, wp_gpio %c\n",
+@@ -271,7 +290,7 @@ static int sdhci_bcm_kona_probe(struct platform_device *pdev)
+ 
+ 	ret = sdhci_bcm_kona_sd_reset(host);
+ 	if (ret)
+-		goto err_pltfm_free;
++		goto err_clk_disable;
+ 
+ 	sdhci_bcm_kona_sd_init(host);
+ 
+@@ -307,6 +326,9 @@ err_remove_host:
+ err_reset:
+ 	sdhci_bcm_kona_sd_reset(host);
+ 
++err_clk_disable:
++	clk_disable_unprepare(kona_dev->external_clk);
++
+ err_pltfm_free:
+ 	sdhci_pltfm_free(pdev);
+ 
+@@ -316,7 +338,18 @@ err_pltfm_free:
+ 
+ static int __exit sdhci_bcm_kona_remove(struct platform_device *pdev)
+ {
+-	return sdhci_pltfm_unregister(pdev);
++	struct sdhci_host *host = platform_get_drvdata(pdev);
++	struct sdhci_pltfm_host *pltfm_priv = sdhci_priv(host);
++	struct sdhci_bcm_kona_dev *kona_dev = sdhci_pltfm_priv(pltfm_priv);
++	int dead = (readl(host->ioaddr + SDHCI_INT_STATUS) == 0xffffffff);
++
++	sdhci_remove_host(host, dead);
++
++	clk_disable_unprepare(kona_dev->external_clk);
++
++	sdhci_pltfm_free(pdev);
++
++	return 0;
+ }
+ 
+ static struct platform_driver sdhci_bcm_kona_driver = {
 -- 
-1.7.9.5
+1.8.0.1
 
