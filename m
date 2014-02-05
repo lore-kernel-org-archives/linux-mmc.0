@@ -1,61 +1,35 @@
-From: David =?ISO-8859-1?Q?Lanzend=F6rfer?= <david.lanzendoerfer-Z7Kmv9EsliU@public.gmane.org>
-Subject: Re: [PATCH v3 0/7] ARM: sunxi: Add driver for SD/MMC
- hosts found on allwinner sunxi SOCs
-Date: Wed, 05 Feb 2014 18:17:46 +0100
-Message-ID: <2733138.OsaPkZKnhk@dizzy-6.o2s.ch>
-References: <20140205134741.3027.50207.stgit@dizzy-6.o2s.ch>
-Reply-To: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+From: Kevin Hilman <khilman@linaro.org>
+Subject: Re: [PATCH 05/17] mmc: mmci: Put the device into low power state at system suspend
+Date: Wed, 05 Feb 2014 12:08:38 -0800
+Message-ID: <87ob2ls4op.fsf@paris.lan>
+References: <1391529538-21685-1-git-send-email-ulf.hansson@linaro.org>
+	<1391529538-21685-6-git-send-email-ulf.hansson@linaro.org>
+	<8738jyu1h9.fsf@paris.lan>
+	<CACRpkdZt5+t7b0_a__2kJP4V9PS2cyXmguWrST+fzbKCnosi7g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; boundary="nextPart1438517.AOmo1C3tjv"; micalg="pgp-sha1"; protocol="application/pgp-signature"
-Return-path: <linux-sunxi+bncBD2JL37LXEKRBSHEZGLQKGQEDS6NFIY-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-In-Reply-To: <20140205134741.3027.50207.stgit-GPtPHOohwllnsqa/0SyWJQ@public.gmane.org>
-List-Post: <http://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Help: <http://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Archive: <http://groups.google.com/group/linux-sunxi>
-Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
-List-Subscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Unsubscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-To: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-Cc: devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Laurent Pinchart <laurent.pinchart+renesas-ryLnwIuWjnjg/C1BVhZhaw@public.gmane.org>, Simon Baatz <gmbnomis-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Emilio =?ISO-8859-1?Q?L=F3pez?= <emilio-0Z03zUJReD5OxF6Tv1QG9Q@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, H Hartley Sweeten <hsweeten-3FF4nKcrg1dE2c76skzGb0EOCMrvLtNR@public.gmane.org>, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, Tejun Heo <tj-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, Guennadi Liakhovetski <g.liakhovetski-Mmb7MZpHnFY@public.gmane.org>
+Content-Type: text/plain
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CACRpkdZt5+t7b0_a__2kJP4V9PS2cyXmguWrST+fzbKCnosi7g@mail.gmail.com>
+	(Linus Walleij's message of "Wed, 5 Feb 2014 13:49:49 +0100")
+Sender: linux-kernel-owner@vger.kernel.org
+To: Linus Walleij <linus.walleij@linaro.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Russell King <linux@arm.linux.org.uk>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Alessandro Rubini <rubini@unipv.it>, Wolfram Sang <wsa@the-dreams.de>, Chris Ball <chris@printf.net>, Mark Brown <broonie@kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-i2c@vger.kernel.org" <linux-i2c@vger.kernel.org>, linux-spi@vger.kernel.org, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
+Linus Walleij <linus.walleij@linaro.org> writes:
 
---nextPart1438517.AOmo1C3tjv
-Content-Transfer-Encoding: quoted-printable
-Content-Type: text/plain; charset="us-ascii"
+> On Tue, Feb 4, 2014 at 8:22 PM, Kevin Hilman <khilman@linaro.org> wrote:
+>> Ulf Hansson <ulf.hansson@linaro.org> writes:
+>>
+>>> Due to the available runtime PM callbacks, we are now able to put our
+>>> device into low power state at system suspend.
+> (...)
+>> I'm trying to thing of a good reason to not make PM_SLEEP depend on
+>> PM_RUNTIME for platforms like this.
+>
+> Isn't the typical Android platform using PM_SLEEP without using
+> PM_RUNTIME?
 
-As Maxime has pointed out, I've forgotten to add a changelog
-in my coverletter.
-Here is, what has changed in this revision:
+No, most Android platforms that I'm aware of use both extensively.
 
-Changes since v1:
-=2DUsing mmc_of_parse instead of diy dt parsing
-=2DAdding nodes for all mmc controller to the dtsi files, including sofar=
- unused
-  controllers
-=2DUsing generic GPIO slot library
-=2DAdding additional MMC device nodes into DTSI files
-
-Changes since v2:
-=2DAdd missing Signed-off-by tags
-=2DStop using __raw_readl / __raw_writel so that barriers are properly us=
-ed
-=2DAdding missing new lines
-=2DAdding missing patch for automatic reparenting of clocks
-
-cheers
-david
---nextPart1438517.AOmo1C3tjv
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: This is a digitally signed message part.
-Content-Transfer-Encoding: 7Bit
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-
-iEYEABECAAYFAlLycj0ACgkQAeZw77btGjq4IgCfVDzZHDDb0w0JZ2ZrHfngQxay
-Ed4AoLAsD7YPn2Biiwrp3lrn7zgmkaZG
-=2Ypc
------END PGP SIGNATURE-----
-
---nextPart1438517.AOmo1C3tjv--
+Kevin
