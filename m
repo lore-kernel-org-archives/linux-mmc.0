@@ -1,34 +1,79 @@
-From: Fabio Estevam <festevam-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: [PATCH 14/17] i2c: nomadik: Fixup deployment of runtime PM
-Date: Wed, 5 Feb 2014 12:45:54 -0200
-Message-ID: <CAOMZO5CzUuQrmbk6FpFGR56jHBtW-1d_AGcdgB2xyMG0Nkf+Fw@mail.gmail.com>
-References: <1391529538-21685-1-git-send-email-ulf.hansson@linaro.org>
-	<1391529538-21685-15-git-send-email-ulf.hansson@linaro.org>
+From: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: [PATCH v2 0/6] ARM: sunxi: Add driver for SD/MMC
+ hosts found on allwinner sunxi SOCs
+Date: Wed, 05 Feb 2014 16:47:35 +0100
+Message-ID: <52F25D17.9080309@redhat.com>
+References: <20140204191648.29809.14611.stgit@dizzy-6.o2s.ch> <20140205103949.GC3192@lukather> <1676482.sbjAhaSLaV@dizzy-6.o2s.ch>
+Reply-To: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-spi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1391529538-21685-15-git-send-email-ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Sender: linux-spi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Alessandro Rubini <rubini-9wsNiZum9E8@public.gmane.org>, Linus Walleij <linus.walleij-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Wolfram Sang <wsa-z923LK4zBo2bacvFa/9K2g@public.gmane.org>, Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, Mark Brown <broonie-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, linux-kernel <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-i2c <linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-spi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-spi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: quoted-printable
+Return-path: <linux-sunxi+bncBDL4X2GMZUKRBLF2ZGLQKGQEL5IEQ7A-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+In-Reply-To: <1676482.sbjAhaSLaV-GPtPHOohwllnsqa/0SyWJQ@public.gmane.org>
+List-Post: <http://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Help: <http://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Archive: <http://groups.google.com/group/linux-sunxi>
+Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+List-Subscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Unsubscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+To: =?ISO-8859-1?Q?David_Lanzend=F6rfer?= <david.lanzendoerfer-Z7Kmv9EsliU@public.gmane.org>, Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
+Cc: devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Laurent Pinchart <laurent.pinchart+renesas-ryLnwIuWjnjg/C1BVhZhaw@public.gmane.org>, Simon Baatz <gmbnomis-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, H Hartley Sweeten <hsweeten-3FF4nKcrg1dE2c76skzGb0EOCMrvLtNR@public.gmane.org>, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, Tejun Heo <tj-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Guennadi Liakhovetski <g.liakhovetski-Mmb7MZpHnFY@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Tue, Feb 4, 2014 at 1:58 PM, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
+Hi David,
 
-> +static int nmk_i2c_runtime_resume(struct device *dev)
-> +{
-> +       struct amba_device *adev = to_amba_device(dev);,
-> +       struct nmk_i2c_dev *nmk_i2c = amba_get_drvdata(adev);
-> +
-> +       clk_prepare_enable(nmk_i2c->clk);
+On 02/05/2014 02:01 PM, David Lanzend=F6rfer wrote:
+> Hi Maxime
+>> I have four comments here:
+>>    - Read Documentation/SubmittingPatches, especially Section 5 and 12
+>>      (hints, you forgot the clock maintainers for your clock patches
+>>      and you didn't put any signed-off-by tags)
+> Oops. I added signed-offs now
+>>    - You ignored pretty much all the comments that were made during the
+>>      review of the first version. Go through
+> Uh? I just fixed the commits and squashed them together for easier handli=
+ng.
+> I'm even using mmc_of_parse now...
+>> http://lists.infradead.org/pipermail/linux-arm-kernel/2013-December/2193=
+39.
+>> html and address the comments that were made.
+>>    - Each of your patches should compile. Fix the order of your
+>>      patches.
+> Done.
+>>    - Submit a v3, with the changes you made. Otherwise we have no way
+>>      of knowing what have been fixed and what didn't
+> Too many patches would be bloaty.
+> That's why I've squashed them into small and corrected patches.
 
-Previously the code was checking the return value from
-clk_prepare_enable(). You should keep the check here.
+The squashing is fine, what Maxime means is that normally you would include
+a changelog in the coverletter (the [patch 0/x] mail) documenting changes
+done since the previous posting of the patchset, so for v3 that would have =
+been
+something like:
 
-Regards,
+Changes since v1:
+-use mmc_of_parse instead of diy dt parsing
+-add nodes for all mmc controller to the dtsi files, including sofar unused
+  controllers
 
-Fabio Estevam
---
-To unsubscribe from this list: send the line "unsubscribe linux-spi" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Changes since v2:
+-Add missing Signed-off-by tags
+-stop using __raw_readl / __raw_writel so that barriers are properly used
+
+I've probably forgotten a few things, it would be good if you could send
+a reply to the:
+"[PATCH v3 0/7] ARM: sunxi: Add driver for SD/MMC hosts found on allwinner =
+sunxi SOCs"
+mail with the above changelog, amended with whatever I've forgotten to add
+to the above changelog
+
+Thanks & Regards,
+
+Hans
+
+--=20
+You received this message because you are subscribed to the Google Groups "=
+linux-sunxi" group.
+To unsubscribe from this group and stop receiving emails from it, send an e=
+mail to linux-sunxi+unsubscribe-/JYPxA39Uh5TLH3MbocFF+G/Ez6ZCGd0@public.gmane.org
+For more options, visit https://groups.google.com/groups/opt_out.
