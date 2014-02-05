@@ -1,82 +1,63 @@
-From: Nishanth Menon <nm@ti.com>
-Subject: Re: [PATCH] mmc: omap_hsmmc: Add support for Erratum 2.1.1.128 in
- device tree boot
-Date: Wed, 5 Feb 2014 08:12:28 -0600
-Message-ID: <52F246CC.6070600@ti.com>
-References: <1390260542-22213-1-git-send-email-nm@ti.com>
- <52F0E098.3050404@ti.com> <52F104B7.6040606@ti.com> <52F2465A.6060804@ti.com>
+From: Mark Brown <broonie-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH 05/17] mmc: mmci: Put the device into low power state at
+ system suspend
+Date: Wed, 5 Feb 2014 14:13:58 +0000
+Message-ID: <20140205141358.GJ22609@sirena.org.uk>
+References: <1391529538-21685-1-git-send-email-ulf.hansson@linaro.org>
+ <1391529538-21685-6-git-send-email-ulf.hansson@linaro.org>
+ <8738jyu1h9.fsf@paris.lan>
+ <CACRpkdZt5+t7b0_a__2kJP4V9PS2cyXmguWrST+fzbKCnosi7g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <52F2465A.6060804@ti.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Balaji T K <balajitk@ti.com>
-Cc: devicetree@vger.kernel.org, Tony Lindgren <tony@atomide.com>, linux-mmc@vger.kernel.org, Chris Ball <chris@printf.net>, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="NN0dgmCSDRRJ0kp/"
+Return-path: <linux-i2c-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <CACRpkdZt5+t7b0_a__2kJP4V9PS2cyXmguWrST+fzbKCnosi7g-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Sender: linux-i2c-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Linus Walleij <linus.walleij-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Kevin Hilman <khilman-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Alessandro Rubini <rubini-9wsNiZum9E8@public.gmane.org>, Wolfram Sang <wsa-z923LK4zBo2bacvFa/9K2g@public.gmane.org>, Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-spi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Wed 05 Feb 2014 08:10:34 AM CST, Balaji T K wrote:
-> On Tuesday 04 February 2014 08:48 PM, Nishanth Menon wrote:
->> On 02/04/2014 06:44 AM, Balaji T K wrote:
->>> On Tuesday 21 January 2014 04:59 AM, Nishanth Menon wrote:
->>>> When device is booted using devicetree, platforms impacted by
->>>> Erratum 2.1.1.128 is not detected easily in the mmc driver. This erratum
->>>> indicates that the module cannot do multi-block transfers.
->>>>
->>>> Handle this by providing a boolean flag to indicate to driver that it is
->>>> working on a hardware with mentioned limitation.
->>>>
->>>> Signed-off-by: Nishanth Menon <nm@ti.com>
->>>> ---
->>>>
->>>> This explains the logs I see:
->>>> OMAP3430 LDP (ES2.2):
->>>> 	uImage only boot:  http://slexy.org/raw/s2YrbMAi7c
->>>> 	uImage+dtb concatenated boot: http://slexy.org/raw/s20qVg17T0
->>>>
->>>> With the following flag set, device is now able to consistently boot with
->>>> device tree supported uImage+dtb concat boot.
->>>>
->>>>    .../devicetree/bindings/mmc/ti-omap-hsmmc.txt      |    2 ++
->>>>    drivers/mmc/host/omap_hsmmc.c                      |    3 +++
->>>>    2 files changed, 5 insertions(+)
->>>>
->>>> diff --git a/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt b/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
->>>> index 8c8908a..ab36f8b 100644
->>>> --- a/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
->>>> +++ b/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
->>>> @@ -26,6 +26,8 @@ specifier is required.
->>>>    dma-names: List of DMA request names. These strings correspond
->>>>    1:1 with the DMA specifiers listed in dmas. The string naming is
->>>>    to be "rx" and "tx" for RX and TX DMA requests, respectively.
->>>> +ti,erratum-2.1.1.128: boolean, for OMAP3430/OMAP35xx platforms with broken
->>>> +multiblock reads
->>>
->>> Rather than ti,errata.. specific property, something like
->>> caps no/disable multiblock read is more readable in my opinion, Otherwise
->>
->> Is'nt the better definition to state i have quirk X and allow the
->> driver to do the necessary thing/things needed to handle quirk X? in
->> this case, there is just one thing to do: broken multi_block_read, in
->> the case of other quirks, there might be more than 1 thing to do.. let
->> driver figure that out, dts just states the h/w capabilty or in this
->> case, the quirk capability.
->>
->
-> But in this case there is only one. disable multi block read is more readable
-> than the errata reference, No strong feelings though.
 
-Considering this might set an precedence for other quirk description, 
-I'd like to leave it as it stands.
+--NN0dgmCSDRRJ0kp/
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
---
-Regards,
-Nishanth Menon
+On Wed, Feb 05, 2014 at 01:49:49PM +0100, Linus Walleij wrote:
+> On Tue, Feb 4, 2014 at 8:22 PM, Kevin Hilman <khilman-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
+
+> > I'm trying to thing of a good reason to not make PM_SLEEP depend on
+> > PM_RUNTIME for platforms like this.
+
+> Isn't the typical Android platform using PM_SLEEP without using
+> PM_RUNTIME?
+
+No, not at all.  Android does make aggressive use of sleep but it's also
+highly desirable to use runtime PM - for example you don't want to have
+to power up the entire SoC simply because the system is getting a new
+e-mail pushed to it or location updates, most of the hardware is doing
+nothing.
+
+--NN0dgmCSDRRJ0kp/
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+
+iQIcBAEBAgAGBQJS8kciAAoJELSic+t+oim9RHMP/1sOol6uyBPyCeoYAIDa1zv3
+JmyludROrGMYmnRCYTAIu9P656WfkYpjqrXJW2dQms76B9XCgkCoLedvbai3acz5
+CFTUVv3IPjSARmO6J73+9K6Ivpy2vraQCrfA3bkVyzKApdtl5SWidjRMH6ISKpS+
+m9hDTzc2ND0OJuLt/xkSc2khGsKIcFrNkjHAvfePRzzwOaCXXC1RRcU4CpYHSG7g
+olGw5HX+u5fWbq8o8TNKGtKlAVLR24KVafwjBXw3/RCSKAGAy1kgYsXLCiAkrnQ5
+nnTcUD4Xyw+jT1roIPONZr9cKjpMka8aG6k7pJO3ti5oztzV1mO6MTpAApm2Ww8W
+91D5GJJNrNROnHhJlt8etNPrT0Xr52oUX+Dy03pNqYEoY5y4yhUOFM1QOIc7/l0C
+KBvVFZ2L5asB7AqXvz0qCvvlZgorjwPTqWhvOfSZYGWcI/WyIh5HvxZ5aESjttBM
+GFLOmLt37snOuzyZYtDwCh+LxFmzfdMNega2lNL20AXjLZah+/nXGUTQ/LFFxoH2
+HsCHOnyh0ELcEc+Xk4nTCY9X72k0hoZdlwMrhAFuZ/NhXR8YQs010Vsd0+loIH7e
++ekxhy8RJYpr8QFRFPrJYWR/68wlRSInxWMHXlDu4Dkc24qa3Zkv3sATzzSQJpfI
+8YT+IczGa9wjteaJOVBG
+=8X+O
+-----END PGP SIGNATURE-----
+
+--NN0dgmCSDRRJ0kp/--
