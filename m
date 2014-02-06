@@ -1,105 +1,85 @@
 From: Seungwon Jeon <tgih.jun@samsung.com>
-Subject: RE: [PATCH v3 7/8] mmc: dw_mmc: remove the dw_mci_of_cd_gpio()
-Date: Thu, 06 Feb 2014 20:26:19 +0900
-Message-ID: <002901cf232e$41fef750$c5fce5f0$%jun@samsung.com>
-References: <52EF7A5A.1090908@samsung.com>
+Subject: RE: [PATCH v3 8/8] mmc: dw_mmc: fix the checking whether card is
+ present
+Date: Thu, 06 Feb 2014 20:29:52 +0900
+Message-ID: <002a01cf232e$c0d44bc0$427ce340$%jun@samsung.com>
+References: <52EF7A5B.3030902@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=Windows-1252
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout3.samsung.com ([203.254.224.33]:31343 "EHLO
-	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932130AbaBFL0V (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 6 Feb 2014 06:26:21 -0500
-Received: from epcpsbgr4.samsung.com
- (u144.gpu120.samsung.co.kr [203.254.230.144])
- by mailout3.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+Received: from mailout1.samsung.com ([203.254.224.24]:59958 "EHLO
+	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755766AbaBFL3y (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 6 Feb 2014 06:29:54 -0500
+Received: from epcpsbgr1.samsung.com
+ (u141.gpu120.samsung.co.kr [203.254.230.141])
+ by mailout1.samsung.com (Oracle Communications Messaging Server 7u4-24.01
  (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTP id <0N0K00BCLNRW4L70@mailout3.samsung.com> for
- linux-mmc@vger.kernel.org; Thu, 06 Feb 2014 20:26:20 +0900 (KST)
-In-reply-to: <52EF7A5A.1090908@samsung.com>
+ with ESMTP id <0N0K009CTNXTCLB0@mailout1.samsung.com> for
+ linux-mmc@vger.kernel.org; Thu, 06 Feb 2014 20:29:53 +0900 (KST)
+In-reply-to: <52EF7A5B.3030902@samsung.com>
 Content-language: ko
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: 'Jaehoon Chung' <jh80.chung@samsung.com>, linux-mmc@vger.kernel.org
-Cc: 'Chris Ball' <chris@printf.net>
+Cc: 'Chris Ball' <chris@printf.net>, 'Ulf Hansson' <ulf.hansson@linaro.org>
 
 On Mon, February 03, 2014, Jaehoon Chung wrote:
-> If mmc_of_parse() is used, dw_mci_of_get_cd_gpio didn't need.
-> Already implemented into mmc_of_parse().
-
-Can be this done in 2/8(mmc: dw_mmc: use the mmc_of_parse() instead of local parser) together?
-Additionally we have a chance to remove 'write protect gpio' part including dw_mci_of_get_wp_gpio() now.
-mmc_of_parse() also has those.
-Can you address more?
-
-Thanks,
-Seungwon Jeon
-
+> Broken card detection is assumed "the card is present".
+> Non-removable card didn't call get_cd().
+> dw-mmc controller didn't check whether card is present or not.
+> Because DW_MMC_CARD_PRESENT flag is set into dw_mci_get_cd().
+> If cd-pin is used, then dw_mci_get_cd() is called.
 > 
 > Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
 > ---
-> Changelog V3:
-> 	-None
-> 
->  drivers/mmc/host/dw_mmc.c |   26 --------------------------
->  1 file changed, 26 deletions(-)
+>  drivers/mmc/host/dw_mmc.c |    4 +++-
+>  1 file changed, 3 insertions(+), 1 deletion(-)
 > 
 > diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> index 2f40593..ac2907d 100644
+> index ac2907d..0d6ab8f 100644
 > --- a/drivers/mmc/host/dw_mmc.c
 > +++ b/drivers/mmc/host/dw_mmc.c
-> @@ -2048,26 +2048,6 @@ static int dw_mci_of_get_wp_gpio(struct device *dev, u8 slot)
-> 
->  	return gpio;
->  }
-> -
-> -/* find the cd gpio for a given slot */
-> -static void dw_mci_of_get_cd_gpio(struct device *dev, u8 slot,
-> -					struct mmc_host *mmc)
-> -{
-> -	struct device_node *np = dw_mci_of_find_slot_node(dev, slot);
-> -	int gpio;
-> -
-> -	if (!np)
-> -		return;
-> -
-> -	gpio = of_get_named_gpio(np, "cd-gpios", 0);
-> -
-> -	/* Having a missing entry is valid; return silently */
-> -	if (!gpio_is_valid(gpio))
-> -		return;
-> -
-> -	if (mmc_gpio_request_cd(mmc, gpio, 0))
-> -		dev_warn(dev, "gpio [%d] request failed\n", gpio);
-> -}
->  #else /* CONFIG_OF */
->  static int dw_mci_of_get_slot_quirks(struct device *dev, u8 slot)
+> @@ -910,6 +910,7 @@ static void dw_mci_request(struct mmc_host *mmc, struct mmc_request *mrq)
 >  {
-> @@ -2081,11 +2061,6 @@ static int dw_mci_of_get_wp_gpio(struct device *dev, u8 slot)
->  {
->  	return -EINVAL;
->  }
-> -static void dw_mci_of_get_cd_gpio(struct device *dev, u8 slot,
-> -					struct mmc_host *mmc)
-> -{
-> -	return;
-> -}
->  #endif /* CONFIG_OF */
+>  	struct dw_mci_slot *slot = mmc_priv(mmc);
+>  	struct dw_mci *host = slot->host;
+> +	struct dw_mci_board *brd = host->pdata;
 > 
->  static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
-> @@ -2165,7 +2140,6 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
->  	}
+>  	WARN_ON(slot->mrq);
 > 
->  	slot->wp_gpio = dw_mci_of_get_wp_gpio(host->dev, slot->id);
-> -	dw_mci_of_get_cd_gpio(host->dev, slot->id, mmc);
+> @@ -920,7 +921,8 @@ static void dw_mci_request(struct mmc_host *mmc, struct mmc_request *mrq)
+>  	 */
+>  	spin_lock_bh(&host->lock);
 > 
->  	ret = mmc_add_host(mmc);
->  	if (ret)
-> --
-> 1.7.9.5
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> -	if (!test_bit(DW_MMC_CARD_PRESENT, &slot->flags)) {
+> +	if (!(brd->quirks & DW_MCI_QUIRK_BROKEN_CARD_DETECTION) &&
+> +			!test_bit(DW_MMC_CARD_PRESENT, &slot->flags)) {
+
+I think 'non-removable' property doesn't indicate DW_MCI_QUIRK_BROKEN_CARD_DETECTION.
+Actually DW_MCI_QUIRK_BROKEN_CARD_DETECTION is set with 'broken-cd' property as quirk.
+Still, DW_MMC_CARD_PRESENT flag won't be set  with 'non-removable' property.
+
+The following part was removed from commit bf626e5(mmc: dw_mmc: use slot-gpio to handle cd pin).
+It would be better to restore that to resolved this problem. 
+
+<Quoted>
+static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
+@@ -2197,12 +2223,8 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
+ #endif /* CONFIG_MMC_DW_IDMAC */
+        }
+
+-       if (dw_mci_get_cd(mmc))
+-               set_bit(DW_MMC_CARD_PRESENT, &slot->flags);
+-       else
+-               clear_bit(DW_MMC_CARD_PRESENT, &slot->flags);
+-
+</Quoted>
+
+Then, Needed to check 'non-removable' case in dw_mci_get_cd().
+I think MMC_CAP_NONREMOVABLE is useful.
+
+Thanks,
+Seungwon Jeon
 
