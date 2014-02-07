@@ -1,78 +1,27 @@
-From: Tomasz Figa <tomasz.figa@gmail.com>
-Subject: Re: [PATCH 0/6] mmc: sdhci-s3c: Fix base clock source management
-Date: Fri, 07 Feb 2014 10:58:24 +0100
-Message-ID: <52F4AE40.9050907@gmail.com>
-References: <1389476346-20396-1-git-send-email-tomasz.figa@gmail.com>
+From: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: [PATCH 0/2] sunxi-mci: Fix hang on boot caused by irq storm
+Date: Fri,  7 Feb 2014 15:00:39 +0100
+Message-ID: <1391781641-7382-1-git-send-email-hdegoede@redhat.com>
+Reply-To: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-Reply-To: <1389476346-20396-1-git-send-email-tomasz.figa@gmail.com>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: linux-mmc@vger.kernel.org, Chris Ball <chris@printf.net>
-Cc: linux-samsung-soc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Ben Dooks <ben-linux@fluff.org>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, Marek Szyprowski <m.szyprowski@samsung.com>, Tomasz Figa <tomasz.figa@gmail.com>
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-sunxi+bncBDL4X2GMZUKRBE6O2OLQKGQEC2AMUPI-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Post: <http://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Help: <http://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Archive: <http://groups.google.com/group/linux-sunxi>
+Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+List-Subscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Unsubscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+To: =?UTF-8?q?David=20Lanzend=C3=B6rfer?= <david.lanzendoerfer-Z7Kmv9EsliU@public.gmane.org>
+Cc: Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Chris,
+Hi David,
 
-On 11.01.2014 22:39, Tomasz Figa wrote:
-> On platforms prior to Exynos the SDHCI block used internal clock
-> divider controlled by SELFREQ field of CLKCON register to divide base
-> clock selected from several external clocks fed to the block by
-> SELBASECLK bitfield of CONTROL2 register. Depending on wanted clock
-> frequency, different external clock may be the best choice and so
-> the driver needs to switch the SELBASECLK mux on the fly.
->
-> However the selection logic has been broken for quite some time leaving
-> the controller using always clock 0, which is not always the right
-> source and leading to suboptimal performance of the SDHCI block on
-> affected platforms.
->
-> This series intends to fix the problems mentioned above and also clean-up
-> clock management code slightly.
->
-> Tested on S3C6410-based Mini6410 board, with following performance
-> figures:
->
-> * Before this series (133 MHz HCLK always selected, leading to at most
->    33 MHz card clock):
->
-> root@tiny6410:~# hdparm -t /dev/mmcblk0
->
-> /dev/mmcblk0:
->   Timing buffered disk reads:  42 MB in  3.10 seconds =  13.54 MB/sec
-> root@tiny6410:~# hdparm -t /dev/mmcblk0
->
-> /dev/mmcblk0:
->   Timing buffered disk reads:  44 MB in  3.11 seconds =  14.14 MB/sec
-> root@tiny6410:~#
->
-> * After this series (48 MHz EPLL clock selected, leading to 48 MHz card
->    clock):
->
-> root@tiny6410:~# hdparm -t /dev/mmcblk0
->
-> /dev/mmcblk0:
->   Timing buffered disk reads:  56 MB in  3.04 seconds =  18.41 MB/sec
-> root@tiny6410:~# hdparm -t /dev/mmcblk0
->
-> /dev/mmcblk0:
->   Timing buffered disk reads:  60 MB in  3.06 seconds =  19.63 MB/sec
-> root@tiny6410:~#
->
-> Tomasz Figa (6):
->    mmc: sdhci-s3c: Use shifts to divide by powers of two
->    mmc: sdhci-s3c: Cache bus clock rates
->    mmc: sdhci-s3c: Use correct condition to check for clock presence
->    mmc: sdhci-s3c: Simplify min/max clock calculation
->    mmc: sdhci-s3c: Fix handling of bus clock switching
->    mmc: sdhci-s3c: Do not allow frequencies higher than requested
->
->   drivers/mmc/host/sdhci-s3c.c | 170 ++++++++++++++++++++-----------------------
->   1 file changed, 77 insertions(+), 93 deletions(-)
->
+Here are 2 patches fixing a hang on boot caused by an irq storm, which
+I've sometimes observed on my cubietruck during testing. Can you please
+squash these fixes into the next version of the sunxi-mci patch-set ?
 
-What do you think about this series?
+Thanks & Regards,
 
-Best regards,
-Tomasz
+Hans
