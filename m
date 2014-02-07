@@ -1,188 +1,100 @@
 From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH v3 4/8] mmc: dw_mmc: remove unused member variable.
-Date: Fri, 07 Feb 2014 11:44:52 +0900
-Message-ID: <52F448A4.1040006@samsung.com>
-References: <52EF7A58.7000207@samsung.com>
- <002801cf232d$e5affc10$b10ff430$%jun@samsung.com>
+Subject: Re: [PATCH v3 8/8] mmc: dw_mmc: fix the checking whether card is
+ present
+Date: Fri, 07 Feb 2014 11:45:35 +0900
+Message-ID: <52F448CF.20409@samsung.com>
+References: <52EF7A5B.3030902@samsung.com>
+ <002a01cf232e$c0d44bc0$427ce340$%jun@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout2.samsung.com ([203.254.224.25]:11197 "EHLO
-	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751004AbaBGCov (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 6 Feb 2014 21:44:51 -0500
-Received: from epcpsbgr1.samsung.com
- (u141.gpu120.samsung.co.kr [203.254.230.141])
- by mailout2.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+Received: from mailout4.samsung.com ([203.254.224.34]:51124 "EHLO
+	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751150AbaBGCpu (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 6 Feb 2014 21:45:50 -0500
+Received: from epcpsbgr3.samsung.com
+ (u143.gpu120.samsung.co.kr [203.254.230.143])
+ by mailout4.samsung.com (Oracle Communications Messaging Server 7u4-24.01
  (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTP id <0N0L005A7UAQ0U50@mailout2.samsung.com> for
- linux-mmc@vger.kernel.org; Fri, 07 Feb 2014 11:44:50 +0900 (KST)
-In-reply-to: <002801cf232d$e5affc10$b10ff430$%jun@samsung.com>
+ with ESMTP id <0N0L003QTUBWTLC0@mailout4.samsung.com> for
+ linux-mmc@vger.kernel.org; Fri, 07 Feb 2014 11:45:32 +0900 (KST)
+In-reply-to: <002a01cf232e$c0d44bc0$427ce340$%jun@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Seungwon Jeon <tgih.jun@samsung.com>, linux-mmc@vger.kernel.org
-Cc: 'Chris Ball' <chris@printf.net>
+Cc: 'Chris Ball' <chris@printf.net>, 'Ulf Hansson' <ulf.hansson@linaro.org>
 
-On 02/06/2014 08:23 PM, Seungwon Jeon wrote:
-> On Monday, February 03, 2014, Jaehoon Chung wrote:
->> Since using the device-tree, didn't use the callback pointer.
->> So removed the unused callback pointer.
+On 02/06/2014 08:29 PM, Seungwon Jeon wrote:
+> On Mon, February 03, 2014, Jaehoon Chung wrote:
+>> Broken card detection is assumed "the card is present".
+>> Non-removable card didn't call get_cd().
+>> dw-mmc controller didn't check whether card is present or not.
+>> Because DW_MMC_CARD_PRESENT flag is set into dw_mci_get_cd().
+>> If cd-pin is used, then dw_mci_get_cd() is called.
 >>
+>> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+>> ---
+>>  drivers/mmc/host/dw_mmc.c |    4 +++-
+>>  1 file changed, 3 insertions(+), 1 deletion(-)
 >>
-> Above unnecessary line?
-
-Remove it.
+>> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+>> index ac2907d..0d6ab8f 100644
+>> --- a/drivers/mmc/host/dw_mmc.c
+>> +++ b/drivers/mmc/host/dw_mmc.c
+>> @@ -910,6 +910,7 @@ static void dw_mci_request(struct mmc_host *mmc, struct mmc_request *mrq)
+>>  {
+>>  	struct dw_mci_slot *slot = mmc_priv(mmc);
+>>  	struct dw_mci *host = slot->host;
+>> +	struct dw_mci_board *brd = host->pdata;
+>>
+>>  	WARN_ON(slot->mrq);
+>>
+>> @@ -920,7 +921,8 @@ static void dw_mci_request(struct mmc_host *mmc, struct mmc_request *mrq)
+>>  	 */
+>>  	spin_lock_bh(&host->lock);
+>>
+>> -	if (!test_bit(DW_MMC_CARD_PRESENT, &slot->flags)) {
+>> +	if (!(brd->quirks & DW_MCI_QUIRK_BROKEN_CARD_DETECTION) &&
+>> +			!test_bit(DW_MMC_CARD_PRESENT, &slot->flags)) {
 > 
-> Looks good to me.
-> But just one thing is...
-> We may need to consider alternative for setpower soon.
-If we need to consider it, the related code should be located into SoC driver's file
+> I think 'non-removable' property doesn't indicate DW_MCI_QUIRK_BROKEN_CARD_DETECTION.
+> Actually DW_MCI_QUIRK_BROKEN_CARD_DETECTION is set with 'broken-cd' property as quirk.
+> Still, DW_MMC_CARD_PRESENT flag won't be set  with 'non-removable' property.
+
+Right, it's didn't indicate DW_MCI_QUIRK_BROKEN_CARD_DETECTION.
+I think that the below approach is more reasonable.
+
+> 
+> The following part was removed from commit bf626e5(mmc: dw_mmc: use slot-gpio to handle cd pin).
+> It would be better to restore that to resolved this problem. 
+> 
+> <Quoted>
+> static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
+> @@ -2197,12 +2223,8 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
+>  #endif /* CONFIG_MMC_DW_IDMAC */
+>         }
+> 
+> -       if (dw_mci_get_cd(mmc))
+> -               set_bit(DW_MMC_CARD_PRESENT, &slot->flags);
+> -       else
+> -               clear_bit(DW_MMC_CARD_PRESENT, &slot->flags);
+> -
+> </Quoted>
+It's good. I will update after testing.
+> 
+> Then, Needed to check 'non-removable' case in dw_mci_get_cd().
+> I think MMC_CAP_NONREMOVABLE is useful.
+Right. MMC_CAP_NONREMOVABLE is useful. When it's set, it needs not to check the card-status with polling system.
+It's related with increasing a little performance.
+
+Do you have any opinion for other patches?
 
 Best Regards,
 Jaehoon Chung
 > 
 > Thanks,
 > Seungwon Jeon
-> 
->> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
->> ---
->> Changelog V3:
->> 	- None
->> Changelog V2:
->> 	- None
->>
->>  drivers/mmc/host/dw_mmc.c  |   33 +++------------------------------
->>  include/linux/mmc/dw_mmc.h |   14 --------------
->>  2 files changed, 3 insertions(+), 44 deletions(-)
->>
->> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
->> index e7357b8..551dade 100644
->> --- a/drivers/mmc/host/dw_mmc.c
->> +++ b/drivers/mmc/host/dw_mmc.c
->> @@ -850,8 +850,6 @@ static void __dw_mci_start_request(struct dw_mci *host,
->>  	u32 cmdflags;
->>
->>  	mrq = slot->mrq;
->> -	if (host->pdata->select_slot)
->> -		host->pdata->select_slot(slot->id);
->>
->>  	host->cur_slot = slot;
->>  	host->mrq = mrq;
->> @@ -985,17 +983,11 @@ static void dw_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
->>  	switch (ios->power_mode) {
->>  	case MMC_POWER_UP:
->>  		set_bit(DW_MMC_CARD_NEED_INIT, &slot->flags);
->> -		/* Power up slot */
->> -		if (slot->host->pdata->setpower)
->> -			slot->host->pdata->setpower(slot->id, mmc->ocr_avail);
->>  		regs = mci_readl(slot->host, PWREN);
->>  		regs |= (1 << slot->id);
->>  		mci_writel(slot->host, PWREN, regs);
->>  		break;
->>  	case MMC_POWER_OFF:
->> -		/* Power down slot */
->> -		if (slot->host->pdata->setpower)
->> -			slot->host->pdata->setpower(slot->id, 0);
->>  		regs = mci_readl(slot->host, PWREN);
->>  		regs &= ~(1 << slot->id);
->>  		mci_writel(slot->host, PWREN, regs);
->> @@ -1009,13 +1001,10 @@ static int dw_mci_get_ro(struct mmc_host *mmc)
->>  {
->>  	int read_only;
->>  	struct dw_mci_slot *slot = mmc_priv(mmc);
->> -	struct dw_mci_board *brd = slot->host->pdata;
->>
->>  	/* Use platform get_ro function, else try on board write protect */
->>  	if (slot->quirks & DW_MCI_SLOT_QUIRK_NO_WRITE_PROTECT)
->>  		read_only = 0;
->> -	else if (brd->get_ro)
->> -		read_only = brd->get_ro(slot->id);
->>  	else if (gpio_is_valid(slot->wp_gpio))
->>  		read_only = gpio_get_value(slot->wp_gpio);
->>  	else
->> @@ -1039,8 +1028,6 @@ static int dw_mci_get_cd(struct mmc_host *mmc)
->>  	/* Use platform get_cd function, else try onboard card detect */
->>  	if (brd->quirks & DW_MCI_QUIRK_BROKEN_CARD_DETECTION)
->>  		present = 1;
->> -	else if (brd->get_cd)
->> -		present = !brd->get_cd(slot->id);
->>  	else if (!IS_ERR_VALUE(gpio_cd))
->>  		present = gpio_cd;
->>  	else
->> @@ -2138,17 +2125,7 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
->>  		mmc->f_max = freq[1];
->>  	}
->>
->> -	if (host->pdata->get_ocr)
->> -		mmc->ocr_avail = host->pdata->get_ocr(id);
->> -	else
->> -		mmc->ocr_avail = MMC_VDD_32_33 | MMC_VDD_33_34;
->> -
->> -	/*
->> -	 * Start with slot power disabled, it will be enabled when a card
->> -	 * is detected.
->> -	 */
->> -	if (host->pdata->setpower)
->> -		host->pdata->setpower(id, 0);
->> +	mmc->ocr_avail = MMC_VDD_32_33 | MMC_VDD_33_34;
->>
->>  	if (host->pdata->caps)
->>  		mmc->caps = host->pdata->caps;
->> @@ -2217,10 +2194,6 @@ err_setup_bus:
->>
->>  static void dw_mci_cleanup_slot(struct dw_mci_slot *slot, unsigned int id)
->>  {
->> -	/* Shutdown detect IRQ */
->> -	if (slot->host->pdata->exit)
->> -		slot->host->pdata->exit(id);
->> -
->>  	/* Debugfs stuff is cleaned up by mmc core */
->>  	mmc_remove_host(slot->mmc);
->>  	slot->host->slot[id] = NULL;
->> @@ -2395,9 +2368,9 @@ int dw_mci_probe(struct dw_mci *host)
->>  		}
->>  	}
->>
->> -	if (!host->pdata->select_slot && host->pdata->num_slots > 1) {
->> +	if (host->pdata->num_slots > 1) {
->>  		dev_err(host->dev,
->> -			"Platform data must supply select_slot function\n");
->> +			"Platform data must supply num_slots.\n");
->>  		return -ENODEV;
->>  	}
->>
->> diff --git a/include/linux/mmc/dw_mmc.h b/include/linux/mmc/dw_mmc.h
->> index 6ce7d2c..babaea9 100644
->> --- a/include/linux/mmc/dw_mmc.h
->> +++ b/include/linux/mmc/dw_mmc.h
->> @@ -248,20 +248,6 @@ struct dw_mci_board {
->>  	/* delay in mS before detecting cards after interrupt */
->>  	u32 detect_delay_ms;
->>
->> -	int (*init)(u32 slot_id, irq_handler_t , void *);
->> -	int (*get_ro)(u32 slot_id);
->> -	int (*get_cd)(u32 slot_id);
->> -	int (*get_ocr)(u32 slot_id);
->> -	int (*get_bus_wd)(u32 slot_id);
->> -	/*
->> -	 * Enable power to selected slot and set voltage to desired level.
->> -	 * Voltage levels are specified using MMC_VDD_xxx defines defined
->> -	 * in linux/mmc/host.h file.
->> -	 */
->> -	void (*setpower)(u32 slot_id, u32 volt);
->> -	void (*exit)(u32 slot_id);
->> -	void (*select_slot)(u32 slot_id);
->> -
->>  	struct dw_mci_dma_ops *dma_ops;
->>  	struct dma_pdata *data;
->>  	struct block_settings *blk_settings;
->> --
->> 1.7.9.5
->> --
->> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 > 
 > 
 
