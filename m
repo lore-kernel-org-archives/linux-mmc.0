@@ -1,14 +1,13 @@
 From: David =?utf-8?q?Lanzend=C3=B6rfer?= <david.lanzendoerfer-Z7Kmv9EsliU@public.gmane.org>
-Subject: [PATCH v4 1/7] clk: sunxi: factors: automatic
- reparenting support
-Date: Fri, 07 Feb 2014 22:32:38 +0100
-Message-ID: <20140207213237.24624.80810.stgit@dizzy-6.o2s.ch>
+Subject: [PATCH v4 2/7] clk: sunxi: Implement MMC phase control
+Date: Fri, 07 Feb 2014 22:32:51 +0100
+Message-ID: <20140207213251.24624.97232.stgit@dizzy-6.o2s.ch>
 References: <20140207212709.24624.58619.stgit@dizzy-6.o2s.ch>
 Reply-To: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: quoted-printable
-Return-path: <linux-sunxi+bncBD2JL37LXEKRB75B2WLQKGQE6UN4RJQ-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+Return-path: <linux-sunxi+bncBD2JL37LXEKRBDFC2WLQKGQEWT46FJI-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
 In-Reply-To: <20140207212709.24624.58619.stgit-GPtPHOohwllnsqa/0SyWJQ@public.gmane.org>
 List-Post: <http://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
 List-Help: <http://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
@@ -21,73 +20,58 @@ List-Id: linux-mmc@vger.kernel.org
 
 From: Emilio L=C3=B3pez <emilio-0Z03zUJReD5OxF6Tv1QG9Q@public.gmane.org>
 
-This commit implements .determine_rate, so that our factor clocks can be
-reparented when needed.
-
 Signed-off-by: Emilio L=C3=B3pez <emilio-0Z03zUJReD5OxF6Tv1QG9Q@public.gmane.org>
 ---
- drivers/clk/sunxi/clk-factors.c |   36 +++++++++++++++++++++++++++++++++++=
-+
- 1 file changed, 36 insertions(+)
+ drivers/clk/sunxi/clk-sunxi.c |   35 +++++++++++++++++++++++++++++++++++
+ 1 file changed, 35 insertions(+)
 
-diff --git a/drivers/clk/sunxi/clk-factors.c b/drivers/clk/sunxi/clk-factor=
-s.c
-index 9e23264..3806d97 100644
---- a/drivers/clk/sunxi/clk-factors.c
-+++ b/drivers/clk/sunxi/clk-factors.c
-@@ -77,6 +77,41 @@ static long clk_factors_round_rate(struct clk_hw *hw, un=
-signed long rate,
- 	return rate;
- }
+diff --git a/drivers/clk/sunxi/clk-sunxi.c b/drivers/clk/sunxi/clk-sunxi.c
+index abb6c5a..33b9977 100644
+--- a/drivers/clk/sunxi/clk-sunxi.c
++++ b/drivers/clk/sunxi/clk-sunxi.c
+@@ -377,6 +377,41 @@ static void sun7i_a20_get_out_factors(u32 *freq, u32 p=
+arent_rate,
 =20
-+static long clk_factors_determine_rate(struct clk_hw *hw, unsigned long ra=
-te,
-+				       unsigned long *best_parent_rate,
-+				       struct clk **best_parent_p)
+=20
+ /**
++ * clk_sunxi_mmc_phase_control() - configures MMC clock phase control
++ */
++
++void clk_sunxi_mmc_phase_control(struct clk_hw *hw, u8 sample, u8 output)
 +{
-+	struct clk *clk =3D hw->clk, *parent, *best_parent =3D NULL;
-+	int i, num_parents;
-+	unsigned long parent_rate, best =3D 0, child_rate, best_child_rate =3D 0;
++	#define to_clk_composite(_hw) container_of(_hw, struct clk_composite, hw)
++	#define to_clk_factors(_hw) container_of(_hw, struct clk_factors, hw)
 +
-+	/* find the parent that can help provide the fastest rate <=3D rate */
-+	num_parents =3D __clk_get_num_parents(clk);
-+	for (i =3D 0; i < num_parents; i++) {
-+		parent =3D clk_get_parent_by_index(clk, i);
-+		if (!parent)
-+			continue;
-+		if (__clk_get_flags(clk) & CLK_SET_RATE_PARENT)
-+			parent_rate =3D __clk_round_rate(parent, rate);
-+		else
-+			parent_rate =3D __clk_get_rate(parent);
++	struct clk_composite *composite =3D to_clk_composite(hw);
++	struct clk_hw *rate_hw =3D composite->rate_hw;
++	struct clk_factors *factors =3D to_clk_factors(rate_hw);
++	unsigned long flags =3D 0;
++	u32 reg;
 +
-+		child_rate =3D clk_factors_round_rate(hw, rate, &parent_rate);
++	if (factors->lock)
++		spin_lock_irqsave(factors->lock, flags);
 +
-+		if (child_rate <=3D rate && child_rate > best_child_rate) {
-+			best_parent =3D parent;
-+			best =3D parent_rate;
-+			best_child_rate =3D child_rate;
-+		}
-+	}
++	reg =3D readl(factors->reg);
 +
-+	if (best_parent)
-+		*best_parent_p =3D best_parent;
-+	*best_parent_rate =3D best;
++	/* set sample clock phase control */
++	reg &=3D ~(0x7 << 20);
++	reg |=3D ((sample & 0x7) << 20);
 +
-+	return best_child_rate;
++	/* set output clock phase control */
++	reg &=3D ~(0x7 << 8);
++	reg |=3D ((output & 0x7) << 8);
++
++	writel(reg, factors->reg);
++
++	if (factors->lock)
++		spin_unlock_irqrestore(factors->lock, flags);
 +}
 +
- static int clk_factors_set_rate(struct clk_hw *hw, unsigned long rate,
- 				unsigned long parent_rate)
- {
-@@ -113,6 +148,7 @@ static int clk_factors_set_rate(struct clk_hw *hw, unsi=
-gned long rate,
- }
++
++/**
+  * sunxi_factors_clk_setup() - Setup function for factor clocks
+  */
 =20
- const struct clk_ops clk_factors_ops =3D {
-+	.determine_rate =3D clk_factors_determine_rate,
- 	.recalc_rate =3D clk_factors_recalc_rate,
- 	.round_rate =3D clk_factors_round_rate,
- 	.set_rate =3D clk_factors_set_rate,
 
 --=20
 You received this message because you are subscribed to the Google Groups "=
