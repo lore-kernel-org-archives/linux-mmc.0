@@ -1,100 +1,134 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH v3 8/8] mmc: dw_mmc: fix the checking whether card is
- present
-Date: Fri, 07 Feb 2014 11:45:35 +0900
-Message-ID: <52F448CF.20409@samsung.com>
-References: <52EF7A5B.3030902@samsung.com>
- <002a01cf232e$c0d44bc0$427ce340$%jun@samsung.com>
+From: Dong Aisheng <dongas86@gmail.com>
+Subject: Re: [Regression: mmc: sdhci-esdhc-imx: add runtime pm support]
+Date: Fri, 7 Feb 2014 15:56:16 +0800
+Message-ID: <CAA+hA=Qvnm4S1tEQbfopegTeE4uHDdu9nY=fnYAYqdzPrUP8CQ@mail.gmail.com>
+References: <52F3A267.8030302@parkeon.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout4.samsung.com ([203.254.224.34]:51124 "EHLO
-	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751150AbaBGCpu (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 6 Feb 2014 21:45:50 -0500
-Received: from epcpsbgr3.samsung.com
- (u143.gpu120.samsung.co.kr [203.254.230.143])
- by mailout4.samsung.com (Oracle Communications Messaging Server 7u4-24.01
- (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTP id <0N0L003QTUBWTLC0@mailout4.samsung.com> for
- linux-mmc@vger.kernel.org; Fri, 07 Feb 2014 11:45:32 +0900 (KST)
-In-reply-to: <002a01cf232e$c0d44bc0$427ce340$%jun@samsung.com>
+Received: from mail-qc0-f179.google.com ([209.85.216.179]:54773 "EHLO
+	mail-qc0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750715AbaBGH4S (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 7 Feb 2014 02:56:18 -0500
+Received: by mail-qc0-f179.google.com with SMTP id e16so5331374qcx.10
+        for <linux-mmc@vger.kernel.org>; Thu, 06 Feb 2014 23:56:17 -0800 (PST)
+In-Reply-To: <52F3A267.8030302@parkeon.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Seungwon Jeon <tgih.jun@samsung.com>, linux-mmc@vger.kernel.org
-Cc: 'Chris Ball' <chris@printf.net>, 'Ulf Hansson' <ulf.hansson@linaro.org>
+To: Martin Fuzzey <mfuzzey@parkeon.com>
+Cc: Dong Aisheng <b29396@freescale.com>, Chris Ball <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-On 02/06/2014 08:29 PM, Seungwon Jeon wrote:
-> On Mon, February 03, 2014, Jaehoon Chung wrote:
->> Broken card detection is assumed "the card is present".
->> Non-removable card didn't call get_cd().
->> dw-mmc controller didn't check whether card is present or not.
->> Because DW_MMC_CARD_PRESENT flag is set into dw_mci_get_cd().
->> If cd-pin is used, then dw_mci_get_cd() is called.
->>
->> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
->> ---
->>  drivers/mmc/host/dw_mmc.c |    4 +++-
->>  1 file changed, 3 insertions(+), 1 deletion(-)
->>
->> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
->> index ac2907d..0d6ab8f 100644
->> --- a/drivers/mmc/host/dw_mmc.c
->> +++ b/drivers/mmc/host/dw_mmc.c
->> @@ -910,6 +910,7 @@ static void dw_mci_request(struct mmc_host *mmc, struct mmc_request *mrq)
->>  {
->>  	struct dw_mci_slot *slot = mmc_priv(mmc);
->>  	struct dw_mci *host = slot->host;
->> +	struct dw_mci_board *brd = host->pdata;
->>
->>  	WARN_ON(slot->mrq);
->>
->> @@ -920,7 +921,8 @@ static void dw_mci_request(struct mmc_host *mmc, struct mmc_request *mrq)
->>  	 */
->>  	spin_lock_bh(&host->lock);
->>
->> -	if (!test_bit(DW_MMC_CARD_PRESENT, &slot->flags)) {
->> +	if (!(brd->quirks & DW_MCI_QUIRK_BROKEN_CARD_DETECTION) &&
->> +			!test_bit(DW_MMC_CARD_PRESENT, &slot->flags)) {
-> 
-> I think 'non-removable' property doesn't indicate DW_MCI_QUIRK_BROKEN_CARD_DETECTION.
-> Actually DW_MCI_QUIRK_BROKEN_CARD_DETECTION is set with 'broken-cd' property as quirk.
-> Still, DW_MMC_CARD_PRESENT flag won't be set  with 'non-removable' property.
+Hi Martin,
 
-Right, it's didn't indicate DW_MCI_QUIRK_BROKEN_CARD_DETECTION.
-I think that the below approach is more reasonable.
+On Thu, Feb 6, 2014 at 10:55 PM, Martin Fuzzey <mfuzzey@parkeon.com> wrote:
+> Hello all,
+>
+> since
+>
+> commit 89d7e5c131228a8f0d8b0cb48b459c62152bf620
+> Author: Dong Aisheng <b29396@freescale.com>
+> Date:   Mon Nov 4 16:38:29 2013 +0800
+>
+>     mmc: sdhci-esdhc-imx: add runtime pm support
+>
+>
+> My SDIO wifi module (WiiBear n modue based on Marvel 8787 chipset) using
+> mainline mwifiex driver is no longer working:
+>
 
-> 
-> The following part was removed from commit bf626e5(mmc: dw_mmc: use slot-gpio to handle cd pin).
-> It would be better to restore that to resolved this problem. 
-> 
-> <Quoted>
-> static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
-> @@ -2197,12 +2223,8 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
->  #endif /* CONFIG_MMC_DW_IDMAC */
->         }
-> 
-> -       if (dw_mci_get_cd(mmc))
-> -               set_bit(DW_MMC_CARD_PRESENT, &slot->flags);
-> -       else
-> -               clear_bit(DW_MMC_CARD_PRESENT, &slot->flags);
-> -
-> </Quoted>
-It's good. I will update after testing.
-> 
-> Then, Needed to check 'non-removable' case in dw_mci_get_cd().
-> I think MMC_CAP_NONREMOVABLE is useful.
-Right. MMC_CAP_NONREMOVABLE is useful. When it's set, it needs not to check the card-status with polling system.
-It's related with increasing a little performance.
+Some SDIO cards may not be able to work well without clock.
 
-Do you have any opinion for other patches?
+Can you try the following patch to see if it works?
 
-Best Regards,
-Jaehoon Chung
-> 
-> Thanks,
-> Seungwon Jeon
-> 
-> 
+commit d9d062627407f714ba326fa8dd6e8aa20199fdbe
+Author: Dong Aisheng <b29396@freescale.com>
+Date:   Fri Nov 15 17:54:36 2013 +0800
 
+    mmc: sdhci: get runtime pm when sdio irq is enabled
+
+    SDIO cards may need clock to send the card interrupt to host.
+    Thus, we get runtime pm when sdio irq is enabled to prevent the clock
+    resource is released and put it when sdio irq is disabled.
+
+    Signed-off-by: Dong Aisheng <b29396@freescale.com>
+
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 9ddef47..f892757 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -1734,9 +1734,15 @@ static void sdhci_enable_sdio_irq(struct
+mmc_host *mmc, int enable)
+        struct sdhci_host *host = mmc_priv(mmc);
+        unsigned long flags;
+
++       if (enable)
++               sdhci_runtime_pm_get(host);
++
+        spin_lock_irqsave(&host->lock, flags);
+        sdhci_enable_sdio_irq_nolock(host, enable);
+        spin_unlock_irqrestore(&host->lock, flags);
++
++       if (!enable)
++               sdhci_runtime_pm_put(host);
+ }
+
+ static int sdhci_do_start_signal_voltage_switch(struct sdhci_host *host,
+
+
+Regards
+Dong Aisheng
+
+> [   33.465577] mwifiex_sdio mmc2:0001:1: mwifiex_cmd_timeout_func: Timeout
+> cmd id (7242618.212205) = 0xa9, act = 0x0
+> [   33.475944] mwifiex_sdio mmc2:0001:1: num_data_h2c_failure = 0
+> [   33.481793] mwifiex_sdio mmc2:0001:1: num_cmd_h2c_failure = 0
+> [   33.487599] mwifiex_sdio mmc2:0001:1: num_cmd_timeout = 1
+> [   33.493010] mwifiex_sdio mmc2:0001:1: num_tx_timeout = 0
+> [   33.498371] mwifiex_sdio mmc2:0001:1: last_cmd_index = 1
+> [   33.503693] mwifiex_sdio mmc2:0001:1: last_cmd_id: 00 00 a9 00 00 00 00
+> 00 00 00
+> [   33.511137] mwifiex_sdio mmc2:0001:1: last_cmd_act: 00 00 00 00 00 00 00
+> 00 00 00
+> [   33.518660] mwifiex_sdio mmc2:0001:1: last_cmd_resp_index = 0
+> [   33.524417] mwifiex_sdio mmc2:0001:1: last_cmd_resp_id: 00 00 00 00 00 00
+> 00 00 00 00
+> [   33.532301] mwifiex_sdio mmc2:0001:1: last_event_index = 0
+> [   33.537825] mwifiex_sdio mmc2:0001:1: last_event: 00 00 00 00 00 00 00 00
+> 00 00
+> [   33.545164] mwifiex_sdio mmc2:0001:1: data_sent=1 cmd_sent=1
+> [   33.550863] mwifiex_sdio mmc2:0001:1: ps_mode=0 ps_state=0
+> [   33.556425] mwifiex_sdio mmc2:0001:1: cmd timeout
+> [   33.572375] mwifiex_sdio: Resetting card...
+> [   33.728913] mmc2: card 0001 removed
+>
+>
+> Increasing the autosuspend delay from 50ms to 500ms fixes the problem.
+>
+> This is using an i.MX53 SOC
+>
+> This is on 3.13 cherrypicking from mainline this patch and these two
+> supporting patches:
+>
+> commit d433dc63182825538b85de6a85e2ea3fad7f2917
+> Author: Dong Aisheng <b29396@freescale.com>
+> Date:   Mon Nov 4 16:38:25 2013 +0800
+>
+>     mmc: sdhci-pltfm: export pltfm suspend/resume api
+>
+>
+> commit ce090a4eb9626272bfd2529520f2f16351029640
+> Author: Dong Aisheng <b29396@freescale.com>
+> Date:   Mon Nov 4 16:38:28 2013 +0800
+>
+>     mmc: sdhci-esdhc-imx: fix runtime pm unbalance issue
+>
+>
+> Cheers,
+>
+> Martin
+>
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
