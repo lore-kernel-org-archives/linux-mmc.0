@@ -1,258 +1,697 @@
-From: Gwendal Grignou <gwendal@chromium.org>
-Subject: [PATCH] Decode EXT_CSD of eMMC 5.0 device
-Date: Fri,  7 Feb 2014 14:37:23 -0800
-Message-ID: <1391812643-20389-1-git-send-email-gwendal@chromium.org>
+From: Grant Grundler <grundler@chromium.org>
+Subject: [PATCH V3] mmc-utils: add eMMC 5.0 FFU support
+Date: Fri,  7 Feb 2014 16:32:26 -0800
+Message-ID: <1391819546-27857-1-git-send-email-grundler@chromium.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qc0-f202.google.com ([209.85.216.202]:37488 "EHLO
-	mail-qc0-f202.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751920AbaBGWhj (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 7 Feb 2014 17:37:39 -0500
-Received: by mail-qc0-f202.google.com with SMTP id m20so530970qcx.5
-        for <linux-mmc@vger.kernel.org>; Fri, 07 Feb 2014 14:37:38 -0800 (PST)
+Received: from mail-ve0-f201.google.com ([209.85.128.201]:64076 "EHLO
+	mail-ve0-f201.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750706AbaBHAi2 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 7 Feb 2014 19:38:28 -0500
+Received: by mail-ve0-f201.google.com with SMTP id jx11so545177veb.4
+        for <linux-mmc@vger.kernel.org>; Fri, 07 Feb 2014 16:38:26 -0800 (PST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: cjb@laptop.org, oliver@freetz.org
-Cc: linux-mmc@vger.kernel.org, grundler@chromium.org, Gwendal Grignou <gwendal@chromium.org>
+To: Chris Ball <cjb@laptop.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Puthikorn Voravootivat <puthik@chromium.org>, Gwendal Grignou <gwendal@chromium.org>, Grant Grundler <grundler@chromium.org>
 
-Display new attributes in Extended CSD register introduced by eMMC 5.0:
-'mmc  extcsd read /dev/mmcblk0' returns for eMMC 5.0 device:
+Field Firmware Update feature is new for 5.0 spec.
+Code written per JESD84-B50.pdf spec available from:
+    http://www.jedec.org/standards-documents/technology-focus-areas/flash-memory-ssds-ufs-emmc/e-mmc
 
-=============================================
-  Extended CSD rev 1.7 (MMC 5.0)
-=============================================
-
-Card Supported Command sets [S_CMD_SET: 0x01]
-...
-Extended partition attribute support [EXT_SUPPORT: 0x03]
-Supported modes [SUPPORTED_MODES: 0x01]
-FFU features [FFU_FEATURES: 0x00]
-Operation codes timeout [OPERATION_CODE_TIMEOUT: 0x00]
-FFU Argument [FFU_ARG: 0x00000000]
-Number of FW sectors correctly programmed [NUMBER_OF_FW_SECTORS_CORRECTLY_PROGRAMMED: 0]
-Vendor proprietary health report:
-[VENDOR_PROPRIETARY_HEALTH_REPORT[301]]: 0x00
-...
-[VENDOR_PROPRIETARY_HEALTH_REPORT[270]]: 0x00
-Device life time estimation type B [DEVICE_LIFE_TIME_EST_TYP_B: 0x01]
- i.e. 0% - 10% device life time used
-Device life time estimation type B [DEVICE_LIFE_TIME_EST_TYP_A: 0x01]
- i.e. 0% - 10% device life time used
-Pre EOL information [PRE_EOL_INFO: 0x01]
- i.e. Normal
-Optimal read size [OPTIMAL_READ_SIZE: 0x00]
-Optimal write size [OPTIMAL_WRITE_SIZE: 0x10]
-Optimal trim unit size [OPTIMAL_TRIM_UNIT_SIZE: 0x01]
-Device version [DEVICE_VERSION: 0x00 - 0x00]
-Firmware version:
-[FIRMWARE_VERSION[261]]: 0x00
-...
-[FIRMWARE_VERSION[254]]: 0x05
-Power class for 200MHz, DDR at VCC= 3.6V [PWR_CL_DDR_200_360: 0x00]
-Generic CMD6 Timer [GENERIC_CMD6_TIME: 0x0a]
-Power off notification [POWER_OFF_LONG_TIME: 0x3c]
-Cache Size [CACHE_SIZE] is 65536 KiB
-...
-
-Signed-off-by: Gwendal Grignou <gwendal@chromium.org>
-Reviewed-by: Grant Grundler <grundler@chromium.org>
+Change-Id: I0a22e9862876421630f53ac27fc0a161a9c70131
+Signed-off-by: Grant Grundler <grundler@chromium.org>
 ---
- mmc_cmds.c | 146 ++++++++++++++++++++++++++++++++++++++++++-------------------
- 1 file changed, 102 insertions(+), 44 deletions(-)
+V3:
+- reference FFU_ARG instead of hardcoding 0x0000ffff
+- Set MODE_CONFIG[30] to 1 as part of CMD6
+- fixed sequence numbers in comments
+- fix compile warning.
+- Still missing support for MODE_OPERATION_CODES
 
+This version can be cherry-picked into local branch with:
+git fetch https://chromium.googlesource.com/chromiumos/third_party/mmc-utils refs/changes/71/185471/1 && git cherry-pick FETCH_HEAD
+
+Gwendal Grignou has added eMMC 5.0 support to "mmc extcsd read" and I
+don't see that in Chris' mmc-utils tree.  Might want to first grab:
+    "Decode EXT_CSD of eMMC 5.0 device"
+    git fetch https://chromium.googlesource.com/chromiumos/third_party/mmc-utils refs/changes/75/184175/5 && git cherry-pick FETCH_HEAD
+
+V2:
+- Fix compiler borkage in use of strncmp().
+- Use '\0' instead of 0 in char assignment.
+
+V1:
+This patch needs to be reviewed and tested by _ANY_ eMMC 5.0 HW vendor.
+
+If you represent an eMMC 5.0 HW vendor and expect your part will be used
+in a ChromeOS device, make sure FFU works with mmc-utils.
+...
+
+ .gitignore       |   2 +
+ Makefile         |   4 +-
+ mmc.c            |  31 ++++++--
+ mmc.h            |  29 +++++++-
+ mmc_cmds-emmc5.c | 140 +++++++++++++++++++++++++++++++++++++
+ mmc_cmds.c       | 210 ++++++++++++++++++++++++++++++++++++++++++++++++-------
+ mmc_cmds.h       |   6 ++
+ 7 files changed, 387 insertions(+), 35 deletions(-)
+ create mode 100644 mmc_cmds-emmc5.c
+
+diff --git a/.gitignore b/.gitignore
+index 5a94d47..1de13cb 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -1,5 +1,7 @@
+ .mmc.o.d
+ .mmc_cmds.o.d
++.mmc_cmds-emmc5.o.d
+ mmc
+ mmc.o
+ mmc_cmds.o
++mmc_cmds-emmc5.o
+diff --git a/Makefile b/Makefile
+index 91cfc35..1cdd97f 100644
+--- a/Makefile
++++ b/Makefile
+@@ -1,7 +1,7 @@
+ CC ?= gcc
+ AM_CFLAGS = -D_FILE_OFFSET_BITS=64 -D_FORTIFY_SOURCE=2
+ CFLAGS ?= -g -O2
+-objects = mmc.o mmc_cmds.o
++objects = mmc.o mmc_cmds.o mmc_cmds-emmc5.o
+ 
+ CHECKFLAGS = -Wall -Werror -Wuninitialized -Wundef
+ 
+@@ -44,7 +44,7 @@ clean:
+ 	$(MAKE) -C man clean
+ 
+ install: $(progs) install-man
+-	$(INSTALL) -m755 -d $(DESTDIR)$(bindir)
++	$(INSTALL) -m 755 -d $(DESTDIR)$(bindir)
+ 	$(INSTALL) $(progs) $(DESTDIR)$(bindir)
+ 
+ .PHONY: all clean install manpages install-man
+diff --git a/mmc.c b/mmc.c
+index 926e92f..01a5074 100644
+--- a/mmc.c
++++ b/mmc.c
+@@ -20,7 +20,10 @@
+ #include <stdio.h>
+ #include <stdlib.h>
+ #include <string.h>
++#include <errno.h>
++#include <linux/types.h>
+ 
++#include "mmc.h"
+ #include "mmc_cmds.h"
+ 
+ #define MMC_VERSION	"0.1"
+@@ -37,9 +40,9 @@ struct Command {
+ 				   if < 0, _minimum_ number of arguments */
+ 	char	*verb;		/* verb */
+ 	char	*help;		/* help lines; from the 2nd line onward they 
+-                                   are automatically indented */
+-        char    *adv_help;      /* advanced help message; from the 2nd line 
+-                                   onward they are automatically indented */
++				   are automatically indented */
++	char	*adv_help;	/* advanced help message; from the 2nd line
++				   onward they are automatically indented */
+ 
+ 	/* the following fields are run-time filled by the program */
+ 	char	**cmds;		/* array of subcommands */
+@@ -110,9 +113,24 @@ static struct Command commands[] = {
+ 		"Send Sanitize command to the <device>.\nThis will delete the unmapped memory region of the device.",
+ 	  NULL
+ 	},
++	{ do_firmware_update, -2,
++	  "firmware upload", "<firmware_file> " "<device>\n"
++		"Upload/Update firmware on <device> using <firmware_file>.\n",
++	  NULL
++	},
+ 	{ 0, 0, 0, 0 }
+ };
+ 
++const char *manfid_lookup[0x100] = {
++	[MANFID_PANASONIC] = "Panasonic",
++	[MANFID_KINGSTON] = "Kingston",
++	[MANFID_SANDISK] = "Sandisk",
++	[MANFID_SAMSUNG] = "Samsung",
++	[MANFID_TOSHIBA] = "Toshiba",
++	[MANFID_SANDISK_SEM] = "Sandisk_SEM",
++	[MANFID_KINGSTON_MMC] = "Kingston_MMC"
++};
++
+ static char *get_prgname(char *programname)
+ {
+ 	char	*np;
+@@ -363,11 +381,10 @@ static int parse_args(int argc, char **argv,
+ 			return -2;
+ 	}
+ 	
+-        if (prepare_args( nargs_, args_, prgname, matchcmd )){
+-                fprintf(stderr, "ERROR: not enough memory\\n");
++	if (prepare_args( nargs_, args_, prgname, matchcmd )){
++		fprintf(stderr, "ERROR: not enough memory\\n");
+ 		return -20;
+-        }
+-
++	}
+ 
+ 	return 1;
+ }
+diff --git a/mmc.h b/mmc.h
+index 9871d62..61c0303 100644
+--- a/mmc.h
++++ b/mmc.h
+@@ -24,12 +24,25 @@
+ #define MMC_BLOCK_MAJOR			179
+ 
+ /* From kernel linux/mmc/mmc.h */
++#define MMC_GO_IDLE_STATE	0	/* bc                               */
++#define MMC_ALL_SEND_CID	2	/* bcr				R2  */
+ #define MMC_SWITCH		6	/* ac	[31:0] See below	R1b */
++#define MMC_SELECT_CARD		7	/* ac	[31:16] RCA		R1  */
+ #define MMC_SEND_EXT_CSD	8	/* adtc				R1  */
+-#define MMC_SEND_STATUS		13	/* ac   [31:16] RCA        R1  */
++#define MMC_SEND_CID		10	/* ac   [31:16] RCA		R2  */
++#define MMC_STOP_TRANSMISSION	12	/* ac				R1b */
++#define MMC_SEND_STATUS		13	/* ac   [31:16] RCA		R1  */
++#define MMC_READ_SINGLE_BLOCK	17	/* adtc [31:0] data addr	R1  */
++#define MMC_READ_MULTIPLE_BLOCK	18	/* adtc [31:0] data addr	R1  */
++#define MMC_WRITE_BLOCK		24	/* adtc [31:0] data addr	R1  */
++#define MMC_WRITE_MULTIPLE_BLOCK 25	/* adtc				R1  */
++
++#define MMC_GEN_CMD		56	/* adtc [0] RD/WR		R1  */
++
+ #define R1_SWITCH_ERROR   (1 << 7)  /* sx, c */
+ #define MMC_SWITCH_MODE_WRITE_BYTE	0x03	/* Set target to value */
+ 
++
+ /*
+  * EXT_CSD fields
+  */
+@@ -125,3 +138,17 @@
+ 
+ #define MMC_RSP_R1	(MMC_RSP_PRESENT|MMC_RSP_CRC|MMC_RSP_OPCODE)
+ #define MMC_RSP_R1B	(MMC_RSP_PRESENT|MMC_RSP_CRC|MMC_RSP_OPCODE|MMC_RSP_BUSY)
++
++
++/* Manufacturer IDs as shown by /sys/block/mmcblk0/device/manfid */
++#define MANFID_PANASONIC	0x000001
++#define MANFID_KINGSTON		0x000002
++#define MANFID_SANDISK		0x000003
++#define MANFID_SAMSUNG		0x000015
++#define MANFID_TOSHIBA		0x00001d
++#define MANFID_SANDISK_SEM	0x000045	/* seen with "SEM16G" */
++#define MANFID_KINGSTON_MMC	0x000070	/* Seen on embedded device */
++
++#if 0
++const char *manfid_lookup[];
++#endif
+diff --git a/mmc_cmds-emmc5.c b/mmc_cmds-emmc5.c
+new file mode 100644
+index 0000000..155fcad
+--- /dev/null
++++ b/mmc_cmds-emmc5.c
+@@ -0,0 +1,140 @@
++/*
++ * eMMC 5.0+ Specific tools
++ *
++ * Copyright (c) 2013 The Chromium OS Authors. All rights reserved.
++ *
++ * This program is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU General Public
++ * License v2 as published by the Free Software Foundation.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
++ * General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public
++ * License along with this program; if not, write to the
++ * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
++ * Boston, MA 021110-1307, USA.
++ */
++
++#include <stdio.h>
++#include <stdlib.h>
++#include <string.h>	/* for memset() */
++#include <errno.h>
++#include <linux/types.h>
++#include <sys/ioctl.h>
++#include <dirent.h>
++#include <fcntl.h>
++#include <libgen.h>
++#include <limits.h>
++#include <ctype.h>
++
++#include "mmc.h"
++#include "mmc_cmds.h"
++
++
++/* ext_csd[] offsets specific to FFU */
++#define FFU_STATUS	26
++#define FFU_ARG		487
++#define FFU_FEATURES	492
++#define SUPPORTED_MODES	493
++
++int do_emmc5_fw_update(int fd, __u8 *cid, __u8 *ext_csd,
++				char *emmc_fw, size_t fwsize)
++{
++	struct mmc_ioc_cmd idata;
++	int retcode = 0;
++	int ret;
++
++	/* 1) Confirm device supports FFU */
++	if ((ext_csd[SUPPORTED_MODES] & 1) == 0) {
++		fprintf(stderr, "eMMC 5.0 FFU not supported\n");
++		return -EINVAL;
++	}
++
++	/* 2) Host send CMD6 to set MODE_CONFIG[30] = 0x01 */
++	memset(&idata, 0, sizeof(idata));
++	idata.opcode = MMC_SWITCH;
++        idata.arg = (MMC_SWITCH_MODE_WRITE_BYTE << 24) |
++			(30 << 16) |	/* index */
++			(1 << 8) |	/* value */
++			EXT_CSD_CMD_SET_NORMAL;
++	idata.flags = MMC_RSP_R1B | MMC_CMD_AC;;
++	ret = ioctl(fd, MMC_IOC_CMD, &idata);
++	if (ret) {
++		retcode = ret;
++		printf("ioctl: MMC_SWITCH (eMMC 5.0 FW Update) %m\n");
++		goto abort_update;
++	}
++
++	/* 3) send CMD25 with FFU_ARG */
++	memset(&idata, 0, sizeof(idata));
++	idata.write_flag = 1;
++	idata.data_ptr = (__u64) ((unsigned long) emmc_fw); /* Write this FW */
++	idata.opcode = MMC_WRITE_MULTIPLE_BLOCK;
++	idata.arg = le32toh( *((__u32 *) &ext_csd[FFU_ARG]));
++	idata.flags = MMC_RSP_SPI_R1 | MMC_RSP_R1 | MMC_CMD_ADTC;;
++	ret = ioctl(fd, MMC_IOC_CMD, &idata);
++	if (ret) {
++		retcode = ret;
++		printf("ioctl:MMC_WRITE_MULTIPLE_BLOCK (eMMC 5.0 FW Update) %m\n");
++		goto abort_update;
++	}
++
++	/* 3) check FFU_STATUS[26] */
++	ret = read_extcsd(fd, ext_csd);
++	if (ret) {
++		retcode = ret;
++		fprintf(stderr, "read_extcsd error (%d): %m\n", ret);
++		goto abort_update;
++	}
++
++	switch(ext_csd[FFU_STATUS]) {
++	case 0:  break;
++	case 0x10:
++		fprintf(stderr, "eMMC 5.0 FFU had general error and failed (EIO).\n");
++		retcode = -EIO;
++		break;
++	case 0x11:
++		fprintf(stderr, "eMMC 5.0 FFU did not complete (EAGAIN).\n");
++		retcode = -EAGAIN;
++		break;
++	case 0x12:
++		fprintf(stderr, "eMMC 5.0 FFU download failed: checksum "
++			"mismatch or was interrupted (EINTR).\n");
++		retcode = -EINTR;
++		break;
++	default:
++		fprintf(stderr, "eMMC 5.0 FFU unknown error: %x\n", ext_csd[FFU_STATUS]);
++		retcode = -EIO;
++	}
++
++	/* 4) check NUMBER_OF_FW_SECTORS_CORRECTLY_PROGRAMMED[305-302] */
++	ret = ext_csd[302] << 0 | (ext_csd[303] << 8) |
++		(ext_csd[304] << 16) | (ext_csd[305] << 24);
++
++	/* convert that gibberish to bytes */
++	ret *= 512;
++	if (ext_csd[61] == 1)
++		ret *= 8;	/* 4K sectors */
++
++	if (ret != fwsize) {
++		fprintf(stderr, "eMMC 5.0 FFU Failed? (fwsize: %zu,"
++			" PROGRAMMED_SECTORS: %d)\n", fwsize, ret);
++	}
++
++abort_update:
++	/* 4) send CMD0
++	 * This should reset the device and force use of the new firmware.
++	 */
++	memset(&idata, 0, sizeof(idata));
++	idata.opcode = MMC_GO_IDLE_STATE;
++	ret = ioctl(fd, MMC_IOC_CMD, &idata);
++	if (ret) {
++		retcode = ret;
++		perror("ioctl:MMC_GO_IDLE_STATE (eMMC 5.0 FFU)");
++	}
++
++	return retcode;
++}
 diff --git a/mmc_cmds.c b/mmc_cmds.c
-index b8afa74..4b9b12e 100644
+index 4b9b12e..6673837 100644
 --- a/mmc_cmds.c
 +++ b/mmc_cmds.c
-@@ -424,12 +424,17 @@ int do_status_get(int nargs, char **argv)
+@@ -1,3 +1,4 @@
++
+ /*
+  * This program is free software; you can redistribute it and/or
+  * modify it under the terms of the GNU General Public
+@@ -17,9 +18,10 @@
+ #include <stdio.h>
+ #include <stdlib.h>
+ #include <string.h>
+-#include <sys/ioctl.h>
+-#include <sys/types.h>
++#include <errno.h>
+ #include <dirent.h>
++#include <sys/ioctl.h>
++#include <linux/types.h>
+ #include <sys/stat.h>
+ #include <unistd.h>
+ #include <fcntl.h>
+@@ -30,23 +32,27 @@
+ #include "mmc.h"
+ #include "mmc_cmds.h"
+ 
++#define EXT_CSD_SIZE	512
++#define CID_SIZE 16
++
++
+ int read_extcsd(int fd, __u8 *ext_csd)
+ {
+ 	int ret = 0;
+ 	struct mmc_ioc_cmd idata;
+ 	memset(&idata, 0, sizeof(idata));
+-	memset(ext_csd, 0, sizeof(__u8) * 512);
++	memset(ext_csd, 0, sizeof(__u8) * EXT_CSD_SIZE);
+ 	idata.write_flag = 0;
+ 	idata.opcode = MMC_SEND_EXT_CSD;
+ 	idata.arg = 0;
+ 	idata.flags = MMC_RSP_SPI_R1 | MMC_RSP_R1 | MMC_CMD_ADTC;
+-	idata.blksz = 512;
++	idata.blksz = EXT_CSD_SIZE;
+ 	idata.blocks = 1;
+ 	mmc_ioc_cmd_set_data(idata, ext_csd);
+ 
+ 	ret = ioctl(fd, MMC_IOC_CMD, &idata);
+ 	if (ret)
+-		perror("ioctl");
++		perror("ioctl SEND_EXT_CSD");
+ 
  	return ret;
  }
+@@ -67,7 +73,30 @@ int write_extcsd_value(int fd, __u8 index, __u8 value)
  
-+__u32 get_word_from_ext_csd(__u8 *ext_csd_loc)
-+{
-+	return (ext_csd_loc[3] << 24) |
-+		(ext_csd_loc[2] << 16) |
-+		(ext_csd_loc[1] << 8)  |
-+		ext_csd_loc[0];
+ 	ret = ioctl(fd, MMC_IOC_CMD, &idata);
+ 	if (ret)
+-		perror("ioctl");
++		perror("ioctl Write EXT CSD");
++
++	return ret;
 +}
 +
- unsigned int get_sector_count(__u8 *ext_csd)
- {
--	return (ext_csd[EXT_CSD_SEC_COUNT_3] << 24) |
--	(ext_csd[EXT_CSD_SEC_COUNT_2] << 16) |
--	(ext_csd[EXT_CSD_SEC_COUNT_1] << 8)  |
--	ext_csd[EXT_CSD_SEC_COUNT_0];
-+	return get_word_from_ext_csd(&ext_csd[EXT_CSD_SEC_COUNT_0]);
- }
++int read_cid(int fd, __u8 *cid)
++{
++	int ret = 0;
++	struct mmc_ioc_cmd idata;
++
++	memset(&idata, 0, sizeof(idata));
++	memset(cid, 0, sizeof(__u8) * CID_SIZE);
++
++	idata.write_flag = 0;
++	idata.opcode = MMC_SEND_CID;
++	idata.arg    = 0;
++	idata.flags  = MMC_RSP_SPI_R1 | MMC_RSP_R1 | MMC_CMD_ADTC;
++	idata.blksz  = CID_SIZE;
++	idata.blocks = 1;
++	mmc_ioc_cmd_set_data(idata, cid);
++
++	ret = ioctl(fd, MMC_IOC_CMD, &idata);
++	if (ret)
++		perror("ioctl SEND_CID");
  
- int is_blockaddresed(__u8 *ext_csd)
-@@ -701,6 +706,23 @@ int do_read_extcsd(int nargs, char **argv)
+ 	return ret;
+ }
+@@ -103,17 +132,11 @@ void print_writeprotect_status(__u8 *ext_csd)
+ 
+ 		reg = ext_csd[EXT_CSD_BOOT_WP];
+ 		printf("Boot Area Write protection [BOOT_WP]: 0x%02x\n", reg);
+-		printf(" Power ro locking: ");
+-		if (reg & EXT_CSD_BOOT_WP_B_PWR_WP_DIS)
+-			printf("not possible\n");
+-		else
+-			printf("possible\n");
++		printf(" Power ro locking: %spossible\n",
++			(reg & EXT_CSD_BOOT_WP_B_PWR_WP_DIS) ? "not " : "");
+ 
+-		printf(" Permanent ro locking: ");
+-		if (reg & EXT_CSD_BOOT_WP_B_PERM_WP_DIS)
+-			printf("not possible\n");
+-		else
+-			printf("possible\n");
++		printf(" Permanent ro locking: %spossible\n",
++			(reg & EXT_CSD_BOOT_WP_B_PERM_WP_DIS) ? "not " : "");
+ 
+ 		printf(" ro lock status: ");
+ 		if (reg & EXT_CSD_BOOT_WP_B_PWR_WP_EN)
+@@ -127,7 +150,7 @@ void print_writeprotect_status(__u8 *ext_csd)
+ 
+ int do_writeprotect_get(int nargs, char **argv)
+ {
+-	__u8 ext_csd[512];
++	__u8 ext_csd[EXT_CSD_SIZE];
  	int fd, ret;
  	char *device;
- 	const char *str;
-+	const char *ver_str[] = {
-+		"4.0",	/* 0 */
-+		"4.1",	/* 1 */
-+		"4.2",	/* 2 */
-+		"4.3",	/* 3 */
-+		"Obsolete", /* 4 */
-+		"4.41",	/* 5 */
-+		"4.5",  /* 6 */
-+		"5.0",  /* 7 */
-+	};
-+	int boot_access;
-+	const char* boot_access_str[] = {
-+		"No access to boot partition",		/* 0 */
-+		"R/W Boot Partition 1",			/* 1 */
-+		"R/W Boot Partition 2",			/* 2 */
-+		"R/W Replay Protected Memory Block (RPMB)", /* 3 */
-+	};
  
- 	CHECK(nargs != 2, "Usage: mmc extcsd read </path/to/mmcblkX>\n",
- 			  exit(1));
-@@ -721,28 +743,12 @@ int do_read_extcsd(int nargs, char **argv)
+@@ -155,7 +178,7 @@ int do_writeprotect_get(int nargs, char **argv)
  
- 	ext_csd_rev = ext_csd[192];
+ int do_writeprotect_set(int nargs, char **argv)
+ {
+-	__u8 ext_csd[512], value;
++	__u8 ext_csd[EXT_CSD_SIZE], value;
+ 	int fd, ret;
+ 	char *device;
  
--	switch (ext_csd_rev) {
--	case 6:
--		str = "4.5";
--		break;
--	case 5:
--		str = "4.41";
--		break;
--	case 3:
--		str = "4.3";
--		break;
--	case 2:
--		str = "4.2";
--		break;
--	case 1:
--		str = "4.1";
--		break;
--	case 0:
--		str = "4.0";
--		break;
--	default:
-+	if ((ext_csd_rev < sizeof(ver_str)/sizeof(char*)) &&
-+	    (ext_csd_rev != 4))
-+		str = ver_str[ext_csd_rev];
-+	else
- 		goto out_free;
--	}
-+
- 	printf("=============================================\n");
- 	printf("  Extended CSD rev 1.%d (MMC %s)\n", ext_csd_rev, str);
- 	printf("=============================================\n\n");
-@@ -789,13 +795,77 @@ int do_read_extcsd(int nargs, char **argv)
- 			ext_csd[495]);
- 		printf("Extended partition attribute support"
- 			" [EXT_SUPPORT: 0x%02x]\n", ext_csd[494]);
-+	}
-+	if (ext_csd_rev >= 7) {
-+		int j;
-+		int eol_info;
-+		char* eol_info_str[] = {
-+			"Not Defined",	/* 0 */
-+			"Normal",	/* 1 */
-+			"Warning",	/* 2 */
-+			"Urgent",	/* 3 */
-+		};
-+
-+		printf("Supported modes [SUPPORTED_MODES: 0x%02x]\n",
-+			ext_csd[493]);
-+		printf("FFU features [FFU_FEATURES: 0x%02x]\n",
-+			ext_csd[492]);
-+		printf("Operation codes timeout"
-+			" [OPERATION_CODE_TIMEOUT: 0x%02x]\n",
-+			ext_csd[491]);
-+		printf("FFU Argument [FFU_ARG: 0x%08x]\n",
-+			get_word_from_ext_csd(&ext_csd[487]));
-+		printf("Number of FW sectors correctly programmed"
-+			" [NUMBER_OF_FW_SECTORS_CORRECTLY_PROGRAMMED: %d]\n",
-+			get_word_from_ext_csd(&ext_csd[302]));
-+		printf("Vendor proprietary health report:\n");
-+		for (j = 301; j >= 270; j--)
-+			printf("[VENDOR_PROPRIETARY_HEALTH_REPORT[%d]]:"
-+				" 0x%02x\n", j, ext_csd[j]);
-+		for (j = 269; j >= 268; j--) {
-+			__u8 life_used=ext_csd[j];
-+			printf("Device life time estimation type B"
-+				" [DEVICE_LIFE_TIME_EST_TYP_%c: 0x%02x]\n",
-+				'B' + (j - 269), life_used);
-+			if (life_used >= 0x1 && life_used <= 0xa)
-+				printf(" i.e. %d%% - %d%% device life time"
-+					" used\n",
-+					(life_used - 1) * 10, life_used * 10);
-+			else if (life_used == 0xb)
-+				printf(" i.e. Exceeded its maximum estimated"
-+					" device life time\n");
-+		}
-+		eol_info = ext_csd[267];
-+		printf("Pre EOL information [PRE_EOL_INFO: 0x%02x]\n",
-+			eol_info);
-+		if (eol_info < sizeof(eol_info_str)/sizeof(char*))
-+			printf(" i.e. %s\n", eol_info_str[eol_info]);
-+		else
-+			printf(" i.e. Reserved\n");
-+
-+		printf("Optimal read size [OPTIMAL_READ_SIZE: 0x%02x]\n",
-+			ext_csd[266]);
-+		printf("Optimal write size [OPTIMAL_WRITE_SIZE: 0x%02x]\n",
-+			ext_csd[265]);
-+		printf("Optimal trim unit size"
-+			" [OPTIMAL_TRIM_UNIT_SIZE: 0x%02x]\n", ext_csd[264]);
-+		printf("Device version [DEVICE_VERSION: 0x%02x - 0x%02x]\n",
-+			ext_csd[263], ext_csd[262]);
-+		printf("Firmware version:\n");
-+		for (j = 261; j >= 254; j--)
-+			printf("[FIRMWARE_VERSION[%d]]:"
-+				" 0x%02x\n", j, ext_csd[j]);
-+
-+		printf("Power class for 200MHz, DDR at VCC= 3.6V"
-+			" [PWR_CL_DDR_200_360: 0x%02x]\n", ext_csd[253]);
-+	}
-+	if (ext_csd_rev >= 6) {
- 		printf("Generic CMD6 Timer [GENERIC_CMD6_TIME: 0x%02x]\n",
- 			ext_csd[248]);
- 		printf("Power off notification [POWER_OFF_LONG_TIME: 0x%02x]\n",
- 			ext_csd[247]);
- 		printf("Cache Size [CACHE_SIZE] is %d KiB\n",
--			ext_csd[249] << 0 | (ext_csd[250] << 8) |
--			(ext_csd[251] << 16) | (ext_csd[252] << 24));
-+			get_word_from_ext_csd(&ext_csd[249]));
+@@ -191,7 +214,7 @@ int do_writeprotect_set(int nargs, char **argv)
+ 
+ int do_disable_512B_emulation(int nargs, char **argv)
+ {
+-	__u8 ext_csd[512], native_sector_size, data_sector_size, wr_rel_param;
++	__u8 ext_csd[EXT_CSD_SIZE], native_sector_size, data_sector_size, wr_rel_param;
+ 	int fd, ret;
+ 	char *device;
+ 
+@@ -301,7 +324,7 @@ int do_write_boot_en(int nargs, char **argv)
+ 
+ int do_hwreset(int value, int nargs, char **argv)
+ {
+-	__u8 ext_csd[512];
++	__u8 ext_csd[EXT_CSD_SIZE];
+ 	int fd, ret;
+ 	char *device;
+ 
+@@ -360,7 +383,7 @@ int do_hwreset_dis(int nargs, char **argv)
+ 
+ int do_write_bkops_en(int nargs, char **argv)
+ {
+-	__u8 ext_csd[512], value = 0;
++	__u8 ext_csd[EXT_CSD_SIZE], value = 0;
+ 	int fd, ret;
+ 	char *device;
+ 
+@@ -502,7 +525,7 @@ int set_partitioning_setting_completed(int dry_run, const char * const device,
+ int do_enh_area_set(int nargs, char **argv)
+ {
+ 	__u8 value;
+-	__u8 ext_csd[512];
++	__u8 ext_csd[EXT_CSD_SIZE];
+ 	int fd, ret;
+ 	char *device;
+ 	int dry_run = 1;
+@@ -640,7 +663,7 @@ int do_enh_area_set(int nargs, char **argv)
+ int do_write_reliability_set(int nargs, char **argv)
+ {
+ 	__u8 value;
+-	__u8 ext_csd[512];
++	__u8 ext_csd[EXT_CSD_SIZE];
+ 	int fd, ret;
+ 
+ 	int dry_run = 1;
+@@ -701,7 +724,7 @@ int do_write_reliability_set(int nargs, char **argv)
+ 
+ int do_read_extcsd(int nargs, char **argv)
+ {
+-	__u8 ext_csd[512], ext_csd_rev, reg;
++	__u8 ext_csd[EXT_CSD_SIZE], ext_csd_rev, reg;
+ 	__u32 regl;
+ 	int fd, ret;
+ 	char *device;
+@@ -1218,6 +1241,143 @@ int do_sanitize(int nargs, char **argv)
  	}
  
- 	/* A441: Reserved [501:247]
-@@ -945,24 +1015,12 @@ int do_read_extcsd(int nargs, char **argv)
- 		printf(" User Area Enabled for boot\n");
- 		break;
- 	}
--	switch (reg & EXT_CSD_BOOT_CFG_ACC) {
--	case 0x0:
--		printf(" No access to boot partition\n");
--		break;
--	case 0x1:
--		printf(" R/W Boot Partition 1\n");
--		break;
--	case 0x2:
--		printf(" R/W Boot Partition 2\n");
--		break;
--	case 0x3:
--		printf(" R/W Replay Protected Memory Block (RPMB)\n");
--		break;
--	default:
-+	boot_access = reg & EXT_CSD_BOOT_CFG_ACC;
-+	if (boot_access < sizeof(boot_access_str) / sizeof(char*))
-+		printf(" %s\n", boot_access_str[boot_access]);
-+	else
- 		printf(" Access to General Purpose partition %d\n",
--			(reg & EXT_CSD_BOOT_CFG_ACC) - 3);
--		break;
--	}
-+			boot_access - 3);
+ 	return ret;
+-
+ }
  
- 	printf("Boot config protection [BOOT_CONFIG_PROT: 0x%02x]\n",
- 		ext_csd[178]);
++int do_firmware_update(int nargs, char **argv)
++{
++	char *emmc_fw;
++	char *device;
++	char *fwfilename;
++	struct stat fwfilestat;
++	size_t fwsize;
++	int ret = 0;
++	int devfd,fwfd;
++	__u8 ext_csd[EXT_CSD_SIZE];
++	__u8 cid[CID_SIZE];
++	__u8 ext_csd_rev;
++
++
++	CHECK(nargs != 4, "Usage: mmc firmware update"
++			" --I_want_to_destroy_my_drive"
++			" </path/to/mmcblkX> </path/to/FW.bin>\n",
++			  exit(1));
++
++
++	/* Lesson from hdparm: user must be aware of the risks
++	 * Key here is the additional command line flag be UNDOCUMENTED.
++	 * User _must_ read and KNOW this is risky at runtime.
++	 */
++	if (strncmp(argv[4], "--I_want_to_destroy_my_drive", 28)) {
++		fprintf(stderr,"ERROR: Please specify --I_want_to_destroy_my_drive"
++		" as first parameter to firmware update.\n");
++
++		exit(1);
++	}
++
++	emmc_fw = malloc(MMC_IOC_MAX_BYTES);
++	if (!emmc_fw)
++		return -ENOMEM;
++
++	device = argv[5];
++
++	devfd = open(device, O_RDWR);
++	if (devfd < 0) {
++		fprintf(stderr,"ERROR: open %s: %m\n", device); /* %m = errno */
++		goto out_free;
++	}
++
++	/* 1) read device version and attributes */
++	ret = read_extcsd(devfd, ext_csd);
++	if (ret) {
++		fprintf(stderr, "ERROR: Read EXT_CSD from %s: %m\n", device);
++		goto out_dev;
++	}
++
++	ext_csd_rev = ext_csd[192];
++
++	if (ext_csd_rev < 7) {
++		fprintf(stderr, "ERROR: Can not update firmware"
++			": %s is pre-emmc 5.0 vintage\n", device);
++		goto out_dev;
++	}
++
++	printf("%s: FW is currently %c%c%c%c%c%c%c%c\n",
++		device,
++		ext_csd[254], ext_csd[255], ext_csd[256], ext_csd[257],
++		ext_csd[258], ext_csd[259], ext_csd[260], ext_csd[261]
++		);
++
++	/* 2) confirm SUPPORTED_MODES has FFU bit set */
++	if (!(ext_csd[493] & 1)) {
++		fprintf(stderr, "ERROR: %s is eMMC 5.0 device"
++			"but does not support FFU.\n", device);
++		goto out_dev;
++	}
++
++	/* 3) confirm FW updated is NOT disabled on this device */
++	if (ext_csd[169] & 1) {
++		fprintf(stderr, "ERROR: %s is eMMC 5.0 device"
++			"but FFU is disabled.\n", device);
++		goto out_dev;
++	}
++
++	/* 4) read the device manfid */
++	ret = read_cid(devfd, cid);
++	if (ret) {
++		fprintf(stderr, "ERROR: Read EXT_CSD from %s: %m\n", device);
++		goto out_dev;
++	}
++
++	/* 5) Fetch the FW image */
++	fwfilename = argv[2];
++
++	fwfd = open(fwfilename, O_RDONLY);
++	if (fwfd < 0) {
++		/* %m = errno */
++		fprintf(stderr,"ERROR: open %s: %m", fwfilename);
++		goto out_dev;
++	}
++
++	ret = fstat(fwfd, &fwfilestat);
++	if (ret) {
++		/* %m = errno */
++		fprintf(stderr,"ERROR: fstat %s: %m", fwfilename);
++		goto out_fw;
++	}
++
++	fwsize = fwfilestat.st_size;
++	if (fwsize > MMC_IOC_MAX_BYTES) {
++		fprintf(stderr,"ERROR: %s is > %ld bytes long (max allowed)\n",
++			fwfilename, MMC_IOC_MAX_BYTES);
++		goto out_fw;
++	}
++
++	ret = read(fwfd, emmc_fw, fwsize);
++	if (ret < fwsize) {
++		fprintf(stderr,"ERROR: did not read all %zu bytes of %s"
++				"(%d bytes long)\n",
++			fwsize, fwfilename, ret);
++		goto out_fw;
++	}
++
++	ret = do_emmc5_fw_update(devfd, cid, ext_csd, emmc_fw, fwsize);
++	if (ret) {
++		fprintf(stderr,"ERROR: emmc5_fw_update failed for %s: %d", fwfilename, ret);
++		goto out_fw;
++	}
++	cid[13] = '\0';	/* make sure string is NULL terminated */
++
++	printf("%s: FW updated to %8s (0x%2x%2x%2x%2x%2x%2x%2x%2x)\n",
++		device, &(ext_csd[254]),
++		ext_csd[254], ext_csd[255], ext_csd[256], ext_csd[257],
++		ext_csd[258], ext_csd[259], ext_csd[260], ext_csd[261]
++		);
++
++out_fw:
++	close(fwfd);
++out_dev:
++	close(devfd);
++out_free:
++	free(emmc_fw);
++	return ret;
++}
+diff --git a/mmc_cmds.h b/mmc_cmds.h
+index f06cc10..549b851 100644
+--- a/mmc_cmds.h
++++ b/mmc_cmds.h
+@@ -28,3 +28,9 @@ int do_sanitize(int nargs, char **argv);
+ int do_status_get(int nargs, char **argv);
+ int do_enh_area_set(int nargs, char **argv);
+ int do_write_reliability_set(int nargs, char **argv);
++int do_firmware_update(int nargs, char **argv);
++
++int read_extcsd(int fd, __u8 *ext_csd);
++int write_extcsd_value(int fd, __u8 index, __u8 value);
++
++int do_emmc5_fw_update(int devfd, __u8 *cid, __u8 *ext_csd, char *emmc_fw, size_t fwsize);
 -- 
-1.9.0.rc1.175.g0b1dcb5
+1.8.3.2
 
