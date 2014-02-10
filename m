@@ -1,49 +1,100 @@
 From: Shuah Khan <shuah.kh@samsung.com>
-Subject: [RFT][PATCH 00/12] change drivers power management to use dev_pm_ops
-Date: Mon, 10 Feb 2014 09:12:23 -0700
-Message-ID: <cover.1392040064.git.shuah.kh@samsung.com>
+Subject: [RFT][PATCH 10/12] mmc: change tmio_mmc platform power management to use dev_pm_ops
+Date: Mon, 10 Feb 2014 09:15:04 -0700
+Message-ID: <e0668e4c3737e44854a42ee273a37e2161f40b13.1392040068.git.shuah.kh@samsung.com>
+References: <cover.1392040064.git.shuah.kh@samsung.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <cover.1392040064.git.shuah.kh@samsung.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: rjw@rjwysocki.net
-Cc: Shuah Khan <shuah.kh@samsung.com>, linux-pm@vger.kernel.org, linux-kernel@vger.kernel.org, linux@arm.linux.org.uk, linux-arm-kernel@lists.infradead.org, benh@kernel.crashing.org, linuxppc-dev@lists.ozlabs.org, manuel.lauss@gmail.com, chris@printf.net, linux-mmc@vger.kernel.org, sonic.zhang@analog.com, adi-buildroot-devel@lists.sourceforge.net, mirq-linux@rere.qmqm.pl, davidb@codeaurora.org, dwalker@fifo99.com, linux-arm-msm@vger.kernel.org, ian@mnementh.co.uk, gregkh@linuxfoundation.org, linux-pcmcia@lists.infradead.org, ingo.tuchscherer@de.ibm.com, linux390@de.ibm.com, schwidefsky@de.ibm.com, heiko.carstens@de.ibm.com, linux-s390@vger.kernel.org, shuahkhan@gmail.com
+To: rjw@rjwysocki.net, ian@mnementh.co.uk, chris@printf.net
+Cc: Shuah Khan <shuah.kh@samsung.com>, linux-pm@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, shuahkhan@gmail.com
 List-Id: linux-mmc@vger.kernel.org
 
-Change drivers to register pm ops using dev_pm_ops instead of legacy pm_ops.
-.pm hooks call existing legacy suspend and resume interfaces by passing in
-the right pm state. Bus drivers suspend and resume routines call .pm driver
-hooks if found.
+Change tmio_mmc platform driver to register pm ops using dev_pm_ops instead
+of legacy pm_ops. .pm hooks call existing legacy suspend and resume interfaces
+by passing in the right pm state.
 
-Shuah Khan (12):
-  arm: change locomo platform and bus power management to use
-    dev_pm_ops
-  arm: change sa1111 platform and bus power management to use
-    dev_pm_ops
-  arm: change scoop platform power management to use dev_pm_ops
-  drivers/macintosh/adb: change platform power managemnet to use
-    dev_pm_ops
-  mmc: change au1xmmc platform power management to use dev_pm_ops
-  mmc: change bfin_sdh platform power management to use dev_pm_ops
-  isa: change isa bus power managemnet to use dev_pm_ops
-  mmc: change cb710-mmc platform power management to use dev_pm_ops
-  mmc: change msm_sdcc platform power management to use dev_pm_ops
-  mmc: change tmio_mmc platform power management to use dev_pm_ops
-  drivers/pcmcia: change ds driver power management to use dev_pm_ops
-  drivers/s390/crypto: change ap_bus driver power management to use
-    dev_pm_ops
+Signed-off-by: Shuah Khan <shuah.kh@samsung.com>
+---
+ drivers/mmc/host/tmio_mmc.c |   42 +++++++++++++++++++++++++++++++++++-------
+ 1 file changed, 35 insertions(+), 7 deletions(-)
 
- arch/arm/common/locomo.c     |   93 +++++++++++++++++++++++++++++++++++-------
- arch/arm/common/sa1111.c     |   88 +++++++++++++++++++++++++++++++--------
- arch/arm/common/scoop.c      |   44 ++++++++++++++++----
- drivers/base/isa.c           |   30 ++++++++++++--
- drivers/macintosh/adb.c      |   41 ++++++++++++++++---
- drivers/mmc/host/au1xmmc.c   |   43 +++++++++++++++----
- drivers/mmc/host/bfin_sdh.c  |   40 +++++++++++++++---
- drivers/mmc/host/cb710-mmc.c |   37 +++++++++++++++--
- drivers/mmc/host/msm_sdcc.c  |   42 +++++++++++++++----
- drivers/mmc/host/tmio_mmc.c  |   42 +++++++++++++++----
- drivers/pcmcia/ds.c          |   36 +++++++++++++---
- drivers/s390/crypto/ap_bus.c |   30 ++++++++++++--
- 12 files changed, 481 insertions(+), 85 deletions(-)
-
+diff --git a/drivers/mmc/host/tmio_mmc.c b/drivers/mmc/host/tmio_mmc.c
+index 1900abb..e9b0a06 100644
+--- a/drivers/mmc/host/tmio_mmc.c
++++ b/drivers/mmc/host/tmio_mmc.c
+@@ -24,7 +24,7 @@
+ #include "tmio_mmc.h"
+ 
+ #ifdef CONFIG_PM
+-static int tmio_mmc_suspend(struct platform_device *dev, pm_message_t state)
++static int __tmio_mmc_suspend(struct platform_device *dev, pm_message_t state)
+ {
+ 	const struct mfd_cell *cell = mfd_get_cell(dev);
+ 	int ret;
+@@ -38,7 +38,22 @@ static int tmio_mmc_suspend(struct platform_device *dev, pm_message_t state)
+ 	return ret;
+ }
+ 
+-static int tmio_mmc_resume(struct platform_device *dev)
++static int tmio_mmc_suspend(struct device *dev)
++{
++	return __tmio_mmc_suspend(to_platform_device(dev), PMSG_SUSPEND);
++}
++
++static int tmio_mmc_freeze(struct device *dev)
++{
++	return __tmio_mmc_suspend(to_platform_device(dev), PMSG_FREEZE);
++}
++
++static int tmio_mmc_poweroff(struct device *dev)
++{
++	return __tmio_mmc_suspend(to_platform_device(dev), PMSG_HIBERNATE);
++}
++
++static int __tmio_mmc_resume(struct platform_device *dev)
+ {
+ 	const struct mfd_cell *cell = mfd_get_cell(dev);
+ 	int ret = 0;
+@@ -52,9 +67,21 @@ static int tmio_mmc_resume(struct platform_device *dev)
+ 
+ 	return ret;
+ }
+-#else
+-#define tmio_mmc_suspend NULL
+-#define tmio_mmc_resume NULL
++
++static int tmio_mmc_resume(struct device *dev)
++{
++	return __tmio_mmc_resume(to_platform_device(dev));
++}
++
++static const struct dev_pm_ops tmio_mmc_dev_pm_ops = {
++	.suspend = tmio_mmc_suspend,
++	.resume = tmio_mmc_resume,
++	/* Hibernate hooks */
++	.freeze = tmio_mmc_freeze,
++	.thaw = tmio_mmc_resume,
++	.poweroff = tmio_mmc_poweroff,
++	.restore = tmio_mmc_resume,
++};
+ #endif
+ 
+ static int tmio_mmc_probe(struct platform_device *pdev)
+@@ -138,11 +165,12 @@ static struct platform_driver tmio_mmc_driver = {
+ 	.driver = {
+ 		.name = "tmio-mmc",
+ 		.owner = THIS_MODULE,
++#ifdef CONFIG_PM
++		.pm = &tmio_mmc_dev_pm_ops,
++#endif
+ 	},
+ 	.probe = tmio_mmc_probe,
+ 	.remove = tmio_mmc_remove,
+-	.suspend = tmio_mmc_suspend,
+-	.resume = tmio_mmc_resume,
+ };
+ 
+ module_platform_driver(tmio_mmc_driver);
 -- 
 1.7.10.4
