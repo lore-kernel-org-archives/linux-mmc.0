@@ -1,47 +1,31 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 08/17] spi: pl022: Fully gate clocks at request inactivity
-Date: Mon, 10 Feb 2014 11:36:08 +0100
-Message-ID: <CAPDyKFraQUcZ_LjSAwENQA_RVqXokKKgfOZh7WD1vKmJ+5KstQ@mail.gmail.com>
+From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH 09/17] spi: pl022: Simplify clock handling
+Date: Mon, 10 Feb 2014 11:42:15 +0100
+Message-ID: <CAPDyKFqV+5T5jFgjWZ9zkbC3Oijq=7fVBhM9BDLQtDa_c8Yftg@mail.gmail.com>
 References: <1391529538-21685-1-git-send-email-ulf.hansson@linaro.org>
- <1391529538-21685-9-git-send-email-ulf.hansson@linaro.org>
- <20140204170746.GD22609@sirena.org.uk>
+	<1391529538-21685-10-git-send-email-ulf.hansson@linaro.org>
+	<20140204191947.GV22609@sirena.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <20140204170746.GD22609@sirena.org.uk>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Mark Brown <broonie@kernel.org>
-Cc: Russell King <linux@arm.linux.org.uk>, Wolfram Sang <wsa@the-dreams.de>, Linus Walleij <linus.walleij@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-i2c@vger.kernel.org" <linux-i2c@vger.kernel.org>, "linux-spi@vger.kernel.org" <linux-spi@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Alessandro Rubini <rubini@unipv.it>
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-i2c-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20140204191947.GV22609-GFdadSzt00ze9xe1eoZjHA@public.gmane.org>
+Sender: linux-i2c-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Mark Brown <broonie-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Cc: Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Alessandro Rubini <rubini-9wsNiZum9E8@public.gmane.org>, Linus Walleij <linus.walleij-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Wolfram Sang <wsa-z923LK4zBo2bacvFa/9K2g@public.gmane.org>, Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-spi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-spi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 4 February 2014 18:07, Mark Brown <broonie@kernel.org> wrote:
-> On Tue, Feb 04, 2014 at 04:58:49PM +0100, Ulf Hansson wrote:
->> Use clk_disable_unprepare and clk_prepare_enable from the runtime PM
->> callbacks, to fully gate|ungate clocks. Potentially this will save more
->> power, depending on the clock tree for the current SOC.
+On 4 February 2014 20:19, Mark Brown <broonie-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org> wrote:
+> On Tue, Feb 04, 2014 at 04:58:50PM +0100, Ulf Hansson wrote:
+>> Make use of clk_prepare_enable and clk_disable_unprepare to simplify
+>> code. No functional change.
 >
-> The same patch has already been applied (I noticed and fixed it while
-> doing unrelated code review).
+> I went ahead and applied this since it looks good and seems like an
+> unrelated cleanup to the runtime PM stuff which seems to be where the
+> interdependencies are - thanks!  It's on a separate branch with the
+> already applied change so if it does need to be cross merged we can do
+> that easily or even drop the branch.
 
-Sorry, didn't notice that.
-
-Thanks!
+Thanks Mark, it seems like a good approach.
 
 Kind regards
 Ulf Hansson
-
->
->>       pinctrl_pm_select_default_state(dev);
->> -     clk_enable(pl022->clk);
->> +     clk_prepare_enable(pl022->clk);
->
-> Someone should really make this check errors though!
