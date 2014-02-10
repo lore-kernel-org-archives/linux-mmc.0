@@ -1,151 +1,56 @@
-From: Arend van Spriel <arend@broadcom.com>
-Subject: Re: brcm 4329 problems
-Date: Mon, 10 Feb 2014 11:07:46 +0100
-Message-ID: <52F8A4F2.9050903@broadcom.com>
-References: <20140201221548.GB26684@n2100.arm.linux.org.uk> <52EF59CB.5050901@broadcom.com> <20140203153239.GL26684@n2100.arm.linux.org.uk> <52F00021.6070904@broadcom.com> <20140203210450.GN26684@n2100.arm.linux.org.uk> <52F14F7E.9040900@broadcom.com> <20140205153824.GS26684@n2100.arm.linux.org.uk> <20140208215927.GA5276@n2100.arm.linux.org.uk> <52F744C9.7040804@broadcom.com> <20140209205917.GO26684@n2100.arm.linux.org.uk> <20140209232708.GA25900@n2100.arm.linux.org.uk>
+From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH 14/17] i2c: nomadik: Fixup deployment of runtime PM
+Date: Mon, 10 Feb 2014 11:14:46 +0100
+Message-ID: <CAPDyKFrWgB8z1rtWxU7AYvVsmNj_pfGbsozwgP_FzLODpmGRwQ@mail.gmail.com>
+References: <1391529538-21685-1-git-send-email-ulf.hansson@linaro.org>
+	<1391529538-21685-15-git-send-email-ulf.hansson@linaro.org>
+	<CACRpkdZwoXf5ovmQEAN6Ugvz91+_i5uGqStR3MGXQeJGHitj3Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-gw3-out.broadcom.com ([216.31.210.64]:32095 "EHLO
-	mail-gw3-out.broadcom.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751831AbaBJKHt (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 10 Feb 2014 05:07:49 -0500
-In-Reply-To: <20140209232708.GA25900@n2100.arm.linux.org.uk>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-spi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <CACRpkdZwoXf5ovmQEAN6Ugvz91+_i5uGqStR3MGXQeJGHitj3Q-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Sender: linux-spi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Linus Walleij <linus.walleij-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Alessandro Rubini <rubini-9wsNiZum9E8@public.gmane.org>, Wolfram Sang <wsa-z923LK4zBo2bacvFa/9K2g@public.gmane.org>, Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, Mark Brown <broonie-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-spi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Russell King - ARM Linux <linux@arm.linux.org.uk>, Chris Ball <chris@printf.net>, linux-mmc@vger.kernel.org
-Cc: brcm80211-dev-list@broadcom.com
 
-On 02/10/2014 12:27 AM, Russell King - ARM Linux wrote:
-> On Sun, Feb 09, 2014 at 08:59:17PM +0000, Russell King - ARM Linux wrote:
->> On Sun, Feb 09, 2014 at 10:05:13AM +0100, Arend van Spriel wrote:
->>> Yeah. I did not mention this, but indeed the first log you provided
->>> already made that clear (to me). In your last log the driver sends an UP
->>> command to the firmware on which no response is given. So I was hoping
->>> the forensics file (which is firmware console buffer) would show an
->>> error message of some kind. Also that is not the case. Have to come up
->>> with new ideas about what is going wrong here.
+On 5 February 2014 15:34, Linus Walleij <linus.walleij-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
+> On Tue, Feb 4, 2014 at 4:58 PM, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
+>
+>> Since the device is active while a successful probe has been completed,
+>> the reference counting for the clock will be screwed up and never reach
+>> zero.
 >>
->> I'm chasing a theory at the moment, but it's being complicated by the
->> driver oopsing on unload...
-> 
-> Theory proven.
-> 
-> May I first take the time to apologise to Arend for wasting his time with
-> this issue; the issue is not the Broadcom driver, but the SDHCI driver.
+>> The issue is resolved by implementing runtime PM callbacks and let them
+>> handle the resources accordingly, including the clock.
+>>
+>> Cc: Alessandro Rubini <rubini-9wsNiZum9E8@public.gmane.org>
+>> Cc: Linus Walleij <linus.walleij-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+>> Cc: Wolfram Sang <wsa-z923LK4zBo2bacvFa/9K2g@public.gmane.org>
+>> Signed-off-by: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+>
+> Hm do I read it right as patch 13 breaks runtime PM by leaving
+> the device active after probe() and this patch
+> 14 fixes it again? Maybe these two patches should be squashed
+> then.
 
-'Nice' find. There were too many communications going fine to blame it
-on generic interrupt issue. I was not aware runtime PM was enabled for
-the device by default.
+You are right; but the driver will still be working, you just don't
+get the benefit from inactivating the device at request inactivity -
+as you pointed out.
 
-> My theory was that it's the sdhci driver causing the problems...  My
-> suspicions were first raised when I read through various SDHCI driver
-> functions such as the set_ios methods when chasing down a problem with
-> UHS-1 SD cards, and later when I was reading it's interrupt handling
-> code.
-> 
-> The driver looks very much like a patchwork quilt of different hacks,
-> all trying to co-operate with each other in the semblence of something
-> working - the result is something which does stuff in ways that the SD
-> card spec doesn't allow, but also does some pretty stupid things when
-> you have a SDIO device attached.
+The reason for why I wanted to do this as separate steps was to make
+it easier for reviewing, otherwise the patch(es) would have been quite
+big and messy. I am for sure open to  adopt to your proposal, but just
+wanted to give you some more background, before I go ahead and send a
+v2.
 
-Yeah. It seems development has been driven mostly by SD memory cards as
-by SDIO devices.
+Kind regards
+Ulf Hansson
 
-> The SDIO problems become pretty obvious when you see this log:
-> 
-> [   51.112923] brcmfmac: brcmf_fil_cmd_int_set cmd=2, value=0
-> [   51.112937] brcmfmac: brcmf_proto_bcdc_set_dcmd Enter, cmd 2 len 4
-> [   51.112946] brcmfmac: brcmf_proto_bcdc_msg Enter
-> [   51.112981] brcmfmac: brcmf_sdio_bus_sleep request WAKE currently WAKE
-> [   51.112989] brcmfmac: brcmf_sdio_clkctl Enter
-> [   51.113498] brcmfmac: brcmf_proto_bcdc_cmplt Enter
-> [   51.128501] brcmfmac: brcmf_sdio_bus_watchdog idle
-> [   51.128522] brcmfmac: brcmf_sdio_bus_sleep request SLEEP currently WAKE
-> [   51.128532] brcmfmac: brcmf_sdio_clkctl Enter
-> [   51.128540] brcmfmac: brcmf_sdio_htclk Enter
-> [   51.128549] brcmfmac: brcmf_sdiod_regwb addr:0x0001000e, data:0x00
-> [   51.128560] brcmfmac: brcmf_sdiod_request_data rw=1, func=1, addr=0x1000e, nbytes=1
-> [   51.128645] brcmfmac: brcmf_sdio_htclk CLKCTL: turned OFF
-> [   51.128655] brcmfmac: brcmf_sdio_sdclk Enter
-> [   51.128667] brcmfmac: brcmf_sdio_clkctl 3 -> 0
-> [   51.180385] mmc0: runtime suspend
-> [   53.112272] brcmfmac: brcmf_sdio_bus_rxctl: resumed on timeout
-> [   53.118290] brcmfmac: brcmf_sdio_bus_sleep request WAKE currently WAKE
-> [   53.118302] brcmfmac: brcmf_sdio_clkctl Enter
-> [   53.118312] brcmfmac: brcmf_sdio_sdclk Enter
-> [   53.118319] brcmfmac: brcmf_sdio_htclk Enter
-> [   53.118329] brcmfmac: brcmf_sdiod_regwb addr:0x0001000e, data:0x10
-> [   53.118341] brcmfmac: brcmf_sdiod_request_data rw=1, func=1, addr=0x1000e, nbytes=1
-> [   53.118537] sdhci-esdhc-imx 2190000.usdhc: desired SD clock: 50000000, actual: 49500000
-> [   53.118550] mmc0: esdhc_pltfm_set_clock: CLK on
-> [   53.119723] sdhci-esdhc-imx 2190000.usdhc: change pinctrl state for uhs 0
-> [   53.125880] mmc0: sdio irq enabled: 007f0003 007f0003
-> [   53.125898] mmc0: runtime resume
-> [   53.125910] mmc0: card irq raised
-> [   53.125925] mmc0: sdio irq disabled: 007f0103 007f0103
-> [   53.126030] brcmfmac: brcmf_sdiod_regrb addr:0x0001000e
-> [   53.126055] brcmfmac: brcmf_sdiod_request_data rw=0, func=1, addr=0x1000e, nbytes=1
-> 
-> The values printed in "sdio irq *abled" are the INT_ENABLE and SIGNAL_ENABLE
-> register values immediately before the stated action is taken bit 8 is
-> the interrupt enable for card interrupts.  Earlier in the log, SDIO card
-> interrupts were enabled (one was handled immediately before the above
-> broadcom cmd=2 message was sent.
-> 
-> Yep, that's right - at 51.180385, the SDIO host has /all/ interrupts
-> disabled by a runtime suspend - including any interrupt from the card.
-> The brcmfmac driver times out after 2 seconds having sent the "up"
-> command, and re-awakens the host, which is runtime resumed at 53.125898,
-> enabling the SDIO card interrupt at that time.
-> 
-> And lo and behold - the card has an interrupt pending!  Too bad, we're
-> too late for the driver to forward the interrupt to the SDIO interrupt
-> thread and get it to the driver before the time-out is processed.
-> 
-> Here's the proof - the above messages came from:
-> 
-> int sdhci_runtime_suspend_host(struct sdhci_host *host)
-> {
->         unsigned long flags;
->         int ret = 0;
->         
-> printk(KERN_DEBUG "%s: runtime suspend\n",
->         mmc_hostname(host->mmc));
-> ...
->         spin_lock_irqsave(&host->lock, flags);
->         sdhci_mask_irqs(host, SDHCI_INT_ALL_MASK);
->         spin_unlock_irqrestore(&host->lock, flags);
-> 
-> int sdhci_runtime_resume_host(struct sdhci_host *host)
-> {
->         unsigned long flags;
->         int ret = 0, host_flags = host->flags;
-> ...
->         /* Enable SDIO IRQ */
->         if ((host->flags & SDHCI_SDIO_IRQ_ENABLED))
->                 sdhci_enable_sdio_irq_nolock(host, true);
->         
->         /* Enable Card Detection */
->         sdhci_enable_card_detection(host);
->          
-> printk(KERN_DEBUG "%s: runtime resume\n",
->         mmc_hostname(host->mmc));
->         spin_unlock_irqrestore(&host->lock, flags);
->         
->         return ret;   
-> }
-> EXPORT_SYMBOL_GPL(sdhci_runtime_resume_host);
-> 
-> To me, it looks like SDHCI needs a major rework...  And there needs to
-> be some recognition that - maybe - leaving SDIO interrupts enabled even
-> though we may want the host to enter a low power mode is something that's
-> really very very desirable...
-
-The brcmfmac driver does not support runtime PM at the moment.
-Should/could it explicitly disable runtime PM for the host?
-
-Regards,
-Arend
+>
+> Yours,
+> Linus Walleij
+--
+To unsubscribe from this list: send the line "unsubscribe linux-spi" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
