@@ -1,201 +1,73 @@
-From: Dong Aisheng <dongas86@gmail.com>
-Subject: Re: UHS-1 cards with iMX6Q
-Date: Mon, 10 Feb 2014 11:31:40 +0800
-Message-ID: <CAA+hA=TVA-4uSB+RSaCjG52N4CSD+gdw_u4iqfrLr7jYyGkf9w@mail.gmail.com>
-References: <20140207152951.GB26684@n2100.arm.linux.org.uk>
-	<20140207155920.GA10195@S2101-09.ap.freescale.net>
-	<20140209151441.GM26684@n2100.arm.linux.org.uk>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH] dw-mmc: enable trim in eMMC device
+Date: Mon, 10 Feb 2014 13:07:22 +0900
+Message-ID: <52F8507A.4030904@samsung.com>
+References: <1391798398-24634-1-git-send-email-puthik@chromium.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qa0-f51.google.com ([209.85.216.51]:59225 "EHLO
-	mail-qa0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752387AbaBJDbl (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 9 Feb 2014 22:31:41 -0500
-Received: by mail-qa0-f51.google.com with SMTP id f11so8707555qae.38
-        for <linux-mmc@vger.kernel.org>; Sun, 09 Feb 2014 19:31:40 -0800 (PST)
-In-Reply-To: <20140209151441.GM26684@n2100.arm.linux.org.uk>
+Received: from mailout4.samsung.com ([203.254.224.34]:49294 "EHLO
+	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751744AbaBJEHT (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 9 Feb 2014 23:07:19 -0500
+Received: from epcpsbgr4.samsung.com
+ (u144.gpu120.samsung.co.kr [203.254.230.144])
+ by mailout4.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+ (7.0.4.24.0) 64bit (built Nov 17 2011))
+ with ESMTP id <0N0R0015UI44CU70@mailout4.samsung.com> for
+ linux-mmc@vger.kernel.org; Mon, 10 Feb 2014 13:07:16 +0900 (KST)
+In-reply-to: <1391798398-24634-1-git-send-email-puthik@chromium.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Cc: Shawn Guo <shawn.guo@linaro.org>, Dong Aisheng <b29396@freescale.com>, Chris Ball <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Puthikorn Voravootivat <puthik@chromium.org>, Chris Ball <chris@printf.net>, Seungwon Jeon <tgih.jun@samsung.com>
+Cc: MMC list <linux-mmc@vger.kernel.org>, Gwendal Grignou <gwendal@chromium.org>, Grant Grundler <grundler@chromium.org>
 
-On Sun, Feb 9, 2014 at 11:14 PM, Russell King - ARM Linux
-<linux@arm.linux.org.uk> wrote:
-> Okay, I have this working now - there was a hardware problem.  However,
-> it's obvious that this has never been tested with lockdep enabled beacuse
-> of the following:
->
->         disable_irq(host->irq);
->         spin_lock(&host->lock);
->         host->mrq = &mrq;
->
->         sdhci_send_command(host, mrq.cmd);
->
->         spin_unlock(&host->lock);
->         enable_irq(host->irq);
->
-> You can't "work around" stuff like this.  Use spin_lock_irq()..
-> spin_unlock_irq().  You can't just disable the interrupt line and
-> expect lockdep to know that it's safe.
->
+Hi,
 
-Yes, i missed this.
-Such kind of code was originally referenced from sdhci_execute_tuning.
-It was formerly fixed in commit 2b35bd83.
-But i did miss sdhci-esdhci-imx also has such issue.
-Thanks for the reminder.
+On 02/08/2014 03:39 AM, Puthikorn Voravootivat wrote:
+> Force host to have erase capacity to enable trim or
+> discard feature in supported eMMC device.
+> 
+> Signed-off-by: Puthikorn Voravootivat <puthik@chromium.org>
+> ---
+> In mmc_init_queue() before setting up the discard function, mmc driver
+> will call mmc_can_erase() which will always return 0 because the host
+> erase capacity is not set anywhere. So to enable discard function, we
+> need to add erase capacity to the host.
+> 
+>  drivers/mmc/host/dw_mmc.c | 4 ++++
+>  1 file changed, 4 insertions(+)
+> 
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index 55cd110..f47f1c1 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -55,6 +55,8 @@
+>  #define DW_MCI_FREQ_MAX	200000000	/* unit: HZ */
+>  #define DW_MCI_FREQ_MIN	400000		/* unit: HZ */
+>  
+> +#define DW_MCI_DEFAULT_CAPS (MMC_CAP_ERASE)
+> +
 
-You can try the following fix and I will send out a patch for it later.
-diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c
-b/drivers/mmc/host/sdhci-esdhc-imx.c
-index b841bb7..0372baf 100644
---- a/drivers/mmc/host/sdhci-esdhc-imx.c
-+++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-@@ -720,6 +720,7 @@ static int esdhc_send_tuning_cmd(struct sdhci_host
-*host, u32 opcode)
-        struct mmc_data data = {0};
-        struct scatterlist sg;
-        char tuning_pattern[ESDHC_TUNING_BLOCK_PATTERN_LEN];
-+       unsigned long flags;
+This define didn't need.
 
-        cmd.opcode = opcode;
-        cmd.arg = 0;
-@@ -742,14 +743,12 @@ static int esdhc_send_tuning_cmd(struct
-sdhci_host *host, u32 opcode)
-        mrq.done = esdhc_request_done;
-        init_completion(&(mrq.completion));
+>  #ifdef CONFIG_MMC_DW_IDMAC
+>  #define IDMAC_INT_CLR		(SDMMC_IDMAC_INT_AI | SDMMC_IDMAC_INT_NI | \
+>  				 SDMMC_IDMAC_INT_CES | SDMMC_IDMAC_INT_DU | \
+> @@ -2371,6 +2373,8 @@ static struct dw_mci_board *dw_mci_parse_dt(struct dw_mci *host)
+>  		return ERR_PTR(-ENOMEM);
+>  	}
+>  
+> +	pdata->caps |= DW_MCI_DEFAULT_CAPS;
+> +
+I didn't want to enable by default. If it's possible, how about using dt-file?
+Well, if need to enable by default, just use the "pdata->caps |= MMC_CAPS_ERASE;"
 
--       disable_irq(host->irq);
--       spin_lock(&host->lock);
-+       spin_lock_irqsave(&host->lock, flags);
-        host->mrq = &mrq;
+Best Regards,
+Jaehoon Chung
+>  	/* find out number of slots supported */
+>  	if (of_property_read_u32(dev->of_node, "num-slots",
+>  				&pdata->num_slots)) {
+> 
 
-        sdhci_send_command(host, mrq.cmd);
-
--       spin_unlock(&host->lock);
--       enable_irq(host->irq);
-+       spin_unlock_irqrestore(&host->lock, flags);
-
-        wait_for_completion(&mrq.completion);
-
-Regards
-Dong Aisheng
-
-> [    2.290584] =================================
-> [    2.308140] [ INFO: inconsistent lock state ]
-> [    2.308146] 3.14.0-rc1+ #490 Not tainted
-> [    2.308148] ---------------------------------
-> [    2.308152] inconsistent {IN-HARDIRQ-W} -> {HARDIRQ-ON-W} usage.
-> [    2.308158] kworker/u8:0/6 [HC0[0]:SC0[0]:HE1:SE1] takes:
-> [    2.308191]  (&(&host->lock)->rlock#2){?.-...}, at: [<c04b57a4>] esdhc_send_tuning_cmd+0x104/0x14c
-> [    2.308193] {IN-HARDIRQ-W} state was registered at:
-> [    2.308215]   [<c00652fc>] mark_lock+0x15c/0x6f8
-> [    2.308224]   [<c0066354>] __lock_acquire+0xabc/0x1ca0
-> [    2.308231]   [<c0067ad8>] lock_acquire+0xa0/0x130
-> [    2.308251]   [<c0697a44>] _raw_spin_lock+0x34/0x44
-> [    2.308258]   [<c04b0dbc>] sdhci_irq+0x20/0xa40
-> [    2.308272]   [<c0071b1c>] handle_irq_event_percpu+0x74/0x284
-> [    2.308278]   [<c0071d70>] handle_irq_event+0x44/0x64
-> [    2.308289]   [<c0074db8>] handle_fasteoi_irq+0xac/0x140
-> [    2.308296]   [<c007147c>] generic_handle_irq+0x28/0x38
-> [    2.308311]   [<c000efd4>] handle_IRQ+0x40/0x98
-> [    2.308317]   [<c0008584>] gic_handle_irq+0x30/0x64
-> [    2.308324]   [<c0013144>] __irq_svc+0x44/0x58
-> [    2.308336]   [<c0028fc8>] irq_exit+0xc0/0x120
-> [    2.308343]   [<c000efd8>] handle_IRQ+0x44/0x98
-> [    2.308349]   [<c0008584>] gic_handle_irq+0x30/0x64
-> [    2.308355]   [<c0013144>] __irq_svc+0x44/0x58
-> [    2.308363]   [<c068f398>] printk+0x3c/0x44
-> [    2.308378]   [<c03191d0>] _regulator_get+0x1b4/0x1e0
-> [    2.308385]   [<c031924c>] regulator_get+0x18/0x1c
-> [    2.308397]   [<c049fbc4>] mmc_add_host+0x30/0x1c0
-> [    2.308404]   [<c04b2e10>] sdhci_add_host+0x804/0xbbc
-> [    2.308411]   [<c04b5318>] sdhci_esdhc_imx_probe+0x380/0x674
-> [    2.308427]   [<c036d530>] platform_drv_probe+0x20/0x50
-> [    2.308435]   [<c036b948>] driver_probe_device+0x120/0x234
-> [    2.308441]   [<c036baf8>] __driver_attach+0x9c/0xa0
-> [    2.308448]   [<c036a04c>] bus_for_each_dev+0x5c/0x90
-> [    2.308455]   [<c036b418>] driver_attach+0x24/0x28
-> [    2.308462]   [<c036b018>] bus_add_driver+0xe4/0x1d8
-> [    2.308468]   [<c036c1b0>] driver_register+0x80/0xfc
-> [    2.308477]   [<c036ce28>] __platform_driver_register+0x50/0x64
-> [    2.308497]   [<c093706c>] sdhci_esdhc_imx_driver_init+0x18/0x20
-> [    2.308504]   [<c0008834>] do_one_initcall+0x3c/0x164
-> [    2.308519]   [<c0901c94>] kernel_init_freeable+0x104/0x1d0
-> [    2.308537]   [<c068c45c>] kernel_init+0x10/0x118
-> [    2.308546]   [<c000e768>] ret_from_fork+0x14/0x2c
-> [    2.308549] irq event stamp: 5933
-> [    2.308560] hardirqs last  enabled at (5933): [<c069813c>] _raw_spin_unlock_irqrestore+0x38/0x4c
-> [    2.308569] hardirqs last disabled at (5932): [<c0697b04>] _raw_spin_lock_irqsave+0x24/0x60
-> [    2.308577] softirqs last  enabled at (5914): [<c0028ba0>] __do_softirq+0x260/0x360
-> [    2.308584] softirqs last disabled at (5909): [<c0028fc8>] irq_exit+0xc0/0x120
-> [    2.308586]
-> [    2.308586] other info that might help us debug this:
-> [    2.308588]  Possible unsafe locking scenario:
-> [    2.308588]
-> [    2.308590]        CPU0
-> [    2.308592]        ----
-> [    2.308598]   lock(&(&host->lock)->rlock#2);
-> [    2.308600]   <Interrupt>
-> [    2.308606]     lock(&(&host->lock)->rlock#2);
-> [    2.308607]
-> [    2.308607]  *** DEADLOCK ***
-> [    2.308607]
-> [    2.308611] 2 locks held by kworker/u8:0/6:
-> [    2.308626]  #0:  (kmmcd){.+.+.+}, at: [<c003d890>] process_one_work+0x134/0x4e8
-> [    2.308638]  #1:  ((&(&host->detect)->work)){+.+.+.}, at: [<c003d890>] process_one_work+0x134/0x4e8
-> [    2.308640]
-> [    2.308640] stack backtrace:
-> [    2.308649] CPU: 2 PID: 6 Comm: kworker/u8:0 Not tainted 3.14.0-rc1+ #490
-> [    2.308659] Workqueue: kmmcd mmc_rescan
-> [    2.308663] Backtrace:
-> [    2.308679] [<c00124a0>] (dump_backtrace) from [<c0012640>] (show_stack+0x18/0x1c)
-> [    2.308689]  r6:ea07b3e0 r5:ea07af80 r4:00000000 r3:ea07af80
-> [    2.308699] [<c0012628>] (show_stack) from [<c069164c>] (dump_stack+0x70/0x8c)
-> [    2.308707] [<c06915dc>] (dump_stack) from [<c068f080>] (print_usage_bug+0x274/0x2e4)
-> [    2.308713]  r4:c0a8a2c0 r3:ea07af80
-> [    2.308723] [<c068ee0c>] (print_usage_bug) from [<c0065774>] (mark_lock+0x5d4/0x6f8)
-> [    2.308736]  r10:ea07af80 r8:ea07af80 r7:00000000 r6:c0a8a2c0 r5:ea07b3e0 r4:00000002
-> [    2.308745] [<c00651a0>] (mark_lock) from [<c0065e6c>] (__lock_acquire+0x5d4/0x1ca0)
-> [    2.308758]  r10:ea07af80 r9:00000000 r8:ea07b3e0 r7:e988cd28 r6:00000002 r5:00000460
-> [    2.308762]  r4:ea07af80
-> [    2.308770] [<c0065898>] (__lock_acquire) from [<c0067ad8>] (lock_acquire+0xa0/0x130)
-> [    2.308783]  r10:00000000 r9:00000002 r8:00000000 r7:00000000 r6:e988cd28 r5:ea094000
-> [    2.308787]  r4:00000000
-> [    2.308797] [<c0067a38>] (lock_acquire) from [<c0697a44>] (_raw_spin_lock+0x34/0x44)
-> [    2.308809]  r10:00000006 r9:00000002 r8:00000035 r7:e988cd18 r6:ea095bf8 r5:00000002
-> [    2.308813]  r4:e988cd18
-> [    2.308823] [<c0697a10>] (_raw_spin_lock) from [<c04b57a4>] (esdhc_send_tuning_cmd+0x104/0x14c)
-> [    2.308829]  r5:e988cc40 r4:00000000
-> [    2.308838] [<c04b56a0>] (esdhc_send_tuning_cmd) from [<c04b582c>] (esdhc_executing_tuning+0x40/0x100)
-> [    2.308849]  r8:e9878800 r7:00000013 r6:e988cd18 r5:e988cc40 r4:00000000
-> [    2.308858] [<c04b57ec>] (esdhc_executing_tuning) from [<c04afa54>] (sdhci_execute_tuning+0xcc/0x754)
-> [    2.308867]  r7:00000000 r6:e988cd18 r5:00000000 r4:e988c800
-> [    2.308879] [<c04af988>] (sdhci_execute_tuning) from [<c04a4684>] (mmc_sd_init_card+0x65c/0x694)
-> [    2.308891]  r10:00000006 r9:00000002 r8:e9878800 r7:00000000 r6:e982e700 r5:00000000
-> [    2.308895]  r4:e988c800
-> [    2.308903] [<c04a4028>] (mmc_sd_init_card) from [<c04a48f0>] (mmc_attach_sd+0xb0/0x184)
-> [    2.308915]  r10:ea094000 r8:00000000 r7:c0703e20 r6:e988c800 r5:00000000 r4:e988c800
-> [    2.308923] [<c04a4840>] (mmc_attach_sd) from [<c049eb28>] (mmc_rescan+0x26c/0x2e8)
-> [    2.308929]  r5:c0703e14 r4:e988cb08
-> [    2.308936] [<c049e8bc>] (mmc_rescan) from [<c003d914>] (process_one_work+0x1b8/0x4e8)
-> [    2.308946]  r7:ea190200 r6:ea00dc00 r5:ea02d980 r4:e988cb08
-> [    2.308953] [<c003d75c>] (process_one_work) from [<c003e090>] (worker_thread+0x13c/0x3f8)
-> [    2.308965]  r10:ea094000 r9:00000089 r8:ea02d998 r7:ea094000 r6:ea00dc30 r5:ea00dc00
-> [    2.308969]  r4:ea02d980
-> [    2.308984] [<c003df54>] (worker_thread) from [<c00449bc>] (kthread+0xcc/0xe8)
-> [    2.308996]  r10:00000000 r9:00000000 r8:00000000 r7:c003df54 r6:ea02d980 r5:ea040700
-> [    2.309000]  r4:00000000
-> [    2.309010] [<c00448f0>] (kthread) from [<c000e768>] (ret_from_fork+0x14/0x2c)
-> [    2.309020]  r7:00000000 r6:00000000 r5:c00448f0 r4:ea040700
->
->
-> --
-> FTTC broadband for 0.8mile line: 5.8Mbps down 500kbps up.  Estimation
-> in database were 13.1 to 19Mbit for a good line, about 7.5+ for a bad.
-> Estimate before purchase was "up to 13.2Mbit".
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
