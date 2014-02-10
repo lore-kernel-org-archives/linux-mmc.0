@@ -1,16 +1,20 @@
 From: David =?ISO-8859-1?Q?Lanzend=F6rfer?= <david.lanzendoerfer@o2s.ch>
 Subject: Re: [PATCH v4 4/7] ARM: sunxi: Add driver for SD/MMC hosts found on Allwinner sunxi SoCs
 Date: Mon, 10 Feb 2014 12:35:13 +0100
-Message-ID: <7779575.QASLIT4FqB__20877.2938968197$1392032155$gmane$org@dizzy-6.o2s.ch>
+Message-ID: <7779575.QASLIT4FqB__35928.4486076378$1392032160$gmane$org@dizzy-6.o2s.ch>
 References: <20140207212709.24624.58619.stgit@dizzy-6.o2s.ch> <20140207213316.24624.28705.stgit@dizzy-6.o2s.ch> <dac5ec28-3a6d-428f-8ab6-c8f2bb53168f@googlegroups.com>
 Mime-Version: 1.0
 Content-Type: multipart/signed; boundary="nextPart2134609.aEC1CZKHjS"; micalg="pgp-sha1"; protocol="application/pgp-signature"
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from kolab.o2s.ch ([77.109.136.180]:53092 "EHLO kolab.o2s.ch"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751889AbaBJLfd (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 10 Feb 2014 06:35:33 -0500
 In-Reply-To: <dac5ec28-3a6d-428f-8ab6-c8f2bb53168f@googlegroups.com>
-Sender: linux-kernel-owner@vger.kernel.org
+Sender: linux-mmc-owner@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 To: Priit Laes <plaes@plaes.org>
 Cc: linux-sunxi@googlegroups.com, devicetree@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Laurent Pinchart <laurent.pinchart+renesas@ideasonboard.com>, Mike Turquette <mturquette@linaro.org>, Simon Baatz <gmbnomis@gmail.com>, Hans de Goede <hdegoede@redhat.com>, Emilio =?ISO-8859-1?Q?L=F3pez?= <emilio@elopez.com.ar>, linux-mmc@vger.kernel.org, Chris Ball <chris@printf.net>, linux-kernel@vger.kernel.org, H Hartley Sweeten <hsweeten@visionengravers.com>, Tejun Heo <tj@kernel.org>, Maxime Ripard <maxime.ripard@free-electrons.com>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, linux-arm-kernel@lists.infradead.org
-List-Id: linux-mmc@vger.kernel.org
 
 
 --nextPart2134609.aEC1CZKHjS
@@ -50,3 +54,4 @@ iEYEABECAAYFAlL4uXQACgkQAeZw77btGjovpgCgrjjxftD8MfEMous18vmmBe4v
 -----END PGP SIGNATURE-----
 
 --nextPart2134609.aEC1CZKHjS--
+
