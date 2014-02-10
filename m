@@ -1,75 +1,163 @@
-From: Mark Brown <broonie@kernel.org>
-Subject: Re: [PATCH 07/17] spi: pl022: Don't ignore power domain and amba bus
- at system suspend
-Date: Mon, 10 Feb 2014 12:51:13 +0000
-Message-ID: <20140210125113.GZ1757@sirena.org.uk>
-References: <1391529538-21685-1-git-send-email-ulf.hansson@linaro.org>
- <1391529538-21685-8-git-send-email-ulf.hansson@linaro.org>
- <20140204191609.GU22609@sirena.org.uk>
- <CAPDyKFqNdw-6R12cUOre8UOTOnB-PpxHD5rPAMCwuS3i--Sesg@mail.gmail.com>
+From: Russell King - ARM Linux <linux@arm.linux.org.uk>
+Subject: Re: brcm 4329 problems
+Date: Mon, 10 Feb 2014 14:03:46 +0000
+Message-ID: <20140210140346.GW26684@n2100.arm.linux.org.uk>
+References: <20140203153239.GL26684@n2100.arm.linux.org.uk> <52F00021.6070904@broadcom.com> <20140203210450.GN26684@n2100.arm.linux.org.uk> <52F14F7E.9040900@broadcom.com> <20140205153824.GS26684@n2100.arm.linux.org.uk> <20140208215927.GA5276@n2100.arm.linux.org.uk> <52F744C9.7040804@broadcom.com> <20140209205917.GO26684@n2100.arm.linux.org.uk> <20140209232708.GA25900@n2100.arm.linux.org.uk> <CAA+hA=SEoXfSN19z1vLpiLDh8Mo3Qty4cU2HOGJska70dT5Cew@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="+mQruWSI2c46YBtV"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <CAPDyKFqNdw-6R12cUOre8UOTOnB-PpxHD5rPAMCwuS3i--Sesg@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Russell King <linux@arm.linux.org.uk>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Alessandro Rubini <rubini@unipv.it>, Linus Walleij <linus.walleij@linaro.org>, Wolfram Sang <wsa@the-dreams.de>, Chris Ball <chris@printf.net>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-i2c@vger.kernel.org" <linux-i2c@vger.kernel.org>, "linux-spi@vger.kernel.org" <linux-spi@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>
-List-Id: linux-mmc@vger.kernel.org
-
-
---+mQruWSI2c46YBtV
 Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from gw-1.arm.linux.org.uk ([78.32.30.217]:59822 "EHLO
+	pandora.arm.linux.org.uk" rhost-flags-OK-OK-OK-FAIL)
+	by vger.kernel.org with ESMTP id S1751371AbaBJODy (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 10 Feb 2014 09:03:54 -0500
 Content-Disposition: inline
+In-Reply-To: <CAA+hA=SEoXfSN19z1vLpiLDh8Mo3Qty4cU2HOGJska70dT5Cew@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
+To: Dong Aisheng <dongas86@gmail.com>
+Cc: Arend van Spriel <arend@broadcom.com>, Chris Ball <chris@printf.net>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, brcm80211-dev-list@broadcom.com
 
-On Mon, Feb 10, 2014 at 01:33:50PM +0100, Ulf Hansson wrote:
-> On 4 February 2014 20:16, Mark Brown <broonie@kernel.org> wrote:
+On Mon, Feb 10, 2014 at 02:50:42PM +0800, Dong Aisheng wrote:
+> On Mon, Feb 10, 2014 at 7:27 AM, Russell King - ARM Linux
+> <linux@arm.linux.org.uk> wrote:
+> > On Sun, Feb 09, 2014 at 08:59:17PM +0000, Russell King - ARM Linux wrote:
+> >> On Sun, Feb 09, 2014 at 10:05:13AM +0100, Arend van Spriel wrote:
+> >> > Yeah. I did not mention this, but indeed the first log you provided
+> >> > already made that clear (to me). In your last log the driver sends an UP
+> >> > command to the firmware on which no response is given. So I was hoping
+> >> > the forensics file (which is firmware console buffer) would show an
+> >> > error message of some kind. Also that is not the case. Have to come up
+> >> > with new ideas about what is going wrong here.
+> >>
+> >> I'm chasing a theory at the moment, but it's being complicated by the
+> >> driver oopsing on unload...
+> >
+> > Theory proven.
+> >
+> > May I first take the time to apologise to Arend for wasting his time with
+> > this issue; the issue is not the Broadcom driver, but the SDHCI driver.
+> >
+> > My theory was that it's the sdhci driver causing the problems...  My
+> > suspicions were first raised when I read through various SDHCI driver
+> > functions such as the set_ios methods when chasing down a problem with
+> > UHS-1 SD cards, and later when I was reading it's interrupt handling
+> > code.
+> >
+> > The driver looks very much like a patchwork quilt of different hacks,
+> > all trying to co-operate with each other in the semblence of something
+> > working - the result is something which does stuff in ways that the SD
+> > card spec doesn't allow, but also does some pretty stupid things when
+> > you have a SDIO device attached.
+> >
+> > The SDIO problems become pretty obvious when you see this log:
+> >
+> > [   51.112923] brcmfmac: brcmf_fil_cmd_int_set cmd=2, value=0
+> > [   51.112937] brcmfmac: brcmf_proto_bcdc_set_dcmd Enter, cmd 2 len 4
+> > [   51.112946] brcmfmac: brcmf_proto_bcdc_msg Enter
+> > [   51.112981] brcmfmac: brcmf_sdio_bus_sleep request WAKE currently WAKE
+> > [   51.112989] brcmfmac: brcmf_sdio_clkctl Enter
+> > [   51.113498] brcmfmac: brcmf_proto_bcdc_cmplt Enter
+> > [   51.128501] brcmfmac: brcmf_sdio_bus_watchdog idle
+> > [   51.128522] brcmfmac: brcmf_sdio_bus_sleep request SLEEP currently WAKE
+> > [   51.128532] brcmfmac: brcmf_sdio_clkctl Enter
+> > [   51.128540] brcmfmac: brcmf_sdio_htclk Enter
+> > [   51.128549] brcmfmac: brcmf_sdiod_regwb addr:0x0001000e, data:0x00
+> > [   51.128560] brcmfmac: brcmf_sdiod_request_data rw=1, func=1, addr=0x1000e, nbytes=1
+> > [   51.128645] brcmfmac: brcmf_sdio_htclk CLKCTL: turned OFF
+> > [   51.128655] brcmfmac: brcmf_sdio_sdclk Enter
+> > [   51.128667] brcmfmac: brcmf_sdio_clkctl 3 -> 0
+> > [   51.180385] mmc0: runtime suspend
+> > [   53.112272] brcmfmac: brcmf_sdio_bus_rxctl: resumed on timeout
+> > [   53.118290] brcmfmac: brcmf_sdio_bus_sleep request WAKE currently WAKE
+> > [   53.118302] brcmfmac: brcmf_sdio_clkctl Enter
+> > [   53.118312] brcmfmac: brcmf_sdio_sdclk Enter
+> > [   53.118319] brcmfmac: brcmf_sdio_htclk Enter
+> > [   53.118329] brcmfmac: brcmf_sdiod_regwb addr:0x0001000e, data:0x10
+> > [   53.118341] brcmfmac: brcmf_sdiod_request_data rw=1, func=1, addr=0x1000e, nbytes=1
+> > [   53.118537] sdhci-esdhc-imx 2190000.usdhc: desired SD clock: 50000000, actual: 49500000
+> > [   53.118550] mmc0: esdhc_pltfm_set_clock: CLK on
+> > [   53.119723] sdhci-esdhc-imx 2190000.usdhc: change pinctrl state for uhs 0
+> > [   53.125880] mmc0: sdio irq enabled: 007f0003 007f0003
+> > [   53.125898] mmc0: runtime resume
+> > [   53.125910] mmc0: card irq raised
+> > [   53.125925] mmc0: sdio irq disabled: 007f0103 007f0103
+> > [   53.126030] brcmfmac: brcmf_sdiod_regrb addr:0x0001000e
+> > [   53.126055] brcmfmac: brcmf_sdiod_request_data rw=0, func=1, addr=0x1000e, nbytes=1
+> >
+> > The values printed in "sdio irq *abled" are the INT_ENABLE and SIGNAL_ENABLE
+> > register values immediately before the stated action is taken bit 8 is
+> > the interrupt enable for card interrupts.  Earlier in the log, SDIO card
+> > interrupts were enabled (one was handled immediately before the above
+> > broadcom cmd=2 message was sent.
+> >
+> > Yep, that's right - at 51.180385, the SDIO host has /all/ interrupts
+> > disabled by a runtime suspend - including any interrupt from the card.
+> > The brcmfmac driver times out after 2 seconds having sent the "up"
+> > command, and re-awakens the host, which is runtime resumed at 53.125898,
+> > enabling the SDIO card interrupt at that time.
+> >
+> > And lo and behold - the card has an interrupt pending!  Too bad, we're
+> > too late for the driver to forward the interrupt to the SDIO interrupt
+> > thread and get it to the driver before the time-out is processed.
+> >
+> > Here's the proof - the above messages came from:
+> >
+> > int sdhci_runtime_suspend_host(struct sdhci_host *host)
+> > {
+> >         unsigned long flags;
+> >         int ret = 0;
+> >
+> > printk(KERN_DEBUG "%s: runtime suspend\n",
+> >         mmc_hostname(host->mmc));
+> > ...
+> >         spin_lock_irqsave(&host->lock, flags);
+> >         sdhci_mask_irqs(host, SDHCI_INT_ALL_MASK);
+> >         spin_unlock_irqrestore(&host->lock, flags);
+> >
+> > int sdhci_runtime_resume_host(struct sdhci_host *host)
+> > {
+> >         unsigned long flags;
+> >         int ret = 0, host_flags = host->flags;
+> > ...
+> >         /* Enable SDIO IRQ */
+> >         if ((host->flags & SDHCI_SDIO_IRQ_ENABLED))
+> >                 sdhci_enable_sdio_irq_nolock(host, true);
+> >
+> >         /* Enable Card Detection */
+> >         sdhci_enable_card_detection(host);
+> >
+> > printk(KERN_DEBUG "%s: runtime resume\n",
+> >         mmc_hostname(host->mmc));
+> >         spin_unlock_irqrestore(&host->lock, flags);
+> >
+> >         return ret;
+> > }
+> > EXPORT_SYMBOL_GPL(sdhci_runtime_resume_host);
+> >
+> > To me, it looks like SDHCI needs a major rework...  And there needs to
+> > be some recognition that - maybe - leaving SDIO interrupts enabled even
+> > though we may want the host to enter a low power mode is something that's
+> > really very very desirable...
+> >
+> 
+> I'm not quite clear about your issue.
+> But it seems your issue is caused by runtime pm disabling the
+> interrupt & clocks as you said.
+> 
+> Can you try the patch i mentioned here:
+> http://www.spinics.net/lists/linux-mmc/msg24764.html
+> 
+> That will prevent the host to do runtime pm for SDIO devices.
 
-> > This seems like a fairly hideous thing to be having to open code in an
-> > individual driver, it all looks generic and like something that most if
+Why not allow runtime PM at the host level, but still allow the
+interrupt to be received?  Doesn't it make sense to allow PM even with
+SDIO cards in place?
 
-...
+Once I get imx-drm off my plate, I'm going to put some work into
+rewriting the sdhci driver mess in a much cleaner way - we can't go on
+putting hacks on top of what's already there, it's already a total mess.
 
-> > Putting it in a helper would at least mean that it's easier for the
-> > mechanics to be transferred to the core proper later on.
-
-> I agree, a helper function would be nice. I have earlier sent a patch
-> to the PM core, that is similar to the code above, though it was
-> rejected in it's current form. Let me follow up on this again.
-
-> At this point, would a way forward be to still go ahead with this
-> patch and then convert to, when/if, the helper function from the PM
-> core becomes available?
-
-It's definitely *a* way forward, but I'm not convinced it's a good way
-forward.  Since it's something that I'd expect us to be doing in all
-drivers we'd want to replicate it all over the place which is obviously
-not good, or conversely if there are issues that prevented the code
-being added to the PM core then presumably we're just adding problematic
-code to the driver (you've not mentioned what the problems were with
-doing this in the PM core).
-
---+mQruWSI2c46YBtV
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-
-iQIcBAEBAgAGBQJS+Ms9AAoJELSic+t+oim9vVcP/iddVl/HH7sK3ZbvHoVRZLuQ
-o8Z3SPc3B/MkiWNzw9JDDNrXh4UC1n50ywadFLBts3eCd4xu4oh1fww4O6zi3w8Q
-EyEdBMLhi+jt0XyELq5iXVjZJQhyVhT5/jsZSmXKuAVAE1wJWOaGHQ4TcOl0twaI
-KGFhovubhQUSpUYuuui1E6n5/70lUngQyunS4zNEdzzAp/lp336/K258umpPllJG
-tl0FyxZpj+/NNBNuac9xCkcyRlE/nKhfRD3SGFBiXZf4C9tp4WgOrQO+CdRmWdfQ
-d5AGgRJdO6oOiMW7HEsWdvT1a5sVC8yP3tRUbDMYXuJZbjArY7IYFiZfKyJcMG3v
-z1B1tLanG6XrTHKNKnkwUETp/8poipFXx2m/lTFqI3MXt5jr4DXbPcbQ+fdWpgYE
-+l1P0JlVa559TXLytp8Q92st/q7JtvAappjOQdojgeORK8AbhkWsTS9YSjaUn4Ma
-k1xCrH2IUdy4hV5usRo/ecxNEmrNruNou75fyxByhAhr48GKxd13QyeomJcOwBJx
-y62CUIHC8zZWo5Qzm/hip55OqPVBtw8W/nzd/jFqE1Y8jNg/CJsiidWgh2cPP9qk
-3pWwXP0+NqVLaAluYH+C04eeuScrCxmJR5pYYP1I+pTfZ93qF+mtvifyXWfewRaI
-NI5qUJ0lQKC976EI7GbM
-=coWM
------END PGP SIGNATURE-----
-
---+mQruWSI2c46YBtV--
+-- 
+FTTC broadband for 0.8mile line: 5.8Mbps down 500kbps up.  Estimation
+in database were 13.1 to 19Mbit for a good line, about 7.5+ for a bad.
+Estimate before purchase was "up to 13.2Mbit".
