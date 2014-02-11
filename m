@@ -1,118 +1,58 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v3 2/3] mmc: Add realtek USB sdmmc host driver
-Date: Tue, 11 Feb 2014 10:50:43 +0100
-Message-ID: <CAPDyKFqp-_KguRjby4gSnjjXKctHrhjh3uWqYHmJFcD=x3Dogg@mail.gmail.com>
+Subject: Re: [PATCH v3 1/3] mfd: Add realtek USB card reader driver
+Date: Tue, 11 Feb 2014 10:55:22 +0100
+Message-ID: <CAPDyKFqzbz_A+hiTeodKXh30BMuY4ONN9bxy=5Mo1vi9SZyERQ@mail.gmail.com>
 References: <1391697307-23457-1-git-send-email-rogerable@realtek.com>
- <1391697307-23457-3-git-send-email-rogerable@realtek.com>
- <201402110748.s1B7miQ8010938@rtits1.realtek.com>
- <52F9ED02.6000604@realtek.com>
+	<1391697307-23457-2-git-send-email-rogerable@realtek.com>
+	<20140210113054.GE21522@lee--X1>
+	<52F9F012.8030302@realtek.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
-In-Reply-To: <52F9ED02.6000604@realtek.com>
-List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
-List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel>
-List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
-List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
-List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
-Errors-To: driverdev-devel-bounces@linuxdriverproject.org
-Sender: driverdev-devel-bounces@linuxdriverproject.org
-To: Roger <rogerable@realtek.com>
-Cc: Samuel Ortiz <sameo@linux.intel.com>, Alex Dubov <oakad@yahoo.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, driverdev-devel@linuxdriverproject.org, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Wei WANG <wei_wang@realsil.com.cn>, Chris Ball <cjb@laptop.org>, Lee Jones <lee.jones@linaro.org>, Dan Carpenter <dan.carpenter@oracle.com>, Maxim Levitsky <maximlevitsky@gmail.com>
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qa0-f41.google.com ([209.85.216.41]:60510 "EHLO
+	mail-qa0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750767AbaBKJzX (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 11 Feb 2014 04:55:23 -0500
+Received: by mail-qa0-f41.google.com with SMTP id w8so11401289qac.14
+        for <linux-mmc@vger.kernel.org>; Tue, 11 Feb 2014 01:55:23 -0800 (PST)
+In-Reply-To: <52F9F012.8030302@realtek.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Roger <rogerable@realtek.com>
+Cc: Lee Jones <lee.jones@linaro.org>, Samuel Ortiz <sameo@linux.intel.com>, Chris Ball <cjb@laptop.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Maxim Levitsky <maximlevitsky@gmail.com>, Alex Dubov <oakad@yahoo.com>, Dan Carpenter <dan.carpenter@oracle.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, driverdev-devel@linuxdriverproject.org, Wei WANG <wei_wang@realsil.com.cn>, micky_ching@realsil.com.cn
 
-On 11 February 2014 10:27, Roger <rogerable@realtek.com> wrote:
-> On 02/10/2014 10:58 PM, Ulf Hansson wrote:
->>
->> On 6 February 2014 15:35,  <rogerable@realtek.com> wrote:
+On 11 February 2014 10:40, Roger <rogerable@realtek.com> wrote:
+> On 02/10/2014 07:30 PM, Lee Jones wrote:
 >>>
 >>> From: Roger Tseng <rogerable@realtek.com>
 >>>
->>> Realtek USB SD/MMC host driver provides mmc host support based on the
->>> Realtek
->>> USB card reader MFD driver.
+>>> Realtek USB card reader provides a channel to transfer command or data to
+>>> flash
+>>> memory cards. This driver exports host instances for mmc and memstick
+>>> subsystems
+>>> and handles basic works.
 >>>
 >>> Signed-off-by: Roger Tseng <rogerable@realtek.com>
 >>> ---
->>>   drivers/mmc/host/Kconfig          |    7 +
->>>   drivers/mmc/host/Makefile         |    1 +
->>>   drivers/mmc/host/rtsx_usb_sdmmc.c | 1500
->>> +++++++++++++++++++++++++++++++++++++
->>>   3 files changed, 1508 insertions(+)
->>>   create mode 100644 drivers/mmc/host/rtsx_usb_sdmmc.c
+>>>   drivers/mfd/Kconfig          |  10 +
+>>>   drivers/mfd/Makefile         |   1 +
+>>>   drivers/mfd/rtsx_usb.c       | 760
+>>> +++++++++++++++++++++++++++++++++++++++++++
+>>>   include/linux/mfd/rtsx_usb.h | 628 +++++++++++++++++++++++++++++++++++
+>>>   4 files changed, 1399 insertions(+)
+>>>   create mode 100644 drivers/mfd/rtsx_usb.c
+>>>   create mode 100644 include/linux/mfd/rtsx_usb.h
+>>
+>>
+>> Applied with Greg's Ack.
+>>
+> Thanks. But I have to modify some places in PATCH 2/3 and 3/3 according to
+> Ulf's suggestion. I will resend v4 later but currently I don't plan to
+> change the 1/3 part(for mfd) in it.
 >
-> [snip]
->
->>> +#ifdef CONFIG_PM_RUNTIME
->>
->>
->> There are stubs for pm_runtime* functions, thus the ifdefs can be removed.
->> Please go though the complete patch and remove all instances.
->>
->>> +               pm_runtime_put(sdmmc_dev(host));
->>
->>
->> I don't know so much about USB mmc hosts hardware, but I just wanted
->> to find out if I have understood this correct.
->>
->> You can't do fine grained power management of the USB parent device,
->> since it needs to be runtime resumed to be able keep the power the
->> card? Once it becomes runtime suspended, the power to the card will
->> thus also be dropped?
->>
-> Yes, and to keep some internal state of the controller.
+> Would you wait for and re-apply the v4 submission or give any advice?
 
-Okay.
+Just send a v4 of PATCH 2/3 and 3/3, that should be fine I think.
 
-But the internal state of the controller should be possible to restore
-at runtime_resume, so that should not be the reason, right?
-
->
-> [snip]
->
->>> +#ifdef CONFIG_PM
->>
->>
->> I suppose this should be CONFIG_PM_SLEEP?
->>
-> ...
->
->>> +       err = mmc_suspend_host(mmc);
->>
->>
->> This won't compile. The mmc_suspend_host API has been removed.
->>
-> ...
->
->>> +       return mmc_resume_host(mmc);
->>
->>
->> This won't compile. The mmc_resume_host API has been removed.
->>
-> ...
->>>
->>> +static struct platform_driver rtsx_usb_sdmmc_driver = {
->>> +       .probe          = rtsx_usb_sdmmc_drv_probe,
->>> +       .remove         = rtsx_usb_sdmmc_drv_remove,
->>> +       .id_table       = rtsx_usb_sdmmc_ids,
->>> +       .suspend        = rtsx_usb_sdmmc_suspend,
->>> +       .resume         = rtsx_usb_sdmmc_resume,
->>
->>
->> Please use the modern pm_ops instead of the legacy suspend/resume
->> callbacks.
->> I suggest you then also switch to use the SIMPLE_DEV_PM_OPS macro.
->
->
-> I just missed the removal of mmc_suspend|resume_host.
->
-> I'll remove all these unnecessary mmc host pm things as done in commit
-> ff71c4bcb0af2730d047989e485303ae4e1ce794 for drivers of our PCIe devices.
->
-> Thanks for pointing this out.
->
->> Kind regards
->> Ulf Hansson
+Kind regards
+Ulf Hansson
