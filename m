@@ -1,79 +1,129 @@
-From: Russell King <rmk+kernel@arm.linux.org.uk>
-Subject: [PATCH] Fix uses of dma_max_pfn() when converting to a limiting
- address
-Date: Tue, 11 Feb 2014 17:28:07 +0000
-Message-ID: <E1WDH7v-00038J-2k@rmk-PC.arm.linux.org.uk>
+From: Puthikorn Voravootivat <puthik@chromium.org>
+Subject: [PATCH v3] mmc: remove MMC_CAP_ERASE to enable trim in eMMC device
+Date: Tue, 11 Feb 2014 10:40:35 -0800
+Message-ID: <1392144035-12895-1-git-send-email-puthik@chromium.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from gw-1.arm.linux.org.uk ([78.32.30.217]:33022 "EHLO
-	pandora.arm.linux.org.uk" rhost-flags-OK-OK-OK-FAIL)
-	by vger.kernel.org with ESMTP id S1751305AbaBKR2O (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 11 Feb 2014 12:28:14 -0500
+Received: from mail-qa0-f73.google.com ([209.85.216.73]:47742 "EHLO
+	mail-qa0-f73.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750978AbaBKSki (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 11 Feb 2014 13:40:38 -0500
+Received: by mail-qa0-f73.google.com with SMTP id w5so1019712qac.0
+        for <linux-mmc@vger.kernel.org>; Tue, 11 Feb 2014 10:40:37 -0800 (PST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-arm-kernel@lists.infradead.org
-Cc: Chris Ball <chris@printf.net>, "James E.J. Bottomley" <JBottomley@parallels.com>, linux-mmc@vger.kernel.org, linux-scsi@vger.kernel.org, Santosh Shilimkar <santosh.shilimkar@ti.com>
+To: Chris Ball <chris@printf.net>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: MMC list <linux-mmc@vger.kernel.org>, Gwendal Grignou <gwendal@chromium.org>, Grant Grundler <grundler@chromium.org>, Puthikorn Voravootivat <puthik@chromium.org>
 
-We must use a 64-bit for this, otherwise overflowed bits get lost, and
-that can result in a lower than intended value set.
+Remove host erase capacity check to enable trim and
+discard feature in supported eMMC device.
 
-Fixes: 8e0cb8a1f6ac ("ARM: 7797/1: mmc: Use dma_max_pfn(dev) helper for bounce_limit calculations")
-Fixes: 7d35496dd982 ("ARM: 7796/1: scsi: Use dma_max_pfn(dev) helper for bounce_limit calculations")
-Signed-off-by: Russell King <rmk+kernel@arm.linux.org.uk>
+Signed-off-by: Puthikorn Voravootivat <puthik@chromium.org>
 ---
-While poking about with the Cubox-i4 and investigating why my UHS-1
-SD card wasn't achieving its full potential, I came across a slight
-problem... the SDHCI host sets a mask of 0xffffffff, but with the
-start of memory at pfn 0x10000, the blk code sees this when setting
-the bounce limit:
+v3 change:
+As suggested by Jaehoon, this patch remove MMC_CAP_ERASE instead of
+force enable it.
 
-	max addr 0x0ffff000 bounce limit 0xffff dma 1
+v2 change:
+Instead of add MMC_CAP_ERASE just only for dw_mmc, this patch adds
+this capability to all host.
 
-and this results in the bounce functions appearing in the profile:
+ arch/arm/mach-ux500/board-mop500-sdi.c | 3 ---
+ drivers/mmc/core/core.c                | 6 ++----
+ drivers/mmc/host/omap_hsmmc.c          | 2 +-
+ drivers/mmc/host/sdhci.c               | 2 +-
+ include/linux/mmc/host.h               | 1 -
+ 5 files changed, 4 insertions(+), 10 deletions(-)
 
-00000000c00f8b70 copy_to_high_bio_irq                  1139 2.5886
-00000000c00f8d28 bounce_end_io                           12 0.0714
-00000000c00f8dd0 bounce_end_io_read_isa                   8 0.1053
-
-which, compared to the cost of copying the data to userland and
-request handling, this is quite significant:
-
-00000000c04b1794 sdhci_request                          268 0.5447
-00000000c02d0740 __copy_to_user_std                     398 0.4252
-
-With this calculation fixed, we avoid the bouncing code entirely.
-
-	max addr 0x10ffff000 bounce limit 0x10ffff dma 0
-
- drivers/mmc/card/queue.c | 2 +-
- drivers/scsi/scsi_lib.c  | 2 +-
- 2 files changed, 2 insertions(+), 2 deletions(-)
-
-diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
-index 357bbc54fe4b..3e049c13429c 100644
---- a/drivers/mmc/card/queue.c
-+++ b/drivers/mmc/card/queue.c
-@@ -197,7 +197,7 @@ int mmc_init_queue(struct mmc_queue *mq, struct mmc_card *card,
- 	struct mmc_queue_req *mqrq_prev = &mq->mqrq[1];
+diff --git a/arch/arm/mach-ux500/board-mop500-sdi.c b/arch/arm/mach-ux500/board-mop500-sdi.c
+index fcbf3a1..6d9feb8 100644
+--- a/arch/arm/mach-ux500/board-mop500-sdi.c
++++ b/arch/arm/mach-ux500/board-mop500-sdi.c
+@@ -48,7 +48,6 @@ struct mmci_platform_data mop500_sdi0_data = {
+ 	.capabilities	= MMC_CAP_4_BIT_DATA |
+ 				MMC_CAP_SD_HIGHSPEED |
+ 				MMC_CAP_MMC_HIGHSPEED |
+-				MMC_CAP_ERASE |
+ 				MMC_CAP_UHS_SDR12 |
+ 				MMC_CAP_UHS_SDR25,
+ 	.gpio_wp	= -1,
+@@ -119,7 +118,6 @@ struct mmci_platform_data mop500_sdi2_data = {
+ 				MMC_CAP_8_BIT_DATA |
+ 				MMC_CAP_NONREMOVABLE |
+ 				MMC_CAP_MMC_HIGHSPEED |
+-				MMC_CAP_ERASE |
+ 				MMC_CAP_CMD23,
+ 	.gpio_cd	= -1,
+ 	.gpio_wp	= -1,
+@@ -154,7 +152,6 @@ struct mmci_platform_data mop500_sdi4_data = {
+ 				MMC_CAP_8_BIT_DATA |
+ 				MMC_CAP_NONREMOVABLE |
+ 				MMC_CAP_MMC_HIGHSPEED |
+-				MMC_CAP_ERASE |
+ 				MMC_CAP_CMD23,
+ 	.gpio_cd	= -1,
+ 	.gpio_wp	= -1,
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 098374b..82de9f1 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -2007,8 +2007,7 @@ int mmc_erase(struct mmc_card *card, unsigned int from, unsigned int nr,
+ {
+ 	unsigned int rem, to = from + nr;
  
- 	if (mmc_dev(host)->dma_mask && *mmc_dev(host)->dma_mask)
--		limit = dma_max_pfn(mmc_dev(host)) << PAGE_SHIFT;
-+		limit = (u64)dma_max_pfn(mmc_dev(host)) << PAGE_SHIFT;
+-	if (!(card->host->caps & MMC_CAP_ERASE) ||
+-	    !(card->csd.cmdclass & CCC_ERASE))
++	if (!(card->csd.cmdclass & CCC_ERASE))
+ 		return -EOPNOTSUPP;
  
- 	mq->card = card;
- 	mq->queue = blk_init_queue(mmc_request_fn, lock);
-diff --git a/drivers/scsi/scsi_lib.c b/drivers/scsi/scsi_lib.c
-index 7bd7f0d5f050..62ec84b42e31 100644
---- a/drivers/scsi/scsi_lib.c
-+++ b/drivers/scsi/scsi_lib.c
-@@ -1684,7 +1684,7 @@ u64 scsi_calculate_bounce_limit(struct Scsi_Host *shost)
+ 	if (!card->erase_size)
+@@ -2062,8 +2061,7 @@ EXPORT_SYMBOL(mmc_erase);
  
- 	host_dev = scsi_get_device(shost);
- 	if (host_dev && host_dev->dma_mask)
--		bounce_limit = dma_max_pfn(host_dev) << PAGE_SHIFT;
-+		bounce_limit = (u64)dma_max_pfn(host_dev) << PAGE_SHIFT;
- 
- 	return bounce_limit;
+ int mmc_can_erase(struct mmc_card *card)
+ {
+-	if ((card->host->caps & MMC_CAP_ERASE) &&
+-	    (card->csd.cmdclass & CCC_ERASE) && card->erase_size)
++	if ((card->csd.cmdclass & CCC_ERASE) && card->erase_size)
+ 		return 1;
+ 	return 0;
  }
+diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+index dbd32ad..99d8558 100644
+--- a/drivers/mmc/host/omap_hsmmc.c
++++ b/drivers/mmc/host/omap_hsmmc.c
+@@ -1873,7 +1873,7 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
+ 	mmc->max_seg_size = mmc->max_req_size;
+ 
+ 	mmc->caps |= MMC_CAP_MMC_HIGHSPEED | MMC_CAP_SD_HIGHSPEED |
+-		     MMC_CAP_WAIT_WHILE_BUSY | MMC_CAP_ERASE;
++		     MMC_CAP_WAIT_WHILE_BUSY;
+ 
+ 	mmc->caps |= mmc_slot(host).caps;
+ 	if (mmc->caps & MMC_CAP_8_BIT_DATA)
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 9ddef47..6a50141 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -2943,7 +2943,7 @@ int sdhci_add_host(struct sdhci_host *host)
+ 
+ 	mmc->max_discard_to = (1 << 27) / host->timeout_clk;
+ 
+-	mmc->caps |= MMC_CAP_SDIO_IRQ | MMC_CAP_ERASE | MMC_CAP_CMD23;
++	mmc->caps |= MMC_CAP_SDIO_IRQ | MMC_CAP_CMD23;
+ 
+ 	if (host->quirks & SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12)
+ 		host->flags |= SDHCI_AUTO_CMD12;
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index 99f5709..8b1bfab 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -242,7 +242,6 @@ struct mmc_host {
+ #define MMC_CAP_AGGRESSIVE_PM	(1 << 7)	/* Suspend (e)MMC/SD at idle  */
+ #define MMC_CAP_NONREMOVABLE	(1 << 8)	/* Nonremovable e.g. eMMC */
+ #define MMC_CAP_WAIT_WHILE_BUSY	(1 << 9)	/* Waits while card is busy */
+-#define MMC_CAP_ERASE		(1 << 10)	/* Allow erase/trim commands */
+ #define MMC_CAP_1_8V_DDR	(1 << 11)	/* can support */
+ 						/* DDR mode at 1.8V */
+ #define MMC_CAP_1_2V_DDR	(1 << 12)	/* can support */
 -- 
-1.8.3.1
+1.9.0.rc1.175.g0b1dcb5
 
