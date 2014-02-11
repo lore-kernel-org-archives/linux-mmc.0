@@ -1,7 +1,7 @@
-From: Dong Aisheng <dongas86@gmail.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
 Subject: Re: brcm 4329 problems
-Date: Tue, 11 Feb 2014 15:38:11 +0800
-Message-ID: <CAA+hA=RqosTo8sjinztjgauZyd0qdWX+ebJ7481cUkGd=qDeRA@mail.gmail.com>
+Date: Tue, 11 Feb 2014 10:00:41 +0100
+Message-ID: <CAPDyKForrmFr9ycEz5+10G2e1ifWt+hySPfy+AieUL3gWRCX=g@mail.gmail.com>
 References: <20140203153239.GL26684@n2100.arm.linux.org.uk>
 	<52F00021.6070904@broadcom.com>
 	<20140203210450.GN26684@n2100.arm.linux.org.uk>
@@ -13,24 +13,24 @@ References: <20140203153239.GL26684@n2100.arm.linux.org.uk>
 	<20140209232708.GA25900@n2100.arm.linux.org.uk>
 	<CAA+hA=SEoXfSN19z1vLpiLDh8Mo3Qty4cU2HOGJska70dT5Cew@mail.gmail.com>
 	<20140210140346.GW26684@n2100.arm.linux.org.uk>
-	<CAPDyKFqE1Qt4vaxPZXeBB4aqQQj05_kO8NRvuY0Hfe5uRRTpAQ@mail.gmail.com>
+	<CAA+hA=Si4k0A5_-ve0oh8FKxCGDg5pD_M=Z4g2Ca7UWJaeq6Rw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qc0-f176.google.com ([209.85.216.176]:53016 "EHLO
-	mail-qc0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752107AbaBKHiM (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 11 Feb 2014 02:38:12 -0500
-Received: by mail-qc0-f176.google.com with SMTP id e16so12287162qcx.7
-        for <linux-mmc@vger.kernel.org>; Mon, 10 Feb 2014 23:38:11 -0800 (PST)
-In-Reply-To: <CAPDyKFqE1Qt4vaxPZXeBB4aqQQj05_kO8NRvuY0Hfe5uRRTpAQ@mail.gmail.com>
+Received: from mail-qc0-f175.google.com ([209.85.216.175]:63482 "EHLO
+	mail-qc0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751190AbaBKJAm (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 11 Feb 2014 04:00:42 -0500
+Received: by mail-qc0-f175.google.com with SMTP id x13so12558536qcv.34
+        for <linux-mmc@vger.kernel.org>; Tue, 11 Feb 2014 01:00:42 -0800 (PST)
+In-Reply-To: <CAA+hA=Si4k0A5_-ve0oh8FKxCGDg5pD_M=Z4g2Ca7UWJaeq6Rw@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
+To: Dong Aisheng <dongas86@gmail.com>
 Cc: Russell King - ARM Linux <linux@arm.linux.org.uk>, Arend van Spriel <arend@broadcom.com>, Chris Ball <chris@printf.net>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, brcm80211-dev-list@broadcom.com
 
-On Mon, Feb 10, 2014 at 11:25 PM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> On 10 February 2014 15:03, Russell King - ARM Linux
+On 11 February 2014 08:33, Dong Aisheng <dongas86@gmail.com> wrote:
+> On Mon, Feb 10, 2014 at 10:03 PM, Russell King - ARM Linux
 > <linux@arm.linux.org.uk> wrote:
 >> On Mon, Feb 10, 2014 at 02:50:42PM +0800, Dong Aisheng wrote:
 >>> On Mon, Feb 10, 2014 at 7:27 AM, Russell King - ARM Linux
@@ -167,29 +167,33 @@ On Mon, Feb 10, 2014 at 11:25 PM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
 >> Why not allow runtime PM at the host level, but still allow the
 >> interrupt to be received?  Doesn't it make sense to allow PM even with
 >> SDIO cards in place?
->
-> Agree. Just for your reference, there has been related discussions on
-> the mmc list for how to solve this for host drivers.
->
-> This is a patchset for omap_hsmmc, though I don't think the maintainer
-> has picked it up yet.
-> http://www.spinics.net/lists/linux-omap/msg101469.html
->
-> Typically, once the host becomes runtime suspended, you need re-route
-> the DAT1 line to a GPIO irq to continue to get the irqs.
->
-
-That seems a way out.
-But what if the card can not send interrupt to host without clock?
-Then can this still work?
-
-Regards
-Dong Aisheng
-
-> Kind regards
-> Ulf Hansson
->
 >>
+>
+> It depends on both host and card that 1) if host is able to detect
+> SDIO interrupts without clock
+> and 2) if the card is able to send interrupt to host without clock.
+> If any one of both can't do that, we may need to tell host to not
+> do runtime suspend to prevent the clock from being disabled.
+> Or the SDIO interrupt may not work.
+>
+> The IMX esdhc/usdhc can not detect the SDIO interrupts sent from card
+> if the clock is disabled.
+
+So you are saying you have no option to reroute the DAT1 line to a
+GPIO irq, right? I guess that would be SOC specific.
+
+> So we need such quirk to not allow runtime PM for SDIO cards.
+> Doesn't it make sense?
+
+Yes, I think so. But, maybe it should be configurable to use it?
+
+Kind regards
+Uffe
+
+>
+> Regards
+> Dong Aisheng
+>
 >> Once I get imx-drm off my plate, I'm going to put some work into
 >> rewriting the sdhci driver mess in a much cleaner way - we can't go on
 >> putting hacks on top of what's already there, it's already a total mess.
@@ -198,7 +202,7 @@ Dong Aisheng
 >> FTTC broadband for 0.8mile line: 5.8Mbps down 500kbps up.  Estimation
 >> in database were 13.1 to 19Mbit for a good line, about 7.5+ for a bad.
 >> Estimate before purchase was "up to 13.2Mbit".
->> --
->> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
