@@ -1,42 +1,61 @@
-From: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Subject: Re: brcm 4329 problems
-Date: Tue, 11 Feb 2014 10:27:33 +0000
-Message-ID: <20140211102733.GG26684@n2100.arm.linux.org.uk>
-References: <20140203210450.GN26684@n2100.arm.linux.org.uk> <52F14F7E.9040900@broadcom.com> <20140205153824.GS26684@n2100.arm.linux.org.uk> <20140208215927.GA5276@n2100.arm.linux.org.uk> <52F744C9.7040804@broadcom.com> <20140209205917.GO26684@n2100.arm.linux.org.uk> <20140209232708.GA25900@n2100.arm.linux.org.uk> <CAA+hA=SEoXfSN19z1vLpiLDh8Mo3Qty4cU2HOGJska70dT5Cew@mail.gmail.com> <20140210140346.GW26684@n2100.arm.linux.org.uk> <CAA+hA=Si4k0A5_-ve0oh8FKxCGDg5pD_M=Z4g2Ca7UWJaeq6Rw@mail.gmail.com>
+From: Shuah Khan <shuah.kh@samsung.com>
+Subject: Re: [RFT][PATCH 08/12] mmc: change cb710-mmc platform power management
+ to use dev_pm_ops
+Date: Tue, 11 Feb 2014 08:38:39 -0700
+Message-ID: <52FA43FF.8030303@samsung.com>
+References: <cover.1392040064.git.shuah.kh@samsung.com>
+ <5393e4bd34e5667b7d00fa09c9d5bee0f68d659f.1392040068.git.shuah.kh@samsung.com>
+ <20140210234904.GA542@rere.qmqm.pl>
+Reply-To: shuah.kh@samsung.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-2;
+	format=flowed
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from gw-1.arm.linux.org.uk ([78.32.30.217]:60829 "EHLO
-	pandora.arm.linux.org.uk" rhost-flags-OK-OK-OK-FAIL)
-	by vger.kernel.org with ESMTP id S1750797AbaBKK1o (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 11 Feb 2014 05:27:44 -0500
-Content-Disposition: inline
-In-Reply-To: <CAA+hA=Si4k0A5_-ve0oh8FKxCGDg5pD_M=Z4g2Ca7UWJaeq6Rw@mail.gmail.com>
+Received: from mailout1.w2.samsung.com ([211.189.100.11]:60867 "EHLO
+	usmailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751014AbaBKPit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 11 Feb 2014 10:38:49 -0500
+In-reply-to: <20140210234904.GA542@rere.qmqm.pl>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Dong Aisheng <dongas86@gmail.com>
-Cc: Arend van Spriel <arend@broadcom.com>, Chris Ball <chris@printf.net>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, brcm80211-dev-list@broadcom.com
+To: =?ISO-8859-2?Q?Micha=B3_Miros=B3aw?= <mirq-linux@rere.qmqm.pl>
+Cc: rjw@rjwysocki.net, chris@printf.net, linux-pm@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, shuahkhan@gmail.com, Shuah Khan <shuah.kh@samsung.com>
 
-On Tue, Feb 11, 2014 at 03:33:09PM +0800, Dong Aisheng wrote:
-> It depends on both host and card that 1) if host is able to detect
-> SDIO interrupts without clock
-> and 2) if the card is able to send interrupt to host without clock.
-> If any one of both can't do that, we may need to tell host to not
-> do runtime suspend to prevent the clock from being disabled.
-> Or the SDIO interrupt may not work.
-> 
-> The IMX esdhc/usdhc can not detect the SDIO interrupts sent from card
-> if the clock is disabled.
-> So we need such quirk to not allow runtime PM for SDIO cards.
-> Doesn't it make sense?
+On 02/10/2014 04:49 PM, Micha=B3 Miros=B3aw wrote:
+> On Mon, Feb 10, 2014 at 09:12:31AM -0700, Shuah Khan wrote:
+>> Change cb710-mmc platform driver to register pm ops using dev_pm_ops=
+ instead
+>> of legacy pm_ops. .pm hooks call existing legacy suspend and resume =
+interfaces
+>> by passing in the right pm state.
+> [all the patch cut]
+>
+> Aaah, a bit mechanical - this change, isn't it?
 
-That's strange.  I have it working as of last night.
+Yes :)
 
-Yes, I have to leave the AHB clock on so that the registers are readable,
-in the interrupt handler, and that's something I only do if the SDIO
-interrupt is enabled, but everything else gets disabled.
+>
+> The suspend/resume callbacks just clears IRQ mask in the device in ca=
+se it
+> got undefined during sleep state. So the proper change here is to squ=
+ash all
+> the functions in one, and point all of the hooks to it.
+>
+> With the change you have my ack.
+>
+> BTW, you could move cb710_mmc_suspend() (or whatever you'll call it) =
+to one
+> ifdef block with cb710_mmc_dev_pm_ops.
+>
 
--- 
-FTTC broadband for 0.8mile line: 5.8Mbps down 500kbps up.  Estimation
-in database were 13.1 to 19Mbit for a good line, about 7.5+ for a bad.
-Estimate before purchase was "up to 13.2Mbit".
+It makes perfect sense to squash suspend and resume. Thanks for the=20
+review. Code looks lot simpler now. Will send v2 patch shortly.
+
+-- Shuah
+
+--=20
+Shuah Khan
+Senior Linux Kernel Developer - Open Source Group
+Samsung Research America(Silicon Valley)
+shuah.kh@samsung.com | (970) 672-0658
