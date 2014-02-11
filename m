@@ -1,61 +1,79 @@
-From: Shuah Khan <shuah.kh@samsung.com>
-Subject: Re: [RFT][PATCH 08/12] mmc: change cb710-mmc platform power management
- to use dev_pm_ops
-Date: Tue, 11 Feb 2014 08:38:39 -0700
-Message-ID: <52FA43FF.8030303@samsung.com>
-References: <cover.1392040064.git.shuah.kh@samsung.com>
- <5393e4bd34e5667b7d00fa09c9d5bee0f68d659f.1392040068.git.shuah.kh@samsung.com>
- <20140210234904.GA542@rere.qmqm.pl>
-Reply-To: shuah.kh@samsung.com
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-2;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+From: Russell King <rmk+kernel@arm.linux.org.uk>
+Subject: [PATCH] Fix uses of dma_max_pfn() when converting to a limiting
+ address
+Date: Tue, 11 Feb 2014 17:28:07 +0000
+Message-ID: <E1WDH7v-00038J-2k@rmk-PC.arm.linux.org.uk>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout1.w2.samsung.com ([211.189.100.11]:60867 "EHLO
-	usmailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751014AbaBKPit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 11 Feb 2014 10:38:49 -0500
-In-reply-to: <20140210234904.GA542@rere.qmqm.pl>
+Received: from gw-1.arm.linux.org.uk ([78.32.30.217]:33022 "EHLO
+	pandora.arm.linux.org.uk" rhost-flags-OK-OK-OK-FAIL)
+	by vger.kernel.org with ESMTP id S1751305AbaBKR2O (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 11 Feb 2014 12:28:14 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: =?ISO-8859-2?Q?Micha=B3_Miros=B3aw?= <mirq-linux@rere.qmqm.pl>
-Cc: rjw@rjwysocki.net, chris@printf.net, linux-pm@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, shuahkhan@gmail.com, Shuah Khan <shuah.kh@samsung.com>
+To: linux-arm-kernel@lists.infradead.org
+Cc: Chris Ball <chris@printf.net>, "James E.J. Bottomley" <JBottomley@parallels.com>, linux-mmc@vger.kernel.org, linux-scsi@vger.kernel.org, Santosh Shilimkar <santosh.shilimkar@ti.com>
 
-On 02/10/2014 04:49 PM, Micha=B3 Miros=B3aw wrote:
-> On Mon, Feb 10, 2014 at 09:12:31AM -0700, Shuah Khan wrote:
->> Change cb710-mmc platform driver to register pm ops using dev_pm_ops=
- instead
->> of legacy pm_ops. .pm hooks call existing legacy suspend and resume =
-interfaces
->> by passing in the right pm state.
-> [all the patch cut]
->
-> Aaah, a bit mechanical - this change, isn't it?
+We must use a 64-bit for this, otherwise overflowed bits get lost, and
+that can result in a lower than intended value set.
 
-Yes :)
+Fixes: 8e0cb8a1f6ac ("ARM: 7797/1: mmc: Use dma_max_pfn(dev) helper for bounce_limit calculations")
+Fixes: 7d35496dd982 ("ARM: 7796/1: scsi: Use dma_max_pfn(dev) helper for bounce_limit calculations")
+Signed-off-by: Russell King <rmk+kernel@arm.linux.org.uk>
+---
+While poking about with the Cubox-i4 and investigating why my UHS-1
+SD card wasn't achieving its full potential, I came across a slight
+problem... the SDHCI host sets a mask of 0xffffffff, but with the
+start of memory at pfn 0x10000, the blk code sees this when setting
+the bounce limit:
 
->
-> The suspend/resume callbacks just clears IRQ mask in the device in ca=
-se it
-> got undefined during sleep state. So the proper change here is to squ=
-ash all
-> the functions in one, and point all of the hooks to it.
->
-> With the change you have my ack.
->
-> BTW, you could move cb710_mmc_suspend() (or whatever you'll call it) =
-to one
-> ifdef block with cb710_mmc_dev_pm_ops.
->
+	max addr 0x0ffff000 bounce limit 0xffff dma 1
 
-It makes perfect sense to squash suspend and resume. Thanks for the=20
-review. Code looks lot simpler now. Will send v2 patch shortly.
+and this results in the bounce functions appearing in the profile:
 
--- Shuah
+00000000c00f8b70 copy_to_high_bio_irq                  1139 2.5886
+00000000c00f8d28 bounce_end_io                           12 0.0714
+00000000c00f8dd0 bounce_end_io_read_isa                   8 0.1053
 
---=20
-Shuah Khan
-Senior Linux Kernel Developer - Open Source Group
-Samsung Research America(Silicon Valley)
-shuah.kh@samsung.com | (970) 672-0658
+which, compared to the cost of copying the data to userland and
+request handling, this is quite significant:
+
+00000000c04b1794 sdhci_request                          268 0.5447
+00000000c02d0740 __copy_to_user_std                     398 0.4252
+
+With this calculation fixed, we avoid the bouncing code entirely.
+
+	max addr 0x10ffff000 bounce limit 0x10ffff dma 0
+
+ drivers/mmc/card/queue.c | 2 +-
+ drivers/scsi/scsi_lib.c  | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
+index 357bbc54fe4b..3e049c13429c 100644
+--- a/drivers/mmc/card/queue.c
++++ b/drivers/mmc/card/queue.c
+@@ -197,7 +197,7 @@ int mmc_init_queue(struct mmc_queue *mq, struct mmc_card *card,
+ 	struct mmc_queue_req *mqrq_prev = &mq->mqrq[1];
+ 
+ 	if (mmc_dev(host)->dma_mask && *mmc_dev(host)->dma_mask)
+-		limit = dma_max_pfn(mmc_dev(host)) << PAGE_SHIFT;
++		limit = (u64)dma_max_pfn(mmc_dev(host)) << PAGE_SHIFT;
+ 
+ 	mq->card = card;
+ 	mq->queue = blk_init_queue(mmc_request_fn, lock);
+diff --git a/drivers/scsi/scsi_lib.c b/drivers/scsi/scsi_lib.c
+index 7bd7f0d5f050..62ec84b42e31 100644
+--- a/drivers/scsi/scsi_lib.c
++++ b/drivers/scsi/scsi_lib.c
+@@ -1684,7 +1684,7 @@ u64 scsi_calculate_bounce_limit(struct Scsi_Host *shost)
+ 
+ 	host_dev = scsi_get_device(shost);
+ 	if (host_dev && host_dev->dma_mask)
+-		bounce_limit = dma_max_pfn(host_dev) << PAGE_SHIFT;
++		bounce_limit = (u64)dma_max_pfn(host_dev) << PAGE_SHIFT;
+ 
+ 	return bounce_limit;
+ }
+-- 
+1.8.3.1
+
