@@ -1,172 +1,78 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 13/13] mmc: mmci: Enable support for busy detection for
- ux500 variant
-Date: Wed, 12 Feb 2014 14:20:05 +0100
-Message-ID: <CAPDyKFpNToUSXSYuXnqPJ0_Thvx663gvsKAJSv2=0ibcPnFxFQ@mail.gmail.com>
-References: <1391035085-2747-1-git-send-email-ulf.hansson@linaro.org>
-	<1391035085-2747-14-git-send-email-ulf.hansson@linaro.org>
+From: Mark Brown <broonie@kernel.org>
+Subject: Re: [PATCH 1/3] mmc: add support for power-on sequencing through DT
+Date: Wed, 12 Feb 2014 18:33:01 +0000
+Message-ID: <20140212183301.GL28112@sirena.org.uk>
+References: <1390190215-22700-1-git-send-email-olof@lixom.net>
+ <52E700F0.7040708@gmail.com>
+ <CAPDyKFpOhQtiyCmzie3=sfg42Vv5_rReRNgUf8kALoE6TBe2cw@mail.gmail.com>
+ <201401281148.10670.arnd@arndb.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="3E9L5busH6ECpa9r"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qc0-f176.google.com ([209.85.216.176]:63589 "EHLO
-	mail-qc0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751164AbaBLNUG (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 12 Feb 2014 08:20:06 -0500
-Received: by mail-qc0-f176.google.com with SMTP id e16so15314273qcx.35
-        for <linux-mmc@vger.kernel.org>; Wed, 12 Feb 2014 05:20:05 -0800 (PST)
-In-Reply-To: <1391035085-2747-14-git-send-email-ulf.hansson@linaro.org>
+Received: from mezzanine.sirena.org.uk ([106.187.55.193]:41023 "EHLO
+	mezzanine.sirena.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753382AbaBLSdg (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 12 Feb 2014 13:33:36 -0500
+Content-Disposition: inline
+In-Reply-To: <201401281148.10670.arnd@arndb.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Russell King <linux@arm.linux.org.uk>
-Cc: Dong Aisheng <b29396@freescale.com>, Stephen Warren <swarren@nvidia.com>, Vladimir Zapolskiy <vladimir_zapolskiy@mentor.com>, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, Johan Rudholm <jrudholm@gmail.com>, Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>
-
-On 29 January 2014 23:38, Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> The ux500 variants have HW busy detection support, which is indicated
-> by the busy_detect flag. For these variants let's enable the
-> MMC_CAP_WAIT_WHILE_BUSY flag and add the support for it.
->
-> The mmc core will provide the RSP_BUSY command flag for those requests
-> we should care about busy detection. Regarding the max_busy_timeout,
-> the HW don't support busy detection timeouts so at this initial step
-> let's make it simple and set it to zero to indicate we are able to
-> support any timeout.
->
-> Cc: Russell King <linux@arm.linux.org.uk>
-> Cc: Johan Rudholm <jrudholm@gmail.com>
-> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
-
-Hi Russell,
-
-Just wanted to know if you were happy with this patch.
-
-I would prefer if we could let Chris carry this patch, since there are
-a dependency. Are you fine with that?
-
-Kind regards
-Ulf Hansson
+To: Arnd Bergmann <arnd@arndb.de>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, mark.rutland@arm.com, devicetree@vger.kernel.org, Russell King - ARM Linux <linux@arm.linux.org.uk>, Pawel Moll <pawel.moll@arm.com>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Tomasz Figa <t.figa@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, Tomasz Figa <tomasz.figa@gmail.com>, Chris Ball <chris@printf.net>, robh+dt@kernel.org, Kumar Gala <galak@codeaurora.org>, Olof Johansson <olof@lixom.net>, Fabio Estevam <festevam@gmail.com>, Sascha Hauer <s.hauer@pengutronix.de>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 
 
-> ---
->  drivers/mmc/host/mmci.c |   51 +++++++++++++++++++++++++++++++++++++++--------
->  drivers/mmc/host/mmci.h |    2 ++
->  2 files changed, 45 insertions(+), 8 deletions(-)
->
-> diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-> index 1a4b153..9976a90 100644
-> --- a/drivers/mmc/host/mmci.c
-> +++ b/drivers/mmc/host/mmci.c
-> @@ -921,6 +921,29 @@ mmci_cmd_irq(struct mmci_host *host, struct mmc_command *cmd,
->  {
->         void __iomem *base = host->base;
->         bool sbc = (cmd == host->mrq->sbc);
-> +       bool busy_resp = host->variant->busy_detect &&
-> +                       (cmd->flags & MMC_RSP_BUSY);
-> +
-> +       /* Check if we need to wait for busy completion. */
-> +       if (host->busy_status && (status & MCI_ST_CARDBUSY))
-> +               return;
-> +
-> +       /* Enable busy completion if needed and supported. */
-> +       if (!host->busy_status && busy_resp &&
-> +               !(status & (MCI_CMDCRCFAIL|MCI_CMDTIMEOUT)) &&
-> +               (readl(base + MMCISTATUS) & MCI_ST_CARDBUSY)) {
-> +               writel(readl(base + MMCIMASK0) | MCI_ST_BUSYEND,
-> +                       base + MMCIMASK0);
-> +               host->busy_status = status & (MCI_CMDSENT|MCI_CMDRESPEND);
-> +               return;
-> +       }
-> +
-> +       /* At busy completion, mask the IRQ and complete the request. */
-> +       if (host->busy_status) {
-> +               writel(readl(base + MMCIMASK0) & ~MCI_ST_BUSYEND,
-> +                       base + MMCIMASK0);
-> +               host->busy_status = 0;
-> +       }
->
->         host->cmd = NULL;
->
-> @@ -1139,14 +1162,19 @@ static irqreturn_t mmci_irq(int irq, void *dev_id)
->                         status &= ~MCI_IRQ1MASK;
->                 }
->
-> +               /*
-> +                * We intentionally clear the MCI_ST_CARDBUSY IRQ here (if it's
-> +                * enabled) since the HW seems to be triggering the IRQ on both
-> +                * edges while monitoring DAT0 for busy completion.
-> +                */
->                 status &= readl(host->base + MMCIMASK0);
->                 writel(status, host->base + MMCICLEAR);
->
->                 dev_dbg(mmc_dev(host->mmc), "irq0 (data+cmd) %08x\n", status);
->
->                 cmd = host->cmd;
-> -               if (status & (MCI_CMDCRCFAIL|MCI_CMDTIMEOUT|MCI_CMDSENT|
-> -                             MCI_CMDRESPEND) && cmd)
-> +               if ((status|host->busy_status) & (MCI_CMDCRCFAIL|MCI_CMDTIMEOUT|
-> +                       MCI_CMDSENT|MCI_CMDRESPEND) && cmd)
->                         mmci_cmd_irq(host, cmd, status);
->
->                 data = host->data;
-> @@ -1155,6 +1183,10 @@ static irqreturn_t mmci_irq(int irq, void *dev_id)
->                               MCI_DATABLOCKEND) && data)
->                         mmci_data_irq(host, data, status);
->
-> +               /* Don't poll for busy completion in irq context. */
-> +               if (host->busy_status)
-> +                       status &= ~MCI_ST_CARDBUSY;
-> +
->                 ret = 1;
->         } while (status);
->
-> @@ -1504,12 +1536,6 @@ static int mmci_probe(struct amba_device *dev,
->                 goto clk_disable;
->         }
->
-> -       if (variant->busy_detect) {
-> -               mmci_ops.card_busy = mmci_card_busy;
-> -               mmci_write_datactrlreg(host, MCI_ST_DPSM_BUSYMODE);
-> -       }
-> -
-> -       mmc->ops = &mmci_ops;
->         /*
->          * The ARM and ST versions of the block have slightly different
->          * clock divider equations which means that the minimum divider
-> @@ -1543,6 +1569,15 @@ static int mmci_probe(struct amba_device *dev,
->         mmc->caps = plat->capabilities;
->         mmc->caps2 = plat->capabilities2;
->
-> +       if (variant->busy_detect) {
-> +               mmci_ops.card_busy = mmci_card_busy;
-> +               mmci_write_datactrlreg(host, MCI_ST_DPSM_BUSYMODE);
-> +               mmc->caps |= MMC_CAP_WAIT_WHILE_BUSY;
-> +               mmc->max_busy_timeout = 0;
-> +       }
-> +
-> +       mmc->ops = &mmci_ops;
-> +
->         /* We support these PM capabilities. */
->         mmc->pm_caps = MMC_PM_KEEP_POWER;
->
-> diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
-> index 168bc72..b008ace 100644
-> --- a/drivers/mmc/host/mmci.h
-> +++ b/drivers/mmc/host/mmci.h
-> @@ -139,6 +139,7 @@
->  /* Extended status bits for the ST Micro variants */
->  #define MCI_ST_SDIOITMASK      (1 << 22)
->  #define MCI_ST_CEATAENDMASK    (1 << 23)
-> +#define MCI_ST_BUSYEND         (1 << 24)
->
->  #define MMCIMASK1              0x040
->  #define MMCIFIFOCNT            0x048
-> @@ -186,6 +187,7 @@ struct mmci_host {
->         u32                     pwr_reg;
->         u32                     clk_reg;
->         u32                     datactrl_reg;
-> +       u32                     busy_status;
->         bool                    vqmmc_enabled;
->         struct mmci_platform_data *plat;
->         struct variant_data     *variant;
-> --
-> 1.7.9.5
->
+--3E9L5busH6ECpa9r
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
+
+On Tue, Jan 28, 2014 at 11:48:10AM +0100, Arnd Bergmann wrote:
+
+> I think there is another option, which does have its own pros and cons:
+> We could move all the power handling back into the sdio function driver
+> if we allow a secondary detection path using DT rather than the probing
+> of the SDIO bus. Essentially you'd have to list the class/vendor/device
+> ID for each function that cannot be autodetected in DT, and have the
+> SDIO core pretend that it found the device just by looking at the
+> device nodes, and register the struct sdio_func so it can be bound to
+> the driver. The driver then does all the power handling in a device
+> specific way. At some point the hardware gets registered at the=20
+> mmc host, and the sdio core connects the bus state to the already present
+> sdio_func, possibly notifying the function driver that it has become
+> usable.
+
+> Obviously, this can only work for CAP_NONREMOVABLE devices, but those
+> are exactly the ones we are worried about here. The advantage is that
+> the power sequencing for a particular device can then be in device
+> specific code and can have an arbitrarily complex in the driver without
+> needing the mmc code to handle all possible corner cases.
+
+I think this is going to be the most generic solution overall, it's
+going to work with other buses and it's going to allow the device to
+fully power itself off while running (I don't know if it's useful for SD
+but that's definitely common with some other buses).
+
+--3E9L5busH6ECpa9r
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+
+iQIcBAEBAgAGBQJS+75aAAoJELSic+t+oim9eXcQAJ5wIcdY61T/v04L85BmoTH8
+ABn1oFcF04aHWya4JAor+LMdBnlgmvhdbpNhNLqIGNy8PMUoJIvac1AakXWci6MG
+wdQPGit0OJ2RQvaRNynb2Zc4XExkGeaRn9q0MjRyVa288iQZgojLzAZ+v7tfarEp
+6UMGU/geh+gB3gCSv4zwuBuM9q/IcBfTEXaR8sNtmKKm91HdkAqKqp92IfsJe3pC
+RvoejQF4q2BN/MMo3J+iWbCnyrYu5+7a9Jycb9TB+FW/rrx1Lq0tndwWgKYQ9a+v
+A6oRBUmxKrxiV+cmticfDuKNpdOWlotTsIUb8nsnhlXjO/DKzzPj146KjFBP+Va5
+nUu5TWdF+BAcYeMCJQxs6mxBq7GBm9EVg25kW6AjNBTWgZt2bAO04ocgf3Vbh7VD
+t+FRDifMjM2Kk/7cB8R1mMV/IE19OBhrUW8y5zKjoZVU38UyhabLbDWDxBY+3GUB
+irXxgQU+JIDPdSCS3nVSzkFZu53j6w0ZmfnQuxVudPiDVbYMaFh9QO+9FI18jXai
+rPDFdaIwYkUx7zVIXte24/hE+Bm7aD50i6Aqllku8kfPujzGUtDY1iK5HA1plejW
+2rAbMmsIU37aFVEehQz9ojIXI5dMTkyUtDNXQVko/qBidaYMufVVuloq/Mocblyu
+ckE2V/NW8t++o5Ot4M8o
+=bp91
+-----END PGP SIGNATURE-----
+
+--3E9L5busH6ECpa9r--
