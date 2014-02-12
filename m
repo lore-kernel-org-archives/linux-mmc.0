@@ -1,90 +1,44 @@
-From: Shuah Khan <shuah.kh@samsung.com>
-Subject: [RFT][PATCH v3] mmc: change cb710-mmc platform power management to use dev_pm_ops
-Date: Wed, 12 Feb 2014 14:21:29 -0700
-Message-ID: <1392240089-19489-1-git-send-email-shuah.kh@samsung.com>
-Return-path: <linux-pm-owner@vger.kernel.org>
-Sender: linux-pm-owner@vger.kernel.org
-To: rjw@rjwysocki.net, mirq-linux@rere.qmqm.pl, ulf.hansson@linaro.org, chris@printf.net
-Cc: Shuah Khan <shuah.kh@samsung.com>, linux-pm@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, shuahkhan@gmail.com
+From: Simon Horman <horms@verge.net.au>
+Subject: Re: mmc: sh_mobile_sdhi: DT update for R-Car
+Date: Wed, 12 Feb 2014 18:50:58 +0900
+Message-ID: <20140212095056.GB6630@verge.net.au>
+References: <87lhy090m0.wl%kuninori.morimoto.gx@gmail.com>
+ <87d2j87m6u.wl%kuninori.morimoto.gx@gmail.com>
+ <20140212094731.GA6630@verge.net.au>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-sh-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <20140212094731.GA6630@verge.net.au>
+Sender: linux-sh-owner@vger.kernel.org
+To: Kuninori Morimoto <kuninori.morimoto.gx@gmail.com>
+Cc: Chris Ball <cjb@laptop.org>, Magnus <magnus.damm@gmail.com>, Linux-SH <linux-sh@vger.kernel.org>, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-Change cb710-mmc platform driver to register pm ops using dev_pm_ops instead
-of legacy pm_ops. The existing legacy suspend/resume routines are identical
-and simply clear IRQ mask in the device in case it got undefined during sleep
-state. Changed code to collapse suspend and resume into one .pm interface
-for suspend and resume which gets installed for suspend, freeze, poweroff,
-thaw, restore, and resume states using SIMPLE_DEV_PM_OPS().
+On Wed, Feb 12, 2014 at 06:47:35PM +0900, Simon Horman wrote:
+> On Thu, Jan 30, 2014 at 09:30:20PM -0800, Kuninori Morimoto wrote:
+> > Hi Chris, Simon
+> > 
+> > These are v2 of updates code for R-Car.
+> > I separated v1 patches into for mmc, and for SH-ARM.
+> > This is "mmc" part patches.
+> > 
+> > Kuninori Morimoto (4):
+> >       mmc: SDHI: tidyup sh_mobile_sdhi_of_match position
+> >       mmc: SDHI: update sh_mobile_sdhi_of_data for r8a7778
+> >       mmc: SDHI: update sh_mobile_sdhi_of_data for r8a7779
+> >       mmc: SDHI: update sh_mobile_sdhi_of_data for r8a7790
+> > 
+> >  drivers/mmc/host/sh_mobile_sdhi.c |   41 +++++++++++++++++++++++++------------
+> >  1 file changed, 28 insertions(+), 13 deletions(-)
+> > )
+> 
+> To aid other developers I have pushed these
+> in the topic/r-car-sdhi branch of my renesas tree.
+> 
+> To be clear, I am not picking these patches up,
+> that is Chris's domain.
 
-Signed-off-by: Shuah Khan <shuah.kh@samsung.com>
----
+Also, for the entire series:
 
-patch v3: Addresses review comments on patch v2
-
- drivers/mmc/host/cb710-mmc.c |   40 ++++++++++++++++------------------------
- 1 file changed, 16 insertions(+), 24 deletions(-)
-
-diff --git a/drivers/mmc/host/cb710-mmc.c b/drivers/mmc/host/cb710-mmc.c
-index 1087b4c..2dc7b2dc 100644
---- a/drivers/mmc/host/cb710-mmc.c
-+++ b/drivers/mmc/host/cb710-mmc.c
-@@ -662,26 +662,6 @@ static const struct mmc_host_ops cb710_mmc_host = {
- 	.get_cd = cb710_mmc_get_cd,
- };
- 
--#ifdef CONFIG_PM
--
--static int cb710_mmc_suspend(struct platform_device *pdev, pm_message_t state)
--{
--	struct cb710_slot *slot = cb710_pdev_to_slot(pdev);
--
--	cb710_mmc_enable_irq(slot, 0, ~0);
--	return 0;
--}
--
--static int cb710_mmc_resume(struct platform_device *pdev)
--{
--	struct cb710_slot *slot = cb710_pdev_to_slot(pdev);
--
--	cb710_mmc_enable_irq(slot, 0, ~0);
--	return 0;
--}
--
--#endif /* CONFIG_PM */
--
- static int cb710_mmc_init(struct platform_device *pdev)
- {
- 	struct cb710_slot *slot = cb710_pdev_to_slot(pdev);
-@@ -762,14 +742,26 @@ static int cb710_mmc_exit(struct platform_device *pdev)
- 	return 0;
- }
- 
-+#ifdef CONFIG_PM_SLEEP
-+static int cb710_mmc_suspend_resume(struct device *dev)
-+{
-+	struct cb710_slot *slot = cb710_pdev_to_slot(to_platform_device(dev));
-+
-+	cb710_mmc_enable_irq(slot, 0, ~0);
-+	return 0;
-+}
-+#else
-+#define cb710_mmc_suspend_resume NULL
-+#endif
-+
-+static SIMPLE_DEV_PM_OPS(cb710_mmc_dev_pm_ops, cb710_mmc_suspend_resume,
-+			 cb710_mmc_suspend_resume);
-+
- static struct platform_driver cb710_mmc_driver = {
- 	.driver.name = "cb710-mmc",
- 	.probe = cb710_mmc_init,
- 	.remove = cb710_mmc_exit,
--#ifdef CONFIG_PM
--	.suspend = cb710_mmc_suspend,
--	.resume = cb710_mmc_resume,
--#endif
-+	.driver.pm = &cb710_mmc_dev_pm_ops,
- };
- 
- module_platform_driver(cb710_mmc_driver);
--- 
-1.7.10.4
-
+Acked-by: Simon Horman <horms+renesas@verge.net.au>
