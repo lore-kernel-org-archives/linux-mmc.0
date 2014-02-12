@@ -1,153 +1,239 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH v4] mmc: remove MMC_CAP_ERASE to enable trim in eMMC/SD
- Device
-Date: Wed, 12 Feb 2014 10:16:43 +0900
-Message-ID: <52FACB7B.1060707@samsung.com>
-References: <1392163806-28818-1-git-send-email-puthik@chromium.org>
+From: Dong Aisheng <dongas86@gmail.com>
+Subject: Re: brcm 4329 problems
+Date: Wed, 12 Feb 2014 11:06:36 +0800
+Message-ID: <CAA+hA=TFq_1V6EihBApTi5yXmb+mkCxa1S4pmEaJ=ssOCprSaw@mail.gmail.com>
+References: <20140203153239.GL26684@n2100.arm.linux.org.uk>
+	<52F00021.6070904@broadcom.com>
+	<20140203210450.GN26684@n2100.arm.linux.org.uk>
+	<52F14F7E.9040900@broadcom.com>
+	<20140205153824.GS26684@n2100.arm.linux.org.uk>
+	<20140208215927.GA5276@n2100.arm.linux.org.uk>
+	<52F744C9.7040804@broadcom.com>
+	<20140209205917.GO26684@n2100.arm.linux.org.uk>
+	<20140209232708.GA25900@n2100.arm.linux.org.uk>
+	<CAA+hA=SEoXfSN19z1vLpiLDh8Mo3Qty4cU2HOGJska70dT5Cew@mail.gmail.com>
+	<20140210140346.GW26684@n2100.arm.linux.org.uk>
+	<CAA+hA=Si4k0A5_-ve0oh8FKxCGDg5pD_M=Z4g2Ca7UWJaeq6Rw@mail.gmail.com>
+	<CAPDyKForrmFr9ycEz5+10G2e1ifWt+hySPfy+AieUL3gWRCX=g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout2.samsung.com ([203.254.224.25]:35308 "EHLO
-	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751533AbaBLBQh (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 11 Feb 2014 20:16:37 -0500
-Received: from epcpsbgr2.samsung.com
- (u142.gpu120.samsung.co.kr [203.254.230.142])
- by mailout2.samsung.com (Oracle Communications Messaging Server 7u4-24.01
- (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTP id <0N0U00KOJZJN4NB0@mailout2.samsung.com> for
- linux-mmc@vger.kernel.org; Wed, 12 Feb 2014 10:16:35 +0900 (KST)
-In-reply-to: <1392163806-28818-1-git-send-email-puthik@chromium.org>
+Received: from mail-pa0-f52.google.com ([209.85.220.52]:55164 "EHLO
+	mail-pa0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751919AbaBLDGg (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 11 Feb 2014 22:06:36 -0500
+Received: by mail-pa0-f52.google.com with SMTP id bj1so8557691pad.25
+        for <linux-mmc@vger.kernel.org>; Tue, 11 Feb 2014 19:06:36 -0800 (PST)
+In-Reply-To: <CAPDyKForrmFr9ycEz5+10G2e1ifWt+hySPfy+AieUL3gWRCX=g@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Puthikorn Voravootivat <puthik@chromium.org>, Chris Ball <chris@printf.net>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, Linus Walleij <linus.walleij@linaro.org>
-Cc: MMC list <linux-mmc@vger.kernel.org>, Gwendal Grignou <gwendal@chromium.org>, Grant Grundler <grundler@chromium.org>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Russell King - ARM Linux <linux@arm.linux.org.uk>, Arend van Spriel <arend@broadcom.com>, Chris Ball <chris@printf.net>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, brcm80211-dev-list@broadcom.com
 
-Looks good to me.
+On Tue, Feb 11, 2014 at 5:00 PM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> On 11 February 2014 08:33, Dong Aisheng <dongas86@gmail.com> wrote:
+>> On Mon, Feb 10, 2014 at 10:03 PM, Russell King - ARM Linux
+>> <linux@arm.linux.org.uk> wrote:
+>>> On Mon, Feb 10, 2014 at 02:50:42PM +0800, Dong Aisheng wrote:
+>>>> On Mon, Feb 10, 2014 at 7:27 AM, Russell King - ARM Linux
+>>>> <linux@arm.linux.org.uk> wrote:
+>>>> > On Sun, Feb 09, 2014 at 08:59:17PM +0000, Russell King - ARM Linux wrote:
+>>>> >> On Sun, Feb 09, 2014 at 10:05:13AM +0100, Arend van Spriel wrote:
+>>>> >> > Yeah. I did not mention this, but indeed the first log you provided
+>>>> >> > already made that clear (to me). In your last log the driver sends an UP
+>>>> >> > command to the firmware on which no response is given. So I was hoping
+>>>> >> > the forensics file (which is firmware console buffer) would show an
+>>>> >> > error message of some kind. Also that is not the case. Have to come up
+>>>> >> > with new ideas about what is going wrong here.
+>>>> >>
+>>>> >> I'm chasing a theory at the moment, but it's being complicated by the
+>>>> >> driver oopsing on unload...
+>>>> >
+>>>> > Theory proven.
+>>>> >
+>>>> > May I first take the time to apologise to Arend for wasting his time with
+>>>> > this issue; the issue is not the Broadcom driver, but the SDHCI driver.
+>>>> >
+>>>> > My theory was that it's the sdhci driver causing the problems...  My
+>>>> > suspicions were first raised when I read through various SDHCI driver
+>>>> > functions such as the set_ios methods when chasing down a problem with
+>>>> > UHS-1 SD cards, and later when I was reading it's interrupt handling
+>>>> > code.
+>>>> >
+>>>> > The driver looks very much like a patchwork quilt of different hacks,
+>>>> > all trying to co-operate with each other in the semblence of something
+>>>> > working - the result is something which does stuff in ways that the SD
+>>>> > card spec doesn't allow, but also does some pretty stupid things when
+>>>> > you have a SDIO device attached.
+>>>> >
+>>>> > The SDIO problems become pretty obvious when you see this log:
+>>>> >
+>>>> > [   51.112923] brcmfmac: brcmf_fil_cmd_int_set cmd=2, value=0
+>>>> > [   51.112937] brcmfmac: brcmf_proto_bcdc_set_dcmd Enter, cmd 2 len 4
+>>>> > [   51.112946] brcmfmac: brcmf_proto_bcdc_msg Enter
+>>>> > [   51.112981] brcmfmac: brcmf_sdio_bus_sleep request WAKE currently WAKE
+>>>> > [   51.112989] brcmfmac: brcmf_sdio_clkctl Enter
+>>>> > [   51.113498] brcmfmac: brcmf_proto_bcdc_cmplt Enter
+>>>> > [   51.128501] brcmfmac: brcmf_sdio_bus_watchdog idle
+>>>> > [   51.128522] brcmfmac: brcmf_sdio_bus_sleep request SLEEP currently WAKE
+>>>> > [   51.128532] brcmfmac: brcmf_sdio_clkctl Enter
+>>>> > [   51.128540] brcmfmac: brcmf_sdio_htclk Enter
+>>>> > [   51.128549] brcmfmac: brcmf_sdiod_regwb addr:0x0001000e, data:0x00
+>>>> > [   51.128560] brcmfmac: brcmf_sdiod_request_data rw=1, func=1, addr=0x1000e, nbytes=1
+>>>> > [   51.128645] brcmfmac: brcmf_sdio_htclk CLKCTL: turned OFF
+>>>> > [   51.128655] brcmfmac: brcmf_sdio_sdclk Enter
+>>>> > [   51.128667] brcmfmac: brcmf_sdio_clkctl 3 -> 0
+>>>> > [   51.180385] mmc0: runtime suspend
+>>>> > [   53.112272] brcmfmac: brcmf_sdio_bus_rxctl: resumed on timeout
+>>>> > [   53.118290] brcmfmac: brcmf_sdio_bus_sleep request WAKE currently WAKE
+>>>> > [   53.118302] brcmfmac: brcmf_sdio_clkctl Enter
+>>>> > [   53.118312] brcmfmac: brcmf_sdio_sdclk Enter
+>>>> > [   53.118319] brcmfmac: brcmf_sdio_htclk Enter
+>>>> > [   53.118329] brcmfmac: brcmf_sdiod_regwb addr:0x0001000e, data:0x10
+>>>> > [   53.118341] brcmfmac: brcmf_sdiod_request_data rw=1, func=1, addr=0x1000e, nbytes=1
+>>>> > [   53.118537] sdhci-esdhc-imx 2190000.usdhc: desired SD clock: 50000000, actual: 49500000
+>>>> > [   53.118550] mmc0: esdhc_pltfm_set_clock: CLK on
+>>>> > [   53.119723] sdhci-esdhc-imx 2190000.usdhc: change pinctrl state for uhs 0
+>>>> > [   53.125880] mmc0: sdio irq enabled: 007f0003 007f0003
+>>>> > [   53.125898] mmc0: runtime resume
+>>>> > [   53.125910] mmc0: card irq raised
+>>>> > [   53.125925] mmc0: sdio irq disabled: 007f0103 007f0103
+>>>> > [   53.126030] brcmfmac: brcmf_sdiod_regrb addr:0x0001000e
+>>>> > [   53.126055] brcmfmac: brcmf_sdiod_request_data rw=0, func=1, addr=0x1000e, nbytes=1
+>>>> >
+>>>> > The values printed in "sdio irq *abled" are the INT_ENABLE and SIGNAL_ENABLE
+>>>> > register values immediately before the stated action is taken bit 8 is
+>>>> > the interrupt enable for card interrupts.  Earlier in the log, SDIO card
+>>>> > interrupts were enabled (one was handled immediately before the above
+>>>> > broadcom cmd=2 message was sent.
+>>>> >
+>>>> > Yep, that's right - at 51.180385, the SDIO host has /all/ interrupts
+>>>> > disabled by a runtime suspend - including any interrupt from the card.
+>>>> > The brcmfmac driver times out after 2 seconds having sent the "up"
+>>>> > command, and re-awakens the host, which is runtime resumed at 53.125898,
+>>>> > enabling the SDIO card interrupt at that time.
+>>>> >
+>>>> > And lo and behold - the card has an interrupt pending!  Too bad, we're
+>>>> > too late for the driver to forward the interrupt to the SDIO interrupt
+>>>> > thread and get it to the driver before the time-out is processed.
+>>>> >
+>>>> > Here's the proof - the above messages came from:
+>>>> >
+>>>> > int sdhci_runtime_suspend_host(struct sdhci_host *host)
+>>>> > {
+>>>> >         unsigned long flags;
+>>>> >         int ret = 0;
+>>>> >
+>>>> > printk(KERN_DEBUG "%s: runtime suspend\n",
+>>>> >         mmc_hostname(host->mmc));
+>>>> > ...
+>>>> >         spin_lock_irqsave(&host->lock, flags);
+>>>> >         sdhci_mask_irqs(host, SDHCI_INT_ALL_MASK);
+>>>> >         spin_unlock_irqrestore(&host->lock, flags);
+>>>> >
+>>>> > int sdhci_runtime_resume_host(struct sdhci_host *host)
+>>>> > {
+>>>> >         unsigned long flags;
+>>>> >         int ret = 0, host_flags = host->flags;
+>>>> > ...
+>>>> >         /* Enable SDIO IRQ */
+>>>> >         if ((host->flags & SDHCI_SDIO_IRQ_ENABLED))
+>>>> >                 sdhci_enable_sdio_irq_nolock(host, true);
+>>>> >
+>>>> >         /* Enable Card Detection */
+>>>> >         sdhci_enable_card_detection(host);
+>>>> >
+>>>> > printk(KERN_DEBUG "%s: runtime resume\n",
+>>>> >         mmc_hostname(host->mmc));
+>>>> >         spin_unlock_irqrestore(&host->lock, flags);
+>>>> >
+>>>> >         return ret;
+>>>> > }
+>>>> > EXPORT_SYMBOL_GPL(sdhci_runtime_resume_host);
+>>>> >
+>>>> > To me, it looks like SDHCI needs a major rework...  And there needs to
+>>>> > be some recognition that - maybe - leaving SDIO interrupts enabled even
+>>>> > though we may want the host to enter a low power mode is something that's
+>>>> > really very very desirable...
+>>>> >
+>>>>
+>>>> I'm not quite clear about your issue.
+>>>> But it seems your issue is caused by runtime pm disabling the
+>>>> interrupt & clocks as you said.
+>>>>
+>>>> Can you try the patch i mentioned here:
+>>>> http://www.spinics.net/lists/linux-mmc/msg24764.html
+>>>>
+>>>> That will prevent the host to do runtime pm for SDIO devices.
+>>>
+>>> Why not allow runtime PM at the host level, but still allow the
+>>> interrupt to be received?  Doesn't it make sense to allow PM even with
+>>> SDIO cards in place?
+>>>
+>>
+>> It depends on both host and card that 1) if host is able to detect
+>> SDIO interrupts without clock
+>> and 2) if the card is able to send interrupt to host without clock.
+>> If any one of both can't do that, we may need to tell host to not
+>> do runtime suspend to prevent the clock from being disabled.
+>> Or the SDIO interrupt may not work.
+>>
+>> The IMX esdhc/usdhc can not detect the SDIO interrupts sent from card
+>> if the clock is disabled.
+>
+> So you are saying you have no option to reroute the DAT1 line to a
+> GPIO irq, right? I guess that would be SOC specific.
 
-Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
+I think IMX can support reroute the DAT1 line to GPIO altough i've not tried.
+We have to extend the common sdhci driver to support it.
+Actually with some special hack, IMX can also detect SDIO irq without clock by
+using Wakeup Event Enable On Card Interrupt since the wakeup feature
+does not need clock.
+It's quite similar as using GPIO way, the difference is using which
+interrupt(gpio or sdhci itself)
+to enable the clock for the later card interrupt detect.
+The drawback is it does need a lot special and SoC specific hacks in
+common sdhci driver.
+Comparing simply disabling runtime pm way, I'm not so willing to do that.
 
-Best Regards,
-Jaehoon Chung
+And i'm also afraid it may cause performance drop since i have to:
+1) sdio interrupt -> sdhci_irq enter-> disable card interrupt->
+runtime_pm_get (enable clock in async way)
+->sdhci_irq exist
+(after clock is enabled sdio interrupt will be detected again)
+2) sdhci irq -> read sdio interrupt status -> sdio_signal_irq...
 
-On 02/12/2014 09:10 AM, Puthikorn Voravootivat wrote:
-> Remove MMC_CAP_ERASE from all host as it does not make
-> sense that the eMMC/SD device erase feature should be
-> controlled by the host cap. This make trim and/or discard
-> feature usable in the supported eMMC/SD device.
-> 
-> Signed-off-by: Puthikorn Voravootivat <puthik@chromium.org>
-> ---
-> Resend to ux500 maintainer
-> 
-> v4 change:
-> Change commit message to mention SD cards.
-> 
-> v3 change:
-> As suggested by Jaehoon, this patch remove MMC_CAP_ERASE instead of
-> force enable it.
-> 
-> v2 change:
-> Instead of add MMC_CAP_ERASE just only for dw_mmc, this patch adds
-> this capability to all host.
-> 
->  arch/arm/mach-ux500/board-mop500-sdi.c | 3 ---
->  drivers/mmc/core/core.c                | 6 ++----
->  drivers/mmc/host/omap_hsmmc.c          | 2 +-
->  drivers/mmc/host/sdhci.c               | 2 +-
->  include/linux/mmc/host.h               | 1 -
->  5 files changed, 4 insertions(+), 10 deletions(-)
-> 
-> diff --git a/arch/arm/mach-ux500/board-mop500-sdi.c b/arch/arm/mach-ux500/board-mop500-sdi.c
-> index fcbf3a1..6d9feb8 100644
-> --- a/arch/arm/mach-ux500/board-mop500-sdi.c
-> +++ b/arch/arm/mach-ux500/board-mop500-sdi.c
-> @@ -48,7 +48,6 @@ struct mmci_platform_data mop500_sdi0_data = {
->  	.capabilities	= MMC_CAP_4_BIT_DATA |
->  				MMC_CAP_SD_HIGHSPEED |
->  				MMC_CAP_MMC_HIGHSPEED |
-> -				MMC_CAP_ERASE |
->  				MMC_CAP_UHS_SDR12 |
->  				MMC_CAP_UHS_SDR25,
->  	.gpio_wp	= -1,
-> @@ -119,7 +118,6 @@ struct mmci_platform_data mop500_sdi2_data = {
->  				MMC_CAP_8_BIT_DATA |
->  				MMC_CAP_NONREMOVABLE |
->  				MMC_CAP_MMC_HIGHSPEED |
-> -				MMC_CAP_ERASE |
->  				MMC_CAP_CMD23,
->  	.gpio_cd	= -1,
->  	.gpio_wp	= -1,
-> @@ -154,7 +152,6 @@ struct mmci_platform_data mop500_sdi4_data = {
->  				MMC_CAP_8_BIT_DATA |
->  				MMC_CAP_NONREMOVABLE |
->  				MMC_CAP_MMC_HIGHSPEED |
-> -				MMC_CAP_ERASE |
->  				MMC_CAP_CMD23,
->  	.gpio_cd	= -1,
->  	.gpio_wp	= -1,
-> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> index 098374b..82de9f1 100644
-> --- a/drivers/mmc/core/core.c
-> +++ b/drivers/mmc/core/core.c
-> @@ -2007,8 +2007,7 @@ int mmc_erase(struct mmc_card *card, unsigned int from, unsigned int nr,
->  {
->  	unsigned int rem, to = from + nr;
->  
-> -	if (!(card->host->caps & MMC_CAP_ERASE) ||
-> -	    !(card->csd.cmdclass & CCC_ERASE))
-> +	if (!(card->csd.cmdclass & CCC_ERASE))
->  		return -EOPNOTSUPP;
->  
->  	if (!card->erase_size)
-> @@ -2062,8 +2061,7 @@ EXPORT_SYMBOL(mmc_erase);
->  
->  int mmc_can_erase(struct mmc_card *card)
->  {
-> -	if ((card->host->caps & MMC_CAP_ERASE) &&
-> -	    (card->csd.cmdclass & CCC_ERASE) && card->erase_size)
-> +	if ((card->csd.cmdclass & CCC_ERASE) && card->erase_size)
->  		return 1;
->  	return 0;
->  }
-> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-> index dbd32ad..99d8558 100644
-> --- a/drivers/mmc/host/omap_hsmmc.c
-> +++ b/drivers/mmc/host/omap_hsmmc.c
-> @@ -1873,7 +1873,7 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
->  	mmc->max_seg_size = mmc->max_req_size;
->  
->  	mmc->caps |= MMC_CAP_MMC_HIGHSPEED | MMC_CAP_SD_HIGHSPEED |
-> -		     MMC_CAP_WAIT_WHILE_BUSY | MMC_CAP_ERASE;
-> +		     MMC_CAP_WAIT_WHILE_BUSY;
->  
->  	mmc->caps |= mmc_slot(host).caps;
->  	if (mmc->caps & MMC_CAP_8_BIT_DATA)
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 9ddef47..6a50141 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -2943,7 +2943,7 @@ int sdhci_add_host(struct sdhci_host *host)
->  
->  	mmc->max_discard_to = (1 << 27) / host->timeout_clk;
->  
-> -	mmc->caps |= MMC_CAP_SDIO_IRQ | MMC_CAP_ERASE | MMC_CAP_CMD23;
-> +	mmc->caps |= MMC_CAP_SDIO_IRQ | MMC_CAP_CMD23;
->  
->  	if (host->quirks & SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12)
->  		host->flags |= SDHCI_AUTO_CMD12;
-> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-> index 99f5709..8b1bfab 100644
-> --- a/include/linux/mmc/host.h
-> +++ b/include/linux/mmc/host.h
-> @@ -242,7 +242,6 @@ struct mmc_host {
->  #define MMC_CAP_AGGRESSIVE_PM	(1 << 7)	/* Suspend (e)MMC/SD at idle  */
->  #define MMC_CAP_NONREMOVABLE	(1 << 8)	/* Nonremovable e.g. eMMC */
->  #define MMC_CAP_WAIT_WHILE_BUSY	(1 << 9)	/* Waits while card is busy */
-> -#define MMC_CAP_ERASE		(1 << 10)	/* Allow erase/trim commands */
->  #define MMC_CAP_1_8V_DDR	(1 << 11)	/* can support */
->  						/* DDR mode at 1.8V */
->  #define MMC_CAP_1_2V_DDR	(1 << 12)	/* can support */
-> 
+Comparing to original way(2), steps 1 is the extra cost.
+Not sure how many performance will drop since i still have not tried it.
 
+>
+>> So we need such quirk to not allow runtime PM for SDIO cards.
+>> Doesn't it make sense?
+>
+> Yes, I think so. But, maybe it should be configurable to use it?
+>
+
+Well, true, it should be configurable.
+
+Regards
+Dong Aisheng
+
+> Kind regards
+> Uffe
+>
+>>
+>> Regards
+>> Dong Aisheng
+>>
+>>> Once I get imx-drm off my plate, I'm going to put some work into
+>>> rewriting the sdhci driver mess in a much cleaner way - we can't go on
+>>> putting hacks on top of what's already there, it's already a total mess.
+>>>
+>>> --
+>>> FTTC broadband for 0.8mile line: 5.8Mbps down 500kbps up.  Estimation
+>>> in database were 13.1 to 19Mbit for a good line, about 7.5+ for a bad.
+>>> Estimate before purchase was "up to 13.2Mbit".
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
