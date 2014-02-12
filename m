@@ -1,31 +1,38 @@
-From: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Subject: Re: brcm 4329 problems
-Date: Wed, 12 Feb 2014 09:36:34 +0000
-Message-ID: <20140212093634.GL26684@n2100.arm.linux.org.uk>
-References: <20140205153824.GS26684@n2100.arm.linux.org.uk> <20140208215927.GA5276@n2100.arm.linux.org.uk> <52F744C9.7040804@broadcom.com> <20140209205917.GO26684@n2100.arm.linux.org.uk> <20140209232708.GA25900@n2100.arm.linux.org.uk> <CAA+hA=SEoXfSN19z1vLpiLDh8Mo3Qty4cU2HOGJska70dT5Cew@mail.gmail.com> <20140210140346.GW26684@n2100.arm.linux.org.uk> <CAA+hA=Si4k0A5_-ve0oh8FKxCGDg5pD_M=Z4g2Ca7UWJaeq6Rw@mail.gmail.com> <20140211102733.GG26684@n2100.arm.linux.org.uk> <CAA+hA=RSSahbHOy+=_7LuOnv2=u7BUi8hs=CJAovjGTuDJByjg@mail.gmail.com>
+From: Simon Horman <horms@verge.net.au>
+Subject: Re: mmc: sh_mobile_sdhi: DT update for R-Car
+Date: Wed, 12 Feb 2014 18:47:35 +0900
+Message-ID: <20140212094731.GA6630@verge.net.au>
+References: <87lhy090m0.wl%kuninori.morimoto.gx@gmail.com>
+ <87d2j87m6u.wl%kuninori.morimoto.gx@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from gw-1.arm.linux.org.uk ([78.32.30.217]:33634 "EHLO
-	pandora.arm.linux.org.uk" rhost-flags-OK-OK-OK-FAIL)
-	by vger.kernel.org with ESMTP id S1751776AbaBLJgo (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 12 Feb 2014 04:36:44 -0500
+Return-path: <linux-sh-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <CAA+hA=RSSahbHOy+=_7LuOnv2=u7BUi8hs=CJAovjGTuDJByjg@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+In-Reply-To: <87d2j87m6u.wl%kuninori.morimoto.gx@gmail.com>
+Sender: linux-sh-owner@vger.kernel.org
+To: Kuninori Morimoto <kuninori.morimoto.gx@gmail.com>
+Cc: Chris Ball <cjb@laptop.org>, Magnus <magnus.damm@gmail.com>, Linux-SH <linux-sh@vger.kernel.org>, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Dong Aisheng <dongas86@gmail.com>
-Cc: Arend van Spriel <arend@broadcom.com>, Chris Ball <chris@printf.net>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, brcm80211-dev-list@broadcom.com
 
-On Wed, Feb 12, 2014 at 11:17:09AM +0800, Dong Aisheng wrote:
-> That means enabling of ahb clock actually will make ipg and per also open.
-> Then card interrupts can be detected well.
-> You can measure the card clock(pin5) with a scope to double check it.
+On Thu, Jan 30, 2014 at 09:30:20PM -0800, Kuninori Morimoto wrote:
+> Hi Chris, Simon
+> 
+> These are v2 of updates code for R-Car.
+> I separated v1 patches into for mmc, and for SH-ARM.
+> This is "mmc" part patches.
+> 
+> Kuninori Morimoto (4):
+>       mmc: SDHI: tidyup sh_mobile_sdhi_of_match position
+>       mmc: SDHI: update sh_mobile_sdhi_of_data for r8a7778
+>       mmc: SDHI: update sh_mobile_sdhi_of_data for r8a7779
+>       mmc: SDHI: update sh_mobile_sdhi_of_data for r8a7790
+> 
+>  drivers/mmc/host/sh_mobile_sdhi.c |   41 +++++++++++++++++++++++++------------
+>  1 file changed, 28 insertions(+), 13 deletions(-)
+> )
 
-I can't - the brcm is a chip not a SD card, and the signals are all
-embedded on internal layers in the PCB.
+To aid other developers I have pushed these
+in the topic/r-car-sdhi branch of my renesas tree.
 
--- 
-FTTC broadband for 0.8mile line: 5.8Mbps down 500kbps up.  Estimation
-in database were 13.1 to 19Mbit for a good line, about 7.5+ for a bad.
-Estimate before purchase was "up to 13.2Mbit".
+To be clear, I am not picking these patches up,
+that is Chris's domain.
