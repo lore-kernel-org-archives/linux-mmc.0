@@ -1,23 +1,18 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [PATCH V2 16/17] i2c: nomadik: Remove busy check for transfers at suspend late
-Date: Thu, 13 Feb 2014 15:09:06 +0100
-Message-ID: <1392300547-23365-5-git-send-email-ulf.hansson@linaro.org>
+Subject: [PATCH V2 15/17] i2c: nomadik: Convert to late and early system PM callbacks
+Date: Thu, 13 Feb 2014 15:09:05 +0100
+Message-ID: <1392300547-23365-4-git-send-email-ulf.hansson@linaro.org>
 References: <1392300547-23365-1-git-send-email-ulf.hansson@linaro.org>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wi0-f180.google.com ([209.85.212.180]:59338 "EHLO
-	mail-wi0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751560AbaBMOJV (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 13 Feb 2014 09:09:21 -0500
-Received: by mail-wi0-f180.google.com with SMTP id hm4so8606054wib.13
-        for <linux-mmc@vger.kernel.org>; Thu, 13 Feb 2014 06:09:19 -0800 (PST)
+Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1392300547-23365-1-git-send-email-ulf.hansson@linaro.org>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Sender: linux-kernel-owner@vger.kernel.org
 To: Russell King <linux@arm.linux.org.uk>, linux-arm-kernel@lists.infradead.org
 Cc: Alessandro Rubini <rubini@unipv.it>, Linus Walleij <linus.walleij@linaro.org>, Wolfram Sang <wsa@the-dreams.de>, Chris Ball <chris@printf.net>, Mark Brown <broonie@kernel.org>, linux-kernel@vger.kernel.org, linux-i2c@vger.kernel.org, linux-spi@vger.kernel.org, linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+List-Id: linux-mmc@vger.kernel.org
 
-We should never be busy performing transfers at suspend late, thus
-there are no reason to check for it.
+At system suspend_late, runtime PM has been disabled by the PM core
+which means we can safely operate on these resources. Consequentially
+we no longer have to wait until the noirq phase of the system suspend.
 
 Cc: Alessandro Rubini <rubini@unipv.it>
 Cc: Linus Walleij <linus.walleij@linaro.org>
@@ -29,65 +24,59 @@ Changes in v2:
 	Rebased on top of latest i2c-nomadik branch.
 
 ---
- drivers/i2c/busses/i2c-nomadik.c |   10 ----------
- 1 file changed, 10 deletions(-)
+ drivers/i2c/busses/i2c-nomadik.c |   18 ++++--------------
+ 1 file changed, 4 insertions(+), 14 deletions(-)
 
 diff --git a/drivers/i2c/busses/i2c-nomadik.c b/drivers/i2c/busses/i2c-nomadik.c
-index 80b0fd3..8a5dc57b 100644
+index 01b78df..80b0fd3 100644
 --- a/drivers/i2c/busses/i2c-nomadik.c
 +++ b/drivers/i2c/busses/i2c-nomadik.c
-@@ -167,7 +167,6 @@ struct i2c_nmk_client {
-  * @stop: stop condition.
-  * @xfer_complete: acknowledge completion for a I2C message.
-  * @result: controller propogated result.
-- * @busy: Busy doing transfer.
-  */
- struct nmk_i2c_dev {
- 	struct i2c_vendor_data		*vendor;
-@@ -185,7 +184,6 @@ struct nmk_i2c_dev {
- 	int				stop;
- 	struct completion		xfer_complete;
- 	int				result;
--	bool				busy;
- };
+@@ -882,9 +882,8 @@ static irqreturn_t i2c_irq_handler(int irq, void *arg)
+ 	return IRQ_HANDLED;
+ }
  
- /* controller's abort causes */
-@@ -671,8 +669,6 @@ static int nmk_i2c_xfer(struct i2c_adapter *i2c_adap,
- 	struct nmk_i2c_dev *dev = i2c_get_adapdata(i2c_adap);
- 	int j;
- 
--	dev->busy = true;
 -
- 	pm_runtime_get_sync(&dev->adev->dev);
- 
- 	/* Attempt three times to send the message queue */
-@@ -697,8 +693,6 @@ static int nmk_i2c_xfer(struct i2c_adapter *i2c_adap,
- 
- 	pm_runtime_put_sync(&dev->adev->dev);
- 
--	dev->busy = false;
--
- 	/* return the no. messages processed */
- 	if (status)
- 		return status;
-@@ -888,9 +882,6 @@ static int nmk_i2c_suspend_late(struct device *dev)
+-#ifdef CONFIG_PM
+-static int nmk_i2c_suspend(struct device *dev)
++#ifdef CONFIG_PM_SLEEP
++static int nmk_i2c_suspend_late(struct device *dev)
+ {
  	struct amba_device *adev = to_amba_device(dev);
  	struct nmk_i2c_dev *nmk_i2c = amba_get_drvdata(adev);
+@@ -897,7 +896,7 @@ static int nmk_i2c_suspend(struct device *dev)
+ 	return 0;
+ }
  
--	if (nmk_i2c->busy)
--		return -EBUSY;
--
- 	pinctrl_pm_select_sleep_state(dev);
+-static int nmk_i2c_resume(struct device *dev)
++static int nmk_i2c_resume_early(struct device *dev)
+ {
+ 	/* First go to the default state */
+ 	pinctrl_pm_select_default_state(dev);
+@@ -906,9 +905,6 @@ static int nmk_i2c_resume(struct device *dev)
  
  	return 0;
-@@ -997,7 +988,6 @@ static int nmk_i2c_probe(struct amba_device *adev, const struct amba_id *id)
- 		goto err_no_mem;
- 	}
- 	dev->vendor = vendor;
--	dev->busy = false;
- 	dev->adev = adev;
- 	nmk_i2c_of_probe(np, dev);
+ }
+-#else
+-#define nmk_i2c_suspend	NULL
+-#define nmk_i2c_resume	NULL
+ #endif
  
+ #if CONFIG_PM
+@@ -946,14 +942,8 @@ static int nmk_i2c_runtime_resume(struct device *dev)
+ }
+ #endif
+ 
+-/*
+- * We use noirq so that we suspend late and resume before the wakeup interrupt
+- * to ensure that we do the !pm_runtime_suspended() check in resume before
+- * there has been a regular pm runtime resume (via pm_runtime_get_sync()).
+- */
+ static const struct dev_pm_ops nmk_i2c_pm = {
+-	.suspend_noirq	= nmk_i2c_suspend,
+-	.resume_noirq	= nmk_i2c_resume,
++	SET_LATE_SYSTEM_SLEEP_PM_OPS(nmk_i2c_suspend_late, nmk_i2c_resume_early)
+ 	SET_PM_RUNTIME_PM_OPS(nmk_i2c_runtime_suspend,
+ 			nmk_i2c_runtime_resume,
+ 			NULL)
 -- 
 1.7.9.5
-
