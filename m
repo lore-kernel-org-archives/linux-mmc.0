@@ -1,49 +1,94 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [PATCH 1/3] mmc: add support for power-on sequencing through DT
-Date: Thu, 13 Feb 2014 13:48:55 +0100
-Message-ID: <2874395.Ul86gYA57i@wuerfel>
-References: <1390190215-22700-1-git-send-email-olof@lixom.net> <201401281148.10670.arnd@arndb.de> <20140213104248.GU26684@n2100.arm.linux.org.uk>
+From: Shuah Khan <shuah.kh@samsung.com>
+Subject: Re: [RFT][PATCH v3] mmc: change cb710-mmc platform power management to
+ use dev_pm_ops
+Date: Thu, 13 Feb 2014 06:49:33 -0700
+Message-ID: <52FCCD6D.6020704@samsung.com>
+References: <1392240089-19489-1-git-send-email-shuah.kh@samsung.com>
+ <CAPDyKFoukY2PGNWimUbRqDr36eJ_+eBASJR4uac6nH4-kowmCQ@mail.gmail.com>
+Reply-To: shuah.kh@samsung.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7Bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.126.186]:54160 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752760AbaBMMtI (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 13 Feb 2014 07:49:08 -0500
-In-Reply-To: <20140213104248.GU26684@n2100.arm.linux.org.uk>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-pm-owner@vger.kernel.org>
+In-reply-to: <CAPDyKFoukY2PGNWimUbRqDr36eJ_+eBASJR4uac6nH4-kowmCQ@mail.gmail.com>
+Sender: linux-pm-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: "Rafael J. Wysocki" <rjw@rjwysocki.net>, mirq-linux@rere.qmqm.pl, Chris Ball <chris@printf.net>, "linux-pm@vger.kernel.org" <linux-pm@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, Shuah Khan <shuahkhan@gmail.com>, Shuah Khan <shuah.kh@samsung.com>
 List-Id: linux-mmc@vger.kernel.org
-To: linux-arm-kernel@lists.infradead.org
-Cc: Russell King - ARM Linux <linux@arm.linux.org.uk>, mark.rutland@arm.com, devicetree@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Pawel Moll <pawel.moll@arm.com>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Tomasz Figa <t.figa@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, Tomasz Figa <tomasz.figa@gmail.com>, Chris Ball <chris@printf.net>, robh+dt@kernel.org, Kumar Gala <galak@codeaurora.org>, Olof Johansson <olof@lixom.net>, Fabio Estevam <festevam@gmail.com>, Sascha Hauer <s.hauer@pengutronix.de>
 
-On Thursday 13 February 2014 10:42:48 Russell King - ARM Linux wrote:
-> 
-> What if we have a platform where things subtly change, like for instance,
-> the wiring on the SD slot to fix a problem with UHS-1 cards, which means
-> you don't have UHS-1 support for some platforms but do for others.
-> 
-> What if you have a platform which uses a brcm4329 chip for Wifi, but then
-> later in the production run switch to using a different Wifi chipset?
+On 02/13/2014 02:47 AM, Ulf Hansson wrote:
+> On 12 February 2014 22:21, Shuah Khan <shuah.kh@samsung.com> wrote:
+>> Change cb710-mmc platform driver to register pm ops using dev_pm_ops instead
+>> of legacy pm_ops. The existing legacy suspend/resume routines are identical
+>> and simply clear IRQ mask in the device in case it got undefined during sleep
+>> state. Changed code to collapse suspend and resume into one .pm interface
+>> for suspend and resume which gets installed for suspend, freeze, poweroff,
+>> thaw, restore, and resume states using SIMPLE_DEV_PM_OPS().
+>>
+>> Signed-off-by: Shuah Khan <shuah.kh@samsung.com>
+>> ---
+>>
+>> patch v3: Addresses review comments on patch v2
+>>
+>>   drivers/mmc/host/cb710-mmc.c |   40 ++++++++++++++++------------------------
+>>   1 file changed, 16 insertions(+), 24 deletions(-)
+>>
+>> diff --git a/drivers/mmc/host/cb710-mmc.c b/drivers/mmc/host/cb710-mmc.c
+>> index 1087b4c..2dc7b2dc 100644
+>> --- a/drivers/mmc/host/cb710-mmc.c
+>> +++ b/drivers/mmc/host/cb710-mmc.c
+>> @@ -662,26 +662,6 @@ static const struct mmc_host_ops cb710_mmc_host = {
+>>          .get_cd = cb710_mmc_get_cd,
+>>   };
+>>
+>> -#ifdef CONFIG_PM
+>> -
+>> -static int cb710_mmc_suspend(struct platform_device *pdev, pm_message_t state)
+>> -{
+>> -       struct cb710_slot *slot = cb710_pdev_to_slot(pdev);
+>> -
+>> -       cb710_mmc_enable_irq(slot, 0, ~0);
+>> -       return 0;
+>> -}
+>> -
+>> -static int cb710_mmc_resume(struct platform_device *pdev)
+>> -{
+>> -       struct cb710_slot *slot = cb710_pdev_to_slot(pdev);
+>> -
+>> -       cb710_mmc_enable_irq(slot, 0, ~0);
+>> -       return 0;
+>> -}
+>> -
+>> -#endif /* CONFIG_PM */
+>> -
+>>   static int cb710_mmc_init(struct platform_device *pdev)
+>>   {
+>>          struct cb710_slot *slot = cb710_pdev_to_slot(pdev);
+>> @@ -762,14 +742,26 @@ static int cb710_mmc_exit(struct platform_device *pdev)
+>>          return 0;
+>>   }
+>>
+>> +#ifdef CONFIG_PM_SLEEP
+>> +static int cb710_mmc_suspend_resume(struct device *dev)
+>> +{
+>> +       struct cb710_slot *slot = cb710_pdev_to_slot(to_platform_device(dev));
+>> +
+>> +       cb710_mmc_enable_irq(slot, 0, ~0);
+>> +       return 0;
+>> +}
+>> +#else
+>> +#define cb710_mmc_suspend_resume NULL
+>
+> You don't need this. The macro will handle this for you.
+>
 
-As far as I can tell, the power sequencing is normally really
-dependent on the device. If someone has an on-board brcm4329
-that requires a specific set of clocks, resets, voltages etc
-to be routed to the chip and enabled in the correct order to
-allow probing, it seems unlikely that changing the wifi chipset
-to something else would keep the exact same requirements.
+Without this compiles fail when CONFIG_PM_SLEEP is not defined.
 
-> With this information encoded into DT, the number of DT files quickly
-> increases, and then this presents its own problem - how do users get to
-> know which DT file should be used for their platform when all they see
-> externally is "a product of type A"?
+-- Shuah
 
-I haven't seen a suggestion that would not encode this in DT. The
-difference between Olof's original suggestion and mine is that he
-proposed to put the data into the existing node of the host controller,
-while my approach would be to add a node for each function with
-these requirements and modify the sdio code so that we can deal
-with it in the function driver. The data that would get passed
-however is almost the same.
 
-	Arnd
+-- 
+Shuah Khan
+Senior Linux Kernel Developer - Open Source Group
+Samsung Research America(Silicon Valley)
+shuah.kh@samsung.com | (970) 672-0658
