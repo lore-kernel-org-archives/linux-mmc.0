@@ -1,47 +1,68 @@
-From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH V2 12/17] i2c: nomadik: Remove redundant call to pm_runtime_disable
-Date: Thu, 13 Feb 2014 15:09:03 +0100
-Message-ID: <1392300547-23365-2-git-send-email-ulf.hansson@linaro.org>
-References: <1392300547-23365-1-git-send-email-ulf.hansson@linaro.org>
-Return-path: <linux-spi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1392300547-23365-1-git-send-email-ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Sender: linux-spi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-Cc: Alessandro Rubini <rubini-9wsNiZum9E8@public.gmane.org>, Linus Walleij <linus.walleij-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Wolfram Sang <wsa-z923LK4zBo2bacvFa/9K2g@public.gmane.org>, Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, Mark Brown <broonie-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-spi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH 14/17] i2c: nomadik: Fixup deployment of runtime PM
+Date: Thu, 13 Feb 2014 15:12:49 +0100
+Message-ID: <CAPDyKFq_k7dRjuf+XW=DDkM1K2EJ_4vAAs0tTrd+WbUxqxP-tw@mail.gmail.com>
+References: <1391529538-21685-1-git-send-email-ulf.hansson@linaro.org>
+	<1391529538-21685-15-git-send-email-ulf.hansson@linaro.org>
+	<CACRpkdZwoXf5ovmQEAN6Ugvz91+_i5uGqStR3MGXQeJGHitj3Q@mail.gmail.com>
+	<CAPDyKFrWgB8z1rtWxU7AYvVsmNj_pfGbsozwgP_FzLODpmGRwQ@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qa0-f50.google.com ([209.85.216.50]:55721 "EHLO
+	mail-qa0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751076AbaBMOMu (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 13 Feb 2014 09:12:50 -0500
+Received: by mail-qa0-f50.google.com with SMTP id cm18so16387870qab.9
+        for <linux-mmc@vger.kernel.org>; Thu, 13 Feb 2014 06:12:50 -0800 (PST)
+In-Reply-To: <CAPDyKFrWgB8z1rtWxU7AYvVsmNj_pfGbsozwgP_FzLODpmGRwQ@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Linus Walleij <linus.walleij@linaro.org>
+Cc: Russell King <linux@arm.linux.org.uk>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Alessandro Rubini <rubini@unipv.it>, Wolfram Sang <wsa@the-dreams.de>, Chris Ball <chris@printf.net>, Mark Brown <broonie@kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-i2c@vger.kernel.org" <linux-i2c@vger.kernel.org>, "linux-spi@vger.kernel.org" <linux-spi@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-The amba bus are responsible for pm_runtime_enable|disable, remove the
-redundant pm_runtime_disable at driver removal.
+On 10 February 2014 11:14, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> On 5 February 2014 15:34, Linus Walleij <linus.walleij@linaro.org> wrote:
+>> On Tue, Feb 4, 2014 at 4:58 PM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>>
+>>> Since the device is active while a successful probe has been completed,
+>>> the reference counting for the clock will be screwed up and never reach
+>>> zero.
+>>>
+>>> The issue is resolved by implementing runtime PM callbacks and let them
+>>> handle the resources accordingly, including the clock.
+>>>
+>>> Cc: Alessandro Rubini <rubini@unipv.it>
+>>> Cc: Linus Walleij <linus.walleij@linaro.org>
+>>> Cc: Wolfram Sang <wsa@the-dreams.de>
+>>> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+>>
+>> Hm do I read it right as patch 13 breaks runtime PM by leaving
+>> the device active after probe() and this patch
+>> 14 fixes it again? Maybe these two patches should be squashed
+>> then.
 
-Cc: Alessandro Rubini <rubini-9wsNiZum9E8@public.gmane.org>
-Cc: Linus Walleij <linus.walleij-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Wolfram Sang <wsa-z923LK4zBo2bacvFa/9K2g@public.gmane.org>
-Signed-off-by: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
----
+In v2 I have now squashed patch 13 into this patch 14.
 
-Changes in v2:
-	Rebased on top of latest i2c-nomadik branch.
+That means patch13 shall be dropped from this patchset.
 
----
- drivers/i2c/busses/i2c-nomadik.c |    1 -
- 1 file changed, 1 deletion(-)
+Kind regards
+Uffe
 
-diff --git a/drivers/i2c/busses/i2c-nomadik.c b/drivers/i2c/busses/i2c-nomadik.c
-index 5faf9e2..d800d0f 100644
---- a/drivers/i2c/busses/i2c-nomadik.c
-+++ b/drivers/i2c/busses/i2c-nomadik.c
-@@ -1079,7 +1079,6 @@ static int nmk_i2c_remove(struct amba_device *adev)
- 	i2c_clr_bit(dev->virtbase + I2C_CR, I2C_CR_PE);
- 	if (res)
- 		release_mem_region(res->start, resource_size(res));
--	pm_runtime_disable(&adev->dev);
- 
- 	return 0;
- }
--- 
-1.7.9.5
-
---
-To unsubscribe from this list: send the line "unsubscribe linux-spi" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
+> You are right; but the driver will still be working, you just don't
+> get the benefit from inactivating the device at request inactivity -
+> as you pointed out.
+>
+> The reason for why I wanted to do this as separate steps was to make
+> it easier for reviewing, otherwise the patch(es) would have been quite
+> big and messy. I am for sure open to  adopt to your proposal, but just
+> wanted to give you some more background, before I go ahead and send a
+> v2.
+>
+> Kind regards
+> Ulf Hansson
+>
+>>
+>> Yours,
+>> Linus Walleij
