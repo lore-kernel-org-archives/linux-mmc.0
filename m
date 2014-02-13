@@ -1,68 +1,71 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 14/17] i2c: nomadik: Fixup deployment of runtime PM
-Date: Thu, 13 Feb 2014 15:12:49 +0100
-Message-ID: <CAPDyKFq_k7dRjuf+XW=DDkM1K2EJ_4vAAs0tTrd+WbUxqxP-tw@mail.gmail.com>
-References: <1391529538-21685-1-git-send-email-ulf.hansson@linaro.org>
-	<1391529538-21685-15-git-send-email-ulf.hansson@linaro.org>
-	<CACRpkdZwoXf5ovmQEAN6Ugvz91+_i5uGqStR3MGXQeJGHitj3Q@mail.gmail.com>
-	<CAPDyKFrWgB8z1rtWxU7AYvVsmNj_pfGbsozwgP_FzLODpmGRwQ@mail.gmail.com>
+From: Russell King - ARM Linux <linux@arm.linux.org.uk>
+Subject: Re: [PATCH 1/3] mmc: add support for power-on sequencing through DT
+Date: Thu, 13 Feb 2014 14:41:06 +0000
+Message-ID: <20140213144106.GW26684@n2100.arm.linux.org.uk>
+References: <1390190215-22700-1-git-send-email-olof@lixom.net> <201401281148.10670.arnd@arndb.de> <20140213104248.GU26684@n2100.arm.linux.org.uk> <2874395.Ul86gYA57i@wuerfel>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qa0-f50.google.com ([209.85.216.50]:55721 "EHLO
-	mail-qa0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751076AbaBMOMu (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 13 Feb 2014 09:12:50 -0500
-Received: by mail-qa0-f50.google.com with SMTP id cm18so16387870qab.9
-        for <linux-mmc@vger.kernel.org>; Thu, 13 Feb 2014 06:12:50 -0800 (PST)
-In-Reply-To: <CAPDyKFrWgB8z1rtWxU7AYvVsmNj_pfGbsozwgP_FzLODpmGRwQ@mail.gmail.com>
+Received: from gw-1.arm.linux.org.uk ([78.32.30.217]:35042 "EHLO
+	pandora.arm.linux.org.uk" rhost-flags-OK-OK-OK-FAIL)
+	by vger.kernel.org with ESMTP id S1751089AbaBMOlT (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 13 Feb 2014 09:41:19 -0500
+Content-Disposition: inline
+In-Reply-To: <2874395.Ul86gYA57i@wuerfel>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Linus Walleij <linus.walleij@linaro.org>
-Cc: Russell King <linux@arm.linux.org.uk>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Alessandro Rubini <rubini@unipv.it>, Wolfram Sang <wsa@the-dreams.de>, Chris Ball <chris@printf.net>, Mark Brown <broonie@kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-i2c@vger.kernel.org" <linux-i2c@vger.kernel.org>, "linux-spi@vger.kernel.org" <linux-spi@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Arnd Bergmann <arnd@arndb.de>
+Cc: linux-arm-kernel@lists.infradead.org, mark.rutland@arm.com, devicetree@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Pawel Moll <pawel.moll@arm.com>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Tomasz Figa <t.figa@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, Tomasz Figa <tomasz.figa@gmail.com>, Chris Ball <chris@printf.net>, robh+dt@kernel.org, Kumar Gala <galak@codeaurora.org>, Olof Johansson <olof@lixom.net>, Fabio Estevam <festevam@gmail.com>, Sascha Hauer <s.hauer@pengutronix.de>
 
-On 10 February 2014 11:14, Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> On 5 February 2014 15:34, Linus Walleij <linus.walleij@linaro.org> wrote:
->> On Tue, Feb 4, 2014 at 4:58 PM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
->>
->>> Since the device is active while a successful probe has been completed,
->>> the reference counting for the clock will be screwed up and never reach
->>> zero.
->>>
->>> The issue is resolved by implementing runtime PM callbacks and let them
->>> handle the resources accordingly, including the clock.
->>>
->>> Cc: Alessandro Rubini <rubini@unipv.it>
->>> Cc: Linus Walleij <linus.walleij@linaro.org>
->>> Cc: Wolfram Sang <wsa@the-dreams.de>
->>> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
->>
->> Hm do I read it right as patch 13 breaks runtime PM by leaving
->> the device active after probe() and this patch
->> 14 fixes it again? Maybe these two patches should be squashed
->> then.
+On Thu, Feb 13, 2014 at 01:48:55PM +0100, Arnd Bergmann wrote:
+> On Thursday 13 February 2014 10:42:48 Russell King - ARM Linux wrote:
+> > 
+> > What if we have a platform where things subtly change, like for instance,
+> > the wiring on the SD slot to fix a problem with UHS-1 cards, which means
+> > you don't have UHS-1 support for some platforms but do for others.
+> > 
+> > What if you have a platform which uses a brcm4329 chip for Wifi, but then
+> > later in the production run switch to using a different Wifi chipset?
+> 
+> As far as I can tell, the power sequencing is normally really
+> dependent on the device. If someone has an on-board brcm4329
+> that requires a specific set of clocks, resets, voltages etc
+> to be routed to the chip and enabled in the correct order to
+> allow probing, it seems unlikely that changing the wifi chipset
+> to something else would keep the exact same requirements.
 
-In v2 I have now squashed patch 13 into this patch 14.
+That's your assertion - however, do we /know/ whether there's a situation
+where Olof's solution doesn't work because the sequencing is wrong?
 
-That means patch13 shall be dropped from this patchset.
+I see nothing unreasonable about the sequence:
 
-Kind regards
-Uffe
+1. hold reset at low level
+2. apply power
+3. turn clock on
+4. apply reset
+5. release reset
 
->
-> You are right; but the driver will still be working, you just don't
-> get the benefit from inactivating the device at request inactivity -
-> as you pointed out.
->
-> The reason for why I wanted to do this as separate steps was to make
-> it easier for reviewing, otherwise the patch(es) would have been quite
-> big and messy. I am for sure open to  adopt to your proposal, but just
-> wanted to give you some more background, before I go ahead and send a
-> v2.
->
-> Kind regards
-> Ulf Hansson
->
->>
->> Yours,
->> Linus Walleij
+The points being:
+* never set a signal to a high level before power is applied, otherwise
+  we can end up supplying power through that signal (which may cause
+  damage.)  That goes for the reset and clock.
+* devices normally want clocks running to complete their reset sequencing.
+
+This is actually the sequence which MMC/SD cards do (except without the
+reset) anyway - it's spec'd that on the MMC/SD bus, power will be applied
+and will be stable before the clock signal is applied, and then the clock
+signal runs for a certain number of cycles before you even start talking
+to the card.
+
+That all said, we do have the problem that once we decide, we need to
+support it because it becomes part of DT - this is one of the things I
+hate about DT, it requires over-design.  Your point is "Olof's solution
+may break if we have a device which requires a different sequence" which
+is a valid point which has to be considered from the DT perspective and
+addressed whether or not we actually have a device which meets that
+criteria.  I don't see an easy solution to this.
+
+-- 
+FTTC broadband for 0.8mile line: 5.8Mbps down 500kbps up.  Estimation
+in database were 13.1 to 19Mbit for a good line, about 7.5+ for a bad.
+Estimate before purchase was "up to 13.2Mbit".
