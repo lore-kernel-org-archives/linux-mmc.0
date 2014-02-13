@@ -1,94 +1,108 @@
-From: Tomasz Figa <tomasz.figa@gmail.com>
-Subject: Re: [PATCH 1/3] mmc: add support for power-on sequencing through
- DT
-Date: Thu, 13 Feb 2014 10:01:20 +0100
-Message-ID: <52FC89E0.6050305@gmail.com>
-References: <1390190215-22700-1-git-send-email-olof@lixom.net>	<52E700F0.7040708@gmail.com>	<CAPDyKFpOhQtiyCmzie3=sfg42Vv5_rReRNgUf8kALoE6TBe2cw@mail.gmail.com>	<201401281148.10670.arnd@arndb.de> <CAPDyKFo9Xpxe0XzevPEeaofLeCNivnf3R_RttToP2h3aFyB4Yw@mail.gmail.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [RFT][PATCH v3] mmc: change cb710-mmc platform power management
+ to use dev_pm_ops
+Date: Thu, 13 Feb 2014 10:47:59 +0100
+Message-ID: <CAPDyKFoukY2PGNWimUbRqDr36eJ_+eBASJR4uac6nH4-kowmCQ@mail.gmail.com>
+References: <1392240089-19489-1-git-send-email-shuah.kh@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ea0-f169.google.com ([209.85.215.169]:57159 "EHLO
-	mail-ea0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753455AbaBMJBc (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 13 Feb 2014 04:01:32 -0500
-In-Reply-To: <CAPDyKFo9Xpxe0XzevPEeaofLeCNivnf3R_RttToP2h3aFyB4Yw@mail.gmail.com>
+Received: from mail-qa0-f47.google.com ([209.85.216.47]:45215 "EHLO
+	mail-qa0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752367AbaBMJsA (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 13 Feb 2014 04:48:00 -0500
+Received: by mail-qa0-f47.google.com with SMTP id j5so15822208qaq.34
+        for <linux-mmc@vger.kernel.org>; Thu, 13 Feb 2014 01:47:59 -0800 (PST)
+In-Reply-To: <1392240089-19489-1-git-send-email-shuah.kh@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Arnd Bergmann <arnd@arndb.de>
-Cc: Tomasz Figa <t.figa@samsung.com>, Olof Johansson <olof@lixom.net>, linux-mmc <linux-mmc@vger.kernel.org>, devicetree@vger.kernel.org, Russell King - ARM Linux <linux@arm.linux.org.uk>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, robh+dt@kernel.org, mark.rutland@arm.com, Pawel Moll <pawel.moll@arm.com>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Kumar Gala <galak@codeaurora.org>, Chris Ball <chris@printf.net>, Sascha Hauer <s.hauer@pengutronix.de>, Fabio Estevam <festevam@gmail.com>
+To: Shuah Khan <shuah.kh@samsung.com>
+Cc: "Rafael J. Wysocki" <rjw@rjwysocki.net>, mirq-linux@rere.qmqm.pl, Chris Ball <chris@printf.net>, "linux-pm@vger.kernel.org" <linux-pm@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, Shuah Khan <shuahkhan@gmail.com>
 
+On 12 February 2014 22:21, Shuah Khan <shuah.kh@samsung.com> wrote:
+> Change cb710-mmc platform driver to register pm ops using dev_pm_ops instead
+> of legacy pm_ops. The existing legacy suspend/resume routines are identical
+> and simply clear IRQ mask in the device in case it got undefined during sleep
+> state. Changed code to collapse suspend and resume into one .pm interface
+> for suspend and resume which gets installed for suspend, freeze, poweroff,
+> thaw, restore, and resume states using SIMPLE_DEV_PM_OPS().
+>
+> Signed-off-by: Shuah Khan <shuah.kh@samsung.com>
+> ---
+>
+> patch v3: Addresses review comments on patch v2
+>
+>  drivers/mmc/host/cb710-mmc.c |   40 ++++++++++++++++------------------------
+>  1 file changed, 16 insertions(+), 24 deletions(-)
+>
+> diff --git a/drivers/mmc/host/cb710-mmc.c b/drivers/mmc/host/cb710-mmc.c
+> index 1087b4c..2dc7b2dc 100644
+> --- a/drivers/mmc/host/cb710-mmc.c
+> +++ b/drivers/mmc/host/cb710-mmc.c
+> @@ -662,26 +662,6 @@ static const struct mmc_host_ops cb710_mmc_host = {
+>         .get_cd = cb710_mmc_get_cd,
+>  };
+>
+> -#ifdef CONFIG_PM
+> -
+> -static int cb710_mmc_suspend(struct platform_device *pdev, pm_message_t state)
+> -{
+> -       struct cb710_slot *slot = cb710_pdev_to_slot(pdev);
+> -
+> -       cb710_mmc_enable_irq(slot, 0, ~0);
+> -       return 0;
+> -}
+> -
+> -static int cb710_mmc_resume(struct platform_device *pdev)
+> -{
+> -       struct cb710_slot *slot = cb710_pdev_to_slot(pdev);
+> -
+> -       cb710_mmc_enable_irq(slot, 0, ~0);
+> -       return 0;
+> -}
+> -
+> -#endif /* CONFIG_PM */
+> -
+>  static int cb710_mmc_init(struct platform_device *pdev)
+>  {
+>         struct cb710_slot *slot = cb710_pdev_to_slot(pdev);
+> @@ -762,14 +742,26 @@ static int cb710_mmc_exit(struct platform_device *pdev)
+>         return 0;
+>  }
+>
+> +#ifdef CONFIG_PM_SLEEP
+> +static int cb710_mmc_suspend_resume(struct device *dev)
+> +{
+> +       struct cb710_slot *slot = cb710_pdev_to_slot(to_platform_device(dev));
+> +
+> +       cb710_mmc_enable_irq(slot, 0, ~0);
+> +       return 0;
+> +}
+> +#else
+> +#define cb710_mmc_suspend_resume NULL
 
+You don't need this. The macro will handle this for you.
 
-On 13.02.2014 09:56, Ulf Hansson wrote:
-> On 28 January 2014 11:48, Arnd Bergmann <arnd@arndb.de> wrote:
->> On Tuesday 28 January 2014, Ulf Hansson wrote:
->>> On 28 January 2014 01:59, Tomasz Figa <tomasz.figa@gmail.com> wrote:
->>>> On 27.01.2014 11:19, Ulf Hansson wrote:
->>>>> There is already a host capability that I think we could use to handle
->>>>> this. MMC_CAP_NONREMOVABLE, the corresponding DT binding string is
->>>>> "non-removable", and it may be set per host device.
->>>>>
->>>>> Using this cap means the mmc_rescan process that runs to detect new
->>>>> cards, will only be executed once and during boot. So, we need to make
->>>>> sure all resources and powers are provided to the card at this point.
->>>>> Otherwise the card will not be detected.
->>>>
->>>> I don't quite like this requirement, especially if you consider
->>>> multi-platform kernels where a lot of drivers is going to be provided as
->>>> modules. WLAN drivers are especially good candidates. This means that even
->>>> if the card is powered off at boot-up, if user (or init system) loads
->>>> appropriate module, which powers the chip on, MMC core must be able to
->>>> notice this.
->>>
->>> To be able to detect the card, the WLAN driver doesn't have to be
->>> probed, only the "power controller" driver. I suppose this is were it
->>> becomes a bit tricky.
->>>
->>> Somehow the mmc core needs to be involved in the probe process of the
->>> power controller driver. Could perhaps the power controller bus be
->>> located in the mmc core and thus the power controller driver needs to
->>> register itself by using a new API from the mmc core? Similar how SDIO
->>> func driver's register themselves.
->>
->> I think there is another option, which does have its own pros and cons:
->> We could move all the power handling back into the sdio function driver
->> if we allow a secondary detection path using DT rather than the probing
->> of the SDIO bus. Essentially you'd have to list the class/vendor/device
->> ID for each function that cannot be autodetected in DT, and have the
->> SDIO core pretend that it found the device just by looking at the
->> device nodes, and register the struct sdio_func so it can be bound to
->> the driver. The driver then does all the power handling in a device
->> specific way. At some point the hardware gets registered at the
->> mmc host, and the sdio core connects the bus state to the already present
->> sdio_func, possibly notifying the function driver that it has become
->> usable.
->
-> It seems like an option we could try.
->
-> There are some tricky parts that needs to be taken care of by the
-> mmc/sdio core, regarding the probe/removal and the suspend/resume
-> sequence, but I suppose it should be possible.
->
-> A minor concern is how do we handle devices that are fully powered at
-> boot? Unless the sdio func driver will be loaded we can't power off
-> them, right? Do we need to cover this case, do you think?
->
->>
->> Obviously, this can only work for CAP_NONREMOVABLE devices, but those
->> are exactly the ones we are worried about here. The advantage is that
->> the power sequencing for a particular device can then be in device
->> specific code and can have an arbitrarily complex in the driver without
->> needing the mmc code to handle all possible corner cases.
->
-> Agree!
->
-> I think a removable SDIO card won't l need this additional power
-> controller mechanism.
+Kind regards
+Ulf Hansson
 
-Yes, sounds good to me too. It will be more tricky to implement than the 
-solution I initially proposed, but should end up being much cleaner and 
-possibly cover more cases.
-
-Best regards,
-Tomasz
+> +#endif
+> +
+> +static SIMPLE_DEV_PM_OPS(cb710_mmc_dev_pm_ops, cb710_mmc_suspend_resume,
+> +                        cb710_mmc_suspend_resume);
+> +
+>  static struct platform_driver cb710_mmc_driver = {
+>         .driver.name = "cb710-mmc",
+>         .probe = cb710_mmc_init,
+>         .remove = cb710_mmc_exit,
+> -#ifdef CONFIG_PM
+> -       .suspend = cb710_mmc_suspend,
+> -       .resume = cb710_mmc_resume,
+> -#endif
+> +       .driver.pm = &cb710_mmc_dev_pm_ops,
+>  };
+>
+>  module_platform_driver(cb710_mmc_driver);
+> --
+> 1.7.10.4
+>
