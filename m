@@ -1,113 +1,91 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [PATCH 1/3] mmc: add support for power-on sequencing through DT
-Date: Thu, 13 Feb 2014 17:13:14 +0100
-Message-ID: <1626419.Ta3A7zgHIt@wuerfel>
-References: <1390190215-22700-1-git-send-email-olof@lixom.net> <2874395.Ul86gYA57i@wuerfel> <20140213144106.GW26684@n2100.arm.linux.org.uk>
+From: Santosh Shilimkar <santosh.shilimkar@ti.com>
+Subject: Re: [PATCH] Fix uses of dma_max_pfn() when converting to a limiting
+ address
+Date: Thu, 13 Feb 2014 11:34:40 -0500
+Message-ID: <52FCF420.2020603@ti.com>
+References: <E1WDH7v-00038J-2k@rmk-PC.arm.linux.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7Bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.17.10]:52961 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752015AbaBMQOG (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 13 Feb 2014 11:14:06 -0500
-In-Reply-To: <20140213144106.GW26684@n2100.arm.linux.org.uk>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="ISO-8859-1"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-scsi-owner@vger.kernel.org>
+In-Reply-To: <E1WDH7v-00038J-2k@rmk-PC.arm.linux.org.uk>
+Sender: linux-scsi-owner@vger.kernel.org
+To: Russell King <rmk+kernel@arm.linux.org.uk>
+Cc: linux-arm-kernel@lists.infradead.org, Chris Ball <chris@printf.net>, "James E.J. Bottomley" <JBottomley@parallels.com>, linux-mmc@vger.kernel.org, linux-scsi@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Cc: linux-arm-kernel@lists.infradead.org, mark.rutland@arm.com, devicetree@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Pawel Moll <pawel.moll@arm.com>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Tomasz Figa <t.figa@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, Tomasz Figa <tomasz.figa@gmail.com>, Chris Ball <chris@printf.net>, robh+dt@kernel.org, Kumar Gala <galak@codeaurora.org>, Olof Johansson <olof@lixom.net>, Fabio Estevam <festevam@gmail.com>, Sascha Hauer <s.hauer@pengutronix.de>
 
-On Thursday 13 February 2014 14:41:06 Russell King - ARM Linux wrote:
-> On Thu, Feb 13, 2014 at 01:48:55PM +0100, Arnd Bergmann wrote:
-> > On Thursday 13 February 2014 10:42:48 Russell King - ARM Linux wrote:
-> > > 
-> > > What if we have a platform where things subtly change, like for instance,
-> > > the wiring on the SD slot to fix a problem with UHS-1 cards, which means
-> > > you don't have UHS-1 support for some platforms but do for others.
-> > > 
-> > > What if you have a platform which uses a brcm4329 chip for Wifi, but then
-> > > later in the production run switch to using a different Wifi chipset?
-> > 
-> > As far as I can tell, the power sequencing is normally really
-> > dependent on the device. If someone has an on-board brcm4329
-> > that requires a specific set of clocks, resets, voltages etc
-> > to be routed to the chip and enabled in the correct order to
-> > allow probing, it seems unlikely that changing the wifi chipset
-> > to something else would keep the exact same requirements.
+On Tuesday 11 February 2014 12:28 PM, Russell King wrote:
+> We must use a 64-bit for this, otherwise overflowed bits get lost, and
+> that can result in a lower than intended value set.
 > 
-> That's your assertion - however, do we /know/ whether there's a situation
-> where Olof's solution doesn't work because the sequencing is wrong?
+> Fixes: 8e0cb8a1f6ac ("ARM: 7797/1: mmc: Use dma_max_pfn(dev) helper for bounce_limit calculations")
+> Fixes: 7d35496dd982 ("ARM: 7796/1: scsi: Use dma_max_pfn(dev) helper for bounce_limit calculations")
+> Signed-off-by: Russell King <rmk+kernel@arm.linux.org.uk>
+> ---
+> While poking about with the Cubox-i4 and investigating why my UHS-1
+> SD card wasn't achieving its full potential, I came across a slight
+> problem... the SDHCI host sets a mask of 0xffffffff, but with the
+> start of memory at pfn 0x10000, the blk code sees this when setting
+> the bounce limit:
 > 
-> I see nothing unreasonable about the sequence:
+> 	max addr 0x0ffff000 bounce limit 0xffff dma 1
 > 
-> 1. hold reset at low level
-> 2. apply power
-> 3. turn clock on
-> 4. apply reset
-> 5. release reset
-
-I was thinking of cases where you may need a more complex sequence:
-- wait for a device specific time between some of the steps
-  (the cw1200 driver seems to need that, but we could probably
-   get away with waiting long enough for everyone)
-- have more than one of each, and turn them on in the right order.
-  cw1200 seems to need two voltages, two gpio resets ("reset"
-  and "powerup").
-  Again, we could specify a larger number of clocks that can be
-  provided to the host, but if we make it a device specific
-  property, we already know how many we need.
-
-I can't think of anything that would require significant changes
-to the procedure though, just refinements as we run into problems.
-
-> The points being:
-> * never set a signal to a high level before power is applied, otherwise
->   we can end up supplying power through that signal (which may cause
->   damage.)  That goes for the reset and clock.
-> * devices normally want clocks running to complete their reset sequencing.
+> and this results in the bounce functions appearing in the profile:
 > 
-> This is actually the sequence which MMC/SD cards do (except without the
-> reset) anyway - it's spec'd that on the MMC/SD bus, power will be applied
-> and will be stable before the clock signal is applied, and then the clock
-> signal runs for a certain number of cycles before you even start talking
-> to the card.
+> 00000000c00f8b70 copy_to_high_bio_irq                  1139 2.5886
+> 00000000c00f8d28 bounce_end_io                           12 0.0714
+> 00000000c00f8dd0 bounce_end_io_read_isa                   8 0.1053
+> 
+> which, compared to the cost of copying the data to userland and
+> request handling, this is quite significant:
+> 
+> 00000000c04b1794 sdhci_request                          268 0.5447
+> 00000000c02d0740 __copy_to_user_std                     398 0.4252
+> 
+> With this calculation fixed, we avoid the bouncing code entirely.
+> 
+> 	max addr 0x10ffff000 bounce limit 0x10ffff dma 0
+>
+You are right. We were seeing an issue with SCSI HDD over PCI and
+the patch fixes that issue as well.
 
-It may be dangerous to refer to the spec, since we are talking
-specifically about devices that require something beyond what the
-spec says ;-) For instance in SD/MMC cards I'd assume the device clock
-to be derived from the bus clock. However we can expect that clock
-to work already (any working mmc host driver would provide that),
-but we may need to drive the device clock. It still sounds reasonable
-to assume that the sequencing is the same as for the bus clock.
+I think we should send this patch to stable as well. At least 3.13
+should get this patch.
 
-> That all said, we do have the problem that once we decide, we need to
-> support it because it becomes part of DT - this is one of the things I
-> hate about DT, it requires over-design.
+Thanks RMK for the bug fix. Feel free to add, in case the patch is
+not committed already
 
-Yes, I agree. It is a problem that we have to face all the time.
-We have in the past defined bindings of both types, overdesigned
-and not thought through enough.
+Tested-Acked-by: Santosh Shilimkar <santosh.shilimkar@ti.com>
+ 
+>  drivers/mmc/card/queue.c | 2 +-
+>  drivers/scsi/scsi_lib.c  | 2 +-
+>  2 files changed, 2 insertions(+), 2 deletions(-)
+> 
+> diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
+> index 357bbc54fe4b..3e049c13429c 100644
+> --- a/drivers/mmc/card/queue.c
+> +++ b/drivers/mmc/card/queue.c
+> @@ -197,7 +197,7 @@ int mmc_init_queue(struct mmc_queue *mq, struct mmc_card *card,
+>  	struct mmc_queue_req *mqrq_prev = &mq->mqrq[1];
+>  
+>  	if (mmc_dev(host)->dma_mask && *mmc_dev(host)->dma_mask)
+> -		limit = dma_max_pfn(mmc_dev(host)) << PAGE_SHIFT;
+> +		limit = (u64)dma_max_pfn(mmc_dev(host)) << PAGE_SHIFT;
+>  
+>  	mq->card = card;
+>  	mq->queue = blk_init_queue(mmc_request_fn, lock);
+> diff --git a/drivers/scsi/scsi_lib.c b/drivers/scsi/scsi_lib.c
+> index 7bd7f0d5f050..62ec84b42e31 100644
+> --- a/drivers/scsi/scsi_lib.c
+> +++ b/drivers/scsi/scsi_lib.c
+> @@ -1684,7 +1684,7 @@ u64 scsi_calculate_bounce_limit(struct Scsi_Host *shost)
+>  
+>  	host_dev = scsi_get_device(shost);
+>  	if (host_dev && host_dev->dma_mask)
+> -		bounce_limit = dma_max_pfn(host_dev) << PAGE_SHIFT;
+> +		bounce_limit = (u64)dma_max_pfn(host_dev) << PAGE_SHIFT;
+>  
+>  	return bounce_limit;
+>  }
+> 
 
->  Your point is "Olof's solution
-> may break if we have a device which requires a different sequence" which
-> is a valid point which has to be considered from the DT perspective and
-> addressed whether or not we actually have a device which meets that
-> criteria.  I don't see an easy solution to this.
-
-I think either one will work. With Olof's suggestion that may mean we
-have to keep adding support for increasingly complex cases when we
-run into them, or it may all be easy. With my suggestion, we give
-more room for function drivers to mess things up, but at least we
-can keep the complexity in the places that need them and only need
-to change the core once.
-
-Aside from the power-on problem, my suggestion would at the same
-time solve the second problem of having a place to stick arbitrary
-DT properties for the sdio function. Again looking at the cw1200
-example, they may require passing an IRQ descriptor, a MAC address,
-the device clock rate, and two flags for things that are not
-detectable by looking at the device ID (whether a 5GHz antenna is
-connected and something about odd block size transfers).
-This is probably the main difference between the two approaches.
-
-	Arnd
