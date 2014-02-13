@@ -1,267 +1,85 @@
-From: Georgi Djakov <gdjakov@mm-sol.com>
-Subject: Re: [PATCH v8 3/3] mmc: sdhci-msm: Add platform_execute_tunning implementation
-Date: Thu, 13 Feb 2014 18:42:03 +0200
-Message-ID: <52FCF5DB.4030804@mm-sol.com>
-References: <1391107507-17321-1-git-send-email-gdjakov@mm-sol.com> <1391107507-17321-4-git-send-email-gdjakov@mm-sol.com> <20140208032315.GB10784@codeaurora.org>
+From: James Bottomley <James.Bottomley@HansenPartnership.com>
+Subject: Re: [PATCH] Fix uses of dma_max_pfn() when converting to a limiting
+ address
+Date: Thu, 13 Feb 2014 08:58:10 -0800
+Message-ID: <1392310690.2175.13.camel@dabdike.int.hansenpartnership.com>
+References: <E1WDH7v-00038J-2k@rmk-PC.arm.linux.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Type: text/plain; charset="ISO-8859-15"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-doc-owner@vger.kernel.org>
-In-Reply-To: <20140208032315.GB10784@codeaurora.org>
-Sender: linux-doc-owner@vger.kernel.org
-To: Stephen Boyd <sboyd@codeaurora.org>
-Cc: linux-mmc@vger.kernel.org, cjb@laptop.org, devicetree@vger.kernel.org, grant.likely@linaro.org, rob.herring@calxeda.com, pawel.moll@arm.com, mark.rutland@arm.com, swarren@wwwdotorg.org, ijc+devicetree@hellion.org.uk, galak@codeaurora.org, rob@landley.net, linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org
+Return-path: <linux-scsi-owner@vger.kernel.org>
+In-Reply-To: <E1WDH7v-00038J-2k@rmk-PC.arm.linux.org.uk>
+Sender: linux-scsi-owner@vger.kernel.org
+To: Russell King <rmk+kernel@arm.linux.org.uk>
+Cc: linux-arm-kernel@lists.infradead.org, Chris Ball <chris@printf.net>, linux-mmc@vger.kernel.org, linux-scsi@vger.kernel.org, Santosh Shilimkar <santosh.shilimkar@ti.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Stephen,
+On Tue, 2014-02-11 at 17:28 +0000, Russell King wrote:
+> We must use a 64-bit for this, otherwise overflowed bits get lost, and
+> that can result in a lower than intended value set.
+> 
+> Fixes: 8e0cb8a1f6ac ("ARM: 7797/1: mmc: Use dma_max_pfn(dev) helper for bounce_limit calculations")
+> Fixes: 7d35496dd982 ("ARM: 7796/1: scsi: Use dma_max_pfn(dev) helper for bounce_limit calculations")
+> Signed-off-by: Russell King <rmk+kernel@arm.linux.org.uk>
+> ---
+> While poking about with the Cubox-i4 and investigating why my UHS-1
+> SD card wasn't achieving its full potential, I came across a slight
+> problem... the SDHCI host sets a mask of 0xffffffff, but with the
+> start of memory at pfn 0x10000, the blk code sees this when setting
+> the bounce limit:
+> 
+> 	max addr 0x0ffff000 bounce limit 0xffff dma 1
+> 
+> and this results in the bounce functions appearing in the profile:
+> 
+> 00000000c00f8b70 copy_to_high_bio_irq                  1139 2.5886
+> 00000000c00f8d28 bounce_end_io                           12 0.0714
+> 00000000c00f8dd0 bounce_end_io_read_isa                   8 0.1053
+> 
+> which, compared to the cost of copying the data to userland and
+> request handling, this is quite significant:
+> 
+> 00000000c04b1794 sdhci_request                          268 0.5447
+> 00000000c02d0740 __copy_to_user_std                     398 0.4252
+> 
+> With this calculation fixed, we avoid the bouncing code entirely.
+> 
+> 	max addr 0x10ffff000 bounce limit 0x10ffff dma 0
+> 
+>  drivers/mmc/card/queue.c | 2 +-
+>  drivers/scsi/scsi_lib.c  | 2 +-
+>  2 files changed, 2 insertions(+), 2 deletions(-)
+> 
+> diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
+> index 357bbc54fe4b..3e049c13429c 100644
+> --- a/drivers/mmc/card/queue.c
+> +++ b/drivers/mmc/card/queue.c
+> @@ -197,7 +197,7 @@ int mmc_init_queue(struct mmc_queue *mq, struct mmc_card *card,
+>  	struct mmc_queue_req *mqrq_prev = &mq->mqrq[1];
+>  
+>  	if (mmc_dev(host)->dma_mask && *mmc_dev(host)->dma_mask)
+> -		limit = dma_max_pfn(mmc_dev(host)) << PAGE_SHIFT;
+> +		limit = (u64)dma_max_pfn(mmc_dev(host)) << PAGE_SHIFT;
+>  
+>  	mq->card = card;
+>  	mq->queue = blk_init_queue(mmc_request_fn, lock);
+> diff --git a/drivers/scsi/scsi_lib.c b/drivers/scsi/scsi_lib.c
+> index 7bd7f0d5f050..62ec84b42e31 100644
+> --- a/drivers/scsi/scsi_lib.c
+> +++ b/drivers/scsi/scsi_lib.c
+> @@ -1684,7 +1684,7 @@ u64 scsi_calculate_bounce_limit(struct Scsi_Host *shost)
+>  
+>  	host_dev = scsi_get_device(shost);
+>  	if (host_dev && host_dev->dma_mask)
+> -		bounce_limit = dma_max_pfn(host_dev) << PAGE_SHIFT;
+> +		bounce_limit = (u64)dma_max_pfn(host_dev) << PAGE_SHIFT;
 
-On 02/08/2014 05:23 AM, Stephen Boyd wrote:
-> On 01/30, Georgi Djakov wrote:
->> @@ -75,17 +110,389 @@ struct sdhci_msm_host {
->>   };
->>
->>   /* MSM platform specific tuning */
->> -int sdhci_msm_execute_tuning(struct sdhci_host *host, u32 opcode)
->> +static inline int msm_dll_poll_ck_out_en(struct sdhci_host *host, u8 poll)
->> +{
->> +	u32 wait_cnt = 50;
->> +	u8 ck_out_en = 0;
->
-> Looks like a useless assignment.
+This doesn't really look like the right fix.  You replaced dev->dma_mask
+with a calculation on dev_max_pfn().  Since dev->dma_mask is always u64
+and dev_max_pfn is supposed to be returning the pfn of the dma_mask, it
+should unconditionally be 64 bits as well.  Either that or it should
+return dma_addr_t.
 
-Yes, thanks!
-
->
->> +	struct mmc_host *mmc = host->mmc;
->> +
->> +	/* poll for CK_OUT_EN bit.  max. poll time = 50us */
->> +	ck_out_en = !!(readl_relaxed(host->ioaddr + CORE_DLL_CONFIG) &
->> +			CORE_CK_OUT_EN);
->> +
->> +	while (ck_out_en != poll) {
->> +		if (--wait_cnt == 0) {
->> +			dev_err(mmc_dev(mmc), "%s: CK_OUT_EN bit is not %d\n",
->> +			       mmc_hostname(mmc), poll);
->> +			return -ETIMEDOUT;
->> +		}
->> +		udelay(1);
->> +
->> +		ck_out_en = !!(readl_relaxed(host->ioaddr + CORE_DLL_CONFIG) &
->> +				CORE_CK_OUT_EN);
->> +	}
->> +
->> +	return 0;
->> +}
->> +
->> +static int msm_config_cm_dll_phase(struct sdhci_host *host, u8 phase)
->> +{
->> +	int rc = 0;
->
-> Looks like a useless assignment.
-
-Ok.
-
->
->> +	u8 grey_coded_phase_table[] = {
->> +		0x0, 0x1, 0x3, 0x2, 0x6, 0x7, 0x5, 0x4,
->> +		0xc, 0xd, 0xf, 0xe, 0xa, 0xb, 0x9, 0x8
->> +	};
->
-> This could be static const?
-
-Yes, indeed!
-
->
->> +	unsigned long flags;
->> +	u32 config;
->> +	struct mmc_host *mmc = host->mmc;
->> +
->> +	spin_lock_irqsave(&host->lock, flags);
->> +
->> +	config = readl_relaxed(host->ioaddr + CORE_DLL_CONFIG);
->> +	config &= ~(CORE_CDR_EN | CORE_CK_OUT_EN);
->> +	config |= (CORE_CDR_EXT_EN | CORE_DLL_EN);
->> +	writel_relaxed(config, host->ioaddr + CORE_DLL_CONFIG);
->> +
->> +	/* Wait until CK_OUT_EN bit of DLL_CONFIG register becomes '0' */
->> +	rc = msm_dll_poll_ck_out_en(host, 0);
->> +	if (rc)
->> +		goto err_out;
->> +
->> +	/*
->> +	 * Write the selected DLL clock output phase (0 ... 15)
->> +	 * to CDR_SELEXT bit field of DLL_CONFIG register.
->> +	 */
->> +	writel_relaxed(((readl_relaxed(host->ioaddr + CORE_DLL_CONFIG)
->> +			 & ~(0xF << 20))
->> +			| (grey_coded_phase_table[phase] << 20)),
->> +		       host->ioaddr + CORE_DLL_CONFIG);
->
-> Wow this is complicated. Can we please break this up into
-> multiple lines? What does 0xf << 20 mean?
-
-Yes, sure! I will simplify it! Only bits 23:20 are used.
-
->
->> +
->> +	/* Set CK_OUT_EN bit of DLL_CONFIG register to 1. */
->> +	writel_relaxed((readl_relaxed(host->ioaddr + CORE_DLL_CONFIG)
->> +			| CORE_CK_OUT_EN), host->ioaddr + CORE_DLL_CONFIG);
->> +
-> [...]
->> +}
->> +
->> +static int msm_find_most_appropriate_phase(struct sdhci_host *host,
->> +					   u8 *phase_table, u8 total_phases)
->> +{
-> [...]
->> +
->> +	for (cnt = 0; cnt <= row_index; cnt++) {
->> +		if (phases_per_row[cnt] > curr_max) {
->> +			curr_max = phases_per_row[cnt];
->> +			selected_row_index = cnt;
->> +		}
->> +	}
->> +
->> +	i = ((curr_max * 3) / 4);
->
-> Unnecessary extra parentheses here.
-
-Thanks!
-
->
->> +	if (i)
->> +		i--;
->> +
->> +	ret = (int)ranges[selected_row_index][i];
->
-> Is this cast necessary?
-
-Not necessary. Will fix it!
-
->
->> +
->> +	if (ret >= MAX_PHASES) {
->> +		ret = -EINVAL;
->> +		dev_err(mmc_dev(mmc), "%s: invalid phase selected=%d\n",
->> +		       mmc_hostname(mmc), ret);
->> +	}
->> +
->> +	return ret;
->> +}
->> +
->> +static inline void msm_cm_dll_set_freq(struct sdhci_host *host)
->> +{
->> +	u32 mclk_freq = 0;
->> +
->> +	/* Program the MCLK value to MCLK_FREQ bit field */
->> +	if (host->clock <= 112000000)
->> +		mclk_freq = 0;
->> +	else if (host->clock <= 125000000)
->> +		mclk_freq = 1;
->> +	else if (host->clock <= 137000000)
->> +		mclk_freq = 2;
->> +	else if (host->clock <= 150000000)
->> +		mclk_freq = 3;
->> +	else if (host->clock <= 162000000)
->> +		mclk_freq = 4;
->> +	else if (host->clock <= 175000000)
->> +		mclk_freq = 5;
->> +	else if (host->clock <= 187000000)
->> +		mclk_freq = 6;
->> +	else if (host->clock <= 200000000)
->> +		mclk_freq = 7;
->
-> This could be a case statement but I'm not sure it's any clearer.
-> At least the range is specified.
->
-> 	switch (host->clock) {
-> 	case 0 ... 112000000:
-> 		mclk_freq = 0;
-> 		break;
-> 	case 112000001 ...  125000000:
-> 		mclk_freq = 1;
-> 		break;
-> 	...
-
-It seems to be shorter with the ifs, so i prefer to keep it this way.
-
->
->> +
->> +	writel_relaxed(((readl_relaxed(host->ioaddr + CORE_DLL_CONFIG)
->> +			 & ~(7 << 24)) | (mclk_freq << 24)),
->> +		       host->ioaddr + CORE_DLL_CONFIG);
->
-> This is also complicated. Can you split this up into multiple lines?
-
-Yes, sure!
-
->
->> +int sdhci_msm_execute_tuning(struct sdhci_host *host, u32 opcode)
->> +{
-> [...]
->> +	do {
->> +		struct mmc_command cmd = { 0 };
->> +		struct mmc_data data = { 0 };
->> +		struct mmc_request mrq = {
->> +			.cmd = &cmd,
->> +			.data = &data
->> +		};
->> +		struct scatterlist sg;
->> +
->> +		/* set the phase in delay line hw block */
->> +		rc = msm_config_cm_dll_phase(host, phase);
->> +		if (rc)
->> +			goto out;
->> +
->> +		cmd.opcode = opcode;
->> +		cmd.flags = MMC_RSP_R1 | MMC_CMD_ADTC;
->> +
->> +		data.blksz = size;
->> +		data.blocks = 1;
->> +		data.flags = MMC_DATA_READ;
->> +		data.timeout_ns = 1000 * 1000 * 1000;	/* 1 sec */
->
-> NSEC_PER_SEC?
-
-Thanks!
-
->
->> +
->> +		data.sg = &sg;
->> +		data.sg_len = 1;
->> +		sg_init_one(&sg, data_buf, sizeof(data_buf));
->> +		memset(data_buf, 0, sizeof(data_buf));
->> +		mmc_wait_for_req(mmc, &mrq);
->> +
->> +		if (!cmd.error && !data.error &&
->> +		    !memcmp(data_buf, tuning_block_pattern, sizeof(data_buf))) {
->> +			/* tuning is successful at this tuning point */
->> +			tuned_phases[tuned_phase_cnt++] = phase;
->> +			dev_dbg(mmc_dev(mmc), "%s: found good phase = %d\n",
->> +				 mmc_hostname(mmc), phase);
->> +		}
->> +	} while (++phase < 16);
->
-> ++phase < ARRAY_SIZE(tuned_phases) ?
-
-Thanks!
-
->
->> +
->> +	if (tuned_phase_cnt) {
->> +		rc = msm_find_most_appropriate_phase(host, tuned_phases,
->> +						     tuned_phase_cnt);
->> +		if (rc < 0)
->> +			goto out;
->> +		else
->> +			phase = (u8) rc;
->
-> Unnecessary cast?
-
-Yes, thank you for the review!
-
-BR,
-Georgi
+James
 
 
