@@ -1,73 +1,68 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [GIT PULL] MMC updates for mmc-next for 3.15, take 1
-Date: Fri, 14 Feb 2014 12:09:45 +0100
-Message-ID: <CAPDyKFrbLBbq8WJP3umUM4dWoRvm20AsYb9pxzMJRrnA47c6OQ@mail.gmail.com>
+Subject: Re: [PATCH v3 1/8] mmc: core: add the property for hs200
+Date: Fri, 14 Feb 2014 12:31:07 +0100
+Message-ID: <CAPDyKFrPGRbqgCb7p_gkSo8fqaXdKkT+zjwrKQpoqyc+O7KFMw@mail.gmail.com>
+References: <52EF7A57.1020801@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qc0-f182.google.com ([209.85.216.182]:41946 "EHLO
-	mail-qc0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751098AbaBNLJp (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 14 Feb 2014 06:09:45 -0500
-Received: by mail-qc0-f182.google.com with SMTP id c9so19947791qcz.27
-        for <linux-mmc@vger.kernel.org>; Fri, 14 Feb 2014 03:09:45 -0800 (PST)
+Received: from mail-qc0-f180.google.com ([209.85.216.180]:33884 "EHLO
+	mail-qc0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751525AbaBNLbI (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 14 Feb 2014 06:31:08 -0500
+Received: by mail-qc0-f180.google.com with SMTP id i17so19578086qcy.25
+        for <linux-mmc@vger.kernel.org>; Fri, 14 Feb 2014 03:31:07 -0800 (PST)
+In-Reply-To: <52EF7A57.1020801@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>
-Cc: Russell King - ARM Linux <linux@arm.linux.org.uk>
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Seungwon Jeon <tgih.jun@samsung.com>, Olof Johansson <olof@lixom.net>
 
-Hi Chris,
+On 3 February 2014 12:15, Jaehoon Chung <jh80.chung@samsung.com> wrote:
+> mmc-hs200-1.8v and mmc-hs200-1.2v can be used to the general capability.
+>
+> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
 
-I have collected some patches, all from the patchset:
+Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
 
-mmc: Improve busy detection for MMC_CAP_WAIT_WHILE_BUSY
-
-I have also included two patches for the mmci host driver, which I
-would appreciate if you could carry through your tree since there are
-a dependencies.
-I have not yet got confirmation from Russell, that he's happy with
-these, but I expect he will tell if not.
-
-Kind regards
-Ulf Hansson
-
-
-The following changes since commit 7536d3f83aa42ba1a3b1c6b30c2b6d94a820cbb2:
-
-  mmc: core: Enable MMC_CAP2_CACHE_CTRL as default (2014-02-13 22:58:49 -0500)
-
-are available in the git repository at:
-
-  git://git.linaro.org/people/ulfh/mmc.git mmc-next_for_chris
-
-for you to fetch changes up to 13d0f23faabc2899a289630c42088c48d10a0872:
-
-  mmc: mmci: Enable support for busy detection for ux500 variant
-(2014-02-14 09:33:16 +0100)
-
-----------------------------------------------------------------
-Ulf Hansson (13):
-      mmc: core: Rename max_discard_to to max_busy_timeout
-      mmc: core: Rename cmd_timeout_ms to busy_timeout
-      mmc: core: Add ignore_crc flag to __mmc_switch
-      mmc: core: Minor simplifications to __mmc_switch
-      mmc: core: Fixup busy detection for mmc switch operations
-      mmc: core: Use generic CMD6 time while switching to eMMC HS200 mode
-      mmc: core: Respect host's max_busy_timeout when sending sleep cmd
-      mmc: block: Use R1 responses for stop cmds for read requests
-      mmc: block: Implement card_busy_detect() for busy detection
-      mmc: block: Respect hw busy detection in card_busy_detect()
-      mmc: block: Fixup busy detection while invoking stop cmd at recovery
-      mmc: mmci: Handle CMD irq before DATA irq
-      mmc: mmci: Enable support for busy detection for ux500 variant
-
- drivers/mmc/card/block.c   |  178 ++++++++++++++++++++++++++++----------------
- drivers/mmc/core/core.c    |   11 +--
- drivers/mmc/core/mmc.c     |   34 ++++++---
- drivers/mmc/core/mmc_ops.c |   64 ++++++++++------
- drivers/mmc/host/mmci.c    |   54 +++++++++++---
- drivers/mmc/host/mmci.h    |    2 +
- drivers/mmc/host/sdhci.c   |   10 +--
- include/linux/mmc/core.h   |    4 +-
- include/linux/mmc/host.h   |    2 +-
- 9 files changed, 241 insertions(+), 118 deletions(-)
+> ---
+> Changelog V3:
+>         - Use the "len" instead of "NULL"
+> Changelog V2:
+>         - Rename the mmc-hs200-1_8v/1_2v instead of "_caps2_"
+>         - Add the properties into Documentation/devicetree/bindings/mmc/mmc.txt
+>
+>  Documentation/devicetree/bindings/mmc/mmc.txt |    2 ++
+>  drivers/mmc/core/host.c                       |    4 ++++
+>  2 files changed, 6 insertions(+)
+>
+> diff --git a/Documentation/devicetree/bindings/mmc/mmc.txt b/Documentation/devicetree/bindings/mmc/mmc.txt
+> index 458b57f..4bb3894 100644
+> --- a/Documentation/devicetree/bindings/mmc/mmc.txt
+> +++ b/Documentation/devicetree/bindings/mmc/mmc.txt
+> @@ -29,6 +29,8 @@ Optional properties:
+>  - cap-power-off-card: powering off the card is safe
+>  - cap-sdio-irq: enable SDIO IRQ signalling on this interface
+>  - full-pwr-cycle: full power cycle of the card is supported
+> +- mmc-hs200-1_8v: HS200 mode(1.8V I/O) is supported
+> +- mmc-hs200-1_2v: HS200 mode(1.2V I/O) is supported
+>
+>  *NOTE* on CD and WP polarity. To use common for all SD/MMC host controllers line
+>  polarity properties, we have to fix the meaning of the "normal" and "inverted"
+> diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+> index 49bc403..4b81c93 100644
+> --- a/drivers/mmc/core/host.c
+> +++ b/drivers/mmc/core/host.c
+> @@ -429,6 +429,10 @@ int mmc_of_parse(struct mmc_host *host)
+>                 host->pm_caps |= MMC_PM_KEEP_POWER;
+>         if (of_find_property(np, "enable-sdio-wakeup", &len))
+>                 host->pm_caps |= MMC_PM_WAKE_SDIO_IRQ;
+> +       if (of_find_property(np, "mmc-hs200-1_8v", &len))
+> +               host->caps2 |= MMC_CAP2_HS200_1_8V_SDR;
+> +       if (of_find_property(np, "mmc-hs200-1_2v", &len))
+> +               host->caps2 |= MMC_CAP2_HS200_1_2V_SDR;
+>
+>         return 0;
+>
+> --
+> 1.7.9.5
