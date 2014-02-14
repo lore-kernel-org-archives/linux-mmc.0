@@ -1,51 +1,52 @@
-From: Nishanth Menon <nm@ti.com>
-Subject: Re: [PATCH] mmc: omap_hsmmc: Add support for Erratum 2.1.1.128 in
- device tree boot
-Date: Thu, 13 Feb 2014 23:48:54 -0600
-Message-ID: <52FDAE46.4060501@ti.com>
-References: <1390260542-22213-1-git-send-email-nm@ti.com> <52F0E098.3050404@ti.com> <52F104B7.6040606@ti.com> <52F2465A.6060804@ti.com> <52F246CC.6070600@ti.com> <20140213230554.GI28216@atomide.com>
+From: Lee Jones <lee.jones@linaro.org>
+Subject: Re: [PATCH v4 1/3] mfd: Add realtek USB card reader driver
+Date: Fri, 14 Feb 2014 09:44:27 +0000
+Message-ID: <20140214094427.GA7380@lee--X1>
+References: <1392199238-14500-1-git-send-email-rogerable@realtek.com>
+ <1392199238-14500-2-git-send-email-rogerable@realtek.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-omap-owner@vger.kernel.org>
-In-Reply-To: <20140213230554.GI28216@atomide.com>
-Sender: linux-omap-owner@vger.kernel.org
-To: Tony Lindgren <tony@atomide.com>
-Cc: Balaji T K <balajitk@ti.com>, Chris Ball <chris@printf.net>, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wi0-f179.google.com ([209.85.212.179]:48804 "EHLO
+	mail-wi0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751767AbaBNJoe (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 14 Feb 2014 04:44:34 -0500
+Received: by mail-wi0-f179.google.com with SMTP id hn9so275270wib.0
+        for <linux-mmc@vger.kernel.org>; Fri, 14 Feb 2014 01:44:33 -0800 (PST)
+Content-Disposition: inline
+In-Reply-To: <1392199238-14500-2-git-send-email-rogerable@realtek.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: rogerable@realtek.com
+Cc: Samuel Ortiz <sameo@linux.intel.com>, Chris Ball <cjb@laptop.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Maxim Levitsky <maximlevitsky@gmail.com>, Alex Dubov <oakad@yahoo.com>, Dan Carpenter <dan.carpenter@oracle.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, driverdev-devel@linuxdriverproject.org, wei_wang@realsil.com.cn, micky_ching@realsil.com.cn
 
-On 02/13/2014 05:05 PM, Tony Lindgren wrote:
-> * Nishanth Menon <nm@ti.com> [140205 06:15]:
->> On Wed 05 Feb 2014 08:10:34 AM CST, Balaji T K wrote:
->>>>>
->>>>> Rather than ti,errata.. specific property, something like
->>>>> caps no/disable multiblock read is more readable in my opinion, Otherwise
->>>>
->>>> Is'nt the better definition to state i have quirk X and allow the
->>>> driver to do the necessary thing/things needed to handle quirk X? in
->>>> this case, there is just one thing to do: broken multi_block_read, in
->>>> the case of other quirks, there might be more than 1 thing to do.. let
->>>> driver figure that out, dts just states the h/w capabilty or in this
->>>> case, the quirk capability.
->>>>
->>>
->>> But in this case there is only one. disable multi block read is more readable
->>> than the errata reference, No strong feelings though.
->>
->> Considering this might set an precedence for other quirk description, 
->> I'd like to leave it as it stands.
-> 
-> Hmm if this really depends on the hardware version, how about
-> just add new compatible flag ti,omap3430-rev-xyz-hsmmc that
-> allows the driver to deal with the errata?
-> 
+On Wed, 12 Feb 2014, rogerable@realtek.com wrote:
 
-yep - that is a very good idea. updated v2 series tested and posted:
-http://marc.info/?l=linux-omap&m=139235682727541&w=2
-https://patchwork.kernel.org/patch/3650061/
-https://patchwork.kernel.org/patch/3650031/
+> From: Roger Tseng <rogerable@realtek.com>
+>=20
+> Realtek USB card reader provides a channel to transfer command or dat=
+a to flash
+> memory cards. This driver exports host instances for mmc and memstick=
+ subsystems
+> and handles basic works.
+>=20
+> Signed-off-by: Roger Tseng <rogerable@realtek.com>
+> ---
+>  drivers/mfd/Kconfig          |  10 +
+>  drivers/mfd/Makefile         |   1 +
+>  drivers/mfd/rtsx_usb.c       | 760 +++++++++++++++++++++++++++++++++=
+++++++++++
+>  include/linux/mfd/rtsx_usb.h | 628 +++++++++++++++++++++++++++++++++=
+++
+>  4 files changed, 1399 insertions(+)
+>  create mode 100644 drivers/mfd/rtsx_usb.c
+>  create mode 100644 include/linux/mfd/rtsx_usb.h
 
+Applied again, thanks.
 
--- 
-Regards,
-Nishanth Menon
+--=20
+Lee Jones
+Linaro STMicroelectronics Landing Team Lead
+Linaro.org =E2=94=82 Open source software for ARM SoCs
+=46ollow Linaro: Facebook | Twitter | Blog
