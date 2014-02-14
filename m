@@ -1,68 +1,65 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v3 1/8] mmc: core: add the property for hs200
-Date: Fri, 14 Feb 2014 12:31:07 +0100
-Message-ID: <CAPDyKFrPGRbqgCb7p_gkSo8fqaXdKkT+zjwrKQpoqyc+O7KFMw@mail.gmail.com>
-References: <52EF7A57.1020801@samsung.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Subject: [PATCH 1/3] mmc: core: Add DT bindings for SD card's UHS bus speed modes
+Date: Fri, 14 Feb 2014 13:27:07 +0100
+Message-ID: <1392380829-8473-1-git-send-email-ulf.hansson@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qc0-f180.google.com ([209.85.216.180]:33884 "EHLO
-	mail-qc0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751525AbaBNLbI (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 14 Feb 2014 06:31:08 -0500
-Received: by mail-qc0-f180.google.com with SMTP id i17so19578086qcy.25
-        for <linux-mmc@vger.kernel.org>; Fri, 14 Feb 2014 03:31:07 -0800 (PST)
-In-Reply-To: <52EF7A57.1020801@samsung.com>
+Received: from mail-la0-f43.google.com ([209.85.215.43]:36071 "EHLO
+	mail-la0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751957AbaBNM1P (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 14 Feb 2014 07:27:15 -0500
+Received: by mail-la0-f43.google.com with SMTP id pv20so9161793lab.2
+        for <linux-mmc@vger.kernel.org>; Fri, 14 Feb 2014 04:27:13 -0800 (PST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Seungwon Jeon <tgih.jun@samsung.com>, Olof Johansson <olof@lixom.net>
+To: linux-mmc@vger.kernel.org, Chris Ball <chris@printf.net>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, devicetree@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
 
-On 3 February 2014 12:15, Jaehoon Chung <jh80.chung@samsung.com> wrote:
-> mmc-hs200-1.8v and mmc-hs200-1.2v can be used to the general capability.
->
-> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+Provide the option to configure these speed modes per host, for those
+host driver's that can't distinguish this in runtime.
 
-Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
+Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+---
+ Documentation/devicetree/bindings/mmc/mmc.txt |    5 +++++
+ drivers/mmc/core/host.c                       |   10 ++++++++++
+ 2 files changed, 15 insertions(+)
 
-> ---
-> Changelog V3:
->         - Use the "len" instead of "NULL"
-> Changelog V2:
->         - Rename the mmc-hs200-1_8v/1_2v instead of "_caps2_"
->         - Add the properties into Documentation/devicetree/bindings/mmc/mmc.txt
->
->  Documentation/devicetree/bindings/mmc/mmc.txt |    2 ++
->  drivers/mmc/core/host.c                       |    4 ++++
->  2 files changed, 6 insertions(+)
->
-> diff --git a/Documentation/devicetree/bindings/mmc/mmc.txt b/Documentation/devicetree/bindings/mmc/mmc.txt
-> index 458b57f..4bb3894 100644
-> --- a/Documentation/devicetree/bindings/mmc/mmc.txt
-> +++ b/Documentation/devicetree/bindings/mmc/mmc.txt
-> @@ -29,6 +29,8 @@ Optional properties:
->  - cap-power-off-card: powering off the card is safe
->  - cap-sdio-irq: enable SDIO IRQ signalling on this interface
->  - full-pwr-cycle: full power cycle of the card is supported
-> +- mmc-hs200-1_8v: HS200 mode(1.8V I/O) is supported
-> +- mmc-hs200-1_2v: HS200 mode(1.2V I/O) is supported
->
->  *NOTE* on CD and WP polarity. To use common for all SD/MMC host controllers line
->  polarity properties, we have to fix the meaning of the "normal" and "inverted"
-> diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
-> index 49bc403..4b81c93 100644
-> --- a/drivers/mmc/core/host.c
-> +++ b/drivers/mmc/core/host.c
-> @@ -429,6 +429,10 @@ int mmc_of_parse(struct mmc_host *host)
->                 host->pm_caps |= MMC_PM_KEEP_POWER;
->         if (of_find_property(np, "enable-sdio-wakeup", &len))
->                 host->pm_caps |= MMC_PM_WAKE_SDIO_IRQ;
-> +       if (of_find_property(np, "mmc-hs200-1_8v", &len))
-> +               host->caps2 |= MMC_CAP2_HS200_1_8V_SDR;
-> +       if (of_find_property(np, "mmc-hs200-1_2v", &len))
-> +               host->caps2 |= MMC_CAP2_HS200_1_2V_SDR;
->
->         return 0;
->
-> --
-> 1.7.9.5
+diff --git a/Documentation/devicetree/bindings/mmc/mmc.txt b/Documentation/devicetree/bindings/mmc/mmc.txt
+index 458b57f..bd2ce67 100644
+--- a/Documentation/devicetree/bindings/mmc/mmc.txt
++++ b/Documentation/devicetree/bindings/mmc/mmc.txt
+@@ -26,6 +26,11 @@ Optional properties:
+   this system, even if the controller claims it is.
+ - cap-sd-highspeed: SD high-speed timing is supported
+ - cap-mmc-highspeed: MMC high-speed timing is supported
++- sd-uhs-sdr12: SD UHS SDR12 speed is supported
++- sd-uhs-sdr25: SD UHS SDR25 speed is supported
++- sd-uhs-sdr50: SD UHS SDR50 speed is supported
++- sd-uhs-sdr104: SD UHS SDR104 speed is supported
++- sd-uhs-ddr50: SD UHS DDR50 speed is supported
+ - cap-power-off-card: powering off the card is safe
+ - cap-sdio-irq: enable SDIO IRQ signalling on this interface
+ - full-pwr-cycle: full power cycle of the card is supported
+diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+index 49bc403..2644d91 100644
+--- a/drivers/mmc/core/host.c
++++ b/drivers/mmc/core/host.c
+@@ -419,6 +419,16 @@ int mmc_of_parse(struct mmc_host *host)
+ 		host->caps |= MMC_CAP_SD_HIGHSPEED;
+ 	if (of_find_property(np, "cap-mmc-highspeed", &len))
+ 		host->caps |= MMC_CAP_MMC_HIGHSPEED;
++	if (of_find_property(np, "sd-uhs-sdr12", &len))
++		host->caps |= MMC_CAP_UHS_SDR12;
++	if (of_find_property(np, "sd-uhs-sdr25", &len))
++		host->caps |= MMC_CAP_UHS_SDR25;
++	if (of_find_property(np, "sd-uhs-sdr50", &len))
++		host->caps |= MMC_CAP_UHS_SDR50;
++	if (of_find_property(np, "sd-uhs-sdr104", &len))
++		host->caps |= MMC_CAP_UHS_SDR104;
++	if (of_find_property(np, "sd-uhs-ddr50", &len))
++		host->caps |= MMC_CAP_UHS_DDR50;
+ 	if (of_find_property(np, "cap-power-off-card", &len))
+ 		host->caps |= MMC_CAP_POWER_OFF_CARD;
+ 	if (of_find_property(np, "cap-sdio-irq", &len))
+-- 
+1.7.9.5
+
