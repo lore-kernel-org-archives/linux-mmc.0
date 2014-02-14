@@ -1,82 +1,114 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v3 1/8] mmc: core: add the property for hs200
-Date: Fri, 14 Feb 2014 13:30:27 +0100
-Message-ID: <CAPDyKFoxqHsurFicOiE=EQV4JoA3Og0_=m9Fr3kG6is1qUX7Qg@mail.gmail.com>
-References: <52EF7A57.1020801@samsung.com>
-	<CAPDyKFrPGRbqgCb7p_gkSo8fqaXdKkT+zjwrKQpoqyc+O7KFMw@mail.gmail.com>
+Subject: Re: [RFT][PATCH v3] mmc: change cb710-mmc platform power management
+ to use dev_pm_ops
+Date: Fri, 14 Feb 2014 15:32:47 +0100
+Message-ID: <CAPDyKFqYd=CqfTbO8cCqobg=StjYgeq6NhfKecbnPXc8B+W7FQ@mail.gmail.com>
+References: <1392240089-19489-1-git-send-email-shuah.kh@samsung.com>
+	<CAPDyKFoukY2PGNWimUbRqDr36eJ_+eBASJR4uac6nH4-kowmCQ@mail.gmail.com>
+	<52FCCD6D.6020704@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ve0-f178.google.com ([209.85.128.178]:38818 "EHLO
-	mail-ve0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751753AbaBNMab (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 14 Feb 2014 07:30:31 -0500
-Received: by mail-ve0-f178.google.com with SMTP id oy12so9515419veb.23
-        for <linux-mmc@vger.kernel.org>; Fri, 14 Feb 2014 04:30:29 -0800 (PST)
-In-Reply-To: <CAPDyKFrPGRbqgCb7p_gkSo8fqaXdKkT+zjwrKQpoqyc+O7KFMw@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-pm-owner@vger.kernel.org>
+In-Reply-To: <52FCCD6D.6020704@samsung.com>
+Sender: linux-pm-owner@vger.kernel.org
+To: Shuah Khan <shuah.kh@samsung.com>
+Cc: "Rafael J. Wysocki" <rjw@rjwysocki.net>, mirq-linux@rere.qmqm.pl, Chris Ball <chris@printf.net>, "linux-pm@vger.kernel.org" <linux-pm@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, Shuah Khan <shuahkhan@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Seungwon Jeon <tgih.jun@samsung.com>, Olof Johansson <olof@lixom.net>
 
-On 14 February 2014 12:31, Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> On 3 February 2014 12:15, Jaehoon Chung <jh80.chung@samsung.com> wrote:
->> mmc-hs200-1.8v and mmc-hs200-1.2v can be used to the general capability.
+On 13 February 2014 14:49, Shuah Khan <shuah.kh@samsung.com> wrote:
+> On 02/13/2014 02:47 AM, Ulf Hansson wrote:
 >>
->> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+>> On 12 February 2014 22:21, Shuah Khan <shuah.kh@samsung.com> wrote:
+>>>
+>>> Change cb710-mmc platform driver to register pm ops using dev_pm_ops
+>>> instead
+>>> of legacy pm_ops. The existing legacy suspend/resume routines are
+>>> identical
+>>> and simply clear IRQ mask in the device in case it got undefined during
+>>> sleep
+>>> state. Changed code to collapse suspend and resume into one .pm interface
+>>> for suspend and resume which gets installed for suspend, freeze,
+>>> poweroff,
+>>> thaw, restore, and resume states using SIMPLE_DEV_PM_OPS().
+>>>
+>>> Signed-off-by: Shuah Khan <shuah.kh@samsung.com>
+>>> ---
+>>>
+>>> patch v3: Addresses review comments on patch v2
+>>>
+>>>   drivers/mmc/host/cb710-mmc.c |   40
+>>> ++++++++++++++++------------------------
+>>>   1 file changed, 16 insertions(+), 24 deletions(-)
+>>>
+>>> diff --git a/drivers/mmc/host/cb710-mmc.c b/drivers/mmc/host/cb710-mmc.c
+>>> index 1087b4c..2dc7b2dc 100644
+>>> --- a/drivers/mmc/host/cb710-mmc.c
+>>> +++ b/drivers/mmc/host/cb710-mmc.c
+>>> @@ -662,26 +662,6 @@ static const struct mmc_host_ops cb710_mmc_host = {
+>>>          .get_cd = cb710_mmc_get_cd,
+>>>   };
+>>>
+>>> -#ifdef CONFIG_PM
+>>> -
+>>> -static int cb710_mmc_suspend(struct platform_device *pdev, pm_message_t
+>>> state)
+>>> -{
+>>> -       struct cb710_slot *slot = cb710_pdev_to_slot(pdev);
+>>> -
+>>> -       cb710_mmc_enable_irq(slot, 0, ~0);
+>>> -       return 0;
+>>> -}
+>>> -
+>>> -static int cb710_mmc_resume(struct platform_device *pdev)
+>>> -{
+>>> -       struct cb710_slot *slot = cb710_pdev_to_slot(pdev);
+>>> -
+>>> -       cb710_mmc_enable_irq(slot, 0, ~0);
+>>> -       return 0;
+>>> -}
+>>> -
+>>> -#endif /* CONFIG_PM */
+>>> -
+>>>   static int cb710_mmc_init(struct platform_device *pdev)
+>>>   {
+>>>          struct cb710_slot *slot = cb710_pdev_to_slot(pdev);
+>>> @@ -762,14 +742,26 @@ static int cb710_mmc_exit(struct platform_device
+>>> *pdev)
+>>>          return 0;
+>>>   }
+>>>
+>>> +#ifdef CONFIG_PM_SLEEP
+>>> +static int cb710_mmc_suspend_resume(struct device *dev)
+>>> +{
+>>> +       struct cb710_slot *slot =
+>>> cb710_pdev_to_slot(to_platform_device(dev));
+>>> +
+>>> +       cb710_mmc_enable_irq(slot, 0, ~0);
+>>> +       return 0;
+>>> +}
+>>> +#
+>>> +#define cb710_mmc_suspend_resume NULL
+>>
+>>
+>> You don't need this. The macro will handle this for you.
+>>
 >
-> Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
+> Without this compiles fail when CONFIG_PM_SLEEP is not defined.
 
-Hi Jaehoon,
+No it won't. You can remove the #else statement.
 
-While I was adding some more DT bindings for mmc, I decided to rebase
-and fold in this patch into my patchset.
-
-Hope your fine with it, otherwise just let me know.
+The functions don't have to be defined for !CONFIG_PM_SLEEP, since the
+macro will handle that.
 
 Kind regards
 Ulf Hansson
 
-
 >
->> ---
->> Changelog V3:
->>         - Use the "len" instead of "NULL"
->> Changelog V2:
->>         - Rename the mmc-hs200-1_8v/1_2v instead of "_caps2_"
->>         - Add the properties into Documentation/devicetree/bindings/mmc/mmc.txt
->>
->>  Documentation/devicetree/bindings/mmc/mmc.txt |    2 ++
->>  drivers/mmc/core/host.c                       |    4 ++++
->>  2 files changed, 6 insertions(+)
->>
->> diff --git a/Documentation/devicetree/bindings/mmc/mmc.txt b/Documentation/devicetree/bindings/mmc/mmc.txt
->> index 458b57f..4bb3894 100644
->> --- a/Documentation/devicetree/bindings/mmc/mmc.txt
->> +++ b/Documentation/devicetree/bindings/mmc/mmc.txt
->> @@ -29,6 +29,8 @@ Optional properties:
->>  - cap-power-off-card: powering off the card is safe
->>  - cap-sdio-irq: enable SDIO IRQ signalling on this interface
->>  - full-pwr-cycle: full power cycle of the card is supported
->> +- mmc-hs200-1_8v: HS200 mode(1.8V I/O) is supported
->> +- mmc-hs200-1_2v: HS200 mode(1.2V I/O) is supported
->>
->>  *NOTE* on CD and WP polarity. To use common for all SD/MMC host controllers line
->>  polarity properties, we have to fix the meaning of the "normal" and "inverted"
->> diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
->> index 49bc403..4b81c93 100644
->> --- a/drivers/mmc/core/host.c
->> +++ b/drivers/mmc/core/host.c
->> @@ -429,6 +429,10 @@ int mmc_of_parse(struct mmc_host *host)
->>                 host->pm_caps |= MMC_PM_KEEP_POWER;
->>         if (of_find_property(np, "enable-sdio-wakeup", &len))
->>                 host->pm_caps |= MMC_PM_WAKE_SDIO_IRQ;
->> +       if (of_find_property(np, "mmc-hs200-1_8v", &len))
->> +               host->caps2 |= MMC_CAP2_HS200_1_8V_SDR;
->> +       if (of_find_property(np, "mmc-hs200-1_2v", &len))
->> +               host->caps2 |= MMC_CAP2_HS200_1_2V_SDR;
->>
->>         return 0;
->>
->> --
->> 1.7.9.5
+> -- Shuah
+>
+>
+> --
+> Shuah Khan
+> Senior Linux Kernel Developer - Open Source Group
+> Samsung Research America(Silicon Valley)
+> shuah.kh@samsung.com | (970) 672-0658
