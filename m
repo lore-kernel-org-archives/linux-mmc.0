@@ -1,52 +1,73 @@
-From: Lee Jones <lee.jones@linaro.org>
-Subject: Re: [PATCH v4 1/3] mfd: Add realtek USB card reader driver
-Date: Fri, 14 Feb 2014 09:44:27 +0000
-Message-ID: <20140214094427.GA7380@lee--X1>
-References: <1392199238-14500-1-git-send-email-rogerable@realtek.com>
- <1392199238-14500-2-git-send-email-rogerable@realtek.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: [GIT PULL] MMC updates for mmc-next for 3.15, take 1
+Date: Fri, 14 Feb 2014 12:09:45 +0100
+Message-ID: <CAPDyKFrbLBbq8WJP3umUM4dWoRvm20AsYb9pxzMJRrnA47c6OQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wi0-f179.google.com ([209.85.212.179]:48804 "EHLO
-	mail-wi0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751767AbaBNJoe (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 14 Feb 2014 04:44:34 -0500
-Received: by mail-wi0-f179.google.com with SMTP id hn9so275270wib.0
-        for <linux-mmc@vger.kernel.org>; Fri, 14 Feb 2014 01:44:33 -0800 (PST)
-Content-Disposition: inline
-In-Reply-To: <1392199238-14500-2-git-send-email-rogerable@realtek.com>
+Received: from mail-qc0-f182.google.com ([209.85.216.182]:41946 "EHLO
+	mail-qc0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751098AbaBNLJp (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 14 Feb 2014 06:09:45 -0500
+Received: by mail-qc0-f182.google.com with SMTP id c9so19947791qcz.27
+        for <linux-mmc@vger.kernel.org>; Fri, 14 Feb 2014 03:09:45 -0800 (PST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: rogerable@realtek.com
-Cc: Samuel Ortiz <sameo@linux.intel.com>, Chris Ball <cjb@laptop.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Maxim Levitsky <maximlevitsky@gmail.com>, Alex Dubov <oakad@yahoo.com>, Dan Carpenter <dan.carpenter@oracle.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, driverdev-devel@linuxdriverproject.org, wei_wang@realsil.com.cn, micky_ching@realsil.com.cn
+To: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>
+Cc: Russell King - ARM Linux <linux@arm.linux.org.uk>
 
-On Wed, 12 Feb 2014, rogerable@realtek.com wrote:
+Hi Chris,
 
-> From: Roger Tseng <rogerable@realtek.com>
->=20
-> Realtek USB card reader provides a channel to transfer command or dat=
-a to flash
-> memory cards. This driver exports host instances for mmc and memstick=
- subsystems
-> and handles basic works.
->=20
-> Signed-off-by: Roger Tseng <rogerable@realtek.com>
-> ---
->  drivers/mfd/Kconfig          |  10 +
->  drivers/mfd/Makefile         |   1 +
->  drivers/mfd/rtsx_usb.c       | 760 +++++++++++++++++++++++++++++++++=
-++++++++++
->  include/linux/mfd/rtsx_usb.h | 628 +++++++++++++++++++++++++++++++++=
-++
->  4 files changed, 1399 insertions(+)
->  create mode 100644 drivers/mfd/rtsx_usb.c
->  create mode 100644 include/linux/mfd/rtsx_usb.h
+I have collected some patches, all from the patchset:
 
-Applied again, thanks.
+mmc: Improve busy detection for MMC_CAP_WAIT_WHILE_BUSY
 
---=20
-Lee Jones
-Linaro STMicroelectronics Landing Team Lead
-Linaro.org =E2=94=82 Open source software for ARM SoCs
-=46ollow Linaro: Facebook | Twitter | Blog
+I have also included two patches for the mmci host driver, which I
+would appreciate if you could carry through your tree since there are
+a dependencies.
+I have not yet got confirmation from Russell, that he's happy with
+these, but I expect he will tell if not.
+
+Kind regards
+Ulf Hansson
+
+
+The following changes since commit 7536d3f83aa42ba1a3b1c6b30c2b6d94a820cbb2:
+
+  mmc: core: Enable MMC_CAP2_CACHE_CTRL as default (2014-02-13 22:58:49 -0500)
+
+are available in the git repository at:
+
+  git://git.linaro.org/people/ulfh/mmc.git mmc-next_for_chris
+
+for you to fetch changes up to 13d0f23faabc2899a289630c42088c48d10a0872:
+
+  mmc: mmci: Enable support for busy detection for ux500 variant
+(2014-02-14 09:33:16 +0100)
+
+----------------------------------------------------------------
+Ulf Hansson (13):
+      mmc: core: Rename max_discard_to to max_busy_timeout
+      mmc: core: Rename cmd_timeout_ms to busy_timeout
+      mmc: core: Add ignore_crc flag to __mmc_switch
+      mmc: core: Minor simplifications to __mmc_switch
+      mmc: core: Fixup busy detection for mmc switch operations
+      mmc: core: Use generic CMD6 time while switching to eMMC HS200 mode
+      mmc: core: Respect host's max_busy_timeout when sending sleep cmd
+      mmc: block: Use R1 responses for stop cmds for read requests
+      mmc: block: Implement card_busy_detect() for busy detection
+      mmc: block: Respect hw busy detection in card_busy_detect()
+      mmc: block: Fixup busy detection while invoking stop cmd at recovery
+      mmc: mmci: Handle CMD irq before DATA irq
+      mmc: mmci: Enable support for busy detection for ux500 variant
+
+ drivers/mmc/card/block.c   |  178 ++++++++++++++++++++++++++++----------------
+ drivers/mmc/core/core.c    |   11 +--
+ drivers/mmc/core/mmc.c     |   34 ++++++---
+ drivers/mmc/core/mmc_ops.c |   64 ++++++++++------
+ drivers/mmc/host/mmci.c    |   54 +++++++++++---
+ drivers/mmc/host/mmci.h    |    2 +
+ drivers/mmc/host/sdhci.c   |   10 +--
+ include/linux/mmc/core.h   |    4 +-
+ include/linux/mmc/host.h   |    2 +-
+ 9 files changed, 241 insertions(+), 118 deletions(-)
