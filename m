@@ -1,40 +1,130 @@
-From: Tony Lindgren <tony@atomide.com>
-Subject: Re: [PATCH V2 1/2] mmc: omap_hsmmc: Add support for quirky omap3
- hsmmc controller
-Date: Fri, 14 Feb 2014 08:31:03 -0800
-Message-ID: <20140214163102.GA21592@atomide.com>
-References: <1392356749-32091-1-git-send-email-nm@ti.com>
- <1392356749-32091-2-git-send-email-nm@ti.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-doc-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <1392356749-32091-2-git-send-email-nm@ti.com>
-Sender: linux-doc-owner@vger.kernel.org
-To: Nishanth Menon <nm@ti.com>
-Cc: Balaji T K <balajitk@ti.com>, Chris Ball <chris@printf.net>, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, linux-kernel@vger.kernel.org, linux-doc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, devicetree@vger.kernel.org, Felipe Balbi <balbi@ti.com>
+From: Thomas Gleixner <tglx@linutronix.de>
+Subject: [patch 2/2] genirq: Provide irq_wake_thread()
+Date: Sat, 15 Feb 2014 00:55:19 -0000
+Message-ID: <20140215003823.772565780@linutronix.de>
+References: <20140215002742.507053194@linutronix.de>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from www.linutronix.de ([62.245.132.108]:45558 "EHLO
+	Galois.linutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752934AbaBOAzO (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 14 Feb 2014 19:55:14 -0500
+Content-Disposition: inline; filename=genirq-irq-kick-thread.patch
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: LKML <linux-kernel@vger.kernel.org>
+Cc: Russell King <linux@arm.linux.org.uk>, Chris Ball <chris@printf.net>, linux-mmc@vger.kernel.org, Ingo Molnar <mingo@elte.hu>, Peter Zijlstra <peterz@infradead.org>
 
-* Nishanth Menon <nm@ti.com> [140213 21:48]:
-> When device is booted using devicetree, platforms impacted by Erratum
-> 2.1.1.128 is not detected easily in the mmc driver. This erratum
-> indicates that the module cannot do multi-block transfers. Platforms
-> such as LDP which use OMAP3 ES revision prior to ES3.0 are impacted by
-> this.
-> 
-> Provide a new compatible property "ti,omap3-pre-es3-hsmmc" to allow
-> driver to determine if driver needs to implement quirks associated
-> with the specific module version (primarily because the IP revision
-> information is not sufficient for the same).
-> 
-> Signed-off-by: Nishanth Menon <nm@ti.com>
+In course of the sdhci/sdio discussion with Russell about killing the
+sdio kthread hackery we discovered the need to be able to wake an
+interrupt thread from software.
 
-Looks good to me, would be good to get this into the -rc cycle
-as LDP is one of the automated boot testing boards for us.
+The rationale for this is, that sdio hardware can lack proper
+interrupt support for certain features. So the driver needs to poll
+the status registers, but at the same time it needs to be woken up by
+an hardware interrupt.
 
-If you guys want me to pick up both of the patches let me know,
-otherwise feel free to add my ack.
+To be able to get rid of the home brewn kthread construct of sdio we
+need a way to wake an irq thread independent of an actual hardware
+interrupt.
 
-Regards,
+Provide an irq_wake_thread() function which wakes up the thread which
+is associated to a given dev_id. This allows sdio to invoke the irq
+thread from the hardware irq handler via the IRQ_WAKE_THREAD return
+value and provides a possibility to wake it via a timer for the
+polling scenarios. That allows to simplify the sdio logic
+significantly.
 
-Tony
+Signed-off-by: Thomas Gleixner <tglx@linutronix.de>
+---
+ include/linux/interrupt.h |    1 +
+ kernel/irq/handle.c       |    4 ++--
+ kernel/irq/internals.h    |    1 +
+ kernel/irq/manage.c       |   27 +++++++++++++++++++++++++++
+ 4 files changed, 31 insertions(+), 2 deletions(-)
+
+Index: linux-2.6/include/linux/interrupt.h
+===================================================================
+--- linux-2.6.orig/include/linux/interrupt.h
++++ linux-2.6/include/linux/interrupt.h
+@@ -183,6 +183,7 @@ extern void disable_irq(unsigned int irq
+ extern void disable_percpu_irq(unsigned int irq);
+ extern void enable_irq(unsigned int irq);
+ extern void enable_percpu_irq(unsigned int irq, unsigned int type);
++extern void irq_wake_thread(unsigned int irq, void *dev_id);
+ 
+ /* The following three functions are for the core kernel use only. */
+ extern void suspend_device_irqs(void);
+Index: linux-2.6/kernel/irq/handle.c
+===================================================================
+--- linux-2.6.orig/kernel/irq/handle.c
++++ linux-2.6/kernel/irq/handle.c
+@@ -51,7 +51,7 @@ static void warn_no_thread(unsigned int
+ 	       "but no thread function available.", irq, action->name);
+ }
+ 
+-static void irq_wake_thread(struct irq_desc *desc, struct irqaction *action)
++void __irq_wake_thread(struct irq_desc *desc, struct irqaction *action)
+ {
+ 	/*
+ 	 * In case the thread crashed and was killed we just pretend that
+@@ -157,7 +157,7 @@ handle_irq_event_percpu(struct irq_desc
+ 				break;
+ 			}
+ 
+-			irq_wake_thread(desc, action);
++			__irq_wake_thread(desc, action);
+ 
+ 			/* Fall through to add to randomness */
+ 		case IRQ_HANDLED:
+Index: linux-2.6/kernel/irq/internals.h
+===================================================================
+--- linux-2.6.orig/kernel/irq/internals.h
++++ linux-2.6/kernel/irq/internals.h
+@@ -82,6 +82,7 @@ irqreturn_t handle_irq_event(struct irq_
+ /* Resending of interrupts :*/
+ void check_irq_resend(struct irq_desc *desc, unsigned int irq);
+ bool irq_wait_for_poll(struct irq_desc *desc);
++void __irq_wake_thread(struct irq_desc *desc, struct irqaction *action);
+ 
+ #ifdef CONFIG_PROC_FS
+ extern void register_irq_proc(unsigned int irq, struct irq_desc *desc);
+Index: linux-2.6/kernel/irq/manage.c
+===================================================================
+--- linux-2.6.orig/kernel/irq/manage.c
++++ linux-2.6/kernel/irq/manage.c
+@@ -908,6 +908,33 @@ static int irq_thread(void *data)
+ 	return 0;
+ }
+ 
++/**
++ *	irq_wake_thread - wake the irq thread for the action identified by dev_id
++ *	@irq:		Interrupt line
++ *	@dev_id:	Device identity for which the thread should be woken
++ *
++ */
++void irq_wake_thread(unsigned int irq, void *dev_id)
++{
++	struct irq_desc *desc = irq_to_desc(irq);
++	struct irqaction *action;
++	unsigned long flags;
++
++	if (!desc || WARN_ON(irq_settings_is_per_cpu_devid(desc)))
++		return;
++
++	raw_spin_lock_irqsave(&desc->lock, flags);
++	for (action = desc->action; action; action = action->next) {
++		if (action->dev_id == dev_id) {
++			if (action->thread)
++				__irq_wake_thread(desc, action);
++			break;
++		}
++	}
++	raw_spin_unlock_irqrestore(&desc->lock, flags);
++}
++EXPORT_SYMBOL_GPL(irq_wake_thread);
++
+ static void irq_setup_forced_threading(struct irqaction *new)
+ {
+ 	if (!force_irqthreads)
+
+
