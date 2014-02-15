@@ -1,44 +1,35 @@
-From: Peter Zijlstra <peterz@infradead.org>
-Subject: Re: [patch 2/2] genirq: Provide irq_wake_thread()
-Date: Sat, 15 Feb 2014 10:50:28 +0100
-Message-ID: <20140215095028.GH14089@laptop.programming.kicks-ass.net>
-References: <20140215002742.507053194@linutronix.de>
- <20140215003823.772565780@linutronix.de>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+From: Alexander Shiyan <shc_work@mail.ru>
+Subject: [PATCH RESEND] mmc: core: trivial: Typo fix
+Date: Sat, 15 Feb 2014 15:40:58 +0400
+Message-ID: <1392464458-5701-1-git-send-email-shc_work@mail.ru>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from merlin.infradead.org ([205.233.59.134]:33225 "EHLO
-	merlin.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752487AbaBOJuj (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 15 Feb 2014 04:50:39 -0500
-Content-Disposition: inline
-In-Reply-To: <20140215003823.772565780@linutronix.de>
+Received: from fallback2.mail.ru ([94.100.176.87]:35234 "EHLO
+	fallback2.mail.ru" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753052AbaBOLl3 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 15 Feb 2014 06:41:29 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Thomas Gleixner <tglx@linutronix.de>
-Cc: LKML <linux-kernel@vger.kernel.org>, Russell King <linux@arm.linux.org.uk>, Chris Ball <chris@printf.net>, linux-mmc@vger.kernel.org, Ingo Molnar <mingo@elte.hu>
+To: linux-mmc@vger.kernel.org
+Cc: Chris Ball <chris@printf.net>, Jiri Kosina <trivial@kernel.org>, Alexander Shiyan <shc_work@mail.ru>
 
-On Sat, Feb 15, 2014 at 12:55:19AM -0000, Thomas Gleixner wrote:
-> In course of the sdhci/sdio discussion with Russell about killing the
-> sdio kthread hackery we discovered the need to be able to wake an
-> interrupt thread from software.
-> 
-> The rationale for this is, that sdio hardware can lack proper
-> interrupt support for certain features. So the driver needs to poll
-> the status registers, but at the same time it needs to be woken up by
-> an hardware interrupt.
-> 
-> To be able to get rid of the home brewn kthread construct of sdio we
-> need a way to wake an irq thread independent of an actual hardware
-> interrupt.
-> 
-> Provide an irq_wake_thread() function which wakes up the thread which
-> is associated to a given dev_id. This allows sdio to invoke the irq
-> thread from the hardware irq handler via the IRQ_WAKE_THREAD return
-> value and provides a possibility to wake it via a timer for the
-> polling scenarios. That allows to simplify the sdio logic
-> significantly.
-> 
-> Signed-off-by: Thomas Gleixner <tglx@linutronix.de>
+Signed-off-by: Alexander Shiyan <shc_work@mail.ru>
+---
+ drivers/mmc/core/host.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-Acked-by: Peter Zijlstra <peterz@infradead.org>
+diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+index 49bc403..114f6bd 100644
+--- a/drivers/mmc/core/host.c
++++ b/drivers/mmc/core/host.c
+@@ -337,7 +337,7 @@ int mmc_of_parse(struct mmc_host *host)
+ 		break;
+ 	default:
+ 		dev_err(host->parent,
+-			"Invalid \"bus-width\" value %ud!\n", bus_width);
++			"Invalid \"bus-width\" value %u!\n", bus_width);
+ 		return -EINVAL;
+ 	}
+ 
+-- 
+1.8.3.2
+
