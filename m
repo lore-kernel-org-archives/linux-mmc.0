@@ -1,60 +1,60 @@
 From: Seungwon Jeon <tgih.jun@samsung.com>
-Subject: [PATCH v2 3/7] mmc: omap: clarify DDR timing mode between SD-UHS and
- eMMC
-Date: Sat, 15 Feb 2014 23:09:07 +0900
-Message-ID: <006201cf2a57$7d9c7280$78d55780$%jun@samsung.com>
+Subject: [PATCH v2 4/7] mmc: sh_mmcif: clarify DDR timing mode between SD-UHS
+ and eMMC
+Date: Sat, 15 Feb 2014 23:09:14 +0900
+Message-ID: <006301cf2a57$81fa0040$85ee00c0$%jun@samsung.com>
 References: <1383653403-10049-1-git-send-email-ulf.hansson@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout2.samsung.com ([203.254.224.25]:44263 "EHLO
+Received: from mailout2.samsung.com ([203.254.224.25]:44273 "EHLO
 	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753046AbaBOOJI (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 15 Feb 2014 09:09:08 -0500
-Received: from epcpsbgr4.samsung.com
- (u144.gpu120.samsung.co.kr [203.254.230.144])
+	with ESMTP id S1753046AbaBOOJP (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 15 Feb 2014 09:09:15 -0500
+Received: from epcpsbgr5.samsung.com
+ (u145.gpu120.samsung.co.kr [203.254.230.145])
  by mailout2.samsung.com (Oracle Communications Messaging Server 7u4-24.01
  (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTP id <0N11005Z2JB79640@mailout2.samsung.com> for
- linux-mmc@vger.kernel.org; Sat, 15 Feb 2014 23:09:07 +0900 (KST)
+ with ESMTP id <0N11005Z6JBE9640@mailout2.samsung.com> for
+ linux-mmc@vger.kernel.org; Sat, 15 Feb 2014 23:09:14 +0900 (KST)
 In-reply-to: 
 Content-language: ko
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
-Cc: 'Chris Ball' <chris@printf.net>, 'Balaji T K' <balajitk@ti.com>
+Cc: 'Chris Ball' <chris@printf.net>, 'Ulf Hansson' <ulf.hansson@linaro.org>, 'Guennadi Liakhovetski' <g.liakhovetski@gmx.de>
 
 Replaced UHS_DDR50 with MMC_DDR52.
 
+CC: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
-Acked-by: Balaji T K <balajitk@ti.com>
 ---
- drivers/mmc/host/omap_hsmmc.c |    4 ++--
- 1 files changed, 2 insertions(+), 2 deletions(-)
+ drivers/mmc/host/sh_mmcif.c |    9 +++++----
+ 1 files changed, 5 insertions(+), 4 deletions(-)
 
-diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index dbd32ad..cca397e 100644
---- a/drivers/mmc/host/omap_hsmmc.c
-+++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -540,7 +540,7 @@ static void omap_hsmmc_set_clock(struct omap_hsmmc_host *host)
- 	 *	- MMC/SD clock coming out of controller > 25MHz
- 	 */
- 	if ((mmc_slot(host).features & HSMMC_HAS_HSPE_SUPPORT) &&
--	    (ios->timing != MMC_TIMING_UHS_DDR50) &&
-+	    (ios->timing != MMC_TIMING_MMC_DDR52) &&
- 	    ((OMAP_HSMMC_READ(host->base, CAPA) & HSS) == HSS)) {
- 		regval = OMAP_HSMMC_READ(host->base, HCTL);
- 		if (clkdiv && (clk_get_rate(host->fclk)/clkdiv) > 25000000)
-@@ -560,7 +560,7 @@ static void omap_hsmmc_set_bus_width(struct omap_hsmmc_host *host)
- 	u32 con;
- 
- 	con = OMAP_HSMMC_READ(host->base, CON);
--	if (ios->timing == MMC_TIMING_UHS_DDR50)
-+	if (ios->timing == MMC_TIMING_MMC_DDR52)
- 		con |= DDR;	/* configure in DDR mode */
- 	else
- 		con &= ~DDR;
+diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
+index 54730f4..656fbba 100644
+--- a/drivers/mmc/host/sh_mmcif.c
++++ b/drivers/mmc/host/sh_mmcif.c
+@@ -803,12 +803,13 @@ static u32 sh_mmcif_set_cmd(struct sh_mmcif_host *host,
+ 			break;
+ 		}
+ 		switch (host->timing) {
+-		case MMC_TIMING_UHS_DDR50:
++		case MMC_TIMING_MMC_DDR52:
+ 			/*
+ 			 * MMC core will only set this timing, if the host
+-			 * advertises the MMC_CAP_UHS_DDR50 capability. MMCIF
+-			 * implementations with this capability, e.g. sh73a0,
+-			 * will have to set it in their platform data.
++			 * advertises the MMC_CAP_1_8V_DDR/MMC_CAP_1_2V_DDR
++			 * capability. MMCIF implementations with this
++			 * capability, e.g. sh73a0, will have to set it
++			 * in their platform data.
+ 			 */
+ 			tmp |= CMD_SET_DARS;
+ 			break;
 -- 
 1.7.0.4
 
