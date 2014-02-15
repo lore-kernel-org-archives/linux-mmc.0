@@ -1,130 +1,147 @@
 From: Thomas Gleixner <tglx@linutronix.de>
-Subject: [patch 2/2] genirq: Provide irq_wake_thread()
-Date: Sat, 15 Feb 2014 00:55:19 -0000
-Message-ID: <20140215003823.772565780@linutronix.de>
+Subject: [patch 1/2] genirq: Provide synchronize_hardirq()
+Date: Sat, 15 Feb 2014 00:55:18 -0000
+Message-ID: <20140215003823.653236081@linutronix.de>
 References: <20140215002742.507053194@linutronix.de>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from www.linutronix.de ([62.245.132.108]:45558 "EHLO
-	Galois.linutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752934AbaBOAzO (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 14 Feb 2014 19:55:14 -0500
-Content-Disposition: inline; filename=genirq-irq-kick-thread.patch
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline; filename=genirq-synchronize-hardirq.patch
+Sender: linux-kernel-owner@vger.kernel.org
 To: LKML <linux-kernel@vger.kernel.org>
 Cc: Russell King <linux@arm.linux.org.uk>, Chris Ball <chris@printf.net>, linux-mmc@vger.kernel.org, Ingo Molnar <mingo@elte.hu>, Peter Zijlstra <peterz@infradead.org>
+List-Id: linux-mmc@vger.kernel.org
 
-In course of the sdhci/sdio discussion with Russell about killing the
-sdio kthread hackery we discovered the need to be able to wake an
-interrupt thread from software.
+synchronize_irq() waits for hard irq and threaded handlers to complete
+before returning. For some special cases we only need to make sure
+that the hard interrupt part of the irq line is not in progress when
+we disabled the - possibly shared - interrupt at the device level.
 
-The rationale for this is, that sdio hardware can lack proper
-interrupt support for certain features. So the driver needs to poll
-the status registers, but at the same time it needs to be woken up by
-an hardware interrupt.
+A proper use case for this was provided by Russell. The sdhci driver
+requires some irq triggered functions to be run in thread context. The
+current implementation of the thread context is a sdio private kthread
+construct, which has quite some shortcomings. These can be avoided
+when the thread is directly associated to the device interrupt via the
+generic threaded irq infrastructure.
 
-To be able to get rid of the home brewn kthread construct of sdio we
-need a way to wake an irq thread independent of an actual hardware
-interrupt.
+Though there is a corner case related to run time power management
+where one side disables the device interrupts at the device level and
+needs to make sure, that an already running hard interrupt handler has
+completed before proceeding further. Though that hard interrupt
+handler might wake the associated thread, which in turn can request
+the runtime PM to reenable the device. Using synchronize_irq() leads
+to an immediate deadlock of the irq thread waiting for the PM lock and
+the synchronize_irq() waiting for the irq thread to complete.
 
-Provide an irq_wake_thread() function which wakes up the thread which
-is associated to a given dev_id. This allows sdio to invoke the irq
-thread from the hardware irq handler via the IRQ_WAKE_THREAD return
-value and provides a possibility to wake it via a timer for the
-polling scenarios. That allows to simplify the sdio logic
-significantly.
+Due to the fact that it is sufficient for this case to ensure that no
+hard irq handler is executing a new function which avoids the check
+for the thread is required.
+
+Add a function, which just monitors the hard irq parts and ignores the
+threaded handlers.
 
 Signed-off-by: Thomas Gleixner <tglx@linutronix.de>
 ---
- include/linux/interrupt.h |    1 +
- kernel/irq/handle.c       |    4 ++--
- kernel/irq/internals.h    |    1 +
- kernel/irq/manage.c       |   27 +++++++++++++++++++++++++++
- 4 files changed, 31 insertions(+), 2 deletions(-)
+ include/linux/hardirq.h |    1 
+ kernel/irq/manage.c     |   67 +++++++++++++++++++++++++++++++++---------------
+ 2 files changed, 48 insertions(+), 20 deletions(-)
 
-Index: linux-2.6/include/linux/interrupt.h
+Index: linux-2.6/include/linux/hardirq.h
 ===================================================================
---- linux-2.6.orig/include/linux/interrupt.h
-+++ linux-2.6/include/linux/interrupt.h
-@@ -183,6 +183,7 @@ extern void disable_irq(unsigned int irq
- extern void disable_percpu_irq(unsigned int irq);
- extern void enable_irq(unsigned int irq);
- extern void enable_percpu_irq(unsigned int irq, unsigned int type);
-+extern void irq_wake_thread(unsigned int irq, void *dev_id);
+--- linux-2.6.orig/include/linux/hardirq.h
++++ linux-2.6/include/linux/hardirq.h
+@@ -9,6 +9,7 @@
  
- /* The following three functions are for the core kernel use only. */
- extern void suspend_device_irqs(void);
-Index: linux-2.6/kernel/irq/handle.c
-===================================================================
---- linux-2.6.orig/kernel/irq/handle.c
-+++ linux-2.6/kernel/irq/handle.c
-@@ -51,7 +51,7 @@ static void warn_no_thread(unsigned int
- 	       "but no thread function available.", irq, action->name);
- }
  
--static void irq_wake_thread(struct irq_desc *desc, struct irqaction *action)
-+void __irq_wake_thread(struct irq_desc *desc, struct irqaction *action)
- {
- 	/*
- 	 * In case the thread crashed and was killed we just pretend that
-@@ -157,7 +157,7 @@ handle_irq_event_percpu(struct irq_desc
- 				break;
- 			}
+ extern void synchronize_irq(unsigned int irq);
++extern void synchronize_hardirq(unsigned int irq);
  
--			irq_wake_thread(desc, action);
-+			__irq_wake_thread(desc, action);
+ #if defined(CONFIG_TINY_RCU)
  
- 			/* Fall through to add to randomness */
- 		case IRQ_HANDLED:
-Index: linux-2.6/kernel/irq/internals.h
-===================================================================
---- linux-2.6.orig/kernel/irq/internals.h
-+++ linux-2.6/kernel/irq/internals.h
-@@ -82,6 +82,7 @@ irqreturn_t handle_irq_event(struct irq_
- /* Resending of interrupts :*/
- void check_irq_resend(struct irq_desc *desc, unsigned int irq);
- bool irq_wait_for_poll(struct irq_desc *desc);
-+void __irq_wake_thread(struct irq_desc *desc, struct irqaction *action);
- 
- #ifdef CONFIG_PROC_FS
- extern void register_irq_proc(unsigned int irq, struct irq_desc *desc);
 Index: linux-2.6/kernel/irq/manage.c
 ===================================================================
 --- linux-2.6.orig/kernel/irq/manage.c
 +++ linux-2.6/kernel/irq/manage.c
-@@ -908,6 +908,33 @@ static int irq_thread(void *data)
- 	return 0;
- }
+@@ -32,24 +32,10 @@ static int __init setup_forced_irqthread
+ early_param("threadirqs", setup_forced_irqthreads);
+ #endif
  
+-/**
+- *	synchronize_irq - wait for pending IRQ handlers (on other CPUs)
+- *	@irq: interrupt number to wait for
+- *
+- *	This function waits for any pending IRQ handlers for this interrupt
+- *	to complete before returning. If you use this function while
+- *	holding a resource the IRQ handler may need you will deadlock.
+- *
+- *	This function may be called - with care - from IRQ context.
+- */
+-void synchronize_irq(unsigned int irq)
++static void __synchronize_hardirq(struct irq_desc *desc)
+ {
+-	struct irq_desc *desc = irq_to_desc(irq);
+ 	bool inprogress;
+ 
+-	if (!desc)
+-		return;
+-
+ 	do {
+ 		unsigned long flags;
+ 
+@@ -67,12 +53,53 @@ void synchronize_irq(unsigned int irq)
+ 
+ 		/* Oops, that failed? */
+ 	} while (inprogress);
++}
+ 
+-	/*
+-	 * We made sure that no hardirq handler is running. Now verify
+-	 * that no threaded handlers are active.
+-	 */
+-	wait_event(desc->wait_for_threads, !atomic_read(&desc->threads_active));
 +/**
-+ *	irq_wake_thread - wake the irq thread for the action identified by dev_id
-+ *	@irq:		Interrupt line
-+ *	@dev_id:	Device identity for which the thread should be woken
++ *	synchronize_hardirq - wait for pending hard IRQ handlers (on other CPUs)
++ *	@irq: interrupt number to wait for
 + *
++ *	This function waits for any pending hard IRQ handlers for this
++ *	interrupt to complete before returning. If you use this
++ *	function while holding a resource the IRQ handler may need you
++ *	will deadlock. It does not take associated threaded handlers into
++ *	account.
++ *
++ *	This function may be called - with care - from IRQ context.
 + */
-+void irq_wake_thread(unsigned int irq, void *dev_id)
++void synchronize_hardirq(unsigned int irq)
 +{
 +	struct irq_desc *desc = irq_to_desc(irq);
-+	struct irqaction *action;
-+	unsigned long flags;
 +
-+	if (!desc || WARN_ON(irq_settings_is_per_cpu_devid(desc)))
-+		return;
-+
-+	raw_spin_lock_irqsave(&desc->lock, flags);
-+	for (action = desc->action; action; action = action->next) {
-+		if (action->dev_id == dev_id) {
-+			if (action->thread)
-+				__irq_wake_thread(desc, action);
-+			break;
-+		}
-+	}
-+	raw_spin_unlock_irqrestore(&desc->lock, flags);
++	if (desc)
++		__synchronize_hardirq(desc);
 +}
-+EXPORT_SYMBOL_GPL(irq_wake_thread);
++EXPORT_SYMBOL(synchronize_hardirq);
 +
- static void irq_setup_forced_threading(struct irqaction *new)
- {
- 	if (!force_irqthreads)
-
-
++/**
++ *	synchronize_irq - wait for pending IRQ handlers (on other CPUs)
++ *	@irq: interrupt number to wait for
++ *
++ *	This function waits for any pending IRQ handlers for this interrupt
++ *	to complete before returning. If you use this function while
++ *	holding a resource the IRQ handler may need you will deadlock.
++ *
++ *	This function may be called - with care - from IRQ context.
++ */
++void synchronize_irq(unsigned int irq)
++{
++	struct irq_desc *desc = irq_to_desc(irq);
++
++	if (desc) {
++		__synchronize_hardirq(desc);
++		/*
++		 * We made sure that no hardirq handler is
++		 * running. Now verify that no threaded handlers are
++		 * active.
++		 */
++		wait_event(desc->wait_for_threads,
++			   !atomic_read(&desc->threads_active));
++	}
+ }
+ EXPORT_SYMBOL(synchronize_irq);
+ 
