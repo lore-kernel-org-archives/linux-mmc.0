@@ -1,86 +1,114 @@
-From: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Subject: Re: [PATCH 1/3] mmc: add support for power-on sequencing through DT
-Date: Sat, 15 Feb 2014 22:03:19 +0000
-Message-ID: <20140215220319.GM30257@n2100.arm.linux.org.uk>
-References: <1390190215-22700-1-git-send-email-olof@lixom.net> <1580658.FIe4en5bEU@wuerfel> <52FF6A16.5080201@gmail.com> <1528854.BAQRr94nzx@wuerfel> <20140215205159.GL30257@n2100.arm.linux.org.uk> <52FFDDA6.6020607@gmail.com>
+From: David =?utf-8?q?Lanzend=C3=B6rfer?= <david.lanzendoerfer-Z7Kmv9EsliU@public.gmane.org>
+Subject: [PATCH v6 0/8]
+Date: Sun, 16 Feb 2014 00:33:12 +0100
+Message-ID: <20140215233011.30460.27261.stgit@dizzy-6.o2s.ch>
+Reply-To: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from gw-1.arm.linux.org.uk ([78.32.30.217]:37561 "EHLO
-	pandora.arm.linux.org.uk" rhost-flags-OK-OK-OK-FAIL)
-	by vger.kernel.org with ESMTP id S1753138AbaBOWDb (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 15 Feb 2014 17:03:31 -0500
-Content-Disposition: inline
-In-Reply-To: <52FFDDA6.6020607@gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
+Return-path: <linux-sunxi+bncBD2JL37LXEKRBPHS76LQKGQEV73MTZI-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Post: <http://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Help: <http://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Archive: <http://groups.google.com/group/linux-sunxi>
+Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+List-Subscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Unsubscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+To: devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Laurent Pinchart <laurent.pinchart+renesas-ryLnwIuWjnjg/C1BVhZhaw@public.gmane.org>, Mike Turquette <mturquette-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Simon Baatz <gmbnomis-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Emilio =?utf-8?b?TMOzcGV6?= <emilio-0Z03zUJReD5OxF6Tv1QG9Q@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, H Hartley Sweeten <hsweeten-3FF4nKcrg1dE2c76skzGb0EOCMrvLtNR@public.gmane.org>, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, Tejun Heo <tj-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, Guennadi Liakhovetski <g.liakhovetski-Mmb7MZpHnFY@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: Tomasz Figa <tomasz.figa@gmail.com>
-Cc: Arnd Bergmann <arnd@arndb.de>, linux-arm-kernel@lists.infradead.org, mark.rutland@arm.com, devicetree@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Pawel Moll <pawel.moll@arm.com>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Tomasz Figa <t.figa@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, robh+dt@kernel.org, Kumar Gala <galak@codeaurora.org>, Olof Johansson <olof@lixom.net>, Fabio Estevam <festevam@gmail.com>, Sascha Hauer <s.hauer@pengutronix.de>
 
-On Sat, Feb 15, 2014 at 10:35:34PM +0100, Tomasz Figa wrote:
-> If you change your hardware in an incompatible way and such change can't  
-> be detected automatically (i.e. the chip is non-discoverable) then I  
-> don't know how you could let the OS know about this change in any other  
-> way than providing it with the information it needs.
+Hello
+The following patchset adds support for the SD/MMC host found in the Allwin=
+ner SoCs.
+It contains all the necessary modifications for clock environment and also =
+the device
+tree script modification which add it to all the boards using it.
+The clock environment function needed for phase offset configuration has
+been proposed and implemented by Emilio.
+A lot of work and cleanup has been done by Hans de Goede. Special thanks to=
+ him!
+This patchset is the 4th attempt to send this driver upstream.
 
-I'm not talking about such major changes.  I'm talking about minor
-changes where the SDIO device may change, but everything else stays
-compatible.
+Changes since v1:
+-Using mmc_of_parse instead of diy dt parsing
+-Adding nodes for all mmc controller to the dtsi files,
+ including sofar unused controllers
+-Using generic GPIO slot library for WP/CD
+-Adding additional MMC device nodes into DTSI files
 
-Why should such a situation be forced down the path of having a different
-DT file to specify the different SDIO device, when the SDIO device itself
-is discoverable?  For example, BRCM4329 to a BRCM4330.
+Changes since v2:
+-Add missing Signed-off-by tags
+-Stop using __raw_readl / __raw_writel so that barriers are properly used
+-Adding missing new lines
+-Adding missing patch for automatic reparenting of clocks
 
-Look, let's think seriously about this.  Let's say we have a platform
-where there's already two different DT files - one for models with a
-single CPU, and a different DT file for a quad CPU.  This is fine,
-users generally know which model they have, and can choose between
-the two without much difficulty - because this information is part of
-their decision making process when buying the product.
+Changes since v3:
+-Move clk_enable / disable into host_init / exit (Hans)
+-Fix hang on boot caused by irq storm (Hans)
 
-How, let's say that the SDIO chip becomes obsolete, and has to be
-replaced later in the production run.  The external form, fit and
-function remain the same, it's just the internals have now changed.
+Changes since v4:
+-moving sunxi-mci.{c/h} to sunxi-mmc.{c/h}
+-removing camel cases from the defines in  sunxi-mmc.h
+-moving defines out of the struct definition
+ since this is bad coding style
+-adding documentation for the device tree binding
 
-Now, if we go down Arnd's route, then we need to have not two DT files,
-but now four.  One for single CPU with BRCM4329, quad CPU with the
-same, and then those two with a BRCM4330.
+Changes since v5:
+-adding host initialization for when the sdio irq is enabled
+ (just to make sure having a defined state at all time)
+-add mmc support fixup: set pullup on cd pins
+-fixup: Don't set MMC_CAP_NEEDS_POLL /  MMC_CAP_4_BIT_DATA
 
-Now, how does the user choose which DT file is right for their device?
-Do they:
+---
 
-(a) ask the manufacturer, leading to hundreds of support requests.
-(b) open the device up, invalidating the warranty to find out what chips
-    are inside.
-(c) something else (please specify)
+David Lanzend=C3=B6rfer (5):
+      ARM: sunxi: Add driver for SD/MMC hosts found on Allwinner sunxi SoCs
+      ARM: dts: sun7i: Add support for mmc
+      ARM: dts: sun4i: Add support for mmc
+      ARM: dts: sun5i: Add support for mmc
+      ARM: sunxi: Add documentation for driver for SD/MMC hosts found on Al=
+lwinner sunxi SoCs
 
-What I'm trying to get here is the perspective from the other side - the
-/user/ perspective, and the problems that making the wrong decision here
-brings.  It has huge implications, and can make the difference between
-"shall we use a mainline kernel, or shall we keep our own kernel/use an
-ancient vendor's kernel with our own private hacks so we can reduce our
-support costs".
+Emilio L=C3=B3pez (2):
+      clk: sunxi: factors: automatic reparenting support
+      clk: sunxi: Implement MMC phase control
 
-I'm already seeing exactly this kind of problem on the horizon, because
-I know of a platform where there was a bug in part of the hardware -
-and enabling support for some interface features screws up on those
-with the hardware bug.  So, there's already _four_ DT files to think
-about for this hardware platform.  If Arnd's suggestion goes forward,
-then we end up with _six_.  It doesn't take much to see where this
-leads.
+Hans de Goede (1):
+      ARM: sunxi: clk: export clk_sunxi_mmc_phase_control
 
-Meanwhile, these kinds of differences could be dealt with using
-/board specific code/ in the old days to read on-SoC configuration and
-adjust things appropriately - and transparently to the user.
 
-DT is _our_ convenience as kernel hackers.  It is a big _inconvenience_
-to the user when a particular product goes through a revision.
+ .../devicetree/bindings/mmc/sunxi-mmc.txt          |   32 +
+ arch/arm/boot/dts/sun4i-a10-a1000.dts              |    8=20
+ arch/arm/boot/dts/sun4i-a10-cubieboard.dts         |    8=20
+ arch/arm/boot/dts/sun4i-a10.dtsi                   |   54 +
+ arch/arm/boot/dts/sun5i-a10s-olinuxino-micro.dts   |   30 +
+ arch/arm/boot/dts/sun5i-a10s.dtsi                  |   44 +
+ arch/arm/boot/dts/sun5i-a13-olinuxino-micro.dts    |   15=20
+ arch/arm/boot/dts/sun5i-a13-olinuxino.dts          |   15=20
+ arch/arm/boot/dts/sun5i-a13.dtsi                   |   37 +
+ arch/arm/boot/dts/sun7i-a20-cubieboard2.dts        |    8=20
+ arch/arm/boot/dts/sun7i-a20-cubietruck.dts         |    8=20
+ arch/arm/boot/dts/sun7i-a20-olinuxino-micro.dts    |   23 +
+ arch/arm/boot/dts/sun7i-a20.dtsi                   |   61 +
+ drivers/clk/sunxi/clk-factors.c                    |   36 +
+ drivers/clk/sunxi/clk-sunxi.c                      |   35 +
+ drivers/mmc/host/Kconfig                           |    7=20
+ drivers/mmc/host/Makefile                          |    2=20
+ drivers/mmc/host/sunxi-mmc.c                       |  876 ++++++++++++++++=
+++++
+ drivers/mmc/host/sunxi-mmc.h                       |  239 +++++
+ include/linux/clk/sunxi.h                          |   22 +
+ 20 files changed, 1560 insertions(+)
+ create mode 100644 Documentation/devicetree/bindings/mmc/sunxi-mmc.txt
+ create mode 100644 drivers/mmc/host/sunxi-mmc.c
+ create mode 100644 drivers/mmc/host/sunxi-mmc.h
+ create mode 100644 include/linux/clk/sunxi.h
 
-So, never ever forget that "oh, we can just deal with it with a different
-DT file" makes our lives easier at the expense of our users, and without
-users, we've lost.
+--=20
+Signature
 
--- 
-FTTC broadband for 0.8mile line: 5.8Mbps down 500kbps up.  Estimation
-in database were 13.1 to 19Mbit for a good line, about 7.5+ for a bad.
-Estimate before purchase was "up to 13.2Mbit".
+--=20
+You received this message because you are subscribed to the Google Groups "=
+linux-sunxi" group.
+To unsubscribe from this group and stop receiving emails from it, send an e=
+mail to linux-sunxi+unsubscribe-/JYPxA39Uh5TLH3MbocFF+G/Ez6ZCGd0@public.gmane.org
+For more options, visit https://groups.google.com/groups/opt_out.
