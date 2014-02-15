@@ -1,150 +1,86 @@
-From: Tomasz Figa <tomasz.figa@gmail.com>
-Subject: Re: [PATCH 1/3] mmc: add support for power-on sequencing through
- DT
-Date: Sat, 15 Feb 2014 22:35:34 +0100
-Message-ID: <52FFDDA6.6020607@gmail.com>
-References: <1390190215-22700-1-git-send-email-olof@lixom.net> <1580658.FIe4en5bEU@wuerfel> <52FF6A16.5080201@gmail.com> <1528854.BAQRr94nzx@wuerfel> <20140215205159.GL30257@n2100.arm.linux.org.uk>
+From: Russell King - ARM Linux <linux@arm.linux.org.uk>
+Subject: Re: [PATCH 1/3] mmc: add support for power-on sequencing through DT
+Date: Sat, 15 Feb 2014 22:03:19 +0000
+Message-ID: <20140215220319.GM30257@n2100.arm.linux.org.uk>
+References: <1390190215-22700-1-git-send-email-olof@lixom.net> <1580658.FIe4en5bEU@wuerfel> <52FF6A16.5080201@gmail.com> <1528854.BAQRr94nzx@wuerfel> <20140215205159.GL30257@n2100.arm.linux.org.uk> <52FFDDA6.6020607@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ee0-f45.google.com ([74.125.83.45]:53362 "EHLO
-	mail-ee0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753891AbaBOVfp (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 15 Feb 2014 16:35:45 -0500
-In-Reply-To: <20140215205159.GL30257@n2100.arm.linux.org.uk>
+Received: from gw-1.arm.linux.org.uk ([78.32.30.217]:37561 "EHLO
+	pandora.arm.linux.org.uk" rhost-flags-OK-OK-OK-FAIL)
+	by vger.kernel.org with ESMTP id S1753138AbaBOWDb (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 15 Feb 2014 17:03:31 -0500
+Content-Disposition: inline
+In-Reply-To: <52FFDDA6.6020607@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Russell King - ARM Linux <linux@arm.linux.org.uk>, Arnd Bergmann <arnd@arndb.de>
-Cc: linux-arm-kernel@lists.infradead.org, mark.rutland@arm.com, devicetree@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Pawel Moll <pawel.moll@arm.com>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Tomasz Figa <t.figa@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, robh+dt@kernel.org, Kumar Gala <galak@codeaurora.org>, Olof Johansson <olof@lixom.net>, Fabio Estevam <festevam@gmail.com>, Sascha Hauer <s.hauer@pengutronix.de>
+To: Tomasz Figa <tomasz.figa@gmail.com>
+Cc: Arnd Bergmann <arnd@arndb.de>, linux-arm-kernel@lists.infradead.org, mark.rutland@arm.com, devicetree@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Pawel Moll <pawel.moll@arm.com>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Tomasz Figa <t.figa@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, robh+dt@kernel.org, Kumar Gala <galak@codeaurora.org>, Olof Johansson <olof@lixom.net>, Fabio Estevam <festevam@gmail.com>, Sascha Hauer <s.hauer@pengutronix.de>
 
-On 15.02.2014 21:52, Russell King - ARM Linux wrote:
-> On Sat, Feb 15, 2014 at 05:21:11PM +0100, Arnd Bergmann wrote:
->> On Saturday 15 February 2014 14:22:30 Tomasz Figa wrote:
->>> On 15.02.2014 14:09, Arnd Bergmann wrote:
->>>
->>>> For spi-mode SDIO devices I'm assuming it's similar, except that
->>>> you'd describe the actual SDIO device in the board info rather than
->>>> create a fake SDIO controller. Still not discoverable unless I'm
->>>> missing your point.
->>>
->>> I'm not sure if we should assume that SPI = MMC over SPI. I believe
->>> there might be a custom protocol involved as well.
->>
->> In case of SD/MMC, you essentially have three separate command sets:
->> SPI, MMC and SD, and each of them has multiple versions. MMC and SD
->> compatible devices generally also support the SPI command set (IIRC
->> it is required,
->
-> SPI support is mandatory for SDIO as well.
->
-> SDIO has CIS (remember card information structures... like PCMCIA)
-> which identifies the various different logical functions of the device,
-> giving class information, vendor information etc.
->
-> So... certainly the type of the attached device is discoverable even
-> on SPI.
+On Sat, Feb 15, 2014 at 10:35:34PM +0100, Tomasz Figa wrote:
+> If you change your hardware in an incompatible way and such change can't  
+> be detected automatically (i.e. the chip is non-discoverable) then I  
+> don't know how you could let the OS know about this change in any other  
+> way than providing it with the information it needs.
 
-It certainly is, assuming that you properly configure the 
-non-discoverable part.
+I'm not talking about such major changes.  I'm talking about minor
+changes where the SDIO device may change, but everything else stays
+compatible.
 
->> If a device supports both SDIO and SPI, I think a straightforward
->> implementation would be to use the exact same command set, but
->> you are right that this isn't the only possibility, and the SD/MMC
->> shows how they can be slightly different already.
->
-> Given that the SPI mode is mandatory for SDIO cards, why would you
-> also implement another SPI mode with different commands?
+Why should such a situation be forced down the path of having a different
+DT file to specify the different SDIO device, when the SDIO device itself
+is discoverable?  For example, BRCM4329 to a BRCM4330.
 
-Well, isn't this embedded world we're living in a constant race between 
-software and hardware engineers, where the former invent more and more 
-generic solutions to cover wider ranges of hardware with nice 
-abstractions, while the latter invent more quirky hardware designs to 
-destroy the effort of the former? Cute embedded nonsense hacks and so...
+Look, let's think seriously about this.  Let's say we have a platform
+where there's already two different DT files - one for models with a
+single CPU, and a different DT file for a quad CPU.  This is fine,
+users generally know which model they have, and can choose between
+the two without much difficulty - because this information is part of
+their decision making process when buying the product.
 
->>> Stepping aside from SPI, I already gave an example of a WLAN chip that
->>> supports multiple control busses [1]. In addition to the commonly used
->>> SDIO, it supports USB and HSIC as well:
->>>
->>> [1] http://www.marvell.com/wireless/assets/marvell_avastar_88w8797.pdf
->>>
->>> Moreover, some of Samsung boards use HSIC to communicate with modem
->>> chips, which have exactly the same problem as we're trying to solve here
->>> - they need to be powered on to be discovered.
->>
->> Thanks, this definitely makes a good example. I see that it also
->> supports SPI mode for SDIO as mentioned in your link.
->
-> Well, USB is another discoverable bus.  As HSIC is a derivative of USB,
-> I'd be surprised if it weren't discoverable there too.
->
-> So, out of everything identified so far, we have no undiscoverable buses.
->
->> Agreed. Putting the same chip on USB or HSIC has the exact same
->> requirements, since we also have a discoverable bus, but actually
->> finding the device likely involves some power-on sequencing before
->> the bus controller can find it.
->
-> That's partly the nature of integrating something onto a board where you
-> want maximal power savings.  It's basically that dreaded word which
-> software people seem to hate: "embedded".
->
+How, let's say that the SDIO chip becomes obsolete, and has to be
+replaced later in the production run.  The external form, fit and
+function remain the same, it's just the internals have now changed.
 
-This isn't something we can ignore, though.
+Now, if we go down Arnd's route, then we need to have not two DT files,
+but now four.  One for single CPU with BRCM4329, quad CPU with the
+same, and then those two with a BRCM4330.
 
->> * Arnd's proposal (change bus code to probe nonstandard devices
->>    from DT if we can't easily detect them):
->>    + Matches what we already do for PCI (at least on powerpc)
->>      and AMBA/Primecell devices: If a device can't be probed
->>      using the standard method, we treat it as nondiscoverable
->>      and describe it using DT.
->>    + Devices can have arbitrary complex requirements without
->>      impacting the core, since all code is contained in the
->>      driver for the nonstandard device.
->>    + Properties that are required for probing and runtime
->>      configuration only have to be set once (e.g. you may
->>      need clk_get() for probing and clk_set_rate() for
->>      runtime-pm).
->>    + Devices that have alternative bus interfaces like 88w8797
->>      can implement the power-on code in a central place per
->>      driver, and can reuse the code they have for nondiscoverable
->>      buses on the buses that are normally discoverable but
->>      broken here.
->>    - Still need to modify each subsystem to have alternate
->>      ways of probing, and match up devices later.
->>    - Has to be implemented in each driver that needs it, making
->>      it harder to share code for drivers with the same need
->>      (e.g. every device that just needs an external reset
->>      trigger).
->
->   - requires different DT if the chip is changed, which causes problems
->     for users to identify which out of zillions of DT files they should
->     use for their exact platform.
+Now, how does the user choose which DT file is right for their device?
+Do they:
 
-That's how things work in embedded world, unfortunately. As Arnd stated 
-in one of his previous replies, different chips use to have different 
-power-up sequences and set of data the driver needs to know.
+(a) ask the manufacturer, leading to hundreds of support requests.
+(b) open the device up, invalidating the warranty to find out what chips
+    are inside.
+(c) something else (please specify)
 
-If you change your hardware in an incompatible way and such change can't 
-be detected automatically (i.e. the chip is non-discoverable) then I 
-don't know how you could let the OS know about this change in any other 
-way than providing it with the information it needs.
+What I'm trying to get here is the perspective from the other side - the
+/user/ perspective, and the problems that making the wrong decision here
+brings.  It has huge implications, and can make the difference between
+"shall we use a mainline kernel, or shall we keep our own kernel/use an
+ancient vendor's kernel with our own private hacks so we can reduce our
+support costs".
 
->   - have to work out how to match up the fake device with a probed device
->     when it becomes available: existing SDIO drivers all assume that the
->     card has been through a fairly complex initialisation sequence already.
->   - multi-function SDIO is much harder to deal with since you have mutliple
->     drivers involved, and the SDIO device as a whole needs initialisation
->     before anyone can drive it.
->   - adds complexity to the SDIO drivers; they would have to know whether
->     they're embedded or on a plug-in card.
->
+I'm already seeing exactly this kind of problem on the horizon, because
+I know of a platform where there was a bug in part of the hardware -
+and enabling support for some interface features screws up on those
+with the hardware bug.  So, there's already _four_ DT files to think
+about for this hardware platform.  If Arnd's suggestion goes forward,
+then we end up with _six_.  It doesn't take much to see where this
+leads.
 
-The three points above could be eliminated by adopting the solution I 
-proposed [1]. Moreover it could be analogically implemented for other 
-bus types and use almost identical DT bindings.
+Meanwhile, these kinds of differences could be dealt with using
+/board specific code/ in the old days to read on-SoC configuration and
+adjust things appropriately - and transparently to the user.
 
-[1] http://thread.gmane.org/gmane.linux.kernel.mmc/24728/focus=24864
+DT is _our_ convenience as kernel hackers.  It is a big _inconvenience_
+to the user when a particular product goes through a revision.
 
-Best regards,
-Tomasz
+So, never ever forget that "oh, we can just deal with it with a different
+DT file" makes our lives easier at the expense of our users, and without
+users, we've lost.
+
+-- 
+FTTC broadband for 0.8mile line: 5.8Mbps down 500kbps up.  Estimation
+in database were 13.1 to 19Mbit for a good line, about 7.5+ for a bad.
+Estimate before purchase was "up to 13.2Mbit".
