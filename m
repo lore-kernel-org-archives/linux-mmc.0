@@ -1,13 +1,13 @@
 From: David =?utf-8?q?Lanzend=C3=B6rfer?= <david.lanzendoerfer-Z7Kmv9EsliU@public.gmane.org>
-Subject: [PATCH v6 5/8] ARM: dts: sun7i: Add support for mmc
-Date: Sun, 16 Feb 2014 06:11:46 +0100
-Message-ID: <20140216051146.728.82341.stgit@dizzy-6.o2s.ch>
+Subject: [PATCH v6 6/8] ARM: dts: sun4i: Add support for mmc
+Date: Sun, 16 Feb 2014 06:11:59 +0100
+Message-ID: <20140216051158.728.21593.stgit@dizzy-6.o2s.ch>
 References: <20140216050933.728.25526.stgit@dizzy-6.o2s.ch>
 Reply-To: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: quoted-printable
-Return-path: <linux-sunxi+bncBD2JL37LXEKRBGURQGMAKGQEUR57R5I-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+Return-path: <linux-sunxi+bncBD2JL37LXEKRBJ4RQGMAKGQEDCDRL2I-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
 In-Reply-To: <20140216050933.728.25526.stgit-GPtPHOohwllnsqa/0SyWJQ@public.gmane.org>
 List-Post: <http://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
 List-Help: <http://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
@@ -21,19 +21,18 @@ List-Id: linux-mmc@vger.kernel.org
 Signed-off-by: David Lanzend=C3=B6rfer <david.lanzendoerfer-Z7Kmv9EsliU@public.gmane.org>
 Signed-off-by: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 ---
- arch/arm/boot/dts/sun7i-a20-cubieboard2.dts     |    8 +++
- arch/arm/boot/dts/sun7i-a20-cubietruck.dts      |    8 +++
- arch/arm/boot/dts/sun7i-a20-olinuxino-micro.dts |   23 +++++++++
- arch/arm/boot/dts/sun7i-a20.dtsi                |   61 +++++++++++++++++++=
+ arch/arm/boot/dts/sun4i-a10-a1000.dts      |    8 ++++
+ arch/arm/boot/dts/sun4i-a10-cubieboard.dts |    8 ++++
+ arch/arm/boot/dts/sun4i-a10.dtsi           |   54 ++++++++++++++++++++++++=
 ++++
- 4 files changed, 100 insertions(+)
+ 3 files changed, 70 insertions(+)
 
-diff --git a/arch/arm/boot/dts/sun7i-a20-cubieboard2.dts b/arch/arm/boot/dt=
-s/sun7i-a20-cubieboard2.dts
-index 5c51cb8..ae800b6 100644
---- a/arch/arm/boot/dts/sun7i-a20-cubieboard2.dts
-+++ b/arch/arm/boot/dts/sun7i-a20-cubieboard2.dts
-@@ -34,6 +34,14 @@
+diff --git a/arch/arm/boot/dts/sun4i-a10-a1000.dts b/arch/arm/boot/dts/sun4=
+i-a10-a1000.dts
+index d4b081d..a879ef3 100644
+--- a/arch/arm/boot/dts/sun4i-a10-a1000.dts
++++ b/arch/arm/boot/dts/sun4i-a10-a1000.dts
+@@ -35,6 +35,14 @@
  			};
  		};
 =20
@@ -46,70 +45,34 @@ index 5c51cb8..ae800b6 100644
 +		};
 +
  		pinctrl@01c20800 {
- 			led_pins_cubieboard2: led_pins@0 {
+ 			emac_power_pin_a1000: emac_power_pin@0 {
+ 				allwinner,pins =3D "PH15";
+diff --git a/arch/arm/boot/dts/sun4i-a10-cubieboard.dts b/arch/arm/boot/dts=
+/sun4i-a10-cubieboard.dts
+index b139ee6..20b976a 100644
+--- a/arch/arm/boot/dts/sun4i-a10-cubieboard.dts
++++ b/arch/arm/boot/dts/sun4i-a10-cubieboard.dts
+@@ -33,6 +33,14 @@
+ 			};
+ 		};
+=20
++		mmc0: mmc@01c0f000 {
++			pinctrl-names =3D "default", "default";
++			pinctrl-0 =3D <&mmc0_pins_a>;
++			pinctrl-1 =3D <&mmc0_cd_pin_reference_design>;
++			cd-gpios =3D <&pio 7 1 0>; /* PH1 */
++			status =3D "okay";
++		};
++
+ 		pinctrl@01c20800 {
+ 			led_pins_cubieboard: led_pins@0 {
  				allwinner,pins =3D "PH20", "PH21";
-diff --git a/arch/arm/boot/dts/sun7i-a20-cubietruck.dts b/arch/arm/boot/dts=
-/sun7i-a20-cubietruck.dts
-index f9dcb61..370cef84 100644
---- a/arch/arm/boot/dts/sun7i-a20-cubietruck.dts
-+++ b/arch/arm/boot/dts/sun7i-a20-cubietruck.dts
-@@ -19,6 +19,14 @@
- 	compatible =3D "cubietech,cubietruck", "allwinner,sun7i-a20";
-=20
- 	soc@01c00000 {
-+		mmc0: mmc@01c0f000 {
-+			pinctrl-names =3D "default", "default";
-+			pinctrl-0 =3D <&mmc0_pins_a>;
-+			pinctrl-1 =3D <&mmc0_cd_pin_reference_design>;
-+			cd-gpios =3D <&pio 7 1 0>; /* PH1 */
-+			status =3D "okay";
-+		};
-+
- 		pinctrl@01c20800 {
- 			led_pins_cubietruck: led_pins@0 {
- 				allwinner,pins =3D "PH7", "PH11", "PH20", "PH21";
-diff --git a/arch/arm/boot/dts/sun7i-a20-olinuxino-micro.dts b/arch/arm/boo=
-t/dts/sun7i-a20-olinuxino-micro.dts
-index ead3013..685ec06 100644
---- a/arch/arm/boot/dts/sun7i-a20-olinuxino-micro.dts
-+++ b/arch/arm/boot/dts/sun7i-a20-olinuxino-micro.dts
-@@ -34,7 +34,30 @@
- 			};
- 		};
-=20
-+		mmc0: mmc@01c0f000 {
-+			pinctrl-names =3D "default", "default";
-+			pinctrl-0 =3D <&mmc0_pins_a>;
-+			pinctrl-1 =3D <&mmc0_cd_pin_reference_design>;
-+			cd-gpios =3D <&pio 7 1 0>; /* PH1 */
-+			status =3D "okay";
-+		};
-+
-+		mmc3: mmc@01c12000 {
-+			pinctrl-names =3D "default", "default";
-+			pinctrl-0 =3D <&mmc3_pins_a>;
-+			pinctrl-1 =3D <&mmc3_cd_pin_olinuxinom>;
-+			cd-gpios =3D <&pio 7 11 0>; /* PH11 */
-+			status =3D "okay";
-+		};
-+
- 		pinctrl@01c20800 {
-+			mmc3_cd_pin_olinuxinom: mmc3_cd_pin@0 {
-+				allwinner,pins =3D "PH11";
-+				allwinner,function =3D "gpio_in";
-+				allwinner,drive =3D <0>;
-+				allwinner,pull =3D <1>;
-+			};
-+
- 			led_pins_olinuxino: led_pins@0 {
- 				allwinner,pins =3D "PH2";
- 				allwinner,function =3D "gpio_out";
-diff --git a/arch/arm/boot/dts/sun7i-a20.dtsi b/arch/arm/boot/dts/sun7i-a20=
+diff --git a/arch/arm/boot/dts/sun4i-a10.dtsi b/arch/arm/boot/dts/sun4i-a10=
 .dtsi
-index 9ff0948..5b55414 100644
---- a/arch/arm/boot/dts/sun7i-a20.dtsi
-+++ b/arch/arm/boot/dts/sun7i-a20.dtsi
-@@ -355,6 +355,46 @@
+index 9044c53..cd14961 100644
+--- a/arch/arm/boot/dts/sun4i-a10.dtsi
++++ b/arch/arm/boot/dts/sun4i-a10.dtsi
+@@ -330,6 +330,46 @@
  			#size-cells =3D <0>;
  		};
 =20
@@ -118,7 +81,7 @@ index 9ff0948..5b55414 100644
 +			reg =3D <0x01c0f000 0x1000>;
 +			clocks =3D <&ahb_gates 8>, <&mmc0_clk>;
 +			clock-names =3D "ahb", "mod";
-+			interrupts =3D <0 32 4>;
++			interrupts =3D <32>;
 +			bus-width =3D <4>;
 +			status =3D "disabled";
 +		};
@@ -128,7 +91,7 @@ index 9ff0948..5b55414 100644
 +			reg =3D <0x01c10000 0x1000>;
 +			clocks =3D <&ahb_gates 9>, <&mmc1_clk>;
 +			clock-names =3D "ahb", "mod";
-+			interrupts =3D <0 33 4>;
++			interrupts =3D <33>;
 +			bus-width =3D <4>;
 +			status =3D "disabled";
 +		};
@@ -138,7 +101,7 @@ index 9ff0948..5b55414 100644
 +			reg =3D <0x01c11000 0x1000>;
 +			clocks =3D <&ahb_gates 10>, <&mmc2_clk>;
 +			clock-names =3D "ahb", "mod";
-+			interrupts =3D <0 34 4>;
++			interrupts =3D <34>;
 +			bus-width =3D <4>;
 +			status =3D "disabled";
 +		};
@@ -148,15 +111,15 @@ index 9ff0948..5b55414 100644
 +			reg =3D <0x01c12000 0x1000>;
 +			clocks =3D <&ahb_gates 11>, <&mmc3_clk>;
 +			clock-names =3D "ahb", "mod";
-+			interrupts =3D <0 35 4>;
++			interrupts =3D <35>;
 +			bus-width =3D <4>;
 +			status =3D "disabled";
 +		};
 +
- 		pio: pinctrl@01c20800 {
- 			compatible =3D "allwinner,sun7i-a20-pinctrl";
- 			reg =3D <0x01c20800 0x400>;
-@@ -432,6 +472,27 @@
+ 		intc: interrupt-controller@01c20400 {
+ 			compatible =3D "allwinner,sun4i-ic";
+ 			reg =3D <0x01c20400 0x400>;
+@@ -400,6 +440,20 @@
  				allwinner,drive =3D <0>;
  				allwinner,pull =3D <0>;
  			};
@@ -173,13 +136,6 @@ index 9ff0948..5b55414 100644
 +				allwinner,function =3D "gpio_in";
 +				allwinner,drive =3D <0>;
 +				allwinner,pull =3D <1>;
-+			};
-+
-+			mmc3_pins_a: mmc3@0 {
-+				allwinner,pins =3D "PI4","PI5","PI6","PI7","PI8","PI9";
-+				allwinner,function =3D "mmc3";
-+				allwinner,drive =3D <3>;
-+				allwinner,pull =3D <0>;
 +			};
  		};
 =20
