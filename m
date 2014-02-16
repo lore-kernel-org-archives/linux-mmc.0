@@ -1,67 +1,55 @@
-From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+From: Wolfram Sang <wsa-z923LK4zBo2bacvFa/9K2g@public.gmane.org>
 Subject: Re: [PATCH V2 11/17] i2c: nomadik: Convert to devm functions
-Date: Sun, 16 Feb 2014 14:44:07 +0100
-Message-ID: <CAPDyKFrt6QJVSypP5iD_oVxRUvNhzxGcbZ703zR1K8gwJ5uCeQ@mail.gmail.com>
+Date: Sun, 16 Feb 2014 18:02:01 +0100
+Message-ID: <20140216170201.GA2831@katana>
 References: <1392300547-23365-1-git-send-email-ulf.hansson@linaro.org>
-	<20140215150345.GD2579@katana>
+ <20140215150345.GD2579@katana>
+ <CAPDyKFrt6QJVSypP5iD_oVxRUvNhzxGcbZ703zR1K8gwJ5uCeQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-spi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20140215150345.GD2579@katana>
-Sender: linux-spi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Wolfram Sang <wsa-z923LK4zBo2bacvFa/9K2g@public.gmane.org>
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="HlL+5n6rz5pIUxbD"
+Return-path: <linux-i2c-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <CAPDyKFrt6QJVSypP5iD_oVxRUvNhzxGcbZ703zR1K8gwJ5uCeQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Sender: linux-i2c-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 Cc: Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Alessandro Rubini <rubini-9wsNiZum9E8@public.gmane.org>, Linus Walleij <linus.walleij-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, Mark Brown <broonie-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-spi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-spi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 15 February 2014 16:03, Wolfram Sang <wsa-z923LK4zBo2bacvFa/9K2g@public.gmane.org> wrote:
-> On Thu, Feb 13, 2014 at 03:09:02PM +0100, Ulf Hansson wrote:
->> Use devm_* functions to simplify code and error handling.
->>
->> Cc: Alessandro Rubini <rubini-9wsNiZum9E8@public.gmane.org>
->> Cc: Linus Walleij <linus.walleij-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
->> Cc: Wolfram Sang <wsa-z923LK4zBo2bacvFa/9K2g@public.gmane.org>
->> Signed-off-by: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
->> ---
->>
->> Changes in v2:
->>       Rebased on top of latest i2c-nomadik branch.
->
-> Since this depends on Linus' patch already, I think it would be cleaner
-> if I pick this kinda unrelated (but wanted) devm patch, and ack the
-> PM stuff. If this for some reason makes things more complicated, I can
-> also simply ack this one.
 
-I think we will end up having merge conflicts, especially for the
-changes in the probe function if we decide to split it.
+--HlL+5n6rz5pIUxbD
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-Would a way forward be to let you carry all the patches through your
-tree? I believe all but patch 17 can be safely merged. It is only this
-one that depends on the changes in the amba bus, so we can put this
-one on hold for a while.
 
-Another option would be if you drop Linus' patch from you branch and
-let him collect all the patches in a pull request instead?
+> Would a way forward be to let you carry all the patches through your
+> tree? I believe all but patch 17 can be safely merged. It is only this
+> one that depends on the changes in the amba bus, so we can put this
+> one on hold for a while.
 
-I happy with whatever we thinks are easiest. :-)
+I'd favour this. Will do this next week unless somebody objects.
 
->
->> -     dev->virtbase = ioremap(adev->res.start, resource_size(&adev->res));
->> +     dev->virtbase = devm_ioremap(&adev->dev, adev->res.start,
->> +                             resource_size(&adev->res));
->>       if (!dev->virtbase) {
->>               ret = -ENOMEM;
->
-> IS_ERR()!
 
-Will fix in a v2!
+--HlL+5n6rz5pIUxbD
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
 
->
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.15 (GNU/Linux)
 
-Thanks!
+iQIbBAEBAgAGBQJTAO8JAAoJEBQN5MwUoCm2ncEP9RSXythepEDVP+IEvvdsG2ZV
+1u4skawn7w050umqejqGs/9hEyoE1GO8CSIDoY5TetLAdhTAXAllusLUyh5jb7B+
+hVbcl5QuGahz9RETA3D8uKr71PdMFpUJFnO+KJvnrFGCbjqWC+ixmN7eHtIBDGl9
+dPskR69fqmMu3p/FxXcGfB2frGxS04ZVzdhHKLp92IVyIx9m1pj/fkflatsGligv
+/gLgSV1MphonCqnfdlCo1wvQ69nmd2u8v1C8nbWQIGoRBWrYCZ8DbkHyjM/MBhR4
+3bfg3ttHJKrFklhdOIpxmoM3nih0Ms8h/gLPAuUyOHkfhdtWHne2Z9POAI6bc2w3
+Cs2omPqr0Ay/el717koJNh508wjeo0zMVdLuV1szAp/G7HIGDAnCOAYP2vYhIW3e
+5TbjSn5bHNkjNf7JXXB0pQw2uVUaZ+HPmJg35oRNrsvmYnFD8ZoRLh93aQaj7K22
+O3UwcqfW3WIMKSU2R+GbhHYvmPA6vMZ7PvWdNHbwmoxKNEZ3ZS/w6x4H7ALm8b8D
+OmgGHi2U9Dd0FcevTPLdFguZw4I+66AyvpY7VBuVHdxJwL+nzILY2IYd2xzq1eCA
+eS52sf07KR6yVnxB7C4RBtq08rahc00jOkjidYPLwQKBTlshtnek9o5qqkVViC0z
+oFq2/lpUkYjUtikhDU0=
+=NiiC
+-----END PGP SIGNATURE-----
 
-Kind regards
-Ulf Hansson
---
-To unsubscribe from this list: send the line "unsubscribe linux-spi" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+--HlL+5n6rz5pIUxbD--
