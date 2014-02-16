@@ -1,15 +1,13 @@
 From: David =?utf-8?q?Lanzend=C3=B6rfer?= <david.lanzendoerfer-Z7Kmv9EsliU@public.gmane.org>
-Subject: [PATCH v6 8/8] ARM: sunxi: Add documentation for driver
- for SD/MMC hosts found on Allwinner sunxi SoCs
-Date: Sun, 16 Feb 2014 00:34:00 +0100
-Message-ID: <20140215233400.30460.59575.stgit@dizzy-6.o2s.ch>
-References: <20140215233011.30460.27261.stgit@dizzy-6.o2s.ch>
+Subject: [PATCH v6 0/8] ARM: sunxi: Add driver for SD/MMC hosts
+ found on allwinner sunxi SOCs
+Date: Sun, 16 Feb 2014 06:10:42 +0100
+Message-ID: <20140216050933.728.25526.stgit@dizzy-6.o2s.ch>
 Reply-To: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: quoted-printable
-Return-path: <linux-sunxi+bncBD2JL37LXEKRB27S76LQKGQEDDGZZVI-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-In-Reply-To: <20140215233011.30460.27261.stgit-GPtPHOohwllnsqa/0SyWJQ@public.gmane.org>
+Return-path: <linux-sunxi+bncBD2JL37LXEKRBXMQQGMAKGQEPO6JFHI-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
 List-Post: <http://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
 List-Help: <http://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
 List-Archive: <http://groups.google.com/group/linux-sunxi>
@@ -19,52 +17,95 @@ List-Unsubscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailt
 To: devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Laurent Pinchart <laurent.pinchart+renesas-ryLnwIuWjnjg/C1BVhZhaw@public.gmane.org>, Mike Turquette <mturquette-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Simon Baatz <gmbnomis-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Emilio =?utf-8?b?TMOzcGV6?= <emilio-0Z03zUJReD5OxF6Tv1QG9Q@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, H Hartley Sweeten <hsweeten-3FF4nKcrg1dE2c76skzGb0EOCMrvLtNR@public.gmane.org>, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, Tejun Heo <tj-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, Guennadi Liakhovetski <g.liakhovetski-Mmb7MZpHnFY@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-Signed-off-by: David Lanzend=C3=B6rfer <david.lanzendoerfer-Z7Kmv9EsliU@public.gmane.org>
----
- .../devicetree/bindings/mmc/sunxi-mmc.txt          |   32 ++++++++++++++++=
-++++
- 1 file changed, 32 insertions(+)
- create mode 100644 Documentation/devicetree/bindings/mmc/sunxi-mmc.txt
+Hello
+The following patchset adds support for the SD/MMC host found in the Allwin=
+ner SoCs.
+It contains all the necessary modifications for clock environment and also =
+the device
+tree script modification which add it to all the boards using it.
+The clock environment function needed for phase offset configuration has
+been proposed and implemented by Emilio.
+A lot of work and cleanup has been done by Hans de Goede. Special thanks to=
+ him!
+This patchset is the 4th attempt to send this driver upstream.
 
-diff --git a/Documentation/devicetree/bindings/mmc/sunxi-mmc.txt b/Document=
-ation/devicetree/bindings/mmc/sunxi-mmc.txt
-new file mode 100644
-index 0000000..5ce8c5e
---- /dev/null
-+++ b/Documentation/devicetree/bindings/mmc/sunxi-mmc.txt
-@@ -0,0 +1,32 @@
-+* Allwinner sunxi MMC controller
-+
-+The highspeed MMC host controller on Allwinner SoCs provides an interface
-+for MMC, SD and SDIO types of memory cards.
-+
-+Supported maximum speeds are the ones of the eMMC standard 4.5 as well
-+as the speed of SD standard 3.0.
-+Absolute maximum transfer rate is 200MB/s
-+
-+Required properties:
-+- compatible: Should be "allwinner,<revision>-<chip>-mmc".
-+  The supported chips include a10, a10s, 13, a20 and a31.
-+- base registers are 0x1000 appart, so the base of mmc1
-+  would be 0x01c0f000+0x1000=3D0x01c10000(see example)
-+  and so on.
-+- clocks requires the reference at the ahb clock gate
-+  with the correct index (mmc0 -> 8, mmc1 -> 9, and so on)
-+  as well as the reference to the correct mod0 clock.
-+- interrupts requires the correct IRQ line
-+  (mmc0 -> 32, mmc1 -> 33, and so on)
-+
-+Examples:
-+
-+mmc0: mmc@01c0f000 {
-+	compatible =3D "allwinner,sun5i-a13-mmc";
-+	reg =3D <0x01c0f000 0x1000>;
-+	clocks =3D <&ahb_gates 8>, <&mmc0_clk>;
-+	clock-names =3D "ahb", "mod";
-+	interrupts =3D <0 32 4>;
-+	bus-width =3D <4>;
-+	status =3D "disabled";
-+};
+Changes since v1:
+-Using mmc_of_parse instead of diy dt parsing
+-Adding nodes for all mmc controller to the dtsi files,
+ including sofar unused controllers
+-Using generic GPIO slot library for WP/CD
+-Adding additional MMC device nodes into DTSI files
+
+Changes since v2:
+-Add missing Signed-off-by tags
+-Stop using __raw_readl / __raw_writel so that barriers are properly used
+-Adding missing new lines
+-Adding missing patch for automatic reparenting of clocks
+
+Changes since v3:
+-Move clk_enable / disable into host_init / exit (Hans)
+-Fix hang on boot caused by irq storm (Hans)
+
+Changes since v4:
+-moving sunxi-mci.{c/h} to sunxi-mmc.{c/h}
+-removing camel cases from the defines in  sunxi-mmc.h
+-moving defines out of the struct definition
+ since this is bad coding style
+-adding documentation for the device tree binding
+
+Changes since v5:
+-adding host initialization for when the sdio irq is enabled
+ (just to make sure having a defined state at all time)
+-add mmc support fixup: set pullup on cd pins
+-fixup: Don't set MMC_CAP_NEEDS_POLL /  MMC_CAP_4_BIT_DATA
+
+---
+
+David Lanzend=C3=B6rfer (5):
+      ARM: sunxi: Add driver for SD/MMC hosts found on Allwinner sunxi SoCs
+      ARM: dts: sun7i: Add support for mmc
+      ARM: dts: sun4i: Add support for mmc
+      ARM: dts: sun5i: Add support for mmc
+      ARM: sunxi: Add documentation for driver for SD/MMC hosts found on Al=
+lwinner sunxi SoCs
+
+Emilio L=C3=B3pez (2):
+      clk: sunxi: factors: automatic reparenting support
+      clk: sunxi: Implement MMC phase control
+
+Hans de Goede (1):
+      ARM: sunxi: clk: export clk_sunxi_mmc_phase_control
+
+
+ .../devicetree/bindings/mmc/sunxi-mmc.txt          |   32 +
+ arch/arm/boot/dts/sun4i-a10-a1000.dts              |    8=20
+ arch/arm/boot/dts/sun4i-a10-cubieboard.dts         |    8=20
+ arch/arm/boot/dts/sun4i-a10.dtsi                   |   54 +
+ arch/arm/boot/dts/sun5i-a10s-olinuxino-micro.dts   |   30 +
+ arch/arm/boot/dts/sun5i-a10s.dtsi                  |   44 +
+ arch/arm/boot/dts/sun5i-a13-olinuxino-micro.dts    |   15=20
+ arch/arm/boot/dts/sun5i-a13-olinuxino.dts          |   15=20
+ arch/arm/boot/dts/sun5i-a13.dtsi                   |   37 +
+ arch/arm/boot/dts/sun7i-a20-cubieboard2.dts        |    8=20
+ arch/arm/boot/dts/sun7i-a20-cubietruck.dts         |    8=20
+ arch/arm/boot/dts/sun7i-a20-olinuxino-micro.dts    |   23 +
+ arch/arm/boot/dts/sun7i-a20.dtsi                   |   61 +
+ drivers/clk/sunxi/clk-factors.c                    |   36 +
+ drivers/clk/sunxi/clk-sunxi.c                      |   35 +
+ drivers/mmc/host/Kconfig                           |    7=20
+ drivers/mmc/host/Makefile                          |    2=20
+ drivers/mmc/host/sunxi-mmc.c                       |  876 ++++++++++++++++=
+++++
+ drivers/mmc/host/sunxi-mmc.h                       |  239 +++++
+ include/linux/clk/sunxi.h                          |   22 +
+ 20 files changed, 1560 insertions(+)
+ create mode 100644 Documentation/devicetree/bindings/mmc/sunxi-mmc.txt
+ create mode 100644 drivers/mmc/host/sunxi-mmc.c
+ create mode 100644 drivers/mmc/host/sunxi-mmc.h
+ create mode 100644 include/linux/clk/sunxi.h
+
+--=20
+Signature
 
 --=20
 You received this message because you are subscribed to the Google Groups "=
