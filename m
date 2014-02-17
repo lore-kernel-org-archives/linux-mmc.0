@@ -1,92 +1,32 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] Fix uses of dma_max_pfn() when converting to a limiting address
-Date: Mon, 17 Feb 2014 14:39:06 +0100
-Message-ID: <CAPDyKFqb6w9rcDsVX6PivpGdC0_9njgzaOMNOF4F_8zJOPhfDg@mail.gmail.com>
-References: <E1WDH7v-00038J-2k@rmk-PC.arm.linux.org.uk>
+From: Stefan Monnier <monnier-CRDzTM1onBSWkKpYnGOUKg@public.gmane.org>
+Subject: Re: [PATCH v6 4/8] ARM: sunxi: Add driver for SD/MMC
+ hosts found on Allwinner sunxi SoCs
+Date: Mon, 17 Feb 2014 09:01:53 -0500
+Message-ID: <jwveh313klj.fsf-monnier+gmane.comp.hardware.netbook.arm.sunxi@gnu.org>
+References: <20140216050933.728.25526.stgit@dizzy-6.o2s.ch>
+	<20140216051133.728.36386.stgit@dizzy-6.o2s.ch>
+	<1392542548.11093.13.camel@chi.lan>
+	<1744603.zMUgfmoUUP__34248.3586668552$1392621049$gmane$org@pagira.o2s.ch>
+Reply-To: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qa0-f43.google.com ([209.85.216.43]:38851 "EHLO
-	mail-qa0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752395AbaBQNjI (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 17 Feb 2014 08:39:08 -0500
-Received: by mail-qa0-f43.google.com with SMTP id o15so21626335qap.2
-        for <linux-mmc@vger.kernel.org>; Mon, 17 Feb 2014 05:39:08 -0800 (PST)
-In-Reply-To: <E1WDH7v-00038J-2k@rmk-PC.arm.linux.org.uk>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-sunxi+bncBDMKFH665MBBB5FMRCMAKGQEXG7TXWQ-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Post: <http://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Help: <http://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Archive: <http://groups.google.com/group/linux-sunxi>
+Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+List-Subscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Unsubscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+To: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: Russell King <rmk+kernel@arm.linux.org.uk>
-Cc: "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Chris Ball <chris@printf.net>, "James E.J. Bottomley" <JBottomley@parallels.com>, linux-mmc <linux-mmc@vger.kernel.org>, linux-scsi@vger.kernel.org, Santosh Shilimkar <santosh.shilimkar@ti.com>
 
-On 11 February 2014 18:28, Russell King <rmk+kernel@arm.linux.org.uk> wrote:
-> We must use a 64-bit for this, otherwise overflowed bits get lost, and
-> that can result in a lower than intended value set.
->
-> Fixes: 8e0cb8a1f6ac ("ARM: 7797/1: mmc: Use dma_max_pfn(dev) helper for bounce_limit calculations")
-> Fixes: 7d35496dd982 ("ARM: 7796/1: scsi: Use dma_max_pfn(dev) helper for bounce_limit calculations")
-> Signed-off-by: Russell King <rmk+kernel@arm.linux.org.uk>
+> I'm not really into this licensing and copyright stuff.
+> Could you maybe point out what the correct copyright would be?
 
-Reviewed-by: Ulf Hansson <ulf.hansson@linaro.org>
+The dates are when the code is disclosed to the public.  So 2014 would
+be fine, 2013-2014 might be as well, but 2014-2015 can't be right until
+next year.
 
-> ---
-> While poking about with the Cubox-i4 and investigating why my UHS-1
-> SD card wasn't achieving its full potential, I came across a slight
-> problem... the SDHCI host sets a mask of 0xffffffff, but with the
-> start of memory at pfn 0x10000, the blk code sees this when setting
-> the bounce limit:
->
->         max addr 0x0ffff000 bounce limit 0xffff dma 1
->
-> and this results in the bounce functions appearing in the profile:
->
-> 00000000c00f8b70 copy_to_high_bio_irq                  1139 2.5886
-> 00000000c00f8d28 bounce_end_io                           12 0.0714
-> 00000000c00f8dd0 bounce_end_io_read_isa                   8 0.1053
->
-> which, compared to the cost of copying the data to userland and
-> request handling, this is quite significant:
->
-> 00000000c04b1794 sdhci_request                          268 0.5447
-> 00000000c02d0740 __copy_to_user_std                     398 0.4252
->
-> With this calculation fixed, we avoid the bouncing code entirely.
->
->         max addr 0x10ffff000 bounce limit 0x10ffff dma 0
->
->  drivers/mmc/card/queue.c | 2 +-
->  drivers/scsi/scsi_lib.c  | 2 +-
->  2 files changed, 2 insertions(+), 2 deletions(-)
->
-> diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
-> index 357bbc54fe4b..3e049c13429c 100644
-> --- a/drivers/mmc/card/queue.c
-> +++ b/drivers/mmc/card/queue.c
-> @@ -197,7 +197,7 @@ int mmc_init_queue(struct mmc_queue *mq, struct mmc_card *card,
->         struct mmc_queue_req *mqrq_prev = &mq->mqrq[1];
->
->         if (mmc_dev(host)->dma_mask && *mmc_dev(host)->dma_mask)
-> -               limit = dma_max_pfn(mmc_dev(host)) << PAGE_SHIFT;
-> +               limit = (u64)dma_max_pfn(mmc_dev(host)) << PAGE_SHIFT;
->
->         mq->card = card;
->         mq->queue = blk_init_queue(mmc_request_fn, lock);
-> diff --git a/drivers/scsi/scsi_lib.c b/drivers/scsi/scsi_lib.c
-> index 7bd7f0d5f050..62ec84b42e31 100644
-> --- a/drivers/scsi/scsi_lib.c
-> +++ b/drivers/scsi/scsi_lib.c
-> @@ -1684,7 +1684,7 @@ u64 scsi_calculate_bounce_limit(struct Scsi_Host *shost)
->
->         host_dev = scsi_get_device(shost);
->         if (host_dev && host_dev->dma_mask)
-> -               bounce_limit = dma_max_pfn(host_dev) << PAGE_SHIFT;
-> +               bounce_limit = (u64)dma_max_pfn(host_dev) << PAGE_SHIFT;
->
->         return bounce_limit;
->  }
-> --
-> 1.8.3.1
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+        Stefan
