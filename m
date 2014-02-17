@@ -1,122 +1,64 @@
-From: Steffen Trumtrar <s.trumtrar@pengutronix.de>
-Subject: Re: [PATCH 3/3] dts: socfpga: Add support for SD/MMC on the SOCFPGA
- platform
-Date: Mon, 17 Feb 2014 09:18:29 +0100
-Message-ID: <20140217081829.GC6972@pengutronix.de>
-References: <1392622244-18015-1-git-send-email-dinguyen@altera.com>
- <1392622244-18015-3-git-send-email-dinguyen@altera.com>
+From: Lee Jones <lee.jones@linaro.org>
+Subject: Re: [PATCH v4 1/3] mfd: Add realtek USB card reader driver
+Date: Mon, 17 Feb 2014 08:22:22 +0000
+Message-ID: <20140217082222.GA17875@lee--X1>
+References: <1392199238-14500-1-git-send-email-rogerable@realtek.com>
+ <1392199238-14500-2-git-send-email-rogerable@realtek.com>
+ <20140214094427.GA7380@lee--X1>
+ <5301A786.8040607@realtek.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from metis.ext.pengutronix.de ([92.198.50.35]:45348 "EHLO
-	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750956AbaBQISa (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 17 Feb 2014 03:18:30 -0500
+Received: from mail-wi0-f179.google.com ([209.85.212.179]:35430 "EHLO
+	mail-wi0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750951AbaBQIW3 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 17 Feb 2014 03:22:29 -0500
+Received: by mail-wi0-f179.google.com with SMTP id hn9so2099135wib.6
+        for <linux-mmc@vger.kernel.org>; Mon, 17 Feb 2014 00:22:28 -0800 (PST)
 Content-Disposition: inline
-In-Reply-To: <1392622244-18015-3-git-send-email-dinguyen@altera.com>
+In-Reply-To: <5301A786.8040607@realtek.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: dinguyen@altera.com
-Cc: linux-mmc@vger.kernel.org, dinh.linux@gmail.com, devicetree@vger.kernel.org, Rob Herring <robh+dt@kernel.org>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Kumar Gala <galak@codeaurora.org>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Chris Ball <chris@printf.net>
+To: Roger <rogerable@realtek.com>
+Cc: Samuel Ortiz <sameo@linux.intel.com>, Chris Ball <chris@printf.net>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Maxim Levitsky <maximlevitsky@gmail.com>, Alex Dubov <oakad@yahoo.com>, Dan Carpenter <dan.carpenter@oracle.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, driverdev-devel@linuxdriverproject.org, wei_wang@realsil.com.cn, micky_ching@realsil.com.cn
 
-On Mon, Feb 17, 2014 at 01:30:44AM -0600, dinguyen@altera.com wrote:
-> From: Dinh Nguyen <dinguyen@altera.com>
-> 
-> Introduce "altr,socfpga-dw-mshc" to enable Altera's SOCFPGA platform specific
-> implementation of the dwc_mmc driver.
-> 
-> Also add the "syscon" binding to the "altr,sys-mgr" node. The clock
-> driver can use the syscon driver to toggle the register for the SD/MMC
-> clock phase shift settings.
-> 
-> Signed-off-by: Dinh Nguyen <dinguyen@altera.com>
-> Cc: Rob Herring <robh+dt@kernel.org>
-> Cc: Pawel Moll <pawel.moll@arm.com>
-> Cc: Mark Rutland <mark.rutland@arm.com>
-> Cc: Ian Campbell <ijc+devicetree@hellion.org.uk>
-> Cc: Kumar Gala <galak@codeaurora.org>
-> Cc: Seungwon Jeon <tgih.jun@samsung.com>
-> Cc: Jaehoon Chung <jh80.chung@samsung.com>
-> Cc: Chris Ball <chris@printf.net>
-> ---
->  .../devicetree/bindings/mmc/socfpga-dw-mshc.txt    |   23 ++++++++++++++++++++
->  arch/arm/boot/dts/socfpga.dtsi                     |   13 ++++++++++-
->  arch/arm/boot/dts/socfpga_arria5.dtsi              |   11 ++++++++++
->  arch/arm/boot/dts/socfpga_cyclone5.dtsi            |   11 ++++++++++
->  arch/arm/boot/dts/socfpga_vt.dts                   |   11 ++++++++++
->  5 files changed, 68 insertions(+), 1 deletion(-)
->  create mode 100644 Documentation/devicetree/bindings/mmc/socfpga-dw-mshc.txt
-> 
-> diff --git a/Documentation/devicetree/bindings/mmc/socfpga-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/socfpga-dw-mshc.txt
-> new file mode 100644
-> index 0000000..4897bea
-> --- /dev/null
-> +++ b/Documentation/devicetree/bindings/mmc/socfpga-dw-mshc.txt
-> @@ -0,0 +1,23 @@
-> +* Altera SOCFPGA specific extensions to the Synopsys Designware Mobile
-> +  Storage Host Controller
-> +
-> +The Synopsys designware mobile storage host controller is used to interface
-> +a SoC with storage medium such as eMMC or SD/MMC cards. This file documents
-> +differences between the core Synopsys dw mshc controller properties described
-> +by synopsys-dw-mshc.txt and the properties used by the Altera SOCFPGA specific
-> +extensions to the Synopsys Designware Mobile Storage Host Controller.
-> +
-> +Required Properties:
-> +
-> +* compatible: should be
-> +	- "altr,socfpga-dw-mshc": for Altera's SOCFPGA platform
-> +
-> +Example:
-> +
-> +	mmc: dwmmc0@ff704000 {
-> +		compatible = "altr,socfpga-dw-mshc";
-> +		reg = <0xff704000 0x1000>;
-> +		interrupts = <0 129 4>;
-> +		#address-cells = <1>;
-> +		#size-cells = <0>;
-> +	};
-> diff --git a/arch/arm/boot/dts/socfpga.dtsi b/arch/arm/boot/dts/socfpga.dtsi
-> index 3d62f47..967e27f 100644
-> --- a/arch/arm/boot/dts/socfpga.dtsi
-> +++ b/arch/arm/boot/dts/socfpga.dtsi
-> @@ -474,6 +474,17 @@
->  			arm,data-latency = <2 1 1>;
->  		};
->  
-> +		mmc: dwmmc0@ff704000 {
-> +			compatible = "altr,socfpga-dw-mshc";
-> +			reg = <0xff704000 0x1000>;
-> +			interrupts = <0 139 4>;
-> +			fifo-depth = <0x400>;
-> +			#address-cells = <1>;
-> +			#size-cells = <0>;
-> +			clocks = <&l4_mp_clk>, <&sdmmc_clk>;
-> +			clock-names = "biu", "ciu";
-> +		};
-> +
->  		/* Local timer */
->  		timer@fffec600 {
->  			compatible = "arm,cortex-a9-twd-timer";
-> @@ -528,7 +539,7 @@
->  		};
->  
->  		sysmgr@ffd08000 {
-> -				compatible = "altr,sys-mgr";
-> +				compatible = "altr,sys-mgr", "syscon";
->  				reg = <0xffd08000 0x4000>;
->  			};
->  	};
+> >>From: Roger Tseng <rogerable@realtek.com>
+> >>
+> >>Realtek USB card reader provides a channel to transfer command or d=
+ata to flash
+> >>memory cards. This driver exports host instances for mmc and memsti=
+ck subsystems
+> >>and handles basic works.
+> >>
+> >>Signed-off-by: Roger Tseng <rogerable@realtek.com>
+> >>---
+> >>  drivers/mfd/Kconfig          |  10 +
+> >>  drivers/mfd/Makefile         |   1 +
+> >>  drivers/mfd/rtsx_usb.c       | 760 ++++++++++++++++++++++++++++++=
++++++++++++++
+> >>  include/linux/mfd/rtsx_usb.h | 628 ++++++++++++++++++++++++++++++=
++++++
+> >>  4 files changed, 1399 insertions(+)
+> >>  create mode 100644 drivers/mfd/rtsx_usb.c
+> >>  create mode 100644 include/linux/mfd/rtsx_usb.h
+> >
+> >Applied again, thanks.
+> >
+> Would you also apply patch 2/3 and 3/3 that to make the device fully
+> operational for users? Or should they be applied by maintainers of
+> mmc/memstick subsystems?
+>=20
+> Chris, would you give some comment?
 
-Could you also fix the indentation here, while your touching the node?
-This one seems to be the only one left, that uses weird indentation.
+I can apply them, but I need the other Maintainer Acks.
 
-Regards,
-Steffen
+If they are build orthogonal i.e. there are no build dependencies
+between them, it's probably better that they go into their associated
+trees separately.
 
-
--- 
-Pengutronix e.K.                           |                             |
-Industrial Linux Solutions                 | http://www.pengutronix.de/  |
-Peiner Str. 6-8, 31137 Hildesheim, Germany | Phone: +49-5121-206917-0    |
-Amtsgericht Hildesheim, HRA 2686           | Fax:   +49-5121-206917-5555 |
+--=20
+Lee Jones
+Linaro STMicroelectronics Landing Team Lead
+Linaro.org =E2=94=82 Open source software for ARM SoCs
+=46ollow Linaro: Facebook | Twitter | Blog
