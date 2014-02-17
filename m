@@ -1,51 +1,41 @@
-From: Roger <rogerable@realtek.com>
-Subject: Re: [PATCH v4 1/3] mfd: Add realtek USB card reader driver
-Date: Mon, 17 Feb 2014 14:09:10 +0800
-Message-ID: <5301A786.8040607@realtek.com>
-References: <1392199238-14500-1-git-send-email-rogerable@realtek.com>
- <1392199238-14500-2-git-send-email-rogerable@realtek.com>
- <20140214094427.GA7380@lee--X1>
+From: Dinh Nguyen <dinh.linux@gmail.com>
+Subject: Re: [RESEND PATCHv9] mmc: dw_mmc-socfpga: Remove the SOCFPGA specific
+ platform for dw_mmc
+Date: Mon, 17 Feb 2014 00:30:45 -0600
+Message-ID: <5301AC95.3030307@gmail.com>
+References: <1391609126-16088-1-git-send-email-dinguyen@altera.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"; Format="flowed"
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
-Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
-In-Reply-To: <20140214094427.GA7380@lee--X1>
-List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
-List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel>
-List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
-List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
-List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
-Errors-To: driverdev-devel-bounces@linuxdriverproject.org
-Sender: driverdev-devel-bounces@linuxdriverproject.org
-To: Lee Jones <lee.jones@linaro.org>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Maxim Levitsky <maximlevitsky@gmail.com>, Alex Dubov <oakad@yahoo.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, driverdev-devel@linuxdriverproject.org, linux-mmc@vger.kernel.org, Chris Ball <chris@printf.net>, linux-kernel@vger.kernel.org, wei_wang@realsil.com.cn, Dan Carpenter <dan.carpenter@oracle.com>, Samuel Ortiz <sameo@linux.intel.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-oa0-f52.google.com ([209.85.219.52]:35655 "EHLO
+	mail-oa0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750896AbaBQGat (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 17 Feb 2014 01:30:49 -0500
+Received: by mail-oa0-f52.google.com with SMTP id i4so17149316oah.39
+        for <linux-mmc@vger.kernel.org>; Sun, 16 Feb 2014 22:30:48 -0800 (PST)
+In-Reply-To: <1391609126-16088-1-git-send-email-dinguyen@altera.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: dinguyen@altera.com, cjb@laptop.org
+Cc: linux-mmc@vger.kernel.org
 
-On 02/14/2014 05:44 PM, Lee Jones wrote:
-> On Wed, 12 Feb 2014, rogerable@realtek.com wrote:
->
->> From: Roger Tseng <rogerable@realtek.com>
->>
->> Realtek USB card reader provides a channel to transfer command or data to flash
->> memory cards. This driver exports host instances for mmc and memstick subsystems
->> and handles basic works.
->>
->> Signed-off-by: Roger Tseng <rogerable@realtek.com>
->> ---
->>   drivers/mfd/Kconfig          |  10 +
->>   drivers/mfd/Makefile         |   1 +
->>   drivers/mfd/rtsx_usb.c       | 760 +++++++++++++++++++++++++++++++++++++++++++
->>   include/linux/mfd/rtsx_usb.h | 628 +++++++++++++++++++++++++++++++++++
->>   4 files changed, 1399 insertions(+)
->>   create mode 100644 drivers/mfd/rtsx_usb.c
->>   create mode 100644 include/linux/mfd/rtsx_usb.h
->
-> Applied again, thanks.
->
-Would you also apply patch 2/3 and 3/3 that to make the device fully 
-operational for users? Or should they be applied by maintainers of 
-mmc/memstick subsystems?
 
-Chris, would you give some comment?
+On 2/5/14 8:05 AM, dinguyen@altera.com wrote:
+> From: Dinh Nguyen <dinguyen@altera.com>
+>
+> It turns now that the only really platform specific code that is needed for
+> SOCFPGA is using the SDMMC_CMD_USE_HOLD_REG in the prepare_command function.
+> Since the Rockchip already has this functionality, re-use the code that is
+> already in dw_mmc-pltfm.c.
+>
+> Signed-off-by: Dinh Nguyen <dinguyen@altera.com>
+> Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
+>
+Please ignore this thread. I need to rework the patch base on this
+discussion:
+
+http://thread.gmane.org/gmane.linux.kernel.mmc/25039
+
+Thanks,
+Dinh
