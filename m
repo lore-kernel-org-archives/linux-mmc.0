@@ -1,182 +1,81 @@
-From: <dinguyen-EIB2kfCEclfQT0dZR+AlfA@public.gmane.org>
-Subject: [PATCHv2 3/3] dts: socfpga: Add support for SD/MMC on the SOCFPGA platform
-Date: Mon, 17 Feb 2014 13:55:11 -0600
-Message-ID: <1392666911-15985-3-git-send-email-dinguyen@altera.com>
+From: Steffen Trumtrar <s.trumtrar@pengutronix.de>
+Subject: Re: [PATCHv2 2/3] mmc: dw_mmc: Add support for SOCFPGA's platform
+ specific implementation
+Date: Mon, 17 Feb 2014 21:20:18 +0100
+Message-ID: <20140217202018.GC8839@pengutronix.de>
 References: <1392666911-15985-1-git-send-email-dinguyen@altera.com>
+ <1392666911-15985-2-git-send-email-dinguyen@altera.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1392666911-15985-1-git-send-email-dinguyen-EIB2kfCEclfQT0dZR+AlfA@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: dinh.linux-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Dinh Nguyen <dinguyen-EIB2kfCEclfQT0dZR+AlfA@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Pawel Moll <pawel.moll-5wv7dgnIgG8@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Ian Campbell <ijc+devicetree-KcIKpvwj1kUDXYZnReoRVg@public.gmane.org>, Kumar Gala <galak-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Seungwon Jeon <tgih.jun-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from metis.ext.pengutronix.de ([92.198.50.35]:40585 "EHLO
+	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754481AbaBQUUY (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 17 Feb 2014 15:20:24 -0500
+Content-Disposition: inline
+In-Reply-To: <1392666911-15985-2-git-send-email-dinguyen@altera.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: dinguyen@altera.com
+Cc: linux-mmc@vger.kernel.org, dinh.linux@gmail.com, devicetree@vger.kernel.org, Rob Herring <robh+dt@kernel.org>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Kumar Gala <galak@codeaurora.org>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Chris Ball <chris@printf.net>
 
-From: Dinh Nguyen <dinguyen-EIB2kfCEclfQT0dZR+AlfA@public.gmane.org>
+Hi Dinh!
 
-Introduce "altr,socfpga-dw-mshc" to enable Altera's SOCFPGA platform specific
-implementation of the dwc_mmc driver.
+On Mon, Feb 17, 2014 at 01:55:10PM -0600, dinguyen@altera.com wrote:
+> From: Dinh Nguyen <dinguyen@altera.com>
+> 
+> Like the rockchip, Altera's SOCFPGA platform specific implementation of the
+> dw_mmc driver requires using the HOLD register for SD commands.
+> 
+> Signed-off-by: Dinh Nguyen <dinguyen@altera.com>
+> Acked-by: Steffen Trumtrar <s.trumtrar@pengutronix.de>
+> Tested-by: Steffen Trumtrar <s.trumtrar@pengutronix.de>
+> Cc: Rob Herring <robh+dt@kernel.org>
+> Cc: Pawel Moll <pawel.moll@arm.com>
+> Cc: Mark Rutland <mark.rutland@arm.com>
+> Cc: Ian Campbell <ijc+devicetree@hellion.org.uk>
+> Cc: Kumar Gala <galak@codeaurora.org>
+> Cc: Seungwon Jeon <tgih.jun@samsung.com>
+> Cc: Jaehoon Chung <jh80.chung@samsung.com>
+> Cc: Chris Ball <chris@printf.net>
+> ---
+> v2: Use dw_mci_socfpga_prepare_command instead of
+>     dw_mci_rockchip_prepare_command
+> ---
+>  drivers/mmc/host/dw_mmc-pltfm.c |   11 +++++++++++
+>  1 file changed, 11 insertions(+)
+> 
+> diff --git a/drivers/mmc/host/dw_mmc-pltfm.c b/drivers/mmc/host/dw_mmc-pltfm.c
+> index 5c49656..5b87cc2 100644
+> --- a/drivers/mmc/host/dw_mmc-pltfm.c
+> +++ b/drivers/mmc/host/dw_mmc-pltfm.c
+> @@ -30,10 +30,19 @@ static void dw_mci_rockchip_prepare_command(struct dw_mci *host, u32 *cmdr)
+>  	*cmdr |= SDMMC_CMD_USE_HOLD_REG;
+>  }
+>  
+> +static void dw_mci_socfpga_prepare_command(struct dw_mci *host, u32 *cmdr)
+> +{
+> +	*cmdr |= SDMMC_CMD_USE_HOLD_REG;
+> +}
+> +
+>  static const struct dw_mci_drv_data rockchip_drv_data = {
+>  	.prepare_command	= dw_mci_rockchip_prepare_command,
+>  };
+> +static const struct dw_mci_drv_data socfpga_drv_data = {
+> +	.prepare_command	= dw_mci_socfpga_prepare_command,
+> +};
+> +
 
-Also add the "syscon" binding to the "altr,sys-mgr" node. The clock
-driver can use the syscon driver to toggle the register for the SD/MMC
-clock phase shift settings.
+Why didn't you just rename the rockchip function, instead of
+adding the same thing with a different name?
+This seems rather "useless" or I'm missing something.
 
-Finally, fix an indentation error for the sysmgr node.
+Regards,
+Steffen
 
-Signed-off-by: Dinh Nguyen <dinguyen-EIB2kfCEclfQT0dZR+AlfA@public.gmane.org>
-Acked-by: Steffen Trumtrar <s.trumtrar-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org>
-Tested-by: Steffen Trumtrar <s.trumtrar-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org>
-Cc: Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Cc: Pawel Moll <pawel.moll-5wv7dgnIgG8@public.gmane.org>
-Cc: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
-Cc: Ian Campbell <ijc+devicetree-KcIKpvwj1kUDXYZnReoRVg@public.gmane.org>
-Cc: Kumar Gala <galak-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
-Cc: Seungwon Jeon <tgih.jun-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
-Cc: Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
-Cc: Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>
----
-v2: Fix indentation for the sysmgr node
----
- .../devicetree/bindings/mmc/socfpga-dw-mshc.txt    |   23 ++++++++++++++++++++
- arch/arm/boot/dts/socfpga.dtsi                     |   15 +++++++++++--
- arch/arm/boot/dts/socfpga_arria5.dtsi              |   11 ++++++++++
- arch/arm/boot/dts/socfpga_cyclone5.dtsi            |   11 ++++++++++
- arch/arm/boot/dts/socfpga_vt.dts                   |   11 ++++++++++
- 5 files changed, 69 insertions(+), 2 deletions(-)
- create mode 100644 Documentation/devicetree/bindings/mmc/socfpga-dw-mshc.txt
 
-diff --git a/Documentation/devicetree/bindings/mmc/socfpga-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/socfpga-dw-mshc.txt
-new file mode 100644
-index 0000000..4897bea
---- /dev/null
-+++ b/Documentation/devicetree/bindings/mmc/socfpga-dw-mshc.txt
-@@ -0,0 +1,23 @@
-+* Altera SOCFPGA specific extensions to the Synopsys Designware Mobile
-+  Storage Host Controller
-+
-+The Synopsys designware mobile storage host controller is used to interface
-+a SoC with storage medium such as eMMC or SD/MMC cards. This file documents
-+differences between the core Synopsys dw mshc controller properties described
-+by synopsys-dw-mshc.txt and the properties used by the Altera SOCFPGA specific
-+extensions to the Synopsys Designware Mobile Storage Host Controller.
-+
-+Required Properties:
-+
-+* compatible: should be
-+	- "altr,socfpga-dw-mshc": for Altera's SOCFPGA platform
-+
-+Example:
-+
-+	mmc: dwmmc0@ff704000 {
-+		compatible = "altr,socfpga-dw-mshc";
-+		reg = <0xff704000 0x1000>;
-+		interrupts = <0 129 4>;
-+		#address-cells = <1>;
-+		#size-cells = <0>;
-+	};
-diff --git a/arch/arm/boot/dts/socfpga.dtsi b/arch/arm/boot/dts/socfpga.dtsi
-index 3d62f47..eee73c9 100644
---- a/arch/arm/boot/dts/socfpga.dtsi
-+++ b/arch/arm/boot/dts/socfpga.dtsi
-@@ -474,6 +474,17 @@
- 			arm,data-latency = <2 1 1>;
- 		};
- 
-+		mmc: dwmmc0@ff704000 {
-+			compatible = "altr,socfpga-dw-mshc";
-+			reg = <0xff704000 0x1000>;
-+			interrupts = <0 139 4>;
-+			fifo-depth = <0x400>;
-+			#address-cells = <1>;
-+			#size-cells = <0>;
-+			clocks = <&l4_mp_clk>, <&sdmmc_clk>;
-+			clock-names = "biu", "ciu";
-+		};
-+
- 		/* Local timer */
- 		timer@fffec600 {
- 			compatible = "arm,cortex-a9-twd-timer";
-@@ -528,8 +539,8 @@
- 		};
- 
- 		sysmgr@ffd08000 {
--				compatible = "altr,sys-mgr";
--				reg = <0xffd08000 0x4000>;
-+			compatible = "altr,sys-mgr", "syscon";
-+			reg = <0xffd08000 0x4000>;
- 			};
- 	};
- };
-diff --git a/arch/arm/boot/dts/socfpga_arria5.dtsi b/arch/arm/boot/dts/socfpga_arria5.dtsi
-index a85b404..6c87b70 100644
---- a/arch/arm/boot/dts/socfpga_arria5.dtsi
-+++ b/arch/arm/boot/dts/socfpga_arria5.dtsi
-@@ -27,6 +27,17 @@
- 			};
- 		};
- 
-+		dwmmc0@ff704000 {
-+			num-slots = <1>;
-+			supports-highspeed;
-+			broken-cd;
-+
-+			slot@0 {
-+				reg = <0>;
-+				bus-width = <4>;
-+			};
-+		};
-+
- 		serial0@ffc02000 {
- 			clock-frequency = <100000000>;
- 		};
-diff --git a/arch/arm/boot/dts/socfpga_cyclone5.dtsi b/arch/arm/boot/dts/socfpga_cyclone5.dtsi
-index a8716f6..ca41b0e 100644
---- a/arch/arm/boot/dts/socfpga_cyclone5.dtsi
-+++ b/arch/arm/boot/dts/socfpga_cyclone5.dtsi
-@@ -28,6 +28,17 @@
- 			};
- 		};
- 
-+		dwmmc0@ff704000 {
-+			num-slots = <1>;
-+			supports-highspeed;
-+			broken-cd;
-+
-+			slot@0 {
-+				reg = <0>;
-+				bus-width = <4>;
-+			};
-+		};
-+
- 		ethernet@ff702000 {
- 			phy-mode = "rgmii";
- 			phy-addr = <0xffffffff>; /* probe for phy addr */
-diff --git a/arch/arm/boot/dts/socfpga_vt.dts b/arch/arm/boot/dts/socfpga_vt.dts
-index d1ec0ca..222313f 100644
---- a/arch/arm/boot/dts/socfpga_vt.dts
-+++ b/arch/arm/boot/dts/socfpga_vt.dts
-@@ -41,6 +41,17 @@
- 			};
- 		};
- 
-+		dwmmc0@ff704000 {
-+			num-slots = <1>;
-+			supports-highspeed;
-+			broken-cd;
-+
-+			slot@0 {
-+				reg = <0>;
-+				bus-width = <4>;
-+			};
-+		};
-+
- 		ethernet@ff700000 {
- 			phy-mode = "gmii";
- 			status = "okay";
 -- 
-1.7.9.5
-
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Pengutronix e.K.                           |                             |
+Industrial Linux Solutions                 | http://www.pengutronix.de/  |
+Peiner Str. 6-8, 31137 Hildesheim, Germany | Phone: +49-5121-206917-0    |
+Amtsgericht Hildesheim, HRA 2686           | Fax:   +49-5121-206917-5555 |
