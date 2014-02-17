@@ -1,72 +1,70 @@
-From: Lee Jones <lee.jones@linaro.org>
-Subject: Re: [PATCH v4 1/3] mfd: Add realtek USB card reader driver
-Date: Mon, 17 Feb 2014 12:03:26 +0000
-Message-ID: <20140217120326.GC20218@lee--X1>
-References: <1392199238-14500-1-git-send-email-rogerable@realtek.com>
- <1392199238-14500-2-git-send-email-rogerable@realtek.com>
- <20140214094427.GA7380@lee--X1> <5301A786.8040607@realtek.com>
- <20140217082222.GA17875@lee--X1> <5301D369.5010100@realtek.com>
- <20140217100211.GE17875@lee--X1> <5301E376.8010000@realtek.com>
+From: Russell King - ARM Linux <linux@arm.linux.org.uk>
+Subject: Re: [PATCH] Fix uses of dma_max_pfn() when converting to a
+	limiting address
+Date: Mon, 17 Feb 2014 12:43:42 +0000
+Message-ID: <20140217124342.GP30257@n2100.arm.linux.org.uk>
+References: <E1WDH7v-00038J-2k@rmk-PC.arm.linux.org.uk> <1392310690.2175.13.camel@dabdike.int.hansenpartnership.com> <20140213171117.GA30257@n2100.arm.linux.org.uk> <1392314821.2175.16.camel@dabdike.int.hansenpartnership.com> <20140213200112.GF30257@n2100.arm.linux.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from gw-1.arm.linux.org.uk ([78.32.30.217]:38851 "EHLO
+	pandora.arm.linux.org.uk" rhost-flags-OK-OK-OK-FAIL)
+	by vger.kernel.org with ESMTP id S1751552AbaBQMnu (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 17 Feb 2014 07:43:50 -0500
 Content-Disposition: inline
-In-Reply-To: <5301E376.8010000@realtek.com>
-List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
-List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel>
-List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
-List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
-List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
-Errors-To: driverdev-devel-bounces@linuxdriverproject.org
-Sender: driverdev-devel-bounces@linuxdriverproject.org
-To: Roger <rogerable@realtek.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Maxim Levitsky <maximlevitsky@gmail.com>, Alex Dubov <oakad@yahoo.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, driverdev-devel@linuxdriverproject.org, linux-mmc@vger.kernel.org, Chris Ball <chris@printf.net>, linux-kernel@vger.kernel.org, wei_wang@realsil.com.cn, Andrew Morton <akpm@linux-foundation.org>, Dan Carpenter <dan.carpenter@oracle.com>, Samuel Ortiz <sameo@linux.intel.com>
+In-Reply-To: <20140213200112.GF30257@n2100.arm.linux.org.uk>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: James Bottomley <James.Bottomley@HansenPartnership.com>
+Cc: linux-mmc@vger.kernel.org, Santosh Shilimkar <santosh.shilimkar@ti.com>, Chris Ball <chris@printf.net>, linux-arm-kernel@lists.infradead.org, linux-scsi@vger.kernel.org
 
-PiA+Pj4+Pj5Gcm9tOiBSb2dlciBUc2VuZyA8cm9nZXJhYmxlQHJlYWx0ZWsuY29tPgo+ID4+Pj4+
-Pgo+ID4+Pj4+PlJlYWx0ZWsgVVNCIGNhcmQgcmVhZGVyIHByb3ZpZGVzIGEgY2hhbm5lbCB0byB0
-cmFuc2ZlciBjb21tYW5kIG9yIGRhdGEgdG8gZmxhc2gKPiA+Pj4+Pj5tZW1vcnkgY2FyZHMuIFRo
-aXMgZHJpdmVyIGV4cG9ydHMgaG9zdCBpbnN0YW5jZXMgZm9yIG1tYyBhbmQgbWVtc3RpY2sgc3Vi
-c3lzdGVtcwo+ID4+Pj4+PmFuZCBoYW5kbGVzIGJhc2ljIHdvcmtzLgo+ID4+Pj4+Pgo+ID4+Pj4+
-PlNpZ25lZC1vZmYtYnk6IFJvZ2VyIFRzZW5nIDxyb2dlcmFibGVAcmVhbHRlay5jb20+Cj4gPj4+
-Pj4+LS0tCj4gPj4+Pj4+ICBkcml2ZXJzL21mZC9LY29uZmlnICAgICAgICAgIHwgIDEwICsKPiA+
-Pj4+Pj4gIGRyaXZlcnMvbWZkL01ha2VmaWxlICAgICAgICAgfCAgIDEgKwo+ID4+Pj4+PiAgZHJp
-dmVycy9tZmQvcnRzeF91c2IuYyAgICAgICB8IDc2MCArKysrKysrKysrKysrKysrKysrKysrKysr
-KysrKysrKysrKysrKysrKysrCj4gPj4+Pj4+ICBpbmNsdWRlL2xpbnV4L21mZC9ydHN4X3VzYi5o
-IHwgNjI4ICsrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrCj4gPj4+Pj4+ICA0IGZp
-bGVzIGNoYW5nZWQsIDEzOTkgaW5zZXJ0aW9ucygrKQo+ID4+Pj4+PiAgY3JlYXRlIG1vZGUgMTAw
-NjQ0IGRyaXZlcnMvbWZkL3J0c3hfdXNiLmMKPiA+Pj4+Pj4gIGNyZWF0ZSBtb2RlIDEwMDY0NCBp
-bmNsdWRlL2xpbnV4L21mZC9ydHN4X3VzYi5oCj4gPj4+Pj4KPiA+Pj4+PkFwcGxpZWQgYWdhaW4s
-IHRoYW5rcy4KPiA+Pj4+Pgo+ID4+Pj5Xb3VsZCB5b3UgYWxzbyBhcHBseSBwYXRjaCAyLzMgYW5k
-IDMvMyB0aGF0IHRvIG1ha2UgdGhlIGRldmljZSBmdWxseQo+ID4+Pj5vcGVyYXRpb25hbCBmb3Ig
-dXNlcnM/IE9yIHNob3VsZCB0aGV5IGJlIGFwcGxpZWQgYnkgbWFpbnRhaW5lcnMgb2YKPiA+Pj4+
-bW1jL21lbXN0aWNrIHN1YnN5c3RlbXM/Cj4gPj4+Pgo+ID4+Pj5DaHJpcywgd291bGQgeW91IGdp
-dmUgc29tZSBjb21tZW50Pwo+ID4+Pgo+ID4+PkkgY2FuIGFwcGx5IHRoZW0sIGJ1dCBJIG5lZWQg
-dGhlIG90aGVyIE1haW50YWluZXIgQWNrcy4KPiA+Pj4KPiA+Pj5JZiB0aGV5IGFyZSBidWlsZCBv
-cnRob2dvbmFsIGkuZS4gdGhlcmUgYXJlIG5vIGJ1aWxkIGRlcGVuZGVuY2llcwo+ID4+PmJldHdl
-ZW4gdGhlbSwgaXQncyBwcm9iYWJseSBiZXR0ZXIgdGhhdCB0aGV5IGdvIGludG8gdGhlaXIgYXNz
-b2NpYXRlZAo+ID4+PnRyZWVzIHNlcGFyYXRlbHkuCj4gPj4+Cj4gPj5JIHRoaW5rIGl0IHdvdWxk
-IGJlIGJldHRlciB0byBhcHBseSB0aGVtIHRvZ2V0aGVyIHNpbmNlIHRoZSBsYXRlcgo+ID4+cGF0
-Y2hlcyByZWFsbHkgZGVwZW5kIG9uIHRoZSAxc3Qgb25lLHNvIG5vdyB3ZSBhcmUgd2FpdGluZyBm
-b3IgQWNrcwo+ID4+ZnJvbSBtbWMvbWVtc3RpY2sgc3Vic3lzdGVtcy4KPiA+Cj4gPldoZW4geW91
-IHNheSAiZGVwZW5kIG9uIiwgZG8geW91IG1lYW4gYXMgYSBidWlsZCBkZXBlbmVuY3ksIG9yIHdv
-bid0Cj4gPnJ1biB3aXRob3V0IHRoZSBmaXJzdCBwYXRjaCBhcHBsaWVkPwo+IAo+IFRoZSBsYXRl
-ciAyIHBhdGNoZXMgYWN0dWFsbHkgaW52b2tlIHN5bWJvbHMgZGVmaW5lZCBpbiB0aGUgZmlyc3QK
-PiBwYXRjaCBhbmQgd29uJ3QgY29tcGlsZSBpZiBpdCBpcyBub3QgYXBwbGllZCBmaXJzdC4gVGhl
-IEtjb25maWcKPiBjaGFuZ2VzIGZvciB0aGUgbGF0ZXIgb25lc3MgYWxzbyBzcGVjaWZpZWQgdGhp
-cyBieSAiZGVwZW5kcyBvbiIuCj4gCj4gSSdtIG5vdCBzdXJlIGlmIHRoaXMgbWVhbnMgImJ1aWxk
-IGRlcGVuZGVuY3kiLiBTb3JyeSBmb3IgbXkgdW5jbGVhciB3b3Jkcy4KClllcywgdGhhdCBzb3Vu
-ZHMgbGlrZSBhIGJ1aWxkIGRlcGVuZGVuY3kgaS5lLiB3aWxsIG5vdCBidWlsZCB3aXRob3V0CmVy
-cm9ycyBvciB3YXJuaW5ncyB3aXRob3V0IHRoZSBwcmV2aW91cyBwYXRjaCBhcHBsaWVkLgoKPiA+
-PkJ1dCB0aGVyZSBpcyBubyBvbmUgc3BlY2lmaWVkIGZvciAibWVtc3RpY2svaG9zdC8iIGluIE1B
-SU5UQUlORVJTLgo+ID4+Q291bGQgYW55b25lIGVsc2UgQWNrIHRoaXM/CgpBbmRyZXcgKENDJ2Vk
-KSBoYXMgYmVlbiBBY2tpbmcgdGhlc2UgdGh1cyBmYXIuCgotLSAKTGVlIEpvbmVzCkxpbmFybyBT
-VE1pY3JvZWxlY3Ryb25pY3MgTGFuZGluZyBUZWFtIExlYWQKTGluYXJvLm9yZyDilIIgT3BlbiBz
-b3VyY2Ugc29mdHdhcmUgZm9yIEFSTSBTb0NzCkZvbGxvdyBMaW5hcm86IEZhY2Vib29rIHwgVHdp
-dHRlciB8IEJsb2cKX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X18KZGV2ZWwgbWFpbGluZyBsaXN0CmRldmVsQGxpbnV4ZHJpdmVycHJvamVjdC5vcmcKaHR0cDov
-L2RyaXZlcmRldi5saW51eGRyaXZlcnByb2plY3Qub3JnL21haWxtYW4vbGlzdGluZm8vZHJpdmVy
-ZGV2LWRldmVsCg==
+On Thu, Feb 13, 2014 at 08:01:12PM +0000, Russell King - ARM Linux wrote:
+> On Thu, Feb 13, 2014 at 10:07:01AM -0800, James Bottomley wrote:
+> > On Thu, 2014-02-13 at 17:11 +0000, Russell King - ARM Linux wrote:
+> > > On Thu, Feb 13, 2014 at 08:58:10AM -0800, James Bottomley wrote:
+> > > > This doesn't really look like the right fix.  You replaced dev->dma_mask
+> > > > with a calculation on dev_max_pfn().  Since dev->dma_mask is always u64
+> > > > and dev_max_pfn is supposed to be returning the pfn of the dma_mask, it
+> > > > should unconditionally be 64 bits as well.  Either that or it should
+> > > > return dma_addr_t.
+> > > 
+> > > My reasoning is that PFNs in the system are always of type "unsigned long"
+> > > and therefore a function returning a pfn should have that type.  If we
+> > > overflow a PFN fitting in an unsigned long, we have lots of places which
+> > > need fixing.
+> > 
+> > It's not intuitive to people who need the dma mask that they're supposed
+> > to use dma_max_pfn() << PAGE_SHIFT but now they have to worry about the
+> > casting and, if they don't get it right, nothing will warn or tell them.
+> > what about a new macro, say dma_max_mask(dev) that just returns
+> > (u64)dma_max_pfn() << PAGE_SHIFT?
+> 
+> This sounds like a good idea.
+> 
+> I've just been looking at places which do this << PAGE_SHIFT, and we
+> have other places which suffer from this same bug all over the kernel,
+> so maybe we actually need a pfn_to_addr() macro or similar so that
+> people get this right in these other places too?  It appears to be
+> quite a widespread problem.
+> 
+> I'm surprised none of the below haven't already caused a problem.
+> 
+> Thoughts?
+
+Okay, as there's been no response to this, I'm going to push the patch
+as-is to Linus this evening.
+
+Nevertheless, your point is valid, but it is more of a general problem in
+the kernel than with this specific change - and it's more important to fix
+the existing problem here than to try and work out a new way of sorting
+this out to fix the general case in the middle of the -rc series.
+
+It is arguable that people _should_ know that shifting an unsigned long
+left and assigning it to a u64 doesn't automatically get any of the high
+bits set - the promotion happens at assignment, not while the expression
+is being evaluated.
+
+-- 
+FTTC broadband for 0.8mile line: 5.8Mbps down 500kbps up.  Estimation
+in database were 13.1 to 19Mbit for a good line, about 7.5+ for a bad.
+Estimate before purchase was "up to 13.2Mbit".
