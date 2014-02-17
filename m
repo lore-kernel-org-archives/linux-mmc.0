@@ -1,74 +1,74 @@
-From: David =?utf-8?q?Lanzend=C3=B6rfer?= <david.lanzendoerfer-Z7Kmv9EsliU@public.gmane.org>
-Subject: [PATCH v7 8/8] ARM: sunxi: Add documentation for driver
- for SD/MMC hosts found on Allwinner sunxi SoCs
-Date: Mon, 17 Feb 2014 11:03:02 +0100
-Message-ID: <20140217100302.15040.56273.stgit@pagira.o2s.ch>
-References: <20140217095907.15040.81893.stgit@pagira.o2s.ch>
-Reply-To: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+From: Roger <rogerable@realtek.com>
+Subject: Re: [PATCH v4 1/3] mfd: Add realtek USB card reader driver
+Date: Mon, 17 Feb 2014 18:24:54 +0800
+Message-ID: <5301E376.8010000@realtek.com>
+References: <1392199238-14500-1-git-send-email-rogerable@realtek.com>
+ <1392199238-14500-2-git-send-email-rogerable@realtek.com>
+ <20140214094427.GA7380@lee--X1> <5301A786.8040607@realtek.com>
+ <20140217082222.GA17875@lee--X1> <5301D369.5010100@realtek.com>
+ <20140217100211.GE17875@lee--X1>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
-Return-path: <linux-sunxi+bncBD2JL37LXEKRBL55Q6MAKGQEBIFFB2Y-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-In-Reply-To: <20140217095907.15040.81893.stgit-pgFh0Jf6HD9Xzn/AsuzBOg@public.gmane.org>
-List-Post: <http://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Help: <http://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Archive: <http://groups.google.com/group/linux-sunxi>
-Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
-List-Subscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Unsubscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-To: devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Laurent Pinchart <laurent.pinchart+renesas-ryLnwIuWjnjg/C1BVhZhaw@public.gmane.org>, Mike Turquette <mturquette-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Simon Baatz <gmbnomis-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Emilio =?utf-8?b?TMOzcGV6?= <emilio-0Z03zUJReD5OxF6Tv1QG9Q@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, H Hartley Sweeten <hsweeten-3FF4nKcrg1dE2c76skzGb0EOCMrvLtNR@public.gmane.org>, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, Tejun Heo <tj-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, Guennadi Liakhovetski <g.liakhovetski-Mmb7MZpHnFY@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+Content-Type: text/plain; charset="us-ascii"; Format="flowed"
+Content-Transfer-Encoding: 7bit
+Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
+In-Reply-To: <20140217100211.GE17875@lee--X1>
+List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
+List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel>
+List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
+List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
+List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
+Errors-To: driverdev-devel-bounces@linuxdriverproject.org
+Sender: driverdev-devel-bounces@linuxdriverproject.org
+To: Lee Jones <lee.jones@linaro.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Maxim Levitsky <maximlevitsky@gmail.com>, Alex Dubov <oakad@yahoo.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, driverdev-devel@linuxdriverproject.org, linux-mmc@vger.kernel.org, Chris Ball <chris@printf.net>, linux-kernel@vger.kernel.org, wei_wang@realsil.com.cn, Dan Carpenter <dan.carpenter@oracle.com>, Samuel Ortiz <sameo@linux.intel.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Signed-off-by: David Lanzend=C3=B6rfer <david.lanzendoerfer-Z7Kmv9EsliU@public.gmane.org>
----
- .../devicetree/bindings/mmc/sunxi-mmc.txt          |   32 ++++++++++++++++=
-++++
- 1 file changed, 32 insertions(+)
- create mode 100644 Documentation/devicetree/bindings/mmc/sunxi-mmc.txt
+On 02/17/2014 06:02 PM, Lee Jones wrote:
+>>>>>> From: Roger Tseng <rogerable@realtek.com>
+>>>>>>
+>>>>>> Realtek USB card reader provides a channel to transfer command or data to flash
+>>>>>> memory cards. This driver exports host instances for mmc and memstick subsystems
+>>>>>> and handles basic works.
+>>>>>>
+>>>>>> Signed-off-by: Roger Tseng <rogerable@realtek.com>
+>>>>>> ---
+>>>>>>   drivers/mfd/Kconfig          |  10 +
+>>>>>>   drivers/mfd/Makefile         |   1 +
+>>>>>>   drivers/mfd/rtsx_usb.c       | 760 +++++++++++++++++++++++++++++++++++++++++++
+>>>>>>   include/linux/mfd/rtsx_usb.h | 628 +++++++++++++++++++++++++++++++++++
+>>>>>>   4 files changed, 1399 insertions(+)
+>>>>>>   create mode 100644 drivers/mfd/rtsx_usb.c
+>>>>>>   create mode 100644 include/linux/mfd/rtsx_usb.h
+>>>>>
+>>>>> Applied again, thanks.
+>>>>>
+>>>> Would you also apply patch 2/3 and 3/3 that to make the device fully
+>>>> operational for users? Or should they be applied by maintainers of
+>>>> mmc/memstick subsystems?
+>>>>
+>>>> Chris, would you give some comment?
+>>>
+>>> I can apply them, but I need the other Maintainer Acks.
+>>>
+>>> If they are build orthogonal i.e. there are no build dependencies
+>>> between them, it's probably better that they go into their associated
+>>> trees separately.
+>>>
+>> I think it would be better to apply them together since the later
+>> patches really depend on the 1st one,so now we are waiting for Acks
+>> from mmc/memstick subsystems.
+>
+> When you say "depend on", do you mean as a build depenency, or won't
+> run without the first patch applied?
 
-diff --git a/Documentation/devicetree/bindings/mmc/sunxi-mmc.txt b/Document=
-ation/devicetree/bindings/mmc/sunxi-mmc.txt
-new file mode 100644
-index 0000000..5ce8c5e
---- /dev/null
-+++ b/Documentation/devicetree/bindings/mmc/sunxi-mmc.txt
-@@ -0,0 +1,32 @@
-+* Allwinner sunxi MMC controller
-+
-+The highspeed MMC host controller on Allwinner SoCs provides an interface
-+for MMC, SD and SDIO types of memory cards.
-+
-+Supported maximum speeds are the ones of the eMMC standard 4.5 as well
-+as the speed of SD standard 3.0.
-+Absolute maximum transfer rate is 200MB/s
-+
-+Required properties:
-+- compatible: Should be "allwinner,<revision>-<chip>-mmc".
-+  The supported chips include a10, a10s, 13, a20 and a31.
-+- base registers are 0x1000 appart, so the base of mmc1
-+  would be 0x01c0f000+0x1000=3D0x01c10000(see example)
-+  and so on.
-+- clocks requires the reference at the ahb clock gate
-+  with the correct index (mmc0 -> 8, mmc1 -> 9, and so on)
-+  as well as the reference to the correct mod0 clock.
-+- interrupts requires the correct IRQ line
-+  (mmc0 -> 32, mmc1 -> 33, and so on)
-+
-+Examples:
-+
-+mmc0: mmc@01c0f000 {
-+	compatible =3D "allwinner,sun5i-a13-mmc";
-+	reg =3D <0x01c0f000 0x1000>;
-+	clocks =3D <&ahb_gates 8>, <&mmc0_clk>;
-+	clock-names =3D "ahb", "mod";
-+	interrupts =3D <0 32 4>;
-+	bus-width =3D <4>;
-+	status =3D "disabled";
-+};
+The later 2 patches actually invoke symbols defined in the first patch 
+and won't compile if it is not applied first. The Kconfig changes for 
+the later oness also specified this by "depends on".
 
---=20
-You received this message because you are subscribed to the Google Groups "=
-linux-sunxi" group.
-To unsubscribe from this group and stop receiving emails from it, send an e=
-mail to linux-sunxi+unsubscribe-/JYPxA39Uh5TLH3MbocFF+G/Ez6ZCGd0@public.gmane.org
-For more options, visit https://groups.google.com/groups/opt_out.
+I'm not sure if this means "build dependency". Sorry for my unclear words.
+
+>> But there is no one specified for "memstick/host/" in MAINTAINERS.
+>> Could anyone else Ack this?
+>
