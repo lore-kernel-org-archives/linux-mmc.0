@@ -1,7 +1,7 @@
 From: <dinguyen@altera.com>
-Subject: [PATCH 2/3] mmc: dw_mmc: Add support for SOCFPGA's platform specific implementation
-Date: Mon, 17 Feb 2014 01:30:43 -0600
-Message-ID: <1392622244-18015-2-git-send-email-dinguyen@altera.com>
+Subject: [PATCH 3/3] dts: socfpga: Add support for SD/MMC on the SOCFPGA platform
+Date: Mon, 17 Feb 2014 01:30:44 -0600
+Message-ID: <1392622244-18015-3-git-send-email-dinguyen@altera.com>
 References: <1392622244-18015-1-git-send-email-dinguyen@altera.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -9,7 +9,7 @@ Return-path: <linux-mmc-owner@vger.kernel.org>
 Received: from mail-bn1bhn0126.outbound.protection.outlook.com ([157.56.111.126]:48669
 	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
 	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1750896AbaBQHdE (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	id S1750926AbaBQHdE (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
 	Mon, 17 Feb 2014 02:33:04 -0500
 In-Reply-To: <1392622244-18015-1-git-send-email-dinguyen@altera.com>
 Sender: linux-mmc-owner@vger.kernel.org
@@ -19,8 +19,12 @@ Cc: dinh.linux@gmail.com, devicetree@vger.kernel.org, Dinh Nguyen <dinguyen@alte
 
 From: Dinh Nguyen <dinguyen@altera.com>
 
-Like the rockchip, Altera's SOCFPGA platform specific implementation of the
-dw_mmc driver requires using the HOLD register for SD commands.
+Introduce "altr,socfpga-dw-mshc" to enable Altera's SOCFPGA platform specific
+implementation of the dwc_mmc driver.
+
+Also add the "syscon" binding to the "altr,sys-mgr" node. The clock
+driver can use the syscon driver to toggle the register for the SD/MMC
+clock phase shift settings.
 
 Signed-off-by: Dinh Nguyen <dinguyen@altera.com>
 Cc: Rob Herring <robh+dt@kernel.org>
@@ -32,33 +36,140 @@ Cc: Seungwon Jeon <tgih.jun@samsung.com>
 Cc: Jaehoon Chung <jh80.chung@samsung.com>
 Cc: Chris Ball <chris@printf.net>
 ---
- drivers/mmc/host/dw_mmc-pltfm.c |    6 ++++++
- 1 file changed, 6 insertions(+)
+ .../devicetree/bindings/mmc/socfpga-dw-mshc.txt    |   23 ++++++++++++++++++++
+ arch/arm/boot/dts/socfpga.dtsi                     |   13 ++++++++++-
+ arch/arm/boot/dts/socfpga_arria5.dtsi              |   11 ++++++++++
+ arch/arm/boot/dts/socfpga_cyclone5.dtsi            |   11 ++++++++++
+ arch/arm/boot/dts/socfpga_vt.dts                   |   11 ++++++++++
+ 5 files changed, 68 insertions(+), 1 deletion(-)
+ create mode 100644 Documentation/devicetree/bindings/mmc/socfpga-dw-mshc.txt
 
-diff --git a/drivers/mmc/host/dw_mmc-pltfm.c b/drivers/mmc/host/dw_mmc-pltfm.c
-index 5c49656..88047cc 100644
---- a/drivers/mmc/host/dw_mmc-pltfm.c
-+++ b/drivers/mmc/host/dw_mmc-pltfm.c
-@@ -34,6 +34,10 @@ static const struct dw_mci_drv_data rockchip_drv_data = {
- 	.prepare_command	= dw_mci_rockchip_prepare_command,
- };
- 
-+static const struct dw_mci_drv_data socfpga_drv_data = {
-+	.prepare_command	= dw_mci_rockchip_prepare_command,
-+};
+diff --git a/Documentation/devicetree/bindings/mmc/socfpga-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/socfpga-dw-mshc.txt
+new file mode 100644
+index 0000000..4897bea
+--- /dev/null
++++ b/Documentation/devicetree/bindings/mmc/socfpga-dw-mshc.txt
+@@ -0,0 +1,23 @@
++* Altera SOCFPGA specific extensions to the Synopsys Designware Mobile
++  Storage Host Controller
 +
- int dw_mci_pltfm_register(struct platform_device *pdev,
- 			  const struct dw_mci_drv_data *drv_data)
- {
-@@ -92,6 +96,8 @@ static const struct of_device_id dw_mci_pltfm_match[] = {
- 	{ .compatible = "snps,dw-mshc", },
- 	{ .compatible = "rockchip,rk2928-dw-mshc",
- 		.data = &rockchip_drv_data },
-+	{ .compatible = "altr,socfpga-dw-mshc",
-+		.data = &socfpga_drv_data },
- 	{},
- };
- MODULE_DEVICE_TABLE(of, dw_mci_pltfm_match);
++The Synopsys designware mobile storage host controller is used to interface
++a SoC with storage medium such as eMMC or SD/MMC cards. This file documents
++differences between the core Synopsys dw mshc controller properties described
++by synopsys-dw-mshc.txt and the properties used by the Altera SOCFPGA specific
++extensions to the Synopsys Designware Mobile Storage Host Controller.
++
++Required Properties:
++
++* compatible: should be
++	- "altr,socfpga-dw-mshc": for Altera's SOCFPGA platform
++
++Example:
++
++	mmc: dwmmc0@ff704000 {
++		compatible = "altr,socfpga-dw-mshc";
++		reg = <0xff704000 0x1000>;
++		interrupts = <0 129 4>;
++		#address-cells = <1>;
++		#size-cells = <0>;
++	};
+diff --git a/arch/arm/boot/dts/socfpga.dtsi b/arch/arm/boot/dts/socfpga.dtsi
+index 3d62f47..967e27f 100644
+--- a/arch/arm/boot/dts/socfpga.dtsi
++++ b/arch/arm/boot/dts/socfpga.dtsi
+@@ -474,6 +474,17 @@
+ 			arm,data-latency = <2 1 1>;
+ 		};
+ 
++		mmc: dwmmc0@ff704000 {
++			compatible = "altr,socfpga-dw-mshc";
++			reg = <0xff704000 0x1000>;
++			interrupts = <0 139 4>;
++			fifo-depth = <0x400>;
++			#address-cells = <1>;
++			#size-cells = <0>;
++			clocks = <&l4_mp_clk>, <&sdmmc_clk>;
++			clock-names = "biu", "ciu";
++		};
++
+ 		/* Local timer */
+ 		timer@fffec600 {
+ 			compatible = "arm,cortex-a9-twd-timer";
+@@ -528,7 +539,7 @@
+ 		};
+ 
+ 		sysmgr@ffd08000 {
+-				compatible = "altr,sys-mgr";
++				compatible = "altr,sys-mgr", "syscon";
+ 				reg = <0xffd08000 0x4000>;
+ 			};
+ 	};
+diff --git a/arch/arm/boot/dts/socfpga_arria5.dtsi b/arch/arm/boot/dts/socfpga_arria5.dtsi
+index a85b404..6c87b70 100644
+--- a/arch/arm/boot/dts/socfpga_arria5.dtsi
++++ b/arch/arm/boot/dts/socfpga_arria5.dtsi
+@@ -27,6 +27,17 @@
+ 			};
+ 		};
+ 
++		dwmmc0@ff704000 {
++			num-slots = <1>;
++			supports-highspeed;
++			broken-cd;
++
++			slot@0 {
++				reg = <0>;
++				bus-width = <4>;
++			};
++		};
++
+ 		serial0@ffc02000 {
+ 			clock-frequency = <100000000>;
+ 		};
+diff --git a/arch/arm/boot/dts/socfpga_cyclone5.dtsi b/arch/arm/boot/dts/socfpga_cyclone5.dtsi
+index a8716f6..ca41b0e 100644
+--- a/arch/arm/boot/dts/socfpga_cyclone5.dtsi
++++ b/arch/arm/boot/dts/socfpga_cyclone5.dtsi
+@@ -28,6 +28,17 @@
+ 			};
+ 		};
+ 
++		dwmmc0@ff704000 {
++			num-slots = <1>;
++			supports-highspeed;
++			broken-cd;
++
++			slot@0 {
++				reg = <0>;
++				bus-width = <4>;
++			};
++		};
++
+ 		ethernet@ff702000 {
+ 			phy-mode = "rgmii";
+ 			phy-addr = <0xffffffff>; /* probe for phy addr */
+diff --git a/arch/arm/boot/dts/socfpga_vt.dts b/arch/arm/boot/dts/socfpga_vt.dts
+index d1ec0ca..222313f 100644
+--- a/arch/arm/boot/dts/socfpga_vt.dts
++++ b/arch/arm/boot/dts/socfpga_vt.dts
+@@ -41,6 +41,17 @@
+ 			};
+ 		};
+ 
++		dwmmc0@ff704000 {
++			num-slots = <1>;
++			supports-highspeed;
++			broken-cd;
++
++			slot@0 {
++				reg = <0>;
++				bus-width = <4>;
++			};
++		};
++
+ 		ethernet@ff700000 {
+ 			phy-mode = "gmii";
+ 			status = "okay";
 -- 
 1.7.9.5
 
