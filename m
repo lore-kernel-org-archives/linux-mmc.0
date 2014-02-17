@@ -1,58 +1,48 @@
-From: <micky_ching@realsil.com.cn>
-Subject: [PATCH RESEND 1/3] mmc: rtsx: fix card poweroff bug
-Date: Mon, 17 Feb 2014 10:00:55 +0800
-Message-ID: <90c7ee3dd655e1f203938dbe8dc45769cfd509de.1392602322.git.micky_ching@realsil.com.cn>
+From: Samuel Ortiz <sameo@linux.intel.com>
+Subject: Re: [PATCH RESEND 0/3] mmc: rtsx: fix bug and support nonblocking
+ request
+Date: Mon, 17 Feb 2014 03:12:22 +0100
+Message-ID: <20140217021222.GI18868@zurbaran>
 References: <cover.1392602322.git.micky_ching@realsil.com.cn>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga09.intel.com ([134.134.136.24]:7771 "EHLO mga09.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753540AbaBQCMd (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Sun, 16 Feb 2014 21:12:33 -0500
+Content-Disposition: inline
 In-Reply-To: <cover.1392602322.git.micky_ching@realsil.com.cn>
-List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
-List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel>
-List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
-List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
-List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
-Errors-To: driverdev-devel-bounces@linuxdriverproject.org
-Sender: driverdev-devel-bounces@linuxdriverproject.org
-To: chris@printf.net, sameo@linux.intel.com
-Cc: ulf.hansson@linaro.org, gregkh@linuxfoundation.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, wei_wang@realsil.com.cn, rogerable@realtek.com, devel@linuxdriverproject.org, dan.carpenter@oracle.com
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: micky_ching@realsil.com.cn
+Cc: chris@printf.net, gregkh@linuxfoundation.org, dan.carpenter@oracle.com, ulf.hansson@linaro.org, devel@linuxdriverproject.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, rogerable@realtek.com, wei_wang@realsil.com.cn, Lee Jones <lee.jones@linaro.org>
 
-From: Micky Ching <micky_ching@realsil.com.cn>
+Hi Micky,
 
-If the host driver removed while card in the slot, the host will not
-power off card power correctly. This bug is produced because host
-eject flag set before the last mmc_set_ios callback, we should set the
-eject flag after power off.
+On Mon, Feb 17, 2014 at 10:00:54AM +0800, micky_ching@realsil.com.cn wrote:
+> From: Micky Ching <micky_ching@realsil.com.cn>
+> 
+> First we fix the card poweroff bug: the card power is not shutdown when sd/mmc
+> card removed, this will make UHS-card failed to running in high speed mode if we
+> insert the card again.
+> 
+> We offer a concise tuning searching method, it is much easier to read.
+> 
+> At last we add support for nonblocking request, which will improve card read
+> speed at about 10% write speed about 5% normally.
+> 
+> Micky Ching (3):
+>   mmc: rtsx: fix card poweroff bug
+>   mmc: rtsx: modify phase searching method for tuning
+>   mmc: rtsx: add support for pre_req and post_req
+> 
+>  drivers/mfd/rtsx_pcr.c            |  132 ++++++---
+Please add Lee Jones (cc'ed) for MFD.
 
-Signed-off-by: Micky Ching <micky_ching@realsil.com.cn>
----
- drivers/mmc/host/rtsx_pci_sdmmc.c |    3 ++-
- 1 file changed, 2 insertions(+), 1 deletion(-)
+Cheers,
+Samuel.
 
-diff --git a/drivers/mmc/host/rtsx_pci_sdmmc.c b/drivers/mmc/host/rtsx_pci_sdmmc.c
-index 375a880e..c9a7328 100644
---- a/drivers/mmc/host/rtsx_pci_sdmmc.c
-+++ b/drivers/mmc/host/rtsx_pci_sdmmc.c
-@@ -1328,7 +1328,6 @@ static int rtsx_pci_sdmmc_drv_remove(struct platform_device *pdev)
- 	pcr->slots[RTSX_SD_CARD].p_dev = NULL;
- 	pcr->slots[RTSX_SD_CARD].card_event = NULL;
- 	mmc = host->mmc;
--	host->eject = true;
- 
- 	mutex_lock(&host->host_mutex);
- 	if (host->mrq) {
-@@ -1346,6 +1345,8 @@ static int rtsx_pci_sdmmc_drv_remove(struct platform_device *pdev)
- 	mutex_unlock(&host->host_mutex);
- 
- 	mmc_remove_host(mmc);
-+	host->eject = true;
-+
- 	mmc_free_host(mmc);
- 
- 	dev_dbg(&(pdev->dev),
 -- 
-1.7.9.5
+Intel Open Source Technology Centre
+http://oss.intel.com/
