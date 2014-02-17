@@ -1,44 +1,72 @@
-From: Daniel Mack <zonque@gmail.com>
-Subject: [PATCH] mmc: omap_hsmmc: support more DT properties
-Date: Mon, 17 Feb 2014 12:36:33 +0100
-Message-ID: <1392636993-15864-1-git-send-email-zonque@gmail.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ea0-f179.google.com ([209.85.215.179]:62991 "EHLO
-	mail-ea0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751552AbaBQLgt (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 17 Feb 2014 06:36:49 -0500
-Sender: linux-mmc-owner@vger.kernel.org
+From: Lee Jones <lee.jones@linaro.org>
+Subject: Re: [PATCH v4 1/3] mfd: Add realtek USB card reader driver
+Date: Mon, 17 Feb 2014 12:03:26 +0000
+Message-ID: <20140217120326.GC20218@lee--X1>
+References: <1392199238-14500-1-git-send-email-rogerable@realtek.com>
+ <1392199238-14500-2-git-send-email-rogerable@realtek.com>
+ <20140214094427.GA7380@lee--X1> <5301A786.8040607@realtek.com>
+ <20140217082222.GA17875@lee--X1> <5301D369.5010100@realtek.com>
+ <20140217100211.GE17875@lee--X1> <5301E376.8010000@realtek.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
+Content-Disposition: inline
+In-Reply-To: <5301E376.8010000@realtek.com>
+List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
+List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel>
+List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
+List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
+List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
+Errors-To: driverdev-devel-bounces@linuxdriverproject.org
+Sender: driverdev-devel-bounces@linuxdriverproject.org
+To: Roger <rogerable@realtek.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Maxim Levitsky <maximlevitsky@gmail.com>, Alex Dubov <oakad@yahoo.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, driverdev-devel@linuxdriverproject.org, linux-mmc@vger.kernel.org, Chris Ball <chris@printf.net>, linux-kernel@vger.kernel.org, wei_wang@realsil.com.cn, Andrew Morton <akpm@linux-foundation.org>, Dan Carpenter <dan.carpenter@oracle.com>, Samuel Ortiz <sameo@linux.intel.com>
 List-Id: linux-mmc@vger.kernel.org
-To: balajitk@ti.com, chris@printf.net
-Cc: linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, Daniel Mack <zonque@gmail.com>
 
-This should probably be done implicitly through mmc_of_parse(), but that
-doesn't play well along with the multi-slot model the hsmmc driver
-features. Hence, for now, do it manually. The properties are already
-documented in Documentation/devicetree/bindings/mmc/mmc.txt.
-
-Signed-off-by: Daniel Mack <zonque@gmail.com>
----
- drivers/mmc/host/omap_hsmmc.c | 6 ++++++
- 1 file changed, 6 insertions(+)
-
-diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index 2815de6..a5a38cc 100644
---- a/drivers/mmc/host/omap_hsmmc.c
-+++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -1765,6 +1765,12 @@ static struct omap_mmc_platform_data *of_get_hsmmc_pdata(struct device *dev)
- 	if (of_find_property(np, "ti,needs-special-hs-handling", NULL))
- 		pdata->slots[0].features |= HSMMC_HAS_HSPE_SUPPORT;
- 
-+	if (of_find_property(np, "keep-power-in-suspend", NULL))
-+		pdata->slots[0].pm_caps |= MMC_PM_KEEP_POWER;
-+
-+	if (of_find_property(np, "enable-sdio-wakeup", NULL))
-+		pdata->slots[0].pm_caps |= MMC_PM_WAKE_SDIO_IRQ;
-+
- 	return pdata;
- }
- #else
--- 
-1.8.5.3
-
+PiA+Pj4+Pj5Gcm9tOiBSb2dlciBUc2VuZyA8cm9nZXJhYmxlQHJlYWx0ZWsuY29tPgo+ID4+Pj4+
+Pgo+ID4+Pj4+PlJlYWx0ZWsgVVNCIGNhcmQgcmVhZGVyIHByb3ZpZGVzIGEgY2hhbm5lbCB0byB0
+cmFuc2ZlciBjb21tYW5kIG9yIGRhdGEgdG8gZmxhc2gKPiA+Pj4+Pj5tZW1vcnkgY2FyZHMuIFRo
+aXMgZHJpdmVyIGV4cG9ydHMgaG9zdCBpbnN0YW5jZXMgZm9yIG1tYyBhbmQgbWVtc3RpY2sgc3Vi
+c3lzdGVtcwo+ID4+Pj4+PmFuZCBoYW5kbGVzIGJhc2ljIHdvcmtzLgo+ID4+Pj4+Pgo+ID4+Pj4+
+PlNpZ25lZC1vZmYtYnk6IFJvZ2VyIFRzZW5nIDxyb2dlcmFibGVAcmVhbHRlay5jb20+Cj4gPj4+
+Pj4+LS0tCj4gPj4+Pj4+ICBkcml2ZXJzL21mZC9LY29uZmlnICAgICAgICAgIHwgIDEwICsKPiA+
+Pj4+Pj4gIGRyaXZlcnMvbWZkL01ha2VmaWxlICAgICAgICAgfCAgIDEgKwo+ID4+Pj4+PiAgZHJp
+dmVycy9tZmQvcnRzeF91c2IuYyAgICAgICB8IDc2MCArKysrKysrKysrKysrKysrKysrKysrKysr
+KysrKysrKysrKysrKysrKysrCj4gPj4+Pj4+ICBpbmNsdWRlL2xpbnV4L21mZC9ydHN4X3VzYi5o
+IHwgNjI4ICsrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrCj4gPj4+Pj4+ICA0IGZp
+bGVzIGNoYW5nZWQsIDEzOTkgaW5zZXJ0aW9ucygrKQo+ID4+Pj4+PiAgY3JlYXRlIG1vZGUgMTAw
+NjQ0IGRyaXZlcnMvbWZkL3J0c3hfdXNiLmMKPiA+Pj4+Pj4gIGNyZWF0ZSBtb2RlIDEwMDY0NCBp
+bmNsdWRlL2xpbnV4L21mZC9ydHN4X3VzYi5oCj4gPj4+Pj4KPiA+Pj4+PkFwcGxpZWQgYWdhaW4s
+IHRoYW5rcy4KPiA+Pj4+Pgo+ID4+Pj5Xb3VsZCB5b3UgYWxzbyBhcHBseSBwYXRjaCAyLzMgYW5k
+IDMvMyB0aGF0IHRvIG1ha2UgdGhlIGRldmljZSBmdWxseQo+ID4+Pj5vcGVyYXRpb25hbCBmb3Ig
+dXNlcnM/IE9yIHNob3VsZCB0aGV5IGJlIGFwcGxpZWQgYnkgbWFpbnRhaW5lcnMgb2YKPiA+Pj4+
+bW1jL21lbXN0aWNrIHN1YnN5c3RlbXM/Cj4gPj4+Pgo+ID4+Pj5DaHJpcywgd291bGQgeW91IGdp
+dmUgc29tZSBjb21tZW50Pwo+ID4+Pgo+ID4+PkkgY2FuIGFwcGx5IHRoZW0sIGJ1dCBJIG5lZWQg
+dGhlIG90aGVyIE1haW50YWluZXIgQWNrcy4KPiA+Pj4KPiA+Pj5JZiB0aGV5IGFyZSBidWlsZCBv
+cnRob2dvbmFsIGkuZS4gdGhlcmUgYXJlIG5vIGJ1aWxkIGRlcGVuZGVuY2llcwo+ID4+PmJldHdl
+ZW4gdGhlbSwgaXQncyBwcm9iYWJseSBiZXR0ZXIgdGhhdCB0aGV5IGdvIGludG8gdGhlaXIgYXNz
+b2NpYXRlZAo+ID4+PnRyZWVzIHNlcGFyYXRlbHkuCj4gPj4+Cj4gPj5JIHRoaW5rIGl0IHdvdWxk
+IGJlIGJldHRlciB0byBhcHBseSB0aGVtIHRvZ2V0aGVyIHNpbmNlIHRoZSBsYXRlcgo+ID4+cGF0
+Y2hlcyByZWFsbHkgZGVwZW5kIG9uIHRoZSAxc3Qgb25lLHNvIG5vdyB3ZSBhcmUgd2FpdGluZyBm
+b3IgQWNrcwo+ID4+ZnJvbSBtbWMvbWVtc3RpY2sgc3Vic3lzdGVtcy4KPiA+Cj4gPldoZW4geW91
+IHNheSAiZGVwZW5kIG9uIiwgZG8geW91IG1lYW4gYXMgYSBidWlsZCBkZXBlbmVuY3ksIG9yIHdv
+bid0Cj4gPnJ1biB3aXRob3V0IHRoZSBmaXJzdCBwYXRjaCBhcHBsaWVkPwo+IAo+IFRoZSBsYXRl
+ciAyIHBhdGNoZXMgYWN0dWFsbHkgaW52b2tlIHN5bWJvbHMgZGVmaW5lZCBpbiB0aGUgZmlyc3QK
+PiBwYXRjaCBhbmQgd29uJ3QgY29tcGlsZSBpZiBpdCBpcyBub3QgYXBwbGllZCBmaXJzdC4gVGhl
+IEtjb25maWcKPiBjaGFuZ2VzIGZvciB0aGUgbGF0ZXIgb25lc3MgYWxzbyBzcGVjaWZpZWQgdGhp
+cyBieSAiZGVwZW5kcyBvbiIuCj4gCj4gSSdtIG5vdCBzdXJlIGlmIHRoaXMgbWVhbnMgImJ1aWxk
+IGRlcGVuZGVuY3kiLiBTb3JyeSBmb3IgbXkgdW5jbGVhciB3b3Jkcy4KClllcywgdGhhdCBzb3Vu
+ZHMgbGlrZSBhIGJ1aWxkIGRlcGVuZGVuY3kgaS5lLiB3aWxsIG5vdCBidWlsZCB3aXRob3V0CmVy
+cm9ycyBvciB3YXJuaW5ncyB3aXRob3V0IHRoZSBwcmV2aW91cyBwYXRjaCBhcHBsaWVkLgoKPiA+
+PkJ1dCB0aGVyZSBpcyBubyBvbmUgc3BlY2lmaWVkIGZvciAibWVtc3RpY2svaG9zdC8iIGluIE1B
+SU5UQUlORVJTLgo+ID4+Q291bGQgYW55b25lIGVsc2UgQWNrIHRoaXM/CgpBbmRyZXcgKENDJ2Vk
+KSBoYXMgYmVlbiBBY2tpbmcgdGhlc2UgdGh1cyBmYXIuCgotLSAKTGVlIEpvbmVzCkxpbmFybyBT
+VE1pY3JvZWxlY3Ryb25pY3MgTGFuZGluZyBUZWFtIExlYWQKTGluYXJvLm9yZyDilIIgT3BlbiBz
+b3VyY2Ugc29mdHdhcmUgZm9yIEFSTSBTb0NzCkZvbGxvdyBMaW5hcm86IEZhY2Vib29rIHwgVHdp
+dHRlciB8IEJsb2cKX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X18KZGV2ZWwgbWFpbGluZyBsaXN0CmRldmVsQGxpbnV4ZHJpdmVycHJvamVjdC5vcmcKaHR0cDov
+L2RyaXZlcmRldi5saW51eGRyaXZlcnByb2plY3Qub3JnL21haWxtYW4vbGlzdGluZm8vZHJpdmVy
+ZGV2LWRldmVsCg==
