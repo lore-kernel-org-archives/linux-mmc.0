@@ -1,66 +1,60 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH 2/3] mmc: core: Add DT bindings for eMMC high-speed DDR
- 1.8/1.2V
-Date: Mon, 17 Feb 2014 15:56:54 +0900
-Message-ID: <5301B2B6.5060605@samsung.com>
-References: <1392380829-8473-1-git-send-email-ulf.hansson@linaro.org>
- <1392380829-8473-2-git-send-email-ulf.hansson@linaro.org>
+From: David =?ISO-8859-1?Q?Lanzend=F6rfer?= <david.lanzendoerfer@o2s.ch>
+Subject: Re: [linux-sunxi] [PATCH v6 4/8] ARM: sunxi: Add driver for SD/MMC hosts found on Allwinner sunxi SoCs
+Date: Mon, 17 Feb 2014 08:08:57 +0100
+Message-ID: <1744603.zMUgfmoUUP__34248.3586668552$1392621049$gmane$org@pagira.o2s.ch>
+References: <20140216050933.728.25526.stgit@dizzy-6.o2s.ch> <20140216051133.728.36386.stgit@dizzy-6.o2s.ch> <1392542548.11093.13.camel@chi.lan>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; boundary="nextPart3048959.7lgtbpbIvE"; micalg="pgp-sha1"; protocol="application/pgp-signature"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout3.samsung.com ([203.254.224.33]:14535 "EHLO
-	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750905AbaBQG4n (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 17 Feb 2014 01:56:43 -0500
-In-reply-to: <1392380829-8473-2-git-send-email-ulf.hansson@linaro.org>
+Received: from kolab.o2s.ch ([77.109.136.180]:58210 "EHLO kolab.o2s.ch"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751675AbaBQHKh (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 17 Feb 2014 02:10:37 -0500
+In-Reply-To: <1392542548.11093.13.camel@chi.lan>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, Chris Ball <chris@printf.net>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, devicetree@vger.kernel.org
+To: linux-arm-kernel@lists.infradead.org
+Cc: Priit Laes <plaes@plaes.org>, linux-sunxi@googlegroups.com, devicetree@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Laurent Pinchart <laurent.pinchart+renesas@ideasonboard.com>, Mike Turquette <mturquette@linaro.org>, Simon Baatz <gmbnomis@gmail.com>, H Hartley Sweeten <hsweeten@visionengravers.com>, Emilio =?ISO-8859-1?Q?L=F3pez?= <emilio@elopez.com.ar>, linux-mmc@vger.kernel.org, Chris Ball <chris@printf.net>, linux-kernel@vger.kernel.org, Hans de Goede <hdegoede@redhat.com>, Tejun Heo <tj@kernel.org>, Maxime Ripard <maxime.ripard@free-electrons.com>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 
-Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
 
-Best Regards,
-Jaehoon Chung
+--nextPart3048959.7lgtbpbIvE
+Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset="iso-8859-1"
 
-On 02/14/2014 09:27 PM, Ulf Hansson wrote:
-> Provide the option to configure these speed modes per host, for those
-> host driver's that can't distinguish this in runtime.
-> 
-> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
-> ---
->  Documentation/devicetree/bindings/mmc/mmc.txt |    2 ++
->  drivers/mmc/core/host.c                       |    4 ++++
->  2 files changed, 6 insertions(+)
-> 
-> diff --git a/Documentation/devicetree/bindings/mmc/mmc.txt b/Documentation/devicetree/bindings/mmc/mmc.txt
-> index bd2ce67..519d952 100644
-> --- a/Documentation/devicetree/bindings/mmc/mmc.txt
-> +++ b/Documentation/devicetree/bindings/mmc/mmc.txt
-> @@ -34,6 +34,8 @@ Optional properties:
->  - cap-power-off-card: powering off the card is safe
->  - cap-sdio-irq: enable SDIO IRQ signalling on this interface
->  - full-pwr-cycle: full power cycle of the card is supported
-> +- mmc-highspeed-ddr-1_8v: eMMC high-speed DDR mode(1.8V I/O) is supported
-> +- mmc-highspeed-ddr-1_2v: eMMC high-speed DDR mode(1.2V I/O) is supported
->  
->  *NOTE* on CD and WP polarity. To use common for all SD/MMC host controllers line
->  polarity properties, we have to fix the meaning of the "normal" and "inverted"
-> diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
-> index 2644d91..d014127 100644
-> --- a/drivers/mmc/core/host.c
-> +++ b/drivers/mmc/core/host.c
-> @@ -439,6 +439,10 @@ int mmc_of_parse(struct mmc_host *host)
->  		host->pm_caps |= MMC_PM_KEEP_POWER;
->  	if (of_find_property(np, "enable-sdio-wakeup", &len))
->  		host->pm_caps |= MMC_PM_WAKE_SDIO_IRQ;
-> +	if (of_find_property(np, "mmc-ddr-1_8v", &len))
-> +		host->caps |= MMC_CAP_1_8V_DDR;
-> +	if (of_find_property(np, "mmc-ddr-1_2v", &len))
-> +		host->caps |= MMC_CAP_1_2V_DDR;
->  
->  	return 0;
->  
-> 
+Hi
+> > + * Driver for sunxi SD/MMC host controllers
+> > + * (C) Copyright 2014-2015 Reuuimlla Technology Co., Ltd.
+> > + * (C) Copyright 2014-2015 Aaron Maoye <leafy.myeh@reuuimllatech.c=
+om>
+> > + * (C) Copyright 2014-2015 O2S GmbH <www.o2s.ch>
+> > + * (C) Copyright 2014-2015 David Lanzend=F6rfer
+> > <david.lanzendoerfer@o2s.ch>
+> > + * (C) Copyright 2014-2015 Hans de Goede <hdegoede@redhat.com>
+> ETIMETRAVEL
+I'm not really into this licensing and copyright stuff.
+Could you maybe point out what the correct copyright would be?
+
+> __SUNXI_MMC_H__
+Ok. Will fix that.
+
+> Also, you may want to rename SDXC_RESPONSE_* to SDXC_RESP_*, which lo=
+oks
+> better next to the SDXC_DATA_* defines...
+Ok. I will change that :-)
+
+=2Ddavid
+--nextPart3048959.7lgtbpbIvE
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: This is a digitally signed message part.
+Content-Transfer-Encoding: 7Bit
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+
+iEYEABECAAYFAlMBtYwACgkQAeZw77btGjrVnACeOesTow5MFwdxX5un5yfbGWoM
+L+0AniCZ+X7GbUJ1GTZiT7O/hN4keCks
+=ZcbZ
+-----END PGP SIGNATURE-----
+
+--nextPart3048959.7lgtbpbIvE--
 
