@@ -1,124 +1,92 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [PATCH 1/3] mmc: add support for power-on sequencing through DT
-Date: Mon, 17 Feb 2014 14:00:43 +0100
-Message-ID: <201402171400.43899.arnd@arndb.de>
-References: <1390190215-22700-1-git-send-email-olof@lixom.net> <1528854.BAQRr94nzx@wuerfel> <20140215205159.GL30257@n2100.arm.linux.org.uk>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH] Fix uses of dma_max_pfn() when converting to a limiting address
+Date: Mon, 17 Feb 2014 14:39:06 +0100
+Message-ID: <CAPDyKFqb6w9rcDsVX6PivpGdC0_9njgzaOMNOF4F_8zJOPhfDg@mail.gmail.com>
+References: <E1WDH7v-00038J-2k@rmk-PC.arm.linux.org.uk>
 Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="iso-8859-1"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.17.9]:61504 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751594AbaBQNBA (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 17 Feb 2014 08:01:00 -0500
-In-Reply-To: <20140215205159.GL30257@n2100.arm.linux.org.uk>
+Received: from mail-qa0-f43.google.com ([209.85.216.43]:38851 "EHLO
+	mail-qa0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752395AbaBQNjI (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 17 Feb 2014 08:39:08 -0500
+Received: by mail-qa0-f43.google.com with SMTP id o15so21626335qap.2
+        for <linux-mmc@vger.kernel.org>; Mon, 17 Feb 2014 05:39:08 -0800 (PST)
+In-Reply-To: <E1WDH7v-00038J-2k@rmk-PC.arm.linux.org.uk>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Cc: Tomasz Figa <tomasz.figa@gmail.com>, linux-arm-kernel@lists.infradead.org, mark.rutland@arm.com, devicetree@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Pawel Moll <pawel.moll@arm.com>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Tomasz Figa <t.figa@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, robh+dt@kernel.org, Kumar Gala <galak@codeaurora.org>, Olof Johansson <olof@lixom.net>, Fabio Estevam <festevam@gmail.com>, Sascha Hauer <s.hauer@pengutronix.de>
+To: Russell King <rmk+kernel@arm.linux.org.uk>
+Cc: "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Chris Ball <chris@printf.net>, "James E.J. Bottomley" <JBottomley@parallels.com>, linux-mmc <linux-mmc@vger.kernel.org>, linux-scsi@vger.kernel.org, Santosh Shilimkar <santosh.shilimkar@ti.com>
 
-On Saturday 15 February 2014, Russell King - ARM Linux wrote:
-> On Sat, Feb 15, 2014 at 05:21:11PM +0100, Arnd Bergmann wrote:
-> > On Saturday 15 February 2014 14:22:30 Tomasz Figa wrote:
-> > > On 15.02.2014 14:09, Arnd Bergmann wrote:
-> > >
-> > > > For spi-mode SDIO devices I'm assuming it's similar, except that
-> > > > you'd describe the actual SDIO device in the board info rather than
-> > > > create a fake SDIO controller. Still not discoverable unless I'm
-> > > > missing your point.
-> > > 
-> > > I'm not sure if we should assume that SPI = MMC over SPI. I believe 
-> > > there might be a custom protocol involved as well.
-> > 
-> > In case of SD/MMC, you essentially have three separate command sets:
-> > SPI, MMC and SD, and each of them has multiple versions. MMC and SD
-> > compatible devices generally also support the SPI command set (IIRC
-> > it is required,
-> 
-> SPI support is mandatory for SDIO as well.
-> 
-> SDIO has CIS (remember card information structures... like PCMCIA)
-> which identifies the various different logical functions of the device,
-> giving class information, vendor information etc.
-> 
-> So... certainly the type of the attached device is discoverable even
-> on SPI
+On 11 February 2014 18:28, Russell King <rmk+kernel@arm.linux.org.uk> wrote:
+> We must use a 64-bit for this, otherwise overflowed bits get lost, and
+> that can result in a lower than intended value set.
+>
+> Fixes: 8e0cb8a1f6ac ("ARM: 7797/1: mmc: Use dma_max_pfn(dev) helper for bounce_limit calculations")
+> Fixes: 7d35496dd982 ("ARM: 7796/1: scsi: Use dma_max_pfn(dev) helper for bounce_limit calculations")
+> Signed-off-by: Russell King <rmk+kernel@arm.linux.org.uk>
 
-But how are SPI SDIO devices used in Linux and described in DT?
+Reviewed-by: Ulf Hansson <ulf.hansson@linaro.org>
 
-If we always use the MMC_SPI host controller driver and only
-describe the controller in DT, then you are right, and there is
-no difference to the normal SDIO case.
-
-If we just describe it as an SPI device OTOH, the fact that we can
-identify it is useless, because we first have to know what it
-is before we can ask for its identity.
-
-> > If a device supports both SDIO and SPI, I think a straightforward
-> > implementation would be to use the exact same command set, but
-> > you are right that this isn't the only possibility, and the SD/MMC
-> > shows how they can be slightly different already.
-> 
-> Given that the SPI mode is mandatory for SDIO cards, why would you
-> also implement another SPI mode with different commands?
-
-I don't know why, I was just saying that it's what storage SD cards do.
-
-> > > Stepping aside from SPI, I already gave an example of a WLAN chip that 
-> > > supports multiple control busses [1]. In addition to the commonly used 
-> > > SDIO, it supports USB and HSIC as well:
-> > > 
-> > > [1] http://www.marvell.com/wireless/assets/marvell_avastar_88w8797.pdf
-> > > 
-> > > Moreover, some of Samsung boards use HSIC to communicate with modem 
-> > > chips, which have exactly the same problem as we're trying to solve here 
-> > > - they need to be powered on to be discovered.
-> > 
-> > Thanks, this definitely makes a good example. I see that it also
-> > supports SPI mode for SDIO as mentioned in your link.
-> 
-> Well, USB is another discoverable bus.  As HSIC is a derivative of USB,
-> I'd be surprised if it weren't discoverable there too.
-> 
-> So, out of everything identified so far, we have no undiscoverable buses.
-
-The device also lists a high-speed uart interface. While in Linux a
-tty line discipline is not exactly the same as a driver, I would
-still count it as a nondiscoverable interface.
-
->  - requires different DT if the chip is changed, which causes problems
->    for users to identify which out of zillions of DT files they should
->    use for their exact platform.
-
-I'm still not buying this argument. Making any changes to the board
-design that are visible to software can have this effect.
-
->  - have to work out how to match up the fake device with a probed device
->    when it becomes available: existing SDIO drivers all assume that the
->    card has been through a fairly complex initialisation sequence already.
-
-This one is an implementation detail. Yes, we have to ensure it works,
-but it's not inherently harder that getting the other approach to work.
-
->  - multi-function SDIO is much harder to deal with since you have mutliple
->    drivers involved, and the SDIO device as a whole needs initialisation
->    before anyone can drive it.
-
-Agreed, this point is a big one that I hadn't considered before.
-I agree that my approach isn't ideal for multifunction cards, especially
-when you want to be able to load function drivers individually or have
-only one of them in use. It can probably work fine for things like calling
-clk_get() where you can simply describe the clock in each function device
-node separately, but I don't see how I'd easily use a 'reset' line
-that has to be triggered for the first function driver that gets loaded
-but must not be triggered again for the second one :(
-
->  - adds complexity to the SDIO drivers; they would have to know whether
->    they're embedded or on a plug-in card.
-
-How so? If a device can be a plug-in card, I would assume that it is
-actually discoverable without a special power-on sequence, while a device
-that needs this can't be used standalone.
-
-	Arnd
+> ---
+> While poking about with the Cubox-i4 and investigating why my UHS-1
+> SD card wasn't achieving its full potential, I came across a slight
+> problem... the SDHCI host sets a mask of 0xffffffff, but with the
+> start of memory at pfn 0x10000, the blk code sees this when setting
+> the bounce limit:
+>
+>         max addr 0x0ffff000 bounce limit 0xffff dma 1
+>
+> and this results in the bounce functions appearing in the profile:
+>
+> 00000000c00f8b70 copy_to_high_bio_irq                  1139 2.5886
+> 00000000c00f8d28 bounce_end_io                           12 0.0714
+> 00000000c00f8dd0 bounce_end_io_read_isa                   8 0.1053
+>
+> which, compared to the cost of copying the data to userland and
+> request handling, this is quite significant:
+>
+> 00000000c04b1794 sdhci_request                          268 0.5447
+> 00000000c02d0740 __copy_to_user_std                     398 0.4252
+>
+> With this calculation fixed, we avoid the bouncing code entirely.
+>
+>         max addr 0x10ffff000 bounce limit 0x10ffff dma 0
+>
+>  drivers/mmc/card/queue.c | 2 +-
+>  drivers/scsi/scsi_lib.c  | 2 +-
+>  2 files changed, 2 insertions(+), 2 deletions(-)
+>
+> diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
+> index 357bbc54fe4b..3e049c13429c 100644
+> --- a/drivers/mmc/card/queue.c
+> +++ b/drivers/mmc/card/queue.c
+> @@ -197,7 +197,7 @@ int mmc_init_queue(struct mmc_queue *mq, struct mmc_card *card,
+>         struct mmc_queue_req *mqrq_prev = &mq->mqrq[1];
+>
+>         if (mmc_dev(host)->dma_mask && *mmc_dev(host)->dma_mask)
+> -               limit = dma_max_pfn(mmc_dev(host)) << PAGE_SHIFT;
+> +               limit = (u64)dma_max_pfn(mmc_dev(host)) << PAGE_SHIFT;
+>
+>         mq->card = card;
+>         mq->queue = blk_init_queue(mmc_request_fn, lock);
+> diff --git a/drivers/scsi/scsi_lib.c b/drivers/scsi/scsi_lib.c
+> index 7bd7f0d5f050..62ec84b42e31 100644
+> --- a/drivers/scsi/scsi_lib.c
+> +++ b/drivers/scsi/scsi_lib.c
+> @@ -1684,7 +1684,7 @@ u64 scsi_calculate_bounce_limit(struct Scsi_Host *shost)
+>
+>         host_dev = scsi_get_device(shost);
+>         if (host_dev && host_dev->dma_mask)
+> -               bounce_limit = dma_max_pfn(host_dev) << PAGE_SHIFT;
+> +               bounce_limit = (u64)dma_max_pfn(host_dev) << PAGE_SHIFT;
+>
+>         return bounce_limit;
+>  }
+> --
+> 1.8.3.1
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
