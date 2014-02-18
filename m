@@ -1,130 +1,33 @@
-From: Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
-Subject: Re: [PATCH v7 8/8] ARM: sunxi: Add documentation for
- driver for SD/MMC hosts found on Allwinner sunxi SoCs
-Date: Tue, 18 Feb 2014 16:42:12 +0100
-Message-ID: <20140218154212.GL3142@lukather>
-References: <20140217095907.15040.81893.stgit@pagira.o2s.ch>
- <20140217100302.15040.56273.stgit@pagira.o2s.ch>
-Reply-To: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+From: Russell King - ARM Linux <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>
+Subject: Re: [PATCH 03/17] mmc: mmci: Mask IRQs for all variants during
+	runtime suspend
+Date: Tue, 18 Feb 2014 16:05:42 +0000
+Message-ID: <20140218160542.GH21483@n2100.arm.linux.org.uk>
+References: <1391529538-21685-1-git-send-email-ulf.hansson@linaro.org> <1391529538-21685-4-git-send-email-ulf.hansson@linaro.org>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="DN8g+DOX2TxGxleI"
-Return-path: <linux-sunxi+bncBD2ZNBF5VYJRB777RWMAKGQE22Q4J7A-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-i2c-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <20140217100302.15040.56273.stgit-pgFh0Jf6HD9Xzn/AsuzBOg@public.gmane.org>
-List-Post: <http://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Help: <http://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Archive: <http://groups.google.com/group/linux-sunxi>
-Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
-List-Subscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Unsubscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-To: David =?iso-8859-1?Q?Lanzend=F6rfer?= <david.lanzendoerfer-Z7Kmv9EsliU@public.gmane.org>
-Cc: devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Laurent Pinchart <laurent.pinchart+renesas-ryLnwIuWjnjg/C1BVhZhaw@public.gmane.org>, Mike Turquette <mturquette-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Simon Baatz <gmbnomis-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Emilio =?iso-8859-1?Q?L=F3pez?= <emilio-0Z03zUJReD5OxF6Tv1QG9Q@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, H Hartley Sweeten <hsweeten-3FF4nKcrg1dE2c76skzGb0EOCMrvLtNR@public.gmane.org>, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, Tejun Heo <tj-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Guennadi Liakhovetski <g.liakhovetski-Mmb7MZpHnFY@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+In-Reply-To: <1391529538-21685-4-git-send-email-ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Sender: linux-i2c-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Alessandro Rubini <rubini-9wsNiZum9E8@public.gmane.org>, Linus Walleij <linus.walleij-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Wolfram Sang <wsa-z923LK4zBo2bacvFa/9K2g@public.gmane.org>, Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, Mark Brown <broonie-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-spi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
+On Tue, Feb 04, 2014 at 04:58:44PM +0100, Ulf Hansson wrote:
+> In runtime suspended state, we are not expecting IRQs and thus we can
+> safely mask them, not only for pwrreg_nopower variants but for all.
+> 
+> Obviously we then also need to make sure we restore the IRQ mask while
+> becoming runtime resumed.
 
---DN8g+DOX2TxGxleI
-Content-Type: text/plain; charset=iso-8859-1
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+So, what happens when this patch is applied, and a SDIO card is attached
+which expects to receive interrupts at any moment?
 
-On Mon, Feb 17, 2014 at 11:03:02AM +0100, David Lanzend=F6rfer wrote:
-> Signed-off-by: David Lanzend=F6rfer <david.lanzendoerfer-Z7Kmv9EsliU@public.gmane.org>
-> ---
->  .../devicetree/bindings/mmc/sunxi-mmc.txt          |   32 ++++++++++++++=
-++++++
->  1 file changed, 32 insertions(+)
->  create mode 100644 Documentation/devicetree/bindings/mmc/sunxi-mmc.txt
->=20
-> diff --git a/Documentation/devicetree/bindings/mmc/sunxi-mmc.txt b/Docume=
-ntation/devicetree/bindings/mmc/sunxi-mmc.txt
-> new file mode 100644
-> index 0000000..5ce8c5e
-> --- /dev/null
-> +++ b/Documentation/devicetree/bindings/mmc/sunxi-mmc.txt
-> @@ -0,0 +1,32 @@
-> +* Allwinner sunxi MMC controller
-> +
-> +The highspeed MMC host controller on Allwinner SoCs provides an interface
-> +for MMC, SD and SDIO types of memory cards.
-> +
-> +Supported maximum speeds are the ones of the eMMC standard 4.5 as well
-> +as the speed of SD standard 3.0.
-> +Absolute maximum transfer rate is 200MB/s
-> +
-> +Required properties:
-> +- compatible: Should be "allwinner,<revision>-<chip>-mmc".
-> +  The supported chips include a10, a10s, 13, a20 and a31.
+Given that I've run into this during the last week with a SDHCI controller,
+I'm not that thrilled with other interfaces doing the same broken thing.
 
-Please use the real compatibles here. It's much easier to search
-for. Plus, your driver doesn't support all the SoCs you're mentionning here.
-
-> +- base registers are 0x1000 appart, so the base of mmc1
-> +  would be 0x01c0f000+0x1000=3D0x01c10000(see example)
-> +  and so on.
-
-Please provide the real property name to use. No need for an example
-here, you have a full-fledged one in a few lines.
-
-> +- clocks requires the reference at the ahb clock gate
-> +  with the correct index (mmc0 -> 8, mmc1 -> 9, and so on)
-> +  as well as the reference to the correct mod0 clock.
-
-Ditto. Plus, this is not a mod0 clock.
-
-> +- interrupts requires the correct IRQ line
-> +  (mmc0 -> 32, mmc1 -> 33, and so on)
-
-Ditto.
-
-> +
-> +Examples:
-> +
-> +mmc0: mmc@01c0f000 {
-> +	compatible =3D "allwinner,sun5i-a13-mmc";
-> +	reg =3D <0x01c0f000 0x1000>;
-> +	clocks =3D <&ahb_gates 8>, <&mmc0_clk>;
-> +	clock-names =3D "ahb", "mod";
-
-You never talked about the clock-names property, and which clocks were
-supposed to be provided.
-
-> +	interrupts =3D <0 32 4>;
-> +	bus-width =3D <4>;
-
-And you never talked about bus-width either.
-
-> +	status =3D "disabled";
-> +};
->=20
-
-Isn't the cd-gpios property requested too?
-
---=20
-Maxime Ripard, Free Electrons
-Embedded Linux, Kernel and Android engineering
-http://free-electrons.com
-
---DN8g+DOX2TxGxleI
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.14 (GNU/Linux)
-
-iQIcBAEBAgAGBQJTA39UAAoJEBx+YmzsjxAgrQoP/1HzFSTgYBFAw1bVtXhU/jtZ
-GljPpZDpY/1ME7jQb38kGhD5FB3t392ECFtEryOhvzoif91WQzB5Rd8SHKn58zLZ
-vD4zmfAIGiT8x5ifXBVGYAP5TNj9hsG0eKUFQM0tNV+WuUC7L713FkclAR7FlZHX
-4GTHvFKIBmdlpUbFBkAzBfcjDkczA/hjOyoxYX6zFV6i1AEy1xpkd9y5C+LqwA7l
-rffSqhp1I95S7V1md0UReZmMUVqT4jpgYVLpDWiJ0rf1nBanT0axpF8HNsDYb/zl
-PCEj7PteTdgic8q2g2aXnEDshYMhMavf8hrEFIfO0U6hu+Vmj3ei729kM9wl//DO
-FrakQUlJq1le838wk0VIiwRicfP4ooWht6a9VtlTSDEZbOHTNfrewhsqMw/bS+wu
-8PrNIiwRGgFTmfX220PLDoiQRDf9Cq5tk6NEiOkzE4IPMfWb/FzB6Gvfa/JJneyy
-mq/WYY2ucyLXokmUh2hTOqe9Sxt3hgcZgsVCde4T7KleMPfGD1YLvAbXUwlE6Mg0
-OuVw+3u2HgR1hTSC44TBXQlCxFKFvBJmKiMmFfNI5pJq7tSFvWWQEtXhfe24lgN+
-WsUtpy0GMT6RE1SCNOHVs7PuhcTUvtzAe3pgf6XVLvtRrE4cqHyVVXrFp1PVPydC
-cPA2PLr4hDTwfP0O65uO
-=l3Jv
------END PGP SIGNATURE-----
-
---DN8g+DOX2TxGxleI--
+-- 
+FTTC broadband for 0.8mile line: 5.8Mbps down 500kbps up.  Estimation
+in database were 13.1 to 19Mbit for a good line, about 7.5+ for a bad.
+Estimate before purchase was "up to 13.2Mbit".
