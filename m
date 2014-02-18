@@ -1,134 +1,121 @@
 From: Russell King <rmk+kernel@arm.linux.org.uk>
-Subject: [PATCH RFC 02/31] genirq: Provide irq_wake_thread()
-Date: Tue, 18 Feb 2014 15:09:12 +0000
-Message-ID: <E1WFmIK-0006le-OW@rmk-PC.arm.linux.org.uk>
+Subject: [PATCH RFC 03/31] mmc: sdio_irq: rework sdio irq handling
+Date: Tue, 18 Feb 2014 15:09:17 +0000
+Message-ID: <E1WFmIP-0006li-SO@rmk-PC.arm.linux.org.uk>
 References: <20140218150801.GD21483@n2100.arm.linux.org.uk>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from gw-1.arm.linux.org.uk ([78.32.30.217]:40442 "EHLO
+Received: from gw-1.arm.linux.org.uk ([78.32.30.217]:40444 "EHLO
 	pandora.arm.linux.org.uk" rhost-flags-OK-OK-OK-FAIL)
-	by vger.kernel.org with ESMTP id S1755872AbaBRPJO (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 18 Feb 2014 10:09:14 -0500
+	by vger.kernel.org with ESMTP id S1756592AbaBRPJU (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 18 Feb 2014 10:09:20 -0500
 In-Reply-To: <20140218150801.GD21483@n2100.arm.linux.org.uk>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org
-Cc: Thomas Gleixner <tglx@linutronix.de>
+Cc: Chris Ball <chris@printf.net>
 
-From: Thomas Gleixner <tglx@linutronix.de>
+Rather than the SDIO support spawning it's own thread for handling card
+interrupts, use the generic IRQ infrastructure for this, triggering it
+from the host interface's interrupt handling directly.
 
-In course of the sdhci/sdio discussion with Russell about killing the
-sdio kthread hackery we discovered the need to be able to wake an
-interrupt thread from software.
+This avoids a race between the parent thread waiting to receive an
+interrupt response from the card, and the slow startup from the sdio
+irq thread, which can occur as a result of high system load (eg, while
+udev is running.)
 
-The rationale for this is, that sdio hardware can lack proper
-interrupt support for certain features. So the driver needs to poll
-the status registers, but at the same time it needs to be woken up by
-an hardware interrupt.
-
-To be able to get rid of the home brewn kthread construct of sdio we
-need a way to wake an irq thread independent of an actual hardware
-interrupt.
-
-Provide an irq_wake_thread() function which wakes up the thread which
-is associated to a given dev_id. This allows sdio to invoke the irq
-thread from the hardware irq handler via the IRQ_WAKE_THREAD return
-value and provides a possibility to wake it via a timer for the
-polling scenarios. That allows to simplify the sdio logic
-significantly.
-
-Signed-off-by: Thomas Gleixner <tglx@linutronix.de>
 Signed-off-by: Russell King <rmk+kernel@arm.linux.org.uk>
 =-DO NOT APPLY-=
- include/linux/interrupt.h |  1 +
- kernel/irq/handle.c       |  4 ++--
- kernel/irq/internals.h    |  1 +
- kernel/irq/manage.c       | 27 +++++++++++++++++++++++++++
- 4 files changed, 31 insertions(+), 2 deletions(-)
+ drivers/mmc/core/sdio_irq.c | 41 +++++++++++++++++++++++++++++++----------
+ include/linux/mmc/host.h    |  3 +++
+ 2 files changed, 34 insertions(+), 10 deletions(-)
 
-diff --git a/include/linux/interrupt.h b/include/linux/interrupt.h
-index 0053adde0ed9..83c52e8b5221 100644
-=-DO NOT APPLY-= a/include/linux/interrupt.h
-=+DO NOT APPLY+= b/include/linux/interrupt.h
-@@ -183,6 +183,7 @@ extern void disable_irq(unsigned int irq);
- extern void disable_percpu_irq(unsigned int irq);
- extern void enable_irq(unsigned int irq);
- extern void enable_percpu_irq(unsigned int irq, unsigned int type);
-=+DO NOT APPLY+=extern void irq_wake_thread(unsigned int irq, void *dev_id);
- 
- /* The following three functions are for the core kernel use only. */
- extern void suspend_device_irqs(void);
-diff --git a/kernel/irq/handle.c b/kernel/irq/handle.c
-index 131ca176b497..bfec453557b4 100644
-=-DO NOT APPLY-= a/kernel/irq/handle.c
-=+DO NOT APPLY+= b/kernel/irq/handle.c
-@@ -51,7 +51,7 @@ static void warn_no_thread(unsigned int irq, struct irqaction *action)
- 	       "but no thread function available.", irq, action->name);
+diff --git a/drivers/mmc/core/sdio_irq.c b/drivers/mmc/core/sdio_irq.c
+index aaa90460ed23..f23d73993dc6 100644
+=-DO NOT APPLY-= a/drivers/mmc/core/sdio_irq.c
+=+DO NOT APPLY+= b/drivers/mmc/core/sdio_irq.c
+@@ -90,6 +90,15 @@ static int process_sdio_pending_irqs(struct mmc_host *host)
+ 	return ret;
  }
  
--static void irq_wake_thread(struct irq_desc *desc, struct irqaction *action)
-=+DO NOT APPLY+=void __irq_wake_thread(struct irq_desc *desc, struct irqaction *action)
- {
- 	/*
- 	 * In case the thread crashed and was killed we just pretend that
-@@ -157,7 +157,7 @@ handle_irq_event_percpu(struct irq_desc *desc, struct irqaction *action)
- 				break;
- 			}
- 
--			irq_wake_thread(desc, action);
-=+DO NOT APPLY+=			__irq_wake_thread(desc, action);
- 
- 			/* Fall through to add to randomness */
- 		case IRQ_HANDLED:
-diff --git a/kernel/irq/internals.h b/kernel/irq/internals.h
-index 001fa5bab490..d61ac29e32d0 100644
-=-DO NOT APPLY-= a/kernel/irq/internals.h
-=+DO NOT APPLY+= b/kernel/irq/internals.h
-@@ -82,6 +82,7 @@ irqreturn_t handle_irq_event(struct irq_desc *desc);
- /* Resending of interrupts :*/
- void check_irq_resend(struct irq_desc *desc, unsigned int irq);
- bool irq_wait_for_poll(struct irq_desc *desc);
-=+DO NOT APPLY+=void __irq_wake_thread(struct irq_desc *desc, struct irqaction *action);
- 
- #ifdef CONFIG_PROC_FS
- extern void register_irq_proc(unsigned int irq, struct irq_desc *desc);
-diff --git a/kernel/irq/manage.c b/kernel/irq/manage.c
-index 67ac52d59fd3..5ce280a56905 100644
-=-DO NOT APPLY-= a/kernel/irq/manage.c
-=+DO NOT APPLY+= b/kernel/irq/manage.c
-@@ -908,6 +908,33 @@ static int irq_thread(void *data)
- 	return 0;
- }
- 
-=+DO NOT APPLY+=/**
-=+DO NOT APPLY+= *	irq_wake_thread - wake the irq thread for the action identified by dev_id
-=+DO NOT APPLY+= *	@irq:		Interrupt line
-=+DO NOT APPLY+= *	@dev_id:	Device identity for which the thread should be woken
-=+DO NOT APPLY+= *
-=+DO NOT APPLY+= */
-=+DO NOT APPLY+=void irq_wake_thread(unsigned int irq, void *dev_id)
+=+DO NOT APPLY+=void sdio_run_irqs(struct mmc_host *host)
 =+DO NOT APPLY+={
-=+DO NOT APPLY+=	struct irq_desc *desc = irq_to_desc(irq);
-=+DO NOT APPLY+=	struct irqaction *action;
-=+DO NOT APPLY+=	unsigned long flags;
-=+DO NOT APPLY+=
-=+DO NOT APPLY+=	if (!desc || WARN_ON(irq_settings_is_per_cpu_devid(desc)))
-=+DO NOT APPLY+=		return;
-=+DO NOT APPLY+=
-=+DO NOT APPLY+=	raw_spin_lock_irqsave(&desc->lock, flags);
-=+DO NOT APPLY+=	for (action = desc->action; action; action = action->next) {
-=+DO NOT APPLY+=		if (action->dev_id == dev_id) {
-=+DO NOT APPLY+=			if (action->thread)
-=+DO NOT APPLY+=				__irq_wake_thread(desc, action);
-=+DO NOT APPLY+=			break;
-=+DO NOT APPLY+=		}
-=+DO NOT APPLY+=	}
-=+DO NOT APPLY+=	raw_spin_unlock_irqrestore(&desc->lock, flags);
+=+DO NOT APPLY+=	mmc_claim_host(host);
+=+DO NOT APPLY+=	host->sdio_irq_pending = true;
+=+DO NOT APPLY+=	process_sdio_pending_irqs(host);
+=+DO NOT APPLY+=	mmc_release_host(host);
 =+DO NOT APPLY+=}
-=+DO NOT APPLY+=EXPORT_SYMBOL_GPL(irq_wake_thread);
+=+DO NOT APPLY+=EXPORT_SYMBOL_GPL(sdio_run_irqs);
 =+DO NOT APPLY+=
- static void irq_setup_forced_threading(struct irqaction *new)
+ static int sdio_irq_thread(void *_host)
  {
- 	if (!force_irqthreads)
+ 	struct mmc_host *host = _host;
+@@ -189,14 +198,20 @@ static int sdio_card_irq_get(struct mmc_card *card)
+ 	WARN_ON(!host->claimed);
+ 
+ 	if (!host->sdio_irqs++) {
+-		atomic_set(&host->sdio_irq_thread_abort, 0);
+-		host->sdio_irq_thread =
+-			kthread_run(sdio_irq_thread, host, "ksdioirqd/%s",
+-				mmc_hostname(host));
+-		if (IS_ERR(host->sdio_irq_thread)) {
+-			int err = PTR_ERR(host->sdio_irq_thread);
+-			host->sdio_irqs--;
+-			return err;
+=+DO NOT APPLY+=		if (!(host->caps2 & MMC_CAP2_SDIO_NOTHREAD)) {
+=+DO NOT APPLY+=			atomic_set(&host->sdio_irq_thread_abort, 0);
+=+DO NOT APPLY+=			host->sdio_irq_thread =
+=+DO NOT APPLY+=				kthread_run(sdio_irq_thread, host,
+=+DO NOT APPLY+=					    "ksdioirqd/%s", mmc_hostname(host));
+=+DO NOT APPLY+=			if (IS_ERR(host->sdio_irq_thread)) {
+=+DO NOT APPLY+=				int err = PTR_ERR(host->sdio_irq_thread);
+=+DO NOT APPLY+=				host->sdio_irqs--;
+=+DO NOT APPLY+=				return err;
+=+DO NOT APPLY+=			}
+=+DO NOT APPLY+=		} else {
+=+DO NOT APPLY+=			mmc_host_clk_hold(host);
+=+DO NOT APPLY+=			host->ops->enable_sdio_irq(host, 1);
+=+DO NOT APPLY+=			mmc_host_clk_release(host);
+ 		}
+ 	}
+ 
+@@ -211,8 +226,14 @@ static int sdio_card_irq_put(struct mmc_card *card)
+ 	BUG_ON(host->sdio_irqs < 1);
+ 
+ 	if (!--host->sdio_irqs) {
+-		atomic_set(&host->sdio_irq_thread_abort, 1);
+-		kthread_stop(host->sdio_irq_thread);
+=+DO NOT APPLY+=		if (!(host->caps2 & MMC_CAP2_SDIO_NOTHREAD)) {
+=+DO NOT APPLY+=			atomic_set(&host->sdio_irq_thread_abort, 1);
+=+DO NOT APPLY+=			kthread_stop(host->sdio_irq_thread);
+=+DO NOT APPLY+=		} else {
+=+DO NOT APPLY+=			mmc_host_clk_hold(host);
+=+DO NOT APPLY+=			host->ops->enable_sdio_irq(host, 0);
+=+DO NOT APPLY+=			mmc_host_clk_release(host);
+=+DO NOT APPLY+=		}
+ 	}
+ 
+ 	return 0;
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index 99f5709ac343..52bcfd4233e7 100644
+=-DO NOT APPLY-= a/include/linux/mmc/host.h
+=+DO NOT APPLY+= b/include/linux/mmc/host.h
+@@ -282,6 +282,7 @@ struct mmc_host {
+ 				 MMC_CAP2_PACKED_WR)
+ #define MMC_CAP2_NO_PRESCAN_POWERUP (1 << 14)	/* Don't power up before scan */
+ #define MMC_CAP2_SANITIZE	(1 << 15)		/* Support Sanitize */
+=+DO NOT APPLY+=#define MMC_CAP2_SDIO_NOTHREAD	(1 << 16)	/* don't have separate thread */
+ 
+ 	mmc_pm_flag_t		pm_caps;	/* supported pm features */
+ 
+@@ -397,6 +398,8 @@ static inline void mmc_signal_sdio_irq(struct mmc_host *host)
+ 	wake_up_process(host->sdio_irq_thread);
+ }
+ 
+=+DO NOT APPLY+=void sdio_run_irqs(struct mmc_host *host);
+=+DO NOT APPLY+=
+ #ifdef CONFIG_REGULATOR
+ int mmc_regulator_get_ocrmask(struct regulator *supply);
+ int mmc_regulator_set_ocr(struct mmc_host *mmc,
 -- 
 1.8.3.1
 
