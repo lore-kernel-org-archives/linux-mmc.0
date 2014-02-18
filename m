@@ -1,68 +1,184 @@
-From: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Subject: [PATCH RFC 00/31] SDHCI and SDIO IRQ improvements
-Date: Tue, 18 Feb 2014 15:08:01 +0000
-Message-ID: <20140218150801.GD21483@n2100.arm.linux.org.uk>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+From: Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
+Subject: [PATCH] mmc: sdhci-pxav3: add support for the Armada 38x SDHCI controller
+Date: Tue, 18 Feb 2014 16:08:29 +0100
+Message-ID: <1392736109-3981-1-git-send-email-thomas.petazzoni@free-electrons.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from gw-1.arm.linux.org.uk ([78.32.30.217]:40420 "EHLO
-	pandora.arm.linux.org.uk" rhost-flags-OK-OK-OK-FAIL)
-	by vger.kernel.org with ESMTP id S1755610AbaBRPIO (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 18 Feb 2014 10:08:14 -0500
-Content-Disposition: inline
+Received: from top.free-electrons.com ([176.31.233.9]:45872 "EHLO
+	mail.free-electrons.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1755787AbaBRPIf (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 18 Feb 2014 10:08:35 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org
-Cc: Anton Vorontsov <anton@enomsg.org>, Barry Song <baohua@kernel.org>, Ben Dooks <ben-linux@fluff.org>, Chris Ball <chris@printf.net>, linuxppc-dev@lists.ozlabs.org, linux-tegra@vger.kernel.org, Michal Simek <michal.simek@xilinx.com>, spear-devel@list.st.com, Stephen Warren <swarren@wwwdotorg.org>, Thierry Reding <thierry.reding@gmail.com>, Thomas Gleixner <tglx@linutronix.de>, Viresh Kumar <viresh.linux@gmail.com>
+To: Chris Ball <chris@printf.net>, linux-mmc@vger.kernel.org
+Cc: Jason Cooper <jason@lakedaemon.net>, Andrew Lunn <andrew@lunn.ch>, Gregory Clement <gregory.clement@free-electrons.com>, Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>, Ezequiel Garcia <ezequiel.garcia@free-electrons.com>, Lior Amsalem <alior@marvell.com>, Tawfik Bayouk <tawfik@marvell.com>, Marcin Wojtas <mw@semihalf.com>
 
-The following patch series is targetted at two things - fixing the SDIO
-interrupt handling, and fixing problems with the sdhci driver.
+From: Marcin Wojtas <mw@semihalf.com>
 
-- the first two patches from Thomas Gleixner provide genirq support to
-  allow us to fix the SDIO interrupt handling in a graceful manner.
-- patch 3 adds support for avoiding the buggy sdio_irq thread - the
-  problem is described in that commit.  Other solutions were explored,
-  but this is the one which was settled on after discussions between
-  Thomas, scheduler people and myself.
-- patches 4 to 7 update sdhci to use a genirq to deal with the threaded
-  part of the interrupts.
-- patch 8 allows card interrupts to be received from a SDIO card while
-  runtime suspended.  Without this patch, Wifi cards attached to a
-  kernel with runtime PM support built in totally fail to work.  This
-  allows them to work.  Tested in 4-bit mode.
-- patches 9 onwards are cleanups and fixes to the sdhci code.
+The SDHCI unit used on the Armada 380 and 385 Marvell SoC is similar
+to the PXAv3 unit. The only difference is that on Armada 38x, the
+PXAv3 unit accesses memory through MBus windows which must be
+configured prior to using the device. Without this, DMA would not
+work.
 
- drivers/mmc/core/sdio_irq.c        |  41 ++-
- drivers/mmc/host/sdhci-acpi.c      |   8 +
- drivers/mmc/host/sdhci-bcm-kona.c  |   4 +
- drivers/mmc/host/sdhci-bcm2835.c   |   4 +
- drivers/mmc/host/sdhci-cns3xxx.c   |  13 +-
- drivers/mmc/host/sdhci-dove.c      |   4 +
- drivers/mmc/host/sdhci-esdhc-imx.c |  82 ++---
- drivers/mmc/host/sdhci-esdhc.h     |   4 +-
- drivers/mmc/host/sdhci-of-arasan.c |   4 +
- drivers/mmc/host/sdhci-of-esdhc.c  |  70 +++--
- drivers/mmc/host/sdhci-of-hlwd.c   |   4 +
- drivers/mmc/host/sdhci-pci.c       |   9 +-
- drivers/mmc/host/sdhci-pltfm.c     |   4 +
- drivers/mmc/host/sdhci-pxav2.c     |  14 +-
- drivers/mmc/host/sdhci-pxav3.c     |  13 +-
- drivers/mmc/host/sdhci-s3c.c       |  36 ++-
- drivers/mmc/host/sdhci-sirf.c      |   4 +
- drivers/mmc/host/sdhci-spear.c     |   5 +-
- drivers/mmc/host/sdhci-tegra.c     |  27 +-
- drivers/mmc/host/sdhci.c           | 606 ++++++++++++++++++-------------------
- drivers/mmc/host/sdhci.h           |  20 +-
- include/linux/hardirq.h            |   1 +
- include/linux/interrupt.h          |   1 +
- include/linux/mmc/host.h           |   3 +
- include/linux/mmc/sdhci.h          |  14 +-
- kernel/irq/handle.c                |   4 +-
- kernel/irq/internals.h             |   1 +
- kernel/irq/manage.c                |  94 ++++--
- 28 files changed, 608 insertions(+), 486 deletions(-)
+In order to achieve this, the sdhci-pxav3 driver is extended with an
+additional compatible string "marvell,armada-380-sdhci". When this
+compatible string is used, the MBus windows are initialized in a way
+that is identical to what all other DMA-capable drivers for Marvell
+EBU platforms do.
 
+Signed-off-by: Marcin Wojtas <mw@semihalf.com>
+Signed-off-by: Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
+---
+ .../devicetree/bindings/mmc/sdhci-pxa.txt          | 17 +++++-
+ drivers/mmc/host/sdhci-pxav3.c                     | 68 ++++++++++++++++++++++
+ 2 files changed, 84 insertions(+), 1 deletion(-)
+
+diff --git a/Documentation/devicetree/bindings/mmc/sdhci-pxa.txt b/Documentation/devicetree/bindings/mmc/sdhci-pxa.txt
+index dbe98a3..86223c3 100644
+--- a/Documentation/devicetree/bindings/mmc/sdhci-pxa.txt
++++ b/Documentation/devicetree/bindings/mmc/sdhci-pxa.txt
+@@ -4,7 +4,14 @@ This file documents differences between the core properties in mmc.txt
+ and the properties used by the sdhci-pxav2 and sdhci-pxav3 drivers.
+ 
+ Required properties:
+-- compatible: Should be "mrvl,pxav2-mmc" or "mrvl,pxav3-mmc".
++- compatible: Should be "mrvl,pxav2-mmc", "mrvl,pxav3-mmc" or
++  "marvell,armada-380-sdhci".
++- reg:
++  * for "mrvl,pxav2-mmc" and "mrvl,pxav3-mmc", one register area for
++    the SDHCI registers.
++  * for "marvell,armada-380-sdhci", two register areas. The first one
++    for the SDHCI registers themselves, and the second one for the
++    AXI/Mbus bridge registers of the SDHCI unit.
+ 
+ Optional properties:
+ - mrvl,clk-delay-cycles: Specify a number of cycles to delay for tuning.
+@@ -19,3 +26,11 @@ sdhci@d4280800 {
+ 	non-removable;
+ 	mrvl,clk-delay-cycles = <31>;
+ };
++
++sdhci@d8000 {
++	compatible = "marvell,armada-380-sdhci";
++	reg = <0xd8000 0x1000>, <0xdc000 0x100>;
++	interrupts = <0 25 0x4>;
++	clocks = <&gateclk 17>;
++	mrvl,clk-delay-cycles = <0x1F>;
++};
+diff --git a/drivers/mmc/host/sdhci-pxav3.c b/drivers/mmc/host/sdhci-pxav3.c
+index 793dacd..2fd73b3 100644
+--- a/drivers/mmc/host/sdhci-pxav3.c
++++ b/drivers/mmc/host/sdhci-pxav3.c
+@@ -34,6 +34,7 @@
+ #include <linux/of_gpio.h>
+ #include <linux/pm.h>
+ #include <linux/pm_runtime.h>
++#include <linux/mbus.h>
+ 
+ #include "sdhci.h"
+ #include "sdhci-pltfm.h"
+@@ -57,6 +58,60 @@
+ #define SDCE_MISC_INT		(1<<2)
+ #define SDCE_MISC_INT_EN	(1<<1)
+ 
++/*
++ * These registers are relative to the second register region, for the
++ * MBus bridge.
++ */
++#define SDHCI_WINDOW_CTRL(i)	(0x80 + ((i) << 3))
++#define SDHCI_WINDOW_BASE(i)	(0x84 + ((i) << 3))
++#define SDHCI_MAX_WIN_NUM	8
++
++static int mv_conf_mbus_windows(struct platform_device *pdev,
++				const struct mbus_dram_target_info *dram)
++{
++	int i;
++	void __iomem *regs;
++	struct resource *res;
++
++	if (!dram) {
++		dev_err(&pdev->dev, "no mbus dram info\n");
++		return -EINVAL;
++	}
++
++	res = platform_get_resource(pdev, IORESOURCE_MEM, 1);
++	if (!res) {
++		dev_err(&pdev->dev, "cannot get mbus registers\n");
++		return -EINVAL;
++	}
++
++	regs = ioremap(res->start, resource_size(res));
++	if (!regs) {
++		dev_err(&pdev->dev, "cannot map mbus registers\n");
++		return -ENOMEM;
++	}
++
++	for (i = 0; i < SDHCI_MAX_WIN_NUM; i++) {
++		writel(0, regs + SDHCI_WINDOW_CTRL(i));
++		writel(0, regs + SDHCI_WINDOW_BASE(i));
++	}
++
++	for (i = 0; i < dram->num_cs; i++) {
++		const struct mbus_dram_window *cs = dram->cs + i;
++
++		/* Write size, attributes and target id to control register */
++		writel(((cs->size - 1) & 0xffff0000) |
++			(cs->mbus_attr << 8) |
++			(dram->mbus_dram_target_id << 4) | 1,
++			regs + SDHCI_WINDOW_CTRL(i));
++		/* Write base address to base register */
++		writel(cs->base, regs + SDHCI_WINDOW_BASE(i));
++	}
++
++	iounmap(regs);
++
++	return 0;
++}
++
+ static void pxav3_set_private_registers(struct sdhci_host *host, u8 mask)
+ {
+ 	struct platform_device *pdev = to_platform_device(mmc_dev(host->mmc));
+@@ -187,6 +242,9 @@ static const struct of_device_id sdhci_pxav3_of_match[] = {
+ 	{
+ 		.compatible = "mrvl,pxav3-mmc",
+ 	},
++	{
++		.compatible = "marvell,armada-380-sdhci",
++	},
+ 	{},
+ };
+ MODULE_DEVICE_TABLE(of, sdhci_pxav3_of_match);
+@@ -219,6 +277,7 @@ static int sdhci_pxav3_probe(struct platform_device *pdev)
+ 	struct sdhci_pltfm_host *pltfm_host;
+ 	struct sdhci_pxa_platdata *pdata = pdev->dev.platform_data;
+ 	struct device *dev = &pdev->dev;
++	struct device_node *np = pdev->dev.of_node;
+ 	struct sdhci_host *host = NULL;
+ 	struct sdhci_pxa *pxa = NULL;
+ 	const struct of_device_id *match;
+@@ -235,6 +294,14 @@ static int sdhci_pxav3_probe(struct platform_device *pdev)
+ 		kfree(pxa);
+ 		return PTR_ERR(host);
+ 	}
++
++	if (of_device_is_compatible(np, "marvell,armada-380-sdhci")) {
++		ret = mv_conf_mbus_windows(pdev, mv_mbus_dram_info());
++		if (ret < 0)
++			goto err_mbus_win;
++	}
++
++
+ 	pltfm_host = sdhci_priv(host);
+ 	pltfm_host->priv = pxa;
+ 
+@@ -321,6 +388,7 @@ err_add_host:
+ 	clk_disable_unprepare(clk);
+ 	clk_put(clk);
+ err_clk_get:
++err_mbus_win:
+ 	sdhci_pltfm_free(pdev);
+ 	kfree(pxa);
+ 	return ret;
 -- 
-FTTC broadband for 0.8mile line: 5.8Mbps down 500kbps up.  Estimation
-in database were 13.1 to 19Mbit for a good line, about 7.5+ for a bad.
-Estimate before purchase was "up to 13.2Mbit".
+1.8.3.2
+
