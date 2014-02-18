@@ -1,240 +1,72 @@
-From: Seungwon Jeon <tgih.jun@samsung.com>
-Subject: RE: [PATCHv3 1/3] mmc: dw_mmc-socfpga: Remove the SOCFPGA specific
- platform for dw_mmc
-Date: Tue, 18 Feb 2014 23:09:22 +0900
-Message-ID: <000101cf2cb3$06156fb0$12404f10$%jun@samsung.com>
-References: <1392690662-19106-1-git-send-email-dinguyen@altera.com>
+From: Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
+Subject: Re: [PATCH v7 1/8] clk: sunxi: factors: automatic
+ reparenting support
+Date: Tue, 18 Feb 2014 15:05:16 +0100
+Message-ID: <20140218140516.GG3142@lukather>
+References: <20140217095907.15040.81893.stgit@pagira.o2s.ch>
+ <20140217100215.15040.63745.stgit@pagira.o2s.ch>
+Reply-To: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
 Mime-Version: 1.0
-Content-Type: text/plain; charset=Windows-1252
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout3.samsung.com ([203.254.224.33]:64001 "EHLO
-	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755128AbaBROJY (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 18 Feb 2014 09:09:24 -0500
-In-reply-to: <1392690662-19106-1-git-send-email-dinguyen@altera.com>
-Content-language: ko
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="AGZzQgpsuUlWC1xT"
+Return-path: <linux-sunxi+bncBD2ZNBF5VYJRBPGTRWMAKGQEA47PU2Y-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <20140217100215.15040.63745.stgit-pgFh0Jf6HD9Xzn/AsuzBOg@public.gmane.org>
+List-Post: <http://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Help: <http://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Archive: <http://groups.google.com/group/linux-sunxi>
+Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+List-Subscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Unsubscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+To: David =?iso-8859-1?Q?Lanzend=F6rfer?= <david.lanzendoerfer-Z7Kmv9EsliU@public.gmane.org>
+Cc: devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Laurent Pinchart <laurent.pinchart+renesas-ryLnwIuWjnjg/C1BVhZhaw@public.gmane.org>, Mike Turquette <mturquette-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Simon Baatz <gmbnomis-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Emilio =?iso-8859-1?Q?L=F3pez?= <emilio-0Z03zUJReD5OxF6Tv1QG9Q@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, H Hartley Sweeten <hsweeten-3FF4nKcrg1dE2c76skzGb0EOCMrvLtNR@public.gmane.org>, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, Tejun Heo <tj-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Guennadi Liakhovetski <g.liakhovetski-Mmb7MZpHnFY@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: dinguyen@altera.com, linux-mmc@vger.kernel.org
-Cc: dinh.linux@gmail.com, devicetree@vger.kernel.org, 'Rob Herring' <robh+dt@kernel.org>, 'Pawel Moll' <pawel.moll@arm.com>, 'Mark Rutland' <mark.rutland@arm.com>, 'Ian Campbell' <ijc+devicetree@hellion.org.uk>, 'Kumar Gala' <galak@codeaurora.org>, 'Jaehoon Chung' <jh80.chung@samsung.com>, 'Chris Ball' <chris@printf.net>
 
-On Tue, February 18, 2014, Dinh Nguyen wrote:
-> From: Dinh Nguyen <dinguyen@altera.com>
-> 
-> It turns now that the only really platform specific code that is needed for
-> SOCFPGA is using the SDMMC_CMD_USE_HOLD_REG in the prepare_command function.
-> Since the Rockchip already has this functionality, re-use the code that is
-> already in dw_mmc-pltfm.c.
-> 
-> Signed-off-by: Dinh Nguyen <dinguyen@altera.com>
-> Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
-> Acked-by: Steffen Trumtrar <s.trumtrar@pengutronix.de>
-> Tested-by: Steffen Trumtrar <s.trumtrar@pengutronix.de>
-> Cc: Rob Herring <robh+dt@kernel.org>
-> Cc: Pawel Moll <pawel.moll@arm.com>
-> Cc: Mark Rutland <mark.rutland@arm.com>
-> Cc: Ian Campbell <ijc+devicetree@hellion.org.uk>
-> Cc: Kumar Gala <galak@codeaurora.org>
-> Cc: Seungwon Jeon <tgih.jun@samsung.com>
 
-Acked-by: Seungwon Jeon <tgih.jun@samsung.com>
+--AGZzQgpsuUlWC1xT
+Content-Type: text/plain; charset=iso-8859-1
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-Thanks,
-Seungwon Jeon
- 
-> Cc: Jaehoon Chung <jh80.chung@samsung.com>
-> Cc: Chris Ball <chris@printf.net>
-> ---
-> v3: none
-> v2: none
-> ---
->  drivers/mmc/host/Kconfig          |    8 ---
->  drivers/mmc/host/Makefile         |    1 -
->  drivers/mmc/host/dw_mmc-socfpga.c |  138 -------------------------------------
->  3 files changed, 147 deletions(-)
->  delete mode 100644 drivers/mmc/host/dw_mmc-socfpga.c
-> 
-> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-> index 1384f67..82cc34d 100644
-> --- a/drivers/mmc/host/Kconfig
-> +++ b/drivers/mmc/host/Kconfig
-> @@ -580,14 +580,6 @@ config MMC_DW_EXYNOS
->  	  Synopsys DesignWare Memory Card Interface driver. Select this option
->  	  for platforms based on Exynos4 and Exynos5 SoC's.
-> 
-> -config MMC_DW_SOCFPGA
-> -	tristate "SOCFPGA specific extensions for Synopsys DW Memory Card Interface"
-> -	depends on MMC_DW && MFD_SYSCON
-> -	select MMC_DW_PLTFM
-> -	help
-> -	  This selects support for Altera SoCFPGA specific extensions to the
-> -	  Synopsys DesignWare Memory Card Interface driver.
-> -
->  config MMC_DW_K3
->  	tristate "K3 specific extensions for Synopsys DW Memory Card Interface"
->  	depends on MMC_DW
-> diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
-> index 3483b6b..f162f87a0 100644
-> --- a/drivers/mmc/host/Makefile
-> +++ b/drivers/mmc/host/Makefile
-> @@ -43,7 +43,6 @@ obj-$(CONFIG_SDH_BFIN)		+= bfin_sdh.o
->  obj-$(CONFIG_MMC_DW)		+= dw_mmc.o
->  obj-$(CONFIG_MMC_DW_PLTFM)	+= dw_mmc-pltfm.o
->  obj-$(CONFIG_MMC_DW_EXYNOS)	+= dw_mmc-exynos.o
-> -obj-$(CONFIG_MMC_DW_SOCFPGA)	+= dw_mmc-socfpga.o
->  obj-$(CONFIG_MMC_DW_K3)		+= dw_mmc-k3.o
->  obj-$(CONFIG_MMC_DW_PCI)	+= dw_mmc-pci.o
->  obj-$(CONFIG_MMC_SH_MMCIF)	+= sh_mmcif.o
-> diff --git a/drivers/mmc/host/dw_mmc-socfpga.c b/drivers/mmc/host/dw_mmc-socfpga.c
-> deleted file mode 100644
-> index 3e8e53a..0000000
-> --- a/drivers/mmc/host/dw_mmc-socfpga.c
-> +++ /dev/null
-> @@ -1,138 +0,0 @@
-> -/*
-> - * Altera SoCFPGA Specific Extensions for Synopsys DW Multimedia Card Interface
-> - * driver
-> - *
-> - *  Copyright (C) 2012, Samsung Electronics Co., Ltd.
-> - *  Copyright (C) 2013 Altera Corporation
-> - *
-> - * This program is free software; you can redistribute it and/or modify
-> - * it under the terms of the GNU General Public License as published by
-> - * the Free Software Foundation; either version 2 of the License, or
-> - * (at your option) any later version.
-> - *
-> - * Taken from dw_mmc-exynos.c
-> - */
-> -#include <linux/clk.h>
-> -#include <linux/mfd/syscon.h>
-> -#include <linux/mmc/host.h>
-> -#include <linux/mmc/dw_mmc.h>
-> -#include <linux/module.h>
-> -#include <linux/of.h>
-> -#include <linux/platform_device.h>
-> -#include <linux/regmap.h>
-> -
-> -#include "dw_mmc.h"
-> -#include "dw_mmc-pltfm.h"
-> -
-> -#define SYSMGR_SDMMCGRP_CTRL_OFFSET		0x108
-> -#define DRV_CLK_PHASE_SHIFT_SEL_MASK	0x7
-> -#define SYSMGR_SDMMC_CTRL_SET(smplsel, drvsel)          \
-> -	((((smplsel) & 0x7) << 3) | (((drvsel) & 0x7) << 0))
-> -
-> -/* SOCFPGA implementation specific driver private data */
-> -struct dw_mci_socfpga_priv_data {
-> -	u8	ciu_div; /* card interface unit divisor */
-> -	u32	hs_timing; /* bitmask for CIU clock phase shift */
-> -	struct regmap   *sysreg; /* regmap for system manager register */
-> -};
-> -
-> -static int dw_mci_socfpga_priv_init(struct dw_mci *host)
-> -{
-> -	return 0;
-> -}
-> -
-> -static int dw_mci_socfpga_setup_clock(struct dw_mci *host)
-> -{
-> -	struct dw_mci_socfpga_priv_data *priv = host->priv;
-> -
-> -	clk_disable_unprepare(host->ciu_clk);
-> -	regmap_write(priv->sysreg, SYSMGR_SDMMCGRP_CTRL_OFFSET,
-> -		priv->hs_timing);
-> -	clk_prepare_enable(host->ciu_clk);
-> -
-> -	host->bus_hz /= (priv->ciu_div + 1);
-> -	return 0;
-> -}
-> -
-> -static void dw_mci_socfpga_prepare_command(struct dw_mci *host, u32 *cmdr)
-> -{
-> -	struct dw_mci_socfpga_priv_data *priv = host->priv;
-> -
-> -	if (priv->hs_timing & DRV_CLK_PHASE_SHIFT_SEL_MASK)
-> -		*cmdr |= SDMMC_CMD_USE_HOLD_REG;
-> -}
-> -
-> -static int dw_mci_socfpga_parse_dt(struct dw_mci *host)
-> -{
-> -	struct dw_mci_socfpga_priv_data *priv;
-> -	struct device_node *np = host->dev->of_node;
-> -	u32 timing[2];
-> -	u32 div = 0;
-> -	int ret;
-> -
-> -	priv = devm_kzalloc(host->dev, sizeof(*priv), GFP_KERNEL);
-> -	if (!priv) {
-> -		dev_err(host->dev, "mem alloc failed for private data\n");
-> -		return -ENOMEM;
-> -	}
-> -
-> -	priv->sysreg = syscon_regmap_lookup_by_compatible("altr,sys-mgr");
-> -	if (IS_ERR(priv->sysreg)) {
-> -		dev_err(host->dev, "regmap for altr,sys-mgr lookup failed.\n");
-> -		return PTR_ERR(priv->sysreg);
-> -	}
-> -
-> -	ret = of_property_read_u32(np, "altr,dw-mshc-ciu-div", &div);
-> -	if (ret)
-> -		dev_info(host->dev, "No dw-mshc-ciu-div specified, assuming 1");
-> -	priv->ciu_div = div;
-> -
-> -	ret = of_property_read_u32_array(np,
-> -			"altr,dw-mshc-sdr-timing", timing, 2);
-> -	if (ret)
-> -		return ret;
-> -
-> -	priv->hs_timing = SYSMGR_SDMMC_CTRL_SET(timing[0], timing[1]);
-> -	host->priv = priv;
-> -	return 0;
-> -}
-> -
-> -static const struct dw_mci_drv_data socfpga_drv_data = {
-> -	.init			= dw_mci_socfpga_priv_init,
-> -	.setup_clock		= dw_mci_socfpga_setup_clock,
-> -	.prepare_command	= dw_mci_socfpga_prepare_command,
-> -	.parse_dt		= dw_mci_socfpga_parse_dt,
-> -};
-> -
-> -static const struct of_device_id dw_mci_socfpga_match[] = {
-> -	{ .compatible = "altr,socfpga-dw-mshc",
-> -			.data = &socfpga_drv_data, },
-> -	{},
-> -};
-> -MODULE_DEVICE_TABLE(of, dw_mci_socfpga_match);
-> -
-> -static int dw_mci_socfpga_probe(struct platform_device *pdev)
-> -{
-> -	const struct dw_mci_drv_data *drv_data;
-> -	const struct of_device_id *match;
-> -
-> -	match = of_match_node(dw_mci_socfpga_match, pdev->dev.of_node);
-> -	drv_data = match->data;
-> -	return dw_mci_pltfm_register(pdev, drv_data);
-> -}
-> -
-> -static struct platform_driver dw_mci_socfpga_pltfm_driver = {
-> -	.probe		= dw_mci_socfpga_probe,
-> -	.remove		= __exit_p(dw_mci_pltfm_remove),
-> -	.driver		= {
-> -		.name		= "dwmmc_socfpga",
-> -		.of_match_table	= dw_mci_socfpga_match,
-> -		.pm		= &dw_mci_pltfm_pmops,
-> -	},
-> -};
-> -
-> -module_platform_driver(dw_mci_socfpga_pltfm_driver);
-> -
-> -MODULE_DESCRIPTION("Altera SOCFPGA Specific DW-MSHC Driver Extension");
-> -MODULE_LICENSE("GPL v2");
-> -MODULE_ALIAS("platform:dwmmc-socfpga");
-> --
-> 1.7.9.5
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+On Mon, Feb 17, 2014 at 11:02:15AM +0100, David Lanzend=F6rfer wrote:
+> From: Emilio L=F3pez <emilio-0Z03zUJReD5OxF6Tv1QG9Q@public.gmane.org>
+>=20
+> This commit implements .determine_rate, so that our factor clocks can be
+> reparented when needed.
+>=20
+> Signed-off-by: Emilio L=F3pez <emilio-0Z03zUJReD5OxF6Tv1QG9Q@public.gmane.org>
 
+Your signed-off-by is missing here.
+
+Once you added it, you can add my Acked-by
+
+Maxime
+
+--=20
+Maxime Ripard, Free Electrons
+Embedded Linux, Kernel and Android engineering
+http://free-electrons.com
+
+--AGZzQgpsuUlWC1xT
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.14 (GNU/Linux)
+
+iQIcBAEBAgAGBQJTA2icAAoJEBx+YmzsjxAg5XcP/RzuL8bgLRMimiNCl1CyFMld
+lvpOZG6xCaov8c9kC+BafPfxdlyT1lmZTUS0bfqE2lMhQ7s5GhC81wT+9ZCGN9Gn
+iubRJkBUO5YDui3IEQSbeTBgiA9r73n+DYP47AzwidVaJmIKDbBev4JKnIYFx+yD
+yEyqluPHP7j0vj8LQOis9LmsEiDWvpBggcYTRHoI5JdFYleNGv+7mfeSZgQfZm7c
+ACv1hGS2QC3e+Rz32PzUGbLJyTVrSehIsK3Z158WVVY8iTkeXvDm/zlUuolSCg6P
+SwCFxF0TSqgNXPFHy2YjVm/P1S6b4Dc3ZOZOJ0paQNEMbVcBKWNq/4Gr/L1OHBQC
+Cbal0P3NUyEH+NAryTnJUMzCAvQqCGy39NlSeOyb8Rk4AIHXV6kJ7OV9fnredsUK
+E9AaovmlyuDwEr9o+wQz8LkMtF+QJsO9016LtbEUHHTu9sgZhudP3f/COmi8YNob
+Nvo+9mL83OmP3UjpGoEJh5mzBn90qz9umlwBZ/JCDjwRHiTsxlpvUlpNkbVR/LtO
+8ggkDwy9j0+E6LT0DvTSD4bKAuSd5uqBld/Dc7sQ9L6jTz4IjiPX0glHj2mDloA4
+cbi2AY04KPqoUov1bobfjTlOAe6VI7ECZzUBMQmuucxTtj6YCs18+JaYObcjBekZ
+SzG9uXbSlbT4q1mzGyFU
+=rAhV
+-----END PGP SIGNATURE-----
+
+--AGZzQgpsuUlWC1xT--
