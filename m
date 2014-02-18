@@ -1,128 +1,82 @@
-From: Mark Brown <broonie-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH 1/3] mmc: add support for power-on sequencing through DT
-Date: Tue, 18 Feb 2014 08:25:11 +0900
-Message-ID: <20140217232511.GA2669@sirena.org.uk>
-References: <1390190215-22700-1-git-send-email-olof@lixom.net>
- <1580658.FIe4en5bEU@wuerfel>
- <52FF6A16.5080201@gmail.com>
- <1528854.BAQRr94nzx@wuerfel>
+From: <dinguyen@altera.com>
+Subject: [PATCHv3 2/3] mmc: dw_mmc: Add support for SOCFPGA's platform specific implementation
+Date: Mon, 17 Feb 2014 20:31:01 -0600
+Message-ID: <1392690662-19106-2-git-send-email-dinguyen@altera.com>
+References: <1392690662-19106-1-git-send-email-dinguyen@altera.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="VbJkn9YxBvnuCH5J"
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <1528854.BAQRr94nzx@wuerfel>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
-Cc: Tomasz Figa <tomasz.figa-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, mark.rutland-5wv7dgnIgG8@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Russell King - ARM Linux <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Pawel Moll <pawel.moll-5wv7dgnIgG8@public.gmane.org>, Ian Campbell <ijc+devicetree-KcIKpvwj1kUDXYZnReoRVg@public.gmane.org>, Tomasz Figa <t.figa-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, Kumar Gala <galak-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Olof Johansson <olof-nZhT3qVonbNeoWH0uzbU5w@public.gmane.org>, Fabio Estevam <festevam-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Sascha Hauer <s.hauer-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+Content-Type: text/plain
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-bl2on0127.outbound.protection.outlook.com ([65.55.169.127]:3843
+	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1752226AbaBRCd1 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 17 Feb 2014 21:33:27 -0500
+In-Reply-To: <1392690662-19106-1-git-send-email-dinguyen@altera.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: dinh.linux@gmail.com, devicetree@vger.kernel.org, Dinh Nguyen <dinguyen@altera.com>, Rob Herring <robh+dt@kernel.org>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Kumar Gala <galak@codeaurora.org>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Chris Ball <chris@printf.net>
 
+From: Dinh Nguyen <dinguyen@altera.com>
 
---VbJkn9YxBvnuCH5J
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+Like the rockchip, Altera's SOCFPGA platform specific implementation of the
+dw_mmc driver requires using the HOLD register for SD commands. This patch
+renames dw_mci_rockchip_prepare_command to dw_mci_pltfm_prepare_command so
+that SOCFPGA and Rockchip can use it.
 
-On Sat, Feb 15, 2014 at 05:21:11PM +0100, Arnd Bergmann wrote:
-> On Saturday 15 February 2014 14:22:30 Tomasz Figa wrote:
+Signed-off-by: Dinh Nguyen <dinguyen@altera.com>
+Acked-by: Steffen Trumtrar <s.trumtrar@pengutronix.de>
+Tested-by: Steffen Trumtrar <s.trumtrar@pengutronix.de>
+Cc: Rob Herring <robh+dt@kernel.org>
+Cc: Pawel Moll <pawel.moll@arm.com>
+Cc: Mark Rutland <mark.rutland@arm.com>
+Cc: Ian Campbell <ijc+devicetree@hellion.org.uk>
+Cc: Kumar Gala <galak@codeaurora.org>
+Cc: Seungwon Jeon <tgih.jun@samsung.com>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: Chris Ball <chris@printf.net>
+---
+v3: Renamed dw_mci_rockchip_prepare_command to
+    dw_mci_pltfm_prepare_command
+v2: Use dw_mci_socfpga_prepare_command instead of
+    dw_mci_rockchip_prepare_command
+---
+ drivers/mmc/host/dw_mmc-pltfm.c |   10 ++++++++--
+ 1 file changed, 8 insertions(+), 2 deletions(-)
 
-> > I'm not sure if we should assume that SPI =3D MMC over SPI. I believe=
-=20
-> > there might be a custom protocol involved as well.
+diff --git a/drivers/mmc/host/dw_mmc-pltfm.c b/drivers/mmc/host/dw_mmc-pltfm.c
+index 5c49656..3263327 100644
+--- a/drivers/mmc/host/dw_mmc-pltfm.c
++++ b/drivers/mmc/host/dw_mmc-pltfm.c
+@@ -25,13 +25,17 @@
+ #include "dw_mmc.h"
+ #include "dw_mmc-pltfm.h"
+ 
+-static void dw_mci_rockchip_prepare_command(struct dw_mci *host, u32 *cmdr)
++static void dw_mci_pltfm_prepare_command(struct dw_mci *host, u32 *cmdr)
+ {
+ 	*cmdr |= SDMMC_CMD_USE_HOLD_REG;
+ }
+ 
+ static const struct dw_mci_drv_data rockchip_drv_data = {
+-	.prepare_command	= dw_mci_rockchip_prepare_command,
++	.prepare_command	= dw_mci_pltfm_prepare_command,
++};
++
++static const struct dw_mci_drv_data socfpga_drv_data = {
++	.prepare_command	= dw_mci_pltfm_prepare_command,
+ };
+ 
+ int dw_mci_pltfm_register(struct platform_device *pdev,
+@@ -92,6 +96,8 @@ static const struct of_device_id dw_mci_pltfm_match[] = {
+ 	{ .compatible = "snps,dw-mshc", },
+ 	{ .compatible = "rockchip,rk2928-dw-mshc",
+ 		.data = &rockchip_drv_data },
++	{ .compatible = "altr,socfpga-dw-mshc",
++		.data = &socfpga_drv_data },
+ 	{},
+ };
+ MODULE_DEVICE_TABLE(of, dw_mci_pltfm_match);
+-- 
+1.7.9.5
 
-> In case of SD/MMC, you essentially have three separate command sets:
-> SPI, MMC and SD, and each of them has multiple versions. MMC and SD
-> compatible devices generally also support the SPI command set (IIRC
-
-=2E..
-
-> If a device supports both SDIO and SPI, I think a straightforward
-> implementation would be to use the exact same command set, but
-> you are right that this isn't the only possibility, and the SD/MMC
-> shows how they can be slightly different already.
-
-I'm aware of existing devices that do in fact break this assumption.
-
-> > Stepping aside from SPI, I already gave an example of a WLAN chip that=
-=20
-> > supports multiple control busses [1]. In addition to the commonly used=
-=20
-> > SDIO, it supports USB and HSIC as well:
-
-> > [1] http://www.marvell.com/wireless/assets/marvell_avastar_88w8797.pdf
-
-> > Moreover, some of Samsung boards use HSIC to communicate with modem=20
-> > chips, which have exactly the same problem as we're trying to solve her=
-e=20
-> > - they need to be powered on to be discovered.
-
-> Thanks, this definitely makes a good example. I see that it also
-> supports SPI mode for SDIO as mentioned in your link.
-
-Slimbus has all these issues too with the added fun that for normal
-operation some devices want to be in a low power mode where they're
-disconnected from the Slimbus a lot of the time.
-
-> * Olof's proposal (add properties or a child node to the host
->   controller node with just power-on sequencing information):
->   + We only need one implementation for each bus, possibly shared
->     across buses to some degree, and can handle lots of devices
->     without having to touch their individual drivers.
->   + A logical extension of things we already do on SD cards
->     (CD/WP GPIOs, external clocks and voltages supplied to
->     standard compliant devices as part of the normal probing)
->   - The shared code may get rather complex to deal with all
->     possible corner cases we run into over the years.
->   - Somewhat harder to do if you have to attach the power
->     information to a device node for a USB hub port, rather
->     than an SDIO controller that only has one slave device.
-
-We would also need mechanisms to allow devices to take over the running
-of their own resources for cases like the Slimbus ones I mentioned, and
-some mechanism to cope with devices that hotplug themselves in normal
-operation.
-
-> * Arnd's proposal (change bus code to probe nonstandard devices
->   from DT if we can't easily detect them):
-
-I've also proposed this in the past FWIW but never got far enough
-through my list of things I want to do with my subsystems to actually
-start coding.
-
->   - Has to be implemented in each driver that needs it, making
->     it harder to share code for drivers with the same need
->     (e.g. every device that just needs an external reset
->     trigger).
-
-I think we can probably come up with some standard helpers that work
-well for the common case here (see also some of the discussions about
-power domains ensuring that core IP clocks are provided for IPs, it's
-kind of circling back to the same issues).
-
---VbJkn9YxBvnuCH5J
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-
-iQIbBAEBAgAGBQJTAppOAAoJELSic+t+oim9JLsP92gJV3S/qwG2/Nsgl7D6ls9l
-KWiNnf3tfvdTtWArmZKKXYL9QignB4GDSzpS1ih7OHaZ4O3OFCojSE1RG5+RIikG
-j4AlbTFVtGkoOJIX6R3aPhB1fSbAraoWDhqDDobPLMmPg3yxEjerkUKVVmwSpJEK
-Xff/vazrAAURFWMPSD01x2FLVdER/mm4bJ0rexcqbx4gC4sUyrM279Xrt59uXFyk
-4pInuDuRoSu20C+ay+tkXDqcxca9TUoadKHboLiF7EWDqJvrH2B+d3xfrMpn1+kD
-GetGtZ84CDf2xeOjzmBGvWtOwTOTS5lL+GTQpdC+3nwi91/EsXyc012GljaaGaLZ
-TXnKN1Gwe7pOKJwqcmxTVmXXljVe8p5lQTZ8QP4+oUpZ7cvR/njuMH3V2GPe463f
-PJuoQsuVqRv6MKnlZLtpPHJO+mFDJZIeDj2H4rXYDepSqjUZUPvLuuXg+JqfrSuv
-p9xD+TY62xoeE9iqUvZVo4rrRkhdcgxaYHnz2XFOFxNBLTq2iOkGoAFSxgz2b6og
-j0SoFjYx6JoB8qNgdIbt8k4xO0qLFxU+bFRcAmNIjlLtn+iHbrlZpZAc+kkiiCOP
-39OFko577FTvp59rcY9Q5P5gJUAJNb/DFwTEGYOJt4mwFrYlP0TnjF8YV+ugAh5b
-/d3ww6pIFFak3+8kJ/A=
-=RdTe
------END PGP SIGNATURE-----
-
---VbJkn9YxBvnuCH5J--
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
