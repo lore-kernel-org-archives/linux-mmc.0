@@ -1,136 +1,113 @@
 From: Russell King <rmk+kernel@arm.linux.org.uk>
-Subject: [PATCH RFC 15/31] mmc: sdhci: convert ADMA descriptors to a coherent
- allocation
-Date: Tue, 18 Feb 2014 15:10:19 +0000
-Message-ID: <E1WFmJP-0006mm-EP@rmk-PC.arm.linux.org.uk>
+Subject: [PATCH RFC 16/31] mmc: sdhci: clean up
+ sdhci_update_clock()/sdhci_set_clock()
+Date: Tue, 18 Feb 2014 15:10:25 +0000
+Message-ID: <E1WFmJV-0006mq-4P@rmk-PC.arm.linux.org.uk>
 References: <20140218150801.GD21483@n2100.arm.linux.org.uk>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from gw-1.arm.linux.org.uk ([78.32.30.217]:40499 "EHLO
+Received: from gw-1.arm.linux.org.uk ([78.32.30.217]:40504 "EHLO
 	pandora.arm.linux.org.uk" rhost-flags-OK-OK-OK-FAIL)
-	by vger.kernel.org with ESMTP id S1755789AbaBRPKY (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 18 Feb 2014 10:10:24 -0500
+	by vger.kernel.org with ESMTP id S1755906AbaBRPK3 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 18 Feb 2014 10:10:29 -0500
 In-Reply-To: <20140218150801.GD21483@n2100.arm.linux.org.uk>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org
 Cc: Chris Ball <chris@printf.net>
 
-Rather than using the streaming API, use the coherent allocator to
-provide this memory, thereby eliminating cache flushing of it each
-time we map and unmap it.  This results in a 7.5% increase in
-transfer speed with a UHS-1 card operating in 3.3v mode at a clock
-of 49.5MHz.
+Only one caller to sdhci_set_clock() needs to check whether the
+requested clock frequency was the same as the currently set frequency,
+yet we work around this in several other sites via sdhci_update_clock().
+Rather than doing this, move those checks out into sdhci_do_set_ios(),
+which then allows sdhci_update_clock() to be eliminated.
 
 Signed-off-by: Russell King <rmk+kernel@arm.linux.org.uk>
 =-DO NOT APPLY-=
- drivers/mmc/host/sdhci.c | 43 ++++++++++++++++++++++---------------------
- 1 file changed, 22 insertions(+), 21 deletions(-)
+ drivers/mmc/host/sdhci-cns3xxx.c |  3 ---
+ drivers/mmc/host/sdhci.c         | 21 +++++----------------
+ 2 files changed, 5 insertions(+), 19 deletions(-)
 
+diff --git a/drivers/mmc/host/sdhci-cns3xxx.c b/drivers/mmc/host/sdhci-cns3xxx.c
+index 87af66bb1ea8..fa11f63b78a0 100644
+=-DO NOT APPLY-= a/drivers/mmc/host/sdhci-cns3xxx.c
+=+DO NOT APPLY+= b/drivers/mmc/host/sdhci-cns3xxx.c
+@@ -30,9 +30,6 @@ static void sdhci_cns3xxx_set_clock(struct sdhci_host *host, unsigned int clock)
+ 	u16 clk;
+ 	unsigned long timeout;
+ 
+-	if (clock == host->clock)
+-		return;
+-
+ 	sdhci_writew(host, 0, SDHCI_CLOCK_CONTROL);
+ 
+ 	if (clock == 0)
 diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index e918e17c39e4..d046b4eee335 100644
+index d046b4eee335..6e0ffaa84ba0 100644
 =-DO NOT APPLY-= a/drivers/mmc/host/sdhci.c
 =+DO NOT APPLY+= b/drivers/mmc/host/sdhci.c
-@@ -44,6 +44,8 @@
+@@ -1119,9 +1119,6 @@ static void sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
+ 	u16 clk = 0;
+ 	unsigned long timeout;
  
- #define MAX_TUNING_LOOP 40
- 
-=+DO NOT APPLY+=#define ADMA_SIZE	((128 * 2 + 1) * 4)
-=+DO NOT APPLY+=
- static unsigned int debug_quirks = 0;
- static unsigned int debug_quirks2;
- 
-@@ -481,11 +483,6 @@ static int sdhci_adma_table_pre(struct sdhci_host *host,
- 	else
- 		direction = DMA_TO_DEVICE;
- 
--	/*
--	 * The ADMA descriptor table is mapped further down as we
--	 * need to fill it with data first.
--	 */
+-	if (clock && clock == host->clock)
+-		return;
 -
- 	host->align_addr = dma_map_single(mmc_dev(host->mmc),
- 		host->align_buffer, 128 * 4, direction);
- 	if (dma_mapping_error(mmc_dev(host->mmc), host->align_addr))
-@@ -546,7 +543,7 @@ static int sdhci_adma_table_pre(struct sdhci_host *host,
- 		 * If this triggers then we have a calculation bug
- 		 * somewhere. :/
- 		 */
--		WARN_ON((desc - host->adma_desc) > (128 * 2 + 1) * 4);
-=+DO NOT APPLY+=		WARN_ON((desc - host->adma_desc) > ADMA_SIZE);
- 	}
+ 	host->mmc->actual_clock = 0;
  
- 	if (host->quirks & SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC) {
-@@ -574,17 +571,8 @@ static int sdhci_adma_table_pre(struct sdhci_host *host,
- 			host->align_addr, 128 * 4, direction);
- 	}
+ 	if (host->ops->set_clock) {
+@@ -1228,15 +1225,6 @@ static void sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
+ 	host->clock = clock;
+ }
  
--	host->adma_addr = dma_map_single(mmc_dev(host->mmc),
--		host->adma_desc, (128 * 2 + 1) * 4, DMA_TO_DEVICE);
--	if (dma_mapping_error(mmc_dev(host->mmc), host->adma_addr))
--		goto unmap_entries;
--	BUG_ON(host->adma_addr & 0x3);
+-static inline void sdhci_update_clock(struct sdhci_host *host)
+-{
+-	unsigned int clock;
 -
- 	return 0;
- 
--unmap_entries:
--	dma_unmap_sg(mmc_dev(host->mmc), data->sg,
--		data->sg_len, direction);
- unmap_align:
- 	dma_unmap_single(mmc_dev(host->mmc), host->align_addr,
- 		128 * 4, direction);
-@@ -609,9 +597,6 @@ static void sdhci_adma_table_post(struct sdhci_host *host,
- 	else
- 		direction = DMA_TO_DEVICE;
- 
--	dma_unmap_single(mmc_dev(host->mmc), host->adma_addr,
--		(128 * 2 + 1) * 4, DMA_TO_DEVICE);
+-	clock = host->clock;
+-	host->clock = 0;
+-	sdhci_set_clock(host, clock);
+-}
 -
- 	dma_unmap_single(mmc_dev(host->mmc), host->align_addr,
- 		128 * 4, direction);
+ static int sdhci_set_power(struct sdhci_host *host, unsigned short power)
+ {
+ 	u8 pwr = 0;
+@@ -1453,7 +1441,8 @@ static void sdhci_do_set_ios(struct sdhci_host *host, struct mmc_ios *ios)
+ 		!(host->quirks2 & SDHCI_QUIRK2_PRESET_VALUE_BROKEN))
+ 		sdhci_enable_preset_value(host, false);
  
-@@ -2854,15 +2839,29 @@ int sdhci_add_host(struct sdhci_host *host)
- 		 * (128) and potentially one alignment transfer for
- 		 * each of those entries.
- 		 */
--		host->adma_desc = kmalloc((128 * 2 + 1) * 4, GFP_KERNEL);
-=+DO NOT APPLY+=		host->adma_desc = dma_alloc_coherent(mmc_dev(host->mmc),
-=+DO NOT APPLY+=						     ADMA_SIZE, &host->adma_addr,
-=+DO NOT APPLY+=						     GFP_KERNEL);
- 		host->align_buffer = kmalloc(128 * 4, GFP_KERNEL);
- 		if (!host->adma_desc || !host->align_buffer) {
--			kfree(host->adma_desc);
-=+DO NOT APPLY+=			dma_free_coherent(mmc_dev(host->mmc), ADMA_SIZE,
-=+DO NOT APPLY+=					  host->adma_desc, host->adma_addr);
- 			kfree(host->align_buffer);
- 			pr_warning("%s: Unable to allocate ADMA "
- 				"buffers. Falling back to standard DMA.\n",
- 				mmc_hostname(mmc));
- 			host->flags &= ~SDHCI_USE_ADMA;
-=+DO NOT APPLY+=			host->adma_desc = NULL;
-=+DO NOT APPLY+=			host->align_buffer = NULL;
-=+DO NOT APPLY+=		} else if (host->adma_addr & 3) {
-=+DO NOT APPLY+=			pr_warning("%s: unable to allocate aligned ADMA descriptor\n",
-=+DO NOT APPLY+=				   mmc_hostname(mmc));
-=+DO NOT APPLY+=			host->flags &= ~SDHCI_USE_ADMA;
-=+DO NOT APPLY+=			dma_free_coherent(mmc_dev(host->mmc), ADMA_SIZE,
-=+DO NOT APPLY+=					  host->adma_desc, host->adma_addr);
-=+DO NOT APPLY+=			kfree(host->align_buffer);
-=+DO NOT APPLY+=			host->adma_desc = NULL;
-=+DO NOT APPLY+=			host->align_buffer = NULL;
+-	sdhci_set_clock(host, ios->clock);
+=+DO NOT APPLY+=	if (!ios->clock || ios->clock != host->clock)
+=+DO NOT APPLY+=		sdhci_set_clock(host, ios->clock);
+ 
+ 	if (ios->power_mode == MMC_POWER_OFF)
+ 		vdd_bit = sdhci_set_power(host, -1);
+@@ -1521,7 +1510,7 @@ static void sdhci_do_set_ios(struct sdhci_host *host, struct mmc_ios *ios)
+ 			sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
+ 
+ 			/* Re-enable SD Clock */
+-			sdhci_update_clock(host);
+=+DO NOT APPLY+=			sdhci_set_clock(host, host->clock);
  		}
- 	}
  
-@@ -3339,7 +3338,9 @@ void sdhci_remove_host(struct sdhci_host *host, int dead)
- 		regulator_put(host->vqmmc);
- 	}
  
--	kfree(host->adma_desc);
-=+DO NOT APPLY+=	if (host->adma_desc)
-=+DO NOT APPLY+=		dma_free_coherent(mmc_dev(host->mmc), ADMA_SIZE,
-=+DO NOT APPLY+=				  host->adma_desc, host->adma_addr);
- 	kfree(host->align_buffer);
+@@ -1565,7 +1554,7 @@ static void sdhci_do_set_ios(struct sdhci_host *host, struct mmc_ios *ios)
+ 		}
  
- 	host->adma_desc = NULL;
+ 		/* Re-enable SD Clock */
+-		sdhci_update_clock(host);
+=+DO NOT APPLY+=		sdhci_set_clock(host, host->clock);
+ 	} else
+ 		sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
+ 
+@@ -2137,7 +2126,7 @@ static void sdhci_tasklet_finish(unsigned long param)
+ 		/* Some controllers need this kick or reset won't work here */
+ 		if (host->quirks & SDHCI_QUIRK_CLOCK_BEFORE_RESET)
+ 			/* This is to force an update */
+-			sdhci_update_clock(host);
+=+DO NOT APPLY+=			sdhci_set_clock(host, host->clock);
+ 
+ 		/* Spec says we should do both at the same time, but Ricoh
+ 		   controllers do not like that. */
 -- 
 1.8.3.1
 
