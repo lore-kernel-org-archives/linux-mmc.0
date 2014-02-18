@@ -1,131 +1,244 @@
-From: Russell King <rmk+kernel@arm.linux.org.uk>
-Subject: [PATCH RFC 22/31] mmc: sdhci-esdhc-imx: fix lockdep splat upon tuning
-Date: Tue, 18 Feb 2014 15:10:55 +0000
-Message-ID: <E1WFmJz-0006nK-Q0@rmk-PC.arm.linux.org.uk>
-References: <20140218150801.GD21483@n2100.arm.linux.org.uk>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from gw-1.arm.linux.org.uk ([78.32.30.217]:40536 "EHLO
-	pandora.arm.linux.org.uk" rhost-flags-OK-OK-OK-FAIL)
-	by vger.kernel.org with ESMTP id S1755528AbaBRPK7 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 18 Feb 2014 10:10:59 -0500
-In-Reply-To: <20140218150801.GD21483@n2100.arm.linux.org.uk>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: [PATCH v7 5/8] ARM: dts: sun7i: Add support for mmc
+Date: Tue, 18 Feb 2014 16:10:38 +0100
+Message-ID: <530377EE.8010909@redhat.com>
+References: <20140217095907.15040.81893.stgit@pagira.o2s.ch> <20140217100241.15040.24836.stgit@pagira.o2s.ch> <20140218142221.GJ3142@lukather>
+Reply-To: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: quoted-printable
+Return-path: <linux-sunxi+bncBDL4X2GMZUKRBAPQRWMAKGQEX53W6RA-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+In-Reply-To: <20140218142221.GJ3142@lukather>
+List-Post: <http://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Help: <http://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Archive: <http://groups.google.com/group/linux-sunxi>
+Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+List-Subscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Unsubscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+To: Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, =?ISO-8859-1?Q?Davi?= =?ISO-8859-1?Q?d_Lanzend=F6rfer?= <david.lanzendoerfer-Z7Kmv9EsliU@public.gmane.org>
+Cc: devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Laurent Pinchart <laurent.pinchart+renesas-ryLnwIuWjnjg/C1BVhZhaw@public.gmane.org>, Mike Turquette <mturquette-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Simon Baatz <gmbnomis-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, =?ISO-8859-1?Q?Emilio_L=F3pez?= <emilio-0Z03zUJReD5OxF6Tv1QG9Q@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, H Hartley Sweeten <hsweeten-3FF4nKcrg1dE2c76skzGb0EOCMrvLtNR@public.gmane.org>, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, Tejun Heo <tj-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Guennadi Liakhovetski <g.liakhovetski-Mmb7MZpHnFY@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org
-Cc: Chris Ball <chris@printf.net>
 
-=================================
-[ INFO: inconsistent lock state ]
-3.14.0-rc1+ #490 Not tainted
-=-DO NOT APPLY-=------------------------------
-inconsistent {IN-HARDIRQ-W} -> {HARDIRQ-ON-W} usage.
-kworker/u8:0/6 [HC0[0]:SC0[0]:HE1:SE1] takes:
- (&(&host->lock)->rlock#2){?.-...}, at: [<c04b57a4>] esdhc_send_tuning_cmd+0x104/0x14c
-{IN-HARDIRQ-W} state was registered at:
-  [<c00652fc>] mark_lock+0x15c/0x6f8
-  [<c0066354>] __lock_acquire+0xabc/0x1ca0
-  [<c0067ad8>] lock_acquire+0xa0/0x130
-  [<c0697a44>] _raw_spin_lock+0x34/0x44
-  [<c04b0dbc>] sdhci_irq+0x20/0xa40
-  [<c0071b1c>] handle_irq_event_percpu+0x74/0x284
-  [<c0071d70>] handle_irq_event+0x44/0x64
-  [<c0074db8>] handle_fasteoi_irq+0xac/0x140
-  [<c007147c>] generic_handle_irq+0x28/0x38
-  [<c000efd4>] handle_IRQ+0x40/0x98
-  [<c0008584>] gic_handle_irq+0x30/0x64
-  [<c0013144>] __irq_svc+0x44/0x58
-  [<c0028fc8>] irq_exit+0xc0/0x120
-  [<c000efd8>] handle_IRQ+0x44/0x98
-  [<c0008584>] gic_handle_irq+0x30/0x64
-  [<c0013144>] __irq_svc+0x44/0x58
-  [<c068f398>] printk+0x3c/0x44
-  [<c03191d0>] _regulator_get+0x1b4/0x1e0
-  [<c031924c>] regulator_get+0x18/0x1c
-  [<c049fbc4>] mmc_add_host+0x30/0x1c0
-  [<c04b2e10>] sdhci_add_host+0x804/0xbbc
-  [<c04b5318>] sdhci_esdhc_imx_probe+0x380/0x674
-  [<c036d530>] platform_drv_probe+0x20/0x50
-  [<c036b948>] driver_probe_device+0x120/0x234
-  [<c036baf8>] __driver_attach+0x9c/0xa0
-  [<c036a04c>] bus_for_each_dev+0x5c/0x90
-  [<c036b418>] driver_attach+0x24/0x28
-  [<c036b018>] bus_add_driver+0xe4/0x1d8
-  [<c036c1b0>] driver_register+0x80/0xfc
-  [<c036ce28>] __platform_driver_register+0x50/0x64
-  [<c093706c>] sdhci_esdhc_imx_driver_init+0x18/0x20
-  [<c0008834>] do_one_initcall+0x3c/0x164
-  [<c0901c94>] kernel_init_freeable+0x104/0x1d0
-  [<c068c45c>] kernel_init+0x10/0x118
-  [<c000e768>] ret_from_fork+0x14/0x2c
-irq event stamp: 5933
-hardirqs last  enabled at (5933): [<c069813c>] _raw_spin_unlock_irqrestore+0x38/0x4c
-hardirqs last disabled at (5932): [<c0697b04>] _raw_spin_lock_irqsave+0x24/0x60
-softirqs last  enabled at (5914): [<c0028ba0>] __do_softirq+0x260/0x360
-softirqs last disabled at (5909): [<c0028fc8>] irq_exit+0xc0/0x120
+Hi,
 
-other info that might help us debug this:
- Possible unsafe locking scenario:
+On 02/18/2014 03:22 PM, Maxime Ripard wrote:
+> On Mon, Feb 17, 2014 at 11:02:41AM +0100, David Lanzend=F6rfer wrote:
+>> Signed-off-by: David Lanzend=F6rfer <david.lanzendoerfer-Z7Kmv9EsliU@public.gmane.org>
+>> Signed-off-by: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+>> ---
+>>   arch/arm/boot/dts/sun7i-a20-cubieboard2.dts     |    8 +++
+>>   arch/arm/boot/dts/sun7i-a20-cubietruck.dts      |    8 +++
+>>   arch/arm/boot/dts/sun7i-a20-olinuxino-micro.dts |   23 +++++++++
+>>   arch/arm/boot/dts/sun7i-a20.dtsi                |   61 +++++++++++++++=
+++++++++
+>>   4 files changed, 100 insertions(+)
+>>
+>
+> I'd prefer to have three patches here:
+>     - One that add the controllers
+>     - One that add the pin muxing options
+>     - One that enable the controllers on the various boards.
+>
+>> diff --git a/arch/arm/boot/dts/sun7i-a20-cubieboard2.dts b/arch/arm/boot=
+/dts/sun7i-a20-cubieboard2.dts
+>> index 5c51cb8..ae800b6 100644
+>> --- a/arch/arm/boot/dts/sun7i-a20-cubieboard2.dts
+>> +++ b/arch/arm/boot/dts/sun7i-a20-cubieboard2.dts
+>> @@ -34,6 +34,14 @@
+>>   			};
+>>   		};
+>>
+>> +		mmc0: mmc@01c0f000 {
+>> +			pinctrl-names =3D "default", "default";
+>> +			pinctrl-0 =3D <&mmc0_pins_a>;
+>> +			pinctrl-1 =3D <&mmc0_cd_pin_reference_design>;
+>
+> This can be made a single pinctrl group, you don't need the pinctrl-1
+> stuff, it only complicates the node.
 
-       CPU0
-       ----
-  lock(&(&host->lock)->rlock#2);
-  <Interrupt>
-    lock(&(&host->lock)->rlock#2);
+Then how do we deal with boards which use a different gpio for card-detect =
+?
 
- *** DEADLOCK ***
+In that case we don't want to change the mux setting of the reference
+design cd pin. IOW I believe that having 2 separate pinctrl settings for
+this is the rigt thing todo. I would prefer using just mmc0_cd_pin_a instea=
+d
+of _reference_design though.
 
-2 locks held by kworker/u8:0/6:
- #0:  (kmmcd){.+.+.+}, at: [<c003d890>] process_one_work+0x134/0x4e8
- #1:  ((&(&host->detect)->work)){+.+.+.}, at: [<c003d890>] process_one_work+0x134/0x4e8
+Oh wait, you're probably talking about using:
+			pinctrl-0 =3D <&mmc0_pins_a>, <&mmc0_cd_pin_reference_design>;
 
-stack backtrace:
-CPU: 2 PID: 6 Comm: kworker/u8:0 Not tainted 3.14.0-rc1+ #490
-Workqueue: kmmcd mmc_rescan
-Backtrace:
-[<c00124a0>] (dump_backtrace) from [<c0012640>] (show_stack+0x18/0x1c)
-[<c0012628>] (show_stack) from [<c069164c>] (dump_stack+0x70/0x8c)
-[<c06915dc>] (dump_stack) from [<c068f080>] (print_usage_bug+0x274/0x2e4)
-[<c068ee0c>] (print_usage_bug) from [<c0065774>] (mark_lock+0x5d4/0x6f8)
-[<c00651a0>] (mark_lock) from [<c0065e6c>] (__lock_acquire+0x5d4/0x1ca0)
-[<c0065898>] (__lock_acquire) from [<c0067ad8>] (lock_acquire+0xa0/0x130)
-[<c0067a38>] (lock_acquire) from [<c0697a44>] (_raw_spin_lock+0x34/0x44)
-[<c0697a10>] (_raw_spin_lock) from [<c04b57a4>] (esdhc_send_tuning_cmd+0x104/0x14c)
-[<c04b56a0>] (esdhc_send_tuning_cmd) from [<c04b582c>] (esdhc_executing_tuning+0x40/0x100)
-[<c04b57ec>] (esdhc_executing_tuning) from [<c04afa54>] (sdhci_execute_tuning+0xcc/0x754)
-[<c04af988>] (sdhci_execute_tuning) from [<c04a4684>] (mmc_sd_init_card+0x65c/0x694)
-[<c04a4028>] (mmc_sd_init_card) from [<c04a48f0>] (mmc_attach_sd+0xb0/0x184)
-[<c04a4840>] (mmc_attach_sd) from [<c049eb28>] (mmc_rescan+0x26c/0x2e8)
-[<c049e8bc>] (mmc_rescan) from [<c003d914>] (process_one_work+0x1b8/0x4e8)
-[<c003d75c>] (process_one_work) from [<c003e090>] (worker_thread+0x13c/0x3f8)
-[<c003df54>] (worker_thread) from [<c00449bc>] (kthread+0xcc/0xe8)
-[<c00448f0>] (kthread) from [<c000e768>] (ret_from_fork+0x14/0x2c)
+Yes that would be better.
 
-Signed-off-by: Russell King <rmk+kernel@arm.linux.org.uk>
-=-DO NOT APPLY-=
- drivers/mmc/host/sdhci-esdhc-imx.c | 6 ++----
- 1 file changed, 2 insertions(+), 4 deletions(-)
+>
+>> +			cd-gpios =3D <&pio 7 1 0>; /* PH1 */
+>> +			status =3D "okay";
+>> +		};
+>> +
+>>   		pinctrl@01c20800 {
+>>   			led_pins_cubieboard2: led_pins@0 {
+>>   				allwinner,pins =3D "PH20", "PH21";
+>> diff --git a/arch/arm/boot/dts/sun7i-a20-cubietruck.dts b/arch/arm/boot/=
+dts/sun7i-a20-cubietruck.dts
+>> index f9dcb61..370cef84 100644
+>> --- a/arch/arm/boot/dts/sun7i-a20-cubietruck.dts
+>> +++ b/arch/arm/boot/dts/sun7i-a20-cubietruck.dts
+>> @@ -19,6 +19,14 @@
+>>   	compatible =3D "cubietech,cubietruck", "allwinner,sun7i-a20";
+>>
+>>   	soc@01c00000 {
+>> +		mmc0: mmc@01c0f000 {
+>> +			pinctrl-names =3D "default", "default";
+>> +			pinctrl-0 =3D <&mmc0_pins_a>;
+>> +			pinctrl-1 =3D <&mmc0_cd_pin_reference_design>;
+>> +			cd-gpios =3D <&pio 7 1 0>; /* PH1 */
+>> +			status =3D "okay";
+>> +		};
+>> +
+>>   		pinctrl@01c20800 {
+>>   			led_pins_cubietruck: led_pins@0 {
+>>   				allwinner,pins =3D "PH7", "PH11", "PH20", "PH21";
+>> diff --git a/arch/arm/boot/dts/sun7i-a20-olinuxino-micro.dts b/arch/arm/=
+boot/dts/sun7i-a20-olinuxino-micro.dts
+>> index ead3013..685ec06 100644
+>> --- a/arch/arm/boot/dts/sun7i-a20-olinuxino-micro.dts
+>> +++ b/arch/arm/boot/dts/sun7i-a20-olinuxino-micro.dts
+>> @@ -34,7 +34,30 @@
+>>   			};
+>>   		};
+>>
+>> +		mmc0: mmc@01c0f000 {
+>> +			pinctrl-names =3D "default", "default";
+>> +			pinctrl-0 =3D <&mmc0_pins_a>;
+>> +			pinctrl-1 =3D <&mmc0_cd_pin_reference_design>;
+>> +			cd-gpios =3D <&pio 7 1 0>; /* PH1 */
+>> +			status =3D "okay";
+>> +		};
+>> +
+>> +		mmc3: mmc@01c12000 {
+>> +			pinctrl-names =3D "default", "default";
+>> +			pinctrl-0 =3D <&mmc3_pins_a>;
+>> +			pinctrl-1 =3D <&mmc3_cd_pin_olinuxinom>;
+>> +			cd-gpios =3D <&pio 7 11 0>; /* PH11 */
+>> +			status =3D "okay";
+>> +		};
+>> +
+>>   		pinctrl@01c20800 {
+>> +			mmc3_cd_pin_olinuxinom: mmc3_cd_pin@0 {
+>> +				allwinner,pins =3D "PH11";
+>> +				allwinner,function =3D "gpio_in";
+>> +				allwinner,drive =3D <0>;
+>> +				allwinner,pull =3D <1>;
+>> +			};
+>> +
+>>   			led_pins_olinuxino: led_pins@0 {
+>>   				allwinner,pins =3D "PH2";
+>>   				allwinner,function =3D "gpio_out";
+>> diff --git a/arch/arm/boot/dts/sun7i-a20.dtsi b/arch/arm/boot/dts/sun7i-=
+a20.dtsi
+>> index 9ff0948..5b55414 100644
+>> --- a/arch/arm/boot/dts/sun7i-a20.dtsi
+>> +++ b/arch/arm/boot/dts/sun7i-a20.dtsi
+>> @@ -355,6 +355,46 @@
+>>   			#size-cells =3D <0>;
+>>   		};
+>>
+>> +		mmc0: mmc@01c0f000 {
+>> +			compatible =3D "allwinner,sun5i-a13-mmc";
+>> +			reg =3D <0x01c0f000 0x1000>;
+>> +			clocks =3D <&ahb_gates 8>, <&mmc0_clk>;
+>> +			clock-names =3D "ahb", "mod";
+>> +			interrupts =3D <0 32 4>;
+>> +			bus-width =3D <4>;
+>
+> This belongs to the board, the controller itself is able to handle
+> several bus width.
 
-diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-index a9a20c856b0b..5ad4883155a5 100644
-=-DO NOT APPLY-= a/drivers/mmc/host/sdhci-esdhc-imx.c
-=+DO NOT APPLY+= b/drivers/mmc/host/sdhci-esdhc-imx.c
-@@ -736,14 +736,12 @@ static int esdhc_send_tuning_cmd(struct sdhci_host *host, u32 opcode,
- 	mrq.done = esdhc_request_done;
- 	init_completion(&(mrq.completion));
- 
--	disable_irq(host->irq);
--	spin_lock(&host->lock);
-=+DO NOT APPLY+=	spin_lock_irq(&host->lock);
- 	host->mrq = &mrq;
- 
- 	sdhci_send_command(host, mrq.cmd);
- 
--	spin_unlock(&host->lock);
--	enable_irq(host->irq);
-=+DO NOT APPLY+=	spin_unlock_irq(&host->lock);
- 
- 	wait_for_completion(&mrq.completion);
- 
--- 
-1.8.3.1
+I believe that providing some form of default in the dtsi makes sense
+here and all boards we've seen sofar always use 4 bits, we can always
+override this from the dts file itself.
 
+>
+>> +			status =3D "disabled";
+>> +		};
+>> +
+>> +		mmc1: mmc@01c10000 {
+>> +			compatible =3D "allwinner,sun5i-a13-mmc";
+>> +			reg =3D <0x01c10000 0x1000>;
+>> +			clocks =3D <&ahb_gates 9>, <&mmc1_clk>;
+>> +			clock-names =3D "ahb", "mod";
+>> +			interrupts =3D <0 33 4>;
+>> +			bus-width =3D <4>;
+>> +			status =3D "disabled";
+>> +		};
+>> +
+>> +		mmc2: mmc@01c11000 {
+>> +			compatible =3D "allwinner,sun5i-a13-mmc";
+>> +			reg =3D <0x01c11000 0x1000>;
+>> +			clocks =3D <&ahb_gates 10>, <&mmc2_clk>;
+>> +			clock-names =3D "ahb", "mod";
+>> +			interrupts =3D <0 34 4>;
+>> +			bus-width =3D <4>;
+>> +			status =3D "disabled";
+>> +		};
+>> +
+>> +		mmc3: mmc@01c12000 {
+>> +			compatible =3D "allwinner,sun5i-a13-mmc";
+>> +			reg =3D <0x01c12000 0x1000>;
+>> +			clocks =3D <&ahb_gates 11>, <&mmc3_clk>;
+>> +			clock-names =3D "ahb", "mod";
+>> +			interrupts =3D <0 35 4>;
+>> +			bus-width =3D <4>;
+>> +			status =3D "disabled";
+>> +		};
+>> +
+>>   		pio: pinctrl@01c20800 {
+>>   			compatible =3D "allwinner,sun7i-a20-pinctrl";
+>>   			reg =3D <0x01c20800 0x400>;
+>> @@ -432,6 +472,27 @@
+>>   				allwinner,drive =3D <0>;
+>>   				allwinner,pull =3D <0>;
+>>   			};
+>> +
+>> +			mmc0_pins_a: mmc0@0 {
+>> +				allwinner,pins =3D "PF0","PF1","PF2","PF3","PF4","PF5";
+>> +				allwinner,function =3D "mmc0";
+>> +				allwinner,drive =3D <3>;
+>> +				allwinner,pull =3D <0>;
+>> +			};
+>> +
+>> +			mmc0_cd_pin_reference_design: mmc0_cd_pin@0 {
+>> +				allwinner,pins =3D "PH1";
+>> +				allwinner,function =3D "gpio_in";
+>> +				allwinner,drive =3D <0>;
+>> +				allwinner,pull =3D <1>;
+>> +			};
+>> +
+>> +			mmc3_pins_a: mmc3@0 {
+>> +				allwinner,pins =3D "PI4","PI5","PI6","PI7","PI8","PI9";
+>> +				allwinner,function =3D "mmc3";
+>> +				allwinner,drive =3D <3>;
+>> +				allwinner,pull =3D <0>;
+>> +			};
+>>   		};
+>>
+>>   		timer@01c20c00 {
+>>
+>
+> Looks good otherwise.
+>
+> Thanks!
+> Maxime
+>
+
+
+Regards,
+
+Hans
+
+--=20
+You received this message because you are subscribed to the Google Groups "=
+linux-sunxi" group.
+To unsubscribe from this group and stop receiving emails from it, send an e=
+mail to linux-sunxi+unsubscribe-/JYPxA39Uh5TLH3MbocFF+G/Ez6ZCGd0@public.gmane.org
+For more options, visit https://groups.google.com/groups/opt_out.
