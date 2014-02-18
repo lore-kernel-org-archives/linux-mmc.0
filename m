@@ -1,105 +1,130 @@
 From: Russell King <rmk+kernel@arm.linux.org.uk>
-Subject: [PATCH RFC 20/31] mmc: sdhci-esdhc-imx: avoid DMA to kernel stack
-Date: Tue, 18 Feb 2014 15:10:45 +0000
-Message-ID: <E1WFmJp-0006nC-Iv@rmk-PC.arm.linux.org.uk>
+Subject: [PATCH RFC 22/31] mmc: sdhci-esdhc-imx: fix lockdep splat upon tuning
+Date: Tue, 18 Feb 2014 15:10:55 +0000
+Message-ID: <E1WFmJz-0006nK-Q0@rmk-PC.arm.linux.org.uk>
 References: <20140218150801.GD21483@n2100.arm.linux.org.uk>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from gw-1.arm.linux.org.uk ([78.32.30.217]:40525 "EHLO
+Received: from gw-1.arm.linux.org.uk ([78.32.30.217]:40536 "EHLO
 	pandora.arm.linux.org.uk" rhost-flags-OK-OK-OK-FAIL)
-	by vger.kernel.org with ESMTP id S1755560AbaBRPKt (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 18 Feb 2014 10:10:49 -0500
+	by vger.kernel.org with ESMTP id S1755528AbaBRPK7 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 18 Feb 2014 10:10:59 -0500
 In-Reply-To: <20140218150801.GD21483@n2100.arm.linux.org.uk>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org
 Cc: Chris Ball <chris@printf.net>
 
-sdhci-esdhc-imx tries to DMA to the kernel stack when tuning the
-interface, which causes dma-debug to complain.  Fix this by kmallocing
-a buffer to hold the received tuning pattern.
+=================================
+[ INFO: inconsistent lock state ]
+3.14.0-rc1+ #490 Not tainted
+=-DO NOT APPLY-=------------------------------
+inconsistent {IN-HARDIRQ-W} -> {HARDIRQ-ON-W} usage.
+kworker/u8:0/6 [HC0[0]:SC0[0]:HE1:SE1] takes:
+ (&(&host->lock)->rlock#2){?.-...}, at: [<c04b57a4>] esdhc_send_tuning_cmd+0x104/0x14c
+{IN-HARDIRQ-W} state was registered at:
+  [<c00652fc>] mark_lock+0x15c/0x6f8
+  [<c0066354>] __lock_acquire+0xabc/0x1ca0
+  [<c0067ad8>] lock_acquire+0xa0/0x130
+  [<c0697a44>] _raw_spin_lock+0x34/0x44
+  [<c04b0dbc>] sdhci_irq+0x20/0xa40
+  [<c0071b1c>] handle_irq_event_percpu+0x74/0x284
+  [<c0071d70>] handle_irq_event+0x44/0x64
+  [<c0074db8>] handle_fasteoi_irq+0xac/0x140
+  [<c007147c>] generic_handle_irq+0x28/0x38
+  [<c000efd4>] handle_IRQ+0x40/0x98
+  [<c0008584>] gic_handle_irq+0x30/0x64
+  [<c0013144>] __irq_svc+0x44/0x58
+  [<c0028fc8>] irq_exit+0xc0/0x120
+  [<c000efd8>] handle_IRQ+0x44/0x98
+  [<c0008584>] gic_handle_irq+0x30/0x64
+  [<c0013144>] __irq_svc+0x44/0x58
+  [<c068f398>] printk+0x3c/0x44
+  [<c03191d0>] _regulator_get+0x1b4/0x1e0
+  [<c031924c>] regulator_get+0x18/0x1c
+  [<c049fbc4>] mmc_add_host+0x30/0x1c0
+  [<c04b2e10>] sdhci_add_host+0x804/0xbbc
+  [<c04b5318>] sdhci_esdhc_imx_probe+0x380/0x674
+  [<c036d530>] platform_drv_probe+0x20/0x50
+  [<c036b948>] driver_probe_device+0x120/0x234
+  [<c036baf8>] __driver_attach+0x9c/0xa0
+  [<c036a04c>] bus_for_each_dev+0x5c/0x90
+  [<c036b418>] driver_attach+0x24/0x28
+  [<c036b018>] bus_add_driver+0xe4/0x1d8
+  [<c036c1b0>] driver_register+0x80/0xfc
+  [<c036ce28>] __platform_driver_register+0x50/0x64
+  [<c093706c>] sdhci_esdhc_imx_driver_init+0x18/0x20
+  [<c0008834>] do_one_initcall+0x3c/0x164
+  [<c0901c94>] kernel_init_freeable+0x104/0x1d0
+  [<c068c45c>] kernel_init+0x10/0x118
+  [<c000e768>] ret_from_fork+0x14/0x2c
+irq event stamp: 5933
+hardirqs last  enabled at (5933): [<c069813c>] _raw_spin_unlock_irqrestore+0x38/0x4c
+hardirqs last disabled at (5932): [<c0697b04>] _raw_spin_lock_irqsave+0x24/0x60
+softirqs last  enabled at (5914): [<c0028ba0>] __do_softirq+0x260/0x360
+softirqs last disabled at (5909): [<c0028fc8>] irq_exit+0xc0/0x120
+
+other info that might help us debug this:
+ Possible unsafe locking scenario:
+
+       CPU0
+       ----
+  lock(&(&host->lock)->rlock#2);
+  <Interrupt>
+    lock(&(&host->lock)->rlock#2);
+
+ *** DEADLOCK ***
+
+2 locks held by kworker/u8:0/6:
+ #0:  (kmmcd){.+.+.+}, at: [<c003d890>] process_one_work+0x134/0x4e8
+ #1:  ((&(&host->detect)->work)){+.+.+.}, at: [<c003d890>] process_one_work+0x134/0x4e8
+
+stack backtrace:
+CPU: 2 PID: 6 Comm: kworker/u8:0 Not tainted 3.14.0-rc1+ #490
+Workqueue: kmmcd mmc_rescan
+Backtrace:
+[<c00124a0>] (dump_backtrace) from [<c0012640>] (show_stack+0x18/0x1c)
+[<c0012628>] (show_stack) from [<c069164c>] (dump_stack+0x70/0x8c)
+[<c06915dc>] (dump_stack) from [<c068f080>] (print_usage_bug+0x274/0x2e4)
+[<c068ee0c>] (print_usage_bug) from [<c0065774>] (mark_lock+0x5d4/0x6f8)
+[<c00651a0>] (mark_lock) from [<c0065e6c>] (__lock_acquire+0x5d4/0x1ca0)
+[<c0065898>] (__lock_acquire) from [<c0067ad8>] (lock_acquire+0xa0/0x130)
+[<c0067a38>] (lock_acquire) from [<c0697a44>] (_raw_spin_lock+0x34/0x44)
+[<c0697a10>] (_raw_spin_lock) from [<c04b57a4>] (esdhc_send_tuning_cmd+0x104/0x14c)
+[<c04b56a0>] (esdhc_send_tuning_cmd) from [<c04b582c>] (esdhc_executing_tuning+0x40/0x100)
+[<c04b57ec>] (esdhc_executing_tuning) from [<c04afa54>] (sdhci_execute_tuning+0xcc/0x754)
+[<c04af988>] (sdhci_execute_tuning) from [<c04a4684>] (mmc_sd_init_card+0x65c/0x694)
+[<c04a4028>] (mmc_sd_init_card) from [<c04a48f0>] (mmc_attach_sd+0xb0/0x184)
+[<c04a4840>] (mmc_attach_sd) from [<c049eb28>] (mmc_rescan+0x26c/0x2e8)
+[<c049e8bc>] (mmc_rescan) from [<c003d914>] (process_one_work+0x1b8/0x4e8)
+[<c003d75c>] (process_one_work) from [<c003e090>] (worker_thread+0x13c/0x3f8)
+[<c003df54>] (worker_thread) from [<c00449bc>] (kthread+0xcc/0xe8)
+[<c00448f0>] (kthread) from [<c000e768>] (ret_from_fork+0x14/0x2c)
 
 Signed-off-by: Russell King <rmk+kernel@arm.linux.org.uk>
 =-DO NOT APPLY-=
- drivers/mmc/host/sdhci-esdhc-imx.c | 25 ++++++++++++++++---------
- 1 file changed, 16 insertions(+), 9 deletions(-)
+ drivers/mmc/host/sdhci-esdhc-imx.c | 6 ++----
+ 1 file changed, 2 insertions(+), 4 deletions(-)
 
 diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-index ce8939ff97a4..5acfe2fc4fe0 100644
+index a9a20c856b0b..5ad4883155a5 100644
 =-DO NOT APPLY-= a/drivers/mmc/host/sdhci-esdhc-imx.c
 =+DO NOT APPLY+= b/drivers/mmc/host/sdhci-esdhc-imx.c
-@@ -711,13 +711,12 @@ static void esdhc_request_done(struct mmc_request *mrq)
- 	complete(&mrq->completion);
- }
+@@ -736,14 +736,12 @@ static int esdhc_send_tuning_cmd(struct sdhci_host *host, u32 opcode,
+ 	mrq.done = esdhc_request_done;
+ 	init_completion(&(mrq.completion));
  
--static int esdhc_send_tuning_cmd(struct sdhci_host *host, u32 opcode)
-=+DO NOT APPLY+=static int esdhc_send_tuning_cmd(struct sdhci_host *host, u32 opcode,
-=+DO NOT APPLY+=				 struct scatterlist *sg)
- {
- 	struct mmc_command cmd = {0};
- 	struct mmc_request mrq = {NULL};
- 	struct mmc_data data = {0};
--	struct scatterlist sg;
--	char tuning_pattern[ESDHC_TUNING_BLOCK_PATTERN_LEN];
+-	disable_irq(host->irq);
+-	spin_lock(&host->lock);
+=+DO NOT APPLY+=	spin_lock_irq(&host->lock);
+ 	host->mrq = &mrq;
  
- 	cmd.opcode = opcode;
- 	cmd.arg = 0;
-@@ -726,11 +725,9 @@ static int esdhc_send_tuning_cmd(struct sdhci_host *host, u32 opcode)
- 	data.blksz = ESDHC_TUNING_BLOCK_PATTERN_LEN;
- 	data.blocks = 1;
- 	data.flags = MMC_DATA_READ;
--	data.sg = &sg;
-=+DO NOT APPLY+=	data.sg = sg;
- 	data.sg_len = 1;
+ 	sdhci_send_command(host, mrq.cmd);
  
--	sg_init_one(&sg, tuning_pattern, sizeof(tuning_pattern));
--
- 	mrq.cmd = &cmd;
- 	mrq.cmd->mrq = &mrq;
- 	mrq.data = &data;
-@@ -770,13 +767,21 @@ static void esdhc_post_tuning(struct sdhci_host *host)
+-	spin_unlock(&host->lock);
+-	enable_irq(host->irq);
+=+DO NOT APPLY+=	spin_unlock_irq(&host->lock);
  
- static int esdhc_executing_tuning(struct sdhci_host *host, u32 opcode)
- {
-=+DO NOT APPLY+=	struct scatterlist sg;
-=+DO NOT APPLY+=	char *tuning_pattern;
- 	int min, max, avg, ret;
- 
-=+DO NOT APPLY+=	tuning_pattern = kmalloc(ESDHC_TUNING_BLOCK_PATTERN_LEN, GFP_KERNEL);
-=+DO NOT APPLY+=	if (!tuning_pattern)
-=+DO NOT APPLY+=		return -ENOMEM;
-=+DO NOT APPLY+=
-=+DO NOT APPLY+=	sg_init_one(&sg, tuning_pattern, ESDHC_TUNING_BLOCK_PATTERN_LEN);
-=+DO NOT APPLY+=
- 	/* find the mininum delay first which can pass tuning */
- 	min = ESDHC_TUNE_CTRL_MIN;
- 	while (min < ESDHC_TUNE_CTRL_MAX) {
- 		esdhc_prepare_tuning(host, min);
--		if (!esdhc_send_tuning_cmd(host, opcode))
-=+DO NOT APPLY+=		if (!esdhc_send_tuning_cmd(host, opcode, &sg))
- 			break;
- 		min += ESDHC_TUNE_CTRL_STEP;
- 	}
-@@ -785,7 +790,7 @@ static int esdhc_executing_tuning(struct sdhci_host *host, u32 opcode)
- 	max = min + ESDHC_TUNE_CTRL_STEP;
- 	while (max < ESDHC_TUNE_CTRL_MAX) {
- 		esdhc_prepare_tuning(host, max);
--		if (esdhc_send_tuning_cmd(host, opcode)) {
-=+DO NOT APPLY+=		if (esdhc_send_tuning_cmd(host, opcode, &sg)) {
- 			max -= ESDHC_TUNE_CTRL_STEP;
- 			break;
- 		}
-@@ -795,9 +800,11 @@ static int esdhc_executing_tuning(struct sdhci_host *host, u32 opcode)
- 	/* use average delay to get the best timing */
- 	avg = (min + max) / 2;
- 	esdhc_prepare_tuning(host, avg);
--	ret = esdhc_send_tuning_cmd(host, opcode);
-=+DO NOT APPLY+=	ret = esdhc_send_tuning_cmd(host, opcode, &sg);
- 	esdhc_post_tuning(host);
- 
-=+DO NOT APPLY+=	kfree(tuning_pattern);
-=+DO NOT APPLY+=
- 	dev_dbg(mmc_dev(host->mmc), "tunning %s at 0x%x ret %d\n",
- 		ret ? "failed" : "passed", avg, ret);
+ 	wait_for_completion(&mrq.completion);
  
 -- 
 1.8.3.1
