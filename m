@@ -1,134 +1,68 @@
-From: Balaji T K <balajitk@ti.com>
-Subject: Re: [PATCH V2 1/2] mmc: omap_hsmmc: Add support for quirky omap3
- hsmmc controller
-Date: Tue, 18 Feb 2014 20:06:45 +0530
-Message-ID: <53036FFD.1040008@ti.com>
-References: <1392356749-32091-1-git-send-email-nm@ti.com>
- <1392356749-32091-2-git-send-email-nm@ti.com>
+From: Russell King - ARM Linux <linux@arm.linux.org.uk>
+Subject: [PATCH RFC 00/31] SDHCI and SDIO IRQ improvements
+Date: Tue, 18 Feb 2014 15:08:01 +0000
+Message-ID: <20140218150801.GD21483@n2100.arm.linux.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"; Format="flowed"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <1392356749-32091-2-git-send-email-nm@ti.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Nishanth Menon <nm@ti.com>
-Cc: devicetree@vger.kernel.org, linux-doc@vger.kernel.org, Tony Lindgren <tony@atomide.com>, linux-mmc@vger.kernel.org, Chris Ball <chris@printf.net>, Felipe Balbi <balbi@ti.com>, linux-kernel@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from gw-1.arm.linux.org.uk ([78.32.30.217]:40420 "EHLO
+	pandora.arm.linux.org.uk" rhost-flags-OK-OK-OK-FAIL)
+	by vger.kernel.org with ESMTP id S1755610AbaBRPIO (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 18 Feb 2014 10:08:14 -0500
+Content-Disposition: inline
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org
+Cc: Anton Vorontsov <anton@enomsg.org>, Barry Song <baohua@kernel.org>, Ben Dooks <ben-linux@fluff.org>, Chris Ball <chris@printf.net>, linuxppc-dev@lists.ozlabs.org, linux-tegra@vger.kernel.org, Michal Simek <michal.simek@xilinx.com>, spear-devel@list.st.com, Stephen Warren <swarren@wwwdotorg.org>, Thierry Reding <thierry.reding@gmail.com>, Thomas Gleixner <tglx@linutronix.de>, Viresh Kumar <viresh.linux@gmail.com>
 
-On Friday 14 February 2014 11:15 AM, Nishanth Menon wrote:
-> When device is booted using devicetree, platforms impacted by Erratum
-> 2.1.1.128 is not detected easily in the mmc driver. This erratum
-> indicates that the module cannot do multi-block transfers. Platforms
-> such as LDP which use OMAP3 ES revision prior to ES3.0 are impacted by
-> this.
->
-> Provide a new compatible property "ti,omap3-pre-es3-hsmmc" to allow
-> driver to determine if driver needs to implement quirks associated
-> with the specific module version (primarily because the IP revision
-> information is not sufficient for the same).
->
-> Signed-off-by: Nishanth Menon <nm@ti.com>
+The following patch series is targetted at two things - fixing the SDIO
+interrupt handling, and fixing problems with the sdhci driver.
 
-looks good to me
-Acked-by: Balaji T K <balajitk@ti.com>
+- the first two patches from Thomas Gleixner provide genirq support to
+  allow us to fix the SDIO interrupt handling in a graceful manner.
+- patch 3 adds support for avoiding the buggy sdio_irq thread - the
+  problem is described in that commit.  Other solutions were explored,
+  but this is the one which was settled on after discussions between
+  Thomas, scheduler people and myself.
+- patches 4 to 7 update sdhci to use a genirq to deal with the threaded
+  part of the interrupts.
+- patch 8 allows card interrupts to be received from a SDIO card while
+  runtime suspended.  Without this patch, Wifi cards attached to a
+  kernel with runtime PM support built in totally fail to work.  This
+  allows them to work.  Tested in 4-bit mode.
+- patches 9 onwards are cleanups and fixes to the sdhci code.
 
-> ---
-> Changes since v1:
-> 	- new compatible flag as suggested by Tony which contains
-> 	  the relevant controller flag to work around the erratum
->
-> V1: https://patchwork.kernel.org/patch/3514851/
->
->   .../devicetree/bindings/mmc/ti-omap-hsmmc.txt      |    1 +
->   drivers/mmc/host/omap_hsmmc.c                      |   26 +++++++++++++++++---
->   2 files changed, 23 insertions(+), 4 deletions(-)
->
-> diff --git a/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt b/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
-> index 8c8908a..ce80561 100644
-> --- a/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
-> +++ b/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
-> @@ -10,6 +10,7 @@ Required properties:
->   - compatible:
->    Should be "ti,omap2-hsmmc", for OMAP2 controllers
->    Should be "ti,omap3-hsmmc", for OMAP3 controllers
-> + Should be "ti,omap3-pre-es3-hsmmc" for OMAP3 controllers pre ES3.0
->    Should be "ti,omap4-hsmmc", for OMAP4 controllers
->   - ti,hwmods: Must be "mmc<n>", n is controller instance starting 1
->
-> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-> index 575f9cc..390f421 100644
-> --- a/drivers/mmc/host/omap_hsmmc.c
-> +++ b/drivers/mmc/host/omap_hsmmc.c
-> @@ -192,6 +192,11 @@ struct omap_hsmmc_host {
->   	struct	omap_mmc_platform_data	*pdata;
->   };
->
-> +struct omap_mmc_of_data {
-> +	u32 reg_offset;
-> +	u8 controller_flags;
-> +};
-> +
->   static int omap_hsmmc_card_detect(struct device *dev, int slot)
->   {
->   	struct omap_hsmmc_host *host = dev_get_drvdata(dev);
-> @@ -1678,18 +1683,29 @@ static void omap_hsmmc_debugfs(struct mmc_host *mmc)
->   #endif
->
->   #ifdef CONFIG_OF
-> -static u16 omap4_reg_offset = 0x100;
-> +static const struct omap_mmc_of_data omap3_pre_es3_mmc_of_data = {
-> +	/* See 35xx errata 2.1.1.128 in SPRZ278F */
-> +	.controller_flags = OMAP_HSMMC_BROKEN_MULTIBLOCK_READ,
-> +};
-> +
-> +static const struct omap_mmc_of_data omap4_mmc_of_data = {
-> +	.reg_offset = 0x100,
-> +};
->
->   static const struct of_device_id omap_mmc_of_match[] = {
->   	{
->   		.compatible = "ti,omap2-hsmmc",
->   	},
->   	{
-> +		.compatible = "ti,omap3-pre-es3-hsmmc",
-> +		.data = &omap3_pre_es3_mmc_of_data,
-> +	},
-> +	{
->   		.compatible = "ti,omap3-hsmmc",
->   	},
->   	{
->   		.compatible = "ti,omap4-hsmmc",
-> -		.data = &omap4_reg_offset,
-> +		.data = &omap4_mmc_of_data,
->   	},
->   	{},
->   };
-> @@ -1759,6 +1775,7 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
->   	dma_cap_mask_t mask;
->   	unsigned tx_req, rx_req;
->   	struct pinctrl *pinctrl;
-> +	const struct omap_mmc_of_data *data;
->
->   	match = of_match_device(of_match_ptr(omap_mmc_of_match), &pdev->dev);
->   	if (match) {
-> @@ -1768,8 +1785,9 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
->   			return PTR_ERR(pdata);
->
->   		if (match->data) {
-> -			const u16 *offsetp = match->data;
-> -			pdata->reg_offset = *offsetp;
-> +			data = match->data;
-> +			pdata->reg_offset = data->reg_offset;
-> +			pdata->controller_flags |= data->controller_flags;
->   		}
->   	}
->
->
+ drivers/mmc/core/sdio_irq.c        |  41 ++-
+ drivers/mmc/host/sdhci-acpi.c      |   8 +
+ drivers/mmc/host/sdhci-bcm-kona.c  |   4 +
+ drivers/mmc/host/sdhci-bcm2835.c   |   4 +
+ drivers/mmc/host/sdhci-cns3xxx.c   |  13 +-
+ drivers/mmc/host/sdhci-dove.c      |   4 +
+ drivers/mmc/host/sdhci-esdhc-imx.c |  82 ++---
+ drivers/mmc/host/sdhci-esdhc.h     |   4 +-
+ drivers/mmc/host/sdhci-of-arasan.c |   4 +
+ drivers/mmc/host/sdhci-of-esdhc.c  |  70 +++--
+ drivers/mmc/host/sdhci-of-hlwd.c   |   4 +
+ drivers/mmc/host/sdhci-pci.c       |   9 +-
+ drivers/mmc/host/sdhci-pltfm.c     |   4 +
+ drivers/mmc/host/sdhci-pxav2.c     |  14 +-
+ drivers/mmc/host/sdhci-pxav3.c     |  13 +-
+ drivers/mmc/host/sdhci-s3c.c       |  36 ++-
+ drivers/mmc/host/sdhci-sirf.c      |   4 +
+ drivers/mmc/host/sdhci-spear.c     |   5 +-
+ drivers/mmc/host/sdhci-tegra.c     |  27 +-
+ drivers/mmc/host/sdhci.c           | 606 ++++++++++++++++++-------------------
+ drivers/mmc/host/sdhci.h           |  20 +-
+ include/linux/hardirq.h            |   1 +
+ include/linux/interrupt.h          |   1 +
+ include/linux/mmc/host.h           |   3 +
+ include/linux/mmc/sdhci.h          |  14 +-
+ kernel/irq/handle.c                |   4 +-
+ kernel/irq/internals.h             |   1 +
+ kernel/irq/manage.c                |  94 ++++--
+ 28 files changed, 608 insertions(+), 486 deletions(-)
+
+-- 
+FTTC broadband for 0.8mile line: 5.8Mbps down 500kbps up.  Estimation
+in database were 13.1 to 19Mbit for a good line, about 7.5+ for a bad.
+Estimate before purchase was "up to 13.2Mbit".
