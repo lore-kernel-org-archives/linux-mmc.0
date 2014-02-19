@@ -1,109 +1,61 @@
-From: Viresh Kumar <viresh.kumar@linaro.org>
-Subject: Re: [PATCH RFC 07/31] mmc: sdhci: push card_tasklet into threaded irq handler
-Date: Wed, 19 Feb 2014 16:25:12 +0530
-Message-ID: <CAKohpokBf_fJhiUJ53c+=6v+GMcjaDKd7+fwib99=sLMdkjQQQ@mail.gmail.com>
-References: <20140218150801.GD21483@n2100.arm.linux.org.uk>
-	<E1WFmIk-0006m0-Ah@rmk-PC.arm.linux.org.uk>
-	<20140218175703.GJ21483@n2100.arm.linux.org.uk>
-	<CAKohpoknX=acZHJeydwv6XRKFHTD4DM84xfCJ=56NrRfJnBOOA@mail.gmail.com>
-	<20140219094322.GR21483@n2100.arm.linux.org.uk>
-	<CAKohpomfHxWBF5m4D6iqod4a3gw2BU1W6nXMkEOg+YA+izYr=g@mail.gmail.com>
-	<20140219095212.GT21483@n2100.arm.linux.org.uk>
-	<CAKohpo=ZrLRsTyCH86x7TbGE2XJnpXNb1ZDvYyzDUupAwTtS9Q@mail.gmail.com>
-	<20140219105011.GU21483@n2100.arm.linux.org.uk>
+From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH 01/17] amba: Let runtime PM callbacks be available for CONFIG_PM
+Date: Wed, 19 Feb 2014 12:40:39 +0100
+Message-ID: <CAPDyKFqaS1H0vT8KJgmhm35X4dB9dUHsqMXee9Eg3V3t6Dn+uQ@mail.gmail.com>
+References: <1391529538-21685-1-git-send-email-ulf.hansson@linaro.org>
+	<1391529538-21685-2-git-send-email-ulf.hansson@linaro.org>
+	<20140219094037.GQ21483@n2100.arm.linux.org.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ob0-f169.google.com ([209.85.214.169]:42975 "EHLO
-	mail-ob0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751126AbaBSKzN (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 19 Feb 2014 05:55:13 -0500
-Received: by mail-ob0-f169.google.com with SMTP id wo20so208742obc.28
-        for <linux-mmc@vger.kernel.org>; Wed, 19 Feb 2014 02:55:12 -0800 (PST)
-In-Reply-To: <20140219105011.GU21483@n2100.arm.linux.org.uk>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-spi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20140219094037.GQ21483-l+eeeJia6m9vn6HldHNs0ANdhmdF6hFW@public.gmane.org>
+Sender: linux-spi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Russell King - ARM Linux <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>
+Cc: "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Alessandro Rubini <rubini-9wsNiZum9E8@public.gmane.org>, Linus Walleij <linus.walleij-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Wolfram Sang <wsa-z923LK4zBo2bacvFa/9K2g@public.gmane.org>, Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, Mark Brown <broonie-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-spi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-spi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Cc: Pratyush Anand <pratyush.anand@st.com>, spear-devel <spear-devel@list.st.com>, Mohit KUMAR <Mohit.KUMAR@st.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, linux-mmc@vger.kernel.org, Chris Ball <chris@printf.net>
 
-Thanks for removing my ST email id from this mail, I was about to do that
-this time :)
-
-On 19 February 2014 16:20, Russell King - ARM Linux
-<linux@arm.linux.org.uk> wrote:
-> On Wed, Feb 19, 2014 at 03:39:35PM +0530, Viresh Kumar wrote:
-
->> I didn't get that completely here.. sorry completely out of touch on
->> this driver.
->> The power GPIO here is controlling the power to card socket. Once the card
->> is inserted, we need to enable power to the socket so that controller can
->> read back information from card.
+On 19 February 2014 10:40, Russell King - ARM Linux
+<linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org> wrote:
+> On Tue, Feb 04, 2014 at 04:58:42PM +0100, Ulf Hansson wrote:
+>> Convert to the SET_PM_RUNTIME_PM macro while defining the runtime PM
+>> callbacks. This means the callbacks becomes available for both
+>> CONFIG_PM_SLEEP and CONFIG_PM_RUNTIME, which is needed by drivers and
+>> power domains.
 >
-> Yes, and how is this different from any other implementation where power
-> to the socket is controlled?
+> This patch is wrong, because it causes build errors:
 >
-> This is what happens:
-> - You detect a card insertion/removal event
-> - You tell the mmc core about it via mmc_detect_change()
-> - The mmc core looks at the current state, and if the socket is powered down,
->   it first goes through the power up sequence:
->   - Apply power to the socket
->     (a call to set_ios with MMC_POWER_UP and zero clock)
->   - Apply clock to the socket
->     (a call to set_ios with MMC_POWER_ON and non-zero clock)
->   - Wait 74 clock cycles (as required by the spec)
-> - Start the detection by sending commands to the cards
-> - If no cards are detected, power down the socket
-
-Okay, that's all we need then..
-
->> And this set_ios callback is not available to drivers above sdhci.c, i.e.
->> glues like sdhci-pltfm or spear.. so, how we can we get that back in
->> sdhci-spear.c?
+> drivers/amba/bus.c:126:18: error: 'pm_generic_suspend_late' undeclared here (not in a function)
+> drivers/amba/bus.c:127:18: error: 'pm_generic_resume_early' undeclared here (not in a function)
+> drivers/amba/bus.c:128:17: error: 'pm_generic_freeze_late' undeclared here (not in a function)
+> drivers/amba/bus.c:129:16: error: 'pm_generic_thaw_early' undeclared here (not in a function)
+> drivers/amba/bus.c:130:19: error: 'pm_generic_poweroff_late' undeclared here (not in a function)
+> drivers/amba/bus.c:131:19: error: 'pm_generic_restore_early' undeclared here (not in a function)
 >
-> This is the crux of the issue which this patch set tries to address.  sdhci
-> has become - as I've now described it several times - "a patchwork quilt of
-> hacks all cooperating to give the impression of a working driver".
-
-Being honest, I haven't had a in depth look of your patchset. Was really busy
-with some other stuff..
-
-> This is just another such hack, because rather than fixing sdhci.c properly,
-> you've hacked around it, thereby making sdhci.c worse.
+> The failing configuration is:
 >
-> What you could have done is turned the power control code in sdhci.c into
-> a library function, and sdhci_do_set_ios() calls a method in the sdhci_ops
-> to control the power.  What this means is that:
+> # CONFIG_SUSPEND is not set
+> CONFIG_PM_RUNTIME=y
+> CONFIG_PM=y
 >
-> - if you use the standard sdhci power control support, then you can just
->   hook the standard function in there.
-> - if you need to do something extra, you can place your function there
->   to do your own stuff, and call the standard function to do the standard
->   bits.
-> - if you don't need the standard functionality, then you can handle the
->   power control entirely within your driver.
->
-> Not only does this result in a much cleaner implementation, it means that
-> going forward, any other such quirky stuff can be handled in the same way
-> by the "glues" rather than having to augment the horrid quirk/quirk2 stuff,
-> or coming up with hacks like sdhci-spear.c
->
-> If you have a look through this patch set, I've already done that with a
-> number of these methods - set_clock, set_uhs_signaling and reset.
->
-> Moreover, you don't end up fiddling with sdhci internals (such as the
-> card_tasklet) which then impact on attempts to clean that code up, which
-> is exactly why we're discussing this. :)
 
-I agree to all above stuff..
+Thanks for spotting this! I thought I had tested all the various
+combinations, but obvisouly not.
 
->> Again, I can't test any modifications to this code and we need help from
->> Pratyush/Mohit on this..
->
-> The important thing is we understand why the code is the way it is today,
-> and work out some way of cleaning this up.  Do you think the above will
-> work?
+Anyway to add some more clarify; it is not this patch that causes the
+issue. It's patch 2, which introduces the late/early callbacks.
 
-Absolutely, it will work.
+Though the problem need to be fixed in the PM core,
+pm_generic_suspend_late etc is not set to NULL for !CONFIG_PM_SLEEP,
+they should. I guess we should put patch 2 on hold until, right?
 
-Thanks for your efforts in cleaning up this stuff..
+Kind regards
+Ulf Hansson
+
+> --
+> FTTC broadband for 0.8mile line: 5.8Mbps down 500kbps up.  Estimation
+> in database were 13.1 to 19Mbit for a good line, about 7.5+ for a bad.
+> Estimate before purchase was "up to 13.2Mbit".
+--
+To unsubscribe from this list: send the line "unsubscribe linux-spi" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
