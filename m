@@ -1,48 +1,62 @@
 From: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Subject: Re: [PATCH RFC 07/31] mmc: sdhci: push card_tasklet into threaded
- irq handler
-Date: Wed, 19 Feb 2014 09:43:22 +0000
-Message-ID: <20140219094322.GR21483@n2100.arm.linux.org.uk>
-References: <20140218150801.GD21483@n2100.arm.linux.org.uk>
- <E1WFmIk-0006m0-Ah@rmk-PC.arm.linux.org.uk>
- <20140218175703.GJ21483@n2100.arm.linux.org.uk>
- <CAKohpoknX=acZHJeydwv6XRKFHTD4DM84xfCJ=56NrRfJnBOOA@mail.gmail.com>
+Subject: Re: [PATCH RFC 03/31] mmc: sdio_irq: rework sdio irq handling
+Date: Wed, 19 Feb 2014 09:44:11 +0000
+Message-ID: <20140219094411.GS21483@n2100.arm.linux.org.uk>
+References: <20140218150801.GD21483@n2100.arm.linux.org.uk> <E1WFmIP-0006li-SO@rmk-PC.arm.linux.org.uk> <alpine.LFD.2.11.1402182233590.17677@knanqh.ubzr>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from gw-1.arm.linux.org.uk ([78.32.30.217]:42198 "EHLO
+	pandora.arm.linux.org.uk" rhost-flags-OK-OK-OK-FAIL)
+	by vger.kernel.org with ESMTP id S1752943AbaBSJoP (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 19 Feb 2014 04:44:15 -0500
 Content-Disposition: inline
-In-Reply-To: <CAKohpoknX=acZHJeydwv6XRKFHTD4DM84xfCJ=56NrRfJnBOOA@mail.gmail.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Viresh Kumar <viresh.kumar@linaro.org>
-Cc: Pratyush Anand <pratyush.anand@st.com>, Viresh Kumar <viresh.kumar@st.com>, Mohit KUMAR <Mohit.KUMAR@st.com>, spear-devel <spear-devel@list.st.com>, linux-mmc@vger.kernel.org, Chris Ball <chris@printf.net>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+In-Reply-To: <alpine.LFD.2.11.1402182233590.17677@knanqh.ubzr>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Nicolas Pitre <nico@fluxnic.net>
+Cc: linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, Chris Ball <chris@printf.net>
 
-On Wed, Feb 19, 2014 at 11:43:19AM +0530, Viresh Kumar wrote:
-> Adding ST people as well who have access to boards and are working on SPEAr.
+On Tue, Feb 18, 2014 at 10:40:33PM -0500, Nicolas Pitre wrote:
+> On Tue, 18 Feb 2014, Russell King wrote:
 > 
-> On 18 February 2014 23:27, Russell King - ARM Linux
-> <linux@arm.linux.org.uk> wrote:
-> > 1) You're controlling the card power GPIO via the insertion/removal
-> >    interrupt handler?  What's wrong with using a vmmc regulator for
-> >    that, which will be controlled via the MMC subsystem as required?
+> > Rather than the SDIO support spawning it's own thread for handling card
+> > interrupts, use the generic IRQ infrastructure for this, triggering it
+> > from the host interface's interrupt handling directly.
+> > 
+> > This avoids a race between the parent thread waiting to receive an
+> > interrupt response from the card, and the slow startup from the sdio
+> > irq thread, which can occur as a result of high system load (eg, while
+> > udev is running.)
+> > 
+> > Signed-off-by: Russell King <rmk+kernel@arm.linux.org.uk>
+> > =-DO NOT APPLY-=
+> >  drivers/mmc/core/sdio_irq.c | 41 +++++++++++++++++++++++++++++++----------
+> >  include/linux/mmc/host.h    |  3 +++
+> >  2 files changed, 34 insertions(+), 10 deletions(-)
+> > 
+> > diff --git a/drivers/mmc/core/sdio_irq.c b/drivers/mmc/core/sdio_irq.c
+> > index aaa90460ed23..f23d73993dc6 100644
+> > =-DO NOT APPLY-= a/drivers/mmc/core/sdio_irq.c
+> > =+DO NOT APPLY+= b/drivers/mmc/core/sdio_irq.c
+> > @@ -90,6 +90,15 @@ static int process_sdio_pending_irqs(struct mmc_host *host)
+> >  	return ret;
+> >  }
+> >  
+> > =+DO NOT APPLY+=void sdio_run_irqs(struct mmc_host *host)
+> > =+DO NOT APPLY+={
+> > =+DO NOT APPLY+=	mmc_claim_host(host);
+> > =+DO NOT APPLY+=	host->sdio_irq_pending = true;
+> > =+DO NOT APPLY+=	process_sdio_pending_irqs(host);
+> > =+DO NOT APPLY+=	mmc_release_host(host);
+> > =+DO NOT APPLY+=}
+> > =+DO NOT APPLY+=EXPORT_SYMBOL_GPL(sdio_run_irqs);
+> > =+DO NOT APPLY+=
 > 
-> Haven't explored that earlier.. Maybe its possible but no idea.
-> The requirements were like this:
-> - We may or maynot need a GPIO for controlling power
-> - If we need it, we may need to disable/enable power with card removal/
-> insertion Or we may need to keep it enabled for ever..
+> Could you please dispense with those obnoxious "DO NOT APPLY" strings 
+> all over the place?  That makes patch review very annoying.
 
-So how is this any different from any other system which controls power to
-the MMC/SD socket?
+Calm down.  That was a bug in the script, which has since been fixed.
 
 -- 
 FTTC broadband for 0.8mile line: 5.8Mbps down 500kbps up.  Estimation
