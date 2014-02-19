@@ -1,39 +1,48 @@
-From: Russell King - ARM Linux <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>
-Subject: Re: [PATCH 01/17] amba: Let runtime PM callbacks be available for
-	CONFIG_PM
-Date: Wed, 19 Feb 2014 09:40:37 +0000
-Message-ID: <20140219094037.GQ21483@n2100.arm.linux.org.uk>
-References: <1391529538-21685-1-git-send-email-ulf.hansson@linaro.org> <1391529538-21685-2-git-send-email-ulf.hansson@linaro.org>
+From: Russell King - ARM Linux <linux@arm.linux.org.uk>
+Subject: Re: [PATCH RFC 07/31] mmc: sdhci: push card_tasklet into threaded
+ irq handler
+Date: Wed, 19 Feb 2014 09:43:22 +0000
+Message-ID: <20140219094322.GR21483@n2100.arm.linux.org.uk>
+References: <20140218150801.GD21483@n2100.arm.linux.org.uk>
+ <E1WFmIk-0006m0-Ah@rmk-PC.arm.linux.org.uk>
+ <20140218175703.GJ21483@n2100.arm.linux.org.uk>
+ <CAKohpoknX=acZHJeydwv6XRKFHTD4DM84xfCJ=56NrRfJnBOOA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-i2c-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
 Content-Disposition: inline
-In-Reply-To: <1391529538-21685-2-git-send-email-ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Sender: linux-i2c-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Alessandro Rubini <rubini-9wsNiZum9E8@public.gmane.org>, Linus Walleij <linus.walleij-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Wolfram Sang <wsa-z923LK4zBo2bacvFa/9K2g@public.gmane.org>, Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, Mark Brown <broonie-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-spi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+In-Reply-To: <CAKohpoknX=acZHJeydwv6XRKFHTD4DM84xfCJ=56NrRfJnBOOA@mail.gmail.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Viresh Kumar <viresh.kumar@linaro.org>
+Cc: Pratyush Anand <pratyush.anand@st.com>, Viresh Kumar <viresh.kumar@st.com>, Mohit KUMAR <Mohit.KUMAR@st.com>, spear-devel <spear-devel@list.st.com>, linux-mmc@vger.kernel.org, Chris Ball <chris@printf.net>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Tue, Feb 04, 2014 at 04:58:42PM +0100, Ulf Hansson wrote:
-> Convert to the SET_PM_RUNTIME_PM macro while defining the runtime PM
-> callbacks. This means the callbacks becomes available for both
-> CONFIG_PM_SLEEP and CONFIG_PM_RUNTIME, which is needed by drivers and
-> power domains.
+On Wed, Feb 19, 2014 at 11:43:19AM +0530, Viresh Kumar wrote:
+> Adding ST people as well who have access to boards and are working on SPEAr.
+> 
+> On 18 February 2014 23:27, Russell King - ARM Linux
+> <linux@arm.linux.org.uk> wrote:
+> > 1) You're controlling the card power GPIO via the insertion/removal
+> >    interrupt handler?  What's wrong with using a vmmc regulator for
+> >    that, which will be controlled via the MMC subsystem as required?
+> 
+> Haven't explored that earlier.. Maybe its possible but no idea.
+> The requirements were like this:
+> - We may or maynot need a GPIO for controlling power
+> - If we need it, we may need to disable/enable power with card removal/
+> insertion Or we may need to keep it enabled for ever..
 
-This patch is wrong, because it causes build errors:
-
-drivers/amba/bus.c:126:18: error: 'pm_generic_suspend_late' undeclared here (not in a function)
-drivers/amba/bus.c:127:18: error: 'pm_generic_resume_early' undeclared here (not in a function)
-drivers/amba/bus.c:128:17: error: 'pm_generic_freeze_late' undeclared here (not in a function)
-drivers/amba/bus.c:129:16: error: 'pm_generic_thaw_early' undeclared here (not in a function)
-drivers/amba/bus.c:130:19: error: 'pm_generic_poweroff_late' undeclared here (not in a function)
-drivers/amba/bus.c:131:19: error: 'pm_generic_restore_early' undeclared here (not in a function)
-
-The failing configuration is:
-
-# CONFIG_SUSPEND is not set
-CONFIG_PM_RUNTIME=y
-CONFIG_PM=y
+So how is this any different from any other system which controls power to
+the MMC/SD socket?
 
 -- 
 FTTC broadband for 0.8mile line: 5.8Mbps down 500kbps up.  Estimation
