@@ -1,73 +1,49 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 06/17] spi: pl022: Let runtime PM callbacks be available
- for CONFIG_PM
-Date: Wed, 19 Feb 2014 15:20:07 +0100
-Message-ID: <CAPDyKFombL2-Rt46QpXPNWe5PeGQnOGmQQNfYd5MdYdEePn-4w@mail.gmail.com>
-References: <1391529538-21685-1-git-send-email-ulf.hansson@linaro.org>
-	<1391529538-21685-7-git-send-email-ulf.hansson@linaro.org>
+From: Balaji T K <balajitk@ti.com>
+Subject: [PATCH RESEND v10 0/7] mmc: omap_hsmmc: pbias dt and cleanup
+Date: Wed, 19 Feb 2014 20:26:34 +0530
+Message-ID: <1392821801-29673-1-git-send-email-balajitk@ti.com>
+References: <1389627375-9107-1-git-send-email-balajitk@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1391529538-21685-7-git-send-email-ulf.hansson@linaro.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Mark Brown <broonie@kernel.org>
-Cc: Alessandro Rubini <rubini@unipv.it>, Linus Walleij <linus.walleij@linaro.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Wolfram Sang <wsa@the-dreams.de>, Russell King <linux@arm.linux.org.uk>, Chris Ball <chris@printf.net>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-i2c@vger.kernel.org" <linux-i2c@vger.kernel.org>, "linux-spi@vger.kernel.org" <linux-spi@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>
+Content-Type: text/plain
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from bear.ext.ti.com ([192.94.94.41]:56871 "EHLO bear.ext.ti.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753747AbaBSO4w (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 19 Feb 2014 09:56:52 -0500
+In-Reply-To: <1389627375-9107-1-git-send-email-balajitk@ti.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-omap@vger.kernel.org, bcousson@baylibre.com, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, chris@printf.net, tony@atomide.com
+Cc: broonie@kernel.org, Balaji T K <balajitk@ti.com>
 
-On 4 February 2014 16:58, Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> Convert to the SET_PM_RUNTIME_PM macro while defining the runtime PM
-> callbacks. This means the callbacks becomes available for both
-> CONFIG_PM_SLEEP and CONFIG_PM_RUNTIME, which is needed to handle the
-> combinations of these scenarios.
->
-> Cc: Mark Brown <broonie@kernel.org>
-> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+Few cleanups to reduce code indent,
+Add pbias_regulator support and adapt omap_hsmmc to use pbias regulator
+to configure required voltage on mmc1 pad(SD card) i/o rails on OMAP SoCs.
 
-Mark, any thoughts of this one?
+Balaji T K (7):
+  mmc: omap_hsmmc: use devm_regulator API
+  mmc: omap_hsmmc: handle vcc and vcc_aux independently
+  regulator: add pbias regulator support
+  mmc: omap_hsmmc: adapt hsmmc to use pbias regulator
+  ARM: dts: add pbias dt node
+  ARM: OMAP: enable SYSCON and REGULATOR_PBIAS in omap2plus_defconfig
+  mmc: omap_hsmmc: remove pbias workaround
 
-This will be needed no matter of patch 7.
+ .../bindings/regulator/pbias-regulator.txt         |   27 ++
+ arch/arm/boot/dts/dra7.dtsi                        |   17 ++
+ arch/arm/boot/dts/omap2430.dtsi                    |   17 ++
+ arch/arm/boot/dts/omap3.dtsi                       |   17 ++
+ arch/arm/boot/dts/omap4.dtsi                       |   17 ++
+ arch/arm/boot/dts/omap5.dtsi                       |   17 ++
+ arch/arm/configs/omap2plus_defconfig               |    2 +
+ drivers/mmc/host/omap_hsmmc.c                      |  111 +++++----
+ drivers/regulator/Kconfig                          |    9 +
+ drivers/regulator/Makefile                         |    1 +
+ drivers/regulator/pbias-regulator.c                |  255 ++++++++++++++++++++
+ 11 files changed, 441 insertions(+), 49 deletions(-)
+ create mode 100644 Documentation/devicetree/bindings/regulator/pbias-regulator.txt
+ create mode 100644 drivers/regulator/pbias-regulator.c
 
-Also note that, Russell has already applied the corresponding part in
-the amba bus (patch 1)
+-- 
+1.7.5.4
 
-Kind regards
-Uffe
-
-> ---
->  drivers/spi/spi-pl022.c |    6 +++---
->  1 file changed, 3 insertions(+), 3 deletions(-)
->
-> diff --git a/drivers/spi/spi-pl022.c b/drivers/spi/spi-pl022.c
-> index 2789b45..70fa907 100644
-> --- a/drivers/spi/spi-pl022.c
-> +++ b/drivers/spi/spi-pl022.c
-> @@ -2288,7 +2288,7 @@ pl022_remove(struct amba_device *adev)
->         return 0;
->  }
->
-> -#if defined(CONFIG_SUSPEND) || defined(CONFIG_PM_RUNTIME)
-> +#ifdef CONFIG_PM
->  /*
->   * These two functions are used from both suspend/resume and
->   * the runtime counterparts to handle external resources like
-> @@ -2354,7 +2354,7 @@ static int pl022_resume(struct device *dev)
->  }
->  #endif /* CONFIG_PM */
->
-> -#ifdef CONFIG_PM_RUNTIME
-> +#ifdef CONFIG_PM
->  static int pl022_runtime_suspend(struct device *dev)
->  {
->         struct pl022 *pl022 = dev_get_drvdata(dev);
-> @@ -2374,7 +2374,7 @@ static int pl022_runtime_resume(struct device *dev)
->
->  static const struct dev_pm_ops pl022_dev_pm_ops = {
->         SET_SYSTEM_SLEEP_PM_OPS(pl022_suspend, pl022_resume)
-> -       SET_RUNTIME_PM_OPS(pl022_runtime_suspend, pl022_runtime_resume, NULL)
-> +       SET_PM_RUNTIME_PM_OPS(pl022_runtime_suspend, pl022_runtime_resume, NULL)
->  };
->
->  static struct vendor_data vendor_arm = {
-> --
-> 1.7.9.5
->
