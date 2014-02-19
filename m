@@ -1,38 +1,39 @@
-From: Zhang Yi <yix.x.zhang@gmail.com>
-Subject: [PATCH] Add eMMC 5.0 support
-Date: Wed, 19 Feb 2014 21:47:57 +0800
-Message-ID: <1392817677-4755-1-git-send-email-yix.x.zhang@gmail.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pb0-f67.google.com ([209.85.160.67]:56940 "EHLO
-	mail-pb0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754123AbaBSRjA (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 19 Feb 2014 12:39:00 -0500
-Sender: linux-mmc-owner@vger.kernel.org
+From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH 06/17] spi: pl022: Let runtime PM callbacks be available
+ for CONFIG_PM
+Date: Wed, 19 Feb 2014 19:02:54 +0100
+Message-ID: <CAPDyKFqvdm73s9wDPA=z7LkiMmtLhGkcpwEdbS13zGHE5spQNw@mail.gmail.com>
+References: <1391529538-21685-1-git-send-email-ulf.hansson@linaro.org>
+	<1391529538-21685-7-git-send-email-ulf.hansson@linaro.org>
+	<CAPDyKFombL2-Rt46QpXPNWe5PeGQnOGmQQNfYd5MdYdEePn-4w@mail.gmail.com>
+	<20140219151040.GH2669@sirena.org.uk>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-spi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20140219151040.GH2669-GFdadSzt00ze9xe1eoZjHA@public.gmane.org>
+Sender: linux-spi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Mark Brown <broonie-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Cc: Alessandro Rubini <rubini-9wsNiZum9E8@public.gmane.org>, Linus Walleij <linus.walleij-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Wolfram Sang <wsa-z923LK4zBo2bacvFa/9K2g@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-spi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-spi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: cjb@laptop.org
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Zhang Yi <yix.x.zhang@gmail.com>
 
-Current code will exist when read eMMC 5.0, add support for it
+On 19 February 2014 16:10, Mark Brown <broonie-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org> wrote:
+> On Wed, Feb 19, 2014 at 03:20:07PM +0100, Ulf Hansson wrote:
+>
+>> Also note that, Russell has already applied the corresponding part in
+>> the amba bus (patch 1)
+>
+> Why would this depend on an AMBA patch and if it does surely the two
+> need to be merged together somehow?
 
-Signed-off-by: Zhang Yi <yix.x.zhang@gmail.com>
----
- mmc_cmds.c |    3 +++
- 1 file changed, 3 insertions(+)
+There are no immediate dependency, sorry for confusion.
 
-diff --git a/mmc_cmds.c b/mmc_cmds.c
-index b8afa74..5edf42b 100644
---- a/mmc_cmds.c
-+++ b/mmc_cmds.c
-@@ -722,6 +722,9 @@ int do_read_extcsd(int nargs, char **argv)
- 	ext_csd_rev = ext_csd[192];
- 
- 	switch (ext_csd_rev) {
-+	case 7:
-+		str = "5.0";
-+		break;
- 	case 6:
- 		str = "4.5";
- 		break;
--- 
-1.7.9.5
+I just wanted to highlight that the amba has converted to the new
+SET_PM_RUNTIME_PM_OPS. It means the amba bus' runtime PM callbacks are
+available for CONFIG_PM.
 
+Kind regards
+Uffe
+--
+To unsubscribe from this list: send the line "unsubscribe linux-spi" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
