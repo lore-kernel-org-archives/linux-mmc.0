@@ -1,35 +1,88 @@
-From: Balaji T K <balajitk@ti.com>
-Subject: Re: [PATCH V2 2/2] ARM: dts: omap3-ldp: fix mmc configuration
-Date: Thu, 20 Feb 2014 18:51:45 +0530
-Message-ID: <53060169.2050207@ti.com>
-References: <1392356749-32091-1-git-send-email-nm@ti.com>
- <1392356749-32091-3-git-send-email-nm@ti.com>
+From: Tomasz Figa <tomasz.figa@gmail.com>
+Subject: Re: [PATCH 0/6] mmc: sdhci-s3c: Fix base clock source management
+Date: Thu, 20 Feb 2014 20:26:11 +0100
+Message-ID: <530656D3.7010709@gmail.com>
+References: <1389476346-20396-1-git-send-email-tomasz.figa@gmail.com> <52F4AE40.9050907@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"; Format="flowed"
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <1392356749-32091-3-git-send-email-nm@ti.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Nishanth Menon <nm@ti.com>
-Cc: devicetree@vger.kernel.org, linux-doc@vger.kernel.org, Tony Lindgren <tony@atomide.com>, linux-mmc@vger.kernel.org, Chris Ball <chris@printf.net>, Felipe Balbi <balbi@ti.com>, linux-kernel@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-ea0-f173.google.com ([209.85.215.173]:41328 "EHLO
+	mail-ea0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932098AbaBTT0S (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 20 Feb 2014 14:26:18 -0500
+In-Reply-To: <52F4AE40.9050907@gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org, Chris Ball <chris@printf.net>
+Cc: linux-samsung-soc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Ben Dooks <ben-linux@fluff.org>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, Marek Szyprowski <m.szyprowski@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>
 
-On Friday 14 February 2014 11:15 AM, Nishanth Menon wrote:
-> MMC1 is the only MMC interface available on the platform. Further,
-> since the platform is based on older revision of SoC which is not
-> capable of doing multi-block reads, mark it with compatibility for the
-> same and add pinmux to ensure that all relevant pins are configured
-> for non-MMC boot mode.
+Hi Chris,
+
+On 07.02.2014 10:58, Tomasz Figa wrote:
+> Hi Chris,
 >
-> Signed-off-by: Nishanth Menon <nm@ti.com>
+> On 11.01.2014 22:39, Tomasz Figa wrote:
+>> On platforms prior to Exynos the SDHCI block used internal clock
+>> divider controlled by SELFREQ field of CLKCON register to divide base
+>> clock selected from several external clocks fed to the block by
+>> SELBASECLK bitfield of CONTROL2 register. Depending on wanted clock
+>> frequency, different external clock may be the best choice and so
+>> the driver needs to switch the SELBASECLK mux on the fly.
+>>
+>> However the selection logic has been broken for quite some time leaving
+>> the controller using always clock 0, which is not always the right
+>> source and leading to suboptimal performance of the SDHCI block on
+>> affected platforms.
+>>
+>> This series intends to fix the problems mentioned above and also clean-up
+>> clock management code slightly.
+>>
+>> Tested on S3C6410-based Mini6410 board, with following performance
+>> figures:
+>>
+>> * Before this series (133 MHz HCLK always selected, leading to at most
+>>    33 MHz card clock):
+>>
+>> root@tiny6410:~# hdparm -t /dev/mmcblk0
+>>
+>> /dev/mmcblk0:
+>>   Timing buffered disk reads:  42 MB in  3.10 seconds =  13.54 MB/sec
+>> root@tiny6410:~# hdparm -t /dev/mmcblk0
+>>
+>> /dev/mmcblk0:
+>>   Timing buffered disk reads:  44 MB in  3.11 seconds =  14.14 MB/sec
+>> root@tiny6410:~#
+>>
+>> * After this series (48 MHz EPLL clock selected, leading to 48 MHz card
+>>    clock):
+>>
+>> root@tiny6410:~# hdparm -t /dev/mmcblk0
+>>
+>> /dev/mmcblk0:
+>>   Timing buffered disk reads:  56 MB in  3.04 seconds =  18.41 MB/sec
+>> root@tiny6410:~# hdparm -t /dev/mmcblk0
+>>
+>> /dev/mmcblk0:
+>>   Timing buffered disk reads:  60 MB in  3.06 seconds =  19.63 MB/sec
+>> root@tiny6410:~#
+>>
+>> Tomasz Figa (6):
+>>    mmc: sdhci-s3c: Use shifts to divide by powers of two
+>>    mmc: sdhci-s3c: Cache bus clock rates
+>>    mmc: sdhci-s3c: Use correct condition to check for clock presence
+>>    mmc: sdhci-s3c: Simplify min/max clock calculation
+>>    mmc: sdhci-s3c: Fix handling of bus clock switching
+>>    mmc: sdhci-s3c: Do not allow frequencies higher than requested
+>>
+>>   drivers/mmc/host/sdhci-s3c.c | 170
+>> ++++++++++++++++++++-----------------------
+>>   1 file changed, 77 insertions(+), 93 deletions(-)
+>>
+>
+> What do you think about this series?
 
-looks good to me
-Acked-by: Balaji T K <balajitk@ti.com>
+Could you take this series for 3.15?
+
+Best regards,
+Tomasz
