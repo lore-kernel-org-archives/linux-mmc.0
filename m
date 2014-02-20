@@ -1,56 +1,52 @@
-From: Russell King - ARM Linux <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>
-Subject: Re: [PATCH RFC 31/31] mmc: sdhci-tegra: get rid of special
-	PRESENT_STATE register handling
-Date: Wed, 19 Feb 2014 23:28:37 +0000
-Message-ID: <20140219232837.GX21483@n2100.arm.linux.org.uk>
-References: <20140218150801.GD21483@n2100.arm.linux.org.uk> <E1WFmKj-0006nv-Py@rmk-PC.arm.linux.org.uk> <53050E43.3030602@wwwdotorg.org> <20140219232253.GW21483@n2100.arm.linux.org.uk>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH] Add eMMC 5.0 support
+Date: Thu, 20 Feb 2014 11:12:49 +0900
+Message-ID: <530564A1.50708@samsung.com>
+References: <1392817677-4755-1-git-send-email-yix.x.zhang@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <20140219232253.GW21483-l+eeeJia6m9vn6HldHNs0ANdhmdF6hFW@public.gmane.org>
-Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>
-Cc: linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Thierry Reding <thierry.reding-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout4.samsung.com ([203.254.224.34]:41544 "EHLO
+	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751752AbaBTCMh (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 19 Feb 2014 21:12:37 -0500
+In-reply-to: <1392817677-4755-1-git-send-email-yix.x.zhang@gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Zhang Yi <yix.x.zhang@gmail.com>, cjb@laptop.org
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-On Wed, Feb 19, 2014 at 11:22:53PM +0000, Russell King - ARM Linux wrote:
-> The script was a little too over-zealous.  It was just supposed to do
-> the following transformation:
-> 
-> --- => =-DO NOT APPLY-=
-> +++ => =+DO NOT APPLY+=
-> 
-> which would've made it reversible with a trivial sed expression - but I
-> cocked up because of the utterly random nature of regexp flavours, and
-> instead gave sed this:
-> 
-> 	sed -i 's/^---/=-DO NOT APPLY-=/;s/^\+\+\+/=+DO NOT APPLY+=/'
-> 
-> The escaped '+' ends up causing sed to match a single + at the beginning
-> of a line.  (Other regexp flavours require you to escape the '+' otherwise
-> it's interpreted as "one or more".)
-> 
-> I had added that mode to my script a few months ago, and I just assumed
-> I'd fully tested it when I used it yesterday... clearly not so.
-> 
-> So... yes it was designed to stop it being _accepted_ but it should have
-> also been completely reversible for those who wished to apply it via
-> the obvious reversed sed expression.
+Hi,
 
-Oh, and before you ask why I'm now doing it, it's through necessity.  I've
-had too many instances where some maintainers will take patches sent out
-as part of a RFC without being asked to do so - and I've then had to email
-the maintainers asking them to drop such patches from their trees.
+You can refer to this.
 
-I wish this kind of buggeration of patches wasn't necessary, but
-unfortunately - as seems to always be the case - people just can't be
-trusted to pay due care and attention, and do the right thing.
+http://comments.gmane.org/gmane.linux.kernel.mmc/23838
 
-That's why the intention is to (a) prevent the patch being applied without
-thought while (b) allowing it to be applied with a trivial transformation.
+Best Regards,
+Jaehoon Chung
 
--- 
-FTTC broadband for 0.8mile line: 5.8Mbps down 500kbps up.  Estimation
-in database were 13.1 to 19Mbit for a good line, about 7.5+ for a bad.
-Estimate before purchase was "up to 13.2Mbit".
+On 02/19/2014 10:47 PM, Zhang Yi wrote:
+> Current code will exist when read eMMC 5.0, add support for it
+> 
+> Signed-off-by: Zhang Yi <yix.x.zhang@gmail.com>
+> ---
+>  mmc_cmds.c |    3 +++
+>  1 file changed, 3 insertions(+)
+> 
+> diff --git a/mmc_cmds.c b/mmc_cmds.c
+> index b8afa74..5edf42b 100644
+> --- a/mmc_cmds.c
+> +++ b/mmc_cmds.c
+> @@ -722,6 +722,9 @@ int do_read_extcsd(int nargs, char **argv)
+>  	ext_csd_rev = ext_csd[192];
+>  
+>  	switch (ext_csd_rev) {
+> +	case 7:
+> +		str = "5.0";
+> +		break;
+>  	case 6:
+>  		str = "4.5";
+>  		break;
+> 
+
