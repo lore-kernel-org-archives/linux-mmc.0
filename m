@@ -1,42 +1,77 @@
-From: Geert Uytterhoeven <geert@linux-m68k.org>
-Subject: [PATCH 2/2] mmc: host: MMC_OMAP_HS should depend on HAS_DMA
-Date: Fri, 21 Feb 2014 20:52:51 +0100
-Message-ID: <1393012371-22320-2-git-send-email-geert@linux-m68k.org>
-References: <1393012371-22320-1-git-send-email-geert@linux-m68k.org>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1393012371-22320-1-git-send-email-geert@linux-m68k.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Chris Ball <chris@printf.net>, Laurent Pinchart <laurent.pinchart+renesas@ideasonboard.com>, Amarinder Bindra <a-bindra@ti.com>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Geert Uytterhoeven <geert@linux-m68k.org>
+From: Arend van Spriel <arend@broadcom.com>
+Subject: RESEND:[PATCH V3] sdhci: only reprogram retuning timer when flag is set
+Date: Fri, 21 Feb 2014 20:59:42 +0100
+Message-ID: <1393012782-23917-1-git-send-email-arend@broadcom.com>
+Mime-Version: 1.0
+Content-Type: text/plain
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-gw2-out.broadcom.com ([216.31.210.63]:31468 "EHLO
+	mail-gw2-out.broadcom.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751308AbaBUT7r (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 21 Feb 2014 14:59:47 -0500
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Chris Ball <chris@printf.net>
+Cc: linux-mmc@vger.kernel.org, Arend van Spriel <arend@broadcom.com>, Dong Aisheng <dongas86@gmail.com>, Aaron Lu <aaron.lwe@gmail.com>
 
-If NO_DMA=y:
+When the host->tuning_count is zero it means that the
+retuning is disabled. This is checked on the first
+run of sdhci_execute_tuning() by the if statement below:
 
-    drivers/built-in.o: In function `omap_hsmmc_pre_dma_transfer':
-    omap_hsmmc.c:(.text+0x5a0928): undefined reference to `dma_map_sg'
-    drivers/built-in.o: In function `omap_hsmmc_dma_cleanup':
-    omap_hsmmc.c:(.text+0x5a0e8e): undefined reference to `dma_unmap_sg'
-    drivers/built-in.o: In function `omap_hsmmc_dma_callback':
-    omap_hsmmc.c:(.text+0x5a1f58): undefined reference to `dma_unmap_sg'
-    drivers/built-in.o: In function `omap_hsmmc_post_req':
-    omap_hsmmc.c:(.text+0x5a2082): undefined reference to `dma_unmap_sg'
+	if (!(host->flags & SDHCI_NEEDS_RETUNING) && host->tuning_count &&
+	    (host->tuning_mode == SDHCI_TUNING_MODE_1)) {
 
-Signed-off-by: Geert Uytterhoeven <geert@linux-m68k.org>
+So only when tuning_count is non-zero it will set the host
+flag SDHCI_USING_RETUNING_TIMER. The else statement is only
+for re-programming the timer, which means that flag must be
+set. Because that is not checked the else statement is executed
+in the first run when tuning_count is zero.
+
+This was seen on a host controller which indicated
+SDHCI_TUNING_MODE_1 (0) and tuning_count being zero. Suspect
+that (one of) these registers is not properly set.
+
+Cc: Dong Aisheng <dongas86@gmail.com>
+Cc: Aaron Lu <aaron.lwe@gmail.com>
+Signed-off-by: Arend van Spriel <arend@broadcom.com>
 ---
- drivers/mmc/host/Kconfig |    1 +
- 1 file changed, 1 insertion(+)
+Noticed this patch was still not applied so please reconsider
+taking it in and let me know. The patch has been rebased and
+applies to the mmc-next branch.
 
-diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-index bfe2133d0b9c..2496b9d649f1 100644
---- a/drivers/mmc/host/Kconfig
-+++ b/drivers/mmc/host/Kconfig
-@@ -296,6 +296,7 @@ config MMC_OMAP
+Regards,
+Arend
+
+V3:
+- remote tuning mode check for retuning timer reload
+
+V2:
+- add more explanation to the commit message
+- check host flag SDHCI_USING_RETUNING_TIMER
+---
+ drivers/mmc/host/sdhci.c | 7 +++----
+ 1 file changed, 3 insertions(+), 4 deletions(-)
+
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 9ddef47..d5b421d 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -2026,12 +2026,11 @@ out:
+ 			host->tuning_count * HZ);
+ 		/* Tuning mode 1 limits the maximum data length to 4MB */
+ 		mmc->max_blk_count = (4 * 1024 * 1024) / mmc->max_blk_size;
+-	} else {
++	} else if (host->flags & SDHCI_USING_RETUNING_TIMER) {
+ 		host->flags &= ~SDHCI_NEEDS_RETUNING;
+ 		/* Reload the new initial value for timer */
+-		if (host->tuning_mode == SDHCI_TUNING_MODE_1)
+-			mod_timer(&host->tuning_timer, jiffies +
+-				host->tuning_count * HZ);
++		mod_timer(&host->tuning_timer, jiffies +
++			  host->tuning_count * HZ);
+ 	}
  
- config MMC_OMAP_HS
- 	tristate "TI OMAP High Speed Multimedia Card Interface support"
-+	depends on HAS_DMA
- 	depends on ARCH_OMAP2PLUS || COMPILE_TEST
- 	help
- 	  This selects the TI OMAP High Speed Multimedia card Interface.
+ 	/*
 -- 
-1.7.9.5
+1.8.1.3
+
