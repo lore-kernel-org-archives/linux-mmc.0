@@ -1,88 +1,36 @@
-From: Alistair Popple <alistair@popple.id.au>
-Subject: =?UTF-8?q?=5BPATCH=201/7=5D=20IBM=20Akebono=3A=20Add=20a=20SDHCI=20platform=20driver?=
-Date: Fri, 21 Feb 2014 17:31:27 +1100
-Message-ID: <1392964293-13687-2-git-send-email-alistair@popple.id.au>
-References: <1392964293-13687-1-git-send-email-alistair@popple.id.au>
+From: Russell King - ARM Linux <linux@arm.linux.org.uk>
+Subject: Re: [PATCH RFC 07/31] mmc: sdhci: push card_tasklet into threaded
+	irq handler
+Date: Fri, 21 Feb 2014 10:37:10 +0000
+Message-ID: <20140221103710.GB21483@n2100.arm.linux.org.uk>
+References: <20140218175703.GJ21483@n2100.arm.linux.org.uk> <CAKohpoknX=acZHJeydwv6XRKFHTD4DM84xfCJ=56NrRfJnBOOA@mail.gmail.com> <20140219094322.GR21483@n2100.arm.linux.org.uk> <CAKohpomfHxWBF5m4D6iqod4a3gw2BU1W6nXMkEOg+YA+izYr=g@mail.gmail.com> <20140219095212.GT21483@n2100.arm.linux.org.uk> <CAKohpo=ZrLRsTyCH86x7TbGE2XJnpXNb1ZDvYyzDUupAwTtS9Q@mail.gmail.com> <20140219105011.GU21483@n2100.arm.linux.org.uk> <CAKohpokBf_fJhiUJ53c+=6v+GMcjaDKd7+fwib99=sLMdkjQQQ@mail.gmail.com> <20140220105903.GY21483@n2100.arm.linux.org.uk> <CAKohpo=FTk9SGCMJGBdOUheUg71WsG7qaeE9rwQRqd5dP4O8FQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org>
-In-Reply-To: <1392964293-13687-1-git-send-email-alistair@popple.id.au>
-List-Unsubscribe: <https://lists.ozlabs.org/options/linuxppc-dev>,
- <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=unsubscribe>
-List-Archive: <http://lists.ozlabs.org/pipermail/linuxppc-dev/>
-List-Post: <mailto:linuxppc-dev@lists.ozlabs.org>
-List-Help: <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=help>
-List-Subscribe: <https://lists.ozlabs.org/listinfo/linuxppc-dev>,
- <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=subscribe>
-Errors-To: linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org
-Sender: "Linuxppc-dev"
- <linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org>
-To: linux-mmc@vger.kernel.org, cjb@laptop.org
-Cc: Alistair Popple <alistair@popple.id.au>, linuxppc-dev@lists.ozlabs.org, linux-kernel@vger.kernel.org, devicetree@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from gw-1.arm.linux.org.uk ([78.32.30.217]:45418 "EHLO
+	pandora.arm.linux.org.uk" rhost-flags-OK-OK-OK-FAIL)
+	by vger.kernel.org with ESMTP id S1753944AbaBUKhX (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 21 Feb 2014 05:37:23 -0500
+Content-Disposition: inline
+In-Reply-To: <CAKohpo=FTk9SGCMJGBdOUheUg71WsG7qaeE9rwQRqd5dP4O8FQ@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Viresh Kumar <viresh.kumar@linaro.org>
+Cc: Pratyush Anand <pratyush.anand@st.com>, spear-devel <spear-devel@list.st.com>, Mohit KUMAR <Mohit.KUMAR@st.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, linux-mmc@vger.kernel.org, Chris Ball <chris@printf.net>
 
-VGhpcyBwYXRjaCBhZGRzIGEgU0RIQ0kgcGxhdGZvcm0gZHJpdmVyIGZvciB0aGUgbmV3IElCTSBQ
-UEM0NzZHVFIgU29DCndoaWNoIGlzIG9uIHRoZSBBa2Vib25vIGJvYXJkLgoKU2lnbmVkLW9mZi1i
-eTogQWxpc3RhaXIgUG9wcGxlIDxhbGlzdGFpckBwb3BwbGUuaWQuYXU+Ci0tLQogZHJpdmVycy9t
-bWMvaG9zdC9LY29uZmlnICAgICAgICAgICB8ICAgMTIgKysrKysrKysKIGRyaXZlcnMvbW1jL2hv
-c3QvTWFrZWZpbGUgICAgICAgICAgfCAgICAxICsKIGRyaXZlcnMvbW1jL2hvc3Qvc2RoY2ktb2Yt
-NDc2Z3RyLmMgfCAgIDYwICsrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKwogMyBm
-aWxlcyBjaGFuZ2VkLCA3MyBpbnNlcnRpb25zKCspCiBjcmVhdGUgbW9kZSAxMDA2NDQgZHJpdmVy
-cy9tbWMvaG9zdC9zZGhjaS1vZi00NzZndHIuYwoKZGlmZiAtLWdpdCBhL2RyaXZlcnMvbW1jL2hv
-c3QvS2NvbmZpZyBiL2RyaXZlcnMvbW1jL2hvc3QvS2NvbmZpZwppbmRleCA3ZmM1MDk5Li4xNDIx
-MGRmIDEwMDY0NAotLS0gYS9kcml2ZXJzL21tYy9ob3N0L0tjb25maWcKKysrIGIvZHJpdmVycy9t
-bWMvaG9zdC9LY29uZmlnCkBAIC0xMzAsNiArMTMwLDE4IEBAIGNvbmZpZyBNTUNfU0RIQ0lfT0Zf
-SExXRAogCiAJICBJZiB1bnN1cmUsIHNheSBOLgogCitjb25maWcgTU1DX1NESENJX09GXzQ3NkdU
-UgorCXRyaXN0YXRlICJTREhDSSBPRiBzdXBwb3J0IGZvciB0aGUgSUJNIFBQQzQ3NkdUUiBTb0Mi
-CisJZGVwZW5kcyBvbiBNTUNfU0RIQ0lfUExURk0KKwlkZXBlbmRzIG9uIFBQQ19PRgorCWhlbHAK
-KwkgIFRoaXMgc2VsZWN0cyB0aGUgU2VjdXJlIERpZ2l0YWwgSG9zdCBDb250cm9sbGVyIEludGVy
-ZmFjZSAoU0RIQ0kpCisJICBmb3VuZCBvbiB0aGUgUFBDNDc2R1RSIFNvQy4KKworCSAgSWYgeW91
-IGhhdmUgYSBjb250cm9sbGVyIHdpdGggdGhpcyBpbnRlcmZhY2UsIHNheSBZIG9yIE0gaGVyZS4K
-KworCSAgSWYgdW5zdXJlLCBzYXkgTi4KKwogY29uZmlnIE1NQ19TREhDSV9DTlMzWFhYCiAJdHJp
-c3RhdGUgIlNESENJIHN1cHBvcnQgb24gdGhlIENhdml1bSBOZXR3b3JrcyBDTlMzeHh4IFNvQyIK
-IAlkZXBlbmRzIG9uIEFSQ0hfQ05TM1hYWApkaWZmIC0tZ2l0IGEvZHJpdmVycy9tbWMvaG9zdC9N
-YWtlZmlsZSBiL2RyaXZlcnMvbW1jL2hvc3QvTWFrZWZpbGUKaW5kZXggYzQxZDBjMy4uOTJiZWZm
-MyAxMDA2NDQKLS0tIGEvZHJpdmVycy9tbWMvaG9zdC9NYWtlZmlsZQorKysgYi9kcml2ZXJzL21t
-Yy9ob3N0L01ha2VmaWxlCkBAIC01OSw2ICs1OSw3IEBAIG9iai0kKENPTkZJR19NTUNfU0RIQ0lf
-RE9WRSkJCSs9IHNkaGNpLWRvdmUubwogb2JqLSQoQ09ORklHX01NQ19TREhDSV9URUdSQSkJCSs9
-IHNkaGNpLXRlZ3JhLm8KIG9iai0kKENPTkZJR19NTUNfU0RIQ0lfT0ZfRVNESEMpCSs9IHNkaGNp
-LW9mLWVzZGhjLm8KIG9iai0kKENPTkZJR19NTUNfU0RIQ0lfT0ZfSExXRCkJCSs9IHNkaGNpLW9m
-LWhsd2Qubworb2JqLSQoQ09ORklHX01NQ19TREhDSV9PRl80NzZHVFIpCSs9IHNkaGNpLW9mLTQ3
-Nmd0ci5vCiBvYmotJChDT05GSUdfTU1DX1NESENJX0JDTV9LT05BKQkrPSBzZGhjaS1iY20ta29u
-YS5vCiBvYmotJChDT05GSUdfTU1DX1NESENJX0JDTTI4MzUpCQkrPSBzZGhjaS1iY20yODM1Lm8K
-IApkaWZmIC0tZ2l0IGEvZHJpdmVycy9tbWMvaG9zdC9zZGhjaS1vZi00NzZndHIuYyBiL2RyaXZl
-cnMvbW1jL2hvc3Qvc2RoY2ktb2YtNDc2Z3RyLmMKbmV3IGZpbGUgbW9kZSAxMDA2NDQKaW5kZXgg
-MDAwMDAwMC4uMTMxMGY4YwotLS0gL2Rldi9udWxsCisrKyBiL2RyaXZlcnMvbW1jL2hvc3Qvc2Ro
-Y2ktb2YtNDc2Z3RyLmMKQEAgLTAsMCArMSw2MCBAQAorLyoKKyAqIGRyaXZlcnMvbW1jL2hvc3Qv
-c2RoY2ktb2YtNDc2Z3RyLmMKKyAqCisgKiBDb3B5cmlnaHQgwqkgMjAxMyBBbGlzdGFpciBQb3Bw
-bGUgPGFsaXN0YWlyQHBvcHBsZS5pZC5hdT4gSUJNIENvcnBvcmF0aW9uCisgKgorICogQmFzZWQg
-b24gc2RoY2ktb2YtaGx3ZC5jCisgKgorICogQ29weXJpZ2h0IChDKSAyMDA5IFRoZSBHYW1lQ3Vi
-ZSBMaW51eCBUZWFtCisgKiBDb3B5cmlnaHQgKEMpIDIwMDkgQWxiZXJ0IEhlcnJhbnoKKyAqCisg
-KiBUaGlzIHByb2dyYW0gaXMgZnJlZSBzb2Z0d2FyZTsgeW91IGNhbiByZWRpc3RyaWJ1dGUgaXQg
-YW5kL29yIG1vZGlmeQorICogaXQgdW5kZXIgdGhlIHRlcm1zIG9mIHRoZSBHTlUgR2VuZXJhbCBQ
-dWJsaWMgTGljZW5zZSBhcyBwdWJsaXNoZWQgYnkKKyAqIHRoZSBGcmVlIFNvZnR3YXJlIEZvdW5k
-YXRpb247IGVpdGhlciB2ZXJzaW9uIDIgb2YgdGhlIExpY2Vuc2UsIG9yIChhdAorICogeW91ciBv
-cHRpb24pIGFueSBsYXRlciB2ZXJzaW9uLgorICovCisKKyNpbmNsdWRlIDxsaW51eC9kZWxheS5o
-PgorI2luY2x1ZGUgPGxpbnV4L21vZHVsZS5oPgorI2luY2x1ZGUgPGxpbnV4L21tYy9ob3N0Lmg+
-CisjaW5jbHVkZSAic2RoY2ktcGx0Zm0uaCIKKworc3RhdGljIGNvbnN0IHN0cnVjdCBzZGhjaV9v
-cHMgc2RoY2lfNDc2Z3RyX29wcyA9IHsKK307CisKK3N0YXRpYyBjb25zdCBzdHJ1Y3Qgc2RoY2lf
-cGx0Zm1fZGF0YSBzZGhjaV80NzZndHJfcGRhdGEgPSB7CisJLm9wcyA9ICZzZGhjaV80NzZndHJf
-b3BzLAorfTsKKworc3RhdGljIGludCBzZGhjaV80NzZndHJfcHJvYmUoc3RydWN0IHBsYXRmb3Jt
-X2RldmljZSAqcGRldikKK3sKKwlyZXR1cm4gc2RoY2lfcGx0Zm1fcmVnaXN0ZXIocGRldiwgJnNk
-aGNpXzQ3Nmd0cl9wZGF0YSwgMCk7Cit9CisKK3N0YXRpYyBpbnQgc2RoY2lfNDc2Z3RyX3JlbW92
-ZShzdHJ1Y3QgcGxhdGZvcm1fZGV2aWNlICpwZGV2KQoreworCXJldHVybiBzZGhjaV9wbHRmbV91
-bnJlZ2lzdGVyKHBkZXYpOworfQorCitzdGF0aWMgY29uc3Qgc3RydWN0IG9mX2RldmljZV9pZCBz
-ZGhjaV80NzZndHJfb2ZfbWF0Y2hbXSA9IHsKKwl7IC5jb21wYXRpYmxlID0gImlibSw0NzZndHIt
-c2RoY2kiIH0sCisJeyB9Cit9OworTU9EVUxFX0RFVklDRV9UQUJMRShvZiwgc2RoY2lfNDc2Z3Ry
-X29mX21hdGNoKTsKKworc3RhdGljIHN0cnVjdCBwbGF0Zm9ybV9kcml2ZXIgc2RoY2lfNDc2Z3Ry
-X2RyaXZlciA9IHsKKwkuZHJpdmVyID0geworCQkubmFtZSA9ICJzZGhjaS00NzZndHIiLAorCQku
-b3duZXIgPSBUSElTX01PRFVMRSwKKwkJLm9mX21hdGNoX3RhYmxlID0gc2RoY2lfNDc2Z3RyX29m
-X21hdGNoLAorCQkucG0gPSBTREhDSV9QTFRGTV9QTU9QUywKKwl9LAorCS5wcm9iZSA9IHNkaGNp
-XzQ3Nmd0cl9wcm9iZSwKKwkucmVtb3ZlID0gc2RoY2lfNDc2Z3RyX3JlbW92ZSwKK307CisKK21v
-ZHVsZV9wbGF0Zm9ybV9kcml2ZXIoc2RoY2lfNDc2Z3RyX2RyaXZlcik7CisKK01PRFVMRV9ERVND
-UklQVElPTigiUFBDNDc2R1RSIFNESENJIE9GIGRyaXZlciIpOworTU9EVUxFX0FVVEhPUigiQWxp
-c3RhaXIgUG9wcGxlIik7CitNT0RVTEVfTElDRU5TRSgiR1BMIHYyIik7Ci0tIAoxLjcuMTAuNAoK
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KTGludXhwcGMt
-ZGV2IG1haWxpbmcgbGlzdApMaW51eHBwYy1kZXZAbGlzdHMub3psYWJzLm9yZwpodHRwczovL2xp
-c3RzLm96bGFicy5vcmcvbGlzdGluZm8vbGludXhwcGMtZGV2
+On Thu, Feb 20, 2014 at 04:48:58PM +0530, Viresh Kumar wrote:
+> Nothing wrong in that, only right.. Do you want me to float a patch for
+> this or you can get that done along with your series?
+
+I'll send a follow-up mini-series of five patches for it.  It shouldn't
+depend all that much on the bigger series - and I think the first two
+patches could well do with going into -rc.
+
+ drivers/mmc/host/sdhci-spear.c  | 190 +++++++++-------------------------------
+ include/linux/mmc/sdhci-spear.h |   8 --
+ 2 files changed, 43 insertions(+), 155 deletions(-)
+
+-- 
+FTTC broadband for 0.8mile line: 5.8Mbps down 500kbps up.  Estimation
+in database were 13.1 to 19Mbit for a good line, about 7.5+ for a bad.
+Estimate before purchase was "up to 13.2Mbit".
