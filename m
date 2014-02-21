@@ -1,133 +1,48 @@
-From: Russell King <rmk+kernel@arm.linux.org.uk>
-Subject: [PATCH 5/5] mmc: sdhci-spear: use generic card detection gpio support
-Date: Fri, 21 Feb 2014 10:41:28 +0000
-Message-ID: <E1WGnXs-0007Jw-0M@rmk-PC.arm.linux.org.uk>
-References: <20140221103710.GB21483@n2100.arm.linux.org.uk>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from gw-1.arm.linux.org.uk ([78.32.30.217]:45461 "EHLO
-	pandora.arm.linux.org.uk" rhost-flags-OK-OK-OK-FAIL)
-	by vger.kernel.org with ESMTP id S1754688AbaBUKlk (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 21 Feb 2014 05:41:40 -0500
-In-Reply-To: <20140221103710.GB21483@n2100.arm.linux.org.uk>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>
+Subject: Re: [PATCH 5/5][RESENT] mmc: SDHI: update sh_mobile_sdhi_of_data
+ for r8a7791
+Date: Fri, 21 Feb 2014 16:36:27 +0400
+Message-ID: <5307484B.5040500@cogentembedded.com>
+References: <87lhy090m0.wl%kuninori.morimoto.gx@gmail.com>	<878ut5qo9d.wl%kuninori.morimoto.gx@gmail.com> <871tyxqo6v.wl%kuninori.morimoto.gx@gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-sh-owner@vger.kernel.org>
+In-Reply-To: <871tyxqo6v.wl%kuninori.morimoto.gx@gmail.com>
+Sender: linux-sh-owner@vger.kernel.org
+To: Kuninori Morimoto <kuninori.morimoto.gx@gmail.com>, Chris Ball <cjb@laptop.org>
+Cc: Simon <horms@verge.net.au>, Magnus <magnus.damm@gmail.com>, Linux-SH <linux-sh@vger.kernel.org>, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Viresh Kumar <viresh.kumar@linaro.org>, Pratyush Anand <pratyush.anand@st.com>, Mohit KUMAR <Mohit.KUMAR@st.com>
-Cc: linux-arm-kernel@lists.infradead.org, Viresh Kumar <viresh.linux@gmail.com>, Chris Ball <chris@printf.net>, spear-devel@list.st.com, linux-mmc@vger.kernel.org
 
-sdhci has support for using GPIOs for card detection.  If we have a
-GPIO specified, we can use that directly, without needing our own
-interrupt handler.
+Hello.
 
-Signed-off-by: Russell King <rmk+kernel@arm.linux.org.uk>
----
- drivers/mmc/host/sdhci-spear.c | 78 +++++++++---------------------------------
- 1 file changed, 16 insertions(+), 62 deletions(-)
+On 21-02-2014 4:55, Kuninori Morimoto wrote:
 
-diff --git a/drivers/mmc/host/sdhci-spear.c b/drivers/mmc/host/sdhci-spear.c
-index 00a73b1a6444..af3338fb0762 100644
---- a/drivers/mmc/host/sdhci-spear.c
-+++ b/drivers/mmc/host/sdhci-spear.c
-@@ -43,28 +43,6 @@ static const struct sdhci_ops sdhci_pltfm_ops = {
- 	.set_uhs_signaling = sdhci_set_uhs_signaling,
- };
- 
--/* gpio card detection interrupt handler */
--static irqreturn_t sdhci_gpio_irq(int irq, void *dev_id)
--{
--	struct platform_device *pdev = dev_id;
--	struct sdhci_host *host = platform_get_drvdata(pdev);
--	struct spear_sdhci *sdhci = dev_get_platdata(&pdev->dev);
--	unsigned long gpio_irq_type;
--	int val;
--
--	val = gpio_get_value(sdhci->data->card_int_gpio);
--
--	/* val == 1 -> card removed, val == 0 -> card inserted */
--	/* if card removed - set irq for low level, else vice versa */
--	gpio_irq_type = val ? IRQF_TRIGGER_LOW : IRQF_TRIGGER_HIGH;
--	irq_set_irq_type(irq, gpio_irq_type);
--
--	/* inform sdhci driver about card insertion/removal */
--	tasklet_schedule(&host->card_tasklet);
--
--	return IRQ_HANDLED;
--}
--
- #ifdef CONFIG_OF
- static struct sdhci_plat_data *sdhci_probe_config_dt(struct platform_device *pdev)
- {
-@@ -157,6 +135,22 @@ static int sdhci_probe(struct platform_device *pdev)
- 		sdhci->data = dev_get_platdata(&pdev->dev);
- 	}
- 
-+	/*
-+	 * It is optional to use GPIOs for sdhci card detection. If
-+	 * sdhci->data is NULL, then use original sdhci lines otherwise
-+	 * GPIO lines. We use the built-in GPIO support for this.
-+	 */
-+	if (sdhci->data && sdhci->data->card_int_gpio >= 0) {
-+		ret = mmc_gpio_request_cd(host->mmc,
-+					  sdhci->data->card_int_gpio, 0);
-+		if (ret < 0) {
-+			dev_dbg(&pdev->dev,
-+				"failed to request card-detect gpio%d\n",
-+				sdhci->data->card_int_gpio);
-+			goto disable_clk;
-+		}
-+	}
-+
- 	ret = sdhci_add_host(host);
- 	if (ret) {
- 		dev_dbg(&pdev->dev, "error adding host\n");
-@@ -165,48 +159,8 @@ static int sdhci_probe(struct platform_device *pdev)
- 
- 	platform_set_drvdata(pdev, host);
- 
--	/*
--	 * It is optional to use GPIOs for sdhci Power control & sdhci card
--	 * interrupt detection. If sdhci->data is NULL, then use original sdhci
--	 * lines otherwise GPIO lines.
--	 * If GPIO is selected for power control, then power should be disabled
--	 * after card removal and should be enabled when card insertion
--	 * interrupt occurs
--	 */
--	if (!sdhci->data)
--		return 0;
--
--	if (sdhci->data->card_int_gpio >= 0) {
--		ret = devm_gpio_request(&pdev->dev, sdhci->data->card_int_gpio,
--				"sdhci");
--		if (ret < 0) {
--			dev_dbg(&pdev->dev, "gpio request fail: %d\n",
--					sdhci->data->card_int_gpio);
--			goto set_drvdata;
--		}
--
--		ret = gpio_direction_input(sdhci->data->card_int_gpio);
--		if (ret) {
--			dev_dbg(&pdev->dev, "gpio set direction fail: %d\n",
--					sdhci->data->card_int_gpio);
--			goto set_drvdata;
--		}
--		ret = devm_request_irq(&pdev->dev,
--				gpio_to_irq(sdhci->data->card_int_gpio),
--				sdhci_gpio_irq, IRQF_TRIGGER_LOW,
--				mmc_hostname(host->mmc), pdev);
--		if (ret) {
--			dev_dbg(&pdev->dev, "gpio request irq fail: %d\n",
--					sdhci->data->card_int_gpio);
--			goto set_drvdata;
--		}
--
--	}
--
- 	return 0;
- 
--set_drvdata:
--	sdhci_remove_host(host, 1);
- disable_clk:
- 	clk_disable_unprepare(sdhci->clk);
- err_host:
--- 
-1.8.3.1
+> From: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
+
+> This patch updates r8a7791 DT data to have SoC specific settings.
+
+    It doesn't update R8A7791 DT data, it adds the DT support for R8A7791. 
+Please fix the changelog.
+
+> Acked-by: Simon Horman <horms+renesas@verge.net.au>
+> Signed-off-by: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
+> ---
+>   drivers/mmc/host/sh_mobile_sdhi.c |    1 +
+>   1 file changed, 1 insertion(+)
+
+> diff --git a/drivers/mmc/host/sh_mobile_sdhi.c b/drivers/mmc/host/sh_mobile_sdhi.c
+> index cfc37ec..91058da 100644
+> --- a/drivers/mmc/host/sh_mobile_sdhi.c
+> +++ b/drivers/mmc/host/sh_mobile_sdhi.c
+> @@ -67,6 +67,7 @@ static const struct of_device_id sh_mobile_sdhi_of_match[] = {
+>   	{ .compatible = "renesas,sdhi-r8a7778", .data = &of_rcar_gen1_compatible, },
+>   	{ .compatible = "renesas,sdhi-r8a7779", .data = &of_rcar_gen1_compatible, },
+>   	{ .compatible = "renesas,sdhi-r8a7790", .data = &of_rcar_gen2_compatible, },
+> +	{ .compatible = "renesas,sdhi-r8a7791", .data = &of_rcar_gen2_compatible, },
+>   	{},
+>   };
+>   MODULE_DEVICE_TABLE(of, sh_mobile_sdhi_of_match);
+
+WBR, Sergei
 
