@@ -1,92 +1,103 @@
 From: Russell King <rmk+kernel@arm.linux.org.uk>
-Subject: [PATCH 3/5] mmc: sdhci-spear: simplify resource handling
-Date: Fri, 21 Feb 2014 10:41:17 +0000
-Message-ID: <E1WGnXh-0007Jo-Pr@rmk-PC.arm.linux.org.uk>
+Subject: [PATCH 4/5] mmc: sdhci-spear: remove support for power gpio
+Date: Fri, 21 Feb 2014 10:41:22 +0000
+Message-ID: <E1WGnXm-0007Js-TC@rmk-PC.arm.linux.org.uk>
 References: <20140221103710.GB21483@n2100.arm.linux.org.uk>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from gw-1.arm.linux.org.uk ([78.32.30.217]:45450 "EHLO
+Received: from gw-1.arm.linux.org.uk ([78.32.30.217]:45458 "EHLO
 	pandora.arm.linux.org.uk" rhost-flags-OK-OK-OK-FAIL)
-	by vger.kernel.org with ESMTP id S1754608AbaBUKl0 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 21 Feb 2014 05:41:26 -0500
+	by vger.kernel.org with ESMTP id S1754682AbaBUKlc (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 21 Feb 2014 05:41:32 -0500
 In-Reply-To: <20140221103710.GB21483@n2100.arm.linux.org.uk>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Viresh Kumar <viresh.kumar@linaro.org>, Pratyush Anand <pratyush.anand@st.com>, Mohit KUMAR <Mohit.KUMAR@st.com>
 Cc: linux-arm-kernel@lists.infradead.org, Viresh Kumar <viresh.linux@gmail.com>, Chris Ball <chris@printf.net>, spear-devel@list.st.com, linux-mmc@vger.kernel.org
 
-Use devm_ioremap_resource() to simplify iomem resource handling in the
-probe path.
+None of this code is currently used: there are no definitions of
+struct sdhci_plat_data in arch/arm, neither are there any DT properties
+which use card_power_gpio/power_active_high/power_always_enb.  In any
+case, slot power control should be rigged up via vmmc and the regulator
+subsystem in the DT case.
 
 Signed-off-by: Russell King <rmk+kernel@arm.linux.org.uk>
 ---
- drivers/mmc/host/sdhci-spear.c | 40 +++++++++++++---------------------------
- 1 file changed, 13 insertions(+), 27 deletions(-)
+ drivers/mmc/host/sdhci-spear.c  | 32 --------------------------------
+ include/linux/mmc/sdhci-spear.h |  8 --------
+ 2 files changed, 40 deletions(-)
 
 diff --git a/drivers/mmc/host/sdhci-spear.c b/drivers/mmc/host/sdhci-spear.c
-index ca1cb9776ea2..f879b27e59b1 100644
+index f879b27e59b1..00a73b1a6444 100644
 --- a/drivers/mmc/host/sdhci-spear.c
 +++ b/drivers/mmc/host/sdhci-spear.c
-@@ -113,20 +113,6 @@ static int sdhci_probe(struct platform_device *pdev)
- 	struct device *dev;
- 	int ret;
+@@ -59,14 +59,6 @@ static irqreturn_t sdhci_gpio_irq(int irq, void *dev_id)
+ 	gpio_irq_type = val ? IRQF_TRIGGER_LOW : IRQF_TRIGGER_HIGH;
+ 	irq_set_irq_type(irq, gpio_irq_type);
  
--	iomem = platform_get_resource(pdev, IORESOURCE_MEM, 0);
--	if (!iomem) {
--		ret = -ENOMEM;
--		dev_dbg(&pdev->dev, "memory resource not defined\n");
--		goto err;
+-	if (sdhci->data->card_power_gpio >= 0) {
+-		if (!sdhci->data->power_always_enb) {
+-			/* if card inserted, give power, otherwise remove it */
+-			val = sdhci->data->power_active_high ? !val : val ;
+-			gpio_set_value(sdhci->data->card_power_gpio, val);
+-		}
 -	}
 -
--	if (!devm_request_mem_region(&pdev->dev, iomem->start,
--				resource_size(iomem), "spear-sdhci")) {
--		ret = -EBUSY;
--		dev_dbg(&pdev->dev, "cannot request region\n");
--		goto err;
+ 	/* inform sdhci driver about card insertion/removal */
+ 	tasklet_schedule(&host->card_tasklet);
+ 
+@@ -184,30 +176,6 @@ static int sdhci_probe(struct platform_device *pdev)
+ 	if (!sdhci->data)
+ 		return 0;
+ 
+-	if (sdhci->data->card_power_gpio >= 0) {
+-		int val = 0;
+-
+-		ret = devm_gpio_request(&pdev->dev,
+-				sdhci->data->card_power_gpio, "sdhci");
+-		if (ret < 0) {
+-			dev_dbg(&pdev->dev, "gpio request fail: %d\n",
+-					sdhci->data->card_power_gpio);
+-			goto set_drvdata;
+-		}
+-
+-		if (sdhci->data->power_always_enb)
+-			val = sdhci->data->power_active_high;
+-		else
+-			val = !sdhci->data->power_active_high;
+-
+-		ret = gpio_direction_output(sdhci->data->card_power_gpio, val);
+-		if (ret) {
+-			dev_dbg(&pdev->dev, "gpio set direction fail: %d\n",
+-					sdhci->data->card_power_gpio);
+-			goto set_drvdata;
+-		}
 -	}
 -
- 	dev = pdev->dev.parent ? pdev->dev.parent : &pdev->dev;
- 	host = sdhci_alloc_host(dev, sizeof(*sdhci));
- 	if (IS_ERR(host)) {
-@@ -135,6 +121,19 @@ static int sdhci_probe(struct platform_device *pdev)
- 		goto err;
- 	}
+ 	if (sdhci->data->card_int_gpio >= 0) {
+ 		ret = devm_gpio_request(&pdev->dev, sdhci->data->card_int_gpio,
+ 				"sdhci");
+diff --git a/include/linux/mmc/sdhci-spear.h b/include/linux/mmc/sdhci-spear.h
+index e78c0e236e9d..8cc095a76cf8 100644
+--- a/include/linux/mmc/sdhci-spear.h
++++ b/include/linux/mmc/sdhci-spear.h
+@@ -18,17 +18,9 @@
+ /*
+  * struct sdhci_plat_data: spear sdhci platform data structure
+  *
+- * @card_power_gpio: gpio pin for enabling/disabling power to sdhci socket
+- * @power_active_high: if set, enable power to sdhci socket by setting
+- *			card_power_gpio
+- * @power_always_enb: If set, then enable power on probe, otherwise enable only
+- *			on card insertion and disable on card removal.
+  * card_int_gpio: gpio pin used for card detection
+  */
+ struct sdhci_plat_data {
+-	int card_power_gpio;
+-	int power_active_high;
+-	int power_always_enb;
+ 	int card_int_gpio;
+ };
  
-+	iomem = platform_get_resource(pdev, IORESOURCE_MEM, 0);
-+	host->ioaddr = devm_ioremap_resource(&pdev->dev, iomem);
-+	if (IS_ERR(host->ioaddr)) {
-+		ret = PTR_ERR(host->ioaddr);
-+		dev_dbg(&pdev->dev, "unable to map iomem: %d\n", ret);
-+		goto err_host;
-+	}
-+
-+	host->hw_name = "sdhci";
-+	host->ops = &sdhci_pltfm_ops;
-+	host->irq = platform_get_irq(pdev, 0);
-+	host->quirks = SDHCI_QUIRK_BROKEN_ADMA;
-+
- 	sdhci = sdhci_priv(host);
- 
- 	/* clk enable */
-@@ -166,19 +165,6 @@ static int sdhci_probe(struct platform_device *pdev)
- 		sdhci->data = dev_get_platdata(&pdev->dev);
- 	}
- 
--	host->hw_name = "sdhci";
--	host->ops = &sdhci_pltfm_ops;
--	host->irq = platform_get_irq(pdev, 0);
--	host->quirks = SDHCI_QUIRK_BROKEN_ADMA;
--
--	host->ioaddr = devm_ioremap(&pdev->dev, iomem->start,
--			resource_size(iomem));
--	if (!host->ioaddr) {
--		ret = -ENOMEM;
--		dev_dbg(&pdev->dev, "failed to remap registers\n");
--		goto disable_clk;
--	}
--
- 	ret = sdhci_add_host(host);
- 	if (ret) {
- 		dev_dbg(&pdev->dev, "error adding host\n");
 -- 
 1.8.3.1
 
