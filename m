@@ -1,55 +1,84 @@
-From: =?GB2312?B?1cXS4w==?= <yix.x.zhang@gmail.com>
-Subject: Re: [PATCH] Add eMMC 5.0 support
-Date: Fri, 21 Feb 2014 10:16:11 +0800
-Message-ID: <CAAP1=Nk4ppcmMhQ8b6QzT3AQG1cSExfVpmk=6Duun9HhOb1wuA@mail.gmail.com>
-References: <1392817677-4755-1-git-send-email-yix.x.zhang@gmail.com>
-	<530564A1.50708@samsung.com>
+From: Alistair Popple <alistair@popple.id.au>
+Subject: [PATCH 0/7] IBM Akebono/PPC476GTR Support
+Date: Fri, 21 Feb 2014 17:31:26 +1100
+Message-ID: <1392964293-13687-1-git-send-email-alistair@popple.id.au>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qc0-f195.google.com ([209.85.216.195]:64892 "EHLO
-	mail-qc0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751163AbaBUCQM (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 20 Feb 2014 21:16:12 -0500
-In-Reply-To: <530564A1.50708@samsung.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org>
+List-Unsubscribe: <https://lists.ozlabs.org/options/linuxppc-dev>,
+ <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=unsubscribe>
+List-Archive: <http://lists.ozlabs.org/pipermail/linuxppc-dev/>
+List-Post: <mailto:linuxppc-dev@lists.ozlabs.org>
+List-Help: <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=help>
+List-Subscribe: <https://lists.ozlabs.org/listinfo/linuxppc-dev>,
+ <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=subscribe>
+Errors-To: linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org
+Sender: "Linuxppc-dev"
+ <linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org>
+To: benh@kernel.crashing.org, gregkh@linuxfoundation.org, netdev@vger.kernel.org, linux-mmc@vger.kernel.org, cjb@laptop.org, linux-usb@vger.kernel.org
+Cc: Alistair Popple <alistair@popple.id.au>, linuxppc-dev@lists.ozlabs.org, linux-kernel@vger.kernel.org, devicetree@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-Oh, I missed this mail, thanks
-
-2014-02-20 10:12 GMT+08:00 Jaehoon Chung <jh80.chung@samsung.com>:
-> Hi,
->
-> You can refer to this.
->
-> http://comments.gmane.org/gmane.linux.kernel.mmc/23838
->
-> Best Regards,
-> Jaehoon Chung
->
-> On 02/19/2014 10:47 PM, Zhang Yi wrote:
->> Current code will exist when read eMMC 5.0, add support for it
->>
->> Signed-off-by: Zhang Yi <yix.x.zhang@gmail.com>
->> ---
->>  mmc_cmds.c |    3 +++
->>  1 file changed, 3 insertions(+)
->>
->> diff --git a/mmc_cmds.c b/mmc_cmds.c
->> index b8afa74..5edf42b 100644
->> --- a/mmc_cmds.c
->> +++ b/mmc_cmds.c
->> @@ -722,6 +722,9 @@ int do_read_extcsd(int nargs, char **argv)
->>       ext_csd_rev = ext_csd[192];
->>
->>       switch (ext_csd_rev) {
->> +     case 7:
->> +             str = "5.0";
->> +             break;
->>       case 6:
->>               str = "4.5";
->>               break;
->>
->
+VGhlIElCTSBBa2Vib25vIGJvYXJkIGlzIGEgZGV2ZWxvcG1lbnQgYm9hcmQgZm9yIHRoZSBuZXcg
+UFBDNDc2R1RSCnN5c3RlbSBvbiBjaGlwIChTb0MpLgoKVGhpcyBpcyBqdXN0IGEgcmVzdWJtaXNz
+aW9uIG9mIHRoZSBwcmV2aW91cyBwYXRjaGVzIHJlYmFzZWQgb24ga2VybmVsCnYzLjEzLiBCZW4g
+SCBoYXMgaW5kaWNhdGVkIHRoZSBzdWJzeXN0ZW0gc3BlY2lmaWMgY2hhbmdlcyBzaG91bGQgYmUK
+bWVyZ2VkIHZpYSB0aGUgYXBwcm9wcmlhdGUga2VybmVsIHRyZWVzLgoKQWxpc3RhaXIgUG9wcGxl
+ICg3KToKICBJQk0gQWtlYm9ubzogQWRkIGEgU0RIQ0kgcGxhdGZvcm0gZHJpdmVyCiAgSUJNIEFr
+ZWJvbm86IEFkZCBzdXBwb3J0IGZvciBhIG5ldyBQSFkgaW50ZXJmYWNlIHRvIHRoZSBJQk0gZW1h
+YwogICAgZHJpdmVyCiAgSUJNIEFrZWJvbm86IEFkZCBzdXBwb3J0IHRvIHRoZSBPSENJIHBsYXRm
+b3JtIGRyaXZlciBmb3IgUFBDNDc2R1RSCiAgRUNISSBQbGF0Zm9ybTogTWVyZ2UgcHBjLW9mIEVI
+Q0kgZHJpdmVyIGludG8gdGhlIGVoY2ktcGxhdGZvcm0gZHJpdmVyCiAgSUJNIEN1cnJpdHVjazog
+Q2xlYW4gdXAgYm9hcmQgc3BlY2lmaWMgY29kZSBiZWZvcmUgYWRkaW5nIEFrZWJvbm8KICAgIGNv
+ZGUKICBJQk0gQWtlYm9ubzogQWRkIHRoZSBBa2Vib25vIHBsYXRmb3JtCiAgcG93ZXJwYzogQWRk
+ZWQgUENJIE1TSSBzdXBwb3J0IHVzaW5nIHRoZSBIU1RBIG1vZHVsZQoKIC4uLi9kZXZpY2V0cmVl
+L2JpbmRpbmdzL3Bvd2VycGMvNHh4L2FrZWJvbm8udHh0ICAgIHwgICA1NCArKysKIC4uLi9kZXZp
+Y2V0cmVlL2JpbmRpbmdzL3Bvd2VycGMvNHh4L2VtYWMudHh0ICAgICAgIHwgICAgOSArCiBhcmNo
+L3Bvd2VycGMvYm9vdC9NYWtlZmlsZSAgICAgICAgICAgICAgICAgICAgICAgICB8ICAgIDMgKwog
+YXJjaC9wb3dlcnBjL2Jvb3QvZGNyLmggICAgICAgICAgICAgICAgICAgICAgICAgICAgfCAgICA0
+ICsKIGFyY2gvcG93ZXJwYy9ib290L2R0cy9ha2Vib25vLmR0cyAgICAgICAgICAgICAgICAgIHwg
+IDQxNSArKysrKysrKysrKysrKysrKysrKwogYXJjaC9wb3dlcnBjL2Jvb3QvdHJlZWJvb3QtYWtl
+Ym9uby5jICAgICAgICAgICAgICAgfCAgMTYzICsrKysrKysrCiBhcmNoL3Bvd2VycGMvYm9vdC93
+cmFwcGVyICAgICAgICAgICAgICAgICAgICAgICAgICB8ICAgIDMgKwogYXJjaC9wb3dlcnBjL2Nv
+bmZpZ3MvNDR4L2FrZWJvbm9fZGVmY29uZmlnICAgICAgICAgfCAgMTQ4ICsrKysrKysKIGFyY2gv
+cG93ZXJwYy9wbGF0Zm9ybXMvNDR4L0tjb25maWcgICAgICAgICAgICAgICAgIHwgICAyOCArKwog
+YXJjaC9wb3dlcnBjL3BsYXRmb3Jtcy80NHgvTWFrZWZpbGUgICAgICAgICAgICAgICAgfCAgICAz
+ICstCiBhcmNoL3Bvd2VycGMvcGxhdGZvcm1zLzQ0eC9jdXJyaXR1Y2suYyAgICAgICAgICAgICB8
+ICAyMzMgLS0tLS0tLS0tLS0KIGFyY2gvcG93ZXJwYy9wbGF0Zm9ybXMvNDR4L3BwYzQ3Ni5jICAg
+ICAgICAgICAgICAgIHwgIDI5OSArKysrKysrKysrKysrKwogYXJjaC9wb3dlcnBjL3N5c2Rldi9L
+Y29uZmlnICAgICAgICAgICAgICAgICAgICAgICAgfCAgICA2ICsKIGFyY2gvcG93ZXJwYy9zeXNk
+ZXYvTWFrZWZpbGUgICAgICAgICAgICAgICAgICAgICAgIHwgICAgMSArCiBhcmNoL3Bvd2VycGMv
+c3lzZGV2L3BwYzR4eF9oc3RhX21zaS5jICAgICAgICAgICAgICB8ICAyMTUgKysrKysrKysrKwog
+YXJjaC9wb3dlcnBjL3N5c2Rldi9wcGM0eHhfcGNpLmMgICAgICAgICAgICAgICAgICAgfCAgIDIx
+ICstCiBkcml2ZXJzL21tYy9ob3N0L0tjb25maWcgICAgICAgICAgICAgICAgICAgICAgICAgICB8
+ICAgMTIgKwogZHJpdmVycy9tbWMvaG9zdC9NYWtlZmlsZSAgICAgICAgICAgICAgICAgICAgICAg
+ICAgfCAgICAxICsKIGRyaXZlcnMvbW1jL2hvc3Qvc2RoY2ktb2YtNDc2Z3RyLmMgICAgICAgICAg
+ICAgICAgIHwgICA2MCArKysKIGRyaXZlcnMvbmV0L2V0aGVybmV0L2libS9lbWFjL0tjb25maWcg
+ICAgICAgICAgICAgIHwgICAgNCArCiBkcml2ZXJzL25ldC9ldGhlcm5ldC9pYm0vZW1hYy9NYWtl
+ZmlsZSAgICAgICAgICAgICB8ICAgIDEgKwogZHJpdmVycy9uZXQvZXRoZXJuZXQvaWJtL2VtYWMv
+Y29yZS5jICAgICAgICAgICAgICAgfCAgIDUwICsrLQogZHJpdmVycy9uZXQvZXRoZXJuZXQvaWJt
+L2VtYWMvY29yZS5oICAgICAgICAgICAgICAgfCAgIDEyICsKIGRyaXZlcnMvbmV0L2V0aGVybmV0
+L2libS9lbWFjL3JnbWlpX3dvbC5jICAgICAgICAgIHwgIDI0NCArKysrKysrKysrKysKIGRyaXZl
+cnMvbmV0L2V0aGVybmV0L2libS9lbWFjL3JnbWlpX3dvbC5oICAgICAgICAgIHwgICA2MiArKysK
+IGRyaXZlcnMvdXNiL2hvc3QvS2NvbmZpZyAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgICAg
+NyArLQogZHJpdmVycy91c2IvaG9zdC9laGNpLWhjZC5jICAgICAgICAgICAgICAgICAgICAgICAg
+fCAgICA1IC0KIGRyaXZlcnMvdXNiL2hvc3QvZWhjaS1wbGF0Zm9ybS5jICAgICAgICAgICAgICAg
+ICAgIHwgICA4NyArKystCiBkcml2ZXJzL3VzYi9ob3N0L2VoY2ktcHBjLW9mLmMgICAgICAgICAg
+ICAgICAgICAgICB8ICAyMzggLS0tLS0tLS0tLS0KIGRyaXZlcnMvdXNiL2hvc3Qvb2hjaS1wbGF0
+Zm9ybS5jICAgICAgICAgICAgICAgICAgIHwgICAyMiArLQogMzAgZmlsZXMgY2hhbmdlZCwgMTkx
+MiBpbnNlcnRpb25zKCspLCA0OTggZGVsZXRpb25zKC0pCiBjcmVhdGUgbW9kZSAxMDA2NDQgRG9j
+dW1lbnRhdGlvbi9kZXZpY2V0cmVlL2JpbmRpbmdzL3Bvd2VycGMvNHh4L2FrZWJvbm8udHh0CiBj
+cmVhdGUgbW9kZSAxMDA2NDQgYXJjaC9wb3dlcnBjL2Jvb3QvZHRzL2FrZWJvbm8uZHRzCiBjcmVh
+dGUgbW9kZSAxMDA2NDQgYXJjaC9wb3dlcnBjL2Jvb3QvdHJlZWJvb3QtYWtlYm9uby5jCiBjcmVh
+dGUgbW9kZSAxMDA2NDQgYXJjaC9wb3dlcnBjL2NvbmZpZ3MvNDR4L2FrZWJvbm9fZGVmY29uZmln
+CiBkZWxldGUgbW9kZSAxMDA2NDQgYXJjaC9wb3dlcnBjL3BsYXRmb3Jtcy80NHgvY3Vycml0dWNr
+LmMKIGNyZWF0ZSBtb2RlIDEwMDY0NCBhcmNoL3Bvd2VycGMvcGxhdGZvcm1zLzQ0eC9wcGM0NzYu
+YwogY3JlYXRlIG1vZGUgMTAwNjQ0IGFyY2gvcG93ZXJwYy9zeXNkZXYvcHBjNHh4X2hzdGFfbXNp
+LmMKIGNyZWF0ZSBtb2RlIDEwMDY0NCBkcml2ZXJzL21tYy9ob3N0L3NkaGNpLW9mLTQ3Nmd0ci5j
+CiBjcmVhdGUgbW9kZSAxMDA2NDQgZHJpdmVycy9uZXQvZXRoZXJuZXQvaWJtL2VtYWMvcmdtaWlf
+d29sLmMKIGNyZWF0ZSBtb2RlIDEwMDY0NCBkcml2ZXJzL25ldC9ldGhlcm5ldC9pYm0vZW1hYy9y
+Z21paV93b2wuaAogZGVsZXRlIG1vZGUgMTAwNjQ0IGRyaXZlcnMvdXNiL2hvc3QvZWhjaS1wcGMt
+b2YuYwoKLS0gCjEuNy4xMC40CgpfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fXwpMaW51eHBwYy1kZXYgbWFpbGluZyBsaXN0CkxpbnV4cHBjLWRldkBsaXN0cy5v
+emxhYnMub3JnCmh0dHBzOi8vbGlzdHMub3psYWJzLm9yZy9saXN0aW5mby9saW51eHBwYy1kZXY=
