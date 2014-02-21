@@ -1,77 +1,62 @@
-From: Arend van Spriel <arend@broadcom.com>
-Subject: RESEND:[PATCH V3] sdhci: only reprogram retuning timer when flag is set
-Date: Fri, 21 Feb 2014 20:59:42 +0100
-Message-ID: <1393012782-23917-1-git-send-email-arend@broadcom.com>
+From: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
+Subject: Re: [PATCH 1/2] mmc: host: MMC_SH_MMCIF should depend on HAS_DMA
+Date: Fri, 21 Feb 2014 21:26:59 +0100
+Message-ID: <1491186.LfrL8k5P1F@avalon>
+References: <1393012371-22320-1-git-send-email-geert@linux-m68k.org>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7Bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-gw2-out.broadcom.com ([216.31.210.63]:31468 "EHLO
-	mail-gw2-out.broadcom.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751308AbaBUT7r (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 21 Feb 2014 14:59:47 -0500
+Received: from perceval.ideasonboard.com ([95.142.166.194]:37853 "EHLO
+	perceval.ideasonboard.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754240AbaBUUZq (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 21 Feb 2014 15:25:46 -0500
+In-Reply-To: <1393012371-22320-1-git-send-email-geert@linux-m68k.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <chris@printf.net>
-Cc: linux-mmc@vger.kernel.org, Arend van Spriel <arend@broadcom.com>, Dong Aisheng <dongas86@gmail.com>, Aaron Lu <aaron.lwe@gmail.com>
+To: Geert Uytterhoeven <geert@linux-m68k.org>, Amarinder Bindra <a-bindra@ti.com>
+Cc: Chris Ball <chris@printf.net>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-When the host->tuning_count is zero it means that the
-retuning is disabled. This is checked on the first
-run of sdhci_execute_tuning() by the if statement below:
+Hi Geert,
 
-	if (!(host->flags & SDHCI_NEEDS_RETUNING) && host->tuning_count &&
-	    (host->tuning_mode == SDHCI_TUNING_MODE_1)) {
+Thank you for the patches.
 
-So only when tuning_count is non-zero it will set the host
-flag SDHCI_USING_RETUNING_TIMER. The else statement is only
-for re-programming the timer, which means that flag must be
-set. Because that is not checked the else statement is executed
-in the first run when tuning_count is zero.
+On Friday 21 February 2014 20:52:50 Geert Uytterhoeven wrote:
+> If NO_DMA=y:
+> 
+>     drivers/built-in.o: In function `sh_mmcif_start_dma_tx':
+>     sh_mmcif.c:(.text+0x5a3286): undefined reference to `dma_map_sg'
+>     drivers/built-in.o: In function `sh_mmcif_start_dma_rx':
+>     sh_mmcif.c:(.text+0x5a33fc): undefined reference to `dma_map_sg'
+>     drivers/built-in.o: In function `sh_mmcif_end_cmd':
+>     sh_mmcif.c:(.text+0x5a3668): undefined reference to `dma_unmap_sg'
+> 
+> Signed-off-by: Geert Uytterhoeven <geert@linux-m68k.org>
 
-This was seen on a host controller which indicated
-SDHCI_TUNING_MODE_1 (0) and tuning_count being zero. Suspect
-that (one of) these registers is not properly set.
+For both,
 
-Cc: Dong Aisheng <dongas86@gmail.com>
-Cc: Aaron Lu <aaron.lwe@gmail.com>
-Signed-off-by: Arend van Spriel <arend@broadcom.com>
----
-Noticed this patch was still not applied so please reconsider
-taking it in and let me know. The patch has been rebased and
-applies to the mmc-next branch.
+Acked-by: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
 
-Regards,
-Arend
+> ---
+>  drivers/mmc/host/Kconfig |    2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+> 
+> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+> index 1384f67abe21..bfe2133d0b9c 100644
+> --- a/drivers/mmc/host/Kconfig
+> +++ b/drivers/mmc/host/Kconfig
+> @@ -611,7 +611,7 @@ config MMC_DW_PCI
+> 
+>  config MMC_SH_MMCIF
+>  	tristate "SuperH Internal MMCIF support"
+> -	depends on MMC_BLOCK
+> +	depends on MMC_BLOCK && HAS_DMA
+>  	depends on SUPERH || ARCH_SHMOBILE || COMPILE_TEST
+>  	help
+>  	  This selects the MMC Host Interface controller (MMCIF).
 
-V3:
-- remote tuning mode check for retuning timer reload
-
-V2:
-- add more explanation to the commit message
-- check host flag SDHCI_USING_RETUNING_TIMER
----
- drivers/mmc/host/sdhci.c | 7 +++----
- 1 file changed, 3 insertions(+), 4 deletions(-)
-
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 9ddef47..d5b421d 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -2026,12 +2026,11 @@ out:
- 			host->tuning_count * HZ);
- 		/* Tuning mode 1 limits the maximum data length to 4MB */
- 		mmc->max_blk_count = (4 * 1024 * 1024) / mmc->max_blk_size;
--	} else {
-+	} else if (host->flags & SDHCI_USING_RETUNING_TIMER) {
- 		host->flags &= ~SDHCI_NEEDS_RETUNING;
- 		/* Reload the new initial value for timer */
--		if (host->tuning_mode == SDHCI_TUNING_MODE_1)
--			mod_timer(&host->tuning_timer, jiffies +
--				host->tuning_count * HZ);
-+		mod_timer(&host->tuning_timer, jiffies +
-+			  host->tuning_count * HZ);
- 	}
- 
- 	/*
 -- 
-1.8.1.3
+Regards,
+
+Laurent Pinchart
 
