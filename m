@@ -1,100 +1,75 @@
-From: <micky_ching@realsil.com.cn>
-Subject: [PATCH] mmc: sdhci: add support for realtek rts5250
-Date: Fri, 21 Feb 2014 18:40:35 +0800
-Message-ID: <1392979235-26664-1-git-send-email-micky_ching@realsil.com.cn>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
-List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
-List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel>
-List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
-List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
-List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
-Errors-To: driverdev-devel-bounces@linuxdriverproject.org
-Sender: driverdev-devel-bounces@linuxdriverproject.org
-To: chris@printf.net, sameo@linux.intel.com, lee.jones@linaro.org
-Cc: ulf.hansson@linaro.org, gregkh@linuxfoundation.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, wei_wang@realsil.com.cn, rogerable@realtek.com, devel@linuxdriverproject.org, dan.carpenter@oracle.com
+From: Russell King <rmk+kernel@arm.linux.org.uk>
+Subject: [PATCH 1/5] mmc: sdhci-spear: fix error handling paths for DT
+Date: Fri, 21 Feb 2014 10:41:07 +0000
+Message-ID: <E1WGnXX-0007Jg-JR@rmk-PC.arm.linux.org.uk>
+References: <20140221103710.GB21483@n2100.arm.linux.org.uk>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from gw-1.arm.linux.org.uk ([78.32.30.217]:45436 "EHLO
+	pandora.arm.linux.org.uk" rhost-flags-OK-OK-OK-FAIL)
+	by vger.kernel.org with ESMTP id S1754620AbaBUKlQ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 21 Feb 2014 05:41:16 -0500
+In-Reply-To: <20140221103710.GB21483@n2100.arm.linux.org.uk>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Viresh Kumar <viresh.kumar@linaro.org>, Pratyush Anand <pratyush.anand@st.com>, Mohit KUMAR <Mohit.KUMAR@st.com>
+Cc: linux-arm-kernel@lists.infradead.org, Viresh Kumar <viresh.linux@gmail.com>, Chris Ball <chris@printf.net>, spear-devel@list.st.com, linux-mmc@vger.kernel.org
 
-From: Micky Ching <micky_ching@realsil.com.cn>
+Fix the error handling paths for DT and simplify using the devm_* API
+for clk_get().
 
-Add support for realtek rts5250 pci card reader. The card reader have
-some problem with DDR50 mode, so add a new quirks2 for broken ddr50.
-
-Signed-off-by: Micky Ching <micky_ching@realsil.com.cn>
+Signed-off-by: Russell King <rmk+kernel@arm.linux.org.uk>
 ---
- drivers/mmc/host/sdhci-pci.c |   20 ++++++++++++++++++++
- drivers/mmc/host/sdhci.c     |    3 ++-
- include/linux/mmc/sdhci.h    |    2 ++
- 3 files changed, 24 insertions(+), 1 deletion(-)
+ drivers/mmc/host/sdhci-spear.c | 9 +++------
+ 1 file changed, 3 insertions(+), 6 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-pci.c b/drivers/mmc/host/sdhci-pci.c
-index 0955777..fdc6121 100644
---- a/drivers/mmc/host/sdhci-pci.c
-+++ b/drivers/mmc/host/sdhci-pci.c
-@@ -610,6 +610,18 @@ static const struct sdhci_pci_fixes sdhci_via = {
- 	.probe		= via_probe,
- };
+diff --git a/drivers/mmc/host/sdhci-spear.c b/drivers/mmc/host/sdhci-spear.c
+index 94ae64d23ef3..d4621eb59527 100644
+--- a/drivers/mmc/host/sdhci-spear.c
++++ b/drivers/mmc/host/sdhci-spear.c
+@@ -134,7 +134,7 @@ static int sdhci_probe(struct platform_device *pdev)
+ 	}
  
-+static int rtsx_probe_slot(struct sdhci_pci_slot *slot)
-+{
-+	slot->host->mmc->caps2 |= MMC_CAP2_HS200;
-+	return 0;
-+}
-+
-+static const struct sdhci_pci_fixes sdhci_rtsx = {
-+	.quirks2	= SDHCI_QUIRK2_PRESET_VALUE_BROKEN |
-+			SDHCI_QUIRK2_BROKEN_DDR50,
-+	.probe_slot	= rtsx_probe_slot,
-+};
-+
- static const struct pci_device_id pci_ids[] = {
- 	{
- 		.vendor		= PCI_VENDOR_ID_RICOH,
-@@ -732,6 +744,14 @@ static const struct pci_device_id pci_ids[] = {
- 	},
+ 	/* clk enable */
+-	sdhci->clk = clk_get(&pdev->dev, NULL);
++	sdhci->clk = devm_clk_get(&pdev->dev, NULL);
+ 	if (IS_ERR(sdhci->clk)) {
+ 		ret = PTR_ERR(sdhci->clk);
+ 		dev_dbg(&pdev->dev, "Error getting clock\n");
+@@ -144,7 +144,7 @@ static int sdhci_probe(struct platform_device *pdev)
+ 	ret = clk_prepare_enable(sdhci->clk);
+ 	if (ret) {
+ 		dev_dbg(&pdev->dev, "Error enabling clock\n");
+-		goto put_clk;
++		goto err;
+ 	}
  
- 	{
-+		.vendor		= PCI_VENDOR_ID_REALTEK,
-+		.device		= 0x5250,
-+		.subvendor	= PCI_ANY_ID,
-+		.subdevice	= PCI_ANY_ID,
-+		.driver_data	= (kernel_ulong_t)&sdhci_rtsx,
-+	},
-+
-+	{
- 		.vendor		= PCI_VENDOR_ID_INTEL,
- 		.device		= PCI_DEVICE_ID_INTEL_MRST_SD0,
- 		.subvendor	= PCI_ANY_ID,
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 9ddef47..8958edc 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -3020,7 +3020,8 @@ int sdhci_add_host(struct sdhci_host *host)
- 	} else if (caps[1] & SDHCI_SUPPORT_SDR50)
- 		mmc->caps |= MMC_CAP_UHS_SDR50;
+ 	ret = clk_set_rate(sdhci->clk, 50000000);
+@@ -156,7 +156,7 @@ static int sdhci_probe(struct platform_device *pdev)
+ 		sdhci->data = sdhci_probe_config_dt(pdev);
+ 		if (IS_ERR(sdhci->data)) {
+ 			dev_err(&pdev->dev, "DT: Failed to get pdata\n");
+-			return -ENODEV;
++			goto disable_clk;
+ 		}
+ 	} else {
+ 		sdhci->data = dev_get_platdata(&pdev->dev);
+@@ -266,8 +266,6 @@ static int sdhci_probe(struct platform_device *pdev)
+ 	sdhci_free_host(host);
+ disable_clk:
+ 	clk_disable_unprepare(sdhci->clk);
+-put_clk:
+-	clk_put(sdhci->clk);
+ err:
+ 	dev_err(&pdev->dev, "spear-sdhci probe failed: %d\n", ret);
+ 	return ret;
+@@ -287,7 +285,6 @@ static int sdhci_remove(struct platform_device *pdev)
+ 	sdhci_remove_host(host, dead);
+ 	sdhci_free_host(host);
+ 	clk_disable_unprepare(sdhci->clk);
+-	clk_put(sdhci->clk);
  
--	if (caps[1] & SDHCI_SUPPORT_DDR50)
-+	if ((caps[1] & SDHCI_SUPPORT_DDR50) &&
-+		!(host->quirks2 & SDHCI_QUIRK2_BROKEN_DDR50))
- 		mmc->caps |= MMC_CAP_UHS_DDR50;
- 
- 	/* Does the host need tuning for SDR50? */
-diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
-index 362927c4..7be12b8 100644
---- a/include/linux/mmc/sdhci.h
-+++ b/include/linux/mmc/sdhci.h
-@@ -100,6 +100,8 @@ struct sdhci_host {
- #define SDHCI_QUIRK2_BROKEN_HOST_CONTROL		(1<<5)
- /* Controller does not support HS200 */
- #define SDHCI_QUIRK2_BROKEN_HS200			(1<<6)
-+/* Controller does not support DDR50 */
-+#define SDHCI_QUIRK2_BROKEN_DDR50			(1<<7)
- 
- 	int irq;		/* Device IRQ */
- 	void __iomem *ioaddr;	/* Mapped address */
+ 	return 0;
+ }
 -- 
-1.7.9.5
+1.8.3.1
+
