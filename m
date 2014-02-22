@@ -1,32 +1,70 @@
 From: Chris Ball <chris@printf.net>
-Subject: Re: [PATCH] MAINTAINERS: Add maintainer for the mmc subsystem
-Date: Sat, 22 Feb 2014 19:05:48 +0000
-Message-ID: <86txbrt1bn.fsf@void.printf.net>
-References: <1392764465-14927-1-git-send-email-ulf.hansson@linaro.org>
+Subject: Re: [PATCH RFC 07/31] mmc: sdhci: push card_tasklet into threaded irq handler
+Date: Sat, 22 Feb 2014 19:11:57 +0000
+Message-ID: <86ppmft11e.fsf@void.printf.net>
+References: <20140219094322.GR21483@n2100.arm.linux.org.uk>
+	<CAKohpomfHxWBF5m4D6iqod4a3gw2BU1W6nXMkEOg+YA+izYr=g@mail.gmail.com>
+	<20140219095212.GT21483@n2100.arm.linux.org.uk>
+	<CAKohpo=ZrLRsTyCH86x7TbGE2XJnpXNb1ZDvYyzDUupAwTtS9Q@mail.gmail.com>
+	<20140219105011.GU21483@n2100.arm.linux.org.uk>
+	<CAKohpokBf_fJhiUJ53c+=6v+GMcjaDKd7+fwib99=sLMdkjQQQ@mail.gmail.com>
+	<20140220105903.GY21483@n2100.arm.linux.org.uk>
+	<CAKohpo=FTk9SGCMJGBdOUheUg71WsG7qaeE9rwQRqd5dP4O8FQ@mail.gmail.com>
+	<20140221103710.GB21483@n2100.arm.linux.org.uk>
+	<8638jbvw91.fsf@void.printf.net>
+	<20140222190536.GI21483@n2100.arm.linux.org.uk>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1392764465-14927-1-git-send-email-ulf.hansson@linaro.org> (Ulf
-	Hansson's message of "Wed, 19 Feb 2014 00:01:05 +0100")
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from void.printf.net ([89.145.121.20]:54227 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751466AbaBVTME (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Sat, 22 Feb 2014 14:12:04 -0500
+In-Reply-To: <20140222190536.GI21483@n2100.arm.linux.org.uk> (Russell King's
+	message of "Sat, 22 Feb 2014 19:05:36 +0000")
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Russell King - ARM Linux <linux@arm.linux.org.uk>
+Cc: Viresh Kumar <viresh.kumar@linaro.org>, Pratyush Anand <pratyush.anand@st.com>, spear-devel <spear-devel@list.st.com>, Mohit KUMAR <Mohit.KUMAR@st.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, linux-mmc@vger.kernel.org
 
-Hi Ulf,
+Hi Russell,
 
-On Tue, Feb 18 2014, Ulf Hansson wrote:
-> Put myself as a (co)maintainer of the mmc subsystem to help out Chris
-> Ball in a more official role.
+On Sat, Feb 22 2014, Russell King - ARM Linux wrote:
+>> > I'll send a follow-up mini-series of five patches for it.  It shouldn't
+>> > depend all that much on the bigger series - and I think the first two
+>> > patches could well do with going into -rc.
+>> 
+>> Thanks.  Since testing resources might be scarce, and it looks like
+>> Viresh is in favor of the series, any objections to putting these in
+>> mmc-next straight away rather than waiting for test results to come in?
 >
-> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
-> ---
->
-> Chris, if you are happy having me as your co-maintainer, the plan from
-> my side are to review and ack patches, but from a more official role
-> than what I have currently. Then let's see how things evolve.
+> The series needs to be re-ordered to avoid patch 7 breaking sdhci-spear.
+> I'll send out a new series appropriately ordered.  I'm continuing to do
+> more to this driver as time permits.
 
-Sounds good, pushed to mmc-next.  And thank you for your work so far!
+Ah, I guess I chose the wrong mail to reply to -- I'm talking about
+merging the five patch mini-series that descends from this mail
+straight away, not the 31 patch RFC.
+
+> One thing which I've toyed with is passing a "changes" field in struct
+> mmc_ios, so that host drivers can know what's changed and avoid resetting
+> the power, clocks, etc on every set_ios call.  Another thing I've toyed
+> with is the idea of splitting set_ios up into several sub-calls which
+> the core only calls with the various changes.
+>
+> One of my reasonings for the second idea is that with the variability
+> in hosts, particularly with how they deal with the application of power,
+> it would be a good idea to allow hosts which do the "turn power on,
+> send 74 clocks" automonously avoid having to deal with the power_up
+> transition.
+>
+> It also means that hosts aren't having to work out if the timings have
+> changed, or the clocks, or anything else.
+>
+> What are your thoughts on that?
+
+Sounds like an improvement.  Splitting up set_ios sounds cleaner than
+using a "changes" field to me.  Thanks,
 
 - Chris.
 -- 
