@@ -1,96 +1,74 @@
-From: Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
-Subject: Re: [PATCH v7 8/8] ARM: sunxi: Add documentation for
- driver for SD/MMC hosts found on Allwinner sunxi SoCs
-Date: Sat, 22 Feb 2014 09:37:18 +0100
-Message-ID: <20140222083718.GI3931@lukather>
-References: <20140217095907.15040.81893.stgit@pagira.o2s.ch>
- <20140217100302.15040.56273.stgit@pagira.o2s.ch>
- <20140218154212.GL3142@lukather>
- <1559221.mEv19UvCzF@pagira.o2s.ch>
+From: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: [PATCH v7 4/8] ARM: sunxi: Add driver for SD/MMC
+ hosts found on Allwinner sunxi SoCs
+Date: Sat, 22 Feb 2014 12:19:07 +0100
+Message-ID: <530887AB.1030805@redhat.com>
+References: <20140217095907.15040.81893.stgit@pagira.o2s.ch> <20140217100234.15040.84232.stgit@pagira.o2s.ch> <20140218153731.GK3142@lukather> <5303C751.5090809@redhat.com> <20140219094615.GT3142@lukather> <5304A042.7090903@redhat.com> <20140222083128.GH3931@lukather>
 Reply-To: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="g3RkK9jYN81zD2N+"
-Return-path: <linux-sunxi+bncBD2ZNBF5VYJRBYWEUGMAKGQEPQXZ37Q-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <1559221.mEv19UvCzF-pgFh0Jf6HD9Xzn/AsuzBOg@public.gmane.org>
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Return-path: <linux-sunxi+bncBDL4X2GMZUKRBPMPUKMAKGQENR4QKMI-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+In-Reply-To: <20140222083128.GH3931@lukather>
 List-Post: <http://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
 List-Help: <http://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
 List-Archive: <http://groups.google.com/group/linux-sunxi>
 Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
 List-Subscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
 List-Unsubscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-To: David =?iso-8859-1?Q?Lanzend=F6rfer?= <david.lanzendoerfer-Z7Kmv9EsliU@public.gmane.org>
-Cc: devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Laurent Pinchart <laurent.pinchart+renesas-ryLnwIuWjnjg/C1BVhZhaw@public.gmane.org>, Mike Turquette <mturquette-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Simon Baatz <gmbnomis-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Emilio =?iso-8859-1?Q?L=F3pez?= <emilio-0Z03zUJReD5OxF6Tv1QG9Q@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, H Hartley Sweeten <hsweeten-3FF4nKcrg1dE2c76skzGb0EOCMrvLtNR@public.gmane.org>, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, Tejun Heo <tj-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Guennadi Liakhovetski <g.liakhovetski-Mmb7MZpHnFY@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+To: Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
+Cc: =?ISO-8859-1?Q?David_Lanzend=F6rfer?= <david.lanzendoerfer-Z7Kmv9EsliU@public.gmane.org>, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Laurent Pinchart <laurent.pinchart+renesas-ryLnwIuWjnjg/C1BVhZhaw@public.gmane.org>, Mike Turquette <mturquette-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Simon Baatz <gmbnomis-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, =?ISO-8859-1?Q?Emilio_L=F3pez?= <emilio-0Z03zUJReD5OxF6Tv1QG9Q@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, H Hartley Sweeten <hsweeten-3FF4nKcrg1dE2c76skzGb0EOCMrvLtNR@public.gmane.org>, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, Tejun Heo <tj-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Guennadi Liakhovetski <g.liakhovetski-Mmb7MZpHnFY@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
+Hi,
 
---g3RkK9jYN81zD2N+
-Content-Type: text/plain; charset=iso-8859-1
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+On 02/22/2014 09:31 AM, Maxime Ripard wrote:
 
-Hi David,
+<snip>
 
-On Sat, Feb 22, 2014 at 08:32:03AM +0100, David Lanzend=F6rfer wrote:
-> > Ditto. Plus, this is not a mod0 clock.
-> Yes it is! But maybe the formulation hasn't been clear enough...
-
-Technically, it's not, it has this phase controls features a mod0
-clock doesn't have.
-
-> > You never talked about the clock-names property, and which clocks
-> > were supposed to be provided.
+>>>>> This should be before the registration. Otherwise, you're racy.
+>>>>
+>>>> Nope, we only need this to get the data on sunxi_mmc_remove,
+>>>> everywhere else the data is found through the mmc-host struct.
+>>>
+>>> Still, if anyone makes a following patch using the platform_device
+>>> for some reason, we will have a race condition, without any way to
+>>> notice it.
+>>>
+>>> Plus, you're doing all the other bits of initialization of your
+>>> structures much earlier, why not be consistent and having all of
+>>> them at the same place?
+>>
+>> Most platform drivers I've worked on do platform_set_drvdata as late
+>> as possible, so that the drvdata does not get set and never cleared
+>> in error paths.
 >
-> Yes I did? But I expanded the text a little bit further...
+> You don't actually have to clear it,
 
-I can't see any reference to the fact that clock-names should be set,
-and what values should it hold.
+Erm, yes and no, you used to have to manually clear it, so as to not
+leave a dangling pointer in there, which may confuse things later.
 
-Something like that:
-https://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/tree/Docume=
-ntation/devicetree/bindings/arm/tegra/nvidia,tegra20-pmc.txt#n11
+But since a few kernel releases, the driver core will explicitly
+clear it on probe failure, since many many drivers got this wrong.
+I know this because I wrote the driver core patch doing the clearing :)
 
-> > > +	interrupts =3D <0 32 4>;
-> > > +	bus-width =3D <4>;
-> > And you never talked about bus-width either.
-> I can throw in a line for refering to the mmc slot gpio lib docs.
+So in drivers which used to get it right, you will see the
+platform_set_drvdata call quite late and it being so late
+in the sunxi-mmc.c driver is old habits dying hard.
 
-Yes, that would be great :)
+But you're right that this is no longer needed, still I see little
+reason to move it up, but if you really want it to be moved up,
+I'm fine with that.
 
-> > Isn't the cd-gpios property requested too?
-> I can refer to the docs there as well if you like... :-)
+> and some frameworks actually require you to call dev_set_drvdata before registration, so that
+> statement looks quite odd to me.
 
-That would be great too :)
+And the proper thing to do when using those frameworks was to
+manually clear drvdata again on probe failure. Anyways this is
+all handled in the driver core now, so this whole discussion
+is moot anyways. I was merely trying to explain where my
+preference for doing the dev_set_drvdata call as late as
+possible comes from.
 
-Thanks!
-Maxime
+Regards,
 
---=20
-Maxime Ripard, Free Electrons
-Embedded Linux, Kernel and Android engineering
-http://free-electrons.com
-
---g3RkK9jYN81zD2N+
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.14 (GNU/Linux)
-
-iQIcBAEBAgAGBQJTCGG+AAoJEBx+YmzsjxAg2PMP/3N76bxfD58hjd2LTrRw9Wp1
-LG/yClUN9Uv3nAP5zIVzFWOwK5XQVqNgCrq7PLGMxwjkNVRhX3Vrq7K/ixHbvz92
-HM4ivGapOLN+payQNU70TyZ7oviRc69f2klXKt9f4bbW9L2t4TxTAS/wAVd+yshh
-jeDqHIbtCLHN3fT0Pm8b+jQmmBMnUkaU4h3lU2S3nw5rKbuFJRVjr9GpQeAVYuuX
-/tcgWTx+05Yol9UmfFBt4zvQUALTFxyvmTC5zTeaAiw+4rRQu2XRtLDK/WdVKLLO
-KxR843Z9FrDRbvATl/7IBlMZruISnbxzvs8n51ccot1rptoehSKHRt19SsZBv7wg
-yjD3kNsZopQy/DpX6D/oEtbXLFO8YpbfJuP+sVXPrIs22F2G3T0+85CE3aanmfaZ
-BVZwOye2rAOVvuXvtsWIlyN+MwHOZfRWhr5jj6bnelZTOE8gpVFZ40pDqnU6aOLB
-lj0mxWoQbOzwt8dcmDUjCMMNjLHu/IlyLN4KQ3QDcCOh8rfbtdxJXINaJ4WJ+aGg
-Q3mq6uHOq8D0qYNi5BAFXzdbqWuY3aaQtIrLWSibHR9Q9yfQiSsBAzQfkbH40J5x
-M8p9yILN/FK5QbvoGnWkzjWNTAGVkHbf8KJwaxY7d9q4RDe9iTP1BFOCb5u3UPDK
-gT6OfvaXESZ82nANHK1u
-=a/tj
------END PGP SIGNATURE-----
-
---g3RkK9jYN81zD2N+--
+Hans
