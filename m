@@ -1,37 +1,31 @@
 From: Chris Ball <chris@printf.net>
-Subject: Re: [PATCH v2 0/3] mmc: rtsx: fix bug and support nonblocking request
-Date: Sat, 22 Feb 2014 18:34:57 +0000
-Message-ID: <86y513uhbi.fsf@void.printf.net>
-References: <cover.1392626511.git.micky_ching@realsil.com.cn>
+Subject: Re: [PATCH 1/3] mmc: core: Add DT bindings for SD card's UHS bus speed modes
+Date: Sat, 22 Feb 2014 18:52:31 +0000
+Message-ID: <86y513t1xs.fsf@void.printf.net>
+References: <1392380829-8473-1-git-send-email-ulf.hansson@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:39837 "EHLO void.printf.net"
+Received: from void.printf.net ([89.145.121.20]:49426 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751470AbaBVSfE (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sat, 22 Feb 2014 13:35:04 -0500
-In-Reply-To: <cover.1392626511.git.micky_ching@realsil.com.cn> (micky ching's
-	message of "Mon, 17 Feb 2014 16:45:45 +0800")
+	id S1752434AbaBVSwf (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Sat, 22 Feb 2014 13:52:35 -0500
+In-Reply-To: <1392380829-8473-1-git-send-email-ulf.hansson@linaro.org> (Ulf
+	Hansson's message of "Fri, 14 Feb 2014 13:27:07 +0100")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: micky_ching@realsil.com.cn
-Cc: sameo@linux.intel.com, lee.jones@linaro.org, gregkh@linuxfoundation.org, dan.carpenter@oracle.com, ulf.hansson@linaro.org, devel@linuxdriverproject.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, rogerable@realtek.com, wei_wang@realsil.com.cn
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org, Jaehoon Chung <jh80.chung@samsung.com>, devicetree@vger.kernel.org
 
-Hi Micky,
+Hi Ulf,
 
-On Mon, Feb 17 2014, micky_ching@realsil.com.cn wrote:
-> From: Micky Ching <micky_ching@realsil.com.cn>
+On Fri, Feb 14 2014, Ulf Hansson wrote:
+> Provide the option to configure these speed modes per host, for those
+> host driver's that can't distinguish this in runtime.
 >
-> First we fix the card poweroff bug: the card power is not shutdown when sd/mmc
-> card removed, this will make UHS-card failed to running in high speed mode if we
-> insert the card again.
->
-> We offer a concise tuning searching method, it is much easier to read.
->
-> At last we add support for nonblocking request, which will improve card read
-> speed at about 10% write speed about 5% normally.
+> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 
-Thanks, all 3 patches pushed to mmc-next for 3.15.
+Thanks, pushed all 3/3 to mmc-next for 3.15.
 
 - Chris.
 -- 
