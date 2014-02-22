@@ -1,46 +1,51 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [PATCH 2/2] mmc: mxcmmc: Convert to SIMPLE_DEV_PM_OPS
-Date: Sat, 22 Feb 2014 16:42:38 +0100
-Message-ID: <1498408.4o9IO9pcnR@wuerfel>
-References: <1393080372-6760-1-git-send-email-shc_work@mail.ru> <1393081369.457413293@f421.i.mail.ru> <CAOMZO5DF5DOBMoD7G3237ecPW6YRmEx-KH0pQu4GiSoS+4f5eg@mail.gmail.com>
+From: =?UTF-8?B?QWxleGFuZGVyIFNoaXlhbg==?= <shc_work@mail.ru>
+Subject: =?UTF-8?B?UmU6IFtQQVRDSCAxLzJdIG1tYzogbXhjbW1jOiBDb252ZXJ0IHRvIGRldm0t?=
+ =?UTF-8?B?KiBBUEk=?=
+Date: Sat, 22 Feb 2014 20:02:23 +0400
+Message-ID: <1393084943.334126206@f375.i.mail.ru>
+References: <1393080372-6760-1-git-send-email-shc_work@mail.ru>
+ <2376908.tRC2oWmiYE@wuerfel>
+Reply-To: =?UTF-8?B?QWxleGFuZGVyIFNoaXlhbg==?= <shc_work@mail.ru>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7Bit
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: base64
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.126.186]:51230 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751292AbaBVPms (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 22 Feb 2014 10:42:48 -0500
-In-Reply-To: <CAOMZO5DF5DOBMoD7G3237ecPW6YRmEx-KH0pQu4GiSoS+4f5eg@mail.gmail.com>
+Received: from fallback3.mail.ru ([94.100.176.58]:50730 "EHLO
+	fallback3.mail.ru" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751300AbaBVQDT (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 22 Feb 2014 11:03:19 -0500
+In-Reply-To: <2376908.tRC2oWmiYE@wuerfel>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Fabio Estevam <festevam@gmail.com>
-Cc: Alexander Shiyan <shc_work@mail.ru>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Shawn Guo <shawn.guo@linaro.org>, Sascha Hauer <kernel@pengutronix.de>
+To: =?UTF-8?B?QXJuZCBCZXJnbWFubg==?= <arnd@arndb.de>
+Cc: linux-mmc@vger.kernel.org, =?UTF-8?B?Q2hyaXMgQmFsbA==?= <chris@printf.net>, =?UTF-8?B?U2hhd24gR3Vv?= <shawn.guo@linaro.org>, =?UTF-8?B?U2FzY2hhIEhhdWVy?= <kernel@pengutronix.de>
 
-On Saturday 22 February 2014 12:05:43 Fabio Estevam wrote:
-> On Sat, Feb 22, 2014 at 12:02 PM, Alexander Shiyan <shc_work@mail.ru> wrote:
-> 
-> >> but then you would get a warning saying that "mxcmci_suspend/resume"
-> >> are defined by not used" when CONFIG_PM_SLEEP=n
-> >
-> > Please see the patch first,
-> > this warnings is avoided by "__maybe_unused" attributes.
-> 
-> Ok, I see it now 
-> 
-> Reviewed-by: Fabio Estevam <fabio.estevam@freescale.com>
-> 
-
-Unfortunately, everyone else uses the #ifdef here, and a lot of people
-don't understand how to use __maybe_unused for this. IMHO all
-drivers should do it the way that Alexander does it here, or
-we should change the SIMPLE_DEV_PM_OPS() definition in a way that
-doesn't need the #ifdef.
-
-I have in the past tried to come up with a way to handle this more
-naturally, but couldn't figure out how to migrate to it. If
-SIMPLE_DEV_PM_OPS() defines an unused variable pointing to the
-operations, we need neither the #ifdef nor the __maybe_unused
-marker, but then it fails to build when there is an #ifdef.
-
-	Arnd
+0KHRg9Cx0LHQvtGC0LAsIDIyINGE0LXQstGA0LDQu9GPIDIwMTQsIDE2OjM3ICswMTowMCDQvtGC
+IEFybmQgQmVyZ21hbm4gPGFybmRAYXJuZGIuZGU+Ogo+IE9uIFNhdHVyZGF5IDIyIEZlYnJ1YXJ5
+IDIwMTQgMTg6NDY6MTEgQWxleGFuZGVyIFNoaXlhbiB3cm90ZToKPiA+IFJlcGxhY2UgZXhpc3Rp
+bmcgcmVzb3VyY2UgaGFuZGxpbmcgaW4gdGhlIGRyaXZlciB3aXRoIG1hbmFnZWQKPiA+IGRldmlj
+ZSByZXNvdXJjZSwgdGhpcyBlbnN1cmVzIG1vcmUgY29uc2lzdGVudCBlcnJvciB2YWx1ZXMgYW5k
+Cj4gPiBzaW1wbGlmaWVzIGVycm9yIHBhdGhzLgo+ID4gCj4gPiBTaWduZWQtb2ZmLWJ5OiBBbGV4
+YW5kZXIgU2hpeWFuIDxzaGNfd29ya0BtYWlsLnJ1Pgo+IAo+IE5pY2UgY2xlYW51cCEKLi4uCj4g
+PiArKysgYi9kcml2ZXJzL21tYy9ob3N0L214Y21tYy5jCj4gPiBAQCAtMTI0LDkgKzEyNCw4IEBA
+IGVudW0gbXhjbWNpX3R5cGUgewo+ID4gIAo+ID4gIHN0cnVjdCBteGNtY2lfaG9zdCB7Cj4gPiAg
+ICAgICAgIHN0cnVjdCBtbWNfaG9zdCAgICAgICAgICptbWM7Cj4gPiAtICAgICAgIHN0cnVjdCBy
+ZXNvdXJjZSAgICAgICAgICpyZXM7Cj4gPiAgICAgICAgIHZvaWQgX19pb21lbSAgICAgICAgICAg
+ICpiYXNlOwo+ID4gLSAgICAgICBpbnQgICAgICAgICAgICAgICAgICAgICBpcnE7Cj4gPiArICAg
+ICAgIGRtYV9hZGRyX3QgICAgICAgICAgICAgIHBoeXNfYmFzZTsKPiA+ICAgICAgICAgaW50ICAg
+ICAgICAgICAgICAgICAgICAgZGV0ZWN0X2lycTsKPiA+ICAgICAgICAgc3RydWN0IGRtYV9jaGFu
+ICAgICAgICAgKmRtYTsKPiA+ICAgICAgICAgc3RydWN0IGRtYV9hc3luY190eF9kZXNjcmlwdG9y
+ICpkZXNjOwo+IAo+IEp1c3Qgbml0cGlja2luZywgYnV0IEkgdGhpbmsgcGh5c19iYXNlIHNob3Vs
+ZCBiZSBlaXRoZXIgcGh5c19hZGRyX3Qgb3IKPiByZXNvdXJjZV9zaXplX3QuIGRtYV9hZGRyX3Qg
+aXMgd2hhdCB5b3UgZ2V0IG91dCBvZiB0aGUgZG1hLW1hcHBpbmcgQVBJLAo+IG5vdCB3aGF0IHlv
+dSB1c2UgZm9yIGlvcmVtYXAuIEluIHRoZW9yeSB0aGV5IG1heSBiZSBkaWZmZXJlbnQsIGJ1dCBJ
+Cj4gZG9uJ3Qga25vdyBob3cgd2UnZCBoYW5kbGUgdGhhdCBjYXNlIGZvciB0aGUgZG1hZW5naW5l
+IEFQSSwgc2luY2Ugd2UKPiBkb24ndCBjdXJyZW50bHkgaGF2ZSBhIHdheSB0byBjb252ZXJ0IGJl
+dHdlZW4gdGhlIHR3bywgb3RoZXIgdGhhbiBmb3IKPiBkb2luZyBETUEgb24gbWVtb3J5IHBhZ2Vz
+LgoKTWF5YmUgSSdsbCB0aGluayBvZiBzb21ldGhpbmcgaW4gdGhlIHN1YnNlcXVlbnQgY2xlYW51
+cCBvZiB0aGUgZHJpdmVyLgpDdXJyZW50bHksIG1hbnkgdGhpbmdzIGxvb2sgaW4gdGhlIGRyaXZl
+ciBqdXN0IHNjYXJ5LCBoZXJlIGZvciBleGFtcGxlOgoKc3RhdGljIGlubGluZSB2b2lkIG14Y21j
+aV93cml0ZWwoc3RydWN0IG14Y21jaV9ob3N0ICpob3N0LCB1MzIgdmFsLCBpbnQgcmVnKQp7Cglp
+ZiAoSVNfRU5BQkxFRChDT05GSUdfUFBDX01QQzUxMngpKQoJCWlvd3JpdGUzMmJlKHZhbCwgaG9z
+dC0+YmFzZSArIHJlZyk7CgllbHNlCgkJd3JpdGVsKHZhbCwgaG9zdC0+YmFzZSArIHJlZyk7Cn0K
+Ci0tLQo=
