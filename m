@@ -1,54 +1,85 @@
-From: Eli Billauer <eli.billauer@gmail.com>
-Subject: Re: [PATCH] mmc: sdhci: add quirk for broken write protect detection
-Date: Mon, 24 Feb 2014 02:54:06 +0200
-Message-ID: <530A982E.80200@gmail.com>
-References: <1393198345-8365-1-git-send-email-eli.billauer@gmail.com>
- <86r46ts70i.fsf@void.printf.net>
+From: Roger <rogerable@realtek.com>
+Subject: Re: [PATCH v4 1/3] mfd: Add realtek USB card reader driver
+Date: Mon, 24 Feb 2014 10:56:19 +0800
+Message-ID: <530AB4D3.4090103@realtek.com>
+References: <1392199238-14500-1-git-send-email-rogerable@realtek.com>
+ <1392199238-14500-2-git-send-email-rogerable@realtek.com>
+ <20140214094427.GA7380@lee--X1> <5301A786.8040607@realtek.com>
+ <20140217082222.GA17875@lee--X1> <5301D369.5010100@realtek.com>
+ <20140217100211.GE17875@lee--X1> <5301E376.8010000@realtek.com>
+ <20140217120326.GC20218@lee--X1>
 Mime-Version: 1.0
-Content-Type: text/plain; CHARSET=US-ASCII; format=flowed
-Content-Transfer-Encoding: 7BIT
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mxout7.netvision.net.il ([194.90.6.2]:39351 "EHLO
-	mxout7.netvision.net.il" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751214AbaBXBJr (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 23 Feb 2014 20:09:47 -0500
-Received: from ocho.localdomain ([89.139.18.202]) by mxout7.netvision.net.il
- (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
- 17 2011)) with ESMTP id <0N1H00EFD6J2AE20@mxout7.netvision.net.il> for
- linux-mmc@vger.kernel.org; Mon, 24 Feb 2014 02:54:38 +0200 (IST)
-In-reply-to: <86r46ts70i.fsf@void.printf.net>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"; Format="flowed"
+Content-Transfer-Encoding: 7bit
+Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
+In-Reply-To: <20140217120326.GC20218@lee--X1>
+List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
+List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel>
+List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
+List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
+List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
+Errors-To: driverdev-devel-bounces@linuxdriverproject.org
+Sender: driverdev-devel-bounces@linuxdriverproject.org
+To: Chris Ball <chris@printf.net>, Andrew Morton <akpm@linux-foundation.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Samuel Ortiz <sameo@linux.intel.com>, Alex Dubov <oakad@yahoo.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, driverdev-devel@linuxdriverproject.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, wei_wang@realsil.com.cn, Lee Jones <lee.jones@linaro.org>, Dan Carpenter <dan.carpenter@oracle.com>, Maxim Levitsky <maximlevitsky@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <chris@printf.net>
-Cc: michal.simek@xilinx.com, linux-mmc@vger.kernel.org
 
-Hello Chris.
-
-On 24/02/14 02:12, Chris Ball wrote:
-> Hi Eli,
->
-> On Sun, Feb 23 2014, Eli Billauer wrote:
->    
->> The write protection signal is absent on a board based upon Xilinx' Zynq
->> processor ("ZyBo"). This leads the kernel to think that the MicroSD card is
->> write protected, and causes a kernel panic during boot, as root fails to
->> mount RW.
+On 02/17/2014 08:03 PM, Lee Jones wrote:
+>>>>>>>> From: Roger Tseng <rogerable@realtek.com>
+>>>>>>>>
+>>>>>>>> Realtek USB card reader provides a channel to transfer command or data to flash
+>>>>>>>> memory cards. This driver exports host instances for mmc and memstick subsystems
+>>>>>>>> and handles basic works.
+>>>>>>>>
+>>>>>>>> Signed-off-by: Roger Tseng <rogerable@realtek.com>
+>>>>>>>> ---
+>>>>>>>>   drivers/mfd/Kconfig          |  10 +
+>>>>>>>>   drivers/mfd/Makefile         |   1 +
+>>>>>>>>   drivers/mfd/rtsx_usb.c       | 760 +++++++++++++++++++++++++++++++++++++++++++
+>>>>>>>>   include/linux/mfd/rtsx_usb.h | 628 +++++++++++++++++++++++++++++++++++
+>>>>>>>>   4 files changed, 1399 insertions(+)
+>>>>>>>>   create mode 100644 drivers/mfd/rtsx_usb.c
+>>>>>>>>   create mode 100644 include/linux/mfd/rtsx_usb.h
+>>>>>>>
+>>>>>>> Applied again, thanks.
+>>>>>>>
+>>>>>> Would you also apply patch 2/3 and 3/3 that to make the device fully
+>>>>>> operational for users? Or should they be applied by maintainers of
+>>>>>> mmc/memstick subsystems?
+>>>>>>
+>>>>>> Chris, would you give some comment?
+>>>>>
+>>>>> I can apply them, but I need the other Maintainer Acks.
+>>>>>
+>>>>> If they are build orthogonal i.e. there are no build dependencies
+>>>>> between them, it's probably better that they go into their associated
+>>>>> trees separately.
+>>>>>
+>>>> I think it would be better to apply them together since the later
+>>>> patches really depend on the 1st one,so now we are waiting for Acks
+>>> >from mmc/memstick subsystems.
+>>>
+>>> When you say "depend on", do you mean as a build depenency, or won't
+>>> run without the first patch applied?
 >>
->> This patch adds a quirk and an optional OF property, sdhci,wp-broken to
->> work around this issue.
->>      
-> Just to confirm your motivation for the patch:  wp-inverted would solve
-> this problem for you, but you'd rather add a new property that more
-> accurately describes the hardware?
->    
-Yes, that's the point.
-> (We'd probably use broken-wp, for symmetry with the existing broken-cd.)
->    
-I picked "sdhci,wp-broken" because of the similarity with 
-"sdhci,wp-inverted", as opposed to "broken-cd" (with no "sdhci," prefix).
+>> The later 2 patches actually invoke symbols defined in the first
+>> patch and won't compile if it is not applied first. The Kconfig
+>> changes for the later oness also specified this by "depends on".
+>>
+>> I'm not sure if this means "build dependency". Sorry for my unclear words.
+>
+> Yes, that sounds like a build dependency i.e. will not build without
+> errors or warnings without the previous patch applied.
+>
+>>>> But there is no one specified for "memstick/host/" in MAINTAINERS.
+>>>> Could anyone else Ack this?
+>
+> Andrew (CC'ed) has been Acking these thus far.
+>
+Hi Chris and Andrew,
 
-Would you like me to resubmit the patch with "broken-wp"? Or maybe 
-"sdhci,broken-wp"?
-
-Regards,
-    Eli
+Would you please help comment PATCH 2/3 and 3/3 (for mmc and memstick, 
+respectively) or give Acks? Thus we can proceed with applying or 
+revision if necessary.
