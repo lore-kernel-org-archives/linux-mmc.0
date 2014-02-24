@@ -1,48 +1,54 @@
-From: Alistair Popple <alistair@popple.id.au>
-Subject: Re: [PATCH 1/7] IBM Akebono: Add a SDHCI platform driver
-Date: Mon, 24 Feb 2014 11:38:30 +1100
-Message-ID: <278655068.asy5NBOYab@mexican>
-References: <1392964293-13687-1-git-send-email-alistair@popple.id.au> <1392964293-13687-2-git-send-email-alistair@popple.id.au> <1773685.WfxOP0FuHM@wuerfel>
+From: Eli Billauer <eli.billauer@gmail.com>
+Subject: Re: [PATCH] mmc: sdhci: add quirk for broken write protect detection
+Date: Mon, 24 Feb 2014 02:54:06 +0200
+Message-ID: <530A982E.80200@gmail.com>
+References: <1393198345-8365-1-git-send-email-eli.billauer@gmail.com>
+ <86r46ts70i.fsf@void.printf.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7Bit
+Content-Type: text/plain; CHARSET=US-ASCII; format=flowed
+Content-Transfer-Encoding: 7BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from ipmail04.adl6.internode.on.net ([150.101.137.141]:37659 "EHLO
-	ipmail04.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1750871AbaBXAii (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 23 Feb 2014 19:38:38 -0500
-In-Reply-To: <1773685.WfxOP0FuHM@wuerfel>
+Received: from mxout7.netvision.net.il ([194.90.6.2]:39351 "EHLO
+	mxout7.netvision.net.il" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751214AbaBXBJr (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 23 Feb 2014 20:09:47 -0500
+Received: from ocho.localdomain ([89.139.18.202]) by mxout7.netvision.net.il
+ (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
+ 17 2011)) with ESMTP id <0N1H00EFD6J2AE20@mxout7.netvision.net.il> for
+ linux-mmc@vger.kernel.org; Mon, 24 Feb 2014 02:54:38 +0200 (IST)
+In-reply-to: <86r46ts70i.fsf@void.printf.net>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: linux-mmc@vger.kernel.org, cjb@laptop.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linuxppc-dev@lists.ozlabs.org
+To: Chris Ball <chris@printf.net>
+Cc: michal.simek@xilinx.com, linux-mmc@vger.kernel.org
 
-On Fri, 21 Feb 2014 15:14:30 Arnd Bergmann wrote:
-> On Friday 21 February 2014 17:31:27 Alistair Popple wrote:
-> > +config MMC_SDHCI_OF_476GTR
-> > +	tristate "SDHCI OF support for the IBM PPC476GTR SoC"
-> > +	depends on MMC_SDHCI_PLTFM
-> > +	depends on PPC_OF
-> > +	help
-> > +	  This selects the Secure Digital Host Controller Interface (SDHCI)
-> > +	  found on the PPC476GTR SoC.
-> > +
-> > +	  If you have a controller with this interface, say Y or M here.
-> > +
-> > +	  If unsure, say N.
-> 
-> Your driver doesn't actually do anything beyond what is in the common
-> sdhci-pltfm.c infrastructure. IMHO you really shoulnd't need a SoC
-> specific abstraction for it at all and instead add a generic
-> platform driver registration into sdhci-pltfm.c. I'd suggest
-> you use "generic-sdhci" (similar to what we do for usb-ohci and usb-ehci
-> now) as the compatible string and change your device tree to claim
-> compatibility with that and your soc-specific string.
+Hello Chris.
 
-That's a reasonable point. I guess I was just following the example set by the 
-other sdhci-* drivers. However on review they're not as generic as this one so 
-I will merge this into sdhci-pltfm.c as suggested.
+On 24/02/14 02:12, Chris Ball wrote:
+> Hi Eli,
+>
+> On Sun, Feb 23 2014, Eli Billauer wrote:
+>    
+>> The write protection signal is absent on a board based upon Xilinx' Zynq
+>> processor ("ZyBo"). This leads the kernel to think that the MicroSD card is
+>> write protected, and causes a kernel panic during boot, as root fails to
+>> mount RW.
+>>
+>> This patch adds a quirk and an optional OF property, sdhci,wp-broken to
+>> work around this issue.
+>>      
+> Just to confirm your motivation for the patch:  wp-inverted would solve
+> this problem for you, but you'd rather add a new property that more
+> accurately describes the hardware?
+>    
+Yes, that's the point.
+> (We'd probably use broken-wp, for symmetry with the existing broken-cd.)
+>    
+I picked "sdhci,wp-broken" because of the similarity with 
+"sdhci,wp-inverted", as opposed to "broken-cd" (with no "sdhci," prefix).
 
-- Alistair
+Would you like me to resubmit the patch with "broken-wp"? Or maybe 
+"sdhci,broken-wp"?
 
-> 	Arnd
+Regards,
+    Eli
