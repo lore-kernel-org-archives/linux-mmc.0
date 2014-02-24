@@ -1,36 +1,58 @@
-From: Chris Ball <chris@printf.net>
-Subject: Re: [PATCH v4 5/8] mmc: sdhci-bcm-kona: Add basic use of clocks
-Date: Mon, 24 Feb 2014 19:40:35 +0000
-Message-ID: <86ha7os3ik.fsf@void.printf.net>
-References: <1386271244-3927-1-git-send-email-tim.kryger@linaro.org>
-	<1386271244-3927-6-git-send-email-tim.kryger@linaro.org>
-	<CAEPRUYrPXf7QNzput0bz_UPfytRy1eYgyOJYnH5v2v4DCEKSNA@mail.gmail.com>
-	<CAAYSxhoCrveHd5Wkc7Z0qzpGr41qG6-neYSSsuHQuC7AcuJmZQ@mail.gmail.com>
-	<CAAYSxhrBSv8_Z1SfB-b3iGgq218Gttny4FEgYJnLtSFhJd2UFg@mail.gmail.com>
-	<20140224193301.GW5038@beef>
+From: Franky Lin <frankyl@broadcom.com>
+Subject: Re: [PATCH] mmc: sdhci: only invoke clock re-tuning for adtc type
+ commands
+Date: Mon, 24 Feb 2014 11:57:42 -0800
+Message-ID: <530BA436.4030207@broadcom.com>
+References: <1389119511-26228-1-git-send-email-frankyl@broadcom.com> <1389119859-28955-1-git-send-email-frankyl@broadcom.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:46596 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752794AbaBXTki (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 24 Feb 2014 14:40:38 -0500
-In-Reply-To: <20140224193301.GW5038@beef> (Matt Porter's message of "Mon, 24
-	Feb 2014 14:33:01 -0500")
+Received: from mail-gw3-out.broadcom.com ([216.31.210.64]:18793 "EHLO
+	mail-gw3-out.broadcom.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753080AbaBXT5p (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 24 Feb 2014 14:57:45 -0500
+In-Reply-To: <1389119859-28955-1-git-send-email-frankyl@broadcom.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Matt Porter <mporter@linaro.org>
-Cc: Christian Daudt <bcm@fixthebug.org>, Axel Lin <axel.lin@ingics.com>, Alex Elder <elder@linaro.org>, Linux ARM Kernel List <linux-arm-kernel@lists.infradead.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux MMC List <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>
+To: chris@printf.net
+Cc: linux-mmc@vger.kernel.org
 
-Hi,
+Hi Chris,
 
-On Mon, Feb 24 2014, Matt Porter wrote:
-> Chris: we no longer need this to be taken through arm-soc since removing
-> the dependency. Could you please take this patch through your tree for
-> 3.15?
+On 01/07/2014 10:37 AM, Franky Lin wrote:
+> For high clock frequency modes, ie. SDR104 and possibly SDR50, the data
+> window on the CMD and DAT lines needs to be tuned. Once tuned to a
+> sample clock rate, a re-tuning might required because of drifted signal
+> on different lines. This re-tuning is needed and only necessary for
+> commands using the DAT lines, ie. adtc type commands. This patch is an
+> optimization by adding the condition of the requested command being adtc
+> type in order to execute the re-tuning procedure.
+>
+> Signed-off-by: Franky Lin <frankyl@broadcom.com>
+> ---
 
-Thanks, pushed to mmc-next for 3.15.
+Is this still in your queue? Any remarks on it?
 
-- Chris.
--- 
-Chris Ball   <chris@printf.net>   <http://printf.net/>
+Thanks,
+Franky
+
+>   drivers/mmc/host/sdhci.c |    3 ++-
+>   1 file changed, 2 insertions(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index cc00bed..f301cd6 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -1389,7 +1389,8 @@ static void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
+>   		 * tuning procedure before sending command.
+>   		 */
+>   		if ((host->flags & SDHCI_NEEDS_RETUNING) &&
+> -		    !(present_state & (SDHCI_DOING_WRITE | SDHCI_DOING_READ))) {
+> +		    !(present_state & (SDHCI_DOING_WRITE | SDHCI_DOING_READ)) &&
+> +		    mmc_cmd_type(mrq->cmd) == MMC_CMD_ADTC) {
+>   			if (mmc->card) {
+>   				/* eMMC uses cmd21 but sd and sdio use cmd19 */
+>   				tuning_opcode =
+>
+
