@@ -1,43 +1,33 @@
-From: =?UTF-8?B?QWxleGFuZGVyIFNoaXlhbg==?= <shc_work@mail.ru>
-Subject: =?UTF-8?B?UmU6IFtQQVRDSCBSRkNdIG1tYzogc2xvdC1ncGlvOiBDb252ZXJ0IHRvIGdw?=
- =?UTF-8?B?aW9kXyogQVBJ?=
-Date: Mon, 24 Feb 2014 08:35:45 +0400
-Message-ID: <1393216545.708393164@f347.i.mail.ru>
-References: <1393171552-8808-1-git-send-email-shc_work@mail.ru>
- <Pine.LNX.4.64.1402232258370.19145@axis700.grange>
-Reply-To: =?UTF-8?B?QWxleGFuZGVyIFNoaXlhbg==?= <shc_work@mail.ru>
+From: Viresh Kumar <viresh.kumar@linaro.org>
+Subject: Re: [PATCH 1/5] mmc: sdhci-spear: fix error handling paths for DT
+Date: Mon, 24 Feb 2014 11:29:18 +0530
+Message-ID: <CAKohpok+p+7uBhO3GF18fSOTCb-=29sH7Ua_fSsGFzPc83bgsQ@mail.gmail.com>
+References: <20140221103710.GB21483@n2100.arm.linux.org.uk>
+	<E1WGnXX-0007Jg-JR@rmk-PC.arm.linux.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from fallback8.mail.ru ([94.100.176.136]:51591 "EHLO
-	fallback8.mail.ru" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752159AbaBXEgK (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 23 Feb 2014 23:36:10 -0500
-Received: from f347.i.mail.ru (f347.i.mail.ru [217.69.140.243])
-	by fallback8.mail.ru (mPOP.Fallback_MX) with ESMTP id E75C25197294
-	for <linux-mmc@vger.kernel.org>; Mon, 24 Feb 2014 08:36:01 +0400 (MSK)
-In-Reply-To: <Pine.LNX.4.64.1402232258370.19145@axis700.grange>
+Received: from mail-oa0-f42.google.com ([209.85.219.42]:34533 "EHLO
+	mail-oa0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750720AbaBXF7S (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 24 Feb 2014 00:59:18 -0500
+Received: by mail-oa0-f42.google.com with SMTP id j17so4649253oag.15
+        for <linux-mmc@vger.kernel.org>; Sun, 23 Feb 2014 21:59:18 -0800 (PST)
+In-Reply-To: <E1WGnXX-0007Jg-JR@rmk-PC.arm.linux.org.uk>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: =?UTF-8?B?R3Vlbm5hZGkgTGlha2hvdmV0c2tp?= <g.liakhovetski@gmx.de>
-Cc: linux-mmc@vger.kernel.org
+To: Russell King <rmk+kernel@arm.linux.org.uk>
+Cc: Pratyush Anand <pratyush.anand@st.com>, Mohit KUMAR <Mohit.KUMAR@st.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Viresh Kumar <viresh.linux@gmail.com>, Chris Ball <chris@printf.net>, spear-devel <spear-devel@list.st.com>, linux-mmc@vger.kernel.org
 
-0JLQvtGB0LrRgNC10YHQtdC90YzQtSwgMjMg0YTQtdCy0YDQsNC70Y8gMjAxNCwgMjM6MTAgKzAx
-OjAwINC+0YIgR3Vlbm5hZGkgTGlha2hvdmV0c2tpIDxnLmxpYWtob3ZldHNraUBnbXguZGU+Ogo+
-IEhpIEFsZXhhbmRlciwKPiAKPiBTb3JyeSwgdGhpcyBpc24ndCBnb2luZyB0byBiZSBhIGNvbXBs
-ZXRlIHJldmlldywganVzdCBhIGNvdXBsZSBvZiAKPiBjb21tZW50cy4KPiAKPiBPbiBTdW4sIDIz
-IEZlYiAyMDE0LCBBbGV4YW5kZXIgU2hpeWFuIHdyb3RlOgo+IAo+ID4gVGhpcyBpcyBhIFJGQyBw
-YXRjaCBvbmx5LCBwbGVhc2UgZG8gbm90IGFwcGx5IGl0Lgo+ID4gCj4gPiBUaGlzIGludHJvZHVj
-ZSBhIGNvbnZlcnNpb24gc2xvdC1ncGlvIHRvIGdwaW9kLSogQVBJLgo+ID4gVXNhZ2Ugb2YgZ3Bp
-b2QtKiBBUEkgYWxsb3dzIHVzIHRvIHJlbW92ZSBhbGwgcGllY2VzIG9mIHN0b3JhZ2UKPiA+IEdQ
-SU9zIGluIHRoZSBkcml2ZXIncyBwbGF0Zm9ybV9kYXRhIGluIHRoZSBmdXR1cmUuCj4gPiBQYXRj
-aCBzYXZlcyBjYWxscyB0byBleGlzdGluZyBmdW5jdGlvbnMgdGhhdCBhbGxvd3MgdXMgdG8gY29u
-dmVydAo+ID4gYWxsIGRyaXZlcnMgdG8gdXNlIG5ldyBpbnRlcmZhY2UsIG9uZSBieSBvbmUuCj4g
-PiBSZWFkeSBmb3IgY29tbWVudHMgYW5kIHN1Z2dlc3Rpb25zLgo+ID4gLS0tCi4uLgo+ID4gIHN0
-cnVjdCBtbWNfZ3BpbyB7Cj4gPiAtCWludCByb19ncGlvOwo+ID4gLQlpbnQgY2RfZ3BpbzsKPiA+
-IC0JY2hhciAqcm9fbGFiZWw7Cj4gPiAtCWNoYXIgY2RfbGFiZWxbMF07Cj4gPiArCXN0cnVjdCBn
-cGlvX2Rlc2MgKnJvX2dwaW87Cj4gPiArCXN0cnVjdCBncGlvX2Rlc2MgKmNkX2dwaW87Cj4gPiAr
-CWNoYXIgKmNkX2xhYmVsOwo+IAo+IEZpcnN0IHF1ZXN0aW9uOiBoYXMgdGhpcyBwYXRjaCBiZWVu
-IHJ1bi10aW1lIHRlc3RlZD8KCk5vLCBpdCBpcyBvbmx5IGZvciBvdmVydmlldyB0aGUgZ2VuZXJh
-bCBjb25jZXB0LgoKLS0tCg==
+On 21 February 2014 16:11, Russell King <rmk+kernel@arm.linux.org.uk> wrote:
+> Fix the error handling paths for DT and simplify using the devm_* API
+> for clk_get().
+>
+> Signed-off-by: Russell King <rmk+kernel@arm.linux.org.uk>
+> ---
+>  drivers/mmc/host/sdhci-spear.c | 9 +++------
+>  1 file changed, 3 insertions(+), 6 deletions(-)
+
+For all patches:
+
+Acked-by: Viresh Kumar <viresh.kumar@linaro.org>
