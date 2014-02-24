@@ -1,41 +1,48 @@
-From: Chris Ball <chris@printf.net>
-Subject: Re: [PATCH] mmc: sdhci: add quirk for broken write protect detection
-Date: Mon, 24 Feb 2014 00:12:45 +0000
-Message-ID: <86r46ts70i.fsf@void.printf.net>
-References: <1393198345-8365-1-git-send-email-eli.billauer@gmail.com>
+From: Alistair Popple <alistair@popple.id.au>
+Subject: Re: [PATCH 1/7] IBM Akebono: Add a SDHCI platform driver
+Date: Mon, 24 Feb 2014 11:38:30 +1100
+Message-ID: <278655068.asy5NBOYab@mexican>
+References: <1392964293-13687-1-git-send-email-alistair@popple.id.au> <1392964293-13687-2-git-send-email-alistair@popple.id.au> <1773685.WfxOP0FuHM@wuerfel>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7Bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:50793 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750976AbaBXAMx (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sun, 23 Feb 2014 19:12:53 -0500
-In-Reply-To: <1393198345-8365-1-git-send-email-eli.billauer@gmail.com> (Eli
-	Billauer's message of "Mon, 24 Feb 2014 01:32:25 +0200")
+Received: from ipmail04.adl6.internode.on.net ([150.101.137.141]:37659 "EHLO
+	ipmail04.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1750871AbaBXAii (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 23 Feb 2014 19:38:38 -0500
+In-Reply-To: <1773685.WfxOP0FuHM@wuerfel>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Eli Billauer <eli.billauer@gmail.com>
-Cc: michal.simek@xilinx.com, linux-mmc@vger.kernel.org
+To: Arnd Bergmann <arnd@arndb.de>
+Cc: linux-mmc@vger.kernel.org, cjb@laptop.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linuxppc-dev@lists.ozlabs.org
 
-Hi Eli,
+On Fri, 21 Feb 2014 15:14:30 Arnd Bergmann wrote:
+> On Friday 21 February 2014 17:31:27 Alistair Popple wrote:
+> > +config MMC_SDHCI_OF_476GTR
+> > +	tristate "SDHCI OF support for the IBM PPC476GTR SoC"
+> > +	depends on MMC_SDHCI_PLTFM
+> > +	depends on PPC_OF
+> > +	help
+> > +	  This selects the Secure Digital Host Controller Interface (SDHCI)
+> > +	  found on the PPC476GTR SoC.
+> > +
+> > +	  If you have a controller with this interface, say Y or M here.
+> > +
+> > +	  If unsure, say N.
+> 
+> Your driver doesn't actually do anything beyond what is in the common
+> sdhci-pltfm.c infrastructure. IMHO you really shoulnd't need a SoC
+> specific abstraction for it at all and instead add a generic
+> platform driver registration into sdhci-pltfm.c. I'd suggest
+> you use "generic-sdhci" (similar to what we do for usb-ohci and usb-ehci
+> now) as the compatible string and change your device tree to claim
+> compatibility with that and your soc-specific string.
 
-On Sun, Feb 23 2014, Eli Billauer wrote:
-> The write protection signal is absent on a board based upon Xilinx' Zynq
-> processor ("ZyBo"). This leads the kernel to think that the MicroSD card is
-> write protected, and causes a kernel panic during boot, as root fails to
-> mount RW.
->
-> This patch adds a quirk and an optional OF property, sdhci,wp-broken to
-> work around this issue.
+That's a reasonable point. I guess I was just following the example set by the 
+other sdhci-* drivers. However on review they're not as generic as this one so 
+I will merge this into sdhci-pltfm.c as suggested.
 
-Just to confirm your motivation for the patch:  wp-inverted would solve
-this problem for you, but you'd rather add a new property that more
-accurately describes the hardware?
+- Alistair
 
-(We'd probably use broken-wp, for symmetry with the existing broken-cd.)
-
-Thanks,
-
-- Chris.
--- 
-Chris Ball   <chris@printf.net>   <http://printf.net/>
+> 	Arnd
