@@ -1,75 +1,65 @@
-From: Mike Looijmans <mike.looijmans@topic.nl>
-Subject: [PATCH] sdhci: Add a quirk to disable write-protect
-Date: Mon, 24 Feb 2014 07:59:48 +0100
-Message-ID: <1393225188-18000-1-git-send-email-mike.looijmans@topic.nl>
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: Re: [PATCH 03/17] mmc: mmci: Mask IRQs for all variants during
+ runtime suspend
+Date: Mon, 24 Feb 2014 15:54:10 +0100
+Message-ID: <CACRpkdYF4sR4SJ_jZsVLY2tNV0xDfR2GG63bF5e=bkthpDsDGQ@mail.gmail.com>
+References: <1391529538-21685-1-git-send-email-ulf.hansson@linaro.org>
+	<1391529538-21685-4-git-send-email-ulf.hansson@linaro.org>
+	<20140218160542.GH21483@n2100.arm.linux.org.uk>
+	<CAPDyKFq3uAoo7p-7hZgBmMJ4jf9A7dC0aUZJYUE0z1Qq5W=0bw@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from atl4mhfb02.myregisteredsite.com ([209.17.115.56]:53905 "EHLO
-	atl4mhfb02.myregisteredsite.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751175AbaBXHAK (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 24 Feb 2014 02:00:10 -0500
-Received: from atl4mhob05.myregisteredsite.com (atl4mhob05.myregisteredsite.com [209.17.115.43])
-	by atl4mhfb02.myregisteredsite.com (8.14.4/8.14.4) with ESMTP id s1O709ql013668
-	for <linux-mmc@vger.kernel.org>; Mon, 24 Feb 2014 02:00:09 -0500
-Received: from mailpod.hostingplatform.com ([10.30.71.211])
-	by atl4mhob05.myregisteredsite.com (8.14.4/8.14.4) with ESMTP id s1O6xvjQ022993
-	for <linux-mmc@vger.kernel.org>; Mon, 24 Feb 2014 01:59:57 -0500
+Received: from mail-oa0-f43.google.com ([209.85.219.43]:55126 "EHLO
+	mail-oa0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752489AbaBXOyK (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 24 Feb 2014 09:54:10 -0500
+Received: by mail-oa0-f43.google.com with SMTP id i7so4069210oag.30
+        for <linux-mmc@vger.kernel.org>; Mon, 24 Feb 2014 06:54:10 -0800 (PST)
+In-Reply-To: <CAPDyKFq3uAoo7p-7hZgBmMJ4jf9A7dC0aUZJYUE0z1Qq5W=0bw@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, anton@enomsg.org
-Cc: linux-kernel@vger.kernel.org, devicetree@vger.kernel.org, cjb@laptop.org, Mike Looijmans <mike.looijmans@topic.nl>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Russell King - ARM Linux <linux@arm.linux.org.uk>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Alessandro Rubini <rubini@unipv.it>, Wolfram Sang <wsa@the-dreams.de>, Chris Ball <chris@printf.net>, Mark Brown <broonie@kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-i2c@vger.kernel.org" <linux-i2c@vger.kernel.org>, "linux-spi@vger.kernel.org" <linux-spi@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>
 
-When a board does not have the WP line wired at all, the card
-may be detected as read-only. Add a quirk and a device property
-to disable WP detection.
+On Tue, Feb 18, 2014 at 5:36 PM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> On 18 February 2014 17:05, Russell King - ARM Linux
+> <linux@arm.linux.org.uk> wrote:
+>> On Tue, Feb 04, 2014 at 04:58:44PM +0100, Ulf Hansson wrote:
+>>> In runtime suspended state, we are not expecting IRQs and thus we can
+>>> safely mask them, not only for pwrreg_nopower variants but for all.
+>>>
+>>> Obviously we then also need to make sure we restore the IRQ mask while
+>>> becoming runtime resumed.
+>>
+>> So, what happens when this patch is applied, and a SDIO card is attached
+>> which expects to receive interrupts at any moment?
+>
+> Currently, no variant implements SDIO irq.
+>
+> The SDIO irq polling mode from the sdio core will still be functional,
+> as of today. So, this patch will not break SDIO.
+>
+>>
+>> Given that I've run into this during the last week with a SDHCI controller,
+>> I'm not that thrilled with other interfaces doing the same broken thing.
+>
+> If we add SDIO irq support to mmci in future; parts of that
+> implementation includes a re-route of DAT1 to a GPIO irq when entering
+> runtime suspend state. The mmci HW will in runtime suspend state, not
+> be responsible for handling irqs, which is the same as of today.
 
-Signed-off-by: Mike Looijmans <mike.looijmans@topic.nl>
----
- drivers/mmc/host/sdhci-pltfm.c |    3 +++
- drivers/mmc/host/sdhci.c       |    3 ++-
- include/linux/mmc/sdhci.h      |    2 ++
- 3 files changed, 7 insertions(+), 1 deletion(-)
+[Just smalltalk]
 
-diff --git a/drivers/mmc/host/sdhci-pltfm.c b/drivers/mmc/host/sdhci-pltfm.c
-index e2065a4..9e83ada 100644
---- a/drivers/mmc/host/sdhci-pltfm.c
-+++ b/drivers/mmc/host/sdhci-pltfm.c
-@@ -83,6 +83,9 @@ void sdhci_get_of_property(struct platform_device *pdev)
- 		if (sdhci_of_wp_inverted(np))
- 			host->quirks |= SDHCI_QUIRK_INVERTED_WRITE_PROTECT;
- 
-+		if (of_get_property(np, "disable-wp", NULL))
-+			host->quirks2 |= SDHCI_QUIRK2_DISABLE_WP;
-+
- 		if (of_get_property(np, "broken-cd", NULL))
- 			host->quirks |= SDHCI_QUIRK_BROKEN_CARD_DETECTION;
- 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 7a7fb4f..68f47fc 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -1635,7 +1635,8 @@ static int sdhci_check_ro(struct sdhci_host *host)
- 
- 	spin_lock_irqsave(&host->lock, flags);
- 
--	if (host->flags & SDHCI_DEVICE_DEAD)
-+	if ((host->flags & SDHCI_DEVICE_DEAD) ||
-+		(host->quirks2 & SDHCI_QUIRK2_DISABLE_WP))
- 		is_readonly = 0;
- 	else if (host->ops->get_ro)
- 		is_readonly = host->ops->get_ro(host);
-diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
-index 3e781b8..967dba0 100644
---- a/include/linux/mmc/sdhci.h
-+++ b/include/linux/mmc/sdhci.h
-@@ -98,6 +98,8 @@ struct sdhci_host {
- #define SDHCI_QUIRK2_CARD_ON_NEEDS_BUS_ON		(1<<4)
- /* Controller has a non-standard host control register */
- #define SDHCI_QUIRK2_BROKEN_HOST_CONTROL		(1<<5)
-+/* Controller lacks write protect detection */
-+#define SDHCI_QUIRK2_DISABLE_WP			(1<<6)
- 
- 	int irq;		/* Device IRQ */
- 	void __iomem *ioaddr;	/* Mapped address */
--- 
-1.7.9.5
+Switching DAT1 to "gpio mode" (which is something of a fallacy, see
+explanation in Documentation/pinctrl.txt) is not at all possible in all
+implementations of the PL18x, as it depends on exploiting properties
+on an assumed pin controller.
 
+Systems that don't have such wakeup features on their pins are
+unlikely to support deepsleep in any capacity, and if they do they are
+ill-designed from the top level as this needs to be taken into account
+when devising the hardware :-/
+
+Yours,
+Linus Walleij
