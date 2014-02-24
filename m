@@ -1,65 +1,61 @@
-From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: [PATCH 03/17] mmc: mmci: Mask IRQs for all variants during
- runtime suspend
-Date: Mon, 24 Feb 2014 15:54:10 +0100
-Message-ID: <CACRpkdYF4sR4SJ_jZsVLY2tNV0xDfR2GG63bF5e=bkthpDsDGQ@mail.gmail.com>
-References: <1391529538-21685-1-git-send-email-ulf.hansson@linaro.org>
-	<1391529538-21685-4-git-send-email-ulf.hansson@linaro.org>
-	<20140218160542.GH21483@n2100.arm.linux.org.uk>
-	<CAPDyKFq3uAoo7p-7hZgBmMJ4jf9A7dC0aUZJYUE0z1Qq5W=0bw@mail.gmail.com>
+From: Daniel Mack <zonque@gmail.com>
+Subject: Re: [PATCH] mmc: omap_hsmmc: support more DT properties
+Date: Mon, 24 Feb 2014 16:31:56 +0100
+Message-ID: <530B65EC.3010806@gmail.com>
+References: <1392636993-15864-1-git-send-email-zonque@gmail.com> <53036FF4.2000906@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-oa0-f43.google.com ([209.85.219.43]:55126 "EHLO
-	mail-oa0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752489AbaBXOyK (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 24 Feb 2014 09:54:10 -0500
-Received: by mail-oa0-f43.google.com with SMTP id i7so4069210oag.30
-        for <linux-mmc@vger.kernel.org>; Mon, 24 Feb 2014 06:54:10 -0800 (PST)
-In-Reply-To: <CAPDyKFq3uAoo7p-7hZgBmMJ4jf9A7dC0aUZJYUE0z1Qq5W=0bw@mail.gmail.com>
+Received: from mail-wi0-f175.google.com ([209.85.212.175]:41937 "EHLO
+	mail-wi0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752442AbaBXPb7 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 24 Feb 2014 10:31:59 -0500
+In-Reply-To: <53036FF4.2000906@ti.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Russell King - ARM Linux <linux@arm.linux.org.uk>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Alessandro Rubini <rubini@unipv.it>, Wolfram Sang <wsa@the-dreams.de>, Chris Ball <chris@printf.net>, Mark Brown <broonie@kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-i2c@vger.kernel.org" <linux-i2c@vger.kernel.org>, "linux-spi@vger.kernel.org" <linux-spi@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>
+To: Balaji T K <balajitk@ti.com>
+Cc: chris@printf.net, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org
 
-On Tue, Feb 18, 2014 at 5:36 PM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> On 18 February 2014 17:05, Russell King - ARM Linux
-> <linux@arm.linux.org.uk> wrote:
->> On Tue, Feb 04, 2014 at 04:58:44PM +0100, Ulf Hansson wrote:
->>> In runtime suspended state, we are not expecting IRQs and thus we can
->>> safely mask them, not only for pwrreg_nopower variants but for all.
->>>
->>> Obviously we then also need to make sure we restore the IRQ mask while
->>> becoming runtime resumed.
+On 02/18/2014 03:36 PM, Balaji T K wrote:
+> On Monday 17 February 2014 05:06 PM, Daniel Mack wrote:
+>> This should probably be done implicitly through mmc_of_parse(), but that
+>> doesn't play well along with the multi-slot model the hsmmc driver
+>> features. Hence, for now, do it manually. The properties are already
+>> documented in Documentation/devicetree/bindings/mmc/mmc.txt.
 >>
->> So, what happens when this patch is applied, and a SDIO card is attached
->> which expects to receive interrupts at any moment?
->
-> Currently, no variant implements SDIO irq.
->
-> The SDIO irq polling mode from the sdio core will still be functional,
-> as of today. So, this patch will not break SDIO.
->
+>> Signed-off-by: Daniel Mack <zonque@gmail.com>
+> 
+> looks good to me
+> Acked-by: Balaji T K <balajitk@ti.com>
+
+Thanks for the review! Did it land in any tree yet?
+
+
+Best regards,
+Daniel
+
+>> ---
+>>   drivers/mmc/host/omap_hsmmc.c | 6 ++++++
+>>   1 file changed, 6 insertions(+)
 >>
->> Given that I've run into this during the last week with a SDHCI controller,
->> I'm not that thrilled with other interfaces doing the same broken thing.
->
-> If we add SDIO irq support to mmci in future; parts of that
-> implementation includes a re-route of DAT1 to a GPIO irq when entering
-> runtime suspend state. The mmci HW will in runtime suspend state, not
-> be responsible for handling irqs, which is the same as of today.
+>> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+>> index 2815de6..a5a38cc 100644
+>> --- a/drivers/mmc/host/omap_hsmmc.c
+>> +++ b/drivers/mmc/host/omap_hsmmc.c
+>> @@ -1765,6 +1765,12 @@ static struct omap_mmc_platform_data *of_get_hsmmc_pdata(struct device *dev)
+>>   	if (of_find_property(np, "ti,needs-special-hs-handling", NULL))
+>>   		pdata->slots[0].features |= HSMMC_HAS_HSPE_SUPPORT;
+>>
+>> +	if (of_find_property(np, "keep-power-in-suspend", NULL))
+>> +		pdata->slots[0].pm_caps |= MMC_PM_KEEP_POWER;
+>> +
+>> +	if (of_find_property(np, "enable-sdio-wakeup", NULL))
+>> +		pdata->slots[0].pm_caps |= MMC_PM_WAKE_SDIO_IRQ;
+>> +
+>>   	return pdata;
+>>   }
+>>   #else
+>>
+> 
 
-[Just smalltalk]
-
-Switching DAT1 to "gpio mode" (which is something of a fallacy, see
-explanation in Documentation/pinctrl.txt) is not at all possible in all
-implementations of the PL18x, as it depends on exploiting properties
-on an assumed pin controller.
-
-Systems that don't have such wakeup features on their pins are
-unlikely to support deepsleep in any capacity, and if they do they are
-ill-designed from the top level as this needs to be taken into account
-when devising the hardware :-/
-
-Yours,
-Linus Walleij
