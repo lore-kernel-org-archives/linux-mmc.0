@@ -1,54 +1,50 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH Resend 01/10] mmc: ushc: Fix incorrect parameter in sizeof
-Date: Tue, 25 Feb 2014 11:06:49 +0100
-Message-ID: <CAPDyKFp-s4eXcBDC3xU1CBziWBW=ZA_Tqmgfne5avu=AqcDZOw@mail.gmail.com>
-References: <1393321708-9719-1-git-send-email-sachin.kamat@linaro.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qc0-f174.google.com ([209.85.216.174]:59623 "EHLO
-	mail-qc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753134AbaBYKO6 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 25 Feb 2014 05:14:58 -0500
-Received: by mail-qc0-f174.google.com with SMTP id e16so3382008qcx.5
-        for <linux-mmc@vger.kernel.org>; Tue, 25 Feb 2014 02:14:58 -0800 (PST)
-In-Reply-To: <1393321708-9719-1-git-send-email-sachin.kamat@linaro.org>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Andreas Fenkart <afenkart@gmail.com>
+Subject: [PATCH v7 0/4] mmc: omap_hsmmc: SDIO IRQ.
+Date: Tue, 25 Feb 2014 13:37:42 +0100
+Message-ID: <1393331866-28307-1-git-send-email-afenkart@gmail.com>
+Return-path: <linux-doc-owner@vger.kernel.org>
+Sender: linux-doc-owner@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>
+Cc: Tony Lindgren <tony@atomide.com>, Grant Likely <grant.likely@secretlab.ca>, Felipe Balbi <balbi@ti.com>, Balaji T K <balajitk@ti.com>, zonque@gmail.com, galak@codeaurora.org, linux-doc@vger.kernel.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, Andreas Fenkart <afenkart@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Sachin Kamat <sachin.kamat@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>
 
-On 25 February 2014 10:48, Sachin Kamat <sachin.kamat@linaro.org> wrote:
-> sizeof should be of the parent structure type.
->
-> Signed-off-by: Sachin Kamat <sachin.kamat@linaro.org>
+v7
+- rebase on 3.14.0-rc3-49726-g77e15ec
+- split omap_hsmmc_pin_init due to regression on omap-3730 platform
+@tony pls try if it still works after applying patch 2?
 
-For the hole series:
+v6
+- rebase on Linux 3.13-rc3
+- reformatting debugfs
 
-Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
+v5
+- fix compile error introduced by last minute one line fix
 
-> ---
-> Hi Ulf / Chris,
->
-> This series which is a re-send has been pending since a very long time.
-> Hope to have this merged atleast during this cycle.
-> ---
->  drivers/mmc/host/ushc.c |    2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/host/ushc.c b/drivers/mmc/host/ushc.c
-> index c0105a2e269a..d2c386f09d69 100644
-> --- a/drivers/mmc/host/ushc.c
-> +++ b/drivers/mmc/host/ushc.c
-> @@ -504,7 +504,7 @@ static int ushc_probe(struct usb_interface *intf, const struct usb_device_id *id
->                 ret = -ENOMEM;
->                 goto err;
->         }
-> -       ushc->csw = kzalloc(sizeof(struct ushc_cbw), GFP_KERNEL);
-> +       ushc->csw = kzalloc(sizeof(struct ushc_csw), GFP_KERNEL);
->         if (ushc->csw == NULL) {
->                 ret = -ENOMEM;
->                 goto err;
-> --
-> 1.7.9.5
->
+v4:
+- switch to interrupts-extended format
+- drop ti,swakeup-missing flag convert to comaptible section
+
+v3:
+- removed gpio_irq from platform_data
+
+v2:
+- incorparated changes as suggested by reviewers
+- simplified workaround for am335x, gpio will now only wake
+  the module from runtime suspend, not handle the sdio irq
+  itself 
+
+Andreas Fenkart (4):
+  mmc: omap_hsmmc: Enable SDIO IRQ.
+  mmc: omap_hsmmc: Remux SDIO pins within driver.
+  mmc: omap_hsmmc: Pin remux workaround to support SDIO interrupt on
+    AM335x.
+  mmc: omap_hsmmc: Extend debugfs for SDIO IRQ, GPIO and pinmux.
+
+ .../devicetree/bindings/mmc/ti-omap-hsmmc.txt      |   50 ++++
+ drivers/mmc/host/omap_hsmmc.c                      |  315 ++++++++++++++++++--
+ include/linux/platform_data/mmc-omap.h             |    1 +
+ 3 files changed, 341 insertions(+), 25 deletions(-)
+
+-- 
+1.7.10.4
+
