@@ -1,52 +1,51 @@
 From: Sachin Kamat <sachin.kamat@linaro.org>
-Subject: [PATCH 02/10] mmc: wmt-sdmmc: Fix NULL pointer dereference
-Date: Tue, 25 Feb 2014 15:18:20 +0530
-Message-ID: <1393321708-9719-2-git-send-email-sachin.kamat@linaro.org>
+Subject: [PATCH 04/10] mmc: davinci: Remove redundant of_match_ptr
+Date: Tue, 25 Feb 2014 15:18:22 +0530
+Message-ID: <1393321708-9719-4-git-send-email-sachin.kamat@linaro.org>
 References: <1393321708-9719-1-git-send-email-sachin.kamat@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pd0-f171.google.com ([209.85.192.171]:59504 "EHLO
-	mail-pd0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750768AbaBYJyM (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 25 Feb 2014 04:54:12 -0500
-Received: by mail-pd0-f171.google.com with SMTP id r10so2036868pdi.2
-        for <linux-mmc@vger.kernel.org>; Tue, 25 Feb 2014 01:54:12 -0800 (PST)
+Received: from mail-pd0-f176.google.com ([209.85.192.176]:44879 "EHLO
+	mail-pd0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750768AbaBYJyS (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 25 Feb 2014 04:54:18 -0500
+Received: by mail-pd0-f176.google.com with SMTP id r10so465370pdi.7
+        for <linux-mmc@vger.kernel.org>; Tue, 25 Feb 2014 01:54:18 -0800 (PST)
 In-Reply-To: <1393321708-9719-1-git-send-email-sachin.kamat@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 Cc: ulf.hansson@linaro.org, chris@printf.net, sachin.kamat@linaro.org
 
-'of_id' is dereferenced before NULL pointer check. Move it to
-after the check.
+The data structure of_match_ptr() protects is always compiled in.
+Hence of_match_ptr() is not needed.
 
 Signed-off-by: Sachin Kamat <sachin.kamat@linaro.org>
-Acked-by: Tony Prisk <linux@prisktech.co.nz>
 ---
- drivers/mmc/host/wmt-sdmmc.c |    4 +++-
- 1 file changed, 3 insertions(+), 1 deletion(-)
+ drivers/mmc/host/davinci_mmc.c |    4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
-diff --git a/drivers/mmc/host/wmt-sdmmc.c b/drivers/mmc/host/wmt-sdmmc.c
-index e902ed7846b0..498d1f799085 100644
---- a/drivers/mmc/host/wmt-sdmmc.c
-+++ b/drivers/mmc/host/wmt-sdmmc.c
-@@ -757,7 +757,7 @@ static int wmt_mci_probe(struct platform_device *pdev)
- 	struct device_node *np = pdev->dev.of_node;
- 	const struct of_device_id *of_id =
- 		of_match_device(wmt_mci_dt_ids, &pdev->dev);
--	const struct wmt_mci_caps *wmt_caps = of_id->data;
-+	const struct wmt_mci_caps *wmt_caps;
- 	int ret;
- 	int regular_irq, dma_irq;
+diff --git a/drivers/mmc/host/davinci_mmc.c b/drivers/mmc/host/davinci_mmc.c
+index d6153740b77f..5d4c5e0fba2f 100644
+--- a/drivers/mmc/host/davinci_mmc.c
++++ b/drivers/mmc/host/davinci_mmc.c
+@@ -1192,7 +1192,7 @@ static struct davinci_mmc_config
+ 	struct device_node *np;
+ 	struct davinci_mmc_config *pdata = pdev->dev.platform_data;
+ 	const struct of_device_id *match =
+-		of_match_device(of_match_ptr(davinci_mmc_dt_ids), &pdev->dev);
++		of_match_device(davinci_mmc_dt_ids, &pdev->dev);
+ 	u32 data;
  
-@@ -766,6 +766,8 @@ static int wmt_mci_probe(struct platform_device *pdev)
- 		return -EFAULT;
- 	}
- 
-+	wmt_caps = of_id->data;
-+
- 	if (!np) {
- 		dev_err(&pdev->dev, "Missing SDMMC description in devicetree\n");
- 		return -EFAULT;
+ 	np = pdev->dev.of_node;
+@@ -1468,7 +1468,7 @@ static struct platform_driver davinci_mmcsd_driver = {
+ 		.name	= "davinci_mmc",
+ 		.owner	= THIS_MODULE,
+ 		.pm	= davinci_mmcsd_pm_ops,
+-		.of_match_table = of_match_ptr(davinci_mmc_dt_ids),
++		.of_match_table = davinci_mmc_dt_ids,
+ 	},
+ 	.remove		= __exit_p(davinci_mmcsd_remove),
+ 	.id_table	= davinci_mmc_devtype,
 -- 
 1.7.9.5
 
