@@ -1,38 +1,44 @@
-From: Dan Carpenter <dan.carpenter@oracle.com>
-Subject: Re: mmc: rtsx: add support for pre_req and post_req
-Date: Tue, 25 Feb 2014 10:59:28 +0300
-Message-ID: <20140225075928.GS26776@mwanda>
-References: <20140224220328.GA29170@elgon.mountain>
- <530BF74C.4010603@realsil.com.cn>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+From: Sachin Kamat <sachin.kamat@linaro.org>
+Subject: [PATCH Resend 01/10] mmc: ushc: Fix incorrect parameter in sizeof
+Date: Tue, 25 Feb 2014 15:18:19 +0530
+Message-ID: <1393321708-9719-1-git-send-email-sachin.kamat@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from userp1040.oracle.com ([156.151.31.81]:32416 "EHLO
-	userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750735AbaBYH7k (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 25 Feb 2014 02:59:40 -0500
-Content-Disposition: inline
-In-Reply-To: <530BF74C.4010603@realsil.com.cn>
+Received: from mail-pb0-f45.google.com ([209.85.160.45]:53675 "EHLO
+	mail-pb0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750708AbaBYJyJ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 25 Feb 2014 04:54:09 -0500
+Received: by mail-pb0-f45.google.com with SMTP id un15so7863334pbc.32
+        for <linux-mmc@vger.kernel.org>; Tue, 25 Feb 2014 01:54:08 -0800 (PST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: micky <micky_ching@realsil.com.cn>
-Cc: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: ulf.hansson@linaro.org, chris@printf.net, sachin.kamat@linaro.org
 
-On Tue, Feb 25, 2014 at 09:52:12AM +0800, micky wrote:
-> Hi Dan,
-> 
-> I'm wondering how to get this warning info, so I can check before
-> sending patch.
-> Can you give me some idea?
-> 
+sizeof should be of the parent structure type.
 
-This is a smatch thing, but you it's a cross function bug so you have to
-build the database first and that takes some hours.  The commands are
-simple though.  Run:
+Signed-off-by: Sachin Kamat <sachin.kamat@linaro.org>
+---
+Hi Ulf / Chris,
 
-	~/path/to/smatch_scripts/build_kernel_data.sh
-	~/path/to/smatch_scripts/kchecker drivers/mmc/host/rtsx_pci_sdmmc.c
+This series which is a re-send has been pending since a very long time.
+Hope to have this merged atleast during this cycle.
+---
+ drivers/mmc/host/ushc.c |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-regards,
-dan carpenter
+diff --git a/drivers/mmc/host/ushc.c b/drivers/mmc/host/ushc.c
+index c0105a2e269a..d2c386f09d69 100644
+--- a/drivers/mmc/host/ushc.c
++++ b/drivers/mmc/host/ushc.c
+@@ -504,7 +504,7 @@ static int ushc_probe(struct usb_interface *intf, const struct usb_device_id *id
+ 		ret = -ENOMEM;
+ 		goto err;
+ 	}
+-	ushc->csw = kzalloc(sizeof(struct ushc_cbw), GFP_KERNEL);
++	ushc->csw = kzalloc(sizeof(struct ushc_csw), GFP_KERNEL);
+ 	if (ushc->csw == NULL) {
+ 		ret = -ENOMEM;
+ 		goto err;
+-- 
+1.7.9.5
 
