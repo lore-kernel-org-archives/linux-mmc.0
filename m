@@ -1,103 +1,271 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH] mmc: host: dw: fix possible build error
-Date: Wed, 26 Feb 2014 07:03:59 +0900
-Message-ID: <530D134F.5090403@samsung.com>
-References: <1393340264-22687-1-git-send-email-balbi@ti.com>
+From: Grant Grundler <grundler@chromium.org>
+Subject: Re: [PATCH] Decode EXT_CSD of eMMC 5.0 device
+Date: Tue, 25 Feb 2014 14:26:30 -0800
+Message-ID: <CANEJEGudtZEewoG8Grxi+yVsTU5_M_4TFwCq2rhWwkL3AJ=jZQ@mail.gmail.com>
+References: <1391812643-20389-1-git-send-email-gwendal@chromium.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout1.samsung.com ([203.254.224.24]:24827 "EHLO
-	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751356AbaBYWDm convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 25 Feb 2014 17:03:42 -0500
-In-reply-to: <1393340264-22687-1-git-send-email-balbi@ti.com>
+Received: from mail-oa0-f52.google.com ([209.85.219.52]:59955 "EHLO
+	mail-oa0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753098AbaBYW0a (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 25 Feb 2014 17:26:30 -0500
+Received: by mail-oa0-f52.google.com with SMTP id i4so1212082oah.11
+        for <linux-mmc@vger.kernel.org>; Tue, 25 Feb 2014 14:26:30 -0800 (PST)
+In-Reply-To: <1391812643-20389-1-git-send-email-gwendal@chromium.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Felipe Balbi <balbi@ti.com>, chris@printf.net
-Cc: jh80.chung@samsung.com, tgih.jun@samsung.com, linux-mmc@vger.kernel.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>
+To: Gwendal Grignou <gwendal@chromium.org>
+Cc: Chris Ball <cjb@laptop.org>, oliver@freetz.org, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Grant Grundler <grundler@chromium.org>, Ulf Hansson <ulf.hansson@linaro.org>
 
-Hi, Felipe.
++Ulf
 
-When you send the patch related with dw_mmc controller, could you use t=
-he prefix "mmc: dw_mmc:"?
-"mmc: dw_mmc: fix possible build error"
+Hi Chris,
+Any chance of this getting reviewed or accepted soon?
 
-Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
+thanks!
+grant
 
-Best Regards,
-Jaehoon Chung
-
-On 02/25/2014 11:57 PM, Felipe Balbi wrote:
-> Fix the following build errors:
->=20
-> drivers/mmc/host/dw_mmc-k3.c: In function =E2=80=98dw_mci_k3_suspend=E2=
-=80=99:
-> drivers/mmc/host/dw_mmc-k3.c:58:2: error: implicit declaration of
-> 	function =E2=80=98dw_mci_suspend=E2=80=99 [-Werror=3Dimplicit-functi=
-on-declaration]
->   ret =3D dw_mci_suspend(host);
->   ^
-> drivers/mmc/host/dw_mmc-k3.c: In function =E2=80=98dw_mci_k3_resume=E2=
-=80=99:
-> drivers/mmc/host/dw_mmc-k3.c:76:2: error: implicit declaration of
-> 	function =E2=80=98dw_mci_resume=E2=80=99 [-Werror=3Dimplicit-functio=
-n-declaration]
->   return dw_mci_resume(host);
->   ^
-> drivers/mmc/host/dw_mmc-k3.c: At top level:
-> drivers/mmc/host/dw_mmc-k3.c:53:12: warning: =E2=80=98dw_mci_k3_suspe=
-nd=E2=80=99 defined
-> 	but not used [-Wunused-function]
->  static int dw_mci_k3_suspend(struct device *dev)
->             ^
-> drivers/mmc/host/dw_mmc-k3.c:65:12: warning: =E2=80=98dw_mci_k3_resum=
-e=E2=80=99 defined
-> 	but not used [-Wunused-function]
->  static int dw_mci_k3_resume(struct device *dev)
->             ^
->=20
-> Signed-off-by: Felipe Balbi <balbi@ti.com>
+On Fri, Feb 7, 2014 at 2:37 PM, Gwendal Grignou <gwendal@chromium.org> wrote:
+> Display new attributes in Extended CSD register introduced by eMMC 5.0:
+> 'mmc  extcsd read /dev/mmcblk0' returns for eMMC 5.0 device:
+>
+> =============================================
+>   Extended CSD rev 1.7 (MMC 5.0)
+> =============================================
+>
+> Card Supported Command sets [S_CMD_SET: 0x01]
+> ...
+> Extended partition attribute support [EXT_SUPPORT: 0x03]
+> Supported modes [SUPPORTED_MODES: 0x01]
+> FFU features [FFU_FEATURES: 0x00]
+> Operation codes timeout [OPERATION_CODE_TIMEOUT: 0x00]
+> FFU Argument [FFU_ARG: 0x00000000]
+> Number of FW sectors correctly programmed [NUMBER_OF_FW_SECTORS_CORRECTLY_PROGRAMMED: 0]
+> Vendor proprietary health report:
+> [VENDOR_PROPRIETARY_HEALTH_REPORT[301]]: 0x00
+> ...
+> [VENDOR_PROPRIETARY_HEALTH_REPORT[270]]: 0x00
+> Device life time estimation type B [DEVICE_LIFE_TIME_EST_TYP_B: 0x01]
+>  i.e. 0% - 10% device life time used
+> Device life time estimation type B [DEVICE_LIFE_TIME_EST_TYP_A: 0x01]
+>  i.e. 0% - 10% device life time used
+> Pre EOL information [PRE_EOL_INFO: 0x01]
+>  i.e. Normal
+> Optimal read size [OPTIMAL_READ_SIZE: 0x00]
+> Optimal write size [OPTIMAL_WRITE_SIZE: 0x10]
+> Optimal trim unit size [OPTIMAL_TRIM_UNIT_SIZE: 0x01]
+> Device version [DEVICE_VERSION: 0x00 - 0x00]
+> Firmware version:
+> [FIRMWARE_VERSION[261]]: 0x00
+> ...
+> [FIRMWARE_VERSION[254]]: 0x05
+> Power class for 200MHz, DDR at VCC= 3.6V [PWR_CL_DDR_200_360: 0x00]
+> Generic CMD6 Timer [GENERIC_CMD6_TIME: 0x0a]
+> Power off notification [POWER_OFF_LONG_TIME: 0x3c]
+> Cache Size [CACHE_SIZE] is 65536 KiB
+> ...
+>
+> Signed-off-by: Gwendal Grignou <gwendal@chromium.org>
+> Reviewed-by: Grant Grundler <grundler@chromium.org>
 > ---
->  drivers/mmc/host/dw_mmc-k3.c | 2 ++
->  drivers/mmc/host/dw_mmc.h    | 2 +-
->  2 files changed, 3 insertions(+), 1 deletion(-)
->=20
-> diff --git a/drivers/mmc/host/dw_mmc-k3.c b/drivers/mmc/host/dw_mmc-k=
-3.c
-> index f567c21..650f9cc 100644
-> --- a/drivers/mmc/host/dw_mmc-k3.c
-> +++ b/drivers/mmc/host/dw_mmc-k3.c
-> @@ -50,6 +50,7 @@ static int dw_mci_k3_probe(struct platform_device *=
-pdev)
->  	return dw_mci_pltfm_register(pdev, drv_data);
+>  mmc_cmds.c | 146 ++++++++++++++++++++++++++++++++++++++++++-------------------
+>  1 file changed, 102 insertions(+), 44 deletions(-)
+>
+> diff --git a/mmc_cmds.c b/mmc_cmds.c
+> index b8afa74..4b9b12e 100644
+> --- a/mmc_cmds.c
+> +++ b/mmc_cmds.c
+> @@ -424,12 +424,17 @@ int do_status_get(int nargs, char **argv)
+>         return ret;
 >  }
-> =20
-> +#ifdef CONFIG_PM_SLEEP
->  static int dw_mci_k3_suspend(struct device *dev)
+>
+> +__u32 get_word_from_ext_csd(__u8 *ext_csd_loc)
+> +{
+> +       return (ext_csd_loc[3] << 24) |
+> +               (ext_csd_loc[2] << 16) |
+> +               (ext_csd_loc[1] << 8)  |
+> +               ext_csd_loc[0];
+> +}
+> +
+>  unsigned int get_sector_count(__u8 *ext_csd)
 >  {
->  	struct dw_mci *host =3D dev_get_drvdata(dev);
-> @@ -75,6 +76,7 @@ static int dw_mci_k3_resume(struct device *dev)
-> =20
->  	return dw_mci_resume(host);
+> -       return (ext_csd[EXT_CSD_SEC_COUNT_3] << 24) |
+> -       (ext_csd[EXT_CSD_SEC_COUNT_2] << 16) |
+> -       (ext_csd[EXT_CSD_SEC_COUNT_1] << 8)  |
+> -       ext_csd[EXT_CSD_SEC_COUNT_0];
+> +       return get_word_from_ext_csd(&ext_csd[EXT_CSD_SEC_COUNT_0]);
 >  }
-> +#endif /* CONFIG_PM_SLEEP */
-> =20
->  static SIMPLE_DEV_PM_OPS(dw_mci_k3_pmops, dw_mci_k3_suspend, dw_mci_=
-k3_resume);
-> =20
-> diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
-> index 6bf24ab..1f7a745 100644
-> --- a/drivers/mmc/host/dw_mmc.h
-> +++ b/drivers/mmc/host/dw_mmc.h
-> @@ -185,7 +185,7 @@
-> =20
->  extern int dw_mci_probe(struct dw_mci *host);
->  extern void dw_mci_remove(struct dw_mci *host);
-> -#ifdef CONFIG_PM
-> +#ifdef CONFIG_PM_SLEEP
->  extern int dw_mci_suspend(struct dw_mci *host);
->  extern int dw_mci_resume(struct dw_mci *host);
->  #endif
->=20
-
+>
+>  int is_blockaddresed(__u8 *ext_csd)
+> @@ -701,6 +706,23 @@ int do_read_extcsd(int nargs, char **argv)
+>         int fd, ret;
+>         char *device;
+>         const char *str;
+> +       const char *ver_str[] = {
+> +               "4.0",  /* 0 */
+> +               "4.1",  /* 1 */
+> +               "4.2",  /* 2 */
+> +               "4.3",  /* 3 */
+> +               "Obsolete", /* 4 */
+> +               "4.41", /* 5 */
+> +               "4.5",  /* 6 */
+> +               "5.0",  /* 7 */
+> +       };
+> +       int boot_access;
+> +       const char* boot_access_str[] = {
+> +               "No access to boot partition",          /* 0 */
+> +               "R/W Boot Partition 1",                 /* 1 */
+> +               "R/W Boot Partition 2",                 /* 2 */
+> +               "R/W Replay Protected Memory Block (RPMB)", /* 3 */
+> +       };
+>
+>         CHECK(nargs != 2, "Usage: mmc extcsd read </path/to/mmcblkX>\n",
+>                           exit(1));
+> @@ -721,28 +743,12 @@ int do_read_extcsd(int nargs, char **argv)
+>
+>         ext_csd_rev = ext_csd[192];
+>
+> -       switch (ext_csd_rev) {
+> -       case 6:
+> -               str = "4.5";
+> -               break;
+> -       case 5:
+> -               str = "4.41";
+> -               break;
+> -       case 3:
+> -               str = "4.3";
+> -               break;
+> -       case 2:
+> -               str = "4.2";
+> -               break;
+> -       case 1:
+> -               str = "4.1";
+> -               break;
+> -       case 0:
+> -               str = "4.0";
+> -               break;
+> -       default:
+> +       if ((ext_csd_rev < sizeof(ver_str)/sizeof(char*)) &&
+> +           (ext_csd_rev != 4))
+> +               str = ver_str[ext_csd_rev];
+> +       else
+>                 goto out_free;
+> -       }
+> +
+>         printf("=============================================\n");
+>         printf("  Extended CSD rev 1.%d (MMC %s)\n", ext_csd_rev, str);
+>         printf("=============================================\n\n");
+> @@ -789,13 +795,77 @@ int do_read_extcsd(int nargs, char **argv)
+>                         ext_csd[495]);
+>                 printf("Extended partition attribute support"
+>                         " [EXT_SUPPORT: 0x%02x]\n", ext_csd[494]);
+> +       }
+> +       if (ext_csd_rev >= 7) {
+> +               int j;
+> +               int eol_info;
+> +               char* eol_info_str[] = {
+> +                       "Not Defined",  /* 0 */
+> +                       "Normal",       /* 1 */
+> +                       "Warning",      /* 2 */
+> +                       "Urgent",       /* 3 */
+> +               };
+> +
+> +               printf("Supported modes [SUPPORTED_MODES: 0x%02x]\n",
+> +                       ext_csd[493]);
+> +               printf("FFU features [FFU_FEATURES: 0x%02x]\n",
+> +                       ext_csd[492]);
+> +               printf("Operation codes timeout"
+> +                       " [OPERATION_CODE_TIMEOUT: 0x%02x]\n",
+> +                       ext_csd[491]);
+> +               printf("FFU Argument [FFU_ARG: 0x%08x]\n",
+> +                       get_word_from_ext_csd(&ext_csd[487]));
+> +               printf("Number of FW sectors correctly programmed"
+> +                       " [NUMBER_OF_FW_SECTORS_CORRECTLY_PROGRAMMED: %d]\n",
+> +                       get_word_from_ext_csd(&ext_csd[302]));
+> +               printf("Vendor proprietary health report:\n");
+> +               for (j = 301; j >= 270; j--)
+> +                       printf("[VENDOR_PROPRIETARY_HEALTH_REPORT[%d]]:"
+> +                               " 0x%02x\n", j, ext_csd[j]);
+> +               for (j = 269; j >= 268; j--) {
+> +                       __u8 life_used=ext_csd[j];
+> +                       printf("Device life time estimation type B"
+> +                               " [DEVICE_LIFE_TIME_EST_TYP_%c: 0x%02x]\n",
+> +                               'B' + (j - 269), life_used);
+> +                       if (life_used >= 0x1 && life_used <= 0xa)
+> +                               printf(" i.e. %d%% - %d%% device life time"
+> +                                       " used\n",
+> +                                       (life_used - 1) * 10, life_used * 10);
+> +                       else if (life_used == 0xb)
+> +                               printf(" i.e. Exceeded its maximum estimated"
+> +                                       " device life time\n");
+> +               }
+> +               eol_info = ext_csd[267];
+> +               printf("Pre EOL information [PRE_EOL_INFO: 0x%02x]\n",
+> +                       eol_info);
+> +               if (eol_info < sizeof(eol_info_str)/sizeof(char*))
+> +                       printf(" i.e. %s\n", eol_info_str[eol_info]);
+> +               else
+> +                       printf(" i.e. Reserved\n");
+> +
+> +               printf("Optimal read size [OPTIMAL_READ_SIZE: 0x%02x]\n",
+> +                       ext_csd[266]);
+> +               printf("Optimal write size [OPTIMAL_WRITE_SIZE: 0x%02x]\n",
+> +                       ext_csd[265]);
+> +               printf("Optimal trim unit size"
+> +                       " [OPTIMAL_TRIM_UNIT_SIZE: 0x%02x]\n", ext_csd[264]);
+> +               printf("Device version [DEVICE_VERSION: 0x%02x - 0x%02x]\n",
+> +                       ext_csd[263], ext_csd[262]);
+> +               printf("Firmware version:\n");
+> +               for (j = 261; j >= 254; j--)
+> +                       printf("[FIRMWARE_VERSION[%d]]:"
+> +                               " 0x%02x\n", j, ext_csd[j]);
+> +
+> +               printf("Power class for 200MHz, DDR at VCC= 3.6V"
+> +                       " [PWR_CL_DDR_200_360: 0x%02x]\n", ext_csd[253]);
+> +       }
+> +       if (ext_csd_rev >= 6) {
+>                 printf("Generic CMD6 Timer [GENERIC_CMD6_TIME: 0x%02x]\n",
+>                         ext_csd[248]);
+>                 printf("Power off notification [POWER_OFF_LONG_TIME: 0x%02x]\n",
+>                         ext_csd[247]);
+>                 printf("Cache Size [CACHE_SIZE] is %d KiB\n",
+> -                       ext_csd[249] << 0 | (ext_csd[250] << 8) |
+> -                       (ext_csd[251] << 16) | (ext_csd[252] << 24));
+> +                       get_word_from_ext_csd(&ext_csd[249]));
+>         }
+>
+>         /* A441: Reserved [501:247]
+> @@ -945,24 +1015,12 @@ int do_read_extcsd(int nargs, char **argv)
+>                 printf(" User Area Enabled for boot\n");
+>                 break;
+>         }
+> -       switch (reg & EXT_CSD_BOOT_CFG_ACC) {
+> -       case 0x0:
+> -               printf(" No access to boot partition\n");
+> -               break;
+> -       case 0x1:
+> -               printf(" R/W Boot Partition 1\n");
+> -               break;
+> -       case 0x2:
+> -               printf(" R/W Boot Partition 2\n");
+> -               break;
+> -       case 0x3:
+> -               printf(" R/W Replay Protected Memory Block (RPMB)\n");
+> -               break;
+> -       default:
+> +       boot_access = reg & EXT_CSD_BOOT_CFG_ACC;
+> +       if (boot_access < sizeof(boot_access_str) / sizeof(char*))
+> +               printf(" %s\n", boot_access_str[boot_access]);
+> +       else
+>                 printf(" Access to General Purpose partition %d\n",
+> -                       (reg & EXT_CSD_BOOT_CFG_ACC) - 3);
+> -               break;
+> -       }
+> +                       boot_access - 3);
+>
+>         printf("Boot config protection [BOOT_CONFIG_PROT: 0x%02x]\n",
+>                 ext_csd[178]);
+> --
+> 1.9.0.rc1.175.g0b1dcb5
+>
