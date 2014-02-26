@@ -1,83 +1,121 @@
-From: Tony Lindgren <tony@atomide.com>
-Subject: Re: SD card timeout problems on Nokia N900 (omap_hsmmc on OMAP3)
-Date: Wed, 26 Feb 2014 09:03:23 -0800
-Message-ID: <20140226170323.GB11654@atomide.com>
-References: <20140225234746.GA13866@earth.universe>
- <CAOf5uwn0sziBhE9edyiVqj8MUTidbX19YhgDsgikn5VLbx0B7A@mail.gmail.com>
- <530D8FF2.3070100@gmail.com>
- <530DA97E.7090406@ti.com>
+From: Frank Bormann <fbormann@yahoo.com>
+Subject: Inconsistency in MMC EXT_CSD configuration
+Date: Wed, 26 Feb 2014 17:54:47 -0500
+Message-ID: <530E70B7.70307@yahoo.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mho-03-ewr.mailhop.org ([204.13.248.66]:19551 "EHLO
-	mho-01-ewr.mailhop.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1752500AbaBZRDh (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 26 Feb 2014 12:03:37 -0500
-Content-Disposition: inline
-In-Reply-To: <530DA97E.7090406@ti.com>
+Received: from nm38-vm9.bullet.mail.bf1.yahoo.com ([72.30.239.25]:28491 "EHLO
+	nm38-vm9.bullet.mail.bf1.yahoo.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751445AbaBZXA2 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 26 Feb 2014 18:00:28 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Balaji T K <balajitk@ti.com>
-Cc: Stefan Roese <stefan.roese@gmail.com>, Sebastian Reichel <sre@ring0.de>, Michael Trimarchi <michael@amarulasolutions.com>, Linux OMAP Mailing List <linux-omap@vger.kernel.org>, Linux MMC List <linux-mmc@vger.kernel.org>, 'Chris Ball' <chris@printf.net>
+To: linux-mmc@vger.kernel.org, Chris Ball <chris@printf.net>
 
-* Balaji T K <balajitk@ti.com> [140226 00:48]:
-> On Wednesday 26 February 2014 12:25 PM, Stefan Roese wrote:
-> >Hi Sebastian,
-> >
-> >On 26.02.2014 07:02, Michael Trimarchi wrote:
-> >>Hi Sebastian
-> >>
-> >>On Wed, Feb 26, 2014 at 12:47 AM, Sebastian Reichel <sre@ring0.de> wrote:
-> >>>Hi,
-> >>>
-> >>>I have problems with the SD-card initialization on my Nokia N900
-> >>>using a 3.14-rc1 based kernel in DT boot mode. The bug is can be
-> >>>circumvented by changing the kernel slightly (e.g. remove some DT
-> >>>nodes or mark them as disabled). So the SD card's timeout problems
-> >>>seem to derive from kernel timing problems. I'm pretty sure, that
-> >>>the problems are not originating from a broken SD card, since
-> 
-> Can you provide removed/Disabled dt nodes, it might give some clue ?
-> 
-> >>>
-> >>>  1. The SD card worked quite good before and still does depending
-> >>>     on unrelated DTS changes (=> loading less drivers).
-> >>>  2. The SD card works flawlessly on my notebook using a USB adapter
-> >>>  3. Another SD card showed the same problem
-> >>>
-> >>>I tried to git bisect the problem, but I just get shown some
-> >>>unrelated driver additions.
-> >>>
-> >>>Anyways, this is the error I get during boot:
-> >>>
-> >>>[    3.896820] mmc0: mmc_rescan_try_freq: trying to init card at 400000 Hz
-> >>>...
-> >>>[    5.956237] mmc0: error -110 whilst initialising SD card
-> >>>
-> >>
-> >>Are you sure that some subsystem that you deactivate don't change
-> >>pin muxing setting? Can you check in the broken system if the pins of the sdcard
-> >>are correctly muxed? Does it happen even if you change the sdcard?
-> >
-> >Did you try to add this patch series:
-> >
-> >http://www.spinics.net/lists/linux-omap/msg103264.html
-> >
-> >Without it I'm also having problems with MMC detection on some OMAP3 based boards.
-> >
-> >Balaji, what is the status of this patch series? Are there any chances that it will be included in v3.14?
-> >
-> 
-> Due to dependencies between regulator, mmc, omap def config, devicetree changes,
-> I am hoping either Chris or Tony pick the whole series for 3.15
+Hi Everyone,
 
-Best that Chris takes it all, I just acked the only patch that did not have
-my ack yet.
- 
-> Couple of tested-by will surely help.
+I seem to have found a bug in the MMC kernel driver, particularly when 
+reading/writing configuration to EXT_CSD register 179 (PARTITION_CONFIG). This 
+register is being used to switch between the different partitions on a mmc card 
+(boot0, boot1, user). The kernel seems to read the EXT_CSD once in 
+mmc_init_card() and then keeps a copy of this register's contents in the 
+part_config member of struct mmc_card. Whenever it has to switch to a different
+mmc partition, it reads the internal copy of that register's contents, modifies 
+the bits for PARTITION_ACCESS and then write the result back to the EXT_CSD.
+This doesn't take into account any changes that have been made to other 
+configuration in that same register (BOOT_PARTITION_ENABLE, BOOT_ACK) from user 
+space through mmc-utils.
 
-Yeah please ack in the thread above if you did not already.
+As a result, configuration made to the PARTITION_CONFIG register through 
+mmc-utils, will get reverted whenever the kernel needs to switch to a different 
+mmc partition.
 
-Regards,
+I have attached a small patch that solves this problem for me. However, I am not 
+sure, if I accounted for all the possible code paths that may change EXT_CSD 
+register 179.
 
-Tony
+The patch is against linux-stable from today.
+
+Any input on this is highly appreciated.
+
+Thanks,
+Frank
+
+----
+
+From: Frank Bormann <fbormann@yahoo.com>
+Date: Wed, 26 Feb 2014 17:13:43 -0500
+Subject: [PATCH] Remember changes to PARTITON_CONFIG [179] EXT_CSD register
+  across accesses of multiple partitions (boot0, boot1, user)
+  of the same card.
+
+---
+  drivers/mmc/card/block.c |   17 +++++++++++++++++
+  include/linux/mmc/mmc.h  |   16 ++++++++++++++++
+  2 files changed, 33 insertions(+)
+
+diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+index 7b5424f..8002583 100644
+--- a/drivers/mmc/card/block.c
++++ b/drivers/mmc/card/block.c
+@@ -588,6 +588,23 @@ static int mmc_blk_ioctl_cmd(struct block_device *bdev,
+  >------>-------}
+  >------}
+~
++>------if (cmd.opcode == MMC_SWITCH
++>------>-------&& (cmd.arg & MMC_SWITCH_INDEX_MASK) >> MMC_SWITCH_INDEX_SHIFT
++>------>-------== EXT_CSD_PART_CONFIG) {
++>------>-------u8 val = (cmd.arg & MMC_SWITCH_VALUE_MASK) >> 
+MMC_SWITCH_VALUE_SHIFT;
++>------>-------switch ((cmd.arg & MMC_SWITCH_MODE_MASK) >> MMC_SWITCH_MODE_SHIFT) {
++>------>-------case MMC_SWITCH_MODE_SET_BITS:
++>------>------->-------card->ext_csd.part_config |= val;
++>------>------->-------break;
++>------>-------case MMC_SWITCH_MODE_CLEAR_BITS:
++>------>------->-------card->ext_csd.part_config &= ~val;
++>------>------->-------break;
++>------>-------case MMC_SWITCH_MODE_WRITE_BYTE:
++>------>------->-------card->ext_csd.part_config = val;
++>------>------->-------break;
++>------>-------}
++>------}
++
+  >------if (is_rpmb) {
+  >------>-------/*
+  >------>------- * Ensure RPMB command has completed by polling CMD13
+diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
+index 50bcde3..241aa13 100644
+--- a/include/linux/mmc/mmc.h
++++ b/include/linux/mmc/mmc.h
+@@ -413,9 +413,25 @@ struct _mmc_csd {
+   * MMC_SWITCH access modes
+   */
+~
++#define MMC_SWITCH_MODE_SHIFT>->-------24
++#define MMC_SWITCH_MODE_MASK>-->-------(0x03<<MMC_SWITCH_MODE_SHIFT)
+  #define MMC_SWITCH_MODE_CMD_SET>------->-------0x00>---/* Change the command 
+set */
+  #define MMC_SWITCH_MODE_SET_BITS>------0x01>---/* Set bits which are 1 in value */
+  #define MMC_SWITCH_MODE_CLEAR_BITS>----0x02>---/* Clear bits which are 1 in 
+value */
+  #define MMC_SWITCH_MODE_WRITE_BYTE>----0x03>---/* Set target to value */
+~
++/*
++ * MMC_SWITCH index
++ */
++
++#define MMC_SWITCH_INDEX_SHIFT>>-------16
++#define MMC_SWITCH_INDEX_MASK>->-------(0xFF<<MMC_SWITCH_INDEX_SHIFT)
++
++/*
++ * MMC_SWITCH value
++ */
++
++#define MMC_SWITCH_VALUE_SHIFT>>-------8
++#define MMC_SWITCH_VALUE_MASK>->-------(0xFF<<MMC_SWITCH_VALUE_SHIFT)
++
+  #endif /* LINUX_MMC_MMC_H */
+--~
+1.7.10.4
