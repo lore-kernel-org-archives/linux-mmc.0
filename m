@@ -1,73 +1,53 @@
-From: Balaji T K <balajitk@ti.com>
-Subject: Re: SD card timeout problems on Nokia N900 (omap_hsmmc on OMAP3)
-Date: Wed, 26 Feb 2014 14:14:46 +0530
-Message-ID: <530DA97E.7090406@ti.com>
-References: <20140225234746.GA13866@earth.universe> <CAOf5uwn0sziBhE9edyiVqj8MUTidbX19YhgDsgikn5VLbx0B7A@mail.gmail.com> <530D8FF2.3070100@gmail.com>
+From: Stefan Roese <stefan.roese@gmail.com>
+Subject: Re: [PATCH RESEND v10 0/7] mmc: omap_hsmmc: pbias dt and cleanup
+Date: Wed, 26 Feb 2014 09:51:39 +0100
+Message-ID: <530DAB1B.6000406@gmail.com>
+References: <1389627375-9107-1-git-send-email-balajitk@ti.com> <1392821801-29673-1-git-send-email-balajitk@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from bear.ext.ti.com ([192.94.94.41]:55419 "EHLO bear.ext.ti.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750814AbaBZIo4 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 26 Feb 2014 03:44:56 -0500
-In-Reply-To: <530D8FF2.3070100@gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-omap-owner@vger.kernel.org>
+In-Reply-To: <1392821801-29673-1-git-send-email-balajitk@ti.com>
+Sender: linux-omap-owner@vger.kernel.org
+To: Balaji T K <balajitk@ti.com>, linux-omap@vger.kernel.org, bcousson@baylibre.com, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, chris@printf.net, tony@atomide.com
+Cc: broonie@kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Stefan Roese <stefan.roese@gmail.com>, Sebastian Reichel <sre@ring0.de>
-Cc: Michael Trimarchi <michael@amarulasolutions.com>, Linux OMAP Mailing List <linux-omap@vger.kernel.org>, Linux MMC List <linux-mmc@vger.kernel.org>, Tony Lindgren <tony@atomide.com>, 'Chris Ball' <chris@printf.net>
 
-On Wednesday 26 February 2014 12:25 PM, Stefan Roese wrote:
-> Hi Sebastian,
+On 19.02.2014 15:56, Balaji T K wrote:
+> Few cleanups to reduce code indent,
+> Add pbias_regulator support and adapt omap_hsmmc to use pbias regulator
+> to configure required voltage on mmc1 pad(SD card) i/o rails on OMAP SoCs.
 >
-> On 26.02.2014 07:02, Michael Trimarchi wrote:
->> Hi Sebastian
->>
->> On Wed, Feb 26, 2014 at 12:47 AM, Sebastian Reichel <sre@ring0.de> wrote:
->>> Hi,
->>>
->>> I have problems with the SD-card initialization on my Nokia N900
->>> using a 3.14-rc1 based kernel in DT boot mode. The bug is can be
->>> circumvented by changing the kernel slightly (e.g. remove some DT
->>> nodes or mark them as disabled). So the SD card's timeout problems
->>> seem to derive from kernel timing problems. I'm pretty sure, that
->>> the problems are not originating from a broken SD card, since
+> Balaji T K (7):
+>    mmc: omap_hsmmc: use devm_regulator API
+>    mmc: omap_hsmmc: handle vcc and vcc_aux independently
+>    regulator: add pbias regulator support
+>    mmc: omap_hsmmc: adapt hsmmc to use pbias regulator
+>    ARM: dts: add pbias dt node
+>    ARM: OMAP: enable SYSCON and REGULATOR_PBIAS in omap2plus_defconfig
+>    mmc: omap_hsmmc: remove pbias workaround
+>
+>   .../bindings/regulator/pbias-regulator.txt         |   27 ++
+>   arch/arm/boot/dts/dra7.dtsi                        |   17 ++
+>   arch/arm/boot/dts/omap2430.dtsi                    |   17 ++
+>   arch/arm/boot/dts/omap3.dtsi                       |   17 ++
+>   arch/arm/boot/dts/omap4.dtsi                       |   17 ++
+>   arch/arm/boot/dts/omap5.dtsi                       |   17 ++
+>   arch/arm/configs/omap2plus_defconfig               |    2 +
+>   drivers/mmc/host/omap_hsmmc.c                      |  111 +++++----
+>   drivers/regulator/Kconfig                          |    9 +
+>   drivers/regulator/Makefile                         |    1 +
+>   drivers/regulator/pbias-regulator.c                |  255 ++++++++++++++++++++
+>   11 files changed, 441 insertions(+), 49 deletions(-)
+>   create mode 100644 Documentation/devicetree/bindings/regulator/pbias-regulator.txt
+>   create mode 100644 drivers/regulator/pbias-regulator.c
 
-Can you provide removed/Disabled dt nodes, it might give some clue ?
+This patch series (its v11 even though this mail has the subject v10) 
+fixes problems I'm experiencing with MMC detection on some OMAP3 based 
+boards. So:
 
->>>
->>>   1. The SD card worked quite good before and still does depending
->>>      on unrelated DTS changes (=> loading less drivers).
->>>   2. The SD card works flawlessly on my notebook using a USB adapter
->>>   3. Another SD card showed the same problem
->>>
->>> I tried to git bisect the problem, but I just get shown some
->>> unrelated driver additions.
->>>
->>> Anyways, this is the error I get during boot:
->>>
->>> [    3.896820] mmc0: mmc_rescan_try_freq: trying to init card at 400000 Hz
->>> ...
->>> [    5.956237] mmc0: error -110 whilst initialising SD card
->>>
->>
->> Are you sure that some subsystem that you deactivate don't change
->> pin muxing setting? Can you check in the broken system if the pins of the sdcard
->> are correctly muxed? Does it happen even if you change the sdcard?
->
-> Did you try to add this patch series:
->
-> http://www.spinics.net/lists/linux-omap/msg103264.html
->
-> Without it I'm also having problems with MMC detection on some OMAP3 based boards.
->
-> Balaji, what is the status of this patch series? Are there any chances that it will be included in v3.14?
->
+Tested-by: Stefan Roese <sr@denx.de>
 
-Due to dependencies between regulator, mmc, omap def config, devicetree changes,
-I am hoping either Chris or Tony pick the whole series for 3.15
+Thanks,
+Stefan
 
-Couple of tested-by will surely help.
-
-Thanks and Regards,
-Balaji T K
