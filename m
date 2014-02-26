@@ -1,48 +1,61 @@
-From: Balaji T K <balajitk@ti.com>
-Subject: Re: [PATCH RESEND v10 0/7] mmc: omap_hsmmc: pbias dt and cleanup
-Date: Wed, 26 Feb 2014 20:13:29 +0530
-Message-ID: <530DFD91.4090601@ti.com>
-References: <1389627375-9107-1-git-send-email-balajitk@ti.com> <1392821801-29673-1-git-send-email-balajitk@ti.com> <530DF453.40201@epfl.ch>
+From: Tony Lindgren <tony@atomide.com>
+Subject: Re: [PATCH RESEND v11 6/7] ARM: OMAP: enable SYSCON and
+ REGULATOR_PBIAS in omap2plus_defconfig
+Date: Wed, 26 Feb 2014 09:01:53 -0800
+Message-ID: <20140226170152.GA11654@atomide.com>
+References: <1389627375-9107-1-git-send-email-balajitk@ti.com>
+ <1392821801-29673-1-git-send-email-balajitk@ti.com>
+ <1392821801-29673-7-git-send-email-balajitk@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from arroyo.ext.ti.com ([192.94.94.40]:59192 "EHLO arroyo.ext.ti.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751808AbaBZOnp (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 26 Feb 2014 09:43:45 -0500
-In-Reply-To: <530DF453.40201@epfl.ch>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-omap-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <1392821801-29673-7-git-send-email-balajitk@ti.com>
+Sender: linux-omap-owner@vger.kernel.org
+To: Balaji T K <balajitk@ti.com>
+Cc: linux-omap@vger.kernel.org, bcousson@baylibre.com, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, chris@printf.net, broonie@kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: florian.vaussard@epfl.ch
-Cc: linux-omap@vger.kernel.org, bcousson@baylibre.com, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, chris@printf.net, tony@atomide.com, broonie@kernel.org, Stefan Roese <stefan.roese@gmail.com>
 
-On Wednesday 26 February 2014 07:34 PM, Florian Vaussard wrote:
-> Hi,
->
-> On 02/19/2014 03:56 PM, Balaji T K wrote:
->> Few cleanups to reduce code indent,
->> Add pbias_regulator support and adapt omap_hsmmc to use pbias regulator
->> to configure required voltage on mmc1 pad(SD card) i/o rails on OMAP SoCs.
->>
->
-> I tested on both OMAP3630 (Overo Storm) and OMAP4430 (DuoVero). The
-> rootfs is mounted on mmc1 and works as usual. Here is what I can see:
->
-> - pbias-supply is parsed from DT
-> - VMMC1 is set to 3V
-> - According to the debugfs entry, we are working at 3V signaling
-> - By dumping CONTROL_PBIASLITE, bit MMC1_PBIASLITE_VMODE
-> (PBIASLITEVMODE0 on OMAP3) is set to 1 (-> 3V)
->
-> Do you see any other tests that I could run to validate your patches?
+* Balaji T K <balajitk@ti.com> [140219 07:00]:
+> Enable REGULATOR_PBIAS needed for SD card on most OMAPs.
+> 
+> Signed-off-by: Balaji T K <balajitk@ti.com>
 
-Nope, Stefan has tested the other use case of detecting sd card at kernel
-without any sd card/pbias activity at u-boot.
+I belive this is the only one missing my ack:
 
-> Otherwise:
->
-> Tested-by: Florian Vaussard <florian.vaussard@epfl.ch>
->
+Acked-by: Tony Lindgren <tony@atomide.com>
 
-Thanks Florian, Stefan for Testing.
+Probably best that this all gets queued along with other MMC related
+patches by Balaji and Chris.
+
+> ---
+>  arch/arm/configs/omap2plus_defconfig |    2 ++
+>  1 files changed, 2 insertions(+), 0 deletions(-)
+> 
+> diff --git a/arch/arm/configs/omap2plus_defconfig b/arch/arm/configs/omap2plus_defconfig
+> index 3a0b53d..e4fec1c 100644
+> --- a/arch/arm/configs/omap2plus_defconfig
+> +++ b/arch/arm/configs/omap2plus_defconfig
+> @@ -169,6 +169,7 @@ CONFIG_DRA752_THERMAL=y
+>  CONFIG_WATCHDOG=y
+>  CONFIG_OMAP_WATCHDOG=y
+>  CONFIG_TWL4030_WATCHDOG=y
+> +CONFIG_MFD_SYSCON=y
+>  CONFIG_MFD_PALMAS=y
+>  CONFIG_MFD_TPS65217=y
+>  CONFIG_MFD_TPS65910=y
+> @@ -180,6 +181,7 @@ CONFIG_REGULATOR_TPS6507X=y
+>  CONFIG_REGULATOR_TPS65217=y
+>  CONFIG_REGULATOR_TPS65910=y
+>  CONFIG_REGULATOR_TWL4030=y
+> +CONFIG_REGULATOR_PBIAS=y
+>  CONFIG_FB=y
+>  CONFIG_FIRMWARE_EDID=y
+>  CONFIG_FB_MODE_HELPERS=y
+> -- 
+> 1.7.5.4
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-omap" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
