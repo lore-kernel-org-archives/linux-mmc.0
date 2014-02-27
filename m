@@ -1,90 +1,40 @@
-From: Chanho Min <chanho.min@lge.com>
-Subject: [PATCH RESEND] mmc:sdhci: handle busy-end interrupt during command
-Date: Thu, 27 Feb 2014 11:12:18 +0900
-Message-ID: <1393467138-5633-1-git-send-email-chanho.min@lge.com>
+From: Chris Ball <chris@printf.net>
+Subject: Re: [PATCHv3 1/3] mmc: dw_mmc-socfpga: Remove the SOCFPGA specific platform for dw_mmc
+Date: Thu, 27 Feb 2014 02:32:14 +0000
+Message-ID: <864n3ls2tt.fsf@void.printf.net>
+References: <1392690662-19106-1-git-send-email-dinguyen@altera.com>
+	<000101cf2cb3$06156fb0$12404f10$%jun@samsung.com>
+	<530CCBBB.9010503@gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lgeamrelo02.lge.com ([156.147.1.126]:43068 "EHLO
-	LGEAMRELO02.lge.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753908AbaB0CMX (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 26 Feb 2014 21:12:23 -0500
+Received: from void.printf.net ([89.145.121.20]:44535 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753288AbaB0CcY (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 26 Feb 2014 21:32:24 -0500
+In-Reply-To: <530CCBBB.9010503@gmail.com> (Dinh Nguyen's message of "Tue, 25
+	Feb 2014 10:58:35 -0600")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>, Chris Ball <chris@printf.net>
-Cc: Hankyung Yu <hankyung.yu@lge.com>, Shawn Guo <shawn.guo@linaro.org>, Dong Aisheng <b29396@freescale.com>, Kevin Liu <kliu5@marvell.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Chanho Min <chanho.min@lge.com>
+To: Dinh Nguyen <dinh.linux@gmail.com>
+Cc: Seungwon Jeon <tgih.jun@samsung.com>, dinguyen@altera.com, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, 'Rob Herring' <robh+dt@kernel.org>, 'Pawel Moll' <pawel.moll@arm.com>, 'Mark Rutland' <mark.rutland@arm.com>, 'Ian Campbell' <ijc+devicetree@hellion.org.uk>, 'Kumar Gala' <galak@codeaurora.org>, 'Jaehoon Chung' <jh80.chung@samsung.com>
 
-It is fully legal for a controller to start handling busy-end interrupt
-before it has signaled that the command has completed. So make sure
-we do things in the proper order, Or it results that command interrupt
-is ignored so it can cause unexpected operations. This is founded at some
-toshiba emmc with the bellow warning.
+Hi,
 
-"mmc0: Got command interrupt 0x00000001 even though
-no command operation was in progress."
+On Tue, Feb 25 2014, Dinh Nguyen wrote:
+>>> From: Dinh Nguyen <dinguyen@altera.com>
+>>>
+>>> It turns now that the only really platform specific code that is needed for
+>>> SOCFPGA is using the SDMMC_CMD_USE_HOLD_REG in the prepare_command function.
+>>> Since the Rockchip already has this functionality, re-use the code that is
+>>> already in dw_mmc-pltfm.c.
+>>
+>> Acked-by: Seungwon Jeon <tgih.jun@samsung.com>
+>
+> If you're ok with this patch series, can you please apply them for 3.15?
 
-Can anyone ACK/NACK of this patch? Any comment will be appreciated.
+Thanks, pushed to mmc-next for 3.15.
 
-Signed-off-by: Hankyung Yu <hankyung.yu@lge.com>
-Signed-off-by: Chanho Min <chanho.min@lge.com>
----
- drivers/mmc/host/sdhci.c  |   17 +++++++++++++++--
- include/linux/mmc/sdhci.h |    1 +
- 2 files changed, 16 insertions(+), 2 deletions(-)
-
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index bd8a098..21f98e7 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -1016,6 +1016,7 @@ void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
- 	mod_timer(&host->timer, jiffies + 10 * HZ);
- 
- 	host->cmd = cmd;
-+	host->busy_handle = 0;
- 
- 	sdhci_prepare_data(host, cmd);
- 
-@@ -2271,8 +2272,12 @@ static void sdhci_cmd_irq(struct sdhci_host *host, u32 intmask)
- 		if (host->cmd->data)
- 			DBG("Cannot wait for busy signal when also "
- 				"doing a data transfer");
--		else if (!(host->quirks & SDHCI_QUIRK_NO_BUSY_IRQ))
-+		else if (!(host->quirks & SDHCI_QUIRK_NO_BUSY_IRQ)
-+				&& !host->busy_handle) {
-+			/* Mark that command complete before busy is ended */
-+			host->busy_handle = 1;
- 			return;
-+		}
- 
- 		/* The controller does not support the end-of-busy IRQ,
- 		 * fall through and take the SDHCI_INT_RESPONSE */
-@@ -2335,7 +2340,15 @@ static void sdhci_data_irq(struct sdhci_host *host, u32 intmask)
- 		 */
- 		if (host->cmd && (host->cmd->flags & MMC_RSP_BUSY)) {
- 			if (intmask & SDHCI_INT_DATA_END) {
--				sdhci_finish_command(host);
-+				/*
-+				 * Some cards handle busy-end interrupt
-+				 * before the command completed, so make
-+				 * sure we do things in the proper order.
-+				 */
-+				if (host->busy_handle)
-+					sdhci_finish_command(host);
-+				else
-+					host->busy_handle = 1;
- 				return;
- 			}
- 		}
-diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
-index 3e781b8..0118020 100644
---- a/include/linux/mmc/sdhci.h
-+++ b/include/linux/mmc/sdhci.h
-@@ -148,6 +148,7 @@ struct sdhci_host {
- 	struct mmc_command *cmd;	/* Current command */
- 	struct mmc_data *data;	/* Current data request */
- 	unsigned int data_early:1;	/* Data finished before cmd */
-+	unsigned int busy_handle:1;	/* Handling the order of Busy-end */
- 
- 	struct sg_mapping_iter sg_miter;	/* SG state for PIO */
- 	unsigned int blocks;	/* remaining PIO blocks */
+- Chris.
 -- 
-1.7.9.5
-
+Chris Ball   <chris@printf.net>   <http://printf.net/>
