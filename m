@@ -1,157 +1,105 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: SDIO driver return -ENOSYS behaviour change?
-Date: Thu, 27 Feb 2014 14:05:33 +0100
-Message-ID: <CAPDyKFpcJ5T9QXbFzZnu4fdgfjsTntfrtS=mo=5Wb_uJa7iMbw@mail.gmail.com>
-References: <530F0118.2010501@intel.com>
-	<CAPDyKFrZAAVfFcaFx7o3TWMikWx7TvSPW_AuV1VsiuQF656uXg@mail.gmail.com>
-	<530F20E5.9000107@intel.com>
+From: Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>
+Subject: [PATCH 2/4] ARM: dove: prepare new Dove DT Kconfig
+	variable
+Date: Thu, 27 Feb 2014 22:28:03 +0100
+Message-ID: <1393536486-3827-3-git-send-email-sebastian.hesselbarth@gmail.com>
+References: <1393536486-3827-1-git-send-email-sebastian.hesselbarth@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qc0-f178.google.com ([209.85.216.178]:46929 "EHLO
-	mail-qc0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751382AbaB0NFe (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 27 Feb 2014 08:05:34 -0500
-Received: by mail-qc0-f178.google.com with SMTP id i8so3223777qcq.9
-        for <linux-mmc@vger.kernel.org>; Thu, 27 Feb 2014 05:05:33 -0800 (PST)
-In-Reply-To: <530F20E5.9000107@intel.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <alsa-devel-bounces@alsa-project.org>
+In-Reply-To: <1393536486-3827-1-git-send-email-sebastian.hesselbarth@gmail.com>
+List-Unsubscribe: <http://mailman.alsa-project.org/mailman/options/alsa-devel>,
+ <mailto:alsa-devel-request@alsa-project.org?subject=unsubscribe>
+List-Archive: <http://mailman.alsa-project.org/pipermail/alsa-devel/>
+List-Post: <mailto:alsa-devel@alsa-project.org>
+List-Help: <mailto:alsa-devel-request@alsa-project.org?subject=help>
+List-Subscribe: <http://mailman.alsa-project.org/mailman/listinfo/alsa-devel>,
+ <mailto:alsa-devel-request@alsa-project.org?subject=subscribe>
+Errors-To: alsa-devel-bounces@alsa-project.org
+Sender: alsa-devel-bounces@alsa-project.org
+To: Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>
+Cc: Andrew Lunn <andrew@lunn.ch>, alsa-devel@alsa-project.org, Jason Cooper <jason@lakedaemon.net>, linux-pm@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, Chris Ball <chris@printf.net>, Liam Girdwood <lgirdwood@gmail.com>, Eduardo Valentin <eduardo.valentin@ti.com>, Wim Van Sebroeck <wim@iguana.be>, Mark Brown <broonie@kernel.org>, Gregory Clement <gregory.clement@free-electrons.com>, Zhang Rui <rui.zhang@intel.com>, linux-arm-kernel@lists.infradead.org, linux-watchdog@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Aaron Lu <aaron.lu@intel.com>
-Cc: NeilBrown <neilb@suse.de>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-On 27 February 2014 12:26, Aaron Lu <aaron.lu@intel.com> wrote:
-> On 02/27/2014 06:18 PM, Ulf Hansson wrote:
->> On 27 February 2014 10:10, Aaron Lu <aaron.lu@intel.com> wrote:
->>> Hi Ulf,
->>>
->>> I was tracking some SDIO suspend problem and came across this. As Neil
->>> mentioned here:
->>> http://lkml.org/lkml/2012/3/25/20
->>> Quote:
->>> "
->>> SDIO (and possible MMC in general) has a protocol where the suspend
->>>  method can return -ENOSYS and this means "There is no point in suspending,
->>>  just turn me off".
->>> "
->>>
->>> It seems that the following commit:
->>>
->>> commit 810caddba42a54fe5db4e2664757a9a334ba359c
->>> Author: Ulf Hansson <ulf.hansson@linaro.org>
->>> Date:   Mon Jun 10 17:03:37 2013 +0200
->>>
->>>     mmc: core: Validate suspend prerequisites for SDIO at SUSPEND_PREPARE
->>>
->>> Changed this behaviour?
->>
->> I realized I changed the behaviour to not cover for sdio func drivers,
->> that actually implements the pm callbacks - but do return -ENOSYS in
->> them. That wasn't obvious when looking at the code back then, sorry!
->
-> Never mind, this behaviour change doesn't cause my problems but knowing
-> whether this behaviour should be kept affects how I'm going to solve my
-> problem.
+DT-enabled Dove will move over from ARCH_DOVE in mach-dove to MACH_DOVE in
+mach-mvebu. As non-DT ARCH_DOVE will stay to rot for a while, add a new
+DT-only MACH_DOVE to mmc, thermal, wdt, and asoc Kconfigs.
 
-So let's aim for the a proper solution instead of a quick hack.
+Signed-off-by: Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>
+---
+Cc: Chris Ball <chris@printf.net>
+Cc: Zhang Rui <rui.zhang@intel.com>
+Cc: Eduardo Valentin <eduardo.valentin@ti.com>
+Cc: Wim Van Sebroeck <wim@iguana.be>
+Cc: Liam Girdwood <lgirdwood@gmail.com>
+Cc: Mark Brown <broonie@kernel.org>
+Cc: Jason Cooper <jason@lakedaemon.net>
+Cc: Andrew Lunn <andrew@lunn.ch>
+Cc: Gregory Clement <gregory.clement@free-electrons.com>
+Cc: alsa-devel@alsa-project.org
+Cc: linux-watchdog@vger.kernel.org
+Cc: linux-pm@vger.kernel.org
+Cc: linux-mmc@vger.kernel.org
+Cc: linux-arm-kernel@lists.infradead.org
+Cc: linux-kernel@vger.kernel.org
+---
+ drivers/mmc/host/Kconfig   | 2 +-
+ drivers/thermal/Kconfig    | 2 +-
+ drivers/watchdog/Kconfig   | 2 +-
+ sound/soc/kirkwood/Kconfig | 2 +-
+ 4 files changed, 4 insertions(+), 4 deletions(-)
 
-Although apparently mwifiex, libertas and btmrvl_sdio (bluetooth) may
-return -ENOSYS from the respective system supend callbacks, thus
-expecting the card to be removed. Currently this won't happen, but
-instead the suspend will be aborted, which is really bad.
-
-I believe those driver's suspend callback should be fixed to not
-return -ENOSYS. Returning 0 will, when MMC_PM_KEEP_POWER is not set,
-power off the card similar what's done when removing the card - that
-should be perfectly fine. Do note that the sdio func driver then
-should expect the resume callback to invoked, instead of being
-_probed_ at the next system resume.
-
->
-> My problem is that, after the following commit:
->
-> commit eed222aca8d077af3600b651176f6fd04d95cce1
-> Author: Aaron Lu <aaron.lu@intel.com>
-> Date:   Tue Mar 5 11:24:52 2013 +0800
->
->     mmc: sdio: bind acpi with sdio function device
->
-> The SDIO function that has an ACPI node associated with will have the
-> pm_domain assigned, which breaks the intention that during SDIO function
-> device suspend phase nothing should be done by having a dummy BUS layer
-> callback. The existence of the pm_domain for the SDIO function device
-> will make its function driver's suspend callback gets called now. The
-> end result is the function driver's suspend callback is called twice.
-
-Why is the sdio bus ignored?
-
-Are you saying the power domain is using the pm_generic_suspend for or
-from it's ->suspend callback? If so, that could be the problem!?
-
->
-> To solve this problem, I was wondering why SDIO function device has this
-> 'special' requirement that nothing should be done at its own device
-> suspend phase but instead, relies on its suspend callback gets called in
-> its parent device's suspend callback. And then I realized the reason is
-> for the special handling of -ENOSYS.
-
-That's to my understanding not the only reason.
-
-I think it's more a matter of having a controlled suspend sequence.
-The mmc core are not able to serve any new SDIO requests while it is
-suspended, therefore it tells the sdio func driver about when it safe
-to send request - using it's PM callbacks.
-
-You could debate whether that actually should be done though the PM
-callbacks, or by some other SDIO specific callbacks. Haven't thought
-it through completely yet.
-
->
-> So if we could get rid of the -ENOSYS, my problem could be easily solved
-> by deleting some lines in current code(the calling of function driver's
-> suspend callback in mmc_sdio_suspend and the dummy system suspend/resume
-> callback for SDIO bus). Buf if the behaviour has to be kept, I'll
-> probably need to remove the pm_domain for the device and do some
-> additional ACPI handing in mmc_sdio_suspend/resume for the function
-> device.
->
-
-So we have two different issues to address here.
-
-Removing the option for sdio func drivers to return -ENOSYS from their
-suspend callback - has already be done, though by my mistake. Anyway,
-this won't solve your problem.
-
-Additionally, I don't like putting this option back, since it's not
-possible to remove the card in that path. Still we could handle
--ENOSYS and OK error and decide to power off the card. On the other
-hand, we could instead fix the sdio func drivers, that should be quite
-easy I think.
-
->>
->> There are no solution to this problem in the mmc core right now, since
->> we can't remove the card while we have reach the state when the
->> suspend callback is being invoked.
->>
->> Instead, the sdio func driver shall not implement the PM callbacks at
->> all. That behaviour means the mmc core will remove the card, but now
->> it's done a in an earlier phase of the system suspend when we are
->> still able to remove it.
->
-> The libertas suspend callback is doing different things depending on
-> different conditions - sometime it will enable wakeup capability and
-> sometime it will want the mmc core to remove the device entirely by
-> retuning -ENOSYS, so it may not be that easy by just deleting the
-> callback, but I don't know for sure.
-
-I had a look, the callback must remains.
-
-As, stated - fix the suspend callback to not return -ENOSYS.
-
-Kind regards
-Uffe
-
-
->
-> Thanks,
-> Aaron
+diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+index 1384f67abe21..a69e48b582e5 100644
+--- a/drivers/mmc/host/Kconfig
++++ b/drivers/mmc/host/Kconfig
+@@ -168,7 +168,7 @@ config MMC_SDHCI_ESDHC_IMX
+ 
+ config MMC_SDHCI_DOVE
+ 	tristate "SDHCI support on Marvell's Dove SoC"
+-	depends on ARCH_DOVE
++	depends on ARCH_DOVE || MACH_DOVE
+ 	depends on MMC_SDHCI_PLTFM
+ 	select MMC_SDHCI_IO_ACCESSORS
+ 	help
+diff --git a/drivers/thermal/Kconfig b/drivers/thermal/Kconfig
+index 35c066489a19..07b5e56e9a97 100644
+--- a/drivers/thermal/Kconfig
++++ b/drivers/thermal/Kconfig
+@@ -150,7 +150,7 @@ config KIRKWOOD_THERMAL
+ 
+ config DOVE_THERMAL
+ 	tristate "Temperature sensor on Marvell Dove SoCs"
+-	depends on ARCH_DOVE
++	depends on ARCH_DOVE || MACH_DOVE
+ 	depends on OF
+ 	help
+ 	  Support for the Dove thermal sensor driver in the Linux thermal
+diff --git a/drivers/watchdog/Kconfig b/drivers/watchdog/Kconfig
+index 79d25894343a..5659c62a175c 100644
+--- a/drivers/watchdog/Kconfig
++++ b/drivers/watchdog/Kconfig
+@@ -292,7 +292,7 @@ config DAVINCI_WATCHDOG
+ 
+ config ORION_WATCHDOG
+ 	tristate "Orion watchdog"
+-	depends on ARCH_ORION5X || ARCH_KIRKWOOD || ARCH_DOVE
++	depends on ARCH_ORION5X || ARCH_KIRKWOOD || ARCH_DOVE || MACH_DOVE
+ 	select WATCHDOG_CORE
+ 	help
+ 	  Say Y here if to include support for the watchdog timer
+diff --git a/sound/soc/kirkwood/Kconfig b/sound/soc/kirkwood/Kconfig
+index 78ed4a42ad21..a1506d57e646 100644
+--- a/sound/soc/kirkwood/Kconfig
++++ b/sound/soc/kirkwood/Kconfig
+@@ -1,6 +1,6 @@
+ config SND_KIRKWOOD_SOC
+ 	tristate "SoC Audio for the Marvell Kirkwood and Dove chips"
+-	depends on ARCH_KIRKWOOD || ARCH_DOVE || COMPILE_TEST
++	depends on ARCH_KIRKWOOD || ARCH_DOVE || MACH_DOVE || COMPILE_TEST
+ 	help
+ 	  Say Y or M if you want to add support for codecs attached to
+ 	  the Kirkwood I2S interface. You will also need to select the
+-- 
+1.8.5.3
