@@ -1,62 +1,36 @@
-From: Balaji T K <balajitk@ti.com>
-Subject: Re: [PATCH v7 1/4] mmc: omap_hsmmc: Enable SDIO IRQ.
-Date: Fri, 28 Feb 2014 22:34:44 +0530
-Message-ID: <5310C1AC.5060301@ti.com>
-References: <1393331866-28307-1-git-send-email-afenkart@gmail.com> <1393331866-28307-2-git-send-email-afenkart@gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
+From: Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>
+Subject: Re: [PATCH 2/4] ARM: dove: prepare new Dove DT Kconfig variable
+Date: Fri, 28 Feb 2014 19:12:20 +0100
+Message-ID: <5310D184.3050905@gmail.com>
+References: <1393536486-3827-1-git-send-email-sebastian.hesselbarth@gmail.com> <1393536486-3827-3-git-send-email-sebastian.hesselbarth@gmail.com> <20140228015310.GC9383@sirena.org.uk> <20140228163448.GM1872@titan.lakedaemon.net>
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-doc-owner@vger.kernel.org>
-In-Reply-To: <1393331866-28307-2-git-send-email-afenkart@gmail.com>
-Sender: linux-doc-owner@vger.kernel.org
-To: Andreas Fenkart <afenkart@gmail.com>
-Cc: Chris Ball <cjb@laptop.org>, Tony Lindgren <tony@atomide.com>, Grant Likely <grant.likely@secretlab.ca>, Felipe Balbi <balbi@ti.com>, zonque@gmail.com, galak@codeaurora.org, linux-doc@vger.kernel.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20140228163448.GM1872@titan.lakedaemon.net>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Jason Cooper <jason@lakedaemon.net>, Mark Brown <broonie@kernel.org>
+Cc: Chris Ball <chris@printf.net>, Zhang Rui <rui.zhang@intel.com>, Eduardo Valentin <eduardo.valentin@ti.com>, Wim Van Sebroeck <wim@iguana.be>, Liam Girdwood <lgirdwood@gmail.com>, Andrew Lunn <andrew@lunn.ch>, Gregory Clement <gregory.clement@free-electrons.com>, alsa-devel@alsa-project.org, linux-watchdog@vger.kernel.org, linux-pm@vger.kernel.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Tuesday 25 February 2014 06:07 PM, Andreas Fenkart wrote:
-> For now, only support SDIO interrupt if we are booted with
-> DT. This is because some platforms need special quirks. And
-> we don't want to add new legacy mux platform init code
-> callbacks any longer as we are moving to DT based booting
-> anyways.
+On 02/28/2014 05:34 PM, Jason Cooper wrote:
+> On Fri, Feb 28, 2014 at 10:53:10AM +0900, Mark Brown wrote:
+>> On Thu, Feb 27, 2014 at 10:28:03PM +0100, Sebastian Hesselbarth wrote:
+>>> DT-enabled Dove will move over from ARCH_DOVE in mach-dove to MACH_DOVE in
+>>> mach-mvebu. As non-DT ARCH_DOVE will stay to rot for a while, add a new
+>>> DT-only MACH_DOVE to mmc, thermal, wdt, and asoc Kconfigs.
+>>
+>> I'd be much happier merging this sort of stuff individually through the
+>> subsystems, we already have an annoying conflict here...  Is there some
+>> bisection problem with doing that?
 >
-> Signed-off-by: Andreas Fenkart <afenkart@gmail.com>
+> shouldn't be.  Since these changes || the old with the new config
+> symbols.
 >
-> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-> index a5a38cc..bd3bb0c 100644
-> --- a/drivers/mmc/host/omap_hsmmc.c
-> +++ b/drivers/mmc/host/omap_hsmmc.c
+> Sebastian, can you split this up into individual patches?
 
-<snip>
+Sure, I'll send them in-reply-to this mail soon. I'll also add the SATA
+PHY Kconfig in a bisectable way, i.e. add MACH_DOVE and for now ignore
+that the driver is DT-only. We plan to remove mach-dove in one or two
+cycles anyway, it will go with it then.
 
-> @@ -1705,7 +1757,18 @@ static void omap_hsmmc_debugfs(struct mmc_host *mmc)
->   #endif
->
->   #ifdef CONFIG_OF
-> -static u16 omap4_reg_offset = 0x100;
-> +struct of_data {
-> +	u16 offset;
-> +	int flags;
-> +};
-> +
-Hi Andreas,
-
-struct of_data declaration needs to be moved out of #ifdef CONFIG_OF
-for !CONFIG_OF build.
-
-I tried testing this patch series on am335x, I see throughput in the
-range of KBs. Will give another try with Tony's version.
-
-Thanks and Regards,
-Balaji T K
-
-> +static struct of_data omap4_data = {
-> +	.offset	= 0x100,
-> +};
-> +static struct of_data am33xx_data = {
-> +	.offset	= 0x100,
-> +	.flags	= OMAP_HSMMC_SWAKEUP_MISSING,
-> +};
->
->   static const struct of_device_id omap_mmc_of_match[] = {
->   	{
+Sebastian
