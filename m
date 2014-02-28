@@ -1,450 +1,206 @@
-From: Grant Grundler <grundler@chromium.org>
-Subject: Re: [RFC PATCH 1/1 ]mmc: Support-FFU-for-eMMC-v5.0
-Date: Thu, 27 Feb 2014 18:29:26 -0800
-Message-ID: <CANEJEGvqk3J-4UmpAhckJ_pceVTUYxa4wZ-qo=u2HVC=+zmzLw@mail.gmail.com>
-References: <FDD07FEB422EF948A392FDC201AEEAE63F49709D@SACMBXIP01.sdcorp.global.sandisk.com>
-	<CANEJEGudCOTViPR6UJcEAuCcS64P9Uh1G-TtE7BL3hJ4TU+MuQ@mail.gmail.com>
+From: Aaron Lu <aaron.lu@intel.com>
+Subject: Re: SDIO driver return -ENOSYS behaviour change?
+Date: Fri, 28 Feb 2014 10:37:58 +0800
+Message-ID: <530FF686.2080901@intel.com>
+References: <530F0118.2010501@intel.com>	<CAPDyKFrZAAVfFcaFx7o3TWMikWx7TvSPW_AuV1VsiuQF656uXg@mail.gmail.com>	<530F20E5.9000107@intel.com> <CAPDyKFpcJ5T9QXbFzZnu4fdgfjsTntfrtS=mo=5Wb_uJa7iMbw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-oa0-f51.google.com ([209.85.219.51]:43066 "EHLO
-	mail-oa0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751263AbaB1C30 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 27 Feb 2014 21:29:26 -0500
-Received: by mail-oa0-f51.google.com with SMTP id j17so3416359oag.38
-        for <linux-mmc@vger.kernel.org>; Thu, 27 Feb 2014 18:29:26 -0800 (PST)
-In-Reply-To: <CANEJEGudCOTViPR6UJcEAuCcS64P9Uh1G-TtE7BL3hJ4TU+MuQ@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-pm-owner@vger.kernel.org>
+In-Reply-To: <CAPDyKFpcJ5T9QXbFzZnu4fdgfjsTntfrtS=mo=5Wb_uJa7iMbw@mail.gmail.com>
+Sender: linux-pm-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: NeilBrown <neilb@suse.de>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "Rafael J. Wysocki" <rjw@rjwysocki.net>, Linux-pm mailing list <linux-pm@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Grant Grundler <grundler@chromium.org>
-Cc: Avi Shchislowski <Avi.Shchislowski@sandisk.com>, "cjb@laptop.org" <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Alex Lemberg <Alex.Lemberg@sandisk.com>
 
-Sorry. Gmail isn't vi and accidentally sent this prematurely. /o\
-Continuing the review comments...
+On 02/27/2014 09:05 PM, Ulf Hansson wrote:
+> On 27 February 2014 12:26, Aaron Lu <aaron.lu@intel.com> wrote:
+>> On 02/27/2014 06:18 PM, Ulf Hansson wrote:
+>>> On 27 February 2014 10:10, Aaron Lu <aaron.lu@intel.com> wrote:
+>>>> Hi Ulf,
+>>>>
+>>>> I was tracking some SDIO suspend problem and came across this. As Neil
+>>>> mentioned here:
+>>>> http://lkml.org/lkml/2012/3/25/20
+>>>> Quote:
+>>>> "
+>>>> SDIO (and possible MMC in general) has a protocol where the suspend
+>>>>  method can return -ENOSYS and this means "There is no point in suspending,
+>>>>  just turn me off".
+>>>> "
+>>>>
+>>>> It seems that the following commit:
+>>>>
+>>>> commit 810caddba42a54fe5db4e2664757a9a334ba359c
+>>>> Author: Ulf Hansson <ulf.hansson@linaro.org>
+>>>> Date:   Mon Jun 10 17:03:37 2013 +0200
+>>>>
+>>>>     mmc: core: Validate suspend prerequisites for SDIO at SUSPEND_PREPARE
+>>>>
+>>>> Changed this behaviour?
+>>>
+>>> I realized I changed the behaviour to not cover for sdio func drivers,
+>>> that actually implements the pm callbacks - but do return -ENOSYS in
+>>> them. That wasn't obvious when looking at the code back then, sorry!
+>>
+>> Never mind, this behaviour change doesn't cause my problems but knowing
+>> whether this behaviour should be kept affects how I'm going to solve my
+>> problem.
+> 
+> So let's aim for the a proper solution instead of a quick hack.
 
-On Thu, Feb 27, 2014 at 6:12 PM, Grant Grundler <grundler@chromium.org> wrote:
-...
->> +
->> +/*
->> + * Map memory into a scatterlist.
->> + */
->> +static int mmc_ffu_map_sg(struct mmc_ffu_mem *mem, unsigned long size,
->> +       struct scatterlist *sglist, unsigned int max_segs,
->> +       unsigned int max_seg_sz, unsigned int *sg_len,
->> +       int min_sg_len)
->> +{
->> +       struct scatterlist *sg = NULL;
->> +       unsigned int i;
->> +       unsigned long sz = size;
->> +
->> +       sg_init_table(sglist, max_segs);
->> +       if (min_sg_len > max_segs)
->> +               min_sg_len = max_segs;
->> +
->> +       *sg_len = 0;
->
-> and add
+OK.
 
-And add "sg = sglist;" here.
+> 
+> Although apparently mwifiex, libertas and btmrvl_sdio (bluetooth) may
+> return -ENOSYS from the respective system supend callbacks, thus
+> expecting the card to be removed. Currently this won't happen, but
+> instead the suspend will be aborted, which is really bad.
+> 
+> I believe those driver's suspend callback should be fixed to not
+> return -ENOSYS. Returning 0 will, when MMC_PM_KEEP_POWER is not set,
+> power off the card similar what's done when removing the card - that
+> should be perfectly fine. Do note that the sdio func driver then
+> should expect the resume callback to invoked, instead of being
+> _probed_ at the next system resume.
 
->
->> +       do {
->> +               for (i = 0; i < mem->cnt; i++) {
->> +                       unsigned long len = PAGE_SIZE <<
->> + mem->arr[i].order;
->
-> This word wrap is likely wrong in the source code (not mangled by the
-> mail handler).
->
->> +
->> +                       if (min_sg_len && (size / min_sg_len < len))
->> +                               len = ALIGN(size / min_sg_len, CARD_BLOCK_SIZE);
->> +                       if (len > sz)
->> +                               len = sz;
->> +                       if (len > max_seg_sz)
->> +                               len = max_seg_sz;
->> +                       if (sg)
->> +                               sg = sg_next(sg);
->> +                       else
->> +                               sg = sglist;
->
-> can't we initialize "sg" outside the loop to sglist?
->
->> +                       if (!sg)
->> +                               return -EINVAL;
->
-> This test is for "sg = sg_next(sg)" code...both should move to the end
-> of the loop.
->
->> +                       sg_set_page(sg, mem->arr[i].page, len, 0);
->
-> This should be at the top of the loop?
->
->> +                       sz -= len;
->> +                       *sg_len += 1;
->> +                       if (!sz)
->> +                               break;
->
-> move this test into the for() loop condition
-> It's a bit confusing...why do{ } while (sz)?
->
-> A comment explaining the relationship between sz and mem->cnt could
-> justify the do/while loop.
->
->> +               }
->> +       } while (sz);
->> +
->> +       if (sg)
->
-> We will have returned -EINVAL if this is not true. We shouldn't need
-> to test here.
->
->> +               sg_mark_end(sg);
->> +
->> +       return 0;
->> +}
->> +
->> +static void mmc_ffu_free_mem(struct mmc_ffu_mem *mem) {
+Good to know this.
 
-I'd prefer:
-   static void mmc_ffu_free( struct mmc_ffu_pages mem_arr[], cnt)
+> 
+>>
+>> My problem is that, after the following commit:
+>>
+>> commit eed222aca8d077af3600b651176f6fd04d95cce1
+>> Author: Aaron Lu <aaron.lu@intel.com>
+>> Date:   Tue Mar 5 11:24:52 2013 +0800
+>>
+>>     mmc: sdio: bind acpi with sdio function device
+>>
+>> The SDIO function that has an ACPI node associated with will have the
+>> pm_domain assigned, which breaks the intention that during SDIO function
+>> device suspend phase nothing should be done by having a dummy BUS layer
+>> callback. The existence of the pm_domain for the SDIO function device
+>> will make its function driver's suspend callback gets called now. The
+>> end result is the function driver's suspend callback is called twice.
+> 
+> Why is the sdio bus ignored?
 
-but that's just my $0.02.
+In __device_suspend, if pm_domain is set, the suspend callback is
+fetched there, no matter if there is a suspend callback defined in the
+pm_domain or not. In ACPI PM domain's case, the suspend callback is
+NULL, so the driver's suspend callback is used then.
 
->> +       if (!mem)
->> +               return;
->> +       while (mem->cnt--)
->> +               __free_pages(mem->arr[mem->cnt].page, mem->arr[mem->cnt].order);
->> +       kfree(mem->arr);
+I consulted Rafael whether adding a NULL check before goto Run is OK
+like the following shows:
 
-and then don't need to kalloc or kfree this object.
+diff --git a/drivers/base/power/main.c b/drivers/base/power/main.c
+index 1b41fca3d65a..506583d84ed4 100644
+--- a/drivers/base/power/main.c
++++ b/drivers/base/power/main.c
+@@ -1160,7 +1160,8 @@ static int __device_suspend(struct device *dev, pm_message_t state, bool async)
+ 	if (dev->pm_domain) {
+ 		info = "power domain ";
+ 		callback = pm_op(&dev->pm_domain->ops, state);
+-		goto Run;
++		if (callback)
++			goto Run;
+ 	}
+ 
+ 	if (dev->type && dev->type->pm) {
 
->> +}
->> +
->> +/*
->> + * Cleanup struct mmc_ffu_area.
->> + */
->> +static int mmc_ffu_area_cleanup(struct mmc_ffu_area *area) {
->> +       kfree(area->sg);
->> +       mmc_ffu_free_mem(area->mem);
->> +
->> +       return 0;
->> +}
->> +
->> +/*
->> + * Allocate a lot of memory, preferably max_sz but at least min_sz. In
->> +case
->> + * there isn't much memory do not exceed 1/16th total low mem pages.
->> +Also do
->> + * not exceed a maximum number of segments and try not to make segments
->> +much
->> + * bigger than maximum segment size.
->
-> The comment doesn't explain WHY the code needs to do all the memory
-> allocation gymnastics.
-> It lists several the constraints, most of which are obvious from the
-> code, but only explains one (why 1/16th total low mem pages).
->
-> This feels like a lot of code to do what copy_from_user() and DMA API
-> should be taking care of.
-> (just guessing at this point though).
->
->> + */
->> +static struct mmc_ffu_mem *mmc_ffu_alloc_mem(unsigned long min_sz,
->> +       unsigned long max_sz, unsigned int max_segs, unsigned int
->> +max_seg_sz) {
->> +       unsigned long max_page_cnt = DIV_ROUND_UP(max_sz, PAGE_SIZE);
->> +       unsigned long min_page_cnt = DIV_ROUND_UP(min_sz, PAGE_SIZE);
->> +       unsigned long max_seg_page_cnt = DIV_ROUND_UP(max_seg_sz, PAGE_SIZE);
->> +       unsigned long page_cnt = 0;
->> +       unsigned long limit = nr_free_buffer_pages() >> 4;
->> +       struct mmc_ffu_mem *mem;
->> +
->> +       if (max_page_cnt > limit)
->> +               max_page_cnt = limit;
->> +       if (min_page_cnt > max_page_cnt)
->> +               min_page_cnt = max_page_cnt;
->> +
->> +       if (max_seg_page_cnt > max_page_cnt)
->> +               max_seg_page_cnt = max_page_cnt;
->> +
->> +       if (max_segs > max_page_cnt)
->> +               max_segs = max_page_cnt;
->> +
->> +       mem = kzalloc(sizeof(struct mmc_ffu_mem), GFP_KERNEL);
->> +       if (!mem)
->> +               return NULL;
->> +
->> +       mem->arr = kzalloc(sizeof(struct mmc_ffu_pages) * max_segs, GFP_KERNEL);
->> +       if (!mem->arr)
->> +               goto out_free;
->> +
->> +       while (max_page_cnt) {
->> +               struct page *page;
->> +               unsigned int order;
->> +               gfp_t flags = GFP_KERNEL | GFP_DMA | __GFP_NOWARN |
->> +                       __GFP_NORETRY;
->> +
->> +               order = get_order(max_seg_page_cnt << PAGE_SHIFT);
->> +               while (1) {
->> +                       page = alloc_pages(flags, order);
->> +                       if (page || !order)
->> +                               break;
->> +                       order -= 1;
->> +               }
->
-> Would this be cleaner to write as:
->    do {
->      page = alloc_pages(flags, order);
->    while (!page && order--);
->
-> "Nice" side effects: order will still have the same value if the
-> allocation succeeds.
->
->> +               if (!page) {
->> +                       if (page_cnt < min_page_cnt)
->> +                               goto out_free;
->> +                       break;
->> +               }
->> +               mem->arr[mem->cnt].page = page;
->> +               mem->arr[mem->cnt].order = order;
->> +               mem->cnt += 1;
->
-> These three lines make sense - just recording what was allocated.
->
->> +               if (max_page_cnt <= (1UL << order))
->> +                       break;
->> +               max_page_cnt -= 1UL << order;
->> +               page_cnt += 1UL << order;
->> +               if (mem->cnt >= max_segs) {
->
-> Make this part of the while() loop condition.
->
->> +                       if (page_cnt < min_page_cnt)
->> +                               goto out_free;
->
-> move this test out of the loop.
->
->> +                       break;
->> +               }
->> +       }
->> +
->> +       return mem;
->
-> if (page_cnt >= min_page_cnt)
->     return mem;
->
->> +
->> +out_free:
->> +       mmc_ffu_free_mem(mem);
->> +       return NULL;
->> +}
->> +
->> +/*
->> + * Initialize an area for data transfers.
->> + * Copy the data to the allocated pages.
->> + */
->> +static int mmc_ffu_area_init(struct mmc_ffu_area *area, struct mmc_card *card,
->> +       u8 *data, unsigned int size)
->> +{
->> +       int ret, i, length;
->> +
->> +       area->max_segs = card->host->max_segs;
->> +       area->max_seg_sz = card->host->max_seg_size & ~(CARD_BLOCK_SIZE - 1);
->> +       area->max_tfr = size;
->> +
->> +       if (area->max_tfr >> 9 > card->host->max_blk_count)
->> +               area->max_tfr = card->host->max_blk_count << 9;
->> +       if (area->max_tfr > card->host->max_req_size)
->> +               area->max_tfr = card->host->max_req_size;
->> +       if (area->max_tfr / area->max_seg_sz > area->max_segs)
->> +               area->max_tfr = area->max_segs * area->max_seg_sz;
->> +
->> +       /*
->> +        * Try to allocate enough memory for a max. sized transfer. Less is OK
->> +        * because the same memory can be mapped into the scatterlist more than
->> +        * once. Also, take into account the limits imposed on scatterlist
->> +        * segments by the host driver.
->> +        */
->> +       area->mem = mmc_ffu_alloc_mem(1, area->max_tfr, area->max_segs,
->> +                       area->max_seg_sz);
->> +       if (!area->mem)
->> +               return -ENOMEM;
->> +
->> +       /* copy data to page */
->> +       length = 0;
->> +       for (i = 0; i < area->mem->cnt; i++) {
->> +                memcpy(page_address(area->mem->arr[i].page), data + length,
->> +                       min(size - length, area->max_seg_sz));
->> +               length += area->max_seg_sz;
->> +       }
->> +
->> +       area->sg = kmalloc(sizeof(struct scatterlist) * area->max_segs,
->> +               GFP_KERNEL);
->> +       if (!area->sg) {
->> +               ret = -ENOMEM;
->> +               goto out_free;
->> +       }
->> +
->> +       ret = mmc_ffu_map_sg(area->mem, size, area->sg,
->> +                       area->max_segs, area->max_seg_sz, &area->sg_len,
->> + 1);
->> +
->> +       if (ret != 0)
->> +               goto out_free;
->> +
->> +       return 0;
->> +
->> +out_free:
->> +       mmc_ffu_area_cleanup(area);
->> +       return ret;
->> +}
->> +
->> +static int mmc_ffu_write(struct mmc_card *card, u8 *src, u32 arg,
->> +       int size)
->> +{
->> +       int rc;
->> +       struct mmc_ffu_area mem;
->> +
->> +       mem.sg = NULL;
->> +       mem.mem = NULL;
->> +
->> +       if (!src) {
->> +               pr_err("FFU: %s: data buffer is NULL\n",
->> +                       mmc_hostname(card->host));
->> +               return -EINVAL;
->> +       }
->> +       rc = mmc_ffu_area_init(&mem, card, src, size);
->> +       if (rc != 0)
->> +               goto exit;
->> +
->> +       rc = mmc_ffu_simple_transfer(card, mem.sg, mem.sg_len, arg,
->> +               size / CARD_BLOCK_SIZE, CARD_BLOCK_SIZE, 1);
->> +
->> +exit:
->> +       mmc_ffu_area_cleanup(&mem);
->> +       return rc;
->> +}
->> +/* Flush all scheduled work from the MMC work queue.
->> + * and initialize the MMC device */
->> +static int mmc_ffu_restart(struct mmc_card *card) {
->> +       struct mmc_host *host = card->host;
->> +       int err = 0;
->> +
->> +       mmc_cache_ctrl(host, 0);
+And Rafael said that would introduce regressions elsewhere, so it's a no
+go.
 
-Did you mean mmc_flush() here?
+> 
+> Are you saying the power domain is using the pm_generic_suspend for or
+> from it's ->suspend callback? If so, that could be the problem!?
+> 
+>>
+>> To solve this problem, I was wondering why SDIO function device has this
+>> 'special' requirement that nothing should be done at its own device
+>> suspend phase but instead, relies on its suspend callback gets called in
+>> its parent device's suspend callback. And then I realized the reason is
+>> for the special handling of -ENOSYS.
+> 
+> That's to my understanding not the only reason.
+> 
+> I think it's more a matter of having a controlled suspend sequence.
+> The mmc core are not able to serve any new SDIO requests while it is
+> suspended, therefore it tells the sdio func driver about when it safe
+> to send request - using it's PM callbacks.
 
->> +       err = mmc_power_save_host(host);
->> +       if (err) {
->> +               pr_warn("%s: going to sleep failed (%d)!!!\n",
->> +                       __func__ , err);
->> +               goto exit;
->> +       }
->> +
->> +       err = mmc_power_restore_host(host);
->> +
->> +exit:
->> +
->> +       return err;
->> +}
->> +
->> +/* Host set the EXT_CSD */
->> +static int mmc_host_set_ffu(struct mmc_card *card, u32 ffu_enable) {
->> +       int err;
->> +
->> +       /* check if card is eMMC 5.0 or higher */
->> +       if (card->ext_csd.rev < 7)
->> +               return -EINVAL;
->> +
->> +       if (FFU_ENABLED(ffu_enable)) {
->> +               err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
->> +                       EXT_CSD_FW_CONFIG, MMC_FFU_ENABLE,
->> +                       card->ext_csd.generic_cmd6_time);
->> +               if (err) {
->> +                       pr_err("%s: switch to FFU failed with error %d\n",
->> +                               mmc_hostname(card->host), err);
->> +                       return err;
->> +               }
->> +       }
->> +
->> +       return 0;
->> +}
->> +
->> +int mmc_ffu_download(struct mmc_card *card, struct mmc_command *cmd,
->> +       u8 *data, int buf_bytes)
->> +{
->> +       u8 ext_csd[CARD_BLOCK_SIZE];
->> +       int err;
->> +       int ret;
->> +
->> +       /* Read the EXT_CSD */
->> +       err = mmc_send_ext_csd(card, ext_csd);
->> +       if (err) {
->> +               pr_err("FFU: %s: error %d sending ext_csd\n",
->> +                       mmc_hostname(card->host), err);
->> +               goto exit;
->> +       }
->> +
->> +       /* Check if FFU is supported by card */
->> +       if (!FFU_SUPPORTED_MODE(ext_csd[EXT_CSD_SUPPORTED_MODE])) {
->> +               err = -EINVAL;
->> +               pr_err("FFU: %s: error %d FFU is not supported\n",
->> +                       mmc_hostname(card->host), err);
->> +               goto exit;
->> +       }
->> +
->> +       err = mmc_host_set_ffu(card, ext_csd[EXT_CSD_FW_CONFIG]);
->> +       if (err) {
->> +               pr_err("FFU: %s: error %d FFU is not supported\n",
+Does this mean after the function device is suspended from PM core's
+pespective, the mmc core will still send some requests to the function
+device? I did see one such request, disable_width, get sent after the
+function driver's suspend callback is invoked, don't know if there are
+others.
 
-mmc_host_set_ffu is already printing an error message. Both don't need
-to be verbose about the same error.
+>From the mmc_sdio_suspend function I can see two things are done:
+1 function device driver's suspend callback is called;
+2 optionally disable_width and power off the card according to some flags.
 
->> +                       mmc_hostname(card->host), err);
->> +               err = -EINVAL;
+So once we fixed the -ENOSYS problem, can we have the function device
+run its own suspend callback and have the mmc_sdio_suspend just did the
+disable_width and power off thing?
 
-Clobbering the err that was returned?
+> 
+> You could debate whether that actually should be done though the PM
+> callbacks, or by some other SDIO specific callbacks. Haven't thought
+> it through completely yet.
+> 
+>>
+>> So if we could get rid of the -ENOSYS, my problem could be easily solved
+>> by deleting some lines in current code(the calling of function driver's
+>> suspend callback in mmc_sdio_suspend and the dummy system suspend/resume
+>> callback for SDIO bus). Buf if the behaviour has to be kept, I'll
+>> probably need to remove the pm_domain for the device and do some
+>> additional ACPI handing in mmc_sdio_suspend/resume for the function
+>> device.
+>>
+> 
+> So we have two different issues to address here.
+> 
+> Removing the option for sdio func drivers to return -ENOSYS from their
+> suspend callback - has already be done, though by my mistake. Anyway,
+> this won't solve your problem.
+> 
+> Additionally, I don't like putting this option back, since it's not
+> possible to remove the card in that path. Still we could handle
+> -ENOSYS and OK error and decide to power off the card. On the other
+> hand, we could instead fix the sdio func drivers, that should be quite
+> easy I think.
+> 
+>>>
+>>> There are no solution to this problem in the mmc core right now, since
+>>> we can't remove the card while we have reach the state when the
+>>> suspend callback is being invoked.
+>>>
+>>> Instead, the sdio func driver shall not implement the PM callbacks at
+>>> all. That behaviour means the mmc core will remove the card, but now
+>>> it's done a in an earlier phase of the system suspend when we are
+>>> still able to remove it.
+>>
+>> The libertas suspend callback is doing different things depending on
+>> different conditions - sometime it will enable wakeup capability and
+>> sometime it will want the mmc core to remove the device entirely by
+>> retuning -ENOSYS, so it may not be that easy by just deleting the
+>> callback, but I don't know for sure.
+> 
+> I had a look, the callback must remains.
+> 
+> As, stated - fix the suspend callback to not return -ENOSYS.
 
->> +               goto exit;
->> +       }
->> +
->> +       /* set device to FFU mode */
->> +       err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL, EXT_CSD_MODE_CONFIG,
->> +               MMC_FFU_MODE_SET, card->ext_csd.generic_cmd6_time);
+OK, I see, I'll try to come up with a patch for this, thanks for the
+suggestion!
 
-Not calling mmc_host_set_ffu() to do this?
+-Aaron
 
->> +       if (err) {
->> +               pr_err("FFU: %s: error %d FFU is not supported\n",
->> +                       mmc_hostname(card->host), err);
->> +               goto exit_normal;
->> +       }
->> +
->> +       /* set CMD ARG */
->> +       cmd->arg = ext_csd[EXT_CSD_FFU_ARG] |
->> +               ext_csd[EXT_CSD_FFU_ARG + 1] << 8 |
->> +               ext_csd[EXT_CSD_FFU_ARG + 2] << 16 |
->> +               ext_csd[EXT_CSD_FFU_ARG + 3] << 24;
->> +
->> +       err = mmc_ffu_write(card, data, cmd->arg, buf_bytes);
->> +
->> +exit_normal:
->> +       /* host switch back to work in normal MMC Read/Write commands */
->> +       ret = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
->> +               EXT_CSD_MODE_CONFIG, MMC_FFU_MODE_NORMAL,
->> +               card->ext_csd.generic_cmd6_time);
->> +       if (ret)
->> +               err = ret;
->> +
->> +exit:
->> +       return err;
->> +}
->> +EXPORT_SYMBOL(mmc_ffu_download);
+> 
+> Kind regards
+> Uffe
+> 
+> 
+>>
+>> Thanks,
+>> Aaron
 
-
-Ok...no additional comments for now...but I am pretty sure I need to
-stare at this more to understand how it works.
-
-cheers,
-grant
