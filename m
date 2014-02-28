@@ -1,59 +1,45 @@
-From: Nishanth Menon <nm@ti.com>
-Subject: Re: [PATCH V2 1/2] mmc: omap_hsmmc: Add support for quirky omap3
- hsmmc controller
-Date: Fri, 28 Feb 2014 09:09:26 -0600
-Message-ID: <5310A6A6.6030803@ti.com>
-References: <1392356749-32091-1-git-send-email-nm@ti.com>
- <1392356749-32091-2-git-send-email-nm@ti.com>
- <20140214163102.GA21592@atomide.com>
+From: Jason Cooper <jason@lakedaemon.net>
+Subject: Re: [PATCH 2/4] ARM: dove: prepare new Dove DT Kconfig
+	variable
+Date: Fri, 28 Feb 2014 11:34:48 -0500
+Message-ID: <20140228163448.GM1872@titan.lakedaemon.net>
+References: <1393536486-3827-1-git-send-email-sebastian.hesselbarth@gmail.com>
+ <1393536486-3827-3-git-send-email-sebastian.hesselbarth@gmail.com>
+ <20140228015310.GC9383@sirena.org.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <20140214163102.GA21592@atomide.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Tony Lindgren <tony@atomide.com>, Chris Ball <chris@printf.net>
-Cc: devicetree@vger.kernel.org, Balaji T K <balajitk@ti.com>, linux-doc@vger.kernel.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Felipe Balbi <balbi@ti.com>, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Return-path: <alsa-devel-bounces@alsa-project.org>
+Content-Disposition: inline
+In-Reply-To: <20140228015310.GC9383@sirena.org.uk>
+List-Unsubscribe: <http://mailman.alsa-project.org/mailman/options/alsa-devel>,
+ <mailto:alsa-devel-request@alsa-project.org?subject=unsubscribe>
+List-Archive: <http://mailman.alsa-project.org/pipermail/alsa-devel/>
+List-Post: <mailto:alsa-devel@alsa-project.org>
+List-Help: <mailto:alsa-devel-request@alsa-project.org?subject=help>
+List-Subscribe: <http://mailman.alsa-project.org/mailman/listinfo/alsa-devel>,
+ <mailto:alsa-devel-request@alsa-project.org?subject=subscribe>
+Errors-To: alsa-devel-bounces@alsa-project.org
+Sender: alsa-devel-bounces@alsa-project.org
+To: Mark Brown <broonie@kernel.org>
+Cc: Andrew Lunn <andrew@lunn.ch>, alsa-devel@alsa-project.org, linux-watchdog@vger.kernel.org, linux-pm@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, Liam Girdwood <lgirdwood@gmail.com>, Chris Ball <chris@printf.net>, Eduardo Valentin <eduardo.valentin@ti.com>, Wim Van Sebroeck <wim@iguana.be>, Gregory Clement <gregory.clement@free-electrons.com>, Zhang Rui <rui.zhang@intel.com>, linux-arm-kernel@lists.infradead.org, Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On 02/14/2014 10:31 AM, Tony Lindgren wrote:
-> * Nishanth Menon <nm@ti.com> [140213 21:48]:
->> When device is booted using devicetree, platforms impacted by Erratum
->> 2.1.1.128 is not detected easily in the mmc driver. This erratum
->> indicates that the module cannot do multi-block transfers. Platforms
->> such as LDP which use OMAP3 ES revision prior to ES3.0 are impacted by
->> this.
->>
->> Provide a new compatible property "ti,omap3-pre-es3-hsmmc" to allow
->> driver to determine if driver needs to implement quirks associated
->> with the specific module version (primarily because the IP revision
->> information is not sufficient for the same).
->>
->> Signed-off-by: Nishanth Menon <nm@ti.com>
+On Fri, Feb 28, 2014 at 10:53:10AM +0900, Mark Brown wrote:
+> On Thu, Feb 27, 2014 at 10:28:03PM +0100, Sebastian Hesselbarth wrote:
+> > DT-enabled Dove will move over from ARCH_DOVE in mach-dove to MACH_DOVE in
+> > mach-mvebu. As non-DT ARCH_DOVE will stay to rot for a while, add a new
+> > DT-only MACH_DOVE to mmc, thermal, wdt, and asoc Kconfigs.
 > 
-> Looks good to me, would be good to get this into the -rc cycle
-> as LDP is one of the automated boot testing boards for us.
-> 
-> If you guys want me to pick up both of the patches let me know,
-> otherwise feel free to add my ack.
-> 
+> I'd be much happier merging this sort of stuff individually through the
+> subsystems, we already have an annoying conflict here...  Is there some
+> bisection problem with doing that?
 
-Chris,
-would you be picking up the series that fixes LDP dt boot behavior or
-should Tony pick it up?
+shouldn't be.  Since these changes || the old with the new config
+symbols.
 
-https://patchwork.kernel.org/patch/3650061/
-https://patchwork.kernel.org/patch/3650031/
+Sebastian, can you split this up into individual patches?
 
+thx,
 
--- 
-Regards,
-Nishanth Menon
+Jason.
