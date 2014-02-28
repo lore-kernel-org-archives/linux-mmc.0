@@ -1,984 +1,450 @@
 From: Grant Grundler <grundler@chromium.org>
 Subject: Re: [RFC PATCH 1/1 ]mmc: Support-FFU-for-eMMC-v5.0
-Date: Thu, 27 Feb 2014 18:12:37 -0800
-Message-ID: <CANEJEGudCOTViPR6UJcEAuCcS64P9Uh1G-TtE7BL3hJ4TU+MuQ@mail.gmail.com>
+Date: Thu, 27 Feb 2014 18:29:26 -0800
+Message-ID: <CANEJEGvqk3J-4UmpAhckJ_pceVTUYxa4wZ-qo=u2HVC=+zmzLw@mail.gmail.com>
 References: <FDD07FEB422EF948A392FDC201AEEAE63F49709D@SACMBXIP01.sdcorp.global.sandisk.com>
+	<CANEJEGudCOTViPR6UJcEAuCcS64P9Uh1G-TtE7BL3hJ4TU+MuQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ob0-f177.google.com ([209.85.214.177]:58296 "EHLO
-	mail-ob0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750941AbaB1CMi (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 27 Feb 2014 21:12:38 -0500
-Received: by mail-ob0-f177.google.com with SMTP id wo20so980494obc.8
-        for <linux-mmc@vger.kernel.org>; Thu, 27 Feb 2014 18:12:37 -0800 (PST)
-In-Reply-To: <FDD07FEB422EF948A392FDC201AEEAE63F49709D@SACMBXIP01.sdcorp.global.sandisk.com>
+Received: from mail-oa0-f51.google.com ([209.85.219.51]:43066 "EHLO
+	mail-oa0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751263AbaB1C30 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 27 Feb 2014 21:29:26 -0500
+Received: by mail-oa0-f51.google.com with SMTP id j17so3416359oag.38
+        for <linux-mmc@vger.kernel.org>; Thu, 27 Feb 2014 18:29:26 -0800 (PST)
+In-Reply-To: <CANEJEGudCOTViPR6UJcEAuCcS64P9Uh1G-TtE7BL3hJ4TU+MuQ@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Avi Shchislowski <Avi.Shchislowski@sandisk.com>
-Cc: "cjb@laptop.org" <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Grant Grundler <grundler@chromium.org>, Alex Lemberg <Alex.Lemberg@sandisk.com>
+To: Grant Grundler <grundler@chromium.org>
+Cc: Avi Shchislowski <Avi.Shchislowski@sandisk.com>, "cjb@laptop.org" <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Alex Lemberg <Alex.Lemberg@sandisk.com>
 
-Avi,
-thanks for posting this and apologies for not seeing/reviewing this earlier.
-Comments inline below.
+Sorry. Gmail isn't vi and accidentally sent this prematurely. /o\
+Continuing the review comments...
 
-
-On Sun, Feb 9, 2014 at 1:07 AM, Avi Shchislowski
-<Avi.Shchislowski@sandisk.com> wrote:
->   Add Support to Field Firmware Update (FFU) for eMMC v5.0 and up devices.
+On Thu, Feb 27, 2014 at 6:12 PM, Grant Grundler <grundler@chromium.org> wrote:
+...
+>> +
+>> +/*
+>> + * Map memory into a scatterlist.
+>> + */
+>> +static int mmc_ffu_map_sg(struct mmc_ffu_mem *mem, unsigned long size,
+>> +       struct scatterlist *sglist, unsigned int max_segs,
+>> +       unsigned int max_seg_sz, unsigned int *sg_len,
+>> +       int min_sg_len)
+>> +{
+>> +       struct scatterlist *sg = NULL;
+>> +       unsigned int i;
+>> +       unsigned long sz = size;
+>> +
+>> +       sg_init_table(sglist, max_segs);
+>> +       if (min_sg_len > max_segs)
+>> +               min_sg_len = max_segs;
+>> +
+>> +       *sg_len = 0;
 >
->   The code implemented according to  JEDEC eMMC spec - JESD84-B50.pdf
->   http://www.jedec.org/standards-documents/technology-focus-areas/flash-memory-ssds-ufs-emmc/e-mmc
+> and add
+
+And add "sg = sglist;" here.
+
 >
+>> +       do {
+>> +               for (i = 0; i < mem->cnt; i++) {
+>> +                       unsigned long len = PAGE_SIZE <<
+>> + mem->arr[i].order;
 >
-> Signed-off-by: Avi Shchislowski <avi.shchislowski@sandisk.com>
-> Signed-off-by: Alex Lemberg <alex.lemberg@sandisk.com>
+> This word wrap is likely wrong in the source code (not mangled by the
+> mail handler).
 >
-> diff --git a/drivers/mmc/card/Kconfig b/drivers/mmc/card/Kconfig index 5562308..19ba729 100644
-> --- a/drivers/mmc/card/Kconfig
-> +++ b/drivers/mmc/card/Kconfig
-> @@ -68,3 +68,11 @@ config MMC_TEST
+>> +
+>> +                       if (min_sg_len && (size / min_sg_len < len))
+>> +                               len = ALIGN(size / min_sg_len, CARD_BLOCK_SIZE);
+>> +                       if (len > sz)
+>> +                               len = sz;
+>> +                       if (len > max_seg_sz)
+>> +                               len = max_seg_sz;
+>> +                       if (sg)
+>> +                               sg = sg_next(sg);
+>> +                       else
+>> +                               sg = sglist;
 >
->           This driver is only of interest to those developing or
->           testing a host driver. Most people should say N here.
-> +
-> +config MMC_FFU
-> +       bool "FFU SUPPORT"
-
-This should be spelled out: "eMMC 5.0+ Field Firmware update support"
-
-On second thought, I don't believe FFU should be an option. It should
-be part of the core support and required since it's part of the eMMC
-spec.
-
-> +       depends on MMC != n
-> +       help
-> +         This is an option to run firmware update on eMMC 5.0.
-> +         Field firmware updates (FFU) enables features enhancement
-> +         in the field.
-
-Wordsmithing suggestion:
-eMMC 5.0 spec defines a standard method to update firmware on eMMC 5.0
-compliant devices. Setting this option to Y enables support to update
-firmware on eMMC 5.0 compliant devices. See mmc-utils package for
-corresponding user space tool which invokes the FFU method enabled by
-this option.
-
-(It's the fact the mmc-utils depends on this feature that makes me
-think it should be required.)
-
-> diff --git a/drivers/mmc/card/Makefile b/drivers/mmc/card/Makefile index c73b406..1e9223b 100644
-> --- a/drivers/mmc/card/Makefile
-> +++ b/drivers/mmc/card/Makefile
-> @@ -8,3 +8,4 @@ obj-$(CONFIG_MMC_TEST)          += mmc_test.o
+> can't we initialize "sg" outside the loop to sglist?
 >
->  obj-$(CONFIG_SDIO_UART)                += sdio_uart.o
+>> +                       if (!sg)
+>> +                               return -EINVAL;
 >
-> +obj-$(CONFIG_MMC_FFU)          += ffu.o
-> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c index 7b5424f..8311200 100644
-> --- a/drivers/mmc/card/block.c
-> +++ b/drivers/mmc/card/block.c
-> @@ -41,6 +41,7 @@
->  #include <linux/mmc/host.h>
->  #include <linux/mmc/mmc.h>
->  #include <linux/mmc/sd.h>
-> +#include <linux/mmc/ffu.h>
+> This test is for "sg = sg_next(sg)" code...both should move to the end
+> of the loop.
 >
->  #include <asm/uaccess.h>
+>> +                       sg_set_page(sg, mem->arr[i].page, len, 0);
 >
-> @@ -525,6 +526,17 @@ static int mmc_blk_ioctl_cmd(struct block_device *bdev,
+> This should be at the top of the loop?
 >
->         mmc_get_card(card);
+>> +                       sz -= len;
+>> +                       *sg_len += 1;
+>> +                       if (!sz)
+>> +                               break;
 >
-> +       if (cmd.opcode == MMC_FFU_DOWNLOAD_OP) {
-> +               err = mmc_ffu_download(card, &cmd , idata->buf,
-> +                       idata->buf_bytes);
-> +               goto cmd_rel_host;
-> +       }
-
-I saw the mmc_ffu_prepare_mrq() includes support to READ.
-
-While I don't believe "upload" is part of the spec, does SanDisk
-implement an "MMC_FFU_UPLOAD_OP"?
-
-
-> +
-> +       if (cmd.opcode == MMC_FFU_INSTALL_OP) {
-> +               err = mmc_ffu_install(card);
-
-Should the "install" be keeping track of state to make sure previous
-FFU_DOWNLOAD_OP to this device was successful?
-
-INSTALL_OP makes no sense if DOWNLOAD failed or had issues. If it
-should be stateless, then perhaps call this step "MMC_RESET_OP"?
-
-> +               goto cmd_rel_host;
-> +       }
-> +
->         err = mmc_blk_part_switch(card, md);
->         if (err)
->                 goto cmd_rel_host;
-> diff --git a/drivers/mmc/card/ffu.c b/drivers/mmc/card/ffu.c new file mode 100644 index 0000000..ed5f30a
-> --- /dev/null
-> +++ b/drivers/mmc/card/ffu.c
-> @@ -0,0 +1,605 @@
-> +/*
-> + * *  ffu.c
-> + *
-> + *  Modified by SanDisk Corp., Copyright (c) 2013 SanDisk Corp.
-> + *
-> + * This program is free software; you can redistribute it and/or modify
-> + * it under the terms of the GNU General Public License as published by
-> + * the Free Software Foundation; either version 2 of the License, or
-> +(at
-> + * your option) any later version.
-> + *
-> + * The original, unmodified version of this program - the mmc_test.c
-> + *  Copyright 2007-2008 Pierre Ossman
-> + * The file - is obtained under the GPL v2.0 license that is available
-> +via
-> + * http://www.gnu.org/licenses/,
-> + * or http://www.opensource.org/licenses/gpl-2.0.php
-> +*/
-> +
-> +#include <linux/bug.h>
-> +#include <linux/errno.h>
-> +#include <linux/mmc/card.h>
-> +#include <linux/mmc/host.h>
-> +#include <linux/mmc/mmc.h>
-> +#include <linux/scatterlist.h>
-> +#include <linux/slab.h>
-> +#include <linux/swap.h>
-> +#include <linux/mmc/ffu.h>
-> +
-> +/**
-
-This is intended to be used for DocString? I'm not seeing a need for
-it since it's not an API.
-
-> + * struct mmc_ffu_pages - pages allocated by 'alloc_pages()'.
-> + * @page: first page in the allocation
-> + * @order: order of the number of pages allocated  */ struct
-
-white space mangle.
-
-> +mmc_ffu_pages {
-> +       struct page *page;
-> +       unsigned int order;
-> +};
-> +
-> +/**
-
-"/**" -- are you sure it's useful to have docbook stuff pick these up?
-These feel like local/internal definitions and aren't really part of any API.
-
-I think "/*" would be suitable. but Chris or someone could say otherwise.
-
-> + * struct mmc_ffu_mem - allocated memory.
-> + * @arr: array of allocations
-> + * @cnt: number of allocations
-> + */
-> +struct mmc_ffu_mem {
-> +       struct mmc_ffu_pages *arr;
-> +       unsigned int cnt;
-> +};
-
-
-I'm not seeing where this struct as being that useful - it's mostly
-obfuscating the code.
-ie it could just be two fields in struct mmc_ffu_area.
-mmc_ffu_free_mem() can take two parameters.
-
-The only possible justification would it's use as return value for
-mmc_ffu_alloc_mem(). I would consider a different way of returning the
-page array and page array element count.
-
-> +
-> +struct mmc_ffu_area {
-> +       unsigned long max_sz;
-> +       unsigned int max_tfr;
-> +       unsigned int max_segs;
-> +       unsigned int max_seg_sz;
-> +       unsigned int blocks;
-> +       unsigned int sg_len;
-> +       struct mmc_ffu_mem *mem;
-> +       struct scatterlist *sg;
-
-To help keep pointers "naturally aligned", can you put the "struct *"
-fields at the top of the struct mmc_ffu_area?
-
-> +};
-> +
-> +static void mmc_ffu_prepare_mrq(struct mmc_card *card,
-> +       struct mmc_request *mrq, struct scatterlist *sg, unsigned int sg_len,
-> +       u32 arg, unsigned int blocks, unsigned int blksz, int write) {
-> +       BUG_ON(!mrq || !mrq->cmd || !mrq->data || !mrq->stop);
-
-BUG_ON means you are willing to crash the system if any of these are not true.
-Are you sure that's what you want?
-
-> +
-> +       if (blocks > 1) {
-> +               mrq->cmd->opcode = write ?
-> +                       MMC_WRITE_MULTIPLE_BLOCK : MMC_READ_MULTIPLE_BLOCK;
-> +       } else {
-> +               mrq->cmd->opcode = write ? MMC_WRITE_BLOCK :
-> +                       MMC_READ_SINGLE_BLOCK;
-> +       }
-> +
-> +       mrq->cmd->arg = arg;
-> +       if (!mmc_card_blockaddr(card))
-> +               mrq->cmd->arg <<= 9;
-
-Assumes 512 byte. I'd prefer you use "/= DATA_SECTOR_SIZE" or whatever
-it is. If it's a constant, the compiler will know it's a power of two
-and turn that into a bit shift operation.
-
-> +
-> +       mrq->cmd->flags = MMC_RSP_R1 | MMC_CMD_ADTC;
-> +       if (blocks == 1) {
-> +               mrq->stop = NULL;
-> +       } else {
-> +               mrq->stop->opcode = MMC_STOP_TRANSMISSION;
-> +               mrq->stop->arg = 0;
-> +               mrq->stop->flags = MMC_RSP_R1B | MMC_CMD_AC;
-> +       }
-> +
-> +       mrq->data->blksz = blksz;
-> +       mrq->data->blocks = blocks;
-> +       mrq->data->flags = write ? MMC_DATA_WRITE : MMC_DATA_READ;
-> +       mrq->data->sg = sg;
-> +       mrq->data->sg_len = sg_len;
-> +
-> +       mmc_set_data_timeout(mrq->data, card); }
-> +
-> +/*
-> + * Checks that a normal transfer didn't have any errors  */ static int
-> +mmc_ffu_check_result(struct mmc_request *mrq) {
-> +       BUG_ON(!mrq || !mrq->cmd || !mrq->data);
-> +
-> +       if (mrq->cmd->error != 0)
-> +               return -EINVAL;
-> +
-> +       if (mrq->data->error != 0)
-> +               return -EINVAL;
-> +
-> +       if (mrq->stop != NULL && mrq->stop->error != 0)
-> +               return -1;
-
-I'd prefer to see "-E<mumble>" to be consistent with the return values.
-
-I'm also not sure all of these should be -EINVAL.
-
-> +
-> +       if (mrq->data->bytes_xfered != (mrq->data->blocks * mrq->data->blksz))
-> +               return -EINVAL;
-> +
-> +       return 0;
-> +}
-> +
-> +static int mmc_ffu_busy(struct mmc_command *cmd) {
-> +       return !(cmd->resp[0] & R1_READY_FOR_DATA) ||
-> +               (R1_CURRENT_STATE(cmd->resp[0]) == R1_STATE_PRG); }
-> +
-> +static int mmc_ffu_wait_busy(struct mmc_card *card) {
-> +       int ret, busy = 0;
-> +       struct mmc_command cmd = {0};
-> +
-> +       memset(&cmd, 0, sizeof(struct mmc_command));
-> +       cmd.opcode = MMC_SEND_STATUS;
-> +       cmd.arg = card->rca << 16;
-> +       cmd.flags = MMC_RSP_SPI_R2 | MMC_RSP_R1 | MMC_CMD_AC;
-> +
-> +       do {
-> +               ret = mmc_wait_for_cmd(card->host, &cmd, 0);
-
-Is it safe to re-use the cmd struct again without memsetting it?
-
-> +               if (ret)
-> +                       break;
-> +
-> +               if (!busy && mmc_ffu_busy(&cmd)) {
-> +                       busy = 1;
-> +                       if (card->host->caps & MMC_CAP_WAIT_WHILE_BUSY) {
-> +                               pr_warn("%s: Warning: Host did not "
-> +                                       "wait for busy state to end.\n",
-> +                                       mmc_hostname(card->host));
-> +                       }
-> +               }
-> +
-> +       } while (mmc_ffu_busy(&cmd));
-> +
-> +       return ret;
-> +}
-> +
-> +/*
-> + * transfer with certain parameters
-> + */
-> +static int mmc_ffu_simple_transfer(struct mmc_card *card,
-> +       struct scatterlist *sg, unsigned int sg_len, u32 arg,
-> +       unsigned int blocks, unsigned int blksz, int write) {
-> +       struct mmc_request mrq = {0};
-> +       struct mmc_command cmd = {0};
-> +       struct mmc_command stop = {0};
-> +       struct mmc_data data = {0};
-> +
-> +       mrq.cmd = &cmd;
-> +       mrq.data = &data;
-> +       mrq.stop = &stop;
-
-The BUG_ON I questioned earlier is just checking this? I'm not seeing
-the point of having a BUG_ON above.
-
-> +       mmc_ffu_prepare_mrq(card, &mrq, sg, sg_len, arg, blocks, blksz,
-> +               write);
-> +       mmc_wait_for_req(card->host, &mrq);
-> +
-> +       mmc_ffu_wait_busy(card);
-> +
-> +       return mmc_ffu_check_result(&mrq); }
-
-white space mangle.
-
-> +
-> +/*
-> + * Map memory into a scatterlist.
-> + */
-> +static int mmc_ffu_map_sg(struct mmc_ffu_mem *mem, unsigned long size,
-> +       struct scatterlist *sglist, unsigned int max_segs,
-> +       unsigned int max_seg_sz, unsigned int *sg_len,
-> +       int min_sg_len)
-> +{
-> +       struct scatterlist *sg = NULL;
-> +       unsigned int i;
-> +       unsigned long sz = size;
-> +
-> +       sg_init_table(sglist, max_segs);
-> +       if (min_sg_len > max_segs)
-> +               min_sg_len = max_segs;
-> +
-> +       *sg_len = 0;
-
-and add
-
-> +       do {
-> +               for (i = 0; i < mem->cnt; i++) {
-> +                       unsigned long len = PAGE_SIZE <<
-> + mem->arr[i].order;
-
-This word wrap is likely wrong in the source code (not mangled by the
-mail handler).
-
-> +
-> +                       if (min_sg_len && (size / min_sg_len < len))
-> +                               len = ALIGN(size / min_sg_len, CARD_BLOCK_SIZE);
-> +                       if (len > sz)
-> +                               len = sz;
-> +                       if (len > max_seg_sz)
-> +                               len = max_seg_sz;
-> +                       if (sg)
-> +                               sg = sg_next(sg);
-> +                       else
-> +                               sg = sglist;
-
-can't we initialize "sg" outside the loop to sglist?
-
-> +                       if (!sg)
-> +                               return -EINVAL;
-
-This test is for "sg = sg_next(sg)" code...both should move to the end
-of the loop.
-
-> +                       sg_set_page(sg, mem->arr[i].page, len, 0);
-
-This should be at the top of the loop?
-
-> +                       sz -= len;
-> +                       *sg_len += 1;
-> +                       if (!sz)
-> +                               break;
-
-move this test into the for() loop condition
-It's a bit confusing...why do{ } while (sz)?
-
-A comment explaining the relationship between sz and mem->cnt could
-justify the do/while loop.
-
-> +               }
-> +       } while (sz);
-> +
-> +       if (sg)
-
-We will have returned -EINVAL if this is not true. We shouldn't need
-to test here.
-
-> +               sg_mark_end(sg);
-> +
-> +       return 0;
-> +}
-> +
-> +static void mmc_ffu_free_mem(struct mmc_ffu_mem *mem) {
-> +       if (!mem)
-> +               return;
-> +       while (mem->cnt--)
-> +               __free_pages(mem->arr[mem->cnt].page, mem->arr[mem->cnt].order);
-> +       kfree(mem->arr);
-> +}
-> +
-> +/*
-> + * Cleanup struct mmc_ffu_area.
-> + */
-> +static int mmc_ffu_area_cleanup(struct mmc_ffu_area *area) {
-> +       kfree(area->sg);
-> +       mmc_ffu_free_mem(area->mem);
-> +
-> +       return 0;
-> +}
-> +
-> +/*
-> + * Allocate a lot of memory, preferably max_sz but at least min_sz. In
-> +case
-> + * there isn't much memory do not exceed 1/16th total low mem pages.
-> +Also do
-> + * not exceed a maximum number of segments and try not to make segments
-> +much
-> + * bigger than maximum segment size.
-
-The comment doesn't explain WHY the code needs to do all the memory
-allocation gymnastics.
-It lists several the constraints, most of which are obvious from the
-code, but only explains one (why 1/16th total low mem pages).
-
-This feels like a lot of code to do what copy_from_user() and DMA API
-should be taking care of.
-(just guessing at this point though).
-
-> + */
-> +static struct mmc_ffu_mem *mmc_ffu_alloc_mem(unsigned long min_sz,
-> +       unsigned long max_sz, unsigned int max_segs, unsigned int
-> +max_seg_sz) {
-> +       unsigned long max_page_cnt = DIV_ROUND_UP(max_sz, PAGE_SIZE);
-> +       unsigned long min_page_cnt = DIV_ROUND_UP(min_sz, PAGE_SIZE);
-> +       unsigned long max_seg_page_cnt = DIV_ROUND_UP(max_seg_sz, PAGE_SIZE);
-> +       unsigned long page_cnt = 0;
-> +       unsigned long limit = nr_free_buffer_pages() >> 4;
-> +       struct mmc_ffu_mem *mem;
-> +
-> +       if (max_page_cnt > limit)
-> +               max_page_cnt = limit;
-> +       if (min_page_cnt > max_page_cnt)
-> +               min_page_cnt = max_page_cnt;
-> +
-> +       if (max_seg_page_cnt > max_page_cnt)
-> +               max_seg_page_cnt = max_page_cnt;
-> +
-> +       if (max_segs > max_page_cnt)
-> +               max_segs = max_page_cnt;
-> +
-> +       mem = kzalloc(sizeof(struct mmc_ffu_mem), GFP_KERNEL);
-> +       if (!mem)
-> +               return NULL;
-> +
-> +       mem->arr = kzalloc(sizeof(struct mmc_ffu_pages) * max_segs, GFP_KERNEL);
-> +       if (!mem->arr)
-> +               goto out_free;
-> +
-> +       while (max_page_cnt) {
-> +               struct page *page;
-> +               unsigned int order;
-> +               gfp_t flags = GFP_KERNEL | GFP_DMA | __GFP_NOWARN |
-> +                       __GFP_NORETRY;
-> +
-> +               order = get_order(max_seg_page_cnt << PAGE_SHIFT);
-> +               while (1) {
-> +                       page = alloc_pages(flags, order);
-> +                       if (page || !order)
-> +                               break;
-> +                       order -= 1;
-> +               }
-
-Would this be cleaner to write as:
-   do {
-     page = alloc_pages(flags, order);
-   while (!page && order--);
-
-"Nice" side effects: order will still have the same value if the
-allocation succeeds.
-
-> +               if (!page) {
-> +                       if (page_cnt < min_page_cnt)
-> +                               goto out_free;
-> +                       break;
-> +               }
-> +               mem->arr[mem->cnt].page = page;
-> +               mem->arr[mem->cnt].order = order;
-> +               mem->cnt += 1;
-
-These three lines make sense - just recording what was allocated.
-
-> +               if (max_page_cnt <= (1UL << order))
-> +                       break;
-> +               max_page_cnt -= 1UL << order;
-> +               page_cnt += 1UL << order;
-> +               if (mem->cnt >= max_segs) {
-
-Make this part of the while() loop condition.
-
-> +                       if (page_cnt < min_page_cnt)
-> +                               goto out_free;
-
-move this test out of the loop.
-
-> +                       break;
-> +               }
-> +       }
-> +
-> +       return mem;
-
-if (page_cnt >= min_page_cnt)
-    return mem;
-
-> +
-> +out_free:
-> +       mmc_ffu_free_mem(mem);
-> +       return NULL;
-> +}
-> +
-> +/*
-> + * Initialize an area for data transfers.
-> + * Copy the data to the allocated pages.
-> + */
-> +static int mmc_ffu_area_init(struct mmc_ffu_area *area, struct mmc_card *card,
-> +       u8 *data, unsigned int size)
-> +{
-> +       int ret, i, length;
-> +
-> +       area->max_segs = card->host->max_segs;
-> +       area->max_seg_sz = card->host->max_seg_size & ~(CARD_BLOCK_SIZE - 1);
-> +       area->max_tfr = size;
-> +
-> +       if (area->max_tfr >> 9 > card->host->max_blk_count)
-> +               area->max_tfr = card->host->max_blk_count << 9;
-> +       if (area->max_tfr > card->host->max_req_size)
-> +               area->max_tfr = card->host->max_req_size;
-> +       if (area->max_tfr / area->max_seg_sz > area->max_segs)
-> +               area->max_tfr = area->max_segs * area->max_seg_sz;
-> +
-> +       /*
-> +        * Try to allocate enough memory for a max. sized transfer. Less is OK
-> +        * because the same memory can be mapped into the scatterlist more than
-> +        * once. Also, take into account the limits imposed on scatterlist
-> +        * segments by the host driver.
-> +        */
-> +       area->mem = mmc_ffu_alloc_mem(1, area->max_tfr, area->max_segs,
-> +                       area->max_seg_sz);
-> +       if (!area->mem)
-> +               return -ENOMEM;
-> +
-> +       /* copy data to page */
-> +       length = 0;
-> +       for (i = 0; i < area->mem->cnt; i++) {
-> +                memcpy(page_address(area->mem->arr[i].page), data + length,
-> +                       min(size - length, area->max_seg_sz));
-> +               length += area->max_seg_sz;
-> +       }
-> +
-> +       area->sg = kmalloc(sizeof(struct scatterlist) * area->max_segs,
-> +               GFP_KERNEL);
-> +       if (!area->sg) {
-> +               ret = -ENOMEM;
-> +               goto out_free;
-> +       }
-> +
-> +       ret = mmc_ffu_map_sg(area->mem, size, area->sg,
-> +                       area->max_segs, area->max_seg_sz, &area->sg_len,
-> + 1);
-> +
-> +       if (ret != 0)
-> +               goto out_free;
-> +
-> +       return 0;
-> +
-> +out_free:
-> +       mmc_ffu_area_cleanup(area);
-> +       return ret;
-> +}
-> +
-> +static int mmc_ffu_write(struct mmc_card *card, u8 *src, u32 arg,
-> +       int size)
-> +{
-> +       int rc;
-> +       struct mmc_ffu_area mem;
-> +
-> +       mem.sg = NULL;
-> +       mem.mem = NULL;
-> +
-> +       if (!src) {
-> +               pr_err("FFU: %s: data buffer is NULL\n",
-> +                       mmc_hostname(card->host));
-> +               return -EINVAL;
-> +       }
-> +       rc = mmc_ffu_area_init(&mem, card, src, size);
-> +       if (rc != 0)
-> +               goto exit;
-> +
-> +       rc = mmc_ffu_simple_transfer(card, mem.sg, mem.sg_len, arg,
-> +               size / CARD_BLOCK_SIZE, CARD_BLOCK_SIZE, 1);
-> +
-> +exit:
-> +       mmc_ffu_area_cleanup(&mem);
-> +       return rc;
-> +}
-> +/* Flush all scheduled work from the MMC work queue.
-> + * and initialize the MMC device */
-> +static int mmc_ffu_restart(struct mmc_card *card) {
-> +       struct mmc_host *host = card->host;
-> +       int err = 0;
-> +
-> +       mmc_cache_ctrl(host, 0);
-> +       err = mmc_power_save_host(host);
-> +       if (err) {
-> +               pr_warn("%s: going to sleep failed (%d)!!!\n",
-> +                       __func__ , err);
-> +               goto exit;
-> +       }
-> +
-> +       err = mmc_power_restore_host(host);
-> +
-> +exit:
-> +
-> +       return err;
-> +}
-> +
-> +/* Host set the EXT_CSD */
-> +static int mmc_host_set_ffu(struct mmc_card *card, u32 ffu_enable) {
-> +       int err;
-> +
-> +       /* check if card is eMMC 5.0 or higher */
-> +       if (card->ext_csd.rev < 7)
-> +               return -EINVAL;
-> +
-> +       if (FFU_ENABLED(ffu_enable)) {
-> +               err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-> +                       EXT_CSD_FW_CONFIG, MMC_FFU_ENABLE,
-> +                       card->ext_csd.generic_cmd6_time);
-> +               if (err) {
-> +                       pr_err("%s: switch to FFU failed with error %d\n",
-> +                               mmc_hostname(card->host), err);
-> +                       return err;
-> +               }
-> +       }
-> +
-> +       return 0;
-> +}
-> +
-> +int mmc_ffu_download(struct mmc_card *card, struct mmc_command *cmd,
-> +       u8 *data, int buf_bytes)
-> +{
-> +       u8 ext_csd[CARD_BLOCK_SIZE];
-> +       int err;
-> +       int ret;
-> +
-> +       /* Read the EXT_CSD */
-> +       err = mmc_send_ext_csd(card, ext_csd);
-> +       if (err) {
-> +               pr_err("FFU: %s: error %d sending ext_csd\n",
-> +                       mmc_hostname(card->host), err);
-> +               goto exit;
-> +       }
-> +
-> +       /* Check if FFU is supported by card */
-> +       if (!FFU_SUPPORTED_MODE(ext_csd[EXT_CSD_SUPPORTED_MODE])) {
-> +               err = -EINVAL;
-> +               pr_err("FFU: %s: error %d FFU is not supported\n",
-> +                       mmc_hostname(card->host), err);
-> +               goto exit;
-> +       }
-> +
-> +       err = mmc_host_set_ffu(card, ext_csd[EXT_CSD_FW_CONFIG]);
-> +       if (err) {
-> +               pr_err("FFU: %s: error %d FFU is not supported\n",
-> +                       mmc_hostname(card->host), err);
-> +               err = -EINVAL;
-> +               goto exit;
-> +       }
-> +
-> +       /* set device to FFU mode */
-> +       err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL, EXT_CSD_MODE_CONFIG,
-> +               MMC_FFU_MODE_SET, card->ext_csd.generic_cmd6_time);
-> +       if (err) {
-> +               pr_err("FFU: %s: error %d FFU is not supported\n",
-> +                       mmc_hostname(card->host), err);
-> +               goto exit_normal;
-> +       }
-> +
-> +       /* set CMD ARG */
-> +       cmd->arg = ext_csd[EXT_CSD_FFU_ARG] |
-> +               ext_csd[EXT_CSD_FFU_ARG + 1] << 8 |
-> +               ext_csd[EXT_CSD_FFU_ARG + 2] << 16 |
-> +               ext_csd[EXT_CSD_FFU_ARG + 3] << 24;
-> +
-> +       err = mmc_ffu_write(card, data, cmd->arg, buf_bytes);
-> +
-> +exit_normal:
-> +       /* host switch back to work in normal MMC Read/Write commands */
-> +       ret = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-> +               EXT_CSD_MODE_CONFIG, MMC_FFU_MODE_NORMAL,
-> +               card->ext_csd.generic_cmd6_time);
-> +       if (ret)
-> +               err = ret;
-> +
-> +exit:
-> +       return err;
-> +}
-> +EXPORT_SYMBOL(mmc_ffu_download);
-
-If FFU is not a config option and thus separate module, card/ffu.o can
-be directly linked with card/block.o to produce block.ko and we
-wouldn't need to export this symbol.
-
-BTW, Since this code is GPL, I'd consider using EXPORT_SYMBOL_GPL().
-
-
-
-> +
-> +int mmc_ffu_install(struct mmc_card *card) {
-> +       u8 ext_csd[CARD_BLOCK_SIZE];
-> +       int err;
-> +       u32 ffu_data_len;
-> +       u32 timeout;
-> +
-> +       err = mmc_send_ext_csd(card, ext_csd);
-> +       if (err) {
-> +               pr_err("FFU: %s: error %d sending ext_csd\n",
-> +                       mmc_hostname(card->host), err);
-> +               goto exit;
-> +       }
-> +
-> +       /* Check if FFU is supported */
-> +       if (!FFU_SUPPORTED_MODE(ext_csd[EXT_CSD_SUPPORTED_MODE]) ||
-> +               FFU_CONFIG(ext_csd[EXT_CSD_FW_CONFIG])) {
-> +               err = -EINVAL;
-> +               pr_err("FFU: %s: error %d FFU is not supported\n",
-> +                       mmc_hostname(card->host), err);
-> +               goto exit;
-> +       }
-> +
-> +       ffu_data_len = ext_csd[EXT_CSD_NUM_OF_FW_SEC_PROG]|
-> +               ext_csd[EXT_CSD_NUM_OF_FW_SEC_PROG + 1] << 8 |
-> +               ext_csd[EXT_CSD_NUM_OF_FW_SEC_PROG + 2] << 16 |
-> +               ext_csd[EXT_CSD_NUM_OF_FW_SEC_PROG + 3] << 24;
-> +
-> +       if (!ffu_data_len) {
-> +               err = -EPERM;
-> +               return err;
-> +       }
-> +
-> +       /* check mode operation */
-> +       if (!FFU_FEATURES(ext_csd[EXT_CSD_FFU_FEATURES])) {
-> +               /* restart the eMMC */
-> +               err = mmc_ffu_restart(card);
-> +               if (err) {
-> +                       pr_err("FFU: %s: error %d FFU install:\n",
-> +                               mmc_hostname(card->host), err);
-> +               }
-> +       } else {
-> +                       /* set device to FFU mode */
-> +                       err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-> +                               EXT_CSD_MODE_CONFIG, 0x1,
-> +                               card->ext_csd.generic_cmd6_time);
-> +                       if (err) {
-> +                               pr_err("FFU: %s: error %d FFU is not supported\n",
-> +                                       mmc_hostname(card->host), err);
-> +                               goto exit;
-> +                       }
-> +
-> +                       timeout = ext_csd[EXT_CSD_OPERATION_CODE_TIMEOUT];
-> +                       if (timeout == 0 || timeout > 0x17) {
-> +                               timeout = 0x17;
-> +                               pr_warn("FFU: %s: operation code timeout is out "
-> +                                               "of range. Using maximum timeout.\n",
-> +                                       mmc_hostname(card->host));
-> +                       }
-> +
-> +                       /* timeout is at millisecond resolution */
-> +                       timeout = (100 * (1 << timeout) / 1000) + 1;
-> +
-> +                       /* set ext_csd to install mode */
-> +                       err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-> +                               EXT_CSD_MODE_OPERATION_CODES,
-> +                               MMC_FFU_INSTALL_SET, timeout);
-> +
-> +                       if (err) {
-> +                               pr_err("FFU: %s: error %d setting install mode\n",
-> +                                       mmc_hostname(card->host), err);
-> +                               goto exit;
-> +                       }
-> +
-> +                       /* read ext_csd */
-> +                       err = mmc_send_ext_csd(card, ext_csd);
-> +                       if (err) {
-> +                               pr_err("FFU: %s: error %d sending ext_csd\n",
-> +                                       mmc_hostname(card->host), err);
-> +                               goto exit;
-> +                       }
-> +                       /* return status */
-> +                       err = ext_csd[EXT_CSD_FFU_STATUS];
-> +                       if (err) {
-> +                               pr_err("FFU: %s: error %d FFU install:\n",
-> +                                       mmc_hostname(card->host), err);
-> +                               err = -EINVAL;
-> +                               goto exit;
-> +                       }
-> +               }
-> +
-> +exit:
-> +       return err;
-> +}
-> +EXPORT_SYMBOL(mmc_ffu_install);
-
-Same story as the export for mmc_ffu_download.
-
-> +
-> diff --git a/include/linux/mmc/ffu.h b/include/linux/mmc/ffu.h new file mode 100644 index 0000000..744696c
-> --- /dev/null
-> +++ b/include/linux/mmc/ffu.h
-> @@ -0,0 +1,63 @@
-> +/*
-> + *
-> + *  ffu.h
-> + *
-> + * Copyright (c) 2013 SanDisk Corp.
-> + *
-> + * This program is free software; you can redistribute it and/or modify
-> + * it under the terms of the GNU General Public License as published by
-> + * the Free Software Foundation; either version 2 of the License, or
-> +(at
-> + * your option) any later version.
-> + *
-> + * This program was created by SanDisk Corp
-> + * The swrm_mmc_api.h file is obtained under the GPL v2.0 license that
-> +is
-> + * available via http://www.gnu.org/licenses/,
-> + * or http://www.opensource.org/licenses/gpl-2.0.php
-> +*/
-> +
-> +#if !defined(_FFU_H_)
-> +#define _FFU_H_
-> +
-> +#include <linux/mmc/card.h>
-> +
-> +#define CARD_BLOCK_SIZE 512
-
-I thought sector size is advertised by the device. It could be either
-512 or 4K bytes. No?
-
-"7.4.17 NUMBER_OF_FW_SECTORS_CORRECTLY_PROGRAMMED [305-302]
-
-The value is in terms of 512 Bytes or in multiple of eight 512Bytes
-sectors (4KBytes) depending on the value of the DATA_SECTOR_SIZE field."
-
-> +
-> +/*
-> + * eMMC5.0 Field Firmware Update (FFU) opcodes */ #define
-> +MMC_FFU_DOWNLOAD_OP 302 #define MMC_FFU_INSTALL_OP 303
-
-White space mangle?
-
-> +
-> +#define MMC_FFU_MODE_SET 0x1
-> +#define MMC_FFU_MODE_NORMAL 0x0
-> +#define MMC_FFU_INSTALL_SET 0x1
-> +
-> +#ifdef CONFIG_MMC_FFU
-> +#define MMC_FFU_ENABLE 0x0
-> +#define MMC_FFU_CONFIG 0x1
-
-
-This is redundant with CONFIG_MMC_FFU
-
-> +#define MMC_FFU_SUPPORTED_MODES 0x1
-> +#define MMC_FFU_FEATURES 0x1
-> +
-> +#define FFU_ENABLED(ffu_enable)        (ffu_enable & MMC_FFU_CONFIG)
-
-Using "& MMC_FFU_CONFIG" inside "ifdef CONFIG_MMC_FFU" just looks wrong.
-
-Perhaps you want MMC_FFU_ENABLE 0x1 and then "& MMC_FFU_ENABLE"?
-
-Ah...this ends up looking at ext_csd[FW_CONFIG] & Update_Disable bit.
-Any reason to not match the names used in jedec spec?
-
-So I'd propose:
-#define FFU_DISABLED(fw_config)  (fw_config & 0x1)
-
-and then use that as appropriate.
-
-> +#define FFU_SUPPORTED_MODE(ffu_sup_mode) \
-> +       (ffu_sup_mode && MMC_FFU_SUPPORTED_MODES) #define
-> +FFU_CONFIG(ffu_config) (ffu_config & MMC_FFU_CONFIG) #define
-> +FFU_FEATURES(ffu_fetures) (ffu_fetures & MMC_FFU_FEATURES)
-
-more white space mangle. I'm not sure what the point of "ffu_config"
-is. I'd drop it.
-
-BTW, typo: "fetures" should be features.
-
-
-> +
-> +int mmc_ffu_download(struct mmc_card *card, struct mmc_command *cmd,
-> +       u8 *data, int buf_bytes);
-> +int mmc_ffu_install(struct mmc_card *card); #else static inline int
-
-more white space mangle. Is it gmail messing this up or did you send
-this through an exchange server?
-
-
-> +mmc_ffu_download(struct mmc_card *card,
-> +       struct mmc_command *cmd, u8 *data, int buf_bytes) {
-> +       return -ENOSYS;
-> +}
-> +static inline int mmc_ffu_install(struct mmc_card *card) {
-> +       return -ENOSYS;
-> +}
-> +
-> +#endif
-> +#endif /* FFU_H_ */
-> +
-> diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h index 50bcde3..bf29e52 100644
-> --- a/include/linux/mmc/mmc.h
-> +++ b/include/linux/mmc/mmc.h
-> @@ -272,6 +272,9 @@ struct _mmc_csd {
->   * EXT_CSD fields
->   */
+> move this test into the for() loop condition
+> It's a bit confusing...why do{ } while (sz)?
 >
-> +#define EXT_CSD_FFU_STATUS             26      /* R */
-> +#define EXT_CSD_MODE_OPERATION_CODES   29      /* W */
-> +#define EXT_CSD_MODE_CONFIG            30      /* R/W */
->  #define EXT_CSD_FLUSH_CACHE            32      /* W */
->  #define EXT_CSD_CACHE_CTRL             33      /* R/W */
->  #define EXT_CSD_POWER_OFF_NOTIFICATION 34      /* R/W */
-> @@ -290,6 +293,7 @@ struct _mmc_csd {
->  #define EXT_CSD_SANITIZE_START         165     /* W */
->  #define EXT_CSD_WR_REL_PARAM           166     /* RO */
->  #define EXT_CSD_RPMB_MULT              168     /* RO */
-> +#define EXT_CSD_FW_CONFIG              169     /* R/W */
->  #define EXT_CSD_BOOT_WP                        173     /* R/W */
->  #define EXT_CSD_ERASE_GROUP_DEF                175     /* R/W */
->  #define EXT_CSD_PART_CONFIG            179     /* R/W */
-> @@ -325,6 +329,11 @@ struct _mmc_csd {
->  #define EXT_CSD_POWER_OFF_LONG_TIME    247     /* RO */
->  #define EXT_CSD_GENERIC_CMD6_TIME      248     /* RO */
->  #define EXT_CSD_CACHE_SIZE             249     /* RO, 4 bytes */
-> +#define EXT_CSD_NUM_OF_FW_SEC_PROG     302     /* RO */
-> +#define EXT_CSD_FFU_ARG                        487     /* RO, 4 bytes */
-> +#define EXT_CSD_OPERATION_CODE_TIMEOUT 491     /* RO */
-> +#define EXT_CSD_FFU_FEATURES           492     /* RO */
-> +#define EXT_CSD_SUPPORTED_MODE         493     /* RO */
->  #define EXT_CSD_TAG_UNIT_SIZE          498     /* RO */
->  #define EXT_CSD_DATA_TAG_SUPPORT       499     /* RO */
->  #define EXT_CSD_MAX_PACKED_WRITES      500     /* RO */
-> --
-> 1.7.5.4
+> A comment explaining the relationship between sz and mem->cnt could
+> justify the do/while loop.
 >
+>> +               }
+>> +       } while (sz);
+>> +
+>> +       if (sg)
 >
+> We will have returned -EINVAL if this is not true. We shouldn't need
+> to test here.
+>
+>> +               sg_mark_end(sg);
+>> +
+>> +       return 0;
+>> +}
+>> +
+>> +static void mmc_ffu_free_mem(struct mmc_ffu_mem *mem) {
+
+I'd prefer:
+   static void mmc_ffu_free( struct mmc_ffu_pages mem_arr[], cnt)
+
+but that's just my $0.02.
+
+>> +       if (!mem)
+>> +               return;
+>> +       while (mem->cnt--)
+>> +               __free_pages(mem->arr[mem->cnt].page, mem->arr[mem->cnt].order);
+>> +       kfree(mem->arr);
+
+and then don't need to kalloc or kfree this object.
+
+>> +}
+>> +
+>> +/*
+>> + * Cleanup struct mmc_ffu_area.
+>> + */
+>> +static int mmc_ffu_area_cleanup(struct mmc_ffu_area *area) {
+>> +       kfree(area->sg);
+>> +       mmc_ffu_free_mem(area->mem);
+>> +
+>> +       return 0;
+>> +}
+>> +
+>> +/*
+>> + * Allocate a lot of memory, preferably max_sz but at least min_sz. In
+>> +case
+>> + * there isn't much memory do not exceed 1/16th total low mem pages.
+>> +Also do
+>> + * not exceed a maximum number of segments and try not to make segments
+>> +much
+>> + * bigger than maximum segment size.
+>
+> The comment doesn't explain WHY the code needs to do all the memory
+> allocation gymnastics.
+> It lists several the constraints, most of which are obvious from the
+> code, but only explains one (why 1/16th total low mem pages).
+>
+> This feels like a lot of code to do what copy_from_user() and DMA API
+> should be taking care of.
+> (just guessing at this point though).
+>
+>> + */
+>> +static struct mmc_ffu_mem *mmc_ffu_alloc_mem(unsigned long min_sz,
+>> +       unsigned long max_sz, unsigned int max_segs, unsigned int
+>> +max_seg_sz) {
+>> +       unsigned long max_page_cnt = DIV_ROUND_UP(max_sz, PAGE_SIZE);
+>> +       unsigned long min_page_cnt = DIV_ROUND_UP(min_sz, PAGE_SIZE);
+>> +       unsigned long max_seg_page_cnt = DIV_ROUND_UP(max_seg_sz, PAGE_SIZE);
+>> +       unsigned long page_cnt = 0;
+>> +       unsigned long limit = nr_free_buffer_pages() >> 4;
+>> +       struct mmc_ffu_mem *mem;
+>> +
+>> +       if (max_page_cnt > limit)
+>> +               max_page_cnt = limit;
+>> +       if (min_page_cnt > max_page_cnt)
+>> +               min_page_cnt = max_page_cnt;
+>> +
+>> +       if (max_seg_page_cnt > max_page_cnt)
+>> +               max_seg_page_cnt = max_page_cnt;
+>> +
+>> +       if (max_segs > max_page_cnt)
+>> +               max_segs = max_page_cnt;
+>> +
+>> +       mem = kzalloc(sizeof(struct mmc_ffu_mem), GFP_KERNEL);
+>> +       if (!mem)
+>> +               return NULL;
+>> +
+>> +       mem->arr = kzalloc(sizeof(struct mmc_ffu_pages) * max_segs, GFP_KERNEL);
+>> +       if (!mem->arr)
+>> +               goto out_free;
+>> +
+>> +       while (max_page_cnt) {
+>> +               struct page *page;
+>> +               unsigned int order;
+>> +               gfp_t flags = GFP_KERNEL | GFP_DMA | __GFP_NOWARN |
+>> +                       __GFP_NORETRY;
+>> +
+>> +               order = get_order(max_seg_page_cnt << PAGE_SHIFT);
+>> +               while (1) {
+>> +                       page = alloc_pages(flags, order);
+>> +                       if (page || !order)
+>> +                               break;
+>> +                       order -= 1;
+>> +               }
+>
+> Would this be cleaner to write as:
+>    do {
+>      page = alloc_pages(flags, order);
+>    while (!page && order--);
+>
+> "Nice" side effects: order will still have the same value if the
+> allocation succeeds.
+>
+>> +               if (!page) {
+>> +                       if (page_cnt < min_page_cnt)
+>> +                               goto out_free;
+>> +                       break;
+>> +               }
+>> +               mem->arr[mem->cnt].page = page;
+>> +               mem->arr[mem->cnt].order = order;
+>> +               mem->cnt += 1;
+>
+> These three lines make sense - just recording what was allocated.
+>
+>> +               if (max_page_cnt <= (1UL << order))
+>> +                       break;
+>> +               max_page_cnt -= 1UL << order;
+>> +               page_cnt += 1UL << order;
+>> +               if (mem->cnt >= max_segs) {
+>
+> Make this part of the while() loop condition.
+>
+>> +                       if (page_cnt < min_page_cnt)
+>> +                               goto out_free;
+>
+> move this test out of the loop.
+>
+>> +                       break;
+>> +               }
+>> +       }
+>> +
+>> +       return mem;
+>
+> if (page_cnt >= min_page_cnt)
+>     return mem;
+>
+>> +
+>> +out_free:
+>> +       mmc_ffu_free_mem(mem);
+>> +       return NULL;
+>> +}
+>> +
+>> +/*
+>> + * Initialize an area for data transfers.
+>> + * Copy the data to the allocated pages.
+>> + */
+>> +static int mmc_ffu_area_init(struct mmc_ffu_area *area, struct mmc_card *card,
+>> +       u8 *data, unsigned int size)
+>> +{
+>> +       int ret, i, length;
+>> +
+>> +       area->max_segs = card->host->max_segs;
+>> +       area->max_seg_sz = card->host->max_seg_size & ~(CARD_BLOCK_SIZE - 1);
+>> +       area->max_tfr = size;
+>> +
+>> +       if (area->max_tfr >> 9 > card->host->max_blk_count)
+>> +               area->max_tfr = card->host->max_blk_count << 9;
+>> +       if (area->max_tfr > card->host->max_req_size)
+>> +               area->max_tfr = card->host->max_req_size;
+>> +       if (area->max_tfr / area->max_seg_sz > area->max_segs)
+>> +               area->max_tfr = area->max_segs * area->max_seg_sz;
+>> +
+>> +       /*
+>> +        * Try to allocate enough memory for a max. sized transfer. Less is OK
+>> +        * because the same memory can be mapped into the scatterlist more than
+>> +        * once. Also, take into account the limits imposed on scatterlist
+>> +        * segments by the host driver.
+>> +        */
+>> +       area->mem = mmc_ffu_alloc_mem(1, area->max_tfr, area->max_segs,
+>> +                       area->max_seg_sz);
+>> +       if (!area->mem)
+>> +               return -ENOMEM;
+>> +
+>> +       /* copy data to page */
+>> +       length = 0;
+>> +       for (i = 0; i < area->mem->cnt; i++) {
+>> +                memcpy(page_address(area->mem->arr[i].page), data + length,
+>> +                       min(size - length, area->max_seg_sz));
+>> +               length += area->max_seg_sz;
+>> +       }
+>> +
+>> +       area->sg = kmalloc(sizeof(struct scatterlist) * area->max_segs,
+>> +               GFP_KERNEL);
+>> +       if (!area->sg) {
+>> +               ret = -ENOMEM;
+>> +               goto out_free;
+>> +       }
+>> +
+>> +       ret = mmc_ffu_map_sg(area->mem, size, area->sg,
+>> +                       area->max_segs, area->max_seg_sz, &area->sg_len,
+>> + 1);
+>> +
+>> +       if (ret != 0)
+>> +               goto out_free;
+>> +
+>> +       return 0;
+>> +
+>> +out_free:
+>> +       mmc_ffu_area_cleanup(area);
+>> +       return ret;
+>> +}
+>> +
+>> +static int mmc_ffu_write(struct mmc_card *card, u8 *src, u32 arg,
+>> +       int size)
+>> +{
+>> +       int rc;
+>> +       struct mmc_ffu_area mem;
+>> +
+>> +       mem.sg = NULL;
+>> +       mem.mem = NULL;
+>> +
+>> +       if (!src) {
+>> +               pr_err("FFU: %s: data buffer is NULL\n",
+>> +                       mmc_hostname(card->host));
+>> +               return -EINVAL;
+>> +       }
+>> +       rc = mmc_ffu_area_init(&mem, card, src, size);
+>> +       if (rc != 0)
+>> +               goto exit;
+>> +
+>> +       rc = mmc_ffu_simple_transfer(card, mem.sg, mem.sg_len, arg,
+>> +               size / CARD_BLOCK_SIZE, CARD_BLOCK_SIZE, 1);
+>> +
+>> +exit:
+>> +       mmc_ffu_area_cleanup(&mem);
+>> +       return rc;
+>> +}
+>> +/* Flush all scheduled work from the MMC work queue.
+>> + * and initialize the MMC device */
+>> +static int mmc_ffu_restart(struct mmc_card *card) {
+>> +       struct mmc_host *host = card->host;
+>> +       int err = 0;
+>> +
+>> +       mmc_cache_ctrl(host, 0);
+
+Did you mean mmc_flush() here?
+
+>> +       err = mmc_power_save_host(host);
+>> +       if (err) {
+>> +               pr_warn("%s: going to sleep failed (%d)!!!\n",
+>> +                       __func__ , err);
+>> +               goto exit;
+>> +       }
+>> +
+>> +       err = mmc_power_restore_host(host);
+>> +
+>> +exit:
+>> +
+>> +       return err;
+>> +}
+>> +
+>> +/* Host set the EXT_CSD */
+>> +static int mmc_host_set_ffu(struct mmc_card *card, u32 ffu_enable) {
+>> +       int err;
+>> +
+>> +       /* check if card is eMMC 5.0 or higher */
+>> +       if (card->ext_csd.rev < 7)
+>> +               return -EINVAL;
+>> +
+>> +       if (FFU_ENABLED(ffu_enable)) {
+>> +               err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+>> +                       EXT_CSD_FW_CONFIG, MMC_FFU_ENABLE,
+>> +                       card->ext_csd.generic_cmd6_time);
+>> +               if (err) {
+>> +                       pr_err("%s: switch to FFU failed with error %d\n",
+>> +                               mmc_hostname(card->host), err);
+>> +                       return err;
+>> +               }
+>> +       }
+>> +
+>> +       return 0;
+>> +}
+>> +
+>> +int mmc_ffu_download(struct mmc_card *card, struct mmc_command *cmd,
+>> +       u8 *data, int buf_bytes)
+>> +{
+>> +       u8 ext_csd[CARD_BLOCK_SIZE];
+>> +       int err;
+>> +       int ret;
+>> +
+>> +       /* Read the EXT_CSD */
+>> +       err = mmc_send_ext_csd(card, ext_csd);
+>> +       if (err) {
+>> +               pr_err("FFU: %s: error %d sending ext_csd\n",
+>> +                       mmc_hostname(card->host), err);
+>> +               goto exit;
+>> +       }
+>> +
+>> +       /* Check if FFU is supported by card */
+>> +       if (!FFU_SUPPORTED_MODE(ext_csd[EXT_CSD_SUPPORTED_MODE])) {
+>> +               err = -EINVAL;
+>> +               pr_err("FFU: %s: error %d FFU is not supported\n",
+>> +                       mmc_hostname(card->host), err);
+>> +               goto exit;
+>> +       }
+>> +
+>> +       err = mmc_host_set_ffu(card, ext_csd[EXT_CSD_FW_CONFIG]);
+>> +       if (err) {
+>> +               pr_err("FFU: %s: error %d FFU is not supported\n",
+
+mmc_host_set_ffu is already printing an error message. Both don't need
+to be verbose about the same error.
+
+>> +                       mmc_hostname(card->host), err);
+>> +               err = -EINVAL;
+
+Clobbering the err that was returned?
+
+>> +               goto exit;
+>> +       }
+>> +
+>> +       /* set device to FFU mode */
+>> +       err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL, EXT_CSD_MODE_CONFIG,
+>> +               MMC_FFU_MODE_SET, card->ext_csd.generic_cmd6_time);
+
+Not calling mmc_host_set_ffu() to do this?
+
+>> +       if (err) {
+>> +               pr_err("FFU: %s: error %d FFU is not supported\n",
+>> +                       mmc_hostname(card->host), err);
+>> +               goto exit_normal;
+>> +       }
+>> +
+>> +       /* set CMD ARG */
+>> +       cmd->arg = ext_csd[EXT_CSD_FFU_ARG] |
+>> +               ext_csd[EXT_CSD_FFU_ARG + 1] << 8 |
+>> +               ext_csd[EXT_CSD_FFU_ARG + 2] << 16 |
+>> +               ext_csd[EXT_CSD_FFU_ARG + 3] << 24;
+>> +
+>> +       err = mmc_ffu_write(card, data, cmd->arg, buf_bytes);
+>> +
+>> +exit_normal:
+>> +       /* host switch back to work in normal MMC Read/Write commands */
+>> +       ret = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+>> +               EXT_CSD_MODE_CONFIG, MMC_FFU_MODE_NORMAL,
+>> +               card->ext_csd.generic_cmd6_time);
+>> +       if (ret)
+>> +               err = ret;
+>> +
+>> +exit:
+>> +       return err;
+>> +}
+>> +EXPORT_SYMBOL(mmc_ffu_download);
+
+
+Ok...no additional comments for now...but I am pretty sure I need to
+stare at this more to understand how it works.
+
+cheers,
+grant
