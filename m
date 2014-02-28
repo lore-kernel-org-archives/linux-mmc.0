@@ -1,67 +1,112 @@
-From: Aaron Lu <aaron.lu@intel.com>
-Subject: Re: SDIO driver return -ENOSYS behaviour change?
-Date: Fri, 28 Feb 2014 16:49:52 +0800
-Message-ID: <53104DB0.9010709@intel.com>
-References: <530F0118.2010501@intel.com>	<CAPDyKFrZAAVfFcaFx7o3TWMikWx7TvSPW_AuV1VsiuQF656uXg@mail.gmail.com>	<530F20E5.9000107@intel.com>	<CAPDyKFpcJ5T9QXbFzZnu4fdgfjsTntfrtS=mo=5Wb_uJa7iMbw@mail.gmail.com>	<530FF686.2080901@intel.com> <CAPDyKFpWS+hRJM2Fz=TZxyFzQWkGwE7YRTuToB_t+1ODY0SQeg@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-pm-owner@vger.kernel.org>
-In-Reply-To: <CAPDyKFpWS+hRJM2Fz=TZxyFzQWkGwE7YRTuToB_t+1ODY0SQeg@mail.gmail.com>
-Sender: linux-pm-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: NeilBrown <neilb@suse.de>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "Rafael J. Wysocki" <rjw@rjwysocki.net>, Linux-pm mailing list <linux-pm@vger.kernel.org>
+From: Georgi Djakov <gdjakov@mm-sol.com>
+Subject: [PATCH v9 0/3] mmc: sdhci-msm: Add support for Qualcomm chipsets
+Date: Fri, 28 Feb 2014 13:24:32 +0200
+Message-ID: <1393586675-14628-1-git-send-email-gdjakov@mm-sol.com>
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: linux-mmc@vger.kernel.org, cjb@laptop.org, ulf.hansson@linaro.org, devicetree@vger.kernel.org, grant.likely@linaro.org, robh+dt@kernel.org, pawel.moll@arm.com, mark.rutland@arm.com, swarren@wwwdotorg.org, ijc+devicetree@hellion.org.uk, galak@codeaurora.org, rob@landley.net
+Cc: linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org, Georgi Djakov <gdjakov@mm-sol.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On 02/28/2014 04:30 PM, Ulf Hansson wrote:
-> On 28 February 2014 03:37, Aaron Lu <aaron.lu@intel.com> wrote:
->> On 02/27/2014 09:05 PM, Ulf Hansson wrote:
->>> I think it's more a matter of having a controlled suspend sequence.
->>> The mmc core are not able to serve any new SDIO requests while it is
->>> suspended, therefore it tells the sdio func driver about when it safe
->>> to send request - using it's PM callbacks.
->>
->> Does this mean after the function device is suspended from PM core's
->> pespective, the mmc core will still send some requests to the function
->> device? I did see one such request, disable_width, get sent after the
->> function driver's suspend callback is invoked, don't know if there are
->> others.
-> 
-> Nope. The mmc core will send request to the "card device" during
-> suspend. Those are part's of a sequence to put the card in a proper
-> "suspend mode".
+This patchset adds basic support of the Secure Digital Host Controller
+Interface compliant controller found in Qualcomm SoCs.
 
-I suppose this request is sent after calling function driver's suspend
-callback? BTW, what request is it?
+Tested with eMMC and various micro SD cards on APQ8074 Dragonboard.
+Applies to linux-next.
 
-> 
->>
->> From the mmc_sdio_suspend function I can see two things are done:
->> 1 function device driver's suspend callback is called;
->> 2 optionally disable_width and power off the card according to some flags.
->>
->> So once we fixed the -ENOSYS problem, can we have the function device
->> run its own suspend callback and have the mmc_sdio_suspend just did the
->> disable_width and power off thing?
-> 
-> That requires that all sdio func devices get suspended before the card
-> devices. (And resumed after, but that will of course be implicit.)
+Changes from v8:
+- Added controller version suffix to the DT compatible string.
+- Switched Kconfig dependency from ARCH_MSM to the new ARCH_QCOM multiplatform.
+- Addressed comments from Stephen Boyd on the 2nd patch (execute tunning).
+- Added signed-off-by lines of the initial driver authors.
+- Picked up tested-by. https://lkml.org/lkml/2013/11/14/85
+- Minor changes on comments, prints and formatting.
 
-Yes, and this is guaranteed by PM core as the function device is the
-child of the card device.
+Changes from v7:
+- Added call to sdhci_get_of_property().
+- Refactored sdhci_msm_dt_parse_vreg_info().
+- Fixed possible ERR_PTR() dereferencing.
+- Updated DT binding documentation.
+- Removed lpm and currents from DT.
+- Removed bus-speed-mode from DT.
+- Updated and moved the sanity checks.
+- Various typo and coding style fixes.
+- Added platform_execute_tunning implementation.
 
-> 
-> I guess the guarantee for that is already present, since we have added
-> the func device to the driver model after we have added the card
-> device at mmc_sdio_attach(). So, I suppose this could work.
+Changes from v6:
+- Fixed wrong pointer in sdhci_msm_pwr_irq().
+- Added platform_execute_tuning() callback as the MSM SDHC does not
+  support tuning as in SDHC 3.0 spec and will need custom implementation
+  in order to support SDR104, HS200 and HS400.
+- Removed the always-on devicetree property - if the regulator is
+  configured as always-on, it will not be disabled anyway.
+- Removed devm_pinctrl_get_select_default() - the default pins are 
+  already set from the device core.
+- Removed wrapper function sdhci_msm_set_vdd_io_vol() and enum
+  vdd_io_level and now calling regulator_set_voltage() directly.
+- Converted #defines to use BIT() macro.
+- Added IS_ERR(vreg->reg) check at the beginning of sdhci_msm_vreg
+  functions.
+- Do not print errors when regulators init return -EPROBE_DEFER as the
+  deffered init is not an actual error.
+- Handle each power irq status bit separately in sdhci_msm_pwr_irq().
+- Ensure that any pending power irq is acknowledged before enabling it,
+  otherwise the irq handler will be fired prematurely.
+- Minor changes.
 
-Exactly.
+Changes from v5:
+- Driver is split into multiple patches
+- Do not initialize variables that are assigned later in code
+- Remove some useless comments
+- Use shorter variable names
+- Change pr_err() to dev_err()
+- Optimized sdhci_msm_setup_vreg()
+- Some code alignment fixes
+- Improved DT values sanity check
+- Added dev_dbg print for sdhci controller version in probe()
+- Added usleep_range() after SW reset - it can take some time
+- Added SDHCI_QUIRK_SINGLE_POWER_WRITE - power handled by PMIC
+- Renamed DT property vdd-io to vddio
 
-> 
-> Do you want me to create a patch that you can test?
+Changes from v4:
+- Simplified sdhci_msm_vreg_disable() and sdhci_msm_set_vdd_io_vol()
+- Use devm_ioremap_resource() instead of devm_ioremap()
+- Converted IS_ERR_OR_NULL to IS_ERR
+- Disable regulators in sdhci_msm_remove()
+- Check for DT node at the beginning in sdhci_msm_probe()
+- Removed more redundant code
+- Changes in some error messages
+- Minor fixes
 
-That would be good. I do not have any SDIO card at hand, but I would be
-glad to review the patch.
+Changes from v3:
+- Allocate memory for all required structs at once
+- Added termination entry in sdhci_msm_dt_match[]
+- Fixed a missing sdhci_pltfm_free() in probe()
+- Removed redundant of_match_ptr
+- Removed the unneeded function sdhci_msm_vreg_reset()
 
-Thanks,
-Aaron
+Changes from v2:
+- Added DT bindings for clocks
+- Moved voltage regulators data to platform data
+- Removed unneeded includes
+- Removed obsolete and wrapper functions
+- Removed error checking where unnecessary
+- Removed redundant _clk suffix from clock names
+- Just return instead of goto where possible
+- Minor fixes
+
+Georgi Djakov (3):
+  mmc: sdhci-msm: Qualcomm SDHCI binding documentation
+  mmc: sdhci-msm: Initial support for Qualcomm chipsets
+  mmc: sdhci-msm: Add platform_execute_tunning implementation
+
+ .../devicetree/bindings/mmc/sdhci-msm.txt          |   80 ++
+ drivers/mmc/host/Kconfig                           |   13 +
+ drivers/mmc/host/Makefile                          |    1 +
+ drivers/mmc/host/sdhci-msm.c                       |  940 ++++++++++++++++++++
+ 4 files changed, 1034 insertions(+)
+ create mode 100644 Documentation/devicetree/bindings/mmc/sdhci-msm.txt
+ create mode 100644 drivers/mmc/host/sdhci-msm.c
+
+-- 
+1.7.9.5
