@@ -1,36 +1,44 @@
-From: Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>
-Subject: Re: [PATCH 2/4] ARM: dove: prepare new Dove DT Kconfig variable
-Date: Fri, 28 Feb 2014 19:12:20 +0100
-Message-ID: <5310D184.3050905@gmail.com>
-References: <1393536486-3827-1-git-send-email-sebastian.hesselbarth@gmail.com> <1393536486-3827-3-git-send-email-sebastian.hesselbarth@gmail.com> <20140228015310.GC9383@sirena.org.uk> <20140228163448.GM1872@titan.lakedaemon.net>
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20140228163448.GM1872@titan.lakedaemon.net>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Jason Cooper <jason@lakedaemon.net>, Mark Brown <broonie@kernel.org>
-Cc: Chris Ball <chris@printf.net>, Zhang Rui <rui.zhang@intel.com>, Eduardo Valentin <eduardo.valentin@ti.com>, Wim Van Sebroeck <wim@iguana.be>, Liam Girdwood <lgirdwood@gmail.com>, Andrew Lunn <andrew@lunn.ch>, Gregory Clement <gregory.clement@free-electrons.com>, alsa-devel@alsa-project.org, linux-watchdog@vger.kernel.org, linux-pm@vger.kernel.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
+From: Dan Carpenter <dan.carpenter@oracle.com>
+Subject: re: mmc: rtsx: add support for pre_req and post_req
+Date: Fri, 28 Feb 2014 23:35:42 +0300
+Message-ID: <20140228202432.GA29547@elgon.mountain>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from aserp1040.oracle.com ([141.146.126.69]:25904 "EHLO
+	aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751682AbaB1UiV (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 28 Feb 2014 15:38:21 -0500
+Content-Disposition: inline
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: micky_ching@realsil.com.cn
+Cc: linux-mmc@vger.kernel.org
 
-On 02/28/2014 05:34 PM, Jason Cooper wrote:
-> On Fri, Feb 28, 2014 at 10:53:10AM +0900, Mark Brown wrote:
->> On Thu, Feb 27, 2014 at 10:28:03PM +0100, Sebastian Hesselbarth wrote:
->>> DT-enabled Dove will move over from ARCH_DOVE in mach-dove to MACH_DOVE in
->>> mach-mvebu. As non-DT ARCH_DOVE will stay to rot for a while, add a new
->>> DT-only MACH_DOVE to mmc, thermal, wdt, and asoc Kconfigs.
->>
->> I'd be much happier merging this sort of stuff individually through the
->> subsystems, we already have an annoying conflict here...  Is there some
->> bisection problem with doing that?
->
-> shouldn't be.  Since these changes || the old with the new config
-> symbols.
->
-> Sebastian, can you split this up into individual patches?
+Hello Micky Ching,
 
-Sure, I'll send them in-reply-to this mail soon. I'll also add the SATA
-PHY Kconfig in a bisectable way, i.e. add MACH_DOVE and for now ignore
-that the driver is DT-only. We plan to remove mach-dove in one or two
-cycles anyway, it will go with it then.
+The patch c42deffd5b53: "mmc: rtsx: add support for pre_req and
+post_req" from Feb 17, 2014, leads to the following static checker
+warning:
 
-Sebastian
+	drivers/mmc/host/rtsx_pci_sdmmc.c:525 sd_pre_dma_transfer()
+	warn: we tested 'next' before and it was 'false'
+
+drivers/mmc/host/rtsx_pci_sdmmc.c
+   520                          "error: invalid cookie data[%d] host[%d]\n",
+   521                          data->host_cookie, host->next_data.cookie);
+   522                  data->host_cookie = 0;
+   523          }
+   524  
+   525          if (next || (!next && data->host_cookie != host->next_data.cookie))
+                             ^^^^^
+We are testing "next" twice.  Often that means the intention was to test
+a different variable?
+
+   526                  sg_count = rtsx_pci_dma_map_sg(pcr,
+   527                                  data->sg, data->sg_len, read);
+   528          else
+   529                  sg_count = host->next_data.sg_count;
+
+regards,
+dan carpenter
