@@ -1,52 +1,59 @@
-From: Balaji T K <balajitk@ti.com>
-Subject: [PATCH 1/2] mmc: omap_hsmmc: fix return error code for of_get_hsmmc_pdata
-Date: Fri, 28 Feb 2014 19:52:31 +0530
-Message-ID: <1393597352-13282-2-git-send-email-balajitk@ti.com>
-References: <1393597352-13282-1-git-send-email-balajitk@ti.com>
+From: Nishanth Menon <nm@ti.com>
+Subject: Re: [PATCH V2 1/2] mmc: omap_hsmmc: Add support for quirky omap3
+ hsmmc controller
+Date: Fri, 28 Feb 2014 09:09:26 -0600
+Message-ID: <5310A6A6.6030803@ti.com>
+References: <1392356749-32091-1-git-send-email-nm@ti.com>
+ <1392356749-32091-2-git-send-email-nm@ti.com>
+ <20140214163102.GA21592@atomide.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from devils.ext.ti.com ([198.47.26.153]:40062 "EHLO
-	devils.ext.ti.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751581AbaB1OWm (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 28 Feb 2014 09:22:42 -0500
-In-Reply-To: <1393597352-13282-1-git-send-email-balajitk@ti.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <20140214163102.GA21592@atomide.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Tony Lindgren <tony@atomide.com>, Chris Ball <chris@printf.net>
+Cc: devicetree@vger.kernel.org, Balaji T K <balajitk@ti.com>, linux-doc@vger.kernel.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Felipe Balbi <balbi@ti.com>, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, chris@printf.net
-Cc: linux-omap@vger.kernel.org, Balaji T K <balajitk@ti.com>
 
-of_get_hsmmc_pdata returns a pointer, returning NULL is invalid,
-return ERR_PTR for error case.
+On 02/14/2014 10:31 AM, Tony Lindgren wrote:
+> * Nishanth Menon <nm@ti.com> [140213 21:48]:
+>> When device is booted using devicetree, platforms impacted by Erratum
+>> 2.1.1.128 is not detected easily in the mmc driver. This erratum
+>> indicates that the module cannot do multi-block transfers. Platforms
+>> such as LDP which use OMAP3 ES revision prior to ES3.0 are impacted by
+>> this.
+>>
+>> Provide a new compatible property "ti,omap3-pre-es3-hsmmc" to allow
+>> driver to determine if driver needs to implement quirks associated
+>> with the specific module version (primarily because the IP revision
+>> information is not sufficient for the same).
+>>
+>> Signed-off-by: Nishanth Menon <nm@ti.com>
+> 
+> Looks good to me, would be good to get this into the -rc cycle
+> as LDP is one of the automated boot testing boards for us.
+> 
+> If you guys want me to pick up both of the patches let me know,
+> otherwise feel free to add my ack.
+> 
 
-Signed-off-by: Balaji T K <balajitk@ti.com>
-Reported-by: Dan Carpenter <dan.carpenter@oracle.com>
----
- drivers/mmc/host/omap_hsmmc.c |    4 ++--
- 1 files changed, 2 insertions(+), 2 deletions(-)
+Chris,
+would you be picking up the series that fixes LDP dt boot behavior or
+should Tony pick it up?
 
-diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index 014bfe5..7d03d36 100644
---- a/drivers/mmc/host/omap_hsmmc.c
-+++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -1725,7 +1725,7 @@ static struct omap_mmc_platform_data *of_get_hsmmc_pdata(struct device *dev)
- 
- 	pdata = devm_kzalloc(dev, sizeof(*pdata), GFP_KERNEL);
- 	if (!pdata)
--		return NULL; /* out of memory */
-+		return ERR_PTR(-ENOMEM); /* out of memory */
- 
- 	if (of_find_property(np, "ti,dual-volt", NULL))
- 		pdata->controller_flags |= OMAP_HSMMC_SUPPORTS_DUAL_VOLT;
-@@ -1760,7 +1760,7 @@ static struct omap_mmc_platform_data *of_get_hsmmc_pdata(struct device *dev)
- static inline struct omap_mmc_platform_data
- 			*of_get_hsmmc_pdata(struct device *dev)
- {
--	return NULL;
-+	return ERR_PTR(-EINVAL);
- }
- #endif
- 
+https://patchwork.kernel.org/patch/3650061/
+https://patchwork.kernel.org/patch/3650031/
+
+
 -- 
-1.7.5.4
-
+Regards,
+Nishanth Menon
