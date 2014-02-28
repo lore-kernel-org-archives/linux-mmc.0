@@ -1,44 +1,43 @@
-From: Dan Carpenter <dan.carpenter@oracle.com>
-Subject: re: mmc: rtsx: add support for pre_req and post_req
-Date: Fri, 28 Feb 2014 23:35:42 +0300
-Message-ID: <20140228202432.GA29547@elgon.mountain>
+From: Josh Cartwright <joshc@codeaurora.org>
+Subject: Re: [PATCH v9 3/3] mmc: sdhci-msm: Add platform_execute_tunning
+ implementation
+Date: Fri, 28 Feb 2014 14:45:54 -0600
+Message-ID: <20140228204554.GI7308@joshc.qualcomm.com>
+References: <1393586675-14628-1-git-send-email-gdjakov@mm-sol.com>
+ <1393586675-14628-4-git-send-email-gdjakov@mm-sol.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from aserp1040.oracle.com ([141.146.126.69]:25904 "EHLO
-	aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751682AbaB1UiV (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 28 Feb 2014 15:38:21 -0500
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
 Content-Disposition: inline
-Sender: linux-mmc-owner@vger.kernel.org
+In-Reply-To: <1393586675-14628-4-git-send-email-gdjakov@mm-sol.com>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: Georgi Djakov <gdjakov@mm-sol.com>
+Cc: linux-mmc@vger.kernel.org, cjb@laptop.org, ulf.hansson@linaro.org, devicetree@vger.kernel.org, grant.likely@linaro.org, robh+dt@kernel.org, pawel.moll@arm.com, mark.rutland@arm.com, swarren@wwwdotorg.org, ijc+devicetree@hellion.org.uk, galak@codeaurora.org, rob@landley.net, linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: micky_ching@realsil.com.cn
-Cc: linux-mmc@vger.kernel.org
 
-Hello Micky Ching,
+Nit below.
 
-The patch c42deffd5b53: "mmc: rtsx: add support for pre_req and
-post_req" from Feb 17, 2014, leads to the following static checker
-warning:
+On Fri, Feb 28, 2014 at 01:24:35PM +0200, Georgi Djakov wrote:
+> This patch adds implementation for platform specific tuning in order to support
+> HS200 bus speed mode on Qualcomm SDHCI controller.
+> 
+> Signed-off-by: Asutosh Das <asutoshd@codeaurora.org>
+> Signed-off-by: Venkat Gopalakrishnan <venkatg@codeaurora.org>
+> Signed-off-by: Georgi Djakov <gdjakov@mm-sol.com>
+> ---
+>  drivers/mmc/host/sdhci-msm.c |  424 +++++++++++++++++++++++++++++++++++++++++-
+>  1 file changed, 418 insertions(+), 6 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+> index b4490a2..69f6887 100644
+> --- a/drivers/mmc/host/sdhci-msm.c
+> +++ b/drivers/mmc/host/sdhci-msm.c
+[..]
+>  
+> +int sdhci_msm_execute_tuning(struct sdhci_host *host, u32 opcode)
 
-	drivers/mmc/host/rtsx_pci_sdmmc.c:525 sd_pre_dma_transfer()
-	warn: we tested 'next' before and it was 'false'
+This wants to be static.
 
-drivers/mmc/host/rtsx_pci_sdmmc.c
-   520                          "error: invalid cookie data[%d] host[%d]\n",
-   521                          data->host_cookie, host->next_data.cookie);
-   522                  data->host_cookie = 0;
-   523          }
-   524  
-   525          if (next || (!next && data->host_cookie != host->next_data.cookie))
-                             ^^^^^
-We are testing "next" twice.  Often that means the intention was to test
-a different variable?
-
-   526                  sg_count = rtsx_pci_dma_map_sg(pcr,
-   527                                  data->sg, data->sg_len, read);
-   528          else
-   529                  sg_count = host->next_data.sg_count;
-
-regards,
-dan carpenter
+-- 
+Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum,
+hosted by The Linux Foundation
