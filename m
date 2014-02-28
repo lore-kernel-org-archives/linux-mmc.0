@@ -1,141 +1,56 @@
-From: Russell King <rmk+kernel@arm.linux.org.uk>
-Subject: [PATCH 6/6] mmc: sdhci-spear: use generic card detection gpio support
-Date: Fri, 28 Feb 2014 21:32:49 +0000
-Message-ID: <E1WJV33-00042Y-Hb@rmk-PC.arm.linux.org.uk>
+From: Markus Mayer <markus.mayer@linaro.org>
+Subject: Re: [PATCH 1/6] mmc: sdhci-bcm-kona: fix build errors when built-in
+Date: Fri, 28 Feb 2014 13:54:50 -0800
+Message-ID: <CAPdLdqmm8NpeovzA7aMYmkPA=34ty4niUgcNX=3tVUUny-dckw@mail.gmail.com>
 References: <20140228212936.GA21483@n2100.arm.linux.org.uk>
+	<E1WJV2e-000429-1D@rmk-PC.arm.linux.org.uk>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from gw-1.arm.linux.org.uk ([78.32.30.217]:60188 "EHLO
-	pandora.arm.linux.org.uk" rhost-flags-OK-OK-OK-FAIL)
-	by vger.kernel.org with ESMTP id S1752206AbaB1Vcw (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 28 Feb 2014 16:32:52 -0500
-In-Reply-To: <20140228212936.GA21483@n2100.arm.linux.org.uk>
+Received: from mail-ig0-f169.google.com ([209.85.213.169]:62395 "EHLO
+	mail-ig0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752162AbaB1Vyv (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 28 Feb 2014 16:54:51 -0500
+Received: by mail-ig0-f169.google.com with SMTP id y6so3046951igj.0
+        for <linux-mmc@vger.kernel.org>; Fri, 28 Feb 2014 13:54:50 -0800 (PST)
+In-Reply-To: <E1WJV2e-000429-1D@rmk-PC.arm.linux.org.uk>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <chris@printf.net>
-Cc: Viresh Kumar <viresh.linux@gmail.com>, spear-devel@list.st.com, linux-mmc@vger.kernel.org
+To: Russell King <rmk+kernel@arm.linux.org.uk>
+Cc: Chris Ball <chris@printf.net>, linux-mmc@vger.kernel.org, Christian Daudt <csd@broadcom.com>, Matt Porter <matt.porter@linaro.org>
 
-sdhci has support for using GPIOs for card detection.  If we have a
-GPIO specified, we can use that directly, without needing our own
-interrupt handler.
+On 28 February 2014 13:32, Russell King <rmk+kernel@arm.linux.org.uk> wrote:
+> `sdhci_bcm_kona_remove' referenced in section `.data' of drivers/built-in.o: defined in discarded section `.exit.text' of drivers/built-in.o
+>
+> Fixes: 058feb53666f ("mmc: sdhci-bcm-kona: make linker-section warning go away")
+> Cc: Markus Mayer <markus.mayer@linaro.org>
+> Cc: Christian Daudt <csd@broadcom.com>
+> Cc: Matt Porter <matt.porter@linaro.org>
+> Cc: <stable@vger.kernel.org>
+> Signed-off-by: Russell King <rmk+kernel@arm.linux.org.uk>
+> ---
+>  drivers/mmc/host/sdhci-bcm-kona.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/host/sdhci-bcm-kona.c b/drivers/mmc/host/sdhci-bcm-kona.c
+> index 7a190fe4dff1..e5565aa5ed36 100644
+> --- a/drivers/mmc/host/sdhci-bcm-kona.c
+> +++ b/drivers/mmc/host/sdhci-bcm-kona.c
+> @@ -314,7 +314,7 @@ static int sdhci_bcm_kona_probe(struct platform_device *pdev)
+>         return ret;
+>  }
+>
+> -static int __exit sdhci_bcm_kona_remove(struct platform_device *pdev)
+> +static int sdhci_bcm_kona_remove(struct platform_device *pdev)
+>  {
+>         return sdhci_pltfm_unregister(pdev);
+>  }
+> --
+> 1.8.3.1
+>
 
-Signed-off-by: Russell King <rmk+kernel@arm.linux.org.uk>
----
- drivers/mmc/host/sdhci-spear.c | 79 +++++++++---------------------------------
- 1 file changed, 17 insertions(+), 62 deletions(-)
+Tested-by: Markus Mayer <markus.mayer@linaro.org>
 
-diff --git a/drivers/mmc/host/sdhci-spear.c b/drivers/mmc/host/sdhci-spear.c
-index 2a208a9b4de1..87e737c00876 100644
---- a/drivers/mmc/host/sdhci-spear.c
-+++ b/drivers/mmc/host/sdhci-spear.c
-@@ -27,6 +27,7 @@
- #include <linux/slab.h>
- #include <linux/mmc/host.h>
- #include <linux/mmc/sdhci-spear.h>
-+#include <linux/mmc/slot-gpio.h>
- #include <linux/io.h>
- #include "sdhci.h"
- 
-@@ -40,28 +41,6 @@ static const struct sdhci_ops sdhci_pltfm_ops = {
- 	/* Nothing to do for now. */
- };
- 
--/* gpio card detection interrupt handler */
--static irqreturn_t sdhci_gpio_irq(int irq, void *dev_id)
--{
--	struct platform_device *pdev = dev_id;
--	struct sdhci_host *host = platform_get_drvdata(pdev);
--	struct spear_sdhci *sdhci = dev_get_platdata(&pdev->dev);
--	unsigned long gpio_irq_type;
--	int val;
--
--	val = gpio_get_value(sdhci->data->card_int_gpio);
--
--	/* val == 1 -> card removed, val == 0 -> card inserted */
--	/* if card removed - set irq for low level, else vice versa */
--	gpio_irq_type = val ? IRQF_TRIGGER_LOW : IRQF_TRIGGER_HIGH;
--	irq_set_irq_type(irq, gpio_irq_type);
--
--	/* inform sdhci driver about card insertion/removal */
--	tasklet_schedule(&host->card_tasklet);
--
--	return IRQ_HANDLED;
--}
--
- #ifdef CONFIG_OF
- static struct sdhci_plat_data *sdhci_probe_config_dt(struct platform_device *pdev)
- {
-@@ -154,6 +133,22 @@ static int sdhci_probe(struct platform_device *pdev)
- 		sdhci->data = dev_get_platdata(&pdev->dev);
- 	}
- 
-+	/*
-+	 * It is optional to use GPIOs for sdhci card detection. If
-+	 * sdhci->data is NULL, then use original sdhci lines otherwise
-+	 * GPIO lines. We use the built-in GPIO support for this.
-+	 */
-+	if (sdhci->data && sdhci->data->card_int_gpio >= 0) {
-+		ret = mmc_gpio_request_cd(host->mmc,
-+					  sdhci->data->card_int_gpio, 0);
-+		if (ret < 0) {
-+			dev_dbg(&pdev->dev,
-+				"failed to request card-detect gpio%d\n",
-+				sdhci->data->card_int_gpio);
-+			goto disable_clk;
-+		}
-+	}
-+
- 	ret = sdhci_add_host(host);
- 	if (ret) {
- 		dev_dbg(&pdev->dev, "error adding host\n");
-@@ -162,48 +157,8 @@ static int sdhci_probe(struct platform_device *pdev)
- 
- 	platform_set_drvdata(pdev, host);
- 
--	/*
--	 * It is optional to use GPIOs for sdhci Power control & sdhci card
--	 * interrupt detection. If sdhci->data is NULL, then use original sdhci
--	 * lines otherwise GPIO lines.
--	 * If GPIO is selected for power control, then power should be disabled
--	 * after card removal and should be enabled when card insertion
--	 * interrupt occurs
--	 */
--	if (!sdhci->data)
--		return 0;
--
--	if (sdhci->data->card_int_gpio >= 0) {
--		ret = devm_gpio_request(&pdev->dev, sdhci->data->card_int_gpio,
--				"sdhci");
--		if (ret < 0) {
--			dev_dbg(&pdev->dev, "gpio request fail: %d\n",
--					sdhci->data->card_int_gpio);
--			goto set_drvdata;
--		}
--
--		ret = gpio_direction_input(sdhci->data->card_int_gpio);
--		if (ret) {
--			dev_dbg(&pdev->dev, "gpio set direction fail: %d\n",
--					sdhci->data->card_int_gpio);
--			goto set_drvdata;
--		}
--		ret = devm_request_irq(&pdev->dev,
--				gpio_to_irq(sdhci->data->card_int_gpio),
--				sdhci_gpio_irq, IRQF_TRIGGER_LOW,
--				mmc_hostname(host->mmc), pdev);
--		if (ret) {
--			dev_dbg(&pdev->dev, "gpio request irq fail: %d\n",
--					sdhci->data->card_int_gpio);
--			goto set_drvdata;
--		}
--
--	}
--
- 	return 0;
- 
--set_drvdata:
--	sdhci_remove_host(host, 1);
- disable_clk:
- 	clk_disable_unprepare(sdhci->clk);
- err_host:
 -- 
-1.8.3.1
-
+Markus Mayer
+Broadcom Landing Team
