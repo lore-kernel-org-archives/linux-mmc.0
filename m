@@ -1,38 +1,62 @@
-From: Kumar Gala <galak@codeaurora.org>
-Subject: Re: [PATCH v9 3/3] mmc: sdhci-msm: Add platform_execute_tunning implementation
-Date: Fri, 28 Feb 2014 10:51:19 -0600
-Message-ID: <F9D8CFEF-1A3C-4B25-B593-419C56E3A168@codeaurora.org>
-References: <1393586675-14628-1-git-send-email-gdjakov@mm-sol.com> <1393586675-14628-4-git-send-email-gdjakov@mm-sol.com>
-Mime-Version: 1.0 (Mac OS X Mail 7.2 \(1874\))
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1393586675-14628-4-git-send-email-gdjakov@mm-sol.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Georgi Djakov <gdjakov@mm-sol.com>
-Cc: linux-mmc@vger.kernel.org, cjb@laptop.org, ulf.hansson@linaro.org, devicetree@vger.kernel.org, grant.likely@linaro.org, robh+dt@kernel.org, pawel.moll@arm.com, mark.rutland@arm.com, swarren@wwwdotorg.org, ijc+devicetree@hellion.org.uk, rob@landley.net, linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org
+From: Balaji T K <balajitk@ti.com>
+Subject: Re: [PATCH v7 1/4] mmc: omap_hsmmc: Enable SDIO IRQ.
+Date: Fri, 28 Feb 2014 22:34:44 +0530
+Message-ID: <5310C1AC.5060301@ti.com>
+References: <1393331866-28307-1-git-send-email-afenkart@gmail.com> <1393331866-28307-2-git-send-email-afenkart@gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-doc-owner@vger.kernel.org>
+In-Reply-To: <1393331866-28307-2-git-send-email-afenkart@gmail.com>
+Sender: linux-doc-owner@vger.kernel.org
+To: Andreas Fenkart <afenkart@gmail.com>
+Cc: Chris Ball <cjb@laptop.org>, Tony Lindgren <tony@atomide.com>, Grant Likely <grant.likely@secretlab.ca>, Felipe Balbi <balbi@ti.com>, zonque@gmail.com, galak@codeaurora.org, linux-doc@vger.kernel.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
+On Tuesday 25 February 2014 06:07 PM, Andreas Fenkart wrote:
+> For now, only support SDIO interrupt if we are booted with
+> DT. This is because some platforms need special quirks. And
+> we don't want to add new legacy mux platform init code
+> callbacks any longer as we are moving to DT based booting
+> anyways.
+>
+> Signed-off-by: Andreas Fenkart <afenkart@gmail.com>
+>
+> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+> index a5a38cc..bd3bb0c 100644
+> --- a/drivers/mmc/host/omap_hsmmc.c
+> +++ b/drivers/mmc/host/omap_hsmmc.c
 
-On Feb 28, 2014, at 5:24 AM, Georgi Djakov <gdjakov@mm-sol.com> wrote:
+<snip>
 
-> This patch adds implementation for platform specific tuning in order =
-to support
-> HS200 bus speed mode on Qualcomm SDHCI controller.
->=20
-> Signed-off-by: Asutosh Das <asutoshd@codeaurora.org>
-> Signed-off-by: Venkat Gopalakrishnan <venkatg@codeaurora.org>
-> Signed-off-by: Georgi Djakov <gdjakov@mm-sol.com>
-> ---
-> drivers/mmc/host/sdhci-msm.c |  424 +++++++++++++++++++++++++++++++++=
-++++++++-
-> 1 file changed, 418 insertions(+), 6 deletions(-)
+> @@ -1705,7 +1757,18 @@ static void omap_hsmmc_debugfs(struct mmc_host *mmc)
+>   #endif
+>
+>   #ifdef CONFIG_OF
+> -static u16 omap4_reg_offset = 0x100;
+> +struct of_data {
+> +	u16 offset;
+> +	int flags;
+> +};
+> +
+Hi Andreas,
 
-minor nit, in subject (platform_execute_tuning, with one =92n=92).
+struct of_data declaration needs to be moved out of #ifdef CONFIG_OF
+for !CONFIG_OF build.
 
-- k
+I tried testing this patch series on am335x, I see throughput in the
+range of KBs. Will give another try with Tony's version.
 
---=20
-Employee of Qualcomm Innovation Center, Inc.
-Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum, host=
-ed by The Linux Foundation
+Thanks and Regards,
+Balaji T K
+
+> +static struct of_data omap4_data = {
+> +	.offset	= 0x100,
+> +};
+> +static struct of_data am33xx_data = {
+> +	.offset	= 0x100,
+> +	.flags	= OMAP_HSMMC_SWAKEUP_MISSING,
+> +};
+>
+>   static const struct of_device_id omap_mmc_of_match[] = {
+>   	{
