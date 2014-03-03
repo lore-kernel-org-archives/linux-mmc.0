@@ -1,65 +1,47 @@
-From: Felipe Balbi <balbi@ti.com>
-Subject: Re: [PATCH] mmc: host: dw: fix possible build error
-Date: Mon, 3 Mar 2014 13:05:41 -0600
-Message-ID: <20140303190541.GA27953@saruman.home>
-References: <1393340264-22687-1-git-send-email-balbi@ti.com>
- <530D134F.5090403@samsung.com>
- <20140303180614.GA31301@saruman.home>
- <86vbvvqf6m.fsf@void.printf.net>
-Reply-To: <balbi@ti.com>
-Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="y0ulUmNC+osPPQO6"
+From: Johnson Thomas <johnsonthomas@nanometrics.ca>
+Subject: [PATCH] mmc: mmc_spi: synchronize STOP_TRANSMISSION with next data token during block reads
+Date: Mon,  3 Mar 2014 14:17:11 -0500
+Message-ID: <1393874231-21929-1-git-send-email-johnsonthomas@nanometrics.ca>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <86vbvvqf6m.fsf@void.printf.net>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Chris Ball <chris@printf.net>
-Cc: balbi@ti.com, Jaehoon Chung <jh80.chung@samsung.com>, tgih.jun@samsung.com, linux-mmc@vger.kernel.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>
+To: cjb@laptop.org
+Cc: dbrownell@users.sourceforge.net, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, johnsonthomas@nanometrics.ca, jamesnuss@nanometrics.ca
 List-Id: linux-mmc@vger.kernel.org
 
---y0ulUmNC+osPPQO6
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+Certain SD cards respond with an invalid response (ie,. response
+not defined in the SD protocol) during block reads when the
+OUT_OF_RANGE data token is sent back from the card at the same time
+as the host sends a STOP_TRANSMISSION command (CMD12). As a result,
+the card enters a bad state which leads to rejecting any subsequent
+commands until the card is reset.
 
-On Mon, Mar 03, 2014 at 07:01:53PM +0000, Chris Ball wrote:
-> Hi,
->=20
-> On Mon, Mar 03 2014, Felipe Balbi wrote:
-> >> When you send the patch related with dw_mmc controller, could you use
-> >> the prefix "mmc: dw_mmc:"?  "mmc: dw_mmc: fix possible build error"
-> >
-> > sure, no problem. Do I *really* need to resend though ? It's already
-> > -rc5 and I still don't see this patch merged.
->=20
-> No need to resend, I can fix this up -- pushed to mmc-next, thanks.
+Synchronize with the subsequent data token for every block read before
+issuing a STOP_TRANSMISSION command (CMD12). The synchronization is
+done by issuing 0xff bytes until a data token is received.
 
-Thanks Chris.
+Signed-off-by: Johnson Thomas <johnsonthomas@nanometrics.ca>
+---
+ drivers/mmc/host/mmc_spi.c |    8 ++++++++
+ 1 files changed, 8 insertions(+), 0 deletions(-)
 
---=20
-balbi
-
---y0ulUmNC+osPPQO6
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1
-
-iQIcBAEBAgAGBQJTFNKFAAoJEIaOsuA1yqRE8qwP/217LyoidzHj0zWRdzQA4+T8
-gnK2BWNeM6X8RCaZ07CXr3sA4Vm/m+aHMdKjPS9opAbG65npgLTS29r2tgbNvSsp
-9Zn2mUnZHsS46P7jafJdeKne9V0dwQOcSK9RJxMvHKQa1cIVkMzpLLmZbEqnVeCu
-bjRdDbJQ35FArg8ZWvrU7n4/MBbHX4zuIBuEqrQNiuIx15YCBmvBIhTC/yY8qvcg
-QVzR5YIXfBcAokvwchlNWSW6WqNRAN/bQO0YKjyQL6Cwo0nGjf3Dh1r0EGhuEcOe
-D+ToVcls8wvB44CGnTjARRglAvYuvlUlX9YeXdfWbn/r7bmjSpsc5Cl+flSIZx/y
-SR4mqFIJ9Ku+Kle5eCO2UTeeXRjvz31MKF+GWw3iL9wTSM0NLMZZVdHVpm8DUMMO
-EXr2w0naFm+5vkDE2wpKcWUpj6jE8D+syospzJQOz/Xou7p2IcVW1E6GgGgM6ISr
-GGFN9FFKuCUJ1zMNGJNWoZMOK6z+udIemskLcyp7IL8IRhFzvyRfkUPPxUHTppJn
-mbknJB/nkZOfU67Kii1GXtGGsMUifpjIXTcmmwdyve+7VtrsyY0SVQvW0b020Dfj
-5bNOCrUfc5XXfqqQkHHyodWOXCY+zic9N1GrsoiFzRJJE0K0Z97YJRrM4xdygQY0
-0jydMRpyrZNaU2vt9O+9
-=Lcar
------END PGP SIGNATURE-----
-
---y0ulUmNC+osPPQO6--
+diff --git a/drivers/mmc/host/mmc_spi.c b/drivers/mmc/host/mmc_spi.c
+index 7c1e16a..7703a15 100644
+--- a/drivers/mmc/host/mmc_spi.c
++++ b/drivers/mmc/host/mmc_spi.c
+@@ -984,6 +984,14 @@ mmc_spi_data_do(struct mmc_spi_host *host, struct mmc_command *cmd,
+ 		}
+ 	}
+ 
++	if (direction == DMA_FROM_DEVICE && multiple) {
++		int status = mmc_spi_readtoken(host, timeout);
++		if (status < 0)
++			dev_dbg(&spi->dev,
++				"read error for data token, returned status: 0x%02x (%d)\n",
++				status, status);
++	}
++
+ 	/* NOTE some docs describe an MMC-only SET_BLOCK_COUNT (CMD23) that
+ 	 * can be issued before multiblock writes.  Unlike its more widely
+ 	 * documented analogue for SD cards (SET_WR_BLK_ERASE_COUNT, ACMD23),
+-- 
+1.7.1
