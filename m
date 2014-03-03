@@ -1,47 +1,46 @@
-From: Johnson Thomas <johnsonthomas@nanometrics.ca>
-Subject: [PATCH] mmc: mmc_spi: synchronize STOP_TRANSMISSION with next data token during block reads
-Date: Mon,  3 Mar 2014 14:17:11 -0500
-Message-ID: <1393874231-21929-1-git-send-email-johnsonthomas@nanometrics.ca>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: cjb@laptop.org
-Cc: dbrownell@users.sourceforge.net, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, johnsonthomas@nanometrics.ca, jamesnuss@nanometrics.ca
+From: Daniel Mack <zonque@gmail.com>
+Subject: [PATCH RESEND] mmc: omap_hsmmc: support more DT properties
+Date: Mon,  3 Mar 2014 22:16:16 +0100
+Message-ID: <1393881376-10751-1-git-send-email-zonque@gmail.com>
+Return-path: <linux-omap-owner@vger.kernel.org>
+Sender: linux-omap-owner@vger.kernel.org
+To: balajitk@ti.com, chris@printf.net
+Cc: linux-mmc@vger.kernel.org, tony@atomide.com, linux-omap@vger.kernel.org, Daniel Mack <zonque@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Certain SD cards respond with an invalid response (ie,. response
-not defined in the SD protocol) during block reads when the
-OUT_OF_RANGE data token is sent back from the card at the same time
-as the host sends a STOP_TRANSMISSION command (CMD12). As a result,
-the card enters a bad state which leads to rejecting any subsequent
-commands until the card is reset.
+This should probably be done implicitly through mmc_of_parse(), but that
+doesn't play well along with the multi-slot model the hsmmc driver
+features. Hence, for now, do it manually. The properties are already
+documented in Documentation/devicetree/bindings/mmc/mmc.txt.
 
-Synchronize with the subsequent data token for every block read before
-issuing a STOP_TRANSMISSION command (CMD12). The synchronization is
-done by issuing 0xff bytes until a data token is received.
-
-Signed-off-by: Johnson Thomas <johnsonthomas@nanometrics.ca>
+Signed-off-by: Daniel Mack <zonque@gmail.com>
+Acked-by: Balaji T K <balajitk@ti.com>
 ---
- drivers/mmc/host/mmc_spi.c |    8 ++++++++
- 1 files changed, 8 insertions(+), 0 deletions(-)
+This is a resend of a patch that was already acked by Balaji T K:
 
-diff --git a/drivers/mmc/host/mmc_spi.c b/drivers/mmc/host/mmc_spi.c
-index 7c1e16a..7703a15 100644
---- a/drivers/mmc/host/mmc_spi.c
-+++ b/drivers/mmc/host/mmc_spi.c
-@@ -984,6 +984,14 @@ mmc_spi_data_do(struct mmc_spi_host *host, struct mmc_command *cmd,
- 		}
- 	}
+  http://www.spinics.net/lists/linux-mmc/msg25029.html
+
+
+ drivers/mmc/host/omap_hsmmc.c | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+index 2815de6..a5a38cc 100644
+--- a/drivers/mmc/host/omap_hsmmc.c
++++ b/drivers/mmc/host/omap_hsmmc.c
+@@ -1765,6 +1765,12 @@ static struct omap_mmc_platform_data *of_get_hsmmc_pdata(struct device *dev)
+ 	if (of_find_property(np, "ti,needs-special-hs-handling", NULL))
+ 		pdata->slots[0].features |= HSMMC_HAS_HSPE_SUPPORT;
  
-+	if (direction == DMA_FROM_DEVICE && multiple) {
-+		int status = mmc_spi_readtoken(host, timeout);
-+		if (status < 0)
-+			dev_dbg(&spi->dev,
-+				"read error for data token, returned status: 0x%02x (%d)\n",
-+				status, status);
-+	}
++	if (of_find_property(np, "keep-power-in-suspend", NULL))
++		pdata->slots[0].pm_caps |= MMC_PM_KEEP_POWER;
 +
- 	/* NOTE some docs describe an MMC-only SET_BLOCK_COUNT (CMD23) that
- 	 * can be issued before multiblock writes.  Unlike its more widely
- 	 * documented analogue for SD cards (SET_WR_BLK_ERASE_COUNT, ACMD23),
++	if (of_find_property(np, "enable-sdio-wakeup", NULL))
++		pdata->slots[0].pm_caps |= MMC_PM_WAKE_SDIO_IRQ;
++
+ 	return pdata;
+ }
+ #else
 -- 
-1.7.1
+1.8.5.3
+
