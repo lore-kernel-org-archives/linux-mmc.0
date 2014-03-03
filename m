@@ -1,72 +1,91 @@
-From: Balaji T K <balajitk@ti.com>
-Subject: Re: [PATCH RESEND v11 6/7] ARM: OMAP: enable SYSCON and REGULATOR_PBIAS
- in omap2plus_defconfig
-Date: Mon, 3 Mar 2014 20:03:40 +0530
-Message-ID: <531492C4.9010005@ti.com>
-References: <1389627375-9107-1-git-send-email-balajitk@ti.com> <1392821801-29673-1-git-send-email-balajitk@ti.com> <1392821801-29673-7-git-send-email-balajitk@ti.com> <20140226170152.GA11654@atomide.com>
+From: Tomasz Figa <tomasz.figa@gmail.com>
+Subject: Re: [PATCH 0/6] mmc: sdhci-s3c: Fix base clock source management
+Date: Mon, 03 Mar 2014 16:06:57 +0100
+Message-ID: <53149A91.4030509@gmail.com>
+References: <1389476346-20396-1-git-send-email-tomasz.figa@gmail.com> <52F4AE40.9050907@gmail.com> <530656D3.7010709@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-omap-owner@vger.kernel.org>
-In-Reply-To: <20140226170152.GA11654@atomide.com>
-Sender: linux-omap-owner@vger.kernel.org
-To: Tony Lindgren <tony@atomide.com>
-Cc: linux-omap@vger.kernel.org, bcousson@baylibre.com, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, chris@printf.net, broonie@kernel.org
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-Reply-To: <530656D3.7010709@gmail.com>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: linux-mmc@vger.kernel.org, Chris Ball <chris@printf.net>
+Cc: linux-samsung-soc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Ben Dooks <ben-linux@fluff.org>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, Marek Szyprowski <m.szyprowski@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, Andrew Morton <akpm@linux-foundation.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Wednesday 26 February 2014 10:31 PM, Tony Lindgren wrote:
-> * Balaji T K <balajitk@ti.com> [140219 07:00]:
->> Enable REGULATOR_PBIAS needed for SD card on most OMAPs.
+On 20.02.2014 20:26, Tomasz Figa wrote:
+> Hi Chris,
+>
+> On 07.02.2014 10:58, Tomasz Figa wrote:
+>> Hi Chris,
 >>
->> Signed-off-by: Balaji T K <balajitk@ti.com>
->
-> I belive this is the only one missing my ack:
->
-> Acked-by: Tony Lindgren <tony@atomide.com>
->
-
-Thanks Tony
-
-> Probably best that this all gets queued along with other MMC related
-> patches by Balaji and Chris.
-
-Hi Chris,
-
-Can you please pull this patch series for 3.15?
-
-Thanks and Regards,
-Balaji T K
-
->
->> ---
->>   arch/arm/configs/omap2plus_defconfig |    2 ++
->>   1 files changed, 2 insertions(+), 0 deletions(-)
+>> On 11.01.2014 22:39, Tomasz Figa wrote:
+>>> On platforms prior to Exynos the SDHCI block used internal clock
+>>> divider controlled by SELFREQ field of CLKCON register to divide base
+>>> clock selected from several external clocks fed to the block by
+>>> SELBASECLK bitfield of CONTROL2 register. Depending on wanted clock
+>>> frequency, different external clock may be the best choice and so
+>>> the driver needs to switch the SELBASECLK mux on the fly.
+>>>
+>>> However the selection logic has been broken for quite some time leaving
+>>> the controller using always clock 0, which is not always the right
+>>> source and leading to suboptimal performance of the SDHCI block on
+>>> affected platforms.
+>>>
+>>> This series intends to fix the problems mentioned above and also
+>>> clean-up
+>>> clock management code slightly.
+>>>
+>>> Tested on S3C6410-based Mini6410 board, with following performance
+>>> figures:
+>>>
+>>> * Before this series (133 MHz HCLK always selected, leading to at most
+>>>    33 MHz card clock):
+>>>
+>>> root@tiny6410:~# hdparm -t /dev/mmcblk0
+>>>
+>>> /dev/mmcblk0:
+>>>   Timing buffered disk reads:  42 MB in  3.10 seconds =  13.54 MB/sec
+>>> root@tiny6410:~# hdparm -t /dev/mmcblk0
+>>>
+>>> /dev/mmcblk0:
+>>>   Timing buffered disk reads:  44 MB in  3.11 seconds =  14.14 MB/sec
+>>> root@tiny6410:~#
+>>>
+>>> * After this series (48 MHz EPLL clock selected, leading to 48 MHz card
+>>>    clock):
+>>>
+>>> root@tiny6410:~# hdparm -t /dev/mmcblk0
+>>>
+>>> /dev/mmcblk0:
+>>>   Timing buffered disk reads:  56 MB in  3.04 seconds =  18.41 MB/sec
+>>> root@tiny6410:~# hdparm -t /dev/mmcblk0
+>>>
+>>> /dev/mmcblk0:
+>>>   Timing buffered disk reads:  60 MB in  3.06 seconds =  19.63 MB/sec
+>>> root@tiny6410:~#
+>>>
+>>> Tomasz Figa (6):
+>>>    mmc: sdhci-s3c: Use shifts to divide by powers of two
+>>>    mmc: sdhci-s3c: Cache bus clock rates
+>>>    mmc: sdhci-s3c: Use correct condition to check for clock presence
+>>>    mmc: sdhci-s3c: Simplify min/max clock calculation
+>>>    mmc: sdhci-s3c: Fix handling of bus clock switching
+>>>    mmc: sdhci-s3c: Do not allow frequencies higher than requested
+>>>
+>>>   drivers/mmc/host/sdhci-s3c.c | 170
+>>> ++++++++++++++++++++-----------------------
+>>>   1 file changed, 77 insertions(+), 93 deletions(-)
+>>>
 >>
->> diff --git a/arch/arm/configs/omap2plus_defconfig b/arch/arm/configs/omap2plus_defconfig
->> index 3a0b53d..e4fec1c 100644
->> --- a/arch/arm/configs/omap2plus_defconfig
->> +++ b/arch/arm/configs/omap2plus_defconfig
->> @@ -169,6 +169,7 @@ CONFIG_DRA752_THERMAL=y
->>   CONFIG_WATCHDOG=y
->>   CONFIG_OMAP_WATCHDOG=y
->>   CONFIG_TWL4030_WATCHDOG=y
->> +CONFIG_MFD_SYSCON=y
->>   CONFIG_MFD_PALMAS=y
->>   CONFIG_MFD_TPS65217=y
->>   CONFIG_MFD_TPS65910=y
->> @@ -180,6 +181,7 @@ CONFIG_REGULATOR_TPS6507X=y
->>   CONFIG_REGULATOR_TPS65217=y
->>   CONFIG_REGULATOR_TPS65910=y
->>   CONFIG_REGULATOR_TWL4030=y
->> +CONFIG_REGULATOR_PBIAS=y
->>   CONFIG_FB=y
->>   CONFIG_FIRMWARE_EDID=y
->>   CONFIG_FB_MODE_HELPERS=y
->> --
->> 1.7.5.4
->>
->> --
->> To unsubscribe from this list: send the line "unsubscribe linux-omap" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>> What do you think about this series?
+>
+> Could you take this series for 3.15?
 
+Ping.
+
+It's been almost two months since I posted this series, it's been 
+already ACKed and it would be nice to have it applied for upcoming release.
+
+Best regards,
+Tomasz
