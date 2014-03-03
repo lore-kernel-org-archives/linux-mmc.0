@@ -1,49 +1,48 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: [PATCH  v4 7/7] mmc: dw_mmc: restore the card-present checking point
-Date: Mon, 03 Mar 2014 11:36:48 +0900
-Message-ID: <5313EAC0.9040600@samsung.com>
+From: Jon Ringle <jonringle@gmail.com>
+Subject: Re: wait_for_completion in mmc_wait_for_req_done never returns
+Date: Mon, 3 Mar 2014 01:32:05 -0500
+Message-ID: <CAMwGMjyEWoiTcT6C_7oYFRQfa-x0BMLnhWNmQ31aJHyoCiS9og@mail.gmail.com>
+References: <8272F2D9-5168-421C-93F4-E4FE6FFA5E23@gmail.com>
+Reply-To: jon@ringle.org
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout1.samsung.com ([203.254.224.24]:15961 "EHLO
-	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752082AbaCCCgY (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 2 Mar 2014 21:36:24 -0500
-Received: from epcpsbgr4.samsung.com
- (u144.gpu120.samsung.co.kr [203.254.230.144])
- by mailout1.samsung.com (Oracle Communications Messaging Server 7u4-24.01
- (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTP id <0N1U008FD9WMJMC0@mailout1.samsung.com> for
- linux-mmc@vger.kernel.org; Mon, 03 Mar 2014 11:36:23 +0900 (KST)
+Received: from mail-la0-f48.google.com ([209.85.215.48]:40218 "EHLO
+	mail-la0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750987AbaCCGcH (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 3 Mar 2014 01:32:07 -0500
+Received: by mail-la0-f48.google.com with SMTP id gf5so4332189lab.35
+        for <linux-mmc@vger.kernel.org>; Sun, 02 Mar 2014 22:32:05 -0800 (PST)
+In-Reply-To: <8272F2D9-5168-421C-93F4-E4FE6FFA5E23@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Cc: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Seungwon Jeon <tgih.jun@samsung.com>
+Cc: "schwidefsky@de.ibm.com" <schwidefsky@de.ibm.com>
 
-Restore the card-present cheching point.
-(The following part was removed from commit bf626e5(mmc: dw_mmc: use slot-gpio to handle cd pin).)
+My apologizes for the noise. I had a buggy bisect run script. The
+mentioned commit here is not the source of the problem I am
+encountering.
 
-Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
----
- drivers/mmc/host/dw_mmc.c |    5 +++++
- 1 file changed, 5 insertions(+)
+Jon
 
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 22184c1..ab4c86d 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -2113,6 +2113,11 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
- #endif /* CONFIG_MMC_DW_IDMAC */
- 	}
- 
-+	if (dw_mci_get_cd(mmc))
-+		set_bit(DW_MMC_CARD_PRESENT, &slot->flags);
-+	else
-+		clear_bit(DW_MMC_CARD_PRESENT, &slot->flags);
-+
- 	ret = mmc_add_host(mmc);
- 	if (ret)
- 		goto err_setup_bus;
--- 
-1.7.9.5
+On Sat, Mar 1, 2014 at 11:10 AM, Jon Ringle <jonringle@gmail.com> wrote:
+> I'm porting an arm board from linux-3.10 to linux-3.12 and found that I can no longer detect the SD card. I found that the wait_for_completion(&mrq->completion) in drivers/mmc/core/core.c:mmc_wait_for_req_done() is never returning.
+>
+> I was able to bisect the problem to this commit:
+>   0244ad004a54e39308d495fee0a2e637f8b5c317 is the first bad commit
+>   commit 0244ad004a54e39308d495fee0a2e637f8b5c317
+>   Author: Martin Schwidefsky <schwidefsky@de.ibm.com>
+>   Date:   Fri Aug 30 09:39:53 2013 +0200
+>
+>   Remove GENERIC_HARDIRQ config option
+>
+>   After the last architecture switched to generic hard irqs the config
+>   options HAVE_GENERIC_HARDIRQS & GENERIC_HARDIRQS and the related code
+>   for !CONFIG_GENERIC_HARDIRQS can be removed.
+>
+>   Signed-off-by: Martin Schwidefsky <schwidefsky@de.ibm.com>
+>
+> I'm not sure what I should do to fix the problem. Does anyone have any suggestions?
+>
+> Thanks,
+> Jon Ringle
