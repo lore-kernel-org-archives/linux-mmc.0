@@ -1,50 +1,97 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH 1/1] mmc: dw_mmc: exynos: Staticize dw_mci_exynos_pmops
-Date: Tue, 04 Mar 2014 20:44:49 +0900
-Message-ID: <5315BCB1.5020000@samsung.com>
-References: <1393909405-2760-1-git-send-email-sachin.kamat@linaro.org>
+From: Balaji T K <balajitk@TI.COM>
+Subject: Re: [PATCH RESEND] mmc: omap_hsmmc: support more DT properties
+Date: Tue, 4 Mar 2014 21:49:52 +0530
+Message-ID: <5315FD28.4020800@ti.com>
+References: <1393881376-10751-1-git-send-email-zonque@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout2.samsung.com ([203.254.224.25]:20732 "EHLO
-	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756661AbaCDLoZ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 4 Mar 2014 06:44:25 -0500
-Received: from epcpsbgr2.samsung.com
- (u142.gpu120.samsung.co.kr [203.254.230.142])
- by mailout2.samsung.com (Oracle Communications Messaging Server 7u4-24.01
- (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTP id <0N1W00JJ7TXZ3180@mailout2.samsung.com> for
- linux-mmc@vger.kernel.org; Tue, 04 Mar 2014 20:44:23 +0900 (KST)
-In-reply-to: <1393909405-2760-1-git-send-email-sachin.kamat@linaro.org>
+Received: from arroyo.ext.ti.com ([192.94.94.40]:45078 "EHLO arroyo.ext.ti.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750990AbaCDQT5 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 4 Mar 2014 11:19:57 -0500
+In-Reply-To: <1393881376-10751-1-git-send-email-zonque@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Sachin Kamat <sachin.kamat@linaro.org>, linux-mmc@vger.kernel.org
-Cc: ulf.hansson@linaro.org, tgih.jun@samsung.com, chris@printf.net
+To: chris@printf.net, linux-mmc@vger.kernel.org
+Cc: Daniel Mack <zonque@gmail.com>, tony@atomide.com, linux-omap@vger.kernel.org
 
-Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
-
-On 03/04/2014 02:03 PM, Sachin Kamat wrote:
-> 'dw_mci_exynos_pmops' is local to this file.
-> 
-> Signed-off-by: Sachin Kamat <sachin.kamat@linaro.org>
+On Tuesday 04 March 2014 02:46 AM, Daniel Mack wrote:
+> This should probably be done implicitly through mmc_of_parse(), but that
+> doesn't play well along with the multi-slot model the hsmmc driver
+> features. Hence, for now, do it manually. The properties are already
+> documented in Documentation/devicetree/bindings/mmc/mmc.txt.
+>
+> Signed-off-by: Daniel Mack <zonque@gmail.com>
+> Acked-by: Balaji T K <balajitk@ti.com>
 > ---
->  drivers/mmc/host/dw_mmc-exynos.c |    2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
-> 
-> diff --git a/drivers/mmc/host/dw_mmc-exynos.c b/drivers/mmc/host/dw_mmc-exynos.c
-> index 3423c5ed50c7..12f0929f12a9 100644
-> --- a/drivers/mmc/host/dw_mmc-exynos.c
-> +++ b/drivers/mmc/host/dw_mmc-exynos.c
-> @@ -426,7 +426,7 @@ static int dw_mci_exynos_probe(struct platform_device *pdev)
->  	return dw_mci_pltfm_register(pdev, drv_data);
->  }
->  
-> -const struct dev_pm_ops dw_mci_exynos_pmops = {
-> +static const struct dev_pm_ops dw_mci_exynos_pmops = {
->  	SET_SYSTEM_SLEEP_PM_OPS(dw_mci_exynos_suspend, dw_mci_exynos_resume)
->  	.resume_noirq = dw_mci_exynos_resume_noirq,
->  	.thaw_noirq = dw_mci_exynos_resume_noirq,
-> 
+> This is a resend of a patch that was already acked by Balaji T K:
+>
+>    http://www.spinics.net/lists/linux-mmc/msg25029.html
+
+Hi Chris,
+
+To make it easier for you, I have collected omap_hsmmc patches [1]
+and pushed a branch omap_hsmmc-for-3.15 based on 3.14rc2.
+
+Please pull or cherry pick
+
+The following changes since commit b28a960c42fcd9cfc987441fa6d1c1a471f0f9ed:
+
+   Linux 3.14-rc2 (2014-02-09 18:15:47 -0800)
+
+are available in the git repository at:
+   git://git.ti.com/~balajitk/ti-linux-kernel/omap-hsmmc.git omap_hsmmc-for-3.15
+
+Balaji T K (14):
+       mmc: omap_hsmmc: use devm_regulator API
+       mmc: omap_hsmmc: handle vcc and vcc_aux independently
+       regulator: add pbias regulator support
+       mmc: omap_hsmmc: adapt hsmmc to use pbias regulator
+       ARM: dts: add pbias dt node
+       ARM: OMAP: enable SYSCON and REGULATOR_PBIAS in omap2plus_defconfig
+       mmc: omap_hsmmc: remove pbias workaround
+       mmc: omap_hsmmc: fix return error code for of_get_hsmmc_pdata
+       mmc: omap_hsmmc: remove redundant reset done
+       mmc: omap_hsmmc: save clock rate to use in interrupt context
+       mmc: omap_hsmmc: fix request done for sbc error case
+       mmc: omap_hsmmc: split dma setup
+       mmc: omap_hsmmc: add cmd23 support
+       mmc: omap_hsmmc: add autocmd23 support
+
+Dan Carpenter (1):
+       mmc: omap_hsmmc: remove a duplicative test
+
+Daniel Mack (1):
+       mmc: omap_hsmmc: support more DT properties
+
+Nishanth Menon (2):
+       mmc: omap_hsmmc: Add support for quirky omap3 hsmmc controller
+       ARM: dts: omap3-ldp: fix mmc configuration
+
+  .../devicetree/bindings/mmc/ti-omap-hsmmc.txt      |    1 +
+  .../bindings/regulator/pbias-regulator.txt         |   27 ++
+  arch/arm/boot/dts/dra7.dtsi                        |   17 ++
+  arch/arm/boot/dts/omap2430.dtsi                    |   17 ++
+  arch/arm/boot/dts/omap3-ldp.dts                    |   23 ++
+  arch/arm/boot/dts/omap3.dtsi                       |   17 ++
+  arch/arm/boot/dts/omap4.dtsi                       |   17 ++
+  arch/arm/boot/dts/omap5.dtsi                       |   17 ++
+  arch/arm/configs/omap2plus_defconfig               |    2 +
+  drivers/mmc/host/omap_hsmmc.c                      |  242 +++++++++++++------
+  drivers/regulator/Kconfig                          |    9 +
+  drivers/regulator/Makefile                         |    1 +
+  drivers/regulator/pbias-regulator.c                |  255 ++++++++++++++++++++
+  13 files changed, 569 insertions(+), 76 deletions(-)
+  create mode 100644 Documentation/devicetree/bindings/regulator/pbias-regulator.txt
+  create mode 100644 drivers/regulator/pbias-regulator.c
+
+[1]
+http://www.spinics.net/lists/linux-omap/msg102811.html
+http://lkml.org/lkml/2014/2/14/13
+http://www.spinics.net/lists/linux-mmc/msg25029.html
+http://www.spinics.net/lists/linux-omap/msg103488.html
+http://www.spinics.net/lists/linux-omap/msg103608.html
+http://comments.gmane.org/gmane.linux.kernel.mmc/24777
 
