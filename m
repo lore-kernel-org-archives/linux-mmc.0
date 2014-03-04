@@ -1,48 +1,94 @@
-From: =?utf-8?B?U8O2cmVu?= Brinkmann <soren.brinkmann@xilinx.com>
-Subject: Re: [PATCH v2] mmc: sdhci: add quirk for broken write protect
- detection
-Date: Tue, 4 Mar 2014 11:26:05 -0800
-Message-ID: <74003aec-1707-4f43-b947-df148d573fa1@TX2EHSMHS038.ehs.local>
-References: <1393759200-22819-1-git-send-email-eli.billauer@gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from tx2ehsobe003.messaging.microsoft.com ([65.55.88.13]:1895 "EHLO
-	tx2outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751494AbaCDT00 convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 4 Mar 2014 14:26:26 -0500
-Content-Disposition: inline
-In-Reply-To: <1393759200-22819-1-git-send-email-eli.billauer@gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Georgi Djakov <gdjakov@mm-sol.com>
+Subject: [PATCH v10 1/3] mmc: sdhci-msm: Qualcomm SDHCI binding documentation
+Date: Tue,  4 Mar 2014 21:27:04 +0200
+Message-ID: <1393961226-25618-2-git-send-email-gdjakov@mm-sol.com>
+References: <1393961226-25618-1-git-send-email-gdjakov@mm-sol.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1393961226-25618-1-git-send-email-gdjakov@mm-sol.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-mmc@vger.kernel.org, cjb@laptop.org, ulf.hansson@linaro.org, devicetree@vger.kernel.org, grant.likely@linaro.org, robh+dt@kernel.org, pawel.moll@arm.com, mark.rutland@arm.com, swarren@wwwdotorg.org, ijc+devicetree@hellion.org.uk, galak@codeaurora.org, rob@landley.net
+Cc: linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org, Georgi Djakov <gdjakov@mm-sol.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Eli Billauer <eli.billauer@gmail.com>
-Cc: chris@printf.net, michal.simek@xilinx.com, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, Mike Looijmans <mike.looijmans@topic.nl>
 
-Hi Eli,
+This patch adds the device-tree binding documentation for
+Qualcomm SDHCI driver. It contains the differences between
+the core properties in mmc.txt and the properties used by
+the sdhci-msm driver.
 
-On Sun, 2014-03-02 at 01:20PM +0200, Eli Billauer wrote:
-> The write protection signal is absent on a board based upon Xilinx' Z=
-ynq
-> processor ("ZyBo"). This leads the kernel to think that the MicroSD c=
-ard is
-> write protected, and causes a kernel panic during boot, as root fails=
- to
-> mount RW.
+Signed-off-by: Georgi Djakov <gdjakov@mm-sol.com>
+---
+ .../devicetree/bindings/mmc/sdhci-msm.txt          |   63 ++++++++++++++++++++
+ 1 file changed, 63 insertions(+)
+ create mode 100644 Documentation/devicetree/bindings/mmc/sdhci-msm.txt
 
-I talked to some people here at Xilinx. According to them, you have the
-option to pin out the WP signal, which would mean the board needs to
-tie/connect the signal properly. Or, if you select to not pin out the W=
-P
-signal, it should be tied to 0 within the chip.
-Currently, I have some doubts that is the case, since Mike reported the
-same issue, but would you mind double checking?
-In theory the signal should default to logic zero which would at most
-require to add the, already existing, 'wp-inverted' quirk when using
-micro-sd on Zynq.
-
-	Thanks,
-	S=C3=B6ren
-
-
+diff --git a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
+new file mode 100644
+index 0000000..c635c53
+--- /dev/null
++++ b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
+@@ -0,0 +1,63 @@
++* Qualcomm SDHCI controller (sdhci-msm)
++
++This file documents differences between the core properties in mmc.txt
++and the properties used by the sdhci-msm driver.
++
++Required properties:
++- compatible: Should contain "qcom,sdhci-msm-v4".
++- reg: Base address and length of the register set listed in reg-names.
++- reg-names: Should contain the following:
++	"hc_mem"   - Host controller register map
++	"core_mem" - SD Core register map
++- interrupts: Should contain an interrupt-specifiers for the interrupts listed in interrupt-names.
++- interrupt-names: Should contain the following:
++	"hc_irq"     - Host controller interrupt
++	"pwr_irq"    - PMIC interrupt
++- vdd-supply: Phandle to the regulator for the vdd (core voltage) supply.
++- vdd-io-supply: Phandle to the regulator for the vdd-io (i/o voltage) supply.
++- pinctrl-names: Should contain only one value - "default".
++- pinctrl-0: Should specify pin control groups used for this controller.
++- clocks: A list of phandle + clock-specifier pairs for the clocks listed in clock-names.
++- clock-names: Should contain the following:
++	"iface" - Main peripheral bus clock (PCLK/HCLK - AHB Bus clock) (required)
++	"core"	- SDC MMC clock (MCLK) (required)
++	"bus"	- SDCC bus voter clock (optional)
++
++Example:
++
++	sdhc_1: sdhci@f9824900 {
++		compatible = "qcom,sdhci-msm-v4";
++		reg = <0xf9824900 0x11c>, <0xf9824000 0x800>;
++		reg-names = "hc_mem", "core_mem";
++		interrupts = <0 123 0>, <0 138 0>;
++		interrupt-names = "hc_irq", "pwr_irq";
++		bus-width = <8>;
++		non-removable;
++
++		vdd-supply = <&pm8941_l20>;
++		vdd-io-supply = <&pm8941_s3>;
++
++		pinctrl-names = "default";
++		pinctrl-0 = <&sdc1_clk &sdc1_cmd &sdc1_data>;
++
++		clocks = <&gcc GCC_SDCC1_APPS_CLK>, <&gcc GCC_SDCC1_AHB_CLK>;
++		clock-names = "core", "iface";
++	};
++
++	sdhc_2: sdhci@f98a4900 {
++		compatible = "qcom,sdhci-msm-v4";
++		reg = <0xf98a4900 0x11c>, <0xf98a4000 0x800>;
++		reg-names = "hc_mem", "core_mem";
++		interrupts = <0 125 0>, <0 221 0>;
++		interrupt-names = "hc_irq", "pwr_irq";
++		bus-width = <4>;
++
++		vdd-supply = <&pm8941_l21>;
++		vdd-io-supply = <&pm8941_l13>;
++
++		pinctrl-names = "default";
++		pinctrl-0 = <&sdc2_clk &sdc2_cmd &sdc2_data>;
++
++		clocks = <&gcc GCC_SDCC2_APPS_CLK>, <&gcc GCC_SDCC2_AHB_CLK>;
++		clock-names = "core", "iface";
++	};
+-- 
+1.7.9.5
