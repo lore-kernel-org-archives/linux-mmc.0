@@ -1,123 +1,65 @@
-From: Georgi Djakov <gdjakov@mm-sol.com>
-Subject: [PATCH v10 0/3] mmc: sdhci-msm: Add support for Qualcomm chipsets
-Date: Tue,  4 Mar 2014 21:27:03 +0200
-Message-ID: <1393961226-25618-1-git-send-email-gdjakov@mm-sol.com>
+From: Eli Billauer <eli.billauer@gmail.com>
+Subject: Re: [PATCH v2] mmc: sdhci: add quirk for broken write protect detection
+Date: Tue, 04 Mar 2014 22:06:31 +0200
+Message-ID: <53163247.8000904@gmail.com>
+References: <1393759200-22819-1-git-send-email-eli.billauer@gmail.com>
+ <74003aec-1707-4f43-b947-df148d573fa1@TX2EHSMHS038.ehs.local>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8;
+	format=flowed
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-reply-to: <74003aec-1707-4f43-b947-df148d573fa1@TX2EHSMHS038.ehs.local>
 Sender: linux-kernel-owner@vger.kernel.org
-To: linux-mmc@vger.kernel.org, cjb@laptop.org, ulf.hansson@linaro.org, devicetree@vger.kernel.org, grant.likely@linaro.org, robh+dt@kernel.org, pawel.moll@arm.com, mark.rutland@arm.com, swarren@wwwdotorg.org, ijc+devicetree@hellion.org.uk, galak@codeaurora.org, rob@landley.net
-Cc: linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org, Georgi Djakov <gdjakov@mm-sol.com>
+To: =?UTF-8?B?U8O2cmVuIEJyaW5rbWFubg==?= <soren.brinkmann@xilinx.com>
+Cc: chris@printf.net, michal.simek@xilinx.com, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, Mike Looijmans <mike.looijmans@topic.nl>
 List-Id: linux-mmc@vger.kernel.org
 
-This patchset adds basic support of the Secure Digital Host Controller
-Interface compliant controller found in Qualcomm SoCs.
+Hello S=C3=B6ren,
 
-Tested with eMMC and various micro SD cards on APQ8074 Dragonboard.
-Applies to linux-next.
+wp-inverted solves the practical problem indeed, and fools the driver=20
+into thinking that the card has an inverted write protection sensor, an=
+d=20
+the logic zero that it finds in the hardware register means that the=20
+card isn't write protected.
 
-Changes from v9:
-- Make platform_execute_tuning() static (suggested by Josh Cartwright) 
-- Fix buffer size in platform_execute_tuning() (suggested by Josh Cartwright)
-- Fix typo in patch subject (suggested by Kumar Gala)
-- Move voltage ranges from DT to the driver (suggested by Bjorn Andersson)
-- Simplify sdhci_msm_setup_vreg and irq handler (suggested by Bjorn Andersson)
-- Disable prw irq in sdhci_msm_remove (suggested by Bjorn Andersson)
-- Fail on peripheral clock errors (suggested by Bjorn Andersson)
-- Remove unnecessary core_memres assignment (suggested by Bjorn Andersson)
-- Fixes on freeing resources in probe() (suggested by Bjorn Andersson)
+I'm insisting on this patch, because I think that the device tree shoul=
+d=20
+describe the hardware as it is, and not fool the driver into behaving=20
+the way we want it to. These tricks always bite back later on.
 
-Changes from v8:
-- Added controller version suffix to the DT compatible string.
-- Switched Kconfig dependency from ARCH_MSM to the new ARCH_QCOM multiplatform.
-- Addressed comments from Stephen Boyd on the 3rd patch (execute tunning).
-- Added signed-off-by lines of the initial driver authors.
-- Picked up tested-by. https://lkml.org/lkml/2013/11/14/85
-- Minor changes on comments, prints and formatting.
+Regards,
+    Eli
 
-Changes from v7:
-- Added call to sdhci_get_of_property().
-- Refactored sdhci_msm_dt_parse_vreg_info().
-- Fixed possible ERR_PTR() dereferencing.
-- Updated DT binding documentation.
-- Removed lpm and currents from DT.
-- Removed bus-speed-mode from DT.
-- Updated and moved the sanity checks.
-- Various typo and coding style fixes.
-- Added platform_execute_tunning implementation.
-
-Changes from v6:
-- Fixed wrong pointer in sdhci_msm_pwr_irq().
-- Added platform_execute_tuning() callback as the MSM SDHC does not
-  support tuning as in SDHC 3.0 spec and will need custom implementation
-  in order to support SDR104, HS200 and HS400.
-- Removed the always-on devicetree property - if the regulator is
-  configured as always-on, it will not be disabled anyway.
-- Removed devm_pinctrl_get_select_default() - the default pins are 
-  already set from the device core.
-- Removed wrapper function sdhci_msm_set_vdd_io_vol() and enum
-  vdd_io_level and now calling regulator_set_voltage() directly.
-- Converted #defines to use BIT() macro.
-- Added IS_ERR(vreg->reg) check at the beginning of sdhci_msm_vreg
-  functions.
-- Do not print errors when regulators init return -EPROBE_DEFER as the
-  deffered init is not an actual error.
-- Handle each power irq status bit separately in sdhci_msm_pwr_irq().
-- Ensure that any pending power irq is acknowledged before enabling it,
-  otherwise the irq handler will be fired prematurely.
-- Minor changes.
-
-Changes from v5:
-- Driver is split into multiple patches
-- Do not initialize variables that are assigned later in code
-- Remove some useless comments
-- Use shorter variable names
-- Change pr_err() to dev_err()
-- Optimized sdhci_msm_setup_vreg()
-- Some code alignment fixes
-- Improved DT values sanity check
-- Added dev_dbg print for sdhci controller version in probe()
-- Added usleep_range() after SW reset - it can take some time
-- Added SDHCI_QUIRK_SINGLE_POWER_WRITE - power handled by PMIC
-- Renamed DT property vdd-io to vddio
-
-Changes from v4:
-- Simplified sdhci_msm_vreg_disable() and sdhci_msm_set_vdd_io_vol()
-- Use devm_ioremap_resource() instead of devm_ioremap()
-- Converted IS_ERR_OR_NULL to IS_ERR
-- Disable regulators in sdhci_msm_remove()
-- Check for DT node at the beginning in sdhci_msm_probe()
-- Removed more redundant code
-- Changes in some error messages
-- Minor fixes
-
-Changes from v3:
-- Allocate memory for all required structs at once
-- Added termination entry in sdhci_msm_dt_match[]
-- Fixed a missing sdhci_pltfm_free() in probe()
-- Removed redundant of_match_ptr
-- Removed the unneeded function sdhci_msm_vreg_reset()
-
-Changes from v2:
-- Added DT bindings for clocks
-- Moved voltage regulators data to platform data
-- Removed unneeded includes
-- Removed obsolete and wrapper functions
-- Removed error checking where unnecessary
-- Removed redundant _clk suffix from clock names
-- Just return instead of goto where possible
-- Minor fixes
-
-Georgi Djakov (3):
-  mmc: sdhci-msm: Qualcomm SDHCI binding documentation
-  mmc: sdhci-msm: Initial support for Qualcomm chipsets
-  mmc: sdhci-msm: Add platform_execute_tuning implementation
-
- .../devicetree/bindings/mmc/sdhci-msm.txt          |   63 ++
- drivers/mmc/host/Kconfig                           |   13 +
- drivers/mmc/host/Makefile                          |    1 +
- drivers/mmc/host/sdhci-msm.c                       |  838 ++++++++++++++++++++
- 4 files changed, 915 insertions(+)
- create mode 100644 Documentation/devicetree/bindings/mmc/sdhci-msm.txt
- create mode 100644 drivers/mmc/host/sdhci-msm.c
-
--- 
-1.7.9.5
+On 04/03/14 21:26, S=C3=B6ren Brinkmann wrote:
+> Hi Eli,
+>
+> On Sun, 2014-03-02 at 01:20PM +0200, Eli Billauer wrote:
+>   =20
+>> The write protection signal is absent on a board based upon Xilinx' =
+Zynq
+>> processor ("ZyBo"). This leads the kernel to think that the MicroSD =
+card is
+>> write protected, and causes a kernel panic during boot, as root fail=
+s to
+>> mount RW.
+>>     =20
+> I talked to some people here at Xilinx. According to them, you have t=
+he
+> option to pin out the WP signal, which would mean the board needs to
+> tie/connect the signal properly. Or, if you select to not pin out the=
+ WP
+> signal, it should be tied to 0 within the chip.
+> Currently, I have some doubts that is the case, since Mike reported t=
+he
+> same issue, but would you mind double checking?
+> In theory the signal should default to logic zero which would at most
+> require to add the, already existing, 'wp-inverted' quirk when using
+> micro-sd on Zynq.
+>
+> 	Thanks,
+> 	S=C3=B6ren
+>
+>
+>
+>   =20
