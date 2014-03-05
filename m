@@ -1,58 +1,65 @@
 From: Andreas Fenkart <afenkart@gmail.com>
 Subject: Re: [PATCH v7 1/4] mmc: omap_hsmmc: Enable SDIO IRQ.
-Date: Wed, 5 Mar 2014 09:27:42 +0100
-Message-ID: <CALtMJEArwH4g1o+_v8daoxiYZtpHvPMbxM4CZjTxnyGgxTS+aQ@mail.gmail.com>
+Date: Wed, 5 Mar 2014 09:30:57 +0100
+Message-ID: <CALtMJEA9opDbEb1HRbA3CdOc3UigrpeD1bhaNAgyEKehsBDvgg@mail.gmail.com>
 References: <1393331866-28307-1-git-send-email-afenkart@gmail.com>
 	<1393331866-28307-2-git-send-email-afenkart@gmail.com>
-	<20140227213335.GJ11654@atomide.com>
+	<5310C1AC.5060301@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-omap-owner@vger.kernel.org>
-In-Reply-To: <20140227213335.GJ11654@atomide.com>
-Sender: linux-omap-owner@vger.kernel.org
-To: Tony Lindgren <tony@atomide.com>
-Cc: Chris Ball <cjb@laptop.org>, Grant Likely <grant.likely@secretlab.ca>, Felipe Balbi <balbi@ti.com>, Balaji T K <balajitk@ti.com>, Daniel Mack <zonque@gmail.com>, Kumar Gala <galak@codeaurora.org>, linux-doc@vger.kernel.org, linux-mmc <linux-mmc@vger.kernel.org>, linux-omap <linux-omap@vger.kernel.org>
+Return-path: <linux-doc-owner@vger.kernel.org>
+In-Reply-To: <5310C1AC.5060301@ti.com>
+Sender: linux-doc-owner@vger.kernel.org
+To: Balaji T K <balajitk@ti.com>
+Cc: Chris Ball <cjb@laptop.org>, Tony Lindgren <tony@atomide.com>, Grant Likely <grant.likely@secretlab.ca>, Felipe Balbi <balbi@ti.com>, Daniel Mack <zonque@gmail.com>, Kumar Gala <galak@codeaurora.org>, linux-doc@vger.kernel.org, linux-mmc <linux-mmc@vger.kernel.org>, linux-omap <linux-omap@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
 Hi,
 
-2014-02-27 22:33 GMT+01:00 Tony Lindgren <tony@atomide.com>:
+2014-02-28 18:04 GMT+01:00 Balaji T K <balajitk@ti.com>:
+> On Tuesday 25 February 2014 06:07 PM, Andreas Fenkart wrote:
+>>
+>> For now, only support SDIO interrupt if we are booted with
+>> DT. This is because some platforms need special quirks. And
+>> we don't want to add new legacy mux platform init code
+>> callbacks any longer as we are moving to DT based booting
+>> anyways.
+>>
+>> Signed-off-by: Andreas Fenkart <afenkart@gmail.com>
+>>
+>> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+>> index a5a38cc..bd3bb0c 100644
+>> --- a/drivers/mmc/host/omap_hsmmc.c
+>> +++ b/drivers/mmc/host/omap_hsmmc.c
 >
-> Thanks for updating this, I finally got around to spend some
-> time with it again. I've folded in your fixes and quirk support
-> into my earlier patch from [0] as that had a better changelog
-> describing the earlier work.
-thanks, always struggled with that
-
-> And I've also now made the SDIO support to depend on properly
-> configured wake-up irq from device tree as otherwise wake from
-> idle states won't work properly. I've also cleaned up the the
-> wake-up irq initialization a bit.
-Looks much better now.
-
-Mind that the sdio irq is level triggered. So we have to disable the
-IRQ in the handler otherwise we enter an infinite loop.
-
-
-
-> The wake-irq is needed for omaps with wake-up path and also
-> when doing GPIO remuxing. So the wake-up handling is pretty
-> much the same for both cases.
-I added this comment to the patch, since I was puzzled that you need
-a wake_irq even whithout remuxing.
+>
+> <snip>
+>
+>
+>> @@ -1705,7 +1757,18 @@ static void omap_hsmmc_debugfs(struct mmc_host
+>> *mmc)
+>>   #endif
+>>
+>>   #ifdef CONFIG_OF
+>> -static u16 omap4_reg_offset = 0x100;
+>> +struct of_data {
+>> +       u16 offset;
+>> +       int flags;
+>> +};
+>> +
+>
+> Hi Andreas,
+>
+> struct of_data declaration needs to be moved out of #ifdef CONFIG_OF
+> for !CONFIG_OF build.
+should be fixed with new version
 
 >
-> I've kept your Signed-off-by, can you please check if the patch
-> below works for you with the second patch I'll post shortly?
+> I tried testing this patch series on am335x, I see throughput in the
+> range of KBs. Will give another try with Tony's version.
+KB sounds really bad, even with polling I have > 5MBytes/s.
 
-Will send out another patch soon. Left your Signed-off as well, not
-in the sense of your agreement, but didn't dare to remove it because
-of your contributions.
+Could you pls paste
+# cat /sys/kernel/debug/mmc0/regs
 
->
-> Regards,
->
-> Tony
->
-> [0] https://www.mail-archive.com/linux-mmc@vger.kernel.org/msg22290.html
->
+Thanks for testing.
