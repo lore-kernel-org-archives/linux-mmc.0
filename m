@@ -1,51 +1,86 @@
-From: Josh Cartwright <joshc@codeaurora.org>
-Subject: Re: [PATCH v10 1/3] mmc: sdhci-msm: Qualcomm SDHCI binding
- documentation
-Date: Wed, 5 Mar 2014 16:10:47 -0600
-Message-ID: <20140305221047.GC18529@joshc.qualcomm.com>
-References: <1393961226-25618-1-git-send-email-gdjakov@mm-sol.com>
- <1393961226-25618-2-git-send-email-gdjakov@mm-sol.com>
- <CAL_JsqKJ5Jn4wb8xtqrc09kkP4dzUA6qDEkK396RW+4qFNVf+Q@mail.gmail.com>
+From: Al Cooper <alcooperx@gmail.com>
+Subject: [PATCH V3 0/7] Add password protected lock/unlock support for SD/MMC
+Date: Wed, 5 Mar 2014 18:44:45 -0500
+Message-ID: <1394063092-9048-1-git-send-email-alcooperx@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-doc-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <CAL_JsqKJ5Jn4wb8xtqrc09kkP4dzUA6qDEkK396RW+4qFNVf+Q@mail.gmail.com>
-Sender: linux-doc-owner@vger.kernel.org
-To: Rob Herring <robherring2@gmail.com>
-Cc: Georgi Djakov <gdjakov@mm-sol.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Ulf Hansson <ulf.hansson@linaro.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Grant Likely <grant.likely@linaro.org>, Rob Herring <robh+dt@kernel.org>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Stephen Warren <swarren@wwwdotorg.org>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Kumar Gala <galak@codeaurora.org>, Rob Landley <rob@landley.net>, "linux-doc@vger.kernel.org" <linux-doc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-arm-msm <linux-arm-msm@vger.kernel.org>
+Content-Type: text/plain
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-gw1-out.broadcom.com ([216.31.210.62]:41188 "EHLO
+	mail-gw1-out.broadcom.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756502AbaCEXws (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 5 Mar 2014 18:52:48 -0500
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: cjb@laptop.org, linux-mmc@vger.kernel.org
+Cc: Al Cooper <alcooperx@gmail.com>
 
-Hey Rob-
+Changed for V3:
+The previously submitted patches are apparently being used and
+uncovered an issue where hotplug scripts are trying to read
+the block device of a locked card and getting read/write
+errors. This has been solved by preventing the block layer from
+coming up until the card is unlocked. Also added more detail
+to this cover letter on the use of the KEYS subsystem.
 
-On Wed, Mar 05, 2014 at 12:56:22AM -0600, Rob Herring wrote:
-> On Tue, Mar 4, 2014 at 1:27 PM, Georgi Djakov <gdjakov@mm-sol.com> wrote:
-> > +- reg-names: Should contain the following:
-> > +       "hc_mem"   - Host controller register map
-> > +       "core_mem" - SD Core register map
->
-> reg-names should not be required and the order specified by the binding.
->
-> > +- interrupts: Should contain an interrupt-specifiers for the interrupts listed in interrupt-names.
-> > +- interrupt-names: Should contain the following:
-> > +       "hc_irq"     - Host controller interrupt
-> > +       "pwr_irq"    - PMIC interrupt
->
-> Same for interrupt-names.
+Changed for V2:
+The V2 changes were not functional and were just general cleanup.
+  - Use stub functions to reduce the number of CONFIG ifdefs.
+  - Add static to a few functions that were local.
+  - Use pr_warn instead of pr_warning.
+  - Improve a few variable names and messages.
 
-Could you elaborate on this a bit?  I can understand not modifying an
-existing binding to make {reg,interrupt}-names required, but for
-completely new bindings, why is this a problem?
+This set of patches adds support for password protected locking
+and unlocking of MMC and SD devices. It uses the LOCK/UNLOCK command
+(CMD42) available in both the MMC and SD command sets.
 
-Not allowing a binding to require these properties renders
-platform_get_{resource,irq}_byname() useless for drivers which
-exclusively use DT for enumeration.  It also makes it impossible to make
-a reg entry optional (although, there probably isn't a good usecase for
-this).
+Some of this code was based on a patch set submitted in 2006 by
+Anderson Briglia "Add MMC Password Protection (lock/unlock)". This
+patch set never made it into mainline. 
 
-Thanks,
-  Josh
+By default, a card with no password assigned is always in "unlocked"
+state. After password assignment, in the next power cycle the card
+switches to a "locked" state where only the "basic" and "lock card"
+command classes are accepted by the card. Only after unlocking it with
+the correct password can the card be used for normal operations like
+block I/O.
+
+Password management and caching is done through the "Kernel Key
+Retention Service" mechanism and the sysfs filesystem. The KEY
+name for a specific SD/MMC device is the devices "cid" because it
+will be unique for every card. The use of the kernel KEYS subsystem
+requires support from user space and needs to have the keyutils
+package included in the rootfs. A user space script or helper app
+will need to be added that will lookup the password based on cid
+and use the "keyctl" utility to instantiate the key. Two new sysfs
+attributes were added. The "lock" attribute is used to lock, unlock,
+assign a password, clear a password and force erase a card. The
+"unlock_retry" attribute is used to retry an unlock that failed
+during boot because the rootfs was not yet available to setup the
+keys password. The "unlock_retry" attribute is a NOP for unlocked
+cards, so user space init processing can write a 1 to all instances
+found in the sysfs once the rootfs with keyutils functionality is
+available.
+
+Al Cooper (7):
+  mmc: lock: Use the kernel "KEYS" subsystem to get a card's password
+  mmc: lock: Add low level LOCK_UNLOCK command
+  mmc: lock: Add function to unlock a password locked card
+  mmc: lock: Add card lock/unlock maintenance commands
+  mmc: lock: Change SD init functionality to handle locked SD cards
+  mmc: lock: Prevent block device from coming up for locked cards.
+  mmc: lock: Change MMC init to handle locked cards.
+
+ drivers/mmc/card/block.c   |  10 ++++
+ drivers/mmc/core/Kconfig   |   8 +++
+ drivers/mmc/core/core.c    | 131 ++++++++++++++++++++++++++++++++++++++++++
+ drivers/mmc/core/core.h    |  15 ++++-
+ drivers/mmc/core/mmc.c     | 123 ++++++++++++++++++++++++++++++++++++++++
+ drivers/mmc/core/mmc_ops.c | 109 +++++++++++++++++++++++++++++++++++
+ drivers/mmc/core/mmc_ops.h |  13 +++++
+ drivers/mmc/core/sd.c      | 138 +++++++++++++++++++++++++++++++++------------
+ include/linux/mmc/card.h   |   6 ++
+ 9 files changed, 515 insertions(+), 38 deletions(-)
 
 -- 
-Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum,
-hosted by The Linux Foundation
+1.8.1.3
+
