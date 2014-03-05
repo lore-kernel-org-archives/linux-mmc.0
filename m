@@ -1,233 +1,375 @@
-From: Alex Lemberg <Alex.Lemberg@sandisk.com>
-Subject: RE: [RFC PATCH 1/1] mmc-utils: Support-sending-eMMC-5.0-FFU
-Date: Wed, 5 Mar 2014 16:35:02 +0000
-Message-ID: <282CEDFCBC30114F83C499CB8F2ED53337E59D62@SACMBXIP02.sdcorp.global.sandisk.com>
+From: Gwendal Grignou <gwendal@chromium.org>
+Subject: Re: [RFC PATCH 1/1] mmc-utils: Support-sending-eMMC-5.0-FFU
+Date: Wed, 5 Mar 2014 09:55:58 -0800
+Message-ID: <CAMHSBOUAJ+NobozOBdkewUndYC+juwR6TiR+gNoaNPOPhF4bXg@mail.gmail.com>
 References: <FDD07FEB422EF948A392FDC201AEEAE63F4970C7@SACMBXIP01.sdcorp.global.sandisk.com>
-	<CANEJEGtrBR21P_KnGv5ZwAfwNA700gVmARU42J7N+cpmD4dKJA@mail.gmail.com>
- <CAGXu5j+Vb242CPMVrrW7DbDujPpTkPHh3ei1hpO7f-BbBJ9MdQ@mail.gmail.com>
+ <CANEJEGtrBR21P_KnGv5ZwAfwNA700gVmARU42J7N+cpmD4dKJA@mail.gmail.com>
+ <CAGXu5j+Vb242CPMVrrW7DbDujPpTkPHh3ei1hpO7f-BbBJ9MdQ@mail.gmail.com> <282CEDFCBC30114F83C499CB8F2ED53337E59D62@SACMBXIP02.sdcorp.global.sandisk.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from ch1ehsobe006.messaging.microsoft.com ([216.32.181.186]:30008
-	"EHLO ch1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1750817AbaCEQgR (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 5 Mar 2014 11:36:17 -0500
-In-Reply-To: <CAGXu5j+Vb242CPMVrrW7DbDujPpTkPHh3ei1hpO7f-BbBJ9MdQ@mail.gmail.com>
-Content-Language: en-US
+Received: from mail-ve0-f176.google.com ([209.85.128.176]:50525 "EHLO
+	mail-ve0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752946AbaCER4T (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 5 Mar 2014 12:56:19 -0500
+Received: by mail-ve0-f176.google.com with SMTP id cz12so1396227veb.35
+        for <linux-mmc@vger.kernel.org>; Wed, 05 Mar 2014 09:56:18 -0800 (PST)
+In-Reply-To: <282CEDFCBC30114F83C499CB8F2ED53337E59D62@SACMBXIP02.sdcorp.global.sandisk.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Kees Cook <keescook@chromium.org>, Grant Grundler <grundler@chromium.org>
-Cc: Avi Shchislowski <Avi.Shchislowski@sandisk.com>, "cjb@laptop.org" <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Gwendal Grignou <gwendal@chromium.org>, Puthikorn Voravootivat <puthik@chromium.org>
+To: Alex Lemberg <Alex.Lemberg@sandisk.com>
+Cc: Kees Cook <keescook@chromium.org>, Grant Grundler <grundler@chromium.org>, Avi Shchislowski <Avi.Shchislowski@sandisk.com>, "cjb@laptop.org" <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Gwendal Grignou <gwendal@chromium.org>, Puthikorn Voravootivat <puthik@chromium.org>
 
-SGkgS2VlcywNCg0KVGhhbmtzIGZvciB5b3VyIGNvbW1lbnQuDQpQbGVhc2Ugc2VlIG91ciByZXNw
-b25zZSBpbmxpbmUuDQoNCg0KPiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBr
-ZWVzY29va0Bnb29nbGUuY29tIFttYWlsdG86a2Vlc2Nvb2tAZ29vZ2xlLmNvbV0gT24gQmVoYWxm
-IE9mDQo+IEtlZXMgQ29vaw0KPiBTZW50OiBTYXR1cmRheSwgTWFyY2ggMDEsIDIwMTQgMToyMSBB
-TQ0KPiBUbzogR3JhbnQgR3J1bmRsZXINCj4gQ2M6IEF2aSBTaGNoaXNsb3dza2k7IGNqYkBsYXB0
-b3Aub3JnOyBsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnOyBBbGV4DQo+IExlbWJlcmc7IEd3ZW5k
-YWwgR3JpZ25vdTsgUHV0aGlrb3JuIFZvcmF2b290aXZhdA0KPiBTdWJqZWN0OiBSZTogW1JGQyBQ
-QVRDSCAxLzFdIG1tYy11dGlsczogU3VwcG9ydC1zZW5kaW5nLWVNTUMtNS4wLUZGVQ0KPiANCj4g
-T24gRnJpLCBGZWIgMjgsIDIwMTQgYXQgMjozOSBQTSwgR3JhbnQgR3J1bmRsZXIgPGdydW5kbGVy
-QGNocm9taXVtLm9yZz4NCj4gd3JvdGU6DQo+ID4gQXZpLA0KPiA+IFRoYW5rcyBmb3IgcG9zdGlu
-ZyB0aGVzZSAtIEkgbG9vayBmb3J3YXJkIHRvIHNlZWluZyB0aGlzIGZ1bmN0aW9uYWxpdHkNCj4g
-PiBhdmFpbGFibGUgaW4gbW1jLXV0aWxzIChhbmQga2VybmVsIGFzIG5lZWRlZCkuDQo+ID4NCj4g
-PiBDb21tZW50cyBhcyB1c3VhbCBpbmxpbmUuDQo+ID4NCj4gPiBJJ3ZlIGFkZGVkIEd3ZW5kYWwv
-S2VlcyB0byBDQyB0byBjb21tZW50IG9uIHNlY3VyaXR5IGlzc3VlcyBvZiB0aGlzDQo+ID4gcHJv
-cG9zYWwuIFNlZSBub3RlcyBiZWxvdy4NCj4gPg0KPiA+DQo+ID4gT24gU3VuLCBGZWIgOSwgMjAx
-NCBhdCAxOjA4IEFNLCBBdmkgU2hjaGlzbG93c2tpDQo+ID4gPEF2aS5TaGNoaXNsb3dza2lAc2Fu
-ZGlzay5jb20+IHdyb3RlOg0KPiA+PiAgIFRoZSBtbWMtdXRpbHMgd2FzIG1vZGlmaWVkIHRvIGlu
-dm9rZSBlTU1DNS4wIEZpZWxkIEZpcm13YXJlIFVwZGF0ZQ0KPiAoRkZVKSBwcm9jZXNzIGluIG1t
-YyBkcml2ZXINCj4gPj4gICBOZXcgY29tbWFuZCB3YXMgYWRkOiAiZG9fZW1tYzUwX2ZmdSIuDQo+
-ID4+DQo+ID4+ICAgVGhpcyBwYXRjaCBkZXBlbmRzIG9uIHBhdGNoICBtbWM6IFN1cHBvcnQtRkZV
-LWZvci1lTU1DLXY1LjANCj4gPj4gQ29tbWl0dGVkIGJ5IEF2aSBTaGNoaXNsb3dza2kgPGF2aS5z
-aGNoaXNsb3dza2lAc2FuZGlzay5jb20+DQo+ID4+DQo+ID4+ICAgRkZVIHdpbGwgYmUgZG9uZSBp
-biB0d28gc3RlcHMuIFR3byBuZXcgSU9DVEwgY29kZXMgd2lsbCBiZSBzZW50IHRvIHRoZQ0KPiBk
-cml2ZXIgaW4gb3JkZXIgdG8gb3BlcmF0ZSBGRlUgY29kZToNCj4gPj4gICAgIDEuICBGRlVfRFdP
-TkxPQURfT1AgKHNlbnQgaW4gZmZ1X2Rvd25sb2FkX2ltYWdlKCkgZnVuY3Rpb24pDQo+ID4NCj4g
-PiBBbnkgcmVhc29uIGZvciB0aGUgdHlwbz8gRE9XTkxPQUQgbWF5YmU/DQo+ID4gU2hvdWxkbid0
-IHRoYXQgYmUgTU1DX0ZGVV9ET1dOTE9BRF9PUCB0byBtYXRjaCB0aGUgcHJvcG9zZWQNCj4ga2Vy
-bmVsIGRlZmluaXRpb24/DQo+ID4NCj4gPj4gICAgICAgICAyLiAgRkZVX0lOU1RBTExfT1AgKHNl
-bnQgaW4gZmZ1X2luc3RhbGwoKSBmdW5jdGlvbikNCj4gPg0KPiA+IERpdHRvOiBNTUNfRkZVX0lO
-U1RBTExfT1ANCj4gPg0KPiA+Pg0KPiA+Pg0KPiA+PiBTaWduZWQtb2ZmLWJ5OiBBdmkgU2hjaGlz
-bG93c2tpIDxhdmkuc2hjaGlzbG93c2tpQHNhbmRpc2suY29tPg0KPiA+PiBTaWduZWQtb2ZmLWJ5
-OiBBbGV4IExlbWJlcmcgPGFsZXgubGVtYmVyZ0BzYW5kaXNrLmNvbT4NCj4gPj4NCj4gPj4gZGlm
-ZiAtLWdpdCBhL21tYy5jIGIvbW1jLmMNCj4gPj4gaW5kZXggOTI2ZTkyZi4uYTAxODUyZCAxMDA2
-NDQNCj4gPj4gLS0tIGEvbW1jLmMNCj4gPj4gKysrIGIvbW1jLmMNCj4gPj4gQEAgLTM2LDkgKzM2
-LDkgQEAgc3RydWN0IENvbW1hbmQgew0KPiA+PiAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
-ICAgICAgIGlmID49IDAsIG51bWJlciBvZiBhcmd1bWVudHMsDQo+ID4+ICAgICAgICAgICAgICAg
-ICAgICAgICAgICAgICAgICAgICAgaWYgPCAwLCBfbWluaW11bV8gbnVtYmVyIG9mIGFyZ3VtZW50
-cyAqLw0KPiA+PiAgICAgICAgIGNoYXIgICAgKnZlcmI7ICAgICAgICAgIC8qIHZlcmIgKi8NCj4g
-Pj4gLSAgICAgICBjaGFyICAgICpoZWxwOyAgICAgICAgICAvKiBoZWxwIGxpbmVzOyBmcm9tIHRo
-ZSAybmQgbGluZSBvbndhcmQgdGhleQ0KPiA+PiArICAgICAgIGNoYXIgICAgKmhlbHA7ICAgICAg
-ICAgIC8qIGhlbHAgbGluZXM7IGZyb20gdGhlIDJuZCBsaW5lIG9ud2FyZCB0aGV5DQo+ID4+ICAg
-ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGFyZSBhdXRvbWF0aWNhbGx5IGluZGVu
-dGVkICovDQo+ID4+IC0gICAgICAgIGNoYXIgICAgKmFkdl9oZWxwOyAgICAgIC8qIGFkdmFuY2Vk
-IGhlbHAgbWVzc2FnZTsgZnJvbSB0aGUgMm5kIGxpbmUNCj4gPj4gKyAgICAgICAgY2hhciAgICAq
-YWR2X2hlbHA7ICAgICAgLyogYWR2YW5jZWQgaGVscCBtZXNzYWdlOyBmcm9tIHRoZSAybmQgbGlu
-ZQ0KPiA+DQo+ID4gU29ycnksIGl0J3Mgbm90IG9idmlvdXMgd2hhdCBjaGFuZ2VkIGhlcmUuIFdo
-eSBpcyB0aGlzIGluY2x1ZGVkPw0KPiA+DQo+ID4+ICAgICAgICAgICAgICAgICAgICAgICAgICAg
-ICAgICAgICAgIG9ud2FyZCB0aGV5IGFyZSBhdXRvbWF0aWNhbGx5DQo+ID4+IGluZGVudGVkICov
-DQo+ID4+DQo+ID4+ICAgICAgICAgLyogdGhlIGZvbGxvd2luZyBmaWVsZHMgYXJlIHJ1bi10aW1l
-IGZpbGxlZCBieSB0aGUgcHJvZ3JhbSAqLyBAQCAtDQo+IDExMCw2ICsxMTAsMTEgQEAgc3RhdGlj
-IHN0cnVjdCBDb21tYW5kIGNvbW1hbmRzW10gPSB7DQo+ID4+ICAgICAgICAgICAgICAgICAiU2Vu
-ZCBTYW5pdGl6ZSBjb21tYW5kIHRvIHRoZSA8ZGV2aWNlPi5cblRoaXMgd2lsbCBkZWxldGUgdGhl
-DQo+IHVubWFwcGVkIG1lbW9yeSByZWdpb24gb2YgdGhlIGRldmljZS4iLA0KPiA+PiAgICAgICAg
-ICAgTlVMTA0KPiA+PiAgICAgICAgIH0sDQo+ID4+ICsgICAgICAgeyBkb19lbW1jNTBfZmZ1LCAt
-MiwNCj4gPj4gKyAgICAgICAiZW1tYzUwIGZmdSIsICI8aW1hZ2UgcGF0aD4gPGRldmljZT5cbiIN
-Cj4gPj4gKyAgICAgICAgICJydW4gZU1NQyA1LjAgRmllbGQgZmlybXdhcmUgdXBkYXRlLlxuLiIs
-DQo+ID4NCj4gPiBOaXQ6IFRoaXMgaXNuJ3QgInJ1biIuIEl0J3MgImRvd25sb2FkIGZpcm13YXJl
-IHRvIGVNTUMgNS4wIGNvbXBsaWFudA0KPiBkZXZpY2UiLg0KPiA+DQo+ID4+ICsgICAgICAgICBO
-VUxMDQo+ID4+ICsgICAgICAgfSwNCj4gPj4gICAgICAgICB7IDAsIDAsIDAsIDAgfQ0KPiA+PiAg
-fTsNCj4gPj4NCj4gPj4gQEAgLTM2Miw3ICszNjcsNyBAQCBzdGF0aWMgaW50IHBhcnNlX2FyZ3Mo
-aW50IGFyZ2MsIGNoYXIgKiphcmd2LA0KPiA+PiAgICAgICAgICAgICAgICAgICAgICAgICBtYXRj
-aGNtZC0+dmVyYiwgbWF0Y2hjbWQtPm5hcmdzKTsNCj4gPj4gICAgICAgICAgICAgICAgICAgICAg
-ICAgcmV0dXJuIC0yOw0KPiA+PiAgICAgICAgIH0NCj4gPj4gLQ0KPiA+PiArDQo+ID4NCj4gPiBJ
-J20gZ29pbmcgdG8gaWdub3JlIHdoaXRlIHNwYWNlIG1hbmdsZSBvbiB0aGlzIHBhdGNoIGFuZCBh
-c3N1bWUgeW91J2xsDQo+ID4gYXNrIGlmIHlvdSBuZWVkIGhlbHAgdXNpbmcgZ21haWwgdG8gc2Vu
-ZCBwYXRjaGVzIHVzaW5nIGdpdCBzZW5kLWVtYWlsLg0KPiA+DQo+ID4gQnV0IHRoZSBhYm92ZSBp
-c24ndCB3aGl0ZSBzcGFjZSBtYW5nbGUgY2F1c2VkIGJ5IGVtYWlsIC0gaXQncyBwYXJ0IG9mDQo+
-ID4gdGhpcyBwYXRjaCBhbmQgSSdtIG5vdCBzZWVpbmcgYSBkaWZmZXJlbmNlIGluIHRoaXMgPFJF
-REFDVEVEPiBnbWFpbA0KPiA+IGVkaXRvci4NCj4gPg0KPiA+PiAgICAgICAgICBpZiAocHJlcGFy
-ZV9hcmdzKCBuYXJnc18sIGFyZ3NfLCBwcmduYW1lLCBtYXRjaGNtZCApKXsNCj4gPj4gICAgICAg
-ICAgICAgICAgICBmcHJpbnRmKHN0ZGVyciwgIkVSUk9SOiBub3QgZW5vdWdoIG1lbW9yeVxcbiIp
-Ow0KPiA+PiAgICAgICAgICAgICAgICAgcmV0dXJuIC0yMDsNCj4gPj4gZGlmZiAtLWdpdCBhL21t
-Yy5oIGIvbW1jLmgNCj4gPj4gaW5kZXggOTg3MWQ2Mi4uM2JlNmRiMCAxMDA2NDQNCj4gPj4gLS0t
-IGEvbW1jLmgNCj4gPj4gKysrIGIvbW1jLmgNCj4gPj4gQEAgLTgwLDYgKzgwLDE0IEBADQo+ID4+
-ICAjZGVmaW5lIEJLT1BTX0VOQUJMRSAgICgxPDwwKQ0KPiA+Pg0KPiA+PiAgLyoNCj4gPj4gKyAq
-IHNlY3RvciBzaXplDQo+ID4+ICsqLw0KPiA+PiArI2RlZmluZSBDQVJEX0JMT0NLX1NJWkUgICAg
-ICAgIDUxMg0KPiA+DQo+ID4gc2VjdG9yIHNpemUgaXMgYWR2ZXJ0aXNlZCBieSB0aGUgZGV2aWNl
-LiBJdCBjb3VsZCBiZSBlaXRoZXIgNTEyIG9yIDRLIGJ5dGVzLg0KPiBObz8NCj4gPg0KPiA+ICI3
-LjQuMTcgTlVNQkVSX09GX0ZXX1NFQ1RPUlNfQ09SUkVDVExZX1BST0dSQU1NRUQgWzMwNS0zMDJd
-DQo+ID4NCj4gPiBUaGUgdmFsdWUgaXMgaW4gdGVybXMgb2YgNTEyIEJ5dGVzIG9yIGluIG11bHRp
-cGxlIG9mIGVpZ2h0IDUxMkJ5dGVzDQo+ID4gc2VjdG9ycyAoNEtCeXRlcykgZGVwZW5kaW5nIG9u
-IHRoZSB2YWx1ZSBvZiB0aGUgREFUQV9TRUNUT1JfU0laRSBmaWVsZC4iDQo+ID4NCj4gPiBJIGRv
-bid0IHRoaW5rIHRoaXMgc2hvdWxkIGJlIGhhcmQgY29kZWQgdG8gNTEyLiBBbmQgYSBmZXcgcGxh
-Y2VzIEkgc2VlDQo+ID4gaGFyZCBjb2RlZCB3aXRoICI8PCA5IiB3aWxsIGxpa2VseSBuZWVkIHRv
-IHRha2UgdGhpcyBpbnRvIGFjY291bnQuDQo+ID4NCj4gPg0KPiA+PiArDQo+ID4+ICsjZGVmaW5l
-IEZGVV9EV09OTE9BRF9PUCAgICAgICAgMzAyDQo+ID4+ICsjZGVmaW5lIEZGVV9JTlNUQUxMX09Q
-IDMwMw0KPiA+DQo+ID4gVGhlc2Ugc2hvdWxkIG1hdGNoIGtlcm5lbCBkZWZpbml0aW9ucyAoY29t
-cGxldGUgbmFtZSBhbmQgdmFsdWUpLg0KPiA+DQo+ID4+ICsNCj4gPj4gKy8qDQo+ID4+ICAgKiBF
-WFRfQ1NEIGZpZWxkIGRlZmluaXRpb25zDQo+ID4+ICAgKi8NCj4gPj4gICNkZWZpbmUgRVhUX0NT
-RF9IUElfU1VQUCAgICAgICAgICAgICAgICgxPDwwKQ0KPiA+PiBkaWZmIC0tZ2l0IGEvbW1jX2Nt
-ZHMuYyBiL21tY19jbWRzLmMNCj4gPj4gaW5kZXggYjhhZmE3NC4uMjRjNGE2YiAxMDA2NDQNCj4g
-Pj4gLS0tIGEvbW1jX2NtZHMuYw0KPiA+PiArKysgYi9tbWNfY21kcy5jDQo+ID4+IEBAIC0xMTYz
-LDMgKzExNjMsMTEyIEBAIGludCBkb19zYW5pdGl6ZShpbnQgbmFyZ3MsIGNoYXIgKiphcmd2KQ0K
-PiA+Pg0KPiA+PiAgfQ0KPiA+Pg0KPiA+PiArc3RhdGljIGludCBmZnVfZG93bmxvYWRfaW1hZ2Uo
-aW50IGZ3X2ZkLCBpbnQgbW1jX2ZkKSB7DQo+ID4+ICsgICAgICAgaW50IHJldCA9IDA7DQo+ID4+
-ICsgICAgICAgc3RydWN0IG1tY19pb2NfY21kIG1tY19pb2NfY21kOw0KPiA+PiArICAgICAgIGNo
-YXIgZGF0YV9idWZmW01NQ19JT0NfTUFYX0JZVEVTXTsNCj4gPj4gKyAgICAgICBpbnQgZmlsZV9z
-aXplOw0KPiA+DQo+ID4gVGhpcyBzaG91bGQgYmUgb2ZmX3QgdHlwZS4gU2VlICJtYW4gMiBsc2Vl
-ayIuDQo+ID4NCj4gPj4gKyAgICAgICBpbnQgc2l6ZTsNCj4gPg0KPiA+IFRoaXMgc2hvdWxkIGJl
-IHNpemVfdCB0eXBlLiAgU2VlICJtYW4gMiByZWFkIi4NCj4gPg0KPiA+PiArICAgICAgIGludCBk
-YXRhX2xlbmd0aDsNCj4gPg0KPiA+IFRoaXMgc2hvdWxkIHNzaXplX3QgdHlwZS4gU2VlICJtYW4g
-MiByZWFkIi4NCj4gPg0KPiA+PiArDQo+ID4+ICsgICAgICAgbWVtc2V0KGRhdGFfYnVmZiwgMCwg
-c2l6ZW9mKGRhdGFfYnVmZikpOw0KPiA+PiArICAgICAgIC8qIGdldCBmaWxlIHNpemUgKi8NCj4g
-Pj4gKyAgICAgICBmaWxlX3NpemUgPSBsc2Vlayhmd19mZCwgMCwgU0VFS19FTkQpOw0KPiA+DQo+
-ID4gSSdtIHdvbmRlcmluZyB3aHkgbHNlZWsgd291bGQgYmUgcHJlZmVycmVkIG92ZXIgZnN0YXQo
-KS4NCj4gPg0KPiA+PiArICAgICAgIGlmIChmaWxlX3NpemUgPCAwKSB7DQo+ID4+ICsgICAgICAg
-ICAgICAgICByZXQgPSAgLTE7DQo+ID4+ICsgICAgICAgICAgICAgICBwZXJyb3IoInNlZWsgZmls
-ZSBlcnJvciBcbiIpOw0KPiA+PiArICAgICAgICAgICAgICAgZ290byBleGl0Ow0KPiA+PiArICAg
-ICAgIH0NCj4gPj4gKw0KPiA+PiArICAgICAgIGxzZWVrKGZ3X2ZkLCAwLCBTRUVLX1NFVCk7DQo+
-ID4+ICsgICAgICAgZG8gew0KPiA+PiArICAgICAgICAgICAgICAgc2l6ZSA9IChmaWxlX3NpemUg
-PiBNTUNfSU9DX01BWF9CWVRFUykgPw0KPiA+PiArICAgICAgICAgICAgICAgICAgICAgICAgICAg
-ICAgIE1NQ19JT0NfTUFYX0JZVEVTIDogZmlsZV9zaXplOw0KPiA+PiArICAgICAgICAgICAgICAg
-LyogUmVhZCBGVyBkYXRhIGZyb20gZmlsZSAqLw0KPiA+PiArICAgICAgICAgICAgICAgZGF0YV9s
-ZW5ndGggPSByZWFkKGZ3X2ZkLCBkYXRhX2J1ZmYsIHNpemUpOw0KPiA+PiArICAgICAgICAgICAg
-ICAgaWYgKGRhdGFfbGVuZ3RoID09IC0xKSB7DQo+ID4NCj4gPiBTaG91bGQgdGhpcyB0ZXN0IGRh
-dGFfbGVuZ3RoIDwgc2l6ZSA/DQo+ID4NCj4gPj4gKyAgICAgICAgICAgICAgICAgICAgICAgcmV0
-ID0gLTE7DQo+ID4+ICsgICAgICAgICAgICAgICAgICAgICAgIGdvdG8gZXhpdDsNCj4gPj4gKyAg
-ICAgICAgICAgICAgIH0NCj4gPg0KPiA+IEd3ZW5kYWwgYW5kIEtlZXMgKENDJ2QpIHdvdWxkIHBy
-ZWZlciB0byBzZW5kIHRoZSBmaWxlIG5hbWUgdG8gdGhlDQo+ID4ga2VybmVsIGFzIHBhcnQgb2Yg
-dGhlIGlvY3RsIGFuZCB1c2UgZXhpc3RpbmcgdWRldiBtZWNoYW5pc21zIHRvDQo+ID4gcmVxdWVz
-dCB0aGUgZmlybXdhcmUuDQo+IA0KPiBZZXMsIHBsZWFzZSBzZWUgRG9jdW1lbnRhdGlvbi9maXJt
-d2FyZV9jbGFzcy9SRUFETUUgZm9yIGluZm9ybWF0aW9uIG9uDQo+IHRoZSBrZXJuZWwgaW50ZXJu
-YWxzLCBidXQgSSB3b3VsZCBtdWNoIHByZWZlciB0aGUga2VybmVsIGRvIGFsbCB0aGUgbG9hZGlu
-ZywNCj4gbm90IHVzZXJzcGFjZS4gVGhlIGtlcm5lbCBkcml2ZXIgY2FuIHJlcXVlc3QgdGhlIGZp
-cm13YXJlDQo+IGNvbnRlbnRzOg0KPiANCj4gICAgICAgICAgaWYocmVxdWVzdF9maXJtd2FyZSgm
-ZndfZW50cnksICRGSVJNV0FSRSwgZGV2aWNlKSA9PSAwKQ0KPiAgICAgICAgICAgICAgICAgY29w
-eV9md190b19kZXZpY2UoZndfZW50cnktPmRhdGEsIGZ3X2VudHJ5LT5zaXplKTsNCj4gICAgICAg
-ICAgcmVsZWFzZShmd19lbnRyeSk7DQo+IA0KPiBhbmQgdGhlbiBzZW5kIGl0IHRvIHRoZSBkZXZp
-Y2UuIERvaW5nIHRoaXMgZnJvbSB1c2Vyc3BhY2UgbWVhbnMgdGhlcmUgaXMgbm8NCj4gd2F5IHRv
-IHZlcmlmeSB0aGUgZmlybXdhcmUgY29udGVudHMuIEVxdWFsbHksIHRoZSBrZXJuZWwgc2hvdWxk
-IGFjdGl2ZWx5IGJsb2NrDQo+IHRoZSBNTUNfRkZVX0RPV05MT0FEX09QIG9wLCBzaW5jZSBpdCBz
-aG91bGQgYmUgY29uc2lkZXJlZCBhIHNlbnNpdGl2ZQ0KPiBvcGVyYXRpb24uDQoNCkluZGVlZCB0
-aGlzIG1lY2hhbmlzbSBhbGxvd3MgdG8gZG93bmxvYWQgRlcgZmlsZSBkaXJlY3RseSB0byB0aGUg
-ZHJpdmVyLCBhbmQgbm90IHVzaW5nIElPQ1RMIGZvciB0aGlzLg0KDQpCdXQgYWN0dWFsbHksIGVN
-TUM1LjAgc3BlYyBkb2VzIG5vdCByZXF1aXJlcyBhbnkgb2YgRlcgZmlsZSBjb250ZW50IHRvIGJl
-IHZlcmlmaWVkIGJ5IHRoZSBob3N0Lg0KVGhlIEZXIGZpbGUgc2hvdWxkICBiZSBkb3dubG9hZGVk
-IGVudGlyZWx5IGFuZCB2ZXJpZmllZCBieSBlTU1DIGRldmljZSBpbnRlcm5hbGx5Lg0KDQpQbGVh
-c2UgbGV0IHVzIGtub3cgaWYgeW91IGF3YXJlIG9mIG90aGVyIHNvbHV0aW9ucywgd2hpY2ggYXJl
-IHJlcXVpcmVzIEZXIGZpbGUgdmVyaWZpY2F0aW9uIGluIHRoZSBob3N0IHNpZGUuDQoNCkluIHRo
-ZSB3YXkgdGhhdCB3ZSBoYXZlIGltcGxlbWVudGVkIEZXIGRvd25sb2FkIHJvdXRpbmUgaW4gdGhl
-IGRyaXZlciwgdGhlIEZXIGRvd25sb2FkIHByb2Nlc3MgaXMgYmxvY2tlZCAodXNpbmcgY2xhaW1f
-aG9zdCgpKSBhbnl3YXksIA0KYW5kIHByZXZlbnRzIGludGVycnVwdGlvbnMgb2YgdGhpcyBwcm9j
-ZXNzIGJ5IG90aGVyIElPIHJlcXVlc3RzLg0KDQo+IA0KPiAtS2Vlcw0KPiANCj4gPg0KPiA+IFRo
-aXMgaGFzIHNvbWUgYWR2YW50YWdlcyBmb3Igc2VjdXJpdHkgd2hpY2ggbWFrZSBpdCBhIGxvdCBo
-YXJkZXIgdG8NCj4gPiAicGxhbnQiIHRoZSBoYWNrZWQgZmlybXdhcmUgb24gZGV2aWNlcy4gSSds
-bCBsZXQgR3dlbmRhbCBhbmQgS2Vlcw0KPiA+IHByZXNlbnQgdGhlIGRldGFpbHMgb2YgdGhvc2Ug
-aWRlYXMuDQo+ID4NCj4gPj4gKyAgICAgICAgICAgICAgIC8qIHByZXBhcmUgYW5kIHNlbmQgaW9j
-dGwgKi8NCj4gPj4gKyAgICAgICAgICAgICAgIG1lbXNldCgmbW1jX2lvY19jbWQsIDAsIHNpemVv
-ZihtbWNfaW9jX2NtZCkpOw0KPiA+PiArICAgICAgICAgICAgICAgbW1jX2lvY19jbWQub3Bjb2Rl
-ID0gIEZGVV9EV09OTE9BRF9PUDsNCj4gPj4gKyAgICAgICAgICAgICAgIG1tY19pb2NfY21kLmJs
-a3N6ID0gQ0FSRF9CTE9DS19TSVpFOw0KPiA+PiArICAgICAgICAgICAgICAgbW1jX2lvY19jbWQu
-YmxvY2tzID0gZGF0YV9sZW5ndGggLyBtbWNfaW9jX2NtZC5ibGtzejsNCj4gPj4gKyAgICAgICAg
-ICAgICAgIG1tY19pb2NfY21kLmFyZyA9ICAwOw0KPiA+PiArICAgICAgICAgICAgICAgbW1jX2lv
-Y19jbWQuZmxhZ3MgPSBNTUNfUlNQX1NQSV9SMSB8IE1NQ19SU1BfUjEgfA0KPiBNTUNfQ01EX0FE
-VEM7DQo+ID4+ICsgICAgICAgICAgICAgICBtbWNfaW9jX2NtZC53cml0ZV9mbGFnID0gMTsNCj4g
-Pj4gKyAgICAgICAgICAgICAgIG1tY19pb2NfY21kX3NldF9kYXRhKG1tY19pb2NfY21kLCBkYXRh
-X2J1ZmYpOw0KPiA+PiArICAgICAgICAgICAgICAgcmV0ID0gaW9jdGwobW1jX2ZkLCBNTUNfSU9D
-X0NNRCwgJm1tY19pb2NfY21kKTsNCj4gPj4gKyAgICAgICAgICAgICAgIGlmIChyZXQpIHsNCj4g
-Pj4gKyAgICAgICAgICAgICAgICAgICAgICAgcGVycm9yKCJpb2N0bCBGVyBkb3dubG9hZCIpOw0K
-PiA+PiArICAgICAgICAgICAgICAgICAgICAgICBnb3RvIGV4aXQ7DQo+ID4+ICsgICAgICAgICAg
-ICAgICB9DQo+ID4+ICsNCj4gPj4gKyAgICAgICAgICAgICAgIGZpbGVfc2l6ZSA9IGZpbGVfc2l6
-ZSAtIHNpemU7DQo+ID4+ICsgICAgICAgICAgICAgICBwcmludGYoImZpcm13YXJlIGZpbGUgbG9h
-ZGluZywgcmVtYWluaW5nOiAgICVkXG4iLCBmaWxlX3NpemUpOw0KPiA+PiArICAgICAgIH0gd2hp
-bGUgKGZpbGVfc2l6ZSA+IDApOw0KPiA+PiArDQo+ID4+ICtleGl0Og0KPiA+PiArDQo+ID4+ICsg
-ICAgICAgcmV0dXJuIHJldDsNCj4gPj4gK30NCj4gPj4gKw0KPiA+PiArc3RhdGljIGludCBmZnVf
-aW5zdGFsbChpbnQgbW1jX2ZkKQ0KPiA+PiArew0KPiA+PiArICAgICAgIGludCByZXQ7DQo+ID4+
-ICsgICAgICAgc3RydWN0IG1tY19pb2NfY21kIG1tY19pb2NfY21kOw0KPiA+PiArDQo+ID4+ICsg
-ICAgICAgbWVtc2V0KCZtbWNfaW9jX2NtZCwgMCwgc2l6ZW9mKG1tY19pb2NfY21kKSk7DQo+ID4+
-ICsgICAgICAgbW1jX2lvY19jbWQub3Bjb2RlID0gRkZVX0lOU1RBTExfT1A7DQo+ID4+ICsgICAg
-ICAgbW1jX2lvY19jbWQuYmxrc3ogPSBDQVJEX0JMT0NLX1NJWkU7DQo+ID4+ICsgICAgICAgbW1j
-X2lvY19jbWQuYmxvY2tzID0gMDsNCj4gPj4gKyAgICAgICBtbWNfaW9jX2NtZC5hcmcgPSAgMDsN
-Cj4gPj4gKyAgICAgICBtbWNfaW9jX2NtZC5mbGFncyA9IE1NQ19SU1BfU1BJX1IxIHwgTU1DX1JT
-UF9SMSB8DQo+IE1NQ19DTURfQURUQzsNCj4gPj4gKyAgICAgICBtbWNfaW9jX2NtZC53cml0ZV9m
-bGFnID0gMDsNCj4gPj4gKyAgICAgICByZXQgPSBpb2N0bChtbWNfZmQsIE1NQ19JT0NfQ01ELCAm
-bW1jX2lvY19jbWQpOw0KPiA+PiArICAgICAgIGlmIChyZXQpDQo+ID4+ICsgICAgICAgICAgICAg
-ICBwZXJyb3IoImlvY3RsIGluc3RhbGwiKTsNCj4gPj4gKw0KPiA+PiArICAgICAgIHByaW50Zigi
-ZmZ1X2luc3RhbGwgcmV0ICVkIFxuIiwgcmV0KTsNCj4gPj4gKyAgICAgICByZXR1cm4gcmV0Ow0K
-PiA+PiArfQ0KPiA+PiArDQo+ID4+ICtpbnQgZG9fZW1tYzUwX2ZmdShpbnQgbmFyZ3MsIGNoYXIg
-Kiphcmd2KSB7DQo+ID4+ICsgICAgICAgaW50IGZkLCBmd19mZCwgcmV0Ow0KPiA+PiArICAgICAg
-IGNoYXIgKmRldmljZTsNCj4gPj4gKw0KPiA+PiArICAgICAgIENIRUNLKG5hcmdzICE9IDMsICJV
-c2FnZTogZmZ1IDxpbWFnZSBwYXRoPiA8L3BhdGgvdG8vbW1jYmxrWD4NCj4gXG4iLA0KPiA+PiAr
-ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGV4aXQoMSkpOw0KPiA+PiArDQo+ID4+ICsg
-ICAgICAgZGV2aWNlID0gYXJndlsyXTsNCj4gPj4gKyAgICAgICBmZCA9IG9wZW4oZGV2aWNlLCBP
-X1JEV1IpOw0KPiA+PiArICAgICAgIGlmIChmZCA8IDApIHsNCj4gPj4gKyAgICAgICAgICAgICAg
-IHBlcnJvcigib3BlbiIpOw0KPiA+PiArICAgICAgICAgICAgICAgZXhpdCgxKTsNCj4gPj4gKyAg
-ICAgICB9DQo+ID4+ICsNCj4gPj4gKyAgICAgICAvKiBvcGVuIGVNTUM1LjAgZmlybXdhcmUgaW1h
-Z2UgZmlsZSAqLw0KPiA+PiArICAgICAgIGZ3X2ZkID0gb3Blbihhcmd2WzFdLCBPX1JET05MWSk7
-DQo+ID4+ICsgICAgICAgaWYgKGZ3X2ZkIDwgMCkgew0KPiA+PiArICAgICAgICAgICAgICAgcGVy
-cm9yKCJvcGVuIGVNTUM1LjAgZmlybXdhcmUgZmlsZSIpOw0KPiA+PiArICAgICAgICAgICAgICAg
-cmV0ID0gLTE7DQo+ID4NCj4gPiBEb24ndCB3YW50IHRvIHJldHVybiB0aGUgZXJybm8gdmFsdWU/
-DQo+ID4NCj4gPj4gKyAgICAgICAgICAgICAgIGdvdG8gZXhpdDsNCj4gPj4gKyAgICAgICB9DQo+
-ID4+ICsNCj4gPj4gKyAgICAgICByZXQgPSBmZnVfZG93bmxvYWRfaW1hZ2UoZndfZmQsIGZkKTsN
-Cj4gPj4gKyAgICAgICBpZiAocmV0KQ0KPiA+PiArICAgICAgICAgICAgICAgZ290byBleGl0Ow0K
-PiA+PiArDQo+ID4+ICsgICAgICAgcmV0ID0gZmZ1X2luc3RhbGwoZmQpOw0KPiA+PiArICAgICAg
-IGlmIChyZXQpDQo+ID4+ICsgICAgICAgICAgICAgICBnb3RvIGV4aXQ7DQo+ID4+ICsNCj4gPj4g
-K2V4aXQ6DQo+ID4+ICsgICAgICAgY2xvc2UoZmQpOw0KPiA+PiArICAgICAgIGNsb3NlKGZ3X2Zk
-KTsNCj4gPj4gKw0KPiA+PiArICAgICAgIHJldHVybiByZXQ7DQo+ID4+ICt9DQo+ID4+IGRpZmYg
-LS1naXQgYS9tbWNfY21kcy5oIGIvbW1jX2NtZHMuaA0KPiA+PiBpbmRleCBmMDZjYzEwLi43N2E2
-Y2I4IDEwMDY0NA0KPiA+PiAtLS0gYS9tbWNfY21kcy5oDQo+ID4+ICsrKyBiL21tY19jbWRzLmgN
-Cj4gPj4gQEAgLTI4LDMgKzI4LDUgQEAgaW50IGRvX3Nhbml0aXplKGludCBuYXJncywgY2hhciAq
-KmFyZ3YpOyAgaW50DQo+ID4+IGRvX3N0YXR1c19nZXQoaW50IG5hcmdzLCBjaGFyICoqYXJndik7
-ICBpbnQgZG9fZW5oX2FyZWFfc2V0KGludA0KPiA+PiBuYXJncywgY2hhciAqKmFyZ3YpOyAgaW50
-IGRvX3dyaXRlX3JlbGlhYmlsaXR5X3NldChpbnQgbmFyZ3MsIGNoYXINCj4gPj4gKiphcmd2KTsN
-Cj4gPj4gK2ludCBkb19lbW1jNTBfZmZ1KGludCBuYXJncywgY2hhciAqKmFyZ3YpOw0KPiA+PiAr
-DQo+ID4+IC0tDQo+ID4+IDEuNy41LjQNCj4gPj4NCj4gPj4NCj4gPj4gQXZpIFNoY2hpc2xvd3Nr
-aSB8IFN0YWZmIFNvZnR3YXJlIEVuZ2luZWVyLCBNQ1MgRW1iZWRkZWQgIHwgU2FuRGlzayB8DQo+
-ID4+ICs5NzIuMDkuNzYzLTI2NjZ8IHd3dy5zYW5kaXNrLmNvbQ0KPiA+Pg0KPiA+DQo+ID4gY2hl
-ZXJzLA0KPiA+IGdyYW50DQo+IA0KPiANCj4gDQo+IC0tDQo+IEtlZXMgQ29vaw0KPiBDaHJvbWUg
-T1MgU2VjdXJpdHkNCg0KCgo=
+On Wed, Mar 5, 2014 at 8:35 AM, Alex Lemberg <Alex.Lemberg@sandisk.com> wrote:
+> Hi Kees,
+>
+> Thanks for your comment.
+> Please see our response inline.
+>
+>
+>> -----Original Message-----
+>> From: keescook@google.com [mailto:keescook@google.com] On Behalf Of
+>> Kees Cook
+>> Sent: Saturday, March 01, 2014 1:21 AM
+>> To: Grant Grundler
+>> Cc: Avi Shchislowski; cjb@laptop.org; linux-mmc@vger.kernel.org; Alex
+>> Lemberg; Gwendal Grignou; Puthikorn Voravootivat
+>> Subject: Re: [RFC PATCH 1/1] mmc-utils: Support-sending-eMMC-5.0-FFU
+>>
+>> On Fri, Feb 28, 2014 at 2:39 PM, Grant Grundler <grundler@chromium.org>
+>> wrote:
+>> > Avi,
+>> > Thanks for posting these - I look forward to seeing this functionality
+>> > available in mmc-utils (and kernel as needed).
+>> >
+>> > Comments as usual inline.
+>> >
+>> > I've added Gwendal/Kees to CC to comment on security issues of this
+>> > proposal. See notes below.
+>> >
+>> >
+>> > On Sun, Feb 9, 2014 at 1:08 AM, Avi Shchislowski
+>> > <Avi.Shchislowski@sandisk.com> wrote:
+>> >>   The mmc-utils was modified to invoke eMMC5.0 Field Firmware Update
+>> (FFU) process in mmc driver
+>> >>   New command was add: "do_emmc50_ffu".
+>> >>
+>> >>   This patch depends on patch  mmc: Support-FFU-for-eMMC-v5.0
+>> >> Committed by Avi Shchislowski <avi.shchislowski@sandisk.com>
+>> >>
+>> >>   FFU will be done in two steps. Two new IOCTL codes will be sent to the
+>> driver in order to operate FFU code:
+>> >>     1.  FFU_DWONLOAD_OP (sent in ffu_download_image() function)
+>> >
+>> > Any reason for the typo? DOWNLOAD maybe?
+>> > Shouldn't that be MMC_FFU_DOWNLOAD_OP to match the proposed
+>> kernel definition?
+>> >
+>> >>         2.  FFU_INSTALL_OP (sent in ffu_install() function)
+>> >
+>> > Ditto: MMC_FFU_INSTALL_OP
+>> >
+>> >>
+>> >>
+>> >> Signed-off-by: Avi Shchislowski <avi.shchislowski@sandisk.com>
+>> >> Signed-off-by: Alex Lemberg <alex.lemberg@sandisk.com>
+>> >>
+>> >> diff --git a/mmc.c b/mmc.c
+>> >> index 926e92f..a01852d 100644
+>> >> --- a/mmc.c
+>> >> +++ b/mmc.c
+>> >> @@ -36,9 +36,9 @@ struct Command {
+>> >>                                    if >= 0, number of arguments,
+>> >>                                    if < 0, _minimum_ number of arguments */
+>> >>         char    *verb;          /* verb */
+>> >> -       char    *help;          /* help lines; from the 2nd line onward they
+>> >> +       char    *help;          /* help lines; from the 2nd line onward they
+>> >>                                     are automatically indented */
+>> >> -        char    *adv_help;      /* advanced help message; from the 2nd line
+>> >> +        char    *adv_help;      /* advanced help message; from the 2nd line
+>> >
+>> > Sorry, it's not obvious what changed here. Why is this included?
+>> >
+>> >>                                     onward they are automatically
+>> >> indented */
+>> >>
+>> >>         /* the following fields are run-time filled by the program */ @@ -
+>> 110,6 +110,11 @@ static struct Command commands[] = {
+>> >>                 "Send Sanitize command to the <device>.\nThis will delete the
+>> unmapped memory region of the device.",
+>> >>           NULL
+>> >>         },
+>> >> +       { do_emmc50_ffu, -2,
+>> >> +       "emmc50 ffu", "<image path> <device>\n"
+>> >> +         "run eMMC 5.0 Field firmware update.\n.",
+>> >
+>> > Nit: This isn't "run". It's "download firmware to eMMC 5.0 compliant
+>> device".
+>> >
+>> >> +         NULL
+>> >> +       },
+>> >>         { 0, 0, 0, 0 }
+>> >>  };
+>> >>
+>> >> @@ -362,7 +367,7 @@ static int parse_args(int argc, char **argv,
+>> >>                         matchcmd->verb, matchcmd->nargs);
+>> >>                         return -2;
+>> >>         }
+>> >> -
+>> >> +
+>> >
+>> > I'm going to ignore white space mangle on this patch and assume you'll
+>> > ask if you need help using gmail to send patches using git send-email.
+>> >
+>> > But the above isn't white space mangle caused by email - it's part of
+>> > this patch and I'm not seeing a difference in this <REDACTED> gmail
+>> > editor.
+>> >
+>> >>          if (prepare_args( nargs_, args_, prgname, matchcmd )){
+>> >>                  fprintf(stderr, "ERROR: not enough memory\\n");
+>> >>                 return -20;
+>> >> diff --git a/mmc.h b/mmc.h
+>> >> index 9871d62..3be6db0 100644
+>> >> --- a/mmc.h
+>> >> +++ b/mmc.h
+>> >> @@ -80,6 +80,14 @@
+>> >>  #define BKOPS_ENABLE   (1<<0)
+>> >>
+>> >>  /*
+>> >> + * sector size
+>> >> +*/
+>> >> +#define CARD_BLOCK_SIZE        512
+>> >
+>> > sector size is advertised by the device. It could be either 512 or 4K bytes.
+>> No?
+>> >
+>> > "7.4.17 NUMBER_OF_FW_SECTORS_CORRECTLY_PROGRAMMED [305-302]
+>> >
+>> > The value is in terms of 512 Bytes or in multiple of eight 512Bytes
+>> > sectors (4KBytes) depending on the value of the DATA_SECTOR_SIZE field."
+>> >
+>> > I don't think this should be hard coded to 512. And a few places I see
+>> > hard coded with "<< 9" will likely need to take this into account.
+>> >
+>> >
+>> >> +
+>> >> +#define FFU_DWONLOAD_OP        302
+>> >> +#define FFU_INSTALL_OP 303
+>> >
+>> > These should match kernel definitions (complete name and value).
+>> >
+>> >> +
+>> >> +/*
+>> >>   * EXT_CSD field definitions
+>> >>   */
+>> >>  #define EXT_CSD_HPI_SUPP               (1<<0)
+>> >> diff --git a/mmc_cmds.c b/mmc_cmds.c
+>> >> index b8afa74..24c4a6b 100644
+>> >> --- a/mmc_cmds.c
+>> >> +++ b/mmc_cmds.c
+>> >> @@ -1163,3 +1163,112 @@ int do_sanitize(int nargs, char **argv)
+>> >>
+>> >>  }
+>> >>
+>> >> +static int ffu_download_image(int fw_fd, int mmc_fd) {
+>> >> +       int ret = 0;
+>> >> +       struct mmc_ioc_cmd mmc_ioc_cmd;
+>> >> +       char data_buff[MMC_IOC_MAX_BYTES];
+>> >> +       int file_size;
+>> >
+>> > This should be off_t type. See "man 2 lseek".
+>> >
+>> >> +       int size;
+>> >
+>> > This should be size_t type.  See "man 2 read".
+>> >
+>> >> +       int data_length;
+>> >
+>> > This should ssize_t type. See "man 2 read".
+>> >
+>> >> +
+>> >> +       memset(data_buff, 0, sizeof(data_buff));
+>> >> +       /* get file size */
+>> >> +       file_size = lseek(fw_fd, 0, SEEK_END);
+>> >
+>> > I'm wondering why lseek would be preferred over fstat().
+>> >
+>> >> +       if (file_size < 0) {
+>> >> +               ret =  -1;
+>> >> +               perror("seek file error \n");
+>> >> +               goto exit;
+>> >> +       }
+>> >> +
+>> >> +       lseek(fw_fd, 0, SEEK_SET);
+>> >> +       do {
+>> >> +               size = (file_size > MMC_IOC_MAX_BYTES) ?
+>> >> +                               MMC_IOC_MAX_BYTES : file_size;
+>> >> +               /* Read FW data from file */
+>> >> +               data_length = read(fw_fd, data_buff, size);
+>> >> +               if (data_length == -1) {
+>> >
+>> > Should this test data_length < size ?
+>> >
+>> >> +                       ret = -1;
+>> >> +                       goto exit;
+>> >> +               }
+>> >
+>> > Gwendal and Kees (CC'd) would prefer to send the file name to the
+>> > kernel as part of the ioctl and use existing udev mechanisms to
+>> > request the firmware.
+>>
+>> Yes, please see Documentation/firmware_class/README for information on
+>> the kernel internals, but I would much prefer the kernel do all the loading,
+>> not userspace. The kernel driver can request the firmware
+>> contents:
+>>
+>>          if(request_firmware(&fw_entry, $FIRMWARE, device) == 0)
+>>                 copy_fw_to_device(fw_entry->data, fw_entry->size);
+>>          release(fw_entry);
+>>
+>> and then send it to the device. Doing this from userspace means there is no
+>> way to verify the firmware contents. Equally, the kernel should actively block
+>> the MMC_FFU_DOWNLOAD_OP op, since it should be considered a sensitive
+>> operation.
+>
+> Indeed this mechanism allows to download FW file directly to the driver, and not using IOCTL for this.
+>
+> But actually, eMMC5.0 spec does not requires any of FW file content to be verified by the host.
+> The FW file should  be downloaded entirely and verified by eMMC device internally.
 
+The point of using firmware_request() is the firmware image is not
+sent within the IOCTL itself but provided by a well known daemon, in
+this case udevd.
+We can make udevd the gate keeper of firmware images [not only eMMC
+devices, but wifi and 3g modems as well] and ensure that only approved
+and well-known images are sent to the devices.
 
+>
+> Please let us know if you aware of other solutions, which are requires FW file verification in the host side.
+>
+> In the way that we have implemented FW download routine in the driver, the FW download process is blocked (using claim_host()) anyway,
+> and prevents interruptions of this process by other IO requests.
+>
+>>
+>> -Kees
+>>
+>> >
+>> > This has some advantages for security which make it a lot harder to
+>> > "plant" the hacked firmware on devices. I'll let Gwendal and Kees
+>> > present the details of those ideas.
+>> >
+>> >> +               /* prepare and send ioctl */
+>> >> +               memset(&mmc_ioc_cmd, 0, sizeof(mmc_ioc_cmd));
+>> >> +               mmc_ioc_cmd.opcode =  FFU_DWONLOAD_OP;
+>> >> +               mmc_ioc_cmd.blksz = CARD_BLOCK_SIZE;
+>> >> +               mmc_ioc_cmd.blocks = data_length / mmc_ioc_cmd.blksz;
+>> >> +               mmc_ioc_cmd.arg =  0;
+>> >> +               mmc_ioc_cmd.flags = MMC_RSP_SPI_R1 | MMC_RSP_R1 |
+>> MMC_CMD_ADTC;
+>> >> +               mmc_ioc_cmd.write_flag = 1;
+>> >> +               mmc_ioc_cmd_set_data(mmc_ioc_cmd, data_buff);
+>> >> +               ret = ioctl(mmc_fd, MMC_IOC_CMD, &mmc_ioc_cmd);
+>> >> +               if (ret) {
+>> >> +                       perror("ioctl FW download");
+>> >> +                       goto exit;
+>> >> +               }
+>> >> +
+>> >> +               file_size = file_size - size;
+>> >> +               printf("firmware file loading, remaining:   %d\n", file_size);
+>> >> +       } while (file_size > 0);
+>> >> +
+>> >> +exit:
+>> >> +
+>> >> +       return ret;
+>> >> +}
+>> >> +
+>> >> +static int ffu_install(int mmc_fd)
+>> >> +{
+>> >> +       int ret;
+>> >> +       struct mmc_ioc_cmd mmc_ioc_cmd;
+>> >> +
+>> >> +       memset(&mmc_ioc_cmd, 0, sizeof(mmc_ioc_cmd));
+>> >> +       mmc_ioc_cmd.opcode = FFU_INSTALL_OP;
+>> >> +       mmc_ioc_cmd.blksz = CARD_BLOCK_SIZE;
+>> >> +       mmc_ioc_cmd.blocks = 0;
+>> >> +       mmc_ioc_cmd.arg =  0;
+>> >> +       mmc_ioc_cmd.flags = MMC_RSP_SPI_R1 | MMC_RSP_R1 |
+>> MMC_CMD_ADTC;
+>> >> +       mmc_ioc_cmd.write_flag = 0;
+>> >> +       ret = ioctl(mmc_fd, MMC_IOC_CMD, &mmc_ioc_cmd);
+>> >> +       if (ret)
+>> >> +               perror("ioctl install");
+>> >> +
+>> >> +       printf("ffu_install ret %d \n", ret);
+>> >> +       return ret;
+>> >> +}
+>> >> +
+>> >> +int do_emmc50_ffu(int nargs, char **argv) {
+>> >> +       int fd, fw_fd, ret;
+>> >> +       char *device;
+>> >> +
+>> >> +       CHECK(nargs != 3, "Usage: ffu <image path> </path/to/mmcblkX>
+>> \n",
+>> >> +                               exit(1));
+>> >> +
+>> >> +       device = argv[2];
+>> >> +       fd = open(device, O_RDWR);
+>> >> +       if (fd < 0) {
+>> >> +               perror("open");
+>> >> +               exit(1);
+>> >> +       }
+>> >> +
+>> >> +       /* open eMMC5.0 firmware image file */
+>> >> +       fw_fd = open(argv[1], O_RDONLY);
+>> >> +       if (fw_fd < 0) {
+>> >> +               perror("open eMMC5.0 firmware file");
+>> >> +               ret = -1;
+>> >
+>> > Don't want to return the errno value?
+>> >
+>> >> +               goto exit;
+>> >> +       }
+>> >> +
+>> >> +       ret = ffu_download_image(fw_fd, fd);
+>> >> +       if (ret)
+>> >> +               goto exit;
+>> >> +
+>> >> +       ret = ffu_install(fd);
+>> >> +       if (ret)
+>> >> +               goto exit;
+>> >> +
+>> >> +exit:
+>> >> +       close(fd);
+>> >> +       close(fw_fd);
+>> >> +
+>> >> +       return ret;
+>> >> +}
+>> >> diff --git a/mmc_cmds.h b/mmc_cmds.h
+>> >> index f06cc10..77a6cb8 100644
+>> >> --- a/mmc_cmds.h
+>> >> +++ b/mmc_cmds.h
+>> >> @@ -28,3 +28,5 @@ int do_sanitize(int nargs, char **argv);  int
+>> >> do_status_get(int nargs, char **argv);  int do_enh_area_set(int
+>> >> nargs, char **argv);  int do_write_reliability_set(int nargs, char
+>> >> **argv);
+>> >> +int do_emmc50_ffu(int nargs, char **argv);
+>> >> +
+>> >> --
+>> >> 1.7.5.4
+>> >>
+>> >>
+>> >> Avi Shchislowski | Staff Software Engineer, MCS Embedded  | SanDisk |
+>> >> +972.09.763-2666| www.sandisk.com
+>> >>
+>> >
+>> > cheers,
+>> > grant
+>>
+>>
+>>
+>> --
+>> Kees Cook
+>> Chrome OS Security
+>
+>
+>
