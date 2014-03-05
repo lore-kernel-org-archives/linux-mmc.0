@@ -1,48 +1,40 @@
-From: Tony Lindgren <tony@atomide.com>
-Subject: Re: [PATCH v8 0/3] mmc: omap_hsmmc: Enable SDIO IRQ.
-Date: Wed, 5 Mar 2014 10:55:45 -0800
-Message-ID: <20140305185544.GI4983@atomide.com>
-References: <1394008070-30138-1-git-send-email-afenkart@gmail.com>
+From: Georgi Djakov <gdjakov@mm-sol.com>
+Subject: Re: [PATCH v10 1/3] mmc: sdhci-msm: Qualcomm SDHCI binding documentation
+Date: Wed, 05 Mar 2014 22:21:59 +0200
+Message-ID: <53178767.9020908@mm-sol.com>
+References: <1393961226-25618-1-git-send-email-gdjakov@mm-sol.com>	<1393961226-25618-2-git-send-email-gdjakov@mm-sol.com> <CAPDyKFp2whNGYj=bEM74DaNDjdqSkej=HsKD8AUNTo6hjZccHw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-doc-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <1394008070-30138-1-git-send-email-afenkart@gmail.com>
-Sender: linux-doc-owner@vger.kernel.org
-To: Andreas Fenkart <afenkart@gmail.com>
-Cc: Chris Ball <chris@printf.net>, Grant Likely <grant.likely@secretlab.ca>, Felipe Balbi <balbi@ti.com>, Balaji T K <balajitk@ti.com>, zonque@gmail.com, galak@codeaurora.org, linux-doc@vger.kernel.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: <CAPDyKFp2whNGYj=bEM74DaNDjdqSkej=HsKD8AUNTo6hjZccHw@mail.gmail.com>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, devicetree@vger.kernel.org, grant.likely@linaro.org, Rob Herring <robh+dt@kernel.org>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Stephen Warren <swarren@wwwdotorg.org>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Kumar Gala <galak@codeaurora.org>, Rob Landley <rob@landley.net>, linux-doc@vger.kernel.org, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-arm-msm@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-* Andreas Fenkart <afenkart@gmail.com> [140305 00:39]:
-> Hi Tony,
-> 
-> I had an infinite loop in hsmmc_disable_wake_irq. Since the SDIO
-> irq is level triggered, I have to disable the IRQ in the handler
-> otherwise it is called infinitely. 
-> 
-> Did some other minor changes see below.
-> 
-> v8
-> - rebased on top of Tony Lindgren<tony@atomide.com> changes
->   - improved changelog describing the earlier work
->   - improved wakeup irq setup
->   - works on am3730 es platform now
-> - my changes on top:
->   - compile tested with #undef CONFIG_OF
->   - disable wake_irq in handler to prevent infinite loop  
->   - fixed typo and added comment about wake-irq
+On 03/05/2014 06:25 AM, Ulf Hansson wrote:
+> On 4 March 2014 20:27, Georgi Djakov <gdjakov@mm-sol.com> wrote:
+[..]
+>> +Required properties:
+>> +- compatible: Should contain "qcom,sdhci-msm-v4".
+>> +- reg: Base address and length of the register set listed in reg-names.
+>> +- reg-names: Should contain the following:
+>> +       "hc_mem"   - Host controller register map
+>> +       "core_mem" - SD Core register map
+>> +- interrupts: Should contain an interrupt-specifiers for the interrupts listed in interrupt-names.
+>> +- interrupt-names: Should contain the following:
+>> +       "hc_irq"     - Host controller interrupt
+>> +       "pwr_irq"    - PMIC interrupt
+>> +- vdd-supply: Phandle to the regulator for the vdd (core voltage) supply.
+>> +- vdd-io-supply: Phandle to the regulator for the vdd-io (i/o voltage) supply.
+>
+> The common naming of the above regulators are "vmmc" and "vqmmc". Is
+> there any specific reason to why you can't use these names?
 
-Great, tested here and things work for me for waking omap3
-from off-idle based on the SDIO interrupt.
+Hi Ulf,
+They are named this way on the schematics, i will change them to the 
+common names. Thanks!
 
-Maybe leave out the trailing period from the Subject line
-for the last patch? If you look at git log --pretty=oneline
-the trailing period is rarely used :)
-
-Balaji, care to queue or ack these for Chris? Looks like
-Chris has a wrong email address (corrected in this mail),
-so maybe one more repost of the series is needed.
-
-Regards,
-
-Tony
+BR,
+Georgi
