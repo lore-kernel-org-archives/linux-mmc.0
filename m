@@ -1,74 +1,118 @@
 From: Al Cooper <alcooperx@gmail.com>
-Subject: [PATCH V3 3/7] mmc: lock: Add function to unlock a password locked card
-Date: Wed, 5 Mar 2014 18:44:48 -0500
-Message-ID: <1394063092-9048-4-git-send-email-alcooperx@gmail.com>
+Subject: [PATCH V3 7/7] mmc: lock: Change MMC init to handle locked cards.
+Date: Wed, 5 Mar 2014 18:44:52 -0500
+Message-ID: <1394063092-9048-8-git-send-email-alcooperx@gmail.com>
 References: <1394063092-9048-1-git-send-email-alcooperx@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-gw1-out.broadcom.com ([216.31.210.62]:7333 "EHLO
-	mail-gw1-out.broadcom.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756720AbaCEXw7 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 5 Mar 2014 18:52:59 -0500
+Received: from mail-gw2-out.broadcom.com ([216.31.210.63]:46172 "EHLO
+	mail-gw2-out.broadcom.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756720AbaCEXxC (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 5 Mar 2014 18:53:02 -0500
 In-Reply-To: <1394063092-9048-1-git-send-email-alcooperx@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: cjb@laptop.org, linux-mmc@vger.kernel.org
 Cc: Al Cooper <alcooperx@gmail.com>
 
-This function will try to get a password for the card and use the
-password to unlock it. It will leave the card state flag set
-appropriately.
+- Change mmc_init_card() to check for a locked card and, if found,
+try to get a password using the kernel KEYS subsystem, unlock the card
+and continue. Unlike SD cards, MMC cards support all initialization
+commands when locked so the init sequence can be completed on a
+locked card and the card can be used without further init after being
+unlocked. If the unlock fails, the card state will be marked as "locked"
+and the block layer will be prevented from coming up.
+
+- Add sysfs attribute "unlock_retry" that will try again to unlock
+the card. If the unlock succeeds, the cards "locked" state will be cleared
+and the block layer will be allowed to come up.
 
 Signed-off-by: Al Cooper <alcooperx@gmail.com>
 ---
- drivers/mmc/core/core.c | 26 ++++++++++++++++++++++++++
- 1 file changed, 26 insertions(+)
+ drivers/mmc/core/mmc.c | 46 ++++++++++++++++++++++++++++++++++++++++++++--
+ 1 file changed, 44 insertions(+), 2 deletions(-)
 
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 8fc8c11..978e4e5 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -2793,6 +2793,27 @@ static inline void mmc_unregister_key_type(void)
- 	unregister_key_type(&key_type_mmc);
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index 3703cd1..240ff48 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -726,10 +726,37 @@ out:
+ 		return res;
  }
  
-+int mmc_unlock_card(struct mmc_card *card)
+-static DEVICE_ATTR(lock, S_IWUSR | S_IRUGO,
+-		   mmc_lock_show, mmc_lock_store);
++static ssize_t mmc_unlock_retry_store(struct device *dev,
++				      struct device_attribute *att,
++				      const char *data, size_t len)
 +{
-+	int stat;
-+	struct mmc_password password;
++	struct mmc_card *card = mmc_dev_to_card(dev);
++	struct mmc_host *host = card->host;
++	int err;
+ 
++	BUG_ON(!card);
++	BUG_ON(!host);
 +
-+	mmc_card_set_locked(card);
-+	stat = mmc_get_password(card, &password);
-+	if (stat) {
-+		pr_warn("%s: Cannot find matching key\n",
-+			mmc_hostname(card->host));
-+		return stat;
++	mmc_claim_host(host);
++	if (!mmc_card_locked(card)) {
++		mmc_release_host(host);
++		return len;
 +	}
-+	stat = mmc_lock_unlock(card, &password, MMC_LOCK_MODE_UNLOCK);
-+	if (stat)
-+		pr_warn("%s: Password failed to unlock card\n",
-+			mmc_hostname(card->host));
-+	else
-+		mmc_card_clear_locked(card);
-+	return stat;
++	err = mmc_unlock_card(card);
++	mmc_release_host(host);
++	if (err < 0)
++		return err;
++	device_release_driver(dev);
++	err = device_attach(dev);
++	if (err < 0)
++		return err;
++	return len;
 +}
-+
- #else /* CONFIG_MMC_LOCK */
  
- int mmc_get_password(struct mmc_card *card, struct mmc_password *password)
-@@ -2809,6 +2830,11 @@ static inline void mmc_unregister_key_type(void)
- {
- }
- 
-+int mmc_unlock_card(struct mmc_card *card)
-+{
-+	return -ENOKEY;
-+}
-+
++static DEVICE_ATTR(lock, S_IWUSR | S_IRUGO,
++		   mmc_lock_show, mmc_lock_store);
++static DEVICE_ATTR(unlock_retry, S_IWUSR,
++		   NULL, mmc_unlock_retry_store);
  #endif /* CONFIG_MMC_LOCK */
  
- static int __init mmc_init(void)
+ 
+@@ -772,6 +799,7 @@ static struct attribute *mmc_std_attrs[] = {
+ 	&dev_attr_rel_sectors.attr,
+ #ifdef CONFIG_MMC_LOCK
+ 	&dev_attr_lock.attr,
++	&dev_attr_unlock_retry.attr,
+ #endif /* CONFIG_MMC_LOCK */
+ 	NULL,
+ };
+@@ -958,6 +986,7 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+ 	unsigned int max_dtr;
+ 	u32 rocr;
+ 	u8 *ext_csd = NULL;
++	u32 status;
+ 
+ 	BUG_ON(!host);
+ 	WARN_ON(!host->claimed);
+@@ -1413,6 +1442,19 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+ 		}
+ 	}
+ 
++	/* If card is locked, try to unlock it */
++	err = mmc_send_status(card, &status);
++	if (err)
++		goto free_card;
++	if (status & R1_CARD_IS_LOCKED) {
++		pr_info("%s: card is locked.\n", mmc_hostname(card->host));
++		err = mmc_unlock_card(card);
++		if (err != 0) {
++			pr_warn("%s: Card unlock failed.\n",
++				mmc_hostname(card->host));
++		}
++	}
++
+ 	if (!oldcard)
+ 		host->card = card;
+ 
 -- 
 1.8.1.3
 
