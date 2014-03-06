@@ -1,70 +1,70 @@
-From: =?utf-8?B?U8O2cmVu?= Brinkmann <soren.brinkmann@xilinx.com>
-Subject: Re: [PATCH v2] mmc: sdhci: add quirk for broken write protect
- detection
-Date: Thu, 6 Mar 2014 08:42:48 -0800
-Message-ID: <ad0a3559-a687-4f51-b284-f515372cfad2@VA3EHSMHS001.ehs.local>
-References: <1393759200-22819-1-git-send-email-eli.billauer@gmail.com>
- <74003aec-1707-4f43-b947-df148d573fa1@TX2EHSMHS038.ehs.local>
- <53163247.8000904@gmail.com>
- <ae0f71ac-c5f7-4af7-a9ba-c019cec19ebf@AM1EHSMHS017.ehs.local>
- <531878C8.2020001@topic.nl>
+From: Georgi Djakov <gdjakov@mm-sol.com>
+Subject: Re: [PATCH v10 1/3] mmc: sdhci-msm: Qualcomm SDHCI binding documentation
+Date: Thu, 06 Mar 2014 19:45:55 +0200
+Message-ID: <5318B453.9060804@mm-sol.com>
+References: <1393961226-25618-1-git-send-email-gdjakov@mm-sol.com>	<1393961226-25618-2-git-send-email-gdjakov@mm-sol.com> <CAL_JsqKJ5Jn4wb8xtqrc09kkP4dzUA6qDEkK396RW+4qFNVf+Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from va3ehsobe010.messaging.microsoft.com ([216.32.180.30]:21677
-	"EHLO va3outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752068AbaCFQnq convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 6 Mar 2014 11:43:46 -0500
-Content-Disposition: inline
-In-Reply-To: <531878C8.2020001@topic.nl>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-doc-owner@vger.kernel.org>
+In-Reply-To: <CAL_JsqKJ5Jn4wb8xtqrc09kkP4dzUA6qDEkK396RW+4qFNVf+Q@mail.gmail.com>
+Sender: linux-doc-owner@vger.kernel.org
+To: Rob Herring <robherring2@gmail.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Ulf Hansson <ulf.hansson@linaro.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Grant Likely <grant.likely@linaro.org>, Rob Herring <robh+dt@kernel.org>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Stephen Warren <swarren@wwwdotorg.org>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Kumar Gala <galak@codeaurora.org>, Rob Landley <rob@landley.net>, "linux-doc@vger.kernel.org" <linux-doc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-arm-msm <linux-arm-msm@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Mike Looijmans <mike.looijmans@topic.nl>
-Cc: Eli Billauer <eli.billauer@gmail.com>, chris@printf.net, michal.simek@xilinx.com, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org
 
-On Thu, 2014-03-06 at 02:31PM +0100, Mike Looijmans wrote:
-> On 03/04/2014 10:00 PM, S=C3=B6ren Brinkmann wrote:
-> >On Tue, 2014-03-04 at 10:06PM +0200, Eli Billauer wrote:
-> >>Hello S=C3=B6ren,
-> >>
-> >>wp-inverted solves the practical problem indeed, and fools the
-> >>driver into thinking that the card has an inverted write protection
-> >>sensor, and the logic zero that it finds in the hardware register
-> >>means that the card isn't write protected.
-> >>
-> >>I'm insisting on this patch, because I think that the device tree
-> >>should describe the hardware as it is, and not fool the driver into
-> >>behaving the way we want it to. These tricks always bite back later
-> >>on.
-> >Well, why is broken-wp more accurate than wp-inverted? Strictly
-> >speaking the WP is there and working, it's just tied off to some val=
-ue
-> >you want to have interpreted the other way.
-> >Anyway, seems like this is solvable with wp-inverted and whether the
-> >additional quirk is needed I leave to others do decide.
->=20
-> I've begged for this patch - or a similar one - to be included too,
-> because on our boards, the "wp" value appears to be sort of random.
-> Out of 5 prototype boards, 3 would only boot with wp-inverted while
-> the other 2 wouldn't boot with wp-inverted set.
->=20
-> In our case I really don't know (and I don't care either) to which
-> logic level the wp happens to think it's wired. I just want to be
-> able to tell the driver that the WP line is
-> free-floating-and-might-have-any-random-value-at-any-given-moment
-> which is a bit long, so I'd go for disable-wp instead.
+On 03/05/2014 08:56 AM, Rob Herring wrote:
+> On Tue, Mar 4, 2014 at 1:27 PM, Georgi Djakov <gdjakov@mm-sol.com> wrote:
+[..]
+>> +Required properties:
+>> +- compatible: Should contain "qcom,sdhci-msm-v4".
+>> +- reg: Base address and length of the register set listed in reg-names.
+>> +- reg-names: Should contain the following:
+>> +       "hc_mem"   - Host controller register map
+>> +       "core_mem" - SD Core register map
+>
+> reg-names should not be required and the order specified by the binding.
+>
 
-Could you provide the design you use and give more details? According t=
-o
-the people I talked to, the signal should never float, unless you pin i=
-t
-out and don't drive it.
-Actually, you should open a support case for this. It is not supposed t=
-o
-happen.
+Ok, Rob! Thanks!
 
-	S=C3=B6ren
+>> +- interrupts: Should contain an interrupt-specifiers for the interrupts listed in interrupt-names.
+>> +- interrupt-names: Should contain the following:
+>> +       "hc_irq"     - Host controller interrupt
+>> +       "pwr_irq"    - PMIC interrupt
+>
+> Same for interrupt-names.
+>
 
+Ok.
 
+>> +- vdd-supply: Phandle to the regulator for the vdd (core voltage) supply.
+>> +- vdd-io-supply: Phandle to the regulator for the vdd-io (i/o voltage) supply.
+>> +- pinctrl-names: Should contain only one value - "default".
+>> +- pinctrl-0: Should specify pin control groups used for this controller.
+>> +- clocks: A list of phandle + clock-specifier pairs for the clocks listed in clock-names.
+>> +- clock-names: Should contain the following:
+>> +       "iface" - Main peripheral bus clock (PCLK/HCLK - AHB Bus clock) (required)
+>> +       "core"  - SDC MMC clock (MCLK) (required)
+>> +       "bus"   - SDCC bus voter clock (optional)
+>> +
+>> +Example:
+>> +
+>> +       sdhc_1: sdhci@f9824900 {
+>> +               compatible = "qcom,sdhci-msm-v4";
+>> +               reg = <0xf9824900 0x11c>, <0xf9824000 0x800>;
+>
+> Are there cases where these are really in a different 4KB range? If
+> not, this should just be 1 range.
+>
+
+Thanks for your suggestion. This sounds reasonable, but in this case,
+I think that it might be better leaving the memory regions separated as 
+it will help avoiding code duplication. I am using the generic 
+sdhci_pltfm_init(), which assumes that the first resource is the HC 
+iomem and configures the host. If I merge them, the HC address will be 
+offset and this might require duplicating some of the init code.
+Is it acceptable to leave it this way?
+
+BR,
+Georgi
