@@ -1,51 +1,90 @@
-From: Al Cooper <alcooperx@gmail.com>
-Subject: [PATCH V3 6/7] mmc: lock: Prevent block device from coming up for locked cards.
-Date: Wed, 5 Mar 2014 18:44:51 -0500
-Message-ID: <1394063092-9048-7-git-send-email-alcooperx@gmail.com>
-References: <1394063092-9048-1-git-send-email-alcooperx@gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-gw3-out.broadcom.com ([216.31.210.64]:4980 "EHLO
-	mail-gw3-out.broadcom.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757296AbaCEXxB (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 5 Mar 2014 18:53:01 -0500
-In-Reply-To: <1394063092-9048-1-git-send-email-alcooperx@gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Alistair Popple <alistair-Y4h6yKqj69EXC2x5gXVKYQ@public.gmane.org>
+Subject: [PATCH 1/5] SDHCI: Add a generic registration to the SDHCI platform driver
+Date: Thu,  6 Mar 2014 14:52:24 +1100
+Message-ID: <1394077948-8395-2-git-send-email-alistair@popple.id.au>
+References: <1394077948-8395-1-git-send-email-alistair@popple.id.au>
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1394077948-8395-1-git-send-email-alistair-Y4h6yKqj69EXC2x5gXVKYQ@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org
+Cc: Alistair Popple <alistair-Y4h6yKqj69EXC2x5gXVKYQ@public.gmane.org>, linuxppc-dev-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: cjb@laptop.org, linux-mmc@vger.kernel.org
-Cc: Al Cooper <alcooperx@gmail.com>
 
-A locked card will return an error for all reads/writes to the
-block device, so prevent the block layer from coming up until
-the card is unlocked.
+This patch adds a generic platform driver registration to the exiting SDHCI
+platform driver using the devicetree compatibility string "generic-sdhci".
 
-Signed-off-by: Al Cooper <alcooperx@gmail.com>
+Signed-off-by: Alistair Popple <alistair-Y4h6yKqj69EXC2x5gXVKYQ@public.gmane.org>
 ---
- drivers/mmc/card/block.c | 10 ++++++++++
- 1 file changed, 10 insertions(+)
+ .../devicetree/bindings/mmc/sdhci-pltfm.txt        | 16 +++++++++++++
+ drivers/mmc/host/sdhci-pltfm.c                     | 28 ++++++++++++++++++++++
+ 2 files changed, 44 insertions(+)
+ create mode 100644 Documentation/devicetree/bindings/mmc/sdhci-pltfm.txt
 
-diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-index 7b5424f..a4b909d 100644
---- a/drivers/mmc/card/block.c
-+++ b/drivers/mmc/card/block.c
-@@ -2377,6 +2377,16 @@ static int mmc_blk_probe(struct mmc_card *card)
- 	struct mmc_blk_data *md, *part_md;
- 	char cap_str[10];
+diff --git a/Documentation/devicetree/bindings/mmc/sdhci-pltfm.txt b/Documentation/devicetree/bindings/mmc/sdhci-pltfm.txt
+new file mode 100644
+index 0000000..3940659
+--- /dev/null
++++ b/Documentation/devicetree/bindings/mmc/sdhci-pltfm.txt
+@@ -0,0 +1,16 @@
++Generic SHDCI platform driver
++
++The generic SDHCI platform driver should support most SDHCI host
++controllers. It uses the compatible="generic-sdhci" property and
++supports the following device tree properties as described in mmc.txt.
++
++Supported properties (described in mmc.txt):
++- reg
++- interrupts
++- wp-inverted
++- broken-cd
++- no-1-8-v
++- keep-power-in-suspend
++- enable-sdio-wakeup
++- bus-width
++- clock-frequency
+diff --git a/drivers/mmc/host/sdhci-pltfm.c b/drivers/mmc/host/sdhci-pltfm.c
+index bef250e..696d1f6 100644
+--- a/drivers/mmc/host/sdhci-pltfm.c
++++ b/drivers/mmc/host/sdhci-pltfm.c
+@@ -260,6 +260,34 @@ const struct dev_pm_ops sdhci_pltfm_pmops = {
+ EXPORT_SYMBOL_GPL(sdhci_pltfm_pmops);
+ #endif	/* CONFIG_PM */
  
++static int sdhci_generic_probe(struct platform_device *pdev)
++{
++	return sdhci_pltfm_register(pdev, NULL, 0);
++}
 +
-+	/* if the card is locked, don't bring up the block layer because
-+	 * all reads and writes will fail.
-+	 */
-+	if (mmc_card_locked(card)) {
-+		pr_debug("%s: %s - Probe aborted because card is locked\n",
-+			 mmc_hostname(card->host), __func__);
-+		return -ENODEV;
-+	}
++static int sdhci_generic_remove(struct platform_device *pdev)
++{
++	return sdhci_pltfm_unregister(pdev);
++}
 +
- 	/*
- 	 * Check that the card supports the command class(es) we need.
- 	 */
++static const struct of_device_id sdhci_generic_of_match[] = {
++	{ .compatible = "generic-sdhci" },
++	{ }
++};
++MODULE_DEVICE_TABLE(of, sdhci_generic_of_match);
++
++static struct platform_driver sdhci_generic_driver = {
++	.driver = {
++		.name = "sdhci-generic",
++		.owner = THIS_MODULE,
++		.of_match_table = sdhci_generic_of_match,
++		.pm = SDHCI_PLTFM_PMOPS,
++	},
++	.probe = sdhci_generic_probe,
++	.remove = sdhci_generic_remove,
++};
++module_platform_driver(sdhci_generic_driver);
++
+ static int __init sdhci_pltfm_drv_init(void)
+ {
+ 	pr_info("sdhci-pltfm: SDHCI platform and OF driver helper\n");
 -- 
-1.8.1.3
+1.8.3.2
 
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
