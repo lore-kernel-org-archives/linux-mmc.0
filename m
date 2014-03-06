@@ -1,184 +1,70 @@
-From: Balaji T K <balajitk@ti.com>
-Subject: Re: [PATCH RFT] regulator: pbias: Convert to use regmap helper functions
-Date: Thu, 6 Mar 2014 20:50:13 +0530
-Message-ID: <5318922D.5090508@ti.com>
-References: <1394111433.21007.2.camel@phoenix>
+From: =?utf-8?B?U8O2cmVu?= Brinkmann <soren.brinkmann@xilinx.com>
+Subject: Re: [PATCH v2] mmc: sdhci: add quirk for broken write protect
+ detection
+Date: Thu, 6 Mar 2014 08:42:48 -0800
+Message-ID: <ad0a3559-a687-4f51-b284-f515372cfad2@VA3EHSMHS001.ehs.local>
+References: <1393759200-22819-1-git-send-email-eli.billauer@gmail.com>
+ <74003aec-1707-4f43-b947-df148d573fa1@TX2EHSMHS038.ehs.local>
+ <53163247.8000904@gmail.com>
+ <ae0f71ac-c5f7-4af7-a9ba-c019cec19ebf@AM1EHSMHS017.ehs.local>
+ <531878C8.2020001@topic.nl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1394111433.21007.2.camel@phoenix>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Axel Lin <axel.lin@ingics.com>
-Cc: Chris Ball <chris@printf.net>, Liam Girdwood <lgirdwood@gmail.com>, Mark Brown <broonie@kernel.org>, Florian Vaussard <florian.vaussard@epfl.ch>, Stefan Roese <sr@denx.de>, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from va3ehsobe010.messaging.microsoft.com ([216.32.180.30]:21677
+	"EHLO va3outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752068AbaCFQnq convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 6 Mar 2014 11:43:46 -0500
+Content-Disposition: inline
+In-Reply-To: <531878C8.2020001@topic.nl>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Mike Looijmans <mike.looijmans@topic.nl>
+Cc: Eli Billauer <eli.billauer@gmail.com>, chris@printf.net, michal.simek@xilinx.com, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org
 
-On Thursday 06 March 2014 06:40 PM, Axel Lin wrote:
-> This patch converts this driver to use the regmap helper functions provided by
-> regulator core.
->
-> This fixes a few issues in current implementation:
->
-> 1) In original code, the set voltage does not check max_uV,
->     which means if request max_uV < 1800000, it will still set the voltage
->     to 1800000.
->
-> 2) The is_enable implementation is wrong in some cases:
->     e.g. for pbias_mmc_omap5: emable_mask is : BIT(27) | BIT(25) | BIT(26)
->     However, pbias_regulator_enable() only sets BIT(26) | BIT(22) bits.
->     So is_enable always return false in this case.
->
-> Signed-off-by: Axel Lin <axel.lin@ingics.com>
-> ---
-> Hi Balaji,
-> I don't have this h/w, so please test if it works.
+On Thu, 2014-03-06 at 02:31PM +0100, Mike Looijmans wrote:
+> On 03/04/2014 10:00 PM, S=C3=B6ren Brinkmann wrote:
+> >On Tue, 2014-03-04 at 10:06PM +0200, Eli Billauer wrote:
+> >>Hello S=C3=B6ren,
+> >>
+> >>wp-inverted solves the practical problem indeed, and fools the
+> >>driver into thinking that the card has an inverted write protection
+> >>sensor, and the logic zero that it finds in the hardware register
+> >>means that the card isn't write protected.
+> >>
+> >>I'm insisting on this patch, because I think that the device tree
+> >>should describe the hardware as it is, and not fool the driver into
+> >>behaving the way we want it to. These tricks always bite back later
+> >>on.
+> >Well, why is broken-wp more accurate than wp-inverted? Strictly
+> >speaking the WP is there and working, it's just tied off to some val=
+ue
+> >you want to have interpreted the other way.
+> >Anyway, seems like this is solvable with wp-inverted and whether the
+> >additional quirk is needed I leave to others do decide.
+>=20
+> I've begged for this patch - or a similar one - to be included too,
+> because on our boards, the "wp" value appears to be sort of random.
+> Out of 5 prototype boards, 3 would only boot with wp-inverted while
+> the other 2 wouldn't boot with wp-inverted set.
+>=20
+> In our case I really don't know (and I don't care either) to which
+> logic level the wp happens to think it's wired. I just want to be
+> able to tell the driver that the WP line is
+> free-floating-and-might-have-any-random-value-at-any-given-moment
+> which is a bit long, so I'd go for disable-wp instead.
 
-Hi Axel,
+Could you provide the design you use and give more details? According t=
+o
+the people I talked to, the signal should never float, unless you pin i=
+t
+out and don't drive it.
+Actually, you should open a support case for this. It is not supposed t=
+o
+happen.
 
-There were few issues when I tried using regmap helper,
-will check on this.
+	S=C3=B6ren
 
-Thanks and Regards,
-Balaji T K
 
-> Regards,
-> Axel
->   drivers/regulator/pbias-regulator.c | 86 ++++++++++---------------------------
->   1 file changed, 23 insertions(+), 63 deletions(-)
->
-> diff --git a/drivers/regulator/pbias-regulator.c b/drivers/regulator/pbias-regulator.c
-> index ded3b35..f25c91e 100644
-> --- a/drivers/regulator/pbias-regulator.c
-> +++ b/drivers/regulator/pbias-regulator.c
-> @@ -38,85 +38,41 @@ struct pbias_reg_info {
->   struct pbias_regulator_data {
->   	struct regulator_desc desc;
->   	void __iomem *pbias_addr;
-> -	unsigned int pbias_reg;
->   	struct regulator_dev *dev;
->   	struct regmap *syscon;
->   	const struct pbias_reg_info *info;
->   	int voltage;
->   };
->
-> -static int pbias_regulator_set_voltage(struct regulator_dev *dev,
-> -			int min_uV, int max_uV, unsigned *selector)
-> +static int pbias_regulator_list_voltage(struct regulator_dev *rdev,
-> +					unsigned int selector)
->   {
-> -	struct pbias_regulator_data *data = rdev_get_drvdata(dev);
-> -	const struct pbias_reg_info *info = data->info;
-> -	int ret, vmode;
-> -
-> -	if (min_uV <= 1800000)
-> -		vmode = 0;
-> -	else if (min_uV > 1800000)
-> -		vmode = info->vmode;
-> -
-> -	ret = regmap_update_bits(data->syscon, data->pbias_reg,
-> -						info->vmode, vmode);
-> -
-> -	return ret;
-> -}
-> -
-> -static int pbias_regulator_get_voltage(struct regulator_dev *rdev)
-> -{
-> -	struct pbias_regulator_data *data = rdev_get_drvdata(rdev);
-> -	const struct pbias_reg_info *info = data->info;
-> -	int value, voltage;
-> -
-> -	regmap_read(data->syscon, data->pbias_reg, &value);
-> -	value &= info->vmode;
-> -
-> -	voltage = value ? 3000000 : 1800000;
-> -
-> -	return voltage;
-> +	switch (selector) {
-> +	case 0:
-> +		return 1800000;
-> +	case 1:
-> +		return 3000000;
-> +	default:
-> +		return -EINVAL;
-> +	}
->   }
->
->   static int pbias_regulator_enable(struct regulator_dev *rdev)
->   {
->   	struct pbias_regulator_data *data = rdev_get_drvdata(rdev);
->   	const struct pbias_reg_info *info = data->info;
-> -	int ret;
-> -
-> -	ret = regmap_update_bits(data->syscon, data->pbias_reg,
-> -					info->enable_mask, info->enable);
-> -
-> -	return ret;
-> -}
-> -
-> -static int pbias_regulator_disable(struct regulator_dev *rdev)
-> -{
-> -	struct pbias_regulator_data *data = rdev_get_drvdata(rdev);
-> -	const struct pbias_reg_info *info = data->info;
-> -	int ret;
-> -
-> -	ret = regmap_update_bits(data->syscon, data->pbias_reg,
-> -						info->enable_mask, 0);
-> -	return ret;
-> -}
-> -
-> -static int pbias_regulator_is_enable(struct regulator_dev *rdev)
-> -{
-> -	struct pbias_regulator_data *data = rdev_get_drvdata(rdev);
-> -	const struct pbias_reg_info *info = data->info;
-> -	int value;
-> -
-> -	regmap_read(data->syscon, data->pbias_reg, &value);
->
-> -	return (value & info->enable_mask) == info->enable_mask;
-> +	return regmap_update_bits(data->syscon, rdev->desc->enable_reg,
-> +				  info->enable_mask, info->enable);
->   }
->
->   static struct regulator_ops pbias_regulator_voltage_ops = {
-> -	.set_voltage	= pbias_regulator_set_voltage,
-> -	.get_voltage	= pbias_regulator_get_voltage,
-> -	.enable		= pbias_regulator_enable,
-> -	.disable	= pbias_regulator_disable,
-> -	.is_enabled	= pbias_regulator_is_enable,
-> +	.list_voltage = pbias_regulator_list_voltage,
-> +	.get_voltage_sel = regulator_get_voltage_sel_regmap,
-> +	.set_voltage_sel = regulator_set_voltage_sel_regmap,
-> +	.enable = pbias_regulator_enable,
-> +	.disable = regulator_disable_regmap,
-> +	.is_enabled = regulator_is_enabled_regmap,
->   };
->
->   static const struct pbias_reg_info pbias_mmc_omap2430 = {
-> @@ -192,6 +148,7 @@ static int pbias_regulator_probe(struct platform_device *pdev)
->   	if (IS_ERR(syscon))
->   		return PTR_ERR(syscon);
->
-> +	cfg.regmap = syscon;
->   	cfg.dev = &pdev->dev;
->
->   	for (idx = 0; idx < PBIAS_NUM_REGS && data_idx < count; idx++) {
-> @@ -207,7 +164,6 @@ static int pbias_regulator_probe(struct platform_device *pdev)
->   		if (!res)
->   			return -EINVAL;
->
-> -		drvdata[data_idx].pbias_reg = res->start;
->   		drvdata[data_idx].syscon = syscon;
->   		drvdata[data_idx].info = info;
->   		drvdata[data_idx].desc.name = info->name;
-> @@ -216,6 +172,10 @@ static int pbias_regulator_probe(struct platform_device *pdev)
->   		drvdata[data_idx].desc.ops = &pbias_regulator_voltage_ops;
->   		drvdata[data_idx].desc.n_voltages = 2;
->   		drvdata[data_idx].desc.enable_time = info->enable_time;
-> +		drvdata[data_idx].desc.vsel_reg = res->start;
-> +		drvdata[data_idx].desc.vsel_mask = info->vmode;
-> +		drvdata[data_idx].desc.enable_reg = res->start;
-> +		drvdata[data_idx].desc.enable_mask = info->enable_mask;
->
->   		cfg.init_data = pbias_matches[idx].init_data;
->   		cfg.driver_data = &drvdata[data_idx];
->
