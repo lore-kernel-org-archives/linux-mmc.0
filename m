@@ -1,71 +1,168 @@
-From: Markus Mayer <markus.mayer@linaro.org>
-Subject: [PATCH] mmc: sdhci-bcm-kona: Fix locking in sdhci_bcm_kona_sd_card_emulate()
-Date: Thu,  6 Mar 2014 12:25:58 +0800
-Message-ID: <1394079958-11697-1-git-send-email-markus.mayer@linaro.org>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Chris Ball <chris@printf.net>, Matt Porter <matt.porter@linaro.org>, Christian Daudt <bcm@fixthebug.org>
-Cc: Linux MMC List <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH v4 1/7] mmc: dw_mmc: use the mmc_of_parse() instead of
+ local parser
+Date: Thu, 06 Mar 2014 14:34:18 +0900
+Message-ID: <531808DA.5070306@samsung.com>
+References: <5313EAB9.7010001@gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout2.samsung.com ([203.254.224.25]:16667 "EHLO
+	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750970AbaCFFdw (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 6 Mar 2014 00:33:52 -0500
+Received: from epcpsbgr1.samsung.com
+ (u141.gpu120.samsung.co.kr [203.254.230.141])
+ by mailout2.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+ (7.0.4.24.0) 64bit (built Nov 17 2011))
+ with ESMTP id <0N200014I24E1T80@mailout2.samsung.com> for
+ linux-mmc@vger.kernel.org; Thu, 06 Mar 2014 14:33:50 +0900 (KST)
+In-reply-to: <5313EAB9.7010001@gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Cc: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Seungwon Jeon <tgih.jun@samsung.com>
 
-Since sdhci_bcm_kona_sd_card_emulate() can be called from interrupt
-context, we must use a spinlock instead of a mutex. This change
-essentially restores the way things worked before the change to
-mutexes in http://www.spinics.net/lists/linux-mmc/msg20276.html.
+Dear, All.
 
-Without this change, we see "scheduling while atomic" errors.
+Do you have any other comment for this patchset?
+I have tested with exynos4/5 board. it's working fine.(eMMC/SD)
 
-Signed-off-by: Markus Mayer <markus.mayer@linaro.org>
----
- drivers/mmc/host/sdhci-bcm-kona.c | 10 +++++-----
- 1 file changed, 5 insertions(+), 5 deletions(-)
+If it needs to change more, let me know, plz.
 
-diff --git a/drivers/mmc/host/sdhci-bcm-kona.c b/drivers/mmc/host/sdhci-bcm-kona.c
-index 7a190fe..f1b0a62 100644
---- a/drivers/mmc/host/sdhci-bcm-kona.c
-+++ b/drivers/mmc/host/sdhci-bcm-kona.c
-@@ -1,5 +1,5 @@
- /*
-- * Copyright (C) 2013 Broadcom Corporation
-+ * Copyright (C) 2013-2014 Broadcom Corporation
-  *
-  * This program is free software; you can redistribute it and/or
-  * modify it under the terms of the GNU General Public License as
-@@ -53,7 +53,7 @@
- #define KONA_MMC_AUTOSUSPEND_DELAY		(50)
- 
- struct sdhci_bcm_kona_dev {
--	struct mutex	write_lock; /* protect back to back writes */
-+	spinlock_t write_lock; /* protect back to back writes */
- };
- 
- 
-@@ -135,7 +135,7 @@ static int sdhci_bcm_kona_sd_card_emulate(struct sdhci_host *host, int insert)
- 	 * insert-removal.
- 	 * We keep 20uS
- 	 */
--	mutex_lock(&kona_dev->write_lock);
-+	spin_lock_bh(&kona_dev->write_lock);
- 	udelay(20);
- 	val = sdhci_readl(host, KONA_SDHOST_CORESTAT);
- 
-@@ -153,7 +153,7 @@ static int sdhci_bcm_kona_sd_card_emulate(struct sdhci_host *host, int insert)
- 		val &= ~KONA_SDHOST_CD_SW;
- 		sdhci_writel(host, val, KONA_SDHOST_CORESTAT);
- 	}
--	mutex_unlock(&kona_dev->write_lock);
-+	spin_unlock_bh(&kona_dev->write_lock);
- 
- 	return 0;
- }
-@@ -247,7 +247,7 @@ static int sdhci_bcm_kona_probe(struct platform_device *pdev)
- 	pltfm_priv = sdhci_priv(host);
- 
- 	kona_dev = sdhci_pltfm_priv(pltfm_priv);
--	mutex_init(&kona_dev->write_lock);
-+	spin_lock_init(&kona_dev->write_lock);
- 
- 	mmc_of_parse(host->mmc);
- 
--- 
-1.9.0
+Best Regards,
+Jaehoon Chung
+
+On 03/03/2014 11:36 AM, Jaehoon Chung wrote:
+> mmc_of_parse() have been already parsed the general capability.
+> Didn't need to use the local parser.
+> 
+> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+> ---
+> Changelog V4:
+> 	- None
+> Changelog V3:
+> 	- Remove the caps2-mmc-hs-1_8v/1_2v into synopsys-dw-mshc.txt
+> Changelog V2:
+> 	- None
+>  .../devicetree/bindings/mmc/synopsys-dw-mshc.txt   |    5 --
+>  drivers/mmc/host/dw_mmc.c                          |   49 +-------------------
+>  2 files changed, 1 insertion(+), 53 deletions(-)
+> 
+> diff --git a/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt
+> index 8f3f133..2d4a725 100644
+> --- a/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt
+> +++ b/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt
+> @@ -69,10 +69,6 @@ Optional properties:
+>  
+>  * supports-highspeed: Enables support for high speed cards (up to 50MHz)
+>  
+> -* caps2-mmc-hs200-1_8v: Supports mmc HS200 SDR 1.8V mode
+> -
+> -* caps2-mmc-hs200-1_2v: Supports mmc HS200 SDR 1.2V mode
+> -
+>  * broken-cd: as documented in mmc core bindings.
+>  
+>  * vmmc-supply: The phandle to the regulator to use for vmmc.  If this is
+> @@ -103,7 +99,6 @@ board specific portions as listed below.
+>  		clock-freq-min-max = <400000 200000000>;
+>  		num-slots = <1>;
+>  		supports-highspeed;
+> -		caps2-mmc-hs200-1_8v;
+>  		broken-cd;
+>  		fifo-depth = <0x80>;
+>  		card-detect-delay = <200>;
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index 55cd110..8193e21 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -2046,21 +2046,6 @@ static int dw_mci_of_get_slot_quirks(struct device *dev, u8 slot)
+>  	return quirks;
+>  }
+>  
+> -/* find out bus-width for a given slot */
+> -static u32 dw_mci_of_get_bus_wd(struct device *dev, u8 slot)
+> -{
+> -	struct device_node *np = dw_mci_of_find_slot_node(dev, slot);
+> -	u32 bus_wd = 1;
+> -
+> -	if (!np)
+> -		return 1;
+> -
+> -	if (of_property_read_u32(np, "bus-width", &bus_wd))
+> -		dev_err(dev, "bus-width property not found, assuming width"
+> -			       " as 1\n");
+> -	return bus_wd;
+> -}
+> -
+>  /* find the write protect gpio for a given slot; or -1 if none specified */
+>  static int dw_mci_of_get_wp_gpio(struct device *dev, u8 slot)
+>  {
+> @@ -2108,10 +2093,6 @@ static int dw_mci_of_get_slot_quirks(struct device *dev, u8 slot)
+>  {
+>  	return 0;
+>  }
+> -static u32 dw_mci_of_get_bus_wd(struct device *dev, u8 slot)
+> -{
+> -	return 1;
+> -}
+>  static struct device_node *dw_mci_of_find_slot_node(struct device *dev, u8 slot)
+>  {
+>  	return NULL;
+> @@ -2134,7 +2115,6 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
+>  	const struct dw_mci_drv_data *drv_data = host->drv_data;
+>  	int ctrl_id, ret;
+>  	u32 freq[2];
+> -	u8 bus_width;
+>  
+>  	mmc = mmc_alloc_host(sizeof(struct dw_mci_slot), host->dev);
+>  	if (!mmc)
+> @@ -2189,19 +2169,7 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
+>  	if (host->pdata->caps2)
+>  		mmc->caps2 = host->pdata->caps2;
+>  
+> -	if (host->pdata->get_bus_wd)
+> -		bus_width = host->pdata->get_bus_wd(slot->id);
+> -	else if (host->dev->of_node)
+> -		bus_width = dw_mci_of_get_bus_wd(host->dev, slot->id);
+> -	else
+> -		bus_width = 1;
+> -
+> -	switch (bus_width) {
+> -	case 8:
+> -		mmc->caps |= MMC_CAP_8_BIT_DATA;
+> -	case 4:
+> -		mmc->caps |= MMC_CAP_4_BIT_DATA;
+> -	}
+> +	mmc_of_parse(mmc);
+>  
+>  	if (host->pdata->blk_settings) {
+>  		mmc->max_segs = host->pdata->blk_settings->max_segs;
+> @@ -2399,24 +2367,9 @@ static struct dw_mci_board *dw_mci_parse_dt(struct dw_mci *host)
+>  			return ERR_PTR(ret);
+>  	}
+>  
+> -	if (of_find_property(np, "keep-power-in-suspend", NULL))
+> -		pdata->pm_caps |= MMC_PM_KEEP_POWER;
+> -
+> -	if (of_find_property(np, "enable-sdio-wakeup", NULL))
+> -		pdata->pm_caps |= MMC_PM_WAKE_SDIO_IRQ;
+> -
+>  	if (of_find_property(np, "supports-highspeed", NULL))
+>  		pdata->caps |= MMC_CAP_SD_HIGHSPEED | MMC_CAP_MMC_HIGHSPEED;
+>  
+> -	if (of_find_property(np, "caps2-mmc-hs200-1_8v", NULL))
+> -		pdata->caps2 |= MMC_CAP2_HS200_1_8V_SDR;
+> -
+> -	if (of_find_property(np, "caps2-mmc-hs200-1_2v", NULL))
+> -		pdata->caps2 |= MMC_CAP2_HS200_1_2V_SDR;
+> -
+> -	if (of_get_property(np, "cd-inverted", NULL))
+> -		pdata->caps2 |= MMC_CAP2_CD_ACTIVE_HIGH;
+> -
+>  	return pdata;
+>  }
+>  
+> 
+
