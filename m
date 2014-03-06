@@ -1,65 +1,71 @@
-From: Alistair Popple <alistair@popple.id.au>
-Subject: [PATCH 0/5] V2 IBM Akebono/PPC46GTR Support
-Date: Thu,  6 Mar 2014 14:52:23 +1100
-Message-ID: <1394077948-8395-1-git-send-email-alistair@popple.id.au>
+From: Markus Mayer <markus.mayer@linaro.org>
+Subject: [PATCH] mmc: sdhci-bcm-kona: Fix locking in sdhci_bcm_kona_sd_card_emulate()
+Date: Thu,  6 Mar 2014 12:25:58 +0800
+Message-ID: <1394079958-11697-1-git-send-email-markus.mayer@linaro.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: benh@kernel.crashing.org, netdev@vger.kernel.org, linux-mmc@vger.kernel.org, chris@printf.net, linuxppc-dev@lists.ozlabs.org, davem@davemloft.net
-Cc: Alistair Popple <alistair@popple.id.au>, linux-kernel@vger.kernel.org, devicetree@vger.kernel.org
+To: Chris Ball <chris@printf.net>, Matt Porter <matt.porter@linaro.org>, Christian Daudt <bcm@fixthebug.org>
+Cc: Linux MMC List <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-The IBM Akebono board is a development board for the new PPC476GTR
-system on chip (SoC).
+Since sdhci_bcm_kona_sd_card_emulate() can be called from interrupt
+context, we must use a spinlock instead of a mutex. This change
+essentially restores the way things worked before the change to
+mutexes in http://www.spinics.net/lists/linux-mmc/msg20276.html.
 
-This version of the series updates the device tree and drops the USB
-patches as the equivalent functionality is already in linux-next. It
-also addresses feedback from the previous submission.
+Without this change, we see "scheduling while atomic" errors.
 
-Alistair Popple (5):
-  SDHCI: Add a generic registration to the SDHCI platform driver
-  IBM Akebono: Add support for a new PHY interface to the IBM emac
-    driver
-  IBM Currituck: Clean up board specific code before adding Akebono code
-  IBM Akebono: Add the Akebono platform
-  powerpc: Added PCI MSI support using the HSTA module
+Signed-off-by: Markus Mayer <markus.mayer@linaro.org>
+---
+ drivers/mmc/host/sdhci-bcm-kona.c | 10 +++++-----
+ 1 file changed, 5 insertions(+), 5 deletions(-)
 
- .../devicetree/bindings/mmc/sdhci-pltfm.txt        |  16 +
- .../devicetree/bindings/powerpc/4xx/akebono.txt    |  54 +++
- .../devicetree/bindings/powerpc/4xx/emac.txt       |   9 +
- .../devicetree/bindings/powerpc/4xx/hsta.txt       |  19 +
- arch/powerpc/boot/Makefile                         |   3 +
- arch/powerpc/boot/dcr.h                            |   4 +
- arch/powerpc/boot/dts/akebono.dts                  | 415 +++++++++++++++++++++
- arch/powerpc/boot/treeboot-akebono.c               | 163 ++++++++
- arch/powerpc/boot/wrapper                          |   3 +
- arch/powerpc/configs/44x/akebono_defconfig         | 148 ++++++++
- arch/powerpc/platforms/44x/Kconfig                 |  28 ++
- arch/powerpc/platforms/44x/Makefile                |   3 +-
- arch/powerpc/platforms/44x/currituck.c             | 233 ------------
- arch/powerpc/platforms/44x/ppc476.c                | 299 +++++++++++++++
- arch/powerpc/sysdev/Kconfig                        |   6 +
- arch/powerpc/sysdev/Makefile                       |   1 +
- arch/powerpc/sysdev/ppc4xx_hsta_msi.c              | 215 +++++++++++
- arch/powerpc/sysdev/ppc4xx_pci.c                   |  21 +-
- drivers/mmc/host/sdhci-pltfm.c                     |  28 ++
- drivers/net/ethernet/ibm/emac/Kconfig              |   4 +
- drivers/net/ethernet/ibm/emac/Makefile             |   1 +
- drivers/net/ethernet/ibm/emac/core.c               |  50 ++-
- drivers/net/ethernet/ibm/emac/core.h               |  12 +
- drivers/net/ethernet/ibm/emac/rgmii_wol.c          | 244 ++++++++++++
- drivers/net/ethernet/ibm/emac/rgmii_wol.h          |  62 +++
- 25 files changed, 1796 insertions(+), 245 deletions(-)
- create mode 100644 Documentation/devicetree/bindings/mmc/sdhci-pltfm.txt
- create mode 100644 Documentation/devicetree/bindings/powerpc/4xx/akebono.txt
- create mode 100644 Documentation/devicetree/bindings/powerpc/4xx/hsta.txt
- create mode 100644 arch/powerpc/boot/dts/akebono.dts
- create mode 100644 arch/powerpc/boot/treeboot-akebono.c
- create mode 100644 arch/powerpc/configs/44x/akebono_defconfig
- delete mode 100644 arch/powerpc/platforms/44x/currituck.c
- create mode 100644 arch/powerpc/platforms/44x/ppc476.c
- create mode 100644 arch/powerpc/sysdev/ppc4xx_hsta_msi.c
- create mode 100644 drivers/net/ethernet/ibm/emac/rgmii_wol.c
- create mode 100644 drivers/net/ethernet/ibm/emac/rgmii_wol.h
-
+diff --git a/drivers/mmc/host/sdhci-bcm-kona.c b/drivers/mmc/host/sdhci-bcm-kona.c
+index 7a190fe..f1b0a62 100644
+--- a/drivers/mmc/host/sdhci-bcm-kona.c
++++ b/drivers/mmc/host/sdhci-bcm-kona.c
+@@ -1,5 +1,5 @@
+ /*
+- * Copyright (C) 2013 Broadcom Corporation
++ * Copyright (C) 2013-2014 Broadcom Corporation
+  *
+  * This program is free software; you can redistribute it and/or
+  * modify it under the terms of the GNU General Public License as
+@@ -53,7 +53,7 @@
+ #define KONA_MMC_AUTOSUSPEND_DELAY		(50)
+ 
+ struct sdhci_bcm_kona_dev {
+-	struct mutex	write_lock; /* protect back to back writes */
++	spinlock_t write_lock; /* protect back to back writes */
+ };
+ 
+ 
+@@ -135,7 +135,7 @@ static int sdhci_bcm_kona_sd_card_emulate(struct sdhci_host *host, int insert)
+ 	 * insert-removal.
+ 	 * We keep 20uS
+ 	 */
+-	mutex_lock(&kona_dev->write_lock);
++	spin_lock_bh(&kona_dev->write_lock);
+ 	udelay(20);
+ 	val = sdhci_readl(host, KONA_SDHOST_CORESTAT);
+ 
+@@ -153,7 +153,7 @@ static int sdhci_bcm_kona_sd_card_emulate(struct sdhci_host *host, int insert)
+ 		val &= ~KONA_SDHOST_CD_SW;
+ 		sdhci_writel(host, val, KONA_SDHOST_CORESTAT);
+ 	}
+-	mutex_unlock(&kona_dev->write_lock);
++	spin_unlock_bh(&kona_dev->write_lock);
+ 
+ 	return 0;
+ }
+@@ -247,7 +247,7 @@ static int sdhci_bcm_kona_probe(struct platform_device *pdev)
+ 	pltfm_priv = sdhci_priv(host);
+ 
+ 	kona_dev = sdhci_pltfm_priv(pltfm_priv);
+-	mutex_init(&kona_dev->write_lock);
++	spin_lock_init(&kona_dev->write_lock);
+ 
+ 	mmc_of_parse(host->mmc);
+ 
 -- 
-1.8.3.2
+1.9.0
