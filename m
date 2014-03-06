@@ -1,173 +1,75 @@
-From: Axel Lin <axel.lin@ingics.com>
-Subject: [PATCH RFT] regulator: pbias: Convert to use regmap helper functions
-Date: Thu, 06 Mar 2014 21:10:33 +0800
-Message-ID: <1394111433.21007.2.camel@phoenix>
+From: Mike Looijmans <mike.looijmans@topic.nl>
+Subject: Re: [PATCH v2] mmc: sdhci: add quirk for broken write protect detection
+Date: Thu, 6 Mar 2014 14:31:52 +0100
+Message-ID: <531878C8.2020001@topic.nl>
+References: <1393759200-22819-1-git-send-email-eli.billauer@gmail.com> <74003aec-1707-4f43-b947-df148d573fa1@TX2EHSMHS038.ehs.local> <53163247.8000904@gmail.com> <ae0f71ac-c5f7-4af7-a9ba-c019cec19ebf@AM1EHSMHS017.ehs.local>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Chris Ball <chris@printf.net>, Liam Girdwood <lgirdwood@gmail.com>, Mark Brown <broonie@kernel.org>
-Cc: Balaji T K <balajitk@ti.com>, Florian Vaussard <florian.vaussard@epfl.ch>, Stefan Roese <sr@denx.de>, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8;
+	format=flowed
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from retry101.mer-nm.internl.net ([217.149.192.105]:36498 "EHLO
+	retry101.mer-nm.internl.net" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1750760AbaCFNlS convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 6 Mar 2014 08:41:18 -0500
+In-Reply-To: <ae0f71ac-c5f7-4af7-a9ba-c019cec19ebf@AM1EHSMHS017.ehs.local>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: =?UTF-8?B?U8O2cmVuIEJyaW5rbWFubg==?= <soren.brinkmann@xilinx.com>, Eli Billauer <eli.billauer@gmail.com>
+Cc: chris@printf.net, michal.simek@xilinx.com, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org
 
-This patch converts this driver to use the regmap helper functions provided by
-regulator core.
+=EF=BB=BFOn 03/04/2014 10:00 PM, S=C3=B6ren Brinkmann wrote:
+> On Tue, 2014-03-04 at 10:06PM +0200, Eli Billauer wrote:
+>> Hello S=C3=B6ren,
+>>
+>> wp-inverted solves the practical problem indeed, and fools the
+>> driver into thinking that the card has an inverted write protection
+>> sensor, and the logic zero that it finds in the hardware register
+>> means that the card isn't write protected.
+>>
+>> I'm insisting on this patch, because I think that the device tree
+>> should describe the hardware as it is, and not fool the driver into
+>> behaving the way we want it to. These tricks always bite back later
+>> on.
+> Well, why is broken-wp more accurate than wp-inverted? Strictly
+> speaking the WP is there and working, it's just tied off to some valu=
+e
+> you want to have interpreted the other way.
+> Anyway, seems like this is solvable with wp-inverted and whether the
+> additional quirk is needed I leave to others do decide.
 
-This fixes a few issues in current implementation:
+I've begged for this patch - or a similar one - to be included too, bec=
+ause on=20
+our boards, the "wp" value appears to be sort of random. Out of 5 proto=
+type=20
+boards, 3 would only boot with wp-inverted while the other 2 wouldn't b=
+oot=20
+with wp-inverted set.
 
-1) In original code, the set voltage does not check max_uV,
-   which means if request max_uV < 1800000, it will still set the voltage
-   to 1800000.
+In our case I really don't know (and I don't care either) to which logi=
+c level=20
+the wp happens to think it's wired. I just want to be able to tell the =
+driver=20
+that the WP line is=20
+free-floating-and-might-have-any-random-value-at-any-given-moment which=
+ is a=20
+bit long, so I'd go for disable-wp instead.
 
-2) The is_enable implementation is wrong in some cases:
-   e.g. for pbias_mmc_omap5: emable_mask is : BIT(27) | BIT(25) | BIT(26)
-   However, pbias_regulator_enable() only sets BIT(26) | BIT(22) bits.
-   So is_enable always return false in this case.
+Mike.
 
-Signed-off-by: Axel Lin <axel.lin@ingics.com>
----
-Hi Balaji,
-I don't have this h/w, so please test if it works.
-Regards,
-Axel
- drivers/regulator/pbias-regulator.c | 86 ++++++++++---------------------------
- 1 file changed, 23 insertions(+), 63 deletions(-)
 
-diff --git a/drivers/regulator/pbias-regulator.c b/drivers/regulator/pbias-regulator.c
-index ded3b35..f25c91e 100644
---- a/drivers/regulator/pbias-regulator.c
-+++ b/drivers/regulator/pbias-regulator.c
-@@ -38,85 +38,41 @@ struct pbias_reg_info {
- struct pbias_regulator_data {
- 	struct regulator_desc desc;
- 	void __iomem *pbias_addr;
--	unsigned int pbias_reg;
- 	struct regulator_dev *dev;
- 	struct regmap *syscon;
- 	const struct pbias_reg_info *info;
- 	int voltage;
- };
- 
--static int pbias_regulator_set_voltage(struct regulator_dev *dev,
--			int min_uV, int max_uV, unsigned *selector)
-+static int pbias_regulator_list_voltage(struct regulator_dev *rdev,
-+					unsigned int selector)
- {
--	struct pbias_regulator_data *data = rdev_get_drvdata(dev);
--	const struct pbias_reg_info *info = data->info;
--	int ret, vmode;
--
--	if (min_uV <= 1800000)
--		vmode = 0;
--	else if (min_uV > 1800000)
--		vmode = info->vmode;
--
--	ret = regmap_update_bits(data->syscon, data->pbias_reg,
--						info->vmode, vmode);
--
--	return ret;
--}
--
--static int pbias_regulator_get_voltage(struct regulator_dev *rdev)
--{
--	struct pbias_regulator_data *data = rdev_get_drvdata(rdev);
--	const struct pbias_reg_info *info = data->info;
--	int value, voltage;
--
--	regmap_read(data->syscon, data->pbias_reg, &value);
--	value &= info->vmode;
--
--	voltage = value ? 3000000 : 1800000;
--
--	return voltage;
-+	switch (selector) {
-+	case 0:
-+		return 1800000;
-+	case 1:
-+		return 3000000;
-+	default:
-+		return -EINVAL;
-+	}
- }
- 
- static int pbias_regulator_enable(struct regulator_dev *rdev)
- {
- 	struct pbias_regulator_data *data = rdev_get_drvdata(rdev);
- 	const struct pbias_reg_info *info = data->info;
--	int ret;
--
--	ret = regmap_update_bits(data->syscon, data->pbias_reg,
--					info->enable_mask, info->enable);
--
--	return ret;
--}
--
--static int pbias_regulator_disable(struct regulator_dev *rdev)
--{
--	struct pbias_regulator_data *data = rdev_get_drvdata(rdev);
--	const struct pbias_reg_info *info = data->info;
--	int ret;
--
--	ret = regmap_update_bits(data->syscon, data->pbias_reg,
--						info->enable_mask, 0);
--	return ret;
--}
--
--static int pbias_regulator_is_enable(struct regulator_dev *rdev)
--{
--	struct pbias_regulator_data *data = rdev_get_drvdata(rdev);
--	const struct pbias_reg_info *info = data->info;
--	int value;
--
--	regmap_read(data->syscon, data->pbias_reg, &value);
- 
--	return (value & info->enable_mask) == info->enable_mask;
-+	return regmap_update_bits(data->syscon, rdev->desc->enable_reg,
-+				  info->enable_mask, info->enable);
- }
- 
- static struct regulator_ops pbias_regulator_voltage_ops = {
--	.set_voltage	= pbias_regulator_set_voltage,
--	.get_voltage	= pbias_regulator_get_voltage,
--	.enable		= pbias_regulator_enable,
--	.disable	= pbias_regulator_disable,
--	.is_enabled	= pbias_regulator_is_enable,
-+	.list_voltage = pbias_regulator_list_voltage,
-+	.get_voltage_sel = regulator_get_voltage_sel_regmap,
-+	.set_voltage_sel = regulator_set_voltage_sel_regmap,
-+	.enable = pbias_regulator_enable,
-+	.disable = regulator_disable_regmap,
-+	.is_enabled = regulator_is_enabled_regmap,
- };
- 
- static const struct pbias_reg_info pbias_mmc_omap2430 = {
-@@ -192,6 +148,7 @@ static int pbias_regulator_probe(struct platform_device *pdev)
- 	if (IS_ERR(syscon))
- 		return PTR_ERR(syscon);
- 
-+	cfg.regmap = syscon;
- 	cfg.dev = &pdev->dev;
- 
- 	for (idx = 0; idx < PBIAS_NUM_REGS && data_idx < count; idx++) {
-@@ -207,7 +164,6 @@ static int pbias_regulator_probe(struct platform_device *pdev)
- 		if (!res)
- 			return -EINVAL;
- 
--		drvdata[data_idx].pbias_reg = res->start;
- 		drvdata[data_idx].syscon = syscon;
- 		drvdata[data_idx].info = info;
- 		drvdata[data_idx].desc.name = info->name;
-@@ -216,6 +172,10 @@ static int pbias_regulator_probe(struct platform_device *pdev)
- 		drvdata[data_idx].desc.ops = &pbias_regulator_voltage_ops;
- 		drvdata[data_idx].desc.n_voltages = 2;
- 		drvdata[data_idx].desc.enable_time = info->enable_time;
-+		drvdata[data_idx].desc.vsel_reg = res->start;
-+		drvdata[data_idx].desc.vsel_mask = info->vmode;
-+		drvdata[data_idx].desc.enable_reg = res->start;
-+		drvdata[data_idx].desc.enable_mask = info->enable_mask;
- 
- 		cfg.init_data = pbias_matches[idx].init_data;
- 		cfg.driver_data = &drvdata[data_idx];
--- 
-1.8.1.2
+Met vriendelijke groet / kind regards,
+
+Mike Looijmans
+
+TOPIC Embedded Systems
+Eindhovenseweg 32-C, NL-5683 KH Best
+Postbus 440, NL-5680 AK Best
+Telefoon: (+31) (0) 499 33 69 79
+Telefax:  (+31) (0) 499 33 69 70
+E-mail: mike.looijmans@topic.nl
+Website: www.topic.nl
+
+Please consider the environment before printing this e-mail
+
