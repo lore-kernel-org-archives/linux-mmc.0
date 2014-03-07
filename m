@@ -1,175 +1,94 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH v4 1/7] mmc: dw_mmc: use the mmc_of_parse() instead of
- local parser
-Date: Fri, 07 Mar 2014 11:30:35 +0900
-Message-ID: <53192F4B.3090505@samsung.com>
-References: <5313EAB9.7010001@gmail.com>
- <CAPDyKFrk7JUgK4hpa3H9sg=DWNyhUd7Kt153ZOYEFL8=kqjmiw@mail.gmail.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: RESEND:[PATCH V3] sdhci: only reprogram retuning timer when flag
+ is set
+Date: Fri, 7 Mar 2014 05:06:03 +0100
+Message-ID: <CAPDyKFpQSEhH4OoJ=v7drpfbTPZy4PQdSnbix5HG6XzGGTjzrQ@mail.gmail.com>
+References: <1393012782-23917-1-git-send-email-arend@broadcom.com>
+	<53183FF9.4090803@broadcom.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout4.samsung.com ([203.254.224.34]:9074 "EHLO
-	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751055AbaCGCaM (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 6 Mar 2014 21:30:12 -0500
-Received: from epcpsbgr4.samsung.com
- (u144.gpu120.samsung.co.kr [203.254.230.144])
- by mailout4.samsung.com (Oracle Communications Messaging Server 7u4-24.01
- (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTP id <0N2100DH9OAA75D0@mailout4.samsung.com> for
- linux-mmc@vger.kernel.org; Fri, 07 Mar 2014 11:30:10 +0900 (KST)
-In-reply-to: <CAPDyKFrk7JUgK4hpa3H9sg=DWNyhUd7Kt153ZOYEFL8=kqjmiw@mail.gmail.com>
+Received: from mail-qc0-f177.google.com ([209.85.216.177]:51952 "EHLO
+	mail-qc0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751055AbaCGEGF (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 6 Mar 2014 23:06:05 -0500
+Received: by mail-qc0-f177.google.com with SMTP id w7so4020101qcr.22
+        for <linux-mmc@vger.kernel.org>; Thu, 06 Mar 2014 20:06:03 -0800 (PST)
+In-Reply-To: <53183FF9.4090803@broadcom.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Seungwon Jeon <tgih.jun@samsung.com>
+To: Arend van Spriel <arend@broadcom.com>
+Cc: Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>, Dong Aisheng <dongas86@gmail.com>, Aaron Lu <aaron.lwe@gmail.com>
 
-On 03/06/2014 04:18 PM, Ulf Hansson wrote:
-> On 3 March 2014 03:36, Jaehoon Chung <jh80.chung@gmail.com> wrote:
->> mmc_of_parse() have been already parsed the general capability.
->> Didn't need to use the local parser.
+On 6 March 2014 10:29, Arend van Spriel <arend@broadcom.com> wrote:
+> On 02/21/2014 08:59 PM, Arend van Spriel wrote:
+>> When the host->tuning_count is zero it means that the
+>> retuning is disabled. This is checked on the first
+>> run of sdhci_execute_tuning() by the if statement below:
 >>
->> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+>>       if (!(host->flags & SDHCI_NEEDS_RETUNING) && host->tuning_count &&
+>>           (host->tuning_mode == SDHCI_TUNING_MODE_1)) {
+>>
+>> So only when tuning_count is non-zero it will set the host
+>> flag SDHCI_USING_RETUNING_TIMER. The else statement is only
+>> for re-programming the timer, which means that flag must be
+>> set. Because that is not checked the else statement is executed
+>> in the first run when tuning_count is zero.
+>>
+>> This was seen on a host controller which indicated
+>> SDHCI_TUNING_MODE_1 (0) and tuning_count being zero. Suspect
+>> that (one of) these registers is not properly set.
+>>
+>> Cc: Dong Aisheng <dongas86@gmail.com>
+>> Cc: Aaron Lu <aaron.lwe@gmail.com>
+>> Signed-off-by: Arend van Spriel <arend@broadcom.com>
 >> ---
->> Changelog V4:
->>         - None
->> Changelog V3:
->>         - Remove the caps2-mmc-hs-1_8v/1_2v into synopsys-dw-mshc.txt
->> Changelog V2:
->>         - None
->>  .../devicetree/bindings/mmc/synopsys-dw-mshc.txt   |    5 --
->>  drivers/mmc/host/dw_mmc.c                          |   49 +-------------------
->>  2 files changed, 1 insertion(+), 53 deletions(-)
+>> Noticed this patch was still not applied so please reconsider
+>> taking it in and let me know. The patch has been rebased and
+>> applies to the mmc-next branch.
+>
+> ping? Am I on some spam filter? What is needed to get this change applied?
+>
+> Regards,
+> Arend
+>
+>> Regards,
+>> Arend
 >>
->> diff --git a/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt
->> index 8f3f133..2d4a725 100644
->> --- a/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt
->> +++ b/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt
->> @@ -69,10 +69,6 @@ Optional properties:
+>> V3:
+>> - remote tuning mode check for retuning timer reload
 >>
->>  * supports-highspeed: Enables support for high speed cards (up to 50MHz)
+>> V2:
+>> - add more explanation to the commit message
+>> - check host flag SDHCI_USING_RETUNING_TIMER
+>> ---
+>>  drivers/mmc/host/sdhci.c | 7 +++----
+>>  1 file changed, 3 insertions(+), 4 deletions(-)
 >>
->> -* caps2-mmc-hs200-1_8v: Supports mmc HS200 SDR 1.8V mode
->> -
->> -* caps2-mmc-hs200-1_2v: Supports mmc HS200 SDR 1.2V mode
->> -
->>  * broken-cd: as documented in mmc core bindings.
+>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+>> index 9ddef47..d5b421d 100644
+>> --- a/drivers/mmc/host/sdhci.c
+>> +++ b/drivers/mmc/host/sdhci.c
+>> @@ -2026,12 +2026,11 @@ out:
+>>                       host->tuning_count * HZ);
+>>               /* Tuning mode 1 limits the maximum data length to 4MB */
+>>               mmc->max_blk_count = (4 * 1024 * 1024) / mmc->max_blk_size;
+>> -     } else {
+>> +     } else if (host->flags & SDHCI_USING_RETUNING_TIMER) {
+>>               host->flags &= ~SDHCI_NEEDS_RETUNING;
+>>               /* Reload the new initial value for timer */
+>> -             if (host->tuning_mode == SDHCI_TUNING_MODE_1)
+>> -                     mod_timer(&host->tuning_timer, jiffies +
+>> -                             host->tuning_count * HZ);
+>> +             mod_timer(&host->tuning_timer, jiffies +
+>> +                       host->tuning_count * HZ);
+>>       }
 >>
->>  * vmmc-supply: The phandle to the regulator to use for vmmc.  If this is
->> @@ -103,7 +99,6 @@ board specific portions as listed below.
->>                 clock-freq-min-max = <400000 200000000>;
->>                 num-slots = <1>;
->>                 supports-highspeed;
->> -               caps2-mmc-hs200-1_8v;
->>                 broken-cd;
->>                 fifo-depth = <0x80>;
->>                 card-detect-delay = <200>;
->> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
->> index 55cd110..8193e21 100644
->> --- a/drivers/mmc/host/dw_mmc.c
->> +++ b/drivers/mmc/host/dw_mmc.c
->> @@ -2046,21 +2046,6 @@ static int dw_mci_of_get_slot_quirks(struct device *dev, u8 slot)
->>         return quirks;
->>  }
+>>       /*
 >>
->> -/* find out bus-width for a given slot */
->> -static u32 dw_mci_of_get_bus_wd(struct device *dev, u8 slot)
->> -{
->> -       struct device_node *np = dw_mci_of_find_slot_node(dev, slot);
->> -       u32 bus_wd = 1;
->> -
->> -       if (!np)
->> -               return 1;
->> -
->> -       if (of_property_read_u32(np, "bus-width", &bus_wd))
->> -               dev_err(dev, "bus-width property not found, assuming width"
->> -                              " as 1\n");
->> -       return bus_wd;
->> -}
->> -
->>  /* find the write protect gpio for a given slot; or -1 if none specified */
->>  static int dw_mci_of_get_wp_gpio(struct device *dev, u8 slot)
->>  {
->> @@ -2108,10 +2093,6 @@ static int dw_mci_of_get_slot_quirks(struct device *dev, u8 slot)
->>  {
->>         return 0;
->>  }
->> -static u32 dw_mci_of_get_bus_wd(struct device *dev, u8 slot)
->> -{
->> -       return 1;
->> -}
->>  static struct device_node *dw_mci_of_find_slot_node(struct device *dev, u8 slot)
->>  {
->>         return NULL;
->> @@ -2134,7 +2115,6 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
->>         const struct dw_mci_drv_data *drv_data = host->drv_data;
->>         int ctrl_id, ret;
->>         u32 freq[2];
->> -       u8 bus_width;
->>
->>         mmc = mmc_alloc_host(sizeof(struct dw_mci_slot), host->dev);
->>         if (!mmc)
->> @@ -2189,19 +2169,7 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
->>         if (host->pdata->caps2)
->>                 mmc->caps2 = host->pdata->caps2;
->>
->> -       if (host->pdata->get_bus_wd)
->> -               bus_width = host->pdata->get_bus_wd(slot->id);
->> -       else if (host->dev->of_node)
->> -               bus_width = dw_mci_of_get_bus_wd(host->dev, slot->id);
->> -       else
->> -               bus_width = 1;
->> -
->> -       switch (bus_width) {
->> -       case 8:
->> -               mmc->caps |= MMC_CAP_8_BIT_DATA;
->> -       case 4:
->> -               mmc->caps |= MMC_CAP_4_BIT_DATA;
->> -       }
->> +       mmc_of_parse(mmc);
->>
->>         if (host->pdata->blk_settings) {
->>                 mmc->max_segs = host->pdata->blk_settings->max_segs;
->> @@ -2399,24 +2367,9 @@ static struct dw_mci_board *dw_mci_parse_dt(struct dw_mci *host)
->>                         return ERR_PTR(ret);
->>         }
->>
->> -       if (of_find_property(np, "keep-power-in-suspend", NULL))
->> -               pdata->pm_caps |= MMC_PM_KEEP_POWER;
->> -
->> -       if (of_find_property(np, "enable-sdio-wakeup", NULL))
->> -               pdata->pm_caps |= MMC_PM_WAKE_SDIO_IRQ;
->> -
->>         if (of_find_property(np, "supports-highspeed", NULL))
->>                 pdata->caps |= MMC_CAP_SD_HIGHSPEED | MMC_CAP_MMC_HIGHSPEED;
-> 
-> We should convert to the common bindings for highspeed modes as well,
-> but that's outside this patch though.
-It can be used "caps-sd-highspeed" and "caps-mmc-highspeed" instead of "support-highspeed".
-I will send the other patch for this.
+>
 
-Thanks for your acked.
+I don't have any deeper insight about the retuning mechanism for
+sdhci, still this seems reasonable.
 
-Best Regards,
-Jaehoon Chung
-> 
->>
->> -       if (of_find_property(np, "caps2-mmc-hs200-1_8v", NULL))
->> -               pdata->caps2 |= MMC_CAP2_HS200_1_8V_SDR;
->> -
->> -       if (of_find_property(np, "caps2-mmc-hs200-1_2v", NULL))
->> -               pdata->caps2 |= MMC_CAP2_HS200_1_2V_SDR;
->> -
->> -       if (of_get_property(np, "cd-inverted", NULL))
->> -               pdata->caps2 |= MMC_CAP2_CD_ACTIVE_HIGH;
->> -
->>         return pdata;
->>  }
->>
->> --
->> 1.7.9.5
-> 
-> Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
-> 
-
+Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
