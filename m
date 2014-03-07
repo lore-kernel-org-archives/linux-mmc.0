@@ -1,58 +1,40 @@
-From: Balaji T K <balajitk@ti.com>
-Subject: Re: [PATCH 1/3] regulator: pbias: Fix is_enabled callback implementation
-Date: Fri, 7 Mar 2014 22:18:59 +0530
-Message-ID: <5319F87B.8080400@ti.com>
-References: <1394206897.17867.1.camel@phoenix>
+From: Chris Ball <chris@printf.net>
+Subject: Re: RFC: raw extcsd dump
+Date: Fri, 07 Mar 2014 17:23:46 +0000
+Message-ID: <86siqtgbx9.fsf@void.printf.net>
+References: <CANEJEGtyGM0jbyy9b0SSY-9D90J8EZFNWYVOUMLQ27rz1Jkztg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from comal.ext.ti.com ([198.47.26.152]:56886 "EHLO comal.ext.ti.com"
+Received: from void.printf.net ([89.145.121.20]:42362 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752191AbaCGQtJ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 7 Mar 2014 11:49:09 -0500
-In-Reply-To: <1394206897.17867.1.camel@phoenix>
+	id S1751487AbaCGRXt (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 7 Mar 2014 12:23:49 -0500
+In-Reply-To: <CANEJEGtyGM0jbyy9b0SSY-9D90J8EZFNWYVOUMLQ27rz1Jkztg@mail.gmail.com>
+	(Grant Grundler's message of "Fri, 7 Mar 2014 08:31:21 -0800")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Axel Lin <axel.lin@ingics.com>
-Cc: Chris Ball <chris@printf.net>, Liam Girdwood <lgirdwood@gmail.com>, Mark Brown <broonie@kernel.org>, Florian Vaussard <florian.vaussard@epfl.ch>, Stefan Roese <sr@denx.de>, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
+To: Grant Grundler <grundler@google.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-On Friday 07 March 2014 09:11 PM, Axel Lin wrote:
-> The is_enabled implementation is wrong in some cases:
-> e.g. for pbias_mmc_omap5: emable_mask is : BIT(27) | BIT(25) | BIT(26)
-Hi Axel,
+Hi Grant,
 
-s/emable_mask/enable_mask
+On Fri, Mar 07 2014, Grant Grundler wrote:
+> Are you interested in "raw dump" of extcsd data?
+>
+> We need it to dump vendor specific data that happens to be in a reserved field.
 
-> However, pbias_regulator_enable() only sets BIT(26) | BIT(22) bits.
+I don't see any reason to exclude it from mmc-utils, but have you seen
+the debugfs node?
 
-You mixed up enable_mask of omap5 with .enable of omap4 :-)
-above comment should be
-"However, pbias_regulator_enable() only sets BIT(27) | BIT(26) bits"
-Other than that
-Acked-by: Balaji T K <balajitk@ti.com>
+mount -t debugfs /dev/mmcblk0 /mnt/
+cat /mnt/mmc0/mmc0\:0001/ext_csd
 
-> So is_enabled callback will always return false in this case.
-> Fix the logic to compare the register value with info->enable rather than
-> info->enable_mask.
->
-> Signed-off-by: Axel Lin <axel.lin@ingics.com>
-> ---
->   drivers/regulator/pbias-regulator.c | 2 +-
->   1 file changed, 1 insertion(+), 1 deletion(-)
->
-> diff --git a/drivers/regulator/pbias-regulator.c b/drivers/regulator/pbias-regulator.c
-> index ded3b35..d89a1d8 100644
-> --- a/drivers/regulator/pbias-regulator.c
-> +++ b/drivers/regulator/pbias-regulator.c
-> @@ -108,7 +108,7 @@ static int pbias_regulator_is_enable(struct regulator_dev *rdev)
->
->   	regmap_read(data->syscon, data->pbias_reg, &value);
->
-> -	return (value & info->enable_mask) == info->enable_mask;
-> +	return (value & info->enable_mask) == info->enable;
->   }
->
->   static struct regulator_ops pbias_regulator_voltage_ops = {
->
+Want to explain whether that's insufficient?  If so, maybe we should
+just fix that instead.
 
+Thanks,
+
+- Chris.
+-- 
+Chris Ball   <chris@printf.net>   <http://printf.net/>
