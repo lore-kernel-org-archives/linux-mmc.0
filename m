@@ -1,94 +1,71 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: RESEND:[PATCH V3] sdhci: only reprogram retuning timer when flag
- is set
-Date: Fri, 7 Mar 2014 05:06:03 +0100
-Message-ID: <CAPDyKFpQSEhH4OoJ=v7drpfbTPZy4PQdSnbix5HG6XzGGTjzrQ@mail.gmail.com>
-References: <1393012782-23917-1-git-send-email-arend@broadcom.com>
-	<53183FF9.4090803@broadcom.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+From: Steffen Trumtrar <s.trumtrar@pengutronix.de>
+Subject: [RFC 1/2] sdhci: add init_card callback
+Date: Fri,  7 Mar 2014 10:25:48 +0100
+Message-ID: <1394184350-25214-1-git-send-email-s.trumtrar@pengutronix.de>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qc0-f177.google.com ([209.85.216.177]:51952 "EHLO
-	mail-qc0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751055AbaCGEGF (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 6 Mar 2014 23:06:05 -0500
-Received: by mail-qc0-f177.google.com with SMTP id w7so4020101qcr.22
-        for <linux-mmc@vger.kernel.org>; Thu, 06 Mar 2014 20:06:03 -0800 (PST)
-In-Reply-To: <53183FF9.4090803@broadcom.com>
+Received: from metis.ext.pengutronix.de ([92.198.50.35]:44571 "EHLO
+	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750896AbaCGJZ5 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 7 Mar 2014 04:25:57 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Arend van Spriel <arend@broadcom.com>
-Cc: Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>, Dong Aisheng <dongas86@gmail.com>, Aaron Lu <aaron.lwe@gmail.com>
+To: linux-mmc@vger.kernel.org
+Cc: Chris Ball <chris@printf.net>, Dong Aisheng <b29396@freescale.com>, Steffen Trumtrar <s.trumtrar@pengutronix.de>
 
-On 6 March 2014 10:29, Arend van Spriel <arend@broadcom.com> wrote:
-> On 02/21/2014 08:59 PM, Arend van Spriel wrote:
->> When the host->tuning_count is zero it means that the
->> retuning is disabled. This is checked on the first
->> run of sdhci_execute_tuning() by the if statement below:
->>
->>       if (!(host->flags & SDHCI_NEEDS_RETUNING) && host->tuning_count &&
->>           (host->tuning_mode == SDHCI_TUNING_MODE_1)) {
->>
->> So only when tuning_count is non-zero it will set the host
->> flag SDHCI_USING_RETUNING_TIMER. The else statement is only
->> for re-programming the timer, which means that flag must be
->> set. Because that is not checked the else statement is executed
->> in the first run when tuning_count is zero.
->>
->> This was seen on a host controller which indicated
->> SDHCI_TUNING_MODE_1 (0) and tuning_count being zero. Suspect
->> that (one of) these registers is not properly set.
->>
->> Cc: Dong Aisheng <dongas86@gmail.com>
->> Cc: Aaron Lu <aaron.lwe@gmail.com>
->> Signed-off-by: Arend van Spriel <arend@broadcom.com>
->> ---
->> Noticed this patch was still not applied so please reconsider
->> taking it in and let me know. The patch has been rebased and
->> applies to the mmc-next branch.
->
-> ping? Am I on some spam filter? What is needed to get this change applied?
->
-> Regards,
-> Arend
->
->> Regards,
->> Arend
->>
->> V3:
->> - remote tuning mode check for retuning timer reload
->>
->> V2:
->> - add more explanation to the commit message
->> - check host flag SDHCI_USING_RETUNING_TIMER
->> ---
->>  drivers/mmc/host/sdhci.c | 7 +++----
->>  1 file changed, 3 insertions(+), 4 deletions(-)
->>
->> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
->> index 9ddef47..d5b421d 100644
->> --- a/drivers/mmc/host/sdhci.c
->> +++ b/drivers/mmc/host/sdhci.c
->> @@ -2026,12 +2026,11 @@ out:
->>                       host->tuning_count * HZ);
->>               /* Tuning mode 1 limits the maximum data length to 4MB */
->>               mmc->max_blk_count = (4 * 1024 * 1024) / mmc->max_blk_size;
->> -     } else {
->> +     } else if (host->flags & SDHCI_USING_RETUNING_TIMER) {
->>               host->flags &= ~SDHCI_NEEDS_RETUNING;
->>               /* Reload the new initial value for timer */
->> -             if (host->tuning_mode == SDHCI_TUNING_MODE_1)
->> -                     mod_timer(&host->tuning_timer, jiffies +
->> -                             host->tuning_count * HZ);
->> +             mod_timer(&host->tuning_timer, jiffies +
->> +                       host->tuning_count * HZ);
->>       }
->>
->>       /*
->>
->
+Currently host drivers using the sdhci-pltfm code can not configure the
+host based on the type of card inserted.
 
-I don't have any deeper insight about the retuning mechanism for
-sdhci, still this seems reasonable.
+The sdio driver e.g. calls the card_init callback, so the host can now
+know what card is used and configure itself accordingly.
 
-Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
+Provide a callback for users of the sdhci-pltfm code to use this callback
+function.
+
+Signed-off-by: Steffen Trumtrar <s.trumtrar@pengutronix.de>
+---
+ drivers/mmc/host/sdhci.c |    9 +++++++++
+ drivers/mmc/host/sdhci.h |    1 +
+ 2 files changed, 10 insertions(+)
+
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 9ddef47..20bf40b 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -2106,6 +2106,14 @@ static void sdhci_card_event(struct mmc_host *mmc)
+ 	spin_unlock_irqrestore(&host->lock, flags);
+ }
+ 
++static void sdhci_init_card(struct mmc_host *mmc, struct mmc_card *card)
++{
++	struct sdhci_host *host = mmc_priv(mmc);
++
++	if (host->ops->card_type_init)
++		host->ops->card_type_init(host, card);
++}
++
+ static const struct mmc_host_ops sdhci_ops = {
+ 	.request	= sdhci_request,
+ 	.set_ios	= sdhci_set_ios,
+@@ -2117,6 +2125,7 @@ static const struct mmc_host_ops sdhci_ops = {
+ 	.execute_tuning			= sdhci_execute_tuning,
+ 	.card_event			= sdhci_card_event,
+ 	.card_busy	= sdhci_card_busy,
++	.init_card	= sdhci_init_card,
+ };
+ 
+ /*****************************************************************************\
+diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+index 0a3ed01..331a285 100644
+--- a/drivers/mmc/host/sdhci.h
++++ b/drivers/mmc/host/sdhci.h
+@@ -296,6 +296,7 @@ struct sdhci_ops {
+ 	void    (*adma_workaround)(struct sdhci_host *host, u32 intmask);
+ 	void	(*platform_init)(struct sdhci_host *host);
+ 	void    (*card_event)(struct sdhci_host *host);
++	void	(*card_type_init)(struct sdhci_host *host, struct mmc_card *card);
+ };
+ 
+ #ifdef CONFIG_MMC_SDHCI_IO_ACCESSORS
+-- 
+1.7.10.4
+
