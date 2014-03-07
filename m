@@ -1,58 +1,59 @@
-From: Axel Lin <axel.lin@ingics.com>
-Subject: Re: [PATCH RFT] regulator: pbias: Convert to use regmap helper functions
-Date: Fri, 7 Mar 2014 23:57:03 +0800
-Message-ID: <CAFRkauACGODncvyPs0nNC+pkr4f55Xrhgn1hmAJbKHB+GoaVWA@mail.gmail.com>
-References: <1394111433.21007.2.camel@phoenix>
-	<5319E4E9.5010207@ti.com>
+From: Tony Lindgren <tony@atomide.com>
+Subject: Re: [PATCH v7 1/4] mmc: omap_hsmmc: Enable SDIO IRQ.
+Date: Fri, 7 Mar 2014 08:04:42 -0800
+Message-ID: <20140307160442.GA3789@atomide.com>
+References: <1393331866-28307-1-git-send-email-afenkart@gmail.com>
+ <1393331866-28307-2-git-send-email-afenkart@gmail.com>
+ <5310C1AC.5060301@ti.com>
+ <CALtMJEA9opDbEb1HRbA3CdOc3UigrpeD1bhaNAgyEKehsBDvgg@mail.gmail.com>
+ <5319E1C1.9000107@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qc0-f180.google.com ([209.85.216.180]:45748 "EHLO
-	mail-qc0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752019AbaCGP5F (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 7 Mar 2014 10:57:05 -0500
-Received: by mail-qc0-f180.google.com with SMTP id x3so4841387qcv.39
-        for <linux-mmc@vger.kernel.org>; Fri, 07 Mar 2014 07:57:04 -0800 (PST)
-In-Reply-To: <5319E4E9.5010207@ti.com>
+Received: from mho-02-ewr.mailhop.org ([204.13.248.72]:44071 "EHLO
+	mho-02-ewr.mailhop.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751578AbaCGQEw (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 7 Mar 2014 11:04:52 -0500
+Content-Disposition: inline
+In-Reply-To: <5319E1C1.9000107@ti.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Balaji T K <balajitk@ti.com>
-Cc: Chris Ball <chris@printf.net>, Liam Girdwood <lgirdwood@gmail.com>, Mark Brown <broonie@kernel.org>, Florian Vaussard <florian.vaussard@epfl.ch>, Stefan Roese <sr@denx.de>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-mmc@vger.kernel.org
+Cc: Andreas Fenkart <afenkart@gmail.com>, Chris Ball <cjb@laptop.org>, Grant Likely <grant.likely@secretlab.ca>, Felipe Balbi <balbi@ti.com>, Daniel Mack <zonque@gmail.com>, Kumar Gala <galak@codeaurora.org>, linux-doc@vger.kernel.org, linux-mmc <linux-mmc@vger.kernel.org>, linux-omap <linux-omap@vger.kernel.org>
 
-2014-03-07 23:25 GMT+08:00 Balaji T K <balajitk@ti.com>:
-> On Thursday 06 March 2014 06:40 PM, Axel Lin wrote:
->>
->> This patch converts this driver to use the regmap helper functions
->> provided by
->> regulator core.
->>
->> This fixes a few issues in current implementation:
->>
->> 1) In original code, the set voltage does not check max_uV,
->>     which means if request max_uV < 1800000, it will still set the voltage
->>     to 1800000.
->>
->
-> Hi Axel,
->
-> May be I am not getting your logic here, why would max_uV be less than
-> min_uV
+* Balaji T K <balajitk@ti.com> [140307 07:15]:
+> On Wednesday 05 March 2014 02:00 PM, Andreas Fenkart wrote:
+> >2014-02-28 18:04 GMT+01:00 Balaji T K <balajitk@ti.com>:
+> >>
+> >>I tried testing this patch series on am335x, I see throughput in the
+> >>range of KBs. Will give another try with Tony's version.
+> >KB sounds really bad, even with polling I have > 5MBytes/s.
+> >
+> >Could you pls paste
+> ># cat /sys/kernel/debug/mmc0/regs
+> >
+> Hi,
+> 
+> Find below debug reg dump
+> 
+> mmc0:
+> sdio irq        enabled
+> pinmux config   sdio
+> ctx_loss:       1
+> 
+> regs:
+> CON:            0x00000600
+> PSTATE:         0x01f70000
+> HCTL:           0x00000d06
+> SYSCTL:         0x000d0087
+> IE:             0x00000100
+> ISE:            0x00000100
+> CAPA:           0x06e10080
 
-I think this is an unlikely case here.
->
-> The intention was to set vmode to 0 for any voltage request lesser than
-> 1.8V.
+Is this with wl12xx? If so, wl12xx driver is missing calls to
+sdio_claim_irq() and sdio_release_irq() so it probably won't
+behave properly with the SDIO interrupt until those are added.
 
-This statement sounds wrong to me.
-For example, If the request voltage range is 1.0V ~ 1.5V.
-We should return error rather than set the voltage to 1.8V (which may
-damage the device).
+Regards,
 
-> With regmap conversion, set voltage of 0V will become invalid. However
-> since pbias is not set to 0V anywhere, I think it shouldn't be an issue.
-ok.
-
-> Will test and confirm.
-
-Thanks,
-Axel
+Tony
