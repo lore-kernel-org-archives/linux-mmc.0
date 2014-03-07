@@ -1,74 +1,61 @@
-From: Steffen Trumtrar <s.trumtrar@pengutronix.de>
-Subject: [RFC 2/2] sdhci: imx: add callback for card_type inits
-Date: Fri,  7 Mar 2014 10:25:49 +0100
-Message-ID: <1394184350-25214-2-git-send-email-s.trumtrar@pengutronix.de>
-References: <1394184350-25214-1-git-send-email-s.trumtrar@pengutronix.de>
+From: Seungwon Jeon <tgih.jun@samsung.com>
+Subject: [PATCH v3 0/7] mmc: distinguish DDR timing mode for eMMC/UHS
+Date: Fri, 07 Mar 2014 22:30:23 +0900
+Message-ID: <002801cf3a09$64b390c0$2e1ab240$%jun@samsung.com>
+References: <1383653403-10049-1-git-send-email-ulf.hansson@linaro.org>
+ <005f01cf2a57$6ed025d0$4c707170$%jun@samsung.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from metis.ext.pengutronix.de ([92.198.50.35]:44568 "EHLO
-	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752081AbaCGJZ5 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 7 Mar 2014 04:25:57 -0500
-In-Reply-To: <1394184350-25214-1-git-send-email-s.trumtrar@pengutronix.de>
+Received: from mailout4.samsung.com ([203.254.224.34]:24816 "EHLO
+	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752533AbaCGNa0 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 7 Mar 2014 08:30:26 -0500
+Received: from epcpsbgr4.samsung.com
+ (u144.gpu120.samsung.co.kr [203.254.230.144])
+ by mailout4.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+ (7.0.4.24.0) 64bit (built Nov 17 2011))
+ with ESMTP id <0N2200D4CIUNN710@mailout4.samsung.com> for
+ linux-mmc@vger.kernel.org; Fri, 07 Mar 2014 22:30:24 +0900 (KST)
+In-reply-to: <005f01cf2a57$6ed025d0$4c707170$%jun@samsung.com>
+Content-language: ko
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
-Cc: Chris Ball <chris@printf.net>, Dong Aisheng <b29396@freescale.com>, Steffen Trumtrar <s.trumtrar@pengutronix.de>
+Cc: 'Chris Ball' <chris@printf.net>, 'Ulf Hansson' <ulf.hansson@linaro.org>, rickard.andersson@stericsson.com, linux@arm.linux.org.uk, balajitk@ti.com, g.liakhovetski@gmx.de, wei_wang@realsil.com.cn, sameo@linux.intel.com, jh80.chung@samsung.com
 
-At least the i.MX35 (there may be others) currently implements a quirk
-to turn of multiblock transfers for the esdhc host.
-According to the errata this is only true for SD cards and NOT for
-sdio cards.
+These changes intend to distinguish two DDR timing modes related to eMMC & UHS.
+Even though two modes are different actually, UHS_DDR50 is used as eMMC DDR mode.
+MMC_TIMING_MMC_DDR52 mode is added.
 
-When the sdio driver initializes the card, it knows the type of card
-we actually have. So now the sdhci-esdhc-imx could decide based on
-card type if multiblock transfers should be used or not.
+Changes in V3:
+	(6/7) Added MMC-DDR52 mode instead of replacing UHS-DDR50 in dw_mmc-exynos
 
-Signed-off-by: Steffen Trumtrar <s.trumtrar@pengutronix.de>
----
- drivers/mmc/host/sdhci-esdhc-imx.c |   16 ++++++++++++++++
- 1 file changed, 16 insertions(+)
-
-diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-index b841bb7..332eb00 100644
---- a/drivers/mmc/host/sdhci-esdhc-imx.c
-+++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-@@ -18,6 +18,7 @@
- #include <linux/gpio.h>
- #include <linux/module.h>
- #include <linux/slab.h>
-+#include <linux/mmc/card.h>
- #include <linux/mmc/host.h>
- #include <linux/mmc/mmc.h>
- #include <linux/mmc/sdio.h>
-@@ -878,6 +879,20 @@ static int esdhc_set_uhs_signaling(struct sdhci_host *host, unsigned int uhs)
- 	return esdhc_change_pinstate(host, uhs);
- }
+Changes in V2:
+	(2/7) Added MMC-DDR52 mode instead of replacing UHS-DDR50 in mmci
  
-+static void esdhc_init_card_type(struct sdhci_host *host, struct mmc_card *card)
-+{
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct pltfm_imx_data *imx_data = pltfm_host->priv;
-+	struct mmc_host *mmc = host->mmc;
-+
-+	if (imx_data->socdata->flags & ESDHC_FLAG_ENGCM07207) {
-+		if (card->type == MMC_TYPE_SDIO)
-+			mmc->max_blk_count = 65535;
-+		else
-+			mmc->max_blk_count = 1;
-+	}
-+}
-+
- static struct sdhci_ops sdhci_esdhc_ops = {
- 	.read_l = esdhc_readl_le,
- 	.read_w = esdhc_readw_le,
-@@ -890,6 +905,7 @@ static struct sdhci_ops sdhci_esdhc_ops = {
- 	.get_ro = esdhc_pltfm_get_ro,
- 	.platform_bus_width = esdhc_pltfm_bus_width,
- 	.set_uhs_signaling = esdhc_set_uhs_signaling,
-+	.card_type_init = esdhc_init_card_type,
- };
- 
- static const struct sdhci_pltfm_data sdhci_esdhc_imx_pdata = {
--- 
-1.7.10.4
+Seungwon Jeon (7):
+  mmc: clarify DDR timing mode between SD-UHS and eMMC
+  mmc: mmci: clarify DDR timing mode between SD-UHS and eMMC
+  mmc: omap: clarify DDR timing mode between SD-UHS and eMMC
+  mmc: sh_mmcif: clarify DDR timing mode between SD-UHS and eMMC
+  mmc: rtsx: clarify DDR timing mode between SD-UHS and eMMC
+  mmc: dw_mmc: clarify DDR timing mode between SD-UHS and eMMC
+  mmc: sdhci: clarify DDR timing mode between SD-UHS and eMMC
+
+ drivers/mmc/core/debugfs.c        |    3 +++
+ drivers/mmc/core/mmc.c            |    2 +-
+ drivers/mmc/host/dw_mmc-exynos.c  |    5 ++---
+ drivers/mmc/host/dw_mmc.c         |    2 +-
+ drivers/mmc/host/mmci.c           |    6 ++++--
+ drivers/mmc/host/omap_hsmmc.c     |    4 ++--
+ drivers/mmc/host/rtsx_pci_sdmmc.c |    2 ++
+ drivers/mmc/host/sdhci.c          |    4 +++-
+ drivers/mmc/host/sh_mmcif.c       |    9 +++++----
+ include/linux/mmc/host.h          |    3 ++-
+ 10 files changed, 25 insertions(+), 15 deletions(-)
+
+Thanks,
+sw-j
 
