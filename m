@@ -1,86 +1,194 @@
 From: Balaji T K <balajitk@ti.com>
-Subject: Re: [PATCH v7 1/4] mmc: omap_hsmmc: Enable SDIO IRQ.
-Date: Fri, 7 Mar 2014 20:42:01 +0530
-Message-ID: <5319E1C1.9000107@ti.com>
-References: <1393331866-28307-1-git-send-email-afenkart@gmail.com> <1393331866-28307-2-git-send-email-afenkart@gmail.com> <5310C1AC.5060301@ti.com> <CALtMJEA9opDbEb1HRbA3CdOc3UigrpeD1bhaNAgyEKehsBDvgg@mail.gmail.com>
+Subject: Re: [PATCH RFT] regulator: pbias: Convert to use regmap helper functions
+Date: Fri, 7 Mar 2014 20:55:29 +0530
+Message-ID: <5319E4E9.5010207@ti.com>
+References: <1394111433.21007.2.camel@phoenix>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from arroyo.ext.ti.com ([192.94.94.40]:45564 "EHLO arroyo.ext.ti.com"
+Received: from bear.ext.ti.com ([192.94.94.41]:33540 "EHLO bear.ext.ti.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752718AbaCGPM0 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 7 Mar 2014 10:12:26 -0500
-In-Reply-To: <CALtMJEA9opDbEb1HRbA3CdOc3UigrpeD1bhaNAgyEKehsBDvgg@mail.gmail.com>
+	id S1751065AbaCGPZs (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 7 Mar 2014 10:25:48 -0500
+In-Reply-To: <1394111433.21007.2.camel@phoenix>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Andreas Fenkart <afenkart@gmail.com>
-Cc: Chris Ball <cjb@laptop.org>, Tony Lindgren <tony@atomide.com>, Grant Likely <grant.likely@secretlab.ca>, Felipe Balbi <balbi@ti.com>, Daniel Mack <zonque@gmail.com>, Kumar Gala <galak@codeaurora.org>, linux-doc@vger.kernel.org, linux-mmc <linux-mmc@vger.kernel.org>, linux-omap <linux-omap@vger.kernel.org>
+To: Axel Lin <axel.lin@ingics.com>
+Cc: Chris Ball <chris@printf.net>, Liam Girdwood <lgirdwood@gmail.com>, Mark Brown <broonie@kernel.org>, Florian Vaussard <florian.vaussard@epfl.ch>, Stefan Roese <sr@denx.de>, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
 
-On Wednesday 05 March 2014 02:00 PM, Andreas Fenkart wrote:
-> Hi,
+On Thursday 06 March 2014 06:40 PM, Axel Lin wrote:
+> This patch converts this driver to use the regmap helper functions provided by
+> regulator core.
 >
-> 2014-02-28 18:04 GMT+01:00 Balaji T K <balajitk@ti.com>:
->> On Tuesday 25 February 2014 06:07 PM, Andreas Fenkart wrote:
->>>
->>> For now, only support SDIO interrupt if we are booted with
->>> DT. This is because some platforms need special quirks. And
->>> we don't want to add new legacy mux platform init code
->>> callbacks any longer as we are moving to DT based booting
->>> anyways.
->>>
->>> Signed-off-by: Andreas Fenkart <afenkart@gmail.com>
->>>
->>> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
->>> index a5a38cc..bd3bb0c 100644
->>> --- a/drivers/mmc/host/omap_hsmmc.c
->>> +++ b/drivers/mmc/host/omap_hsmmc.c
->>
->>
->> <snip>
->>
->>
->>> @@ -1705,7 +1757,18 @@ static void omap_hsmmc_debugfs(struct mmc_host
->>> *mmc)
->>>    #endif
->>>
->>>    #ifdef CONFIG_OF
->>> -static u16 omap4_reg_offset = 0x100;
->>> +struct of_data {
->>> +       u16 offset;
->>> +       int flags;
->>> +};
->>> +
->>
->> Hi Andreas,
->>
->> struct of_data declaration needs to be moved out of #ifdef CONFIG_OF
->> for !CONFIG_OF build.
-> should be fixed with new version
+> This fixes a few issues in current implementation:
 >
->>
->> I tried testing this patch series on am335x, I see throughput in the
->> range of KBs. Will give another try with Tony's version.
-> KB sounds really bad, even with polling I have > 5MBytes/s.
+> 1) In original code, the set voltage does not check max_uV,
+>     which means if request max_uV < 1800000, it will still set the voltage
+>     to 1800000.
 >
-> Could you pls paste
-> # cat /sys/kernel/debug/mmc0/regs
->
-Hi,
 
-Find below debug reg dump
+Hi Axel,
 
-mmc0:
-sdio irq        enabled
-pinmux config   sdio
-ctx_loss:       1
+May be I am not getting your logic here, why would max_uV be less than min_uV
 
-regs:
-CON:            0x00000600
-PSTATE:         0x01f70000
-HCTL:           0x00000d06
-SYSCTL:         0x000d0087
-IE:             0x00000100
-ISE:            0x00000100
-CAPA:           0x06e10080
+The intention was to set vmode to 0 for any voltage request lesser than 1.8V.
+With regmap conversion, set voltage of 0V will become invalid. However
+since pbias is not set to 0V anywhere, I think it shouldn't be an issue.
+Will test and confirm.
+
+
+Thanks and Regards
+Balaji T K
+
+> 2) The is_enable implementation is wrong in some cases:
+>     e.g. for pbias_mmc_omap5: emable_mask is : BIT(27) | BIT(25) | BIT(26)
+>     However, pbias_regulator_enable() only sets BIT(26) | BIT(22) bits.
+>     So is_enable always return false in this case.
+>
+> Signed-off-by: Axel Lin <axel.lin@ingics.com>
+> ---
+> Hi Balaji,
+> I don't have this h/w, so please test if it works.
+> Regards,
+> Axel
+>   drivers/regulator/pbias-regulator.c | 86 ++++++++++---------------------------
+>   1 file changed, 23 insertions(+), 63 deletions(-)
+>
+> diff --git a/drivers/regulator/pbias-regulator.c b/drivers/regulator/pbias-regulator.c
+> index ded3b35..f25c91e 100644
+> --- a/drivers/regulator/pbias-regulator.c
+> +++ b/drivers/regulator/pbias-regulator.c
+> @@ -38,85 +38,41 @@ struct pbias_reg_info {
+>   struct pbias_regulator_data {
+>   	struct regulator_desc desc;
+>   	void __iomem *pbias_addr;
+> -	unsigned int pbias_reg;
+>   	struct regulator_dev *dev;
+>   	struct regmap *syscon;
+>   	const struct pbias_reg_info *info;
+>   	int voltage;
+>   };
+>
+> -static int pbias_regulator_set_voltage(struct regulator_dev *dev,
+> -			int min_uV, int max_uV, unsigned *selector)
+> +static int pbias_regulator_list_voltage(struct regulator_dev *rdev,
+> +					unsigned int selector)
+>   {
+> -	struct pbias_regulator_data *data = rdev_get_drvdata(dev);
+> -	const struct pbias_reg_info *info = data->info;
+> -	int ret, vmode;
+> -
+> -	if (min_uV <= 1800000)
+> -		vmode = 0;
+> -	else if (min_uV > 1800000)
+> -		vmode = info->vmode;
+> -
+> -	ret = regmap_update_bits(data->syscon, data->pbias_reg,
+> -						info->vmode, vmode);
+> -
+> -	return ret;
+> -}
+> -
+> -static int pbias_regulator_get_voltage(struct regulator_dev *rdev)
+> -{
+> -	struct pbias_regulator_data *data = rdev_get_drvdata(rdev);
+> -	const struct pbias_reg_info *info = data->info;
+> -	int value, voltage;
+> -
+> -	regmap_read(data->syscon, data->pbias_reg, &value);
+> -	value &= info->vmode;
+> -
+> -	voltage = value ? 3000000 : 1800000;
+> -
+> -	return voltage;
+> +	switch (selector) {
+> +	case 0:
+> +		return 1800000;
+> +	case 1:
+> +		return 3000000;
+> +	default:
+> +		return -EINVAL;
+> +	}
+>   }
+>
+>   static int pbias_regulator_enable(struct regulator_dev *rdev)
+>   {
+>   	struct pbias_regulator_data *data = rdev_get_drvdata(rdev);
+>   	const struct pbias_reg_info *info = data->info;
+> -	int ret;
+> -
+> -	ret = regmap_update_bits(data->syscon, data->pbias_reg,
+> -					info->enable_mask, info->enable);
+> -
+> -	return ret;
+> -}
+> -
+> -static int pbias_regulator_disable(struct regulator_dev *rdev)
+> -{
+> -	struct pbias_regulator_data *data = rdev_get_drvdata(rdev);
+> -	const struct pbias_reg_info *info = data->info;
+> -	int ret;
+> -
+> -	ret = regmap_update_bits(data->syscon, data->pbias_reg,
+> -						info->enable_mask, 0);
+> -	return ret;
+> -}
+> -
+> -static int pbias_regulator_is_enable(struct regulator_dev *rdev)
+> -{
+> -	struct pbias_regulator_data *data = rdev_get_drvdata(rdev);
+> -	const struct pbias_reg_info *info = data->info;
+> -	int value;
+> -
+> -	regmap_read(data->syscon, data->pbias_reg, &value);
+>
+> -	return (value & info->enable_mask) == info->enable_mask;
+> +	return regmap_update_bits(data->syscon, rdev->desc->enable_reg,
+> +				  info->enable_mask, info->enable);
+>   }
+>
+>   static struct regulator_ops pbias_regulator_voltage_ops = {
+> -	.set_voltage	= pbias_regulator_set_voltage,
+> -	.get_voltage	= pbias_regulator_get_voltage,
+> -	.enable		= pbias_regulator_enable,
+> -	.disable	= pbias_regulator_disable,
+> -	.is_enabled	= pbias_regulator_is_enable,
+> +	.list_voltage = pbias_regulator_list_voltage,
+> +	.get_voltage_sel = regulator_get_voltage_sel_regmap,
+> +	.set_voltage_sel = regulator_set_voltage_sel_regmap,
+> +	.enable = pbias_regulator_enable,
+> +	.disable = regulator_disable_regmap,
+> +	.is_enabled = regulator_is_enabled_regmap,
+>   };
+>
+>   static const struct pbias_reg_info pbias_mmc_omap2430 = {
+> @@ -192,6 +148,7 @@ static int pbias_regulator_probe(struct platform_device *pdev)
+>   	if (IS_ERR(syscon))
+>   		return PTR_ERR(syscon);
+>
+> +	cfg.regmap = syscon;
+>   	cfg.dev = &pdev->dev;
+>
+>   	for (idx = 0; idx < PBIAS_NUM_REGS && data_idx < count; idx++) {
+> @@ -207,7 +164,6 @@ static int pbias_regulator_probe(struct platform_device *pdev)
+>   		if (!res)
+>   			return -EINVAL;
+>
+> -		drvdata[data_idx].pbias_reg = res->start;
+>   		drvdata[data_idx].syscon = syscon;
+>   		drvdata[data_idx].info = info;
+>   		drvdata[data_idx].desc.name = info->name;
+> @@ -216,6 +172,10 @@ static int pbias_regulator_probe(struct platform_device *pdev)
+>   		drvdata[data_idx].desc.ops = &pbias_regulator_voltage_ops;
+>   		drvdata[data_idx].desc.n_voltages = 2;
+>   		drvdata[data_idx].desc.enable_time = info->enable_time;
+> +		drvdata[data_idx].desc.vsel_reg = res->start;
+> +		drvdata[data_idx].desc.vsel_mask = info->vmode;
+> +		drvdata[data_idx].desc.enable_reg = res->start;
+> +		drvdata[data_idx].desc.enable_mask = info->enable_mask;
+>
+>   		cfg.init_data = pbias_matches[idx].init_data;
+>   		cfg.driver_data = &drvdata[data_idx];
+>
 
