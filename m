@@ -1,59 +1,34 @@
-From: Tony Lindgren <tony@atomide.com>
-Subject: Re: [PATCH v7 1/4] mmc: omap_hsmmc: Enable SDIO IRQ.
-Date: Fri, 7 Mar 2014 08:04:42 -0800
-Message-ID: <20140307160442.GA3789@atomide.com>
-References: <1393331866-28307-1-git-send-email-afenkart@gmail.com>
- <1393331866-28307-2-git-send-email-afenkart@gmail.com>
- <5310C1AC.5060301@ti.com>
- <CALtMJEA9opDbEb1HRbA3CdOc3UigrpeD1bhaNAgyEKehsBDvgg@mail.gmail.com>
- <5319E1C1.9000107@ti.com>
+From: Grant Grundler <grundler@google.com>
+Subject: RFC: raw extcsd dump
+Date: Fri, 7 Mar 2014 08:31:21 -0800
+Message-ID: <CANEJEGtyGM0jbyy9b0SSY-9D90J8EZFNWYVOUMLQ27rz1Jkztg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mho-02-ewr.mailhop.org ([204.13.248.72]:44071 "EHLO
-	mho-02-ewr.mailhop.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751578AbaCGQEw (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 7 Mar 2014 11:04:52 -0500
-Content-Disposition: inline
-In-Reply-To: <5319E1C1.9000107@ti.com>
+Received: from mail-oa0-f47.google.com ([209.85.219.47]:33857 "EHLO
+	mail-oa0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751645AbaCGQbW (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 7 Mar 2014 11:31:22 -0500
+Received: by mail-oa0-f47.google.com with SMTP id i11so4367829oag.6
+        for <linux-mmc@vger.kernel.org>; Fri, 07 Mar 2014 08:31:21 -0800 (PST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Balaji T K <balajitk@ti.com>
-Cc: Andreas Fenkart <afenkart@gmail.com>, Chris Ball <cjb@laptop.org>, Grant Likely <grant.likely@secretlab.ca>, Felipe Balbi <balbi@ti.com>, Daniel Mack <zonque@gmail.com>, Kumar Gala <galak@codeaurora.org>, linux-doc@vger.kernel.org, linux-mmc <linux-mmc@vger.kernel.org>, linux-omap <linux-omap@vger.kernel.org>
+To: Chris Ball <cjb@laptop.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-* Balaji T K <balajitk@ti.com> [140307 07:15]:
-> On Wednesday 05 March 2014 02:00 PM, Andreas Fenkart wrote:
-> >2014-02-28 18:04 GMT+01:00 Balaji T K <balajitk@ti.com>:
-> >>
-> >>I tried testing this patch series on am335x, I see throughput in the
-> >>range of KBs. Will give another try with Tony's version.
-> >KB sounds really bad, even with polling I have > 5MBytes/s.
-> >
-> >Could you pls paste
-> ># cat /sys/kernel/debug/mmc0/regs
-> >
-> Hi,
-> 
-> Find below debug reg dump
-> 
-> mmc0:
-> sdio irq        enabled
-> pinmux config   sdio
-> ctx_loss:       1
-> 
-> regs:
-> CON:            0x00000600
-> PSTATE:         0x01f70000
-> HCTL:           0x00000d06
-> SYSCTL:         0x000d0087
-> IE:             0x00000100
-> ISE:            0x00000100
-> CAPA:           0x06e10080
+Chris,
+Are you interested in "raw dump" of extcsd data?
 
-Is this with wl12xx? If so, wl12xx driver is missing calls to
-sdio_claim_irq() and sdio_release_irq() so it probably won't
-behave properly with the SDIO interrupt until those are added.
+We need it to dump vendor specific data that happens to be in a reserved field.
 
-Regards,
+Chromium.org code review is here:
+   https://chromium-review.googlesource.com/#/c/189002/
 
-Tony
+git magic to pull that patch is here:
+   git pull https://chromium.googlesource.com/chromiumos/third_party/mmc-utils
+refs/changes/02/189002/4
+
+I can also post the patch as normal inline if you are interested.
+
+cheers
+grant
