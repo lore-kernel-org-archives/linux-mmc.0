@@ -1,82 +1,65 @@
-From: Axel Lin <axel.lin@ingics.com>
-Subject: [PATCH RESEND] mmc: Convert to use ATTRIBUTE_GROUPS
-Date: Sat, 08 Mar 2014 15:05:27 +0800
-Message-ID: <1394262327.3868.3.camel@phoenix>
+From: Mark Brown <broonie@kernel.org>
+Subject: Re: [PATCH RFT] regulator: pbias: Convert to use regmap helper
+ functions
+Date: Sun, 9 Mar 2014 08:46:12 +0000
+Message-ID: <20140309084612.GV28112@sirena.org.uk>
+References: <1394111433.21007.2.camel@phoenix>
+ <5319E4E9.5010207@ti.com>
+ <CAFRkauACGODncvyPs0nNC+pkr4f55Xrhgn1hmAJbKHB+GoaVWA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="SSL0Wx1ZzjCczihW"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pd0-f173.google.com ([209.85.192.173]:38398 "EHLO
-	mail-pd0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750945AbaCHHFc (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 8 Mar 2014 02:05:32 -0500
-Received: by mail-pd0-f173.google.com with SMTP id z10so4971557pdj.32
-        for <linux-mmc@vger.kernel.org>; Fri, 07 Mar 2014 23:05:31 -0800 (PST)
+Received: from mezzanine.sirena.org.uk ([106.187.55.193]:55967 "EHLO
+	mezzanine.sirena.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752334AbaCIIqd (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 9 Mar 2014 04:46:33 -0400
+Content-Disposition: inline
+In-Reply-To: <CAFRkauACGODncvyPs0nNC+pkr4f55Xrhgn1hmAJbKHB+GoaVWA@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <chris@printf.net>
-Cc: linux-mmc@vger.kernel.org
-
-Use new ATTRIBUTE_GROUPS macro to declare attribute groups.
-
-Signed-off-by: Axel Lin <axel.lin@ingics.com>
----
- drivers/mmc/core/mmc.c | 12 ++----------
- drivers/mmc/core/sd.c  | 12 ++----------
- 2 files changed, 4 insertions(+), 20 deletions(-)
-
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index f631f5a..db0f250 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -694,18 +694,10 @@ static struct attribute *mmc_std_attrs[] = {
- 	&dev_attr_rel_sectors.attr,
- 	NULL,
- };
--
--static struct attribute_group mmc_std_attr_group = {
--	.attrs = mmc_std_attrs,
--};
--
--static const struct attribute_group *mmc_attr_groups[] = {
--	&mmc_std_attr_group,
--	NULL,
--};
-+ATTRIBUTE_GROUPS(mmc_std);
- 
- static struct device_type mmc_type = {
--	.groups = mmc_attr_groups,
-+	.groups = mmc_std_groups,
- };
- 
- /*
-diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
-index 6f42050..c52cb77 100644
---- a/drivers/mmc/core/sd.c
-+++ b/drivers/mmc/core/sd.c
-@@ -700,18 +700,10 @@ static struct attribute *sd_std_attrs[] = {
- 	&dev_attr_serial.attr,
- 	NULL,
- };
--
--static struct attribute_group sd_std_attr_group = {
--	.attrs = sd_std_attrs,
--};
--
--static const struct attribute_group *sd_attr_groups[] = {
--	&sd_std_attr_group,
--	NULL,
--};
-+ATTRIBUTE_GROUPS(sd_std);
- 
- struct device_type sd_type = {
--	.groups = sd_attr_groups,
-+	.groups = sd_std_groups,
- };
- 
- /*
--- 
-1.8.1.2
+To: Axel Lin <axel.lin@ingics.com>
+Cc: Balaji T K <balajitk@ti.com>, Chris Ball <chris@printf.net>, Liam Girdwood <lgirdwood@gmail.com>, Florian Vaussard <florian.vaussard@epfl.ch>, Stefan Roese <sr@denx.de>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-mmc@vger.kernel.org
 
 
+--SSL0Wx1ZzjCczihW
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
+On Fri, Mar 07, 2014 at 11:57:03PM +0800, Axel Lin wrote:
+> 2014-03-07 23:25 GMT+08:00 Balaji T K <balajitk@ti.com>:
+
+> > The intention was to set vmode to 0 for any voltage request lesser than
+> > 1.8V.
+
+> This statement sounds wrong to me.
+> For example, If the request voltage range is 1.0V ~ 1.5V.
+> We should return error rather than set the voltage to 1.8V (which may
+> damage the device).
+
+Yes, that's the expected behaviour - the selected voltage still needs to
+be within spec.
+
+--SSL0Wx1ZzjCczihW
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+
+iQIcBAEBAgAGBQJTHCpRAAoJELSic+t+oim9Gy0P/2BT85rO87tbZzVJWZA//Z1u
+vUADvZ9F6+Ev87CMIRg8Rmp/JOFp5jgDIbvbcKYH2GO0FaVLOFixurkpyLw4mJRx
+sPHFvJa+QFRyl9IlgAm9PDoK9OwZKG5jBTcgFNYOXO0+ABCxG59ClpmKFHfDQMrf
+uDKgC9FpG4pHqzJal9E3l1fZKjDqUGnUgVnGdT7nVtQtchZV35Fa0cA5iOWOxalP
+YWcZ6koj9W5KEpyJg1kOBtlmyepkeYnBND13DEtNR5a4IqIyfP84zIPkIgHZsrZR
+yLtv+BlqSJY0n7W1PRuOwjXv0NQgd8afP52clziz/ykcjzSoZMYiwafTxXnnNsxR
+HA5VG0zMmt9mabC0pjPcMpcaLCaqUtjF6r0Ls3bMcAVa8F5JjzD3mjqA8P5fCKJd
+ajKyrWxd6k7Ab5Iji1YJl5cpsz6/I0LwWeiQ5DU0lp4jciDkaDktGFkHXwwf+4fd
+NnLpASO3ZVkfq+f5e3NaGAfJlEJor+mdKmZ3EfmV9soFIFpSZaRk0HU+HBK70O15
+ENOsxWoX4shdlIZuvX5Fpx5Uu76vPuZINQMTRT76pTx0wHEREfLKr3L2Mo2mBAnI
+vu2ftQPuN6jYsGsE2AiYTk6Z68+Q8x4xi+Y0UW9Vl4ucc/xY+WGuzq8kowAul/oI
+3nbW8eA8tUiOl4KW0q83
+=jJfK
+-----END PGP SIGNATURE-----
+
+--SSL0Wx1ZzjCczihW--
