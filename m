@@ -1,475 +1,470 @@
-From: Georgi Djakov <gdjakov@mm-sol.com>
-Subject: [PATCH v11 3/3] mmc: sdhci-msm: Add platform_execute_tuning implementation
-Date: Mon, 10 Mar 2014 17:37:13 +0200
-Message-ID: <1394465833-22581-4-git-send-email-gdjakov@mm-sol.com>
-References: <1394465833-22581-1-git-send-email-gdjakov@mm-sol.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1394465833-22581-1-git-send-email-gdjakov@mm-sol.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-mmc@vger.kernel.org, cjb@laptop.org, ulf.hansson@linaro.org, devicetree@vger.kernel.org, grant.likely@linaro.org, robh+dt@kernel.org, pawel.moll@arm.com, mark.rutland@arm.com, swarren@wwwdotorg.org, ijc+devicetree@hellion.org.uk, galak@codeaurora.org, rob@landley.net
-Cc: linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org, Georgi Djakov <gdjakov@mm-sol.com>
+From: Kees Cook <keescook@chromium.org>
+Subject: Re: [RFC PATCH 1/1] mmc-utils: Support-sending-eMMC-5.0-FFU
+Date: Mon, 10 Mar 2014 10:25:31 -0700
+Message-ID: <CAGXu5j+xMhOb=_-q_mQh+mN3LMpic1iVUEU8LXpfuBtejew+Mg@mail.gmail.com>
+References: <FDD07FEB422EF948A392FDC201AEEAE63F4970C7@SACMBXIP01.sdcorp.global.sandisk.com>
+	<CANEJEGtrBR21P_KnGv5ZwAfwNA700gVmARU42J7N+cpmD4dKJA@mail.gmail.com>
+	<CAGXu5j+Vb242CPMVrrW7DbDujPpTkPHh3ei1hpO7f-BbBJ9MdQ@mail.gmail.com>
+	<282CEDFCBC30114F83C499CB8F2ED53337E59D62@SACMBXIP02.sdcorp.global.sandisk.com>
+	<CAMHSBOUkG6mzdLNY4qMKg9vJqp8=U+U2CjJFa6KKVbV-MJrYRA@mail.gmail.com>
+	<CAGXu5j+OSQz8ph2ycBk=uWHrJ+MEscc_isMFbrD9-6oE1u6uFw@mail.gmail.com>
+	<282CEDFCBC30114F83C499CB8F2ED53337E75A26@SACMBXIP02.sdcorp.global.sandisk.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-ob0-f169.google.com ([209.85.214.169]:35763 "EHLO
+	mail-ob0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753765AbaCJRZb (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 10 Mar 2014 13:25:31 -0400
+Received: by mail-ob0-f169.google.com with SMTP id va2so7226329obc.14
+        for <linux-mmc@vger.kernel.org>; Mon, 10 Mar 2014 10:25:31 -0700 (PDT)
+In-Reply-To: <282CEDFCBC30114F83C499CB8F2ED53337E75A26@SACMBXIP02.sdcorp.global.sandisk.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Alex Lemberg <Alex.Lemberg@sandisk.com>
+Cc: Gwendal Grignou <gwendal@chromium.org>, Grant Grundler <grundler@chromium.org>, Avi Shchislowski <Avi.Shchislowski@sandisk.com>, "cjb@laptop.org" <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Puthikorn Voravootivat <puthik@chromium.org>
 
-This patch adds implementation for platform specific tuning in order to support
-HS200 bus speed mode on Qualcomm SDHCI controller.
+On Mon, Mar 10, 2014 at 1:55 AM, Alex Lemberg <Alex.Lemberg@sandisk.com> wrote:
+> Hi Kees and Gwendal,
+>
+> Please see inline.
+>
+> Thanks,
+> Alex
+>
+>> -----Original Message-----
+>> From: keescook@google.com [mailto:keescook@google.com] On Behalf Of
+>> Kees Cook
+>> Sent: Wednesday, March 05, 2014 11:59 PM
+>> To: Gwendal Grignou
+>> Cc: Alex Lemberg; Grant Grundler; Avi Shchislowski; cjb@laptop.org; linux-
+>> mmc@vger.kernel.org; Puthikorn Voravootivat
+>> Subject: Re: [RFC PATCH 1/1] mmc-utils: Support-sending-eMMC-5.0-FFU
+>>
+>> On Wed, Mar 5, 2014 at 9:52 AM, Gwendal Grignou
+>> <gwendal@chromium.org> wrote:
+>> >
+>> >
+>> >
+>> > On Wed, Mar 5, 2014 at 8:35 AM, Alex Lemberg
+>> > <Alex.Lemberg@sandisk.com>
+>> > wrote:
+>> >>
+>> >> Hi Kees,
+>> >>
+>> >> Thanks for your comment.
+>> >> Please see our response inline.
+>> >>
+>> >>
+>> >> > -----Original Message-----
+>> >> > From: keescook@google.com [mailto:keescook@google.com] On
+>> Behalf Of
+>> >> > Kees Cook
+>> >> > Sent: Saturday, March 01, 2014 1:21 AM
+>> >> > To: Grant Grundler
+>> >> > Cc: Avi Shchislowski; cjb@laptop.org; linux-mmc@vger.kernel.org;
+>> >> > Alex Lemberg; Gwendal Grignou; Puthikorn Voravootivat
+>> >> > Subject: Re: [RFC PATCH 1/1] mmc-utils:
+>> >> > Support-sending-eMMC-5.0-FFU
+>> >> >
+>> >> > On Fri, Feb 28, 2014 at 2:39 PM, Grant Grundler
+>> >> > <grundler@chromium.org>
+>> >> > wrote:
+>> >> > > Avi,
+>> >> > > Thanks for posting these - I look forward to seeing this
+>> >> > > functionality available in mmc-utils (and kernel as needed).
+>> >> > >
+>> >> > > Comments as usual inline.
+>> >> > >
+>> >> > > I've added Gwendal/Kees to CC to comment on security issues of
+>> >> > > this proposal. See notes below.
+>> >> > >
+>> >> > >
+>> >> > > On Sun, Feb 9, 2014 at 1:08 AM, Avi Shchislowski
+>> >> > > <Avi.Shchislowski@sandisk.com> wrote:
+>> >> > >>   The mmc-utils was modified to invoke eMMC5.0 Field Firmware
+>> >> > >> Update
+>> >> > (FFU) process in mmc driver
+>> >> > >>   New command was add: "do_emmc50_ffu".
+>> >> > >>
+>> >> > >>   This patch depends on patch  mmc: Support-FFU-for-eMMC-v5.0
+>> >> > >> Committed by Avi Shchislowski <avi.shchislowski@sandisk.com>
+>> >> > >>
+>> >> > >>   FFU will be done in two steps. Two new IOCTL codes will be
+>> >> > >> sent to the
+>> >> > driver in order to operate FFU code:
+>> >> > >>     1.  FFU_DWONLOAD_OP (sent in ffu_download_image() function)
+>> >> > >
+>> >> > > Any reason for the typo? DOWNLOAD maybe?
+>> >> > > Shouldn't that be MMC_FFU_DOWNLOAD_OP to match the proposed
+>> >> > kernel definition?
+>> >> > >
+>> >> > >>         2.  FFU_INSTALL_OP (sent in ffu_install() function)
+>> >> > >
+>> >> > > Ditto: MMC_FFU_INSTALL_OP
+>> >> > >
+>> >> > >>
+>> >> > >>
+>> >> > >> Signed-off-by: Avi Shchislowski <avi.shchislowski@sandisk.com>
+>> >> > >> Signed-off-by: Alex Lemberg <alex.lemberg@sandisk.com>
+>> >> > >>
+>> >> > >> diff --git a/mmc.c b/mmc.c
+>> >> > >> index 926e92f..a01852d 100644
+>> >> > >> --- a/mmc.c
+>> >> > >> +++ b/mmc.c
+>> >> > >> @@ -36,9 +36,9 @@ struct Command {
+>> >> > >>                                    if >= 0, number of arguments,
+>> >> > >>                                    if < 0, _minimum_ number of
+>> >> > >> arguments */
+>> >> > >>         char    *verb;          /* verb */
+>> >> > >> -       char    *help;          /* help lines; from the 2nd line
+>> >> > >> onward they
+>> >> > >> +       char    *help;          /* help lines; from the 2nd line
+>> >> > >> onward they
+>> >> > >>                                     are automatically indented */
+>> >> > >> -        char    *adv_help;      /* advanced help message; from the
+>> >> > >> 2nd line
+>> >> > >> +        char    *adv_help;      /* advanced help message; from the
+>> >> > >> 2nd line
+>> >> > >
+>> >> > > Sorry, it's not obvious what changed here. Why is this included?
+>> >> > >
+>> >> > >>                                     onward they are
+>> >> > >> automatically indented */
+>> >> > >>
+>> >> > >>         /* the following fields are run-time filled by the
+>> >> > >> program */ @@ -
+>> >> > 110,6 +110,11 @@ static struct Command commands[] = {
+>> >> > >>                 "Send Sanitize command to the <device>.\nThis
+>> >> > >> will delete the
+>> >> > unmapped memory region of the device.",
+>> >> > >>           NULL
+>> >> > >>         },
+>> >> > >> +       { do_emmc50_ffu, -2,
+>> >> > >> +       "emmc50 ffu", "<image path> <device>\n"
+>> >> > >> +         "run eMMC 5.0 Field firmware update.\n.",
+>> >> > >
+>> >> > > Nit: This isn't "run". It's "download firmware to eMMC 5.0
+>> >> > > compliant
+>> >> > device".
+>> >> > >
+>> >> > >> +         NULL
+>> >> > >> +       },
+>> >> > >>         { 0, 0, 0, 0 }
+>> >> > >>  };
+>> >> > >>
+>> >> > >> @@ -362,7 +367,7 @@ static int parse_args(int argc, char **argv,
+>> >> > >>                         matchcmd->verb, matchcmd->nargs);
+>> >> > >>                         return -2;
+>> >> > >>         }
+>> >> > >> -
+>> >> > >> +
+>> >> > >
+>> >> > > I'm going to ignore white space mangle on this patch and assume
+>> >> > > you'll ask if you need help using gmail to send patches using git send-
+>> email.
+>> >> > >
+>> >> > > But the above isn't white space mangle caused by email - it's
+>> >> > > part of this patch and I'm not seeing a difference in this
+>> >> > > <REDACTED> gmail editor.
+>> >> > >
+>> >> > >>          if (prepare_args( nargs_, args_, prgname, matchcmd )){
+>> >> > >>                  fprintf(stderr, "ERROR: not enough memory\\n");
+>> >> > >>                 return -20;
+>> >> > >> diff --git a/mmc.h b/mmc.h
+>> >> > >> index 9871d62..3be6db0 100644
+>> >> > >> --- a/mmc.h
+>> >> > >> +++ b/mmc.h
+>> >> > >> @@ -80,6 +80,14 @@
+>> >> > >>  #define BKOPS_ENABLE   (1<<0)
+>> >> > >>
+>> >> > >>  /*
+>> >> > >> + * sector size
+>> >> > >> +*/
+>> >> > >> +#define CARD_BLOCK_SIZE        512
+>> >> > >
+>> >> > > sector size is advertised by the device. It could be either 512
+>> >> > > or 4K bytes.
+>> >> > No?
+>> >> > >
+>> >> > > "7.4.17 NUMBER_OF_FW_SECTORS_CORRECTLY_PROGRAMMED
+>> [305-302]
+>> >> > >
+>> >> > > The value is in terms of 512 Bytes or in multiple of eight
+>> >> > > 512Bytes sectors (4KBytes) depending on the value of the
+>> >> > > DATA_SECTOR_SIZE field."
+>> >> > >
+>> >> > > I don't think this should be hard coded to 512. And a few places
+>> >> > > I see hard coded with "<< 9" will likely need to take this into account.
+>> >> > >
+>> >> > >
+>> >> > >> +
+>> >> > >> +#define FFU_DWONLOAD_OP        302
+>> >> > >> +#define FFU_INSTALL_OP 303
+>> >> > >
+>> >> > > These should match kernel definitions (complete name and value).
+>> >> > >
+>> >> > >> +
+>> >> > >> +/*
+>> >> > >>   * EXT_CSD field definitions
+>> >> > >>   */
+>> >> > >>  #define EXT_CSD_HPI_SUPP               (1<<0)
+>> >> > >> diff --git a/mmc_cmds.c b/mmc_cmds.c index b8afa74..24c4a6b
+>> >> > >> 100644
+>> >> > >> --- a/mmc_cmds.c
+>> >> > >> +++ b/mmc_cmds.c
+>> >> > >> @@ -1163,3 +1163,112 @@ int do_sanitize(int nargs, char **argv)
+>> >> > >>
+>> >> > >>  }
+>> >> > >>
+>> >> > >> +static int ffu_download_image(int fw_fd, int mmc_fd) {
+>> >> > >> +       int ret = 0;
+>> >> > >> +       struct mmc_ioc_cmd mmc_ioc_cmd;
+>> >> > >> +       char data_buff[MMC_IOC_MAX_BYTES];
+>> >> > >> +       int file_size;
+>> >> > >
+>> >> > > This should be off_t type. See "man 2 lseek".
+>> >> > >
+>> >> > >> +       int size;
+>> >> > >
+>> >> > > This should be size_t type.  See "man 2 read".
+>> >> > >
+>> >> > >> +       int data_length;
+>> >> > >
+>> >> > > This should ssize_t type. See "man 2 read".
+>> >> > >
+>> >> > >> +
+>> >> > >> +       memset(data_buff, 0, sizeof(data_buff));
+>> >> > >> +       /* get file size */
+>> >> > >> +       file_size = lseek(fw_fd, 0, SEEK_END);
+>> >> > >
+>> >> > > I'm wondering why lseek would be preferred over fstat().
+>> >> > >
+>> >> > >> +       if (file_size < 0) {
+>> >> > >> +               ret =  -1;
+>> >> > >> +               perror("seek file error \n");
+>> >> > >> +               goto exit;
+>> >> > >> +       }
+>> >> > >> +
+>> >> > >> +       lseek(fw_fd, 0, SEEK_SET);
+>> >> > >> +       do {
+>> >> > >> +               size = (file_size > MMC_IOC_MAX_BYTES) ?
+>> >> > >> +                               MMC_IOC_MAX_BYTES : file_size;
+>> >> > >> +               /* Read FW data from file */
+>> >> > >> +               data_length = read(fw_fd, data_buff, size);
+>> >> > >> +               if (data_length == -1) {
+>> >> > >
+>> >> > > Should this test data_length < size ?
+>> >> > >
+>> >> > >> +                       ret = -1;
+>> >> > >> +                       goto exit;
+>> >> > >> +               }
+>> >> > >
+>> >> > > Gwendal and Kees (CC'd) would prefer to send the file name to the
+>> >> > > kernel as part of the ioctl and use existing udev mechanisms to
+>> >> > > request the firmware.
+>> >> >
+>> >> > Yes, please see Documentation/firmware_class/README for
+>> information
+>> >> > on the kernel internals, but I would much prefer the kernel do all
+>> >> > the loading, not userspace. The kernel driver can request the
+>> >> > firmware
+>> >> > contents:
+>> >> >
+>> >> >          if(request_firmware(&fw_entry, $FIRMWARE, device) == 0)
+>> >> >                 copy_fw_to_device(fw_entry->data, fw_entry->size);
+>> >> >          release(fw_entry);
+>> >> >
+>> >> > and then send it to the device. Doing this from userspace means
+>> >> > there is no way to verify the firmware contents. Equally, the
+>> >> > kernel should actively block the MMC_FFU_DOWNLOAD_OP op, since it
+>> >> > should be considered a sensitive operation.
+>> >>
+>> >> Indeed this mechanism allows to download FW file directly to the
+>> >> driver, and not using IOCTL for this.
+>> >>
+>> >> But actually, eMMC5.0 spec does not requires any of FW file content
+>> >> to be verified by the host.
+>> >> The FW file should  be downloaded entirely and verified by eMMC
+>> >> device internally.
+>> >
+>> >
+>> > The point of using firmware_request() is the firmware image is not
+>> > sent within the IOCTL itself but provided by a well known daemon, in
+>> > this case udevd.
+>> > We can make udevd the gate keeper of firmware images [not only eMMC
+>> > devices, but wifi and 3g modems as well] and ensure that only approved
+>> > and well-known images are sent to the devices.
+>>
+>> Not only udevd, but the kernel itself -- the kernel too. The goal is to make the
+>> kernel the trusted element, and to not trust any portion of userspace that
+>> can't be cryptographically verified.
+>>
+>> -Kees
+>>
+>
+> We will consider using udev mechanism. But first we need to make a short research on this topic.
+> As well as we need to understand if udev is also used in mobile platforms environment.
+> Are you familiar with udev usage on mobile platforms?
 
-Signed-off-by: Asutosh Das <asutoshd@codeaurora.org>
-Signed-off-by: Venkat Gopalakrishnan <venkatg@codeaurora.org>
-Signed-off-by: Georgi Djakov <gdjakov@mm-sol.com>
----
- drivers/mmc/host/sdhci-msm.c |  420 +++++++++++++++++++++++++++++++++++++++++-
- 1 file changed, 415 insertions(+), 5 deletions(-)
+I think it's very likely that there is a kernel event notification
+handler (usually udev) running on all Linux devices. That would be the
+software responsible for servicing the firmware request.
 
-diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-index 3b0606f..acb0e9e 100644
---- a/drivers/mmc/host/sdhci-msm.c
-+++ b/drivers/mmc/host/sdhci-msm.c
-@@ -18,6 +18,8 @@
- #include <linux/of_device.h>
- #include <linux/regulator/consumer.h>
- #include <linux/delay.h>
-+#include <linux/mmc/mmc.h>
-+#include <linux/slab.h>
- 
- #include "sdhci-pltfm.h"
- 
-@@ -26,6 +28,42 @@
- #define CORE_POWER		0x0
- #define CORE_SW_RST		BIT(7)
- 
-+#define MAX_PHASES		16
-+#define CORE_DLL_LOCK		BIT(7)
-+#define CORE_DLL_EN		BIT(16)
-+#define CORE_CDR_EN		BIT(17)
-+#define CORE_CK_OUT_EN		BIT(18)
-+#define CORE_CDR_EXT_EN		BIT(19)
-+#define CORE_DLL_PDN		BIT(29)
-+#define CORE_DLL_RST		BIT(30)
-+#define CORE_DLL_CONFIG		0x100
-+#define CORE_DLL_STATUS		0x108
-+
-+#define CORE_VENDOR_SPEC	0x10c
-+#define CORE_CLK_PWRSAVE	BIT(1)
-+
-+#define CDR_SELEXT_SHIFT	20
-+#define CDR_SELEXT_MASK		(0xf << CDR_SELEXT_SHIFT)
-+#define CMUX_SHIFT_PHASE_SHIFT	24
-+#define CMUX_SHIFT_PHASE_MASK	(7 << CMUX_SHIFT_PHASE_SHIFT)
-+
-+static const u32 tuning_block_64[] = {
-+	0x00ff0fff, 0xccc3ccff, 0xffcc3cc3, 0xeffefffe,
-+	0xddffdfff, 0xfbfffbff, 0xff7fffbf, 0xefbdf777,
-+	0xf0fff0ff, 0x3cccfc0f, 0xcfcc33cc, 0xeeffefff,
-+	0xfdfffdff, 0xffbfffdf, 0xfff7ffbb, 0xde7b7ff7
-+};
-+
-+static const u32 tuning_block_128[] = {
-+	0xff00ffff, 0x0000ffff, 0xccccffff, 0xcccc33cc,
-+	0xcc3333cc, 0xffffcccc, 0xffffeeff, 0xffeeeeff,
-+	0xffddffff, 0xddddffff, 0xbbffffff, 0xbbffffff,
-+	0xffffffbb, 0xffffff77, 0x77ff7777, 0xffeeddbb,
-+	0x00ffffff, 0x00ffffff, 0xccffff00, 0xcc33cccc,
-+	0x3333cccc, 0xffcccccc, 0xffeeffff, 0xeeeeffff,
-+	0xddffffff, 0xddffffff, 0xffffffdd, 0xffffffbb,
-+	0xffffbbbb, 0xffff77ff, 0xff7777ff, 0xeeddbb77
-+};
- 
- struct sdhci_msm_host {
- 	struct platform_device *pdev;
-@@ -38,17 +76,389 @@ struct sdhci_msm_host {
- };
- 
- /* Platform specific tuning */
--static int sdhci_msm_execute_tuning(struct sdhci_host *host, u32 opcode)
-+static inline int msm_dll_poll_ck_out_en(struct sdhci_host *host, u8 poll)
-+{
-+	u32 wait_cnt = 50;
-+	u8 ck_out_en;
-+	struct mmc_host *mmc = host->mmc;
-+
-+	/* Poll for CK_OUT_EN bit.  max. poll time = 50us */
-+	ck_out_en = !!(readl_relaxed(host->ioaddr + CORE_DLL_CONFIG) &
-+			CORE_CK_OUT_EN);
-+
-+	while (ck_out_en != poll) {
-+		if (--wait_cnt == 0) {
-+			dev_err(mmc_dev(mmc), "%s: CK_OUT_EN bit is not %d\n",
-+			       mmc_hostname(mmc), poll);
-+			return -ETIMEDOUT;
-+		}
-+		udelay(1);
-+
-+		ck_out_en = !!(readl_relaxed(host->ioaddr + CORE_DLL_CONFIG) &
-+				CORE_CK_OUT_EN);
-+	}
-+
-+	return 0;
-+}
-+
-+static int msm_config_cm_dll_phase(struct sdhci_host *host, u8 phase)
-+{
-+	int rc;
-+	static const u8 grey_coded_phase_table[] = {
-+		0x0, 0x1, 0x3, 0x2, 0x6, 0x7, 0x5, 0x4,
-+		0xc, 0xd, 0xf, 0xe, 0xa, 0xb, 0x9, 0x8
-+	};
-+	unsigned long flags;
-+	u32 config;
-+	struct mmc_host *mmc = host->mmc;
-+
-+	spin_lock_irqsave(&host->lock, flags);
-+
-+	config = readl_relaxed(host->ioaddr + CORE_DLL_CONFIG);
-+	config &= ~(CORE_CDR_EN | CORE_CK_OUT_EN);
-+	config |= (CORE_CDR_EXT_EN | CORE_DLL_EN);
-+	writel_relaxed(config, host->ioaddr + CORE_DLL_CONFIG);
-+
-+	/* Wait until CK_OUT_EN bit of DLL_CONFIG register becomes '0' */
-+	rc = msm_dll_poll_ck_out_en(host, 0);
-+	if (rc)
-+		goto err_out;
-+
-+	/*
-+	 * Write the selected DLL clock output phase (0 ... 15)
-+	 * to CDR_SELEXT bit field of DLL_CONFIG register.
-+	 */
-+	config = readl_relaxed(host->ioaddr + CORE_DLL_CONFIG);
-+	config &= ~CDR_SELEXT_MASK;
-+	config |= grey_coded_phase_table[phase] << CDR_SELEXT_SHIFT;
-+	writel_relaxed(config, host->ioaddr + CORE_DLL_CONFIG);
-+
-+	/* Set CK_OUT_EN bit of DLL_CONFIG register to 1. */
-+	writel_relaxed((readl_relaxed(host->ioaddr + CORE_DLL_CONFIG)
-+			| CORE_CK_OUT_EN), host->ioaddr + CORE_DLL_CONFIG);
-+
-+	/* Wait until CK_OUT_EN bit of DLL_CONFIG register becomes '1' */
-+	rc = msm_dll_poll_ck_out_en(host, 1);
-+	if (rc)
-+		goto err_out;
-+
-+	config = readl_relaxed(host->ioaddr + CORE_DLL_CONFIG);
-+	config |= CORE_CDR_EN;
-+	config &= ~CORE_CDR_EXT_EN;
-+	writel_relaxed(config, host->ioaddr + CORE_DLL_CONFIG);
-+	goto out;
-+
-+err_out:
-+	dev_err(mmc_dev(mmc), "%s: Failed to set DLL phase: %d\n",
-+	       mmc_hostname(mmc), phase);
-+out:
-+	spin_unlock_irqrestore(&host->lock, flags);
-+	return rc;
-+}
-+
-+/*
-+ * Find out the greatest range of consecuitive selected
-+ * DLL clock output phases that can be used as sampling
-+ * setting for SD3.0 UHS-I card read operation (in SDR104
-+ * timing mode) or for eMMC4.5 card read operation (in HS200
-+ * timing mode).
-+ * Select the 3/4 of the range and configure the DLL with the
-+ * selected DLL clock output phase.
-+ */
-+
-+static int msm_find_most_appropriate_phase(struct sdhci_host *host,
-+					   u8 *phase_table, u8 total_phases)
-+{
-+	int ret;
-+	u8 ranges[MAX_PHASES][MAX_PHASES] = { {0}, {0} };
-+	u8 phases_per_row[MAX_PHASES] = { 0 };
-+	int row_index = 0, col_index = 0, selected_row_index = 0, curr_max = 0;
-+	int i, cnt, phase_0_raw_index = 0, phase_15_raw_index = 0;
-+	bool phase_0_found = false, phase_15_found = false;
-+	struct mmc_host *mmc = host->mmc;
-+
-+	if (!total_phases || (total_phases > MAX_PHASES)) {
-+		dev_err(mmc_dev(mmc), "%s: Invalid argument: total_phases=%d\n",
-+		       mmc_hostname(mmc), total_phases);
-+		return -EINVAL;
-+	}
-+
-+	for (cnt = 0; cnt < total_phases; cnt++) {
-+		ranges[row_index][col_index] = phase_table[cnt];
-+		phases_per_row[row_index] += 1;
-+		col_index++;
-+
-+		if ((cnt + 1) == total_phases) {
-+			continue;
-+		/* check if next phase in phase_table is consecutive or not */
-+		} else if ((phase_table[cnt] + 1) != phase_table[cnt + 1]) {
-+			row_index++;
-+			col_index = 0;
-+		}
-+	}
-+
-+	if (row_index >= MAX_PHASES)
-+		return -EINVAL;
-+
-+	/* Check if phase-0 is present in first valid window? */
-+	if (!ranges[0][0]) {
-+		phase_0_found = true;
-+		phase_0_raw_index = 0;
-+		/* Check if cycle exist between 2 valid windows */
-+		for (cnt = 1; cnt <= row_index; cnt++) {
-+			if (phases_per_row[cnt]) {
-+				for (i = 0; i < phases_per_row[cnt]; i++) {
-+					if (ranges[cnt][i] == 15) {
-+						phase_15_found = true;
-+						phase_15_raw_index = cnt;
-+						break;
-+					}
-+				}
-+			}
-+		}
-+	}
-+
-+	/* If 2 valid windows form cycle then merge them as single window */
-+	if (phase_0_found && phase_15_found) {
-+		/* number of phases in raw where phase 0 is present */
-+		u8 phases_0 = phases_per_row[phase_0_raw_index];
-+		/* number of phases in raw where phase 15 is present */
-+		u8 phases_15 = phases_per_row[phase_15_raw_index];
-+
-+		if (phases_0 + phases_15 >= MAX_PHASES)
-+			/*
-+			 * If there are more than 1 phase windows then total
-+			 * number of phases in both the windows should not be
-+			 * more than or equal to MAX_PHASES.
-+			 */
-+			return -EINVAL;
-+
-+		/* Merge 2 cyclic windows */
-+		i = phases_15;
-+		for (cnt = 0; cnt < phases_0; cnt++) {
-+			ranges[phase_15_raw_index][i] =
-+			    ranges[phase_0_raw_index][cnt];
-+			if (++i >= MAX_PHASES)
-+				break;
-+		}
-+
-+		phases_per_row[phase_0_raw_index] = 0;
-+		phases_per_row[phase_15_raw_index] = phases_15 + phases_0;
-+	}
-+
-+	for (cnt = 0; cnt <= row_index; cnt++) {
-+		if (phases_per_row[cnt] > curr_max) {
-+			curr_max = phases_per_row[cnt];
-+			selected_row_index = cnt;
-+		}
-+	}
-+
-+	i = (curr_max * 3) / 4;
-+	if (i)
-+		i--;
-+
-+	ret = ranges[selected_row_index][i];
-+
-+	if (ret >= MAX_PHASES) {
-+		ret = -EINVAL;
-+		dev_err(mmc_dev(mmc), "%s: Invalid phase selected=%d\n",
-+		       mmc_hostname(mmc), ret);
-+	}
-+
-+	return ret;
-+}
-+
-+static inline void msm_cm_dll_set_freq(struct sdhci_host *host)
-+{
-+	u32 mclk_freq = 0, config;
-+
-+	/* Program the MCLK value to MCLK_FREQ bit field */
-+	if (host->clock <= 112000000)
-+		mclk_freq = 0;
-+	else if (host->clock <= 125000000)
-+		mclk_freq = 1;
-+	else if (host->clock <= 137000000)
-+		mclk_freq = 2;
-+	else if (host->clock <= 150000000)
-+		mclk_freq = 3;
-+	else if (host->clock <= 162000000)
-+		mclk_freq = 4;
-+	else if (host->clock <= 175000000)
-+		mclk_freq = 5;
-+	else if (host->clock <= 187000000)
-+		mclk_freq = 6;
-+	else if (host->clock <= 200000000)
-+		mclk_freq = 7;
-+
-+	config = readl_relaxed(host->ioaddr + CORE_DLL_CONFIG);
-+	config &= ~CMUX_SHIFT_PHASE_MASK;
-+	config |= mclk_freq << CMUX_SHIFT_PHASE_SHIFT;
-+	writel_relaxed(config, host->ioaddr + CORE_DLL_CONFIG);
-+}
-+
-+/* Initialize the DLL (Programmable Delay Line) */
-+static int msm_init_cm_dll(struct sdhci_host *host)
- {
-+	struct mmc_host *mmc = host->mmc;
-+	int wait_cnt = 50;
-+	unsigned long flags;
-+
-+	spin_lock_irqsave(&host->lock, flags);
-+
- 	/*
--	 * Tuning is required for SDR104, HS200 and HS400 cards and if the clock
--	 * frequency greater than 100MHz in those modes. The standard tuning
--	 * procedure should not be executed, but a custom implementation will be
--	 * added here instead.
-+	 * Make sure that clock is always enabled when DLL
-+	 * tuning is in progress. Keeping PWRSAVE ON may
-+	 * turn off the clock.
- 	 */
-+	writel_relaxed((readl_relaxed(host->ioaddr + CORE_VENDOR_SPEC)
-+			& ~CORE_CLK_PWRSAVE), host->ioaddr + CORE_VENDOR_SPEC);
-+
-+	/* Write 1 to DLL_RST bit of DLL_CONFIG register */
-+	writel_relaxed((readl_relaxed(host->ioaddr + CORE_DLL_CONFIG)
-+			| CORE_DLL_RST), host->ioaddr + CORE_DLL_CONFIG);
-+
-+	/* Write 1 to DLL_PDN bit of DLL_CONFIG register */
-+	writel_relaxed((readl_relaxed(host->ioaddr + CORE_DLL_CONFIG)
-+			| CORE_DLL_PDN), host->ioaddr + CORE_DLL_CONFIG);
-+	msm_cm_dll_set_freq(host);
-+
-+	/* Write 0 to DLL_RST bit of DLL_CONFIG register */
-+	writel_relaxed((readl_relaxed(host->ioaddr + CORE_DLL_CONFIG)
-+			& ~CORE_DLL_RST), host->ioaddr + CORE_DLL_CONFIG);
-+
-+	/* Write 0 to DLL_PDN bit of DLL_CONFIG register */
-+	writel_relaxed((readl_relaxed(host->ioaddr + CORE_DLL_CONFIG)
-+			& ~CORE_DLL_PDN), host->ioaddr + CORE_DLL_CONFIG);
-+
-+	/* Set DLL_EN bit to 1. */
-+	writel_relaxed((readl_relaxed(host->ioaddr + CORE_DLL_CONFIG)
-+			| CORE_DLL_EN), host->ioaddr + CORE_DLL_CONFIG);
-+
-+	/* Set CK_OUT_EN bit to 1. */
-+	writel_relaxed((readl_relaxed(host->ioaddr + CORE_DLL_CONFIG)
-+			| CORE_CK_OUT_EN), host->ioaddr + CORE_DLL_CONFIG);
-+
-+	/* Wait until DLL_LOCK bit of DLL_STATUS register becomes '1' */
-+	while (!(readl_relaxed(host->ioaddr + CORE_DLL_STATUS) &
-+		 CORE_DLL_LOCK)) {
-+		/* max. wait for 50us sec for LOCK bit to be set */
-+		if (--wait_cnt == 0) {
-+			dev_err(mmc_dev(mmc), "%s: DLL failed to LOCK\n",
-+			       mmc_hostname(mmc));
-+			spin_unlock_irqrestore(&host->lock, flags);
-+			return -ETIMEDOUT;
-+		}
-+		udelay(1);
-+	}
-+
-+	spin_unlock_irqrestore(&host->lock, flags);
- 	return 0;
- }
- 
-+static int sdhci_msm_execute_tuning(struct sdhci_host *host, u32 opcode)
-+{
-+	int tuning_seq_cnt = 3;
-+	u8 phase, *data_buf, tuned_phases[16], tuned_phase_cnt = 0;
-+	const u32 *tuning_block_pattern = tuning_block_64;
-+	int size = sizeof(tuning_block_64);	/* Pattern size in bytes */
-+	int rc;
-+	struct mmc_host *mmc = host->mmc;
-+	struct mmc_ios ios = host->mmc->ios;
-+
-+	/*
-+	 * Tuning is required for SDR104, HS200 and HS400 cards and
-+	 * if clock frequency is greater than 100MHz in these modes.
-+	 */
-+	if (host->clock <= 100 * 1000 * 1000 ||
-+	    !((ios.timing == MMC_TIMING_MMC_HS200) ||
-+	      (ios.timing == MMC_TIMING_UHS_SDR104)))
-+		return 0;
-+
-+	if ((opcode == MMC_SEND_TUNING_BLOCK_HS200) &&
-+	    (mmc->ios.bus_width == MMC_BUS_WIDTH_8)) {
-+		tuning_block_pattern = tuning_block_128;
-+		size = sizeof(tuning_block_128);
-+	}
-+
-+	data_buf = kmalloc(size, GFP_KERNEL);
-+	if (!data_buf)
-+		return -ENOMEM;
-+
-+retry:
-+	/* First of all reset the tuning block */
-+	rc = msm_init_cm_dll(host);
-+	if (rc)
-+		goto out;
-+
-+	phase = 0;
-+	do {
-+		struct mmc_command cmd = { 0 };
-+		struct mmc_data data = { 0 };
-+		struct mmc_request mrq = {
-+			.cmd = &cmd,
-+			.data = &data
-+		};
-+		struct scatterlist sg;
-+
-+		/* Set the phase in delay line hw block */
-+		rc = msm_config_cm_dll_phase(host, phase);
-+		if (rc)
-+			goto out;
-+
-+		cmd.opcode = opcode;
-+		cmd.flags = MMC_RSP_R1 | MMC_CMD_ADTC;
-+
-+		data.blksz = size;
-+		data.blocks = 1;
-+		data.flags = MMC_DATA_READ;
-+		data.timeout_ns = NSEC_PER_SEC;	/* 1 second */
-+
-+		data.sg = &sg;
-+		data.sg_len = 1;
-+		sg_init_one(&sg, data_buf, size);
-+		memset(data_buf, 0, size);
-+		mmc_wait_for_req(mmc, &mrq);
-+
-+		if (!cmd.error && !data.error &&
-+		    !memcmp(data_buf, tuning_block_pattern, size)) {
-+			/* Tuning is successful at this tuning point */
-+			tuned_phases[tuned_phase_cnt++] = phase;
-+			dev_dbg(mmc_dev(mmc), "%s: Found good phase = %d\n",
-+				 mmc_hostname(mmc), phase);
-+		}
-+	} while (++phase < ARRAY_SIZE(tuned_phases));
-+
-+	if (tuned_phase_cnt) {
-+		rc = msm_find_most_appropriate_phase(host, tuned_phases,
-+						     tuned_phase_cnt);
-+		if (rc < 0)
-+			goto out;
-+		else
-+			phase = rc;
-+
-+		/*
-+		 * Finally set the selected phase in delay
-+		 * line hw block.
-+		 */
-+		rc = msm_config_cm_dll_phase(host, phase);
-+		if (rc)
-+			goto out;
-+		dev_dbg(mmc_dev(mmc), "%s: Setting the tuning phase to %d\n",
-+			 mmc_hostname(mmc), phase);
-+	} else {
-+		if (--tuning_seq_cnt)
-+			goto retry;
-+		/* Tuning failed */
-+		dev_dbg(mmc_dev(mmc), "%s: No tuning point found\n",
-+		       mmc_hostname(mmc));
-+		rc = -EIO;
-+	}
-+
-+out:
-+	kfree(data_buf);
-+	return rc;
-+}
-+
- static const struct of_device_id sdhci_msm_dt_match[] = {
- 	{ .compatible = "qcom,sdhci-msm-v4" },
- 	{},
+-Kees
+
+>
+>
+>> >
+>> > Gwendal.
+>> >>
+>> >>
+>> >> Please let us know if you aware of other solutions, which are
+>> >> requires FW file verification in the host side.
+>> >>
+>> >> In the way that we have implemented FW download routine in the
+>> >> driver, the FW download process is blocked (using claim_host())
+>> >> anyway, and prevents interruptions of this process by other IO requests.
+>> >>
+>> >> >
+>> >> > -Kees
+>> >> >
+>> >> > >
+>> >> > > This has some advantages for security which make it a lot harder
+>> >> > > to "plant" the hacked firmware on devices. I'll let Gwendal and
+>> >> > > Kees present the details of those ideas.
+>> >> > >
+>> >> > >> +               /* prepare and send ioctl */
+>> >> > >> +               memset(&mmc_ioc_cmd, 0, sizeof(mmc_ioc_cmd));
+>> >> > >> +               mmc_ioc_cmd.opcode =  FFU_DWONLOAD_OP;
+>> >> > >> +               mmc_ioc_cmd.blksz = CARD_BLOCK_SIZE;
+>> >> > >> +               mmc_ioc_cmd.blocks = data_length / mmc_ioc_cmd.blksz;
+>> >> > >> +               mmc_ioc_cmd.arg =  0;
+>> >> > >> +               mmc_ioc_cmd.flags = MMC_RSP_SPI_R1 | MMC_RSP_R1
+>> >> > >> + |
+>> >> > MMC_CMD_ADTC;
+>> >> > >> +               mmc_ioc_cmd.write_flag = 1;
+>> >> > >> +               mmc_ioc_cmd_set_data(mmc_ioc_cmd, data_buff);
+>> >> > >> +               ret = ioctl(mmc_fd, MMC_IOC_CMD, &mmc_ioc_cmd);
+>> >> > >> +               if (ret) {
+>> >> > >> +                       perror("ioctl FW download");
+>> >> > >> +                       goto exit;
+>> >> > >> +               }
+>> >> > >> +
+>> >> > >> +               file_size = file_size - size;
+>> >> > >> +               printf("firmware file loading, remaining:   %d\n",
+>> >> > >> file_size);
+>> >> > >> +       } while (file_size > 0);
+>> >> > >> +
+>> >> > >> +exit:
+>> >> > >> +
+>> >> > >> +       return ret;
+>> >> > >> +}
+>> >> > >> +
+>> >> > >> +static int ffu_install(int mmc_fd) {
+>> >> > >> +       int ret;
+>> >> > >> +       struct mmc_ioc_cmd mmc_ioc_cmd;
+>> >> > >> +
+>> >> > >> +       memset(&mmc_ioc_cmd, 0, sizeof(mmc_ioc_cmd));
+>> >> > >> +       mmc_ioc_cmd.opcode = FFU_INSTALL_OP;
+>> >> > >> +       mmc_ioc_cmd.blksz = CARD_BLOCK_SIZE;
+>> >> > >> +       mmc_ioc_cmd.blocks = 0;
+>> >> > >> +       mmc_ioc_cmd.arg =  0;
+>> >> > >> +       mmc_ioc_cmd.flags = MMC_RSP_SPI_R1 | MMC_RSP_R1 |
+>> >> > MMC_CMD_ADTC;
+>> >> > >> +       mmc_ioc_cmd.write_flag = 0;
+>> >> > >> +       ret = ioctl(mmc_fd, MMC_IOC_CMD, &mmc_ioc_cmd);
+>> >> > >> +       if (ret)
+>> >> > >> +               perror("ioctl install");
+>> >> > >> +
+>> >> > >> +       printf("ffu_install ret %d \n", ret);
+>> >> > >> +       return ret;
+>> >> > >> +}
+>> >> > >> +
+>> >> > >> +int do_emmc50_ffu(int nargs, char **argv) {
+>> >> > >> +       int fd, fw_fd, ret;
+>> >> > >> +       char *device;
+>> >> > >> +
+>> >> > >> +       CHECK(nargs != 3, "Usage: ffu <image path>
+>> >> > >> + </path/to/mmcblkX>
+>> >> > \n",
+>> >> > >> +                               exit(1));
+>> >> > >> +
+>> >> > >> +       device = argv[2];
+>> >> > >> +       fd = open(device, O_RDWR);
+>> >> > >> +       if (fd < 0) {
+>> >> > >> +               perror("open");
+>> >> > >> +               exit(1);
+>> >> > >> +       }
+>> >> > >> +
+>> >> > >> +       /* open eMMC5.0 firmware image file */
+>> >> > >> +       fw_fd = open(argv[1], O_RDONLY);
+>> >> > >> +       if (fw_fd < 0) {
+>> >> > >> +               perror("open eMMC5.0 firmware file");
+>> >> > >> +               ret = -1;
+>> >> > >
+>> >> > > Don't want to return the errno value?
+>> >> > >
+>> >> > >> +               goto exit;
+>> >> > >> +       }
+>> >> > >> +
+>> >> > >> +       ret = ffu_download_image(fw_fd, fd);
+>> >> > >> +       if (ret)
+>> >> > >> +               goto exit;
+>> >> > >> +
+>> >> > >> +       ret = ffu_install(fd);
+>> >> > >> +       if (ret)
+>> >> > >> +               goto exit;
+>> >> > >> +
+>> >> > >> +exit:
+>> >> > >> +       close(fd);
+>> >> > >> +       close(fw_fd);
+>> >> > >> +
+>> >> > >> +       return ret;
+>> >> > >> +}
+>> >> > >> diff --git a/mmc_cmds.h b/mmc_cmds.h index f06cc10..77a6cb8
+>> >> > >> 100644
+>> >> > >> --- a/mmc_cmds.h
+>> >> > >> +++ b/mmc_cmds.h
+>> >> > >> @@ -28,3 +28,5 @@ int do_sanitize(int nargs, char **argv);  int
+>> >> > >> do_status_get(int nargs, char **argv);  int do_enh_area_set(int
+>> >> > >> nargs, char **argv);  int do_write_reliability_set(int nargs,
+>> >> > >> char **argv);
+>> >> > >> +int do_emmc50_ffu(int nargs, char **argv);
+>> >> > >> +
+>> >> > >> --
+>> >> > >> 1.7.5.4
+>> >> > >>
+>> >> > >>
+>> >> > >> Avi Shchislowski | Staff Software Engineer, MCS Embedded  |
+>> >> > >> SanDisk |
+>> >> > >> +972.09.763-2666| www.sandisk.com
+>> >> > >>
+>> >> > >
+>> >> > > cheers,
+>> >> > > grant
+>> >> >
+>> >> >
+>> >> >
+>> >> > --
+>> >> > Kees Cook
+>> >> > Chrome OS Security
+>> >>
+>> >>
+>> >>
+>> >
+>>
+>>
+>>
+>> --
+>> Kees Cook
+>> Chrome OS Security
+>
+>
+>
+
+
+
 -- 
-1.7.9.5
+Kees Cook
+Chrome OS Security
