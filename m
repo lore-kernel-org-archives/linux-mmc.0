@@ -1,47 +1,179 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH 5/6] mmc: sdhci-acpi: Add device id 80860F16
-Date: Mon, 10 Mar 2014 15:02:43 +0200
-Message-ID: <1394456564-13783-6-git-send-email-adrian.hunter@intel.com>
+Subject: [PATCH 3/6] mmc: slot-gpio: Add GPIO descriptor based CD GPIO API
+Date: Mon, 10 Mar 2014 15:02:41 +0200
+Message-ID: <1394456564-13783-4-git-send-email-adrian.hunter@intel.com>
 References: <1394456564-13783-1-git-send-email-adrian.hunter@intel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
 Received: from mga01.intel.com ([192.55.52.88]:46138 "EHLO mga01.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753247AbaCJNEK (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 10 Mar 2014 09:04:10 -0400
+	id S1753247AbaCJNEJ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 10 Mar 2014 09:04:09 -0400
 In-Reply-To: <1394456564-13783-1-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Chris Ball <chris@printf.net>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>, Linus Walleij <linus.walleij@linaro.org>, Alexandre Courbot <gnurou@gmail.com>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 
-Add ACPI HID 80860F16 as a host controller for
-a SD card.
+Add functions to request a CD GPIO using the GPIO
+descriptor API.  Note that the new request function
+is paired with mmc_gpiod_free_cd() not mmc_gpio_free_cd().
+Note also that it must be called prior to mmc_add_host()
+otherwise the caller must also call mmc_gpiod_request_cd_irq().
 
 Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
- drivers/mmc/host/sdhci-acpi.c | 2 ++
- 1 file changed, 2 insertions(+)
+ drivers/mmc/core/core.c       |  4 +++
+ drivers/mmc/core/slot-gpio.c  | 81 ++++++++++++++++++++++++++++++++++++++++++-
+ include/linux/mmc/slot-gpio.h |  6 ++++
+ 3 files changed, 90 insertions(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
-index 98c7420..0d372f0 100644
---- a/drivers/mmc/host/sdhci-acpi.c
-+++ b/drivers/mmc/host/sdhci-acpi.c
-@@ -143,6 +143,7 @@ struct sdhci_acpi_uid_slot {
- static const struct sdhci_acpi_uid_slot sdhci_acpi_uids[] = {
- 	{ "80860F14" , "1" , &sdhci_acpi_slot_int_emmc },
- 	{ "80860F14" , "3" , &sdhci_acpi_slot_int_sd   },
-+	{ "80860F16" , NULL, &sdhci_acpi_slot_int_sd   },
- 	{ "INT33BB"  , "2" , &sdhci_acpi_slot_int_sdio },
- 	{ "INT33C6"  , NULL, &sdhci_acpi_slot_int_sdio },
- 	{ "INT3436"  , NULL, &sdhci_acpi_slot_int_sdio },
-@@ -152,6 +153,7 @@ static const struct sdhci_acpi_uid_slot sdhci_acpi_uids[] = {
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index dc7a5fb..acbc3f2 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -34,6 +34,7 @@
+ #include <linux/mmc/host.h>
+ #include <linux/mmc/mmc.h>
+ #include <linux/mmc/sd.h>
++#include <linux/mmc/slot-gpio.h>
  
- static const struct acpi_device_id sdhci_acpi_ids[] = {
- 	{ "80860F14" },
-+	{ "80860F16" },
- 	{ "INT33BB"  },
- 	{ "INT33C6"  },
- 	{ "INT3436"  },
+ #include "core.h"
+ #include "bus.h"
+@@ -2471,6 +2472,7 @@ void mmc_start_host(struct mmc_host *host)
+ 		mmc_power_off(host);
+ 	else
+ 		mmc_power_up(host, host->ocr_avail);
++	mmc_gpiod_request_cd_irq(host);
+ 	_mmc_detect_change(host, 0, false);
+ }
+ 
+@@ -2482,6 +2484,8 @@ void mmc_stop_host(struct mmc_host *host)
+ 	host->removed = 1;
+ 	spin_unlock_irqrestore(&host->lock, flags);
+ #endif
++	if (host->slot.cd_irq >= 0)
++		disable_irq(host->slot.cd_irq);
+ 
+ 	host->rescan_disable = 1;
+ 	cancel_delayed_work_sync(&host->detect);
+diff --git a/drivers/mmc/core/slot-gpio.c b/drivers/mmc/core/slot-gpio.c
+index 47fa07e..f7650b8 100644
+--- a/drivers/mmc/core/slot-gpio.c
++++ b/drivers/mmc/core/slot-gpio.c
+@@ -139,7 +139,7 @@ int mmc_gpio_request_ro(struct mmc_host *host, unsigned int gpio)
+ }
+ EXPORT_SYMBOL(mmc_gpio_request_ro);
+ 
+-static void mmc_gpiod_request_cd_irq(struct mmc_host *host)
++void mmc_gpiod_request_cd_irq(struct mmc_host *host)
+ {
+ 	struct mmc_gpio *ctx = host->slot.handler_priv;
+ 	int ret, irq;
+@@ -171,6 +171,7 @@ static void mmc_gpiod_request_cd_irq(struct mmc_host *host)
+ 	if (irq < 0)
+ 		host->caps |= MMC_CAP_NEEDS_POLL;
+ }
++EXPORT_SYMBOL(mmc_gpiod_request_cd_irq);
+ 
+ /**
+  * mmc_gpio_request_cd - request a gpio for card-detection
+@@ -276,3 +277,81 @@ void mmc_gpio_free_cd(struct mmc_host *host)
+ 	devm_gpio_free(&host->class_dev, gpio);
+ }
+ EXPORT_SYMBOL(mmc_gpio_free_cd);
++
++/**
++ * mmc_gpiod_request_cd - request a gpio descriptor for card-detection
++ * @host: mmc host
++ * @con_id: function within the GPIO consumer
++ * @idx: index of the GPIO to obtain in the consumer
++ * @override_active_level: ignore %GPIO_ACTIVE_LOW flag
++ * @debounce: debounce time in microseconds
++ *
++ * Use this function in place of mmc_gpio_request_cd() to use the GPIO
++ * descriptor API.  Note that it is paired with mmc_gpiod_free_cd() not
++ * mmc_gpio_free_cd().  Note also that it must be called prior to mmc_add_host()
++ * otherwise the caller must also call mmc_gpiod_request_cd_irq().
++ *
++ * Returns zero on success, else an error.
++ */
++int mmc_gpiod_request_cd(struct mmc_host *host, const char *con_id,
++			 unsigned int idx, bool override_active_level,
++			 unsigned int debounce)
++{
++	struct mmc_gpio *ctx;
++	struct gpio_desc *desc;
++	int ret;
++
++	ret = mmc_gpio_alloc(host);
++	if (ret < 0)
++		return ret;
++
++	ctx = host->slot.handler_priv;
++
++	if (!con_id)
++		con_id = ctx->cd_label;
++
++	desc = devm_gpiod_get_index(host->parent, con_id, idx);
++	if (IS_ERR(desc))
++		return PTR_ERR(desc);
++
++	ret = gpiod_direction_input(desc);
++	if (ret < 0)
++		return ret;
++
++	if (debounce) {
++		ret = gpiod_set_debounce(desc, debounce);
++		if (ret < 0)
++			return ret;
++	}
++
++	ctx->override_cd_active_level = override_active_level;
++	ctx->cd_gpio = desc;
++
++	return 0;
++}
++EXPORT_SYMBOL(mmc_gpiod_request_cd);
++
++/**
++ * mmc_gpiod_free_cd - free the card-detection gpio descriptor
++ * @host: mmc host
++ *
++ * It's provided only for cases that client drivers need to manually free
++ * up the card-detection gpio requested by mmc_gpiod_request_cd().
++ */
++void mmc_gpiod_free_cd(struct mmc_host *host)
++{
++	struct mmc_gpio *ctx = host->slot.handler_priv;
++
++	if (!ctx || !ctx->cd_gpio)
++		return;
++
++	if (host->slot.cd_irq >= 0) {
++		devm_free_irq(&host->class_dev, host->slot.cd_irq, host);
++		host->slot.cd_irq = -EINVAL;
++	}
++
++	devm_gpiod_put(&host->class_dev, ctx->cd_gpio);
++
++	ctx->cd_gpio = NULL;
++}
++EXPORT_SYMBOL(mmc_gpiod_free_cd);
+diff --git a/include/linux/mmc/slot-gpio.h b/include/linux/mmc/slot-gpio.h
+index b0c73e4..d243338 100644
+--- a/include/linux/mmc/slot-gpio.h
++++ b/include/linux/mmc/slot-gpio.h
+@@ -22,4 +22,10 @@ int mmc_gpio_request_cd(struct mmc_host *host, unsigned int gpio,
+ 			unsigned int debounce);
+ void mmc_gpio_free_cd(struct mmc_host *host);
+ 
++int mmc_gpiod_request_cd(struct mmc_host *host, const char *con_id,
++			 unsigned int idx, bool override_active_level,
++			 unsigned int debounce);
++void mmc_gpiod_free_cd(struct mmc_host *host);
++void mmc_gpiod_request_cd_irq(struct mmc_host *host);
++
+ #endif
 -- 
 1.8.3.2
 
