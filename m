@@ -1,155 +1,86 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH 4/6] mmc: sdhci-acpi: Fix broken card detect for ACPI HID 80860F14
-Date: Mon, 10 Mar 2014 15:02:42 +0200
-Message-ID: <1394456564-13783-5-git-send-email-adrian.hunter@intel.com>
-References: <1394456564-13783-1-git-send-email-adrian.hunter@intel.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga01.intel.com ([192.55.52.88]:46138 "EHLO mga01.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753321AbaCJNEJ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 10 Mar 2014 09:04:09 -0400
-In-Reply-To: <1394456564-13783-1-git-send-email-adrian.hunter@intel.com>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Georgi Djakov <gdjakov@mm-sol.com>
+Subject: [PATCH v11 1/3] mmc: sdhci-msm: Qualcomm SDHCI binding documentation
+Date: Mon, 10 Mar 2014 17:37:11 +0200
+Message-ID: <1394465833-22581-2-git-send-email-gdjakov@mm-sol.com>
+References: <1394465833-22581-1-git-send-email-gdjakov@mm-sol.com>
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: <1394465833-22581-1-git-send-email-gdjakov@mm-sol.com>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: linux-mmc@vger.kernel.org, cjb@laptop.org, ulf.hansson@linaro.org, devicetree@vger.kernel.org, grant.likely@linaro.org, robh+dt@kernel.org, pawel.moll@arm.com, mark.rutland@arm.com, swarren@wwwdotorg.org, ijc+devicetree@hellion.org.uk, galak@codeaurora.org, rob@landley.net
+Cc: linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org, Georgi Djakov <gdjakov@mm-sol.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <chris@printf.net>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Linus Walleij <linus.walleij@linaro.org>, Alexandre Courbot <gnurou@gmail.com>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 
-Some 80860F14 devices do not support card detect and must rely
-completely on GPIO.  Presently the card detect GPIO is used
-only to wake-up from runtime suspend.  Change to using
-mmc_gpioid_request_cd() which will cause the SDHCI driver to
-prefer the GPIO to the host controller's native card detect.
+This patch adds the device-tree binding documentation for
+Qualcomm SDHCI driver. It contains the differences between
+the core properties in mmc.txt and the properties used by
+the sdhci-msm driver.
 
-Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+Signed-off-by: Georgi Djakov <gdjakov@mm-sol.com>
 ---
- drivers/mmc/host/sdhci-acpi.c | 77 +++++++++----------------------------------
- 1 file changed, 15 insertions(+), 62 deletions(-)
+ .../devicetree/bindings/mmc/sdhci-msm.txt          |   55 ++++++++++++++++++++
+ 1 file changed, 55 insertions(+)
+ create mode 100644 Documentation/devicetree/bindings/mmc/sdhci-msm.txt
 
-diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
-index 9ce17f6..98c7420 100644
---- a/drivers/mmc/host/sdhci-acpi.c
-+++ b/drivers/mmc/host/sdhci-acpi.c
-@@ -31,7 +31,6 @@
- #include <linux/bitops.h>
- #include <linux/types.h>
- #include <linux/err.h>
--#include <linux/gpio/consumer.h>
- #include <linux/interrupt.h>
- #include <linux/acpi.h>
- #include <linux/pm.h>
-@@ -40,13 +39,15 @@
- 
- #include <linux/mmc/host.h>
- #include <linux/mmc/pm.h>
-+#include <linux/mmc/slot-gpio.h>
- #include <linux/mmc/sdhci.h>
- 
- #include "sdhci.h"
- 
- enum {
--	SDHCI_ACPI_SD_CD	= BIT(0),
--	SDHCI_ACPI_RUNTIME_PM	= BIT(1),
-+	SDHCI_ACPI_SD_CD		= BIT(0),
-+	SDHCI_ACPI_RUNTIME_PM		= BIT(1),
-+	SDHCI_ACPI_SD_CD_OVERRIDE_LEVEL	= BIT(2),
- };
- 
- struct sdhci_acpi_chip {
-@@ -128,7 +129,8 @@ static const struct sdhci_acpi_slot sdhci_acpi_slot_int_sdio = {
- };
- 
- static const struct sdhci_acpi_slot sdhci_acpi_slot_int_sd = {
--	.flags   = SDHCI_ACPI_SD_CD | SDHCI_ACPI_RUNTIME_PM,
-+	.flags   = SDHCI_ACPI_SD_CD | SDHCI_ACPI_SD_CD_OVERRIDE_LEVEL |
-+		   SDHCI_ACPI_RUNTIME_PM,
- 	.quirks2 = SDHCI_QUIRK2_CARD_ON_NEEDS_BUS_ON,
- };
- 
-@@ -192,59 +194,6 @@ static const struct sdhci_acpi_slot *sdhci_acpi_get_slot(acpi_handle handle,
- 	return slot;
- }
- 
--#ifdef CONFIG_PM_RUNTIME
--
--static irqreturn_t sdhci_acpi_sd_cd(int irq, void *dev_id)
--{
--	mmc_detect_change(dev_id, msecs_to_jiffies(200));
--	return IRQ_HANDLED;
--}
--
--static int sdhci_acpi_add_own_cd(struct device *dev, struct mmc_host *mmc)
--{
--	struct gpio_desc *desc;
--	unsigned long flags;
--	int err, irq;
--
--	desc = devm_gpiod_get_index(dev, "sd_cd", 0);
--	if (IS_ERR(desc)) {
--		err = PTR_ERR(desc);
--		goto out;
--	}
--
--	err = gpiod_direction_input(desc);
--	if (err)
--		goto out_free;
--
--	irq = gpiod_to_irq(desc);
--	if (irq < 0) {
--		err = irq;
--		goto out_free;
--	}
--
--	flags = IRQF_TRIGGER_RISING | IRQF_TRIGGER_FALLING;
--	err = devm_request_irq(dev, irq, sdhci_acpi_sd_cd, flags, "sd_cd", mmc);
--	if (err)
--		goto out_free;
--
--	return 0;
--
--out_free:
--	devm_gpiod_put(dev, desc);
--out:
--	dev_warn(dev, "failed to setup card detect wake up\n");
--	return err;
--}
--
--#else
--
--static int sdhci_acpi_add_own_cd(struct device *dev, struct mmc_host *mmc)
--{
--	return 0;
--}
--
--#endif
--
- static int sdhci_acpi_probe(struct platform_device *pdev)
- {
- 	struct device *dev = &pdev->dev;
-@@ -332,15 +281,19 @@ static int sdhci_acpi_probe(struct platform_device *pdev)
- 
- 	host->mmc->caps2 |= MMC_CAP2_NO_PRESCAN_POWERUP;
- 
--	err = sdhci_add_host(host);
--	if (err)
--		goto err_free;
--
- 	if (sdhci_acpi_flag(c, SDHCI_ACPI_SD_CD)) {
--		if (sdhci_acpi_add_own_cd(dev, host->mmc))
-+		bool v = sdhci_acpi_flag(c, SDHCI_ACPI_SD_CD_OVERRIDE_LEVEL);
+diff --git a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
+new file mode 100644
+index 0000000..81b33b5
+--- /dev/null
++++ b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
+@@ -0,0 +1,55 @@
++* Qualcomm SDHCI controller (sdhci-msm)
 +
-+		if (mmc_gpiod_request_cd(host->mmc, NULL, 0, v, 0)) {
-+			dev_warn(dev, "failed to setup card detect gpio\n");
- 			c->use_runtime_pm = false;
-+		}
- 	}
- 
-+	err = sdhci_add_host(host);
-+	if (err)
-+		goto err_free;
++This file documents differences between the core properties in mmc.txt
++and the properties used by the sdhci-msm driver.
 +
- 	if (c->use_runtime_pm) {
- 		pm_runtime_set_active(dev);
- 		pm_suspend_ignore_children(dev, 1);
++Required properties:
++- compatible: Should contain "qcom,sdhci-msm-v4".
++- reg: Base address and length of the register in the following order:
++	- Host controller register map (required)
++	- SD Core register map (required)
++- interrupts: Should contain an interrupt-specifiers for the interrupts:
++	- Host controller interrupt (required)
++- pinctrl-names: Should contain only one value - "default".
++- pinctrl-0: Should specify pin control groups used for this controller.
++- clocks: A list of phandle + clock-specifier pairs for the clocks listed in clock-names.
++- clock-names: Should contain the following:
++	"iface" - Main peripheral bus clock (PCLK/HCLK - AHB Bus clock) (required)
++	"core"	- SDC MMC clock (MCLK) (required)
++	"bus"	- SDCC bus voter clock (optional)
++
++Example:
++
++	sdhc_1: sdhci@f9824900 {
++		compatible = "qcom,sdhci-msm-v4";
++		reg = <0xf9824900 0x11c>, <0xf9824000 0x800>;
++		interrupts = <0 123 0>;
++		bus-width = <8>;
++		non-removable;
++
++		vmmc = <&pm8941_l20>;
++		vqmmc = <&pm8941_s3>;
++
++		pinctrl-names = "default";
++		pinctrl-0 = <&sdc1_clk &sdc1_cmd &sdc1_data>;
++
++		clocks = <&gcc GCC_SDCC1_APPS_CLK>, <&gcc GCC_SDCC1_AHB_CLK>;
++		clock-names = "core", "iface";
++	};
++
++	sdhc_2: sdhci@f98a4900 {
++		compatible = "qcom,sdhci-msm-v4";
++		reg = <0xf98a4900 0x11c>, <0xf98a4000 0x800>;
++		interrupts = <0 125 0>;
++		bus-width = <4>;
++		cd-gpios = <&msmgpio 62 0x1>;
++
++		vmmc = <&pm8941_l21>;
++		vqmmc = <&pm8941_l13>;
++
++		pinctrl-names = "default";
++		pinctrl-0 = <&sdc2_clk &sdc2_cmd &sdc2_data>;
++
++		clocks = <&gcc GCC_SDCC2_APPS_CLK>, <&gcc GCC_SDCC2_AHB_CLK>;
++		clock-names = "core", "iface";
++	};
 -- 
-1.8.3.2
-
+1.7.9.5
