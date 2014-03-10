@@ -1,386 +1,297 @@
-From: Jackey Shen <jackey.shen@amd.com>
-Subject: Re: [PATCH v2 5/5] mmc: add support for HS400 mode of eMMC5.0
-Date: Tue, 11 Mar 2014 08:45:49 +0800
-Message-ID: <20140311004548.GA3198@ubuntu>
-References: <1383653403-10049-1-git-send-email-ulf.hansson@linaro.org>
- <006c01cf2a59$aeb38410$0c1a8c30$%jun@samsung.com>
- <003f01cf3a12$a911eba0$fb35c2e0$%jun@samsung.com>
+From: Alex Lemberg <Alex.Lemberg@sandisk.com>
+Subject: RE: [RFC PATCH 1/1] mmc-utils: Support-sending-eMMC-5.0-FFU
+Date: Mon, 10 Mar 2014 08:55:18 +0000
+Message-ID: <282CEDFCBC30114F83C499CB8F2ED53337E75A26@SACMBXIP02.sdcorp.global.sandisk.com>
+References: <FDD07FEB422EF948A392FDC201AEEAE63F4970C7@SACMBXIP01.sdcorp.global.sandisk.com>
+	<CANEJEGtrBR21P_KnGv5ZwAfwNA700gVmARU42J7N+cpmD4dKJA@mail.gmail.com>
+	<CAGXu5j+Vb242CPMVrrW7DbDujPpTkPHh3ei1hpO7f-BbBJ9MdQ@mail.gmail.com>
+	<282CEDFCBC30114F83C499CB8F2ED53337E59D62@SACMBXIP02.sdcorp.global.sandisk.com>
+	<CAMHSBOUkG6mzdLNY4qMKg9vJqp8=U+U2CjJFa6KKVbV-MJrYRA@mail.gmail.com>
+ <CAGXu5j+OSQz8ph2ycBk=uWHrJ+MEscc_isMFbrD9-6oE1u6uFw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from tx2ehsobe002.messaging.microsoft.com ([65.55.88.12]:30938 "EHLO
-	tx2outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751675AbaCJI0w (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 10 Mar 2014 04:26:52 -0400
-Content-Disposition: inline
-In-Reply-To: <003f01cf3a12$a911eba0$fb35c2e0$%jun@samsung.com>
+Received: from am1ehsobe002.messaging.microsoft.com ([213.199.154.205]:9231
+	"EHLO am1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751812AbaCJIz1 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 10 Mar 2014 04:55:27 -0400
+In-Reply-To: <CAGXu5j+OSQz8ph2ycBk=uWHrJ+MEscc_isMFbrD9-6oE1u6uFw@mail.gmail.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Seungwon Jeon <tgih.jun@samsung.com>
-Cc: linux-mmc@vger.kernel.org, 'Chris Ball' <chris@printf.net>, 'Ulf Hansson' <ulf.hansson@linaro.org>, 'Jaehoon Chung' <jh80.chung@samsung.com>, 'Alim Akhtar' <alim.akhtar@samsung.com>
+To: Kees Cook <keescook@chromium.org>, Gwendal Grignou <gwendal@chromium.org>
+Cc: Grant Grundler <grundler@chromium.org>, Avi Shchislowski <Avi.Shchislowski@sandisk.com>, "cjb@laptop.org" <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Puthikorn Voravootivat <puthik@chromium.org>
 
-Signed-off-by: Jackey Shen <jackey.shen@amd.com>
+SGkgS2VlcyBhbmQgR3dlbmRhbCwNCg0KUGxlYXNlIHNlZSBpbmxpbmUuDQoNClRoYW5rcywNCkFs
+ZXgNCg0KPiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBrZWVzY29va0Bnb29n
+bGUuY29tIFttYWlsdG86a2Vlc2Nvb2tAZ29vZ2xlLmNvbV0gT24gQmVoYWxmIE9mDQo+IEtlZXMg
+Q29vaw0KPiBTZW50OiBXZWRuZXNkYXksIE1hcmNoIDA1LCAyMDE0IDExOjU5IFBNDQo+IFRvOiBH
+d2VuZGFsIEdyaWdub3UNCj4gQ2M6IEFsZXggTGVtYmVyZzsgR3JhbnQgR3J1bmRsZXI7IEF2aSBT
+aGNoaXNsb3dza2k7IGNqYkBsYXB0b3Aub3JnOyBsaW51eC0NCj4gbW1jQHZnZXIua2VybmVsLm9y
+ZzsgUHV0aGlrb3JuIFZvcmF2b290aXZhdA0KPiBTdWJqZWN0OiBSZTogW1JGQyBQQVRDSCAxLzFd
+IG1tYy11dGlsczogU3VwcG9ydC1zZW5kaW5nLWVNTUMtNS4wLUZGVQ0KPiANCj4gT24gV2VkLCBN
+YXIgNSwgMjAxNCBhdCA5OjUyIEFNLCBHd2VuZGFsIEdyaWdub3UNCj4gPGd3ZW5kYWxAY2hyb21p
+dW0ub3JnPiB3cm90ZToNCj4gPg0KPiA+DQo+ID4NCj4gPiBPbiBXZWQsIE1hciA1LCAyMDE0IGF0
+IDg6MzUgQU0sIEFsZXggTGVtYmVyZw0KPiA+IDxBbGV4LkxlbWJlcmdAc2FuZGlzay5jb20+DQo+
+ID4gd3JvdGU6DQo+ID4+DQo+ID4+IEhpIEtlZXMsDQo+ID4+DQo+ID4+IFRoYW5rcyBmb3IgeW91
+ciBjb21tZW50Lg0KPiA+PiBQbGVhc2Ugc2VlIG91ciByZXNwb25zZSBpbmxpbmUuDQo+ID4+DQo+
+ID4+DQo+ID4+ID4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gPj4gPiBGcm9tOiBrZWVz
+Y29va0Bnb29nbGUuY29tIFttYWlsdG86a2Vlc2Nvb2tAZ29vZ2xlLmNvbV0gT24NCj4gQmVoYWxm
+IE9mDQo+ID4+ID4gS2VlcyBDb29rDQo+ID4+ID4gU2VudDogU2F0dXJkYXksIE1hcmNoIDAxLCAy
+MDE0IDE6MjEgQU0NCj4gPj4gPiBUbzogR3JhbnQgR3J1bmRsZXINCj4gPj4gPiBDYzogQXZpIFNo
+Y2hpc2xvd3NraTsgY2piQGxhcHRvcC5vcmc7IGxpbnV4LW1tY0B2Z2VyLmtlcm5lbC5vcmc7DQo+
+ID4+ID4gQWxleCBMZW1iZXJnOyBHd2VuZGFsIEdyaWdub3U7IFB1dGhpa29ybiBWb3Jhdm9vdGl2
+YXQNCj4gPj4gPiBTdWJqZWN0OiBSZTogW1JGQyBQQVRDSCAxLzFdIG1tYy11dGlsczoNCj4gPj4g
+PiBTdXBwb3J0LXNlbmRpbmctZU1NQy01LjAtRkZVDQo+ID4+ID4NCj4gPj4gPiBPbiBGcmksIEZl
+YiAyOCwgMjAxNCBhdCAyOjM5IFBNLCBHcmFudCBHcnVuZGxlcg0KPiA+PiA+IDxncnVuZGxlckBj
+aHJvbWl1bS5vcmc+DQo+ID4+ID4gd3JvdGU6DQo+ID4+ID4gPiBBdmksDQo+ID4+ID4gPiBUaGFu
+a3MgZm9yIHBvc3RpbmcgdGhlc2UgLSBJIGxvb2sgZm9yd2FyZCB0byBzZWVpbmcgdGhpcw0KPiA+
+PiA+ID4gZnVuY3Rpb25hbGl0eSBhdmFpbGFibGUgaW4gbW1jLXV0aWxzIChhbmQga2VybmVsIGFz
+IG5lZWRlZCkuDQo+ID4+ID4gPg0KPiA+PiA+ID4gQ29tbWVudHMgYXMgdXN1YWwgaW5saW5lLg0K
+PiA+PiA+ID4NCj4gPj4gPiA+IEkndmUgYWRkZWQgR3dlbmRhbC9LZWVzIHRvIENDIHRvIGNvbW1l
+bnQgb24gc2VjdXJpdHkgaXNzdWVzIG9mDQo+ID4+ID4gPiB0aGlzIHByb3Bvc2FsLiBTZWUgbm90
+ZXMgYmVsb3cuDQo+ID4+ID4gPg0KPiA+PiA+ID4NCj4gPj4gPiA+IE9uIFN1biwgRmViIDksIDIw
+MTQgYXQgMTowOCBBTSwgQXZpIFNoY2hpc2xvd3NraQ0KPiA+PiA+ID4gPEF2aS5TaGNoaXNsb3dz
+a2lAc2FuZGlzay5jb20+IHdyb3RlOg0KPiA+PiA+ID4+ICAgVGhlIG1tYy11dGlscyB3YXMgbW9k
+aWZpZWQgdG8gaW52b2tlIGVNTUM1LjAgRmllbGQgRmlybXdhcmUNCj4gPj4gPiA+PiBVcGRhdGUN
+Cj4gPj4gPiAoRkZVKSBwcm9jZXNzIGluIG1tYyBkcml2ZXINCj4gPj4gPiA+PiAgIE5ldyBjb21t
+YW5kIHdhcyBhZGQ6ICJkb19lbW1jNTBfZmZ1Ii4NCj4gPj4gPiA+Pg0KPiA+PiA+ID4+ICAgVGhp
+cyBwYXRjaCBkZXBlbmRzIG9uIHBhdGNoICBtbWM6IFN1cHBvcnQtRkZVLWZvci1lTU1DLXY1LjAN
+Cj4gPj4gPiA+PiBDb21taXR0ZWQgYnkgQXZpIFNoY2hpc2xvd3NraSA8YXZpLnNoY2hpc2xvd3Nr
+aUBzYW5kaXNrLmNvbT4NCj4gPj4gPiA+Pg0KPiA+PiA+ID4+ICAgRkZVIHdpbGwgYmUgZG9uZSBp
+biB0d28gc3RlcHMuIFR3byBuZXcgSU9DVEwgY29kZXMgd2lsbCBiZQ0KPiA+PiA+ID4+IHNlbnQg
+dG8gdGhlDQo+ID4+ID4gZHJpdmVyIGluIG9yZGVyIHRvIG9wZXJhdGUgRkZVIGNvZGU6DQo+ID4+
+ID4gPj4gICAgIDEuICBGRlVfRFdPTkxPQURfT1AgKHNlbnQgaW4gZmZ1X2Rvd25sb2FkX2ltYWdl
+KCkgZnVuY3Rpb24pDQo+ID4+ID4gPg0KPiA+PiA+ID4gQW55IHJlYXNvbiBmb3IgdGhlIHR5cG8/
+IERPV05MT0FEIG1heWJlPw0KPiA+PiA+ID4gU2hvdWxkbid0IHRoYXQgYmUgTU1DX0ZGVV9ET1dO
+TE9BRF9PUCB0byBtYXRjaCB0aGUgcHJvcG9zZWQNCj4gPj4gPiBrZXJuZWwgZGVmaW5pdGlvbj8N
+Cj4gPj4gPiA+DQo+ID4+ID4gPj4gICAgICAgICAyLiAgRkZVX0lOU1RBTExfT1AgKHNlbnQgaW4g
+ZmZ1X2luc3RhbGwoKSBmdW5jdGlvbikNCj4gPj4gPiA+DQo+ID4+ID4gPiBEaXR0bzogTU1DX0ZG
+VV9JTlNUQUxMX09QDQo+ID4+ID4gPg0KPiA+PiA+ID4+DQo+ID4+ID4gPj4NCj4gPj4gPiA+PiBT
+aWduZWQtb2ZmLWJ5OiBBdmkgU2hjaGlzbG93c2tpIDxhdmkuc2hjaGlzbG93c2tpQHNhbmRpc2su
+Y29tPg0KPiA+PiA+ID4+IFNpZ25lZC1vZmYtYnk6IEFsZXggTGVtYmVyZyA8YWxleC5sZW1iZXJn
+QHNhbmRpc2suY29tPg0KPiA+PiA+ID4+DQo+ID4+ID4gPj4gZGlmZiAtLWdpdCBhL21tYy5jIGIv
+bW1jLmMNCj4gPj4gPiA+PiBpbmRleCA5MjZlOTJmLi5hMDE4NTJkIDEwMDY0NA0KPiA+PiA+ID4+
+IC0tLSBhL21tYy5jDQo+ID4+ID4gPj4gKysrIGIvbW1jLmMNCj4gPj4gPiA+PiBAQCAtMzYsOSAr
+MzYsOSBAQCBzdHJ1Y3QgQ29tbWFuZCB7DQo+ID4+ID4gPj4gICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICBpZiA+PSAwLCBudW1iZXIgb2YgYXJndW1lbnRzLA0KPiA+PiA+ID4+ICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgaWYgPCAwLCBfbWluaW11bV8gbnVtYmVy
+IG9mDQo+ID4+ID4gPj4gYXJndW1lbnRzICovDQo+ID4+ID4gPj4gICAgICAgICBjaGFyICAgICp2
+ZXJiOyAgICAgICAgICAvKiB2ZXJiICovDQo+ID4+ID4gPj4gLSAgICAgICBjaGFyICAgICpoZWxw
+OyAgICAgICAgICAvKiBoZWxwIGxpbmVzOyBmcm9tIHRoZSAybmQgbGluZQ0KPiA+PiA+ID4+IG9u
+d2FyZCB0aGV5DQo+ID4+ID4gPj4gKyAgICAgICBjaGFyICAgICpoZWxwOyAgICAgICAgICAvKiBo
+ZWxwIGxpbmVzOyBmcm9tIHRoZSAybmQgbGluZQ0KPiA+PiA+ID4+IG9ud2FyZCB0aGV5DQo+ID4+
+ID4gPj4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgYXJlIGF1dG9tYXRpY2Fs
+bHkgaW5kZW50ZWQgKi8NCj4gPj4gPiA+PiAtICAgICAgICBjaGFyICAgICphZHZfaGVscDsgICAg
+ICAvKiBhZHZhbmNlZCBoZWxwIG1lc3NhZ2U7IGZyb20gdGhlDQo+ID4+ID4gPj4gMm5kIGxpbmUN
+Cj4gPj4gPiA+PiArICAgICAgICBjaGFyICAgICphZHZfaGVscDsgICAgICAvKiBhZHZhbmNlZCBo
+ZWxwIG1lc3NhZ2U7IGZyb20gdGhlDQo+ID4+ID4gPj4gMm5kIGxpbmUNCj4gPj4gPiA+DQo+ID4+
+ID4gPiBTb3JyeSwgaXQncyBub3Qgb2J2aW91cyB3aGF0IGNoYW5nZWQgaGVyZS4gV2h5IGlzIHRo
+aXMgaW5jbHVkZWQ/DQo+ID4+ID4gPg0KPiA+PiA+ID4+ICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgIG9ud2FyZCB0aGV5IGFyZQ0KPiA+PiA+ID4+IGF1dG9tYXRpY2FsbHkgaW5k
+ZW50ZWQgKi8NCj4gPj4gPiA+Pg0KPiA+PiA+ID4+ICAgICAgICAgLyogdGhlIGZvbGxvd2luZyBm
+aWVsZHMgYXJlIHJ1bi10aW1lIGZpbGxlZCBieSB0aGUNCj4gPj4gPiA+PiBwcm9ncmFtICovIEBA
+IC0NCj4gPj4gPiAxMTAsNiArMTEwLDExIEBAIHN0YXRpYyBzdHJ1Y3QgQ29tbWFuZCBjb21tYW5k
+c1tdID0gew0KPiA+PiA+ID4+ICAgICAgICAgICAgICAgICAiU2VuZCBTYW5pdGl6ZSBjb21tYW5k
+IHRvIHRoZSA8ZGV2aWNlPi5cblRoaXMNCj4gPj4gPiA+PiB3aWxsIGRlbGV0ZSB0aGUNCj4gPj4g
+PiB1bm1hcHBlZCBtZW1vcnkgcmVnaW9uIG9mIHRoZSBkZXZpY2UuIiwNCj4gPj4gPiA+PiAgICAg
+ICAgICAgTlVMTA0KPiA+PiA+ID4+ICAgICAgICAgfSwNCj4gPj4gPiA+PiArICAgICAgIHsgZG9f
+ZW1tYzUwX2ZmdSwgLTIsDQo+ID4+ID4gPj4gKyAgICAgICAiZW1tYzUwIGZmdSIsICI8aW1hZ2Ug
+cGF0aD4gPGRldmljZT5cbiINCj4gPj4gPiA+PiArICAgICAgICAgInJ1biBlTU1DIDUuMCBGaWVs
+ZCBmaXJtd2FyZSB1cGRhdGUuXG4uIiwNCj4gPj4gPiA+DQo+ID4+ID4gPiBOaXQ6IFRoaXMgaXNu
+J3QgInJ1biIuIEl0J3MgImRvd25sb2FkIGZpcm13YXJlIHRvIGVNTUMgNS4wDQo+ID4+ID4gPiBj
+b21wbGlhbnQNCj4gPj4gPiBkZXZpY2UiLg0KPiA+PiA+ID4NCj4gPj4gPiA+PiArICAgICAgICAg
+TlVMTA0KPiA+PiA+ID4+ICsgICAgICAgfSwNCj4gPj4gPiA+PiAgICAgICAgIHsgMCwgMCwgMCwg
+MCB9DQo+ID4+ID4gPj4gIH07DQo+ID4+ID4gPj4NCj4gPj4gPiA+PiBAQCAtMzYyLDcgKzM2Nyw3
+IEBAIHN0YXRpYyBpbnQgcGFyc2VfYXJncyhpbnQgYXJnYywgY2hhciAqKmFyZ3YsDQo+ID4+ID4g
+Pj4gICAgICAgICAgICAgICAgICAgICAgICAgbWF0Y2hjbWQtPnZlcmIsIG1hdGNoY21kLT5uYXJn
+cyk7DQo+ID4+ID4gPj4gICAgICAgICAgICAgICAgICAgICAgICAgcmV0dXJuIC0yOw0KPiA+PiA+
+ID4+ICAgICAgICAgfQ0KPiA+PiA+ID4+IC0NCj4gPj4gPiA+PiArDQo+ID4+ID4gPg0KPiA+PiA+
+ID4gSSdtIGdvaW5nIHRvIGlnbm9yZSB3aGl0ZSBzcGFjZSBtYW5nbGUgb24gdGhpcyBwYXRjaCBh
+bmQgYXNzdW1lDQo+ID4+ID4gPiB5b3UnbGwgYXNrIGlmIHlvdSBuZWVkIGhlbHAgdXNpbmcgZ21h
+aWwgdG8gc2VuZCBwYXRjaGVzIHVzaW5nIGdpdCBzZW5kLQ0KPiBlbWFpbC4NCj4gPj4gPiA+DQo+
+ID4+ID4gPiBCdXQgdGhlIGFib3ZlIGlzbid0IHdoaXRlIHNwYWNlIG1hbmdsZSBjYXVzZWQgYnkg
+ZW1haWwgLSBpdCdzDQo+ID4+ID4gPiBwYXJ0IG9mIHRoaXMgcGF0Y2ggYW5kIEknbSBub3Qgc2Vl
+aW5nIGEgZGlmZmVyZW5jZSBpbiB0aGlzDQo+ID4+ID4gPiA8UkVEQUNURUQ+IGdtYWlsIGVkaXRv
+ci4NCj4gPj4gPiA+DQo+ID4+ID4gPj4gICAgICAgICAgaWYgKHByZXBhcmVfYXJncyggbmFyZ3Nf
+LCBhcmdzXywgcHJnbmFtZSwgbWF0Y2hjbWQgKSl7DQo+ID4+ID4gPj4gICAgICAgICAgICAgICAg
+ICBmcHJpbnRmKHN0ZGVyciwgIkVSUk9SOiBub3QgZW5vdWdoIG1lbW9yeVxcbiIpOw0KPiA+PiA+
+ID4+ICAgICAgICAgICAgICAgICByZXR1cm4gLTIwOw0KPiA+PiA+ID4+IGRpZmYgLS1naXQgYS9t
+bWMuaCBiL21tYy5oDQo+ID4+ID4gPj4gaW5kZXggOTg3MWQ2Mi4uM2JlNmRiMCAxMDA2NDQNCj4g
+Pj4gPiA+PiAtLS0gYS9tbWMuaA0KPiA+PiA+ID4+ICsrKyBiL21tYy5oDQo+ID4+ID4gPj4gQEAg
+LTgwLDYgKzgwLDE0IEBADQo+ID4+ID4gPj4gICNkZWZpbmUgQktPUFNfRU5BQkxFICAgKDE8PDAp
+DQo+ID4+ID4gPj4NCj4gPj4gPiA+PiAgLyoNCj4gPj4gPiA+PiArICogc2VjdG9yIHNpemUNCj4g
+Pj4gPiA+PiArKi8NCj4gPj4gPiA+PiArI2RlZmluZSBDQVJEX0JMT0NLX1NJWkUgICAgICAgIDUx
+Mg0KPiA+PiA+ID4NCj4gPj4gPiA+IHNlY3RvciBzaXplIGlzIGFkdmVydGlzZWQgYnkgdGhlIGRl
+dmljZS4gSXQgY291bGQgYmUgZWl0aGVyIDUxMg0KPiA+PiA+ID4gb3IgNEsgYnl0ZXMuDQo+ID4+
+ID4gTm8/DQo+ID4+ID4gPg0KPiA+PiA+ID4gIjcuNC4xNyBOVU1CRVJfT0ZfRldfU0VDVE9SU19D
+T1JSRUNUTFlfUFJPR1JBTU1FRA0KPiBbMzA1LTMwMl0NCj4gPj4gPiA+DQo+ID4+ID4gPiBUaGUg
+dmFsdWUgaXMgaW4gdGVybXMgb2YgNTEyIEJ5dGVzIG9yIGluIG11bHRpcGxlIG9mIGVpZ2h0DQo+
+ID4+ID4gPiA1MTJCeXRlcyBzZWN0b3JzICg0S0J5dGVzKSBkZXBlbmRpbmcgb24gdGhlIHZhbHVl
+IG9mIHRoZQ0KPiA+PiA+ID4gREFUQV9TRUNUT1JfU0laRSBmaWVsZC4iDQo+ID4+ID4gPg0KPiA+
+PiA+ID4gSSBkb24ndCB0aGluayB0aGlzIHNob3VsZCBiZSBoYXJkIGNvZGVkIHRvIDUxMi4gQW5k
+IGEgZmV3IHBsYWNlcw0KPiA+PiA+ID4gSSBzZWUgaGFyZCBjb2RlZCB3aXRoICI8PCA5IiB3aWxs
+IGxpa2VseSBuZWVkIHRvIHRha2UgdGhpcyBpbnRvIGFjY291bnQuDQo+ID4+ID4gPg0KPiA+PiA+
+ID4NCj4gPj4gPiA+PiArDQo+ID4+ID4gPj4gKyNkZWZpbmUgRkZVX0RXT05MT0FEX09QICAgICAg
+ICAzMDINCj4gPj4gPiA+PiArI2RlZmluZSBGRlVfSU5TVEFMTF9PUCAzMDMNCj4gPj4gPiA+DQo+
+ID4+ID4gPiBUaGVzZSBzaG91bGQgbWF0Y2gga2VybmVsIGRlZmluaXRpb25zIChjb21wbGV0ZSBu
+YW1lIGFuZCB2YWx1ZSkuDQo+ID4+ID4gPg0KPiA+PiA+ID4+ICsNCj4gPj4gPiA+PiArLyoNCj4g
+Pj4gPiA+PiAgICogRVhUX0NTRCBmaWVsZCBkZWZpbml0aW9ucw0KPiA+PiA+ID4+ICAgKi8NCj4g
+Pj4gPiA+PiAgI2RlZmluZSBFWFRfQ1NEX0hQSV9TVVBQICAgICAgICAgICAgICAgKDE8PDApDQo+
+ID4+ID4gPj4gZGlmZiAtLWdpdCBhL21tY19jbWRzLmMgYi9tbWNfY21kcy5jIGluZGV4IGI4YWZh
+NzQuLjI0YzRhNmINCj4gPj4gPiA+PiAxMDA2NDQNCj4gPj4gPiA+PiAtLS0gYS9tbWNfY21kcy5j
+DQo+ID4+ID4gPj4gKysrIGIvbW1jX2NtZHMuYw0KPiA+PiA+ID4+IEBAIC0xMTYzLDMgKzExNjMs
+MTEyIEBAIGludCBkb19zYW5pdGl6ZShpbnQgbmFyZ3MsIGNoYXIgKiphcmd2KQ0KPiA+PiA+ID4+
+DQo+ID4+ID4gPj4gIH0NCj4gPj4gPiA+Pg0KPiA+PiA+ID4+ICtzdGF0aWMgaW50IGZmdV9kb3du
+bG9hZF9pbWFnZShpbnQgZndfZmQsIGludCBtbWNfZmQpIHsNCj4gPj4gPiA+PiArICAgICAgIGlu
+dCByZXQgPSAwOw0KPiA+PiA+ID4+ICsgICAgICAgc3RydWN0IG1tY19pb2NfY21kIG1tY19pb2Nf
+Y21kOw0KPiA+PiA+ID4+ICsgICAgICAgY2hhciBkYXRhX2J1ZmZbTU1DX0lPQ19NQVhfQllURVNd
+Ow0KPiA+PiA+ID4+ICsgICAgICAgaW50IGZpbGVfc2l6ZTsNCj4gPj4gPiA+DQo+ID4+ID4gPiBU
+aGlzIHNob3VsZCBiZSBvZmZfdCB0eXBlLiBTZWUgIm1hbiAyIGxzZWVrIi4NCj4gPj4gPiA+DQo+
+ID4+ID4gPj4gKyAgICAgICBpbnQgc2l6ZTsNCj4gPj4gPiA+DQo+ID4+ID4gPiBUaGlzIHNob3Vs
+ZCBiZSBzaXplX3QgdHlwZS4gIFNlZSAibWFuIDIgcmVhZCIuDQo+ID4+ID4gPg0KPiA+PiA+ID4+
+ICsgICAgICAgaW50IGRhdGFfbGVuZ3RoOw0KPiA+PiA+ID4NCj4gPj4gPiA+IFRoaXMgc2hvdWxk
+IHNzaXplX3QgdHlwZS4gU2VlICJtYW4gMiByZWFkIi4NCj4gPj4gPiA+DQo+ID4+ID4gPj4gKw0K
+PiA+PiA+ID4+ICsgICAgICAgbWVtc2V0KGRhdGFfYnVmZiwgMCwgc2l6ZW9mKGRhdGFfYnVmZikp
+Ow0KPiA+PiA+ID4+ICsgICAgICAgLyogZ2V0IGZpbGUgc2l6ZSAqLw0KPiA+PiA+ID4+ICsgICAg
+ICAgZmlsZV9zaXplID0gbHNlZWsoZndfZmQsIDAsIFNFRUtfRU5EKTsNCj4gPj4gPiA+DQo+ID4+
+ID4gPiBJJ20gd29uZGVyaW5nIHdoeSBsc2VlayB3b3VsZCBiZSBwcmVmZXJyZWQgb3ZlciBmc3Rh
+dCgpLg0KPiA+PiA+ID4NCj4gPj4gPiA+PiArICAgICAgIGlmIChmaWxlX3NpemUgPCAwKSB7DQo+
+ID4+ID4gPj4gKyAgICAgICAgICAgICAgIHJldCA9ICAtMTsNCj4gPj4gPiA+PiArICAgICAgICAg
+ICAgICAgcGVycm9yKCJzZWVrIGZpbGUgZXJyb3IgXG4iKTsNCj4gPj4gPiA+PiArICAgICAgICAg
+ICAgICAgZ290byBleGl0Ow0KPiA+PiA+ID4+ICsgICAgICAgfQ0KPiA+PiA+ID4+ICsNCj4gPj4g
+PiA+PiArICAgICAgIGxzZWVrKGZ3X2ZkLCAwLCBTRUVLX1NFVCk7DQo+ID4+ID4gPj4gKyAgICAg
+ICBkbyB7DQo+ID4+ID4gPj4gKyAgICAgICAgICAgICAgIHNpemUgPSAoZmlsZV9zaXplID4gTU1D
+X0lPQ19NQVhfQllURVMpID8NCj4gPj4gPiA+PiArICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgIE1NQ19JT0NfTUFYX0JZVEVTIDogZmlsZV9zaXplOw0KPiA+PiA+ID4+ICsgICAgICAgICAg
+ICAgICAvKiBSZWFkIEZXIGRhdGEgZnJvbSBmaWxlICovDQo+ID4+ID4gPj4gKyAgICAgICAgICAg
+ICAgIGRhdGFfbGVuZ3RoID0gcmVhZChmd19mZCwgZGF0YV9idWZmLCBzaXplKTsNCj4gPj4gPiA+
+PiArICAgICAgICAgICAgICAgaWYgKGRhdGFfbGVuZ3RoID09IC0xKSB7DQo+ID4+ID4gPg0KPiA+
+PiA+ID4gU2hvdWxkIHRoaXMgdGVzdCBkYXRhX2xlbmd0aCA8IHNpemUgPw0KPiA+PiA+ID4NCj4g
+Pj4gPiA+PiArICAgICAgICAgICAgICAgICAgICAgICByZXQgPSAtMTsNCj4gPj4gPiA+PiArICAg
+ICAgICAgICAgICAgICAgICAgICBnb3RvIGV4aXQ7DQo+ID4+ID4gPj4gKyAgICAgICAgICAgICAg
+IH0NCj4gPj4gPiA+DQo+ID4+ID4gPiBHd2VuZGFsIGFuZCBLZWVzIChDQydkKSB3b3VsZCBwcmVm
+ZXIgdG8gc2VuZCB0aGUgZmlsZSBuYW1lIHRvIHRoZQ0KPiA+PiA+ID4ga2VybmVsIGFzIHBhcnQg
+b2YgdGhlIGlvY3RsIGFuZCB1c2UgZXhpc3RpbmcgdWRldiBtZWNoYW5pc21zIHRvDQo+ID4+ID4g
+PiByZXF1ZXN0IHRoZSBmaXJtd2FyZS4NCj4gPj4gPg0KPiA+PiA+IFllcywgcGxlYXNlIHNlZSBE
+b2N1bWVudGF0aW9uL2Zpcm13YXJlX2NsYXNzL1JFQURNRSBmb3INCj4gaW5mb3JtYXRpb24NCj4g
+Pj4gPiBvbiB0aGUga2VybmVsIGludGVybmFscywgYnV0IEkgd291bGQgbXVjaCBwcmVmZXIgdGhl
+IGtlcm5lbCBkbyBhbGwNCj4gPj4gPiB0aGUgbG9hZGluZywgbm90IHVzZXJzcGFjZS4gVGhlIGtl
+cm5lbCBkcml2ZXIgY2FuIHJlcXVlc3QgdGhlDQo+ID4+ID4gZmlybXdhcmUNCj4gPj4gPiBjb250
+ZW50czoNCj4gPj4gPg0KPiA+PiA+ICAgICAgICAgIGlmKHJlcXVlc3RfZmlybXdhcmUoJmZ3X2Vu
+dHJ5LCAkRklSTVdBUkUsIGRldmljZSkgPT0gMCkNCj4gPj4gPiAgICAgICAgICAgICAgICAgY29w
+eV9md190b19kZXZpY2UoZndfZW50cnktPmRhdGEsIGZ3X2VudHJ5LT5zaXplKTsNCj4gPj4gPiAg
+ICAgICAgICByZWxlYXNlKGZ3X2VudHJ5KTsNCj4gPj4gPg0KPiA+PiA+IGFuZCB0aGVuIHNlbmQg
+aXQgdG8gdGhlIGRldmljZS4gRG9pbmcgdGhpcyBmcm9tIHVzZXJzcGFjZSBtZWFucw0KPiA+PiA+
+IHRoZXJlIGlzIG5vIHdheSB0byB2ZXJpZnkgdGhlIGZpcm13YXJlIGNvbnRlbnRzLiBFcXVhbGx5
+LCB0aGUNCj4gPj4gPiBrZXJuZWwgc2hvdWxkIGFjdGl2ZWx5IGJsb2NrIHRoZSBNTUNfRkZVX0RP
+V05MT0FEX09QIG9wLCBzaW5jZSBpdA0KPiA+PiA+IHNob3VsZCBiZSBjb25zaWRlcmVkIGEgc2Vu
+c2l0aXZlIG9wZXJhdGlvbi4NCj4gPj4NCj4gPj4gSW5kZWVkIHRoaXMgbWVjaGFuaXNtIGFsbG93
+cyB0byBkb3dubG9hZCBGVyBmaWxlIGRpcmVjdGx5IHRvIHRoZQ0KPiA+PiBkcml2ZXIsIGFuZCBu
+b3QgdXNpbmcgSU9DVEwgZm9yIHRoaXMuDQo+ID4+DQo+ID4+IEJ1dCBhY3R1YWxseSwgZU1NQzUu
+MCBzcGVjIGRvZXMgbm90IHJlcXVpcmVzIGFueSBvZiBGVyBmaWxlIGNvbnRlbnQNCj4gPj4gdG8g
+YmUgdmVyaWZpZWQgYnkgdGhlIGhvc3QuDQo+ID4+IFRoZSBGVyBmaWxlIHNob3VsZCAgYmUgZG93
+bmxvYWRlZCBlbnRpcmVseSBhbmQgdmVyaWZpZWQgYnkgZU1NQw0KPiA+PiBkZXZpY2UgaW50ZXJu
+YWxseS4NCj4gPg0KPiA+DQo+ID4gVGhlIHBvaW50IG9mIHVzaW5nIGZpcm13YXJlX3JlcXVlc3Qo
+KSBpcyB0aGUgZmlybXdhcmUgaW1hZ2UgaXMgbm90DQo+ID4gc2VudCB3aXRoaW4gdGhlIElPQ1RM
+IGl0c2VsZiBidXQgcHJvdmlkZWQgYnkgYSB3ZWxsIGtub3duIGRhZW1vbiwgaW4NCj4gPiB0aGlz
+IGNhc2UgdWRldmQuDQo+ID4gV2UgY2FuIG1ha2UgdWRldmQgdGhlIGdhdGUga2VlcGVyIG9mIGZp
+cm13YXJlIGltYWdlcyBbbm90IG9ubHkgZU1NQw0KPiA+IGRldmljZXMsIGJ1dCB3aWZpIGFuZCAz
+ZyBtb2RlbXMgYXMgd2VsbF0gYW5kIGVuc3VyZSB0aGF0IG9ubHkgYXBwcm92ZWQNCj4gPiBhbmQg
+d2VsbC1rbm93biBpbWFnZXMgYXJlIHNlbnQgdG8gdGhlIGRldmljZXMuDQo+IA0KPiBOb3Qgb25s
+eSB1ZGV2ZCwgYnV0IHRoZSBrZXJuZWwgaXRzZWxmIC0tIHRoZSBrZXJuZWwgdG9vLiBUaGUgZ29h
+bCBpcyB0byBtYWtlIHRoZQ0KPiBrZXJuZWwgdGhlIHRydXN0ZWQgZWxlbWVudCwgYW5kIHRvIG5v
+dCB0cnVzdCBhbnkgcG9ydGlvbiBvZiB1c2Vyc3BhY2UgdGhhdA0KPiBjYW4ndCBiZSBjcnlwdG9n
+cmFwaGljYWxseSB2ZXJpZmllZC4NCj4gDQo+IC1LZWVzDQo+IA0KDQpXZSB3aWxsIGNvbnNpZGVy
+IHVzaW5nIHVkZXYgbWVjaGFuaXNtLiBCdXQgZmlyc3Qgd2UgbmVlZCB0byBtYWtlIGEgc2hvcnQg
+cmVzZWFyY2ggb24gdGhpcyB0b3BpYy4NCkFzIHdlbGwgYXMgd2UgbmVlZCB0byB1bmRlcnN0YW5k
+IGlmIHVkZXYgaXMgYWxzbyB1c2VkIGluIG1vYmlsZSBwbGF0Zm9ybXMgZW52aXJvbm1lbnQuDQpB
+cmUgeW91IGZhbWlsaWFyIHdpdGggdWRldiB1c2FnZSBvbiBtb2JpbGUgcGxhdGZvcm1zPw0KDQoN
+Cj4gPg0KPiA+IEd3ZW5kYWwuDQo+ID4+DQo+ID4+DQo+ID4+IFBsZWFzZSBsZXQgdXMga25vdyBp
+ZiB5b3UgYXdhcmUgb2Ygb3RoZXIgc29sdXRpb25zLCB3aGljaCBhcmUNCj4gPj4gcmVxdWlyZXMg
+RlcgZmlsZSB2ZXJpZmljYXRpb24gaW4gdGhlIGhvc3Qgc2lkZS4NCj4gPj4NCj4gPj4gSW4gdGhl
+IHdheSB0aGF0IHdlIGhhdmUgaW1wbGVtZW50ZWQgRlcgZG93bmxvYWQgcm91dGluZSBpbiB0aGUN
+Cj4gPj4gZHJpdmVyLCB0aGUgRlcgZG93bmxvYWQgcHJvY2VzcyBpcyBibG9ja2VkICh1c2luZyBj
+bGFpbV9ob3N0KCkpDQo+ID4+IGFueXdheSwgYW5kIHByZXZlbnRzIGludGVycnVwdGlvbnMgb2Yg
+dGhpcyBwcm9jZXNzIGJ5IG90aGVyIElPIHJlcXVlc3RzLg0KPiA+Pg0KPiA+PiA+DQo+ID4+ID4g
+LUtlZXMNCj4gPj4gPg0KPiA+PiA+ID4NCj4gPj4gPiA+IFRoaXMgaGFzIHNvbWUgYWR2YW50YWdl
+cyBmb3Igc2VjdXJpdHkgd2hpY2ggbWFrZSBpdCBhIGxvdCBoYXJkZXINCj4gPj4gPiA+IHRvICJw
+bGFudCIgdGhlIGhhY2tlZCBmaXJtd2FyZSBvbiBkZXZpY2VzLiBJJ2xsIGxldCBHd2VuZGFsIGFu
+ZA0KPiA+PiA+ID4gS2VlcyBwcmVzZW50IHRoZSBkZXRhaWxzIG9mIHRob3NlIGlkZWFzLg0KPiA+
+PiA+ID4NCj4gPj4gPiA+PiArICAgICAgICAgICAgICAgLyogcHJlcGFyZSBhbmQgc2VuZCBpb2N0
+bCAqLw0KPiA+PiA+ID4+ICsgICAgICAgICAgICAgICBtZW1zZXQoJm1tY19pb2NfY21kLCAwLCBz
+aXplb2YobW1jX2lvY19jbWQpKTsNCj4gPj4gPiA+PiArICAgICAgICAgICAgICAgbW1jX2lvY19j
+bWQub3Bjb2RlID0gIEZGVV9EV09OTE9BRF9PUDsNCj4gPj4gPiA+PiArICAgICAgICAgICAgICAg
+bW1jX2lvY19jbWQuYmxrc3ogPSBDQVJEX0JMT0NLX1NJWkU7DQo+ID4+ID4gPj4gKyAgICAgICAg
+ICAgICAgIG1tY19pb2NfY21kLmJsb2NrcyA9IGRhdGFfbGVuZ3RoIC8gbW1jX2lvY19jbWQuYmxr
+c3o7DQo+ID4+ID4gPj4gKyAgICAgICAgICAgICAgIG1tY19pb2NfY21kLmFyZyA9ICAwOw0KPiA+
+PiA+ID4+ICsgICAgICAgICAgICAgICBtbWNfaW9jX2NtZC5mbGFncyA9IE1NQ19SU1BfU1BJX1Ix
+IHwgTU1DX1JTUF9SMQ0KPiA+PiA+ID4+ICsgfA0KPiA+PiA+IE1NQ19DTURfQURUQzsNCj4gPj4g
+PiA+PiArICAgICAgICAgICAgICAgbW1jX2lvY19jbWQud3JpdGVfZmxhZyA9IDE7DQo+ID4+ID4g
+Pj4gKyAgICAgICAgICAgICAgIG1tY19pb2NfY21kX3NldF9kYXRhKG1tY19pb2NfY21kLCBkYXRh
+X2J1ZmYpOw0KPiA+PiA+ID4+ICsgICAgICAgICAgICAgICByZXQgPSBpb2N0bChtbWNfZmQsIE1N
+Q19JT0NfQ01ELCAmbW1jX2lvY19jbWQpOw0KPiA+PiA+ID4+ICsgICAgICAgICAgICAgICBpZiAo
+cmV0KSB7DQo+ID4+ID4gPj4gKyAgICAgICAgICAgICAgICAgICAgICAgcGVycm9yKCJpb2N0bCBG
+VyBkb3dubG9hZCIpOw0KPiA+PiA+ID4+ICsgICAgICAgICAgICAgICAgICAgICAgIGdvdG8gZXhp
+dDsNCj4gPj4gPiA+PiArICAgICAgICAgICAgICAgfQ0KPiA+PiA+ID4+ICsNCj4gPj4gPiA+PiAr
+ICAgICAgICAgICAgICAgZmlsZV9zaXplID0gZmlsZV9zaXplIC0gc2l6ZTsNCj4gPj4gPiA+PiAr
+ICAgICAgICAgICAgICAgcHJpbnRmKCJmaXJtd2FyZSBmaWxlIGxvYWRpbmcsIHJlbWFpbmluZzog
+ICAlZFxuIiwNCj4gPj4gPiA+PiBmaWxlX3NpemUpOw0KPiA+PiA+ID4+ICsgICAgICAgfSB3aGls
+ZSAoZmlsZV9zaXplID4gMCk7DQo+ID4+ID4gPj4gKw0KPiA+PiA+ID4+ICtleGl0Og0KPiA+PiA+
+ID4+ICsNCj4gPj4gPiA+PiArICAgICAgIHJldHVybiByZXQ7DQo+ID4+ID4gPj4gK30NCj4gPj4g
+PiA+PiArDQo+ID4+ID4gPj4gK3N0YXRpYyBpbnQgZmZ1X2luc3RhbGwoaW50IG1tY19mZCkgew0K
+PiA+PiA+ID4+ICsgICAgICAgaW50IHJldDsNCj4gPj4gPiA+PiArICAgICAgIHN0cnVjdCBtbWNf
+aW9jX2NtZCBtbWNfaW9jX2NtZDsNCj4gPj4gPiA+PiArDQo+ID4+ID4gPj4gKyAgICAgICBtZW1z
+ZXQoJm1tY19pb2NfY21kLCAwLCBzaXplb2YobW1jX2lvY19jbWQpKTsNCj4gPj4gPiA+PiArICAg
+ICAgIG1tY19pb2NfY21kLm9wY29kZSA9IEZGVV9JTlNUQUxMX09QOw0KPiA+PiA+ID4+ICsgICAg
+ICAgbW1jX2lvY19jbWQuYmxrc3ogPSBDQVJEX0JMT0NLX1NJWkU7DQo+ID4+ID4gPj4gKyAgICAg
+ICBtbWNfaW9jX2NtZC5ibG9ja3MgPSAwOw0KPiA+PiA+ID4+ICsgICAgICAgbW1jX2lvY19jbWQu
+YXJnID0gIDA7DQo+ID4+ID4gPj4gKyAgICAgICBtbWNfaW9jX2NtZC5mbGFncyA9IE1NQ19SU1Bf
+U1BJX1IxIHwgTU1DX1JTUF9SMSB8DQo+ID4+ID4gTU1DX0NNRF9BRFRDOw0KPiA+PiA+ID4+ICsg
+ICAgICAgbW1jX2lvY19jbWQud3JpdGVfZmxhZyA9IDA7DQo+ID4+ID4gPj4gKyAgICAgICByZXQg
+PSBpb2N0bChtbWNfZmQsIE1NQ19JT0NfQ01ELCAmbW1jX2lvY19jbWQpOw0KPiA+PiA+ID4+ICsg
+ICAgICAgaWYgKHJldCkNCj4gPj4gPiA+PiArICAgICAgICAgICAgICAgcGVycm9yKCJpb2N0bCBp
+bnN0YWxsIik7DQo+ID4+ID4gPj4gKw0KPiA+PiA+ID4+ICsgICAgICAgcHJpbnRmKCJmZnVfaW5z
+dGFsbCByZXQgJWQgXG4iLCByZXQpOw0KPiA+PiA+ID4+ICsgICAgICAgcmV0dXJuIHJldDsNCj4g
+Pj4gPiA+PiArfQ0KPiA+PiA+ID4+ICsNCj4gPj4gPiA+PiAraW50IGRvX2VtbWM1MF9mZnUoaW50
+IG5hcmdzLCBjaGFyICoqYXJndikgew0KPiA+PiA+ID4+ICsgICAgICAgaW50IGZkLCBmd19mZCwg
+cmV0Ow0KPiA+PiA+ID4+ICsgICAgICAgY2hhciAqZGV2aWNlOw0KPiA+PiA+ID4+ICsNCj4gPj4g
+PiA+PiArICAgICAgIENIRUNLKG5hcmdzICE9IDMsICJVc2FnZTogZmZ1IDxpbWFnZSBwYXRoPg0K
+PiA+PiA+ID4+ICsgPC9wYXRoL3RvL21tY2Jsa1g+DQo+ID4+ID4gXG4iLA0KPiA+PiA+ID4+ICsg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgZXhpdCgxKSk7DQo+ID4+ID4gPj4gKw0KPiA+
+PiA+ID4+ICsgICAgICAgZGV2aWNlID0gYXJndlsyXTsNCj4gPj4gPiA+PiArICAgICAgIGZkID0g
+b3BlbihkZXZpY2UsIE9fUkRXUik7DQo+ID4+ID4gPj4gKyAgICAgICBpZiAoZmQgPCAwKSB7DQo+
+ID4+ID4gPj4gKyAgICAgICAgICAgICAgIHBlcnJvcigib3BlbiIpOw0KPiA+PiA+ID4+ICsgICAg
+ICAgICAgICAgICBleGl0KDEpOw0KPiA+PiA+ID4+ICsgICAgICAgfQ0KPiA+PiA+ID4+ICsNCj4g
+Pj4gPiA+PiArICAgICAgIC8qIG9wZW4gZU1NQzUuMCBmaXJtd2FyZSBpbWFnZSBmaWxlICovDQo+
+ID4+ID4gPj4gKyAgICAgICBmd19mZCA9IG9wZW4oYXJndlsxXSwgT19SRE9OTFkpOw0KPiA+PiA+
+ID4+ICsgICAgICAgaWYgKGZ3X2ZkIDwgMCkgew0KPiA+PiA+ID4+ICsgICAgICAgICAgICAgICBw
+ZXJyb3IoIm9wZW4gZU1NQzUuMCBmaXJtd2FyZSBmaWxlIik7DQo+ID4+ID4gPj4gKyAgICAgICAg
+ICAgICAgIHJldCA9IC0xOw0KPiA+PiA+ID4NCj4gPj4gPiA+IERvbid0IHdhbnQgdG8gcmV0dXJu
+IHRoZSBlcnJubyB2YWx1ZT8NCj4gPj4gPiA+DQo+ID4+ID4gPj4gKyAgICAgICAgICAgICAgIGdv
+dG8gZXhpdDsNCj4gPj4gPiA+PiArICAgICAgIH0NCj4gPj4gPiA+PiArDQo+ID4+ID4gPj4gKyAg
+ICAgICByZXQgPSBmZnVfZG93bmxvYWRfaW1hZ2UoZndfZmQsIGZkKTsNCj4gPj4gPiA+PiArICAg
+ICAgIGlmIChyZXQpDQo+ID4+ID4gPj4gKyAgICAgICAgICAgICAgIGdvdG8gZXhpdDsNCj4gPj4g
+PiA+PiArDQo+ID4+ID4gPj4gKyAgICAgICByZXQgPSBmZnVfaW5zdGFsbChmZCk7DQo+ID4+ID4g
+Pj4gKyAgICAgICBpZiAocmV0KQ0KPiA+PiA+ID4+ICsgICAgICAgICAgICAgICBnb3RvIGV4aXQ7
+DQo+ID4+ID4gPj4gKw0KPiA+PiA+ID4+ICtleGl0Og0KPiA+PiA+ID4+ICsgICAgICAgY2xvc2Uo
+ZmQpOw0KPiA+PiA+ID4+ICsgICAgICAgY2xvc2UoZndfZmQpOw0KPiA+PiA+ID4+ICsNCj4gPj4g
+PiA+PiArICAgICAgIHJldHVybiByZXQ7DQo+ID4+ID4gPj4gK30NCj4gPj4gPiA+PiBkaWZmIC0t
+Z2l0IGEvbW1jX2NtZHMuaCBiL21tY19jbWRzLmggaW5kZXggZjA2Y2MxMC4uNzdhNmNiOA0KPiA+
+PiA+ID4+IDEwMDY0NA0KPiA+PiA+ID4+IC0tLSBhL21tY19jbWRzLmgNCj4gPj4gPiA+PiArKysg
+Yi9tbWNfY21kcy5oDQo+ID4+ID4gPj4gQEAgLTI4LDMgKzI4LDUgQEAgaW50IGRvX3Nhbml0aXpl
+KGludCBuYXJncywgY2hhciAqKmFyZ3YpOyAgaW50DQo+ID4+ID4gPj4gZG9fc3RhdHVzX2dldChp
+bnQgbmFyZ3MsIGNoYXIgKiphcmd2KTsgIGludCBkb19lbmhfYXJlYV9zZXQoaW50DQo+ID4+ID4g
+Pj4gbmFyZ3MsIGNoYXIgKiphcmd2KTsgIGludCBkb193cml0ZV9yZWxpYWJpbGl0eV9zZXQoaW50
+IG5hcmdzLA0KPiA+PiA+ID4+IGNoYXIgKiphcmd2KTsNCj4gPj4gPiA+PiAraW50IGRvX2VtbWM1
+MF9mZnUoaW50IG5hcmdzLCBjaGFyICoqYXJndik7DQo+ID4+ID4gPj4gKw0KPiA+PiA+ID4+IC0t
+DQo+ID4+ID4gPj4gMS43LjUuNA0KPiA+PiA+ID4+DQo+ID4+ID4gPj4NCj4gPj4gPiA+PiBBdmkg
+U2hjaGlzbG93c2tpIHwgU3RhZmYgU29mdHdhcmUgRW5naW5lZXIsIE1DUyBFbWJlZGRlZCAgfA0K
+PiA+PiA+ID4+IFNhbkRpc2sgfA0KPiA+PiA+ID4+ICs5NzIuMDkuNzYzLTI2NjZ8IHd3dy5zYW5k
+aXNrLmNvbQ0KPiA+PiA+ID4+DQo+ID4+ID4gPg0KPiA+PiA+ID4gY2hlZXJzLA0KPiA+PiA+ID4g
+Z3JhbnQNCj4gPj4gPg0KPiA+PiA+DQo+ID4+ID4NCj4gPj4gPiAtLQ0KPiA+PiA+IEtlZXMgQ29v
+aw0KPiA+PiA+IENocm9tZSBPUyBTZWN1cml0eQ0KPiA+Pg0KPiA+Pg0KPiA+Pg0KPiA+DQo+IA0K
+PiANCj4gDQo+IC0tDQo+IEtlZXMgQ29vaw0KPiBDaHJvbWUgT1MgU2VjdXJpdHkNCg0KCgo=
 
-Thanks,
-Jackey
-
-On Fri, Mar 07, 2014 at 11:36:43PM +0900, Seungwon Jeon wrote:
-> This patch adds HS400 mode support for eMMC5.0 device.
-> HS400 mode is high speed DDR interface timing from HS200.
-> Clock frequency is up to 200MHz and only 8-bit bus width is
-> supported. In addition, tuning process of HS200 is required
-> to synchronize the command response on the CMD line because
-> CMD input timing for HS400 mode is the same as HS200 mode.
-> 
-> Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
-> ---
-> Changes in v2:
-> 	Cleaned up some unnecessary codes.
-> 
->  drivers/mmc/core/bus.c     |    1 +
->  drivers/mmc/core/debugfs.c |    3 +
->  drivers/mmc/core/mmc.c     |  120 +++++++++++++++++++++++++++++++++++++++++---
->  include/linux/mmc/card.h   |    1 +
->  include/linux/mmc/host.h   |   15 +++++-
->  include/linux/mmc/mmc.h    |    7 ++-
->  6 files changed, 138 insertions(+), 9 deletions(-)
-> 
-> diff --git a/drivers/mmc/core/bus.c b/drivers/mmc/core/bus.c
-> index f37e9d6..d2dbf02 100644
-> --- a/drivers/mmc/core/bus.c
-> +++ b/drivers/mmc/core/bus.c
-> @@ -349,6 +349,7 @@ int mmc_add_card(struct mmc_card *card)
->  			mmc_hostname(card->host),
->  			mmc_card_uhs(card) ? "ultra high speed " :
->  			(mmc_card_hs(card) ? "high speed " : ""),
-> +			mmc_card_hs400(card) ? "HS400 " :
->  			(mmc_card_hs200(card) ? "HS200 " : ""),
->  			mmc_card_ddr52(card) ? "DDR " : "",
->  			uhs_bus_speed_mode, type, card->rca);
-> diff --git a/drivers/mmc/core/debugfs.c b/drivers/mmc/core/debugfs.c
-> index 1f730db..91eb162 100644
-> --- a/drivers/mmc/core/debugfs.c
-> +++ b/drivers/mmc/core/debugfs.c
-> @@ -141,6 +141,9 @@ static int mmc_ios_show(struct seq_file *s, void *data)
->  	case MMC_TIMING_MMC_HS200:
->  		str = "mmc HS200";
->  		break;
-> +	case MMC_TIMING_MMC_HS400:
-> +		str = "mmc HS400";
-> +		break;
->  	default:
->  		str = "invalid";
->  		break;
-> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-> index e356a54..998b0af 100644
-> --- a/drivers/mmc/core/mmc.c
-> +++ b/drivers/mmc/core/mmc.c
-> @@ -240,7 +240,7 @@ static int mmc_get_ext_csd(struct mmc_card *card, u8 **new_ext_csd)
->  static void mmc_select_card_type(struct mmc_card *card)
->  {
->  	struct mmc_host *host = card->host;
-> -	u8 card_type = card->ext_csd.raw_card_type & EXT_CSD_CARD_TYPE_MASK;
-> +	u8 card_type = card->ext_csd.raw_card_type;
->  	u32 caps = host->caps, caps2 = host->caps2;
->  	unsigned int hs_max_dtr = 0, hs200_max_dtr = 0;
->  	unsigned int avail_type = 0;
-> @@ -281,6 +281,18 @@ static void mmc_select_card_type(struct mmc_card *card)
->  		avail_type |= EXT_CSD_CARD_TYPE_HS200_1_2V;
->  	}
->  
-> +	if (caps2 & MMC_CAP2_HS400_1_8V &&
-> +	    card_type & EXT_CSD_CARD_TYPE_HS400_1_8V) {
-> +		hs200_max_dtr = MMC_HS200_MAX_DTR;
-> +		avail_type |= EXT_CSD_CARD_TYPE_HS400_1_8V;
-> +	}
-> +
-> +	if (caps2 & MMC_CAP2_HS400_1_2V &&
-> +	    card_type & EXT_CSD_CARD_TYPE_HS400_1_2V) {
-> +		hs200_max_dtr = MMC_HS200_MAX_DTR;
-> +		avail_type |= EXT_CSD_CARD_TYPE_HS400_1_2V;
-> +	}
-> +
->  	card->ext_csd.hs_max_dtr = hs_max_dtr;
->  	card->ext_csd.hs200_max_dtr = hs200_max_dtr;
->  	card->mmc_avail_type = avail_type;
-> @@ -499,6 +511,8 @@ static int mmc_read_ext_csd(struct mmc_card *card, u8 *ext_csd)
->  			ext_csd[EXT_CSD_PWR_CL_DDR_52_195];
->  		card->ext_csd.raw_pwr_cl_ddr_52_360 =
->  			ext_csd[EXT_CSD_PWR_CL_DDR_52_360];
-> +		card->ext_csd.raw_pwr_cl_ddr_200_360 =
-> +			ext_csd[EXT_CSD_PWR_CL_DDR_200_360];
->  	}
->  
->  	if (card->ext_csd.rev >= 5) {
-> @@ -665,7 +679,10 @@ static int mmc_compare_ext_csds(struct mmc_card *card, unsigned bus_width)
->  		(card->ext_csd.raw_pwr_cl_ddr_52_195 ==
->  			bw_ext_csd[EXT_CSD_PWR_CL_DDR_52_195]) &&
->  		(card->ext_csd.raw_pwr_cl_ddr_52_360 ==
-> -			bw_ext_csd[EXT_CSD_PWR_CL_DDR_52_360]));
-> +			bw_ext_csd[EXT_CSD_PWR_CL_DDR_52_360]) &&
-> +		(card->ext_csd.raw_pwr_cl_ddr_200_360 ==
-> +			bw_ext_csd[EXT_CSD_PWR_CL_DDR_200_360]));
-> +
->  	if (err)
->  		err = -EINVAL;
->  
-> @@ -729,7 +746,8 @@ static struct device_type mmc_type = {
->  
->  static inline unsigned int mmc_snoop_ddr(struct mmc_card *card)
->  {
-> -	return card->mmc_avail_type & EXT_CSD_CARD_TYPE_DDR_52;
-> +	return card->mmc_avail_type &
-> +		(EXT_CSD_CARD_TYPE_DDR_52 | EXT_CSD_CARD_TYPE_HS400);
->  }
->  
->  /*
-> @@ -781,7 +799,9 @@ static int __mmc_select_powerclass(struct mmc_card *card,
->  				ext_csd->raw_pwr_cl_52_360 :
->  				ext_csd->raw_pwr_cl_ddr_52_360;
->  		else if (host->ios.clock <= MMC_HS200_MAX_DTR)
-> -			pwrclass_val = ext_csd->raw_pwr_cl_200_360;
-> +			pwrclass_val = (bus_width == EXT_CSD_DDR_BUS_WIDTH_8) ?
-> +				ext_csd->raw_pwr_cl_ddr_200_360 :
-> +				ext_csd->raw_pwr_cl_200_360;
->  		break;
->  	default:
->  		pr_warning("%s: Voltage range not supported "
-> @@ -845,7 +865,8 @@ static void mmc_set_bus_speed(struct mmc_card *card)
->  {
->  	unsigned int max_dtr = (unsigned int)-1;
->  
-> -	if (mmc_card_hs200(card) && max_dtr > card->ext_csd.hs200_max_dtr)
-> +	if ((mmc_card_hs200(card) || mmc_card_hs400(card)) &&
-> +	     max_dtr > card->ext_csd.hs200_max_dtr)
->  		max_dtr = card->ext_csd.hs200_max_dtr;
->  	else if (mmc_card_hs(card) && max_dtr > card->ext_csd.hs_max_dtr)
->  		max_dtr = card->ext_csd.hs_max_dtr;
-> @@ -944,6 +965,28 @@ static int mmc_select_hs(struct mmc_card *card)
->  }
->  
->  /*
-> + * Revert to the high-speed mode from above speed
-> + */
-> +static int mmc_revert_to_hs(struct mmc_card *card)
-> +{
-> +	/*
-> +	 * CMD13, which is used to confirm the completion of timing
-> +	 * change, will be issued at higher speed timing condtion
-> +	 * rather than high-speed. If device has completed the change
-> +	 * to high-speed mode, it may not be proper timing to issue
-> +	 * command. Low speed supplies better timing margin than high
-> +	 * speed. Accordingly clock rate & timging should be chagned
-> +	 * ahead before actual switch.
-> +	 */
-> +	mmc_set_timing(card->host, MMC_TIMING_MMC_HS);
-> +	mmc_set_bus_speed(card);
-> +
-> +	return mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-> +			  EXT_CSD_HS_TIMING, EXT_CSD_TIMING_HS,
-> +			  card->ext_csd.generic_cmd6_time);
-> +}
-> +
-> +/*
->   * Activate wide bus and DDR if supported.
->   */
->  static int mmc_select_hs_ddr(struct mmc_card *card)
-> @@ -999,6 +1042,56 @@ static int mmc_select_hs_ddr(struct mmc_card *card)
->  	return err;
->  }
->  
-> +static int mmc_select_hs400(struct mmc_card *card)
-> +{
-> +	struct mmc_host *host = card->host;
-> +	int err = 0, ddr;
-> +
-> +	ddr = mmc_snoop_ddr(card);
-> +
-> +	/*
-> +	 * The bus width is set to only 8 DDR in HS400 mode
-> +	 */
-> +	if (!(ddr & EXT_CSD_CARD_TYPE_HS400 &&
-> +	      host->ios.bus_width == MMC_BUS_WIDTH_8))
-> +		return 0;
-> +
-> +	/*
-> +	 * Before setting BUS_WIDTH for dual data rate operation,
-> +	 * HS_TIMING must be set to High Speed(0x1)
-> +	 */
-> +	err = mmc_revert_to_hs(card);
-> +	if (err) {
-> +		pr_warn("%s: switch to high-speed from hs200 failed, err:%d\n",
-> +			mmc_hostname(host), err);
-> +		return err;
-> +	}
-> +
-> +	err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-> +			 EXT_CSD_BUS_WIDTH,
-> +			 EXT_CSD_DDR_BUS_WIDTH_8,
-> +			 card->ext_csd.generic_cmd6_time);
-> +	if (err) {
-> +		pr_warn("%s: switch to bus width for hs400 failed, err:%d\n",
-> +			mmc_hostname(host), err);
-> +		return err;
-> +	}
-> +
-> +	err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-> +			 EXT_CSD_HS_TIMING, EXT_CSD_TIMING_HS400,
-> +			 card->ext_csd.generic_cmd6_time);
-> +	if (err) {
-> +		pr_warn("%s: switch to hs400 failed, err:%d\n",
-> +			 mmc_hostname(host), err);
-> +		return err;
-> +	}
-> +
-> +	mmc_set_timing(host, MMC_TIMING_MMC_HS400);
-> +	mmc_set_bus_speed(card);
-> +
-> +	return 0;
-> +}
-> +
->  /*
->   * For device supporting HS200 mode, the following sequence
->   * should be done before executing the tuning process.
-> @@ -1031,7 +1124,16 @@ static int mmc_select_hs200(struct mmc_card *card)
->  				   EXT_CSD_HS_TIMING, EXT_CSD_TIMING_HS200,
->  				   card->ext_csd.generic_cmd6_time,
->  				   true, true, true);
-> -		if (!err)
-> +		if (err)
-> +			goto err;
-> +
-> +		if (card->mmc_avail_type & EXT_CSD_CARD_TYPE_HS400)
-> +			/*
-> +			 * Timing should be adjusted to the HS400 target
-> +			 * operation frequency for tuning process
-> +			 */
-> +			mmc_set_timing(host, MMC_TIMING_MMC_HS400_TUNING);
-> +		else
->  			mmc_set_timing(host, MMC_TIMING_MMC_HS200);
->  	}
->  err:
-> @@ -1076,7 +1178,7 @@ bus_speed:
->  
->  /*
->   * Execute tuning sequence to seek the proper bus operating
-> - * conditions for HS200, which sends CMD21 to the device.
-> + * conditions for HS200 and HS400, which sends CMD21 to the device.
->   */
->  static int mmc_hs200_tuning(struct mmc_card *card)
->  {
-> @@ -1310,6 +1412,10 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
->  		err = mmc_hs200_tuning(card);
->  		if (err)
->  			goto err;
-> +
-> +		err = mmc_select_hs400(card);
-> +		if (err)
-> +			goto err;
->  	} else if (mmc_card_hs(card)) {
->  		/* Select the desired bus width optionally */
->  		err = mmc_select_bus_width(card);
-> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-> index def6814..2b24c36 100644
-> --- a/include/linux/mmc/card.h
-> +++ b/include/linux/mmc/card.h
-> @@ -110,6 +110,7 @@ struct mmc_ext_csd {
->  	u8			raw_pwr_cl_200_360;	/* 237 */
->  	u8			raw_pwr_cl_ddr_52_195;	/* 238 */
->  	u8			raw_pwr_cl_ddr_52_360;	/* 239 */
-> +	u8			raw_pwr_cl_ddr_200_360;	/* 253 */
->  	u8			raw_bkops_status;	/* 246 */
->  	u8			raw_sectors[4];		/* 212 - 4 bytes */
->  
-> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-> index 1ee3c10..cc716e4 100644
-> --- a/include/linux/mmc/host.h
-> +++ b/include/linux/mmc/host.h
-> @@ -61,6 +61,8 @@ struct mmc_ios {
->  #define MMC_TIMING_UHS_DDR50	7
->  #define MMC_TIMING_MMC_DDR52	8
->  #define MMC_TIMING_MMC_HS200	9
-> +#define MMC_TIMING_MMC_HS400	10
-> +#define MMC_TIMING_MMC_HS400_TUNING 11
->  
->  	unsigned char	signal_voltage;		/* signalling voltage (1.8V or 3.3V) */
->  
-> @@ -274,6 +276,10 @@ struct mmc_host {
->  #define MMC_CAP2_PACKED_CMD	(MMC_CAP2_PACKED_RD | \
->  				 MMC_CAP2_PACKED_WR)
->  #define MMC_CAP2_NO_PRESCAN_POWERUP (1 << 14)	/* Don't power up before scan */
-> +#define MMC_CAP2_HS400_1_8V	(1 << 15)	/* Can support HS400 1.8V */
-> +#define MMC_CAP2_HS400_1_2V	(1 << 16)	/* Can support HS400 1.2V */
-> +#define MMC_CAP2_HS400		(MMC_CAP2_HS400_1_8V | \
-> +				 MMC_CAP2_HS400_1_2V)
->  
->  	mmc_pm_flag_t		pm_caps;	/* supported pm features */
->  
-> @@ -486,11 +492,18 @@ static inline int mmc_card_uhs(struct mmc_card *card)
->  
->  static inline bool mmc_card_hs200(struct mmc_card *card)
->  {
-> -	return card->host->ios.timing == MMC_TIMING_MMC_HS200;
-> +	return card->host->ios.timing == MMC_TIMING_MMC_HS200 ||
-> +		card->host->ios.timing == MMC_TIMING_MMC_HS400_TUNING;
->  }
->  
->  static inline bool mmc_card_ddr52(struct mmc_card *card)
->  {
->  	return card->host->ios.timing == MMC_TIMING_MMC_DDR52;
->  }
-> +
-> +static inline bool mmc_card_hs400(struct mmc_card *card)
-> +{
-> +	return card->host->ios.timing == MMC_TIMING_MMC_HS400;
-> +}
-> +
->  #endif /* LINUX_MMC_HOST_H */
-> diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
-> index f429f13..64ec963 100644
-> --- a/include/linux/mmc/mmc.h
-> +++ b/include/linux/mmc/mmc.h
-> @@ -325,6 +325,7 @@ struct _mmc_csd {
->  #define EXT_CSD_POWER_OFF_LONG_TIME	247	/* RO */
->  #define EXT_CSD_GENERIC_CMD6_TIME	248	/* RO */
->  #define EXT_CSD_CACHE_SIZE		249	/* RO, 4 bytes */
-> +#define EXT_CSD_PWR_CL_DDR_200_360	253	/* RO */
->  #define EXT_CSD_TAG_UNIT_SIZE		498	/* RO */
->  #define EXT_CSD_DATA_TAG_SUPPORT	499	/* RO */
->  #define EXT_CSD_MAX_PACKED_WRITES	500	/* RO */
-> @@ -354,7 +355,6 @@ struct _mmc_csd {
->  #define EXT_CSD_CMD_SET_SECURE		(1<<1)
->  #define EXT_CSD_CMD_SET_CPSECURE	(1<<2)
->  
-> -#define EXT_CSD_CARD_TYPE_MASK	0x3F	/* Mask out reserved bits */
->  #define EXT_CSD_CARD_TYPE_HS_26	(1<<0)	/* Card can run at 26MHz */
->  #define EXT_CSD_CARD_TYPE_HS_52	(1<<1)	/* Card can run at 52MHz */
->  #define EXT_CSD_CARD_TYPE_HS	(EXT_CSD_CARD_TYPE_HS_26 | \
-> @@ -370,6 +370,10 @@ struct _mmc_csd {
->  						/* SDR mode @1.2V I/O */
->  #define EXT_CSD_CARD_TYPE_HS200		(EXT_CSD_CARD_TYPE_HS200_1_8V | \
->  					 EXT_CSD_CARD_TYPE_HS200_1_2V)
-> +#define EXT_CSD_CARD_TYPE_HS400_1_8V	(1<<6)	/* Card can run at 200MHz DDR, 1.8V */
-> +#define EXT_CSD_CARD_TYPE_HS400_1_2V	(1<<7)	/* Card can run at 200MHz DDR, 1.2V */
-> +#define EXT_CSD_CARD_TYPE_HS400		(EXT_CSD_CARD_TYPE_HS400_1_8V | \
-> +					 EXT_CSD_CARD_TYPE_HS400_1_2V)
->  
->  #define EXT_CSD_BUS_WIDTH_1	0	/* Card is in 1 bit mode */
->  #define EXT_CSD_BUS_WIDTH_4	1	/* Card is in 4 bit mode */
-> @@ -380,6 +384,7 @@ struct _mmc_csd {
->  #define EXT_CSD_TIMING_BC	0	/* Backwards compatility */
->  #define EXT_CSD_TIMING_HS	1	/* High speed */
->  #define EXT_CSD_TIMING_HS200	2	/* HS200 */
-> +#define EXT_CSD_TIMING_HS400	3	/* HS400 */
->  
->  #define EXT_CSD_SEC_ER_EN	BIT(0)
->  #define EXT_CSD_SEC_BD_BLK_EN	BIT(2)
-> -- 
-> 1.7.0.4
-> 
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
 
