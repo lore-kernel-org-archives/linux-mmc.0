@@ -1,67 +1,92 @@
-From: Andreas Fenkart <afenkart@gmail.com>
-Subject: [PATCH v9 3/3] mmc: omap_hsmmc: Extend debugfs for SDIO IRQ, GPIO and pinmux
-Date: Tue, 11 Mar 2014 10:42:45 +0100
-Message-ID: <1394530965-6022-4-git-send-email-afenkart@gmail.com>
-References: <1394530965-6022-1-git-send-email-afenkart@gmail.com>
-Return-path: <linux-omap-owner@vger.kernel.org>
-In-Reply-To: <1394530965-6022-1-git-send-email-afenkart@gmail.com>
-Sender: linux-omap-owner@vger.kernel.org
-To: Tony Lindgren <tony@atomide.com>
-Cc: Chris Ball <chris@printf.net>, Grant Likely <grant.likely@secretlab.ca>, Felipe Balbi <balbi@ti.com>, Balaji T K <balajitk@ti.com>, zonque@gmail.com, galak@codeaurora.org, linux-doc@vger.kernel.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, Andreas Fenkart <afenkart@gmail.com>
+From: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: [PATCH v5 6/8] ARM: dts: sun4i: Add support for mmc
+Date: Tue, 11 Mar 2014 16:55:47 +0100
+Message-ID: <531F3203.3010807@redhat.com>
+References: <20140211190543.4568.83517.stgit@dizzy-6.o2s.ch> <20140211193423.4568.34947.stgit@dizzy-6.o2s.ch> <ac47de94-92ef-4b53-9983-34dd2f9924ea@googlegroups.com>
+Reply-To: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
+Return-path: <linux-sunxi+bncBDL4X2GMZUKRBE7E7SMAKGQE5QUPYVA-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+In-Reply-To: <ac47de94-92ef-4b53-9983-34dd2f9924ea-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Post: <http://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Help: <http://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Archive: <http://groups.google.com/group/linux-sunxi>
+Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+List-Subscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Unsubscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+To: mr.nuke.me-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+Cc: devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Laurent Pinchart <laurent.pinchart+renesas-ryLnwIuWjnjg/C1BVhZhaw@public.gmane.org>, Mike Turquette <mturquette-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Simon Baatz <gmbnomis-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, =?UTF-8?B?RW1pbGlvIEzDs3Bleg==?= <emilio-0Z03zUJReD5OxF6Tv1QG9Q@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, H Hartley Sweeten <hsweeten-3FF4nKcrg1dE2c76skzGb0EOCMrvLtNR@public.gmane.org>, Tejun Heo <tj-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, Guennadi Liakhovetski <g.liakhovetski-Mmb7MZpHnFY@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, david.lanzendoerfer-Z7Kmv9EsliU@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-Add SDIO IRQ entries to debugfs entry. Note that PSTATE shows current
-state of data lines, incl. SDIO IRQ pending
+Hi,
 
-Signed-off-by: Andreas Fenkart <afenkart@gmail.com>
-Signed-off-by: Tony Lindgren <tony@atomide.com>
+Oh, good catch, thanks! Fixed in the sunxi-devel branch
+in my *personal* git repo. I'll also push this to the official linux-sunxi
+sunxi-devel branch later today.
 
-diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index 36052f4e..2fdb2a8 100644
---- a/drivers/mmc/host/omap_hsmmc.c
-+++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -82,6 +82,7 @@ static void apply_clk_hack(struct device *dev)
- #define OMAP_HSMMC_RSP54	0x0118
- #define OMAP_HSMMC_RSP76	0x011C
- #define OMAP_HSMMC_DATA		0x0120
-+#define OMAP_HSMMC_PSTATE	0x0124
- #define OMAP_HSMMC_HCTL		0x0128
- #define OMAP_HSMMC_SYSCTL	0x012C
- #define OMAP_HSMMC_STAT		0x0130
-@@ -1854,14 +1855,30 @@ static int omap_hsmmc_regs_show(struct seq_file *s, void *data)
- {
- 	struct mmc_host *mmc = s->private;
- 	struct omap_hsmmc_host *host = mmc_priv(mmc);
-+	const char *cirq_state;
-+	bool suspended;
- 
--	seq_printf(s, "mmc%d:\n ctx_loss:\t%d\n\nregs:\n",
--			mmc->index, host->context_loss);
-+	seq_printf(s, "mmc%d:\n", mmc->index);
-+	if (mmc->caps & MMC_CAP_SDIO_IRQ)
-+		cirq_state = (host->flags & HSMMC_SDIO_IRQ_ENABLED) ?
-+			"enabled" : "disabled";
-+	else
-+		cirq_state = "polling";
-+	seq_printf(s, "sdio irq\t%s\n", cirq_state);
- 
--	pm_runtime_get_sync(host->dev);
-+	if (host->flags & HSMMC_SWAKEUP_QUIRK) {
-+		suspended = host->dev->power.runtime_status != RPM_ACTIVE;
-+		seq_printf(s, "pinmux config\t%s\n", (suspended ?
-+						      "gpio" : "sdio"));
-+	}
-+	seq_printf(s, "ctx_loss:\t%d\n", host->context_loss);
- 
-+	pm_runtime_get_sync(host->dev);
-+	seq_puts(s, "\nregs:\n");
- 	seq_printf(s, "CON:\t\t0x%08x\n",
- 			OMAP_HSMMC_READ(host->base, CON));
-+	seq_printf(s, "PSTATE:\t\t0x%08x\n",
-+		   OMAP_HSMMC_READ(host->base, PSTATE));
- 	seq_printf(s, "HCTL:\t\t0x%08x\n",
- 			OMAP_HSMMC_READ(host->base, HCTL));
- 	seq_printf(s, "SYSCTL:\t\t0x%08x\n",
--- 
-1.7.10.4
+Regards,
 
+Hans
+
+
+
+On 03/10/2014 10:49 PM, mr.nuke.me-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org wrote:
+> On Tuesday, February 11, 2014 1:34:25 PM UTC-6, David Lanzend=C3=B6rfer w=
+rote:
+>> diff --git a/arch/arm/boot/dts/sun4i-a10-cubieboard.dts
+>> b/arch/arm/boot/dts/sun4i-a10-cubieboard.dts
+>> index b139ee6..20b976a 100644
+>> --- a/arch/arm/boot/dts/sun4i-a10-cubieboard.dts
+>> +++ b/arch/arm/boot/dts/sun4i-a10-cubieboard.dts
+>> @@ -33,6 +33,14 @@
+>>  			};
+>>  	=09
+>>  		};
+>> +		mmc0: mmc@01c0f000 {
+>> +			pinctrl-names =3D "default", "default";
+>> +			pinctrl-0 =3D <&mmc0_pins_a>;
+>> +			pinctrl-1 =3D <&mmc0_cd_pin_reference_design>;
+>> +			cd-gpios =3D <&pio 7 1 0>; /* PH1 */
+>> +			status =3D "okay";
+>> +		};
+>> +
+>>  		pinctrl@01c20800 {
+>>  	=09
+>>  			led_pins_cubieboard: led_pins@0 {
+>>  		=09
+>>  				allwinner,pins =3D "PH20", "PH21";
+>> diff --git a/arch/arm/boot/dts/sun4i-a10.dtsi
+>> b/arch/arm/boot/dts/sun4i-a10.dtsi
+>> index 9044c53..d040d37 100644
+>> --- a/arch/arm/boot/dts/sun4i-a10.dtsi
+>> +++ b/arch/arm/boot/dts/sun4i-a10.dtsi
+>> @@ -330,6 +330,46 @@
+>>  			#size-cells =3D <0>;
+>>  	=09
+>>  		};
+>> +		mmc0: mmc@01c0f000 {
+>> +			compatible =3D "allwinner,sun5i-a13-mmc";
+>=20
+> Should be "allwinner,sun4i-a10-mmc", or we will hang the MMC driver on A1=
+0.
+>=20
+>> +		mmc1: mmc@01c10000 {
+>> +			compatible =3D "allwinner,sun5i-a13-mmc";
+> ditto
+>=20
+>> +		mmc2: mmc@01c11000 {
+>> +			compatible =3D "allwinner,sun5i-a13-mmc";
+> ditto
+>=20
+>> +		mmc3: mmc@01c12000 {
+>> +			compatible =3D "allwinner,sun5i-a13-mmc";
+> ditto
+>=20
+
+--=20
+You received this message because you are subscribed to the Google Groups "=
+linux-sunxi" group.
+To unsubscribe from this group and stop receiving emails from it, send an e=
+mail to linux-sunxi+unsubscribe-/JYPxA39Uh5TLH3MbocFF+G/Ez6ZCGd0@public.gmane.org
+For more options, visit https://groups.google.com/d/optout.
