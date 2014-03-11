@@ -1,53 +1,46 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH V2 6/6] mmc: sdhci: Allow for irq being shared.
-Date: Tue, 11 Mar 2014 10:09:36 +0200
-Message-ID: <531EC4C0.5020205@intel.com>
-References: <1394456564-13783-1-git-send-email-adrian.hunter@intel.com> <1394456564-13783-7-git-send-email-adrian.hunter@intel.com>
+From: Andreas Fenkart <afenkart@gmail.com>
+Subject: Re: [PATCH v7 1/4] mmc: omap_hsmmc: Enable SDIO IRQ.
+Date: Tue, 11 Mar 2014 10:42:11 +0100
+Message-ID: <CALtMJEAv36qubJbNKZnnQPktP5UYYcxKc4e_K51AhQw6qePqjQ@mail.gmail.com>
+References: <1393331866-28307-1-git-send-email-afenkart@gmail.com>
+	<1393331866-28307-2-git-send-email-afenkart@gmail.com>
+	<20140227213335.GJ11654@atomide.com>
+	<CALtMJEArwH4g1o+_v8daoxiYZtpHvPMbxM4CZjTxnyGgxTS+aQ@mail.gmail.com>
+	<20140305163331.GC4983@atomide.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from [143.182.124.37] ([143.182.124.37]:22875 "EHLO mga14.intel.com"
-	rhost-flags-FAIL-FAIL-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751626AbaCKIKQ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 11 Mar 2014 04:10:16 -0400
-In-Reply-To: <1394456564-13783-7-git-send-email-adrian.hunter@intel.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-doc-owner@vger.kernel.org>
+In-Reply-To: <20140305163331.GC4983@atomide.com>
+Sender: linux-doc-owner@vger.kernel.org
+To: Tony Lindgren <tony@atomide.com>
+Cc: Chris Ball <cjb@laptop.org>, Grant Likely <grant.likely@secretlab.ca>, Felipe Balbi <balbi@ti.com>, Balaji T K <balajitk@ti.com>, Daniel Mack <zonque@gmail.com>, Kumar Gala <galak@codeaurora.org>, linux-doc@vger.kernel.org, linux-mmc <linux-mmc@vger.kernel.org>, linux-omap <linux-omap@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <chris@printf.net>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>
 
-If the SDHCI irq is shared with another device then
-the interrupt handler can get called while SDHCI
-is runtime suspended.  That is harmless but the
-warning message is not useful so remove it.  Also
-returning IRQ_NONE is more appropriate.
+Hi,
 
-Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
----
+2014-03-05 17:33 GMT+01:00 Tony Lindgren <tony@atomide.com>:
+> * Andreas Fenkart <afenkart@gmail.com> [140305 00:30]:
+>> Hi,
+>>
+>> 2014-02-27 22:33 GMT+01:00 Tony Lindgren <tony@atomide.com>:
+>> >
+>> > The wake-irq is needed for omaps with wake-up path and also
+>> > when doing GPIO remuxing. So the wake-up handling is pretty
+>> > much the same for both cases.
+>> I added this comment to the patch, since I was puzzled that you need
+>> a wake_irq even whithout remuxing.
+>
+> Yeah we need it because omap_hsmmc is already doing runtime PM,
+> so there's nothing stopping from shutting it down. And there's
+> really no need to block runtime PM for it as it's working.
+>
+Also added this comment, since it really clarifies the issue.
 
-Changes in V2:
-	Return IRQ_NONE instead of IRQ_HANDLED
+FYI, just tried the patch without pin remuxing on am335x and
+it actually works. Read: I'm always using the sdio pinmux never
+reconfiguring the pin as a GPIO, but still get GPIO interrupts.
+Yes, it fails if I comment out the pm_runtime_resume.
 
-
- drivers/mmc/host/sdhci.c | 4 +---
- 1 file changed, 1 insertion(+), 3 deletions(-)
-
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 7f95211..04a5e25 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -2434,9 +2434,7 @@ static irqreturn_t sdhci_irq(int irq, void *dev_id)
- 
- 	if (host->runtime_suspended) {
- 		spin_unlock(&host->lock);
--		pr_warning("%s: got irq while runtime suspended\n",
--		       mmc_hostname(host->mmc));
--		return IRQ_HANDLED;
-+		return IRQ_NONE;
- 	}
- 
- 	intmask = sdhci_readl(host, SDHCI_INT_STATUS);
--- 
-1.8.3.2
-
+So it's not that the am335x suddenly has a swakeup line,
+but looks like an implementation detail of the am335x GPIO
+block.
