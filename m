@@ -1,78 +1,57 @@
-From: mr.nuke.me-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org
-Subject: Re: [PATCH v5 6/8] ARM: dts: sun4i: Add support for mmc
-Date: Mon, 10 Mar 2014 14:49:15 -0700 (PDT)
-Message-ID: <ac47de94-92ef-4b53-9983-34dd2f9924ea@googlegroups.com>
-References: <20140211190543.4568.83517.stgit@dizzy-6.o2s.ch>
- <20140211193423.4568.34947.stgit@dizzy-6.o2s.ch>
-Reply-To: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+From: Roger <rogerable@realtek.com>
+Subject: Re: [PATCH v4 1/3] mfd: Add realtek USB card reader driver
+Date: Tue, 11 Mar 2014 11:28:09 +0800
+Message-ID: <531E82C9.3080303@realtek.com>
+References: <1392199238-14500-1-git-send-email-rogerable@realtek.com>	<1392199238-14500-2-git-send-email-rogerable@realtek.com>	<20140214094427.GA7380@lee--X1>
+ <5301A786.8040607@realtek.com>	<20140217082222.GA17875@lee--X1>
+ <5301D369.5010100@realtek.com>	<20140217100211.GE17875@lee--X1>
+ <5301E376.8010000@realtek.com>	<20140217120326.GC20218@lee--X1>
+ <530AB4D3.4090103@realtek.com> <86mwhhrz9b.fsf@void.printf.net>
+ <531441D8.8090209@realtek.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
-Return-path: <linux-sunxi+bncBDGJVA6QWUDRBXHG7CMAKGQEQN7VB7I-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-In-Reply-To: <20140211193423.4568.34947.stgit-GPtPHOohwllnsqa/0SyWJQ@public.gmane.org>
-List-Post: <http://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Help: <http://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Archive: <http://groups.google.com/group/linux-sunxi>
-Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
-List-Subscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Unsubscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-To: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
-Cc: devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Laurent Pinchart <laurent.pinchart+renesas-ryLnwIuWjnjg/C1BVhZhaw@public.gmane.org>, Mike Turquette <mturquette-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Simon Baatz <gmbnomis-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, =?UTF-8?Q?Emilio_L=C3=B3pez?= <emilio-0Z03zUJReD5OxF6Tv1QG9Q@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, H Hartley Sweeten <hsweeten-3FF4nKcrg1dE2c76skzGb0EOCMrvLtNR@public.gmane.org>, Tejun Heo <tj-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, Guennadi Liakhovetski <g.liakhovetski-Mmb7MZpHnFY@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, david.lanzendoerfer-Z7Kmv9EsliU@public.gmane.org
+Content-Type: text/plain; charset="us-ascii"; Format="flowed"
+Content-Transfer-Encoding: 7bit
+Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
+In-Reply-To: <531441D8.8090209@realtek.com>
+List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
+List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel>
+List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
+List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
+List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
+Errors-To: driverdev-devel-bounces@linuxdriverproject.org
+Sender: driverdev-devel-bounces@linuxdriverproject.org
+To: Andrew Morton <akpm@linux-foundation.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Maxim Levitsky <maximlevitsky@gmail.com>, Alex Dubov <oakad@yahoo.com>, driverdev-devel@linuxdriverproject.org, linux-mmc@vger.kernel.org, Chris Ball <chris@printf.net>, linux-kernel@vger.kernel.org, wei_wang@realsil.com.cn, Lee Jones <lee.jones@linaro.org>, Dan Carpenter <dan.carpenter@oracle.com>, Samuel Ortiz <sameo@linux.intel.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On Tuesday, February 11, 2014 1:34:25 PM UTC-6, David Lanzend=C3=B6rfer wro=
-te:
-> diff --git a/arch/arm/boot/dts/sun4i-a10-cubieboard.dts
-> b/arch/arm/boot/dts/sun4i-a10-cubieboard.dts
-> index b139ee6..20b976a 100644
-> --- a/arch/arm/boot/dts/sun4i-a10-cubieboard.dts
-> +++ b/arch/arm/boot/dts/sun4i-a10-cubieboard.dts
-> @@ -33,6 +33,14 @@
->  			};
->  	=09
->  		};
-> +		mmc0: mmc@01c0f000 {
-> +			pinctrl-names =3D "default", "default";
-> +			pinctrl-0 =3D <&mmc0_pins_a>;
-> +			pinctrl-1 =3D <&mmc0_cd_pin_reference_design>;
-> +			cd-gpios =3D <&pio 7 1 0>; /* PH1 */
-> +			status =3D "okay";
-> +		};
-> +
->  		pinctrl@01c20800 {
->  	=09
->  			led_pins_cubieboard: led_pins@0 {
->  		=09
->  				allwinner,pins =3D "PH20", "PH21";
-> diff --git a/arch/arm/boot/dts/sun4i-a10.dtsi
-> b/arch/arm/boot/dts/sun4i-a10.dtsi
-> index 9044c53..d040d37 100644
-> --- a/arch/arm/boot/dts/sun4i-a10.dtsi
-> +++ b/arch/arm/boot/dts/sun4i-a10.dtsi
-> @@ -330,6 +330,46 @@
->  			#size-cells =3D <0>;
->  	=09
->  		};
-> +		mmc0: mmc@01c0f000 {
-> +			compatible =3D "allwinner,sun5i-a13-mmc";
+On 03/03/2014 04:48 PM, Roger wrote:
+> On 02/24/2014 11:00 AM, Chris Ball wrote:
+>> Hi,
+>>
+>> On Mon, Feb 24 2014, Roger wrote:
+>>> Would you please help comment PATCH 2/3 and 3/3 (for mmc and memstick,
+>>> respectively) or give Acks? Thus we can proceed with applying or
+>>> revision if necessary.
+>>
+>> For 2/3:
+>>
+>> Acked-by: Chris Ball <chris@printf.net>
+>>
+>> Thanks,
+>>
+>> - Chris.
+>>
+> Hi Andrew,
+>
+> Could you please give some comment to the 3/3(memstick) patch?
+>
 
-Should be "allwinner,sun4i-a10-mmc", or we will hang the MMC driver on A10.
+Lee has introduced and CC'ed AKPM for acking the memstick patch (3/3)
+several weeks ago but so far we haven't get any response. Thus the merge 
+of all 3 patches is blocked. Is there anyone else can help this or 
+anything else I could do?
 
-> +		mmc1: mmc@01c10000 {
-> +			compatible =3D "allwinner,sun5i-a13-mmc";
-ditto
-
-> +		mmc2: mmc@01c11000 {
-> +			compatible =3D "allwinner,sun5i-a13-mmc";
-ditto
-
-> +		mmc3: mmc@01c12000 {
-> +			compatible =3D "allwinner,sun5i-a13-mmc";
-ditto
-
---=20
-You received this message because you are subscribed to the Google Groups "=
-linux-sunxi" group.
-To unsubscribe from this group and stop receiving emails from it, send an e=
-mail to linux-sunxi+unsubscribe-/JYPxA39Uh5TLH3MbocFF+G/Ez6ZCGd0@public.gmane.org
-For more options, visit https://groups.google.com/d/optout.
+Best regards,
+Roger Tseng
