@@ -1,57 +1,53 @@
-From: Roger <rogerable@realtek.com>
-Subject: Re: [PATCH v4 1/3] mfd: Add realtek USB card reader driver
-Date: Tue, 11 Mar 2014 11:28:09 +0800
-Message-ID: <531E82C9.3080303@realtek.com>
-References: <1392199238-14500-1-git-send-email-rogerable@realtek.com>	<1392199238-14500-2-git-send-email-rogerable@realtek.com>	<20140214094427.GA7380@lee--X1>
- <5301A786.8040607@realtek.com>	<20140217082222.GA17875@lee--X1>
- <5301D369.5010100@realtek.com>	<20140217100211.GE17875@lee--X1>
- <5301E376.8010000@realtek.com>	<20140217120326.GC20218@lee--X1>
- <530AB4D3.4090103@realtek.com> <86mwhhrz9b.fsf@void.printf.net>
- <531441D8.8090209@realtek.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: [PATCH V2 6/6] mmc: sdhci: Allow for irq being shared.
+Date: Tue, 11 Mar 2014 10:09:36 +0200
+Message-ID: <531EC4C0.5020205@intel.com>
+References: <1394456564-13783-1-git-send-email-adrian.hunter@intel.com> <1394456564-13783-7-git-send-email-adrian.hunter@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"; Format="flowed"
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
-Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
-In-Reply-To: <531441D8.8090209@realtek.com>
-List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
-List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel>
-List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
-List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
-List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
-Errors-To: driverdev-devel-bounces@linuxdriverproject.org
-Sender: driverdev-devel-bounces@linuxdriverproject.org
-To: Andrew Morton <akpm@linux-foundation.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Maxim Levitsky <maximlevitsky@gmail.com>, Alex Dubov <oakad@yahoo.com>, driverdev-devel@linuxdriverproject.org, linux-mmc@vger.kernel.org, Chris Ball <chris@printf.net>, linux-kernel@vger.kernel.org, wei_wang@realsil.com.cn, Lee Jones <lee.jones@linaro.org>, Dan Carpenter <dan.carpenter@oracle.com>, Samuel Ortiz <sameo@linux.intel.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from [143.182.124.37] ([143.182.124.37]:22875 "EHLO mga14.intel.com"
+	rhost-flags-FAIL-FAIL-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1751626AbaCKIKQ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 11 Mar 2014 04:10:16 -0400
+In-Reply-To: <1394456564-13783-7-git-send-email-adrian.hunter@intel.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Chris Ball <chris@printf.net>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>
 
-On 03/03/2014 04:48 PM, Roger wrote:
-> On 02/24/2014 11:00 AM, Chris Ball wrote:
->> Hi,
->>
->> On Mon, Feb 24 2014, Roger wrote:
->>> Would you please help comment PATCH 2/3 and 3/3 (for mmc and memstick,
->>> respectively) or give Acks? Thus we can proceed with applying or
->>> revision if necessary.
->>
->> For 2/3:
->>
->> Acked-by: Chris Ball <chris@printf.net>
->>
->> Thanks,
->>
->> - Chris.
->>
-> Hi Andrew,
->
-> Could you please give some comment to the 3/3(memstick) patch?
->
+If the SDHCI irq is shared with another device then
+the interrupt handler can get called while SDHCI
+is runtime suspended.  That is harmless but the
+warning message is not useful so remove it.  Also
+returning IRQ_NONE is more appropriate.
 
-Lee has introduced and CC'ed AKPM for acking the memstick patch (3/3)
-several weeks ago but so far we haven't get any response. Thus the merge 
-of all 3 patches is blocked. Is there anyone else can help this or 
-anything else I could do?
+Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+---
 
-Best regards,
-Roger Tseng
+Changes in V2:
+	Return IRQ_NONE instead of IRQ_HANDLED
+
+
+ drivers/mmc/host/sdhci.c | 4 +---
+ 1 file changed, 1 insertion(+), 3 deletions(-)
+
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 7f95211..04a5e25 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -2434,9 +2434,7 @@ static irqreturn_t sdhci_irq(int irq, void *dev_id)
+ 
+ 	if (host->runtime_suspended) {
+ 		spin_unlock(&host->lock);
+-		pr_warning("%s: got irq while runtime suspended\n",
+-		       mmc_hostname(host->mmc));
+-		return IRQ_HANDLED;
++		return IRQ_NONE;
+ 	}
+ 
+ 	intmask = sdhci_readl(host, SDHCI_INT_STATUS);
+-- 
+1.8.3.2
+
