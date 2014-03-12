@@ -1,60 +1,158 @@
-From: Tony Lindgren <tony@atomide.com>
-Subject: Re: [PATCH v7 1/4] mmc: omap_hsmmc: Enable SDIO IRQ.
-Date: Tue, 11 Mar 2014 09:37:54 -0700
-Message-ID: <20140311163753.GC7177@atomide.com>
-References: <1393331866-28307-1-git-send-email-afenkart@gmail.com>
- <1393331866-28307-2-git-send-email-afenkart@gmail.com>
- <20140227213335.GJ11654@atomide.com>
- <CALtMJEArwH4g1o+_v8daoxiYZtpHvPMbxM4CZjTxnyGgxTS+aQ@mail.gmail.com>
- <20140305163331.GC4983@atomide.com>
- <CALtMJEAv36qubJbNKZnnQPktP5UYYcxKc4e_K51AhQw6qePqjQ@mail.gmail.com>
+From: Aaron Lu <aaron.lu@intel.com>
+Subject: Re: [RFC PATCH] mmc: core: Invoke sdio func driver's PM callbacks
+ from the sdio bus
+Date: Wed, 12 Mar 2014 10:35:47 +0800
+Message-ID: <531FC803.1030403@intel.com>
+References: <1393588140-20605-1-git-send-email-ulf.hansson@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-doc-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <CALtMJEAv36qubJbNKZnnQPktP5UYYcxKc4e_K51AhQw6qePqjQ@mail.gmail.com>
-Sender: linux-doc-owner@vger.kernel.org
-To: Andreas Fenkart <afenkart@gmail.com>
-Cc: Chris Ball <cjb@laptop.org>, Grant Likely <grant.likely@secretlab.ca>, Felipe Balbi <balbi@ti.com>, Balaji T K <balajitk@ti.com>, Daniel Mack <zonque@gmail.com>, Kumar Gala <galak@codeaurora.org>, linux-doc@vger.kernel.org, linux-mmc <linux-mmc@vger.kernel.org>, linux-omap <linux-omap@vger.kernel.org>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga01.intel.com ([192.55.52.88]:31497 "EHLO mga01.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752024AbaCLCfT (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 11 Mar 2014 22:35:19 -0400
+In-Reply-To: <1393588140-20605-1-git-send-email-ulf.hansson@linaro.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, Chris Ball <chris@printf.net>, "Liu, Chuansheng" <chuansheng.liu@intel.com>, "Dong, Chuanxiao" <chuanxiao.dong@intel.com>
+Cc: linux-kernel@vger.kernel.org, NeilBrown <neilb@suse.de>, "Rafael J. Wysocki" <rjw@rjwysocki.net>
 
-* Andreas Fenkart <afenkart@gmail.com> [140311 02:45]:
-> Hi,
+Hi Chuansheng & Chuanxiao,
+
+Can you please help us testing this patch on your platform
+and let us know the test result? Thanks.
+
+-Aaron
+
+On 02/28/2014 07:49 PM, Ulf Hansson wrote:
+> The sdio func device is added to the driver model after the card
+> device.
 > 
-> 2014-03-05 17:33 GMT+01:00 Tony Lindgren <tony@atomide.com>:
-> > * Andreas Fenkart <afenkart@gmail.com> [140305 00:30]:
-> >> Hi,
-> >>
-> >> 2014-02-27 22:33 GMT+01:00 Tony Lindgren <tony@atomide.com>:
-> >> >
-> >> > The wake-irq is needed for omaps with wake-up path and also
-> >> > when doing GPIO remuxing. So the wake-up handling is pretty
-> >> > much the same for both cases.
-> >> I added this comment to the patch, since I was puzzled that you need
-> >> a wake_irq even whithout remuxing.
-> >
-> > Yeah we need it because omap_hsmmc is already doing runtime PM,
-> > so there's nothing stopping from shutting it down. And there's
-> > really no need to block runtime PM for it as it's working.
-> >
-> Also added this comment, since it really clarifies the issue.
-
-OK thanks.
- 
-> FYI, just tried the patch without pin remuxing on am335x and
-> it actually works. Read: I'm always using the sdio pinmux never
-> reconfiguring the pin as a GPIO, but still get GPIO interrupts.
-> Yes, it fails if I comment out the pm_runtime_resume.
+> This means the sdio func device will be suspend before the card device
+> and thus resumed after. The consequence are the mmc core don't
+> explicity need to protect itself from receiving sdio requests in
+> suspended state. Instead that can be handled from the sdio bus, which
+> is thus invokes the PM callbacks instead of old dummy function.
 > 
-> So it's not that the am335x suddenly has a swakeup line,
-> but looks like an implementation detail of the am335x GPIO
-> block.
+> In the case were the sdio func driver don't implement the PM callbacks
+> the mmc core will in the early phase of system suspend, remove the
+> card from the driver model and thus power off it.
+> 
+> Cc: Aaron Lu <aaron.lu@intel.com>
+> Cc: NeilBrown <neilb@suse.de>
+> Cc: Rafael J. Wysocki <rjw@rjwysocki.net>
+> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+> ---
+> 
+> Note, this patch has only been compile tested. Would appreciate if some with
+> SDIO and a sdio func driver could help out to test this. Especially the
+> libertas driver would be nice.
+> 
+> ---
+>  drivers/mmc/core/sdio.c     |   45 ++++---------------------------------------
+>  drivers/mmc/core/sdio_bus.c |   14 +-------------
+>  2 files changed, 5 insertions(+), 54 deletions(-)
+> 
+> diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
+> index 4d721c6..9933e42 100644
+> --- a/drivers/mmc/core/sdio.c
+> +++ b/drivers/mmc/core/sdio.c
+> @@ -943,40 +943,21 @@ static int mmc_sdio_pre_suspend(struct mmc_host *host)
+>   */
+>  static int mmc_sdio_suspend(struct mmc_host *host)
+>  {
+> -	int i, err = 0;
+> -
+> -	for (i = 0; i < host->card->sdio_funcs; i++) {
+> -		struct sdio_func *func = host->card->sdio_func[i];
+> -		if (func && sdio_func_present(func) && func->dev.driver) {
+> -			const struct dev_pm_ops *pmops = func->dev.driver->pm;
+> -			err = pmops->suspend(&func->dev);
+> -			if (err)
+> -				break;
+> -		}
+> -	}
+> -	while (err && --i >= 0) {
+> -		struct sdio_func *func = host->card->sdio_func[i];
+> -		if (func && sdio_func_present(func) && func->dev.driver) {
+> -			const struct dev_pm_ops *pmops = func->dev.driver->pm;
+> -			pmops->resume(&func->dev);
+> -		}
+> -	}
+> -
+> -	if (!err && mmc_card_keep_power(host) && mmc_card_wake_sdio_irq(host)) {
+> +	if (mmc_card_keep_power(host) && mmc_card_wake_sdio_irq(host)) {
+>  		mmc_claim_host(host);
+>  		sdio_disable_wide(host->card);
+>  		mmc_release_host(host);
+>  	}
+>  
+> -	if (!err && !mmc_card_keep_power(host))
+> +	if (!mmc_card_keep_power(host))
+>  		mmc_power_off(host);
+>  
+> -	return err;
+> +	return 0;
+>  }
+>  
+>  static int mmc_sdio_resume(struct mmc_host *host)
+>  {
+> -	int i, err = 0;
+> +	int err = 0;
+>  
+>  	BUG_ON(!host);
+>  	BUG_ON(!host->card);
+> @@ -1019,24 +1000,6 @@ static int mmc_sdio_resume(struct mmc_host *host)
+>  		wake_up_process(host->sdio_irq_thread);
+>  	mmc_release_host(host);
+>  
+> -	/*
+> -	 * If the card looked to be the same as before suspending, then
+> -	 * we proceed to resume all card functions.  If one of them returns
+> -	 * an error then we simply return that error to the core and the
+> -	 * card will be redetected as new.  It is the responsibility of
+> -	 * the function driver to perform further tests with the extra
+> -	 * knowledge it has of the card to confirm the card is indeed the
+> -	 * same as before suspending (same MAC address for network cards,
+> -	 * etc.) and return an error otherwise.
+> -	 */
+> -	for (i = 0; !err && i < host->card->sdio_funcs; i++) {
+> -		struct sdio_func *func = host->card->sdio_func[i];
+> -		if (func && sdio_func_present(func) && func->dev.driver) {
+> -			const struct dev_pm_ops *pmops = func->dev.driver->pm;
+> -			err = pmops->resume(&func->dev);
+> -		}
+> -	}
+> -
+>  	host->pm_flags &= ~MMC_PM_KEEP_POWER;
+>  	return err;
+>  }
+> diff --git a/drivers/mmc/core/sdio_bus.c b/drivers/mmc/core/sdio_bus.c
+> index 92d1ba8..4fa8fef9 100644
+> --- a/drivers/mmc/core/sdio_bus.c
+> +++ b/drivers/mmc/core/sdio_bus.c
+> @@ -197,20 +197,8 @@ static int sdio_bus_remove(struct device *dev)
+>  
+>  #ifdef CONFIG_PM
+>  
+> -#ifdef CONFIG_PM_SLEEP
+> -static int pm_no_operation(struct device *dev)
+> -{
+> -	/*
+> -	 * Prevent the PM core from calling SDIO device drivers' suspend
+> -	 * callback routines, which it is not supposed to do, by using this
+> -	 * empty function as the bus type suspend callaback for SDIO.
+> -	 */
+> -	return 0;
+> -}
+> -#endif
+> -
+>  static const struct dev_pm_ops sdio_bus_pm_ops = {
+> -	SET_SYSTEM_SLEEP_PM_OPS(pm_no_operation, pm_no_operation)
+> +	SET_SYSTEM_SLEEP_PM_OPS(pm_generic_suspend, pm_generic_resume)
+>  	SET_RUNTIME_PM_OPS(
+>  		pm_generic_runtime_suspend,
+>  		pm_generic_runtime_resume,
+> 
 
-Oh OK, that's good to know. I think 2420 behaved that way too
-for the serial wake-up. What also may affect things is if that
-GPIO line is in the first GPIO bank, for the other banks
-remuxing may still be needed for deeper idle states.
-
-Regards,
-
-Tony
