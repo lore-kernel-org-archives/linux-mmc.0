@@ -1,158 +1,121 @@
-From: Aaron Lu <aaron.lu@intel.com>
-Subject: Re: [RFC PATCH] mmc: core: Invoke sdio func driver's PM callbacks
+From: "Dong, Chuanxiao" <chuanxiao.dong@intel.com>
+Subject: RE: [RFC PATCH] mmc: core: Invoke sdio func driver's PM callbacks
  from the sdio bus
-Date: Wed, 12 Mar 2014 10:35:47 +0800
-Message-ID: <531FC803.1030403@intel.com>
+Date: Wed, 12 Mar 2014 03:44:26 +0000
+Message-ID: <17296D9F8FF2234F831FC3DF505A87A911A096AA@shsmsx102.ccr.corp.intel.com>
 References: <1393588140-20605-1-git-send-email-ulf.hansson@linaro.org>
+ <531FC803.1030403@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga01.intel.com ([192.55.52.88]:31497 "EHLO mga01.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752024AbaCLCfT (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 11 Mar 2014 22:35:19 -0400
-In-Reply-To: <1393588140-20605-1-git-send-email-ulf.hansson@linaro.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <531FC803.1030403@intel.com>
+Content-Language: en-US
+Sender: linux-kernel-owner@vger.kernel.org
+To: "Lu, Aaron" <aaron.lu@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, "Liu, Chuansheng" <chuansheng.liu@intel.com>
+Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, NeilBrown <neilb@suse.de>, "Rafael J. Wysocki" <rjw@rjwysocki.net>, "Wang, Xiaoming" <xiaoming.wang@intel.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, Chris Ball <chris@printf.net>, "Liu, Chuansheng" <chuansheng.liu@intel.com>, "Dong, Chuanxiao" <chuanxiao.dong@intel.com>
-Cc: linux-kernel@vger.kernel.org, NeilBrown <neilb@suse.de>, "Rafael J. Wysocki" <rjw@rjwysocki.net>
 
-Hi Chuansheng & Chuanxiao,
-
-Can you please help us testing this patch on your platform
-and let us know the test result? Thanks.
-
--Aaron
-
-On 02/28/2014 07:49 PM, Ulf Hansson wrote:
-> The sdio func device is added to the driver model after the card
-> device.
-> 
-> This means the sdio func device will be suspend before the card device
-> and thus resumed after. The consequence are the mmc core don't
-> explicity need to protect itself from receiving sdio requests in
-> suspended state. Instead that can be handled from the sdio bus, which
-> is thus invokes the PM callbacks instead of old dummy function.
-> 
-> In the case were the sdio func driver don't implement the PM callbacks
-> the mmc core will in the early phase of system suspend, remove the
-> card from the driver model and thus power off it.
-> 
-> Cc: Aaron Lu <aaron.lu@intel.com>
-> Cc: NeilBrown <neilb@suse.de>
-> Cc: Rafael J. Wysocki <rjw@rjwysocki.net>
-> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
-> ---
-> 
-> Note, this patch has only been compile tested. Would appreciate if some with
-> SDIO and a sdio func driver could help out to test this. Especially the
-> libertas driver would be nice.
-> 
-> ---
->  drivers/mmc/core/sdio.c     |   45 ++++---------------------------------------
->  drivers/mmc/core/sdio_bus.c |   14 +-------------
->  2 files changed, 5 insertions(+), 54 deletions(-)
-> 
-> diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
-> index 4d721c6..9933e42 100644
-> --- a/drivers/mmc/core/sdio.c
-> +++ b/drivers/mmc/core/sdio.c
-> @@ -943,40 +943,21 @@ static int mmc_sdio_pre_suspend(struct mmc_host *host)
->   */
->  static int mmc_sdio_suspend(struct mmc_host *host)
->  {
-> -	int i, err = 0;
-> -
-> -	for (i = 0; i < host->card->sdio_funcs; i++) {
-> -		struct sdio_func *func = host->card->sdio_func[i];
-> -		if (func && sdio_func_present(func) && func->dev.driver) {
-> -			const struct dev_pm_ops *pmops = func->dev.driver->pm;
-> -			err = pmops->suspend(&func->dev);
-> -			if (err)
-> -				break;
-> -		}
-> -	}
-> -	while (err && --i >= 0) {
-> -		struct sdio_func *func = host->card->sdio_func[i];
-> -		if (func && sdio_func_present(func) && func->dev.driver) {
-> -			const struct dev_pm_ops *pmops = func->dev.driver->pm;
-> -			pmops->resume(&func->dev);
-> -		}
-> -	}
-> -
-> -	if (!err && mmc_card_keep_power(host) && mmc_card_wake_sdio_irq(host)) {
-> +	if (mmc_card_keep_power(host) && mmc_card_wake_sdio_irq(host)) {
->  		mmc_claim_host(host);
->  		sdio_disable_wide(host->card);
->  		mmc_release_host(host);
->  	}
->  
-> -	if (!err && !mmc_card_keep_power(host))
-> +	if (!mmc_card_keep_power(host))
->  		mmc_power_off(host);
->  
-> -	return err;
-> +	return 0;
->  }
->  
->  static int mmc_sdio_resume(struct mmc_host *host)
->  {
-> -	int i, err = 0;
-> +	int err = 0;
->  
->  	BUG_ON(!host);
->  	BUG_ON(!host->card);
-> @@ -1019,24 +1000,6 @@ static int mmc_sdio_resume(struct mmc_host *host)
->  		wake_up_process(host->sdio_irq_thread);
->  	mmc_release_host(host);
->  
-> -	/*
-> -	 * If the card looked to be the same as before suspending, then
-> -	 * we proceed to resume all card functions.  If one of them returns
-> -	 * an error then we simply return that error to the core and the
-> -	 * card will be redetected as new.  It is the responsibility of
-> -	 * the function driver to perform further tests with the extra
-> -	 * knowledge it has of the card to confirm the card is indeed the
-> -	 * same as before suspending (same MAC address for network cards,
-> -	 * etc.) and return an error otherwise.
-> -	 */
-> -	for (i = 0; !err && i < host->card->sdio_funcs; i++) {
-> -		struct sdio_func *func = host->card->sdio_func[i];
-> -		if (func && sdio_func_present(func) && func->dev.driver) {
-> -			const struct dev_pm_ops *pmops = func->dev.driver->pm;
-> -			err = pmops->resume(&func->dev);
-> -		}
-> -	}
-> -
->  	host->pm_flags &= ~MMC_PM_KEEP_POWER;
->  	return err;
->  }
-> diff --git a/drivers/mmc/core/sdio_bus.c b/drivers/mmc/core/sdio_bus.c
-> index 92d1ba8..4fa8fef9 100644
-> --- a/drivers/mmc/core/sdio_bus.c
-> +++ b/drivers/mmc/core/sdio_bus.c
-> @@ -197,20 +197,8 @@ static int sdio_bus_remove(struct device *dev)
->  
->  #ifdef CONFIG_PM
->  
-> -#ifdef CONFIG_PM_SLEEP
-> -static int pm_no_operation(struct device *dev)
-> -{
-> -	/*
-> -	 * Prevent the PM core from calling SDIO device drivers' suspend
-> -	 * callback routines, which it is not supposed to do, by using this
-> -	 * empty function as the bus type suspend callaback for SDIO.
-> -	 */
-> -	return 0;
-> -}
-> -#endif
-> -
->  static const struct dev_pm_ops sdio_bus_pm_ops = {
-> -	SET_SYSTEM_SLEEP_PM_OPS(pm_no_operation, pm_no_operation)
-> +	SET_SYSTEM_SLEEP_PM_OPS(pm_generic_suspend, pm_generic_resume)
->  	SET_RUNTIME_PM_OPS(
->  		pm_generic_runtime_suspend,
->  		pm_generic_runtime_resume,
-> 
-
+SGkgQWFyb24sDQoNClRoaXMgcGF0Y2ggaXMgdGVzdGVkIG9uIEludGVsIHBsYXRmb3JtLCBhbmQg
+U0RJTyBmdW5jdGlvbiBkcml2ZXIncyBzdXNwZW5kL3Jlc3VtZSBjYWxsYmFjayB3aWxsIG9ubHkg
+YmUgY2FsbGVkIG9uY2UsIHdoaWNoIGZpeGVkIHRoaXMgaXNzdWUuIFByZXZpb3VzbHksIHRoZXkg
+Y2FuIGJlIGNhbGxlZCB0d2ljZS4NCg0KSGVyZSBpcyB0aGUgdGVzdGVkLWJ5Og0KDQpUZXN0ZWQt
+Ynk6IHhpYW9taW5nIHdhbmcgPHhpYW9taW5nLndhbmdAaW50ZWwuY29tPg0KVGVzdGVkLWJ5OiBD
+aHVhbnhpYW8gRG9uZyA8Y2h1YW54aWFvLmRvbmdAaW50ZWwuY29tPg0KDQpUaGFua3MNCkNodWFu
+eGlhbw0KDQo+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+IEZyb206IEx1LCBBYXJvbg0K
+PiBTZW50OiBXZWRuZXNkYXksIE1hcmNoIDEyLCAyMDE0IDEwOjM2IEFNDQo+IFRvOiBVbGYgSGFu
+c3NvbjsgbGludXgtbW1jQHZnZXIua2VybmVsLm9yZzsgQ2hyaXMgQmFsbDsgTGl1LCBDaHVhbnNo
+ZW5nOyBEb25nLA0KPiBDaHVhbnhpYW8NCj4gQ2M6IGxpbnV4LWtlcm5lbEB2Z2VyLmtlcm5lbC5v
+cmc7IE5laWxCcm93bjsgUmFmYWVsIEouIFd5c29ja2kNCj4gU3ViamVjdDogUmU6IFtSRkMgUEFU
+Q0hdIG1tYzogY29yZTogSW52b2tlIHNkaW8gZnVuYyBkcml2ZXIncyBQTSBjYWxsYmFja3MgZnJv
+bSB0aGUNCj4gc2RpbyBidXMNCj4gDQo+IEhpIENodWFuc2hlbmcgJiBDaHVhbnhpYW8sDQo+IA0K
+PiBDYW4geW91IHBsZWFzZSBoZWxwIHVzIHRlc3RpbmcgdGhpcyBwYXRjaCBvbiB5b3VyIHBsYXRm
+b3JtIGFuZCBsZXQgdXMga25vdyB0aGUgdGVzdA0KPiByZXN1bHQ/IFRoYW5rcy4NCj4gDQo+IC1B
+YXJvbg0KPiANCj4gT24gMDIvMjgvMjAxNCAwNzo0OSBQTSwgVWxmIEhhbnNzb24gd3JvdGU6DQo+
+ID4gVGhlIHNkaW8gZnVuYyBkZXZpY2UgaXMgYWRkZWQgdG8gdGhlIGRyaXZlciBtb2RlbCBhZnRl
+ciB0aGUgY2FyZA0KPiA+IGRldmljZS4NCj4gPg0KPiA+IFRoaXMgbWVhbnMgdGhlIHNkaW8gZnVu
+YyBkZXZpY2Ugd2lsbCBiZSBzdXNwZW5kIGJlZm9yZSB0aGUgY2FyZCBkZXZpY2UNCj4gPiBhbmQg
+dGh1cyByZXN1bWVkIGFmdGVyLiBUaGUgY29uc2VxdWVuY2UgYXJlIHRoZSBtbWMgY29yZSBkb24n
+dA0KPiA+IGV4cGxpY2l0eSBuZWVkIHRvIHByb3RlY3QgaXRzZWxmIGZyb20gcmVjZWl2aW5nIHNk
+aW8gcmVxdWVzdHMgaW4NCj4gPiBzdXNwZW5kZWQgc3RhdGUuIEluc3RlYWQgdGhhdCBjYW4gYmUg
+aGFuZGxlZCBmcm9tIHRoZSBzZGlvIGJ1cywgd2hpY2gNCj4gPiBpcyB0aHVzIGludm9rZXMgdGhl
+IFBNIGNhbGxiYWNrcyBpbnN0ZWFkIG9mIG9sZCBkdW1teSBmdW5jdGlvbi4NCj4gPg0KPiA+IElu
+IHRoZSBjYXNlIHdlcmUgdGhlIHNkaW8gZnVuYyBkcml2ZXIgZG9uJ3QgaW1wbGVtZW50IHRoZSBQ
+TSBjYWxsYmFja3MNCj4gPiB0aGUgbW1jIGNvcmUgd2lsbCBpbiB0aGUgZWFybHkgcGhhc2Ugb2Yg
+c3lzdGVtIHN1c3BlbmQsIHJlbW92ZSB0aGUNCj4gPiBjYXJkIGZyb20gdGhlIGRyaXZlciBtb2Rl
+bCBhbmQgdGh1cyBwb3dlciBvZmYgaXQuDQo+ID4NCj4gPiBDYzogQWFyb24gTHUgPGFhcm9uLmx1
+QGludGVsLmNvbT4NCj4gPiBDYzogTmVpbEJyb3duIDxuZWlsYkBzdXNlLmRlPg0KPiA+IENjOiBS
+YWZhZWwgSi4gV3lzb2NraSA8cmp3QHJqd3lzb2NraS5uZXQ+DQo+ID4gU2lnbmVkLW9mZi1ieTog
+VWxmIEhhbnNzb24gPHVsZi5oYW5zc29uQGxpbmFyby5vcmc+DQo+ID4gLS0tDQo+ID4NCj4gPiBO
+b3RlLCB0aGlzIHBhdGNoIGhhcyBvbmx5IGJlZW4gY29tcGlsZSB0ZXN0ZWQuIFdvdWxkIGFwcHJl
+Y2lhdGUgaWYNCj4gPiBzb21lIHdpdGggU0RJTyBhbmQgYSBzZGlvIGZ1bmMgZHJpdmVyIGNvdWxk
+IGhlbHAgb3V0IHRvIHRlc3QgdGhpcy4NCj4gPiBFc3BlY2lhbGx5IHRoZSBsaWJlcnRhcyBkcml2
+ZXIgd291bGQgYmUgbmljZS4NCj4gPg0KPiA+IC0tLQ0KPiA+ICBkcml2ZXJzL21tYy9jb3JlL3Nk
+aW8uYyAgICAgfCAgIDQ1ICsrKystLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0NCj4gPiAgZHJpdmVycy9tbWMvY29yZS9zZGlvX2J1cy5jIHwgICAxNCArLS0tLS0tLS0tLS0t
+LQ0KPiA+ICAyIGZpbGVzIGNoYW5nZWQsIDUgaW5zZXJ0aW9ucygrKSwgNTQgZGVsZXRpb25zKC0p
+DQo+ID4NCj4gPiBkaWZmIC0tZ2l0IGEvZHJpdmVycy9tbWMvY29yZS9zZGlvLmMgYi9kcml2ZXJz
+L21tYy9jb3JlL3NkaW8uYyBpbmRleA0KPiA+IDRkNzIxYzYuLjk5MzNlNDIgMTAwNjQ0DQo+ID4g
+LS0tIGEvZHJpdmVycy9tbWMvY29yZS9zZGlvLmMNCj4gPiArKysgYi9kcml2ZXJzL21tYy9jb3Jl
+L3NkaW8uYw0KPiA+IEBAIC05NDMsNDAgKzk0MywyMSBAQCBzdGF0aWMgaW50IG1tY19zZGlvX3By
+ZV9zdXNwZW5kKHN0cnVjdCBtbWNfaG9zdA0KPiAqaG9zdCkNCj4gPiAgICovDQo+ID4gIHN0YXRp
+YyBpbnQgbW1jX3NkaW9fc3VzcGVuZChzdHJ1Y3QgbW1jX2hvc3QgKmhvc3QpICB7DQo+ID4gLQlp
+bnQgaSwgZXJyID0gMDsNCj4gPiAtDQo+ID4gLQlmb3IgKGkgPSAwOyBpIDwgaG9zdC0+Y2FyZC0+
+c2Rpb19mdW5jczsgaSsrKSB7DQo+ID4gLQkJc3RydWN0IHNkaW9fZnVuYyAqZnVuYyA9IGhvc3Qt
+PmNhcmQtPnNkaW9fZnVuY1tpXTsNCj4gPiAtCQlpZiAoZnVuYyAmJiBzZGlvX2Z1bmNfcHJlc2Vu
+dChmdW5jKSAmJiBmdW5jLT5kZXYuZHJpdmVyKSB7DQo+ID4gLQkJCWNvbnN0IHN0cnVjdCBkZXZf
+cG1fb3BzICpwbW9wcyA9IGZ1bmMtPmRldi5kcml2ZXItPnBtOw0KPiA+IC0JCQllcnIgPSBwbW9w
+cy0+c3VzcGVuZCgmZnVuYy0+ZGV2KTsNCj4gPiAtCQkJaWYgKGVycikNCj4gPiAtCQkJCWJyZWFr
+Ow0KPiA+IC0JCX0NCj4gPiAtCX0NCj4gPiAtCXdoaWxlIChlcnIgJiYgLS1pID49IDApIHsNCj4g
+PiAtCQlzdHJ1Y3Qgc2Rpb19mdW5jICpmdW5jID0gaG9zdC0+Y2FyZC0+c2Rpb19mdW5jW2ldOw0K
+PiA+IC0JCWlmIChmdW5jICYmIHNkaW9fZnVuY19wcmVzZW50KGZ1bmMpICYmIGZ1bmMtPmRldi5k
+cml2ZXIpIHsNCj4gPiAtCQkJY29uc3Qgc3RydWN0IGRldl9wbV9vcHMgKnBtb3BzID0gZnVuYy0+
+ZGV2LmRyaXZlci0+cG07DQo+ID4gLQkJCXBtb3BzLT5yZXN1bWUoJmZ1bmMtPmRldik7DQo+ID4g
+LQkJfQ0KPiA+IC0JfQ0KPiA+IC0NCj4gPiAtCWlmICghZXJyICYmIG1tY19jYXJkX2tlZXBfcG93
+ZXIoaG9zdCkgJiYgbW1jX2NhcmRfd2FrZV9zZGlvX2lycShob3N0KSkNCj4gew0KPiA+ICsJaWYg
+KG1tY19jYXJkX2tlZXBfcG93ZXIoaG9zdCkgJiYgbW1jX2NhcmRfd2FrZV9zZGlvX2lycShob3N0
+KSkgew0KPiA+ICAJCW1tY19jbGFpbV9ob3N0KGhvc3QpOw0KPiA+ICAJCXNkaW9fZGlzYWJsZV93
+aWRlKGhvc3QtPmNhcmQpOw0KPiA+ICAJCW1tY19yZWxlYXNlX2hvc3QoaG9zdCk7DQo+ID4gIAl9
+DQo+ID4NCj4gPiAtCWlmICghZXJyICYmICFtbWNfY2FyZF9rZWVwX3Bvd2VyKGhvc3QpKQ0KPiA+
+ICsJaWYgKCFtbWNfY2FyZF9rZWVwX3Bvd2VyKGhvc3QpKQ0KPiA+ICAJCW1tY19wb3dlcl9vZmYo
+aG9zdCk7DQo+ID4NCj4gPiAtCXJldHVybiBlcnI7DQo+ID4gKwlyZXR1cm4gMDsNCj4gPiAgfQ0K
+PiA+DQo+ID4gIHN0YXRpYyBpbnQgbW1jX3NkaW9fcmVzdW1lKHN0cnVjdCBtbWNfaG9zdCAqaG9z
+dCkgIHsNCj4gPiAtCWludCBpLCBlcnIgPSAwOw0KPiA+ICsJaW50IGVyciA9IDA7DQo+ID4NCj4g
+PiAgCUJVR19PTighaG9zdCk7DQo+ID4gIAlCVUdfT04oIWhvc3QtPmNhcmQpOw0KPiA+IEBAIC0x
+MDE5LDI0ICsxMDAwLDYgQEAgc3RhdGljIGludCBtbWNfc2Rpb19yZXN1bWUoc3RydWN0IG1tY19o
+b3N0ICpob3N0KQ0KPiA+ICAJCXdha2VfdXBfcHJvY2Vzcyhob3N0LT5zZGlvX2lycV90aHJlYWQp
+Ow0KPiA+ICAJbW1jX3JlbGVhc2VfaG9zdChob3N0KTsNCj4gPg0KPiA+IC0JLyoNCj4gPiAtCSAq
+IElmIHRoZSBjYXJkIGxvb2tlZCB0byBiZSB0aGUgc2FtZSBhcyBiZWZvcmUgc3VzcGVuZGluZywg
+dGhlbg0KPiA+IC0JICogd2UgcHJvY2VlZCB0byByZXN1bWUgYWxsIGNhcmQgZnVuY3Rpb25zLiAg
+SWYgb25lIG9mIHRoZW0gcmV0dXJucw0KPiA+IC0JICogYW4gZXJyb3IgdGhlbiB3ZSBzaW1wbHkg
+cmV0dXJuIHRoYXQgZXJyb3IgdG8gdGhlIGNvcmUgYW5kIHRoZQ0KPiA+IC0JICogY2FyZCB3aWxs
+IGJlIHJlZGV0ZWN0ZWQgYXMgbmV3LiAgSXQgaXMgdGhlIHJlc3BvbnNpYmlsaXR5IG9mDQo+ID4g
+LQkgKiB0aGUgZnVuY3Rpb24gZHJpdmVyIHRvIHBlcmZvcm0gZnVydGhlciB0ZXN0cyB3aXRoIHRo
+ZSBleHRyYQ0KPiA+IC0JICoga25vd2xlZGdlIGl0IGhhcyBvZiB0aGUgY2FyZCB0byBjb25maXJt
+IHRoZSBjYXJkIGlzIGluZGVlZCB0aGUNCj4gPiAtCSAqIHNhbWUgYXMgYmVmb3JlIHN1c3BlbmRp
+bmcgKHNhbWUgTUFDIGFkZHJlc3MgZm9yIG5ldHdvcmsgY2FyZHMsDQo+ID4gLQkgKiBldGMuKSBh
+bmQgcmV0dXJuIGFuIGVycm9yIG90aGVyd2lzZS4NCj4gPiAtCSAqLw0KPiA+IC0JZm9yIChpID0g
+MDsgIWVyciAmJiBpIDwgaG9zdC0+Y2FyZC0+c2Rpb19mdW5jczsgaSsrKSB7DQo+ID4gLQkJc3Ry
+dWN0IHNkaW9fZnVuYyAqZnVuYyA9IGhvc3QtPmNhcmQtPnNkaW9fZnVuY1tpXTsNCj4gPiAtCQlp
+ZiAoZnVuYyAmJiBzZGlvX2Z1bmNfcHJlc2VudChmdW5jKSAmJiBmdW5jLT5kZXYuZHJpdmVyKSB7
+DQo+ID4gLQkJCWNvbnN0IHN0cnVjdCBkZXZfcG1fb3BzICpwbW9wcyA9IGZ1bmMtPmRldi5kcml2
+ZXItPnBtOw0KPiA+IC0JCQllcnIgPSBwbW9wcy0+cmVzdW1lKCZmdW5jLT5kZXYpOw0KPiA+IC0J
+CX0NCj4gPiAtCX0NCj4gPiAtDQo+ID4gIAlob3N0LT5wbV9mbGFncyAmPSB+TU1DX1BNX0tFRVBf
+UE9XRVI7DQo+ID4gIAlyZXR1cm4gZXJyOw0KPiA+ICB9DQo+ID4gZGlmZiAtLWdpdCBhL2RyaXZl
+cnMvbW1jL2NvcmUvc2Rpb19idXMuYyBiL2RyaXZlcnMvbW1jL2NvcmUvc2Rpb19idXMuYw0KPiA+
+IGluZGV4IDkyZDFiYTguLjRmYThmZWY5IDEwMDY0NA0KPiA+IC0tLSBhL2RyaXZlcnMvbW1jL2Nv
+cmUvc2Rpb19idXMuYw0KPiA+ICsrKyBiL2RyaXZlcnMvbW1jL2NvcmUvc2Rpb19idXMuYw0KPiA+
+IEBAIC0xOTcsMjAgKzE5Nyw4IEBAIHN0YXRpYyBpbnQgc2Rpb19idXNfcmVtb3ZlKHN0cnVjdCBk
+ZXZpY2UgKmRldikNCj4gPg0KPiA+ICAjaWZkZWYgQ09ORklHX1BNDQo+ID4NCj4gPiAtI2lmZGVm
+IENPTkZJR19QTV9TTEVFUA0KPiA+IC1zdGF0aWMgaW50IHBtX25vX29wZXJhdGlvbihzdHJ1Y3Qg
+ZGV2aWNlICpkZXYpIC17DQo+ID4gLQkvKg0KPiA+IC0JICogUHJldmVudCB0aGUgUE0gY29yZSBm
+cm9tIGNhbGxpbmcgU0RJTyBkZXZpY2UgZHJpdmVycycgc3VzcGVuZA0KPiA+IC0JICogY2FsbGJh
+Y2sgcm91dGluZXMsIHdoaWNoIGl0IGlzIG5vdCBzdXBwb3NlZCB0byBkbywgYnkgdXNpbmcgdGhp
+cw0KPiA+IC0JICogZW1wdHkgZnVuY3Rpb24gYXMgdGhlIGJ1cyB0eXBlIHN1c3BlbmQgY2FsbGFi
+YWNrIGZvciBTRElPLg0KPiA+IC0JICovDQo+ID4gLQlyZXR1cm4gMDsNCj4gPiAtfQ0KPiA+IC0j
+ZW5kaWYNCj4gPiAtDQo+ID4gIHN0YXRpYyBjb25zdCBzdHJ1Y3QgZGV2X3BtX29wcyBzZGlvX2J1
+c19wbV9vcHMgPSB7DQo+ID4gLQlTRVRfU1lTVEVNX1NMRUVQX1BNX09QUyhwbV9ub19vcGVyYXRp
+b24sIHBtX25vX29wZXJhdGlvbikNCj4gPiArCVNFVF9TWVNURU1fU0xFRVBfUE1fT1BTKHBtX2dl
+bmVyaWNfc3VzcGVuZCwgcG1fZ2VuZXJpY19yZXN1bWUpDQo+ID4gIAlTRVRfUlVOVElNRV9QTV9P
+UFMoDQo+ID4gIAkJcG1fZ2VuZXJpY19ydW50aW1lX3N1c3BlbmQsDQo+ID4gIAkJcG1fZ2VuZXJp
+Y19ydW50aW1lX3Jlc3VtZSwNCj4gPg0KDQo=
