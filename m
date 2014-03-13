@@ -1,66 +1,175 @@
 From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH RESEND 0/5]  update selection of bus speed mode for eMMC
-Date: Thu, 13 Mar 2014 18:52:22 +0900
-Message-ID: <53217FD6.2090001@samsung.com>
-References: <1383653403-10049-1-git-send-email-ulf.hansson@linaro.org>
- <006701cf2a58$c628e050$527aa0f0$%jun@samsung.com>
+Subject: Re: [PATCH 1/6] mmc: slot-gpio: Record GPIO descriptors instead of
+ GPIO numbers
+Date: Thu, 13 Mar 2014 22:00:58 +0900
+Message-ID: <5321AC0A.5090203@samsung.com>
+References: <1394456564-13783-1-git-send-email-adrian.hunter@intel.com>
+ <1394456564-13783-2-git-send-email-adrian.hunter@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout3.samsung.com ([203.254.224.33]:29634 "EHLO
-	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753477AbaCMJwT (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 13 Mar 2014 05:52:19 -0400
-Received: from epcpsbgr1.samsung.com
- (u141.gpu120.samsung.co.kr [203.254.230.141])
- by mailout3.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+Received: from mailout2.samsung.com ([203.254.224.25]:14946 "EHLO
+	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752282AbaCMNAz (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 13 Mar 2014 09:00:55 -0400
+Received: from epcpsbgr3.samsung.com
+ (u143.gpu120.samsung.co.kr [203.254.230.143])
+ by mailout2.samsung.com (Oracle Communications Messaging Server 7u4-24.01
  (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTP id <0N2D00N5UCR50R00@mailout3.samsung.com> for
- linux-mmc@vger.kernel.org; Thu, 13 Mar 2014 18:52:17 +0900 (KST)
-In-reply-to: <006701cf2a58$c628e050$527aa0f0$%jun@samsung.com>
+ with ESMTP id <0N2D0091DLHGR350@mailout2.samsung.com> for
+ linux-mmc@vger.kernel.org; Thu, 13 Mar 2014 22:00:53 +0900 (KST)
+In-reply-to: <1394456564-13783-2-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Seungwon Jeon <tgih.jun@samsung.com>, linux-mmc@vger.kernel.org
-Cc: 'Chris Ball' <chris@printf.net>, 'Ulf Hansson' <ulf.hansson@linaro.org>, 'Jaehoon Chung' <jh80.chung@samsung.com>, 'Jackey Shen' <jackey.shen@amd.com>, 'Alim Akhtar' <alim.akhtar@samsung.com>
+To: Adrian Hunter <adrian.hunter@intel.com>, Chris Ball <chris@printf.net>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Linus Walleij <linus.walleij@linaro.org>, Alexandre Courbot <gnurou@gmail.com>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 
-I have tested with Exynos5. It's working fine.
+Dear Adrain.
 
-Tested-by: Jaehoon Chung <jh80.chung@samsung.com>
-Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
+I have tested with your patch-set related slot-gpio.
+It's working fine. And looks good to me.
 
-On 02/15/2014 11:18 PM, Seungwon Jeon wrote:
-> This series contains the change for selection of bus speed mode.
-> Previous implementation is complicated and some sequence is duplicated.
-> And specially, HS400 mode eMMC5.0 is introduced this time.
+I have a question. what's override_cd/ro_active_level?
+I didn't fully understand this value. Could you explain to me, plz?
+
+Best Regards,
+Jaehoon Chung
+
+On 03/10/2014 10:02 PM, Adrian Hunter wrote:
+> In preparation for adding a descriptor-based CD GPIO
+> API, switch from recording GPIO numbers to recording
+> GPIO descriptors.
 > 
-> - Continued/Updated since "[PATCH 0/3] mmc: update bus speed mode" series.
->   (Applied some comments from Ulf Hansson, Jackey Shen.)
-> - Tested at EXYNOS SOC.
+> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+> ---
+>  drivers/mmc/core/slot-gpio.c | 45 ++++++++++++++++++++++++++------------------
+>  1 file changed, 27 insertions(+), 18 deletions(-)
 > 
-> Seungwon Jeon (5):
->   mmc: drop the speed mode of card's state
->   mmc: identify available device type to select
->   mmc: step power class after final selection of bus mode
->   mmc: rework selection of bus speed mode
->   mmc: add support for HS400 mode of eMMC5.0
-> 
->  drivers/mmc/core/bus.c     |   10 +-
->  drivers/mmc/core/core.c    |    3 +-
->  drivers/mmc/core/debugfs.c |    5 +-
->  drivers/mmc/core/mmc.c     |  690 ++++++++++++++++++++++++++++----------------
->  drivers/mmc/core/sd.c      |   16 +-
->  drivers/mmc/core/sd.h      |    1 -
->  drivers/mmc/core/sdio.c    |    8 +-
->  include/linux/mmc/card.h   |   32 +--
->  include/linux/mmc/host.h   |   42 +++-
->  include/linux/mmc/mmc.h    |   23 ++-
->  10 files changed, 529 insertions(+), 301 deletions(-)
-> 
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> diff --git a/drivers/mmc/core/slot-gpio.c b/drivers/mmc/core/slot-gpio.c
+> index 46596b71..86547a2 100644
+> --- a/drivers/mmc/core/slot-gpio.c
+> +++ b/drivers/mmc/core/slot-gpio.c
+> @@ -10,6 +10,7 @@
+>  
+>  #include <linux/err.h>
+>  #include <linux/gpio.h>
+> +#include <linux/gpio/consumer.h>
+>  #include <linux/interrupt.h>
+>  #include <linux/jiffies.h>
+>  #include <linux/mmc/host.h>
+> @@ -18,8 +19,10 @@
+>  #include <linux/slab.h>
+>  
+>  struct mmc_gpio {
+> -	int ro_gpio;
+> -	int cd_gpio;
+> +	struct gpio_desc *ro_gpio;
+> +	struct gpio_desc *cd_gpio;
+> +	bool override_ro_active_level;
+> +	bool override_cd_active_level;
+>  	char *ro_label;
+>  	char cd_label[0];
+>  };
+> @@ -57,8 +60,6 @@ static int mmc_gpio_alloc(struct mmc_host *host)
+>  			ctx->ro_label = ctx->cd_label + len;
+>  			snprintf(ctx->cd_label, len, "%s cd", dev_name(host->parent));
+>  			snprintf(ctx->ro_label, len, "%s ro", dev_name(host->parent));
+> -			ctx->cd_gpio = -EINVAL;
+> -			ctx->ro_gpio = -EINVAL;
+>  			host->slot.handler_priv = ctx;
+>  		}
+>  	}
+> @@ -72,11 +73,14 @@ int mmc_gpio_get_ro(struct mmc_host *host)
+>  {
+>  	struct mmc_gpio *ctx = host->slot.handler_priv;
+>  
+> -	if (!ctx || !gpio_is_valid(ctx->ro_gpio))
+> +	if (!ctx || !ctx->ro_gpio)
+>  		return -ENOSYS;
+>  
+> -	return !gpio_get_value_cansleep(ctx->ro_gpio) ^
+> -		!!(host->caps2 & MMC_CAP2_RO_ACTIVE_HIGH);
+> +	if (ctx->override_ro_active_level)
+> +		return !gpiod_get_raw_value_cansleep(ctx->ro_gpio) ^
+> +			!!(host->caps2 & MMC_CAP2_RO_ACTIVE_HIGH);
+> +
+> +	return gpiod_get_value_cansleep(ctx->ro_gpio);
+>  }
+>  EXPORT_SYMBOL(mmc_gpio_get_ro);
+>  
+> @@ -84,11 +88,14 @@ int mmc_gpio_get_cd(struct mmc_host *host)
+>  {
+>  	struct mmc_gpio *ctx = host->slot.handler_priv;
+>  
+> -	if (!ctx || !gpio_is_valid(ctx->cd_gpio))
+> +	if (!ctx || !ctx->cd_gpio)
+>  		return -ENOSYS;
+>  
+> -	return !gpio_get_value_cansleep(ctx->cd_gpio) ^
+> -		!!(host->caps2 & MMC_CAP2_CD_ACTIVE_HIGH);
+> +	if (ctx->override_cd_active_level)
+> +		return !gpiod_get_raw_value_cansleep(ctx->cd_gpio) ^
+> +			!!(host->caps2 & MMC_CAP2_CD_ACTIVE_HIGH);
+> +
+> +	return gpiod_get_value_cansleep(ctx->cd_gpio);
+>  }
+>  EXPORT_SYMBOL(mmc_gpio_get_cd);
+>  
+> @@ -125,7 +132,8 @@ int mmc_gpio_request_ro(struct mmc_host *host, unsigned int gpio)
+>  	if (ret < 0)
+>  		return ret;
+>  
+> -	ctx->ro_gpio = gpio;
+> +	ctx->override_ro_active_level = true;
+> +	ctx->ro_gpio = gpio_to_desc(gpio);
+>  
+>  	return 0;
+>  }
+> @@ -201,7 +209,8 @@ int mmc_gpio_request_cd(struct mmc_host *host, unsigned int gpio,
+>  	if (irq < 0)
+>  		host->caps |= MMC_CAP_NEEDS_POLL;
+>  
+> -	ctx->cd_gpio = gpio;
+> +	ctx->override_cd_active_level = true;
+> +	ctx->cd_gpio = gpio_to_desc(gpio);
+>  
+>  	return 0;
+>  }
+> @@ -219,11 +228,11 @@ void mmc_gpio_free_ro(struct mmc_host *host)
+>  	struct mmc_gpio *ctx = host->slot.handler_priv;
+>  	int gpio;
+>  
+> -	if (!ctx || !gpio_is_valid(ctx->ro_gpio))
+> +	if (!ctx || !ctx->ro_gpio)
+>  		return;
+>  
+> -	gpio = ctx->ro_gpio;
+> -	ctx->ro_gpio = -EINVAL;
+> +	gpio = desc_to_gpio(ctx->ro_gpio);
+> +	ctx->ro_gpio = NULL;
+>  
+>  	devm_gpio_free(&host->class_dev, gpio);
+>  }
+> @@ -241,7 +250,7 @@ void mmc_gpio_free_cd(struct mmc_host *host)
+>  	struct mmc_gpio *ctx = host->slot.handler_priv;
+>  	int gpio;
+>  
+> -	if (!ctx || !gpio_is_valid(ctx->cd_gpio))
+> +	if (!ctx || !ctx->cd_gpio)
+>  		return;
+>  
+>  	if (host->slot.cd_irq >= 0) {
+> @@ -249,8 +258,8 @@ void mmc_gpio_free_cd(struct mmc_host *host)
+>  		host->slot.cd_irq = -EINVAL;
+>  	}
+>  
+> -	gpio = ctx->cd_gpio;
+> -	ctx->cd_gpio = -EINVAL;
+> +	gpio = desc_to_gpio(ctx->cd_gpio);
+> +	ctx->cd_gpio = NULL;
+>  
+>  	devm_gpio_free(&host->class_dev, gpio);
+>  }
 > 
 
