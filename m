@@ -1,227 +1,128 @@
-From: Seungwon Jeon <tgih.jun@samsung.com>
-Subject: RE: [PATCH v2 3/5] mmc: step power class after final selection of bus
- mode
-Date: Fri, 14 Mar 2014 11:49:37 +0900
-Message-ID: <002201cf3f30$09d94dd0$1d8be970$%jun@samsung.com>
-References: <1383653403-10049-1-git-send-email-ulf.hansson@linaro.org>
- <006a01cf2a59$863f6030$92be2090$%jun@samsung.com>
- <003d01cf3a12$9eedf150$dcc9d3f0$%jun@samsung.com>
- <CAPDyKFrPLdGbSwB=ZfodivYKwywQkhc=SrSrDrVQX4GR_oHd9g@mail.gmail.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: [PATCH] mmc: dw_mmc: add the vqmmc regulator
+Date: Fri, 14 Mar 2014 16:24:27 +0900
+Message-ID: <5322AEAB.8010602@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=Windows-1252
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout2.samsung.com ([203.254.224.25]:41282 "EHLO
-	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754466AbaCNCtj (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 13 Mar 2014 22:49:39 -0400
-Received: from epcpsbgr2.samsung.com
- (u142.gpu120.samsung.co.kr [203.254.230.142])
- by mailout2.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+Received: from mailout4.samsung.com ([203.254.224.34]:57284 "EHLO
+	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755133AbaCNHY1 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 14 Mar 2014 03:24:27 -0400
+Received: from epcpsbgr5.samsung.com
+ (u145.gpu120.samsung.co.kr [203.254.230.145])
+ by mailout4.samsung.com (Oracle Communications Messaging Server 7u4-24.01
  (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTP id <0N2E001D5NUQRT50@mailout2.samsung.com> for
- linux-mmc@vger.kernel.org; Fri, 14 Mar 2014 11:49:38 +0900 (KST)
-In-reply-to: <CAPDyKFrPLdGbSwB=ZfodivYKwywQkhc=SrSrDrVQX4GR_oHd9g@mail.gmail.com>
-Content-language: ko
+ with ESMTP id <0N2F00DFY0KM3S40@mailout4.samsung.com> for
+ linux-mmc@vger.kernel.org; Fri, 14 Mar 2014 16:24:22 +0900 (KST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: 'Ulf Hansson' <ulf.hansson@linaro.org>
-Cc: 'linux-mmc' <linux-mmc@vger.kernel.org>, 'Chris Ball' <chris@printf.net>, 'Jaehoon Chung' <jh80.chung@samsung.com>, 'Jackey Shen' <jackey.shen@amd.com>, 'Alim Akhtar' <alim.akhtar@samsung.com>
+To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Cc: Chris Ball <chris@printf.net>, Seungwon Jeon <tgih.jun@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>
 
-On Thu, March 13, 2014, Ulf Hansson wrote:
-> On 7 March 2014 15:36, Seungwon Jeon <tgih.jun@samsung.com> wrote:
-> > Power class is changed once only after selection of bus modes
-> > including speed and bus-width finishes finally.
-> >
-> > Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
-> > ---
-> > Changes in v2:
-> >         Cleaned up some unnecessary codes.
-> >
-> >  drivers/mmc/core/mmc.c |   94 +++++++++++++++++++++++++++--------------------
-> >  1 files changed, 54 insertions(+), 40 deletions(-)
-> >
-> > diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-> > index 0abece0..88ff217 100644
-> > --- a/drivers/mmc/core/mmc.c
-> > +++ b/drivers/mmc/core/mmc.c
-> > @@ -737,17 +737,13 @@ static inline unsigned int mmc_snoop_ddr(struct mmc_card *card)
-> >   * extended CSD register, select it by executing the
-> >   * mmc_switch command.
-> >   */
-> > -static int mmc_select_powerclass(struct mmc_card *card,
-> > -               unsigned int bus_width)
-> > +static int __mmc_select_powerclass(struct mmc_card *card,
-> > +                                  unsigned int bus_width)
-> >  {
-> >         int err = 0;
-> >         unsigned int pwrclass_val = 0;
-> > -       struct mmc_host *host;
-> > -
-> > -       BUG_ON(!card);
-> > -
-> > -       host = card->host;
-> > -       BUG_ON(!host);
-> > +       struct mmc_host *host = card->host;
-> > +       struct mmc_ext_csd *ext_csd = &card->ext_csd;
-> >
-> >         /* Power class selection is supported for versions >= 4.0 */
-> >         if (card->csd.mmca_vsn < CSD_SPEC_VER_4)
-> > @@ -759,14 +755,14 @@ static int mmc_select_powerclass(struct mmc_card *card,
-> >
-> >         switch (1 << host->ios.vdd) {
-> >         case MMC_VDD_165_195:
-> > -               if (host->ios.clock <= 26000000)
-> > -                       pwrclass_val = card->ext_csd.raw_pwr_cl_26_195;
-> > -               else if (host->ios.clock <= 52000000)
-> > +               if (host->ios.clock <= MMC_HIGH_26_MAX_DTR)
-> > +                       pwrclass_val = ext_csd->raw_pwr_cl_26_195;
-> > +               else if (host->ios.clock <= MMC_HIGH_52_MAX_DTR)
-> >                         pwrclass_val = (bus_width <= EXT_CSD_BUS_WIDTH_8) ?
-> > -                               card->ext_csd.raw_pwr_cl_52_195 :
-> > -                               card->ext_csd.raw_pwr_cl_ddr_52_195;
-> > -               else if (host->ios.clock <= 200000000)
-> > -                       pwrclass_val = card->ext_csd.raw_pwr_cl_200_195;
-> > +                               ext_csd->raw_pwr_cl_52_195 :
-> > +                               ext_csd->raw_pwr_cl_ddr_52_195;
-> > +               else if (host->ios.clock <= MMC_HS200_MAX_DTR)
-> > +                       pwrclass_val = ext_csd->raw_pwr_cl_200_195;
-> >                 break;
-> >         case MMC_VDD_27_28:
-> >         case MMC_VDD_28_29:
-> > @@ -777,14 +773,14 @@ static int mmc_select_powerclass(struct mmc_card *card,
-> >         case MMC_VDD_33_34:
-> >         case MMC_VDD_34_35:
-> >         case MMC_VDD_35_36:
-> > -               if (host->ios.clock <= 26000000)
-> > -                       pwrclass_val = card->ext_csd.raw_pwr_cl_26_360;
-> > -               else if (host->ios.clock <= 52000000)
-> > +               if (host->ios.clock <= MMC_HIGH_26_MAX_DTR)
-> > +                       pwrclass_val = ext_csd->raw_pwr_cl_26_360;
-> > +               else if (host->ios.clock <= MMC_HIGH_52_MAX_DTR)
-> >                         pwrclass_val = (bus_width <= EXT_CSD_BUS_WIDTH_8) ?
-> > -                               card->ext_csd.raw_pwr_cl_52_360 :
-> > -                               card->ext_csd.raw_pwr_cl_ddr_52_360;
-> > -               else if (host->ios.clock <= 200000000)
-> > -                       pwrclass_val = card->ext_csd.raw_pwr_cl_200_360;
-> > +                               ext_csd->raw_pwr_cl_52_360 :
-> > +                               ext_csd->raw_pwr_cl_ddr_52_360;
-> > +               else if (host->ios.clock <= MMC_HS200_MAX_DTR)
-> > +                       pwrclass_val = ext_csd->raw_pwr_cl_200_360;
-> >                 break;
-> >         default:
-> >                 pr_warning("%s: Voltage range not supported "
-> > @@ -810,6 +806,37 @@ static int mmc_select_powerclass(struct mmc_card *card,
-> >         return err;
-> >  }
-> >
-> > +static int mmc_select_powerclass(struct mmc_card *card)
-> > +{
-> > +       int err, ddr;
-> > +       u32 bus_width, ext_csd_bits;
-> > +       struct mmc_host *host = card->host;
-> > +
-> > +       /* Power class selection is supported for versions >= 4.0 */
-> > +       if (card->csd.mmca_vsn < CSD_SPEC_VER_4)
-> > +               return 0;
-> > +
-> > +       bus_width = host->ios.bus_width;
-> > +       /* Power class values are defined only for 4/8 bit bus */
-> > +       if (bus_width == MMC_BUS_WIDTH_1)
-> > +               return 0;
-> > +
-> > +       ddr = mmc_snoop_ddr(card);
-> > +       if (ddr)
-> > +               ext_csd_bits = (bus_width == MMC_BUS_WIDTH_8) ?
-> > +                       EXT_CSD_DDR_BUS_WIDTH_8 : EXT_CSD_DDR_BUS_WIDTH_4;
-> > +       else
-> > +               ext_csd_bits = (bus_width == MMC_BUS_WIDTH_8) ?
-> > +                       EXT_CSD_BUS_WIDTH_8 :  EXT_CSD_BUS_WIDTH_4;
-> > +
-> > +       err = __mmc_select_powerclass(card, ext_csd_bits);
-> > +       if (err)
-> > +               pr_warn("%s: power class selection to bus width %d ddr %d failed\n",
-> > +                       mmc_hostname(host), 1 << bus_width, ddr);
-> > +
-> > +       return err;
-> > +}
-> > +
-> >  /*
-> >   * Selects the desired buswidth and switch to the HS200 mode
-> >   * if bus width set without error
-> > @@ -1171,11 +1198,6 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
-> >
-> >                 ext_csd_bits = (bus_width == MMC_BUS_WIDTH_8) ?
-> >                                 EXT_CSD_BUS_WIDTH_8 : EXT_CSD_BUS_WIDTH_4;
-> > -               err = mmc_select_powerclass(card, ext_csd_bits);
-> > -               if (err)
-> > -                       pr_warning("%s: power class selection to bus width %d"
-> > -                                  " failed\n", mmc_hostname(card->host),
-> > -                                  1 << bus_width);
-> >         }
-> >
-> >         /*
-> > @@ -1204,12 +1226,6 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
-> >                         bus_width = bus_widths[idx];
-> >                         if (bus_width == MMC_BUS_WIDTH_1)
-> >                                 ddr = 0; /* no DDR for 1-bit width */
-> > -                       err = mmc_select_powerclass(card, ext_csd_bits[idx][0]);
-> > -                       if (err)
-> > -                               pr_warning("%s: power class selection to "
-> > -                                          "bus width %d failed\n",
-> > -                                          mmc_hostname(card->host),
-> > -                                          1 << bus_width);
-> >
-> >                         err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-> >                                          EXT_CSD_BUS_WIDTH,
-> > @@ -1234,13 +1250,6 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
-> >                 }
-> >
-> >                 if (!err && ddr) {
-> > -                       err = mmc_select_powerclass(card, ext_csd_bits[idx][1]);
-> > -                       if (err)
-> > -                               pr_warning("%s: power class selection to "
-> > -                                          "bus width %d ddr %d failed\n",
-> > -                                          mmc_hostname(card->host),
-> > -                                          1 << bus_width, ddr);
-> > -
-> >                         err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-> >                                          EXT_CSD_BUS_WIDTH,
-> >                                          ext_csd_bits[idx][1],
-> > @@ -1278,6 +1287,11 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
-> >         }
-> >
-> >         /*
-> > +        * Choose the power calss with selected bus interface
-> 
-> One line of comment is enough.
-> 
-> "calss" -> "class".
-OK.
+Add the "vqmmc" regulator into dw_mmc.c
 
-> 
-> > +        */
-> > +       mmc_select_powerclass(card);
-> > +
-> > +       /*
-> >          * Enable HPI feature (if supported)
-> >          */
-> >         if (card->ext_csd.hpi) {
-> > --
-> > 1.7.0.4
-> >
-> >
-> 
-> You should run checkpatch as well.
-It think there was no warning & error in 3/5.
-Ok. Let me check more.
+This patch depend on below patches. ([PATCH v4 1/7] mmc: dw_mmc: use the mmc_of_parse() instead of local parser ~)
 
-> 
-> Besides these minor things, looks good - nice clean up!
+https://patchwork.kernel.org/patch/3750681/
+https://patchwork.kernel.org/patch/3750691/
+https://patchwork.kernel.org/patch/3750711/
+https://patchwork.kernel.org/patch/3750701/
+https://patchwork.kernel.org/patch/3750721/
+https://patchwork.kernel.org/patch/3750731/
+https://patchwork.kernel.org/patch/3750741/
 
-Thanks,
-Seungwon Jeon
-> 
-> Kind regards
-> Ulf Hansson
+Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+---
+ drivers/mmc/host/dw_mmc.c  |   34 ++++++++++++++++++++++++++++++++++
+ include/linux/mmc/dw_mmc.h |    1 +
+ 2 files changed, 35 insertions(+)
 
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index 5e78748..9a33a6d 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -2393,6 +2393,24 @@ int dw_mci_probe(struct dw_mci *host)
+ 		}
+ 	}
+ 
++	host->vqmmc = devm_regulator_get_optional(host->dev, "vqmmc");
++	if (IS_ERR(host->vqmmc)) {
++		ret = PTR_ERR(host->vqmmc);
++		if (ret == -EPROBE_DEFER)
++			goto err_vqmmc;
++
++		dev_info(host->dev, "no vqmmc regulator found: %d\n", ret);
++		host->vqmmc = NULL;
++	} else {
++		ret = regulator_enable(host->vqmmc);
++		if (ret) {
++			if (ret != -EPROBE_DEFER)
++				dev_err(host->dev,
++					"regulator_enable fail: %d\n", ret);
++			goto err_vqmmc;
++		}
++	}
++
+ 	host->quirks = host->pdata->quirks;
+ 
+ 	spin_lock_init(&host->lock);
+@@ -2536,6 +2554,9 @@ err_workqueue:
+ err_dmaunmap:
+ 	if (host->use_dma && host->dma_ops->exit)
+ 		host->dma_ops->exit(host);
++	if (host->vqmmc)
++		regulator_disable(host->vqmmc);
++err_vqmmc:
+ 	if (host->vmmc)
+ 		regulator_disable(host->vmmc);
+ 
+@@ -2575,6 +2596,8 @@ void dw_mci_remove(struct dw_mci *host)
+ 
+ 	if (host->vmmc)
+ 		regulator_disable(host->vmmc);
++	if (host->vqmmc)
++		regulator_disable(host->vqmmc);
+ 
+ 	if (!IS_ERR(host->ciu_clk))
+ 		clk_disable_unprepare(host->ciu_clk);
+@@ -2594,6 +2617,8 @@ int dw_mci_suspend(struct dw_mci *host)
+ {
+ 	if (host->vmmc)
+ 		regulator_disable(host->vmmc);
++	if (host->vqmmc)
++		regulator_disable(host->vqmmc);
+ 
+ 	return 0;
+ }
+@@ -2612,6 +2637,15 @@ int dw_mci_resume(struct dw_mci *host)
+ 		}
+ 	}
+ 
++	if (host->vqmmc) {
++		ret = regulator_enable(host->vqmmc);
++		if (ret) {
++			dev_err(host->dev,
++				"failed to enable regulator: %d\n", ret);
++			return ret;
++		}
++	}
++
+ 	if (!dw_mci_ctrl_all_reset(host)) {
+ 		ret = -ENODEV;
+ 		return ret;
+diff --git a/include/linux/mmc/dw_mmc.h b/include/linux/mmc/dw_mmc.h
+index babaea9..8912d92 100644
+--- a/include/linux/mmc/dw_mmc.h
++++ b/include/linux/mmc/dw_mmc.h
+@@ -189,6 +189,7 @@ struct dw_mci {
+ 	u32			quirks;
+ 
+ 	struct regulator	*vmmc;	/* Power regulator */
++	struct regulator	*vqmmc;	/* Signalling regulator */
+ 	unsigned long		irq_flags; /* IRQ flags */
+ 	int			irq;
+ };
+-- 
+1.7.9.5
