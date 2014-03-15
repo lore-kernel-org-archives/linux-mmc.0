@@ -1,25 +1,44 @@
-From: Chanho Min <chanho.min@lge.com>
-Subject: [PATCH RESEND] mmc:sdhci: handle busy-end interrupt during command
-Date: Sat, 15 Mar 2014 15:22:52 +0900
-Message-ID: <1394864572-27885-1-git-send-email-chanho.min@lge.com>
+From: Youssef TRIKI <youssef.triki@st.com>
+Subject: RE: [PATCH RESEND] mmc:sdhci: handle busy-end interrupt during
+ command
+Date: Sat, 15 Mar 2014 13:35:43 +0100
+Message-ID: <DAE3A3C9CBA1B14593D953926111E0E10150CDA540FC@SAFEX1MAIL1.st.com>
+References: <1394864572-27885-1-git-send-email-chanho.min@lge.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from LGEMRELSE6Q.lge.com ([156.147.1.121]:50308 "EHLO
-	lgeamrelo05.lge.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1750756AbaCOGXV (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 15 Mar 2014 02:23:21 -0400
+Received: from mx08-00178001.pphosted.com ([62.209.51.94]:51471 "EHLO
+	mx07-00178001.pphosted.com" rhost-flags-OK-FAIL-OK-OK)
+	by vger.kernel.org with ESMTP id S1755618AbaCONDC convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Sat, 15 Mar 2014 09:03:02 -0400
+In-Reply-To: <1394864572-27885-1-git-send-email-chanho.min@lge.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>, Chris Ball <chris@printf.net>
-Cc: Hankyung Yu <hankyung.yu@lge.com>, Shawn Guo <shawn.guo@linaro.org>, Dong Aisheng <b29396@freescale.com>, Kevin Liu <kliu5@marvell.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, HyoJun Im <hyojun.im@lge.com>, Gunho Lee <gunho.lee@lge.com>, Youssef TRIKI <youssef.triki@st.com>, Chanho Min <chanho.min@lge.com>
+To: Chanho Min <chanho.min@lge.com>, Chris Ball <cjb@laptop.org>, Chris Ball <chris@printf.net>
+Cc: Hankyung Yu <hankyung.yu@lge.com>, Shawn Guo <shawn.guo@linaro.org>, Dong Aisheng <b29396@freescale.com>, Kevin Liu <kliu5@marvell.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, HyoJun Im <hyojun.im@lge.com>, Gunho Lee <gunho.lee@lge.com>, Youssef TRIKI <youssef.triki@st.com>
 
-It is fully legal for a controller to start handling busy-end interrupt
-before it has signaled that the command has completed. So make sure
-we do things in the proper order, Or it results that command interrupt
-is ignored so it can cause unexpected operations. This is founded at some
-toshiba emmc with the bellow warning.
+Hi Guys,
 
-"mmc0: Got command interrupt 0x00000001 even though
-no command operation was in progress."
+It is not specific to Toshiba devices, and happens with eMMC  devices as well as SD card which support Auto-CMD12 rather than CMD23.
+This warning is seen in read operation and the cause is well explained below. Thanks Chanho Min for the patch.
+And Thanks to add it to the mainline.
+
+Regards,
+Youssef. 
+
+-----Original Message-----
+From: Chanho Min [mailto:chanho.min@lge.com] 
+Sent: samedi 15 mars 2014 07:23
+To: Chris Ball; Chris Ball
+Cc: Hankyung Yu; Shawn Guo; Dong Aisheng; Kevin Liu; linux-mmc@vger.kernel.org; linux-kernel@vger.kernel.org; HyoJun Im; Gunho Lee; Youssef TRIKI; Chanho Min
+Subject: [PATCH RESEND] mmc:sdhci: handle busy-end interrupt during command
+
+It is fully legal for a controller to start handling busy-end interrupt before it has signaled that the command has completed. So make sure we do things in the proper order, Or it results that command interrupt is ignored so it can cause unexpected operations. This is founded at some toshiba emmc with the bellow warning.
+
+"mmc0: Got command interrupt 0x00000001 even though no command operation was in progress."
 
 Can anyone ACK/NACK of this patch? Any comment will be appreciated.
 
@@ -31,8 +50,7 @@ Tested-by: Youssef TRIKI <youssef.triki@st.com>
  include/linux/mmc/sdhci.h |    1 +
  2 files changed, 16 insertions(+), 2 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index bd8a098..21f98e7 100644
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c index bd8a098..21f98e7 100644
 --- a/drivers/mmc/host/sdhci.c
 +++ b/drivers/mmc/host/sdhci.c
 @@ -1016,6 +1016,7 @@ void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
@@ -56,8 +74,7 @@ index bd8a098..21f98e7 100644
 +		}
  
  		/* The controller does not support the end-of-busy IRQ,
- 		 * fall through and take the SDHCI_INT_RESPONSE */
-@@ -2335,7 +2340,15 @@ static void sdhci_data_irq(struct sdhci_host *host, u32 intmask)
+ 		 * fall through and take the SDHCI_INT_RESPONSE */ @@ -2335,7 +2340,15 @@ static void sdhci_data_irq(struct sdhci_host *host, u32 intmask)
  		 */
  		if (host->cmd && (host->cmd->flags & MMC_RSP_BUSY)) {
  			if (intmask & SDHCI_INT_DATA_END) {
@@ -74,8 +91,7 @@ index bd8a098..21f98e7 100644
  				return;
  			}
  		}
-diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
-index 3e781b8..0118020 100644
+diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h index 3e781b8..0118020 100644
 --- a/include/linux/mmc/sdhci.h
 +++ b/include/linux/mmc/sdhci.h
 @@ -148,6 +148,7 @@ struct sdhci_host {
@@ -86,6 +102,6 @@ index 3e781b8..0118020 100644
  
  	struct sg_mapping_iter sg_miter;	/* SG state for PIO */
  	unsigned int blocks;	/* remaining PIO blocks */
--- 
+--
 1.7.9.5
 
