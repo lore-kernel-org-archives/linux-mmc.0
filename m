@@ -1,107 +1,85 @@
-From: Youssef TRIKI <youssef.triki@st.com>
-Subject: RE: [PATCH RESEND] mmc:sdhci: handle busy-end interrupt during
- command
-Date: Sat, 15 Mar 2014 13:35:43 +0100
-Message-ID: <DAE3A3C9CBA1B14593D953926111E0E10150CDA540FC@SAFEX1MAIL1.st.com>
-References: <1394864572-27885-1-git-send-email-chanho.min@lge.com>
+From: Franky Lin <frankyl@broadcom.com>
+Subject: Re: [PATCH] mmc: sdhci: only invoke clock re-tuning for adtc type
+ commands
+Date: Sat, 15 Mar 2014 12:16:29 -0700
+Message-ID: <5324A70D.6080501@broadcom.com>
+References: <1389119511-26228-1-git-send-email-frankyl@broadcom.com> <1389119859-28955-1-git-send-email-frankyl@broadcom.com> <530BA436.4030207@broadcom.com> <531A23E1.8060400@broadcom.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mx08-00178001.pphosted.com ([62.209.51.94]:51471 "EHLO
-	mx07-00178001.pphosted.com" rhost-flags-OK-FAIL-OK-OK)
-	by vger.kernel.org with ESMTP id S1755618AbaCONDC convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sat, 15 Mar 2014 09:03:02 -0400
-In-Reply-To: <1394864572-27885-1-git-send-email-chanho.min@lge.com>
-Content-Language: en-US
+Received: from mail-gw2-out.broadcom.com ([216.31.210.63]:25382 "EHLO
+	mail-gw2-out.broadcom.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755974AbaCOTQf (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 15 Mar 2014 15:16:35 -0400
+In-Reply-To: <531A23E1.8060400@broadcom.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chanho Min <chanho.min@lge.com>, Chris Ball <cjb@laptop.org>, Chris Ball <chris@printf.net>
-Cc: Hankyung Yu <hankyung.yu@lge.com>, Shawn Guo <shawn.guo@linaro.org>, Dong Aisheng <b29396@freescale.com>, Kevin Liu <kliu5@marvell.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, HyoJun Im <hyojun.im@lge.com>, Gunho Lee <gunho.lee@lge.com>, Youssef TRIKI <youssef.triki@st.com>
+To: chris@printf.net, ulf.hansson@linaro.org
+Cc: linux-mmc@vger.kernel.org
 
-Hi Guys,
+Hi Chris and Ulf,
 
-It is not specific to Toshiba devices, and happens with eMMC  devices as well as SD card which support Auto-CMD12 rather than CMD23.
-This warning is seen in read operation and the cause is well explained below. Thanks Chanho Min for the patch.
-And Thanks to add it to the mainline.
+On 03/07/2014 11:54 AM, Franky Lin wrote:
+> On 02/24/2014 11:57 AM, Franky Lin wrote:
+>> Hi Chris,
+>>
+>> On 01/07/2014 10:37 AM, Franky Lin wrote:
+>>> For high clock frequency modes, ie. SDR104 and possibly SDR50, the data
+>>> window on the CMD and DAT lines needs to be tuned. Once tuned to a
+>>> sample clock rate, a re-tuning might required because of drifted signal
+>>> on different lines. This re-tuning is needed and only necessary for
+>>> commands using the DAT lines, ie. adtc type commands. This patch is an
+>>> optimization by adding the condition of the requested command being adtc
+>>> type in order to execute the re-tuning procedure.
+>>>
+>>> Signed-off-by: Franky Lin <frankyl@broadcom.com>
+>>> ---
+>>
+>> Is this still in your queue? Any remarks on it?
+>>
+>> Thanks,
+>> Franky
+>>
+>
+> Ping?
 
-Regards,
-Youssef. 
+Need to try my luck again. :) Could you please share your thought about 
+this patch?
 
------Original Message-----
-From: Chanho Min [mailto:chanho.min@lge.com] 
-Sent: samedi 15 mars 2014 07:23
-To: Chris Ball; Chris Ball
-Cc: Hankyung Yu; Shawn Guo; Dong Aisheng; Kevin Liu; linux-mmc@vger.kernel.org; linux-kernel@vger.kernel.org; HyoJun Im; Gunho Lee; Youssef TRIKI; Chanho Min
-Subject: [PATCH RESEND] mmc:sdhci: handle busy-end interrupt during command
+Thanks,
+Franky
 
-It is fully legal for a controller to start handling busy-end interrupt before it has signaled that the command has completed. So make sure we do things in the proper order, Or it results that command interrupt is ignored so it can cause unexpected operations. This is founded at some toshiba emmc with the bellow warning.
-
-"mmc0: Got command interrupt 0x00000001 even though no command operation was in progress."
-
-Can anyone ACK/NACK of this patch? Any comment will be appreciated.
-
-Signed-off-by: Hankyung Yu <hankyung.yu@lge.com>
-Signed-off-by: Chanho Min <chanho.min@lge.com>
-Tested-by: Youssef TRIKI <youssef.triki@st.com>
----
- drivers/mmc/host/sdhci.c  |   17 +++++++++++++++--
- include/linux/mmc/sdhci.h |    1 +
- 2 files changed, 16 insertions(+), 2 deletions(-)
-
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c index bd8a098..21f98e7 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -1016,6 +1016,7 @@ void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
- 	mod_timer(&host->timer, jiffies + 10 * HZ);
- 
- 	host->cmd = cmd;
-+	host->busy_handle = 0;
- 
- 	sdhci_prepare_data(host, cmd);
- 
-@@ -2271,8 +2272,12 @@ static void sdhci_cmd_irq(struct sdhci_host *host, u32 intmask)
- 		if (host->cmd->data)
- 			DBG("Cannot wait for busy signal when also "
- 				"doing a data transfer");
--		else if (!(host->quirks & SDHCI_QUIRK_NO_BUSY_IRQ))
-+		else if (!(host->quirks & SDHCI_QUIRK_NO_BUSY_IRQ)
-+				&& !host->busy_handle) {
-+			/* Mark that command complete before busy is ended */
-+			host->busy_handle = 1;
- 			return;
-+		}
- 
- 		/* The controller does not support the end-of-busy IRQ,
- 		 * fall through and take the SDHCI_INT_RESPONSE */ @@ -2335,7 +2340,15 @@ static void sdhci_data_irq(struct sdhci_host *host, u32 intmask)
- 		 */
- 		if (host->cmd && (host->cmd->flags & MMC_RSP_BUSY)) {
- 			if (intmask & SDHCI_INT_DATA_END) {
--				sdhci_finish_command(host);
-+				/*
-+				 * Some cards handle busy-end interrupt
-+				 * before the command completed, so make
-+				 * sure we do things in the proper order.
-+				 */
-+				if (host->busy_handle)
-+					sdhci_finish_command(host);
-+				else
-+					host->busy_handle = 1;
- 				return;
- 			}
- 		}
-diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h index 3e781b8..0118020 100644
---- a/include/linux/mmc/sdhci.h
-+++ b/include/linux/mmc/sdhci.h
-@@ -148,6 +148,7 @@ struct sdhci_host {
- 	struct mmc_command *cmd;	/* Current command */
- 	struct mmc_data *data;	/* Current data request */
- 	unsigned int data_early:1;	/* Data finished before cmd */
-+	unsigned int busy_handle:1;	/* Handling the order of Busy-end */
- 
- 	struct sg_mapping_iter sg_miter;	/* SG state for PIO */
- 	unsigned int blocks;	/* remaining PIO blocks */
---
-1.7.9.5
+>
+>>>   drivers/mmc/host/sdhci.c |    3 ++-
+>>>   1 file changed, 2 insertions(+), 1 deletion(-)
+>>>
+>>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+>>> index cc00bed..f301cd6 100644
+>>> --- a/drivers/mmc/host/sdhci.c
+>>> +++ b/drivers/mmc/host/sdhci.c
+>>> @@ -1389,7 +1389,8 @@ static void sdhci_request(struct mmc_host *mmc,
+>>> struct mmc_request *mrq)
+>>>            * tuning procedure before sending command.
+>>>            */
+>>>           if ((host->flags & SDHCI_NEEDS_RETUNING) &&
+>>> -            !(present_state & (SDHCI_DOING_WRITE |
+>>> SDHCI_DOING_READ))) {
+>>> +            !(present_state & (SDHCI_DOING_WRITE |
+>>> SDHCI_DOING_READ)) &&
+>>> +            mmc_cmd_type(mrq->cmd) == MMC_CMD_ADTC) {
+>>>               if (mmc->card) {
+>>>                   /* eMMC uses cmd21 but sd and sdio use cmd19 */
+>>>                   tuning_opcode =
+>>>
+>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
