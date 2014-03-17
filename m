@@ -1,39 +1,92 @@
-From: Chris Ball <chris@printf.net>
-Subject: Re: [PATCH 0/6] mmc: sdhci-acpi: Fix broken card detect for ACPI HID 80860F14
-Date: Mon, 17 Mar 2014 13:14:16 +0000
-Message-ID: <86zjkpvufr.fsf@void.printf.net>
-References: <1394456564-13783-1-git-send-email-adrian.hunter@intel.com>
-	<5326BCF1.4010509@intel.com>
+From: Franky Lin <frankyl@broadcom.com>
+Subject: Re: [PATCH] mmc: sdhci: only invoke clock re-tuning for adtc type
+ commands
+Date: Mon, 17 Mar 2014 09:51:36 -0700
+Message-ID: <53272818.5030706@broadcom.com>
+References: <1389119511-26228-1-git-send-email-frankyl@broadcom.com>	<1389119859-28955-1-git-send-email-frankyl@broadcom.com> <CAPDyKFoGxa0Xp33o2OfUrFGbiHPvvLOg-ZE39DJLX2R2htKCHQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:37513 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932514AbaCQNOT (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 17 Mar 2014 09:14:19 -0400
-In-Reply-To: <5326BCF1.4010509@intel.com> (Adrian Hunter's message of "Mon, 17
-	Mar 2014 11:14:25 +0200")
+Received: from mail-gw3-out.broadcom.com ([216.31.210.64]:49370 "EHLO
+	mail-gw3-out.broadcom.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753117AbaCQQvh (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 17 Mar 2014 12:51:37 -0400
+In-Reply-To: <CAPDyKFoGxa0Xp33o2OfUrFGbiHPvvLOg-ZE39DJLX2R2htKCHQ@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Linus Walleij <linus.walleij@linaro.org>, Alexandre Courbot <gnurou@gmail.com>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Ulf Hansson <ulf.hansson@linaro.org>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>
 
-Hi Adrian,
+Hi Ulf,
 
-On Mon, Mar 17 2014, Adrian Hunter wrote:
->> Adrian Hunter (6):
->>       mmc: slot-gpio: Record GPIO descriptors instead of GPIO numbers
->>       mmc: slot-gpio: Split out CD IRQ request into a separate function
->>       mmc: slot-gpio: Add GPIO descriptor based CD GPIO API
->>       mmc: sdhci-acpi: Fix broken card detect for ACPI HID 80860F14 SD cards
->>       mmc: sdhci-acpi: Add device id 80860F16
->>       mmc: sdhci: Allow for irq being shared.
+On 03/17/2014 02:12 AM, Ulf Hansson wrote:
+> On 7 January 2014 19:37, Franky Lin <frankyl@broadcom.com> wrote:
+>> For high clock frequency modes, ie. SDR104 and possibly SDR50, the data
+>> window on the CMD and DAT lines needs to be tuned. Once tuned to a
+>> sample clock rate, a re-tuning might required because of drifted signal
+>> on different lines. This re-tuning is needed and only necessary for
+>> commands using the DAT lines, ie. adtc type commands. This patch is an
+>> optimization by adding the condition of the requested command being adtc
+>> type in order to execute the re-tuning procedure.
+>>
+>> Signed-off-by: Franky Lin <frankyl@broadcom.com>
 >
-> Chris, can these be queued for 3.15?  Note I did a V2 of just "mmc: sdhci:
-> Allow for irq being shared"
+> Hi Franky,
+>
+> Sorry for the delay.
+>
+>> ---
+>>   drivers/mmc/host/sdhci.c |    3 ++-
+>>   1 file changed, 2 insertions(+), 1 deletion(-)
+>>
+>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+>> index cc00bed..f301cd6 100644
+>> --- a/drivers/mmc/host/sdhci.c
+>> +++ b/drivers/mmc/host/sdhci.c
+>> @@ -1389,7 +1389,8 @@ static void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
+>>                   * tuning procedure before sending command.
+>>                   */
+>>                  if ((host->flags & SDHCI_NEEDS_RETUNING) &&
+>> -                   !(present_state & (SDHCI_DOING_WRITE | SDHCI_DOING_READ))) {
+>> +                   !(present_state & (SDHCI_DOING_WRITE | SDHCI_DOING_READ)) &&
+>> +                   mmc_cmd_type(mrq->cmd) == MMC_CMD_ADTC) {
+>
+> I don't have the in-depth knowledge about the sdhci; Still, to me it
+> seems like checking for MMC_CMD_ADTC, is that not just the same a
+> checking if there are a READ/WRITE?
 
-Thanks, merged all six patches (with v2 of 6/6) to mmc-next for 3.15.
+non-adtc commands like CMD17/CMD24/CMD52 do not use the data lines. 
+Tuning is only necessary for adtc commands as CMD18/CMD25/CMD53 which 
+involve data lines.
 
-- Chris.
--- 
-Chris Ball   <chris@printf.net>   <http://printf.net/>
+> Another note, we really should be working on moving the periodic
+> "re-tuning trigger" mechanism into the mmc core layer, so all host
+> driver's could benefit from this. Do you want to help out fixing this?
+
+I thought about this before but hesitated because of non-sdhci drivers. 
+I have seen some of them don't have standardized implementation(well if 
+they do they would have used sdhci anyway).
+
+Thanks,
+Franky
+
+> Kind regards
+> Ulf Hansson
+>
+>>                          if (mmc->card) {
+>>                                  /* eMMC uses cmd21 but sd and sdio use cmd19 */
+>>                                  tuning_opcode =
+>> --
+>> 1.7.9.5
+>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
+
