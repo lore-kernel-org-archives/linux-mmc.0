@@ -1,13 +1,11 @@
 From: <micky_ching@realsil.com.cn>
-Subject: [PATCH 1/2] mmc: rtsx: add R1-no-CRC mmc command type handle
-Date: Tue, 18 Mar 2014 10:01:44 +0800
-Message-ID: <d450ec5a404692c840e46cc0ab3147fae607d22a.1395107222.git.micky_ching@realsil.com.cn>
-References: <cover.1395107222.git.micky_ching@realsil.com.cn>
+Subject: [PATCH 0/2] add new cmd type handle and remove smatch warnings
+Date: Tue, 18 Mar 2014 10:01:43 +0800
+Message-ID: <cover.1395107222.git.micky_ching@realsil.com.cn>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
-In-Reply-To: <cover.1395107222.git.micky_ching@realsil.com.cn>
 List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
  <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
 List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel>
@@ -23,30 +21,18 @@ List-Id: linux-mmc@vger.kernel.org
 
 From: Micky Ching <micky_ching@realsil.com.cn>
 
-commit a27fbf2f067b0cd6f172c8b696b9a44c58bfaa7a
-<mmc: add ignorance case for CMD13 CRC error>
-produced a cmd.flags unhandled in realtek pci host driver.
-This will make MMC card failed initialize, this patch is
-used to handle the new cmd.flags condition and MMC card can be used.
+Add new command type(R1 without CRC) handle, without this patch mmc card
+initialize will be failed.
 
-Signed-off-by: Micky Ching <micky_ching@realsil.com.cn>
----
- drivers/mmc/host/rtsx_pci_sdmmc.c |    3 +++
- 1 file changed, 3 insertions(+)
+Using a more careful handle in request timeout, and debug info is printed
+using non DMA mode. Smatch warning was removed.
 
-diff --git a/drivers/mmc/host/rtsx_pci_sdmmc.c b/drivers/mmc/host/rtsx_pci_sdmmc.c
-index 5fb994f..0d8904a 100644
---- a/drivers/mmc/host/rtsx_pci_sdmmc.c
-+++ b/drivers/mmc/host/rtsx_pci_sdmmc.c
-@@ -346,6 +346,9 @@ static void sd_send_cmd(struct realtek_pci_sdmmc *host, struct mmc_command *cmd)
- 	case MMC_RSP_R1:
- 		rsp_type = SD_RSP_TYPE_R1;
- 		break;
-+	case MMC_RSP_R1 & ~MMC_RSP_CRC:
-+		rsp_type = SD_RSP_TYPE_R1 | SD_NO_CHECK_CRC7;
-+		break;
- 	case MMC_RSP_R1B:
- 		rsp_type = SD_RSP_TYPE_R1b;
- 		break;
--- 
+Micky Ching (2):
+  mmc: rtsx: add R1-no-CRC mmc command type handle
+  mmc: rtsx: modify error handle and remove smatch warnings
+
+ drivers/mmc/host/rtsx_pci_sdmmc.c |  121 ++++++++++++++++++++-----------------
+ 1 file changed, 67 insertions(+), 54 deletions(-)
+
+--
 1.7.9.5
