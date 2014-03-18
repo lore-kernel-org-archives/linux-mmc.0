@@ -1,100 +1,74 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v3 0/5] update selection of bus speed mode for eMMC
-Date: Tue, 18 Mar 2014 09:01:59 +0100
-Message-ID: <CAPDyKFqvjSCS4RauREWuG9FphPYxK47Nbh6ewqfi_9qtm2DZ+g@mail.gmail.com>
-References: <1383653403-10049-1-git-send-email-ulf.hansson@linaro.org>
-	<006701cf2a58$c628e050$527aa0f0$%jun@samsung.com>
-	<003a01cf3f7f$2e170210$8a450630$%jun@samsung.com>
-	<CAPDyKFphJhmwSJn76J4CTu3WmU-9JPMa_R=v62j-zhx+R8iz-Q@mail.gmail.com>
-	<007b01cf424b$82fc58b0$88f50a10$%jun@samsung.com>
-	<5327C99B.4020005@samsung.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+From: Steffen Trumtrar <s.trumtrar@pengutronix.de>
+Subject: [PATCH 2/2] sdhci: imx: add callback for card_type inits
+Date: Tue, 18 Mar 2014 09:31:30 +0100
+Message-ID: <1395131490-11919-2-git-send-email-s.trumtrar@pengutronix.de>
+References: <1395131490-11919-1-git-send-email-s.trumtrar@pengutronix.de>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qc0-f179.google.com ([209.85.216.179]:56468 "EHLO
-	mail-qc0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753956AbaCRICA (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 18 Mar 2014 04:02:00 -0400
-Received: by mail-qc0-f179.google.com with SMTP id m20so7247097qcx.38
-        for <linux-mmc@vger.kernel.org>; Tue, 18 Mar 2014 01:02:00 -0700 (PDT)
-In-Reply-To: <5327C99B.4020005@samsung.com>
+Received: from metis.ext.pengutronix.de ([92.198.50.35]:35782 "EHLO
+	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754637AbaCRIb3 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 18 Mar 2014 04:31:29 -0400
+In-Reply-To: <1395131490-11919-1-git-send-email-s.trumtrar@pengutronix.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: Seungwon Jeon <tgih.jun@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Jackey Shen <jackey.shen@amd.com>, Alim Akhtar <alim.akhtar@samsung.com>
+To: linux-mmc@vger.kernel.org
+Cc: Chris Ball <chris@printf.net>, Dong Aisheng <b29396@freescale.com>, Steffen Trumtrar <s.trumtrar@pengutronix.de>
 
-On 18 March 2014 05:20, Jaehoon Chung <jh80.chung@samsung.com> wrote:
-> On 03/18/2014 10:43 AM, Seungwon Jeon wrote:
->> On Mon, March 17, 2014, Ulf Hansson wrote:
->>> On 14 March 2014 13:16, Seungwon Jeon <tgih.jun@samsung.com> wrote:
->>>> This series contains the change for selection of bus speed mode.
->>>> Previous implementation is complicated and some sequence is duplicated.
->>>> And specially, HS400 mode eMMC5.0 is introduced this time.
->>>> This patch-set has been tested in Exynos SoC.
->>>>
->>>> Changes in v3:
->>>>         Removed the function to check DDR type(mmc_snoop_ddr).
->>>>         Rebased with the latest branch.
->>>
->>> I tried to apply patch 1 for Chris' mmc-next branch, but it failed.
->>> Please have a look.
->>
->> It depends on the following patch.
->> Please could you check?
->> [PATCH RESEND v3 1/7] mmc: clarify DDR timing mode between SD-UHS and eMMC
+At least the i.MX35 (there may be others) currently implements a quirk
+to turn of multiblock transfers for the esdhc host.
+According to the errata this is only true for SD cards and NOT for
+sdio cards.
 
-I see, that wasn't obvious since that patch comes from a different patchset.
+When the sdio driver initializes the card, it knows the type of card
+we actually have. So now the sdhci-esdhc-imx could decide based on
+card type if multiblock transfers should be used or not.
 
-I would future-wise prefer if you could keep dependencies encapsulated
-within a single patchset (unless you explicitly states else,
-somewhere). That means one patchset won't prevent another one from
-being applied, which is good. :-)
+Signed-off-by: Steffen Trumtrar <s.trumtrar@pengutronix.de>
+---
+ drivers/mmc/host/sdhci-esdhc-imx.c |   16 ++++++++++++++++
+ 1 file changed, 16 insertions(+)
 
-Anyway, I will try it out this time.
+diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+index b841bb7..332eb00 100644
+--- a/drivers/mmc/host/sdhci-esdhc-imx.c
++++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+@@ -18,6 +18,7 @@
+ #include <linux/gpio.h>
+ #include <linux/module.h>
+ #include <linux/slab.h>
++#include <linux/mmc/card.h>
+ #include <linux/mmc/host.h>
+ #include <linux/mmc/mmc.h>
+ #include <linux/mmc/sdio.h>
+@@ -878,6 +879,20 @@ static int esdhc_set_uhs_signaling(struct sdhci_host *host, unsigned int uhs)
+ 	return esdhc_change_pinstate(host, uhs);
+ }
+ 
++static void esdhc_init_card_type(struct sdhci_host *host, struct mmc_card *card)
++{
++	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++	struct pltfm_imx_data *imx_data = pltfm_host->priv;
++	struct mmc_host *mmc = host->mmc;
++
++	if (imx_data->socdata->flags & ESDHC_FLAG_ENGCM07207) {
++		if (card->type == MMC_TYPE_SDIO)
++			mmc->max_blk_count = 65535;
++		else
++			mmc->max_blk_count = 1;
++	}
++}
++
+ static struct sdhci_ops sdhci_esdhc_ops = {
+ 	.read_l = esdhc_readl_le,
+ 	.read_w = esdhc_readw_le,
+@@ -890,6 +905,7 @@ static struct sdhci_ops sdhci_esdhc_ops = {
+ 	.get_ro = esdhc_pltfm_get_ro,
+ 	.platform_bus_width = esdhc_pltfm_bus_width,
+ 	.set_uhs_signaling = esdhc_set_uhs_signaling,
++	.card_type_init = esdhc_init_card_type,
+ };
+ 
+ static const struct sdhci_pltfm_data sdhci_esdhc_imx_pdata = {
+-- 
+1.7.10.4
 
-Kind regards
-Ulf Hansson
-
->
-> I have checked these after applied above patch-set. It's applied fine.
->
-> Best Regards,
-> Jaehoon Chung
->>
->> Thanks,
->> Seungwon Jeon
->>
->>>
->>> Kind regards
->>> Ulf Hansson
->>>
->>>>
->>>> Seungwon Jeon (5):
->>>>   mmc: drop the speed mode of card's state
->>>>   mmc: identify available device type to select
->>>>   mmc: step power class after final selection of bus mode
->>>>   mmc: rework selection of bus speed mode
->>>>   mmc: add support for HS400 mode of eMMC5.0
->>>>
->>>>  drivers/mmc/core/bus.c     |    9 +-
->>>>  drivers/mmc/core/core.c    |    3 +-
->>>>  drivers/mmc/core/debugfs.c |    5 +-
->>>>  drivers/mmc/core/mmc.c     |  681 +++++++++++++++++++++++++++-----------------
->>>>  drivers/mmc/core/sd.c      |   16 +-
->>>>  drivers/mmc/core/sd.h      |    1 -
->>>>  drivers/mmc/core/sdio.c    |    8 +-
->>>>  include/linux/mmc/card.h   |   31 +--
->>>>  include/linux/mmc/host.h   |   42 +++-
->>>>  include/linux/mmc/mmc.h    |   23 ++-
->>>>  10 files changed, 497 insertions(+), 322 deletions(-)
->>>>
->>>> Thanks,
->>>> Sw-j
->>>>
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->>
->
