@@ -1,92 +1,82 @@
-From: Franky Lin <frankyl@broadcom.com>
-Subject: Re: [PATCH] mmc: sdhci: only invoke clock re-tuning for adtc type
- commands
-Date: Mon, 17 Mar 2014 09:51:36 -0700
-Message-ID: <53272818.5030706@broadcom.com>
-References: <1389119511-26228-1-git-send-email-frankyl@broadcom.com>	<1389119859-28955-1-git-send-email-frankyl@broadcom.com> <CAPDyKFoGxa0Xp33o2OfUrFGbiHPvvLOg-ZE39DJLX2R2htKCHQ@mail.gmail.com>
+From: Seungwon Jeon <tgih.jun@samsung.com>
+Subject: RE: [PATCH v3 0/5] update selection of bus speed mode for eMMC
+Date: Tue, 18 Mar 2014 10:43:50 +0900
+Message-ID: <007b01cf424b$82fc58b0$88f50a10$%jun@samsung.com>
+References: <1383653403-10049-1-git-send-email-ulf.hansson@linaro.org>
+ <006701cf2a58$c628e050$527aa0f0$%jun@samsung.com>
+ <003a01cf3f7f$2e170210$8a450630$%jun@samsung.com>
+ <CAPDyKFphJhmwSJn76J4CTu3WmU-9JPMa_R=v62j-zhx+R8iz-Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
+Content-Type: text/plain; charset=Windows-1252
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-gw3-out.broadcom.com ([216.31.210.64]:49370 "EHLO
-	mail-gw3-out.broadcom.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753117AbaCQQvh (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 17 Mar 2014 12:51:37 -0400
-In-Reply-To: <CAPDyKFoGxa0Xp33o2OfUrFGbiHPvvLOg-ZE39DJLX2R2htKCHQ@mail.gmail.com>
+Received: from mailout3.samsung.com ([203.254.224.33]:37856 "EHLO
+	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751375AbaCRBnx (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 17 Mar 2014 21:43:53 -0400
+Received: from epcpsbgr5.samsung.com
+ (u145.gpu120.samsung.co.kr [203.254.230.145])
+ by mailout3.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+ (7.0.4.24.0) 64bit (built Nov 17 2011))
+ with ESMTP id <0N2L00MY7ZH27SA0@mailout3.samsung.com> for
+ linux-mmc@vger.kernel.org; Tue, 18 Mar 2014 10:43:51 +0900 (KST)
+In-reply-to: <CAPDyKFphJhmwSJn76J4CTu3WmU-9JPMa_R=v62j-zhx+R8iz-Q@mail.gmail.com>
+Content-language: ko
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>
+To: 'Ulf Hansson' <ulf.hansson@linaro.org>
+Cc: 'linux-mmc' <linux-mmc@vger.kernel.org>, 'Chris Ball' <chris@printf.net>, 'Jaehoon Chung' <jh80.chung@samsung.com>, 'Jackey Shen' <jackey.shen@amd.com>, 'Alim Akhtar' <alim.akhtar@samsung.com>
 
-Hi Ulf,
+On Mon, March 17, 2014, Ulf Hansson wrote:
+> On 14 March 2014 13:16, Seungwon Jeon <tgih.jun@samsung.com> wrote:
+> > This series contains the change for selection of bus speed mode.
+> > Previous implementation is complicated and some sequence is duplicated.
+> > And specially, HS400 mode eMMC5.0 is introduced this time.
+> > This patch-set has been tested in Exynos SoC.
+> >
+> > Changes in v3:
+> >         Removed the function to check DDR type(mmc_snoop_ddr).
+> >         Rebased with the latest branch.
+> 
+> I tried to apply patch 1 for Chris' mmc-next branch, but it failed.
+> Please have a look.
 
-On 03/17/2014 02:12 AM, Ulf Hansson wrote:
-> On 7 January 2014 19:37, Franky Lin <frankyl@broadcom.com> wrote:
->> For high clock frequency modes, ie. SDR104 and possibly SDR50, the data
->> window on the CMD and DAT lines needs to be tuned. Once tuned to a
->> sample clock rate, a re-tuning might required because of drifted signal
->> on different lines. This re-tuning is needed and only necessary for
->> commands using the DAT lines, ie. adtc type commands. This patch is an
->> optimization by adding the condition of the requested command being adtc
->> type in order to execute the re-tuning procedure.
->>
->> Signed-off-by: Franky Lin <frankyl@broadcom.com>
->
-> Hi Franky,
->
-> Sorry for the delay.
->
->> ---
->>   drivers/mmc/host/sdhci.c |    3 ++-
->>   1 file changed, 2 insertions(+), 1 deletion(-)
->>
->> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
->> index cc00bed..f301cd6 100644
->> --- a/drivers/mmc/host/sdhci.c
->> +++ b/drivers/mmc/host/sdhci.c
->> @@ -1389,7 +1389,8 @@ static void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
->>                   * tuning procedure before sending command.
->>                   */
->>                  if ((host->flags & SDHCI_NEEDS_RETUNING) &&
->> -                   !(present_state & (SDHCI_DOING_WRITE | SDHCI_DOING_READ))) {
->> +                   !(present_state & (SDHCI_DOING_WRITE | SDHCI_DOING_READ)) &&
->> +                   mmc_cmd_type(mrq->cmd) == MMC_CMD_ADTC) {
->
-> I don't have the in-depth knowledge about the sdhci; Still, to me it
-> seems like checking for MMC_CMD_ADTC, is that not just the same a
-> checking if there are a READ/WRITE?
-
-non-adtc commands like CMD17/CMD24/CMD52 do not use the data lines. 
-Tuning is only necessary for adtc commands as CMD18/CMD25/CMD53 which 
-involve data lines.
-
-> Another note, we really should be working on moving the periodic
-> "re-tuning trigger" mechanism into the mmc core layer, so all host
-> driver's could benefit from this. Do you want to help out fixing this?
-
-I thought about this before but hesitated because of non-sdhci drivers. 
-I have seen some of them don't have standardized implementation(well if 
-they do they would have used sdhci anyway).
+It depends on the following patch.
+Please could you check?
+[PATCH RESEND v3 1/7] mmc: clarify DDR timing mode between SD-UHS and eMMC
 
 Thanks,
-Franky
+Seungwon Jeon
 
+> 
 > Kind regards
 > Ulf Hansson
->
->>                          if (mmc->card) {
->>                                  /* eMMC uses cmd21 but sd and sdio use cmd19 */
->>                                  tuning_opcode =
->> --
->> 1.7.9.5
->>
->> --
->> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> >
+> > Seungwon Jeon (5):
+> >   mmc: drop the speed mode of card's state
+> >   mmc: identify available device type to select
+> >   mmc: step power class after final selection of bus mode
+> >   mmc: rework selection of bus speed mode
+> >   mmc: add support for HS400 mode of eMMC5.0
+> >
+> >  drivers/mmc/core/bus.c     |    9 +-
+> >  drivers/mmc/core/core.c    |    3 +-
+> >  drivers/mmc/core/debugfs.c |    5 +-
+> >  drivers/mmc/core/mmc.c     |  681 +++++++++++++++++++++++++++-----------------
+> >  drivers/mmc/core/sd.c      |   16 +-
+> >  drivers/mmc/core/sd.h      |    1 -
+> >  drivers/mmc/core/sdio.c    |    8 +-
+> >  include/linux/mmc/card.h   |   31 +--
+> >  include/linux/mmc/host.h   |   42 +++-
+> >  include/linux/mmc/mmc.h    |   23 ++-
+> >  10 files changed, 497 insertions(+), 322 deletions(-)
+> >
+> > Thanks,
+> > Sw-j
+> >
 > --
 > To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
 
