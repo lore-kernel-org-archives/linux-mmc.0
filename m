@@ -1,102 +1,87 @@
-From: Arend van Spriel <arend@broadcom.com>
-Subject: Re: RESEND:[PATCH V3] sdhci: only reprogram retuning timer when flag
- is set
-Date: Tue, 18 Mar 2014 22:02:29 +0100
-Message-ID: <5328B465.5040200@broadcom.com>
-References: <1393012782-23917-1-git-send-email-arend@broadcom.com>	<53183FF9.4090803@broadcom.com> <CAPDyKFpQSEhH4OoJ=v7drpfbTPZy4PQdSnbix5HG6XzGGTjzrQ@mail.gmail.com>
+From: Christian Daudt <bcm@fixthebug.org>
+Subject: Re: [PATCH] mmc: sdhci-bcm-kona: Fix locking in sdhci_bcm_kona_sd_card_emulate()
+Date: Wed, 19 Mar 2014 00:22:04 -0700
+Message-ID: <CAEPRUYojhHD4DtqDP38smhVytC3VSR=3Fsh7cEOSY4xRCfuR1A@mail.gmail.com>
+References: <1394079958-11697-1-git-send-email-markus.mayer@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-gw1-out.broadcom.com ([216.31.210.62]:36295 "EHLO
-	mail-gw1-out.broadcom.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752143AbaCRVCc (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 18 Mar 2014 17:02:32 -0400
-In-Reply-To: <CAPDyKFpQSEhH4OoJ=v7drpfbTPZy4PQdSnbix5HG6XzGGTjzrQ@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1394079958-11697-1-git-send-email-markus.mayer@linaro.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Markus Mayer <markus.mayer@linaro.org>
+Cc: Chris Ball <chris@printf.net>, Matt Porter <matt.porter@linaro.org>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <chris@printf.net>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, Dong Aisheng <dongas86@gmail.com>, Aaron Lu <aaron.lwe@gmail.com>
 
-On 03/07/14 05:06, Ulf Hansson wrote:
-> On 6 March 2014 10:29, Arend van Spriel<arend@broadcom.com>  wrote:
->> On 02/21/2014 08:59 PM, Arend van Spriel wrote:
->>> When the host->tuning_count is zero it means that the
->>> retuning is disabled. This is checked on the first
->>> run of sdhci_execute_tuning() by the if statement below:
->>>
->>>        if (!(host->flags&  SDHCI_NEEDS_RETUNING)&&  host->tuning_count&&
->>>            (host->tuning_mode == SDHCI_TUNING_MODE_1)) {
->>>
->>> So only when tuning_count is non-zero it will set the host
->>> flag SDHCI_USING_RETUNING_TIMER. The else statement is only
->>> for re-programming the timer, which means that flag must be
->>> set. Because that is not checked the else statement is executed
->>> in the first run when tuning_count is zero.
->>>
->>> This was seen on a host controller which indicated
->>> SDHCI_TUNING_MODE_1 (0) and tuning_count being zero. Suspect
->>> that (one of) these registers is not properly set.
->>>
->>> Cc: Dong Aisheng<dongas86@gmail.com>
->>> Cc: Aaron Lu<aaron.lwe@gmail.com>
->>> Signed-off-by: Arend van Spriel<arend@broadcom.com>
->>> ---
->>> Noticed this patch was still not applied so please reconsider
->>> taking it in and let me know. The patch has been rebased and
->>> applies to the mmc-next branch.
->>
->> ping? Am I on some spam filter? What is needed to get this change applied?
-
-Hi Chris,
-
-Did this patch fall between the cracks. If needed I can rebase and 
-resend it once more.
-
-Regards,
-Arend
-
->> Regards,
->> Arend
->>
->>> Regards,
->>> Arend
->>>
->>> V3:
->>> - remote tuning mode check for retuning timer reload
->>>
->>> V2:
->>> - add more explanation to the commit message
->>> - check host flag SDHCI_USING_RETUNING_TIMER
->>> ---
->>>   drivers/mmc/host/sdhci.c | 7 +++----
->>>   1 file changed, 3 insertions(+), 4 deletions(-)
->>>
->>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
->>> index 9ddef47..d5b421d 100644
->>> --- a/drivers/mmc/host/sdhci.c
->>> +++ b/drivers/mmc/host/sdhci.c
->>> @@ -2026,12 +2026,11 @@ out:
->>>                        host->tuning_count * HZ);
->>>                /* Tuning mode 1 limits the maximum data length to 4MB */
->>>                mmc->max_blk_count = (4 * 1024 * 1024) / mmc->max_blk_size;
->>> -     } else {
->>> +     } else if (host->flags&  SDHCI_USING_RETUNING_TIMER) {
->>>                host->flags&= ~SDHCI_NEEDS_RETUNING;
->>>                /* Reload the new initial value for timer */
->>> -             if (host->tuning_mode == SDHCI_TUNING_MODE_1)
->>> -                     mod_timer(&host->tuning_timer, jiffies +
->>> -                             host->tuning_count * HZ);
->>> +             mod_timer(&host->tuning_timer, jiffies +
->>> +                       host->tuning_count * HZ);
->>>        }
->>>
->>>        /*
->>>
->>
+On Wed, Mar 5, 2014 at 8:25 PM, Markus Mayer <markus.mayer@linaro.org> wrote:
+> Since sdhci_bcm_kona_sd_card_emulate() can be called from interrupt
+> context, we must use a spinlock instead of a mutex. This change
+> essentially restores the way things worked before the change to
+> mutexes in http://www.spinics.net/lists/linux-mmc/msg20276.html.
 >
-> I don't have any deeper insight about the retuning mechanism for
-> sdhci, still this seems reasonable.
+> Without this change, we see "scheduling while atomic" errors.
 >
-> Acked-by: Ulf Hansson<ulf.hansson@linaro.org>
+> Signed-off-by: Markus Mayer <markus.mayer@linaro.org>
+> ---
 
+So digging back in memory (since I no longer have the
+broadcom-internal email threads on this topic), I think I recall what
+the problem is. card_event is being called directly from
+mmc_gpio_cd_irqt, which is atomic context. My plan for this was to
+delay the card_event callback into the mmc_rescan worker, as that
+would have 2 nice results: remove the callback from atomic context
+which it doesn't need to be in, and put it in line with the debounced
+rescan (which I think it should be). I made mention of that option in
+this thread (https://lkml.org/lkml/2013/8/19/539) but seems I never
+followed up with code...
+ Something along the lines of the (untested) code below might do the trick:
+
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 098374b..d4ffba8 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -2421,6 +2421,11 @@ void mmc_rescan(struct work_struct *work)
+  container_of(work, struct mmc_host, detect.work);
+  int i;
+
++ if (host->trigger_card_event && host->ops->card_event) {
++ host->ops->card_event(host);
++ host->trigger_card_event = 0;
++ }
++
+  if (host->rescan_disable)
+  return;
+
+diff --git a/drivers/mmc/core/slot-gpio.c b/drivers/mmc/core/slot-gpio.c
+index 46596b71..fc648ae 100644
+--- a/drivers/mmc/core/slot-gpio.c
++++ b/drivers/mmc/core/slot-gpio.c
+@@ -29,9 +29,7 @@ static irqreturn_t mmc_gpio_cd_irqt(int irq, void *dev_id)
+  /* Schedule a card detection after a debounce timeout */
+  struct mmc_host *host = dev_id;
+
+- if (host->ops->card_event)
+- host->ops->card_event(host);
+-
++ host->trigger_card_event = 1;
+  mmc_detect_change(host, msecs_to_jiffies(200));
+
+  return IRQ_HANDLED;
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index 99f5709..0b6bddf 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -322,6 +322,8 @@ struct mmc_host {
+  int rescan_disable; /* disable card detection */
+  int rescan_entered; /* used with nonremovable devices */
+
++ int trigger_card_event; /* card_event necessary */
++
+  struct mmc_card *card; /* device attached to this host */
+
+  wait_queue_head_t wq;
+
+
+Of course there are (a few) more users of card_event callback than
+bcm_kona that need to be confirmed ok such a change
+ Thanks,
+   csd
