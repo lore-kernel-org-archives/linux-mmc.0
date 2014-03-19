@@ -1,87 +1,45 @@
-From: Christian Daudt <bcm@fixthebug.org>
-Subject: Re: [PATCH] mmc: sdhci-bcm-kona: Fix locking in sdhci_bcm_kona_sd_card_emulate()
-Date: Wed, 19 Mar 2014 00:22:04 -0700
-Message-ID: <CAEPRUYojhHD4DtqDP38smhVytC3VSR=3Fsh7cEOSY4xRCfuR1A@mail.gmail.com>
-References: <1394079958-11697-1-git-send-email-markus.mayer@linaro.org>
+From: Bruno =?UTF-8?B?UHLDqW1vbnQ=?= <bonbons@linux-vserver.org>
+Subject: mvsdio: unhandled interrupt, mmc writes queuing up
+Date: Wed, 19 Mar 2014 16:28:32 +0100
+Message-ID: <20140319162832.1f5caae0@neptune.home>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1394079958-11697-1-git-send-email-markus.mayer@linaro.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Markus Mayer <markus.mayer@linaro.org>
-Cc: Chris Ball <chris@printf.net>, Matt Porter <matt.porter@linaro.org>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+To: Nicolas Pitre <nico@fluxnic.net>, linux-mmc@vger.kernel.org
+Cc: linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Wed, Mar 5, 2014 at 8:25 PM, Markus Mayer <markus.mayer@linaro.org> wrote:
-> Since sdhci_bcm_kona_sd_card_emulate() can be called from interrupt
-> context, we must use a spinlock instead of a mutex. This change
-> essentially restores the way things worked before the change to
-> mutexes in http://www.spinics.net/lists/linux-mmc/msg20276.html.
->
-> Without this change, we see "scheduling while atomic" errors.
->
-> Signed-off-by: Markus Mayer <markus.mayer@linaro.org>
-> ---
+Hi,
 
-So digging back in memory (since I no longer have the
-broadcom-internal email threads on this topic), I think I recall what
-the problem is. card_event is being called directly from
-mmc_gpio_cd_irqt, which is atomic context. My plan for this was to
-delay the card_event callback into the mmc_rescan worker, as that
-would have 2 nice results: remove the callback from atomic context
-which it doesn't need to be in, and put it in line with the debounced
-rescan (which I think it should be). I made mention of that option in
-this thread (https://lkml.org/lkml/2013/8/19/539) but seems I never
-followed up with code...
- Something along the lines of the (untested) code below might do the trick:
-
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 098374b..d4ffba8 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -2421,6 +2421,11 @@ void mmc_rescan(struct work_struct *work)
-  container_of(work, struct mmc_host, detect.work);
-  int i;
-
-+ if (host->trigger_card_event && host->ops->card_event) {
-+ host->ops->card_event(host);
-+ host->trigger_card_event = 0;
-+ }
-+
-  if (host->rescan_disable)
-  return;
-
-diff --git a/drivers/mmc/core/slot-gpio.c b/drivers/mmc/core/slot-gpio.c
-index 46596b71..fc648ae 100644
---- a/drivers/mmc/core/slot-gpio.c
-+++ b/drivers/mmc/core/slot-gpio.c
-@@ -29,9 +29,7 @@ static irqreturn_t mmc_gpio_cd_irqt(int irq, void *dev_id)
-  /* Schedule a card detection after a debounce timeout */
-  struct mmc_host *host = dev_id;
-
-- if (host->ops->card_event)
-- host->ops->card_event(host);
--
-+ host->trigger_card_event = 1;
-  mmc_detect_change(host, msecs_to_jiffies(200));
-
-  return IRQ_HANDLED;
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index 99f5709..0b6bddf 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -322,6 +322,8 @@ struct mmc_host {
-  int rescan_disable; /* disable card detection */
-  int rescan_entered; /* used with nonremovable devices */
-
-+ int trigger_card_event; /* card_event necessary */
-+
-  struct mmc_card *card; /* device attached to this host */
-
-  wait_queue_head_t wq;
+Since upgrading my Sheevaplug from 3.7.2 to 3.13.6 (FDT) I'm seeing
+  mvsdio f1090000.mvsdio: unhandled interrupt status=0x8810 en=0x0000 pio=0
+at varied timings.
 
 
-Of course there are (a few) more users of card_event callback than
-bcm_kona that need to be confirmed ok such a change
- Thanks,
-   csd
+In addition to that, kernel seems excessively busy doing writeback via
+workqueue (without success?):
+[14909.275124] kworker/u2:2    R running      0  2001      2 0x00000000
+[14909.275137] Workqueue: writeback bdi_writeback_workfn (flush-179:0)
+[14909.275157] [<c0351df8>] (__schedule+0x180/0x38c) from [<c0034a24>] (__cond_resched+0x24/0x34)
+[14909.275172] [<c0034a24>] (__cond_resched+0x24/0x34) from [<c0034a70>] (__cond_resched_lock+0x3c/0x44)
+[14909.275187] [<c0034a70>] (__cond_resched_lock+0x3c/0x44) from [<c00b8a2c>] (writeback_sb_inodes+0x2b0/0x348)
+[14909.275201] [<c00b8a2c>] (writeback_sb_inodes+0x2b0/0x348) from [<c00b8b34>] (__writeback_inodes_wb+0x70/0xac)
+[14909.275214] [<c00b8b34>] (__writeback_inodes_wb+0x70/0xac) from [<c00b8cf0>] (wb_writeback+0x180/0x190)
+[14909.275228] [<c00b8cf0>] (wb_writeback+0x180/0x190) from [<c00b91c0>] (bdi_writeback_workfn+0x144/0x324)
+[14909.275243] [<c00b91c0>] (bdi_writeback_workfn+0x144/0x324) from [<c00286b8>] (process_one_work+0x104/0x358)
+[14909.275258] [<c00286b8>] (process_one_work+0x104/0x358) from [<c0028ce8>] (worker_thread+0x134/0x38c)
+[14909.275273] [<c0028ce8>] (worker_thread+0x134/0x38c) from [<c002dec4>] (kthread+0xb0/0xcc)
+[14909.275287] [<c002dec4>] (kthread+0xb0/0xcc) from [<c0009490>] (ret_from_fork+0x14/0x24)
+(eating about 50% CPU time with variations between 10% and 90%)
+
+Dirty pages accumulate and calls to `sync` do not write those back
+to storage.
+
+
+Any idea what it could be and how to fix it?
+
+I get same results with 3.14-rc7.
+
+Bruno
