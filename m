@@ -1,55 +1,46 @@
-From: Nicolas Pitre <nico@fluxnic.net>
-Subject: Re: mvsdio: unhandled interrupt, mmc writes queuing up
-Date: Wed, 19 Mar 2014 12:37:09 -0400 (EDT)
-Message-ID: <alpine.LFD.2.11.1403191221310.1291@knanqh.ubzr>
-References: <20140319162832.1f5caae0@neptune.home>
+From: Aaron Lu <aaron.lu@intel.com>
+Subject: Re: RESEND:[PATCH V3] sdhci: only reprogram retuning timer when flag
+ is set
+Date: Thu, 20 Mar 2014 13:32:55 +0800
+Message-ID: <532A7D87.4000009@intel.com>
+References: <1393012782-23917-1-git-send-email-arend@broadcom.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="Boundary_(ID_n48gUnlOLpW4D2TOtnel7g)"
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from relais.videotron.ca ([24.201.245.36]:52536 "EHLO
-	relais.videotron.ca" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755374AbaCSQhK (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 19 Mar 2014 12:37:10 -0400
-In-reply-to: <20140319162832.1f5caae0@neptune.home>
-Content-id: <alpine.LFD.2.11.1403191222250.1291@knanqh.ubzr>
+Received: from mga11.intel.com ([192.55.52.93]:22090 "EHLO mga11.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750743AbaCTFcb (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 20 Mar 2014 01:32:31 -0400
+In-Reply-To: <1393012782-23917-1-git-send-email-arend@broadcom.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: =?ISO-8859-15?Q?Bruno_Pr=E9mont?= <bonbons@linux-vserver.org>
-Cc: Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Arend van Spriel <arend@broadcom.com>, Chris Ball <chris@printf.net>
+Cc: linux-mmc@vger.kernel.org, Dong Aisheng <dongas86@gmail.com>
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
-
---Boundary_(ID_n48gUnlOLpW4D2TOtnel7g)
-Content-id: <alpine.LFD.2.11.1403191222251.1291@knanqh.ubzr>
-Content-type: TEXT/PLAIN; CHARSET=ISO-8859-15
-Content-transfer-encoding: 8BIT
-
-On Wed, 19 Mar 2014, Bruno Prémont wrote:
-
-> Hi,
+On 02/22/2014 03:59 AM, Arend van Spriel wrote:
+> When the host->tuning_count is zero it means that the
+> retuning is disabled. This is checked on the first
+> run of sdhci_execute_tuning() by the if statement below:
 > 
-> Since upgrading my Sheevaplug from 3.7.2 to 3.13.6 (FDT) I'm seeing
->   mvsdio f1090000.mvsdio: unhandled interrupt status=0x8810 en=0x0000 pio=0
-> at varied timings.
+> 	if (!(host->flags & SDHCI_NEEDS_RETUNING) && host->tuning_count &&
+> 	    (host->tuning_mode == SDHCI_TUNING_MODE_1)) {
+> 
+> So only when tuning_count is non-zero it will set the host
+> flag SDHCI_USING_RETUNING_TIMER. The else statement is only
+> for re-programming the timer, which means that flag must be
+> set. Because that is not checked the else statement is executed
+> in the first run when tuning_count is zero.
+> 
+> This was seen on a host controller which indicated
+> SDHCI_TUNING_MODE_1 (0) and tuning_count being zero. Suspect
+> that (one of) these registers is not properly set.
+> 
+> Cc: Dong Aisheng <dongas86@gmail.com>
+> Cc: Aaron Lu <aaron.lwe@gmail.com>
+> Signed-off-by: Arend van Spriel <arend@broadcom.com>
 
-It has been many years since I've looked at the code for this driver.  
-I'm therefore including Thomas Petazzoni to the CC list as he appears to 
-have been the most active since then.
+In addition to solve your problem, this patch also makes sense in the
+common case, so:
 
-The reported status seems to indicate missing data in the context of a 
-transfer with CMD12, and a CRC error ensued of course.
-
-At this point I'd suggest testing intermediate kernels between 3.7 and 
-3.13, and try bisection until you find the offending commit.
-
-[...]
-> I get same results with 3.14-rc7.
-
-Excellent, that reduces the search space significantly.  You can do a 
-git bisect directly.
-
-
-Nicolas
-
---Boundary_(ID_n48gUnlOLpW4D2TOtnel7g)--
+Reviewed-by: Aaron Lu <aaron.lu@intel.com>
