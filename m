@@ -1,229 +1,465 @@
-From: Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
-Subject: Re: [PATCH] mmc: sdhci-pxav3: add support for the Armada 38x SDHCI
- controller
-Date: Thu, 20 Mar 2014 21:13:57 +0100
-Message-ID: <20140320211357.53972e79@skate>
-References: <1392736109-3981-1-git-send-email-thomas.petazzoni@free-electrons.com>
-	<20140225194013.14693cbd@skate>
+From: Andrew Morton <akpm@linux-foundation.org>
+Subject: Re: [PATCH v4 3/3] memstick: Add realtek USB memstick host driver
+Date: Thu, 20 Mar 2014 16:18:27 -0700
+Message-ID: <20140320161827.5904bc407f9d3490514fd84e@linux-foundation.org>
+References: <1392199238-14500-1-git-send-email-rogerable@realtek.com>
+	<1392199238-14500-4-git-send-email-rogerable@realtek.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=US-ASCII
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from top.free-electrons.com ([176.31.233.9]:52363 "EHLO
-	mail.free-electrons.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1751671AbaCTUOP (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 20 Mar 2014 16:14:15 -0400
-In-Reply-To: <20140225194013.14693cbd@skate>
+Received: from mail.linuxfoundation.org ([140.211.169.12]:35792 "EHLO
+	mail.linuxfoundation.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1759932AbaCTXS3 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 20 Mar 2014 19:18:29 -0400
+In-Reply-To: <1392199238-14500-4-git-send-email-rogerable@realtek.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <chris@printf.net>
-Cc: linux-mmc@vger.kernel.org, Jason Cooper <jason@lakedaemon.net>, Andrew Lunn <andrew@lunn.ch>, Gregory Clement <gregory.clement@free-electrons.com>, Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>, Ezequiel Garcia <ezequiel.garcia@free-electrons.com>, Lior Amsalem <alior@marvell.com>, Tawfik Bayouk <tawfik@marvell.com>, Marcin Wojtas <mw@semihalf.com>
+To: rogerable@realtek.com
+Cc: Samuel Ortiz <sameo@linux.intel.com>, Lee Jones <lee.jones@linaro.org>, Chris Ball <cjb@laptop.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Maxim Levitsky <maximlevitsky@gmail.com>, Alex Dubov <oakad@yahoo.com>, Dan Carpenter <dan.carpenter@oracle.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, driverdev-devel@linuxdriverproject.org, wei_wang@realsil.com.cn, micky_ching@realsil.com.cn
 
-Hello Chris,
+On Wed, 12 Feb 2014 18:00:38 +0800 <rogerable@realtek.com> wrote:
 
-The patch below has been sent more than a month ago, and despite a ping
-on February, 25th, I haven't received any feedback.
-
-Would it be possible to get it merged, or at least get some review
-comments so that some progress can be made? Or would you accept if this
-patch was pushed through the ARM mvebu maintainers tree, with your
-Acked-by?
-
-Thanks a lot,
-
-Thomas
-
-On Tue, 25 Feb 2014 19:40:13 +0100, Thomas Petazzoni wrote:
-> Hello Chris,
+> From: Roger Tseng <rogerable@realtek.com>
 > 
-> Do you think it would be possible to have the below patch merged for
-> 3.15 ?
+> Realtek USB memstick host driver provides memstick host support based on the
+> Realtek USB card reader MFD driver.
 > 
-> It would allow us to enable SDHCI support in the new Marvell Armada 38x
-> SOCs. The patch is fairly simple I believe, just adding an additional
-> compatible string to the driver, and adding a little bit of logic to
-> configure Marvell-specific windows when this compatible string is being
-> used.
-> 
-> Thanks a lot!
-> 
-> Thomas
-> 
-> On Tue, 18 Feb 2014 16:08:29 +0100, Thomas Petazzoni wrote:
-> > From: Marcin Wojtas <mw@semihalf.com>
-> > 
-> > The SDHCI unit used on the Armada 380 and 385 Marvell SoC is similar
-> > to the PXAv3 unit. The only difference is that on Armada 38x, the
-> > PXAv3 unit accesses memory through MBus windows which must be
-> > configured prior to using the device. Without this, DMA would not
-> > work.
-> > 
-> > In order to achieve this, the sdhci-pxav3 driver is extended with an
-> > additional compatible string "marvell,armada-380-sdhci". When this
-> > compatible string is used, the MBus windows are initialized in a way
-> > that is identical to what all other DMA-capable drivers for Marvell
-> > EBU platforms do.
-> > 
-> > Signed-off-by: Marcin Wojtas <mw@semihalf.com>
-> > Signed-off-by: Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
-> > ---
-> >  .../devicetree/bindings/mmc/sdhci-pxa.txt          | 17 +++++-
-> >  drivers/mmc/host/sdhci-pxav3.c                     | 68 ++++++++++++++++++++++
-> >  2 files changed, 84 insertions(+), 1 deletion(-)
-> > 
-> > diff --git a/Documentation/devicetree/bindings/mmc/sdhci-pxa.txt b/Documentation/devicetree/bindings/mmc/sdhci-pxa.txt
-> > index dbe98a3..86223c3 100644
-> > --- a/Documentation/devicetree/bindings/mmc/sdhci-pxa.txt
-> > +++ b/Documentation/devicetree/bindings/mmc/sdhci-pxa.txt
-> > @@ -4,7 +4,14 @@ This file documents differences between the core properties in mmc.txt
-> >  and the properties used by the sdhci-pxav2 and sdhci-pxav3 drivers.
-> >  
-> >  Required properties:
-> > -- compatible: Should be "mrvl,pxav2-mmc" or "mrvl,pxav3-mmc".
-> > +- compatible: Should be "mrvl,pxav2-mmc", "mrvl,pxav3-mmc" or
-> > +  "marvell,armada-380-sdhci".
-> > +- reg:
-> > +  * for "mrvl,pxav2-mmc" and "mrvl,pxav3-mmc", one register area for
-> > +    the SDHCI registers.
-> > +  * for "marvell,armada-380-sdhci", two register areas. The first one
-> > +    for the SDHCI registers themselves, and the second one for the
-> > +    AXI/Mbus bridge registers of the SDHCI unit.
-> >  
-> >  Optional properties:
-> >  - mrvl,clk-delay-cycles: Specify a number of cycles to delay for tuning.
-> > @@ -19,3 +26,11 @@ sdhci@d4280800 {
-> >  	non-removable;
-> >  	mrvl,clk-delay-cycles = <31>;
-> >  };
-> > +
-> > +sdhci@d8000 {
-> > +	compatible = "marvell,armada-380-sdhci";
-> > +	reg = <0xd8000 0x1000>, <0xdc000 0x100>;
-> > +	interrupts = <0 25 0x4>;
-> > +	clocks = <&gateclk 17>;
-> > +	mrvl,clk-delay-cycles = <0x1F>;
-> > +};
-> > diff --git a/drivers/mmc/host/sdhci-pxav3.c b/drivers/mmc/host/sdhci-pxav3.c
-> > index 793dacd..2fd73b3 100644
-> > --- a/drivers/mmc/host/sdhci-pxav3.c
-> > +++ b/drivers/mmc/host/sdhci-pxav3.c
-> > @@ -34,6 +34,7 @@
-> >  #include <linux/of_gpio.h>
-> >  #include <linux/pm.h>
-> >  #include <linux/pm_runtime.h>
-> > +#include <linux/mbus.h>
-> >  
-> >  #include "sdhci.h"
-> >  #include "sdhci-pltfm.h"
-> > @@ -57,6 +58,60 @@
-> >  #define SDCE_MISC_INT		(1<<2)
-> >  #define SDCE_MISC_INT_EN	(1<<1)
-> >  
-> > +/*
-> > + * These registers are relative to the second register region, for the
-> > + * MBus bridge.
-> > + */
-> > +#define SDHCI_WINDOW_CTRL(i)	(0x80 + ((i) << 3))
-> > +#define SDHCI_WINDOW_BASE(i)	(0x84 + ((i) << 3))
-> > +#define SDHCI_MAX_WIN_NUM	8
-> > +
-> > +static int mv_conf_mbus_windows(struct platform_device *pdev,
-> > +				const struct mbus_dram_target_info *dram)
-> > +{
-> > +	int i;
-> > +	void __iomem *regs;
-> > +	struct resource *res;
-> > +
-> > +	if (!dram) {
-> > +		dev_err(&pdev->dev, "no mbus dram info\n");
-> > +		return -EINVAL;
-> > +	}
-> > +
-> > +	res = platform_get_resource(pdev, IORESOURCE_MEM, 1);
-> > +	if (!res) {
-> > +		dev_err(&pdev->dev, "cannot get mbus registers\n");
-> > +		return -EINVAL;
-> > +	}
-> > +
-> > +	regs = ioremap(res->start, resource_size(res));
-> > +	if (!regs) {
-> > +		dev_err(&pdev->dev, "cannot map mbus registers\n");
-> > +		return -ENOMEM;
-> > +	}
-> > +
-> > +	for (i = 0; i < SDHCI_MAX_WIN_NUM; i++) {
-> > +		writel(0, regs + SDHCI_WINDOW_CTRL(i));
-> > +		writel(0, regs + SDHCI_WINDOW_BASE(i));
-> > +	}
-> > +
-> > +	for (i = 0; i < dram->num_cs; i++) {
-> > +		const struct mbus_dram_window *cs = dram->cs + i;
-> > +
-> > +		/* Write size, attributes and target id to control register */
-> > +		writel(((cs->size - 1) & 0xffff0000) |
-> > +			(cs->mbus_attr << 8) |
-> > +			(dram->mbus_dram_target_id << 4) | 1,
-> > +			regs + SDHCI_WINDOW_CTRL(i));
-> > +		/* Write base address to base register */
-> > +		writel(cs->base, regs + SDHCI_WINDOW_BASE(i));
-> > +	}
-> > +
-> > +	iounmap(regs);
-> > +
-> > +	return 0;
-> > +}
-> > +
-> >  static void pxav3_set_private_registers(struct sdhci_host *host, u8 mask)
-> >  {
-> >  	struct platform_device *pdev = to_platform_device(mmc_dev(host->mmc));
-> > @@ -187,6 +242,9 @@ static const struct of_device_id sdhci_pxav3_of_match[] = {
-> >  	{
-> >  		.compatible = "mrvl,pxav3-mmc",
-> >  	},
-> > +	{
-> > +		.compatible = "marvell,armada-380-sdhci",
-> > +	},
-> >  	{},
-> >  };
-> >  MODULE_DEVICE_TABLE(of, sdhci_pxav3_of_match);
-> > @@ -219,6 +277,7 @@ static int sdhci_pxav3_probe(struct platform_device *pdev)
-> >  	struct sdhci_pltfm_host *pltfm_host;
-> >  	struct sdhci_pxa_platdata *pdata = pdev->dev.platform_data;
-> >  	struct device *dev = &pdev->dev;
-> > +	struct device_node *np = pdev->dev.of_node;
-> >  	struct sdhci_host *host = NULL;
-> >  	struct sdhci_pxa *pxa = NULL;
-> >  	const struct of_device_id *match;
-> > @@ -235,6 +294,14 @@ static int sdhci_pxav3_probe(struct platform_device *pdev)
-> >  		kfree(pxa);
-> >  		return PTR_ERR(host);
-> >  	}
-> > +
-> > +	if (of_device_is_compatible(np, "marvell,armada-380-sdhci")) {
-> > +		ret = mv_conf_mbus_windows(pdev, mv_mbus_dram_info());
-> > +		if (ret < 0)
-> > +			goto err_mbus_win;
-> > +	}
-> > +
-> > +
-> >  	pltfm_host = sdhci_priv(host);
-> >  	pltfm_host->priv = pxa;
-> >  
-> > @@ -321,6 +388,7 @@ err_add_host:
-> >  	clk_disable_unprepare(clk);
-> >  	clk_put(clk);
-> >  err_clk_get:
-> > +err_mbus_win:
-> >  	sdhci_pltfm_free(pdev);
-> >  	kfree(pxa);
-> >  	return ret;
-> 
-> 
-> 
+> ...
+>
+> +#include <linux/module.h>
+> +#include <linux/highmem.h>
+> +#include <linux/delay.h>
+> +#include <linux/platform_device.h>
+> +#include <linux/workqueue.h>
+> +#include <linux/memstick.h>
+> +#include <linux/kthread.h>
+> +#include <linux/mfd/rtsx_usb.h>
+> +#include <linux/pm_runtime.h>
+> +#include <asm/unaligned.h>
+> +
+> +struct rtsx_usb_ms {
+> +	struct platform_device	*pdev;
+> +	struct rtsx_ucr	*ucr;
+> +	struct memstick_host	*msh;
+> +	struct memstick_request	*req;
+> +
+> +	struct mutex		host_mutex;
 
+Should have included mutex.h.
 
+> +	struct work_struct	handle_req;
+> +
+> +	struct task_struct	*detect_ms;
 
--- 
-Thomas Petazzoni, CTO, Free Electrons
-Embedded Linux, Kernel and Android engineering
-http://free-electrons.com
+sched.h.
+
+> +	struct completion	detect_ms_exit;
+
+completion.h.
+
+> +	u8			ssc_depth;
+> +	unsigned int		clock;
+> +	int			power_mode;
+> +	unsigned char           ifmode;
+> +	bool			eject;
+> +};
+> +
+> 
+> ...
+>
+> +
+> +#else
+> +
+> +#define ms_print_debug_regs(host)
+
+static void ms_print_debug_regs(struct rtsx_usb_ms *host)
+{
+}
+
+It is good to have the same signature for either case.  And doing it in
+C provides typechecking and can avoid variable-unused warnings.  
+
+> +#endif
+> 
+> ...
+>
+> +static int ms_power_on(struct rtsx_usb_ms *host)
+> +{
+> +	struct rtsx_ucr *ucr = host->ucr;
+> +	int err;
+> +
+> +	dev_dbg(ms_dev(host), "%s\n", __func__);
+> +
+> +	rtsx_usb_init_cmd(ucr);
+> +	rtsx_usb_add_cmd(ucr, WRITE_REG_CMD, CARD_SELECT, 0x07, MS_MOD_SEL);
+> +	rtsx_usb_add_cmd(ucr, WRITE_REG_CMD, CARD_SHARE_MODE,
+> +			CARD_SHARE_MASK, CARD_SHARE_MS);
+> +	rtsx_usb_add_cmd(ucr, WRITE_REG_CMD, CARD_CLK_EN,
+> +			MS_CLK_EN, MS_CLK_EN);
+> +	err = rtsx_usb_send_cmd(ucr, MODE_C, 100);
+> +	if (err < 0)
+> +		return err;
+> +
+> +	if (CHECK_PKG(ucr, LQFP48))
+> +		err = ms_pull_ctl_enable_lqfp48(ucr);
+> +	else
+> +		err = ms_pull_ctl_enable_qfn24(ucr);
+> +	if (err < 0)
+> +		return err;
+> +
+> +	err = rtsx_usb_write_register(ucr, CARD_PWR_CTL,
+> +			POWER_MASK, PARTIAL_POWER_ON);
+> +	if (err)
+> +		return err;
+> +
+> +	/* Wait ms power stable */
+
+Comment is strange.
+
+> +	usleep_range(800, 1000);
+> +
+> +	rtsx_usb_init_cmd(ucr);
+> +	rtsx_usb_add_cmd(ucr, WRITE_REG_CMD, CARD_PWR_CTL,
+> +			POWER_MASK, POWER_ON);
+> +	rtsx_usb_add_cmd(ucr, WRITE_REG_CMD, CARD_OE,
+> +			MS_OUTPUT_EN, MS_OUTPUT_EN);
+> +
+> +	return rtsx_usb_send_cmd(ucr, MODE_C, 100);
+> +}
+> +
+> 
+> ...
+>
+> +static int ms_transfer_data(struct rtsx_usb_ms *host, unsigned char data_dir,
+> +		u8 tpc, u8 cfg, struct scatterlist *sg)
+> +{
+> +	struct rtsx_ucr *ucr = host->ucr;
+> +	int err;
+> +	unsigned int length = sg->length;
+> +	u16 sec_cnt = (u16)(length / 512);
+> +	u8 trans_mode, dma_dir, flag;
+> +	unsigned int pipe;
+> +	struct memstick_dev *card = host->msh->card;
+> +
+> +	dev_dbg(ms_dev(host), "%s: tpc = 0x%02x, data_dir = %s, length = %d\n",
+
+length = %u
+
+> +			__func__, tpc, (data_dir == READ) ? "READ" : "WRITE",
+> +			length);
+> +
+> +	if (data_dir == READ) {
+> +		flag = MODE_CDIR;
+> +		dma_dir = DMA_DIR_FROM_CARD;
+> +		if (card->id.type != MEMSTICK_TYPE_PRO)
+> +			trans_mode = MS_TM_NORMAL_READ;
+> +		else
+> +			trans_mode = MS_TM_AUTO_READ;
+> +		pipe = usb_rcvbulkpipe(ucr->pusb_dev, EP_BULK_IN);
+> +	} else {
+> +		flag = MODE_CDOR;
+> +		dma_dir = DMA_DIR_TO_CARD;
+> +		if (card->id.type != MEMSTICK_TYPE_PRO)
+> +			trans_mode = MS_TM_NORMAL_WRITE;
+> +		else
+> +			trans_mode = MS_TM_AUTO_WRITE;
+> +		pipe = usb_sndbulkpipe(ucr->pusb_dev, EP_BULK_OUT);
+> +	}
+> +
+> +	rtsx_usb_init_cmd(ucr);
+> +
+> +	rtsx_usb_add_cmd(ucr, WRITE_REG_CMD, MS_TPC, 0xFF, tpc);
+> +	if (card->id.type == MEMSTICK_TYPE_PRO) {
+> +		rtsx_usb_add_cmd(ucr, WRITE_REG_CMD, MS_SECTOR_CNT_H,
+> +				0xFF, (u8)(sec_cnt >> 8));
+> +		rtsx_usb_add_cmd(ucr, WRITE_REG_CMD, MS_SECTOR_CNT_L,
+> +				0xFF, (u8)sec_cnt);
+> +	}
+> +	rtsx_usb_add_cmd(ucr, WRITE_REG_CMD, MS_TRANS_CFG, 0xFF, cfg);
+> +
+> +	rtsx_usb_add_cmd(ucr, WRITE_REG_CMD, MC_DMA_TC3,
+> +			0xFF, (u8)(length >> 24));
+> +	rtsx_usb_add_cmd(ucr, WRITE_REG_CMD, MC_DMA_TC2,
+> +			0xFF, (u8)(length >> 16));
+> +	rtsx_usb_add_cmd(ucr, WRITE_REG_CMD, MC_DMA_TC1,
+> +			0xFF, (u8)(length >> 8));
+> +	rtsx_usb_add_cmd(ucr, WRITE_REG_CMD, MC_DMA_TC0, 0xFF,
+> +			(u8)length);
+> +	rtsx_usb_add_cmd(ucr, WRITE_REG_CMD, MC_DMA_CTL,
+> +			0x03 | DMA_PACK_SIZE_MASK, dma_dir | DMA_EN | DMA_512);
+> +	rtsx_usb_add_cmd(ucr, WRITE_REG_CMD, CARD_DATA_SOURCE,
+> +			0x01, RING_BUFFER);
+> +
+> +	rtsx_usb_add_cmd(ucr, WRITE_REG_CMD, MS_TRANSFER,
+> +			0xFF, MS_TRANSFER_START | trans_mode);
+> +	rtsx_usb_add_cmd(ucr, CHECK_REG_CMD, MS_TRANSFER,
+> +			MS_TRANSFER_END, MS_TRANSFER_END);
+> +
+> +	err = rtsx_usb_send_cmd(ucr, flag | STAGE_MS_STATUS, 100);
+> +	if (err)
+> +		return err;
+> +
+> +	err = rtsx_usb_transfer_data(ucr, pipe, sg, length,
+> +			1, NULL, 10000);
+> +	if (err)
+> +		goto err_out;
+> +
+> +	err = rtsx_usb_get_rsp(ucr, 3, 15000);
+> +	if (err)
+> +		goto err_out;
+> +
+> +	if (ucr->rsp_buf[0] & MS_TRANSFER_ERR ||
+> +	    ucr->rsp_buf[1] & (MS_CRC16_ERR | MS_RDY_TIMEOUT)) {
+> +		err = -EIO;
+> +		goto err_out;
+> +	}
+> +	return 0;
+> +err_out:
+> +	ms_clear_error(host);
+> +	return err;
+> +}
+> +
+> +static int ms_write_bytes(struct rtsx_usb_ms *host, u8 tpc,
+> +		u8 cfg, u8 cnt, u8 *data, u8 *int_reg)
+> +{
+> +	struct rtsx_ucr *ucr = host->ucr;
+> +	int err, i;
+> +
+> +	dev_dbg(ms_dev(host), "%s: tpc = 0x%02x\n", __func__, tpc);
+> +
+> +	if (!data)
+> +		return -EINVAL;
+
+Is this needed?
+
+> +	rtsx_usb_init_cmd(ucr);
+> +
+> +	for (i = 0; i < cnt; i++)
+> +		rtsx_usb_add_cmd(ucr, WRITE_REG_CMD,
+> +				PPBUF_BASE2 + i, 0xFF, data[i]);
+> +
+> +	if (cnt % 2)
+> +		rtsx_usb_add_cmd(ucr, WRITE_REG_CMD,
+> +				PPBUF_BASE2 + i, 0xFF, 0xFF);
+> +
+> +	rtsx_usb_add_cmd(ucr, WRITE_REG_CMD, MS_TPC, 0xFF, tpc);
+> +	rtsx_usb_add_cmd(ucr, WRITE_REG_CMD, MS_BYTE_CNT, 0xFF, cnt);
+> +	rtsx_usb_add_cmd(ucr, WRITE_REG_CMD, MS_TRANS_CFG, 0xFF, cfg);
+> +	rtsx_usb_add_cmd(ucr, WRITE_REG_CMD, CARD_DATA_SOURCE,
+> +			0x01, PINGPONG_BUFFER);
+> +
+> +	rtsx_usb_add_cmd(ucr, WRITE_REG_CMD, MS_TRANSFER,
+> +			0xFF, MS_TRANSFER_START | MS_TM_WRITE_BYTES);
+> +	rtsx_usb_add_cmd(ucr, CHECK_REG_CMD, MS_TRANSFER,
+> +			MS_TRANSFER_END, MS_TRANSFER_END);
+> +	rtsx_usb_add_cmd(ucr, READ_REG_CMD, MS_TRANS_CFG, 0, 0);
+> +
+> +	err = rtsx_usb_send_cmd(ucr, MODE_CR, 100);
+> +	if (err)
+> +		return err;
+> +
+> +	err = rtsx_usb_get_rsp(ucr, 2, 5000);
+> +	if (err || (ucr->rsp_buf[0] & MS_TRANSFER_ERR)) {
+> +		u8 val;
+> +
+> +		rtsx_usb_ep0_read_register(ucr, MS_TRANS_CFG, &val);
+> +		dev_dbg(ms_dev(host), "MS_TRANS_CFG: 0x%02x\n", val);
+> +
+> +		if (int_reg)
+> +			*int_reg = val & 0x0F;
+> +
+> +		ms_print_debug_regs(host);
+> +
+> +		ms_clear_error(host);
+> +
+> +		if (!(tpc & 0x08)) {
+> +			if (val & MS_CRC16_ERR)
+> +				return -EIO;
+> +		} else {
+> +			if (!(val & 0x80)) {
+> +				if (val & (MS_INT_ERR | MS_INT_CMDNK))
+> +					return -EIO;
+> +			}
+> +		}
+> +
+> +		return -ETIMEDOUT;
+> +	}
+> +
+> +	if (int_reg)
+> +		*int_reg = ucr->rsp_buf[1] & 0x0F;
+> +
+> +	return 0;
+> +}
+> +
+> 
+> ...
+>
+> +static void rtsx_usb_ms_request(struct memstick_host *msh)
+> +{
+> +	struct rtsx_usb_ms *host = memstick_priv(msh);
+> +
+> +	dev_dbg(ms_dev(host), "--> %s\n", __func__);
+> +
+> +	schedule_work(&host->handle_req);
+> +}
+
+I see a schedule_work() but I see no flush_scheduled_work() on the
+shutdown/rmmod path.  Do we have races here?  Should the shutdown paths
+be waiting for work completion before tearing things down?
+
+> 
+> ...
+>
+> +static int rtsx_usb_detect_ms_card(void *__host)
+> +{
+> +	struct rtsx_usb_ms *host = (struct rtsx_usb_ms *)__host;
+> +	struct rtsx_ucr *ucr = host->ucr;
+> +	u8 val = 0;
+> +	int err;
+> +
+> +	for (;;) {
+> +		mutex_lock(&ucr->dev_mutex);
+> +
+> +		/* Check pending MS card changes */
+> +		err = rtsx_usb_read_register(ucr, CARD_INT_PEND, &val);
+> +		if (err) {
+> +			mutex_unlock(&ucr->dev_mutex);
+> +			goto poll_again;
+> +		}
+> +
+> +		/* Clear the pending */
+> +		rtsx_usb_write_register(ucr, CARD_INT_PEND,
+> +				XD_INT | MS_INT | SD_INT,
+> +				XD_INT | MS_INT | SD_INT);
+> +
+> +		mutex_unlock(&ucr->dev_mutex);
+> +
+> +		if (val & MS_INT) {
+> +			dev_dbg(ms_dev(host), "MS slot change detected\n");
+> +			memstick_detect_change(host->msh);
+> +		}
+> +
+> +poll_again:
+> +		if (host->eject)
+> +			break;
+> +
+> +		msleep(1000);
+> +	}
+> +
+> +	complete(&host->detect_ms_exit);
+> +	return 0;
+> +}
+
+Would be helpful to add a comment explaining that this is a kernel
+thread and describing its lifetime, exit conditions, etc.
+
+> +static int rtsx_usb_ms_drv_probe(struct platform_device *pdev)
+> +{
+> +	struct memstick_host *msh;
+> +	struct rtsx_usb_ms *host;
+> +	struct rtsx_ucr *ucr;
+> +	int err;
+> +
+> +	ucr = usb_get_intfdata(to_usb_interface(pdev->dev.parent));
+> +	if (!ucr)
+> +		return -ENXIO;
+> +
+> +	dev_dbg(&(pdev->dev),
+> +			"Realtek USB Memstick controller found\n");
+> +
+> +	msh = memstick_alloc_host(sizeof(*host), &pdev->dev);
+> +	if (!msh)
+> +		return -ENOMEM;
+> +
+> +	host = memstick_priv(msh);
+> +	host->ucr = ucr;
+> +	host->msh = msh;
+> +	host->pdev = pdev;
+> +	host->power_mode = MEMSTICK_POWER_OFF;
+> +	platform_set_drvdata(pdev, host);
+> +
+> +	mutex_init(&host->host_mutex);
+> +	INIT_WORK(&host->handle_req, rtsx_usb_ms_handle_req);
+> +
+> +	init_completion(&host->detect_ms_exit);
+> +	host->detect_ms = kthread_create(rtsx_usb_detect_ms_card, host,
+> +			"rtsx_usb_ms_%d", pdev->id);
+> +	if (IS_ERR(host->detect_ms)) {
+> +		dev_dbg(&(pdev->dev),
+> +				"Unable to create polling thread.\n");
+> +		err = PTR_ERR(host->detect_ms);
+> +		goto err_out;
+> +	}
+> +
+> +	msh->request = rtsx_usb_ms_request;
+> +	msh->set_param = rtsx_usb_ms_set_param;
+> +	msh->caps = MEMSTICK_CAP_PAR4;
+> +
+> +	pm_runtime_enable(&pdev->dev);
+> +	err = memstick_add_host(msh);
+> +	if (err)
+> +		goto err_out;
+
+Isn't that kernel thread still running?
+
+> +	wake_up_process(host->detect_ms);
+> +	return 0;
+> +err_out:
+> +	memstick_free_host(msh);
+> +	return err;
+> +}
+> +
+> +static int rtsx_usb_ms_drv_remove(struct platform_device *pdev)
+> +{
+> +	struct rtsx_usb_ms *host = platform_get_drvdata(pdev);
+> +	struct memstick_host *msh;
+> +	int err;
+> +
+> +	if (!host)
+> +		return 0;
+
+Can this happen?
+
+> +	msh = host->msh;
+> +	host->eject = true;
+> +
+> +	mutex_lock(&host->host_mutex);
+> +	if (host->req) {
+> +		dev_dbg(&(pdev->dev),
+> +			"%s: Controller removed during transfer\n",
+> +			dev_name(&msh->dev));
+> +		host->req->error = -ENOMEDIUM;
+> +		do {
+> +			err = memstick_next_req(msh, &host->req);
+> +			if (!err)
+> +				host->req->error = -ENOMEDIUM;
+> +		} while (!err);
+> +	}
+> +	mutex_unlock(&host->host_mutex);
+> +
+> +	wait_for_completion(&host->detect_ms_exit);
+
+OK, so here we're waiting for the kernel thread to terminate.
+
+> +	memstick_remove_host(msh);
+> +	memstick_free_host(msh);
+> +
+> +	/* Balance possible unbalanced usage count
+> +	 * e.g. unconditional module removal
+> +	 */
+> +	if (pm_runtime_active(ms_dev(host)))
+> +		pm_runtime_put(ms_dev(host));
+> +
+> +	pm_runtime_disable(&pdev->dev);
+> +	platform_set_drvdata(pdev, NULL);
+> +
+> +	dev_dbg(&(pdev->dev),
+> +		": Realtek USB Memstick controller has been removed\n");
+> +
+> +	return 0;
+> +}
+> 
+> ...
+>
+
