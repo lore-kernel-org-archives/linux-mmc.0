@@ -1,71 +1,36 @@
-From: Andreas Fenkart <afenkart@gmail.com>
-Subject: [PATCH v9 resend 3/3] mmc: omap_hsmmc: Extend debugfs for SDIO IRQ, GPIO and pinmux
-Date: Fri, 21 Mar 2014 13:20:48 +0100
-Message-ID: <1395404448-30030-4-git-send-email-afenkart@gmail.com>
-References: <1395404448-30030-1-git-send-email-afenkart@gmail.com>
+From: Hans-Christian Egtvedt <egtvedt@samfundet.no>
+Subject: Backporting eMMC v5 support to Linux 3.4
+Date: Fri, 21 Mar 2014 13:28:44 +0100
+Message-ID: <20140321122844.GA5417@samfundet.no>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ee0-f54.google.com ([74.125.83.54]:41444 "EHLO
-	mail-ee0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S965451AbaCUMVc (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 21 Mar 2014 08:21:32 -0400
-In-Reply-To: <1395404448-30030-1-git-send-email-afenkart@gmail.com>
+Received: from cassarossa.samfundet.no ([193.35.52.29]:45732 "EHLO
+	cassarossa.samfundet.no" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753575AbaCUM2q (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 21 Mar 2014 08:28:46 -0400
+Received: from egtvedt by cassarossa.samfundet.no with local (Exim 4.80)
+	(envelope-from <egtvedt@samfundet.no>)
+	id 1WQyZ2-0007P3-3I
+	for linux-mmc@vger.kernel.org; Fri, 21 Mar 2014 13:28:44 +0100
+Content-Disposition: inline
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Tony Lindgren <tony@atomide.com>
-Cc: Chris Ball <chris@printf.net>, Grant Likely <grant.likely@secretlab.ca>, Felipe Balbi <balbi@ti.com>, Balaji T K <balajitk@ti.com>, zonque@gmail.com, galak@codeaurora.org, linux-doc@vger.kernel.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, Andreas Fenkart <afenkart@gmail.com>
+To: linux-mmc@vger.kernel.org
 
-Add SDIO IRQ entries to debugfs entry. Note that PSTATE shows current
-state of data lines, incl. SDIO IRQ pending
+Hello,
 
-Signed-off-by: Andreas Fenkart <afenkart@gmail.com>
-Signed-off-by: Tony Lindgren <tony@atomide.com>
+I have a device, which has received an eMMC v5 device, and thus the 3.4
+kernel the vendor provides does not identify the flash chip anymore.
 
-diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index 2307c78..681bf68 100644
---- a/drivers/mmc/host/omap_hsmmc.c
-+++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -82,6 +82,7 @@ static void apply_clk_hack(struct device *dev)
- #define OMAP_HSMMC_RSP54	0x0118
- #define OMAP_HSMMC_RSP76	0x011C
- #define OMAP_HSMMC_DATA		0x0120
-+#define OMAP_HSMMC_PSTATE	0x0124
- #define OMAP_HSMMC_HCTL		0x0128
- #define OMAP_HSMMC_SYSCTL	0x012C
- #define OMAP_HSMMC_STAT		0x0130
-@@ -1854,14 +1855,30 @@ static int omap_hsmmc_regs_show(struct seq_file *s, void *data)
- {
- 	struct mmc_host *mmc = s->private;
- 	struct omap_hsmmc_host *host = mmc_priv(mmc);
-+	const char *cirq_state;
-+	bool suspended;
- 
--	seq_printf(s, "mmc%d:\n ctx_loss:\t%d\n\nregs:\n",
--			mmc->index, host->context_loss);
-+	seq_printf(s, "mmc%d:\n", mmc->index);
-+	if (mmc->caps & MMC_CAP_SDIO_IRQ)
-+		cirq_state = (host->flags & HSMMC_SDIO_IRQ_ENABLED) ?
-+			"enabled" : "disabled";
-+	else
-+		cirq_state = "polling";
-+	seq_printf(s, "sdio irq\t%s\n", cirq_state);
- 
--	pm_runtime_get_sync(host->dev);
-+	if (host->flags & HSMMC_SWAKEUP_QUIRK) {
-+		suspended = host->dev->power.runtime_status != RPM_ACTIVE;
-+		seq_printf(s, "pinmux config\t%s\n", (suspended ?
-+						      "gpio" : "sdio"));
-+	}
-+	seq_printf(s, "ctx_loss:\t%d\n", host->context_loss);
- 
-+	pm_runtime_get_sync(host->dev);
-+	seq_puts(s, "\nregs:\n");
- 	seq_printf(s, "CON:\t\t0x%08x\n",
- 			OMAP_HSMMC_READ(host->base, CON));
-+	seq_printf(s, "PSTATE:\t\t0x%08x\n",
-+		   OMAP_HSMMC_READ(host->base, PSTATE));
- 	seq_printf(s, "HCTL:\t\t0x%08x\n",
- 			OMAP_HSMMC_READ(host->base, HCTL));
- 	seq_printf(s, "SYSCTL:\t\t0x%08x\n",
+Looking at the kernel history, it seems very easy to backport support for it.
+Would it be as easy as cherry picking commit 6636bad8?
+  mmc: core: Update the ext-csd.rev check for eMMC5.1
+
+And just when I'm on backporting, perhaps fetching commit 7c4f10ac
+  mmc: core: production year for eMMC 4.41 and later
+
+Or have I forgotten anything vital?
+
 -- 
-1.7.10.4
-
+Hans-Christian Egtvedt
