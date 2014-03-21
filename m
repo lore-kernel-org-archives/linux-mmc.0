@@ -1,96 +1,74 @@
-From: Roger <rogerable@realtek.com>
-Subject: Re: [PATCH v4 3/3] memstick: Add realtek USB memstick host driver
-Date: Fri, 21 Mar 2014 14:43:25 +0800
-Message-ID: <532BDF8D.2060402@realtek.com>
-References: <1392199238-14500-1-git-send-email-rogerable@realtek.com>	<1392199238-14500-4-git-send-email-rogerable@realtek.com>
- <20140320161827.5904bc407f9d3490514fd84e@linux-foundation.org>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH] mmc: sdhci: don't read cd-gpio while holding spinlock
+Date: Fri, 21 Mar 2014 08:45:59 +0200
+Message-ID: <532BE027.9010909@intel.com>
+References: <1395341232-14490-1-git-send-email-abrestic@chromium.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"; Format="flowed"
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
-Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
-In-Reply-To: <20140320161827.5904bc407f9d3490514fd84e@linux-foundation.org>
-List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
-List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel>
-List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
-List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
-List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
-Errors-To: driverdev-devel-bounces@linuxdriverproject.org
-Sender: driverdev-devel-bounces@linuxdriverproject.org
-To: Andrew Morton <akpm@linux-foundation.org>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Samuel Ortiz <sameo@linux.intel.com>, Alex Dubov <oakad@yahoo.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, driverdev-devel@linuxdriverproject.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, wei_wang@realsil.com.cn, Chris Ball <cjb@laptop.org>, Lee Jones <lee.jones@linaro.org>, Dan Carpenter <dan.carpenter@oracle.com>, Maxim Levitsky <maximlevitsky@gmail.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga09.intel.com ([134.134.136.24]:11082 "EHLO mga09.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1759912AbaCUGqk (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 21 Mar 2014 02:46:40 -0400
+In-Reply-To: <1395341232-14490-1-git-send-email-abrestic@chromium.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Andrew Bresticker <abrestic@chromium.org>
+Cc: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-On 03/21/2014 07:18 AM, Andrew Morton wrote:
-> On Wed, 12 Feb 2014 18:00:38 +0800 <rogerable@realtek.com> wrote:
->
->> From: Roger Tseng <rogerable@realtek.com>
->>
->> Realtek USB memstick host driver provides memstick host support based on the
->> Realtek USB card reader MFD driver.
->>
-...
->> +static int rtsx_usb_ms_drv_probe(struct platform_device *pdev)
->> +{
->> +	struct memstick_host *msh;
->> +	struct rtsx_usb_ms *host;
->> +	struct rtsx_ucr *ucr;
->> +	int err;
->> +
->> +	ucr = usb_get_intfdata(to_usb_interface(pdev->dev.parent));
->> +	if (!ucr)
->> +		return -ENXIO;
->> +
->> +	dev_dbg(&(pdev->dev),
->> +			"Realtek USB Memstick controller found\n");
->> +
->> +	msh = memstick_alloc_host(sizeof(*host), &pdev->dev);
->> +	if (!msh)
->> +		return -ENOMEM;
->> +
->> +	host = memstick_priv(msh);
->> +	host->ucr = ucr;
->> +	host->msh = msh;
->> +	host->pdev = pdev;
->> +	host->power_mode = MEMSTICK_POWER_OFF;
->> +	platform_set_drvdata(pdev, host);
->> +
->> +	mutex_init(&host->host_mutex);
->> +	INIT_WORK(&host->handle_req, rtsx_usb_ms_handle_req);
->> +
->> +	init_completion(&host->detect_ms_exit);
->> +	host->detect_ms = kthread_create(rtsx_usb_detect_ms_card, host,
->> +			"rtsx_usb_ms_%d", pdev->id);
->> +	if (IS_ERR(host->detect_ms)) {
->> +		dev_dbg(&(pdev->dev),
->> +				"Unable to create polling thread.\n");
->> +		err = PTR_ERR(host->detect_ms);
->> +		goto err_out;
->> +	}
->> +
->> +	msh->request = rtsx_usb_ms_request;
->> +	msh->set_param = rtsx_usb_ms_set_param;
->> +	msh->caps = MEMSTICK_CAP_PAR4;
->> +
->> +	pm_runtime_enable(&pdev->dev);
->> +	err = memstick_add_host(msh);
->> +	if (err)
->> +		goto err_out;
->
-> Isn't that kernel thread still running?
->
-The kernel thread is created(kthread_create) but should not start before 
-the "goto".
+On 20.03.2014 20:47, Andrew Bresticker wrote:
+> mmc_request() reads the cd-gpio via mmc_gpio_get_cd(), which can sleep,
+> while holding host->lock.  This may result in the following BUG:
+> 
+>   BUG: spinlock wrong CPU on CPU#2, kworker/u8:16/4296
+>   lock: 0xea6b9c80, .magic: dead4ead, .owner: kworker/u8:16/4296, .owner_cpu: 0
+>   CPU: 2 PID: 4296 Comm: kworker/u8:16 Tainted: G         C   3.10.18 #137
+>   Workqueue: kmmcd mmc_rescan
+>   [<8020cf8c>] (unwind_backtrace+0x0/0x118) from [<8020a0c8>] (show_stack+0x20/0x24)
+>   [<8020a0c8>] (show_stack+0x20/0x24) from [<8075e5b8>] (dump_stack+0x20/0x28)
+>   [<8075e5b8>] (dump_stack+0x20/0x28) from [<804184a8>] (spin_dump+0x80/0x94)
+>   [<804184a8>] (spin_dump+0x80/0x94) from [<804184e8>] (spin_bug+0x2c/0x30)
+>   [<804184e8>] (spin_bug+0x2c/0x30) from [<80418790>] (do_raw_spin_unlock+0x94/0xd4)
+>   [<80418790>] (do_raw_spin_unlock+0x94/0xd4) from [<80761a44>] (_raw_spin_unlock_irqrestore+0x1c/0x24)
+>   [<80761a44>] (_raw_spin_unlock_irqrestore+0x1c/0x24) from [<805ff66c>] (sdhci_request+0x1c8/0x1d0)
+>   [<805ff66c>] (sdhci_request+0x1c8/0x1d0) from [<805ebb5c>] (mmc_start_request+0xec/0xf4)
+>   [<805ebb5c>] (mmc_start_request+0xec/0xf4) from [<805ebcbc>] (mmc_wait_for_req+0x80/0xf4)
+>   ...
+> 
+> Read the cd-gpio before acquiring the spinlock instead.
 
-Did I miss anything or will it be better to move all kthread things 
-after here?
->> +	wake_up_process(host->detect_ms);
->> +	return 0;
->> +err_out:
->> +	memstick_free_host(msh);
->> +	return err;
->> +}
+The same problem appears to be in sdhci_card_event() which calls
+sdhci_do_get_cd() under spinlock which then calls mmc_gpio_get_cd()
 
-Best regards,
-Roger Tseng
+Will you fix that too?
+
+
+> 
+> Signed-off-by: Andrew Bresticker <abrestic@chromium.org>
+> ---
+>  drivers/mmc/host/sdhci.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index 04a5e25..f2ef978 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -1340,6 +1340,7 @@ static void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
+>  	u32 tuning_opcode;
+>  
+>  	host = mmc_priv(mmc);
+> +	present = mmc_gpio_get_cd(host->mmc);
+>  
+>  	sdhci_runtime_pm_get(host);
+>  
+> @@ -1371,7 +1372,6 @@ static void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
+>  	 *     zero: cd-gpio is used, and card is removed
+>  	 *     one: cd-gpio is used, and card is present
+>  	 */
+> -	present = mmc_gpio_get_cd(host->mmc);
+>  	if (present < 0) {
+>  		/* If polling, assume that the card is always present. */
+>  		if (host->quirks & SDHCI_QUIRK_BROKEN_CARD_DETECTION)
+> 
+
