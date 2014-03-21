@@ -1,74 +1,70 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH] mmc: sdhci: don't read cd-gpio while holding spinlock
-Date: Fri, 21 Mar 2014 08:45:59 +0200
-Message-ID: <532BE027.9010909@intel.com>
-References: <1395341232-14490-1-git-send-email-abrestic@chromium.org>
+From: Seungwon Jeon <tgih.jun@samsung.com>
+Subject: [PATCH] mmc: core: add DT bindings for eMMC HS400 1.8/1.2V
+Date: Fri, 21 Mar 2014 20:37:29 +0900
+Message-ID: <000d01cf44f9$f0d2dc50$d27894f0$%jun@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga09.intel.com ([134.134.136.24]:11082 "EHLO mga09.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1759912AbaCUGqk (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 21 Mar 2014 02:46:40 -0400
-In-Reply-To: <1395341232-14490-1-git-send-email-abrestic@chromium.org>
+Received: from mailout2.samsung.com ([203.254.224.25]:13649 "EHLO
+	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1760185AbaCULha (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 21 Mar 2014 07:37:30 -0400
+Received: from epcpsbgr2.samsung.com
+ (u142.gpu120.samsung.co.kr [203.254.230.142])
+ by mailout2.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+ (7.0.4.24.0) 64bit (built Nov 17 2011))
+ with ESMTP id <0N2S00E5IAYHNL70@mailout2.samsung.com> for
+ linux-mmc@vger.kernel.org; Fri, 21 Mar 2014 20:37:29 +0900 (KST)
+Content-language: ko
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Andrew Bresticker <abrestic@chromium.org>
-Cc: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: 'Chris Ball' <chris@printf.net>, 'Ulf Hansson' <ulf.hansson@linaro.org>
 
-On 20.03.2014 20:47, Andrew Bresticker wrote:
-> mmc_request() reads the cd-gpio via mmc_gpio_get_cd(), which can sleep,
-> while holding host->lock.  This may result in the following BUG:
-> 
->   BUG: spinlock wrong CPU on CPU#2, kworker/u8:16/4296
->   lock: 0xea6b9c80, .magic: dead4ead, .owner: kworker/u8:16/4296, .owner_cpu: 0
->   CPU: 2 PID: 4296 Comm: kworker/u8:16 Tainted: G         C   3.10.18 #137
->   Workqueue: kmmcd mmc_rescan
->   [<8020cf8c>] (unwind_backtrace+0x0/0x118) from [<8020a0c8>] (show_stack+0x20/0x24)
->   [<8020a0c8>] (show_stack+0x20/0x24) from [<8075e5b8>] (dump_stack+0x20/0x28)
->   [<8075e5b8>] (dump_stack+0x20/0x28) from [<804184a8>] (spin_dump+0x80/0x94)
->   [<804184a8>] (spin_dump+0x80/0x94) from [<804184e8>] (spin_bug+0x2c/0x30)
->   [<804184e8>] (spin_bug+0x2c/0x30) from [<80418790>] (do_raw_spin_unlock+0x94/0xd4)
->   [<80418790>] (do_raw_spin_unlock+0x94/0xd4) from [<80761a44>] (_raw_spin_unlock_irqrestore+0x1c/0x24)
->   [<80761a44>] (_raw_spin_unlock_irqrestore+0x1c/0x24) from [<805ff66c>] (sdhci_request+0x1c8/0x1d0)
->   [<805ff66c>] (sdhci_request+0x1c8/0x1d0) from [<805ebb5c>] (mmc_start_request+0xec/0xf4)
->   [<805ebb5c>] (mmc_start_request+0xec/0xf4) from [<805ebcbc>] (mmc_wait_for_req+0x80/0xf4)
->   ...
-> 
-> Read the cd-gpio before acquiring the spinlock instead.
+Provide the option to configure these speed modes per host,
+for those host driver's that can't distinguish this in runtime.
+Specially, if host can support HS400, it means that host can also
+support HS200.
 
-The same problem appears to be in sdhci_card_event() which calls
-sdhci_do_get_cd() under spinlock which then calls mmc_gpio_get_cd()
+Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
+---
+Note:
+	Depending on [PATCH v3 5/5] mmc: add support for HS400 mode of eMMC5.0
 
-Will you fix that too?
+ Documentation/devicetree/bindings/mmc/mmc.txt |    2 ++
+ drivers/mmc/core/host.c                       |    4 ++++
+ 2 files changed, 6 insertions(+), 0 deletions(-)
 
+diff --git a/Documentation/devicetree/bindings/mmc/mmc.txt b/Documentation/devicetree/bindings/mmc/mmc.txt
+index 9dce540..3c18001 100644
+--- a/Documentation/devicetree/bindings/mmc/mmc.txt
++++ b/Documentation/devicetree/bindings/mmc/mmc.txt
+@@ -38,6 +38,8 @@ Optional properties:
+ - mmc-highspeed-ddr-1_2v: eMMC high-speed DDR mode(1.2V I/O) is supported
+ - mmc-hs200-1_8v: eMMC HS200 mode(1.8V I/O) is supported
+ - mmc-hs200-1_2v: eMMC HS200 mode(1.2V I/O) is supported
++- mmc-hs400-1_8v: eMMC HS400 mode(1.8V I/O) is supported
++- mmc-hs400-1_2v: eMMC HS400 mode(1.2V I/O) is supported
+ 
+ *NOTE* on CD and WP polarity. To use common for all SD/MMC host controllers line
+ polarity properties, we have to fix the meaning of the "normal" and "inverted"
+diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+index 453573d..4e35043 100644
+--- a/drivers/mmc/core/host.c
++++ b/drivers/mmc/core/host.c
+@@ -447,6 +447,10 @@ int mmc_of_parse(struct mmc_host *host)
+ 		host->caps2 |= MMC_CAP2_HS200_1_8V_SDR;
+ 	if (of_find_property(np, "mmc-hs200-1_2v", &len))
+ 		host->caps2 |= MMC_CAP2_HS200_1_2V_SDR;
++	if (of_find_property(np, "mmc-hs400-1_8v", &len))
++		host->caps2 |= MMC_CAP2_HS400_1_8V | MMC_CAP2_HS200_1_8V_SDR;
++	if (of_find_property(np, "mmc-hs400-1_2v", &len))
++		host->caps2 |= MMC_CAP2_HS400_1_2V | MMC_CAP2_HS200_1_2V_SDR;
+ 
+ 	return 0;
+ 
+-- 
+1.7.0.4
 
-> 
-> Signed-off-by: Andrew Bresticker <abrestic@chromium.org>
-> ---
->  drivers/mmc/host/sdhci.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 04a5e25..f2ef978 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -1340,6 +1340,7 @@ static void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
->  	u32 tuning_opcode;
->  
->  	host = mmc_priv(mmc);
-> +	present = mmc_gpio_get_cd(host->mmc);
->  
->  	sdhci_runtime_pm_get(host);
->  
-> @@ -1371,7 +1372,6 @@ static void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
->  	 *     zero: cd-gpio is used, and card is removed
->  	 *     one: cd-gpio is used, and card is present
->  	 */
-> -	present = mmc_gpio_get_cd(host->mmc);
->  	if (present < 0) {
->  		/* If polling, assume that the card is always present. */
->  		if (host->quirks & SDHCI_QUIRK_BROKEN_CARD_DETECTION)
-> 
 
