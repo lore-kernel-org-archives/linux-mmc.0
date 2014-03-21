@@ -1,7 +1,7 @@
 From: Balaji T K <balajitk@ti.com>
-Subject: [PATCH 1/9] mmc: omap_hsmmc: use devm_clk_get
-Date: Fri, 21 Mar 2014 21:47:30 +0530
-Message-ID: <1395418658-2375-2-git-send-email-balajitk@ti.com>
+Subject: [PATCH 4/9] mmc: omap_hsmmc: use devm_request_mem_region
+Date: Fri, 21 Mar 2014 21:47:33 +0530
+Message-ID: <1395418658-2375-5-git-send-email-balajitk@ti.com>
 References: <1395404448-30030-2-git-send-email-afenkart@gmail.com>
  <1395418658-2375-1-git-send-email-balajitk@ti.com>
 Mime-Version: 1.0
@@ -13,69 +13,56 @@ To: linux-mmc@vger.kernel.org, chris@printf.net
 Cc: linux-omap@vger.kernel.org, Balaji T K <balajitk@ti.com>
 List-Id: linux-mmc@vger.kernel.org
 
-With devm_clk_get conversion clk_put can be removed in clean up path
+With devm_request_mem_region conversion release_mem_region can be
+removed in clean up path
 
 Signed-off-by: Balaji T K <balajitk@ti.com>
 ---
- drivers/mmc/host/omap_hsmmc.c |   15 ++++-----------
- 1 files changed, 4 insertions(+), 11 deletions(-)
+ drivers/mmc/host/omap_hsmmc.c |   11 ++---------
+ 1 files changed, 2 insertions(+), 9 deletions(-)
 
 diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index e91ee21..578e983 100644
+index 8e35a6e..9952673 100644
 --- a/drivers/mmc/host/omap_hsmmc.c
 +++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -1922,7 +1922,7 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
+@@ -1881,7 +1881,8 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
+ 	if (res == NULL || irq < 0)
+ 		return -ENXIO;
  
- 	spin_lock_init(&host->irq_lock);
+-	res = request_mem_region(res->start, resource_size(res), pdev->name);
++	res = devm_request_mem_region(&pdev->dev, res->start,
++					resource_size(res), pdev->name);
+ 	if (res == NULL)
+ 		return -EBUSY;
  
--	host->fclk = clk_get(&pdev->dev, "fck");
-+	host->fclk = devm_clk_get(&pdev->dev, "fck");
- 	if (IS_ERR(host->fclk)) {
- 		ret = PTR_ERR(host->fclk);
- 		host->fclk = NULL;
-@@ -1941,7 +1941,7 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
+@@ -2109,16 +2110,12 @@ err1:
+ err_alloc:
+ 	omap_hsmmc_gpio_free(pdata);
+ err:
+-	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+-	if (res)
+-		release_mem_region(res->start, resource_size(res));
+ 	return ret;
+ }
  
- 	omap_hsmmc_context_save(host);
+ static int omap_hsmmc_remove(struct platform_device *pdev)
+ {
+ 	struct omap_hsmmc_host *host = platform_get_drvdata(pdev);
+-	struct resource *res;
  
--	host->dbclk = clk_get(&pdev->dev, "mmchsdb_fck");
-+	host->dbclk = devm_clk_get(&pdev->dev, "mmchsdb_fck");
- 	/*
- 	 * MMC can still work without debounce clock.
- 	 */
-@@ -1949,7 +1949,6 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
- 		host->dbclk = NULL;
- 	} else if (clk_prepare_enable(host->dbclk) != 0) {
- 		dev_warn(mmc_dev(host->mmc), "Failed to enable debounce clk\n");
--		clk_put(host->dbclk);
- 		host->dbclk = NULL;
- 	}
- 
-@@ -2105,11 +2104,8 @@ err_irq:
- 		dma_release_channel(host->rx_chan);
- 	pm_runtime_put_sync(host->dev);
- 	pm_runtime_disable(host->dev);
--	clk_put(host->fclk);
--	if (host->dbclk) {
-+	if (host->dbclk)
- 		clk_disable_unprepare(host->dbclk);
--		clk_put(host->dbclk);
--	}
- err1:
+ 	pm_runtime_get_sync(host->dev);
+ 	mmc_remove_host(host->mmc);
+@@ -2141,10 +2138,6 @@ static int omap_hsmmc_remove(struct platform_device *pdev)
  	iounmap(host->base);
- 	mmc_free_host(mmc);
-@@ -2144,11 +2140,8 @@ static int omap_hsmmc_remove(struct platform_device *pdev)
+ 	mmc_free_host(host->mmc);
  
- 	pm_runtime_put_sync(host->dev);
- 	pm_runtime_disable(host->dev);
--	clk_put(host->fclk);
--	if (host->dbclk) {
-+	if (host->dbclk)
- 		clk_disable_unprepare(host->dbclk);
--		clk_put(host->dbclk);
--	}
+-	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+-	if (res)
+-		release_mem_region(res->start, resource_size(res));
+-
+ 	return 0;
+ }
  
- 	omap_hsmmc_gpio_free(host->pdata);
- 	iounmap(host->base);
 -- 
 1.7.5.4
 
