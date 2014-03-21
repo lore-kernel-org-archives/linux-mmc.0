@@ -1,56 +1,65 @@
-From: Yuvaraj Kumar C D <yuvaraj.cd@gmail.com>
-Subject: [PATCH] mmc: dw_mmc: Support setting the ciu-div on exynos
-Date: Fri, 21 Mar 2014 17:32:07 +0530
-Message-ID: <1395403327-19713-1-git-send-email-yuvaraj.cd@samsung.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pd0-f171.google.com ([209.85.192.171]:62797 "EHLO
-	mail-pd0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1758075AbaCUMCj (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 21 Mar 2014 08:02:39 -0400
-Sender: linux-mmc-owner@vger.kernel.org
+From: Andreas Fenkart <afenkart@gmail.com>
+Subject: [PATCH v9 resend 0/3] mmc: omap_hsmmc: Enable SDIO IRQ.
+Date: Fri, 21 Mar 2014 13:20:45 +0100
+Message-ID: <1395404448-30030-1-git-send-email-afenkart@gmail.com>
+Return-path: <linux-doc-owner@vger.kernel.org>
+Sender: linux-doc-owner@vger.kernel.org
+To: Tony Lindgren <tony@atomide.com>
+Cc: Chris Ball <chris@printf.net>, Grant Likely <grant.likely@secretlab.ca>, Felipe Balbi <balbi@ti.com>, Balaji T K <balajitk@ti.com>, zonque@gmail.com, galak@codeaurora.org, linux-doc@vger.kernel.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, Andreas Fenkart <afenkart@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
-To: grundler@chromium.org, linux-samsung-soc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, jh80.chung@samsung.com, cjb@laptop.org, tgih.jun@samsung.com, linux-mmc@vger.kernel.org, sonnyrao@chromium.org, kgene.kim@samsung.com, joshi@samsung.com
-Cc: t.figa@samsung.com, Doug Anderson <dianders@chromium.org>, Yuvaraj Kumar C D <yuvaraj.cd@samsung.com>
 
-From: Doug Anderson <dianders@chromium.org>
+Resend of v8, with Chris Ball on cc and following changes.
 
-The existing dw_mmc code for exynos5250/exynos5420 read the ciu-div
-property from the device tree and used it in calculations, but didn't
-actually ever set it in hardware.  That means that if the hardware
-value set by the firmware didn't match what was in the device tree
-that we'd be clocking things incorrectly.
+v9
+- extended comment about why wake-irq is needed
+- drop double '(' ')' around card_detect_irq
+- drop final '.' in in subject line of patch
 
-Signed-off-by: Doug Anderson <dianders@chromium.org>
-Signed-off-by: Yuvaraj Kumar C D <yuvaraj.cd@samsung.com>
----
- drivers/mmc/host/dw_mmc-exynos.c |    7 +++++++
- 1 file changed, 7 insertions(+)
+v8
+- rebased on top of Tony Lindgren<tony@atomide.com> changes
+  - improved changelog describing the earlier work
+  - improved wakeup irq setup
+  - works for am3730 es platform now
+- my changes on top:
+  - compile tested with #undef CONFIG_OF
+  - disable wake_irq in handler to prevent infinite loop  
+  - fixed typo and added comment about wake-irq
 
-diff --git a/drivers/mmc/host/dw_mmc-exynos.c b/drivers/mmc/host/dw_mmc-exynos.c
-index 3423c5e..07392ac 100644
---- a/drivers/mmc/host/dw_mmc-exynos.c
-+++ b/drivers/mmc/host/dw_mmc-exynos.c
-@@ -28,6 +28,7 @@
- #define SDMMC_CLKSEL_CCLK_SAMPLE(x)	(((x) & 7) << 0)
- #define SDMMC_CLKSEL_CCLK_DRIVE(x)	(((x) & 7) << 16)
- #define SDMMC_CLKSEL_CCLK_DIVIDER(x)	(((x) & 7) << 24)
-+#define SDMMC_CLKSEL_GET_SAMPLE(x)      (((x) >> 0) & 0x7)
- #define SDMMC_CLKSEL_GET_DRV_WD3(x)	(((x) >> 16) & 0x7)
- #define SDMMC_CLKSEL_TIMING(x, y, z)	(SDMMC_CLKSEL_CCLK_SAMPLE(x) |	\
- 					SDMMC_CLKSEL_CCLK_DRIVE(y) |	\
-@@ -118,6 +119,12 @@ static int dw_mci_exynos_setup_clock(struct dw_mci *host)
- {
- 	struct dw_mci_exynos_priv_data *priv = host->priv;
- 	unsigned long rate = clk_get_rate(host->ciu_clk);
-+	u32 clksel = mci_readl(host, CLKSEL);
-+
-+	clksel = SDMMC_CLKSEL_TIMING(SDMMC_CLKSEL_GET_SAMPLE(clksel),
-+				     SDMMC_CLKSEL_GET_DRV_WD3(clksel),
-+				     priv->ciu_div);
-+	mci_writel(host, CLKSEL, clksel);
- 
- 	host->bus_hz = rate / (priv->ciu_div + 1);
- 	return 0;
+v7
+- rebase on 3.14.0-rc3-49726-g77e15ec
+- split omap_hsmmc_pin_init due to regression on omap-3730 platform
+
+v6
+- rebase on Linux 3.13-rc3
+- reformatting debugfs
+
+v5
+- fix compile error introduced by last minute one line fix
+
+v4:
+- switch to interrupts-extended format
+- drop ti,swakeup-missing flag convert to comaptible section
+
+v3:
+- removed gpio_irq from platform_data
+
+v2:
+- incorparated changes as suggested by reviewers
+- simplified workaround for am335x, gpio will now only wake
+  the module from runtime suspend, not handle the sdio irq
+  itself 
+
+Andreas Fenkart (3):
+  mmc: omap_hsmmc: Enable SDIO interrupt
+  mmc: omap_hsmmc: Pin remux workaround to support SDIO interrupt on
+    AM335x
+  mmc: omap_hsmmc: Extend debugfs for SDIO IRQ, GPIO and pinmux
+
+ .../devicetree/bindings/mmc/ti-omap-hsmmc.txt      |   50 +++
+ drivers/mmc/host/omap_hsmmc.c                      |  339 ++++++++++++++++++--
+ include/linux/platform_data/mmc-omap.h             |    1 +
+ 3 files changed, 365 insertions(+), 25 deletions(-)
+
 -- 
 1.7.10.4
 
