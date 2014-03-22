@@ -1,83 +1,70 @@
-From: Andrew Bresticker <abrestic@chromium.org>
-Subject: Re: [PATCH] mmc: sdhci: don't read cd-gpio while holding spinlock
-Date: Fri, 21 Mar 2014 18:38:14 -0700
-Message-ID: <CAL1qeaHUPu693yGcf+5vRS5JT3O70GDpnVSoGVQgB+bgxExGAA@mail.gmail.com>
-References: <1395341232-14490-1-git-send-email-abrestic@chromium.org>
-	<532BE027.9010909@intel.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+From: Alexander Shiyan <shc_work@mail.ru>
+Subject: [PATCH RESEND 2/2] mmc: mxcmmc: Convert to SIMPLE_DEV_PM_OPS
+Date: Sat, 22 Mar 2014 12:52:46 +0400
+Message-ID: <1395478366-6276-2-git-send-email-shc_work@mail.ru>
+References: <1395478366-6276-1-git-send-email-shc_work@mail.ru>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-vc0-f170.google.com ([209.85.220.170]:34818 "EHLO
-	mail-vc0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751002AbaCVBiQ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 21 Mar 2014 21:38:16 -0400
-Received: by mail-vc0-f170.google.com with SMTP id hu19so3495229vcb.29
-        for <linux-mmc@vger.kernel.org>; Fri, 21 Mar 2014 18:38:15 -0700 (PDT)
-In-Reply-To: <532BE027.9010909@intel.com>
+Received: from smtp1.mail.ru ([94.100.176.129]:46219 "EHLO smtp1.mail.ru"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750738AbaCVIxE (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Sat, 22 Mar 2014 04:53:04 -0400
+In-Reply-To: <1395478366-6276-1-git-send-email-shc_work@mail.ru>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+To: linux-mmc@vger.kernel.org
+Cc: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Sascha Hauer <s.hauer@pengutronix.de>, Anatolij Gustschin <agust@denx.de>, Alexander Shiyan <shc_work@mail.ru>
 
-On Thu, Mar 20, 2014 at 11:45 PM, Adrian Hunter <adrian.hunter@intel.com> wrote:
-> On 20.03.2014 20:47, Andrew Bresticker wrote:
->> mmc_request() reads the cd-gpio via mmc_gpio_get_cd(), which can sleep,
->> while holding host->lock.  This may result in the following BUG:
->>
->>   BUG: spinlock wrong CPU on CPU#2, kworker/u8:16/4296
->>   lock: 0xea6b9c80, .magic: dead4ead, .owner: kworker/u8:16/4296, .owner_cpu: 0
->>   CPU: 2 PID: 4296 Comm: kworker/u8:16 Tainted: G         C   3.10.18 #137
->>   Workqueue: kmmcd mmc_rescan
->>   [<8020cf8c>] (unwind_backtrace+0x0/0x118) from [<8020a0c8>] (show_stack+0x20/0x24)
->>   [<8020a0c8>] (show_stack+0x20/0x24) from [<8075e5b8>] (dump_stack+0x20/0x28)
->>   [<8075e5b8>] (dump_stack+0x20/0x28) from [<804184a8>] (spin_dump+0x80/0x94)
->>   [<804184a8>] (spin_dump+0x80/0x94) from [<804184e8>] (spin_bug+0x2c/0x30)
->>   [<804184e8>] (spin_bug+0x2c/0x30) from [<80418790>] (do_raw_spin_unlock+0x94/0xd4)
->>   [<80418790>] (do_raw_spin_unlock+0x94/0xd4) from [<80761a44>] (_raw_spin_unlock_irqrestore+0x1c/0x24)
->>   [<80761a44>] (_raw_spin_unlock_irqrestore+0x1c/0x24) from [<805ff66c>] (sdhci_request+0x1c8/0x1d0)
->>   [<805ff66c>] (sdhci_request+0x1c8/0x1d0) from [<805ebb5c>] (mmc_start_request+0xec/0xf4)
->>   [<805ebb5c>] (mmc_start_request+0xec/0xf4) from [<805ebcbc>] (mmc_wait_for_req+0x80/0xf4)
->>   ...
->>
->> Read the cd-gpio before acquiring the spinlock instead.
->
-> The same problem appears to be in sdhci_card_event() which calls
-> sdhci_do_get_cd() under spinlock which then calls mmc_gpio_get_cd()
->
-> Will you fix that too?
+Signed-off-by: Alexander Shiyan <shc_work@mail.ru>
+---
+ drivers/mmc/host/mxcmmc.c | 13 +++----------
+ 1 file changed, 3 insertions(+), 10 deletions(-)
 
-Yes, will do.
+diff --git a/drivers/mmc/host/mxcmmc.c b/drivers/mmc/host/mxcmmc.c
+index 84d630e..86401c0 100644
+--- a/drivers/mmc/host/mxcmmc.c
++++ b/drivers/mmc/host/mxcmmc.c
+@@ -1220,8 +1220,7 @@ static int mxcmci_remove(struct platform_device *pdev)
+ 	return 0;
+ }
+ 
+-#ifdef CONFIG_PM
+-static int mxcmci_suspend(struct device *dev)
++static int __maybe_unused mxcmci_suspend(struct device *dev)
+ {
+ 	struct mmc_host *mmc = dev_get_drvdata(dev);
+ 	struct mxcmci_host *host = mmc_priv(mmc);
+@@ -1231,7 +1230,7 @@ static int mxcmci_suspend(struct device *dev)
+ 	return 0;
+ }
+ 
+-static int mxcmci_resume(struct device *dev)
++static int __maybe_unused mxcmci_resume(struct device *dev)
+ {
+ 	struct mmc_host *mmc = dev_get_drvdata(dev);
+ 	struct mxcmci_host *host = mmc_priv(mmc);
+@@ -1241,11 +1240,7 @@ static int mxcmci_resume(struct device *dev)
+ 	return 0;
+ }
+ 
+-static const struct dev_pm_ops mxcmci_pm_ops = {
+-	.suspend	= mxcmci_suspend,
+-	.resume		= mxcmci_resume,
+-};
+-#endif
++static SIMPLE_DEV_PM_OPS(mxcmci_pm_ops, mxcmci_suspend, mxcmci_resume);
+ 
+ static struct platform_driver mxcmci_driver = {
+ 	.probe		= mxcmci_probe,
+@@ -1254,9 +1249,7 @@ static struct platform_driver mxcmci_driver = {
+ 	.driver		= {
+ 		.name		= DRIVER_NAME,
+ 		.owner		= THIS_MODULE,
+-#ifdef CONFIG_PM
+ 		.pm	= &mxcmci_pm_ops,
+-#endif
+ 		.of_match_table	= mxcmci_of_match,
+ 	}
+ };
+-- 
+1.8.3.2
 
-Thanks,
-Andrew
-
->
->
->>
->> Signed-off-by: Andrew Bresticker <abrestic@chromium.org>
->> ---
->>  drivers/mmc/host/sdhci.c | 2 +-
->>  1 file changed, 1 insertion(+), 1 deletion(-)
->>
->> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
->> index 04a5e25..f2ef978 100644
->> --- a/drivers/mmc/host/sdhci.c
->> +++ b/drivers/mmc/host/sdhci.c
->> @@ -1340,6 +1340,7 @@ static void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
->>       u32 tuning_opcode;
->>
->>       host = mmc_priv(mmc);
->> +     present = mmc_gpio_get_cd(host->mmc);
->>
->>       sdhci_runtime_pm_get(host);
->>
->> @@ -1371,7 +1372,6 @@ static void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
->>        *     zero: cd-gpio is used, and card is removed
->>        *     one: cd-gpio is used, and card is present
->>        */
->> -     present = mmc_gpio_get_cd(host->mmc);
->>       if (present < 0) {
->>               /* If polling, assume that the card is always present. */
->>               if (host->quirks & SDHCI_QUIRK_BROKEN_CARD_DETECTION)
->>
->
