@@ -1,265 +1,191 @@
-From: Alexander Shiyan <shc_work@mail.ru>
-Subject: [PATCH RESEND 1/2] mmc: mxcmmc: Convert to devm-* API
-Date: Sat, 22 Mar 2014 12:52:45 +0400
-Message-ID: <1395478366-6276-1-git-send-email-shc_work@mail.ru>
+From: Seungwon Jeon <tgih.jun@samsung.com>
+Subject: RE: [PATCH v3 4/5] mmc: rework selection of bus speed mode
+Date: Sat, 22 Mar 2014 21:04:09 +0900
+Message-ID: <003301cf45c6$d4d42db0$7e7c8910$%jun@samsung.com>
+References: <1383653403-10049-1-git-send-email-ulf.hansson@linaro.org>
+ <006b01cf2a59$a203d5d0$e60b8170$%jun@samsung.com>
+ <003e01cf3f7f$43eb8a20$cbc29e60$%jun@samsung.com>
+ <CAPDyKFoHR1Re6a3fpc0rCvx2jiXDQotU2wA7wSHiTQeWEguoxA@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=Windows-1252
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp1.mail.ru ([94.100.176.129]:46192 "EHLO smtp1.mail.ru"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750706AbaCVIxE (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sat, 22 Mar 2014 04:53:04 -0400
+Received: from mailout1.samsung.com ([203.254.224.24]:18802 "EHLO
+	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750706AbaCVMEL (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 22 Mar 2014 08:04:11 -0400
+Received: from epcpsbgr3.samsung.com
+ (u143.gpu120.samsung.co.kr [203.254.230.143])
+ by mailout1.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+ (7.0.4.24.0) 64bit (built Nov 17 2011))
+ with ESMTP id <0N2U00CUU6UX7200@mailout1.samsung.com> for
+ linux-mmc@vger.kernel.org; Sat, 22 Mar 2014 21:04:09 +0900 (KST)
+In-reply-to: <CAPDyKFoHR1Re6a3fpc0rCvx2jiXDQotU2wA7wSHiTQeWEguoxA@mail.gmail.com>
+Content-language: ko
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Sascha Hauer <s.hauer@pengutronix.de>, Anatolij Gustschin <agust@denx.de>, Alexander Shiyan <shc_work@mail.ru>
+To: 'Ulf Hansson' <ulf.hansson@linaro.org>
+Cc: 'linux-mmc' <linux-mmc@vger.kernel.org>, 'Chris Ball' <chris@printf.net>, 'Jaehoon Chung' <jh80.chung@samsung.com>, 'Jackey Shen' <jackey.shen@amd.com>, 'Alim Akhtar' <alim.akhtar@samsung.com>
 
-Replace existing resource handling in the driver with managed
-device resource, this ensures more consistent error values and
-simplifies error paths.
+On Fri, March 21, 2014, Ulf Hansson wrote:
+> On 14 March 2014 13:16, Seungwon Jeon <tgih.jun@samsung.com> wrote:
+> > Current implementation for bus speed mode selection is too
+> > complicated. This patch is to simplify the codes and remove
+> > some duplicate parts.
+> 
+> Really appreciate you taking on this task!
+> 
+> >
+> > The following changes are including:
+> > * Adds functions for each mode selection(HS, HS-DDR, HS200 and etc)
+> > * Rearranged the mode selection sequence with supported device type
+> > * Adds maximum speed for HS200 mode(hs200_max_dtr)
+> > * Adds field definition for HS_TIMING of EXT_CSD
+> >
+> > Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
+> > Tested-by: Jaehoon Chung <jh80.chung@samsung.com>
+> > Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
+> > ---
+> >  drivers/mmc/core/debugfs.c |    2 +-
+> >  drivers/mmc/core/mmc.c     |  431 ++++++++++++++++++++++++--------------------
+> >  include/linux/mmc/card.h   |    1 +
+> >  include/linux/mmc/mmc.h    |    4 +
+> >  4 files changed, 238 insertions(+), 200 deletions(-)
+> >
+> > diff --git a/drivers/mmc/core/debugfs.c b/drivers/mmc/core/debugfs.c
+> > index 509229b..1f730db 100644
+> > --- a/drivers/mmc/core/debugfs.c
+> > +++ b/drivers/mmc/core/debugfs.c
+> > @@ -139,7 +139,7 @@ static int mmc_ios_show(struct seq_file *s, void *data)
+> >                 str = "mmc DDR52";
+> >                 break;
+> >         case MMC_TIMING_MMC_HS200:
+> > -               str = "mmc high-speed SDR200";
+> > +               str = "mmc HS200";
+> >                 break;
+> >         default:
+> >                 str = "invalid";
+> > diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+> > index 480c100..6dd68e6 100644
+> > --- a/drivers/mmc/core/mmc.c
+> > +++ b/drivers/mmc/core/mmc.c
+> > @@ -242,7 +242,7 @@ static void mmc_select_card_type(struct mmc_card *card)
+> >         struct mmc_host *host = card->host;
+> >         u8 card_type = card->ext_csd.raw_card_type & EXT_CSD_CARD_TYPE_MASK;
+> >         u32 caps = host->caps, caps2 = host->caps2;
+> > -       unsigned int hs_max_dtr = 0;
+> > +       unsigned int hs_max_dtr = 0, hs200_max_dtr = 0;
+> >         unsigned int avail_type = 0;
+> >
+> >         if (caps & MMC_CAP_MMC_HIGHSPEED &&
+> > @@ -271,17 +271,18 @@ static void mmc_select_card_type(struct mmc_card *card)
+> >
+> >         if (caps2 & MMC_CAP2_HS200_1_8V_SDR &&
+> >             card_type & EXT_CSD_CARD_TYPE_HS200_1_8V) {
+> > -               hs_max_dtr = MMC_HS200_MAX_DTR;
+> > +               hs200_max_dtr = MMC_HS200_MAX_DTR;
+> >                 avail_type |= EXT_CSD_CARD_TYPE_HS200_1_8V;
+> >         }
+> >
+> >         if (caps2 & MMC_CAP2_HS200_1_2V_SDR &&
+> >             card_type & EXT_CSD_CARD_TYPE_HS200_1_2V) {
+> > -               hs_max_dtr = MMC_HS200_MAX_DTR;
+> > +               hs200_max_dtr = MMC_HS200_MAX_DTR;
+> >                 avail_type |= EXT_CSD_CARD_TYPE_HS200_1_2V;
+> >         }
+> >
+> >         card->ext_csd.hs_max_dtr = hs_max_dtr;
+> > +       card->ext_csd.hs200_max_dtr = hs200_max_dtr;
+> >         card->mmc_avail_type = avail_type;
+> >  }
+> >
+> > @@ -833,37 +834,46 @@ static int mmc_select_powerclass(struct mmc_card *card)
+> >  }
+> >
+> >  /*
+> > - * Selects the desired buswidth and switch to the HS200 mode
+> > - * if bus width set without error
+> > + * Set the bus speed for the selected speed mode.
+> >   */
+> > -static int mmc_select_hs200(struct mmc_card *card)
+> > +static void mmc_set_bus_speed(struct mmc_card *card)
+> > +{
+> > +       unsigned int max_dtr = (unsigned int)-1;
+> 
+> I guess this is to silence compile warnings? Why not just:
+> unsigned int max_dtr = 0;
+Basically, I made an effort to keep the previous codes if it's not a problem.
+If you found something wrong, please let me know.
 
-Signed-off-by: Alexander Shiyan <shc_work@mail.ru>
----
- drivers/mmc/host/mxcmmc.c | 101 +++++++++++++++++-----------------------------
- 1 file changed, 38 insertions(+), 63 deletions(-)
+> 
+> > +
+> > +       if (mmc_card_hs200(card) && max_dtr > card->ext_csd.hs200_max_dtr)
+> > +               max_dtr = card->ext_csd.hs200_max_dtr;
+> > +       else if (mmc_card_hs(card) && max_dtr > card->ext_csd.hs_max_dtr)
+> > +               max_dtr = card->ext_csd.hs_max_dtr;
+> > +       else if (max_dtr > card->csd.max_dtr)
+> > +               max_dtr = card->csd.max_dtr;
+> > +
+> > +       mmc_set_clock(card->host, max_dtr);
+> > +}
+> > +
+> > +/*
+> > + * Select the bus width amoung 4-bit and 8-bit(SDR).
+> > + * If the bus width is changed successfully, return the slected width value.
+> > + * Zero is returned instead of error value if the wide width is not supported.
+> > + */
+> > +static int mmc_select_bus_width(struct mmc_card *card)
+> >  {
+> > -       int idx, err = -EINVAL;
+> > -       struct mmc_host *host;
+> >         static unsigned ext_csd_bits[] = {
+> > -               EXT_CSD_BUS_WIDTH_4,
+> >                 EXT_CSD_BUS_WIDTH_8,
+> > +               EXT_CSD_BUS_WIDTH_4,
+> >         };
+> >         static unsigned bus_widths[] = {
+> > -               MMC_BUS_WIDTH_4,
+> >                 MMC_BUS_WIDTH_8,
+> > +               MMC_BUS_WIDTH_4,
+> >         };
+> 
+> Do we really need to keep these arrays? The only contain only two values.
+> 
+> Can't we just try with 8-bit, if supported, and if it fails try with
+> 4-bit. Would that further simplify the code?
+Yes, current implementation does that.
+First,  it tries with 8-bit if supported, and if failed, it will be tried with 4-bit.
+And I think using array can make simple retry coding if considering failure case.
+I intended to keep original way.
 
-diff --git a/drivers/mmc/host/mxcmmc.c b/drivers/mmc/host/mxcmmc.c
-index f7199c8..84d630e 100644
---- a/drivers/mmc/host/mxcmmc.c
-+++ b/drivers/mmc/host/mxcmmc.c
-@@ -124,9 +124,8 @@ enum mxcmci_type {
- 
- struct mxcmci_host {
- 	struct mmc_host		*mmc;
--	struct resource		*res;
- 	void __iomem		*base;
--	int			irq;
-+	dma_addr_t		phys_base;
- 	int			detect_irq;
- 	struct dma_chan		*dma;
- 	struct dma_async_tx_descriptor *desc;
-@@ -241,33 +240,26 @@ static inline void mxcmci_writew(struct mxcmci_host *host, u16 val, int reg)
- 
- static void mxcmci_set_clk_rate(struct mxcmci_host *host, unsigned int clk_ios);
- 
--static inline void mxcmci_init_ocr(struct mxcmci_host *host)
-+static void mxcmci_init_ocr(struct mxcmci_host *host)
- {
--	host->vcc = regulator_get(mmc_dev(host->mmc), "vmmc");
--
-+	host->vcc = devm_regulator_get(mmc_dev(host->mmc), "vmmc");
- 	if (IS_ERR(host->vcc)) {
--		host->vcc = NULL;
-+		if (host->pdata && host->pdata->ocr_avail)
-+			host->mmc->ocr_avail = host->pdata->ocr_avail;
-+		else
-+			host->mmc->ocr_avail = MMC_VDD_32_33 | MMC_VDD_33_34;
- 	} else {
- 		host->mmc->ocr_avail = mmc_regulator_get_ocrmask(host->vcc);
- 		if (host->pdata && host->pdata->ocr_avail)
- 			dev_warn(mmc_dev(host->mmc),
- 				"pdata->ocr_avail will not be used\n");
- 	}
--
--	if (host->vcc == NULL) {
--		/* fall-back to platform data */
--		if (host->pdata && host->pdata->ocr_avail)
--			host->mmc->ocr_avail = host->pdata->ocr_avail;
--		else
--			host->mmc->ocr_avail = MMC_VDD_32_33 | MMC_VDD_33_34;
--	}
- }
- 
--static inline void mxcmci_set_power(struct mxcmci_host *host,
--				    unsigned char power_mode,
--				    unsigned int vdd)
-+static void mxcmci_set_power(struct mxcmci_host *host, unsigned char power_mode,
-+			     unsigned int vdd)
- {
--	if (host->vcc) {
-+	if (!IS_ERR(host->vcc)) {
- 		if (power_mode == MMC_POWER_UP)
- 			mmc_regulator_set_ocr(host->mmc, host->vcc, vdd);
- 		else if (power_mode == MMC_POWER_OFF)
-@@ -299,7 +291,6 @@ static void mxcmci_softreset(struct mxcmci_host *host)
- 
- 	mxcmci_writew(host, 0xff, MMC_REG_RES_TO);
- }
--static int mxcmci_setup_dma(struct mmc_host *mmc);
- 
- #if IS_ENABLED(CONFIG_PPC_MPC512x)
- static inline void buffer_swap32(u32 *buf, int len)
-@@ -868,8 +859,8 @@ static int mxcmci_setup_dma(struct mmc_host *mmc)
- 	struct mxcmci_host *host = mmc_priv(mmc);
- 	struct dma_slave_config *config = &host->dma_slave_config;
- 
--	config->dst_addr = host->res->start + MMC_REG_BUFFER_ACCESS;
--	config->src_addr = host->res->start + MMC_REG_BUFFER_ACCESS;
-+	config->dst_addr = host->phys_base + MMC_REG_BUFFER_ACCESS;
-+	config->src_addr = host->phys_base + MMC_REG_BUFFER_ACCESS;
- 	config->dst_addr_width = 4;
- 	config->src_addr_width = 4;
- 	config->dst_maxburst = host->burstlen;
-@@ -1040,8 +1031,8 @@ static const struct mmc_host_ops mxcmci_ops = {
- static int mxcmci_probe(struct platform_device *pdev)
- {
- 	struct mmc_host *mmc;
--	struct mxcmci_host *host = NULL;
--	struct resource *iores, *r;
-+	struct mxcmci_host *host;
-+	struct resource *res;
- 	int ret = 0, irq;
- 	bool dat3_card_detect = false;
- 	dma_cap_mask_t mask;
-@@ -1052,21 +1043,25 @@ static int mxcmci_probe(struct platform_device *pdev)
- 
- 	of_id = of_match_device(mxcmci_of_match, &pdev->dev);
- 
--	iores = platform_get_resource(pdev, IORESOURCE_MEM, 0);
-+	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
- 	irq = platform_get_irq(pdev, 0);
--	if (!iores || irq < 0)
-+	if (irq < 0)
- 		return -EINVAL;
- 
--	r = request_mem_region(iores->start, resource_size(iores), pdev->name);
--	if (!r)
--		return -EBUSY;
-+	mmc = mmc_alloc_host(sizeof(*host), &pdev->dev);
-+	if (!mmc)
-+		return -ENOMEM;
- 
--	mmc = mmc_alloc_host(sizeof(struct mxcmci_host), &pdev->dev);
--	if (!mmc) {
--		ret = -ENOMEM;
--		goto out_release_mem;
-+	host = mmc_priv(mmc);
-+
-+	host->base = devm_ioremap_resource(&pdev->dev, res);
-+	if (IS_ERR(host->base)) {
-+		ret = PTR_ERR(host->base);
-+		goto out_free;
- 	}
- 
-+	host->phys_base = res->start;
-+
- 	ret = mmc_of_parse(mmc);
- 	if (ret)
- 		goto out_free;
-@@ -1084,13 +1079,6 @@ static int mxcmci_probe(struct platform_device *pdev)
- 	mmc->max_req_size = mmc->max_blk_size * mmc->max_blk_count;
- 	mmc->max_seg_size = mmc->max_req_size;
- 
--	host = mmc_priv(mmc);
--	host->base = ioremap(r->start, resource_size(r));
--	if (!host->base) {
--		ret = -ENOMEM;
--		goto out_free;
--	}
--
- 	if (of_id) {
- 		const struct platform_device_id *id_entry = of_id->data;
- 		host->devtype = id_entry->driver_data;
-@@ -1120,19 +1108,16 @@ static int mxcmci_probe(struct platform_device *pdev)
- 	else
- 		host->default_irq_mask = 0;
- 
--	host->res = r;
--	host->irq = irq;
--
- 	host->clk_ipg = devm_clk_get(&pdev->dev, "ipg");
- 	if (IS_ERR(host->clk_ipg)) {
- 		ret = PTR_ERR(host->clk_ipg);
--		goto out_iounmap;
-+		goto out_free;
- 	}
- 
- 	host->clk_per = devm_clk_get(&pdev->dev, "per");
- 	if (IS_ERR(host->clk_per)) {
- 		ret = PTR_ERR(host->clk_per);
--		goto out_iounmap;
-+		goto out_free;
- 	}
- 
- 	clk_prepare_enable(host->clk_per);
-@@ -1159,9 +1144,9 @@ static int mxcmci_probe(struct platform_device *pdev)
- 	if (!host->pdata) {
- 		host->dma = dma_request_slave_channel(&pdev->dev, "rx-tx");
- 	} else {
--		r = platform_get_resource(pdev, IORESOURCE_DMA, 0);
--		if (r) {
--			host->dmareq = r->start;
-+		res = platform_get_resource(pdev, IORESOURCE_DMA, 0);
-+		if (res) {
-+			host->dmareq = res->start;
- 			host->dma_data.peripheral_type = IMX_DMATYPE_SDHC;
- 			host->dma_data.priority = DMA_PRIO_LOW;
- 			host->dma_data.dma_request = host->dmareq;
-@@ -1178,7 +1163,8 @@ static int mxcmci_probe(struct platform_device *pdev)
- 
- 	INIT_WORK(&host->datawork, mxcmci_datawork);
- 
--	ret = request_irq(host->irq, mxcmci_irq, 0, DRIVER_NAME, host);
-+	ret = devm_request_irq(&pdev->dev, irq, mxcmci_irq, 0,
-+			       dev_name(&pdev->dev), host);
- 	if (ret)
- 		goto out_free_dma;
- 
-@@ -1188,7 +1174,7 @@ static int mxcmci_probe(struct platform_device *pdev)
- 		ret = host->pdata->init(&pdev->dev, mxcmci_detect_irq,
- 				host->mmc);
- 		if (ret)
--			goto out_free_irq;
-+			goto out_free_dma;
- 	}
- 
- 	init_timer(&host->watchdog);
-@@ -1199,20 +1185,17 @@ static int mxcmci_probe(struct platform_device *pdev)
- 
- 	return 0;
- 
--out_free_irq:
--	free_irq(host->irq, host);
- out_free_dma:
- 	if (host->dma)
- 		dma_release_channel(host->dma);
-+
- out_clk_put:
- 	clk_disable_unprepare(host->clk_per);
- 	clk_disable_unprepare(host->clk_ipg);
--out_iounmap:
--	iounmap(host->base);
-+
- out_free:
- 	mmc_free_host(mmc);
--out_release_mem:
--	release_mem_region(iores->start, resource_size(iores));
-+
- 	return ret;
- }
- 
-@@ -1223,23 +1206,15 @@ static int mxcmci_remove(struct platform_device *pdev)
- 
- 	mmc_remove_host(mmc);
- 
--	if (host->vcc)
--		regulator_put(host->vcc);
--
- 	if (host->pdata && host->pdata->exit)
- 		host->pdata->exit(&pdev->dev, mmc);
- 
--	free_irq(host->irq, host);
--	iounmap(host->base);
--
- 	if (host->dma)
- 		dma_release_channel(host->dma);
- 
- 	clk_disable_unprepare(host->clk_per);
- 	clk_disable_unprepare(host->clk_ipg);
- 
--	release_mem_region(host->res->start, resource_size(host->res));
--
- 	mmc_free_host(mmc);
- 
- 	return 0;
--- 
-1.8.3.2
+> 
+> Overall looks good to me, besides the minor comments above.
+> 
+> Since this kind of touches quite old code, I would appreciate if it
+> could go though some more testing in linux next, thus it's material
+> for early queueing to 3.16.
+> 
+> But before we go on, I would like to know if you managed to test all
+> the different variants of buswidth/speedmode and the bus width test?
+> If there is any specific test would like to get help to run, just tell
+> me.
+> 
+> Nice work!
+It would be nice if it's picked for 3.15.
+As I mentioned above, I basically kept the original flow and way.
+
+This change applies only to eMMC type and participates only in card initialization's process.
+I tested on the following various mode and detection is performed successfully.
+
+- HS400	w/ 8-bit
+- HS400	w/ 4-bit	: HS200 mode is selected(Because HS400 is possible with 8-bit)
+- HS200	w/ 4-bit or 8-bit 
+- DDR52	w/ 4-bit or 8-bit
+- High speed	w/ 1-bit, 4-bit or 8-bit
+- Backwards	w/ 1-bit, 4-bit or 8-bit
+
+I really appreciate your deep reviews.
+
+Thanks,
+Seungwon Jeon
 
