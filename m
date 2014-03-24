@@ -1,86 +1,88 @@
-From: Andrew Bresticker <abrestic@chromium.org>
-Subject: [PATCH V2] mmc: sdhci: don't read cd-gpio while holding spinlock
-Date: Sun, 23 Mar 2014 18:43:00 -0700
-Message-ID: <1395625380-12507-1-git-send-email-abrestic@chromium.org>
-References: <1395341232-14490-1-git-send-email-abrestic@chromium.org>
+From: Yuvaraj Kumar C D <yuvaraj.cd@gmail.com>
+Subject: [PATCH] mmc: dw_mmc: Fix the max_blk_count in IDMAC
+Date: Mon, 24 Mar 2014 09:23:38 +0530
+Message-ID: <1395633218-23766-1-git-send-email-yuvaraj.cd@samsung.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-oa0-f73.google.com ([209.85.219.73]:61339 "EHLO
-	mail-oa0-f73.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751729AbaCXBnF (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 23 Mar 2014 21:43:05 -0400
-Received: by mail-oa0-f73.google.com with SMTP id n16so891215oag.2
-        for <linux-mmc@vger.kernel.org>; Sun, 23 Mar 2014 18:43:04 -0700 (PDT)
-In-Reply-To: <1395341232-14490-1-git-send-email-abrestic@chromium.org>
+Received: from mail-pd0-f174.google.com ([209.85.192.174]:47610 "EHLO
+	mail-pd0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750900AbaCXDxw (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 23 Mar 2014 23:53:52 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <chris@printf.net>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Adrian Hunter <adrian.hunter@intel.com>, Andrew Bresticker <abrestic@chromium.org>
+To: grundler@chromium.org, linux-samsung-soc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, jh80.chung@samsung.com, cjb@laptop.org, tgih.jun@samsung.com, linux-mmc@vger.kernel.org, sonnyrao@chromium.org, kgene.kim@samsung.com, joshi@samsung.com
+Cc: t.figa@samsung.com, Alim Akhtar <alim.akhtar@samsung.com>, Yuvaraj Kumar C D <yuvaraj.cd@samsung.com>
 
-sdhci_request() and sdhci_card_event() read the cd-gpio via
-mmc_gpio_get_cd(), which can sleep, while holding host->lock.
-This may result in the following BUG:
+From: Alim Akhtar <alim.akhtar@samsung.com>
 
-  BUG: spinlock wrong CPU on CPU#2, kworker/u8:16/4296
-  lock: 0xea6b9c80, .magic: dead4ead, .owner: kworker/u8:16/4296, .owner_cpu: 0
-  CPU: 2 PID: 4296 Comm: kworker/u8:16 Tainted: G         C   3.10.18 #137
-  Workqueue: kmmcd mmc_rescan
-  [<8020cf8c>] (unwind_backtrace+0x0/0x118) from [<8020a0c8>] (show_stack+0x20/0x24)
-  [<8020a0c8>] (show_stack+0x20/0x24) from [<8075e5b8>] (dump_stack+0x20/0x28)
-  [<8075e5b8>] (dump_stack+0x20/0x28) from [<804184a8>] (spin_dump+0x80/0x94)
-  [<804184a8>] (spin_dump+0x80/0x94) from [<804184e8>] (spin_bug+0x2c/0x30)
-  [<804184e8>] (spin_bug+0x2c/0x30) from [<80418790>] (do_raw_spin_unlock+0x94/0xd4)
-  [<80418790>] (do_raw_spin_unlock+0x94/0xd4) from [<80761a44>] (_raw_spin_unlock_irqrestore+0x1c/0x24)
-  [<80761a44>] (_raw_spin_unlock_irqrestore+0x1c/0x24) from [<805ff66c>] (sdhci_request+0x1c8/0x1d0)
-  [<805ff66c>] (sdhci_request+0x1c8/0x1d0) from [<805ebb5c>] (mmc_start_request+0xec/0xf4)
-  [<805ebb5c>] (mmc_start_request+0xec/0xf4) from [<805ebcbc>] (mmc_wait_for_req+0x80/0xf4)
-  ...
+max_blk_count is currently set incorrectly, and the correct value can
+be determined by looking at the maximum number of bytes which can be
+transferred and the block size.  We use the maximum block size to
+determine the minimum number of blocks that the controller should
+support.  It could probably do more with a smaller block size but this
+value should be sufficient for good performance.
 
-Read the cd-gpio before acquiring the spinlock instead.
+This improves sequential performance by 82% on write and 6% read on
+one particular device.
 
-Signed-off-by: Andrew Bresticker <abrestic@chromium.org>
+TEST= with this patch
+	time dd if=/dev/zero of=/usr/local/100 bs=1M count=100 conv=fdatasync
+	100+0 records in
+	100+0 records out
+	104857600 bytes (105 MB) copied, 2.62541 s, 39.9 MB/s
+
+	real    0m2.638s
+	user    0m0.000s
+	sys     0m0.645s
+
+	without this patch:
+	time dd if=/dev/zero of=/usr/local/100 bs=1M count=100 conv=fdatasync
+	100+0 records in
+	100+0 records out
+	104857600 bytes (105 MB) copied, 3.25873 s, 32.2 MB/s
+
+	real    0m3.265s
+	user    0m0.005s
+	sys     0m0.690s
+
+Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
+Signed-off-by: Alim Akhtar <alim.akhtar@samsung.com>
+Signed-off-by: Sonny Rao <sonnyrao@chromium.org>
+Signed-off-by: Yuvaraj Kumar C D <yuvaraj.cd@samsung.com>
 ---
- drivers/mmc/host/sdhci.c | 7 ++++---
- 1 file changed, 4 insertions(+), 3 deletions(-)
+ drivers/mmc/host/dw_mmc.c |   18 ++++++++++++++++--
+ 1 file changed, 16 insertions(+), 2 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 04a5e25..328b250 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -1340,6 +1340,7 @@ static void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
- 	u32 tuning_opcode;
- 
- 	host = mmc_priv(mmc);
-+	present = mmc_gpio_get_cd(host->mmc);
- 
- 	sdhci_runtime_pm_get(host);
- 
-@@ -1371,7 +1372,6 @@ static void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
- 	 *     zero: cd-gpio is used, and card is removed
- 	 *     one: cd-gpio is used, and card is present
- 	 */
--	present = mmc_gpio_get_cd(host->mmc);
- 	if (present < 0) {
- 		/* If polling, assume that the card is always present. */
- 		if (host->quirks & SDHCI_QUIRK_BROKEN_CARD_DETECTION)
-@@ -2082,15 +2082,16 @@ static void sdhci_card_event(struct mmc_host *mmc)
- {
- 	struct sdhci_host *host = mmc_priv(mmc);
- 	unsigned long flags;
-+	int present;
- 
- 	/* First check if client has provided their own card event */
- 	if (host->ops->card_event)
- 		host->ops->card_event(host);
- 
-+	present = sdhci_get_cd(mmc);
- 	spin_lock_irqsave(&host->lock, flags);
- 
--	/* Check host->mrq first in case we are runtime suspended */
--	if (host->mrq && !sdhci_do_get_cd(host)) {
-+	if (host->mrq && !present) {
- 		pr_err("%s: Card removed during transfer!\n",
- 			mmc_hostname(host->mmc));
- 		pr_err("%s: Resetting controller.\n",
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index 0c56faa..2fc4030 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -2213,10 +2213,24 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
+ 		/* Useful defaults if platform data is unset. */
+ #ifdef CONFIG_MMC_DW_IDMAC
+ 		mmc->max_segs = host->ring_size;
++
++		/* the BLKSIZ register is 16-bits wide */
+ 		mmc->max_blk_size = 65536;
+-		mmc->max_blk_count = host->ring_size;
++
++		/*
++		 * This value is calculated by taking the size of the
++		 * 32-bit BYTCNT (byte count) register and dividing by the
++		 * BLKSIZ (block size) register.  This is the minimum number
++		 * of blocks which could be handled.
++		 */
++		mmc->max_blk_count = 0xFFFF;
+ 		mmc->max_seg_size = 0x1000;
+-		mmc->max_req_size = mmc->max_seg_size * mmc->max_blk_count;
++		/*
++		 * Maximum request size should be total number of descriptors
++		 * times the maximum amount of data each can reference
++		 */
++
++		mmc->max_req_size = mmc->max_seg_size * mmc->max_segs;
+ #else
+ 		mmc->max_segs = 64;
+ 		mmc->max_blk_size = 65536; /* BLKSIZ is 16 bits */
 -- 
-1.9.1.423.g4596e3a
+1.7.10.4
 
