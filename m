@@ -1,280 +1,152 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH RESEND 1/2] mmc: mxcmmc: Convert to devm-* API
-Date: Mon, 24 Mar 2014 10:29:45 +0100
-Message-ID: <CAPDyKFoJ_NFdhr9b+yPqo8jpTjpjjP9+KvnoDrvxDae75Ed2qQ@mail.gmail.com>
-References: <1395478366-6276-1-git-send-email-shc_work@mail.ru>
+From: Dmitry Lifshitz <lifshitz@compulab.co.il>
+Subject: Re: [PATCH v9 resend 1/3] mmc: omap_hsmmc: Enable SDIO interrupt
+Date: Mon, 24 Mar 2014 11:30:43 +0200
+Message-ID: <532FFB43.5020408@compulab.co.il>
+References: <1395404448-30030-1-git-send-email-afenkart@gmail.com> <1395404448-30030-2-git-send-email-afenkart@gmail.com> <532C6489.4050307@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qc0-f177.google.com ([209.85.216.177]:43224 "EHLO
-	mail-qc0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752024AbaCXJ3q (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 24 Mar 2014 05:29:46 -0400
-Received: by mail-qc0-f177.google.com with SMTP id w7so5472365qcr.8
-        for <linux-mmc@vger.kernel.org>; Mon, 24 Mar 2014 02:29:45 -0700 (PDT)
-In-Reply-To: <1395478366-6276-1-git-send-email-shc_work@mail.ru>
+Received: from softlayer.compulab.co.il ([50.23.254.55]:40858 "EHLO
+	compulab.co.il" rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752259AbaCXJbW (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 24 Mar 2014 05:31:22 -0400
+In-Reply-To: <532C6489.4050307@ti.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Alexander Shiyan <shc_work@mail.ru>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Sascha Hauer <s.hauer@pengutronix.de>, Anatolij Gustschin <agust@denx.de>
+To: Balaji T K <balajitk@ti.com>
+Cc: Andreas Fenkart <afenkart@gmail.com>, Tony Lindgren <tony@atomide.com>, Chris Ball <chris@printf.net>, Grant Likely <grant.likely@secretlab.ca>, Felipe Balbi <balbi@ti.com>, zonque@gmail.com, galak@codeaurora.org, linux-doc@vger.kernel.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org
 
-On 22 March 2014 09:52, Alexander Shiyan <shc_work@mail.ru> wrote:
-> Replace existing resource handling in the driver with managed
-> device resource, this ensures more consistent error values and
-> simplifies error paths.
->
-> Signed-off-by: Alexander Shiyan <shc_work@mail.ru>
-> ---
->  drivers/mmc/host/mxcmmc.c | 101 +++++++++++++++++-----------------------------
->  1 file changed, 38 insertions(+), 63 deletions(-)
->
-> diff --git a/drivers/mmc/host/mxcmmc.c b/drivers/mmc/host/mxcmmc.c
-> index f7199c8..84d630e 100644
-> --- a/drivers/mmc/host/mxcmmc.c
-> +++ b/drivers/mmc/host/mxcmmc.c
-> @@ -124,9 +124,8 @@ enum mxcmci_type {
->
->  struct mxcmci_host {
->         struct mmc_host         *mmc;
-> -       struct resource         *res;
->         void __iomem            *base;
-> -       int                     irq;
-> +       dma_addr_t              phys_base;
->         int                     detect_irq;
->         struct dma_chan         *dma;
->         struct dma_async_tx_descriptor *desc;
-> @@ -241,33 +240,26 @@ static inline void mxcmci_writew(struct mxcmci_host *host, u16 val, int reg)
->
->  static void mxcmci_set_clk_rate(struct mxcmci_host *host, unsigned int clk_ios);
->
-> -static inline void mxcmci_init_ocr(struct mxcmci_host *host)
-> +static void mxcmci_init_ocr(struct mxcmci_host *host)
->  {
-> -       host->vcc = regulator_get(mmc_dev(host->mmc), "vmmc");
-> -
-> +       host->vcc = devm_regulator_get(mmc_dev(host->mmc), "vmmc");
+Hi,
 
-A semi-related comment to this patch. May I suggest you post a follow
-up patch on top of this one, which convert to use the
-mmc_regulator_get_supply() API.
+I've tested the branch omap_hsmmc_sdio_irq_devm_cleanup on custom OMAP5 
+based board.
+We have mwifiex connected to MMC3.
+
+I used two approaches:
+
+* Using dat1 line as GPIO with dynamic remuxing
+* Using separate GPIO connected to dat1 with static mux settings
+
+Both works just fine. Thanks Andreas for a great solution.
+
+I have just one issue - how to define GPIO IRQ using DT in OMAP5 case.
+As a temporary hack for testing I used a fixed GPIO number and 
+gpio_to_irq() call in omap_hsmmc_configure_wake_irq().
+
+OMAP5 MMC3 has the following DT entry (omap5.dtsi):
+
+                 mmc3: mmc@480ad000 {
+                         compatible = "ti,omap4-hsmmc";
+                         reg = <0x480ad000 0x400>;
+                         interrupts = <GIC_SPI 94 IRQ_TYPE_LEVEL_HIGH>;
+                         ti,hwmods = "mmc3";
+                         ti,needs-special-reset;
+                         dmas = <&sdma 77>, <&sdma 78>;
+                         dma-names = "tx", "rx";
+                 };
+
+What should be by board MMC3 setup?
+
+Something like this?
+
+&mmc3 {
+         pinctrl-names = "default", "active", "idle";
+         pinctrl-0 = <&mmc3_pins>;
+         pinctrl-1 = <&mmc3_pins>;
+         pinctrl-2 = <&mmc3_cirq_pin>;
+
+         interrupts = <GIC_SPI 94 IRQ_TYPE_LEVEL_HIGH>,
+                             <????????>;
+
+         vmmc-supply = <&ldo2_reg>;
+         bus-width = <4>;
+         ti,non-removable;
+};
+
+I tried to specify the second interrupt as (wlsdio_data1 / gpio5_131):
+
+<&gpio5 3 IRQ_TYPE_NONE>
+
+but it fails:
+
+[    2.275777] ------------[ cut here ]------------
+[    2.280604] WARNING: CPU: 1 PID: 6 at 
+/home/lifshitz/workroot/OMAP5-eewiki/omap5-kernel/kernel/irq/manage.c:1418 
+request_threaded_irq+0x11c/0x12c()
+[    2.294414] Modules linked in:
+[    2.297611] CPU: 1 PID: 6 Comm: kworker/u4:0 Tainted: G W    
+3.14.0-rc4-cm-t54-test-suit+ #30
+[    2.307165] Workqueue: deferwq deferred_probe_work_func
+[    2.312629] [<c001597c>] (unwind_backtrace) from [<c001283c>] 
+(show_stack+0x10/0x14)
+[    2.320739] [<c001283c>] (show_stack) from [<c06494dc>] 
+(dump_stack+0x70/0x88)
+[    2.328294] [<c06494dc>] (dump_stack) from [<c003a520>] 
+(warn_slowpath_common+0x70/0x88)
+[    2.336761] [<c003a520>] (warn_slowpath_common) from [<c003a554>] 
+(warn_slowpath_null+0x1c/0x24)
+[    2.345940] [<c003a554>] (warn_slowpath_null) from [<c0083ce4>] 
+(request_threaded_irq+0x11c/0x12c)
+[    2.355312] [<c0083ce4>] (request_threaded_irq) from [<c0085964>] 
+(devm_request_threaded_irq+0x5c/0x90)
+[    2.361973] mmc1: host does not support reading read-only switch. 
+assuming write-enable.
+[    2.362020] mmc1: new SDHC card at address e624
+[    2.362331] mmcblk1: mmc1:e624 SU08G 7.40 GiB
+[    2.368152]  mmcblk1: p1 p2
+[    2.385850] [<c0085964>] (devm_request_threaded_irq) from 
+[<c047d958>] (omap_hsmmc_configure_wake_irq+0x7c/0xfc)
+[    2.393150] usb 1-2: New USB device found, idVendor=0424, idProduct=3503
+[    2.393156] usb 1-2: New USB device strings: Mfr=0, Product=0, 
+SerialNumber=0
+[    2.393674] hub 1-2:1.0: USB hub found
+[    2.393769] hub 1-2:1.0: 3 ports detected
+[    2.419038] [<c047d958>] (omap_hsmmc_configure_wake_irq) from 
+[<c047ea28>] (omap_hsmmc_probe+0x5b4/0x854)
+[    2.429052] [<c047ea28>] (omap_hsmmc_probe) from [<c0359ec0>] 
+(platform_drv_probe+0x18/0x48)
+[    2.437879] [<c0359ec0>] (platform_drv_probe) from [<c03580c8>] 
+(really_probe+0x80/0x208)
+[    2.446427] [<c03580c8>] (really_probe) from [<c0358360>] 
+(driver_probe_device+0x30/0x48)
+[    2.454976] [<c0358360>] (driver_probe_device) from [<c0356a58>] 
+(bus_for_each_drv+0x5c/0x88)
+[    2.463891] [<c0356a58>] (bus_for_each_drv) from [<c03582f4>] 
+(device_attach+0x80/0xa0)
+[    2.472247] [<c03582f4>] (device_attach) from [<c03577b4>] 
+(bus_probe_device+0x84/0xa8)
+[    2.480617] [<c03577b4>] (bus_probe_device) from [<c0357bb8>] 
+(deferred_probe_work_func+0x68/0x98)
+[    2.489987] [<c0357bb8>] (deferred_probe_work_func) from [<c00533c0>] 
+(process_one_work+0x150/0x41c)
+[    2.499542] [<c00533c0>] (process_one_work) from [<c0053d10>] 
+(worker_thread+0xf4/0x31c)
+[    2.508011] [<c0053d10>] (worker_thread) from [<c0059994>] 
+(kthread+0xd4/0xe8)
+[    2.512785] usb 1-3: new high-speed USB device number 3 using ehci-omap
+[    2.522474] [<c0059994>] (kthread) from [<c000e878>] 
+(ret_from_fork+0x14/0x3c)
+[    2.530023] ---[ end trace 8d60f1d3adba88d7 ]---
 
 
->         if (IS_ERR(host->vcc)) {
-> -               host->vcc = NULL;
-> +               if (host->pdata && host->pdata->ocr_avail)
-> +                       host->mmc->ocr_avail = host->pdata->ocr_avail;
-> +               else
-> +                       host->mmc->ocr_avail = MMC_VDD_32_33 | MMC_VDD_33_34;
->         } else {
->                 host->mmc->ocr_avail = mmc_regulator_get_ocrmask(host->vcc);
->                 if (host->pdata && host->pdata->ocr_avail)
->                         dev_warn(mmc_dev(host->mmc),
->                                 "pdata->ocr_avail will not be used\n");
->         }
-> -
-> -       if (host->vcc == NULL) {
-> -               /* fall-back to platform data */
-> -               if (host->pdata && host->pdata->ocr_avail)
-> -                       host->mmc->ocr_avail = host->pdata->ocr_avail;
-> -               else
-> -                       host->mmc->ocr_avail = MMC_VDD_32_33 | MMC_VDD_33_34;
-> -       }
->  }
->
-> -static inline void mxcmci_set_power(struct mxcmci_host *host,
-> -                                   unsigned char power_mode,
-> -                                   unsigned int vdd)
-> +static void mxcmci_set_power(struct mxcmci_host *host, unsigned char power_mode,
-> +                            unsigned int vdd)
->  {
-> -       if (host->vcc) {
-> +       if (!IS_ERR(host->vcc)) {
->                 if (power_mode == MMC_POWER_UP)
->                         mmc_regulator_set_ocr(host->mmc, host->vcc, vdd);
->                 else if (power_mode == MMC_POWER_OFF)
-> @@ -299,7 +291,6 @@ static void mxcmci_softreset(struct mxcmci_host *host)
->
->         mxcmci_writew(host, 0xff, MMC_REG_RES_TO);
->  }
-> -static int mxcmci_setup_dma(struct mmc_host *mmc);
->
->  #if IS_ENABLED(CONFIG_PPC_MPC512x)
->  static inline void buffer_swap32(u32 *buf, int len)
-> @@ -868,8 +859,8 @@ static int mxcmci_setup_dma(struct mmc_host *mmc)
->         struct mxcmci_host *host = mmc_priv(mmc);
->         struct dma_slave_config *config = &host->dma_slave_config;
->
-> -       config->dst_addr = host->res->start + MMC_REG_BUFFER_ACCESS;
-> -       config->src_addr = host->res->start + MMC_REG_BUFFER_ACCESS;
-> +       config->dst_addr = host->phys_base + MMC_REG_BUFFER_ACCESS;
-> +       config->src_addr = host->phys_base + MMC_REG_BUFFER_ACCESS;
->         config->dst_addr_width = 4;
->         config->src_addr_width = 4;
->         config->dst_maxburst = host->burstlen;
-> @@ -1040,8 +1031,8 @@ static const struct mmc_host_ops mxcmci_ops = {
->  static int mxcmci_probe(struct platform_device *pdev)
->  {
->         struct mmc_host *mmc;
-> -       struct mxcmci_host *host = NULL;
-> -       struct resource *iores, *r;
-> +       struct mxcmci_host *host;
-> +       struct resource *res;
->         int ret = 0, irq;
->         bool dat3_card_detect = false;
->         dma_cap_mask_t mask;
-> @@ -1052,21 +1043,25 @@ static int mxcmci_probe(struct platform_device *pdev)
->
->         of_id = of_match_device(mxcmci_of_match, &pdev->dev);
->
-> -       iores = platform_get_resource(pdev, IORESOURCE_MEM, 0);
-> +       res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
->         irq = platform_get_irq(pdev, 0);
-> -       if (!iores || irq < 0)
-> +       if (irq < 0)
->                 return -EINVAL;
->
-> -       r = request_mem_region(iores->start, resource_size(iores), pdev->name);
-> -       if (!r)
-> -               return -EBUSY;
-> +       mmc = mmc_alloc_host(sizeof(*host), &pdev->dev);
-> +       if (!mmc)
-> +               return -ENOMEM;
->
-> -       mmc = mmc_alloc_host(sizeof(struct mxcmci_host), &pdev->dev);
-> -       if (!mmc) {
-> -               ret = -ENOMEM;
-> -               goto out_release_mem;
-> +       host = mmc_priv(mmc);
-> +
-> +       host->base = devm_ioremap_resource(&pdev->dev, res);
-> +       if (IS_ERR(host->base)) {
-> +               ret = PTR_ERR(host->base);
-> +               goto out_free;
->         }
->
-> +       host->phys_base = res->start;
-> +
->         ret = mmc_of_parse(mmc);
->         if (ret)
->                 goto out_free;
-> @@ -1084,13 +1079,6 @@ static int mxcmci_probe(struct platform_device *pdev)
->         mmc->max_req_size = mmc->max_blk_size * mmc->max_blk_count;
->         mmc->max_seg_size = mmc->max_req_size;
->
-> -       host = mmc_priv(mmc);
-> -       host->base = ioremap(r->start, resource_size(r));
-> -       if (!host->base) {
-> -               ret = -ENOMEM;
-> -               goto out_free;
-> -       }
-> -
->         if (of_id) {
->                 const struct platform_device_id *id_entry = of_id->data;
->                 host->devtype = id_entry->driver_data;
-> @@ -1120,19 +1108,16 @@ static int mxcmci_probe(struct platform_device *pdev)
->         else
->                 host->default_irq_mask = 0;
->
-> -       host->res = r;
-> -       host->irq = irq;
-> -
->         host->clk_ipg = devm_clk_get(&pdev->dev, "ipg");
->         if (IS_ERR(host->clk_ipg)) {
->                 ret = PTR_ERR(host->clk_ipg);
-> -               goto out_iounmap;
-> +               goto out_free;
->         }
->
->         host->clk_per = devm_clk_get(&pdev->dev, "per");
->         if (IS_ERR(host->clk_per)) {
->                 ret = PTR_ERR(host->clk_per);
-> -               goto out_iounmap;
-> +               goto out_free;
->         }
->
->         clk_prepare_enable(host->clk_per);
-> @@ -1159,9 +1144,9 @@ static int mxcmci_probe(struct platform_device *pdev)
->         if (!host->pdata) {
->                 host->dma = dma_request_slave_channel(&pdev->dev, "rx-tx");
->         } else {
-> -               r = platform_get_resource(pdev, IORESOURCE_DMA, 0);
-> -               if (r) {
-> -                       host->dmareq = r->start;
-> +               res = platform_get_resource(pdev, IORESOURCE_DMA, 0);
-> +               if (res) {
-> +                       host->dmareq = res->start;
->                         host->dma_data.peripheral_type = IMX_DMATYPE_SDHC;
->                         host->dma_data.priority = DMA_PRIO_LOW;
->                         host->dma_data.dma_request = host->dmareq;
-> @@ -1178,7 +1163,8 @@ static int mxcmci_probe(struct platform_device *pdev)
->
->         INIT_WORK(&host->datawork, mxcmci_datawork);
->
-> -       ret = request_irq(host->irq, mxcmci_irq, 0, DRIVER_NAME, host);
-> +       ret = devm_request_irq(&pdev->dev, irq, mxcmci_irq, 0,
-> +                              dev_name(&pdev->dev), host);
->         if (ret)
->                 goto out_free_dma;
->
-> @@ -1188,7 +1174,7 @@ static int mxcmci_probe(struct platform_device *pdev)
->                 ret = host->pdata->init(&pdev->dev, mxcmci_detect_irq,
->                                 host->mmc);
->                 if (ret)
-> -                       goto out_free_irq;
-> +                       goto out_free_dma;
->         }
->
->         init_timer(&host->watchdog);
-> @@ -1199,20 +1185,17 @@ static int mxcmci_probe(struct platform_device *pdev)
->
->         return 0;
->
-> -out_free_irq:
-> -       free_irq(host->irq, host);
->  out_free_dma:
->         if (host->dma)
->                 dma_release_channel(host->dma);
-> +
->  out_clk_put:
->         clk_disable_unprepare(host->clk_per);
->         clk_disable_unprepare(host->clk_ipg);
-> -out_iounmap:
-> -       iounmap(host->base);
-> +
->  out_free:
->         mmc_free_host(mmc);
-> -out_release_mem:
-> -       release_mem_region(iores->start, resource_size(iores));
-> +
->         return ret;
->  }
->
-> @@ -1223,23 +1206,15 @@ static int mxcmci_remove(struct platform_device *pdev)
->
->         mmc_remove_host(mmc);
->
-> -       if (host->vcc)
-> -               regulator_put(host->vcc);
-> -
->         if (host->pdata && host->pdata->exit)
->                 host->pdata->exit(&pdev->dev, mmc);
->
-> -       free_irq(host->irq, host);
-> -       iounmap(host->base);
-> -
->         if (host->dma)
->                 dma_release_channel(host->dma);
->
->         clk_disable_unprepare(host->clk_per);
->         clk_disable_unprepare(host->clk_ipg);
->
-> -       release_mem_region(host->res->start, resource_size(host->res));
-> -
->         mmc_free_host(mmc);
->
->         return 0;
-> --
-> 1.8.3.2
->
+Regards,
 
-Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
+Dmitry
+
+On 03/21/2014 06:10 PM, Balaji T K wrote:
+> On Friday 21 March 2014 05:50 PM, Andreas Fenkart wrote:
+>
+> Thanks Andreas for the patch series
+>
+> I rebased against latest mmc-next, made few changes to your patch.
+> I have hosted your series along with devm cleanups on a branch[1] for 
+> testing
+> [1]
+> git://git.ti.com/~balajitk/ti-linux-kernel/omap-hsmmc.git 
+> omap_hsmmc_sdio_irq_devm_cleanup
+>
+> Can you please test on your platform and provide feedback.
+>
+> Details about the changes below.
+
