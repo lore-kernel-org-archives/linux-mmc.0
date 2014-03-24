@@ -1,521 +1,399 @@
-From: Andreas Fenkart <afenkart@gmail.com>
-Subject: Re: [PATCH 6/9] mmc: omap_hsmmc: Enable SDIO interrupt
-Date: Mon, 24 Mar 2014 15:59:33 +0100
-Message-ID: <CALtMJECaQrGhMmJjK+tvce3iSEGMUx==pOmMECU-smy=0fyZ3Q@mail.gmail.com>
-References: <1395404448-30030-2-git-send-email-afenkart@gmail.com>
-	<1395418658-2375-1-git-send-email-balajitk@ti.com>
-	<1395418658-2375-7-git-send-email-balajitk@ti.com>
-	<CAPDyKFqzDS0CX60BVcFx1+kJR840qkyEU6CtATkZSEd8F2z26w@mail.gmail.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v3 5/5] mmc: add support for HS400 mode of eMMC5.0
+Date: Mon, 24 Mar 2014 16:41:24 +0100
+Message-ID: <CAPDyKFryCNh_SL=f9qZnf1L1UeTW2fZvzTFbZ3zv13JV28FM+A@mail.gmail.com>
+References: <1383653403-10049-1-git-send-email-ulf.hansson@linaro.org>
+	<006c01cf2a59$aeb38410$0c1a8c30$%jun@samsung.com>
+	<003f01cf3f7f$46fb6230$d4f22690$%jun@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qc0-f178.google.com ([209.85.216.178]:38897 "EHLO
-	mail-qc0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753220AbaCXO7e (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 24 Mar 2014 10:59:34 -0400
-In-Reply-To: <CAPDyKFqzDS0CX60BVcFx1+kJR840qkyEU6CtATkZSEd8F2z26w@mail.gmail.com>
+Received: from mail-qg0-f41.google.com ([209.85.192.41]:37260 "EHLO
+	mail-qg0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752663AbaCXPlZ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 24 Mar 2014 11:41:25 -0400
+Received: by mail-qg0-f41.google.com with SMTP id i50so17128330qgf.0
+        for <linux-mmc@vger.kernel.org>; Mon, 24 Mar 2014 08:41:25 -0700 (PDT)
+In-Reply-To: <003f01cf3f7f$46fb6230$d4f22690$%jun@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Balaji T K <balajitk@ti.com>, Tony Lindgren <tony@atomide.com>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, linux-omap <linux-omap@vger.kernel.org>
+To: Seungwon Jeon <tgih.jun@samsung.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Jaehoon Chung <jh80.chung@samsung.com>, Jackey Shen <jackey.shen@amd.com>, Alim Akhtar <alim.akhtar@samsung.com>
 
-Hi,
-
-2014-03-24 13:43 GMT+01:00 Ulf Hansson <ulf.hansson@linaro.org>:
-> On 21 March 2014 17:17, Balaji T K <balajitk@ti.com> wrote:
->> From: Andreas Fenkart <afenkart@gmail.com>
->>
->> There have been various patches floating around for enabling
->> the SDIO IRQ for hsmmc, but none of them ever got merged.
->>
->> Probably the reason for not merging the SDIO interrupt patches
->> has been the lack of wake-up path for SDIO on some omaps that
->> has also needed remuxing the SDIO DAT1 line to a GPIO making
->> the patches complex.
->>
->> This patch adds the minimal SDIO IRQ support to hsmmc for
->> omaps that do have the wake-up path. For those omaps, the
->> DAT1 line need to have the wake-up enable bit set, and the
->> wake-up interrupt is the same as for the MMC controller.
->>
->> This patch has been tested on am3730 es1.2 with mwifiex
->> connected to MMC3 with mwifiex waking to Ethernet traffic
->> from off-idle mode. Note that for omaps that do not have
->> the SDIO wake-up path, this patch will not work for idle
->> modes and further patches for remuxing DAT1 to GPIO are
->> needed.
->>
->> Based on earlier patches [1][2] by David Vrabel
->> <david.vrabel@csr.com>, Steve Sakoman <steve@sakoman.com>
->> and Andreas Fenkart <afenkart@gmail.com> with the SDIO IRQ
->> handing improved following how sdhci.c is doing it.
->>
->> For now, only support SDIO interrupt if we are booted with
->> a separate wake-irq configued via device tree. This is
->> because omaps need the wake-irq for idle states, and some
->> omaps need special quirks. And we don't want to add new
->> legacy mux platform init code callbacks any longer as we
->> are moving to DT based booting anyways.
->>
->> To use it, you need to specify the wake-irq using the
->> interrupts-extended property.
->>
->> [1] http://www.sakoman.com/cgi-bin/gitweb.cgi?p=linux.git;a=commitdiff_plain;h=010810d22f6f49ac03da4ba384969432e0320453
->> [2] http://comments.gmane.org/gmane.linux.kernel.mmc/20446
->>
->> Signed-off-by: Andreas Fenkart <afenkart@gmail.com>
->> Signed-off-by: Tony Lindgren <tony@atomide.com>
->> Signed-off-by: Balaji T K <balajitk@ti.com>
->> ---
->>  drivers/mmc/host/omap_hsmmc.c          |  207 ++++++++++++++++++++++++++++++--
->>  include/linux/platform_data/mmc-omap.h |    1 +
->>  2 files changed, 196 insertions(+), 12 deletions(-)
->>
->> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
->> index 38a75bc..0275e0a 100644
->> --- a/drivers/mmc/host/omap_hsmmc.c
->> +++ b/drivers/mmc/host/omap_hsmmc.c
->> @@ -29,6 +29,7 @@
->>  #include <linux/timer.h>
->>  #include <linux/clk.h>
->>  #include <linux/of.h>
->> +#include <linux/of_irq.h>
->>  #include <linux/of_gpio.h>
->>  #include <linux/of_device.h>
->>  #include <linux/omap-dma.h>
->> @@ -36,6 +37,7 @@
->>  #include <linux/mmc/core.h>
->>  #include <linux/mmc/mmc.h>
->>  #include <linux/io.h>
->> +#include <linux/irq.h>
->>  #include <linux/gpio.h>
->>  #include <linux/regulator/consumer.h>
->>  #include <linux/pinctrl/consumer.h>
->> @@ -106,6 +108,7 @@
->>  #define TC_EN                  (1 << 1)
->>  #define BWR_EN                 (1 << 4)
->>  #define BRR_EN                 (1 << 5)
->> +#define CIRQ_EN                        (1 << 8)
->>  #define ERR_EN                 (1 << 15)
->>  #define CTO_EN                 (1 << 16)
->>  #define CCRC_EN                        (1 << 17)
->> @@ -140,7 +143,6 @@
->>  #define VDD_3V0                        3000000         /* 300000 uV */
->>  #define VDD_165_195            (ffs(MMC_VDD_165_195) - 1)
->>
->> -#define AUTO_CMD23             (1 << 1)        /* Auto CMD23 support */
->>  /*
->>   * One controller can have multiple slots, like on some omap boards using
->>   * omap.c controller driver. Luckily this is not currently done on any known
->> @@ -194,6 +196,7 @@ struct omap_hsmmc_host {
->>         u32                     sysctl;
->>         u32                     capa;
->>         int                     irq;
->> +       int                     wake_irq;
->>         int                     use_dma, dma_ch;
->>         struct dma_chan         *tx_chan;
->>         struct dma_chan         *rx_chan;
->> @@ -206,6 +209,11 @@ struct omap_hsmmc_host {
->>         int                     req_in_progress;
->>         unsigned long           clk_rate;
->>         unsigned int            flags;
->> +#define HSMMC_RUNTIME_SUSPENDED (1 << 0)
->> +#define AUTO_CMD23             (1 << 1)        /* Auto CMD23 support */
-
-merge conflict here? I do not use HSMMC_RUNTIME_SUSPEND anymore
-and of course, neither do I define AUTO_CMD23. :-)
-
->> +#define HSMMC_SWAKEUP_QUIRK    (1 << 2)
->> +#define HSMMC_SDIO_IRQ_ENABLED (1 << 3)        /* SDIO irq enabled */
->> +#define HSMMC_WAKE_IRQ_ENABLED (1 << 4)
->>         struct omap_hsmmc_next  next_data;
->>         struct  omap_mmc_platform_data  *pdata;
->>  };
->> @@ -510,27 +518,40 @@ static void omap_hsmmc_stop_clock(struct omap_hsmmc_host *host)
->>  static void omap_hsmmc_enable_irq(struct omap_hsmmc_host *host,
->>                                   struct mmc_command *cmd)
->>  {
->> -       unsigned int irq_mask;
->> +       u32 irq_mask = INT_EN_MASK;
->> +       unsigned long flags;
->>
->>         if (host->use_dma)
->> -               irq_mask = INT_EN_MASK & ~(BRR_EN | BWR_EN);
->> -       else
->> -               irq_mask = INT_EN_MASK;
->> +               irq_mask &= ~(BRR_EN | BWR_EN);
->>
->>         /* Disable timeout for erases */
->>         if (cmd->opcode == MMC_ERASE)
->>                 irq_mask &= ~DTO_EN;
->>
->> +       spin_lock_irqsave(&host->irq_lock, flags);
->>         OMAP_HSMMC_WRITE(host->base, STAT, STAT_CLEAR);
->>         OMAP_HSMMC_WRITE(host->base, ISE, irq_mask);
->> +
->> +       /* latch pending CIRQ, but don't signal MMC core */
->> +       if (host->flags & HSMMC_SDIO_IRQ_ENABLED)
->> +               irq_mask |= CIRQ_EN;
->>         OMAP_HSMMC_WRITE(host->base, IE, irq_mask);
->> +       spin_unlock_irqrestore(&host->irq_lock, flags);
->>  }
->>
->>  static void omap_hsmmc_disable_irq(struct omap_hsmmc_host *host)
->>  {
->> -       OMAP_HSMMC_WRITE(host->base, ISE, 0);
->> -       OMAP_HSMMC_WRITE(host->base, IE, 0);
->> +       u32 irq_mask = 0;
->> +       unsigned long flags;
->> +
->> +       spin_lock_irqsave(&host->irq_lock, flags);
->> +       /* no transfer running but need to keep cirq if enabled */
->> +       if (host->flags & HSMMC_SDIO_IRQ_ENABLED)
->> +               irq_mask |= CIRQ_EN;
->> +       OMAP_HSMMC_WRITE(host->base, ISE, irq_mask);
->> +       OMAP_HSMMC_WRITE(host->base, IE, irq_mask);
->>         OMAP_HSMMC_WRITE(host->base, STAT, STAT_CLEAR);
->> +       spin_unlock_irqrestore(&host->irq_lock, flags);
->>  }
->>
->>  /* Calculate divisor for the given clock frequency */
->> @@ -1117,8 +1138,12 @@ static irqreturn_t omap_hsmmc_irq(int irq, void *dev_id)
->>         int status;
->>
->>         status = OMAP_HSMMC_READ(host->base, STAT);
->> -       while (status & INT_EN_MASK && host->req_in_progress) {
->> -               omap_hsmmc_do_irq(host, status);
->> +       while (status & (INT_EN_MASK | CIRQ_EN)) {
->> +               if (host->req_in_progress)
->> +                       omap_hsmmc_do_irq(host, status);
->> +
->> +               if (status & CIRQ_EN)
->> +                       mmc_signal_sdio_irq(host->mmc);
->>
->>                 /* Flush posted write */
->>                 status = OMAP_HSMMC_READ(host->base, STAT);
->> @@ -1127,6 +1152,24 @@ static irqreturn_t omap_hsmmc_irq(int irq, void *dev_id)
->>         return IRQ_HANDLED;
->>  }
->>
->> +static irqreturn_t omap_hsmmc_wake_irq(int irq, void *dev_id)
->> +{
->> +       struct omap_hsmmc_host *host = dev_id;
->> +       unsigned long flags;
->> +
->> +       /* cirq is level triggered, disable to avoid infinite loop */
->> +       spin_lock_irqsave(&host->irq_lock, flags);
->> +       if (host->flags & HSMMC_WAKE_IRQ_ENABLED) {
->> +               disable_irq_nosync(host->wake_irq);
->> +               host->flags &= ~HSMMC_WAKE_IRQ_ENABLED;
->> +       }
->> +       spin_unlock_irqrestore(&host->irq_lock, flags);
->> +
->> +       pm_request_resume(host->dev); /* no use counter */
->> +
->> +       return IRQ_HANDLED;
->> +}
->> +
->>  static void set_sd_bus_power(struct omap_hsmmc_host *host)
->>  {
->>         unsigned long i;
->> @@ -1638,6 +1681,81 @@ static void omap_hsmmc_init_card(struct mmc_host *mmc, struct mmc_card *card)
->>                 mmc_slot(host).init_card(card);
->>  }
->>
->> +static void omap_hsmmc_enable_sdio_irq(struct mmc_host *mmc, int enable)
->> +{
->> +       struct omap_hsmmc_host *host = mmc_priv(mmc);
->> +       u32 irq_mask;
->> +       unsigned long flags;
->> +
->> +       if (enable)
->> +               pm_runtime_get_sync(host->dev);
->> +       spin_lock_irqsave(&host->irq_lock, flags);
->> +       if (host->flags & HSMMC_RUNTIME_SUSPENDED)
->> +               goto out;
+On 14 March 2014 13:16, Seungwon Jeon <tgih.jun@samsung.com> wrote:
+> This patch adds HS400 mode support for eMMC5.0 device.
+> HS400 mode is high speed DDR interface timing from HS200.
+> Clock frequency is up to 200MHz and only 8-bit bus width is
+> supported. In addition, tuning process of HS200 is required
+> to synchronize the command response on the CMD line because
+> CMD input timing for HS400 mode is the same as HS200 mode.
 >
-> This seems wrong to me.
+> Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
+> Reviewed-by: Jackey Shen <jackey.shen@amd.com>
+> Tested-by: Jaehoon Chung <jh80.chung@samsung.com>
+> Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
+> ---
+>  drivers/mmc/core/bus.c     |    1 +
+>  drivers/mmc/core/debugfs.c |    3 +
+>  drivers/mmc/core/mmc.c     |  115 +++++++++++++++++++++++++++++++++++++++++--
+>  include/linux/mmc/card.h   |    1 +
+>  include/linux/mmc/host.h   |   15 +++++-
+>  include/linux/mmc/mmc.h    |    7 ++-
+>  6 files changed, 134 insertions(+), 8 deletions(-)
 >
-> What if the host is suspended (runtime PM wise) and you want to
-> disable SDIO irq.
-> Won't SDIO irq be kept enabled in this case?
-
-Whenever you enter this function the module is not suspended,
-mind that register accesses will fail without fclk. So before entering here,
-there must have been a  pm_runtime_resume somewhere.
-
+> diff --git a/drivers/mmc/core/bus.c b/drivers/mmc/core/bus.c
+> index f37e9d6..d2dbf02 100644
+> --- a/drivers/mmc/core/bus.c
+> +++ b/drivers/mmc/core/bus.c
+> @@ -349,6 +349,7 @@ int mmc_add_card(struct mmc_card *card)
+>                         mmc_hostname(card->host),
+>                         mmc_card_uhs(card) ? "ultra high speed " :
+>                         (mmc_card_hs(card) ? "high speed " : ""),
+> +                       mmc_card_hs400(card) ? "HS400 " :
+>                         (mmc_card_hs200(card) ? "HS200 " : ""),
+>                         mmc_card_ddr52(card) ? "DDR " : "",
+>                         uhs_bus_speed_mode, type, card->rca);
+> diff --git a/drivers/mmc/core/debugfs.c b/drivers/mmc/core/debugfs.c
+> index 1f730db..91eb162 100644
+> --- a/drivers/mmc/core/debugfs.c
+> +++ b/drivers/mmc/core/debugfs.c
+> @@ -141,6 +141,9 @@ static int mmc_ios_show(struct seq_file *s, void *data)
+>         case MMC_TIMING_MMC_HS200:
+>                 str = "mmc HS200";
+>                 break;
+> +       case MMC_TIMING_MMC_HS400:
+> +               str = "mmc HS400";
+> +               break;
+>         default:
+>                 str = "invalid";
+>                 break;
+> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+> index 6dd68e6..969d595 100644
+> --- a/drivers/mmc/core/mmc.c
+> +++ b/drivers/mmc/core/mmc.c
+> @@ -240,7 +240,7 @@ static int mmc_get_ext_csd(struct mmc_card *card, u8 **new_ext_csd)
+>  static void mmc_select_card_type(struct mmc_card *card)
+>  {
+>         struct mmc_host *host = card->host;
+> -       u8 card_type = card->ext_csd.raw_card_type & EXT_CSD_CARD_TYPE_MASK;
+> +       u8 card_type = card->ext_csd.raw_card_type;
+>         u32 caps = host->caps, caps2 = host->caps2;
+>         unsigned int hs_max_dtr = 0, hs200_max_dtr = 0;
+>         unsigned int avail_type = 0;
+> @@ -281,6 +281,18 @@ static void mmc_select_card_type(struct mmc_card *card)
+>                 avail_type |= EXT_CSD_CARD_TYPE_HS200_1_2V;
+>         }
 >
->> +
->> +       irq_mask = OMAP_HSMMC_READ(host->base, ISE);
->> +       if (enable) {
->> +               host->flags |= HSMMC_SDIO_IRQ_ENABLED;
->> +               irq_mask |= CIRQ_EN;
->> +       } else {
->> +               host->flags &= ~HSMMC_SDIO_IRQ_ENABLED;
->> +               irq_mask &= ~CIRQ_EN;
->> +       }
->> +       OMAP_HSMMC_WRITE(host->base, IE, irq_mask);
->> +
->> +       /*
->> +        * if enable, piggy back detection on current request
->> +        * but always disable immediately
->> +        */
->> +       if (!host->req_in_progress || !enable)
->> +               OMAP_HSMMC_WRITE(host->base, ISE, irq_mask);
->> +
->> +       /* flush posted write */
->> +       OMAP_HSMMC_READ(host->base, IE);
->> +
->> +out:
->> +       spin_unlock_irqrestore(&host->irq_lock, flags);
->> +       if (enable) {
->> +               pm_runtime_mark_last_busy(host->dev);
->> +               pm_runtime_put_autosuspend(host->dev);
->> +       }
->> +}
->> +
->> +static int omap_hsmmc_configure_wake_irq(struct omap_hsmmc_host *host)
->> +{
->> +       struct mmc_host *mmc = host->mmc;
->> +       int ret;
->> +
->> +       /*
->> +        * For omaps with wake-up path, wakeirq will be irq from pinctrl and
->> +        * for other omaps, wakeirq will be from GPIO (dat line remuxed to
->> +        * gpio). wakeirq is needed to detect sdio irq in runtime suspend state
->> +        * with functional clock disabled.
->> +        */
->> +       if (!host->dev->of_node || !host->wake_irq)
->> +               return -ENODEV;
->> +
->> +       /* Prevent auto-enabling of IRQ */
->> +       irq_set_status_flags(host->wake_irq, IRQ_NOAUTOEN);
->> +       ret = request_irq(host->wake_irq, omap_hsmmc_wake_irq,
->> +                         IRQF_TRIGGER_LOW | IRQF_ONESHOT,
->> +                         mmc_hostname(mmc), host);
->> +       if (ret) {
->> +               dev_err(mmc_dev(host->mmc),
->> +                       "Unable to request wake IRQ\n");
->> +               return ret;
->> +       }
->> +
->> +       /*
->> +        * Some omaps don't have wake-up path from deeper idle states
->> +        * and need to remux SDIO DAT1 to GPIO for wake-up from idle.
->> +        */
->> +       if (host->pdata->controller_flags & OMAP_HSMMC_SWAKEUP_MISSING)
->> +               host->flags |= HSMMC_SWAKEUP_QUIRK;
->> +
->> +       return 0;
->> +}
->> +
->>  static void omap_hsmmc_conf_bus_power(struct omap_hsmmc_host *host)
->>  {
->>         u32 hctl, capa, value;
->> @@ -1690,7 +1808,7 @@ static const struct mmc_host_ops omap_hsmmc_ops = {
->>         .get_cd = omap_hsmmc_get_cd,
->>         .get_ro = omap_hsmmc_get_ro,
->>         .init_card = omap_hsmmc_init_card,
->> -       /* NYET -- enable_sdio_irq */
->> +       .enable_sdio_irq = omap_hsmmc_enable_sdio_irq,
->>  };
->>
->>  #ifdef CONFIG_DEBUG_FS
->> @@ -1761,6 +1879,11 @@ static const struct omap_mmc_of_data omap4_mmc_of_data = {
->>         .reg_offset = 0x100,
->>  };
->>
->> +static struct omap_mmc_of_data am33xx_mmc_of_data = {
->> +       .reg_offset = 0x100,
->> +       .controller_flags = OMAP_HSMMC_SWAKEUP_MISSING,
->> +};
->> +
->>  static const struct of_device_id omap_mmc_of_match[] = {
->>         {
->>                 .compatible = "ti,omap2-hsmmc",
->> @@ -1776,6 +1899,10 @@ static const struct of_device_id omap_mmc_of_match[] = {
->>                 .compatible = "ti,omap4-hsmmc",
->>                 .data = &omap4_mmc_of_data,
->>         },
->> +       {
->> +               .compatible = "ti,am33xx-hsmmc",
->> +               .data = &am33xx_mmc_of_data,
->> +       },
->>         {},
->>  };
->>  MODULE_DEVICE_TABLE(of, omap_mmc_of_match);
->> @@ -1837,6 +1964,7 @@ static inline struct omap_mmc_platform_data
->>  {
->>         return ERR_PTR(-EINVAL);
->>  }
->> +#define omap_mmc_of_match      NULL
->>  #endif
->>
->>  static int omap_hsmmc_probe(struct platform_device *pdev)
->> @@ -1912,6 +2040,9 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
->>
->>         platform_set_drvdata(pdev, host);
->>
->> +       if (pdev->dev.of_node)
->> +               host->wake_irq = irq_of_parse_and_map(pdev->dev.of_node, 1);
->> +
->>         mmc->ops        = &omap_hsmmc_ops;
->>
->>         mmc->f_min = OMAP_MMC_MIN_CLOCK;
->> @@ -2065,6 +2196,18 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
->>                 dev_warn(&pdev->dev,
->>                         "pins are not configured from the driver\n");
->>
->> +       /*
->> +        * For now, only support SDIO interrupt if we have a separate
->> +        * wake-up interrupt configured from device tree. This is because
->> +        * the wake-up interrupt is needed for idle state and some
->> +        * platforms need special quirks. And we don't want to add new
->> +        * legacy mux platform init code callbacks any longer as we
->> +        * are moving to DT based booting anyways.
->> +        */
->> +       ret = omap_hsmmc_configure_wake_irq(host);
->> +       if (!ret)
->> +               mmc->caps |= MMC_CAP_SDIO_IRQ;
->> +
->>         omap_hsmmc_protect_card(host);
->>
->>         mmc_add_host(mmc);
->> @@ -2089,12 +2232,16 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
->>
->>  err_slot_name:
->>         mmc_remove_host(mmc);
->> +       if (host->wake_irq)
->> +               free_irq(host->wake_irq, host);
->>  err_irq_cd:
->>         if (host->use_reg)
->>                 omap_hsmmc_reg_put(host);
->>  err_reg:
->>         if (host->pdata->cleanup)
->>                 host->pdata->cleanup(&pdev->dev);
->> +       if (host->wake_irq)
->> +               free_irq(host->wake_irq, host);
->>  err_irq:
->>         if (host->tx_chan)
->>                 dma_release_channel(host->tx_chan);
->> @@ -2174,6 +2321,9 @@ static int omap_hsmmc_suspend(struct device *dev)
->>                                 OMAP_HSMMC_READ(host->base, HCTL) & ~SDBP);
->>         }
->>
->> +       if (host->wake_irq && !(host->mmc->pm_flags & MMC_PM_WAKE_SDIO_IRQ))
->> +               disable_irq(host->wake_irq);
->> +
->>         if (host->dbclk)
->>                 clk_disable_unprepare(host->dbclk);
->>
->> @@ -2199,6 +2349,9 @@ static int omap_hsmmc_resume(struct device *dev)
->>
->>         omap_hsmmc_protect_card(host);
->>
->> +       if (host->wake_irq & !(host->mmc->pm_flags & MMC_PM_WAKE_SDIO_IRQ))
->> +               enable_irq(host->wake_irq);
->> +
->>         pm_runtime_mark_last_busy(host->dev);
->>         pm_runtime_put_autosuspend(host->dev);
->>         return 0;
->> @@ -2214,23 +2367,53 @@ static int omap_hsmmc_resume(struct device *dev)
->>  static int omap_hsmmc_runtime_suspend(struct device *dev)
->>  {
->>         struct omap_hsmmc_host *host;
->> +       int ret = 0;
->> +       unsigned long flags;
->>
->>         host = platform_get_drvdata(to_platform_device(dev));
->>         omap_hsmmc_context_save(host);
->>         dev_dbg(dev, "disabled\n");
->>
->> -       return 0;
->> +       spin_lock_irqsave(&host->irq_lock, flags);
->> +       host->flags |= HSMMC_RUNTIME_SUSPENDED;
->> +       if (host->flags & HSMMC_SDIO_IRQ_ENABLED) {
->> +               OMAP_HSMMC_WRITE(host->base, ISE, 0);
->> +               OMAP_HSMMC_WRITE(host->base, IE, 0);
->> +               OMAP_HSMMC_WRITE(host->base, STAT, STAT_CLEAR);
->> +               if (host->wake_irq && !(host->flags & HSMMC_WAKE_IRQ_ENABLED)) {
->> +                       enable_irq(host->wake_irq);
->> +                       host->flags |= HSMMC_WAKE_IRQ_ENABLED;
->> +               }
->> +       }
->> +       spin_unlock_irqrestore(&host->irq_lock, flags);
+> +       if (caps2 & MMC_CAP2_HS400_1_8V &&
+> +           card_type & EXT_CSD_CARD_TYPE_HS400_1_8V) {
+> +               hs200_max_dtr = MMC_HS200_MAX_DTR;
+> +               avail_type |= EXT_CSD_CARD_TYPE_HS400_1_8V;
+> +       }
+> +
+> +       if (caps2 & MMC_CAP2_HS400_1_2V &&
+> +           card_type & EXT_CSD_CARD_TYPE_HS400_1_2V) {
+> +               hs200_max_dtr = MMC_HS200_MAX_DTR;
+> +               avail_type |= EXT_CSD_CARD_TYPE_HS400_1_2V;
+> +       }
+> +
+>         card->ext_csd.hs_max_dtr = hs_max_dtr;
+>         card->ext_csd.hs200_max_dtr = hs200_max_dtr;
+>         card->mmc_avail_type = avail_type;
+> @@ -499,6 +511,8 @@ static int mmc_read_ext_csd(struct mmc_card *card, u8 *ext_csd)
+>                         ext_csd[EXT_CSD_PWR_CL_DDR_52_195];
+>                 card->ext_csd.raw_pwr_cl_ddr_52_360 =
+>                         ext_csd[EXT_CSD_PWR_CL_DDR_52_360];
+> +               card->ext_csd.raw_pwr_cl_ddr_200_360 =
+> +                       ext_csd[EXT_CSD_PWR_CL_DDR_200_360];
+>         }
 >
-> This seems like code you need to execute during system suspend as
-> well? How will you else make sure the wakeup irq is fetched in this
-> scenario?
+>         if (card->ext_csd.rev >= 5) {
+> @@ -665,7 +679,10 @@ static int mmc_compare_ext_csds(struct mmc_card *card, unsigned bus_width)
+>                 (card->ext_csd.raw_pwr_cl_ddr_52_195 ==
+>                         bw_ext_csd[EXT_CSD_PWR_CL_DDR_52_195]) &&
+>                 (card->ext_csd.raw_pwr_cl_ddr_52_360 ==
+> -                       bw_ext_csd[EXT_CSD_PWR_CL_DDR_52_360]));
+> +                       bw_ext_csd[EXT_CSD_PWR_CL_DDR_52_360]) &&
+> +               (card->ext_csd.raw_pwr_cl_ddr_200_360 ==
+> +                       bw_ext_csd[EXT_CSD_PWR_CL_DDR_200_360]));
+> +
+>         if (err)
+>                 err = -EINVAL;
 >
-> Maybe, you have a work around for this problem in the omap power domain?
+> @@ -776,7 +793,9 @@ static int __mmc_select_powerclass(struct mmc_card *card,
+>                                 ext_csd->raw_pwr_cl_52_360 :
+>                                 ext_csd->raw_pwr_cl_ddr_52_360;
+>                 else if (host->ios.clock <= MMC_HS200_MAX_DTR)
+> -                       pwrclass_val = ext_csd->raw_pwr_cl_200_360;
+> +                       pwrclass_val = (bus_width == EXT_CSD_DDR_BUS_WIDTH_8) ?
+> +                               ext_csd->raw_pwr_cl_ddr_200_360 :
+> +                               ext_csd->raw_pwr_cl_200_360;
+>                 break;
+>         default:
+>                 pr_warning("%s: Voltage range not supported "
+> @@ -840,7 +859,8 @@ static void mmc_set_bus_speed(struct mmc_card *card)
+>  {
+>         unsigned int max_dtr = (unsigned int)-1;
+>
+> -       if (mmc_card_hs200(card) && max_dtr > card->ext_csd.hs200_max_dtr)
+> +       if ((mmc_card_hs200(card) || mmc_card_hs400(card)) &&
+> +            max_dtr > card->ext_csd.hs200_max_dtr)
+>                 max_dtr = card->ext_csd.hs200_max_dtr;
+>         else if (mmc_card_hs(card) && max_dtr > card->ext_csd.hs_max_dtr)
+>                 max_dtr = card->ext_csd.hs_max_dtr;
+> @@ -939,6 +959,28 @@ static int mmc_select_hs(struct mmc_card *card)
+>  }
+>
+>  /*
+> + * Revert to the high-speed mode from above speed
+> + */
+> +static int mmc_revert_to_hs(struct mmc_card *card)
+> +{
+> +       /*
+> +        * CMD13, which is used to confirm the completion of timing
+> +        * change, will be issued at higher speed timing condtion
+> +        * rather than high-speed. If device has completed the change
+> +        * to high-speed mode, it may not be proper timing to issue
+> +        * command. Low speed supplies better timing margin than high
+> +        * speed. Accordingly clock rate & timging should be chagned
+> +        * ahead before actual switch.
 
-I just added printks in resume and pm_runtime_resume, and did a
-suspend/resume cycle:
+I have some problem to understand this comment. I guess you are trying
+to provide the arguments to why it makes sense to perform the revert
+to lower speed mode!?
 
-[   42.853308] net eth0: initializing cpsw version 1.12 (0)
-[   42.937224] net eth0: phy found : id is : 0x4dd076
-[   42.957608] omap_hsmmc_resume
-[   43.067149] PM: resume of devices complete after 218.241 msecs
-[   43.085387] PM: Sending message for resetting M3 state machine
-[   43.092981] Restarting tasks ... done.
-[   43.177550] omap_hsmmc_runtime_resume
-[   46.937556] libphy: 4a101000.mdio:04 - Link is Up - 100/Full
-root@stream800:~#
+This makes me wonder if this is not part of the spec? Could you try to clarify?
 
-So it seems, pm_runtime_resume is triggered by system resume.
+> +        */
+> +       mmc_set_timing(card->host, MMC_TIMING_MMC_HS);
+> +       mmc_set_bus_speed(card);
+> +
+> +       return mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+> +                         EXT_CSD_HS_TIMING, EXT_CSD_TIMING_HS,
+> +                         card->ext_csd.generic_cmd6_time);
+> +}
+> +
+> +/*
+>   * Activate wide bus and DDR if supported.
+>   */
+>  static int mmc_select_hs_ddr(struct mmc_card *card)
+> @@ -993,6 +1035,54 @@ static int mmc_select_hs_ddr(struct mmc_card *card)
+>         return err;
+>  }
+>
+> +static int mmc_select_hs400(struct mmc_card *card)
+> +{
+> +       struct mmc_host *host = card->host;
+> +       int err = 0;
+> +
+> +       /*
+> +        * The bus width is set to only 8 DDR in HS400 mode
+
+Please rephrase the comment to something like:
+"HS400 mode requires 8-bit bus width."
+
+> +        */
+> +       if (!(card->mmc_avail_type & EXT_CSD_CARD_TYPE_HS400 &&
+> +             host->ios.bus_width == MMC_BUS_WIDTH_8))
+> +               return 0;
+> +
+> +       /*
+> +        * Before setting BUS_WIDTH for dual data rate operation,
+> +        * HS_TIMING must be set to High Speed(0x1)
+> +        */
+
+Please rephrase comment:
+
+"Before switching to dual data rate operation for HS400, we need
+revert from HS200 timing to regular HS timing."
+
+> +       err = mmc_revert_to_hs(card);
+
+I don't think we need a separate function to handle the revert.
+Please, just add the code here instead. While you do that, I suppose
+we should combine the comment in that function into one comment here.
+
+> +       if (err) {
+> +               pr_warn("%s: switch to high-speed from hs200 failed, err:%d\n",
+> +                       mmc_hostname(host), err);
+> +               return err;
+> +       }
+> +
+> +       err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+> +                        EXT_CSD_BUS_WIDTH,
+> +                        EXT_CSD_DDR_BUS_WIDTH_8,
+> +                        card->ext_csd.generic_cmd6_time);
+> +       if (err) {
+> +               pr_warn("%s: switch to bus width for hs400 failed, err:%d\n",
+> +                       mmc_hostname(host), err);
+> +               return err;
+> +       }
+> +
+> +       err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+> +                        EXT_CSD_HS_TIMING, EXT_CSD_TIMING_HS400,
+> +                        card->ext_csd.generic_cmd6_time);
+> +       if (err) {
+> +               pr_warn("%s: switch to hs400 failed, err:%d\n",
+> +                        mmc_hostname(host), err);
+> +               return err;
+> +       }
+> +
+> +       mmc_set_timing(host, MMC_TIMING_MMC_HS400);
+> +       mmc_set_bus_speed(card);
+> +
+> +       return 0;
+> +}
+> +
+>  /*
+>   * For device supporting HS200 mode, the following sequence
+>   * should be done before executing the tuning process.
+> @@ -1025,7 +1115,16 @@ static int mmc_select_hs200(struct mmc_card *card)
+>                                    EXT_CSD_HS_TIMING, EXT_CSD_TIMING_HS200,
+>                                    card->ext_csd.generic_cmd6_time,
+>                                    true, true, true);
+> -               if (!err)
+> +               if (err)
+> +                       goto err;
+> +
+> +               if (card->mmc_avail_type & EXT_CSD_CARD_TYPE_HS400)
+> +                       /*
+> +                        * Timing should be adjusted to the HS400 target
+> +                        * operation frequency for tuning process
+> +                        */
+> +                       mmc_set_timing(host, MMC_TIMING_MMC_HS400_TUNING);
+
+This seems strange. Do we really need a separate
+MMC_TIMING_MMC_HS400_TUNING value?
+
+> +               else
+>                         mmc_set_timing(host, MMC_TIMING_MMC_HS200);
+>         }
+>  err:
+> @@ -1070,7 +1169,7 @@ bus_speed:
+>
+>  /*
+>   * Execute tuning sequence to seek the proper bus operating
+> - * conditions for HS200, which sends CMD21 to the device.
+> + * conditions for HS200 and HS400, which sends CMD21 to the device.
+>   */
+>  static int mmc_hs200_tuning(struct mmc_card *card)
+>  {
+> @@ -1304,6 +1403,10 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+>                 err = mmc_hs200_tuning(card);
+>                 if (err)
+>                         goto err;
+> +
+> +               err = mmc_select_hs400(card);
+> +               if (err)
+> +                       goto err;
+>         } else if (mmc_card_hs(card)) {
+>                 /* Select the desired bus width optionally */
+>                 err = mmc_select_bus_width(card);
+> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+> index def6814..2b24c36 100644
+> --- a/include/linux/mmc/card.h
+> +++ b/include/linux/mmc/card.h
+> @@ -110,6 +110,7 @@ struct mmc_ext_csd {
+>         u8                      raw_pwr_cl_200_360;     /* 237 */
+>         u8                      raw_pwr_cl_ddr_52_195;  /* 238 */
+>         u8                      raw_pwr_cl_ddr_52_360;  /* 239 */
+> +       u8                      raw_pwr_cl_ddr_200_360; /* 253 */
+>         u8                      raw_bkops_status;       /* 246 */
+>         u8                      raw_sectors[4];         /* 212 - 4 bytes */
+>
+> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+> index 1ee3c10..cc716e4 100644
+> --- a/include/linux/mmc/host.h
+> +++ b/include/linux/mmc/host.h
+> @@ -61,6 +61,8 @@ struct mmc_ios {
+>  #define MMC_TIMING_UHS_DDR50   7
+>  #define MMC_TIMING_MMC_DDR52   8
+>  #define MMC_TIMING_MMC_HS200   9
+> +#define MMC_TIMING_MMC_HS400   10
+> +#define MMC_TIMING_MMC_HS400_TUNING 11
+
+MMC_TIMING_MMC_HS400_TUNING ?
 
 >
-> Kind regards
-> Ulf Hansson
+>         unsigned char   signal_voltage;         /* signalling voltage (1.8V or 3.3V) */
 >
->> +
->> +       return ret;
->>  }
->>
->>  static int omap_hsmmc_runtime_resume(struct device *dev)
->>  {
->>         struct omap_hsmmc_host *host;
->> +       int ret = 0;
->> +       unsigned long flags;
->>
->>         host = platform_get_drvdata(to_platform_device(dev));
->>         omap_hsmmc_context_restore(host);
->>         dev_dbg(dev, "enabled\n");
->>
->> -       return 0;
->> +       spin_lock_irqsave(&host->irq_lock, flags);
->> +       host->flags &= ~HSMMC_RUNTIME_SUSPENDED;
->> +       if (host->flags & HSMMC_SDIO_IRQ_ENABLED) {
->> +               if (host->wake_irq && (host->flags & HSMMC_WAKE_IRQ_ENABLED)) {
->> +                       disable_irq_nosync(host->wake_irq);
->> +                       host->flags &= ~HSMMC_WAKE_IRQ_ENABLED;
->> +               }
->> +
->> +               OMAP_HSMMC_WRITE(host->base, STAT, STAT_CLEAR);
->> +               OMAP_HSMMC_WRITE(host->base, ISE, CIRQ_EN);
->> +               OMAP_HSMMC_WRITE(host->base, IE, CIRQ_EN);
->> +       }
->> +       spin_unlock_irqrestore(&host->irq_lock, flags);
->> +       return ret;
->>  }
->>
->>  static struct dev_pm_ops omap_hsmmc_dev_pm_ops = {
->> diff --git a/include/linux/platform_data/mmc-omap.h b/include/linux/platform_data/mmc-omap.h
->> index 2bf1b30..51e70cf 100644
->> --- a/include/linux/platform_data/mmc-omap.h
->> +++ b/include/linux/platform_data/mmc-omap.h
->> @@ -28,6 +28,7 @@
->>   */
->>  #define OMAP_HSMMC_SUPPORTS_DUAL_VOLT          BIT(0)
->>  #define OMAP_HSMMC_BROKEN_MULTIBLOCK_READ      BIT(1)
->> +#define OMAP_HSMMC_SWAKEUP_MISSING             BIT(2)
->>
->>  struct mmc_card;
->>
->> --
->> 1.7.5.4
->>
->> --
->> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> @@ -274,6 +276,10 @@ struct mmc_host {
+>  #define MMC_CAP2_PACKED_CMD    (MMC_CAP2_PACKED_RD | \
+>                                  MMC_CAP2_PACKED_WR)
+>  #define MMC_CAP2_NO_PRESCAN_POWERUP (1 << 14)  /* Don't power up before scan */
+> +#define MMC_CAP2_HS400_1_8V    (1 << 15)       /* Can support HS400 1.8V */
+> +#define MMC_CAP2_HS400_1_2V    (1 << 16)       /* Can support HS400 1.2V */
+> +#define MMC_CAP2_HS400         (MMC_CAP2_HS400_1_8V | \
+> +                                MMC_CAP2_HS400_1_2V)
+>
+>         mmc_pm_flag_t           pm_caps;        /* supported pm features */
+>
+> @@ -486,11 +492,18 @@ static inline int mmc_card_uhs(struct mmc_card *card)
+>
+>  static inline bool mmc_card_hs200(struct mmc_card *card)
+>  {
+> -       return card->host->ios.timing == MMC_TIMING_MMC_HS200;
+> +       return card->host->ios.timing == MMC_TIMING_MMC_HS200 ||
+> +               card->host->ios.timing == MMC_TIMING_MMC_HS400_TUNING;
+
+MMC_TIMING_MMC_HS400_TUNING ?
+
+>  }
+>
+>  static inline bool mmc_card_ddr52(struct mmc_card *card)
+>  {
+>         return card->host->ios.timing == MMC_TIMING_MMC_DDR52;
+>  }
+> +
+> +static inline bool mmc_card_hs400(struct mmc_card *card)
+> +{
+> +       return card->host->ios.timing == MMC_TIMING_MMC_HS400;
+> +}
+> +
+>  #endif /* LINUX_MMC_HOST_H */
+> diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
+> index f429f13..64ec963 100644
+> --- a/include/linux/mmc/mmc.h
+> +++ b/include/linux/mmc/mmc.h
+> @@ -325,6 +325,7 @@ struct _mmc_csd {
+>  #define EXT_CSD_POWER_OFF_LONG_TIME    247     /* RO */
+>  #define EXT_CSD_GENERIC_CMD6_TIME      248     /* RO */
+>  #define EXT_CSD_CACHE_SIZE             249     /* RO, 4 bytes */
+> +#define EXT_CSD_PWR_CL_DDR_200_360     253     /* RO */
+>  #define EXT_CSD_TAG_UNIT_SIZE          498     /* RO */
+>  #define EXT_CSD_DATA_TAG_SUPPORT       499     /* RO */
+>  #define EXT_CSD_MAX_PACKED_WRITES      500     /* RO */
+> @@ -354,7 +355,6 @@ struct _mmc_csd {
+>  #define EXT_CSD_CMD_SET_SECURE         (1<<1)
+>  #define EXT_CSD_CMD_SET_CPSECURE       (1<<2)
+>
+> -#define EXT_CSD_CARD_TYPE_MASK 0x3F    /* Mask out reserved bits */
+>  #define EXT_CSD_CARD_TYPE_HS_26        (1<<0)  /* Card can run at 26MHz */
+>  #define EXT_CSD_CARD_TYPE_HS_52        (1<<1)  /* Card can run at 52MHz */
+>  #define EXT_CSD_CARD_TYPE_HS   (EXT_CSD_CARD_TYPE_HS_26 | \
+> @@ -370,6 +370,10 @@ struct _mmc_csd {
+>                                                 /* SDR mode @1.2V I/O */
+>  #define EXT_CSD_CARD_TYPE_HS200                (EXT_CSD_CARD_TYPE_HS200_1_8V | \
+>                                          EXT_CSD_CARD_TYPE_HS200_1_2V)
+> +#define EXT_CSD_CARD_TYPE_HS400_1_8V   (1<<6)  /* Card can run at 200MHz DDR, 1.8V */
+> +#define EXT_CSD_CARD_TYPE_HS400_1_2V   (1<<7)  /* Card can run at 200MHz DDR, 1.2V */
+> +#define EXT_CSD_CARD_TYPE_HS400                (EXT_CSD_CARD_TYPE_HS400_1_8V | \
+> +                                        EXT_CSD_CARD_TYPE_HS400_1_2V)
+>
+>  #define EXT_CSD_BUS_WIDTH_1    0       /* Card is in 1 bit mode */
+>  #define EXT_CSD_BUS_WIDTH_4    1       /* Card is in 4 bit mode */
+> @@ -380,6 +384,7 @@ struct _mmc_csd {
+>  #define EXT_CSD_TIMING_BC      0       /* Backwards compatility */
+>  #define EXT_CSD_TIMING_HS      1       /* High speed */
+>  #define EXT_CSD_TIMING_HS200   2       /* HS200 */
+> +#define EXT_CSD_TIMING_HS400   3       /* HS400 */
+>
+>  #define EXT_CSD_SEC_ER_EN      BIT(0)
+>  #define EXT_CSD_SEC_BD_BLK_EN  BIT(2)
+> --
+> 1.7.0.4
+>
+>
+
+Kind regards
+Ulf Hansson
