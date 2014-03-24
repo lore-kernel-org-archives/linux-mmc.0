@@ -1,169 +1,280 @@
-From: Seungwon Jeon <tgih.jun@samsung.com>
-Subject: RE: [PATCH 3/7] mmc: dw_mmc: exynos: move definitions to header file
-Date: Mon, 24 Mar 2014 15:43:30 +0900
-Message-ID: <000b01cf472c$5ecadd00$1c609700$%jun@samsung.com>
-References: <001d01cf450e$5c8ae960$15a0bc20$%jun@samsung.com>
- <532FB2B6.3060102@samsung.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH RESEND 1/2] mmc: mxcmmc: Convert to devm-* API
+Date: Mon, 24 Mar 2014 10:29:45 +0100
+Message-ID: <CAPDyKFoJ_NFdhr9b+yPqo8jpTjpjjP9+KvnoDrvxDae75Ed2qQ@mail.gmail.com>
+References: <1395478366-6276-1-git-send-email-shc_work@mail.ru>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-reply-to: <532FB2B6.3060102@samsung.com>
-Content-language: ko
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: 'Jaehoon Chung' <jh80.chung@samsung.com>, linux-samsung-soc@vger.kernel.org, linux-mmc@vger.kernel.org
-Cc: 'Chris Ball' <chris@printf.net>, 'Kukjin Kim' <kgene.kim@samsung.com>, 'Ulf Hansson' <ulf.hansson@linaro.org>, 'Alim Akhtar' <alim.akhtar@samsung.com>
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qc0-f177.google.com ([209.85.216.177]:43224 "EHLO
+	mail-qc0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752024AbaCXJ3q (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 24 Mar 2014 05:29:46 -0400
+Received: by mail-qc0-f177.google.com with SMTP id w7so5472365qcr.8
+        for <linux-mmc@vger.kernel.org>; Mon, 24 Mar 2014 02:29:45 -0700 (PDT)
+In-Reply-To: <1395478366-6276-1-git-send-email-shc_work@mail.ru>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Alexander Shiyan <shc_work@mail.ru>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Sascha Hauer <s.hauer@pengutronix.de>, Anatolij Gustschin <agust@denx.de>
 
-On Mon, March 24, 2014, Jaehoon Chung wrote:
-> Hi, Seungwon.
-> 
-> On 03/21/2014 11:03 PM, Seungwon Jeon wrote:
-> > Moves some parts related to definition to header file
-> >
-> > Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
-> > ---
-> >  drivers/mmc/host/dw_mmc-exynos.c |   46 ++++---------------------------
-> >  drivers/mmc/host/dw_mmc-exynos.h |   55 ++++++++++++++++++++++++++++++++++++++
-> >  2 files changed, 61 insertions(+), 40 deletions(-)
-> >  create mode 100644 drivers/mmc/host/dw_mmc-exynos.h
-> >
-> > diff --git a/drivers/mmc/host/dw_mmc-exynos.c b/drivers/mmc/host/dw_mmc-exynos.c
-> > index 89aa019..801861b 100644
-> > --- a/drivers/mmc/host/dw_mmc-exynos.c
-> > +++ b/drivers/mmc/host/dw_mmc-exynos.c
-> > @@ -21,42 +21,8 @@
-> >
-> >  #include "dw_mmc.h"
-> >  #include "dw_mmc-pltfm.h"
-> > +#include "dw_mmc-exynos.h"
-> >
-> > -#define NUM_PINS(x)			(x + 2)
-> > -
-> > -#define SDMMC_CLKSEL			0x09C
-> > -#define SDMMC_CLKSEL_CCLK_SAMPLE(x)	(((x) & 7) << 0)
-> > -#define SDMMC_CLKSEL_CCLK_DRIVE(x)	(((x) & 7) << 16)
-> > -#define SDMMC_CLKSEL_CCLK_DIVIDER(x)	(((x) & 7) << 24)
-> > -#define SDMMC_CLKSEL_GET_DRV_WD3(x)	(((x) >> 16) & 0x7)
-> > -#define SDMMC_CLKSEL_TIMING(x, y, z)	(SDMMC_CLKSEL_CCLK_SAMPLE(x) |	\
-> > -					SDMMC_CLKSEL_CCLK_DRIVE(y) |	\
-> > -					SDMMC_CLKSEL_CCLK_DIVIDER(z))
-> > -#define SDMMC_CLKSEL_WAKEUP_INT		BIT(11)
-> > -
-> > -#define EXYNOS4210_FIXED_CIU_CLK_DIV	2
-> > -#define EXYNOS4412_FIXED_CIU_CLK_DIV	4
-> > -
-> > -/* Block number in eMMC */
-> > -#define DWMCI_BLOCK_NUM		0xFFFFFFFF
-> > -
-> > -#define SDMMC_EMMCP_BASE	0x1000
-> > -#define SDMMC_MPSECURITY	(SDMMC_EMMCP_BASE + 0x0010)
-> > -#define SDMMC_MPSBEGIN0		(SDMMC_EMMCP_BASE + 0x0200)
-> > -#define SDMMC_MPSEND0		(SDMMC_EMMCP_BASE + 0x0204)
-> > -#define SDMMC_MPSCTRL0		(SDMMC_EMMCP_BASE + 0x020C)
-> > -
-> > -/* SMU control bits */
-> > -#define DWMCI_MPSCTRL_SECURE_READ_BIT		BIT(7)
-> > -#define DWMCI_MPSCTRL_SECURE_WRITE_BIT		BIT(6)
-> > -#define DWMCI_MPSCTRL_NON_SECURE_READ_BIT	BIT(5)
-> > -#define DWMCI_MPSCTRL_NON_SECURE_WRITE_BIT	BIT(4)
-> > -#define DWMCI_MPSCTRL_USE_FUSE_KEY		BIT(3)
-> > -#define DWMCI_MPSCTRL_ECB_MODE			BIT(2)
-> > -#define DWMCI_MPSCTRL_ENCRYPTION		BIT(1)
-> > -#define DWMCI_MPSCTRL_VALID			BIT(0)
-> > -
-> > -#define EXYNOS_CCLKIN_MIN	50000000	/* unit: HZ */
-> >
-> >  /* Variations in Exynos specific dw-mshc controller */
-> >  enum dw_mci_exynos_type {
-> > @@ -104,11 +70,11 @@ static int dw_mci_exynos_priv_init(struct dw_mci *host)
-> >
-> >  	if (priv->ctrl_type == DW_MCI_TYPE_EXYNOS5420_SMU) {
-> >  		mci_writel(host, MPSBEGIN0, 0);
-> > -		mci_writel(host, MPSEND0, DWMCI_BLOCK_NUM);
-> > -		mci_writel(host, MPSCTRL0, DWMCI_MPSCTRL_SECURE_WRITE_BIT |
-> > -			   DWMCI_MPSCTRL_NON_SECURE_READ_BIT |
-> > -			   DWMCI_MPSCTRL_VALID |
-> > -			   DWMCI_MPSCTRL_NON_SECURE_WRITE_BIT);
-> > +		mci_writel(host, MPSEND0, SDMMC_ENDING_SEC_NR_MAX);
-> > +		mci_writel(host, MPSCTRL0, SDMMC_MPSCTRL_SECURE_WRITE_BIT |
-> > +			   SDMMC_MPSCTRL_NON_SECURE_READ_BIT |
-> > +			   SDMMC_MPSCTRL_VALID |
-> > +			   SDMMC_MPSCTRL_NON_SECURE_WRITE_BIT);
-> >  	}
-> >
-> >  	return 0;
-> > diff --git a/drivers/mmc/host/dw_mmc-exynos.h b/drivers/mmc/host/dw_mmc-exynos.h
-> > new file mode 100644
-> > index 0000000..a4c6e10
-> > --- /dev/null
-> > +++ b/drivers/mmc/host/dw_mmc-exynos.h
-> > @@ -0,0 +1,55 @@
-> > +/*
-> > + * Exynos Specific Extensions for Synopsys DW Multimedia Card Interface driver
-> > + *
-> > + * Copyright (C) 201333Samsung Electronics Co., Ltd.
-> 2013333 Typo? :)
-Oh, thank you for detect.
+On 22 March 2014 09:52, Alexander Shiyan <shc_work@mail.ru> wrote:
+> Replace existing resource handling in the driver with managed
+> device resource, this ensures more consistent error values and
+> simplifies error paths.
+>
+> Signed-off-by: Alexander Shiyan <shc_work@mail.ru>
+> ---
+>  drivers/mmc/host/mxcmmc.c | 101 +++++++++++++++++-----------------------------
+>  1 file changed, 38 insertions(+), 63 deletions(-)
+>
+> diff --git a/drivers/mmc/host/mxcmmc.c b/drivers/mmc/host/mxcmmc.c
+> index f7199c8..84d630e 100644
+> --- a/drivers/mmc/host/mxcmmc.c
+> +++ b/drivers/mmc/host/mxcmmc.c
+> @@ -124,9 +124,8 @@ enum mxcmci_type {
+>
+>  struct mxcmci_host {
+>         struct mmc_host         *mmc;
+> -       struct resource         *res;
+>         void __iomem            *base;
+> -       int                     irq;
+> +       dma_addr_t              phys_base;
+>         int                     detect_irq;
+>         struct dma_chan         *dma;
+>         struct dma_async_tx_descriptor *desc;
+> @@ -241,33 +240,26 @@ static inline void mxcmci_writew(struct mxcmci_host *host, u16 val, int reg)
+>
+>  static void mxcmci_set_clk_rate(struct mxcmci_host *host, unsigned int clk_ios);
+>
+> -static inline void mxcmci_init_ocr(struct mxcmci_host *host)
+> +static void mxcmci_init_ocr(struct mxcmci_host *host)
+>  {
+> -       host->vcc = regulator_get(mmc_dev(host->mmc), "vmmc");
+> -
+> +       host->vcc = devm_regulator_get(mmc_dev(host->mmc), "vmmc");
 
-Thanks,
-Seungwon Jeon
+A semi-related comment to this patch. May I suggest you post a follow
+up patch on top of this one, which convert to use the
+mmc_regulator_get_supply() API.
 
-> 
-> > + *
-> > + * This program is free software; you can redistribute it and/or modify
-> > + * it under the terms of the GNU General Public License as published by
-> > + * the Free Software Foundation; either version 2 of the License, or
-> > + * (at your option) any later version.
-> > + */
-> > +
-> > +#ifndef _DW_MMC_EXYNOS_H_
-> > +#define _DW_MMC_EXYNOS_H_
-> > +
-> > +/* Extended Register's Offset */
-> > +#define SDMMC_CLKSEL			0x09C
-> > +
-> > +/* CLKSEL register defines */
-> > +#define SDMMC_CLKSEL_CCLK_SAMPLE(x)	(((x) & 7) << 0)
-> > +#define SDMMC_CLKSEL_CCLK_DRIVE(x)	(((x) & 7) << 16)
-> > +#define SDMMC_CLKSEL_CCLK_DIVIDER(x)	(((x) & 7) << 24)
-> > +#define SDMMC_CLKSEL_GET_DRV_WD3(x)	(((x) >> 16) & 0x7)
-> > +#define SDMMC_CLKSEL_TIMING(x, y, z)	(SDMMC_CLKSEL_CCLK_SAMPLE(x) |	\
-> > +					 SDMMC_CLKSEL_CCLK_DRIVE(y) |	\
-> > +					 SDMMC_CLKSEL_CCLK_DIVIDER(z))
-> > +#define SDMMC_CLKSEL_WAKEUP_INT		BIT(11)
-> > +
-> > +/* Protector Register */
-> > +#define SDMMC_EMMCP_BASE	0x1000
-> > +#define SDMMC_MPSECURITY	(SDMMC_EMMCP_BASE + 0x0010)
-> > +#define SDMMC_MPSBEGIN0		(SDMMC_EMMCP_BASE + 0x0200)
-> > +#define SDMMC_MPSEND0		(SDMMC_EMMCP_BASE + 0x0204)
-> > +#define SDMMC_MPSCTRL0		(SDMMC_EMMCP_BASE + 0x020C)
-> > +
-> > +/* SMU control defines */
-> > +#define SDMMC_MPSCTRL_SECURE_READ_BIT		BIT(7)
-> > +#define SDMMC_MPSCTRL_SECURE_WRITE_BIT		BIT(6)
-> > +#define SDMMC_MPSCTRL_NON_SECURE_READ_BIT	BIT(5)
-> > +#define SDMMC_MPSCTRL_NON_SECURE_WRITE_BIT	BIT(4)
-> > +#define SDMMC_MPSCTRL_USE_FUSE_KEY		BIT(3)
-> > +#define SDMMC_MPSCTRL_ECB_MODE			BIT(2)
-> > +#define SDMMC_MPSCTRL_ENCRYPTION		BIT(1)
-> > +#define SDMMC_MPSCTRL_VALID			BIT(0)
-> > +
-> > +/* Maximum number of Ending sector */
-> > +#define SDMMC_ENDING_SEC_NR_MAX	0xFFFFFFFF
-> > +
-> > +/* Fixed clock divider */
-> > +#define EXYNOS4210_FIXED_CIU_CLK_DIV	2
-> > +#define EXYNOS4412_FIXED_CIU_CLK_DIV	4
-> > +
-> > +/* Minimal required clock frequency for cclkin, unit: HZ */
-> > +#define EXYNOS_CCLKIN_MIN	50000000
-> > +
-> > +#endif /* _DW_MMC_EXYNOS_H_ */
-> >
-> 
+
+>         if (IS_ERR(host->vcc)) {
+> -               host->vcc = NULL;
+> +               if (host->pdata && host->pdata->ocr_avail)
+> +                       host->mmc->ocr_avail = host->pdata->ocr_avail;
+> +               else
+> +                       host->mmc->ocr_avail = MMC_VDD_32_33 | MMC_VDD_33_34;
+>         } else {
+>                 host->mmc->ocr_avail = mmc_regulator_get_ocrmask(host->vcc);
+>                 if (host->pdata && host->pdata->ocr_avail)
+>                         dev_warn(mmc_dev(host->mmc),
+>                                 "pdata->ocr_avail will not be used\n");
+>         }
+> -
+> -       if (host->vcc == NULL) {
+> -               /* fall-back to platform data */
+> -               if (host->pdata && host->pdata->ocr_avail)
+> -                       host->mmc->ocr_avail = host->pdata->ocr_avail;
+> -               else
+> -                       host->mmc->ocr_avail = MMC_VDD_32_33 | MMC_VDD_33_34;
+> -       }
+>  }
+>
+> -static inline void mxcmci_set_power(struct mxcmci_host *host,
+> -                                   unsigned char power_mode,
+> -                                   unsigned int vdd)
+> +static void mxcmci_set_power(struct mxcmci_host *host, unsigned char power_mode,
+> +                            unsigned int vdd)
+>  {
+> -       if (host->vcc) {
+> +       if (!IS_ERR(host->vcc)) {
+>                 if (power_mode == MMC_POWER_UP)
+>                         mmc_regulator_set_ocr(host->mmc, host->vcc, vdd);
+>                 else if (power_mode == MMC_POWER_OFF)
+> @@ -299,7 +291,6 @@ static void mxcmci_softreset(struct mxcmci_host *host)
+>
+>         mxcmci_writew(host, 0xff, MMC_REG_RES_TO);
+>  }
+> -static int mxcmci_setup_dma(struct mmc_host *mmc);
+>
+>  #if IS_ENABLED(CONFIG_PPC_MPC512x)
+>  static inline void buffer_swap32(u32 *buf, int len)
+> @@ -868,8 +859,8 @@ static int mxcmci_setup_dma(struct mmc_host *mmc)
+>         struct mxcmci_host *host = mmc_priv(mmc);
+>         struct dma_slave_config *config = &host->dma_slave_config;
+>
+> -       config->dst_addr = host->res->start + MMC_REG_BUFFER_ACCESS;
+> -       config->src_addr = host->res->start + MMC_REG_BUFFER_ACCESS;
+> +       config->dst_addr = host->phys_base + MMC_REG_BUFFER_ACCESS;
+> +       config->src_addr = host->phys_base + MMC_REG_BUFFER_ACCESS;
+>         config->dst_addr_width = 4;
+>         config->src_addr_width = 4;
+>         config->dst_maxburst = host->burstlen;
+> @@ -1040,8 +1031,8 @@ static const struct mmc_host_ops mxcmci_ops = {
+>  static int mxcmci_probe(struct platform_device *pdev)
+>  {
+>         struct mmc_host *mmc;
+> -       struct mxcmci_host *host = NULL;
+> -       struct resource *iores, *r;
+> +       struct mxcmci_host *host;
+> +       struct resource *res;
+>         int ret = 0, irq;
+>         bool dat3_card_detect = false;
+>         dma_cap_mask_t mask;
+> @@ -1052,21 +1043,25 @@ static int mxcmci_probe(struct platform_device *pdev)
+>
+>         of_id = of_match_device(mxcmci_of_match, &pdev->dev);
+>
+> -       iores = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+> +       res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+>         irq = platform_get_irq(pdev, 0);
+> -       if (!iores || irq < 0)
+> +       if (irq < 0)
+>                 return -EINVAL;
+>
+> -       r = request_mem_region(iores->start, resource_size(iores), pdev->name);
+> -       if (!r)
+> -               return -EBUSY;
+> +       mmc = mmc_alloc_host(sizeof(*host), &pdev->dev);
+> +       if (!mmc)
+> +               return -ENOMEM;
+>
+> -       mmc = mmc_alloc_host(sizeof(struct mxcmci_host), &pdev->dev);
+> -       if (!mmc) {
+> -               ret = -ENOMEM;
+> -               goto out_release_mem;
+> +       host = mmc_priv(mmc);
+> +
+> +       host->base = devm_ioremap_resource(&pdev->dev, res);
+> +       if (IS_ERR(host->base)) {
+> +               ret = PTR_ERR(host->base);
+> +               goto out_free;
+>         }
+>
+> +       host->phys_base = res->start;
+> +
+>         ret = mmc_of_parse(mmc);
+>         if (ret)
+>                 goto out_free;
+> @@ -1084,13 +1079,6 @@ static int mxcmci_probe(struct platform_device *pdev)
+>         mmc->max_req_size = mmc->max_blk_size * mmc->max_blk_count;
+>         mmc->max_seg_size = mmc->max_req_size;
+>
+> -       host = mmc_priv(mmc);
+> -       host->base = ioremap(r->start, resource_size(r));
+> -       if (!host->base) {
+> -               ret = -ENOMEM;
+> -               goto out_free;
+> -       }
+> -
+>         if (of_id) {
+>                 const struct platform_device_id *id_entry = of_id->data;
+>                 host->devtype = id_entry->driver_data;
+> @@ -1120,19 +1108,16 @@ static int mxcmci_probe(struct platform_device *pdev)
+>         else
+>                 host->default_irq_mask = 0;
+>
+> -       host->res = r;
+> -       host->irq = irq;
+> -
+>         host->clk_ipg = devm_clk_get(&pdev->dev, "ipg");
+>         if (IS_ERR(host->clk_ipg)) {
+>                 ret = PTR_ERR(host->clk_ipg);
+> -               goto out_iounmap;
+> +               goto out_free;
+>         }
+>
+>         host->clk_per = devm_clk_get(&pdev->dev, "per");
+>         if (IS_ERR(host->clk_per)) {
+>                 ret = PTR_ERR(host->clk_per);
+> -               goto out_iounmap;
+> +               goto out_free;
+>         }
+>
+>         clk_prepare_enable(host->clk_per);
+> @@ -1159,9 +1144,9 @@ static int mxcmci_probe(struct platform_device *pdev)
+>         if (!host->pdata) {
+>                 host->dma = dma_request_slave_channel(&pdev->dev, "rx-tx");
+>         } else {
+> -               r = platform_get_resource(pdev, IORESOURCE_DMA, 0);
+> -               if (r) {
+> -                       host->dmareq = r->start;
+> +               res = platform_get_resource(pdev, IORESOURCE_DMA, 0);
+> +               if (res) {
+> +                       host->dmareq = res->start;
+>                         host->dma_data.peripheral_type = IMX_DMATYPE_SDHC;
+>                         host->dma_data.priority = DMA_PRIO_LOW;
+>                         host->dma_data.dma_request = host->dmareq;
+> @@ -1178,7 +1163,8 @@ static int mxcmci_probe(struct platform_device *pdev)
+>
+>         INIT_WORK(&host->datawork, mxcmci_datawork);
+>
+> -       ret = request_irq(host->irq, mxcmci_irq, 0, DRIVER_NAME, host);
+> +       ret = devm_request_irq(&pdev->dev, irq, mxcmci_irq, 0,
+> +                              dev_name(&pdev->dev), host);
+>         if (ret)
+>                 goto out_free_dma;
+>
+> @@ -1188,7 +1174,7 @@ static int mxcmci_probe(struct platform_device *pdev)
+>                 ret = host->pdata->init(&pdev->dev, mxcmci_detect_irq,
+>                                 host->mmc);
+>                 if (ret)
+> -                       goto out_free_irq;
+> +                       goto out_free_dma;
+>         }
+>
+>         init_timer(&host->watchdog);
+> @@ -1199,20 +1185,17 @@ static int mxcmci_probe(struct platform_device *pdev)
+>
+>         return 0;
+>
+> -out_free_irq:
+> -       free_irq(host->irq, host);
+>  out_free_dma:
+>         if (host->dma)
+>                 dma_release_channel(host->dma);
+> +
+>  out_clk_put:
+>         clk_disable_unprepare(host->clk_per);
+>         clk_disable_unprepare(host->clk_ipg);
+> -out_iounmap:
+> -       iounmap(host->base);
+> +
+>  out_free:
+>         mmc_free_host(mmc);
+> -out_release_mem:
+> -       release_mem_region(iores->start, resource_size(iores));
+> +
+>         return ret;
+>  }
+>
+> @@ -1223,23 +1206,15 @@ static int mxcmci_remove(struct platform_device *pdev)
+>
+>         mmc_remove_host(mmc);
+>
+> -       if (host->vcc)
+> -               regulator_put(host->vcc);
+> -
+>         if (host->pdata && host->pdata->exit)
+>                 host->pdata->exit(&pdev->dev, mmc);
+>
+> -       free_irq(host->irq, host);
+> -       iounmap(host->base);
+> -
+>         if (host->dma)
+>                 dma_release_channel(host->dma);
+>
+>         clk_disable_unprepare(host->clk_per);
+>         clk_disable_unprepare(host->clk_ipg);
+>
+> -       release_mem_region(host->res->start, resource_size(host->res));
+> -
+>         mmc_free_host(mmc);
+>
+>         return 0;
 > --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 1.8.3.2
+>
+
+Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
