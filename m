@@ -1,191 +1,295 @@
-From: Seungwon Jeon <tgih.jun@samsung.com>
-Subject: RE: [PATCH v3 4/5] mmc: rework selection of bus speed mode
-Date: Sat, 22 Mar 2014 21:04:09 +0900
-Message-ID: <003301cf45c6$d4d42db0$7e7c8910$%jun@samsung.com>
-References: <1383653403-10049-1-git-send-email-ulf.hansson@linaro.org>
- <006b01cf2a59$a203d5d0$e60b8170$%jun@samsung.com>
- <003e01cf3f7f$43eb8a20$cbc29e60$%jun@samsung.com>
- <CAPDyKFoHR1Re6a3fpc0rCvx2jiXDQotU2wA7wSHiTQeWEguoxA@mail.gmail.com>
+From: <micky_ching@realsil.com.cn>
+Subject: [PATCH 2/2] mmc: rtsx: modify error handle and remove smatch warnings
+Date: Mon, 24 Mar 2014 09:43:28 +0800
+Message-ID: <370ba2995ab57326581bb1a0de5502d729e7d4c1.1395624930.git.micky_ching@realsil.com.cn>
+References: <cover.1395624929.git.micky_ching@realsil.com.cn>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=Windows-1252
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout1.samsung.com ([203.254.224.24]:18802 "EHLO
-	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750706AbaCVMEL (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 22 Mar 2014 08:04:11 -0400
-Received: from epcpsbgr3.samsung.com
- (u143.gpu120.samsung.co.kr [203.254.230.143])
- by mailout1.samsung.com (Oracle Communications Messaging Server 7u4-24.01
- (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTP id <0N2U00CUU6UX7200@mailout1.samsung.com> for
- linux-mmc@vger.kernel.org; Sat, 22 Mar 2014 21:04:09 +0900 (KST)
-In-reply-to: <CAPDyKFoHR1Re6a3fpc0rCvx2jiXDQotU2wA7wSHiTQeWEguoxA@mail.gmail.com>
-Content-language: ko
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
+In-Reply-To: <cover.1395624929.git.micky_ching@realsil.com.cn>
+List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
+List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel>
+List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
+List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
+List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
+Errors-To: driverdev-devel-bounces@linuxdriverproject.org
+Sender: driverdev-devel-bounces@linuxdriverproject.org
+To: chris@printf.net, sameo@linux.intel.com
+Cc: ulf.hansson@linaro.org, gregkh@linuxfoundation.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, wei_wang@realsil.com.cn, rogerable@realtek.com, devel@linuxdriverproject.org, dan.carpenter@oracle.com
 List-Id: linux-mmc@vger.kernel.org
-To: 'Ulf Hansson' <ulf.hansson@linaro.org>
-Cc: 'linux-mmc' <linux-mmc@vger.kernel.org>, 'Chris Ball' <chris@printf.net>, 'Jaehoon Chung' <jh80.chung@samsung.com>, 'Jackey Shen' <jackey.shen@amd.com>, 'Alim Akhtar' <alim.akhtar@samsung.com>
 
-On Fri, March 21, 2014, Ulf Hansson wrote:
-> On 14 March 2014 13:16, Seungwon Jeon <tgih.jun@samsung.com> wrote:
-> > Current implementation for bus speed mode selection is too
-> > complicated. This patch is to simplify the codes and remove
-> > some duplicate parts.
-> 
-> Really appreciate you taking on this task!
-> 
-> >
-> > The following changes are including:
-> > * Adds functions for each mode selection(HS, HS-DDR, HS200 and etc)
-> > * Rearranged the mode selection sequence with supported device type
-> > * Adds maximum speed for HS200 mode(hs200_max_dtr)
-> > * Adds field definition for HS_TIMING of EXT_CSD
-> >
-> > Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
-> > Tested-by: Jaehoon Chung <jh80.chung@samsung.com>
-> > Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
-> > ---
-> >  drivers/mmc/core/debugfs.c |    2 +-
-> >  drivers/mmc/core/mmc.c     |  431 ++++++++++++++++++++++++--------------------
-> >  include/linux/mmc/card.h   |    1 +
-> >  include/linux/mmc/mmc.h    |    4 +
-> >  4 files changed, 238 insertions(+), 200 deletions(-)
-> >
-> > diff --git a/drivers/mmc/core/debugfs.c b/drivers/mmc/core/debugfs.c
-> > index 509229b..1f730db 100644
-> > --- a/drivers/mmc/core/debugfs.c
-> > +++ b/drivers/mmc/core/debugfs.c
-> > @@ -139,7 +139,7 @@ static int mmc_ios_show(struct seq_file *s, void *data)
-> >                 str = "mmc DDR52";
-> >                 break;
-> >         case MMC_TIMING_MMC_HS200:
-> > -               str = "mmc high-speed SDR200";
-> > +               str = "mmc HS200";
-> >                 break;
-> >         default:
-> >                 str = "invalid";
-> > diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-> > index 480c100..6dd68e6 100644
-> > --- a/drivers/mmc/core/mmc.c
-> > +++ b/drivers/mmc/core/mmc.c
-> > @@ -242,7 +242,7 @@ static void mmc_select_card_type(struct mmc_card *card)
-> >         struct mmc_host *host = card->host;
-> >         u8 card_type = card->ext_csd.raw_card_type & EXT_CSD_CARD_TYPE_MASK;
-> >         u32 caps = host->caps, caps2 = host->caps2;
-> > -       unsigned int hs_max_dtr = 0;
-> > +       unsigned int hs_max_dtr = 0, hs200_max_dtr = 0;
-> >         unsigned int avail_type = 0;
-> >
-> >         if (caps & MMC_CAP_MMC_HIGHSPEED &&
-> > @@ -271,17 +271,18 @@ static void mmc_select_card_type(struct mmc_card *card)
-> >
-> >         if (caps2 & MMC_CAP2_HS200_1_8V_SDR &&
-> >             card_type & EXT_CSD_CARD_TYPE_HS200_1_8V) {
-> > -               hs_max_dtr = MMC_HS200_MAX_DTR;
-> > +               hs200_max_dtr = MMC_HS200_MAX_DTR;
-> >                 avail_type |= EXT_CSD_CARD_TYPE_HS200_1_8V;
-> >         }
-> >
-> >         if (caps2 & MMC_CAP2_HS200_1_2V_SDR &&
-> >             card_type & EXT_CSD_CARD_TYPE_HS200_1_2V) {
-> > -               hs_max_dtr = MMC_HS200_MAX_DTR;
-> > +               hs200_max_dtr = MMC_HS200_MAX_DTR;
-> >                 avail_type |= EXT_CSD_CARD_TYPE_HS200_1_2V;
-> >         }
-> >
-> >         card->ext_csd.hs_max_dtr = hs_max_dtr;
-> > +       card->ext_csd.hs200_max_dtr = hs200_max_dtr;
-> >         card->mmc_avail_type = avail_type;
-> >  }
-> >
-> > @@ -833,37 +834,46 @@ static int mmc_select_powerclass(struct mmc_card *card)
-> >  }
-> >
-> >  /*
-> > - * Selects the desired buswidth and switch to the HS200 mode
-> > - * if bus width set without error
-> > + * Set the bus speed for the selected speed mode.
-> >   */
-> > -static int mmc_select_hs200(struct mmc_card *card)
-> > +static void mmc_set_bus_speed(struct mmc_card *card)
-> > +{
-> > +       unsigned int max_dtr = (unsigned int)-1;
-> 
-> I guess this is to silence compile warnings? Why not just:
-> unsigned int max_dtr = 0;
-Basically, I made an effort to keep the previous codes if it's not a problem.
-If you found something wrong, please let me know.
+From: Micky Ching <micky_ching@realsil.com.cn>
 
-> 
-> > +
-> > +       if (mmc_card_hs200(card) && max_dtr > card->ext_csd.hs200_max_dtr)
-> > +               max_dtr = card->ext_csd.hs200_max_dtr;
-> > +       else if (mmc_card_hs(card) && max_dtr > card->ext_csd.hs_max_dtr)
-> > +               max_dtr = card->ext_csd.hs_max_dtr;
-> > +       else if (max_dtr > card->csd.max_dtr)
-> > +               max_dtr = card->csd.max_dtr;
-> > +
-> > +       mmc_set_clock(card->host, max_dtr);
-> > +}
-> > +
-> > +/*
-> > + * Select the bus width amoung 4-bit and 8-bit(SDR).
-> > + * If the bus width is changed successfully, return the slected width value.
-> > + * Zero is returned instead of error value if the wide width is not supported.
-> > + */
-> > +static int mmc_select_bus_width(struct mmc_card *card)
-> >  {
-> > -       int idx, err = -EINVAL;
-> > -       struct mmc_host *host;
-> >         static unsigned ext_csd_bits[] = {
-> > -               EXT_CSD_BUS_WIDTH_4,
-> >                 EXT_CSD_BUS_WIDTH_8,
-> > +               EXT_CSD_BUS_WIDTH_4,
-> >         };
-> >         static unsigned bus_widths[] = {
-> > -               MMC_BUS_WIDTH_4,
-> >                 MMC_BUS_WIDTH_8,
-> > +               MMC_BUS_WIDTH_4,
-> >         };
-> 
-> Do we really need to keep these arrays? The only contain only two values.
-> 
-> Can't we just try with 8-bit, if supported, and if it fails try with
-> 4-bit. Would that further simplify the code?
-Yes, current implementation does that.
-First,  it tries with 8-bit if supported, and if failed, it will be tried with 4-bit.
-And I think using array can make simple retry coding if considering failure case.
-I intended to keep original way.
+Using non-DMA dump-regs, which would be more exactly for DMA transfer failed.
 
-> 
-> Overall looks good to me, besides the minor comments above.
-> 
-> Since this kind of touches quite old code, I would appreciate if it
-> could go though some more testing in linux next, thus it's material
-> for early queueing to 3.16.
-> 
-> But before we go on, I would like to know if you managed to test all
-> the different variants of buswidth/speedmode and the bus width test?
-> If there is any specific test would like to get help to run, just tell
-> me.
-> 
-> Nice work!
-It would be nice if it's picked for 3.15.
-As I mentioned above, I basically kept the original flow and way.
+More careful handle when cmd/data timeout, add stop(CMD12) cmd before go to
+finish request when multi-rw timeout.
 
-This change applies only to eMMC type and participates only in card initialization's process.
-I tested on the following various mode and detection is performed successfully.
+Remove some static checher warings.
+on commit: <mmc: rtsx: add support for pre_req and post_req>
+drivers/mmc/host/rtsx_pci_sdmmc.c:194 sd_finish_request()
+error: we previously assumed 'mrq' could be null (see line 158)
+drivers/mmc/host/rtsx_pci_sdmmc.c:504 sd_get_rsp()
+error: we previously assumed 'cmd' could be null (see line 434)
+drivers/mmc/host/rtsx_pci_sdmmc.c:525 sd_pre_dma_transfer()
+warn: we tested 'next' before and it was 'false'
 
-- HS400	w/ 8-bit
-- HS400	w/ 4-bit	: HS200 mode is selected(Because HS400 is possible with 8-bit)
-- HS200	w/ 4-bit or 8-bit 
-- DDR52	w/ 4-bit or 8-bit
-- High speed	w/ 1-bit, 4-bit or 8-bit
-- Backwards	w/ 1-bit, 4-bit or 8-bit
+Signed-off-by: Micky Ching <micky_ching@realsil.com.cn>
+---
+ drivers/mmc/host/rtsx_pci_sdmmc.c |  118 ++++++++++++++++++++-----------------
+ 1 file changed, 64 insertions(+), 54 deletions(-)
 
-I really appreciate your deep reviews.
-
-Thanks,
-Seungwon Jeon
-
+diff --git a/drivers/mmc/host/rtsx_pci_sdmmc.c b/drivers/mmc/host/rtsx_pci_sdmmc.c
+index 0d8904a..d00a94e 100644
+--- a/drivers/mmc/host/rtsx_pci_sdmmc.c
++++ b/drivers/mmc/host/rtsx_pci_sdmmc.c
+@@ -81,25 +81,23 @@ static inline void sd_clear_error(struct realtek_pci_sdmmc *host)
+ }
+ 
+ #ifdef DEBUG
++static inline void sd_print_reg(struct realtek_pci_sdmmc *host, u16 reg)
++{
++	u8 val;
++	if (rtsx_pci_read_register(host->pcr, reg, &val) < 0)
++		dev_dbg(sdmmc_dev(host), "read 0x%04x failed\n", reg);
++	else
++		dev_dbg(sdmmc_dev(host), "0x%04X: 0x%02x\n", reg, val);
++}
++
+ static void sd_print_debug_regs(struct realtek_pci_sdmmc *host)
+ {
+-	struct rtsx_pcr *pcr = host->pcr;
+ 	u16 i;
+-	u8 *ptr;
+-
+-	/* Print SD host internal registers */
+-	rtsx_pci_init_cmd(pcr);
+-	for (i = 0xFDA0; i <= 0xFDAE; i++)
+-		rtsx_pci_add_cmd(pcr, READ_REG_CMD, i, 0, 0);
+-	for (i = 0xFD52; i <= 0xFD69; i++)
+-		rtsx_pci_add_cmd(pcr, READ_REG_CMD, i, 0, 0);
+-	rtsx_pci_send_cmd(pcr, 100);
+ 
+-	ptr = rtsx_pci_get_cmd_data(pcr);
+ 	for (i = 0xFDA0; i <= 0xFDAE; i++)
+-		dev_dbg(sdmmc_dev(host), "0x%04X: 0x%02x\n", i, *(ptr++));
++		sd_print_reg(host, i);
+ 	for (i = 0xFD52; i <= 0xFD69; i++)
+-		dev_dbg(sdmmc_dev(host), "0x%04X: 0x%02x\n", i, *(ptr++));
++		sd_print_reg(host, i);
+ }
+ #else
+ #define sd_print_debug_regs(host)
+@@ -125,19 +123,27 @@ static void sd_request_timeout(unsigned long host_addr)
+ 	spin_lock_irqsave(&host->lock, flags);
+ 
+ 	if (!host->mrq) {
+-		dev_err(sdmmc_dev(host), "error: no request exist\n");
+-		goto out;
++		dev_err(sdmmc_dev(host), "error: request not exist\n");
++		spin_unlock_irqrestore(&host->lock, flags);
++		return;
+ 	}
+ 
+-	if (host->cmd)
++	if (host->cmd && host->data)
++		dev_err(sdmmc_dev(host), "error: cmd and data conflict\n");
++
++	if (host->cmd) {
+ 		host->cmd->error = -ETIMEDOUT;
+-	if (host->data)
+-		host->data->error = -ETIMEDOUT;
++		dev_dbg(sdmmc_dev(host), "timeout for cmd %d\n",
++			host->cmd->opcode);
++		tasklet_schedule(&host->cmd_tasklet);
++	}
+ 
+-	dev_dbg(sdmmc_dev(host), "timeout for request\n");
++	if (host->data) {
++		host->data->error = -ETIMEDOUT;
++		dev_dbg(sdmmc_dev(host), "timeout for data transfer\n");
++		tasklet_schedule(&host->data_tasklet);
++	}
+ 
+-out:
+-	tasklet_schedule(&host->finish_tasklet);
+ 	spin_unlock_irqrestore(&host->lock, flags);
+ }
+ 
+@@ -157,7 +163,8 @@ static void sd_finish_request(unsigned long host_addr)
+ 	mrq = host->mrq;
+ 	if (!mrq) {
+ 		dev_err(sdmmc_dev(host), "error: no request need finish\n");
+-		goto out;
++		spin_unlock_irqrestore(&host->lock, flags);
++		return;
+ 	}
+ 
+ 	cmd = mrq->cmd;
+@@ -167,11 +174,6 @@ static void sd_finish_request(unsigned long host_addr)
+ 		(mrq->stop && mrq->stop->error) ||
+ 		(cmd && cmd->error) || (data && data->error);
+ 
+-	if (any_error) {
+-		rtsx_pci_stop_cmd(pcr);
+-		sd_clear_error(host);
+-	}
+-
+ 	if (data) {
+ 		if (any_error)
+ 			data->bytes_xfered = 0;
+@@ -188,7 +190,6 @@ static void sd_finish_request(unsigned long host_addr)
+ 	host->cmd = NULL;
+ 	host->data = NULL;
+ 
+-out:
+ 	spin_unlock_irqrestore(&host->lock, flags);
+ 	mutex_unlock(&pcr->pcr_mutex);
+ 	mmc_request_done(host->mmc, mrq);
+@@ -373,8 +374,11 @@ static void sd_send_cmd(struct realtek_pci_sdmmc *host, struct mmc_command *cmd)
+ 	if (cmd->opcode == SD_SWITCH_VOLTAGE) {
+ 		err = rtsx_pci_write_register(pcr, SD_BUS_STAT,
+ 				0xFF, SD_CLK_TOGGLE_EN);
+-		if (err < 0)
++		if (err < 0) {
++			rtsx_pci_write_register(pcr, SD_BUS_STAT,
++				SD_CLK_TOGGLE_EN | SD_CLK_FORCE_STOP, 0);
+ 			goto out;
++		}
+ 	}
+ 
+ 	rtsx_pci_init_cmd(pcr);
+@@ -436,7 +440,8 @@ static void sd_get_rsp(unsigned long host_addr)
+ 
+ 	if (!cmd) {
+ 		dev_err(sdmmc_dev(host), "error: cmd not exist\n");
+-		goto out;
++		spin_unlock_irqrestore(&host->lock, flags);
++		return;
+ 	}
+ 
+ 	spin_lock(&pcr->lock);
+@@ -446,16 +451,18 @@ static void sd_get_rsp(unsigned long host_addr)
+ 		err = -EINVAL;
+ 	spin_unlock(&pcr->lock);
+ 
+-	if (err < 0)
++	if (err < 0) {
++		rtsx_pci_stop_cmd(host->pcr);
++		sd_print_debug_regs(host);
++		sd_clear_error(host);
+ 		goto out;
++	}
+ 
+ 	rsp_type = host->rsp_type;
+ 	stat_idx = host->rsp_len;
+ 
+-	if (rsp_type == SD_RSP_TYPE_R0) {
+-		err = 0;
++	if (rsp_type == SD_RSP_TYPE_R0)
+ 		goto out;
+-	}
+ 
+ 	/* Eliminate returned value of CHECK_REG_CMD */
+ 	ptr = rtsx_pci_get_cmd_data(pcr) + 1;
+@@ -498,14 +505,19 @@ static void sd_get_rsp(unsigned long host_addr)
+ 		goto out;
+ 
+ 	if (cmd->data) {
+-		sd_start_multi_rw(host, host->mrq);
++		err = sd_start_multi_rw(host, host->mrq);
++		if (err) {
++			cmd->data->error = err;
++			dev_err(sdmmc_dev(host),
++				"error: start data transfer failed\n");
++			tasklet_schedule(&host->data_tasklet);
++		}
+ 		spin_unlock_irqrestore(&host->lock, flags);
+ 		return;
+ 	}
+ 
+ out:
+ 	cmd->error = err;
+-
+ 	tasklet_schedule(&host->finish_tasklet);
+ 	spin_unlock_irqrestore(&host->lock, flags);
+ }
+@@ -525,7 +537,7 @@ static int sd_pre_dma_transfer(struct realtek_pci_sdmmc *host,
+ 		data->host_cookie = 0;
+ 	}
+ 
+-	if (next || (!next && data->host_cookie != host->next_data.cookie))
++	if (next || data->host_cookie != host->next_data.cookie)
+ 		sg_count = rtsx_pci_dma_map_sg(pcr,
+ 				data->sg, data->sg_len, read);
+ 	else
+@@ -580,7 +592,6 @@ static int sd_start_multi_rw(struct realtek_pci_sdmmc *host,
+ 	int uhs = mmc_card_uhs(card);
+ 	int read = data->flags & MMC_DATA_READ;
+ 	u8 cfg2, trans_mode;
+-	int err;
+ 	size_t data_len = data->blksz * data->blocks;
+ 
+ 	if (host->data)
+@@ -641,12 +652,7 @@ static int sd_start_multi_rw(struct realtek_pci_sdmmc *host,
+ 	mod_timer(&host->timer, jiffies + 10 * HZ);
+ 	rtsx_pci_send_cmd_no_wait(pcr);
+ 
+-	err = rtsx_pci_dma_transfer(pcr, data->sg, host->sg_count, read);
+-	if (err < 0) {
+-		data->error = err;
+-		tasklet_schedule(&host->finish_tasklet);
+-	}
+-	return 0;
++	return rtsx_pci_dma_transfer(pcr, data->sg, host->sg_count, read);
+ }
+ 
+ static void sd_finish_multi_rw(unsigned long host_addr)
+@@ -660,8 +666,9 @@ static void sd_finish_multi_rw(unsigned long host_addr)
+ 	spin_lock_irqsave(&host->lock, flags);
+ 
+ 	if (!host->data) {
+-		dev_err(sdmmc_dev(host), "error: no data exist\n");
+-		goto out;
++		dev_err(sdmmc_dev(host), "error: data not exist\n");
++		spin_unlock_irqrestore(&host->lock, flags);
++		return;
+ 	}
+ 
+ 	data = host->data;
+@@ -672,19 +679,22 @@ static void sd_finish_multi_rw(unsigned long host_addr)
+ 	else if (pcr->trans_result != TRANS_RESULT_OK)
+ 		err = -EINVAL;
+ 
+-	if (err < 0) {
++	if (err < 0)
+ 		data->error = err;
+-		goto out;
++
++	if (data->error) {
++		rtsx_pci_stop_cmd(host->pcr);
++		sd_print_debug_regs(host);
++		sd_clear_error(host);
++		dev_dbg(sdmmc_dev(host), "data transfer failed %d\n",
++			data->error);
+ 	}
+ 
+-	if (!host->mrq->sbc && data->stop) {
++	if (!host->mrq->sbc && data->stop)
+ 		sd_send_cmd(host, data->stop);
+-		spin_unlock_irqrestore(&host->lock, flags);
+-		return;
+-	}
++	else
++		tasklet_schedule(&host->finish_tasklet);
+ 
+-out:
+-	tasklet_schedule(&host->finish_tasklet);
+ 	spin_unlock_irqrestore(&host->lock, flags);
+ }
+ 
+-- 
+1.7.9.5
