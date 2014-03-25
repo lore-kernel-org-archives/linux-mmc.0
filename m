@@ -1,72 +1,43 @@
 From: Gwendal Grignou <gwendal@chromium.org>
-Subject: [PATCH 0/4] Set max_discard_sectors maximal value to UINT_MAX>>9
-Date: Tue, 25 Mar 2014 16:48:22 -0700
-Message-ID: <1395791307-23727-1-git-send-email-gwendal@chromium.org>
+Subject: [PATCH 2/4] Limit max_discard_sectors to UINT_MAX>>9
+Date: Tue, 25 Mar 2014 16:48:24 -0700
+Message-ID: <1395791307-23727-3-git-send-email-gwendal@chromium.org>
+References: <1395791307-23727-1-git-send-email-gwendal@chromium.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pa0-f73.google.com ([209.85.220.73]:64358 "EHLO
-	mail-pa0-f73.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751619AbaCYXtD (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 25 Mar 2014 19:49:03 -0400
-Received: by mail-pa0-f73.google.com with SMTP id kq14so154456pab.2
-        for <linux-mmc@vger.kernel.org>; Tue, 25 Mar 2014 16:49:02 -0700 (PDT)
+Received: from mail-ob0-f202.google.com ([209.85.214.202]:45134 "EHLO
+	mail-ob0-f202.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751291AbaCYXtM (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 25 Mar 2014 19:49:12 -0400
+Received: by mail-ob0-f202.google.com with SMTP id wo20so268626obc.5
+        for <linux-mmc@vger.kernel.org>; Tue, 25 Mar 2014 16:49:11 -0700 (PDT)
+In-Reply-To: <1395791307-23727-1-git-send-email-gwendal@chromium.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: axboe@kernel.dk, ulf.hansson@linaro.org
 Cc: linux-mtd@lists.infradead.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Gwendal Grignou <gwendal@chromium.org>
 
-Without this change, 'blkdiscard /dev/mmcblk0' would panic:
-Because max_discard_sectors was set to 4G sectors, discard request issued
-on behalf of blkdiscard would be merged, leading to request larger than 4GB:
-[  169.035929] __end_that: dev mmcblk0: type=1, flags=122c8081
-[  169.041464]   sector 0, nr/cnr 0/4294966272
-[  169.045689]   bio ebb7a380, biotail ebb7aa80, buffer   (null), len 0
-[  169.052106] blk_update_request: bio idx 0 >= vcnt 0
-[  169.057068] request botched: dev mmcblk0: type=1, flags=122c8081
-[  169.063138]   sector 0, nr/cnr 0/4294966272
-[  169.067436]   bio ebb7a380, biotail ebb7aa80, buffer   (null), len 0
-The IOCTL would be stuck in the kernel, a watchdog would reboot the machine.
+max_discard_sectors can not be larger than UINT_MAX>>9,
+otherwise, there is a risk that discard requests would be merged
+into a request larger than 4GB.
 
-After this change, blkdiscard works fine. With blktrace/blkparse, I verified
-the discard requests are sane: 8387584 is 4GB in sectors rounded down.
-Example of a ~16GB device:
- 9368  Q   D 0 + 8387584 [blkdiscard]
-    0  m   N cfq9368 alloced
- 9368  G   D 0 + 8387584 [blkdiscard]
- 9368  P   N [blkdiscard]
- 9368  Q   D 8387584 + 8387584 [blkdiscard]
- 9368  G   D 8387584 + 8387584 [blkdiscard]
- 9368  Q   D 16775168 + 8387584 [blkdiscard]
- 9368  G   D 16775168 + 8387584 [blkdiscard]
- 9368  Q   D 25162752 + 5372928 [blkdiscard]
- 9368  G   D 25162752 + 5372928 [blkdiscard]
- 9368  I   D 0 + 8387584 [blkdiscard]
-    0  m   N cfq9368 insert_request
-    0  m   N cfq9368 add_to_rr
- 9368  I   D 8387584 + 8387584 [blkdiscard]
-    0  m   N cfq9368 insert_request
- 9368  I   D 16775168 + 8387584 [blkdiscard]
-    0  m   N cfq9368 insert_request
- 9368  I   D 25162752 + 5372928 [blkdiscard]
-    0  m   N cfq9368 insert_request
- 9368  U   N [blkdiscard] 4
- ...
+Signed-off-by: Gwendal Grignou <gwendal@chromium.org>
+---
+ block/blk-lib.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-I fixed the other locations where max_discard_sectors was set to
-UINT_MAX and checked the other settings were in units of 512 bytes
-sectors.
-
-Gwendal Grignou (4):
-  Limit max_discard_sectors to UINT_MAX>>9
-  Limit max_discard_sectors to UINT_MAX>>9
-  Limit max_discard_sectors to UINT_MAX>>9
-  Limit max_discard_sectors to UINT_MAX>>9
-
- block/blk-lib.c           | 2 +-
- drivers/block/nbd.c       | 2 +-
- drivers/mmc/core/core.c   | 6 ++++--
- drivers/mtd/mtd_blkdevs.c | 2 +-
- 4 files changed, 7 insertions(+), 5 deletions(-)
-
+diff --git a/block/blk-lib.c b/block/blk-lib.c
+index 9b5b561..67bb0e7 100644
+--- a/block/blk-lib.c
++++ b/block/blk-lib.c
+@@ -64,7 +64,7 @@ int blkdev_issue_discard(struct block_device *bdev, sector_t sector,
+ 	 * Ensure that max_discard_sectors is of the proper
+ 	 * granularity, so that requests stay aligned after a split.
+ 	 */
+-	max_discard_sectors = min(q->limits.max_discard_sectors, UINT_MAX >> 9);
++	max_discard_sectors = q->limits.max_discard_sectors;
+ 	max_discard_sectors -= max_discard_sectors % granularity;
+ 	if (unlikely(!max_discard_sectors)) {
+ 		/* Avoid infinite loop below. Being cautious never hurts. */
 -- 
 1.9.1.423.g4596e3a
 
