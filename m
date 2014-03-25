@@ -1,70 +1,72 @@
-From: Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>
-Subject: Re: mvsdio: unhandled interrupt, mmc writes queuing up
-Date: Tue, 25 Mar 2014 23:16:53 +0100
-Message-ID: <53320055.9080307@gmail.com>
-References: <20140325192759.GJ29769@segv.de>
-Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+From: Gwendal Grignou <gwendal@chromium.org>
+Subject: [PATCH 0/4] Set max_discard_sectors maximal value to UINT_MAX>>9
+Date: Tue, 25 Mar 2014 16:48:22 -0700
+Message-ID: <1395791307-23727-1-git-send-email-gwendal@chromium.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ee0-f45.google.com ([74.125.83.45]:65200 "EHLO
-	mail-ee0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751431AbaCYWQ7 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 25 Mar 2014 18:16:59 -0400
-In-Reply-To: <20140325192759.GJ29769@segv.de>
+Received: from mail-pa0-f73.google.com ([209.85.220.73]:64358 "EHLO
+	mail-pa0-f73.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751619AbaCYXtD (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 25 Mar 2014 19:49:03 -0400
+Received: by mail-pa0-f73.google.com with SMTP id kq14so154456pab.2
+        for <linux-mmc@vger.kernel.org>; Tue, 25 Mar 2014 16:49:02 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Alexander Elbs <alex@segv.de>, Nicolas Pitre <nico@fluxnic.net>
-Cc: Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, bonbons@linux-vserver.org, Jason Cooper <jason@lakedaemon.net>, Andrew Lunn <andrew@lunn.ch>, Gregory CLEMENT <gregory.clement@free-electrons.com>
+To: axboe@kernel.dk, ulf.hansson@linaro.org
+Cc: linux-mtd@lists.infradead.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Gwendal Grignou <gwendal@chromium.org>
 
-On 03/25/2014 08:27 PM, Alexander Elbs wrote:
->> On Wed, 19 Mar 2014, Bruno Pr=E9mont wrote:
->>> Since upgrading my Sheevaplug from 3.7.2 to 3.13.6 (FDT) I'm seeing
->>>   mvsdio f1090000.mvsdio: unhandled interrupt status=3D0x8810 en=3D=
-0x0000 pio=3D0
->>> at varied timings.
->=20
-> I have the same problem on my sheevaplug.
->=20
->> It has been many years since I've looked at the code for this driver=
-=2E =20
->> I'm therefore including Thomas Petazzoni to the CC list as he appear=
-s to=20
->> have been the most active since then.
->>
->> The reported status seems to indicate missing data in the context of=
- a=20
->> transfer with CMD12, and a CRC error ensued of course.
->>
->> At this point I'd suggest testing intermediate kernels between 3.7 a=
-nd=20
->> 3.13, and try bisection until you find the offending commit.
->>
->> [...]
->>> I get same results with 3.14-rc7.
->>
->> Excellent, that reduces the search space significantly.  You can do =
-a=20
->> git bisect directly.
->=20
-> I did a git bisect.
->   good: no message "unhandled interrupt"
->   bad: message above appears
->   skipped: unbootable kernel, usually stuck after the line "Uncompres=
-sing Linux".=20
->=20
-> So far I am down to a few commits after 3.11.
->=20
-> $ git bisect view --oneline
-> 2326f04 (refs/bisect/bad) ARM: kirkwood: convert to DT irqchip and cl=
-ocksource
+Without this change, 'blkdiscard /dev/mmcblk0' would panic:
+Because max_discard_sectors was set to 4G sectors, discard request issued
+on behalf of blkdiscard would be merged, leading to request larger than 4GB:
+[  169.035929] __end_that: dev mmcblk0: type=1, flags=122c8081
+[  169.041464]   sector 0, nr/cnr 0/4294966272
+[  169.045689]   bio ebb7a380, biotail ebb7aa80, buffer   (null), len 0
+[  169.052106] blk_update_request: bio idx 0 >= vcnt 0
+[  169.057068] request botched: dev mmcblk0: type=1, flags=122c8081
+[  169.063138]   sector 0, nr/cnr 0/4294966272
+[  169.067436]   bio ebb7a380, biotail ebb7aa80, buffer   (null), len 0
+The IOCTL would be stuck in the kernel, a watchdog would reboot the machine.
 
-Can you please try the patches contained in [1]?
+After this change, blkdiscard works fine. With blktrace/blkparse, I verified
+the discard requests are sane: 8387584 is 4GB in sectors rounded down.
+Example of a ~16GB device:
+ 9368  Q   D 0 + 8387584 [blkdiscard]
+    0  m   N cfq9368 alloced
+ 9368  G   D 0 + 8387584 [blkdiscard]
+ 9368  P   N [blkdiscard]
+ 9368  Q   D 8387584 + 8387584 [blkdiscard]
+ 9368  G   D 8387584 + 8387584 [blkdiscard]
+ 9368  Q   D 16775168 + 8387584 [blkdiscard]
+ 9368  G   D 16775168 + 8387584 [blkdiscard]
+ 9368  Q   D 25162752 + 5372928 [blkdiscard]
+ 9368  G   D 25162752 + 5372928 [blkdiscard]
+ 9368  I   D 0 + 8387584 [blkdiscard]
+    0  m   N cfq9368 insert_request
+    0  m   N cfq9368 add_to_rr
+ 9368  I   D 8387584 + 8387584 [blkdiscard]
+    0  m   N cfq9368 insert_request
+ 9368  I   D 16775168 + 8387584 [blkdiscard]
+    0  m   N cfq9368 insert_request
+ 9368  I   D 25162752 + 5372928 [blkdiscard]
+    0  m   N cfq9368 insert_request
+ 9368  U   N [blkdiscard] 4
+ ...
 
-They have been Acked-by Jason Cooper, but I guess we simply lost
-track of them.
+I fixed the other locations where max_discard_sectors was set to
+UINT_MAX and checked the other settings were in units of 512 bytes
+sectors.
 
-Sebastian
+Gwendal Grignou (4):
+  Limit max_discard_sectors to UINT_MAX>>9
+  Limit max_discard_sectors to UINT_MAX>>9
+  Limit max_discard_sectors to UINT_MAX>>9
+  Limit max_discard_sectors to UINT_MAX>>9
 
-[1] https://lkml.org/lkml/2013/11/15/276
+ block/blk-lib.c           | 2 +-
+ drivers/block/nbd.c       | 2 +-
+ drivers/mmc/core/core.c   | 6 ++++--
+ drivers/mtd/mtd_blkdevs.c | 2 +-
+ 4 files changed, 7 insertions(+), 5 deletions(-)
+
+-- 
+1.9.1.423.g4596e3a
 
