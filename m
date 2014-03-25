@@ -1,60 +1,70 @@
-From: Chris Ball <chris@printf.net>
-Subject: Re: RESEND:[PATCH V3] sdhci: only reprogram retuning timer when flag is set
-Date: Tue, 25 Mar 2014 20:56:19 +0000
-Message-ID: <86lhvyvvyk.fsf@void.printf.net>
-References: <1393012782-23917-1-git-send-email-arend@broadcom.com>
-	<532A7D87.4000009@intel.com> <5331EBF1.4030600@broadcom.com>
+From: Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>
+Subject: Re: mvsdio: unhandled interrupt, mmc writes queuing up
+Date: Tue, 25 Mar 2014 23:16:53 +0100
+Message-ID: <53320055.9080307@gmail.com>
+References: <20140325192759.GJ29769@segv.de>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: TEXT/PLAIN; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:47385 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754122AbaCYU41 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 25 Mar 2014 16:56:27 -0400
-In-Reply-To: <5331EBF1.4030600@broadcom.com> (Arend van Spriel's message of
-	"Tue, 25 Mar 2014 21:49:53 +0100")
+Received: from mail-ee0-f45.google.com ([74.125.83.45]:65200 "EHLO
+	mail-ee0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751431AbaCYWQ7 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 25 Mar 2014 18:16:59 -0400
+In-Reply-To: <20140325192759.GJ29769@segv.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Arend van Spriel <arend@broadcom.com>
-Cc: Aaron Lu <aaron.lu@intel.com>, linux-mmc@vger.kernel.org, Dong Aisheng <dongas86@gmail.com>
+To: Alexander Elbs <alex@segv.de>, Nicolas Pitre <nico@fluxnic.net>
+Cc: Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, bonbons@linux-vserver.org, Jason Cooper <jason@lakedaemon.net>, Andrew Lunn <andrew@lunn.ch>, Gregory CLEMENT <gregory.clement@free-electrons.com>
 
-Hi Arend,
-
-On Tue, Mar 25 2014, Arend van Spriel wrote:
-> On 03/20/14 06:32, Aaron Lu wrote:
->> On 02/22/2014 03:59 AM, Arend van Spriel wrote:
->>> When the host->tuning_count is zero it means that the
->>> retuning is disabled. This is checked on the first
->>> run of sdhci_execute_tuning() by the if statement below:
->>>
->>> 	if (!(host->flags&  SDHCI_NEEDS_RETUNING)&&  host->tuning_count&&
->>> 	(host->tuning_mode == SDHCI_TUNING_MODE_1)) {
->>>
->>> So only when tuning_count is non-zero it will set the host
->>> flag SDHCI_USING_RETUNING_TIMER. The else statement is only
->>> for re-programming the timer, which means that flag must be
->>> set. Because that is not checked the else statement is executed
->>> in the first run when tuning_count is zero.
->>>
->>> This was seen on a host controller which indicated
->>> SDHCI_TUNING_MODE_1 (0) and tuning_count being zero. Suspect
->>> that (one of) these registers is not properly set.
->>>
->>> Cc: Dong Aisheng<dongas86@gmail.com>
->>> Cc: Aaron Lu<aaron.lwe@gmail.com>
->>> Signed-off-by: Arend van Spriel<arend@broadcom.com>
+On 03/25/2014 08:27 PM, Alexander Elbs wrote:
+>> On Wed, 19 Mar 2014, Bruno Pr=E9mont wrote:
+>>> Since upgrading my Sheevaplug from 3.7.2 to 3.13.6 (FDT) I'm seeing
+>>>   mvsdio f1090000.mvsdio: unhandled interrupt status=3D0x8810 en=3D=
+0x0000 pio=3D0
+>>> at varied timings.
+>=20
+> I have the same problem on my sheevaplug.
+>=20
+>> It has been many years since I've looked at the code for this driver=
+=2E =20
+>> I'm therefore including Thomas Petazzoni to the CC list as he appear=
+s to=20
+>> have been the most active since then.
 >>
->> In addition to solve your problem, this patch also makes sense in the
->> common case, so:
+>> The reported status seems to indicate missing data in the context of=
+ a=20
+>> transfer with CMD12, and a CRC error ensued of course.
 >>
->> Reviewed-by: Aaron Lu<aaron.lu@intel.com>
->
-> Hi Chris,
->
-> Is this patch still in your queue?
+>> At this point I'd suggest testing intermediate kernels between 3.7 a=
+nd=20
+>> 3.13, and try bisection until you find the offending commit.
+>>
+>> [...]
+>>> I get same results with 3.14-rc7.
+>>
+>> Excellent, that reduces the search space significantly.  You can do =
+a=20
+>> git bisect directly.
+>=20
+> I did a git bisect.
+>   good: no message "unhandled interrupt"
+>   bad: message above appears
+>   skipped: unbootable kernel, usually stuck after the line "Uncompres=
+sing Linux".=20
+>=20
+> So far I am down to a few commits after 3.11.
+>=20
+> $ git bisect view --oneline
+> 2326f04 (refs/bisect/bad) ARM: kirkwood: convert to DT irqchip and cl=
+ocksource
 
-Thanks!  I've pushed this to mmc-next for 3.15 with Aaron/Ulf's ACKs now.
+Can you please try the patches contained in [1]?
 
-- Chris.
--- 
-Chris Ball   <chris@printf.net>   <http://printf.net/>
+They have been Acked-by Jason Cooper, but I guess we simply lost
+track of them.
+
+Sebastian
+
+[1] https://lkml.org/lkml/2013/11/15/276
+
