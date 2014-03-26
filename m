@@ -1,271 +1,93 @@
 From: Seungwon Jeon <tgih.jun@samsung.com>
-Subject: [PATCH v2 6/7] ARM: dts: drop dw-mshc-ciu-div property from Exynos
-Date: Wed, 26 Mar 2014 20:31:50 +0900
-Message-ID: <000601cf48e6$fad62590$f08270b0$%jun@samsung.com>
+Subject: [PATCH v2 7/7] ARM: dts: add HS400 support for Exynos5420
+Date: Wed, 26 Mar 2014 20:31:58 +0900
+Message-ID: <000701cf48e6$ffd7e290$ff87a7b0$%jun@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout1.samsung.com ([203.254.224.24]:15372 "EHLO
+	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751601AbaCZLcY (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 26 Mar 2014 07:32:24 -0400
 References: 
 In-reply-to: 
 Content-language: ko
-Sender: linux-samsung-soc-owner@vger.kernel.org
+Sender: linux-mmc-owner@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 To: linux-samsung-soc@vger.kernel.org, linux-mmc@vger.kernel.org
 Cc: 'Chris Ball' <chris@printf.net>, 'Kukjin Kim' <kgene.kim@samsung.com>, 'Jaehoon Chung' <jh80.chung@samsung.com>, 'Ulf Hansson' <ulf.hansson@linaro.org>, 'Alim Akhtar' <alim.akhtar@samsung.com>
-List-Id: linux-mmc@vger.kernel.org
 
-As dw-mshc-ciu-div is strongly close to timing property,
-it is merged with each timing property.
+HS400 timing value set is added for SMDK5420.
+And GPIO line for RCLK should be pull-down state.
 
 Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
 ---
- .../devicetree/bindings/mmc/exynos-dw-mshc.txt     |   12 +++++-------
- arch/arm/boot/dts/exynos4412-odroidx.dts           |    5 ++---
- arch/arm/boot/dts/exynos4412-origen.dts            |    5 ++---
- arch/arm/boot/dts/exynos4412-trats2.dts            |    5 ++---
- arch/arm/boot/dts/exynos5250-arndale.dts           |   10 ++++------
- arch/arm/boot/dts/exynos5250-cros-common.dtsi      |   15 ++++++---------
- arch/arm/boot/dts/exynos5250-smdk5250.dts          |   10 ++++------
- arch/arm/boot/dts/exynos5420-arndale-octa.dts      |   10 ++++------
- arch/arm/boot/dts/exynos5420-smdk5420.dts          |   10 ++++------
- 9 files changed, 33 insertions(+), 49 deletions(-)
+ .../devicetree/bindings/mmc/exynos-dw-mshc.txt     |    6 ++++++
+ arch/arm/boot/dts/exynos5420-pinctrl.dtsi          |    7 +++++++
+ arch/arm/boot/dts/exynos5420-smdk5420.dts          |    5 ++++-
+ 3 files changed, 17 insertions(+), 1 deletions(-)
 
 diff --git a/Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt
-index 532b1d4..ca1914f 100644
+index ca1914f..39c3014 100644
 --- a/Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt
 +++ b/Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt
-@@ -19,10 +19,6 @@ Required Properties:
- 	- "samsung,exynos5420-dw-mshc": for controllers with Samsung Exynos5420
- 	  specific extensions.
- 
--* samsung,dw-mshc-ciu-div: Specifies the divider value for the card interface
--  unit (ciu) clock. This property is applicable only for Exynos5 SoC's and
--  ignored for Exynos4 SoC's. The valid range of divider value is 0 to 7.
--
- * samsung,dw-mshc-sdr-timing: Specifies the value of CIU clock phase shift value
-   in transmit mode and CIU clock phase shift value in receive mode for single
+@@ -29,6 +29,9 @@ Required Properties:
    data rate mode operation. Refer notes below for the order of the cells and the
-@@ -38,6 +34,9 @@ Required Properties:
+   valid values.
+ 
++* samsung,dw-mshc-hs200-timing: Similar with dw-mshc-sdr-timing.
++* samsung,dw-mshc-hs400-timing: Similar with dw-mshc-ddr-timing.
++
+   Notes for the sdr-timing and ddr-timing values:
+ 
      The order of the cells should be
-       - First Cell: CIU clock phase shift value for tx mode.
-       - Second Cell: CIU clock phase shift value for rx mode.
-+      - Thrid Cell: Specifies the divider value for the card interface
-+           unit (ciu) clock. This property is applicable only for Exynos5 SoC's and
-+           ignored for Exynos4 SoC's. The valid range of divider value is 0 to 7.
+@@ -45,6 +48,9 @@ Required Properties:
+       - if CIU clock divider value is 0 (that is divide by 1), both tx and rx
+         phase shift clocks should be 0.
  
-     Valid values for SDR and DDR CIU clock timing for Exynos5250:
-       - valid value for tx phase shift and rx phase shift is 0 to 7.
-@@ -73,9 +72,8 @@ Example:
- 		broken-cd;
- 		fifo-depth = <0x80>;
- 		card-detect-delay = <200>;
--		samsung,dw-mshc-ciu-div = <3>;
--		samsung,dw-mshc-sdr-timing = <2 3>;
--		samsung,dw-mshc-ddr-timing = <1 2>;
-+		samsung,dw-mshc-sdr-timing = <2 3 3>;
-+		samsung,dw-mshc-ddr-timing = <1 2 3>;
++* read-strobe-delay: RCLK (Data strobe) delay to control HS400 mode
++  (Latency value for delay line in Read path)
++
+ Required properties for a slot:
  
- 		slot@0 {
- 			reg = <0>;
-diff --git a/arch/arm/boot/dts/exynos4412-odroidx.dts b/arch/arm/boot/dts/exynos4412-odroidx.dts
-index 9804fcb..99f32db 100644
---- a/arch/arm/boot/dts/exynos4412-odroidx.dts
-+++ b/arch/arm/boot/dts/exynos4412-odroidx.dts
-@@ -48,9 +48,8 @@
- 		supports-highspeed;
- 		broken-cd;
- 		card-detect-delay = <200>;
--		samsung,dw-mshc-ciu-div = <3>;
--		samsung,dw-mshc-sdr-timing = <2 3>;
--		samsung,dw-mshc-ddr-timing = <1 2>;
-+		samsung,dw-mshc-sdr-timing = <2 3 0>;
-+		samsung,dw-mshc-ddr-timing = <1 2 0>;
+ * gpios: specifies a list of gpios used for command, clock and data bus. The
+diff --git a/arch/arm/boot/dts/exynos5420-pinctrl.dtsi b/arch/arm/boot/dts/exynos5420-pinctrl.dtsi
+index e62c8eb..51233ee 100644
+--- a/arch/arm/boot/dts/exynos5420-pinctrl.dtsi
++++ b/arch/arm/boot/dts/exynos5420-pinctrl.dtsi
+@@ -194,6 +194,13 @@
+ 			samsung,pin-drv = <3>;
+ 		};
  
- 		slot@0 {
- 			reg = <0>;
-diff --git a/arch/arm/boot/dts/exynos4412-origen.dts b/arch/arm/boot/dts/exynos4412-origen.dts
-index 6bc0539..7c0b535 100644
---- a/arch/arm/boot/dts/exynos4412-origen.dts
-+++ b/arch/arm/boot/dts/exynos4412-origen.dts
-@@ -131,9 +131,8 @@
- 		supports-highspeed;
- 		broken-cd;
- 		card-detect-delay = <200>;
--		samsung,dw-mshc-ciu-div = <3>;
--		samsung,dw-mshc-sdr-timing = <2 3>;
--		samsung,dw-mshc-ddr-timing = <1 2>;
-+		samsung,dw-mshc-sdr-timing = <2 3 0>;
-+		samsung,dw-mshc-ddr-timing = <1 2 0>;
- 
- 		slot@0 {
- 			reg = <0>;
-diff --git a/arch/arm/boot/dts/exynos4412-trats2.dts b/arch/arm/boot/dts/exynos4412-trats2.dts
-index 4f851cc..556e414 100644
---- a/arch/arm/boot/dts/exynos4412-trats2.dts
-+++ b/arch/arm/boot/dts/exynos4412-trats2.dts
-@@ -451,9 +451,8 @@
- 		card-detect-delay = <200>;
- 		vmmc-supply = <&vemmc_reg>;
- 		clock-frequency = <400000000>;
--		samsung,dw-mshc-ciu-div = <0>;
--		samsung,dw-mshc-sdr-timing = <2 3>;
--		samsung,dw-mshc-ddr-timing = <1 2>;
-+		samsung,dw-mshc-sdr-timing = <2 3 0>;
-+		samsung,dw-mshc-ddr-timing = <1 2 0>;
- 		pinctrl-0 = <&sd4_clk &sd4_cmd &sd4_bus4 &sd4_bus8>;
- 		pinctrl-names = "default";
- 		status = "okay";
-diff --git a/arch/arm/boot/dts/exynos5250-arndale.dts b/arch/arm/boot/dts/exynos5250-arndale.dts
-index b42e658..dc53b51 100644
---- a/arch/arm/boot/dts/exynos5250-arndale.dts
-+++ b/arch/arm/boot/dts/exynos5250-arndale.dts
-@@ -376,9 +376,8 @@
- 		supports-highspeed;
- 		broken-cd;
- 		card-detect-delay = <200>;
--		samsung,dw-mshc-ciu-div = <3>;
--		samsung,dw-mshc-sdr-timing = <2 3>;
--		samsung,dw-mshc-ddr-timing = <1 2>;
-+		samsung,dw-mshc-sdr-timing = <2 3 3>;
-+		samsung,dw-mshc-ddr-timing = <1 2 3>;
- 		vmmc-supply = <&mmc_reg>;
- 		pinctrl-names = "default";
- 		pinctrl-0 = <&sd0_clk &sd0_cmd &sd0_bus4 &sd0_bus8>;
-@@ -394,9 +393,8 @@
- 		num-slots = <1>;
- 		supports-highspeed;
- 		card-detect-delay = <200>;
--		samsung,dw-mshc-ciu-div = <3>;
--		samsung,dw-mshc-sdr-timing = <2 3>;
--		samsung,dw-mshc-ddr-timing = <1 2>;
-+		samsung,dw-mshc-sdr-timing = <2 3 3>;
-+		samsung,dw-mshc-ddr-timing = <1 2 3>;
- 		vmmc-supply = <&mmc_reg>;
- 		pinctrl-names = "default";
- 		pinctrl-0 = <&sd2_clk &sd2_cmd &sd2_cd &sd2_bus4>;
-diff --git a/arch/arm/boot/dts/exynos5250-cros-common.dtsi b/arch/arm/boot/dts/exynos5250-cros-common.dtsi
-index 2c1560d..d550261 100644
---- a/arch/arm/boot/dts/exynos5250-cros-common.dtsi
-+++ b/arch/arm/boot/dts/exynos5250-cros-common.dtsi
-@@ -251,9 +251,8 @@
- 		supports-highspeed;
- 		broken-cd;
- 		card-detect-delay = <200>;
--		samsung,dw-mshc-ciu-div = <3>;
--		samsung,dw-mshc-sdr-timing = <2 3>;
--		samsung,dw-mshc-ddr-timing = <1 2>;
-+		samsung,dw-mshc-sdr-timing = <2 3 3>;
-+		samsung,dw-mshc-ddr-timing = <1 2 3>;
- 		pinctrl-names = "default";
- 		pinctrl-0 = <&sd0_clk &sd0_cmd &sd0_cd &sd0_bus4 &sd0_bus8>;
- 
-@@ -267,9 +266,8 @@
- 		num-slots = <1>;
- 		supports-highspeed;
- 		card-detect-delay = <200>;
--		samsung,dw-mshc-ciu-div = <3>;
--		samsung,dw-mshc-sdr-timing = <2 3>;
--		samsung,dw-mshc-ddr-timing = <1 2>;
-+		samsung,dw-mshc-sdr-timing = <2 3 3>;
-+		samsung,dw-mshc-ddr-timing = <1 2 3>;
- 		pinctrl-names = "default";
- 		pinctrl-0 = <&sd2_clk &sd2_cmd &sd2_cd &sd2_bus4>;
- 
-@@ -285,9 +283,8 @@
- 		supports-highspeed;
- 		broken-cd;
- 		card-detect-delay = <200>;
--		samsung,dw-mshc-ciu-div = <3>;
--		samsung,dw-mshc-sdr-timing = <2 3>;
--		samsung,dw-mshc-ddr-timing = <1 2>;
-+		samsung,dw-mshc-sdr-timing = <2 3 3>;
-+		samsung,dw-mshc-ddr-timing = <1 2 3>;
- 		/* See board-specific dts files for pin setup */
- 
- 		slot@0 {
-diff --git a/arch/arm/boot/dts/exynos5250-smdk5250.dts b/arch/arm/boot/dts/exynos5250-smdk5250.dts
-index 3e69837..a59a1ae 100644
---- a/arch/arm/boot/dts/exynos5250-smdk5250.dts
-+++ b/arch/arm/boot/dts/exynos5250-smdk5250.dts
-@@ -134,9 +134,8 @@
- 		supports-highspeed;
- 		broken-cd;
- 		card-detect-delay = <200>;
--		samsung,dw-mshc-ciu-div = <3>;
--		samsung,dw-mshc-sdr-timing = <2 3>;
--		samsung,dw-mshc-ddr-timing = <1 2>;
-+		samsung,dw-mshc-sdr-timing = <2 3 3>;
-+		samsung,dw-mshc-ddr-timing = <1 2 3>;
- 		pinctrl-names = "default";
- 		pinctrl-0 = <&sd0_clk &sd0_cmd &sd0_bus4 &sd0_bus8>;
- 
-@@ -151,9 +150,8 @@
- 		num-slots = <1>;
- 		supports-highspeed;
- 		card-detect-delay = <200>;
--		samsung,dw-mshc-ciu-div = <3>;
--		samsung,dw-mshc-sdr-timing = <2 3>;
--		samsung,dw-mshc-ddr-timing = <1 2>;
-+		samsung,dw-mshc-sdr-timing = <2 3 3>;
-+		samsung,dw-mshc-ddr-timing = <1 2 3>;
- 		pinctrl-names = "default";
- 		pinctrl-0 = <&sd2_clk &sd2_cmd &sd2_cd &sd2_bus4>;
- 
-diff --git a/arch/arm/boot/dts/exynos5420-arndale-octa.dts b/arch/arm/boot/dts/exynos5420-arndale-octa.dts
-index 7340745..ce2a50f 100644
---- a/arch/arm/boot/dts/exynos5420-arndale-octa.dts
-+++ b/arch/arm/boot/dts/exynos5420-arndale-octa.dts
-@@ -36,9 +36,8 @@
- 		broken-cd;
- 		supports-highspeed;
- 		card-detect-delay = <200>;
--		samsung,dw-mshc-ciu-div = <3>;
--		samsung,dw-mshc-sdr-timing = <0 4>;
--		samsung,dw-mshc-ddr-timing = <0 2>;
-+		samsung,dw-mshc-sdr-timing = <0 4 3>;
-+		samsung,dw-mshc-ddr-timing = <0 2 3>;
- 		pinctrl-names = "default";
- 		pinctrl-0 = <&sd0_clk &sd0_cmd &sd0_bus4 &sd0_bus8>;
- 
-@@ -52,9 +51,8 @@
- 		status = "okay";
- 		supports-highspeed;
- 		card-detect-delay = <200>;
--		samsung,dw-mshc-ciu-div = <3>;
--		samsung,dw-mshc-sdr-timing = <2 3>;
--		samsung,dw-mshc-ddr-timing = <1 2>;
-+		samsung,dw-mshc-sdr-timing = <2 3 3>;
-+		samsung,dw-mshc-ddr-timing = <1 2 3>;
- 		pinctrl-names = "default";
- 		pinctrl-0 = <&sd2_clk &sd2_cmd &sd2_cd &sd2_bus4>;
- 
++		sd0_rclk: sd0-rclk {
++			samsung,pins = "gpc0-7";
++			samsung,pin-function = <2>;
++			samsung,pin-pud = <1>;
++			samsung,pin-drv = <3>;
++		};
++
+ 		sd1_clk: sd1-clk {
+ 			samsung,pins = "gpc1-0";
+ 			samsung,pin-function = <2>;
 diff --git a/arch/arm/boot/dts/exynos5420-smdk5420.dts b/arch/arm/boot/dts/exynos5420-smdk5420.dts
-index fb5a1e2..3ad4ef3 100644
+index 3ad4ef3..4796d44 100644
 --- a/arch/arm/boot/dts/exynos5420-smdk5420.dts
 +++ b/arch/arm/boot/dts/exynos5420-smdk5420.dts
-@@ -36,9 +36,8 @@
- 		broken-cd;
- 		supports-highspeed;
+@@ -38,8 +38,11 @@
  		card-detect-delay = <200>;
--		samsung,dw-mshc-ciu-div = <3>;
--		samsung,dw-mshc-sdr-timing = <0 4>;
--		samsung,dw-mshc-ddr-timing = <0 2>;
-+		samsung,dw-mshc-sdr-timing = <0 4 3>;
-+		samsung,dw-mshc-ddr-timing = <0 2 3>;
+ 		samsung,dw-mshc-sdr-timing = <0 4 3>;
+ 		samsung,dw-mshc-ddr-timing = <0 2 3>;
++		samsung,dw-mshc-hs200-timing = <0 2 3>;
++		samsung,dw-mshc-hs400-timing = <0 2 1>;
++		read-strobe-delay = <90>;
  		pinctrl-names = "default";
- 		pinctrl-0 = <&sd0_clk &sd0_cmd &sd0_bus4 &sd0_bus8>;
+-		pinctrl-0 = <&sd0_clk &sd0_cmd &sd0_bus4 &sd0_bus8>;
++		pinctrl-0 = <&sd0_clk &sd0_cmd &sd0_bus4 &sd0_bus8 &sd0_rclk>;
  
-@@ -52,9 +51,8 @@
- 		status = "okay";
- 		supports-highspeed;
- 		card-detect-delay = <200>;
--		samsung,dw-mshc-ciu-div = <3>;
--		samsung,dw-mshc-sdr-timing = <2 3>;
--		samsung,dw-mshc-ddr-timing = <1 2>;
-+		samsung,dw-mshc-sdr-timing = <2 3 3>;
-+		samsung,dw-mshc-ddr-timing = <1 2 3>;
- 		pinctrl-names = "default";
- 		pinctrl-0 = <&sd2_clk &sd2_cmd &sd2_cd &sd2_bus4>;
- 
+ 		slot@0 {
+ 			reg = <0>;
 -- 
 1.7.4.1
+
+
