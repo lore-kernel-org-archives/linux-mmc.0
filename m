@@ -1,55 +1,162 @@
-From: Bruno =?UTF-8?B?UHLDqW1vbnQ=?= <bonbons@linux-vserver.org>
-Subject: Re: mvsdio: unhandled interrupt, mmc writes queuing up
-Date: Wed, 26 Mar 2014 21:46:31 +0100
-Message-ID: <20140326214631.7dccf8b6@neptune.home>
-References: <20140325192759.GJ29769@segv.de>
-	<53320055.9080307@gmail.com>
-	<20140326000735.GI28304@titan.lakedaemon.net>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v11 0/3] mmc: sdhci-msm: Add support for Qualcomm chipsets
+Date: Thu, 27 Mar 2014 00:09:24 +0100
+Message-ID: <CAPDyKFqjjgWnH4Lt7vOPSM09ngvY1N6ustaBU41tZCJoKWrkzw@mail.gmail.com>
+References: <1394465833-22581-1-git-send-email-gdjakov@mm-sol.com>
+	<53330387.7000803@mm-sol.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from hygieia.santi-shop.eu ([78.46.175.2]:45230 "EHLO
-	hygieia.santi-shop.eu" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753861AbaCZUqg convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 26 Mar 2014 16:46:36 -0400
-In-Reply-To: <20140326000735.GI28304@titan.lakedaemon.net>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-doc-owner@vger.kernel.org>
+In-Reply-To: <53330387.7000803@mm-sol.com>
+Sender: linux-doc-owner@vger.kernel.org
+To: Georgi Djakov <gdjakov@mm-sol.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Grant Likely <grant.likely@linaro.org>, Rob Herring <robh+dt@kernel.org>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Stephen Warren <swarren@wwwdotorg.org>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Kumar Gala <galak@codeaurora.org>, Rob Landley <rob@landley.net>, Chris Ball <chris@printf.net>, linux-doc@vger.kernel.org, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-arm-msm@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jason Cooper <jason@lakedaemon.net>
-Cc: linux-kernel@vger.kernel.org, Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>, Alexander Elbs <alex@segv.de>, Nicolas Pitre <nico@fluxnic.net>, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, linux-mmc@vger.kernel.org, Andrew Lunn <andrew@lunn.ch>, Gregory CLEMENT <gregory.clement@free-electrons.com>
 
-Hello Jason Sebastian,
+On 26 March 2014 17:42, Georgi Djakov <gdjakov@mm-sol.com> wrote:
+> Hello Chris, Ulf,
+>
+> Do you have any comments on the patches?
+> The arch code that will use this driver is already in mainline. The
+> regulators support seem to be still on its way, but this driver also works
+> fine with dummy regulators.
 
-On Tue, 25 March 2014 Jason Cooper <jason@lakedaemon.net> wrote:
-> On Tue, Mar 25, 2014 at 11:16:53PM +0100, Sebastian Hesselbarth wrote=
-:
-> > >> On Wed, 19 Mar 2014, Bruno Pr=C3=A9mont wrote:
-> > >>> Since upgrading my Sheevaplug from 3.7.2 to 3.13.6 (FDT) I'm se=
-eing
-> > >>> mvsdio f1090000.mvsdio: unhandled interrupt status=3D0x8810 en=3D=
-0x0000 pio=3D0
-> > >>> at varied timings.
-> >=20
-> > Can you please try the patches contained in [1]?
-> >=20
-> > They have been Acked-by Jason Cooper, but I guess we simply lost
-> > track of them.
-> >=20
-> > Sebastian
-> >=20
-> > [1] https://lkml.org/lkml/2013/11/15/276
->=20
-> If these work for you, please send a Tested-by and I'll keep better
-> track of them this time.  I think these were sent before we had a
-> process for shuttling things into irqchip...
+Looks good to me!
 
+For the complete patchset:
 
-Same for me as for Alexander, tested the series of 3 patches on top of
-3.14-rc7 here with no complaints about unhandled interrupts left.
+Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
 
-So for the 3 of them:
-Tested-by: Bruno Pr=C3=A9mont <bonbons@linux-vserver.org>
-
-Thanks,
-Bruno
+>
+> Thanks,
+> Georgi
+>
+>
+>
+> On 03/10/2014 05:37 PM, Georgi Djakov wrote:
+>>
+>> This patchset adds basic support of the Secure Digital Host Controller
+>> Interface compliant controller found in Qualcomm SoCs.
+>>
+>> Tested with eMMC and various micro SD cards on APQ8074 Dragonboard.
+>> Applies to linux-next.
+>>
+>> Changes from v10:
+>> - Make reg-names and interrupt-names optional (suggested by Rob Herring)
+>> - Use the common names (vmmc, vqmmc) for regulators (suggested by Ulf
+>> Hansson)
+>> - Use the sdhci core to take care of regulators and clock (suggested by
+>> Ulf
+>>    Hansson and Bjorn Andersson)
+>> - Cleanup of unused variables and defines
+>>
+>> Changes from v9:
+>> - Make platform_execute_tuning() static (suggested by Josh Cartwright)
+>> - Fix buffer size in platform_execute_tuning() (suggested by Josh
+>> Cartwright)
+>> - Fix typo in patch subject (suggested by Kumar Gala)
+>> - Move voltage ranges from DT to the driver (suggested by Bjorn Andersson)
+>> - Simplify sdhci_msm_setup_vreg and irq handler (suggested by Bjorn
+>> Andersson)
+>> - Disable prw irq in sdhci_msm_remove (suggested by Bjorn Andersson)
+>> - Fail on peripheral clock errors (suggested by Bjorn Andersson)
+>> - Remove unnecessary core_memres assignment (suggested by Bjorn Andersson)
+>> - Fixes on freeing resources in probe() (suggested by Bjorn Andersson)
+>>
+>> Changes from v8:
+>> - Added controller version suffix to the DT compatible string.
+>> - Switched Kconfig dependency from ARCH_MSM to the new ARCH_QCOM
+>> multiplatform.
+>> - Addressed comments from Stephen Boyd on the 3rd patch (execute tunning).
+>> - Added signed-off-by lines of the initial driver authors.
+>> - Picked up tested-by. https://lkml.org/lkml/2013/11/14/85
+>> - Minor changes on comments, prints and formatting.
+>>
+>> Changes from v7:
+>> - Added call to sdhci_get_of_property().
+>> - Refactored sdhci_msm_dt_parse_vreg_info().
+>> - Fixed possible ERR_PTR() dereferencing.
+>> - Updated DT binding documentation.
+>> - Removed lpm and currents from DT.
+>> - Removed bus-speed-mode from DT.
+>> - Updated and moved the sanity checks.
+>> - Various typo and coding style fixes.
+>> - Added platform_execute_tunning implementation.
+>>
+>> Changes from v6:
+>> - Fixed wrong pointer in sdhci_msm_pwr_irq().
+>> - Added platform_execute_tuning() callback as the MSM SDHC does not
+>>    support tuning as in SDHC 3.0 spec and will need custom implementation
+>>    in order to support SDR104, HS200 and HS400.
+>> - Removed the always-on devicetree property - if the regulator is
+>>    configured as always-on, it will not be disabled anyway.
+>> - Removed devm_pinctrl_get_select_default() - the default pins are
+>>    already set from the device core.
+>> - Removed wrapper function sdhci_msm_set_vdd_io_vol() and enum
+>>    vdd_io_level and now calling regulator_set_voltage() directly.
+>> - Converted #defines to use BIT() macro.
+>> - Added IS_ERR(vreg->reg) check at the beginning of sdhci_msm_vreg
+>>    functions.
+>> - Do not print errors when regulators init return -EPROBE_DEFER as the
+>>    deffered init is not an actual error.
+>> - Handle each power irq status bit separately in sdhci_msm_pwr_irq().
+>> - Ensure that any pending power irq is acknowledged before enabling it,
+>>    otherwise the irq handler will be fired prematurely.
+>> - Minor changes.
+>>
+>> Changes from v5:
+>> - Driver is split into multiple patches
+>> - Do not initialize variables that are assigned later in code
+>> - Remove some useless comments
+>> - Use shorter variable names
+>> - Change pr_err() to dev_err()
+>> - Optimized sdhci_msm_setup_vreg()
+>> - Some code alignment fixes
+>> - Improved DT values sanity check
+>> - Added dev_dbg print for sdhci controller version in probe()
+>> - Added usleep_range() after SW reset - it can take some time
+>> - Added SDHCI_QUIRK_SINGLE_POWER_WRITE - power handled by PMIC
+>> - Renamed DT property vdd-io to vddio
+>>
+>> Changes from v4:
+>> - Simplified sdhci_msm_vreg_disable() and sdhci_msm_set_vdd_io_vol()
+>> - Use devm_ioremap_resource() instead of devm_ioremap()
+>> - Converted IS_ERR_OR_NULL to IS_ERR
+>> - Disable regulators in sdhci_msm_remove()
+>> - Check for DT node at the beginning in sdhci_msm_probe()
+>> - Removed more redundant code
+>> - Changes in some error messages
+>> - Minor fixes
+>>
+>> Changes from v3:
+>> - Allocate memory for all required structs at once
+>> - Added termination entry in sdhci_msm_dt_match[]
+>> - Fixed a missing sdhci_pltfm_free() in probe()
+>> - Removed redundant of_match_ptr
+>> - Removed the unneeded function sdhci_msm_vreg_reset()
+>>
+>> Changes from v2:
+>> - Added DT bindings for clocks
+>> - Moved voltage regulators data to platform data
+>> - Removed unneeded includes
+>> - Removed obsolete and wrapper functions
+>> - Removed error checking where unnecessary
+>> - Removed redundant _clk suffix from clock names
+>> - Just return instead of goto where possible
+>> - Minor fixes
+>>
+>> Georgi Djakov (3):
+>>    mmc: sdhci-msm: Qualcomm SDHCI binding documentation
+>>    mmc: sdhci-msm: Initial support for Qualcomm chipsets
+>>    mmc: sdhci-msm: Add platform_execute_tuning implementation
+>>
+>>   .../devicetree/bindings/mmc/sdhci-msm.txt          |   55 ++
+>>   drivers/mmc/host/Kconfig                           |   13 +
+>>   drivers/mmc/host/Makefile                          |    1 +
+>>   drivers/mmc/host/sdhci-msm.c                       |  618
+>> ++++++++++++++++++++
+>>   4 files changed, 687 insertions(+)
+>>   create mode 100644 Documentation/devicetree/bindings/mmc/sdhci-msm.txt
+>>   create mode 100644 drivers/mmc/host/sdhci-msm.c
+>>
+>
