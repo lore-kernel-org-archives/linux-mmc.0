@@ -1,73 +1,145 @@
 From: Georgi Djakov <gdjakov@mm-sol.com>
-Subject: Re: [PATCH] sdhci: Forward EPROBE_DEFER on vmmc and vqmmc regulators
-Date: Wed, 26 Mar 2014 17:09:47 +0200
-Message-ID: <5332EDBB.7010105@mm-sol.com>
-References: <1394201923-27345-1-git-send-email-mike.looijmans@topic.nl>
+Subject: Re: [PATCH v11 0/3] mmc: sdhci-msm: Add support for Qualcomm chipsets
+Date: Wed, 26 Mar 2014 18:42:47 +0200
+Message-ID: <53330387.7000803@mm-sol.com>
+References: <1394465833-22581-1-git-send-email-gdjakov@mm-sol.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from ns.mm-sol.com ([37.157.136.199]:36407 "EHLO extserv.mm-sol.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750956AbaCZPJt (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 26 Mar 2014 11:09:49 -0400
-In-Reply-To: <1394201923-27345-1-git-send-email-mike.looijmans@topic.nl>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1394465833-22581-1-git-send-email-gdjakov@mm-sol.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-mmc@vger.kernel.org, cjb@laptop.org, ulf.hansson@linaro.org, devicetree@vger.kernel.org, grant.likely@linaro.org, robh+dt@kernel.org, pawel.moll@arm.com, mark.rutland@arm.com, swarren@wwwdotorg.org, ijc+devicetree@hellion.org.uk, galak@codeaurora.org, rob@landley.net, chris@printf.net
+Cc: linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Mike Looijmans <mike.looijmans@topic.nl>, cjb@laptop.org, linux-mmc@vger.kernel.org
-Cc: linux-kernel@vger.kernel.org, git@xilinx.com
 
-On 03/07/2014 04:18 PM, Mike Looijmans wrote:
-> If vmmc or vqmmc regulators are controlled by an I2C device, the
-> request for the regulator is likely to fail because the I2C bus has
-> not been probed yet. The sdhci then incorrectly assumes that the user
-> never wanted to use a regulator anyway and continues without ever
-> enabling or configuring the required regulator.
->
-> To solve this, when a required voltage regulator returns
-> EPROBE_DEFER, signalling that the regulator exists but is not
-> available yet, forward this error to the probe method instead
-> of simply assuming that the user never wanted to use a regulator
-> anyway.
->
-> Tested on a custom board that has an I2C regulator for one of the sdhcis
-> and no regulators at all for the other. This patch enables such a system
-> to work correctly.
-> ---
->   drivers/mmc/host/sdhci.c |    8 ++++++--
->   1 file changed, 6 insertions(+), 2 deletions(-)
->
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 34aef81..43b90c1 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -2972,6 +2972,8 @@ int sdhci_add_host(struct sdhci_host *host)
->   	host->vqmmc = regulator_get_optional(mmc_dev(mmc), "vqmmc");
->   	if (IS_ERR_OR_NULL(host->vqmmc)) {
->   		if (PTR_ERR(host->vqmmc) < 0) {
-> +			if (PTR_ERR(host->vqmmc) == -EPROBE_DEFER)
-> +				return -EPROBE_DEFER;
->   			pr_info("%s: no vqmmc regulator found\n",
->   				mmc_hostname(mmc));
->   			host->vqmmc = NULL;
-> @@ -3048,8 +3050,10 @@ int sdhci_add_host(struct sdhci_host *host)
->   	host->vmmc = regulator_get_optional(mmc_dev(mmc), "vmmc");
->   	if (IS_ERR_OR_NULL(host->vmmc)) {
->   		if (PTR_ERR(host->vmmc) < 0) {
-> -			pr_info("%s: no vmmc regulator found\n",
-> -				mmc_hostname(mmc));
-> +			if (PTR_ERR(host->vmmc) == -EPROBE_DEFER)
-> +				return -EPROBE_DEFER;
-> +			pr_info("%s: no vmmc regulator found (%d)\n",
+Hello Chris, Ulf,
 
-I suggest using %ld here. The rest looks fine to me! Thanks!
+Do you have any comments on the patches?
+The arch code that will use this driver is already in mainline. The 
+regulators support seem to be still on its way, but this driver also 
+works fine with dummy regulators.
 
-> +				mmc_hostname(mmc), PTR_ERR(host->vmmc));
->   			host->vmmc = NULL;
->   		}
->   	}
->
-
-BR,
+Thanks,
 Georgi
 
+
+On 03/10/2014 05:37 PM, Georgi Djakov wrote:
+> This patchset adds basic support of the Secure Digital Host Controller
+> Interface compliant controller found in Qualcomm SoCs.
+>
+> Tested with eMMC and various micro SD cards on APQ8074 Dragonboard.
+> Applies to linux-next.
+>
+> Changes from v10:
+> - Make reg-names and interrupt-names optional (suggested by Rob Herring)
+> - Use the common names (vmmc, vqmmc) for regulators (suggested by Ulf Hansson)
+> - Use the sdhci core to take care of regulators and clock (suggested by Ulf
+>    Hansson and Bjorn Andersson)
+> - Cleanup of unused variables and defines
+>
+> Changes from v9:
+> - Make platform_execute_tuning() static (suggested by Josh Cartwright)
+> - Fix buffer size in platform_execute_tuning() (suggested by Josh Cartwright)
+> - Fix typo in patch subject (suggested by Kumar Gala)
+> - Move voltage ranges from DT to the driver (suggested by Bjorn Andersson)
+> - Simplify sdhci_msm_setup_vreg and irq handler (suggested by Bjorn Andersson)
+> - Disable prw irq in sdhci_msm_remove (suggested by Bjorn Andersson)
+> - Fail on peripheral clock errors (suggested by Bjorn Andersson)
+> - Remove unnecessary core_memres assignment (suggested by Bjorn Andersson)
+> - Fixes on freeing resources in probe() (suggested by Bjorn Andersson)
+>
+> Changes from v8:
+> - Added controller version suffix to the DT compatible string.
+> - Switched Kconfig dependency from ARCH_MSM to the new ARCH_QCOM multiplatform.
+> - Addressed comments from Stephen Boyd on the 3rd patch (execute tunning).
+> - Added signed-off-by lines of the initial driver authors.
+> - Picked up tested-by. https://lkml.org/lkml/2013/11/14/85
+> - Minor changes on comments, prints and formatting.
+>
+> Changes from v7:
+> - Added call to sdhci_get_of_property().
+> - Refactored sdhci_msm_dt_parse_vreg_info().
+> - Fixed possible ERR_PTR() dereferencing.
+> - Updated DT binding documentation.
+> - Removed lpm and currents from DT.
+> - Removed bus-speed-mode from DT.
+> - Updated and moved the sanity checks.
+> - Various typo and coding style fixes.
+> - Added platform_execute_tunning implementation.
+>
+> Changes from v6:
+> - Fixed wrong pointer in sdhci_msm_pwr_irq().
+> - Added platform_execute_tuning() callback as the MSM SDHC does not
+>    support tuning as in SDHC 3.0 spec and will need custom implementation
+>    in order to support SDR104, HS200 and HS400.
+> - Removed the always-on devicetree property - if the regulator is
+>    configured as always-on, it will not be disabled anyway.
+> - Removed devm_pinctrl_get_select_default() - the default pins are
+>    already set from the device core.
+> - Removed wrapper function sdhci_msm_set_vdd_io_vol() and enum
+>    vdd_io_level and now calling regulator_set_voltage() directly.
+> - Converted #defines to use BIT() macro.
+> - Added IS_ERR(vreg->reg) check at the beginning of sdhci_msm_vreg
+>    functions.
+> - Do not print errors when regulators init return -EPROBE_DEFER as the
+>    deffered init is not an actual error.
+> - Handle each power irq status bit separately in sdhci_msm_pwr_irq().
+> - Ensure that any pending power irq is acknowledged before enabling it,
+>    otherwise the irq handler will be fired prematurely.
+> - Minor changes.
+>
+> Changes from v5:
+> - Driver is split into multiple patches
+> - Do not initialize variables that are assigned later in code
+> - Remove some useless comments
+> - Use shorter variable names
+> - Change pr_err() to dev_err()
+> - Optimized sdhci_msm_setup_vreg()
+> - Some code alignment fixes
+> - Improved DT values sanity check
+> - Added dev_dbg print for sdhci controller version in probe()
+> - Added usleep_range() after SW reset - it can take some time
+> - Added SDHCI_QUIRK_SINGLE_POWER_WRITE - power handled by PMIC
+> - Renamed DT property vdd-io to vddio
+>
+> Changes from v4:
+> - Simplified sdhci_msm_vreg_disable() and sdhci_msm_set_vdd_io_vol()
+> - Use devm_ioremap_resource() instead of devm_ioremap()
+> - Converted IS_ERR_OR_NULL to IS_ERR
+> - Disable regulators in sdhci_msm_remove()
+> - Check for DT node at the beginning in sdhci_msm_probe()
+> - Removed more redundant code
+> - Changes in some error messages
+> - Minor fixes
+>
+> Changes from v3:
+> - Allocate memory for all required structs at once
+> - Added termination entry in sdhci_msm_dt_match[]
+> - Fixed a missing sdhci_pltfm_free() in probe()
+> - Removed redundant of_match_ptr
+> - Removed the unneeded function sdhci_msm_vreg_reset()
+>
+> Changes from v2:
+> - Added DT bindings for clocks
+> - Moved voltage regulators data to platform data
+> - Removed unneeded includes
+> - Removed obsolete and wrapper functions
+> - Removed error checking where unnecessary
+> - Removed redundant _clk suffix from clock names
+> - Just return instead of goto where possible
+> - Minor fixes
+>
+> Georgi Djakov (3):
+>    mmc: sdhci-msm: Qualcomm SDHCI binding documentation
+>    mmc: sdhci-msm: Initial support for Qualcomm chipsets
+>    mmc: sdhci-msm: Add platform_execute_tuning implementation
+>
+>   .../devicetree/bindings/mmc/sdhci-msm.txt          |   55 ++
+>   drivers/mmc/host/Kconfig                           |   13 +
+>   drivers/mmc/host/Makefile                          |    1 +
+>   drivers/mmc/host/sdhci-msm.c                       |  618 ++++++++++++++++++++
+>   4 files changed, 687 insertions(+)
+>   create mode 100644 Documentation/devicetree/bindings/mmc/sdhci-msm.txt
+>   create mode 100644 drivers/mmc/host/sdhci-msm.c
+>
