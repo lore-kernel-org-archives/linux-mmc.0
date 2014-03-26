@@ -1,78 +1,109 @@
-From: Franky Lin <frankyl@broadcom.com>
-Subject: Re: [PATCH] mmc: sdhci: only invoke clock re-tuning for adtc type
- commands
-Date: Wed, 26 Mar 2014 09:49:45 -0700
-Message-ID: <53330529.9010804@broadcom.com>
-References: <1389119511-26228-1-git-send-email-frankyl@broadcom.com>	<1389119859-28955-1-git-send-email-frankyl@broadcom.com> <CAPDyKFoGxa0Xp33o2OfUrFGbiHPvvLOg-ZE39DJLX2R2htKCHQ@mail.gmail.com> <53272818.5030706@broadcom.com>
+From: Alexander Elbs <alex@segv.de>
+Subject: Re: mvsdio: unhandled interrupt, mmc writes queuing up
+Date: Wed, 26 Mar 2014 21:06:21 +0100
+Message-ID: <20140326200621.GL29769@segv.de>
+References: <20140325192759.GJ29769@segv.de>
+ <53320055.9080307@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-gw2-out.broadcom.com ([216.31.210.63]:31323 "EHLO
-	mail-gw2-out.broadcom.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755320AbaCZQts (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 26 Mar 2014 12:49:48 -0400
-In-Reply-To: <53272818.5030706@broadcom.com>
+Received: from siggy.segv.de ([78.46.139.7]:49887 "EHLO siggy.segv.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1755645AbaCZUGZ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 26 Mar 2014 16:06:25 -0400
+Content-Disposition: inline
+In-Reply-To: <53320055.9080307@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>
+To: Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>
+Cc: Nicolas Pitre <nico@fluxnic.net>, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, bonbons@linux-vserver.org, Jason Cooper <jason@lakedaemon.net>, Andrew Lunn <andrew@lunn.ch>, Gregory CLEMENT <gregory.clement@free-electrons.com>
 
-On 03/17/2014 09:51 AM, Franky Lin wrote:
-> Hi Ulf,
->
-> On 03/17/2014 02:12 AM, Ulf Hansson wrote:
->> On 7 January 2014 19:37, Franky Lin <frankyl@broadcom.com> wrote:
->>> For high clock frequency modes, ie. SDR104 and possibly SDR50, the data
->>> window on the CMD and DAT lines needs to be tuned. Once tuned to a
->>> sample clock rate, a re-tuning might required because of drifted signal
->>> on different lines. This re-tuning is needed and only necessary for
->>> commands using the DAT lines, ie. adtc type commands. This patch is an
->>> optimization by adding the condition of the requested command being 
->>> adtc
->>> type in order to execute the re-tuning procedure.
->>>
->>> Signed-off-by: Franky Lin <frankyl@broadcom.com>
->>
->> Hi Franky,
->>
->> Sorry for the delay.
->>
->>> ---
->>>   drivers/mmc/host/sdhci.c |    3 ++-
->>>   1 file changed, 2 insertions(+), 1 deletion(-)
->>>
->>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
->>> index cc00bed..f301cd6 100644
->>> --- a/drivers/mmc/host/sdhci.c
->>> +++ b/drivers/mmc/host/sdhci.c
->>> @@ -1389,7 +1389,8 @@ static void sdhci_request(struct mmc_host 
->>> *mmc, struct mmc_request *mrq)
->>>                   * tuning procedure before sending command.
->>>                   */
->>>                  if ((host->flags & SDHCI_NEEDS_RETUNING) &&
->>> -                   !(present_state & (SDHCI_DOING_WRITE | 
->>> SDHCI_DOING_READ))) {
->>> +                   !(present_state & (SDHCI_DOING_WRITE | 
->>> SDHCI_DOING_READ)) &&
->>> +                   mmc_cmd_type(mrq->cmd) == MMC_CMD_ADTC) {
->>
->> I don't have the in-depth knowledge about the sdhci; Still, to me it
->> seems like checking for MMC_CMD_ADTC, is that not just the same a
->> checking if there are a READ/WRITE?
->
-> non-adtc commands like CMD17/CMD24/CMD52 do not use the data lines. 
-> Tuning is only necessary for adtc commands as CMD18/CMD25/CMD53 which 
-> involve data lines.
->
->> Another note, we really should be working on moving the periodic
->> "re-tuning trigger" mechanism into the mmc core layer, so all host
->> driver's could benefit from this. Do you want to help out fixing this?
->
-> I thought about this before but hesitated because of non-sdhci 
-> drivers. I have seen some of them don't have standardized 
-> implementation(well if they do they would have used sdhci anyway).
->
-Ping?
+On Tue, Mar 25, 2014 at 11:16:53PM +0100, Sebastian Hesselbarth wrote:
+> > $ git bisect view --oneline
+> > 2326f04 (refs/bisect/bad) ARM: kirkwood: convert to DT irqchip and clocksource
+> 
+> Can you please try the patches contained in [1]?
+> 
+> They have been Acked-by Jason Cooper, but I guess we simply lost
+> track of them.
+> 
+> Sebastian
+> 
+> [1] https://lkml.org/lkml/2013/11/15/276
+> 
 
+Hello Sebastian,
+
+I tested the patch series from [1] on top of 3.14-rc8. Works fine: no more
+unhandled interrupt messages.
+
+Tested-by: Alexander Elbs <alex@segv.de>
+
+Regards,
+Alexander
+
+diff --git a/drivers/irqchip/irq-orion.c b/drivers/irqchip/irq-orion.c
+index 8e41be6..a6ab87c 100644
+--- a/drivers/irqchip/irq-orion.c
++++ b/drivers/irqchip/irq-orion.c
+@@ -42,7 +42,7 @@ __exception_irq_entry orion_handle_irq(struct pt_regs *regs)
+                u32 stat = readl_relaxed(gc->reg_base + ORION_IRQ_CAUSE) &
+                        gc->mask_cache;
+                while (stat) {
+-                       u32 hwirq = ffs(stat) - 1;
++                       u32 hwirq = __fls(stat);
+                        u32 irq = irq_find_mapping(orion_irq_domain,
+                                                   gc->irq_base + hwirq);
+                        handle_IRQ(irq, regs);
+@@ -117,7 +117,7 @@ static void orion_bridge_irq_handler(unsigned int irq,
+struct irq_desc *desc)
+                   gc->mask_cache;
+ 
+        while (stat) {
+-               u32 hwirq = ffs(stat) - 1;
++               u32 hwirq = __fls(stat);
+ 
+                generic_handle_irq(irq_find_mapping(d, gc->irq_base + hwirq));
+                stat &= ~(1 << hwirq);
+diff --git a/drivers/mmc/host/mvsdio.c b/drivers/mmc/host/mvsdio.c
+index 45aa220..5eceec4 100644
+--- a/drivers/mmc/host/mvsdio.c
++++ b/drivers/mmc/host/mvsdio.c
+@@ -354,6 +354,21 @@ static irqreturn_t mvsd_irq(int irq, void *dev)
+                intr_status, mvsd_read(MVSD_NOR_INTR_EN),
+                mvsd_read(MVSD_HW_STATE));
+ 
++       /*
++        * It looks like, SDIO IP can issue one late, spurious irq
++        * although all irqs should be disabled. To work around this,
++        * bail out early, if we didn't expect any irqs to occur.
++        */
++       if (!mvsd_read(MVSD_NOR_INTR_EN) && !mvsd_read(MVSD_ERR_INTR_EN)) {
++               dev_dbg(host->dev,
++                       "spurious irq detected intr 0x%04x intr_en 0x%04x erri
+0x%04x erri_en 0x%04x\n",
++                       mvsd_read(MVSD_NOR_INTR_STATUS),
++                       mvsd_read(MVSD_NOR_INTR_EN),
++                       mvsd_read(MVSD_ERR_INTR_STATUS),
++                       mvsd_read(MVSD_ERR_INTR_EN));
++               return IRQ_HANDLED;
++       }
++
+        spin_lock(&host->lock);
+ 
+        /* PIO handling, if needed. Messy business... */
+@@ -801,10 +816,9 @@ static int mvsd_probe(struct platform_device *pdev)
+                goto out;
+ 
+        if (!(mmc->caps & MMC_CAP_NEEDS_POLL))
+-               dev_notice(&pdev->dev, "using GPIO for card detection\n");
++               dev_dbg(&pdev->dev, "using GPIO for card detection\n");
+        else
+-               dev_notice(&pdev->dev,
+-                          "lacking card detect (fall back to polling)\n");
++               dev_dbg(&pdev->dev, "lacking card detect, fall back to
+polling\n");
+        return 0;
+ 
+ out:
 
