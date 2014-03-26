@@ -1,98 +1,206 @@
-From: Yuvaraj Kumar C D <yuvaraj.cd@gmail.com>
-Subject: [PATCH] mmc: dw_mmc: change to use recommended reset procedure
-Date: Wed, 26 Mar 2014 17:16:14 +0530
-Message-ID: <1395834374-1988-1-git-send-email-yuvaraj.cd@samsung.com>
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: grundler@chromium.org, linux-samsung-soc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, jh80.chung@samsung.com, cjb@laptop.org, tgih.jun@samsung.com, linux-mmc@vger.kernel.org, sonnyrao@chromium.org, kgene.kim@samsung.com, joshi@samsung.com
-Cc: t.figa@samsung.com, Yuvaraj Kumar C D <yuvaraj.cd@samsung.org>
+From: Oliver Neukum <oneukum@suse.de>
+Subject: Re: [PATCH v5 1/3] mfd: Add realtek USB card reader driver
+Date: Wed, 26 Mar 2014 15:36:44 +0100
+Message-ID: <1395844604.483.12.camel@linux-fkkt.site>
+References: <1395744293-24398-1-git-send-email-rogerable@realtek.com>
+	 <1395744293-24398-2-git-send-email-rogerable@realtek.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from cantor2.suse.de ([195.135.220.15]:46180 "EHLO mx2.suse.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754790AbaCZOgr (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 26 Mar 2014 10:36:47 -0400
+In-Reply-To: <1395744293-24398-2-git-send-email-rogerable@realtek.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: rogerable@realtek.com
+Cc: Samuel Ortiz <sameo@linux.intel.com>, Lee Jones <lee.jones@linaro.org>, Chris Ball <chris@printf.net>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Maxim Levitsky <maximlevitsky@gmail.com>, Alex Dubov <oakad@yahoo.com>, Dan Carpenter <dan.carpenter@oracle.com>, Ulf Hansson <ulf.hansson@linaro.org>, Andrew Morton <akpm@linux-foundation.org>, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, driverdev-devel@linuxdriverproject.org, wei_wang@realsil.com.cn, micky_ching@realsil.com.cn
 
-From: Sonny Rao <sonnyrao@chromium.org>
+On Tue, 2014-03-25 at 18:44 +0800, rogerable@realtek.com wrote:
+> From: Roger Tseng <rogerable@realtek.com>
 
-This patch changes the fifo reset code to follow the reset procedure
-outlined in the documentation of Synopsys  Mobile storage host databook
-7.2.13.
-Without this patch, we could able to see eMMC was not detected after
-multiple reboots due to driver hangs while eMMC tuning for HS200.
+> +static int rtsx_usb_bulk_transfer_sglist(struct rtsx_ucr *ucr,
+> +		unsigned int pipe, struct scatterlist *sg, int num_sg,
+> +		unsigned int length, unsigned int *act_len, int timeout)
+> +{
+> +	int ret;
+> +
+> +	dev_dbg(&ucr->pusb_intf->dev, "%s: xfer %u bytes, %d entries\n",
+> +			__func__, length, num_sg);
+> +	ret = usb_sg_init(&ucr->current_sg, ucr->pusb_dev, pipe, 0,
+> +			sg, num_sg, length, GFP_NOIO);
+> +	if (ret)
+> +		return ret;
+> +
+> +	ucr->sg_timer.expires = jiffies + msecs_to_jiffies(timeout);
+> +	add_timer(&ucr->sg_timer);
+> +	usb_sg_wait(&ucr->current_sg);
+> +	del_timer(&ucr->sg_timer);
+> +
 
-Signed-off-by: Sonny Rao <sonnyrao@chromium.org>
-Signed-off-by: Yuvaraj Kumar C D <yuvaraj.cd@samsung.org>
----
- drivers/mmc/host/dw_mmc.c |   48 ++++++++++++++++++++++++++++++++++++++++++++-
- drivers/mmc/host/dw_mmc.h |    1 +
- 2 files changed, 48 insertions(+), 1 deletion(-)
+A slight race. You cannot rule out that the timer handler is still
+running when you call this the next time. You'd better use
+del_timer_sync()
 
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 32dd81d..1d77431 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -2220,7 +2220,53 @@ static inline bool dw_mci_fifo_reset(struct dw_mci *host)
- 		host->sg = NULL;
- 	}
- 
--	return dw_mci_ctrl_reset(host, SDMMC_CTRL_FIFO_RESET);
-+	/*
-+	 * The recommended method for resetting is to always reset the
-+	 * controller and the fifo, but differs slightly depending on the mode.
-+	 * Note that this doesn't handle the "generic DMA" (not IDMAC) case.
-+	 */
-+	if (dw_mci_ctrl_reset(host, SDMMC_CTRL_RESET | SDMMC_CTRL_FIFO_RESET)) {
-+		unsigned long timeout = jiffies + msecs_to_jiffies(500);
-+		u32 status, rint;
-+
-+		/* if using dma we wait for dma_req to clear */
-+		if (host->using_dma) {
-+			do {
-+				status = mci_readl(host, STATUS);
-+				if (!(status & SDMMC_STATUS_DMA_REQ))
-+					break;
-+				cpu_relax();
-+			} while (time_before(jiffies, timeout));
-+
-+			if (status & SDMMC_STATUS_DMA_REQ)
-+				dev_err(host->dev,
-+					"%s: Timeout waiting for dma_req to "
-+					"clear during reset", __func__);
-+
-+			/* when using DMA next we reset the fifo again */
-+			dw_mci_ctrl_reset(host, SDMMC_CTRL_FIFO_RESET);
-+		}
-+		/*
-+		 * In all cases we clear the RAWINTS register to clear any
-+		 * interrupts.
-+		 */
-+		rint = mci_readl(host, RINTSTS);
-+		rint = rint & (~mci_readl(host, MINTSTS));
-+		if (rint)
-+			mci_writel(host, RINTSTS, rint);
-+
-+	} else
-+		dev_err(host->dev, "%s: Reset bits didn't clear", __func__);
-+
-+ #ifdef CONFIG_MMC_DW_IDMAC
-+	/* It is also recommended that we reset and reprogram idmac */
-+	dw_mci_idmac_reset(host);
-+ #endif
-+
-+	/* After a CTRL reset we need to have CIU set clock registers  */
-+	mci_send_cmd(host->cur_slot, SDMMC_CMD_UPD_CLK, 0);
-+
-+	return true;
- }
- 
- static inline bool dw_mci_ctrl_all_reset(struct dw_mci *host)
-diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
-index 738fa24..037e47a 100644
---- a/drivers/mmc/host/dw_mmc.h
-+++ b/drivers/mmc/host/dw_mmc.h
-@@ -129,6 +129,7 @@
- #define SDMMC_CMD_INDX(n)		((n) & 0x1F)
- /* Status register defines */
- #define SDMMC_GET_FCNT(x)		(((x)>>17) & 0x1FFF)
-+#define SDMMC_STATUS_DMA_REQ		BIT(31)
- /* FIFOTH register defines */
- #define SDMMC_SET_FIFOTH(m, r, t)	(((m) & 0x7) << 28 | \
- 					 ((r) & 0xFFF) << 16 | \
--- 
-1.7.10.4
+> +static int rtsx_usb_probe(struct usb_interface *intf,
+> +			 const struct usb_device_id *id)
+> +{
+> +	struct usb_device *usb_dev = interface_to_usbdev(intf);
+> +	struct rtsx_ucr *ucr;
+> +	int ret;
+> +
+> +	dev_dbg(&intf->dev,
+> +		": Realtek USB Card Reader found at bus %03d address %03d\n",
+> +		 usb_dev->bus->busnum, usb_dev->devnum);
+> +
+> +	ucr = devm_kzalloc(&intf->dev, sizeof(*ucr), GFP_KERNEL);
+> +	if (!ucr)
+> +		return -ENOMEM;
+> +
+> +	ucr->pusb_dev = usb_dev;
+> +
+> +	ucr->iobuf = usb_alloc_coherent(ucr->pusb_dev, IOBUF_SIZE,
+> +			GFP_KERNEL, &ucr->iobuf_dma);
+> +	if (!ucr->iobuf)
+> +		return -ENOMEM;
+> +
+> +	usb_set_intfdata(intf, ucr);
+> +
+> +	ucr->vendor_id = id->idVendor;
+> +	ucr->product_id = id->idProduct;
+> +	ucr->cmd_buf = ucr->rsp_buf = ucr->iobuf;
+> +
+> +	mutex_init(&ucr->dev_mutex);
+> +
+> +	ucr->pusb_intf = intf;
+> +
+> +	/* initialize */
+> +	ret = rtsx_usb_init_chip(ucr);
+> +	if (ret)
+> +		goto out_init_fail;
+> +
+> +	ret = mfd_add_devices(&intf->dev, usb_dev->devnum, rtsx_usb_cells,
+> +			ARRAY_SIZE(rtsx_usb_cells), NULL, 0, NULL);
+
+Race condition. What prevents the mfd layer from using this device
+before you've finished the next steps of the initialisation?
+
+> +	if (ret)
+> +		goto out_init_fail;
+> +
+> +	/* initialize USB SG transfer timer */
+> +	init_timer(&ucr->sg_timer);
+> +	setup_timer(&ucr->sg_timer, rtsx_usb_sg_timed_out, (unsigned long) ucr);
+> +#ifdef CONFIG_PM
+> +	intf->needs_remote_wakeup = 1;
+
+Why?
+> +	usb_enable_autosuspend(usb_dev);
+> +#endif
+> +
+> +	return 0;
+> +
+> +out_init_fail:
+> +	usb_free_coherent(ucr->pusb_dev, IOBUF_SIZE, ucr->iobuf,
+> +			ucr->iobuf_dma);
+> +	return ret;
+> +}
+> +
+> +static void rtsx_usb_disconnect(struct usb_interface *intf)
+> +{
+> +	struct rtsx_ucr *ucr = (struct rtsx_ucr *)usb_get_intfdata(intf);
+> +
+> +	dev_dbg(&intf->dev, "%s called\n", __func__);
+> +
+> +	mfd_remove_devices(&intf->dev);
+> +
+> +	usb_set_intfdata(ucr->pusb_intf, NULL);
+> +	usb_free_coherent(ucr->pusb_dev, IOBUF_SIZE, ucr->iobuf,
+> +			ucr->iobuf_dma);
+> +}
+> +
+> +#ifdef CONFIG_PM
+> +static int rtsx_usb_suspend(struct usb_interface *intf, pm_message_t message)
+> +{
+> +	struct rtsx_ucr *ucr =
+> +		(struct rtsx_ucr *)usb_get_intfdata(intf);
+> +
+> +	dev_dbg(&intf->dev, "%s called with pm message 0x%04u\n",
+> +			__func__, message.event);
+> +
+> +	mutex_lock(&ucr->dev_mutex);
+> +	rtsx_usb_turn_off_led(ucr);
+
+When is this turned on again?
+
+> +	mutex_unlock(&ucr->dev_mutex);
+> +	return 0;
+> +}
+> +
+> +static int rtsx_usb_resume(struct usb_interface *intf)
+> +{
+> +	return 0;
+> +}
+> +
+> +static int rtsx_usb_reset_resume(struct usb_interface *intf)
+> +{
+> +	struct rtsx_ucr *ucr =
+> +		(struct rtsx_ucr *)usb_get_intfdata(intf);
+> +
+> +	rtsx_usb_reset_chip(ucr);
+> +	return 0;
+> +}
+> +
+> +#else /* CONFIG_PM */
+> +
+> +#define rtsx_usb_suspend NULL
+> +#define rtsx_usb_resume NULL
+> +#define rtsx_usb_reset_resume NULL
+> +
+> +#endif /* CONFIG_PM */
+> +
+> +
+> +static int rtsx_usb_pre_reset(struct usb_interface *intf)
+> +{
+> +	struct rtsx_ucr *ucr = (struct rtsx_ucr *)usb_get_intfdata(intf);
+> +
+> +	mutex_lock(&ucr->dev_mutex);
+> +	return 0;
+> +}
+> +
+> +static int rtsx_usb_post_reset(struct usb_interface *intf)
+> +{
+> +	struct rtsx_ucr *ucr = (struct rtsx_ucr *)usb_get_intfdata(intf);
+> +
+> +	mutex_unlock(&ucr->dev_mutex);
+> +	return 0;
+> +}
+> +
+> +static struct usb_device_id rtsx_usb_usb_ids[] = {
+> +	{ USB_DEVICE(0x0BDA, 0x0129) },
+> +	{ USB_DEVICE(0x0BDA, 0x0139) },
+> +	{ USB_DEVICE(0x0BDA, 0x0140) },
+> +	{ }
+> +};
+> +
+> +static struct usb_driver rtsx_usb_driver = {
+> +	.name			= "rtsx_usb",
+> +	.probe			= rtsx_usb_probe,
+> +	.disconnect		= rtsx_usb_disconnect,
+> +	.suspend		= rtsx_usb_suspend,
+> +	.resume			= rtsx_usb_resume,
+> +	.reset_resume		= rtsx_usb_reset_resume,
+> +	.pre_reset		= rtsx_usb_pre_reset,
+> +	.post_reset		= rtsx_usb_post_reset,
+> +	.id_table		= rtsx_usb_usb_ids,
+> +	.supports_autosuspend	= 1,
+> +	.soft_unbind		= 1,
+> +};
+> +
+
+	Regards
+		Oliver
+
+
