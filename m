@@ -1,84 +1,38 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 0/2] mmc: rtsx: add new cmd type handle and modify
- errorhandle
-Date: Wed, 26 Mar 2014 09:34:41 +0100
-Message-ID: <CAPDyKFqAfenktuHqcsJDVipsWVZgdOLq8VzP1=aZ+DEpxabXfw@mail.gmail.com>
-References: <cover.1395625491.git.micky_ching@realsil.com.cn>
- <CAPDyKFrk-7msEVcYzY5Vc+ZODtMbiCWGAMU7G2oscgN1Ad9URA@mail.gmail.com>
- <53322D81.3050701@realsil.com.cn>
+From: Sachin Kamat <sachin.kamat@linaro.org>
+Subject: Re: [PATCH 1/1] mmc: dw_mmc: exynos: Staticize dw_mci_exynos_pmops
+Date: Wed, 26 Mar 2014 14:07:16 +0530
+Message-ID: <CAK9yfHyQ0jHLcQnSF2fmpw3HDr4deSNqgzZWQQT9zvrp=u06DQ@mail.gmail.com>
+References: <1393909405-2760-1-git-send-email-sachin.kamat@linaro.org>
+	<5315BCB1.5020000@samsung.com>
+	<CAK9yfHwWQncsjSA6JXjLKOXSKpjPoe=PGm0UA_KkVdbpNbEdvQ@mail.gmail.com>
+	<000501cf4271$939002a0$bab007e0$%jun@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
-In-Reply-To: <53322D81.3050701@realsil.com.cn>
-List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
-List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel>
-List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
-List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
-List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
-Errors-To: driverdev-devel-bounces@linuxdriverproject.org
-Sender: driverdev-devel-bounces@linuxdriverproject.org
-To: micky <micky_ching@realsil.com.cn>
-Cc: Samuel Ortiz <sameo@linux.intel.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Chris Ball <chris@printf.net>, Wei WANG <wei_wang@realsil.com.cn>, Roger <rogerable@realtek.com>, devel@linuxdriverproject.org, Dan Carpenter <dan.carpenter@oracle.com>
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-ob0-f170.google.com ([209.85.214.170]:54435 "EHLO
+	mail-ob0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750991AbaCZIhR (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 26 Mar 2014 04:37:17 -0400
+Received: by mail-ob0-f170.google.com with SMTP id uz6so2092710obc.15
+        for <linux-mmc@vger.kernel.org>; Wed, 26 Mar 2014 01:37:16 -0700 (PDT)
+In-Reply-To: <000501cf4271$939002a0$bab007e0$%jun@samsung.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "chris@printf.net" <chris@printf.net>
 
-On 26 March 2014 02:29, micky <micky_ching@realsil.com.cn> wrote:
-> Hi Ulf,
+On 18 March 2014 11:46, Seungwon Jeon <tgih.jun@samsung.com> wrote:
+> On Tue, March 18, 2014, Sachin Kamat wrote:
+>> On 4 March 2014 17:14, Jaehoon Chung <jh80.chung@samsung.com> wrote:
+>> > Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
+>>
+>> Ping Ulf, Chris.
 >
-> On 03/25/2014 06:44 PM, Ulf Hansson wrote:
->>
->> On 25 March 2014 10:47,  <micky_ching@realsil.com.cn> wrote:
->>>
->>> From: Micky Ching <micky_ching@realsil.com.cn>
->>>
->>> Add new command type(R1 without CRC) handle, without this
->>> patch mmc card initialize will be failed.
->>>
->>> Using a more careful handle in request timeout, this would
->>> improve error recover capability. Debug info is printed
->>> using non DMA mode, this would help print more accurately
->>> for DMA command failed. Smatch warning was removed.
->>
->> Hi Micky,
->>
->> Seems like this patchset has been around for some time, sorry for the
->> delay.
->>
->> I don't have any objections to it getting merged, but you need to run
->> checkpatch of your patches. Patch2 has a warning you should fix.
->
-> Patch2 is based on <mmc: rtsx: fix bug and support nonblocking request>
-> see: https://lkml.org/lkml/2014/2/17/270
-> checkpatch.pl seems ok, is there any thing I need to check?
+> Acked-by: Seungwon Jeon <tgih.jun@samsung.com>
 
-It seems like the checkpatch script has been recently patched. When I
-ran the script for your patch I used the latest from Stephen
-Rothwell's linux-next tree. Please do the same.
+Ping Ulf.
 
-Kind regards
-Ulf Hansson
 
->
-> Best Regards.
-> micky.
->>
->> Kind regards
->> Ulf Hansson
->>
->>
->>> Micky Ching (2):
->>>    mmc: rtsx: add R1-no-CRC mmc command type handle
->>>    mmc: rtsx: modify error handle and remove smatch warnings
->>>
->>>   drivers/mmc/host/rtsx_pci_sdmmc.c |  121
->>> ++++++++++++++++++++-----------------
->>>   1 file changed, 67 insertions(+), 54 deletions(-)
->>>
->>> --
->>> 1.7.9.5
->>
->> .
->>
->
+-- 
+With warm regards,
+Sachin
