@@ -1,87 +1,79 @@
-From: Tejun Heo <tj@kernel.org>
-Subject: Re: [PATCH] workqueue: WQ_NON_REENTRANT is meaningless and going away
-Date: Thu, 27 Mar 2014 11:21:34 -0400
-Message-ID: <20140327152134.GG18503@htj.dyndns.org>
-References: <532BF8BC.5060007@huawei.com>
- <533381DB.2090900@huawei.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+From: Stefan Wahren <stefan.wahren@i2se.com>
+Subject: [PATCH] mmc: core: Use maximum timeout values in case TACC field is zero
+Date: Thu, 27 Mar 2014 16:32:48 +0100
+Message-ID: <1395934368-29207-1-git-send-email-stefan.wahren@i2se.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qc0-f177.google.com ([209.85.216.177]:47082 "EHLO
-	mail-qc0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753304AbaC0PVi (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 27 Mar 2014 11:21:38 -0400
-Received: by mail-qc0-f177.google.com with SMTP id w7so4385296qcr.22
-        for <linux-mmc@vger.kernel.org>; Thu, 27 Mar 2014 08:21:37 -0700 (PDT)
-Content-Disposition: inline
-In-Reply-To: <533381DB.2090900@huawei.com>
+Received: from moutng.kundenserver.de ([212.227.126.131]:55012 "EHLO
+	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754659AbaC0Pdk (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 27 Mar 2014 11:33:40 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: ZhangZhen <zhenzhang.zhang@huawei.com>
-Cc: jchapman@katalix.com, linux-mmc@vger.kernel.org, tgih.jun@samsung.com, Chris Ball <chris@printf.net>
+To: fabio.estevam@freescale.com
+Cc: chris@printf.net, otavio@ossystems.com.br, Peter.Chen@freescale.com, Kernel@pengutronix.de, linux-mmc@vger.kernel.org
 
-On Thu, Mar 27, 2014 at 09:41:47AM +0800, ZhangZhen wrote:
-> Tejun Heo has  made WQ_NON_REENTRANT useless in the commit:dbf2576e37 ("workqueue: make all
-> workqueues non-reentrant"). So remove its usages.
-> 
-> This patch doesn't introduce any behavior changes.
-> 
-> Signed-off-by: zhangzhen <zhenzhang.zhang@huawei.com>
+When plugging a specific micro SD card at MMC socket of a custom i.MX28 board,
+we get the following kernel warning:
 
-James, Chris, can you guys please ack this?  I think it'd be best to
-route it through workqueue branch.
+WARNING: CPU: 0 PID: 30 at drivers/mmc/host/mxs-mmc.c:342 mxs_mmc_start_cmd+0x34c/0x378()
+Modules linked in:
+CPU: 0 PID: 30 Comm: kworker/u2:1 Not tainted 3.14.0-rc5 #8
+Workqueue: kmmcd mmc_rescan
+[<c0015420>] (unwind_backtrace) from [<c0012cb0>] (show_stack+0x10/0x14)
+[<c0012cb0>] (show_stack) from [<c001daf8>] (warn_slowpath_common+0x6c/0x8c)
+[<c001daf8>] (warn_slowpath_common) from [<c001db34>] (warn_slowpath_null+0x1c/0x24)
+[<c001db34>] (warn_slowpath_null) from [<c0349478>] (mxs_mmc_start_cmd+0x34c/0x378)
+[<c0349478>] (mxs_mmc_start_cmd) from [<c0338fa0>] (mmc_start_request+0xc4/0xf4)
+[<c0338fa0>] (mmc_start_request) from [<c03390b4>] (mmc_wait_for_req+0x50/0x164)
+[<c03390b4>] (mmc_wait_for_req) from [<c03405b8>] (mmc_app_send_scr+0x158/0x1c8)
+[<c03405b8>] (mmc_app_send_scr) from [<c033ee1c>] (mmc_sd_setup_card+0x80/0x3c8)
+[<c033ee1c>] (mmc_sd_setup_card) from [<c033f788>] (mmc_sd_init_card+0x124/0x66c)
+[<c033f788>] (mmc_sd_init_card) from [<c033fd7c>] (mmc_attach_sd+0xac/0x174)
+[<c033fd7c>] (mmc_attach_sd) from [<c033a658>] (mmc_rescan+0x25c/0x2d8)
+[<c033a658>] (mmc_rescan) from [<c003597c>] (process_one_work+0x1b4/0x4ec)
+[<c003597c>] (process_one_work) from [<c0035de4>] (worker_thread+0x130/0x464)
+[<c0035de4>] (worker_thread) from [<c003c824>] (kthread+0xb4/0xd0)
+[<c003c824>] (kthread) from [<c000f420>] (ret_from_fork+0x14/0x34)
 
-Thanks.
+The error is due to an invalid value in CSD register of a specific 2GB micro
+SD card. The CSD version of this card is 1.0 but the TACC field has the invalid
+value 0. Since the kernel is making use of this TACC field to calculate the
+SD card timeout, an invalid value 0 leads to a warning at mxs_ns_to_ssp_ticks()
+and later the following misleading error messages appears in a loop:
 
-> ---
->  drivers/mmc/host/dw_mmc.c |    2 +-
->  include/linux/workqueue.h |    6 ------
->  net/l2tp/l2tp_core.c      |    2 +-
->  3 files changed, 2 insertions(+), 8 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> index 55cd110..c204b7d 100644
-> --- a/drivers/mmc/host/dw_mmc.c
-> +++ b/drivers/mmc/host/dw_mmc.c
-> @@ -2607,7 +2607,7 @@ int dw_mci_probe(struct dw_mci *host)
-> 
->  	tasklet_init(&host->tasklet, dw_mci_tasklet_func, (unsigned long)host);
->  	host->card_workqueue = alloc_workqueue("dw-mci-card",
-> -			WQ_MEM_RECLAIM | WQ_NON_REENTRANT, 1);
-> +			WQ_MEM_RECLAIM, 1);
->  	if (!host->card_workqueue) {
->  		ret = -ENOMEM;
->  		goto err_dmaunmap;
-> diff --git a/include/linux/workqueue.h b/include/linux/workqueue.h
-> index 594521b..57b2687 100644
-> --- a/include/linux/workqueue.h
-> +++ b/include/linux/workqueue.h
-> @@ -295,12 +295,6 @@ static inline unsigned int work_static(struct work_struct *work) { return 0; }
->   * Documentation/workqueue.txt.
->   */
->  enum {
-> -	/*
-> -	 * All wqs are now non-reentrant making the following flag
-> -	 * meaningless.  Will be removed.
-> -	 */
-> -	WQ_NON_REENTRANT	= 1 << 0, /* DEPRECATED */
-> -
->  	WQ_UNBOUND		= 1 << 1, /* not bound to any cpu */
->  	WQ_FREEZABLE		= 1 << 2, /* freeze during suspend */
->  	WQ_MEM_RECLAIM		= 1 << 3, /* may be used for memory reclaim */
-> diff --git a/net/l2tp/l2tp_core.c b/net/l2tp/l2tp_core.c
-> index 735d0f6..fcbd63e 100644
-> --- a/net/l2tp/l2tp_core.c
-> +++ b/net/l2tp/l2tp_core.c
-> @@ -2016,7 +2016,7 @@ static int __init l2tp_init(void)
->  	if (rc)
->  		goto out;
-> 
-> -	l2tp_wq = alloc_workqueue("l2tp", WQ_NON_REENTRANT | WQ_UNBOUND, 0);
-> +	l2tp_wq = alloc_workqueue("l2tp", WQ_UNBOUND, 0);
->  	if (!l2tp_wq) {
->  		pr_err("alloc_workqueue failed\n");
->  		rc = -ENOMEM;
+mxs-mmc 80010000.ssp: card claims to support voltages below defined range
+mxs-mmc 80010000.ssp: no support for card's volts
+mmc0: error -22 whilst initialising MMC card
 
+This error is only found on this 2GB SD card on mxs platform.
+On x86 this card works without any problems.
+
+The following patch based on the work of Peter Chen and Otavio Salvador. It
+catches the case that the determined timeout is still 0 and set it's to a
+valid value.
+
+Successful tested on a i.MX28 board.
+
+Signed-off-by: Stefan Wahren <stefan.wahren@i2se.com>
+---
+ drivers/mmc/core/core.c |    4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 098374b..a9cd996 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -815,6 +815,10 @@ void mmc_set_data_timeout(struct mmc_data *data, const struct mmc_card *card)
+ 			data->timeout_ns = limit_us * 1000;
+ 			data->timeout_clks = 0;
+ 		}
++
++		/* assign limit value if invalid */
++		if (data->timeout_ns == 0)
++			data->timeout_ns = limit_us * 1000;
+ 	}
+ 
+ 	/*
 -- 
-tejun
+1.7.10.4
+
