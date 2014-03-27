@@ -1,39 +1,93 @@
-From: Chris Ball <chris@printf.net>
-Subject: Re: [PATCH v11 0/3] mmc: sdhci-msm: Add support for Qualcomm chipsets
-Date: Thu, 27 Mar 2014 01:31:42 +0000
-Message-ID: <86eh1owhoh.fsf@void.printf.net>
-References: <1394465833-22581-1-git-send-email-gdjakov@mm-sol.com>
-	<53330387.7000803@mm-sol.com>
-	<CAPDyKFqjjgWnH4Lt7vOPSM09ngvY1N6ustaBU41tZCJoKWrkzw@mail.gmail.com>
+From: ZhangZhen <zhenzhang.zhang@huawei.com>
+Subject: [PATCH] workqueue: WQ_NON_REENTRANT is meaningless and going away
+Date: Thu, 27 Mar 2014 09:41:47 +0800
+Message-ID: <533381DB.2090900@huawei.com>
+References: <532BF8BC.5060007@huawei.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-doc-owner@vger.kernel.org>
-In-Reply-To: <CAPDyKFqjjgWnH4Lt7vOPSM09ngvY1N6ustaBU41tZCJoKWrkzw@mail.gmail.com>
-	(Ulf Hansson's message of "Thu, 27 Mar 2014 00:09:24 +0100")
-Sender: linux-doc-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Georgi Djakov <gdjakov@mm-sol.com>, linux-mmc <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Grant Likely <grant.likely@linaro.org>, Rob Herring <robh+dt@kernel.org>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Stephen Warren <swarren@wwwdotorg.org>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Kumar Gala <galak@codeaurora.org>, Rob Landley <rob@landley.net>, linux-doc@vger.kernel.org, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-arm-msm@vger.kernel.org
+Content-Type: text/plain; charset="ISO-8859-1"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from szxga03-in.huawei.com ([119.145.14.66]:43270 "EHLO
+	szxga03-in.huawei.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751445AbaC0BmM (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 26 Mar 2014 21:42:12 -0400
+In-Reply-To: <532BF8BC.5060007@huawei.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Tejun Heo <tj@kernel.org>
+Cc: jchapman@katalix.com, linux-mmc@vger.kernel.org, tgih.jun@samsung.com
 
-Hi,
+Tejun Heo has  made WQ_NON_REENTRANT useless in the commit:dbf2576e37 ("workqueue: make all
+workqueues non-reentrant"). So remove its usages.
 
-On Wed, Mar 26 2014, Ulf Hansson wrote:
-> On 26 March 2014 17:42, Georgi Djakov <gdjakov@mm-sol.com> wrote:
->> Hello Chris, Ulf,
->>
->> Do you have any comments on the patches?
->> The arch code that will use this driver is already in mainline. The
->> regulators support seem to be still on its way, but this driver also works
->> fine with dummy regulators.
->
-> Looks good to me!
->
-> For the complete patchset:
->
-> Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
+This patch doesn't introduce any behavior changes.
 
-Thanks Georgi and Ulf -- pushed all three patches to mmc-next for 3.15.
+Signed-off-by: zhangzhen <zhenzhang.zhang@huawei.com>
+---
+ drivers/mmc/host/dw_mmc.c |    2 +-
+ include/linux/workqueue.h |    6 ------
+ net/l2tp/l2tp_core.c      |    2 +-
+ 3 files changed, 2 insertions(+), 8 deletions(-)
 
-- Chris.
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index 55cd110..c204b7d 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -2607,7 +2607,7 @@ int dw_mci_probe(struct dw_mci *host)
+
+ 	tasklet_init(&host->tasklet, dw_mci_tasklet_func, (unsigned long)host);
+ 	host->card_workqueue = alloc_workqueue("dw-mci-card",
+-			WQ_MEM_RECLAIM | WQ_NON_REENTRANT, 1);
++			WQ_MEM_RECLAIM, 1);
+ 	if (!host->card_workqueue) {
+ 		ret = -ENOMEM;
+ 		goto err_dmaunmap;
+diff --git a/include/linux/workqueue.h b/include/linux/workqueue.h
+index 594521b..57b2687 100644
+--- a/include/linux/workqueue.h
++++ b/include/linux/workqueue.h
+@@ -295,12 +295,6 @@ static inline unsigned int work_static(struct work_struct *work) { return 0; }
+  * Documentation/workqueue.txt.
+  */
+ enum {
+-	/*
+-	 * All wqs are now non-reentrant making the following flag
+-	 * meaningless.  Will be removed.
+-	 */
+-	WQ_NON_REENTRANT	= 1 << 0, /* DEPRECATED */
+-
+ 	WQ_UNBOUND		= 1 << 1, /* not bound to any cpu */
+ 	WQ_FREEZABLE		= 1 << 2, /* freeze during suspend */
+ 	WQ_MEM_RECLAIM		= 1 << 3, /* may be used for memory reclaim */
+diff --git a/net/l2tp/l2tp_core.c b/net/l2tp/l2tp_core.c
+index 735d0f6..fcbd63e 100644
+--- a/net/l2tp/l2tp_core.c
++++ b/net/l2tp/l2tp_core.c
+@@ -2016,7 +2016,7 @@ static int __init l2tp_init(void)
+ 	if (rc)
+ 		goto out;
+
+-	l2tp_wq = alloc_workqueue("l2tp", WQ_NON_REENTRANT | WQ_UNBOUND, 0);
++	l2tp_wq = alloc_workqueue("l2tp", WQ_UNBOUND, 0);
+ 	if (!l2tp_wq) {
+ 		pr_err("alloc_workqueue failed\n");
+ 		rc = -ENOMEM;
 -- 
-Chris Ball   <chris@printf.net>   <http://printf.net/>
+1.6.0.2
+
+
+.
+
+
+
+
+_______________________________________________
+kernel.openeuler mailing list
+kernel.openeuler@huawei.com
+http://rnd-openeuler.huawei.com/mailman/listinfo/kernel.openeuler
+
+.
+
+
+
+
