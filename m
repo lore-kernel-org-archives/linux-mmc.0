@@ -1,80 +1,71 @@
-From: Georgi Djakov <gdjakov@mm-sol.com>
-Subject: Re: [PATCH] sdhci: Forward EPROBE_DEFER on vmmc and vqmmc regulators
-Date: Thu, 27 Mar 2014 23:13:40 +0200
-Message-ID: <53349484.5050100@mm-sol.com>
-References: <1394201923-27345-1-git-send-email-mike.looijmans@topic.nl> <5332EDBB.7010105@mm-sol.com> <5334644A.3010201@topic.nl>
+From: <dinguyen@altera.com>
+Subject: [PATCH] mmc: dw_mmc: fix status error for Kingston brand SD cards
+Date: Thu, 27 Mar 2014 17:00:22 -0500
+Message-ID: <1395957622-3428-1-git-send-email-dinguyen@altera.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <5334644A.3010201@topic.nl>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Mike Looijmans <mike.looijmans@topic.nl>, cjb@laptop.org, linux-mmc@vger.kernel.org
-Cc: linux-kernel@vger.kernel.org, git@xilinx.com
+Content-Type: text/plain
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-bn1on0136.outbound.protection.outlook.com ([157.56.110.136]:8981
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1757228AbaC0WRI (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 27 Mar 2014 18:17:08 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: tgih.jun@samsung.com, jh80.chung@samsung.com
+Cc: dinh.linux@gmail.com, linux-mmc@vger.kernel.org, Dinh Nguyen <dinguyen@altera.com>
 
-On 27.03.14, 19:47, Mike Looijmans wrote:
-> On 26-3-2014 16:09, Georgi Djakov wrote:
->> On 03/07/2014 04:18 PM, Mike Looijmans wrote:
->>> If vmmc or vqmmc regulators are controlled by an I2C device, the
->>> request for the regulator is likely to fail because the I2C bus has
->>> not been probed yet. The sdhci then incorrectly assumes that the user
->>> never wanted to use a regulator anyway and continues without ever
->>> enabling or configuring the required regulator.
->>>
->>> To solve this, when a required voltage regulator returns
->>> EPROBE_DEFER, signalling that the regulator exists but is not
->>> available yet, forward this error to the probe method instead
->>> of simply assuming that the user never wanted to use a regulator
->>> anyway.
->>>
->>> Tested on a custom board that has an I2C regulator for one of the sdhcis
->>> and no regulators at all for the other. This patch enables such a system
->>> to work correctly.
->>> ---
->>>   drivers/mmc/host/sdhci.c |    8 ++++++--
->>>   1 file changed, 6 insertions(+), 2 deletions(-)
->>>
->>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
->>> index 34aef81..43b90c1 100644
->>> --- a/drivers/mmc/host/sdhci.c
->>> +++ b/drivers/mmc/host/sdhci.c
->>> @@ -2972,6 +2972,8 @@ int sdhci_add_host(struct sdhci_host *host)
->>>       host->vqmmc = regulator_get_optional(mmc_dev(mmc), "vqmmc");
->>>       if (IS_ERR_OR_NULL(host->vqmmc)) {
->>>           if (PTR_ERR(host->vqmmc) < 0) {
->>> +            if (PTR_ERR(host->vqmmc) == -EPROBE_DEFER)
->>> +                return -EPROBE_DEFER;
->>>               pr_info("%s: no vqmmc regulator found\n",
->>>                   mmc_hostname(mmc));
->>>               host->vqmmc = NULL;
->>> @@ -3048,8 +3050,10 @@ int sdhci_add_host(struct sdhci_host *host)
->>>       host->vmmc = regulator_get_optional(mmc_dev(mmc), "vmmc");
->>>       if (IS_ERR_OR_NULL(host->vmmc)) {
->>>           if (PTR_ERR(host->vmmc) < 0) {
->>> -            pr_info("%s: no vmmc regulator found\n",
->>> -                mmc_hostname(mmc));
->>> +            if (PTR_ERR(host->vmmc) == -EPROBE_DEFER)
->>> +                return -EPROBE_DEFER;
->>> +            pr_info("%s: no vmmc regulator found (%d)\n",
->>
->> I suggest using %ld here. The rest looks fine to me! Thanks!
-> 
-> Does this mean you're waiting for a patch v2 that I should submit?
-> 
+From: Dinh Nguyen <dinguyen@altera.com>
 
-Yes, please submit v2 and hope to get some more feedback from the community.
+commits [90c2143a8f mmc: dw_mmc: guarantee stop-abort cmd in data errors]
+and [e352c813110 mmc: dw_mmc: rework the code related to cmd/data completion]
+cause the SD/MMC DMA interface to stop working on Kingston brand SD cards.
 
-Thanks,
-Georgi
+---
+Hi Seungwon,
 
->>
->>> +                mmc_hostname(mmc), PTR_ERR(host->vmmc));
->>>               host->vmmc = NULL;
->>>           }
->>>       }
->>>
->>
->> BR,
->> Georgi
->>
+I am seeing this error on v3.13 kernel of the dw_mmc driver:
+
+mmc0: problem reading SD Status register.
+mmc0: error -110 whilst initialising SD card
+
+I only see this error on a Kingston brand card, although I have heard reports
+that it also fails a Samsung card. Also it only fails when with
+CONFIG_MMC_DW_IDMAC=y.
+
+The patch below seems to fix it for me. Any chance you have seen this error?
+
+Dinh
+---
+ drivers/mmc/host/dw_mmc.c |    8 +++++++-
+ 1 file changed, 7 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index 7833002..7dcaa30 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -1312,7 +1312,8 @@ static void dw_mci_tasklet_func(unsigned long priv)
+ 			if (test_and_clear_bit(EVENT_DATA_ERROR,
+ 					       &host->pending_events)) {
+ 				dw_mci_stop_dma(host);
+-				send_stop_abort(host, data);
++				if (data->stop)
++					send_stop_abort(host, data);
+ 				state = STATE_DATA_ERROR;
+ 				break;
+ 			}
+@@ -1334,6 +1335,11 @@ static void dw_mci_tasklet_func(unsigned long priv)
+ 			set_bit(EVENT_DATA_COMPLETE, &host->completed_events);
+ 			err = dw_mci_data_complete(host, data);
+ 
++			if (!data->stop) {
++				dw_mci_request_end(host, host->mrq);
++				goto unlock;
++			}
++
+ 			if (!err) {
+ 				if (!data->stop || mrq->sbc) {
+ 					if (mrq->sbc)
+-- 
+1.7.9.5
+
