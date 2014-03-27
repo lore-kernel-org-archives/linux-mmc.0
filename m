@@ -1,75 +1,89 @@
 From: Felipe Balbi <balbi@ti.com>
-Subject: [PATCH 2/5] mmc: host: omap_hsmmc: add reg_offset field
-Date: Wed, 26 Mar 2014 19:04:47 -0500
-Message-ID: <1395878690-9650-3-git-send-email-balbi@ti.com>
+Subject: Re: [PATCH 5/5] mmc: host: omap_hsmmc: set max_blk_size correctly
+Date: Wed, 26 Mar 2014 19:12:17 -0500
+Message-ID: <20140327001216.GC30531@saruman.home>
 References: <1395878690-9650-1-git-send-email-balbi@ti.com>
+ <1395878690-9650-6-git-send-email-balbi@ti.com>
+Reply-To: <balbi@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="sHrvAb52M6C8blB9"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1395878690-9650-1-git-send-email-balbi@ti.com>
+Content-Disposition: inline
+In-Reply-To: <1395878690-9650-6-git-send-email-balbi@ti.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Balaji T K <balajitk@ti.com>
-Cc: chris@printf.net, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, Linux OMAP Mailing List <linux-omap@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Felipe Balbi <balbi@ti.com>
+To: Felipe Balbi <balbi@ti.com>
+Cc: Balaji T K <balajitk@ti.com>, chris@printf.net, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, Linux OMAP Mailing List <linux-omap@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-by saving reg_offset inside our host structure
-we can ioremap the correct area, make use of
-resource_size() and make sure newer versions
-of the IP have access to the new set of registers
-which were added back in OMAP4.
+--sHrvAb52M6C8blB9
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-Signed-off-by: Felipe Balbi <balbi@ti.com>
----
- drivers/mmc/host/omap_hsmmc.c | 14 ++++++++------
- 1 file changed, 8 insertions(+), 6 deletions(-)
+Hi,
 
-diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index a8f1e08..d46f768 100644
---- a/drivers/mmc/host/omap_hsmmc.c
-+++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -152,10 +152,10 @@
-  * MMC Host controller read/write API's
-  */
- #define OMAP_HSMMC_READ(host, reg)	\
--	__raw_readl((host)->base + OMAP_HSMMC_##reg)
-+	__raw_readl((host)->base + OMAP_HSMMC_##reg + host->reg_offset)
- 
- #define OMAP_HSMMC_WRITE(host, reg, val) \
--	__raw_writel((val), (host)->base + OMAP_HSMMC_##reg)
-+	__raw_writel((val), (host)->base + OMAP_HSMMC_##reg + host->reg_offset)
- 
- struct omap_hsmmc_next {
- 	unsigned int	dma_len;
-@@ -184,6 +184,7 @@ struct omap_hsmmc_host {
- 	void	__iomem		*base;
- 	resource_size_t		mapbase;
- 	spinlock_t		irq_lock; /* Prevent races with irq handler */
-+	unsigned int		reg_offset;
- 	unsigned int		dma_len;
- 	unsigned int		dma_sg_idx;
- 	unsigned char		bus_mode;
-@@ -1354,8 +1355,8 @@ static int omap_hsmmc_setup_dma_transfer(struct omap_hsmmc_host *host,
- 
- 	chan = omap_hsmmc_get_dma_chan(host, data);
- 
--	cfg.src_addr = host->mapbase + OMAP_HSMMC_DATA;
--	cfg.dst_addr = host->mapbase + OMAP_HSMMC_DATA;
-+	cfg.src_addr = host->mapbase + OMAP_HSMMC_DATA + host->reg_offset;
-+	cfg.dst_addr = host->mapbase + OMAP_HSMMC_DATA + host->reg_offset;
- 	cfg.src_addr_width = DMA_SLAVE_BUSWIDTH_4_BYTES;
- 	cfg.dst_addr_width = DMA_SLAVE_BUSWIDTH_4_BYTES;
- 	cfg.src_maxburst = data->blksz / 4;
-@@ -1903,8 +1904,9 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
- 	host->dma_ch	= -1;
- 	host->irq	= irq;
- 	host->slot_id	= 0;
--	host->mapbase	= res->start + pdata->reg_offset;
--	host->base	= ioremap(host->mapbase, SZ_4K);
-+	host->reg_offset = pdata->reg_offset;
-+	host->mapbase	= res->start;
-+	host->base	= ioremap(res->start, resource_size(res));
- 	host->power_mode = MMC_POWER_OFF;
- 	host->next_data.cookie = 1;
- 	host->pbias_enabled = 0;
--- 
-1.9.1.286.g5172cb3
+On Wed, Mar 26, 2014 at 07:04:50PM -0500, Felipe Balbi wrote:
+> @@ -1867,6 +1879,37 @@ static inline struct omap_mmc_platform_data
+>  }
+>  #endif
+> =20
+> +static void omap_hsmmc_set_max_blk_size(struct omap_hsmmc_host *host)
+> +{
+> +	struct mmc_host *mmc =3D host->mmc;
+> +
+> +	if (of_device_is_compatible(host->dev->of_node, "ti,omap4-hsmmc")) {
+> +		u32 mem;
+> +		u32 reg;
+> +
+> +		reg =3D omap_hsmmc_read_no_offset(host, OMAP_HSMMC_HL_HWINFO);
+> +		mem =3D OMAP_HSMMC_HL_HWINFO_MEM_SIZE(reg);
+> +
+> +		switch (mem) {
+> +		case 1:
+> +			mmc->max_blk_size =3D 512;
+> +			break;
+> +		case 2:
+> +			mmc->max_blk_size =3D 1024;
+> +			break;
+> +		case 4:
+> +			/* FALLTHROUGH */
+> +		case 8:
+> +			/* FALLTHROUGH */
+> +		default:
+> +			mmc->max_blk_size =3D 2048;
+> +			break;
+> +		}
+> +	} else {
+> +		mmc->max_blk_size =3D 512;       /* Block Length at max can be 1024 */
+
+looks like here, we could read CAPA register to figure out if older
+devices support bigger block sizes. According to TRM, omap3 should
+support 1024 just fine.
+
+--=20
+balbi
+
+--sHrvAb52M6C8blB9
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1
+
+iQIcBAEBAgAGBQJTM2zgAAoJEIaOsuA1yqREr4MQAKfXD7YGglaQR9xZ/pJM8uvD
+MmFZSirUnoz7NmJ4JQXq64dGOB2BVWEu2cGrrcbCSY2MWF6G7CTdG1Rx/Mn5HMYi
+xgmyUTFT+uX4p6agFX0EyCYY05mjUhcbsMK/Wc0X+7EnbLUA/KJy9VGOWZdC+2sd
+e2CPfW/We7ZfU4A+QE7s7WNglSa2t9bRxw5pTSnQ4eMcTWVyvs7u1cK2f+gvE5LN
+FRwAGme+Na6Wh4j5r/V8Z/07VJ0L1ipn6Zhmo8GTi4N9e/tTMPkvmuhIWsS/vRLI
+fXfZH1ogzn/xFBYhQ7840PZoguBLg7pNf8uTg0xxsXg4/tjjOa7oCS7UaiCjwj55
+ZBSlmIHqqTyDDxdhexM7MxO/Lvhxko3xcm0qZF1CDW5sVeNjLTng1ST/tiNGYSvc
+/ReUkspObPlXeB2QYpwtFgwPzfDsJ2IEW+dm/dVo/LDQkSciBCxij5hGMsjlJGOd
+J92mQNt6utf4xgRnQ41nP+Yq/grrY3KVR9eL3/dBIOgvabzxJ1SEbrwtGpi4fDMy
+5+C0EHfjOjhRqTLiw/1tiUncOqqLtsTHopzT6VGdTBWKsolyfSzku8mWoMAyUT9P
+FIIAee4k9GNLdVDo/QDlO+cnXnWaPW/WxjWJk+ea3x9pHH/8R31eDSldRP1aB0Z2
+MXLYAi1CpQZAW9jZmn5e
+=Reqr
+-----END PGP SIGNATURE-----
+
+--sHrvAb52M6C8blB9--
