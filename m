@@ -1,200 +1,76 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v4 3/5] mmc: step power class after final selection of bus mode
-Date: Fri, 28 Mar 2014 09:43:45 +0100
-Message-ID: <CAPDyKFos8LC3niECUhC12zfXNSN-RdX7iMjT9s4BnCZUxbndCQ@mail.gmail.com>
-References: <1383653403-10049-1-git-send-email-ulf.hansson@linaro.org>
-	<006701cf2a58$c628e050$527aa0f0$%jun@samsung.com>
-	<000301cf48e2$92a77310$b7f65930$%jun@samsung.com>
+From: Roger <rogerable@realtek.com>
+Subject: Re: [PATCH v5 1/3] mfd: Add realtek USB card reader driver
+Date: Fri, 28 Mar 2014 16:57:37 +0800
+Message-ID: <53353981.7050302@realtek.com>
+References: <1395744293-24398-1-git-send-email-rogerable@realtek.com>		
+ <1395744293-24398-2-git-send-email-rogerable@realtek.com>	
+ <201403280231.s2S2VP8X017745@rtits1.realtek.com>	
+ <5334ED70.6050309@realtek.com> <1395995486.9520.2.camel@linux-fkkt.site>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qc0-f176.google.com ([209.85.216.176]:62513 "EHLO
-	mail-qc0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751115AbaC1Inq (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 28 Mar 2014 04:43:46 -0400
-Received: by mail-qc0-f176.google.com with SMTP id m20so5542646qcx.21
-        for <linux-mmc@vger.kernel.org>; Fri, 28 Mar 2014 01:43:46 -0700 (PDT)
-In-Reply-To: <000301cf48e2$92a77310$b7f65930$%jun@samsung.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"; Format="flowed"
+Content-Transfer-Encoding: 7bit
+Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
+In-Reply-To: <1395995486.9520.2.camel@linux-fkkt.site>
+List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
+List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel>
+List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
+List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
+List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
+Errors-To: driverdev-devel-bounces@linuxdriverproject.org
+Sender: driverdev-devel-bounces@linuxdriverproject.org
+To: Oliver Neukum <oneukum@suse.de>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Maxim Levitsky <maximlevitsky@gmail.com>, Alex Dubov <oakad@yahoo.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, driverdev-devel@linuxdriverproject.org, linux-mmc@vger.kernel.org, Chris Ball <chris@printf.net>, linux-kernel@vger.kernel.org, wei_wang@realsil.com.cn, Andrew Morton <akpm@linux-foundation.org>, Lee Jones <lee.jones@linaro.org>, Dan Carpenter <dan.carpenter@oracle.com>, Samuel Ortiz <sameo@linux.intel.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Seungwon Jeon <tgih.jun@samsung.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Jaehoon Chung <jh80.chung@samsung.com>, Jackey Shen <jackey.shen@amd.com>, Alim Akhtar <alim.akhtar@samsung.com>
 
-On 26 March 2014 12:00, Seungwon Jeon <tgih.jun@samsung.com> wrote:
-> Power class is changed once only after selection of bus modes
-> including speed and bus-width finishes finally.
->
-> Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
-> Tested-by: Jaehoon Chung <jh80.chung@samsung.com>
-> Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
 
-Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
+On 03/28/2014 04:31 PM, Oliver Neukum wrote:
+> On Fri, 2014-03-28 at 11:33 +0800, Roger wrote:
+>> On 03/26/2014 10:36 PM, Oliver Neukum wrote:
+>>> On Tue, 2014-03-25 at 18:44 +0800, rogerable@realtek.com wrote:
+>>>> From: Roger Tseng <rogerable@realtek.com>
+>
+>>>> +	if (ret)
+>>>> +		goto out_init_fail;
+>>>> +
+>>>> +	/* initialize USB SG transfer timer */
+>>>> +	init_timer(&ucr->sg_timer);
+>>>> +	setup_timer(&ucr->sg_timer, rtsx_usb_sg_timed_out, (unsigned long) ucr);
+>>>> +#ifdef CONFIG_PM
+>>>> +	intf->needs_remote_wakeup = 1;
+>>>
+>>> Why?
+>> Our reader supports remote wake-up from card slot event(insertion,
+>> removal). It should be enabled to let the driver be able to detect the
+>> newly inserted card.
+>
+> Interesting. This capability has been lacking for a long time.
+> That is cool hardware. Are you sure the upper layers implement
+> the event infrastructure so that devices are not polled?
+>
+Polling is still necessary because USB essentially doesn't support 
+interrupt.
 
-> ---
->  drivers/mmc/core/mmc.c |   96 +++++++++++++++++++++++++++--------------------
->  1 files changed, 55 insertions(+), 41 deletions(-)
+However, if remote wake-up is not enabled or supported, the device will 
+have to be resumed every time when polling and then suspended right away 
+if there isn't a new card. This should consume more power than the 
+designed behavior: suspending device while card removed, taking failed 
+polls as no-card, and card being successfully polled after 
+insertion-triggered remote wake-up.
+
+>> The LED is not in a permanent cut-off state after here. It is called to
+>> guarantee the LED is off during suspend to save more power. It could be
+>> lit up in the card host drivers(e.g. rtsx_usb_sdmmc.c) anytime whenever
+>> necessary.
+>>
+>> This has been asked may times. I'm considering putting some comment in
+>> next revision.
 >
-> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-> index 97f1912..480c100 100644
-> --- a/drivers/mmc/core/mmc.c
-> +++ b/drivers/mmc/core/mmc.c
-> @@ -732,17 +732,13 @@ static struct device_type mmc_type = {
->   * extended CSD register, select it by executing the
->   * mmc_switch command.
->   */
-> -static int mmc_select_powerclass(struct mmc_card *card,
-> -               unsigned int bus_width)
-> +static int __mmc_select_powerclass(struct mmc_card *card,
-> +                                  unsigned int bus_width)
->  {
-> -       int err = 0;
-> +       struct mmc_host *host = card->host;
-> +       struct mmc_ext_csd *ext_csd = &card->ext_csd;
->         unsigned int pwrclass_val = 0;
-> -       struct mmc_host *host;
-> -
-> -       BUG_ON(!card);
-> -
-> -       host = card->host;
-> -       BUG_ON(!host);
-> +       int err = 0;
+> Good idea.
 >
->         /* Power class selection is supported for versions >= 4.0 */
->         if (card->csd.mmca_vsn < CSD_SPEC_VER_4)
-> @@ -754,14 +750,14 @@ static int mmc_select_powerclass(struct mmc_card *card,
->
->         switch (1 << host->ios.vdd) {
->         case MMC_VDD_165_195:
-> -               if (host->ios.clock <= 26000000)
-> -                       pwrclass_val = card->ext_csd.raw_pwr_cl_26_195;
-> -               else if (host->ios.clock <= 52000000)
-> +               if (host->ios.clock <= MMC_HIGH_26_MAX_DTR)
-> +                       pwrclass_val = ext_csd->raw_pwr_cl_26_195;
-> +               else if (host->ios.clock <= MMC_HIGH_52_MAX_DTR)
->                         pwrclass_val = (bus_width <= EXT_CSD_BUS_WIDTH_8) ?
-> -                               card->ext_csd.raw_pwr_cl_52_195 :
-> -                               card->ext_csd.raw_pwr_cl_ddr_52_195;
-> -               else if (host->ios.clock <= 200000000)
-> -                       pwrclass_val = card->ext_csd.raw_pwr_cl_200_195;
-> +                               ext_csd->raw_pwr_cl_52_195 :
-> +                               ext_csd->raw_pwr_cl_ddr_52_195;
-> +               else if (host->ios.clock <= MMC_HS200_MAX_DTR)
-> +                       pwrclass_val = ext_csd->raw_pwr_cl_200_195;
->                 break;
->         case MMC_VDD_27_28:
->         case MMC_VDD_28_29:
-> @@ -772,14 +768,14 @@ static int mmc_select_powerclass(struct mmc_card *card,
->         case MMC_VDD_33_34:
->         case MMC_VDD_34_35:
->         case MMC_VDD_35_36:
-> -               if (host->ios.clock <= 26000000)
-> -                       pwrclass_val = card->ext_csd.raw_pwr_cl_26_360;
-> -               else if (host->ios.clock <= 52000000)
-> +               if (host->ios.clock <= MMC_HIGH_26_MAX_DTR)
-> +                       pwrclass_val = ext_csd->raw_pwr_cl_26_360;
-> +               else if (host->ios.clock <= MMC_HIGH_52_MAX_DTR)
->                         pwrclass_val = (bus_width <= EXT_CSD_BUS_WIDTH_8) ?
-> -                               card->ext_csd.raw_pwr_cl_52_360 :
-> -                               card->ext_csd.raw_pwr_cl_ddr_52_360;
-> -               else if (host->ios.clock <= 200000000)
-> -                       pwrclass_val = card->ext_csd.raw_pwr_cl_200_360;
-> +                               ext_csd->raw_pwr_cl_52_360 :
-> +                               ext_csd->raw_pwr_cl_ddr_52_360;
-> +               else if (host->ios.clock <= MMC_HS200_MAX_DTR)
-> +                       pwrclass_val = ext_csd->raw_pwr_cl_200_360;
->                 break;
->         default:
->                 pr_warning("%s: Voltage range not supported "
-> @@ -805,6 +801,37 @@ static int mmc_select_powerclass(struct mmc_card *card,
->         return err;
->  }
->
-> +static int mmc_select_powerclass(struct mmc_card *card)
-> +{
-> +       struct mmc_host *host = card->host;
-> +       u32 bus_width, ext_csd_bits;
-> +       int err, ddr;
-> +
-> +       /* Power class selection is supported for versions >= 4.0 */
-> +       if (card->csd.mmca_vsn < CSD_SPEC_VER_4)
-> +               return 0;
-> +
-> +       bus_width = host->ios.bus_width;
-> +       /* Power class values are defined only for 4/8 bit bus */
-> +       if (bus_width == MMC_BUS_WIDTH_1)
-> +               return 0;
-> +
-> +       ddr = card->mmc_avail_type & EXT_CSD_CARD_TYPE_DDR_52;
-> +       if (ddr)
-> +               ext_csd_bits = (bus_width == MMC_BUS_WIDTH_8) ?
-> +                       EXT_CSD_DDR_BUS_WIDTH_8 : EXT_CSD_DDR_BUS_WIDTH_4;
-> +       else
-> +               ext_csd_bits = (bus_width == MMC_BUS_WIDTH_8) ?
-> +                       EXT_CSD_BUS_WIDTH_8 :  EXT_CSD_BUS_WIDTH_4;
-> +
-> +       err = __mmc_select_powerclass(card, ext_csd_bits);
-> +       if (err)
-> +               pr_warn("%s: power class selection to bus width %d ddr %d failed\n",
-> +                       mmc_hostname(host), 1 << bus_width, ddr);
-> +
-> +       return err;
-> +}
-> +
->  /*
->   * Selects the desired buswidth and switch to the HS200 mode
->   * if bus width set without error
-> @@ -1166,11 +1193,6 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
->
->                 ext_csd_bits = (bus_width == MMC_BUS_WIDTH_8) ?
->                                 EXT_CSD_BUS_WIDTH_8 : EXT_CSD_BUS_WIDTH_4;
-> -               err = mmc_select_powerclass(card, ext_csd_bits);
-> -               if (err)
-> -                       pr_warning("%s: power class selection to bus width %d"
-> -                                  " failed\n", mmc_hostname(card->host),
-> -                                  1 << bus_width);
->         }
->
->         /*
-> @@ -1199,12 +1221,6 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
->                         bus_width = bus_widths[idx];
->                         if (bus_width == MMC_BUS_WIDTH_1)
->                                 ddr = 0; /* no DDR for 1-bit width */
-> -                       err = mmc_select_powerclass(card, ext_csd_bits[idx][0]);
-> -                       if (err)
-> -                               pr_warning("%s: power class selection to "
-> -                                          "bus width %d failed\n",
-> -                                          mmc_hostname(card->host),
-> -                                          1 << bus_width);
->
->                         err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
->                                          EXT_CSD_BUS_WIDTH,
-> @@ -1229,13 +1245,6 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
->                 }
->
->                 if (!err && ddr) {
-> -                       err = mmc_select_powerclass(card, ext_csd_bits[idx][1]);
-> -                       if (err)
-> -                               pr_warning("%s: power class selection to "
-> -                                          "bus width %d ddr %d failed\n",
-> -                                          mmc_hostname(card->host),
-> -                                          1 << bus_width, ddr);
-> -
->                         err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
->                                          EXT_CSD_BUS_WIDTH,
->                                          ext_csd_bits[idx][1],
-> @@ -1273,6 +1282,11 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
->         }
->
->         /*
-> +        * Choose the power class with selected bus interface
-> +        */
-> +       mmc_select_powerclass(card);
-> +
-> +       /*
->          * Enable HPI feature (if supported)
->          */
->         if (card->ext_csd.hpi) {
-> --
-> 1.7.0.4
->
->
+> 	Regards
+> 		Oliver
+
+Best regards,
+Roger Tseng
