@@ -1,267 +1,78 @@
-From: Seunguk Shin <seunguk.shin@samsung.com>
-Subject: Re: [RFC PATCH 1/1 ]mmc: Support-FFU-for-eMMC-v5.0
-Date: Mon, 31 Mar 2014 19:51:59 +0900
-Message-ID: <001901cf4ccf$3dc64920$b952db60$@samsung.com>
+From: Markus Mayer <markus.mayer@linaro.org>
+Subject: [PATCH] mmc: Delay the card_event callback into the mmc_rescan worker
+Date: Mon, 31 Mar 2014 14:01:45 -0700
+Message-ID: <1396299705-29268-1-git-send-email-markus.mayer@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout2.samsung.com ([203.254.224.25]:51653 "EHLO
-	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751749AbaCaKwB (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 31 Mar 2014 06:52:01 -0400
-Received: from epcpsbgr3.samsung.com
- (u143.gpu120.samsung.co.kr [203.254.230.143])
- by mailout2.samsung.com (Oracle Communications Messaging Server 7u4-24.01
- (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTP id <0N3A0039ZRINQV20@mailout2.samsung.com> for
- linux-mmc@vger.kernel.org; Mon, 31 Mar 2014 19:51:59 +0900 (KST)
-Content-language: ko
+Received: from mail-gw1-out.broadcom.com ([216.31.210.62]:24460 "EHLO
+	mail-gw1-out.broadcom.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751086AbaCaVBt (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 31 Mar 2014 17:01:49 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, Avi.Shchislowski@sandisk.com, chris@printf.net, cpgs@samsung.com
+To: Chris Ball <cjb@laptop.org>, Ulf Hansson <ulf.hansson@linaro.org>, Christian Daudt <bcm@fixthebug.org>
+Cc: Linux MMC List <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 
-Some of Samsung eMMC does not show the argument for ffu in ext_csd.
-In case of this, eMMC shows 0x0 from ext_csd, Host has to modify the
-argument.
+This change removes the callback from atomic context which it doesn't
+need to be in, and puts it in line with the debounced rescan.
 
-Add "#define CID_MANFID_SAMSUNG		0x15"
+This code is based on these e-mail threads with Christian Daudt:
 
-> +int mmc_ffu_download(struct mmc_card *card, struct mmc_command *cmd,
-> +       u8 *data, int buf_bytes)
-> +{
-> +       u8 ext_csd[CARD_BLOCK_SIZE];
-> +       int err;
-> +       int ret;
-> +
-> +       /* Read the EXT_CSD */
-> +       err = mmc_send_ext_csd(card, ext_csd);
-> +       if (err) {
-> +               pr_err("FFU: %s: error %d sending ext_csd\n",
-> +                       mmc_hostname(card->host), err);
-> +               goto exit;
-> +       }
-> +
-> +       /* Check if FFU is supported by card */
-> +       if (!FFU_SUPPORTED_MODE(ext_csd[EXT_CSD_SUPPORTED_MODE])) {
-> +               err = -EINVAL;
-> +               pr_err("FFU: %s: error %d FFU is not supported\n",
-> +                       mmc_hostname(card->host), err);
-> +               goto exit;
-> +       }
-> +
-> +       err = mmc_host_set_ffu(card, ext_csd[EXT_CSD_FW_CONFIG]);
-> +       if (err) {
-> +               pr_err("FFU: %s: error %d FFU is not supported\n",
-> +                       mmc_hostname(card->host), err);
-> +               err = -EINVAL;
-> +               goto exit;
-> +       }
-> +
-> +       /* set device to FFU mode */
-> +       err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-EXT_CSD_MODE_CONFIG,
-> +               MMC_FFU_MODE_SET, card->ext_csd.generic_cmd6_time);
-> +       if (err) {
-> +               pr_err("FFU: %s: error %d FFU is not supported\n",
-> +                       mmc_hostname(card->host), err);
-> +               goto exit_normal;
-> +       }
-> +
-> +       /* set CMD ARG */
-> +       cmd->arg = ext_csd[EXT_CSD_FFU_ARG] |
-> +               ext_csd[EXT_CSD_FFU_ARG + 1] << 8 |
-> +               ext_csd[EXT_CSD_FFU_ARG + 2] << 16 |
-> +               ext_csd[EXT_CSD_FFU_ARG + 3] << 24;
-> +
+  https://lkml.org/lkml/2013/8/19/539
+  https://lkml.org/lkml/2014/3/19/79
 
-Add followings
-"
-       /* If arg is zero, should be set to a special value for samsung eMMC
-*/
-       if ( card->cid.manfid == CID_MANFID_SAMSUNG && cmd->arg == 0x0 ) {
-               cmd->arg = 0xc7810000;
-       }
-"
+Signed-off-by: Markus Mayer <markus.mayer@linaro.org>
+---
+ drivers/mmc/core/core.c      |    5 +++++
+ drivers/mmc/core/slot-gpio.c |    4 +---
+ include/linux/mmc/host.h     |    2 ++
+ 3 files changed, 8 insertions(+), 3 deletions(-)
 
-> +       err = mmc_ffu_write(card, data, cmd->arg, buf_bytes);
-> +
-> +exit_normal:
-> +       /* host switch back to work in normal MMC Read/Write commands */
-> +       ret = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-> +               EXT_CSD_MODE_CONFIG, MMC_FFU_MODE_NORMAL,
-> +               card->ext_csd.generic_cmd6_time);
-> +       if (ret)
-> +               err = ret;
-> +
-> +exit:
-> +       return err;
-> +}
-> +EXPORT_SYMBOL(mmc_ffu_download);
-> +
-
-
-
-eMMC 5.0 Spec. says if device does not support MODE_OPERATION_CODES, device
-doesn't need to use NUMBER_OF_FW_SECTORS_CORRECTLY_PROGRAMMED.
-So, it's better to move the code for checking this value to
-FFU_FEATURES(ext_csd[EXT_CSD_FFU_FEATURES]
-
-> +int mmc_ffu_install(struct mmc_card *card) {
-> +       u8 ext_csd[CARD_BLOCK_SIZE];
-> +       int err;
-> +       u32 ffu_data_len;
-> +       u32 timeout;
-> +
-> +       err = mmc_send_ext_csd(card, ext_csd);
-> +       if (err) {
-> +               pr_err("FFU: %s: error %d sending ext_csd\n",
-> +                       mmc_hostname(card->host), err);
-> +               goto exit;
-> +       }
-> +
-> +       /* Check if FFU is supported */
-> +       if (!FFU_SUPPORTED_MODE(ext_csd[EXT_CSD_SUPPORTED_MODE]) ||
-> +               FFU_CONFIG(ext_csd[EXT_CSD_FW_CONFIG])) {
-> +               err = -EINVAL;
-> +               pr_err("FFU: %s: error %d FFU is not supported\n",
-> +                       mmc_hostname(card->host), err);
-> +               goto exit;
-> +       }
-
-Remove followings
-"
-       ffu_data_len = ext_csd[EXT_CSD_NUM_OF_FW_SEC_PROG]|
-               ext_csd[EXT_CSD_NUM_OF_FW_SEC_PROG + 1] << 8 |
-               ext_csd[EXT_CSD_NUM_OF_FW_SEC_PROG + 2] << 16 |
-               ext_csd[EXT_CSD_NUM_OF_FW_SEC_PROG + 3] << 24;
-
-       if (!ffu_data_len) {
-               err = -EPERM;
-               return err;
-       }
-"
-
-> +
-> +       /* check mode operation */
-> +       if (!FFU_FEATURES(ext_csd[EXT_CSD_FFU_FEATURES])) {
-> +               /* restart the eMMC */
-> +               err = mmc_ffu_restart(card);
-> +               if (err) {
-> +                       pr_err("FFU: %s: error %d FFU install:\n",
-> +                               mmc_hostname(card->host), err);
-> +               }
-> +       } else {
-
-Add followings
-"
-                        ffu_data_len = ext_csd[EXT_CSD_NUM_OF_FW_SEC_PROG]|
-                                ext_csd[EXT_CSD_NUM_OF_FW_SEC_PROG + 1] << 8
-|
-                                ext_csd[EXT_CSD_NUM_OF_FW_SEC_PROG + 2] <<
-16 |
-                                ext_csd[EXT_CSD_NUM_OF_FW_SEC_PROG + 3] <<
-24;
-
-                        if (!ffu_data_len) {
-                                err = -EPERM;
-                                return err;
-                        }
-"
-
-> +                       /* set device to FFU mode */
-> +                       err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-> +                               EXT_CSD_MODE_CONFIG, 0x1,
-> +                               card->ext_csd.generic_cmd6_time);
-> +                       if (err) {
-> +                               pr_err("FFU: %s: error %d FFU is not
-supported\n",
-> +                                       mmc_hostname(card->host), err);
-> +                               goto exit;
-> +                       }
-
-
-
-Checking ffu status in ext_csd should be done even if device does not
-support MODE_OPERATION_CODES So, it's better to move the code for checking
-this value to out of brace for FFU_FEATURES(ext_csd[EXT_CSD_FFU_FEATURES]
-
-> +                       /* set ext_csd to install mode */
-> +                       err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-> +                               EXT_CSD_MODE_OPERATION_CODES,
-> +                               MMC_FFU_INSTALL_SET, timeout);
-> +
-> +                       if (err) {
-> +                               pr_err("FFU: %s: error %d setting install
-mode\n",
-> +                                       mmc_hostname(card->host), err);
-> +                               goto exit;
-> +                       }
-> +
-
-Remove followings
-"
-                       /* read ext_csd */
-                       err = mmc_send_ext_csd(card, ext_csd);
-                       if (err) {
-                               pr_err("FFU: %s: error %d sending ext_csd\n",
-                                       mmc_hostname(card->host), err);
-                               goto exit;
-                       }
-                       /* return status */
-                       err = ext_csd[EXT_CSD_FFU_STATUS];
-                       if (err) {
-                               pr_err("FFU: %s: error %d FFU install:\n",
-                                       mmc_hostname(card->host), err);
-                               err = -EINVAL;
-                               goto exit;
-                       }
-"
-
-> +               }
-> +
-
-Add followings
-"
-           /* read ext_csd */
-           err = mmc_send_ext_csd(card, ext_csd);
-           if (err) {
-                   pr_err("FFU: %s: error %d sending ext_csd\n",
-                              mmc_hostname(card->host), err);
-                   goto exit;
-           }
-           /* return status */
-           err = ext_csd[EXT_CSD_FFU_STATUS];
-           if (err) {
-                   pr_err("FFU: %s: error %d FFU install:\n",
-                              mmc_hostname(card->host), err);
-                   err = -EINVAL;
-                   goto exit;
-           }
-"
-
-> +exit:
-> +       return err;
-> +}
-> +EXPORT_SYMBOL(mmc_ffu_install);
-> +
-
-
-
-And some device's fw should be transferred with one command.
-They does not support multiple commands for fw transfer.
-For these devices, MMC_IOC_MAX_BYTES should be greater.
-
-diff --git a/include/uapi/linux/mmc/ioctl.h b/include/uapi/linux/mmc/ioctl.h
-index 1f5e689..af9ea62 100644
---- a/include/uapi/linux/mmc/ioctl.h
-+++ b/include/uapi/linux/mmc/ioctl.h
-@@ -53,5 +53,5 @@ struct mmc_ioc_cmd {
-  * is enforced per ioctl call.  For larger data transfers, use the normal
-  * block device operations.
-  */
--#define MMC_IOC_MAX_BYTES  (512L * 256)
-+#define MMC_IOC_MAX_BYTES  (512L * 1024)
- #endif /* LINUX_MMC_IOCTL_H */
-
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 098374b..ff7fd2e 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -2421,6 +2421,11 @@ void mmc_rescan(struct work_struct *work)
+ 		container_of(work, struct mmc_host, detect.work);
+ 	int i;
+ 
++	if (host->trigger_card_event && host->ops->card_event) {
++		host->ops->card_event(host);
++		host->trigger_card_event = false;
++	}
++
+ 	if (host->rescan_disable)
+ 		return;
+ 
+diff --git a/drivers/mmc/core/slot-gpio.c b/drivers/mmc/core/slot-gpio.c
+index 46596b71..4029c85 100644
+--- a/drivers/mmc/core/slot-gpio.c
++++ b/drivers/mmc/core/slot-gpio.c
+@@ -29,9 +29,7 @@ static irqreturn_t mmc_gpio_cd_irqt(int irq, void *dev_id)
+ 	/* Schedule a card detection after a debounce timeout */
+ 	struct mmc_host *host = dev_id;
+ 
+-	if (host->ops->card_event)
+-		host->ops->card_event(host);
+-
++	host->trigger_card_event = true;
+ 	mmc_detect_change(host, msecs_to_jiffies(200));
+ 
+ 	return IRQ_HANDLED;
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index 99f5709..63b983b 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -322,6 +322,8 @@ struct mmc_host {
+ 	int			rescan_disable;	/* disable card detection */
+ 	int			rescan_entered;	/* used with nonremovable devices */
+ 
++	bool			trigger_card_event; /* card_event necessary */
++
+ 	struct mmc_card		*card;		/* device attached to this host */
+ 
+ 	wait_queue_head_t	wq;
+-- 
+1.7.9.5
 
