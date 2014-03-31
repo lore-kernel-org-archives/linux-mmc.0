@@ -1,78 +1,66 @@
-From: Markus Mayer <markus.mayer@linaro.org>
-Subject: [PATCH] mmc: Delay the card_event callback into the mmc_rescan worker
-Date: Mon, 31 Mar 2014 14:01:45 -0700
-Message-ID: <1396299705-29268-1-git-send-email-markus.mayer@linaro.org>
+From: Paolo Pisati <p.pisati@gmail.com>
+Subject: Re: 3.1[34]: omap4: panda: hang on reboot?
+Date: Mon, 31 Mar 2014 23:56:59 +0200
+Message-ID: <20140331215659.GA8214@luxor.wired.org>
+References: <20140327175414.GA5795@luxor.wired.org>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-gw1-out.broadcom.com ([216.31.210.62]:24460 "EHLO
-	mail-gw1-out.broadcom.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751086AbaCaVBt (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 31 Mar 2014 17:01:49 -0400
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-omap-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <20140327175414.GA5795@luxor.wired.org>
+Sender: linux-omap-owner@vger.kernel.org
+To: Balaji T K <balajitk@ti.com>, Chris Ball <cjb@laptop.org>
+Cc: linux-mmc' <linux-mmc@vger.kernel.org>, linux-omap <linux-omap@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>, Ulf Hansson <ulf.hansson@linaro.org>, Christian Daudt <bcm@fixthebug.org>
-Cc: Linux MMC List <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 
-This change removes the callback from atomic context which it doesn't
-need to be in, and puts it in line with the debounced rescan.
+On Thu, Mar 27, 2014 at 06:54:14PM +0100, Paolo Pisati wrote:
+> I've been experiencing hangs on reboot on two different panda boards (es rev1
+> and vanilla rev a1) with v3.14-rc8 (but reproducible in 3.13 too):
+> 
+> toolchanin: gcc version 4.8.1 (Ubuntu/Linaro 4.8.1-10ubuntu7)
+> 
+> the config is a multi_v7_defconfig plus a couple of codepages:
+> 
+> http://people.canonical.com/~ppisati/omap4_reboot_hangs/config
+> 
+> a prebuilt zImage is available here:
+> 
+> http://people.canonical.com/~ppisati/omap4_reboot_hangs/zImage
+> 
+> sometimes i can hit this two times in a row, others it's a bit less
+> frequent - put this into your crontab and let it go:
+> 
+> */5 * * * *       /bin/date >> /reboot.log && /sbin/reboot
+> 
+> it never passed 2hrs of reboot cycles.
+> 
+> I already tried different u-boots but that doesn't make any difference,
+> am i the only one experiencing this issue?
 
-This code is based on these e-mail threads with Christian Daudt:
+i bisected it down to this commit:
 
-  https://lkml.org/lkml/2013/8/19/539
-  https://lkml.org/lkml/2014/3/19/79
+commit e002264f7e45d7661b237045577052fd0b40f89c
+Author: Balaji T K <balajitk@ti.com>
+Date:   Mon Oct 21 00:25:18 2013 +0530
 
-Signed-off-by: Markus Mayer <markus.mayer@linaro.org>
----
- drivers/mmc/core/core.c      |    5 +++++
- drivers/mmc/core/slot-gpio.c |    4 +---
- include/linux/mmc/host.h     |    2 ++
- 3 files changed, 8 insertions(+), 3 deletions(-)
+    mmc: omap_hsmmc: Fix pbias_disable for omap4
+    
+    pbias_disable is set to protect the mmc pbias i/o cells in DT boot
+    by preventing voltage switch. Currently pbias_disable is enabled only
+    for omap3 and not for omap4 due to reg_offset difference of 0x100.
+    Enable pbias_disable for omap4+ too by using res->start
+    which does not include the reg_offset.
+    
+    Signed-off-by: Balaji T K <balajitk@ti.com>
+    Signed-off-by: Chris Ball <cjb@laptop.org>
 
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 098374b..ff7fd2e 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -2421,6 +2421,11 @@ void mmc_rescan(struct work_struct *work)
- 		container_of(work, struct mmc_host, detect.work);
- 	int i;
- 
-+	if (host->trigger_card_event && host->ops->card_event) {
-+		host->ops->card_event(host);
-+		host->trigger_card_event = false;
-+	}
-+
- 	if (host->rescan_disable)
- 		return;
- 
-diff --git a/drivers/mmc/core/slot-gpio.c b/drivers/mmc/core/slot-gpio.c
-index 46596b71..4029c85 100644
---- a/drivers/mmc/core/slot-gpio.c
-+++ b/drivers/mmc/core/slot-gpio.c
-@@ -29,9 +29,7 @@ static irqreturn_t mmc_gpio_cd_irqt(int irq, void *dev_id)
- 	/* Schedule a card detection after a debounce timeout */
- 	struct mmc_host *host = dev_id;
- 
--	if (host->ops->card_event)
--		host->ops->card_event(host);
--
-+	host->trigger_card_event = true;
- 	mmc_detect_change(host, msecs_to_jiffies(200));
- 
- 	return IRQ_HANDLED;
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index 99f5709..63b983b 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -322,6 +322,8 @@ struct mmc_host {
- 	int			rescan_disable;	/* disable card detection */
- 	int			rescan_entered;	/* used with nonremovable devices */
- 
-+	bool			trigger_card_event; /* card_event necessary */
-+
- 	struct mmc_card		*card;		/* device attached to this host */
- 
- 	wait_queue_head_t	wq;
+with this commit reverted, i can reboot in a loop for hours without any problem,
+while if i keep this patch, my pandas don't survive more that two hours (again,
+it's really random as it could hang a couple of times in a row and then work
+like a charm for ten reboots straight).
+
+Any idea? does it ring any bell?
+
 -- 
-1.7.9.5
-
+bye,
+p.
