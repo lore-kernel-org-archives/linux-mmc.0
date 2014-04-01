@@ -1,88 +1,60 @@
 From: Ben Dooks <ben.dooks@codethink.co.uk>
-Subject: [PATCH 4/6] mmc: sh-mmcif: use devm_ for irq management
-Date: Tue,  1 Apr 2014 11:25:52 +0100
-Message-ID: <1396347954-13740-5-git-send-email-ben.dooks@codethink.co.uk>
+Subject: [PATCH 5/6] mmc: sh-mmcif: no need to call pm_runtime_suspend on error
+Date: Tue,  1 Apr 2014 11:25:53 +0100
+Message-ID: <1396347954-13740-6-git-send-email-ben.dooks@codethink.co.uk>
 References: <1396347954-13740-1-git-send-email-ben.dooks@codethink.co.uk>
-Return-path: <linux-sh-owner@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from ducie-dc1.codethink.co.uk ([185.25.241.215]:43756 "EHLO
+	ducie-dc1.codethink.co.uk" rhost-flags-OK-FAIL-OK-FAIL)
+	by vger.kernel.org with ESMTP id S1751264AbaDAK0F (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 1 Apr 2014 06:26:05 -0400
 In-Reply-To: <1396347954-13740-1-git-send-email-ben.dooks@codethink.co.uk>
-Sender: linux-sh-owner@vger.kernel.org
+Sender: linux-mmc-owner@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 Cc: linux-sh@vger.kernel.org, Laurent Pinchart <laurent.pinchart@ideasonboard.com>, Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, magnus.damm@opensource.se, linux-kernel@lists.codethink.co.uk, Ben Dooks <ben.dooks@codethink.co.uk>
-List-Id: linux-mmc@vger.kernel.org
 
-Use devm_request_threaded_irq() for the host interrupt handlers so we
-do not have to worry about freeing them on exit or error. Tidies up the
-exit path code for the driver.
+The pm_runtime call should implicitly disable the device once the
+probe is over if there is no explicit reference gained. There is no
+need to call pm_runtime_suspend() before the pm_runtime_disable()
+call.
 
 Signed-off-by: Ben Dooks <ben.dooks@codethink.co.uk>
 ---
- drivers/mmc/host/sh_mmcif.c | 26 ++++++++------------------
- 1 file changed, 8 insertions(+), 18 deletions(-)
+ drivers/mmc/host/sh_mmcif.c | 6 ++----
+ 1 file changed, 2 insertions(+), 4 deletions(-)
 
 diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
-index c006310..485db7b 100644
+index 485db7b..c951760 100644
 --- a/drivers/mmc/host/sh_mmcif.c
 +++ b/drivers/mmc/host/sh_mmcif.c
-@@ -1443,17 +1443,19 @@ static int sh_mmcif_probe(struct platform_device *pdev)
- 	sh_mmcif_writel(host->addr, MMCIF_CE_INT_MASK, MASK_ALL);
- 
- 	name = irq[1] < 0 ? dev_name(&pdev->dev) : "sh_mmc:error";
--	ret = request_threaded_irq(irq[0], sh_mmcif_intr, sh_mmcif_irqt, 0, name, host);
-+	ret = devm_request_threaded_irq(&pdev->dev, irq[0], sh_mmcif_intr,
-+					sh_mmcif_irqt, 0, name, host);
+@@ -1447,7 +1447,7 @@ static int sh_mmcif_probe(struct platform_device *pdev)
+ 					sh_mmcif_irqt, 0, name, host);
  	if (ret) {
  		dev_err(&pdev->dev, "request_irq error (%s)\n", name);
--		goto ereqirq0;
-+		goto err_irq;
+-		goto err_irq;
++		goto err_clk;
  	}
  	if (irq[1] >= 0) {
--		ret = request_threaded_irq(irq[1], sh_mmcif_intr, sh_mmcif_irqt,
--					   0, "sh_mmc:int", host);
-+		ret = devm_request_threaded_irq(&pdev->dev, irq[1],
-+						sh_mmcif_intr, sh_mmcif_irqt,
-+						0, "sh_mmc:int", host);
+ 		ret = devm_request_threaded_irq(&pdev->dev, irq[1],
+@@ -1455,7 +1455,7 @@ static int sh_mmcif_probe(struct platform_device *pdev)
+ 						0, "sh_mmc:int", host);
  		if (ret) {
  			dev_err(&pdev->dev, "request_irq error (sh_mmc:int)\n");
--			goto ereqirq1;
-+			goto err_irq;
+-			goto err_irq;
++			goto err_clk;
  		}
  	}
  
-@@ -1480,11 +1482,7 @@ static int sh_mmcif_probe(struct platform_device *pdev)
+@@ -1482,8 +1482,6 @@ static int sh_mmcif_probe(struct platform_device *pdev)
  
  emmcaddh:
  erqcd:
--	if (irq[1] >= 0)
--		free_irq(irq[1], host);
--ereqirq1:
--	free_irq(irq[0], host);
--ereqirq0:
-+err_irq:
- 	pm_runtime_suspend(&pdev->dev);
+-err_irq:
+-	pm_runtime_suspend(&pdev->dev);
  err_clk:
  	clk_disable_unprepare(host->hclk);
-@@ -1498,7 +1496,6 @@ err_host:
- static int sh_mmcif_remove(struct platform_device *pdev)
- {
- 	struct sh_mmcif_host *host = platform_get_drvdata(pdev);
--	int irq[2];
- 
- 	host->dying = true;
- 	clk_prepare_enable(host->hclk);
-@@ -1516,13 +1513,6 @@ static int sh_mmcif_remove(struct platform_device *pdev)
- 	 */
- 	cancel_delayed_work_sync(&host->timeout_work);
- 
--	irq[0] = platform_get_irq(pdev, 0);
--	irq[1] = platform_get_irq(pdev, 1);
--
--	free_irq(irq[0], host);
--	if (irq[1] >= 0)
--		free_irq(irq[1], host);
--
- 	clk_disable_unprepare(host->hclk);
- 	mmc_free_host(host->mmc);
- 	pm_runtime_put_sync(&pdev->dev);
+ err_pm:
 -- 
 1.9.0
 
