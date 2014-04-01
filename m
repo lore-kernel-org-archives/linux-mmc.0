@@ -1,42 +1,285 @@
-From: Roger <rogerable@realtek.com>
-Subject: Re: [PATCH v5 3/3] memstick: Add realtek USB memstick host driver
-Date: Tue, 1 Apr 2014 11:20:32 +0800
-Message-ID: <533A3080.2020008@realtek.com>
-References: <1395744293-24398-1-git-send-email-rogerable@realtek.com>
- <1395744293-24398-4-git-send-email-rogerable@realtek.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [RFC PATCH 1/1 ]mmc: Support-FFU-for-eMMC-v5.0
+Date: Tue, 01 Apr 2014 13:17:27 +0900
+Message-ID: <533A3DD7.80403@samsung.com>
+References: <001901cf4ccf$3dc64920$b952db60$@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"; Format="flowed"
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
-Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
-In-Reply-To: <1395744293-24398-4-git-send-email-rogerable@realtek.com>
-List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
-List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel>
-List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
-List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
-List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
-Errors-To: driverdev-devel-bounces@linuxdriverproject.org
-Sender: driverdev-devel-bounces@linuxdriverproject.org
-To: Samuel Ortiz <sameo@linux.intel.com>, Lee Jones <lee.jones@linaro.org>, Chris Ball <chris@printf.net>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Maxim Levitsky <maximlevitsky@gmail.com>, Alex Dubov <oakad@yahoo.com>, Dan Carpenter <dan.carpenter@oracle.com>, Ulf Hansson <ulf.hansson@linaro.org>, Andrew Morton <akpm@linux-foundation.org>
-Cc: wei_wang@realsil.com.cn, driverdev-devel@linuxdriverproject.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout4.samsung.com ([203.254.224.34]:12485 "EHLO
+	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751993AbaDAER3 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 1 Apr 2014 00:17:29 -0400
+Received: from epcpsbgr2.samsung.com
+ (u142.gpu120.samsung.co.kr [203.254.230.142])
+ by mailout4.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+ (7.0.4.24.0) 64bit (built Nov 17 2011))
+ with ESMTP id <0N3C00HP93X3BZB0@mailout4.samsung.com> for
+ linux-mmc@vger.kernel.org; Tue, 01 Apr 2014 13:17:27 +0900 (KST)
+In-reply-to: <001901cf4ccf$3dc64920$b952db60$@samsung.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Seunguk Shin <seunguk.shin@samsung.com>, linux-mmc@vger.kernel.org, Avi.Shchislowski@sandisk.com, chris@printf.net, cpgs@samsung.com
 
-On 03/25/2014 06:44 PM, rogerable@realtek.com wrote:
-> From: Roger Tseng <rogerable@realtek.com>
->
-> Realtek USB memstick host driver provides memstick host support based on the
-> Realtek USB card reader MFD driver.
->
-> Signed-off-by: Roger Tseng <rogerable@realtek.com>
-> ---
->   drivers/memstick/host/Kconfig       |  10 +
->   drivers/memstick/host/Makefile      |   1 +
->   drivers/memstick/host/rtsx_usb_ms.c | 839 ++++++++++++++++++++++++++++++++++++
->   3 files changed, 850 insertions(+)
->   create mode 100644 drivers/memstick/host/rtsx_usb_ms.c
-Hi Andrew,
+Hi, Seunguk.
 
-Since I'll have to send next revision(v6, to modify patch 1/3) and 
-you've commented v4, would you also comment or Ack the 3/3 of this one? 
-This should save one revision for me to make any necessary change.
+On 03/31/2014 07:51 PM, Seunguk Shin wrote:
+> Some of Samsung eMMC does not show the argument for ffu in ext_csd.
+> In case of this, eMMC shows 0x0 from ext_csd, Host has to modify the
+> argument.
+> 
+> Add "#define CID_MANFID_SAMSUNG		0x15"
+If you need to add the Samsung eMMC specific code, 
+it would be better you would send the Samsung eMMC specific patch. (based-on this patch.)
+This patch isn't patch for samsung eMMC.
+I didn't see this patch fully, but i think this patch is general code.
+
+Best Regards,
+Jaehoon Chung
+
+> 
+>> +int mmc_ffu_download(struct mmc_card *card, struct mmc_command *cmd,
+>> +       u8 *data, int buf_bytes)
+>> +{
+>> +       u8 ext_csd[CARD_BLOCK_SIZE];
+>> +       int err;
+>> +       int ret;
+>> +
+>> +       /* Read the EXT_CSD */
+>> +       err = mmc_send_ext_csd(card, ext_csd);
+>> +       if (err) {
+>> +               pr_err("FFU: %s: error %d sending ext_csd\n",
+>> +                       mmc_hostname(card->host), err);
+>> +               goto exit;
+>> +       }
+>> +
+>> +       /* Check if FFU is supported by card */
+>> +       if (!FFU_SUPPORTED_MODE(ext_csd[EXT_CSD_SUPPORTED_MODE])) {
+>> +               err = -EINVAL;
+>> +               pr_err("FFU: %s: error %d FFU is not supported\n",
+>> +                       mmc_hostname(card->host), err);
+>> +               goto exit;
+>> +       }
+>> +
+>> +       err = mmc_host_set_ffu(card, ext_csd[EXT_CSD_FW_CONFIG]);
+>> +       if (err) {
+>> +               pr_err("FFU: %s: error %d FFU is not supported\n",
+>> +                       mmc_hostname(card->host), err);
+>> +               err = -EINVAL;
+>> +               goto exit;
+>> +       }
+>> +
+>> +       /* set device to FFU mode */
+>> +       err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+> EXT_CSD_MODE_CONFIG,
+>> +               MMC_FFU_MODE_SET, card->ext_csd.generic_cmd6_time);
+>> +       if (err) {
+>> +               pr_err("FFU: %s: error %d FFU is not supported\n",
+>> +                       mmc_hostname(card->host), err);
+>> +               goto exit_normal;
+>> +       }
+>> +
+>> +       /* set CMD ARG */
+>> +       cmd->arg = ext_csd[EXT_CSD_FFU_ARG] |
+>> +               ext_csd[EXT_CSD_FFU_ARG + 1] << 8 |
+>> +               ext_csd[EXT_CSD_FFU_ARG + 2] << 16 |
+>> +               ext_csd[EXT_CSD_FFU_ARG + 3] << 24;
+>> +
+> 
+> Add followings
+> "
+>        /* If arg is zero, should be set to a special value for samsung eMMC
+> */
+>        if ( card->cid.manfid == CID_MANFID_SAMSUNG && cmd->arg == 0x0 ) {
+>                cmd->arg = 0xc7810000;
+>        }
+> "
+> 
+>> +       err = mmc_ffu_write(card, data, cmd->arg, buf_bytes);
+>> +
+>> +exit_normal:
+>> +       /* host switch back to work in normal MMC Read/Write commands */
+>> +       ret = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+>> +               EXT_CSD_MODE_CONFIG, MMC_FFU_MODE_NORMAL,
+>> +               card->ext_csd.generic_cmd6_time);
+>> +       if (ret)
+>> +               err = ret;
+>> +
+>> +exit:
+>> +       return err;
+>> +}
+>> +EXPORT_SYMBOL(mmc_ffu_download);
+>> +
+> 
+> 
+> 
+> eMMC 5.0 Spec. says if device does not support MODE_OPERATION_CODES, device
+> doesn't need to use NUMBER_OF_FW_SECTORS_CORRECTLY_PROGRAMMED.
+> So, it's better to move the code for checking this value to
+> FFU_FEATURES(ext_csd[EXT_CSD_FFU_FEATURES]
+> 
+>> +int mmc_ffu_install(struct mmc_card *card) {
+>> +       u8 ext_csd[CARD_BLOCK_SIZE];
+>> +       int err;
+>> +       u32 ffu_data_len;
+>> +       u32 timeout;
+>> +
+>> +       err = mmc_send_ext_csd(card, ext_csd);
+>> +       if (err) {
+>> +               pr_err("FFU: %s: error %d sending ext_csd\n",
+>> +                       mmc_hostname(card->host), err);
+>> +               goto exit;
+>> +       }
+>> +
+>> +       /* Check if FFU is supported */
+>> +       if (!FFU_SUPPORTED_MODE(ext_csd[EXT_CSD_SUPPORTED_MODE]) ||
+>> +               FFU_CONFIG(ext_csd[EXT_CSD_FW_CONFIG])) {
+>> +               err = -EINVAL;
+>> +               pr_err("FFU: %s: error %d FFU is not supported\n",
+>> +                       mmc_hostname(card->host), err);
+>> +               goto exit;
+>> +       }
+> 
+> Remove followings
+> "
+>        ffu_data_len = ext_csd[EXT_CSD_NUM_OF_FW_SEC_PROG]|
+>                ext_csd[EXT_CSD_NUM_OF_FW_SEC_PROG + 1] << 8 |
+>                ext_csd[EXT_CSD_NUM_OF_FW_SEC_PROG + 2] << 16 |
+>                ext_csd[EXT_CSD_NUM_OF_FW_SEC_PROG + 3] << 24;
+> 
+>        if (!ffu_data_len) {
+>                err = -EPERM;
+>                return err;
+>        }
+> "
+> 
+>> +
+>> +       /* check mode operation */
+>> +       if (!FFU_FEATURES(ext_csd[EXT_CSD_FFU_FEATURES])) {
+>> +               /* restart the eMMC */
+>> +               err = mmc_ffu_restart(card);
+>> +               if (err) {
+>> +                       pr_err("FFU: %s: error %d FFU install:\n",
+>> +                               mmc_hostname(card->host), err);
+>> +               }
+>> +       } else {
+> 
+> Add followings
+> "
+>                         ffu_data_len = ext_csd[EXT_CSD_NUM_OF_FW_SEC_PROG]|
+>                                 ext_csd[EXT_CSD_NUM_OF_FW_SEC_PROG + 1] << 8
+> |
+>                                 ext_csd[EXT_CSD_NUM_OF_FW_SEC_PROG + 2] <<
+> 16 |
+>                                 ext_csd[EXT_CSD_NUM_OF_FW_SEC_PROG + 3] <<
+> 24;
+> 
+>                         if (!ffu_data_len) {
+>                                 err = -EPERM;
+>                                 return err;
+>                         }
+> "
+> 
+>> +                       /* set device to FFU mode */
+>> +                       err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+>> +                               EXT_CSD_MODE_CONFIG, 0x1,
+>> +                               card->ext_csd.generic_cmd6_time);
+>> +                       if (err) {
+>> +                               pr_err("FFU: %s: error %d FFU is not
+> supported\n",
+>> +                                       mmc_hostname(card->host), err);
+>> +                               goto exit;
+>> +                       }
+> 
+> 
+> 
+> Checking ffu status in ext_csd should be done even if device does not
+> support MODE_OPERATION_CODES So, it's better to move the code for checking
+> this value to out of brace for FFU_FEATURES(ext_csd[EXT_CSD_FFU_FEATURES]
+> 
+>> +                       /* set ext_csd to install mode */
+>> +                       err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+>> +                               EXT_CSD_MODE_OPERATION_CODES,
+>> +                               MMC_FFU_INSTALL_SET, timeout);
+>> +
+>> +                       if (err) {
+>> +                               pr_err("FFU: %s: error %d setting install
+> mode\n",
+>> +                                       mmc_hostname(card->host), err);
+>> +                               goto exit;
+>> +                       }
+>> +
+> 
+> Remove followings
+> "
+>                        /* read ext_csd */
+>                        err = mmc_send_ext_csd(card, ext_csd);
+>                        if (err) {
+>                                pr_err("FFU: %s: error %d sending ext_csd\n",
+>                                        mmc_hostname(card->host), err);
+>                                goto exit;
+>                        }
+>                        /* return status */
+>                        err = ext_csd[EXT_CSD_FFU_STATUS];
+>                        if (err) {
+>                                pr_err("FFU: %s: error %d FFU install:\n",
+>                                        mmc_hostname(card->host), err);
+>                                err = -EINVAL;
+>                                goto exit;
+>                        }
+> "
+> 
+>> +               }
+>> +
+> 
+> Add followings
+> "
+>            /* read ext_csd */
+>            err = mmc_send_ext_csd(card, ext_csd);
+>            if (err) {
+>                    pr_err("FFU: %s: error %d sending ext_csd\n",
+>                               mmc_hostname(card->host), err);
+>                    goto exit;
+>            }
+>            /* return status */
+>            err = ext_csd[EXT_CSD_FFU_STATUS];
+>            if (err) {
+>                    pr_err("FFU: %s: error %d FFU install:\n",
+>                               mmc_hostname(card->host), err);
+>                    err = -EINVAL;
+>                    goto exit;
+>            }
+> "
+> 
+>> +exit:
+>> +       return err;
+>> +}
+>> +EXPORT_SYMBOL(mmc_ffu_install);
+>> +
+> 
+> 
+> 
+> And some device's fw should be transferred with one command.
+> They does not support multiple commands for fw transfer.
+> For these devices, MMC_IOC_MAX_BYTES should be greater.
+> 
+> diff --git a/include/uapi/linux/mmc/ioctl.h b/include/uapi/linux/mmc/ioctl.h
+> index 1f5e689..af9ea62 100644
+> --- a/include/uapi/linux/mmc/ioctl.h
+> +++ b/include/uapi/linux/mmc/ioctl.h
+> @@ -53,5 +53,5 @@ struct mmc_ioc_cmd {
+>   * is enforced per ioctl call.  For larger data transfers, use the normal
+>   * block device operations.
+>   */
+> -#define MMC_IOC_MAX_BYTES  (512L * 256)
+> +#define MMC_IOC_MAX_BYTES  (512L * 1024)
+>  #endif /* LINUX_MMC_IOCTL_H */
+> 
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+
