@@ -1,24 +1,29 @@
 From: Geert Uytterhoeven <geert@linux-m68k.org>
-Subject: Re: [PATCH 1/6] mmc: sh-mmcif: print bus clock rate on probe
-Date: Tue, 1 Apr 2014 12:45:04 +0200
-Message-ID: <CAMuHMdXSif2ZhiQphW0cMeuRgM7t6fWR2=JVqxL8QQX505wuwg@mail.gmail.com>
+Subject: Re: [PATCH 2/6] mmc: sh-mmcif: use devm_ for ioremap
+Date: Tue, 1 Apr 2014 12:55:11 +0200
+Message-ID: <CAMuHMdVB6ZB0rnH5ekRd=NCy3zbFSTf0BSH3J48yDhF2YbNoCA@mail.gmail.com>
 References: <1396347954-13740-1-git-send-email-ben.dooks@codethink.co.uk>
-	<1396347954-13740-2-git-send-email-ben.dooks@codethink.co.uk>
+	<1396347954-13740-3-git-send-email-ben.dooks@codethink.co.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <1396347954-13740-2-git-send-email-ben.dooks@codethink.co.uk>
+In-Reply-To: <1396347954-13740-3-git-send-email-ben.dooks@codethink.co.uk>
 Sender: linux-sh-owner@vger.kernel.org
 To: Ben Dooks <ben.dooks@codethink.co.uk>
 Cc: Linux MMC List <linux-mmc@vger.kernel.org>, Linux-sh list <linux-sh@vger.kernel.org>, Laurent Pinchart <laurent.pinchart@ideasonboard.com>, Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, magnus.damm@opensource.se, linux-kernel@lists.codethink.co.uk
 List-Id: linux-mmc@vger.kernel.org
 
 On Tue, Apr 1, 2014 at 12:25 PM, Ben Dooks <ben.dooks@codethink.co.uk> wrote:
-> -       dev_info(&pdev->dev, "driver version %s\n", DRIVER_VERSION);
-> +       dev_info(&pdev->dev, "driver version %s, clock rate %ldMHz\n",
-> +                DRIVER_VERSION, clk_get_rate(host->hclk) / 1000000);
+> +       reg = devm_ioremap_resource(&pdev->dev, res);
+> +       if (IS_ERR(reg)) {
+>                 dev_err(&pdev->dev, "ioremap error.\n");
 
-%lu (soon the clocks won't fit in unsigned 32-bit anymore, though...)
+devm_ioremap_resource() already calls dev_err() for the various error
+cases, so you can drop this line.
+
+>                 return -ENOMEM;
+
+return PTR_ERR(reg);
 
 Gr{oetje,eeting}s,
 
