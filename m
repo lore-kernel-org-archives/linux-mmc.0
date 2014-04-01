@@ -1,78 +1,88 @@
 From: Ben Dooks <ben.dooks@codethink.co.uk>
-Subject: [PATCH 2/6] mmc: sh-mmcif: use devm_ for ioremap
-Date: Tue,  1 Apr 2014 11:25:50 +0100
-Message-ID: <1396347954-13740-3-git-send-email-ben.dooks@codethink.co.uk>
+Subject: [PATCH 4/6] mmc: sh-mmcif: use devm_ for irq management
+Date: Tue,  1 Apr 2014 11:25:52 +0100
+Message-ID: <1396347954-13740-5-git-send-email-ben.dooks@codethink.co.uk>
 References: <1396347954-13740-1-git-send-email-ben.dooks@codethink.co.uk>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from ducie-dc1.codethink.co.uk ([185.25.241.215]:43726 "EHLO
-	ducie-dc1.codethink.co.uk" rhost-flags-OK-FAIL-OK-FAIL)
-	by vger.kernel.org with ESMTP id S1751118AbaDAK0D (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 1 Apr 2014 06:26:03 -0400
+Return-path: <linux-sh-owner@vger.kernel.org>
 In-Reply-To: <1396347954-13740-1-git-send-email-ben.dooks@codethink.co.uk>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Sender: linux-sh-owner@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 Cc: linux-sh@vger.kernel.org, Laurent Pinchart <laurent.pinchart@ideasonboard.com>, Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, magnus.damm@opensource.se, linux-kernel@lists.codethink.co.uk, Ben Dooks <ben.dooks@codethink.co.uk>
+List-Id: linux-mmc@vger.kernel.org
 
-Start tidying the probe/release code by using devm_ioremap_resource() to
-map the IO registers.
+Use devm_request_threaded_irq() for the host interrupt handlers so we
+do not have to worry about freeing them on exit or error. Tidies up the
+exit path code for the driver.
 
 Signed-off-by: Ben Dooks <ben.dooks@codethink.co.uk>
 ---
- drivers/mmc/host/sh_mmcif.c | 20 +++++---------------
- 1 file changed, 5 insertions(+), 15 deletions(-)
+ drivers/mmc/host/sh_mmcif.c | 26 ++++++++------------------
+ 1 file changed, 8 insertions(+), 18 deletions(-)
 
 diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
-index c48df98..be6be2b 100644
+index c006310..485db7b 100644
 --- a/drivers/mmc/host/sh_mmcif.c
 +++ b/drivers/mmc/host/sh_mmcif.c
-@@ -1379,22 +1379,17 @@ static int sh_mmcif_probe(struct platform_device *pdev)
- 		dev_err(&pdev->dev, "Get irq error\n");
- 		return -ENXIO;
+@@ -1443,17 +1443,19 @@ static int sh_mmcif_probe(struct platform_device *pdev)
+ 	sh_mmcif_writel(host->addr, MMCIF_CE_INT_MASK, MASK_ALL);
+ 
+ 	name = irq[1] < 0 ? dev_name(&pdev->dev) : "sh_mmc:error";
+-	ret = request_threaded_irq(irq[0], sh_mmcif_intr, sh_mmcif_irqt, 0, name, host);
++	ret = devm_request_threaded_irq(&pdev->dev, irq[0], sh_mmcif_intr,
++					sh_mmcif_irqt, 0, name, host);
+ 	if (ret) {
+ 		dev_err(&pdev->dev, "request_irq error (%s)\n", name);
+-		goto ereqirq0;
++		goto err_irq;
  	}
-+
- 	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
--	if (!res) {
--		dev_err(&pdev->dev, "platform_get_resource error.\n");
--		return -ENXIO;
--	}
--	reg = ioremap(res->start, resource_size(res));
--	if (!reg) {
-+	reg = devm_ioremap_resource(&pdev->dev, res);
-+	if (IS_ERR(reg)) {
- 		dev_err(&pdev->dev, "ioremap error.\n");
- 		return -ENOMEM;
+ 	if (irq[1] >= 0) {
+-		ret = request_threaded_irq(irq[1], sh_mmcif_intr, sh_mmcif_irqt,
+-					   0, "sh_mmc:int", host);
++		ret = devm_request_threaded_irq(&pdev->dev, irq[1],
++						sh_mmcif_intr, sh_mmcif_irqt,
++						0, "sh_mmc:int", host);
+ 		if (ret) {
+ 			dev_err(&pdev->dev, "request_irq error (sh_mmc:int)\n");
+-			goto ereqirq1;
++			goto err_irq;
+ 		}
  	}
  
- 	mmc = mmc_alloc_host(sizeof(struct sh_mmcif_host), &pdev->dev);
--	if (!mmc) {
--		ret = -ENOMEM;
--		goto ealloch;
--	}
-+	if (!mmc)
-+		return -ENOMEM;
+@@ -1480,11 +1482,7 @@ static int sh_mmcif_probe(struct platform_device *pdev)
  
- 	ret = mmc_of_parse(mmc);
- 	if (ret < 0)
-@@ -1499,8 +1494,6 @@ eclkget:
- 	pm_runtime_disable(&pdev->dev);
- eofparse:
- 	mmc_free_host(mmc);
--ealloch:
--	iounmap(reg);
- 	return ret;
- }
+ emmcaddh:
+ erqcd:
+-	if (irq[1] >= 0)
+-		free_irq(irq[1], host);
+-ereqirq1:
+-	free_irq(irq[0], host);
+-ereqirq0:
++err_irq:
+ 	pm_runtime_suspend(&pdev->dev);
+ err_clk:
+ 	clk_disable_unprepare(host->hclk);
+@@ -1498,7 +1496,6 @@ err_host:
+ static int sh_mmcif_remove(struct platform_device *pdev)
+ {
+ 	struct sh_mmcif_host *host = platform_get_drvdata(pdev);
+-	int irq[2];
  
-@@ -1525,9 +1518,6 @@ static int sh_mmcif_remove(struct platform_device *pdev)
+ 	host->dying = true;
+ 	clk_prepare_enable(host->hclk);
+@@ -1516,13 +1513,6 @@ static int sh_mmcif_remove(struct platform_device *pdev)
  	 */
  	cancel_delayed_work_sync(&host->timeout_work);
  
--	if (host->addr)
--		iounmap(host->addr);
+-	irq[0] = platform_get_irq(pdev, 0);
+-	irq[1] = platform_get_irq(pdev, 1);
 -
- 	irq[0] = platform_get_irq(pdev, 0);
- 	irq[1] = platform_get_irq(pdev, 1);
- 
+-	free_irq(irq[0], host);
+-	if (irq[1] >= 0)
+-		free_irq(irq[1], host);
+-
+ 	clk_disable_unprepare(host->hclk);
+ 	mmc_free_host(host->mmc);
+ 	pm_runtime_put_sync(&pdev->dev);
 -- 
 1.9.0
 
