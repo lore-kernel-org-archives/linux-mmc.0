@@ -1,54 +1,22 @@
 From: Ben Dooks <ben.dooks@codethink.co.uk>
-Subject: Re: [PATCH 1/6] mmc: sh-mmcif: print bus clock rate on probe
-Date: Tue, 01 Apr 2014 12:37:08 +0100
-Message-ID: <533AA4E4.5070805@codethink.co.uk>
-References: <1396347954-13740-1-git-send-email-ben.dooks@codethink.co.uk> <1396347954-13740-2-git-send-email-ben.dooks@codethink.co.uk> <5193000.YsnDiAM2O1@avalon>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <5193000.YsnDiAM2O1@avalon>
-Sender: linux-sh-owner@vger.kernel.org
-To: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
-Cc: linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, magnus.damm@opensource.se, linux-kernel@lists.codethink.co.uk
+Subject: sh mmcif cleanups
+Date: Tue,  1 Apr 2014 13:01:40 +0100
+Message-ID: <1396353706-31864-1-git-send-email-ben.dooks@codethink.co.uk>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from ducie-dc1.codethink.co.uk ([185.25.241.215]:47295 "EHLO
+	ducie-dc1.codethink.co.uk" rhost-flags-OK-FAIL-OK-FAIL)
+	by vger.kernel.org with ESMTP id S1751332AbaDAMBu (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 1 Apr 2014 08:01:50 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: linux-sh@vger.kernel.org, Laurent Pinchart <laurent.pinchart@ideasonboard.com>, Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, magnus.damm@opensource.se, linux-kernel@lists.codethink.co.uk
 
-On 01/04/14 12:08, Laurent Pinchart wrote:
-> Hi Ben,
->
-> Thank you for the patch.
->
-> On Tuesday 01 April 2014 11:25:49 Ben Dooks wrote:
->> Add a print to show the host-bus clock rate for mmcif on probe to allow
->> easy check on what clock rate the bus clock is at.
->>
->> Signed-off-by: Ben Dooks <ben.dooks@codethink.co.uk>
->> ---
->>   drivers/mmc/host/sh_mmcif.c | 3 ++-
->>   1 file changed, 2 insertions(+), 1 deletion(-)
->>
->> diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
->> index e8713d7..c48df98 100644
->> --- a/drivers/mmc/host/sh_mmcif.c
->> +++ b/drivers/mmc/host/sh_mmcif.c
->> @@ -1477,7 +1477,8 @@ static int sh_mmcif_probe(struct platform_device
->> *pdev)
->>
->>   	dev_pm_qos_expose_latency_limit(&pdev->dev, 100);
->>
->> -	dev_info(&pdev->dev, "driver version %s\n", DRIVER_VERSION);
->> +	dev_info(&pdev->dev, "driver version %s, clock rate %ldMHz\n",
->> +		 DRIVER_VERSION, clk_get_rate(host->hclk) / 1000000);
->>   	dev_dbg(&pdev->dev, "chip ver H'%04x\n",
->>   		sh_mmcif_readl(host->addr, MMCIF_CE_VERSION) & 0x0000ffff);
->>   	return ret;
->
-> Given that DRIVER_VERSION is defined as "2010-04-28", I'd take this as an
-> opportunity to remove it completely. You could combine the dev_info and
-> dev_dbg message into something similar to
+This is a second round of the mmcif cleanups
 
-Ok, changed to use this.
+Changes since v1:
 
--- 
-Ben Dooks				http://www.codethink.co.uk/
-Senior Engineer				Codethink - Providing Genius
+	- fix issues with devm_ioremap return, and error printing
+	- change the initial print
+	- fix issue with disabling clock
+
