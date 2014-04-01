@@ -1,37 +1,78 @@
 From: Ben Dooks <ben.dooks@codethink.co.uk>
-Subject: [PATCH 1/6] mmc: sh-mmcif: print bus clock rate on probe
-Date: Tue,  1 Apr 2014 11:25:49 +0100
-Message-ID: <1396347954-13740-2-git-send-email-ben.dooks@codethink.co.uk>
+Subject: [PATCH 2/6] mmc: sh-mmcif: use devm_ for ioremap
+Date: Tue,  1 Apr 2014 11:25:50 +0100
+Message-ID: <1396347954-13740-3-git-send-email-ben.dooks@codethink.co.uk>
 References: <1396347954-13740-1-git-send-email-ben.dooks@codethink.co.uk>
-Return-path: <linux-sh-owner@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from ducie-dc1.codethink.co.uk ([185.25.241.215]:43726 "EHLO
+	ducie-dc1.codethink.co.uk" rhost-flags-OK-FAIL-OK-FAIL)
+	by vger.kernel.org with ESMTP id S1751118AbaDAK0D (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 1 Apr 2014 06:26:03 -0400
 In-Reply-To: <1396347954-13740-1-git-send-email-ben.dooks@codethink.co.uk>
-Sender: linux-sh-owner@vger.kernel.org
+Sender: linux-mmc-owner@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 Cc: linux-sh@vger.kernel.org, Laurent Pinchart <laurent.pinchart@ideasonboard.com>, Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, magnus.damm@opensource.se, linux-kernel@lists.codethink.co.uk, Ben Dooks <ben.dooks@codethink.co.uk>
-List-Id: linux-mmc@vger.kernel.org
 
-Add a print to show the host-bus clock rate for mmcif on probe to allow
-easy check on what clock rate the bus clock is at.
+Start tidying the probe/release code by using devm_ioremap_resource() to
+map the IO registers.
 
 Signed-off-by: Ben Dooks <ben.dooks@codethink.co.uk>
 ---
- drivers/mmc/host/sh_mmcif.c | 3 ++-
- 1 file changed, 2 insertions(+), 1 deletion(-)
+ drivers/mmc/host/sh_mmcif.c | 20 +++++---------------
+ 1 file changed, 5 insertions(+), 15 deletions(-)
 
 diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
-index e8713d7..c48df98 100644
+index c48df98..be6be2b 100644
 --- a/drivers/mmc/host/sh_mmcif.c
 +++ b/drivers/mmc/host/sh_mmcif.c
-@@ -1477,7 +1477,8 @@ static int sh_mmcif_probe(struct platform_device *pdev)
+@@ -1379,22 +1379,17 @@ static int sh_mmcif_probe(struct platform_device *pdev)
+ 		dev_err(&pdev->dev, "Get irq error\n");
+ 		return -ENXIO;
+ 	}
++
+ 	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+-	if (!res) {
+-		dev_err(&pdev->dev, "platform_get_resource error.\n");
+-		return -ENXIO;
+-	}
+-	reg = ioremap(res->start, resource_size(res));
+-	if (!reg) {
++	reg = devm_ioremap_resource(&pdev->dev, res);
++	if (IS_ERR(reg)) {
+ 		dev_err(&pdev->dev, "ioremap error.\n");
+ 		return -ENOMEM;
+ 	}
  
- 	dev_pm_qos_expose_latency_limit(&pdev->dev, 100);
+ 	mmc = mmc_alloc_host(sizeof(struct sh_mmcif_host), &pdev->dev);
+-	if (!mmc) {
+-		ret = -ENOMEM;
+-		goto ealloch;
+-	}
++	if (!mmc)
++		return -ENOMEM;
  
--	dev_info(&pdev->dev, "driver version %s\n", DRIVER_VERSION);
-+	dev_info(&pdev->dev, "driver version %s, clock rate %ldMHz\n",
-+		 DRIVER_VERSION, clk_get_rate(host->hclk) / 1000000);
- 	dev_dbg(&pdev->dev, "chip ver H'%04x\n",
- 		sh_mmcif_readl(host->addr, MMCIF_CE_VERSION) & 0x0000ffff);
+ 	ret = mmc_of_parse(mmc);
+ 	if (ret < 0)
+@@ -1499,8 +1494,6 @@ eclkget:
+ 	pm_runtime_disable(&pdev->dev);
+ eofparse:
+ 	mmc_free_host(mmc);
+-ealloch:
+-	iounmap(reg);
  	return ret;
+ }
+ 
+@@ -1525,9 +1518,6 @@ static int sh_mmcif_remove(struct platform_device *pdev)
+ 	 */
+ 	cancel_delayed_work_sync(&host->timeout_work);
+ 
+-	if (host->addr)
+-		iounmap(host->addr);
+-
+ 	irq[0] = platform_get_irq(pdev, 0);
+ 	irq[1] = platform_get_irq(pdev, 1);
+ 
 -- 
 1.9.0
 
