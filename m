@@ -1,62 +1,77 @@
 From: Ben Dooks <ben.dooks@codethink.co.uk>
-Subject: [PATCH 6/6] mmc: sh-mmcif: final error path cleanup
-Date: Tue,  1 Apr 2014 11:25:54 +0100
-Message-ID: <1396347954-13740-7-git-send-email-ben.dooks@codethink.co.uk>
+Subject: [PATCH 3/6] mmc: sh-mmcif: use devm_ for clock management
+Date: Tue,  1 Apr 2014 11:25:51 +0100
+Message-ID: <1396347954-13740-4-git-send-email-ben.dooks@codethink.co.uk>
 References: <1396347954-13740-1-git-send-email-ben.dooks@codethink.co.uk>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from ducie-dc1.codethink.co.uk ([185.25.241.215]:43770 "EHLO
+Received: from ducie-dc1.codethink.co.uk ([185.25.241.215]:43744 "EHLO
 	ducie-dc1.codethink.co.uk" rhost-flags-OK-FAIL-OK-FAIL)
-	by vger.kernel.org with ESMTP id S1751240AbaDAK0I (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 1 Apr 2014 06:26:08 -0400
+	by vger.kernel.org with ESMTP id S1751240AbaDAK0F (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 1 Apr 2014 06:26:05 -0400
 In-Reply-To: <1396347954-13740-1-git-send-email-ben.dooks@codethink.co.uk>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 Cc: linux-sh@vger.kernel.org, Laurent Pinchart <laurent.pinchart@ideasonboard.com>, Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, magnus.damm@opensource.se, linux-kernel@lists.codethink.co.uk, Ben Dooks <ben.dooks@codethink.co.uk>
 
-Remove the error path items that are no longer needed. The mmc card-detect
-code cleans up after itself (and registers with devm) and the host error
-is the same as the clock disable.
-
-This should also fix a double call to clk_disable_unprepare() if the call
-to mmc_add_host() fails.
-
-Signed-off-by: Ben Dooks <ben.dooks@codethink.co.uk>
 ---
- drivers/mmc/host/sh_mmcif.c | 6 ++----
- 1 file changed, 2 insertions(+), 4 deletions(-)
+ drivers/mmc/host/sh_mmcif.c | 18 ++++++++----------
+ 1 file changed, 8 insertions(+), 10 deletions(-)
 
 diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
-index c951760..d63cfa7 100644
+index be6be2b..c006310 100644
 --- a/drivers/mmc/host/sh_mmcif.c
 +++ b/drivers/mmc/host/sh_mmcif.c
-@@ -1462,7 +1462,7 @@ static int sh_mmcif_probe(struct platform_device *pdev)
- 	if (pd && pd->use_cd_gpio) {
- 		ret = mmc_gpio_request_cd(mmc, pd->cd_gpio, 0);
- 		if (ret < 0)
--			goto erqcd;
-+			goto err_clk;
- 	}
+@@ -1393,7 +1393,7 @@ static int sh_mmcif_probe(struct platform_device *pdev)
  
- 	mutex_init(&host->thread_lock);
-@@ -1470,7 +1470,7 @@ static int sh_mmcif_probe(struct platform_device *pdev)
- 	clk_disable_unprepare(host->hclk);
- 	ret = mmc_add_host(mmc);
+ 	ret = mmc_of_parse(mmc);
  	if (ret < 0)
--		goto emmcaddh;
+-		goto eofparse;
++		goto err_host;
+ 
+ 	host		= mmc_priv(mmc);
+ 	host->mmc	= mmc;
+@@ -1423,19 +1423,19 @@ static int sh_mmcif_probe(struct platform_device *pdev)
+ 	pm_runtime_enable(&pdev->dev);
+ 	host->power = false;
+ 
+-	host->hclk = clk_get(&pdev->dev, NULL);
++	host->hclk = devm_clk_get(&pdev->dev, NULL);
+ 	if (IS_ERR(host->hclk)) {
+ 		ret = PTR_ERR(host->hclk);
+ 		dev_err(&pdev->dev, "cannot get clock: %d\n", ret);
+-		goto eclkget;
 +		goto err_pm;
+ 	}
+ 	ret = sh_mmcif_clk_update(host);
+ 	if (ret < 0)
+-		goto eclkupdate;
++		goto err_clk;
  
- 	dev_pm_qos_expose_latency_limit(&pdev->dev, 100);
+ 	ret = pm_runtime_resume(&pdev->dev);
+ 	if (ret < 0)
+-		goto eresume;
++		goto err_clk;
  
-@@ -1480,8 +1480,6 @@ static int sh_mmcif_probe(struct platform_device *pdev)
- 		sh_mmcif_readl(host->addr, MMCIF_CE_VERSION) & 0x0000ffff);
- 	return ret;
+ 	INIT_DELAYED_WORK(&host->timeout_work, mmcif_timeout_work);
  
--emmcaddh:
--erqcd:
- err_clk:
+@@ -1486,13 +1486,11 @@ ereqirq1:
+ 	free_irq(irq[0], host);
+ ereqirq0:
+ 	pm_runtime_suspend(&pdev->dev);
+-eresume:
++err_clk:
  	clk_disable_unprepare(host->hclk);
- err_pm:
+-eclkupdate:
+-	clk_put(host->hclk);
+-eclkget:
++err_pm:
+ 	pm_runtime_disable(&pdev->dev);
+-eofparse:
++err_host:
+ 	mmc_free_host(mmc);
+ 	return ret;
+ }
 -- 
 1.9.0
 
