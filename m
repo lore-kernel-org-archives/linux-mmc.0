@@ -1,8 +1,10 @@
 From: stefan-XLVq0VzYD2Y@public.gmane.org
-Subject: [RFC 0/2] fixed order for mmc devices/mmc block devices
-Date: Tue,  1 Apr 2014 22:35:50 +0200
-Message-ID: <cover.1396384101.git.stefan@agner.ch>
+Subject: [RFC 1/2] mmc: read mmc alias from device tree
+Date: Tue,  1 Apr 2014 22:35:51 +0200
+Message-ID: <5570bdf5ebb3aaae5a376634ecfbac9c2fd7b9f4.1396384101.git.stefan@agner.ch>
+References: <cover.1396384101.git.stefan@agner.ch>
 Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <cover.1396384101.git.stefan-XLVq0VzYD2Y@public.gmane.org>
 Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 To: chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 Cc: linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, stefan-XLVq0VzYD2Y@public.gmane.org
@@ -10,42 +12,65 @@ List-Id: linux-mmc@vger.kernel.org
 
 From: Stefan Agner <stefan-XLVq0VzYD2Y@public.gmane.org>
 
-Nowadays SoCs usually have multiple SD/MMC host adapters. Often
-the first is connected to an internal eMMC, however sometimes it
-is the second controller that is connected to the eMMC.
+To get the SD/MMC host device ID, read the alias from the device
+tree.
 
-If the second controller is connected to the eMMC, the number
-assigned to the eMMC block device varies depending on whether the
-external SD-Card is present or not.
-The boot device could be specified using partition UUIDs, but
-those can change when recreating the partition table. Especially
-for embedded devices it would be preferable to have a reliable
-assigned block device number.
+This is useful in case a SoC has multipe SD/MMC host controllers while
+the second controller should logically be the first device (e.g. if
+the second controller is connected to an internal eMMC). Combined
+with block device numbering using MMC/SD host device ID, this
+results in predictable name assignment of the internal eMMC block
+device.
 
-The first patch aims to give a way to specify the logical SD/MMC
-host order. This is achieved by extending the device tree using
-aliases:
+Signed-off-by: Stefan Agner <stefan-XLVq0VzYD2Y@public.gmane.org>
+---
+ drivers/mmc/core/host.c | 24 +++++++++++++++++++-----
+ 1 file changed, 19 insertions(+), 5 deletions(-)
 
-aliases {
-        mmc0 = "/sdhci@78000600";
-        mmc1 = "/sdhci@78000200";
-};
-
-The second patch then uses the SD/MMC host index as preferred id
-for the block device.
-
-In theory, one SD/MMC host could control multiple cards. For this
-case, this patch is somewhat ugly. It would only assign the first
-host/card combination with a predictable block number. However,
-for the case at hand this would be sufficient. 
-
-Stefan Agner (2):
-  mmc: read mmc alias from device tree
-  mmc: use SD/MMC host ID for block device name ID
-
- drivers/mmc/card/block.c |  3 ++-
- drivers/mmc/core/host.c  | 24 +++++++++++++++++++-----
- 2 files changed, 21 insertions(+), 6 deletions(-)
-
+diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+index 49bc403..29f44cf 100644
+--- a/drivers/mmc/core/host.c
++++ b/drivers/mmc/core/host.c
+@@ -448,8 +448,8 @@ EXPORT_SYMBOL(mmc_of_parse);
+  */
+ struct mmc_host *mmc_alloc_host(int extra, struct device *dev)
+ {
+-	int err;
+ 	struct mmc_host *host;
++	int of_id = -1, id = -1;
+ 
+ 	host = kzalloc(sizeof(struct mmc_host) + extra, GFP_KERNEL);
+ 	if (!host)
+@@ -459,12 +459,26 @@ struct mmc_host *mmc_alloc_host(int extra, struct device *dev)
+ 	host->rescan_disable = 1;
+ 	idr_preload(GFP_KERNEL);
+ 	spin_lock(&mmc_host_lock);
+-	err = idr_alloc(&mmc_host_idr, host, 0, 0, GFP_NOWAIT);
+-	if (err >= 0)
+-		host->index = err;
++
++	if (dev->of_node)
++		of_id = of_alias_get_id(dev->of_node, "mmc");
++
++	if (of_id >= 0) {
++		id = idr_alloc(&mmc_host_idr, host, of_id, of_id + 1,
++				GFP_NOWAIT);
++		if (id < 0)
++			dev_warn(dev, "/aliases ID %d not available\n", of_id);
++	}
++
++	if (id < 0)
++		id = idr_alloc(&mmc_host_idr, host, 0, 0, GFP_NOWAIT);
++
++	if (id >= 0)
++		host->index = id;
++
+ 	spin_unlock(&mmc_host_lock);
+ 	idr_preload_end();
+-	if (err < 0)
++	if (id < 0)
+ 		goto free;
+ 
+ 	dev_set_name(&host->class_dev, "mmc%d", host->index);
 -- 
 1.9.1
