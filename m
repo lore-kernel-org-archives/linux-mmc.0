@@ -1,7 +1,7 @@
 From: Ben Dooks <ben.dooks@codethink.co.uk>
-Subject: [PATCH v2 6/6] mmc: sh-mmcif: final error path cleanup
-Date: Tue,  1 Apr 2014 13:01:46 +0100
-Message-ID: <1396353706-31864-7-git-send-email-ben.dooks@codethink.co.uk>
+Subject: [PATCH v2 3/6] mmc: sh-mmcif: use devm_ for clock management
+Date: Tue,  1 Apr 2014 13:01:43 +0100
+Message-ID: <1396353706-31864-4-git-send-email-ben.dooks@codethink.co.uk>
 References: <1396353706-31864-1-git-send-email-ben.dooks@codethink.co.uk>
 Return-path: <linux-sh-owner@vger.kernel.org>
 In-Reply-To: <1396353706-31864-1-git-send-email-ben.dooks@codethink.co.uk>
@@ -10,45 +10,68 @@ To: linux-mmc@vger.kernel.org
 Cc: linux-sh@vger.kernel.org, Laurent Pinchart <laurent.pinchart@ideasonboard.com>, Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, magnus.damm@opensource.se, linux-kernel@lists.codethink.co.uk, Ben Dooks <ben.dooks@codethink.co.uk>
 List-Id: linux-mmc@vger.kernel.org
 
-Remove the error path items that are no longer needed. The mmc card-detect
-code cleans up after itself (and registers with devm) and the host error
-is the same as the clock disable.
+Use the devm_clk_get() code to get the clock and allow it to be freed
+automatically on release.
 
 Signed-off-by: Ben Dooks <ben.dooks@codethink.co.uk>
 ---
- drivers/mmc/host/sh_mmcif.c | 6 ++----
- 1 file changed, 2 insertions(+), 4 deletions(-)
+ drivers/mmc/host/sh_mmcif.c | 18 ++++++++----------
+ 1 file changed, 8 insertions(+), 10 deletions(-)
 
 diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
-index 33f2365..efe997f 100644
+index bb8e4e6..fbd7364 100644
 --- a/drivers/mmc/host/sh_mmcif.c
 +++ b/drivers/mmc/host/sh_mmcif.c
-@@ -1460,14 +1460,14 @@ static int sh_mmcif_probe(struct platform_device *pdev)
- 	if (pd && pd->use_cd_gpio) {
- 		ret = mmc_gpio_request_cd(mmc, pd->cd_gpio, 0);
- 		if (ret < 0)
--			goto erqcd;
-+			goto err_clk;
- 	}
+@@ -1391,7 +1391,7 @@ static int sh_mmcif_probe(struct platform_device *pdev)
  
- 	mutex_init(&host->thread_lock);
- 
- 	ret = mmc_add_host(mmc);
+ 	ret = mmc_of_parse(mmc);
  	if (ret < 0)
--		goto emmcaddh;
+-		goto eofparse;
++		goto err_host;
+ 
+ 	host		= mmc_priv(mmc);
+ 	host->mmc	= mmc;
+@@ -1421,19 +1421,19 @@ static int sh_mmcif_probe(struct platform_device *pdev)
+ 	pm_runtime_enable(&pdev->dev);
+ 	host->power = false;
+ 
+-	host->hclk = clk_get(&pdev->dev, NULL);
++	host->hclk = devm_clk_get(&pdev->dev, NULL);
+ 	if (IS_ERR(host->hclk)) {
+ 		ret = PTR_ERR(host->hclk);
+ 		dev_err(&pdev->dev, "cannot get clock: %d\n", ret);
+-		goto eclkget;
++		goto err_pm;
+ 	}
+ 	ret = sh_mmcif_clk_update(host);
+ 	if (ret < 0)
+-		goto eclkupdate;
++		goto err_pm;
+ 
+ 	ret = pm_runtime_resume(&pdev->dev);
+ 	if (ret < 0)
+-		goto eresume;
 +		goto err_clk;
  
- 	dev_pm_qos_expose_latency_limit(&pdev->dev, 100);
+ 	INIT_DELAYED_WORK(&host->timeout_work, mmcif_timeout_work);
  
-@@ -1478,8 +1478,6 @@ static int sh_mmcif_probe(struct platform_device *pdev)
+@@ -1484,13 +1484,11 @@ ereqirq1:
+ 	free_irq(irq[0], host);
+ ereqirq0:
+ 	pm_runtime_suspend(&pdev->dev);
+-eresume:
++err_clk:
  	clk_disable_unprepare(host->hclk);
+-eclkupdate:
+-	clk_put(host->hclk);
+-eclkget:
++err_pm:
+ 	pm_runtime_disable(&pdev->dev);
+-eofparse:
++err_host:
+ 	mmc_free_host(mmc);
  	return ret;
- 
--emmcaddh:
--erqcd:
- err_clk:
- 	clk_disable_unprepare(host->hclk);
- err_pm:
+ }
 -- 
 1.9.0
 
