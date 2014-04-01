@@ -1,66 +1,57 @@
-From: Geert Uytterhoeven <geert@linux-m68k.org>
-Subject: Re: [PATCH 3/6] mmc: sh-mmcif: use devm_ for clock management
-Date: Tue, 1 Apr 2014 12:59:24 +0200
-Message-ID: <CAMuHMdU4mcz1u0ghpWduuh1LzsbHGxu7ZkuXses4170rz=g3Sw@mail.gmail.com>
-References: <1396347954-13740-1-git-send-email-ben.dooks@codethink.co.uk>
-	<1396347954-13740-4-git-send-email-ben.dooks@codethink.co.uk>
+From: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
+Subject: Re: [PATCH 1/6] mmc: sh-mmcif: print bus clock rate on probe
+Date: Tue, 01 Apr 2014 13:08:01 +0200
+Message-ID: <5193000.YsnDiAM2O1@avalon>
+References: <1396347954-13740-1-git-send-email-ben.dooks@codethink.co.uk> <1396347954-13740-2-git-send-email-ben.dooks@codethink.co.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7Bit
 Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <1396347954-13740-4-git-send-email-ben.dooks@codethink.co.uk>
+In-Reply-To: <1396347954-13740-2-git-send-email-ben.dooks@codethink.co.uk>
 Sender: linux-sh-owner@vger.kernel.org
 To: Ben Dooks <ben.dooks@codethink.co.uk>
-Cc: Linux MMC List <linux-mmc@vger.kernel.org>, Linux-sh list <linux-sh@vger.kernel.org>, Laurent Pinchart <laurent.pinchart@ideasonboard.com>, Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, magnus.damm@opensource.se, linux-kernel@lists.codethink.co.uk
+Cc: linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, magnus.damm@opensource.se, linux-kernel@lists.codethink.co.uk
 List-Id: linux-mmc@vger.kernel.org
 
-On Tue, Apr 1, 2014 at 12:25 PM, Ben Dooks <ben.dooks@codethink.co.uk> wrote:
-> -       host->hclk = clk_get(&pdev->dev, NULL);
-> +       host->hclk = devm_clk_get(&pdev->dev, NULL);
->         if (IS_ERR(host->hclk)) {
->                 ret = PTR_ERR(host->hclk);
->                 dev_err(&pdev->dev, "cannot get clock: %d\n", ret);
-> -               goto eclkget;
-> +               goto err_pm;
->         }
->         ret = sh_mmcif_clk_update(host);
->         if (ret < 0)
-> -               goto eclkupdate;
-> +               goto err_clk;
+Hi Ben,
 
-This goto doesn't look correct to me. If sh_mmcif_clk_update() failed,
-the clock was not enabled nor prepared. "goto err_pm"?
+Thank you for the patch.
 
->         ret = pm_runtime_resume(&pdev->dev);
->         if (ret < 0)
-> -               goto eresume;
-> +               goto err_clk;
->
->         INIT_DELAYED_WORK(&host->timeout_work, mmcif_timeout_work);
->
-> @@ -1486,13 +1486,11 @@ ereqirq1:
->         free_irq(irq[0], host);
->  ereqirq0:
->         pm_runtime_suspend(&pdev->dev);
-> -eresume:
-> +err_clk:
->         clk_disable_unprepare(host->hclk);
-> -eclkupdate:
-> -       clk_put(host->hclk);
-> -eclkget:
-> +err_pm:
->         pm_runtime_disable(&pdev->dev);
-> -eofparse:
-> +err_host:
->         mmc_free_host(mmc);
->         return ret;
+On Tuesday 01 April 2014 11:25:49 Ben Dooks wrote:
+> Add a print to show the host-bus clock rate for mmcif on probe to allow
+> easy check on what clock rate the bus clock is at.
+> 
+> Signed-off-by: Ben Dooks <ben.dooks@codethink.co.uk>
+> ---
+>  drivers/mmc/host/sh_mmcif.c | 3 ++-
+>  1 file changed, 2 insertions(+), 1 deletion(-)
+> 
+> diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
+> index e8713d7..c48df98 100644
+> --- a/drivers/mmc/host/sh_mmcif.c
+> +++ b/drivers/mmc/host/sh_mmcif.c
+> @@ -1477,7 +1477,8 @@ static int sh_mmcif_probe(struct platform_device
+> *pdev)
+> 
+>  	dev_pm_qos_expose_latency_limit(&pdev->dev, 100);
+> 
+> -	dev_info(&pdev->dev, "driver version %s\n", DRIVER_VERSION);
+> +	dev_info(&pdev->dev, "driver version %s, clock rate %ldMHz\n",
+> +		 DRIVER_VERSION, clk_get_rate(host->hclk) / 1000000);
+>  	dev_dbg(&pdev->dev, "chip ver H'%04x\n",
+>  		sh_mmcif_readl(host->addr, MMCIF_CE_VERSION) & 0x0000ffff);
+>  	return ret;
 
-Gr{oetje,eeting}s,
+Given that DRIVER_VERSION is defined as "2010-04-28", I'd take this as an 
+opportunity to remove it completely. You could combine the dev_info and 
+dev_dbg message into something similar to
 
-                        Geert
+	dev_info(&pdev->dev, "Chip version 0x%04x found, clock rate %luMHz\n",
+		 sh_mmcif_readl(host->addr, MMCIF_CE_VERSION) & 0xffff,
+ 		 clk_get_rate(host->hclk) / 1000000);
 
---
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
+-- 
+Regards,
 
-In personal conversations with technical people, I call myself a hacker. But
-when I'm talking to journalists I just say "programmer" or something like that.
-                                -- Linus Torvalds
+Laurent Pinchart
+
