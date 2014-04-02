@@ -1,57 +1,34 @@
-From: Lee Jones <lee.jones@linaro.org>
-Subject: Re: [PATCH v5 3/3] memstick: Add realtek USB memstick host driver
-Date: Wed, 2 Apr 2014 16:16:54 +0100
-Message-ID: <20140402151654.GA24060@lee--X1>
-References: <1395744293-24398-1-git-send-email-rogerable@realtek.com>
- <1395744293-24398-4-git-send-email-rogerable@realtek.com>
- <533A3080.2020008@realtek.com>
- <20140401150654.fe27636428a62fdf9e0d2dc1@linux-foundation.org>
+From: Axel Lin <axel.lin@ingics.com>
+Subject: Re: [PATCH v2 1/2] regulator: pbias: Fix is_enabled callback implementation
+Date: Wed, 2 Apr 2014 08:26:18 +0800
+Message-ID: <CAFRkauBA0XPQvoqsUkUwHksf4WbEGi=2Ekm-AY82SNmegHDsrg@mail.gmail.com>
+References: <1394250929.3892.1.camel@phoenix>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
-Content-Disposition: inline
-In-Reply-To: <20140401150654.fe27636428a62fdf9e0d2dc1@linux-foundation.org>
-List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
-List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel>
-List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
-List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
-List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
-Errors-To: driverdev-devel-bounces@linuxdriverproject.org
-Sender: driverdev-devel-bounces@linuxdriverproject.org
-To: Andrew Morton <akpm@linux-foundation.org>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Maxim Levitsky <maximlevitsky@gmail.com>, Alex Dubov <oakad@yahoo.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, driverdev-devel@linuxdriverproject.org, linux-mmc@vger.kernel.org, Chris Ball <chris@printf.net>, linux-kernel@vger.kernel.org, wei_wang@realsil.com.cn, Roger <rogerable@realtek.com>, Dan Carpenter <dan.carpenter@oracle.com>, Samuel Ortiz <sameo@linux.intel.com>
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qa0-f54.google.com ([209.85.216.54]:50762 "EHLO
+	mail-qa0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751738AbaDBA0T (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 1 Apr 2014 20:26:19 -0400
+Received: by mail-qa0-f54.google.com with SMTP id w8so10215555qac.41
+        for <linux-mmc@vger.kernel.org>; Tue, 01 Apr 2014 17:26:18 -0700 (PDT)
+In-Reply-To: <1394250929.3892.1.camel@phoenix>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Chris Ball <chris@printf.net>
+Cc: Liam Girdwood <lgirdwood@gmail.com>, Mark Brown <broonie@kernel.org>, Balaji T K <balajitk@ti.com>, Florian Vaussard <florian.vaussard@epfl.ch>, Stefan Roese <sr@denx.de>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-mmc@vger.kernel.org
 
-T24gVHVlLCAwMSBBcHIgMjAxNCwgQW5kcmV3IE1vcnRvbiB3cm90ZToKCj4gT24gVHVlLCAxIEFw
-ciAyMDE0IDExOjIwOjMyICswODAwIFJvZ2VyIDxyb2dlcmFibGVAcmVhbHRlay5jb20+IHdyb3Rl
-Ogo+IAo+ID4gT24gMDMvMjUvMjAxNCAwNjo0NCBQTSwgcm9nZXJhYmxlQHJlYWx0ZWsuY29tIHdy
-b3RlOgo+ID4gPiBGcm9tOiBSb2dlciBUc2VuZyA8cm9nZXJhYmxlQHJlYWx0ZWsuY29tPgo+ID4g
-Pgo+ID4gPiBSZWFsdGVrIFVTQiBtZW1zdGljayBob3N0IGRyaXZlciBwcm92aWRlcyBtZW1zdGlj
-ayBob3N0IHN1cHBvcnQgYmFzZWQgb24gdGhlCj4gPiA+IFJlYWx0ZWsgVVNCIGNhcmQgcmVhZGVy
-IE1GRCBkcml2ZXIuCj4gPiA+Cj4gPiA+IFNpZ25lZC1vZmYtYnk6IFJvZ2VyIFRzZW5nIDxyb2dl
-cmFibGVAcmVhbHRlay5jb20+Cj4gPiA+IC0tLQo+ID4gPiAgIGRyaXZlcnMvbWVtc3RpY2svaG9z
-dC9LY29uZmlnICAgICAgIHwgIDEwICsKPiA+ID4gICBkcml2ZXJzL21lbXN0aWNrL2hvc3QvTWFr
-ZWZpbGUgICAgICB8ICAgMSArCj4gPiA+ICAgZHJpdmVycy9tZW1zdGljay9ob3N0L3J0c3hfdXNi
-X21zLmMgfCA4MzkgKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrCj4gPiA+ICAg
-MyBmaWxlcyBjaGFuZ2VkLCA4NTAgaW5zZXJ0aW9ucygrKQo+ID4gPiAgIGNyZWF0ZSBtb2RlIDEw
-MDY0NCBkcml2ZXJzL21lbXN0aWNrL2hvc3QvcnRzeF91c2JfbXMuYwo+ID4gSGkgQW5kcmV3LAo+
-ID4gCj4gPiBTaW5jZSBJJ2xsIGhhdmUgdG8gc2VuZCBuZXh0IHJldmlzaW9uKHY2LCB0byBtb2Rp
-ZnkgcGF0Y2ggMS8zKSBhbmQgCj4gPiB5b3UndmUgY29tbWVudGVkIHY0LCB3b3VsZCB5b3UgYWxz
-byBjb21tZW50IG9yIEFjayB0aGUgMy8zIG9mIHRoaXMgb25lPyAKPiA+IFRoaXMgc2hvdWxkIHNh
-dmUgb25lIHJldmlzaW9uIGZvciBtZSB0byBtYWtlIGFueSBuZWNlc3NhcnkgY2hhbmdlLgo+IAo+
-IEl0IGxvb2tzIE9LIHRvIG15IGluZXhwZXJ0IGV5ZS4gIEl0IHdvdWxkIGJlIGJldHRlciBpZiBN
-YXhpbSBhbmQvb3IgQWxleAo+IGNvdWxkIHJldmlldyB0aGUgY29kZS4gIElmIHRoYXQgZG9lc24n
-dCBoYXBwZW4gdGhlbiBJIGd1ZXNzIHRoZSBiZXN0IHdlCj4gY2FuIGRvIGlzIHRvIGdvIGFoZWFk
-IGFuZCBtZXJnZSBpdC4gIEhhdmUgeW91IHdvcmtlZCBvdXQgdmlhIHdoaWNoIHRyZWUKPiB0aGUg
-cGF0Y2hlcyB3aWxsIGJlIG1lcmdlZD8KCkknbGwgYmUgaGFwcHkgdG8gdGFrZSB0aGUgc2V0IGlm
-IG9uZSBvZiB0aGUgc3Vic3lzdGVtIGV4cGVydHMgd291bGQgYmUKa2luZCBlbm91Z2ggdG8gY2Fz
-dCBhbiBleWUgb3ZlciBpdC4KCk1heGltLCBBbGV4PwoKLS0gCkxlZSBKb25lcwpMaW5hcm8gU1RN
-aWNyb2VsZWN0cm9uaWNzIExhbmRpbmcgVGVhbSBMZWFkCkxpbmFyby5vcmcg4pSCIE9wZW4gc291
-cmNlIHNvZnR3YXJlIGZvciBBUk0gU29DcwpGb2xsb3cgTGluYXJvOiBGYWNlYm9vayB8IFR3aXR0
-ZXIgfCBCbG9nCl9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-CmRldmVsIG1haWxpbmcgbGlzdApkZXZlbEBsaW51eGRyaXZlcnByb2plY3Qub3JnCmh0dHA6Ly9k
-cml2ZXJkZXYubGludXhkcml2ZXJwcm9qZWN0Lm9yZy9tYWlsbWFuL2xpc3RpbmZvL2RyaXZlcmRl
-di1kZXZlbAo=
+2014-03-08 11:55 GMT+08:00 Axel Lin <axel.lin@ingics.com>:
+> The is_enabled implementation is wrong in some cases:
+> e.g. for pbias_mmc_omap5: enable_mask is : BIT(27) | BIT(25) | BIT(26)
+> However, pbias_regulator_enable() only sets BIT(27) | BIT(26) bits.
+> So is_enabled callback will always return false in this case.
+> Fix the logic to compare the register value with info->enable rather than
+> info->enable_mask.
+>
+
+Hi Chris,
+Would you pick up this patch serial?
+
+Regards,
+Axel
