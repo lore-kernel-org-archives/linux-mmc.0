@@ -1,102 +1,194 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
+From: Stefan Wahren <stefan.wahren@i2se.com>
 Subject: Re: [PATCH] mmc: core: Use maximum timeout values in case TACC field
  is zero
-Date: Wed, 2 Apr 2014 13:25:15 +0200
-Message-ID: <CAPDyKFq96P_zYcrPxsj9UHeFnY6Cjt=Euf=kUsZbM-8r2shBsw@mail.gmail.com>
-References: <1395934368-29207-1-git-send-email-stefan.wahren@i2se.com>
+Date: Wed, 02 Apr 2014 17:36:45 +0200
+Message-ID: <533C2E8D.60309@i2se.com>
+References: <1395934368-29207-1-git-send-email-stefan.wahren@i2se.com> <CAPDyKFq96P_zYcrPxsj9UHeFnY6Cjt=Euf=kUsZbM-8r2shBsw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qc0-f179.google.com ([209.85.216.179]:54098 "EHLO
-	mail-qc0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1758226AbaDBLZQ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 2 Apr 2014 07:25:16 -0400
-Received: by mail-qc0-f179.google.com with SMTP id m20so37285qcx.38
-        for <linux-mmc@vger.kernel.org>; Wed, 02 Apr 2014 04:25:15 -0700 (PDT)
-In-Reply-To: <1395934368-29207-1-git-send-email-stefan.wahren@i2se.com>
+Received: from moutng.kundenserver.de ([212.227.126.131]:58198 "EHLO
+	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1758579AbaDBPhN (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 2 Apr 2014 11:37:13 -0400
+In-Reply-To: <CAPDyKFq96P_zYcrPxsj9UHeFnY6Cjt=Euf=kUsZbM-8r2shBsw@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Stefan Wahren <stefan.wahren@i2se.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: Fabio Estevam <fabio.estevam@freescale.com>, Chris Ball <chris@printf.net>, otavio@ossystems.com.br, Peter.Chen@freescale.com, Kernel@pengutronix.de, linux-mmc <linux-mmc@vger.kernel.org>
 
-On 27 March 2014 16:32, Stefan Wahren <stefan.wahren@i2se.com> wrote:
-> When plugging a specific micro SD card at MMC socket of a custom i.MX28 board,
-> we get the following kernel warning:
->
-> WARNING: CPU: 0 PID: 30 at drivers/mmc/host/mxs-mmc.c:342 mxs_mmc_start_cmd+0x34c/0x378()
-> Modules linked in:
-> CPU: 0 PID: 30 Comm: kworker/u2:1 Not tainted 3.14.0-rc5 #8
-> Workqueue: kmmcd mmc_rescan
-> [<c0015420>] (unwind_backtrace) from [<c0012cb0>] (show_stack+0x10/0x14)
-> [<c0012cb0>] (show_stack) from [<c001daf8>] (warn_slowpath_common+0x6c/0x8c)
-> [<c001daf8>] (warn_slowpath_common) from [<c001db34>] (warn_slowpath_null+0x1c/0x24)
-> [<c001db34>] (warn_slowpath_null) from [<c0349478>] (mxs_mmc_start_cmd+0x34c/0x378)
-> [<c0349478>] (mxs_mmc_start_cmd) from [<c0338fa0>] (mmc_start_request+0xc4/0xf4)
-> [<c0338fa0>] (mmc_start_request) from [<c03390b4>] (mmc_wait_for_req+0x50/0x164)
-> [<c03390b4>] (mmc_wait_for_req) from [<c03405b8>] (mmc_app_send_scr+0x158/0x1c8)
-> [<c03405b8>] (mmc_app_send_scr) from [<c033ee1c>] (mmc_sd_setup_card+0x80/0x3c8)
-> [<c033ee1c>] (mmc_sd_setup_card) from [<c033f788>] (mmc_sd_init_card+0x124/0x66c)
-> [<c033f788>] (mmc_sd_init_card) from [<c033fd7c>] (mmc_attach_sd+0xac/0x174)
-> [<c033fd7c>] (mmc_attach_sd) from [<c033a658>] (mmc_rescan+0x25c/0x2d8)
-> [<c033a658>] (mmc_rescan) from [<c003597c>] (process_one_work+0x1b4/0x4ec)
-> [<c003597c>] (process_one_work) from [<c0035de4>] (worker_thread+0x130/0x464)
-> [<c0035de4>] (worker_thread) from [<c003c824>] (kthread+0xb4/0xd0)
-> [<c003c824>] (kthread) from [<c000f420>] (ret_from_fork+0x14/0x34)
->
-> The error is due to an invalid value in CSD register of a specific 2GB micro
-> SD card. The CSD version of this card is 1.0 but the TACC field has the invalid
-> value 0. Since the kernel is making use of this TACC field to calculate the
-> SD card timeout, an invalid value 0 leads to a warning at mxs_ns_to_ssp_ticks()
-> and later the following misleading error messages appears in a loop:
->
-> mxs-mmc 80010000.ssp: card claims to support voltages below defined range
-> mxs-mmc 80010000.ssp: no support for card's volts
-> mmc0: error -22 whilst initialising MMC card
->
-> This error is only found on this 2GB SD card on mxs platform.
-> On x86 this card works without any problems.
->
-> The following patch based on the work of Peter Chen and Otavio Salvador. It
-> catches the case that the determined timeout is still 0 and set it's to a
-> valid value.
->
-> Successful tested on a i.MX28 board.
->
-> Signed-off-by: Stefan Wahren <stefan.wahren@i2se.com>
-> ---
->  drivers/mmc/core/core.c |    4 ++++
->  1 file changed, 4 insertions(+)
->
-> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> index 098374b..a9cd996 100644
-> --- a/drivers/mmc/core/core.c
-> +++ b/drivers/mmc/core/core.c
-> @@ -815,6 +815,10 @@ void mmc_set_data_timeout(struct mmc_data *data, const struct mmc_card *card)
->                         data->timeout_ns = limit_us * 1000;
->                         data->timeout_clks = 0;
->                 }
-> +
-> +               /* assign limit value if invalid */
-> +               if (data->timeout_ns == 0)
+Hi Ulf,
 
-Shouldn't you be checking the local variable "timeout_us" instead?
-Or are you saying that tacc_clks is correct for this SD card but not tacc_ns?
+Am 02.04.2014 13:25, schrieb Ulf Hansson:
+> On 27 March 2014 16:32, Stefan Wahren <stefan.wahren@i2se.com> wrote:
+>> When plugging a specific micro SD card at MMC socket of a custom i.M=
+X28 board,
+>> we get the following kernel warning:
+>>
+>> WARNING: CPU: 0 PID: 30 at drivers/mmc/host/mxs-mmc.c:342 mxs_mmc_st=
+art_cmd+0x34c/0x378()
+>> Modules linked in:
+>> CPU: 0 PID: 30 Comm: kworker/u2:1 Not tainted 3.14.0-rc5 #8
+>> Workqueue: kmmcd mmc_rescan
+>> [<c0015420>] (unwind_backtrace) from [<c0012cb0>] (show_stack+0x10/0=
+x14)
+>> [<c0012cb0>] (show_stack) from [<c001daf8>] (warn_slowpath_common+0x=
+6c/0x8c)
+>> [<c001daf8>] (warn_slowpath_common) from [<c001db34>] (warn_slowpath=
+_null+0x1c/0x24)
+>> [<c001db34>] (warn_slowpath_null) from [<c0349478>] (mxs_mmc_start_c=
+md+0x34c/0x378)
+>> [<c0349478>] (mxs_mmc_start_cmd) from [<c0338fa0>] (mmc_start_reques=
+t+0xc4/0xf4)
+>> [<c0338fa0>] (mmc_start_request) from [<c03390b4>] (mmc_wait_for_req=
++0x50/0x164)
+>> [<c03390b4>] (mmc_wait_for_req) from [<c03405b8>] (mmc_app_send_scr+=
+0x158/0x1c8)
+>> [<c03405b8>] (mmc_app_send_scr) from [<c033ee1c>] (mmc_sd_setup_card=
++0x80/0x3c8)
+>> [<c033ee1c>] (mmc_sd_setup_card) from [<c033f788>] (mmc_sd_init_card=
++0x124/0x66c)
+>> [<c033f788>] (mmc_sd_init_card) from [<c033fd7c>] (mmc_attach_sd+0xa=
+c/0x174)
+>> [<c033fd7c>] (mmc_attach_sd) from [<c033a658>] (mmc_rescan+0x25c/0x2=
+d8)
+>> [<c033a658>] (mmc_rescan) from [<c003597c>] (process_one_work+0x1b4/=
+0x4ec)
+>> [<c003597c>] (process_one_work) from [<c0035de4>] (worker_thread+0x1=
+30/0x464)
+>> [<c0035de4>] (worker_thread) from [<c003c824>] (kthread+0xb4/0xd0)
+>> [<c003c824>] (kthread) from [<c000f420>] (ret_from_fork+0x14/0x34)
+>>
+>> The error is due to an invalid value in CSD register of a specific 2=
+GB micro
+>> SD card. The CSD version of this card is 1.0 but the TACC field has =
+the invalid
+>> value 0. Since the kernel is making use of this TACC field to calcul=
+ate the
+>> SD card timeout, an invalid value 0 leads to a warning at mxs_ns_to_=
+ssp_ticks()
+>> and later the following misleading error messages appears in a loop:
+>>
+>> mxs-mmc 80010000.ssp: card claims to support voltages below defined =
+range
+>> mxs-mmc 80010000.ssp: no support for card's volts
+>> mmc0: error -22 whilst initialising MMC card
+>>
+>> This error is only found on this 2GB SD card on mxs platform.
+>> On x86 this card works without any problems.
+>>
+>> The following patch based on the work of Peter Chen and Otavio Salva=
+dor. It
+>> catches the case that the determined timeout is still 0 and set it's=
+ to a
+>> valid value.
+>>
+>> Successful tested on a i.MX28 board.
+>>
+>> Signed-off-by: Stefan Wahren <stefan.wahren@i2se.com>
+>> ---
+>>  drivers/mmc/core/core.c |    4 ++++
+>>  1 file changed, 4 insertions(+)
+>>
+>> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+>> index 098374b..a9cd996 100644
+>> --- a/drivers/mmc/core/core.c
+>> +++ b/drivers/mmc/core/core.c
+>> @@ -815,6 +815,10 @@ void mmc_set_data_timeout(struct mmc_data *data=
+, const struct mmc_card *card)
+>>                         data->timeout_ns =3D limit_us * 1000;
+>>                         data->timeout_clks =3D 0;
+>>                 }
+>> +
+>> +               /* assign limit value if invalid */
+>> +               if (data->timeout_ns =3D=3D 0)
+> Shouldn't you be checking the local variable "timeout_us" instead?
 
-We also have MMC_QUIRK_LONG_READ_TIME. Inventing one for WRITE as well
-and then add this card for both quirks is another option to solve the
-problem. Not sure which one I prefer yet. :-)
+you're right.
 
-Kind regards
-Ulf Hansson
+> Or are you saying that tacc_clks is correct for this SD card but not =
+tacc_ns?
 
-> +                       data->timeout_ns = limit_us * 1000;
->         }
+No, like many other of the fields they are zero (here is a dump with
+this specific sd card):
+
+root@duckbill:/sys/class/block/mmcblk0/device# grep "" * 2>/dev/null
+cid:0000005553442020000000000000583f
+csd:00000032535a83bfedb7ffbf1680003f
+date:08/2005
+erase_size:512
+fwrev:0x0
+hwrev:0x0
+manfid:0x000000
+name:USD
+oemid:0x0000
+preferred_erase_size:4194304
+scr:0225000000000000
+serial:0x00000000
+type:SD
+uevent:DRIVER=3Dmmcblk
+uevent:MMC_TYPE=3DSD
+uevent:MMC_NAME=3DUSD
+uevent:MODALIAS=3Dmmc:block
+
+May be this has an influence on your preferred option.
+
+Thanks for your feedback.
+
+Best regards
+Stefan Wahren
+
 >
->         /*
+> We also have MMC_QUIRK_LONG_READ_TIME. Inventing one for WRITE as wel=
+l
+> and then add this card for both quirks is another option to solve the
+> problem. Not sure which one I prefer yet. :-)
+>
+> Kind regards
+> Ulf Hansson
+>
+>> +                       data->timeout_ns =3D limit_us * 1000;
+>>         }
+>>
+>>         /*
+>> --
+>> 1.7.10.4
+>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe linux-mmc"=
+ in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 > --
-> 1.7.10.4
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" =
+in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+
+--=20
+Software-Entwickler / software developer
+
+I2SE GmbH                           Tel: +49 (0) 341 355667-00
+=46riedrich-Ebert-Str. 61             Fax: +49 (0) 341 355667-02
+04109 Leipzig
+Germany
+Web: http://www.i2se.com/           Mail: info@i2se.com
+VAT No.: DE 811528334
+Amtsgericht Leipzig HRB 23784
+Gesch=E4ftsf=FChrer/CEO: Carsten Ziermann
+
+*** Diese E-Mail ist allein f=FCr den bezeichneten Adressaten bestimmt.=
+ Sie kann rechtlich vertrauliche Informationen enthalten. Wenn Sie dies=
+e E-Mail irrt=FCmlich erhalten haben, informieren Sie bitte unverz=FCgl=
+ich den Absender per E-Mail und l=F6schen Sie diese E-Mail von Ihrem Co=
+mputer, ohne Kopien anzufertigen.
+Vielen Dank. ***
+
+*** This email is for the exclusive use of the addressee. It may contai=
+n legally privileged information. If you have received this message in =
+error, please notify the sender by email immediately and delete the mes=
+sage from your computer without making any copies.
+Thank you. ***
+
