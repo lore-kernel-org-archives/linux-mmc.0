@@ -1,253 +1,299 @@
 From: Alex Lemberg <Alex.Lemberg@sandisk.com>
 Subject: RE: [RFC PATCH 1/1 ]mmc: Support-FFU-for-eMMC-v5.0
-Date: Thu, 3 Apr 2014 12:54:23 +0000
-Message-ID: <282CEDFCBC30114F83C499CB8F2ED53337EB7426@SACMBXIP02.sdcorp.global.sandisk.com>
+Date: Thu, 3 Apr 2014 14:18:07 +0000
+Message-ID: <282CEDFCBC30114F83C499CB8F2ED53337EB7642@SACMBXIP02.sdcorp.global.sandisk.com>
 References: <001901cf4ccf$3dc64920$b952db60$@samsung.com>
-	<533A3DD7.80403@samsung.com>
-	<CANEJEGt=5EegY80F3EvsG70poUwVFRjeZT-hUJD8LdULAz=S_w@mail.gmail.com>
- <CANEJEGu8btGqp=NqV+JjFBWKxSh6_=DcsbH4aoL9tGgK2xcUFA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from ch1ehsobe005.messaging.microsoft.com ([216.32.181.185]:48890
-	"EHLO ch1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751738AbaDCMy2 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 3 Apr 2014 08:54:28 -0400
-In-Reply-To: <CANEJEGu8btGqp=NqV+JjFBWKxSh6_=DcsbH4aoL9tGgK2xcUFA@mail.gmail.com>
+Received: from [213.199.154.209] ([213.199.154.209]:53557 "EHLO
+	am1outboundpool.messaging.microsoft.com" rhost-flags-FAIL-FAIL-OK-OK)
+	by vger.kernel.org with ESMTP id S1752170AbaDCOT3 convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 3 Apr 2014 10:19:29 -0400
+In-Reply-To: <001901cf4ccf$3dc64920$b952db60$@samsung.com>
 Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Grant Grundler <grundler@chromium.org>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, Seunguk Shin <seunguk.shin@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Avi Shchislowski <Avi.Shchislowski@sandisk.com>, Chris Ball <chris@printf.net>, CPGS <cpgs@samsung.com>, Puthikorn Voravootivat <puthik@chromium.org>, Gwendal Grignou <gwendal@chromium.org>
+To: Seunguk Shin <seunguk.shin@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Avi Shchislowski <Avi.Shchislowski@sandisk.com>, "chris@printf.net" <chris@printf.net>, "cpgs@samsung.com" <cpgs@samsung.com>
 
-SGkgR3JhbnQsDQoNCldlIHdvcmsgb24gVjIsIGFuZCBBdmkgd2lsbCBwb3N0IGl0IGluIGZldyBj
-b21pbmcgZGF5cy4NCg0KVGhhbmtzLA0KQWxleA0KDQo+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0t
-LS0tDQo+IEZyb206IGxpbnV4LW1tYy1vd25lckB2Z2VyLmtlcm5lbC5vcmcgW21haWx0bzpsaW51
-eC1tbWMtDQo+IG93bmVyQHZnZXIua2VybmVsLm9yZ10gT24gQmVoYWxmIE9mIEdyYW50IEdydW5k
-bGVyDQo+IFNlbnQ6IFR1ZXNkYXksIEFwcmlsIDAxLCAyMDE0IDExOjMwIFBNDQo+IFRvOiBHcmFu
-dCBHcnVuZGxlcg0KPiBDYzogSmFlaG9vbiBDaHVuZzsgU2V1bmd1ayBTaGluOyBsaW51eC1tbWNA
-dmdlci5rZXJuZWwub3JnOyBBdmkNCj4gU2hjaGlzbG93c2tpOyBDaHJpcyBCYWxsOyBDUEdTOyBQ
-dXRoaWtvcm4gVm9yYXZvb3RpdmF0OyBHd2VuZGFsIEdyaWdub3UNCj4gU3ViamVjdDogUmU6IFtS
-RkMgUEFUQ0ggMS8xIF1tbWM6IFN1cHBvcnQtRkZVLWZvci1lTU1DLXY1LjANCj4gDQo+IGFyZ2gu
-Li5yZXBvc3RpbmcgbXkgcmVzcG9uc2UgYXMgdGV4dCBvbmx5IHNpbmNlIGxpbnV4LW1tYyBkb2Vz
-bid0IGxpa2UgaHRtbA0KPiBtYWlsLiA6KA0KPiANCj4gT24gVHVlLCBBcHIgMSwgMjAxNCBhdCAx
-OjI2IFBNLCBHcmFudCBHcnVuZGxlciA8Z3J1bmRsZXJAY2hyb21pdW0ub3JnPg0KPiB3cm90ZToN
-Cj4gPg0KPiA+DQo+ID4NCj4gPiBPbiBNb24sIE1hciAzMSwgMjAxNCBhdCA5OjE3IFBNLCBKYWVo
-b29uIENodW5nDQo+ID4gPGpoODAuY2h1bmdAc2Ftc3VuZy5jb20+DQo+ID4gd3JvdGU6DQo+ID4+
-DQo+ID4+IEhpLCBTZXVuZ3VrLg0KPiA+Pg0KPiA+PiBPbiAwMy8zMS8yMDE0IDA3OjUxIFBNLCBT
-ZXVuZ3VrIFNoaW4gd3JvdGU6DQo+ID4+ID4gU29tZSBvZiBTYW1zdW5nIGVNTUMgZG9lcyBub3Qg
-c2hvdyB0aGUgYXJndW1lbnQgZm9yIGZmdSBpbiBleHRfY3NkLg0KPiA+PiA+IEluIGNhc2Ugb2Yg
-dGhpcywgZU1NQyBzaG93cyAweDAgZnJvbSBleHRfY3NkLCBIb3N0IGhhcyB0byBtb2RpZnkNCj4g
-Pj4gPiB0aGUgYXJndW1lbnQuDQo+ID4+ID4NCj4gPj4gPiBBZGQgIiNkZWZpbmUgQ0lEX01BTkZJ
-RF9TQU1TVU5HICAgICAgICAgICAgICAgMHgxNSINCj4gPj4gSWYgeW91IG5lZWQgdG8gYWRkIHRo
-ZSBTYW1zdW5nIGVNTUMgc3BlY2lmaWMgY29kZSwgaXQgd291bGQgYmUgYmV0dGVyDQo+ID4+IHlv
-dSB3b3VsZCBzZW5kIHRoZSBTYW1zdW5nIGVNTUMgc3BlY2lmaWMgcGF0Y2guDQo+ID4+IChiYXNl
-ZC1vbiB0aGlzIHBhdGNoLikNCj4gPg0KPiA+DQo+ID4gSSBiZWxpZXZlIFNldW5ndWsgU2hpbiBw
-cm92aWRlZCB0aGUgaW5mb3JtYXRpb24gc28gc29tZW9uZSBlbHNlIGNvdWxkDQo+ID4gYWRkIHRo
-aXMgY29kZS4gSSBjb3VsZCBiZSB0aGF0IHBlcnNvbiBpZiBubyBvbmUgZnJvbSBTYW1zdW5nIGhh
-cyBoYXZlDQo+ID4gdGltZSBmb3IgdGhpcy4gIEknbSB2ZXJ5IGdyYXRlZnVsIHRvIFNldW5nZ3Vr
-IGZvciBwb3N0aW5nIHRoZXNlIGRldGFpbHMuDQo+ID4NCj4gPiBJIGhvcGUgd2UgY2FuIHNlZSB0
-aGUgc2FtZSBkZXRhaWxzIGZvciBTYW1zdW5nIGVNTUMgNC41IGFsc28gKGJ1dA0KPiA+IHBsZWFz
-ZSB1c2UgYSBkaWZmZXJlbnQgZW1haWwgU3ViamVjdCBsaW5lIHNvIHdlIGFyZW4ndCBjb25mdXNl
-ZC4pDQo+ID4NCj4gPj4gVGhpcyBwYXRjaCBpc24ndCBwYXRjaCBmb3Igc2Ftc3VuZyBlTU1DLg0K
-PiA+PiBJIGRpZG4ndCBzZWUgdGhpcyBwYXRjaCBmdWxseSwgYnV0IGkgdGhpbmsgdGhpcyBwYXRj
-aCBpcyBnZW5lcmFsIGNvZGUuDQo+ID4NCj4gPg0KPiA+IEFGQUlDVCwgdGhlIE1BTkZJRF9TQU1T
-VU5HIGlzIG9ubHkgYSAicXVpcmsiIGZvciBTYW1zdW5nIGRldmljZXMNCj4gd2hpY2gNCj4gPiBz
-cGVjaWZ5IHRoZSBFWFRfQ1NEX0ZGVV9BUkcgYXMgMC4NCj4gPg0KPiA+IFRoZSBvcmlnaW5hbCBw
-YXRjaCBmcm9tIFNhbkRpc2sgaXMgZ2VuZXJhbCBjb2RlIGFuZCBtb3N0IG9mIFNldW5ndWsncw0K
-PiA+IGNvbW1lbnRzIGFyZSBnZW5lcmFsIHRvby4gU2FuRGlzayAoaWUgQXZpKSBzaG91bGQgcGxl
-YXNlIEFDSyB0aGV5J3ZlDQo+ID4gc2VlbiB0aG9zZSBjb21tZW50cyBzaW5jZSBJIGJlbGlldmUg
-U2V1bmd1ayBpcyBjb3JyZWN0Lg0KPiA+DQo+ID4gQW5kIEF2aSwgcGxlYXNlIGxldCB1cyBrbm93
-IGlmL3doZW4geW91IHBsYW4gb24gcG9zdGluZyBhIFYyLiBPciBhdA0KPiA+IGxlYXN0IG5vdCBi
-ZSBvZmZlbmRlZCBpZiBJIGdldCBpbXBhdGllbnQgYW5kIGhpamFjayB0aGlzIHBhdGNoIHNlcmll
-cy4NCj4gPiA6KQ0KPiA+DQo+ID4gY2hlZXJzLA0KPiA+IGdyYW50DQo+ID4NCj4gPj4gQmVzdCBS
-ZWdhcmRzLA0KPiA+PiBKYWVob29uIENodW5nDQo+ID4+DQo+ID4+ID4NCj4gPj4gPj4gK2ludCBt
-bWNfZmZ1X2Rvd25sb2FkKHN0cnVjdCBtbWNfY2FyZCAqY2FyZCwgc3RydWN0DQo+IG1tY19jb21t
-YW5kICpjbWQsDQo+ID4+ID4+ICsgICAgICAgdTggKmRhdGEsIGludCBidWZfYnl0ZXMpDQo+ID4+
-ID4+ICt7DQo+ID4+ID4+ICsgICAgICAgdTggZXh0X2NzZFtDQVJEX0JMT0NLX1NJWkVdOw0KPiA+
-PiA+PiArICAgICAgIGludCBlcnI7DQo+ID4+ID4+ICsgICAgICAgaW50IHJldDsNCj4gPj4gPj4g
-Kw0KPiA+PiA+PiArICAgICAgIC8qIFJlYWQgdGhlIEVYVF9DU0QgKi8NCj4gPj4gPj4gKyAgICAg
-ICBlcnIgPSBtbWNfc2VuZF9leHRfY3NkKGNhcmQsIGV4dF9jc2QpOw0KPiA+PiA+PiArICAgICAg
-IGlmIChlcnIpIHsNCj4gPj4gPj4gKyAgICAgICAgICAgICAgIHByX2VycigiRkZVOiAlczogZXJy
-b3IgJWQgc2VuZGluZyBleHRfY3NkXG4iLA0KPiA+PiA+PiArICAgICAgICAgICAgICAgICAgICAg
-ICBtbWNfaG9zdG5hbWUoY2FyZC0+aG9zdCksIGVycik7DQo+ID4+ID4+ICsgICAgICAgICAgICAg
-ICBnb3RvIGV4aXQ7DQo+ID4+ID4+ICsgICAgICAgfQ0KPiA+PiA+PiArDQo+ID4+ID4+ICsgICAg
-ICAgLyogQ2hlY2sgaWYgRkZVIGlzIHN1cHBvcnRlZCBieSBjYXJkICovDQo+ID4+ID4+ICsgICAg
-ICAgaWYNCj4gKCFGRlVfU1VQUE9SVEVEX01PREUoZXh0X2NzZFtFWFRfQ1NEX1NVUFBPUlRFRF9N
-T0RFXSkpIHsNCj4gPj4gPj4gKyAgICAgICAgICAgICAgIGVyciA9IC1FSU5WQUw7DQo+ID4+ID4+
-ICsgICAgICAgICAgICAgICBwcl9lcnIoIkZGVTogJXM6IGVycm9yICVkIEZGVSBpcyBub3Qgc3Vw
-cG9ydGVkXG4iLA0KPiA+PiA+PiArICAgICAgICAgICAgICAgICAgICAgICBtbWNfaG9zdG5hbWUo
-Y2FyZC0+aG9zdCksIGVycik7DQo+ID4+ID4+ICsgICAgICAgICAgICAgICBnb3RvIGV4aXQ7DQo+
-ID4+ID4+ICsgICAgICAgfQ0KPiA+PiA+PiArDQo+ID4+ID4+ICsgICAgICAgZXJyID0gbW1jX2hv
-c3Rfc2V0X2ZmdShjYXJkLCBleHRfY3NkW0VYVF9DU0RfRldfQ09ORklHXSk7DQo+ID4+ID4+ICsg
-ICAgICAgaWYgKGVycikgew0KPiA+PiA+PiArICAgICAgICAgICAgICAgcHJfZXJyKCJGRlU6ICVz
-OiBlcnJvciAlZCBGRlUgaXMgbm90IHN1cHBvcnRlZFxuIiwNCj4gPj4gPj4gKyAgICAgICAgICAg
-ICAgICAgICAgICAgbW1jX2hvc3RuYW1lKGNhcmQtPmhvc3QpLCBlcnIpOw0KPiA+PiA+PiArICAg
-ICAgICAgICAgICAgZXJyID0gLUVJTlZBTDsNCj4gPj4gPj4gKyAgICAgICAgICAgICAgIGdvdG8g
-ZXhpdDsNCj4gPj4gPj4gKyAgICAgICB9DQo+ID4+ID4+ICsNCj4gPj4gPj4gKyAgICAgICAvKiBz
-ZXQgZGV2aWNlIHRvIEZGVSBtb2RlICovDQo+ID4+ID4+ICsgICAgICAgZXJyID0gbW1jX3N3aXRj
-aChjYXJkLCBFWFRfQ1NEX0NNRF9TRVRfTk9STUFMLA0KPiA+PiA+IEVYVF9DU0RfTU9ERV9DT05G
-SUcsDQo+ID4+ID4+ICsgICAgICAgICAgICAgICBNTUNfRkZVX01PREVfU0VULCBjYXJkLT5leHRf
-Y3NkLmdlbmVyaWNfY21kNl90aW1lKTsNCj4gPj4gPj4gKyAgICAgICBpZiAoZXJyKSB7DQo+ID4+
-ID4+ICsgICAgICAgICAgICAgICBwcl9lcnIoIkZGVTogJXM6IGVycm9yICVkIEZGVSBpcyBub3Qg
-c3VwcG9ydGVkXG4iLA0KPiA+PiA+PiArICAgICAgICAgICAgICAgICAgICAgICBtbWNfaG9zdG5h
-bWUoY2FyZC0+aG9zdCksIGVycik7DQo+ID4+ID4+ICsgICAgICAgICAgICAgICBnb3RvIGV4aXRf
-bm9ybWFsOw0KPiA+PiA+PiArICAgICAgIH0NCj4gPj4gPj4gKw0KPiA+PiA+PiArICAgICAgIC8q
-IHNldCBDTUQgQVJHICovDQo+ID4+ID4+ICsgICAgICAgY21kLT5hcmcgPSBleHRfY3NkW0VYVF9D
-U0RfRkZVX0FSR10gfA0KPiA+PiA+PiArICAgICAgICAgICAgICAgZXh0X2NzZFtFWFRfQ1NEX0ZG
-VV9BUkcgKyAxXSA8PCA4IHwNCj4gPj4gPj4gKyAgICAgICAgICAgICAgIGV4dF9jc2RbRVhUX0NT
-RF9GRlVfQVJHICsgMl0gPDwgMTYgfA0KPiA+PiA+PiArICAgICAgICAgICAgICAgZXh0X2NzZFtF
-WFRfQ1NEX0ZGVV9BUkcgKyAzXSA8PCAyNDsNCj4gPj4gPj4gKw0KPiA+PiA+DQo+ID4+ID4gQWRk
-IGZvbGxvd2luZ3MNCj4gPj4gPiAiDQo+ID4+ID4gICAgICAgIC8qIElmIGFyZyBpcyB6ZXJvLCBz
-aG91bGQgYmUgc2V0IHRvIGEgc3BlY2lhbCB2YWx1ZSBmb3INCj4gPj4gPiBzYW1zdW5nIGVNTUMg
-Ki8NCj4gPj4gPiAgICAgICAgaWYgKCBjYXJkLT5jaWQubWFuZmlkID09IENJRF9NQU5GSURfU0FN
-U1VORyAmJiBjbWQtPmFyZyA9PQ0KPiA+PiA+IDB4MCApIHsNCj4gPj4gPiAgICAgICAgICAgICAg
-ICBjbWQtPmFyZyA9IDB4Yzc4MTAwMDA7DQo+ID4+ID4gICAgICAgIH0NCj4gPj4gPiAiDQo+ID4+
-ID4NCj4gPj4gPj4gKyAgICAgICBlcnIgPSBtbWNfZmZ1X3dyaXRlKGNhcmQsIGRhdGEsIGNtZC0+
-YXJnLCBidWZfYnl0ZXMpOw0KPiA+PiA+PiArDQo+ID4+ID4+ICtleGl0X25vcm1hbDoNCj4gPj4g
-Pj4gKyAgICAgICAvKiBob3N0IHN3aXRjaCBiYWNrIHRvIHdvcmsgaW4gbm9ybWFsIE1NQyBSZWFk
-L1dyaXRlDQo+ID4+ID4+ICtjb21tYW5kcw0KPiA+PiA+PiAqLw0KPiA+PiA+PiArICAgICAgIHJl
-dCA9IG1tY19zd2l0Y2goY2FyZCwgRVhUX0NTRF9DTURfU0VUX05PUk1BTCwNCj4gPj4gPj4gKyAg
-ICAgICAgICAgICAgIEVYVF9DU0RfTU9ERV9DT05GSUcsIE1NQ19GRlVfTU9ERV9OT1JNQUwsDQo+
-ID4+ID4+ICsgICAgICAgICAgICAgICBjYXJkLT5leHRfY3NkLmdlbmVyaWNfY21kNl90aW1lKTsN
-Cj4gPj4gPj4gKyAgICAgICBpZiAocmV0KQ0KPiA+PiA+PiArICAgICAgICAgICAgICAgZXJyID0g
-cmV0Ow0KPiA+PiA+PiArDQo+ID4+ID4+ICtleGl0Og0KPiA+PiA+PiArICAgICAgIHJldHVybiBl
-cnI7DQo+ID4+ID4+ICt9DQo+ID4+ID4+ICtFWFBPUlRfU1lNQk9MKG1tY19mZnVfZG93bmxvYWQp
-Ow0KPiA+PiA+PiArDQo+ID4+ID4NCj4gPj4gPg0KPiA+PiA+DQo+ID4+ID4gZU1NQyA1LjAgU3Bl
-Yy4gc2F5cyBpZiBkZXZpY2UgZG9lcyBub3Qgc3VwcG9ydA0KPiA+PiA+IE1PREVfT1BFUkFUSU9O
-X0NPREVTLCBkZXZpY2UgZG9lc24ndCBuZWVkIHRvIHVzZQ0KPiA+PiA+IE5VTUJFUl9PRl9GV19T
-RUNUT1JTX0NPUlJFQ1RMWV9QUk9HUkFNTUVELg0KPiA+PiA+IFNvLCBpdCdzIGJldHRlciB0byBt
-b3ZlIHRoZSBjb2RlIGZvciBjaGVja2luZyB0aGlzIHZhbHVlIHRvDQo+ID4+ID4gRkZVX0ZFQVRV
-UkVTKGV4dF9jc2RbRVhUX0NTRF9GRlVfRkVBVFVSRVNdDQo+ID4+ID4NCj4gPj4gPj4gK2ludCBt
-bWNfZmZ1X2luc3RhbGwoc3RydWN0IG1tY19jYXJkICpjYXJkKSB7DQo+ID4+ID4+ICsgICAgICAg
-dTggZXh0X2NzZFtDQVJEX0JMT0NLX1NJWkVdOw0KPiA+PiA+PiArICAgICAgIGludCBlcnI7DQo+
-ID4+ID4+ICsgICAgICAgdTMyIGZmdV9kYXRhX2xlbjsNCj4gPj4gPj4gKyAgICAgICB1MzIgdGlt
-ZW91dDsNCj4gPj4gPj4gKw0KPiA+PiA+PiArICAgICAgIGVyciA9IG1tY19zZW5kX2V4dF9jc2Qo
-Y2FyZCwgZXh0X2NzZCk7DQo+ID4+ID4+ICsgICAgICAgaWYgKGVycikgew0KPiA+PiA+PiArICAg
-ICAgICAgICAgICAgcHJfZXJyKCJGRlU6ICVzOiBlcnJvciAlZCBzZW5kaW5nIGV4dF9jc2RcbiIs
-DQo+ID4+ID4+ICsgICAgICAgICAgICAgICAgICAgICAgIG1tY19ob3N0bmFtZShjYXJkLT5ob3N0
-KSwgZXJyKTsNCj4gPj4gPj4gKyAgICAgICAgICAgICAgIGdvdG8gZXhpdDsNCj4gPj4gPj4gKyAg
-ICAgICB9DQo+ID4+ID4+ICsNCj4gPj4gPj4gKyAgICAgICAvKiBDaGVjayBpZiBGRlUgaXMgc3Vw
-cG9ydGVkICovDQo+ID4+ID4+ICsgICAgICAgaWYNCj4gKCFGRlVfU1VQUE9SVEVEX01PREUoZXh0
-X2NzZFtFWFRfQ1NEX1NVUFBPUlRFRF9NT0RFXSkgfHwNCj4gPj4gPj4gKyAgICAgICAgICAgICAg
-IEZGVV9DT05GSUcoZXh0X2NzZFtFWFRfQ1NEX0ZXX0NPTkZJR10pKSB7DQo+ID4+ID4+ICsgICAg
-ICAgICAgICAgICBlcnIgPSAtRUlOVkFMOw0KPiA+PiA+PiArICAgICAgICAgICAgICAgcHJfZXJy
-KCJGRlU6ICVzOiBlcnJvciAlZCBGRlUgaXMgbm90IHN1cHBvcnRlZFxuIiwNCj4gPj4gPj4gKyAg
-ICAgICAgICAgICAgICAgICAgICAgbW1jX2hvc3RuYW1lKGNhcmQtPmhvc3QpLCBlcnIpOw0KPiA+
-PiA+PiArICAgICAgICAgICAgICAgZ290byBleGl0Ow0KPiA+PiA+PiArICAgICAgIH0NCj4gPj4g
-Pg0KPiA+PiA+IFJlbW92ZSBmb2xsb3dpbmdzDQo+ID4+ID4gIg0KPiA+PiA+ICAgICAgICBmZnVf
-ZGF0YV9sZW4gPSBleHRfY3NkW0VYVF9DU0RfTlVNX09GX0ZXX1NFQ19QUk9HXXwNCj4gPj4gPiAg
-ICAgICAgICAgICAgICBleHRfY3NkW0VYVF9DU0RfTlVNX09GX0ZXX1NFQ19QUk9HICsgMV0gPDwg
-OCB8DQo+ID4+ID4gICAgICAgICAgICAgICAgZXh0X2NzZFtFWFRfQ1NEX05VTV9PRl9GV19TRUNf
-UFJPRyArIDJdIDw8IDE2IHwNCj4gPj4gPiAgICAgICAgICAgICAgICBleHRfY3NkW0VYVF9DU0Rf
-TlVNX09GX0ZXX1NFQ19QUk9HICsgM10gPDwgMjQ7DQo+ID4+ID4NCj4gPj4gPiAgICAgICAgaWYg
-KCFmZnVfZGF0YV9sZW4pIHsNCj4gPj4gPiAgICAgICAgICAgICAgICBlcnIgPSAtRVBFUk07DQo+
-ID4+ID4gICAgICAgICAgICAgICAgcmV0dXJuIGVycjsNCj4gPj4gPiAgICAgICAgfQ0KPiA+PiA+
-ICINCj4gPj4gPg0KPiA+PiA+PiArDQo+ID4+ID4+ICsgICAgICAgLyogY2hlY2sgbW9kZSBvcGVy
-YXRpb24gKi8NCj4gPj4gPj4gKyAgICAgICBpZiAoIUZGVV9GRUFUVVJFUyhleHRfY3NkW0VYVF9D
-U0RfRkZVX0ZFQVRVUkVTXSkpIHsNCj4gPj4gPj4gKyAgICAgICAgICAgICAgIC8qIHJlc3RhcnQg
-dGhlIGVNTUMgKi8NCj4gPj4gPj4gKyAgICAgICAgICAgICAgIGVyciA9IG1tY19mZnVfcmVzdGFy
-dChjYXJkKTsNCj4gPj4gPj4gKyAgICAgICAgICAgICAgIGlmIChlcnIpIHsNCj4gPj4gPj4gKyAg
-ICAgICAgICAgICAgICAgICAgICAgcHJfZXJyKCJGRlU6ICVzOiBlcnJvciAlZCBGRlUgaW5zdGFs
-bDpcbiIsDQo+ID4+ID4+ICsgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgbW1jX2hvc3Ru
-YW1lKGNhcmQtPmhvc3QpLCBlcnIpOw0KPiA+PiA+PiArICAgICAgICAgICAgICAgfQ0KPiA+PiA+
-PiArICAgICAgIH0gZWxzZSB7DQo+ID4+ID4NCj4gPj4gPiBBZGQgZm9sbG93aW5ncw0KPiA+PiA+
-ICINCj4gPj4gPiAgICAgICAgICAgICAgICAgICAgICAgICBmZnVfZGF0YV9sZW4gPQ0KPiA+PiA+
-IGV4dF9jc2RbRVhUX0NTRF9OVU1fT0ZfRldfU0VDX1BST0ddfA0KPiA+PiA+ICAgICAgICAgICAg
-ICAgICAgICAgICAgICAgICAgICAgZXh0X2NzZFtFWFRfQ1NEX05VTV9PRl9GV19TRUNfUFJPRw0K
-PiA+PiA+ICsgMV0gPDwgOA0KPiA+PiA+IHwNCj4gPj4gPiAgICAgICAgICAgICAgICAgICAgICAg
-ICAgICAgICAgIGV4dF9jc2RbRVhUX0NTRF9OVU1fT0ZfRldfU0VDX1BST0cNCj4gPj4gPiArIDJd
-IDw8DQo+ID4+ID4gMTYgfA0KPiA+PiA+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
-ZXh0X2NzZFtFWFRfQ1NEX05VTV9PRl9GV19TRUNfUFJPRw0KPiA+PiA+ICsgM10gPDwgMjQ7DQo+
-ID4+ID4NCj4gPj4gPiAgICAgICAgICAgICAgICAgICAgICAgICBpZiAoIWZmdV9kYXRhX2xlbikg
-ew0KPiA+PiA+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgZXJyID0gLUVQRVJNOw0K
-PiA+PiA+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgcmV0dXJuIGVycjsNCj4gPj4g
-PiAgICAgICAgICAgICAgICAgICAgICAgICB9DQo+ID4+ID4gIg0KPiA+PiA+DQo+ID4+ID4+ICsg
-ICAgICAgICAgICAgICAgICAgICAgIC8qIHNldCBkZXZpY2UgdG8gRkZVIG1vZGUgKi8NCj4gPj4g
-Pj4gKyAgICAgICAgICAgICAgICAgICAgICAgZXJyID0gbW1jX3N3aXRjaChjYXJkLCBFWFRfQ1NE
-X0NNRF9TRVRfTk9STUFMLA0KPiA+PiA+PiArICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
-IEVYVF9DU0RfTU9ERV9DT05GSUcsIDB4MSwNCj4gPj4gPj4gKyAgICAgICAgICAgICAgICAgICAg
-ICAgICAgICAgICBjYXJkLT5leHRfY3NkLmdlbmVyaWNfY21kNl90aW1lKTsNCj4gPj4gPj4gKyAg
-ICAgICAgICAgICAgICAgICAgICAgaWYgKGVycikgew0KPiA+PiA+PiArICAgICAgICAgICAgICAg
-ICAgICAgICAgICAgICAgIHByX2VycigiRkZVOiAlczogZXJyb3IgJWQgRkZVIGlzDQo+ID4+ID4+
-ICsgbm90DQo+ID4+ID4gc3VwcG9ydGVkXG4iLA0KPiA+PiA+PiArICAgICAgICAgICAgICAgICAg
-ICAgICAgICAgICAgICAgICAgICAgbW1jX2hvc3RuYW1lKGNhcmQtPmhvc3QpLCBlcnIpOw0KPiA+
-PiA+PiArICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGdvdG8gZXhpdDsNCj4gPj4gPj4g
-KyAgICAgICAgICAgICAgICAgICAgICAgfQ0KPiA+PiA+DQo+ID4+ID4NCj4gPj4gPg0KPiA+PiA+
-IENoZWNraW5nIGZmdSBzdGF0dXMgaW4gZXh0X2NzZCBzaG91bGQgYmUgZG9uZSBldmVuIGlmIGRl
-dmljZSBkb2VzDQo+ID4+ID4gbm90IHN1cHBvcnQgTU9ERV9PUEVSQVRJT05fQ09ERVMgU28sIGl0
-J3MgYmV0dGVyIHRvIG1vdmUgdGhlIGNvZGUNCj4gPj4gPiBmb3IgY2hlY2tpbmcgdGhpcyB2YWx1
-ZSB0byBvdXQgb2YgYnJhY2UgZm9yDQo+ID4+ID4gRkZVX0ZFQVRVUkVTKGV4dF9jc2RbRVhUX0NT
-RF9GRlVfRkVBVFVSRVNdDQo+ID4+ID4NCj4gPj4gPj4gKyAgICAgICAgICAgICAgICAgICAgICAg
-Lyogc2V0IGV4dF9jc2QgdG8gaW5zdGFsbCBtb2RlICovDQo+ID4+ID4+ICsgICAgICAgICAgICAg
-ICAgICAgICAgIGVyciA9IG1tY19zd2l0Y2goY2FyZCwgRVhUX0NTRF9DTURfU0VUX05PUk1BTCwN
-Cj4gPj4gPj4gKyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBFWFRfQ1NEX01PREVfT1BF
-UkFUSU9OX0NPREVTLA0KPiA+PiA+PiArICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIE1N
-Q19GRlVfSU5TVEFMTF9TRVQsIHRpbWVvdXQpOw0KPiA+PiA+PiArDQo+ID4+ID4+ICsgICAgICAg
-ICAgICAgICAgICAgICAgIGlmIChlcnIpIHsNCj4gPj4gPj4gKyAgICAgICAgICAgICAgICAgICAg
-ICAgICAgICAgICBwcl9lcnIoIkZGVTogJXM6IGVycm9yICVkIHNldHRpbmcNCj4gPj4gPj4gaW5z
-dGFsbA0KPiA+PiA+IG1vZGVcbiIsDQo+ID4+ID4+ICsgICAgICAgICAgICAgICAgICAgICAgICAg
-ICAgICAgICAgICAgICBtbWNfaG9zdG5hbWUoY2FyZC0+aG9zdCksIGVycik7DQo+ID4+ID4+ICsg
-ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgZ290byBleGl0Ow0KPiA+PiA+PiArICAgICAg
-ICAgICAgICAgICAgICAgICB9DQo+ID4+ID4+ICsNCj4gPj4gPg0KPiA+PiA+IFJlbW92ZSBmb2xs
-b3dpbmdzDQo+ID4+ID4gIg0KPiA+PiA+ICAgICAgICAgICAgICAgICAgICAgICAgLyogcmVhZCBl
-eHRfY3NkICovDQo+ID4+ID4gICAgICAgICAgICAgICAgICAgICAgICBlcnIgPSBtbWNfc2VuZF9l
-eHRfY3NkKGNhcmQsIGV4dF9jc2QpOw0KPiA+PiA+ICAgICAgICAgICAgICAgICAgICAgICAgaWYg
-KGVycikgew0KPiA+PiA+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBwcl9lcnIoIkZG
-VTogJXM6IGVycm9yICVkIHNlbmRpbmcNCj4gPj4gPiBleHRfY3NkXG4iLA0KPiA+PiA+ICAgICAg
-ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIG1tY19ob3N0bmFtZShjYXJkLT5ob3N0
-KSwgZXJyKTsNCj4gPj4gPiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgZ290byBleGl0
-Ow0KPiA+PiA+ICAgICAgICAgICAgICAgICAgICAgICAgfQ0KPiA+PiA+ICAgICAgICAgICAgICAg
-ICAgICAgICAgLyogcmV0dXJuIHN0YXR1cyAqLw0KPiA+PiA+ICAgICAgICAgICAgICAgICAgICAg
-ICAgZXJyID0gZXh0X2NzZFtFWFRfQ1NEX0ZGVV9TVEFUVVNdOw0KPiA+PiA+ICAgICAgICAgICAg
-ICAgICAgICAgICAgaWYgKGVycikgew0KPiA+PiA+ICAgICAgICAgICAgICAgICAgICAgICAgICAg
-ICAgICBwcl9lcnIoIkZGVTogJXM6IGVycm9yICVkIEZGVQ0KPiA+PiA+IGluc3RhbGw6XG4iLA0K
-PiA+PiA+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIG1tY19ob3N0bmFt
-ZShjYXJkLT5ob3N0KSwgZXJyKTsNCj4gPj4gPiAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
-ICAgZXJyID0gLUVJTlZBTDsNCj4gPj4gPiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
-Z290byBleGl0Ow0KPiA+PiA+ICAgICAgICAgICAgICAgICAgICAgICAgfQ0KPiA+PiA+ICINCj4g
-Pj4gPg0KPiA+PiA+PiArICAgICAgICAgICAgICAgfQ0KPiA+PiA+PiArDQo+ID4+ID4NCj4gPj4g
-PiBBZGQgZm9sbG93aW5ncw0KPiA+PiA+ICINCj4gPj4gPiAgICAgICAgICAgIC8qIHJlYWQgZXh0
-X2NzZCAqLw0KPiA+PiA+ICAgICAgICAgICAgZXJyID0gbW1jX3NlbmRfZXh0X2NzZChjYXJkLCBl
-eHRfY3NkKTsNCj4gPj4gPiAgICAgICAgICAgIGlmIChlcnIpIHsNCj4gPj4gPiAgICAgICAgICAg
-ICAgICAgICAgcHJfZXJyKCJGRlU6ICVzOiBlcnJvciAlZCBzZW5kaW5nIGV4dF9jc2RcbiIsDQo+
-ID4+ID4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgbW1jX2hvc3RuYW1lKGNhcmQtPmhv
-c3QpLCBlcnIpOw0KPiA+PiA+ICAgICAgICAgICAgICAgICAgICBnb3RvIGV4aXQ7DQo+ID4+ID4g
-ICAgICAgICAgICB9DQo+ID4+ID4gICAgICAgICAgICAvKiByZXR1cm4gc3RhdHVzICovDQo+ID4+
-ID4gICAgICAgICAgICBlcnIgPSBleHRfY3NkW0VYVF9DU0RfRkZVX1NUQVRVU107DQo+ID4+ID4g
-ICAgICAgICAgICBpZiAoZXJyKSB7DQo+ID4+ID4gICAgICAgICAgICAgICAgICAgIHByX2Vycigi
-RkZVOiAlczogZXJyb3IgJWQgRkZVIGluc3RhbGw6XG4iLA0KPiA+PiA+ICAgICAgICAgICAgICAg
-ICAgICAgICAgICAgICAgIG1tY19ob3N0bmFtZShjYXJkLT5ob3N0KSwgZXJyKTsNCj4gPj4gPiAg
-ICAgICAgICAgICAgICAgICAgZXJyID0gLUVJTlZBTDsNCj4gPj4gPiAgICAgICAgICAgICAgICAg
-ICAgZ290byBleGl0Ow0KPiA+PiA+ICAgICAgICAgICAgfQ0KPiA+PiA+ICINCj4gPj4gPg0KPiA+
-PiA+PiArZXhpdDoNCj4gPj4gPj4gKyAgICAgICByZXR1cm4gZXJyOw0KPiA+PiA+PiArfQ0KPiA+
-PiA+PiArRVhQT1JUX1NZTUJPTChtbWNfZmZ1X2luc3RhbGwpOw0KPiA+PiA+PiArDQo+ID4+ID4N
-Cj4gPj4gPg0KPiA+PiA+DQo+ID4+ID4gQW5kIHNvbWUgZGV2aWNlJ3MgZncgc2hvdWxkIGJlIHRy
-YW5zZmVycmVkIHdpdGggb25lIGNvbW1hbmQuDQo+ID4+ID4gVGhleSBkb2VzIG5vdCBzdXBwb3J0
-IG11bHRpcGxlIGNvbW1hbmRzIGZvciBmdyB0cmFuc2Zlci4NCj4gPj4gPiBGb3IgdGhlc2UgZGV2
-aWNlcywgTU1DX0lPQ19NQVhfQllURVMgc2hvdWxkIGJlIGdyZWF0ZXIuDQo+ID4+ID4NCj4gPj4g
-PiBkaWZmIC0tZ2l0IGEvaW5jbHVkZS91YXBpL2xpbnV4L21tYy9pb2N0bC5oDQo+ID4+ID4gYi9p
-bmNsdWRlL3VhcGkvbGludXgvbW1jL2lvY3RsLmggaW5kZXggMWY1ZTY4OS4uYWY5ZWE2MiAxMDA2
-NDQNCj4gPj4gPiAtLS0gYS9pbmNsdWRlL3VhcGkvbGludXgvbW1jL2lvY3RsLmgNCj4gPj4gPiAr
-KysgYi9pbmNsdWRlL3VhcGkvbGludXgvbW1jL2lvY3RsLmgNCj4gPj4gPiBAQCAtNTMsNSArNTMs
-NSBAQCBzdHJ1Y3QgbW1jX2lvY19jbWQgew0KPiA+PiA+ICAgKiBpcyBlbmZvcmNlZCBwZXIgaW9j
-dGwgY2FsbC4gIEZvciBsYXJnZXIgZGF0YSB0cmFuc2ZlcnMsIHVzZSB0aGUNCj4gPj4gPiBub3Jt
-YWwNCj4gPj4gPiAgICogYmxvY2sgZGV2aWNlIG9wZXJhdGlvbnMuDQo+ID4+ID4gICAqLw0KPiA+
-PiA+IC0jZGVmaW5lIE1NQ19JT0NfTUFYX0JZVEVTICAoNTEyTCAqIDI1NikNCj4gPj4gPiArI2Rl
-ZmluZSBNTUNfSU9DX01BWF9CWVRFUyAgKDUxMkwgKiAxMDI0KQ0KPiA+PiA+ICAjZW5kaWYgLyog
-TElOVVhfTU1DX0lPQ1RMX0ggKi8NCj4gPj4gPg0KPiA+PiA+DQo+ID4+ID4gLS0NCj4gPj4gPiBU
-byB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUN
-Cj4gPj4gPiBsaW51eC1tbWMiIGluIHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9A
-dmdlci5rZXJuZWwub3JnDQo+ID4+ID4gTW9yZSBtYWpvcmRvbW8gaW5mbyBhdCAgaHR0cDovL3Zn
-ZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQo+ID4+ID4NCj4gPj4NCj4gPj4gLS0N
-Cj4gPj4gVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vi
-c2NyaWJlIGxpbnV4LW1tYyINCj4gPj4gaW4gdGhlIGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9y
-ZG9tb0B2Z2VyLmtlcm5lbC5vcmcgTW9yZQ0KPiBtYWpvcmRvbW8NCj4gPj4gaW5mbyBhdCAgaHR0
-cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQo+ID4NCj4gPg0KPiAtLQ0K
-PiBUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3Jp
-YmUgbGludXgtbW1jIiBpbiB0aGUNCj4gYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZn
-ZXIua2VybmVsLm9yZyBNb3JlIG1ham9yZG9tbyBpbmZvIGF0DQo+IGh0dHA6Ly92Z2VyLmtlcm5l
-bC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbA0KDQoKCg==
+Hi Seunguk,
+
+
+> -----Original Message-----
+> From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
+> owner@vger.kernel.org] On Behalf Of Seunguk Shin
+> Sent: Monday, March 31, 2014 1:52 PM
+> To: linux-mmc@vger.kernel.org; Avi Shchislowski; chris@printf.net;
+> cpgs@samsung.com
+> Subject: Re: [RFC PATCH 1/1 ]mmc: Support-FFU-for-eMMC-v5.0
+> 
+> Some of Samsung eMMC does not show the argument for ffu in ext_csd.
+> In case of this, eMMC shows 0x0 from ext_csd, Host has to modify the
+> argument.
+> 
+> Add "#define CID_MANFID_SAMSUNG		0x15"
+> 
+> > +int mmc_ffu_download(struct mmc_card *card, struct mmc_command
+> *cmd,
+> > +       u8 *data, int buf_bytes)
+> > +{
+> > +       u8 ext_csd[CARD_BLOCK_SIZE];
+> > +       int err;
+> > +       int ret;
+> > +
+> > +       /* Read the EXT_CSD */
+> > +       err = mmc_send_ext_csd(card, ext_csd);
+> > +       if (err) {
+> > +               pr_err("FFU: %s: error %d sending ext_csd\n",
+> > +                       mmc_hostname(card->host), err);
+> > +               goto exit;
+> > +       }
+> > +
+> > +       /* Check if FFU is supported by card */
+> > +       if (!FFU_SUPPORTED_MODE(ext_csd[EXT_CSD_SUPPORTED_MODE]))
+> {
+> > +               err = -EINVAL;
+> > +               pr_err("FFU: %s: error %d FFU is not supported\n",
+> > +                       mmc_hostname(card->host), err);
+> > +               goto exit;
+> > +       }
+> > +
+> > +       err = mmc_host_set_ffu(card, ext_csd[EXT_CSD_FW_CONFIG]);
+> > +       if (err) {
+> > +               pr_err("FFU: %s: error %d FFU is not supported\n",
+> > +                       mmc_hostname(card->host), err);
+> > +               err = -EINVAL;
+> > +               goto exit;
+> > +       }
+> > +
+> > +       /* set device to FFU mode */
+> > +       err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+> EXT_CSD_MODE_CONFIG,
+> > +               MMC_FFU_MODE_SET, card->ext_csd.generic_cmd6_time);
+> > +       if (err) {
+> > +               pr_err("FFU: %s: error %d FFU is not supported\n",
+> > +                       mmc_hostname(card->host), err);
+> > +               goto exit_normal;
+> > +       }
+> > +
+> > +       /* set CMD ARG */
+> > +       cmd->arg = ext_csd[EXT_CSD_FFU_ARG] |
+> > +               ext_csd[EXT_CSD_FFU_ARG + 1] << 8 |
+> > +               ext_csd[EXT_CSD_FFU_ARG + 2] << 16 |
+> > +               ext_csd[EXT_CSD_FFU_ARG + 3] << 24;
+> > +
+> 
+> Add followings
+> "
+>        /* If arg is zero, should be set to a special value for samsung eMMC */
+>        if ( card->cid.manfid == CID_MANFID_SAMSUNG && cmd->arg == 0x0 ) {
+>                cmd->arg = 0xc7810000;
+>        }
+> "
+
+This code is provides a generic FFU solution. 
+I think it will be better to implement the Samsung-specific part as a QUIRK in MMC driver, and commit this as a separate patch.
+
+> 
+> > +       err = mmc_ffu_write(card, data, cmd->arg, buf_bytes);
+> > +
+> > +exit_normal:
+> > +       /* host switch back to work in normal MMC Read/Write commands */
+> > +       ret = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+> > +               EXT_CSD_MODE_CONFIG, MMC_FFU_MODE_NORMAL,
+> > +               card->ext_csd.generic_cmd6_time);
+> > +       if (ret)
+> > +               err = ret;
+> > +
+> > +exit:
+> > +       return err;
+> > +}
+> > +EXPORT_SYMBOL(mmc_ffu_download);
+> > +
+> 
+> 
+> 
+> eMMC 5.0 Spec. says if device does not support MODE_OPERATION_CODES,
+> device doesn't need to use
+> NUMBER_OF_FW_SECTORS_CORRECTLY_PROGRAMMED.
+> So, it's better to move the code for checking this value to
+> FFU_FEATURES(ext_csd[EXT_CSD_FFU_FEATURES]
+
+OK, will be checked only in case of MODE_OPERATION_CODES is NOT supported.
+
+> 
+> > +int mmc_ffu_install(struct mmc_card *card) {
+> > +       u8 ext_csd[CARD_BLOCK_SIZE];
+> > +       int err;
+> > +       u32 ffu_data_len;
+> > +       u32 timeout;
+> > +
+> > +       err = mmc_send_ext_csd(card, ext_csd);
+> > +       if (err) {
+> > +               pr_err("FFU: %s: error %d sending ext_csd\n",
+> > +                       mmc_hostname(card->host), err);
+> > +               goto exit;
+> > +       }
+> > +
+> > +       /* Check if FFU is supported */
+> > +       if (!FFU_SUPPORTED_MODE(ext_csd[EXT_CSD_SUPPORTED_MODE])
+> ||
+> > +               FFU_CONFIG(ext_csd[EXT_CSD_FW_CONFIG])) {
+> > +               err = -EINVAL;
+> > +               pr_err("FFU: %s: error %d FFU is not supported\n",
+> > +                       mmc_hostname(card->host), err);
+> > +               goto exit;
+> > +       }
+> 
+> Remove followings
+> "
+>        ffu_data_len = ext_csd[EXT_CSD_NUM_OF_FW_SEC_PROG]|
+>                ext_csd[EXT_CSD_NUM_OF_FW_SEC_PROG + 1] << 8 |
+>                ext_csd[EXT_CSD_NUM_OF_FW_SEC_PROG + 2] << 16 |
+>                ext_csd[EXT_CSD_NUM_OF_FW_SEC_PROG + 3] << 24;
+> 
+>        if (!ffu_data_len) {
+>                err = -EPERM;
+>                return err;
+>        }
+> "
+> 
+> > +
+> > +       /* check mode operation */
+> > +       if (!FFU_FEATURES(ext_csd[EXT_CSD_FFU_FEATURES])) {
+> > +               /* restart the eMMC */
+> > +               err = mmc_ffu_restart(card);
+> > +               if (err) {
+> > +                       pr_err("FFU: %s: error %d FFU install:\n",
+> > +                               mmc_hostname(card->host), err);
+> > +               }
+> > +       } else {
+> 
+> Add followings
+> "
+>                         ffu_data_len = ext_csd[EXT_CSD_NUM_OF_FW_SEC_PROG]|
+>                                 ext_csd[EXT_CSD_NUM_OF_FW_SEC_PROG + 1] << 8
+> |
+>                                 ext_csd[EXT_CSD_NUM_OF_FW_SEC_PROG + 2] <<
+> 16 |
+>                                 ext_csd[EXT_CSD_NUM_OF_FW_SEC_PROG + 3] << 24;
+> 
+>                         if (!ffu_data_len) {
+>                                 err = -EPERM;
+>                                 return err;
+>                         }
+> "
+> 
+> > +                       /* set device to FFU mode */
+> > +                       err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+> > +                               EXT_CSD_MODE_CONFIG, 0x1,
+> > +                               card->ext_csd.generic_cmd6_time);
+> > +                       if (err) {
+> > +                               pr_err("FFU: %s: error %d FFU is not
+> supported\n",
+> > +                                       mmc_hostname(card->host), err);
+> > +                               goto exit;
+> > +                       }
+> 
+> 
+> 
+> Checking ffu status in ext_csd should be done even if device does not support
+> MODE_OPERATION_CODES So, it's better to move the code for checking this
+> value to out of brace for FFU_FEATURES(ext_csd[EXT_CSD_FFU_FEATURES]
+> 
+
+You are right, we will move ffu status check to be done in both modes.
+
+ 
+> > +                       /* set ext_csd to install mode */
+> > +                       err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+> > +                               EXT_CSD_MODE_OPERATION_CODES,
+> > +                               MMC_FFU_INSTALL_SET, timeout);
+> > +
+> > +                       if (err) {
+> > +                               pr_err("FFU: %s: error %d setting
+> > + install
+> mode\n",
+> > +                                       mmc_hostname(card->host), err);
+> > +                               goto exit;
+> > +                       }
+> > +
+> 
+> Remove followings
+> "
+>                        /* read ext_csd */
+>                        err = mmc_send_ext_csd(card, ext_csd);
+>                        if (err) {
+>                                pr_err("FFU: %s: error %d sending ext_csd\n",
+>                                        mmc_hostname(card->host), err);
+>                                goto exit;
+>                        }
+>                        /* return status */
+>                        err = ext_csd[EXT_CSD_FFU_STATUS];
+>                        if (err) {
+>                                pr_err("FFU: %s: error %d FFU install:\n",
+>                                        mmc_hostname(card->host), err);
+>                                err = -EINVAL;
+>                                goto exit;
+>                        }
+> "
+> 
+> > +               }
+> > +
+> 
+> Add followings
+> "
+>            /* read ext_csd */
+>            err = mmc_send_ext_csd(card, ext_csd);
+>            if (err) {
+>                    pr_err("FFU: %s: error %d sending ext_csd\n",
+>                               mmc_hostname(card->host), err);
+>                    goto exit;
+>            }
+>            /* return status */
+>            err = ext_csd[EXT_CSD_FFU_STATUS];
+>            if (err) {
+>                    pr_err("FFU: %s: error %d FFU install:\n",
+>                               mmc_hostname(card->host), err);
+>                    err = -EINVAL;
+>                    goto exit;
+>            }
+> "
+> 
+> > +exit:
+> > +       return err;
+> > +}
+> > +EXPORT_SYMBOL(mmc_ffu_install);
+> > +
+> 
+> 
+> 
+> And some device's fw should be transferred with one command.
+> They does not support multiple commands for fw transfer.
+> For these devices, MMC_IOC_MAX_BYTES should be greater.
+> 
+> diff --git a/include/uapi/linux/mmc/ioctl.h b/include/uapi/linux/mmc/ioctl.h
+> index 1f5e689..af9ea62 100644
+> --- a/include/uapi/linux/mmc/ioctl.h
+> +++ b/include/uapi/linux/mmc/ioctl.h
+> @@ -53,5 +53,5 @@ struct mmc_ioc_cmd {
+>   * is enforced per ioctl call.  For larger data transfers, use the normal
+>   * block device operations.
+>   */
+> -#define MMC_IOC_MAX_BYTES  (512L * 256)
+> +#define MMC_IOC_MAX_BYTES  (512L * 1024)
+>  #endif /* LINUX_MMC_IOCTL_H */
+
+We do not feel confident enough with changing the previously defined IOCTL limitation.
+Our next patch (V2) should probably resolve FW size limitation - will use "udev" mechanism.
+
+> 
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in the
+> body of a message to majordomo@vger.kernel.org More majordomo info at
+> http://vger.kernel.org/majordomo-info.html
 
 
