@@ -1,212 +1,91 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: core: Use maximum timeout values in case TACC field
- is zero
-Date: Thu, 3 Apr 2014 09:15:26 +0200
-Message-ID: <CAPDyKFpxxFym8L=JKDJAaiP-eVMSo5NZxe9G+AimghGBSBUfRg@mail.gmail.com>
-References: <1395934368-29207-1-git-send-email-stefan.wahren@i2se.com>
-	<CAPDyKFq96P_zYcrPxsj9UHeFnY6Cjt=Euf=kUsZbM-8r2shBsw@mail.gmail.com>
-	<533C2E8D.60309@i2se.com>
+From: Seungwon Jeon <tgih.jun@samsung.com>
+Subject: RE: [PATCH RESEND v3 0/7] mmc: distinguish DDR timing mode for eMMC/UHS
+Date: Thu, 03 Apr 2014 20:56:52 +0900
+Message-ID: <000e01cf4f33$cdb2d790$691886b0$%jun@samsung.com>
+References: <1383653403-10049-1-git-send-email-ulf.hansson@linaro.org>
+ <005f01cf2a57$6ed025d0$4c707170$%jun@samsung.com>
+ <003201cf3f7e$933ea860$b9bbf920$%jun@samsung.com>
+ <CAPDyKFpgfQvo-BP-Eb-2V9pypGianO4-3SnvtQphM+ONaaXdcQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=Windows-1252
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qg0-f49.google.com ([209.85.192.49]:39130 "EHLO
-	mail-qg0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1162401AbaDCHP1 convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 3 Apr 2014 03:15:27 -0400
-Received: by mail-qg0-f49.google.com with SMTP id j107so107906qga.8
-        for <linux-mmc@vger.kernel.org>; Thu, 03 Apr 2014 00:15:26 -0700 (PDT)
-In-Reply-To: <533C2E8D.60309@i2se.com>
+Received: from mailout1.samsung.com ([203.254.224.24]:38031 "EHLO
+	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751853AbaDCL4y (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 3 Apr 2014 07:56:54 -0400
+Received: from epcpsbgr3.samsung.com
+ (u143.gpu120.samsung.co.kr [203.254.230.143])
+ by mailout1.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+ (7.0.4.24.0) 64bit (built Nov 17 2011))
+ with ESMTP id <0N3G00JOEEITR170@mailout1.samsung.com> for
+ linux-mmc@vger.kernel.org; Thu, 03 Apr 2014 20:56:53 +0900 (KST)
+In-reply-to: <CAPDyKFpgfQvo-BP-Eb-2V9pypGianO4-3SnvtQphM+ONaaXdcQ@mail.gmail.com>
+Content-language: ko
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Stefan Wahren <stefan.wahren@i2se.com>
-Cc: Fabio Estevam <fabio.estevam@freescale.com>, Chris Ball <chris@printf.net>, Otavio Salvador <otavio@ossystems.com.br>, Peter.Chen@freescale.com, Kernel@pengutronix.de, linux-mmc <linux-mmc@vger.kernel.org>
+To: 'Ulf Hansson' <ulf.hansson@linaro.org>
+Cc: 'linux-mmc' <linux-mmc@vger.kernel.org>, 'Chris Ball' <chris@printf.net>, 'Rickard Andersson' <rickard.andersson@stericsson.com>, 'Russell King - ARM Linux' <linux@arm.linux.org.uk>, 'balajitk' <balajitk@ti.com>, 'Guennadi Liakhovetski' <g.liakhovetski@gmx.de>, 'Wei WANG' <wei_wang@realsil.com.cn>, 'Samuel Ortiz' <sameo@linux.intel.com>, 'Jaehoon Chung' <jh80.chung@samsung.com>
 
-On 2 April 2014 17:36, Stefan Wahren <stefan.wahren@i2se.com> wrote:
-> Hi Ulf,
->
-> Am 02.04.2014 13:25, schrieb Ulf Hansson:
->> On 27 March 2014 16:32, Stefan Wahren <stefan.wahren@i2se.com> wrote=
-:
->>> When plugging a specific micro SD card at MMC socket of a custom i.=
-MX28 board,
->>> we get the following kernel warning:
->>>
->>> WARNING: CPU: 0 PID: 30 at drivers/mmc/host/mxs-mmc.c:342 mxs_mmc_s=
-tart_cmd+0x34c/0x378()
->>> Modules linked in:
->>> CPU: 0 PID: 30 Comm: kworker/u2:1 Not tainted 3.14.0-rc5 #8
->>> Workqueue: kmmcd mmc_rescan
->>> [<c0015420>] (unwind_backtrace) from [<c0012cb0>] (show_stack+0x10/=
-0x14)
->>> [<c0012cb0>] (show_stack) from [<c001daf8>] (warn_slowpath_common+0=
-x6c/0x8c)
->>> [<c001daf8>] (warn_slowpath_common) from [<c001db34>] (warn_slowpat=
-h_null+0x1c/0x24)
->>> [<c001db34>] (warn_slowpath_null) from [<c0349478>] (mxs_mmc_start_=
-cmd+0x34c/0x378)
->>> [<c0349478>] (mxs_mmc_start_cmd) from [<c0338fa0>] (mmc_start_reque=
-st+0xc4/0xf4)
->>> [<c0338fa0>] (mmc_start_request) from [<c03390b4>] (mmc_wait_for_re=
-q+0x50/0x164)
->>> [<c03390b4>] (mmc_wait_for_req) from [<c03405b8>] (mmc_app_send_scr=
-+0x158/0x1c8)
->>> [<c03405b8>] (mmc_app_send_scr) from [<c033ee1c>] (mmc_sd_setup_car=
-d+0x80/0x3c8)
->>> [<c033ee1c>] (mmc_sd_setup_card) from [<c033f788>] (mmc_sd_init_car=
-d+0x124/0x66c)
->>> [<c033f788>] (mmc_sd_init_card) from [<c033fd7c>] (mmc_attach_sd+0x=
-ac/0x174)
->>> [<c033fd7c>] (mmc_attach_sd) from [<c033a658>] (mmc_rescan+0x25c/0x=
-2d8)
->>> [<c033a658>] (mmc_rescan) from [<c003597c>] (process_one_work+0x1b4=
-/0x4ec)
->>> [<c003597c>] (process_one_work) from [<c0035de4>] (worker_thread+0x=
-130/0x464)
->>> [<c0035de4>] (worker_thread) from [<c003c824>] (kthread+0xb4/0xd0)
->>> [<c003c824>] (kthread) from [<c000f420>] (ret_from_fork+0x14/0x34)
->>>
->>> The error is due to an invalid value in CSD register of a specific =
-2GB micro
->>> SD card. The CSD version of this card is 1.0 but the TACC field has=
- the invalid
->>> value 0. Since the kernel is making use of this TACC field to calcu=
-late the
->>> SD card timeout, an invalid value 0 leads to a warning at mxs_ns_to=
-_ssp_ticks()
->>> and later the following misleading error messages appears in a loop=
-:
->>>
->>> mxs-mmc 80010000.ssp: card claims to support voltages below defined=
- range
->>> mxs-mmc 80010000.ssp: no support for card's volts
->>> mmc0: error -22 whilst initialising MMC card
->>>
->>> This error is only found on this 2GB SD card on mxs platform.
->>> On x86 this card works without any problems.
->>>
->>> The following patch based on the work of Peter Chen and Otavio Salv=
-ador. It
->>> catches the case that the determined timeout is still 0 and set it'=
-s to a
->>> valid value.
->>>
->>> Successful tested on a i.MX28 board.
->>>
->>> Signed-off-by: Stefan Wahren <stefan.wahren@i2se.com>
->>> ---
->>>  drivers/mmc/core/core.c |    4 ++++
->>>  1 file changed, 4 insertions(+)
->>>
->>> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
->>> index 098374b..a9cd996 100644
->>> --- a/drivers/mmc/core/core.c
->>> +++ b/drivers/mmc/core/core.c
->>> @@ -815,6 +815,10 @@ void mmc_set_data_timeout(struct mmc_data *dat=
-a, const struct mmc_card *card)
->>>                         data->timeout_ns =3D limit_us * 1000;
->>>                         data->timeout_clks =3D 0;
->>>                 }
->>> +
->>> +               /* assign limit value if invalid */
->>> +               if (data->timeout_ns =3D=3D 0)
->> Shouldn't you be checking the local variable "timeout_us" instead?
->
-> you're right.
->
->> Or are you saying that tacc_clks is correct for this SD card but not=
- tacc_ns?
->
-> No, like many other of the fields they are zero (here is a dump with
-> this specific sd card):
->
-> root@duckbill:/sys/class/block/mmcblk0/device# grep "" * 2>/dev/null
-> cid:0000005553442020000000000000583f
-> csd:00000032535a83bfedb7ffbf1680003f
-> date:08/2005
-> erase_size:512
-> fwrev:0x0
-> hwrev:0x0
-> manfid:0x000000
-> name:USD
-> oemid:0x0000
-> preferred_erase_size:4194304
-> scr:0225000000000000
-> serial:0x00000000
-> type:SD
-> uevent:DRIVER=3Dmmcblk
-> uevent:MMC_TYPE=3DSD
-> uevent:MMC_NAME=3DUSD
-> uevent:MODALIAS=3Dmmc:block
->
-> May be this has an influence on your preferred option.
+On Wed, April 02, 2014, Ulf Hansson wrote:
+> On 14 March 2014 13:11, Seungwon Jeon <tgih.jun@samsung.com> wrote:
+> > These changes intend to distinguish two DDR timing modes related to eMMC & UHS.
+> > Even though two modes are different actually, UHS_DDR50 is used as eMMC DDR mode.
+> > MMC_TIMING_MMC_DDR52 mode is added.
+> 
+> This will likely be one of first patchset applied to mmc-next when
+> next 3.15 rc[n] becomes available.
+Hi Chris,
 
-Hi Stefan,
+Do you have any plan to pick this patch-set for 3.15?
+I think there is no functional change.
 
-Since we can check the local variable "timeout_us" instead, I am happy
-to keep it as you have proposed in this patch. That should thus fix
-problems for all broken SD cards.
+Thanks,
+Seungwon Jeon
 
-Kind regards
-Ulf Hansson
-
->
-> Thanks for your feedback.
->
-> Best regards
-> Stefan Wahren
->
->>
->> We also have MMC_QUIRK_LONG_READ_TIME. Inventing one for WRITE as we=
-ll
->> and then add this card for both quirks is another option to solve th=
-e
->> problem. Not sure which one I prefer yet. :-)
->>
->> Kind regards
->> Ulf Hansson
->>
->>> +                       data->timeout_ns =3D limit_us * 1000;
->>>         }
->>>
->>>         /*
->>> --
->>> 1.7.10.4
->>>
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe linux-mmc=
-" in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->> --
->> To unsubscribe from this list: send the line "unsubscribe linux-mmc"=
- in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
->
+> 
+> From a bi-sectable point of view, we should squash the enrire patchset
+> into one patch. I hope you are fine with that Seungwon!? If some of
+> the host driver maintainers prefer another solution, also please tell
+> me.
+> 
+> Kind regards
+> Ulf Hansson
+> 
+> >
+> > Changes in V3:
+> >         (6/7) Added MMC-DDR52 mode instead of replacing UHS-DDR50 in dw_mmc-exynos
+> >
+> > Changes in V2:
+> >         (2/7) Added MMC-DDR52 mode instead of replacing UHS-DDR50 in mmci
+> >
+> > Seungwon Jeon (7):
+> >   mmc: clarify DDR timing mode between SD-UHS and eMMC
+> >   mmc: mmci: clarify DDR timing mode between SD-UHS and eMMC
+> >   mmc: omap: clarify DDR timing mode between SD-UHS and eMMC
+> >   mmc: sh_mmcif: clarify DDR timing mode between SD-UHS and eMMC
+> >   mmc: rtsx: clarify DDR timing mode between SD-UHS and eMMC
+> >   mmc: dw_mmc: clarify DDR timing mode between SD-UHS and eMMC
+> >   mmc: sdhci: clarify DDR timing mode between SD-UHS and eMMC
+> >
+> >  drivers/mmc/core/debugfs.c        |    3 +++
+> >  drivers/mmc/core/mmc.c            |    2 +-
+> >  drivers/mmc/host/dw_mmc-exynos.c  |    5 ++---
+> >  drivers/mmc/host/dw_mmc.c         |    2 +-
+> >  drivers/mmc/host/mmci.c           |    6 ++++--
+> >  drivers/mmc/host/omap_hsmmc.c     |    4 ++--
+> >  drivers/mmc/host/rtsx_pci_sdmmc.c |    2 ++
+> >  drivers/mmc/host/sdhci.c          |    4 +++-
+> >  drivers/mmc/host/sh_mmcif.c       |    9 +++++----
+> >  include/linux/mmc/host.h          |    3 ++-
+> >  10 files changed, 25 insertions(+), 15 deletions(-)>
+> >
+> >
+> > Thanks,
+> > sw-j
+> >
 > --
-> Software-Entwickler / software developer
->
-> I2SE GmbH                           Tel: +49 (0) 341 355667-00
-> Friedrich-Ebert-Str. 61             Fax: +49 (0) 341 355667-02
-> 04109 Leipzig
-> Germany
-> Web: http://www.i2se.com/           Mail: info@i2se.com
-> VAT No.: DE 811528334
-> Amtsgericht Leipzig HRB 23784
-> Gesch=E4ftsf=FChrer/CEO: Carsten Ziermann
->
-> *** Diese E-Mail ist allein f=FCr den bezeichneten Adressaten bestimm=
-t. Sie kann rechtlich vertrauliche Informationen enthalten. Wenn Sie di=
-ese E-Mail irrt=FCmlich erhalten haben, informieren Sie bitte unverz=FC=
-glich den Absender per E-Mail und l=F6schen Sie diese E-Mail von Ihrem =
-Computer, ohne Kopien anzufertigen.
-> Vielen Dank. ***
->
-> *** This email is for the exclusive use of the addressee. It may cont=
-ain legally privileged information. If you have received this message i=
-n error, please notify the sender by email immediately and delete the m=
-essage from your computer without making any copies.
-> Thank you. ***
->
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
