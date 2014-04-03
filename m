@@ -1,74 +1,233 @@
-From: Stefan Wahren <stefan.wahren@i2se.com>
-Subject: Re: [PATCH] mmc: core: Use maximum timeout values in case TACC field
- is zero
-Date: Wed, 02 Apr 2014 10:42:25 +0200
-Message-ID: <533BCD71.2090800@i2se.com>
-References: <1395934368-29207-1-git-send-email-stefan.wahren@i2se.com> <CAOMZO5C=Oo2CiAGf8YWJ5T8uV_5M+35_tumZQvKzccGjGeejhg@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+From: Sascha Hauer <s.hauer@pengutronix.de>
+Subject: [PATCH] mmc: Add SDIO function devicetree subnode parsing
+Date: Thu,  3 Apr 2014 11:33:09 +0200
+Message-ID: <1396517589-31203-1-git-send-email-s.hauer@pengutronix.de>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from moutng.kundenserver.de ([212.227.126.130]:56846 "EHLO
-	moutng.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1758093AbaDBImn (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 2 Apr 2014 04:42:43 -0400
-In-Reply-To: <CAOMZO5C=Oo2CiAGf8YWJ5T8uV_5M+35_tumZQvKzccGjGeejhg@mail.gmail.com>
+Received: from metis.ext.pengutronix.de ([92.198.50.35]:33593 "EHLO
+	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751834AbaDCJds (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 3 Apr 2014 05:33:48 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Fabio Estevam <festevam@gmail.com>
-Cc: Fabio Estevam <fabio.estevam@freescale.com>, Chris Ball <chris@printf.net>, Otavio Salvador <otavio@ossystems.com.br>, Sascha Hauer <Kernel@pengutronix.de>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: linux-mmc@vger.kernel.org
+Cc: kernel@pengutronix.de, Sascha Hauer <s.hauer@pengutronix.de>, Chris Ball <chris@printf.net>, linux-kernel@vger.kernel.org, Luciano Coelho <coelho@ti.com>, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 
-Am 27.03.2014 16:41, schrieb Fabio Estevam:
-> On Thu, Mar 27, 2014 at 12:32 PM, Stefan Wahren <stefan.wahren@i2se.com> wrote:
->> When plugging a specific micro SD card at MMC socket of a custom i.MX28 board,
->> we get the following kernel warning:
->>
->> WARNING: CPU: 0 PID: 30 at drivers/mmc/host/mxs-mmc.c:342 mxs_mmc_start_cmd+0x34c/0x378()
->> Modules linked in:
->> CPU: 0 PID: 30 Comm: kworker/u2:1 Not tainted 3.14.0-rc5 #8
->> Workqueue: kmmcd mmc_rescan
->> [<c0015420>] (unwind_backtrace) from [<c0012cb0>] (show_stack+0x10/0x14)
->> [<c0012cb0>] (show_stack) from [<c001daf8>] (warn_slowpath_common+0x6c/0x8c)
->> [<c001daf8>] (warn_slowpath_common) from [<c001db34>] (warn_slowpath_null+0x1c/0x24)
->> [<c001db34>] (warn_slowpath_null) from [<c0349478>] (mxs_mmc_start_cmd+0x34c/0x378)
->> [<c0349478>] (mxs_mmc_start_cmd) from [<c0338fa0>] (mmc_start_request+0xc4/0xf4)
->> [<c0338fa0>] (mmc_start_request) from [<c03390b4>] (mmc_wait_for_req+0x50/0x164)
->> [<c03390b4>] (mmc_wait_for_req) from [<c03405b8>] (mmc_app_send_scr+0x158/0x1c8)
->> [<c03405b8>] (mmc_app_send_scr) from [<c033ee1c>] (mmc_sd_setup_card+0x80/0x3c8)
->> [<c033ee1c>] (mmc_sd_setup_card) from [<c033f788>] (mmc_sd_init_card+0x124/0x66c)
->> [<c033f788>] (mmc_sd_init_card) from [<c033fd7c>] (mmc_attach_sd+0xac/0x174)
->> [<c033fd7c>] (mmc_attach_sd) from [<c033a658>] (mmc_rescan+0x25c/0x2d8)
->> [<c033a658>] (mmc_rescan) from [<c003597c>] (process_one_work+0x1b4/0x4ec)
->> [<c003597c>] (process_one_work) from [<c0035de4>] (worker_thread+0x130/0x464)
->> [<c0035de4>] (worker_thread) from [<c003c824>] (kthread+0xb4/0xd0)
->> [<c003c824>] (kthread) from [<c000f420>] (ret_from_fork+0x14/0x34)
->>
->> The error is due to an invalid value in CSD register of a specific 2GB micro
->> SD card. The CSD version of this card is 1.0 but the TACC field has the invalid
->> value 0. Since the kernel is making use of this TACC field to calculate the
->> SD card timeout, an invalid value 0 leads to a warning at mxs_ns_to_ssp_ticks()
->> and later the following misleading error messages appears in a loop:
->>
->> mxs-mmc 80010000.ssp: card claims to support voltages below defined range
->> mxs-mmc 80010000.ssp: no support for card's volts
->> mmc0: error -22 whilst initialising MMC card
->>
->> This error is only found on this 2GB SD card on mxs platform.
->> On x86 this card works without any problems.
-> Thanks for the patch, Stefan.
->
->> The following patch based on the work of Peter Chen and Otavio Salvador. It
-> It was Peter Chan, not Peter Chen.
+This adds SDIO devicetree subnode parsing to the mmc core. While
+SDIO devices are runtime probable they sometimes need nonprobable
+additional information on embedded systems, like an additional gpio
+interrupt or a clock. This patch makes it possible to supply this
+information from the devicetree. SDIO drivers will find a pointer
+to the devicenode in their devices of_node pointer.
 
-Oops, i will fix that but i don't have his mail address.
+Signed-off-by: Sascha Hauer <s.hauer@pengutronix.de>
+Cc: linux-mmc@vger.kernel.org
+Cc: Chris Ball <chris@printf.net>
+Cc: linux-kernel@vger.kernel.org
+Cc: Luciano Coelho <coelho@ti.com>
+Cc: devicetree@vger.kernel.org
+Cc: linux-arm-kernel@lists.infradead.org
+---
 
-Beside that, are there any other opinions about this patch?
+Motivation for this comes from the TI wilink WLAN driver which
+needs platform_data and currently specifies this via an awkward
+global data pointer, see drivers/net/wireless/ti/wilink_platform_data.c
 
->
-> Regards,
->
-> Fabio Estevam
+ Documentation/devicetree/bindings/mmc/mmc.txt | 30 +++++++++++++++++++++++++++
+ drivers/mmc/core/bus.c                        | 14 +++++++++++++
+ drivers/mmc/core/core.c                       | 25 ++++++++++++++++++++++
+ drivers/mmc/core/core.h                       |  3 +++
+ drivers/mmc/core/sdio_bus.c                   | 16 ++++++++++++++
+ 5 files changed, 88 insertions(+)
 
-Best regards,
+diff --git a/Documentation/devicetree/bindings/mmc/mmc.txt b/Documentation/devicetree/bindings/mmc/mmc.txt
+index 458b57f..6ccfae8 100644
+--- a/Documentation/devicetree/bindings/mmc/mmc.txt
++++ b/Documentation/devicetree/bindings/mmc/mmc.txt
+@@ -51,6 +51,15 @@ Optional SDIO properties:
+ - keep-power-in-suspend: Preserves card power during a suspend/resume cycle
+ - enable-sdio-wakeup: Enables wake up of host system on SDIO IRQ assertion
+ 
++Function subnodes:
++On embedded systems the cards connected to a host may need additional properties.
++These can be specified in subnodes to the host controller node. The subnodes are
++identified by the standard 'reg' property.
++Required properties:
++- reg: Must contain the SDIO function number of the function this subnode describes.
++       A value of 0 denotes the memory SD function, values from 1 to 7 denote the
++       SDIO functions.
++
+ Example:
+ 
+ sdhci@ab000000 {
+@@ -65,3 +74,24 @@ sdhci@ab000000 {
+ 	keep-power-in-suspend;
+ 	enable-sdio-wakeup;
+ }
++
++Example with SDIO subnode:
++
++sdhci@ab000000 {
++	compatible = "sdhci";
++	reg = <0xab000000 0x200>;
++	interrupts = <23>;
++	bus-width = <4>;
++	cd-gpios = <&gpio 69 0>;
++	cd-inverted;
++	wp-gpios = <&gpio 70 0>;
++	max-frequency = <50000000>;
++	keep-power-in-suspend;
++	enable-sdio-wakeup;
++
++	func@2 {
++		reg = <2>;
++		reset-gpios = <&gpio 69 0>;
++		clock-frequency = <26000000>;
++	};
++}
+diff --git a/drivers/mmc/core/bus.c b/drivers/mmc/core/bus.c
+index 64145a3..b63c9b9 100644
+--- a/drivers/mmc/core/bus.c
++++ b/drivers/mmc/core/bus.c
+@@ -16,6 +16,7 @@
+ #include <linux/err.h>
+ #include <linux/slab.h>
+ #include <linux/stat.h>
++#include <linux/of.h>
+ #include <linux/pm_runtime.h>
+ 
+ #include <linux/mmc/card.h>
+@@ -297,6 +298,16 @@ struct mmc_card *mmc_alloc_card(struct mmc_host *host, struct device_type *type)
+ 	return card;
+ }
+ 
++static void mmc_set_of_node(struct mmc_card *card)
++{
++	struct mmc_host *host = card->host;
++
++	if (!host->parent->of_node)
++		return;
++
++	card->dev.of_node = mmc_of_find_child_device(host->parent->of_node, 0);
++}
++
+ /*
+  * Register a new MMC card with the driver model.
+  */
+@@ -367,6 +378,8 @@ int mmc_add_card(struct mmc_card *card)
+ #endif
+ 	mmc_init_context_info(card->host);
+ 
++	mmc_set_of_node(card);
++
+ 	ret = device_add(&card->dev);
+ 	if (ret)
+ 		return ret;
+@@ -395,6 +408,7 @@ void mmc_remove_card(struct mmc_card *card)
+ 				mmc_hostname(card->host), card->rca);
+ 		}
+ 		device_del(&card->dev);
++		of_node_put(card->dev.of_node);
+ 	}
+ 
+ 	put_device(&card->dev);
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 098374b..9ca0ad2 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -1216,6 +1216,31 @@ EXPORT_SYMBOL(mmc_of_parse_voltage);
+ 
+ #endif /* CONFIG_OF */
+ 
++static int mmc_of_get_func_num(struct device_node *node)
++{
++	u32 reg;
++	int ret;
++
++	ret = of_property_read_u32(node, "reg", &reg);
++	if (ret < 0)
++		return ret;
++
++	return reg;
++}
++
++struct device_node *mmc_of_find_child_device(struct device_node *parent,
++		unsigned func_num)
++{
++	struct device_node *node;
++
++	for_each_child_of_node(parent, node) {
++		if (mmc_of_get_func_num(node) == func_num)
++			return node;
++	}
++
++	return NULL;
++}
++
+ #ifdef CONFIG_REGULATOR
+ 
+ /**
+diff --git a/drivers/mmc/core/core.h b/drivers/mmc/core/core.h
+index 443a584..65615f3 100644
+--- a/drivers/mmc/core/core.h
++++ b/drivers/mmc/core/core.h
+@@ -32,6 +32,9 @@ struct mmc_bus_ops {
+ void mmc_attach_bus(struct mmc_host *host, const struct mmc_bus_ops *ops);
+ void mmc_detach_bus(struct mmc_host *host);
+ 
++struct device_node *mmc_of_find_child_device(struct device_node *parent,
++		unsigned func_num);
++
+ void mmc_init_erase(struct mmc_card *card);
+ 
+ void mmc_set_chip_select(struct mmc_host *host, int mode);
+diff --git a/drivers/mmc/core/sdio_bus.c b/drivers/mmc/core/sdio_bus.c
+index 92d1ba8..0bff9e8 100644
+--- a/drivers/mmc/core/sdio_bus.c
++++ b/drivers/mmc/core/sdio_bus.c
+@@ -22,6 +22,7 @@
+ #include <linux/mmc/host.h>
+ #include <linux/mmc/sdio_func.h>
+ 
++#include "core.h"
+ #include "sdio_cis.h"
+ #include "sdio_bus.h"
+ 
+@@ -314,6 +315,19 @@ static void sdio_acpi_set_handle(struct sdio_func *func)
+ static inline void sdio_acpi_set_handle(struct sdio_func *func) {}
+ #endif
+ 
++#include <linux/of.h>
++
++void sdio_set_of_node(struct sdio_func *func)
++{
++	struct mmc_host *host = func->card->host;
++
++	if (!host->parent->of_node)
++		return;
++
++	func->dev.of_node = mmc_of_find_child_device(host->parent->of_node,
++						    func->num);
++}
++
+ /*
+  * Register a new SDIO function with the driver model.
+  */
+@@ -323,6 +337,7 @@ int sdio_add_func(struct sdio_func *func)
+ 
+ 	dev_set_name(&func->dev, "%s:%d", mmc_card_id(func->card), func->num);
+ 
++	sdio_set_of_node(func);
+ 	sdio_acpi_set_handle(func);
+ 	ret = device_add(&func->dev);
+ 	if (ret == 0) {
+@@ -346,6 +361,7 @@ void sdio_remove_func(struct sdio_func *func)
+ 
+ 	acpi_dev_pm_detach(&func->dev, false);
+ 	device_del(&func->dev);
++	of_node_put(func->dev.of_node);
+ 	put_device(&func->dev);
+ }
+ 
+-- 
+1.9.1
 
-Stefan Wahren
