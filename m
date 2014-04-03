@@ -1,447 +1,253 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v3 5/5] mmc: add support for HS400 mode of eMMC5.0
-Date: Thu, 3 Apr 2014 15:14:40 +0200
-Message-ID: <CAPDyKFqdxR_V74PC80qnge9sfr+ehhAsGXN=P9uEK2zfHCEocw@mail.gmail.com>
-References: <1383653403-10049-1-git-send-email-ulf.hansson@linaro.org>
-	<006c01cf2a59$aeb38410$0c1a8c30$%jun@samsung.com>
-	<003f01cf3f7f$46fb6230$d4f22690$%jun@samsung.com>
-	<CAPDyKFryCNh_SL=f9qZnf1L1UeTW2fZvzTFbZ3zv13JV28FM+A@mail.gmail.com>
-	<001501cf480b$edb9f160$c92dd420$%jun@samsung.com>
-	<CAPDyKFo=E4v409bQi9KOGm8aj4TBrjim8COxf6j7_ocvM-Z5jA@mail.gmail.com>
-	<000201cf4a7f$dbef0350$93cd09f0$%jun@samsung.com>
-	<CAPDyKFqVxTEvaqFQo8MQnC4Vf2O1TOoDjvGRD_bcnDeFXddWmg@mail.gmail.com>
-	<002c01cf4e11$1623cfd0$426b6f70$%jun@samsung.com>
-	<CAPDyKFoZUw18AQrhuKWKkj7R6vH9Bx=WEwJ5MPoYsD62QuqoBw@mail.gmail.com>
-	<000d01cf4f33$4a085460$de18fd20$%jun@samsung.com>
+From: Alex Lemberg <Alex.Lemberg@sandisk.com>
+Subject: RE: [RFC PATCH 1/1 ]mmc: Support-FFU-for-eMMC-v5.0
+Date: Thu, 3 Apr 2014 12:54:23 +0000
+Message-ID: <282CEDFCBC30114F83C499CB8F2ED53337EB7426@SACMBXIP02.sdcorp.global.sandisk.com>
+References: <001901cf4ccf$3dc64920$b952db60$@samsung.com>
+	<533A3DD7.80403@samsung.com>
+	<CANEJEGt=5EegY80F3EvsG70poUwVFRjeZT-hUJD8LdULAz=S_w@mail.gmail.com>
+ <CANEJEGu8btGqp=NqV+JjFBWKxSh6_=DcsbH4aoL9tGgK2xcUFA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qc0-f170.google.com ([209.85.216.170]:42120 "EHLO
-	mail-qc0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751836AbaDCNOl (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 3 Apr 2014 09:14:41 -0400
-Received: by mail-qc0-f170.google.com with SMTP id x13so1821414qcv.15
-        for <linux-mmc@vger.kernel.org>; Thu, 03 Apr 2014 06:14:40 -0700 (PDT)
-In-Reply-To: <000d01cf4f33$4a085460$de18fd20$%jun@samsung.com>
+Received: from ch1ehsobe005.messaging.microsoft.com ([216.32.181.185]:48890
+	"EHLO ch1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751738AbaDCMy2 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 3 Apr 2014 08:54:28 -0400
+In-Reply-To: <CANEJEGu8btGqp=NqV+JjFBWKxSh6_=DcsbH4aoL9tGgK2xcUFA@mail.gmail.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Seungwon Jeon <tgih.jun@samsung.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Jaehoon Chung <jh80.chung@samsung.com>, Jackey Shen <jackey.shen@amd.com>, Alim Akhtar <alim.akhtar@samsung.com>
+To: Grant Grundler <grundler@chromium.org>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, Seunguk Shin <seunguk.shin@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Avi Shchislowski <Avi.Shchislowski@sandisk.com>, Chris Ball <chris@printf.net>, CPGS <cpgs@samsung.com>, Puthikorn Voravootivat <puthik@chromium.org>, Gwendal Grignou <gwendal@chromium.org>
 
-On 3 April 2014 13:53, Seungwon Jeon <tgih.jun@samsung.com> wrote:
-> On Wed, April 02, 2014, Ulf Hansson wrote:
->> On 2 April 2014 03:15, Seungwon Jeon <tgih.jun@samsung.com> wrote:
->> > On Fri, March 28, 2014, Ulf Hansson wrote:
->> >> On 28 March 2014 13:18, Seungwon Jeon <tgih.jun@samsung.com> wrote:
->> >> > On Fri, March 28, 2014, Ulf Hansson wrote:
->> >> >> On 25 March 2014 10:23, Seungwon Jeon <tgih.jun@samsung.com> wrote:
->> >> >> > Hi Ulf,
->> >> >> >
->> >> >> > On Tue, March 25, 2014, Ulf Hansson wrote:
->> >> >> >> On 14 March 2014 13:16, Seungwon Jeon <tgih.jun@samsung.com> wrote:
->> >> >> >> > This patch adds HS400 mode support for eMMC5.0 device.
->> >> >> >> > HS400 mode is high speed DDR interface timing from HS200.
->> >> >> >> > Clock frequency is up to 200MHz and only 8-bit bus width is
->> >> >> >> > supported. In addition, tuning process of HS200 is required
->> >> >> >> > to synchronize the command response on the CMD line because
->> >> >> >> > CMD input timing for HS400 mode is the same as HS200 mode.
->> >> >> >> >
->> >> >> >> > Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
->> >> >> >> > Reviewed-by: Jackey Shen <jackey.shen@amd.com>
->> >> >> >> > Tested-by: Jaehoon Chung <jh80.chung@samsung.com>
->> >> >> >> > Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
->> >> >> >> > ---
->> >> >> >> >  drivers/mmc/core/bus.c     |    1 +
->> >> >> >> >  drivers/mmc/core/debugfs.c |    3 +
->> >> >> >> >  drivers/mmc/core/mmc.c     |  115 +++++++++++++++++++++++++++++++++++++++++--
->> >> >> >> >  include/linux/mmc/card.h   |    1 +
->> >> >> >> >  include/linux/mmc/host.h   |   15 +++++-
->> >> >> >> >  include/linux/mmc/mmc.h    |    7 ++-
->> >> >> >> >  6 files changed, 134 insertions(+), 8 deletions(-)
->> >> >> >> >
->> >> >> >> > diff --git a/drivers/mmc/core/bus.c b/drivers/mmc/core/bus.c
->> >> >> >> > index f37e9d6..d2dbf02 100644
->> >> >> >> > --- a/drivers/mmc/core/bus.c
->> >> >> >> > +++ b/drivers/mmc/core/bus.c
->> >> >> >> > @@ -349,6 +349,7 @@ int mmc_add_card(struct mmc_card *card)
->> >> >> >> >                         mmc_hostname(card->host),
->> >> >> >> >                         mmc_card_uhs(card) ? "ultra high speed " :
->> >> >> >> >                         (mmc_card_hs(card) ? "high speed " : ""),
->> >> >> >> > +                       mmc_card_hs400(card) ? "HS400 " :
->> >> >> >> >                         (mmc_card_hs200(card) ? "HS200 " : ""),
->> >> >> >> >                         mmc_card_ddr52(card) ? "DDR " : "",
->> >> >> >> >                         uhs_bus_speed_mode, type, card->rca);
->> >> >> >> > diff --git a/drivers/mmc/core/debugfs.c b/drivers/mmc/core/debugfs.c
->> >> >> >> > index 1f730db..91eb162 100644
->> >> >> >> > --- a/drivers/mmc/core/debugfs.c
->> >> >> >> > +++ b/drivers/mmc/core/debugfs.c
->> >> >> >> > @@ -141,6 +141,9 @@ static int mmc_ios_show(struct seq_file *s, void *data)
->> >> >> >> >         case MMC_TIMING_MMC_HS200:
->> >> >> >> >                 str = "mmc HS200";
->> >> >> >> >                 break;
->> >> >> >> > +       case MMC_TIMING_MMC_HS400:
->> >> >> >> > +               str = "mmc HS400";
->> >> >> >> > +               break;
->> >> >> >> >         default:
->> >> >> >> >                 str = "invalid";
->> >> >> >> >                 break;
->> >> >> >> > diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
->> >> >> >> > index 6dd68e6..969d595 100644
->> >> >> >> > --- a/drivers/mmc/core/mmc.c
->> >> >> >> > +++ b/drivers/mmc/core/mmc.c
->> >> >> >> > @@ -240,7 +240,7 @@ static int mmc_get_ext_csd(struct mmc_card *card, u8 **new_ext_csd)
->> >> >> >> >  static void mmc_select_card_type(struct mmc_card *card)
->> >> >> >> >  {
->> >> >> >> >         struct mmc_host *host = card->host;
->> >> >> >> > -       u8 card_type = card->ext_csd.raw_card_type & EXT_CSD_CARD_TYPE_MASK;
->> >> >> >> > +       u8 card_type = card->ext_csd.raw_card_type;
->> >> >> >> >         u32 caps = host->caps, caps2 = host->caps2;
->> >> >> >> >         unsigned int hs_max_dtr = 0, hs200_max_dtr = 0;
->> >> >> >> >         unsigned int avail_type = 0;
->> >> >> >> > @@ -281,6 +281,18 @@ static void mmc_select_card_type(struct mmc_card *card)
->> >> >> >> >                 avail_type |= EXT_CSD_CARD_TYPE_HS200_1_2V;
->> >> >> >> >         }
->> >> >> >> >
->> >> >> >> > +       if (caps2 & MMC_CAP2_HS400_1_8V &&
->> >> >> >> > +           card_type & EXT_CSD_CARD_TYPE_HS400_1_8V) {
->> >> >> >> > +               hs200_max_dtr = MMC_HS200_MAX_DTR;
->> >> >> >> > +               avail_type |= EXT_CSD_CARD_TYPE_HS400_1_8V;
->> >> >> >> > +       }
->> >> >> >> > +
->> >> >> >> > +       if (caps2 & MMC_CAP2_HS400_1_2V &&
->> >> >> >> > +           card_type & EXT_CSD_CARD_TYPE_HS400_1_2V) {
->> >> >> >> > +               hs200_max_dtr = MMC_HS200_MAX_DTR;
->> >> >> >> > +               avail_type |= EXT_CSD_CARD_TYPE_HS400_1_2V;
->> >> >> >> > +       }
->> >> >> >> > +
->> >> >> >> >         card->ext_csd.hs_max_dtr = hs_max_dtr;
->> >> >> >> >         card->ext_csd.hs200_max_dtr = hs200_max_dtr;
->> >> >> >> >         card->mmc_avail_type = avail_type;
->> >> >> >> > @@ -499,6 +511,8 @@ static int mmc_read_ext_csd(struct mmc_card *card, u8 *ext_csd)
->> >> >> >> >                         ext_csd[EXT_CSD_PWR_CL_DDR_52_195];
->> >> >> >> >                 card->ext_csd.raw_pwr_cl_ddr_52_360 =
->> >> >> >> >                         ext_csd[EXT_CSD_PWR_CL_DDR_52_360];
->> >> >> >> > +               card->ext_csd.raw_pwr_cl_ddr_200_360 =
->> >> >> >> > +                       ext_csd[EXT_CSD_PWR_CL_DDR_200_360];
->> >> >> >> >         }
->> >> >> >> >
->> >> >> >> >         if (card->ext_csd.rev >= 5) {
->> >> >> >> > @@ -665,7 +679,10 @@ static int mmc_compare_ext_csds(struct mmc_card *card, unsigned
->> bus_width)
->> >> >> >> >                 (card->ext_csd.raw_pwr_cl_ddr_52_195 ==
->> >> >> >> >                         bw_ext_csd[EXT_CSD_PWR_CL_DDR_52_195]) &&
->> >> >> >> >                 (card->ext_csd.raw_pwr_cl_ddr_52_360 ==
->> >> >> >> > -                       bw_ext_csd[EXT_CSD_PWR_CL_DDR_52_360]));
->> >> >> >> > +                       bw_ext_csd[EXT_CSD_PWR_CL_DDR_52_360]) &&
->> >> >> >> > +               (card->ext_csd.raw_pwr_cl_ddr_200_360 ==
->> >> >> >> > +                       bw_ext_csd[EXT_CSD_PWR_CL_DDR_200_360]));
->> >> >> >> > +
->> >> >> >> >         if (err)
->> >> >> >> >                 err = -EINVAL;
->> >> >> >> >
->> >> >> >> > @@ -776,7 +793,9 @@ static int __mmc_select_powerclass(struct mmc_card *card,
->> >> >> >> >                                 ext_csd->raw_pwr_cl_52_360 :
->> >> >> >> >                                 ext_csd->raw_pwr_cl_ddr_52_360;
->> >> >> >> >                 else if (host->ios.clock <= MMC_HS200_MAX_DTR)
->> >> >> >> > -                       pwrclass_val = ext_csd->raw_pwr_cl_200_360;
->> >> >> >> > +                       pwrclass_val = (bus_width == EXT_CSD_DDR_BUS_WIDTH_8) ?
->> >> >> >> > +                               ext_csd->raw_pwr_cl_ddr_200_360 :
->> >> >> >> > +                               ext_csd->raw_pwr_cl_200_360;
->> >> >> >> >                 break;
->> >> >> >> >         default:
->> >> >> >> >                 pr_warning("%s: Voltage range not supported "
->> >> >> >> > @@ -840,7 +859,8 @@ static void mmc_set_bus_speed(struct mmc_card *card)
->> >> >> >> >  {
->> >> >> >> >         unsigned int max_dtr = (unsigned int)-1;
->> >> >> >> >
->> >> >> >> > -       if (mmc_card_hs200(card) && max_dtr > card->ext_csd.hs200_max_dtr)
->> >> >> >> > +       if ((mmc_card_hs200(card) || mmc_card_hs400(card)) &&
->> >> >> >> > +            max_dtr > card->ext_csd.hs200_max_dtr)
->> >> >> >> >                 max_dtr = card->ext_csd.hs200_max_dtr;
->> >> >> >> >         else if (mmc_card_hs(card) && max_dtr > card->ext_csd.hs_max_dtr)
->> >> >> >> >                 max_dtr = card->ext_csd.hs_max_dtr;
->> >> >> >> > @@ -939,6 +959,28 @@ static int mmc_select_hs(struct mmc_card *card)
->> >> >> >> >  }
->> >> >> >> >
->> >> >> >> >  /*
->> >> >> >> > + * Revert to the high-speed mode from above speed
->> >> >> >> > + */
->> >> >> >> > +static int mmc_revert_to_hs(struct mmc_card *card)
->> >> >> >> > +{
->> >> >> >> > +       /*
->> >> >> >> > +        * CMD13, which is used to confirm the completion of timing
->> >> >> >> > +        * change, will be issued at higher speed timing condtion
->> >> >> >> > +        * rather than high-speed. If device has completed the change
->> >> >> >> > +        * to high-speed mode, it may not be proper timing to issue
->> >> >> >> > +        * command. Low speed supplies better timing margin than high
->> >> >> >> > +        * speed. Accordingly clock rate & timging should be chagned
->> >> >> >> > +        * ahead before actual switch.
->> >> >> >>
->> >> >> >> I have some problem to understand this comment. I guess you are trying
->> >> >> >> to provide the arguments to why it makes sense to perform the revert
->> >> >> >> to lower speed mode!?
->> >> >> >>
->> >> >> >> This makes me wonder if this is not part of the spec? Could you try to clarify?
->> >> >> > But specification says that "HS_TIMING must be set to "0x1" before setting BUS_WIDTH for dual
->> >> data
->> >> >> rate operation".
->> >> >> > I think this sequence is not graceful.
->> >> >> > I also commented why speed mode should be changed to high-speed mode from HS200 mode in the
->> >> >> function-called part.
->> >> >> > Because it is not possible to set 8-bit data bus for dual rate on HS200 mode, revert to high-
->> >> speed
->> >> >> from HS200 is needed.
->> >> >> > If the above-commented point makes it confused, it could be removed.
->> >> >> > Please let me know your opinion.
->> >> >> >
->> >> >> >>
->> >> >> >> > +        */
->> >> >> >> > +       mmc_set_timing(card->host, MMC_TIMING_MMC_HS);
->> >> >> >> > +       mmc_set_bus_speed(card);
->> >> >> >> > +
->> >> >> >> > +       return mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
->> >> >> >> > +                         EXT_CSD_HS_TIMING, EXT_CSD_TIMING_HS,
->> >> >> >> > +                         card->ext_csd.generic_cmd6_time);
->> >> >> >> > +}
->> >> >> >> > +
->> >> >> >> > +/*
->> >> >> >> >   * Activate wide bus and DDR if supported.
->> >> >> >> >   */
->> >> >> >> >  static int mmc_select_hs_ddr(struct mmc_card *card)
->> >> >> >> > @@ -993,6 +1035,54 @@ static int mmc_select_hs_ddr(struct mmc_card *card)
->> >> >> >> >         return err;
->> >> >> >> >  }
->> >> >> >> >
->> >> >> >> > +static int mmc_select_hs400(struct mmc_card *card)
->> >> >> >> > +{
->> >> >> >> > +       struct mmc_host *host = card->host;
->> >> >> >> > +       int err = 0;
->> >> >> >> > +
->> >> >> >> > +       /*
->> >> >> >> > +        * The bus width is set to only 8 DDR in HS400 mode
->> >> >> >>
->> >> >> >> Please rephrase the comment to something like:
->> >> >> >> "HS400 mode requires 8-bit bus width."
->> >> >> > As it is, it was from spec's description.
->> >> >> > But I think yours would be more clearable.
->> >> >> >
->> >> >> >>
->> >> >> >> > +        */
->> >> >> >> > +       if (!(card->mmc_avail_type & EXT_CSD_CARD_TYPE_HS400 &&
->> >> >> >> > +             host->ios.bus_width == MMC_BUS_WIDTH_8))
->> >> >> >> > +               return 0;
->> >> >> >> > +
->> >> >> >> > +       /*
->> >> >> >> > +        * Before setting BUS_WIDTH for dual data rate operation,
->> >> >> >> > +        * HS_TIMING must be set to High Speed(0x1)
->> >> >> >> > +        */
->> >> >> >>
->> >> >> >> Please rephrase comment:
->> >> >> >>
->> >> >> >> "Before switching to dual data rate operation for HS400, we need
->> >> >> >> revert from HS200 timing to regular HS timing."
->> >> >> > Ok.
->> >> >> >
->> >> >> >>
->> >> >> >> > +       err = mmc_revert_to_hs(card);
->> >> >> >>
->> >> >> >> I don't think we need a separate function to handle the revert.
->> >> >> >> Please, just add the code here instead. While you do that, I suppose
->> >> >> >> we should combine the comment in that function into one comment here.
->> >> >> > OK, I don't oppose that.
->> >> >> >
->> >> >> >>
->> >> >> >> > +       if (err) {
->> >> >> >> > +               pr_warn("%s: switch to high-speed from hs200 failed, err:%d\n",
->> >> >> >> > +                       mmc_hostname(host), err);
->> >> >> >> > +               return err;
->> >> >> >> > +       }
->> >> >> >> > +
->> >> >> >> > +       err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
->> >> >> >> > +                        EXT_CSD_BUS_WIDTH,
->> >> >> >> > +                        EXT_CSD_DDR_BUS_WIDTH_8,
->> >> >> >> > +                        card->ext_csd.generic_cmd6_time);
->> >> >> >> > +       if (err) {
->> >> >> >> > +               pr_warn("%s: switch to bus width for hs400 failed, err:%d\n",
->> >> >> >> > +                       mmc_hostname(host), err);
->> >> >> >> > +               return err;
->> >> >> >> > +       }
->> >> >> >> > +
->> >> >> >> > +       err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
->> >> >> >> > +                        EXT_CSD_HS_TIMING, EXT_CSD_TIMING_HS400,
->> >> >> >> > +                        card->ext_csd.generic_cmd6_time);
->> >> >> >> > +       if (err) {
->> >> >> >> > +               pr_warn("%s: switch to hs400 failed, err:%d\n",
->> >> >> >> > +                        mmc_hostname(host), err);
->> >> >> >> > +               return err;
->> >> >> >> > +       }
->> >> >> >> > +
->> >> >> >> > +       mmc_set_timing(host, MMC_TIMING_MMC_HS400);
->> >> >> >> > +       mmc_set_bus_speed(card);
->> >> >> >> > +
->> >> >> >> > +       return 0;
->> >> >> >> > +}
->> >> >> >> > +
->> >> >> >> >  /*
->> >> >> >> >   * For device supporting HS200 mode, the following sequence
->> >> >> >> >   * should be done before executing the tuning process.
->> >> >> >> > @@ -1025,7 +1115,16 @@ static int mmc_select_hs200(struct mmc_card *card)
->> >> >> >> >                                    EXT_CSD_HS_TIMING, EXT_CSD_TIMING_HS200,
->> >> >> >> >                                    card->ext_csd.generic_cmd6_time,
->> >> >> >> >                                    true, true, true);
->> >> >> >> > -               if (!err)
->> >> >> >> > +               if (err)
->> >> >> >> > +                       goto err;
->> >> >> >> > +
->> >> >> >> > +               if (card->mmc_avail_type & EXT_CSD_CARD_TYPE_HS400)
->> >> >> >> > +                       /*
->> >> >> >> > +                        * Timing should be adjusted to the HS400 target
->> >> >> >> > +                        * operation frequency for tuning process
->> >> >> >> > +                        */
->> >> >> >> > +                       mmc_set_timing(host, MMC_TIMING_MMC_HS400_TUNING);
->> >> >> >>
->> >> >> >> This seems strange. Do we really need a separate
->> >> >> >> MMC_TIMING_MMC_HS400_TUNING value?
->> >> >> > Spec. describes the HS400 selection sequence like below.
->> >> >> > <Quot>
->> >> >> > ...
->> >> >> > 6) Perform the Tuning Process at the HS400 target operating frequency
->> >> >> > (Note: tuning process in HS200 mode is required to synchronize the command response on the CMD
->> >> line
->> >> >> to CLK for HS400 operation).
->> >> >> > ...
->> >> >> > </Quot>
->> >> >> > That means target clock rate for tuning sequence can be different with HS200.
->> >> >> > Considering for that, it needs to distinguish.
->> >> >>
->> >> >> I understand the spec now, thanks.
->> >> >>
->> >> >> Still, I am not convinced we should handle this through the
->> >> >> MMC_TIMING* field. That will leave host drivers to do some magic clock
->> >> >> frequency calculation from their ->set_ios callbacks, just depending
->> >> >> on the MMC_TIMING_MMC_HS400_TUNING value.
->> >> >>
->> >> >> I am also a bit concerned how MMC_TIMING_MMC_HS400_TUNING, would work
->> >> >> if/when we implement periodic re-tuning - triggered from the mmc core
->> >> >> layer.
->> >> >>
->> >> >> What we really want to do, is to pretend we were to operate in
->> >> >> MMC_TIMING_MMC_HS400 and ask the host driver what the target frequency
->> >> >> would be in this case. Then set this frequency through
->> >> >> mmc_set_clock().
->> >> >>
->> >> >> Then how do we ask the host driver about this frequency? Let's add a
->> >> >> new host_ops callback. We want it to be generic, so provide the
->> >> >> MMC_TIMING bit as a parameter. Additionally we want it to be optional
->> >> >> to implement, thus for those host drivers that supports the same
->> >> >> target frequency for HS200 as for HS400, they don't need to implement
->> >> >> it.
->> >> >>
->> >> >> Would this be a way forward?
->> >> >
->> >> > Thanks for your opinion.
->> >> >
->> >> > IMO, in this case additional callback handling seems to cause the complication in host side.
->> >> > I think we don't need to ask host driver about target frequency for HS400 in order to set
->> specific
->> >> frequency through
->> >> > mmc_set_clock().
->> >> > Target frequency which core layer requires for HS400 will be 200MHz and it is also mentioned in
->> >> specification.
->> >> > Host driver including actual controller just will effort to make DDR rate with 200MHz.
->> >>
->> >> What the mmc_set_clock() request is not the same as what the frequency
->> >> actually will be set to. That depends on the host controller/driver.
->> >>
->> >> If for some reason the host controller/driver are not able to use the
->> >> same frequency for HS200 as for HS400, this should be possible to be
->> >> addressed in the way I suggested.
->> > I checked your sequence, but I'm not sure whether your suggestion is suitable for this.
->> > As we know, in case of DDR52 clock rate requested by mmc_set_clock() is not different from High
->> speed; Actually same 52Mhz is
->> > requested.
->> > It will be same in HS400 mode. Clock rate for mmc_set_clock() will be 200MHz in both HS200 and HS400.
->> > Instead, host driver may control specific register for DDR rate output.
->> > This is why core layer don't need call extra mmc_set_clock().
->> > That means it doesn't need to ask host driver about frequency with using additional callback.
->> > What core layer should do is to gives host driver timing information such as
->> MMC_TIMING_MMC_HS400_TUNING.
->> > Then, host can prepare specific timing setting for HS400 tuning.
->> > As you mentioned, it depends on the host controller/driver.
->>
->> The reason why I suggested to add a new host_ops callback and to use
->> the mmc_set_clock() method was to address what's mentioned in the
->> spec, which you pointed me to.
->>
->> So, now you are saying we don't need to consider this scenario,
->> because very likely we will be using the same frequency as for HS200.
-> I didn't mean actual output clock frequency.
-> Just mentioned required clock rate through mmc_set_clock() in core layer.
->
-> I think clock generation depends on host controller.
-> For higher speed, some programmable setting will be needed.
-> Hopefully, you could find the following patch to check how HS400 is handled in host driver.
-> Exynos host changes internal clock rate for HS400 mode.
-> "[PATCH v2 5/7] mmc: dw_mmc: exynos: support eMMC's HS400 mode"
->
->>
->> Okay - let's leave this to be implemented if/when we see there is a need for it.
->>
->> >
->> >>
->> >> > MMC_TIMING_MMC_HS400_TUNING may be used as notification for host to prepare HS400 tuning sequence.
->> >>
->> >> So, are you saying that your controller are have different tuning
->> >> methods for HS200 vs HS400? That's a different requirement, which of
->> >> course we need to handle.
->> > NO, tuning method is equal. I meant that host's setting for IO timing would be different.
->>
->> I suppose this means the host don't need to bother about HS400 (at
->> all) during tuning sequence and thus we don't need the
->> MMC_TIMING_MMC_HS400_TUNING timing? Or am I missing your point?
-> Please check the patch I mentioned above.
+SGkgR3JhbnQsDQoNCldlIHdvcmsgb24gVjIsIGFuZCBBdmkgd2lsbCBwb3N0IGl0IGluIGZldyBj
+b21pbmcgZGF5cy4NCg0KVGhhbmtzLA0KQWxleA0KDQo+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0t
+LS0tDQo+IEZyb206IGxpbnV4LW1tYy1vd25lckB2Z2VyLmtlcm5lbC5vcmcgW21haWx0bzpsaW51
+eC1tbWMtDQo+IG93bmVyQHZnZXIua2VybmVsLm9yZ10gT24gQmVoYWxmIE9mIEdyYW50IEdydW5k
+bGVyDQo+IFNlbnQ6IFR1ZXNkYXksIEFwcmlsIDAxLCAyMDE0IDExOjMwIFBNDQo+IFRvOiBHcmFu
+dCBHcnVuZGxlcg0KPiBDYzogSmFlaG9vbiBDaHVuZzsgU2V1bmd1ayBTaGluOyBsaW51eC1tbWNA
+dmdlci5rZXJuZWwub3JnOyBBdmkNCj4gU2hjaGlzbG93c2tpOyBDaHJpcyBCYWxsOyBDUEdTOyBQ
+dXRoaWtvcm4gVm9yYXZvb3RpdmF0OyBHd2VuZGFsIEdyaWdub3UNCj4gU3ViamVjdDogUmU6IFtS
+RkMgUEFUQ0ggMS8xIF1tbWM6IFN1cHBvcnQtRkZVLWZvci1lTU1DLXY1LjANCj4gDQo+IGFyZ2gu
+Li5yZXBvc3RpbmcgbXkgcmVzcG9uc2UgYXMgdGV4dCBvbmx5IHNpbmNlIGxpbnV4LW1tYyBkb2Vz
+bid0IGxpa2UgaHRtbA0KPiBtYWlsLiA6KA0KPiANCj4gT24gVHVlLCBBcHIgMSwgMjAxNCBhdCAx
+OjI2IFBNLCBHcmFudCBHcnVuZGxlciA8Z3J1bmRsZXJAY2hyb21pdW0ub3JnPg0KPiB3cm90ZToN
+Cj4gPg0KPiA+DQo+ID4NCj4gPiBPbiBNb24sIE1hciAzMSwgMjAxNCBhdCA5OjE3IFBNLCBKYWVo
+b29uIENodW5nDQo+ID4gPGpoODAuY2h1bmdAc2Ftc3VuZy5jb20+DQo+ID4gd3JvdGU6DQo+ID4+
+DQo+ID4+IEhpLCBTZXVuZ3VrLg0KPiA+Pg0KPiA+PiBPbiAwMy8zMS8yMDE0IDA3OjUxIFBNLCBT
+ZXVuZ3VrIFNoaW4gd3JvdGU6DQo+ID4+ID4gU29tZSBvZiBTYW1zdW5nIGVNTUMgZG9lcyBub3Qg
+c2hvdyB0aGUgYXJndW1lbnQgZm9yIGZmdSBpbiBleHRfY3NkLg0KPiA+PiA+IEluIGNhc2Ugb2Yg
+dGhpcywgZU1NQyBzaG93cyAweDAgZnJvbSBleHRfY3NkLCBIb3N0IGhhcyB0byBtb2RpZnkNCj4g
+Pj4gPiB0aGUgYXJndW1lbnQuDQo+ID4+ID4NCj4gPj4gPiBBZGQgIiNkZWZpbmUgQ0lEX01BTkZJ
+RF9TQU1TVU5HICAgICAgICAgICAgICAgMHgxNSINCj4gPj4gSWYgeW91IG5lZWQgdG8gYWRkIHRo
+ZSBTYW1zdW5nIGVNTUMgc3BlY2lmaWMgY29kZSwgaXQgd291bGQgYmUgYmV0dGVyDQo+ID4+IHlv
+dSB3b3VsZCBzZW5kIHRoZSBTYW1zdW5nIGVNTUMgc3BlY2lmaWMgcGF0Y2guDQo+ID4+IChiYXNl
+ZC1vbiB0aGlzIHBhdGNoLikNCj4gPg0KPiA+DQo+ID4gSSBiZWxpZXZlIFNldW5ndWsgU2hpbiBw
+cm92aWRlZCB0aGUgaW5mb3JtYXRpb24gc28gc29tZW9uZSBlbHNlIGNvdWxkDQo+ID4gYWRkIHRo
+aXMgY29kZS4gSSBjb3VsZCBiZSB0aGF0IHBlcnNvbiBpZiBubyBvbmUgZnJvbSBTYW1zdW5nIGhh
+cyBoYXZlDQo+ID4gdGltZSBmb3IgdGhpcy4gIEknbSB2ZXJ5IGdyYXRlZnVsIHRvIFNldW5nZ3Vr
+IGZvciBwb3N0aW5nIHRoZXNlIGRldGFpbHMuDQo+ID4NCj4gPiBJIGhvcGUgd2UgY2FuIHNlZSB0
+aGUgc2FtZSBkZXRhaWxzIGZvciBTYW1zdW5nIGVNTUMgNC41IGFsc28gKGJ1dA0KPiA+IHBsZWFz
+ZSB1c2UgYSBkaWZmZXJlbnQgZW1haWwgU3ViamVjdCBsaW5lIHNvIHdlIGFyZW4ndCBjb25mdXNl
+ZC4pDQo+ID4NCj4gPj4gVGhpcyBwYXRjaCBpc24ndCBwYXRjaCBmb3Igc2Ftc3VuZyBlTU1DLg0K
+PiA+PiBJIGRpZG4ndCBzZWUgdGhpcyBwYXRjaCBmdWxseSwgYnV0IGkgdGhpbmsgdGhpcyBwYXRj
+aCBpcyBnZW5lcmFsIGNvZGUuDQo+ID4NCj4gPg0KPiA+IEFGQUlDVCwgdGhlIE1BTkZJRF9TQU1T
+VU5HIGlzIG9ubHkgYSAicXVpcmsiIGZvciBTYW1zdW5nIGRldmljZXMNCj4gd2hpY2gNCj4gPiBz
+cGVjaWZ5IHRoZSBFWFRfQ1NEX0ZGVV9BUkcgYXMgMC4NCj4gPg0KPiA+IFRoZSBvcmlnaW5hbCBw
+YXRjaCBmcm9tIFNhbkRpc2sgaXMgZ2VuZXJhbCBjb2RlIGFuZCBtb3N0IG9mIFNldW5ndWsncw0K
+PiA+IGNvbW1lbnRzIGFyZSBnZW5lcmFsIHRvby4gU2FuRGlzayAoaWUgQXZpKSBzaG91bGQgcGxl
+YXNlIEFDSyB0aGV5J3ZlDQo+ID4gc2VlbiB0aG9zZSBjb21tZW50cyBzaW5jZSBJIGJlbGlldmUg
+U2V1bmd1ayBpcyBjb3JyZWN0Lg0KPiA+DQo+ID4gQW5kIEF2aSwgcGxlYXNlIGxldCB1cyBrbm93
+IGlmL3doZW4geW91IHBsYW4gb24gcG9zdGluZyBhIFYyLiBPciBhdA0KPiA+IGxlYXN0IG5vdCBi
+ZSBvZmZlbmRlZCBpZiBJIGdldCBpbXBhdGllbnQgYW5kIGhpamFjayB0aGlzIHBhdGNoIHNlcmll
+cy4NCj4gPiA6KQ0KPiA+DQo+ID4gY2hlZXJzLA0KPiA+IGdyYW50DQo+ID4NCj4gPj4gQmVzdCBS
+ZWdhcmRzLA0KPiA+PiBKYWVob29uIENodW5nDQo+ID4+DQo+ID4+ID4NCj4gPj4gPj4gK2ludCBt
+bWNfZmZ1X2Rvd25sb2FkKHN0cnVjdCBtbWNfY2FyZCAqY2FyZCwgc3RydWN0DQo+IG1tY19jb21t
+YW5kICpjbWQsDQo+ID4+ID4+ICsgICAgICAgdTggKmRhdGEsIGludCBidWZfYnl0ZXMpDQo+ID4+
+ID4+ICt7DQo+ID4+ID4+ICsgICAgICAgdTggZXh0X2NzZFtDQVJEX0JMT0NLX1NJWkVdOw0KPiA+
+PiA+PiArICAgICAgIGludCBlcnI7DQo+ID4+ID4+ICsgICAgICAgaW50IHJldDsNCj4gPj4gPj4g
+Kw0KPiA+PiA+PiArICAgICAgIC8qIFJlYWQgdGhlIEVYVF9DU0QgKi8NCj4gPj4gPj4gKyAgICAg
+ICBlcnIgPSBtbWNfc2VuZF9leHRfY3NkKGNhcmQsIGV4dF9jc2QpOw0KPiA+PiA+PiArICAgICAg
+IGlmIChlcnIpIHsNCj4gPj4gPj4gKyAgICAgICAgICAgICAgIHByX2VycigiRkZVOiAlczogZXJy
+b3IgJWQgc2VuZGluZyBleHRfY3NkXG4iLA0KPiA+PiA+PiArICAgICAgICAgICAgICAgICAgICAg
+ICBtbWNfaG9zdG5hbWUoY2FyZC0+aG9zdCksIGVycik7DQo+ID4+ID4+ICsgICAgICAgICAgICAg
+ICBnb3RvIGV4aXQ7DQo+ID4+ID4+ICsgICAgICAgfQ0KPiA+PiA+PiArDQo+ID4+ID4+ICsgICAg
+ICAgLyogQ2hlY2sgaWYgRkZVIGlzIHN1cHBvcnRlZCBieSBjYXJkICovDQo+ID4+ID4+ICsgICAg
+ICAgaWYNCj4gKCFGRlVfU1VQUE9SVEVEX01PREUoZXh0X2NzZFtFWFRfQ1NEX1NVUFBPUlRFRF9N
+T0RFXSkpIHsNCj4gPj4gPj4gKyAgICAgICAgICAgICAgIGVyciA9IC1FSU5WQUw7DQo+ID4+ID4+
+ICsgICAgICAgICAgICAgICBwcl9lcnIoIkZGVTogJXM6IGVycm9yICVkIEZGVSBpcyBub3Qgc3Vw
+cG9ydGVkXG4iLA0KPiA+PiA+PiArICAgICAgICAgICAgICAgICAgICAgICBtbWNfaG9zdG5hbWUo
+Y2FyZC0+aG9zdCksIGVycik7DQo+ID4+ID4+ICsgICAgICAgICAgICAgICBnb3RvIGV4aXQ7DQo+
+ID4+ID4+ICsgICAgICAgfQ0KPiA+PiA+PiArDQo+ID4+ID4+ICsgICAgICAgZXJyID0gbW1jX2hv
+c3Rfc2V0X2ZmdShjYXJkLCBleHRfY3NkW0VYVF9DU0RfRldfQ09ORklHXSk7DQo+ID4+ID4+ICsg
+ICAgICAgaWYgKGVycikgew0KPiA+PiA+PiArICAgICAgICAgICAgICAgcHJfZXJyKCJGRlU6ICVz
+OiBlcnJvciAlZCBGRlUgaXMgbm90IHN1cHBvcnRlZFxuIiwNCj4gPj4gPj4gKyAgICAgICAgICAg
+ICAgICAgICAgICAgbW1jX2hvc3RuYW1lKGNhcmQtPmhvc3QpLCBlcnIpOw0KPiA+PiA+PiArICAg
+ICAgICAgICAgICAgZXJyID0gLUVJTlZBTDsNCj4gPj4gPj4gKyAgICAgICAgICAgICAgIGdvdG8g
+ZXhpdDsNCj4gPj4gPj4gKyAgICAgICB9DQo+ID4+ID4+ICsNCj4gPj4gPj4gKyAgICAgICAvKiBz
+ZXQgZGV2aWNlIHRvIEZGVSBtb2RlICovDQo+ID4+ID4+ICsgICAgICAgZXJyID0gbW1jX3N3aXRj
+aChjYXJkLCBFWFRfQ1NEX0NNRF9TRVRfTk9STUFMLA0KPiA+PiA+IEVYVF9DU0RfTU9ERV9DT05G
+SUcsDQo+ID4+ID4+ICsgICAgICAgICAgICAgICBNTUNfRkZVX01PREVfU0VULCBjYXJkLT5leHRf
+Y3NkLmdlbmVyaWNfY21kNl90aW1lKTsNCj4gPj4gPj4gKyAgICAgICBpZiAoZXJyKSB7DQo+ID4+
+ID4+ICsgICAgICAgICAgICAgICBwcl9lcnIoIkZGVTogJXM6IGVycm9yICVkIEZGVSBpcyBub3Qg
+c3VwcG9ydGVkXG4iLA0KPiA+PiA+PiArICAgICAgICAgICAgICAgICAgICAgICBtbWNfaG9zdG5h
+bWUoY2FyZC0+aG9zdCksIGVycik7DQo+ID4+ID4+ICsgICAgICAgICAgICAgICBnb3RvIGV4aXRf
+bm9ybWFsOw0KPiA+PiA+PiArICAgICAgIH0NCj4gPj4gPj4gKw0KPiA+PiA+PiArICAgICAgIC8q
+IHNldCBDTUQgQVJHICovDQo+ID4+ID4+ICsgICAgICAgY21kLT5hcmcgPSBleHRfY3NkW0VYVF9D
+U0RfRkZVX0FSR10gfA0KPiA+PiA+PiArICAgICAgICAgICAgICAgZXh0X2NzZFtFWFRfQ1NEX0ZG
+VV9BUkcgKyAxXSA8PCA4IHwNCj4gPj4gPj4gKyAgICAgICAgICAgICAgIGV4dF9jc2RbRVhUX0NT
+RF9GRlVfQVJHICsgMl0gPDwgMTYgfA0KPiA+PiA+PiArICAgICAgICAgICAgICAgZXh0X2NzZFtF
+WFRfQ1NEX0ZGVV9BUkcgKyAzXSA8PCAyNDsNCj4gPj4gPj4gKw0KPiA+PiA+DQo+ID4+ID4gQWRk
+IGZvbGxvd2luZ3MNCj4gPj4gPiAiDQo+ID4+ID4gICAgICAgIC8qIElmIGFyZyBpcyB6ZXJvLCBz
+aG91bGQgYmUgc2V0IHRvIGEgc3BlY2lhbCB2YWx1ZSBmb3INCj4gPj4gPiBzYW1zdW5nIGVNTUMg
+Ki8NCj4gPj4gPiAgICAgICAgaWYgKCBjYXJkLT5jaWQubWFuZmlkID09IENJRF9NQU5GSURfU0FN
+U1VORyAmJiBjbWQtPmFyZyA9PQ0KPiA+PiA+IDB4MCApIHsNCj4gPj4gPiAgICAgICAgICAgICAg
+ICBjbWQtPmFyZyA9IDB4Yzc4MTAwMDA7DQo+ID4+ID4gICAgICAgIH0NCj4gPj4gPiAiDQo+ID4+
+ID4NCj4gPj4gPj4gKyAgICAgICBlcnIgPSBtbWNfZmZ1X3dyaXRlKGNhcmQsIGRhdGEsIGNtZC0+
+YXJnLCBidWZfYnl0ZXMpOw0KPiA+PiA+PiArDQo+ID4+ID4+ICtleGl0X25vcm1hbDoNCj4gPj4g
+Pj4gKyAgICAgICAvKiBob3N0IHN3aXRjaCBiYWNrIHRvIHdvcmsgaW4gbm9ybWFsIE1NQyBSZWFk
+L1dyaXRlDQo+ID4+ID4+ICtjb21tYW5kcw0KPiA+PiA+PiAqLw0KPiA+PiA+PiArICAgICAgIHJl
+dCA9IG1tY19zd2l0Y2goY2FyZCwgRVhUX0NTRF9DTURfU0VUX05PUk1BTCwNCj4gPj4gPj4gKyAg
+ICAgICAgICAgICAgIEVYVF9DU0RfTU9ERV9DT05GSUcsIE1NQ19GRlVfTU9ERV9OT1JNQUwsDQo+
+ID4+ID4+ICsgICAgICAgICAgICAgICBjYXJkLT5leHRfY3NkLmdlbmVyaWNfY21kNl90aW1lKTsN
+Cj4gPj4gPj4gKyAgICAgICBpZiAocmV0KQ0KPiA+PiA+PiArICAgICAgICAgICAgICAgZXJyID0g
+cmV0Ow0KPiA+PiA+PiArDQo+ID4+ID4+ICtleGl0Og0KPiA+PiA+PiArICAgICAgIHJldHVybiBl
+cnI7DQo+ID4+ID4+ICt9DQo+ID4+ID4+ICtFWFBPUlRfU1lNQk9MKG1tY19mZnVfZG93bmxvYWQp
+Ow0KPiA+PiA+PiArDQo+ID4+ID4NCj4gPj4gPg0KPiA+PiA+DQo+ID4+ID4gZU1NQyA1LjAgU3Bl
+Yy4gc2F5cyBpZiBkZXZpY2UgZG9lcyBub3Qgc3VwcG9ydA0KPiA+PiA+IE1PREVfT1BFUkFUSU9O
+X0NPREVTLCBkZXZpY2UgZG9lc24ndCBuZWVkIHRvIHVzZQ0KPiA+PiA+IE5VTUJFUl9PRl9GV19T
+RUNUT1JTX0NPUlJFQ1RMWV9QUk9HUkFNTUVELg0KPiA+PiA+IFNvLCBpdCdzIGJldHRlciB0byBt
+b3ZlIHRoZSBjb2RlIGZvciBjaGVja2luZyB0aGlzIHZhbHVlIHRvDQo+ID4+ID4gRkZVX0ZFQVRV
+UkVTKGV4dF9jc2RbRVhUX0NTRF9GRlVfRkVBVFVSRVNdDQo+ID4+ID4NCj4gPj4gPj4gK2ludCBt
+bWNfZmZ1X2luc3RhbGwoc3RydWN0IG1tY19jYXJkICpjYXJkKSB7DQo+ID4+ID4+ICsgICAgICAg
+dTggZXh0X2NzZFtDQVJEX0JMT0NLX1NJWkVdOw0KPiA+PiA+PiArICAgICAgIGludCBlcnI7DQo+
+ID4+ID4+ICsgICAgICAgdTMyIGZmdV9kYXRhX2xlbjsNCj4gPj4gPj4gKyAgICAgICB1MzIgdGlt
+ZW91dDsNCj4gPj4gPj4gKw0KPiA+PiA+PiArICAgICAgIGVyciA9IG1tY19zZW5kX2V4dF9jc2Qo
+Y2FyZCwgZXh0X2NzZCk7DQo+ID4+ID4+ICsgICAgICAgaWYgKGVycikgew0KPiA+PiA+PiArICAg
+ICAgICAgICAgICAgcHJfZXJyKCJGRlU6ICVzOiBlcnJvciAlZCBzZW5kaW5nIGV4dF9jc2RcbiIs
+DQo+ID4+ID4+ICsgICAgICAgICAgICAgICAgICAgICAgIG1tY19ob3N0bmFtZShjYXJkLT5ob3N0
+KSwgZXJyKTsNCj4gPj4gPj4gKyAgICAgICAgICAgICAgIGdvdG8gZXhpdDsNCj4gPj4gPj4gKyAg
+ICAgICB9DQo+ID4+ID4+ICsNCj4gPj4gPj4gKyAgICAgICAvKiBDaGVjayBpZiBGRlUgaXMgc3Vw
+cG9ydGVkICovDQo+ID4+ID4+ICsgICAgICAgaWYNCj4gKCFGRlVfU1VQUE9SVEVEX01PREUoZXh0
+X2NzZFtFWFRfQ1NEX1NVUFBPUlRFRF9NT0RFXSkgfHwNCj4gPj4gPj4gKyAgICAgICAgICAgICAg
+IEZGVV9DT05GSUcoZXh0X2NzZFtFWFRfQ1NEX0ZXX0NPTkZJR10pKSB7DQo+ID4+ID4+ICsgICAg
+ICAgICAgICAgICBlcnIgPSAtRUlOVkFMOw0KPiA+PiA+PiArICAgICAgICAgICAgICAgcHJfZXJy
+KCJGRlU6ICVzOiBlcnJvciAlZCBGRlUgaXMgbm90IHN1cHBvcnRlZFxuIiwNCj4gPj4gPj4gKyAg
+ICAgICAgICAgICAgICAgICAgICAgbW1jX2hvc3RuYW1lKGNhcmQtPmhvc3QpLCBlcnIpOw0KPiA+
+PiA+PiArICAgICAgICAgICAgICAgZ290byBleGl0Ow0KPiA+PiA+PiArICAgICAgIH0NCj4gPj4g
+Pg0KPiA+PiA+IFJlbW92ZSBmb2xsb3dpbmdzDQo+ID4+ID4gIg0KPiA+PiA+ICAgICAgICBmZnVf
+ZGF0YV9sZW4gPSBleHRfY3NkW0VYVF9DU0RfTlVNX09GX0ZXX1NFQ19QUk9HXXwNCj4gPj4gPiAg
+ICAgICAgICAgICAgICBleHRfY3NkW0VYVF9DU0RfTlVNX09GX0ZXX1NFQ19QUk9HICsgMV0gPDwg
+OCB8DQo+ID4+ID4gICAgICAgICAgICAgICAgZXh0X2NzZFtFWFRfQ1NEX05VTV9PRl9GV19TRUNf
+UFJPRyArIDJdIDw8IDE2IHwNCj4gPj4gPiAgICAgICAgICAgICAgICBleHRfY3NkW0VYVF9DU0Rf
+TlVNX09GX0ZXX1NFQ19QUk9HICsgM10gPDwgMjQ7DQo+ID4+ID4NCj4gPj4gPiAgICAgICAgaWYg
+KCFmZnVfZGF0YV9sZW4pIHsNCj4gPj4gPiAgICAgICAgICAgICAgICBlcnIgPSAtRVBFUk07DQo+
+ID4+ID4gICAgICAgICAgICAgICAgcmV0dXJuIGVycjsNCj4gPj4gPiAgICAgICAgfQ0KPiA+PiA+
+ICINCj4gPj4gPg0KPiA+PiA+PiArDQo+ID4+ID4+ICsgICAgICAgLyogY2hlY2sgbW9kZSBvcGVy
+YXRpb24gKi8NCj4gPj4gPj4gKyAgICAgICBpZiAoIUZGVV9GRUFUVVJFUyhleHRfY3NkW0VYVF9D
+U0RfRkZVX0ZFQVRVUkVTXSkpIHsNCj4gPj4gPj4gKyAgICAgICAgICAgICAgIC8qIHJlc3RhcnQg
+dGhlIGVNTUMgKi8NCj4gPj4gPj4gKyAgICAgICAgICAgICAgIGVyciA9IG1tY19mZnVfcmVzdGFy
+dChjYXJkKTsNCj4gPj4gPj4gKyAgICAgICAgICAgICAgIGlmIChlcnIpIHsNCj4gPj4gPj4gKyAg
+ICAgICAgICAgICAgICAgICAgICAgcHJfZXJyKCJGRlU6ICVzOiBlcnJvciAlZCBGRlUgaW5zdGFs
+bDpcbiIsDQo+ID4+ID4+ICsgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgbW1jX2hvc3Ru
+YW1lKGNhcmQtPmhvc3QpLCBlcnIpOw0KPiA+PiA+PiArICAgICAgICAgICAgICAgfQ0KPiA+PiA+
+PiArICAgICAgIH0gZWxzZSB7DQo+ID4+ID4NCj4gPj4gPiBBZGQgZm9sbG93aW5ncw0KPiA+PiA+
+ICINCj4gPj4gPiAgICAgICAgICAgICAgICAgICAgICAgICBmZnVfZGF0YV9sZW4gPQ0KPiA+PiA+
+IGV4dF9jc2RbRVhUX0NTRF9OVU1fT0ZfRldfU0VDX1BST0ddfA0KPiA+PiA+ICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgZXh0X2NzZFtFWFRfQ1NEX05VTV9PRl9GV19TRUNfUFJPRw0K
+PiA+PiA+ICsgMV0gPDwgOA0KPiA+PiA+IHwNCj4gPj4gPiAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgIGV4dF9jc2RbRVhUX0NTRF9OVU1fT0ZfRldfU0VDX1BST0cNCj4gPj4gPiArIDJd
+IDw8DQo+ID4+ID4gMTYgfA0KPiA+PiA+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ZXh0X2NzZFtFWFRfQ1NEX05VTV9PRl9GV19TRUNfUFJPRw0KPiA+PiA+ICsgM10gPDwgMjQ7DQo+
+ID4+ID4NCj4gPj4gPiAgICAgICAgICAgICAgICAgICAgICAgICBpZiAoIWZmdV9kYXRhX2xlbikg
+ew0KPiA+PiA+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgZXJyID0gLUVQRVJNOw0K
+PiA+PiA+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgcmV0dXJuIGVycjsNCj4gPj4g
+PiAgICAgICAgICAgICAgICAgICAgICAgICB9DQo+ID4+ID4gIg0KPiA+PiA+DQo+ID4+ID4+ICsg
+ICAgICAgICAgICAgICAgICAgICAgIC8qIHNldCBkZXZpY2UgdG8gRkZVIG1vZGUgKi8NCj4gPj4g
+Pj4gKyAgICAgICAgICAgICAgICAgICAgICAgZXJyID0gbW1jX3N3aXRjaChjYXJkLCBFWFRfQ1NE
+X0NNRF9TRVRfTk9STUFMLA0KPiA+PiA+PiArICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+IEVYVF9DU0RfTU9ERV9DT05GSUcsIDB4MSwNCj4gPj4gPj4gKyAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICBjYXJkLT5leHRfY3NkLmdlbmVyaWNfY21kNl90aW1lKTsNCj4gPj4gPj4gKyAg
+ICAgICAgICAgICAgICAgICAgICAgaWYgKGVycikgew0KPiA+PiA+PiArICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgIHByX2VycigiRkZVOiAlczogZXJyb3IgJWQgRkZVIGlzDQo+ID4+ID4+
+ICsgbm90DQo+ID4+ID4gc3VwcG9ydGVkXG4iLA0KPiA+PiA+PiArICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgbW1jX2hvc3RuYW1lKGNhcmQtPmhvc3QpLCBlcnIpOw0KPiA+
+PiA+PiArICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGdvdG8gZXhpdDsNCj4gPj4gPj4g
+KyAgICAgICAgICAgICAgICAgICAgICAgfQ0KPiA+PiA+DQo+ID4+ID4NCj4gPj4gPg0KPiA+PiA+
+IENoZWNraW5nIGZmdSBzdGF0dXMgaW4gZXh0X2NzZCBzaG91bGQgYmUgZG9uZSBldmVuIGlmIGRl
+dmljZSBkb2VzDQo+ID4+ID4gbm90IHN1cHBvcnQgTU9ERV9PUEVSQVRJT05fQ09ERVMgU28sIGl0
+J3MgYmV0dGVyIHRvIG1vdmUgdGhlIGNvZGUNCj4gPj4gPiBmb3IgY2hlY2tpbmcgdGhpcyB2YWx1
+ZSB0byBvdXQgb2YgYnJhY2UgZm9yDQo+ID4+ID4gRkZVX0ZFQVRVUkVTKGV4dF9jc2RbRVhUX0NT
+RF9GRlVfRkVBVFVSRVNdDQo+ID4+ID4NCj4gPj4gPj4gKyAgICAgICAgICAgICAgICAgICAgICAg
+Lyogc2V0IGV4dF9jc2QgdG8gaW5zdGFsbCBtb2RlICovDQo+ID4+ID4+ICsgICAgICAgICAgICAg
+ICAgICAgICAgIGVyciA9IG1tY19zd2l0Y2goY2FyZCwgRVhUX0NTRF9DTURfU0VUX05PUk1BTCwN
+Cj4gPj4gPj4gKyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBFWFRfQ1NEX01PREVfT1BF
+UkFUSU9OX0NPREVTLA0KPiA+PiA+PiArICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIE1N
+Q19GRlVfSU5TVEFMTF9TRVQsIHRpbWVvdXQpOw0KPiA+PiA+PiArDQo+ID4+ID4+ICsgICAgICAg
+ICAgICAgICAgICAgICAgIGlmIChlcnIpIHsNCj4gPj4gPj4gKyAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICBwcl9lcnIoIkZGVTogJXM6IGVycm9yICVkIHNldHRpbmcNCj4gPj4gPj4gaW5z
+dGFsbA0KPiA+PiA+IG1vZGVcbiIsDQo+ID4+ID4+ICsgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICBtbWNfaG9zdG5hbWUoY2FyZC0+aG9zdCksIGVycik7DQo+ID4+ID4+ICsg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgZ290byBleGl0Ow0KPiA+PiA+PiArICAgICAg
+ICAgICAgICAgICAgICAgICB9DQo+ID4+ID4+ICsNCj4gPj4gPg0KPiA+PiA+IFJlbW92ZSBmb2xs
+b3dpbmdzDQo+ID4+ID4gIg0KPiA+PiA+ICAgICAgICAgICAgICAgICAgICAgICAgLyogcmVhZCBl
+eHRfY3NkICovDQo+ID4+ID4gICAgICAgICAgICAgICAgICAgICAgICBlcnIgPSBtbWNfc2VuZF9l
+eHRfY3NkKGNhcmQsIGV4dF9jc2QpOw0KPiA+PiA+ICAgICAgICAgICAgICAgICAgICAgICAgaWYg
+KGVycikgew0KPiA+PiA+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBwcl9lcnIoIkZG
+VTogJXM6IGVycm9yICVkIHNlbmRpbmcNCj4gPj4gPiBleHRfY3NkXG4iLA0KPiA+PiA+ICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIG1tY19ob3N0bmFtZShjYXJkLT5ob3N0
+KSwgZXJyKTsNCj4gPj4gPiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgZ290byBleGl0
+Ow0KPiA+PiA+ICAgICAgICAgICAgICAgICAgICAgICAgfQ0KPiA+PiA+ICAgICAgICAgICAgICAg
+ICAgICAgICAgLyogcmV0dXJuIHN0YXR1cyAqLw0KPiA+PiA+ICAgICAgICAgICAgICAgICAgICAg
+ICAgZXJyID0gZXh0X2NzZFtFWFRfQ1NEX0ZGVV9TVEFUVVNdOw0KPiA+PiA+ICAgICAgICAgICAg
+ICAgICAgICAgICAgaWYgKGVycikgew0KPiA+PiA+ICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICBwcl9lcnIoIkZGVTogJXM6IGVycm9yICVkIEZGVQ0KPiA+PiA+IGluc3RhbGw6XG4iLA0K
+PiA+PiA+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIG1tY19ob3N0bmFt
+ZShjYXJkLT5ob3N0KSwgZXJyKTsNCj4gPj4gPiAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgZXJyID0gLUVJTlZBTDsNCj4gPj4gPiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+Z290byBleGl0Ow0KPiA+PiA+ICAgICAgICAgICAgICAgICAgICAgICAgfQ0KPiA+PiA+ICINCj4g
+Pj4gPg0KPiA+PiA+PiArICAgICAgICAgICAgICAgfQ0KPiA+PiA+PiArDQo+ID4+ID4NCj4gPj4g
+PiBBZGQgZm9sbG93aW5ncw0KPiA+PiA+ICINCj4gPj4gPiAgICAgICAgICAgIC8qIHJlYWQgZXh0
+X2NzZCAqLw0KPiA+PiA+ICAgICAgICAgICAgZXJyID0gbW1jX3NlbmRfZXh0X2NzZChjYXJkLCBl
+eHRfY3NkKTsNCj4gPj4gPiAgICAgICAgICAgIGlmIChlcnIpIHsNCj4gPj4gPiAgICAgICAgICAg
+ICAgICAgICAgcHJfZXJyKCJGRlU6ICVzOiBlcnJvciAlZCBzZW5kaW5nIGV4dF9jc2RcbiIsDQo+
+ID4+ID4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgbW1jX2hvc3RuYW1lKGNhcmQtPmhv
+c3QpLCBlcnIpOw0KPiA+PiA+ICAgICAgICAgICAgICAgICAgICBnb3RvIGV4aXQ7DQo+ID4+ID4g
+ICAgICAgICAgICB9DQo+ID4+ID4gICAgICAgICAgICAvKiByZXR1cm4gc3RhdHVzICovDQo+ID4+
+ID4gICAgICAgICAgICBlcnIgPSBleHRfY3NkW0VYVF9DU0RfRkZVX1NUQVRVU107DQo+ID4+ID4g
+ICAgICAgICAgICBpZiAoZXJyKSB7DQo+ID4+ID4gICAgICAgICAgICAgICAgICAgIHByX2Vycigi
+RkZVOiAlczogZXJyb3IgJWQgRkZVIGluc3RhbGw6XG4iLA0KPiA+PiA+ICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgIG1tY19ob3N0bmFtZShjYXJkLT5ob3N0KSwgZXJyKTsNCj4gPj4gPiAg
+ICAgICAgICAgICAgICAgICAgZXJyID0gLUVJTlZBTDsNCj4gPj4gPiAgICAgICAgICAgICAgICAg
+ICAgZ290byBleGl0Ow0KPiA+PiA+ICAgICAgICAgICAgfQ0KPiA+PiA+ICINCj4gPj4gPg0KPiA+
+PiA+PiArZXhpdDoNCj4gPj4gPj4gKyAgICAgICByZXR1cm4gZXJyOw0KPiA+PiA+PiArfQ0KPiA+
+PiA+PiArRVhQT1JUX1NZTUJPTChtbWNfZmZ1X2luc3RhbGwpOw0KPiA+PiA+PiArDQo+ID4+ID4N
+Cj4gPj4gPg0KPiA+PiA+DQo+ID4+ID4gQW5kIHNvbWUgZGV2aWNlJ3MgZncgc2hvdWxkIGJlIHRy
+YW5zZmVycmVkIHdpdGggb25lIGNvbW1hbmQuDQo+ID4+ID4gVGhleSBkb2VzIG5vdCBzdXBwb3J0
+IG11bHRpcGxlIGNvbW1hbmRzIGZvciBmdyB0cmFuc2Zlci4NCj4gPj4gPiBGb3IgdGhlc2UgZGV2
+aWNlcywgTU1DX0lPQ19NQVhfQllURVMgc2hvdWxkIGJlIGdyZWF0ZXIuDQo+ID4+ID4NCj4gPj4g
+PiBkaWZmIC0tZ2l0IGEvaW5jbHVkZS91YXBpL2xpbnV4L21tYy9pb2N0bC5oDQo+ID4+ID4gYi9p
+bmNsdWRlL3VhcGkvbGludXgvbW1jL2lvY3RsLmggaW5kZXggMWY1ZTY4OS4uYWY5ZWE2MiAxMDA2
+NDQNCj4gPj4gPiAtLS0gYS9pbmNsdWRlL3VhcGkvbGludXgvbW1jL2lvY3RsLmgNCj4gPj4gPiAr
+KysgYi9pbmNsdWRlL3VhcGkvbGludXgvbW1jL2lvY3RsLmgNCj4gPj4gPiBAQCAtNTMsNSArNTMs
+NSBAQCBzdHJ1Y3QgbW1jX2lvY19jbWQgew0KPiA+PiA+ICAgKiBpcyBlbmZvcmNlZCBwZXIgaW9j
+dGwgY2FsbC4gIEZvciBsYXJnZXIgZGF0YSB0cmFuc2ZlcnMsIHVzZSB0aGUNCj4gPj4gPiBub3Jt
+YWwNCj4gPj4gPiAgICogYmxvY2sgZGV2aWNlIG9wZXJhdGlvbnMuDQo+ID4+ID4gICAqLw0KPiA+
+PiA+IC0jZGVmaW5lIE1NQ19JT0NfTUFYX0JZVEVTICAoNTEyTCAqIDI1NikNCj4gPj4gPiArI2Rl
+ZmluZSBNTUNfSU9DX01BWF9CWVRFUyAgKDUxMkwgKiAxMDI0KQ0KPiA+PiA+ICAjZW5kaWYgLyog
+TElOVVhfTU1DX0lPQ1RMX0ggKi8NCj4gPj4gPg0KPiA+PiA+DQo+ID4+ID4gLS0NCj4gPj4gPiBU
+byB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUN
+Cj4gPj4gPiBsaW51eC1tbWMiIGluIHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9A
+dmdlci5rZXJuZWwub3JnDQo+ID4+ID4gTW9yZSBtYWpvcmRvbW8gaW5mbyBhdCAgaHR0cDovL3Zn
+ZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQo+ID4+ID4NCj4gPj4NCj4gPj4gLS0N
+Cj4gPj4gVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vi
+c2NyaWJlIGxpbnV4LW1tYyINCj4gPj4gaW4gdGhlIGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9y
+ZG9tb0B2Z2VyLmtlcm5lbC5vcmcgTW9yZQ0KPiBtYWpvcmRvbW8NCj4gPj4gaW5mbyBhdCAgaHR0
+cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQo+ID4NCj4gPg0KPiAtLQ0K
+PiBUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3Jp
+YmUgbGludXgtbW1jIiBpbiB0aGUNCj4gYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZn
+ZXIua2VybmVsLm9yZyBNb3JlIG1ham9yZG9tbyBpbmZvIGF0DQo+IGh0dHA6Ly92Z2VyLmtlcm5l
+bC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbA0KDQoKCg==
 
-In the patch you refer to above, your ->set_ios callback takes
-specific actions while "MMC_TIMING_MMC_HS400_TUNING".
 
-Like this:
-+       case MMC_TIMING_MMC_HS400_TUNING:
-+               clksel = priv->hs400_timing;
-+               wanted <<= 1;
-+               break;
-
-I don't think inventing MMC_TIMING_MMC_HS400_TUNING is the correct
-approach to solve this. Instead, I believe we have these two options:
-
-1. Let the host_ops->execute_tuning callback, notify the host about
-HS400 tuning. Currently the "opcode" parameter is directly related to
-the actual MMC command, but we could change that to have a different
-meaning. Obviously you need to convert those host drivers implementing
-the callback, but that should be quite simply I think.
-
-2. Invent a new host_ops callback, like host_ops->execute_hs400_tuning.
-
->
->>
->> While we are discussion this, what about re-tuning? Is that also
->> supposed to be done in HS200 mode?
-> I guess re-tuning is not related to this patch.
-> OK, Can you say in more detail?
-> I didn't get your meaning.
-
-Currently sdhci performs re-tuning while a timer has elapsed, locally
-implemented in the sdhci host.
-
-Instead, I would like the re-tuning to be triggered from the mmc core
-layer - thus all host drivers can benefit. Potentially the mmc core
-would invoke the host_ops->execute_tuning callback to perform the
-re-tuning. I just wanted you to keep this in mind, while implementing
-1) or 2), sorry if it was too unclear.
-
-Kind regards
-Ulf Hansson
-
->
-> Thanks,
-> Seungwon Jeon
->
