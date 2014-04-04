@@ -1,104 +1,179 @@
 From: Seunguk Shin <seunguk.shin@samsung.com>
-Subject: [PATCH] mmc: Support FFU for eMMC v5.0 for Samsung
-Date: Fri, 04 Apr 2014 21:07:29 +0900
-Message-ID: <000101cf4ffe$73484f80$59d8ee80$@samsung.com>
+Subject: [PATCH] mmc-utils: Support sending Samsung eMMC 4.5 FFU
+Date: Fri, 04 Apr 2014 21:07:47 +0900
+Message-ID: <000301cf4ffe$7e1dbf80$7a593e80$@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout3.samsung.com ([203.254.224.33]:55755 "EHLO
+Received: from mailout3.samsung.com ([203.254.224.33]:55788 "EHLO
 	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752582AbaDDMH3 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 4 Apr 2014 08:07:29 -0400
-Received: from epcpsbgr3.samsung.com
- (u143.gpu120.samsung.co.kr [203.254.230.143])
+	with ESMTP id S1752582AbaDDMHr (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 4 Apr 2014 08:07:47 -0400
+Received: from epcpsbgr5.samsung.com
+ (u145.gpu120.samsung.co.kr [203.254.230.145])
  by mailout3.samsung.com (Oracle Communications Messaging Server 7u4-24.01
  (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTP id <0N3I00IL59OGXD10@mailout3.samsung.com> for
- linux-mmc@vger.kernel.org; Fri, 04 Apr 2014 21:07:28 +0900 (KST)
+ with ESMTP id <0N3I00K299OY4F10@mailout3.samsung.com> for
+ linux-mmc@vger.kernel.org; Fri, 04 Apr 2014 21:07:46 +0900 (KST)
 Content-language: ko
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org, chris@printf.net, cpgs@samsung.com
 
-This change adds support to field firmware update (ffu) for Samsung emmc
-v5.0
+This change adds support to invoke Samsung eMMC 4.5 field firmware update
+(ffu) process.
+New command was added: "emmc45 ffu".
 
-Some of Samsung eMMC does not show the argument for ffu in ext_csd.
-In case of this, eMMC shows 0x0 from ext_csd, Host has to modify the
-argument.
+Samsung eMMC 4.5 FFU protocol is similar with eMMC 5.0 FFU without
+MODE_OPERATION.
+It uses the different EXT_CSD offset.
 
-And ffu for Samsung eMMC should transfer f/w through not multiple commands
-but one command.
-Because of f/w size, MMC_IOC_MAX_BYTES should be increased.
-Usually normal io uses 512KB as the max chunk size,
-So I think it does not cause the problem.
-
-This patch depends on patch mmc: Support-FFU-for-eMMC-v5.0 committed by Avi
-Shchislowski <avi.shchislowski@sandisk.com>
+This patch depends on patch mmc-utils: Support-sending-eMMC-v5.0 committed
+by Avi Shchislowski <avi.shchislowski@sandisk.com> and mmc: Support FFU for
+Samsung eMMC v4.5 committed by Seunguk Shin <seunguk.shin@samsung.com>
 
 ---
- drivers/mmc/card/ffu.c         | 7 +++++++
- include/linux/mmc/card.h       | 1 +
- include/uapi/linux/mmc/ioctl.h | 2 +-
- 3 files changed, 9 insertions(+), 1 deletion(-)
+ mmc.c      |  5 ++++
+ mmc.h      |  1 +
+ mmc_cmds.c | 87
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ mmc_cmds.h |  1 +
+ 4 files changed, 94 insertions(+)
 
-diff --git a/drivers/mmc/card/ffu.c b/drivers/mmc/card/ffu.c
-index 41aad31..092a791 100644
---- a/drivers/mmc/card/ffu.c
-+++ b/drivers/mmc/card/ffu.c
-@@ -444,6 +444,8 @@ static int mmc_host_set_ffu(struct mmc_card *card, u32
-ffu_enable)
-        return 0;
+diff --git a/mmc.c b/mmc.c
+index 7234953..44aaf6d 100644
+--- a/mmc.c
++++ b/mmc.c
+@@ -115,6 +115,11 @@ static struct Command commands[] = {
+ 		"run eMMC 5.0 Field firmware update.\n.",
+ 	  NULL
+ 	},
++	{ do_emmc45_ffu, -2,
++	  "emmc45 ffu", "<image path> <device>\n"
++		"run eMMC 4.5 Field firmware update for samsung.\n.",
++	  NULL
++	},
+ 	{ 0, 0, 0, 0 }
+ };
+ 
+diff --git a/mmc.h b/mmc.h
+index 19eaaba..ca4b70b 100644
+--- a/mmc.h
++++ b/mmc.h
+@@ -86,6 +86,7 @@
+ 
+ #define FFU_DWONLOAD_OP        302
+ #define FFU_INSTALL_OP 303
++#define FFU_SAMSUNG45_OP	304
+ 
+ /*
+  * EXT_CSD field definitions
+diff --git a/mmc_cmds.c b/mmc_cmds.c
+index f667d10..17e50d8 100644
+--- a/mmc_cmds.c
++++ b/mmc_cmds.c
+@@ -1271,3 +1271,90 @@ exit:
+        return ret;
  }
-
-+#define CID_MANFID_SAMSUNG             0x15
+ 
++static int ffu_execute(int fw_fd, int mmc_fd)
++{
++	int ret = 0;
++	struct mmc_ioc_cmd mmc_ioc_cmd;
++	char data_buff[MMC_IOC_MAX_BYTES];
++	int file_size;
++	int data_length;
 +
- int mmc_ffu_download(struct mmc_card *card, struct mmc_command *cmd,
-        u8 *data, int buf_bytes)
- {
-@@ -490,6 +492,11 @@ int mmc_ffu_download(struct mmc_card *card, struct
-mmc_command *cmd,
-                ext_csd[EXT_CSD_FFU_ARG + 2] << 16 |
-                ext_csd[EXT_CSD_FFU_ARG + 3] << 24;
-
-+       /* If arg is zero, should be set to a special value for samsung eMMC
-*/
-+       if (card->quirks & MMC_QUIRK_SEC_FIX_FFU_ARG &&
-+           card->cid.manfid == CID_MANFID_SAMSUNG && cmd->arg == 0x0)
-+               cmd->arg = 0xc7810000;
++	memset(data_buff, 0, sizeof(data_buff));
++	/* get file size */
++	file_size = lseek(fw_fd, 0, SEEK_END);
++	if (file_size < 0) {
++		ret = -1;
++		perror("seek file error \n");
++		goto exit;
++	}
 +
-        err = mmc_ffu_write(card, data, cmd->arg, buf_bytes);
-
- exit_normal:
-diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-index b730272..3e781f9 100644
---- a/include/linux/mmc/card.h
-+++ b/include/linux/mmc/card.h
-@@ -275,6 +275,7 @@ struct mmc_card {
- #define MMC_QUIRK_LONG_READ_TIME (1<<9)                /* Data read time >
-CSD says */
- #define MMC_QUIRK_SEC_ERASE_TRIM_BROKEN (1<<10)        /* Skip secure for
-erase/trim */
- #define MMC_QUIRK_BROKEN_IRQ_POLLING   (1<<11) /* Polling SDIO_CCCR_INTx
-could create a fake interrupt */
-+#define MMC_QUIRK_SEC_FIX_FFU_ARG (1<<12)      /* Fix ffu argument */
-
-        unsigned int            erase_size;     /* erase size in sectors */
-        unsigned int            erase_shift;    /* if erase unit is power 2
-*/
-diff --git a/include/uapi/linux/mmc/ioctl.h b/include/uapi/linux/mmc/ioctl.h
-index 1f5e689..af9ea62 100644
---- a/include/uapi/linux/mmc/ioctl.h
-+++ b/include/uapi/linux/mmc/ioctl.h
-@@ -53,5 +53,5 @@ struct mmc_ioc_cmd {
-  * is enforced per ioctl call.  For larger data transfers, use the normal
-  * block device operations.
-  */
--#define MMC_IOC_MAX_BYTES  (512L * 256)
-+#define MMC_IOC_MAX_BYTES  (512L * 1024)
- #endif /* LINUX_MMC_IOCTL_H */
---
++	lseek(fw_fd, 0, SEEK_SET);
++
++	if (file_size > MMC_IOC_MAX_BYTES) {
++		ret = -1;
++		perror("firmware file size error \n");
++		goto exit;
++	} else {
++		/* Read FW data from file */
++		data_length = read(fw_fd, data_buff, file_size);
++		if (data_length == -1) {
++			ret = -1;
++			goto exit;
++		}
++		/* prepare and send ioctl */
++		memset(&mmc_ioc_cmd, 0, sizeof(mmc_ioc_cmd));
++		mmc_ioc_cmd.opcode = FFU_SAMSUNG45_OP;
++		mmc_ioc_cmd.blksz = CARD_BLOCK_SIZE;
++		mmc_ioc_cmd.blocks = (data_length + mmc_ioc_cmd.blksz - 1) /
++			mmc_ioc_cmd.blksz;
++		mmc_ioc_cmd.arg = 0;
++		mmc_ioc_cmd.flags = MMC_RSP_SPI_R1 | MMC_RSP_R1 |
+MMC_CMD_ADTC;
++		mmc_ioc_cmd.write_flag = 1;
++		mmc_ioc_cmd_set_data(mmc_ioc_cmd, data_buff);
++		ret = ioctl(mmc_fd, MMC_IOC_CMD, &mmc_ioc_cmd);
++
++		if (ret) {
++			perror("ioctl FW download");
++			goto exit;
++		}
++	}
++
++exit:
++
++	return ret;
++}
++
++int do_emmc45_ffu(int nargs, char **argv)
++{
++	int fd, fw_fd, ret;
++	char *device;
++
++	CHECK(nargs != 3, "Usage: ffu <image path> </path/to/mmcblkX> \n",
++		exit(1));
++
++	device = argv[2];
++	fd = open(device, O_RDWR);
++	if (fd < 0) {
++		perror("device open error \n");
++		exit(1);
++	}
++
++	/* open eMMC4.5 firmware image file */
++	fw_fd = open(argv[1], O_RDONLY);
++	if (fw_fd < 0) {
++		perror("open eMMC4.5 firmware file");
++		ret = -1;
++		goto exit;
++	}
++
++	ret = ffu_execute(fw_fd, fd);
++	if (ret)
++		goto exit;
++
++exit:
++	close(fd);
++	close(fw_fd);
++
++	return ret;
++}
++
+diff --git a/mmc_cmds.h b/mmc_cmds.h
+index 3ff3440..1ab9cd5 100644
+--- a/mmc_cmds.h
++++ b/mmc_cmds.h
+@@ -29,3 +29,4 @@ int do_status_get(int nargs, char **argv);
+ int do_enh_area_set(int nargs, char **argv);
+ int do_write_reliability_set(int nargs, char **argv);
+ int do_emmc50_ffu(int nargs, char **argv);
++int do_emmc45_ffu(int nargs, char **argv);
+-- 
 1.8.3.2
-
 
