@@ -1,67 +1,51 @@
-From: Mike Looijmans <mike.looijmans@topic.nl>
-Subject: [PATCH] sdhci: Forward EPROBE_DEFER on vmmc and vqmmc regulators
-Date: Mon,  7 Apr 2014 08:45:19 +0200
-Message-ID: <1396853119-11181-1-git-send-email-mike.looijmans@topic.nl>
-References: <1396852708-11058-1-git-send-email-mike.looijmans@topic.nl>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH] mmc: sdhci-acpi: Intel SDIO has broken card detect
+Date: Mon, 7 Apr 2014 09:42:08 +0200
+Message-ID: <CAPDyKFpyfGA2=SpeK=6Mh_E3WtiCe7K=Oegjpu+fJ6VRN8_3Kw@mail.gmail.com>
+References: <1396526319-614-1-git-send-email-adrian.hunter@intel.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from atl4mhob03.myregisteredsite.com ([209.17.115.41]:40632 "EHLO
-	atl4mhob03.myregisteredsite.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1754826AbaDGGpZ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 7 Apr 2014 02:45:25 -0400
-Received: from mailpod.hostingplatform.com ([10.30.71.208])
-	by atl4mhob03.myregisteredsite.com (8.14.4/8.14.4) with ESMTP id s376jM4A018239
-	for <linux-mmc@vger.kernel.org>; Mon, 7 Apr 2014 02:45:22 -0400
-In-Reply-To: <1396852708-11058-1-git-send-email-mike.looijmans@topic.nl>
+Received: from mail-qg0-f49.google.com ([209.85.192.49]:33430 "EHLO
+	mail-qg0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750960AbaDGHmJ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 7 Apr 2014 03:42:09 -0400
+Received: by mail-qg0-f49.google.com with SMTP id 63so2738071qgz.8
+        for <linux-mmc@vger.kernel.org>; Mon, 07 Apr 2014 00:42:08 -0700 (PDT)
+In-Reply-To: <1396526319-614-1-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: linux-kernel@vger.kernel.org, cjb@laptop.org, gdjakov@mm-sol.com, Mike Looijmans <mike.looijmans@topic.nl>
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>
 
-If vmmc or vqmmc regulators are controlled by an I2C device, the
-request for the regulator is likely to fail because the I2C bus has
-not been probed yet. The sdhci then incorrectly assumes that the user
-never wanted to use a regulator anyway and continues without ever
-enabling or configuring the required regulator.
+On 3 April 2014 13:58, Adrian Hunter <adrian.hunter@intel.com> wrote:
+> Intel SDIO has broken card detect so add a quirk
+> to reflect that.
+>
+> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 
-To solve this, when a required voltage regulator returns
-EPROBE_DEFER, signalling that the regulator exists but is not
-available yet, forward this error to the probe method instead
-of simply assuming that the user never wanted to use a regulator
-anyway.
+Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
 
-Tested on a custom board that has an I2C regulator for one of the sdhcis
-and no regulators at all for the other. This patch enables such a system
-to work correctly.
-
-v2: Do not change logging output
-
-Signed-off-by: Mike Looijmans <mike.looijmans@topic.nl>
----
- drivers/mmc/host/sdhci.c |    4 ++++
- 1 file changed, 4 insertions(+)
-
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 34aef81..c92a5a1 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -2972,6 +2972,8 @@ int sdhci_add_host(struct sdhci_host *host)
- 	host->vqmmc = regulator_get_optional(mmc_dev(mmc), "vqmmc");
- 	if (IS_ERR_OR_NULL(host->vqmmc)) {
- 		if (PTR_ERR(host->vqmmc) < 0) {
-+			if (PTR_ERR(host->vqmmc) == -EPROBE_DEFER)
-+				return -EPROBE_DEFER;
- 			pr_info("%s: no vqmmc regulator found\n",
- 				mmc_hostname(mmc));
- 			host->vqmmc = NULL;
-@@ -3048,6 +3050,8 @@ int sdhci_add_host(struct sdhci_host *host)
- 	host->vmmc = regulator_get_optional(mmc_dev(mmc), "vmmc");
- 	if (IS_ERR_OR_NULL(host->vmmc)) {
- 		if (PTR_ERR(host->vmmc) < 0) {
-+			if (PTR_ERR(host->vmmc) == -EPROBE_DEFER)
-+				return -EPROBE_DEFER;
- 			pr_info("%s: no vmmc regulator found\n",
- 				mmc_hostname(mmc));
- 			host->vmmc = NULL;
--- 
-1.7.9.5
-
+> ---
+>  drivers/mmc/host/sdhci-acpi.c | 1 +
+>  1 file changed, 1 insertion(+)
+>
+> diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
+> index 0d372f0..ebb3f39 100644
+> --- a/drivers/mmc/host/sdhci-acpi.c
+> +++ b/drivers/mmc/host/sdhci-acpi.c
+> @@ -122,6 +122,7 @@ static const struct sdhci_acpi_slot sdhci_acpi_slot_int_emmc = {
+>  };
+>
+>  static const struct sdhci_acpi_slot sdhci_acpi_slot_int_sdio = {
+> +       .quirks  = SDHCI_QUIRK_BROKEN_CARD_DETECTION,
+>         .quirks2 = SDHCI_QUIRK2_HOST_OFF_CARD_ON,
+>         .caps    = MMC_CAP_NONREMOVABLE | MMC_CAP_POWER_OFF_CARD,
+>         .flags   = SDHCI_ACPI_RUNTIME_PM,
+> --
+> 1.8.3.2
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
