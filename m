@@ -1,17 +1,18 @@
-From: Roger <rogerable@realtek.com>
+From: Lee Jones <lee.jones@linaro.org>
 Subject: Re: [PATCH v5 3/3] memstick: Add realtek USB memstick host driver
-Date: Tue, 8 Apr 2014 16:06:18 +0800
-Message-ID: <5343ADFA.7010703@realtek.com>
+Date: Tue, 8 Apr 2014 12:37:51 +0100
+Message-ID: <20140408113751.GG8888@lee--X1>
 References: <1395744293-24398-1-git-send-email-rogerable@realtek.com>
  <1395744293-24398-4-git-send-email-rogerable@realtek.com>
  <533A3080.2020008@realtek.com>
  <20140401150654.fe27636428a62fdf9e0d2dc1@linux-foundation.org>
- <20140402151654.GA24060@lee--X1>
+ <20140402151654.GA24060@lee--X1> <5343ADFA.7010703@realtek.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"; Format="flowed"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
-In-Reply-To: <20140402151654.GA24060@lee--X1>
+Content-Disposition: inline
+In-Reply-To: <5343ADFA.7010703@realtek.com>
 List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
  <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
 List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel>
@@ -21,69 +22,49 @@ List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driver
  <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
 Errors-To: driverdev-devel-bounces@linuxdriverproject.org
 Sender: driverdev-devel-bounces@linuxdriverproject.org
-To: Lee Jones <lee.jones@linaro.org>, Andrew Morton <akpm@linux-foundation.org>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Maxim Levitsky <maximlevitsky@gmail.com>, Alex Dubov <oakad@yahoo.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, driverdev-devel@linuxdriverproject.org, linux-mmc@vger.kernel.org, Chris Ball <chris@printf.net>, linux-kernel@vger.kernel.org, wei_wang@realsil.com.cn, Dan Carpenter <dan.carpenter@oracle.com>, Samuel Ortiz <sameo@linux.intel.com>
+To: Roger <rogerable@realtek.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Maxim Levitsky <maximlevitsky@gmail.com>, Alex Dubov <oakad@yahoo.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, driverdev-devel@linuxdriverproject.org, linux-mmc@vger.kernel.org, Chris Ball <chris@printf.net>, linux-kernel@vger.kernel.org, wei_wang@realsil.com.cn, Andrew Morton <akpm@linux-foundation.org>, Dan Carpenter <dan.carpenter@oracle.com>, Samuel Ortiz <sameo@linux.intel.com>
 List-Id: linux-mmc@vger.kernel.org
 
-
-On 04/02/2014 11:16 PM, Lee Jones wrote:
-> On Tue, 01 Apr 2014, Andrew Morton wrote:
->
->> On Tue, 1 Apr 2014 11:20:32 +0800 Roger <rogerable@realtek.com> wrote:
->>
->>> On 03/25/2014 06:44 PM, rogerable@realtek.com wrote:
->>>> From: Roger Tseng <rogerable@realtek.com>
->>>>
->>>> Realtek USB memstick host driver provides memstick host support based on the
->>>> Realtek USB card reader MFD driver.
->>>>
->>>> Signed-off-by: Roger Tseng <rogerable@realtek.com>
->>>> ---
->>>>    drivers/memstick/host/Kconfig       |  10 +
->>>>    drivers/memstick/host/Makefile      |   1 +
->>>>    drivers/memstick/host/rtsx_usb_ms.c | 839 ++++++++++++++++++++++++++++++++++++
->>>>    3 files changed, 850 insertions(+)
->>>>    create mode 100644 drivers/memstick/host/rtsx_usb_ms.c
->>> Hi Andrew,
->>>
->>> Since I'll have to send next revision(v6, to modify patch 1/3) and
->>> you've commented v4, would you also comment or Ack the 3/3 of this one?
->>> This should save one revision for me to make any necessary change.
->>
->> It looks OK to my inexpert eye.  It would be better if Maxim and/or Alex
->> could review the code.  If that doesn't happen then I guess the best we
->> can do is to go ahead and merge it.  Have you worked out via which tree
->> the patches will be merged?
->
-> I'll be happy to take the set if one of the subsystem experts would be
-> kind enough to cast an eye over it.
->
-> Maxim, Alex?
->
-Lee,
-
-When I prepare my next submission, I found a previous version of this 
-patch set(and only the 1/3 'mfd' part)  seems to be merged in the 
-following commit:
-
-commit e5744abb2fa3629aa5a94e21ca1eae32ff2fe00b
-Merge: c29aa15 2d28ca7
-Author: Linus Torvalds <torvalds@linux-foundation.org>
-Date:   Mon Apr 7 10:24:18 2014 -0700
-
-     Merge tag 'mfd-for-linus-3.15' of 
-git://git.kernel.org/pub/scm/linux/kernel/git/lee/mfd
-
-Is there any chance to revert it? Or what can I do to help current 
-situation?
-
-note: the merged commit:
-commit 730876be256603b4ee7225a125467d97a7ce9060
-Author: Roger Tseng <rogerable@realtek.com>
-Date:   Wed Feb 12 18:00:36 2014 +0800
-
-     mfd: Add realtek USB card reader driver
-
-
-Best regards,
-Roger Tseng
+PiA+Pj4+RnJvbTogUm9nZXIgVHNlbmcgPHJvZ2VyYWJsZUByZWFsdGVrLmNvbT4KPiA+Pj4+Cj4g
+Pj4+PlJlYWx0ZWsgVVNCIG1lbXN0aWNrIGhvc3QgZHJpdmVyIHByb3ZpZGVzIG1lbXN0aWNrIGhv
+c3Qgc3VwcG9ydCBiYXNlZCBvbiB0aGUKPiA+Pj4+UmVhbHRlayBVU0IgY2FyZCByZWFkZXIgTUZE
+IGRyaXZlci4KPiA+Pj4+Cj4gPj4+PlNpZ25lZC1vZmYtYnk6IFJvZ2VyIFRzZW5nIDxyb2dlcmFi
+bGVAcmVhbHRlay5jb20+Cj4gPj4+Pi0tLQo+ID4+Pj4gICBkcml2ZXJzL21lbXN0aWNrL2hvc3Qv
+S2NvbmZpZyAgICAgICB8ICAxMCArCj4gPj4+PiAgIGRyaXZlcnMvbWVtc3RpY2svaG9zdC9NYWtl
+ZmlsZSAgICAgIHwgICAxICsKPiA+Pj4+ICAgZHJpdmVycy9tZW1zdGljay9ob3N0L3J0c3hfdXNi
+X21zLmMgfCA4MzkgKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrCj4gPj4+PiAg
+IDMgZmlsZXMgY2hhbmdlZCwgODUwIGluc2VydGlvbnMoKykKPiA+Pj4+ICAgY3JlYXRlIG1vZGUg
+MTAwNjQ0IGRyaXZlcnMvbWVtc3RpY2svaG9zdC9ydHN4X3VzYl9tcy5jCj4gPj4+SGkgQW5kcmV3
+LAo+ID4+Pgo+ID4+PlNpbmNlIEknbGwgaGF2ZSB0byBzZW5kIG5leHQgcmV2aXNpb24odjYsIHRv
+IG1vZGlmeSBwYXRjaCAxLzMpIGFuZAo+ID4+PnlvdSd2ZSBjb21tZW50ZWQgdjQsIHdvdWxkIHlv
+dSBhbHNvIGNvbW1lbnQgb3IgQWNrIHRoZSAzLzMgb2YgdGhpcyBvbmU/Cj4gPj4+VGhpcyBzaG91
+bGQgc2F2ZSBvbmUgcmV2aXNpb24gZm9yIG1lIHRvIG1ha2UgYW55IG5lY2Vzc2FyeSBjaGFuZ2Uu
+Cj4gPj4KPiA+Pkl0IGxvb2tzIE9LIHRvIG15IGluZXhwZXJ0IGV5ZS4gIEl0IHdvdWxkIGJlIGJl
+dHRlciBpZiBNYXhpbSBhbmQvb3IgQWxleAo+ID4+Y291bGQgcmV2aWV3IHRoZSBjb2RlLiAgSWYg
+dGhhdCBkb2Vzbid0IGhhcHBlbiB0aGVuIEkgZ3Vlc3MgdGhlIGJlc3Qgd2UKPiA+PmNhbiBkbyBp
+cyB0byBnbyBhaGVhZCBhbmQgbWVyZ2UgaXQuICBIYXZlIHlvdSB3b3JrZWQgb3V0IHZpYSB3aGlj
+aCB0cmVlCj4gPj50aGUgcGF0Y2hlcyB3aWxsIGJlIG1lcmdlZD8KPiA+Cj4gPkknbGwgYmUgaGFw
+cHkgdG8gdGFrZSB0aGUgc2V0IGlmIG9uZSBvZiB0aGUgc3Vic3lzdGVtIGV4cGVydHMgd291bGQg
+YmUKPiA+a2luZCBlbm91Z2ggdG8gY2FzdCBhbiBleWUgb3ZlciBpdC4KPiA+Cj4gPk1heGltLCBB
+bGV4Pwo+ID4KPiBMZWUsCj4gCj4gV2hlbiBJIHByZXBhcmUgbXkgbmV4dCBzdWJtaXNzaW9uLCBJ
+IGZvdW5kIGEgcHJldmlvdXMgdmVyc2lvbiBvZgo+IHRoaXMgcGF0Y2ggc2V0KGFuZCBvbmx5IHRo
+ZSAxLzMgJ21mZCcgcGFydCkgIHNlZW1zIHRvIGJlIG1lcmdlZCBpbgo+IHRoZSBmb2xsb3dpbmcg
+Y29tbWl0Ogo+IAo+IGNvbW1pdCBlNTc0NGFiYjJmYTM2MjlhYTVhOTRlMjFjYTFlYWUzMmZmMmZl
+MDBiCj4gTWVyZ2U6IGMyOWFhMTUgMmQyOGNhNwo+IEF1dGhvcjogTGludXMgVG9ydmFsZHMgPHRv
+cnZhbGRzQGxpbnV4LWZvdW5kYXRpb24ub3JnPgo+IERhdGU6ICAgTW9uIEFwciA3IDEwOjI0OjE4
+IDIwMTQgLTA3MDAKPiAKPiAgICAgTWVyZ2UgdGFnICdtZmQtZm9yLWxpbnVzLTMuMTUnIG9mCj4g
+Z2l0Oi8vZ2l0Lmtlcm5lbC5vcmcvcHViL3NjbS9saW51eC9rZXJuZWwvZ2l0L2xlZS9tZmQKPiAK
+PiBJcyB0aGVyZSBhbnkgY2hhbmNlIHRvIHJldmVydCBpdD8gT3Igd2hhdCBjYW4gSSBkbyB0byBo
+ZWxwIGN1cnJlbnQKPiBzaXR1YXRpb24/CgpXaGF0IHdpbGwgaGFwcGVuIGlmIHdlIGRvbid0IHJl
+dmVydCBpdD8gRG9lcyBpdCBkZXBlbmQgb24gc29tZXRoaW5nCmVsc2U/Cgo+IG5vdGU6IHRoZSBt
+ZXJnZWQgY29tbWl0Ogo+IGNvbW1pdCA3MzA4NzZiZTI1NjYwM2I0ZWU3MjI1YTEyNTQ2N2Q5N2E3
+Y2U5MDYwCj4gQXV0aG9yOiBSb2dlciBUc2VuZyA8cm9nZXJhYmxlQHJlYWx0ZWsuY29tPgo+IERh
+dGU6ICAgV2VkIEZlYiAxMiAxODowMDozNiAyMDE0ICswODAwCj4gCj4gICAgIG1mZDogQWRkIHJl
+YWx0ZWsgVVNCIGNhcmQgcmVhZGVyIGRyaXZlcgo+IAo+IAo+IEJlc3QgcmVnYXJkcywKPiBSb2dl
+ciBUc2VuZwoKLS0gCkxlZSBKb25lcwpMaW5hcm8gU1RNaWNyb2VsZWN0cm9uaWNzIExhbmRpbmcg
+VGVhbSBMZWFkCkxpbmFyby5vcmcg4pSCIE9wZW4gc291cmNlIHNvZnR3YXJlIGZvciBBUk0gU29D
+cwpGb2xsb3cgTGluYXJvOiBGYWNlYm9vayB8IFR3aXR0ZXIgfCBCbG9nCl9fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fCmRldmVsIG1haWxpbmcgbGlzdApkZXZl
+bEBsaW51eGRyaXZlcnByb2plY3Qub3JnCmh0dHA6Ly9kcml2ZXJkZXYubGludXhkcml2ZXJwcm9q
+ZWN0Lm9yZy9tYWlsbWFuL2xpc3RpbmZvL2RyaXZlcmRldi1kZXZlbAo=
