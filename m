@@ -1,40 +1,78 @@
-From: Stefan Roese <stefan.roese@gmail.com>
-Subject: Re: omap_hsmmc: Problem with SanDisk Extreme Pro MicroSDHC 1
-Date: Tue, 08 Apr 2014 16:09:44 +0200
-Message-ID: <53440328.5010609@gmail.com>
-References: <5342AC5C.8000904@gmail.com>
+From: Markus Mayer <markus.mayer@linaro.org>
+Subject: [PATCH RESEND] mmc: Delay the card_event callback into the mmc_rescan worker
+Date: Tue, 8 Apr 2014 15:19:43 -0700
+Message-ID: <1396995583-5475-1-git-send-email-markus.mayer@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mo4-p05-ob.smtp.rzone.de ([81.169.146.180]:11207 "EHLO
-	mo4-p05-ob.smtp.rzone.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756996AbaDHOJ0 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 8 Apr 2014 10:09:26 -0400
-In-Reply-To: <5342AC5C.8000904@gmail.com>
+Received: from mail-gw3-out.broadcom.com ([216.31.210.64]:25920 "EHLO
+	mail-gw3-out.broadcom.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751594AbaDHWTt (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 8 Apr 2014 18:19:49 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: Balaji T K <balajitk@ti.com>
+To: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Christian Daudt <bcm@fixthebug.org>
+Cc: Linux MMC List <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 
-On 07.04.2014 15:47, Stefan Roese wrote:
-> I'm currently testing on an OMAP3530 board (tao3530 SOM with custom
-> baseboard) with v3.14. I applied all the OMAP/pbias patch from Balaji
-> and MMC/SDcard detection seemed to work reliably.
->
-> But now I noticed that the SanDisk Extreme Pro MicroSDHC 1 (8 GB) is not
-> detected all the time. It seems that the card detected fails with
-> timeout on (approx?) each 2nd reboot (via reset button). A quick check
-> shows that the timeout happens in mmc_send_app_op_cond():
->
-> [    4.901275] mmc0: error -110 whilst initialising SD card
-> [    4.939849] mmc1: new SDIO card at address 0001
->
-> Is this a known issue? Any ideas on how to fix this?
+This change removes the callback from atomic context which it doesn't
+need to be in, and puts it in line with the debounced rescan.
 
-Just to let you know. I missed to add the "cd-gpios" property to the mmc 
-DT node. With this addition the detection seems to work reliably.
+This code is based on these e-mail threads with Christian Daudt:
 
-Sorry for the noise,
-Stefan
+  https://lkml.org/lkml/2013/8/19/539
+  https://lkml.org/lkml/2014/3/19/79
+
+Signed-off-by: Markus Mayer <markus.mayer@linaro.org>
+---
+ drivers/mmc/core/core.c      |    5 +++++
+ drivers/mmc/core/slot-gpio.c |    4 +---
+ include/linux/mmc/host.h     |    2 ++
+ 3 files changed, 8 insertions(+), 3 deletions(-)
+
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 098374b..ff7fd2e 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -2421,6 +2421,11 @@ void mmc_rescan(struct work_struct *work)
+ 		container_of(work, struct mmc_host, detect.work);
+ 	int i;
+ 
++	if (host->trigger_card_event && host->ops->card_event) {
++		host->ops->card_event(host);
++		host->trigger_card_event = false;
++	}
++
+ 	if (host->rescan_disable)
+ 		return;
+ 
+diff --git a/drivers/mmc/core/slot-gpio.c b/drivers/mmc/core/slot-gpio.c
+index 46596b71..4029c85 100644
+--- a/drivers/mmc/core/slot-gpio.c
++++ b/drivers/mmc/core/slot-gpio.c
+@@ -29,9 +29,7 @@ static irqreturn_t mmc_gpio_cd_irqt(int irq, void *dev_id)
+ 	/* Schedule a card detection after a debounce timeout */
+ 	struct mmc_host *host = dev_id;
+ 
+-	if (host->ops->card_event)
+-		host->ops->card_event(host);
+-
++	host->trigger_card_event = true;
+ 	mmc_detect_change(host, msecs_to_jiffies(200));
+ 
+ 	return IRQ_HANDLED;
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index 99f5709..63b983b 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -322,6 +322,8 @@ struct mmc_host {
+ 	int			rescan_disable;	/* disable card detection */
+ 	int			rescan_entered;	/* used with nonremovable devices */
+ 
++	bool			trigger_card_event; /* card_event necessary */
++
+ 	struct mmc_card		*card;		/* device attached to this host */
+ 
+ 	wait_queue_head_t	wq;
+-- 
+1.7.9.5
 
