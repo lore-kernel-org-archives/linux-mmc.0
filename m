@@ -1,217 +1,89 @@
-From: Grant Grundler <grundler@chromium.org>
-Subject: Re: [PATCH] mmc-utils: Support sending Samsung eMMC 4.5 FFU
-Date: Mon, 7 Apr 2014 22:06:27 -0700
-Message-ID: <CANEJEGvd70HN=MNJNQbJn49H=Q7-35bm_eE22a--f-PNdX5JuQ@mail.gmail.com>
-References: <000301cf4ffe$7e1dbf80$7a593e80$@samsung.com>
+From: Roger <rogerable@realtek.com>
+Subject: Re: [PATCH v5 3/3] memstick: Add realtek USB memstick host driver
+Date: Tue, 8 Apr 2014 16:06:18 +0800
+Message-ID: <5343ADFA.7010703@realtek.com>
+References: <1395744293-24398-1-git-send-email-rogerable@realtek.com>
+ <1395744293-24398-4-git-send-email-rogerable@realtek.com>
+ <533A3080.2020008@realtek.com>
+ <20140401150654.fe27636428a62fdf9e0d2dc1@linux-foundation.org>
+ <20140402151654.GA24060@lee--X1>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-oa0-f53.google.com ([209.85.219.53]:59093 "EHLO
-	mail-oa0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750994AbaDHFG2 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 8 Apr 2014 01:06:28 -0400
-Received: by mail-oa0-f53.google.com with SMTP id j17so473496oag.12
-        for <linux-mmc@vger.kernel.org>; Mon, 07 Apr 2014 22:06:27 -0700 (PDT)
-In-Reply-To: <000301cf4ffe$7e1dbf80$7a593e80$@samsung.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"; Format="flowed"
+Content-Transfer-Encoding: 7bit
+Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
+In-Reply-To: <20140402151654.GA24060@lee--X1>
+List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
+List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel>
+List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
+List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
+List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
+Errors-To: driverdev-devel-bounces@linuxdriverproject.org
+Sender: driverdev-devel-bounces@linuxdriverproject.org
+To: Lee Jones <lee.jones@linaro.org>, Andrew Morton <akpm@linux-foundation.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Maxim Levitsky <maximlevitsky@gmail.com>, Alex Dubov <oakad@yahoo.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, driverdev-devel@linuxdriverproject.org, linux-mmc@vger.kernel.org, Chris Ball <chris@printf.net>, linux-kernel@vger.kernel.org, wei_wang@realsil.com.cn, Dan Carpenter <dan.carpenter@oracle.com>, Samuel Ortiz <sameo@linux.intel.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Seunguk Shin <seunguk.shin@samsung.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, CPGS <cpgs@samsung.com>, Avi Shchislowski <Avi.Shchislowski@sandisk.com>, Puthikorn Voravootivat <puthik@chromium.org>
 
-On Fri, Apr 4, 2014 at 5:07 AM, Seunguk Shin <seunguk.shin@samsung.com> wrote:
-> This change adds support to invoke Samsung eMMC 4.5 field firmware update
-> (ffu) process.
-> New command was added: "emmc45 ffu".
+
+On 04/02/2014 11:16 PM, Lee Jones wrote:
+> On Tue, 01 Apr 2014, Andrew Morton wrote:
 >
-> Samsung eMMC 4.5 FFU protocol is similar with eMMC 5.0 FFU without
-> MODE_OPERATION.
-> It uses the different EXT_CSD offset.
+>> On Tue, 1 Apr 2014 11:20:32 +0800 Roger <rogerable@realtek.com> wrote:
+>>
+>>> On 03/25/2014 06:44 PM, rogerable@realtek.com wrote:
+>>>> From: Roger Tseng <rogerable@realtek.com>
+>>>>
+>>>> Realtek USB memstick host driver provides memstick host support based on the
+>>>> Realtek USB card reader MFD driver.
+>>>>
+>>>> Signed-off-by: Roger Tseng <rogerable@realtek.com>
+>>>> ---
+>>>>    drivers/memstick/host/Kconfig       |  10 +
+>>>>    drivers/memstick/host/Makefile      |   1 +
+>>>>    drivers/memstick/host/rtsx_usb_ms.c | 839 ++++++++++++++++++++++++++++++++++++
+>>>>    3 files changed, 850 insertions(+)
+>>>>    create mode 100644 drivers/memstick/host/rtsx_usb_ms.c
+>>> Hi Andrew,
+>>>
+>>> Since I'll have to send next revision(v6, to modify patch 1/3) and
+>>> you've commented v4, would you also comment or Ack the 3/3 of this one?
+>>> This should save one revision for me to make any necessary change.
+>>
+>> It looks OK to my inexpert eye.  It would be better if Maxim and/or Alex
+>> could review the code.  If that doesn't happen then I guess the best we
+>> can do is to go ahead and merge it.  Have you worked out via which tree
+>> the patches will be merged?
 >
-> This patch depends on patch mmc-utils: Support-sending-eMMC-v5.0 committed
-> by Avi Shchislowski <avi.shchislowski@sandisk.com> and mmc: Support FFU for
-> Samsung eMMC v4.5 committed by Seunguk Shin <seunguk.shin@samsung.com>
+> I'll be happy to take the set if one of the subsystem experts would be
+> kind enough to cast an eye over it.
 >
-> ---
->  mmc.c      |  5 ++++
->  mmc.h      |  1 +
->  mmc_cmds.c | 87
-> ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
->  mmc_cmds.h |  1 +
->  4 files changed, 94 insertions(+)
+> Maxim, Alex?
 >
-> diff --git a/mmc.c b/mmc.c
-> index 7234953..44aaf6d 100644
-> --- a/mmc.c
-> +++ b/mmc.c
-> @@ -115,6 +115,11 @@ static struct Command commands[] = {
->                 "run eMMC 5.0 Field firmware update.\n.",
->           NULL
->         },
-> +       { do_emmc45_ffu, -2,
-> +         "emmc45 ffu", "<image path> <device>\n"
+Lee,
 
-I think this is a good starting point and I think we should adopt this
-patch as-is. Partly because I want to see Seunguk's name _and_ email
-address "permanently" recorded as the original author. I'm
-particularly interested in making sure @samsung.com is listed as the
-original author. :)
+When I prepare my next submission, I found a previous version of this 
+patch set(and only the 1/3 'mfd' part)  seems to be merged in the 
+following commit:
 
-I understand this code depends on a patch that hasn't been accepted
-yet. :) So effectively this might not matter:
+commit e5744abb2fa3629aa5a94e21ca1eae32ff2fe00b
+Merge: c29aa15 2d28ca7
+Author: Linus Torvalds <torvalds@linux-foundation.org>
+Date:   Mon Apr 7 10:24:18 2014 -0700
 
-Reviewed-by: Grant Grundler <grundler@chromium.org>
+     Merge tag 'mfd-for-linus-3.15' of 
+git://git.kernel.org/pub/scm/linux/kernel/git/lee/mfd
+
+Is there any chance to revert it? Or what can I do to help current 
+situation?
+
+note: the merged commit:
+commit 730876be256603b4ee7225a125467d97a7ce9060
+Author: Roger Tseng <rogerable@realtek.com>
+Date:   Wed Feb 12 18:00:36 2014 +0800
+
+     mfd: Add realtek USB card reader driver
 
 
-Sorry, I'll dump some more thoughts here:
-I was originally thinking mmc-utils should be looking at the
-ext_csd[CSD_REV] to determine which FFU method would be used.
-
-But the kernel knows enough about the device (e.g. eMMC version and
-MANFID) to select the right FFU method in the IOCTL calls. The user
-space really only needs "upload this file for FFU".
-
-Is there any reason we wouldn't want to "install" once the FFU has
-successfully completed?
-
-I reread Avi's previous patches and it's not explained why
-FFU_INSTALL_OP should be a separate step for user space.
-If not, the kernel will know when the FFU is complete and can perform
-"install" automatically. I think it's a good idea to keep the kernel
-internal implementation as two discrete steps though.
-
-I'm reading "install" to mean issue some magic commands that will
-trigger the new firmware to start executing on the device.
-
-cheers,
-grant
-
-> +               "run eMMC 4.5 Field firmware update for samsung.\n.",
-> +         NULL
-> +       },
->         { 0, 0, 0, 0 }
->  };
->
-> diff --git a/mmc.h b/mmc.h
-> index 19eaaba..ca4b70b 100644
-> --- a/mmc.h
-> +++ b/mmc.h
-> @@ -86,6 +86,7 @@
->
->  #define FFU_DWONLOAD_OP        302
->  #define FFU_INSTALL_OP 303
-> +#define FFU_SAMSUNG45_OP       304
->
->  /*
->   * EXT_CSD field definitions
-> diff --git a/mmc_cmds.c b/mmc_cmds.c
-> index f667d10..17e50d8 100644
-> --- a/mmc_cmds.c
-> +++ b/mmc_cmds.c
-> @@ -1271,3 +1271,90 @@ exit:
->         return ret;
->  }
->
-> +static int ffu_execute(int fw_fd, int mmc_fd)
-> +{
-> +       int ret = 0;
-> +       struct mmc_ioc_cmd mmc_ioc_cmd;
-> +       char data_buff[MMC_IOC_MAX_BYTES];
-> +       int file_size;
-> +       int data_length;
-> +
-> +       memset(data_buff, 0, sizeof(data_buff));
-> +       /* get file size */
-> +       file_size = lseek(fw_fd, 0, SEEK_END);
-> +       if (file_size < 0) {
-> +               ret = -1;
-> +               perror("seek file error \n");
-> +               goto exit;
-> +       }
-> +
-> +       lseek(fw_fd, 0, SEEK_SET);
-> +
-> +       if (file_size > MMC_IOC_MAX_BYTES) {
-> +               ret = -1;
-> +               perror("firmware file size error \n");
-> +               goto exit;
-> +       } else {
-> +               /* Read FW data from file */
-> +               data_length = read(fw_fd, data_buff, file_size);
-> +               if (data_length == -1) {
-> +                       ret = -1;
-> +                       goto exit;
-> +               }
-> +               /* prepare and send ioctl */
-> +               memset(&mmc_ioc_cmd, 0, sizeof(mmc_ioc_cmd));
-> +               mmc_ioc_cmd.opcode = FFU_SAMSUNG45_OP;
-> +               mmc_ioc_cmd.blksz = CARD_BLOCK_SIZE;
-> +               mmc_ioc_cmd.blocks = (data_length + mmc_ioc_cmd.blksz - 1) /
-> +                       mmc_ioc_cmd.blksz;
-> +               mmc_ioc_cmd.arg = 0;
-> +               mmc_ioc_cmd.flags = MMC_RSP_SPI_R1 | MMC_RSP_R1 |
-> MMC_CMD_ADTC;
-> +               mmc_ioc_cmd.write_flag = 1;
-> +               mmc_ioc_cmd_set_data(mmc_ioc_cmd, data_buff);
-> +               ret = ioctl(mmc_fd, MMC_IOC_CMD, &mmc_ioc_cmd);
-> +
-> +               if (ret) {
-> +                       perror("ioctl FW download");
-> +                       goto exit;
-> +               }
-> +       }
-> +
-> +exit:
-> +
-> +       return ret;
-> +}
-> +
-> +int do_emmc45_ffu(int nargs, char **argv)
-> +{
-> +       int fd, fw_fd, ret;
-> +       char *device;
-> +
-> +       CHECK(nargs != 3, "Usage: ffu <image path> </path/to/mmcblkX> \n",
-> +               exit(1));
-> +
-> +       device = argv[2];
-> +       fd = open(device, O_RDWR);
-> +       if (fd < 0) {
-> +               perror("device open error \n");
-> +               exit(1);
-> +       }
-> +
-> +       /* open eMMC4.5 firmware image file */
-> +       fw_fd = open(argv[1], O_RDONLY);
-> +       if (fw_fd < 0) {
-> +               perror("open eMMC4.5 firmware file");
-> +               ret = -1;
-> +               goto exit;
-> +       }
-> +
-> +       ret = ffu_execute(fw_fd, fd);
-> +       if (ret)
-> +               goto exit;
-> +
-> +exit:
-> +       close(fd);
-> +       close(fw_fd);
-> +
-> +       return ret;
-> +}
-> +
-> diff --git a/mmc_cmds.h b/mmc_cmds.h
-> index 3ff3440..1ab9cd5 100644
-> --- a/mmc_cmds.h
-> +++ b/mmc_cmds.h
-> @@ -29,3 +29,4 @@ int do_status_get(int nargs, char **argv);
->  int do_enh_area_set(int nargs, char **argv);
->  int do_write_reliability_set(int nargs, char **argv);
->  int do_emmc50_ffu(int nargs, char **argv);
-> +int do_emmc45_ffu(int nargs, char **argv);
-> --
-> 1.8.3.2
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Best regards,
+Roger Tseng
