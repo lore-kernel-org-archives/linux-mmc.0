@@ -1,92 +1,53 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH RESEND] mmc: Delay the card_event callback into the
- mmc_rescan worker
-Date: Wed, 9 Apr 2014 10:56:36 +0200
-Message-ID: <CAPDyKFpS3x902iQqEC69hkryHVGieeDykD=rBJX5OqYAD+afwA@mail.gmail.com>
-References: <1396995583-5475-1-git-send-email-markus.mayer@linaro.org>
+Subject: Re: [PATCH] mmc: card.h: Use NULL instead of 0 for END_FIXUP
+Date: Wed, 9 Apr 2014 11:33:41 +0200
+Message-ID: <CAPDyKFrGhX1R6HsVF_r=MTGXg_06xEe1WL3YCaywhKWq19TLFQ@mail.gmail.com>
+References: <1396662168-6501-1-git-send-email-festevam@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1396995583-5475-1-git-send-email-markus.mayer@linaro.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Markus Mayer <markus.mayer@linaro.org>
-Cc: Chris Ball <chris@printf.net>, Christian Daudt <bcm@fixthebug.org>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qg0-f46.google.com ([209.85.192.46]:43092 "EHLO
+	mail-qg0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750784AbaDIJdm (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 9 Apr 2014 05:33:42 -0400
+Received: by mail-qg0-f46.google.com with SMTP id 63so1896743qgz.19
+        for <linux-mmc@vger.kernel.org>; Wed, 09 Apr 2014 02:33:41 -0700 (PDT)
+In-Reply-To: <1396662168-6501-1-git-send-email-festevam@gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Fabio Estevam <festevam@gmail.com>
+Cc: Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>, Fabio Estevam <fabio.estevam@freescale.com>
 
-On 9 April 2014 00:19, Markus Mayer <markus.mayer@linaro.org> wrote:
-> This change removes the callback from atomic context which it doesn't
-> need to be in, and puts it in line with the debounced rescan.
+On 5 April 2014 03:42, Fabio Estevam <festevam@gmail.com> wrote:
+> From: Fabio Estevam <fabio.estevam@freescale.com>
 >
-> This code is based on these e-mail threads with Christian Daudt:
+> Fix the following sparse warnings:
 >
->   https://lkml.org/lkml/2013/8/19/539
->   https://lkml.org/lkml/2014/3/19/79
+> drivers/mmc/card/block.c:2421:9: warning: Using plain integer as NULL pointer
 >
-> Signed-off-by: Markus Mayer <markus.mayer@linaro.org>
+> drivers/mmc/core/quirks.c:69:9: warning: Using plain integer as NULL pointer
+>
+> Signed-off-by: Fabio Estevam <fabio.estevam@freescale.com>
+
+Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
+
 > ---
->  drivers/mmc/core/core.c      |    5 +++++
->  drivers/mmc/core/slot-gpio.c |    4 +---
->  include/linux/mmc/host.h     |    2 ++
->  3 files changed, 8 insertions(+), 3 deletions(-)
+>  include/linux/mmc/card.h | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
 >
-> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> index 098374b..ff7fd2e 100644
-> --- a/drivers/mmc/core/core.c
-> +++ b/drivers/mmc/core/core.c
-> @@ -2421,6 +2421,11 @@ void mmc_rescan(struct work_struct *work)
->                 container_of(work, struct mmc_host, detect.work);
->         int i;
+> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+> index b730272..aa7e57f 100644
+> --- a/include/linux/mmc/card.h
+> +++ b/include/linux/mmc/card.h
+> @@ -353,7 +353,7 @@ struct mmc_fixup {
+>  #define CID_OEMID_ANY ((unsigned short) -1)
+>  #define CID_NAME_ANY (NULL)
 >
-> +       if (host->trigger_card_event && host->ops->card_event) {
-> +               host->ops->card_event(host);
-> +               host->trigger_card_event = false;
-> +       }
-> +
-
-So this might be a stupid question. :-)
-
-Could you elaborate on why the host->ops->card_event then is needed at
-all. Why can't host drivers use host->ops->get_cd to perform the
-actions they need?
-
-The reason for bringing this up, is because this patch moves the
-invokes of the these callbacks quite close to each other. Earlier they
-were more separated.
-
-Kind regards
-Ulf Hansson
-
->         if (host->rescan_disable)
->                 return;
+> -#define END_FIXUP { 0 }
+> +#define END_FIXUP { NULL }
 >
-> diff --git a/drivers/mmc/core/slot-gpio.c b/drivers/mmc/core/slot-gpio.c
-> index 46596b71..4029c85 100644
-> --- a/drivers/mmc/core/slot-gpio.c
-> +++ b/drivers/mmc/core/slot-gpio.c
-> @@ -29,9 +29,7 @@ static irqreturn_t mmc_gpio_cd_irqt(int irq, void *dev_id)
->         /* Schedule a card detection after a debounce timeout */
->         struct mmc_host *host = dev_id;
->
-> -       if (host->ops->card_event)
-> -               host->ops->card_event(host);
-> -
-> +       host->trigger_card_event = true;
->         mmc_detect_change(host, msecs_to_jiffies(200));
->
->         return IRQ_HANDLED;
-> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-> index 99f5709..63b983b 100644
-> --- a/include/linux/mmc/host.h
-> +++ b/include/linux/mmc/host.h
-> @@ -322,6 +322,8 @@ struct mmc_host {
->         int                     rescan_disable; /* disable card detection */
->         int                     rescan_entered; /* used with nonremovable devices */
->
-> +       bool                    trigger_card_event; /* card_event necessary */
-> +
->         struct mmc_card         *card;          /* device attached to this host */
->
->         wait_queue_head_t       wq;
+>  #define _FIXUP_EXT(_name, _manfid, _oemid, _rev_start, _rev_end,       \
+>                    _cis_vendor, _cis_device,                            \
 > --
-> 1.7.9.5
+> 1.8.3.2
 >
