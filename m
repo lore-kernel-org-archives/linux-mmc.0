@@ -1,190 +1,179 @@
-From: Avi Shchislowski <Avi.Shchislowski@sandisk.com>
-Subject: [RFC PATCH 1/1 v3] mmc-utils: Support-sending-eMMC-5.0-FFU
-Date: Thu, 10 Apr 2014 18:10:02 +0000
-Message-ID: <FDD07FEB422EF948A392FDC201AEEAE641180FAD@SACMBXIP01.sdcorp.global.sandisk.com>
+From: Tim Kryger <tim.kryger@linaro.org>
+Subject: [PATCH] mmc: sdhci: Set ocr_avail directly based on vmmc
+Date: Thu, 10 Apr 2014 16:31:48 -0700
+Message-ID: <1397172708-19735-1-git-send-email-tim.kryger@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from am1ehsobe005.messaging.microsoft.com ([213.199.154.208]:41438
-	"EHLO am1outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753323AbaDJSKH convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 10 Apr 2014 14:10:07 -0400
-Content-Language: en-US
+Received: from mail-gw3-out.broadcom.com ([216.31.210.64]:25865 "EHLO
+	mail-gw3-out.broadcom.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753845AbaDJXcG (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 10 Apr 2014 19:32:06 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "'linux-mmc@vger.kernel.org'" <linux-mmc@vger.kernel.org>, "'cjb@laptop.org'" <cjb@laptop.org>
-Cc: 'Grant Grundler' <grundler@chromium.org>, Alex Lemberg <Alex.Lemberg@sandisk.com>
+To: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Tim Kryger <tim.kryger@linaro.org>, Linux MMC Mailing List <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 
-Firmware Update (FFU)
+When an external regulator provides VDD, set ocr_avail directly based on
+the supported voltage range.  This allows for the use of regulators that
+can't provide exactly 1.8v, 3.0v, or 3.3v and ensures that ocr_avil bits
+are only set for supported voltage ranges.  Commit cec2e21 had attempted
+to relax the range checks but because it relied on setting capabilities
+as an intermediate step, ocr_avail could easily get a bit set that the
+host couldn't support.
 
-New command was add: "do_emmc50_ffu".
+Signed-off-by: Tim Kryger <tim.kryger@linaro.org>
+---
+ drivers/mmc/host/sdhci.c |  107 +++++++++++++++++++++++++---------------------
+ 1 file changed, 58 insertions(+), 49 deletions(-)
 
-This patch depends on patch  mmc: Support-FFU-for-eMMC-v5.0
-Committed by Avi Shchislowski <avi.shchislowski@sandisk.com>
-
-FFU will be done in two steps. Two new IOCTL codes will be sent to the driver in order to operate FFU code:
-1.  FFU_DWONLOAD_OP (sent in ffu_download_image() function)
-2.  FFU_INSTALL_OP (sent in ffu_install() function)
-
-Signed-off-by: Avi Shchislowski <avi.shchislowski@sandisk.com>
-Signed-off-by: Alex Lemberg <alex.lemberg@sandisk.com>
-
-diff --git a/mmc.c b/mmc.c
-index 926e92f..ee23cd3 100644
---- a/mmc.c
-+++ b/mmc.c
-@@ -110,6 +110,11 @@ static struct Command commands[] = {
- 		"Send Sanitize command to the <device>.\nThis will delete the unmapped memory region of the device.",
- 	  NULL
- 	},
-+	{ do_emmc50_ffu, -2,
-+		  "ffu", "<image name> <device>\n"
-+			"run eMMC 5.0 Field firmware update.\n.",
-+		  NULL
-+	},
- 	{ 0, 0, 0, 0 }
- };
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 9a79fc4..4d56fbe 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -2769,6 +2769,29 @@ struct sdhci_host *sdhci_alloc_host(struct device *dev,
  
-diff --git a/mmc.h b/mmc.h
-index 9871d62..b338e1d 100644
---- a/mmc.h
-+++ b/mmc.h
-@@ -64,6 +64,7 @@
- #define EXT_CSD_ENH_START_ADDR_2	138
- #define EXT_CSD_ENH_START_ADDR_1	137
- #define EXT_CSD_ENH_START_ADDR_0	136
-+#define EXT_CSD_REV			192
- #define EXT_CSD_NATIVE_SECTOR_SIZE	63 /* R */
- #define EXT_CSD_USE_NATIVE_SECTOR	62 /* R/W */
- #define EXT_CSD_DATA_SECTOR_SIZE	61 /* R */
-@@ -79,6 +80,9 @@
-  */
- #define BKOPS_ENABLE	(1<<0)
+ EXPORT_SYMBOL_GPL(sdhci_alloc_host);
  
-+#define MMC_FFU_DOWNLOAD_OP	302
-+#define MMC_FFU_INSTALL_OP	303
-+
- /*
-  * EXT_CSD field definitions
-  */
-diff --git a/mmc_cmds.c b/mmc_cmds.c
-index b8afa74..71a2ce3 100644
---- a/mmc_cmds.c
-+++ b/mmc_cmds.c
-@@ -1142,7 +1142,7 @@ int do_sanitize(int nargs, char **argv)
- 	char *device;
- 
- 	CHECK(nargs != 2, "Usage: mmc sanitize </path/to/mmcblkX>\n",
--			exit(1));
-+		exit(1));
- 
- 	device = argv[1];
- 
-@@ -1163,3 +1163,94 @@ int do_sanitize(int nargs, char **argv)
- 
- }
- 
-+static int ffu_download_image(char *fname, int mmc_fd, int blk_size)
++static unsigned int sdhci_get_ocr_avail_from_vmmc(struct sdhci_host *host)
 +{
-+	int ret = 0;
-+	struct mmc_ioc_cmd mmc_ioc_cmd;
-+	char firmware_name[512];
++	unsigned int ocr_avail = 0;
++	struct regulator *vmmc = host->vmmc;
 +
-+	memset(firmware_name, 0, sizeof(firmware_name));
-+	memcpy(firmware_name, fname, strlen(fname));
++	if (regulator_is_supported_voltage(vmmc, 1650000, 1950000) > 0)
++		ocr_avail |= MMC_VDD_165_195;
 +
-+	/* prepare and send ioctl */
-+	memset(&mmc_ioc_cmd, 0, sizeof(mmc_ioc_cmd));
-+	mmc_ioc_cmd.opcode = MMC_FFU_DOWNLOAD_OP;
-+	mmc_ioc_cmd.blksz = blk_size;
-+	mmc_ioc_cmd.blocks = 1;
-+	mmc_ioc_cmd.arg = 0;
-+	mmc_ioc_cmd.flags = MMC_RSP_SPI_R1 | MMC_RSP_R1 | MMC_CMD_ADTC;
-+	mmc_ioc_cmd.write_flag = 1;
-+	mmc_ioc_cmd_set_data(mmc_ioc_cmd, firmware_name);
-+	ret = ioctl(mmc_fd, MMC_IOC_CMD, &mmc_ioc_cmd);
-+	if (ret) {
-+		fprintf(stderr, "ioctl FW download error%d\n", ret);
-+		return ret;
-+	}
++	if (regulator_is_supported_voltage(vmmc, 2900000, 3000000) > 0)
++		ocr_avail |= MMC_VDD_29_30;
 +
-+	return ret;
++	if (regulator_is_supported_voltage(vmmc, 3000000, 3100000) > 0)
++		ocr_avail |= MMC_VDD_30_31;
++
++	if (regulator_is_supported_voltage(vmmc, 3200000, 3300000) > 0)
++		ocr_avail |= MMC_VDD_32_33;
++
++	if (regulator_is_supported_voltage(vmmc, 3300000, 3400000) > 0)
++		ocr_avail |= MMC_VDD_33_34;
++
++	return ocr_avail;
 +}
 +
-+static int ffu_install(int mmc_fd, int blk_size)
-+{
-+	int ret;
-+	struct mmc_ioc_cmd mmc_ioc_cmd;
-+
-+	memset(&mmc_ioc_cmd, 0, sizeof(mmc_ioc_cmd));
-+	mmc_ioc_cmd.opcode = MMC_FFU_INSTALL_OP;
-+	mmc_ioc_cmd.blksz = blk_size;
-+	mmc_ioc_cmd.blocks = 0;
-+	mmc_ioc_cmd.arg = 0;
-+	mmc_ioc_cmd.flags = MMC_RSP_SPI_R1 | MMC_RSP_R1 | MMC_CMD_ADTC;
-+	mmc_ioc_cmd.write_flag = 0;
-+	ret = ioctl(mmc_fd, MMC_IOC_CMD, &mmc_ioc_cmd);
-+
-+	return ret;
-+}
-+
-+int do_emmc50_ffu (int nargs, char **argv)
-+{
-+	int fd, ret;
-+	char *device;
-+	char *path;
-+	__u8 ext_csd[512];
-+	int blk_size;
-+
-+	CHECK(nargs != 3, "Usage: ffu <image name> </path/to/mmcblkX> \n",
-+		exit(1));
-+
-+	device = argv[2];
-+	fd = open(device, O_RDWR);
-+	if (fd < 0) {
-+		perror("open");
-+		exit(1);
+ int sdhci_add_host(struct sdhci_host *host)
+ {
+ 	struct mmc_host *mmc;
+@@ -3063,24 +3086,39 @@ int sdhci_add_host(struct sdhci_host *host)
+ 		}
+ 	}
+ 
+-#ifdef CONFIG_REGULATOR
+-	/*
+-	 * Voltage range check makes sense only if regulator reports
+-	 * any voltage value.
+-	 */
++	/* If using external regulator, check supported voltage ranges */
+ 	if (host->vmmc && regulator_get_voltage(host->vmmc) > 0) {
+-		ret = regulator_is_supported_voltage(host->vmmc, 2700000,
+-			3600000);
+-		if ((ret <= 0) || (!(caps[0] & SDHCI_CAN_VDD_330)))
+-			caps[0] &= ~SDHCI_CAN_VDD_330;
+-		if ((ret <= 0) || (!(caps[0] & SDHCI_CAN_VDD_300)))
+-			caps[0] &= ~SDHCI_CAN_VDD_300;
+-		ret = regulator_is_supported_voltage(host->vmmc, 1700000,
+-			1950000);
+-		if ((ret <= 0) || (!(caps[0] & SDHCI_CAN_VDD_180)))
+-			caps[0] &= ~SDHCI_CAN_VDD_180;
+-	}
+-#endif /* CONFIG_REGULATOR */
++		ocr_avail = sdhci_get_ocr_avail_from_vmmc(host);
++	} else {
++		if (caps[0] & SDHCI_CAN_VDD_330)
++			ocr_avail |= MMC_VDD_32_33 | MMC_VDD_33_34;
++		if (caps[0] & SDHCI_CAN_VDD_300)
++			ocr_avail |= MMC_VDD_29_30 | MMC_VDD_30_31;
++		if (caps[0] & SDHCI_CAN_VDD_180)
++			ocr_avail |= MMC_VDD_165_195;
 +	}
 +
-+	ret = read_extcsd(fd, ext_csd);
-+	if (ret) {
-+		fprintf(stderr, "Could not read EXT_CSD from %s\n", device);
-+		exit(1);
-+	}
++	if (host->ocr_mask)
++		ocr_avail = host->ocr_mask;
 +
-+	if (ext_csd[EXT_CSD_REV] < 7) {
-+		fprintf(stderr, "FFU is not supported on device %s\n", device);
-+		exit(1);
-+	}
++	mmc->ocr_avail = ocr_avail;
++	mmc->ocr_avail_sdio = ocr_avail;
++	if (host->ocr_avail_sdio)
++		mmc->ocr_avail_sdio &= host->ocr_avail_sdio;
++	mmc->ocr_avail_sd = ocr_avail;
++	if (host->ocr_avail_sd)
++		mmc->ocr_avail_sd &= host->ocr_avail_sd;
++	else /* normal SD controllers don't support 1.8V */
++		mmc->ocr_avail_sd &= ~MMC_VDD_165_195;
++	mmc->ocr_avail_mmc = ocr_avail;
++	if (host->ocr_avail_mmc)
++		mmc->ocr_avail_mmc &= host->ocr_avail_mmc;
 +
-+	blk_size = (ext_csd[EXT_CSD_DATA_SECTOR_SIZE] == 0) ? 512 : 4096;
-+	path = argv[1];
-+	ret = ffu_download_image(path, fd, blk_size);
-+	if (ret) {
-+		fprintf(stderr, "FFU failed %d\n", ret);
-+		exit(1);
++	if (mmc->ocr_avail == 0) {
++		pr_err("%s: Hardware doesn't report any support voltages.\n",
++		       mmc_hostname(mmc));
++		return -ENODEV;
 +	}
-+
-+	ret = ffu_install(fd, blk_size);
-+	if (ret) {
-+		fprintf(stderr, "FFU failed %d\n", ret);
-+		exit(1);
-+	}
-+
-+	close(fd);
-+	fprintf(stderr, "FFU finished with status %d \n", ret);
-+	return ret;
-+}
-diff --git a/mmc_cmds.h b/mmc_cmds.h
-index f06cc10..3ff3440 100644
---- a/mmc_cmds.h
-+++ b/mmc_cmds.h
-@@ -28,3 +28,4 @@ int do_sanitize(int nargs, char **argv);
- int do_status_get(int nargs, char **argv);
- int do_enh_area_set(int nargs, char **argv);
- int do_write_reliability_set(int nargs, char **argv);
-+int do_emmc50_ffu(int nargs, char **argv);
-
+ 
+ 	/*
+ 	 * According to SD Host Controller spec v3.00, if the Host System
+@@ -3106,52 +3144,23 @@ int sdhci_add_host(struct sdhci_host *host)
+ 		}
+ 	}
+ 
+-	if (caps[0] & SDHCI_CAN_VDD_330) {
+-		ocr_avail |= MMC_VDD_32_33 | MMC_VDD_33_34;
+-
++	if (ocr_avail & (MMC_VDD_32_33 | MMC_VDD_33_34))
+ 		mmc->max_current_330 = ((max_current_caps &
+ 				   SDHCI_MAX_CURRENT_330_MASK) >>
+ 				   SDHCI_MAX_CURRENT_330_SHIFT) *
+ 				   SDHCI_MAX_CURRENT_MULTIPLIER;
+-	}
+-	if (caps[0] & SDHCI_CAN_VDD_300) {
+-		ocr_avail |= MMC_VDD_29_30 | MMC_VDD_30_31;
+ 
++	if (ocr_avail & (MMC_VDD_29_30 | MMC_VDD_30_31))
+ 		mmc->max_current_300 = ((max_current_caps &
+ 				   SDHCI_MAX_CURRENT_300_MASK) >>
+ 				   SDHCI_MAX_CURRENT_300_SHIFT) *
+ 				   SDHCI_MAX_CURRENT_MULTIPLIER;
+-	}
+-	if (caps[0] & SDHCI_CAN_VDD_180) {
+-		ocr_avail |= MMC_VDD_165_195;
+ 
++	if (ocr_avail & MMC_VDD_165_195)
+ 		mmc->max_current_180 = ((max_current_caps &
+ 				   SDHCI_MAX_CURRENT_180_MASK) >>
+ 				   SDHCI_MAX_CURRENT_180_SHIFT) *
+ 				   SDHCI_MAX_CURRENT_MULTIPLIER;
+-	}
+-
+-	if (host->ocr_mask)
+-		ocr_avail = host->ocr_mask;
+-
+-	mmc->ocr_avail = ocr_avail;
+-	mmc->ocr_avail_sdio = ocr_avail;
+-	if (host->ocr_avail_sdio)
+-		mmc->ocr_avail_sdio &= host->ocr_avail_sdio;
+-	mmc->ocr_avail_sd = ocr_avail;
+-	if (host->ocr_avail_sd)
+-		mmc->ocr_avail_sd &= host->ocr_avail_sd;
+-	else /* normal SD controllers don't support 1.8V */
+-		mmc->ocr_avail_sd &= ~MMC_VDD_165_195;
+-	mmc->ocr_avail_mmc = ocr_avail;
+-	if (host->ocr_avail_mmc)
+-		mmc->ocr_avail_mmc &= host->ocr_avail_mmc;
+-
+-	if (mmc->ocr_avail == 0) {
+-		pr_err("%s: Hardware doesn't report any "
+-			"support voltages.\n", mmc_hostname(mmc));
+-		return -ENODEV;
+-	}
+ 
+ 	spin_lock_init(&host->lock);
+ 
+-- 
+1.7.9.5
 
