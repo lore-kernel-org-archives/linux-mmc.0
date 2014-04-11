@@ -1,179 +1,55 @@
-From: Tim Kryger <tim.kryger@linaro.org>
-Subject: [PATCH] mmc: sdhci: Set ocr_avail directly based on vmmc
-Date: Thu, 10 Apr 2014 16:31:48 -0700
-Message-ID: <1397172708-19735-1-git-send-email-tim.kryger@linaro.org>
+From: <rogerable@realtek.com>
+Subject: [PATCH v7 2/4] [v6 fix] mfd/rtsx_usb: add comment in rtsx_usb_suspend
+Date: Fri, 11 Apr 2014 14:53:21 +0800
+Message-ID: <1397199203-2235-3-git-send-email-rogerable@realtek.com>
+References: <1397199203-2235-1-git-send-email-rogerable@realtek.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-gw3-out.broadcom.com ([216.31.210.64]:25865 "EHLO
-	mail-gw3-out.broadcom.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753845AbaDJXcG (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 10 Apr 2014 19:32:06 -0400
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
+In-Reply-To: <1397199203-2235-1-git-send-email-rogerable@realtek.com>
+List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
+List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel>
+List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
+List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
+List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
+Errors-To: driverdev-devel-bounces@linuxdriverproject.org
+Sender: driverdev-devel-bounces@linuxdriverproject.org
+To: Samuel Ortiz <sameo@linux.intel.com>, Lee Jones <lee.jones@linaro.org>, Chris Ball <chris@printf.net>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Maxim Levitsky <maximlevitsky@gmail.com>, Alex Dubov <oakad@yahoo.com>, Dan Carpenter <dan.carpenter@oracle.com>, Ulf Hansson <ulf.hansson@linaro.org>, Andrew Morton <akpm@linux-foundation.org>, Oliver Neukum <oneukum@suse.de>
+Cc: driverdev-devel@linuxdriverproject.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, wei_wang@realsil.com.cn, rogerable@realtek.com
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Tim Kryger <tim.kryger@linaro.org>, Linux MMC Mailing List <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 
-When an external regulator provides VDD, set ocr_avail directly based on
-the supported voltage range.  This allows for the use of regulators that
-can't provide exactly 1.8v, 3.0v, or 3.3v and ensures that ocr_avil bits
-are only set for supported voltage ranges.  Commit cec2e21 had attempted
-to relax the range checks but because it relied on setting capabilities
-as an intermediate step, ocr_avail could easily get a bit set that the
-host couldn't support.
+From: Roger Tseng <rogerable@realtek.com>
 
-Signed-off-by: Tim Kryger <tim.kryger@linaro.org>
+Explain why there is no need to have a symmetric LED turn-on in resume handler
+while calling rtsx_usb_turn_off_led() in suspend handler.
+
+Signed-off-by: Roger Tseng <rogerable@realtek.com>
 ---
- drivers/mmc/host/sdhci.c |  107 +++++++++++++++++++++++++---------------------
- 1 file changed, 58 insertions(+), 49 deletions(-)
+ drivers/mfd/rtsx_usb.c | 6 ++++++
+ 1 file changed, 6 insertions(+)
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 9a79fc4..4d56fbe 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -2769,6 +2769,29 @@ struct sdhci_host *sdhci_alloc_host(struct device *dev,
+diff --git a/drivers/mfd/rtsx_usb.c b/drivers/mfd/rtsx_usb.c
+index 0ca7973..141ea52 100644
+--- a/drivers/mfd/rtsx_usb.c
++++ b/drivers/mfd/rtsx_usb.c
+@@ -687,9 +687,15 @@ static int rtsx_usb_suspend(struct usb_interface *intf, pm_message_t message)
+ 	dev_dbg(&intf->dev, "%s called with pm message 0x%04u\n",
+ 			__func__, message.event);
  
- EXPORT_SYMBOL_GPL(sdhci_alloc_host);
- 
-+static unsigned int sdhci_get_ocr_avail_from_vmmc(struct sdhci_host *host)
-+{
-+	unsigned int ocr_avail = 0;
-+	struct regulator *vmmc = host->vmmc;
++	/*
++	 * Call to make sure LED is off during suspend to save more power.
++	 * It is NOT a permanent state and could be turned on anytime later.
++	 * Thus no need to call turn_on when resunming.
++	 */
+ 	mutex_lock(&ucr->dev_mutex);
+ 	rtsx_usb_turn_off_led(ucr);
+ 	mutex_unlock(&ucr->dev_mutex);
 +
-+	if (regulator_is_supported_voltage(vmmc, 1650000, 1950000) > 0)
-+		ocr_avail |= MMC_VDD_165_195;
-+
-+	if (regulator_is_supported_voltage(vmmc, 2900000, 3000000) > 0)
-+		ocr_avail |= MMC_VDD_29_30;
-+
-+	if (regulator_is_supported_voltage(vmmc, 3000000, 3100000) > 0)
-+		ocr_avail |= MMC_VDD_30_31;
-+
-+	if (regulator_is_supported_voltage(vmmc, 3200000, 3300000) > 0)
-+		ocr_avail |= MMC_VDD_32_33;
-+
-+	if (regulator_is_supported_voltage(vmmc, 3300000, 3400000) > 0)
-+		ocr_avail |= MMC_VDD_33_34;
-+
-+	return ocr_avail;
-+}
-+
- int sdhci_add_host(struct sdhci_host *host)
- {
- 	struct mmc_host *mmc;
-@@ -3063,24 +3086,39 @@ int sdhci_add_host(struct sdhci_host *host)
- 		}
- 	}
- 
--#ifdef CONFIG_REGULATOR
--	/*
--	 * Voltage range check makes sense only if regulator reports
--	 * any voltage value.
--	 */
-+	/* If using external regulator, check supported voltage ranges */
- 	if (host->vmmc && regulator_get_voltage(host->vmmc) > 0) {
--		ret = regulator_is_supported_voltage(host->vmmc, 2700000,
--			3600000);
--		if ((ret <= 0) || (!(caps[0] & SDHCI_CAN_VDD_330)))
--			caps[0] &= ~SDHCI_CAN_VDD_330;
--		if ((ret <= 0) || (!(caps[0] & SDHCI_CAN_VDD_300)))
--			caps[0] &= ~SDHCI_CAN_VDD_300;
--		ret = regulator_is_supported_voltage(host->vmmc, 1700000,
--			1950000);
--		if ((ret <= 0) || (!(caps[0] & SDHCI_CAN_VDD_180)))
--			caps[0] &= ~SDHCI_CAN_VDD_180;
--	}
--#endif /* CONFIG_REGULATOR */
-+		ocr_avail = sdhci_get_ocr_avail_from_vmmc(host);
-+	} else {
-+		if (caps[0] & SDHCI_CAN_VDD_330)
-+			ocr_avail |= MMC_VDD_32_33 | MMC_VDD_33_34;
-+		if (caps[0] & SDHCI_CAN_VDD_300)
-+			ocr_avail |= MMC_VDD_29_30 | MMC_VDD_30_31;
-+		if (caps[0] & SDHCI_CAN_VDD_180)
-+			ocr_avail |= MMC_VDD_165_195;
-+	}
-+
-+	if (host->ocr_mask)
-+		ocr_avail = host->ocr_mask;
-+
-+	mmc->ocr_avail = ocr_avail;
-+	mmc->ocr_avail_sdio = ocr_avail;
-+	if (host->ocr_avail_sdio)
-+		mmc->ocr_avail_sdio &= host->ocr_avail_sdio;
-+	mmc->ocr_avail_sd = ocr_avail;
-+	if (host->ocr_avail_sd)
-+		mmc->ocr_avail_sd &= host->ocr_avail_sd;
-+	else /* normal SD controllers don't support 1.8V */
-+		mmc->ocr_avail_sd &= ~MMC_VDD_165_195;
-+	mmc->ocr_avail_mmc = ocr_avail;
-+	if (host->ocr_avail_mmc)
-+		mmc->ocr_avail_mmc &= host->ocr_avail_mmc;
-+
-+	if (mmc->ocr_avail == 0) {
-+		pr_err("%s: Hardware doesn't report any support voltages.\n",
-+		       mmc_hostname(mmc));
-+		return -ENODEV;
-+	}
- 
- 	/*
- 	 * According to SD Host Controller spec v3.00, if the Host System
-@@ -3106,52 +3144,23 @@ int sdhci_add_host(struct sdhci_host *host)
- 		}
- 	}
- 
--	if (caps[0] & SDHCI_CAN_VDD_330) {
--		ocr_avail |= MMC_VDD_32_33 | MMC_VDD_33_34;
--
-+	if (ocr_avail & (MMC_VDD_32_33 | MMC_VDD_33_34))
- 		mmc->max_current_330 = ((max_current_caps &
- 				   SDHCI_MAX_CURRENT_330_MASK) >>
- 				   SDHCI_MAX_CURRENT_330_SHIFT) *
- 				   SDHCI_MAX_CURRENT_MULTIPLIER;
--	}
--	if (caps[0] & SDHCI_CAN_VDD_300) {
--		ocr_avail |= MMC_VDD_29_30 | MMC_VDD_30_31;
- 
-+	if (ocr_avail & (MMC_VDD_29_30 | MMC_VDD_30_31))
- 		mmc->max_current_300 = ((max_current_caps &
- 				   SDHCI_MAX_CURRENT_300_MASK) >>
- 				   SDHCI_MAX_CURRENT_300_SHIFT) *
- 				   SDHCI_MAX_CURRENT_MULTIPLIER;
--	}
--	if (caps[0] & SDHCI_CAN_VDD_180) {
--		ocr_avail |= MMC_VDD_165_195;
- 
-+	if (ocr_avail & MMC_VDD_165_195)
- 		mmc->max_current_180 = ((max_current_caps &
- 				   SDHCI_MAX_CURRENT_180_MASK) >>
- 				   SDHCI_MAX_CURRENT_180_SHIFT) *
- 				   SDHCI_MAX_CURRENT_MULTIPLIER;
--	}
--
--	if (host->ocr_mask)
--		ocr_avail = host->ocr_mask;
--
--	mmc->ocr_avail = ocr_avail;
--	mmc->ocr_avail_sdio = ocr_avail;
--	if (host->ocr_avail_sdio)
--		mmc->ocr_avail_sdio &= host->ocr_avail_sdio;
--	mmc->ocr_avail_sd = ocr_avail;
--	if (host->ocr_avail_sd)
--		mmc->ocr_avail_sd &= host->ocr_avail_sd;
--	else /* normal SD controllers don't support 1.8V */
--		mmc->ocr_avail_sd &= ~MMC_VDD_165_195;
--	mmc->ocr_avail_mmc = ocr_avail;
--	if (host->ocr_avail_mmc)
--		mmc->ocr_avail_mmc &= host->ocr_avail_mmc;
--
--	if (mmc->ocr_avail == 0) {
--		pr_err("%s: Hardware doesn't report any "
--			"support voltages.\n", mmc_hostname(mmc));
--		return -ENODEV;
--	}
- 
- 	spin_lock_init(&host->lock);
+ 	return 0;
+ }
  
 -- 
-1.7.9.5
-
+1.8.2
