@@ -1,197 +1,42 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: sdhci: Set ocr_avail directly based on vmmc
-Date: Fri, 11 Apr 2014 10:15:41 +0200
-Message-ID: <CAPDyKFrFyBLtL6dVgFy6DkY0gdCjiVpk1OhsfUXD0nhajCetxg@mail.gmail.com>
-References: <1397172708-19735-1-git-send-email-tim.kryger@linaro.org>
+From: Lee Jones <lee.jones@linaro.org>
+Subject: Re: [PATCH v7 0/4] Add modules for realtek USB card reader
+Date: Fri, 11 Apr 2014 11:28:46 +0100
+Message-ID: <20140411102846.GB9801@lee--X1>
+References: <1397199203-2235-1-git-send-email-rogerable@realtek.com>
+ <1397201514.1589.0.camel@linux-fkkt.site>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1397172708-19735-1-git-send-email-tim.kryger@linaro.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Tim Kryger <tim.kryger@linaro.org>
-Cc: Chris Ball <chris@printf.net>, Linux MMC Mailing List <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
+Content-Disposition: inline
+In-Reply-To: <1397201514.1589.0.camel@linux-fkkt.site>
+List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
+List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel>
+List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
+List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
+List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
+Errors-To: driverdev-devel-bounces@linuxdriverproject.org
+Sender: driverdev-devel-bounces@linuxdriverproject.org
+To: Oliver Neukum <oneukum@suse.de>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Maxim Levitsky <maximlevitsky@gmail.com>, Alex Dubov <oakad@yahoo.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, driverdev-devel@linuxdriverproject.org, linux-mmc@vger.kernel.org, Chris Ball <chris@printf.net>, linux-kernel@vger.kernel.org, wei_wang@realsil.com.cn, rogerable@realtek.com, Andrew Morton <akpm@linux-foundation.org>, Dan Carpenter <dan.carpenter@oracle.com>, Samuel Ortiz <sameo@linux.intel.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On 11 April 2014 01:31, Tim Kryger <tim.kryger@linaro.org> wrote:
-> When an external regulator provides VDD, set ocr_avail directly based on
-> the supported voltage range.  This allows for the use of regulators that
-> can't provide exactly 1.8v, 3.0v, or 3.3v and ensures that ocr_avil bits
-> are only set for supported voltage ranges.  Commit cec2e21 had attempted
-> to relax the range checks but because it relied on setting capabilities
-> as an intermediate step, ocr_avail could easily get a bit set that the
-> host couldn't support.
->
-> Signed-off-by: Tim Kryger <tim.kryger@linaro.org>
-> ---
->  drivers/mmc/host/sdhci.c |  107 +++++++++++++++++++++++++---------------------
->  1 file changed, 58 insertions(+), 49 deletions(-)
->
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 9a79fc4..4d56fbe 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -2769,6 +2769,29 @@ struct sdhci_host *sdhci_alloc_host(struct device *dev,
->
->  EXPORT_SYMBOL_GPL(sdhci_alloc_host);
->
-> +static unsigned int sdhci_get_ocr_avail_from_vmmc(struct sdhci_host *host)
-> +{
-> +       unsigned int ocr_avail = 0;
-> +       struct regulator *vmmc = host->vmmc;
-> +
-> +       if (regulator_is_supported_voltage(vmmc, 1650000, 1950000) > 0)
-> +               ocr_avail |= MMC_VDD_165_195;
-> +
-> +       if (regulator_is_supported_voltage(vmmc, 2900000, 3000000) > 0)
-> +               ocr_avail |= MMC_VDD_29_30;
-> +
-> +       if (regulator_is_supported_voltage(vmmc, 3000000, 3100000) > 0)
-> +               ocr_avail |= MMC_VDD_30_31;
-> +
-> +       if (regulator_is_supported_voltage(vmmc, 3200000, 3300000) > 0)
-> +               ocr_avail |= MMC_VDD_32_33;
-> +
-> +       if (regulator_is_supported_voltage(vmmc, 3300000, 3400000) > 0)
-> +               ocr_avail |= MMC_VDD_33_34;
-> +
-> +       return ocr_avail;
-> +}
-> +
-
-There is an API called mmc_regulator_get_ocrmask() for this.
-
->  int sdhci_add_host(struct sdhci_host *host)
->  {
->         struct mmc_host *mmc;
-> @@ -3063,24 +3086,39 @@ int sdhci_add_host(struct sdhci_host *host)
->                 }
->         }
->
-> -#ifdef CONFIG_REGULATOR
-> -       /*
-> -        * Voltage range check makes sense only if regulator reports
-> -        * any voltage value.
-> -        */
-> +       /* If using external regulator, check supported voltage ranges */
->         if (host->vmmc && regulator_get_voltage(host->vmmc) > 0) {
-> -               ret = regulator_is_supported_voltage(host->vmmc, 2700000,
-> -                       3600000);
-> -               if ((ret <= 0) || (!(caps[0] & SDHCI_CAN_VDD_330)))
-> -                       caps[0] &= ~SDHCI_CAN_VDD_330;
-> -               if ((ret <= 0) || (!(caps[0] & SDHCI_CAN_VDD_300)))
-> -                       caps[0] &= ~SDHCI_CAN_VDD_300;
-> -               ret = regulator_is_supported_voltage(host->vmmc, 1700000,
-> -                       1950000);
-> -               if ((ret <= 0) || (!(caps[0] & SDHCI_CAN_VDD_180)))
-> -                       caps[0] &= ~SDHCI_CAN_VDD_180;
-> -       }
-> -#endif /* CONFIG_REGULATOR */
-> +               ocr_avail = sdhci_get_ocr_avail_from_vmmc(host);
-> +       } else {
-> +               if (caps[0] & SDHCI_CAN_VDD_330)
-> +                       ocr_avail |= MMC_VDD_32_33 | MMC_VDD_33_34;
-> +               if (caps[0] & SDHCI_CAN_VDD_300)
-> +                       ocr_avail |= MMC_VDD_29_30 | MMC_VDD_30_31;
-> +               if (caps[0] & SDHCI_CAN_VDD_180)
-> +                       ocr_avail |= MMC_VDD_165_195;
-> +       }
-> +
-> +       if (host->ocr_mask)
-> +               ocr_avail = host->ocr_mask;
-> +
-> +       mmc->ocr_avail = ocr_avail;
-> +       mmc->ocr_avail_sdio = ocr_avail;
-> +       if (host->ocr_avail_sdio)
-> +               mmc->ocr_avail_sdio &= host->ocr_avail_sdio;
-> +       mmc->ocr_avail_sd = ocr_avail;
-> +       if (host->ocr_avail_sd)
-> +               mmc->ocr_avail_sd &= host->ocr_avail_sd;
-> +       else /* normal SD controllers don't support 1.8V */
-> +               mmc->ocr_avail_sd &= ~MMC_VDD_165_195;
-> +       mmc->ocr_avail_mmc = ocr_avail;
-> +       if (host->ocr_avail_mmc)
-> +               mmc->ocr_avail_mmc &= host->ocr_avail_mmc;
-> +
-> +       if (mmc->ocr_avail == 0) {
-> +               pr_err("%s: Hardware doesn't report any support voltages.\n",
-> +                      mmc_hostname(mmc));
-> +               return -ENODEV;
-> +       }
-
-I have not fully understand why you have different ocr masks depending
-on what card you initialize. Is that really supported by the
-controller?
-
->
->         /*
->          * According to SD Host Controller spec v3.00, if the Host System
-> @@ -3106,52 +3144,23 @@ int sdhci_add_host(struct sdhci_host *host)
->                 }
->         }
->
-> -       if (caps[0] & SDHCI_CAN_VDD_330) {
-> -               ocr_avail |= MMC_VDD_32_33 | MMC_VDD_33_34;
-> -
-> +       if (ocr_avail & (MMC_VDD_32_33 | MMC_VDD_33_34))
->                 mmc->max_current_330 = ((max_current_caps &
->                                    SDHCI_MAX_CURRENT_330_MASK) >>
->                                    SDHCI_MAX_CURRENT_330_SHIFT) *
->                                    SDHCI_MAX_CURRENT_MULTIPLIER;
-> -       }
-> -       if (caps[0] & SDHCI_CAN_VDD_300) {
-> -               ocr_avail |= MMC_VDD_29_30 | MMC_VDD_30_31;
->
-> +       if (ocr_avail & (MMC_VDD_29_30 | MMC_VDD_30_31))
->                 mmc->max_current_300 = ((max_current_caps &
->                                    SDHCI_MAX_CURRENT_300_MASK) >>
->                                    SDHCI_MAX_CURRENT_300_SHIFT) *
->                                    SDHCI_MAX_CURRENT_MULTIPLIER;
-> -       }
-> -       if (caps[0] & SDHCI_CAN_VDD_180) {
-> -               ocr_avail |= MMC_VDD_165_195;
->
-> +       if (ocr_avail & MMC_VDD_165_195)
->                 mmc->max_current_180 = ((max_current_caps &
->                                    SDHCI_MAX_CURRENT_180_MASK) >>
->                                    SDHCI_MAX_CURRENT_180_SHIFT) *
->                                    SDHCI_MAX_CURRENT_MULTIPLIER;
-> -       }
-> -
-> -       if (host->ocr_mask)
-> -               ocr_avail = host->ocr_mask;
-> -
-> -       mmc->ocr_avail = ocr_avail;
-> -       mmc->ocr_avail_sdio = ocr_avail;
-> -       if (host->ocr_avail_sdio)
-> -               mmc->ocr_avail_sdio &= host->ocr_avail_sdio;
-> -       mmc->ocr_avail_sd = ocr_avail;
-> -       if (host->ocr_avail_sd)
-> -               mmc->ocr_avail_sd &= host->ocr_avail_sd;
-> -       else /* normal SD controllers don't support 1.8V */
-> -               mmc->ocr_avail_sd &= ~MMC_VDD_165_195;
-> -       mmc->ocr_avail_mmc = ocr_avail;
-> -       if (host->ocr_avail_mmc)
-> -               mmc->ocr_avail_mmc &= host->ocr_avail_mmc;
-> -
-> -       if (mmc->ocr_avail == 0) {
-> -               pr_err("%s: Hardware doesn't report any "
-> -                       "support voltages.\n", mmc_hostname(mmc));
-> -               return -ENODEV;
-> -       }
->
-
-I have seen some patches around lately touching the code for handling
-the regulators (vcc and vccq) in sdhci.
-
-A few times I have suggested to switch to use the
-mmc_regulator_get_supply() API to simplify and consolidate code. Could
-you please have a look at that?
-
-Kind regards
-Ulf Hansson
-
->         spin_lock_init(&host->lock);
->
-> --
-> 1.7.9.5
->
+PiA+IEZyb206IFJvZ2VyIFRzZW5nIDxyb2dlcmFibGVAcmVhbHRlay5jb20+Cj4gPiAKPiA+IFRo
+aXMgcGF0Y2hzZXQgYWRkcyBtb2R1bGVzIHRvIHN1cHBvcnQgUmVhbHRlayBVU0IgdmVuZG9yIHNw
+ZWNpZmljIGNsYXNzIGZsYXNoCj4gPiBjYXJkIHJlYWRlcjogb25lIGJhc2UgbW9kdWxlIGluIE1G
+RCBzdWJzeXN0ZW0gYW5kIHR3byBob3N0IG1vZHVsZXMgaW4gYm90aCBtbWMKPiA+IGFuZCBtZW1z
+dGljayBzdWJzeXN0ZW1zLiBUaGUgYXJjaGl0ZWN0dXJlIGlzIHNpbWlsYXIgdG8gcnRzeF9wY2ku
+Cj4gPiAKPiA+IFRoaXMgd29yayBpcyBkb25lIHByaW1hcmlseSB0byByZXBsYWNlIHRoZSBzdGFn
+aW5nIGRyaXZlcjogc3RhZ2luZy9ydHM1MTM5LAo+ID4gd2hpY2ggZG9lc24ndCB1dGlsaXplIG1t
+YyBub3IgbWVtc3RpY2sgc3Vic3lzdGVtcy4gT25jZSB0aGUgcGF0Y2hzZXQgb3IgaXRzCj4gPiBy
+ZXZpc2lvbiBpcyBhcHBsaWVkLCB3ZSBtYXkgbmVlZCBHcmVnJ3MgaGVscCB0byByZW1vdmUgdGhl
+IHN0YWdpbmcgb25lLgo+IAo+IExvb2tzIGdvb2QgdG8gbWUuCgpJcyB0aGF0IGFuIEFjaz8KCj4g
+CVJlZ2FyZHMKPiAJCU9saXZlcgo+IAo+IAoKLS0gCkxlZSBKb25lcwpMaW5hcm8gU1RNaWNyb2Vs
+ZWN0cm9uaWNzIExhbmRpbmcgVGVhbSBMZWFkCkxpbmFyby5vcmcg4pSCIE9wZW4gc291cmNlIHNv
+ZnR3YXJlIGZvciBBUk0gU29DcwpGb2xsb3cgTGluYXJvOiBGYWNlYm9vayB8IFR3aXR0ZXIgfCBC
+bG9nCl9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fCmRldmVs
+IG1haWxpbmcgbGlzdApkZXZlbEBsaW51eGRyaXZlcnByb2plY3Qub3JnCmh0dHA6Ly9kcml2ZXJk
+ZXYubGludXhkcml2ZXJwcm9qZWN0Lm9yZy9tYWlsbWFuL2xpc3RpbmZvL2RyaXZlcmRldi1kZXZl
+bAo=
