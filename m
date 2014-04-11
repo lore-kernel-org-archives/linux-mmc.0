@@ -1,42 +1,70 @@
-From: Oliver Neukum <oneukum@suse.de>
-Subject: Re: [PATCH v7 0/4] Add modules for realtek USB card reader
-Date: Fri, 11 Apr 2014 12:36:42 +0200
-Message-ID: <1397212602.4632.2.camel@linux-fkkt.site>
-References: <1397199203-2235-1-git-send-email-rogerable@realtek.com>
- <1397201514.1589.0.camel@linux-fkkt.site> <20140411102846.GB9801@lee--X1>
+From: Seungwon Jeon <tgih.jun@samsung.com>
+Subject: [PATCH v5 0/5] update selection of bus speed mode for eMMC
+Date: Fri, 11 Apr 2014 20:33:59 +0900
+Message-ID: <001701cf5579$ee74f5c0$cb5ee140$%jun@samsung.com>
+References: <1383653403-10049-1-git-send-email-ulf.hansson@linaro.org>
+ <006701cf2a58$c628e050$527aa0f0$%jun@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
-Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
-In-Reply-To: <20140411102846.GB9801@lee--X1>
-List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
-List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel>
-List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
-List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
-List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
-Errors-To: driverdev-devel-bounces@linuxdriverproject.org
-Sender: driverdev-devel-bounces@linuxdriverproject.org
-To: Lee Jones <lee.jones@linaro.org>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Maxim Levitsky <maximlevitsky@gmail.com>, Alex Dubov <oakad@yahoo.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, driverdev-devel@linuxdriverproject.org, linux-mmc@vger.kernel.org, Chris Ball <chris@printf.net>, linux-kernel@vger.kernel.org, wei_wang@realsil.com.cn, rogerable@realtek.com, Andrew Morton <akpm@linux-foundation.org>, Dan Carpenter <dan.carpenter@oracle.com>, Samuel Ortiz <sameo@linux.intel.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout2.samsung.com ([203.254.224.25]:50733 "EHLO
+	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755364AbaDKLeB (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 11 Apr 2014 07:34:01 -0400
+Received: from epcpsbgr1.samsung.com
+ (u141.gpu120.samsung.co.kr [203.254.230.141])
+ by mailout2.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+ (7.0.4.24.0) 64bit (built Nov 17 2011))
+ with ESMTP id <0N3V003MI6SN7PB0@mailout2.samsung.com> for
+ linux-mmc@vger.kernel.org; Fri, 11 Apr 2014 20:34:00 +0900 (KST)
+In-reply-to: 
+Content-language: ko
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: 'Chris Ball' <chris@printf.net>, 'Ulf Hansson' <ulf.hansson@linaro.org>, 'Jaehoon Chung' <jh80.chung@samsung.com>, 'Jackey Shen' <jackey.shen@amd.com>, 'Alim Akhtar' <alim.akhtar@samsung.com>
 
-On Fri, 2014-04-11 at 11:28 +0100, Lee Jones wrote:
-> > > From: Roger Tseng <rogerable@realtek.com>
-> > > 
-> > > This patchset adds modules to support Realtek USB vendor specific class flash
-> > > card reader: one base module in MFD subsystem and two host modules in both mmc
-> > > and memstick subsystems. The architecture is similar to rtsx_pci.
-> > > 
-> > > This work is done primarily to replace the staging driver: staging/rts5139,
-> > > which doesn't utilize mmc nor memstick subsystems. Once the patchset or its
-> > > revision is applied, we may need Greg's help to remove the staging one.
-> > 
-> > Looks good to me.
-> 
-> Is that an Ack?
-Acked-by: Oliver <oneukum@suse.de>
+This series contains the change for selection of bus speed mode.
+Previous implementation is complicated and some sequence is duplicated.
+And specially, HS400 mode eMMC5.0 is introduced this time.
+This patch-set has been tested in Exynos SoC.
 
-	Sorry
-		Oliver
+Note:
+This patch-set depends on "[PATCH RESEND v3 1/7] mmc: clarify DDR timing mode between SD-UHS and eMMC".
+
+Changes in v5:
+	(5/5) Added callback operation for HS400 target operation frequency
+	       instead of specific timing identifier.
+	(2/5) Removed using union declaration.
+
+Changes in v4:
+	(5/5)Reverting to HS mode is included in mmc_select_hs400() using __mmc_switch().
+
+Changes in v3:
+ 	Removed the function to check DDR type(mmc_snoop_ddr).
+ 	Rebased with the latest branch.
+
+Seungwon Jeon (5):
+  mmc: drop the speed mode of card's state
+  mmc: identify available device type to select
+  mmc: step power class after final selection of bus mode
+  mmc: rework selection of bus speed mode
+  mmc: add support for HS400 mode of eMMC5.0
+
+ drivers/mmc/core/bus.c     |    9 +-
+ drivers/mmc/core/core.c    |    3 +-
+ drivers/mmc/core/debugfs.c |    5 +-
+ drivers/mmc/core/mmc.c     |  666 ++++++++++++++++++++++++++------------------
+ drivers/mmc/core/sd.c      |   16 +-
+ drivers/mmc/core/sd.h      |    1 -
+ drivers/mmc/core/sdio.c    |    8 +-
+ include/linux/mmc/card.h   |   27 +--
+ include/linux/mmc/host.h   |   43 +++-
+ include/linux/mmc/mmc.h    |   23 ++-
+ 10 files changed, 480 insertions(+), 321 deletions(-)
+
+ 
+Thanks,
+sw-j
+
