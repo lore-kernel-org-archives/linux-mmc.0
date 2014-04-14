@@ -1,55 +1,42 @@
-From: Mark Brown <broonie@kernel.org>
-Subject: Re: [PATCH v2 1/2] regulator: pbias: Fix is_enabled callback
- implementation
-Date: Mon, 14 Apr 2014 22:16:44 +0100
-Message-ID: <20140414211644.GG12304@sirena.org.uk>
-References: <1394250929.3892.1.camel@phoenix>
+From: Bjorn Helgaas <bhelgaas@google.com>
+Subject: [PATCH] mmc: sdhci-pci: Remove useless check for "slots == 0"
+Date: Mon, 14 Apr 2014 16:23:30 -0600
+Message-ID: <20140414222330.14817.81724.stgit@bhelgaas-glaptop.roam.corp.google.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="doKZ0ri6bHmN2Q5y"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <1394250929.3892.1.camel@phoenix>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Axel Lin <axel.lin@ingics.com>
-Cc: Chris Ball <chris@printf.net>, Liam Girdwood <lgirdwood@gmail.com>, Balaji T K <balajitk@ti.com>, Florian Vaussard <florian.vaussard@epfl.ch>, Stefan Roese <sr@denx.de>, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-ie0-f174.google.com ([209.85.223.174]:54398 "EHLO
+	mail-ie0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754682AbaDNWXc (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 14 Apr 2014 18:23:32 -0400
+Received: by mail-ie0-f174.google.com with SMTP id rp18so8484704iec.5
+        for <linux-mmc@vger.kernel.org>; Mon, 14 Apr 2014 15:23:32 -0700 (PDT)
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
+Remove the check for "slots == 0" because it can never be 0 here.
 
---doKZ0ri6bHmN2Q5y
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+Found by Coverity (CID 744269).
 
-On Sat, Mar 08, 2014 at 11:55:29AM +0800, Axel Lin wrote:
-> The is_enabled implementation is wrong in some cases:
-> e.g. for pbias_mmc_omap5: enable_mask is : BIT(27) | BIT(25) | BIT(26)
-> However, pbias_regulator_enable() only sets BIT(27) | BIT(26) bits.
-> So is_enabled callback will always return false in this case.
-> Fix the logic to compare the register value with info->enable rather than
-> info->enable_mask.
+Signed-off-by: Bjorn Helgaas <bhelgaas@google.com>
+---
+ drivers/mmc/host/sdhci-pci.c |    2 --
+ 1 file changed, 2 deletions(-)
 
-Applied both, thanks.
+diff --git a/drivers/mmc/host/sdhci-pci.c b/drivers/mmc/host/sdhci-pci.c
+index fdc612120362..15edb3f56dae 100644
+--- a/drivers/mmc/host/sdhci-pci.c
++++ b/drivers/mmc/host/sdhci-pci.c
+@@ -1491,8 +1491,6 @@ static int sdhci_pci_probe(struct pci_dev *pdev,
+ 
+ 	slots = PCI_SLOT_INFO_SLOTS(slots) + 1;
+ 	dev_dbg(&pdev->dev, "found %d slot(s)\n", slots);
+-	if (slots == 0)
+-		return -ENODEV;
+ 
+ 	BUG_ON(slots > MAX_SLOTS);
+ 
 
---doKZ0ri6bHmN2Q5y
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-
-iQIcBAEBAgAGBQJTTFA5AAoJELSic+t+oim9JQMP/20rRsKXT4ak8E0OlIBfw+vj
-ySYYv/ipvCFqanhlxPW6w+n5xSvjCaJFslktkXSkDwrFo4go/9I0yOGge3jr+viV
-15HfMROhNBtZmRJX213U+XJZaw/0KINnTvZqlMwo2kcDhdJ1wg4/YXQhliY38pv5
-CJpcoW5sMulsn3EqgZN/8dGUyDkf2dvi8QJTjME39vAdzazfe/87RojokdtveneG
-L09Z5fBVP5/oAtzP9Jz/Md8JVC1FjmDOt8+L+hMAlL8fp/SHUb1zfS064PLh/0qz
-1Jp/T7IhaaM0QBa56XzH986PeQ5f1EUA3g8xpn+WBmixUCAk+2FJuC+7+KhfZ89h
-EXzPQtSAK5VfxCZHcAfQqCbtK7FADLQTOUsLgQ2QyEDi5JxOMofd4ZQ/Ec+M8gTC
-cmMz3eG7KJv4nBeBKxW4o2Bz0wLPkKGGdoNJ2kFiOkhQUNFPzPpJKA5EMfhUy1oi
-zBhHkCUSTJXVQ2YWoSlOPKbW4Qjs2ubdR6iWdMZmVoog26ri3ktkRFSCMHNH7NWD
-opajMEQYrYL0m6MNkeLbyS7JqbN8uUaCaEQbvfuwtW8Mp4XmQ+Zy07LnUBhDiL0n
-zKNBwomtPF8PHk6gQRqEh0ufiC+4QwgqlOGbyykxhAc0W355aAyboB639rKFlXku
-OKcfAhRSYyZJZ2mXdhyL
-=A465
------END PGP SIGNATURE-----
-
---doKZ0ri6bHmN2Q5y--
