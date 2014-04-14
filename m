@@ -1,159 +1,183 @@
 From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH v2 3/7] mmc: dw_mmc: exynos: move definitions to header file
-Date: Mon, 14 Apr 2014 16:31:07 +0900
-Message-ID: <534B8EBB.4020007@samsung.com>
-References: <000301cf48e6$ea205860$be610920$%jun@samsung.com>
+Subject: Re: [PATCH] mmc: dw_mmc: fix status error for Kingston brand SD cards
+Date: Mon, 14 Apr 2014 17:08:47 +0900
+Message-ID: <534B978F.7090704@samsung.com>
+References: <1395957622-3428-1-git-send-email-dinguyen@altera.com>
+ <000401cf4a81$d9433250$8bc996f0$%jun@samsung.com>
+ <1396022007.32715.4.camel@linux-builds1>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout1.samsung.com ([203.254.224.24]:47869 "EHLO
-	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750881AbaDNHbJ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 14 Apr 2014 03:31:09 -0400
-In-reply-to: <000301cf48e6$ea205860$be610920$%jun@samsung.com>
+Received: from mailout3.samsung.com ([203.254.224.33]:46909 "EHLO
+	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752862AbaDNIIt (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 14 Apr 2014 04:08:49 -0400
+Received: from epcpsbgr3.samsung.com
+ (u143.gpu120.samsung.co.kr [203.254.230.143])
+ by mailout3.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+ (7.0.4.24.0) 64bit (built Nov 17 2011))
+ with ESMTP id <0N4000ENRHAOCS60@mailout3.samsung.com> for
+ linux-mmc@vger.kernel.org; Mon, 14 Apr 2014 17:08:48 +0900 (KST)
+In-reply-to: <1396022007.32715.4.camel@linux-builds1>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Seungwon Jeon <tgih.jun@samsung.com>, linux-samsung-soc@vger.kernel.org, linux-mmc@vger.kernel.org
-Cc: 'Chris Ball' <chris@printf.net>, 'Kukjin Kim' <kgene.kim@samsung.com>, 'Ulf Hansson' <ulf.hansson@linaro.org>, 'Alim Akhtar' <alim.akhtar@samsung.com>
+To: Dinh Nguyen <dinguyen@altera.com>, Seungwon Jeon <tgih.jun@samsung.com>
+Cc: dinh.linux@gmail.com, linux-mmc@vger.kernel.org
 
-Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
+Hi, Dinh.
 
-On 03/26/2014 08:31 PM, Seungwon Jeon wrote:
-> Move some parts related to definition to header file.
+On 03/29/2014 12:53 AM, Dinh Nguyen wrote:
+> On Fri, 2014-03-28 at 21:32 +0900, Seungwon Jeon wrote:
+>> Hi Dinh,
+>>
+>> On Fri, March 28, 2014, Dinh Nguyen wrote:
+>>> From: Dinh Nguyen <dinguyen@altera.com>
+>>>
+>>> commits [90c2143a8f mmc: dw_mmc: guarantee stop-abort cmd in data errors]
+>>> and [e352c813110 mmc: dw_mmc: rework the code related to cmd/data completion]
+>>> cause the SD/MMC DMA interface to stop working on Kingston brand SD cards.
+>>>
+>>> ---
+>>> Hi Seungwon,
+>>>
+>>> I am seeing this error on v3.13 kernel of the dw_mmc driver:
+>>>
+>>> mmc0: problem reading SD Status register.
+>>> mmc0: error -110 whilst initialising SD card
+>>>
+>>> I only see this error on a Kingston brand card, although I have heard reports
+>>> that it also fails a Samsung card. Also it only fails when with
+>>> CONFIG_MMC_DW_IDMAC=y.
+>>>
+>>> The patch below seems to fix it for me. Any chance you have seen this error?
+>> I didn't see but I'll try to find it.
+>> And do you have any analysis for this issue?
 > 
-> Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
-> ---
->  drivers/mmc/host/dw_mmc-exynos.c |   46 ++++---------------------------
->  drivers/mmc/host/dw_mmc-exynos.h |   55 ++++++++++++++++++++++++++++++++++++++
->  2 files changed, 61 insertions(+), 40 deletions(-)
->  create mode 100644 drivers/mmc/host/dw_mmc-exynos.h
+> Thanks. Here's the debug output that I am seeing. 
+
+I didn't know what difference is "without patch" and "with patch".
+Is it always occurred the data-error?
+I didn't find this issue yet. Did you fix it without applied patch?
+
+Best Regards,
+Jaehoon Chung
 > 
-> diff --git a/drivers/mmc/host/dw_mmc-exynos.c b/drivers/mmc/host/dw_mmc-exynos.c
-> index a2d06c5..bab97e9 100644
-> --- a/drivers/mmc/host/dw_mmc-exynos.c
-> +++ b/drivers/mmc/host/dw_mmc-exynos.c
-> @@ -21,42 +21,8 @@
->  
->  #include "dw_mmc.h"
->  #include "dw_mmc-pltfm.h"
-> +#include "dw_mmc-exynos.h"
->  
-> -#define NUM_PINS(x)			(x + 2)
-> -
-> -#define SDMMC_CLKSEL			0x09C
-> -#define SDMMC_CLKSEL_CCLK_SAMPLE(x)	(((x) & 7) << 0)
-> -#define SDMMC_CLKSEL_CCLK_DRIVE(x)	(((x) & 7) << 16)
-> -#define SDMMC_CLKSEL_CCLK_DIVIDER(x)	(((x) & 7) << 24)
-> -#define SDMMC_CLKSEL_GET_DRV_WD3(x)	(((x) >> 16) & 0x7)
-> -#define SDMMC_CLKSEL_TIMING(x, y, z)	(SDMMC_CLKSEL_CCLK_SAMPLE(x) |	\
-> -					SDMMC_CLKSEL_CCLK_DRIVE(y) |	\
-> -					SDMMC_CLKSEL_CCLK_DIVIDER(z))
-> -#define SDMMC_CLKSEL_WAKEUP_INT		BIT(11)
-> -
-> -#define EXYNOS4210_FIXED_CIU_CLK_DIV	2
-> -#define EXYNOS4412_FIXED_CIU_CLK_DIV	4
-> -
-> -/* Block number in eMMC */
-> -#define DWMCI_BLOCK_NUM		0xFFFFFFFF
-> -
-> -#define SDMMC_EMMCP_BASE	0x1000
-> -#define SDMMC_MPSECURITY	(SDMMC_EMMCP_BASE + 0x0010)
-> -#define SDMMC_MPSBEGIN0		(SDMMC_EMMCP_BASE + 0x0200)
-> -#define SDMMC_MPSEND0		(SDMMC_EMMCP_BASE + 0x0204)
-> -#define SDMMC_MPSCTRL0		(SDMMC_EMMCP_BASE + 0x020C)
-> -
-> -/* SMU control bits */
-> -#define DWMCI_MPSCTRL_SECURE_READ_BIT		BIT(7)
-> -#define DWMCI_MPSCTRL_SECURE_WRITE_BIT		BIT(6)
-> -#define DWMCI_MPSCTRL_NON_SECURE_READ_BIT	BIT(5)
-> -#define DWMCI_MPSCTRL_NON_SECURE_WRITE_BIT	BIT(4)
-> -#define DWMCI_MPSCTRL_USE_FUSE_KEY		BIT(3)
-> -#define DWMCI_MPSCTRL_ECB_MODE			BIT(2)
-> -#define DWMCI_MPSCTRL_ENCRYPTION		BIT(1)
-> -#define DWMCI_MPSCTRL_VALID			BIT(0)
-> -
-> -#define EXYNOS_CCLKIN_MIN	50000000	/* unit: HZ */
->  
->  /* Variations in Exynos specific dw-mshc controller */
->  enum dw_mci_exynos_type {
-> @@ -104,11 +70,11 @@ static int dw_mci_exynos_priv_init(struct dw_mci *host)
->  
->  	if (priv->ctrl_type == DW_MCI_TYPE_EXYNOS5420_SMU) {
->  		mci_writel(host, MPSBEGIN0, 0);
-> -		mci_writel(host, MPSEND0, DWMCI_BLOCK_NUM);
-> -		mci_writel(host, MPSCTRL0, DWMCI_MPSCTRL_SECURE_WRITE_BIT |
-> -			   DWMCI_MPSCTRL_NON_SECURE_READ_BIT |
-> -			   DWMCI_MPSCTRL_VALID |
-> -			   DWMCI_MPSCTRL_NON_SECURE_WRITE_BIT);
-> +		mci_writel(host, MPSEND0, SDMMC_ENDING_SEC_NR_MAX);
-> +		mci_writel(host, MPSCTRL0, SDMMC_MPSCTRL_SECURE_WRITE_BIT |
-> +			   SDMMC_MPSCTRL_NON_SECURE_READ_BIT |
-> +			   SDMMC_MPSCTRL_VALID |
-> +			   SDMMC_MPSCTRL_NON_SECURE_WRITE_BIT);
->  	}
->  
->  	return 0;
-> diff --git a/drivers/mmc/host/dw_mmc-exynos.h b/drivers/mmc/host/dw_mmc-exynos.h
-> new file mode 100644
-> index 0000000..2554e2f
-> --- /dev/null
-> +++ b/drivers/mmc/host/dw_mmc-exynos.h
-> @@ -0,0 +1,55 @@
-> +/*
-> + * Exynos Specific Extensions for Synopsys DW Multimedia Card Interface driver
-> + *
-> + * Copyright (C) 2012-2014 Samsung Electronics Co., Ltd.
-> + *
-> + * This program is free software; you can redistribute it and/or modify
-> + * it under the terms of the GNU General Public License as published by
-> + * the Free Software Foundation; either version 2 of the License, or
-> + * (at your option) any later version.
-> + */
-> +
-> +#ifndef _DW_MMC_EXYNOS_H_
-> +#define _DW_MMC_EXYNOS_H_
-> +
-> +/* Extended Register's Offset */
-> +#define SDMMC_CLKSEL			0x09C
-> +
-> +/* CLKSEL register defines */
-> +#define SDMMC_CLKSEL_CCLK_SAMPLE(x)	(((x) & 7) << 0)
-> +#define SDMMC_CLKSEL_CCLK_DRIVE(x)	(((x) & 7) << 16)
-> +#define SDMMC_CLKSEL_CCLK_DIVIDER(x)	(((x) & 7) << 24)
-> +#define SDMMC_CLKSEL_GET_DRV_WD3(x)	(((x) >> 16) & 0x7)
-> +#define SDMMC_CLKSEL_TIMING(x, y, z)	(SDMMC_CLKSEL_CCLK_SAMPLE(x) |	\
-> +					 SDMMC_CLKSEL_CCLK_DRIVE(y) |	\
-> +					 SDMMC_CLKSEL_CCLK_DIVIDER(z))
-> +#define SDMMC_CLKSEL_WAKEUP_INT		BIT(11)
-> +
-> +/* Protector Register */
-> +#define SDMMC_EMMCP_BASE	0x1000
-> +#define SDMMC_MPSECURITY	(SDMMC_EMMCP_BASE + 0x0010)
-> +#define SDMMC_MPSBEGIN0		(SDMMC_EMMCP_BASE + 0x0200)
-> +#define SDMMC_MPSEND0		(SDMMC_EMMCP_BASE + 0x0204)
-> +#define SDMMC_MPSCTRL0		(SDMMC_EMMCP_BASE + 0x020C)
-> +
-> +/* SMU control defines */
-> +#define SDMMC_MPSCTRL_SECURE_READ_BIT		BIT(7)
-> +#define SDMMC_MPSCTRL_SECURE_WRITE_BIT		BIT(6)
-> +#define SDMMC_MPSCTRL_NON_SECURE_READ_BIT	BIT(5)
-> +#define SDMMC_MPSCTRL_NON_SECURE_WRITE_BIT	BIT(4)
-> +#define SDMMC_MPSCTRL_USE_FUSE_KEY		BIT(3)
-> +#define SDMMC_MPSCTRL_ECB_MODE			BIT(2)
-> +#define SDMMC_MPSCTRL_ENCRYPTION		BIT(1)
-> +#define SDMMC_MPSCTRL_VALID			BIT(0)
-> +
-> +/* Maximum number of Ending sector */
-> +#define SDMMC_ENDING_SEC_NR_MAX	0xFFFFFFFF
-> +
-> +/* Fixed clock divider */
-> +#define EXYNOS4210_FIXED_CIU_CLK_DIV	2
-> +#define EXYNOS4412_FIXED_CIU_CLK_DIV	4
-> +
-> +/* Minimal required clock frequency for cclkin, unit: HZ */
-> +#define EXYNOS_CCLKIN_MIN	50000000
-> +
-> +#endif /* _DW_MMC_EXYNOS_H_ */
+> With patch applied:
+> 
+> [    2.503394] mmc0: req done (CMD51): 0: 00000920 00000000 00000000
+> 00000000
+> [    2.510239] mmc0:     8 bytes transferred: 0
+> [    2.514519] mmc0: starting CMD55 arg 00070000 flags 00000095
+> [    2.520452] mmc0: req done (CMD55): 0: 00000920 00000000 00000000
+> 00000000
+> [    2.527324] mmc0: starting CMD13 arg 00000000 flags 000001b5
+> [    2.532974] mmc0:     blksz 64 blocks 1 flags 00000200 tsac 100 ms
+> nsac 0
+> [    2.541526] dwmmc_socfpga ff704000.dwmmc0: data error, status
+> 0x00000800
+> [    2.548203] mmc0: req done (CMD13): 0: 00000920 00000000 00000000
+> 00000000
+> [    2.555057] mmc0:     0 bytes transferred: -5
+> [    2.559410] mmc0: problem reading SD Status register.
+> [    2.564459] mmc0: starting CMD6 arg 00fffff0 flags 000000b5
+> [    2.570008] mmc0:     blksz 64 blocks 1 flags 00000200 tsac 100 ms
+> nsac 0
+> [    2.578703] mmc0: req done (CMD6): 0: 00000900 00000000 00000000
+> 00000000
+> [    2.585471] mmc0:     64 bytes transferred: 0
+> [    2.589829] mmc_host mmc0: card is read-write
+> [    2.594182] mmc0: starting CMD6 arg 80fffff1 flags 000000b5
+> [    2.599733] mmc0:     blksz 64 blocks 1 flags 00000200 tsac 100 ms
+> nsac 0
+> [    2.609308] mmc0: req done (CMD6): 0: 00000900 00000000 00000000
+> 00000000
+> [    2.616076] mmc0:     64 bytes transferred: 0
+> [    2.620434] mmc0: clock 400000Hz busmode 2 powermode 2 cs 0 Vdd 21
+> width 0 timing 2
+> [    2.628076] mmc0: clock 50000000Hz busmode 2 powermode 2 cs 0 Vdd 21
+> width 0 timing 2
+> 
+> 
+> Without patch:
+> 
+> [    2.503381] mmc0: req done (CMD51): 0: 00000920 00000000 00000000
+> 00000000
+> [    2.510226] mmc0:     8 bytes transferred: 0
+> [    2.514505] mmc0: starting CMD55 arg 00070000 flags 00000095
+> [    2.520437] mmc0: req done (CMD55): 0: 00000920 00000000 00000000
+> 00000000
+> [    2.527309] mmc0: starting CMD13 arg 00000000 flags 000001b5
+> [    2.532960] mmc0:     blksz 64 blocks 1 flags 00000200 tsac 100 ms
+> nsac 0
+> [    2.541509] dwmmc_socfpga ff704000.dwmmc0: data error, status
+> 0x00000080
+> [    2.548185] mmc0: req done (CMD13): 0: 00000920 00000000 00000000
+> 00000000
+> [    2.555038] mmc0:     0 bytes transferred: -84
+> [    2.559477] mmc0: problem reading SD Status register.
+> [    2.564528] mmc0: starting CMD6 arg 00fffff0 flags 000000b5
+> [    2.570078] mmc0:     blksz 64 blocks 1 flags 00000200 tsac 100 ms
+> nsac 0
+> [    2.577814] mmc0: req done (CMD6): -110: 00000920 00000000 00000000
+> 00000000
+> [    2.584841] mmc0:     0 bytes transferred: -115
+> [    2.589375] mmc0: error -110 whilst initialising SD card
+> 
+> 
+>>
+>>>
+>>> Dinh
+>>> ---
+>>>  drivers/mmc/host/dw_mmc.c |    8 +++++++-
+>>>  1 file changed, 7 insertions(+), 1 deletion(-)
+>>>
+>>> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+>>> index 7833002..7dcaa30 100644
+>>> --- a/drivers/mmc/host/dw_mmc.c
+>>> +++ b/drivers/mmc/host/dw_mmc.c
+>>> @@ -1312,7 +1312,8 @@ static void dw_mci_tasklet_func(unsigned long priv)
+>>>  			if (test_and_clear_bit(EVENT_DATA_ERROR,
+>>>  					       &host->pending_events)) {
+>>>  				dw_mci_stop_dma(host);
+>>> -				send_stop_abort(host, data);
+>>> +				if (data->stop)
+>>> +					send_stop_abort(host, data);
+>> This routine is for error handing.
+>> Is it effective to detect card normally?
+>>
+> 
+> Yes, detecting the card works fine.
+> 
+> Thanks,
+> Dinh
+>> Thanks,
+>> Seungwon Jeon
+>>
+>>>  				state = STATE_DATA_ERROR;
+>>>  				break;
+>>>  			}
+>>> @@ -1334,6 +1335,11 @@ static void dw_mci_tasklet_func(unsigned long priv)
+>>>  			set_bit(EVENT_DATA_COMPLETE, &host->completed_events);
+>>>  			err = dw_mci_data_complete(host, data);
+>>>
+>>> +			if (!data->stop) {
+>>> +				dw_mci_request_end(host, host->mrq);
+>>> +				goto unlock;
+>>> +			}
+>>> +
+>>>  			if (!err) {
+>>>  				if (!data->stop || mrq->sbc) {
+>>>  					if (mrq->sbc)
+>>> --
+>>> 1.7.9.5
+>>>
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+>>> the body of a message to majordomo@vger.kernel.org
+>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
+> 
+> 
 > 
 
