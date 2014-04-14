@@ -1,79 +1,57 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH RESEND 2/2] mmc: mxcmmc: Convert to SIMPLE_DEV_PM_OPS
-Date: Mon, 14 Apr 2014 14:37:38 +0200
-Message-ID: <CAPDyKFq0UXE-auZxi2UJZetA7awu1B_ZuJYJQPc02o+mDyDwzA@mail.gmail.com>
-References: <1395478366-6276-1-git-send-email-shc_work@mail.ru>
-	<1395478366-6276-2-git-send-email-shc_work@mail.ru>
+Subject: Re: [PATCH RESEND] mmc: sdhci-s3c: Remove unused define for NUM_GPIOS
+Date: Mon, 14 Apr 2014 14:57:31 +0200
+Message-ID: <CAPDyKFpTOjXbgepXcEDm0=UhNyAv+4bsQ8jzynAzqU=vQbyKAw@mail.gmail.com>
+References: <1394262224.3868.1.camel@phoenix>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qc0-f182.google.com ([209.85.216.182]:51222 "EHLO
-	mail-qc0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750948AbaDNMhj (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 14 Apr 2014 08:37:39 -0400
-Received: by mail-qc0-f182.google.com with SMTP id e16so8569396qcx.41
-        for <linux-mmc@vger.kernel.org>; Mon, 14 Apr 2014 05:37:38 -0700 (PDT)
-In-Reply-To: <1395478366-6276-2-git-send-email-shc_work@mail.ru>
+Received: from mail-qa0-f53.google.com ([209.85.216.53]:58787 "EHLO
+	mail-qa0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751282AbaDNM5b (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 14 Apr 2014 08:57:31 -0400
+Received: by mail-qa0-f53.google.com with SMTP id w8so7794694qac.40
+        for <linux-mmc@vger.kernel.org>; Mon, 14 Apr 2014 05:57:31 -0700 (PDT)
+In-Reply-To: <1394262224.3868.1.camel@phoenix>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Alexander Shiyan <shc_work@mail.ru>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Sascha Hauer <s.hauer@pengutronix.de>, Anatolij Gustschin <agust@denx.de>
+To: Axel Lin <axel.lin@ingics.com>
+Cc: Chris Ball <chris@printf.net>, Thomas Abraham <thomas.abraham@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>
 
-On 22 March 2014 09:52, Alexander Shiyan <shc_work@mail.ru> wrote:
-> Signed-off-by: Alexander Shiyan <shc_work@mail.ru>
+On 8 March 2014 08:03, Axel Lin <axel.lin@ingics.com> wrote:
+> NUM_GPIOS is not used after commit e19499ae
+> "mmc: sdhci-s3c: let device core setup the default pin configuration".
+> Thus remove it.
+>
+> Signed-off-by: Axel Lin <axel.lin@ingics.com>
+> Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
 
 Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
 
 > ---
->  drivers/mmc/host/mxcmmc.c | 13 +++----------
->  1 file changed, 3 insertions(+), 10 deletions(-)
+>  drivers/mmc/host/sdhci-s3c.c | 3 ---
+>  1 file changed, 3 deletions(-)
 >
-> diff --git a/drivers/mmc/host/mxcmmc.c b/drivers/mmc/host/mxcmmc.c
-> index 84d630e..86401c0 100644
-> --- a/drivers/mmc/host/mxcmmc.c
-> +++ b/drivers/mmc/host/mxcmmc.c
-> @@ -1220,8 +1220,7 @@ static int mxcmci_remove(struct platform_device *pdev)
->         return 0;
->  }
+> diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
+> index 926aaf6..d0732d2 100644
+> --- a/drivers/mmc/host/sdhci-s3c.c
+> +++ b/drivers/mmc/host/sdhci-s3c.c
+> @@ -33,9 +33,6 @@
 >
-> -#ifdef CONFIG_PM
-> -static int mxcmci_suspend(struct device *dev)
-> +static int __maybe_unused mxcmci_suspend(struct device *dev)
->  {
->         struct mmc_host *mmc = dev_get_drvdata(dev);
->         struct mxcmci_host *host = mmc_priv(mmc);
-> @@ -1231,7 +1230,7 @@ static int mxcmci_suspend(struct device *dev)
->         return 0;
->  }
+>  #define MAX_BUS_CLK    (4)
 >
-> -static int mxcmci_resume(struct device *dev)
-> +static int __maybe_unused mxcmci_resume(struct device *dev)
->  {
->         struct mmc_host *mmc = dev_get_drvdata(dev);
->         struct mxcmci_host *host = mmc_priv(mmc);
-> @@ -1241,11 +1240,7 @@ static int mxcmci_resume(struct device *dev)
->         return 0;
->  }
->
-> -static const struct dev_pm_ops mxcmci_pm_ops = {
-> -       .suspend        = mxcmci_suspend,
-> -       .resume         = mxcmci_resume,
-> -};
-> -#endif
-> +static SIMPLE_DEV_PM_OPS(mxcmci_pm_ops, mxcmci_suspend, mxcmci_resume);
->
->  static struct platform_driver mxcmci_driver = {
->         .probe          = mxcmci_probe,
-> @@ -1254,9 +1249,7 @@ static struct platform_driver mxcmci_driver = {
->         .driver         = {
->                 .name           = DRIVER_NAME,
->                 .owner          = THIS_MODULE,
-> -#ifdef CONFIG_PM
->                 .pm     = &mxcmci_pm_ops,
-> -#endif
->                 .of_match_table = mxcmci_of_match,
->         }
->  };
+> -/* Number of gpio's used is max data bus width + command and clock lines */
+> -#define NUM_GPIOS(x)   (x + 2)
+> -
+>  /**
+>   * struct sdhci_s3c - S3C SDHCI instance
+>   * @host: The SDHCI host created
 > --
-> 1.8.3.2
+> 1.8.1.2
 >
+>
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
