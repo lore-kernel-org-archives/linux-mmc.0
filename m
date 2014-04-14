@@ -1,81 +1,79 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH RESEND] mmc: Delay the card_event callback into the
- mmc_rescan worker
-Date: Mon, 14 Apr 2014 13:52:28 +0200
-Message-ID: <CAPDyKFoNnmqc_6Vz7kTGk6yY5W64Wc2Q8MmWz1fNgUNX1PP61g@mail.gmail.com>
-References: <1396995583-5475-1-git-send-email-markus.mayer@linaro.org>
+Subject: Re: [PATCH RESEND 2/2] mmc: mxcmmc: Convert to SIMPLE_DEV_PM_OPS
+Date: Mon, 14 Apr 2014 14:37:38 +0200
+Message-ID: <CAPDyKFq0UXE-auZxi2UJZetA7awu1B_ZuJYJQPc02o+mDyDwzA@mail.gmail.com>
+References: <1395478366-6276-1-git-send-email-shc_work@mail.ru>
+	<1395478366-6276-2-git-send-email-shc_work@mail.ru>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1396995583-5475-1-git-send-email-markus.mayer@linaro.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Markus Mayer <markus.mayer@linaro.org>
-Cc: Chris Ball <chris@printf.net>, Christian Daudt <bcm@fixthebug.org>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qc0-f182.google.com ([209.85.216.182]:51222 "EHLO
+	mail-qc0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750948AbaDNMhj (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 14 Apr 2014 08:37:39 -0400
+Received: by mail-qc0-f182.google.com with SMTP id e16so8569396qcx.41
+        for <linux-mmc@vger.kernel.org>; Mon, 14 Apr 2014 05:37:38 -0700 (PDT)
+In-Reply-To: <1395478366-6276-2-git-send-email-shc_work@mail.ru>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Alexander Shiyan <shc_work@mail.ru>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Sascha Hauer <s.hauer@pengutronix.de>, Anatolij Gustschin <agust@denx.de>
 
-On 9 April 2014 00:19, Markus Mayer <markus.mayer@linaro.org> wrote:
-> This change removes the callback from atomic context which it doesn't
-> need to be in, and puts it in line with the debounced rescan.
->
-> This code is based on these e-mail threads with Christian Daudt:
->
->   https://lkml.org/lkml/2013/8/19/539
->   https://lkml.org/lkml/2014/3/19/79
->
-> Signed-off-by: Markus Mayer <markus.mayer@linaro.org>
+On 22 March 2014 09:52, Alexander Shiyan <shc_work@mail.ru> wrote:
+> Signed-off-by: Alexander Shiyan <shc_work@mail.ru>
 
 Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
 
 > ---
->  drivers/mmc/core/core.c      |    5 +++++
->  drivers/mmc/core/slot-gpio.c |    4 +---
->  include/linux/mmc/host.h     |    2 ++
->  3 files changed, 8 insertions(+), 3 deletions(-)
+>  drivers/mmc/host/mxcmmc.c | 13 +++----------
+>  1 file changed, 3 insertions(+), 10 deletions(-)
 >
-> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> index 098374b..ff7fd2e 100644
-> --- a/drivers/mmc/core/core.c
-> +++ b/drivers/mmc/core/core.c
-> @@ -2421,6 +2421,11 @@ void mmc_rescan(struct work_struct *work)
->                 container_of(work, struct mmc_host, detect.work);
->         int i;
+> diff --git a/drivers/mmc/host/mxcmmc.c b/drivers/mmc/host/mxcmmc.c
+> index 84d630e..86401c0 100644
+> --- a/drivers/mmc/host/mxcmmc.c
+> +++ b/drivers/mmc/host/mxcmmc.c
+> @@ -1220,8 +1220,7 @@ static int mxcmci_remove(struct platform_device *pdev)
+>         return 0;
+>  }
 >
-> +       if (host->trigger_card_event && host->ops->card_event) {
-> +               host->ops->card_event(host);
-> +               host->trigger_card_event = false;
-> +       }
-> +
->         if (host->rescan_disable)
->                 return;
+> -#ifdef CONFIG_PM
+> -static int mxcmci_suspend(struct device *dev)
+> +static int __maybe_unused mxcmci_suspend(struct device *dev)
+>  {
+>         struct mmc_host *mmc = dev_get_drvdata(dev);
+>         struct mxcmci_host *host = mmc_priv(mmc);
+> @@ -1231,7 +1230,7 @@ static int mxcmci_suspend(struct device *dev)
+>         return 0;
+>  }
 >
-> diff --git a/drivers/mmc/core/slot-gpio.c b/drivers/mmc/core/slot-gpio.c
-> index 46596b71..4029c85 100644
-> --- a/drivers/mmc/core/slot-gpio.c
-> +++ b/drivers/mmc/core/slot-gpio.c
-> @@ -29,9 +29,7 @@ static irqreturn_t mmc_gpio_cd_irqt(int irq, void *dev_id)
->         /* Schedule a card detection after a debounce timeout */
->         struct mmc_host *host = dev_id;
+> -static int mxcmci_resume(struct device *dev)
+> +static int __maybe_unused mxcmci_resume(struct device *dev)
+>  {
+>         struct mmc_host *mmc = dev_get_drvdata(dev);
+>         struct mxcmci_host *host = mmc_priv(mmc);
+> @@ -1241,11 +1240,7 @@ static int mxcmci_resume(struct device *dev)
+>         return 0;
+>  }
 >
-> -       if (host->ops->card_event)
-> -               host->ops->card_event(host);
-> -
-> +       host->trigger_card_event = true;
->         mmc_detect_change(host, msecs_to_jiffies(200));
+> -static const struct dev_pm_ops mxcmci_pm_ops = {
+> -       .suspend        = mxcmci_suspend,
+> -       .resume         = mxcmci_resume,
+> -};
+> -#endif
+> +static SIMPLE_DEV_PM_OPS(mxcmci_pm_ops, mxcmci_suspend, mxcmci_resume);
 >
->         return IRQ_HANDLED;
-> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-> index 99f5709..63b983b 100644
-> --- a/include/linux/mmc/host.h
-> +++ b/include/linux/mmc/host.h
-> @@ -322,6 +322,8 @@ struct mmc_host {
->         int                     rescan_disable; /* disable card detection */
->         int                     rescan_entered; /* used with nonremovable devices */
->
-> +       bool                    trigger_card_event; /* card_event necessary */
-> +
->         struct mmc_card         *card;          /* device attached to this host */
->
->         wait_queue_head_t       wq;
+>  static struct platform_driver mxcmci_driver = {
+>         .probe          = mxcmci_probe,
+> @@ -1254,9 +1249,7 @@ static struct platform_driver mxcmci_driver = {
+>         .driver         = {
+>                 .name           = DRIVER_NAME,
+>                 .owner          = THIS_MODULE,
+> -#ifdef CONFIG_PM
+>                 .pm     = &mxcmci_pm_ops,
+> -#endif
+>                 .of_match_table = mxcmci_of_match,
+>         }
+>  };
 > --
-> 1.7.9.5
+> 1.8.3.2
 >
