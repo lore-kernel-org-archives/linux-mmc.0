@@ -1,534 +1,201 @@
-From: Haijun Zhang <Haijun.Zhang@freescale.com>
-Subject: [PATCH] mmc:esdhc: use generic IO entry to replace fix IO to support different endian mode
-Date: Mon, 14 Apr 2014 10:49:11 +0800
-Message-ID: <1397443751-1278-1-git-send-email-Haijun.Zhang@freescale.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH v2 4/7] mmc: dw_mmc: exynos: incorporate ciu_div into
+ timing property
+Date: Mon, 14 Apr 2014 16:29:39 +0900
+Message-ID: <534B8E63.5010405@samsung.com>
+References: <000401cf48e6$f173a680$d45af380$%jun@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from va3ehsobe010.messaging.microsoft.com ([216.32.180.30]:50328
-	"EHLO va3outboundpool.messaging.microsoft.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1750779AbaDNDbu (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 13 Apr 2014 23:31:50 -0400
+Received: from mailout3.samsung.com ([203.254.224.33]:36761 "EHLO
+	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752768AbaDNH3n (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 14 Apr 2014 03:29:43 -0400
+In-reply-to: <000401cf48e6$f173a680$d45af380$%jun@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: cbouatmailru@gmail.com, ulf.hansson@linaro.org, cjb@laptop.org
-Cc: linux-mmc@vger.kernel.org, X.Xie@freescale.com, arnd@arndb.de, shawn.guo@linaro.org, lars@metafoo.de, Haijun Zhang <Haijun.Zhang@freescale.com>
+To: Seungwon Jeon <tgih.jun@samsung.com>, linux-samsung-soc@vger.kernel.org, linux-mmc@vger.kernel.org
+Cc: 'Chris Ball' <chris@printf.net>, 'Kukjin Kim' <kgene.kim@samsung.com>, 'Ulf Hansson' <ulf.hansson@linaro.org>, 'Alim Akhtar' <alim.akhtar@samsung.com>
 
-1. Esdhc driver aim to support different endian mode of eSDHC
-host on different SoC(Arm-little-endian/Powerpc-big-endian).
-Adding a property in device node to indicate the endian mode
-of the host controller. In the same time using generic IO
-entry to help auto transfer between little/big endian mode cpu.
+Hi, Seungwon.
 
-Example:
+On 03/26/2014 08:31 PM, Seungwon Jeon wrote:
+> ciu_div may not be common value for all speed mode.
+> So, it needs to be attached to CLKSEL timing.
+> 
+> Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
+> ---
+>  drivers/mmc/host/dw_mmc-exynos.c |   75 ++++++++++++++++++++++++++------------
+>  drivers/mmc/host/dw_mmc-exynos.h |    1 +
+>  2 files changed, 53 insertions(+), 23 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/dw_mmc-exynos.c b/drivers/mmc/host/dw_mmc-exynos.c
+> index bab97e9..39f9114 100644
+> --- a/drivers/mmc/host/dw_mmc-exynos.c
+> +++ b/drivers/mmc/host/dw_mmc-exynos.c
+> @@ -39,6 +39,7 @@ struct dw_mci_exynos_priv_data {
+>  	u8				ciu_div;
+>  	u32				sdr_timing;
+>  	u32				ddr_timing;
+> +	u32				hs200_timing;
+>  	u32				cur_speed;
+>  };
+>  
+> @@ -64,6 +65,18 @@ static struct dw_mci_exynos_compatible {
+>  	},
+>  };
+>  
+> +static inline u8 dw_mci_exynos_get_ciu_div(struct dw_mci *host)
+> +{
+> +	struct dw_mci_exynos_priv_data *priv = host->priv;
+> +
+> +	if (priv->ctrl_type == DW_MCI_TYPE_EXYNOS4412)
+> +		return EXYNOS4412_FIXED_CIU_CLK_DIV;
+> +	else if (priv->ctrl_type == DW_MCI_TYPE_EXYNOS4210)
+> +		return EXYNOS4210_FIXED_CIU_CLK_DIV;
+> +	else
+> +		return SDMMC_CLKSEL_GET_DIV(mci_readl(host, CLKSEL)) + 1;
+> +}
+> +
+>  static int dw_mci_exynos_priv_init(struct dw_mci *host)
+>  {
+>  	struct dw_mci_exynos_priv_data *priv = host->priv;
+> @@ -77,6 +90,8 @@ static int dw_mci_exynos_priv_init(struct dw_mci *host)
+>  			   SDMMC_MPSCTRL_NON_SECURE_WRITE_BIT);
+>  	}
+>  
+> +	priv->ciu_div = dw_mci_exynos_get_ciu_div(host);
+> +
+>  	return 0;
+>  }
+>  
+> @@ -84,7 +99,7 @@ static int dw_mci_exynos_setup_clock(struct dw_mci *host)
+>  {
+>  	struct dw_mci_exynos_priv_data *priv = host->priv;
+>  
+> -	host->bus_hz /= (priv->ciu_div + 1);
+> +	host->bus_hz /= priv->ciu_div;
+>  
+>  	return 0;
+>  }
+> @@ -151,9 +166,10 @@ static void dw_mci_exynos_set_ios(struct dw_mci *host, struct mmc_ios *ios)
+>  	struct dw_mci_exynos_priv_data *priv = host->priv;
+>  	unsigned int wanted = ios->clock;
+>  	unsigned long actual;
+> -	u8 div = priv->ciu_div + 1;
+>  
+> -	if (ios->timing == MMC_TIMING_MMC_DDR52) {
+> +	if (ios->timing == MMC_TIMING_MMC_HS200) {
+> +		mci_writel(host, CLKSEL, priv->hs200_timing);
+> +	} else if (ios->timing == MMC_TIMING_MMC_DDR52) {
+>  		mci_writel(host, CLKSEL, priv->ddr_timing);
+>  		/* Should be double rate for DDR mode */
+>  		if (ios->bus_width == MMC_BUS_WIDTH_8)
+> @@ -174,6 +190,7 @@ static void dw_mci_exynos_set_ios(struct dw_mci *host, struct mmc_ios *ios)
+>  		wanted = EXYNOS_CCLKIN_MIN;
+>  
+>  	if (wanted != priv->cur_speed) {
+> +		u8 div = dw_mci_exynos_get_ciu_div(host);
+>  		int ret = clk_set_rate(host->ciu_clk, wanted * div);
+>  		if (ret)
+>  			dev_warn(host->dev,
+> @@ -186,14 +203,34 @@ static void dw_mci_exynos_set_ios(struct dw_mci *host, struct mmc_ios *ios)
+>  	}
+>  }
+>  
+> +static int dw_mci_exynos_dt_populate_timing(struct dw_mci *host,
+> +					    unsigned int ctrl_type,
+> +					    const char *propname,
+> +					    u32 *out_values)
+> +{
+> +	struct device_node *np = host->dev->of_node;
+> +	u32 timing[3];
+> +	int ret;
+> +
+> +	ret = of_property_read_u32_array(np, propname, timing, 3);
+> +	if (ret)
+> +		return ret;
+> +
+> +	if (ctrl_type == DW_MCI_TYPE_EXYNOS4412 ||
+> +	    ctrl_type == DW_MCI_TYPE_EXYNOS4210)
+> +		timing[2] = 0;
+> +
+> +	*out_values = SDMMC_CLKSEL_TIMING(timing[0], timing[1], timing[2]);
+> +
+> +	return 0;
+> +}
+> +
+> +
+>  static int dw_mci_exynos_parse_dt(struct dw_mci *host)
+>  {
+>  	struct dw_mci_exynos_priv_data *priv;
+>  	struct device_node *np = host->dev->of_node;
+> -	u32 timing[2];
+> -	u32 div = 0;
+> -	int idx;
+> -	int ret;
+> +	int idx, ret;
+>  
+>  	priv = devm_kzalloc(host->dev, sizeof(*priv), GFP_KERNEL);
+>  	if (!priv) {
+> @@ -206,29 +243,21 @@ static int dw_mci_exynos_parse_dt(struct dw_mci *host)
+>  			priv->ctrl_type = exynos_compat[idx].ctrl_type;
+>  	}
+>  
+> -	if (priv->ctrl_type == DW_MCI_TYPE_EXYNOS4412)
+> -		priv->ciu_div = EXYNOS4412_FIXED_CIU_CLK_DIV - 1;
+> -	else if (priv->ctrl_type == DW_MCI_TYPE_EXYNOS4210)
+> -		priv->ciu_div = EXYNOS4210_FIXED_CIU_CLK_DIV - 1;
+> -	else {
+> -		of_property_read_u32(np, "samsung,dw-mshc-ciu-div", &div);
+> -		priv->ciu_div = div;
+> -	}
+Did you remove the property of "ciu-div"?
+I didn't find anywhere it's used, when this is removed.
+Then it needs to remove the properties into device-tree.
+And i want to maintain the property of "ciu-div".
 
-*  - big-endian/little-endian: Specifies the endian mode the controller
-*    works in.
+Best Regards,
+Jaehoon Chung
 
-esdhc: esdhc@1560000 {
-	compatible = "fsl,esdhc";
-	reg = <0x1560000 0x10000>;
-	interrupts = <0 94 0x04>;
-	clock-names = "esdhc";
-	clocks = <&platform_clk 0>;
-	voltage-ranges = <1800 3300>;
-	sdhci,auto-cmd12;
-	big-endian;
-	bus-width = <4>;
-	status = "disabled";
-};
-
-2. Using sdhci_readl() to replace readl() in sdhci_pltfm_unregister
-to support working on different platforms.
-
-3. Update IO entry for Nintendo Wii SDHCI controllers. This change
-needs to be verified.
-
-This patch has been verified on p1021rdb-pc(Powerpc), VF610(arm),
-ls1021A(arm) platforms.
-
-Signed-off-by: Haijun Zhang <Haijun.Zhang@freescale.com>
----
- .../devicetree/bindings/mmc/fsl-esdhc.txt          |   3 +
- drivers/mmc/host/Kconfig                           |   1 -
- drivers/mmc/host/sdhci-of-esdhc.c                  | 107 ++++++++++++++-------
- drivers/mmc/host/sdhci-of-hlwd.c                   |  12 +--
- drivers/mmc/host/sdhci-pltfm.c                     |  11 ++-
- drivers/mmc/host/sdhci-pltfm.h                     |  74 ++++++++++----
- 6 files changed, 145 insertions(+), 63 deletions(-)
-
-diff --git a/Documentation/devicetree/bindings/mmc/fsl-esdhc.txt b/Documentation/devicetree/bindings/mmc/fsl-esdhc.txt
-index b7943f3..6d853d7 100644
---- a/Documentation/devicetree/bindings/mmc/fsl-esdhc.txt
-+++ b/Documentation/devicetree/bindings/mmc/fsl-esdhc.txt
-@@ -22,6 +22,8 @@ Optional properties:
-   - voltage-ranges : two cells are required, first cell specifies minimum
-     slot voltage (mV), second cell specifies maximum slot voltage (mV).
-     Several ranges could be specified.
-+  - big-endian/little-endian: Specifies the endia mode the controller
-+    works in.
- 
- Example:
- 
-@@ -33,4 +35,5 @@ sdhci@2e000 {
- 	/* Filled in by U-Boot */
- 	clock-frequency = <0>;
- 	voltage-ranges = <3300 3300>;
-+	big-endian;
- };
-diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-index 8aaf8c1..3cc367e 100644
---- a/drivers/mmc/host/Kconfig
-+++ b/drivers/mmc/host/Kconfig
-@@ -119,7 +119,6 @@ config MMC_SDHCI_OF_ARASAN
- config MMC_SDHCI_OF_ESDHC
- 	tristate "SDHCI OF support for the Freescale eSDHC controller"
- 	depends on MMC_SDHCI_PLTFM
--	depends on PPC_OF
- 	select MMC_SDHCI_BIG_ENDIAN_32BIT_BYTE_SWAPPER
- 	help
- 	  This selects the Freescale eSDHC controller support.
-diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
-index 0b24997..ef9d87b 100644
---- a/drivers/mmc/host/sdhci-of-esdhc.c
-+++ b/drivers/mmc/host/sdhci-of-esdhc.c
-@@ -28,7 +28,7 @@ static u32 esdhc_readl(struct sdhci_host *host, int reg)
- {
- 	u32 ret;
- 
--	ret = in_be32(host->ioaddr + reg);
-+	ret = sdhci_32bs_readl(host, reg);
- 	/*
- 	 * The bit of ADMA flag in eSDHC is not compatible with standard
- 	 * SDHC register, so set fake flag SDHCI_CAN_DO_ADMA2 when ADMA is
-@@ -40,7 +40,7 @@ static u32 esdhc_readl(struct sdhci_host *host, int reg)
- 	 * the verdor version number, oxFE is SDHCI_HOST_VERSION.
- 	 */
- 	if ((reg == SDHCI_CAPABILITIES) && (ret & SDHCI_CAN_DO_ADMA1)) {
--		u32 tmp = in_be32(host->ioaddr + SDHCI_SLOT_INT_STATUS);
-+		u32 tmp = sdhci_32bs_readl(host, SDHCI_SLOT_INT_STATUS);
- 		tmp = (tmp & SDHCI_VENDOR_VER_MASK) >> SDHCI_VENDOR_VER_SHIFT;
- 		if (tmp > VENDOR_V_22)
- 			ret |= SDHCI_CAN_DO_ADMA2;
-@@ -56,9 +56,9 @@ static u16 esdhc_readw(struct sdhci_host *host, int reg)
- 	int shift = (reg & 0x2) * 8;
- 
- 	if (unlikely(reg == SDHCI_HOST_VERSION))
--		ret = in_be32(host->ioaddr + base) & 0xffff;
-+		ret = sdhci_32bs_readl(host, base) & 0xffff;
- 	else
--		ret = (in_be32(host->ioaddr + base) >> shift) & 0xffff;
-+		ret = (sdhci_32bs_readl(host, base) >> shift) & 0xffff;
- 	return ret;
- }
- 
-@@ -66,7 +66,10 @@ static u8 esdhc_readb(struct sdhci_host *host, int reg)
- {
- 	int base = reg & ~0x3;
- 	int shift = (reg & 0x3) * 8;
--	u8 ret = (in_be32(host->ioaddr + base) >> shift) & 0xff;
-+	u32 ret;
-+	u8 val;
-+
-+	ret = sdhci_32bs_readl(host, base);
- 
- 	/*
- 	 * "DMA select" locates at offset 0x28 in SD specification, but on
-@@ -75,16 +78,18 @@ static u8 esdhc_readb(struct sdhci_host *host, int reg)
- 	if (reg == SDHCI_HOST_CONTROL) {
- 		u32 dma_bits;
- 
--		dma_bits = in_be32(host->ioaddr + reg);
- 		/* DMA select is 22,23 bits in Protocol Control Register */
--		dma_bits = (dma_bits >> 5) & SDHCI_CTRL_DMA_MASK;
-+		dma_bits = (ret >> 5) & SDHCI_CTRL_DMA_MASK;
- 
- 		/* fixup the result */
- 		ret &= ~SDHCI_CTRL_DMA_MASK;
- 		ret |= dma_bits;
-+		val = (ret & 0xff);
- 	}
- 
--	return ret;
-+	val = (ret >> shift) & 0xff;
-+
-+	return val;
- }
- 
- static void esdhc_writel(struct sdhci_host *host, u32 val, int reg)
-@@ -96,11 +101,28 @@ static void esdhc_writel(struct sdhci_host *host, u32 val, int reg)
- 	 */
- 	if (reg == SDHCI_INT_ENABLE)
- 		val |= SDHCI_INT_BLK_GAP;
--	sdhci_be32bs_writel(host, val, reg);
-+	sdhci_32bs_writel(host, val, reg);
- }
- 
- static void esdhc_writew(struct sdhci_host *host, u16 val, int reg)
- {
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+
-+	switch (reg) {
-+	case SDHCI_TRANSFER_MODE:
-+		/*
-+		 * Postpone this write, we must do it together with a
-+		 * command write that is down below.
-+		 */
-+		pltfm_host->xfer_mode_shadow = val;
-+		return;
-+	case SDHCI_COMMAND:
-+		sdhci_32bs_writel(host, val << 16 |
-+				  pltfm_host->xfer_mode_shadow,
-+				  SDHCI_TRANSFER_MODE);
-+		return;
-+	}
-+
- 	if (reg == SDHCI_BLOCK_SIZE) {
- 		/*
- 		 * Two last DMA bits are reserved, and first one is used for
-@@ -109,7 +131,7 @@ static void esdhc_writew(struct sdhci_host *host, u16 val, int reg)
- 		 */
- 		val &= ~SDHCI_MAKE_BLKSZ(0x7, 0);
- 	}
--	sdhci_be32bs_writew(host, val, reg);
-+	sdhci_clrsetbits(host, 0xffff, val, reg);
- }
- 
- static void esdhc_writeb(struct sdhci_host *host, u8 val, int reg)
-@@ -130,16 +152,16 @@ static void esdhc_writeb(struct sdhci_host *host, u8 val, int reg)
- 
- 		/* DMA select is 22,23 bits in Protocol Control Register */
- 		dma_bits = (val & SDHCI_CTRL_DMA_MASK) << 5;
--		clrsetbits_be32(host->ioaddr + reg , SDHCI_CTRL_DMA_MASK << 5,
--			dma_bits);
-+		sdhci_clrsetbits(host, SDHCI_CTRL_DMA_MASK << 5, dma_bits,
-+				 SDHCI_HOST_CONTROL);
- 		val &= ~SDHCI_CTRL_DMA_MASK;
--		val |= in_be32(host->ioaddr + reg) & SDHCI_CTRL_DMA_MASK;
-+		val |= sdhci_32bs_readl(host, reg) & SDHCI_CTRL_DMA_MASK;
- 	}
- 
- 	/* Prevent SDHCI core from writing reserved bits (e.g. HISPD). */
- 	if (reg == SDHCI_HOST_CONTROL)
- 		val &= ~ESDHC_HOST_CONTROL_RES;
--	sdhci_be32bs_writeb(host, val, reg);
-+	sdhci_clrsetbits(host, 0xff, val, reg);
- }
- 
- /*
-@@ -156,7 +178,7 @@ static void esdhci_of_adma_workaround(struct sdhci_host *host, u32 intmask)
- 	dma_addr_t dmastart;
- 	dma_addr_t dmanow;
- 
--	tmp = in_be32(host->ioaddr + SDHCI_SLOT_INT_STATUS);
-+	tmp = esdhc_readl(host, SDHCI_SLOT_INT_STATUS);
- 	tmp = (tmp & SDHCI_VENDOR_VER_MASK) >> SDHCI_VENDOR_VER_SHIFT;
- 
- 	applicable = (intmask & SDHCI_INT_DATA_END) &&
-@@ -174,12 +196,13 @@ static void esdhci_of_adma_workaround(struct sdhci_host *host, u32 intmask)
- 	dmanow = (dmanow & ~(SDHCI_DEFAULT_BOUNDARY_SIZE - 1)) +
- 		SDHCI_DEFAULT_BOUNDARY_SIZE;
- 	host->data->bytes_xfered = dmanow - dmastart;
--	sdhci_writel(host, dmanow, SDHCI_DMA_ADDRESS);
-+	esdhc_writel(host, dmanow, SDHCI_DMA_ADDRESS);
- }
- 
- static int esdhc_of_enable_dma(struct sdhci_host *host)
- {
--	setbits32(host->ioaddr + ESDHC_DMA_SYSCTL, ESDHC_DMA_SNOOP);
-+	esdhc_writel(host, esdhc_readl(host, ESDHC_DMA_SYSCTL)
-+			| ESDHC_DMA_SNOOP, ESDHC_DMA_SYSCTL);
- 	return 0;
- }
- 
-@@ -246,13 +269,13 @@ out:
- static u32 esdhc_proctl;
- static void esdhc_of_suspend(struct sdhci_host *host)
- {
--	esdhc_proctl = sdhci_be32bs_readl(host, SDHCI_HOST_CONTROL);
-+	esdhc_proctl = esdhc_readl(host, SDHCI_HOST_CONTROL);
- }
- 
- static void esdhc_of_resume(struct sdhci_host *host)
- {
- 	esdhc_of_enable_dma(host);
--	sdhci_be32bs_writel(host, esdhc_proctl, SDHCI_HOST_CONTROL);
-+	esdhc_writel(host, esdhc_proctl, SDHCI_HOST_CONTROL);
- }
- #endif
- 
-@@ -260,7 +283,7 @@ static void esdhc_of_platform_init(struct sdhci_host *host)
- {
- 	u32 vvn;
- 
--	vvn = in_be32(host->ioaddr + SDHCI_SLOT_INT_STATUS);
-+	vvn = esdhc_readl(host, SDHCI_SLOT_INT_STATUS);
- 	vvn = (vvn & SDHCI_VENDOR_VER_MASK) >> SDHCI_VENDOR_VER_SHIFT;
- 	if (vvn == VENDOR_V_22)
- 		host->quirks2 |= SDHCI_QUIRK2_HOST_NO_CMD23;
-@@ -287,8 +310,8 @@ static int esdhc_pltfm_bus_width(struct sdhci_host *host, int width)
- 		break;
- 	}
- 
--	clrsetbits_be32(host->ioaddr + SDHCI_HOST_CONTROL,
--			ESDHC_CTRL_BUSWIDTH_MASK, ctrl);
-+	sdhci_clrsetbits(host, ESDHC_CTRL_BUSWIDTH_MASK, ctrl,
-+			 SDHCI_HOST_CONTROL);
- 
- 	return 0;
- }
-@@ -324,19 +347,18 @@ static const struct sdhci_pltfm_data sdhci_esdhc_pdata = {
- 	.ops = &sdhci_esdhc_ops,
- };
- 
--static int sdhci_esdhc_probe(struct platform_device *pdev)
-+static void esdhc_get_property(struct platform_device *pdev)
- {
--	struct sdhci_host *host;
--	struct device_node *np;
--	int ret;
--
--	host = sdhci_pltfm_init(pdev, &sdhci_esdhc_pdata, 0);
--	if (IS_ERR(host))
--		return PTR_ERR(host);
-+	struct device_node *np = pdev->dev.of_node;
-+	struct sdhci_host *host = platform_get_drvdata(pdev);
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
- 
- 	sdhci_get_of_property(pdev);
- 
--	np = pdev->dev.of_node;
-+	/* call to generic mmc_of_parse to support additional capabilities */
-+	mmc_of_parse(host->mmc);
-+	mmc_of_parse_voltage(np, &host->ocr_mask);
-+
- 	if (of_device_is_compatible(np, "fsl,p2020-esdhc")) {
- 		/*
- 		 * Freescale messed up with P2020 as it has a non-standard
-@@ -345,10 +367,27 @@ static int sdhci_esdhc_probe(struct platform_device *pdev)
- 		host->quirks2 |= SDHCI_QUIRK2_BROKEN_HOST_CONTROL;
- 	}
- 
--	/* call to generic mmc_of_parse to support additional capabilities */
--	mmc_of_parse(host->mmc);
--	mmc_of_parse_voltage(np, &host->ocr_mask);
-+	if (of_device_is_compatible(np, "fsl,ls1021a-esdhc"))
-+		host->quirks |= SDHCI_QUIRK_BROKEN_TIMEOUT_VAL;
-+
-+	if (!pltfm_host->clock) {
-+		pltfm_host->clk = devm_clk_get(&pdev->dev, NULL);
-+		pltfm_host->clock = clk_get_rate(pltfm_host->clk);
-+		clk_prepare_enable(pltfm_host->clk);
-+	}
-+}
-+
-+static int sdhci_esdhc_probe(struct platform_device *pdev)
-+{
-+	struct sdhci_host *host;
-+	int ret;
-+
-+
-+	host = sdhci_pltfm_init(pdev, &sdhci_esdhc_pdata, 0);
-+	if (IS_ERR(host))
-+		return PTR_ERR(host);
- 
-+	esdhc_get_property(pdev);
- 	ret = sdhci_add_host(host);
- 	if (ret)
- 		sdhci_pltfm_free(pdev);
-diff --git a/drivers/mmc/host/sdhci-of-hlwd.c b/drivers/mmc/host/sdhci-of-hlwd.c
-index 57c514a..3605665 100644
---- a/drivers/mmc/host/sdhci-of-hlwd.c
-+++ b/drivers/mmc/host/sdhci-of-hlwd.c
-@@ -35,26 +35,26 @@
- 
- static void sdhci_hlwd_writel(struct sdhci_host *host, u32 val, int reg)
- {
--	sdhci_be32bs_writel(host, val, reg);
-+	sdhci_32bs_writel(host, val, reg);
- 	udelay(SDHCI_HLWD_WRITE_DELAY);
- }
- 
- static void sdhci_hlwd_writew(struct sdhci_host *host, u16 val, int reg)
- {
--	sdhci_be32bs_writew(host, val, reg);
-+	sdhci_32bs_writew(host, val, reg);
- 	udelay(SDHCI_HLWD_WRITE_DELAY);
- }
- 
- static void sdhci_hlwd_writeb(struct sdhci_host *host, u8 val, int reg)
- {
--	sdhci_be32bs_writeb(host, val, reg);
-+	sdhci_32bs_writeb(host, val, reg);
- 	udelay(SDHCI_HLWD_WRITE_DELAY);
- }
- 
- static const struct sdhci_ops sdhci_hlwd_ops = {
--	.read_l = sdhci_be32bs_readl,
--	.read_w = sdhci_be32bs_readw,
--	.read_b = sdhci_be32bs_readb,
-+	.read_l = sdhci_32bs_readl,
-+	.read_w = sdhci_32bs_readw,
-+	.read_b = sdhci_32bs_readb,
- 	.write_l = sdhci_hlwd_writel,
- 	.write_w = sdhci_hlwd_writew,
- 	.write_b = sdhci_hlwd_writeb,
-diff --git a/drivers/mmc/host/sdhci-pltfm.c b/drivers/mmc/host/sdhci-pltfm.c
-index bef250e..0d31e7e 100644
---- a/drivers/mmc/host/sdhci-pltfm.c
-+++ b/drivers/mmc/host/sdhci-pltfm.c
-@@ -120,6 +120,7 @@ struct sdhci_host *sdhci_pltfm_init(struct platform_device *pdev,
- {
- 	struct sdhci_host *host;
- 	struct device_node *np = pdev->dev.of_node;
-+	struct sdhci_pltfm_host *pltfm_host;
- 	struct resource *iomem;
- 	int ret;
- 
-@@ -145,6 +146,14 @@ struct sdhci_host *sdhci_pltfm_init(struct platform_device *pdev,
- 		goto err;
- 	}
- 
-+	pltfm_host = sdhci_priv(host);
-+	pltfm_host->endian_mode = BIG_ENDIAN_MODE;
-+
-+#ifdef CONFIG_OF
-+	if (of_get_property(np, "little-endian", NULL))
-+		pltfm_host->endian_mode = LITTLE_ENDIAN_MODE;
-+#endif /* CONFIG_OF */
-+
- 	host->hw_name = dev_name(&pdev->dev);
- 	if (pdata && pdata->ops)
- 		host->ops = pdata->ops;
-@@ -227,7 +236,7 @@ EXPORT_SYMBOL_GPL(sdhci_pltfm_register);
- int sdhci_pltfm_unregister(struct platform_device *pdev)
- {
- 	struct sdhci_host *host = platform_get_drvdata(pdev);
--	int dead = (readl(host->ioaddr + SDHCI_INT_STATUS) == 0xffffffff);
-+	int dead = (sdhci_readl(host, SDHCI_INT_STATUS) == 0xffffffff);
- 
- 	sdhci_remove_host(host, dead);
- 	sdhci_pltfm_free(pdev);
-diff --git a/drivers/mmc/host/sdhci-pltfm.h b/drivers/mmc/host/sdhci-pltfm.h
-index 04bc248..a8cf954 100644
---- a/drivers/mmc/host/sdhci-pltfm.h
-+++ b/drivers/mmc/host/sdhci-pltfm.h
-@@ -28,6 +28,10 @@ struct sdhci_pltfm_host {
- 	/* migrate from sdhci_of_host */
- 	unsigned int clock;
- 	u16 xfer_mode_shadow;
-+	enum endian_mode {
-+		LITTLE_ENDIAN_MODE,
-+		BIG_ENDIAN_MODE,
-+	} endian_mode;
- 
- 	unsigned long private[0] ____cacheline_aligned;
- };
-@@ -37,33 +41,61 @@ struct sdhci_pltfm_host {
-  * These accessors are designed for big endian hosts doing I/O to
-  * little endian controllers incorporating a 32-bit hardware byte swapper.
-  */
--static inline u32 sdhci_be32bs_readl(struct sdhci_host *host, int reg)
-+static inline void sdhci_clrsetbits(struct sdhci_host *host, u32 mask,
-+				    u32 val, int reg)
- {
--	return in_be32(host->ioaddr + reg);
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	void __iomem *base = host->ioaddr + (reg & ~0x3);
-+	u32 shift = (reg & 0x3) * 8;
-+
-+	if (pltfm_host->endian_mode == BIG_ENDIAN_MODE)
-+		iowrite32be(((ioread32be(base) & ~(mask << shift)) |
-+			    (val << shift)), base);
-+	else
-+		iowrite32(((ioread32(base) & ~(mask << shift)) |
-+			  (val << shift)), base);
- }
- 
--static inline u16 sdhci_be32bs_readw(struct sdhci_host *host, int reg)
-+static inline u32 sdhci_32bs_readl(struct sdhci_host *host, int reg)
- {
--	return in_be16(host->ioaddr + (reg ^ 0x2));
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+
-+	if (pltfm_host->endian_mode == BIG_ENDIAN_MODE)
-+		return ioread32be(host->ioaddr + reg);
-+	else
-+		return ioread32(host->ioaddr + reg);
- }
- 
--static inline u8 sdhci_be32bs_readb(struct sdhci_host *host, int reg)
-+static inline u16 sdhci_32bs_readw(struct sdhci_host *host, int reg)
- {
--	return in_8(host->ioaddr + (reg ^ 0x3));
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+
-+	if (pltfm_host->endian_mode == BIG_ENDIAN_MODE)
-+		return ioread16be(host->ioaddr + (reg ^ 0x2));
-+	else
-+		return ioread16(host->ioaddr + (reg ^ 0x2));
- }
- 
--static inline void sdhci_be32bs_writel(struct sdhci_host *host,
--				       u32 val, int reg)
-+static inline u8 sdhci_32bs_readb(struct sdhci_host *host, int reg)
- {
--	out_be32(host->ioaddr + reg, val);
-+	return ioread8(host->ioaddr + (reg ^ 0x3));
- }
- 
--static inline void sdhci_be32bs_writew(struct sdhci_host *host,
-+static inline void sdhci_32bs_writel(struct sdhci_host *host,
-+		u32 val, int reg)
-+{
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+
-+	if (pltfm_host->endian_mode == BIG_ENDIAN_MODE)
-+		iowrite32be(val, host->ioaddr + reg);
-+	else
-+		iowrite32(val, host->ioaddr + reg);
-+}
-+
-+static inline void sdhci_32bs_writew(struct sdhci_host *host,
- 				       u16 val, int reg)
- {
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
--	int base = reg & ~0x3;
--	int shift = (reg & 0x2) * 8;
- 
- 	switch (reg) {
- 	case SDHCI_TRANSFER_MODE:
-@@ -74,20 +106,20 @@ static inline void sdhci_be32bs_writew(struct sdhci_host *host,
- 		pltfm_host->xfer_mode_shadow = val;
- 		return;
- 	case SDHCI_COMMAND:
--		sdhci_be32bs_writel(host,
--				    val << 16 | pltfm_host->xfer_mode_shadow,
--				    SDHCI_TRANSFER_MODE);
-+		if (pltfm_host->endian_mode == BIG_ENDIAN_MODE)
-+			iowrite32be(val << 16 | pltfm_host->xfer_mode_shadow,
-+				    host->ioaddr + SDHCI_TRANSFER_MODE);
-+		else
-+			iowrite32(val << 16 | pltfm_host->xfer_mode_shadow,
-+				  host->ioaddr + SDHCI_TRANSFER_MODE);
- 		return;
- 	}
--	clrsetbits_be32(host->ioaddr + base, 0xffff << shift, val << shift);
-+	sdhci_clrsetbits(host, 0xffff, val, reg);
- }
- 
--static inline void sdhci_be32bs_writeb(struct sdhci_host *host, u8 val, int reg)
-+static inline void sdhci_32bs_writeb(struct sdhci_host *host, u8 val, int reg)
- {
--	int base = reg & ~0x3;
--	int shift = (reg & 0x3) * 8;
--
--	clrsetbits_be32(host->ioaddr + base , 0xff << shift, val << shift);
-+	sdhci_clrsetbits(host, 0xff, val, reg);
- }
- #endif /* CONFIG_MMC_SDHCI_BIG_ENDIAN_32BIT_BYTE_SWAPPER */
- 
--- 
-1.8.4
-
+> -
+> -	ret = of_property_read_u32_array(np,
+> -			"samsung,dw-mshc-sdr-timing", timing, 2);
+> +	ret = dw_mci_exynos_dt_populate_timing(host, priv->ctrl_type,
+> +			"samsung,dw-mshc-sdr-timing", &priv->sdr_timing);
+>  	if (ret)
+>  		return ret;
+>  
+> -	priv->sdr_timing = SDMMC_CLKSEL_TIMING(timing[0], timing[1], div);
+> -
+> -	ret = of_property_read_u32_array(np,
+> -			"samsung,dw-mshc-ddr-timing", timing, 2);
+> +	ret = dw_mci_exynos_dt_populate_timing(host, priv->ctrl_type,
+> +			"samsung,dw-mshc-ddr-timing", &priv->ddr_timing);
+>  	if (ret)
+>  		return ret;
+>  
+> -	priv->ddr_timing = SDMMC_CLKSEL_TIMING(timing[0], timing[1], div);
+> +	dw_mci_exynos_dt_populate_timing(host, priv->ctrl_type,
+> +			"samsung,dw-mshc-hs200-timing", &priv->hs200_timing);
+> +
+>  	host->priv = priv;
+> +
+>  	return 0;
+>  }
+>  
+> diff --git a/drivers/mmc/host/dw_mmc-exynos.h b/drivers/mmc/host/dw_mmc-exynos.h
+> index 2554e2f..2c8c228 100644
+> --- a/drivers/mmc/host/dw_mmc-exynos.h
+> +++ b/drivers/mmc/host/dw_mmc-exynos.h
+> @@ -20,6 +20,7 @@
+>  #define SDMMC_CLKSEL_CCLK_DRIVE(x)	(((x) & 7) << 16)
+>  #define SDMMC_CLKSEL_CCLK_DIVIDER(x)	(((x) & 7) << 24)
+>  #define SDMMC_CLKSEL_GET_DRV_WD3(x)	(((x) >> 16) & 0x7)
+> +#define SDMMC_CLKSEL_GET_DIV(x)		(((x) >> 24) & 0x7)
+>  #define SDMMC_CLKSEL_TIMING(x, y, z)	(SDMMC_CLKSEL_CCLK_SAMPLE(x) |	\
+>  					 SDMMC_CLKSEL_CCLK_DRIVE(y) |	\
+>  					 SDMMC_CLKSEL_CCLK_DIVIDER(z))
+> 
 
