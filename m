@@ -1,232 +1,50 @@
-From: Linus Walleij <linus.walleij@linaro.org>
-Subject: [PATCH] mmc: mmci: switch the driver to using gpio descriptors
-Date: Tue, 15 Apr 2014 10:33:06 +0200
-Message-ID: <1397550786-8146-1-git-send-email-linus.walleij@linaro.org>
+From: =?UTF-8?B?QWxleGFuZGVyIFNoaXlhbg==?= <shc_work@mail.ru>
+Subject: =?UTF-8?B?UmU6IFtQQVRDSF0gbW1jOiBtbWNpOiBzd2l0Y2ggdGhlIGRyaXZlciB0byB1?=
+ =?UTF-8?B?c2luZyBncGlvIGRlc2NyaXB0b3Jz?=
+Date: Tue, 15 Apr 2014 12:43:55 +0400
+Message-ID: <1397551435.309400197@f243.i.mail.ru>
+References: <1397550786-8146-1-git-send-email-linus.walleij@linaro.org>
+Reply-To: =?UTF-8?B?QWxleGFuZGVyIFNoaXlhbg==?= <shc_work@mail.ru>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: base64
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-we0-f181.google.com ([74.125.82.181]:50170 "EHLO
-	mail-we0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751001AbaDOIdW (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 15 Apr 2014 04:33:22 -0400
-Received: by mail-we0-f181.google.com with SMTP id q58so8908062wes.26
-        for <linux-mmc@vger.kernel.org>; Tue, 15 Apr 2014 01:33:21 -0700 (PDT)
+Received: from fallback1.mail.ru ([94.100.176.18]:47768 "EHLO
+	fallback1.mail.ru" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750866AbaDOIo0 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 15 Apr 2014 04:44:26 -0400
+Received: from f243.i.mail.ru (f243.i.mail.ru [94.100.178.218])
+	by fallback1.mail.ru (mPOP.Fallback_MX) with ESMTP id 0706B3707A54
+	for <linux-mmc@vger.kernel.org>; Tue, 15 Apr 2014 12:44:24 +0400 (MSK)
+In-Reply-To: <1397550786-8146-1-git-send-email-linus.walleij@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
-Cc: Russell King <linux@arm.linux.org.uk>, Ulf Hansson <ulf.hansson@stericsson.com>, Linus Walleij <linus.walleij@linaro.org>, Alexandre Courbot <gnurou@gmail.com>, Ulf Hansson <ulf.hansson@linaro.org>
+To: =?UTF-8?B?TGludXMgV2FsbGVpag==?= <linus.walleij@linaro.org>
+Cc: =?UTF-8?B?QWxleGFuZHJlIENvdXJib3Q=?= <gnurou@gmail.com>, =?UTF-8?B?UnVzc2VsbCBLaW5n?= <linux@arm.linux.org.uk>, =?UTF-8?B?VWxmIEhhbnNzb24=?= <ulf.hansson@stericsson.com>, =?UTF-8?B?VWxmIEhhbnNzb24=?= <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 
-The next step in modernization of GPIO is to let drivers handle
-descriptors rather than integer numbers representing GPIO pins,
-akin to how clocks or regulators are already handled today.
-
-This patch makes the MMCI driver use GPIO descriptos in the
-core code with fallback code using the platform data if that
-is not possible. After all platforms with MMCI have been
-migrated to use descriptors, the platform data entries for
-GPIO pins can be removed.
-
-Cc: Alexandre Courbot <gnurou@gmail.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Russell King <linux@arm.linux.org.uk>
-Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
----
-Hi Russell,Ulf: there is no hurry to do these changes (only used
-for my very corner-case MMCI PL181 experiments) but it's the
-desired direction to use descriptors for GPIOs going forward.
-I can rebase this on top of Ulf's patch stack any time, no
-problem.
----
- drivers/mmc/host/mmci.c | 76 ++++++++++++++++++++++++-------------------------
- drivers/mmc/host/mmci.h |  4 +--
- 2 files changed, 40 insertions(+), 40 deletions(-)
-
-diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index 771c60ab4a32..f84e39a5d592 100644
---- a/drivers/mmc/host/mmci.c
-+++ b/drivers/mmc/host/mmci.c
-@@ -26,7 +26,7 @@
- #include <linux/amba/bus.h>
- #include <linux/clk.h>
- #include <linux/scatterlist.h>
--#include <linux/gpio.h>
-+#include <linux/gpio/consumer.h>
- #include <linux/of_gpio.h>
- #include <linux/regulator/consumer.h>
- #include <linux/dmaengine.h>
-@@ -1330,10 +1330,10 @@ static int mmci_get_ro(struct mmc_host *mmc)
- {
- 	struct mmci_host *host = mmc_priv(mmc);
- 
--	if (host->gpio_wp == -ENOSYS)
-+	if (IS_ERR(host->gpio_wp))
- 		return -ENOSYS;
- 
--	return gpio_get_value_cansleep(host->gpio_wp);
-+	return gpiod_get_value_cansleep(host->gpio_wp);
- }
- 
- static int mmci_get_cd(struct mmc_host *mmc)
-@@ -1342,13 +1342,13 @@ static int mmci_get_cd(struct mmc_host *mmc)
- 	struct mmci_platform_data *plat = host->plat;
- 	unsigned int status;
- 
--	if (host->gpio_cd == -ENOSYS) {
-+	if (IS_ERR(host->gpio_cd)) {
- 		if (!plat->status)
- 			return 1; /* Assume always present */
- 
- 		status = plat->status(mmc_dev(host->mmc));
- 	} else
--		status = !!gpio_get_value_cansleep(host->gpio_cd)
-+		status = !!gpiod_get_value_cansleep(host->gpio_cd)
- 			^ plat->cd_invert;
- 
- 	/*
-@@ -1412,13 +1412,10 @@ static struct mmc_host_ops mmci_ops = {
- 
- #ifdef CONFIG_OF
- static void mmci_dt_populate_generic_pdata(struct device_node *np,
--					struct mmci_platform_data *pdata)
-+					   struct mmci_platform_data *pdata)
- {
- 	int bus_width = 0;
- 
--	pdata->gpio_wp = of_get_named_gpio(np, "wp-gpios", 0);
--	pdata->gpio_cd = of_get_named_gpio(np, "cd-gpios", 0);
--
- 	if (of_get_property(np, "cd-inverted", NULL))
- 		pdata->cd_invert = true;
- 	else
-@@ -1494,9 +1491,20 @@ static int mmci_probe(struct amba_device *dev,
- 	host = mmc_priv(mmc);
- 	host->mmc = mmc;
- 
--	host->gpio_wp = -ENOSYS;
--	host->gpio_cd = -ENOSYS;
-+	host->gpio_wp = ERR_PTR(-ENOSYS);
-+	host->gpio_cd = ERR_PTR(-ENOSYS);
- 	host->gpio_cd_irq = -1;
-+	/*
-+	 * TODO: when we finally get rid of all platform data for all
-+	 * platforms deploying the MMCI block, we can delete the
-+	 * gpio_to_desc() calls.
-+	 */
-+	host->gpio_wp = gpiod_get(&dev->dev, "wp");
-+	if (IS_ERR(host->gpio_wp) && gpio_is_valid(plat->gpio_wp))
-+		host->gpio_wp = gpio_to_desc(plat->gpio_wp);
-+	host->gpio_cd = gpiod_get(&dev->dev, "cd");
-+	if (IS_ERR(host->gpio_cd) && gpio_is_valid(plat->gpio_wp))
-+		host->gpio_cd = gpio_to_desc(plat->gpio_cd);
- 
- 	host->hw_designer = amba_manf(dev);
- 	host->hw_revision = amba_rev(dev);
-@@ -1616,17 +1624,13 @@ static int mmci_probe(struct amba_device *dev,
- 	writel(0, host->base + MMCIMASK1);
- 	writel(0xfff, host->base + MMCICLEAR);
- 
--	if (plat->gpio_cd == -EPROBE_DEFER) {
-+	if (PTR_ERR(host->gpio_cd) == -EPROBE_DEFER) {
- 		ret = -EPROBE_DEFER;
- 		goto err_gpio_cd;
- 	}
--	if (gpio_is_valid(plat->gpio_cd)) {
--		ret = gpio_request(plat->gpio_cd, DRIVER_NAME " (cd)");
--		if (ret == 0)
--			ret = gpio_direction_input(plat->gpio_cd);
--		if (ret == 0)
--			host->gpio_cd = plat->gpio_cd;
--		else if (ret != -ENOSYS)
-+	if (!IS_ERR(host->gpio_cd)) {
-+		ret = gpiod_direction_input(host->gpio_cd);
-+		if (ret < 0 && ret != -ENOSYS)
- 			goto err_gpio_cd;
- 
- 		/*
-@@ -1636,28 +1640,24 @@ static int mmci_probe(struct amba_device *dev,
- 		 * for the inverted case) so we request triggers on both
- 		 * edges.
- 		 */
--		ret = request_any_context_irq(gpio_to_irq(plat->gpio_cd),
-+		ret = request_any_context_irq(gpiod_to_irq(host->gpio_cd),
- 				mmci_cd_irq,
- 				IRQF_TRIGGER_RISING | IRQF_TRIGGER_FALLING,
- 				DRIVER_NAME " (cd)", host);
- 		if (ret >= 0)
--			host->gpio_cd_irq = gpio_to_irq(plat->gpio_cd);
-+			host->gpio_cd_irq = gpiod_to_irq(host->gpio_cd);
- 	}
--	if (plat->gpio_wp == -EPROBE_DEFER) {
-+	if (PTR_ERR(host->gpio_wp) == -EPROBE_DEFER) {
- 		ret = -EPROBE_DEFER;
- 		goto err_gpio_wp;
- 	}
--	if (gpio_is_valid(plat->gpio_wp)) {
--		ret = gpio_request(plat->gpio_wp, DRIVER_NAME " (wp)");
--		if (ret == 0)
--			ret = gpio_direction_input(plat->gpio_wp);
--		if (ret == 0)
--			host->gpio_wp = plat->gpio_wp;
--		else if (ret != -ENOSYS)
-+	if (!IS_ERR(host->gpio_wp)) {
-+		ret = gpiod_direction_input(host->gpio_wp);
-+		if (ret < 0 && ret != -ENOSYS)
- 			goto err_gpio_wp;
- 	}
- 
--	if ((host->plat->status || host->gpio_cd != -ENOSYS)
-+	if ((host->plat->status || !IS_ERR(host->gpio_cd))
- 	    && host->gpio_cd_irq < 0)
- 		mmc->caps |= MMC_CAP_NEEDS_POLL;
- 
-@@ -1696,13 +1696,13 @@ static int mmci_probe(struct amba_device *dev,
-  irq0_free:
- 	free_irq(dev->irq[0], host);
-  unmap:
--	if (host->gpio_wp != -ENOSYS)
--		gpio_free(host->gpio_wp);
-+	if (!IS_ERR(host->gpio_wp))
-+		gpiod_put(host->gpio_wp);
-  err_gpio_wp:
- 	if (host->gpio_cd_irq >= 0)
- 		free_irq(host->gpio_cd_irq, host);
--	if (host->gpio_cd != -ENOSYS)
--		gpio_free(host->gpio_cd);
-+	if (!IS_ERR(host->gpio_cd))
-+		gpiod_put(host->gpio_cd);
-  err_gpio_cd:
- 	iounmap(host->base);
-  clk_disable:
-@@ -1741,12 +1741,12 @@ static int mmci_remove(struct amba_device *dev)
- 		if (!host->singleirq)
- 			free_irq(dev->irq[1], host);
- 
--		if (host->gpio_wp != -ENOSYS)
--			gpio_free(host->gpio_wp);
-+		if (!IS_ERR(host->gpio_wp))
-+			gpiod_put(host->gpio_wp);
- 		if (host->gpio_cd_irq >= 0)
- 			free_irq(host->gpio_cd_irq, host);
--		if (host->gpio_cd != -ENOSYS)
--			gpio_free(host->gpio_cd);
-+		if (!IS_ERR(host->gpio_cd))
-+			gpiod_put(host->gpio_cd);
- 
- 		iounmap(host->base);
- 		clk_disable_unprepare(host->clk);
-diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
-index 58b1b8896bf2..b1c1de28201f 100644
---- a/drivers/mmc/host/mmci.h
-+++ b/drivers/mmc/host/mmci.h
-@@ -176,8 +176,8 @@ struct mmci_host {
- 	struct mmc_data		*data;
- 	struct mmc_host		*mmc;
- 	struct clk		*clk;
--	int			gpio_cd;
--	int			gpio_wp;
-+	struct gpio_desc	*gpio_cd;
-+	struct gpio_desc	*gpio_wp;
- 	int			gpio_cd_irq;
- 	bool			singleirq;
- 
--- 
-1.9.0
-
+VHVlLCAxNSBBcHIgMjAxNCAxMDozMzowNiArMDIwMCDQvtGCIExpbnVzIFdhbGxlaWogPGxpbnVz
+LndhbGxlaWpAbGluYXJvLm9yZz46Cj4gVGhlIG5leHQgc3RlcCBpbiBtb2Rlcm5pemF0aW9uIG9m
+IEdQSU8gaXMgdG8gbGV0IGRyaXZlcnMgaGFuZGxlCj4gZGVzY3JpcHRvcnMgcmF0aGVyIHRoYW4g
+aW50ZWdlciBudW1iZXJzIHJlcHJlc2VudGluZyBHUElPIHBpbnMsCj4gYWtpbiB0byBob3cgY2xv
+Y2tzIG9yIHJlZ3VsYXRvcnMgYXJlIGFscmVhZHkgaGFuZGxlZCB0b2RheS4KPiAKPiBUaGlzIHBh
+dGNoIG1ha2VzIHRoZSBNTUNJIGRyaXZlciB1c2UgR1BJTyBkZXNjcmlwdG9zIGluIHRoZQo+IGNv
+cmUgY29kZSB3aXRoIGZhbGxiYWNrIGNvZGUgdXNpbmcgdGhlIHBsYXRmb3JtIGRhdGEgaWYgdGhh
+dAo+IGlzIG5vdCBwb3NzaWJsZS4gQWZ0ZXIgYWxsIHBsYXRmb3JtcyB3aXRoIE1NQ0kgaGF2ZSBi
+ZWVuCj4gbWlncmF0ZWQgdG8gdXNlIGRlc2NyaXB0b3JzLCB0aGUgcGxhdGZvcm0gZGF0YSBlbnRy
+aWVzIGZvcgo+IEdQSU8gcGlucyBjYW4gYmUgcmVtb3ZlZC4KPiAKPiBDYzogQWxleGFuZHJlIENv
+dXJib3QgPGdudXJvdUBnbWFpbC5jb20+Cj4gQ2M6IFVsZiBIYW5zc29uIDx1bGYuaGFuc3NvbkBs
+aW5hcm8ub3JnPgo+IENjOiBSdXNzZWxsIEtpbmcgPGxpbnV4QGFybS5saW51eC5vcmcudWs+Cj4g
+U2lnbmVkLW9mZi1ieTogTGludXMgV2FsbGVpaiA8bGludXMud2FsbGVpakBsaW5hcm8ub3JnPgo+
+IC0tLQo+IEhpIFJ1c3NlbGwsVWxmOiB0aGVyZSBpcyBubyBodXJyeSB0byBkbyB0aGVzZSBjaGFu
+Z2VzIChvbmx5IHVzZWQKPiBmb3IgbXkgdmVyeSBjb3JuZXItY2FzZSBNTUNJIFBMMTgxIGV4cGVy
+aW1lbnRzKSBidXQgaXQncyB0aGUKPiBkZXNpcmVkIGRpcmVjdGlvbiB0byB1c2UgZGVzY3JpcHRv
+cnMgZm9yIEdQSU9zIGdvaW5nIGZvcndhcmQuCj4gSSBjYW4gcmViYXNlIHRoaXMgb24gdG9wIG9m
+IFVsZidzIHBhdGNoIHN0YWNrIGFueSB0aW1lLCBubwo+IHByb2JsZW0uCj4gLS0tCi4uLgo+ICBz
+dGF0aWMgdm9pZCBtbWNpX2R0X3BvcHVsYXRlX2dlbmVyaWNfcGRhdGEoc3RydWN0IGRldmljZV9u
+b2RlICpucCwKPiAtCQkJCQlzdHJ1Y3QgbW1jaV9wbGF0Zm9ybV9kYXRhICpwZGF0YSkKPiArCQkJ
+CQkgICBzdHJ1Y3QgbW1jaV9wbGF0Zm9ybV9kYXRhICpwZGF0YSkKPiAgewo+ICAJaW50IGJ1c193
+aWR0aCA9IDA7Cj4gIAo+IC0JcGRhdGEtPmdwaW9fd3AgPSBvZl9nZXRfbmFtZWRfZ3BpbyhucCwg
+IndwLWdwaW9zIiwgMCk7Cj4gLQlwZGF0YS0+Z3Bpb19jZCA9IG9mX2dldF9uYW1lZF9ncGlvKG5w
+LCAiY2QtZ3Bpb3MiLCAwKTsKPiAtCj4gIAlpZiAob2ZfZ2V0X3Byb3BlcnR5KG5wLCAiY2QtaW52
+ZXJ0ZWQiLCBOVUxMKSkKPiAgCQlwZGF0YS0+Y2RfaW52ZXJ0ID0gdHJ1ZTsKCllvdSBjb3VsZCBl
+dmVuIGVsaW1pbmF0ZSAiY2QtaW52ZXJ0ZWQiIHByb3BlcnR5IGZvciBEVCBjYXNlLgoKLS0tCgo=
