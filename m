@@ -1,40 +1,45 @@
-From: Stephen Warren <swarren@wwwdotorg.org>
-Subject: Re: [PATCH 2/4] mmc: tegra: fix reporting of base clock frequency
-Date: Tue, 15 Apr 2014 12:25:01 -0600
-Message-ID: <534D797D.7030201@wwwdotorg.org>
-References: <1397526163-20126-1-git-send-email-abrestic@chromium.org> <1397526163-20126-3-git-send-email-abrestic@chromium.org>
+From: Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>
+Subject: Re: [PATCH 3/4] mmc: sdhci: defer probing on regulator_get_optional()
+ failures
+Date: Tue, 15 Apr 2014 12:28:45 -0600
+Message-ID: <534D7A5D.9090707@wwwdotorg.org>
+References: <1397526163-20126-1-git-send-email-abrestic@chromium.org> <1397526163-20126-4-git-send-email-abrestic@chromium.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from avon.wwwdotorg.org ([70.85.31.133]:50937 "EHLO
-	avon.wwwdotorg.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752340AbaDOSZE (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 15 Apr 2014 14:25:04 -0400
-In-Reply-To: <1397526163-20126-3-git-send-email-abrestic@chromium.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1397526163-20126-4-git-send-email-abrestic-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Andrew Bresticker <abrestic-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Thierry Reding <thierry.reding-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: Andrew Bresticker <abrestic@chromium.org>, Thierry Reding <thierry.reding@gmail.com>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org, linux-tegra@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
 
 On 04/14/2014 07:42 PM, Andrew Bresticker wrote:
-> Tegra SDHCI controllers, by default, report a base clock frequency
-> of 208Mhz in SDHCI_CAPABILTIES which may or may not be equal to the
-> actual base clock frequency.
+> If regulator_get_optional() returns EPROBE_DEFER, it indicates
+> that the regulator may show up later (e.g. the DT property is
+> present but the corresponding regulator may not have probed).
+> Instead of continuing without the regulator, return EPROBE_DEFER
+> from sdhci_add_host().  Also, fix regulator leaks in the error
+> paths in sdhci_add_host().
 
-Some explanation of why this "may or may not be equal to the actual base
-clock frequency" would be nice.
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
 
-Presumably, it's because the clock frequency is supplied by the clock
-controller module, and configuring that happens externally to the SD
-controller, so the SD HW has no knowledge of the actual frequency, and
-hence simply reports a hard-coded maximum possible clock frequency?
+>  	if (IS_ERR_OR_NULL(host->vqmmc)) {
 
-> While this can be overridden by setting
-> BASE_CLK_FREQ in VENDOR_CLOCK_CTRL on Tegra30 and later SoCs, just
-> set SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN and supply a get_max_clock()
-> callback to get the actual rate of the base clock.
+This is a pre-existing condition, but ick: Why doesn't this test either
+IS_ERR() /or/ == NULL, but not both. On error, the regulator API should
+either return and error-point or return NULL, so that client code
+shouldn't need to check for both.
 
-It's not clear to me from the function name that
-sdhci_pltfm_clk_get_max_clock() simply calls clk_get() on the actual
-clock. It might be nice to mention that in the commit description.
+> +put_vmmc:
+> +	if (host->vmmc)
+> +		regulator_put(host->vmmc);
+> +put_vqmmc:
+> +	if (host->vqmmc)
+> +		regulator_put(host->vqmmc);
+
+If IS_ERR_OR_NULL() really is required above, it should be used here
+too. More likely, I hope you need to replace if (host->vmmc) with if
+(!IS_ERR(host->vmmc)).
+
+I wonder if fixing this would help solve the crashes that Alex saw?
