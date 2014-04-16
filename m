@@ -1,39 +1,50 @@
-From: Lee Jones <lee.jones@linaro.org>
-Subject: Re: [PATCH v7 2/4] [v6 fix] mfd/rtsx_usb: add comment in
- rtsx_usb_suspend
-Date: Wed, 16 Apr 2014 11:40:21 +0100
-Message-ID: <20140416104021.GO4754@lee--X1>
-References: <1397199203-2235-1-git-send-email-rogerable@realtek.com>
- <1397199203-2235-3-git-send-email-rogerable@realtek.com>
+From: =?UTF-8?q?Antoine=20T=C3=A9nart?=
+	<antoine.tenart@free-electrons.com>
+Subject: [PATCH 0/4] ARM: berlin: add SDHCI support
+Date: Wed, 16 Apr 2014 14:40:07 +0200
+Message-ID: <1397652011-21284-1-git-send-email-antoine.tenart@free-electrons.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
-Content-Disposition: inline
-In-Reply-To: <1397199203-2235-3-git-send-email-rogerable@realtek.com>
-List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
-List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel>
-List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
-List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
-List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
-Errors-To: driverdev-devel-bounces@linuxdriverproject.org
-Sender: driverdev-devel-bounces@linuxdriverproject.org
-To: rogerable@realtek.com
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Maxim Levitsky <maximlevitsky@gmail.com>, Alex Dubov <oakad@yahoo.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, driverdev-devel@linuxdriverproject.org, linux-mmc@vger.kernel.org, Chris Ball <chris@printf.net>, linux-kernel@vger.kernel.org, wei_wang@realsil.com.cn, Andrew Morton <akpm@linux-foundation.org>, Oliver Neukum <oneukum@suse.de>, Dan Carpenter <dan.carpenter@oracle.com>, Samuel Ortiz <sameo@linux.intel.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from top.free-electrons.com ([176.31.233.9]:47866 "EHLO
+	mail.free-electrons.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1754523AbaDPMkP (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Apr 2014 08:40:15 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: sebastian.hesselbarth@gmail.com, chris@printf.net, anton@enomsg.org
+Cc: =?UTF-8?q?Antoine=20T=C3=A9nart?= <antoine.tenart@free-electrons.com>, alexandre.belloni@free-electrons.com, zmxu@marvell.com, jszhang@marvell.com, linux-arm-kernel@lists.infradead.org, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-T24gRnJpLCAxMSBBcHIgMjAxNCwgcm9nZXJhYmxlQHJlYWx0ZWsuY29tIHdyb3RlOgoKPiBGcm9t
-OiBSb2dlciBUc2VuZyA8cm9nZXJhYmxlQHJlYWx0ZWsuY29tPgo+IAo+IEV4cGxhaW4gd2h5IHRo
-ZXJlIGlzIG5vIG5lZWQgdG8gaGF2ZSBhIHN5bW1ldHJpYyBMRUQgdHVybi1vbiBpbiByZXN1bWUg
-aGFuZGxlcgo+IHdoaWxlIGNhbGxpbmcgcnRzeF91c2JfdHVybl9vZmZfbGVkKCkgaW4gc3VzcGVu
-ZCBoYW5kbGVyLgo+IAo+IFNpZ25lZC1vZmYtYnk6IFJvZ2VyIFRzZW5nIDxyb2dlcmFibGVAcmVh
-bHRlay5jb20+Cj4gLS0tCj4gIGRyaXZlcnMvbWZkL3J0c3hfdXNiLmMgfCA2ICsrKysrKwo+ICAx
-IGZpbGUgY2hhbmdlZCwgNiBpbnNlcnRpb25zKCspCgpBcHBsaWVkLCB0aGFua3MuCgotLSAKTGVl
-IEpvbmVzCkxpbmFybyBTVE1pY3JvZWxlY3Ryb25pY3MgTGFuZGluZyBUZWFtIExlYWQKTGluYXJv
-Lm9yZyDilIIgT3BlbiBzb3VyY2Ugc29mdHdhcmUgZm9yIEFSTSBTb0NzCkZvbGxvdyBMaW5hcm86
-IEZhY2Vib29rIHwgVHdpdHRlciB8IEJsb2cKX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX18KZGV2ZWwgbWFpbGluZyBsaXN0CmRldmVsQGxpbnV4ZHJpdmVycHJv
-amVjdC5vcmcKaHR0cDovL2RyaXZlcmRldi5saW51eGRyaXZlcnByb2plY3Qub3JnL21haWxtYW4v
-bGlzdGluZm8vZHJpdmVyZGV2LWRldmVsCg==
+This series adds the support for the SDHCI controller for Marvell Berli=
+n
+SoCs and enable the SD card reader and eMMC for the BG2Q DMP. The
+controller supports 3 sockets.
+
+Tested on the BG2Q DMP.
+
+This series applies on top of Alexandre's patches for the Berlin's pll:
+https://patchwork.kernel.org/patch/3890341/
+https://patchwork.kernel.org/patch/3876271/
+
+Antoine T=C3=A9nart (4):
+  mmc: sdhci: add a driver for Berlin SoCs
+  Documentation: bindings: add the sdhci-berlin
+  ARM: dts: berlin: add the SDHCI nodes for the BG2Q
+  ARM: dts: berlin: enable SD card reader and eMMC for the BG2Q DMP
+
+ .../devicetree/bindings/mmc/sdhci-berlin.txt       |  18 +++
+ arch/arm/boot/dts/berlin2q-marvell-dmp.dts         |   8 ++
+ arch/arm/boot/dts/berlin2q.dtsi                    |  40 +++++++
+ drivers/mmc/host/Kconfig                           |  11 ++
+ drivers/mmc/host/Makefile                          |   1 +
+ drivers/mmc/host/sdhci-berlin.c                    | 129 +++++++++++++=
+++++++++
+ 6 files changed, 207 insertions(+)
+ create mode 100644 Documentation/devicetree/bindings/mmc/sdhci-berlin.=
+txt
+ create mode 100644 drivers/mmc/host/sdhci-berlin.c
+
+--=20
+1.8.3.2
+
