@@ -1,136 +1,111 @@
-From: Sergei Ianovich <ynvich@gmail.com>
-Subject: [PATCH v4 07/21] ARM: dts: parse DMA config in pxamci
-Date: Wed, 16 Apr 2014 21:17:12 +0400
-Message-ID: <1397668667-27328-1-git-send-email-ynvich@gmail.com>
-References: <1397668411-27162-7-git-send-email-ynvich@gmail.com>
+From: Andrew Bresticker <abrestic@chromium.org>
+Subject: Re: [PATCH] sdhci: Forward EPROBE_DEFER on vmmc and vqmmc regulators
+Date: Wed, 16 Apr 2014 13:15:53 -0700
+Message-ID: <CAL1qeaET+cy19EtB_TbtQ40Lb9r9hrO4H5vjG5YmCTpYoOmcog@mail.gmail.com>
+References: <1395991817-3503-1-git-send-email-mike.looijmans@topic.nl>
+	<10471336.Pb8zVvW3Hp@wuerfel>
+	<53429AD4.7030508@topic.nl>
+	<4902841.krZFXFDZqb@wuerfel>
+	<5342A3F5.606@topic.nl>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-la0-f44.google.com ([209.85.215.44]:55322 "EHLO
-	mail-la0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751111AbaDPRSG (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Apr 2014 13:18:06 -0400
-In-Reply-To: <1397668411-27162-7-git-send-email-ynvich@gmail.com>
+Received: from mail-vc0-f180.google.com ([209.85.220.180]:41998 "EHLO
+	mail-vc0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753917AbaDPUPy (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Apr 2014 16:15:54 -0400
+Received: by mail-vc0-f180.google.com with SMTP id lf12so11163282vcb.39
+        for <linux-mmc@vger.kernel.org>; Wed, 16 Apr 2014 13:15:53 -0700 (PDT)
+In-Reply-To: <5342A3F5.606@topic.nl>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
-Cc: Sergei Ianovich <ynvich@gmail.com>, Daniel Mack <zonque@gmail.com>, Haojian Zhuang <haojian.zhuang@gmail.com>, Arnd Bergmann <arnd@arndb.de>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Jaehoon Chung <jh80.chung@samsung.com>, Jingoo Han <jg1.han@samsung.com>, Mark Brown <broonie@linaro.org>, linux-mmc@vger.kernel.org
+To: Mike Looijmans <mike.looijmans@topic.nl>
+Cc: Arnd Bergmann <arnd@arndb.de>, Ben Dooks <ben.dooks@codethink.co.uk>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, cjb@laptop.org, gdjakov@mm-sol.com, "broonie@kernel.org" <broonie@kernel.org>
 
-The existing PXA MMC driver cannot get DMA channels in a proper
-way from the respective device tree binding.
+Hi Mike,
 
-This patch provides temporary workaround which allows using the
-existing driver in DT machines by pointing to the proper
-dmaengine-based "marvell,pdma-1.0" DMA.
+On Mon, Apr 7, 2014 at 6:11 AM, Mike Looijmans <mike.looijmans@topic.nl> wrote:
+> On 04/07/2014 02:51 PM, Arnd Bergmann wrote:
+>>
+>> On Monday 07 April 2014 14:32:20 Mike Looijmans wrote:
+>>>
+>>> On 04/07/2014 02:25 PM, Arnd Bergmann wrote:
+>>>
+>>> Judging from the kernel output, regulator_get_optional returns -ENODEV if
+>>> the
+>>> supply wasn't found.
+>>>
+>>> Maybe the API is confusing (or wrong?) here.
+>>>
+>>> If you change the code as per your suggestion, the SD will not work
+>>> unless you
+>>> explicitly assign supplies. And judging from what I've seen so far, I am
+>>> the
+>>> first to have ever attached a power supply to this controller...
+>>
+>>
+>> It's certainly not very "optional" if it returns an error here.
+>>
+>> You could try to special-case the "-ENODEV" return here, but I think it
+>> would be better to change the regulator interface to be less confusing.
+>>
+>
+> Judging from the code:
+> http://lxr.free-electrons.com/source/drivers/regulator/core.c#L1476
+>
+> The behaviour is supposed to be something like "regulator_get_optional" will
+> return an error if the supply wasn't found, but "regulator_get" will create
+> a dummy supply for you instead of returning an error code.
+>
+> So "regulator_get_optional" means: "I handle my own problems, just gimme the
+> bad news". But "regulator_get" appears to imply: "I will shoot the
+> messenger, so do whatever you can to get me something to say 'enable' to".
+>
+> In this case, the IS_NULL part is wrong indeed, it will never return NULL.
 
-Even though the new DMA provider is not present we can parse device node
-attributes manually and use channel numbers to acquire DMA channel
-from the existing non-dmaengine provider.
+Not true.  If !CONFIG_REGULATOR, regulator_get() and co. will return
+NULL.  Normally it is ok to ignore this case, but the sdhci driver
+will call regulator_is_supported_voltage() on vqmmc to determine
+whether 1.8V signalling is supported.  With !CONFIG_REGULATOR,
+regulator_is_supported_voltage() will always return false, causing the
+sdhci driver to disable all UHS modes.  So we still need to handle the
+NULL (!CONFIG_REGULATOR) case.  One possibility is to guard the
+voltage check with #ifdef CONFIG_REGULATOR, as is done later with
+vmmc.
 
-When Daniel's DMA series is merged there will be no need to manually
-parse for "dmas" and this patch can be safely reverted.
+BTW, I was working on a similar patch at:
+https://patchwork.kernel.org/patch/3988271/.
 
-Signed-off-by: Sergei Ianovich <ynvich@gmail.com>
-CC: Daniel Mack <zonque@gmail.com>
-CC: Haojian Zhuang <haojian.zhuang@gmail.com>
-CC: Arnd Bergmann <arnd@arndb.de>
----
-   v3..v4
-   * no changes
+Thanks,
+Andrew
 
-   v2..v3
-   * split into good (PATCH 07/21) and temporary (this one) parts
-
-   v1..v2
-   * add binding for next-gen dma controller
-   * use correct dma declararion
-   * number changed from 5 to 3
-
- drivers/mmc/host/pxamci.c | 59 ++++++++++++++++++++++++++++++++++++++---------
- 1 file changed, 48 insertions(+), 11 deletions(-)
-
-diff --git a/drivers/mmc/host/pxamci.c b/drivers/mmc/host/pxamci.c
-index 32fe113..6b67764 100644
---- a/drivers/mmc/host/pxamci.c
-+++ b/drivers/mmc/host/pxamci.c
-@@ -613,11 +613,46 @@ static int pxamci_of_init(struct platform_device *pdev)
- 
-         return 0;
- }
-+
-+static int pxamci_of_init_dma(struct platform_device *pdev,
-+		struct pxamci_host *host)
-+{
-+	struct device_node *np = pdev->dev.of_node;
-+	u32 tmp;
-+	int i;
-+	int ret;
-+
-+	i = of_property_match_string(np, "dma-names", "rx");
-+	if (i < 0)
-+		return i;
-+
-+	ret = of_property_read_u32_index(np, "dmas", 2 * i + 1, &tmp);
-+	if (ret < 0)
-+		return ret;
-+	host->dma_drcmrrx = tmp;
-+
-+	i = of_property_match_string(np, "dma-names", "tx");
-+	if (i < 0)
-+		return i;
-+
-+	ret = of_property_read_u32_index(np, "dmas", 2 * i + 1, &tmp);
-+	if (ret < 0)
-+		return ret;
-+	host->dma_drcmrtx = tmp;
-+
-+	return 0;
-+}
- #else
- static int pxamci_of_init(struct platform_device *pdev)
- {
-         return 0;
- }
-+
-+static int pxamci_of_init_dma(struct platform_device *pdev,
-+		struct pxamci_host *host)
-+{
-+	return -ENODATA;
-+}
- #endif
- 
- static int pxamci_probe(struct platform_device *pdev)
-@@ -741,19 +776,21 @@ static int pxamci_probe(struct platform_device *pdev)
- 
- 	platform_set_drvdata(pdev, mmc);
- 
--	dmarx = platform_get_resource(pdev, IORESOURCE_DMA, 0);
--	if (!dmarx) {
--		ret = -ENXIO;
--		goto out;
--	}
--	host->dma_drcmrrx = dmarx->start;
-+	if (pxamci_of_init_dma(pdev, host) < 0) {
-+		dmarx = platform_get_resource(pdev, IORESOURCE_DMA, 0);
-+		if (!dmarx) {
-+			ret = -ENXIO;
-+			goto out;
-+		}
-+		host->dma_drcmrrx = dmarx->start;
- 
--	dmatx = platform_get_resource(pdev, IORESOURCE_DMA, 1);
--	if (!dmatx) {
--		ret = -ENXIO;
--		goto out;
-+		dmatx = platform_get_resource(pdev, IORESOURCE_DMA, 1);
-+		if (!dmatx) {
-+			ret = -ENXIO;
-+			goto out;
-+		}
-+		host->dma_drcmrtx = dmatx->start;
- 	}
--	host->dma_drcmrtx = dmatx->start;
- 
- 	if (host->pdata) {
- 		gpio_cd = host->pdata->gpio_card_detect;
--- 
-1.8.4.2
-
+>
+> I still think it's unrelated to my patch and should be submitted separately.
+>
+>
+> Mike.
+>
+>
+> Met vriendelijke groet / kind regards,
+>
+> Mike Looijmans
+>
+> TOPIC Embedded Systems
+> Eindhovenseweg 32-C, NL-5683 KH Best
+> Postbus 440, NL-5680 AK Best
+> Telefoon: (+31) (0) 499 33 69 79
+> Telefax:  (+31) (0) 499 33 69 70
+> E-mail: mike.looijmans@topic.nl
+> Website: www.topic.nl
+>
+> Please consider the environment before printing this e-mail
+>
+> Visit us at the Hannover Messe 7 - 11 April 2014 - Hall 002/D10 (Dutch
+> Pavillion)
+> http://www.hannovermesse.de/exhibitor/topic-embedded-products/V229623
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-kernel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> Please read the FAQ at  http://www.tux.org/lkml/
