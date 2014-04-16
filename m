@@ -1,115 +1,71 @@
-From: =?UTF-8?q?Antoine=20T=C3=A9nart?= <antoine.tenart@free-electrons.com>
-Subject: [PATCH 1/4] mmc: sdhci: add a driver for Berlin SoCs
-Date: Wed, 16 Apr 2014 14:40:08 +0200
-Message-ID: <1397652011-21284-2-git-send-email-antoine.tenart@free-electrons.com>
+From: Joe Perches <joe@perches.com>
+Subject: Re: [PATCH 1/4] mmc: sdhci: add a driver for Berlin SoCs
+Date: Wed, 16 Apr 2014 05:56:34 -0700
+Message-ID: <1397652994.30935.5.camel@joe-AO722>
 References: <1397652011-21284-1-git-send-email-antoine.tenart@free-electrons.com>
+	 <1397652011-21284-2-git-send-email-antoine.tenart@free-electrons.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <1397652011-21284-1-git-send-email-antoine.tenart@free-electrons.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: sebastian.hesselbarth@gmail.com, chris@printf.net, anton@enomsg.org
-Cc: zmxu@marvell.com, jszhang@marvell.com, devicetree@vger.kernel.org, =?UTF-8?q?Antoine=20T=C3=A9nart?= <antoine.tenart@free-electrons.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, alexandre.belloni@free-electrons.com, linux-arm-kernel@lists.infradead.org
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1397652011-21284-2-git-send-email-antoine.tenart@free-electrons.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Antoine =?ISO-8859-1?Q?T=E9nart?= <antoine.tenart@free-electrons.com>
+Cc: sebastian.hesselbarth@gmail.com, chris@printf.net, anton@enomsg.org, alexandre.belloni@free-electrons.com, zmxu@marvell.com, jszhang@marvell.com, linux-arm-kernel@lists.infradead.org, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-QWRkIGEgRHJpdmVyIHRvIHN1cHBvcnQgdGhlIFNESENJIGNvbnRyb2xsZXIgb2YgdGhlIE1hcnZl
-bGwgQmVybGluIFNvQ3MuClRoaXMgY29udHJvbGxlciBzdXBwb3J0cyAzIHNvY2tldHMuCgpTaWdu
-ZWQtb2ZmLWJ5OiBBbnRvaW5lIFTDqW5hcnQgPGFudG9pbmUudGVuYXJ0QGZyZWUtZWxlY3Ryb25z
-LmNvbT4KLS0tCiBkcml2ZXJzL21tYy9ob3N0L0tjb25maWcgICAgICAgIHwgIDExICsrKysKIGRy
-aXZlcnMvbW1jL2hvc3QvTWFrZWZpbGUgICAgICAgfCAgIDEgKwogZHJpdmVycy9tbWMvaG9zdC9z
-ZGhjaS1iZXJsaW4uYyB8IDEyOSArKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysr
-KysrCiAzIGZpbGVzIGNoYW5nZWQsIDE0MSBpbnNlcnRpb25zKCspCiBjcmVhdGUgbW9kZSAxMDA2
-NDQgZHJpdmVycy9tbWMvaG9zdC9zZGhjaS1iZXJsaW4uYwoKZGlmZiAtLWdpdCBhL2RyaXZlcnMv
-bW1jL2hvc3QvS2NvbmZpZyBiL2RyaXZlcnMvbW1jL2hvc3QvS2NvbmZpZwppbmRleCAxMzg0ZjY3
-YWJlMjEuLjQyZGI3MDAzMWViMiAxMDA2NDQKLS0tIGEvZHJpdmVycy9tbWMvaG9zdC9LY29uZmln
-CisrKyBiL2RyaXZlcnMvbW1jL2hvc3QvS2NvbmZpZwpAQCAtMjgzLDYgKzI4MywxNyBAQCBjb25m
-aWcgTU1DX1NESENJX0JDTTI4MzUKIAogCSAgSWYgdW5zdXJlLCBzYXkgTi4KIAorY29uZmlnIE1N
-Q19TREhDSV9CRVJMSU4KKwl0cmlzdGF0ZSAiTWFydmVsbCBCZXJsaW4gU0QvTU1DIEhvc3QgQ29u
-dHJvbGxlciBzdXBwb3J0IgorCWRlcGVuZHMgb24gQVJDSF9CRVJMSU4KKwlkZXBlbmRzIG9uIE1N
-Q19TREhDSV9QTFRGTQorCXNlbGVjdCBNTUNfU0RIQ0lfSU9fQUNDRVNTT1JTCisJaGVscAorCSAg
-VGhpcyBzZWxlY3RzIHRoZSBCZXJsaW4gU0QvTU1DIGNvbnRyb2xsZXIuIElmIHlvdSBoYXZlIGEg
-QmVybGluCisJICBwbGF0Zm9ybSB3aXRoIFNEIG9yIE1NQyBkZXZpY2VzLCBzYXkgWSBvciBNIGhl
-cmUuCisKKwkgIElmIHVuc3VyZSwgc2F5IE4uCisKIGNvbmZpZyBNTUNfT01BUAogCXRyaXN0YXRl
-ICJUSSBPTUFQIE11bHRpbWVkaWEgQ2FyZCBJbnRlcmZhY2Ugc3VwcG9ydCIKIAlkZXBlbmRzIG9u
-IEFSQ0hfT01BUApkaWZmIC0tZ2l0IGEvZHJpdmVycy9tbWMvaG9zdC9NYWtlZmlsZSBiL2RyaXZl
-cnMvbW1jL2hvc3QvTWFrZWZpbGUKaW5kZXggMzQ4M2I2YjZiODgwLi5iMDI1NjI5MDUzMGMgMTAw
-NjQ0Ci0tLSBhL2RyaXZlcnMvbW1jL2hvc3QvTWFrZWZpbGUKKysrIGIvZHJpdmVycy9tbWMvaG9z
-dC9NYWtlZmlsZQpAQCAtNjQsNiArNjQsNyBAQCBvYmotJChDT05GSUdfTU1DX1NESENJX09GX0VT
-REhDKQkrPSBzZGhjaS1vZi1lc2RoYy5vCiBvYmotJChDT05GSUdfTU1DX1NESENJX09GX0hMV0Qp
-CQkrPSBzZGhjaS1vZi1obHdkLm8KIG9iai0kKENPTkZJR19NTUNfU0RIQ0lfQkNNX0tPTkEpCSs9
-IHNkaGNpLWJjbS1rb25hLm8KIG9iai0kKENPTkZJR19NTUNfU0RIQ0lfQkNNMjgzNSkJCSs9IHNk
-aGNpLWJjbTI4MzUubworb2JqLSQoQ09ORklHX01NQ19TREhDSV9CRVJMSU4pCQkrPSBzZGhjaS1i
-ZXJsaW4ubwogCiBpZmVxICgkKENPTkZJR19DQjcxMF9ERUJVRykseSkKIAlDRkxBR1MtY2I3MTAt
-bW1jCSs9IC1EREVCVUcKZGlmZiAtLWdpdCBhL2RyaXZlcnMvbW1jL2hvc3Qvc2RoY2ktYmVybGlu
-LmMgYi9kcml2ZXJzL21tYy9ob3N0L3NkaGNpLWJlcmxpbi5jCm5ldyBmaWxlIG1vZGUgMTAwNjQ0
-CmluZGV4IDAwMDAwMDAwMDAwMC4uZWNlOGY3ODYzOTM3Ci0tLSAvZGV2L251bGwKKysrIGIvZHJp
-dmVycy9tbWMvaG9zdC9zZGhjaS1iZXJsaW4uYwpAQCAtMCwwICsxLDEyOSBAQAorLyoKKyAqIE1h
-cnZlbGwgQmVybGluIFNESENJIGRyaXZlcgorICoKKyAqIENvcHlyaWdodCAoQykgMjAxNCBNYXJ2
-ZWxsIFRlY2hub2xvZ3kgR3JvdXAgTHRkLgorICoKKyAqIEFudG9pbmUgVMOpbmFydCA8YW50b2lu
-ZS50ZW5hcnRAZnJlZS1lbGVjdHJvbnMuY29tPgorICoKKyAqIFRoaXMgZmlsZSBpcyBsaWNlbnNl
-ZCB1bmRlciB0aGUgdGVybXMgb2YgdGhlIEdOVSBHZW5lcmFsIFB1YmxpYworICogTGljZW5zZSB2
-ZXJzaW9uIDIuIFRoaXMgcHJvZ3JhbSBpcyBsaWNlbnNlZCAiYXMgaXMiIHdpdGhvdXQgYW55Cisg
-KiB3YXJyYW50eSBvZiBhbnkga2luZCwgd2hldGhlciBleHByZXNzIG9yIGltcGxpZWQKKyAqLwor
-CisjaW5jbHVkZSA8bGludXgvY2xrLmg+CisjaW5jbHVkZSA8bGludXgvZXJyLmg+CisjaW5jbHVk
-ZSA8bGludXgvaW8uaD4KKyNpbmNsdWRlIDxsaW51eC9tbWMvaG9zdC5oPgorI2luY2x1ZGUgPGxp
-bnV4L21vZHVsZS5oPgorI2luY2x1ZGUgPGxpbnV4L29mLmg+CisjaW5jbHVkZSA8bGludXgvb2Zf
-ZGV2aWNlLmg+CisKKyNpbmNsdWRlICJzZGhjaS1wbHRmbS5oIgorCitzdGF0aWMgc3RydWN0IHNk
-aGNpX29wcyBzZGhjaV9iZXJsaW5fb3BzID0geworCS5nZXRfbWF4X2Nsb2NrID0gc2RoY2lfcGx0
-Zm1fY2xrX2dldF9tYXhfY2xvY2ssCit9OworCitzdGF0aWMgc3RydWN0IHNkaGNpX3BsdGZtX2Rh
-dGEgc2RoY2lfYmVybGluMl9wZGF0YSA9IHsKKwkucXVpcmtzCT0gU0RIQ0lfUVVJUktfQ0FQX0NM
-T0NLX0JBU0VfQlJPS0VOIHwKKwkJICBTREhDSV9RVUlSS19CUk9LRU5fQURNQSB8CisJCSAgU0RI
-Q0lfUVVJUktfQlJPS0VOX1RJTUVPVVRfVkFMLAorCS5vcHMgPSAmc2RoY2lfYmVybGluX29wcywK
-K307CisKK3N0YXRpYyBzdHJ1Y3Qgc2RoY2lfcGx0Zm1fZGF0YSBzZGhjaV9iZXJsaW4ycV9wZGF0
-YSA9IHsKKwkucXVpcmtzCT0gU0RIQ0lfUVVJUktfQ0FQX0NMT0NLX0JBU0VfQlJPS0VOIHwKKwkJ
-ICBTREhDSV9RVUlSS19JTlZFUlRFRF9XUklURV9QUk9URUNUIHwKKwkJICBTREhDSV9RVUlSS19C
-Uk9LRU5fVElNRU9VVF9WQUwsCisJLm9wcyA9ICZzZGhjaV9iZXJsaW5fb3BzLAorfTsKKworc3Rh
-dGljIGNvbnN0IHN0cnVjdCBvZl9kZXZpY2VfaWQgc2RoY2lfYmVybGluX29mX21hdGNoX3RhYmxl
-W10gPSB7CisJeworCQkuY29tcGF0aWJsZSA9ICJtYXJ2ZWxsLGJlcmxpbjItc2RoY2kiLAorCQku
-ZGF0YSA9ICZzZGhjaV9iZXJsaW4yX3BkYXRhLAorCX0sCisJeworCQkuY29tcGF0aWJsZSA9ICJt
-YXJ2ZWxsLGJlcmxpbjJjZC1zZGhjaSIsCisJCS5kYXRhID0gJnNkaGNpX2JlcmxpbjJfcGRhdGEs
-CisJfSwKKwl7CisJCS5jb21wYXRpYmxlID0gIm1hcnZlbGwsYmVybGluMnEtc2RoY2kiLAorCQku
-ZGF0YSA9ICZzZGhjaV9iZXJsaW4ycV9wZGF0YSwKKwl9LAorCXt9Cit9OworTU9EVUxFX0RFVklD
-RV9UQUJMRShvZiwgc2RoY2lfYmVybGluX29mX21hdGNoX3RhYmxlKTsKKworc3RhdGljIGludCBz
-ZGhjaV9iZXJsaW5fcHJvYmUoc3RydWN0IHBsYXRmb3JtX2RldmljZSAqcGRldikKK3sKKwlzdHJ1
-Y3QgZGV2aWNlICpkZXYgPSAmcGRldi0+ZGV2OworCXN0cnVjdCBzZGhjaV9ob3N0ICpob3N0Owor
-CXN0cnVjdCBzZGhjaV9wbHRmbV9ob3N0ICpwbHRmbV9ob3N0OworCXN0cnVjdCBjbGsgKmNsazsK
-Kwljb25zdCBzdHJ1Y3Qgb2ZfZGV2aWNlX2lkICpkZXZpY2UgPQorCQlvZl9tYXRjaF9kZXZpY2Uo
-c2RoY2lfYmVybGluX29mX21hdGNoX3RhYmxlLCBkZXYpOworCWludCByZXQ7CisKKwlob3N0ID0g
-c2RoY2lfcGx0Zm1faW5pdChwZGV2LAorCQkJCShzdHJ1Y3Qgc2RoY2lfcGx0Zm1fZGF0YSAqKWRl
-dmljZS0+ZGF0YSwgMCk7CisJaWYgKElTX0VSUihob3N0KSkKKwkJcmV0dXJuIFBUUl9FUlIoaG9z
-dCk7CisKKwlwbHRmbV9ob3N0ID0gc2RoY2lfcHJpdihob3N0KTsKKworCWNsayA9IGRldm1fY2xr
-X2dldChkZXYsIE5VTEwpOworCWlmIChJU19FUlIoY2xrKSkgeworCQlkZXZfZXJyKGRldiwgImNv
-dWxkIG5vdCBnZXQgY2xvY2s6ICVsZFxuIiwgUFRSX0VSUihjbGspKTsKKwkJcmV0ID0gUFRSX0VS
-UihjbGspOworCQlnb3RvIGVycl9jbGtfZ2V0OworCX0KKworCWNsa19wcmVwYXJlX2VuYWJsZShj
-bGspOworCXBsdGZtX2hvc3QtPmNsayA9IGNsazsKKworCXNkaGNpX2dldF9vZl9wcm9wZXJ0eShw
-ZGV2KTsKKworCWlmIChob3N0LT5xdWlya3MgJiBTREhDSV9RVUlSS19CUk9LRU5fQ0FSRF9ERVRF
-Q1RJT04pCisJCWhvc3QtPm1tYy0+Y2FwcyB8PSBNTUNfQ0FQX05PTlJFTU9WQUJMRTsKKworCXJl
-dCA9IHNkaGNpX2FkZF9ob3N0KGhvc3QpOworCWlmIChyZXQpCisJCWdvdG8gZXJyX2FkZF9ob3N0
-OworCisJcmV0dXJuIDA7CisKK2Vycl9hZGRfaG9zdDoKKwljbGtfZGlzYWJsZV91bnByZXBhcmUo
-cGx0Zm1faG9zdC0+Y2xrKTsKK2Vycl9jbGtfZ2V0OgorCXNkaGNpX3BsdGZtX2ZyZWUocGRldik7
-CisKKwlyZXR1cm4gcmV0OworfQorCitzdGF0aWMgaW50IHNkaGNpX2Jlcmxpbl9yZW1vdmUoc3Ry
-dWN0IHBsYXRmb3JtX2RldmljZSAqcGRldikKK3sKKwlzdHJ1Y3Qgc2RoY2lfaG9zdCAqaG9zdCA9
-IHBsYXRmb3JtX2dldF9kcnZkYXRhKHBkZXYpOworCXN0cnVjdCBzZGhjaV9wbHRmbV9ob3N0ICpw
-bHRmbV9ob3N0ID0gc2RoY2lfcHJpdihob3N0KTsKKworCXNkaGNpX3BsdGZtX3VucmVnaXN0ZXIo
-cGRldik7CisJY2xrX2Rpc2FibGVfdW5wcmVwYXJlKHBsdGZtX2hvc3QtPmNsayk7CisKKwlyZXR1
-cm4gMDsKK30KKworc3RhdGljIHN0cnVjdCBwbGF0Zm9ybV9kcml2ZXIgc2RoY2lfYmVybGluX2Ry
-aXZlciA9IHsKKwkuZHJpdmVyCQk9IHsKKwkJLm5hbWUJPSAiYmVybGluLXNkaGNpIiwKKwkJLm93
-bmVyCT0gVEhJU19NT0RVTEUsCisJCS5wbQk9IFNESENJX1BMVEZNX1BNT1BTLAorCQkub2ZfbWF0
-Y2hfdGFibGUgPSBzZGhjaV9iZXJsaW5fb2ZfbWF0Y2hfdGFibGUsCisJfSwKKwkucHJvYmUJCT0g
-c2RoY2lfYmVybGluX3Byb2JlLAorCS5yZW1vdmUJCT0gc2RoY2lfYmVybGluX3JlbW92ZSwKK307
-Cittb2R1bGVfcGxhdGZvcm1fZHJpdmVyKHNkaGNpX2Jlcmxpbl9kcml2ZXIpOworCitNT0RVTEVf
-REVTQ1JJUFRJT04oIlNESENJIGRyaXZlciBmb3IgTWFydmVsbCBCZXJsaW4gU29DIik7CitNT0RV
-TEVfQVVUSE9SKCJBbnRvaW5lIFTDqW5hcnQgPGFudG9pbmUudGVuYXJ0QGZyZWUtZWxlY3Ryb25z
-LmNvbT4iKTsKK01PRFVMRV9MSUNFTlNFKCJHUEwiKTsKLS0gCjEuOC4zLjIKCgpfX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwpsaW51eC1hcm0ta2VybmVsIG1h
-aWxpbmcgbGlzdApsaW51eC1hcm0ta2VybmVsQGxpc3RzLmluZnJhZGVhZC5vcmcKaHR0cDovL2xp
-c3RzLmluZnJhZGVhZC5vcmcvbWFpbG1hbi9saXN0aW5mby9saW51eC1hcm0ta2VybmVsCg==
+On Wed, 2014-04-16 at 14:40 +0200, Antoine T=E9nart wrote:
+> Add a Driver to support the SDHCI controller of the Marvell Berlin So=
+Cs.
+> This controller supports 3 sockets.
+
+trivial notes:
+
+> diff --git a/drivers/mmc/host/sdhci-berlin.c b/drivers/mmc/host/sdhci=
+-berlin.c
+[]
+> +static struct sdhci_ops sdhci_berlin_ops =3D {
+> +	.get_max_clock =3D sdhci_pltfm_clk_get_max_clock,
+> +};
+> +
+> +static struct sdhci_pltfm_data sdhci_berlin2_pdata =3D {
+> +	.quirks	=3D SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN |
+> +		  SDHCI_QUIRK_BROKEN_ADMA |
+> +		  SDHCI_QUIRK_BROKEN_TIMEOUT_VAL,
+> +	.ops =3D &sdhci_berlin_ops,
+> +};
+> +
+> +static struct sdhci_pltfm_data sdhci_berlin2q_pdata =3D {
+> +	.quirks	=3D SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN |
+> +		  SDHCI_QUIRK_INVERTED_WRITE_PROTECT |
+> +		  SDHCI_QUIRK_BROKEN_TIMEOUT_VAL,
+> +	.ops =3D &sdhci_berlin_ops,
+> +};
+
+Perhaps const?
+
+> +static int sdhci_berlin_probe(struct platform_device *pdev)
+> +{
+[]
+> +	host =3D sdhci_pltfm_init(pdev,
+> +				(struct sdhci_pltfm_data *)device->data, 0);
+
+Unnecessary cast?  Maybe:
+
+	host =3D sdhci_pltfm_init(pdev, device->data, 0);
+
+> +	if (IS_ERR(host))
+> +		return PTR_ERR(host);
+> +
+> +	pltfm_host =3D sdhci_priv(host);
+> +
+> +	clk =3D devm_clk_get(dev, NULL);
+> +	if (IS_ERR(clk)) {
+> +		dev_err(dev, "could not get clock: %ld\n", PTR_ERR(clk));
+> +		ret =3D PTR_ERR(clk);
+
+PTR_ERR is an int.  Does this produce a compile warning?
+Maybe reverse these lines and use ret?
+
+		ret =3D PTR_ERR(clk);
+		dev_err(dev, count not get clock: %d\n", ret);
