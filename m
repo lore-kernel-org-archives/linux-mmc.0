@@ -1,71 +1,100 @@
-From: Mark Brown <broonie@kernel.org>
-Subject: Re: [PATCH] sdhci: Forward EPROBE_DEFER on vmmc and vqmmc regulators
-Date: Wed, 16 Apr 2014 21:47:33 +0100
-Message-ID: <20140416204733.GX12304@sirena.org.uk>
-References: <1395991817-3503-1-git-send-email-mike.looijmans@topic.nl>
- <10471336.Pb8zVvW3Hp@wuerfel>
- <53429AD4.7030508@topic.nl>
- <4902841.krZFXFDZqb@wuerfel>
- <5342A3F5.606@topic.nl>
- <CAL1qeaET+cy19EtB_TbtQ40Lb9r9hrO4H5vjG5YmCTpYoOmcog@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="MikxO53xlyBvwArL"
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mezzanine.sirena.org.uk ([106.187.55.193]:35362 "EHLO
-	mezzanine.sirena.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754294AbaDPUsG (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Apr 2014 16:48:06 -0400
-Content-Disposition: inline
-In-Reply-To: <CAL1qeaET+cy19EtB_TbtQ40Lb9r9hrO4H5vjG5YmCTpYoOmcog@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Andrew Bresticker <abrestic@chromium.org>
+Subject: [PATCH v2 1/3] mmc: tegra: disable UHS modes
+Date: Wed, 16 Apr 2014 16:08:37 -0700
+Message-ID: <1397689719-28882-2-git-send-email-abrestic@chromium.org>
+References: <1397526163-20126-1-git-send-email-abrestic@chromium.org>
+ <1397689719-28882-1-git-send-email-abrestic@chromium.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1397689719-28882-1-git-send-email-abrestic@chromium.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Stephen Warren <swarren@wwwdotorg.org>, Thierry Reding <thierry.reding@gmail.com>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org, linux-tegra@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, Andrew Bresticker <abrestic@chromium.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Andrew Bresticker <abrestic@chromium.org>
-Cc: Mike Looijmans <mike.looijmans@topic.nl>, Arnd Bergmann <arnd@arndb.de>, Ben Dooks <ben.dooks@codethink.co.uk>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, cjb@laptop.org, gdjakov@mm-sol.com
 
+Program TEGRA_SDHCI_VENDOR_MISC_CTRL so that UHS modes aren't advertised
+in SDHCI_CAPABILITIES_1.  While the Tegra SDHCI controller does support
+these modes, they require Tegra-specific tuning and calibration routines
+which the driver does not support yet.
 
---MikxO53xlyBvwArL
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+Signed-off-by: Andrew Bresticker <abrestic@chromium.org>
+---
+No changes from v1
+---
+ drivers/mmc/host/sdhci-tegra.c | 30 +++++++++++++++++++++++-------
+ 1 file changed, 23 insertions(+), 7 deletions(-)
 
-On Wed, Apr 16, 2014 at 01:15:53PM -0700, Andrew Bresticker wrote:
-
-> Not true.  If !CONFIG_REGULATOR, regulator_get() and co. will return
-> NULL.  Normally it is ok to ignore this case, but the sdhci driver
-> will call regulator_is_supported_voltage() on vqmmc to determine
-> whether 1.8V signalling is supported.  With !CONFIG_REGULATOR,
-> regulator_is_supported_voltage() will always return false, causing the
-> sdhci driver to disable all UHS modes.  So we still need to handle the
-> NULL (!CONFIG_REGULATOR) case.  One possibility is to guard the
-> voltage check with #ifdef CONFIG_REGULATOR, as is done later with
-> vmmc.
-
-It seems better to just fix regulator_get_optional() to return an error
-if the API is disabled, that case didn't really get considered since
-it's a bit surprising that something actively using regulators (rather
-than simply ensuring they're enabled) would be using that function.
-Though if you already have ifdefs the ifdef is probably fine.
-
---MikxO53xlyBvwArL
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-
-iQIcBAEBAgAGBQJTTuxiAAoJELSic+t+oim9laQQAIHSElUlAe5voqkRes1Ay1GX
-y62AwRiryRpmY215UUCBemS9fEKTfJYHb/yHgGF+kRbIU3j6cmRuWome4PDtnVCp
-H4C8uNVZ1F/OaebL6822DJzSsaPObICUBIm39a6phTIHLKlsgLpEQLAgWWQ6DJNS
-TTTI2jx9rLDjn9AV6V+RokTCANF48xRkd4ZK7goPwuSWjZkwRpZBVGlk6qhnwx+f
-u7ugIjVrD70e4joZMu6T1OVRsjl40k8eSDMzabIqGSlE2eLWewvuhll92yKISvSl
-eDHzf4CtUI9a/mru6Wymklu2+TL2Y2LdSgVj21KqaKIt2mSC77v/yhkga+aCqUIg
-WA2Wr5QfgszA8dG96vztDPYBLs2iNx05hhkwCS8P2iZWRP8k/VaM5PWoO20CcTpC
-bbu8cXfpnlI511fy3hDHlxauPXafXvFkTjHNbt5rp1W6IaiOPHDcX/6JECo1jwoo
-4x4gwZSnTd23xWQGuc0ch16dgV353ob9jOOU5V0rY781RDi0ECN3xHdKDwFwR4Sm
-M6M7DD+wI3zxJv9lA1RqMQVbRWSYcql/sHmv/ok5inV44gVbhfY+l/LJ4QjV2pqG
-RLkt6cracze+JIyoQlFJX7kBf4rauE+mz14Sy+rF97SyK6THrG/HNnOqFpef2/W7
-om3wHy6xhA+4HHziD6Uh
-=IucX
------END PGP SIGNATURE-----
-
---MikxO53xlyBvwArL--
+diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
+index a835898..3cadd9c 100644
+--- a/drivers/mmc/host/sdhci-tegra.c
++++ b/drivers/mmc/host/sdhci-tegra.c
+@@ -32,11 +32,17 @@
+ 
+ /* Tegra SDHOST controller vendor register definitions */
+ #define SDHCI_TEGRA_VENDOR_MISC_CTRL		0x120
++#define SDHCI_MISC_CTRL_ENABLE_SDR104		0x8
++#define SDHCI_MISC_CTRL_ENABLE_SDR50		0x10
+ #define SDHCI_MISC_CTRL_ENABLE_SDHCI_SPEC_300	0x20
++#define SDHCI_MISC_CTRL_ENABLE_DDR50		0x200
+ 
+ #define NVQUIRK_FORCE_SDHCI_SPEC_200	BIT(0)
+ #define NVQUIRK_ENABLE_BLOCK_GAP_DET	BIT(1)
+ #define NVQUIRK_ENABLE_SDHCI_SPEC_300	BIT(2)
++#define NVQUIRK_DISABLE_SDR50		BIT(3)
++#define NVQUIRK_DISABLE_SDR104		BIT(4)
++#define NVQUIRK_DISABLE_DDR50		BIT(5)
+ 
+ struct sdhci_tegra_soc_data {
+ 	const struct sdhci_pltfm_data *pdata;
+@@ -113,18 +119,23 @@ static void tegra_sdhci_reset_exit(struct sdhci_host *host, u8 mask)
+ 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+ 	struct sdhci_tegra *tegra_host = pltfm_host->priv;
+ 	const struct sdhci_tegra_soc_data *soc_data = tegra_host->soc_data;
++	u32 misc_ctrl;
+ 
+ 	if (!(mask & SDHCI_RESET_ALL))
+ 		return;
+ 
++	misc_ctrl = sdhci_readw(host, SDHCI_TEGRA_VENDOR_MISC_CTRL);
+ 	/* Erratum: Enable SDHCI spec v3.00 support */
+-	if (soc_data->nvquirks & NVQUIRK_ENABLE_SDHCI_SPEC_300) {
+-		u32 misc_ctrl;
+-
+-		misc_ctrl = sdhci_readb(host, SDHCI_TEGRA_VENDOR_MISC_CTRL);
++	if (soc_data->nvquirks & NVQUIRK_ENABLE_SDHCI_SPEC_300)
+ 		misc_ctrl |= SDHCI_MISC_CTRL_ENABLE_SDHCI_SPEC_300;
+-		sdhci_writeb(host, misc_ctrl, SDHCI_TEGRA_VENDOR_MISC_CTRL);
+-	}
++	/* Don't advertise UHS modes which aren't supported yet */
++	if (soc_data->nvquirks & NVQUIRK_DISABLE_SDR50)
++		misc_ctrl &= ~SDHCI_MISC_CTRL_ENABLE_SDR50;
++	if (soc_data->nvquirks & NVQUIRK_DISABLE_DDR50)
++		misc_ctrl &= ~SDHCI_MISC_CTRL_ENABLE_DDR50;
++	if (soc_data->nvquirks & NVQUIRK_DISABLE_SDR104)
++		misc_ctrl &= ~SDHCI_MISC_CTRL_ENABLE_SDR104;
++	sdhci_writew(host, misc_ctrl, SDHCI_TEGRA_VENDOR_MISC_CTRL);
+ }
+ 
+ static int tegra_sdhci_buswidth(struct sdhci_host *host, int bus_width)
+@@ -181,7 +192,9 @@ static const struct sdhci_pltfm_data sdhci_tegra30_pdata = {
+ 
+ static struct sdhci_tegra_soc_data soc_data_tegra30 = {
+ 	.pdata = &sdhci_tegra30_pdata,
+-	.nvquirks = NVQUIRK_ENABLE_SDHCI_SPEC_300,
++	.nvquirks = NVQUIRK_ENABLE_SDHCI_SPEC_300 |
++		    NVQUIRK_DISABLE_SDR50 |
++		    NVQUIRK_DISABLE_SDR104,
+ };
+ 
+ static const struct sdhci_pltfm_data sdhci_tegra114_pdata = {
+@@ -195,6 +208,9 @@ static const struct sdhci_pltfm_data sdhci_tegra114_pdata = {
+ 
+ static struct sdhci_tegra_soc_data soc_data_tegra114 = {
+ 	.pdata = &sdhci_tegra114_pdata,
++	.nvquirks = NVQUIRK_DISABLE_SDR50 |
++		    NVQUIRK_DISABLE_DDR50 |
++		    NVQUIRK_DISABLE_SDR104,
+ };
+ 
+ static const struct of_device_id sdhci_tegra_dt_match[] = {
+-- 
+1.9.1.423.g4596e3a
