@@ -1,8 +1,8 @@
 From: =?UTF-8?q?Antoine=20T=C3=A9nart?=
 	<antoine.tenart-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
-Subject: [PATCH 2/4] Documentation: bindings: add the sdhci-berlin
-Date: Wed, 16 Apr 2014 14:40:09 +0200
-Message-ID: <1397652011-21284-3-git-send-email-antoine.tenart@free-electrons.com>
+Subject: [PATCH 3/4] ARM: dts: berlin: add the SDHCI nodes for the BG2Q
+Date: Wed, 16 Apr 2014 14:40:10 +0200
+Message-ID: <1397652011-21284-4-git-send-email-antoine.tenart@free-electrons.com>
 References: <1397652011-21284-1-git-send-email-antoine.tenart@free-electrons.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -14,41 +14,74 @@ To: sebastian.hesselbarth-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, chris-OsFVWbf
 Cc: =?UTF-8?q?Antoine=20T=C3=A9nart?= <antoine.tenart-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, alexandre.belloni-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org, zmxu-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org, jszhang-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-Add the binding documentation for the Marvell Berlin SDHCI driver.
+Add the SDHCI nodes for the Marvell Berlin BG2Q, using the berlin-sdhci
+driver.
 
 Signed-off-by: Antoine T=C3=A9nart <antoine.tenart-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
 ---
- Documentation/devicetree/bindings/mmc/sdhci-berlin.txt | 18 ++++++++++=
-++++++++
- 1 file changed, 18 insertions(+)
- create mode 100644 Documentation/devicetree/bindings/mmc/sdhci-berlin.=
-txt
+ arch/arm/boot/dts/berlin2q.dtsi | 40 +++++++++++++++++++++++++++++++++=
++++++++
+ 1 file changed, 40 insertions(+)
 
-diff --git a/Documentation/devicetree/bindings/mmc/sdhci-berlin.txt b/D=
-ocumentation/devicetree/bindings/mmc/sdhci-berlin.txt
-new file mode 100644
-index 000000000000..1a5591f85a64
---- /dev/null
-+++ b/Documentation/devicetree/bindings/mmc/sdhci-berlin.txt
-@@ -0,0 +1,18 @@
-+* Marvell Berlin SDHCI controller
+diff --git a/arch/arm/boot/dts/berlin2q.dtsi b/arch/arm/boot/dts/berlin=
+2q.dtsi
+index 5925e6a16749..8f897d461460 100644
+--- a/arch/arm/boot/dts/berlin2q.dtsi
++++ b/arch/arm/boot/dts/berlin2q.dtsi
+@@ -67,6 +67,14 @@
+ 		clock-div =3D <3>;
+ 	};
+=20
++	sdio1clk: sdio1clk {
++		compatible =3D "fixed-factor-clock";
++		#clock-cells =3D <0>;
++		clocks =3D <&syspll>;
++		clock-mult =3D <1>;
++		clock-div =3D <4>;
++	};
 +
-+All common properties are documented in mmc.txt
+ 	soc {
+ 		compatible =3D "simple-bus";
+ 		#address-cells =3D <1>;
+@@ -75,6 +83,38 @@
+ 		ranges =3D <0 0xf7000000 0x1000000>;
+ 		interrupt-parent =3D <&gic>;
+=20
++		sdhci0: sdhci@ab0000 {
++			compatible =3D "marvell,berlin2q-sdhci";
++			reg =3D <0xab0000 0x200>;
++			clocks =3D <&sdio1clk>;
++			interrupts =3D <GIC_SPI 17 IRQ_TYPE_LEVEL_HIGH>;
++			keep-power-in-suspend;
++			enable-sdio-wakeup;
++			broken-cd;
++			status =3D "disabled";
++		};
 +
-+Required properties:
-+- compatible: "marvell,berlin2-sdhci",
-+	      "marvell,berlin2cd-sdhci",
-+	      "marvell,berlin2q-sdhci"
-+- clocks: reference to the SDHCI controller clock
++		sdhci1: sdhci@ab0800 {
++			compatible =3D "marvell,berlin2q-sdhci";
++			reg =3D <0xab0800 0x200>;
++			clocks =3D <&sdio1clk>;
++			interrupts =3D <GIC_SPI 20 IRQ_TYPE_LEVEL_HIGH>;
++			keep-power-in-suspend;
++			enable-sdio-wakeup;
++			status =3D "disabled";
++		};
 +
-+Example:
++		sdhci2: sdhci@ab1000 {
++			compatible =3D "marvell,berlin2q-sdhci";
++			reg =3D <0xab1000 0x200>;
++			interrupts =3D <GIC_SPI 28 IRQ_TYPE_LEVEL_HIGH>;
++			clocks =3D <&sdio1clk>;
++			keep-power-in-suspend;
++			enable-sdio-wakeup;
++			broken-cd;
++			status =3D "disabled";
++		};
 +
-+sdhci0: sdhci@ab0000 {
-+	compatible =3D "marvell,berlin2q-sdhci";
-+	reg =3D <0xab0000 0x200>;
-+	clocks =3D <&sdio1clk>;
-+	interrupts =3D <GIC_SPI 17 IRQ_TYPE_LEVEL_HIGH>;
-+};
+ 		l2: l2-cache-controller@ac0000 {
+ 			compatible =3D "arm,pl310-cache";
+ 			reg =3D <0xac0000 0x1000>;
 --=20
 1.8.3.2
 
