@@ -1,23 +1,55 @@
-From: Andrew Bresticker <abrestic-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
-Subject: Re: [PATCH 4/4] ARM: tegra: fix Venice2 VQMMC regulators
-Date: Tue, 15 Apr 2014 17:29:56 -0700
-Message-ID: <CAL1qeaGGSs5fpqrKWA4u4+RXRy9Ko2pN=s9QQdbXAfLG3ujR8g@mail.gmail.com>
-References: <1397526163-20126-1-git-send-email-abrestic@chromium.org>
-	<1397526163-20126-5-git-send-email-abrestic@chromium.org>
+From: <micky_ching@realsil.com.cn>
+Subject: [PATCH] mmc: rtsx: fix possible circular locking dependency
+Date: Wed, 16 Apr 2014 09:38:44 +0800
+Message-ID: <1397612325-4968-1-git-send-email-micky_ching@realsil.com.cn>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1397526163-20126-5-git-send-email-abrestic-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
-Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>, Thierry Reding <thierry.reding-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Andrew Bresticker <abrestic-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
+List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
+List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel>
+List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
+List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
+List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
+Errors-To: driverdev-devel-bounces@linuxdriverproject.org
+Sender: driverdev-devel-bounces@linuxdriverproject.org
+To: chris@printf.net, sameo@linux.intel.com
+Cc: ulf.hansson@linaro.org, gregkh@linuxfoundation.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, wei_wang@realsil.com.cn, rogerable@realtek.com, devel@linuxdriverproject.org, dan.carpenter@oracle.com
 List-Id: linux-mmc@vger.kernel.org
 
->         sdhci@0,700b0600 {
->                 status = "okay";
->                 bus-width = <8>;
-> +               vqmmc-supply = <&vddio_1v8>;
+From: Micky Ching <micky_ching@realsil.com.cn>
 
-It turns out this bit isn't needed as the initialization failures are
-instead due to +3V3_RUN toggling, which Stephen has fixed:
-http://patchwork.ozlabs.org/patch/339386/
+To avoid dead lock, we need make sure host->lock is always acquire
+before pcr->lock. But in irq handler, we acquired pcr->lock in rtsx mfd
+driver, and sd_isr_done_transfer() is called during pcr->lock already
+acquired. Since in sd_isr_done_transfer() the only work we do is schdule
+tasklet, the cmd_tasklet and data_tasklet never conflict, so it is safe
+to remove spin_lock() here.
+
+Signed-off-by: Micky Ching <micky_ching@realsil.com.cn>
+---
+ drivers/mmc/host/rtsx_pci_sdmmc.c |    4 +---
+ 1 file changed, 1 insertion(+), 3 deletions(-)
+
+diff --git a/drivers/mmc/host/rtsx_pci_sdmmc.c b/drivers/mmc/host/rtsx_pci_sdmmc.c
+index 453e1d4..40695e0 100644
+--- a/drivers/mmc/host/rtsx_pci_sdmmc.c
++++ b/drivers/mmc/host/rtsx_pci_sdmmc.c
+@@ -108,12 +108,10 @@ static void sd_isr_done_transfer(struct platform_device *pdev)
+ {
+ 	struct realtek_pci_sdmmc *host = platform_get_drvdata(pdev);
+ 
+-	spin_lock(&host->lock);
+ 	if (host->cmd)
+ 		tasklet_schedule(&host->cmd_tasklet);
+-	if (host->data)
++	else if (host->data)
+ 		tasklet_schedule(&host->data_tasklet);
+-	spin_unlock(&host->lock);
+ }
+ 
+ static void sd_request_timeout(unsigned long host_addr)
+-- 
+1.7.9.5
