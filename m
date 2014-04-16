@@ -1,59 +1,72 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: sdhci: Set ocr_avail directly based on vmmc
-Date: Wed, 16 Apr 2014 09:20:57 +0200
-Message-ID: <CAPDyKFp+xTbLtMip847wn1XM_ZJNix_TgQ6Psjq4RrB9=CWThw@mail.gmail.com>
-References: <1397172708-19735-1-git-send-email-tim.kryger@linaro.org>
-	<CAPDyKFrFyBLtL6dVgFy6DkY0gdCjiVpk1OhsfUXD0nhajCetxg@mail.gmail.com>
-	<CAAYSxho=S5TqSU4uOiSuH-yh-O6tQxbKEzCn6ow=PLDBKPiSpQ@mail.gmail.com>
+Subject: Re: [PATCH v7 0/4] Add modules for realtek USB card reader
+Date: Wed, 16 Apr 2014 09:27:48 +0200
+Message-ID: <CAPDyKFpaWT0JqwkrYzRZN4g5B5k0NB8hq0BY5yzN-T0pxX55WA@mail.gmail.com>
+References: <1397199203-2235-1-git-send-email-rogerable@realtek.com>
+ <1397201514.1589.0.camel@linux-fkkt.site>
+ <20140411102846.GB9801@lee--X1>
+ <1397212602.4632.2.camel@linux-fkkt.site>
+ <534DF6B1.30609@realtek.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qc0-f182.google.com ([209.85.216.182]:53669 "EHLO
-	mail-qc0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754738AbaDPHU5 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Apr 2014 03:20:57 -0400
-Received: by mail-qc0-f182.google.com with SMTP id e16so11722862qcx.27
-        for <linux-mmc@vger.kernel.org>; Wed, 16 Apr 2014 00:20:57 -0700 (PDT)
-In-Reply-To: <CAAYSxho=S5TqSU4uOiSuH-yh-O6tQxbKEzCn6ow=PLDBKPiSpQ@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
+In-Reply-To: <534DF6B1.30609@realtek.com>
+List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
+List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel>
+List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
+List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
+List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
+Errors-To: driverdev-devel-bounces@linuxdriverproject.org
+Sender: driverdev-devel-bounces@linuxdriverproject.org
+To: Roger <rogerable@realtek.com>
+Cc: Oliver Neukum <oneukum@suse.de>, Maxim Levitsky <maximlevitsky@gmail.com>, Alex Dubov <oakad@yahoo.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, driverdev-devel@linuxdriverproject.org, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Wei WANG <wei_wang@realsil.com.cn>, Andrew Morton <akpm@linux-foundation.org>, Lee Jones <lee.jones@linaro.org>, Dan Carpenter <dan.carpenter@oracle.com>, Samuel Ortiz <sameo@linux.intel.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Tim Kryger <tim.kryger@linaro.org>
-Cc: Chris Ball <chris@printf.net>, Linux MMC Mailing List <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 
-On 15 April 2014 19:09, Tim Kryger <tim.kryger@linaro.org> wrote:
-> On Fri, Apr 11, 2014 at 1:15 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+On 16 April 2014 05:19, Roger <rogerable@realtek.com> wrote:
+> On 04/11/2014 06:36 PM, Oliver Neukum wrote:
+>>
+>> On Fri, 2014-04-11 at 11:28 +0100, Lee Jones wrote:
+>>>>>
+>>>>> From: Roger Tseng <rogerable@realtek.com>
+>>>>>
+>>>>> This patchset adds modules to support Realtek USB vendor specific class
+>>>>> flash
+>>>>> card reader: one base module in MFD subsystem and two host modules in
+>>>>> both mmc
+>>>>> and memstick subsystems. The architecture is similar to rtsx_pci.
+>>>>>
+>>>>> This work is done primarily to replace the staging driver:
+>>>>> staging/rts5139,
+>>>>> which doesn't utilize mmc nor memstick subsystems. Once the patchset or
+>>>>> its
+>>>>> revision is applied, we may need Greg's help to remove the staging one.
+>>>>
+>>>>
+>>>> Looks good to me.
+>>>
+>>>
+>>> Is that an Ack?
+>>
+>> Acked-by: Oliver <oneukum@suse.de>
+>>
+>>         Sorry
+>>                 Oliver
+>>
+> Lee,
 >
->> I have seen some patches around lately touching the code for handling
->> the regulators (vcc and vccq) in sdhci.
->
-> Was it this patch you were thinking of or something else?
->
-> http://www.spinics.net/lists/linux-mmc/msg25640.html
+> Would you apply all of these patches?
 
-Yes, that's one of them. I am not sure I remember correct, but I think
-there were patches for converting to devm_* API as well.
-
->
->> A few times I have suggested to switch to use the
->> mmc_regulator_get_supply() API to simplify and consolidate code. Could
->> you please have a look at that?
->
-> This function will solve my problem but it also suggests that SDHCI
-> drivers should use the vmmc/vqmmc pointers in the mmc_host struct
-> rather than the ones in the sdhci_host struct.
->
-> Is this your intent?  Do you want to see the regulator pointers in the
-> sdhci_host struct removed once all drivers are modified to use the
-> mmc_host ones?
-
-Correct. That will consolidate code!
-
-Then if sdhci has some special needs for regulators, let's first see
-if we can adopt the API to handle it, before we decide to put that
-code in sdhci driver.
+I have sent a pull request to Chris, containing the patch with the new
+mmc driver. The rest I am fine with if Lee can take though the mfd
+tree.
 
 Kind regards
-Uffe
+Ulf Hansson
 
 >
-> -Tim
+>
+> Best regards,
+> Roger Tseng
