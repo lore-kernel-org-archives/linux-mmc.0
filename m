@@ -1,11 +1,15 @@
-From: <micky_ching@realsil.com.cn>
-Subject: [PATCH] mmc: rtsx: fix possible circular locking dependency
-Date: Wed, 16 Apr 2014 09:38:44 +0800
-Message-ID: <1397612325-4968-1-git-send-email-micky_ching@realsil.com.cn>
+From: Roger <rogerable@realtek.com>
+Subject: Re: [PATCH v7 0/4] Add modules for realtek USB card reader
+Date: Wed, 16 Apr 2014 11:19:13 +0800
+Message-ID: <534DF6B1.30609@realtek.com>
+References: <1397199203-2235-1-git-send-email-rogerable@realtek.com>	
+ <1397201514.1589.0.camel@linux-fkkt.site> <20140411102846.GB9801@lee--X1>
+ <1397212602.4632.2.camel@linux-fkkt.site>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset="us-ascii"; Format="flowed"
 Content-Transfer-Encoding: 7bit
 Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
+In-Reply-To: <1397212602.4632.2.camel@linux-fkkt.site>
 List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
  <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
 List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel>
@@ -15,41 +19,34 @@ List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driver
  <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
 Errors-To: driverdev-devel-bounces@linuxdriverproject.org
 Sender: driverdev-devel-bounces@linuxdriverproject.org
-To: chris@printf.net, sameo@linux.intel.com
-Cc: ulf.hansson@linaro.org, gregkh@linuxfoundation.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, wei_wang@realsil.com.cn, rogerable@realtek.com, devel@linuxdriverproject.org, dan.carpenter@oracle.com
+To: Oliver Neukum <oneukum@suse.de>, Lee Jones <lee.jones@linaro.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Maxim Levitsky <maximlevitsky@gmail.com>, Alex Dubov <oakad@yahoo.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, driverdev-devel@linuxdriverproject.org, linux-mmc@vger.kernel.org, Chris Ball <chris@printf.net>, linux-kernel@vger.kernel.org, wei_wang@realsil.com.cn, Andrew Morton <akpm@linux-foundation.org>, Dan Carpenter <dan.carpenter@oracle.com>, Samuel Ortiz <sameo@linux.intel.com>
 List-Id: linux-mmc@vger.kernel.org
 
-From: Micky Ching <micky_ching@realsil.com.cn>
+On 04/11/2014 06:36 PM, Oliver Neukum wrote:
+> On Fri, 2014-04-11 at 11:28 +0100, Lee Jones wrote:
+>>>> From: Roger Tseng <rogerable@realtek.com>
+>>>>
+>>>> This patchset adds modules to support Realtek USB vendor specific class flash
+>>>> card reader: one base module in MFD subsystem and two host modules in both mmc
+>>>> and memstick subsystems. The architecture is similar to rtsx_pci.
+>>>>
+>>>> This work is done primarily to replace the staging driver: staging/rts5139,
+>>>> which doesn't utilize mmc nor memstick subsystems. Once the patchset or its
+>>>> revision is applied, we may need Greg's help to remove the staging one.
+>>>
+>>> Looks good to me.
+>>
+>> Is that an Ack?
+> Acked-by: Oliver <oneukum@suse.de>
+>
+> 	Sorry
+> 		Oliver
+>
+Lee,
 
-To avoid dead lock, we need make sure host->lock is always acquire
-before pcr->lock. But in irq handler, we acquired pcr->lock in rtsx mfd
-driver, and sd_isr_done_transfer() is called during pcr->lock already
-acquired. Since in sd_isr_done_transfer() the only work we do is schdule
-tasklet, the cmd_tasklet and data_tasklet never conflict, so it is safe
-to remove spin_lock() here.
+Would you apply all of these patches?
 
-Signed-off-by: Micky Ching <micky_ching@realsil.com.cn>
----
- drivers/mmc/host/rtsx_pci_sdmmc.c |    4 +---
- 1 file changed, 1 insertion(+), 3 deletions(-)
 
-diff --git a/drivers/mmc/host/rtsx_pci_sdmmc.c b/drivers/mmc/host/rtsx_pci_sdmmc.c
-index 453e1d4..40695e0 100644
---- a/drivers/mmc/host/rtsx_pci_sdmmc.c
-+++ b/drivers/mmc/host/rtsx_pci_sdmmc.c
-@@ -108,12 +108,10 @@ static void sd_isr_done_transfer(struct platform_device *pdev)
- {
- 	struct realtek_pci_sdmmc *host = platform_get_drvdata(pdev);
- 
--	spin_lock(&host->lock);
- 	if (host->cmd)
- 		tasklet_schedule(&host->cmd_tasklet);
--	if (host->data)
-+	else if (host->data)
- 		tasklet_schedule(&host->data_tasklet);
--	spin_unlock(&host->lock);
- }
- 
- static void sd_request_timeout(unsigned long host_addr)
--- 
-1.7.9.5
+Best regards,
+Roger Tseng
