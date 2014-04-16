@@ -1,34 +1,71 @@
-From: Andrew Bresticker <abrestic-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
-Subject: Re: [PATCH 4/4] ARM: tegra: fix Venice2 VQMMC regulators
-Date: Wed, 16 Apr 2014 13:24:25 -0700
-Message-ID: <CAL1qeaENYazDf6cuWsFLgJcsAPTU9D4nz1dPr3Jva_++Po_mrw@mail.gmail.com>
-References: <1397526163-20126-1-git-send-email-abrestic@chromium.org>
-	<1397526163-20126-5-git-send-email-abrestic@chromium.org>
-	<CAL1qeaGGSs5fpqrKWA4u4+RXRy9Ko2pN=s9QQdbXAfLG3ujR8g@mail.gmail.com>
-	<534EAD91.90704@wwwdotorg.org>
+From: Mark Brown <broonie@kernel.org>
+Subject: Re: [PATCH] sdhci: Forward EPROBE_DEFER on vmmc and vqmmc regulators
+Date: Wed, 16 Apr 2014 21:47:33 +0100
+Message-ID: <20140416204733.GX12304@sirena.org.uk>
+References: <1395991817-3503-1-git-send-email-mike.looijmans@topic.nl>
+ <10471336.Pb8zVvW3Hp@wuerfel>
+ <53429AD4.7030508@topic.nl>
+ <4902841.krZFXFDZqb@wuerfel>
+ <5342A3F5.606@topic.nl>
+ <CAL1qeaET+cy19EtB_TbtQ40Lb9r9hrO4H5vjG5YmCTpYoOmcog@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <534EAD91.90704-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>
-Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>
-Cc: Thierry Reding <thierry.reding-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="MikxO53xlyBvwArL"
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mezzanine.sirena.org.uk ([106.187.55.193]:35362 "EHLO
+	mezzanine.sirena.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754294AbaDPUsG (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Apr 2014 16:48:06 -0400
+Content-Disposition: inline
+In-Reply-To: <CAL1qeaET+cy19EtB_TbtQ40Lb9r9hrO4H5vjG5YmCTpYoOmcog@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Andrew Bresticker <abrestic@chromium.org>
+Cc: Mike Looijmans <mike.looijmans@topic.nl>, Arnd Bergmann <arnd@arndb.de>, Ben Dooks <ben.dooks@codethink.co.uk>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, cjb@laptop.org, gdjakov@mm-sol.com
 
-On Wed, Apr 16, 2014 at 9:19 AM, Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org> wrote:
-> On 04/15/2014 06:29 PM, Andrew Bresticker wrote:
->>>         sdhci@0,700b0600 {
->>>                 status = "okay";
->>>                 bus-width = <8>;
->>> +               vqmmc-supply = <&vddio_1v8>;
->>
->> It turns out this bit isn't needed as the initialization failures are
->> instead due to +3V3_RUN toggling, which Stephen has fixed:
->> http://patchwork.ozlabs.org/patch/339386/
->
-> Indeed, if I apply patches 1, 2, and 4 from this series, revert the hunk
-> above, apply my Venice2 regulator patch, and finally apply your AS3722
-> regulator GPIO patch, then everything works fine for me:-)
 
-Great, I'll fix up and resend without patch 3 as it looks like that
-will need some more work.
+--MikxO53xlyBvwArL
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+
+On Wed, Apr 16, 2014 at 01:15:53PM -0700, Andrew Bresticker wrote:
+
+> Not true.  If !CONFIG_REGULATOR, regulator_get() and co. will return
+> NULL.  Normally it is ok to ignore this case, but the sdhci driver
+> will call regulator_is_supported_voltage() on vqmmc to determine
+> whether 1.8V signalling is supported.  With !CONFIG_REGULATOR,
+> regulator_is_supported_voltage() will always return false, causing the
+> sdhci driver to disable all UHS modes.  So we still need to handle the
+> NULL (!CONFIG_REGULATOR) case.  One possibility is to guard the
+> voltage check with #ifdef CONFIG_REGULATOR, as is done later with
+> vmmc.
+
+It seems better to just fix regulator_get_optional() to return an error
+if the API is disabled, that case didn't really get considered since
+it's a bit surprising that something actively using regulators (rather
+than simply ensuring they're enabled) would be using that function.
+Though if you already have ifdefs the ifdef is probably fine.
+
+--MikxO53xlyBvwArL
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+
+iQIcBAEBAgAGBQJTTuxiAAoJELSic+t+oim9laQQAIHSElUlAe5voqkRes1Ay1GX
+y62AwRiryRpmY215UUCBemS9fEKTfJYHb/yHgGF+kRbIU3j6cmRuWome4PDtnVCp
+H4C8uNVZ1F/OaebL6822DJzSsaPObICUBIm39a6phTIHLKlsgLpEQLAgWWQ6DJNS
+TTTI2jx9rLDjn9AV6V+RokTCANF48xRkd4ZK7goPwuSWjZkwRpZBVGlk6qhnwx+f
+u7ugIjVrD70e4joZMu6T1OVRsjl40k8eSDMzabIqGSlE2eLWewvuhll92yKISvSl
+eDHzf4CtUI9a/mru6Wymklu2+TL2Y2LdSgVj21KqaKIt2mSC77v/yhkga+aCqUIg
+WA2Wr5QfgszA8dG96vztDPYBLs2iNx05hhkwCS8P2iZWRP8k/VaM5PWoO20CcTpC
+bbu8cXfpnlI511fy3hDHlxauPXafXvFkTjHNbt5rp1W6IaiOPHDcX/6JECo1jwoo
+4x4gwZSnTd23xWQGuc0ch16dgV353ob9jOOU5V0rY781RDi0ECN3xHdKDwFwR4Sm
+M6M7DD+wI3zxJv9lA1RqMQVbRWSYcql/sHmv/ok5inV44gVbhfY+l/LJ4QjV2pqG
+RLkt6cracze+JIyoQlFJX7kBf4rauE+mz14Sy+rF97SyK6THrG/HNnOqFpef2/W7
+om3wHy6xhA+4HHziD6Uh
+=IucX
+-----END PGP SIGNATURE-----
+
+--MikxO53xlyBvwArL--
