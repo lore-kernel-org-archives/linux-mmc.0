@@ -1,50 +1,59 @@
 From: =?UTF-8?q?Antoine=20T=C3=A9nart?=
-	<antoine.tenart@free-electrons.com>
-Subject: [PATCH 0/4] ARM: berlin: add SDHCI support
-Date: Wed, 16 Apr 2014 14:40:07 +0200
-Message-ID: <1397652011-21284-1-git-send-email-antoine.tenart@free-electrons.com>
+	<antoine.tenart-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
+Subject: [PATCH 2/4] Documentation: bindings: add the sdhci-berlin
+Date: Wed, 16 Apr 2014 14:40:09 +0200
+Message-ID: <1397652011-21284-3-git-send-email-antoine.tenart@free-electrons.com>
+References: <1397652011-21284-1-git-send-email-antoine.tenart@free-electrons.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from top.free-electrons.com ([176.31.233.9]:47866 "EHLO
-	mail.free-electrons.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1754523AbaDPMkP (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Apr 2014 08:40:15 -0400
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1397652011-21284-1-git-send-email-antoine.tenart-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: sebastian.hesselbarth-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org, anton-9xeibp6oKSgdnm+yROfE0A@public.gmane.org
+Cc: =?UTF-8?q?Antoine=20T=C3=A9nart?= <antoine.tenart-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, alexandre.belloni-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org, zmxu-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org, jszhang-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: sebastian.hesselbarth@gmail.com, chris@printf.net, anton@enomsg.org
-Cc: =?UTF-8?q?Antoine=20T=C3=A9nart?= <antoine.tenart@free-electrons.com>, alexandre.belloni@free-electrons.com, zmxu@marvell.com, jszhang@marvell.com, linux-arm-kernel@lists.infradead.org, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-This series adds the support for the SDHCI controller for Marvell Berli=
-n
-SoCs and enable the SD card reader and eMMC for the BG2Q DMP. The
-controller supports 3 sockets.
+Add the binding documentation for the Marvell Berlin SDHCI driver.
 
-Tested on the BG2Q DMP.
-
-This series applies on top of Alexandre's patches for the Berlin's pll:
-https://patchwork.kernel.org/patch/3890341/
-https://patchwork.kernel.org/patch/3876271/
-
-Antoine T=C3=A9nart (4):
-  mmc: sdhci: add a driver for Berlin SoCs
-  Documentation: bindings: add the sdhci-berlin
-  ARM: dts: berlin: add the SDHCI nodes for the BG2Q
-  ARM: dts: berlin: enable SD card reader and eMMC for the BG2Q DMP
-
- .../devicetree/bindings/mmc/sdhci-berlin.txt       |  18 +++
- arch/arm/boot/dts/berlin2q-marvell-dmp.dts         |   8 ++
- arch/arm/boot/dts/berlin2q.dtsi                    |  40 +++++++
- drivers/mmc/host/Kconfig                           |  11 ++
- drivers/mmc/host/Makefile                          |   1 +
- drivers/mmc/host/sdhci-berlin.c                    | 129 +++++++++++++=
+Signed-off-by: Antoine T=C3=A9nart <antoine.tenart-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
+---
+ Documentation/devicetree/bindings/mmc/sdhci-berlin.txt | 18 ++++++++++=
 ++++++++
- 6 files changed, 207 insertions(+)
+ 1 file changed, 18 insertions(+)
  create mode 100644 Documentation/devicetree/bindings/mmc/sdhci-berlin.=
 txt
- create mode 100644 drivers/mmc/host/sdhci-berlin.c
 
+diff --git a/Documentation/devicetree/bindings/mmc/sdhci-berlin.txt b/D=
+ocumentation/devicetree/bindings/mmc/sdhci-berlin.txt
+new file mode 100644
+index 000000000000..1a5591f85a64
+--- /dev/null
++++ b/Documentation/devicetree/bindings/mmc/sdhci-berlin.txt
+@@ -0,0 +1,18 @@
++* Marvell Berlin SDHCI controller
++
++All common properties are documented in mmc.txt
++
++Required properties:
++- compatible: "marvell,berlin2-sdhci",
++	      "marvell,berlin2cd-sdhci",
++	      "marvell,berlin2q-sdhci"
++- clocks: reference to the SDHCI controller clock
++
++Example:
++
++sdhci0: sdhci@ab0000 {
++	compatible =3D "marvell,berlin2q-sdhci";
++	reg =3D <0xab0000 0x200>;
++	clocks =3D <&sdio1clk>;
++	interrupts =3D <GIC_SPI 17 IRQ_TYPE_LEVEL_HIGH>;
++};
 --=20
 1.8.3.2
 
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" i=
+n
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
