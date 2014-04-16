@@ -1,92 +1,39 @@
-From: =?UTF-8?q?Antoine=20T=C3=A9nart?=
-	<antoine.tenart-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
-Subject: [PATCH 3/4] ARM: dts: berlin: add the SDHCI nodes for the BG2Q
-Date: Wed, 16 Apr 2014 14:40:10 +0200
-Message-ID: <1397652011-21284-4-git-send-email-antoine.tenart@free-electrons.com>
+From: =?UTF-8?q?Antoine=20T=C3=A9nart?= <antoine.tenart@free-electrons.com>
+Subject: [PATCH 4/4] ARM: dts: berlin: enable SD card reader and eMMC for the
+ BG2Q DMP
+Date: Wed, 16 Apr 2014 14:40:11 +0200
+Message-ID: <1397652011-21284-5-git-send-email-antoine.tenart@free-electrons.com>
 References: <1397652011-21284-1-git-send-email-antoine.tenart@free-electrons.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1397652011-21284-1-git-send-email-antoine.tenart-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: sebastian.hesselbarth-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org, anton-9xeibp6oKSgdnm+yROfE0A@public.gmane.org
-Cc: =?UTF-8?q?Antoine=20T=C3=A9nart?= <antoine.tenart-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, alexandre.belloni-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org, zmxu-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org, jszhang-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <1397652011-21284-1-git-send-email-antoine.tenart@free-electrons.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: sebastian.hesselbarth@gmail.com, chris@printf.net, anton@enomsg.org
+Cc: zmxu@marvell.com, jszhang@marvell.com, devicetree@vger.kernel.org, =?UTF-8?q?Antoine=20T=C3=A9nart?= <antoine.tenart@free-electrons.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, alexandre.belloni@free-electrons.com, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-Add the SDHCI nodes for the Marvell Berlin BG2Q, using the berlin-sdhci
-driver.
-
-Signed-off-by: Antoine T=C3=A9nart <antoine.tenart-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
----
- arch/arm/boot/dts/berlin2q.dtsi | 40 +++++++++++++++++++++++++++++++++=
-+++++++
- 1 file changed, 40 insertions(+)
-
-diff --git a/arch/arm/boot/dts/berlin2q.dtsi b/arch/arm/boot/dts/berlin=
-2q.dtsi
-index 5925e6a16749..8f897d461460 100644
---- a/arch/arm/boot/dts/berlin2q.dtsi
-+++ b/arch/arm/boot/dts/berlin2q.dtsi
-@@ -67,6 +67,14 @@
- 		clock-div =3D <3>;
- 	};
-=20
-+	sdio1clk: sdio1clk {
-+		compatible =3D "fixed-factor-clock";
-+		#clock-cells =3D <0>;
-+		clocks =3D <&syspll>;
-+		clock-mult =3D <1>;
-+		clock-div =3D <4>;
-+	};
-+
- 	soc {
- 		compatible =3D "simple-bus";
- 		#address-cells =3D <1>;
-@@ -75,6 +83,38 @@
- 		ranges =3D <0 0xf7000000 0x1000000>;
- 		interrupt-parent =3D <&gic>;
-=20
-+		sdhci0: sdhci@ab0000 {
-+			compatible =3D "marvell,berlin2q-sdhci";
-+			reg =3D <0xab0000 0x200>;
-+			clocks =3D <&sdio1clk>;
-+			interrupts =3D <GIC_SPI 17 IRQ_TYPE_LEVEL_HIGH>;
-+			keep-power-in-suspend;
-+			enable-sdio-wakeup;
-+			broken-cd;
-+			status =3D "disabled";
-+		};
-+
-+		sdhci1: sdhci@ab0800 {
-+			compatible =3D "marvell,berlin2q-sdhci";
-+			reg =3D <0xab0800 0x200>;
-+			clocks =3D <&sdio1clk>;
-+			interrupts =3D <GIC_SPI 20 IRQ_TYPE_LEVEL_HIGH>;
-+			keep-power-in-suspend;
-+			enable-sdio-wakeup;
-+			status =3D "disabled";
-+		};
-+
-+		sdhci2: sdhci@ab1000 {
-+			compatible =3D "marvell,berlin2q-sdhci";
-+			reg =3D <0xab1000 0x200>;
-+			interrupts =3D <GIC_SPI 28 IRQ_TYPE_LEVEL_HIGH>;
-+			clocks =3D <&sdio1clk>;
-+			keep-power-in-suspend;
-+			enable-sdio-wakeup;
-+			broken-cd;
-+			status =3D "disabled";
-+		};
-+
- 		l2: l2-cache-controller@ac0000 {
- 			compatible =3D "arm,pl310-cache";
- 			reg =3D <0xac0000 0x1000>;
---=20
-1.8.3.2
-
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" i=
-n
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+RW5hYmxlIHRoZSBTRCBDYXJkIHJlYWRlciBhbmQgdGhlIGludGVybmFsIGVNTUMgb24gdGhlIEJl
+cmxpbiBCRzJRIERNUAp1c2luZyB0d28gb2YgdGhlIFNESENJIG5vZGVzIG9mIHRoZSBCZXJsaW4g
+QkcyUS4KClNpZ25lZC1vZmYtYnk6IEFudG9pbmUgVMOpbmFydCA8YW50b2luZS50ZW5hcnRAZnJl
+ZS1lbGVjdHJvbnMuY29tPgotLS0KIGFyY2gvYXJtL2Jvb3QvZHRzL2JlcmxpbjJxLW1hcnZlbGwt
+ZG1wLmR0cyB8IDggKysrKysrKysKIDEgZmlsZSBjaGFuZ2VkLCA4IGluc2VydGlvbnMoKykKCmRp
+ZmYgLS1naXQgYS9hcmNoL2FybS9ib290L2R0cy9iZXJsaW4ycS1tYXJ2ZWxsLWRtcC5kdHMgYi9h
+cmNoL2FybS9ib290L2R0cy9iZXJsaW4ycS1tYXJ2ZWxsLWRtcC5kdHMKaW5kZXggMmRhOWM0MWUy
+OWQ4Li42NzFlZDRkMDU1ZWQgMTAwNjQ0Ci0tLSBhL2FyY2gvYXJtL2Jvb3QvZHRzL2JlcmxpbjJx
+LW1hcnZlbGwtZG1wLmR0cworKysgYi9hcmNoL2FybS9ib290L2R0cy9iZXJsaW4ycS1tYXJ2ZWxs
+LWRtcC5kdHMKQEAgLTI2LDMgKzI2LDExIEBACiAmdWFydDAgewogCXN0YXR1cyA9ICJva2F5IjsK
+IH07CisKKyZzZGhjaTEgeworCXN0YXR1cyA9ICJva2F5IjsKK307CisKKyZzZGhjaTIgeworCXN0
+YXR1cyA9ICJva2F5IjsKK307Ci0tIAoxLjguMy4yCgoKX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX18KbGludXgtYXJtLWtlcm5lbCBtYWlsaW5nIGxpc3QKbGlu
+dXgtYXJtLWtlcm5lbEBsaXN0cy5pbmZyYWRlYWQub3JnCmh0dHA6Ly9saXN0cy5pbmZyYWRlYWQu
+b3JnL21haWxtYW4vbGlzdGluZm8vbGludXgtYXJtLWtlcm5lbAo=
