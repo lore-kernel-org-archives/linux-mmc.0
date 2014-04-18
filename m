@@ -1,61 +1,68 @@
-From: Mark Brown <broonie@kernel.org>
-Subject: Re: [PATCH v2 1/2] regulator: pbias: Fix is_enabled callback
- implementation
-Date: Fri, 18 Apr 2014 18:27:56 +0100
-Message-ID: <20140418172756.GR12304@sirena.org.uk>
-References: <1394250929.3892.1.camel@phoenix>
- <20140414211644.GG12304@sirena.org.uk>
- <CAFRkauDTvEGoaWFBtPWHtw-JFmhTbdHcxoVP56fnv1YG047Knw@mail.gmail.com>
+From: Tim Kryger <tim.kryger@linaro.org>
+Subject: [PATCH] mmc: core: Try other signal levels during power up
+Date: Fri, 18 Apr 2014 11:58:30 -0700
+Message-ID: <1397847510-17199-1-git-send-email-tim.kryger@linaro.org>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="Y0koQ0R6+zV0KVa4"
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mezzanine.sirena.org.uk ([106.187.55.193]:38126 "EHLO
-	mezzanine.sirena.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751984AbaDRR2d (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 18 Apr 2014 13:28:33 -0400
-Content-Disposition: inline
-In-Reply-To: <CAFRkauDTvEGoaWFBtPWHtw-JFmhTbdHcxoVP56fnv1YG047Knw@mail.gmail.com>
+Received: from mail-gw2-out.broadcom.com ([216.31.210.63]:30693 "EHLO
+	mail-gw2-out.broadcom.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751885AbaDRS6m (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 18 Apr 2014 14:58:42 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Axel Lin <axel.lin@ingics.com>
-Cc: Chris Ball <chris@printf.net>, Liam Girdwood <lgirdwood@gmail.com>, Balaji T K <balajitk@ti.com>, Florian Vaussard <florian.vaussard@epfl.ch>, Stefan Roese <sr@denx.de>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-mmc@vger.kernel.org
+To: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Tim Kryger <tim.kryger@linaro.org>, Linux MMC <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 
+The eMMC signalling voltage is determined by VCCQ which is provided to
+the card by the host.  Signalling is not required to begin at 3.3v and,
+if the host and card both support a particular VCC/VCCQ combination, it
+can be used immediately.
 
---Y0koQ0R6+zV0KVa4
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+In contrast, SD Cards must begin with 3.3v signalling and may switch to
+a lower voltage signalling if instructed to do so in CMD11.  A message
+is required to coordinate this operation because the card only receives
+a 3.3v VDD and must know when to use the 1.8v produced by its internal
+regulator.
 
-On Tue, Apr 15, 2014 at 11:14:13PM +0800, Axel Lin wrote:
+It makes sense for the core to begin with 3.3v signalling but when that
+can't be set, 1.8v and 1.2v signalling also should be attempted.  This
+is especially important when an external regulator with a limited range
+is used to supply VCCQ to an eMMC part.
 
-> commit 60e8c1e34d3a
-> "regulator: pbias: Convert to use regmap helper functions"
-> might also required for 3.15.
-> The reason is this commit implements .list_voltage and the mmc core calls
-> regulator_list_voltage() in mmc_regulator_get_ocrmask().
+Signed-off-by: Tim Kryger <tim.kryger@linaro.org>
+---
+ drivers/mmc/core/core.c |   10 +++++++++-
+ 1 file changed, 9 insertions(+), 1 deletion(-)
 
-Makes sense, yes.
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index acbc3f2..ecdbeae 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -1517,6 +1517,8 @@ void mmc_set_driver_type(struct mmc_host *host, unsigned int drv_type)
+  */
+ void mmc_power_up(struct mmc_host *host, u32 ocr)
+ {
++	int err;
++
+ 	if (host->ios.power_mode == MMC_POWER_ON)
+ 		return;
+ 
+@@ -1534,7 +1536,13 @@ void mmc_power_up(struct mmc_host *host, u32 ocr)
+ 	mmc_set_ios(host);
+ 
+ 	/* Set signal voltage to 3.3V */
+-	__mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_330);
++	err = __mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_330);
++
++	/* Since eMMC parts can start at 1.8v or 1.2v try those too */
++	if (err)
++		err = __mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_180);
++	if (err)
++		__mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_120);
+ 
+ 	/*
+ 	 * This delay should be sufficient to allow the power supply
+-- 
+1.7.9.5
 
---Y0koQ0R6+zV0KVa4
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-
-iQIcBAEBAgAGBQJTUWCZAAoJELSic+t+oim9J+cP/1lirOR4yrhIrTa6o8Nyc1uy
-tKXOK2cNUyWJUpKHh3GhrEApeA49ym5FZccaN8A43NWy0j5rmjh+/C/8E7vbDYAc
-MNyBldKtvN3IvCUk7b5Y++mWHDSk4l0hxuMZ2vnc6L9bHUKd9x1O4RBTDX87Gzxm
-/P/ApR9TpYav9KAfKe1x/JxGw69UwdlquRIyPuT9wv1BlmuHpIVPVIG/RmepICaa
-v2oRCiBnVUkqeqwgn+UV8whxVBC3rVmQvZR0t75bjWjvS9wDD+mO8birRJFdJypN
-DhxkP8WCaOtlmjVQYqhXYf5UP6a2k1KfedfFmuOKcmdRM5W3sPcSxIDVHRcD7p3Q
-qfMxBJH7kQUkF6o6ZfsuEPoAh/wdsE69qmoWNyzZPTvJ9K4q2qPdENQ+OOnJCdZk
-G/c2nC09MseRFeP6/JVVksTJgsZ6HamAFNcXd7vSLdoPqCNn+18ZJYeOSy1S7c+9
-ob8uHsFxBY1rhVHl5AN28yF3KhsZSaApjkX7sL5G33nOCRjpz3M1kZgRwZQfMEnE
-lkMERrCo3w6hvoufaJ8RGPZ8qL64Ia8lfDPGmginadDbakH2ZYSiefxAy/zdonoe
-5+a+UlA+f/j3Kvzth0LJeQlhEIcdNOMLHS8tVxPlAlR4HTUpJiEH5UGVqHcXuluT
-QtS73l4woo9QE/BN9VKC
-=SvxI
------END PGP SIGNATURE-----
-
---Y0koQ0R6+zV0KVa4--
