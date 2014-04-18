@@ -1,107 +1,79 @@
-From: Peter Wu <peter@lekensteyn.nl>
-Subject: Re: [PATCH] mmc: rtsx: fix possible circular locking dependency
-Date: Fri, 18 Apr 2014 16:00:53 +0200
-Message-ID: <29134783.v67ScDLFcC@al>
-References: <1397612325-4968-1-git-send-email-micky_ching@realsil.com.cn>
+From: Tony Lindgren <tony@atomide.com>
+Subject: Re: [PATCH v9 resend 1/3] mmc: omap_hsmmc: Enable SDIO interrupt
+Date: Fri, 18 Apr 2014 09:46:30 -0700
+Message-ID: <20140418164630.GE5354@atomide.com>
+References: <1395404448-30030-1-git-send-email-afenkart@gmail.com>
+ <1395404448-30030-2-git-send-email-afenkart@gmail.com>
+ <532C6489.4050307@ti.com>
+ <532FFB43.5020408@compulab.co.il>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7Bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1397612325-4968-1-git-send-email-micky_ching@realsil.com.cn>
-Sender: linux-kernel-owner@vger.kernel.org
-To: driverdev-devel@linuxdriverproject.org
-Cc: micky_ching@realsil.com.cn, chris@printf.net, sameo@linux.intel.com, ulf.hansson@linaro.org, gregkh@linuxfoundation.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, wei_wang@realsil.com.cn, rogerable@realtek.com, devel@linuxdriverproject.org, dan.carpenter@oracle.com
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-omap-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <532FFB43.5020408@compulab.co.il>
+Sender: linux-omap-owner@vger.kernel.org
+To: Dmitry Lifshitz <lifshitz@compulab.co.il>
+Cc: Balaji T K <balajitk@ti.com>, Andreas Fenkart <afenkart@gmail.com>, Chris Ball <chris@printf.net>, Grant Likely <grant.likely@secretlab.ca>, Felipe Balbi <balbi@ti.com>, zonque@gmail.com, galak@codeaurora.org, linux-doc@vger.kernel.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-Hi!
+Hi,
 
-On Wednesday 16 April 2014 09:38:44 micky_ching@realsil.com.cn wrote:
-> From: Micky Ching <micky_ching@realsil.com.cn>
+Sorry for the delay, just noticed this one.
+
+* Dmitry Lifshitz <lifshitz@compulab.co.il> [140324 02:34]:
+> Hi,
 > 
-> To avoid dead lock, we need make sure host->lock is always acquire
-> before pcr->lock. But in irq handler, we acquired pcr->lock in rtsx mfd
-> driver, and sd_isr_done_transfer() is called during pcr->lock already
-> acquired. Since in sd_isr_done_transfer() the only work we do is schdule
-> tasklet, the cmd_tasklet and data_tasklet never conflict, so it is safe
-> to remove spin_lock() here.
+> I've tested the branch omap_hsmmc_sdio_irq_devm_cleanup on custom OMAP5
+> based board.
+> We have mwifiex connected to MMC3.
 > 
-> Signed-off-by: Micky Ching <micky_ching@realsil.com.cn>
-> ---
->  drivers/mmc/host/rtsx_pci_sdmmc.c |    4 +---
->  1 file changed, 1 insertion(+), 3 deletions(-)
-
-This patch came from https://lkml.kernel.org/r/534DE1D7.3000308@realsil.com.cn
-("Re: rtsx_pci_sdmmc lockdep splat").
-
-With v3.15-rc1-49-g10ec34f, I have a hung machine when inserting a SD card.
-lockdep was not enabled for the kernel, I have not bisected yet.
-This patch on top of that kernel version does not help (tested by
-rmmod rtsx_pci_sdmmc and insmod the patched one).
-
-Console (as typed over from a picture, sorry for any typos):
-WARNING: CPU: 1 PID: 0 at kernel/locking/mutex.c:698
-DEBUG_LOCKS_WARN_ON(in_interrupt())
-Modules linked in: ...
-CPU: 1 PID: 0 Comm: swapper/1 Not tainted 3.15-rc1-custom-000049-g10ec34f #5
-Hardware name: Shuttle Inc. XS36V/XS36V, BIOS 1.11 12/18/2012
-Call trace:
-<IRQ> dump_stack
-warn_slowpath_common
-warn_slowpath_fmt
-__mutex_unlock_slowpath
-mutex_unlock
-sd_finish_request [rtsx_pci_sdmmc]
-tasklet_action
-__do_softirq
-irq_exit
-smp_apic_timer_interrupt
-apic_timer_interrupt
-<EOI> ? cpuidle_enter_state
-cpuidle_enter
-cpu_startup_entry
-start_secondary
----[end trace ...]---
-(60 seconds later:)
-INFO: rcu_preempt detected stalls on CPUs/tasks: {} (detected by 1, t=18004 jiffies, g=3264, c=3263, q=2)
-INFO: Stall ended before state dump start
-
-I also managed to get this trace about 106 seconds later when switching TTY:
-INFO: task kworker/... blocked for more than 120 seconds
-Workqueue: kmmcd mm_rescan [mmc_core]
-Call trace:
-? update_rq_clock.part80
-? internal_add_timer
-schedule
-schedule_preempt
-__mutex_lock_slowpath
-mutex_lock
-sdmmc_request [rtsx_pci_sdmmc]
-mmc_start_request [mmc_core]
-__mmc_start_req [mmc_core]
-mmc_wait_for_cmd [mmc_core]
-? mmc_release_host [mmc_core]
-mmc_io_rw_direct_host [mmc_core]
-
-I'll try to get a lockdep kernel and text logs later, but perhaps you already
-know the issue?
-
-Peter
-
-> diff --git a/drivers/mmc/host/rtsx_pci_sdmmc.c
-> b/drivers/mmc/host/rtsx_pci_sdmmc.c index 453e1d4..40695e0 100644
-> --- a/drivers/mmc/host/rtsx_pci_sdmmc.c
-> +++ b/drivers/mmc/host/rtsx_pci_sdmmc.c
-> @@ -108,12 +108,10 @@ static void sd_isr_done_transfer(struct
-> platform_device *pdev) {
->  	struct realtek_pci_sdmmc *host = platform_get_drvdata(pdev);
+> I used two approaches:
 > 
-> -	spin_lock(&host->lock);
->  	if (host->cmd)
->  		tasklet_schedule(&host->cmd_tasklet);
-> -	if (host->data)
-> +	else if (host->data)
->  		tasklet_schedule(&host->data_tasklet);
-> -	spin_unlock(&host->lock);
->  }
+> * Using dat1 line as GPIO with dynamic remuxing
+> * Using separate GPIO connected to dat1 with static mux settings
 > 
->  static void sd_request_timeout(unsigned long host_addr)
+> Both works just fine. Thanks Andreas for a great solution.
+> 
+> I have just one issue - how to define GPIO IRQ using DT in OMAP5 case.
+> As a temporary hack for testing I used a fixed GPIO number and gpio_to_irq()
+> call in omap_hsmmc_configure_wake_irq().
+> 
+> OMAP5 MMC3 has the following DT entry (omap5.dtsi):
+> 
+>                 mmc3: mmc@480ad000 {
+>                         compatible = "ti,omap4-hsmmc";
+>                         reg = <0x480ad000 0x400>;
+>                         interrupts = <GIC_SPI 94 IRQ_TYPE_LEVEL_HIGH>;
+>                         ti,hwmods = "mmc3";
+>                         ti,needs-special-reset;
+>                         dmas = <&sdma 77>, <&sdma 78>;
+>                         dma-names = "tx", "rx";
+>                 };
+> 
+> What should be by board MMC3 setup?
+
+You need to use the interrupts-extended property in omap5.dtsi
+for the MMC interrupt. And if using the wake-up interrupts
+for your board, you need to sepcify interrupts-extended in your
+board file again to add the second wake-up interrupt.
+
+If using the async wake-up path, the wake-up interrupt is the
+OMAP5_CORE_IOPAD() or OMAP5_WKUP_IOPAD() pinctrl register offset
+for that pin. If remuxing to GPIO for the wake-up, the wake-up
+interrupt is the standard gpio interrupt property.
+
+Then you also need this patch to avoid warnings during boot:
+
+http://lkml.org/lkml/2014/4/10/620
+
+After the above gets merged, we can apply the serial wake-up
+patch too:
+
+http://lists.infradead.org/pipermail/linux-arm-kernel/2013-November/213873.html
+
+That shows you some examples on how to specify the wake-up
+interrupt.
+
+Regards,
+
+Tony
