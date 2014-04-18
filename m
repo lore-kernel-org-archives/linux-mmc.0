@@ -1,68 +1,49 @@
 From: Tim Kryger <tim.kryger@linaro.org>
-Subject: [PATCH] mmc: core: Try other signal levels during power up
-Date: Fri, 18 Apr 2014 11:58:30 -0700
-Message-ID: <1397847510-17199-1-git-send-email-tim.kryger@linaro.org>
+Subject: Re: [PATCH] mmc: sdhci: Set ocr_avail directly based on vmmc
+Date: Fri, 18 Apr 2014 14:23:34 -0700
+Message-ID: <CAAYSxhp=oQRpX05dAoxJNyRGXCfpM4EsxUbLz=doVWxWf6bODQ@mail.gmail.com>
+References: <1397172708-19735-1-git-send-email-tim.kryger@linaro.org>
+	<CAPDyKFrFyBLtL6dVgFy6DkY0gdCjiVpk1OhsfUXD0nhajCetxg@mail.gmail.com>
+	<CAAYSxho=S5TqSU4uOiSuH-yh-O6tQxbKEzCn6ow=PLDBKPiSpQ@mail.gmail.com>
+	<CAPDyKFp+xTbLtMip847wn1XM_ZJNix_TgQ6Psjq4RrB9=CWThw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-gw2-out.broadcom.com ([216.31.210.63]:30693 "EHLO
-	mail-gw2-out.broadcom.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751885AbaDRS6m (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 18 Apr 2014 14:58:42 -0400
+Received: from mail-oa0-f54.google.com ([209.85.219.54]:35558 "EHLO
+	mail-oa0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753153AbaDRVXe (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 18 Apr 2014 17:23:34 -0400
+Received: by mail-oa0-f54.google.com with SMTP id n16so2225330oag.13
+        for <linux-mmc@vger.kernel.org>; Fri, 18 Apr 2014 14:23:34 -0700 (PDT)
+In-Reply-To: <CAPDyKFp+xTbLtMip847wn1XM_ZJNix_TgQ6Psjq4RrB9=CWThw@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Tim Kryger <tim.kryger@linaro.org>, Linux MMC <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Chris Ball <chris@printf.net>, Linux MMC Mailing List <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 
-The eMMC signalling voltage is determined by VCCQ which is provided to
-the card by the host.  Signalling is not required to begin at 3.3v and,
-if the host and card both support a particular VCC/VCCQ combination, it
-can be used immediately.
+On Wed, Apr 16, 2014 at 12:20 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> On 15 April 2014 19:09, Tim Kryger <tim.kryger@linaro.org> wrote:
+>> On Fri, Apr 11, 2014 at 1:15 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
 
-In contrast, SD Cards must begin with 3.3v signalling and may switch to
-a lower voltage signalling if instructed to do so in CMD11.  A message
-is required to coordinate this operation because the card only receives
-a 3.3v VDD and must know when to use the 1.8v produced by its internal
-regulator.
+>>> A few times I have suggested to switch to use the
+>>> mmc_regulator_get_supply() API to simplify and consolidate code. Could
+>>> you please have a look at that?
+>>
+>> This function will solve my problem but it also suggests that SDHCI
+>> drivers should use the vmmc/vqmmc pointers in the mmc_host struct
+>> rather than the ones in the sdhci_host struct.
+>>
+>> Is this your intent?  Do you want to see the regulator pointers in the
+>> sdhci_host struct removed once all drivers are modified to use the
+>> mmc_host ones?
+>
+> Correct. That will consolidate code!
+>
+> Then if sdhci has some special needs for regulators, let's first see
+> if we can adopt the API to handle it, before we decide to put that
+> code in sdhci driver.
 
-It makes sense for the core to begin with 3.3v signalling but when that
-can't be set, 1.8v and 1.2v signalling also should be attempted.  This
-is especially important when an external regulator with a limited range
-is used to supply VCCQ to an eMMC part.
+Sounds good.  Please forget about this patch and consider the new
+series instead.
 
-Signed-off-by: Tim Kryger <tim.kryger@linaro.org>
----
- drivers/mmc/core/core.c |   10 +++++++++-
- 1 file changed, 9 insertions(+), 1 deletion(-)
-
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index acbc3f2..ecdbeae 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -1517,6 +1517,8 @@ void mmc_set_driver_type(struct mmc_host *host, unsigned int drv_type)
-  */
- void mmc_power_up(struct mmc_host *host, u32 ocr)
- {
-+	int err;
-+
- 	if (host->ios.power_mode == MMC_POWER_ON)
- 		return;
- 
-@@ -1534,7 +1536,13 @@ void mmc_power_up(struct mmc_host *host, u32 ocr)
- 	mmc_set_ios(host);
- 
- 	/* Set signal voltage to 3.3V */
--	__mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_330);
-+	err = __mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_330);
-+
-+	/* Since eMMC parts can start at 1.8v or 1.2v try those too */
-+	if (err)
-+		err = __mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_180);
-+	if (err)
-+		__mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_120);
- 
- 	/*
- 	 * This delay should be sufficient to allow the power supply
--- 
-1.7.9.5
-
+https://lkml.org/lkml/2014/4/17/653
