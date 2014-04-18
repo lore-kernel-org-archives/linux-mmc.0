@@ -1,64 +1,107 @@
-From: Matthieu CASTET <matthieu.castet@parrot.com>
-Subject: SDHCI DDR50 implies MMC DDR
-Date: Fri, 18 Apr 2014 15:55:39 +0200
-Message-ID: <20140418155539.5d43a9c8@parrot.com>
+From: Peter Wu <peter@lekensteyn.nl>
+Subject: Re: [PATCH] mmc: rtsx: fix possible circular locking dependency
+Date: Fri, 18 Apr 2014 16:00:53 +0200
+Message-ID: <29134783.v67ScDLFcC@al>
+References: <1397612325-4968-1-git-send-email-micky_ching@realsil.com.cn>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="MP_/ZYPgCYlKaEjr4wQWybyE+HZ"
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail.aswsp.com ([193.34.35.150]:17102 "EHLO mail.aswsp.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751307AbaDRNzh (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 18 Apr 2014 09:55:37 -0400
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7Bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1397612325-4968-1-git-send-email-micky_ching@realsil.com.cn>
+Sender: linux-kernel-owner@vger.kernel.org
+To: driverdev-devel@linuxdriverproject.org
+Cc: micky_ching@realsil.com.cn, chris@printf.net, sameo@linux.intel.com, ulf.hansson@linaro.org, gregkh@linuxfoundation.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, wei_wang@realsil.com.cn, rogerable@realtek.com, devel@linuxdriverproject.org, dan.carpenter@oracle.com
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: Giuseppe CAVALLARO <peppe.cavallaro@st.com>, Chris Ball <cjb@laptop.org>, Dong Aisheng <b29396@freescale.com>
 
---MP_/ZYPgCYlKaEjr4wQWybyE+HZ
-Content-Type: text/plain; charset="US-ASCII"
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
+Hi!
 
-Hi,
+On Wednesday 16 April 2014 09:38:44 micky_ching@realsil.com.cn wrote:
+> From: Micky Ching <micky_ching@realsil.com.cn>
+> 
+> To avoid dead lock, we need make sure host->lock is always acquire
+> before pcr->lock. But in irq handler, we acquired pcr->lock in rtsx mfd
+> driver, and sd_isr_done_transfer() is called during pcr->lock already
+> acquired. Since in sd_isr_done_transfer() the only work we do is schdule
+> tasklet, the cmd_tasklet and data_tasklet never conflict, so it is safe
+> to remove spin_lock() here.
+> 
+> Signed-off-by: Micky Ching <micky_ching@realsil.com.cn>
+> ---
+>  drivers/mmc/host/rtsx_pci_sdmmc.c |    4 +---
+>  1 file changed, 1 insertion(+), 3 deletions(-)
 
-shouldn't we add something like that do auto-detect MMC_CAP_1_8V_DDR on
-sdhci controller ?
+This patch came from https://lkml.kernel.org/r/534DE1D7.3000308@realsil.com.cn
+("Re: rtsx_pci_sdmmc lockdep splat").
 
+With v3.15-rc1-49-g10ec34f, I have a hung machine when inserting a SD card.
+lockdep was not enabled for the kernel, I have not bisected yet.
+This patch on top of that kernel version does not help (tested by
+rmmod rtsx_pci_sdmmc and insmod the patched one).
 
-Matthieu
---MP_/ZYPgCYlKaEjr4wQWybyE+HZ
-Content-Type: text/x-patch
-Content-Transfer-Encoding: 7bit
-Content-Disposition: attachment;
-	filename="0001-sdhci-UHS-DDR50-implies-MMC-DDR.patch"
+Console (as typed over from a picture, sorry for any typos):
+WARNING: CPU: 1 PID: 0 at kernel/locking/mutex.c:698
+DEBUG_LOCKS_WARN_ON(in_interrupt())
+Modules linked in: ...
+CPU: 1 PID: 0 Comm: swapper/1 Not tainted 3.15-rc1-custom-000049-g10ec34f #5
+Hardware name: Shuttle Inc. XS36V/XS36V, BIOS 1.11 12/18/2012
+Call trace:
+<IRQ> dump_stack
+warn_slowpath_common
+warn_slowpath_fmt
+__mutex_unlock_slowpath
+mutex_unlock
+sd_finish_request [rtsx_pci_sdmmc]
+tasklet_action
+__do_softirq
+irq_exit
+smp_apic_timer_interrupt
+apic_timer_interrupt
+<EOI> ? cpuidle_enter_state
+cpuidle_enter
+cpu_startup_entry
+start_secondary
+---[end trace ...]---
+(60 seconds later:)
+INFO: rcu_preempt detected stalls on CPUs/tasks: {} (detected by 1, t=18004 jiffies, g=3264, c=3263, q=2)
+INFO: Stall ended before state dump start
 
->From f821501dada7041521fe80a5fe92bdc8b15f055b Mon Sep 17 00:00:00 2001
-From: Matthieu CASTET <matthieu.castet@parrot.com>
-Date: Fri, 18 Apr 2014 15:49:05 +0200
-Subject: [PATCH] sdhci : UHS DDR50 implies MMC DDR
+I also managed to get this trace about 106 seconds later when switching TTY:
+INFO: task kworker/... blocked for more than 120 seconds
+Workqueue: kmmcd mm_rescan [mmc_core]
+Call trace:
+? update_rq_clock.part80
+? internal_add_timer
+schedule
+schedule_preempt
+__mutex_lock_slowpath
+mutex_lock
+sdmmc_request [rtsx_pci_sdmmc]
+mmc_start_request [mmc_core]
+__mmc_start_req [mmc_core]
+mmc_wait_for_cmd [mmc_core]
+? mmc_release_host [mmc_core]
+mmc_io_rw_direct_host [mmc_core]
 
----
- drivers/mmc/host/sdhci.c | 5 +++++
- 1 file changed, 5 insertions(+)
+I'll try to get a lockdep kernel and text logs later, but perhaps you already
+know the issue?
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 9a79fc4..2b7478e 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -2971,6 +2971,11 @@ int sdhci_add_host(struct sdhci_host *host)
- 	if (caps[0] & SDHCI_CAN_DO_HISPD)
- 		mmc->caps |= MMC_CAP_SD_HIGHSPEED | MMC_CAP_MMC_HIGHSPEED;
- 
-+	/* DDR50 implies MMC DDR at 1.8 or 3.3 */
-+	if ((caps[1] & SDHCI_SUPPORT_DDR50) &&
-+		!(host->quirks2 & SDHCI_QUIRK2_BROKEN_DDR50))
-+		mmc->caps |= MMC_CAP_1_8V_DDR;
-+
- 	if ((host->quirks & SDHCI_QUIRK_BROKEN_CARD_DETECTION) &&
- 	    !(host->mmc->caps & MMC_CAP_NONREMOVABLE))
- 		mmc->caps |= MMC_CAP_NEEDS_POLL;
--- 
-1.9.2
+Peter
 
-
---MP_/ZYPgCYlKaEjr4wQWybyE+HZ--
+> diff --git a/drivers/mmc/host/rtsx_pci_sdmmc.c
+> b/drivers/mmc/host/rtsx_pci_sdmmc.c index 453e1d4..40695e0 100644
+> --- a/drivers/mmc/host/rtsx_pci_sdmmc.c
+> +++ b/drivers/mmc/host/rtsx_pci_sdmmc.c
+> @@ -108,12 +108,10 @@ static void sd_isr_done_transfer(struct
+> platform_device *pdev) {
+>  	struct realtek_pci_sdmmc *host = platform_get_drvdata(pdev);
+> 
+> -	spin_lock(&host->lock);
+>  	if (host->cmd)
+>  		tasklet_schedule(&host->cmd_tasklet);
+> -	if (host->data)
+> +	else if (host->data)
+>  		tasklet_schedule(&host->data_tasklet);
+> -	spin_unlock(&host->lock);
+>  }
+> 
+>  static void sd_request_timeout(unsigned long host_addr)
