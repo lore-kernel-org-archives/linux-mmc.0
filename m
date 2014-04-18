@@ -1,70 +1,64 @@
-From: Seungwon Jeon <tgih.jun@samsung.com>
-Subject: [PATCH v6 6/6] mmc: core: add DT bindings for eMMC HS400 1.8/1.2V
-Date: Fri, 18 Apr 2014 22:37:09 +0900
-Message-ID: <001901cf5b0b$4be8ce70$e3ba6b50$%jun@samsung.com>
-References: <1383653403-10049-1-git-send-email-ulf.hansson@linaro.org>
- <006701cf2a58$c628e050$527aa0f0$%jun@samsung.com>
+From: Matthieu CASTET <matthieu.castet@parrot.com>
+Subject: SDHCI DDR50 implies MMC DDR
+Date: Fri, 18 Apr 2014 15:55:39 +0200
+Message-ID: <20140418155539.5d43a9c8@parrot.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/mixed; boundary="MP_/ZYPgCYlKaEjr4wQWybyE+HZ"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout2.samsung.com ([203.254.224.25]:64763 "EHLO
-	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751159AbaDRNhK (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 18 Apr 2014 09:37:10 -0400
-Received: from epcpsbgr5.samsung.com
- (u145.gpu120.samsung.co.kr [203.254.230.145])
- by mailout2.samsung.com (Oracle Communications Messaging Server 7u4-24.01
- (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTP id <0N48001M4B5XWL80@mailout2.samsung.com> for
- linux-mmc@vger.kernel.org; Fri, 18 Apr 2014 22:37:09 +0900 (KST)
-In-reply-to: 
-Content-language: ko
+Received: from mail.aswsp.com ([193.34.35.150]:17102 "EHLO mail.aswsp.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751307AbaDRNzh (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 18 Apr 2014 09:55:37 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
-Cc: 'Chris Ball' <chris@printf.net>, 'Ulf Hansson' <ulf.hansson@linaro.org>, 'Jaehoon Chung' <jh80.chung@samsung.com>, 'Jackey Shen' <jackey.shen@amd.com>, 'Alim Akhtar' <alim.akhtar@samsung.com>
+Cc: Giuseppe CAVALLARO <peppe.cavallaro@st.com>, Chris Ball <cjb@laptop.org>, Dong Aisheng <b29396@freescale.com>
 
-Provide the option to configure these speed modes per host,
-for those host driver's that can't distinguish this in runtime.
-Specially, if host can support HS400, it means that host can also
-support HS200.
+--MP_/ZYPgCYlKaEjr4wQWybyE+HZ
+Content-Type: text/plain; charset="US-ASCII"
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
 
-Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
+Hi,
+
+shouldn't we add something like that do auto-detect MMC_CAP_1_8V_DDR on
+sdhci controller ?
+
+
+Matthieu
+--MP_/ZYPgCYlKaEjr4wQWybyE+HZ
+Content-Type: text/x-patch
+Content-Transfer-Encoding: 7bit
+Content-Disposition: attachment;
+	filename="0001-sdhci-UHS-DDR50-implies-MMC-DDR.patch"
+
+>From f821501dada7041521fe80a5fe92bdc8b15f055b Mon Sep 17 00:00:00 2001
+From: Matthieu CASTET <matthieu.castet@parrot.com>
+Date: Fri, 18 Apr 2014 15:49:05 +0200
+Subject: [PATCH] sdhci : UHS DDR50 implies MMC DDR
+
 ---
- Documentation/devicetree/bindings/mmc/mmc.txt |    2 ++
- drivers/mmc/core/host.c                       |    4 ++++
- 2 files changed, 6 insertions(+), 0 deletions(-)
+ drivers/mmc/host/sdhci.c | 5 +++++
+ 1 file changed, 5 insertions(+)
 
-diff --git a/Documentation/devicetree/bindings/mmc/mmc.txt b/Documentation/devicetree/bindings/mmc/mmc.txt
-index 9dce540..3c18001 100644
---- a/Documentation/devicetree/bindings/mmc/mmc.txt
-+++ b/Documentation/devicetree/bindings/mmc/mmc.txt
-@@ -38,6 +38,8 @@ Optional properties:
- - mmc-highspeed-ddr-1_2v: eMMC high-speed DDR mode(1.2V I/O) is supported
- - mmc-hs200-1_8v: eMMC HS200 mode(1.8V I/O) is supported
- - mmc-hs200-1_2v: eMMC HS200 mode(1.2V I/O) is supported
-+- mmc-hs400-1_8v: eMMC HS400 mode(1.8V I/O) is supported
-+- mmc-hs400-1_2v: eMMC HS400 mode(1.2V I/O) is supported
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 9a79fc4..2b7478e 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -2971,6 +2971,11 @@ int sdhci_add_host(struct sdhci_host *host)
+ 	if (caps[0] & SDHCI_CAN_DO_HISPD)
+ 		mmc->caps |= MMC_CAP_SD_HIGHSPEED | MMC_CAP_MMC_HIGHSPEED;
  
- *NOTE* on CD and WP polarity. To use common for all SD/MMC host controllers line
- polarity properties, we have to fix the meaning of the "normal" and "inverted"
-diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
-index fdea825..95cceae 100644
---- a/drivers/mmc/core/host.c
-+++ b/drivers/mmc/core/host.c
-@@ -447,6 +447,10 @@ int mmc_of_parse(struct mmc_host *host)
- 		host->caps2 |= MMC_CAP2_HS200_1_8V_SDR;
- 	if (of_find_property(np, "mmc-hs200-1_2v", &len))
- 		host->caps2 |= MMC_CAP2_HS200_1_2V_SDR;
-+	if (of_find_property(np, "mmc-hs400-1_8v", &len))
-+		host->caps2 |= MMC_CAP2_HS400_1_8V | MMC_CAP2_HS200_1_8V_SDR;
-+	if (of_find_property(np, "mmc-hs400-1_2v", &len))
-+		host->caps2 |= MMC_CAP2_HS400_1_2V | MMC_CAP2_HS200_1_2V_SDR;
- 
- 	return 0;
- 
++	/* DDR50 implies MMC DDR at 1.8 or 3.3 */
++	if ((caps[1] & SDHCI_SUPPORT_DDR50) &&
++		!(host->quirks2 & SDHCI_QUIRK2_BROKEN_DDR50))
++		mmc->caps |= MMC_CAP_1_8V_DDR;
++
+ 	if ((host->quirks & SDHCI_QUIRK_BROKEN_CARD_DETECTION) &&
+ 	    !(host->mmc->caps & MMC_CAP_NONREMOVABLE))
+ 		mmc->caps |= MMC_CAP_NEEDS_POLL;
 -- 
-1.7.0.4
+1.9.2
 
 
+--MP_/ZYPgCYlKaEjr4wQWybyE+HZ--
