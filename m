@@ -1,78 +1,74 @@
-From: James Cameron <quozl@laptop.org>
-Subject: [PATCH] mmc: avoid garbage when dt properties missing
-Date: Sat, 19 Apr 2014 11:24:09 +1000
-Message-ID: <20140419012409.GA27990@us.netrek.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from zimbra.real-time.com ([63.170.91.9]:54217 "EHLO
-	zimbra.real-time.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751911AbaDSBdc (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 18 Apr 2014 21:33:32 -0400
-Content-Disposition: inline
-Sender: linux-mmc-owner@vger.kernel.org
+From: Daniel Willmann <daniel@totalueberwachung.de>
+Subject: [PATCH] mmc: mxs: fix card detection function for broken card detect
+Date: Sat, 19 Apr 2014 23:59:18 +0200
+Message-ID: <dec3cef26b7470cabfc11a83750a88db5b545a41.1397944151.git.daniel@totalueberwachung.de>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Sascha Hauer <s.hauer@pengutronix.de>, Shawn Guo <shawn.guo@linaro.org>, Daniel Willmann <daniel@totalueberwachung.de>
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: Chris Ball <cjb@laptop.org>, James Cameron <quozl@laptop.org>
 
-When of_property_read_u32 does not find a property, it does not
-initialise the variable, yet we were using the uninitialised variable.
+Return -ENOSYS in get_cd if broken-cd is specified in the device tree.
 
-Found and reproduced in sdhci-pxav3.c, on wider review found also in two
-other places in drivers/mmc/host/, did not review wider.
+Commit a91fe279ae75 (mmc: mxs: use standard flag for broken card
+detection) sets MMC_CAP_NEEDS_POLL when broken-cd is specified. This
+driver sets this flag unconditionally as it does not support a card
+detect interrupt. Instead, broken-cd means that there is no card detect
+signal connected.
 
-Signed-off-by: James Cameron <quozl@laptop.org>
+The mmc core checks the get_cd function return value to determine if a
+card is present. Only for a non-zero return value it will attempt to
+initialize the card. So retuning -ENOSYS will allow the card to be
+initialized.
+For comparison, mmc_gpio_get_cd in slot-gpio.c also returns -ENOSYS if
+the card detect GPIO is not valid.
+
+Signed-off-by: Daniel Willmann <daniel@totalueberwachung.de>
 ---
- drivers/mmc/host/omap_hsmmc.c  | 2 +-
- drivers/mmc/host/sdhci-pxav2.c | 4 ++--
- drivers/mmc/host/sdhci-pxav3.c | 2 +-
- 3 files changed, 4 insertions(+), 4 deletions(-)
+This might be relevant for stable kernels. The patch was tested with 3.14.1 on
+olinuxino nano.
 
-diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index e91ee21..21ff9aa 100644
---- a/drivers/mmc/host/omap_hsmmc.c
-+++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -1784,7 +1784,7 @@ static struct omap_mmc_platform_data *of_get_hsmmc_pdata(struct device *dev)
- {
- 	struct omap_mmc_platform_data *pdata;
- 	struct device_node *np = dev->of_node;
--	u32 bus_width, max_freq;
-+	u32 bus_width = 0, max_freq;
- 	int cd_gpio, wp_gpio;
+ drivers/mmc/host/mxs-mmc.c | 7 +++++++
+ 1 file changed, 7 insertions(+)
+
+diff --git a/drivers/mmc/host/mxs-mmc.c b/drivers/mmc/host/mxs-mmc.c
+index 073e871a0fc8..babfea03ba8a 100644
+--- a/drivers/mmc/host/mxs-mmc.c
++++ b/drivers/mmc/host/mxs-mmc.c
+@@ -70,6 +70,7 @@ struct mxs_mmc_host {
+ 	unsigned char			bus_width;
+ 	spinlock_t			lock;
+ 	int				sdio_irq_en;
++	bool				broken_cd;
+ };
  
- 	cd_gpio = of_get_named_gpio(np, "cd-gpios", 0);
-diff --git a/drivers/mmc/host/sdhci-pxav2.c b/drivers/mmc/host/sdhci-pxav2.c
-index d51e061..10bb29b 100644
---- a/drivers/mmc/host/sdhci-pxav2.c
-+++ b/drivers/mmc/host/sdhci-pxav2.c
-@@ -130,8 +130,8 @@ static struct sdhci_pxa_platdata *pxav2_get_mmc_pdata(struct device *dev)
- {
- 	struct sdhci_pxa_platdata *pdata;
- 	struct device_node *np = dev->of_node;
--	u32 bus_width;
--	u32 clk_delay_cycles;
-+	u32 bus_width = 0;
-+	u32 clk_delay_cycles = 0;
+ static int mxs_mmc_get_cd(struct mmc_host *mmc)
+@@ -78,6 +79,9 @@ static int mxs_mmc_get_cd(struct mmc_host *mmc)
+ 	struct mxs_ssp *ssp = &host->ssp;
+ 	int present, ret;
  
- 	pdata = devm_kzalloc(dev, sizeof(*pdata), GFP_KERNEL);
- 	if (!pdata)
-diff --git a/drivers/mmc/host/sdhci-pxav3.c b/drivers/mmc/host/sdhci-pxav3.c
-index 2fd73b3..d2baa15 100644
---- a/drivers/mmc/host/sdhci-pxav3.c
-+++ b/drivers/mmc/host/sdhci-pxav3.c
-@@ -253,7 +253,7 @@ static struct sdhci_pxa_platdata *pxav3_get_mmc_pdata(struct device *dev)
++	if (host->broken_cd)
++		return -ENOSYS;
++
+ 	ret = mmc_gpio_get_cd(mmc);
+ 	if (ret >= 0)
+ 		return ret;
+@@ -568,6 +572,7 @@ static int mxs_mmc_probe(struct platform_device *pdev)
  {
- 	struct sdhci_pxa_platdata *pdata;
- 	struct device_node *np = dev->of_node;
--	u32 clk_delay_cycles;
-+	u32 clk_delay_cycles = 0;
+ 	const struct of_device_id *of_id =
+ 			of_match_device(mxs_mmc_dt_ids, &pdev->dev);
++	struct device_node *np = pdev->dev.of_node;
+ 	struct mxs_mmc_host *host;
+ 	struct mmc_host *mmc;
+ 	struct resource *iores;
+@@ -634,6 +639,8 @@ static int mxs_mmc_probe(struct platform_device *pdev)
+ 	mmc->caps = MMC_CAP_SD_HIGHSPEED | MMC_CAP_MMC_HIGHSPEED |
+ 		    MMC_CAP_SDIO_IRQ | MMC_CAP_NEEDS_POLL;
  
- 	pdata = devm_kzalloc(dev, sizeof(*pdata), GFP_KERNEL);
- 	if (!pdata)
++	host->broken_cd = of_property_read_bool(np, "broken-cd");
++
+ 	mmc->f_min = 400000;
+ 	mmc->f_max = 288000000;
+ 
 -- 
-1.8.3.2
-
-
--- 
-James Cameron
-http://quozl.linux.org.au/
+1.8.4.2
