@@ -1,162 +1,229 @@
-From: Peter Guo <peter.guo@bayhubtech.com>
-Subject: [PATCH 1/1 v2] mmc: sdhci-pci-o2micro Add SeaBird SeaEagle SD3
- support
-Date: Mon, 21 Apr 2014 07:21:57 +0000
-Message-ID: <cbe772e81fc0470d9136fc08e6f8f264@CO2PR04MB651.namprd04.prod.outlook.com>
+From: micky <micky_ching@realsil.com.cn>
+Subject: Re: Locking issues in "mmc: rtsx: add support for pre_req and
+ post_req"
+Date: Mon, 21 Apr 2014 16:43:54 +0800
+Message-ID: <5354DA4A.8060503@realsil.com.cn>
+References: <1397612325-4968-1-git-send-email-micky_ching@realsil.com.cn>
+ <29134783.v67ScDLFcC@al> <201404200220.s3K2KC4h007515@rtits1.realtek.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bn1lp0140.outbound.protection.outlook.com ([207.46.163.140]:41545
-	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1750712AbaDUHWB convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 21 Apr 2014 03:22:01 -0400
-Content-Language: en-US
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"; Format="flowed"
+Content-Transfer-Encoding: 7bit
+Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
+In-Reply-To: <201404200220.s3K2KC4h007515@rtits1.realtek.com>
+List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
+List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel>
+List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
+List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
+List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
+Errors-To: driverdev-devel-bounces@linuxdriverproject.org
+Sender: driverdev-devel-bounces@linuxdriverproject.org
+To: Peter Wu <peter@lekensteyn.nl>, driverdev-devel@linuxdriverproject.org
+Cc: ulf.hansson@linaro.org, sameo@linux.intel.com, gregkh@linuxfoundation.org, linux-mmc@vger.kernel.org, chris@printf.net, linux-kernel@vger.kernel.org, wei_wang@realsil.com.cn, Borislav Petkov <bp@alien8.de>, devel@linuxdriverproject.org, rogerable@realtek.com, dan.carpenter@oracle.com
 List-Id: linux-mmc@vger.kernel.org
-To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Cc: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Adam Lee <adam.lee@canonical.com>, Samuel Guan <samuel.guan@bayhubtech.com>
 
-Add O2Micro/BayHubTech chip 8520 subversion B1 SD3.0 support.
-Add O2Micro/BayHubTech chip 8620 and 8621 SD3.0 support
-Enable Led function of 8520 chip.
+Hi Peter,
 
-Signed-off-by: peter.guo <peter.guo@bayhubtech.com>
----
- drivers/mmc/host/sdhci-pci-o2micro.c |   68 +++++++++++++++++++++++++++++++++-
- drivers/mmc/host/sdhci-pci-o2micro.h |    6 +++
- 2 files changed, 73 insertions(+), 1 deletion(-)
+I'm considering not using spinlock to get it work and will resend the 
+patch later.
+Thank you.
 
-diff --git a/drivers/mmc/host/sdhci-pci-o2micro.c b/drivers/mmc/host/sdhci-pci-o2micro.c
-index f49666b..1c4d302 100644
---- a/drivers/mmc/host/sdhci-pci-o2micro.c
-+++ b/drivers/mmc/host/sdhci-pci-o2micro.c
-@@ -21,6 +21,42 @@
- #include "sdhci-pci.h"
- #include "sdhci-pci-o2micro.h"
- 
-+static void o2_pci_set_baseclk(struct sdhci_pci_chip *chip, u32 value)
-+{
-+	u32 scratch_32;
-+	pci_read_config_dword(chip->pdev,
-+			O2_SD_PLL_SETTING, &scratch_32);
-+
-+	scratch_32 &= 0x0000FFFF;
-+	scratch_32 |= value;
-+
-+	pci_write_config_dword(chip->pdev,
-+			O2_SD_PLL_SETTING, scratch_32);
-+}
-+static void o2_pci_led_enable(struct sdhci_pci_chip *chip)
-+{
-+	int ret;
-+	u32 scratch_32;
-+
-+	/* Set led of SD host function enable	*/
-+	ret = pci_read_config_dword(chip->pdev,
-+			O2_SD_FUNC_REG0, &scratch_32);
-+	if (ret)
-+		return;
-+	scratch_32 &= ~O2_SD_FREG0_LEFOFF;
-+	pci_write_config_dword(chip->pdev,
-+			O2_SD_FUNC_REG0, scratch_32);
-+
-+	ret = pci_read_config_dword(chip->pdev,
-+			O2_SD_TEST_REG, &scratch_32);
-+	if (ret)
-+		return;
-+	scratch_32 |= O2_SD_LED_ENABLE;
-+	pci_write_config_dword(chip->pdev,
-+			O2_SD_TEST_REG, scratch_32);
-+
-+}
-+
- void sdhci_pci_o2_fujin2_pci_init(struct sdhci_pci_chip *chip)
- {
- 	u32 scratch_32;
-@@ -216,6 +252,33 @@ int sdhci_pci_o2_probe(struct sdhci_pci_chip *chip)
- 		scratch &= 0x7f;
- 		pci_write_config_byte(chip->pdev, O2_SD_LOCK_WP, scratch);
- 
-+		/* DevId=8520 subId= 0x11 or 0x12  Type Chip support */
-+		if (chip->pdev->device == PCI_DEVICE_ID_O2_FUJIN2) {
-+			ret = pci_read_config_dword(chip->pdev,
-+						O2_SD_FUNC_REG0, &scratch_32);
-+			scratch_32 = ((scratch_32 & 0xFF000000) >> 24);
-+			/* Check Whether subId is 0x11 or 0x12	*/
-+			if ((scratch_32 == 0x11) || (scratch_32 == 0x12)) {
-+				scratch_32 = 0x2c280000;
-+				/* Set Base Clock to 208MZ	*/
-+				o2_pci_set_baseclk(chip, scratch_32);
-+				ret = pci_read_config_dword(chip->pdev,
-+						O2_SD_FUNC_REG4, &scratch_32);
-+				/* Enable Base Clk setting change	*/
-+				scratch_32 |= O2_SD_FREG4_ENABLE_CLK_SET;
-+				pci_write_config_dword(chip->pdev,
-+					O2_SD_FUNC_REG4, scratch_32);
-+
-+				/* Set Tuning Window to 4	*/
-+				pci_write_config_byte(chip->pdev,
-+					O2_SD_TUNING_CTRL, 0x44);
-+				break;
-+			}
-+		}
-+
-+		/* Enable 8520 led function	*/
-+		o2_pci_led_enable(chip);
-+
- 		/* Set timeout CLK */
- 		ret = pci_read_config_dword(chip->pdev,
- 					    O2_SD_CLK_SETTING, &scratch_32);
-@@ -276,7 +339,7 @@ int sdhci_pci_o2_probe(struct sdhci_pci_chip *chip)
- 		pci_write_config_byte(chip->pdev, O2_SD_LOCK_WP, scratch);
- 
- 		ret = pci_read_config_dword(chip->pdev,
--					    O2_SD_FUNC_REG0, &scratch_32);
-+					    O2_SD_PLL_SETTING, &scratch_32);
- 
- 		if ((scratch_32 & 0xff000000) == 0x01000000) {
- 			scratch_32 &= 0x0000FFFF;
-@@ -299,6 +362,9 @@ int sdhci_pci_o2_probe(struct sdhci_pci_chip *chip)
- 					       O2_SD_FUNC_REG4, scratch_32);
- 		}
- 
-+		/* Set Tuning Windows to 5 */
-+		pci_write_config_byte(chip->pdev,
-+				O2_SD_TUNING_CTRL, 0x55);
- 		/* Lock WP */
- 		ret = pci_read_config_byte(chip->pdev,
- 					   O2_SD_LOCK_WP, &scratch);
-diff --git a/drivers/mmc/host/sdhci-pci-o2micro.h b/drivers/mmc/host/sdhci-pci-o2micro.h
-index dbec4c9..5331678 100644
---- a/drivers/mmc/host/sdhci-pci-o2micro.h
-+++ b/drivers/mmc/host/sdhci-pci-o2micro.h
-@@ -39,7 +39,11 @@
- #define O2_SD_DEV_CTRL		0x88
- #define O2_SD_LOCK_WP		0xD3
- #define O2_SD_TEST_REG		0xD4
-+#define	O2_SD_LED_ENABLE	BIT(6)
-+
- #define O2_SD_FUNC_REG0		0xDC
-+#define O2_SD_FRGE0_LEDOFF	BIT(13)
-+
- #define O2_SD_MULTI_VCC3V	0xEE
- #define O2_SD_CLKREQ		0xEC
- #define O2_SD_CAPS		0xE0
-@@ -57,10 +61,12 @@
- #define O2_SD_UHS2_L1_CTRL	0x35C
- #define O2_SD_FUNC_REG3		0x3E0
- #define O2_SD_FUNC_REG4		0x3E4
-+#define O2_SD_FREG4_ENABLE_CLK_SET	BIT(22)
- 
- #define O2_SD_VENDOR_SETTING	0x110
- #define O2_SD_VENDOR_SETTING2	0x1C8
- 
-+
- extern void sdhci_pci_o2_fujin2_pci_init(struct sdhci_pci_chip *chip);
- 
- extern int sdhci_pci_o2_probe_slot(struct sdhci_pci_slot *slot);
--- 
-1.7.9.5
-
+Best Regards.
+micky
+On 04/19/2014 07:13 AM, Peter Wu wrote:
+> So, I reverted c42deffd5b53c9e583d83c7964854ede2f12410d ("mmc: rtsx: add
+> support for pre_req and post_req") on top of v3.15-rc1-49-g10ec34f and the
+> hang issue went away.
+>
+> There is something that is possibly problematic. All three tasklets (cmd,
+> data, finish) try to spinlock on host->lock. According to the tasklets
+> documentation[1], they always run at interrupts (i.e., at any time, possibly
+> right after tasklet_schedule if I got this right?).
+>
+> These tasklets however do get scheduled *under* the host->lock which will
+> cause a deadlock. This proposed patch ("mmc: rtsx: fix possible circular
+> locking dependency") fixes the issue for sd_isr_done_transfer, but there are
+> others:
+>
+> 1. sd_request_timeout:
+>   125         spin_lock_irqsave(&host->lock, flags);
+>   ...
+>   139 out:
+>   140         tasklet_schedule(&host->finish_tasklet); // <--
+>   141         spin_unlock_irqrestore(&host->lock, flags);
+>
+> 2. sd_get_rsp (cmd_tasklet!):
+>   429         spin_lock_irqsave(&host->lock, flags);
+>   ...
+>   506         tasklet_schedule(&host->finish_tasklet); // <--
+>   507         spin_unlock_irqrestore(&host->lock, flags);
+>
+> 3. sd_finish_multi_rw (data_tasklet!):
+>   657         spin_lock_irqsave(&host->lock, flags);
+>   ...
+>   684         tasklet_schedule(&host->finish_tasklet); // <--
+>   685         spin_unlock_irqrestore(&host->lock, flags);
+>
+> 4. sdmmc_request:
+>   921         mutex_lock(&pcr->pcr_mutex);
+>   922         spin_lock_irqsave(&host->lock, flags);
+>   ...
+>   967         tasklet_schedule(&host->finish_tasklet); // <--
+>   968         spin_unlock_irqrestore(&host->lock, flags);
+>
+> 5. rtsx_pci_sdmmc_drv_remove:
+>    1526         spin_lock_irqsave(&host->lock, flags);
+>    1527         if (host->mrq) {
+>    ...
+>    1541                 tasklet_schedule(&host->finish_tasklet); // <--
+>    1542         }
+>    1543         spin_unlock_irqrestore(&host->lock, flags);
+>    1544
+>    1545         del_timer_sync(&host->timer);
+>    1546         tasklet_kill(&host->cmd_tasklet);
+>    1547         tasklet_kill(&host->data_tasklet);
+>    1548         tasklet_kill(&host->finish_tasklet); // <--
+>
+> pcr_mutex (un)locking:
+>   - gets locked in sdmmc_request
+>   - gets unlocked in sd_finish_request (finish_tasklet).
+>   - gets locked/unlocked in sdmmc_set_ios
+>   - gets locked/unlocked in sdmmc_get_ro
+>   - gets locked/unlocked in sdmmc_get_cd
+>   - gets locked/unlocked in sdmmc_switch_voltage
+>   - gets locked/unlocked in sdmmc_execute_tuning
+>
+> finish_tasklet (sd_finish_request()) gets scheduled in:
+>   - sd_request_timeout (under host->lock; called on timer expiration)
+>   - error path of sd_send_cmd
+>   - get_rsp (cmd_tasklet; under host->lock)
+>   - error path of sd_start_multi_rw (after mod timer)
+>   - sd_finish_multi_rw (under host->lock)
+>   - sdmmc_request (under host->lock in error path; without host->lock
+>     elsewhere)
+>   - rtsx_pci_sdmmc_drv_remove (under host->lock)
+>
+> sd_request_timeout (timer) related:
+>   - deleted in sd_finish_request under host->lock (also assumes pcr_mutex)
+>   - sd_send_cmd (timer set with 100ms timeout, not called in error path)
+>   - sd_start_multi_rw (timeout set to 10 HZ, called before error path is
+>     checked in which finish_tasklet gets scheduled)
+> Note: sd_request_timeout claims+releases host->lock.
+>
+> If I understand it correctly, host->lock is responsible for protecting the
+> realtek_pci_sdmmc structure. Why is tasklet_schedule() on the same lock?
+>
+> Shouldn't the above five tasklet_schedule calls be moved outside the lock?
+> Will it be problematic if the same tasklet gets executed multiple times (if
+> that is possible?).
+>
+> Does it really need that much locking? dw_mmc.c also implements pre_req, but
+> uses tasklets without needing to lock anything.
+>
+> Kind regards,
+> Peter
+>
+>   [1]: http://www.makelinux.net/ldd3/chp-7-sect-5
+>
+> On Friday 18 April 2014 16:00:53 Peter Wu wrote:
+>> On Wednesday 16 April 2014 09:38:44 micky_ching@realsil.com.cn wrote:
+>>> From: Micky Ching <micky_ching@realsil.com.cn>
+>>>
+>>> To avoid dead lock, we need make sure host->lock is always acquire
+>>> before pcr->lock. But in irq handler, we acquired pcr->lock in rtsx mfd
+>>> driver, and sd_isr_done_transfer() is called during pcr->lock already
+>>> acquired. Since in sd_isr_done_transfer() the only work we do is schdule
+>>> tasklet, the cmd_tasklet and data_tasklet never conflict, so it is safe
+>>> to remove spin_lock() here.
+>>>
+>>> Signed-off-by: Micky Ching <micky_ching@realsil.com.cn>
+>>> ---
+>>>
+>>>   drivers/mmc/host/rtsx_pci_sdmmc.c |    4 +---
+>>>   1 file changed, 1 insertion(+), 3 deletions(-)
+>> This patch came from
+>> https://lkml.kernel.org/r/534DE1D7.3000308@realsil.com.cn ("Re:
+>> rtsx_pci_sdmmc lockdep splat").
+>>
+>> With v3.15-rc1-49-g10ec34f, I have a hung machine when inserting a SD card.
+>> lockdep was not enabled for the kernel, I have not bisected yet.
+>> This patch on top of that kernel version does not help (tested by
+>> rmmod rtsx_pci_sdmmc and insmod the patched one).
+>>
+>> Console (as typed over from a picture, sorry for any typos):
+>> WARNING: CPU: 1 PID: 0 at kernel/locking/mutex.c:698
+>> DEBUG_LOCKS_WARN_ON(in_interrupt())
+>> Modules linked in: ...
+>> CPU: 1 PID: 0 Comm: swapper/1 Not tainted 3.15-rc1-custom-000049-g10ec34f #5
+>> Hardware name: Shuttle Inc. XS36V/XS36V, BIOS 1.11 12/18/2012
+>> Call trace:
+>> <IRQ> dump_stack
+>> warn_slowpath_common
+>> warn_slowpath_fmt
+>> __mutex_unlock_slowpath
+>> mutex_unlock
+>> sd_finish_request [rtsx_pci_sdmmc]
+>> tasklet_action
+>> __do_softirq
+>> irq_exit
+>> smp_apic_timer_interrupt
+>> apic_timer_interrupt
+>> <EOI> ? cpuidle_enter_state
+>> cpuidle_enter
+>> cpu_startup_entry
+>> start_secondary
+>> ---[end trace ...]---
+>> (60 seconds later:)
+>> INFO: rcu_preempt detected stalls on CPUs/tasks: {} (detected by 1, t=18004
+>> jiffies, g=3264, c=3263, q=2) INFO: Stall ended before state dump start
+>>
+>> I also managed to get this trace about 106 seconds later when switching TTY:
+>> INFO: task kworker/... blocked for more than 120 seconds
+>> Workqueue: kmmcd mm_rescan [mmc_core]
+>> Call trace:
+>> ? update_rq_clock.part80
+>> ? internal_add_timer
+>> schedule
+>> schedule_preempt
+>> __mutex_lock_slowpath
+>> mutex_lock
+>> sdmmc_request [rtsx_pci_sdmmc]
+>> mmc_start_request [mmc_core]
+>> __mmc_start_req [mmc_core]
+>> mmc_wait_for_cmd [mmc_core]
+>> ? mmc_release_host [mmc_core]
+>> mmc_io_rw_direct_host [mmc_core]
+>>
+>> I'll try to get a lockdep kernel and text logs later, but perhaps you
+>> already know the issue?
+>>
+>> Peter
+>>
+>>> diff --git a/drivers/mmc/host/rtsx_pci_sdmmc.c
+>>> b/drivers/mmc/host/rtsx_pci_sdmmc.c index 453e1d4..40695e0 100644
+>>> --- a/drivers/mmc/host/rtsx_pci_sdmmc.c
+>>> +++ b/drivers/mmc/host/rtsx_pci_sdmmc.c
+>>> @@ -108,12 +108,10 @@ static void sd_isr_done_transfer(struct
+>>> platform_device *pdev) {
+>>>
+>>>   	struct realtek_pci_sdmmc *host = platform_get_drvdata(pdev);
+>>>
+>>> -	spin_lock(&host->lock);
+>>>
+>>>   	if (host->cmd)
+>>>   	
+>>>   		tasklet_schedule(&host->cmd_tasklet);
+>>>
+>>> -	if (host->data)
+>>> +	else if (host->data)
+>>>
+>>>   		tasklet_schedule(&host->data_tasklet);
+>>>
+>>> -	spin_unlock(&host->lock);
+>>>
+>>>   }
+>>>   
+>>>   static void sd_request_timeout(unsigned long host_addr)
+> .
+>
