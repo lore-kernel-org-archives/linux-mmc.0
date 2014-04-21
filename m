@@ -1,57 +1,162 @@
-From: Seungwon Jeon <tgih.jun@samsung.com>
-Subject: RE: [PATCH v6 0/6] update selection of bus speed mode for eMMC
-Date: Mon, 21 Apr 2014 12:55:21 +0900
-Message-ID: <000001cf5d15$84587600$8d096200$%jun@samsung.com>
-References: <1383653403-10049-1-git-send-email-ulf.hansson@linaro.org>
- <006701cf2a58$c628e050$527aa0f0$%jun@samsung.com>
- <001301cf5b0b$2ffe5a40$8ffb0ec0$%jun@samsung.com>
- <CAPDyKFpHasn88pi6o3Hf7pZhj9wr9UHK=ui9PzpQvA66_=fivA@mail.gmail.com>
+From: Peter Guo <peter.guo@bayhubtech.com>
+Subject: [PATCH 1/1 v2] mmc: sdhci-pci-o2micro Add SeaBird SeaEagle SD3
+ support
+Date: Mon, 21 Apr 2014 07:21:57 +0000
+Message-ID: <cbe772e81fc0470d9136fc08e6f8f264@CO2PR04MB651.namprd04.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout1.samsung.com ([203.254.224.24]:36640 "EHLO
-	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751718AbaDUDzX (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 20 Apr 2014 23:55:23 -0400
-Received: from epcpsbgr1.samsung.com
- (u141.gpu120.samsung.co.kr [203.254.230.141])
- by mailout1.samsung.com (Oracle Communications Messaging Server 7u4-24.01
- (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTP id <0N4D00BZH489LY90@mailout1.samsung.com> for
- linux-mmc@vger.kernel.org; Mon, 21 Apr 2014 12:55:21 +0900 (KST)
-In-reply-to: <CAPDyKFpHasn88pi6o3Hf7pZhj9wr9UHK=ui9PzpQvA66_=fivA@mail.gmail.com>
-Content-language: ko
+Received: from mail-bn1lp0140.outbound.protection.outlook.com ([207.46.163.140]:41545
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1750712AbaDUHWB convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 21 Apr 2014 03:22:01 -0400
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: 'Ulf Hansson' <ulf.hansson@linaro.org>
-Cc: 'linux-mmc' <linux-mmc@vger.kernel.org>, 'Chris Ball' <chris@printf.net>, 'Jaehoon Chung' <jh80.chung@samsung.com>, 'Jackey Shen' <jackey.shen@amd.com>, 'Alim Akhtar' <alim.akhtar@samsung.com>
+To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Cc: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Adam Lee <adam.lee@canonical.com>, Samuel Guan <samuel.guan@bayhubtech.com>
 
-On Sun, April 20, 2014, Ulf Hansson wrote:
-> Hi Seungwon,
-> 
-> On 18 April 2014 15:36, Seungwon Jeon <tgih.jun@samsung.com> wrote:
-> > This series contains the change for selection of bus speed mode.
-> > Previous implementation is complicated and some sequence is duplicated.
-> > And specially, HS400 mode eMMC5.0 is introduced this time.
-> > This patch-set has been tested in Exynos SoC.
-> >
-> > Note:
-> > This patch-set depends on "[PATCH RESEND v3 1/7] mmc: clarify DDR timing mode between SD-UHS and
-> eMMC".
-> >
-> > Changes in v6:
-> >         (6/6) Included "mmc: core: add DT bindings for eMMC HS400 1.8/1.2V" into this patch-set
-> >         (5/6) Changed return type of prepare_hs400_tuning callback(int -> void)
-> 
-> I would favour the int return type, that leaves room for the
-> possibility of drivers to fail.
-> 
-> Moreover, I have already sent a pull request to Chris, with the v5
-> version of this patchset, which I think is fine.
-OK. It would be fine.
+Add O2Micro/BayHubTech chip 8520 subversion B1 SD3.0 support.
+Add O2Micro/BayHubTech chip 8620 and 8621 SD3.0 support
+Enable Led function of 8520 chip.
 
-Thanks,
-Seungwon Jeon
+Signed-off-by: peter.guo <peter.guo@bayhubtech.com>
+---
+ drivers/mmc/host/sdhci-pci-o2micro.c |   68 +++++++++++++++++++++++++++++++++-
+ drivers/mmc/host/sdhci-pci-o2micro.h |    6 +++
+ 2 files changed, 73 insertions(+), 1 deletion(-)
 
+diff --git a/drivers/mmc/host/sdhci-pci-o2micro.c b/drivers/mmc/host/sdhci-pci-o2micro.c
+index f49666b..1c4d302 100644
+--- a/drivers/mmc/host/sdhci-pci-o2micro.c
++++ b/drivers/mmc/host/sdhci-pci-o2micro.c
+@@ -21,6 +21,42 @@
+ #include "sdhci-pci.h"
+ #include "sdhci-pci-o2micro.h"
+ 
++static void o2_pci_set_baseclk(struct sdhci_pci_chip *chip, u32 value)
++{
++	u32 scratch_32;
++	pci_read_config_dword(chip->pdev,
++			O2_SD_PLL_SETTING, &scratch_32);
++
++	scratch_32 &= 0x0000FFFF;
++	scratch_32 |= value;
++
++	pci_write_config_dword(chip->pdev,
++			O2_SD_PLL_SETTING, scratch_32);
++}
++static void o2_pci_led_enable(struct sdhci_pci_chip *chip)
++{
++	int ret;
++	u32 scratch_32;
++
++	/* Set led of SD host function enable	*/
++	ret = pci_read_config_dword(chip->pdev,
++			O2_SD_FUNC_REG0, &scratch_32);
++	if (ret)
++		return;
++	scratch_32 &= ~O2_SD_FREG0_LEFOFF;
++	pci_write_config_dword(chip->pdev,
++			O2_SD_FUNC_REG0, scratch_32);
++
++	ret = pci_read_config_dword(chip->pdev,
++			O2_SD_TEST_REG, &scratch_32);
++	if (ret)
++		return;
++	scratch_32 |= O2_SD_LED_ENABLE;
++	pci_write_config_dword(chip->pdev,
++			O2_SD_TEST_REG, scratch_32);
++
++}
++
+ void sdhci_pci_o2_fujin2_pci_init(struct sdhci_pci_chip *chip)
+ {
+ 	u32 scratch_32;
+@@ -216,6 +252,33 @@ int sdhci_pci_o2_probe(struct sdhci_pci_chip *chip)
+ 		scratch &= 0x7f;
+ 		pci_write_config_byte(chip->pdev, O2_SD_LOCK_WP, scratch);
+ 
++		/* DevId=8520 subId= 0x11 or 0x12  Type Chip support */
++		if (chip->pdev->device == PCI_DEVICE_ID_O2_FUJIN2) {
++			ret = pci_read_config_dword(chip->pdev,
++						O2_SD_FUNC_REG0, &scratch_32);
++			scratch_32 = ((scratch_32 & 0xFF000000) >> 24);
++			/* Check Whether subId is 0x11 or 0x12	*/
++			if ((scratch_32 == 0x11) || (scratch_32 == 0x12)) {
++				scratch_32 = 0x2c280000;
++				/* Set Base Clock to 208MZ	*/
++				o2_pci_set_baseclk(chip, scratch_32);
++				ret = pci_read_config_dword(chip->pdev,
++						O2_SD_FUNC_REG4, &scratch_32);
++				/* Enable Base Clk setting change	*/
++				scratch_32 |= O2_SD_FREG4_ENABLE_CLK_SET;
++				pci_write_config_dword(chip->pdev,
++					O2_SD_FUNC_REG4, scratch_32);
++
++				/* Set Tuning Window to 4	*/
++				pci_write_config_byte(chip->pdev,
++					O2_SD_TUNING_CTRL, 0x44);
++				break;
++			}
++		}
++
++		/* Enable 8520 led function	*/
++		o2_pci_led_enable(chip);
++
+ 		/* Set timeout CLK */
+ 		ret = pci_read_config_dword(chip->pdev,
+ 					    O2_SD_CLK_SETTING, &scratch_32);
+@@ -276,7 +339,7 @@ int sdhci_pci_o2_probe(struct sdhci_pci_chip *chip)
+ 		pci_write_config_byte(chip->pdev, O2_SD_LOCK_WP, scratch);
+ 
+ 		ret = pci_read_config_dword(chip->pdev,
+-					    O2_SD_FUNC_REG0, &scratch_32);
++					    O2_SD_PLL_SETTING, &scratch_32);
+ 
+ 		if ((scratch_32 & 0xff000000) == 0x01000000) {
+ 			scratch_32 &= 0x0000FFFF;
+@@ -299,6 +362,9 @@ int sdhci_pci_o2_probe(struct sdhci_pci_chip *chip)
+ 					       O2_SD_FUNC_REG4, scratch_32);
+ 		}
+ 
++		/* Set Tuning Windows to 5 */
++		pci_write_config_byte(chip->pdev,
++				O2_SD_TUNING_CTRL, 0x55);
+ 		/* Lock WP */
+ 		ret = pci_read_config_byte(chip->pdev,
+ 					   O2_SD_LOCK_WP, &scratch);
+diff --git a/drivers/mmc/host/sdhci-pci-o2micro.h b/drivers/mmc/host/sdhci-pci-o2micro.h
+index dbec4c9..5331678 100644
+--- a/drivers/mmc/host/sdhci-pci-o2micro.h
++++ b/drivers/mmc/host/sdhci-pci-o2micro.h
+@@ -39,7 +39,11 @@
+ #define O2_SD_DEV_CTRL		0x88
+ #define O2_SD_LOCK_WP		0xD3
+ #define O2_SD_TEST_REG		0xD4
++#define	O2_SD_LED_ENABLE	BIT(6)
++
+ #define O2_SD_FUNC_REG0		0xDC
++#define O2_SD_FRGE0_LEDOFF	BIT(13)
++
+ #define O2_SD_MULTI_VCC3V	0xEE
+ #define O2_SD_CLKREQ		0xEC
+ #define O2_SD_CAPS		0xE0
+@@ -57,10 +61,12 @@
+ #define O2_SD_UHS2_L1_CTRL	0x35C
+ #define O2_SD_FUNC_REG3		0x3E0
+ #define O2_SD_FUNC_REG4		0x3E4
++#define O2_SD_FREG4_ENABLE_CLK_SET	BIT(22)
+ 
+ #define O2_SD_VENDOR_SETTING	0x110
+ #define O2_SD_VENDOR_SETTING2	0x1C8
+ 
++
+ extern void sdhci_pci_o2_fujin2_pci_init(struct sdhci_pci_chip *chip);
+ 
+ extern int sdhci_pci_o2_probe_slot(struct sdhci_pci_slot *slot);
+-- 
+1.7.9.5
 
