@@ -1,59 +1,44 @@
 From: srinivas.kandagatla@linaro.org
-Subject: [PATCH RFC 06/12] mmc: mmci: Add write delay to variant structure.
-Date: Mon, 21 Apr 2014 22:48:18 +0100
-Message-ID: <1398116898-31478-1-git-send-email-srinivas.kandagatla@linaro.org>
+Subject: [PATCH RFC 07/12] mmc: mmci: Qcomm: Add 3 clock cycle delay after each register write
+Date: Mon, 21 Apr 2014 22:48:29 +0100
+Message-ID: <1398116909-31517-1-git-send-email-srinivas.kandagatla@linaro.org>
 References: <1398116624-31052-1-git-send-email-srinivas.kandagatla@linaro.org>
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-we0-f178.google.com ([74.125.82.178]:38804 "EHLO
+	mail-we0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754886AbaDUVsi (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 21 Apr 2014 17:48:38 -0400
+Received: by mail-we0-f178.google.com with SMTP id u56so4104147wes.23
+        for <linux-mmc@vger.kernel.org>; Mon, 21 Apr 2014 14:48:37 -0700 (PDT)
 In-Reply-To: <1398116624-31052-1-git-send-email-srinivas.kandagatla@linaro.org>
-Sender: linux-arm-msm-owner@vger.kernel.org
+Sender: linux-mmc-owner@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 Cc: Russell King <linux@arm.linux.org.uk>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, linux-kernel@vger.kernel.org, agross@quicinc.com, linux-arm-msm@vger.kernel.org, Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
-List-Id: linux-mmc@vger.kernel.org
 
 From: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
 
-This patch adds write delay parameter required after each write to controller
-registers on some of the SOCs like Qualcomm ones. The delay parameter will
-provide information on how many clock cycle delay required after each write.
+This patch adds a 3 clock cycle delay required after writing to controller
+registers on Qualcomm SOCs. Without this delay cards are either not detected
+or fails as soon as card is put into data transfer mode.
 
 Signed-off-by: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
 ---
- drivers/mmc/host/mmci.c |    8 ++++++++
- 1 file changed, 8 insertions(+)
+ drivers/mmc/host/mmci.c |    1 +
+ 1 file changed, 1 insertion(+)
 
 diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index 4f8d0ba..86bf330 100644
+index 86bf330..2dc7581 100644
 --- a/drivers/mmc/host/mmci.c
 +++ b/drivers/mmc/host/mmci.c
-@@ -55,6 +55,8 @@ static unsigned int fmax = 515633;
-  *	      is asserted (likewise for RX)
-  * @fifohalfsize: number of bytes that can be written when MCI_TXFIFOHALFEMPTY
-  *		  is asserted (likewise for RX)
-+ * @reg_write_delay: delay in number of clock cycles required after each write
-+ *		     to controller registers.
-  * @sdio: variant supports SDIO
-  * @st_clkdiv: true if using a ST-specific clock divider algorithm
-  * @blksz_datactrl16: true if Block size is at b16..b30 position in datactrl register
-@@ -72,6 +74,7 @@ struct variant_data {
- 	unsigned int		datalength_bits;
- 	unsigned int		fifosize;
- 	unsigned int		fifohalfsize;
-+	unsigned int		reg_write_delay;
- 	bool			sdio;
- 	bool			st_clkdiv;
- 	bool			blksz_datactrl16;
-@@ -178,7 +181,12 @@ static inline u32 mmci_readl(struct mmci_host *host, u32 off)
- 
- static inline void mmci_writel(struct mmci_host *host, u32 data, u32 off)
- {
-+	struct variant_data *var = host->variant;
-+
- 	writel(data, host->base + off);
-+
-+	if (var->reg_write_delay && host->mclk)
-+		udelay(1 + ((var->reg_write_delay * USEC_PER_SEC)/host->mclk));
- }
- 
- static int mmci_card_busy(struct mmc_host *mmc)
+@@ -168,6 +168,7 @@ static struct variant_data variant_qcom = {
+ 	.fifosize		= 16 * 4,
+ 	.fifohalfsize		= 8 * 4,
+ 	.clkreg			= MCI_CLK_ENABLE,
++	.reg_write_delay	= 3,
+ 	.blksz_datactrl4	= true,
+ 	.datalength_bits	= 24,
+ 	.blksz_datactrl4	= true,
 -- 
 1.7.9.5
+
