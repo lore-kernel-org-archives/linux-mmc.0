@@ -1,74 +1,74 @@
-From: Felipe Balbi <balbi@ti.com>
-Subject: Re: [PATCH 0/5] mmc: host: omap_hsmmc: a few improvements
-Date: Mon, 21 Apr 2014 12:32:04 -0500
-Message-ID: <20140421173203.GH22794@saruman.home>
-References: <1395878690-9650-1-git-send-email-balbi@ti.com>
-Reply-To: <balbi@ti.com>
-Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="CEUtFxTsmBsHRLs3"
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from comal.ext.ti.com ([198.47.26.152]:48040 "EHLO comal.ext.ti.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751373AbaDURee (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 21 Apr 2014 13:34:34 -0400
-Content-Disposition: inline
-In-Reply-To: <1395878690-9650-1-git-send-email-balbi@ti.com>
-Sender: linux-mmc-owner@vger.kernel.org
+From: srinivas.kandagatla@linaro.org
+Subject: [PATCH RFC 00/12] Add Qualcomm SD Card Controller support.
+Date: Mon, 21 Apr 2014 22:43:44 +0100
+Message-ID: <1398116624-31052-1-git-send-email-srinivas.kandagatla@linaro.org>
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: Russell King <linux@arm.linux.org.uk>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, linux-kernel@vger.kernel.org, agross@quicinc.com, linux-arm-msm@vger.kernel.org, Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Felipe Balbi <balbi@ti.com>
-Cc: Balaji T K <balajitk@ti.com>, chris@printf.net, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, Linux OMAP Mailing List <linux-omap@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 
---CEUtFxTsmBsHRLs3
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+From: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
 
-Hi,
+This patch series adds Qualcomm SD Card Controller support in pl180 mmci
+driver. QCom SDCC is basically a pl180, but bit more customized, some of the
+register layouts and offsets are different to the ones mentioned in pl180
+datasheet. The plan is to totally remove the standalone SDCC driver
+drivers/mmc/host/msm_sdcc.* and start using generic mmci driver for all
+Qualcomm parts, as we get chance to test on other Qcom boards.
 
-On Wed, Mar 26, 2014 at 07:04:45PM -0500, Felipe Balbi wrote:
-> this series lets us access the newer registers introduced
-> back in OMAP4 which give us some valid information about
-> the OMAP HSMMC IP like max block size, support for ADMA,
-> support for Retention.
->=20
-> Right now, only setting max_blk_size correctly as supporting
-> ADMA and Retention will take a lot of work.
->=20
-> Tested on OMAP5 uEVM.
->=20
-> Felipe Balbi (5):
->   mmc: host: omap_hsmmc: pass host as an argument
->   mmc: host: omap_hsmmc: add reg_offset field
->   mmc: host: omap_hsmmc: introduce new accessor functions
->   mmc: host: omap_hsmmc: switch over to new accessors
->   mmc: host: omap_hsmmc: set max_blk_size correctly
+To start using the existing mmci driver, a fake amba id for Qualcomm is added
+in patches:
+ ARM: amba: Add Qualcomm vendor ID.
+ mmc: mmci: Add Qualcomm Id to amba id table.
 
-this has been here for almost a month, any comments ?
+Second change is, adding a 3 clock cycle delay for register writes on QCOM SDCC
+registers, which is done in patches:
+  mmc: mmci: Add register read/write wrappers.
+  mmc: mmci: Add write delay to variant structure.
+  mmc: mmci: Qcomm: Add 3 clock cycle delay after each register write
 
---=20
-balbi
+Third change was to accommodate DATCTRL and MMCICLK register layout changes in
+Qcom SDCC. Which is done in patches:
+  mmc: mmci: Add Qcom datactrl register variant
+  mmc: mmci: Add Qcom variations to MCICommand register.
+  mmc: mmci: Qcom fix MCICLK register settings.
+  mmc: mmci: Add clock support for Qualcomm.
 
---CEUtFxTsmBsHRLs3
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
+Fourth major change was to add qcom specfic pio read function, the need for
+this is because the way MCIFIFOCNT register behaved in QCOM SDCC is very
+ different to the one in pl180. This change is done in patch:
+  mmc: mmci: Add Qcom specific pio_read function.
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1
+Last some Qcom unrelated changes to support Qcom are done in patches:
+  mmc: mmci: use NSEC_PER_SEC macro
+  mmc: mmci: move ST specific register extensions access under condition.
 
-iQIcBAEBAgAGBQJTVVYTAAoJEIaOsuA1yqREC1QQAKN1hJ+u2Jd13AFvIt09j91T
-LMJz908joUX9yOQk989qRS5JE4jN2lsXcJ9RWoDLYVQ3OKdpgHFEv0DyPDcR62qy
-7eHrEH3UuIlRYazO5dLQVc7zYs4hYhNIsRN9drbHdGVk61aQ/kdye9NMyOr4zA7C
-AfY8afhgi9G6aQc1TVcP2fWtXlhOsi5QaxBC7tlR1glXwGhgxmi3hEf1uXvMi0DJ
-0FIofkR9egFCmB7JuCSACwDklX66GJTm5I/KISXuRidC/ha+ZVIpMZH94H6lw+ab
-aaoa5LSVtrqr7rA4vDMg3i7pLOboGWoMjoxZIQ8lUB1dIvAMANc8PgYrO8lKvANH
-r3SoRXZlHPTeKPbVxIjvDjN0ql5ZWK/EyQ42oEQv7XuwEHwZAgMYHdcMoAH9D13C
-xdA1rqxT8Sj4PUP5FaKeI8TRpxfVeEwACkRf4rJW609FJbg6SuysnZ9Pk6/9D0Oe
-ynrOxipIqbvGOta0R9VlgPwuOEEqEkjpaZO5s6L+wpscwChU56AcAfPmKsBSofT4
-4n1QFqQtCGpMApFJejVK9hl7CRP1b/3blQN8vEDeA/GnwHGUa7HUNEqYGQVX/0F8
-BxTAs1oZh6l3SG6cBXcg+YBg/lDheSUBr/kLeYCec2FmnKNT3pEDKM9ykECgbiBD
-fI8p4MFUdV0TlATUas9J
-=rtoW
------END PGP SIGNATURE-----
+This patches are tested in PIO mode on IFC8064 board with both eMMC and
+external SD card. I would appreciate any feedback/suggestions on the overall
+approach.
 
---CEUtFxTsmBsHRLs3--
+Thanks,
+srini
+
+Srinivas Kandagatla (12):
+  ARM: amba: Add Qualcomm vendor ID.
+  mmc: mmci: Add Qualcomm Id to amba id table
+  mmc: mmci: Add Qcom datactrl register variant
+  mmc: mmci: Add register read/write wrappers.
+  mmc: mmci: use NSEC_PER_SEC macro
+  mmc: mmci: Add write delay to variant structure.
+  mmc: mmci: Qcomm: Add 3 clock cycle delay after each register write
+  mmc: mmci: move ST specific register extensions access under condition.
+  mmc: mmci: Qcom fix MCICLK register settings.
+  mmc: mmci: Add clock support for Qualcomm.
+  mmc: mmci: Add Qcom variations to MCICommand register.
+  mmc: mmci: Add Qcom specific pio_read function.
+
+ drivers/mmc/host/mmci.c  |  239 +++++++++++++++++++++++++++++++++-------------
+ drivers/mmc/host/mmci.h  |   28 ++++++
+ include/linux/amba/bus.h |    1 +
+ 3 files changed, 202 insertions(+), 66 deletions(-)
+
+-- 
+1.7.9.5
