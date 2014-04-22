@@ -1,41 +1,44 @@
-From: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
-Subject: Re: [PATCH RFC 00/12] Add Qualcomm SD Card Controller support.
-Date: Tue, 22 Apr 2014 15:16:17 +0100
-Message-ID: <535679B1.5080407@linaro.org>
-References: <1398116624-31052-1-git-send-email-srinivas.kandagatla@linaro.org> <53566778.5090603@codeaurora.org>
+From: Balaji T K <balajitk@ti.com>
+Subject: Re: [PATCH 0/5] mmc: host: omap_hsmmc: a few improvements
+Date: Tue, 22 Apr 2014 21:00:12 +0530
+Message-ID: <53568B04.4050703@ti.com>
+References: <1395878690-9650-1-git-send-email-balbi@ti.com> <20140421173203.GH22794@saruman.home>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <53566778.5090603@codeaurora.org>
+In-Reply-To: <20140421173203.GH22794@saruman.home>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Christopher Covington <cov@codeaurora.org>
-Cc: linux-mmc@vger.kernel.org, Russell King <linux@arm.linux.org.uk>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, linux-kernel@vger.kernel.org, agross@quicinc.com, linux-arm-msm@vger.kernel.org
+To: balbi@ti.com
+Cc: chris@printf.net, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, Linux OMAP Mailing List <linux-omap@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Christopher,
-
-
-On 22/04/14 13:58, Christopher Covington wrote:
-> Hi Srini,
+On Monday 21 April 2014 11:02 PM, Felipe Balbi wrote:
+> Hi,
 >
-> On 04/21/2014 05:43 PM, srinivas.kandagatla@linaro.org wrote:
->
->> This patches are tested in PIO mode on IFC8064 board with both eMMC and
->> external SD card. I would appreciate any feedback/suggestions on the overall
->> approach.
->
-I pushed a temporary tag "mmci-pio-srini-wip" for you on my git tree 
-git://git.linaro.org/landing-teams/working/qualcomm/kernel.git
+> On Wed, Mar 26, 2014 at 07:04:45PM -0500, Felipe Balbi wrote:
+>> this series lets us access the newer registers introduced
+>> back in OMAP4 which give us some valid information about
+>> the OMAP HSMMC IP like max block size, support for ADMA,
+>> support for Retention.
+>>
+>> Right now, only setting max_blk_size correctly as supporting
+>> ADMA and Retention will take a lot of work.
+>>
+>> Tested on OMAP5 uEVM.
+>>
+>> Felipe Balbi (5):
+>>    mmc: host: omap_hsmmc: pass host as an argument
+>>    mmc: host: omap_hsmmc: add reg_offset field
+>>    mmc: host: omap_hsmmc: introduce new accessor functions
+>>    mmc: host: omap_hsmmc: switch over to new accessors
+>>    mmc: host: omap_hsmmc: set max_blk_size correctly
 
-> Is a non-upstream device tree needed to reproduce your test setup? If so could
-> you please point to or post it?
+Got mislead by your reply to this series, about the alternative way of
+reading memory size from CAPA register
 
-You will need to use multi_v7_defconfig.
+>
+> this has been here for almost a month, any comments ?
+>
 
-Thanks,
-srini
->
-> Thanks,
-> Christopher
->
+Do you see any performance impact with this series ?
