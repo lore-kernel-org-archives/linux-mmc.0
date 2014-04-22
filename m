@@ -1,26 +1,95 @@
-From: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
-Subject: Re: [PATCH RFC 10/12] mmc: mmci: Add clock support for Qualcomm.
-Date: Tue, 22 Apr 2014 11:03:08 +0100
-Message-ID: <53563E5C.1080709@linaro.org>
-References: <1398116624-31052-1-git-send-email-srinivas.kandagatla@linaro.org> <1398116945-31640-1-git-send-email-srinivas.kandagatla@linaro.org> <535599BD.1020605@codeaurora.org>
+From: Seungwon Jeon <tgih.jun@samsung.com>
+Subject: RE: [PATCH] linux-next: rsi: fix using of removed stuff from mmc
+Date: Tue, 22 Apr 2014 19:53:00 +0900
+Message-ID: <000801cf5e19$07613c40$1623b4c0$%jun@samsung.com>
+References: <000c01cf5df8$1fecf810$5fc6e830$%jun@samsung.com>
+ <CAPDyKFoMOJ_Eb3O5B-Sy-fF0Yx7Mp==3-Wyff=rTVNCO3YxCFg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
-In-Reply-To: <535599BD.1020605@codeaurora.org>
-Sender: linux-arm-msm-owner@vger.kernel.org
-To: Stephen Boyd <sboyd@codeaurora.org>
-Cc: linux-mmc@vger.kernel.org, Russell King <linux@arm.linux.org.uk>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, linux-kernel@vger.kernel.org, agross@quicinc.com, linux-arm-msm@vger.kernel.org
+Return-path: <linux-next-owner@vger.kernel.org>
+In-reply-to: <CAPDyKFoMOJ_Eb3O5B-Sy-fF0Yx7Mp==3-Wyff=rTVNCO3YxCFg@mail.gmail.com>
+Content-language: ko
+Sender: linux-next-owner@vger.kernel.org
+To: 'Ulf Hansson' <ulf.hansson@linaro.org>
+Cc: 'Stephen Rothwell' <sfr@canb.auug.org.au>, 'Fariya Fatima' <fariyaf@gmail.com>, "'John W. Linville'" <linville@tuxdriver.com>, 'Jaehoon Chung' <jh80.chung@samsung.com>, 'Chris Ball' <chris@printf.net>, linux-next@vger.kernel.org, linux-kernel@vger.kernel.org, 'linux-mmc' <linux-mmc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Thankyou Stephen,
-
-On 21/04/14 23:20, Stephen Boyd wrote:
-> Please turn on lockdep (PROVE_LOCKING) and sleeping while atomic checks
-> (DEBUG_ATOMIC_SLEEP). You cannot call clk_set_rate() in atomic context.
-You are correct, there is a spinlock taken just before entering this 
-code. I will fix this in next version by moving clk_set_rate out of this 
-lock.
+On Tue, April 22, 2014, Ulf Hansson wrote:
+> On 22 April 2014 08:57, Seungwon Jeon <tgih.jun@samsung.com> wrote:
+> > As commit 3957848(mmc: drop the speed mode of card's state) applies,
+> > this change should be followed.
+> >
+> > drivers/net/wireless/rsi/rsi_91x_sdio.c:288:20: error: 'MMC_STATE_HIGHSPEED' undeclared (first use
+> in this function)
+> > drivers/net/wireless/rsi/rsi_91x_sdio.c:299:4: error: implicit declaration of function
+> 'mmc_card_set_highspeed' [-Werror=implicit-function-declaration]
+> > drivers/net/wireless/rsi/rsi_91x_sdio.c:306:2: error: implicit declaration of function
+> 'mmc_card_highspeed' [-Werror=implicit-function-declaration]
+> >
+> > Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
+> 
+> Hi Seungwon,
+> 
+> Thanks for responding quickly!
+> 
+> > ---
+> >  drivers/net/wireless/rsi/rsi_91x_sdio.c |    4 +---
+> >  1 files changed, 1 insertions(+), 3 deletions(-)
+> >
+> > diff --git a/drivers/net/wireless/rsi/rsi_91x_sdio.c b/drivers/net/wireless/rsi/rsi_91x_sdio.c
+> > index 2e39d38..46e7af4 100644
+> > --- a/drivers/net/wireless/rsi/rsi_91x_sdio.c
+> > +++ b/drivers/net/wireless/rsi/rsi_91x_sdio.c
+> > @@ -285,7 +285,6 @@ static void rsi_reset_card(struct sdio_func *pfunction)
+> >                 if (err) {
+> >                         rsi_dbg(ERR_ZONE, "%s: CCCR speed reg read failed: %d\n",
+> >                                 __func__, err);
+> > -                       card->state &= ~MMC_STATE_HIGHSPEED;
+> >                 } else {
+> >                         err = rsi_cmd52writebyte(card,
+> >                                                  SDIO_CCCR_SPEED,
+> > @@ -296,14 +295,13 @@ static void rsi_reset_card(struct sdio_func *pfunction)
+> >                                         __func__, err);
+> >                                 return;
+> >                         }
+> > -                       mmc_card_set_highspeed(card);
+> >                         host->ios.timing = MMC_TIMING_SD_HS;
+> >                         host->ops->set_ios(host, &host->ios);
+> >                 }
+> >         }
+> >
+> >         /* Set clock */
+> > -       if (mmc_card_highspeed(card))
+> > +       if (mmc_card_hs(card))
+> >                 clock = 50000000;
+> >         else
+> >                 clock = card->cis.max_dtr;
+> > --
+> > 1.7.0.4
+> >
+> >
+> 
+> I am not sure it's safe to carry this patch through Chris' mmc tree
+> due to merge conflicts with John's wireless tree.
+> 
+> Though, since you have changed the mmc_card_highspeed() function to be
+> named to mmc_card_hs(), we need to work out the dependency.
+> 
+> We have some options to handle this, I suggest the following.
+> 
+> Re-spin this patch to keep using mmc_card_highspeed() and let John
+> take it through his wireless tree. Thus  you also need to keep the
+It would be better if this patch can be handled in Chris's.
+Because if the rest of changes of this patch with keeping "mmc_card_highspeed" is applied,
+high-speed SDIO will be ignored in John's tree.
 
 Thanks,
-srini
+Seungwon Jeon
+
+> name mmc_card_highspeed() function from the patches to the mmc core -
+> could you please re-spin and post new version of those patches as
+> well!?
+> 
+> Kind regards
+> Ulf Hansson
