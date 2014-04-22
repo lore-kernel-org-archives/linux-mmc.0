@@ -1,13 +1,15 @@
 From: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: [PATCH v8 00/17] ARM: sunxi: Add driver for SD/MMC
- hosts found on Allwinner sunxi SoCs
-Date: Tue, 22 Apr 2014 13:01:20 +0200
-Message-ID: <1398164497-14212-1-git-send-email-hdegoede@redhat.com>
+Subject: [PATCH v8 01/17] clk: sunxi: factors: automatic
+ reparenting support
+Date: Tue, 22 Apr 2014 13:01:21 +0200
+Message-ID: <1398164497-14212-2-git-send-email-hdegoede@redhat.com>
+References: <1398164497-14212-1-git-send-email-hdegoede@redhat.com>
 Reply-To: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: quoted-printable
-Return-path: <linux-sunxi+bncBDL4X2GMZUKRBHEY3GNAKGQET64F22Q-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+Return-path: <linux-sunxi+bncBDL4X2GMZUKRBIEY3GNAKGQETY42RPY-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+In-Reply-To: <1398164497-14212-1-git-send-email-hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Post: <http://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
 List-Help: <http://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
 List-Archive: <http://groups.google.com/group/linux-sunxi>
@@ -15,88 +17,80 @@ Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
 List-Subscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
 List-Unsubscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
 To: Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Emilio Lopez <emilio-0Z03zUJReD5OxF6Tv1QG9Q@public.gmane.org>, Mike Turquette <mturquette-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: =?UTF-8?q?David=20Lanzend=C3=B6rfer?= <david.lanzendoerfer-Z7Kmv9EsliU@public.gmane.org>, Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, devicetree <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+Cc: =?UTF-8?q?David=20Lanzend=C3=B6rfer?= <david.lanzendoerfer-Z7Kmv9EsliU@public.gmane.org>, Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, devicetree <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi All,
+From: Emilio L=C3=B3pez <emilio-0Z03zUJReD5OxF6Tv1QG9Q@public.gmane.org>
 
-Here is v8 of the sunxi-mmc patch-set David Lanzend=C3=B6rfer and I have be=
-en
-working on.
+This commit implements .determine_rate, so that our factor clocks can be
+reparented when needed.
 
-The first 2 patches are depenencies which should go in through the clk tree=
-,
-Mike can you pick these 2 up please ?  :
+Signed-off-by: Emilio L=C3=B3pez <emilio-0Z03zUJReD5OxF6Tv1QG9Q@public.gmane.org>
+Signed-off-by: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+---
+ drivers/clk/sunxi/clk-factors.c | 36 ++++++++++++++++++++++++++++++++++++
+ 1 file changed, 36 insertions(+)
 
-"clk: sunxi: factors: automatic reparenting support"
-Is uncontroversial and has been favorably reviewed by various people.
-
-"clk: sunxi: Implement MMC phase control"
-Is somewhat more controversial as there has been lots of discussion about
-adding a generic phase control method to the clk framework. The problem is
-that there has been a lot of talk about such a generic phase control method
-but not a single patch. Therefor I would like to move forwards with using
-a platform specific method for now. I hereby promise that once we've a gene=
-ric
-method I'll write patches to convert the sunxi code to that method.
-
-The third patch is the patch adding the actual mmc driver and should go in
-through the mmc tree.
-
-All the other patches are devicetree patches hooking things up, and should
-go upstream through Maxime's sunxi-dt tree.
-
-Changes since v1:
--Using mmc_of_parse instead of diy dt parsing
--Adding nodes for all mmc controller to the dtsi files,
- including sofar unused controllers
--Using generic GPIO slot library for WP/CD
--Adding additional MMC device nodes into DTSI files
-
-Changes since v2:
--Add missing Signed-off-by tags
--Stop using __raw_readl / __raw_writel so that barriers are properly used
--Adding missing new lines
--Adding missing patch for automatic reparenting of clocks
-
-Changes since v3:
--Move clk_enable / disable into host_init / exit (Hans)
--Fix hang on boot caused by irq storm (Hans)
-
-Changes since v4:
--moving sunxi-mci.{c/h} to sunxi-mmc.{c/h}
--removing camel cases from the defines in  sunxi-mmc.h
--moving defines out of the struct definition
- since this is bad coding style
--adding documentation for the device tree binding
-Changes since v5:
--adding host initialization for when the sdio irq is enabled
- (just to make sure having a defined state at all time)
--add mmc support fixup: set pullup on cd pins
--fixup: Don't set MMC_CAP_NEEDS_POLL /  MMC_CAP_4_BIT_DATA
-
-Changes since v6:
--fixing copyright info in sunxi-mmc.*
--s/__SUNXI_MCI_H__/__SUNXI_MMC_H__/g
--s/SDXC_RESPONSE_/SDXC_RESP_/g
--s/define/definitions <- Comment from Priit Laes
-
-Changes since v7:
--Merge sunxi-mmc.h into sunxi-mmc.c
--Various style fixes / cleanups based on Maxime's review
--sun6i support
--Fix a race condition in interrupt / tasklet interaction
--Split the dts patches into 3 per platform:
- 1) Add mmc nodes to the dtsi
- 2) Add mmc pinmux to the dtsi
- 3) Add mmc nodes to the various board files
--Moved setting of bus-width and cd gpio polarity from .dtsi to the board-fi=
-les
--Added sun6i dts patches
-
-Regards,
-
-Hans
+diff --git a/drivers/clk/sunxi/clk-factors.c b/drivers/clk/sunxi/clk-factor=
+s.c
+index 9e23264..3806d97 100644
+--- a/drivers/clk/sunxi/clk-factors.c
++++ b/drivers/clk/sunxi/clk-factors.c
+@@ -77,6 +77,41 @@ static long clk_factors_round_rate(struct clk_hw *hw, un=
+signed long rate,
+ 	return rate;
+ }
+=20
++static long clk_factors_determine_rate(struct clk_hw *hw, unsigned long ra=
+te,
++				       unsigned long *best_parent_rate,
++				       struct clk **best_parent_p)
++{
++	struct clk *clk =3D hw->clk, *parent, *best_parent =3D NULL;
++	int i, num_parents;
++	unsigned long parent_rate, best =3D 0, child_rate, best_child_rate =3D 0;
++
++	/* find the parent that can help provide the fastest rate <=3D rate */
++	num_parents =3D __clk_get_num_parents(clk);
++	for (i =3D 0; i < num_parents; i++) {
++		parent =3D clk_get_parent_by_index(clk, i);
++		if (!parent)
++			continue;
++		if (__clk_get_flags(clk) & CLK_SET_RATE_PARENT)
++			parent_rate =3D __clk_round_rate(parent, rate);
++		else
++			parent_rate =3D __clk_get_rate(parent);
++
++		child_rate =3D clk_factors_round_rate(hw, rate, &parent_rate);
++
++		if (child_rate <=3D rate && child_rate > best_child_rate) {
++			best_parent =3D parent;
++			best =3D parent_rate;
++			best_child_rate =3D child_rate;
++		}
++	}
++
++	if (best_parent)
++		*best_parent_p =3D best_parent;
++	*best_parent_rate =3D best;
++
++	return best_child_rate;
++}
++
+ static int clk_factors_set_rate(struct clk_hw *hw, unsigned long rate,
+ 				unsigned long parent_rate)
+ {
+@@ -113,6 +148,7 @@ static int clk_factors_set_rate(struct clk_hw *hw, unsi=
+gned long rate,
+ }
+=20
+ const struct clk_ops clk_factors_ops =3D {
++	.determine_rate =3D clk_factors_determine_rate,
+ 	.recalc_rate =3D clk_factors_recalc_rate,
+ 	.round_rate =3D clk_factors_round_rate,
+ 	.set_rate =3D clk_factors_set_rate,
+--=20
+1.9.0
 
 --=20
 You received this message because you are subscribed to the Google Groups "=
