@@ -1,118 +1,69 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] linux-next: rsi: fix using of removed stuff from mmc
-Date: Tue, 22 Apr 2014 13:36:11 +0200
-Message-ID: <CAPDyKFpe4_3BXFB8jxHhZknfmT2UrO6ddCcOpq2whN3ayEO6Dg@mail.gmail.com>
-References: <000c01cf5df8$1fecf810$5fc6e830$%jun@samsung.com>
-	<CAPDyKFoMOJ_Eb3O5B-Sy-fF0Yx7Mp==3-Wyff=rTVNCO3YxCFg@mail.gmail.com>
-	<000801cf5e19$07613c40$1623b4c0$%jun@samsung.com>
+From: =?UTF-8?B?RW1pbGlvIEzDs3Bleg==?= <emilio-0Z03zUJReD5OxF6Tv1QG9Q@public.gmane.org>
+Subject: Re: [PATCH v8 00/17] ARM: sunxi: Add driver for SD/MMC
+ hosts found on Allwinner sunxi SoCs
+Date: Tue, 22 Apr 2014 09:07:16 -0300
+Message-ID: <53565B74.4000703@elopez.com.ar>
+References: <1398164497-14212-1-git-send-email-hdegoede@redhat.com>
+Reply-To: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-next-owner@vger.kernel.org>
-In-Reply-To: <000801cf5e19$07613c40$1623b4c0$%jun@samsung.com>
-Sender: linux-next-owner@vger.kernel.org
-To: Seungwon Jeon <tgih.jun@samsung.com>
-Cc: Stephen Rothwell <sfr@canb.auug.org.au>, Fariya Fatima <fariyaf@gmail.com>, "John W. Linville" <linville@tuxdriver.com>, Jaehoon Chung <jh80.chung@samsung.com>, Chris Ball <chris@printf.net>, "linux-next@vger.kernel.org" <linux-next@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: quoted-printable
+Return-path: <linux-sunxi+bncBD73XIMS3EHBBG5X3GNAKGQEYBAPOCI-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+In-Reply-To: <1398164497-14212-1-git-send-email-hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+List-Post: <http://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Help: <http://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Archive: <http://groups.google.com/group/linux-sunxi>
+Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+List-Subscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Unsubscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+To: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Mike Turquette <mturquette-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, =?UTF-8?B?RGF2aWQgTGFuemVuZMO2cmZlcg==?= <david.lanzendoerfer-Z7Kmv9EsliU@public.gmane.org>, Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, devicetree <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-On 22 April 2014 12:53, Seungwon Jeon <tgih.jun@samsung.com> wrote:
-> On Tue, April 22, 2014, Ulf Hansson wrote:
->> On 22 April 2014 08:57, Seungwon Jeon <tgih.jun@samsung.com> wrote:
->> > As commit 3957848(mmc: drop the speed mode of card's state) applies,
->> > this change should be followed.
->> >
->> > drivers/net/wireless/rsi/rsi_91x_sdio.c:288:20: error: 'MMC_STATE_HIGHSPEED' undeclared (first use
->> in this function)
->> > drivers/net/wireless/rsi/rsi_91x_sdio.c:299:4: error: implicit declaration of function
->> 'mmc_card_set_highspeed' [-Werror=implicit-function-declaration]
->> > drivers/net/wireless/rsi/rsi_91x_sdio.c:306:2: error: implicit declaration of function
->> 'mmc_card_highspeed' [-Werror=implicit-function-declaration]
->> >
->> > Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
->>
->> Hi Seungwon,
->>
->> Thanks for responding quickly!
->>
->> > ---
->> >  drivers/net/wireless/rsi/rsi_91x_sdio.c |    4 +---
->> >  1 files changed, 1 insertions(+), 3 deletions(-)
->> >
->> > diff --git a/drivers/net/wireless/rsi/rsi_91x_sdio.c b/drivers/net/wireless/rsi/rsi_91x_sdio.c
->> > index 2e39d38..46e7af4 100644
->> > --- a/drivers/net/wireless/rsi/rsi_91x_sdio.c
->> > +++ b/drivers/net/wireless/rsi/rsi_91x_sdio.c
->> > @@ -285,7 +285,6 @@ static void rsi_reset_card(struct sdio_func *pfunction)
->> >                 if (err) {
->> >                         rsi_dbg(ERR_ZONE, "%s: CCCR speed reg read failed: %d\n",
->> >                                 __func__, err);
->> > -                       card->state &= ~MMC_STATE_HIGHSPEED;
->> >                 } else {
->> >                         err = rsi_cmd52writebyte(card,
->> >                                                  SDIO_CCCR_SPEED,
->> > @@ -296,14 +295,13 @@ static void rsi_reset_card(struct sdio_func *pfunction)
->> >                                         __func__, err);
->> >                                 return;
->> >                         }
->> > -                       mmc_card_set_highspeed(card);
->> >                         host->ios.timing = MMC_TIMING_SD_HS;
->> >                         host->ops->set_ios(host, &host->ios);
->> >                 }
->> >         }
->> >
->> >         /* Set clock */
->> > -       if (mmc_card_highspeed(card))
->> > +       if (mmc_card_hs(card))
->> >                 clock = 50000000;
->> >         else
->> >                 clock = card->cis.max_dtr;
->> > --
->> > 1.7.0.4
->> >
->> >
->>
->> I am not sure it's safe to carry this patch through Chris' mmc tree
->> due to merge conflicts with John's wireless tree.
->>
->> Though, since you have changed the mmc_card_highspeed() function to be
->> named to mmc_card_hs(), we need to work out the dependency.
->>
->> We have some options to handle this, I suggest the following.
->>
->> Re-spin this patch to keep using mmc_card_highspeed() and let John
->> take it through his wireless tree. Thus  you also need to keep the
-> It would be better if this patch can be handled in Chris's.
-> Because if the rest of changes of this patch with keeping "mmc_card_highspeed" is applied,
-> high-speed SDIO will be ignored in John's tree.
+Hi Hans,
 
-You are right Seungwon!
-
-Please re-spin the patchset on the mmc core an squash the code from
-this patch, into the patch "mmc: drop the speed mode of card's state".
-We then need to get acks from John and Fariya.
-
-BTW, I had a look at the rsi_reset_card() function
-(drivers/net/wireless/rsi/rsi_91x_sdio.c), which handles a complete
-SDIO re-initialization and I think performs "layering violations"
-while doing that.  I suppose it's because of lack of documentation
-about the mmc/sdio core, but I really don't think an SDIO func driver
-should be doing that kind of stuff by itself. There are APIs to use to
-perform an SDIO reset. Two options exists:
-
-a) Use pm_runtime_get|put in combination with a MMC_CAP_POWER_OFF_CARD
-enabled host.
-b) Invoke mmc_power_save|restore_host() API.
-
-Kind regards
-Ulf Hansson
-
+El 22/04/14 08:01, Hans de Goede escribi=C3=B3:
+> Hi All,
 >
-> Thanks,
-> Seungwon Jeon
+> Here is v8 of the sunxi-mmc patch-set David Lanzend=C3=B6rfer and I have =
+been
+> working on.
 >
->> name mmc_card_highspeed() function from the patches to the mmc core -
->> could you please re-spin and post new version of those patches as
->> well!?
->>
->> Kind regards
->> Ulf Hansson
+> The first 2 patches are depenencies which should go in through the clk tr=
+ee,
+> Mike can you pick these 2 up please ?  :
 >
+> "clk: sunxi: factors: automatic reparenting support"
+> Is uncontroversial and has been favorably reviewed by various people.
+
+I'll pick this one up for 3.16 if you're ok with that. Mike, let me know=20
+if you have any objection to the patch, but I'm pretty sure you=20
+(informally?) acked it in the past.
+
+> "clk: sunxi: Implement MMC phase control"
+> Is somewhat more controversial as there has been lots of discussion about
+> adding a generic phase control method to the clk framework. The problem i=
+s
+> that there has been a lot of talk about such a generic phase control meth=
+od
+> but not a single patch. Therefor I would like to move forwards with using
+> a platform specific method for now. I hereby promise that once we've a ge=
+neric
+> method I'll write patches to convert the sunxi code to that method.
+
+Mike proposed a RFC for handling this better, and there were talks with=20
+Allwinner people to see what did these phase controls actually mean. We=20
+should be able to get a proper solution for it during this cycle. I'd=20
+prefer to work towards that instead of merging this, as we have more=20
+than a month to get it ready still.
+
+Cheers,
+
+Emilio
+
+--=20
+You received this message because you are subscribed to the Google Groups "=
+linux-sunxi" group.
+To unsubscribe from this group and stop receiving emails from it, send an e=
+mail to linux-sunxi+unsubscribe-/JYPxA39Uh5TLH3MbocFF+G/Ez6ZCGd0@public.gmane.org
+For more options, visit https://groups.google.com/d/optout.
