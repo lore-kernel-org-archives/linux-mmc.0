@@ -1,44 +1,64 @@
-From: Fabio Estevam <festevam@gmail.com>
-Subject: Re: SD CRC error on mx27pdk
-Date: Wed, 23 Apr 2014 15:47:57 -0300
-Message-ID: <CAOMZO5CvwF2ALNHcpYRM6MyCuzFtXJyc9AJ6NHnHG1etpwHXkw@mail.gmail.com>
-References: <CAOMZO5AZ4gJZMo-DZRPffaF+NdzmzMf32YwPu2gEp9AH8gDk4Q@mail.gmail.com>
- <CAOMZO5CWLH=ZbUd9dyTqtNVqu0RTSMeBGReBYetO-wzxayS7qw@mail.gmail.com>
- <1398278554.472691404@f213.i.mail.ru>
+From: Russell King - ARM Linux <linux@arm.linux.org.uk>
+Subject: [PATCH 00/38] MMC updates, plus CuBox-i WiFi support
+Date: Wed, 23 Apr 2014 19:55:34 +0100
+Message-ID: <20140423185534.GA26756@n2100.arm.linux.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <1398278554.472691404@f213.i.mail.ru>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Alexander Shiyan <shc_work@mail.ru>
-Cc: Shawn Guo <shawn.guo@freescale.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Sascha Hauer <kernel@pengutronix.de>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-doc-owner@vger.kernel.org>
+Content-Disposition: inline
+Sender: linux-doc-owner@vger.kernel.org
+To: Anton Vorontsov <anton@enomsg.org>, Barry Song <baohua@kernel.org>, Ben Dooks <ben-linux@fluff.org>, Chris Ball <chris@printf.net>, devicetree@vger.kernel.org, Ian Campbell <ijc+devicetree@hellion.org.uk>, Jaehoon Chung <jh80.chung@samsung.com>, Kumar Gala <galak@codeaurora.org>, linux-arm-kernel@lists.infradead.org, linux-doc@vger.kernel.org, linux-mmc@vger.kernel.org, linuxppc-dev@lists.ozlabs.org, linux-tegra@vger.kernel.org, Mark Rutland <mark.rutland@arm.com>, Michal Simek <michal.simek@xilinx.com>, Pawel Moll <pawel.moll@arm.com>, Randy Dunlap <rdunlap@infradead.org>, Rob Herring <robh+dt@kernel.org>, Sascha Hauer <kernel@pengutronix.de>, Seungwon Jeon <tgih.jun@samsung.com>, Shawn Guo <shawn.guo@freescale.com>, spear-devel@list.st.com, Stephen Warren <swarren@wwwdotorg.org>, Thierry Reding <thierry.reding@gmail.com>, Ulf Hansson <ulf.hansson@linaro.org>, Vir
 List-Id: linux-mmc@vger.kernel.org
 
-SGkgQWxleGFuZGVyLAoKT24gV2VkLCBBcHIgMjMsIDIwMTQgYXQgMzo0MiBQTSwgQWxleGFuZGVy
-IFNoaXlhbiA8c2hjX3dvcmtAbWFpbC5ydT4gd3JvdGU6Cj4gV2VkLCAyMyBBcHIgMjAxNCAxMjoy
-MTozOSAtMDMwMCDQvtGCIEZhYmlvIEVzdGV2YW0gPGZlc3RldmFtQGdtYWlsLmNvbT46Cj4+IE9u
-IFdlZCwgQXByIDIzLCAyMDE0IGF0IDEyOjEwIFBNLCBGYWJpbyBFc3RldmFtIDxmZXN0ZXZhbUBn
-bWFpbC5jb20+IHdyb3RlOgo+Pgo+PiA+ICxidXQgSSBnZXQgdGhpcyBlcnJvcjoKPj4gPgo+PiA+
-IG14Yy1tbWMgMTAwMTMwMDAuc2RoY2k6IG14Y21jaV9maW5pc2hfZGF0YTogLUVJTFNFUQo+PiA+
-IG1tYzA6IGVycm9yIC04NCB3aGlsc3QgaW5pdGlhbGlzaW5nIFNEIGNhcmQKPj4gPiBtbWMwOiBo
-b3N0IGRvZXMgbm90IHN1cHBvcnQgcmVhZGluZyByZWFkLW9ubHkgc3dpdGNoLiBhc3N1bWluZyB3
-cml0ZS1lbmFibGUuCj4+ID4gbW1jMDogbmV3IFNESEMgY2FyZCBhdCBhZGRyZXNzIGI1YTEKPj4g
-PiBtbWNibGswOiBtbWMwOmI1YTEgU0QwNEcgMy42OSBHaUIKPj4gPiAgbW1jYmxrMDogdW5rbm93
-biBwYXJ0aXRpb24gdGFibGUKPj4KPj4gSSBmb3Jnb3QgdG8gbWVudGlvbiB0aGF0IHRoaXMgZXJy
-b3IgZG9lcyBub3QgaGFwcGVuIGlmIEkgYm9vdCB0aGUKPj4gbm9uLWR0IGtlcm5lbCwgc28gaXQg
-c2VlbXMgdG8gYmUgcmVsYXRlZCB0byBkdCBvbmx5Lgo+Cj4gUHJvYmFibHkgeW91IHNob3VsZCBh
-bHNvIHVzZSB2bW1jKl9yZWcgdm9sdGFnZXMgZnJvbSBQTUlDPwoKT24gbXgyN3BkayBib2FyZCB0
-aGUgdm1tYzFfcmVnIHBvd2VycyB1cCB0aGUgQ01PUyBjYW1lcmEgaW5zdGVhZCBvZiBtbWMgc3Vw
-cGx5LgoKVGhhbmtzCgpfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fXwpsaW51eC1hcm0ta2VybmVsIG1haWxpbmcgbGlzdApsaW51eC1hcm0ta2VybmVsQGxpc3Rz
-LmluZnJhZGVhZC5vcmcKaHR0cDovL2xpc3RzLmluZnJhZGVhZC5vcmcvbWFpbG1hbi9saXN0aW5m
-by9saW51eC1hcm0ta2VybmVsCg==
+All,
+
+This is where I'm at with trying to clean up the SDHCI mess, and sort out
+issues I've noticed when trying to get UHS support working on CuBoxes.
+This is my full patch set, but I recommend not applying patch 37 as there
+appears to be a hardware issue preventing it working reliably.
+
+In any case, patches 0-33 inclusive are the SDHCI clean up, based against
+v3.15-rc1.  Patches 34 and 35 are Olof's Wifi support, 36 is my fix against
+those, and 38 adds the Broadcom Wifi and BT support for CuBox.
+
+The questions over how to handle these devices were never properly settled,
+so I recommend against merging patch 34 onwards.  As for the rest, I'm not
+planning on any further work, so it may be a good idea for people to
+consider testing them with a view to getting them merged.
+
+ Documentation/devicetree/bindings/mmc/mmc.txt |  11 +
+ arch/arm/boot/dts/imx6qdl-cubox-i.dtsi        |  34 +-
+ arch/arm/boot/dts/imx6qdl-microsom.dtsi       |  98 ++++
+ drivers/mmc/core/core.c                       |  42 ++
+ drivers/mmc/core/host.c                       |  68 +++
+ drivers/mmc/core/sdio_irq.c                   |  41 +-
+ drivers/mmc/host/Kconfig                      |  63 +--
+ drivers/mmc/host/dw_mmc.c                     |   2 +
+ drivers/mmc/host/sdhci-acpi.c                 |   8 +
+ drivers/mmc/host/sdhci-bcm-kona.c             |   4 +
+ drivers/mmc/host/sdhci-bcm2835.c              |   4 +
+ drivers/mmc/host/sdhci-cns3xxx.c              |  13 +-
+ drivers/mmc/host/sdhci-dove.c                 |   4 +
+ drivers/mmc/host/sdhci-esdhc-imx.c            |  82 +--
+ drivers/mmc/host/sdhci-esdhc.h                |   4 +-
+ drivers/mmc/host/sdhci-of-arasan.c            |   4 +
+ drivers/mmc/host/sdhci-of-esdhc.c             |  70 ++-
+ drivers/mmc/host/sdhci-of-hlwd.c              |   4 +
+ drivers/mmc/host/sdhci-pci.c                  |   9 +-
+ drivers/mmc/host/sdhci-pltfm.c                |   4 +
+ drivers/mmc/host/sdhci-pxav2.c                |  14 +-
+ drivers/mmc/host/sdhci-pxav3.c                |  13 +-
+ drivers/mmc/host/sdhci-s3c.c                  |  36 +-
+ drivers/mmc/host/sdhci-sirf.c                 |   4 +
+ drivers/mmc/host/sdhci-spear.c                |   5 +-
+ drivers/mmc/host/sdhci-tegra.c                |  27 +-
+ drivers/mmc/host/sdhci.c                      | 728 +++++++++++++-------------
+ drivers/mmc/host/sdhci.h                      |  20 +-
+ include/linux/mmc/host.h                      |   8 +
+ include/linux/mmc/sdhci.h                     |  15 +-
+ 30 files changed, 885 insertions(+), 554 deletions(-)
+
+
+-- 
+FTTC broadband for 0.8mile line: now at 9.7Mbps down 460kbps up... slowly
+improving, and getting towards what was expected from it.
