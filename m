@@ -1,115 +1,66 @@
 From: Russell King <rmk+kernel@arm.linux.org.uk>
-Subject: [PATCH 27/38] mmc: sdhci-of-esdhc: remove
- platform_suspend/platform_resume callbacks
-Date: Wed, 23 Apr 2014 20:08:28 +0100
-Message-ID: <E1Wd2Wy-0003w6-9y@rmk-PC.arm.linux.org.uk>
+Subject: [PATCH 28/38] mmc: sdhci: remove platform_suspend/platform_resume
+ callbacks
+Date: Wed, 23 Apr 2014 20:08:33 +0100
+Message-ID: <E1Wd2X3-0003wA-Dv@rmk-PC.arm.linux.org.uk>
 References: <20140423185534.GA26756@n2100.arm.linux.org.uk>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from gw-1.arm.linux.org.uk ([78.32.30.217]:46496 "EHLO
+Received: from gw-1.arm.linux.org.uk ([78.32.30.217]:46503 "EHLO
 	pandora.arm.linux.org.uk" rhost-flags-OK-OK-OK-FAIL)
-	by vger.kernel.org with ESMTP id S932171AbaDWTIc (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 23 Apr 2014 15:08:32 -0400
+	by vger.kernel.org with ESMTP id S932171AbaDWTIh (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 23 Apr 2014 15:08:37 -0400
 In-Reply-To: <20140423185534.GA26756@n2100.arm.linux.org.uk>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Chris Ball <chris@printf.net>, linux-mmc@vger.kernel.org
 Cc: linux-arm-kernel@lists.infradead.org, Ulf Hansson <ulf.hansson@linaro.org>
 
-We don't need these hooks in order to insert code in these paths, we
-can just provide our own handlers and call the main sdhci handlers as
-appropriate.
+The only user (sdhci-of-esdhc) no longer uses these callbacks, so lets
+remove them to discourage any further use.
 
 Signed-off-by: Russell King <rmk+kernel@arm.linux.org.uk>
 ---
- drivers/mmc/host/sdhci-of-esdhc.c | 55 +++++++++++++++++++++++++--------------
- 1 file changed, 36 insertions(+), 19 deletions(-)
+ drivers/mmc/host/sdhci.c | 6 ------
+ drivers/mmc/host/sdhci.h | 2 --
+ 2 files changed, 8 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
-index fcaeae5f55b8..605815e52f5f 100644
---- a/drivers/mmc/host/sdhci-of-esdhc.c
-+++ b/drivers/mmc/host/sdhci-of-esdhc.c
-@@ -241,20 +241,6 @@ static void esdhc_of_set_clock(struct sdhci_host *host, unsigned int clock)
- 	mdelay(1);
- }
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index c1bd77e17458..f9bca1e7da25 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -2530,9 +2530,6 @@ EXPORT_SYMBOL_GPL(sdhci_disable_irq_wakeups);
  
--#ifdef CONFIG_PM
--static u32 esdhc_proctl;
--static void esdhc_of_suspend(struct sdhci_host *host)
--{
--	esdhc_proctl = sdhci_be32bs_readl(host, SDHCI_HOST_CONTROL);
--}
--
--static void esdhc_of_resume(struct sdhci_host *host)
--{
--	esdhc_of_enable_dma(host);
--	sdhci_be32bs_writel(host, esdhc_proctl, SDHCI_HOST_CONTROL);
--}
--#endif
--
- static void esdhc_of_platform_init(struct sdhci_host *host)
+ int sdhci_suspend_host(struct sdhci_host *host)
  {
- 	u32 vvn;
-@@ -302,16 +288,47 @@ static const struct sdhci_ops sdhci_esdhc_ops = {
- 	.get_max_clock = esdhc_of_get_max_clock,
- 	.get_min_clock = esdhc_of_get_min_clock,
- 	.platform_init = esdhc_of_platform_init,
--#ifdef CONFIG_PM
--	.platform_suspend = esdhc_of_suspend,
--	.platform_resume = esdhc_of_resume,
--#endif
- 	.adma_workaround = esdhci_of_adma_workaround,
- 	.set_bus_width = esdhc_pltfm_set_bus_width,
- 	.reset = sdhci_reset,
- 	.set_uhs_signaling = sdhci_set_uhs_signaling,
- };
+-	if (host->ops->platform_suspend)
+-		host->ops->platform_suspend(host);
+-
+ 	sdhci_disable_card_detection(host);
  
-+#ifdef CONFIG_PM
-+
-+static u32 esdhc_proctl;
-+static int esdhc_of_suspend(struct device *dev)
-+{
-+	struct sdhci_host *host = dev_get_drvdata(dev);
-+
-+	esdhc_proctl = sdhci_be32bs_readl(host, SDHCI_HOST_CONTROL);
-+
-+	return sdhci_suspend_host(host);
-+}
-+
-+static void esdhc_of_resume(device *dev)
-+{
-+	struct sdhci_host *host = dev_get_drvdata(dev);
-+	int ret = sdhci_resume_host(host);
-+
-+	if (ret == 0) {
-+		/* Isn't this already done by sdhci_resume_host() ? --rmk */
-+		esdhc_of_enable_dma(host);
-+		sdhci_be32bs_writel(host, esdhc_proctl, SDHCI_HOST_CONTROL);
-+	}
-+
-+	return ret;
-+}
-+
-+static const struct dev_pm_ops esdhc_pmops = {
-+	.suspend	= esdhci_of_suspend,
-+	.resume		= esdhci_of_resume,
-+};
-+#define ESDHC_PMOPS (&esdhc_pmops)
-+#else
-+#define ESDHC_PMOPS NULL
-+#endif
-+
- static const struct sdhci_pltfm_data sdhci_esdhc_pdata = {
- 	/*
- 	 * card detection could be handled via GPIO
-@@ -373,7 +390,7 @@ static struct platform_driver sdhci_esdhc_driver = {
- 		.name = "sdhci-esdhc",
- 		.owner = THIS_MODULE,
- 		.of_match_table = sdhci_esdhc_of_match,
--		.pm = SDHCI_PLTFM_PMOPS,
-+		.pm = ESDHC_PMOPS,
- 	},
- 	.probe = sdhci_esdhc_probe,
- 	.remove = sdhci_esdhc_remove,
+ 	/* Disable tuning since we are suspending */
+@@ -2589,9 +2586,6 @@ int sdhci_resume_host(struct sdhci_host *host)
+ 
+ 	sdhci_enable_card_detection(host);
+ 
+-	if (host->ops->platform_resume)
+-		host->ops->platform_resume(host);
+-
+ 	/* Set the re-tuning expiration flag */
+ 	if (host->flags & SDHCI_USING_RETUNING_TIMER)
+ 		host->flags |= SDHCI_NEEDS_RETUNING;
+diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+index 7a35395e5f56..4a5cd5e3fa3e 100644
+--- a/drivers/mmc/host/sdhci.h
++++ b/drivers/mmc/host/sdhci.h
+@@ -289,8 +289,6 @@ struct sdhci_ops {
+ 	int	(*platform_execute_tuning)(struct sdhci_host *host, u32 opcode);
+ 	void	(*set_uhs_signaling)(struct sdhci_host *host, unsigned int uhs);
+ 	void	(*hw_reset)(struct sdhci_host *host);
+-	void	(*platform_suspend)(struct sdhci_host *host);
+-	void	(*platform_resume)(struct sdhci_host *host);
+ 	void    (*adma_workaround)(struct sdhci_host *host, u32 intmask);
+ 	void	(*platform_init)(struct sdhci_host *host);
+ 	void    (*card_event)(struct sdhci_host *host);
 -- 
 1.8.3.1
 
