@@ -1,65 +1,114 @@
-From: Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
-Subject: Re: [PATCH v8 14/17] ARM: dts: sun6i: Enable the mmc
- controller on the m9
-Date: Wed, 23 Apr 2014 11:51:43 +0200
-Message-ID: <20140423095143.GN24905@lukather>
-References: <1398164497-14212-1-git-send-email-hdegoede@redhat.com>
- <1398164497-14212-15-git-send-email-hdegoede@redhat.com>
-Reply-To: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+From: Hans de Goede <hdegoede@redhat.com>
+Subject: Re: [linux-sunxi] Re: [PATCH v8 07/17] ARM: dts: sun5i: Add mmc controller
+ nodes
+Date: Wed, 23 Apr 2014 11:57:25 +0200
+Message-ID: <53578E85.9000906@redhat.com>
+References: <1398164497-14212-1-git-send-email-hdegoede@redhat.com> <1398164497-14212-8-git-send-email-hdegoede@redhat.com> <20140423094840.GL24905@lukather>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="jdM5ZcN/ZcXXVwZs"
-Return-path: <linux-sunxi+bncBD2ZNBF5VYJRBIE432NAKGQEIPQDBMA-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <1398164497-14212-15-git-send-email-hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-List-Post: <http://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Help: <http://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Archive: <http://groups.google.com/group/linux-sunxi>
-Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
-List-Subscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Unsubscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-To: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Emilio Lopez <emilio-0Z03zUJReD5OxF6Tv1QG9Q@public.gmane.org>, Mike Turquette <mturquette-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, David =?iso-8859-1?Q?Lanzend=F6rfer?= <david.lanzendoerfer-Z7Kmv9EsliU@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, devicetree <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mx1.redhat.com ([209.132.183.28]:5286 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753009AbaDWJ6M (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 23 Apr 2014 05:58:12 -0400
+In-Reply-To: <20140423094840.GL24905@lukather>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-sunxi@googlegroups.com, Hans de Goede <hdegoede@redhat.com>
+Cc: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Emilio Lopez <emilio@elopez.com.ar>, Mike Turquette <mturquette@linaro.org>, =?ISO-8859-1?Q?David_Lanzend=F6?= =?ISO-8859-1?Q?rfer?= <david.lanzendoerfer@o2s.ch>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, devicetree <devicetree@vger.kernel.org>
 
+Hi,
 
---jdM5ZcN/ZcXXVwZs
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
-
-On Tue, Apr 22, 2014 at 01:01:34PM +0200, Hans de Goede wrote:
-> Tested on a Mele A1000G Quad.
+On 04/23/2014 11:48 AM, Maxime Ripard wrote:
+> On Tue, Apr 22, 2014 at 01:01:27PM +0200, Hans de Goede wrote:
+>> From: David Lanzend=F6rfer <david.lanzendoerfer@o2s.ch>
+>>
+>> Add nodes for the 3 mmc controllers found on A10s SoCs and for the 2=
+ mmc
+>> controllers found on A13 SoCs.
+>>
+>> Signed-off-by: David Lanzend=F6rfer <david.lanzendoerfer@o2s.ch>
+>> Signed-off-by: Hans de Goede <hdegoede@redhat.com>
+>> ---
+>>  arch/arm/boot/dts/sun5i-a10s.dtsi | 27 +++++++++++++++++++++++++++
+>>  arch/arm/boot/dts/sun5i-a13.dtsi  | 18 ++++++++++++++++++
+>>  2 files changed, 45 insertions(+)
+>>
+>> diff --git a/arch/arm/boot/dts/sun5i-a10s.dtsi b/arch/arm/boot/dts/s=
+un5i-a10s.dtsi
+>> index 79989ed..12113f9 100644
+>> --- a/arch/arm/boot/dts/sun5i-a10s.dtsi
+>> +++ b/arch/arm/boot/dts/sun5i-a10s.dtsi
+>> @@ -338,6 +338,33 @@
+>>  			#size-cells =3D <0>;
+>>  		};
+>> =20
+>> +		mmc0: mmc@01c0f000 {
+>> +			compatible =3D "allwinner,sun5i-a13-mmc";
+>> +			reg =3D <0x01c0f000 0x1000>;
+>> +			clocks =3D <&ahb_gates 8>, <&mmc0_clk>;
+>> +			clock-names =3D "ahb", "mod";
+>> +			interrupts =3D <32>;
+>> +			status =3D "disabled";
+>> +		};
+>> +
+>> +		mmc1: mmc@01c10000 {
+>> +			compatible =3D "allwinner,sun5i-a13-mmc";
+>> +			reg =3D <0x01c10000 0x1000>;
+>> +			clocks =3D <&ahb_gates 9>, <&mmc1_clk>;
+>> +			clock-names =3D "ahb", "mod";
+>> +			interrupts =3D <33>;
+>> +			status =3D "disabled";
+>> +		};
+>> +
+>> +		mmc2: mmc@01c11000 {
+>> +			compatible =3D "allwinner,sun5i-a13-mmc";
+>> +			reg =3D <0x01c11000 0x1000>;
+>> +			clocks =3D <&ahb_gates 10>, <&mmc2_clk>;
+>> +			clock-names =3D "ahb", "mod";
+>> +			interrupts =3D <34>;
+>> +			status =3D "disabled";
+>> +		};
+>> +
+>>  		usbphy: phy@01c13400 {
+>>  			#phy-cells =3D <1>;
+>>  			compatible =3D "allwinner,sun5i-a13-usb-phy";
+>> diff --git a/arch/arm/boot/dts/sun5i-a13.dtsi b/arch/arm/boot/dts/su=
+n5i-a13.dtsi
+>> index f01c315..a0e55e8 100644
+>> --- a/arch/arm/boot/dts/sun5i-a13.dtsi
+>> +++ b/arch/arm/boot/dts/sun5i-a13.dtsi
+>> @@ -320,6 +320,24 @@
+>>  			#size-cells =3D <0>;
+>>  		};
+>> =20
+>> +		mmc0: mmc@01c0f000 {
+>> +			compatible =3D "allwinner,sun5i-a13-mmc";
+>> +			reg =3D <0x01c0f000 0x1000>;
+>> +			clocks =3D <&ahb_gates 8>, <&mmc0_clk>;
+>> +			clock-names =3D "ahb", "mod";
+>> +			interrupts =3D <32>;
+>> +			status =3D "disabled";
+>> +		};
+>> +
+>> +		mmc2: mmc@01c11000 {
+>> +			compatible =3D "allwinner,sun5i-a13-mmc";
+>> +			reg =3D <0x01c11000 0x1000>;
+>> +			clocks =3D <&ahb_gates 10>, <&mmc2_clk>;
+>> +			clock-names =3D "ahb", "mod";
+>> +			interrupts =3D <34>;
+>> +			status =3D "disabled";
+>> +		};
+>> +
 >=20
-> Signed-off-by: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+> The A13 user manual reports that there is 3 of them in the A13, just
+> like on the A10s. Have you forgotten one?
 
-This patch can be merged with the previous one.
+mmc1 is likely there, but it is not usable as it is not routed to the o=
+utside,
+so I've left it out deliberately.
 
---=20
-Maxime Ripard, Free Electrons
-Embedded Linux, Kernel and Android engineering
-http://free-electrons.com
+Regards,
 
---jdM5ZcN/ZcXXVwZs
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.14 (GNU/Linux)
-
-iQIcBAEBAgAGBQJTV40vAAoJEBx+YmzsjxAgAtkP/2i4BA3yasvc1CdxxHeaCK4S
-mNUAq2QoiPKThZt73lyOLnnbNw1Yc9u1r6OsubHqleyTZBu/stIoDxwtmZWHsZVz
-jpmqN4/7JYEogqaTwFCRJ1HoMYMpETwlFtl79FOjfacI9XUiYXCFc2/LB2cc9gGX
-oNig1xpPwW1cCdyO/x7E/G5wIe9PNf2sq/QjTDac04n3Uy++vioV8EV61vUajnQo
-zjBhvDnE7W7c0X+if8xZW72oqURcQgNElSM3mzhhp3ThzrKAgw2BexUKM0ZzX6VM
-b5lYVIw43a+he633+0g7HHmD7DVsUquw5CpixmrW1FL4xlbGo2LQi9ZeZFrBfzdU
-5CIcWnyco3ucUFEc4rhOAaIKNRnXHkJetj7g3zmgY+vVQgtkm++sHcy0VHzWScxN
-jSoA0OeQe2qlemRPnGtzsARfPA/ZCNvsoq7A1Urm/KkH913Nin5+GRKK62PSPJWW
-WKBaWOQWdKBixNRBWweYeoWhUtttjSxmAiON5opDS6NqvEQP1i5xYbgJBi65z7If
-oIXn3LLOyBtAS6QRTsirFZdDd+xVepY/YtAEBluuyVo62tUlwKVDy57n7/3D9BdR
-DRjdqHHAu5wrqnamb4xfI4+QZD2jjnMybU6keWnQ4KZW4XYWoEJbBmlnfHbckdYu
-8KISiUVcZKNRpITecAnK
-=rhac
------END PGP SIGNATURE-----
-
---jdM5ZcN/ZcXXVwZs--
+Hans
