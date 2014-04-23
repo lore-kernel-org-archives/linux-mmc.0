@@ -1,59 +1,54 @@
-From: Hans de Goede <hdegoede@redhat.com>
-Subject: Re: [PATCH v8 11/17] ARM: dts: sun6i: Add mmc controller nodes
-Date: Wed, 23 Apr 2014 12:11:10 +0200
-Message-ID: <535791BE.80804@redhat.com>
-References: <1398164497-14212-1-git-send-email-hdegoede@redhat.com> <1398164497-14212-12-git-send-email-hdegoede@redhat.com> <20140423095029.GM24905@lukather>
+From: Jean Delvare <jdelvare@suse.de>
+Subject: [PATCH] mmc: Add hardware dependencies for sdhci-pxav3 and
+ sdhci-pxav2
+Date: Wed, 23 Apr 2014 14:57:52 +0200
+Message-ID: <20140423145752.004e5e7d@endymion.delvare>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=US-ASCII
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:51255 "EHLO mx1.redhat.com"
+Received: from cantor2.suse.de ([195.135.220.15]:33057 "EHLO mx2.suse.de"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751750AbaDWKMC (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 23 Apr 2014 06:12:02 -0400
-In-Reply-To: <20140423095029.GM24905@lukather>
+	id S1752927AbaDWM54 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 23 Apr 2014 08:57:56 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Maxime Ripard <maxime.ripard@free-electrons.com>
-Cc: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Emilio Lopez <emilio@elopez.com.ar>, Mike Turquette <mturquette@linaro.org>, =?ISO-8859-1?Q?David_Lanzend=F6?= =?ISO-8859-1?Q?rfer?= <david.lanzendoerfer@o2s.ch>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, devicetree <devicetree@vger.kernel.org>, linux-sunxi@googlegroups.com
+To: linux-mmc@vger.kernel.org
+Cc: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>
 
-Hi,
+I seem to understand that the sdhci-pxav3 and sdhci-pxav2 drivers are
+only needed on the MMP architecture. So add a hardware dependency on
+ARCH_MMP, so that other users don't get to build useless drivers.
 
-On 04/23/2014 11:50 AM, Maxime Ripard wrote:
-> On Tue, Apr 22, 2014 at 01:01:31PM +0200, Hans de Goede wrote:
->> Add nodes for the 4 mmc controllers found on A31 SoCs to
->> arch/arm/boot/dts/sun6i-a31.dtsi.
->>
->> Signed-off-by: Hans de Goede <hdegoede@redhat.com>
->> ---
->>  arch/arm/boot/dts/sun6i-a31.dtsi | 52 ++++++++++++++++++++++++++++++++++++++++
->>  1 file changed, 52 insertions(+)
->>
->> diff --git a/arch/arm/boot/dts/sun6i-a31.dtsi b/arch/arm/boot/dts/sun6i-a31.dtsi
->> index 12bcc17..a27afc8 100644
->> --- a/arch/arm/boot/dts/sun6i-a31.dtsi
->> +++ b/arch/arm/boot/dts/sun6i-a31.dtsi
->> @@ -269,6 +269,58 @@
->>  		#size-cells = <1>;
->>  		ranges;
->>  
->> +		mmc0: mmc@01c0f000 {
->> +			compatible = "allwinner,sun5i-a13-mmc";
->> +			reg = <0x01c0f000 0x1000>;
->> +			clocks = <&ahb1_gates 8>, <&mmc0_clk>;
->> +			clock-names = "ahb", "mod";
->> +			resets = <&ahb1_rst 8>;
->> +			reset-names = "ahb";
->> +			interrupts = <0 60 4>;
->> +			bus-width = <4>;
->> +			cd-inverted;
-> 
-> The two last items should be in the DTS.
+Signed-off-by: Jean Delvare <jdelvare@suse.de>
+Cc: Chris Ball <chris@printf.net>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>
+---
+ drivers/mmc/host/Kconfig |    4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
-Ah, I had fixed sun4i / sun5i & sun7i but forgot about this one,
-fixed in my local tree now. I've also squashed the m9 mmc enablement
-patch into the m9 addition patch as you've requested.
+--- linux-3.15-rc2.orig/drivers/mmc/host/Kconfig	2014-04-14 09:42:30.197082285 +0200
++++ linux-3.15-rc2/drivers/mmc/host/Kconfig	2014-04-23 14:10:48.863916201 +0200
+@@ -215,7 +215,7 @@ config MMC_SDHCI_SIRF
+ 
+ config MMC_SDHCI_PXAV3
+ 	tristate "Marvell MMP2 SD Host Controller support (PXAV3)"
+-	depends on CLKDEV_LOOKUP
++	depends on CLKDEV_LOOKUP && (ARCH_MMP || COMPILE_TEST)
+ 	select MMC_SDHCI
+ 	select MMC_SDHCI_PLTFM
+ 	default CPU_MMP2
+@@ -228,7 +228,7 @@ config MMC_SDHCI_PXAV3
+ 
+ config MMC_SDHCI_PXAV2
+ 	tristate "Marvell PXA9XX SD Host Controller support (PXAV2)"
+-	depends on CLKDEV_LOOKUP
++	depends on CLKDEV_LOOKUP && (ARCH_MMP || COMPILE_TEST)
+ 	select MMC_SDHCI
+ 	select MMC_SDHCI_PLTFM
+ 	default CPU_PXA910
 
-Regards,
 
-Hans
+-- 
+Jean Delvare
+SUSE L3 Support
