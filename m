@@ -1,74 +1,146 @@
 From: Russell King <rmk+kernel@arm.linux.org.uk>
-Subject: [PATCH 29/38] mmc: sdhci-tegra: get rid of special PRESENT_STATE
- register handling
-Date: Wed, 23 Apr 2014 20:08:38 +0100
-Message-ID: <E1Wd2X8-0003wE-HW@rmk-PC.arm.linux.org.uk>
+Subject: [PATCH 30/38] mmc: sdhci: move regulator handling into
+ sdhci_set_power()
+Date: Wed, 23 Apr 2014 20:08:43 +0100
+Message-ID: <E1Wd2XD-0003wI-LG@rmk-PC.arm.linux.org.uk>
 References: <20140423185534.GA26756@n2100.arm.linux.org.uk>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from gw-1.arm.linux.org.uk ([78.32.30.217]:46507 "EHLO
+Received: from gw-1.arm.linux.org.uk ([78.32.30.217]:46513 "EHLO
 	pandora.arm.linux.org.uk" rhost-flags-OK-OK-OK-FAIL)
-	by vger.kernel.org with ESMTP id S932171AbaDWTIm (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 23 Apr 2014 15:08:42 -0400
+	by vger.kernel.org with ESMTP id S932456AbaDWTIq (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 23 Apr 2014 15:08:46 -0400
 In-Reply-To: <20140423185534.GA26756@n2100.arm.linux.org.uk>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Chris Ball <chris@printf.net>, linux-mmc@vger.kernel.org
-Cc: linux-arm-kernel@lists.infradead.org, Ulf Hansson <ulf.hansson@linaro.org>, Stephen Warren <swarren@wwwdotorg.org>, Thierry Reding <thierry.reding@gmail.com>, linux-tegra@vger.kernel.org
+Cc: linux-arm-kernel@lists.infradead.org, Ulf Hansson <ulf.hansson@linaro.org>
 
-sdhci-tegra provides a get_ro method, which overrides the checking
-of the write protect bit in the PRESENT_STATE register in sdhci.c:
-
-        if (host->flags & SDHCI_DEVICE_DEAD)
-                is_readonly = 0;
-        else if (host->ops->get_ro)
-                is_readonly = host->ops->get_ro(host);
-        else
-                is_readonly = !(sdhci_readl(host, SDHCI_PRESENT_STATE)
-                                & SDHCI_WRITE_PROTECT);
-
-This means it's pointless detecting accesses to this register and
-manually setting the SDHCI_WRITE_PROTECT as it has no effect.
-
-This means that the whole of tegra_sdhci_readl() can be removed and
-we can use the builtin sdhci readl functionality here.
+Move the regulator handling into sdhci_set_power() rather than being in
+sdhci_do_set_ios().  This wraps all power control up into this function.
 
 Signed-off-by: Russell King <rmk+kernel@arm.linux.org.uk>
 ---
- drivers/mmc/host/sdhci-tegra.c | 14 --------------
- 1 file changed, 14 deletions(-)
+ drivers/mmc/host/sdhci.c | 72 +++++++++++++++++++++++-------------------------
+ 1 file changed, 35 insertions(+), 37 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
-index d06b6ff60432..985247649f46 100644
---- a/drivers/mmc/host/sdhci-tegra.c
-+++ b/drivers/mmc/host/sdhci-tegra.c
-@@ -48,19 +48,6 @@ struct sdhci_tegra {
- 	int power_gpio;
- };
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index f9bca1e7da25..decc5c64efb8 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -1216,7 +1216,7 @@ void sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
+ }
+ EXPORT_SYMBOL_GPL(sdhci_set_clock);
  
--static u32 tegra_sdhci_readl(struct sdhci_host *host, int reg)
--{
--	u32 val;
--
--	if (unlikely(reg == SDHCI_PRESENT_STATE)) {
--		/* Use wp_gpio here instead? */
--		val = readl(host->ioaddr + reg);
--		return val | SDHCI_WRITE_PROTECT;
+-static int sdhci_set_power(struct sdhci_host *host, unsigned short power)
++static void sdhci_set_power(struct sdhci_host *host, unsigned short power)
+ {
+ 	u8 pwr = 0;
+ 
+@@ -1239,7 +1239,7 @@ static int sdhci_set_power(struct sdhci_host *host, unsigned short power)
+ 	}
+ 
+ 	if (host->pwr == pwr)
+-		return -1;
++		return;
+ 
+ 	host->pwr = pwr;
+ 
+@@ -1247,38 +1247,43 @@ static int sdhci_set_power(struct sdhci_host *host, unsigned short power)
+ 		sdhci_writeb(host, 0, SDHCI_POWER_CONTROL);
+ 		if (host->quirks2 & SDHCI_QUIRK2_CARD_ON_NEEDS_BUS_ON)
+ 			sdhci_runtime_pm_bus_off(host);
+-		return 0;
 -	}
 -
--	return readl(host->ioaddr + reg);
--}
--
- static u16 tegra_sdhci_readw(struct sdhci_host *host, int reg)
- {
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-@@ -150,7 +137,6 @@ static void tegra_sdhci_set_bus_width(struct sdhci_host *host, int bus_width)
+-	/*
+-	 * Spec says that we should clear the power reg before setting
+-	 * a new value. Some controllers don't seem to like this though.
+-	 */
+-	if (!(host->quirks & SDHCI_QUIRK_SINGLE_POWER_WRITE))
+-		sdhci_writeb(host, 0, SDHCI_POWER_CONTROL);
++		power = 0;
++	} else {
++		/*
++		 * Spec says that we should clear the power reg before setting
++		 * a new value. Some controllers don't seem to like this though.
++		 */
++		if (!(host->quirks & SDHCI_QUIRK_SINGLE_POWER_WRITE))
++			sdhci_writeb(host, 0, SDHCI_POWER_CONTROL);
  
- static const struct sdhci_ops tegra_sdhci_ops = {
- 	.get_ro     = tegra_sdhci_get_ro,
--	.read_l     = tegra_sdhci_readl,
- 	.read_w     = tegra_sdhci_readw,
- 	.write_l    = tegra_sdhci_writel,
- 	.set_clock  = sdhci_set_clock,
+-	/*
+-	 * At least the Marvell CaFe chip gets confused if we set the voltage
+-	 * and set turn on power at the same time, so set the voltage first.
+-	 */
+-	if (host->quirks & SDHCI_QUIRK_NO_SIMULT_VDD_AND_POWER)
+-		sdhci_writeb(host, pwr, SDHCI_POWER_CONTROL);
++		/*
++		 * At least the Marvell CaFe chip gets confused if we set the
++		 * voltage and set turn on power at the same time, so set the
++		 * voltage first.
++		 */
++		if (host->quirks & SDHCI_QUIRK_NO_SIMULT_VDD_AND_POWER)
++			sdhci_writeb(host, pwr, SDHCI_POWER_CONTROL);
+ 
+-	pwr |= SDHCI_POWER_ON;
++		pwr |= SDHCI_POWER_ON;
+ 
+-	sdhci_writeb(host, pwr, SDHCI_POWER_CONTROL);
++		sdhci_writeb(host, pwr, SDHCI_POWER_CONTROL);
+ 
+-	if (host->quirks2 & SDHCI_QUIRK2_CARD_ON_NEEDS_BUS_ON)
+-		sdhci_runtime_pm_bus_on(host);
++		if (host->quirks2 & SDHCI_QUIRK2_CARD_ON_NEEDS_BUS_ON)
++			sdhci_runtime_pm_bus_on(host);
+ 
+-	/*
+-	 * Some controllers need an extra 10ms delay of 10ms before they
+-	 * can apply clock after applying power
+-	 */
+-	if (host->quirks & SDHCI_QUIRK_DELAY_AFTER_POWER)
+-		mdelay(10);
++		/*
++		 * Some controllers need an extra 10ms delay of 10ms before
++		 * they can apply clock after applying power
++		 */
++		if (host->quirks & SDHCI_QUIRK_DELAY_AFTER_POWER)
++			mdelay(10);
++	}
+ 
+-	return power;
++	if (host->vmmc) {
++		spin_unlock_irq(&host->lock);
++		mmc_regulator_set_ocr(host->mmc, host->vmmc, power);
++		spin_lock_irq(&host->lock);
++	}
+ }
+ 
+ /*****************************************************************************\
+@@ -1428,7 +1433,6 @@ EXPORT_SYMBOL_GPL(sdhci_set_uhs_signaling);
+ static void sdhci_do_set_ios(struct sdhci_host *host, struct mmc_ios *ios)
+ {
+ 	unsigned long flags;
+-	int vdd_bit = -1;
+ 	u8 ctrl;
+ 
+ 	spin_lock_irqsave(&host->lock, flags);
+@@ -1460,15 +1464,9 @@ static void sdhci_do_set_ios(struct sdhci_host *host, struct mmc_ios *ios)
+ 	}
+ 
+ 	if (ios->power_mode == MMC_POWER_OFF)
+-		vdd_bit = sdhci_set_power(host, -1);
++		sdhci_set_power(host, -1);
+ 	else
+-		vdd_bit = sdhci_set_power(host, ios->vdd);
+-
+-	if (host->vmmc && vdd_bit != -1) {
+-		spin_unlock_irqrestore(&host->lock, flags);
+-		mmc_regulator_set_ocr(host->mmc, host->vmmc, vdd_bit);
+-		spin_lock_irqsave(&host->lock, flags);
+-	}
++		sdhci_set_power(host, ios->vdd);
+ 
+ 	if (host->ops->platform_send_init_74_clocks)
+ 		host->ops->platform_send_init_74_clocks(host, ios->power_mode);
 -- 
 1.8.3.1
 
