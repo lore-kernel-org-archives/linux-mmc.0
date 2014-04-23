@@ -1,407 +1,131 @@
 From: Russell King <rmk+kernel@arm.linux.org.uk>
-Subject: [PATCH 17/38] mmc: sdhci: convert sdhci_set_clock() into a library
- function
-Date: Wed, 23 Apr 2014 20:07:37 +0100
-Message-ID: <E1Wd2W9-0003vQ-3o@rmk-PC.arm.linux.org.uk>
+Subject: [PATCH 20/38] mmc: sdhci-esdhc-imx: fix lockdep splat upon tuning
+Date: Wed, 23 Apr 2014 20:07:52 +0100
+Message-ID: <E1Wd2WO-0003vc-Gk@rmk-PC.arm.linux.org.uk>
 References: <20140423185534.GA26756@n2100.arm.linux.org.uk>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from gw-1.arm.linux.org.uk ([78.32.30.217]:46435 "EHLO
+Received: from gw-1.arm.linux.org.uk ([78.32.30.217]:46451 "EHLO
 	pandora.arm.linux.org.uk" rhost-flags-OK-OK-OK-FAIL)
-	by vger.kernel.org with ESMTP id S932092AbaDWTHp (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 23 Apr 2014 15:07:45 -0400
+	by vger.kernel.org with ESMTP id S932222AbaDWTH6 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 23 Apr 2014 15:07:58 -0400
 In-Reply-To: <20140423185534.GA26756@n2100.arm.linux.org.uk>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Chris Ball <chris@printf.net>, linux-mmc@vger.kernel.org
-Cc: linux-arm-kernel@lists.infradead.org, Ulf Hansson <ulf.hansson@linaro.org>, Michal Simek <michal.simek@xilinx.com>, Anton Vorontsov <anton@enomsg.org>, Ben Dooks <ben-linux@fluff.org>, Barry Song <baohua@kernel.org>, Viresh Kumar <viresh.linux@gmail.com>, Stephen Warren <swarren@wwwdotorg.org>, Thierry Reding <thierry.reding@gmail.com>, linuxppc-dev@lists.ozlabs.org, spear-devel@list.st.com, linux-tegra@vger.kernel.org
+Cc: linux-arm-kernel@lists.infradead.org, Ulf Hansson <ulf.hansson@linaro.org>
+
+=================================
+[ INFO: inconsistent lock state ]
+3.14.0-rc1+ #490 Not tainted
+---------------------------------
+inconsistent {IN-HARDIRQ-W} -> {HARDIRQ-ON-W} usage.
+kworker/u8:0/6 [HC0[0]:SC0[0]:HE1:SE1] takes:
+ (&(&host->lock)->rlock#2){?.-...}, at: [<c04b57a4>] esdhc_send_tuning_cmd+0x104/0x14c
+{IN-HARDIRQ-W} state was registered at:
+  [<c00652fc>] mark_lock+0x15c/0x6f8
+  [<c0066354>] __lock_acquire+0xabc/0x1ca0
+  [<c0067ad8>] lock_acquire+0xa0/0x130
+  [<c0697a44>] _raw_spin_lock+0x34/0x44
+  [<c04b0dbc>] sdhci_irq+0x20/0xa40
+  [<c0071b1c>] handle_irq_event_percpu+0x74/0x284
+  [<c0071d70>] handle_irq_event+0x44/0x64
+  [<c0074db8>] handle_fasteoi_irq+0xac/0x140
+  [<c007147c>] generic_handle_irq+0x28/0x38
+  [<c000efd4>] handle_IRQ+0x40/0x98
+  [<c0008584>] gic_handle_irq+0x30/0x64
+  [<c0013144>] __irq_svc+0x44/0x58
+  [<c0028fc8>] irq_exit+0xc0/0x120
+  [<c000efd8>] handle_IRQ+0x44/0x98
+  [<c0008584>] gic_handle_irq+0x30/0x64
+  [<c0013144>] __irq_svc+0x44/0x58
+  [<c068f398>] printk+0x3c/0x44
+  [<c03191d0>] _regulator_get+0x1b4/0x1e0
+  [<c031924c>] regulator_get+0x18/0x1c
+  [<c049fbc4>] mmc_add_host+0x30/0x1c0
+  [<c04b2e10>] sdhci_add_host+0x804/0xbbc
+  [<c04b5318>] sdhci_esdhc_imx_probe+0x380/0x674
+  [<c036d530>] platform_drv_probe+0x20/0x50
+  [<c036b948>] driver_probe_device+0x120/0x234
+  [<c036baf8>] __driver_attach+0x9c/0xa0
+  [<c036a04c>] bus_for_each_dev+0x5c/0x90
+  [<c036b418>] driver_attach+0x24/0x28
+  [<c036b018>] bus_add_driver+0xe4/0x1d8
+  [<c036c1b0>] driver_register+0x80/0xfc
+  [<c036ce28>] __platform_driver_register+0x50/0x64
+  [<c093706c>] sdhci_esdhc_imx_driver_init+0x18/0x20
+  [<c0008834>] do_one_initcall+0x3c/0x164
+  [<c0901c94>] kernel_init_freeable+0x104/0x1d0
+  [<c068c45c>] kernel_init+0x10/0x118
+  [<c000e768>] ret_from_fork+0x14/0x2c
+irq event stamp: 5933
+hardirqs last  enabled at (5933): [<c069813c>] _raw_spin_unlock_irqrestore+0x38/0x4c
+hardirqs last disabled at (5932): [<c0697b04>] _raw_spin_lock_irqsave+0x24/0x60
+softirqs last  enabled at (5914): [<c0028ba0>] __do_softirq+0x260/0x360
+softirqs last disabled at (5909): [<c0028fc8>] irq_exit+0xc0/0x120
+
+other info that might help us debug this:
+ Possible unsafe locking scenario:
+
+       CPU0
+       ----
+  lock(&(&host->lock)->rlock#2);
+  <Interrupt>
+    lock(&(&host->lock)->rlock#2);
+
+ *** DEADLOCK ***
+
+2 locks held by kworker/u8:0/6:
+ #0:  (kmmcd){.+.+.+}, at: [<c003d890>] process_one_work+0x134/0x4e8
+ #1:  ((&(&host->detect)->work)){+.+.+.}, at: [<c003d890>] process_one_work+0x134/0x4e8
+
+stack backtrace:
+CPU: 2 PID: 6 Comm: kworker/u8:0 Not tainted 3.14.0-rc1+ #490
+Workqueue: kmmcd mmc_rescan
+Backtrace:
+[<c00124a0>] (dump_backtrace) from [<c0012640>] (show_stack+0x18/0x1c)
+[<c0012628>] (show_stack) from [<c069164c>] (dump_stack+0x70/0x8c)
+[<c06915dc>] (dump_stack) from [<c068f080>] (print_usage_bug+0x274/0x2e4)
+[<c068ee0c>] (print_usage_bug) from [<c0065774>] (mark_lock+0x5d4/0x6f8)
+[<c00651a0>] (mark_lock) from [<c0065e6c>] (__lock_acquire+0x5d4/0x1ca0)
+[<c0065898>] (__lock_acquire) from [<c0067ad8>] (lock_acquire+0xa0/0x130)
+[<c0067a38>] (lock_acquire) from [<c0697a44>] (_raw_spin_lock+0x34/0x44)
+[<c0697a10>] (_raw_spin_lock) from [<c04b57a4>] (esdhc_send_tuning_cmd+0x104/0x14c)
+[<c04b56a0>] (esdhc_send_tuning_cmd) from [<c04b582c>] (esdhc_executing_tuning+0x40/0x100)
+[<c04b57ec>] (esdhc_executing_tuning) from [<c04afa54>] (sdhci_execute_tuning+0xcc/0x754)
+[<c04af988>] (sdhci_execute_tuning) from [<c04a4684>] (mmc_sd_init_card+0x65c/0x694)
+[<c04a4028>] (mmc_sd_init_card) from [<c04a48f0>] (mmc_attach_sd+0xb0/0x184)
+[<c04a4840>] (mmc_attach_sd) from [<c049eb28>] (mmc_rescan+0x26c/0x2e8)
+[<c049e8bc>] (mmc_rescan) from [<c003d914>] (process_one_work+0x1b8/0x4e8)
+[<c003d75c>] (process_one_work) from [<c003e090>] (worker_thread+0x13c/0x3f8)
+[<c003df54>] (worker_thread) from [<c00449bc>] (kthread+0xcc/0xe8)
+[<c00448f0>] (kthread) from [<c000e768>] (ret_from_fork+0x14/0x2c)
 
 Signed-off-by: Russell King <rmk+kernel@arm.linux.org.uk>
 ---
- drivers/mmc/host/sdhci-acpi.c      |  2 ++
- drivers/mmc/host/sdhci-bcm-kona.c  |  1 +
- drivers/mmc/host/sdhci-bcm2835.c   |  1 +
- drivers/mmc/host/sdhci-cns3xxx.c   |  3 +--
- drivers/mmc/host/sdhci-dove.c      |  1 +
- drivers/mmc/host/sdhci-esdhc.h     |  1 -
- drivers/mmc/host/sdhci-of-arasan.c |  1 +
- drivers/mmc/host/sdhci-of-hlwd.c   |  1 +
- drivers/mmc/host/sdhci-pci.c       |  1 +
- drivers/mmc/host/sdhci-pltfm.c     |  1 +
- drivers/mmc/host/sdhci-pxav2.c     |  1 +
- drivers/mmc/host/sdhci-pxav3.c     |  1 +
- drivers/mmc/host/sdhci-s3c.c       | 19 ++++++++++++++-----
- drivers/mmc/host/sdhci-sirf.c      |  1 +
- drivers/mmc/host/sdhci-spear.c     |  1 +
- drivers/mmc/host/sdhci-tegra.c     |  1 +
- drivers/mmc/host/sdhci.c           | 17 ++++++-----------
- drivers/mmc/host/sdhci.h           |  1 +
- include/linux/mmc/sdhci.h          |  2 --
- 19 files changed, 36 insertions(+), 21 deletions(-)
+ drivers/mmc/host/sdhci-esdhc-imx.c | 6 ++----
+ 1 file changed, 2 insertions(+), 4 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
-index aca84a682551..323e2a688563 100644
---- a/drivers/mmc/host/sdhci-acpi.c
-+++ b/drivers/mmc/host/sdhci-acpi.c
-@@ -102,12 +102,14 @@ static void sdhci_acpi_int_hw_reset(struct sdhci_host *host)
- }
+diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+index eb7a13796bcb..dfed2c37ab3f 100644
+--- a/drivers/mmc/host/sdhci-esdhc-imx.c
++++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+@@ -738,14 +738,12 @@ static int esdhc_send_tuning_cmd(struct sdhci_host *host, u32 opcode,
+ 	mrq.done = esdhc_request_done;
+ 	init_completion(&(mrq.completion));
  
- static const struct sdhci_ops sdhci_acpi_ops_dflt = {
-+	.set_clock = sdhci_set_clock,
- 	.enable_dma = sdhci_acpi_enable_dma,
- 	.set_bus_width = sdhci_set_bus_width,
- 	.reset = sdhci_reset,
- };
+-	disable_irq(host->irq);
+-	spin_lock(&host->lock);
++	spin_lock_irq(&host->lock);
+ 	host->mrq = &mrq;
  
- static const struct sdhci_ops sdhci_acpi_ops_int = {
-+	.set_clock = sdhci_set_clock,
- 	.enable_dma = sdhci_acpi_enable_dma,
- 	.set_bus_width = sdhci_set_bus_width,
- 	.reset = sdhci_reset,
-diff --git a/drivers/mmc/host/sdhci-bcm-kona.c b/drivers/mmc/host/sdhci-bcm-kona.c
-index 7b97bfab910d..e610811c09b0 100644
---- a/drivers/mmc/host/sdhci-bcm-kona.c
-+++ b/drivers/mmc/host/sdhci-bcm-kona.c
-@@ -206,6 +206,7 @@ static void sdhci_bcm_kona_init_74_clocks(struct sdhci_host *host,
- }
+ 	sdhci_send_command(host, mrq.cmd);
  
- static struct sdhci_ops sdhci_bcm_kona_ops = {
-+	.set_clock = sdhci_set_clock,
- 	.get_max_clock = sdhci_bcm_kona_get_max_clk,
- 	.get_timeout_clock = sdhci_bcm_kona_get_timeout_clock,
- 	.platform_send_init_74_clocks = sdhci_bcm_kona_init_74_clocks,
-diff --git a/drivers/mmc/host/sdhci-bcm2835.c b/drivers/mmc/host/sdhci-bcm2835.c
-index 289b1c80d5fc..74906d6008e1 100644
---- a/drivers/mmc/host/sdhci-bcm2835.c
-+++ b/drivers/mmc/host/sdhci-bcm2835.c
-@@ -131,6 +131,7 @@ static const struct sdhci_ops bcm2835_sdhci_ops = {
- 	.read_l = bcm2835_sdhci_readl,
- 	.read_w = bcm2835_sdhci_readw,
- 	.read_b = bcm2835_sdhci_readb,
-+	.set_clock = sdhci_set_clock,
- 	.get_max_clock = sdhci_pltfm_clk_get_max_clock,
- 	.get_min_clock = bcm2835_sdhci_get_min_clock,
- 	.set_bus_width = sdhci_set_bus_width,
-diff --git a/drivers/mmc/host/sdhci-cns3xxx.c b/drivers/mmc/host/sdhci-cns3xxx.c
-index 416f4a4c2e35..587d73ef33ff 100644
---- a/drivers/mmc/host/sdhci-cns3xxx.c
-+++ b/drivers/mmc/host/sdhci-cns3xxx.c
-@@ -89,8 +89,7 @@ static const struct sdhci_pltfm_data sdhci_cns3xxx_pdata = {
- 		  SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK |
- 		  SDHCI_QUIRK_INVERTED_WRITE_PROTECT |
- 		  SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN |
--		  SDHCI_QUIRK_BROKEN_TIMEOUT_VAL |
--		  SDHCI_QUIRK_NONSTANDARD_CLOCK,
-+		  SDHCI_QUIRK_BROKEN_TIMEOUT_VAL,
- };
+-	spin_unlock(&host->lock);
+-	enable_irq(host->irq);
++	spin_unlock_irq(&host->lock);
  
- static int sdhci_cns3xxx_probe(struct platform_device *pdev)
-diff --git a/drivers/mmc/host/sdhci-dove.c b/drivers/mmc/host/sdhci-dove.c
-index 1408cc11d881..8ef4ab52f8e0 100644
---- a/drivers/mmc/host/sdhci-dove.c
-+++ b/drivers/mmc/host/sdhci-dove.c
-@@ -86,6 +86,7 @@ static u32 sdhci_dove_readl(struct sdhci_host *host, int reg)
- static const struct sdhci_ops sdhci_dove_ops = {
- 	.read_w	= sdhci_dove_readw,
- 	.read_l	= sdhci_dove_readl,
-+	.set_clock = sdhci_set_clock,
- 	.set_bus_width = sdhci_set_bus_width,
- 	.reset = sdhci_reset,
- };
-diff --git a/drivers/mmc/host/sdhci-esdhc.h b/drivers/mmc/host/sdhci-esdhc.h
-index de69bddc3afc..3497cfaf683c 100644
---- a/drivers/mmc/host/sdhci-esdhc.h
-+++ b/drivers/mmc/host/sdhci-esdhc.h
-@@ -20,7 +20,6 @@
+ 	wait_for_completion(&mrq.completion);
  
- #define ESDHC_DEFAULT_QUIRKS	(SDHCI_QUIRK_FORCE_BLK_SZ_2048 | \
- 				SDHCI_QUIRK_NO_BUSY_IRQ | \
--				SDHCI_QUIRK_NONSTANDARD_CLOCK | \
- 				SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK | \
- 				SDHCI_QUIRK_PIO_NEEDS_DELAY)
- 
-diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
-index faef21740584..f0ee594f25d1 100644
---- a/drivers/mmc/host/sdhci-of-arasan.c
-+++ b/drivers/mmc/host/sdhci-of-arasan.c
-@@ -52,6 +52,7 @@ static unsigned int sdhci_arasan_get_timeout_clock(struct sdhci_host *host)
- }
- 
- static struct sdhci_ops sdhci_arasan_ops = {
-+	.set_clock = sdhci_set_clock,
- 	.get_max_clock = sdhci_pltfm_clk_get_max_clock,
- 	.get_timeout_clock = sdhci_arasan_get_timeout_clock,
- 	.set_bus_width = sdhci_set_bus_width,
-diff --git a/drivers/mmc/host/sdhci-of-hlwd.c b/drivers/mmc/host/sdhci-of-hlwd.c
-index fb01958cb18e..a4a1f0f2c0a0 100644
---- a/drivers/mmc/host/sdhci-of-hlwd.c
-+++ b/drivers/mmc/host/sdhci-of-hlwd.c
-@@ -58,6 +58,7 @@ static const struct sdhci_ops sdhci_hlwd_ops = {
- 	.write_l = sdhci_hlwd_writel,
- 	.write_w = sdhci_hlwd_writew,
- 	.write_b = sdhci_hlwd_writeb,
-+	.set_clock = sdhci_set_clock,
- 	.set_bus_width = sdhci_set_bus_width,
- 	.reset = sdhci_reset,
- };
-diff --git a/drivers/mmc/host/sdhci-pci.c b/drivers/mmc/host/sdhci-pci.c
-index 87f9dd91f68c..b3a28f6b170e 100644
---- a/drivers/mmc/host/sdhci-pci.c
-+++ b/drivers/mmc/host/sdhci-pci.c
-@@ -1078,6 +1078,7 @@ static void sdhci_pci_hw_reset(struct sdhci_host *host)
- }
- 
- static const struct sdhci_ops sdhci_pci_ops = {
-+	.set_clock	= sdhci_set_clock,
- 	.enable_dma	= sdhci_pci_enable_dma,
- 	.set_bus_width	= sdhci_pci_set_bus_width,
- 	.reset		= sdhci_reset,
-diff --git a/drivers/mmc/host/sdhci-pltfm.c b/drivers/mmc/host/sdhci-pltfm.c
-index bfbf467b61c7..1fb89f44bd58 100644
---- a/drivers/mmc/host/sdhci-pltfm.c
-+++ b/drivers/mmc/host/sdhci-pltfm.c
-@@ -45,6 +45,7 @@ unsigned int sdhci_pltfm_clk_get_max_clock(struct sdhci_host *host)
- EXPORT_SYMBOL_GPL(sdhci_pltfm_clk_get_max_clock);
- 
- static const struct sdhci_ops sdhci_pltfm_ops = {
-+	.set_clock = sdhci_set_clock,
- 	.set_bus_width = sdhci_set_bus_width,
- 	.reset = sdhci_reset,
- };
-diff --git a/drivers/mmc/host/sdhci-pxav2.c b/drivers/mmc/host/sdhci-pxav2.c
-index 2eee0c8b88eb..db5257bf032e 100644
---- a/drivers/mmc/host/sdhci-pxav2.c
-+++ b/drivers/mmc/host/sdhci-pxav2.c
-@@ -112,6 +112,7 @@ static void pxav2_mmc_set_bus_width(struct sdhci_host *host, int width)
- }
- 
- static const struct sdhci_ops pxav2_sdhci_ops = {
-+	.set_clock     = sdhci_set_clock,
- 	.get_max_clock = sdhci_pltfm_clk_get_max_clock,
- 	.set_bus_width = pxav2_mmc_set_bus_width,
- 	.reset         = pxav2_reset,
-diff --git a/drivers/mmc/host/sdhci-pxav3.c b/drivers/mmc/host/sdhci-pxav3.c
-index 86564233ae93..8a40e079a57e 100644
---- a/drivers/mmc/host/sdhci-pxav3.c
-+++ b/drivers/mmc/host/sdhci-pxav3.c
-@@ -225,6 +225,7 @@ static int pxav3_set_uhs_signaling(struct sdhci_host *host, unsigned int uhs)
- }
- 
- static const struct sdhci_ops pxav3_sdhci_ops = {
-+	.set_clock = sdhci_set_clock,
- 	.set_uhs_signaling = pxav3_set_uhs_signaling,
- 	.platform_send_init_74_clocks = pxav3_gen_init_74_clocks,
- 	.get_max_clock = sdhci_pltfm_clk_get_max_clock,
-diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
-index 464059c91a24..0ac075dfd844 100644
---- a/drivers/mmc/host/sdhci-s3c.c
-+++ b/drivers/mmc/host/sdhci-s3c.c
-@@ -58,6 +58,8 @@ struct sdhci_s3c {
- 	struct clk		*clk_io;
- 	struct clk		*clk_bus[MAX_BUS_CLK];
- 	unsigned long		clk_rates[MAX_BUS_CLK];
-+
-+	bool			no_divider;
- };
- 
- /**
-@@ -70,6 +72,7 @@ struct sdhci_s3c {
-  */
- struct sdhci_s3c_drv_data {
- 	unsigned int	sdhci_quirks;
-+	bool		no_divider;
- };
- 
- static inline struct sdhci_s3c *to_s3c(struct sdhci_host *host)
-@@ -119,7 +122,7 @@ static unsigned int sdhci_s3c_consider_clock(struct sdhci_s3c *ourhost,
- 	 * If controller uses a non-standard clock division, find the best clock
- 	 * speed possible with selected clock source and skip the division.
- 	 */
--	if (ourhost->host->quirks & SDHCI_QUIRK_NONSTANDARD_CLOCK) {
-+	if (ourhost->no_divider) {
- 		rate = clk_round_rate(clksrc, wanted);
- 		return wanted - rate;
- 	}
-@@ -164,8 +167,10 @@ static void sdhci_s3c_set_clock(struct sdhci_host *host, unsigned int clock)
- 	host->mmc->actual_clock = 0;
- 
- 	/* don't bother if the clock is going off. */
--	if (clock == 0)
-+	if (clock == 0) {
-+		sdhci_set_clock(host, clock);
- 		return;
-+	}
- 
- 	for (src = 0; src < MAX_BUS_CLK; src++) {
- 		delta = sdhci_s3c_consider_clock(ourhost, src, clock);
-@@ -217,6 +222,8 @@ static void sdhci_s3c_set_clock(struct sdhci_host *host, unsigned int clock)
- 	if (clock < 25 * 1000000)
- 		ctrl |= (S3C_SDHCI_CTRL3_FCSEL3 | S3C_SDHCI_CTRL3_FCSEL2);
- 	writel(ctrl, host->ioaddr + S3C_SDHCI_CONTROL3);
-+
-+	sdhci_set_clock(host, clock);
- }
- 
- /**
-@@ -606,8 +613,10 @@ static int sdhci_s3c_probe(struct platform_device *pdev)
- 	/* Setup quirks for the controller */
- 	host->quirks |= SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC;
- 	host->quirks |= SDHCI_QUIRK_NO_HISPD_BIT;
--	if (drv_data)
-+	if (drv_data) {
- 		host->quirks |= drv_data->sdhci_quirks;
-+		sc->no_divider = drv_data->no_divider;
-+	}
- 
- #ifndef CONFIG_MMC_SDHCI_S3C_DMA
- 
-@@ -656,7 +665,7 @@ static int sdhci_s3c_probe(struct platform_device *pdev)
- 	 * If controller does not have internal clock divider,
- 	 * we can use overriding functions instead of default.
- 	 */
--	if (host->quirks & SDHCI_QUIRK_NONSTANDARD_CLOCK) {
-+	if (sc->no_divider) {
- 		sdhci_s3c_ops.set_clock = sdhci_cmu_set_clock;
- 		sdhci_s3c_ops.get_min_clock = sdhci_cmu_get_min_clock;
- 		sdhci_s3c_ops.get_max_clock = sdhci_cmu_get_max_clock;
-@@ -797,7 +806,7 @@ static const struct dev_pm_ops sdhci_s3c_pmops = {
- 
- #if defined(CONFIG_CPU_EXYNOS4210) || defined(CONFIG_SOC_EXYNOS4212)
- static struct sdhci_s3c_drv_data exynos4_sdhci_drv_data = {
--	.sdhci_quirks = SDHCI_QUIRK_NONSTANDARD_CLOCK,
-+	.no_divider = true,
- };
- #define EXYNOS4_SDHCI_DRV_DATA ((kernel_ulong_t)&exynos4_sdhci_drv_data)
- #else
-diff --git a/drivers/mmc/host/sdhci-sirf.c b/drivers/mmc/host/sdhci-sirf.c
-index 5d79e10e1ba2..3b775348b470 100644
---- a/drivers/mmc/host/sdhci-sirf.c
-+++ b/drivers/mmc/host/sdhci-sirf.c
-@@ -28,6 +28,7 @@ static unsigned int sdhci_sirf_get_max_clk(struct sdhci_host *host)
- }
- 
- static struct sdhci_ops sdhci_sirf_ops = {
-+	.set_clock = sdhci_set_clock,
- 	.get_max_clock	= sdhci_sirf_get_max_clk,
- 	.set_bus_width = sdhci_set_bus_width,
- 	.reset = sdhci_reset,
-diff --git a/drivers/mmc/host/sdhci-spear.c b/drivers/mmc/host/sdhci-spear.c
-index c2a2bedc8813..8bf64ab36720 100644
---- a/drivers/mmc/host/sdhci-spear.c
-+++ b/drivers/mmc/host/sdhci-spear.c
-@@ -38,6 +38,7 @@ struct spear_sdhci {
- 
- /* sdhci ops */
- static const struct sdhci_ops sdhci_pltfm_ops = {
-+	.set_clock = sdhci_set_clock,
- 	.set_bus_width = sdhci_set_bus_width,
- 	.reset = sdhci_reset,
- };
-diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
-index 7754c0319fda..a0a8b5cc3b0c 100644
---- a/drivers/mmc/host/sdhci-tegra.c
-+++ b/drivers/mmc/host/sdhci-tegra.c
-@@ -153,6 +153,7 @@ static const struct sdhci_ops tegra_sdhci_ops = {
- 	.read_l     = tegra_sdhci_readl,
- 	.read_w     = tegra_sdhci_readw,
- 	.write_l    = tegra_sdhci_writel,
-+	.set_clock  = sdhci_set_clock,
- 	.set_bus_width = tegra_sdhci_set_bus_width,
- 	.reset      = tegra_sdhci_reset,
- };
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 67b7a5752049..748333ba6e96 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -1112,19 +1112,13 @@ static u16 sdhci_get_preset_value(struct sdhci_host *host)
- 	return preset;
- }
- 
--static void sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
-+void sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
- {
- 	int div = 0; /* Initialized for compiler warning */
- 	int real_div = div, clk_mul = 1;
- 	u16 clk = 0;
- 	unsigned long timeout;
- 
--	if (host->ops->set_clock) {
--		host->ops->set_clock(host, clock);
--		if (host->quirks & SDHCI_QUIRK_NONSTANDARD_CLOCK)
--			return;
--	}
--
- 	host->mmc->actual_clock = 0;
- 
- 	sdhci_writew(host, 0, SDHCI_CLOCK_CONTROL);
-@@ -1221,6 +1215,7 @@ static void sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
- 	clk |= SDHCI_CLOCK_CARD_EN;
- 	sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
- }
-+EXPORT_SYMBOL_GPL(sdhci_set_clock);
- 
- static int sdhci_set_power(struct sdhci_host *host, unsigned short power)
- {
-@@ -1439,7 +1434,7 @@ static void sdhci_do_set_ios(struct sdhci_host *host, struct mmc_ios *ios)
- 		sdhci_enable_preset_value(host, false);
- 
- 	if (!ios->clock || ios->clock != host->clock) {
--		sdhci_set_clock(host, ios->clock);
-+		host->ops->set_clock(host, ios->clock);
- 		host->clock = ios->clock;
- 	}
- 
-@@ -1509,7 +1504,7 @@ static void sdhci_do_set_ios(struct sdhci_host *host, struct mmc_ios *ios)
- 			sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
- 
- 			/* Re-enable SD Clock */
--			sdhci_set_clock(host, host->clock);
-+			host->ops->set_clock(host, host->clock);
- 		}
- 
- 
-@@ -1553,7 +1548,7 @@ static void sdhci_do_set_ios(struct sdhci_host *host, struct mmc_ios *ios)
- 		}
- 
- 		/* Re-enable SD Clock */
--		sdhci_set_clock(host, host->clock);
-+		host->ops->set_clock(host, host->clock);
- 	} else
- 		sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
- 
-@@ -2124,7 +2119,7 @@ static void sdhci_tasklet_finish(unsigned long param)
- 		/* Some controllers need this kick or reset won't work here */
- 		if (host->quirks & SDHCI_QUIRK_CLOCK_BEFORE_RESET)
- 			/* This is to force an update */
--			sdhci_set_clock(host, host->clock);
-+			host->ops->set_clock(host, host->clock);
- 
- 		/* Spec says we should do both at the same time, but Ricoh
- 		   controllers do not like that. */
-diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index 7d84cb3b0e00..ac20195f667b 100644
---- a/drivers/mmc/host/sdhci.h
-+++ b/drivers/mmc/host/sdhci.h
-@@ -400,6 +400,7 @@ static inline bool sdhci_sdio_irq_enabled(struct sdhci_host *host)
- 	return !!(host->flags & SDHCI_SDIO_IRQ_ENABLED);
- }
- 
-+void sdhci_set_clock(struct sdhci_host *host, unsigned int clock);
- void sdhci_set_bus_width(struct sdhci_host *host, int width);
- void sdhci_reset(struct sdhci_host *host, u8 mask);
- 
-diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
-index 02919ef99419..72a90baf111f 100644
---- a/include/linux/mmc/sdhci.h
-+++ b/include/linux/mmc/sdhci.h
-@@ -57,8 +57,6 @@ struct sdhci_host {
- #define SDHCI_QUIRK_BROKEN_CARD_DETECTION		(1<<15)
- /* Controller reports inverted write-protect state */
- #define SDHCI_QUIRK_INVERTED_WRITE_PROTECT		(1<<16)
--/* Controller has nonstandard clock management */
--#define SDHCI_QUIRK_NONSTANDARD_CLOCK			(1<<17)
- /* Controller does not like fast PIO transfers */
- #define SDHCI_QUIRK_PIO_NEEDS_DELAY			(1<<18)
- /* Controller has to be forced to use block size of 2048 bytes */
 -- 
 1.8.3.1
 
