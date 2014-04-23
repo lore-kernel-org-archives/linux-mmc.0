@@ -1,131 +1,66 @@
 From: Russell King <rmk+kernel@arm.linux.org.uk>
-Subject: [PATCH 20/38] mmc: sdhci-esdhc-imx: fix lockdep splat upon tuning
-Date: Wed, 23 Apr 2014 20:07:52 +0100
-Message-ID: <E1Wd2WO-0003vc-Gk@rmk-PC.arm.linux.org.uk>
+Subject: [PATCH 21/38] mmc: sdhci: hack up driver to make it more compliant
+ with UHS-1
+Date: Wed, 23 Apr 2014 20:07:57 +0100
+Message-ID: <E1Wd2WT-0003vg-Ke@rmk-PC.arm.linux.org.uk>
 References: <20140423185534.GA26756@n2100.arm.linux.org.uk>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from gw-1.arm.linux.org.uk ([78.32.30.217]:46451 "EHLO
+Received: from gw-1.arm.linux.org.uk ([78.32.30.217]:46458 "EHLO
 	pandora.arm.linux.org.uk" rhost-flags-OK-OK-OK-FAIL)
-	by vger.kernel.org with ESMTP id S932222AbaDWTH6 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 23 Apr 2014 15:07:58 -0400
+	by vger.kernel.org with ESMTP id S932222AbaDWTIB (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 23 Apr 2014 15:08:01 -0400
 In-Reply-To: <20140423185534.GA26756@n2100.arm.linux.org.uk>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Chris Ball <chris@printf.net>, linux-mmc@vger.kernel.org
 Cc: linux-arm-kernel@lists.infradead.org, Ulf Hansson <ulf.hansson@linaro.org>
 
-=================================
-[ INFO: inconsistent lock state ]
-3.14.0-rc1+ #490 Not tainted
----------------------------------
-inconsistent {IN-HARDIRQ-W} -> {HARDIRQ-ON-W} usage.
-kworker/u8:0/6 [HC0[0]:SC0[0]:HE1:SE1] takes:
- (&(&host->lock)->rlock#2){?.-...}, at: [<c04b57a4>] esdhc_send_tuning_cmd+0x104/0x14c
-{IN-HARDIRQ-W} state was registered at:
-  [<c00652fc>] mark_lock+0x15c/0x6f8
-  [<c0066354>] __lock_acquire+0xabc/0x1ca0
-  [<c0067ad8>] lock_acquire+0xa0/0x130
-  [<c0697a44>] _raw_spin_lock+0x34/0x44
-  [<c04b0dbc>] sdhci_irq+0x20/0xa40
-  [<c0071b1c>] handle_irq_event_percpu+0x74/0x284
-  [<c0071d70>] handle_irq_event+0x44/0x64
-  [<c0074db8>] handle_fasteoi_irq+0xac/0x140
-  [<c007147c>] generic_handle_irq+0x28/0x38
-  [<c000efd4>] handle_IRQ+0x40/0x98
-  [<c0008584>] gic_handle_irq+0x30/0x64
-  [<c0013144>] __irq_svc+0x44/0x58
-  [<c0028fc8>] irq_exit+0xc0/0x120
-  [<c000efd8>] handle_IRQ+0x44/0x98
-  [<c0008584>] gic_handle_irq+0x30/0x64
-  [<c0013144>] __irq_svc+0x44/0x58
-  [<c068f398>] printk+0x3c/0x44
-  [<c03191d0>] _regulator_get+0x1b4/0x1e0
-  [<c031924c>] regulator_get+0x18/0x1c
-  [<c049fbc4>] mmc_add_host+0x30/0x1c0
-  [<c04b2e10>] sdhci_add_host+0x804/0xbbc
-  [<c04b5318>] sdhci_esdhc_imx_probe+0x380/0x674
-  [<c036d530>] platform_drv_probe+0x20/0x50
-  [<c036b948>] driver_probe_device+0x120/0x234
-  [<c036baf8>] __driver_attach+0x9c/0xa0
-  [<c036a04c>] bus_for_each_dev+0x5c/0x90
-  [<c036b418>] driver_attach+0x24/0x28
-  [<c036b018>] bus_add_driver+0xe4/0x1d8
-  [<c036c1b0>] driver_register+0x80/0xfc
-  [<c036ce28>] __platform_driver_register+0x50/0x64
-  [<c093706c>] sdhci_esdhc_imx_driver_init+0x18/0x20
-  [<c0008834>] do_one_initcall+0x3c/0x164
-  [<c0901c94>] kernel_init_freeable+0x104/0x1d0
-  [<c068c45c>] kernel_init+0x10/0x118
-  [<c000e768>] ret_from_fork+0x14/0x2c
-irq event stamp: 5933
-hardirqs last  enabled at (5933): [<c069813c>] _raw_spin_unlock_irqrestore+0x38/0x4c
-hardirqs last disabled at (5932): [<c0697b04>] _raw_spin_lock_irqsave+0x24/0x60
-softirqs last  enabled at (5914): [<c0028ba0>] __do_softirq+0x260/0x360
-softirqs last disabled at (5909): [<c0028fc8>] irq_exit+0xc0/0x120
-
-other info that might help us debug this:
- Possible unsafe locking scenario:
-
-       CPU0
-       ----
-  lock(&(&host->lock)->rlock#2);
-  <Interrupt>
-    lock(&(&host->lock)->rlock#2);
-
- *** DEADLOCK ***
-
-2 locks held by kworker/u8:0/6:
- #0:  (kmmcd){.+.+.+}, at: [<c003d890>] process_one_work+0x134/0x4e8
- #1:  ((&(&host->detect)->work)){+.+.+.}, at: [<c003d890>] process_one_work+0x134/0x4e8
-
-stack backtrace:
-CPU: 2 PID: 6 Comm: kworker/u8:0 Not tainted 3.14.0-rc1+ #490
-Workqueue: kmmcd mmc_rescan
-Backtrace:
-[<c00124a0>] (dump_backtrace) from [<c0012640>] (show_stack+0x18/0x1c)
-[<c0012628>] (show_stack) from [<c069164c>] (dump_stack+0x70/0x8c)
-[<c06915dc>] (dump_stack) from [<c068f080>] (print_usage_bug+0x274/0x2e4)
-[<c068ee0c>] (print_usage_bug) from [<c0065774>] (mark_lock+0x5d4/0x6f8)
-[<c00651a0>] (mark_lock) from [<c0065e6c>] (__lock_acquire+0x5d4/0x1ca0)
-[<c0065898>] (__lock_acquire) from [<c0067ad8>] (lock_acquire+0xa0/0x130)
-[<c0067a38>] (lock_acquire) from [<c0697a44>] (_raw_spin_lock+0x34/0x44)
-[<c0697a10>] (_raw_spin_lock) from [<c04b57a4>] (esdhc_send_tuning_cmd+0x104/0x14c)
-[<c04b56a0>] (esdhc_send_tuning_cmd) from [<c04b582c>] (esdhc_executing_tuning+0x40/0x100)
-[<c04b57ec>] (esdhc_executing_tuning) from [<c04afa54>] (sdhci_execute_tuning+0xcc/0x754)
-[<c04af988>] (sdhci_execute_tuning) from [<c04a4684>] (mmc_sd_init_card+0x65c/0x694)
-[<c04a4028>] (mmc_sd_init_card) from [<c04a48f0>] (mmc_attach_sd+0xb0/0x184)
-[<c04a4840>] (mmc_attach_sd) from [<c049eb28>] (mmc_rescan+0x26c/0x2e8)
-[<c049e8bc>] (mmc_rescan) from [<c003d914>] (process_one_work+0x1b8/0x4e8)
-[<c003d75c>] (process_one_work) from [<c003e090>] (worker_thread+0x13c/0x3f8)
-[<c003df54>] (worker_thread) from [<c00449bc>] (kthread+0xcc/0xe8)
-[<c00448f0>] (kthread) from [<c000e768>] (ret_from_fork+0x14/0x2c)
+Patch suggested by Dong Aisheng <dongas86@gmail.com>, this avoids
+additional clock start/stop cycles during the transition to 1.8V
+signalling mode.
 
 Signed-off-by: Russell King <rmk+kernel@arm.linux.org.uk>
 ---
- drivers/mmc/host/sdhci-esdhc-imx.c | 6 ++----
- 1 file changed, 2 insertions(+), 4 deletions(-)
+ drivers/mmc/host/sdhci.c | 12 ------------
+ 1 file changed, 12 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-index eb7a13796bcb..dfed2c37ab3f 100644
---- a/drivers/mmc/host/sdhci-esdhc-imx.c
-+++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-@@ -738,14 +738,12 @@ static int esdhc_send_tuning_cmd(struct sdhci_host *host, u32 opcode,
- 	mrq.done = esdhc_request_done;
- 	init_completion(&(mrq.completion));
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 748333ba6e96..0bcef2d42da4 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -1507,12 +1507,6 @@ static void sdhci_do_set_ios(struct sdhci_host *host, struct mmc_ios *ios)
+ 			host->ops->set_clock(host, host->clock);
+ 		}
  
--	disable_irq(host->irq);
--	spin_lock(&host->lock);
-+	spin_lock_irq(&host->lock);
- 	host->mrq = &mrq;
+-
+-		/* Reset SD Clock Enable */
+-		clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
+-		clk &= ~SDHCI_CLOCK_CARD_EN;
+-		sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
+-
+ 		if (host->ops->set_uhs_signaling)
+ 			host->ops->set_uhs_signaling(host, ios->timing);
+ 		else {
+@@ -1546,9 +1540,6 @@ static void sdhci_do_set_ios(struct sdhci_host *host, struct mmc_ios *ios)
+ 			ios->drv_type = (preset & SDHCI_PRESET_DRV_MASK)
+ 				>> SDHCI_PRESET_DRV_SHIFT;
+ 		}
+-
+-		/* Re-enable SD Clock */
+-		host->ops->set_clock(host, host->clock);
+ 	} else
+ 		sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
  
- 	sdhci_send_command(host, mrq.cmd);
+@@ -1757,9 +1748,6 @@ static int sdhci_do_start_signal_voltage_switch(struct sdhci_host *host,
+ 		ctrl |= SDHCI_CTRL_VDD_180;
+ 		sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
  
--	spin_unlock(&host->lock);
--	enable_irq(host->irq);
-+	spin_unlock_irq(&host->lock);
- 
- 	wait_for_completion(&mrq.completion);
- 
+-		/* Wait for 5ms */
+-		usleep_range(5000, 5500);
+-
+ 		/* 1.8V regulator output should be stable within 5 ms */
+ 		ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
+ 		if (ctrl & SDHCI_CTRL_VDD_180)
 -- 
 1.8.3.1
 
