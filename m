@@ -1,83 +1,53 @@
-From: Yuvaraj Cd <yuvaraj.lkml@gmail.com>
-Subject: Re: [PATCH V2] mmc: dw_mmc: exynos: Turn SDIO interrupts on
-Date: Wed, 23 Apr 2014 12:24:48 +0530
-Message-ID: <CA+NduCB6b5TAPs9ZWaBoFgg38==727s=NB-ko7AnYMpjHn8j0w@mail.gmail.com>
-References: <1395635037-24081-1-git-send-email-yuvaraj.cd@samsung.com>
-	<532FB4A7.7020700@samsung.com>
-	<CAKuRcOKOBebW157R16_KtSR541MwwZ4pyynBRnbvOLm9RK4SAg@mail.gmail.com>
-	<CAGOxZ53urGaOmezRi35fGpz_sR+E8Ukq3s9v08pAGLL6ChOWKw@mail.gmail.com>
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: Re: [PATCH] mmc: mmci: switch the driver to using gpio descriptors
+Date: Wed, 23 Apr 2014 08:59:30 +0200
+Message-ID: <CACRpkdZHbxYvHbxrTzZ_k=U9sUNjh86GkwUiEjM5cZXM3WyfEA@mail.gmail.com>
+References: <1397550786-8146-1-git-send-email-linus.walleij@linaro.org>
+	<CAPDyKFq8TGsHQixYJwtPGkr0HS8r1-B0LZWsO9DKYH+gTq_Dgg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-Reply-To: <CAGOxZ53urGaOmezRi35fGpz_sR+E8Ukq3s9v08pAGLL6ChOWKw@mail.gmail.com>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Alim Akhtar <alim.akhtar@gmail.com>
-Cc: Yuvaraj Kumar <yuvaraj.cd@gmail.com>, Yuvaraj Kumar C D <yuvaraj.cd@samsung.com>, "linux-samsung-soc@vger.kernel.org" <linux-samsung-soc@vger.kernel.org>, Grant Grundler <grundler@chromium.org>, Tomasz Figa <t.figa@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, sunil joshi <joshi@samsung.com>, Doug Anderson <dianders@chromium.org>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, "kgene.kim@samsung.com" <kgene.kim@samsung.com>, Chris Ball <cjb@laptop.org>, Sonny Rao <sonnyrao@chromium.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-ob0-f175.google.com ([209.85.214.175]:41521 "EHLO
+	mail-ob0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753858AbaDWG7b (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 23 Apr 2014 02:59:31 -0400
+Received: by mail-ob0-f175.google.com with SMTP id wp4so579248obc.6
+        for <linux-mmc@vger.kernel.org>; Tue, 22 Apr 2014 23:59:31 -0700 (PDT)
+In-Reply-To: <CAPDyKFq8TGsHQixYJwtPGkr0HS8r1-B0LZWsO9DKYH+gTq_Dgg@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Russell King <linux@arm.linux.org.uk>, Ulf Hansson <ulf.hansson@stericsson.com>, Alexandre Courbot <gnurou@gmail.com>
 
-On Wed, Apr 23, 2014 at 9:42 AM, Alim Akhtar <alim.akhtar@gmail.com> wrote:
-> Hi Yuvaraj,
+On Wed, Apr 16, 2014 at 9:31 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> On 15 April 2014 10:33, Linus Walleij <linus.walleij@linaro.org> wrote:
+>> The next step in modernization of GPIO is to let drivers handle
+>> descriptors rather than integer numbers representing GPIO pins,
+>> akin to how clocks or regulators are already handled today.
+>>
+>> This patch makes the MMCI driver use GPIO descriptos in the
+>> core code with fallback code using the platform data if that
+>> is not possible. After all platforms with MMCI have been
+>> migrated to use descriptors, the platform data entries for
+>> GPIO pins can be removed.
+>>
+>> Cc: Alexandre Courbot <gnurou@gmail.com>
+>> Cc: Ulf Hansson <ulf.hansson@linaro.org>
+>> Cc: Russell King <linux@arm.linux.org.uk>
+>> Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
+>> ---
+>> Hi Russell,Ulf: there is no hurry to do these changes (only used
+>> for my very corner-case MMCI PL181 experiments) but it's the
+>> desired direction to use descriptors for GPIOs going forward.
+>> I can rebase this on top of Ulf's patch stack any time, no
+>> problem.
 >
-> On Mon, Mar 24, 2014 at 10:12 AM, Yuvaraj Kumar <yuvaraj.cd@gmail.com> wrote:
->> On Mon, Mar 24, 2014 at 9:59 AM, Jaehoon Chung <jh80.chung@samsung.com> wrote:
->>> Hi, Yuvaraj.
->>>
->>> NACK. we can use "mmc_of_parese()".
->> Thanks Jaehoon for the pointer.I will use "mmc_of_parse()".
-> Are you planning to re-spin this patch? Now Jaehoon's changes for
-> using mmc_of_parse() is landed in mmc-next.
-As its already added mmc_of_parse(),no respin of this.
-Just we need to use it in DT.
-> Thanks!!
->>>
->>> I have sent the patch that use "mmc_of_parse()".
->>> https://patchwork.kernel.org/patch/3750681/
->>>
->>> Best Regards,
->>> Jaehoon Chung
->>>
->>> On 03/24/2014 01:23 PM, Yuvaraj Kumar C D wrote:
->>>> The mmc part in exynos supports SDIO interrupts and they work fine, so
->>>> turn the capability on.  With this I see download speeds increase
->>>> about 10x.
->>>>
->>>> This V1 of this patch is posted to LKML at
->>>> https://patchwork.kernel.org/patch/2429661/) by Doug Anderson.
->>>>
->>>> Signed-off-by: Doug Anderson <dianders@chromium.org>
->>>> Signed-off-by: Yuvaraj Kumar C D <yuvaraj.cd@samsung.com>
->>>> ---
->>>>  drivers/mmc/host/dw_mmc.c |    3 +++
->>>>  1 file changed, 3 insertions(+)
->>>>
->>>> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
->>>> index 0c56faa..240949d 100644
->>>> --- a/drivers/mmc/host/dw_mmc.c
->>>> +++ b/drivers/mmc/host/dw_mmc.c
->>>> @@ -2417,6 +2417,9 @@ static struct dw_mci_board *dw_mci_parse_dt(struct dw_mci *host)
->>>>       if (of_get_property(np, "cd-inverted", NULL))
->>>>               pdata->caps2 |= MMC_CAP2_CD_ACTIVE_HIGH;
->>>>
->>>> +     if (of_find_property(np, "cap-sdio-irq", NULL))
->>>> +             pdata->caps |= MMC_CAP_SDIO_IRQ;
->>>> +
->>>>       return pdata;
->>>>  }
->>>>
->>>>
->>>
->> --
->> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
->
->
-> --
-> Regards,
-> Alim
->
-> _______________________________________________
-> linux-arm-kernel mailing list
-> linux-arm-kernel@lists.infradead.org
-> http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
+> If you rebase it on top of my patch stack - I can resend the pull
+> request I sent a few days ago and include this one!?
+
+There is no hurry. I'd let Russell think about your recent patches
+first and I will keep this patch on my watchlist until things
+settle down.
+
+Yours,
+Linus Walleij
