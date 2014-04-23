@@ -1,94 +1,96 @@
 From: Russell King <rmk+kernel@arm.linux.org.uk>
-Subject: [PATCH 25/38] mmc: sdhci: clean up sdhci_execute_tuning() decision
-Date: Wed, 23 Apr 2014 20:08:18 +0100
-Message-ID: <E1Wd2Wo-0003vx-2y@rmk-PC.arm.linux.org.uk>
+Subject: [PATCH 26/38] mmc: sdhci-esdhc-imx: remove emulation of uhs_mode
+Date: Wed, 23 Apr 2014 20:08:23 +0100
+Message-ID: <E1Wd2Wt-0003w1-6P@rmk-PC.arm.linux.org.uk>
 References: <20140423185534.GA26756@n2100.arm.linux.org.uk>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from gw-1.arm.linux.org.uk ([78.32.30.217]:46484 "EHLO
+Received: from gw-1.arm.linux.org.uk ([78.32.30.217]:46490 "EHLO
 	pandora.arm.linux.org.uk" rhost-flags-OK-OK-OK-FAIL)
-	by vger.kernel.org with ESMTP id S932171AbaDWTIX (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 23 Apr 2014 15:08:23 -0400
+	by vger.kernel.org with ESMTP id S932171AbaDWTI2 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 23 Apr 2014 15:08:28 -0400
 In-Reply-To: <20140423185534.GA26756@n2100.arm.linux.org.uk>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Chris Ball <chris@printf.net>, linux-mmc@vger.kernel.org
 Cc: linux-arm-kernel@lists.infradead.org, Ulf Hansson <ulf.hansson@linaro.org>
 
-Clean up the code in sdhci_execute_tuning() so the decision whether
-to execute tuning is clearer - and despite this reflecting what the
-original code was doing, it shows that it may not be what the author
-actually intended.
+We no longer need to emulate the uhs_mode field of the host control2
+register - the main sdhci driver never reads this back to evaluate
+the current mode as it caches the current mode instead.
 
 Signed-off-by: Russell King <rmk+kernel@arm.linux.org.uk>
 ---
- drivers/mmc/host/sdhci.c | 31 +++++++++++++++----------------
- 1 file changed, 15 insertions(+), 16 deletions(-)
+ drivers/mmc/host/sdhci-esdhc-imx.c | 17 +++--------------
+ 1 file changed, 3 insertions(+), 14 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 5f067a040ec4..c1bd77e17458 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -1806,21 +1806,16 @@ static int sdhci_card_busy(struct mmc_host *mmc)
+diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+index 72e0581e564f..4866d802f9e2 100644
+--- a/drivers/mmc/host/sdhci-esdhc-imx.c
++++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+@@ -160,7 +160,6 @@ struct pltfm_imx_data {
+ 		MULTIBLK_IN_PROCESS, /* exact multiblock cmd in process */
+ 		WAIT_FOR_INT,        /* sent CMD12, waiting for response INT */
+ 	} multiblock_status;
+-	u32 uhs_mode;
+ 	u32 is_ddr;
+ };
  
- static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
+@@ -382,7 +381,6 @@ static u16 esdhc_readw_le(struct sdhci_host *host, int reg)
+ 		if (val & ESDHC_MIX_CTRL_SMPCLK_SEL)
+ 			ret |= SDHCI_CTRL_TUNED_CLK;
+ 
+-		ret |= (imx_data->uhs_mode & SDHCI_CTRL_UHS_MASK);
+ 		ret &= ~SDHCI_CTRL_PRESET_VAL_ENABLE;
+ 
+ 		return ret;
+@@ -429,7 +427,6 @@ static void esdhc_writew_le(struct sdhci_host *host, u16 val, int reg)
+ 		else
+ 			new_val &= ~ESDHC_VENDOR_SPEC_VSELECT;
+ 		writel(new_val, host->ioaddr + ESDHC_VENDOR_SPEC);
+-		imx_data->uhs_mode = val & SDHCI_CTRL_UHS_MASK;
+ 		if (imx_data->socdata->flags & ESDHC_FLAG_MAN_TUNING) {
+ 			new_val = readl(host->ioaddr + ESDHC_MIX_CTRL);
+ 			if (val & SDHCI_CTRL_TUNED_CLK)
+@@ -841,28 +838,20 @@ static int esdhc_change_pinstate(struct sdhci_host *host,
+ 	return pinctrl_select_state(imx_data->pinctrl, pinctrl);
+ }
+ 
+-static void esdhc_set_uhs_signaling(struct sdhci_host *host, unsigned int uhs)
++static void esdhc_set_uhs_signaling(struct sdhci_host *host, unsigned timing)
  {
--	struct sdhci_host *host;
-+	struct sdhci_host *host = mmc_priv(mmc);
- 	u16 ctrl;
- 	int tuning_loop_counter = MAX_TUNING_LOOP;
- 	unsigned long timeout;
- 	int err = 0;
--	bool requires_tuning_nonuhs = false;
- 	unsigned long flags;
+ 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+ 	struct pltfm_imx_data *imx_data = pltfm_host->priv;
+ 	struct esdhc_platform_data *boarddata = &imx_data->boarddata;
  
--	host = mmc_priv(mmc);
--
- 	sdhci_runtime_pm_get(host);
- 	spin_lock_irqsave(&host->lock, flags);
- 
--	ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
--
- 	/*
- 	 * The Host Controller needs tuning only in case of SDR104 mode
- 	 * and for SDR50 mode when Use Tuning for SDR50 is set in the
-@@ -1828,16 +1823,18 @@ static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
- 	 * If the Host Controller supports the HS200 mode then the
- 	 * tuning function has to be executed.
- 	 */
--	if (host->timing == MMC_TIMING_UHS_SDR50 &&
--	    (host->flags & SDHCI_SDR50_NEEDS_TUNING ||
--	     host->flags & SDHCI_SDR104_NEEDS_TUNING))
--		requires_tuning_nonuhs = true;
--
--	if (host->timing == MMC_TIMING_MMC_HS200 ||
--	    host->timing == MMC_TIMING_UHS_SDR104 ||
--	    requires_tuning_nonuhs)
--		ctrl |= SDHCI_CTRL_EXEC_TUNING;
--	else {
-+	switch (host->timing) {
-+	case MMC_TIMING_MMC_HS200:
-+	case MMC_TIMING_UHS_SDR104:
-+		break;
-+
-+	case MMC_TIMING_UHS_SDR50:
-+		if (host->flags & SDHCI_SDR50_NEEDS_TUNING ||
-+		    host->flags & SDHCI_SDR104_NEEDS_TUNING)
-+			break;
-+		/* FALLTHROUGH */
-+
-+	default:
- 		spin_unlock_irqrestore(&host->lock, flags);
- 		sdhci_runtime_pm_put(host);
- 		return 0;
-@@ -1850,6 +1847,8 @@ static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
- 		return err;
+-	switch (uhs) {
++	switch (timing) {
+ 	case MMC_TIMING_UHS_SDR12:
+-		imx_data->uhs_mode = SDHCI_CTRL_UHS_SDR12;
+-		break;
+ 	case MMC_TIMING_UHS_SDR25:
+-		imx_data->uhs_mode = SDHCI_CTRL_UHS_SDR25;
+-		break;
+ 	case MMC_TIMING_UHS_SDR50:
+-		imx_data->uhs_mode = SDHCI_CTRL_UHS_SDR50;
+-		break;
+ 	case MMC_TIMING_UHS_SDR104:
+ 	case MMC_TIMING_MMC_HS200:
+-		imx_data->uhs_mode = SDHCI_CTRL_UHS_SDR104;
+ 		break;
+ 	case MMC_TIMING_UHS_DDR50:
+-		imx_data->uhs_mode = SDHCI_CTRL_UHS_DDR50;
+ 		writel(readl(host->ioaddr + ESDHC_MIX_CTRL) |
+ 				ESDHC_MIX_CTRL_DDREN,
+ 				host->ioaddr + ESDHC_MIX_CTRL);
+@@ -879,7 +868,7 @@ static void esdhc_set_uhs_signaling(struct sdhci_host *host, unsigned int uhs)
+ 		break;
  	}
  
-+	ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
-+	ctrl |= SDHCI_CTRL_EXEC_TUNING;
- 	sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
+-	esdhc_change_pinstate(host, uhs);
++	esdhc_change_pinstate(host, timing);
+ }
  
- 	/*
+ static void esdhc_reset(struct sdhci_host *host, u8 mask)
 -- 
 1.8.3.1
 
