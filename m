@@ -1,19 +1,23 @@
 From: Russell King <rmk+kernel@arm.linux.org.uk>
-Subject: [PATCH 09/38] mmc: sdhci: convert generic bus width setup to library
- function
-Date: Wed, 23 Apr 2014 20:06:56 +0100
-Message-ID: <E1Wd2VU-0003uq-63@rmk-PC.arm.linux.org.uk>
+Subject: [PATCH 10/38] mmc: sdhci: convert reset into a library function
+Date: Wed, 23 Apr 2014 20:07:01 +0100
+Message-ID: <E1Wd2VZ-0003uu-9X@rmk-PC.arm.linux.org.uk>
 References: <20140423185534.GA26756@n2100.arm.linux.org.uk>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from gw-1.arm.linux.org.uk ([78.32.30.217]:46378 "EHLO
+Received: from gw-1.arm.linux.org.uk ([78.32.30.217]:46385 "EHLO
 	pandora.arm.linux.org.uk" rhost-flags-OK-OK-OK-FAIL)
-	by vger.kernel.org with ESMTP id S932291AbaDWTHA (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 23 Apr 2014 15:07:00 -0400
+	by vger.kernel.org with ESMTP id S1751343AbaDWTHG (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 23 Apr 2014 15:07:06 -0400
 In-Reply-To: <20140423185534.GA26756@n2100.arm.linux.org.uk>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Chris Ball <chris@printf.net>, linux-mmc@vger.kernel.org
 Cc: linux-arm-kernel@lists.infradead.org, Ulf Hansson <ulf.hansson@linaro.org>, Michal Simek <michal.simek@xilinx.com>, Anton Vorontsov <anton@enomsg.org>, Ben Dooks <ben-linux@fluff.org>, Barry Song <baohua@kernel.org>, Viresh Kumar <viresh.linux@gmail.com>, Stephen Warren <swarren@wwwdotorg.org>, Thierry Reding <thierry.reding@gmail.com>, linuxppc-dev@lists.ozlabs.org, spear-devel@list.st.com, linux-tegra@vger.kernel.org
+
+Rather than having platform_reset_enter/platform_reset_exit methods,
+turn the core of the reset handling into a library function which
+platforms can call at the appropriate moment in their (new) reset
+method.
 
 Signed-off-by: Russell King <rmk+kernel@arm.linux.org.uk>
 ---
@@ -22,436 +26,433 @@ Signed-off-by: Russell King <rmk+kernel@arm.linux.org.uk>
  drivers/mmc/host/sdhci-bcm2835.c   |  1 +
  drivers/mmc/host/sdhci-cns3xxx.c   |  1 +
  drivers/mmc/host/sdhci-dove.c      |  1 +
- drivers/mmc/host/sdhci-esdhc-imx.c |  6 ++---
+ drivers/mmc/host/sdhci-esdhc-imx.c |  1 +
  drivers/mmc/host/sdhci-of-arasan.c |  1 +
- drivers/mmc/host/sdhci-of-esdhc.c  |  6 ++---
+ drivers/mmc/host/sdhci-of-esdhc.c  |  1 +
  drivers/mmc/host/sdhci-of-hlwd.c   |  1 +
- drivers/mmc/host/sdhci-pci.c       |  6 ++---
+ drivers/mmc/host/sdhci-pci.c       |  1 +
  drivers/mmc/host/sdhci-pltfm.c     |  1 +
- drivers/mmc/host/sdhci-pxav2.c     |  6 ++---
- drivers/mmc/host/sdhci-pxav3.c     |  1 +
- drivers/mmc/host/sdhci-s3c.c       |  8 +++----
+ drivers/mmc/host/sdhci-pxav2.c     |  6 +++--
+ drivers/mmc/host/sdhci-pxav3.c     |  6 +++--
+ drivers/mmc/host/sdhci-s3c.c       |  1 +
  drivers/mmc/host/sdhci-sirf.c      |  1 +
- drivers/mmc/host/sdhci-spear.c     |  2 +-
- drivers/mmc/host/sdhci-tegra.c     |  5 ++---
- drivers/mmc/host/sdhci.c           | 45 +++++++++++++++++++-------------------
- drivers/mmc/host/sdhci.h           |  5 +++--
- 19 files changed, 50 insertions(+), 50 deletions(-)
+ drivers/mmc/host/sdhci-spear.c     |  1 +
+ drivers/mmc/host/sdhci-tegra.c     |  6 +++--
+ drivers/mmc/host/sdhci.c           | 47 +++++++++++++++++++-------------------
+ drivers/mmc/host/sdhci.h           |  4 ++--
+ 19 files changed, 53 insertions(+), 31 deletions(-)
 
 diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
-index ebb3f392b589..0e4ba0a4cd71 100644
+index 0e4ba0a4cd71..aca84a682551 100644
 --- a/drivers/mmc/host/sdhci-acpi.c
 +++ b/drivers/mmc/host/sdhci-acpi.c
-@@ -103,10 +103,12 @@ static void sdhci_acpi_int_hw_reset(struct sdhci_host *host)
- 
+@@ -104,11 +104,13 @@ static void sdhci_acpi_int_hw_reset(struct sdhci_host *host)
  static const struct sdhci_ops sdhci_acpi_ops_dflt = {
  	.enable_dma = sdhci_acpi_enable_dma,
-+	.set_bus_width = sdhci_set_bus_width,
+ 	.set_bus_width = sdhci_set_bus_width,
++	.reset = sdhci_reset,
  };
  
  static const struct sdhci_ops sdhci_acpi_ops_int = {
  	.enable_dma = sdhci_acpi_enable_dma,
-+	.set_bus_width = sdhci_set_bus_width,
+ 	.set_bus_width = sdhci_set_bus_width,
++	.reset = sdhci_reset,
  	.hw_reset   = sdhci_acpi_int_hw_reset,
  };
  
 diff --git a/drivers/mmc/host/sdhci-bcm-kona.c b/drivers/mmc/host/sdhci-bcm-kona.c
-index 6f166e63b817..06cdb8abb25e 100644
+index 06cdb8abb25e..7b97bfab910d 100644
 --- a/drivers/mmc/host/sdhci-bcm-kona.c
 +++ b/drivers/mmc/host/sdhci-bcm-kona.c
-@@ -209,6 +209,7 @@ static struct sdhci_ops sdhci_bcm_kona_ops = {
- 	.get_max_clock = sdhci_bcm_kona_get_max_clk,
+@@ -210,6 +210,7 @@ static struct sdhci_ops sdhci_bcm_kona_ops = {
  	.get_timeout_clock = sdhci_bcm_kona_get_timeout_clock,
  	.platform_send_init_74_clocks = sdhci_bcm_kona_init_74_clocks,
-+	.set_bus_width = sdhci_set_bus_width,
+ 	.set_bus_width = sdhci_set_bus_width,
++	.reset = sdhci_reset,
  	.card_event = sdhci_bcm_kona_card_event,
  };
  
 diff --git a/drivers/mmc/host/sdhci-bcm2835.c b/drivers/mmc/host/sdhci-bcm2835.c
-index f6d8d67c545f..7ab69af979b4 100644
+index 7ab69af979b4..289b1c80d5fc 100644
 --- a/drivers/mmc/host/sdhci-bcm2835.c
 +++ b/drivers/mmc/host/sdhci-bcm2835.c
-@@ -133,6 +133,7 @@ static const struct sdhci_ops bcm2835_sdhci_ops = {
- 	.read_b = bcm2835_sdhci_readb,
+@@ -134,6 +134,7 @@ static const struct sdhci_ops bcm2835_sdhci_ops = {
  	.get_max_clock = sdhci_pltfm_clk_get_max_clock,
  	.get_min_clock = bcm2835_sdhci_get_min_clock,
-+	.set_bus_width = sdhci_set_bus_width,
+ 	.set_bus_width = sdhci_set_bus_width,
++	.reset = sdhci_reset,
  };
  
  static const struct sdhci_pltfm_data bcm2835_sdhci_pdata = {
 diff --git a/drivers/mmc/host/sdhci-cns3xxx.c b/drivers/mmc/host/sdhci-cns3xxx.c
-index f2cc26633cb2..5e0cc9c47887 100644
+index 5e0cc9c47887..87af66bb1ea8 100644
 --- a/drivers/mmc/host/sdhci-cns3xxx.c
 +++ b/drivers/mmc/host/sdhci-cns3xxx.c
-@@ -82,6 +82,7 @@ static void sdhci_cns3xxx_set_clock(struct sdhci_host *host, unsigned int clock)
- static const struct sdhci_ops sdhci_cns3xxx_ops = {
+@@ -83,6 +83,7 @@ static const struct sdhci_ops sdhci_cns3xxx_ops = {
  	.get_max_clock	= sdhci_cns3xxx_get_max_clk,
  	.set_clock	= sdhci_cns3xxx_set_clock,
-+	.set_bus_width	= sdhci_set_bus_width,
+ 	.set_bus_width	= sdhci_set_bus_width,
++	.reset          = sdhci_reset,
  };
  
  static const struct sdhci_pltfm_data sdhci_cns3xxx_pdata = {
 diff --git a/drivers/mmc/host/sdhci-dove.c b/drivers/mmc/host/sdhci-dove.c
-index 736d7a2eb7ec..8fc547a7048a 100644
+index 8fc547a7048a..1408cc11d881 100644
 --- a/drivers/mmc/host/sdhci-dove.c
 +++ b/drivers/mmc/host/sdhci-dove.c
-@@ -86,6 +86,7 @@ static u32 sdhci_dove_readl(struct sdhci_host *host, int reg)
- static const struct sdhci_ops sdhci_dove_ops = {
+@@ -87,6 +87,7 @@ static const struct sdhci_ops sdhci_dove_ops = {
  	.read_w	= sdhci_dove_readw,
  	.read_l	= sdhci_dove_readl,
-+	.set_bus_width = sdhci_set_bus_width,
+ 	.set_bus_width = sdhci_set_bus_width,
++	.reset = sdhci_reset,
  };
  
  static const struct sdhci_pltfm_data sdhci_dove_pdata = {
 diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-index b0b4eea8d232..568239d84cbe 100644
+index 568239d84cbe..b1d74fa33c5f 100644
 --- a/drivers/mmc/host/sdhci-esdhc-imx.c
 +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-@@ -668,7 +668,7 @@ static unsigned int esdhc_pltfm_get_ro(struct sdhci_host *host)
- 	return -ENOSYS;
- }
- 
--static int esdhc_pltfm_bus_width(struct sdhci_host *host, int width)
-+static void esdhc_pltfm_set_bus_width(struct sdhci_host *host, int width)
- {
- 	u32 ctrl;
- 
-@@ -686,8 +686,6 @@ static int esdhc_pltfm_bus_width(struct sdhci_host *host, int width)
- 
- 	esdhc_clrset_le(host, ESDHC_CTRL_BUSWIDTH_MASK, ctrl,
- 			SDHCI_HOST_CONTROL);
--
--	return 0;
- }
- 
- static void esdhc_prepare_tuning(struct sdhci_host *host, u32 val)
-@@ -888,7 +886,7 @@ static struct sdhci_ops sdhci_esdhc_ops = {
- 	.get_max_clock = esdhc_pltfm_get_max_clock,
- 	.get_min_clock = esdhc_pltfm_get_min_clock,
+@@ -888,6 +888,7 @@ static struct sdhci_ops sdhci_esdhc_ops = {
  	.get_ro = esdhc_pltfm_get_ro,
--	.platform_bus_width = esdhc_pltfm_bus_width,
-+	.set_bus_width = esdhc_pltfm_set_bus_width,
+ 	.set_bus_width = esdhc_pltfm_set_bus_width,
  	.set_uhs_signaling = esdhc_set_uhs_signaling,
++	.reset = sdhci_reset,
  };
  
+ static const struct sdhci_pltfm_data sdhci_esdhc_imx_pdata = {
 diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
-index f7c7cf62437d..9bb1dd263a45 100644
+index 9bb1dd263a45..faef21740584 100644
 --- a/drivers/mmc/host/sdhci-of-arasan.c
 +++ b/drivers/mmc/host/sdhci-of-arasan.c
-@@ -54,6 +54,7 @@ static unsigned int sdhci_arasan_get_timeout_clock(struct sdhci_host *host)
- static struct sdhci_ops sdhci_arasan_ops = {
+@@ -55,6 +55,7 @@ static struct sdhci_ops sdhci_arasan_ops = {
  	.get_max_clock = sdhci_pltfm_clk_get_max_clock,
  	.get_timeout_clock = sdhci_arasan_get_timeout_clock,
-+	.set_bus_width = sdhci_set_bus_width,
+ 	.set_bus_width = sdhci_set_bus_width,
++	.reset = sdhci_reset,
  };
  
  static struct sdhci_pltfm_data sdhci_arasan_pdata = {
 diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
-index 0b249970b119..86b8326e77c3 100644
+index 86b8326e77c3..4530f9957f20 100644
 --- a/drivers/mmc/host/sdhci-of-esdhc.c
 +++ b/drivers/mmc/host/sdhci-of-esdhc.c
-@@ -269,7 +269,7 @@ static void esdhc_of_platform_init(struct sdhci_host *host)
- 		host->quirks &= ~SDHCI_QUIRK_NO_BUSY_IRQ;
- }
- 
--static int esdhc_pltfm_bus_width(struct sdhci_host *host, int width)
-+static void esdhc_pltfm_set_bus_width(struct sdhci_host *host, int width)
- {
- 	u32 ctrl;
- 
-@@ -289,8 +289,6 @@ static int esdhc_pltfm_bus_width(struct sdhci_host *host, int width)
- 
- 	clrsetbits_be32(host->ioaddr + SDHCI_HOST_CONTROL,
- 			ESDHC_CTRL_BUSWIDTH_MASK, ctrl);
--
--	return 0;
- }
- 
- static const struct sdhci_ops sdhci_esdhc_ops = {
-@@ -310,7 +308,7 @@ static const struct sdhci_ops sdhci_esdhc_ops = {
- 	.platform_resume = esdhc_of_resume,
+@@ -309,6 +309,7 @@ static const struct sdhci_ops sdhci_esdhc_ops = {
  #endif
  	.adma_workaround = esdhci_of_adma_workaround,
--	.platform_bus_width = esdhc_pltfm_bus_width,
-+	.set_bus_width = esdhc_pltfm_set_bus_width,
+ 	.set_bus_width = esdhc_pltfm_set_bus_width,
++	.reset = sdhci_reset,
  };
  
  static const struct sdhci_pltfm_data sdhci_esdhc_pdata = {
 diff --git a/drivers/mmc/host/sdhci-of-hlwd.c b/drivers/mmc/host/sdhci-of-hlwd.c
-index 57c514a81ca5..4d5d0015e392 100644
+index 4d5d0015e392..fb01958cb18e 100644
 --- a/drivers/mmc/host/sdhci-of-hlwd.c
 +++ b/drivers/mmc/host/sdhci-of-hlwd.c
-@@ -58,6 +58,7 @@ static const struct sdhci_ops sdhci_hlwd_ops = {
- 	.write_l = sdhci_hlwd_writel,
+@@ -59,6 +59,7 @@ static const struct sdhci_ops sdhci_hlwd_ops = {
  	.write_w = sdhci_hlwd_writew,
  	.write_b = sdhci_hlwd_writeb,
-+	.set_bus_width = sdhci_set_bus_width,
+ 	.set_bus_width = sdhci_set_bus_width,
++	.reset = sdhci_reset,
  };
  
  static const struct sdhci_pltfm_data sdhci_hlwd_pdata = {
 diff --git a/drivers/mmc/host/sdhci-pci.c b/drivers/mmc/host/sdhci-pci.c
-index fdc612120362..8c4e9c2909b7 100644
+index 8c4e9c2909b7..87f9dd91f68c 100644
 --- a/drivers/mmc/host/sdhci-pci.c
 +++ b/drivers/mmc/host/sdhci-pci.c
-@@ -1031,7 +1031,7 @@ static int sdhci_pci_enable_dma(struct sdhci_host *host)
- 	return 0;
- }
- 
--static int sdhci_pci_bus_width(struct sdhci_host *host, int width)
-+static void sdhci_pci_set_bus_width(struct sdhci_host *host, int width)
- {
- 	u8 ctrl;
- 
-@@ -1052,8 +1052,6 @@ static int sdhci_pci_bus_width(struct sdhci_host *host, int width)
- 	}
- 
- 	sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
--
--	return 0;
- }
- 
- static void sdhci_pci_gpio_hw_reset(struct sdhci_host *host)
-@@ -1081,7 +1079,7 @@ static void sdhci_pci_hw_reset(struct sdhci_host *host)
- 
+@@ -1080,6 +1080,7 @@ static void sdhci_pci_hw_reset(struct sdhci_host *host)
  static const struct sdhci_ops sdhci_pci_ops = {
  	.enable_dma	= sdhci_pci_enable_dma,
--	.platform_bus_width	= sdhci_pci_bus_width,
-+	.set_bus_width	= sdhci_pci_set_bus_width,
+ 	.set_bus_width	= sdhci_pci_set_bus_width,
++	.reset		= sdhci_reset,
  	.hw_reset		= sdhci_pci_hw_reset,
  };
  
 diff --git a/drivers/mmc/host/sdhci-pltfm.c b/drivers/mmc/host/sdhci-pltfm.c
-index bef250e95418..40b0fe224f9d 100644
+index 40b0fe224f9d..bfbf467b61c7 100644
 --- a/drivers/mmc/host/sdhci-pltfm.c
 +++ b/drivers/mmc/host/sdhci-pltfm.c
-@@ -45,6 +45,7 @@ unsigned int sdhci_pltfm_clk_get_max_clock(struct sdhci_host *host)
- EXPORT_SYMBOL_GPL(sdhci_pltfm_clk_get_max_clock);
+@@ -46,6 +46,7 @@ EXPORT_SYMBOL_GPL(sdhci_pltfm_clk_get_max_clock);
  
  static const struct sdhci_ops sdhci_pltfm_ops = {
-+	.set_bus_width = sdhci_set_bus_width,
+ 	.set_bus_width = sdhci_set_bus_width,
++	.reset = sdhci_reset,
  };
  
  #ifdef CONFIG_OF
 diff --git a/drivers/mmc/host/sdhci-pxav2.c b/drivers/mmc/host/sdhci-pxav2.c
-index d51e061ec576..d24c282e5eb8 100644
+index d24c282e5eb8..2eee0c8b88eb 100644
 --- a/drivers/mmc/host/sdhci-pxav2.c
 +++ b/drivers/mmc/host/sdhci-pxav2.c
-@@ -88,7 +88,7 @@ static void pxav2_set_private_registers(struct sdhci_host *host, u8 mask)
- 	}
- }
+@@ -51,11 +51,13 @@
+ #define MMC_CARD		0x1000
+ #define MMC_WIDTH		0x0100
  
--static int pxav2_mmc_set_width(struct sdhci_host *host, int width)
-+static void pxav2_mmc_set_bus_width(struct sdhci_host *host, int width)
+-static void pxav2_set_private_registers(struct sdhci_host *host, u8 mask)
++static void pxav2_reset(struct sdhci_host *host, u8 mask)
  {
- 	u8 ctrl;
- 	u16 tmp;
-@@ -107,14 +107,12 @@ static int pxav2_mmc_set_width(struct sdhci_host *host, int width)
- 	}
- 	writew(tmp, host->ioaddr + SD_CE_ATA_2);
- 	writeb(ctrl, host->ioaddr + SDHCI_HOST_CONTROL);
--
--	return 0;
- }
+ 	struct platform_device *pdev = to_platform_device(mmc_dev(host->mmc));
+ 	struct sdhci_pxa_platdata *pdata = pdev->dev.platform_data;
+ 
++	sdhci_reset(host, mask);
++
+ 	if (mask == SDHCI_RESET_ALL) {
+ 		u16 tmp = 0;
+ 
+@@ -111,8 +113,8 @@ static void pxav2_mmc_set_bus_width(struct sdhci_host *host, int width)
  
  static const struct sdhci_ops pxav2_sdhci_ops = {
  	.get_max_clock = sdhci_pltfm_clk_get_max_clock,
- 	.platform_reset_exit = pxav2_set_private_registers,
--	.platform_bus_width = pxav2_mmc_set_width,
-+	.set_bus_width = pxav2_mmc_set_bus_width,
+-	.platform_reset_exit = pxav2_set_private_registers,
+ 	.set_bus_width = pxav2_mmc_set_bus_width,
++	.reset         = pxav2_reset,
  };
  
  #ifdef CONFIG_OF
 diff --git a/drivers/mmc/host/sdhci-pxav3.c b/drivers/mmc/host/sdhci-pxav3.c
-index 2fd73b38c303..b06db03b6d81 100644
+index b06db03b6d81..86564233ae93 100644
 --- a/drivers/mmc/host/sdhci-pxav3.c
 +++ b/drivers/mmc/host/sdhci-pxav3.c
-@@ -227,6 +227,7 @@ static const struct sdhci_ops pxav3_sdhci_ops = {
+@@ -112,11 +112,13 @@ static int mv_conf_mbus_windows(struct platform_device *pdev,
+ 	return 0;
+ }
+ 
+-static void pxav3_set_private_registers(struct sdhci_host *host, u8 mask)
++static void pxav3_reset(struct sdhci_host *host, u8 mask)
+ {
+ 	struct platform_device *pdev = to_platform_device(mmc_dev(host->mmc));
+ 	struct sdhci_pxa_platdata *pdata = pdev->dev.platform_data;
+ 
++	sdhci_reset(host, mask);
++
+ 	if (mask == SDHCI_RESET_ALL) {
+ 		/*
+ 		 * tune timing of read data/command when crc error happen
+@@ -223,11 +225,11 @@ static int pxav3_set_uhs_signaling(struct sdhci_host *host, unsigned int uhs)
+ }
+ 
+ static const struct sdhci_ops pxav3_sdhci_ops = {
+-	.platform_reset_exit = pxav3_set_private_registers,
  	.set_uhs_signaling = pxav3_set_uhs_signaling,
  	.platform_send_init_74_clocks = pxav3_gen_init_74_clocks,
  	.get_max_clock = sdhci_pltfm_clk_get_max_clock,
-+	.set_bus_width = sdhci_set_bus_width,
+ 	.set_bus_width = sdhci_set_bus_width,
++	.reset = pxav3_reset,
  };
  
  static struct sdhci_pltfm_data sdhci_pxav3_pdata = {
 diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
-index d61eb5a70833..181d8c962f26 100644
+index 181d8c962f26..8e26172a97de 100644
 --- a/drivers/mmc/host/sdhci-s3c.c
 +++ b/drivers/mmc/host/sdhci-s3c.c
-@@ -329,14 +329,14 @@ static void sdhci_cmu_set_clock(struct sdhci_host *host, unsigned int clock)
- }
- 
- /**
-- * sdhci_s3c_platform_bus_width - support 8bit buswidth
-+ * sdhci_s3c_set_bus_width - support 8bit buswidth
-  * @host: The SDHCI host being queried
-  * @width: MMC_BUS_WIDTH_ macro for the bus width being requested
-  *
-  * We have 8-bit width support but is not a v3 controller.
-  * So we add platform_bus_width() and support 8bit width.
-  */
--static int sdhci_s3c_platform_bus_width(struct sdhci_host *host, int width)
-+static void sdhci_s3c_set_bus_width(struct sdhci_host *host, int width)
- {
- 	u8 ctrl;
- 
-@@ -358,15 +358,13 @@ static int sdhci_s3c_platform_bus_width(struct sdhci_host *host, int width)
- 	}
- 
- 	sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
--
--	return 0;
- }
- 
- static struct sdhci_ops sdhci_s3c_ops = {
- 	.get_max_clock		= sdhci_s3c_get_max_clk,
+@@ -365,6 +365,7 @@ static struct sdhci_ops sdhci_s3c_ops = {
  	.set_clock		= sdhci_s3c_set_clock,
  	.get_min_clock		= sdhci_s3c_get_min_clock,
--	.platform_bus_width	= sdhci_s3c_platform_bus_width,
-+	.set_bus_width		= sdhci_s3c_set_bus_width,
+ 	.set_bus_width		= sdhci_s3c_set_bus_width,
++	.reset			= sdhci_reset,
  };
  
  static void sdhci_s3c_notify_change(struct platform_device *dev, int state)
 diff --git a/drivers/mmc/host/sdhci-sirf.c b/drivers/mmc/host/sdhci-sirf.c
-index 696122c1b468..16fcd48f9556 100644
+index 16fcd48f9556..5d79e10e1ba2 100644
 --- a/drivers/mmc/host/sdhci-sirf.c
 +++ b/drivers/mmc/host/sdhci-sirf.c
-@@ -29,6 +29,7 @@ static unsigned int sdhci_sirf_get_max_clk(struct sdhci_host *host)
- 
+@@ -30,6 +30,7 @@ static unsigned int sdhci_sirf_get_max_clk(struct sdhci_host *host)
  static struct sdhci_ops sdhci_sirf_ops = {
  	.get_max_clock	= sdhci_sirf_get_max_clk,
-+	.set_bus_width = sdhci_set_bus_width,
+ 	.set_bus_width = sdhci_set_bus_width,
++	.reset = sdhci_reset,
  };
  
  static struct sdhci_pltfm_data sdhci_sirf_pdata = {
 diff --git a/drivers/mmc/host/sdhci-spear.c b/drivers/mmc/host/sdhci-spear.c
-index 0316dec3f006..dc8967b657ed 100644
+index dc8967b657ed..c2a2bedc8813 100644
 --- a/drivers/mmc/host/sdhci-spear.c
 +++ b/drivers/mmc/host/sdhci-spear.c
-@@ -38,7 +38,7 @@ struct spear_sdhci {
- 
+@@ -39,6 +39,7 @@ struct spear_sdhci {
  /* sdhci ops */
  static const struct sdhci_ops sdhci_pltfm_ops = {
--	/* Nothing to do for now. */
-+	.set_bus_width = sdhci_set_bus_width,
+ 	.set_bus_width = sdhci_set_bus_width,
++	.reset = sdhci_reset,
  };
  
  #ifdef CONFIG_OF
 diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
-index a835898a68dd..feed799b827a 100644
+index feed799b827a..7754c0319fda 100644
 --- a/drivers/mmc/host/sdhci-tegra.c
 +++ b/drivers/mmc/host/sdhci-tegra.c
-@@ -127,7 +127,7 @@ static void tegra_sdhci_reset_exit(struct sdhci_host *host, u8 mask)
- 	}
+@@ -108,12 +108,14 @@ static unsigned int tegra_sdhci_get_ro(struct sdhci_host *host)
+ 	return mmc_gpio_get_ro(host->mmc);
  }
  
--static int tegra_sdhci_buswidth(struct sdhci_host *host, int bus_width)
-+static void tegra_sdhci_set_bus_width(struct sdhci_host *host, int bus_width)
+-static void tegra_sdhci_reset_exit(struct sdhci_host *host, u8 mask)
++static void tegra_sdhci_reset(struct sdhci_host *host, u8 mask)
  {
- 	u32 ctrl;
+ 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+ 	struct sdhci_tegra *tegra_host = pltfm_host->priv;
+ 	const struct sdhci_tegra_soc_data *soc_data = tegra_host->soc_data;
  
-@@ -144,7 +144,6 @@ static int tegra_sdhci_buswidth(struct sdhci_host *host, int bus_width)
- 			ctrl &= ~SDHCI_CTRL_4BITBUS;
- 	}
- 	sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
--	return 0;
- }
++	sdhci_reset(host, mask);
++
+ 	if (!(mask & SDHCI_RESET_ALL))
+ 		return;
  
- static const struct sdhci_ops tegra_sdhci_ops = {
-@@ -152,7 +151,7 @@ static const struct sdhci_ops tegra_sdhci_ops = {
- 	.read_l     = tegra_sdhci_readl,
+@@ -152,7 +154,7 @@ static const struct sdhci_ops tegra_sdhci_ops = {
  	.read_w     = tegra_sdhci_readw,
  	.write_l    = tegra_sdhci_writel,
--	.platform_bus_width = tegra_sdhci_buswidth,
-+	.set_bus_width = tegra_sdhci_set_bus_width,
- 	.platform_reset_exit = tegra_sdhci_reset_exit,
+ 	.set_bus_width = tegra_sdhci_set_bus_width,
+-	.platform_reset_exit = tegra_sdhci_reset_exit,
++	.reset      = tegra_sdhci_reset,
  };
  
+ static const struct sdhci_pltfm_data sdhci_tegra20_pdata = {
 diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 6b3ccd2d1f6c..0036f032b864 100644
+index 0036f032b864..b5d1c28048dc 100644
 --- a/drivers/mmc/host/sdhci.c
 +++ b/drivers/mmc/host/sdhci.c
-@@ -1413,6 +1413,27 @@ static void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
- 	spin_unlock_irqrestore(&host->lock, flags);
+@@ -163,17 +163,9 @@ static void sdhci_disable_card_detection(struct sdhci_host *host)
+ 	sdhci_set_card_detection(host, false);
  }
  
-+void sdhci_set_bus_width(struct sdhci_host *host, int width)
-+{
-+	u8 ctrl;
-+
-+	ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL);
-+	if (width == MMC_BUS_WIDTH_8) {
-+		ctrl &= ~SDHCI_CTRL_4BITBUS;
-+		if (host->version >= SDHCI_SPEC_300)
-+			ctrl |= SDHCI_CTRL_8BITBUS;
-+	} else {
-+		if (host->version >= SDHCI_SPEC_300)
-+			ctrl &= ~SDHCI_CTRL_8BITBUS;
-+		if (width == MMC_BUS_WIDTH_4)
-+			ctrl |= SDHCI_CTRL_4BITBUS;
-+		else
-+			ctrl &= ~SDHCI_CTRL_4BITBUS;
-+	}
-+	sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
-+}
-+EXPORT_SYMBOL_GPL(sdhci_set_bus_width);
-+
- static void sdhci_do_set_ios(struct sdhci_host *host, struct mmc_ios *ios)
+-static void sdhci_reset(struct sdhci_host *host, u8 mask)
++void sdhci_reset(struct sdhci_host *host, u8 mask)
  {
- 	unsigned long flags;
-@@ -1458,29 +1479,7 @@ static void sdhci_do_set_ios(struct sdhci_host *host, struct mmc_ios *ios)
- 	if (host->ops->platform_send_init_74_clocks)
- 		host->ops->platform_send_init_74_clocks(host, ios->power_mode);
- 
--	/*
--	 * If your platform has 8-bit width support but is not a v3 controller,
--	 * or if it requires special setup code, you should implement that in
--	 * platform_bus_width().
--	 */
--	if (host->ops->platform_bus_width) {
--		host->ops->platform_bus_width(host, ios->bus_width);
--	} else {
--		ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL);
--		if (ios->bus_width == MMC_BUS_WIDTH_8) {
--			ctrl &= ~SDHCI_CTRL_4BITBUS;
--			if (host->version >= SDHCI_SPEC_300)
--				ctrl |= SDHCI_CTRL_8BITBUS;
--		} else {
--			if (host->version >= SDHCI_SPEC_300)
--				ctrl &= ~SDHCI_CTRL_8BITBUS;
--			if (ios->bus_width == MMC_BUS_WIDTH_4)
--				ctrl |= SDHCI_CTRL_4BITBUS;
--			else
--				ctrl &= ~SDHCI_CTRL_4BITBUS;
--		}
--		sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
+ 	unsigned long timeout;
+-	if (host->quirks & SDHCI_QUIRK_NO_CARD_NO_RESET) {
+-		if (!(sdhci_readl(host, SDHCI_PRESENT_STATE) &
+-			SDHCI_CARD_PRESENT))
+-			return;
 -	}
-+	host->ops->set_bus_width(host, ios->bus_width);
+-
+-	if (host->ops->platform_reset_enter)
+-		host->ops->platform_reset_enter(host, mask);
  
- 	ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL);
+ 	sdhci_writeb(host, mask, SDHCI_SOFTWARE_RESET);
  
+@@ -198,9 +190,18 @@ static void sdhci_reset(struct sdhci_host *host, u8 mask)
+ 		timeout--;
+ 		mdelay(1);
+ 	}
++}
++EXPORT_SYMBOL_GPL(sdhci_reset);
++
++static void sdhci_do_reset(struct sdhci_host *host, u8 mask)
++{
++	if (host->quirks & SDHCI_QUIRK_NO_CARD_NO_RESET) {
++		if (!(sdhci_readl(host, SDHCI_PRESENT_STATE) &
++			SDHCI_CARD_PRESENT))
++			return;
++	}
+ 
+-	if (host->ops->platform_reset_exit)
+-		host->ops->platform_reset_exit(host, mask);
++	host->ops->reset(host, mask);
+ 
+ 	if (host->quirks & SDHCI_QUIRK_RESTORE_IRQS_AFTER_RESET) {
+ 		sdhci_writel(host, host->ier, SDHCI_INT_ENABLE);
+@@ -218,9 +219,9 @@ static void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios);
+ static void sdhci_init(struct sdhci_host *host, int soft)
+ {
+ 	if (soft)
+-		sdhci_reset(host, SDHCI_RESET_CMD|SDHCI_RESET_DATA);
++		sdhci_do_reset(host, SDHCI_RESET_CMD|SDHCI_RESET_DATA);
+ 	else
+-		sdhci_reset(host, SDHCI_RESET_ALL);
++		sdhci_do_reset(host, SDHCI_RESET_ALL);
+ 
+ 	host->ier = SDHCI_INT_BUS_POWER | SDHCI_INT_DATA_END_BIT |
+ 		    SDHCI_INT_DATA_CRC | SDHCI_INT_DATA_TIMEOUT |
+@@ -962,8 +963,8 @@ static void sdhci_finish_data(struct sdhci_host *host)
+ 		 * upon error conditions.
+ 		 */
+ 		if (data->error) {
+-			sdhci_reset(host, SDHCI_RESET_CMD);
+-			sdhci_reset(host, SDHCI_RESET_DATA);
++			sdhci_do_reset(host, SDHCI_RESET_CMD);
++			sdhci_do_reset(host, SDHCI_RESET_DATA);
+ 		}
+ 
+ 		sdhci_send_command(host, data->stop);
+@@ -1585,7 +1586,7 @@ static void sdhci_do_set_ios(struct sdhci_host *host, struct mmc_ios *ios)
+ 	 * it on each ios seems to solve the problem.
+ 	 */
+ 	if(host->quirks & SDHCI_QUIRK_RESET_CMD_DATA_ON_IOS)
+-		sdhci_reset(host, SDHCI_RESET_CMD | SDHCI_RESET_DATA);
++		sdhci_do_reset(host, SDHCI_RESET_CMD | SDHCI_RESET_DATA);
+ 
+ 	mmiowb();
+ 	spin_unlock_irqrestore(&host->lock, flags);
+@@ -2081,8 +2082,8 @@ static void sdhci_card_event(struct mmc_host *mmc)
+ 		pr_err("%s: Resetting controller.\n",
+ 			mmc_hostname(host->mmc));
+ 
+-		sdhci_reset(host, SDHCI_RESET_CMD);
+-		sdhci_reset(host, SDHCI_RESET_DATA);
++		sdhci_do_reset(host, SDHCI_RESET_CMD);
++		sdhci_do_reset(host, SDHCI_RESET_DATA);
+ 
+ 		host->mrq->cmd->error = -ENOMEDIUM;
+ 		tasklet_schedule(&host->finish_tasklet);
+@@ -2150,8 +2151,8 @@ static void sdhci_tasklet_finish(unsigned long param)
+ 
+ 		/* Spec says we should do both at the same time, but Ricoh
+ 		   controllers do not like that. */
+-		sdhci_reset(host, SDHCI_RESET_CMD);
+-		sdhci_reset(host, SDHCI_RESET_DATA);
++		sdhci_do_reset(host, SDHCI_RESET_CMD);
++		sdhci_do_reset(host, SDHCI_RESET_DATA);
+ 	}
+ 
+ 	host->mrq = NULL;
+@@ -2786,7 +2787,7 @@ int sdhci_add_host(struct sdhci_host *host)
+ 	if (debug_quirks2)
+ 		host->quirks2 = debug_quirks2;
+ 
+-	sdhci_reset(host, SDHCI_RESET_ALL);
++	sdhci_do_reset(host, SDHCI_RESET_ALL);
+ 
+ 	host->version = sdhci_readw(host, SDHCI_HOST_VERSION);
+ 	host->version = (host->version & SDHCI_SPEC_VER_MASK)
+@@ -3270,7 +3271,7 @@ int sdhci_add_host(struct sdhci_host *host)
+ 
+ #ifdef SDHCI_USE_LEDS_CLASS
+ reset:
+-	sdhci_reset(host, SDHCI_RESET_ALL);
++	sdhci_do_reset(host, SDHCI_RESET_ALL);
+ 	sdhci_writel(host, 0, SDHCI_INT_ENABLE);
+ 	sdhci_writel(host, 0, SDHCI_SIGNAL_ENABLE);
+ 	free_irq(host->irq, host);
+@@ -3312,7 +3313,7 @@ void sdhci_remove_host(struct sdhci_host *host, int dead)
+ #endif
+ 
+ 	if (!dead)
+-		sdhci_reset(host, SDHCI_RESET_ALL);
++		sdhci_do_reset(host, SDHCI_RESET_ALL);
+ 
+ 	sdhci_writel(host, 0, SDHCI_INT_ENABLE);
+ 	sdhci_writel(host, 0, SDHCI_SIGNAL_ENABLE);
 diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index fc6f81d2f377..0301f928eb11 100644
+index 0301f928eb11..7d84cb3b0e00 100644
 --- a/drivers/mmc/host/sdhci.h
 +++ b/drivers/mmc/host/sdhci.h
-@@ -281,8 +281,7 @@ struct sdhci_ops {
- 	unsigned int	(*get_max_clock)(struct sdhci_host *host);
- 	unsigned int	(*get_min_clock)(struct sdhci_host *host);
- 	unsigned int	(*get_timeout_clock)(struct sdhci_host *host);
--	int		(*platform_bus_width)(struct sdhci_host *host,
--					       int width);
-+	void		(*set_bus_width)(struct sdhci_host *host, int width);
+@@ -285,8 +285,7 @@ struct sdhci_ops {
  	void (*platform_send_init_74_clocks)(struct sdhci_host *host,
  					     u8 power_mode);
  	unsigned int    (*get_ro)(struct sdhci_host *host);
-@@ -402,6 +401,8 @@ static inline bool sdhci_sdio_irq_enabled(struct sdhci_host *host)
- 	return !!(host->flags & SDHCI_SDIO_IRQ_ENABLED);
+-	void	(*platform_reset_enter)(struct sdhci_host *host, u8 mask);
+-	void	(*platform_reset_exit)(struct sdhci_host *host, u8 mask);
++	void		(*reset)(struct sdhci_host *host, u8 mask);
+ 	int	(*platform_execute_tuning)(struct sdhci_host *host, u32 opcode);
+ 	int	(*set_uhs_signaling)(struct sdhci_host *host, unsigned int uhs);
+ 	void	(*hw_reset)(struct sdhci_host *host);
+@@ -402,6 +401,7 @@ static inline bool sdhci_sdio_irq_enabled(struct sdhci_host *host)
  }
  
-+void sdhci_set_bus_width(struct sdhci_host *host, int width);
-+
+ void sdhci_set_bus_width(struct sdhci_host *host, int width);
++void sdhci_reset(struct sdhci_host *host, u8 mask);
+ 
  #ifdef CONFIG_PM
  extern int sdhci_suspend_host(struct sdhci_host *host);
- extern int sdhci_resume_host(struct sdhci_host *host);
 -- 
 1.8.3.1
 
