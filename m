@@ -1,223 +1,233 @@
 From: Russell King <rmk+kernel@arm.linux.org.uk>
-Subject: [PATCH 33/38] mmc: sdhci: fix SDHCI dependencies
-Date: Wed, 23 Apr 2014 20:08:59 +0100
-Message-ID: <E1Wd2XT-0003wV-0H@rmk-PC.arm.linux.org.uk>
+Subject: [PATCH 34/38] mmc: add support for power-on sequencing through DT
+Date: Wed, 23 Apr 2014 20:09:04 +0100
+Message-ID: <E1Wd2XY-0003wa-3n@rmk-PC.arm.linux.org.uk>
 References: <20140423185534.GA26756@n2100.arm.linux.org.uk>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from gw-1.arm.linux.org.uk ([78.32.30.217]:46527 "EHLO
+Received: from gw-1.arm.linux.org.uk ([78.32.30.217]:46542 "EHLO
 	pandora.arm.linux.org.uk" rhost-flags-OK-OK-OK-FAIL)
-	by vger.kernel.org with ESMTP id S932456AbaDWTJB (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 23 Apr 2014 15:09:01 -0400
+	by vger.kernel.org with ESMTP id S932511AbaDWTJO (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 23 Apr 2014 15:09:14 -0400
 In-Reply-To: <20140423185534.GA26756@n2100.arm.linux.org.uk>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Chris Ball <chris@printf.net>, linux-mmc@vger.kernel.org
-Cc: linux-arm-kernel@lists.infradead.org, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-arm-kernel@lists.infradead.org, Rob Herring <robh+dt@kernel.org>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Kumar Gala <galak@codeaurora.org>, Randy Dunlap <rdunlap@infradead.org>, Ulf Hansson <ulf.hansson@linaro.org>, devicetree@vger.kernel.org, linux-doc@vger.kernel.org
 
+From: Olof Johansson <olof@lixom.net>
+
+This patch enables support for power-on sequencing of SDIO peripherals through DT.
+
+In general, it's quite common that wifi modules and other similar
+peripherals have several signals in addition to the SDIO interface that
+needs wiggling before the module will power on. It's common to have a
+reference clock, one or several power rails and one or several lines
+for reset/enable type functions.
+
+The binding as written today introduces a number of reset gpios,
+a regulator and a clock specifier. The code will handle up to 2 gpio
+reset lines, but it's trivial to increase to more than that if needed
+at some point.
+
+Implementation-wise, the MMC core has been changed to handle this during
+host power up, before the host interface is powered on. I have not yet
+implemented the power-down side, I wanted people to have a chance for
+reporting back w.r.t. issues (or comments on the bindings) first.
+
+I have not tested the regulator portion, since the system and module
+I'm working on doesn't need one (Samsung Chromebook with Marvell
+8797-based wifi). Testing of those portions (and reporting back) would
+be appreciated.
+
+Signed-off-by: Olof Johansson <olof@lixom.net>
 Signed-off-by: Russell King <rmk+kernel@arm.linux.org.uk>
 ---
- drivers/mmc/host/Kconfig | 63 ++++++++++++++++++++++++------------------------
- 1 file changed, 32 insertions(+), 31 deletions(-)
+ Documentation/devicetree/bindings/mmc/mmc.txt | 11 +++++++
+ drivers/mmc/core/core.c                       | 42 +++++++++++++++++++++++++++
+ drivers/mmc/core/host.c                       | 30 ++++++++++++++++++-
+ include/linux/mmc/host.h                      |  5 ++++
+ 4 files changed, 87 insertions(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-index 8aaf8c1f3f63..d8c1f31ab37f 100644
---- a/drivers/mmc/host/Kconfig
-+++ b/drivers/mmc/host/Kconfig
-@@ -25,8 +25,7 @@ config MMC_PXA
- 	  If unsure, say N.
+diff --git a/Documentation/devicetree/bindings/mmc/mmc.txt b/Documentation/devicetree/bindings/mmc/mmc.txt
+index 9dce540771fb..b9b534ebc0c5 100644
+--- a/Documentation/devicetree/bindings/mmc/mmc.txt
++++ b/Documentation/devicetree/bindings/mmc/mmc.txt
+@@ -5,6 +5,8 @@ these definitions.
+ Interpreted by the OF core:
+ - reg: Registers location and length.
+ - interrupts: Interrupts used by the MMC controller.
++- clocks: Clocks needed for the host controller, if any.
++- clock-names: Goes with clocks above.
  
- config MMC_SDHCI
--	tristate "Secure Digital Host Controller Interface support"
--	depends on HAS_DMA
-+	tristate
- 	help
- 	  This selects the generic Secure Digital Host Controller Interface.
- 	  It is used by manufacturers such as Texas Instruments(R), Ricoh(R)
-@@ -59,7 +58,8 @@ config MMC_SDHCI_BIG_ENDIAN_32BIT_BYTE_SWAPPER
+ Card detection:
+ If no property below is supplied, host native card detect is used.
+@@ -39,6 +41,15 @@ If no property below is supplied, host native card detect is used.
+ - mmc-hs200-1_8v: eMMC HS200 mode(1.8V I/O) is supported
+ - mmc-hs200-1_2v: eMMC HS200 mode(1.2V I/O) is supported
  
- config MMC_SDHCI_PCI
- 	tristate "SDHCI support on PCI bus"
--	depends on MMC_SDHCI && PCI
-+	depends on PCI && HAS_DMA
-+	select MMC_SDHCI
- 	help
- 	  This selects the PCI Secure Digital Host Controller Interface.
- 	  Most controllers found today are PCI devices.
-@@ -83,7 +83,8 @@ config MMC_RICOH_MMC
++Card power and reset control:
++The following properties can be specified for cases where the MMC
++peripheral needs additional reset, regulator and clock lines. It is for
++example common for WiFi/BT adapters to have these separate from the main
++MMC bus:
++  - card-reset-gpios: Specify GPIOs for card reset (reset active low)
++  - card-external-vcc-supply: Regulator to drive (independent) card VCC
++  - clock with name "card_ext_clock": External clock provided to the card
++
+ *NOTE* on CD and WP polarity. To use common for all SD/MMC host controllers line
+ polarity properties, we have to fix the meaning of the "normal" and "inverted"
+ line levels. We choose to follow the SDHCI standard, which specifies both those
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index acbc3f2aaaf9..41c4033ec765 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -13,11 +13,13 @@
+ #include <linux/module.h>
+ #include <linux/init.h>
+ #include <linux/interrupt.h>
++#include <linux/clk.h>
+ #include <linux/completion.h>
+ #include <linux/device.h>
+ #include <linux/delay.h>
+ #include <linux/pagemap.h>
+ #include <linux/err.h>
++#include <linux/gpio.h>
+ #include <linux/leds.h>
+ #include <linux/scatterlist.h>
+ #include <linux/log2.h>
+@@ -1504,6 +1506,43 @@ void mmc_set_driver_type(struct mmc_host *host, unsigned int drv_type)
+ 	mmc_host_clk_release(host);
+ }
  
- config MMC_SDHCI_ACPI
- 	tristate "SDHCI support for ACPI enumerated SDHCI controllers"
--	depends on MMC_SDHCI && ACPI
-+	depends on ACPI && HAS_DMA
-+	select MMC_SDHCI
- 	help
- 	  This selects support for ACPI enumerated SDHCI controllers,
- 	  identified by ACPI Compatibility ID PNP0D40 or specific
-@@ -94,8 +95,8 @@ config MMC_SDHCI_ACPI
- 	  If unsure, say N.
++static void mmc_card_power_up(struct mmc_host *host)
++{
++	int i;
++	struct gpio_desc **gds = host->card_reset_gpios;
++
++	for (i = 0; i < ARRAY_SIZE(host->card_reset_gpios); i++) {
++		if (gds[i]) {
++			dev_dbg(host->parent, "Asserting reset line %d", i);
++			gpiod_set_value(gds[i], 1);
++		}
++	}
++
++	if (host->card_regulator) {
++		dev_dbg(host->parent, "Enabling external regulator");
++		if (regulator_enable(host->card_regulator))
++			dev_err(host->parent, "Failed to enable external regulator");
++	}
++
++	if (host->card_clk) {
++		dev_dbg(host->parent, "Enabling external clock");
++		clk_prepare_enable(host->card_clk);
++	}
++
++	/* 2ms delay to let clocks and power settle */
++	mmc_delay(20);
++
++	for (i = 0; i < ARRAY_SIZE(host->card_reset_gpios); i++) {
++		if (gds[i]) {
++			dev_dbg(host->parent, "Deasserting reset line %d", i);
++			gpiod_set_value(gds[i], 0);
++		}
++	}
++
++	/* 2ms delay to after reset release */
++	mmc_delay(20);
++}
++
+ /*
+  * Apply power to the MMC stack.  This is a two-stage process.
+  * First, we enable power to the card without the clock running.
+@@ -1520,6 +1559,9 @@ void mmc_power_up(struct mmc_host *host, u32 ocr)
+ 	if (host->ios.power_mode == MMC_POWER_ON)
+ 		return;
  
- config MMC_SDHCI_PLTFM
--	tristate "SDHCI platform and OF driver helper"
--	depends on MMC_SDHCI
-+	tristate
-+	select MMC_SDHCI
- 	help
- 	  This selects the common helper functions support for Secure Digital
- 	  Host Controller Interface based platform and OF drivers.
-@@ -106,8 +107,8 @@ config MMC_SDHCI_PLTFM
++	/* Power up the card/module first, if needed */
++	mmc_card_power_up(host);
++
+ 	mmc_host_clk_hold(host);
  
- config MMC_SDHCI_OF_ARASAN
- 	tristate "SDHCI OF support for the Arasan SDHCI controllers"
--	depends on MMC_SDHCI_PLTFM
--	depends on OF
-+	depends on OF && HAS_DMA
-+	select MMC_SDHCI_PLTFM
- 	help
- 	  This selects the Arasan Secure Digital Host Controller Interface
- 	  (SDHCI). This hardware is found e.g. in Xilinx' Zynq SoC.
-@@ -118,9 +119,9 @@ config MMC_SDHCI_OF_ARASAN
+ 	host->ios.vdd = fls(ocr) - 1;
+diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+index fdea825dbb24..abc60f39aa7e 100644
+--- a/drivers/mmc/core/host.c
++++ b/drivers/mmc/core/host.c
+@@ -12,14 +12,18 @@
+  *  MMC host class device management
+  */
  
- config MMC_SDHCI_OF_ESDHC
- 	tristate "SDHCI OF support for the Freescale eSDHC controller"
--	depends on MMC_SDHCI_PLTFM
--	depends on PPC_OF
-+	depends on PPC_OF && HAS_DMA
- 	select MMC_SDHCI_BIG_ENDIAN_32BIT_BYTE_SWAPPER
-+	select MMC_SDHCI_PLTFM
- 	help
- 	  This selects the Freescale eSDHC controller support.
++#include <linux/kernel.h>
++#include <linux/clk.h>
+ #include <linux/device.h>
+ #include <linux/err.h>
++#include <linux/gpio/consumer.h>
+ #include <linux/idr.h>
+ #include <linux/of.h>
+ #include <linux/of_gpio.h>
+ #include <linux/pagemap.h>
+ #include <linux/export.h>
+ #include <linux/leds.h>
++#include <linux/regulator/consumer.h>
+ #include <linux/slab.h>
+ #include <linux/suspend.h>
  
-@@ -130,9 +131,9 @@ config MMC_SDHCI_OF_ESDHC
+@@ -312,7 +316,7 @@ int mmc_of_parse(struct mmc_host *host)
+ 	u32 bus_width;
+ 	bool explicit_inv_wp, gpio_inv_wp = false;
+ 	enum of_gpio_flags flags;
+-	int len, ret, gpio;
++	int i, len, ret, gpio;
  
- config MMC_SDHCI_OF_HLWD
- 	tristate "SDHCI OF support for the Nintendo Wii SDHCI controllers"
--	depends on MMC_SDHCI_PLTFM
--	depends on PPC_OF
-+	depends on PPC_OF && HAS_DMA
- 	select MMC_SDHCI_BIG_ENDIAN_32BIT_BYTE_SWAPPER
-+	select MMC_SDHCI_PLTFM
- 	help
- 	  This selects the Secure Digital Host Controller Interface (SDHCI)
- 	  found in the "Hollywood" chipset of the Nintendo Wii video game
-@@ -144,8 +145,8 @@ config MMC_SDHCI_OF_HLWD
+ 	if (!host->parent || !host->parent->of_node)
+ 		return 0;
+@@ -415,6 +419,30 @@ int mmc_of_parse(struct mmc_host *host)
+ 	if (explicit_inv_wp ^ gpio_inv_wp)
+ 		host->caps2 |= MMC_CAP2_RO_ACTIVE_HIGH;
  
- config MMC_SDHCI_CNS3XXX
- 	tristate "SDHCI support on the Cavium Networks CNS3xxx SoC"
--	depends on ARCH_CNS3XXX
--	depends on MMC_SDHCI_PLTFM
-+	depends on ARCH_CNS3XXX && HAS_DMA
-+	select MMC_SDHCI_PLTFM
- 	help
- 	  This selects the SDHCI support for CNS3xxx System-on-Chip devices.
++	/* Parse card power/reset/clock control */
++	if (of_find_property(np, "card-reset-gpios", NULL)) {
++		struct gpio_desc *gpd;
++		for (i = 0; i < ARRAY_SIZE(host->card_reset_gpios); i++) {
++			gpd = devm_gpiod_get_index(host->parent, "card-reset", i);
++			if (IS_ERR(gpd))
++				break;
++			gpiod_direction_output(gpd, 0);
++			host->card_reset_gpios[i] = gpd;
++		}
++
++		gpd = devm_gpiod_get_index(host->parent, "card-reset", ARRAY_SIZE(host->card_reset_gpios));
++		if (!IS_ERR(gpd)) {
++			dev_warn(host->parent, "More reset gpios than we can handle");
++			gpiod_put(gpd);
++		}
++	}
++
++	host->card_clk = of_clk_get_by_name(np, "card_ext_clock");
++	if (IS_ERR(host->card_clk))
++		host->card_clk = NULL;
++
++	host->card_regulator = regulator_get(host->parent, "card-external-vcc");
++
+ 	if (of_find_property(np, "cap-sd-highspeed", &len))
+ 		host->caps |= MMC_CAP_SD_HIGHSPEED;
+ 	if (of_find_property(np, "cap-mmc-highspeed", &len))
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index 28c5e796292f..c3a8c5f6c9b8 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -294,6 +294,11 @@ struct mmc_host {
+ 	unsigned long           clkgate_delay;
+ #endif
  
-@@ -155,9 +156,9 @@ config MMC_SDHCI_CNS3XXX
- 
- config MMC_SDHCI_ESDHC_IMX
- 	tristate "SDHCI support for the Freescale eSDHC/uSDHC i.MX controller"
--	depends on ARCH_MXC
--	depends on MMC_SDHCI_PLTFM
-+	depends on ARCH_MXC && HAS_DMA
- 	select MMC_SDHCI_IO_ACCESSORS
-+	select MMC_SDHCI_PLTFM
- 	help
- 	  This selects the Freescale eSDHC/uSDHC controller support
- 	  found on i.MX25, i.MX35 i.MX5x and i.MX6x.
-@@ -168,9 +169,9 @@ config MMC_SDHCI_ESDHC_IMX
- 
- config MMC_SDHCI_DOVE
- 	tristate "SDHCI support on Marvell's Dove SoC"
--	depends on ARCH_DOVE
--	depends on MMC_SDHCI_PLTFM
-+	depends on ARCH_DOVE && HAS_DMA
- 	select MMC_SDHCI_IO_ACCESSORS
-+	select MMC_SDHCI_PLTFM
- 	help
- 	  This selects the Secure Digital Host Controller Interface in
- 	  Marvell's Dove SoC.
-@@ -181,9 +182,9 @@ config MMC_SDHCI_DOVE
- 
- config MMC_SDHCI_TEGRA
- 	tristate "SDHCI platform support for the Tegra SD/MMC Controller"
--	depends on ARCH_TEGRA
--	depends on MMC_SDHCI_PLTFM
-+	depends on ARCH_TEGRA && HAS_DMA
- 	select MMC_SDHCI_IO_ACCESSORS
-+	select MMC_SDHCI_PLTFM
- 	help
- 	  This selects the Tegra SD/MMC controller. If you have a Tegra
- 	  platform with SD or MMC devices, say Y or M here.
-@@ -192,7 +193,8 @@ config MMC_SDHCI_TEGRA
- 
- config MMC_SDHCI_S3C
- 	tristate "SDHCI support on Samsung S3C SoC"
--	depends on MMC_SDHCI && PLAT_SAMSUNG
-+	depends on PLAT_SAMSUNG && HAS_DMA
-+	select MMC_SDHCI
- 	help
- 	  This selects the Secure Digital Host Controller Interface (SDHCI)
- 	  often referrered to as the HSMMC block in some of the Samsung S3C
-@@ -204,8 +206,8 @@ config MMC_SDHCI_S3C
- 
- config MMC_SDHCI_SIRF
- 	tristate "SDHCI support on CSR SiRFprimaII and SiRFmarco SoCs"
--	depends on ARCH_SIRF
--	depends on MMC_SDHCI_PLTFM
-+	depends on ARCH_SIRF && HAS_DMA
-+	select MMC_SDHCI_PLTFM
- 	help
- 	  This selects the SDHCI support for SiRF System-on-Chip devices.
- 
-@@ -215,8 +217,7 @@ config MMC_SDHCI_SIRF
- 
- config MMC_SDHCI_PXAV3
- 	tristate "Marvell MMP2 SD Host Controller support (PXAV3)"
--	depends on CLKDEV_LOOKUP
--	select MMC_SDHCI
-+	depends on CLKDEV_LOOKUP && HAS_DMA
- 	select MMC_SDHCI_PLTFM
- 	default CPU_MMP2
- 	help
-@@ -228,8 +229,7 @@ config MMC_SDHCI_PXAV3
- 
- config MMC_SDHCI_PXAV2
- 	tristate "Marvell PXA9XX SD Host Controller support (PXAV2)"
--	depends on CLKDEV_LOOKUP
--	select MMC_SDHCI
-+	depends on CLKDEV_LOOKUP && HAS_DMA
- 	select MMC_SDHCI_PLTFM
- 	default CPU_PXA910
- 	help
-@@ -241,7 +241,8 @@ config MMC_SDHCI_PXAV2
- 
- config MMC_SDHCI_SPEAR
- 	tristate "SDHCI support on ST SPEAr platform"
--	depends on MMC_SDHCI && PLAT_SPEAR
-+	depends on PLAT_SPEAR && HAS_DMA
-+	select MMC_SDHCI
- 	help
- 	  This selects the Secure Digital Host Controller Interface (SDHCI)
- 	  often referrered to as the HSMMC block in some of the ST SPEAR range
-@@ -263,7 +264,7 @@ config MMC_SDHCI_S3C_DMA
- 
- config MMC_SDHCI_BCM_KONA
- 	tristate "SDHCI support on Broadcom KONA platform"
--	depends on ARCH_BCM_MOBILE
-+	depends on ARCH_BCM_MOBILE && HAS_DMA
- 	select MMC_SDHCI_PLTFM
- 	help
- 	  This selects the Broadcom Kona Secure Digital Host Controller
-@@ -274,9 +275,9 @@ config MMC_SDHCI_BCM_KONA
- 
- config MMC_SDHCI_BCM2835
- 	tristate "SDHCI platform support for the BCM2835 SD/MMC Controller"
--	depends on ARCH_BCM2835
--	depends on MMC_SDHCI_PLTFM
-+	depends on ARCH_BCM2835 && HAS_DMA
- 	select MMC_SDHCI_IO_ACCESSORS
-+	select MMC_SDHCI_PLTFM
- 	help
- 	  This selects the BCM2835 SD/MMC controller. If you have a BCM2835
- 	  platform with SD or MMC devices, say Y or M here.
++	/* card specific properties to deal with power and reset */
++	struct regulator	*card_regulator; /* External VCC needed by the card */
++	struct gpio_desc	*card_reset_gpios[2]; /* External resets, active low */
++	struct clk		*card_clk;	/* External clock needed by the card */
++
+ 	/* host specific block data */
+ 	unsigned int		max_seg_size;	/* see blk_queue_max_segment_size */
+ 	unsigned short		max_segs;	/* see blk_queue_max_segments */
 -- 
 1.8.3.1
 
