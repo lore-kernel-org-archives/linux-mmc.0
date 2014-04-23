@@ -1,64 +1,121 @@
-From: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Subject: [PATCH 00/38] MMC updates, plus CuBox-i WiFi support
-Date: Wed, 23 Apr 2014 19:55:34 +0100
-Message-ID: <20140423185534.GA26756@n2100.arm.linux.org.uk>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-doc-owner@vger.kernel.org>
-Content-Disposition: inline
-Sender: linux-doc-owner@vger.kernel.org
-To: Anton Vorontsov <anton@enomsg.org>, Barry Song <baohua@kernel.org>, Ben Dooks <ben-linux@fluff.org>, Chris Ball <chris@printf.net>, devicetree@vger.kernel.org, Ian Campbell <ijc+devicetree@hellion.org.uk>, Jaehoon Chung <jh80.chung@samsung.com>, Kumar Gala <galak@codeaurora.org>, linux-arm-kernel@lists.infradead.org, linux-doc@vger.kernel.org, linux-mmc@vger.kernel.org, linuxppc-dev@lists.ozlabs.org, linux-tegra@vger.kernel.org, Mark Rutland <mark.rutland@arm.com>, Michal Simek <michal.simek@xilinx.com>, Pawel Moll <pawel.moll@arm.com>, Randy Dunlap <rdunlap@infradead.org>, Rob Herring <robh+dt@kernel.org>, Sascha Hauer <kernel@pengutronix.de>, Seungwon Jeon <tgih.jun@samsung.com>, Shawn Guo <shawn.guo@freescale.com>, spear-devel@list.st.com, Stephen Warren <swarren@wwwdotorg.org>, Thierry Reding <thierry.reding@gmail.com>, Ulf Hansson <ulf.hansson@linaro.org>, Vir
+From: Russell King <rmk+kernel@arm.linux.org.uk>
+Subject: [PATCH 01/38] mmc: sdio_irq: rework sdio irq handling
+Date: Wed, 23 Apr 2014 20:06:15 +0100
+Message-ID: <E1Wd2Up-0003uJ-7k@rmk-PC.arm.linux.org.uk>
+References: <20140423185534.GA26756@n2100.arm.linux.org.uk>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from gw-1.arm.linux.org.uk ([78.32.30.217]:46343 "EHLO
+	pandora.arm.linux.org.uk" rhost-flags-OK-OK-OK-FAIL)
+	by vger.kernel.org with ESMTP id S932491AbaDWTGR (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 23 Apr 2014 15:06:17 -0400
+In-Reply-To: <20140423185534.GA26756@n2100.arm.linux.org.uk>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Chris Ball <chris@printf.net>, linux-mmc@vger.kernel.org
+Cc: linux-arm-kernel@lists.infradead.org, Ulf Hansson <ulf.hansson@linaro.org>
 
-All,
+Rather than the SDIO support spawning it's own thread for handling card
+interrupts, use the generic IRQ infrastructure for this, triggering it
+from the host interface's interrupt handling directly.
 
-This is where I'm at with trying to clean up the SDHCI mess, and sort out
-issues I've noticed when trying to get UHS support working on CuBoxes.
-This is my full patch set, but I recommend not applying patch 37 as there
-appears to be a hardware issue preventing it working reliably.
+This avoids a race between the parent thread waiting to receive an
+interrupt response from the card, and the slow startup from the sdio
+irq thread, which can occur as a result of high system load (eg, while
+udev is running.)
 
-In any case, patches 0-33 inclusive are the SDHCI clean up, based against
-v3.15-rc1.  Patches 34 and 35 are Olof's Wifi support, 36 is my fix against
-those, and 38 adds the Broadcom Wifi and BT support for CuBox.
+Signed-off-by: Russell King <rmk+kernel@arm.linux.org.uk>
+---
+ drivers/mmc/core/sdio_irq.c | 41 +++++++++++++++++++++++++++++++----------
+ include/linux/mmc/host.h    |  3 +++
+ 2 files changed, 34 insertions(+), 10 deletions(-)
 
-The questions over how to handle these devices were never properly settled,
-so I recommend against merging patch 34 onwards.  As for the rest, I'm not
-planning on any further work, so it may be a good idea for people to
-consider testing them with a view to getting them merged.
-
- Documentation/devicetree/bindings/mmc/mmc.txt |  11 +
- arch/arm/boot/dts/imx6qdl-cubox-i.dtsi        |  34 +-
- arch/arm/boot/dts/imx6qdl-microsom.dtsi       |  98 ++++
- drivers/mmc/core/core.c                       |  42 ++
- drivers/mmc/core/host.c                       |  68 +++
- drivers/mmc/core/sdio_irq.c                   |  41 +-
- drivers/mmc/host/Kconfig                      |  63 +--
- drivers/mmc/host/dw_mmc.c                     |   2 +
- drivers/mmc/host/sdhci-acpi.c                 |   8 +
- drivers/mmc/host/sdhci-bcm-kona.c             |   4 +
- drivers/mmc/host/sdhci-bcm2835.c              |   4 +
- drivers/mmc/host/sdhci-cns3xxx.c              |  13 +-
- drivers/mmc/host/sdhci-dove.c                 |   4 +
- drivers/mmc/host/sdhci-esdhc-imx.c            |  82 +--
- drivers/mmc/host/sdhci-esdhc.h                |   4 +-
- drivers/mmc/host/sdhci-of-arasan.c            |   4 +
- drivers/mmc/host/sdhci-of-esdhc.c             |  70 ++-
- drivers/mmc/host/sdhci-of-hlwd.c              |   4 +
- drivers/mmc/host/sdhci-pci.c                  |   9 +-
- drivers/mmc/host/sdhci-pltfm.c                |   4 +
- drivers/mmc/host/sdhci-pxav2.c                |  14 +-
- drivers/mmc/host/sdhci-pxav3.c                |  13 +-
- drivers/mmc/host/sdhci-s3c.c                  |  36 +-
- drivers/mmc/host/sdhci-sirf.c                 |   4 +
- drivers/mmc/host/sdhci-spear.c                |   5 +-
- drivers/mmc/host/sdhci-tegra.c                |  27 +-
- drivers/mmc/host/sdhci.c                      | 728 +++++++++++++-------------
- drivers/mmc/host/sdhci.h                      |  20 +-
- include/linux/mmc/host.h                      |   8 +
- include/linux/mmc/sdhci.h                     |  15 +-
- 30 files changed, 885 insertions(+), 554 deletions(-)
-
-
+diff --git a/drivers/mmc/core/sdio_irq.c b/drivers/mmc/core/sdio_irq.c
+index aaa90460ed23..f23d73993dc6 100644
+--- a/drivers/mmc/core/sdio_irq.c
++++ b/drivers/mmc/core/sdio_irq.c
+@@ -90,6 +90,15 @@ static int process_sdio_pending_irqs(struct mmc_host *host)
+ 	return ret;
+ }
+ 
++void sdio_run_irqs(struct mmc_host *host)
++{
++	mmc_claim_host(host);
++	host->sdio_irq_pending = true;
++	process_sdio_pending_irqs(host);
++	mmc_release_host(host);
++}
++EXPORT_SYMBOL_GPL(sdio_run_irqs);
++
+ static int sdio_irq_thread(void *_host)
+ {
+ 	struct mmc_host *host = _host;
+@@ -189,14 +198,20 @@ static int sdio_card_irq_get(struct mmc_card *card)
+ 	WARN_ON(!host->claimed);
+ 
+ 	if (!host->sdio_irqs++) {
+-		atomic_set(&host->sdio_irq_thread_abort, 0);
+-		host->sdio_irq_thread =
+-			kthread_run(sdio_irq_thread, host, "ksdioirqd/%s",
+-				mmc_hostname(host));
+-		if (IS_ERR(host->sdio_irq_thread)) {
+-			int err = PTR_ERR(host->sdio_irq_thread);
+-			host->sdio_irqs--;
+-			return err;
++		if (!(host->caps2 & MMC_CAP2_SDIO_NOTHREAD)) {
++			atomic_set(&host->sdio_irq_thread_abort, 0);
++			host->sdio_irq_thread =
++				kthread_run(sdio_irq_thread, host,
++					    "ksdioirqd/%s", mmc_hostname(host));
++			if (IS_ERR(host->sdio_irq_thread)) {
++				int err = PTR_ERR(host->sdio_irq_thread);
++				host->sdio_irqs--;
++				return err;
++			}
++		} else {
++			mmc_host_clk_hold(host);
++			host->ops->enable_sdio_irq(host, 1);
++			mmc_host_clk_release(host);
+ 		}
+ 	}
+ 
+@@ -211,8 +226,14 @@ static int sdio_card_irq_put(struct mmc_card *card)
+ 	BUG_ON(host->sdio_irqs < 1);
+ 
+ 	if (!--host->sdio_irqs) {
+-		atomic_set(&host->sdio_irq_thread_abort, 1);
+-		kthread_stop(host->sdio_irq_thread);
++		if (!(host->caps2 & MMC_CAP2_SDIO_NOTHREAD)) {
++			atomic_set(&host->sdio_irq_thread_abort, 1);
++			kthread_stop(host->sdio_irq_thread);
++		} else {
++			mmc_host_clk_hold(host);
++			host->ops->enable_sdio_irq(host, 0);
++			mmc_host_clk_release(host);
++		}
+ 	}
+ 
+ 	return 0;
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index cb61ea4d6945..28c5e796292f 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -278,6 +278,7 @@ struct mmc_host {
+ #define MMC_CAP2_PACKED_CMD	(MMC_CAP2_PACKED_RD | \
+ 				 MMC_CAP2_PACKED_WR)
+ #define MMC_CAP2_NO_PRESCAN_POWERUP (1 << 14)	/* Don't power up before scan */
++#define MMC_CAP2_SDIO_NOTHREAD	(1 << 15)
+ 
+ 	mmc_pm_flag_t		pm_caps;	/* supported pm features */
+ 
+@@ -391,6 +392,8 @@ static inline void mmc_signal_sdio_irq(struct mmc_host *host)
+ 	wake_up_process(host->sdio_irq_thread);
+ }
+ 
++void sdio_run_irqs(struct mmc_host *host);
++
+ #ifdef CONFIG_REGULATOR
+ int mmc_regulator_get_ocrmask(struct regulator *supply);
+ int mmc_regulator_set_ocr(struct mmc_host *mmc,
 -- 
-FTTC broadband for 0.8mile line: now at 9.7Mbps down 460kbps up... slowly
-improving, and getting towards what was expected from it.
+1.8.3.1
+
