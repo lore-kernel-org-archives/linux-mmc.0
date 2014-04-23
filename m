@@ -1,79 +1,132 @@
 From: Russell King <rmk+kernel@arm.linux.org.uk>
-Subject: [PATCH 31/38] mmc: sdhci: move remaining power handling into
- sdhci_set_power()
-Date: Wed, 23 Apr 2014 20:08:48 +0100
-Message-ID: <E1Wd2XI-0003wM-P5@rmk-PC.arm.linux.org.uk>
+Subject: [PATCH 32/38] mmc: sdhci: track whether preset mode is currently
+ enabled in hardware
+Date: Wed, 23 Apr 2014 20:08:53 +0100
+Message-ID: <E1Wd2XN-0003wQ-Sh@rmk-PC.arm.linux.org.uk>
 References: <20140423185534.GA26756@n2100.arm.linux.org.uk>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from gw-1.arm.linux.org.uk ([78.32.30.217]:46518 "EHLO
+Received: from gw-1.arm.linux.org.uk ([78.32.30.217]:46521 "EHLO
 	pandora.arm.linux.org.uk" rhost-flags-OK-OK-OK-FAIL)
-	by vger.kernel.org with ESMTP id S932456AbaDWTIu (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 23 Apr 2014 15:08:50 -0400
+	by vger.kernel.org with ESMTP id S932456AbaDWTI4 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 23 Apr 2014 15:08:56 -0400
 In-Reply-To: <20140423185534.GA26756@n2100.arm.linux.org.uk>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Chris Ball <chris@printf.net>, linux-mmc@vger.kernel.org
 Cc: linux-arm-kernel@lists.infradead.org, Ulf Hansson <ulf.hansson@linaro.org>
 
-Move the remaining parts of the power handling in sdhci_do_set_ios()
-into sdhci_set_power().
+Track whether preset mode is currently enabled in hardware, and use that
+when making decisions elsewhere in the code rather than reading the
+register and checking the bit.
 
 Signed-off-by: Russell King <rmk+kernel@arm.linux.org.uk>
 ---
- drivers/mmc/host/sdhci.c | 16 +++++++---------
- 1 file changed, 7 insertions(+), 9 deletions(-)
+ drivers/mmc/host/sdhci.c  | 44 ++++++++++++++++++++++++++------------------
+ include/linux/mmc/sdhci.h |  1 +
+ 2 files changed, 27 insertions(+), 18 deletions(-)
 
 diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index decc5c64efb8..a3334460c0c6 100644
+index a3334460c0c6..4f66722a1ee7 100644
 --- a/drivers/mmc/host/sdhci.c
 +++ b/drivers/mmc/host/sdhci.c
-@@ -1216,12 +1216,13 @@ void sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
- }
- EXPORT_SYMBOL_GPL(sdhci_set_clock);
+@@ -205,9 +205,14 @@ static void sdhci_do_reset(struct sdhci_host *host, u8 mask)
  
--static void sdhci_set_power(struct sdhci_host *host, unsigned short power)
-+static void sdhci_set_power(struct sdhci_host *host, unsigned char mode,
-+			    unsigned short vdd)
+ 	host->ops->reset(host, mask);
+ 
+-	if (host->flags & (SDHCI_USE_SDMA | SDHCI_USE_ADMA)) {
+-		if ((host->ops->enable_dma) && (mask & SDHCI_RESET_ALL))
+-			host->ops->enable_dma(host);
++	if (mask & SDHCI_RESET_ALL) {
++		if (host->flags & (SDHCI_USE_SDMA | SDHCI_USE_ADMA)) {
++			if (host->ops->enable_dma)
++				host->ops->enable_dma(host);
++		}
++
++		/* Resetting the controller clears many */
++		host->preset_enabled = false;
+ 	}
+ }
+ 
+@@ -1126,8 +1131,7 @@ void sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
+ 		return;
+ 
+ 	if (host->version >= SDHCI_SPEC_300) {
+-		if (sdhci_readw(host, SDHCI_HOST_CONTROL2) &
+-			SDHCI_CTRL_PRESET_VAL_ENABLE) {
++		if (host->preset_enabled) {
+ 			u16 pre_val;
+ 
+ 			clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
+@@ -1491,13 +1495,13 @@ static void sdhci_do_set_ios(struct sdhci_host *host, struct mmc_ios *ios)
+ 		    (ios->timing == MMC_TIMING_UHS_SDR25))
+ 			ctrl |= SDHCI_CTRL_HISPD;
+ 
+-		ctrl_2 = sdhci_readw(host, SDHCI_HOST_CONTROL2);
+-		if (!(ctrl_2 & SDHCI_CTRL_PRESET_VAL_ENABLE)) {
++		if (!host->preset_enabled) {
+ 			sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
+ 			/*
+ 			 * We only need to set Driver Strength if the
+ 			 * preset value enable is not set.
+ 			 */
++			ctrl_2 = sdhci_readw(host, SDHCI_HOST_CONTROL2);
+ 			ctrl_2 &= ~SDHCI_CTRL_DRV_TYPE_MASK;
+ 			if (ios->drv_type == MMC_SET_DRIVER_TYPE_A)
+ 				ctrl_2 |= SDHCI_CTRL_DRV_TYPE_A;
+@@ -2001,26 +2005,30 @@ static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
+ 
+ static void sdhci_enable_preset_value(struct sdhci_host *host, bool enable)
  {
- 	u8 pwr = 0;
+-	u16 ctrl;
+-
+ 	/* Host Controller v3.00 defines preset value registers */
+ 	if (host->version < SDHCI_SPEC_300)
+ 		return;
  
--	if (power != (unsigned short)-1) {
--		switch (1 << power) {
-+	if (mode != MMC_POWER_OFF) {
-+		switch (1 << vdd) {
- 		case MMC_VDD_165_195:
- 			pwr = SDHCI_POWER_180;
- 			break;
-@@ -1247,7 +1248,7 @@ static void sdhci_set_power(struct sdhci_host *host, unsigned short power)
- 		sdhci_writeb(host, 0, SDHCI_POWER_CONTROL);
- 		if (host->quirks2 & SDHCI_QUIRK2_CARD_ON_NEEDS_BUS_ON)
- 			sdhci_runtime_pm_bus_off(host);
--		power = 0;
-+		vdd = 0;
- 	} else {
- 		/*
- 		 * Spec says that we should clear the power reg before setting
-@@ -1281,7 +1282,7 @@ static void sdhci_set_power(struct sdhci_host *host, unsigned short power)
- 
- 	if (host->vmmc) {
- 		spin_unlock_irq(&host->lock);
--		mmc_regulator_set_ocr(host->mmc, host->vmmc, power);
-+		mmc_regulator_set_ocr(host->mmc, host->vmmc, vdd);
- 		spin_lock_irq(&host->lock);
+-	ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
+-
+ 	/*
+ 	 * We only enable or disable Preset Value if they are not already
+ 	 * enabled or disabled respectively. Otherwise, we bail out.
+ 	 */
+-	if (enable && !(ctrl & SDHCI_CTRL_PRESET_VAL_ENABLE)) {
+-		ctrl |= SDHCI_CTRL_PRESET_VAL_ENABLE;
+-		sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
+-		host->flags |= SDHCI_PV_ENABLED;
+-	} else if (!enable && (ctrl & SDHCI_CTRL_PRESET_VAL_ENABLE)) {
+-		ctrl &= ~SDHCI_CTRL_PRESET_VAL_ENABLE;
++	if (host->preset_enabled != enable) {
++		u16 ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
++
++		if (enable)
++			ctrl |= SDHCI_CTRL_PRESET_VAL_ENABLE;
++		else
++			ctrl &= ~SDHCI_CTRL_PRESET_VAL_ENABLE;
++
+ 		sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
+-		host->flags &= ~SDHCI_PV_ENABLED;
++
++		if (enable)
++			host->flags |= SDHCI_PV_ENABLED;
++		else
++			host->flags &= ~SDHCI_PV_ENABLED;
++
++		host->preset_enabled = enable;
  	}
  }
-@@ -1463,10 +1464,7 @@ static void sdhci_do_set_ios(struct sdhci_host *host, struct mmc_ios *ios)
- 		host->clock = ios->clock;
- 	}
  
--	if (ios->power_mode == MMC_POWER_OFF)
--		sdhci_set_power(host, -1);
--	else
--		sdhci_set_power(host, ios->vdd);
-+	sdhci_set_power(host, ios->power_mode, ios->vdd);
+diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
+index 7f3efbab8732..08abe9941884 100644
+--- a/include/linux/mmc/sdhci.h
++++ b/include/linux/mmc/sdhci.h
+@@ -143,6 +143,7 @@ struct sdhci_host {
  
- 	if (host->ops->platform_send_init_74_clocks)
- 		host->ops->platform_send_init_74_clocks(host, ios->power_mode);
+ 	bool runtime_suspended;	/* Host is runtime suspended */
+ 	bool bus_on;		/* Bus power prevents runtime suspend */
++	bool preset_enabled;	/* Preset is enabled */
+ 
+ 	struct mmc_request *mrq;	/* Current request */
+ 	struct mmc_command *cmd;	/* Current command */
 -- 
 1.8.3.1
 
