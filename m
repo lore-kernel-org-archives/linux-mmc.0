@@ -1,16 +1,17 @@
 From: Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
-Subject: Re: [PATCH v8 00/17] ARM: sunxi: Add driver for SD/MMC
- hosts found on Allwinner sunxi SoCs
-Date: Wed, 23 Apr 2014 11:53:19 +0200
-Message-ID: <20140423095319.GO24905@lukather>
+Subject: Re: [PATCH v8 14/17] ARM: dts: sun6i: Enable the mmc
+ controller on the m9
+Date: Wed, 23 Apr 2014 11:51:43 +0200
+Message-ID: <20140423095143.GN24905@lukather>
 References: <1398164497-14212-1-git-send-email-hdegoede@redhat.com>
+ <1398164497-14212-15-git-send-email-hdegoede@redhat.com>
 Reply-To: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
 Mime-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="rQ7Ovc9/RBrrr0/1"
-Return-path: <linux-sunxi+bncBD2ZNBF5VYJRBIM432NAKGQEGILZT5Q-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+	protocol="application/pgp-signature"; boundary="jdM5ZcN/ZcXXVwZs"
+Return-path: <linux-sunxi+bncBD2ZNBF5VYJRBIE432NAKGQEIPQDBMA-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <1398164497-14212-1-git-send-email-hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+In-Reply-To: <1398164497-14212-15-git-send-email-hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Post: <http://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
 List-Help: <http://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
 List-Archive: <http://groups.google.com/group/linux-sunxi>
@@ -22,72 +23,43 @@ Cc: Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, Ulf Hansson <ulf
 List-Id: linux-mmc@vger.kernel.org
 
 
---rQ7Ovc9/RBrrr0/1
-Content-Type: text/plain; charset=iso-8859-1
+--jdM5ZcN/ZcXXVwZs
+Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
 Content-Transfer-Encoding: quoted-printable
 
-Hi Hans,
+On Tue, Apr 22, 2014 at 01:01:34PM +0200, Hans de Goede wrote:
+> Tested on a Mele A1000G Quad.
+>=20
+> Signed-off-by: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 
-On Tue, Apr 22, 2014 at 01:01:20PM +0200, Hans de Goede wrote:
-> Hi All,
->=20
-> Here is v8 of the sunxi-mmc patch-set David Lanzend=F6rfer and I have been
-> working on.
->=20
-> The first 2 patches are depenencies which should go in through the clk tr=
-ee,
-> Mike can you pick these 2 up please ?  :
->=20
-> "clk: sunxi: factors: automatic reparenting support"
-> Is uncontroversial and has been favorably reviewed by various people.
->=20
-> "clk: sunxi: Implement MMC phase control"
-> Is somewhat more controversial as there has been lots of discussion about
-> adding a generic phase control method to the clk framework. The problem is
-> that there has been a lot of talk about such a generic phase control meth=
-od
-> but not a single patch. Therefor I would like to move forwards with using
-> a platform specific method for now. I hereby promise that once we've a ge=
-neric
-> method I'll write patches to convert the sunxi code to that method.
->=20
-> The third patch is the patch adding the actual mmc driver and should go in
-> through the mmc tree.
->=20
-> All the other patches are devicetree patches hooking things up, and should
-> go upstream through Maxime's sunxi-dt tree.
-
-Apart from the ever-controversial phase control thing, and the minor
-comments I had here and there, this looks good, thanks!
-
-Maxime
+This patch can be merged with the previous one.
 
 --=20
 Maxime Ripard, Free Electrons
 Embedded Linux, Kernel and Android engineering
 http://free-electrons.com
 
---rQ7Ovc9/RBrrr0/1
+--jdM5ZcN/ZcXXVwZs
 Content-Type: application/pgp-signature; name="signature.asc"
 Content-Description: Digital signature
 
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v1.4.14 (GNU/Linux)
 
-iQIcBAEBAgAGBQJTV42OAAoJEBx+YmzsjxAg5W8QAJ/e1BiIHXhRTAMvQzQYpwmj
-dFOC7VXKecgTj4GHQ/gM4hmL6BwQ5reryedV8aVsZ9H2E1J/VW5h5EmnVoK6HEtO
-hXmc97Bzqmh9gXo4K8Rv8n15E7luaH+49F+TYIKCS0MoaNvbLeJh04MXK4rhp4+b
-UsviqvCQLqV9XAKnL3Lr2ESVeOJsR4DPyiZrWqCKPNrx0zfiEhxV9hZx/JK2Urw5
-tKWnPg6uXFfPih/g/S0MQ/0vCBKEXgUb5AQxrlwqIdebEdxMjpUIz6BQFaWmmReG
-kd2nhGe/AXfi7BS4yTktJ2LxqKgQFav48XRBaN799CCxNXUpkSKqQljvFLxUjuyq
-Ze+f/IqBhxDp2P5NVo46eFK5E7ODFvmvLKI6Yqp770PtiwNYwX2m+SIGYDIQEPBF
-7PibWy/6yFLXrPAjYHMt8hDG//1xDufaGdAJhHxQA09n2JQ/hVZlNlFx6wLqU2pk
-5loB0/f6Y8e+ZhLcsDe+TqS5jaULHwTgswikcTQTix7Km5ZF8xhZZCoTp5pCjnIZ
-+vVVRDHlWDxbXLzsmbiMFxUaH3wP4RnN2Kxg8oM41/nEvLhc/GIkKg2kM3V4Hns9
-KXzaBEi662TUZgacoNlhM6CvpxFLRV1KWAbP47lcx9mhxGmXQGPFH11FUdg62o06
-LvIPPNgjRY4JCs78DX4m
-=3a0d
+iQIcBAEBAgAGBQJTV40vAAoJEBx+YmzsjxAgAtkP/2i4BA3yasvc1CdxxHeaCK4S
+mNUAq2QoiPKThZt73lyOLnnbNw1Yc9u1r6OsubHqleyTZBu/stIoDxwtmZWHsZVz
+jpmqN4/7JYEogqaTwFCRJ1HoMYMpETwlFtl79FOjfacI9XUiYXCFc2/LB2cc9gGX
+oNig1xpPwW1cCdyO/x7E/G5wIe9PNf2sq/QjTDac04n3Uy++vioV8EV61vUajnQo
+zjBhvDnE7W7c0X+if8xZW72oqURcQgNElSM3mzhhp3ThzrKAgw2BexUKM0ZzX6VM
+b5lYVIw43a+he633+0g7HHmD7DVsUquw5CpixmrW1FL4xlbGo2LQi9ZeZFrBfzdU
+5CIcWnyco3ucUFEc4rhOAaIKNRnXHkJetj7g3zmgY+vVQgtkm++sHcy0VHzWScxN
+jSoA0OeQe2qlemRPnGtzsARfPA/ZCNvsoq7A1Urm/KkH913Nin5+GRKK62PSPJWW
+WKBaWOQWdKBixNRBWweYeoWhUtttjSxmAiON5opDS6NqvEQP1i5xYbgJBi65z7If
+oIXn3LLOyBtAS6QRTsirFZdDd+xVepY/YtAEBluuyVo62tUlwKVDy57n7/3D9BdR
+DRjdqHHAu5wrqnamb4xfI4+QZD2jjnMybU6keWnQ4KZW4XYWoEJbBmlnfHbckdYu
+8KISiUVcZKNRpITecAnK
+=rhac
 -----END PGP SIGNATURE-----
 
---rQ7Ovc9/RBrrr0/1--
+--jdM5ZcN/ZcXXVwZs--
