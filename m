@@ -1,45 +1,69 @@
-From: Russell King <rmk+kernel@arm.linux.org.uk>
-Subject: [PATCH 35/38] mmc: dw_mmc: call mmc_of_parse to fill in common
- options
-Date: Wed, 23 Apr 2014 20:09:09 +0100
-Message-ID: <E1Wd2Xd-0003we-7P@rmk-PC.arm.linux.org.uk>
+From: Russell King <rmk+kernel-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>
+Subject: [PATCH 37/38] ARM: cubox-i: add support for SD UHS-1 cards
+Date: Wed, 23 Apr 2014 20:09:19 +0100
+Message-ID: <E1Wd2Xn-0003wm-Ei@rmk-PC.arm.linux.org.uk>
 References: <20140423185534.GA26756@n2100.arm.linux.org.uk>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from gw-1.arm.linux.org.uk ([78.32.30.217]:46536 "EHLO
-	pandora.arm.linux.org.uk" rhost-flags-OK-OK-OK-FAIL)
-	by vger.kernel.org with ESMTP id S932508AbaDWTJL (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 23 Apr 2014 15:09:11 -0400
-In-Reply-To: <20140423185534.GA26756@n2100.arm.linux.org.uk>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20140423185534.GA26756-l+eeeJia6m9vn6HldHNs0ANdhmdF6hFW@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Shawn Guo <shawn.guo-KZfg59tc24xl57MIdRCFDg@public.gmane.org>, Sascha Hauer <kernel-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Pawel Moll <pawel.moll-5wv7dgnIgG8@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Ian Campbell <ijc+devicetree-KcIKpvwj1kUDXYZnReoRVg@public.gmane.org>, Kumar Gala <galak-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <chris@printf.net>, linux-mmc@vger.kernel.org
-Cc: linux-arm-kernel@lists.infradead.org, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>
 
-From: Olof Johansson <olof@lixom.net>
-
-The shared of parse function fills in common options for capabilities,
-etc, but it needs to be called from each driver that wants to make use
-of it. dw_mmc was missing the call.
-
-Signed-off-by: Olof Johansson <olof@lixom.net>
-Signed-off-by: Russell King <rmk+kernel@arm.linux.org.uk>
+Signed-off-by: Russell King <rmk+kernel-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>
 ---
- drivers/mmc/host/dw_mmc.c | 2 ++
- 1 file changed, 2 insertions(+)
+ arch/arm/boot/dts/imx6qdl-cubox-i.dtsi | 26 +++++++++++++++++++++++++-
+ 1 file changed, 25 insertions(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index cced599d5aeb..a2c12ebb376e 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -2140,6 +2140,8 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
- 	if (!mmc)
- 		return -ENOMEM;
- 
-+	mmc_of_parse(mmc);
+diff --git a/arch/arm/boot/dts/imx6qdl-cubox-i.dtsi b/arch/arm/boot/dts/imx6qdl-cubox-i.dtsi
+index c2a24888a276..c928c0a5e3cc 100644
+--- a/arch/arm/boot/dts/imx6qdl-cubox-i.dtsi
++++ b/arch/arm/boot/dts/imx6qdl-cubox-i.dtsi
+@@ -111,6 +111,28 @@
+ 				MX6QDL_PAD_SD2_DAT3__SD2_DATA3 0x13059
+ 			>;
+ 		};
 +
- 	slot = mmc_priv(mmc);
- 	slot->id = id;
- 	slot->mmc = mmc;
++		pinctrl_cubox_i_usdhc2_100mhz: cubox-i-usdhc2-100mhz {
++			fsl,pins = <
++				MX6QDL_PAD_SD2_CMD__SD2_CMD    0x170b9
++				MX6QDL_PAD_SD2_CLK__SD2_CLK    0x100b9
++				MX6QDL_PAD_SD2_DAT0__SD2_DATA0 0x170b9
++				MX6QDL_PAD_SD2_DAT1__SD2_DATA1 0x170b9
++				MX6QDL_PAD_SD2_DAT2__SD2_DATA2 0x170b9
++				MX6QDL_PAD_SD2_DAT3__SD2_DATA3 0x130b9
++			>;
++		};
++
++		pinctrl_cubox_i_usdhc2_200mhz: cubox-i-usdhc2-200mhz {
++			fsl,pins = <
++				MX6QDL_PAD_SD2_CMD__SD2_CMD    0x170f9
++				MX6QDL_PAD_SD2_CLK__SD2_CLK    0x100f9
++				MX6QDL_PAD_SD2_DAT0__SD2_DATA0 0x170f9
++				MX6QDL_PAD_SD2_DAT1__SD2_DATA1 0x170f9
++				MX6QDL_PAD_SD2_DAT2__SD2_DATA2 0x170f9
++				MX6QDL_PAD_SD2_DAT3__SD2_DATA3 0x130f9
++			>;
++		};
+ 	};
+ };
+ 
+@@ -131,8 +153,10 @@
+ };
+ 
+ &usdhc2 {
+-	pinctrl-names = "default";
++	pinctrl-names = "default", "state_100mhz", "state_200mhz";
+ 	pinctrl-0 = <&pinctrl_cubox_i_usdhc2_aux &pinctrl_cubox_i_usdhc2>;
++	pinctrl-1 = <&pinctrl_cubox_i_usdhc2_aux &pinctrl_cubox_i_usdhc2_100mhz>;
++	pinctrl-2 = <&pinctrl_cubox_i_usdhc2_aux &pinctrl_cubox_i_usdhc2_200mhz>;
+ 	vmmc-supply = <&reg_3p3v>;
+ 	cd-gpios = <&gpio1 4 0>;
+ 	status = "okay";
 -- 
 1.8.3.1
 
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
