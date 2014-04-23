@@ -1,58 +1,83 @@
-From: Seungwon Jeon <tgih.jun@samsung.com>
-Subject: RE: [PATCH] mmc: dw_mmc: Don't print data errors
-Date: Wed, 23 Apr 2014 15:22:44 +0900
-Message-ID: <000201cf5ebc$70213200$50639600$%jun@samsung.com>
-References: <1398210681-22976-1-git-send-email-dianders@chromium.org>
+From: Yuvaraj Cd <yuvaraj.lkml@gmail.com>
+Subject: Re: [PATCH V2] mmc: dw_mmc: exynos: Turn SDIO interrupts on
+Date: Wed, 23 Apr 2014 12:24:48 +0530
+Message-ID: <CA+NduCB6b5TAPs9ZWaBoFgg38==727s=NB-ko7AnYMpjHn8j0w@mail.gmail.com>
+References: <1395635037-24081-1-git-send-email-yuvaraj.cd@samsung.com>
+	<532FB4A7.7020700@samsung.com>
+	<CAKuRcOKOBebW157R16_KtSR541MwwZ4pyynBRnbvOLm9RK4SAg@mail.gmail.com>
+	<CAGOxZ53urGaOmezRi35fGpz_sR+E8Ukq3s9v08pAGLL6ChOWKw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ks_c_5601-1987
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-reply-to: <1398210681-22976-1-git-send-email-dianders@chromium.org>
-Content-language: ko
+In-Reply-To: <CAGOxZ53urGaOmezRi35fGpz_sR+E8Ukq3s9v08pAGLL6ChOWKw@mail.gmail.com>
 Sender: linux-samsung-soc-owner@vger.kernel.org
-To: 'Doug Anderson' <dianders@chromium.org>, 'Jaehoon Chung' <jh80.chung@samsung.com>
-Cc: yuvaraj.cd@samsung.com, 'Alim Akhtar' <alim.akhtar@samsung.com>, 'Sonny Rao' <sonnyrao@chromium.org>, linux-samsung-soc@vger.kernel.org, chris@printf.net, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Alim Akhtar <alim.akhtar@gmail.com>
+Cc: Yuvaraj Kumar <yuvaraj.cd@gmail.com>, Yuvaraj Kumar C D <yuvaraj.cd@samsung.com>, "linux-samsung-soc@vger.kernel.org" <linux-samsung-soc@vger.kernel.org>, Grant Grundler <grundler@chromium.org>, Tomasz Figa <t.figa@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, sunil joshi <joshi@samsung.com>, Doug Anderson <dianders@chromium.org>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, "kgene.kim@samsung.com" <kgene.kim@samsung.com>, Chris Ball <cjb@laptop.org>, Sonny Rao <sonnyrao@chromium.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Wed, April 23, 2014, Doug Anderson wrote:
-> Data errors are completely expected during tuning.  Printing them out
-> is confusing people looking at the kernel logs.  They see things like:
-> 
->  [    3.613296] dwmmc_exynos 12200000.dwmmc0: data error, status 0x00000088
-> 
-> ...and they think something is wrong with their hardware.
-> 
-> Remove the printouts.  We'll leave it up to a higher level to report
-> about errors.
-Yes, your saying makes sense.
-But in normal I/O, actual error information such as status below is useful, isn't it?
-
-Thanks,
-Seungwon Jeon
-
-> 
-> Signed-off-by: Doug Anderson <dianders@chromium.org>
-> ---
->  drivers/mmc/host/dw_mmc.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
-> 
-> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> index cced599..4c8d423 100644
-> --- a/drivers/mmc/host/dw_mmc.c
-> +++ b/drivers/mmc/host/dw_mmc.c
-> @@ -1248,7 +1248,7 @@ static int dw_mci_data_complete(struct dw_mci *host, struct mmc_data *data)
->  			data->error = -EIO;
->  		}
-> 
-> -		dev_err(host->dev, "data error, status 0x%08x\n", status);
-> +		dev_dbg(host->dev, "data error, status 0x%08x\n", status);
-> 
->  		/*
->  		 * After an error, there may be data lingering
+On Wed, Apr 23, 2014 at 9:42 AM, Alim Akhtar <alim.akhtar@gmail.com> wrote:
+> Hi Yuvaraj,
+>
+> On Mon, Mar 24, 2014 at 10:12 AM, Yuvaraj Kumar <yuvaraj.cd@gmail.com> wrote:
+>> On Mon, Mar 24, 2014 at 9:59 AM, Jaehoon Chung <jh80.chung@samsung.com> wrote:
+>>> Hi, Yuvaraj.
+>>>
+>>> NACK. we can use "mmc_of_parese()".
+>> Thanks Jaehoon for the pointer.I will use "mmc_of_parse()".
+> Are you planning to re-spin this patch? Now Jaehoon's changes for
+> using mmc_of_parse() is landed in mmc-next.
+As its already added mmc_of_parse(),no respin of this.
+Just we need to use it in DT.
+> Thanks!!
+>>>
+>>> I have sent the patch that use "mmc_of_parse()".
+>>> https://patchwork.kernel.org/patch/3750681/
+>>>
+>>> Best Regards,
+>>> Jaehoon Chung
+>>>
+>>> On 03/24/2014 01:23 PM, Yuvaraj Kumar C D wrote:
+>>>> The mmc part in exynos supports SDIO interrupts and they work fine, so
+>>>> turn the capability on.  With this I see download speeds increase
+>>>> about 10x.
+>>>>
+>>>> This V1 of this patch is posted to LKML at
+>>>> https://patchwork.kernel.org/patch/2429661/) by Doug Anderson.
+>>>>
+>>>> Signed-off-by: Doug Anderson <dianders@chromium.org>
+>>>> Signed-off-by: Yuvaraj Kumar C D <yuvaraj.cd@samsung.com>
+>>>> ---
+>>>>  drivers/mmc/host/dw_mmc.c |    3 +++
+>>>>  1 file changed, 3 insertions(+)
+>>>>
+>>>> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+>>>> index 0c56faa..240949d 100644
+>>>> --- a/drivers/mmc/host/dw_mmc.c
+>>>> +++ b/drivers/mmc/host/dw_mmc.c
+>>>> @@ -2417,6 +2417,9 @@ static struct dw_mci_board *dw_mci_parse_dt(struct dw_mci *host)
+>>>>       if (of_get_property(np, "cd-inverted", NULL))
+>>>>               pdata->caps2 |= MMC_CAP2_CD_ACTIVE_HIGH;
+>>>>
+>>>> +     if (of_find_property(np, "cap-sdio-irq", NULL))
+>>>> +             pdata->caps |= MMC_CAP_SDIO_IRQ;
+>>>> +
+>>>>       return pdata;
+>>>>  }
+>>>>
+>>>>
+>>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
+>
+>
 > --
-> 1.9.1.423.g4596e3a
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> Regards,
+> Alim
+>
+> _______________________________________________
+> linux-arm-kernel mailing list
+> linux-arm-kernel@lists.infradead.org
+> http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
