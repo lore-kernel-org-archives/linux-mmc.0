@@ -1,38 +1,41 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: dw_mmc: Don't print data errors
-Date: Thu, 24 Apr 2014 11:14:51 +0200
-Message-ID: <CAPDyKFo7Mi9+WJx+7rcB_fqdi59TuY+FhT=Ued9Zi=rhNGnYtA@mail.gmail.com>
-References: <1398210681-22976-1-git-send-email-dianders@chromium.org>
-	<CAPDyKFpzPCi2Yb_33akh5dg1NjudydLkJrdGnQ_xJtsEGGcQ3g@mail.gmail.com>
-	<CAD=FV=U_H_RdoMr2R9TAgj9HmaU0zm=UxcvvMXErzQ-acwZJwA@mail.gmail.com>
+From: Russell King - ARM Linux <linux@arm.linux.org.uk>
+Subject: Re: [PATCH 00/38] MMC updates, plus CuBox-i WiFi support
+Date: Thu, 24 Apr 2014 11:17:26 +0100
+Message-ID: <20140424101726.GH26756@n2100.arm.linux.org.uk>
+References: <20140423185534.GA26756@n2100.arm.linux.org.uk> <CAPDyKFozP69yngKAkdwHYyyvi+pdLEm05udOmBiVshQFi4hnLQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-Reply-To: <CAD=FV=U_H_RdoMr2R9TAgj9HmaU0zm=UxcvvMXErzQ-acwZJwA@mail.gmail.com>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Doug Anderson <dianders@chromium.org>
-Cc: Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Yuvaraj Kumar C D <yuvaraj.cd@samsung.com>, Alim Akhtar <alim.akhtar@samsung.com>, Sonny Rao <sonnyrao@chromium.org>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-doc-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <CAPDyKFozP69yngKAkdwHYyyvi+pdLEm05udOmBiVshQFi4hnLQ@mail.gmail.com>
+Sender: linux-doc-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Anton Vorontsov <anton@enomsg.org>, Barry Song <baohua@kernel.org>, Ben Dooks <ben-linux@fluff.org>, Chris Ball <chris@printf.net>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Jaehoon Chung <jh80.chung@samsung.com>, Kumar Gala <galak@codeaurora.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, linux-doc@vger.kernel.org, linux-mmc <linux-mmc@vger.kernel.org>, linuxppc-dev@lists.ozlabs.org, "linux-tegra@vger.kernel.org" <linux-tegra@vger.kernel.org>, Mark Rutland <mark.rutland@arm.com>, Michal Simek <michal.simek@xilinx.com>, Pawel Moll <pawel.moll@arm.com>, Randy Dunlap <rdunlap@infradead.org>, Rob Herring <robh+dt@kernel.org>, Sascha Hauer <kernel@pengutronix.de>, Seungwon Jeon <tgih.jun@samsung.com>, Shawn Guo <shawn.guo@freescale.com>, spear-devel@list.st.com, Stephen
 List-Id: linux-mmc@vger.kernel.org
 
->> The "status" here could be useful information about the status
->> register, which is not considered while printing errors by the "higher
->> levels". An option could be to print the error, but not when you
->> perform tuning.
->>
->> No big deal though, just a thought.
->
-> Right, I could potentially put the driver into "tuning" mode and then
-> suppress the errors during that time.  If you request it I will do
-> that.
->
-> I will also note that there are many other error conditions in the
-> driver that don't have such printouts.  I think the general philosophy
-> of this driver is not to print them...
+On Thu, Apr 24, 2014 at 10:25:42AM +0200, Ulf Hansson wrote:
+> I have looked though the patches up until patch 33 and this is clearly
+> a nice piece of clean-up /fixes work for sdhci. Besides my minor
+> comments per patch, I don't have any objections code-review wise to
+> proceed merging them.
+> 
+> I have also tried to applied them on Chris' mmc-next branch,
+> unfortunate it fails at patch 23, so it would be nice to get a
+> re-based patchset for the mmc-next branch.
 
-So, then let's stick to that philosophy and keep this as is.
+I /could/ rebase it but then I wouldn't be able to produce the patch
+sets/patches for others [*] (such as the Novena project) to derive
+their kernel tree from my iMX6 patch set.
 
-Kind regards
-Ulf Hansson
+What I'd prefer is to keep the patch set intact, and provide Chris
+with a pull request for it up to patch 33, which would need a
+conflict fixed - and this would mean that I can be sure that what
+I'm testing, and what I'm distributing is what Chris will also be
+submitting.
 
->
-> -Doug
+* - this currently stands at 230 patches in all - mmc + l2c + fec +
+    imx-drm + other iMX6 changes.
+
+-- 
+FTTC broadband for 0.8mile line: now at 9.7Mbps down 460kbps up... slowly
+improving, and getting towards what was expected from it.
