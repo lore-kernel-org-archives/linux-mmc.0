@@ -1,68 +1,68 @@
 From: Balaji T K <balajitk@ti.com>
-Subject: Re: [PATCH 3/5] mmc: host: omap_hsmmc: introduce new accessor functions
-Date: Thu, 24 Apr 2014 20:47:38 +0530
-Message-ID: <53592B12.8090700@ti.com>
-References: <1395878690-9650-1-git-send-email-balbi@ti.com> <1395878690-9650-4-git-send-email-balbi@ti.com>
+Subject: Re: [PATCH 0/5] mmc: host: omap_hsmmc: a few improvements
+Date: Thu, 24 Apr 2014 20:51:25 +0530
+Message-ID: <53592BF5.6020104@ti.com>
+References: <1395878690-9650-1-git-send-email-balbi@ti.com> <20140421173203.GH22794@saruman.home> <53568B04.4050703@ti.com> <20140422154858.GN5524@saruman.home>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from arroyo.ext.ti.com ([192.94.94.40]:44893 "EHLO arroyo.ext.ti.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753208AbaDXPRp (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 24 Apr 2014 11:17:45 -0400
-In-Reply-To: <1395878690-9650-4-git-send-email-balbi@ti.com>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
-To: Felipe Balbi <balbi@ti.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20140422154858.GN5524@saruman.home>
+Sender: linux-kernel-owner@vger.kernel.org
+To: balbi@ti.com
 Cc: chris@printf.net, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, Linux OMAP Mailing List <linux-omap@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+List-Id: linux-mmc@vger.kernel.org
 
-On Thursday 27 March 2014 05:34 AM, Felipe Balbi wrote:
-> we introduce new accessors which provide for register
-> access with and without offsets.
+On Tuesday 22 April 2014 09:18 PM, Felipe Balbi wrote:
+> Hi,
 >
-> This is just to make sure newer versions of the IP
-> can access the new registers prepended at the beginning
-> of the address space.
+> On Tue, Apr 22, 2014 at 09:00:12PM +0530, Balaji T K wrote:
+>> On Monday 21 April 2014 11:02 PM, Felipe Balbi wrote:
+>>> Hi,
+>>>
+>>> On Wed, Mar 26, 2014 at 07:04:45PM -0500, Felipe Balbi wrote:
+>>>> this series lets us access the newer registers introduced
+>>>> back in OMAP4 which give us some valid information about
+>>>> the OMAP HSMMC IP like max block size, support for ADMA,
+>>>> support for Retention.
+>>>>
+>>>> Right now, only setting max_blk_size correctly as supporting
+>>>> ADMA and Retention will take a lot of work.
+>>>>
+>>>> Tested on OMAP5 uEVM.
+>>>>
+>>>> Felipe Balbi (5):
+>>>>    mmc: host: omap_hsmmc: pass host as an argument
+>>>>    mmc: host: omap_hsmmc: add reg_offset field
+>>>>    mmc: host: omap_hsmmc: introduce new accessor functions
+>>>>    mmc: host: omap_hsmmc: switch over to new accessors
+>>>>    mmc: host: omap_hsmmc: set max_blk_size correctly
+>>
+>> Got mislead by your reply to this series, about the alternative way of
+>> reading memory size from CAPA register
 >
-> Signed-off-by: Felipe Balbi <balbi@ti.com>
-> ---
->   drivers/mmc/host/omap_hsmmc.c | 36 ++++++++++++++++++++++++++++++++++++
->   1 file changed, 36 insertions(+)
+> sure, we can do that if you prefer, I just felt I wouldn't touch
+ > platforms I can't really test :-s
+
+I think so, since those 3 newer registers are not documented for all platforms.
+Not sure whether it is valid in those cases where it is not documented.
+
+Since capa register has these info and can be
+applied uniformly across all paltforms, I feel reading capa register is the
+way to go. Do you still think there is a need for new api with no offset ?
+
 >
-> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-> index d46f768..e596c6a 100644
-> --- a/drivers/mmc/host/omap_hsmmc.c
-> +++ b/drivers/mmc/host/omap_hsmmc.c
-> @@ -211,6 +211,42 @@ struct omap_hsmmc_host {
->   	struct	omap_mmc_platform_data	*pdata;
->   };
+>>> this has been here for almost a month, any comments ?
+>>>
+>>
+>> Do you see any performance impact with this series ?
 >
-> +static inline int _omap_hsmmc_read(struct omap_hsmmc_host *host,
-> +		u32 reg, bool offset)
-> +{
-> +	return readl(host->base + reg + (offset ? host->reg_offset : 0));
-> +}
-> +
-> +static inline void _omap_hsmmc_write(struct omap_hsmmc_host *host,
-> +		u32 reg, u32 val, bool offset)
-> +{
-> +	writel(val, host->base + reg + (offset ? host->reg_offset : 0));
-> +}
-> +
-> +static inline int omap_hsmmc_read_offset(struct omap_hsmmc_host *host,
+> in the normal case ? no... it helps only with large transfers
+>
 
-I think you can rename this function as just omap_hsmmc_read
-(removing _offset suffix)
+Do you have the numbers ?
+Is it for read or write,
+how large should the transfer size be ?
 
-> +		u32 reg)
-> +{
-> +	return _omap_hsmmc_read(host, reg, true);
-> +}
-> +
-> +static inline void omap_hsmmc_write_offset(struct omap_hsmmc_host *host,
-
-and this one as omap_hsmmc_write since this version of read/write is most often
-used, the one with no_offset might be used less often.
-
-
+I couldn't get any performance improvements with this patch series,
+Could you please share your test setup, may be I am missing something.
