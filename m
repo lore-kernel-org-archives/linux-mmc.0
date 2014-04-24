@@ -1,178 +1,79 @@
-From: Russell King <rmk+kernel@arm.linux.org.uk>
-Subject: [PATCH 38/38] ARM: cubox-i: add support for Wifi/BT
-Date: Wed, 23 Apr 2014 20:09:24 +0100
-Message-ID: <E1Wd2Xs-0003wq-IR@rmk-PC.arm.linux.org.uk>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH 35/38] mmc: dw_mmc: call mmc_of_parse to fill in common
+ options
+Date: Thu, 24 Apr 2014 09:31:54 +0900
+Message-ID: <53585B7A.3@samsung.com>
 References: <20140423185534.GA26756@n2100.arm.linux.org.uk>
+ <E1Wd2Xd-0003we-7P@rmk-PC.arm.linux.org.uk>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from gw-1.arm.linux.org.uk ([78.32.30.217]:46563 "EHLO
-	pandora.arm.linux.org.uk" rhost-flags-OK-OK-OK-FAIL)
-	by vger.kernel.org with ESMTP id S932511AbaDWTJc (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 23 Apr 2014 15:09:32 -0400
-In-Reply-To: <20140423185534.GA26756@n2100.arm.linux.org.uk>
+Received: from mailout3.samsung.com ([203.254.224.33]:61499 "EHLO
+	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751671AbaDXAbr (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 23 Apr 2014 20:31:47 -0400
+Received: from epcpsbgr2.samsung.com
+ (u142.gpu120.samsung.co.kr [203.254.230.142])
+ by mailout3.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+ (7.0.4.24.0) 64bit (built Nov 17 2011))
+ with ESMTP id <0N4I00DU4ESYW350@mailout3.samsung.com> for
+ linux-mmc@vger.kernel.org; Thu, 24 Apr 2014 09:31:46 +0900 (KST)
+In-reply-to: <E1Wd2Xd-0003we-7P@rmk-PC.arm.linux.org.uk>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <chris@printf.net>, linux-mmc@vger.kernel.org
-Cc: linux-arm-kernel@lists.infradead.org, Shawn Guo <shawn.guo@freescale.com>, Sascha Hauer <kernel@pengutronix.de>, Rob Herring <robh+dt@kernel.org>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Kumar Gala <galak@codeaurora.org>, devicetree@vger.kernel.org
+To: Russell King <rmk+kernel@arm.linux.org.uk>, Chris Ball <chris@printf.net>, linux-mmc@vger.kernel.org
+Cc: linux-arm-kernel@lists.infradead.org, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>
 
-Signed-off-by: Russell King <rmk+kernel@arm.linux.org.uk>
----
- arch/arm/boot/dts/imx6qdl-cubox-i.dtsi  |  8 +++
- arch/arm/boot/dts/imx6qdl-microsom.dtsi | 98 +++++++++++++++++++++++++++++++++
- 2 files changed, 106 insertions(+)
+Dear, Russell.
 
-diff --git a/arch/arm/boot/dts/imx6qdl-cubox-i.dtsi b/arch/arm/boot/dts/imx6qdl-cubox-i.dtsi
-index c928c0a5e3cc..67fe5585f6dd 100644
---- a/arch/arm/boot/dts/imx6qdl-cubox-i.dtsi
-+++ b/arch/arm/boot/dts/imx6qdl-cubox-i.dtsi
-@@ -152,6 +152,14 @@
- 	status = "okay";
- };
- 
-+&uart4 {
-+	status = "okay";
-+};
-+
-+&usdhc1 {
-+	status = "okay";
-+};
-+
- &usdhc2 {
- 	pinctrl-names = "default", "state_100mhz", "state_200mhz";
- 	pinctrl-0 = <&pinctrl_cubox_i_usdhc2_aux &pinctrl_cubox_i_usdhc2>;
-diff --git a/arch/arm/boot/dts/imx6qdl-microsom.dtsi b/arch/arm/boot/dts/imx6qdl-microsom.dtsi
-index d729d0b15f25..a5d72895d9ce 100644
---- a/arch/arm/boot/dts/imx6qdl-microsom.dtsi
-+++ b/arch/arm/boot/dts/imx6qdl-microsom.dtsi
-@@ -1,9 +1,69 @@
- /*
-  * Copyright (C) 2013,2014 Russell King
-  */
-+#include <dt-bindings/gpio/gpio.h>
-+/ {
-+	regulators {
-+		compatible = "simple-bus";
-+
-+		reg_brcm_osc: brcm-osc-reg {
-+			compatible = "regulator-fixed";
-+			enable-active-high;
-+			gpio = <&gpio5 5 0>;
-+			pinctrl-names = "default";
-+			pinctrl-0 = <&pinctrl_microsom_brcm_osc_reg>;
-+			regulator-name = "brcm_osc_reg";
-+			regulator-min-microvolt = <3300000>;
-+			regulator-max-microvolt = <3300000>;
-+			regulator-always-on;
-+			regulator-boot-on;
-+		};
-+
-+		reg_brcm: brcm-reg {
-+			compatible = "regulator-fixed";
-+			enable-active-high;
-+			gpio = <&gpio3 19 0>;
-+			pinctrl-names = "default";
-+			pinctrl-0 = <&pinctrl_microsom_brcm_reg>;
-+			regulator-name = "brcm_reg";
-+			regulator-min-microvolt = <3300000>;
-+			regulator-max-microvolt = <3300000>;
-+			startup-delay-us = <200000>;
-+		};
-+	};
-+};
- 
- &iomuxc {
- 	microsom {
-+		pinctrl_microsom_brcm_osc_reg: microsom-brcm-osc-reg {
-+			fsl,pins = <
-+				MX6QDL_PAD_DISP0_DAT11__GPIO5_IO05 0x40013070
-+			>;
-+		};
-+
-+		pinctrl_microsom_brcm_reg: microsom-brcm-reg {
-+			fsl,pins = <
-+				MX6QDL_PAD_EIM_D19__GPIO3_IO19 0x40013070
-+			>;
-+		};
-+
-+		pinctrl_microsom_brcm_wifi: microsom-brcm-wifi {
-+			fsl,pins = <
-+				MX6QDL_PAD_GPIO_8__XTALOSC_REF_CLK_32K	0x1b0b0
-+				MX6QDL_PAD_CSI0_DATA_EN__GPIO5_IO20	0x40013070
-+				MX6QDL_PAD_CSI0_DAT8__GPIO5_IO26	0x40013070
-+				MX6QDL_PAD_CSI0_DAT9__GPIO5_IO27	0x40013070
-+			>;
-+		};
-+
-+		pinctrl_microsom_brcm_bt: microsom-brcm-bt {
-+			fsl,pins = <
-+				MX6QDL_PAD_CSI0_DAT14__GPIO6_IO00	0x40013070
-+				MX6QDL_PAD_CSI0_DAT15__GPIO6_IO01	0x40013070
-+				MX6QDL_PAD_CSI0_DAT18__GPIO6_IO04	0x40013070
-+			>;
-+		};
-+
- 		pinctrl_microsom_uart1: microsom-uart1 {
- 			fsl,pins = <
- 				MX6QDL_PAD_CSI0_DAT10__UART1_TX_DATA	0x1b0b1
-@@ -11,6 +71,15 @@
- 			>;
- 		};
- 
-+		pinctrl_microsom_uart4_1: microsom-uart4 {
-+			fsl,pins = <
-+				MX6QDL_PAD_CSI0_DAT12__UART4_TX_DATA 0x1b0b1
-+				MX6QDL_PAD_CSI0_DAT13__UART4_RX_DATA 0x1b0b1
-+				MX6QDL_PAD_CSI0_DAT16__UART4_RTS_B 0x1b0b1
-+				MX6QDL_PAD_CSI0_DAT17__UART4_CTS_B 0x1b0b1
-+			>;
-+		};
-+
- 		pinctrl_microsom_usbotg: microsom-usbotg {
- 			/*
- 			 * Similar to pinctrl_usbotg_2, but we want it
-@@ -18,6 +87,17 @@
- 			 */
- 			fsl,pins = <MX6QDL_PAD_GPIO_1__USB_OTG_ID 0x13059>;
- 		};
-+
-+		pinctrl_microsom_usdhc1: microsom-usdhc1 {
-+			fsl,pins = <
-+				MX6QDL_PAD_SD1_CMD__SD1_CMD    0x17059
-+				MX6QDL_PAD_SD1_CLK__SD1_CLK    0x10059
-+				MX6QDL_PAD_SD1_DAT0__SD1_DATA0 0x17059
-+				MX6QDL_PAD_SD1_DAT1__SD1_DATA1 0x17059
-+				MX6QDL_PAD_SD1_DAT2__SD1_DATA2 0x17059
-+				MX6QDL_PAD_SD1_DAT3__SD1_DATA3 0x17059
-+			>;
-+		};
- 	};
- };
- 
-@@ -27,7 +107,25 @@
- 	status = "okay";
- };
- 
-+/* UART4 - Connected to optional BRCM Wifi/BT/FM */
-+&uart4 {
-+	pinctrl-names = "default";
-+	pinctrl-0 = <&pinctrl_microsom_brcm_bt &pinctrl_microsom_uart4_1>;
-+	fsl,uart-has-rtscts;
-+};
-+
- &usbotg {
- 	pinctrl-names = "default";
- 	pinctrl-0 = <&pinctrl_microsom_usbotg>;
- };
-+
-+/* USDHC1 - Connected to optional BRCM Wifi/BT/FM */
-+&usdhc1 {
-+	card-external-vcc-supply = <&reg_brcm>;
-+	card-reset-gpios = <&gpio5 26 GPIO_ACTIVE_LOW>, <&gpio6 0 GPIO_ACTIVE_LOW>;
-+	keep-power-in-suspend;
-+	non-removable;
-+	pinctrl-names = "default";
-+	pinctrl-0 = <&pinctrl_microsom_brcm_wifi &pinctrl_microsom_usdhc1>;
-+	vmmc-supply = <&reg_brcm>;
-+};
--- 
-1.8.3.1
+I didn't know which version you have checked.
+But I have known that mmc_of_parse() have already included at mmc-next repository.
+
+commit 6ca5c60605dde3420ce7fee6f93ec4a7c7924848
+Author: Jaehoon Chung <jh80.chung@gmail.com>
+Date:   Mon Mar 3 11:36:41 2014 +0900
+
+    mmc: dw_mmc: use the mmc_of_parse() instead of local parser
+
+    mmc_of_parse() have been already parsed the general capability.
+    Didn't need to use the local parser.
+
+    Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+    Acked-by: Seungwon Jeon <tgih.jun@samsung.com>
+    Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+    Signed-off-by: Chris Ball <chris@printf.net>
+
+Could you check it, plz?
+
+Best Regards,
+Jaehoon Chung
+
+On 04/24/2014 04:09 AM, Russell King wrote:
+> From: Olof Johansson <olof@lixom.net>
+> 
+> The shared of parse function fills in common options for capabilities,
+> etc, but it needs to be called from each driver that wants to make use
+> of it. dw_mmc was missing the call.
+> 
+> Signed-off-by: Olof Johansson <olof@lixom.net>
+> Signed-off-by: Russell King <rmk+kernel@arm.linux.org.uk>
+> ---
+>  drivers/mmc/host/dw_mmc.c | 2 ++
+>  1 file changed, 2 insertions(+)
+> 
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index cced599d5aeb..a2c12ebb376e 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -2140,6 +2140,8 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
+>  	if (!mmc)
+>  		return -ENOMEM;
+>  
+> +	mmc_of_parse(mmc);
+> +
+>  	slot = mmc_priv(mmc);
+>  	slot->id = id;
+>  	slot->mmc = mmc;
+> 
 
