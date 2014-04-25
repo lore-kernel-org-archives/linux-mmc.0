@@ -1,72 +1,42 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2] mmc: core: Try other signal levels during power up
-Date: Fri, 25 Apr 2014 10:16:40 +0200
-Message-ID: <CAPDyKFqUs+tq1+5xPLAjZrmTb1DjkLdVKzXs+-o1NH=b4HH-jQ@mail.gmail.com>
-References: <1398375866-8898-1-git-send-email-tim.kryger@linaro.org>
+From: Russell King - ARM Linux <linux@arm.linux.org.uk>
+Subject: Re: [PATCH 00/38] MMC updates, plus CuBox-i WiFi support
+Date: Fri, 25 Apr 2014 10:03:43 +0100
+Message-ID: <20140425090343.GH26756@n2100.arm.linux.org.uk>
+References: <20140423185534.GA26756@n2100.arm.linux.org.uk> <CAPDyKFozP69yngKAkdwHYyyvi+pdLEm05udOmBiVshQFi4hnLQ@mail.gmail.com> <20140424101726.GH26756@n2100.arm.linux.org.uk> <CAPDyKFrGReKF0ucer7D195boEoQW26=4vDXT+=Wn6BO-p_B1gQ@mail.gmail.com> <20140424105745.GM26756@n2100.arm.linux.org.uk> <CAPDyKFr=2=dg1NTYb1_EAgxXZq2Rd+o2Q2B5TE+GZwr8MUU1_Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qc0-f175.google.com ([209.85.216.175]:42839 "EHLO
-	mail-qc0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752457AbaDYIQl (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 25 Apr 2014 04:16:41 -0400
-Received: by mail-qc0-f175.google.com with SMTP id e16so3637477qcx.6
-        for <linux-mmc@vger.kernel.org>; Fri, 25 Apr 2014 01:16:40 -0700 (PDT)
-In-Reply-To: <1398375866-8898-1-git-send-email-tim.kryger@linaro.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-doc-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <CAPDyKFr=2=dg1NTYb1_EAgxXZq2Rd+o2Q2B5TE+GZwr8MUU1_Q@mail.gmail.com>
+Sender: linux-doc-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Chris Ball <chris@printf.net>, Anton Vorontsov <anton@enomsg.org>, Barry Song <baohua@kernel.org>, Ben Dooks <ben-linux@fluff.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Jaehoon Chung <jh80.chung@samsung.com>, Kumar Gala <galak@codeaurora.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, linux-doc@vger.kernel.org, linux-mmc <linux-mmc@vger.kernel.org>, linuxppc-dev@lists.ozlabs.org, "linux-tegra@vger.kernel.org" <linux-tegra@vger.kernel.org>, Mark Rutland <mark.rutland@arm.com>, Michal Simek <michal.simek@xilinx.com>, Pawel Moll <pawel.moll@arm.com>, Randy Dunlap <rdunlap@infradead.org>, Rob Herring <robh+dt@kernel.org>, Sascha Hauer <kernel@pengutronix.de>, Seungwon Jeon <tgih.jun@samsung.com>, Shawn Guo <shawn.guo@freescale.com>, spear-devel@list.st.com, Stephe
 List-Id: linux-mmc@vger.kernel.org
-To: Tim Kryger <tim.kryger@linaro.org>
-Cc: Chris Ball <chris@printf.net>, Linux MMC <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 
-On 24 April 2014 23:44, Tim Kryger <tim.kryger@linaro.org> wrote:
-> The eMMC signalling voltage is determined by VCCQ which is provided to
-> the card by the host.  Signalling is not required to begin at 3.3v and,
-> if the host and card both support a particular VCC/VCCQ combination, it
-> can be used immediately.
->
-> In contrast, SD Cards must begin with 3.3v signalling and may switch to
-> a lower voltage signalling if instructed to do so in CMD11.  A message
-> is required to coordinate this operation because the card only receives
-> a 3.3v VDD and must know when to use the 1.8v produced by its internal
-> regulator.
->
-> It makes sense for the core to begin with 3.3v signalling but when that
-> can't be set, 1.8v and 1.2v signalling also should be attempted.  This
-> is especially important when an external regulator with a limited range
-> is used to supply VCCQ to an eMMC part.
->
-> Signed-off-by: Tim Kryger <tim.kryger@linaro.org>
+On Thu, Apr 24, 2014 at 01:13:05PM +0200, Ulf Hansson wrote:
+> On 24 April 2014 12:57, Russell King - ARM Linux <linux@arm.linux.org.uk> wrote:
+> > This is nothing new or unexpected - it was last posted back in February,
+> > and I elected that it should be held off until after the last merge
+> > window.
+> >
+> > Unfortunately, I didn't have time to post it immediately after the merge
+> > window closed, partly because it needed to be rebased on top of tglx's
+> > IRQ changes on which it depends.  I was carrying those as separate commits
+> > to the ones Thomas was carrying in his tree - and in the event, Thomas had
+> > modified his patches slightly between sending me copies of them and the
+> > versions he sent during the merge window.
+> 
+> Okay, so let's keep up the frequency here then. I only had some minor
+> comments, please fix them and send a v2.
 
-Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
+Right, so I've updated the patches, and added one ack to one patch.
+That seems insufficient to me - the only platform these have been
+tested on is iMX6, which is sdhci-esdhc-imx.c.
 
-> ---
->
-> Changes since v1:
->   - Eliminated temporary err variable and added debug output
->
->  drivers/mmc/core/core.c |    9 +++++++--
->  1 file changed, 7 insertions(+), 2 deletions(-)
->
-> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> index acbc3f2..72926a9 100644
-> --- a/drivers/mmc/core/core.c
-> +++ b/drivers/mmc/core/core.c
-> @@ -1533,8 +1533,13 @@ void mmc_power_up(struct mmc_host *host, u32 ocr)
->         host->ios.timing = MMC_TIMING_LEGACY;
->         mmc_set_ios(host);
->
-> -       /* Set signal voltage to 3.3V */
-> -       __mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_330);
-> +       /* Try to set signal voltage to 3.3V but fall back to 1.8v or 1.2v */
-> +       if (__mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_330) == 0)
-> +               dev_dbg(mmc_dev(host), "Initial signal voltage of 3.3v\n");
-> +       else if (__mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_180) == 0)
-> +               dev_dbg(mmc_dev(host), "Initial signal voltage of 1.8v\n");
-> +       else if (__mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_120) == 0)
-> +               dev_dbg(mmc_dev(host), "Initial signal voltage of 1.2v\n");
->
->         /*
->          * This delay should be sufficient to allow the power supply
-> --
-> 1.7.9.5
->
+They _really_ need testing elsewhere too.  Or is the plan to merge
+them and then see about getting people to test them and fix them up
+afterwards?
+
+-- 
+FTTC broadband for 0.8mile line: now at 9.7Mbps down 460kbps up... slowly
+improving, and getting towards what was expected from it.
