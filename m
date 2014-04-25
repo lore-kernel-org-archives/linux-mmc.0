@@ -1,67 +1,146 @@
 From: Russell King <rmk+kernel@arm.linux.org.uk>
-Subject: [PATCH 27/32] mmc: sdhci: remove platform_suspend/platform_resume
- callbacks
-Date: Fri, 25 Apr 2014 14:26:58 +0100
-Message-ID: <E1Wdg9a-00080c-Gi@rmk-PC.arm.linux.org.uk>
+Subject: [PATCH 29/32] mmc: sdhci: move regulator handling into
+ sdhci_set_power()
+Date: Fri, 25 Apr 2014 14:27:08 +0100
+Message-ID: <E1Wdg9k-00080k-NW@rmk-PC.arm.linux.org.uk>
 References: <20140425132245.GO26756@n2100.arm.linux.org.uk>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from gw-1.arm.linux.org.uk ([78.32.30.217]:50687 "EHLO
+Received: from gw-1.arm.linux.org.uk ([78.32.30.217]:50699 "EHLO
 	pandora.arm.linux.org.uk" rhost-flags-OK-OK-OK-FAIL)
-	by vger.kernel.org with ESMTP id S1753677AbaDYN1C (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 25 Apr 2014 09:27:02 -0400
+	by vger.kernel.org with ESMTP id S1751311AbaDYN1N (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 25 Apr 2014 09:27:13 -0400
 In-Reply-To: <20140425132245.GO26756@n2100.arm.linux.org.uk>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Chris Ball <chris@printf.net>, linux-mmc@vger.kernel.org, Markus Pargmann <mpa@pengutronix.de>
 Cc: Ulf Hansson <ulf.hansson@linaro.org>
 
-The only user (sdhci-of-esdhc) no longer uses these callbacks, so lets
-remove them to discourage any further use.
+Move the regulator handling into sdhci_set_power() rather than being in
+sdhci_do_set_ios().  This wraps all power control up into this function.
 
-Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
 Signed-off-by: Russell King <rmk+kernel@arm.linux.org.uk>
 ---
- drivers/mmc/host/sdhci.c | 6 ------
- drivers/mmc/host/sdhci.h | 2 --
- 2 files changed, 8 deletions(-)
+ drivers/mmc/host/sdhci.c | 72 +++++++++++++++++++++++-------------------------
+ 1 file changed, 35 insertions(+), 37 deletions(-)
 
 diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index e5e9f2139f77..02d43765ddd5 100644
+index 02d43765ddd5..95604e09a00d 100644
 --- a/drivers/mmc/host/sdhci.c
 +++ b/drivers/mmc/host/sdhci.c
-@@ -2541,9 +2541,6 @@ EXPORT_SYMBOL_GPL(sdhci_disable_irq_wakeups);
+@@ -1216,7 +1216,7 @@ void sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
+ }
+ EXPORT_SYMBOL_GPL(sdhci_set_clock);
  
- int sdhci_suspend_host(struct sdhci_host *host)
+-static int sdhci_set_power(struct sdhci_host *host, unsigned short power)
++static void sdhci_set_power(struct sdhci_host *host, unsigned short power)
  {
--	if (host->ops->platform_suspend)
--		host->ops->platform_suspend(host);
+ 	u8 pwr = 0;
+ 
+@@ -1239,7 +1239,7 @@ static int sdhci_set_power(struct sdhci_host *host, unsigned short power)
+ 	}
+ 
+ 	if (host->pwr == pwr)
+-		return -1;
++		return;
+ 
+ 	host->pwr = pwr;
+ 
+@@ -1247,38 +1247,43 @@ static int sdhci_set_power(struct sdhci_host *host, unsigned short power)
+ 		sdhci_writeb(host, 0, SDHCI_POWER_CONTROL);
+ 		if (host->quirks2 & SDHCI_QUIRK2_CARD_ON_NEEDS_BUS_ON)
+ 			sdhci_runtime_pm_bus_off(host);
+-		return 0;
+-	}
 -
- 	sdhci_disable_card_detection(host);
+-	/*
+-	 * Spec says that we should clear the power reg before setting
+-	 * a new value. Some controllers don't seem to like this though.
+-	 */
+-	if (!(host->quirks & SDHCI_QUIRK_SINGLE_POWER_WRITE))
+-		sdhci_writeb(host, 0, SDHCI_POWER_CONTROL);
++		power = 0;
++	} else {
++		/*
++		 * Spec says that we should clear the power reg before setting
++		 * a new value. Some controllers don't seem to like this though.
++		 */
++		if (!(host->quirks & SDHCI_QUIRK_SINGLE_POWER_WRITE))
++			sdhci_writeb(host, 0, SDHCI_POWER_CONTROL);
  
- 	/* Disable tuning since we are suspending */
-@@ -2600,9 +2597,6 @@ int sdhci_resume_host(struct sdhci_host *host)
+-	/*
+-	 * At least the Marvell CaFe chip gets confused if we set the voltage
+-	 * and set turn on power at the same time, so set the voltage first.
+-	 */
+-	if (host->quirks & SDHCI_QUIRK_NO_SIMULT_VDD_AND_POWER)
+-		sdhci_writeb(host, pwr, SDHCI_POWER_CONTROL);
++		/*
++		 * At least the Marvell CaFe chip gets confused if we set the
++		 * voltage and set turn on power at the same time, so set the
++		 * voltage first.
++		 */
++		if (host->quirks & SDHCI_QUIRK_NO_SIMULT_VDD_AND_POWER)
++			sdhci_writeb(host, pwr, SDHCI_POWER_CONTROL);
  
- 	sdhci_enable_card_detection(host);
+-	pwr |= SDHCI_POWER_ON;
++		pwr |= SDHCI_POWER_ON;
  
--	if (host->ops->platform_resume)
--		host->ops->platform_resume(host);
+-	sdhci_writeb(host, pwr, SDHCI_POWER_CONTROL);
++		sdhci_writeb(host, pwr, SDHCI_POWER_CONTROL);
+ 
+-	if (host->quirks2 & SDHCI_QUIRK2_CARD_ON_NEEDS_BUS_ON)
+-		sdhci_runtime_pm_bus_on(host);
++		if (host->quirks2 & SDHCI_QUIRK2_CARD_ON_NEEDS_BUS_ON)
++			sdhci_runtime_pm_bus_on(host);
+ 
+-	/*
+-	 * Some controllers need an extra 10ms delay of 10ms before they
+-	 * can apply clock after applying power
+-	 */
+-	if (host->quirks & SDHCI_QUIRK_DELAY_AFTER_POWER)
+-		mdelay(10);
++		/*
++		 * Some controllers need an extra 10ms delay of 10ms before
++		 * they can apply clock after applying power
++		 */
++		if (host->quirks & SDHCI_QUIRK_DELAY_AFTER_POWER)
++			mdelay(10);
++	}
+ 
+-	return power;
++	if (host->vmmc) {
++		spin_unlock_irq(&host->lock);
++		mmc_regulator_set_ocr(host->mmc, host->vmmc, power);
++		spin_lock_irq(&host->lock);
++	}
+ }
+ 
+ /*****************************************************************************\
+@@ -1428,7 +1433,6 @@ EXPORT_SYMBOL_GPL(sdhci_set_uhs_signaling);
+ static void sdhci_do_set_ios(struct sdhci_host *host, struct mmc_ios *ios)
+ {
+ 	unsigned long flags;
+-	int vdd_bit = -1;
+ 	u8 ctrl;
+ 
+ 	spin_lock_irqsave(&host->lock, flags);
+@@ -1460,15 +1464,9 @@ static void sdhci_do_set_ios(struct sdhci_host *host, struct mmc_ios *ios)
+ 	}
+ 
+ 	if (ios->power_mode == MMC_POWER_OFF)
+-		vdd_bit = sdhci_set_power(host, -1);
++		sdhci_set_power(host, -1);
+ 	else
+-		vdd_bit = sdhci_set_power(host, ios->vdd);
 -
- 	/* Set the re-tuning expiration flag */
- 	if (host->flags & SDHCI_USING_RETUNING_TIMER)
- 		host->flags |= SDHCI_NEEDS_RETUNING;
-diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index 7a35395e5f56..4a5cd5e3fa3e 100644
---- a/drivers/mmc/host/sdhci.h
-+++ b/drivers/mmc/host/sdhci.h
-@@ -289,8 +289,6 @@ struct sdhci_ops {
- 	int	(*platform_execute_tuning)(struct sdhci_host *host, u32 opcode);
- 	void	(*set_uhs_signaling)(struct sdhci_host *host, unsigned int uhs);
- 	void	(*hw_reset)(struct sdhci_host *host);
--	void	(*platform_suspend)(struct sdhci_host *host);
--	void	(*platform_resume)(struct sdhci_host *host);
- 	void    (*adma_workaround)(struct sdhci_host *host, u32 intmask);
- 	void	(*platform_init)(struct sdhci_host *host);
- 	void    (*card_event)(struct sdhci_host *host);
+-	if (host->vmmc && vdd_bit != -1) {
+-		spin_unlock_irqrestore(&host->lock, flags);
+-		mmc_regulator_set_ocr(host->mmc, host->vmmc, vdd_bit);
+-		spin_lock_irqsave(&host->lock, flags);
+-	}
++		sdhci_set_power(host, ios->vdd);
+ 
+ 	if (host->ops->platform_send_init_74_clocks)
+ 		host->ops->platform_send_init_74_clocks(host, ios->power_mode);
 -- 
 1.8.3.1
 
