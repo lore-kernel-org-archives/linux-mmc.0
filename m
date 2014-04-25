@@ -1,76 +1,92 @@
-From: Tim Kryger <tim.kryger@linaro.org>
-Subject: [PATCH RESEND] mmc: core: Improve support for deferred regulators
-Date: Fri, 25 Apr 2014 11:40:11 -0700
-Message-ID: <1398451211-19693-1-git-send-email-tim.kryger@linaro.org>
+From: Andrew Bresticker <abrestic@chromium.org>
+Subject: Re: [PATCH RESEND] mmc: core: Improve support for deferred regulators
+Date: Fri, 25 Apr 2014 14:33:35 -0700
+Message-ID: <CAL1qeaFFpVNRBqmS4j1Vx1-NKX3VjJuDrVNYTsT91nB_bQ7HJA@mail.gmail.com>
+References: <1398451211-19693-1-git-send-email-tim.kryger@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-gw3-out.broadcom.com ([216.31.210.64]:37904 "EHLO
-	mail-gw3-out.broadcom.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751333AbaDYSkm (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 25 Apr 2014 14:40:42 -0400
+Received: from mail-ve0-f170.google.com ([209.85.128.170]:51530 "EHLO
+	mail-ve0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751757AbaDYVdg (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 25 Apr 2014 17:33:36 -0400
+Received: by mail-ve0-f170.google.com with SMTP id pa12so5408739veb.15
+        for <linux-mmc@vger.kernel.org>; Fri, 25 Apr 2014 14:33:35 -0700 (PDT)
+In-Reply-To: <1398451211-19693-1-git-send-email-tim.kryger@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Tim Kryger <tim.kryger@linaro.org>, Mike Looijmans <mike.looijmans@topic.nl>, Andrew Bresticker <abrestic@chromium.org>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+To: Tim Kryger <tim.kryger@linaro.org>
+Cc: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Mike Looijmans <mike.looijmans@topic.nl>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 
-It is important that callers of mmc_regulator_get_supply know if either
-vmmc or vqmmc are present but not yet available.  To support this need,
-modify this function to return zero except when either of the regulator
-get operations fail with -EPROBE_DEFER.  Current callers don't check the
-return value and may continue to use IS_ERR on the vmmc/vqmmc values to
-determine if those regulators are available.  Furthermore, since all of
-these callers are capable of dealing with absent regulators, switch over
-to use the non-optional variety of the regulator get call.
+Hi Tim,
 
-Signed-off-by: Tim Kryger <tim.kryger@linaro.org>
----
- drivers/mmc/core/core.c |   27 +++++++++++++++++----------
- 1 file changed, 17 insertions(+), 10 deletions(-)
+> It is important that callers of mmc_regulator_get_supply know if either
+> vmmc or vqmmc are present but not yet available.  To support this need,
+> modify this function to return zero except when either of the regulator
+> get operations fail with -EPROBE_DEFER.  Current callers don't check the
+> return value and may continue to use IS_ERR on the vmmc/vqmmc values to
+> determine if those regulators are available.  Furthermore, since all of
+> these callers are capable of dealing with absent regulators, switch over
+> to use the non-optional variety of the regulator get call.
+>
+> Signed-off-by: Tim Kryger <tim.kryger@linaro.org>
+> ---
+>  drivers/mmc/core/core.c |   27 +++++++++++++++++----------
+>  1 file changed, 17 insertions(+), 10 deletions(-)
+>
+> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> index acbc3f2..095eef0 100644
+> --- a/drivers/mmc/core/core.c
+> +++ b/drivers/mmc/core/core.c
+> @@ -1313,21 +1313,28 @@ EXPORT_SYMBOL_GPL(mmc_regulator_set_ocr);
+>  int mmc_regulator_get_supply(struct mmc_host *mmc)
+>  {
+>         struct device *dev = mmc_dev(mmc);
+> -       struct regulator *supply;
+>         int ret;
+>
+> -       supply = devm_regulator_get(dev, "vmmc");
+> -       mmc->supply.vmmc = supply;
+> +       mmc->supply.vmmc = devm_regulator_get_optional(dev, "vmmc");
+>         mmc->supply.vqmmc = devm_regulator_get_optional(dev, "vqmmc");
+>
+> -       if (IS_ERR(supply))
+> -               return PTR_ERR(supply);
+> +       if (IS_ERR(mmc->supply.vmmc)) {
+> +               if (PTR_ERR(mmc->supply.vmmc) == -EPROBE_DEFER)
+> +                       return -EPROBE_DEFER;
+> +               dev_info(dev, "No vmmc regulator found\n");
+> +       } else {
+> +               ret = mmc_regulator_get_ocrmask(mmc->supply.vmmc);
+> +               if (ret > 0)
+> +                       mmc->ocr_avail = ret;
+> +               else
+> +                       dev_warn(dev, "Failed getting OCR mask: %d\n", ret);
+> +       }
 
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index acbc3f2..095eef0 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -1313,21 +1313,28 @@ EXPORT_SYMBOL_GPL(mmc_regulator_set_ocr);
- int mmc_regulator_get_supply(struct mmc_host *mmc)
- {
- 	struct device *dev = mmc_dev(mmc);
--	struct regulator *supply;
- 	int ret;
- 
--	supply = devm_regulator_get(dev, "vmmc");
--	mmc->supply.vmmc = supply;
-+	mmc->supply.vmmc = devm_regulator_get_optional(dev, "vmmc");
- 	mmc->supply.vqmmc = devm_regulator_get_optional(dev, "vqmmc");
- 
--	if (IS_ERR(supply))
--		return PTR_ERR(supply);
-+	if (IS_ERR(mmc->supply.vmmc)) {
-+		if (PTR_ERR(mmc->supply.vmmc) == -EPROBE_DEFER)
-+			return -EPROBE_DEFER;
-+		dev_info(dev, "No vmmc regulator found\n");
-+	} else {
-+		ret = mmc_regulator_get_ocrmask(mmc->supply.vmmc);
-+		if (ret > 0)
-+			mmc->ocr_avail = ret;
-+		else
-+			dev_warn(dev, "Failed getting OCR mask: %d\n", ret);
-+	}
- 
--	ret = mmc_regulator_get_ocrmask(supply);
--	if (ret > 0)
--		mmc->ocr_avail = ret;
--	else
--		dev_warn(mmc_dev(mmc), "Failed getting OCR mask: %d\n", ret);
-+	if (IS_ERR(mmc->supply.vqmmc)) {
-+		if (PTR_ERR(mmc->supply.vqmmc) == -EPROBE_DEFER)
-+			return -EPROBE_DEFER;
-+		dev_info(dev, "No vqmmc regulator found\n");
-+	}
- 
- 	return 0;
- }
--- 
-1.7.9.5
+I think we also need to handle the case where supply is NULL, i.e.
+!CONFIG_REGULATOR.  The SDHCI driver, for example, calls
+regulator_is_supported_voltage() which will always return false on
+NULL regulators.  Perhaps we should set the supplies to
+ERR_PTR(-ENODEV) in that case?
 
+Thanks,
+Andrew
+
+>
+> -       ret = mmc_regulator_get_ocrmask(supply);
+> -       if (ret > 0)
+> -               mmc->ocr_avail = ret;
+> -       else
+> -               dev_warn(mmc_dev(mmc), "Failed getting OCR mask: %d\n", ret);
+> +       if (IS_ERR(mmc->supply.vqmmc)) {
+> +               if (PTR_ERR(mmc->supply.vqmmc) == -EPROBE_DEFER)
+> +                       return -EPROBE_DEFER;
+> +               dev_info(dev, "No vqmmc regulator found\n");
+> +       }
+>
+>         return 0;
+>  }
+> --
+> 1.7.9.5
+>
