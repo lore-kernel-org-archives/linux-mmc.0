@@ -1,13 +1,13 @@
 From: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: [PATCH v9 07/17] ARM: dts: sun5i: Add mmc controller nodes
-Date: Sat, 26 Apr 2014 12:16:11 +0200
-Message-ID: <1398507381-5614-8-git-send-email-hdegoede@redhat.com>
+Subject: [PATCH v9 08/17] ARM: dts: sun5i: Add pin-muxing info
+ for the mmc controllers
+Date: Sat, 26 Apr 2014 12:16:12 +0200
+Message-ID: <1398507381-5614-9-git-send-email-hdegoede@redhat.com>
 References: <1398507381-5614-1-git-send-email-hdegoede@redhat.com>
 Reply-To: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
-Return-path: <linux-sunxi+bncBDRZXY4CYYORBEMP52NAKGQEWWT736Y-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-sunxi+bncBDRZXY4CYYORBE4P52NAKGQERR3STFI-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
 In-Reply-To: <1398507381-5614-1-git-send-email-hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Post: <http://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
 List-Help: <http://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
@@ -19,93 +19,57 @@ To: Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, Ulf Hansson <ulf
 Cc: =?UTF-8?q?David=20Lanzend=C3=B6rfer?= <david.lanzendoerfer-Z7Kmv9EsliU@public.gmane.org>, Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, devicetree <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-From: David Lanzend=C3=B6rfer <david.lanzendoerfer-Z7Kmv9EsliU@public.gmane.org>
+This adds  pin-muxing info for the mmc controller / port combinations which
+are known to be used on actual boards.
 
-Add nodes for the 3 mmc controllers found on A10s SoCs and for the 2 mmc
-controllers found on A13 SoCs.
-
-Signed-off-by: David Lanzend=C3=B6rfer <david.lanzendoerfer-Z7Kmv9EsliU@public.gmane.org>
 Signed-off-by: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 ---
- arch/arm/boot/dts/sun5i-a10s.dtsi | 27 +++++++++++++++++++++++++++
- arch/arm/boot/dts/sun5i-a13.dtsi  | 18 ++++++++++++++++++
- 2 files changed, 45 insertions(+)
+ arch/arm/boot/dts/sun5i-a10s.dtsi | 14 ++++++++++++++
+ arch/arm/boot/dts/sun5i-a13.dtsi  |  7 +++++++
+ 2 files changed, 21 insertions(+)
 
-diff --git a/arch/arm/boot/dts/sun5i-a10s.dtsi b/arch/arm/boot/dts/sun5i-a1=
-0s.dtsi
-index 79989ed..12113f9 100644
+diff --git a/arch/arm/boot/dts/sun5i-a10s.dtsi b/arch/arm/boot/dts/sun5i-a10s.dtsi
+index 12113f9..fb345c2 100644
 --- a/arch/arm/boot/dts/sun5i-a10s.dtsi
 +++ b/arch/arm/boot/dts/sun5i-a10s.dtsi
-@@ -338,6 +338,33 @@
- 			#size-cells =3D <0>;
+@@ -478,6 +478,20 @@
+ 				allwinner,drive = <0>;
+ 				allwinner,pull = <0>;
+ 			};
++
++			mmc0_pins_a: mmc0@0 {
++				allwinner,pins = "PF0","PF1","PF2","PF3","PF4","PF5";
++				allwinner,function = "mmc0";
++				allwinner,drive = <2>;
++				allwinner,pull = <0>;
++			};
++
++			mmc1_pins_a: mmc1@0 {
++				allwinner,pins = "PG3","PG4","PG5","PG6","PG7","PG8";
++				allwinner,function = "mmc1";
++				allwinner,drive = <2>;
++				allwinner,pull = <0>;
++			};
  		};
-=20
-+		mmc0: mmc@01c0f000 {
-+			compatible =3D "allwinner,sun5i-a13-mmc";
-+			reg =3D <0x01c0f000 0x1000>;
-+			clocks =3D <&ahb_gates 8>, <&mmc0_clk>;
-+			clock-names =3D "ahb", "mod";
-+			interrupts =3D <32>;
-+			status =3D "disabled";
-+		};
-+
-+		mmc1: mmc@01c10000 {
-+			compatible =3D "allwinner,sun5i-a13-mmc";
-+			reg =3D <0x01c10000 0x1000>;
-+			clocks =3D <&ahb_gates 9>, <&mmc1_clk>;
-+			clock-names =3D "ahb", "mod";
-+			interrupts =3D <33>;
-+			status =3D "disabled";
-+		};
-+
-+		mmc2: mmc@01c11000 {
-+			compatible =3D "allwinner,sun5i-a13-mmc";
-+			reg =3D <0x01c11000 0x1000>;
-+			clocks =3D <&ahb_gates 10>, <&mmc2_clk>;
-+			clock-names =3D "ahb", "mod";
-+			interrupts =3D <34>;
-+			status =3D "disabled";
-+		};
-+
- 		usbphy: phy@01c13400 {
- 			#phy-cells =3D <1>;
- 			compatible =3D "allwinner,sun5i-a13-usb-phy";
-diff --git a/arch/arm/boot/dts/sun5i-a13.dtsi b/arch/arm/boot/dts/sun5i-a13=
-.dtsi
-index f01c315..a0e55e8 100644
+ 
+ 		timer@01c20c00 {
+diff --git a/arch/arm/boot/dts/sun5i-a13.dtsi b/arch/arm/boot/dts/sun5i-a13.dtsi
+index a0e55e8..48ffa51 100644
 --- a/arch/arm/boot/dts/sun5i-a13.dtsi
 +++ b/arch/arm/boot/dts/sun5i-a13.dtsi
-@@ -320,6 +320,24 @@
- 			#size-cells =3D <0>;
+@@ -433,6 +433,13 @@
+ 				allwinner,drive = <0>;
+ 				allwinner,pull = <0>;
+ 			};
++
++			mmc0_pins_a: mmc0@0 {
++				allwinner,pins = "PF0","PF1","PF2","PF3","PF4","PF5";
++				allwinner,function = "mmc0";
++				allwinner,drive = <2>;
++				allwinner,pull = <0>;
++			};
  		};
-=20
-+		mmc0: mmc@01c0f000 {
-+			compatible =3D "allwinner,sun5i-a13-mmc";
-+			reg =3D <0x01c0f000 0x1000>;
-+			clocks =3D <&ahb_gates 8>, <&mmc0_clk>;
-+			clock-names =3D "ahb", "mod";
-+			interrupts =3D <32>;
-+			status =3D "disabled";
-+		};
-+
-+		mmc2: mmc@01c11000 {
-+			compatible =3D "allwinner,sun5i-a13-mmc";
-+			reg =3D <0x01c11000 0x1000>;
-+			clocks =3D <&ahb_gates 10>, <&mmc2_clk>;
-+			clock-names =3D "ahb", "mod";
-+			interrupts =3D <34>;
-+			status =3D "disabled";
-+		};
-+
- 		usbphy: phy@01c13400 {
- 			#phy-cells =3D <1>;
- 			compatible =3D "allwinner,sun5i-a13-usb-phy";
---=20
+ 
+ 		timer@01c20c00 {
+-- 
 1.9.0
-
---=20
-You received this message because you are subscribed to the Google Groups "=
-linux-sunxi" group.
-To unsubscribe from this group and stop receiving emails from it, send an e=
-mail to linux-sunxi+unsubscribe-/JYPxA39Uh5TLH3MbocFF+G/Ez6ZCGd0@public.gmane.org
-For more options, visit https://groups.google.com/d/optout.
