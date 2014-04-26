@@ -1,92 +1,117 @@
-From: Andrew Bresticker <abrestic@chromium.org>
-Subject: Re: [PATCH RESEND] mmc: core: Improve support for deferred regulators
-Date: Fri, 25 Apr 2014 14:33:35 -0700
-Message-ID: <CAL1qeaFFpVNRBqmS4j1Vx1-NKX3VjJuDrVNYTsT91nB_bQ7HJA@mail.gmail.com>
-References: <1398451211-19693-1-git-send-email-tim.kryger@linaro.org>
+From: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: [PATCH v9 00/17] ARM: sunxi: Add driver for SD/MMC
+ hosts found on Allwinner sunxi SoCs
+Date: Sat, 26 Apr 2014 12:16:04 +0200
+Message-ID: <1398507381-5614-1-git-send-email-hdegoede@redhat.com>
+Reply-To: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ve0-f170.google.com ([209.85.128.170]:51530 "EHLO
-	mail-ve0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751757AbaDYVdg (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 25 Apr 2014 17:33:36 -0400
-Received: by mail-ve0-f170.google.com with SMTP id pa12so5408739veb.15
-        for <linux-mmc@vger.kernel.org>; Fri, 25 Apr 2014 14:33:35 -0700 (PDT)
-In-Reply-To: <1398451211-19693-1-git-send-email-tim.kryger@linaro.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Transfer-Encoding: quoted-printable
+Return-path: <linux-sunxi+bncBDRZXY4CYYORBAMP52NAKGQE5HJCP4A-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Post: <http://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Help: <http://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Archive: <http://groups.google.com/group/linux-sunxi>
+Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+List-Subscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Unsubscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+To: Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Emilio Lopez <emilio-0Z03zUJReD5OxF6Tv1QG9Q@public.gmane.org>, Mike Turquette <mturquette-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+Cc: =?UTF-8?q?David=20Lanzend=C3=B6rfer?= <david.lanzendoerfer-Z7Kmv9EsliU@public.gmane.org>, Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, devicetree <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Tim Kryger <tim.kryger@linaro.org>
-Cc: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Mike Looijmans <mike.looijmans@topic.nl>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 
-Hi Tim,
+Hi All,
 
-> It is important that callers of mmc_regulator_get_supply know if either
-> vmmc or vqmmc are present but not yet available.  To support this need,
-> modify this function to return zero except when either of the regulator
-> get operations fail with -EPROBE_DEFER.  Current callers don't check the
-> return value and may continue to use IS_ERR on the vmmc/vqmmc values to
-> determine if those regulators are available.  Furthermore, since all of
-> these callers are capable of dealing with absent regulators, switch over
-> to use the non-optional variety of the regulator get call.
->
-> Signed-off-by: Tim Kryger <tim.kryger@linaro.org>
-> ---
->  drivers/mmc/core/core.c |   27 +++++++++++++++++----------
->  1 file changed, 17 insertions(+), 10 deletions(-)
->
-> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> index acbc3f2..095eef0 100644
-> --- a/drivers/mmc/core/core.c
-> +++ b/drivers/mmc/core/core.c
-> @@ -1313,21 +1313,28 @@ EXPORT_SYMBOL_GPL(mmc_regulator_set_ocr);
->  int mmc_regulator_get_supply(struct mmc_host *mmc)
->  {
->         struct device *dev = mmc_dev(mmc);
-> -       struct regulator *supply;
->         int ret;
->
-> -       supply = devm_regulator_get(dev, "vmmc");
-> -       mmc->supply.vmmc = supply;
-> +       mmc->supply.vmmc = devm_regulator_get_optional(dev, "vmmc");
->         mmc->supply.vqmmc = devm_regulator_get_optional(dev, "vqmmc");
->
-> -       if (IS_ERR(supply))
-> -               return PTR_ERR(supply);
-> +       if (IS_ERR(mmc->supply.vmmc)) {
-> +               if (PTR_ERR(mmc->supply.vmmc) == -EPROBE_DEFER)
-> +                       return -EPROBE_DEFER;
-> +               dev_info(dev, "No vmmc regulator found\n");
-> +       } else {
-> +               ret = mmc_regulator_get_ocrmask(mmc->supply.vmmc);
-> +               if (ret > 0)
-> +                       mmc->ocr_avail = ret;
-> +               else
-> +                       dev_warn(dev, "Failed getting OCR mask: %d\n", ret);
-> +       }
+Here is v9 of the sunxi-mmc patch-set David Lanzend=C3=B6rfer and I have be=
+en
+working on, this has some minor changes since v8, the plan for upstreaming =
+is
+still the same:
 
-I think we also need to handle the case where supply is NULL, i.e.
-!CONFIG_REGULATOR.  The SDHCI driver, for example, calls
-regulator_is_supported_voltage() which will always return false on
-NULL regulators.  Perhaps we should set the supplies to
-ERR_PTR(-ENODEV) in that case?
+The first 2 patches are depenencies which should go in through the clk tree=
+,
+Mike can you pick these 2 up please ?  :
 
-Thanks,
-Andrew
+"clk: sunxi: factors: automatic reparenting support"
+Is uncontroversial and has been favorably reviewed by various people.
 
->
-> -       ret = mmc_regulator_get_ocrmask(supply);
-> -       if (ret > 0)
-> -               mmc->ocr_avail = ret;
-> -       else
-> -               dev_warn(mmc_dev(mmc), "Failed getting OCR mask: %d\n", ret);
-> +       if (IS_ERR(mmc->supply.vqmmc)) {
-> +               if (PTR_ERR(mmc->supply.vqmmc) == -EPROBE_DEFER)
-> +                       return -EPROBE_DEFER;
-> +               dev_info(dev, "No vqmmc regulator found\n");
-> +       }
->
->         return 0;
->  }
-> --
-> 1.7.9.5
->
+"clk: sunxi: Implement MMC phase control"
+Is somewhat more controversial as there has been lots of discussion about
+adding a generic phase control method to the clk framework. The problem is
+that there has been a lot of talk about such a generic phase control method
+but not a single patch. Therefor I would like to move forwards with using
+a platform specific method for now. I hereby promise that once we've a gene=
+ric
+method I'll write patches to convert the sunxi code to that method.
+
+The third patch is the patch adding the actual mmc driver and should go in
+through the mmc tree.
+
+All the other patches are devicetree patches hooking things up, and should
+go upstream through Maxime's sunxi-dt tree.
+
+Changes since v1:
+-Using mmc_of_parse instead of diy dt parsing
+-Adding nodes for all mmc controller to the dtsi files,
+ including sofar unused controllers
+-Using generic GPIO slot library for WP/CD
+-Adding additional MMC device nodes into DTSI files
+
+Changes since v2:
+-Add missing Signed-off-by tags
+-Stop using __raw_readl / __raw_writel so that barriers are properly used
+-Adding missing new lines
+-Adding missing patch for automatic reparenting of clocks
+
+Changes since v3:
+-Move clk_enable / disable into host_init / exit (Hans)
+-Fix hang on boot caused by irq storm (Hans)
+
+Changes since v4:
+-moving sunxi-mci.{c/h} to sunxi-mmc.{c/h}
+-removing camel cases from the defines in  sunxi-mmc.h
+-moving defines out of the struct definition
+ since this is bad coding style
+-adding documentation for the device tree binding
+Changes since v5:
+-adding host initialization for when the sdio irq is enabled
+ (just to make sure having a defined state at all time)
+-add mmc support fixup: set pullup on cd pins
+-fixup: Don't set MMC_CAP_NEEDS_POLL /  MMC_CAP_4_BIT_DATA
+
+Changes since v6:
+-fixing copyright info in sunxi-mmc.*
+-s/__SUNXI_MCI_H__/__SUNXI_MMC_H__/g
+-s/SDXC_RESPONSE_/SDXC_RESP_/g
+-s/define/definitions <- Comment from Priit Laes
+
+Changes since v7:
+-Merge sunxi-mmc.h into sunxi-mmc.c
+-Various style fixes / cleanups based on Maxime's review
+-sun6i support
+-Fix a race condition in interrupt / tasklet interaction
+-Split the dts patches into 3 per platform:
+ 1) Add mmc nodes to the dtsi
+ 2) Add mmc pinmux to the dtsi
+ 3) Add mmc nodes to the various board files
+-Moved setting of bus-width and cd gpio polarity from .dtsi to the board-fi=
+les
+-Added sun6i dts patches
+
+Changes since v8:
+-Don't claim MMC_CAP_SDIO_IRQ by default, sdio-irq support appears to not
+ always be reliable. Can be re-added to the caps on a per board basis
+ through dts
+-Added EXPORT_SYMBOL(clk_sunxi_mmc_phase_control)
+-Moved bus-width and cd-inverted dts attributes for sun6i from dtsi to dts
+-Squashed patches adding sun6i-a31-m9.dts and mmc support for m9 together
+-Added a patch enabling the sdio wifi on the cubietruck in dts
+
+Regards,
+
+Hans
+
+--=20
+You received this message because you are subscribed to the Google Groups "=
+linux-sunxi" group.
+To unsubscribe from this group and stop receiving emails from it, send an e=
+mail to linux-sunxi+unsubscribe-/JYPxA39Uh5TLH3MbocFF+G/Ez6ZCGd0@public.gmane.org
+For more options, visit https://groups.google.com/d/optout.
