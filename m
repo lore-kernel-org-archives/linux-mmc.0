@@ -1,97 +1,127 @@
-From: Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>
-Subject: [PATCH RESEND 0/3] Orion irqchip and Kirkwood SDIO
-Date: Sat, 26 Apr 2014 21:34:12 +0200
-Message-ID: <1398540855-27367-1-git-send-email-sebastian.hesselbarth@gmail.com>
+From: Axel Lin <axel.lin@ingics.com>
+Subject: [RESEND][PATCH] mmc: wmt-sdmmc: Fix settting BM_EIGHTBIT_MODE bit
+ in wmt_mci_set_ios()
+Date: Sun, 27 Apr 2014 18:22:51 +0800
+Message-ID: <1398594171.6291.2.camel@phoenix>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>
-Cc: Andrew Lunn <andrew@lunn.ch>, Ulf Hansson <ulf.hansson@linaro.org>, Jason Cooper <jason@lakedaemon.net>, Nicolas Pitre <nico@fluxnic.net>, linux-mmc@vger.kernel.org, Chris Ball <chris@printf.net>, linux-kernel@vger.kernel.org, Gregory Clement <gregory.clement@free-electrons.com>, Thomas Gleixner <tglx@linutronix.de>, linux-arm-kernel@lists.infradead.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-vc0-f177.google.com ([209.85.220.177]:62750 "EHLO
+	mail-vc0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753331AbaD0KW6 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 27 Apr 2014 06:22:58 -0400
+Received: by mail-vc0-f177.google.com with SMTP id if17so6681184vcb.8
+        for <linux-mmc@vger.kernel.org>; Sun, 27 Apr 2014 03:22:57 -0700 (PDT)
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Tony Prisk <linux@prisktech.co.nz>, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org
 
-Guys,
+For MMC_BUS_WIDTH_8 case, current code missed setting BM_EIGHTBIT_MODE bit.
+Also has a small refactor to make the code looks better in readability.
 
-we somehow forgot this patch set, which was aimed for v3.12/v3.13
-and first sent and acked in November 2013 [1]. Now this is rebase on
-to v3.15-rc1 and should be taken for v3.16.
+So the bit settings witch below logic:
 
-In contrast to the original patch set, I reordered the individual
-patches by subsystem and made some cosmetic but no functional changes.
+SDMMC_BUSMODE register:
+Set EIGHTBIT_MODE bit for 8 bit mode, Set FOURBIT_MODE bit for 4 bit mode.
+Clear both EIGHTBIT_MODE and FOURBIT_MODE bits for 1 bit mode.
 
->From the original patch set:
+SDMMC_EXTCTRL register:
+Set EXT_EIGHTBIT bit for 8 bit mode, Clear EXT_EIGHTBIT bit for 1/4 bit mode.
 
-This patch set tries to deal with a minor irq issue seen on Marvell
-Kirkwood SoCs with irqchip/irq-orion and mvsdio drivers. In contrast
-to non-DT irq handling, irqchip driver does handle irqs a little bit
-different. First of all, it reads irq cause register once and works
-through all bits set while non-DT irq handling read irq cause and
-handled only one irq. Second, irqchip reverses irq priorities by
-using ffs() instead of fls().
-This now, seems to trigger a minor ip design issue in sdio peripheral
-where sdio irq can occur upstream while sdio interrupts are all
-disabled in the ip registers. This extra, unexpected irq does neither
-harm correct function of HW nor SW driver but triggers a warning in
-mvsdio irq handler.
+Add define for EXT_EIGHTBIT to avoid using magic number.
+BM_ONEBIT_MASK is no longer used, thus remove it.
 
-I have tried to debug this and can say that the sequence of irq
-related events is:
-(a) sdio irq is set in upstream irq
-(b) generic-chip handler masks sdio irq
-(c) sdio irq handler deals with it,
-    acks and disables all peripheral irq registers
-(d) sdio irq cause is cleared
-(e) generic-chip handler unmasks sdio irq
-(f) sdio irq is set in upstream irq and cleared little later
-(g) sdio irq handler is upset about being called with no irq to handle
+This patch is untested due to lack of platform with 8-bit hardware.
+However since the code is there, it's good to make the code match the document.
 
-This patch set is actually three independent patches in one as mvsdio
-irq workaround just motivates irqchip handling changes. The third just
-silences a noisy mvsdio dev_notice down to dev_dbg. I have chosen to
-keep them together anyway. Below is a more detailed description of the
-individual patches.
-
-First patch silences a card detect mechanism related dev_notice to
-dev_dbg to not bother users with that.
-
-Second patch works around the spurious irq issue in mvsdio by bailing
-out of the irq handler early, if peripheral irq registers indicate that
-none should have been fired.
-
-Third patch reverses irq handling priority for irqchip driver to what
-non-DT irq did before by using fls() instead of ffs(). The "read cause
-once, work through all irqs" handling is maintained.
-
-[1] https://lkml.org/lkml/2013/11/15/276
-
-Sebastian Hesselbarth (3):
-  mmc: mvsdio: silence card detect notice
-  mmc: mvsdio: workaround for spurious irqs
-  irqchip: orion: reverse irq handling priority
-
- drivers/irqchip/irq-orion.c |  4 ++--
- drivers/mmc/host/mvsdio.c   | 20 +++++++++++++++++---
- 2 files changed, 19 insertions(+), 5 deletions(-)
-
+Signed-off-by: Axel Lin <axel.lin@ingics.com>
 ---
-Cc: Nicolas Pitre <nico@fluxnic.net>
-Cc: Chris Ball <chris@printf.net>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Jason Cooper <jason@lakedaemon.net>
-Cc: Andrew Lunn <andrew@lunn.ch>
-Cc: Gregory Clement <gregory.clement@free-electrons.com>
-Cc: Thomas Gleixner <tglx@linutronix.de>
-Cc: linux-mmc@vger.kernel.org
-Cc: linux-arm-kernel@lists.infradead.org
-Cc: linux-kernel@vger.kernel.org
+This patch was sent on:
+http://www.spinics.net/lists/linux-mmc/msg22926.html
+The document (wm8505 sdmmc controller suppliment.pdf) is available at:
+https://groups.google.com/group/vt8500-wm8505-linux-kernel/attach/ac3d5037e860a34/wm8505%20sdmmc%20controller%20suppliment.pdf?part=4&authuser=1
+
+Regards,
+Axel
+
+ drivers/mmc/host/wmt-sdmmc.c | 31 +++++++++++++++----------------
+ 1 file changed, 15 insertions(+), 16 deletions(-)
+
+diff --git a/drivers/mmc/host/wmt-sdmmc.c b/drivers/mmc/host/wmt-sdmmc.c
+index 8a48a50..6ed18f8 100644
+--- a/drivers/mmc/host/wmt-sdmmc.c
++++ b/drivers/mmc/host/wmt-sdmmc.c
+@@ -72,7 +72,6 @@
+ #define BM_SPI_CS			0x20
+ #define BM_SD_POWER			0x40
+ #define BM_SOFT_RESET			0x80
+-#define BM_ONEBIT_MASK			0xFD
+ 
+ /* SDMMC_BLKLEN bit fields */
+ #define BLKL_CRCERR_ABORT		0x0800
+@@ -120,6 +119,8 @@
+ #define STS2_DATARSP_BUSY		0x20
+ #define STS2_DIS_FORCECLK		0x80
+ 
++/* SDMMC_EXTCTRL bit fields */
++#define EXT_EIGHTBIT			0x04
+ 
+ /* MMC/SD DMA Controller Registers */
+ #define SDDMA_GCR			0x100
+@@ -672,7 +673,7 @@ static void wmt_mci_request(struct mmc_host *mmc, struct mmc_request *req)
+ static void wmt_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ {
+ 	struct wmt_mci_priv *priv;
+-	u32 reg_tmp;
++	u32 busmode, extctrl;
+ 
+ 	priv = mmc_priv(mmc);
+ 
+@@ -687,28 +688,26 @@ static void wmt_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 	if (ios->clock != 0)
+ 		clk_set_rate(priv->clk_sdmmc, ios->clock);
+ 
++	busmode = readb(priv->sdmmc_base + SDMMC_BUSMODE);
++	extctrl = readb(priv->sdmmc_base + SDMMC_EXTCTRL);
++
++	busmode &= ~(BM_EIGHTBIT_MODE | BM_FOURBIT_MODE);
++	extctrl &= ~EXT_EIGHTBIT;
++
+ 	switch (ios->bus_width) {
+ 	case MMC_BUS_WIDTH_8:
+-		reg_tmp = readb(priv->sdmmc_base + SDMMC_EXTCTRL);
+-		writeb(reg_tmp | 0x04, priv->sdmmc_base + SDMMC_EXTCTRL);
++		busmode |= BM_EIGHTBIT_MODE;
++		extctrl |= EXT_EIGHTBIT;
+ 		break;
+ 	case MMC_BUS_WIDTH_4:
+-		reg_tmp = readb(priv->sdmmc_base + SDMMC_BUSMODE);
+-		writeb(reg_tmp | BM_FOURBIT_MODE, priv->sdmmc_base +
+-		       SDMMC_BUSMODE);
+-
+-		reg_tmp = readb(priv->sdmmc_base + SDMMC_EXTCTRL);
+-		writeb(reg_tmp & 0xFB, priv->sdmmc_base + SDMMC_EXTCTRL);
++		busmode |= BM_FOURBIT_MODE;
+ 		break;
+ 	case MMC_BUS_WIDTH_1:
+-		reg_tmp = readb(priv->sdmmc_base + SDMMC_BUSMODE);
+-		writeb(reg_tmp & BM_ONEBIT_MASK, priv->sdmmc_base +
+-		       SDMMC_BUSMODE);
+-
+-		reg_tmp = readb(priv->sdmmc_base + SDMMC_EXTCTRL);
+-		writeb(reg_tmp & 0xFB, priv->sdmmc_base + SDMMC_EXTCTRL);
+ 		break;
+ 	}
++
++	writeb(busmode, priv->sdmmc_base + SDMMC_BUSMODE);
++	writeb(extctrl, priv->sdmmc_base + SDMMC_EXTCTRL);
+ }
+ 
+ static int wmt_mci_get_ro(struct mmc_host *mmc)
 -- 
-1.9.1
+1.8.1.2
+
+
+
