@@ -1,17 +1,17 @@
 From: Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
-Subject: Re: [PATCH v9 01/17] clk: sunxi: factors: automatic
- reparenting support
-Date: Mon, 28 Apr 2014 12:34:01 -0700
-Message-ID: <20140428193401.GH3134@lukather>
+Subject: Re: [PATCH v9 08/17] ARM: dts: sun5i: Add pin-muxing
+ info for the mmc controllers
+Date: Mon, 28 Apr 2014 12:32:46 -0700
+Message-ID: <20140428193246.GG3134@lukather>
 References: <1398507381-5614-1-git-send-email-hdegoede@redhat.com>
- <1398507381-5614-2-git-send-email-hdegoede@redhat.com>
+ <1398507381-5614-9-git-send-email-hdegoede@redhat.com>
 Reply-To: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
 Mime-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="hAW+M2+FUO+onfmf"
-Return-path: <linux-sunxi+bncBD2ZNBF5VYJRBIO37KNAKGQEUUJDZKA-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+	protocol="application/pgp-signature"; boundary="/i8j2F0k9BYX4qLc"
+Return-path: <linux-sunxi+bncBD2ZNBF5VYJRBHO37KNAKGQEDUHZ6LI-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <1398507381-5614-2-git-send-email-hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+In-Reply-To: <1398507381-5614-9-git-send-email-hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Post: <http://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
 List-Help: <http://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
 List-Archive: <http://groups.google.com/group/linux-sunxi>
@@ -23,23 +23,20 @@ Cc: Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, Ulf Hansson <ulf
 List-Id: linux-mmc@vger.kernel.org
 
 
---hAW+M2+FUO+onfmf
-Content-Type: text/plain; charset=iso-8859-1
+--/i8j2F0k9BYX4qLc
+Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
 Content-Transfer-Encoding: quoted-printable
 
-On Sat, Apr 26, 2014 at 12:16:05PM +0200, Hans de Goede wrote:
-> From: Emilio L=F3pez <emilio-0Z03zUJReD5OxF6Tv1QG9Q@public.gmane.org>
+On Sat, Apr 26, 2014 at 12:16:12PM +0200, Hans de Goede wrote:
+> This adds  pin-muxing info for the mmc controller / port combinations whi=
+ch
+> are known to be used on actual boards.
 >=20
-> This commit implements .determine_rate, so that our factor clocks can be
-> reparented when needed.
->=20
-> Signed-off-by: Emilio L=F3pez <emilio-0Z03zUJReD5OxF6Tv1QG9Q@public.gmane.org>
 > Signed-off-by: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 
-Acked-by: Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
+Applied, thanks!
 
-Thanks!
 Maxime
 
 --=20
@@ -47,26 +44,26 @@ Maxime Ripard, Free Electrons
 Embedded Linux, Kernel and Android engineering
 http://free-electrons.com
 
---hAW+M2+FUO+onfmf
+--/i8j2F0k9BYX4qLc
 Content-Type: application/pgp-signature; name="signature.asc"
 Content-Description: Digital signature
 
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v1.4.14 (GNU/Linux)
 
-iQIcBAEBAgAGBQJTXq0pAAoJEBx+YmzsjxAgRp0QAIhb1pPID2aj5tZ87/aDR426
-uZfvzYeVAweFaBuQXcn2nY2yOQV0AoewDXHvXXqjkBTASFoQXFezrjni3vCy9RkL
-njajrDi/QEjmoDd0yP01sULJYs6uKy2ycCwNCsFRGQDxtm6OgtoePFyt8udw0Bxc
-uw1+DDIL/Az/Ca1ohWL0qYFZw495d1/HFITt/+7ED+Zjm0wrkX9165027bHjVwRV
-BoKOm/n4lB4yzjNUNcVcTomFXN/jB+2EpYuZglIAGtgLCW53r73WTkL5zHxIpjiz
-Gs/IOqY9T0/es+A1dvFkC37BWyHkKOvSfyYifSTE9SK65NV0TUgmY/AbzimKYo7j
-XNkKSDV+BX8c0ycMTvNM25Uh5vm0pDypYQDnYIA3D0AgTmGZ4EEDiZRFTQ8+OJV0
-KACd0FzOy79RdTzktK8tQU7jHT5OZhkTEN0zzbnhpx/38c3v06/AtaK/Xwr7S6Ut
-MHcq0J44ERSl2CKguBf/ijDBt8Ku7bwJquw+K6hGhlx02jbp/ODTE8cz+g1J+nzK
-VnfSNLOchtZmb9bOIPjsns2VHGy6kYCw7VSZ63kzyrPF84PXpNlwUk1CaFKb2XRV
-ftsRT1ponepTD3mc7YDayDuwJjJJDU0HWSpiwtNC2h/1wDf3Gzcxypk4oGlYJhH6
-uwI345Yr81Q+gLPUnmnE
-=d8vW
+iQIcBAEBAgAGBQJTXqzdAAoJEBx+YmzsjxAgwbEQAJthSKH1+paUb0T0Wg5dUbeW
+JG81mMh3FgNkS1EekBhwXzMNC31fNAd//Pq4Wocs4i040oga//YSwpXoOO11gGel
+H/y1+6VYEj9YwDzbP+jy8MMzXftHBjSVwe1jzv1t3QSG9s2nJhs4WQQQzRxQu8dK
+33gCE3odgcEFNEmg4kveLYKSx1rpSUUtu4c31Z/KzAz9mufMae511BdJCfmClb2v
+tCWeCUC80MPJW9KLdwBVbCwz9jrn2P7osnwQpFMCjqHem4ZZhFi3Ck8r83/5bCA2
+3ay83tAlCRHaXjLonNubZ7BHEuGKLnR6UQ9+DhnfhyEM/XfA7bUP6/NwPhf6FrEl
+TJo5mNKVzVEltD1aoixmwmoAkPAV7Dm7FopS+G1JeN4/Hj5wy+qJ3kYE7Y2mYDGK
+AFXu1byXN8Nh9s1KOZRy63dOkYWZaW12cVAqXz+/ZTsEXa4EmZInPVHuXghXj4mh
+dBL+IpQzVTOXw0tDzJ3pyjrttbMmm9oWdO0E2xpD9IIltZ2ds1IiWwWUBa+omiZX
+pFvpGjdDc5/Ei6Hf2hDtfev3wGmo/vPE3q4HjSxiizvkrSDbQ7UFIJIO0FmFqiHm
+0Nw0qBSKkZmRuQgcBrefZzLpe5Uu7quI31sSXSMWIwLb5bZ8reMKV9qJseAKl3Tn
+lIlAIo0t57m4Ojp8TKdD
+=fikm
 -----END PGP SIGNATURE-----
 
---hAW+M2+FUO+onfmf--
+--/i8j2F0k9BYX4qLc--
