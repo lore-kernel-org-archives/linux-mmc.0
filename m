@@ -1,308 +1,81 @@
-From: micky <micky_ching@realsil.com.cn>
-Subject: Re: [PATCH v2 2/2] mmc: rtsx: modify error handle and remove
- smatchwarnings
-Date: Mon, 28 Apr 2014 19:37:49 +0800
-Message-ID: <535E3D8D.3000309@realsil.com.cn>
-References: <cover.1395824147.git.micky_ching@realsil.com.cn>
- <2f71c814a30f26a0550f1132bd53a682338c44d3.1395824147.git.micky_ching@realsil.com.cn>
+From: Russell King - ARM Linux <linux@arm.linux.org.uk>
+Subject: Re: [PATCH 21/38] mmc: sdhci: hack up driver to make it more
+	compliant with UHS-1
+Date: Mon, 28 Apr 2014 12:51:07 +0100
+Message-ID: <20140428115107.GJ26756@n2100.arm.linux.org.uk>
+References: <20140423185534.GA26756@n2100.arm.linux.org.uk> <E1Wd2WT-0003vg-Ke@rmk-PC.arm.linux.org.uk> <20140425123820.GA15179@pengutronix.de> <CAPDyKFpja-dGwsEL6YP=Nn=YSRRgMzTTz6WVQ8DiUOMrkLJpBQ@mail.gmail.com> <20140428110259.GI26756@n2100.arm.linux.org.uk> <CAPDyKFpHoLbY4Li45UfPweJ0xKpa5E5d=YX+Sgz9pvRG4W2xiQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"; Format="flowed"
-Content-Transfer-Encoding: 7bit
-Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
-In-Reply-To: <2f71c814a30f26a0550f1132bd53a682338c44d3.1395824147.git.micky_ching@realsil.com.cn>
-List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
-List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel>
-List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
-List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
-List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
-Errors-To: driverdev-devel-bounces@linuxdriverproject.org
-Sender: driverdev-devel-bounces@linuxdriverproject.org
-To: chris@printf.net, sameo@linux.intel.com
-Cc: ulf.hansson@linaro.org, gregkh@linuxfoundation.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, wei_wang@realsil.com.cn, rogerable@realtek.com, devel@linuxdriverproject.org, dan.carpenter@oracle.com
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from gw-1.arm.linux.org.uk ([78.32.30.217]:54444 "EHLO
+	pandora.arm.linux.org.uk" rhost-flags-OK-OK-OK-FAIL)
+	by vger.kernel.org with ESMTP id S1751767AbaD1LwC (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 28 Apr 2014 07:52:02 -0400
+Content-Disposition: inline
+In-Reply-To: <CAPDyKFpHoLbY4Li45UfPweJ0xKpa5E5d=YX+Sgz9pvRG4W2xiQ@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Markus Pargmann <mpa@pengutronix.de>, Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 
-Hi Chris and Ulf,
+On Mon, Apr 28, 2014 at 01:11:20PM +0200, Ulf Hansson wrote:
+> On 28 April 2014 13:02, Russell King - ARM Linux <linux@arm.linux.org.uk> wrote:
+> > On Mon, Apr 28, 2014 at 12:50:54PM +0200, Ulf Hansson wrote:
+> >> On 25 April 2014 14:38, Markus Pargmann <mpa@pengutronix.de> wrote:
+> >> > Hi,
+> >> >
+> >> > On Wed, Apr 23, 2014 at 08:07:57PM +0100, Russell King wrote:
+> >> >> Patch suggested by Dong Aisheng <dongas86@gmail.com>, this avoids
+> >> >> additional clock start/stop cycles during the transition to 1.8V
+> >> >> signalling mode.
+> >> >>
+> >> >> Signed-off-by: Russell King <rmk+kernel@arm.linux.org.uk>
+> >> >
+> >> > I tested the series on imx6s with a RIoT board. With this patch applied
+> >> > the RIoT board emmc does not work. Here is the output of the board:
+> >>
+> >> Hi Markus,
+> >>
+> >> Thanks for helping out testing!
+> >>
+> >> Does that mean patch 1->20 works fine for you? May I add your tested-by tag?
+> >
+> > Why should _you_ add someone elses tested-by tag to _my_ patches?
+> >
+> > I still wonder whether you understood anything that I've already said to
+> > you about the handling of this patch set.
+> 
+> That was based upon that _I_ would help out in creating the pull
+> request to Chris, to minimize his effort in resolving conflicts.
+> 
+> All-right, I back off - I was just trying to help here. Please send
+> the pull request to Chris directly instead.
 
-This patch is denpend on commit c42deffd5b53c9e583d83c7964854ede2f12410d.
-<mmc: rtsx: add support for pre_req and post_req>, and we discard the 
-previous commit.
-we want discard this patch also(it it now in linux-next), need I send 
-another patch to
-revert or it will be discard automatically?
+I thought I clearly explained the logistics in a previous mail:
 
-Best Regards.
-micky.
-On 03/27/2014 01:35 PM, micky_ching@realsil.com.cn wrote:
-> From: Micky Ching <micky_ching@realsil.com.cn>
->
-> Using non-DMA dump-regs, which would be more exactly for DMA transfer failed.
->
-> More careful handle when cmd/data timeout, add stop(CMD12) cmd before go to
-> finish request when multi-rw timeout.
->
-> Remove some static checher warings.
-> on commit: <mmc: rtsx: add support for pre_req and post_req>
-> drivers/mmc/host/rtsx_pci_sdmmc.c:194 sd_finish_request()
-> error: we previously assumed 'mrq' could be null (see line 158)
-> drivers/mmc/host/rtsx_pci_sdmmc.c:504 sd_get_rsp()
-> error: we previously assumed 'cmd' could be null (see line 434)
-> drivers/mmc/host/rtsx_pci_sdmmc.c:525 sd_pre_dma_transfer()
-> warn: we tested 'next' before and it was 'false'
->
-> Signed-off-by: Micky Ching <micky_ching@realsil.com.cn>
-> ---
->   drivers/mmc/host/rtsx_pci_sdmmc.c |  119 ++++++++++++++++++++-----------------
->   1 file changed, 65 insertions(+), 54 deletions(-)
->
-> diff --git a/drivers/mmc/host/rtsx_pci_sdmmc.c b/drivers/mmc/host/rtsx_pci_sdmmc.c
-> index 0d8904a..453e1d4 100644
-> --- a/drivers/mmc/host/rtsx_pci_sdmmc.c
-> +++ b/drivers/mmc/host/rtsx_pci_sdmmc.c
-> @@ -81,25 +81,24 @@ static inline void sd_clear_error(struct realtek_pci_sdmmc *host)
->   }
->   
->   #ifdef DEBUG
-> +static inline void sd_print_reg(struct realtek_pci_sdmmc *host, u16 reg)
-> +{
-> +	u8 val = 0;
-> +
-> +	if (rtsx_pci_read_register(host->pcr, reg, &val) < 0)
-> +		dev_dbg(sdmmc_dev(host), "read 0x%04x failed\n", reg);
-> +	else
-> +		dev_dbg(sdmmc_dev(host), "0x%04X: 0x%02x\n", reg, val);
-> +}
-> +
->   static void sd_print_debug_regs(struct realtek_pci_sdmmc *host)
->   {
-> -	struct rtsx_pcr *pcr = host->pcr;
->   	u16 i;
-> -	u8 *ptr;
-> -
-> -	/* Print SD host internal registers */
-> -	rtsx_pci_init_cmd(pcr);
-> -	for (i = 0xFDA0; i <= 0xFDAE; i++)
-> -		rtsx_pci_add_cmd(pcr, READ_REG_CMD, i, 0, 0);
-> -	for (i = 0xFD52; i <= 0xFD69; i++)
-> -		rtsx_pci_add_cmd(pcr, READ_REG_CMD, i, 0, 0);
-> -	rtsx_pci_send_cmd(pcr, 100);
->   
-> -	ptr = rtsx_pci_get_cmd_data(pcr);
->   	for (i = 0xFDA0; i <= 0xFDAE; i++)
-> -		dev_dbg(sdmmc_dev(host), "0x%04X: 0x%02x\n", i, *(ptr++));
-> +		sd_print_reg(host, i);
->   	for (i = 0xFD52; i <= 0xFD69; i++)
-> -		dev_dbg(sdmmc_dev(host), "0x%04X: 0x%02x\n", i, *(ptr++));
-> +		sd_print_reg(host, i);
->   }
->   #else
->   #define sd_print_debug_regs(host)
-> @@ -125,19 +124,27 @@ static void sd_request_timeout(unsigned long host_addr)
->   	spin_lock_irqsave(&host->lock, flags);
->   
->   	if (!host->mrq) {
-> -		dev_err(sdmmc_dev(host), "error: no request exist\n");
-> -		goto out;
-> +		dev_err(sdmmc_dev(host), "error: request not exist\n");
-> +		spin_unlock_irqrestore(&host->lock, flags);
-> +		return;
->   	}
->   
-> -	if (host->cmd)
-> +	if (host->cmd && host->data)
-> +		dev_err(sdmmc_dev(host), "error: cmd and data conflict\n");
-> +
-> +	if (host->cmd) {
->   		host->cmd->error = -ETIMEDOUT;
-> -	if (host->data)
-> -		host->data->error = -ETIMEDOUT;
-> +		dev_dbg(sdmmc_dev(host), "timeout for cmd %d\n",
-> +			host->cmd->opcode);
-> +		tasklet_schedule(&host->cmd_tasklet);
-> +	}
->   
-> -	dev_dbg(sdmmc_dev(host), "timeout for request\n");
-> +	if (host->data) {
-> +		host->data->error = -ETIMEDOUT;
-> +		dev_dbg(sdmmc_dev(host), "timeout for data transfer\n");
-> +		tasklet_schedule(&host->data_tasklet);
-> +	}
->   
-> -out:
-> -	tasklet_schedule(&host->finish_tasklet);
->   	spin_unlock_irqrestore(&host->lock, flags);
->   }
->   
-> @@ -157,7 +164,8 @@ static void sd_finish_request(unsigned long host_addr)
->   	mrq = host->mrq;
->   	if (!mrq) {
->   		dev_err(sdmmc_dev(host), "error: no request need finish\n");
-> -		goto out;
-> +		spin_unlock_irqrestore(&host->lock, flags);
-> +		return;
->   	}
->   
->   	cmd = mrq->cmd;
-> @@ -167,11 +175,6 @@ static void sd_finish_request(unsigned long host_addr)
->   		(mrq->stop && mrq->stop->error) ||
->   		(cmd && cmd->error) || (data && data->error);
->   
-> -	if (any_error) {
-> -		rtsx_pci_stop_cmd(pcr);
-> -		sd_clear_error(host);
-> -	}
-> -
->   	if (data) {
->   		if (any_error)
->   			data->bytes_xfered = 0;
-> @@ -188,7 +191,6 @@ static void sd_finish_request(unsigned long host_addr)
->   	host->cmd = NULL;
->   	host->data = NULL;
->   
-> -out:
->   	spin_unlock_irqrestore(&host->lock, flags);
->   	mutex_unlock(&pcr->pcr_mutex);
->   	mmc_request_done(host->mmc, mrq);
-> @@ -373,8 +375,11 @@ static void sd_send_cmd(struct realtek_pci_sdmmc *host, struct mmc_command *cmd)
->   	if (cmd->opcode == SD_SWITCH_VOLTAGE) {
->   		err = rtsx_pci_write_register(pcr, SD_BUS_STAT,
->   				0xFF, SD_CLK_TOGGLE_EN);
-> -		if (err < 0)
-> +		if (err < 0) {
-> +			rtsx_pci_write_register(pcr, SD_BUS_STAT,
-> +				SD_CLK_TOGGLE_EN | SD_CLK_FORCE_STOP, 0);
->   			goto out;
-> +		}
->   	}
->   
->   	rtsx_pci_init_cmd(pcr);
-> @@ -436,7 +441,8 @@ static void sd_get_rsp(unsigned long host_addr)
->   
->   	if (!cmd) {
->   		dev_err(sdmmc_dev(host), "error: cmd not exist\n");
-> -		goto out;
-> +		spin_unlock_irqrestore(&host->lock, flags);
-> +		return;
->   	}
->   
->   	spin_lock(&pcr->lock);
-> @@ -446,16 +452,18 @@ static void sd_get_rsp(unsigned long host_addr)
->   		err = -EINVAL;
->   	spin_unlock(&pcr->lock);
->   
-> -	if (err < 0)
-> +	if (err < 0) {
-> +		rtsx_pci_stop_cmd(host->pcr);
-> +		sd_print_debug_regs(host);
-> +		sd_clear_error(host);
->   		goto out;
-> +	}
->   
->   	rsp_type = host->rsp_type;
->   	stat_idx = host->rsp_len;
->   
-> -	if (rsp_type == SD_RSP_TYPE_R0) {
-> -		err = 0;
-> +	if (rsp_type == SD_RSP_TYPE_R0)
->   		goto out;
-> -	}
->   
->   	/* Eliminate returned value of CHECK_REG_CMD */
->   	ptr = rtsx_pci_get_cmd_data(pcr) + 1;
-> @@ -498,14 +506,19 @@ static void sd_get_rsp(unsigned long host_addr)
->   		goto out;
->   
->   	if (cmd->data) {
-> -		sd_start_multi_rw(host, host->mrq);
-> +		err = sd_start_multi_rw(host, host->mrq);
-> +		if (err) {
-> +			cmd->data->error = err;
-> +			dev_err(sdmmc_dev(host),
-> +				"error: start data transfer failed\n");
-> +			tasklet_schedule(&host->data_tasklet);
-> +		}
->   		spin_unlock_irqrestore(&host->lock, flags);
->   		return;
->   	}
->   
->   out:
->   	cmd->error = err;
-> -
->   	tasklet_schedule(&host->finish_tasklet);
->   	spin_unlock_irqrestore(&host->lock, flags);
->   }
-> @@ -525,7 +538,7 @@ static int sd_pre_dma_transfer(struct realtek_pci_sdmmc *host,
->   		data->host_cookie = 0;
->   	}
->   
-> -	if (next || (!next && data->host_cookie != host->next_data.cookie))
-> +	if (next || data->host_cookie != host->next_data.cookie)
->   		sg_count = rtsx_pci_dma_map_sg(pcr,
->   				data->sg, data->sg_len, read);
->   	else
-> @@ -580,7 +593,6 @@ static int sd_start_multi_rw(struct realtek_pci_sdmmc *host,
->   	int uhs = mmc_card_uhs(card);
->   	int read = data->flags & MMC_DATA_READ;
->   	u8 cfg2, trans_mode;
-> -	int err;
->   	size_t data_len = data->blksz * data->blocks;
->   
->   	if (host->data)
-> @@ -641,12 +653,7 @@ static int sd_start_multi_rw(struct realtek_pci_sdmmc *host,
->   	mod_timer(&host->timer, jiffies + 10 * HZ);
->   	rtsx_pci_send_cmd_no_wait(pcr);
->   
-> -	err = rtsx_pci_dma_transfer(pcr, data->sg, host->sg_count, read);
-> -	if (err < 0) {
-> -		data->error = err;
-> -		tasklet_schedule(&host->finish_tasklet);
-> -	}
-> -	return 0;
-> +	return rtsx_pci_dma_transfer(pcr, data->sg, host->sg_count, read);
->   }
->   
->   static void sd_finish_multi_rw(unsigned long host_addr)
-> @@ -660,8 +667,9 @@ static void sd_finish_multi_rw(unsigned long host_addr)
->   	spin_lock_irqsave(&host->lock, flags);
->   
->   	if (!host->data) {
-> -		dev_err(sdmmc_dev(host), "error: no data exist\n");
-> -		goto out;
-> +		dev_err(sdmmc_dev(host), "error: data not exist\n");
-> +		spin_unlock_irqrestore(&host->lock, flags);
-> +		return;
->   	}
->   
->   	data = host->data;
-> @@ -672,19 +680,22 @@ static void sd_finish_multi_rw(unsigned long host_addr)
->   	else if (pcr->trans_result != TRANS_RESULT_OK)
->   		err = -EINVAL;
->   
-> -	if (err < 0) {
-> +	if (err < 0)
->   		data->error = err;
-> -		goto out;
-> +
-> +	if (data->error) {
-> +		rtsx_pci_stop_cmd(host->pcr);
-> +		sd_print_debug_regs(host);
-> +		sd_clear_error(host);
-> +		dev_dbg(sdmmc_dev(host), "data transfer failed %d\n",
-> +			data->error);
->   	}
->   
-> -	if (!host->mrq->sbc && data->stop) {
-> +	if (!host->mrq->sbc && data->stop)
->   		sd_send_cmd(host, data->stop);
-> -		spin_unlock_irqrestore(&host->lock, flags);
-> -		return;
-> -	}
-> +	else
-> +		tasklet_schedule(&host->finish_tasklet);
->   
-> -out:
-> -	tasklet_schedule(&host->finish_tasklet);
->   	spin_unlock_irqrestore(&host->lock, flags);
->   }
->   
+| I /could/ rebase it but then I wouldn't be able to produce the patch
+| sets/patches for others [*] (such as the Novena project) to derive
+| their kernel tree from my iMX6 patch set.
+| 
+| What I'd prefer is to keep the patch set intact, and provide Chris
+| with a pull request for it up to patch 33, which would need a
+| conflict fixed - and this would mean that I can be sure that what
+| I'm testing, and what I'm distributing is what Chris will also be
+| submitting.
+
+One of the problems with your approaches is that the commit IDs for
+the patches I'm carrying become different from the commit IDs which
+will end up being merged, which then means I have to either silently
+drop _my_ commits and hope that they've been merged intact, or I have
+to manually diff each patch and compare it with what's merged, or
+I have to rebase my patch set on top of what's merged and hope that
+git spots that the patches are already applied (which it won't do if
+there's other changes on top of them which make it non-obvious to git
+that they're applied.)
+
+To put it another way, recommitting these changes makes /more/ work
+for me in the long run because of how git works.
+
+-- 
+FTTC broadband for 0.8mile line: now at 9.7Mbps down 460kbps up... slowly
+improving, and getting towards what was expected from it.
