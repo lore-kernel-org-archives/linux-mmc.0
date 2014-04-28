@@ -1,19 +1,19 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH RESEND 1/3] mmc: mvsdio: silence card detect notice
-Date: Mon, 28 Apr 2014 13:02:19 +0200
-Message-ID: <CAPDyKFr+R0cV2gDxEV5j7Z1vpaz_XOkHjbgPN-JRF21Ymamdeg@mail.gmail.com>
+Subject: Re: [PATCH RESEND 2/3] mmc: mvsdio: workaround for spurious irqs
+Date: Mon, 28 Apr 2014 13:02:42 +0200
+Message-ID: <CAPDyKFrd0zeUy-Umm6GQ0oVonFU4VRcwGL5zYqVYmMSPeEmogg@mail.gmail.com>
 References: <1398540855-27367-1-git-send-email-sebastian.hesselbarth@gmail.com>
-	<1398540855-27367-2-git-send-email-sebastian.hesselbarth@gmail.com>
+	<1398540855-27367-3-git-send-email-sebastian.hesselbarth@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qa0-f45.google.com ([209.85.216.45]:36500 "EHLO
-	mail-qa0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754440AbaD1LCU (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 28 Apr 2014 07:02:20 -0400
-Received: by mail-qa0-f45.google.com with SMTP id cm18so6161999qab.32
-        for <linux-mmc@vger.kernel.org>; Mon, 28 Apr 2014 04:02:19 -0700 (PDT)
-In-Reply-To: <1398540855-27367-2-git-send-email-sebastian.hesselbarth@gmail.com>
+Received: from mail-qa0-f49.google.com ([209.85.216.49]:54578 "EHLO
+	mail-qa0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755212AbaD1LCn (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 28 Apr 2014 07:02:43 -0400
+Received: by mail-qa0-f49.google.com with SMTP id dc16so2831278qab.36
+        for <linux-mmc@vger.kernel.org>; Mon, 28 Apr 2014 04:02:42 -0700 (PDT)
+In-Reply-To: <1398540855-27367-3-git-send-email-sebastian.hesselbarth@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>
@@ -21,10 +21,11 @@ Cc: Nicolas Pitre <nico@fluxnic.net>, Chris Ball <chris@printf.net>, Jason Coope
 
 On 26 April 2014 21:34, Sebastian Hesselbarth
 <sebastian.hesselbarth@gmail.com> wrote:
-> mvsdio reports method of card detection with dev_notice, while for
-> removable cards it may be sane, for non-removable cards it is not.
-> Also, as the user cannot do anything about it, silence the message
-> by reducing it from dev_notice to dev_dbg.
+> SDIO controllers found on Marvell Kirkwood SoCs seem to cause a late,
+> spurious irq although all interrupts have been disabled. This irq
+> doesn't do any harm, neither to HW nor driver. To avoid some
+> "unexpected irq" warning later, we workaround above issue by bailing
+> out of irq handler early, if we didn't expect any.
 >
 > Signed-off-by: Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>
 > Acked-by: Jason Cooper <jason@lakedaemon.net>
@@ -42,27 +43,34 @@ On 26 April 2014 21:34, Sebastian Hesselbarth
 Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
 
 > ---
->  drivers/mmc/host/mvsdio.c | 6 +++---
->  1 file changed, 3 insertions(+), 3 deletions(-)
+>  drivers/mmc/host/mvsdio.c | 14 ++++++++++++++
+>  1 file changed, 14 insertions(+)
 >
 > diff --git a/drivers/mmc/host/mvsdio.c b/drivers/mmc/host/mvsdio.c
-> index 45aa2206741d..41aca7f28c23 100644
+> index 41aca7f28c23..9377284f8544 100644
 > --- a/drivers/mmc/host/mvsdio.c
 > +++ b/drivers/mmc/host/mvsdio.c
-> @@ -801,10 +801,10 @@ static int mvsd_probe(struct platform_device *pdev)
->                 goto out;
+> @@ -354,6 +354,20 @@ static irqreturn_t mvsd_irq(int irq, void *dev)
+>                 intr_status, mvsd_read(MVSD_NOR_INTR_EN),
+>                 mvsd_read(MVSD_HW_STATE));
 >
->         if (!(mmc->caps & MMC_CAP_NEEDS_POLL))
-> -               dev_notice(&pdev->dev, "using GPIO for card detection\n");
-> +               dev_dbg(&pdev->dev, "using GPIO for card detection\n");
->         else
-> -               dev_notice(&pdev->dev,
-> -                          "lacking card detect (fall back to polling)\n");
-> +               dev_dbg(&pdev->dev, "lacking card detect (fall back to polling)\n");
+> +       /*
+> +        * It looks like, SDIO IP can issue one late, spurious irq
+> +        * although all irqs should be disabled. To work around this,
+> +        * bail out early, if we didn't expect any irqs to occur.
+> +        */
+> +       if (!mvsd_read(MVSD_NOR_INTR_EN) && !mvsd_read(MVSD_ERR_INTR_EN)) {
+> +               dev_dbg(host->dev, "spurious irq detected intr 0x%04x intr_en 0x%04x erri 0x%04x erri_en 0x%04x\n",
+> +                       mvsd_read(MVSD_NOR_INTR_STATUS),
+> +                       mvsd_read(MVSD_NOR_INTR_EN),
+> +                       mvsd_read(MVSD_ERR_INTR_STATUS),
+> +                       mvsd_read(MVSD_ERR_INTR_EN));
+> +               return IRQ_HANDLED;
+> +       }
 > +
->         return 0;
+>         spin_lock(&host->lock);
 >
->  out:
+>         /* PIO handling, if needed. Messy business... */
 > --
 > 1.9.1
 >
