@@ -1,148 +1,109 @@
-From: Andreas Fenkart <afenkart@gmail.com>
-Subject: [PATCH v10 5/5] mmc: omap_hsmmc: Pin remux workaround to support SDIO interrupt on AM335x
-Date: Mon, 28 Apr 2014 09:41:00 +0200
-Message-ID: <1398670860-30695-6-git-send-email-afenkart@gmail.com>
-References: <1398670860-30695-1-git-send-email-afenkart@gmail.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ee0-f43.google.com ([74.125.83.43]:39261 "EHLO
-	mail-ee0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753981AbaD1Hmk (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 28 Apr 2014 03:42:40 -0400
-In-Reply-To: <1398670860-30695-1-git-send-email-afenkart@gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Sascha Hauer <s.hauer@pengutronix.de>
+Subject: Re: [PATCH] mmc: mxs: fix card detection function for broken card
+ detect
+Date: Mon, 28 Apr 2014 11:13:41 +0200
+Message-ID: <20140428091341.GA5918@pengutronix.de>
+References: <dec3cef26b7470cabfc11a83750a88db5b545a41.1397944151.git.daniel@totalueberwachung.de>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <dec3cef26b7470cabfc11a83750a88db5b545a41.1397944151.git.daniel@totalueberwachung.de>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Daniel Willmann <daniel@totalueberwachung.de>
+Cc: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Shawn Guo <shawn.guo@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Tony Lindgren <tony@atomide.com>
-Cc: Chris Ball <chris@printf.net>, Grant Likely <grant.likely@secretlab.ca>, Felipe Balbi <balbi@ti.com>, Balaji T K <balajitk@ti.com>, zonque@gmail.com, galak@codeaurora.org, linux-doc@vger.kernel.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, Andreas Fenkart <afenkart@gmail.com>
 
-The am335x can't detect pending cirq in PM runtime suspend.
-This patch reconfigures dat1 as a GPIO before going to suspend.
-SDIO interrupts are detected with the GPIO, the GPIO will only wake
-the module from suspend, SDIO irq detection will still happen through the
-IP block.
+On Sat, Apr 19, 2014 at 11:59:18PM +0200, Daniel Willmann wrote:
+> Return -ENOSYS in get_cd if broken-cd is specified in the device tree.
+> 
+> Commit a91fe279ae75 (mmc: mxs: use standard flag for broken card
+> detection) sets MMC_CAP_NEEDS_POLL when broken-cd is specified. This
+> driver sets this flag unconditionally as it does not support a card
+> detect interrupt. Instead, broken-cd means that there is no card detect
+> signal connected.
+> 
+> The mmc core checks the get_cd function return value to determine if a
+> card is present. Only for a non-zero return value it will attempt to
+> initialize the card. So retuning -ENOSYS will allow the card to be
+> initialized.
+> For comparison, mmc_gpio_get_cd in slot-gpio.c also returns -ENOSYS if
+> the card detect GPIO is not valid.
 
-Idea of remuxing the pins by Tony Lindgren. Code contributions from
-Tony Lindgren and Balaji T K <balajitk@ti.com>
+Short answer for fixing this regression:
 
-Signed-off-by: Andreas Fenkart <afenkart@gmail.com>
-Signed-off-by: Tony Lindgren <tony@atomide.com>
+Acked-by: Sascha Hauer <s.hauer@pengutronix.de>
 
-diff --git a/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt b/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
-index ce80561..4767cd1 100644
---- a/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
-+++ b/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
-@@ -56,3 +56,54 @@ Examples:
- 			&edma 25>;
- 		dma-names = "tx", "rx";
- 	};
-+
-+[workaround for missing swakeup on am33xx]
-+
-+This SOC is missing the swakeup line, it will not detect SDIO irq
-+while in suspend.
-+
-+                             ------
-+                             | PRCM |
-+                              ------
-+                               ^ |
-+                       swakeup | | fclk
-+                               | v
-+       ------                -------               -----
-+      | card | -- CIRQ -->  | hsmmc | -- IRQ -->  | CPU |
-+       ------                -------               -----
-+
-+In suspend the fclk is off and the module is disfunctional. Even
-+register reads will fail. A small logic in the host will request
-+fclk restore, when an external event is detected. Once the clock
-+is restored, the host detects the event normally. Since am33xx
-+doesn't have this line it never wakes from suspend.
-+
-+The workaround is to reconfigure the dat1 line as a GPIO upon
-+suspend. To make this work, we need to set 1) the named pinctrl
-+states "default", "idle" and "gpio_dat1", 2) the gpio detecting
-+sdio irq in suspend and 3) the compatibe section, see example below.
-+The MMC driver will then toggle between gpio_dat1 and default during
-+the runtime. If configuration is incomplete, a warning message is
-+emitted "falling back to polling". Mind not every application
-+needs SDIO irq, e.g. MMC cards Affected chips are am335x,
-+probably others
-+
-+
-+	mmc1: mmc@48060100 {
-+		compatible = "ti,am33xx-hsmmc";
-+		...
-+		interrupts-extended = <&intc 64 &gpio2 28 0>;
-+		...
-+		pinctrl-names = "default", "idle", "sleep", "gpio_dat1"
-+		pinctrl-0 = <&mmc1_pins>;
-+		pinctrl-1 = <&mmc1_idle>;
-+		pinctrl-2 = <&mmc1_sleep>;
-+		pinctrl-3 = <&mmc1_cirq_pin>;
-+		...
-+	};
-+
-+	mmc1_cirq_pin: pinmux_cirq_pin {
-+		pinctrl-single,pins = <
-+		        0x0f8 0x3f      /* GPIO2_28 */
-+		>;
-+	};
-diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index 9cc0d21..8661e1f 100644
---- a/drivers/mmc/host/omap_hsmmc.c
-+++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -213,7 +213,10 @@ struct omap_hsmmc_host {
- #define AUTO_CMD23		(1 << 0)        /* Auto CMD23 support */
- #define HSMMC_SDIO_IRQ_ENABLED	(1 << 1)        /* SDIO irq enabled */
- #define HSMMC_WAKE_IRQ_ENABLED	(1 << 2)
-+#define HSMMC_SWAKEUP_QUIRK	(1 << 3)
- 	struct omap_hsmmc_next	next_data;
-+	struct pinctrl		*pinctrl;
-+	struct pinctrl_state	*gpio_pinmux;
- 	struct	omap_mmc_platform_data	*pdata;
- };
- 
-@@ -1744,8 +1747,28 @@ static int omap_hsmmc_configure_wake_irq(struct omap_hsmmc_host *host)
- 	 * and need to remux SDIO DAT1 to GPIO for wake-up from idle.
- 	 */
- 	if (host->pdata->controller_flags & OMAP_HSMMC_SWAKEUP_MISSING) {
--		ret = -ENODEV;
--		goto err;
-+		if (IS_ERR(host->dev->pins->default_state)) {
-+			dev_info(host->dev, "missing default pinctrl state\n");
-+			ret = -EINVAL;
-+			goto err;
-+		}
-+
-+		host->pinctrl = devm_pinctrl_get(host->dev);
-+		if (IS_ERR(host->pinctrl)) {
-+			dev_warn(host->dev, "no pinctrl handle\n");
-+			ret = -ENODEV;
-+			goto err;
-+		}
-+
-+		host->gpio_pinmux = pinctrl_lookup_state(host->pinctrl,
-+							 "gpio_dat1");
-+		if (IS_ERR(host->gpio_pinmux)) {
-+			dev_info(host->dev, "missing \"gpio_dat1\" pinctrl state\n");
-+			ret = -ENODEV;
-+			goto err;
-+		}
-+
-+		host->flags |= HSMMC_SWAKEUP_QUIRK;
- 	}
- 
- 	devres_remove_group(host->dev, NULL);
-@@ -2438,7 +2461,10 @@ static int omap_hsmmc_runtime_suspend(struct device *dev)
- 			goto abort;
- 		}
- 
--		pinctrl_pm_select_idle_state(dev);
-+		if (host->flags & HSMMC_SWAKEUP_QUIRK)
-+			pinctrl_select_state(host->pinctrl, host->gpio_pinmux);
-+		else
-+			pinctrl_pm_select_idle_state(dev);
- 
- 		WARN_ON(host->flags & HSMMC_WAKE_IRQ_ENABLED);
- 		enable_irq(host->wake_irq);
+Long answer:
+
+This is broken in the MMC OF parser. When the parser finds the
+'broken-cd' property it just sets the MMC_CAP_NEEDS_POLL flag. This is
+wrong.  broken-cd means that we cannot rely on any card detection, but
+instead have to talk to the card to find out if it's available.
+Currently there is no flag to signal this situation, so the host driver
+has to handle this by returning true in the get_cd callback, just like
+the patch below does.
+
+IMO the correct solution would be to add a MMC_CAP_CD_NEEDS_TALK_TO_CARD
+flag to the core.
+
+Sascha
+
+> 
+> Signed-off-by: Daniel Willmann <daniel@totalueberwachung.de>
+> ---
+> This might be relevant for stable kernels. The patch was tested with 3.14.1 on
+> olinuxino nano.
+> 
+>  drivers/mmc/host/mxs-mmc.c | 7 +++++++
+>  1 file changed, 7 insertions(+)
+> 
+> diff --git a/drivers/mmc/host/mxs-mmc.c b/drivers/mmc/host/mxs-mmc.c
+> index 073e871a0fc8..babfea03ba8a 100644
+> --- a/drivers/mmc/host/mxs-mmc.c
+> +++ b/drivers/mmc/host/mxs-mmc.c
+> @@ -70,6 +70,7 @@ struct mxs_mmc_host {
+>  	unsigned char			bus_width;
+>  	spinlock_t			lock;
+>  	int				sdio_irq_en;
+> +	bool				broken_cd;
+>  };
+>  
+>  static int mxs_mmc_get_cd(struct mmc_host *mmc)
+> @@ -78,6 +79,9 @@ static int mxs_mmc_get_cd(struct mmc_host *mmc)
+>  	struct mxs_ssp *ssp = &host->ssp;
+>  	int present, ret;
+>  
+> +	if (host->broken_cd)
+> +		return -ENOSYS;
+> +
+>  	ret = mmc_gpio_get_cd(mmc);
+>  	if (ret >= 0)
+>  		return ret;
+> @@ -568,6 +572,7 @@ static int mxs_mmc_probe(struct platform_device *pdev)
+>  {
+>  	const struct of_device_id *of_id =
+>  			of_match_device(mxs_mmc_dt_ids, &pdev->dev);
+> +	struct device_node *np = pdev->dev.of_node;
+>  	struct mxs_mmc_host *host;
+>  	struct mmc_host *mmc;
+>  	struct resource *iores;
+> @@ -634,6 +639,8 @@ static int mxs_mmc_probe(struct platform_device *pdev)
+>  	mmc->caps = MMC_CAP_SD_HIGHSPEED | MMC_CAP_MMC_HIGHSPEED |
+>  		    MMC_CAP_SDIO_IRQ | MMC_CAP_NEEDS_POLL;
+>  
+> +	host->broken_cd = of_property_read_bool(np, "broken-cd");
+> +
+>  	mmc->f_min = 400000;
+>  	mmc->f_max = 288000000;
+>  
+> -- 
+> 1.8.4.2
+> 
+> 
+
 -- 
-1.7.10.4
-
+Pengutronix e.K.                           |                             |
+Industrial Linux Solutions                 | http://www.pengutronix.de/  |
+Peiner Str. 6-8, 31137 Hildesheim, Germany | Phone: +49-5121-206917-0    |
+Amtsgericht Hildesheim, HRA 2686           | Fax:   +49-5121-206917-5555 |
