@@ -1,62 +1,60 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: rtsx: Revert "mmc: rtsx: add support for pre_req and
- post_req"
-Date: Mon, 28 Apr 2014 16:11:30 +0200
-Message-ID: <CAPDyKFpRwGSgR1by+7TEa=Ec7cQ1v4qYhJuLkv785z2NxORBUQ@mail.gmail.com>
-References: <1398670584-26687-1-git-send-email-micky_ching@realsil.com.cn>
- <20140428105350.GM21279@lee--X1>
- <CAPDyKFr6kNjfE+adx_j05wes0Y1fg=zD-AwciWy0vQdw=DbOrg@mail.gmail.com>
- <20140428122918.GG21279@lee--X1>
+From: Phil Edworthy <phil.edworthy@renesas.com>
+Subject: RE: [PATCH v2] mmc: add a driver for the Renesas usdhi6rol0 SD/SDIO
+ host controller
+Date: Mon, 28 Apr 2014 15:02:46 +0000
+Message-ID: <a3075651ae064d2fb70073eb3472ede4@HKXPR06MB168.apcprd06.prod.outlook.com>
+References: <Pine.LNX.4.64.1404261404030.21367@axis700.grange>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
-In-Reply-To: <20140428122918.GG21279@lee--X1>
-List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
-List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel>
-List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
-List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
-List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
-Errors-To: driverdev-devel-bounces@linuxdriverproject.org
-Sender: driverdev-devel-bounces@linuxdriverproject.org
-To: Lee Jones <lee.jones@linaro.org>
-Cc: Samuel Ortiz <sameo@linux.intel.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Wei WANG <wei_wang@realsil.com.cn>, Roger <rogerable@realtek.com>, devel@linuxdriverproject.org, Dan Carpenter <dan.carpenter@oracle.com>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from relmlor4.renesas.com ([210.160.252.174]:5169 "EHLO
+	relmlie3.idc.renesas.com" rhost-flags-OK-OK-OK-FAIL)
+	by vger.kernel.org with ESMTP id S1756466AbaD1PCw convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 28 Apr 2014 11:02:52 -0400
+In-Reply-To: <Pine.LNX.4.64.1404261404030.21367@axis700.grange>
+Content-Language: en-US
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Cc: Chris Ball <chris@printf.net>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Rob Herring <robh+dt@kernel.org>, Grant Likely <grant.likely@linaro.org>
 
-T24gMjggQXByaWwgMjAxNCAxNDoyOSwgTGVlIEpvbmVzIDxsZWUuam9uZXNAbGluYXJvLm9yZz4g
-d3JvdGU6Cj4+ID4+IEZyb206IE1pY2t5IENoaW5nIDxtaWNreV9jaGluZ0ByZWFsc2lsLmNvbS5j
-bj4KPj4gPj4KPj4gPj4gVGhpcyByZXZlcnRzIGNvbW1pdCBjNDJkZWZmZDViNTNjOWU1ODNkODNj
-Nzk2NDg1NGVkZTJmMTI0MTBkLgo+PiA+Cj4+ID4gV2h5IHdhcyB0aGlzIHBhdGNoIGV2ZW4gbWVy
-Z2VkIHdpdGhvdXQgYW4gTUZEIEFjaz8KPj4gPgo+PiA+PiBjb21taXQgPG1tYzogcnRzeDogYWRk
-IHN1cHBvcnQgZm9yIHByZV9yZXEgYW5kIHBvc3RfcmVxPiBkaWQgdXNlCj4+ID4+IG11dGV4X3Vu
-bG9jaygpIGluIHRhc2tsZXQsIGJ1dCBtdXRleF91bmxvY2soKSBjYW4ndCB1c2VkIGluCj4+ID4+
-IHRhc2tsZXQoYXRvbWljIGNvbnRleHQpLiBUaGUgZHJpdmVyIG5lZWQgdXNlIG11dGV4IHRvIGF2
-b2lkIGNvbmN1cnJlbmN5LAo+PiA+PiBzbyB3ZSBjYW4ndCB1c2UgdGFza2xldCBoZXJlLCB0aGUg
-cGF0Y2ggbmVlZCB0byBiZSByZW1vdmVkLgo+PiA+Pgo+PiA+PiBUaGUgc3BpbmxvY2sgaG9zdC0+
-bG9jayBhbmQgcGNyLT5sb2NrIG1heSBkZWFkbG9jaywgb25lIHdheSB0byBzb2x2ZSB0aGUKPj4g
-Pj4gZGVhZGxvY2sgaXMgcmVtb3ZlIGhvc3QtPmxvY2sgaW4gc2RfaXNyX2RvbmVfdHJhbnNmZXIo
-KSwgYnV0IGlmIHVzaW5nCj4+ID4+IHdvcmtxdWV1ZSB0aGUgd2UgY2FuIGF2b2lkIHVzaW5nIHRo
-ZSBzcGlubG9jayBhbmQgYWxzbyBhdm9pZCB0aGUgcHJvYmxlbS4KPj4gPj4KPj4gPj4gU2lnbmVk
-LW9mZi1ieTogTWlja3kgQ2hpbmcgPG1pY2t5X2NoaW5nQHJlYWxzaWwuY29tLmNuPgo+PiA+PiAt
-LS0KPj4gPj4gIGRyaXZlcnMvbWZkL3J0c3hfcGNyLmMgICAgICAgICAgICB8ICAxMzIgKysrKy0t
-LS0tLS0tCj4+ID4+ICBkcml2ZXJzL21tYy9ob3N0L3J0c3hfcGNpX3NkbW1jLmMgfCAgNDE4ICsr
-KysrKy0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0KPj4gPj4gIGluY2x1ZGUvbGludXgv
-bWZkL3J0c3hfY29tbW9uLmggICB8ICAgIDEgLQo+PiA+PiAgaW5jbHVkZS9saW51eC9tZmQvcnRz
-eF9wY2kuaCAgICAgIHwgICAgNiAtCj4+ID4+ICA0IGZpbGVzIGNoYW5nZWQsIDEwOSBpbnNlcnRp
-b25zKCspLCA0NDggZGVsZXRpb25zKC0pCj4+ID4KPj4gPiBUaGlzIHBhdGNoIHNob3VsZCBiZSBz
-ZW50IHRvIHRoZSAtcmNzIGFzIHNvb24gYXMgcG9zc2libGU6Cj4+Cj4+IERvIHlvdSBtaW5kIGhl
-bHBpbmcgb3V0IGRvaW5nIGl0IGhlcmUgTGVlPyBOb3Qgc3VyZSBob3cgYnVzeSBDaHJpcyBpcwo+
-PiBhdCB0aGUgbW9tZW50Lgo+Cj4gSSBkb24ndCBtaW5kLiBJIGp1c3QgbmVlZCBhIG1haW50YWlu
-ZXIgQWNrIGZyb20gb25lIG9mIHlvdSBndXlzLgoKVGhhbmtzIGZvciBoZWxwaW5nIG91dCBMZWUu
-IFBsZWFzZSBob2xkIG9uIHVudGlsIHdlIHNvcnRlZCBvdXQgZXhhY3RseQp3aGF0IHNob3VsZCBi
-ZSByZXZlcnRlZCwgaXQgc2VlbXMgbGlrZSBzb21lIGFkZGl0aW9uYWwgcGF0Y2ggc2hvdWxkIGJl
-CnJlbW92ZWQvcmV2ZXJ0ZWQgYXMgd2VsbC4KCktpbmQgcmVnYXJkcwpVZmZlCgo+Cj4+ID4KPj4g
-PiBBY2tlZC1ieTogTGVlIEpvbmVzIDxsZWUuam9uZXNAbGluYXJvLm9yZz4KPgo+IC0tCj4gTGVl
-IEpvbmVzCj4gTGluYXJvIFNUTWljcm9lbGVjdHJvbmljcyBMYW5kaW5nIFRlYW0gTGVhZAo+IExp
-bmFyby5vcmcg4pSCIE9wZW4gc291cmNlIHNvZnR3YXJlIGZvciBBUk0gU29Dcwo+IEZvbGxvdyBM
-aW5hcm86IEZhY2Vib29rIHwgVHdpdHRlciB8IEJsb2cKX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX18KZGV2ZWwgbWFpbGluZyBsaXN0CmRldmVsQGxpbnV4ZHJp
-dmVycHJvamVjdC5vcmcKaHR0cDovL2RyaXZlcmRldi5saW51eGRyaXZlcnByb2plY3Qub3JnL21h
-aWxtYW4vbGlzdGluZm8vZHJpdmVyZGV2LWRldmVsCg==
+Hi Guennadi,
+
+On 26 April 2014 13:06, Guennadi wrote:
+> Subject: [PATCH v2] mmc: add a driver for the Renesas usdhi6rol0 SD/SDIO
+> host controller
+> 
+> This patch adds a driver for the Renesas usdhi6rol0 SD/SDIO host controller
+> in both PIO and DMA modes.
+
+...
+> +static void usdhi6_dma_stop_unmap(struct usdhi6_host *host)
+> +{
+> +	struct mmc_data *data = host->mrq->data;
+> +
+> +	if (!host->dma_active)
+> +		return;
+> +
+> +	usdhi6_write(host, USDHI6_CC_EXT_MODE, 0);
+> +	host->dma_active = false;
+> +
+> +	if (data->flags & MMC_DATA_READ)
+> +		/* TODO: do we have to synchronise? */
+> +		dma_unmap_sg(host->chan_rx->device->dev, data->sg,
+> +			     data->sg_len, DMA_FROM_DEVICE);
+Yes, you have to sync, so you can remove this TODO comment.
+
+...
+> +static int usdhi6_probe(struct platform_device *pdev)
+> +{
+...
+> +	host		= mmc_priv(mmc);
+> +	host->mmc	= mmc;
+> +	host->wait	= USDHI6_WAIT_FOR_REQUEST;
+> +	host->timeout	= msecs_to_jiffies(1000);
+In all places you use host->timeout, the code uses host->timeout * 4. Wouldn't it better to just set it here to 4 seconds?
+
+Thanks
+Phil
