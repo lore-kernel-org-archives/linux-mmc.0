@@ -1,71 +1,45 @@
-From: Sascha Hauer <s.hauer@pengutronix.de>
-Subject: Re: [PATCH] mmc: mxs: fix card detection function for broken card
- detect
-Date: Mon, 28 Apr 2014 11:36:19 +0200
-Message-ID: <20140428093619.GP5858@pengutronix.de>
-References: <dec3cef26b7470cabfc11a83750a88db5b545a41.1397944151.git.daniel@totalueberwachung.de>
- <20140428091341.GA5918@pengutronix.de>
- <CAPDyKFqP_cDTyC38+8XDPLWN0C6wWs9e6iZD06nkb_LqqLjjnw@mail.gmail.com>
+From: Lee Jones <lee.jones@linaro.org>
+Subject: Re: [PATCH v7 4/4] memstick: Add realtek USB memstick host driver
+Date: Mon, 28 Apr 2014 11:10:10 +0100
+Message-ID: <20140428101010.GR6264@lee--X1>
+References: <1397199203-2235-1-git-send-email-rogerable@realtek.com>
+ <1397199203-2235-5-git-send-email-rogerable@realtek.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from metis.ext.pengutronix.de ([92.198.50.35]:39144 "EHLO
-	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751837AbaD1JgV (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 28 Apr 2014 05:36:21 -0400
+Received: from mail-wi0-f182.google.com ([209.85.212.182]:61977 "EHLO
+	mail-wi0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754251AbaD1KKS (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 28 Apr 2014 06:10:18 -0400
+Received: by mail-wi0-f182.google.com with SMTP id d1so5375639wiv.3
+        for <linux-mmc@vger.kernel.org>; Mon, 28 Apr 2014 03:10:17 -0700 (PDT)
 Content-Disposition: inline
-In-Reply-To: <CAPDyKFqP_cDTyC38+8XDPLWN0C6wWs9e6iZD06nkb_LqqLjjnw@mail.gmail.com>
+In-Reply-To: <1397199203-2235-5-git-send-email-rogerable@realtek.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Daniel Willmann <daniel@totalueberwachung.de>, Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Shawn Guo <shawn.guo@linaro.org>
+To: rogerable@realtek.com
+Cc: Samuel Ortiz <sameo@linux.intel.com>, Chris Ball <chris@printf.net>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Maxim Levitsky <maximlevitsky@gmail.com>, Alex Dubov <oakad@yahoo.com>, Dan Carpenter <dan.carpenter@oracle.com>, Ulf Hansson <ulf.hansson@linaro.org>, Andrew Morton <akpm@linux-foundation.org>, Oliver Neukum <oneukum@suse.de>, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, driverdev-devel@linuxdriverproject.org, wei_wang@realsil.com.cn, micky_ching@realsil.com.cn
 
-On Mon, Apr 28, 2014 at 11:31:03AM +0200, Ulf Hansson wrote:
-> On 28 April 2014 11:13, Sascha Hauer <s.hauer@pengutronix.de> wrote:
-> > On Sat, Apr 19, 2014 at 11:59:18PM +0200, Daniel Willmann wrote:
-> >> Return -ENOSYS in get_cd if broken-cd is specified in the device tree.
-> >>
-> >> Commit a91fe279ae75 (mmc: mxs: use standard flag for broken card
-> >> detection) sets MMC_CAP_NEEDS_POLL when broken-cd is specified. This
-> >> driver sets this flag unconditionally as it does not support a card
-> >> detect interrupt. Instead, broken-cd means that there is no card detect
-> >> signal connected.
-> >>
-> >> The mmc core checks the get_cd function return value to determine if a
-> >> card is present. Only for a non-zero return value it will attempt to
-> >> initialize the card. So retuning -ENOSYS will allow the card to be
-> >> initialized.
-> >> For comparison, mmc_gpio_get_cd in slot-gpio.c also returns -ENOSYS if
-> >> the card detect GPIO is not valid.
-> >
-> > Short answer for fixing this regression:
-> >
-> > Acked-by: Sascha Hauer <s.hauer@pengutronix.de>
-> >
-> > Long answer:
-> >
-> > This is broken in the MMC OF parser. When the parser finds the
-> > 'broken-cd' property it just sets the MMC_CAP_NEEDS_POLL flag. This is
-> > wrong.  broken-cd means that we cannot rely on any card detection, but
-> > instead have to talk to the card to find out if it's available.
-> > Currently there is no flag to signal this situation, so the host driver
-> > has to handle this by returning true in the get_cd callback, just like
-> > the patch below does.
-> >
-> > IMO the correct solution would be to add a MMC_CAP_CD_NEEDS_TALK_TO_CARD
-> > flag to the core.
-> >
-> 
-> So if I understand correct, you want the host-ops->get_cd function to
-> be invoked from the mmc rescan - only when it actually can provide
-> useful information?
+> From: Roger Tseng <rogerable@realtek.com>
+>=20
+> Realtek USB memstick host driver provides memstick host support based=
+ on the
+> Realtek USB card reader MFD driver.
+>=20
+> Signed-off-by: Roger Tseng <rogerable@realtek.com>
+> ---
+>  drivers/memstick/host/Kconfig       |  10 +
+>  drivers/memstick/host/Makefile      |   1 +
+>  drivers/memstick/host/rtsx_usb_ms.c | 839 ++++++++++++++++++++++++++=
+++++++++++
+>  3 files changed, 850 insertions(+)
+>  create mode 100644 drivers/memstick/host/rtsx_usb_ms.c
 
-Yes.
+Applied, thanks.
 
-Sascha
-
--- 
-Pengutronix e.K.                           |                             |
-Industrial Linux Solutions                 | http://www.pengutronix.de/  |
-Peiner Str. 6-8, 31137 Hildesheim, Germany | Phone: +49-5121-206917-0    |
-Amtsgericht Hildesheim, HRA 2686           | Fax:   +49-5121-206917-5555 |
+--=20
+Lee Jones
+Linaro STMicroelectronics Landing Team Lead
+Linaro.org =E2=94=82 Open source software for ARM SoCs
+=46ollow Linaro: Facebook | Twitter | Blog
