@@ -1,16 +1,16 @@
 From: Andreas Fenkart <afenkart@gmail.com>
-Subject: [PATCH 0/5] mmc: omap_hsmmc: Enable SDIO IRQ.
-Date: Mon, 28 Apr 2014 09:37:53 +0200
-Message-ID: <1398670678-30611-1-git-send-email-afenkart@gmail.com>
-Return-path: <linux-omap-owner@vger.kernel.org>
-Sender: linux-omap-owner@vger.kernel.org
+Subject: [PATCH v10 0/5] mmc: omap_hsmmc: Enable SDIO IRQ.
+Date: Mon, 28 Apr 2014 09:40:55 +0200
+Message-ID: <1398670860-30695-1-git-send-email-afenkart@gmail.com>
+Return-path: <linux-doc-owner@vger.kernel.org>
+Sender: linux-doc-owner@vger.kernel.org
 To: Tony Lindgren <tony@atomide.com>
 Cc: Chris Ball <chris@printf.net>, Grant Likely <grant.likely@secretlab.ca>, Felipe Balbi <balbi@ti.com>, Balaji T K <balajitk@ti.com>, zonque@gmail.com, galak@codeaurora.org, linux-doc@vger.kernel.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, Andreas Fenkart <afenkart@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
 
 Hi Balaji, Tony, all
 
-v10 
+v10
 - bug fix on multi-core, untested
 - incorporated changes from Balaji
 - use devres / RAII mechanism to configure wake_up /
@@ -18,8 +18,8 @@ v10
 - drop pinctrl state 'active'
   rely on driver-model states 'default', 'idle'
 - add specific 'gpio_dat1' state for am335x SWAKEUP hack
-- reorganized patches; +1 patch multi-core bugfix / +1 for pinctrl 
-- rebased 455c6fdbd21916 / cherry-picks from mmc-next 
+- reorganized patches; +1 patch multi-core bugfix / +1 for pinctrl
+- rebased 455c6fdbd21916 / cherry-picks from mmc-next
 
 v9
 - extended comment about why wake-irq is needed
