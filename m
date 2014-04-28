@@ -1,103 +1,62 @@
-From: Markus Pargmann <mpa@pengutronix.de>
-Subject: Re: [PATCH 21/38] mmc: sdhci: hack up driver to make it more
- compliant with UHS-1
-Date: Mon, 28 Apr 2014 15:10:43 +0200
-Message-ID: <20140428131043.GD15179@pengutronix.de>
-References: <20140423185534.GA26756@n2100.arm.linux.org.uk>
- <E1Wd2WT-0003vg-Ke@rmk-PC.arm.linux.org.uk>
- <20140425123820.GA15179@pengutronix.de>
- <20140425124945.GM26756@n2100.arm.linux.org.uk>
- <20140425130849.GB15179@pengutronix.de>
- <20140425131529.GN26756@n2100.arm.linux.org.uk>
- <20140425132245.GO26756@n2100.arm.linux.org.uk>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH] mmc: rtsx: Revert "mmc: rtsx: add support for pre_req and
+ post_req"
+Date: Mon, 28 Apr 2014 16:11:30 +0200
+Message-ID: <CAPDyKFpRwGSgR1by+7TEa=Ec7cQ1v4qYhJuLkv785z2NxORBUQ@mail.gmail.com>
+References: <1398670584-26687-1-git-send-email-micky_ching@realsil.com.cn>
+ <20140428105350.GM21279@lee--X1>
+ <CAPDyKFr6kNjfE+adx_j05wes0Y1fg=zD-AwciWy0vQdw=DbOrg@mail.gmail.com>
+ <20140428122918.GG21279@lee--X1>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="bjuZg6miEcdLYP6q"
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from metis.ext.pengutronix.de ([92.198.50.35]:36525 "EHLO
-	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751656AbaD1NKp (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 28 Apr 2014 09:10:45 -0400
-Content-Disposition: inline
-In-Reply-To: <20140425132245.GO26756@n2100.arm.linux.org.uk>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
+In-Reply-To: <20140428122918.GG21279@lee--X1>
+List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
+List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel>
+List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
+List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
+List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
+Errors-To: driverdev-devel-bounces@linuxdriverproject.org
+Sender: driverdev-devel-bounces@linuxdriverproject.org
+To: Lee Jones <lee.jones@linaro.org>
+Cc: Samuel Ortiz <sameo@linux.intel.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Wei WANG <wei_wang@realsil.com.cn>, Roger <rogerable@realtek.com>, devel@linuxdriverproject.org, Dan Carpenter <dan.carpenter@oracle.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, Chris Ball <chris@printf.net>, linux-arm-kernel@lists.infradead.org
 
-
---bjuZg6miEcdLYP6q
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
-
-Hi,
-
-On Fri, Apr 25, 2014 at 02:22:45PM +0100, Russell King - ARM Linux wrote:
-> On Fri, Apr 25, 2014 at 02:15:30PM +0100, Russell King - ARM Linux wrote:
-> > On Fri, Apr 25, 2014 at 03:08:49PM +0200, Markus Pargmann wrote:
-> > > I just tried the different parts of the patch. Without the following
-> > > change, emmc works:
-> > >=20
-> > > --- a/drivers/mmc/host/sdhci.c
-> > > +++ b/drivers/mmc/host/sdhci.c
-> > > @@ -1507,12 +1507,6 @@ static void sdhci_do_set_ios(struct sdhci_host=
- *host, struct mmc_ios *ios)
-> > >  			host->ops->set_clock(host, host->clock);
-> > >  		}
-> > > =20
-> > > -
-> > > -		/* Reset SD Clock Enable */
-> > > -		clk =3D sdhci_readw(host, SDHCI_CLOCK_CONTROL);
-> > > -		clk &=3D ~SDHCI_CLOCK_CARD_EN;
-> > > -		sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
-> > > -
-> >=20
-> > So the bit which stops us violating the SD spec stops eMMC from working=
-=2E..
-> > that's... just great.
-> >=20
-> > Okay, I'll look deeper at this and see what can be done, but I suspect =
-it
-> > will turn out to require more patches and be more invasive.
->=20
-> In the mean time, here's the remainder (to patch 33) of the series with
-> this commit omitted.
-
-I tested the whole series again, from 1 to patch 32 and it is working
-correctly now on the RIoT board (imx6s) with emmc and sd-card. You can
-add my tested-by tag for all core and imx related patches if you want to.
-
-Regards,
-
-Markus
-
---=20
-Pengutronix e.K.                           |                             |
-Industrial Linux Solutions                 | http://www.pengutronix.de/  |
-Peiner Str. 6-8, 31137 Hildesheim, Germany | Phone: +49-5121-206917-0    |
-Amtsgericht Hildesheim, HRA 2686           | Fax:   +49-5121-206917-5555 |
-
---bjuZg6miEcdLYP6q
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.12 (GNU/Linux)
-
-iQIcBAEBAgAGBQJTXlNSAAoJEEpcgKtcEGQQ2XoP/1WltveUNA5YoSV0AOg7gXrV
-uS2lcfiru61osdFgpw9VyNys6jyEmNM3uL+O3llcJI2SsJ/p0FtPAeLJrWLlcT9H
-pmAcf0SaEhZ4Xhw1ivBkKtVytRbzJm1EiS51jHWsSaN9XI6nhYXNZVbVfErsX73b
-tjPHUdKQrxzDzvvTQxQzrYSIZsCMDvjMyafiCsDJyJWi+rfSh2vCqeIxijulcJIA
-WtlPwtClv3l87FcFZeRengR7Pqep8Zf9LqTaXa1ZKh+ZlyRSUb0cnyudGF4IbBEr
-5xTWLx2yNPQNPufp2LLlEN//SG7EGlCCBZKaKexwp+mNyqC5k+RV5CIkLiniUIRw
-BN9Td0hBiTrxLWOrWmgzePED/+c6zKB0Fi2HVCTZU2n8rzWFj9hkb+5xWHKwHeQj
-kp/xinKISwCZhcmLIxCk9rbNrITX9qZmfpNAFj1Q9frp0XpbULkoFPKKD5syffDN
-yZasr27b+ZxkI9TljR3nP68XTRGs5bOWWnw+caJ/lmRZnYAaHEdvuQpLwQHHDuds
-KB9m1OzESLy96GRPtSaSnSgNk4a1ePEP+Su3gBeKowwiZuAA7IheN+zwLgYpEMwG
-lwZ+h+DOadFo7iR6JXg7lmHd8YQsdwc8cvDwFczc2LfCRpWsNR0KjLSNTrw6+awv
-wKdedv+VN70FJrNfsdBe
-=BSz5
------END PGP SIGNATURE-----
-
---bjuZg6miEcdLYP6q--
+T24gMjggQXByaWwgMjAxNCAxNDoyOSwgTGVlIEpvbmVzIDxsZWUuam9uZXNAbGluYXJvLm9yZz4g
+d3JvdGU6Cj4+ID4+IEZyb206IE1pY2t5IENoaW5nIDxtaWNreV9jaGluZ0ByZWFsc2lsLmNvbS5j
+bj4KPj4gPj4KPj4gPj4gVGhpcyByZXZlcnRzIGNvbW1pdCBjNDJkZWZmZDViNTNjOWU1ODNkODNj
+Nzk2NDg1NGVkZTJmMTI0MTBkLgo+PiA+Cj4+ID4gV2h5IHdhcyB0aGlzIHBhdGNoIGV2ZW4gbWVy
+Z2VkIHdpdGhvdXQgYW4gTUZEIEFjaz8KPj4gPgo+PiA+PiBjb21taXQgPG1tYzogcnRzeDogYWRk
+IHN1cHBvcnQgZm9yIHByZV9yZXEgYW5kIHBvc3RfcmVxPiBkaWQgdXNlCj4+ID4+IG11dGV4X3Vu
+bG9jaygpIGluIHRhc2tsZXQsIGJ1dCBtdXRleF91bmxvY2soKSBjYW4ndCB1c2VkIGluCj4+ID4+
+IHRhc2tsZXQoYXRvbWljIGNvbnRleHQpLiBUaGUgZHJpdmVyIG5lZWQgdXNlIG11dGV4IHRvIGF2
+b2lkIGNvbmN1cnJlbmN5LAo+PiA+PiBzbyB3ZSBjYW4ndCB1c2UgdGFza2xldCBoZXJlLCB0aGUg
+cGF0Y2ggbmVlZCB0byBiZSByZW1vdmVkLgo+PiA+Pgo+PiA+PiBUaGUgc3BpbmxvY2sgaG9zdC0+
+bG9jayBhbmQgcGNyLT5sb2NrIG1heSBkZWFkbG9jaywgb25lIHdheSB0byBzb2x2ZSB0aGUKPj4g
+Pj4gZGVhZGxvY2sgaXMgcmVtb3ZlIGhvc3QtPmxvY2sgaW4gc2RfaXNyX2RvbmVfdHJhbnNmZXIo
+KSwgYnV0IGlmIHVzaW5nCj4+ID4+IHdvcmtxdWV1ZSB0aGUgd2UgY2FuIGF2b2lkIHVzaW5nIHRo
+ZSBzcGlubG9jayBhbmQgYWxzbyBhdm9pZCB0aGUgcHJvYmxlbS4KPj4gPj4KPj4gPj4gU2lnbmVk
+LW9mZi1ieTogTWlja3kgQ2hpbmcgPG1pY2t5X2NoaW5nQHJlYWxzaWwuY29tLmNuPgo+PiA+PiAt
+LS0KPj4gPj4gIGRyaXZlcnMvbWZkL3J0c3hfcGNyLmMgICAgICAgICAgICB8ICAxMzIgKysrKy0t
+LS0tLS0tCj4+ID4+ICBkcml2ZXJzL21tYy9ob3N0L3J0c3hfcGNpX3NkbW1jLmMgfCAgNDE4ICsr
+KysrKy0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0KPj4gPj4gIGluY2x1ZGUvbGludXgv
+bWZkL3J0c3hfY29tbW9uLmggICB8ICAgIDEgLQo+PiA+PiAgaW5jbHVkZS9saW51eC9tZmQvcnRz
+eF9wY2kuaCAgICAgIHwgICAgNiAtCj4+ID4+ICA0IGZpbGVzIGNoYW5nZWQsIDEwOSBpbnNlcnRp
+b25zKCspLCA0NDggZGVsZXRpb25zKC0pCj4+ID4KPj4gPiBUaGlzIHBhdGNoIHNob3VsZCBiZSBz
+ZW50IHRvIHRoZSAtcmNzIGFzIHNvb24gYXMgcG9zc2libGU6Cj4+Cj4+IERvIHlvdSBtaW5kIGhl
+bHBpbmcgb3V0IGRvaW5nIGl0IGhlcmUgTGVlPyBOb3Qgc3VyZSBob3cgYnVzeSBDaHJpcyBpcwo+
+PiBhdCB0aGUgbW9tZW50Lgo+Cj4gSSBkb24ndCBtaW5kLiBJIGp1c3QgbmVlZCBhIG1haW50YWlu
+ZXIgQWNrIGZyb20gb25lIG9mIHlvdSBndXlzLgoKVGhhbmtzIGZvciBoZWxwaW5nIG91dCBMZWUu
+IFBsZWFzZSBob2xkIG9uIHVudGlsIHdlIHNvcnRlZCBvdXQgZXhhY3RseQp3aGF0IHNob3VsZCBi
+ZSByZXZlcnRlZCwgaXQgc2VlbXMgbGlrZSBzb21lIGFkZGl0aW9uYWwgcGF0Y2ggc2hvdWxkIGJl
+CnJlbW92ZWQvcmV2ZXJ0ZWQgYXMgd2VsbC4KCktpbmQgcmVnYXJkcwpVZmZlCgo+Cj4+ID4KPj4g
+PiBBY2tlZC1ieTogTGVlIEpvbmVzIDxsZWUuam9uZXNAbGluYXJvLm9yZz4KPgo+IC0tCj4gTGVl
+IEpvbmVzCj4gTGluYXJvIFNUTWljcm9lbGVjdHJvbmljcyBMYW5kaW5nIFRlYW0gTGVhZAo+IExp
+bmFyby5vcmcg4pSCIE9wZW4gc291cmNlIHNvZnR3YXJlIGZvciBBUk0gU29Dcwo+IEZvbGxvdyBM
+aW5hcm86IEZhY2Vib29rIHwgVHdpdHRlciB8IEJsb2cKX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX18KZGV2ZWwgbWFpbGluZyBsaXN0CmRldmVsQGxpbnV4ZHJp
+dmVycHJvamVjdC5vcmcKaHR0cDovL2RyaXZlcmRldi5saW51eGRyaXZlcnByb2plY3Qub3JnL21h
+aWxtYW4vbGlzdGluZm8vZHJpdmVyZGV2LWRldmVsCg==
