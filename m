@@ -1,64 +1,59 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 21/38] mmc: sdhci: hack up driver to make it more
- compliant with UHS-1
-Date: Mon, 28 Apr 2014 13:11:20 +0200
-Message-ID: <CAPDyKFpHoLbY4Li45UfPweJ0xKpa5E5d=YX+Sgz9pvRG4W2xiQ@mail.gmail.com>
-References: <20140423185534.GA26756@n2100.arm.linux.org.uk>
-	<E1Wd2WT-0003vg-Ke@rmk-PC.arm.linux.org.uk>
-	<20140425123820.GA15179@pengutronix.de>
-	<CAPDyKFpja-dGwsEL6YP=Nn=YSRRgMzTTz6WVQ8DiUOMrkLJpBQ@mail.gmail.com>
-	<20140428110259.GI26756@n2100.arm.linux.org.uk>
+From: micky <micky_ching@realsil.com.cn>
+Subject: Re: [PATCH v2 1/2] mmc: rtsx: add R1-no-CRC mmc command type handle
+Date: Mon, 28 Apr 2014 19:30:52 +0800
+Message-ID: <535E3BEC.9040100@realsil.com.cn>
+References: <cover.1395824147.git.micky_ching@realsil.com.cn>
+ <afbc1328fb8a89fda3da23f1e9c755311450e1f6.1395824147.git.micky_ching@realsil.com.cn>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qa0-f48.google.com ([209.85.216.48]:38237 "EHLO
-	mail-qa0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754379AbaD1LLV (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 28 Apr 2014 07:11:21 -0400
-Received: by mail-qa0-f48.google.com with SMTP id j15so3417657qaq.7
-        for <linux-mmc@vger.kernel.org>; Mon, 28 Apr 2014 04:11:20 -0700 (PDT)
-In-Reply-To: <20140428110259.GI26756@n2100.arm.linux.org.uk>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"; Format="flowed"
+Content-Transfer-Encoding: 7bit
+Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
+In-Reply-To: <afbc1328fb8a89fda3da23f1e9c755311450e1f6.1395824147.git.micky_ching@realsil.com.cn>
+List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
+List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel>
+List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
+List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
+List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
+Errors-To: driverdev-devel-bounces@linuxdriverproject.org
+Sender: driverdev-devel-bounces@linuxdriverproject.org
+To: chris@printf.net, sameo@linux.intel.com
+Cc: ulf.hansson@linaro.org, gregkh@linuxfoundation.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, wei_wang@realsil.com.cn, rogerable@realtek.com, devel@linuxdriverproject.org, dan.carpenter@oracle.com
 List-Id: linux-mmc@vger.kernel.org
-To: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Cc: Markus Pargmann <mpa@pengutronix.de>, Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 
-On 28 April 2014 13:02, Russell King - ARM Linux <linux@arm.linux.org.uk> wrote:
-> On Mon, Apr 28, 2014 at 12:50:54PM +0200, Ulf Hansson wrote:
->> On 25 April 2014 14:38, Markus Pargmann <mpa@pengutronix.de> wrote:
->> > Hi,
->> >
->> > On Wed, Apr 23, 2014 at 08:07:57PM +0100, Russell King wrote:
->> >> Patch suggested by Dong Aisheng <dongas86@gmail.com>, this avoids
->> >> additional clock start/stop cycles during the transition to 1.8V
->> >> signalling mode.
->> >>
->> >> Signed-off-by: Russell King <rmk+kernel@arm.linux.org.uk>
->> >
->> > I tested the series on imx6s with a RIoT board. With this patch applied
->> > the RIoT board emmc does not work. Here is the output of the board:
->>
->> Hi Markus,
->>
->> Thanks for helping out testing!
->>
->> Does that mean patch 1->20 works fine for you? May I add your tested-by tag?
+Hi Chris and Ulf,
+
+This patch should be applied to 3.15(rc), 3.14, 3.13.
+without this patch the MMC card can not identified.
+
+Best Regards.
+micky.
+On 03/27/2014 01:35 PM, micky_ching@realsil.com.cn wrote:
+> From: Micky Ching <micky_ching@realsil.com.cn>
 >
-> Why should _you_ add someone elses tested-by tag to _my_ patches?
+> commit a27fbf2f067b0cd6f172c8b696b9a44c58bfaa7a
+> <mmc: add ignorance case for CMD13 CRC error>
+> produced a cmd.flags unhandled in realtek pci host driver.
+> This will make MMC card failed initialize, this patch is
+> used to handle the new cmd.flags condition and MMC card can be used.
 >
-> I still wonder whether you understood anything that I've already said to
-> you about the handling of this patch set.
-
-That was based upon that _I_ would help out in creating the pull
-request to Chris, to minimize his effort in resolving conflicts.
-
-All-right, I back off - I was just trying to help here. Please send
-the pull request to Chris directly instead.
-
-Kind regards
-Ulf Hansson
-
+> Signed-off-by: Micky Ching <micky_ching@realsil.com.cn>
+> ---
+>   drivers/mmc/host/rtsx_pci_sdmmc.c |    3 +++
+>   1 file changed, 3 insertions(+)
 >
-> --
-> FTTC broadband for 0.8mile line: now at 9.7Mbps down 460kbps up... slowly
-> improving, and getting towards what was expected from it.
+> diff --git a/drivers/mmc/host/rtsx_pci_sdmmc.c b/drivers/mmc/host/rtsx_pci_sdmmc.c
+> index 5fb994f..0d8904a 100644
+> --- a/drivers/mmc/host/rtsx_pci_sdmmc.c
+> +++ b/drivers/mmc/host/rtsx_pci_sdmmc.c
+> @@ -346,6 +346,9 @@ static void sd_send_cmd(struct realtek_pci_sdmmc *host, struct mmc_command *cmd)
+>   	case MMC_RSP_R1:
+>   		rsp_type = SD_RSP_TYPE_R1;
+>   		break;
+> +	case MMC_RSP_R1 & ~MMC_RSP_CRC:
+> +		rsp_type = SD_RSP_TYPE_R1 | SD_NO_CHECK_CRC7;
+> +		break;
+>   	case MMC_RSP_R1B:
+>   		rsp_type = SD_RSP_TYPE_R1b;
+>   		break;
