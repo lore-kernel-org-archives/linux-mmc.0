@@ -1,57 +1,85 @@
-From: Lee Jones <lee.jones@linaro.org>
-Subject: Re: [PATCH 0/2] mmc: rtsx: revert support for mmc async request
-Date: Tue, 29 Apr 2014 09:02:40 +0100
-Message-ID: <20140429080240.GC29462@lee--X1>
-References: <cover.1398735435.git.micky_ching@realsil.com.cn>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+From: srinivas.kandagatla@linaro.org
+Subject: [PATCH v1 00/11] Add Qualcomm SD Card Controller support.
+Date: Tue, 29 Apr 2014 09:18:12 +0100
+Message-ID: <1398759492-12970-1-git-send-email-srinivas.kandagatla@linaro.org>
+References: <1398116624-31052-1-git-send-email-srinivas.kandagatla@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wg0-f51.google.com ([74.125.82.51]:65155 "EHLO
-	mail-wg0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751915AbaD2ICr (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 29 Apr 2014 04:02:47 -0400
-Received: by mail-wg0-f51.google.com with SMTP id z12so6306309wgg.22
-        for <linux-mmc@vger.kernel.org>; Tue, 29 Apr 2014 01:02:45 -0700 (PDT)
-Content-Disposition: inline
-In-Reply-To: <cover.1398735435.git.micky_ching@realsil.com.cn>
+Received: from mail-wg0-f42.google.com ([74.125.82.42]:49947 "EHLO
+	mail-wg0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755545AbaD2ISq (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 29 Apr 2014 04:18:46 -0400
+Received: by mail-wg0-f42.google.com with SMTP id k14so4728320wgh.13
+        for <linux-mmc@vger.kernel.org>; Tue, 29 Apr 2014 01:18:45 -0700 (PDT)
+In-Reply-To: <1398116624-31052-1-git-send-email-srinivas.kandagatla@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: micky_ching@realsil.com.cn
-Cc: chris@printf.net, ulf.hansson@linaro.org, sameo@linux.intel.com, gregkh@linuxfoundation.org, dan.carpenter@oracle.com, devel@linuxdriverproject.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, rogerable@realtek.com, wei_wang@realsil.com.cn
+To: Russell King <linux@arm.linux.org.uk>, linux-mmc@vger.kernel.org
+Cc: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, linux-kernel@vger.kernel.org, agross@quicinc.com, linux-arm-msm@vger.kernel.org, Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
 
-> From: Micky Ching <micky_ching@realsil.com.cn>
->=20
-> The commit <mmc: rtsx: add support for pre_req and post_req> have som=
-e problem,
-> using mutex_unlock() in atomic context, spinlock deadlock, it is hard=
- to fix
-> these problem, and better to use a new method. So just remove it.
->=20
-> The commit <mmc: rtsx: modify error handle and remove smatch warnings=
-> depends
-> on the previous patch. And mainly fix some problem for the previous p=
-atch. So
-> need remove.
->=20
-> Micky Ching (2):
->   mmc: rtsx: Revert "mmc: rtsx: modify error handle and remove smatch
->     warnings"
->   mmc: rtsx: Revert "mmc: rtsx: add support for pre_req and post_req"
->=20
->  drivers/mfd/rtsx_pcr.c            |  132 ++++-------
->  drivers/mmc/host/rtsx_pci_sdmmc.c |  459 +++++++--------------------=
-----------
->  include/linux/mfd/rtsx_common.h   |    1 -
->  include/linux/mfd/rtsx_pci.h      |    6 -
->  4 files changed, 124 insertions(+), 474 deletions(-)
+From: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
 
-Just to clarify, what commit did you base these changes on? Have you
-tested to ensure everything works as it should with these two
-reversions?
+Hi Russell,
 
---=20
-Lee Jones
-Linaro STMicroelectronics Landing Team Lead
-Linaro.org =E2=94=82 Open source software for ARM SoCs
-=46ollow Linaro: Facebook | Twitter | Blog
+This patch series adds Qualcomm SD Card Controller support in pl180 mmci
+driver. QCom SDCC is basically a pl180, but bit more customized, some of the
+register layouts and offsets are different to the ones mentioned in pl180
+datasheet. The plan is to totally remove the standalone SDCC driver
+drivers/mmc/host/msm_sdcc.* and start using generic mmci driver for all
+Qualcomm parts, as we get chance to test on other Qcom boards.
+
+To start using the existing mmci driver, a fake amba id for Qualcomm is added
+in patches:
+ ARM: amba: Add Qualcomm vendor ID.
+ mmc: mmci: Add Qualcomm Id to amba id table.
+
+Second change is, adding a 3 clock cycle delay for register writes on QCOM
+SDCC
+registers, which is done in patches:
+  mmc: mmci: Add register read/write wrappers.
+  mmc: mmci: Qcomm: Add 3 clock cycle delay after each register write
+
+Third change was to accommodate DATCTRL and MMCICLK register layout changes in
+Qcom SDCC. Which is done in patches:
+  mmc: mmci: Add Qcom datactrl register variant
+  mmc: mmci: Add Qcom variations to MCICommand register.
+  mmc: mmci: Qcom fix MCICLK register settings.
+  mmc: mmci: Add clock support for Qualcomm.
+
+Fourth major change was to add qcom specfic pio read function, the need for
+this is because the way MCIFIFOCNT register behaved in QCOM SDCC is very
+ different to the one in pl180. This change is done in patch:
+  mmc: mmci: Add Qcom specific pio_read function.
+
+Last some Qcom unrelated changes to support Qcom are done in patches:
+  mmc: mmci: use NSEC_PER_SEC macro
+  mmc: mmci: move ST specific register extensions access under condition.
+
+This patches are tested  v3.15-rc3 in PIO mode on IFC6410 board with both eMMC
+and external SD card. I would appreciate any feedback on the patches.
+I would like to get this for v3.16.
+
+Thanks,
+srini
+
+Srinivas Kandagatla (11):
+  ARM: amba: Add Qualcomm vendor ID.
+  mmc: mmci: Add Qualcomm Id to amba id table
+  mmc: mmci: Add Qcom datactrl register variant
+  mmc: mmci: Add register read/write wrappers.
+  mmc: mmci: use NSEC_PER_SEC macro
+  mmc: mmci: Qcomm: Add 3 clock cycle delay after register write
+  mmc: mmci: move ST specific register extensions access under
+    condition.
+  mmc: mmci: Qcom fix MCICLK register settings.
+  mmc: mmci: Add clock support for Qualcomm.
+  mmc: mmci: Add Qcom variations to MCICommand register.
+  mmc: mmci: Add Qcom specific pio_read function.
+
+ drivers/mmc/host/mmci.c  |  243 +++++++++++++++++++++++++++++++++-------------
+ drivers/mmc/host/mmci.h  |   28 ++++++
+ include/linux/amba/bus.h |    1 +
+ 3 files changed, 206 insertions(+), 66 deletions(-)
+
+-- 
+1.7.9.5
+
