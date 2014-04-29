@@ -1,43 +1,59 @@
 From: srinivas.kandagatla@linaro.org
-Subject: [PATCH v1 01/11] ARM: amba: Add Qualcomm vendor ID.
-Date: Tue, 29 Apr 2014 09:19:02 +0100
-Message-ID: <1398759542-13017-1-git-send-email-srinivas.kandagatla@linaro.org>
+Subject: [PATCH v1 02/11] mmc: mmci: Add Qualcomm Id to amba id table
+Date: Tue, 29 Apr 2014 09:19:16 +0100
+Message-ID: <1398759556-13056-1-git-send-email-srinivas.kandagatla@linaro.org>
 References: <1398759492-12970-1-git-send-email-srinivas.kandagatla@linaro.org>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wi0-f175.google.com ([209.85.212.175]:34856 "EHLO
-	mail-wi0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756711AbaD2ITN (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 29 Apr 2014 04:19:13 -0400
-Received: by mail-wi0-f175.google.com with SMTP id cc10so6965282wib.8
-        for <linux-mmc@vger.kernel.org>; Tue, 29 Apr 2014 01:19:12 -0700 (PDT)
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
 In-Reply-To: <1398759492-12970-1-git-send-email-srinivas.kandagatla@linaro.org>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Sender: linux-arm-msm-owner@vger.kernel.org
 To: Russell King <linux@arm.linux.org.uk>, linux-mmc@vger.kernel.org
 Cc: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, linux-kernel@vger.kernel.org, agross@quicinc.com, linux-arm-msm@vger.kernel.org, Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+List-Id: linux-mmc@vger.kernel.org
 
 From: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
 
-This patch adds Qualcomm amba vendor Id to the list. This ID is used in mmci
-driver.
+This patch adds a fake Qualcomm ID 0x00051180 to the amba_ids, as Qualcomm
+SDCC controller is pl180, but amba id registers read 0x0's.
+The plan is to remove SDCC driver totally and use mmci as the main SD
+controller driver for Qualcomm SOCs.
 
 Signed-off-by: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
 ---
- include/linux/amba/bus.h |    1 +
- 1 file changed, 1 insertion(+)
+ drivers/mmc/host/mmci.c |   15 +++++++++++++++
+ 1 file changed, 15 insertions(+)
 
-diff --git a/include/linux/amba/bus.h b/include/linux/amba/bus.h
-index 63b5eff..fdd7e1b 100644
---- a/include/linux/amba/bus.h
-+++ b/include/linux/amba/bus.h
-@@ -47,6 +47,7 @@ struct amba_driver {
- enum amba_vendor {
- 	AMBA_VENDOR_ARM = 0x41,
- 	AMBA_VENDOR_ST = 0x80,
-+	AMBA_VENDOR_QCOM = 0x51,
+diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+index 771c60a..391e8d4 100644
+--- a/drivers/mmc/host/mmci.c
++++ b/drivers/mmc/host/mmci.c
+@@ -158,6 +158,15 @@ static struct variant_data variant_ux500v2 = {
+ 	.pwrreg_nopower		= true,
  };
  
- extern struct bus_type amba_bustype;
++static struct variant_data variant_qcom = {
++	.fifosize		= 16 * 4,
++	.fifohalfsize		= 8 * 4,
++	.clkreg			= MCI_CLK_ENABLE,
++	.datalength_bits	= 24,
++	.blksz_datactrl4	= true,
++	.pwrreg_powerup		= MCI_PWR_UP,
++};
++
+ static int mmci_card_busy(struct mmc_host *mmc)
+ {
+ 	struct mmci_host *host = mmc_priv(mmc);
+@@ -1908,6 +1917,12 @@ static struct amba_id mmci_ids[] = {
+ 		.mask   = 0xf0ffffff,
+ 		.data	= &variant_ux500v2,
+ 	},
++	/* Qualcomm variants */
++	{
++		.id     = 0x00051180,
++		.mask	= 0x000fffff,
++		.data	= &variant_qcom,
++	},
+ 	{ 0, 0 },
+ };
+ 
 -- 
 1.7.9.5
-
