@@ -1,15 +1,13 @@
 From: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH v9 03/17] ARM: sunxi: Add driver for SD/MMC
- hosts found on Allwinner sunxi SoCs
-Date: Tue, 29 Apr 2014 10:26:13 +0200
-Message-ID: <535F6225.80202@redhat.com>
-References: <1398507381-5614-1-git-send-email-hdegoede@redhat.com> <1398507381-5614-4-git-send-email-hdegoede@redhat.com> <20140428193629.GI3134@lukather>
+Subject: Re: [PATCH v9 10/17] ARM: dts: sun6i: Add mmc clocks
+Date: Tue, 29 Apr 2014 10:29:02 +0200
+Message-ID: <535F62CE.20606@redhat.com>
+References: <1398507381-5614-1-git-send-email-hdegoede@redhat.com> <1398507381-5614-11-git-send-email-hdegoede@redhat.com> <20140428193753.GJ3134@lukather>
 Reply-To: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
-Return-path: <linux-sunxi+bncBDRZXY4CYYORBL6E7WNAKGQE7FDTXNA-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-In-Reply-To: <20140428193629.GI3134@lukather>
+Return-path: <linux-sunxi+bncBDRZXY4CYYORBV6F7WNAKGQEOO42BAI-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+In-Reply-To: <20140428193753.GJ3134@lukather>
 List-Post: <http://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
 List-Help: <http://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
 List-Archive: <http://groups.google.com/group/linux-sunxi>
@@ -22,69 +20,43 @@ List-Id: linux-mmc@vger.kernel.org
 
 Hi,
 
-On 04/28/2014 09:36 PM, Maxime Ripard wrote:
-> On Sat, Apr 26, 2014 at 12:16:07PM +0200, Hans de Goede wrote:
->> From: David Lanzend=F6rfer <david.lanzendoerfer-Z7Kmv9EsliU@public.gmane.org>
+On 04/28/2014 09:37 PM, Maxime Ripard wrote:
+> On Sat, Apr 26, 2014 at 12:16:14PM +0200, Hans de Goede wrote:
+>> Add clk-nodes for the mmc clocks.
 >>
->> The Allwinner sunxi mmc host uses dma in bus-master mode using a built-i=
-n
->> designware idmac controller, which is identical to the one found in the =
-mmc-dw
->> hosts. However the rest of the host is not identical to mmc-dw, it deals=
- with
->> sending stop commands in hardware which makes it significantly different
->> from the mmc-dw devices.
->>
->> HdG: Various cleanups and fixes.
->>
->> Signed-off-by: David Lanzend=F6rfer <david.lanzendoerfer-Z7Kmv9EsliU@public.gmane.org>
 >> Signed-off-by: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 >> ---
->>  .../devicetree/bindings/mmc/sunxi-mmc.txt          |   43 +
->>  drivers/mmc/host/Kconfig                           |    7 +
->>  drivers/mmc/host/Makefile                          |    2 +
->>  drivers/mmc/host/sunxi-mmc.c                       | 1125 +++++++++++++=
-+++++++
->>  4 files changed, 1177 insertions(+)
->>  create mode 100644 Documentation/devicetree/bindings/mmc/sunxi-mmc.txt
->>  create mode 100644 drivers/mmc/host/sunxi-mmc.c
+>>  arch/arm/boot/dts/sun6i-a31.dtsi | 32 ++++++++++++++++++++++++++++++++
+>>  1 file changed, 32 insertions(+)
 >>
->> diff --git a/Documentation/devicetree/bindings/mmc/sunxi-mmc.txt b/Docum=
-entation/devicetree/bindings/mmc/sunxi-mmc.txt
->> new file mode 100644
->> index 0000000..f0c06e7
->> --- /dev/null
->> +++ b/Documentation/devicetree/bindings/mmc/sunxi-mmc.txt
->> @@ -0,0 +1,43 @@
->> +* Allwinner sunxi MMC controller
->> +
->> +The highspeed MMC host controller on Allwinner SoCs provides an interfa=
-ce
->> +for MMC, SD and SDIO types of memory cards.
->> +
->> +Supported maximum speeds are the ones of the eMMC standard 4.5 as well
->> +as the speed of SD standard 3.0.
->> +Absolute maximum transfer rate is 200MB/s
->> +
->> +Required properties:
->> + - compatible : "allwinner,sun4i-a10-mmc" or "allwinner,sun5i-a13-mmc"
->> + - reg : mmc controller base registers
->> + - clocks : a list with 2 phandle + clock specifier pairs
->> + - clock-names : must contain "ahb" and "mod"
->=20
-> Again, this is not a module0 clock, so the clock name is misleading.
+>> diff --git a/arch/arm/boot/dts/sun6i-a31.dtsi b/arch/arm/boot/dts/sun6i-a31.dtsi
+>> index d45efa7..12bcc17 100644
+>> --- a/arch/arm/boot/dts/sun6i-a31.dtsi
+>> +++ b/arch/arm/boot/dts/sun6i-a31.dtsi
+>> @@ -198,6 +198,38 @@
+>>  					"apb2_uart4", "apb2_uart5";
+>>  		};
+>>  
+>> +		mmc0_clk: clk@01c20088 {
+>> +			#clock-cells = <0>;
+>> +			compatible = "allwinner,sun4i-a10-mod0-clk";
+> 
+> And this is not misleading but wrong. The MMC clocks have the phase
+> control feature that mod0 clock don't have, so they should have a
+> compatible of their own.
 
-Ah, I see what you're getting at, yes giving it a different name here makes
-sense I'll change it to mmc in the next version of the patch-set.
+You said the same thing when I posted v8, and I replied to that, that
+this is the exact same construction used as with sun4i, sun5i and sun7i.
+
+I agree this needs to be fixed, but it needs to be fixed for *all* of
+them, and IMHO it is best to be consistently "wrong" for now and then
+fix them all in one go (and all in the same way) when we've landed a
+generic way of dealing with phase-control.
+
+So for now I'm going to keep this as is, iow the same as the clock
+bindings for mmc which we already have for sun4i, sun5i and sun7i
+which all have the same issue.
 
 Regards,
 
 Hans
-
-
---=20
-You received this message because you are subscribed to the Google Groups "=
-linux-sunxi" group.
-To unsubscribe from this group and stop receiving emails from it, send an e=
-mail to linux-sunxi+unsubscribe-/JYPxA39Uh5TLH3MbocFF+G/Ez6ZCGd0@public.gmane.org
-For more options, visit https://groups.google.com/d/optout.
