@@ -1,37 +1,48 @@
 From: srinivas.kandagatla@linaro.org
-Subject: [PATCH v1 05/11] mmc: mmci: use NSEC_PER_SEC macro
-Date: Tue, 29 Apr 2014 09:20:01 +0100
-Message-ID: <1398759601-13178-1-git-send-email-srinivas.kandagatla@linaro.org>
+Subject: [PATCH v1 06/11] mmc: mmci: Qcomm: Add 3 clock cycle delay after register write
+Date: Tue, 29 Apr 2014 09:20:14 +0100
+Message-ID: <1398759614-13217-1-git-send-email-srinivas.kandagatla@linaro.org>
 References: <1398759492-12970-1-git-send-email-srinivas.kandagatla@linaro.org>
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
 In-Reply-To: <1398759492-12970-1-git-send-email-srinivas.kandagatla@linaro.org>
-Sender: linux-kernel-owner@vger.kernel.org
+Sender: linux-arm-msm-owner@vger.kernel.org
 To: Russell King <linux@arm.linux.org.uk>, linux-mmc@vger.kernel.org
 Cc: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, linux-kernel@vger.kernel.org, agross@quicinc.com, linux-arm-msm@vger.kernel.org, Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
 
 From: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
 
-This patch replaces a constant used in calculating timeout with a proper
-macro. This is make code more readable.
+Most of the Qcomm SD card controller registers must be updated to the MCLK
+domain so subsequent writes to registers will be ignored until 3 clock cycles
+have passed.
+
+This patch adds a 3 clock cycle delay required after writing to controller
+registers on Qualcomm SOCs. Without this delay all the register writes are not
+successfull, resulting in not detecting cards.
 
 Signed-off-by: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
 ---
- drivers/mmc/host/mmci.c |    2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ drivers/mmc/host/mmci.c |    8 ++++++++
+ 1 file changed, 8 insertions(+)
 
 diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index 36db31e..4f8d0ba 100644
+index 4f8d0ba..f73dc48 100644
 --- a/drivers/mmc/host/mmci.c
 +++ b/drivers/mmc/host/mmci.c
-@@ -759,7 +759,7 @@ static void mmci_start_data(struct mmci_host *host, struct mmc_data *data)
- 	data->bytes_xfered = 0;
+@@ -179,6 +179,14 @@ static inline u32 mmci_readl(struct mmci_host *host, u32 off)
+ static inline void mmci_writel(struct mmci_host *host, u32 data, u32 off)
+ {
+ 	writel(data, host->base + off);
++
++	/*
++	 * On QCom SD card controller, registers must be updated to the
++	 * MCLK domain so subsequent writes to this register will be ignored
++	 * for 3 clk cycles.
++	 */
++	if (host->hw_designer == AMBA_VENDOR_QCOM)
++		udelay(1 + ((3 * USEC_PER_SEC)/host->mclk));
+ }
  
- 	clks = (unsigned long long)data->timeout_ns * host->cclk;
--	do_div(clks, 1000000000UL);
-+	do_div(clks, NSEC_PER_SEC);
- 
- 	timeout = data->timeout_clks + (unsigned int)clks;
- 
+ static int mmci_card_busy(struct mmc_host *mmc)
 -- 
 1.7.9.5
