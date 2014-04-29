@@ -1,49 +1,67 @@
-From: srinivas.kandagatla@linaro.org
-Subject: [PATCH v1 07/11] mmc: mmci: move ST specific register extensions access under condition.
-Date: Tue, 29 Apr 2014 09:20:27 +0100
-Message-ID: <1398759627-13256-1-git-send-email-srinivas.kandagatla@linaro.org>
-References: <1398759492-12970-1-git-send-email-srinivas.kandagatla@linaro.org>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1398759492-12970-1-git-send-email-srinivas.kandagatla@linaro.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Russell King <linux@arm.linux.org.uk>, linux-mmc@vger.kernel.org
-Cc: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, linux-kernel@vger.kernel.org, agross@quicinc.com, linux-arm-msm@vger.kernel.org, Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+From: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: [PATCH v9 05/17] ARM: dts: sun4i: Add pin-muxing
+ info for the mmc0 controller
+Date: Tue, 29 Apr 2014 10:20:39 +0200
+Message-ID: <535F60D7.1080500@redhat.com>
+References: <1398507381-5614-1-git-send-email-hdegoede@redhat.com> <1398507381-5614-6-git-send-email-hdegoede@redhat.com> <20140428193210.GF3134@lukather>
+Reply-To: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-sunxi+bncBDRZXY4CYYORBZGB7WNAKGQEKUS4XGI-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+In-Reply-To: <20140428193210.GF3134@lukather>
+List-Post: <http://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Help: <http://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Archive: <http://groups.google.com/group/linux-sunxi>
+Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+List-Subscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Unsubscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+To: Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
+Cc: Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Emilio Lopez <emilio-0Z03zUJReD5OxF6Tv1QG9Q@public.gmane.org>, Mike Turquette <mturquette-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, =?ISO-8859-1?Q?David_Lanzend=F6rfer?= <david.lanzendoerfer-Z7Kmv9EsliU@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, devicetree <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-From: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+Hi,
 
-This patch moves some of the ST specific register extensions access under
-condition, so that other SOCs like Qualcomm or ARM would not a side effect of
-writing to those reserved/different purpose bits.
+On 04/28/2014 09:32 PM, Maxime Ripard wrote:
+> Hi Hans,
+> 
+> On Sat, Apr 26, 2014 at 12:16:09PM +0200, Hans de Goede wrote:
+>> mmc0 is the only controller actually being used on boards, so limit the
+>> pin-muxing options to that.
+>>
+>> Signed-off-by: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+>> ---
+>>  arch/arm/boot/dts/sun4i-a10.dtsi | 14 ++++++++++++++
+>>  1 file changed, 14 insertions(+)
+>>
+>> diff --git a/arch/arm/boot/dts/sun4i-a10.dtsi b/arch/arm/boot/dts/sun4i-a10.dtsi
+>> index dce074b..29fd4f5 100644
+>> --- a/arch/arm/boot/dts/sun4i-a10.dtsi
+>> +++ b/arch/arm/boot/dts/sun4i-a10.dtsi
+>> @@ -565,6 +565,20 @@
+>>  				allwinner,drive = <0>;
+>>  				allwinner,pull = <0>;
+>>  			};
+>> +
+>> +			mmc0_pins_a: mmc0@0 {
+>> +				allwinner,pins = "PF0","PF1","PF2","PF3","PF4","PF5";
+>> +				allwinner,function = "mmc0";
+>> +				allwinner,drive = <2>;
+>> +				allwinner,pull = <0>;
+>> +			};
+>> +
+>> +			mmc0_cd_pin_a: mmc0_cd_pin@0 {
+>> +				allwinner,pins = "PH1";
+>> +				allwinner,function = "gpio_in";
+>> +				allwinner,drive = <0>;
+>> +				allwinner,pull = <1>;
+>> +			};
+> 
+> Actually, I like very much the reference_pin mention you had in your
+> bindings documentation. Could you use it for this and the other
+> patches?
 
-Signed-off-by: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
----
- drivers/mmc/host/mmci.c |    6 ++++--
- 1 file changed, 4 insertions(+), 2 deletions(-)
+Ok will fix this up for the next version.
 
-diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index f73dc48..306e0c8 100644
---- a/drivers/mmc/host/mmci.c
-+++ b/drivers/mmc/host/mmci.c
-@@ -269,7 +269,8 @@ static void mmci_write_pwrreg(struct mmci_host *host, u32 pwr)
- static void mmci_write_datactrlreg(struct mmci_host *host, u32 datactrl)
- {
- 	/* Keep ST Micro busy mode if enabled */
--	datactrl |= host->datactrl_reg & MCI_ST_DPSM_BUSYMODE;
-+	if (host->hw_designer == AMBA_VENDOR_ST)
-+		datactrl |= host->datactrl_reg & MCI_ST_DPSM_BUSYMODE;
- 
- 	if (host->datactrl_reg != datactrl) {
- 		host->datactrl_reg = datactrl;
-@@ -815,7 +816,8 @@ static void mmci_start_data(struct mmci_host *host, struct mmc_data *data)
- 			mmci_write_clkreg(host, clk);
- 		}
- 
--	if (host->mmc->ios.timing == MMC_TIMING_UHS_DDR50)
-+	if (host->mmc->ios.timing == MMC_TIMING_UHS_DDR50 &&
-+	    host->hw_designer == AMBA_VENDOR_ST)
- 		datactrl |= MCI_ST_DPSM_DDRMODE;
- 
- 	/*
--- 
-1.7.9.5
+Regards,
+
+Hans
