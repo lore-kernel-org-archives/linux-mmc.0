@@ -1,64 +1,63 @@
-From: micky <micky_ching@realsil.com.cn>
-Subject: Re: [PATCH 0/2] mmc: rtsx: revert support for mmc async request
-Date: Wed, 30 Apr 2014 09:32:57 +0800
-Message-ID: <536052C9.309@realsil.com.cn>
-References: <cover.1398735435.git.micky_ching@realsil.com.cn>
- <20140429080240.GC29462@lee--X1>
+From: Joel Fernandes <joelf@ti.com>
+Subject: Re: [PATCH v10 1/5] mmc: omap_hsmmc: Enable SDIO interrupt
+Date: Mon, 28 Apr 2014 23:43:41 -0500
+Message-ID: <535F2DFD.5070307@ti.com>
+References: <1398670860-30695-1-git-send-email-afenkart@gmail.com> <1398670860-30695-2-git-send-email-afenkart@gmail.com>
+Reply-To: <joelf@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"; Format="flowed"
+Content-Type: text/plain; charset="ISO-8859-1"
 Content-Transfer-Encoding: 7bit
-Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
-In-Reply-To: <20140429080240.GC29462@lee--X1>
-List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
-List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel>
-List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
-List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
-List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
-Errors-To: driverdev-devel-bounces@linuxdriverproject.org
-Sender: driverdev-devel-bounces@linuxdriverproject.org
-To: Lee Jones <lee.jones@linaro.org>
-Cc: ulf.hansson@linaro.org, sameo@linux.intel.com, gregkh@linuxfoundation.org, linux-mmc@vger.kernel.org, chris@printf.net, linux-kernel@vger.kernel.org, wei_wang@realsil.com.cn, rogerable@realtek.com, devel@linuxdriverproject.org, dan.carpenter@oracle.com
+Return-path: <linux-omap-owner@vger.kernel.org>
+In-Reply-To: <1398670860-30695-2-git-send-email-afenkart@gmail.com>
+Sender: linux-omap-owner@vger.kernel.org
+To: Andreas Fenkart <afenkart@gmail.com>, Tony Lindgren <tony@atomide.com>
+Cc: Chris Ball <chris@printf.net>, Grant Likely <grant.likely@secretlab.ca>, Felipe Balbi <balbi@ti.com>, Balaji T K <balajitk@ti.com>, zonque@gmail.com, galak@codeaurora.org, linux-doc@vger.kernel.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Lee,
+Minor nit...
 
-On 04/29/2014 04:02 PM, Lee Jones wrote:
->> From: Micky Ching <micky_ching@realsil.com.cn>
->>
->> The commit <mmc: rtsx: add support for pre_req and post_req> have some problem,
->> using mutex_unlock() in atomic context, spinlock deadlock, it is hard to fix
->> these problem, and better to use a new method. So just remove it.
->>
->> The commit <mmc: rtsx: modify error handle and remove smatch warnings> depends
->> on the previous patch. And mainly fix some problem for the previous patch. So
->> need remove.
->>
->> Micky Ching (2):
->>    mmc: rtsx: Revert "mmc: rtsx: modify error handle and remove smatch
->>      warnings"
->>    mmc: rtsx: Revert "mmc: rtsx: add support for pre_req and post_req"
->>
->>   drivers/mfd/rtsx_pcr.c            |  132 ++++-------
->>   drivers/mmc/host/rtsx_pci_sdmmc.c |  459 +++++++------------------------------
->>   include/linux/mfd/rtsx_common.h   |    1 -
->>   include/linux/mfd/rtsx_pci.h      |    6 -
->>   4 files changed, 124 insertions(+), 474 deletions(-)
-> Just to clarify, what commit did you base these changes on? Have you
-> tested to ensure everything works as it should with these two
-> reversions?
->
-I base on linux-nex tree
-commit d397246adc001ee5235f32de10db112ad23175df
-Author: Stephen Rothwell <sfr@canb.auug.org.au>
-Date:   Thu Apr 24 16:22:09 2014 +1000
+On 04/28/2014 02:40 AM, Andreas Fenkart wrote:
+[..]
+>  	/* Do not initialize card-specific things if the power is off */
+>  	if (host->power_mode == MMC_POWER_OFF)
+> @@ -1117,8 +1138,12 @@ static irqreturn_t omap_hsmmc_irq(int irq, void *dev_id)
+>  	int status;
+>  
+>  	status = OMAP_HSMMC_READ(host->base, STAT);
+> -	while (status & INT_EN_MASK && host->req_in_progress) {
+> -		omap_hsmmc_do_irq(host, status);
+> +	while (status & (INT_EN_MASK | CIRQ_EN)) {
+> +		if (host->req_in_progress)
+> +			omap_hsmmc_do_irq(host, status);
+> +
+> +		if (status & CIRQ_EN)
+> +			mmc_signal_sdio_irq(host->mmc);
+>  
+>  		/* Flush posted write */
+>  		status = OMAP_HSMMC_READ(host->base, STAT);
+> @@ -1127,6 +1152,23 @@ static irqreturn_t omap_hsmmc_irq(int irq, void *dev_id)
+>  	return IRQ_HANDLED;
+>  }
+>  
+> +static irqreturn_t omap_hsmmc_wake_irq(int irq, void *dev_id)
+> +{
+> +	struct omap_hsmmc_host *host = dev_id;
+> +	unsigned long flags;
+> +
+> +	/* cirq is level triggered, disable to avoid infinite loop */
+> +	spin_lock_irqsave(&host->irq_lock, flags);
 
-     Add linux-next specific files for 20140424
+Do you need to save restore flags here? IRQ is already disabled since
+you're in hard IRQ context so spin_lock() seems sufficient.
 
-     Signed-off-by: Stephen Rothwell <sfr@canb.auug.org.au>
+> +	if (host->flags & HSMMC_WAKE_IRQ_ENABLED) {
+> +		disable_irq_nosync(host->wake_irq);
+> +		host->flags &= ~HSMMC_WAKE_IRQ_ENABLED;
+> +	}
+> +	spin_unlock_irqrestore(&host->irq_lock, flags);
 
-And tested, so it can works ok.
+spin_unlock() seems sufficient.
 
-Best Regards.
-micky.
+regards,
+-Joel
+
