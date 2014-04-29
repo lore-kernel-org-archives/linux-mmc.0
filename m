@@ -1,62 +1,55 @@
-From: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH v9 10/17] ARM: dts: sun6i: Add mmc clocks
-Date: Tue, 29 Apr 2014 10:29:02 +0200
-Message-ID: <535F62CE.20606@redhat.com>
-References: <1398507381-5614-1-git-send-email-hdegoede@redhat.com> <1398507381-5614-11-git-send-email-hdegoede@redhat.com> <20140428193753.GJ3134@lukather>
-Reply-To: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+From: Alex Smith <alex.smith@imgtec.com>
+Subject: [PATCH] mmc: jz4740: don't wait for PRG_DONE after stop command with R1 response
+Date: Tue, 29 Apr 2014 09:32:33 +0100
+Message-ID: <1398760353-12507-1-git-send-email-alex.smith@imgtec.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-sunxi+bncBDRZXY4CYYORBV6F7WNAKGQEOO42BAI-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-In-Reply-To: <20140428193753.GJ3134@lukather>
-List-Post: <http://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Help: <http://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Archive: <http://groups.google.com/group/linux-sunxi>
-Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
-List-Subscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Unsubscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-To: Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
-Cc: Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Emilio Lopez <emilio-0Z03zUJReD5OxF6Tv1QG9Q@public.gmane.org>, Mike Turquette <mturquette-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, =?ISO-8859-1?Q?David_Lanzend=F6rfer?= <david.lanzendoerfer-Z7Kmv9EsliU@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, devicetree <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Type: text/plain
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailapp01.imgtec.com ([195.89.28.114]:42556 "EHLO
+	mailapp01.imgtec.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754865AbaD2Icy (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 29 Apr 2014 04:32:54 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: Alex Smith <alex.smith@imgtec.com>, Lars-Peter Clausen <lars@metafoo.de>, Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>, James Hogan <james.hogan@imgtec.com>
 
-Hi,
+As of commit bcc3e1726d ("mmc: block: Use R1 responses for stop cmds for
+read requests"), stop commands for reads do not have MMC_RSP_BUSY set.
+In this case we should not wait for a PRG_DONE IRQ after sending the
+stop command: it will not get raised when the busy flag is not set,
+causing the request to fail with a timeout.
 
-On 04/28/2014 09:37 PM, Maxime Ripard wrote:
-> On Sat, Apr 26, 2014 at 12:16:14PM +0200, Hans de Goede wrote:
->> Add clk-nodes for the mmc clocks.
->>
->> Signed-off-by: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
->> ---
->>  arch/arm/boot/dts/sun6i-a31.dtsi | 32 ++++++++++++++++++++++++++++++++
->>  1 file changed, 32 insertions(+)
->>
->> diff --git a/arch/arm/boot/dts/sun6i-a31.dtsi b/arch/arm/boot/dts/sun6i-a31.dtsi
->> index d45efa7..12bcc17 100644
->> --- a/arch/arm/boot/dts/sun6i-a31.dtsi
->> +++ b/arch/arm/boot/dts/sun6i-a31.dtsi
->> @@ -198,6 +198,38 @@
->>  					"apb2_uart4", "apb2_uart5";
->>  		};
->>  
->> +		mmc0_clk: clk@01c20088 {
->> +			#clock-cells = <0>;
->> +			compatible = "allwinner,sun4i-a10-mod0-clk";
-> 
-> And this is not misleading but wrong. The MMC clocks have the phase
-> control feature that mod0 clock don't have, so they should have a
-> compatible of their own.
+Signed-off-by: Alex Smith <alex.smith@imgtec.com>
+Cc: Lars-Peter Clausen <lars@metafoo.de>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Chris Ball <chris@printf.net>
+Cc: James Hogan <james.hogan@imgtec.com>
+---
+ drivers/mmc/host/jz4740_mmc.c | 10 ++++++----
+ 1 file changed, 6 insertions(+), 4 deletions(-)
 
-You said the same thing when I posted v8, and I replied to that, that
-this is the exact same construction used as with sun4i, sun5i and sun7i.
+diff --git a/drivers/mmc/host/jz4740_mmc.c b/drivers/mmc/host/jz4740_mmc.c
+index de2139c..1c3368b 100644
+--- a/drivers/mmc/host/jz4740_mmc.c
++++ b/drivers/mmc/host/jz4740_mmc.c
+@@ -515,10 +515,12 @@ static irqreturn_t jz_mmc_irq_worker(int irq, void *devid)
+ 
+ 		jz4740_mmc_send_command(host, req->stop);
+ 
+-		timeout = jz4740_mmc_poll_irq(host, JZ_MMC_IRQ_PRG_DONE);
+-		if (timeout) {
+-			host->state = JZ4740_MMC_STATE_DONE;
+-			break;
++		if (mmc_resp_type(req->stop) & MMC_RSP_BUSY) {
++			timeout = jz4740_mmc_poll_irq(host, JZ_MMC_IRQ_PRG_DONE);
++			if (timeout) {
++				host->state = JZ4740_MMC_STATE_DONE;
++				break;
++			}
+ 		}
+ 	case JZ4740_MMC_STATE_DONE:
+ 		break;
+-- 
+1.9.2
 
-I agree this needs to be fixed, but it needs to be fixed for *all* of
-them, and IMHO it is best to be consistently "wrong" for now and then
-fix them all in one go (and all in the same way) when we've landed a
-generic way of dealing with phase-control.
-
-So for now I'm going to keep this as is, iow the same as the clock
-bindings for mmc which we already have for sun4i, sun5i and sun7i
-which all have the same issue.
-
-Regards,
-
-Hans
