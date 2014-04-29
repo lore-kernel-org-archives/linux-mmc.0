@@ -1,39 +1,80 @@
-From: Lars-Peter Clausen <lars@metafoo.de>
-Subject: Re: [PATCH] mmc: jz4740: don't wait for PRG_DONE after stop command
- with R1 response
-Date: Tue, 29 Apr 2014 13:28:23 +0200
-Message-ID: <535F8CD7.9060703@metafoo.de>
-References: <1398760353-12507-1-git-send-email-alex.smith@imgtec.com> <CAPDyKFpAbLzhHBuzCnpTjRR9XC=H1uB71wFDkDg9drHfBMeMyw@mail.gmail.com>
+From: Konstantin Dorfman <kdorfman@codeaurora.org>
+Subject: Re: mmc: core: retries counter for data command initialization.
+Date: Tue, 29 Apr 2014 14:48:03 +0300
+Message-ID: <535F9173.1030102@codeaurora.org>
+References: <535F5B02.9060908@codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp-out-063.synserver.de ([212.40.185.63]:1052 "EHLO
-	smtp-out-008.synserver.de" rhost-flags-OK-OK-OK-FAIL)
-	by vger.kernel.org with ESMTP id S933540AbaD2LfG (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 29 Apr 2014 07:35:06 -0400
-In-Reply-To: <CAPDyKFpAbLzhHBuzCnpTjRR9XC=H1uB71wFDkDg9drHfBMeMyw@mail.gmail.com>
+Received: from smtp.codeaurora.org ([198.145.11.231]:39853 "EHLO
+	smtp.codeaurora.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S933771AbaD2LsH (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 29 Apr 2014 07:48:07 -0400
+In-Reply-To: <535F5B02.9060908@codeaurora.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Alex Smith <alex.smith@imgtec.com>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, James Hogan <james.hogan@imgtec.com>
+To: linux-mmc@vger.kernel.org
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>
 
-On 04/29/2014 01:07 PM, Ulf Hansson wrote:
-> On 29 April 2014 10:32, Alex Smith <alex.smith@imgtec.com> wrote:
->> As of commit bcc3e1726d ("mmc: block: Use R1 responses for stop cmds for
->> read requests"), stop commands for reads do not have MMC_RSP_BUSY set.
->> In this case we should not wait for a PRG_DONE IRQ after sending the
->> stop command: it will not get raised when the busy flag is not set,
->> causing the request to fail with a timeout.
->>
->> Signed-off-by: Alex Smith <alex.smith@imgtec.com>
->> Cc: Lars-Peter Clausen <lars@metafoo.de>
->> Cc: Ulf Hansson <ulf.hansson@linaro.org>
->> Cc: Chris Ball <chris@printf.net>
->> Cc: James Hogan <james.hogan@imgtec.com>
+On 04/29/14 10:55, Konstantin Dorfman wrote:
+
+Correction inside
+
+> Hi All,
 >
-> Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
+> After 6035d9730d5825e6e3c225b721a5847a521d6556 "mmc: fix async request
+> mechanism for sequential read scenarios" mmc layer data path async
+> request handling was separated from mmc commands path.
+>
+> mmc_wait_for_data_req_done() function is used to wait for completion of
+> the currently running data request, while for commands
+> mmc_wait_for_req_done() is used.
+>
+> There is code that repeats request cmd->retries times in case of error.
+> The problem that for data command this counter is not initialized
+> properly as it does for mmc command sending:
+>
+>
+> int mmc_wait_for_cmd(struct mmc_host *host, struct mmc_command *cmd, int
+> retries)
+> {
+>      struct mmc_request mrq = {NULL};
+>
+>      WARN_ON(!host->claimed);
+>
+>      memset(cmd->resp, 0, sizeof(cmd->resp));
+>      cmd->retries = retries;                 <-- supplied by
+>                                                      caller
+>
+>      mrq.cmd = cmd;
+>      cmd->data = NULL;
+>
+>      mmc_wait_for_req(host, &mrq);
+>
+>      return cmd->error;
+> }
+>
+> I found that there is no similar initialization for data command
+> processing code, so the counter cmd->retries remains always 0.
+>
+> Lets discuss:
+> - do we need retries for data request
+> - what value is good: for command there are 0 or 5 retries
+> - where to do this initialization:
+
+card/block.c: static void mmc_blk_rw_rq_prep(struct mmc_queue_req *mqrq,
+			       struct mmc_card *card,
+			       int disable_multi,
+			       struct mmc_queue *mq)
+
+>
+> Thanks,
+> Kostya
 >
 
-Acked-by: Lars-Peter Clausen <lars@metafoo.de>
 
+-- 
+sent by an employee of the Qualcomm Innovation Center, Inc.
+The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum,
+hosted by The Linux Foundation
