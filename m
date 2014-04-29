@@ -1,69 +1,289 @@
-From: Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
-Subject: Re: [PATCH v9 12/17] ARM: dts: sun6i: Add pin-muxing
- info for the mmc controllers
-Date: Mon, 28 Apr 2014 12:38:24 -0700
-Message-ID: <20140428193824.GK3134@lukather>
-References: <1398507381-5614-1-git-send-email-hdegoede@redhat.com>
- <1398507381-5614-13-git-send-email-hdegoede@redhat.com>
-Reply-To: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+From: <micky_ching@realsil.com.cn>
+Subject: [PATCH 1/2] mmc: rtsx: Revert "mmc: rtsx: modify error handle and
+ remove smatch warnings"
+Date: Tue, 29 Apr 2014 09:54:53 +0800
+Message-ID: <1076b1824732688774d223a14595ecf26a375d82.1398735435.git.micky_ching@realsil.com.cn>
+References: <cover.1398735435.git.micky_ching@realsil.com.cn>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="1ppIqr1kl39GnwQx"
-Return-path: <linux-sunxi+bncBD2ZNBF5VYJRBHO57KNAKGQE7FVVQCI-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <1398507381-5614-13-git-send-email-hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-List-Post: <http://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Help: <http://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Archive: <http://groups.google.com/group/linux-sunxi>
-Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
-List-Subscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Unsubscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-To: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Emilio Lopez <emilio-0Z03zUJReD5OxF6Tv1QG9Q@public.gmane.org>, Mike Turquette <mturquette-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, David =?iso-8859-1?Q?Lanzend=F6rfer?= <david.lanzendoerfer-Z7Kmv9EsliU@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, devicetree <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
+In-Reply-To: <cover.1398735435.git.micky_ching@realsil.com.cn>
+List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
+List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel>
+List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
+List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
+List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
+Errors-To: driverdev-devel-bounces@linuxdriverproject.org
+Sender: driverdev-devel-bounces@linuxdriverproject.org
+To: chris@printf.net, ulf.hansson@linaro.org, lee.jones@linaro.org, sameo@linux.intel.com
+Cc: gregkh@linuxfoundation.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, wei_wang@realsil.com.cn, devel@linuxdriverproject.org, rogerable@realtek.com, dan.carpenter@oracle.com
 List-Id: linux-mmc@vger.kernel.org
 
+From: Micky Ching <micky_ching@realsil.com.cn>
 
---1ppIqr1kl39GnwQx
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+This reverts commit 1f7b581b3ffcb2a8437397a02f4af89fa6934d08.
 
-On Sat, Apr 26, 2014 at 12:16:16PM +0200, Hans de Goede wrote:
-> This adds  pin-muxing info for the mmc controller / port combinations whi=
-ch
-> are known to be used on actual boards.
->=20
-> Signed-off-by: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+The patch depend on commit c42deffd5b53c9e583d83c7964854ede2f12410d
+<mmc: rtsx: add support for pre_req and post_req>, but the previous
+patch was discard. So we have to delete the patch.
 
-Applied, thanks!
+Signed-off-by: Micky Ching <micky_ching@realsil.com.cn>
+---
+ drivers/mmc/host/rtsx_pci_sdmmc.c |  119 +++++++++++++++++--------------------
+ 1 file changed, 54 insertions(+), 65 deletions(-)
 
-Maxime
-
---=20
-Maxime Ripard, Free Electrons
-Embedded Linux, Kernel and Android engineering
-http://free-electrons.com
-
---1ppIqr1kl39GnwQx
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.14 (GNU/Linux)
-
-iQIcBAEBAgAGBQJTXq4wAAoJEBx+YmzsjxAg3UkP/1pUPduQhd2aLZ2dJ0xjgOEM
-SrBhiL6/uTOOZoFPk/jHfQQCIzB+x4FqEvNI6JQbdRONHc9Bhl0GVOCY1X1bD5ny
-kZdxZFBuobP0phIKYnYgMJMtuviJMDhUiBPi050Jd4HpbVXTzO7nnfKQ9cDVDviV
-cHx7vPLgeNNpaYEdyXkp57lfftUJB3QqIgG4Y+Up9uPvApYLA2z+NQB80OdJGgBH
-YL2eQybJUz/JDchLFDF3xB94BnhXK77Ov+jjfDIJyPFL2JbkJBwZ99wbEanPmnGm
-7kSlllz/xq1AuzwMgOYDu6Lxq7VaNNYISPNOB6XudEjieo+88dKZpb2YovXqfi8H
-ObaARoe6lYpFN5Oce18JO6G0JZQDkv5XtcUl24ri/IP1ogZ0EWRQDKXS1838Q31z
-yqbpe612/Ku4T9duWZt8juRqD5SYPWYoiLFnTXkWAEkkqVmVmCI1vr1E6hymR3T5
-Tf9LpVO228U4RiGO8Y3TtCQwtkZ6A5t5QfiZGLg25jB7CaULsaGaQRsmdFsYW0Xd
-q3yfhSOJjrDiLWs89ltRgjPkg/LciNNZtmPawmV+xalIAdSTkQ9XOvqea7Wj3dX2
-uKLWxaPYVlsSRSl1ODPlqe0q7iee7Xm5xGba3hEJldpeVdmkGcgGyXj0Uj7+HsRo
-Tf/MtPEuJV3Wm8kgVc1j
-=0fFo
------END PGP SIGNATURE-----
-
---1ppIqr1kl39GnwQx--
+diff --git a/drivers/mmc/host/rtsx_pci_sdmmc.c b/drivers/mmc/host/rtsx_pci_sdmmc.c
+index 09340b9..76cfdcc 100644
+--- a/drivers/mmc/host/rtsx_pci_sdmmc.c
++++ b/drivers/mmc/host/rtsx_pci_sdmmc.c
+@@ -81,24 +81,25 @@ static inline void sd_clear_error(struct realtek_pci_sdmmc *host)
+ }
+ 
+ #ifdef DEBUG
+-static inline void sd_print_reg(struct realtek_pci_sdmmc *host, u16 reg)
+-{
+-	u8 val = 0;
+-
+-	if (rtsx_pci_read_register(host->pcr, reg, &val) < 0)
+-		dev_dbg(sdmmc_dev(host), "read 0x%04x failed\n", reg);
+-	else
+-		dev_dbg(sdmmc_dev(host), "0x%04X: 0x%02x\n", reg, val);
+-}
+-
+ static void sd_print_debug_regs(struct realtek_pci_sdmmc *host)
+ {
++	struct rtsx_pcr *pcr = host->pcr;
+ 	u16 i;
++	u8 *ptr;
++
++	/* Print SD host internal registers */
++	rtsx_pci_init_cmd(pcr);
++	for (i = 0xFDA0; i <= 0xFDAE; i++)
++		rtsx_pci_add_cmd(pcr, READ_REG_CMD, i, 0, 0);
++	for (i = 0xFD52; i <= 0xFD69; i++)
++		rtsx_pci_add_cmd(pcr, READ_REG_CMD, i, 0, 0);
++	rtsx_pci_send_cmd(pcr, 100);
+ 
++	ptr = rtsx_pci_get_cmd_data(pcr);
+ 	for (i = 0xFDA0; i <= 0xFDAE; i++)
+-		sd_print_reg(host, i);
++		dev_dbg(sdmmc_dev(host), "0x%04X: 0x%02x\n", i, *(ptr++));
+ 	for (i = 0xFD52; i <= 0xFD69; i++)
+-		sd_print_reg(host, i);
++		dev_dbg(sdmmc_dev(host), "0x%04X: 0x%02x\n", i, *(ptr++));
+ }
+ #else
+ #define sd_print_debug_regs(host)
+@@ -124,27 +125,19 @@ static void sd_request_timeout(unsigned long host_addr)
+ 	spin_lock_irqsave(&host->lock, flags);
+ 
+ 	if (!host->mrq) {
+-		dev_err(sdmmc_dev(host), "error: request not exist\n");
+-		spin_unlock_irqrestore(&host->lock, flags);
+-		return;
++		dev_err(sdmmc_dev(host), "error: no request exist\n");
++		goto out;
+ 	}
+ 
+-	if (host->cmd && host->data)
+-		dev_err(sdmmc_dev(host), "error: cmd and data conflict\n");
+-
+-	if (host->cmd) {
++	if (host->cmd)
+ 		host->cmd->error = -ETIMEDOUT;
+-		dev_dbg(sdmmc_dev(host), "timeout for cmd %d\n",
+-			host->cmd->opcode);
+-		tasklet_schedule(&host->cmd_tasklet);
+-	}
+-
+-	if (host->data) {
++	if (host->data)
+ 		host->data->error = -ETIMEDOUT;
+-		dev_dbg(sdmmc_dev(host), "timeout for data transfer\n");
+-		tasklet_schedule(&host->data_tasklet);
+-	}
+ 
++	dev_dbg(sdmmc_dev(host), "timeout for request\n");
++
++out:
++	tasklet_schedule(&host->finish_tasklet);
+ 	spin_unlock_irqrestore(&host->lock, flags);
+ }
+ 
+@@ -164,8 +157,7 @@ static void sd_finish_request(unsigned long host_addr)
+ 	mrq = host->mrq;
+ 	if (!mrq) {
+ 		dev_err(sdmmc_dev(host), "error: no request need finish\n");
+-		spin_unlock_irqrestore(&host->lock, flags);
+-		return;
++		goto out;
+ 	}
+ 
+ 	cmd = mrq->cmd;
+@@ -175,6 +167,11 @@ static void sd_finish_request(unsigned long host_addr)
+ 		(mrq->stop && mrq->stop->error) ||
+ 		(cmd && cmd->error) || (data && data->error);
+ 
++	if (any_error) {
++		rtsx_pci_stop_cmd(pcr);
++		sd_clear_error(host);
++	}
++
+ 	if (data) {
+ 		if (any_error)
+ 			data->bytes_xfered = 0;
+@@ -191,6 +188,7 @@ static void sd_finish_request(unsigned long host_addr)
+ 	host->cmd = NULL;
+ 	host->data = NULL;
+ 
++out:
+ 	spin_unlock_irqrestore(&host->lock, flags);
+ 	mutex_unlock(&pcr->pcr_mutex);
+ 	mmc_request_done(host->mmc, mrq);
+@@ -375,11 +373,8 @@ static void sd_send_cmd(struct realtek_pci_sdmmc *host, struct mmc_command *cmd)
+ 	if (cmd->opcode == SD_SWITCH_VOLTAGE) {
+ 		err = rtsx_pci_write_register(pcr, SD_BUS_STAT,
+ 				0xFF, SD_CLK_TOGGLE_EN);
+-		if (err < 0) {
+-			rtsx_pci_write_register(pcr, SD_BUS_STAT,
+-				SD_CLK_TOGGLE_EN | SD_CLK_FORCE_STOP, 0);
++		if (err < 0)
+ 			goto out;
+-		}
+ 	}
+ 
+ 	rtsx_pci_init_cmd(pcr);
+@@ -441,8 +436,7 @@ static void sd_get_rsp(unsigned long host_addr)
+ 
+ 	if (!cmd) {
+ 		dev_err(sdmmc_dev(host), "error: cmd not exist\n");
+-		spin_unlock_irqrestore(&host->lock, flags);
+-		return;
++		goto out;
+ 	}
+ 
+ 	spin_lock(&pcr->lock);
+@@ -452,18 +446,16 @@ static void sd_get_rsp(unsigned long host_addr)
+ 		err = -EINVAL;
+ 	spin_unlock(&pcr->lock);
+ 
+-	if (err < 0) {
+-		rtsx_pci_stop_cmd(host->pcr);
+-		sd_print_debug_regs(host);
+-		sd_clear_error(host);
++	if (err < 0)
+ 		goto out;
+-	}
+ 
+ 	rsp_type = host->rsp_type;
+ 	stat_idx = host->rsp_len;
+ 
+-	if (rsp_type == SD_RSP_TYPE_R0)
++	if (rsp_type == SD_RSP_TYPE_R0) {
++		err = 0;
+ 		goto out;
++	}
+ 
+ 	/* Eliminate returned value of CHECK_REG_CMD */
+ 	ptr = rtsx_pci_get_cmd_data(pcr) + 1;
+@@ -506,19 +498,14 @@ static void sd_get_rsp(unsigned long host_addr)
+ 		goto out;
+ 
+ 	if (cmd->data) {
+-		err = sd_start_multi_rw(host, host->mrq);
+-		if (err) {
+-			cmd->data->error = err;
+-			dev_err(sdmmc_dev(host),
+-				"error: start data transfer failed\n");
+-			tasklet_schedule(&host->data_tasklet);
+-		}
++		sd_start_multi_rw(host, host->mrq);
+ 		spin_unlock_irqrestore(&host->lock, flags);
+ 		return;
+ 	}
+ 
+ out:
+ 	cmd->error = err;
++
+ 	tasklet_schedule(&host->finish_tasklet);
+ 	spin_unlock_irqrestore(&host->lock, flags);
+ }
+@@ -538,7 +525,7 @@ static int sd_pre_dma_transfer(struct realtek_pci_sdmmc *host,
+ 		data->host_cookie = 0;
+ 	}
+ 
+-	if (next || data->host_cookie != host->next_data.cookie)
++	if (next || (!next && data->host_cookie != host->next_data.cookie))
+ 		sg_count = rtsx_pci_dma_map_sg(pcr,
+ 				data->sg, data->sg_len, read);
+ 	else
+@@ -593,6 +580,7 @@ static int sd_start_multi_rw(struct realtek_pci_sdmmc *host,
+ 	int uhs = mmc_card_uhs(card);
+ 	int read = data->flags & MMC_DATA_READ;
+ 	u8 cfg2, trans_mode;
++	int err;
+ 	size_t data_len = data->blksz * data->blocks;
+ 
+ 	if (host->data)
+@@ -653,7 +641,12 @@ static int sd_start_multi_rw(struct realtek_pci_sdmmc *host,
+ 	mod_timer(&host->timer, jiffies + 10 * HZ);
+ 	rtsx_pci_send_cmd_no_wait(pcr);
+ 
+-	return rtsx_pci_dma_transfer(pcr, data->sg, host->sg_count, read);
++	err = rtsx_pci_dma_transfer(pcr, data->sg, host->sg_count, read);
++	if (err < 0) {
++		data->error = err;
++		tasklet_schedule(&host->finish_tasklet);
++	}
++	return 0;
+ }
+ 
+ static void sd_finish_multi_rw(unsigned long host_addr)
+@@ -667,9 +660,8 @@ static void sd_finish_multi_rw(unsigned long host_addr)
+ 	spin_lock_irqsave(&host->lock, flags);
+ 
+ 	if (!host->data) {
+-		dev_err(sdmmc_dev(host), "error: data not exist\n");
+-		spin_unlock_irqrestore(&host->lock, flags);
+-		return;
++		dev_err(sdmmc_dev(host), "error: no data exist\n");
++		goto out;
+ 	}
+ 
+ 	data = host->data;
+@@ -680,22 +672,19 @@ static void sd_finish_multi_rw(unsigned long host_addr)
+ 	else if (pcr->trans_result != TRANS_RESULT_OK)
+ 		err = -EINVAL;
+ 
+-	if (err < 0)
++	if (err < 0) {
+ 		data->error = err;
+-
+-	if (data->error) {
+-		rtsx_pci_stop_cmd(host->pcr);
+-		sd_print_debug_regs(host);
+-		sd_clear_error(host);
+-		dev_dbg(sdmmc_dev(host), "data transfer failed %d\n",
+-			data->error);
++		goto out;
+ 	}
+ 
+-	if (!host->mrq->sbc && data->stop)
++	if (!host->mrq->sbc && data->stop) {
+ 		sd_send_cmd(host, data->stop);
+-	else
+-		tasklet_schedule(&host->finish_tasklet);
++		spin_unlock_irqrestore(&host->lock, flags);
++		return;
++	}
+ 
++out:
++	tasklet_schedule(&host->finish_tasklet);
+ 	spin_unlock_irqrestore(&host->lock, flags);
+ }
+ 
+-- 
+1.7.9.5
