@@ -1,50 +1,44 @@
-From: =?UTF-8?Q?Andreas_M=C3=BCller?= <schnitzeltony@googlemail.com>
-Subject: Re: [PATCH v10 1/5] mmc: omap_hsmmc: Enable SDIO interrupt
-Date: Wed, 30 Apr 2014 14:23:54 +0200
-Message-ID: <CALbNGRQL_GoEkyiNnihdP9NQ4Dz5my-FuqH6YYKKv+CBnSq67g@mail.gmail.com>
-References: <1398670860-30695-1-git-send-email-afenkart@gmail.com>
-	<1398670860-30695-2-git-send-email-afenkart@gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-omap-owner@vger.kernel.org>
-In-Reply-To: <1398670860-30695-2-git-send-email-afenkart@gmail.com>
-Sender: linux-omap-owner@vger.kernel.org
-To: Andreas Fenkart <afenkart@gmail.com>
-Cc: Tony Lindgren <tony@atomide.com>, Chris Ball <chris@printf.net>, Grant Likely <grant.likely@secretlab.ca>, Felipe Balbi <balbi@ti.com>, Balaji T K <balajitk@ti.com>, zonque@gmail.com, galak@codeaurora.org, linux-doc@vger.kernel.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org
+From: Sebastian Andrzej Siewior <bigeasy@linutronix.de>
+Subject: [PATCH 1/2] mmc: dw_mmc: poll if CD is broken
+Date: Wed, 30 Apr 2014 15:44:43 +0200
+Message-ID: <1398865484-527-1-git-send-email-bigeasy@linutronix.de>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from www.linutronix.de ([62.245.132.108]:51462 "EHLO
+	Galois.linutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1758576AbaD3Noz (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 30 Apr 2014 09:44:55 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>
+Cc: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, Sebastian Andrzej Siewior <bigeasy@linutronix.de>
 
-On Mon, Apr 28, 2014 at 9:40 AM, Andreas Fenkart <afenkart@gmail.com> wrote:
-> @@ -2201,11 +2346,16 @@ static int omap_hsmmc_suspend(struct device *dev)
->         pm_runtime_get_sync(host->dev);
->
->         if (!(host->mmc->pm_flags & MMC_PM_KEEP_POWER)) {
-> -               omap_hsmmc_disable_irq(host);
-> +               OMAP_HSMMC_WRITE(host->base, ISE, 0);
-> +               OMAP_HSMMC_WRITE(host->base, IE, 0);
-> +               OMAP_HSMMC_WRITE(host->base, STAT, STAT_CLEAR);
->                 OMAP_HSMMC_WRITE(host->base, HCTL,
->                                 OMAP_HSMMC_READ(host->base, HCTL) & ~SDBP);
->         }
->
-> +       if (host->wake_irq && !(host->mmc->pm_flags & MMC_PM_WAKE_SDIO_IRQ))
-> +               disable_irq(host->wake_irq);
-> +
->         if (host->dbclk)
->                 clk_disable_unprepare(host->dbclk);
->
-> @@ -2231,6 +2381,9 @@ static int omap_hsmmc_resume(struct device *dev)
->
->         omap_hsmmc_protect_card(host);
->
-> +       if (host->wake_irq & !(host->mmc->pm_flags & MMC_PM_WAKE_SDIO_IRQ))
-> +               enable_irq(host->wake_irq);
-> +
->         pm_runtime_mark_last_busy(host->dev);
->         pm_runtime_put_autosuspend(host->dev);
->         return 0;
-Maybe I misunderstand something here but shouldn't
-disable_irq/enable_irq be swapped here?
+My CD pin is not available at all (DW_MCI_QUIRK_BROKEN_CARD_DETECTION is
+set). The result was in v3.12 that if MMC card was inserted at load
+time, then the MMC card was detected. If it wasn't, it wasn't detected
+since nobody polled for it and I no irq was wired up.
+I haven't noticed any change in that area, therefore I'm adding the
+MMC_CAP_NEEDS_POLL flag in case the detection is broken so the core will
+check for the MMC card.
 
-regards
+Signed-off-by: Sebastian Andrzej Siewior <bigeasy@linutronix.de>
+---
+ drivers/mmc/host/dw_mmc.c | 3 +++
+ 1 file changed, 3 insertions(+)
 
-Andreas
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index cced599..82f5ea2 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -2227,6 +2227,9 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
+ 	}
+ 
+ 	slot->wp_gpio = dw_mci_of_get_wp_gpio(host->dev, slot->id);
++
++	if (host->quirks & DW_MCI_QUIRK_BROKEN_CARD_DETECTION)
++		mmc->caps |= MMC_CAP_NEEDS_POLL;
+ 	dw_mci_of_get_cd_gpio(host->dev, slot->id, mmc);
+ 
+ 	ret = mmc_add_host(mmc);
+-- 
+1.9.2
+
