@@ -1,81 +1,77 @@
-From: Beomho Seo <beomho.seo@samsung.com>
-Subject: [RESEND PATCH 1/1]  mmc: sdhci-s3c: Use devm_ioremap_resource
-Date: Wed, 30 Apr 2014 13:02:04 +0900
-Message-ID: <536075BC.4090103@samsung.com>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: [PATCH] mmc: rtsx: usb backend needs LED support
+Date: Wed, 30 Apr 2014 09:00:33 +0200
+Message-ID: <5378270.XmQGrvIcFE@wuerfel>
+References: <cover.1398735435.git.micky_ching@realsil.com.cn>
+ <201404300228.s3U2S7WA026782@rtits1.realtek.com>
+ <53606F49.1000401@realtek.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout2.samsung.com ([203.254.224.25]:34465 "EHLO
-	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750799AbaD3ECG (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 30 Apr 2014 00:02:06 -0400
-Received: from epcpsbgr5.samsung.com
- (u145.gpu120.samsung.co.kr [203.254.230.145])
- by mailout2.samsung.com (Oracle Communications Messaging Server 7u4-24.01
- (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTP id <0N4T0098YSJFUW50@mailout2.samsung.com> for
- linux-mmc@vger.kernel.org; Wed, 30 Apr 2014 13:02:03 +0900 (KST)
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
+In-Reply-To: <53606F49.1000401@realtek.com>
+List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
+List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel>
+List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
+List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
+List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
+Errors-To: driverdev-devel-bounces@linuxdriverproject.org
+Sender: driverdev-devel-bounces@linuxdriverproject.org
+To: Roger <rogerable@realtek.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Samuel Ortiz <sameo@linux.intel.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Wei WANG <wei_wang@realsil.com.cn>, devel@linuxdriverproject.org, Lee Jones <lee.jones@linaro.org>, Dan Carpenter <dan.carpenter@oracle.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <cjb@laptop.org>, ulf.hansson@linaro.org
-Cc: linux-mmc@vger.kernel.org, Myungjoo Ham <myungjoo.ham@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, =?ISO-8859-1?Q?Heiko_St=FCbner?= <heiko@sntech.de>
 
-This patch devm_ioremap_resource for replace request region and ioremap.
+On Wednesday 30 April 2014 11:34:33 Roger wrote:
+> I think Ulf's idea is to fix the bug by modifying the .c files.
+> I really found the problem of my ifdef hackery and it should do 
+> something similar in sdhci.c as:
+> 
+> From: Roger Tseng <rogerable@realtek.com>
+> Date: Wed, 30 Apr 2014 11:11:25 +0800
+> Subject: [PATCH] mmc: rtsx: fix possible linking error if built-in
+> 
+> rtsx_usb_sdmmc module uses the LED classdev if available, but the code 
+> failed
+> to consider the situation that it is built-in and the LED classdev is a 
+> module,
+> leading to following linking error:
+> 
+>    LD      init/built-in.o
+> drivers/built-in.o: In function `rtsx_usb_sdmmc_drv_remove':
+> rtsx_usb_sdmmc.c:(.text+0x2a018e): undefined reference to 
+> `led_classdev_unregister'
+> drivers/built-in.o: In function `rtsx_usb_sdmmc_drv_probe':
+> rtsx_usb_sdmmc.c:(.text+0x2a197e): undefined reference to 
+> `led_classdev_register'
+> 
+> Fix by excluding such condition when defining macro RTSX_USB_USE_LEDS_CLASS.
+> 
+> Signed-off-by: Roger Tseng <rogerable@realtek.com>
 
-Signed-off-by: Beomho Seo <beomho.seo@samsung.com>
----
- drivers/mmc/host/sdhci-pltfm.c |   23 ++++-------------------
- 1 file changed, 4 insertions(+), 19 deletions(-)
+Yes, that should work, too.
 
-diff --git a/drivers/mmc/host/sdhci-pltfm.c b/drivers/mmc/host/sdhci-pltfm.c
-index bef250e..a54f3e6 100644
---- a/drivers/mmc/host/sdhci-pltfm.c
-+++ b/drivers/mmc/host/sdhci-pltfm.c
-@@ -157,18 +157,10 @@ struct sdhci_host *sdhci_pltfm_init(struct platform_device *pdev,
+Acked-by: Arnd Bergmann <arnd@arndb.de>
 
- 	host->irq = platform_get_irq(pdev, 0);
 
--	if (!request_mem_region(iomem->start, resource_size(iomem),
--		mmc_hostname(host->mmc))) {
--		dev_err(&pdev->dev, "cannot request region\n");
--		ret = -EBUSY;
--		goto err_request;
--	}
--
--	host->ioaddr = ioremap(iomem->start, resource_size(iomem));
--	if (!host->ioaddr) {
--		dev_err(&pdev->dev, "failed to remap registers\n");
--		ret = -ENOMEM;
--		goto err_remap;
-+	host->ioaddr = devm_ioremap_resource(&pdev->dev, iomem);
-+	if (IS_ERR(host->ioaddr)) {
-+		ret = PTR_ERR(host->ioaddr);
-+		goto err;
- 	}
-
- 	/*
-@@ -182,10 +174,6 @@ struct sdhci_host *sdhci_pltfm_init(struct platform_device *pdev,
-
- 	return host;
-
--err_remap:
--	release_mem_region(iomem->start, resource_size(iomem));
--err_request:
--	sdhci_free_host(host);
- err:
- 	dev_err(&pdev->dev, "%s failed %d\n", __func__, ret);
- 	return ERR_PTR(ret);
-@@ -195,10 +183,7 @@ EXPORT_SYMBOL_GPL(sdhci_pltfm_init);
- void sdhci_pltfm_free(struct platform_device *pdev)
- {
- 	struct sdhci_host *host = platform_get_drvdata(pdev);
--	struct resource *iomem = platform_get_resource(pdev, IORESOURCE_MEM, 0);
-
--	iounmap(host->ioaddr);
--	release_mem_region(iomem->start, resource_size(iomem));
- 	sdhci_free_host(host);
- }
- EXPORT_SYMBOL_GPL(sdhci_pltfm_free);
--- 
-1.7.9.5
+> ---
+>   drivers/mmc/host/rtsx_usb_sdmmc.c | 3 ++-
+>   1 file changed, 2 insertions(+), 1 deletion(-)
+> 
+> diff --git a/drivers/mmc/host/rtsx_usb_sdmmc.c 
+> b/drivers/mmc/host/rtsx_usb_sdmmc.c
+> index e11fafa..38bdda5 100644
+> --- a/drivers/mmc/host/rtsx_usb_sdmmc.c
+> +++ b/drivers/mmc/host/rtsx_usb_sdmmc.c
+> @@ -34,7 +34,8 @@
+>   #include <linux/mfd/rtsx_usb.h>
+>   #include <asm/unaligned.h>
+> 
+> -#if defined(CONFIG_LEDS_CLASS) || defined(CONFIG_LEDS_CLASS_MODULE)
+> +#if defined(CONFIG_LEDS_CLASS) || (defined(CONFIG_LEDS_CLASS_MODULE) && \
+> +       defined(CONFIG_MMC_REALTEK_USB_MODULE))
+>   #include <linux/leds.h>
+>   #include <linux/workqueue.h>
+>   #define RTSX_USB_USE_LEDS_CLASS
+> 
