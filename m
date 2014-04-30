@@ -1,55 +1,64 @@
-From: David =?ISO-8859-1?Q?Lanzend=F6rfer?= <david.lanzendoerfer-Z7Kmv9EsliU@public.gmane.org>
-Subject: Re: [PATCH v9 05/17] ARM: dts: sun4i: Add pin-muxing
- info for the mmc0 controller
-Date: Tue, 29 Apr 2014 23:55:19 +0200
-Message-ID: <1470138.BWEKSClG2D@dizzy-6.o2s.ch>
-References: <1398507381-5614-1-git-send-email-hdegoede@redhat.com> <20140428193210.GF3134@lukather> <535F60D7.1080500@redhat.com>
-Reply-To: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+From: micky <micky_ching@realsil.com.cn>
+Subject: Re: [PATCH 0/2] mmc: rtsx: revert support for mmc async request
+Date: Wed, 30 Apr 2014 09:32:57 +0800
+Message-ID: <536052C9.309@realsil.com.cn>
+References: <cover.1398735435.git.micky_ching@realsil.com.cn>
+ <20140429080240.GC29462@lee--X1>
 Mime-Version: 1.0
-Content-Type: multipart/signed; boundary="nextPart4727379.C8zGM6Drrq"; micalg="pgp-sha1"; protocol="application/pgp-signature"
-Return-path: <linux-sunxi+bncBD2JL37LXEKRBVF7QCNQKGQE35T22FQ-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-In-Reply-To: <535F60D7.1080500-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-List-Post: <http://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Help: <http://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Archive: <http://groups.google.com/group/linux-sunxi>
-Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
-List-Subscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Unsubscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-To: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Emilio Lopez <emilio-0Z03zUJReD5OxF6Tv1QG9Q@public.gmane.org>, Mike Turquette <mturquette-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, devicetree <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Type: text/plain; charset="us-ascii"; Format="flowed"
+Content-Transfer-Encoding: 7bit
+Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
+In-Reply-To: <20140429080240.GC29462@lee--X1>
+List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
+List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel>
+List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
+List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
+List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
+Errors-To: driverdev-devel-bounces@linuxdriverproject.org
+Sender: driverdev-devel-bounces@linuxdriverproject.org
+To: Lee Jones <lee.jones@linaro.org>
+Cc: ulf.hansson@linaro.org, sameo@linux.intel.com, gregkh@linuxfoundation.org, linux-mmc@vger.kernel.org, chris@printf.net, linux-kernel@vger.kernel.org, wei_wang@realsil.com.cn, rogerable@realtek.com, devel@linuxdriverproject.org, dan.carpenter@oracle.com
 List-Id: linux-mmc@vger.kernel.org
 
+Hi Lee,
 
---nextPart4727379.C8zGM6Drrq
-Content-Transfer-Encoding: quoted-printable
-Content-Type: text/plain; charset="iso-8859-1"
+On 04/29/2014 04:02 PM, Lee Jones wrote:
+>> From: Micky Ching <micky_ching@realsil.com.cn>
+>>
+>> The commit <mmc: rtsx: add support for pre_req and post_req> have some problem,
+>> using mutex_unlock() in atomic context, spinlock deadlock, it is hard to fix
+>> these problem, and better to use a new method. So just remove it.
+>>
+>> The commit <mmc: rtsx: modify error handle and remove smatch warnings> depends
+>> on the previous patch. And mainly fix some problem for the previous patch. So
+>> need remove.
+>>
+>> Micky Ching (2):
+>>    mmc: rtsx: Revert "mmc: rtsx: modify error handle and remove smatch
+>>      warnings"
+>>    mmc: rtsx: Revert "mmc: rtsx: add support for pre_req and post_req"
+>>
+>>   drivers/mfd/rtsx_pcr.c            |  132 ++++-------
+>>   drivers/mmc/host/rtsx_pci_sdmmc.c |  459 +++++++------------------------------
+>>   include/linux/mfd/rtsx_common.h   |    1 -
+>>   include/linux/mfd/rtsx_pci.h      |    6 -
+>>   4 files changed, 124 insertions(+), 474 deletions(-)
+> Just to clarify, what commit did you base these changes on? Have you
+> tested to ensure everything works as it should with these two
+> reversions?
+>
+I base on linux-nex tree
+commit d397246adc001ee5235f32de10db112ad23175df
+Author: Stephen Rothwell <sfr@canb.auug.org.au>
+Date:   Thu Apr 24 16:22:09 2014 +1000
 
-Hi
-> Ok will fix this up for the next version.
-Be carefull!
-I removed redundancies on all the boards I've seen so far, which all ha=
-d the
-same pin assignment, based on the reference design of Allwinners.
-Please make sure the boards pin muxing fits onto your board.
-Certain boards differ within their muxing.
+     Add linux-next specific files for 20140424
 
-br
-=2D-=20
-David Lanzend=F6rfer
-OpenSourceSupport GmbH
-System engineer and supporter
-http://www.o2s.ch/
---nextPart4727379.C8zGM6Drrq
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: This is a digitally signed message part.
-Content-Transfer-Encoding: 7Bit
+     Signed-off-by: Stephen Rothwell <sfr@canb.auug.org.au>
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
+And tested, so it can works ok.
 
-iEYEABECAAYFAlNgH9EACgkQAeZw77btGjr61QCeKxAv1J/zIKs+j2UC/NIOzzlF
-C9kAn0PAS4gJuLxMOxnep7UfSZJdnW1+
-=x+ZT
------END PGP SIGNATURE-----
-
---nextPart4727379.C8zGM6Drrq--
+Best Regards.
+micky.
