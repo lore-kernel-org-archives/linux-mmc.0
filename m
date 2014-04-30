@@ -1,56 +1,142 @@
 From: Ian Molton <ian.molton@codethink.co.uk>
-Subject: [PATCH 3/6] mmc: TMIO: Use devm_ioremap()
-Date: Wed, 30 Apr 2014 17:59:08 +0100
-Message-ID: <1398877151-6965-4-git-send-email-ian.molton@codethink.co.uk>
+Subject: [PATCH 5/6] shmobile: TMIO: break register specs out from TMIO kernel driver
+Date: Wed, 30 Apr 2014 17:59:10 +0100
+Message-ID: <1398877151-6965-6-git-send-email-ian.molton@codethink.co.uk>
 References: <1398877151-6965-1-git-send-email-ian.molton@codethink.co.uk>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from ducie-dc1.codethink.co.uk ([185.25.241.215]:47927 "EHLO
+Received: from ducie-dc1.codethink.co.uk ([185.25.241.215]:47945 "EHLO
 	ducie-dc1.codethink.co.uk" rhost-flags-OK-FAIL-OK-FAIL)
-	by vger.kernel.org with ESMTP id S964792AbaD3Q7g (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 30 Apr 2014 12:59:36 -0400
+	by vger.kernel.org with ESMTP id S964792AbaD3Q7m (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 30 Apr 2014 12:59:42 -0400
 In-Reply-To: <1398877151-6965-1-git-send-email-ian.molton@codethink.co.uk>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 Cc: grant.likely@linaro.org, chris@printf.net, Ian Molton <ian.molton@codethink.co.uk>
 
-	Use devm_ioremap for tmio / sh_mobile.
+	Right now we have a public header stuffed full of register defs
+	that ought to be private to the TMIO MMC driver.
+
+	Break out the definitions required for shmobiles bootloader.
+
+	This commit is in preparation for making the TMIO register defs
+	private, as they should be.
 
 Reviewed-by: Violeta Menendez <violeta.menendez@codethink.co.uk>
 Signed-off-by: Ian Molton <ian.molton@codethink.co.uk>
 ---
- drivers/mmc/host/tmio_mmc_pio.c | 4 +---
- 1 file changed, 1 insertion(+), 3 deletions(-)
+ arch/arm/boot/compressed/sdhi-sh7372.c   |  2 +-
+ arch/arm/boot/compressed/sdhi-shmobile.c | 35 +++++++++++++++++++++++++++-----
+ arch/arm/boot/compressed/sdhi-shmobile.h |  2 ++
+ 3 files changed, 33 insertions(+), 6 deletions(-)
 
-diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
-index 7db9310..50e8c01 100644
---- a/drivers/mmc/host/tmio_mmc_pio.c
-+++ b/drivers/mmc/host/tmio_mmc_pio.c
-@@ -1021,7 +1021,7 @@ int tmio_mmc_host_probe(struct tmio_mmc_host *host)
- 	if (ret < 0)
- 		goto host_free;
+diff --git a/arch/arm/boot/compressed/sdhi-sh7372.c b/arch/arm/boot/compressed/sdhi-sh7372.c
+index d279294..b05fba6 100644
+--- a/arch/arm/boot/compressed/sdhi-sh7372.c
++++ b/arch/arm/boot/compressed/sdhi-sh7372.c
+@@ -81,7 +81,7 @@ asmlinkage void mmc_loader(unsigned short *buf, unsigned long len)
+ 	/* load kernel */
+ 	if (sdhi_boot_do_read(SDHI_BASE, high_capacity,
+ 			      0, /* Kernel is at block 1 */
+-			      (len + TMIO_BBS - 1) / TMIO_BBS, buf))
++			      (len + BB_SIZE - 1) / BB_SIZE, buf))
+ 		goto err;
  
--	host->ctl = ioremap(res_ctl->start, resource_size(res_ctl));
-+	host->ctl = devm_ioremap(dev, res_ctl->start, resource_size(res_ctl));
- 	if (!host->ctl) {
- 		ret = -ENOMEM;
- 		goto host_free;
-@@ -1119,7 +1119,6 @@ int tmio_mmc_host_probe(struct tmio_mmc_host *host)
+         /* Disable clock to SDHI1 hardware block */
+diff --git a/arch/arm/boot/compressed/sdhi-shmobile.c b/arch/arm/boot/compressed/sdhi-shmobile.c
+index bd3d469..48be885 100644
+--- a/arch/arm/boot/compressed/sdhi-shmobile.c
++++ b/arch/arm/boot/compressed/sdhi-shmobile.c
+@@ -26,6 +26,17 @@
  
- pm_disable:
- 	pm_runtime_disable(dev);
--	iounmap(host->ctl);
- host_free:
- 	mmc_free_host(mmc);
+ #define RESP_CMD12		0x00000030
  
-@@ -1145,7 +1144,6 @@ void tmio_mmc_host_remove(struct tmio_mmc_host *host)
- 	pm_runtime_put_sync(&pdev->dev);
- 	pm_runtime_disable(&pdev->dev);
- 
--	iounmap(host->ctl);
- 	mmc_free_host(mmc);
++#define CTL_SD_CMD		0x00
++#define CTL_ARG_REG		0x04
++#define CTL_RESPONSE		0x0c
++#define CTL_STATUS		0x1c
++#define CTL_IRQ_MASK		0x20
++#define CTL_SD_CARD_CLK_CTL	0x24
++#define CTL_SD_XFER_LEN		0x26
++#define CTL_SD_MEM_CARD_OPT	0x28
++#define CTL_RESET_SD		0xe0
++#define CTL_CLK_AND_WAIT_CTL	0x138
++
+ static inline u16 sd_ctrl_read16(void __iomem *base, int addr)
+ {
+         return __raw_readw(base + addr);
+@@ -48,6 +59,20 @@ static inline void sd_ctrl_write32(void __iomem *base, int addr, u32 val)
+ 	__raw_writew(val >> 16, base + addr + 2);
  }
- EXPORT_SYMBOL(tmio_mmc_host_remove);
+ 
++#define TMIO_STAT_CMDRESPEND    0x00000001
++#define TMIO_STAT_DATAEND       0x00000004
++#define TMIO_STAT_CMD_IDX_ERR   0x00010000
++#define TMIO_STAT_CRCFAIL       0x00020000
++#define TMIO_STAT_STOPBIT_ERR   0x00040000
++#define TMIO_STAT_DATATIMEOUT   0x00080000
++#define TMIO_STAT_RXOVERFLOW    0x00100000
++#define TMIO_STAT_TXUNDERRUN    0x00200000
++#define TMIO_STAT_CMDTIMEOUT    0x00400000
++#define TMIO_STAT_RXRDY         0x01000000
++#define TMIO_STAT_ILL_FUNC      0x20000000
++#define TMIO_STAT_CMD_BUSY      0x40000000
++#define TMIO_STAT_ILL_ACCESS    0x80000000
++
+ #define ALL_ERROR (TMIO_STAT_CMD_IDX_ERR | TMIO_STAT_CRCFAIL |		\
+ 		   TMIO_STAT_STOPBIT_ERR | TMIO_STAT_DATATIMEOUT |	\
+ 		   TMIO_STAT_RXOVERFLOW | TMIO_STAT_TXUNDERRUN |	\
+@@ -236,7 +261,7 @@ static int sdhi_boot_do_read_single(void __iomem *base, int high_capacity,
+ 		if (high_capacity)
+ 			cmd.arg = block;
+ 		else
+-			cmd.arg = block * TMIO_BBS;
++			cmd.arg = block * BB_SIZE;
+ 		cmd.flags = MMC_RSP_R1;
+ 		err = sdhi_boot_request(base, &cmd);
+ 		if (err)
+@@ -251,8 +276,8 @@ static int sdhi_boot_do_read_single(void __iomem *base, int high_capacity,
+ 	if (err)
+ 		return err;
+ 
+-	sd_ctrl_write16(base, CTL_SD_XFER_LEN, TMIO_BBS);
+-	for (i = 0; i < TMIO_BBS / sizeof(*buf); i++)
++	sd_ctrl_write16(base, CTL_SD_XFER_LEN, BB_SIZE);
++	for (i = 0; i < BB_SIZE / sizeof(*buf); i++)
+ 		*buf++ = sd_ctrl_read16(base, RESP_CMD12);
+ 
+ 	err = sdhi_boot_wait_resp_end(base);
+@@ -271,7 +296,7 @@ int sdhi_boot_do_read(void __iomem *base, int high_capacity,
+ 
+ 	for (i = 0; i < count; i++) {
+ 		err = sdhi_boot_do_read_single(base, high_capacity, offset + i,
+-					       buf + (i * TMIO_BBS /
++					       buf + (i * BB_SIZE /
+ 						      sizeof(*buf)));
+ 		if (err)
+ 			return err;
+@@ -438,7 +463,7 @@ int sdhi_boot_init(void __iomem *base)
+ 	{
+ 		struct mmc_command cmd;
+ 		cmd.opcode = MMC_SET_BLOCKLEN;
+-		cmd.arg = TMIO_BBS;
++		cmd.arg = BB_SIZE;
+ 		cmd.flags = MMC_RSP_R1;
+ 		err = sdhi_boot_request(base, &cmd);
+ 		if (err)
+diff --git a/arch/arm/boot/compressed/sdhi-shmobile.h b/arch/arm/boot/compressed/sdhi-shmobile.h
+index 92eaa09..d82e2d5 100644
+--- a/arch/arm/boot/compressed/sdhi-shmobile.h
++++ b/arch/arm/boot/compressed/sdhi-shmobile.h
+@@ -3,6 +3,8 @@
+ 
+ #include <linux/compiler.h>
+ 
++#define BB_SIZE 512
++
+ int sdhi_boot_do_read(void __iomem *base, int high_capacity,
+ 		      unsigned long offset, unsigned short count,
+ 		      unsigned short *buf);
 -- 
 1.9.1
 
