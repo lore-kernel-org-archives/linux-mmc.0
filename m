@@ -1,78 +1,131 @@
-From: Joel Fernandes <joelf@ti.com>
-Subject: Re: [PATCH v10 1/5] mmc: omap_hsmmc: Enable SDIO interrupt
-Date: Mon, 28 Apr 2014 23:42:04 -0500
-Message-ID: <535F2D9C.6090304@ti.com>
-References: <1398670860-30695-1-git-send-email-afenkart@gmail.com> <1398670860-30695-2-git-send-email-afenkart@gmail.com>
+From: Roger <rogerable@realtek.com>
+Subject: Re: [PATCH] mmc: rtsx: usb backend needs LED support
+Date: Wed, 30 Apr 2014 11:34:33 +0800
+Message-ID: <53606F49.1000401@realtek.com>
+References: <cover.1398735435.git.micky_ching@realsil.com.cn>
+ <7208467.nZIXMIfPji@wuerfel>
+ <CAPDyKFpJrrviaZo_L8MkLF=v7DqGEVj9=uSNsNtU-FXNwu-MmQ@mail.gmail.com>
+ <201404300228.s3U2S7WA026782@rtits1.realtek.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset="us-ascii"; Format="flowed"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from plane.gmane.org ([80.91.229.3]:50379 "EHLO plane.gmane.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932095AbaD3Cae (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 29 Apr 2014 22:30:34 -0400
-Received: from list by plane.gmane.org with local (Exim 4.69)
-	(envelope-from <glkm-linux-mmc@m.gmane.org>)
-	id 1WfKHa-0000LT-Vm
-	for linux-mmc@vger.kernel.org; Wed, 30 Apr 2014 04:30:32 +0200
-Received: from 12.130.116.19 ([12.130.116.19])
-        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <linux-mmc@vger.kernel.org>; Wed, 30 Apr 2014 04:30:02 +0200
-Received: from joelf by 12.130.116.19 with local (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <linux-mmc@vger.kernel.org>; Wed, 30 Apr 2014 04:30:02 +0200
-In-Reply-To: <1398670860-30695-2-git-send-email-afenkart@gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
+In-Reply-To: <201404300228.s3U2S7WA026782@rtits1.realtek.com>
+List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
+List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel>
+List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
+List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
+List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
+Errors-To: driverdev-devel-bounces@linuxdriverproject.org
+Sender: driverdev-devel-bounces@linuxdriverproject.org
+To: Arnd Bergmann <arnd@arndb.de>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Samuel Ortiz <sameo@linux.intel.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Wei WANG <wei_wang@realsil.com.cn>, devel@linuxdriverproject.org, Lee Jones <lee.jones@linaro.org>, Dan Carpenter <dan.carpenter@oracle.com>
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: linux-doc@vger.kernel.org, linux-omap@vger.kernel.orglinux-omap@vger.kernel.org
-
-Minor nit...
-
-On 04/28/2014 02:40 AM, Andreas Fenkart wrote:
-[..]
->  	/* Do not initialize card-specific things if the power is off */
->  	if (host->power_mode == MMC_POWER_OFF)
-> @@ -1117,8 +1138,12 @@ static irqreturn_t omap_hsmmc_irq(int irq, void *dev_id)
->  	int status;
->  
->  	status = OMAP_HSMMC_READ(host->base, STAT);
-> -	while (status & INT_EN_MASK && host->req_in_progress) {
-> -		omap_hsmmc_do_irq(host, status);
-> +	while (status & (INT_EN_MASK | CIRQ_EN)) {
-> +		if (host->req_in_progress)
-> +			omap_hsmmc_do_irq(host, status);
-> +
-> +		if (status & CIRQ_EN)
-> +			mmc_signal_sdio_irq(host->mmc);
->  
->  		/* Flush posted write */
->  		status = OMAP_HSMMC_READ(host->base, STAT);
-> @@ -1127,6 +1152,23 @@ static irqreturn_t omap_hsmmc_irq(int irq, void *dev_id)
->  	return IRQ_HANDLED;
->  }
->  
-> +static irqreturn_t omap_hsmmc_wake_irq(int irq, void *dev_id)
-> +{
-> +	struct omap_hsmmc_host *host = dev_id;
-> +	unsigned long flags;
-> +
-> +	/* cirq is level triggered, disable to avoid infinite loop */
-> +	spin_lock_irqsave(&host->irq_lock, flags);
-
-Do you need to save restore flags here? IRQ is already disabled since
-you're in hard IRQ context so spin_lock() seems sufficient.
-
-> +	if (host->flags & HSMMC_WAKE_IRQ_ENABLED) {
-> +		disable_irq_nosync(host->wake_irq);
-> +		host->flags &= ~HSMMC_WAKE_IRQ_ENABLED;
-> +	}
-> +	spin_unlock_irqrestore(&host->irq_lock, flags);
-
-spin_unlock() seems sufficient.
-
-regards,
--Joel
 
 
+On 04/29/2014 08:46 PM, Arnd Bergmann wrote:
+> On Tuesday 29 April 2014 13:05:15 Ulf Hansson wrote:
+>> On 29 April 2014 11:45, Arnd Bergmann <arnd@arndb.de> wrote:
+>>> drivers/built-in.o: In function `rtsx_usb_sdmmc_drv_remove':
+>>> :(.text+0x806480): undefined reference to `led_classdev_unregister'
+>>> drivers/built-in.o: In function `rtsx_usb_sdmmc_drv_probe':
+>>> :(.text+0x806708): undefined reference to `led_classdev_register'
+>>>
+>>> This adds an explicit dependency in Kconfig
+>>
+>> I think the proper solution is to fix the dependency in the driver code instead.
+>>
+>> There are already some ifdefs hackery for making it optional to use
+>> leds, apparently that's not working properly.
+>>
+>
+> Ah, right, I misinterpreted the bug. Here is a new version:
+>
+> 8<---------
+>>From 5b5588f8c9b8ded8b296fd32d87b2d118e548a29 Mon Sep 17 00:00:00 2001
+> From: Arnd Bergmann <arnd@arndb.de>
+> Date: Tue, 29 Apr 2014 11:41:40 +0200
+> Subject: [PATCH] mmc: rtsx: usb backend needs LED support
+>
+> Building the rtsx USB driver uses the LED classdev base
+> support if available, but that fails if the classdev
+> is a module and the MMC driver is built-in, leading to this
+> link error.
+>
+> drivers/built-in.o: In function `rtsx_usb_sdmmc_drv_remove':
+> :(.text+0x806480): undefined reference to `led_classdev_unregister'
+> drivers/built-in.o: In function `rtsx_usb_sdmmc_drv_probe':
+> :(.text+0x806708): undefined reference to `led_classdev_register'
+>
+> This adds an explicit dependency in Kconfig to ensure that
+> the MMC driver has to be a module if LEDS_CLASS is a module,
+> but still allows it to be built-in if LEDS_CLASS is either
+> disabled or built-in.
+>
+> Signed-off-by: Arnd Bergmann <arnd@arndb.de>
+>
+> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+> index 92d91fe..68da9b8 100644
+> --- a/drivers/mmc/host/Kconfig
+> +++ b/drivers/mmc/host/Kconfig
+> @@ -696,6 +696,7 @@ config MMC_REALTEK_PCI
+>   config MMC_REALTEK_USB
+>   	tristate "Realtek USB SD/MMC Card Interface Driver"
+>   	depends on MFD_RTSX_USB
+> +	depends on m || LEDS_CLASS!=m
+>   	help
+>   	  Say Y here to include driver code to support SD/MMC card interface
+>   	  of Realtek RTS5129/39 series card reader
+>
+> .
+>
+
+I think Ulf's idea is to fix the bug by modifying the .c files.
+I really found the problem of my ifdef hackery and it should do 
+something similar in sdhci.c as:
+
+From: Roger Tseng <rogerable@realtek.com>
+Date: Wed, 30 Apr 2014 11:11:25 +0800
+Subject: [PATCH] mmc: rtsx: fix possible linking error if built-in
+
+rtsx_usb_sdmmc module uses the LED classdev if available, but the code 
+failed
+to consider the situation that it is built-in and the LED classdev is a 
+module,
+leading to following linking error:
+
+   LD      init/built-in.o
+drivers/built-in.o: In function `rtsx_usb_sdmmc_drv_remove':
+rtsx_usb_sdmmc.c:(.text+0x2a018e): undefined reference to 
+`led_classdev_unregister'
+drivers/built-in.o: In function `rtsx_usb_sdmmc_drv_probe':
+rtsx_usb_sdmmc.c:(.text+0x2a197e): undefined reference to 
+`led_classdev_register'
+
+Fix by excluding such condition when defining macro RTSX_USB_USE_LEDS_CLASS.
+
+Signed-off-by: Roger Tseng <rogerable@realtek.com>
+---
+  drivers/mmc/host/rtsx_usb_sdmmc.c | 3 ++-
+  1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/mmc/host/rtsx_usb_sdmmc.c 
+b/drivers/mmc/host/rtsx_usb_sdmmc.c
+index e11fafa..38bdda5 100644
+--- a/drivers/mmc/host/rtsx_usb_sdmmc.c
++++ b/drivers/mmc/host/rtsx_usb_sdmmc.c
+@@ -34,7 +34,8 @@
+  #include <linux/mfd/rtsx_usb.h>
+  #include <asm/unaligned.h>
+
+-#if defined(CONFIG_LEDS_CLASS) || defined(CONFIG_LEDS_CLASS_MODULE)
++#if defined(CONFIG_LEDS_CLASS) || (defined(CONFIG_LEDS_CLASS_MODULE) && \
++       defined(CONFIG_MMC_REALTEK_USB_MODULE))
+  #include <linux/leds.h>
+  #include <linux/workqueue.h>
+  #define RTSX_USB_USE_LEDS_CLASS
+
+Best regards,
+Roger Tseng
