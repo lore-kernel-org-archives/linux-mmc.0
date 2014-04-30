@@ -1,146 +1,153 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: rtsx: usb backend needs LED support
-Date: Wed, 30 Apr 2014 10:19:39 +0200
-Message-ID: <CAPDyKFrA39eFnoy-sAGcAUeDqtB78cvAivV+mmRR5C-tov-9eg@mail.gmail.com>
-References: <cover.1398735435.git.micky_ching@realsil.com.cn>
- <7208467.nZIXMIfPji@wuerfel>
- <CAPDyKFpJrrviaZo_L8MkLF=v7DqGEVj9=uSNsNtU-FXNwu-MmQ@mail.gmail.com>
- <201404300228.s3U2S7WA026782@rtits1.realtek.com>
- <53606F49.1000401@realtek.com>
+From: Beomho Seo <beomho.seo@samsung.com>
+Subject: [PATCH V4 1/1] mmc: sdhci-s3c: Use mmc_gpio_request_cd function
+Date: Wed, 30 Apr 2014 18:04:28 +0900
+Message-ID: <5360BC9C.1010907@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
-Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
-In-Reply-To: <53606F49.1000401@realtek.com>
-List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
-List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel>
-List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
-List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
-List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
-Errors-To: driverdev-devel-bounces@linuxdriverproject.org
-Sender: driverdev-devel-bounces@linuxdriverproject.org
-To: Roger <rogerable@realtek.com>
-Cc: Samuel Ortiz <sameo@linux.intel.com>, Arnd Bergmann <arnd@arndb.de>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Wei WANG <wei_wang@realsil.com.cn>, devel@linuxdriverproject.org, Lee Jones <lee.jones@linaro.org>, Dan Carpenter <dan.carpenter@oracle.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout2.samsung.com ([203.254.224.25]:54508 "EHLO
+	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1758424AbaD3JE3 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 30 Apr 2014 05:04:29 -0400
+Received: from epcpsbgr5.samsung.com
+ (u145.gpu120.samsung.co.kr [203.254.230.145])
+ by mailout2.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+ (7.0.4.24.0) 64bit (built Nov 17 2011))
+ with ESMTP id <0N4U00BL36JFB8B0@mailout2.samsung.com> for
+ linux-mmc@vger.kernel.org; Wed, 30 Apr 2014 18:04:27 +0900 (KST)
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Chris Ball <cjb@laptop.org>, ulf.hansson@linaro.org
+Cc: linux-mmc@vger.kernel.org, Myungjoo Ham <myungjoo.ham@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, =?ISO-8859-1?Q?Heiko_St=FCbner?= <heiko@sntech.de>, beomho.seo@samsung.com
 
-On 30 April 2014 05:34, Roger <rogerable@realtek.com> wrote:
->
-> On 04/29/2014 08:46 PM, Arnd Bergmann wrote:
->>
->> On Tuesday 29 April 2014 13:05:15 Ulf Hansson wrote:
->>>
->>> On 29 April 2014 11:45, Arnd Bergmann <arnd@arndb.de> wrote:
->>>>
->>>> drivers/built-in.o: In function `rtsx_usb_sdmmc_drv_remove':
->>>> :(.text+0x806480): undefined reference to `led_classdev_unregister'
->>>> drivers/built-in.o: In function `rtsx_usb_sdmmc_drv_probe':
->>>> :(.text+0x806708): undefined reference to `led_classdev_register'
->>>>
->>>> This adds an explicit dependency in Kconfig
->>>
->>>
->>> I think the proper solution is to fix the dependency in the driver code
->>> instead.
->>>
->>> There are already some ifdefs hackery for making it optional to use
->>> leds, apparently that's not working properly.
->>>
->>
->> Ah, right, I misinterpreted the bug. Here is a new version:
->>
->> 8<---------
->>>
->>> From 5b5588f8c9b8ded8b296fd32d87b2d118e548a29 Mon Sep 17 00:00:00 2001
->>
->> From: Arnd Bergmann <arnd@arndb.de>
->> Date: Tue, 29 Apr 2014 11:41:40 +0200
->> Subject: [PATCH] mmc: rtsx: usb backend needs LED support
->>
->> Building the rtsx USB driver uses the LED classdev base
->> support if available, but that fails if the classdev
->> is a module and the MMC driver is built-in, leading to this
->> link error.
->>
->> drivers/built-in.o: In function `rtsx_usb_sdmmc_drv_remove':
->> :(.text+0x806480): undefined reference to `led_classdev_unregister'
->> drivers/built-in.o: In function `rtsx_usb_sdmmc_drv_probe':
->> :(.text+0x806708): undefined reference to `led_classdev_register'
->>
->> This adds an explicit dependency in Kconfig to ensure that
->> the MMC driver has to be a module if LEDS_CLASS is a module,
->> but still allows it to be built-in if LEDS_CLASS is either
->> disabled or built-in.
->>
->> Signed-off-by: Arnd Bergmann <arnd@arndb.de>
->>
->> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
->> index 92d91fe..68da9b8 100644
->>
->> --- a/drivers/mmc/host/Kconfig
->> +++ b/drivers/mmc/host/Kconfig
->> @@ -696,6 +696,7 @@ config MMC_REALTEK_PCI
->>   config MMC_REALTEK_USB
->>         tristate "Realtek USB SD/MMC Card Interface Driver"
->>         depends on MFD_RTSX_USB
->> +       depends on m || LEDS_CLASS!=m
->>
->>         help
->>           Say Y here to include driver code to support SD/MMC card
->> interface
->>           of Realtek RTS5129/39 series card reader
->>
->> .
->>
->
-> I think Ulf's idea is to fix the bug by modifying the .c files.
-> I really found the problem of my ifdef hackery and it should do something
-> similar in sdhci.c as:
->
-> From: Roger Tseng <rogerable@realtek.com>
-> Date: Wed, 30 Apr 2014 11:11:25 +0800
-> Subject: [PATCH] mmc: rtsx: fix possible linking error if built-in
->
-> rtsx_usb_sdmmc module uses the LED classdev if available, but the code
-> failed
-> to consider the situation that it is built-in and the LED classdev is a
-> module,
-> leading to following linking error:
->
->   LD      init/built-in.o
-> drivers/built-in.o: In function `rtsx_usb_sdmmc_drv_remove':
-> rtsx_usb_sdmmc.c:(.text+0x2a018e): undefined reference to
-> `led_classdev_unregister'
-> drivers/built-in.o: In function `rtsx_usb_sdmmc_drv_probe':
-> rtsx_usb_sdmmc.c:(.text+0x2a197e): undefined reference to
-> `led_classdev_register'
->
-> Fix by excluding such condition when defining macro RTSX_USB_USE_LEDS_CLASS.
->
-> Signed-off-by: Roger Tseng <rogerable@realtek.com>
+Hi Chris and Ulf,
 
-Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
+Thank you for review. I fixed patch for your review.
 
-> ---
->  drivers/mmc/host/rtsx_usb_sdmmc.c | 3 ++-
->  1 file changed, 2 insertions(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/host/rtsx_usb_sdmmc.c
-> b/drivers/mmc/host/rtsx_usb_sdmmc.c
-> index e11fafa..38bdda5 100644
-> --- a/drivers/mmc/host/rtsx_usb_sdmmc.c
-> +++ b/drivers/mmc/host/rtsx_usb_sdmmc.c
-> @@ -34,7 +34,8 @@
->  #include <linux/mfd/rtsx_usb.h>
->  #include <asm/unaligned.h>
->
-> -#if defined(CONFIG_LEDS_CLASS) || defined(CONFIG_LEDS_CLASS_MODULE)
-> +#if defined(CONFIG_LEDS_CLASS) || (defined(CONFIG_LEDS_CLASS_MODULE) && \
-> +       defined(CONFIG_MMC_REALTEK_USB_MODULE))
->  #include <linux/leds.h>
->  #include <linux/workqueue.h>
->  #define RTSX_USB_USE_LEDS_CLASS
->
-> Best regards,
-> Roger Tseng
+---
+This patch use mmc_gpio_request_cd function.
+
+Signed-off-by: Beomho Seo <beomho.seo@samsung.com>
+Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+Acked-by: Heiko Stuebner <heiko@sntech.de>
+Tested-by: Heiko Stuebner <heiko@sntech.de>
+---
+Changes in v4:
+- Remove unused variable "ext_cd_irq".
+- Remove mmc_gpio_free_cd function.
+
+Changes in v3:
+- Rebased to recent mmc-next branch.
+
+Changes in v2:
+- Fix "err_req_cd:".
+- Remove mmc_gpio_free_cd() and then, used sdhci_remove_host().
+---
+ drivers/mmc/host/sdhci-s3c.c |   56 +++++++++---------------------------------
+ 1 file changed, 12 insertions(+), 44 deletions(-)
+
+diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
+index c12301e..9c76113 100644
+--- a/drivers/mmc/host/sdhci-s3c.c
++++ b/drivers/mmc/host/sdhci-s3c.c
+@@ -27,6 +27,7 @@
+ #include <linux/pm_runtime.h>
+
+ #include <linux/mmc/host.h>
++#include <linux/mmc/slot-gpio.h>
+
+ #include "sdhci-s3c-regs.h"
+ #include "sdhci.h"
+@@ -49,7 +50,6 @@ struct sdhci_s3c {
+ 	struct resource		*ioarea;
+ 	struct s3c_sdhci_platdata *pdata;
+ 	int			cur_clk;
+-	int			ext_cd_irq;
+ 	int			ext_cd_gpio;
+
+ 	struct clk		*clk_io;
+@@ -396,44 +396,6 @@ static void sdhci_s3c_notify_change(struct platform_device *dev, int state)
+ 	}
+ }
+
+-static irqreturn_t sdhci_s3c_gpio_card_detect_thread(int irq, void *dev_id)
+-{
+-	struct sdhci_s3c *sc = dev_id;
+-	int status = gpio_get_value(sc->ext_cd_gpio);
+-	if (sc->pdata->ext_cd_gpio_invert)
+-		status = !status;
+-	sdhci_s3c_notify_change(sc->pdev, status);
+-	return IRQ_HANDLED;
+-}
+-
+-static void sdhci_s3c_setup_card_detect_gpio(struct sdhci_s3c *sc)
+-{
+-	struct s3c_sdhci_platdata *pdata = sc->pdata;
+-	struct device *dev = &sc->pdev->dev;
+-
+-	if (devm_gpio_request(dev, pdata->ext_cd_gpio, "SDHCI EXT CD") == 0) {
+-		sc->ext_cd_gpio = pdata->ext_cd_gpio;
+-		sc->ext_cd_irq = gpio_to_irq(pdata->ext_cd_gpio);
+-		if (sc->ext_cd_irq &&
+-		    request_threaded_irq(sc->ext_cd_irq, NULL,
+-					 sdhci_s3c_gpio_card_detect_thread,
+-					 IRQF_TRIGGER_RISING |
+-					 IRQF_TRIGGER_FALLING |
+-					 IRQF_ONESHOT,
+-					 dev_name(dev), sc) == 0) {
+-			int status = gpio_get_value(sc->ext_cd_gpio);
+-			if (pdata->ext_cd_gpio_invert)
+-				status = !status;
+-			sdhci_s3c_notify_change(sc->pdev, status);
+-		} else {
+-			dev_warn(dev, "cannot request irq for card detect\n");
+-			sc->ext_cd_irq = 0;
+-		}
+-	} else {
+-		dev_err(dev, "cannot request gpio for card detect\n");
+-	}
+-}
+-
+ #ifdef CONFIG_OF
+ static int sdhci_s3c_parse_dt(struct device *dev,
+ 		struct sdhci_host *host, struct s3c_sdhci_platdata *pdata)
+@@ -685,8 +647,14 @@ static int sdhci_s3c_probe(struct platform_device *pdev)
+ 	if (pdata->cd_type == S3C_SDHCI_CD_EXTERNAL && pdata->ext_cd_init)
+ 		pdata->ext_cd_init(&sdhci_s3c_notify_change);
+ 	if (pdata->cd_type == S3C_SDHCI_CD_GPIO &&
+-	    gpio_is_valid(pdata->ext_cd_gpio))
+-		sdhci_s3c_setup_card_detect_gpio(sc);
++	    gpio_is_valid(pdata->ext_cd_gpio)) {
++		ret = mmc_gpio_request_cd(host->mmc, pdata->ext_cd_gpio, 0);
++		if (ret) {
++			dev_err(dev,
++				"failed to reqeust card detect gpio\n");
++			goto err_req_cd;
++		}
++	}
+
+ #ifdef CONFIG_PM_RUNTIME
+ 	if (pdata->cd_type != S3C_SDHCI_CD_INTERNAL)
+@@ -694,6 +662,9 @@ static int sdhci_s3c_probe(struct platform_device *pdev)
+ #endif
+ 	return 0;
+
++ err_req_cd:
++	sdhci_remove_host(host, 1);
++
+  err_req_regs:
+  err_no_busclks:
+ 	clk_disable_unprepare(sc->clk_io);
+@@ -713,9 +684,6 @@ static int sdhci_s3c_remove(struct platform_device *pdev)
+ 	if (pdata->cd_type == S3C_SDHCI_CD_EXTERNAL && pdata->ext_cd_cleanup)
+ 		pdata->ext_cd_cleanup(&sdhci_s3c_notify_change);
+
+-	if (sc->ext_cd_irq)
+-		free_irq(sc->ext_cd_irq, sc);
+-
+ #ifdef CONFIG_PM_RUNTIME
+ 	if (pdata->cd_type != S3C_SDHCI_CD_INTERNAL)
+ 		clk_prepare_enable(sc->clk_io);
+-- 
+1.7.9.5
