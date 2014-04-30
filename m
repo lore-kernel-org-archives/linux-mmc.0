@@ -1,15 +1,15 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [PATCH] mmc: rtsx: usb backend needs LED support
-Date: Wed, 30 Apr 2014 09:00:33 +0200
-Message-ID: <5378270.XmQGrvIcFE@wuerfel>
-References: <cover.1398735435.git.micky_ching@realsil.com.cn>
- <201404300228.s3U2S7WA026782@rtits1.realtek.com>
- <53606F49.1000401@realtek.com>
+From: Roger <rogerable@realtek.com>
+Subject: Re: [PATCH v7 4/4] memstick: Add realtek USB memstick host driver
+Date: Wed, 30 Apr 2014 15:56:20 +0800
+Message-ID: <5360ACA4.80503@realtek.com>
+References: <1397199203-2235-1-git-send-email-rogerable@realtek.com>
+ <1397199203-2235-5-git-send-email-rogerable@realtek.com>
+ <20140428101010.GR6264@lee--X1>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset="us-ascii"; Format="flowed"
 Content-Transfer-Encoding: 7bit
 Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
-In-Reply-To: <53606F49.1000401@realtek.com>
+In-Reply-To: <20140428101010.GR6264@lee--X1>
 List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
  <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
 List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel>
@@ -19,59 +19,39 @@ List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driver
  <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
 Errors-To: driverdev-devel-bounces@linuxdriverproject.org
 Sender: driverdev-devel-bounces@linuxdriverproject.org
-To: Roger <rogerable@realtek.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Samuel Ortiz <sameo@linux.intel.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Wei WANG <wei_wang@realsil.com.cn>, devel@linuxdriverproject.org, Lee Jones <lee.jones@linaro.org>, Dan Carpenter <dan.carpenter@oracle.com>
+To: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Maxim Levitsky <maximlevitsky@gmail.com>, Alex Dubov <oakad@yahoo.com>, driverdev-devel@linuxdriverproject.org, linux-mmc@vger.kernel.org, Chris Ball <chris@printf.net>, linux-kernel@vger.kernel.org, wei_wang@realsil.com.cn, Andrew Morton <akpm@linux-foundation.org>, Lee Jones <lee.jones@linaro.org>, Oliver Neukum <oneukum@suse.de>, Dan Carpenter <dan.carpenter@oracle.com>, Samuel Ortiz <sameo@linux.intel.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On Wednesday 30 April 2014 11:34:33 Roger wrote:
-> I think Ulf's idea is to fix the bug by modifying the .c files.
-> I really found the problem of my ifdef hackery and it should do 
-> something similar in sdhci.c as:
-> 
-> From: Roger Tseng <rogerable@realtek.com>
-> Date: Wed, 30 Apr 2014 11:11:25 +0800
-> Subject: [PATCH] mmc: rtsx: fix possible linking error if built-in
-> 
-> rtsx_usb_sdmmc module uses the LED classdev if available, but the code 
-> failed
-> to consider the situation that it is built-in and the LED classdev is a 
-> module,
-> leading to following linking error:
-> 
->    LD      init/built-in.o
-> drivers/built-in.o: In function `rtsx_usb_sdmmc_drv_remove':
-> rtsx_usb_sdmmc.c:(.text+0x2a018e): undefined reference to 
-> `led_classdev_unregister'
-> drivers/built-in.o: In function `rtsx_usb_sdmmc_drv_probe':
-> rtsx_usb_sdmmc.c:(.text+0x2a197e): undefined reference to 
-> `led_classdev_register'
-> 
-> Fix by excluding such condition when defining macro RTSX_USB_USE_LEDS_CLASS.
-> 
-> Signed-off-by: Roger Tseng <rogerable@realtek.com>
+On 04/28/2014 06:10 PM, Lee Jones wrote:
+>> From: Roger Tseng <rogerable@realtek.com>
+>>
+>> Realtek USB memstick host driver provides memstick host support based on the
+>> Realtek USB card reader MFD driver.
+>>
+>> Signed-off-by: Roger Tseng <rogerable@realtek.com>
+>> ---
+>>   drivers/memstick/host/Kconfig       |  10 +
+>>   drivers/memstick/host/Makefile      |   1 +
+>>   drivers/memstick/host/rtsx_usb_ms.c | 839 ++++++++++++++++++++++++++++++++++++
+>>   3 files changed, 850 insertions(+)
+>>   create mode 100644 drivers/memstick/host/rtsx_usb_ms.c
+>
+> Applied, thanks.
+>
+Greg,
 
-Yes, that should work, too.
+Since all patches have been applied and the device is now supported by 
+the new driver, would you remove the former staging one at 
+drivers/staging/rts5139? Similar removal had been done for our PCIE 
+devices in:
 
-Acked-by: Arnd Bergmann <arnd@arndb.de>
+commit cd2112220b6b0a35fa12ba988a0dd837515dfaf8
+Author: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Date:   Fri Oct 26 09:03:21 2012 -0700
+
+     Staging: remove rts_pstor driver
 
 
-> ---
->   drivers/mmc/host/rtsx_usb_sdmmc.c | 3 ++-
->   1 file changed, 2 insertions(+), 1 deletion(-)
-> 
-> diff --git a/drivers/mmc/host/rtsx_usb_sdmmc.c 
-> b/drivers/mmc/host/rtsx_usb_sdmmc.c
-> index e11fafa..38bdda5 100644
-> --- a/drivers/mmc/host/rtsx_usb_sdmmc.c
-> +++ b/drivers/mmc/host/rtsx_usb_sdmmc.c
-> @@ -34,7 +34,8 @@
->   #include <linux/mfd/rtsx_usb.h>
->   #include <asm/unaligned.h>
-> 
-> -#if defined(CONFIG_LEDS_CLASS) || defined(CONFIG_LEDS_CLASS_MODULE)
-> +#if defined(CONFIG_LEDS_CLASS) || (defined(CONFIG_LEDS_CLASS_MODULE) && \
-> +       defined(CONFIG_MMC_REALTEK_USB_MODULE))
->   #include <linux/leds.h>
->   #include <linux/workqueue.h>
->   #define RTSX_USB_USE_LEDS_CLASS
-> 
+Best regards,
+Roger Tseng
