@@ -1,68 +1,66 @@
-From: Andreas Fenkart <afenkart@gmail.com>
-Subject: Re: [PATCH v10 1/5] mmc: omap_hsmmc: Enable SDIO interrupt
-Date: Wed, 30 Apr 2014 23:04:44 +0200
-Message-ID: <CALtMJEDEnB=4MJMGcupH6GR4QpYumMX9bPB3+mvBnNtAQHphOA@mail.gmail.com>
-References: <1398670860-30695-1-git-send-email-afenkart@gmail.com>
-	<1398670860-30695-2-git-send-email-afenkart@gmail.com>
-	<CALbNGRQL_GoEkyiNnihdP9NQ4Dz5my-FuqH6YYKKv+CBnSq67g@mail.gmail.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH 1/2] mmc: dw_mmc: poll if CD is broken
+Date: Thu, 01 May 2014 17:38:26 +0900
+Message-ID: <53620802.3090504@samsung.com>
+References: <1398865484-527-1-git-send-email-bigeasy@linutronix.de>
+ <CAELcNGT7Ei35tmZzAJ4iCdwMCamd5tC-onRmNG3JL+78_6B0-w@mail.gmail.com>
+ <53611424.4050901@linutronix.de>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-doc-owner@vger.kernel.org>
-In-Reply-To: <CALbNGRQL_GoEkyiNnihdP9NQ4Dz5my-FuqH6YYKKv+CBnSq67g@mail.gmail.com>
-Sender: linux-doc-owner@vger.kernel.org
-To: =?UTF-8?Q?Andreas_M=C3=BCller?= <schnitzeltony@googlemail.com>
-Cc: Tony Lindgren <tony@atomide.com>, Chris Ball <chris@printf.net>, Grant Likely <grant.likely@secretlab.ca>, Felipe Balbi <balbi@ti.com>, Balaji T K <balajitk@ti.com>, Daniel Mack <zonque@gmail.com>, Kumar Gala <galak@codeaurora.org>, linux-doc@vger.kernel.org, linux-mmc <linux-mmc@vger.kernel.org>, linux-omap <linux-omap@vger.kernel.org>
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout2.samsung.com ([203.254.224.25]:55715 "EHLO
+	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752167AbaEAIi2 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 1 May 2014 04:38:28 -0400
+Received: from epcpsbgr1.samsung.com
+ (u141.gpu120.samsung.co.kr [203.254.230.141])
+ by mailout2.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+ (7.0.4.24.0) 64bit (built Nov 17 2011))
+ with ESMTP id <0N4W0008C002G130@mailout2.samsung.com> for
+ linux-mmc@vger.kernel.org; Thu, 01 May 2014 17:38:26 +0900 (KST)
+In-reply-to: <53611424.4050901@linutronix.de>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Sebastian Andrzej Siewior <bigeasy@linutronix.de>, Jae hoon Chung <jh80.chung@gmail.com>
+Cc: Seungwon Jeon <tgih.jun@samsung.com>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-Hi Andreas,
+Hi, Sebastian.
 
-2014-04-30 14:23 GMT+02:00 Andreas M=C3=BCller <schnitzeltony@googlemai=
-l.com>:
-> On Mon, Apr 28, 2014 at 9:40 AM, Andreas Fenkart <afenkart@gmail.com>=
- wrote:
->> @@ -2201,11 +2346,16 @@ static int omap_hsmmc_suspend(struct device =
-*dev)
->>         pm_runtime_get_sync(host->dev);
->>
->>         if (!(host->mmc->pm_flags & MMC_PM_KEEP_POWER)) {
->> -               omap_hsmmc_disable_irq(host);
->> +               OMAP_HSMMC_WRITE(host->base, ISE, 0);
->> +               OMAP_HSMMC_WRITE(host->base, IE, 0);
->> +               OMAP_HSMMC_WRITE(host->base, STAT, STAT_CLEAR);
->>                 OMAP_HSMMC_WRITE(host->base, HCTL,
->>                                 OMAP_HSMMC_READ(host->base, HCTL) & =
-~SDBP);
->>         }
->>
->> +       if (host->wake_irq && !(host->mmc->pm_flags & MMC_PM_WAKE_SD=
-IO_IRQ))
->> +               disable_irq(host->wake_irq);
->> +
+Your patch didn't base on latest mmc-next repository.
+You can refer to below git.
 
-I think it says, "Do you want to wake up from deep power states when
-an SDIO IRQ is pending"
-Will try to bring this more to the point
+http://git.kernel.org/cgit/linux/kernel/git/cjb/mmc.git/
 
->>         if (host->dbclk)
->>                 clk_disable_unprepare(host->dbclk);
->>
->> @@ -2231,6 +2381,9 @@ static int omap_hsmmc_resume(struct device *de=
-v)
->>
->>         omap_hsmmc_protect_card(host);
->>
->> +       if (host->wake_irq & !(host->mmc->pm_flags & MMC_PM_WAKE_SDI=
-O_IRQ))
+I think you made the patch on v3.12.
 
-you're right should be '&&'
+Best Regards,
+Jaehoon Chung
 
->> +               enable_irq(host->wake_irq);
->> +
->>         pm_runtime_mark_last_busy(host->dev);
->>         pm_runtime_put_autosuspend(host->dev);
->>         return 0;
-> Maybe I misunderstand something here but shouldn't
-> disable_irq/enable_irq be swapped here?
+On 05/01/2014 12:17 AM, Sebastian Andrzej Siewior wrote:
+> On 04/30/2014 04:57 PM, Jae hoon Chung wrote:
+>> Hi, Sebastian.
+> 
+> Hi Jaehoon,
+> 
+>> I didn't know which Soc you used.
+> 
+> Altera socfpa.
+> 
+>> Do you use the Device-tree? if you use the device-tree, just add the
+>> "broken-cd" property.
+> 
+> and with this property the code will rescan the card every few secs? I
+> didn't see this in v3.12. I do have "broken-cd" set. And the card will
+> not be detected if it is inserted after the driver probed.
+> 
+> But now that you pointed me at it. You say that "broken-cd" will be
+> scanned by the core, right? Shouldn't the driver then call
+> mmc_of_parse() or am I missing something?
+> 
+>> Best Regards,
+>> Jaehoon Chung
+> 
+> Sebastian
+> 
 
-/Andreas
