@@ -1,14 +1,13 @@
 From: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: [PATCH v10 01/15] clk: sunxi: factors: automatic
- reparenting support
-Date: Fri,  2 May 2014 17:57:15 +0200
-Message-ID: <1399046249-19472-2-git-send-email-hdegoede@redhat.com>
+Subject: [PATCH v10 02/15] clk: sunxi: Implement MMC phase control
+Date: Fri,  2 May 2014 17:57:16 +0200
+Message-ID: <1399046249-19472-3-git-send-email-hdegoede@redhat.com>
 References: <1399046249-19472-1-git-send-email-hdegoede@redhat.com>
 Reply-To: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: quoted-printable
-Return-path: <linux-sunxi+bncBDRZXY4CYYORB5UAR6NQKGQENA2OF2A-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+Return-path: <linux-sunxi+bncBDRZXY4CYYORB6EAR6NQKGQEKUHSAJA-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
 In-Reply-To: <1399046249-19472-1-git-send-email-hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Post: <http://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
 List-Help: <http://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
@@ -22,74 +21,92 @@ List-Id: linux-mmc@vger.kernel.org
 
 From: Emilio L=C3=B3pez <emilio-0Z03zUJReD5OxF6Tv1QG9Q@public.gmane.org>
 
-This commit implements .determine_rate, so that our factor clocks can be
-reparented when needed.
+HdG: add header exporting clk_sunxi_mmc_phase_control
 
 Signed-off-by: Emilio L=C3=B3pez <emilio-0Z03zUJReD5OxF6Tv1QG9Q@public.gmane.org>
 Signed-off-by: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Acked-by: Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
 ---
- drivers/clk/sunxi/clk-factors.c | 36 ++++++++++++++++++++++++++++++++++++
- 1 file changed, 36 insertions(+)
+ drivers/clk/sunxi/clk-sunxi.c | 36 ++++++++++++++++++++++++++++++++++++
+ include/linux/clk/sunxi.h     | 22 ++++++++++++++++++++++
+ 2 files changed, 58 insertions(+)
+ create mode 100644 include/linux/clk/sunxi.h
 
-diff --git a/drivers/clk/sunxi/clk-factors.c b/drivers/clk/sunxi/clk-factor=
-s.c
-index 9e23264..3806d97 100644
---- a/drivers/clk/sunxi/clk-factors.c
-+++ b/drivers/clk/sunxi/clk-factors.c
-@@ -77,6 +77,41 @@ static long clk_factors_round_rate(struct clk_hw *hw, un=
-signed long rate,
- 	return rate;
- }
+diff --git a/drivers/clk/sunxi/clk-sunxi.c b/drivers/clk/sunxi/clk-sunxi.c
+index bd7dc73..59f9040 100644
+--- a/drivers/clk/sunxi/clk-sunxi.c
++++ b/drivers/clk/sunxi/clk-sunxi.c
+@@ -507,6 +507,42 @@ CLK_OF_DECLARE(sun7i_a20_gmac, "allwinner,sun7i-a20-gm=
+ac-clk",
 =20
-+static long clk_factors_determine_rate(struct clk_hw *hw, unsigned long ra=
-te,
-+				       unsigned long *best_parent_rate,
-+				       struct clk **best_parent_p)
+=20
+ /**
++ * clk_sunxi_mmc_phase_control() - configures MMC clock phase control
++ */
++
++void clk_sunxi_mmc_phase_control(struct clk_hw *hw, u8 sample, u8 output)
 +{
-+	struct clk *clk =3D hw->clk, *parent, *best_parent =3D NULL;
-+	int i, num_parents;
-+	unsigned long parent_rate, best =3D 0, child_rate, best_child_rate =3D 0;
++	#define to_clk_composite(_hw) container_of(_hw, struct clk_composite, hw)
++	#define to_clk_factors(_hw) container_of(_hw, struct clk_factors, hw)
 +
-+	/* find the parent that can help provide the fastest rate <=3D rate */
-+	num_parents =3D __clk_get_num_parents(clk);
-+	for (i =3D 0; i < num_parents; i++) {
-+		parent =3D clk_get_parent_by_index(clk, i);
-+		if (!parent)
-+			continue;
-+		if (__clk_get_flags(clk) & CLK_SET_RATE_PARENT)
-+			parent_rate =3D __clk_round_rate(parent, rate);
-+		else
-+			parent_rate =3D __clk_get_rate(parent);
++	struct clk_composite *composite =3D to_clk_composite(hw);
++	struct clk_hw *rate_hw =3D composite->rate_hw;
++	struct clk_factors *factors =3D to_clk_factors(rate_hw);
++	unsigned long flags =3D 0;
++	u32 reg;
 +
-+		child_rate =3D clk_factors_round_rate(hw, rate, &parent_rate);
++	if (factors->lock)
++		spin_lock_irqsave(factors->lock, flags);
 +
-+		if (child_rate <=3D rate && child_rate > best_child_rate) {
-+			best_parent =3D parent;
-+			best =3D parent_rate;
-+			best_child_rate =3D child_rate;
-+		}
-+	}
++	reg =3D readl(factors->reg);
 +
-+	if (best_parent)
-+		*best_parent_p =3D best_parent;
-+	*best_parent_rate =3D best;
++	/* set sample clock phase control */
++	reg &=3D ~(0x7 << 20);
++	reg |=3D ((sample & 0x7) << 20);
 +
-+	return best_child_rate;
++	/* set output clock phase control */
++	reg &=3D ~(0x7 << 8);
++	reg |=3D ((output & 0x7) << 8);
++
++	writel(reg, factors->reg);
++
++	if (factors->lock)
++		spin_unlock_irqrestore(factors->lock, flags);
 +}
++EXPORT_SYMBOL(clk_sunxi_mmc_phase_control);
 +
- static int clk_factors_set_rate(struct clk_hw *hw, unsigned long rate,
- 				unsigned long parent_rate)
- {
-@@ -113,6 +148,7 @@ static int clk_factors_set_rate(struct clk_hw *hw, unsi=
-gned long rate,
- }
++
++/**
+  * sunxi_factors_clk_setup() - Setup function for factor clocks
+  */
 =20
- const struct clk_ops clk_factors_ops =3D {
-+	.determine_rate =3D clk_factors_determine_rate,
- 	.recalc_rate =3D clk_factors_recalc_rate,
- 	.round_rate =3D clk_factors_round_rate,
- 	.set_rate =3D clk_factors_set_rate,
+diff --git a/include/linux/clk/sunxi.h b/include/linux/clk/sunxi.h
+new file mode 100644
+index 0000000..1ef5c89
+--- /dev/null
++++ b/include/linux/clk/sunxi.h
+@@ -0,0 +1,22 @@
++/*
++ * Copyright 2013 - Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation; either version 2 of the License, or
++ * (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ */
++
++#ifndef __LINUX_CLK_SUNXI_H_
++#define __LINUX_CLK_SUNXI_H_
++
++#include <linux/clk.h>
++
++void clk_sunxi_mmc_phase_control(struct clk_hw *hw, u8 sample, u8 output);
++
++#endif
 --=20
 1.9.0
 
