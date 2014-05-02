@@ -1,13 +1,13 @@
 From: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: [PATCH v10 12/15] ARM: dts: sun7i: Add mmc controller nodes
-Date: Fri,  2 May 2014 17:57:26 +0200
-Message-ID: <1399046249-19472-13-git-send-email-hdegoede@redhat.com>
+Subject: [PATCH v10 14/15] ARM: dts: sun7i: Enable mmc
+ controller on various A20 boards
+Date: Fri,  2 May 2014 17:57:28 +0200
+Message-ID: <1399046249-19472-15-git-send-email-hdegoede@redhat.com>
 References: <1399046249-19472-1-git-send-email-hdegoede@redhat.com>
 Reply-To: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
-Return-path: <linux-sunxi+bncBDRZXY4CYYORBFMBR6NQKGQEHIKD2JI-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-sunxi+bncBDRZXY4CYYORBHEBR6NQKGQEJTUTKFI-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
 In-Reply-To: <1399046249-19472-1-git-send-email-hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Post: <http://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
 List-Help: <http://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
@@ -19,69 +19,98 @@ To: Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, Ulf Hansson <ulf
 Cc: =?UTF-8?q?David=20Lanzend=C3=B6rfer?= <david.lanzendoerfer-Z7Kmv9EsliU@public.gmane.org>, Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, devicetree <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Add nodes for the 4 mmc controllers found on A20 SoCs to
-arch/arm/boot/dts/sun7i-a20.dtsi.
+The cd pin settings have been taken from the original firmware fex files,
+and have been confirmed to work on the actual boards.
 
-Signed-off-by: David Lanzend=C3=B6rfer <david.lanzendoerfer-Z7Kmv9EsliU@public.gmane.org>
 Signed-off-by: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 ---
- arch/arm/boot/dts/sun7i-a20.dtsi | 36 ++++++++++++++++++++++++++++++++++++
- 1 file changed, 36 insertions(+)
+ arch/arm/boot/dts/sun7i-a20-cubieboard2.dts     |  9 +++++++++
+ arch/arm/boot/dts/sun7i-a20-cubietruck.dts      |  9 +++++++++
+ arch/arm/boot/dts/sun7i-a20-olinuxino-micro.dts | 25 +++++++++++++++++++++++++
+ 3 files changed, 43 insertions(+)
 
-diff --git a/arch/arm/boot/dts/sun7i-a20.dtsi b/arch/arm/boot/dts/sun7i-a20=
-.dtsi
-index f9f5e0c..9c0ee6f 100644
---- a/arch/arm/boot/dts/sun7i-a20.dtsi
-+++ b/arch/arm/boot/dts/sun7i-a20.dtsi
-@@ -461,6 +461,42 @@
- 			#size-cells =3D <0>;
- 		};
-=20
+diff --git a/arch/arm/boot/dts/sun7i-a20-cubieboard2.dts b/arch/arm/boot/dts/sun7i-a20-cubieboard2.dts
+index 68de89f..3918e2f 100644
+--- a/arch/arm/boot/dts/sun7i-a20-cubieboard2.dts
++++ b/arch/arm/boot/dts/sun7i-a20-cubieboard2.dts
+@@ -20,6 +20,15 @@
+ 	compatible = "cubietech,cubieboard2", "allwinner,sun7i-a20";
+ 
+ 	soc@01c00000 {
 +		mmc0: mmc@01c0f000 {
-+			compatible =3D "allwinner,sun5i-a13-mmc";
-+			reg =3D <0x01c0f000 0x1000>;
-+			clocks =3D <&ahb_gates 8>, <&mmc0_clk>;
-+			clock-names =3D "ahb", "mmc";
-+			interrupts =3D <0 32 4>;
-+			status =3D "disabled";
-+		};
-+
-+		mmc1: mmc@01c10000 {
-+			compatible =3D "allwinner,sun5i-a13-mmc";
-+			reg =3D <0x01c10000 0x1000>;
-+			clocks =3D <&ahb_gates 9>, <&mmc1_clk>;
-+			clock-names =3D "ahb", "mmc";
-+			interrupts =3D <0 33 4>;
-+			status =3D "disabled";
-+		};
-+
-+		mmc2: mmc@01c11000 {
-+			compatible =3D "allwinner,sun5i-a13-mmc";
-+			reg =3D <0x01c11000 0x1000>;
-+			clocks =3D <&ahb_gates 10>, <&mmc2_clk>;
-+			clock-names =3D "ahb", "mmc";
-+			interrupts =3D <0 34 4>;
-+			status =3D "disabled";
-+		};
-+
-+		mmc3: mmc@01c12000 {
-+			compatible =3D "allwinner,sun5i-a13-mmc";
-+			reg =3D <0x01c12000 0x1000>;
-+			clocks =3D <&ahb_gates 11>, <&mmc3_clk>;
-+			clock-names =3D "ahb", "mmc";
-+			interrupts =3D <0 35 4>;
-+			status =3D "disabled";
++			pinctrl-names = "default";
++			pinctrl-0 = <&mmc0_pins_a>, <&mmc0_cd_pin_reference_design>;
++			bus-width = <4>;
++			cd-gpios = <&pio 7 1 0>; /* PH1 */
++			cd-inverted;
++			status = "okay";
 +		};
 +
  		usbphy: phy@01c13400 {
- 			#phy-cells =3D <1>;
- 			compatible =3D "allwinner,sun7i-a20-usb-phy";
---=20
+ 			usb1_vbus-supply = <&reg_usb1_vbus>;
+ 			usb2_vbus-supply = <&reg_usb2_vbus>;
+diff --git a/arch/arm/boot/dts/sun7i-a20-cubietruck.dts b/arch/arm/boot/dts/sun7i-a20-cubietruck.dts
+index cb25d3c..b2e2efd 100644
+--- a/arch/arm/boot/dts/sun7i-a20-cubietruck.dts
++++ b/arch/arm/boot/dts/sun7i-a20-cubietruck.dts
+@@ -20,6 +20,15 @@
+ 	compatible = "cubietech,cubietruck", "allwinner,sun7i-a20";
+ 
+ 	soc@01c00000 {
++		mmc0: mmc@01c0f000 {
++			pinctrl-names = "default";
++			pinctrl-0 = <&mmc0_pins_a>, <&mmc0_cd_pin_reference_design>;
++			bus-width = <4>;
++			cd-gpios = <&pio 7 1 0>; /* PH1 */
++			cd-inverted;
++			status = "okay";
++		};
++
+ 		usbphy: phy@01c13400 {
+ 			usb1_vbus-supply = <&reg_usb1_vbus>;
+ 			usb2_vbus-supply = <&reg_usb2_vbus>;
+diff --git a/arch/arm/boot/dts/sun7i-a20-olinuxino-micro.dts b/arch/arm/boot/dts/sun7i-a20-olinuxino-micro.dts
+index eeadf76..1bfef12 100644
+--- a/arch/arm/boot/dts/sun7i-a20-olinuxino-micro.dts
++++ b/arch/arm/boot/dts/sun7i-a20-olinuxino-micro.dts
+@@ -31,6 +31,24 @@
+ 			status = "okay";
+ 		};
+ 
++		mmc0: mmc@01c0f000 {
++			pinctrl-names = "default";
++			pinctrl-0 = <&mmc0_pins_a>, <&mmc0_cd_pin_reference_design>;
++			bus-width = <4>;
++			cd-gpios = <&pio 7 1 0>; /* PH1 */
++			cd-inverted;
++			status = "okay";
++		};
++
++		mmc3: mmc@01c12000 {
++			pinctrl-names = "default";
++			pinctrl-0 = <&mmc3_pins_a>, <&mmc3_cd_pin_olinuxinom>;
++			bus-width = <4>;
++			cd-gpios = <&pio 7 11 0>; /* PH11 */
++			cd-inverted;
++			status = "okay";
++		};
++
+ 		usbphy: phy@01c13400 {
+ 			usb1_vbus-supply = <&reg_usb1_vbus>;
+ 			usb2_vbus-supply = <&reg_usb2_vbus>;
+@@ -65,6 +83,13 @@
+ 		};
+ 
+ 		pinctrl@01c20800 {
++			mmc3_cd_pin_olinuxinom: mmc3_cd_pin@0 {
++				allwinner,pins = "PH11";
++				allwinner,function = "gpio_in";
++				allwinner,drive = <0>;
++				allwinner,pull = <1>;
++			};
++
+ 			led_pins_olinuxino: led_pins@0 {
+ 				allwinner,pins = "PH2";
+ 				allwinner,function = "gpio_out";
+-- 
 1.9.0
-
---=20
-You received this message because you are subscribed to the Google Groups "=
-linux-sunxi" group.
-To unsubscribe from this group and stop receiving emails from it, send an e=
-mail to linux-sunxi+unsubscribe-/JYPxA39Uh5TLH3MbocFF+G/Ez6ZCGd0@public.gmane.org
-For more options, visit https://groups.google.com/d/optout.
