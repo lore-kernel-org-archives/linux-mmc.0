@@ -1,13 +1,13 @@
 From: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: [PATCH v10 13/15] ARM: dts: sun7i: Add pin-muxing info
- for the mmc controllers
-Date: Fri,  2 May 2014 17:57:27 +0200
-Message-ID: <1399046249-19472-14-git-send-email-hdegoede@redhat.com>
+Subject: [PATCH v10 15/15] ARM: dts: sun7i: Add basic support
+ for the Cubietruck WiFi module
+Date: Fri,  2 May 2014 17:57:29 +0200
+Message-ID: <1399046249-19472-16-git-send-email-hdegoede@redhat.com>
 References: <1399046249-19472-1-git-send-email-hdegoede@redhat.com>
 Reply-To: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-sunxi+bncBDRZXY4CYYORBGEBR6NQKGQESEU6DGY-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+Return-path: <linux-sunxi+bncBDRZXY4CYYORBH4BR6NQKGQEQXJVX4Y-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
 In-Reply-To: <1399046249-19472-1-git-send-email-hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Post: <http://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
 List-Help: <http://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
@@ -16,48 +16,76 @@ Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
 List-Subscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
 List-Unsubscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
 To: Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Emilio Lopez <emilio-0Z03zUJReD5OxF6Tv1QG9Q@public.gmane.org>, Mike Turquette <mturquette-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: =?UTF-8?q?David=20Lanzend=C3=B6rfer?= <david.lanzendoerfer-Z7Kmv9EsliU@public.gmane.org>, Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, devicetree <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: =?UTF-8?q?David=20Lanzend=C3=B6rfer?= <david.lanzendoerfer-Z7Kmv9EsliU@public.gmane.org>, Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, devicetree <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>, Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-This adds  pin-muxing info for the mmc controller / port combinations which
-are known to be used on actual boards.
+From: Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>
+
+The CubieTruck has an AMPAK AP6210 WiFi+Bluetooth module. The WiFi
+part is a BCM43362 IC connected to MMC3 in the A20 SoC via SDIO.
+The IC also takes a power enable signal via GPIO.
+
+The WiFi module supports out-of-band interrupt signaling via GPIO,
+but this is not supported in this patch.
 
 Signed-off-by: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 ---
- arch/arm/boot/dts/sun7i-a20.dtsi | 21 +++++++++++++++++++++
- 1 file changed, 21 insertions(+)
+ arch/arm/boot/dts/sun7i-a20-cubietruck.dts | 31 ++++++++++++++++++++++++++++++
+ 1 file changed, 31 insertions(+)
 
-diff --git a/arch/arm/boot/dts/sun7i-a20.dtsi b/arch/arm/boot/dts/sun7i-a20.dtsi
-index 9c0ee6f..9edd7fe 100644
---- a/arch/arm/boot/dts/sun7i-a20.dtsi
-+++ b/arch/arm/boot/dts/sun7i-a20.dtsi
-@@ -703,6 +703,27 @@
- 				allwinner,drive = <0>;
- 				allwinner,pull = <0>;
- 			};
+diff --git a/arch/arm/boot/dts/sun7i-a20-cubietruck.dts b/arch/arm/boot/dts/sun7i-a20-cubietruck.dts
+index b2e2efd..97b6f02 100644
+--- a/arch/arm/boot/dts/sun7i-a20-cubietruck.dts
++++ b/arch/arm/boot/dts/sun7i-a20-cubietruck.dts
+@@ -29,6 +29,14 @@
+ 			status = "okay";
+ 		};
+ 
++		mmc3: mmc@01c12000 {
++			pinctrl-names = "default";
++			pinctrl-0 = <&mmc3_pins_a>;
++			vmmc-supply = <&reg_vmmc3>;
++			non-removable;
++			status = "okay";
++		};
 +
-+			mmc0_pins_a: mmc0@0 {
-+				allwinner,pins = "PF0","PF1","PF2","PF3","PF4","PF5";
-+				allwinner,function = "mmc0";
-+				allwinner,drive = <2>;
-+				allwinner,pull = <0>;
-+			};
-+
-+			mmc0_cd_pin_reference_design: mmc0_cd_pin@0 {
-+				allwinner,pins = "PH1";
-+				allwinner,function = "gpio_in";
-+				allwinner,drive = <0>;
+ 		usbphy: phy@01c13400 {
+ 			usb1_vbus-supply = <&reg_usb1_vbus>;
+ 			usb2_vbus-supply = <&reg_usb2_vbus>;
+@@ -57,6 +65,18 @@
+ 		};
+ 
+ 		pinctrl@01c20800 {
++			mmc3_pins_a: mmc3@0 {
++				/* AP6210 requires pull-up */
 +				allwinner,pull = <1>;
 +			};
 +
-+			mmc3_pins_a: mmc3@0 {
-+				allwinner,pins = "PI4","PI5","PI6","PI7","PI8","PI9";
-+				allwinner,function = "mmc3";
-+				allwinner,drive = <2>;
++			vmmc3_pin_cubietruck: vmmc3_pin@0 {
++				allwinner,pins = "PH9";
++				allwinner,function = "gpio_out";
++				allwinner,drive = <0>;
 +				allwinner,pull = <0>;
 +			};
- 		};
- 
- 		timer@01c20c00 {
++
+ 			ahci_pwr_pin_cubietruck: ahci_pwr_pin@1 {
+ 				allwinner,pins = "PH12";
+ 				allwinner,function = "gpio_out";
+@@ -148,4 +168,15 @@
+ 	reg_usb2_vbus: usb2-vbus {
+ 		status = "okay";
+ 	};
++
++	reg_vmmc3: vmmc3 {
++		compatible = "regulator-fixed";
++		pinctrl-names = "default";
++		pinctrl-0 = <&vmmc3_pin_cubietruck>;
++		regulator-name = "vmmc3";
++		regulator-min-microvolt = <3300000>;
++		regulator-max-microvolt = <3300000>;
++		enable-active-high;
++		gpio = <&pio 7 9 0>;
++	};
+ };
 -- 
 1.9.0
