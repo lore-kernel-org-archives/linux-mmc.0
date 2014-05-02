@@ -1,13 +1,13 @@
 From: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: [PATCH v10 11/15] ARM: dts: sun6i: Add new sun6i-a31-m9
- dts file for Mele M9
-Date: Fri,  2 May 2014 17:57:25 +0200
-Message-ID: <1399046249-19472-12-git-send-email-hdegoede@redhat.com>
+Subject: [PATCH v10 12/15] ARM: dts: sun7i: Add mmc controller nodes
+Date: Fri,  2 May 2014 17:57:26 +0200
+Message-ID: <1399046249-19472-13-git-send-email-hdegoede@redhat.com>
 References: <1399046249-19472-1-git-send-email-hdegoede@redhat.com>
 Reply-To: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-sunxi+bncBDRZXY4CYYORBEUBR6NQKGQEOOYL45Q-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
+Return-path: <linux-sunxi+bncBDRZXY4CYYORBFMBR6NQKGQEHIKD2JI-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
 In-Reply-To: <1399046249-19472-1-git-send-email-hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Post: <http://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
 List-Help: <http://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
@@ -19,82 +19,69 @@ To: Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, Ulf Hansson <ulf
 Cc: =?UTF-8?q?David=20Lanzend=C3=B6rfer?= <david.lanzendoerfer-Z7Kmv9EsliU@public.gmane.org>, Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, devicetree <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Add a new sun6i-a31-m9 dts file for the Mele M9 / Mele A1000G Quad. These
-HTPCs use the same board in a different case, for more details see:
-http://linux-sunxi.org/Mele_M9
+Add nodes for the 4 mmc controllers found on A20 SoCs to
+arch/arm/boot/dts/sun7i-a20.dtsi.
 
+Signed-off-by: David Lanzend=C3=B6rfer <david.lanzendoerfer-Z7Kmv9EsliU@public.gmane.org>
 Signed-off-by: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 ---
- arch/arm/boot/dts/Makefile         |  1 +
- arch/arm/boot/dts/sun6i-a31-m9.dts | 48 ++++++++++++++++++++++++++++++++++++++
- 2 files changed, 49 insertions(+)
- create mode 100644 arch/arm/boot/dts/sun6i-a31-m9.dts
+ arch/arm/boot/dts/sun7i-a20.dtsi | 36 ++++++++++++++++++++++++++++++++++++
+ 1 file changed, 36 insertions(+)
 
-diff --git a/arch/arm/boot/dts/Makefile b/arch/arm/boot/dts/Makefile
-index 377b7c3..ffa3f5e 100644
---- a/arch/arm/boot/dts/Makefile
-+++ b/arch/arm/boot/dts/Makefile
-@@ -344,6 +344,7 @@ dtb-$(CONFIG_ARCH_SUNXI) += \
- 	sun5i-a13-olinuxino.dtb \
- 	sun5i-a13-olinuxino-micro.dtb \
- 	sun6i-a31-colombus.dtb \
-+	sun6i-a31-m9.dtb \
- 	sun7i-a20-cubieboard2.dtb \
- 	sun7i-a20-cubietruck.dtb \
- 	sun7i-a20-olinuxino-micro.dtb
-diff --git a/arch/arm/boot/dts/sun6i-a31-m9.dts b/arch/arm/boot/dts/sun6i-a31-m9.dts
-new file mode 100644
-index 0000000..22eacf8
---- /dev/null
-+++ b/arch/arm/boot/dts/sun6i-a31-m9.dts
-@@ -0,0 +1,48 @@
-+/*
-+ * Copyright 2014 Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-+ *
-+ * The code contained herein is licensed under the GNU General Public
-+ * License. You may obtain a copy of the GNU General Public License
-+ * Version 2 or later at the following locations:
-+ *
-+ * http://www.opensource.org/licenses/gpl-license.html
-+ * http://www.gnu.org/copyleft/gpl.html
-+ */
-+
-+/dts-v1/;
-+/include/ "sun6i-a31.dtsi"
-+
-+/ {
-+	model = "Mele M9 / A1000G Quad top set box";
-+	compatible = "mele,m9", "allwinner,sun6i-a31";
-+
-+	chosen {
-+		bootargs = "earlyprintk console=ttyS0,115200";
-+	};
-+
-+	soc@01c00000 {
+diff --git a/arch/arm/boot/dts/sun7i-a20.dtsi b/arch/arm/boot/dts/sun7i-a20=
+.dtsi
+index f9f5e0c..9c0ee6f 100644
+--- a/arch/arm/boot/dts/sun7i-a20.dtsi
++++ b/arch/arm/boot/dts/sun7i-a20.dtsi
+@@ -461,6 +461,42 @@
+ 			#size-cells =3D <0>;
+ 		};
+=20
 +		mmc0: mmc@01c0f000 {
-+			pinctrl-names = "default";
-+			pinctrl-0 = <&mmc0_pins_a>, <&mmc0_cd_pin_m9>;
-+			bus-width = <4>;
-+			cd-gpios = <&pio 7 22 0>; /* PH22 */
-+			cd-inverted;
-+			status = "okay";
++			compatible =3D "allwinner,sun5i-a13-mmc";
++			reg =3D <0x01c0f000 0x1000>;
++			clocks =3D <&ahb_gates 8>, <&mmc0_clk>;
++			clock-names =3D "ahb", "mmc";
++			interrupts =3D <0 32 4>;
++			status =3D "disabled";
 +		};
 +
-+		pio: pinctrl@01c20800 {
-+			mmc0_cd_pin_m9: mmc0_cd_pin@0 {
-+				allwinner,pins = "PH22";
-+				allwinner,function = "gpio_in";
-+				allwinner,drive = <0>;
-+				allwinner,pull = <1>;
-+			};
++		mmc1: mmc@01c10000 {
++			compatible =3D "allwinner,sun5i-a13-mmc";
++			reg =3D <0x01c10000 0x1000>;
++			clocks =3D <&ahb_gates 9>, <&mmc1_clk>;
++			clock-names =3D "ahb", "mmc";
++			interrupts =3D <0 33 4>;
++			status =3D "disabled";
 +		};
 +
-+		uart0: serial@01c28000 {
-+			pinctrl-names = "default";
-+			pinctrl-0 = <&uart0_pins_a>;
-+			status = "okay";
++		mmc2: mmc@01c11000 {
++			compatible =3D "allwinner,sun5i-a13-mmc";
++			reg =3D <0x01c11000 0x1000>;
++			clocks =3D <&ahb_gates 10>, <&mmc2_clk>;
++			clock-names =3D "ahb", "mmc";
++			interrupts =3D <0 34 4>;
++			status =3D "disabled";
 +		};
-+	};
-+};
--- 
++
++		mmc3: mmc@01c12000 {
++			compatible =3D "allwinner,sun5i-a13-mmc";
++			reg =3D <0x01c12000 0x1000>;
++			clocks =3D <&ahb_gates 11>, <&mmc3_clk>;
++			clock-names =3D "ahb", "mmc";
++			interrupts =3D <0 35 4>;
++			status =3D "disabled";
++		};
++
+ 		usbphy: phy@01c13400 {
+ 			#phy-cells =3D <1>;
+ 			compatible =3D "allwinner,sun7i-a20-usb-phy";
+--=20
 1.9.0
+
+--=20
+You received this message because you are subscribed to the Google Groups "=
+linux-sunxi" group.
+To unsubscribe from this group and stop receiving emails from it, send an e=
+mail to linux-sunxi+unsubscribe-/JYPxA39Uh5TLH3MbocFF+G/Ez6ZCGd0@public.gmane.org
+For more options, visit https://groups.google.com/d/optout.
