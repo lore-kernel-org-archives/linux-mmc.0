@@ -1,91 +1,83 @@
-From: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: [PATCH v10 15/15] ARM: dts: sun7i: Add basic support
- for the Cubietruck WiFi module
-Date: Fri,  2 May 2014 17:57:29 +0200
-Message-ID: <1399046249-19472-16-git-send-email-hdegoede@redhat.com>
-References: <1399046249-19472-1-git-send-email-hdegoede@redhat.com>
-Reply-To: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+From: Tony Lindgren <tony@atomide.com>
+Subject: Re: [PATCH] mmc: omap: Use DIV_ROUND_UP instead of open coded
+Date: Fri, 2 May 2014 08:39:15 -0700
+Message-ID: <20140502153915.GA3014@atomide.com>
+References: <1398596216.21067.1.camel@phoenix>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-sunxi+bncBDRZXY4CYYORBH4BR6NQKGQEQXJVX4Y-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-In-Reply-To: <1399046249-19472-1-git-send-email-hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-List-Post: <http://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Help: <http://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Archive: <http://groups.google.com/group/linux-sunxi>
-Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
-List-Subscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Unsubscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-To: Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Emilio Lopez <emilio-0Z03zUJReD5OxF6Tv1QG9Q@public.gmane.org>, Mike Turquette <mturquette-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: =?UTF-8?q?David=20Lanzend=C3=B6rfer?= <david.lanzendoerfer-Z7Kmv9EsliU@public.gmane.org>, Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, devicetree <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>, Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mho-02-ewr.mailhop.org ([204.13.248.72]:14234 "EHLO
+	mho-02-ewr.mailhop.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752753AbaEBPjX (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 2 May 2014 11:39:23 -0400
+Content-Disposition: inline
+In-Reply-To: <1398596216.21067.1.camel@phoenix>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Axel Lin <axel.lin@ingics.com>
+Cc: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Jarkko Lavinen <jarkko.lavinen@nokia.com>, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, Jarkko Nikula <jarkko.nikula@bitmer.com>
 
-From: Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>
+* Axel Lin <axel.lin@ingics.com> [140427 03:58]:
+> This also makes the intention more clear.
+> 
+> Signed-off-by: Axel Lin <axel.lin@ingics.com>
 
-The CubieTruck has an AMPAK AP6210 WiFi+Bluetooth module. The WiFi
-part is a BCM43362 IC connected to MMC3 in the A20 SoC via SDIO.
-The IC also takes a power enable signal via GPIO.
+Added Jarkko Nikula to cc.
 
-The WiFi module supports out-of-band interrupt signaling via GPIO,
-but this is not supported in this patch.
+Tony
 
-Signed-off-by: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
----
- arch/arm/boot/dts/sun7i-a20-cubietruck.dts | 31 ++++++++++++++++++++++++++++++
- 1 file changed, 31 insertions(+)
-
-diff --git a/arch/arm/boot/dts/sun7i-a20-cubietruck.dts b/arch/arm/boot/dts/sun7i-a20-cubietruck.dts
-index b2e2efd..97b6f02 100644
---- a/arch/arm/boot/dts/sun7i-a20-cubietruck.dts
-+++ b/arch/arm/boot/dts/sun7i-a20-cubietruck.dts
-@@ -29,6 +29,14 @@
- 			status = "okay";
- 		};
- 
-+		mmc3: mmc@01c12000 {
-+			pinctrl-names = "default";
-+			pinctrl-0 = <&mmc3_pins_a>;
-+			vmmc-supply = <&reg_vmmc3>;
-+			non-removable;
-+			status = "okay";
-+		};
-+
- 		usbphy: phy@01c13400 {
- 			usb1_vbus-supply = <&reg_usb1_vbus>;
- 			usb2_vbus-supply = <&reg_usb2_vbus>;
-@@ -57,6 +65,18 @@
- 		};
- 
- 		pinctrl@01c20800 {
-+			mmc3_pins_a: mmc3@0 {
-+				/* AP6210 requires pull-up */
-+				allwinner,pull = <1>;
-+			};
-+
-+			vmmc3_pin_cubietruck: vmmc3_pin@0 {
-+				allwinner,pins = "PH9";
-+				allwinner,function = "gpio_out";
-+				allwinner,drive = <0>;
-+				allwinner,pull = <0>;
-+			};
-+
- 			ahci_pwr_pin_cubietruck: ahci_pwr_pin@1 {
- 				allwinner,pins = "PH12";
- 				allwinner,function = "gpio_out";
-@@ -148,4 +168,15 @@
- 	reg_usb2_vbus: usb2-vbus {
- 		status = "okay";
- 	};
-+
-+	reg_vmmc3: vmmc3 {
-+		compatible = "regulator-fixed";
-+		pinctrl-names = "default";
-+		pinctrl-0 = <&vmmc3_pin_cubietruck>;
-+		regulator-name = "vmmc3";
-+		regulator-min-microvolt = <3300000>;
-+		regulator-max-microvolt = <3300000>;
-+		enable-active-high;
-+		gpio = <&pio 7 9 0>;
-+	};
- };
--- 
-1.9.0
+> ---
+>  drivers/mmc/host/omap.c | 10 +++++-----
+>  1 file changed, 5 insertions(+), 5 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/omap.c b/drivers/mmc/host/omap.c
+> index 5c2e58b..711981e 100644
+> --- a/drivers/mmc/host/omap.c
+> +++ b/drivers/mmc/host/omap.c
+> @@ -177,7 +177,7 @@ static void mmc_omap_fclk_offdelay(struct mmc_omap_slot *slot)
+>  	unsigned long tick_ns;
+>  
+>  	if (slot != NULL && slot->host->fclk_enabled && slot->fclk_freq > 0) {
+> -		tick_ns = (1000000000 + slot->fclk_freq - 1) / slot->fclk_freq;
+> +		tick_ns = DIV_ROUND_UP(1000000000, slot->fclk_freq);
+>  		ndelay(8 * tick_ns);
+>  	}
+>  }
+> @@ -435,7 +435,7 @@ static void mmc_omap_send_stop_work(struct work_struct *work)
+>  	struct mmc_data *data = host->stop_data;
+>  	unsigned long tick_ns;
+>  
+> -	tick_ns = (1000000000 + slot->fclk_freq - 1)/slot->fclk_freq;
+> +	tick_ns = DIV_ROUND_UP(1000000000, slot->fclk_freq);
+>  	ndelay(8*tick_ns);
+>  
+>  	mmc_omap_start_command(host, data->stop);
+> @@ -477,7 +477,7 @@ mmc_omap_send_abort(struct mmc_omap_host *host, int maxloops)
+>  	u16 stat = 0;
+>  
+>  	/* Sending abort takes 80 clocks. Have some extra and round up */
+> -	timeout = (120*1000000 + slot->fclk_freq - 1)/slot->fclk_freq;
+> +	timeout = DIV_ROUND_UP(120 * 1000000, slot->fclk_freq);
+>  	restarts = 0;
+>  	while (restarts < maxloops) {
+>  		OMAP_MMC_WRITE(host, STAT, 0xFFFF);
+> @@ -677,8 +677,8 @@ mmc_omap_xfer_data(struct mmc_omap_host *host, int write)
+>  	if (n > host->buffer_bytes_left)
+>  		n = host->buffer_bytes_left;
+>  
+> -	nwords = n / 2;
+> -	nwords += n & 1; /* handle odd number of bytes to transfer */
+> +	/* Round up to handle odd number of bytes to transfer */
+> +	nwords = DIV_ROUND_UP(n, 2);
+>  
+>  	host->buffer_bytes_left -= n;
+>  	host->total_bytes_left -= n;
+> -- 
+> 1.8.3.2
+> 
+> 
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-omap" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
