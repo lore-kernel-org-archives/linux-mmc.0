@@ -1,12 +1,13 @@
 From: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: [PATCH v10 10/15] ARM: dts: sun6i: Add mmc controller nodes
-Date: Fri,  2 May 2014 17:57:24 +0200
-Message-ID: <1399046249-19472-11-git-send-email-hdegoede@redhat.com>
+Subject: [PATCH v10 11/15] ARM: dts: sun6i: Add new sun6i-a31-m9
+ dts file for Mele M9
+Date: Fri,  2 May 2014 17:57:25 +0200
+Message-ID: <1399046249-19472-12-git-send-email-hdegoede@redhat.com>
 References: <1399046249-19472-1-git-send-email-hdegoede@redhat.com>
 Reply-To: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-sunxi+bncBDRZXY4CYYORBD4BR6NQKGQEGNER3HA-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+Return-path: <linux-sunxi+bncBDRZXY4CYYORBEUBR6NQKGQEOOYL45Q-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
 In-Reply-To: <1399046249-19472-1-git-send-email-hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Post: <http://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
 List-Help: <http://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
@@ -18,68 +19,82 @@ To: Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, Ulf Hansson <ulf
 Cc: =?UTF-8?q?David=20Lanzend=C3=B6rfer?= <david.lanzendoerfer-Z7Kmv9EsliU@public.gmane.org>, Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, devicetree <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Add nodes for the 4 mmc controllers found on A31 SoCs to
-arch/arm/boot/dts/sun6i-a31.dtsi.
+Add a new sun6i-a31-m9 dts file for the Mele M9 / Mele A1000G Quad. These
+HTPCs use the same board in a different case, for more details see:
+http://linux-sunxi.org/Mele_M9
 
 Signed-off-by: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 ---
- arch/arm/boot/dts/sun6i-a31.dtsi | 44 ++++++++++++++++++++++++++++++++++++++++
- 1 file changed, 44 insertions(+)
+ arch/arm/boot/dts/Makefile         |  1 +
+ arch/arm/boot/dts/sun6i-a31-m9.dts | 48 ++++++++++++++++++++++++++++++++++++++
+ 2 files changed, 49 insertions(+)
+ create mode 100644 arch/arm/boot/dts/sun6i-a31-m9.dts
 
-diff --git a/arch/arm/boot/dts/sun6i-a31.dtsi b/arch/arm/boot/dts/sun6i-a31.dtsi
-index f2bb07c..d97721d 100644
---- a/arch/arm/boot/dts/sun6i-a31.dtsi
-+++ b/arch/arm/boot/dts/sun6i-a31.dtsi
-@@ -277,6 +277,50 @@
- 		#size-cells = <1>;
- 		ranges;
- 
+diff --git a/arch/arm/boot/dts/Makefile b/arch/arm/boot/dts/Makefile
+index 377b7c3..ffa3f5e 100644
+--- a/arch/arm/boot/dts/Makefile
++++ b/arch/arm/boot/dts/Makefile
+@@ -344,6 +344,7 @@ dtb-$(CONFIG_ARCH_SUNXI) += \
+ 	sun5i-a13-olinuxino.dtb \
+ 	sun5i-a13-olinuxino-micro.dtb \
+ 	sun6i-a31-colombus.dtb \
++	sun6i-a31-m9.dtb \
+ 	sun7i-a20-cubieboard2.dtb \
+ 	sun7i-a20-cubietruck.dtb \
+ 	sun7i-a20-olinuxino-micro.dtb
+diff --git a/arch/arm/boot/dts/sun6i-a31-m9.dts b/arch/arm/boot/dts/sun6i-a31-m9.dts
+new file mode 100644
+index 0000000..22eacf8
+--- /dev/null
++++ b/arch/arm/boot/dts/sun6i-a31-m9.dts
+@@ -0,0 +1,48 @@
++/*
++ * Copyright 2014 Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
++ *
++ * The code contained herein is licensed under the GNU General Public
++ * License. You may obtain a copy of the GNU General Public License
++ * Version 2 or later at the following locations:
++ *
++ * http://www.opensource.org/licenses/gpl-license.html
++ * http://www.gnu.org/copyleft/gpl.html
++ */
++
++/dts-v1/;
++/include/ "sun6i-a31.dtsi"
++
++/ {
++	model = "Mele M9 / A1000G Quad top set box";
++	compatible = "mele,m9", "allwinner,sun6i-a31";
++
++	chosen {
++		bootargs = "earlyprintk console=ttyS0,115200";
++	};
++
++	soc@01c00000 {
 +		mmc0: mmc@01c0f000 {
-+			compatible = "allwinner,sun5i-a13-mmc";
-+			reg = <0x01c0f000 0x1000>;
-+			clocks = <&ahb1_gates 8>, <&mmc0_clk>;
-+			clock-names = "ahb", "mmc";
-+			resets = <&ahb1_rst 8>;
-+			reset-names = "ahb";
-+			interrupts = <0 60 4>;
-+			status = "disabled";
++			pinctrl-names = "default";
++			pinctrl-0 = <&mmc0_pins_a>, <&mmc0_cd_pin_m9>;
++			bus-width = <4>;
++			cd-gpios = <&pio 7 22 0>; /* PH22 */
++			cd-inverted;
++			status = "okay";
 +		};
 +
-+		mmc1: mmc@01c10000 {
-+			compatible = "allwinner,sun5i-a13-mmc";
-+			reg = <0x01c10000 0x1000>;
-+			clocks = <&ahb1_gates 9>, <&mmc1_clk>;
-+			clock-names = "ahb", "mmc";
-+			resets = <&ahb1_rst 9>;
-+			reset-names = "ahb";
-+			interrupts = <0 61 4>;
-+			status = "disabled";
++		pio: pinctrl@01c20800 {
++			mmc0_cd_pin_m9: mmc0_cd_pin@0 {
++				allwinner,pins = "PH22";
++				allwinner,function = "gpio_in";
++				allwinner,drive = <0>;
++				allwinner,pull = <1>;
++			};
 +		};
 +
-+		mmc2: mmc@01c11000 {
-+			compatible = "allwinner,sun5i-a13-mmc";
-+			reg = <0x01c11000 0x1000>;
-+			clocks = <&ahb1_gates 10>, <&mmc2_clk>;
-+			clock-names = "ahb", "mmc";
-+			resets = <&ahb1_rst 10>;
-+			reset-names = "ahb";
-+			interrupts = <0 62 4>;
-+			status = "disabled";
++		uart0: serial@01c28000 {
++			pinctrl-names = "default";
++			pinctrl-0 = <&uart0_pins_a>;
++			status = "okay";
 +		};
-+
-+		mmc3: mmc@01c12000 {
-+			compatible = "allwinner,sun5i-a13-mmc";
-+			reg = <0x01c12000 0x1000>;
-+			clocks = <&ahb1_gates 11>, <&mmc3_clk>;
-+			clock-names = "ahb", "mmc";
-+			resets = <&ahb1_rst 11>;
-+			reset-names = "ahb";
-+			interrupts = <0 63 4>;
-+			status = "disabled";
-+		};
-+
- 		nmi_intc: interrupt-controller@01f00c0c {
- 			compatible = "allwinner,sun6i-a31-sc-nmi";
- 			interrupt-controller;
++	};
++};
 -- 
 1.9.0
