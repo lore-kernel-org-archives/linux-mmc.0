@@ -1,103 +1,95 @@
-From: Alexander Shiyan <shc_work@mail.ru>
-Subject: [PATCH] mmc: mxcmmc: Use mmc_regulator_get_supply() API
-Date: Sat,  3 May 2014 10:55:17 +0400
-Message-ID: <1399100117-6978-1-git-send-email-shc_work@mail.ru>
+From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Subject: RE: [PATCH v2] mmc: add a driver for the Renesas usdhi6rol0 SD/SDIO
+ host controller
+Date: Sat, 3 May 2014 11:08:44 +0200 (CEST)
+Message-ID: <Pine.LNX.4.64.1405031046560.23253@axis700.grange>
+References: <Pine.LNX.4.64.1404261404030.21367@axis700.grange>
+ <a3075651ae064d2fb70073eb3472ede4@HKXPR06MB168.apcprd06.prod.outlook.com>
+Mime-Version: 1.0
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from fallback5.mail.ru ([94.100.176.59]:50045 "EHLO
-	fallback5.mail.ru" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750770AbaECGzh (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 3 May 2014 02:55:37 -0400
+Received: from mout.kundenserver.de ([212.227.17.24]:55793 "EHLO
+	mout.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750920AbaECJJA (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 3 May 2014 05:09:00 -0400
+In-Reply-To: <a3075651ae064d2fb70073eb3472ede4@HKXPR06MB168.apcprd06.prod.outlook.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Alexander Shiyan <shc_work@mail.ru>
+To: Phil Edworthy <phil.edworthy@renesas.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Rob Herring <robh+dt@kernel.org>, Grant Likely <grant.likely@linaro.org>
 
-This patch replaces regulator manipulation with
-mmc_regulator_get_supply() function from MMC core.
+Hi Phil,
 
-Signed-off-by: Alexander Shiyan <shc_work@mail.ru>
+Thanks for the comments.
+
+On Mon, 28 Apr 2014, Phil Edworthy wrote:
+
+> Hi Guennadi,
+> 
+> On 26 April 2014 13:06, Guennadi wrote:
+> > Subject: [PATCH v2] mmc: add a driver for the Renesas usdhi6rol0 SD/SDIO
+> > host controller
+> > 
+> > This patch adds a driver for the Renesas usdhi6rol0 SD/SDIO host controller
+> > in both PIO and DMA modes.
+> 
+> ...
+> > +static void usdhi6_dma_stop_unmap(struct usdhi6_host *host)
+> > +{
+> > +	struct mmc_data *data = host->mrq->data;
+> > +
+> > +	if (!host->dma_active)
+> > +		return;
+> > +
+> > +	usdhi6_write(host, USDHI6_CC_EXT_MODE, 0);
+> > +	host->dma_active = false;
+> > +
+> > +	if (data->flags & MMC_DATA_READ)
+> > +		/* TODO: do we have to synchronise? */
+> > +		dma_unmap_sg(host->chan_rx->device->dev, data->sg,
+> > +			     data->sg_len, DMA_FROM_DEVICE);
+> Yes, you have to sync, so you can remove this TODO comment.
+
+Why do you think so? If we really do, we'd have to add it. And I did think 
+synchronisation was needed, that's why I posted this patch series:
+
+http://thread.gmane.org/gmane.linux.kernel.mmc/24969
+
+but it never got applied, even though it got 2 acks. And actually now I 
+think that synchronisation isn't needed. I think dma_map_sg() / 
+dma_unmap_sg() do that for us already. E.g.
+
+dma_map_sg_attrs()
+arm_dma_map_page()
+__dma_page_cpu_to_dev()
+dmac_map_area()
+cpu_cache.dma_map_area()
+v7_dma_inv_range()
+v7_dma_clean_range()
+
+Similar for unmapping. So, I think it would be best to remove the comment 
+without adding synchronisation.
+
+Let me do this: I'll prepare a separate patch for adding dma syncs, but I 
+won't submit it for now, or I can just provide it for reference.
+
+> ...
+> > +static int usdhi6_probe(struct platform_device *pdev)
+> > +{
+> ...
+> > +	host		= mmc_priv(mmc);
+> > +	host->mmc	= mmc;
+> > +	host->wait	= USDHI6_WAIT_FOR_REQUEST;
+> > +	host->timeout	= msecs_to_jiffies(1000);
+
+> In all places you use host->timeout, the code uses host->timeout * 4. 
+> Wouldn't it better to just set it here to 4 seconds?
+
+ok, I'll do that for v3.
+
+Thanks
+Guennadi
 ---
- drivers/mmc/host/mxcmmc.c | 44 +++++++++++++++++---------------------------
- 1 file changed, 17 insertions(+), 27 deletions(-)
-
-diff --git a/drivers/mmc/host/mxcmmc.c b/drivers/mmc/host/mxcmmc.c
-index 86401c0..ed1cb93 100644
---- a/drivers/mmc/host/mxcmmc.c
-+++ b/drivers/mmc/host/mxcmmc.c
-@@ -153,8 +153,6 @@ struct mxcmci_host {
- 	struct work_struct	datawork;
- 	spinlock_t		lock;
- 
--	struct regulator	*vcc;
--
- 	int			burstlen;
- 	int			dmareq;
- 	struct dma_slave_config dma_slave_config;
-@@ -240,30 +238,15 @@ static inline void mxcmci_writew(struct mxcmci_host *host, u16 val, int reg)
- 
- static void mxcmci_set_clk_rate(struct mxcmci_host *host, unsigned int clk_ios);
- 
--static void mxcmci_init_ocr(struct mxcmci_host *host)
-+static void mxcmci_set_power(struct mxcmci_host *host, unsigned int vdd)
- {
--	host->vcc = devm_regulator_get(mmc_dev(host->mmc), "vmmc");
--	if (IS_ERR(host->vcc)) {
--		if (host->pdata && host->pdata->ocr_avail)
--			host->mmc->ocr_avail = host->pdata->ocr_avail;
--		else
--			host->mmc->ocr_avail = MMC_VDD_32_33 | MMC_VDD_33_34;
--	} else {
--		host->mmc->ocr_avail = mmc_regulator_get_ocrmask(host->vcc);
--		if (host->pdata && host->pdata->ocr_avail)
--			dev_warn(mmc_dev(host->mmc),
--				"pdata->ocr_avail will not be used\n");
--	}
--}
--
--static void mxcmci_set_power(struct mxcmci_host *host, unsigned char power_mode,
--			     unsigned int vdd)
--{
--	if (!IS_ERR(host->vcc)) {
--		if (power_mode == MMC_POWER_UP)
--			mmc_regulator_set_ocr(host->mmc, host->vcc, vdd);
--		else if (power_mode == MMC_POWER_OFF)
--			mmc_regulator_set_ocr(host->mmc, host->vcc, 0);
-+	if (!IS_ERR(host->mmc->supply.vmmc)) {
-+		if (host->power_mode == MMC_POWER_UP)
-+			mmc_regulator_set_ocr(host->mmc,
-+					      host->mmc->supply.vmmc, vdd);
-+		else if (host->power_mode == MMC_POWER_OFF)
-+			mmc_regulator_set_ocr(host->mmc,
-+					      host->mmc->supply.vmmc, 0);
- 	}
- 
- 	if (host->pdata && host->pdata->setpower)
-@@ -902,8 +885,8 @@ static void mxcmci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 		host->cmdat &= ~CMD_DAT_CONT_BUS_WIDTH_4;
- 
- 	if (host->power_mode != ios->power_mode) {
--		mxcmci_set_power(host, ios->power_mode, ios->vdd);
- 		host->power_mode = ios->power_mode;
-+		mxcmci_set_power(host, ios->vdd);
- 
- 		if (ios->power_mode == MMC_POWER_ON)
- 			host->cmdat |= CMD_DAT_CONT_INIT;
-@@ -1100,7 +1083,14 @@ static int mxcmci_probe(struct platform_device *pdev)
- 			&& !of_property_read_bool(pdev->dev.of_node, "cd-gpios"))
- 		dat3_card_detect = true;
- 
--	mxcmci_init_ocr(host);
-+	ret = mmc_regulator_get_supply(mmc);
-+	if (ret) {
-+		if (pdata && ret != -EPROBE_DEFER)
-+			mmc->ocr_avail = pdata->ocr_avail ? :
-+				MMC_VDD_32_33 | MMC_VDD_33_34;
-+		else
-+			goto out_free;
-+	}
- 
- 	if (dat3_card_detect)
- 		host->default_irq_mask =
--- 
-1.8.3.2
-
+Guennadi Liakhovetski, Ph.D.
+Freelance Open-Source Software Developer
+http://www.open-technology.de/
