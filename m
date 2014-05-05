@@ -1,52 +1,82 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 2/2] mmc: rtsx: Revert "mmc: rtsx: add support for pre_req
- and post_req"
-Date: Mon, 5 May 2014 11:31:28 +0200
-Message-ID: <CAPDyKFoEWkzHDfPn3BXVuXFMcfsLFtZdvsV36a7ic0DjCgu+NA@mail.gmail.com>
-References: <cover.1398735435.git.micky_ching@realsil.com.cn>
-	<6a8f18cad47244e849adf8a731c621932fa777e0.1398735435.git.micky_ching@realsil.com.cn>
-	<CAPDyKFqSdvjJrsbDeX1KbjQtOjfoAwC0xz3y7Rm-BsD0T8tmxg@mail.gmail.com>
+Subject: Re: [PATCH] mmc: mxs: fix card detection function for broken card detect
+Date: Mon, 5 May 2014 11:14:47 +0200
+Message-ID: <CAPDyKFq-+pOrdwn3QPXCgP=6jHQ0egnAk884OprLvfYKAU1VXA@mail.gmail.com>
+References: <dec3cef26b7470cabfc11a83750a88db5b545a41.1397944151.git.daniel@totalueberwachung.de>
+	<20140428091341.GA5918@pengutronix.de>
+	<CAPDyKFqP_cDTyC38+8XDPLWN0C6wWs9e6iZD06nkb_LqqLjjnw@mail.gmail.com>
+	<20140428093619.GP5858@pengutronix.de>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qg0-f50.google.com ([209.85.192.50]:59374 "EHLO
-	mail-qg0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755512AbaEEJb3 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 5 May 2014 05:31:29 -0400
-Received: by mail-qg0-f50.google.com with SMTP id z60so2054193qgd.23
-        for <linux-mmc@vger.kernel.org>; Mon, 05 May 2014 02:31:28 -0700 (PDT)
-In-Reply-To: <CAPDyKFqSdvjJrsbDeX1KbjQtOjfoAwC0xz3y7Rm-BsD0T8tmxg@mail.gmail.com>
+Received: from mail-qc0-f176.google.com ([209.85.216.176]:57597 "EHLO
+	mail-qc0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755347AbaEEJOs (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 5 May 2014 05:14:48 -0400
+Received: by mail-qc0-f176.google.com with SMTP id r5so647676qcx.7
+        for <linux-mmc@vger.kernel.org>; Mon, 05 May 2014 02:14:47 -0700 (PDT)
+In-Reply-To: <20140428093619.GP5858@pengutronix.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Lee Jones <lee.jones@linaro.org>
-Cc: Chris Ball <chris@printf.net>, micky <micky_ching@realsil.com.cn>, Samuel Ortiz <sameo@linux.intel.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Dan Carpenter <dan.carpenter@oracle.com>, devel@linuxdriverproject.org, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, Roger <rogerable@realtek.com>, Wei WANG <wei_wang@realsil.com.cn>
+To: Sascha Hauer <s.hauer@pengutronix.de>, Daniel Willmann <daniel@totalueberwachung.de>
+Cc: Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Shawn Guo <shawn.guo@linaro.org>
 
-On 29 April 2014 09:36, Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> On 29 April 2014 03:54,  <micky_ching@realsil.com.cn> wrote:
->> From: Micky Ching <micky_ching@realsil.com.cn>
+On 28 April 2014 11:36, Sascha Hauer <s.hauer@pengutronix.de> wrote:
+> On Mon, Apr 28, 2014 at 11:31:03AM +0200, Ulf Hansson wrote:
+>> On 28 April 2014 11:13, Sascha Hauer <s.hauer@pengutronix.de> wrote:
+>> > On Sat, Apr 19, 2014 at 11:59:18PM +0200, Daniel Willmann wrote:
+>> >> Return -ENOSYS in get_cd if broken-cd is specified in the device tree.
+>> >>
+>> >> Commit a91fe279ae75 (mmc: mxs: use standard flag for broken card
+>> >> detection) sets MMC_CAP_NEEDS_POLL when broken-cd is specified. This
+>> >> driver sets this flag unconditionally as it does not support a card
+>> >> detect interrupt. Instead, broken-cd means that there is no card detect
+>> >> signal connected.
+>> >>
+>> >> The mmc core checks the get_cd function return value to determine if a
+>> >> card is present. Only for a non-zero return value it will attempt to
+>> >> initialize the card. So retuning -ENOSYS will allow the card to be
+>> >> initialized.
+>> >> For comparison, mmc_gpio_get_cd in slot-gpio.c also returns -ENOSYS if
+>> >> the card detect GPIO is not valid.
+>> >
+>> > Short answer for fixing this regression:
+>> >
+>> > Acked-by: Sascha Hauer <s.hauer@pengutronix.de>
+>> >
+>> > Long answer:
+>> >
+>> > This is broken in the MMC OF parser. When the parser finds the
+>> > 'broken-cd' property it just sets the MMC_CAP_NEEDS_POLL flag. This is
+>> > wrong.  broken-cd means that we cannot rely on any card detection, but
+>> > instead have to talk to the card to find out if it's available.
+>> > Currently there is no flag to signal this situation, so the host driver
+>> > has to handle this by returning true in the get_cd callback, just like
+>> > the patch below does.
+>> >
+>> > IMO the correct solution would be to add a MMC_CAP_CD_NEEDS_TALK_TO_CARD
+>> > flag to the core.
+>> >
 >>
->> This reverts commit c42deffd5b53c9e583d83c7964854ede2f12410d.
->>
->> commit <mmc: rtsx: add support for pre_req and post_req> did use
->> mutex_unlock() in tasklet, but mutex_unlock() can't used in
->> tasklet(atomic context). The driver need use mutex to avoid concurrency,
->> so we can't use tasklet here, the patch need to be removed.
->>
->> The spinlock host->lock and pcr->lock may deadlock, one way to solve the
->> deadlock is remove host->lock in sd_isr_done_transfer(), but if using
->> workqueue the we can avoid using the spinlock and also avoid the problem.
->>
->> Signed-off-by: Micky Ching <micky_ching@realsil.com.cn>
+>> So if I understand correct, you want the host-ops->get_cd function to
+>> be invoked from the mmc rescan - only when it actually can provide
+>> useful information?
 >
-> Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
+> Yes.
 
-Hi Lee,
+Until/if that happens, I suggest to go ahead with Daniel's patch as well.
 
-Would you mind to pick this up and send it for 3.15 fixes?
+Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
 
-The other revert "[PATCH 1/2] mmc: rtsx: Revert "mmc: rtsx: modify
-error handle and remove smatch warnings", needs to go through the mmc
-tree.
-
-Kind regards
-Uffe
+>
+> Sascha
+>
+> --
+> Pengutronix e.K.                           |                             |
+> Industrial Linux Solutions                 | http://www.pengutronix.de/  |
+> Peiner Str. 6-8, 31137 Hildesheim, Germany | Phone: +49-5121-206917-0    |
+> Amtsgericht Hildesheim, HRA 2686           | Fax:   +49-5121-206917-5555 |
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
