@@ -1,47 +1,61 @@
-From: Maxime Ripard <maxime.ripard@free-electrons.com>
-Subject: Re: [PATCH v10 15/15] ARM: dts: sun7i: Add basic support for the
- Cubietruck WiFi module
-Date: Sun, 4 May 2014 23:02:12 -0500
-Message-ID: <20140505040212.GC11606@lukather>
+From: Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
+Subject: Re: [PATCH v10 00/15] ARM: sunxi: Add driver for SD/MMC hosts found
+ on Allwinner sunxi SoCs
+Date: Sun, 4 May 2014 23:00:26 -0500
+Message-ID: <20140505040026.GB11606@lukather>
 References: <1399046249-19472-1-git-send-email-hdegoede@redhat.com>
- <1399046249-19472-16-git-send-email-hdegoede@redhat.com>
 Mime-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="zCKi3GIZzVBPywwA"
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from top.free-electrons.com ([176.31.233.9]:35353 "EHLO
-	mail.free-electrons.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1750982AbaEEEFM (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 5 May 2014 00:05:12 -0400
+	protocol="application/pgp-signature"; boundary="bCsyhTFzCvuiizWE"
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <1399046249-19472-16-git-send-email-hdegoede@redhat.com>
-Sender: linux-mmc-owner@vger.kernel.org
+In-Reply-To: <1399046249-19472-1-git-send-email-hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Emilio Lopez <emilio-0Z03zUJReD5OxF6Tv1QG9Q@public.gmane.org>, Mike Turquette <mturquette-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, David =?iso-8859-1?Q?Lanzend=F6rfer?= <david.lanzendoerfer-Z7Kmv9EsliU@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, devicetree <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: Hans de Goede <hdegoede@redhat.com>, Chen-Yu Tsai <wens@csie.org>
-Cc: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Emilio Lopez <emilio@elopez.com.ar>, Mike Turquette <mturquette@linaro.org>, David =?iso-8859-1?Q?Lanzend=F6rfer?= <david.lanzendoerfer@o2s.ch>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, devicetree <devicetree@vger.kernel.org>, linux-sunxi@googlegroups.com
 
 
---zCKi3GIZzVBPywwA
-Content-Type: text/plain; charset=us-ascii
+--bCsyhTFzCvuiizWE
+Content-Type: text/plain; charset=iso-8859-1
 Content-Disposition: inline
 Content-Transfer-Encoding: quoted-printable
 
-On Fri, May 02, 2014 at 05:57:29PM +0200, Hans de Goede wrote:
-> From: Chen-Yu Tsai <wens@csie.org>
+On Fri, May 02, 2014 at 05:57:14PM +0200, Hans de Goede wrote:
+> Hi All,
 >=20
-> The CubieTruck has an AMPAK AP6210 WiFi+Bluetooth module. The WiFi
-> part is a BCM43362 IC connected to MMC3 in the A20 SoC via SDIO.
-> The IC also takes a power enable signal via GPIO.
+> Here is v10 of the sunxi-mmc patch-set David Lanzend=F6rfer and I have be=
+en
+> working on, this has some minor changes since v9, the plan for upstreamin=
+g is
+> still the same:
 >=20
-> The WiFi module supports out-of-band interrupt signaling via GPIO,
-> but this is not supported in this patch.
+> The first 2 patches are depenencies which should go in through the clk tr=
+ee,
+> Mike can you pick these 2 up please ?  :
 >=20
-> Signed-off-by: Hans de Goede <hdegoede@redhat.com>
+> "clk: sunxi: factors: automatic reparenting support"
+> Is uncontroversial and has been favorably reviewed by various people.
+>=20
+> "clk: sunxi: Implement MMC phase control"
+> Is somewhat more controversial as there has been lots of discussion about
+> adding a generic phase control method to the clk framework. The problem is
+> that there has been a lot of talk about such a generic phase control meth=
+od
+> but not a single patch. Therefor I would like to move forwards with using
+> a platform specific method for now. I hereby promise that once we've a ge=
+neric
+> method I'll write patches to convert the sunxi code to that method.
+>=20
+> The third patch is the patch adding the actual mmc driver and should go in
+> through the mmc tree.
+>=20
+> All the other patches are devicetree patches hooking things up, and should
+> go upstream through Maxime's sunxi-dt tree.
 
-It doesn't have Chen-Yu SoB. Chen-Yu, are you fine with adding it?
+Applied patches 4 to 14.
 
-No need to respin the set, I'll add it when applying if it's ok.
-
+Thanks!
 Maxime
 
 --=20
@@ -49,26 +63,30 @@ Maxime Ripard, Free Electrons
 Embedded Linux, Kernel and Android engineering
 http://free-electrons.com
 
---zCKi3GIZzVBPywwA
+--bCsyhTFzCvuiizWE
 Content-Type: application/pgp-signature; name="signature.asc"
 Content-Description: Digital signature
 
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v1.4.14 (GNU/Linux)
 
-iQIcBAEBAgAGBQJTZw1EAAoJEBx+YmzsjxAgGDgP/RdSkxqfd9PZsrqZ0uhSQdJz
-qM+lAmdlw48ZG74fu2/ZEeBaDKcikaKp3IMveqD0f5lNRD11kfSSI8AnhZ2fMf4k
-Bid+n6ETXTwYJ8g22o2CC6y95oZhUwvl36juweOB4ro6qVG9rKm+Bt4+wLg3QMs6
-QaXWOe26GaomzBckyz6r7c8W2qYvbwus5YPwBs60qOJQJKysmckOmk586NLdSl1G
-glXVD1Y5EcYpYs/sTqMBNOwkftHIGwWBp53RsFdiG99z9YmCyizMboM6Ccr++FpU
-+JIJ1CVmRgHbN3bKXYLSQwT/9vTebfLmCP+Oy0+s70xgBrjtBCwKsltlnlRONreA
-IMRHd45geDgkhua1zld0sSZz0lDsbTiKhVFrZbMWZI9nWKtQEcpfsSmFXkEbynn8
-zpLtvqjHTO5IdixPUT6efupCmsf6Qu2c/wSQRp33iOg25nakDLw7tD5KaA5DBzag
-Yku6cJBJV7Qwf/vbyznUnlgOokzpgV3txNIeYHZhOoH34JiQgQWiAYo4d/XUjaOD
-hmGILZJ9VwwrXm8+0J34jd2Wj0tepHcuwv2pRBTehuJRa23rUs/WIkTqBGeq1VTu
-SOkVFDzpB0jTcFHTpXPP6DY+K2LBIGE1bTc/RkGZLgpnMKTboDnjU0IDVB0evOga
-uXuSDsjn7cBNQvpKiBVK
-=c/z9
+iQIcBAEBAgAGBQJTZwzaAAoJEBx+YmzsjxAgd6cP/Atp92k/Wape9n7f9yQV1id3
+E+AEKL1wULRaFsSUraIB90xXoBOIfBJC0+YEGtI+SC0HeYqQGCcwTrd/AvFeaZ0Z
+TEe/PKOtYociYJKd8TGblQdt1LE6P4YrMTa+Iy6szzxvrfOasbmjjH9KLtmx+lM8
+9+LX8VdPC4YE64zkSfWSrlb6r/7veUppVihFyM9v2EyAe8q0CzMftVDmW2ms+vBM
+L8++bJPvBNNm7RKVs6hMvl2i91kS0KjM8c0VnjAaPOhs/diISVCY8Saqar6FZ2FE
+unF4tTOyytVhIRklKBBY5IDi8r+R0VVpwxWzruD785BghCFcy+G+fD8OcHUB8Xp1
+FdUL118RofYv8iCwVFkvvf6BMZrTUkw9WEZZlqDJ+52G3AG8LTsGvyiSzRcFuXsx
+d5AzlUKuIwA7MaQ1bNb6SKC0XzHyFayW4sQWAMXmdu8I/ZqI1LmpfUsMP2rJK0Dj
+S+BPLqP9jn50IRKb/4YjHhZEP+jZt9YKW9uBsvDD5uV+PEzCKZQ1pcQujN7rBRir
+oYLaGiwGlLYfjou3nvzx18ll3eb5f4fQKFzCxi8V7pcb25RSts+Cq+o3KI9bVYhl
+qIA2o2xKurHtjvwlF+CoqiIhcoMPV2m/m6sjy5lGrJOdsaIGwhW3eiNjTgF3a18u
+3e2cMR4+ZU2pyBUcJjZF
+=uSAG
 -----END PGP SIGNATURE-----
 
---zCKi3GIZzVBPywwA--
+--bCsyhTFzCvuiizWE--
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
