@@ -1,92 +1,52 @@
-From: Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
-Subject: Re: [PATCH v10 00/15] ARM: sunxi: Add driver for SD/MMC hosts found
- on Allwinner sunxi SoCs
-Date: Sun, 4 May 2014 23:00:26 -0500
-Message-ID: <20140505040026.GB11606@lukather>
-References: <1399046249-19472-1-git-send-email-hdegoede@redhat.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH 1/6] mmc: drop the speed mode of card's state
+Date: Mon, 5 May 2014 10:02:02 +0200
+Message-ID: <CAPDyKFo7p-TtEdPeepc=ng7OERZ191+vB5VUgX0YymJ=fy15BA@mail.gmail.com>
+References: <1383653403-10049-1-git-send-email-ulf.hansson@linaro.org>
+	<006701cf2a58$c628e050$527aa0f0$%jun@samsung.com>
+	<000a01cf5ecb$15fedcf0$41fc96d0$%jun@samsung.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="bCsyhTFzCvuiizWE"
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <1399046249-19472-1-git-send-email-hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Emilio Lopez <emilio-0Z03zUJReD5OxF6Tv1QG9Q@public.gmane.org>, Mike Turquette <mturquette-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, David =?iso-8859-1?Q?Lanzend=F6rfer?= <david.lanzendoerfer-Z7Kmv9EsliU@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, devicetree <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qc0-f177.google.com ([209.85.216.177]:56876 "EHLO
+	mail-qc0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754778AbaEEICD (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 5 May 2014 04:02:03 -0400
+Received: by mail-qc0-f177.google.com with SMTP id i17so6615113qcy.36
+        for <linux-mmc@vger.kernel.org>; Mon, 05 May 2014 01:02:02 -0700 (PDT)
+In-Reply-To: <000a01cf5ecb$15fedcf0$41fc96d0$%jun@samsung.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: "John W. Linville" <linville@tuxdriver.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, linux-wireless@vger.kernel.org, Chris Ball <chris@printf.net>, Jaehoon Chung <jh80.chung@samsung.com>, Jackey Shen <jackey.shen@amd.com>, Alim Akhtar <alim.akhtar@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, Fariya Fatima <fariyaf@gmail.com>
 
+On 23 April 2014 10:07, Seungwon Jeon <tgih.jun@samsung.com> wrote:
+> Timing mode identifier has same role and can take the place
+> of speed mode. This change removes all related speed mode.
+>
+> Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
+> Tested-by: Jaehoon Chung <jh80.chung@samsung.com>
+> Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
+> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+> Signed-off-by: Chris Ball <chris@printf.net>
+> ---
+>  drivers/mmc/core/bus.c                  |    8 ++++----
+>  drivers/mmc/core/core.c                 |    3 +--
+>  drivers/mmc/core/mmc.c                  |   11 +++--------
+>  drivers/mmc/core/sd.c                   |   16 +++-------------
+>  drivers/mmc/core/sd.h                   |    1 -
+>  drivers/mmc/core/sdio.c                 |    8 ++------
+>  drivers/net/wireless/rsi/rsi_91x_sdio.c |    4 +---
+>  include/linux/mmc/card.h                |   23 ++++++-----------------
+>  include/linux/mmc/host.h                |   23 +++++++++++++++++++++++
+>  9 files changed, 43 insertions(+), 54 deletions(-)
 
---bCsyhTFzCvuiizWE
-Content-Type: text/plain; charset=iso-8859-1
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+Hi John,
 
-On Fri, May 02, 2014 at 05:57:14PM +0200, Hans de Goede wrote:
-> Hi All,
->=20
-> Here is v10 of the sunxi-mmc patch-set David Lanzend=F6rfer and I have be=
-en
-> working on, this has some minor changes since v9, the plan for upstreamin=
-g is
-> still the same:
->=20
-> The first 2 patches are depenencies which should go in through the clk tr=
-ee,
-> Mike can you pick these 2 up please ?  :
->=20
-> "clk: sunxi: factors: automatic reparenting support"
-> Is uncontroversial and has been favorably reviewed by various people.
->=20
-> "clk: sunxi: Implement MMC phase control"
-> Is somewhat more controversial as there has been lots of discussion about
-> adding a generic phase control method to the clk framework. The problem is
-> that there has been a lot of talk about such a generic phase control meth=
-od
-> but not a single patch. Therefor I would like to move forwards with using
-> a platform specific method for now. I hereby promise that once we've a ge=
-neric
-> method I'll write patches to convert the sunxi code to that method.
->=20
-> The third patch is the patch adding the actual mmc driver and should go in
-> through the mmc tree.
->=20
-> All the other patches are devicetree patches hooking things up, and should
-> go upstream through Maxime's sunxi-dt tree.
+We would like to queue this patch through Chris' mmc tree for 3.16.
 
-Applied patches 4 to 14.
+Since it touches the rsi wireless driver, could you please have a look
+and let's us know if you have any concerns.
 
-Thanks!
-Maxime
-
---=20
-Maxime Ripard, Free Electrons
-Embedded Linux, Kernel and Android engineering
-http://free-electrons.com
-
---bCsyhTFzCvuiizWE
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.14 (GNU/Linux)
-
-iQIcBAEBAgAGBQJTZwzaAAoJEBx+YmzsjxAgd6cP/Atp92k/Wape9n7f9yQV1id3
-E+AEKL1wULRaFsSUraIB90xXoBOIfBJC0+YEGtI+SC0HeYqQGCcwTrd/AvFeaZ0Z
-TEe/PKOtYociYJKd8TGblQdt1LE6P4YrMTa+Iy6szzxvrfOasbmjjH9KLtmx+lM8
-9+LX8VdPC4YE64zkSfWSrlb6r/7veUppVihFyM9v2EyAe8q0CzMftVDmW2ms+vBM
-L8++bJPvBNNm7RKVs6hMvl2i91kS0KjM8c0VnjAaPOhs/diISVCY8Saqar6FZ2FE
-unF4tTOyytVhIRklKBBY5IDi8r+R0VVpwxWzruD785BghCFcy+G+fD8OcHUB8Xp1
-FdUL118RofYv8iCwVFkvvf6BMZrTUkw9WEZZlqDJ+52G3AG8LTsGvyiSzRcFuXsx
-d5AzlUKuIwA7MaQ1bNb6SKC0XzHyFayW4sQWAMXmdu8I/ZqI1LmpfUsMP2rJK0Dj
-S+BPLqP9jn50IRKb/4YjHhZEP+jZt9YKW9uBsvDD5uV+PEzCKZQ1pcQujN7rBRir
-oYLaGiwGlLYfjou3nvzx18ll3eb5f4fQKFzCxi8V7pcb25RSts+Cq+o3KI9bVYhl
-qIA2o2xKurHtjvwlF+CoqiIhcoMPV2m/m6sjy5lGrJOdsaIGwhW3eiNjTgF3a18u
-3e2cMR4+ZU2pyBUcJjZF
-=uSAG
------END PGP SIGNATURE-----
-
---bCsyhTFzCvuiizWE--
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Kind regards
+Ulf Hansson
