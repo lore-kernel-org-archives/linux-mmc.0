@@ -1,88 +1,52 @@
-From: Maxime Ripard <maxime.ripard@free-electrons.com>
-Subject: Re: [PATCH v10 15/15] ARM: dts: sun7i: Add basic support for the
- Cubietruck WiFi module
-Date: Mon, 5 May 2014 17:46:45 -0500
-Message-ID: <20140505224645.GC9464@lukather>
-References: <1399046249-19472-1-git-send-email-hdegoede@redhat.com>
- <1399046249-19472-16-git-send-email-hdegoede@redhat.com>
- <20140505040212.GC11606@lukather>
- <CAGb2v65egbY5-ZeioLuoTatQ_y6iQ9n=auiiCRNAvTEj1z59hA@mail.gmail.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH 2/2] mmc: rtsx: Revert "mmc: rtsx: add support for pre_req
+ and post_req"
+Date: Mon, 5 May 2014 11:31:28 +0200
+Message-ID: <CAPDyKFoEWkzHDfPn3BXVuXFMcfsLFtZdvsV36a7ic0DjCgu+NA@mail.gmail.com>
+References: <cover.1398735435.git.micky_ching@realsil.com.cn>
+	<6a8f18cad47244e849adf8a731c621932fa777e0.1398735435.git.micky_ching@realsil.com.cn>
+	<CAPDyKFqSdvjJrsbDeX1KbjQtOjfoAwC0xz3y7Rm-BsD0T8tmxg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="da4uJneut+ArUgXk"
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from top.free-electrons.com ([176.31.233.9]:41382 "EHLO
-	mail.free-electrons.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1755985AbaEFANn (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 5 May 2014 20:13:43 -0400
-Content-Disposition: inline
-In-Reply-To: <CAGb2v65egbY5-ZeioLuoTatQ_y6iQ9n=auiiCRNAvTEj1z59hA@mail.gmail.com>
+Received: from mail-qg0-f50.google.com ([209.85.192.50]:59374 "EHLO
+	mail-qg0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755512AbaEEJb3 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 5 May 2014 05:31:29 -0400
+Received: by mail-qg0-f50.google.com with SMTP id z60so2054193qgd.23
+        for <linux-mmc@vger.kernel.org>; Mon, 05 May 2014 02:31:28 -0700 (PDT)
+In-Reply-To: <CAPDyKFqSdvjJrsbDeX1KbjQtOjfoAwC0xz3y7Rm-BsD0T8tmxg@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chen-Yu Tsai <wens@csie.org>
-Cc: Hans de Goede <hdegoede@redhat.com>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Emilio Lopez <emilio@elopez.com.ar>, Mike Turquette <mturquette@linaro.org>, David =?iso-8859-1?Q?Lanzend=F6rfer?= <david.lanzendoerfer@o2s.ch>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>, devicetree <devicetree@vger.kernel.org>, linux-sunxi <linux-sunxi@googlegroups.com>
+To: Lee Jones <lee.jones@linaro.org>
+Cc: Chris Ball <chris@printf.net>, micky <micky_ching@realsil.com.cn>, Samuel Ortiz <sameo@linux.intel.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Dan Carpenter <dan.carpenter@oracle.com>, devel@linuxdriverproject.org, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, Roger <rogerable@realtek.com>, Wei WANG <wei_wang@realsil.com.cn>
 
+On 29 April 2014 09:36, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> On 29 April 2014 03:54,  <micky_ching@realsil.com.cn> wrote:
+>> From: Micky Ching <micky_ching@realsil.com.cn>
+>>
+>> This reverts commit c42deffd5b53c9e583d83c7964854ede2f12410d.
+>>
+>> commit <mmc: rtsx: add support for pre_req and post_req> did use
+>> mutex_unlock() in tasklet, but mutex_unlock() can't used in
+>> tasklet(atomic context). The driver need use mutex to avoid concurrency,
+>> so we can't use tasklet here, the patch need to be removed.
+>>
+>> The spinlock host->lock and pcr->lock may deadlock, one way to solve the
+>> deadlock is remove host->lock in sd_isr_done_transfer(), but if using
+>> workqueue the we can avoid using the spinlock and also avoid the problem.
+>>
+>> Signed-off-by: Micky Ching <micky_ching@realsil.com.cn>
+>
+> Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
 
---da4uJneut+ArUgXk
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+Hi Lee,
 
-On Mon, May 05, 2014 at 12:20:56PM +0800, Chen-Yu Tsai wrote:
-> On Mon, May 5, 2014 at 12:02 PM, Maxime Ripard
-> <maxime.ripard@free-electrons.com> wrote:
-> > On Fri, May 02, 2014 at 05:57:29PM +0200, Hans de Goede wrote:
-> >> From: Chen-Yu Tsai <wens@csie.org>
-> >>
-> >> The CubieTruck has an AMPAK AP6210 WiFi+Bluetooth module. The WiFi
-> >> part is a BCM43362 IC connected to MMC3 in the A20 SoC via SDIO.
-> >> The IC also takes a power enable signal via GPIO.
-> >>
-> >> The WiFi module supports out-of-band interrupt signaling via GPIO,
-> >> but this is not supported in this patch.
-> >>
-> >> Signed-off-by: Hans de Goede <hdegoede@redhat.com>
-> >
-> > It doesn't have Chen-Yu SoB. Chen-Yu, are you fine with adding it?
->=20
-> My apologies, I didn't notice this patch still had my name on it.
-> Looks good.
->=20
-> Signed-off-by: Chen-Yu Tsai <wens@csie.org>
-> (or Acked-by, not sure which applies in this situation.)
+Would you mind to pick this up and send it for 3.15 fixes?
 
-Since you're the author, we need your SoB.
+The other revert "[PATCH 1/2] mmc: rtsx: Revert "mmc: rtsx: modify
+error handle and remove smatch warnings", needs to go through the mmc
+tree.
 
-If you were not involved with writing (or merging the patch), Acked-by
-would have been appropriate.
-
-Maxime
-
---=20
-Maxime Ripard, Free Electrons
-Embedded Linux, Kernel and Android engineering
-http://free-electrons.com
-
---da4uJneut+ArUgXk
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.14 (GNU/Linux)
-
-iQIcBAEBAgAGBQJTaBTUAAoJEBx+YmzsjxAg8oIQALXZQPTWBGtTJyrnf82jra5L
-KuhLhS98Abq2mokSpVXm2sI4JRh2hnQJ9mRxJZTYbQqZK1HszNCxwh/D7PkCUrWs
-i8sQgvOegw670WoJaKXtFIM6a8y0+h9ccuCU02nNYnRtYEMw5xfjbzArxmArMUEe
-PeVEkdXD9iwZJKhjvw+fcqGMTagYdHlO4SRaIgMcKeQDlh06wFiCLyWTQfFB3P/y
-3OiqviTYzZOlbzso/tb0hyfPZsW/Qbvg6C0KU90xba8xOsUgTlmp8sF/SecjQd8x
-MUPLN2fi2uCgevfXmwmZa7CkSQZ2WCdu/KU1PavGmdFlEvWY/m/KqgbJoXS/Crq4
-pQeCiMfsLaDeMD7JtpaPamcXehNuAhiGhsRR3FFAmCJCPqv02BY6RsRjzf69wsdD
-7cXYfVpgl/s7kclvcsokVR5c/9TxIKAEjnEeLHnW0sQPCBvFGCKXGo3Z0jV+dNhh
-fTe3OTfsC7EU+DMN0yrjOAjMnjZpTe6sKUxOjnQnK/r0scnPPnNM6HFH29j6I3dj
-hOROk/T+QD2JgLvil7an1drAv68pKfI6lcCgzyZfJfClH8qtL5EDH/J3UeMFg62I
-eF0nab6GsxaqKCvFtRwzN/lhZdkjmhnDKSW5//psJEZ18mVP6GlCLLsTkEK/aB0D
-6Y4Z9c49Q9/vJR5TyVBz
-=cjm7
------END PGP SIGNATURE-----
-
---da4uJneut+ArUgXk--
+Kind regards
+Uffe
