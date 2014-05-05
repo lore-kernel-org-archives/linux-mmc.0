@@ -1,65 +1,88 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: TRIM timeout calculation
-Date: Mon, 5 May 2014 22:50:39 +0200
-Message-ID: <CAPDyKFo8ir0aKCE9HgEQj2jbNQVxSt2ENPdEshDpuuy7MYE6CQ@mail.gmail.com>
-References: <OF5115E52C.11615B85-ONC1257CCF.005BB35E-C1257CCF.005CF8B5@transmode.se>
+From: Maxime Ripard <maxime.ripard@free-electrons.com>
+Subject: Re: [PATCH v10 15/15] ARM: dts: sun7i: Add basic support for the
+ Cubietruck WiFi module
+Date: Mon, 5 May 2014 17:46:45 -0500
+Message-ID: <20140505224645.GC9464@lukather>
+References: <1399046249-19472-1-git-send-email-hdegoede@redhat.com>
+ <1399046249-19472-16-git-send-email-hdegoede@redhat.com>
+ <20140505040212.GC11606@lukather>
+ <CAGb2v65egbY5-ZeioLuoTatQ_y6iQ9n=auiiCRNAvTEj1z59hA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="da4uJneut+ArUgXk"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qa0-f48.google.com ([209.85.216.48]:51367 "EHLO
-	mail-qa0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752629AbaEEUuk (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 5 May 2014 16:50:40 -0400
-Received: by mail-qa0-f48.google.com with SMTP id i13so2973620qae.35
-        for <linux-mmc@vger.kernel.org>; Mon, 05 May 2014 13:50:39 -0700 (PDT)
-In-Reply-To: <OF5115E52C.11615B85-ONC1257CCF.005BB35E-C1257CCF.005CF8B5@transmode.se>
+Received: from top.free-electrons.com ([176.31.233.9]:41382 "EHLO
+	mail.free-electrons.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1755985AbaEFANn (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 5 May 2014 20:13:43 -0400
+Content-Disposition: inline
+In-Reply-To: <CAGb2v65egbY5-ZeioLuoTatQ_y6iQ9n=auiiCRNAvTEj1z59hA@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Joakim Tjernlund <joakim.tjernlund@transmode.se>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>
-
-On 5 May 2014 18:55, Joakim Tjernlund <joakim.tjernlund@transmode.se> wrote:
-> I got a Micron eMMC 4.41 memory and I am trying to use the TRIM function.
-> my EXT_CSD_TRIM_MULT is 15 which gets me a tmo of 15*300=4500 ms
-> Then in  mmc_calc_max_discard() I have:
->         max_discard = mmc_do_calc_max_discard(card, MMC_ERASE_ARG);
->         if (mmc_can_trim(card)) {
->                 max_trim = mmc_do_calc_max_discard(card, MMC_TRIM_ARG);
->                 if (max_trim < max_discard)
->                         max_discard = max_trim;
->         } else if (max_discard < card->erase_size) {
->                 max_discard = 0;
->         }
->         pr_debug("%s: calculated max. discard sectors %u for timeout %u
-> ms\n",
->                  mmc_hostname(host), max_discard, host->max_busy_timeout);
-> Now  mmc_do_calc_max_discard(card, MMC_TRIM_ARG) returns 0 because the
-> initial trim
-> timeout is so high, 4500 ms:
->   mmc0: calculated max. discard sectors 0 for timeout 2684 ms
->
-> How is this supposed to work?
-
-This piece of code in the mmc core/block layer is somewhat broken :-(
-
-For 3.15 we merged quite some patches to fixup the hardware busy
-detection mechanism supported by some host drivers/controllers.
-Trim/erase may utilize hardware busy detections, it's therefore I
-gives you this background.
-
-Now, those fixes did not mean any improvements immediately for
-erase/trim, but made some preparations for us to fix it. :-) I have it
-on the top of my mmc-TODO list - that's all I can give you sorry. :-)
-
-Anyway, what host driver / controller are you using?
-
-Kind regards
-Ulf Hansson
+To: Chen-Yu Tsai <wens@csie.org>
+Cc: Hans de Goede <hdegoede@redhat.com>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Emilio Lopez <emilio@elopez.com.ar>, Mike Turquette <mturquette@linaro.org>, David =?iso-8859-1?Q?Lanzend=F6rfer?= <david.lanzendoerfer@o2s.ch>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>, devicetree <devicetree@vger.kernel.org>, linux-sunxi <linux-sunxi@googlegroups.com>
 
 
->
->  Jocke
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+--da4uJneut+ArUgXk
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
+
+On Mon, May 05, 2014 at 12:20:56PM +0800, Chen-Yu Tsai wrote:
+> On Mon, May 5, 2014 at 12:02 PM, Maxime Ripard
+> <maxime.ripard@free-electrons.com> wrote:
+> > On Fri, May 02, 2014 at 05:57:29PM +0200, Hans de Goede wrote:
+> >> From: Chen-Yu Tsai <wens@csie.org>
+> >>
+> >> The CubieTruck has an AMPAK AP6210 WiFi+Bluetooth module. The WiFi
+> >> part is a BCM43362 IC connected to MMC3 in the A20 SoC via SDIO.
+> >> The IC also takes a power enable signal via GPIO.
+> >>
+> >> The WiFi module supports out-of-band interrupt signaling via GPIO,
+> >> but this is not supported in this patch.
+> >>
+> >> Signed-off-by: Hans de Goede <hdegoede@redhat.com>
+> >
+> > It doesn't have Chen-Yu SoB. Chen-Yu, are you fine with adding it?
+>=20
+> My apologies, I didn't notice this patch still had my name on it.
+> Looks good.
+>=20
+> Signed-off-by: Chen-Yu Tsai <wens@csie.org>
+> (or Acked-by, not sure which applies in this situation.)
+
+Since you're the author, we need your SoB.
+
+If you were not involved with writing (or merging the patch), Acked-by
+would have been appropriate.
+
+Maxime
+
+--=20
+Maxime Ripard, Free Electrons
+Embedded Linux, Kernel and Android engineering
+http://free-electrons.com
+
+--da4uJneut+ArUgXk
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.14 (GNU/Linux)
+
+iQIcBAEBAgAGBQJTaBTUAAoJEBx+YmzsjxAg8oIQALXZQPTWBGtTJyrnf82jra5L
+KuhLhS98Abq2mokSpVXm2sI4JRh2hnQJ9mRxJZTYbQqZK1HszNCxwh/D7PkCUrWs
+i8sQgvOegw670WoJaKXtFIM6a8y0+h9ccuCU02nNYnRtYEMw5xfjbzArxmArMUEe
+PeVEkdXD9iwZJKhjvw+fcqGMTagYdHlO4SRaIgMcKeQDlh06wFiCLyWTQfFB3P/y
+3OiqviTYzZOlbzso/tb0hyfPZsW/Qbvg6C0KU90xba8xOsUgTlmp8sF/SecjQd8x
+MUPLN2fi2uCgevfXmwmZa7CkSQZ2WCdu/KU1PavGmdFlEvWY/m/KqgbJoXS/Crq4
+pQeCiMfsLaDeMD7JtpaPamcXehNuAhiGhsRR3FFAmCJCPqv02BY6RsRjzf69wsdD
+7cXYfVpgl/s7kclvcsokVR5c/9TxIKAEjnEeLHnW0sQPCBvFGCKXGo3Z0jV+dNhh
+fTe3OTfsC7EU+DMN0yrjOAjMnjZpTe6sKUxOjnQnK/r0scnPPnNM6HFH29j6I3dj
+hOROk/T+QD2JgLvil7an1drAv68pKfI6lcCgzyZfJfClH8qtL5EDH/J3UeMFg62I
+eF0nab6GsxaqKCvFtRwzN/lhZdkjmhnDKSW5//psJEZ18mVP6GlCLLsTkEK/aB0D
+6Y4Z9c49Q9/vJR5TyVBz
+=cjm7
+-----END PGP SIGNATURE-----
+
+--da4uJneut+ArUgXk--
