@@ -1,127 +1,51 @@
 From: Tim Kryger <tim.kryger@linaro.org>
-Subject: Re: [PATCH v2] mmc: core: Improve support for deferred regulators
-Date: Tue, 6 May 2014 15:58:37 -0700
-Message-ID: <CAAYSxhoGoREU-af3DD2O3+tZ8JF8nitnp1a-ZrmFW_Lj31zVPg@mail.gmail.com>
-References: <1399417021-18873-1-git-send-email-tim.kryger@linaro.org>
+Subject: Re: [PATCH] mmc: sdhci: Use mmc core regulator infrastucture
+Date: Tue, 6 May 2014 16:42:07 -0700
+Message-ID: <CAAYSxhob5-8VrgiTS5=BBnFjPei4N0zSE6fhsboWR-C-LvXJog@mail.gmail.com>
+References: <1398378989-14575-1-git-send-email-tim.kryger@linaro.org>
+	<CAPDyKFoZQUNCX7Y4C=kr-JDUF3WRxjxeNU4eJRwhZ+cFbmx7iw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ob0-f176.google.com ([209.85.214.176]:34163 "EHLO
-	mail-ob0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751355AbaEFW6i (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 6 May 2014 18:58:38 -0400
-Received: by mail-ob0-f176.google.com with SMTP id wo20so209784obc.21
-        for <linux-mmc@vger.kernel.org>; Tue, 06 May 2014 15:58:37 -0700 (PDT)
-In-Reply-To: <1399417021-18873-1-git-send-email-tim.kryger@linaro.org>
+Received: from mail-oa0-f47.google.com ([209.85.219.47]:53391 "EHLO
+	mail-oa0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750857AbaEFXmI (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 6 May 2014 19:42:08 -0400
+Received: by mail-oa0-f47.google.com with SMTP id i7so264884oag.6
+        for <linux-mmc@vger.kernel.org>; Tue, 06 May 2014 16:42:08 -0700 (PDT)
+In-Reply-To: <CAPDyKFoZQUNCX7Y4C=kr-JDUF3WRxjxeNU4eJRwhZ+cFbmx7iw@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Tim Kryger <tim.kryger@linaro.org>, Mike Looijmans <mike.looijmans@topic.nl>, Andrew Bresticker <abrestic@chromium.org>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Chris Ball <chris@printf.net>, Mike Looijmans <mike.looijmans@topic.nl>, Andrew Bresticker <abrestic@chromium.org>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Russell King - ARM Linux <linux@arm.linux.org.uk>
 
-On Tue, May 6, 2014 at 3:57 PM, Tim Kryger <tim.kryger@linaro.org> wrote:
-> Callers of mmc_regulator_get_supply could benefit from knowing if either
-> of the regulators are present but not yet available.  Since callers do
-> not currently examine the return value, modify this function to return
-> zero or -EPROBE_DEFER if either regulator get returns the same.
+On Fri, Apr 25, 2014 at 1:15 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> On 25 April 2014 00:36, Tim Kryger <tim.kryger@linaro.org> wrote:
+>> Switch the common SDHCI code over to use mmc_host's regulator pointers
+>> and remove the ones in the sdhci_host structure.  Additionally, use the
+>> common mmc_regulator_get_supply function to get the regulators and set
+>> the ocr_avail mask.
+>>
+>> This change sets the ocr_avail directly based upon the voltage ranges
+>> supported which ensures ocr_avail is set correctly while allowing the
+>> use of regulators that can't provide exactly 1.8v, 3.0v, or 3.3v.
+>>
+>> Signed-off-by: Tim Kryger <tim.kryger@linaro.org>
 >
-> Furthermore, since callers check vmmc/vqmmc using IS_ERR and can deal
-> with absent regulators, switch to devm_regulator_get_optional. This has
-> the added benefit of allowing this function to behave correctly even in
-> the !CONFIG_REGULATOR case such that the stub can be removed.
+> This looks good to me!
 >
-> Signed-off-by: Tim Kryger <tim.kryger@linaro.org>
-> ---
+> I plan to get Russell's sdhci patchset merged, prior to this patch. So
+> likely we need to rebase this patch on top of that soon.
+>
+> Kind regards
+> Ulf Hansson
 
-Changes since v1:
-  - Removed stub function for !CONFIG_REGULATOR case
+Hi Ulf,
 
->  drivers/mmc/core/core.c  |   31 +++++++++++++++++++------------
->  include/linux/mmc/host.h |    8 ++------
->  2 files changed, 21 insertions(+), 18 deletions(-)
->
-> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> index acbc3f2..2d9f6c5 100644
-> --- a/drivers/mmc/core/core.c
-> +++ b/drivers/mmc/core/core.c
-> @@ -1310,31 +1310,38 @@ int mmc_regulator_set_ocr(struct mmc_host *mmc,
->  }
->  EXPORT_SYMBOL_GPL(mmc_regulator_set_ocr);
->
-> +#endif /* CONFIG_REGULATOR */
-> +
->  int mmc_regulator_get_supply(struct mmc_host *mmc)
->  {
->         struct device *dev = mmc_dev(mmc);
-> -       struct regulator *supply;
->         int ret;
->
-> -       supply = devm_regulator_get(dev, "vmmc");
-> -       mmc->supply.vmmc = supply;
-> +       mmc->supply.vmmc = devm_regulator_get_optional(dev, "vmmc");
->         mmc->supply.vqmmc = devm_regulator_get_optional(dev, "vqmmc");
->
-> -       if (IS_ERR(supply))
-> -               return PTR_ERR(supply);
-> +       if (IS_ERR(mmc->supply.vmmc)) {
-> +               if (PTR_ERR(mmc->supply.vmmc) == -EPROBE_DEFER)
-> +                       return -EPROBE_DEFER;
-> +               dev_info(dev, "No vmmc regulator found\n");
-> +       } else {
-> +               ret = mmc_regulator_get_ocrmask(mmc->supply.vmmc);
-> +               if (ret > 0)
-> +                       mmc->ocr_avail = ret;
-> +               else
-> +                       dev_warn(dev, "Failed getting OCR mask: %d\n", ret);
-> +       }
->
-> -       ret = mmc_regulator_get_ocrmask(supply);
-> -       if (ret > 0)
-> -               mmc->ocr_avail = ret;
-> -       else
-> -               dev_warn(mmc_dev(mmc), "Failed getting OCR mask: %d\n", ret);
-> +       if (IS_ERR(mmc->supply.vqmmc)) {
-> +               if (PTR_ERR(mmc->supply.vqmmc) == -EPROBE_DEFER)
-> +                       return -EPROBE_DEFER;
-> +               dev_info(dev, "No vqmmc regulator found\n");
-> +       }
->
->         return 0;
->  }
->  EXPORT_SYMBOL_GPL(mmc_regulator_get_supply);
->
-> -#endif /* CONFIG_REGULATOR */
-> -
->  /*
->   * Mask off any voltages we don't support and select
->   * the lowest voltage
-> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-> index cb61ea4..cfa2ecb 100644
-> --- a/include/linux/mmc/host.h
-> +++ b/include/linux/mmc/host.h
-> @@ -396,7 +396,6 @@ int mmc_regulator_get_ocrmask(struct regulator *supply);
->  int mmc_regulator_set_ocr(struct mmc_host *mmc,
->                         struct regulator *supply,
->                         unsigned short vdd_bit);
-> -int mmc_regulator_get_supply(struct mmc_host *mmc);
->  #else
->  static inline int mmc_regulator_get_ocrmask(struct regulator *supply)
->  {
-> @@ -409,13 +408,10 @@ static inline int mmc_regulator_set_ocr(struct mmc_host *mmc,
->  {
->         return 0;
->  }
-> -
-> -static inline int mmc_regulator_get_supply(struct mmc_host *mmc)
-> -{
-> -       return 0;
-> -}
->  #endif
->
-> +int mmc_regulator_get_supply(struct mmc_host *mmc);
-> +
->  int mmc_pm_notify(struct notifier_block *notify_block, unsigned long, void *);
->
->  static inline int mmc_card_is_removable(struct mmc_host *host)
-> --
-> 1.7.9.5
->
+Can you clarify if this is the series you intend to merge and provide
+a rough estimate on when it might happen?
+
+http://www.spinics.net/lists/arm-kernel/msg324984.html
+
+Thanks,
+Tim Kryger
