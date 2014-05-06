@@ -1,82 +1,61 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: mxs: fix card detection function for broken card detect
-Date: Mon, 5 May 2014 11:14:47 +0200
-Message-ID: <CAPDyKFq-+pOrdwn3QPXCgP=6jHQ0egnAk884OprLvfYKAU1VXA@mail.gmail.com>
-References: <dec3cef26b7470cabfc11a83750a88db5b545a41.1397944151.git.daniel@totalueberwachung.de>
-	<20140428091341.GA5918@pengutronix.de>
-	<CAPDyKFqP_cDTyC38+8XDPLWN0C6wWs9e6iZD06nkb_LqqLjjnw@mail.gmail.com>
-	<20140428093619.GP5858@pengutronix.de>
+From: Joakim Tjernlund <joakim.tjernlund@transmode.se>
+Subject: Re: TRIM timeout calculation
+Date: Tue, 6 May 2014 10:44:17 +0200
+Message-ID: <OF3A79004A.37D11855-ONC1257CD0.002FBD99-C1257CD0.00300021@transmode.se>
+References: <OF5115E52C.11615B85-ONC1257CCF.005BB35E-C1257CCF.005CF8B5@transmode.se>	<CAPDyKFo8ir0aKCE9HgEQj2jbNQVxSt2ENPdEshDpuuy7MYE6CQ@mail.gmail.com>
+	<OF5C054324.0517D62C-ONC1257CD0.0025B7D9-C1257CD0.00280C60@transmode.se> <CAPDyKFpSpT_XJycC+_i-_Y_fKgjmG7YfRu-TrSaqaOw_3diVGA@mail.gmail.com> <OF2CA434B5.1040E603-ONC1257CD0.002A68C4-C1257CD0.002B06CE@LocalDomain>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="US-ASCII"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qc0-f176.google.com ([209.85.216.176]:57597 "EHLO
-	mail-qc0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755347AbaEEJOs (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 5 May 2014 05:14:48 -0400
-Received: by mail-qc0-f176.google.com with SMTP id r5so647676qcx.7
-        for <linux-mmc@vger.kernel.org>; Mon, 05 May 2014 02:14:47 -0700 (PDT)
-In-Reply-To: <20140428093619.GP5858@pengutronix.de>
+Received: from gw1.transmode.se ([195.58.98.146]:51187 "EHLO gw1.transmode.se"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S934434AbaEFIoU (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 6 May 2014 04:44:20 -0400
+In-Reply-To: <OF2CA434B5.1040E603-ONC1257CD0.002A68C4-C1257CD0.002B06CE@LocalDomain>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Sascha Hauer <s.hauer@pengutronix.de>, Daniel Willmann <daniel@totalueberwachung.de>
-Cc: Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Shawn Guo <shawn.guo@linaro.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>
 
-On 28 April 2014 11:36, Sascha Hauer <s.hauer@pengutronix.de> wrote:
-> On Mon, Apr 28, 2014 at 11:31:03AM +0200, Ulf Hansson wrote:
->> On 28 April 2014 11:13, Sascha Hauer <s.hauer@pengutronix.de> wrote:
->> > On Sat, Apr 19, 2014 at 11:59:18PM +0200, Daniel Willmann wrote:
->> >> Return -ENOSYS in get_cd if broken-cd is specified in the device tree.
->> >>
->> >> Commit a91fe279ae75 (mmc: mxs: use standard flag for broken card
->> >> detection) sets MMC_CAP_NEEDS_POLL when broken-cd is specified. This
->> >> driver sets this flag unconditionally as it does not support a card
->> >> detect interrupt. Instead, broken-cd means that there is no card detect
->> >> signal connected.
->> >>
->> >> The mmc core checks the get_cd function return value to determine if a
->> >> card is present. Only for a non-zero return value it will attempt to
->> >> initialize the card. So retuning -ENOSYS will allow the card to be
->> >> initialized.
->> >> For comparison, mmc_gpio_get_cd in slot-gpio.c also returns -ENOSYS if
->> >> the card detect GPIO is not valid.
->> >
->> > Short answer for fixing this regression:
->> >
->> > Acked-by: Sascha Hauer <s.hauer@pengutronix.de>
->> >
->> > Long answer:
->> >
->> > This is broken in the MMC OF parser. When the parser finds the
->> > 'broken-cd' property it just sets the MMC_CAP_NEEDS_POLL flag. This is
->> > wrong.  broken-cd means that we cannot rely on any card detection, but
->> > instead have to talk to the card to find out if it's available.
->> > Currently there is no flag to signal this situation, so the host driver
->> > has to handle this by returning true in the get_cd callback, just like
->> > the patch below does.
->> >
->> > IMO the correct solution would be to add a MMC_CAP_CD_NEEDS_TALK_TO_CARD
->> > flag to the core.
->> >
->>
->> So if I understand correct, you want the host-ops->get_cd function to
->> be invoked from the mmc rescan - only when it actually can provide
->> useful information?
->
-> Yes.
+Joakim Tjernlund/Transmode wrote on 2014/05/06 09:49:57:
+> 
+> Ulf Hansson <ulf.hansson@linaro.org> wrote on 2014/05/06 09:41:12:
+> > 
+> > On 6 May 2014 09:17, Joakim Tjernlund <joakim.tjernlund@transmode.se> 
+wrote:
+> > > Ulf Hansson <ulf.hansson@linaro.org> wrote on 2014/05/05 22:50:39:
+> > >>
+> > >> On 5 May 2014 18:55, Joakim Tjernlund 
+<joakim.tjernlund@transmode.se>
+> > > wrote:
+> > >> > I got a Micron eMMC 4.41 memory and I am trying to use the TRIM
+> > > function.
+> > >> > my EXT_CSD_TRIM_MULT is 15 which gets me a tmo of 15*300=4500 ms
+> > >> > Then in  mmc_calc_max_discard() I have:
+> > >> >         max_discard = mmc_do_calc_max_discard(card, 
+MMC_ERASE_ARG);
+> > >> >         if (mmc_can_trim(card)) {
+> > >> >                 max_trim = mmc_do_calc_max_discard(card,
+> > > MMC_TRIM_ARG);
+> > >> >                 if (max_trim < max_discard)
+> > >> >                         max_discard = max_trim;
+> > >> >         } else if (max_discard < card->erase_size) {
+> > >> >                 max_discard = 0;
+> > >> >         }
+> > >> >         pr_debug("%s: calculated max. discard sectors %u for 
+timeout
+> > > %u
+> > >> > ms\n",
+> > >> >                  mmc_hostname(host), max_discard,
+> > > host->max_busy_timeout);
+> > >> > Now  mmc_do_calc_max_discard(card, MMC_TRIM_ARG) returns 0 
+because the
+> > >> > initial trim
+> > >> > timeout is so high, 4500 ms:
+> > >> >   mmc0: calculated max. discard sectors 0 for timeout 2684 ms
 
-Until/if that happens, I suggest to go ahead with Daniel's patch as well.
+Just a data point, if I disable TRIM in the driver so that the code
+falls back to ERASE I get:
+  mmc0: calculated max. discard sectors 114688 for timeout 2684 ms
+Big difference!
 
-Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
-
->
-> Sascha
->
-> --
-> Pengutronix e.K.                           |                             |
-> Industrial Linux Solutions                 | http://www.pengutronix.de/  |
-> Peiner Str. 6-8, 31137 Hildesheim, Germany | Phone: +49-5121-206917-0    |
-> Amtsgericht Hildesheim, HRA 2686           | Fax:   +49-5121-206917-5555 |
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+  Jocke
