@@ -1,47 +1,101 @@
-From: Alexandre Belloni <alexandre.belloni@free-electrons.com>
-Subject: [PATCH] mmc: atmel: don't test host->data
-Date: Tue,  6 May 2014 17:43:26 +0200
-Message-ID: <1399391006-16007-1-git-send-email-alexandre.belloni@free-electrons.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Chris Ball <chris@printf.net>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Ludovic Desroches <ludovic.desroches@atmel.com>, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, Alexandre Belloni <alexandre.belloni@free-electrons.com>
+From: Phil Edworthy <phil.edworthy@renesas.com>
+Subject: RE: [PATCH v2] mmc: add a driver for the Renesas usdhi6rol0 SD/SDIO
+ host controller
+Date: Tue, 6 May 2014 08:41:52 +0000
+Message-ID: <1d83df00171643148fc62bf493876a86@HKXPR06MB168.apcprd06.prod.outlook.com>
+References: <Pine.LNX.4.64.1404261404030.21367@axis700.grange>
+ <a3075651ae064d2fb70073eb3472ede4@HKXPR06MB168.apcprd06.prod.outlook.com>
+ <Pine.LNX.4.64.1405031046560.23253@axis700.grange>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from relmlor3.renesas.com ([210.160.252.173]:6541 "EHLO
+	relmlie2.idc.renesas.com" rhost-flags-OK-OK-OK-FAIL)
+	by vger.kernel.org with ESMTP id S1753674AbaEFIq7 convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 6 May 2014 04:46:59 -0400
+In-Reply-To: <Pine.LNX.4.64.1405031046560.23253@axis700.grange>
+Content-Language: en-US
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Rob Herring <robh+dt@kernel.org>, Grant Likely <grant.likely@linaro.org>
 
-Found using smatch:
-drivers/mmc/host/atmel-mci.c:827 atmci_pdc_complete() warn: variable
-dereferenced before check 'host->data' (see line 807)
+Hi Guennadi,
 
-Stop testing host->data as it is not NULL at that point.
+On 03 May 2014 10:09, Guennadi wrote:
+> On Mon, 28 Apr 2014, Phil Edworthy wrote:
+> 
+> > Hi Guennadi,
+> >
+> > On 26 April 2014 13:06, Guennadi wrote:
+> > > Subject: [PATCH v2] mmc: add a driver for the Renesas usdhi6rol0
+> SD/SDIO
+> > > host controller
+> > >
+> > > This patch adds a driver for the Renesas usdhi6rol0 SD/SDIO host
+> controller
+> > > in both PIO and DMA modes.
+> >
+> > ...
+> > > +static void usdhi6_dma_stop_unmap(struct usdhi6_host *host)
+> > > +{
+> > > +	struct mmc_data *data = host->mrq->data;
+> > > +
+> > > +	if (!host->dma_active)
+> > > +		return;
+> > > +
+> > > +	usdhi6_write(host, USDHI6_CC_EXT_MODE, 0);
+> > > +	host->dma_active = false;
+> > > +
+> > > +	if (data->flags & MMC_DATA_READ)
+> > > +		/* TODO: do we have to synchronise? */
+> > > +		dma_unmap_sg(host->chan_rx->device->dev, data->sg,
+> > > +			     data->sg_len, DMA_FROM_DEVICE);
+> > Yes, you have to sync, so you can remove this TODO comment.
+> 
+> Why do you think so? If we really do, we'd have to add it. And I did think
+> synchronisation was needed, that's why I posted this patch series:
+> 
+> http://thread.gmane.org/gmane.linux.kernel.mmc/24969
+> 
+> but it never got applied, even though it got 2 acks. And actually now I
+> think that synchronisation isn't needed. I think dma_map_sg() /
+> dma_unmap_sg() do that for us already. E.g.
+> 
+> dma_map_sg_attrs()
+> arm_dma_map_page()
+> __dma_page_cpu_to_dev()
+> dmac_map_area()
+> cpu_cache.dma_map_area()
+> v7_dma_inv_range()
+> v7_dma_clean_range()
+> 
+> Similar for unmapping. So, I think it would be best to remove the comment
+> without adding synchronisation.
+> 
+> Let me do this: I'll prepare a separate patch for adding dma syncs, but I
+> won't submit it for now, or I can just provide it for reference.
 
-Signed-off-by: Alexandre Belloni <alexandre.belloni@free-electrons.com>
----
- drivers/mmc/host/atmel-mci.c | 13 +++----------
- 1 file changed, 3 insertions(+), 10 deletions(-)
+Ok, my comment was based on the fact that your above patches got acks... Based on your comments above, I think it's best just to remove the TODO comment.
 
-diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
-index 42706ea0ba85..aece7cafbb97 100644
---- a/drivers/mmc/host/atmel-mci.c
-+++ b/drivers/mmc/host/atmel-mci.c
-@@ -820,16 +820,9 @@ static void atmci_pdc_complete(struct atmel_mci *host)
- 
- 	atmci_pdc_cleanup(host);
- 
--	/*
--	 * If the card was removed, data will be NULL. No point trying
--	 * to send the stop command or waiting for NBUSY in this case.
--	 */
--	if (host->data) {
--		dev_dbg(&host->pdev->dev,
--		        "(%s) set pending xfer complete\n", __func__);
--		atmci_set_pending(host, EVENT_XFER_COMPLETE);
--		tasklet_schedule(&host->tasklet);
--	}
-+	dev_dbg(&host->pdev->dev, "(%s) set pending xfer complete\n", __func__);
-+	atmci_set_pending(host, EVENT_XFER_COMPLETE);
-+	tasklet_schedule(&host->tasklet);
- }
- 
- static void atmci_dma_cleanup(struct atmel_mci *host)
--- 
-1.9.1
+> > ...
+> > > +static int usdhi6_probe(struct platform_device *pdev)
+> > > +{
+> > ...
+> > > +	host		= mmc_priv(mmc);
+> > > +	host->mmc	= mmc;
+> > > +	host->wait	= USDHI6_WAIT_FOR_REQUEST;
+> > > +	host->timeout	= msecs_to_jiffies(1000);
+> 
+> > In all places you use host->timeout, the code uses host->timeout * 4.
+> > Wouldn't it better to just set it here to 4 seconds?
+> 
+> ok, I'll do that for v3.
+> 
+> Thanks
+> Guennadi
+
+Thanks
+Phil
