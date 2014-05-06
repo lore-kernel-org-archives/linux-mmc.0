@@ -1,101 +1,84 @@
-From: Phil Edworthy <phil.edworthy@renesas.com>
-Subject: RE: [PATCH v2] mmc: add a driver for the Renesas usdhi6rol0 SD/SDIO
- host controller
-Date: Tue, 6 May 2014 08:41:52 +0000
-Message-ID: <1d83df00171643148fc62bf493876a86@HKXPR06MB168.apcprd06.prod.outlook.com>
-References: <Pine.LNX.4.64.1404261404030.21367@axis700.grange>
- <a3075651ae064d2fb70073eb3472ede4@HKXPR06MB168.apcprd06.prod.outlook.com>
- <Pine.LNX.4.64.1405031046560.23253@axis700.grange>
+From: Joakim Tjernlund <joakim.tjernlund@transmode.se>
+Subject: Re: TRIM timeout calculation
+Date: Tue, 6 May 2014 09:17:26 +0200
+Message-ID: <OF5C054324.0517D62C-ONC1257CD0.0025B7D9-C1257CD0.00280C60@transmode.se>
+References: <OF5115E52C.11615B85-ONC1257CCF.005BB35E-C1257CCF.005CF8B5@transmode.se> <CAPDyKFo8ir0aKCE9HgEQj2jbNQVxSt2ENPdEshDpuuy7MYE6CQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset="US-ASCII"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from relmlor3.renesas.com ([210.160.252.173]:6541 "EHLO
-	relmlie2.idc.renesas.com" rhost-flags-OK-OK-OK-FAIL)
-	by vger.kernel.org with ESMTP id S1753674AbaEFIq7 convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 6 May 2014 04:46:59 -0400
-In-Reply-To: <Pine.LNX.4.64.1405031046560.23253@axis700.grange>
-Content-Language: en-US
+Received: from gw1.transmode.se ([195.58.98.146]:55687 "EHLO gw1.transmode.se"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S934055AbaEFHR3 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 6 May 2014 03:17:29 -0400
+In-Reply-To: <CAPDyKFo8ir0aKCE9HgEQj2jbNQVxSt2ENPdEshDpuuy7MYE6CQ@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Rob Herring <robh+dt@kernel.org>, Grant Likely <grant.likely@linaro.org>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>
 
-Hi Guennadi,
-
-On 03 May 2014 10:09, Guennadi wrote:
-> On Mon, 28 Apr 2014, Phil Edworthy wrote:
+Ulf Hansson <ulf.hansson@linaro.org> wrote on 2014/05/05 22:50:39:
 > 
-> > Hi Guennadi,
+> On 5 May 2014 18:55, Joakim Tjernlund <joakim.tjernlund@transmode.se> 
+wrote:
+> > I got a Micron eMMC 4.41 memory and I am trying to use the TRIM 
+function.
+> > my EXT_CSD_TRIM_MULT is 15 which gets me a tmo of 15*300=4500 ms
+> > Then in  mmc_calc_max_discard() I have:
+> >         max_discard = mmc_do_calc_max_discard(card, MMC_ERASE_ARG);
+> >         if (mmc_can_trim(card)) {
+> >                 max_trim = mmc_do_calc_max_discard(card, 
+MMC_TRIM_ARG);
+> >                 if (max_trim < max_discard)
+> >                         max_discard = max_trim;
+> >         } else if (max_discard < card->erase_size) {
+> >                 max_discard = 0;
+> >         }
+> >         pr_debug("%s: calculated max. discard sectors %u for timeout 
+%u
+> > ms\n",
+> >                  mmc_hostname(host), max_discard, 
+host->max_busy_timeout);
+> > Now  mmc_do_calc_max_discard(card, MMC_TRIM_ARG) returns 0 because the
+> > initial trim
+> > timeout is so high, 4500 ms:
+> >   mmc0: calculated max. discard sectors 0 for timeout 2684 ms
 > >
-> > On 26 April 2014 13:06, Guennadi wrote:
-> > > Subject: [PATCH v2] mmc: add a driver for the Renesas usdhi6rol0
-> SD/SDIO
-> > > host controller
-> > >
-> > > This patch adds a driver for the Renesas usdhi6rol0 SD/SDIO host
-> controller
-> > > in both PIO and DMA modes.
-> >
-> > ...
-> > > +static void usdhi6_dma_stop_unmap(struct usdhi6_host *host)
-> > > +{
-> > > +	struct mmc_data *data = host->mrq->data;
-> > > +
-> > > +	if (!host->dma_active)
-> > > +		return;
-> > > +
-> > > +	usdhi6_write(host, USDHI6_CC_EXT_MODE, 0);
-> > > +	host->dma_active = false;
-> > > +
-> > > +	if (data->flags & MMC_DATA_READ)
-> > > +		/* TODO: do we have to synchronise? */
-> > > +		dma_unmap_sg(host->chan_rx->device->dev, data->sg,
-> > > +			     data->sg_len, DMA_FROM_DEVICE);
-> > Yes, you have to sync, so you can remove this TODO comment.
+> > How is this supposed to work?
 > 
-> Why do you think so? If we really do, we'd have to add it. And I did think
-> synchronisation was needed, that's why I posted this patch series:
-> 
-> http://thread.gmane.org/gmane.linux.kernel.mmc/24969
-> 
-> but it never got applied, even though it got 2 acks. And actually now I
-> think that synchronisation isn't needed. I think dma_map_sg() /
-> dma_unmap_sg() do that for us already. E.g.
-> 
-> dma_map_sg_attrs()
-> arm_dma_map_page()
-> __dma_page_cpu_to_dev()
-> dmac_map_area()
-> cpu_cache.dma_map_area()
-> v7_dma_inv_range()
-> v7_dma_clean_range()
-> 
-> Similar for unmapping. So, I think it would be best to remove the comment
-> without adding synchronisation.
-> 
-> Let me do this: I'll prepare a separate patch for adding dma syncs, but I
-> won't submit it for now, or I can just provide it for reference.
+> This piece of code in the mmc core/block layer is somewhat broken :-(
 
-Ok, my comment was based on the fact that your above patches got acks... Based on your comments above, I think it's best just to remove the TODO comment.
+:) good to know. I got the impression that it is the eMMC tmo spec that
+is broken. How can TRIM have 4.5 s tmo when ERASE is way, way below that?
 
-> > ...
-> > > +static int usdhi6_probe(struct platform_device *pdev)
-> > > +{
-> > ...
-> > > +	host		= mmc_priv(mmc);
-> > > +	host->mmc	= mmc;
-> > > +	host->wait	= USDHI6_WAIT_FOR_REQUEST;
-> > > +	host->timeout	= msecs_to_jiffies(1000);
 > 
-> > In all places you use host->timeout, the code uses host->timeout * 4.
-> > Wouldn't it better to just set it here to 4 seconds?
-> 
-> ok, I'll do that for v3.
-> 
-> Thanks
-> Guennadi
+> For 3.15 we merged quite some patches to fixup the hardware busy
+> detection mechanism supported by some host drivers/controllers.
+> Trim/erase may utilize hardware busy detections, it's therefore I
+> gives you this background.
 
-Thanks
-Phil
+I did browse the linus tree but I didn't really see this, but I am new to 
+MMC
+so I don't really know what to look for.
+
+> 
+> Now, those fixes did not mean any improvements immediately for
+> erase/trim, but made some preparations for us to fix it. :-) I have it
+> on the top of my mmc-TODO list - that's all I can give you sorry. :-)
+
+Top of mmc TODO list is great( I hope you don't have several TODO lists :) 
+
+
+> 
+> Anyway, what host driver / controller are you using?
+
+Freescale's esdhc driver/controller for P2040. This controller is
+compliant to eMMC 4.2 but I don't think that should be a problem?
+As far as I can tell a 4.2 controller should be able to drive a 4.5 eMMC
+memory without loss of 4.5 functionality sans the new 4.5 speeds, do you 
+agree?
+
+> 
+> Kind regards
+> Ulf Hansson
+
+
