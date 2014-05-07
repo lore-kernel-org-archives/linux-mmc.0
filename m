@@ -1,51 +1,58 @@
-From: Tim Kryger <tim.kryger@linaro.org>
-Subject: Re: [PATCH] mmc: sdhci: Use mmc core regulator infrastucture
-Date: Tue, 6 May 2014 16:42:07 -0700
-Message-ID: <CAAYSxhob5-8VrgiTS5=BBnFjPei4N0zSE6fhsboWR-C-LvXJog@mail.gmail.com>
-References: <1398378989-14575-1-git-send-email-tim.kryger@linaro.org>
-	<CAPDyKFoZQUNCX7Y4C=kr-JDUF3WRxjxeNU4eJRwhZ+cFbmx7iw@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+From: Nick Sanders <nsanders@chromium.org>
+Subject: [PATCH] mmc: sdhci: remove mdelay in eMMC tuning
+Date: Tue,  6 May 2014 18:52:38 -0700
+Message-ID: <1399427558-8478-1-git-send-email-nsanders@chromium.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-oa0-f47.google.com ([209.85.219.47]:53391 "EHLO
-	mail-oa0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750857AbaEFXmI (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 6 May 2014 19:42:08 -0400
-Received: by mail-oa0-f47.google.com with SMTP id i7so264884oag.6
-        for <linux-mmc@vger.kernel.org>; Tue, 06 May 2014 16:42:08 -0700 (PDT)
-In-Reply-To: <CAPDyKFoZQUNCX7Y4C=kr-JDUF3WRxjxeNU4eJRwhZ+cFbmx7iw@mail.gmail.com>
+Received: from mail-pd0-f176.google.com ([209.85.192.176]:41002 "EHLO
+	mail-pd0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750889AbaEGBxO (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 6 May 2014 21:53:14 -0400
+Received: by mail-pd0-f176.google.com with SMTP id y13so322564pdi.21
+        for <linux-mmc@vger.kernel.org>; Tue, 06 May 2014 18:53:14 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Chris Ball <chris@printf.net>, Mike Looijmans <mike.looijmans@topic.nl>, Andrew Bresticker <abrestic@chromium.org>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Russell King - ARM Linux <linux@arm.linux.org.uk>
+To: Chris Ball <cjb@laptop.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Grant Grundler <grundler@chromium.org>, Doug Anderson <dianders@chromium.org>, Ulf Hansson <ulf.hansson@linaro.org>, Chang-Eun Choi-SSI <cu.choi@ssi.samsung.com>, Nick Sanders <nsanders@chromium.org>
 
-On Fri, Apr 25, 2014 at 1:15 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> On 25 April 2014 00:36, Tim Kryger <tim.kryger@linaro.org> wrote:
->> Switch the common SDHCI code over to use mmc_host's regulator pointers
->> and remove the ones in the sdhci_host structure.  Additionally, use the
->> common mmc_regulator_get_supply function to get the regulators and set
->> the ocr_avail mask.
->>
->> This change sets the ocr_avail directly based upon the voltage ranges
->> supported which ensures ocr_avail is set correctly while allowing the
->> use of regulators that can't provide exactly 1.8v, 3.0v, or 3.3v.
->>
->> Signed-off-by: Tim Kryger <tim.kryger@linaro.org>
->
-> This looks good to me!
->
-> I plan to get Russell's sdhci patchset merged, prior to this patch. So
-> likely we need to rebase this patch on top of that soon.
->
-> Kind regards
-> Ulf Hansson
+This patch removes an unneccesary 1ms mdelay in the HS200 tuning
+loop, called 40 times per retuning. Currently this causes a latency
+of >40ms on any emmc accesses triggering wake from runtime PM,
+which can occur for a significant portion of reads on a mostly idle system.
 
-Hi Ulf,
+The delay is left in place for SD Cards, which use
+MMC_SEND_TUNING_BLOCK rather than MMC_SEND_TUNING_BLOCK_HS200.
+I'm not able to find evidence that this is required for SD in the
+specs I have access to, however this delay has been present from
+initial checkin for SD so I have preserved the original behavior for
+compatibility.
 
-Can you clarify if this is the series you intend to merge and provide
-a rough estimate on when it might happen?
+This has been verified to fix observed glitching on local audio
+playback and recording on apps with inbuilt assumptions on storage
+latency.
 
-http://www.spinics.net/lists/arm-kernel/msg324984.html
+Signed-off-by: Nick Sanders <nsanders@chromium.org>
+Reviewed-by: Grant Grundler <grundler@chromium.org>
+Reviewed-by: Doug Anderson <dianders@chromium.org>
+---
+ drivers/mmc/host/sdhci.c | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
 
-Thanks,
-Tim Kryger
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index df6d85a..05ffac2 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -1987,7 +1987,10 @@ static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
+ 		ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
+ 		tuning_loop_counter--;
+ 		timeout--;
+-		mdelay(1);
++
++		/* eMMC spec does not require a delay between tuning cycles */
++		if (opcode == MMC_SEND_TUNING_BLOCK)
++			mdelay(1);
+ 	} while (ctrl & SDHCI_CTRL_EXEC_TUNING);
+ 
+ 	/*
+-- 
+1.9.1.423.g4596e3a
+
