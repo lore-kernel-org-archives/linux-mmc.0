@@ -1,87 +1,52 @@
-From: Fabio Estevam <festevam@gmail.com>
-Subject: Adding esdhc4 eMMC support on mx6sabresd
-Date: Wed, 7 May 2014 17:14:52 -0300
-Message-ID: <CAOMZO5CJEoe_fGLH-Uu9uVwNdWPp940k3WGAkjzkCiGmjAPAXA@mail.gmail.com>
+From: Tim Kryger <tim.kryger@linaro.org>
+Subject: Re: [PATCH 00/38] MMC updates, plus CuBox-i WiFi support
+Date: Wed, 7 May 2014 13:49:06 -0700
+Message-ID: <CAAYSxhr15dMLT8kuBd6gaFX+WrRgAqxKoWPBgkfVhzHMx299=A@mail.gmail.com>
+References: <20140423185534.GA26756@n2100.arm.linux.org.uk>
+ <535E84FB.4080305@wwwdotorg.org> <86mwf5tn0v.fsf@void.printf.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-oa0-f52.google.com ([209.85.219.52]:54244 "EHLO
-	mail-oa0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750951AbaEGUOw (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 7 May 2014 16:14:52 -0400
-Received: by mail-oa0-f52.google.com with SMTP id eb12so1884040oac.39
-        for <linux-mmc@vger.kernel.org>; Wed, 07 May 2014 13:14:52 -0700 (PDT)
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <86mwf5tn0v.fsf@void.printf.net>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Chris Ball <chris@printf.net>
+Cc: Mark Rutland <mark.rutland@arm.com>, Ulf Hansson <ulf.hansson@linaro.org>, Linux Doc List <linux-doc@vger.kernel.org>, Seungwon Jeon <tgih.jun@samsung.com>, Thierry Reding <thierry.reding@gmail.com>, Russell King - ARM Linux <linux@arm.linux.org.uk>, Anton Vorontsov <anton@enomsg.org>, Michal Simek <michal.simek@xilinx.com>, Jaehoon Chung <jh80.chung@samsung.com>, ARM Kernel List <linux-arm-kernel@lists.infradead.org>, Device Tree List <devicetree@vger.kernel.org>, Pawel Moll <pawel.moll@arm.com>, Stephen Warren <swarren@wwwdotorg.org>, spear-devel@list.st.com, Rob Herring <robh+dt@kernel.org>, Ben Dooks <ben-linux@fluff.org>, linux-tegra@vger.kernel.org, Ian Campbell <ijc+devicetree@hellion.org.uk>, Shawn Guo <shawn.guo@freescale.com>, Barry Song <baohua@kernel.org>, Randy Dunlap <rdunlap@infradead.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Viresh
 List-Id: linux-mmc@vger.kernel.org
-To: Dong Aisheng <b29396@freescale.com>
-Cc: Shawn Guo <shawn.guo@freescale.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Sascha Hauer <kernel@pengutronix.de>
 
-Hi Dong,
+On Mon, Apr 28, 2014 at 9:52 AM, Chris Ball <chris@printf.net> wrote:
+> Hi,
+>
+> On Mon, Apr 28 2014, Stephen Warren wrote:
+>> The series,
+>> Tested-by: Stephen Warren <swarren@nvidia.com>
+>>
+>> (On an NVIDIA Tegra "Jetson TK1" board, with the patches applied on top
+>> of next-20140428, also with Andrew Bresticker's Tegra SDHCI patches
+>> "mmc: tegra: disable UHS modes" and "mmc: tegra: fix reporting of base
+>> clock frequency" applied)
+>
+> Thanks very much Stephen, Russell for the series, and Ulf.
+>
+> This seems like a good time to merge to mmc-next and call for testing
+> in linux-next -- I'm happy to merge a v2 PR when ready.
+>
+> - Chris.
 
-I have tested the following patch to add support for the emmc port on
-mx6qsabresd:
+Hi Russell,
 
---- a/arch/arm/boot/dts/imx6qdl-sabresd.dtsi
-+++ b/arch/arm/boot/dts/imx6qdl-sabresd.dtsi
-@@ -444,6 +444,21 @@
-                                MX6QDL_PAD_SD3_DAT7__SD3_DATA7          0x17059
-                        >;
-                };
-+
-+               pinctrl_usdhc4: usdhc4grp {
-+                       fsl,pins = <
-+                               MX6QDL_PAD_SD4_CMD__SD4_CMD             0x17059
-+                               MX6QDL_PAD_SD4_CLK__SD4_CLK             0x10059
-+                               MX6QDL_PAD_SD4_DAT0__SD4_DATA0          0x17059
-+                               MX6QDL_PAD_SD4_DAT1__SD4_DATA1          0x17059
-+                               MX6QDL_PAD_SD4_DAT2__SD4_DATA2          0x17059
-+                               MX6QDL_PAD_SD4_DAT3__SD4_DATA3          0x17059
-+                               MX6QDL_PAD_SD4_DAT4__SD4_DATA4          0x17059
-+                               MX6QDL_PAD_SD4_DAT5__SD4_DATA5          0x17059
-+                               MX6QDL_PAD_SD4_DAT6__SD4_DATA6          0x17059
-+                               MX6QDL_PAD_SD4_DAT7__SD4_DATA7          0x17059
-+                       >;
-+               };
-        };
+Do you have a rough idea about when you will post your v2 pull request?
 
-        gpio_leds {
-@@ -535,3 +550,11 @@
-        wp-gpios = <&gpio2 1 0>;
-        status = "okay";
- };
-+
-+&usdhc4 {
-+       pinctrl-names = "default";
-+       pinctrl-0 = <&pinctrl_usdhc4>;
-+       bus-width = <8>;
-+       non-removable;
-+       status = "okay";
-+};
-
-
-,and this is the result:
-
-mmc2: new high speed DDR MMC card at address 0001
-mmcblk1: mmc2:0001 SEM08G 7.39 GiB
-mmcblk1boot0: mmc2:0001 SEM08G partition 1 2.00 MiB
-mmcblk1boot1: mmc2:0001 SEM08G partition 2 2.00 MiB
-mmcblk1rpmb: mmc2:0001 SEM08G partition 3 128 KiB
-mmcblk1: error -110 sending stop command, original cmd response 0x900, card sta0
-mmcblk1: error -84 transferring data, sector 0, nr 8, cmd response 0x900, card 0
-mmcblk1: retrying using single block read
-mmcblk1: error -84 transferring data, sector 0, nr 8, cmd response 0x900, card 0
-end_request: I/O error, dev mmcblk1, sector 0
-mmcblk1: error -84 transferring data, sector 1, nr 7, cmd response 0x900, card 0
-end_request: I/O error, dev mmcblk1, sector 1
-mmcblk1: error -84 transferring data, sector 2, nr 6, cmd response 0x900, card 0
-end_request: I/O error, dev mmcblk1, sector 2
-mmcblk1: error -84 transferring data, sector 3, nr 5, cmd response 0x900, card 0
-end_request: I/O error, dev mmcblk1, sector 3
-mmcblk1: error -84 transferring data, sector 4, nr 4, cmd response 0x900, card 0
-....
-
-Is there any extra patch I need to apply? I am running linux-next 20140506.
+I have a pending sdhci patch that I would like to rebase on top of
+your latest work once it is available.
 
 Thanks,
-
-Fabio Estevam
+Tim Kryger
