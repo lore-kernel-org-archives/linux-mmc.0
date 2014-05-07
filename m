@@ -1,52 +1,29 @@
-From: Tim Kryger <tim.kryger@linaro.org>
-Subject: Re: [PATCH 00/38] MMC updates, plus CuBox-i WiFi support
-Date: Wed, 7 May 2014 13:49:06 -0700
-Message-ID: <CAAYSxhr15dMLT8kuBd6gaFX+WrRgAqxKoWPBgkfVhzHMx299=A@mail.gmail.com>
-References: <20140423185534.GA26756@n2100.arm.linux.org.uk>
- <535E84FB.4080305@wwwdotorg.org> <86mwf5tn0v.fsf@void.printf.net>
+From: Nick Sanders <nsanders@chromium.org>
+Subject: Re: [PATCH] mmc: sdhci: remove mdelay in eMMC tuning
+Date: Wed, 7 May 2014 15:01:15 -0700
+Message-ID: <CANvYXzicMyhS2eQ=+ziF=RNR1iP8-vbdyhTBe2jCbVbDDxE5sA@mail.gmail.com>
+References: <1399427558-8478-1-git-send-email-nsanders@chromium.org> <CAPDyKFpsm_M2oY3OuVHZ-MCNezT6xwo-HPwfo1pxfrw5ySKfOg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <86mwf5tn0v.fsf@void.printf.net>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Chris Ball <chris@printf.net>
-Cc: Mark Rutland <mark.rutland@arm.com>, Ulf Hansson <ulf.hansson@linaro.org>, Linux Doc List <linux-doc@vger.kernel.org>, Seungwon Jeon <tgih.jun@samsung.com>, Thierry Reding <thierry.reding@gmail.com>, Russell King - ARM Linux <linux@arm.linux.org.uk>, Anton Vorontsov <anton@enomsg.org>, Michal Simek <michal.simek@xilinx.com>, Jaehoon Chung <jh80.chung@samsung.com>, ARM Kernel List <linux-arm-kernel@lists.infradead.org>, Device Tree List <devicetree@vger.kernel.org>, Pawel Moll <pawel.moll@arm.com>, Stephen Warren <swarren@wwwdotorg.org>, spear-devel@list.st.com, Rob Herring <robh+dt@kernel.org>, Ben Dooks <ben-linux@fluff.org>, linux-tegra@vger.kernel.org, Ian Campbell <ijc+devicetree@hellion.org.uk>, Shawn Guo <shawn.guo@freescale.com>, Barry Song <baohua@kernel.org>, Randy Dunlap <rdunlap@infradead.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Viresh
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-vc0-f174.google.com ([209.85.220.174]:51194 "EHLO
+	mail-vc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751971AbaEGWBg (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 7 May 2014 18:01:36 -0400
+Received: by mail-vc0-f174.google.com with SMTP id ib6so2148726vcb.5
+        for <linux-mmc@vger.kernel.org>; Wed, 07 May 2014 15:01:35 -0700 (PDT)
+In-Reply-To: <CAPDyKFpsm_M2oY3OuVHZ-MCNezT6xwo-HPwfo1pxfrw5ySKfOg@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Chris Ball <cjb@laptop.org>, linux-mmc <linux-mmc@vger.kernel.org>, Grant Grundler <grundler@chromium.org>, Doug Anderson <dianders@chromium.org>, Chang-Eun Choi-SSI <cu.choi@ssi.samsung.com>
 
-On Mon, Apr 28, 2014 at 9:52 AM, Chris Ball <chris@printf.net> wrote:
-> Hi,
+On Wed, May 7, 2014 at 1:35 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> Aha, so you are actually using "MMC_CAP_RUNTIME_RESUME" here - cool :-).
 >
-> On Mon, Apr 28 2014, Stephen Warren wrote:
->> The series,
->> Tested-by: Stephen Warren <swarren@nvidia.com>
->>
->> (On an NVIDIA Tegra "Jetson TK1" board, with the patches applied on top
->> of next-20140428, also with Andrew Bresticker's Tegra SDHCI patches
->> "mmc: tegra: disable UHS modes" and "mmc: tegra: fix reporting of base
->> clock frequency" applied)
->
-> Thanks very much Stephen, Russell for the series, and Ulf.
->
-> This seems like a good time to merge to mmc-next and call for testing
-> in linux-next -- I'm happy to merge a v2 PR when ready.
->
-> - Chris.
+> I suppose those patches that enables the "cap" has not reached
+> mainline yet. Any plans on sending them?
 
-Hi Russell,
-
-Do you have a rough idea about when you will post your v2 pull request?
-
-I have a pending sdhci patch that I would like to rebase on top of
-your latest work once it is available.
-
-Thanks,
-Tim Kryger
+I am actually running 3.10, so MMC_CAP_RUNTIME_RESUME isn't used yet.
+sdhci-acpi.c is enabling runtime pm for my device, and there are no
+caps checks otherwise.
