@@ -1,152 +1,68 @@
-From: Roger <rogerable@realtek.com>
-Subject: Re: [PATCH] mmc: rtsx: usb backend needs LED support
-Date: Thu, 8 May 2014 16:08:15 +0800
-Message-ID: <536B3B6F.1010209@realtek.com>
-References: <cover.1398735435.git.micky_ching@realsil.com.cn>	<7208467.nZIXMIfPji@wuerfel>	<CAPDyKFpJrrviaZo_L8MkLF=v7DqGEVj9=uSNsNtU-FXNwu-MmQ@mail.gmail.com>	<201404300228.s3U2S7WA026782@rtits1.realtek.com>	<53606F49.1000401@realtek.com>
- <CAPDyKFrA39eFnoy-sAGcAUeDqtB78cvAivV+mmRR5C-tov-9eg@mail.gmail.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH 1/2] mmc: rtsx: Revert "mmc: rtsx: modify error
+ handleandremove smatch warnings"
+Date: Thu, 8 May 2014 10:22:28 +0200
+Message-ID: <CAPDyKFqU+7NoZ1JjKa2YMj2DJsuBG5jD8fEt7WdLawA-mmqOjw@mail.gmail.com>
+References: <cover.1398735435.git.micky_ching@realsil.com.cn>
+	<1076b1824732688774d223a14595ecf26a375d82.1398735435.git.micky_ching@realsil.com.cn>
+	<CAPDyKFoZ2_H6Jh0+84zLBhayMb0=q1eJw=vC_m41iCsbz0siFw@mail.gmail.com>
+	<536B1B05.6010604@realsil.com.cn>
+	<20140508075542.GC5307@lee--X1>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"; Format="flowed"
-Content-Transfer-Encoding: 7bit
-Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
-In-Reply-To: <CAPDyKFrA39eFnoy-sAGcAUeDqtB78cvAivV+mmRR5C-tov-9eg@mail.gmail.com>
-List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
-List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel>
-List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
-List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
-List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
-Errors-To: driverdev-devel-bounces@linuxdriverproject.org
-Sender: driverdev-devel-bounces@linuxdriverproject.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Lee Jones <lee.jones@linaro.org>
-Cc: Samuel Ortiz <sameo@linux.intel.com>, Arnd Bergmann <arnd@arndb.de>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Wei WANG <wei_wang@realsil.com.cn>, devel@linuxdriverproject.org, Dan Carpenter <dan.carpenter@oracle.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qa0-f41.google.com ([209.85.216.41]:40050 "EHLO
+	mail-qa0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751552AbaEHIW3 convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 8 May 2014 04:22:29 -0400
+Received: by mail-qa0-f41.google.com with SMTP id dc16so2210065qab.28
+        for <linux-mmc@vger.kernel.org>; Thu, 08 May 2014 01:22:29 -0700 (PDT)
+In-Reply-To: <20140508075542.GC5307@lee--X1>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Lee Jones <lee.jones@linaro.org>
+Cc: micky <micky_ching@realsil.com.cn>, Chris Ball <chris@printf.net>, Samuel Ortiz <sameo@linux.intel.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Dan Carpenter <dan.carpenter@oracle.com>, devel@linuxdriverproject.org, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, Roger <rogerable@realtek.com>, Wei WANG <wei_wang@realsil.com.cn>, Stephen Rothwell <sfr@canb.auug.org.au>
 
-
-On 04/30/2014 04:19 PM, Ulf Hansson wrote:
-> On 30 April 2014 05:34, Roger <rogerable@realtek.com> wrote:
->>
->> On 04/29/2014 08:46 PM, Arnd Bergmann wrote:
->>>
->>> On Tuesday 29 April 2014 13:05:15 Ulf Hansson wrote:
->>>>
->>>> On 29 April 2014 11:45, Arnd Bergmann <arnd@arndb.de> wrote:
->>>>>
->>>>> drivers/built-in.o: In function `rtsx_usb_sdmmc_drv_remove':
->>>>> :(.text+0x806480): undefined reference to `led_classdev_unregister'
->>>>> drivers/built-in.o: In function `rtsx_usb_sdmmc_drv_probe':
->>>>> :(.text+0x806708): undefined reference to `led_classdev_register'
->>>>>
->>>>> This adds an explicit dependency in Kconfig
->>>>
->>>>
->>>> I think the proper solution is to fix the dependency in the driver code
->>>> instead.
->>>>
->>>> There are already some ifdefs hackery for making it optional to use
->>>> leds, apparently that's not working properly.
->>>>
->>>
->>> Ah, right, I misinterpreted the bug. Here is a new version:
->>>
->>> 8<---------
->>>>
->>>>  From 5b5588f8c9b8ded8b296fd32d87b2d118e548a29 Mon Sep 17 00:00:00 2001
->>>
->>> From: Arnd Bergmann <arnd@arndb.de>
->>> Date: Tue, 29 Apr 2014 11:41:40 +0200
->>> Subject: [PATCH] mmc: rtsx: usb backend needs LED support
->>>
->>> Building the rtsx USB driver uses the LED classdev base
->>> support if available, but that fails if the classdev
->>> is a module and the MMC driver is built-in, leading to this
->>> link error.
->>>
->>> drivers/built-in.o: In function `rtsx_usb_sdmmc_drv_remove':
->>> :(.text+0x806480): undefined reference to `led_classdev_unregister'
->>> drivers/built-in.o: In function `rtsx_usb_sdmmc_drv_probe':
->>> :(.text+0x806708): undefined reference to `led_classdev_register'
->>>
->>> This adds an explicit dependency in Kconfig to ensure that
->>> the MMC driver has to be a module if LEDS_CLASS is a module,
->>> but still allows it to be built-in if LEDS_CLASS is either
->>> disabled or built-in.
->>>
->>> Signed-off-by: Arnd Bergmann <arnd@arndb.de>
->>>
->>> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
->>> index 92d91fe..68da9b8 100644
->>>
->>> --- a/drivers/mmc/host/Kconfig
->>> +++ b/drivers/mmc/host/Kconfig
->>> @@ -696,6 +696,7 @@ config MMC_REALTEK_PCI
->>>    config MMC_REALTEK_USB
->>>          tristate "Realtek USB SD/MMC Card Interface Driver"
->>>          depends on MFD_RTSX_USB
->>> +       depends on m || LEDS_CLASS!=m
->>>
->>>          help
->>>            Say Y here to include driver code to support SD/MMC card
->>> interface
->>>            of Realtek RTS5129/39 series card reader
->>>
->>> .
->>>
->>
->> I think Ulf's idea is to fix the bug by modifying the .c files.
->> I really found the problem of my ifdef hackery and it should do something
->> similar in sdhci.c as:
->>
->> From: Roger Tseng <rogerable@realtek.com>
->> Date: Wed, 30 Apr 2014 11:11:25 +0800
->> Subject: [PATCH] mmc: rtsx: fix possible linking error if built-in
->>
->> rtsx_usb_sdmmc module uses the LED classdev if available, but the code
->> failed
->> to consider the situation that it is built-in and the LED classdev is a
->> module,
->> leading to following linking error:
->>
->>    LD      init/built-in.o
->> drivers/built-in.o: In function `rtsx_usb_sdmmc_drv_remove':
->> rtsx_usb_sdmmc.c:(.text+0x2a018e): undefined reference to
->> `led_classdev_unregister'
->> drivers/built-in.o: In function `rtsx_usb_sdmmc_drv_probe':
->> rtsx_usb_sdmmc.c:(.text+0x2a197e): undefined reference to
->> `led_classdev_register'
->>
->> Fix by excluding such condition when defining macro RTSX_USB_USE_LEDS_CLASS.
->>
->> Signed-off-by: Roger Tseng <rogerable@realtek.com>
+On 8 May 2014 09:55, Lee Jones <lee.jones@linaro.org> wrote:
+>> It seems Chris is too busy to responding, so would you help to pick
+>> this patch for 3.15 fix.
 >
-> Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
+> Hmmmm... that's pretty bad timing.  I've literally just sent the
+> pull-request containing the MFD/MMC fixup branch to Linus.  I guess
+> Ulf will have to do it.
+
+There seem to be some confusion here. :-)
+
+This patch is _only_ intended for Chris' mmc_next branch, so it
+shouldn't go for 3.15 fixes. Or better, Chris should drop the patch
+this one is reverting.
+
+Likely we will see a merge problem in Stephen Rothwell's linux-next
+tree, until Chris' drops this patch - causing Stephen to not merge the
+mmc tree for a while. I suppose that's the best we can do, until Chris
+shows up again.
+
+Kind regards
+Ulf Hansson
+
 >
-
-Would this patch be merged into linux-next or Lee's mfd.git 
-ib-mfd-mmc-memstick-3.16 branch?
-
-By the way, should I resend my version?
-
->> ---
->>   drivers/mmc/host/rtsx_usb_sdmmc.c | 3 ++-
->>   1 file changed, 2 insertions(+), 1 deletion(-)
+>> >>>From: Micky Ching<micky_ching@realsil.com.cn>
+>> >>>
+>> >>>This reverts commit 1f7b581b3ffcb2a8437397a02f4af89fa6934d08.
+>> >>>
+>> >>>The patch depend on commit c42deffd5b53c9e583d83c7964854ede2f1241=
+0d
+>> >>><mmc: rtsx: add support for pre_req and post_req>, but the previo=
+us
+>> >>>patch was discard. So we have to delete the patch.
+>> >>>
+>> >>>Signed-off-by: Micky Ching<micky_ching@realsil.com.cn>
+>> >Acked-by: Ulf Hansson<ulf.hansson@linaro.org>
 >>
->> diff --git a/drivers/mmc/host/rtsx_usb_sdmmc.c
->> b/drivers/mmc/host/rtsx_usb_sdmmc.c
->> index e11fafa..38bdda5 100644
->> --- a/drivers/mmc/host/rtsx_usb_sdmmc.c
->> +++ b/drivers/mmc/host/rtsx_usb_sdmmc.c
->> @@ -34,7 +34,8 @@
->>   #include <linux/mfd/rtsx_usb.h>
->>   #include <asm/unaligned.h>
->>
->> -#if defined(CONFIG_LEDS_CLASS) || defined(CONFIG_LEDS_CLASS_MODULE)
->> +#if defined(CONFIG_LEDS_CLASS) || (defined(CONFIG_LEDS_CLASS_MODULE) && \
->> +       defined(CONFIG_MMC_REALTEK_USB_MODULE))
->>   #include <linux/leds.h>
->>   #include <linux/workqueue.h>
->>   #define RTSX_USB_USE_LEDS_CLASS
->>
-
-Best regards,
-Roger Tseng
+>
+> --
+> Lee Jones
+> Linaro STMicroelectronics Landing Team Lead
+> Linaro.org =E2=94=82 Open source software for ARM SoCs
+> Follow Linaro: Facebook | Twitter | Blog
