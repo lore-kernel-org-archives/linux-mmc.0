@@ -1,129 +1,68 @@
-From: Andreas Fenkart <afenkart@gmail.com>
-Subject: [PATCH v11 7/7] mmc: omap_hsmmc: Pin remux workaround to support SDIO interrupt on AM335x
-Date: Fri,  9 May 2014 01:20:34 +0200
-Message-ID: <1399591234-13089-7-git-send-email-afenkart@gmail.com>
+From: Sebastian Reichel <sre@kernel.org>
+Subject: Re: [PATCH v11 1/7] mmc: omap_hsmmc: compile fix for !CONFIG_OF build
+Date: Fri, 9 May 2014 01:48:10 +0200
+Message-ID: <20140508234809.GB7533@earth.universe>
 References: <1399591018-12930-1-git-send-email-afenkart@gmail.com>
  <1399591234-13089-1-git-send-email-afenkart@gmail.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ee0-f49.google.com ([74.125.83.49]:60857 "EHLO
-	mail-ee0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932080AbaEHXVi (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 8 May 2014 19:21:38 -0400
+Mime-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha512;
+	protocol="application/pgp-signature"; boundary="rJwd6BRFiFCcLxzm"
+Return-path: <linux-doc-owner@vger.kernel.org>
+Content-Disposition: inline
 In-Reply-To: <1399591234-13089-1-git-send-email-afenkart@gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Sender: linux-doc-owner@vger.kernel.org
+To: Andreas Fenkart <afenkart@gmail.com>
+Cc: Tony Lindgren <tony@atomide.com>, Chris Ball <chris@printf.net>, Grant Likely <grant.likely@secretlab.ca>, Felipe Balbi <balbi@ti.com>, Balaji T K <balajitk@ti.com>, Andreas Mueller <schnitzeltony@googlemail.com>, zonque@gmail.com, galak@codeaurora.org, linux-doc@vger.kernel.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Tony Lindgren <tony@atomide.com>
-Cc: Chris Ball <chris@printf.net>, Grant Likely <grant.likely@secretlab.ca>, Felipe Balbi <balbi@ti.com>, Balaji T K <balajitk@ti.com>, Andreas Mueller <schnitzeltony@googlemail.com>, zonque@gmail.com, galak@codeaurora.org, linux-doc@vger.kernel.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, Andreas Fenkart <afenkart@gmail.com>
 
-The am335x can't detect pending cirq in PM runtime suspend.
-This patch reconfigures dat1 as a GPIO before going to suspend.
-SDIO interrupts are detected with the GPIO, the GPIO will only wake
-the module from suspend, SDIO irq detection will still happen through the
-IP block.
 
-Idea of remuxing the pins by Tony Lindgren. Code contributions from
-Tony Lindgren and Balaji T K <balajitk@ti.com>
+--rJwd6BRFiFCcLxzm
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-Signed-off-by: Andreas Fenkart <afenkart@gmail.com>
-Signed-off-by: Tony Lindgren <tony@atomide.com>
+On Fri, May 09, 2014 at 01:20:28AM +0200, Andreas Fenkart wrote:
+> Signed-off-by: Andreas Fenkart <afenkart@gmail.com>
+>=20
+> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+> index 8d07e2b..5042a15 100644
+> --- a/drivers/mmc/host/omap_hsmmc.c
+> +++ b/drivers/mmc/host/omap_hsmmc.c
+> @@ -1864,6 +1864,7 @@ static inline struct omap_mmc_platform_data
+>  {
+>  	return ERR_PTR(-EINVAL);
+>  }
+> +#define omap_mmc_of_match      NULL
+>  #endif
+> =20
+>  static int omap_hsmmc_probe(struct platform_device *pdev)
 
-Conflicts:
-	drivers/mmc/host/omap_hsmmc.c
+What do you need this for? omap_hsmmc.c uses of_match_ptr() to
+access omap_mmc_of_match, which is a macro returning NULL for
+!CONFIG_OF.
 
-diff --git a/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt b/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
-index ce80561..946bc5f 100644
---- a/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
-+++ b/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
-@@ -56,3 +56,56 @@ Examples:
- 			&edma 25>;
- 		dma-names = "tx", "rx";
- 	};
-+
-+[workaround for missing swakeup on am33xx]
-+
-+This SOC is missing the swakeup line, it will not detect SDIO irq
-+while in suspend.
-+
-+                             ------
-+                             | PRCM |
-+                              ------
-+                               ^ |
-+                       swakeup | | fclk
-+                               | v
-+       ------                -------               -----
-+      | card | -- CIRQ -->  | hsmmc | -- IRQ -->  | CPU |
-+       ------                -------               -----
-+
-+In suspend the fclk is off and the module is disfunctional. Even register reads
-+will fail. A small logic in the host will request fclk restore, when an
-+external event is detected. Once the clock is restored, the host detects the
-+event normally. Since am33xx doesn't have this line it never wakes from
-+suspend.
-+
-+The workaround is to reconfigure the dat1 line as a GPIO upon suspend. To make
-+this work, we need to set the named pinctrl states "default" and "idle".
-+Prepare idle to remux dat1 as a gpio, and default to remux it back as sdio
-+dat1. The MMC driver will then toggle between idle and default state during
-+runtime.
-+
-+In summary:
-+1. select matching 'compatible' section, see example below.
-+2. specify pinctrl states "default" and "idle", "sleep" is optional.
-+3. specify the gpio irq used for detecting sdio irq in suspend
-+
-+If configuration is incomplete, a warning message is emitted "falling back to
-+polling". Also check the "sdio irq mode" in /sys/kernel/debug/mmc0/regs. Mind
-+not every application needs SDIO irq, e.g. MMC cards.
-+
-+	mmc1: mmc@48060100 {
-+		compatible = "ti,am33xx-hsmmc";
-+		...
-+		pinctrl-names = "default", "idle", "sleep"
-+		pinctrl-0 = <&mmc1_pins>;
-+		pinctrl-1 = <&mmc1_idle>;
-+		pinctrl-2 = <&mmc1_sleep>;
-+		...
-+		interrupts-extended = <&intc 64 &gpio2 28 0>;
-+	};
-+
-+	mmc1_idle : pinmux_cirq_pin {
-+		pinctrl-single,pins = <
-+		        0x0f8 0x3f      /* GPIO2_28 */
-+		>;
-+	};
-diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index 5a321f98..497b2fc 100644
---- a/drivers/mmc/host/omap_hsmmc.c
-+++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -1782,15 +1782,25 @@ static int omap_hsmmc_configure_wake_irq(struct omap_hsmmc_host *host)
- 	 * and need to remux SDIO DAT1 to GPIO for wake-up from idle.
- 	 */
- 	if (host->pdata->controller_flags & OMAP_HSMMC_SWAKEUP_MISSING) {
--		ret = -ENODEV;
--		devm_free_irq(host->dev, host->wake_irq, host);
--		goto err;
-+		if (IS_ERR(host->dev->pins->default_state)) {
-+			dev_info(host->dev, "missing default pinctrl state\n");
-+			ret = -EINVAL;
-+			goto err_free_irq;
-+		}
-+
-+		if (IS_ERR(host->dev->pins->idle_state)) {
-+			dev_info(host->dev, "missing idle pinctrl state\n");
-+			ret = -EINVAL;
-+			goto err_free_irq;
-+		}
- 	}
- 
- 	OMAP_HSMMC_WRITE(host->base, HCTL,
- 			 OMAP_HSMMC_READ(host->base, HCTL) | IWE);
- 	return 0;
- 
-+err_free_irq:
-+	devm_free_irq(host->dev, host->wake_irq, host);
- err:
- 	dev_warn(host->dev, "no SDIO IRQ support, falling back to polling\n");
- 	host->wake_irq = 0;
--- 
-1.7.10.4
+-- Sebastian
 
+--rJwd6BRFiFCcLxzm
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1
+
+iQIcBAEBCgAGBQJTbBe5AAoJENju1/PIO/qaCaYP/RN9LK9aH9XsSferJeV4P/RT
+N5tfholvkQr33PU00R2UJdI1xKxs0UgDTX1X4E/s+NI8xsjYd+9DaaZuR6dhqx+Q
+AIQfmaJ2/Qad+BVueiwCOpK+SzUZEdsbi9tLYvlbBpyrKVMfEap8yCVhRcifPfxG
+fe0J80dKY8rgW95QI35Fvg+SJ1QJsOhvYAktRwrFbgOu57AQcEOpJajEAmbCMnth
+RLiGjU3WaWwXEQuFwv+2+Ku+wAGKChLA4C8hXl0GnzLteAUVu6fcCFrXs0ru8BDh
+WkEEARsZJHa9PTPRj31CxTFemu0uYuL6BIGhlZL4nqpabVQm9MTW5+w7Xmlzaju7
+8K829LxzAjUUJIWCE928q6UJnZNFOSKfhu/zPeDpc65HkAoHDrmfE38rqgouuC1r
+C6raqLrA/acrNgJDIb/IpKFGORdnxn3XwJfCmTMp+w+edr8ieIXIrHGNJAy8i8fo
+sKG/Wpo+m6juuPz3X5DqMSA/cjYJYb8pM/aKuNeMfoF8kPtpR8cO3QkzQeSBOeQh
+shV4RPv/fxuVJIubwMkf5w1BoYNtxKUh4hWzDWPen+ybC86fI9v497eHS+Tw/19E
+ktgzFYNHTwxAaSzbwimRD+u+VQLchRK0gtPDmqFmrdn/I8Ks3jcrLc77Rm+W3vms
+5yzwipQtBYDeffsH4ZLz
+=hyFF
+-----END PGP SIGNATURE-----
+
+--rJwd6BRFiFCcLxzm--
