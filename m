@@ -1,44 +1,58 @@
-From: Fabio Estevam <festevam@gmail.com>
-Subject: Re: Adding esdhc4 eMMC support on mx6sabresd
-Date: Thu, 8 May 2014 11:05:20 -0300
-Message-ID: <CAOMZO5AdS=X93MCeS54_A4hKe=rBHHph+ed_qkw9BFJ3+XJJMw@mail.gmail.com>
-References: <CAOMZO5CJEoe_fGLH-Uu9uVwNdWPp940k3WGAkjzkCiGmjAPAXA@mail.gmail.com>
-	<20140508091835.78daafbe@ipc1.ka-ro>
-	<20140508101730.GA28787@shlinux1.ap.freescale.net>
+From: Ben Dooks <ben@trinity.fluff.org>
+Subject: Re: [PATCH] MAINTAINERS: mmc: Update email for host driver
+ maintainer
+Date: Thu, 8 May 2014 16:37:34 +0100
+Message-ID: <20140508153734.GY4400@trinity.fluff.org>
+References: <1399541098-5104-1-git-send-email-ulf.hansson@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-vc0-f175.google.com ([209.85.220.175]:64534 "EHLO
-	mail-vc0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751128AbaEHOFV (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 8 May 2014 10:05:21 -0400
-Received: by mail-vc0-f175.google.com with SMTP id hu19so332381vcb.34
-        for <linux-mmc@vger.kernel.org>; Thu, 08 May 2014 07:05:20 -0700 (PDT)
-In-Reply-To: <20140508101730.GA28787@shlinux1.ap.freescale.net>
+Received: from trinity.fluff.org ([89.16.178.74]:56212 "EHLO trinity.fluff.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754632AbaEHPhg (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 8 May 2014 11:37:36 -0400
+Content-Disposition: inline
+In-Reply-To: <1399541098-5104-1-git-send-email-ulf.hansson@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Dong Aisheng <b29396@freescale.com>
-Cc: =?UTF-8?Q?Lothar_Wa=C3=9Fmann?= <LW@karo-electronics.de>, Sascha Hauer <kernel@pengutronix.de>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Shawn Guo <shawn.guo@freescale.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org, Chris Ball <chris@printf.net>, linux-kernel@vger.kernel.org, Ian Molton <ian.molton@codethink.co.uk>
 
-On Thu, May 8, 2014 at 7:17 AM, Dong Aisheng <b29396@freescale.com> wrote:
+On Thu, May 08, 2014 at 11:24:58AM +0200, Ulf Hansson wrote:
+> Update Ian Molton's email, the maintainer for tmio/sh_mobile_sdhci.
+> 
+> Cc: Ian Molton <ian.molton@codethink.co.uk>
+> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 
-> I'm not very sure about HYS bit, but it should not be pad setting issue.
-> This pad setting was tested ok with FSL internal tree.
->
-> I just tested an old Chris/mmc-next tree which is 3.14 rc2 with the top commit is b42b9b.
-> The eMMC works well on SabreSD boards.
-> But it failed and got the same issue with latest chris/mmc-next tree.
-> I noticed there's no changes on sdhci-esdhc-imx.c
-> Probably some other changes breaks this function.
->
-> Fabio,
-> You may bisect it yourself or i will do it later when i'm a bit free.
+I think he still has the previous address, so you may want to keep it.
 
-Ok, I have just tested with Shawn's branch and the mmc error does not
-happen, so it must be something in linux-next that causes the issue.
+> ---
+>  MAINTAINERS |    2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+> 
+> diff --git a/MAINTAINERS b/MAINTAINERS
+> index e67ea24..c2803c7 100644
+> --- a/MAINTAINERS
+> +++ b/MAINTAINERS
+> @@ -9000,7 +9000,7 @@ F:	include/linux/toshiba.h
+>  F:	include/uapi/linux/toshiba.h
+>  
+>  TMIO MMC DRIVER
+> -M:	Ian Molton <ian@mnementh.co.uk>
+> +M:	Ian Molton <ian.molton@codethink.co.uk>
+>  L:	linux-mmc@vger.kernel.org
+>  S:	Maintained
+>  F:	drivers/mmc/host/tmio_mmc*
+> -- 
+> 1.7.9.5
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
-Will submit the dts change.
+-- 
+Ben Dooks, ben@fluff.org, http://www.fluff.org/ben/
 
-Regards,
+Large Hadron Colada: A large Pina Colada that makes the universe disappear.
 
-Fabio Estevam
