@@ -1,66 +1,30 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: atmel: don't test host->data
-Date: Thu, 8 May 2014 10:43:08 +0200
-Message-ID: <CAPDyKFr83mB4RWdVAPREDcHjBKKQktbEFKHhDRpPrQioEMtNZw@mail.gmail.com>
-References: <1399391006-16007-1-git-send-email-alexandre.belloni@free-electrons.com>
-	<20140507144306.GO7438@ldesroches-Latitude-E6320>
+Subject: Re: [PATCH] mmc: mxcmmc: Use mmc_regulator_get_supply() API
+Date: Thu, 8 May 2014 10:49:09 +0200
+Message-ID: <CAPDyKFp4VuG_X3A12nv2qmjFQVvN3qVBxbgquUKXWWYTO2Hd9A@mail.gmail.com>
+References: <1399100117-6978-1-git-send-email-shc_work@mail.ru>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20140507144306.GO7438@ldesroches-Latitude-E6320>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Alexandre Belloni <alexandre.belloni@free-electrons.com>
-Cc: Ludovic Desroches <ludovic.desroches@atmel.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Chris Ball <chris@printf.net>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qa0-f50.google.com ([209.85.216.50]:42144 "EHLO
+	mail-qa0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752493AbaEHItJ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 8 May 2014 04:49:09 -0400
+Received: by mail-qa0-f50.google.com with SMTP id j15so2247077qaq.9
+        for <linux-mmc@vger.kernel.org>; Thu, 08 May 2014 01:49:09 -0700 (PDT)
+In-Reply-To: <1399100117-6978-1-git-send-email-shc_work@mail.ru>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Alexander Shiyan <shc_work@mail.ru>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>
 
-On 7 May 2014 16:43, Ludovic Desroches <ludovic.desroches@atmel.com> wrote:
-> On Tue, May 06, 2014 at 05:43:26PM +0200, Alexandre Belloni wrote:
->> Found using smatch:
->> drivers/mmc/host/atmel-mci.c:827 atmci_pdc_complete() warn: variable
->> dereferenced before check 'host->data' (see line 807)
->>
->> Stop testing host->data as it is not NULL at that point.
+On 3 May 2014 08:55, Alexander Shiyan <shc_work@mail.ru> wrote:
+> This patch replaces regulator manipulation with
+> mmc_regulator_get_supply() function from MMC core.
 >
-> I agree
->
->>
->> Signed-off-by: Alexandre Belloni <alexandre.belloni@free-electrons.com>
-> Acked-by: Ludovic Desroches <ludovic.desroches@atmel.com>
->
+> Signed-off-by: Alexander Shiyan <shc_work@mail.ru>
 
-Thanks! I pick it up for the PR I send to Chris.
+Thanks, I will include this in the next PR I send to Chris.
 
 Kind regards
 Ulf Hansson
-
->> ---
->>  drivers/mmc/host/atmel-mci.c | 13 +++----------
->>  1 file changed, 3 insertions(+), 10 deletions(-)
->>
->> diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
->> index 42706ea0ba85..aece7cafbb97 100644
->> --- a/drivers/mmc/host/atmel-mci.c
->> +++ b/drivers/mmc/host/atmel-mci.c
->> @@ -820,16 +820,9 @@ static void atmci_pdc_complete(struct atmel_mci *host)
->>
->>       atmci_pdc_cleanup(host);
->>
->> -     /*
->> -      * If the card was removed, data will be NULL. No point trying
->> -      * to send the stop command or waiting for NBUSY in this case.
->> -      */
->> -     if (host->data) {
->> -             dev_dbg(&host->pdev->dev,
->> -                     "(%s) set pending xfer complete\n", __func__);
->> -             atmci_set_pending(host, EVENT_XFER_COMPLETE);
->> -             tasklet_schedule(&host->tasklet);
->> -     }
->> +     dev_dbg(&host->pdev->dev, "(%s) set pending xfer complete\n", __func__);
->> +     atmci_set_pending(host, EVENT_XFER_COMPLETE);
->> +     tasklet_schedule(&host->tasklet);
->>  }
->>
->>  static void atmci_dma_cleanup(struct atmel_mci *host)
->> --
->> 1.9.1
->>
