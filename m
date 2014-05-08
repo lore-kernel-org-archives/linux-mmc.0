@@ -1,79 +1,54 @@
-From: Lothar =?UTF-8?B?V2HDn21hbm4=?= <LW@KARO-electronics.de>
-Subject: Re: Adding esdhc4 eMMC support on mx6sabresd
-Date: Thu, 8 May 2014 09:18:35 +0200
-Message-ID: <20140508091835.78daafbe@ipc1.ka-ro>
-References: <CAOMZO5CJEoe_fGLH-Uu9uVwNdWPp940k3WGAkjzkCiGmjAPAXA@mail.gmail.com>
+From: Lee Jones <lee.jones@linaro.org>
+Subject: Re: [PATCH 2/2] mmc: rtsx: Revert "mmc: rtsx: add support for
+ pre_req and post_req"
+Date: Thu, 8 May 2014 08:53:57 +0100
+Message-ID: <20140508075357.GB5307@lee--X1>
+References: <cover.1398735435.git.micky_ching@realsil.com.cn>
+ <6a8f18cad47244e849adf8a731c621932fa777e0.1398735435.git.micky_ching@realsil.com.cn>
+ <CAPDyKFqSdvjJrsbDeX1KbjQtOjfoAwC0xz3y7Rm-BsD0T8tmxg@mail.gmail.com>
+ <CAPDyKFoEWkzHDfPn3BXVuXFMcfsLFtZdvsV36a7ic0DjCgu+NA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail.karo-electronics.de ([81.173.242.67]:55096 "EHLO
-	mail.karo-electronics.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752038AbaEHHUW convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 8 May 2014 03:20:22 -0400
-In-Reply-To: <CAOMZO5CJEoe_fGLH-Uu9uVwNdWPp940k3WGAkjzkCiGmjAPAXA@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <CAPDyKFoEWkzHDfPn3BXVuXFMcfsLFtZdvsV36a7ic0DjCgu+NA@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Chris Ball <chris@printf.net>, micky <micky_ching@realsil.com.cn>, Samuel Ortiz <sameo@linux.intel.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Dan Carpenter <dan.carpenter@oracle.com>, devel@linuxdriverproject.org, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, Roger <rogerable@realtek.com>, Wei WANG <wei_wang@realsil.com.cn>
 List-Id: linux-mmc@vger.kernel.org
-To: Fabio Estevam <festevam@gmail.com>
-Cc: Dong Aisheng <b29396@freescale.com>, Sascha Hauer <kernel@pengutronix.de>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Shawn Guo <shawn.guo@freescale.com>
 
-Hi,
+> >> This reverts commit c42deffd5b53c9e583d83c7964854ede2f12410d.
+> >>
+> >> commit <mmc: rtsx: add support for pre_req and post_req> did use
+> >> mutex_unlock() in tasklet, but mutex_unlock() can't used in
+> >> tasklet(atomic context). The driver need use mutex to avoid concur=
+rency,
+> >> so we can't use tasklet here, the patch need to be removed.
+> >>
+> >> The spinlock host->lock and pcr->lock may deadlock, one way to sol=
+ve the
+> >> deadlock is remove host->lock in sd_isr_done_transfer(), but if us=
+ing
+> >> workqueue the we can avoid using the spinlock and also avoid the p=
+roblem.
+> >>
+> >> Signed-off-by: Micky Ching <micky_ching@realsil.com.cn>
+> >
+> > Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
+>=20
+> Hi Lee,
+>=20
+> Would you mind to pick this up and send it for 3.15 fixes?
+>=20
+> The other revert "[PATCH 1/2] mmc: rtsx: Revert "mmc: rtsx: modify
+> error handle and remove smatch warnings", needs to go through the mmc
+> tree.
 
-=46abio Estevam wrote:
-> Hi Dong,
->=20
-> I have tested the following patch to add support for the emmc port on
-> mx6qsabresd:
->=20
-> --- a/arch/arm/boot/dts/imx6qdl-sabresd.dtsi
-> +++ b/arch/arm/boot/dts/imx6qdl-sabresd.dtsi
-> @@ -444,6 +444,21 @@
->                                 MX6QDL_PAD_SD3_DAT7__SD3_DATA7       =
-   0x17059
->                         >;
->                 };
-> +
-> +               pinctrl_usdhc4: usdhc4grp {
-> +                       fsl,pins =3D <
-> +                               MX6QDL_PAD_SD4_CMD__SD4_CMD          =
-   0x17059
-> +                               MX6QDL_PAD_SD4_CLK__SD4_CLK          =
-   0x10059
-> +                               MX6QDL_PAD_SD4_DAT0__SD4_DATA0       =
-   0x17059
-> +                               MX6QDL_PAD_SD4_DAT1__SD4_DATA1       =
-   0x17059
-> +                               MX6QDL_PAD_SD4_DAT2__SD4_DATA2       =
-   0x17059
-> +                               MX6QDL_PAD_SD4_DAT3__SD4_DATA3       =
-   0x17059
-> +                               MX6QDL_PAD_SD4_DAT4__SD4_DATA4       =
-   0x17059
-> +                               MX6QDL_PAD_SD4_DAT5__SD4_DATA5       =
-   0x17059
-> +                               MX6QDL_PAD_SD4_DAT6__SD4_DATA6       =
-   0x17059
-> +                               MX6QDL_PAD_SD4_DAT7__SD4_DATA7       =
-   0x17059
-[...]
->=20
-> Is there any extra patch I need to apply? I am running linux-next 201=
-40506.
->=20
-I'm using the pad settings 0x070b1 for our i.MX6 module with eMMC.
-At least you should probably drop the HYS setting (0x10000), since
-according to my experience the SD interface works much better with
-hysteresis disabled.
+Sent.
 
-
-Lothar Wa=C3=9Fmann
 --=20
-___________________________________________________________
-
-Ka-Ro electronics GmbH | Pascalstra=C3=9Fe 22 | D - 52076 Aachen
-Phone: +49 2408 1402-0 | Fax: +49 2408 1402-10
-Gesch=C3=A4ftsf=C3=BChrer: Matthias Kaussen
-Handelsregistereintrag: Amtsgericht Aachen, HRB 4996
-
-www.karo-electronics.de | info@karo-electronics.de
-___________________________________________________________
+Lee Jones
+Linaro STMicroelectronics Landing Team Lead
+Linaro.org =E2=94=82 Open source software for ARM SoCs
+=46ollow Linaro: Facebook | Twitter | Blog
