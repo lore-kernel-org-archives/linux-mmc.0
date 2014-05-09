@@ -1,136 +1,44 @@
-From: Balaji T K <balajitk@ti.com>
-Subject: Re: [PATCH v11 7/7] mmc: omap_hsmmc: Pin remux workaround to support
- SDIO interrupt on AM335x
-Date: Fri, 9 May 2014 22:41:59 +0530
-Message-ID: <536D0C5F.5090209@ti.com>
-References: <1399591018-12930-1-git-send-email-afenkart@gmail.com> <1399591234-13089-1-git-send-email-afenkart@gmail.com> <1399591234-13089-7-git-send-email-afenkart@gmail.com>
+From: Bjorn Andersson <bjorn@kryo.se>
+Subject: Re: [PATCH v1 00/11] Add Qualcomm SD Card Controller support.
+Date: Fri, 9 May 2014 10:56:35 -0700
+Message-ID: <CAJAp7Oh2iZ2Tqv6cb6atpOfwrgKpHA5LtESLTt4gvVpXE0qDQA@mail.gmail.com>
+References: <1398116624-31052-1-git-send-email-srinivas.kandagatla@linaro.org>
+	<1398759492-12970-1-git-send-email-srinivas.kandagatla@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from devils.ext.ti.com ([198.47.26.153]:36623 "EHLO
-	devils.ext.ti.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757105AbaEIRMJ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 9 May 2014 13:12:09 -0400
-In-Reply-To: <1399591234-13089-7-git-send-email-afenkart@gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: <1398759492-12970-1-git-send-email-srinivas.kandagatla@linaro.org>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: srinivas.kandagatla@linaro.org, Linus Walleij <linus.walleij@linaro.org>
+Cc: Russell King <linux@arm.linux.org.uk>, linux-mmc@vger.kernel.org, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, agross@quicinc.com, linux-arm-msm <linux-arm-msm@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Andreas Fenkart <afenkart@gmail.com>
-Cc: Tony Lindgren <tony@atomide.com>, Chris Ball <chris@printf.net>, Grant Likely <grant.likely@secretlab.ca>, Felipe Balbi <balbi@ti.com>, Andreas Mueller <schnitzeltony@googlemail.com>, zonque@gmail.com, galak@codeaurora.org, linux-doc@vger.kernel.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org
 
-On Friday 09 May 2014 04:50 AM, Andreas Fenkart wrote:
-> The am335x can't detect pending cirq in PM runtime suspend.
-> This patch reconfigures dat1 as a GPIO before going to suspend.
-> SDIO interrupts are detected with the GPIO, the GPIO will only wake
-> the module from suspend, SDIO irq detection will still happen through the
-> IP block.
->
-> Idea of remuxing the pins by Tony Lindgren. Code contributions from
-> Tony Lindgren and Balaji T K <balajitk@ti.com>
->
-> Signed-off-by: Andreas Fenkart <afenkart@gmail.com>
-> Signed-off-by: Tony Lindgren <tony@atomide.com>
->
-> Conflicts:
-> 	drivers/mmc/host/omap_hsmmc.c
+On Tue, Apr 29, 2014 at 1:18 AM,  <srinivas.kandagatla@linaro.org> wrote:
+[...]
+> This patch series adds Qualcomm SD Card Controller support in pl180 mmci
+> driver. QCom SDCC is basically a pl180, but bit more customized, some of the
+> register layouts and offsets are different to the ones mentioned in pl180
+> datasheet. The plan is to totally remove the standalone SDCC driver
+> drivers/mmc/host/msm_sdcc.* and start using generic mmci driver for all
+> Qualcomm parts, as we get chance to test on other Qcom boards.
 
-Remove above 2 lines
-Acked-by: Balaji T K <balajitk@ti.com>
+Hi Srinivas,
 
->
-> diff --git a/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt b/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
-> index ce80561..946bc5f 100644
-> --- a/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
-> +++ b/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
-> @@ -56,3 +56,56 @@ Examples:
->   			&edma 25>;
->   		dma-names = "tx", "rx";
->   	};
-> +
-> +[workaround for missing swakeup on am33xx]
-> +
-> +This SOC is missing the swakeup line, it will not detect SDIO irq
-> +while in suspend.
-> +
-> +                             ------
-> +                             | PRCM |
-> +                              ------
-> +                               ^ |
-> +                       swakeup | | fclk
-> +                               | v
-> +       ------                -------               -----
-> +      | card | -- CIRQ -->  | hsmmc | -- IRQ -->  | CPU |
-> +       ------                -------               -----
-> +
-> +In suspend the fclk is off and the module is disfunctional. Even register reads
-> +will fail. A small logic in the host will request fclk restore, when an
-> +external event is detected. Once the clock is restored, the host detects the
-> +event normally. Since am33xx doesn't have this line it never wakes from
-> +suspend.
-> +
-> +The workaround is to reconfigure the dat1 line as a GPIO upon suspend. To make
-> +this work, we need to set the named pinctrl states "default" and "idle".
-> +Prepare idle to remux dat1 as a gpio, and default to remux it back as sdio
-> +dat1. The MMC driver will then toggle between idle and default state during
-> +runtime.
-> +
-> +In summary:
-> +1. select matching 'compatible' section, see example below.
-> +2. specify pinctrl states "default" and "idle", "sleep" is optional.
-> +3. specify the gpio irq used for detecting sdio irq in suspend
-> +
-> +If configuration is incomplete, a warning message is emitted "falling back to
-> +polling". Also check the "sdio irq mode" in /sys/kernel/debug/mmc0/regs. Mind
-> +not every application needs SDIO irq, e.g. MMC cards.
-> +
-> +	mmc1: mmc@48060100 {
-> +		compatible = "ti,am33xx-hsmmc";
-> +		...
-> +		pinctrl-names = "default", "idle", "sleep"
-> +		pinctrl-0 = <&mmc1_pins>;
-> +		pinctrl-1 = <&mmc1_idle>;
-> +		pinctrl-2 = <&mmc1_sleep>;
-> +		...
-> +		interrupts-extended = <&intc 64 &gpio2 28 0>;
-> +	};
-> +
-> +	mmc1_idle : pinmux_cirq_pin {
-> +		pinctrl-single,pins = <
-> +		        0x0f8 0x3f      /* GPIO2_28 */
-> +		>;
-> +	};
-> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-> index 5a321f98..497b2fc 100644
-> --- a/drivers/mmc/host/omap_hsmmc.c
-> +++ b/drivers/mmc/host/omap_hsmmc.c
-> @@ -1782,15 +1782,25 @@ static int omap_hsmmc_configure_wake_irq(struct omap_hsmmc_host *host)
->   	 * and need to remux SDIO DAT1 to GPIO for wake-up from idle.
->   	 */
->   	if (host->pdata->controller_flags & OMAP_HSMMC_SWAKEUP_MISSING) {
-> -		ret = -ENODEV;
-> -		devm_free_irq(host->dev, host->wake_irq, host);
-> -		goto err;
-> +		if (IS_ERR(host->dev->pins->default_state)) {
-> +			dev_info(host->dev, "missing default pinctrl state\n");
-> +			ret = -EINVAL;
-> +			goto err_free_irq;
-> +		}
-> +
-> +		if (IS_ERR(host->dev->pins->idle_state)) {
-> +			dev_info(host->dev, "missing idle pinctrl state\n");
-> +			ret = -EINVAL;
-> +			goto err_free_irq;
-> +		}
->   	}
->
->   	OMAP_HSMMC_WRITE(host->base, HCTL,
->   			 OMAP_HSMMC_READ(host->base, HCTL) | IWE);
->   	return 0;
->
-> +err_free_irq:
-> +	devm_free_irq(host->dev, host->wake_irq, host);
->   err:
->   	dev_warn(host->dev, "no SDIO IRQ support, falling back to polling\n");
->   	host->wake_irq = 0;
->
+I think your series looks good, so I pulled it into my tree and
+combined with some input from [1] I got this up and running on Sony
+Xperia T (msm8960 based).
 
+I do get below prints in dmesg during probe, mount and some initial
+accesses; but the code seems to retry the operations and things work
+out nicely.
+
+[  193.556540] mmcblk0: response CRC error sending r/w cmd command,
+card status 0xb00
+
+
+PS. please send the patch enabling AMBA to Kumar as well.
+
+[1] https://git.linaro.org/landing-teams/working/qualcomm/kernel.git/commitdiff/14ea2f1dc5bb719dbfb943e2c700ac166a8c125a
+
+Regards,
+Bjorn
