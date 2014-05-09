@@ -1,46 +1,70 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: linux-next: manual merge of the mmc tree with Linus' tree
-Date: Fri, 9 May 2014 09:41:39 +0200
-Message-ID: <CAPDyKFq1O-bB1Vax0uRKaF2p2AJ1FXHC6LNoLsooGx5gBdsuLA@mail.gmail.com>
-References: <20140509134455.07d7de4d@canb.auug.org.au>
-	<20140509071423.GF5767@lee--X1>
+From: Dong Aisheng <b29396@freescale.com>
+Subject: [PATCH 1/1] mmc: sdhci-esdhc-imx: fix mmc ddr mode regression issue
+Date: Fri, 9 May 2014 14:53:15 +0800
+Message-ID: <1399618395-359-1-git-send-email-b29396@freescale.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-next-owner@vger.kernel.org>
-In-Reply-To: <20140509071423.GF5767@lee--X1>
-Sender: linux-next-owner@vger.kernel.org
-To: Stephen Rothwell <sfr@canb.auug.org.au>
-Cc: Lee Jones <lee.jones@linaro.org>, Chris Ball <chris@printf.net>, "linux-next@vger.kernel.org" <linux-next@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Micky Ching <micky_ching@realsil.com.cn>, linux-mmc <linux-mmc@vger.kernel.org>
+Content-Type: text/plain
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-bn1blp0185.outbound.protection.outlook.com ([207.46.163.185]:1487
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1751298AbaEIIH5 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 9 May 2014 04:07:57 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: chris@printf.net, ulf.hansson@linaro.org, shawn.guo@linaro.org, fabio.estevam@freescale.com
 
-On 9 May 2014 09:14, Lee Jones <lee.jones@linaro.org> wrote:
->> Today's linux-next merge of the mmc tree got a conflict in
->> drivers/mmc/host/rtsx_pci_sdmmc.c between commit 98fcc5762dce ("mmc:
->> rtsx: Revert "mmc: rtsx: add support for pre_req and post_req"") from
->> the  tree and commit 1f7b581b3ffc ("mmc: rtsx: modify error handle and
->> remove smatch warnings") from the mmc tree.
->>
->> I fixed it up (maybe - see below and in the final tree) and can carry
->> the fix as necessary (no action is required).
->
-> FYI: From what Ulf (co-maintainer of MMC) says, this was expected and
-> will continue to happen until a pending revert is merged.
->
+The regression is caused by the following commit ...
 
-Hi Stehpen,
+commit 79f7ae7c45a6ccf04e2908337461dee615f6afb0
+Author: Seungwon Jeon <tgih.jun@samsung.com>
+Date:   Fri Mar 14 21:11:56 2014 +0900
 
-Within this context; while Chris is being busy, I would be able to
-help out better as co-maintainer - if we would add my published mmc
-git tree, into your linux-next merge. Could you do that?
+mmc: clarify DDR timing mode between SD-UHS and eMMC
 
-My intent at this point, is to get patches tested in linux-next, but
-still get them merged via Chris' mmc tree. Does that make sense?
+This change distinguishes DDR timing mode of current
+mixed usage to clarify device type.
 
-Here is my git tree:
-git://git.linaro.org/people/ulf.hansson/mmc.git
+Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
+Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
+Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+Signed-off-by: Chris Ball <chris@printf.net>
 
-I have added a next branch, currently it points to the commit for
-"Linux 3.15-rc4", so it holds no patches yet.
+... and the line below.
 
-Kind regards
-Ulf Hansson
+@@ -1264,7 +1264,7 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+goto err;
+	}
+		mmc_card_set_ddr_mode(card);
+-		mmc_set_timing(card->host, MMC_TIMING_UHS_DDR50);
++		mmc_set_timing(card->host, MMC_TIMING_MMC_DDR52);
+		mmc_set_bus_width(card->host, bus_width);
+	}
+}
+
+It's caused by the platform driver was still using MMC_TIMING_UHS_DDR50 for MMC DDR
+mode which needs update too.
+
+Reported-by: Fabio Estevam <fabio.estevam@freescale.com>
+Reported-by: Shawn Guo <shawn.guo@freescale.com>
+Signed-off-by: Dong Aisheng <b29396@freescale.com>
+---
+ drivers/mmc/host/sdhci-esdhc-imx.c |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+index b841bb7..16e4219 100644
+--- a/drivers/mmc/host/sdhci-esdhc-imx.c
++++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+@@ -858,6 +858,7 @@ static int esdhc_set_uhs_signaling(struct sdhci_host *host, unsigned int uhs)
+ 		imx_data->uhs_mode = SDHCI_CTRL_UHS_SDR104;
+ 		break;
+ 	case MMC_TIMING_UHS_DDR50:
++	case MMC_TIMING_MMC_DDR52:
+ 		imx_data->uhs_mode = SDHCI_CTRL_UHS_DDR50;
+ 		writel(readl(host->ioaddr + ESDHC_MIX_CTRL) |
+ 				ESDHC_MIX_CTRL_DDREN,
+-- 
+1.7.8
+
