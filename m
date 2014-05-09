@@ -1,48 +1,61 @@
-From: Grant Grundler <grundler@chromium.org>
-Subject: Re: [RFC PATCH 1/1 v6 ]mmc: Support-FFU-for-eMMC-v5.0
-Date: Fri, 9 May 2014 11:13:35 -0700
-Message-ID: <CANEJEGto9zhNbnhpLtW92vLN_wabMFv2TaX5BHP1UhbmhzMoUQ@mail.gmail.com>
-References: <FDD07FEB422EF948A392FDC201AEEAE641188997@SACMBXIP01.sdcorp.global.sandisk.com>
-	<CANEJEGvPyHhWDSykx_zdEiA7WOYMkFtDwWjhF9kjo-7+Hp_EYQ@mail.gmail.com>
-	<CANEJEGu3e9eMB5qxHXAyWGDbECi4P77sv+SZWr8c9WkKFsd4tw@mail.gmail.com>
+From: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+Subject: Re: [PATCH v1 00/11] Add Qualcomm SD Card Controller support.
+Date: Fri, 09 May 2014 11:32:47 -0700
+Message-ID: <536D1F4F.4050605@linaro.org>
+References: <1398116624-31052-1-git-send-email-srinivas.kandagatla@linaro.org>	<1398759492-12970-1-git-send-email-srinivas.kandagatla@linaro.org> <CAJAp7Oh2iZ2Tqv6cb6atpOfwrgKpHA5LtESLTt4gvVpXE0qDQA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ob0-f177.google.com ([209.85.214.177]:41321 "EHLO
-	mail-ob0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757176AbaEISNg (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 9 May 2014 14:13:36 -0400
-Received: by mail-ob0-f177.google.com with SMTP id gq1so5083553obb.22
-        for <linux-mmc@vger.kernel.org>; Fri, 09 May 2014 11:13:35 -0700 (PDT)
-In-Reply-To: <CANEJEGu3e9eMB5qxHXAyWGDbECi4P77sv+SZWr8c9WkKFsd4tw@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: <CAJAp7Oh2iZ2Tqv6cb6atpOfwrgKpHA5LtESLTt4gvVpXE0qDQA@mail.gmail.com>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: Bjorn Andersson <bjorn@kryo.se>, Linus Walleij <linus.walleij@linaro.org>
+Cc: Russell King <linux@arm.linux.org.uk>, linux-mmc@vger.kernel.org, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, agross@quicinc.com, linux-arm-msm <linux-arm-msm@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Grant Grundler <grundler@chromium.org>
-Cc: Avi Shchislowski <Avi.Shchislowski@sandisk.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "cjb@laptop.org" <cjb@laptop.org>, Alex Lemberg <Alex.Lemberg@sandisk.com>
 
-On Fri, May 9, 2014 at 11:06 AM, Grant Grundler <grundler@chromium.org> wrote:
-> follow up on "malformed patch" problem:
+Thanks Bjorn for testing it on msm8960 SOC.
 
-Sorry...I'm now confident this patch is white space mangled before it
-was generated:
+On 09/05/14 10:56, Bjorn Andersson wrote:
+> On Tue, Apr 29, 2014 at 1:18 AM,  <srinivas.kandagatla@linaro.org> wrote:
+> [...]
+>> This patch series adds Qualcomm SD Card Controller support in pl180 mmci
+>> driver. QCom SDCC is basically a pl180, but bit more customized, some of the
+>> register layouts and offsets are different to the ones mentioned in pl180
+>> datasheet. The plan is to totally remove the standalone SDCC driver
+>> drivers/mmc/host/msm_sdcc.* and start using generic mmci driver for all
+>> Qualcomm parts, as we get chance to test on other Qcom boards.
+>
+> Hi Srinivas,
+>
+> I think your series looks good, so I pulled it into my tree and
+> combined with some input from [1] I got this up and running on Sony
+> Xperia T (msm8960 based).
+>
+> I do get below prints in dmesg during probe, mount and some initial
+> accesses; but the code seems to retry the operations and things work
+> out nicely.
 
-+#define CARD_BLOCK_SIZE 512
-+
-+/*
-+ * eMMC5.0 Field Firmware Update (FFU) opcodes */ #define =
+Great..
 
-+MMC_FFU_DOWNLOAD_OP 302 #define MMC_FFU_INSTALL_OP 303
-+
-+#define MMC_FFU_MODE_SET 0x1
-+#define MMC_FFU_MODE_NORMAL 0x0
+Could I add your Ack on these series?
+>
+> [  193.556540] mmcblk0: response CRC error sending r/w cmd command,
+> card status 0xb00
+>
+I could not reproduce this issue with APQ8064 based IFC6410 board.
+I will keep testing on other boards as on when they are available. Am 
+hoping that we could get this support for v3.16
 
-Please fix and repost as V7
+>
+> PS. please send the patch enabling AMBA to Kumar as well.
 
-After the "---" line I mentioned before, you can say:
-V7:
-- fixed mangled white space
+Sure I will send this patch to Kumar.
+>
+> [1] https://git.linaro.org/landing-teams/working/qualcomm/kernel.git/commitdiff/14ea2f1dc5bb719dbfb943e2c700ac166a8c125a
+>
+> Regards,
+> Bjorn
+>
 
-:)
-
-cheers
-grant
+thanks,
+srini
