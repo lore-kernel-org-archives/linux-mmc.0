@@ -1,84 +1,98 @@
 From: Balaji T K <balajitk@ti.com>
-Subject: Re: [PATCH v11 5/7] mmc: omap_hsmmc: abort runtime suspend if pending
- sdio irq detected
-Date: Fri, 9 May 2014 22:40:54 +0530
-Message-ID: <536D0C1E.1010300@ti.com>
-References: <1399591018-12930-1-git-send-email-afenkart@gmail.com> <1399591234-13089-1-git-send-email-afenkart@gmail.com> <1399591234-13089-5-git-send-email-afenkart@gmail.com>
+Subject: Re: [PATCH v11 6/7] mmc: omap_hsmmc: switch default/idle pinctrl
+ states in runtime hooks
+Date: Fri, 9 May 2014 22:41:52 +0530
+Message-ID: <536D0C58.8080408@ti.com>
+References: <1399591018-12930-1-git-send-email-afenkart@gmail.com> <1399591234-13089-1-git-send-email-afenkart@gmail.com> <1399591234-13089-6-git-send-email-afenkart@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
+Content-Type: text/plain; charset="UTF-8"; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-doc-owner@vger.kernel.org>
-In-Reply-To: <1399591234-13089-5-git-send-email-afenkart@gmail.com>
-Sender: linux-doc-owner@vger.kernel.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from arroyo.ext.ti.com ([192.94.94.40]:38800 "EHLO arroyo.ext.ti.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1757105AbaEIRMA (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 9 May 2014 13:12:00 -0400
+In-Reply-To: <1399591234-13089-6-git-send-email-afenkart@gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 To: Andreas Fenkart <afenkart@gmail.com>
 Cc: Tony Lindgren <tony@atomide.com>, Chris Ball <chris@printf.net>, Grant Likely <grant.likely@secretlab.ca>, Felipe Balbi <balbi@ti.com>, Andreas Mueller <schnitzeltony@googlemail.com>, zonque@gmail.com, galak@codeaurora.org, linux-doc@vger.kernel.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
 
 On Friday 09 May 2014 04:50 AM, Andreas Fenkart wrote:
-> On multicores, an sdio irq handler could be running in parallel to
-> runtime suspend. In the worst case it could be waiting for the spinlock
-> held by the runtime suspend. When runtime suspend is complete and the
-> functional clock (fclk) turned off, the irq handler will continue and
-> cause a SIGBUS on the first register access.
+> These are predefined states of the driver model. When not present,
+> as if not set in the device tree, they become no-ops.
+> Explicitly selecting the default state is not needed since the
+> device core layer sets pin mux to "default" state before probe.
+> This is not the simplest implementation, on AM335x at least, we could
+> switch to idle at any point in the suspend hook, only the default state
+> needs to be set before writing to the irq registers or an IRQ might get
+> lost.
 >
 > Signed-off-by: Andreas Fenkart <afenkart@gmail.com>
 >
+> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+> index 47a5982..5a321f98 100644
+> --- a/drivers/mmc/host/omap_hsmmc.c
+> +++ b/drivers/mmc/host/omap_hsmmc.c
+> @@ -2032,7 +2032,6 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
+>   	const struct of_device_id *match;
+>   	dma_cap_mask_t mask;
+>   	unsigned tx_req, rx_req;
+> -	struct pinctrl *pinctrl;
+>   	const struct omap_mmc_of_data *data;
+>
+>   	apply_clk_hack(&pdev->dev);
+
+Looks like this patches is not based on mmc-next[1]
+Can you please rebase to mmc-next
+[1] http://git.kernel.org/cgit/linux/kernel/git/cjb/mmc.git/log/?id=refs/heads/mmc-next
+
+Other than that:
 
 Acked-by: Balaji T K <balajitk@ti.com>
 
-> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-> index 14857d7..47a5982 100644
-> --- a/drivers/mmc/host/omap_hsmmc.c
-> +++ b/drivers/mmc/host/omap_hsmmc.c
-> @@ -134,6 +134,9 @@ static void apply_clk_hack(struct device *dev)
->   #define SRD			(1 << 26)
->   #define SOFTRESET		(1 << 1)
+> @@ -2258,11 +2257,6 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
 >
-> +/* PSTATE */
-> +#define DLEV_DAT(x)		(1 << (20 + (x)))
+>   	omap_hsmmc_disable_irq(host);
+>
+> -	pinctrl = devm_pinctrl_get_select_default(&pdev->dev);
+> -	if (IS_ERR(pinctrl))
+> -		dev_warn(&pdev->dev,
+> -			"pins are not configured from the driver\n");
+> -
+>   	/*
+>   	 * For now, only support SDIO interrupt if we have a separate
+>   	 * wake-up interrupt configured from device tree. This is because
+> @@ -2486,10 +2480,15 @@ static int omap_hsmmc_runtime_suspend(struct device *dev)
+>   			goto abort;
+>   		}
+>
+> +		pinctrl_pm_select_idle_state(dev);
 > +
->   /* Interrupt masks for IE and ISE register */
->   #define CC_EN			(1 << 0)
->   #define TC_EN			(1 << 1)
-> @@ -2455,6 +2458,7 @@ static int omap_hsmmc_runtime_suspend(struct device *dev)
->   {
->   	struct omap_hsmmc_host *host;
->   	unsigned long flags;
-> +	int ret = 0;
->
->   	host = platform_get_drvdata(to_platform_device(dev));
->   	omap_hsmmc_context_save(host);
-> @@ -2466,14 +2470,29 @@ static int omap_hsmmc_runtime_suspend(struct device *dev)
->   		/* disable sdio irq handling to prevent race */
->   		OMAP_HSMMC_WRITE(host->base, ISE, 0);
->   		OMAP_HSMMC_WRITE(host->base, IE, 0);
-> -		OMAP_HSMMC_WRITE(host->base, STAT, STAT_CLEAR);
-> +
-> +		if (!(OMAP_HSMMC_READ(host->base, PSTATE) & DLEV_DAT(1))) {
-> +			/*
-> +			 * dat1 line low, pending sdio irq
-> +			 * race condition: possible irq handler running on
-> +			 * multi-core, abort
-> +			 */
-> +			dev_dbg(dev, "pending sdio irq, abort suspend\n");
-> +			OMAP_HSMMC_WRITE(host->base, STAT, STAT_CLEAR);
-> +			OMAP_HSMMC_WRITE(host->base, ISE, CIRQ_EN);
-> +			OMAP_HSMMC_WRITE(host->base, IE, CIRQ_EN);
-> +			pm_runtime_mark_last_busy(dev);
-> +			ret = -EBUSY;
-> +			goto abort;
-> +		}
->
 >   		WARN_ON(host->flags & HSMMC_WAKE_IRQ_ENABLED);
 >   		enable_irq(host->wake_irq);
 >   		host->flags |= HSMMC_WAKE_IRQ_ENABLED;
+> +	} else {
+> +		pinctrl_pm_select_idle_state(dev);
 >   	}
-> +abort:
+> +
+>   abort:
 >   	spin_unlock_irqrestore(&host->irq_lock, flags);
-> -	return 0;
-> +	return ret;
->   }
+>   	return ret;
+> @@ -2513,9 +2512,14 @@ static int omap_hsmmc_runtime_resume(struct device *dev)
+>   			host->flags &= ~HSMMC_WAKE_IRQ_ENABLED;
+>   		}
 >
->   static int omap_hsmmc_runtime_resume(struct device *dev)
+> +		pinctrl_pm_select_default_state(host->dev);
+> +
+> +		/* irq lost, if pinmux incorrect */
+>   		OMAP_HSMMC_WRITE(host->base, STAT, STAT_CLEAR);
+>   		OMAP_HSMMC_WRITE(host->base, ISE, CIRQ_EN);
+>   		OMAP_HSMMC_WRITE(host->base, IE, CIRQ_EN);
+> +	} else {
+> +		pinctrl_pm_select_default_state(host->dev);
+>   	}
+>   	spin_unlock_irqrestore(&host->irq_lock, flags);
+>   	return 0;
 >
 
