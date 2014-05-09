@@ -1,68 +1,57 @@
-From: Sebastian Reichel <sre@kernel.org>
-Subject: Re: [PATCH v11 1/7] mmc: omap_hsmmc: compile fix for !CONFIG_OF build
-Date: Fri, 9 May 2014 01:48:10 +0200
-Message-ID: <20140508234809.GB7533@earth.universe>
-References: <1399591018-12930-1-git-send-email-afenkart@gmail.com>
- <1399591234-13089-1-git-send-email-afenkart@gmail.com>
+From: micky <micky_ching@realsil.com.cn>
+Subject: Re: [PATCH 1/2] mmc: rtsx: Revert "mmc: rtsx: modify
+ errorhandleandremovesmatch warnings"
+Date: Fri, 9 May 2014 09:09:36 +0800
+Message-ID: <536C2AD0.7020104@realsil.com.cn>
+References: <cover.1398735435.git.micky_ching@realsil.com.cn>	<1076b1824732688774d223a14595ecf26a375d82.1398735435.git.micky_ching@realsil.com.cn>	<CAPDyKFoZ2_H6Jh0+84zLBhayMb0=q1eJw=vC_m41iCsbz0siFw@mail.gmail.com>	<536B1B05.6010604@realsil.com.cn>	<20140508075542.GC5307@lee--X1>
+ <CAPDyKFqU+7NoZ1JjKa2YMj2DJsuBG5jD8fEt7WdLawA-mmqOjw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-	protocol="application/pgp-signature"; boundary="rJwd6BRFiFCcLxzm"
-Return-path: <linux-doc-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <1399591234-13089-1-git-send-email-afenkart@gmail.com>
-Sender: linux-doc-owner@vger.kernel.org
-To: Andreas Fenkart <afenkart@gmail.com>
-Cc: Tony Lindgren <tony@atomide.com>, Chris Ball <chris@printf.net>, Grant Likely <grant.likely@secretlab.ca>, Felipe Balbi <balbi@ti.com>, Balaji T K <balajitk@ti.com>, Andreas Mueller <schnitzeltony@googlemail.com>, zonque@gmail.com, galak@codeaurora.org, linux-doc@vger.kernel.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org
+Content-Type: text/plain; charset="utf-8"; Format="flowed"
+Content-Transfer-Encoding: base64
+Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
+In-Reply-To: <CAPDyKFqU+7NoZ1JjKa2YMj2DJsuBG5jD8fEt7WdLawA-mmqOjw@mail.gmail.com>
+List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
+List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel>
+List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
+List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
+List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
+Errors-To: driverdev-devel-bounces@linuxdriverproject.org
+Sender: driverdev-devel-bounces@linuxdriverproject.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, Lee Jones <lee.jones@linaro.org>
+Cc: Stephen Rothwell <sfr@canb.auug.org.au>, Samuel Ortiz <sameo@linux.intel.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Chris Ball <chris@printf.net>, Wei WANG <wei_wang@realsil.com.cn>, Roger <rogerable@realtek.com>, devel@linuxdriverproject.org, Dan Carpenter <dan.carpenter@oracle.com>
 List-Id: linux-mmc@vger.kernel.org
 
-
---rJwd6BRFiFCcLxzm
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
-
-On Fri, May 09, 2014 at 01:20:28AM +0200, Andreas Fenkart wrote:
-> Signed-off-by: Andreas Fenkart <afenkart@gmail.com>
->=20
-> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-> index 8d07e2b..5042a15 100644
-> --- a/drivers/mmc/host/omap_hsmmc.c
-> +++ b/drivers/mmc/host/omap_hsmmc.c
-> @@ -1864,6 +1864,7 @@ static inline struct omap_mmc_platform_data
->  {
->  	return ERR_PTR(-EINVAL);
->  }
-> +#define omap_mmc_of_match      NULL
->  #endif
-> =20
->  static int omap_hsmmc_probe(struct platform_device *pdev)
-
-What do you need this for? omap_hsmmc.c uses of_match_ptr() to
-access omap_mmc_of_match, which is a macro returning NULL for
-!CONFIG_OF.
-
--- Sebastian
-
---rJwd6BRFiFCcLxzm
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1
-
-iQIcBAEBCgAGBQJTbBe5AAoJENju1/PIO/qaCaYP/RN9LK9aH9XsSferJeV4P/RT
-N5tfholvkQr33PU00R2UJdI1xKxs0UgDTX1X4E/s+NI8xsjYd+9DaaZuR6dhqx+Q
-AIQfmaJ2/Qad+BVueiwCOpK+SzUZEdsbi9tLYvlbBpyrKVMfEap8yCVhRcifPfxG
-fe0J80dKY8rgW95QI35Fvg+SJ1QJsOhvYAktRwrFbgOu57AQcEOpJajEAmbCMnth
-RLiGjU3WaWwXEQuFwv+2+Ku+wAGKChLA4C8hXl0GnzLteAUVu6fcCFrXs0ru8BDh
-WkEEARsZJHa9PTPRj31CxTFemu0uYuL6BIGhlZL4nqpabVQm9MTW5+w7Xmlzaju7
-8K829LxzAjUUJIWCE928q6UJnZNFOSKfhu/zPeDpc65HkAoHDrmfE38rqgouuC1r
-C6raqLrA/acrNgJDIb/IpKFGORdnxn3XwJfCmTMp+w+edr8ieIXIrHGNJAy8i8fo
-sKG/Wpo+m6juuPz3X5DqMSA/cjYJYb8pM/aKuNeMfoF8kPtpR8cO3QkzQeSBOeQh
-shV4RPv/fxuVJIubwMkf5w1BoYNtxKUh4hWzDWPen+ybC86fI9v497eHS+Tw/19E
-ktgzFYNHTwxAaSzbwimRD+u+VQLchRK0gtPDmqFmrdn/I8Ks3jcrLc77Rm+W3vms
-5yzwipQtBYDeffsH4ZLz
-=hyFF
------END PGP SIGNATURE-----
-
---rJwd6BRFiFCcLxzm--
+SGkgVWxmCgpPbiAwNS8wOC8yMDE0IDA0OjIyIFBNLCBVbGYgSGFuc3NvbiB3cm90ZToKPiBPbiA4
+IE1heSAyMDE0IDA5OjU1LCBMZWUgSm9uZXMgPGxlZS5qb25lc0BsaW5hcm8ub3JnPiB3cm90ZToK
+Pj4+IEl0IHNlZW1zIENocmlzIGlzIHRvbyBidXN5IHRvIHJlc3BvbmRpbmcsIHNvIHdvdWxkIHlv
+dSBoZWxwIHRvIHBpY2sKPj4+IHRoaXMgcGF0Y2ggZm9yIDMuMTUgZml4Lgo+PiBIbW1tbS4uLiB0
+aGF0J3MgcHJldHR5IGJhZCB0aW1pbmcuICBJJ3ZlIGxpdGVyYWxseSBqdXN0IHNlbnQgdGhlCj4+
+IHB1bGwtcmVxdWVzdCBjb250YWluaW5nIHRoZSBNRkQvTU1DIGZpeHVwIGJyYW5jaCB0byBMaW51
+cy4gIEkgZ3Vlc3MKPj4gVWxmIHdpbGwgaGF2ZSB0byBkbyBpdC4KPiBUaGVyZSBzZWVtIHRvIGJl
+IHNvbWUgY29uZnVzaW9uIGhlcmUuIDotKQo+Cj4gVGhpcyBwYXRjaCBpcyBfb25seV8gaW50ZW5k
+ZWQgZm9yIENocmlzJyBtbWNfbmV4dCBicmFuY2gsIHNvIGl0Cj4gc2hvdWxkbid0IGdvIGZvciAz
+LjE1IGZpeGVzLiBPciBiZXR0ZXIsIENocmlzIHNob3VsZCBkcm9wIHRoZSBwYXRjaAo+IHRoaXMg
+b25lIGlzIHJldmVydGluZy4KU29ycnkgZm9yIHRoZSBtaXN0YWtlLCBvbmx5IHRoZSBzZWNvbmQg
+cGF0Y2ggb2YgdGhlIHBhdGNoIHNldCBpcyBuZWVkIApmb3IgMy4xNSBmaXguCkkgd3JvdGUgdGhp
+cyBlbWFpbCBpbiBhIHdyb25nIHBsYWNlLgoKQmVzdCBSZWdhcmRzLgo+IExpa2VseSB3ZSB3aWxs
+IHNlZSBhIG1lcmdlIHByb2JsZW0gaW4gU3RlcGhlbiBSb3Rod2VsbCdzIGxpbnV4LW5leHQKPiB0
+cmVlLCB1bnRpbCBDaHJpcycgZHJvcHMgdGhpcyBwYXRjaCAtIGNhdXNpbmcgU3RlcGhlbiB0byBu
+b3QgbWVyZ2UgdGhlCj4gbW1jIHRyZWUgZm9yIGEgd2hpbGUuIEkgc3VwcG9zZSB0aGF0J3MgdGhl
+IGJlc3Qgd2UgY2FuIGRvLCB1bnRpbCBDaHJpcwo+IHNob3dzIHVwIGFnYWluLgo+Cj4gS2luZCBy
+ZWdhcmRzCj4gVWxmIEhhbnNzb24KPgo+Pj4+Pj4gRnJvbTogTWlja3kgQ2hpbmc8bWlja3lfY2hp
+bmdAcmVhbHNpbC5jb20uY24+Cj4+Pj4+Pgo+Pj4+Pj4gVGhpcyByZXZlcnRzIGNvbW1pdCAxZjdi
+NTgxYjNmZmNiMmE4NDM3Mzk3YTAyZjRhZjg5ZmE2OTM0ZDA4Lgo+Pj4+Pj4KPj4+Pj4+IFRoZSBw
+YXRjaCBkZXBlbmQgb24gY29tbWl0IGM0MmRlZmZkNWI1M2M5ZTU4M2Q4M2M3OTY0ODU0ZWRlMmYx
+MjQxMGQKPj4+Pj4+IDxtbWM6IHJ0c3g6IGFkZCBzdXBwb3J0IGZvciBwcmVfcmVxIGFuZCBwb3N0
+X3JlcT4sIGJ1dCB0aGUgcHJldmlvdXMKPj4+Pj4+IHBhdGNoIHdhcyBkaXNjYXJkLiBTbyB3ZSBo
+YXZlIHRvIGRlbGV0ZSB0aGUgcGF0Y2guCj4+Pj4+Pgo+Pj4+Pj4gU2lnbmVkLW9mZi1ieTogTWlj
+a3kgQ2hpbmc8bWlja3lfY2hpbmdAcmVhbHNpbC5jb20uY24+Cj4+Pj4gQWNrZWQtYnk6IFVsZiBI
+YW5zc29uPHVsZi5oYW5zc29uQGxpbmFyby5vcmc+Cj4+IC0tCj4+IExlZSBKb25lcwo+PiBMaW5h
+cm8gU1RNaWNyb2VsZWN0cm9uaWNzIExhbmRpbmcgVGVhbSBMZWFkCj4+IExpbmFyby5vcmcg4pSC
+IE9wZW4gc291cmNlIHNvZnR3YXJlIGZvciBBUk0gU29Dcwo+PiBGb2xsb3cgTGluYXJvOiBGYWNl
+Ym9vayB8IFR3aXR0ZXIgfCBCbG9nCj4gLgo+CgpfX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fXwpkZXZlbCBtYWlsaW5nIGxpc3QKZGV2ZWxAbGludXhkcml2ZXJw
+cm9qZWN0Lm9yZwpodHRwOi8vZHJpdmVyZGV2LmxpbnV4ZHJpdmVycHJvamVjdC5vcmcvbWFpbG1h
+bi9saXN0aW5mby9kcml2ZXJkZXYtZGV2ZWwK
