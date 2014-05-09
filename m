@@ -1,69 +1,123 @@
-From: Shawn Guo <shawn.guo@freescale.com>
-Subject: Re: Adding esdhc4 eMMC support on mx6sabresd
-Date: Fri, 9 May 2014 11:16:25 +0800
-Message-ID: <20140509031624.GL2794@dragon>
-References: <CAOMZO5CJEoe_fGLH-Uu9uVwNdWPp940k3WGAkjzkCiGmjAPAXA@mail.gmail.com>
- <20140508091835.78daafbe@ipc1.ka-ro>
- <20140508101730.GA28787@shlinux1.ap.freescale.net>
+From: Sonny Rao <sonnyrao@chromium.org>
+Subject: Re: [PATCH] mmc: dw_mmc: Make sure we don't get stuck when we get an error
+Date: Thu, 8 May 2014 20:21:25 -0700
+Message-ID: <CAPz6YkVwT0PrcLP1MJy0vVRw811+_7PwsV_ggKxQkqrjOWeWWw@mail.gmail.com>
+References: <1395901126-6141-1-git-send-email-yuvaraj.cd@samsung.com> <CAKuRcOL_JVjOfLNspb14kRxcAXjpEwX4WkvmM+izryZbZBE4XA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-by2lp0238.outbound.protection.outlook.com ([207.46.163.238]:11553
-	"EHLO na01-by2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1754777AbaEIDQj (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 8 May 2014 23:16:39 -0400
-Content-Disposition: inline
-In-Reply-To: <20140508101730.GA28787@shlinux1.ap.freescale.net>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-Reply-To: <CAKuRcOL_JVjOfLNspb14kRxcAXjpEwX4WkvmM+izryZbZBE4XA@mail.gmail.com>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: Yuvaraj Kumar <yuvaraj.cd@gmail.com>
+Cc: Grant Grundler <grundler@chromium.org>, "linux-samsung-soc@vger.kernel.org" <linux-samsung-soc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Jaehoon Chung <jh80.chung@samsung.com>, Chris Ball <cjb@laptop.org>, Seungwon Jeon <tgih.jun@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, "kgene.kim@samsung.com" <kgene.kim@samsung.com>, sunil joshi <joshi@samsung.com>, Tomasz Figa <t.figa@samsung.com>, Doug Anderson <dianders@chromium.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Dong Aisheng <b29396@freescale.com>
-Cc: Lothar =?iso-8859-1?Q?Wa=DFmann?= <LW@KARO-electronics.de>, Fabio Estevam <festevam@gmail.com>, Sascha Hauer <kernel@pengutronix.de>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>
 
-On Thu, May 08, 2014 at 06:17:32PM +0800, Dong Aisheng wrote:
-> I just tested an old Chris/mmc-next tree which is 3.14 rc2 with the top commit is b42b9b.
-> The eMMC works well on SabreSD boards.
-> But it failed and got the same issue with latest chris/mmc-next tree.
-> I noticed there's no changes on sdhci-esdhc-imx.c
-> Probably some other changes breaks this function.
-> 
-> Fabio,
-> You may bisect it yourself or i will do it later when i'm a bit free.
+On Thu, May 8, 2014 at 2:42 AM, Yuvaraj Kumar <yuvaraj.cd@gmail.com> wrote:
+> Any comments on this patch?
+>
 
-The regression is caused by the following commit ...
+I'll just add that without this fix, running the tuning loop for UHS
+modes is not reliable on dw_mmc because errors will happen and you
+will eventually hit this race and hang.  This can happen any time
+there is tuning like during boot or during resume from suspend.
 
-commit 79f7ae7c45a6ccf04e2908337461dee615f6afb0
-Author: Seungwon Jeon <tgih.jun@samsung.com>
-Date:   Fri Mar 14 21:11:56 2014 +0900
-
-    mmc: clarify DDR timing mode between SD-UHS and eMMC
-
-    This change distinguishes DDR timing mode of current
-    mixed usage to clarify device type.
-
-    Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
-    Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
-    Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
-    Signed-off-by: Chris Ball <chris@printf.net>
-
-... and the line below.
- 
-@@ -1264,7 +1264,7 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
-                                        goto err;
-                        }
-                        mmc_card_set_ddr_mode(card);
--                       mmc_set_timing(card->host, MMC_TIMING_UHS_DDR50);
-+                       mmc_set_timing(card->host, MMC_TIMING_MMC_DDR52);
-                        mmc_set_bus_width(card->host, bus_width);
-                }
-        }
-
-
-> Shawn,
-> I remember this patch should have been upstream through your tree long time ago.
-> http://lists.infradead.org/pipermail/linux-arm-kernel/2013-October/206446.html
-> It seems somehow missed.
-
-Ah, yes.  It got lost.
-
-Shawn
+> On Thu, Mar 27, 2014 at 11:48 AM, Yuvaraj Kumar C D
+> <yuvaraj.cd@gmail.com> wrote:
+>> From: Doug Anderson <dianders@chromium.org>
+>>
+>> If we happened to get a data error at just the wrong time the dw_mmc
+>> driver could get into a state where it would never complete its
+>> request.  That would leave the caller just hanging there.
+>>
+>> We fix this two ways and both of the two fixes on their own appear to
+>> fix the problems we've seen:
+>>
+>> 1. Fix a race in the tasklet where the interrupt setting the data
+>>    error happens _just after_ we check for it, then we get a
+>>    EVENT_XFER_COMPLETE.  We fix this by repeating a bit of code.
+>> 2. Fix it so that if we detect that we've got an error in the "data
+>>    busy" state and we're not going to do anything else we end the
+>>    request and unblock anyone waiting.
+>>
+>> Signed-off-by: Doug Anderson <dianders@chromium.org>
+>> Signed-off-by: Yuvaraj Kumar C D <yuvaraj.cd@gmail.com>
+>> ---
+>>  drivers/mmc/host/dw_mmc.c |   47 +++++++++++++++++++++++++++++++++++++++++++++
+>>  1 file changed, 47 insertions(+)
+>>
+>> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+>> index 1d77431..4c589f1 100644
+>> --- a/drivers/mmc/host/dw_mmc.c
+>> +++ b/drivers/mmc/host/dw_mmc.c
+>> @@ -1300,6 +1300,14 @@ static void dw_mci_tasklet_func(unsigned long priv)
+>>                         /* fall through */
+>>
+>>                 case STATE_SENDING_DATA:
+>> +                       /*
+>> +                        * We could get a data error and never a transfer
+>> +                        * complete so we'd better check for it here.
+>> +                        *
+>> +                        * Note that we don't really care if we also got a
+>> +                        * transfer complete; stopping the DMA and sending an
+>> +                        * abort won't hurt.
+>> +                        */
+>>                         if (test_and_clear_bit(EVENT_DATA_ERROR,
+>>                                                &host->pending_events)) {
+>>                                 dw_mci_stop_dma(host);
+>> @@ -1313,7 +1321,29 @@ static void dw_mci_tasklet_func(unsigned long priv)
+>>                                 break;
+>>
+>>                         set_bit(EVENT_XFER_COMPLETE, &host->completed_events);
+>> +
+>> +                       /*
+>> +                        * Handle an EVENT_DATA_ERROR that might have shown up
+>> +                        * before the transfer completed.  This might not have
+>> +                        * been caught by the check above because the interrupt
+>> +                        * could have gone off between the previous check and
+>> +                        * the check for transfer complete.
+>> +                        *
+>> +                        * Technically this ought not be needed assuming we
+>> +                        * get a DATA_COMPLETE eventually (we'll notice the
+>> +                        * error and end the request), but it shouldn't hurt.
+>> +                        *
+>> +                        * This has the advantage of sending the stop command.
+>> +                        */
+>> +                       if (test_and_clear_bit(EVENT_DATA_ERROR,
+>> +                                              &host->pending_events)) {
+>> +                               dw_mci_stop_dma(host);
+>> +                               send_stop_abort(host, data);
+>> +                               state = STATE_DATA_ERROR;
+>> +                               break;
+>> +                       }
+>>                         prev_state = state = STATE_DATA_BUSY;
+>> +
+>>                         /* fall through */
+>>
+>>                 case STATE_DATA_BUSY:
+>> @@ -1336,6 +1366,23 @@ static void dw_mci_tasklet_func(unsigned long priv)
+>>                                 /* stop command for open-ended transfer*/
+>>                                 if (data->stop)
+>>                                         send_stop_abort(host, data);
+>> +                       } else {
+>> +                               /*
+>> +                                * If we don't have a command complete now we'll
+>> +                                * never get one since we just reset everything;
+>> +                                * better end the request.
+>> +                                *
+>> +                                * If we do have a command complete we'll fall
+>> +                                * through to the SENDING_STOP command and
+>> +                                * everything will be peachy keen.
+>> +                                *
+>> +                                * TODO: I guess we shouldn't send a stop?
+>> +                                */
+>> +                               if (!test_bit(EVENT_CMD_COMPLETE,
+>> +                                             &host->pending_events)) {
+>> +                                       dw_mci_request_end(host, mrq);
+>> +                                       goto unlock;
+>> +                               }
+>>                         }
+>>
+>>                         /*
+>> --
+>> 1.7.10.4
+>>
