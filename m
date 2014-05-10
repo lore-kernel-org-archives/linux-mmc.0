@@ -1,133 +1,83 @@
-From: Seungwon Jeon <tgih.jun@samsung.com>
-Subject: RE: [PATCH] mmc: dw_mmc: Make sure we don't get stuck when we get an
- error
-Date: Sat, 10 May 2014 23:11:17 +0900
-Message-ID: <002001cf6c59$b5b5e680$2121b380$%jun@samsung.com>
-References: <1395901126-6141-1-git-send-email-yuvaraj.cd@samsung.com>
- <CAKuRcOL_JVjOfLNspb14kRxcAXjpEwX4WkvmM+izryZbZBE4XA@mail.gmail.com>
- <CAPz6YkVwT0PrcLP1MJy0vVRw811+_7PwsV_ggKxQkqrjOWeWWw@mail.gmail.com>
+From: Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
+Subject: Re: [PATCH v11 1/6] ARM: sunxi: Add driver for SD/MMC
+ hosts found on Allwinner sunxi SoCs
+Date: Sat, 10 May 2014 12:06:52 -0400
+Message-ID: <20140510160652.GM7047@lukather>
+References: <1399714443-12459-1-git-send-email-hdegoede@redhat.com>
+ <1399714443-12459-2-git-send-email-hdegoede@redhat.com>
+Reply-To: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-reply-to: <CAPz6YkVwT0PrcLP1MJy0vVRw811+_7PwsV_ggKxQkqrjOWeWWw@mail.gmail.com>
-Content-language: ko
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: 'Sonny Rao' <sonnyrao@chromium.org>, 'Yuvaraj Kumar' <yuvaraj.cd@gmail.com>
-Cc: 'Grant Grundler' <grundler@chromium.org>, linux-samsung-soc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, 'Jaehoon Chung' <jh80.chung@samsung.com>, 'Chris Ball' <cjb@laptop.org>, 'linux-mmc' <linux-mmc@vger.kernel.org>, kgene.kim@samsung.com, 'sunil joshi' <joshi@samsung.com>, 'Tomasz Figa' <t.figa@samsung.com>, 'Doug Anderson' <dianders@chromium.org>
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="k1whYXOlSGJlk+LY"
+Return-path: <linux-sunxi+bncBD2ZNBF5VYJRBU7ZXONQKGQECVLKDLQ-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <1399714443-12459-2-git-send-email-hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+List-Post: <http://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Help: <http://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Archive: <http://groups.google.com/group/linux-sunxi>
+Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+List-Subscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Unsubscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+To: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>
+Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, David =?iso-8859-1?Q?Lanzend=F6rfer?= <david.lanzendoerfer-Z7Kmv9EsliU@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, devicetree <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Fri, May 09, 2014, Sonny Rao wrote:
-> On Thu, May 8, 2014 at 2:42 AM, Yuvaraj Kumar <yuvaraj.cd@gmail.com> wrote:
-> > Any comments on this patch?
-> >
-> 
-> I'll just add that without this fix, running the tuning loop for UHS
-> modes is not reliable on dw_mmc because errors will happen and you
-> will eventually hit this race and hang.  This can happen any time
-> there is tuning like during boot or during resume from suspend.
-> 
-> > On Thu, Mar 27, 2014 at 11:48 AM, Yuvaraj Kumar C D
-> > <yuvaraj.cd@gmail.com> wrote:
-> >> From: Doug Anderson <dianders@chromium.org>
-> >>
-> >> If we happened to get a data error at just the wrong time the dw_mmc
-> >> driver could get into a state where it would never complete its
-> >> request.  That would leave the caller just hanging there.
-> >>
-> >> We fix this two ways and both of the two fixes on their own appear to
-> >> fix the problems we've seen:
-> >>
-> >> 1. Fix a race in the tasklet where the interrupt setting the data
-> >>    error happens _just after_ we check for it, then we get a
-> >>    EVENT_XFER_COMPLETE.  We fix this by repeating a bit of code.
-I think repeating is not good approach to fix race.
-In your case, XFER_COMPLETE preceded data error and DTO didn't come?
-It seems strange case.
-I want to know actual error value if you can reproduce.
 
-> >> 2. Fix it so that if we detect that we've got an error in the "data
-> >>    busy" state and we're not going to do anything else we end the
-> >>    request and unblock anyone waiting.
-> >>
-> >> Signed-off-by: Doug Anderson <dianders@chromium.org>
-> >> Signed-off-by: Yuvaraj Kumar C D <yuvaraj.cd@gmail.com>
-> >> ---
-> >>  drivers/mmc/host/dw_mmc.c |   47 +++++++++++++++++++++++++++++++++++++++++++++
-> >>  1 file changed, 47 insertions(+)
-> >>
-> >> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> >> index 1d77431..4c589f1 100644
-> >> --- a/drivers/mmc/host/dw_mmc.c
-> >> +++ b/drivers/mmc/host/dw_mmc.c
-> >> @@ -1300,6 +1300,14 @@ static void dw_mci_tasklet_func(unsigned long priv)
-> >>                         /* fall through */
-> >>
-> >>                 case STATE_SENDING_DATA:
-> >> +                       /*
-> >> +                        * We could get a data error and never a transfer
-> >> +                        * complete so we'd better check for it here.
-> >> +                        *
-> >> +                        * Note that we don't really care if we also got a
-> >> +                        * transfer complete; stopping the DMA and sending an
-> >> +                        * abort won't hurt.
-> >> +                        */
-> >>                         if (test_and_clear_bit(EVENT_DATA_ERROR,
-> >>                                                &host->pending_events)) {
-> >>                                 dw_mci_stop_dma(host);
-> >> @@ -1313,7 +1321,29 @@ static void dw_mci_tasklet_func(unsigned long priv)
-> >>                                 break;
-> >>
-> >>                         set_bit(EVENT_XFER_COMPLETE, &host->completed_events);
-> >> +
-> >> +                       /*
-> >> +                        * Handle an EVENT_DATA_ERROR that might have shown up
-> >> +                        * before the transfer completed.  This might not have
-> >> +                        * been caught by the check above because the interrupt
-> >> +                        * could have gone off between the previous check and
-> >> +                        * the check for transfer complete.
-> >> +                        *
-> >> +                        * Technically this ought not be needed assuming we
-> >> +                        * get a DATA_COMPLETE eventually (we'll notice the
-> >> +                        * error and end the request), but it shouldn't hurt.
-> >> +                        *
-> >> +                        * This has the advantage of sending the stop command.
-> >> +                        */
-> >> +                       if (test_and_clear_bit(EVENT_DATA_ERROR,
-> >> +                                              &host->pending_events)) {
-> >> +                               dw_mci_stop_dma(host);
-> >> +                               send_stop_abort(host, data);
-> >> +                               state = STATE_DATA_ERROR;
-> >> +                               break;
-> >> +                       }
-> >>                         prev_state = state = STATE_DATA_BUSY;
-> >> +
-> >>                         /* fall through */
-> >>
-> >>                 case STATE_DATA_BUSY:
-> >> @@ -1336,6 +1366,23 @@ static void dw_mci_tasklet_func(unsigned long priv)
-> >>                                 /* stop command for open-ended transfer*/
-> >>                                 if (data->stop)
-> >>                                         send_stop_abort(host, data);
-> >> +                       } else {
-> >> +                               /*
-> >> +                                * If we don't have a command complete now we'll
-> >> +                                * never get one since we just reset everything;
-> >> +                                * better end the request.
-> >> +                                *
-> >> +                                * If we do have a command complete we'll fall
-> >> +                                * through to the SENDING_STOP command and
-> >> +                                * everything will be peachy keen.
-> >> +                                *
-> >> +                                * TODO: I guess we shouldn't send a stop?
-> >> +                                */
-> >> +                               if (!test_bit(EVENT_CMD_COMPLETE,
-> >> +                                             &host->pending_events)) {
-> >> +                                       dw_mci_request_end(host, mrq);
-> >> +                                       goto unlock;
-> >> +                               }
-Can you explain what happens above?
-What is it for?
+--k1whYXOlSGJlk+LY
+Content-Type: text/plain; charset=iso-8859-1
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
+
+On Sat, May 10, 2014 at 11:33:58AM +0200, Hans de Goede wrote:
+> From: David Lanzend=F6rfer <david.lanzendoerfer-Z7Kmv9EsliU@public.gmane.org>
+>=20
+> The Allwinner sunxi mmc host uses dma in bus-master mode using a built-in
+> designware idmac controller, which is identical to the one found in the m=
+mc-dw
+> hosts. However the rest of the host is not identical to mmc-dw, it deals =
+with
+> sending stop commands in hardware which makes it significantly different
+> from the mmc-dw devices.
+>=20
+> HdG: Various cleanups and fixes.
+>=20
+> Signed-off-by: David Lanzend=F6rfer <david.lanzendoerfer-Z7Kmv9EsliU@public.gmane.org>
+> Signed-off-by: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+
+Acked-by: Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
+
+Chris, I don't think we ever got a review from you on this? Do you
+have any comments on this patch? It would be great if we could merge
+it for 3.16.
 
 Thanks,
-Seungwon Jeon
+Maxime
+
+--=20
+Maxime Ripard, Free Electrons
+Embedded Linux, Kernel and Android engineering
+http://free-electrons.com
+
+--k1whYXOlSGJlk+LY
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.14 (GNU/Linux)
+
+iQIcBAEBAgAGBQJTbk6bAAoJEBx+YmzsjxAg4/UQAKgUc33A5OgHoRSH3yCmeY+6
+ZxnWdMpRrKd0rW5foPsa9UAsusdKX6sGhASxLvTfoCS/cZ4TKmYkS83DuVoCsJRr
+/34BTBm5eL0mIxAe6abPz1sF8hXQle4MvleN/gdQXyS/UHIRjgrsEdgtWXdiGOeu
+C1v/OuL81rNpGwjkPW5HuHsYamIhD/u18x9LIptZJ3vAVSxfGsxCnPnE3ChG5T0G
+6gv8AcBXVuE0q52nwLVSOsrriJ4gMZd93VQaZ+/aqFxqtbubrU/Awen5YlRG1VcK
+99LM2WxuFzvPhspDyy3d/nkKYRkuKpe9QEejvb12nLr17rjZ2O+4C7O/iK47zq7q
+qDqCnTxcPhnr9gEwIiRiibnmV3b9waYwCdgNLl0pw1oKx5K6sjaj+SJ6Hy43tkge
+B4cDIfb2CU8JYoDJpgtDRvjKFTnQYvGP+KM6Aom0n/OB00CksoxWEtr7SirdJvZI
+3uLszbZZggum9isFVySrgup+jXx9zgmMPaqfxmxz5iCoaD2yUFeiyZ0vhNNg2vOv
+M8NpGY8yz3ijHVW42lmhUnG7DfBaXN2pZmU2n30fDhYdChlQ3lVnRri0mTMR176H
+i3eo5J7jVLPpu7kD565/LCj1dFFEJa6hJiQU0Dme+9hEwOlU/16FWPvGFzS7BHKG
+Uq17JyGjaNEccK8Bnfke
+=Hhsc
+-----END PGP SIGNATURE-----
+
+--k1whYXOlSGJlk+LY--
