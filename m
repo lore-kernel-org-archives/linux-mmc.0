@@ -1,191 +1,135 @@
-From: Sonny Rao <sonnyrao@chromium.org>
-Subject: Re: [PATCH] mmc: dw_mmc: change to use recommended reset procedure
-Date: Fri, 9 May 2014 20:36:35 -0700
-Message-ID: <CAPz6YkUjLmWXvoCkuY8vAwLHksf0Uit6gWP-ADWBbN3NDJBo-w@mail.gmail.com>
-References: <1395834374-1988-1-git-send-email-yuvaraj.cd@samsung.com>
- <CAKuRcOJYsC9OUOrYrvKg_iC5Z6dZ0mqW3-y=UXHtCr99=gQBXw@mail.gmail.com>
- <536C2C31.8000209@samsung.com> <CAPz6YkXGH96mjeePwUSRmPX4Y1YXYif+N+BRKsTwtNxtRq3xoQ@mail.gmail.com>
- <536C594A.5080107@samsung.com> <536C84A0.6020403@samsung.com>
+From: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: [PATCH v11 0/6] ARM: sunxi: Add driver for SD/MMC hosts
+ found on Allwinner sunxi SoCs
+Date: Sat, 10 May 2014 11:33:57 +0200
+Message-ID: <1399714443-12459-1-git-send-email-hdegoede@redhat.com>
+Reply-To: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-Reply-To: <536C84A0.6020403@samsung.com>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: Yuvaraj Kumar <yuvaraj.cd@gmail.com>, Grant Grundler <grundler@chromium.org>, "linux-samsung-soc@vger.kernel.org" <linux-samsung-soc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Chris Ball <cjb@laptop.org>, Seungwon Jeon <tgih.jun@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, "kgene.kim@samsung.com" <kgene.kim@samsung.com>, sunil joshi <joshi@samsung.com>, Tomasz Figa <t.figa@samsung.com>, Yuvaraj Kumar C D <yuvaraj.cd@samsung.org>
+Content-Transfer-Encoding: quoted-printable
+Return-path: <linux-sunxi+bncBDRZXY4CYYORBE7FW6NQKGQEMAEC6XY-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Post: <http://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Help: <http://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Archive: <http://groups.google.com/group/linux-sunxi>
+Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+List-Subscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Unsubscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+To: Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: =?UTF-8?q?David=20Lanzend=C3=B6rfer?= <david.lanzendoerfer-Z7Kmv9EsliU@public.gmane.org>, Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, devicetree <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Fri, May 9, 2014 at 12:32 AM, Jaehoon Chung <jh80.chung@samsung.com> wrote:
-> Hi, Sonny.
->
-> You can discard the my previous some comment.
-> As you mentioned, this reset sequence is recommended at Synopsys TRM.
->
-> Add the minor question.
->
-> On 05/09/2014 01:27 PM, Jaehoon Chung wrote:
->> Hi, Sonny.
->>
->> I have checked the Synopsys TRM..
->>
->> On 05/09/2014 10:34 AM, Sonny Rao wrote:
->>> On Thu, May 8, 2014 at 6:15 PM, Jaehoon Chung <jh80.chung@samsung.com> wrote:
->>>> On 05/08/2014 06:40 PM, Yuvaraj Kumar wrote:
->>>>> Any comments on this patch?
->>>>>
->>>>> On Wed, Mar 26, 2014 at 5:16 PM, Yuvaraj Kumar C D <yuvaraj.cd@gmail.com> wrote:
->>>>>> From: Sonny Rao <sonnyrao@chromium.org>
->>>>>>
->>>>>> This patch changes the fifo reset code to follow the reset procedure
->>>>>> outlined in the documentation of Synopsys  Mobile storage host databook
->>>>>> 7.2.13.
->>>>>> Without this patch, we could able to see eMMC was not detected after
->>>>>> multiple reboots due to driver hangs while eMMC tuning for HS200.
->>>>>>
->>>>>> Signed-off-by: Sonny Rao <sonnyrao@chromium.org>
->>>>>> Signed-off-by: Yuvaraj Kumar C D <yuvaraj.cd@samsung.org>
->>>>>> ---
->>>>>>  drivers/mmc/host/dw_mmc.c |   48 ++++++++++++++++++++++++++++++++++++++++++++-
->>>>>>  drivers/mmc/host/dw_mmc.h |    1 +
->>>>>>  2 files changed, 48 insertions(+), 1 deletion(-)
->>>>>>
->>>>>> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
->>>>>> index 32dd81d..1d77431 100644
->>>>>> --- a/drivers/mmc/host/dw_mmc.c
->>>>>> +++ b/drivers/mmc/host/dw_mmc.c
->>>>>> @@ -2220,7 +2220,53 @@ static inline bool dw_mci_fifo_reset(struct dw_mci *host)
->>>>>>                 host->sg = NULL;
->>>>>>         }
->>>>>>
->>>>>> -       return dw_mci_ctrl_reset(host, SDMMC_CTRL_FIFO_RESET);
->>>>>> +       /*
->>>>>> +        * The recommended method for resetting is to always reset the
->>>>>> +        * controller and the fifo, but differs slightly depending on the mode.
->>>>>> +        * Note that this doesn't handle the "generic DMA" (not IDMAC) case.
->>>>>> +        */
->>>>
->>>> "not IDMAC" is confused..
->>>>
->>>
->>> The documentation describes three different possible modes.  There's a
->>> mode that doesn't use IDMAC but still does DMA.  But as far as I can
->>> tell this driver doesn't support that way.  We can just remove that
->>> wording if it's confusing.
->
-> How did it know whether dma is generic DMA or not?
->
+Hi All,
 
-That's a good question.  I wasn't sure whether the driver supported it
-or not.  It looks like it definitely supports IDMAC through the
-CONFIG_MMC_DW_IDMAC flag, but I wasn't sure if it was supported the
-generic dma.  Maybe if CONFIG_MMC_DW_IDMAC isn't specified but
-host->dma_ops is not NULL then we are using the generic dma mode.
+Here is v11 of the sunxi-mmc patch-set David Lanzend=C3=B6rfer and I have b=
+een
+working on, this makes various changes to the mmc driver itself as a result
+of the review of v10.
 
->>>
->>>>>> +       if (dw_mci_ctrl_reset(host, SDMMC_CTRL_RESET | SDMMC_CTRL_FIFO_RESET)) {
->>>>>> +               unsigned long timeout = jiffies + msecs_to_jiffies(500);
->>>>>> +               u32 status, rint;
->>>>>> +
->>>>>> +               /* if using dma we wait for dma_req to clear */
->>>>>> +               if (host->using_dma) {
->>>>>> +                       do {
->>>>>> +                               status = mci_readl(host, STATUS);
->>>>>> +                               if (!(status & SDMMC_STATUS_DMA_REQ))
->>>>>> +                                       break;
->>>>>> +                               cpu_relax();
->>>>>> +                       } while (time_before(jiffies, timeout));
->>>>>> +
->>>>>> +                       if (status & SDMMC_STATUS_DMA_REQ)
->>>>>> +                               dev_err(host->dev,
->>>>>> +                                       "%s: Timeout waiting for dma_req to "
->>>>>> +                                       "clear during reset", __func__);
->>>>>> +
->>>>>> +                       /* when using DMA next we reset the fifo again */
->>>>>> +                       dw_mci_ctrl_reset(host, SDMMC_CTRL_FIFO_RESET);
->>>>>> +               }
->>>>>> +               /*
->>>>>> +                * In all cases we clear the RAWINTS register to clear any
->>>>>> +                * interrupts.
->>>>>> +                */
->>>>>> +               rint = mci_readl(host, RINTSTS);
->>>>>> +               rint = rint & (~mci_readl(host, MINTSTS));
->> you use the "status or temp" instead of rint. (you can reuse the variable.)
->> And can use "status &= ~mci_readl(host,MINTSTS);"
->>
->>>>
->>>> Just clear the RINTSTS register? why do you add these?
->>>>
->>>
->>> This will look at what is not masked, and only clear those bits.
->> Well, i known if clear the RINTSTS register,
->> recommended to use "0xfffffff" and set the value for interrupt.
->
-> Can be used "0xfffffff"?
->
+All the dts and clk patches in the previous series have been accepted for
+upstream inclusion in 3.16, so they are no longer included.
 
-Yeah we probably can.  We just lose information about interrupts that
-were masked, but maybe we just don't care about any of them anyway, so
-it doesn't matter.
+The first patch in this series is the patch adding the actual mmc driver an=
+d
+should go in through the mmc tree.
 
-> Best Regards,
-> Jaehoon Chung
->>
->>>
->>>>>> +               if (rint)
->>>>>> +                       mci_writel(host, RINTSTS, rint);
->>>>>> +
->>>>>> +       } else
->>>>>> +               dev_err(host->dev, "%s: Reset bits didn't clear", __func__);
->>>>
->>>> Just display the error log? I didn't understand this.
->>>> If you displayed the error log, then it needs to return the error value.
->>>>
->>>>>> +
->>>>>> + #ifdef CONFIG_MMC_DW_IDMAC
->>>>>> +       /* It is also recommended that we reset and reprogram idmac */
->>>>>> +       dw_mci_idmac_reset(host);
->>>>>> + #endif
->>>>>> +
->>>>>> +       /* After a CTRL reset we need to have CIU set clock registers  */
->>>>>> +       mci_send_cmd(host->cur_slot, SDMMC_CMD_UPD_CLK, 0);
->>
->> Well, why do you send the clock update command?
->> I didn't see that update the value related with clock.
->>
->> Best Regards,
->> Jaehoon Chung
->>
->>>>>> +
->>>>>> +       return true;
->>>>>>  }
->>>>>>
->>>>>>  static inline bool dw_mci_ctrl_all_reset(struct dw_mci *host)
->>>>>> diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
->>>>>> index 738fa24..037e47a 100644
->>>>>> --- a/drivers/mmc/host/dw_mmc.h
->>>>>> +++ b/drivers/mmc/host/dw_mmc.h
->>>>>> @@ -129,6 +129,7 @@
->>>>>>  #define SDMMC_CMD_INDX(n)              ((n) & 0x1F)
->>>>>>  /* Status register defines */
->>>>>>  #define SDMMC_GET_FCNT(x)              (((x)>>17) & 0x1FFF)
->>>>>> +#define SDMMC_STATUS_DMA_REQ           BIT(31)
->>>>>>  /* FIFOTH register defines */
->>>>>>  #define SDMMC_SET_FIFOTH(m, r, t)      (((m) & 0x7) << 28 | \
->>>>>>                                          ((r) & 0xFFF) << 16 | \
->>>>>> --
->>>>>> 1.7.10.4
->>>>>>
->>>>>
->>>>
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>
->>
->> --
->> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->
+All the other patches are devicetree patches adding fixed regulator nodes
+for mmc0 to all sunxi board files, and should go upstream through Maxime's
+sunxi-dts tree.
+
+Changes since v1:
+-Using mmc_of_parse instead of diy dt parsing
+-Adding nodes for all mmc controller to the dtsi files,
+ including sofar unused controllers
+-Using generic GPIO slot library for WP/CD
+-Adding additional MMC device nodes into DTSI files
+
+Changes since v2:
+-Add missing Signed-off-by tags
+-Stop using __raw_readl / __raw_writel so that barriers are properly used
+-Adding missing new lines
+-Adding missing patch for automatic reparenting of clocks
+
+Changes since v3:
+-Move clk_enable / disable into host_init / exit (Hans)
+-Fix hang on boot caused by irq storm (Hans)
+
+Changes since v4:
+-moving sunxi-mci.{c/h} to sunxi-mmc.{c/h}
+-removing camel cases from the defines in  sunxi-mmc.h
+-moving defines out of the struct definition
+ since this is bad coding style
+-adding documentation for the device tree binding
+Changes since v5:
+-adding host initialization for when the sdio irq is enabled
+ (just to make sure having a defined state at all time)
+-add mmc support fixup: set pullup on cd pins
+-fixup: Don't set MMC_CAP_NEEDS_POLL /  MMC_CAP_4_BIT_DATA
+
+Changes since v6:
+-fixing copyright info in sunxi-mmc.*
+-s/__SUNXI_MCI_H__/__SUNXI_MMC_H__/g
+-s/SDXC_RESPONSE_/SDXC_RESP_/g
+-s/define/definitions <- Comment from Priit Laes
+
+Changes since v7:
+-Merge sunxi-mmc.h into sunxi-mmc.c
+-Various style fixes / cleanups based on Maxime's review
+-sun6i support
+-Fix a race condition in interrupt / tasklet interaction
+-Split the dts patches into 3 per platform:
+ 1) Add mmc nodes to the dtsi
+ 2) Add mmc pinmux to the dtsi
+ 3) Add mmc nodes to the various board files
+-Moved setting of bus-width and cd gpio polarity from .dtsi to the board-fi=
+les
+-Added sun6i dts patches
+
+Changes since v8:
+-Don't claim MMC_CAP_SDIO_IRQ by default, sdio-irq support appears to not
+ always be reliable. Can be re-added to the caps on a per board basis
+ through dts
+-Added EXPORT_SYMBOL(clk_sunxi_mmc_phase_control)
+-Moved bus-width and cd-inverted dts attributes for sun6i from dtsi to dts
+-Squashed patches adding sun6i-a31-m9.dts and mmc support for m9 together
+-Added a patch enabling the sdio wifi on the cubietruck in dts
+
+Changes since v9:
+-Drop the sun5i and sun6i dts pinmux patches as those have already been
+ accepted
+-Rename the mmc clock for the controller from "mod" to "mmc" so as
+ to not confuse it with a regular mod0 clock
+-Rename pinmux for the reference design card-detect pin from cd_pin_a to
+ cd_pin_reference_design
+
+Changes since v10:
+-Dropped all dts and clk patches, as they are all accepted now
+-Cleanup some somewhat weird names (leftovers from the android code):
+ s/mci_readl/mmc_readl/
+ s/mci_writel/mmc_write/
+ s/smc_host/host/
+-Switched to mmc_regulator_get_supply API and added fixed regulator nodes t=
+o
+ all board files (introducing new dts patches)
+-Got rid of duplicate ios info
+-Stop checking card-detect before each request
+-Drop usleep after changing the clock rate
+-Drop incomplete / wrong voltage switching support
+-Drop the large comment with values copy/pasted from the spec
+-Move enable/disable clk + reset + irq calls from power up / down to
+ probe / remove
+-Make sunxi_mmc_clk_set_rate / sunxi_mmc_oclk_onoff return an error
+-Use a threaded interrupt handler for sending an explicit stop on data erro=
+rs
+-Fix sunxi_mmc_send_manual_stop to properly stop ongoing SD_IO_RW_EXTENDED =
+cmds
+
+Regards,
+
+Hans
+
+--=20
+You received this message because you are subscribed to the Google Groups "=
+linux-sunxi" group.
+To unsubscribe from this group and stop receiving emails from it, send an e=
+mail to linux-sunxi+unsubscribe-/JYPxA39Uh5TLH3MbocFF+G/Ez6ZCGd0@public.gmane.org
+For more options, visit https://groups.google.com/d/optout.
