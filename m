@@ -1,7 +1,7 @@
 From: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: [PATCH v11 5/6] ARM: dts: sun6i: Add reg_vmmc0 to sun6i boards
-Date: Sat, 10 May 2014 11:34:02 +0200
-Message-ID: <1399714443-12459-6-git-send-email-hdegoede@redhat.com>
+Subject: [PATCH v11 6/6] ARM: dts: sun7i: Add reg_vmmc0 to sun7i boards
+Date: Sat, 10 May 2014 11:34:03 +0200
+Message-ID: <1399714443-12459-7-git-send-email-hdegoede@redhat.com>
 References: <1399714443-12459-1-git-send-email-hdegoede@redhat.com>
 Reply-To: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
 Mime-Version: 1.0
@@ -20,37 +20,79 @@ List-Id: linux-mmc@vger.kernel.org
 
 Signed-off-by: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 ---
- arch/arm/boot/dts/sun6i-a31-m9.dts | 6 ++++++
- 1 file changed, 6 insertions(+)
+ arch/arm/boot/dts/sun7i-a20-cubieboard2.dts     | 5 +++++
+ arch/arm/boot/dts/sun7i-a20-cubietruck.dts      | 5 +++++
+ arch/arm/boot/dts/sun7i-a20-olinuxino-micro.dts | 5 +++++
+ 3 files changed, 15 insertions(+)
 
-diff --git a/arch/arm/boot/dts/sun6i-a31-m9.dts b/arch/arm/boot/dts/sun6i-a31-m9.dts
-index 22eacf8..6dc00c3 100644
---- a/arch/arm/boot/dts/sun6i-a31-m9.dts
-+++ b/arch/arm/boot/dts/sun6i-a31-m9.dts
-@@ -11,6 +11,7 @@
- 
- /dts-v1/;
- /include/ "sun6i-a31.dtsi"
-+/include/ "sunxi-common-regulators.dtsi"
- 
- / {
- 	model = "Mele M9 / A1000G Quad top set box";
-@@ -24,6 +25,7 @@
+diff --git a/arch/arm/boot/dts/sun7i-a20-cubieboard2.dts b/arch/arm/boot/dts/sun7i-a20-cubieboard2.dts
+index 3918e2f..d8f8565 100644
+--- a/arch/arm/boot/dts/sun7i-a20-cubieboard2.dts
++++ b/arch/arm/boot/dts/sun7i-a20-cubieboard2.dts
+@@ -23,6 +23,7 @@
  		mmc0: mmc@01c0f000 {
  			pinctrl-names = "default";
- 			pinctrl-0 = <&mmc0_pins_a>, <&mmc0_cd_pin_m9>;
+ 			pinctrl-0 = <&mmc0_pins_a>, <&mmc0_cd_pin_reference_design>;
 +			vmmc-supply = <&reg_vmmc0>;
  			bus-width = <4>;
- 			cd-gpios = <&pio 7 22 0>; /* PH22 */
+ 			cd-gpios = <&pio 7 1 0>; /* PH1 */
  			cd-inverted;
-@@ -45,4 +47,8 @@
- 			status = "okay";
- 		};
+@@ -116,6 +117,10 @@
+ 		status = "okay";
  	};
-+
+ 
 +	reg_vmmc0: vmmc0 {
 +		status = "okay";
 +	};
- };
++
+ 	reg_usb1_vbus: usb1-vbus {
+ 		status = "okay";
+ 	};
+diff --git a/arch/arm/boot/dts/sun7i-a20-cubietruck.dts b/arch/arm/boot/dts/sun7i-a20-cubietruck.dts
+index 9dbb763c..1320078 100644
+--- a/arch/arm/boot/dts/sun7i-a20-cubietruck.dts
++++ b/arch/arm/boot/dts/sun7i-a20-cubietruck.dts
+@@ -23,6 +23,7 @@
+ 		mmc0: mmc@01c0f000 {
+ 			pinctrl-names = "default";
+ 			pinctrl-0 = <&mmc0_pins_a>, <&mmc0_cd_pin_reference_design>;
++			vmmc-supply = <&reg_vmmc0>;
+ 			bus-width = <4>;
+ 			cd-gpios = <&pio 7 1 0>; /* PH1 */
+ 			cd-inverted;
+@@ -175,6 +176,10 @@
+ 		status = "okay";
+ 	};
+ 
++	reg_vmmc0: vmmc0 {
++		status = "okay";
++	};
++
+ 	reg_vmmc3: vmmc3 {
+ 		compatible = "regulator-fixed";
+ 		pinctrl-names = "default";
+diff --git a/arch/arm/boot/dts/sun7i-a20-olinuxino-micro.dts b/arch/arm/boot/dts/sun7i-a20-olinuxino-micro.dts
+index 1bfef12..f735348 100644
+--- a/arch/arm/boot/dts/sun7i-a20-olinuxino-micro.dts
++++ b/arch/arm/boot/dts/sun7i-a20-olinuxino-micro.dts
+@@ -34,6 +34,7 @@
+ 		mmc0: mmc@01c0f000 {
+ 			pinctrl-names = "default";
+ 			pinctrl-0 = <&mmc0_pins_a>, <&mmc0_cd_pin_reference_design>;
++			vmmc-supply = <&reg_vmmc0>;
+ 			bus-width = <4>;
+ 			cd-gpios = <&pio 7 1 0>; /* PH1 */
+ 			cd-inverted;
+@@ -163,6 +164,10 @@
+ 		status = "okay";
+ 	};
+ 
++	reg_vmmc0: vmmc0 {
++		status = "okay";
++	};
++
+ 	reg_usb1_vbus: usb1-vbus {
+ 		status = "okay";
+ 	};
 -- 
 1.9.0
