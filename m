@@ -1,13 +1,13 @@
 From: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: [PATCH v12 4/6] ARM: dts: sun5i: Add reg_vcc3v3 to
- sun5i board mmc nodes
-Date: Sun, 11 May 2014 09:46:55 +0200
-Message-ID: <1399794417-9291-5-git-send-email-hdegoede@redhat.com>
+Subject: [PATCH v12 3/6] ARM: dts: sun4i: Add reg_vcc3v3 to
+ sun4i board mmc nodes
+Date: Sun, 11 May 2014 09:46:54 +0200
+Message-ID: <1399794417-9291-4-git-send-email-hdegoede@redhat.com>
 References: <1399794417-9291-1-git-send-email-hdegoede@redhat.com>
 Reply-To: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-sunxi+bncBDRZXY4CYYORBAWWXSNQKGQEIEO7KNQ-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+Return-path: <linux-sunxi+bncBDRZXY4CYYORBAGWXSNQKGQEX6I2H7Q-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
 In-Reply-To: <1399794417-9291-1-git-send-email-hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Post: <http://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
 List-Help: <http://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
@@ -21,54 +21,98 @@ List-Id: linux-mmc@vger.kernel.org
 
 Signed-off-by: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 ---
- arch/arm/boot/dts/sun5i-a10s-olinuxino-micro.dts | 2 ++
- arch/arm/boot/dts/sun5i-a13-olinuxino-micro.dts  | 1 +
- arch/arm/boot/dts/sun5i-a13-olinuxino.dts        | 1 +
- 3 files changed, 4 insertions(+)
+ arch/arm/boot/dts/sun4i-a10-a1000.dts          | 1 +
+ arch/arm/boot/dts/sun4i-a10-cubieboard.dts     | 1 +
+ arch/arm/boot/dts/sun4i-a10-hackberry.dts      | 1 +
+ arch/arm/boot/dts/sun4i-a10-inet97fv2.dts      | 1 +
+ arch/arm/boot/dts/sun4i-a10-mini-xplus.dts     | 1 +
+ arch/arm/boot/dts/sun4i-a10-olinuxino-lime.dts | 1 +
+ arch/arm/boot/dts/sun4i-a10-pcduino.dts        | 1 +
+ 7 files changed, 7 insertions(+)
 
-diff --git a/arch/arm/boot/dts/sun5i-a10s-olinuxino-micro.dts b/arch/arm/boot/dts/sun5i-a10s-olinuxino-micro.dts
-index de91308..ea9519d 100644
---- a/arch/arm/boot/dts/sun5i-a10s-olinuxino-micro.dts
-+++ b/arch/arm/boot/dts/sun5i-a10s-olinuxino-micro.dts
-@@ -38,6 +38,7 @@
+diff --git a/arch/arm/boot/dts/sun4i-a10-a1000.dts b/arch/arm/boot/dts/sun4i-a10-a1000.dts
+index 93af306..0b97c07 100644
+--- a/arch/arm/boot/dts/sun4i-a10-a1000.dts
++++ b/arch/arm/boot/dts/sun4i-a10-a1000.dts
+@@ -39,6 +39,7 @@
  		mmc0: mmc@01c0f000 {
  			pinctrl-names = "default";
- 			pinctrl-0 = <&mmc0_pins_a>, <&mmc0_cd_pin_olinuxino_micro>;
+ 			pinctrl-0 = <&mmc0_pins_a>, <&mmc0_cd_pin_reference_design>;
 +			vmmc-supply = <&reg_vcc3v3>;
  			bus-width = <4>;
- 			cd-gpios = <&pio 6 1 0>; /* PG1 */
+ 			cd-gpios = <&pio 7 1 0>; /* PH1 */
  			cd-inverted;
-@@ -47,6 +48,7 @@
- 		mmc1: mmc@01c10000 {
- 			pinctrl-names = "default";
- 			pinctrl-0 = <&mmc1_pins_a>, <&mmc1_cd_pin_olinuxino_micro>;
-+			vmmc-supply = <&reg_vcc3v3>;
- 			bus-width = <4>;
- 			cd-gpios = <&pio 6 13 0>; /* PG13 */
- 			cd-inverted;
-diff --git a/arch/arm/boot/dts/sun5i-a13-olinuxino-micro.dts b/arch/arm/boot/dts/sun5i-a13-olinuxino-micro.dts
-index 8515f19..fa44b02 100644
---- a/arch/arm/boot/dts/sun5i-a13-olinuxino-micro.dts
-+++ b/arch/arm/boot/dts/sun5i-a13-olinuxino-micro.dts
-@@ -24,6 +24,7 @@
+diff --git a/arch/arm/boot/dts/sun4i-a10-cubieboard.dts b/arch/arm/boot/dts/sun4i-a10-cubieboard.dts
+index 8581385..c200eac 100644
+--- a/arch/arm/boot/dts/sun4i-a10-cubieboard.dts
++++ b/arch/arm/boot/dts/sun4i-a10-cubieboard.dts
+@@ -37,6 +37,7 @@
  		mmc0: mmc@01c0f000 {
  			pinctrl-names = "default";
- 			pinctrl-0 = <&mmc0_pins_a>, <&mmc0_cd_pin_olinuxinom>;
+ 			pinctrl-0 = <&mmc0_pins_a>, <&mmc0_cd_pin_reference_design>;
 +			vmmc-supply = <&reg_vcc3v3>;
  			bus-width = <4>;
- 			cd-gpios = <&pio 6 0 0>; /* PG0 */
+ 			cd-gpios = <&pio 7 1 0>; /* PH1 */
  			cd-inverted;
-diff --git a/arch/arm/boot/dts/sun5i-a13-olinuxino.dts b/arch/arm/boot/dts/sun5i-a13-olinuxino.dts
-index 51a9438..429994e 100644
---- a/arch/arm/boot/dts/sun5i-a13-olinuxino.dts
-+++ b/arch/arm/boot/dts/sun5i-a13-olinuxino.dts
+diff --git a/arch/arm/boot/dts/sun4i-a10-hackberry.dts b/arch/arm/boot/dts/sun4i-a10-hackberry.dts
+index 9dc7b1c..547fadc 100644
+--- a/arch/arm/boot/dts/sun4i-a10-hackberry.dts
++++ b/arch/arm/boot/dts/sun4i-a10-hackberry.dts
+@@ -39,6 +39,7 @@
+ 		mmc0: mmc@01c0f000 {
+ 			pinctrl-names = "default";
+ 			pinctrl-0 = <&mmc0_pins_a>, <&mmc0_cd_pin_reference_design>;
++			vmmc-supply = <&reg_vcc3v3>;
+ 			bus-width = <4>;
+ 			cd-gpios = <&pio 7 1 0>; /* PH1 */
+ 			cd-inverted;
+diff --git a/arch/arm/boot/dts/sun4i-a10-inet97fv2.dts b/arch/arm/boot/dts/sun4i-a10-inet97fv2.dts
+index 297b8f6..f13723e 100644
+--- a/arch/arm/boot/dts/sun4i-a10-inet97fv2.dts
++++ b/arch/arm/boot/dts/sun4i-a10-inet97fv2.dts
+@@ -27,6 +27,7 @@
+ 		mmc0: mmc@01c0f000 {
+ 			pinctrl-names = "default";
+ 			pinctrl-0 = <&mmc0_pins_a>, <&mmc0_cd_pin_reference_design>;
++			vmmc-supply = <&reg_vcc3v3>;
+ 			bus-width = <4>;
+ 			cd-gpios = <&pio 7 1 0>; /* PH1 */
+ 			cd-inverted;
+diff --git a/arch/arm/boot/dts/sun4i-a10-mini-xplus.dts b/arch/arm/boot/dts/sun4i-a10-mini-xplus.dts
+index b7a4218..c01cea5 100644
+--- a/arch/arm/boot/dts/sun4i-a10-mini-xplus.dts
++++ b/arch/arm/boot/dts/sun4i-a10-mini-xplus.dts
 @@ -23,6 +23,7 @@
  		mmc0: mmc@01c0f000 {
  			pinctrl-names = "default";
- 			pinctrl-0 = <&mmc0_pins_a>, <&mmc0_cd_pin_olinuxino>;
+ 			pinctrl-0 = <&mmc0_pins_a>, <&mmc0_cd_pin_reference_design>;
 +			vmmc-supply = <&reg_vcc3v3>;
  			bus-width = <4>;
- 			cd-gpios = <&pio 6 0 0>; /* PG0 */
+ 			cd-gpios = <&pio 7 1 0>; /* PH1 */
+ 			cd-inverted;
+diff --git a/arch/arm/boot/dts/sun4i-a10-olinuxino-lime.dts b/arch/arm/boot/dts/sun4i-a10-olinuxino-lime.dts
+index 4b7fd04..d46a7db 100644
+--- a/arch/arm/boot/dts/sun4i-a10-olinuxino-lime.dts
++++ b/arch/arm/boot/dts/sun4i-a10-olinuxino-lime.dts
+@@ -36,6 +36,7 @@
+ 		mmc0: mmc@01c0f000 {
+ 			pinctrl-names = "default";
+ 			pinctrl-0 = <&mmc0_pins_a>, <&mmc0_cd_pin_reference_design>;
++			vmmc-supply = <&reg_vcc3v3>;
+ 			bus-width = <4>;
+ 			cd-gpios = <&pio 7 1 0>; /* PH1 */
+ 			cd-inverted;
+diff --git a/arch/arm/boot/dts/sun4i-a10-pcduino.dts b/arch/arm/boot/dts/sun4i-a10-pcduino.dts
+index 4d9c3cd..fb03bcc 100644
+--- a/arch/arm/boot/dts/sun4i-a10-pcduino.dts
++++ b/arch/arm/boot/dts/sun4i-a10-pcduino.dts
+@@ -37,6 +37,7 @@
+ 		mmc0: mmc@01c0f000 {
+ 			pinctrl-names = "default";
+ 			pinctrl-0 = <&mmc0_pins_a>, <&mmc0_cd_pin_reference_design>;
++			vmmc-supply = <&reg_vcc3v3>;
+ 			bus-width = <4>;
+ 			cd-gpios = <&pio 7 1 0>; /* PH1 */
  			cd-inverted;
 -- 
 1.9.0
