@@ -1,45 +1,30 @@
-From: Pavel Machek <pavel@ucw.cz>
-Subject: Re: [PATCH v2 1/3] lib/crc7: Shift crc7() output left 1 bit
-Date: Sun, 11 May 2014 12:32:19 +0200
-Message-ID: <20140511103219.GA32609@xo-6d-61-c0.localdomain>
-References: <20140511082811.GA2695@xo-6d-61-c0.localdomain>
- <20140511100211.1334.qmail@ns.horizon.com>
+From: Pavel Machek <pavel-+ZI9xUNit7I@public.gmane.org>
+Subject: Re: [PATCH 2/3] drivers/mmc/host/mmc_spi.c: Use
+ get/put_unaligned_be32
+Date: Sun, 11 May 2014 12:33:27 +0200
+Message-ID: <20140511103327.GB32609@xo-6d-61-c0.localdomain>
+References: <20140511100211.1334.qmail@ns.horizon.com>
+ <20140511100502.1491.qmail@ns.horizon.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from atrey.karlin.mff.cuni.cz ([195.113.26.193]:36616 "EHLO
-	atrey.karlin.mff.cuni.cz" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757719AbaEKKc2 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 11 May 2014 06:32:28 -0400
+Return-path: <linux-spi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <20140511100211.1334.qmail@ns.horizon.com>
-Sender: linux-mmc-owner@vger.kernel.org
+In-Reply-To: <20140511100502.1491.qmail-HzZAx2gCgqrSUeElwK9/Pw@public.gmane.org>
+Sender: linux-spi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: George Spelvin <linux-gpGsJRJZ3PBBDgjK7y7TUQ@public.gmane.org>
+Cc: arik-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org, david.gnedt-rFfgOQFw6VLk7+2FdBfRIA@public.gmane.org, eliad-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org, jan.nikitenko-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, laurent.pinchart+renesas-ryLnwIuWjnjg/C1BVhZhaw@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-spi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linville-2XuSBdqkA4R54TAoqtyWWQ@public.gmane.org, luca-XPOmlcxoEMv1KXRcyAk9cg@public.gmane.org, tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: George Spelvin <linux@horizon.com>
-Cc: arik@wizery.com, david.gnedt@davizone.at, eliad@wizery.com, jan.nikitenko@gmail.com, laurent.pinchart+renesas@ideasonboard.com, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, linux-spi@vger.kernel.org, linux-wireless@vger.kernel.org, linville@tuxdriver.com, luca@coelho.fi, tony@atomide.com
 
-On Sun 2014-05-11 06:02:11, George Spelvin wrote:
-> >From 770aa22e6c9c92027e3e21797192ccabb3e7c70e Mon Sep 17 00:00:00 2001
-> From: George Spelvin <linux@horizon.com>
-> Date: Sat, 10 May 2014 10:32:57 -0400
-> Subject: [PATCH v2 1/3] lib/crc7: Shift crc7() output left 1 bit
+On Sun 2014-05-11 06:05:02, George Spelvin wrote:
+> Very minor source and binary size reduction.
 > 
-> This eliminates a 1-bit left shift in every single caller,
-> and makes the inner loop of the CRC computation more efficient.
-> 
-> Renamed crc7 to crc7_be (big-endian) since the interface changed.
-> 
-> Also purged #include <linux/crc7.h> from files that don't use it at all.
-> 
-> Signed-off-by: George Spelvin <linux@horizon.com>
+> Signed-off-by: George Spelvin <linux-gpGsJRJZ3PBBDgjK7y7TUQ@public.gmane.org>
 
-Reviewed-by: Pavel Machek <pavel@ucw.cz>
-
-> v2: Functions renamed to reflect different results; Pavel Machek
-> prompted me to think of something not too ugly.
-
-Thanks!
-									Pavel
+Reviewed-by: Pavel Machek <pavel-+ZI9xUNit7I@public.gmane.org>
 -- 
 (english) http://www.livejournal.com/~pavelmachek
 (cesky, pictures) http://atrey.karlin.mff.cuni.cz/~pavel/picture/horses/blog.html
+--
+To unsubscribe from this list: send the line "unsubscribe linux-spi" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
