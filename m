@@ -1,94 +1,141 @@
-From: Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
-Subject: Re: [PATCH v11 2/6] ARM: dts: sunxi: Add reg_vmmc0
- supply to sunxi-common-regulators.dtsi
-Date: Sat, 10 May 2014 08:17:17 -0500
-Message-ID: <20140510131717.GL7047@lukather>
-References: <1399714443-12459-1-git-send-email-hdegoede@redhat.com>
- <1399714443-12459-3-git-send-email-hdegoede@redhat.com>
+From: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: [PATCH v12 0/6] ARM: sunxi: Add driver for SD/MMC hosts
+ found on Allwinner sunxi SoCs
+Date: Sun, 11 May 2014 09:46:51 +0200
+Message-ID: <1399794417-9291-1-git-send-email-hdegoede@redhat.com>
 Reply-To: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="PFhoI1KhOsYPpkJR"
-Return-path: <linux-sunxi+bncBD2ZNBF5VYJRBUXZXONQKGQEGG4ONLI-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <1399714443-12459-3-git-send-email-hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
+Return-path: <linux-sunxi+bncBDRZXY4CYYORB6OVXSNQKGQEXQDVDIQ-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
 List-Post: <http://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
 List-Help: <http://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
 List-Archive: <http://groups.google.com/group/linux-sunxi>
 Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
 List-Subscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
 List-Unsubscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-To: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, David =?iso-8859-1?Q?Lanzend=F6rfer?= <david.lanzendoerfer-Z7Kmv9EsliU@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, devicetree <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+To: Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
+Cc: =?UTF-8?q?David=20Lanzend=C3=B6rfer?= <david.lanzendoerfer-Z7Kmv9EsliU@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, devicetree <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
+Hi All,
 
---PFhoI1KhOsYPpkJR
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+Here is v12 of the sunxi-mmc patch-set David Lanzend=C3=B6rfer and I have b=
+een
+working on, the mmc driver itself is unchanged from v11. New this version a=
+re
+some dts patch changes, see below.
 
-Hi Hans,
+The first patch in this series is the patch adding the actual mmc driver an=
+d
+should go in through the mmc tree.
 
-Thanks for your follow up on this.
+All the other patches are devicetree patches adding / using the new fixed
+reg_vcc3v3 supply to all sunxi board files, and should go upstream through
+Maxime's sunxi-dts tree.
 
-On Sat, May 10, 2014 at 11:33:59AM +0200, Hans de Goede wrote:
-> Signed-off-by: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-> ---
->  arch/arm/boot/dts/sunxi-common-regulators.dtsi | 8 ++++++++
->  1 file changed, 8 insertions(+)
->=20
-> diff --git a/arch/arm/boot/dts/sunxi-common-regulators.dtsi b/arch/arm/bo=
-ot/dts/sunxi-common-regulators.dtsi
-> index 18eeac0..ebbba39 100644
-> --- a/arch/arm/boot/dts/sunxi-common-regulators.dtsi
-> +++ b/arch/arm/boot/dts/sunxi-common-regulators.dtsi
-> @@ -72,4 +72,12 @@
->  		gpio =3D <&pio 7 3 0>;
->  		status =3D "disabled";
->  	};
-> +
-> +	reg_vmmc0: vmmc0 {
-> +		compatible =3D "regulator-fixed";
-> +		regulator-name =3D "vmmc0";
-> +		regulator-min-microvolt =3D <3300000>;
-> +		regulator-max-microvolt =3D <3300000>;
-> +		status =3D "disabled";
-> +	};
+Changes since v1:
+-Using mmc_of_parse instead of diy dt parsing
+-Adding nodes for all mmc controller to the dtsi files,
+ including sofar unused controllers
+-Using generic GPIO slot library for WP/CD
+-Adding additional MMC device nodes into DTSI files
 
-I think you can rather define this as vcc-3.3v or something alike,
-that would always be enabled. That would allow to reuse this in some
-other nodes as well, you won't need to enable it on every board, and
-this is actually more accurate.
+Changes since v2:
+-Add missing Signed-off-by tags
+-Stop using __raw_readl / __raw_writel so that barriers are properly used
+-Adding missing new lines
+-Adding missing patch for automatic reparenting of clocks
 
-Thanks!
-Maxime
+Changes since v3:
+-Move clk_enable / disable into host_init / exit (Hans)
+-Fix hang on boot caused by irq storm (Hans)
+
+Changes since v4:
+-moving sunxi-mci.{c/h} to sunxi-mmc.{c/h}
+-removing camel cases from the defines in  sunxi-mmc.h
+-moving defines out of the struct definition
+ since this is bad coding style
+-adding documentation for the device tree binding
+Changes since v5:
+-adding host initialization for when the sdio irq is enabled
+ (just to make sure having a defined state at all time)
+-add mmc support fixup: set pullup on cd pins
+-fixup: Don't set MMC_CAP_NEEDS_POLL /  MMC_CAP_4_BIT_DATA
+
+Changes since v6:
+-fixing copyright info in sunxi-mmc.*
+-s/__SUNXI_MCI_H__/__SUNXI_MMC_H__/g
+-s/SDXC_RESPONSE_/SDXC_RESP_/g
+-s/define/definitions <- Comment from Priit Laes
+
+Changes since v7:
+-Merge sunxi-mmc.h into sunxi-mmc.c
+-Various style fixes / cleanups based on Maxime's review
+-sun6i support
+-Fix a race condition in interrupt / tasklet interaction
+-Split the dts patches into 3 per platform:
+ 1) Add mmc nodes to the dtsi
+ 2) Add mmc pinmux to the dtsi
+ 3) Add mmc nodes to the various board files
+-Moved setting of bus-width and cd gpio polarity from .dtsi to the board-fi=
+les
+-Added sun6i dts patches
+
+Changes since v8:
+-Don't claim MMC_CAP_SDIO_IRQ by default, sdio-irq support appears to not
+ always be reliable. Can be re-added to the caps on a per board basis
+ through dts
+-Added EXPORT_SYMBOL(clk_sunxi_mmc_phase_control)
+-Moved bus-width and cd-inverted dts attributes for sun6i from dtsi to dts
+-Squashed patches adding sun6i-a31-m9.dts and mmc support for m9 together
+-Added a patch enabling the sdio wifi on the cubietruck in dts
+
+Changes since v9:
+-Drop the sun5i and sun6i dts pinmux patches as those have already been
+ accepted
+-Rename the mmc clock for the controller from "mod" to "mmc" so as
+ to not confuse it with a regular mod0 clock
+-Rename pinmux for the reference design card-detect pin from cd_pin_a to
+ cd_pin_reference_design
+
+Changes since v10:
+-Dropped all dts and clk patches, as they are all accepted now
+-Cleanup some somewhat weird names (leftovers from the android code):
+ s/mci_readl/mmc_readl/
+ s/mci_writel/mmc_write/
+ s/smc_host/host/
+-Switched to mmc_regulator_get_supply API and added fixed regulator nodes t=
+o
+ all board files (introducing new dts patches)
+-Got rid of duplicate ios info
+-Stop checking card-detect before each request
+-Drop usleep after changing the clock rate
+-Drop incomplete / wrong voltage switching support
+-Drop the large comment with values copy/pasted from the spec
+-Move enable/disable clk + reset + irq calls from power up / down to
+ probe / remove
+-Make sunxi_mmc_clk_set_rate / sunxi_mmc_oclk_onoff return an error
+-Use a threaded interrupt handler for sending an explicit stop on data erro=
+rs
+-Fix sunxi_mmc_send_manual_stop to properly stop ongoing SD_IO_RW_EXTENDED =
+cmds
+
+Changes since v11:
+-Instead of adding a reg_vmmc0 regulator add a fixed reg_vcc3v3 regulator, =
+as
+ we may need it in other places too
+-Also add a vmmc-supply entry to thr non mmc0 nodes on the 2 boards which h=
+ave
+ multiple sdcard slots.
+
+Regards,
+
+Hans
 
 --=20
-Maxime Ripard, Free Electrons
-Embedded Linux, Kernel and Android engineering
-http://free-electrons.com
-
---PFhoI1KhOsYPpkJR
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.14 (GNU/Linux)
-
-iQIcBAEBAgAGBQJTbibdAAoJEBx+YmzsjxAguzwQALMbJeFERswfr2KkePo+Ql3k
-vG9S1EFLO7UcYp6jw3Gc9stYAaj9e4iCUdhdP3tpwo6wWMPjLc+JVRbdddhfIQCw
-H9SR9DFo43x7zjLejaShz/0x5lk6eik3FmO4DrVSEaA48/66yD0L2LAiihWVQRWc
-NNbxoiKDNh4K/Kh4FAW7suuryzzYsDBaccOgDGgcrV+zI9tNcPCe/i3cAeX5pY7T
-E7ji8qSfSpyWbOSMJfiIsk5dYxCisiKFaE6HQpX8UdtalkIoyaHghbrr9nZTku4I
-z/nDYGyOSoYzY7i4uK3g2OU5zLwEdMe3EiVUL0nuPx3LybYrGeLn0+l7mj9l3BMx
-IP98s/QJcsp90YsN/ZTXxLXYspAdl/qbk5iImOqqvsRjeCKMsRMIIxOsUL3SgSTK
-+yhwwE3FJdzCh2pJsm+POnNzpnfDnzwd5DNwq6NkdVXiyvT0nLseS+h46VCryaE3
-1GuySYa04xAxtb6tj2ow6i0vCUgP3IJFcPx83GRHnDlr3n8SKUS5Xuhbf6sybCx/
-UvSzut3tY0Da36MKyq4wpxBNel6QLJxOf/udAOywm/zChb5Pqqbyhe9Jyv6hjMv6
-v0kcunk3j0WlKcm1CzWrj+8TVz9S33a1KvTlfgq8HEwQtKtsJiltlWfSJsexLzc/
-q14ezKRBvjbzwSwOnHKt
-=BFW/
------END PGP SIGNATURE-----
-
---PFhoI1KhOsYPpkJR--
+You received this message because you are subscribed to the Google Groups "=
+linux-sunxi" group.
+To unsubscribe from this group and stop receiving emails from it, send an e=
+mail to linux-sunxi+unsubscribe-/JYPxA39Uh5TLH3MbocFF+G/Ez6ZCGd0@public.gmane.org
+For more options, visit https://groups.google.com/d/optout.
