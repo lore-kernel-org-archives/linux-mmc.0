@@ -1,42 +1,49 @@
-From: Ian Molton <ian.molton@codethink.co.uk>
-Subject: Re: [PATCH] MAINTAINERS: mmc: Update email for host driver
- maintainer
-Date: Mon, 12 May 2014 11:47:11 +0100
-Message-ID: <20140512114711.0b054752611662e5a9f041d3@codethink.co.uk>
-References: <1399541098-5104-1-git-send-email-ulf.hansson@linaro.org>
-	<20140508153734.GY4400@trinity.fluff.org>
-	<CAPDyKFruGqNdMGrpa0=_mtUqjon0ZT5f8G=24TOYLHbobT-zMw@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: [PATCH 0/5] mmc: dw_mmc: minor code cleanup.
+Date: Mon, 12 May 2014 20:14:11 +0900
+Message-ID: <1399893256-7071-1-git-send-email-jh80.chung@samsung.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from ducie-dc1.codethink.co.uk ([185.25.241.215]:51962 "EHLO
-	ducie-dc1.codethink.co.uk" rhost-flags-OK-FAIL-OK-FAIL)
-	by vger.kernel.org with ESMTP id S1751604AbaELKrS (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 12 May 2014 06:47:18 -0400
-In-Reply-To: <CAPDyKFruGqNdMGrpa0=_mtUqjon0ZT5f8G=24TOYLHbobT-zMw@mail.gmail.com>
+Received: from mailout3.samsung.com ([203.254.224.33]:32992 "EHLO
+	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754647AbaELLOW (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 12 May 2014 07:14:22 -0400
+Received: from epcpsbgr5.samsung.com
+ (u145.gpu120.samsung.co.kr [203.254.230.145])
+ by mailout3.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+ (7.0.4.24.0) 64bit (built Nov 17 2011))
+ with ESMTP id <0N5G00BLMKJWQ9A0@mailout3.samsung.com> for
+ linux-mmc@vger.kernel.org; Mon, 12 May 2014 20:14:20 +0900 (KST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Ben Dooks <ben@trinity.fluff.org>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+To: linux-mmc@vger.kernel.org
+Cc: chris@printf.net, ulf.hansson@linaro.org, tgih.jun@samsung.com, zhangfei.gao@linaro.org, dinguyen@altera.com, Jaehoon Chung <jh80.chung@samsung.com>
 
-On Fri, 9 May 2014 15:10:51 +0200
-Ulf Hansson <ulf.hansson@linaro.org> wrote:
+Jaehoon Chung (5):
+  mmc: dw_mmc: fix the wrong condition checking
+  mmc: dw_mmc: remove the "supports-highspeed" property.
+  mmc: dw_mmc-exynos: add the MMC_CAP_ERASE by default.
+  mmc: dw_mmc: add the specified capbilities2 of controller.
+  mmc: dw_mmc: use the mmc regulator API into core.c
 
-> On 8 May 2014 17:37, Ben Dooks <ben@trinity.fluff.org> wrote:
-> > On Thu, May 08, 2014 at 11:24:58AM +0200, Ulf Hansson wrote:
-> >> Update Ian Molton's email, the maintainer for tmio/sh_mobile_sdhci.
-> >>
-> >> Cc: Ian Molton <ian.molton@codethink.co.uk>
-> >> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
-> >
-> > I think he still has the previous address, so you may want to keep it.
-> 
-> Actually he responded to me off-list, yesterday. He told me he was
-> happy with that change.
-> 
-> Additionally, I have several times got bounces on his old one. :-)
+ .../devicetree/bindings/mmc/exynos-dw-mshc.txt     |    1 -
+ .../devicetree/bindings/mmc/k3-dw-mshc.txt         |    1 -
+ .../devicetree/bindings/mmc/synopsys-dw-mshc.txt   |    3 -
+ arch/arm/boot/dts/exynos4412-odroidx.dts           |    2 +-
+ arch/arm/boot/dts/exynos4412-origen.dts            |    2 +-
+ arch/arm/boot/dts/exynos4412-trats2.dts            |    2 +-
+ arch/arm/boot/dts/exynos5250-arndale.dts           |    4 +-
+ arch/arm/boot/dts/exynos5250-cros-common.dtsi      |    6 +-
+ arch/arm/boot/dts/exynos5250-smdk5250.dts          |    4 +-
+ arch/arm/boot/dts/exynos5420-arndale-octa.dts      |    4 +-
+ arch/arm/boot/dts/exynos5420-smdk5420.dts          |    4 +-
+ arch/arm/boot/dts/socfpga_arria5.dtsi              |    3 +-
+ arch/arm/boot/dts/socfpga_cyclone5.dtsi            |    3 +-
+ arch/arm/boot/dts/socfpga_vt.dts                   |    3 +-
+ drivers/mmc/host/dw_mmc-exynos.c                   |    9 +--
+ drivers/mmc/host/dw_mmc.c                          |   69 ++++++++------------
+ drivers/mmc/host/dw_mmc.h                          |    2 +
+ 17 files changed, 55 insertions(+), 67 deletions(-)
 
-Yes, I'm happy with it. I've not got time to properly see to the older address, although Ben is correct in saying that it is still a valid address.
+-- 
+1.7.9.5
 
--Ian
