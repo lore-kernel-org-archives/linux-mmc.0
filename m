@@ -1,81 +1,90 @@
-From: Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
-Subject: Re: [PATCH v12 0/6] ARM: sunxi: Add driver for SD/MMC
- hosts found on Allwinner sunxi SoCs
-Date: Sun, 11 May 2014 19:08:43 +0200
-Message-ID: <20140511170843.GT7047@lukather>
-References: <1399794417-9291-1-git-send-email-hdegoede@redhat.com>
-Reply-To: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+From: Stephen Rothwell <sfr@canb.auug.org.au>
+Subject: Re: linux-next: manual merge of the mmc tree with Linus' tree
+Date: Mon, 12 May 2014 10:11:15 +1000
+Message-ID: <20140512101115.3876b3f5@canb.auug.org.au>
+References: <20140509134455.07d7de4d@canb.auug.org.au>
+ <20140509071423.GF5767@lee--X1>
+ <CAPDyKFq1O-bB1Vax0uRKaF2p2AJ1FXHC6LNoLsooGx5gBdsuLA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="uc+LCsvbRhlIZa01"
-Return-path: <linux-sunxi+bncBD2ZNBF5VYJRB2W5X2NQKGQESW4EFLA-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <1399794417-9291-1-git-send-email-hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-List-Post: <http://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Help: <http://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Archive: <http://groups.google.com/group/linux-sunxi>
-Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
-List-Subscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Unsubscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-To: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, David =?iso-8859-1?Q?Lanzend=F6rfer?= <david.lanzendoerfer-Z7Kmv9EsliU@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, devicetree <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+Content-Type: multipart/signed; micalg=pgp-sha256;
+ boundary="Sig_/BNg1iRPXGbdbBwPZG4NXfc9"; protocol="application/pgp-signature"
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from ozlabs.org ([103.22.144.67]:51963 "EHLO ozlabs.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751000AbaELALW (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Sun, 11 May 2014 20:11:22 -0400
+In-Reply-To: <CAPDyKFq1O-bB1Vax0uRKaF2p2AJ1FXHC6LNoLsooGx5gBdsuLA@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Lee Jones <lee.jones@linaro.org>, Chris Ball <chris@printf.net>, "linux-next@vger.kernel.org" <linux-next@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Micky Ching <micky_ching@realsil.com.cn>, linux-mmc <linux-mmc@vger.kernel.org>
 
-
---uc+LCsvbRhlIZa01
-Content-Type: text/plain; charset=iso-8859-1
-Content-Disposition: inline
+--Sig_/BNg1iRPXGbdbBwPZG4NXfc9
+Content-Type: text/plain; charset=US-ASCII
 Content-Transfer-Encoding: quoted-printable
 
-Hi Hans,
+Hi Ulf,
 
-On Sun, May 11, 2014 at 09:46:51AM +0200, Hans de Goede wrote:
-> Hi All,
+On Fri, 9 May 2014 09:41:39 +0200 Ulf Hansson <ulf.hansson@linaro.org> wrot=
+e:
+>
+> Within this context; while Chris is being busy, I would be able to
+> help out better as co-maintainer - if we would add my published mmc
+> git tree, into your linux-next merge. Could you do that?
 >=20
-> Here is v12 of the sunxi-mmc patch-set David Lanzend=F6rfer and I have be=
-en
-> working on, the mmc driver itself is unchanged from v11. New this version=
- are
-> some dts patch changes, see below.
+> My intent at this point, is to get patches tested in linux-next, but
+> still get them merged via Chris' mmc tree. Does that make sense?
 >=20
-> The first patch in this series is the patch adding the actual mmc driver =
-and
-> should go in through the mmc tree.
+> Here is my git tree:
+> git://git.linaro.org/people/ulf.hansson/mmc.git
 >=20
-> All the other patches are devicetree patches adding / using the new fixed
-> reg_vcc3v3 supply to all sunxi board files, and should go upstream through
-> Maxime's sunxi-dts tree.
+> I have added a next branch, currently it points to the commit for
+> "Linux 3.15-rc4", so it holds no patches yet.
 
-I just merged the last 5 patches.
+Added from today. Chris, if this is a problem, give me a heads up.
 
-Thanks!
-Maxime
+Thanks for adding your subsystem tree as a participant of linux-next.  As
+you may know, this is not a judgment of your code.  The purpose of
+linux-next is for integration testing and to lower the impact of
+conflicts between subsystems in the next merge window.=20
+
+You will need to ensure that the patches/commits in your tree/series have
+been:
+     * submitted under GPL v2 (or later) and include the Contributor's
+        Signed-off-by,
+     * posted to the relevant mailing list,
+     * reviewed by you (or another maintainer of your subsystem tree),
+     * successfully unit tested, and=20
+     * destined for the current or next Linux merge window.
+
+Basically, this should be just what you would send to Linus (or ask him
+to fetch).  It is allowed to be rebased if you deem it necessary.
 
 --=20
-Maxime Ripard, Free Electrons
-Embedded Linux, Kernel and Android engineering
-http://free-electrons.com
+Cheers,
+Stephen Rothwell=20
+sfr@canb.auug.org.au
 
---uc+LCsvbRhlIZa01
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
+--Sig_/BNg1iRPXGbdbBwPZG4NXfc9
+Content-Type: application/pgp-signature; name=signature.asc
+Content-Disposition: attachment; filename=signature.asc
 
 -----BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.14 (GNU/Linux)
+Version: GnuPG v2.0.22 (GNU/Linux)
 
-iQIcBAEBAgAGBQJTb66bAAoJEBx+YmzsjxAgTU4P/1Eexy8NCvbZGMQnK+fKgESW
-XKE3MQn/RibyUJkQdsTFf8FQ6Sx56y1yQ+ZiFfXjAPz2RjjGVuqnZwCVFquaRohm
-xaty83t1Dvb8LbjJa5pKQd3NHJkDl3uHuR0kX9fEVafdiE/93m7A9l4rcWn7yBAf
-dSY4Pgp/r62TPWh418R/FSl84TpvKgGc0gtEkKly/xdlo/k+fYNw7LcgXsJGAeVb
-37dO9tLzckpJZwbwrCPRk2rssPmabTWHPeKTTNiasS3CiEj8Y90YUbIJIE+MYcI/
-c4loZUZC9/5XWyr7d1P+lheBqwDLFBrS7ak555WAIlTGLnvppuMNwELRw2OGbl5H
-i5X0305d1wBgbX41jGTY9vu/PHpjo4xhC7Bce1sTc4Gks0cXLow36N7S3ekzgdRJ
-CYVoEm9MoCvGLAA6NvGhKvlZ1gEu7/W90Ny14GN2KAP5AaMhMlqlyMkYZSAinMvr
-MF1ZyvX6xav8eS53MaC5rJgd7aKt1SiQYPOR+fMUDAFiTWejJXJofUwGzs/0nrfI
-0Pgc9SwfpDLaMhsKWtuWA7iJy2I0QAOmTPMCdFsp7iAKDNRS0M+selPmjrgewg/C
-nJoM2JrxZO+GZGAy9Z9oqR16dp1d3oQbjxuSbbF1jkwE2VTSgk1AqE39TMLTfhOf
-JAal5GLPFXZl/xVg//Vt
-=EiU0
+iQIcBAEBCAAGBQJTcBGoAAoJEMDTa8Ir7ZwV1TMP/RN6RAqgS3OxvqjMuPWL19j5
+To6Eog67SCf2a0bSk24PHyRsBPRmpxHYB+ij6VzEqarqbpPg4CeNJNqAn9OUtXUe
+ugoSZEkf9aOVXu87D8damIGv+1vpv4wf0JNwMqs267i/GsZ2t2V1FZjtzeS5HgCY
+i/SMdONZsXo1eVNNZPYGqg05wwNJ7TPuOy440Te6DndmcBSKAGybSvGZn0LzQfh6
+wC7/uTtWVAUcCgHsvEVn+cFpEaoXnJ2CSHWVG2f2fXWVovq3Rizvdqg1cLnThE/f
+u1EpTHKrziPx1TxKYFpnNme++jEDX9+137pB3nxTy5W4w8jKmlgRTQEQzymO1nSe
+QLuos1LyFDChZfcClQLdJUWQHOFHUAfQzEzz/GcfRuf+sGno8v/KjBVKAs+dCn8i
+9Yv4xSAPQ9PS85gDbSP7Lv2JTbNQ38H5HpXg+mQmzUcqE/GaMyHXVgW+QfpLp9Ea
+0fwACVJHjT+dyaGSkf7tV6T001Kjfd17F+GC/Z5dl1xw0edFV38naORZLIbiZSSD
+zV7zrpAM+IiZGpTwQCyNcYFau14IMZjz9DfV4wKFtSWEog6p0OqVNcMTGqstzHxH
+JTRCYQ8PTbVoFx2bbJiDaJU9rX1wlBxv0zWvNGDgrFzQzPi79K9/X6HehW/Zf6jh
+7Wc4iss9e7gpRGhRRh/h
+=/sfq
 -----END PGP SIGNATURE-----
 
---uc+LCsvbRhlIZa01--
+--Sig_/BNg1iRPXGbdbBwPZG4NXfc9--
