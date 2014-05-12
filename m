@@ -1,43 +1,161 @@
-From: =?UTF-8?B?QWxleGFuZGVyIFNoaXlhbg==?= <shc_work@mail.ru>
-Subject: =?UTF-8?B?UmU6IG1tYzogc2xvdC1ncGlv?=
-Date: Mon, 12 May 2014 15:35:30 +0400
-Message-ID: <1399894530.876049214@f169.i.mail.ru>
-References: <1399143257.345301301@f225.i.mail.ru>
- <CACRpkdYfWxTOBZ_JvtwEs-XRMSrE4A8B8KFDBhms5aiAzgVxzQ@mail.gmail.com>
- <CAPDyKFrwbNgTg3RjmFb7w5HMUKpUKEHZBwzV7ppZRKx31aqJSA@mail.gmail.com>
-Reply-To: =?UTF-8?B?QWxleGFuZGVyIFNoaXlhbg==?= <shc_work@mail.ru>
+From: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: [PATCH v12 1/6] ARM: sunxi: Add driver for SD/MMC
+ hosts found on Allwinner sunxi SoCs
+Date: Mon, 12 May 2014 13:40:02 +0200
+Message-ID: <5370B312.2040409@redhat.com>
+References: <1399794417-9291-1-git-send-email-hdegoede@redhat.com>	<1399794417-9291-2-git-send-email-hdegoede@redhat.com>	<CAPDyKFrYeBdB20qhmkcUf5ykw=SbBo6VUPXd=By9dNOvTnvFww@mail.gmail.com>	<5370AE98.9050808@redhat.com> <CAPDyKFqTT17L23iiF2oXj+bmJruT8_qQBecXbR9iCUKo++KDgQ@mail.gmail.com>
+Reply-To: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: base64
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from fallback1.mail.ru ([94.100.176.18]:59973 "EHLO
-	fallback1.mail.ru" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752133AbaELLjI (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 12 May 2014 07:39:08 -0400
-In-Reply-To: <CAPDyKFrwbNgTg3RjmFb7w5HMUKpUKEHZBwzV7ppZRKx31aqJSA@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
+Return-path: <linux-sunxi+bncBDRZXY4CYYORBI7KYKNQKGQERX5DLFI-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+In-Reply-To: <CAPDyKFqTT17L23iiF2oXj+bmJruT8_qQBecXbR9iCUKo++KDgQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+List-Post: <http://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Help: <http://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Archive: <http://groups.google.com/group/linux-sunxi>
+Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+List-Subscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Unsubscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, =?UTF-8?B?RGF2aWQgTGFuemVuZMO2cmZlcg==?= <david.lanzendoerfer-Z7Kmv9EsliU@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, devicetree <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, Mike Turquette <mturquette-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: =?UTF-8?B?VWxmIEhhbnNzb24=?= <ulf.hansson@linaro.org>
-Cc: =?UTF-8?B?bGludXgtbW1jQHZnZXIua2VybmVsLm9yZw==?= <linux-mmc@vger.kernel.org>, =?UTF-8?B?Q2hyaXMgQmFsbA==?= <chris@printf.net>, =?UTF-8?B?ZHJpYW4gSHVudGVy?= <adrian.hunter@intel.com>, =?UTF-8?B?TGludXMgV2FsbGVpag==?= <linus.walleij@linaro.org>
 
-TW9uLCAxMiBNYXkgMjAxNCAxMzoyNzoxOCArMDIwMCDQvtGCIFVsZiBIYW5zc29uIDx1bGYuaGFu
-c3NvbkBsaW5hcm8ub3JnPjoKPiBPbiAxMiBNYXkgMjAxNCAxMTo0MiwgTGludXMgV2FsbGVpaiA8
-bGludXMud2FsbGVpakBsaW5hcm8ub3JnPiB3cm90ZToKPiA+IE9uIFNhdCwgTWF5IDMsIDIwMTQg
-YXQgODo1NCBQTSwgQWxleGFuZGVyIFNoaXlhbiA8c2hjX3dvcmtAbWFpbC5ydT4gd3JvdGU6Cj4g
-Pgo+ID4+IElzIHRoaXMgcGF0Y2ggKGh0dHA6Ly93d3cuc3Bpbmljcy5uZXQvbGlzdHMvbGludXgt
-bW1jL21zZzI1NDEwLmh0bWwpCj4gPj4gbG9va3MgbGlrZSBhIHJpcCBvZmYgbXkgaWRlYToKPiA+
-PiBodHRwOi8vcGVybWFsaW5rLmdtYW5lLm9yZy9nbWFuZS5saW51eC5rZXJuZWwubW1jLzI1NTA2
-Cj4gPj4KPiA+PiBJIGhhdmUgbm8gY29tcGxhaW50cyBidXQgaXQgaXMgdmVyeSBzdHJhbmdlIHRo
-YXQgdGhlIHNhbWUgaWRlYSBjYW1lCj4gPj4gaW1tZWRpYXRlbHkgYWZ0ZXIgbWUuCj4gPgo+ID4g
-U29tZXRpbWVzIGdvb2QgaWRlYXMgYXJlIGp1c3QgImluIHRoZSBhaXIiLCBsaWtlIHdpdGggRWRp
-c29uCj4gPiBhbmQgU2F3eWVycyBmaWdodCBvdmVyIHRoZSBsaWdodGJ1bGIuLi4KPiA+Cj4gPiBD
-YW4ndCB5b3UgZm9sa3MganVzdCBhZGQgdGhlIG90aGVyJ3MgU2lnbmVkLW9mZi1ieSB0byBlaXRo
-ZXIgcGF0Y2guCj4gPiBJIGd1ZXNzIENocmlzIG9yIFVsZiB3aWxsIGRlY2lkZSB3aGljaCBvbmUg
-dG8gdGFrZS4KPiAKPiBMaW51cywgdGhhbmtzIGZvciB0aGUgc3VnZ2VzdGlvbiwgYnV0IHVuZm9y
-dHVuYXRlIHRoYXQncyBub3QgcG9zc2libGUuCj4gVGhlIGZpcnN0IG9uZSBsaXN0ZWQgYWJvdmUg
-aXMgYWxyZWFkeSBpbiBMaW51cyB0cmVlLCBpdCB3YXMgc2VudCBpbgo+IHRoZSBQUiBmb3IgMy4x
-NS4KPiAKPiBBbGV4YW5kZXIsIHNvcnJ5ISBUaGlzIGlzIG5vdCBob3cgaXQncyBzdXBwb3NlZCB0
-byBiZSBoYW5kbGVkLCBidXQKPiBzb21ldGltZXMgInNoaXQgaGFwcGVucyIuCgpObyBwcm9ibGVt
-LiBJIHJlcGVhdCB0aGF0IEkgaGF2ZSBubyBjb21wbGFpbnRzLgpJZiB0aGlzIGNvZGUgd29ya3Mg
-aW4gdGhlIGN1cnJlbnQgaW1wbGVtZW50YXRpb24sIHRoZW4gaXQgbXVzdCBiZSBnb29kIGZvciBl
-dmVyeW9uZS4KCi0tLQoK
+Hi,
+
+On 05/12/2014 01:34 PM, Ulf Hansson wrote:
+> On 12 May 2014 13:20, Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
+>> Hi,
+>>
+>> On 05/12/2014 11:15 AM, Ulf Hansson wrote:
+>>> On 11 May 2014 09:46, Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
+>>>> From: David Lanzend=C3=B6rfer <david.lanzendoerfer-Z7Kmv9EsliU@public.gmane.org>
+>>>>
+>>>> The Allwinner sunxi mmc host uses dma in bus-master mode using a built=
+-in
+>>>> designware idmac controller, which is identical to the one found in th=
+e mmc-dw
+>>>> hosts. However the rest of the host is not identical to mmc-dw, it dea=
+ls with
+>>>> sending stop commands in hardware which makes it significantly differe=
+nt
+>>>> from the mmc-dw devices.
+>>>>
+>>>> HdG: Various cleanups and fixes.
+>>>>
+>>>> Signed-off-by: David Lanzend=C3=B6rfer <david.lanzendoerfer-Z7Kmv9EsliU@public.gmane.org>
+>>>> Signed-off-by: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+>>>
+>>> [snip]
+>>>
+>>>> +
+>>>> +static int sunxi_mmc_clk_set_rate(struct sunxi_mmc_host *host,
+>>>> +                                 struct mmc_ios *ios)
+>>>> +{
+>>>> +       u32 rate, oclk_dly, rval, sclk_dly, src_clk;
+>>>> +       struct clk_hw *hw =3D __clk_get_hw(host->clk_mmc);
+>>>
+>>> Hi Hans,
+>>>
+>>> This seems like the wrong approach. But I guess it's related to the
+>>> "clock phase control" API you have been discussing with the clk
+>>> maintainer, Mike Turquette!?
+>>
+>> Yes, this is meant as a temporary solution until we get a proper
+>> "clock phase control" API.
+>>
+>>>
+>>> __clk_get_hw is supposed to be used by clk providers, not clk consumers=
+.
+>>>
+>>>> +       int ret;
+>>>> +
+>>>> +       rate =3D clk_round_rate(host->clk_mmc, ios->clock);
+>>>> +       dev_dbg(mmc_dev(host->mmc), "setting clk to %d, rounded %d\n",
+>>>> +               ios->clock, rate);
+>>>> +
+>>>> +       /* setting clock rate */
+>>>> +       ret =3D clk_set_rate(host->clk_mmc, rate);
+>>>> +       if (ret) {
+>>>> +               dev_err(mmc_dev(host->mmc), "error setting clk to %d: =
+%d\n",
+>>>> +                       rate, ret);
+>>>> +               return ret;
+>>>> +       }
+>>>> +
+>>>> +       ret =3D sunxi_mmc_oclk_onoff(host, 0);
+>>>> +       if (ret)
+>>>> +               return ret;
+>>>> +
+>>>> +       /* clear internal divider */
+>>>> +       rval =3D mmc_readl(host, REG_CLKCR);
+>>>> +       rval &=3D ~0xff;
+>>>> +       mmc_writel(host, REG_CLKCR, rval);
+>>>> +
+>>>> +       /* determine delays */
+>>>> +       if (rate <=3D 400000) {
+>>>> +               oclk_dly =3D 0;
+>>>> +               sclk_dly =3D 7;
+>>>> +       } else if (rate <=3D 25000000) {
+>>>> +               oclk_dly =3D 0;
+>>>> +               sclk_dly =3D 5;
+>>>> +       } else if (rate <=3D 50000000) {
+>>>> +               if (ios->timing =3D=3D MMC_TIMING_UHS_DDR50) {
+>>>> +                       oclk_dly =3D 2;
+>>>> +                       sclk_dly =3D 4;
+>>>> +               } else {
+>>>> +                       oclk_dly =3D 3;
+>>>> +                       sclk_dly =3D 5;
+>>>> +               }
+>>>> +       } else {
+>>>> +               /* rate > 50000000 */
+>>>> +               oclk_dly =3D 2;
+>>>> +               sclk_dly =3D 4;
+>>>> +       }
+>>>> +
+>>>> +       src_clk =3D clk_get_rate(clk_get_parent(host->clk_mmc));
+>>>> +       if (src_clk >=3D 300000000 && src_clk <=3D 400000000) {
+>>>> +               if (oclk_dly)
+>>>> +                       oclk_dly--;
+>>>> +               if (sclk_dly)
+>>>> +                       sclk_dly--;
+>>>> +       }
+>>>> +
+>>>> +       clk_sunxi_mmc_phase_control(hw, sclk_dly, oclk_dly);
+>>>> +
+>>>> +       return sunxi_mmc_oclk_onoff(host, 1);
+>>>> +}
+>>>> +
+>>>
+>>> [snip]
+>>>
+>>> Besides the above, I think this looks good!
+>>
+>> Thanks!
+>>
+>> Since Mike Turquette has already merged clk_sunxi_mmc_phase_control
+>> I would like to keep this as is, as I already promised Mike, I can
+>> safely promise you too: I promise clean this up as soon as the
+>> "clock phase control" API has been worked out.
+>=20
+> Thanks for promise. :-)
+>=20
+> Anyway, I think I would like Mike to confirm this violation is
+> accepted as a temporary solution. Additionally I would like it to be
+> commented in the code here, that it's a temporary solution and that it
+> violates the clk API.
+
+Thinking more about this the __clk_get_hw call really should have
+been inside the clk_sunxi_mmc_phase_control function. I'll do a followup
+patch for Mike / the clk tree to fix this, and do a v13 of the
+sunxi-mmc driver using the updated version.
+
+Regards,
+
+Hans
+
+--=20
+You received this message because you are subscribed to the Google Groups "=
+linux-sunxi" group.
+To unsubscribe from this group and stop receiving emails from it, send an e=
+mail to linux-sunxi+unsubscribe-/JYPxA39Uh5TLH3MbocFF+G/Ez6ZCGd0@public.gmane.org
+For more options, visit https://groups.google.com/d/optout.
