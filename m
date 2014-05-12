@@ -1,57 +1,47 @@
-From: Fabio Estevam <festevam@gmail.com>
-Subject: Re: [PATCH 1/1] mmc: sdhci-esdhc-imx: fix mmc ddr mode regression issue
-Date: Mon, 12 May 2014 09:14:07 -0300
-Message-ID: <CAOMZO5A-PiGfyCf39XUB8nLBBT_pE_kcb7ih+rPSwETLMjFSNA@mail.gmail.com>
-References: <1399618395-359-1-git-send-email-b29396@freescale.com>
+From: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
+Subject: Re: [PATCH v13 2/2] ARM: sunxi: Add driver for SD/MMC
+ hosts found on Allwinner sunxi SoCs
+Date: Mon, 12 May 2014 14:32:35 +0200
+Message-ID: <4897597.kB99FVQvx0@wuerfel>
+References: <1399896288-5826-1-git-send-email-hdegoede@redhat.com> <1399896288-5826-3-git-send-email-hdegoede@redhat.com>
+Reply-To: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ve0-f169.google.com ([209.85.128.169]:37959 "EHLO
-	mail-ve0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753327AbaELMOI (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 12 May 2014 08:14:08 -0400
-Received: by mail-ve0-f169.google.com with SMTP id jx11so8590711veb.14
-        for <linux-mmc@vger.kernel.org>; Mon, 12 May 2014 05:14:07 -0700 (PDT)
-In-Reply-To: <1399618395-359-1-git-send-email-b29396@freescale.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
+Return-path: <linux-sunxi+bncBDEKVJM7XAHRB3X6YKNQKGQE7J3JFYA-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+In-Reply-To: <1399896288-5826-3-git-send-email-hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+List-Post: <http://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Help: <http://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Archive: <http://groups.google.com/group/linux-sunxi>
+Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+List-Subscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Unsubscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+To: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Mike Turquette <mturquette-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, David =?ISO-8859-1?Q?Lanzend=F6rfer?= <david.lanzendoerfer-Z7Kmv9EsliU@public.gmane.org>, Emilio Lopez <emilio-0Z03zUJReD5OxF6Tv1QG9Q@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, devicetree <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: Dong Aisheng <b29396@freescale.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Shawn Guo <shawn.guo@linaro.org>, Fabio Estevam <fabio.estevam@freescale.com>
 
-On Fri, May 9, 2014 at 3:53 AM, Dong Aisheng <b29396@freescale.com> wrote:
-> The regression is caused by the following commit ...
->
-> commit 79f7ae7c45a6ccf04e2908337461dee615f6afb0
-> Author: Seungwon Jeon <tgih.jun@samsung.com>
-> Date:   Fri Mar 14 21:11:56 2014 +0900
->
-> mmc: clarify DDR timing mode between SD-UHS and eMMC
->
-> This change distinguishes DDR timing mode of current
-> mixed usage to clarify device type.
->
-> Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
-> Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
-> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
-> Signed-off-by: Chris Ball <chris@printf.net>
->
-> ... and the line below.
->
-> @@ -1264,7 +1264,7 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
-> goto err;
->         }
->                 mmc_card_set_ddr_mode(card);
-> -               mmc_set_timing(card->host, MMC_TIMING_UHS_DDR50);
-> +               mmc_set_timing(card->host, MMC_TIMING_MMC_DDR52);
->                 mmc_set_bus_width(card->host, bus_width);
->         }
-> }
->
-> It's caused by the platform driver was still using MMC_TIMING_UHS_DDR50 for MMC DDR
-> mode which needs update too.
->
-> Reported-by: Fabio Estevam <fabio.estevam@freescale.com>
-> Reported-by: Shawn Guo <shawn.guo@freescale.com>
-> Signed-off-by: Dong Aisheng <b29396@freescale.com>
+On Monday 12 May 2014 14:04:48 Hans de Goede wrote:
+> From: David Lanzend=F6rfer <david.lanzendoerfer-Z7Kmv9EsliU@public.gmane.org>
+>=20
+> The Allwinner sunxi mmc host uses dma in bus-master mode using a built-in
+> designware idmac controller, which is identical to the one found in the m=
+mc-dw
+> hosts. However the rest of the host is not identical to mmc-dw, it deals =
+with
+> sending stop commands in hardware which makes it significantly different
+> from the mmc-dw devices.
+>=20
+> HdG: Various cleanups and fixes.
+>=20
+> Signed-off-by: David Lanzend=F6rfer <david.lanzendoerfer-Z7Kmv9EsliU@public.gmane.org>
+> Signed-off-by: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+>=20
 
-Tested-by: Fabio Estevam <fabio.estevam@freescale.com>
+Acked-by: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
+
+--=20
+You received this message because you are subscribed to the Google Groups "=
+linux-sunxi" group.
+To unsubscribe from this group and stop receiving emails from it, send an e=
+mail to linux-sunxi+unsubscribe-/JYPxA39Uh5TLH3MbocFF+G/Ez6ZCGd0@public.gmane.org
+For more options, visit https://groups.google.com/d/optout.
