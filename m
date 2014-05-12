@@ -1,52 +1,143 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: [PATCH 3/5] mmc: dw_mmc-exynos: add the MMC_CAP_ERASE by default.
-Date: Mon, 12 May 2014 20:14:14 +0900
-Message-ID: <1399893256-7071-4-git-send-email-jh80.chung@samsung.com>
-References: <1399893256-7071-1-git-send-email-jh80.chung@samsung.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout4.samsung.com ([203.254.224.34]:43656 "EHLO
-	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754647AbaELLOj (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 12 May 2014 07:14:39 -0400
-Received: from epcpsbgr3.samsung.com
- (u143.gpu120.samsung.co.kr [203.254.230.143])
- by mailout4.samsung.com (Oracle Communications Messaging Server 7u4-24.01
- (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTP id <0N5G00INKKKEQ980@mailout4.samsung.com> for
- linux-mmc@vger.kernel.org; Mon, 12 May 2014 20:14:38 +0900 (KST)
-In-reply-to: <1399893256-7071-1-git-send-email-jh80.chung@samsung.com>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: [PATCH v12 1/6] ARM: sunxi: Add driver for SD/MMC
+ hosts found on Allwinner sunxi SoCs
+Date: Mon, 12 May 2014 13:20:56 +0200
+Message-ID: <5370AE98.9050808@redhat.com>
+References: <1399794417-9291-1-git-send-email-hdegoede@redhat.com>	<1399794417-9291-2-git-send-email-hdegoede@redhat.com> <CAPDyKFrYeBdB20qhmkcUf5ykw=SbBo6VUPXd=By9dNOvTnvFww@mail.gmail.com>
+Reply-To: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
+Return-path: <linux-sunxi+bncBDRZXY4CYYORBIG5YKNQKGQEVV2ID3I-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+In-Reply-To: <CAPDyKFrYeBdB20qhmkcUf5ykw=SbBo6VUPXd=By9dNOvTnvFww-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+List-Post: <http://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Help: <http://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Archive: <http://groups.google.com/group/linux-sunxi>
+Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+List-Subscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Unsubscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, =?UTF-8?B?RGF2aWQgTGFuemVuZMO2cmZlcg==?= <david.lanzendoerfer-Z7Kmv9EsliU@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, devicetree <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, Mike Turquette <mturquette-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: chris@printf.net, ulf.hansson@linaro.org, tgih.jun@samsung.com, zhangfei.gao@linaro.org, dinguyen@altera.com, Jaehoon Chung <jh80.chung@samsung.com>
 
-To use the erase command, add the MMC_CAP_ERASE capability by default.
+Hi,
 
-Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
----
- drivers/mmc/host/dw_mmc-exynos.c |    9 +++++----
- 1 file changed, 5 insertions(+), 4 deletions(-)
+On 05/12/2014 11:15 AM, Ulf Hansson wrote:
+> On 11 May 2014 09:46, Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
+>> From: David Lanzend=C3=B6rfer <david.lanzendoerfer-Z7Kmv9EsliU@public.gmane.org>
+>>
+>> The Allwinner sunxi mmc host uses dma in bus-master mode using a built-i=
+n
+>> designware idmac controller, which is identical to the one found in the =
+mmc-dw
+>> hosts. However the rest of the host is not identical to mmc-dw, it deals=
+ with
+>> sending stop commands in hardware which makes it significantly different
+>> from the mmc-dw devices.
+>>
+>> HdG: Various cleanups and fixes.
+>>
+>> Signed-off-by: David Lanzend=C3=B6rfer <david.lanzendoerfer-Z7Kmv9EsliU@public.gmane.org>
+>> Signed-off-by: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+>=20
+> [snip]
+>=20
+>> +
+>> +static int sunxi_mmc_clk_set_rate(struct sunxi_mmc_host *host,
+>> +                                 struct mmc_ios *ios)
+>> +{
+>> +       u32 rate, oclk_dly, rval, sclk_dly, src_clk;
+>> +       struct clk_hw *hw =3D __clk_get_hw(host->clk_mmc);
+>=20
+> Hi Hans,
+>=20
+> This seems like the wrong approach. But I guess it's related to the
+> "clock phase control" API you have been discussing with the clk
+> maintainer, Mike Turquette!?
 
-diff --git a/drivers/mmc/host/dw_mmc-exynos.c b/drivers/mmc/host/dw_mmc-exynos.c
-index 0fbc53a..46fafd8 100644
---- a/drivers/mmc/host/dw_mmc-exynos.c
-+++ b/drivers/mmc/host/dw_mmc-exynos.c
-@@ -386,10 +386,11 @@ static int dw_mci_exynos_execute_tuning(struct dw_mci_slot *slot, u32 opcode,
- 
- /* Common capabilities of Exynos4/Exynos5 SoC */
- static unsigned long exynos_dwmmc_caps[4] = {
--	MMC_CAP_1_8V_DDR | MMC_CAP_8_BIT_DATA | MMC_CAP_CMD23,
--	MMC_CAP_CMD23,
--	MMC_CAP_CMD23,
--	MMC_CAP_CMD23,
-+	MMC_CAP_1_8V_DDR | MMC_CAP_8_BIT_DATA | MMC_CAP_CMD23 |
-+		MMC_CAP_ERASE,
-+	MMC_CAP_CMD23 | MMC_CAP_ERASE,
-+	MMC_CAP_CMD23 | MMC_CAP_ERASE,
-+	MMC_CAP_CMD23 | MMC_CAP_ERASE,
- };
- 
- static const struct dw_mci_drv_data exynos_drv_data = {
--- 
-1.7.9.5
+Yes, this is meant as a temporary solution until we get a proper
+"clock phase control" API.
 
+>=20
+> __clk_get_hw is supposed to be used by clk providers, not clk consumers.
+>=20
+>> +       int ret;
+>> +
+>> +       rate =3D clk_round_rate(host->clk_mmc, ios->clock);
+>> +       dev_dbg(mmc_dev(host->mmc), "setting clk to %d, rounded %d\n",
+>> +               ios->clock, rate);
+>> +
+>> +       /* setting clock rate */
+>> +       ret =3D clk_set_rate(host->clk_mmc, rate);
+>> +       if (ret) {
+>> +               dev_err(mmc_dev(host->mmc), "error setting clk to %d: %d=
+\n",
+>> +                       rate, ret);
+>> +               return ret;
+>> +       }
+>> +
+>> +       ret =3D sunxi_mmc_oclk_onoff(host, 0);
+>> +       if (ret)
+>> +               return ret;
+>> +
+>> +       /* clear internal divider */
+>> +       rval =3D mmc_readl(host, REG_CLKCR);
+>> +       rval &=3D ~0xff;
+>> +       mmc_writel(host, REG_CLKCR, rval);
+>> +
+>> +       /* determine delays */
+>> +       if (rate <=3D 400000) {
+>> +               oclk_dly =3D 0;
+>> +               sclk_dly =3D 7;
+>> +       } else if (rate <=3D 25000000) {
+>> +               oclk_dly =3D 0;
+>> +               sclk_dly =3D 5;
+>> +       } else if (rate <=3D 50000000) {
+>> +               if (ios->timing =3D=3D MMC_TIMING_UHS_DDR50) {
+>> +                       oclk_dly =3D 2;
+>> +                       sclk_dly =3D 4;
+>> +               } else {
+>> +                       oclk_dly =3D 3;
+>> +                       sclk_dly =3D 5;
+>> +               }
+>> +       } else {
+>> +               /* rate > 50000000 */
+>> +               oclk_dly =3D 2;
+>> +               sclk_dly =3D 4;
+>> +       }
+>> +
+>> +       src_clk =3D clk_get_rate(clk_get_parent(host->clk_mmc));
+>> +       if (src_clk >=3D 300000000 && src_clk <=3D 400000000) {
+>> +               if (oclk_dly)
+>> +                       oclk_dly--;
+>> +               if (sclk_dly)
+>> +                       sclk_dly--;
+>> +       }
+>> +
+>> +       clk_sunxi_mmc_phase_control(hw, sclk_dly, oclk_dly);
+>> +
+>> +       return sunxi_mmc_oclk_onoff(host, 1);
+>> +}
+>> +
+>=20
+> [snip]
+>=20
+> Besides the above, I think this looks good!
+
+Thanks!
+
+Since Mike Turquette has already merged clk_sunxi_mmc_phase_control
+I would like to keep this as is, as I already promised Mike, I can
+safely promise you too: I promise clean this up as soon as the
+"clock phase control" API has been worked out.
+
+Regards,
+
+Hans
+
+--=20
+You received this message because you are subscribed to the Google Groups "=
+linux-sunxi" group.
+To unsubscribe from this group and stop receiving emails from it, send an e=
+mail to linux-sunxi+unsubscribe-/JYPxA39Uh5TLH3MbocFF+G/Ez6ZCGd0@public.gmane.org
+For more options, visit https://groups.google.com/d/optout.
