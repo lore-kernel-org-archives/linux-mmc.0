@@ -1,164 +1,306 @@
 From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: [PATCH 5/5] mmc: dw_mmc: use the mmc regulator API into core.c
-Date: Mon, 12 May 2014 20:14:16 +0900
-Message-ID: <1399893256-7071-6-git-send-email-jh80.chung@samsung.com>
+Subject: [PATCH 2/5] mmc: dw_mmc: remove the "supports-highspeed" property.
+Date: Mon, 12 May 2014 20:14:13 +0900
+Message-ID: <1399893256-7071-3-git-send-email-jh80.chung@samsung.com>
 References: <1399893256-7071-1-git-send-email-jh80.chung@samsung.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout3.samsung.com ([203.254.224.33]:33041 "EHLO
-	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754647AbaELLOb (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 12 May 2014 07:14:31 -0400
+Received: from mailout4.samsung.com ([203.254.224.34]:43622 "EHLO
+	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754647AbaELLO3 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 12 May 2014 07:14:29 -0400
 Received: from epcpsbgr4.samsung.com
  (u144.gpu120.samsung.co.kr [203.254.230.144])
- by mailout3.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+ by mailout4.samsung.com (Oracle Communications Messaging Server 7u4-24.01
  (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTP id <0N5G00BQKKK6SHA0@mailout3.samsung.com> for
- linux-mmc@vger.kernel.org; Mon, 12 May 2014 20:14:30 +0900 (KST)
+ with ESMTP id <0N5G00IOZKK3Q780@mailout4.samsung.com> for
+ linux-mmc@vger.kernel.org; Mon, 12 May 2014 20:14:27 +0900 (KST)
 In-reply-to: <1399893256-7071-1-git-send-email-jh80.chung@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 Cc: chris@printf.net, ulf.hansson@linaro.org, tgih.jun@samsung.com, zhangfei.gao@linaro.org, dinguyen@altera.com, Jaehoon Chung <jh80.chung@samsung.com>
 
-Use the mmc regulator API into core.c instead of enabling locally.
-It can use the "vmmc", and optional "vqmmc".
+Remove the "support-highspeed" property in dw-mmc.
+"support-highspeed" property can be replaced to "cap-sd/mmc-highspeed".
 
 Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
 ---
- drivers/mmc/host/dw_mmc.c |   61 ++++++++++++++++++---------------------------
- 1 file changed, 24 insertions(+), 37 deletions(-)
+ .../devicetree/bindings/mmc/exynos-dw-mshc.txt     |    1 -
+ .../devicetree/bindings/mmc/k3-dw-mshc.txt         |    1 -
+ .../devicetree/bindings/mmc/synopsys-dw-mshc.txt   |    3 ---
+ arch/arm/boot/dts/exynos4412-odroidx.dts           |    2 +-
+ arch/arm/boot/dts/exynos4412-origen.dts            |    2 +-
+ arch/arm/boot/dts/exynos4412-trats2.dts            |    2 +-
+ arch/arm/boot/dts/exynos5250-arndale.dts           |    4 ++--
+ arch/arm/boot/dts/exynos5250-cros-common.dtsi      |    6 +++---
+ arch/arm/boot/dts/exynos5250-smdk5250.dts          |    4 ++--
+ arch/arm/boot/dts/exynos5420-arndale-octa.dts      |    4 ++--
+ arch/arm/boot/dts/exynos5420-smdk5420.dts          |    4 ++--
+ arch/arm/boot/dts/socfpga_arria5.dtsi              |    3 ++-
+ arch/arm/boot/dts/socfpga_cyclone5.dtsi            |    3 ++-
+ arch/arm/boot/dts/socfpga_vt.dts                   |    3 ++-
+ drivers/mmc/host/dw_mmc.c                          |    3 ---
+ 15 files changed, 20 insertions(+), 25 deletions(-)
 
+diff --git a/Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt
+index 532b1d4..fdab6e7 100644
+--- a/Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt
++++ b/Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt
+@@ -69,7 +69,6 @@ Example:
+ 
+ 	dwmmc0@12200000 {
+ 		num-slots = <1>;
+-		supports-highspeed;
+ 		broken-cd;
+ 		fifo-depth = <0x80>;
+ 		card-detect-delay = <200>;
+diff --git a/Documentation/devicetree/bindings/mmc/k3-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/k3-dw-mshc.txt
+index b8653ea..7674026 100644
+--- a/Documentation/devicetree/bindings/mmc/k3-dw-mshc.txt
++++ b/Documentation/devicetree/bindings/mmc/k3-dw-mshc.txt
+@@ -34,7 +34,6 @@ Example:
+ 		num-slots = <1>;
+ 		vmmc-supply = <&ldo12>;
+ 		fifo-depth = <0x100>;
+-		supports-highspeed;
+ 		pinctrl-names = "default";
+ 		pinctrl-0 = <&sd_pmx_pins &sd_cfg_func1 &sd_cfg_func2>;
+ 		slot@0 {
+diff --git a/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt
+index 2d4a725..a8b24d7 100644
+--- a/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt
++++ b/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt
+@@ -67,8 +67,6 @@ Optional properties:
+ * card-detect-delay: Delay in milli-seconds before detecting card after card
+   insert event. The default value is 0.
+ 
+-* supports-highspeed: Enables support for high speed cards (up to 50MHz)
+-
+ * broken-cd: as documented in mmc core bindings.
+ 
+ * vmmc-supply: The phandle to the regulator to use for vmmc.  If this is
+@@ -98,7 +96,6 @@ board specific portions as listed below.
+ 		clock-frequency = <400000000>;
+ 		clock-freq-min-max = <400000 200000000>;
+ 		num-slots = <1>;
+-		supports-highspeed;
+ 		broken-cd;
+ 		fifo-depth = <0x80>;
+ 		card-detect-delay = <200>;
+diff --git a/arch/arm/boot/dts/exynos4412-odroidx.dts b/arch/arm/boot/dts/exynos4412-odroidx.dts
+index 31db28a..77f69d2 100644
+--- a/arch/arm/boot/dts/exynos4412-odroidx.dts
++++ b/arch/arm/boot/dts/exynos4412-odroidx.dts
+@@ -45,7 +45,7 @@
+ 		status = "okay";
+ 
+ 		num-slots = <1>;
+-		supports-highspeed;
++		cap-mmc-highspeed;
+ 		broken-cd;
+ 		card-detect-delay = <200>;
+ 		samsung,dw-mshc-ciu-div = <3>;
+diff --git a/arch/arm/boot/dts/exynos4412-origen.dts b/arch/arm/boot/dts/exynos4412-origen.dts
+index e2c0dca..a0806ce 100644
+--- a/arch/arm/boot/dts/exynos4412-origen.dts
++++ b/arch/arm/boot/dts/exynos4412-origen.dts
+@@ -128,7 +128,7 @@
+ 		status = "okay";
+ 
+ 		num-slots = <1>;
+-		supports-highspeed;
++		cap-mmc-highspeed;
+ 		broken-cd;
+ 		card-detect-delay = <200>;
+ 		samsung,dw-mshc-ciu-div = <3>;
+diff --git a/arch/arm/boot/dts/exynos4412-trats2.dts b/arch/arm/boot/dts/exynos4412-trats2.dts
+index 9583563..cfcd4a3 100644
+--- a/arch/arm/boot/dts/exynos4412-trats2.dts
++++ b/arch/arm/boot/dts/exynos4412-trats2.dts
+@@ -459,7 +459,7 @@
+ 
+ 	mmc@12550000 {
+ 		num-slots = <1>;
+-		supports-highspeed;
++		cap-mmc-highspeed;
+ 		broken-cd;
+ 		non-removable;
+ 		card-detect-delay = <200>;
+diff --git a/arch/arm/boot/dts/exynos5250-arndale.dts b/arch/arm/boot/dts/exynos5250-arndale.dts
+index 090f983..c023e3c 100644
+--- a/arch/arm/boot/dts/exynos5250-arndale.dts
++++ b/arch/arm/boot/dts/exynos5250-arndale.dts
+@@ -399,7 +399,7 @@
+ 	mmc_0: mmc@12200000 {
+ 		status = "okay";
+ 		num-slots = <1>;
+-		supports-highspeed;
++		cap-mmc-highspeed;
+ 		broken-cd;
+ 		card-detect-delay = <200>;
+ 		samsung,dw-mshc-ciu-div = <3>;
+@@ -418,7 +418,7 @@
+ 	mmc_2: mmc@12220000 {
+ 		status = "okay";
+ 		num-slots = <1>;
+-		supports-highspeed;
++		cap-sd-highspeed;
+ 		card-detect-delay = <200>;
+ 		samsung,dw-mshc-ciu-div = <3>;
+ 		samsung,dw-mshc-sdr-timing = <2 3>;
+diff --git a/arch/arm/boot/dts/exynos5250-cros-common.dtsi b/arch/arm/boot/dts/exynos5250-cros-common.dtsi
+index 2c1560d..0efa33b 100644
+--- a/arch/arm/boot/dts/exynos5250-cros-common.dtsi
++++ b/arch/arm/boot/dts/exynos5250-cros-common.dtsi
+@@ -248,7 +248,7 @@
+ 
+ 	mmc@12200000 {
+ 		num-slots = <1>;
+-		supports-highspeed;
++		cap-mmc-highspeed;
+ 		broken-cd;
+ 		card-detect-delay = <200>;
+ 		samsung,dw-mshc-ciu-div = <3>;
+@@ -265,7 +265,7 @@
+ 
+ 	mmc@12220000 {
+ 		num-slots = <1>;
+-		supports-highspeed;
++		cap-sd-highspeed;
+ 		card-detect-delay = <200>;
+ 		samsung,dw-mshc-ciu-div = <3>;
+ 		samsung,dw-mshc-sdr-timing = <2 3>;
+@@ -282,7 +282,7 @@
+ 
+ 	mmc@12230000 {
+ 		num-slots = <1>;
+-		supports-highspeed;
++		cap-sd-highspeed;
+ 		broken-cd;
+ 		card-detect-delay = <200>;
+ 		samsung,dw-mshc-ciu-div = <3>;
+diff --git a/arch/arm/boot/dts/exynos5250-smdk5250.dts b/arch/arm/boot/dts/exynos5250-smdk5250.dts
+index a794a70..9c1a2e6 100644
+--- a/arch/arm/boot/dts/exynos5250-smdk5250.dts
++++ b/arch/arm/boot/dts/exynos5250-smdk5250.dts
+@@ -282,7 +282,7 @@
+ 	mmc@12200000 {
+ 		status = "okay";
+ 		num-slots = <1>;
+-		supports-highspeed;
++		cap-mmc-highspeed;
+ 		broken-cd;
+ 		card-detect-delay = <200>;
+ 		samsung,dw-mshc-ciu-div = <3>;
+@@ -300,7 +300,7 @@
+ 	mmc@12220000 {
+ 		status = "okay";
+ 		num-slots = <1>;
+-		supports-highspeed;
++		cap-sd-highspeed;
+ 		card-detect-delay = <200>;
+ 		samsung,dw-mshc-ciu-div = <3>;
+ 		samsung,dw-mshc-sdr-timing = <2 3>;
+diff --git a/arch/arm/boot/dts/exynos5420-arndale-octa.dts b/arch/arm/boot/dts/exynos5420-arndale-octa.dts
+index 80a3bf4..6b4bb5e 100644
+--- a/arch/arm/boot/dts/exynos5420-arndale-octa.dts
++++ b/arch/arm/boot/dts/exynos5420-arndale-octa.dts
+@@ -40,7 +40,7 @@
+ 	mmc@12200000 {
+ 		status = "okay";
+ 		broken-cd;
+-		supports-highspeed;
++		cap-mmc-highspeed;
+ 		card-detect-delay = <200>;
+ 		samsung,dw-mshc-ciu-div = <3>;
+ 		samsung,dw-mshc-sdr-timing = <0 4>;
+@@ -57,7 +57,7 @@
+ 
+ 	mmc@12220000 {
+ 		status = "okay";
+-		supports-highspeed;
++		cap-sd-highspeed;
+ 		card-detect-delay = <200>;
+ 		samsung,dw-mshc-ciu-div = <3>;
+ 		samsung,dw-mshc-sdr-timing = <2 3>;
+diff --git a/arch/arm/boot/dts/exynos5420-smdk5420.dts b/arch/arm/boot/dts/exynos5420-smdk5420.dts
+index 6910485..b336590 100644
+--- a/arch/arm/boot/dts/exynos5420-smdk5420.dts
++++ b/arch/arm/boot/dts/exynos5420-smdk5420.dts
+@@ -71,7 +71,7 @@
+ 	mmc@12200000 {
+ 		status = "okay";
+ 		broken-cd;
+-		supports-highspeed;
++		cap-mmc-highspped;
+ 		card-detect-delay = <200>;
+ 		samsung,dw-mshc-ciu-div = <3>;
+ 		samsung,dw-mshc-sdr-timing = <0 4>;
+@@ -87,7 +87,7 @@
+ 
+ 	mmc@12220000 {
+ 		status = "okay";
+-		supports-highspeed;
++		cap-sd-highspeed;
+ 		card-detect-delay = <200>;
+ 		samsung,dw-mshc-ciu-div = <3>;
+ 		samsung,dw-mshc-sdr-timing = <2 3>;
+diff --git a/arch/arm/boot/dts/socfpga_arria5.dtsi b/arch/arm/boot/dts/socfpga_arria5.dtsi
+index 6c87b70..0c6080e 100644
+--- a/arch/arm/boot/dts/socfpga_arria5.dtsi
++++ b/arch/arm/boot/dts/socfpga_arria5.dtsi
+@@ -29,7 +29,8 @@
+ 
+ 		dwmmc0@ff704000 {
+ 			num-slots = <1>;
+-			supports-highspeed;
++			cap-mmc-highspeed;
++			cap-sd-highspeed;
+ 			broken-cd;
+ 
+ 			slot@0 {
+diff --git a/arch/arm/boot/dts/socfpga_cyclone5.dtsi b/arch/arm/boot/dts/socfpga_cyclone5.dtsi
+index ca41b0e..10a1c13 100644
+--- a/arch/arm/boot/dts/socfpga_cyclone5.dtsi
++++ b/arch/arm/boot/dts/socfpga_cyclone5.dtsi
+@@ -30,7 +30,8 @@
+ 
+ 		dwmmc0@ff704000 {
+ 			num-slots = <1>;
+-			supports-highspeed;
++			cap-mmc-highspeed;
++			cap-sd-highspeed;
+ 			broken-cd;
+ 
+ 			slot@0 {
+diff --git a/arch/arm/boot/dts/socfpga_vt.dts b/arch/arm/boot/dts/socfpga_vt.dts
+index 87d6f75..66b2aa1 100644
+--- a/arch/arm/boot/dts/socfpga_vt.dts
++++ b/arch/arm/boot/dts/socfpga_vt.dts
+@@ -43,7 +43,8 @@
+ 
+ 		dwmmc0@ff704000 {
+ 			num-slots = <1>;
+-			supports-highspeed;
++			cap-mmc-highspeed;
++			cap-sd-highspeed;
+ 			broken-cd;
+ 
+ 			slot@0 {
 diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index e0e933d..3ab7231 100644
+index 7d4d9ea..75d7d4e 100644
 --- a/drivers/mmc/host/dw_mmc.c
 +++ b/drivers/mmc/host/dw_mmc.c
-@@ -937,6 +937,7 @@ static void dw_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 	struct dw_mci_slot *slot = mmc_priv(mmc);
- 	const struct dw_mci_drv_data *drv_data = slot->host->drv_data;
- 	u32 regs;
-+	int ret;
- 
- 	switch (ios->bus_width) {
- 	case MMC_BUS_WIDTH_4:
-@@ -975,16 +976,36 @@ static void dw_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 
- 	switch (ios->power_mode) {
- 	case MMC_POWER_UP:
-+		if (!IS_ERR(mmc->supply.vmmc))
-+			mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, ios->vdd);
-+
- 		set_bit(DW_MMC_CARD_NEED_INIT, &slot->flags);
- 		regs = mci_readl(slot->host, PWREN);
- 		regs |= (1 << slot->id);
- 		mci_writel(slot->host, PWREN, regs);
-+
- 		break;
- 	case MMC_POWER_OFF:
-+		if (!IS_ERR(mmc->supply.vmmc))
-+			mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, 0);
-+
-+		if (!IS_ERR(mmc->supply.vqmmc) &&
-+				regulator_is_enabled(mmc->supply.vqmmc))
-+			regulator_disable(mmc->supply.vqmmc);
-+
- 		regs = mci_readl(slot->host, PWREN);
- 		regs &= ~(1 << slot->id);
- 		mci_writel(slot->host, PWREN, regs);
- 		break;
-+	case MMC_POWER_ON:
-+		if (!IS_ERR(mmc->supply.vqmmc) &&
-+				!regulator_is_enabled(mmc->supply.vqmmc)) {
-+			ret = regulator_enable(mmc->supply.vqmmc);
-+			if (ret < 0)
-+				dev_err(&slot->mmc->class_dev,
-+						"failed to enable vqmmc\n");
-+		}
-+		break;
- 	default:
- 		break;
- 	}
-@@ -2067,7 +2088,9 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
- 		mmc->f_max = freq[1];
+@@ -2284,9 +2284,6 @@ static struct dw_mci_board *dw_mci_parse_dt(struct dw_mci *host)
+ 			return ERR_PTR(ret);
  	}
  
--	mmc->ocr_avail = MMC_VDD_32_33 | MMC_VDD_33_34;
-+	mmc_regulator_get_supply(mmc);
-+	if (!mmc->ocr_avail)
-+		mmc->ocr_avail = MMC_VDD_32_33 | MMC_VDD_33_34;
- 
- 	if (host->pdata->caps)
- 		mmc->caps = host->pdata->caps;
-@@ -2375,24 +2398,6 @@ int dw_mci_probe(struct dw_mci *host)
- 		}
- 	}
- 
--	host->vmmc = devm_regulator_get_optional(host->dev, "vmmc");
--	if (IS_ERR(host->vmmc)) {
--		ret = PTR_ERR(host->vmmc);
--		if (ret == -EPROBE_DEFER)
--			goto err_clk_ciu;
+-	if (of_find_property(np, "supports-highspeed", NULL))
+-		pdata->caps |= MMC_CAP_SD_HIGHSPEED | MMC_CAP_MMC_HIGHSPEED;
 -
--		dev_info(host->dev, "no vmmc regulator found: %d\n", ret);
--		host->vmmc = NULL;
--	} else {
--		ret = regulator_enable(host->vmmc);
--		if (ret) {
--			if (ret != -EPROBE_DEFER)
--				dev_err(host->dev,
--					"regulator_enable fail: %d\n", ret);
--			goto err_clk_ciu;
--		}
--	}
--
- 	host->quirks = host->pdata->quirks;
- 
- 	spin_lock_init(&host->lock);
-@@ -2536,9 +2541,6 @@ err_workqueue:
- err_dmaunmap:
- 	if (host->use_dma && host->dma_ops->exit)
- 		host->dma_ops->exit(host);
--	if (host->vmmc)
--		regulator_disable(host->vmmc);
--
- err_clk_ciu:
- 	if (!IS_ERR(host->ciu_clk))
- 		clk_disable_unprepare(host->ciu_clk);
-@@ -2573,9 +2575,6 @@ void dw_mci_remove(struct dw_mci *host)
- 	if (host->use_dma && host->dma_ops->exit)
- 		host->dma_ops->exit(host);
- 
--	if (host->vmmc)
--		regulator_disable(host->vmmc);
--
- 	if (!IS_ERR(host->ciu_clk))
- 		clk_disable_unprepare(host->ciu_clk);
- 
-@@ -2592,9 +2591,6 @@ EXPORT_SYMBOL(dw_mci_remove);
-  */
- int dw_mci_suspend(struct dw_mci *host)
- {
--	if (host->vmmc)
--		regulator_disable(host->vmmc);
--
- 	return 0;
+ 	return pdata;
  }
- EXPORT_SYMBOL(dw_mci_suspend);
-@@ -2603,15 +2599,6 @@ int dw_mci_resume(struct dw_mci *host)
- {
- 	int i, ret;
  
--	if (host->vmmc) {
--		ret = regulator_enable(host->vmmc);
--		if (ret) {
--			dev_err(host->dev,
--				"failed to enable regulator: %d\n", ret);
--			return ret;
--		}
--	}
--
- 	if (!dw_mci_ctrl_all_reset(host)) {
- 		ret = -ENODEV;
- 		return ret;
 -- 
 1.7.9.5
 
