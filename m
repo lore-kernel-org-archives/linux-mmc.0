@@ -1,128 +1,51 @@
-From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH v12 1/6] ARM: sunxi: Add driver for SD/MMC
- hosts found on Allwinner sunxi SoCs
-Date: Mon, 12 May 2014 11:15:30 +0200
-Message-ID: <CAPDyKFrYeBdB20qhmkcUf5ykw=SbBo6VUPXd=By9dNOvTnvFww@mail.gmail.com>
-References: <1399794417-9291-1-git-send-email-hdegoede@redhat.com>
-	<1399794417-9291-2-git-send-email-hdegoede@redhat.com>
-Reply-To: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [GIT PULL] ARM: Updates for mmci driver for 3.16, take 1
+Date: Mon, 12 May 2014 11:36:33 +0200
+Message-ID: <CAPDyKFqGgVis6NAgfSXEbC+hbdyix=eWk+2GDEyALC=qv0FYbA@mail.gmail.com>
+References: <CAPDyKFp0K=cijuAZox7_BsTk2UCyC7Dp9HQoO6eJzaHikRMVUw@mail.gmail.com>
+	<CAPDyKFo07dqfqTtrGp3sHwf1ghzCj4BaBqJffRAs=cA1-HP2Tw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
-Return-path: <linux-sunxi+bncBDF57NG2XIHRBMVCYKNQKGQE6UZCDJQ-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-In-Reply-To: <1399794417-9291-2-git-send-email-hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-List-Post: <http://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Help: <http://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Archive: <http://groups.google.com/group/linux-sunxi>
-Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
-List-Subscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Unsubscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-To: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, =?UTF-8?Q?David_Lanzend=C3=B6rfer?= <david.lanzendoerfer-Z7Kmv9EsliU@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, devicetree <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, Mike Turquette <mturquette-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qa0-f51.google.com ([209.85.216.51]:62614 "EHLO
+	mail-qa0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751428AbaELJge (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 12 May 2014 05:36:34 -0400
+Received: by mail-qa0-f51.google.com with SMTP id w8so6689857qac.38
+        for <linux-mmc@vger.kernel.org>; Mon, 12 May 2014 02:36:33 -0700 (PDT)
+In-Reply-To: <CAPDyKFo07dqfqTtrGp3sHwf1ghzCj4BaBqJffRAs=cA1-HP2Tw@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Russell King <linux@arm.linux.org.uk>
+Cc: "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Rob Herring <robh+dt@kernel.org>, Alessandro Rubini <rubini@unipv.it>, Linus Walleij <linus.walleij@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>
 
-On 11 May 2014 09:46, Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
-> From: David Lanzend=C3=B6rfer <david.lanzendoerfer-Z7Kmv9EsliU@public.gmane.org>
+On 24 April 2014 12:57, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> On 14 April 2014 16:17, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>> Hi Russell,
+>>
+>> I have collected some patches which all relates to changes to the mmci driver.
+>>
+>> The SOC specific patches has been acked by the SOC maintainer Linus
+>> Walleij and the DT patches has been iterated a few times, due to
+>> comments from Rob Herring.
+>>
+>> Unless you have some concern with any of the patches, please pull them
+>> into your ARM tree.
 >
-> The Allwinner sunxi mmc host uses dma in bus-master mode using a built-in
-> designware idmac controller, which is identical to the one found in the m=
-mc-dw
-> hosts. However the rest of the host is not identical to mmc-dw, it deals =
-with
-> sending stop commands in hardware which makes it significantly different
-> from the mmc-dw devices.
+> Ping. :-)
 >
-> HdG: Various cleanups and fixes.
+> Please, let me know if you prefer another setup than a pull request.
 >
-> Signed-off-by: David Lanzend=C3=B6rfer <david.lanzendoerfer-Z7Kmv9EsliU@public.gmane.org>
-> Signed-off-by: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 
-[snip]
+Hi Russell,
 
-> +
-> +static int sunxi_mmc_clk_set_rate(struct sunxi_mmc_host *host,
-> +                                 struct mmc_ios *ios)
-> +{
-> +       u32 rate, oclk_dly, rval, sclk_dly, src_clk;
-> +       struct clk_hw *hw =3D __clk_get_hw(host->clk_mmc);
+I understand you have been busy, no worries.
 
-Hi Hans,
+As a way forward and to get some testing in linux-next, I will pull in
+these patches into my next branch in my mmc tree.
+git://git.linaro.org/people/ulf.hansson/mmc.git.
 
-This seems like the wrong approach. But I guess it's related to the
-"clock phase control" API you have been discussing with the clk
-maintainer, Mike Turquette!?
-
-__clk_get_hw is supposed to be used by clk providers, not clk consumers.
-
-> +       int ret;
-> +
-> +       rate =3D clk_round_rate(host->clk_mmc, ios->clock);
-> +       dev_dbg(mmc_dev(host->mmc), "setting clk to %d, rounded %d\n",
-> +               ios->clock, rate);
-> +
-> +       /* setting clock rate */
-> +       ret =3D clk_set_rate(host->clk_mmc, rate);
-> +       if (ret) {
-> +               dev_err(mmc_dev(host->mmc), "error setting clk to %d: %d\=
-n",
-> +                       rate, ret);
-> +               return ret;
-> +       }
-> +
-> +       ret =3D sunxi_mmc_oclk_onoff(host, 0);
-> +       if (ret)
-> +               return ret;
-> +
-> +       /* clear internal divider */
-> +       rval =3D mmc_readl(host, REG_CLKCR);
-> +       rval &=3D ~0xff;
-> +       mmc_writel(host, REG_CLKCR, rval);
-> +
-> +       /* determine delays */
-> +       if (rate <=3D 400000) {
-> +               oclk_dly =3D 0;
-> +               sclk_dly =3D 7;
-> +       } else if (rate <=3D 25000000) {
-> +               oclk_dly =3D 0;
-> +               sclk_dly =3D 5;
-> +       } else if (rate <=3D 50000000) {
-> +               if (ios->timing =3D=3D MMC_TIMING_UHS_DDR50) {
-> +                       oclk_dly =3D 2;
-> +                       sclk_dly =3D 4;
-> +               } else {
-> +                       oclk_dly =3D 3;
-> +                       sclk_dly =3D 5;
-> +               }
-> +       } else {
-> +               /* rate > 50000000 */
-> +               oclk_dly =3D 2;
-> +               sclk_dly =3D 4;
-> +       }
-> +
-> +       src_clk =3D clk_get_rate(clk_get_parent(host->clk_mmc));
-> +       if (src_clk >=3D 300000000 && src_clk <=3D 400000000) {
-> +               if (oclk_dly)
-> +                       oclk_dly--;
-> +               if (sclk_dly)
-> +                       sclk_dly--;
-> +       }
-> +
-> +       clk_sunxi_mmc_phase_control(hw, sclk_dly, oclk_dly);
-> +
-> +       return sunxi_mmc_oclk_onoff(host, 1);
-> +}
-> +
-
-[snip]
-
-Besides the above, I think this looks good!
+I assume you will tell me if you have any concerns.
 
 Kind regards
 Ulf Hansson
-
---=20
-You received this message because you are subscribed to the Google Groups "=
-linux-sunxi" group.
-To unsubscribe from this group and stop receiving emails from it, send an e=
-mail to linux-sunxi+unsubscribe-/JYPxA39Uh5TLH3MbocFF+G/Ez6ZCGd0@public.gmane.org
-For more options, visit https://groups.google.com/d/optout.
