@@ -1,87 +1,48 @@
-From: Konstantin Dorfman <kdorfman@codeaurora.org>
-Subject: Fwd: Re: mmc: core: retries counter for data command initialization.
-Date: Mon, 12 May 2014 17:33:09 +0300
-Message-ID: <5370DBA5.1080108@codeaurora.org>
-References: <535F9173.1030102@codeaurora.org>
+From: United Nations <maj@junin.gob.ar>
+Subject: =?utf-8?Q?Felicit=C4=83ri?=
+Date: Mon, 12 May 2014 12:22:58 -0300 (ART)
+Message-ID: <132381478.422760.1399908178095.JavaMail.zimbra__7527.34758793867$1399908977$gmane$org@junin.gob.ar>
+Reply-To: United Nations <unitednationsgrants@admin.in.th>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp.codeaurora.org ([198.145.11.231]:51682 "EHLO
-	smtp.codeaurora.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1758187AbaELOdM (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 12 May 2014 10:33:12 -0400
-In-Reply-To: <535F9173.1030102@codeaurora.org>
+Received: from junin.gov.ar ([201.234.19.13]:52720 "EHLO mail.junin.gob.ar"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751692AbaELPfe convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 12 May 2014 11:35:34 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
 
-Hello Chris, Ulf,
 
-Sorry for nagging.
+=46elicit=C4=83ri=20
 
-Do you have opinion on issue with retries counter for data command?
+Sunte=C8=9Bi unul dintre beneficiarii de pe ordinea de zi a Na=C8=9Biun=
+ilor Unite 2014/2015 Grant Award. Informa=C8=9Biile dvs. au fost verifi=
+cate =C8=99i suma de =C8=99ase milioane de euro (6.000.000,00) a fost a=
+cordat pentru a v=C4=83 =C3=AEn programul de granturi al Na=C8=9Biunilo=
+r Unite ca Date tale au fost listate pe lista c=C3=A2=C8=99tig=C4=83toa=
+re.=20
 
-Since till now the code behave as there is no retry, may be it is better 
-to remove dead code? Or the counter need to be initialized properly.
+Aceast=C4=83 sum=C4=83 urmeaz=C4=83 a fi utilizate de dumneavoastr=C4=83=
+ pentru orice scop, de care vor beneficia foloseste comunitatea ta.=20
 
-On 04/29/14 10:55, Konstantin Dorfman wrote:
+Informa=C8=9Biile de care avem nevoie pentru verificare sunt:=20
 
-> Hi All,
->
-> After 6035d9730d5825e6e3c225b721a5847a521d6556 "mmc: fix async request
-> mechanism for sequential read scenarios" mmc layer data path async
-> request handling was separated from mmc commands path.
->
-> mmc_wait_for_data_req_done() function is used to wait for completion of
-> the currently running data request, while for commands
-> mmc_wait_for_req_done() is used.
->
-> There is code that repeats request cmd->retries times in case of error.
-> The problem that for data command this counter is not initialized
-> properly as it does for mmc command sending:
->
->
-> int mmc_wait_for_cmd(struct mmc_host *host, struct mmc_command *cmd, int
-> retries)
-> {
->      struct mmc_request mrq = {NULL};
->
->      WARN_ON(!host->claimed);
->
->      memset(cmd->resp, 0, sizeof(cmd->resp));
->      cmd->retries = retries;                 <-- supplied by
->                                                      caller
->
->      mrq.cmd = cmd;
->      cmd->data = NULL;
->
->      mmc_wait_for_req(host, &mrq);
->
->      return cmd->error;
-> }
->
-> I found that there is no similar initialization for data command
-> processing code, so the counter cmd->retries remains always 0.
->
-> Lets discuss:
-> - do we need retries for data request
-> - what value is good: for command there are 0 or 5 retries
-> - where to do this initialization:
+Numele complet:=20
+adresa:=20
+Urm=C4=83tor de Kin:=20
 
-card/block.c: static void mmc_blk_rw_rq_prep(struct mmc_queue_req *mqrq,
-			       struct mmc_card *card,
-			       int disable_multi,
-			       struct mmc_queue *mq)
+Va oferi, de asemenea, un cont bancar care premiile de finan=C8=9Bare a=
+r trebui s=C4=83 fie depus =C3=AEn. Ve=C8=9Bi avea nevoie, de asemenea,=
+ s=C4=83 pl=C4=83teasc=C4=83 doar o tax=C4=83 administrativ=C4=83 de 72=
+1 de euro (=C8=99apte sute dou=C4=83zeci =C8=99i unu de euro).=20
 
--- 
-sent by an employee of the Qualcomm Innovation Center, Inc.
-The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum,
-hosted by The Linux Foundation
---
-To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Ajunge =C3=AEnapoi la noi c=C3=A2t mai cur=C3=A2nd posibil, astfel =C3=AE=
+nc=C3=A2t s=C4=83 pute=C8=9Bi trimite certificatul c=C3=A2=C8=99tig=C4=83=
+toare.=20
 
+Biroul Organiza=C8=9Biei Na=C8=9Biunilor Unite.=20
+2014/2015
 
