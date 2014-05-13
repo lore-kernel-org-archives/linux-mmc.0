@@ -1,42 +1,91 @@
-From: James Hogan <james.hogan@imgtec.com>
-Subject: Re: [PATCH] mmc: dw_mmc: change to use recommended reset procedure
-Date: Tue, 13 May 2014 11:13:33 +0100
-Message-ID: <5371F04D.7060007@imgtec.com>
-References: <1395834374-1988-1-git-send-email-yuvaraj.cd@samsung.com>
- <CAKuRcOJYsC9OUOrYrvKg_iC5Z6dZ0mqW3-y=UXHtCr99=gQBXw@mail.gmail.com>
- <536C2C31.8000209@samsung.com>
- <CAPz6YkXGH96mjeePwUSRmPX4Y1YXYif+N+BRKsTwtNxtRq3xoQ@mail.gmail.com>
- <536C594A.5080107@samsung.com> <536C84A0.6020403@samsung.com>
- <CAPz6YkUjLmWXvoCkuY8vAwLHksf0Uit6gWP-ADWBbN3NDJBo-w@mail.gmail.com>
- <CAPz6YkW5CfdMTW3W-zdK29RCv4q7u9rAMr6AjWip3beuhgsv5g@mail.gmail.com>
+From: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+Subject: Re: [PATCH v1 00/11] Add Qualcomm SD Card Controller support.
+Date: Tue, 13 May 2014 11:21:47 +0100
+Message-ID: <5371F23B.1070800@linaro.org>
+References: <1398116624-31052-1-git-send-email-srinivas.kandagatla@linaro.org>	<1398759492-12970-1-git-send-email-srinivas.kandagatla@linaro.org> <CAPDyKFodzdETbz3cj3mMT7a-ZJ9=Ants3WBstdEFLYiTOa-TnQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <CAPz6YkW5CfdMTW3W-zdK29RCv4q7u9rAMr6AjWip3beuhgsv5g@mail.gmail.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Sonny Rao <sonnyrao@chromium.org>, Jaehoon Chung <jh80.chung@samsung.com>
-Cc: "linux-samsung-soc@vger.kernel.org" <linux-samsung-soc@vger.kernel.org>, Grant Grundler <grundler@chromium.org>, Tomasz Figa <t.figa@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, sunil joshi <joshi@samsung.com>, Douglas Anderson <dianders@chromium.org>, Seungwon Jeon <tgih.jun@samsung.com>, "kgene.kim@samsung.com" <kgene.kim@samsung.com>, Yuvaraj Kumar <yuvaraj.cd@gmail.com>, Yuvaraj Kumar C D <yuvaraj.cd@samsung.org>, Chris Ball <cjb@laptop.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CAPDyKFodzdETbz3cj3mMT7a-ZJ9=Ants3WBstdEFLYiTOa-TnQ@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Russell King <linux@arm.linux.org.uk>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, agross@quicinc.com, linux-arm-msm@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-Hi,
 
-On 12/05/14 22:44, Sonny Rao wrote:
-> Doug mentioned that James Hogan might have an answer.  James, are
-> there Imgtec SoCs which use dw_mmc and use DMA but don't use the
-> IDMAC?  If so, we can add that support into this reset procedure
-> patch.
 
-Yes, the Toumaz TZ1090 SoC has the dw_mmc configured without an IDMAC,
-so it uses the IMG DMAC block instead.
+On 13/05/14 11:04, Ulf Hansson wrote:
+> On 29 April 2014 10:18,  <srinivas.kandagatla@linaro.org> wrote:
+>> From: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+>>
+>> Hi Russell,
+>>
+>> This patch series adds Qualcomm SD Card Controller support in pl180 mmci
+>> driver. QCom SDCC is basically a pl180, but bit more customized, some of the
+>> register layouts and offsets are different to the ones mentioned in pl180
+>> datasheet. The plan is to totally remove the standalone SDCC driver
+>> drivers/mmc/host/msm_sdcc.* and start using generic mmci driver for all
+>> Qualcomm parts, as we get chance to test on other Qcom boards.
+>>
+>> To start using the existing mmci driver, a fake amba id for Qualcomm is added
+>> in patches:
+>>   ARM: amba: Add Qualcomm vendor ID.
+>>   mmc: mmci: Add Qualcomm Id to amba id table.
+>>
+>> Second change is, adding a 3 clock cycle delay for register writes on QCOM
+>> SDCC
+>> registers, which is done in patches:
+>>    mmc: mmci: Add register read/write wrappers.
+>>    mmc: mmci: Qcomm: Add 3 clock cycle delay after each register write
+>>
+>> Third change was to accommodate DATCTRL and MMCICLK register layout changes in
+>> Qcom SDCC. Which is done in patches:
+>>    mmc: mmci: Add Qcom datactrl register variant
+>>    mmc: mmci: Add Qcom variations to MCICommand register.
+>>    mmc: mmci: Qcom fix MCICLK register settings.
+>>    mmc: mmci: Add clock support for Qualcomm.
+>>
+>> Fourth major change was to add qcom specfic pio read function, the need for
+>> this is because the way MCIFIFOCNT register behaved in QCOM SDCC is very
+>>   different to the one in pl180. This change is done in patch:
+>>    mmc: mmci: Add Qcom specific pio_read function.
+>>
+>> Last some Qcom unrelated changes to support Qcom are done in patches:
+>>    mmc: mmci: use NSEC_PER_SEC macro
+>>    mmc: mmci: move ST specific register extensions access under condition.
+>>
+>> This patches are tested  v3.15-rc3 in PIO mode on IFC6410 board with both eMMC
+>> and external SD card. I would appreciate any feedback on the patches.
+>> I would like to get this for v3.16.
+>>
+>> Thanks,
+>> srini
+>>
+>
+> Hi Srinivas,
+>
+Hi Ulf,
+> Thanks for working on this patchset, much appreciated! I intend to
+> review them as soon as I can.
 
-Cheers
-James
+Thats Great.
+>
+> For your information, currently there are one patch queued via Chris'
+> mmc tree for mmci and recently I have added my quite extensive
+> patchset, via mine mmc tree, all to be tested in Linux next.
+>
+> I suppose the best approach to not hit conflicts would be if you base
+> your patches upon my tree. Potentially we could merge them this way,
+> unless of course Russell have other opinions.
+>
+> git://git.linaro.org/people/ulf.hansson/mmc.git next
+>
+Makes sense, I will rebase my next version of patches on top of your mmc 
+git tree, if Russell has no issues with this approach.
+
+Thanks,
+srini
+> Kind regards
+> Ulf Hansson
+>
