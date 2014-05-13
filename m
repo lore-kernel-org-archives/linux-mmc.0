@@ -1,103 +1,79 @@
-From: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
-Subject: Re: [PATCH v1 11/11] mmc: mmci: Add Qcom specific pio_read function.
-Date: Tue, 13 May 2014 10:42:55 +0100
-Message-ID: <5371E91F.7000807@linaro.org>
-References: <1398759492-12970-1-git-send-email-srinivas.kandagatla@linaro.org>	<1398759674-13421-1-git-send-email-srinivas.kandagatla@linaro.org> <CACRpkdY_NzRaz5fiWJDF=rZY6WizmwbDZG6c_+FR+L9Aix8peQ@mail.gmail.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v1 00/11] Add Qualcomm SD Card Controller support.
+Date: Tue, 13 May 2014 12:04:45 +0200
+Message-ID: <CAPDyKFodzdETbz3cj3mMT7a-ZJ9=Ants3WBstdEFLYiTOa-TnQ@mail.gmail.com>
+References: <1398116624-31052-1-git-send-email-srinivas.kandagatla@linaro.org>
+	<1398759492-12970-1-git-send-email-srinivas.kandagatla@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CACRpkdY_NzRaz5fiWJDF=rZY6WizmwbDZG6c_+FR+L9Aix8peQ@mail.gmail.com>
+In-Reply-To: <1398759492-12970-1-git-send-email-srinivas.kandagatla@linaro.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Linus Walleij <linus.walleij@linaro.org>
-Cc: Russell King <linux@arm.linux.org.uk>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, agross@quicinc.com, "linux-arm-msm@vger.kernel.org" <linux-arm-msm@vger.kernel.org>
+To: srinivas.kandagatla@linaro.org
+Cc: Russell King <linux@arm.linux.org.uk>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, agross@quicinc.com, linux-arm-msm@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
+On 29 April 2014 10:18,  <srinivas.kandagatla@linaro.org> wrote:
+> From: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+>
+> Hi Russell,
+>
+> This patch series adds Qualcomm SD Card Controller support in pl180 mmci
+> driver. QCom SDCC is basically a pl180, but bit more customized, some of the
+> register layouts and offsets are different to the ones mentioned in pl180
+> datasheet. The plan is to totally remove the standalone SDCC driver
+> drivers/mmc/host/msm_sdcc.* and start using generic mmci driver for all
+> Qualcomm parts, as we get chance to test on other Qcom boards.
+>
+> To start using the existing mmci driver, a fake amba id for Qualcomm is added
+> in patches:
+>  ARM: amba: Add Qualcomm vendor ID.
+>  mmc: mmci: Add Qualcomm Id to amba id table.
+>
+> Second change is, adding a 3 clock cycle delay for register writes on QCOM
+> SDCC
+> registers, which is done in patches:
+>   mmc: mmci: Add register read/write wrappers.
+>   mmc: mmci: Qcomm: Add 3 clock cycle delay after each register write
+>
+> Third change was to accommodate DATCTRL and MMCICLK register layout changes in
+> Qcom SDCC. Which is done in patches:
+>   mmc: mmci: Add Qcom datactrl register variant
+>   mmc: mmci: Add Qcom variations to MCICommand register.
+>   mmc: mmci: Qcom fix MCICLK register settings.
+>   mmc: mmci: Add clock support for Qualcomm.
+>
+> Fourth major change was to add qcom specfic pio read function, the need for
+> this is because the way MCIFIFOCNT register behaved in QCOM SDCC is very
+>  different to the one in pl180. This change is done in patch:
+>   mmc: mmci: Add Qcom specific pio_read function.
+>
+> Last some Qcom unrelated changes to support Qcom are done in patches:
+>   mmc: mmci: use NSEC_PER_SEC macro
+>   mmc: mmci: move ST specific register extensions access under condition.
+>
+> This patches are tested  v3.15-rc3 in PIO mode on IFC6410 board with both eMMC
+> and external SD card. I would appreciate any feedback on the patches.
+> I would like to get this for v3.16.
+>
+> Thanks,
+> srini
+>
 
+Hi Srinivas,
 
-On 13/05/14 09:34, Linus Walleij wrote:
-> On Tue, Apr 29, 2014 at 10:21 AM,  <srinivas.kandagatla@linaro.org> wrote:
->
->> From: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
->>
->> MCIFIFOCNT register behaviour on Qcom chips is very different than the other
->> pl180 integrations. MCIFIFOCNT register contains the number of
->> words that are still waiting to be transferred through the FIFO. It keeps
->> decrementing once the host CPU reads the MCIFIFO. With the existing logic and
->> the MCIFIFOCNT behaviour, mmci_pio_read will loop forever, as the FIFOCNT
->> register will always return transfer size before reading the FIFO.
->>
->> Also the data sheet states that "This register is only useful for debug
->> purposes and should not be used for normal operation since it does not reflect
->> data which may or may not be in the pipeline".
->>
->> This patch implements qcom_pio_read function so as existing mmci_pio_read is
->> not suitable for Qcom SOCs.
->>
->> Signed-off-by: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
-> (...)
->
->> +static int mmci_qcom_pio_read(struct mmci_host *host, char *buffer,
->> +                        unsigned int remain)
->> +{
->> +       uint32_t        *ptr = (uint32_t *) buffer;
->
-> Just use u32 for this.
->
->> +       int             count = 0;
->> +       struct variant_data *variant = host->variant;
->> +       int             fifo_size = variant->fifosize;
->> +
->> +       if (remain % 4)
->> +               remain = ((remain >> 2) + 1) << 2;
->
-> Explain in a comment exactly what is happening here or noone will
-> understand the code.
+Thanks for working on this patchset, much appreciated! I intend to
+review them as soon as I can.
 
-Ok, I will add more comments here.
->
->> +       while (readl(host->base + MMCISTATUS) & MCI_RXDATAAVLBL) {
->> +               *ptr = readl(host->base + MMCIFIFO + (count % fifo_size));
->> +               ptr++;
->> +               count += sizeof(uint32_t);
->> +               remain -=  sizeof(uint32_t);
->
->
-> sizeof(u32) or just 4 works for these...
->
-Yes, Will fix it in next version.
-> count += 4;
-> remain -= 4;
->
-> Is easier to parse and understand I think.
->
->> +               if (remain == 0)
->> +                       break;
->
-> if (!remain)
->    break;
->
-yep.
+For your information, currently there are one patch queued via Chris'
+mmc tree for mmci and recently I have added my quite extensive
+patchset, via mine mmc tree, all to be tested in Linux next.
 
->> +       }
->> +       return count;
->> +}
->
->> -               if (status & MCI_RXACTIVE)
->> -                       len = mmci_pio_read(host, buffer, remain);
->> +               if (status & MCI_RXACTIVE) {
->> +                       if (host->hw_designer == AMBA_VENDOR_QCOM)
->> +                               len = mmci_qcom_pio_read(host, buffer, remain);
->> +                       else
->> +                               len = mmci_pio_read(host, buffer, remain);
->> +               }
->
-> Use something like bool qcom_fifo; in vendor data instead.
->
-Ok, make sense, I will fix this in next version.
+I suppose the best approach to not hit conflicts would be if you base
+your patches upon my tree. Potentially we could merge them this way,
+unless of course Russell have other opinions.
 
---srini
+git://git.linaro.org/people/ulf.hansson/mmc.git next
 
-> Yours,
-> Linus Walleij
->
+Kind regards
+Ulf Hansson
