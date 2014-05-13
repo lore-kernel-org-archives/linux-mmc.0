@@ -1,37 +1,50 @@
-From: Simon Horman <horms@verge.net.au>
-Subject: Re: [PATCH] tmio_mmc_pio: prevent endless loop in
- tmio_mmc_set_clock()
-Date: Wed, 14 May 2014 06:47:23 +0900
-Message-ID: <20140513214723.GC6784@verge.net.au>
-References: <201405040219.30018.sergei.shtylyov@cogentembedded.com>
- <20140513013820.GC10973@verge.net.au>
- <53720B95.401@cogentembedded.com>
+From: Stephen Boyd <sboyd@codeaurora.org>
+Subject: Re: [PATCH v1 01/11] ARM: amba: Add Qualcomm vendor ID.
+Date: Tue, 13 May 2014 15:13:13 -0700
+Message-ID: <20140513221313.GI20486@codeaurora.org>
+References: <1398759492-12970-1-git-send-email-srinivas.kandagatla@linaro.org>
+ <1398759542-13017-1-git-send-email-srinivas.kandagatla@linaro.org>
+ <CACRpkdZyEAkJUGC5x6CY65-g97jfyg-TMDoe8JxDMexVx5usSA@mail.gmail.com>
+ <5371E8B7.8000103@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-sh-owner@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from smtp.codeaurora.org ([198.145.11.231]:58752 "EHLO
+	smtp.codeaurora.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932153AbaEMWNP (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 13 May 2014 18:13:15 -0400
 Content-Disposition: inline
-In-Reply-To: <53720B95.401@cogentembedded.com>
-Sender: linux-sh-owner@vger.kernel.org
-To: Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>
-Cc: linux-mmc@vger.kernel.org, ian@mnementh.co.uk, linux-sh@vger.kernel.org, chris@printf.net, ulf.hansson@linaro.org
+In-Reply-To: <5371E8B7.8000103@linaro.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+Cc: Linus Walleij <linus.walleij@linaro.org>, Russell King <linux@arm.linux.org.uk>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, agross@quicinc.com, "linux-arm-msm@vger.kernel.org" <linux-arm-msm@vger.kernel.org>
 
-On Tue, May 13, 2014 at 04:09:57PM +0400, Sergei Shtylyov wrote:
-> Hello.
+On 05/13, Srinivas Kandagatla wrote:
+> Thanks Linus W,
 > 
-> On 05/13/2014 05:38 AM, Simon Horman wrote:
+> On 13/05/14 08:16, Linus Walleij wrote:
+> >On Tue, Apr 29, 2014 at 10:19 AM,  <srinivas.kandagatla@linaro.org> wrote:
+> >
+> >>From: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+> >>
+> >>This patch adds Qualcomm amba vendor Id to the list. This ID is used in mmci
+> >>driver.
+> >>
+> >>Signed-off-by: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+> >(...)
+> >>+       AMBA_VENDOR_QCOM = 0x51,
+> >
+> >Yeah it's a "Q", like 0x41 is "A" for ARM. You could as well mention
+> >this in the commit message.
+> >
+> Sounds good, I will fix it in next version and send it to Russell's
+> patch tracker.
 > 
-> >>I've spent a couple of days with the driver just hanging due to me forgetting
-> >>to specify the external crystal frequency, so that clk_get_rate() returned 0
-> >>and thus the loop in tmio_mmc_set_clock() never ended. I don't think that's an
-> >>acceptable behavior, so I suggest that the minimum frequency is checked for 0
-> >>in tmio_mmc_host_probe().
-> 
-> >>Signed-off-by: Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>
-> 
-> >My suggestion is to update tmio_mmc_host_probe() so that it always exits,
-> >perhaps returning an error if appropriate.
-> 
->    Did you mean tmio_mmc_set_clock()?
 
-Sorry for the cut-and-paste error. Yes, that is what I meant.
+Please add a note that this id is fake in the commit text or in
+the code as well.
+
+-- 
+Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum,
+hosted by The Linux Foundation
