@@ -1,60 +1,113 @@
-From: Simon Horman <horms@verge.net.au>
-Subject: Re: [PATCH] tmio_mmc_pio: prevent endless loop in
- tmio_mmc_set_clock()
-Date: Tue, 13 May 2014 10:38:20 +0900
-Message-ID: <20140513013820.GC10973@verge.net.au>
-References: <201405040219.30018.sergei.shtylyov@cogentembedded.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-sh-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <201405040219.30018.sergei.shtylyov@cogentembedded.com>
-Sender: linux-sh-owner@vger.kernel.org
-To: Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>
-Cc: linux-mmc@vger.kernel.org, ian@mnementh.co.uk, linux-sh@vger.kernel.org, chris@printf.net, ulf.hansson@linaro.org
+From: Sonny Rao <sonnyrao@chromium.org>
+Subject: [PATCHv2] mmc: dw_mmc: change to use recommended reset procedure
+Date: Mon, 12 May 2014 18:38:41 -0700
+Message-ID: <1399945121-7387-1-git-send-email-sonnyrao@chromium.org>
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: grundler@chromium.org, linux-samsung-soc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, jh80.chung@samsung.com, cjb@laptop.org, tgih.jun@samsung.com, kgene.kim@samsung.com, joshi@samsung.com, t.figa@samsung.com, dianders@chromium.org, Yuvaraj Kumar C D <yuvaraj.cd@samsung.com>, Sonny Rao <sonnyrao@chromium.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Sun, May 04, 2014 at 02:19:29AM +0400, Sergei Shtylyov wrote:
-> I've spent a couple of days with the driver just hanging due to me forgetting
-> to specify the external crystal frequency, so that clk_get_rate() returned 0
-> and thus the loop in tmio_mmc_set_clock() never ended. I don't think that's an
-> acceptable behavior, so I suggest that the minimum frequency is checked for 0
-> in tmio_mmc_host_probe().
-> 
-> Signed-off-by: Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>
+This patch changes the fifo reset code to follow the reset procedure
+outlined in the documentation of Synopsys  Mobile storage host databook
+7.2.13.
 
-My suggestion is to update tmio_mmc_host_probe() so that it always exits,
-perhaps returning an error if appropriate.
+v2: Add Generic DMA support
+    per the documentation, move interrupt clear before wait
+    make the test for DMA host->use_dma rather than host->using_dma
+    add proper return values (although it appears no caller checks)
 
-> 
-> ---
-> The patch is against Chris Ball's 'mmc.git' repo's 'master' branch.
-> 
->  drivers/mmc/host/tmio_mmc_pio.c |    9 +++++++++
->  1 file changed, 9 insertions(+)
-> 
-> Index: mmc/drivers/mmc/host/tmio_mmc_pio.c
-> ===================================================================
-> --- mmc.orig/drivers/mmc/host/tmio_mmc_pio.c
-> +++ mmc/drivers/mmc/host/tmio_mmc_pio.c
-> @@ -1044,6 +1044,15 @@ int tmio_mmc_host_probe(struct tmio_mmc_
->  	}
->  
->  	/*
-> +	 * Check the sanity of mmc->f_min to prevent tmio_mmc_set_clock() from
-> +	 * looping forever...
-> +	 */
-> +	if (mmc->f_min == 0) {
-> +		ret = -EINVAL;
-> +		goto pm_disable;
-> +	}
-> +
-> +	/*
->  	 * There are 4 different scenarios for the card detection:
->  	 *  1) an external gpio irq handles the cd (best for power savings)
->  	 *  2) internal sdhi irq handles the cd
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-sh" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
+Signed-off-by: Sonny Rao <sonnyrao@chromium.org>
+Signed-off-by: Yuvaraj Kumar C D <yuvaraj.cd@samsung.com>
+---
+ drivers/mmc/host/dw_mmc.c | 55 ++++++++++++++++++++++++++++++++++++++++++++++-
+ drivers/mmc/host/dw_mmc.h |  1 +
+ 2 files changed, 55 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index 55cd110..aff57e1 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -2325,6 +2325,7 @@ static bool dw_mci_ctrl_reset(struct dw_mci *host, u32 reset)
+ 
+ static inline bool dw_mci_fifo_reset(struct dw_mci *host)
+ {
++	u32 flags = SDMMC_CTRL_RESET | SDMMC_CTRL_FIFO_RESET;
+ 	/*
+ 	 * Reseting generates a block interrupt, hence setting
+ 	 * the scatter-gather pointer to NULL.
+@@ -2334,7 +2335,59 @@ static inline bool dw_mci_fifo_reset(struct dw_mci *host)
+ 		host->sg = NULL;
+ 	}
+ 
+-	return dw_mci_ctrl_reset(host, SDMMC_CTRL_FIFO_RESET);
++	/*
++	 * The recommended method for resetting is to always reset the
++	 * controller and the fifo, but differs slightly depending on the mode.
++	 * The Generic DMA mode (non IDMAC) also needs to reset DMA where IDMAC
++	 * mode resets IDMAC at the end.
++	 *
++	 */
++#ifndef CONFIG_MMC_DW_IDMAC
++	if (host->use_dma)
++		flags |= SDMMC_CTRL_DMA_RESET;
++#endif
++	if (dw_mci_ctrl_reset(host, flags)) {
++		/*
++		 * In all cases we clear the RAWINTS register to clear any
++		 * interrupts.
++		 */
++		mci_writel(host, RINTSTS, 0xFFFFFFFF);
++
++		/* if using dma we wait for dma_req to clear */
++		if (host->use_dma) {
++			unsigned long timeout = jiffies + msecs_to_jiffies(500);
++			u32 status;
++			do {
++				status = mci_readl(host, STATUS);
++				if (!(status & SDMMC_STATUS_DMA_REQ))
++					break;
++				cpu_relax();
++			} while (time_before(jiffies, timeout));
++
++			if (status & SDMMC_STATUS_DMA_REQ) {
++				dev_err(host->dev,
++					"%s: Timeout waiting for dma_req to "
++					"clear during reset", __func__);
++				return false;
++			}
++
++			/* when using DMA next we reset the fifo again */
++			dw_mci_ctrl_reset(host, SDMMC_CTRL_FIFO_RESET);
++		}
++	} else {
++		dev_err(host->dev, "%s: Reset bits didn't clear", __func__);
++		return false;
++	}
++
++#ifdef CONFIG_MMC_DW_IDMAC
++	/* It is also recommended that we reset and reprogram idmac */
++	dw_mci_idmac_reset(host);
++#endif
++
++	/* After a CTRL reset we need to have CIU set clock registers  */
++	mci_send_cmd(host->cur_slot, SDMMC_CMD_UPD_CLK, 0);
++
++	return true;
+ }
+ 
+ static inline bool dw_mci_ctrl_all_reset(struct dw_mci *host)
+diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
+index 6bf24ab..2505804 100644
+--- a/drivers/mmc/host/dw_mmc.h
++++ b/drivers/mmc/host/dw_mmc.h
+@@ -129,6 +129,7 @@
+ #define SDMMC_CMD_INDX(n)		((n) & 0x1F)
+ /* Status register defines */
+ #define SDMMC_GET_FCNT(x)		(((x)>>17) & 0x1FFF)
++#define SDMMC_STATUS_DMA_REQ		BIT(31)
+ /* FIFOTH register defines */
+ #define SDMMC_SET_FIFOTH(m, r, t)	(((m) & 0x7) << 28 | \
+ 					 ((r) & 0xFFF) << 16 | \
+-- 
+1.9.1.423.g4596e3a
