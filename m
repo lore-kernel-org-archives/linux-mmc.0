@@ -1,34 +1,84 @@
-From: Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>
-Subject: Re: [PATCH] tmio_mmc_pio: prevent endless loop in tmio_mmc_set_clock()
-Date: Tue, 13 May 2014 16:09:57 +0400
-Message-ID: <53720B95.401@cogentembedded.com>
-References: <201405040219.30018.sergei.shtylyov@cogentembedded.com> <20140513013820.GC10973@verge.net.au>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH 3/5] mmc: dw_mmc-exynos: add the MMC_CAP_ERASE by default.
+Date: Tue, 13 May 2014 21:27:02 +0900
+Message-ID: <53720F96.1050106@samsung.com>
+References: <1399893256-7071-1-git-send-email-jh80.chung@samsung.com>
+ <1399893256-7071-4-git-send-email-jh80.chung@samsung.com>
+ <002b01cf6e9c$962e8b60$c28ba220$%jun@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Type: text/plain; charset=EUC-KR
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <20140513013820.GC10973@verge.net.au>
-Sender: linux-sh-owner@vger.kernel.org
-To: Simon Horman <horms@verge.net.au>
-Cc: linux-mmc@vger.kernel.org, ian@mnementh.co.uk, linux-sh@vger.kernel.org, chris@printf.net, ulf.hansson@linaro.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout4.samsung.com ([203.254.224.34]:26719 "EHLO
+	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753270AbaEMM1D (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 13 May 2014 08:27:03 -0400
+Received: from epcpsbgr2.samsung.com
+ (u142.gpu120.samsung.co.kr [203.254.230.142])
+ by mailout4.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+ (7.0.4.24.0) 64bit (built Nov 17 2011))
+ with ESMTP id <0N5I00BBXIL1TBC0@mailout4.samsung.com> for
+ linux-mmc@vger.kernel.org; Tue, 13 May 2014 21:27:01 +0900 (KST)
+In-reply-to: <002b01cf6e9c$962e8b60$c28ba220$%jun@samsung.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Seungwon Jeon <tgih.jun@samsung.com>, linux-mmc@vger.kernel.org
+Cc: chris@printf.net, ulf.hansson@linaro.org, zhangfei.gao@linaro.org, dinguyen@altera.com
 
-Hello.
+Hi, Seungwon.
 
-On 05/13/2014 05:38 AM, Simon Horman wrote:
+On 05/13/2014 08:15 PM, Seungwon Jeon wrote:
+> Hi Jaehoon,
+> 
+> I think we can remove MMC_CAP_ERASE from host's cap.
+Thanks for reminding. :) 
+It's my mistake..Confused with linux-3.10.
 
->> I've spent a couple of days with the driver just hanging due to me forgetting
->> to specify the external crystal frequency, so that clk_get_rate() returned 0
->> and thus the loop in tmio_mmc_set_clock() never ended. I don't think that's an
->> acceptable behavior, so I suggest that the minimum frequency is checked for 0
->> in tmio_mmc_host_probe().
-
->> Signed-off-by: Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>
-
-> My suggestion is to update tmio_mmc_host_probe() so that it always exits,
-> perhaps returning an error if appropriate.
-
-    Did you mean tmio_mmc_set_clock()?
-
-WBR, Sergei
+Best Regards,
+Jaehoon Chung
+ 
+> 
+> Can you check below patch?
+> [PATCH v4] mmc: remove MMC_CAP_ERASE to enable trim in eMMC/SD Device
+> 
+> Thanks,
+> Seungwon Jeon
+> 
+> On Mon, May 12, 2014, Jaehoon Chung wrote:
+>> To use the erase command, add the MMC_CAP_ERASE capability by default.
+>>
+>> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+>> ---
+>>  drivers/mmc/host/dw_mmc-exynos.c |    9 +++++----
+>>  1 file changed, 5 insertions(+), 4 deletions(-)
+>>
+>> diff --git a/drivers/mmc/host/dw_mmc-exynos.c b/drivers/mmc/host/dw_mmc-exynos.c
+>> index 0fbc53a..46fafd8 100644
+>> --- a/drivers/mmc/host/dw_mmc-exynos.c
+>> +++ b/drivers/mmc/host/dw_mmc-exynos.c
+>> @@ -386,10 +386,11 @@ static int dw_mci_exynos_execute_tuning(struct dw_mci_slot *slot, u32 opcode,
+>>
+>>  /* Common capabilities of Exynos4/Exynos5 SoC */
+>>  static unsigned long exynos_dwmmc_caps[4] = {
+>> -	MMC_CAP_1_8V_DDR | MMC_CAP_8_BIT_DATA | MMC_CAP_CMD23,
+>> -	MMC_CAP_CMD23,
+>> -	MMC_CAP_CMD23,
+>> -	MMC_CAP_CMD23,
+>> +	MMC_CAP_1_8V_DDR | MMC_CAP_8_BIT_DATA | MMC_CAP_CMD23 |
+>> +		MMC_CAP_ERASE,
+>> +	MMC_CAP_CMD23 | MMC_CAP_ERASE,
+>> +	MMC_CAP_CMD23 | MMC_CAP_ERASE,
+>> +	MMC_CAP_CMD23 | MMC_CAP_ERASE,
+>>  };
+>>
+>>  static const struct dw_mci_drv_data exynos_drv_data = {
+>> --
+>> 1.7.9.5
+>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
 
