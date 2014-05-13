@@ -1,91 +1,241 @@
-From: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
-Subject: Re: [PATCH v1 00/11] Add Qualcomm SD Card Controller support.
-Date: Tue, 13 May 2014 11:21:47 +0100
-Message-ID: <5371F23B.1070800@linaro.org>
-References: <1398116624-31052-1-git-send-email-srinivas.kandagatla@linaro.org>	<1398759492-12970-1-git-send-email-srinivas.kandagatla@linaro.org> <CAPDyKFodzdETbz3cj3mMT7a-ZJ9=Ants3WBstdEFLYiTOa-TnQ@mail.gmail.com>
+From: Seungwon Jeon <tgih.jun@samsung.com>
+Subject: RE: [PATCHv2] mmc: dw_mmc: change to use recommended reset procedure
+Date: Tue, 13 May 2014 20:09:04 +0900
+Message-ID: <002a01cf6e9b$c0538900$40fa9b00$%jun@samsung.com>
+References: <1399945121-7387-1-git-send-email-sonnyrao@chromium.org>
+ <002301cf6e68$8809ee00$981dca00$%jun@samsung.com>
+ <CAPz6YkWObQe86MZYmyLrbYOkQ4hHkb2Hcpe8QZWDZCMO5U0f_Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAPDyKFodzdETbz3cj3mMT7a-ZJ9=Ants3WBstdEFLYiTOa-TnQ@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Russell King <linux@arm.linux.org.uk>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, agross@quicinc.com, linux-arm-msm@vger.kernel.org
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-reply-to: <CAPz6YkWObQe86MZYmyLrbYOkQ4hHkb2Hcpe8QZWDZCMO5U0f_Q@mail.gmail.com>
+Content-language: ko
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: 'Sonny Rao' <sonnyrao@chromium.org>
+Cc: 'linux-mmc' <linux-mmc@vger.kernel.org>, 'Grant Grundler' <grundler@chromium.org>, 'linux-samsung-soc' <linux-samsung-soc@vger.kernel.org>, linux-arm-kernel@lists.infradead.org, 'Jaehoon Chung' <jh80.chung@samsung.com>, 'Chris Ball' <cjb@laptop.org>, 'Kukjin Kim' <kgene.kim@samsung.com>, 'sunil joshi' <joshi@samsung.com>, 'Tomasz Figa' <t.figa@samsung.com>, 'Douglas Anderson' <dianders@chromium.org>, 'Yuvaraj Kumar C D' <yuvaraj.cd@samsung.com>
 List-Id: linux-mmc@vger.kernel.org
 
+On Tuesday, May 13, Sonny Rao wrote:
+> On Mon, May 12, 2014 at 10:02 PM, Seungwon Jeon <tgih.jun@samsung.com> wrote:
+> > As I mentioned in previous version, you put all reset stuff in existing fifo_reset function.
+> > Although databook mentions ciu_reset case for SBE error, it's not obvious when ciu_reset is needed
+> in other error cases.
+> > If you intend to add some robust error handing, it would be better to make another function.
+> 
+> The document I have actually doesn't mention error cases, it describes
+> this procedure as "Controller/DMA/FIFO Reset Usage" so I believe it is
+> saying this is the correct procedure in all cases, and based on our
+> testing it seems to work.  I understand the skepticism, as I shared it
+> initially when I saw this, but based on our experience, this is
+> correct and it doesn't need to live in a separate function.
+I agree this active error handling. 
+But, existing fifo_reset function is focused on fifo reset purely.
+I think your change is close to error recovery and it seems overloaded to basic function.
+So, you suggest renaming function for new sequence.
+And look into dw_mci_work_routine_card(). dw_mci_idmac_reset() is redundancy.
+I expect it can be cleaned.
 
+<Quot>
+                                /* Clear down the FIFO */
+                                dw_mci_fifo_reset(host);
+#ifdef CONFIG_MMC_DW_IDMAC
+                                dw_mci_idmac_reset(host);
+#endif
+</Quot>
 
-On 13/05/14 11:04, Ulf Hansson wrote:
-> On 29 April 2014 10:18,  <srinivas.kandagatla@linaro.org> wrote:
->> From: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
->>
->> Hi Russell,
->>
->> This patch series adds Qualcomm SD Card Controller support in pl180 mmci
->> driver. QCom SDCC is basically a pl180, but bit more customized, some of the
->> register layouts and offsets are different to the ones mentioned in pl180
->> datasheet. The plan is to totally remove the standalone SDCC driver
->> drivers/mmc/host/msm_sdcc.* and start using generic mmci driver for all
->> Qualcomm parts, as we get chance to test on other Qcom boards.
->>
->> To start using the existing mmci driver, a fake amba id for Qualcomm is added
->> in patches:
->>   ARM: amba: Add Qualcomm vendor ID.
->>   mmc: mmci: Add Qualcomm Id to amba id table.
->>
->> Second change is, adding a 3 clock cycle delay for register writes on QCOM
->> SDCC
->> registers, which is done in patches:
->>    mmc: mmci: Add register read/write wrappers.
->>    mmc: mmci: Qcomm: Add 3 clock cycle delay after each register write
->>
->> Third change was to accommodate DATCTRL and MMCICLK register layout changes in
->> Qcom SDCC. Which is done in patches:
->>    mmc: mmci: Add Qcom datactrl register variant
->>    mmc: mmci: Add Qcom variations to MCICommand register.
->>    mmc: mmci: Qcom fix MCICLK register settings.
->>    mmc: mmci: Add clock support for Qualcomm.
->>
->> Fourth major change was to add qcom specfic pio read function, the need for
->> this is because the way MCIFIFOCNT register behaved in QCOM SDCC is very
->>   different to the one in pl180. This change is done in patch:
->>    mmc: mmci: Add Qcom specific pio_read function.
->>
->> Last some Qcom unrelated changes to support Qcom are done in patches:
->>    mmc: mmci: use NSEC_PER_SEC macro
->>    mmc: mmci: move ST specific register extensions access under condition.
->>
->> This patches are tested  v3.15-rc3 in PIO mode on IFC6410 board with both eMMC
->> and external SD card. I would appreciate any feedback on the patches.
->> I would like to get this for v3.16.
->>
->> Thanks,
->> srini
->>
->
-> Hi Srinivas,
->
-Hi Ulf,
-> Thanks for working on this patchset, much appreciated! I intend to
-> review them as soon as I can.
+> 
+> > Please check my comments below.
+> >
+> > On Tue, May 13, 2014, Sonny Rao wrote:
+> >> This patch changes the fifo reset code to follow the reset procedure
+> >> outlined in the documentation of Synopsys  Mobile storage host databook
+> >> 7.2.13.
+Please remove this section number.
+No needed. It's old version.
 
-Thats Great.
->
-> For your information, currently there are one patch queued via Chris'
-> mmc tree for mmci and recently I have added my quite extensive
-> patchset, via mine mmc tree, all to be tested in Linux next.
->
-> I suppose the best approach to not hit conflicts would be if you base
-> your patches upon my tree. Potentially we could merge them this way,
-> unless of course Russell have other opinions.
->
-> git://git.linaro.org/people/ulf.hansson/mmc.git next
->
-Makes sense, I will rebase my next version of patches on top of your mmc 
-git tree, if Russell has no issues with this approach.
+> >>
+> >> v2: Add Generic DMA support
+> >>     per the documentation, move interrupt clear before wait
+> >>     make the test for DMA host->use_dma rather than host->using_dma
+> >>     add proper return values (although it appears no caller checks)
+> >>
+> >> Signed-off-by: Sonny Rao <sonnyrao@chromium.org>
+> >> Signed-off-by: Yuvaraj Kumar C D <yuvaraj.cd@samsung.com>
+> >> ---
+> >>  drivers/mmc/host/dw_mmc.c | 55 ++++++++++++++++++++++++++++++++++++++++++++++-
+> >>  drivers/mmc/host/dw_mmc.h |  1 +
+> >>  2 files changed, 55 insertions(+), 1 deletion(-)
+> >>
+> >> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> >> index 55cd110..aff57e1 100644
+> >> --- a/drivers/mmc/host/dw_mmc.c
+> >> +++ b/drivers/mmc/host/dw_mmc.c
+> >> @@ -2325,6 +2325,7 @@ static bool dw_mci_ctrl_reset(struct dw_mci *host, u32 reset)
+> >>
+> >>  static inline bool dw_mci_fifo_reset(struct dw_mci *host)
+> >>  {
+> >> +     u32 flags = SDMMC_CTRL_RESET | SDMMC_CTRL_FIFO_RESET;
+> >>       /*
+> >>        * Reseting generates a block interrupt, hence setting
+> >>        * the scatter-gather pointer to NULL.
+> >> @@ -2334,7 +2335,59 @@ static inline bool dw_mci_fifo_reset(struct dw_mci *host)
+> >>               host->sg = NULL;
+> >>       }
+> >>
+> >> -     return dw_mci_ctrl_reset(host, SDMMC_CTRL_FIFO_RESET);
+> >> +     /*
+> >> +      * The recommended method for resetting is to always reset the
+> >> +      * controller and the fifo, but differs slightly depending on the mode.
+> >> +      * The Generic DMA mode (non IDMAC) also needs to reset DMA where IDMAC
+> >> +      * mode resets IDMAC at the end.
+> >> +      *
+> >> +      */
+> >> +#ifndef CONFIG_MMC_DW_IDMAC
+> > Is it added for generic DMA?
+> > IDMAC should be considered for dma_reseet as well.
+> > Please check databook.
+> >
+> 
+> Yeah it's a little unclear.  In the "7.2.13 Controller/DMA/FIFO Reset
+> Usage" part of the document they mention It is set for what they call
+> "generic" DMA, which I think is when there is an external DMA
+> controller, and the part below that it says for "DW-DMA/Non-DW-DMA"
+> that controller_reset and fifo_reset should be set.   I believe this
+> "DW-DMA" case refers to what is called IDMAC.  So, I think it's not
+> required for this case, but I admit I'm not sure why they also say
+> "Non-DW-DMA". If you know of a good way to differentiate the "Generic
+> DMA" case  I can implement it.  It wasn't clear to me if the driver
+> even supported this "generic" dma case, but it sounds like it might,
+> so I added this code.  In practice, on the Exynos Systems we have,
+> which are using IDMAC, the reset procedure seems to work okay without
+> the dma_reset bit set, but I cannot test this "generic dma" case.
+> 
+> The other places in the doc where I see them mention the dma_reset bit
+> are "7.2.21 Transmission and Reception with Internal DMAC (IDMAC)"
+> and the description of the CTRL register, and in "7.1
+> Software/Hardware Restrictions" where they say it will terminate any
+> pending transfer.
+"DW-DMA" means Synopsys's DMA controller not IDMAC.
+SDMMC_CTRL_DMA_RESET can apply in all type DMA interface.
+
+> 
+> >> +     if (host->use_dma)
+> >> +             flags |= SDMMC_CTRL_DMA_RESET;
+> >> +#endif
+> >> +     if (dw_mci_ctrl_reset(host, flags)) {
+> >> +             /*
+> >> +              * In all cases we clear the RAWINTS register to clear any
+> >> +              * interrupts.
+> >> +              */
+> > I think interrupt masking is needed before reset because we will not handle it anymore.
+> > And Is there any reason to move interrupt clear here compared with previous version?
+> 
+> Yeah I moved it to match the description in the document more closely.
+>  The documents mentioned doing the interrupt clear after setting the
+> reset bits, and before waiting for the dma_req bit in the status
+> register to clear.  We've been running it with the interrupt clear
+> below the loop, for a while, and I just tested it with the clear above
+> the wait to make sure it still works properly and I was able to pass
+> the tuning process with some errors, so I believe this works fine too,
+> and more closely matches the description in the doc that I have.
+When I tried ciu_reset, I found some unexpected interrupts occurred.
+It means that interrupt handler will run to handle extra interrupts.
+Then, we may need mask the interrupt.
+Can you check it for test?
+
+> 
+> >> +             mci_writel(host, RINTSTS, 0xFFFFFFFF);
+> >> +
+> >> +             /* if using dma we wait for dma_req to clear */
+> >> +             if (host->use_dma) {
+> >> +                     unsigned long timeout = jiffies + msecs_to_jiffies(500);
+> >> +                     u32 status;
+> >> +                     do {
+> >> +                             status = mci_readl(host, STATUS);
+> >> +                             if (!(status & SDMMC_STATUS_DMA_REQ))
+> >> +                                     break;
+> >> +                             cpu_relax();
+> > What did you intend here?
+> > If you intent busy-wait, how about using sleep instead?
+> 
+> Yes it is a busy-wait.  There is similar code in dw_mci_ctrl_reset,
+> where that function is polling without sleeps, so I was trying to
+> match that.  The cpu_relax() is something I saw in other busy-waits in
+> the kernel, but I'm happy to take it out if you'd like.
+In case of ctrl_reset, waiting is during 2 clock.
+If this polling status is not long, I'm OK.
+
+> 
+> >> +                     } while (time_before(jiffies, timeout));
+> >> +
+> >> +                     if (status & SDMMC_STATUS_DMA_REQ) {
+> >> +                             dev_err(host->dev,
+> >> +                                     "%s: Timeout waiting for dma_req to "
+> >> +                                     "clear during reset", __func__);
+> >> +                             return false;
+> >> +                     }
+> >> +
+> >> +                     /* when using DMA next we reset the fifo again */
+> >> +                     dw_mci_ctrl_reset(host, SDMMC_CTRL_FIFO_RESET);
+> >> +             }
+> >> +     } else {
+> >> +             dev_err(host->dev, "%s: Reset bits didn't clear", __func__);
+> > If ciu_reset is cleared, clk update below is needed?
+> 
+> I'm honestly not sure what happens if the reset bits don't clear.  The
+> docs say controller_reset and dma_reset will auto clear after a number
+> of clocks, but fifo_reset will clear "after completion of the reset
+> operation"  So in this particular error case I'm not sure if it's
+> possible to recover properly or not and might hang, so I thought it
+> best to just return the error immediately.
+Yes.
+But at least if ciu_reset is done successfully, it may need clock update sequence again.
+In addition, printing reset bit[2:0] will be helpful for debug information.
 
 Thanks,
-srini
-> Kind regards
-> Ulf Hansson
->
+Seungwon Jeon
+
+> 
+> > Thanks,
+> > Seungwon Jeon
+> >
+> >> +             return false;
+> >> +     }
+> >> +
+> >> +#ifdef CONFIG_MMC_DW_IDMAC
+> >> +     /* It is also recommended that we reset and reprogram idmac */
+> >> +     dw_mci_idmac_reset(host);
+> >> +#endif
+> >> +
+> >> +     /* After a CTRL reset we need to have CIU set clock registers  */
+> >> +     mci_send_cmd(host->cur_slot, SDMMC_CMD_UPD_CLK, 0);
+> >> +
+> >> +     return true;
+> >>  }
+> >>
+> >>  static inline bool dw_mci_ctrl_all_reset(struct dw_mci *host)
+> >> diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
+> >> index 6bf24ab..2505804 100644
+> >> --- a/drivers/mmc/host/dw_mmc.h
+> >> +++ b/drivers/mmc/host/dw_mmc.h
+> >> @@ -129,6 +129,7 @@
+> >>  #define SDMMC_CMD_INDX(n)            ((n) & 0x1F)
+> >>  /* Status register defines */
+> >>  #define SDMMC_GET_FCNT(x)            (((x)>>17) & 0x1FFF)
+> >> +#define SDMMC_STATUS_DMA_REQ         BIT(31)
+> >>  /* FIFOTH register defines */
+> >>  #define SDMMC_SET_FIFOTH(m, r, t)    (((m) & 0x7) << 28 | \
+> >>                                        ((r) & 0xFFF) << 16 | \
+> >> --
+> >> 1.9.1.423.g4596e3a
+> >>
+> >> --
+> >> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> >> the body of a message to majordomo@vger.kernel.org
+> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> >
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
