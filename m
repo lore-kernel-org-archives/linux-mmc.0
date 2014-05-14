@@ -1,35 +1,43 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v11 0/6] mmc: omap_hsmmc: Enable SDIO IRQ
-Date: Wed, 14 May 2014 12:21:23 +0200
-Message-ID: <CAPDyKFqwNYr3WHe+4e5+3gt-NCYiwPq7DxG7HHr+YTygZXPZnw@mail.gmail.com>
-References: <1399807738-32223-1-git-send-email-afenkart@gmail.com>
+From: Axel Lin <axel.lin@ingics.com>
+Subject: Re: [PATCH] mmc: wmt-sdmmc: Use GFP_KERNEL instead of hard-coded value
+Date: Wed, 14 May 2014 19:01:36 +0800
+Message-ID: <CAFRkauBCjiePz-Nj46JmDoTmgOM7ch7BoA0s5SxQ2pn29F5aNg@mail.gmail.com>
+References: <1398646711.10750.0.camel@phoenix>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-doc-owner@vger.kernel.org>
-In-Reply-To: <1399807738-32223-1-git-send-email-afenkart@gmail.com>
-Sender: linux-doc-owner@vger.kernel.org
-To: Andreas Fenkart <afenkart@gmail.com>
-Cc: Tony Lindgren <tony@atomide.com>, Chris Ball <chris@printf.net>, Grant Likely <grant.likely@secretlab.ca>, Felipe Balbi <balbi@ti.com>, Balaji T K <balajitk@ti.com>, Andreas Mueller <schnitzeltony@googlemail.com>, Sebastian Reichel <sre@kernel.org>, Daniel Mack <zonque@gmail.com>, Kumar Gala <galak@codeaurora.org>, linux-doc@vger.kernel.org, linux-mmc <linux-mmc@vger.kernel.org>, linux-omap <linux-omap@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qg0-f54.google.com ([209.85.192.54]:51437 "EHLO
+	mail-qg0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754308AbaENLBg (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 14 May 2014 07:01:36 -0400
+Received: by mail-qg0-f54.google.com with SMTP id q108so2515174qgd.27
+        for <linux-mmc@vger.kernel.org>; Wed, 14 May 2014 04:01:36 -0700 (PDT)
+In-Reply-To: <1398646711.10750.0.camel@phoenix>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Tony Prisk <linux@prisktech.co.nz>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>, linux-mmc@vger.kernel.org
 
-On 11 May 2014 13:28, Andreas Fenkart <afenkart@gmail.com> wrote:
-> Hi Balaji, Tony, all
+2014-04-28 8:58 GMT+08:00 Axel Lin <axel.lin@ingics.com>:
+> Signed-off-by: Axel Lin <axel.lin@ingics.com>
+> ---
+>  drivers/mmc/host/wmt-sdmmc.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
 >
-> v12
-> - drop !CONFIG_OF compile break only exists when
->   #undef CONFIG_OF after include headers 1/7(Sebastian Reichel)
-> - do not emit "falling back to polling" if wake_irq not specified
->   since MMC does not need it, and it might confuse users
->   only emit if pinmux default/idle is not present or claiming
->   the irq failed 2/7(Balaji)
-> - dropped out-of-tree patches 6/7(Balaji)
-> - mention "ti,am33xx-hsmmc" compatible section in bindings
->   documentation 1/5
+> diff --git a/drivers/mmc/host/wmt-sdmmc.c b/drivers/mmc/host/wmt-sdmmc.c
+> index 34231d5..3605c37 100644
+> --- a/drivers/mmc/host/wmt-sdmmc.c
+> +++ b/drivers/mmc/host/wmt-sdmmc.c
+> @@ -852,7 +852,7 @@ static int wmt_mci_probe(struct platform_device *pdev)
+>         priv->dma_desc_buffer = dma_alloc_coherent(&pdev->dev,
+>                                                    mmc->max_blk_count * 16,
+>                                                    &priv->dma_desc_device_addr,
+> -                                                  208);
+> +                                                  GFP_KERNEL);
 
-Hi Andreas,
+Hi Ulf,
+This is a pretty trivial patch.
+Would you pick up this patch?
 
-It seems like we are ready to merge this patchset - I will include it
-in the next PR I send to Chris.
-
-Kind regards
-Ulf Hansson
+Regards,
+Axel
