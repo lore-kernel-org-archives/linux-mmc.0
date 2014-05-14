@@ -1,41 +1,46 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH 2/5] mmc: dw_mmc: remove the "supports-highspeed" property.
-Date: Wed, 14 May 2014 13:55:58 +0900
-Message-ID: <5372F75E.9010605@samsung.com>
-References: <1399893256-7071-1-git-send-email-jh80.chung@samsung.com>
- <1399893256-7071-3-git-send-email-jh80.chung@samsung.com>
- <1399916589.5497.2.camel@linux-builds1>
+From: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+Subject: Re: [PATCH v1 01/11] ARM: amba: Add Qualcomm vendor ID.
+Date: Wed, 14 May 2014 07:45:33 +0100
+Message-ID: <5373110D.2070403@linaro.org>
+References: <1398759492-12970-1-git-send-email-srinivas.kandagatla@linaro.org> <1398759542-13017-1-git-send-email-srinivas.kandagatla@linaro.org> <CACRpkdZyEAkJUGC5x6CY65-g97jfyg-TMDoe8JxDMexVx5usSA@mail.gmail.com> <5371E8B7.8000103@linaro.org> <20140513221313.GI20486@codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout1.samsung.com ([203.254.224.24]:16573 "EHLO
-	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750844AbaENE4A (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 14 May 2014 00:56:00 -0400
-Received: from epcpsbgr1.samsung.com
- (u141.gpu120.samsung.co.kr [203.254.230.141])
- by mailout1.samsung.com (Oracle Communications Messaging Server 7u4-24.01
- (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTP id <0N5J00MVYSDACQ40@mailout1.samsung.com> for
- linux-mmc@vger.kernel.org; Wed, 14 May 2014 13:55:58 +0900 (KST)
-In-reply-to: <1399916589.5497.2.camel@linux-builds1>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: <20140513221313.GI20486@codeaurora.org>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: Stephen Boyd <sboyd@codeaurora.org>
+Cc: Linus Walleij <linus.walleij@linaro.org>, Russell King <linux@arm.linux.org.uk>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, agross@quicinc.com, "linux-arm-msm@vger.kernel.org" <linux-arm-msm@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Dinh Nguyen <dinguyen@altera.com>
-Cc: linux-mmc@vger.kernel.org, chris@printf.net, ulf.hansson@linaro.org, tgih.jun@samsung.com, zhangfei.gao@linaro.org
 
-On 05/13/2014 02:43 AM, Dinh Nguyen wrote:
-> On Mon, 2014-05-12 at 20:14 +0900, Jaehoon Chung wrote:
->> Remove the "support-highspeed" property in dw-mmc.
->> "support-highspeed" property can be replaced to "cap-sd/mmc-highspeed".
+
+
+On 13/05/14 23:13, Stephen Boyd wrote:
+> On 05/13, Srinivas Kandagatla wrote:
+>> Thanks Linus W,
 >>
-> 
-> s/support-highspeed/supports-highspeed
+>> On 13/05/14 08:16, Linus Walleij wrote:
+>>> On Tue, Apr 29, 2014 at 10:19 AM,  <srinivas.kandagatla@linaro.org> wrote:
+>>>
+>>>> From: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+>>>>
+>>>> This patch adds Qualcomm amba vendor Id to the list. This ID is used in mmci
+>>>> driver.
+>>>>
+>>>> Signed-off-by: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+>>> (...)
+>>>> +       AMBA_VENDOR_QCOM = 0x51,
+>>>
+>>> Yeah it's a "Q", like 0x41 is "A" for ARM. You could as well mention
+>>> this in the commit message.
+>>>
+>> Sounds good, I will fix it in next version and send it to Russell's
+>> patch tracker.
+>>
+>
+> Please add a note that this id is fake in the commit text or in
+> the code as well.
+Sure, I will add it in commit text.
 
-Will fix.
-> 
-> Dinh
-> 
-> 
 
+>
