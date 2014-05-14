@@ -1,66 +1,72 @@
 From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH 2/5] mmc: dw_mmc: remove the "supports-highspeed" property.
-Date: Wed, 14 May 2014 13:55:28 +0900
-Message-ID: <5372F740.3020401@samsung.com>
+Subject: Re: [PATCH 5/5] mmc: dw_mmc: use the mmc regulator API into core.c
+Date: Wed, 14 May 2014 13:55:45 +0900
+Message-ID: <5372F751.9020405@samsung.com>
 References: <1399893256-7071-1-git-send-email-jh80.chung@samsung.com>
- <1399893256-7071-3-git-send-email-jh80.chung@samsung.com>
- <1399909697.16804.0.camel@linux-builds1>
+ <1399893256-7071-6-git-send-email-jh80.chung@samsung.com>
+ <1399916514.5497.1.camel@linux-builds1>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout2.samsung.com ([203.254.224.25]:11607 "EHLO
-	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750812AbaENEza (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 14 May 2014 00:55:30 -0400
+Received: from mailout3.samsung.com ([203.254.224.33]:14389 "EHLO
+	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750708AbaENEzr (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 14 May 2014 00:55:47 -0400
 Received: from epcpsbgr3.samsung.com
  (u143.gpu120.samsung.co.kr [203.254.230.143])
- by mailout2.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+ by mailout3.samsung.com (Oracle Communications Messaging Server 7u4-24.01
  (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTP id <0N5J00C5JSCGQ090@mailout2.samsung.com> for
- linux-mmc@vger.kernel.org; Wed, 14 May 2014 13:55:28 +0900 (KST)
-In-reply-to: <1399909697.16804.0.camel@linux-builds1>
+ with ESMTP id <0N5J00IJ1SCXFM30@mailout3.samsung.com> for
+ linux-mmc@vger.kernel.org; Wed, 14 May 2014 13:55:45 +0900 (KST)
+In-reply-to: <1399916514.5497.1.camel@linux-builds1>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Dinh Nguyen <dinguyen@altera.com>
 Cc: linux-mmc@vger.kernel.org, chris@printf.net, ulf.hansson@linaro.org, tgih.jun@samsung.com, zhangfei.gao@linaro.org
 
-Hi, Dinh.
-
-On 05/13/2014 12:48 AM, Dinh Nguyen wrote:
+On 05/13/2014 02:41 AM, Dinh Nguyen wrote:
 > On Mon, 2014-05-12 at 20:14 +0900, Jaehoon Chung wrote:
->> Remove the "support-highspeed" property in dw-mmc.
->> "support-highspeed" property can be replaced to "cap-sd/mmc-highspeed".
+>> Use the mmc regulator API into core.c instead of enabling locally.
+>> It can use the "vmmc", and optional "vqmmc".
 >>
 >> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
 >> ---
->>  .../devicetree/bindings/mmc/exynos-dw-mshc.txt     |    1 -
->>  .../devicetree/bindings/mmc/k3-dw-mshc.txt         |    1 -
->>  .../devicetree/bindings/mmc/synopsys-dw-mshc.txt   |    3 ---
->>  arch/arm/boot/dts/exynos4412-odroidx.dts           |    2 +-
->>  arch/arm/boot/dts/exynos4412-origen.dts            |    2 +-
->>  arch/arm/boot/dts/exynos4412-trats2.dts            |    2 +-
->>  arch/arm/boot/dts/exynos5250-arndale.dts           |    4 ++--
->>  arch/arm/boot/dts/exynos5250-cros-common.dtsi      |    6 +++---
->>  arch/arm/boot/dts/exynos5250-smdk5250.dts          |    4 ++--
->>  arch/arm/boot/dts/exynos5420-arndale-octa.dts      |    4 ++--
->>  arch/arm/boot/dts/exynos5420-smdk5420.dts          |    4 ++--
->>  arch/arm/boot/dts/socfpga_arria5.dtsi              |    3 ++-
->>  arch/arm/boot/dts/socfpga_cyclone5.dtsi            |    3 ++-
->>  arch/arm/boot/dts/socfpga_vt.dts                   |    3 ++-
->>  drivers/mmc/host/dw_mmc.c                          |    3 ---
->>  15 files changed, 20 insertions(+), 25 deletions(-)
+>>  drivers/mmc/host/dw_mmc.c |   61 ++++++++++++++++++---------------------------
+>>  1 file changed, 24 insertions(+), 37 deletions(-)
 >>
+>> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+>> index e0e933d..3ab7231 100644
+>> --- a/drivers/mmc/host/dw_mmc.c
+>> +++ b/drivers/mmc/host/dw_mmc.c
+>> @@ -937,6 +937,7 @@ static void dw_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+>>  	struct dw_mci_slot *slot = mmc_priv(mmc);
+>>  	const struct dw_mci_drv_data *drv_data = slot->host->drv_data;
+>>  	u32 regs;
+>> +	int ret;
+>>  
+>>  	switch (ios->bus_width) {
+>>  	case MMC_BUS_WIDTH_4:
+>> @@ -975,16 +976,36 @@ static void dw_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+>>  
+>>  	switch (ios->power_mode) {
+>>  	case MMC_POWER_UP:
+>> +		if (!IS_ERR(mmc->supply.vmmc))
+>> +			mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, ios->vdd);
+>> +
+>>  		set_bit(DW_MMC_CARD_NEED_INIT, &slot->flags);
+>>  		regs = mci_readl(slot->host, PWREN);
+>>  		regs |= (1 << slot->id);
+>>  		mci_writel(slot->host, PWREN, regs);
+>> +
 > 
-> Should exynos5260-xyref5260.dts and exynos5420-peach-pit.dts also get
-> updated?
+> Looks like stray newline here?
 
-I didn't find them..? Is it included into dts folder.
+Will Remove?
 
-Best Regards,
-Jaehoon Chung
 > 
 > Dinh
+> 
 > 
 > 
 
