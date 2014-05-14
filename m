@@ -1,47 +1,39 @@
-From: "John W. Linville" <linville@tuxdriver.com>
-Subject: Re: [PATCH 2/3] drivers/mmc/host/mmc_spi.c: Use
- get/put_unaligned_be32
-Date: Wed, 14 May 2014 10:50:00 -0400
-Message-ID: <20140514144959.GA14183@tuxdriver.com>
-References: <CAPDyKFo9xZ-z6eM0zG2A+=Bwj0EVyGxm=m28Lh9cHPSB+8qq1w@mail.gmail.com>
- <20140514122357.11052.qmail@ns.horizon.com>
+From: Doug Anderson <dianders@chromium.org>
+Subject: Re: [PATCH] mmc: sdhci: remove mdelay in eMMC tuning
+Date: Wed, 14 May 2014 08:08:20 -0700
+Message-ID: <CAD=FV=XtELRaTxjHLRuHchWha9ku-i+ufdvfOAAmF1qkgno3nQ@mail.gmail.com>
+References: <1399427558-8478-1-git-send-email-nsanders@chromium.org>
+	<CAPDyKFpsm_M2oY3OuVHZ-MCNezT6xwo-HPwfo1pxfrw5ySKfOg@mail.gmail.com>
+	<CANEJEGt1-BYD2kaHJisQ=YBj6k4CJU5-7_bjW+M5TZ_yuMY_TQ@mail.gmail.com>
+	<5285574.Jh25nVnT1D@wuerfel>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20140514122357.11052.qmail@ns.horizon.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: George Spelvin <linux@horizon.com>
-Cc: ulf.hansson@linaro.org, arik@wizery.com, david.gnedt@davizone.at, eliad@wizery.com, jan.nikitenko@gmail.com, laurent.pinchart+renesas@ideasonboard.com, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, linux-spi@vger.kernel.org, linux-wireless@vger.kernel.org, luca@coelho.fi, pavel@ucw.cz, tony@atomide.com
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-vc0-f171.google.com ([209.85.220.171]:50463 "EHLO
+	mail-vc0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754561AbaENPIV (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 14 May 2014 11:08:21 -0400
+Received: by mail-vc0-f171.google.com with SMTP id lc6so2603200vcb.2
+        for <linux-mmc@vger.kernel.org>; Wed, 14 May 2014 08:08:20 -0700 (PDT)
+In-Reply-To: <5285574.Jh25nVnT1D@wuerfel>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Arnd Bergmann <arnd@arndb.de>
+Cc: Grant Grundler <grundler@chromium.org>, Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <cjb@laptop.org>, Nick Sanders <nsanders@chromium.org>, linux-mmc <linux-mmc@vger.kernel.org>, Chang-Eun Choi-SSI <cu.choi@ssi.samsung.com>
 
-On Wed, May 14, 2014 at 08:23:57AM -0400, George Spelvin wrote:
-> Ulf Hansson wrote:
-> > Feel free to take this through the wireless tree as well. I assumes
-> > it's that same patchset as the other spi related fixes?
-> 
-> I'd like to answer, but I'm not sure which "other spi related fixes"
-> you're referring to.  If you mean patches 1 and 3 of this series, then
-> obviously.  If you mean something else then probably not.
-> 
-> [PATCH 1/3] lib/crc7: Shift crc7() output left 1 bit
-> [PATCH 3/3] drivers/net/wireless/ti/wl*/spi.c: Simplify CRC computation
-> 
-> 
-> As there seems to be no objection to sending the mmc change via the
-> wireless tree, are they ready to be queued there?
-> 
-> The additional reviews are:
-> All 3: Reviewed-by: Pavel Machek <pavel@ucw.cz>
-> 2/3: Reviewed-by: Geert Uytterhoeven <geert@linux-m68k.org>
-> 2/3: Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
-> 
-> I can resend everything with the additional signoff lines
-> if that's easier for you.
+Arnd,
 
-I can take them, sure.
+On Wed, May 14, 2014 at 5:18 AM, Arnd Bergmann <arnd@arndb.de> wrote:
+> I just stumbled over this thread. Looking at the callers of the
+> execute_tuning() function, I see that all three come from non-atomic
+> context. How about an add-on patch to turn the mdelay(1) into an
+> msleep(1)? That would be much friendlier to other tasks running
+> concurrently.
 
-John
--- 
-John W. Linville		Someday the world will need a hero, and you
-linville@tuxdriver.com			might be all we have.  Be ready.
+Even better if someone could tell us why the mdelay() was there to
+begin with.  As I understand it Nick was confident that it wasn't
+needed for eMMC.  He didn't _think_ it was needed for SD cards either
+but it was safer to leave it there for SD cards since the delay wasn't
+causing any known problems on them.
+
+-Doug
