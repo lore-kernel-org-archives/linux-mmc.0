@@ -1,76 +1,67 @@
-From: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH v13 2/2] ARM: sunxi: Add driver for SD/MMC
- hosts found on Allwinner sunxi SoCs
-Date: Wed, 14 May 2014 14:06:34 +0200
-Message-ID: <53735C4A.70502@redhat.com>
-References: <1399896288-5826-1-git-send-email-hdegoede@redhat.com>	<1399896288-5826-3-git-send-email-hdegoede@redhat.com>	<5370C5D1.2070901@broadcom.com> <CAPDyKFrq=v1SU0+rC5_tCJ1D5jUOd3vwLXpxgpzB9X5NQd-deg@mail.gmail.com>
-Reply-To: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: [PATCH] mmc: sdhci: remove mdelay in eMMC tuning
+Date: Wed, 14 May 2014 14:18:23 +0200
+Message-ID: <5285574.Jh25nVnT1D@wuerfel>
+References: <1399427558-8478-1-git-send-email-nsanders@chromium.org> <CAPDyKFpsm_M2oY3OuVHZ-MCNezT6xwo-HPwfo1pxfrw5ySKfOg@mail.gmail.com> <CANEJEGt1-BYD2kaHJisQ=YBj6k4CJU5-7_bjW+M5TZ_yuMY_TQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
-Return-path: <linux-sunxi+bncBDRZXY4CYYORBVFYZWNQKGQEETVHAYI-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-In-Reply-To: <CAPDyKFrq=v1SU0+rC5_tCJ1D5jUOd3vwLXpxgpzB9X5NQd-deg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Post: <http://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Help: <http://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Archive: <http://groups.google.com/group/linux-sunxi>
-Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
-List-Subscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Unsubscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, Arend van Spriel <arend-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>, Mike Turquette <mturquette-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, devicetree <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Emilio Lopez <emilio-0Z03zUJReD5OxF6Tv1QG9Q@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, =?UTF-8?B?RGF2aWQgTGFuemVuZMO2cmZlcg==?= <david.lanzendoerfer-Z7Kmv9EsliU@public.gmane.org>, Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7Bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mout.kundenserver.de ([212.227.126.131]:57111 "EHLO
+	mout.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750919AbaENMS3 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 14 May 2014 08:18:29 -0400
+In-Reply-To: <CANEJEGt1-BYD2kaHJisQ=YBj6k4CJU5-7_bjW+M5TZ_yuMY_TQ@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Grant Grundler <grundler@chromium.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <cjb@laptop.org>, Nick Sanders <nsanders@chromium.org>, linux-mmc <linux-mmc@vger.kernel.org>, Doug Anderson <dianders@chromium.org>, Chang-Eun Choi-SSI <cu.choi@ssi.samsung.com>
 
-Hi,
+On Tuesday 13 May 2014 18:13:30 Grant Grundler wrote:
+> On Wed, May 7, 2014 at 1:35 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> > On 7 May 2014 03:52, Nick Sanders <nsanders@chromium.org> wrote:
+> >> This patch removes an unneccesary 1ms mdelay in the HS200 tuning
+> >> loop, called 40 times per retuning. Currently this causes a latency
+> >> of >40ms on any emmc accesses triggering wake from runtime PM,
+> >> which can occur for a significant portion of reads on a mostly idle system.
+> >
+> > Aha, so you are actually using "MMC_CAP_RUNTIME_RESUME" here - cool :-).
+> >
+> > I suppose those patches that enables the "cap" has not reached
+> > mainline yet. Any plans on sending them?
+> >
+> >>
+> >> The delay is left in place for SD Cards, which use
+> >> MMC_SEND_TUNING_BLOCK rather than MMC_SEND_TUNING_BLOCK_HS200.
+> >> I'm not able to find evidence that this is required for SD in the
+> >> specs I have access to, however this delay has been present from
+> >> initial checkin for SD so I have preserved the original behavior for
+> >> compatibility.
+> >>
+> >> This has been verified to fix observed glitching on local audio
+> >> playback and recording on apps with inbuilt assumptions on storage
+> >> latency.
+> >>
+> >> Signed-off-by: Nick Sanders <nsanders@chromium.org>
+> >> Reviewed-by: Grant Grundler <grundler@chromium.org>
+> >> Reviewed-by: Doug Anderson <dianders@chromium.org>
+> >
+> > Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
+> 
+> Ulf,
+> Is your ACK enough to get this to land upstream or does cjb need to
+> respond it's been accepted?
+> 
+> It doesn't appear to have landed in mmc-next branch yet:
+>     http://git.kernel.org/cgit/linux/kernel/git/cjb/mmc.git/log/?h=mmc-next
+> 
+> apologies if it appears I am being impatient...but it's been almost a week now.
+> 
 
-On 05/14/2014 02:03 PM, Ulf Hansson wrote:
-> On 12 May 2014 15:00, Arend van Spriel <arend-dY08KVG/lbpWk0Htik3J/w@public.gmane.org> wrote:
->> On 05/12/2014 02:04 PM, Hans de Goede wrote:
->>>
->>> From: David Lanzend=C3=B6rfer<david.lanzendoerfer-Z7Kmv9EsliU@public.gmane.org>
->>>
->>> The Allwinner sunxi mmc host uses dma in bus-master mode using a built-=
-in
->>> designware idmac controller, which is identical to the one found in the
->>> mmc-dw
->>> hosts. However the rest of the host is not identical to mmc-dw, it deal=
-s
->>> with
->>> sending stop commands in hardware which makes it significantly differen=
-t
->>> from the mmc-dw devices.
->>>
->>> HdG: Various cleanups and fixes.
->>
->>
->> Just nitpicking, but usually the above line should be added below the
->> original signoff, so:
->>
->>> Signed-off-by: David Lanzend=C3=B6rfer<david.lanzendoerfer-Z7Kmv9EsliU@public.gmane.org>
->>
->> [hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org: various cleanups and fixes]
->>
->>> Signed-off-by: Hans de Goede<hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
->>
->>
->> As is documented in SubmittingPatches.
->>
->> Gr. AvS
->=20
->=20
-> This looks good to me, thanks Hans!
->=20
-> I will include this in the next PR I send to Chris, I will also take
-> the liberty to fixup the commit msg as pointed out by Arend.
+I just stumbled over this thread. Looking at the callers of the
+execute_tuning() function, I see that all three come from non-atomic
+context. How about an add-on patch to turn the mdelay(1) into an
+msleep(1)? That would be much friendlier to other tasks running
+concurrently.
 
-Great, thanks!
-
-Regards,
-
-Hans
-
---=20
-You received this message because you are subscribed to the Google Groups "=
-linux-sunxi" group.
-To unsubscribe from this group and stop receiving emails from it, send an e=
-mail to linux-sunxi+unsubscribe-/JYPxA39Uh5TLH3MbocFF+G/Ez6ZCGd0@public.gmane.org
-For more options, visit https://groups.google.com/d/optout.
+	Arnd
