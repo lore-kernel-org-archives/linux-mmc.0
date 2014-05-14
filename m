@@ -1,39 +1,78 @@
-From: Doug Anderson <dianders@chromium.org>
-Subject: Re: [PATCH] mmc: sdhci: remove mdelay in eMMC tuning
-Date: Wed, 14 May 2014 08:08:20 -0700
-Message-ID: <CAD=FV=XtELRaTxjHLRuHchWha9ku-i+ufdvfOAAmF1qkgno3nQ@mail.gmail.com>
-References: <1399427558-8478-1-git-send-email-nsanders@chromium.org>
-	<CAPDyKFpsm_M2oY3OuVHZ-MCNezT6xwo-HPwfo1pxfrw5ySKfOg@mail.gmail.com>
-	<CANEJEGt1-BYD2kaHJisQ=YBj6k4CJU5-7_bjW+M5TZ_yuMY_TQ@mail.gmail.com>
-	<5285574.Jh25nVnT1D@wuerfel>
+From: Dinh Nguyen <dinguyen@altera.com>
+Subject: Re: [PATCH 2/5] mmc: dw_mmc: remove the "supports-highspeed"
+ property.
+Date: Wed, 14 May 2014 15:17:08 -0500
+Message-ID: <1400098628.23670.3.camel@linux-builds1>
+References: <1399893256-7071-1-git-send-email-jh80.chung@samsung.com>
+	 <1399893256-7071-3-git-send-email-jh80.chung@samsung.com>
+	 <1399909697.16804.0.camel@linux-builds1> <5372F740.3020401@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-vc0-f171.google.com ([209.85.220.171]:50463 "EHLO
-	mail-vc0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754561AbaENPIV (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 14 May 2014 11:08:21 -0400
-Received: by mail-vc0-f171.google.com with SMTP id lc6so2603200vcb.2
-        for <linux-mmc@vger.kernel.org>; Wed, 14 May 2014 08:08:20 -0700 (PDT)
-In-Reply-To: <5285574.Jh25nVnT1D@wuerfel>
+Received: from mail-bl2lp0207.outbound.protection.outlook.com ([207.46.163.207]:27219
+	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1751118AbaENUTx (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 14 May 2014 16:19:53 -0400
+In-Reply-To: <5372F740.3020401@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: Grant Grundler <grundler@chromium.org>, Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <cjb@laptop.org>, Nick Sanders <nsanders@chromium.org>, linux-mmc <linux-mmc@vger.kernel.org>, Chang-Eun Choi-SSI <cu.choi@ssi.samsung.com>
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: linux-mmc@vger.kernel.org, chris@printf.net, ulf.hansson@linaro.org, tgih.jun@samsung.com, zhangfei.gao@linaro.org
 
-Arnd,
+On Wed, 2014-05-14 at 13:55 +0900, Jaehoon Chung wrote:
+> Hi, Dinh.
+> 
+> On 05/13/2014 12:48 AM, Dinh Nguyen wrote:
+> > On Mon, 2014-05-12 at 20:14 +0900, Jaehoon Chung wrote:
+> >> Remove the "support-highspeed" property in dw-mmc.
+> >> "support-highspeed" property can be replaced to "cap-sd/mmc-highspeed".
+> >>
+> >> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+> >> ---
+> >>  .../devicetree/bindings/mmc/exynos-dw-mshc.txt     |    1 -
+> >>  .../devicetree/bindings/mmc/k3-dw-mshc.txt         |    1 -
+> >>  .../devicetree/bindings/mmc/synopsys-dw-mshc.txt   |    3 ---
+> >>  arch/arm/boot/dts/exynos4412-odroidx.dts           |    2 +-
+> >>  arch/arm/boot/dts/exynos4412-origen.dts            |    2 +-
+> >>  arch/arm/boot/dts/exynos4412-trats2.dts            |    2 +-
+> >>  arch/arm/boot/dts/exynos5250-arndale.dts           |    4 ++--
+> >>  arch/arm/boot/dts/exynos5250-cros-common.dtsi      |    6 +++---
+> >>  arch/arm/boot/dts/exynos5250-smdk5250.dts          |    4 ++--
+> >>  arch/arm/boot/dts/exynos5420-arndale-octa.dts      |    4 ++--
+> >>  arch/arm/boot/dts/exynos5420-smdk5420.dts          |    4 ++--
+> >>  arch/arm/boot/dts/socfpga_arria5.dtsi              |    3 ++-
+> >>  arch/arm/boot/dts/socfpga_cyclone5.dtsi            |    3 ++-
+> >>  arch/arm/boot/dts/socfpga_vt.dts                   |    3 ++-
+> >>  drivers/mmc/host/dw_mmc.c                          |    3 ---
+> >>  15 files changed, 20 insertions(+), 25 deletions(-)
+> >>
+> > 
+> > Should exynos5260-xyref5260.dts and exynos5420-peach-pit.dts also get
+> > updated?
+> 
+> I didn't find them..? Is it included into dts folder.
 
-On Wed, May 14, 2014 at 5:18 AM, Arnd Bergmann <arnd@arndb.de> wrote:
-> I just stumbled over this thread. Looking at the callers of the
-> execute_tuning() function, I see that all three come from non-atomic
-> context. How about an add-on patch to turn the mdelay(1) into an
-> msleep(1)? That would be much friendlier to other tasks running
-> concurrently.
+Ah sorry, I tested this patch series against linux-next, which has these
+2 patches.
 
-Even better if someone could tell us why the mdelay() was there to
-begin with.  As I understand it Nick was confident that it wasn't
-needed for eMMC.  He didn't _think_ it was needed for SD cards either
-but it was safer to leave it there for SD cards since the delay wasn't
-causing any known problems on them.
 
--Doug
+81141a027c5d ARM: dts: add dts files for exynos5260-xyref5260 board
+3528dd34b2d3 ARM: dts: Add exynos5420 peach-pit board support
+
+Not sure if you want to fix those two boards up too, but just thought I
+point them out to you.
+
+Dinh
+
+> 
+> Best Regards,
+> Jaehoon Chung
+> > 
+> > Dinh
+> > 
+> > 
+> 
+
+
