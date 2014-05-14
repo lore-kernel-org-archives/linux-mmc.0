@@ -1,103 +1,169 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH RFC] mmc: add slot argument to mmc_of_parse
-Date: Wed, 14 May 2014 11:53:35 +0200
-Message-ID: <CAPDyKFqeunnWmguTH89byNc5Yy+CBY4avMeeon3ZSfNMmGJa9Q@mail.gmail.com>
-References: <1399457217-22846-1-git-send-email-ludovic.desroches@atmel.com>
+Subject: Re: [PATCH v3] mmc: sdhci-pci-o2micro: Add SeaBird SeaEagle SD3 support
+Date: Wed, 14 May 2014 11:54:50 +0200
+Message-ID: <CAPDyKFr6sKcZfBuzNi69d21nSYm17oy7j64eXwLdd4dyPqXe+A@mail.gmail.com>
+References: <1399287028-2582-1-git-send-email-peter.guo@bayhubtech.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qc0-f171.google.com ([209.85.216.171]:49427 "EHLO
-	mail-qc0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752048AbaENJxg (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 14 May 2014 05:53:36 -0400
-Received: by mail-qc0-f171.google.com with SMTP id x13so2407109qcv.30
-        for <linux-mmc@vger.kernel.org>; Wed, 14 May 2014 02:53:35 -0700 (PDT)
-In-Reply-To: <1399457217-22846-1-git-send-email-ludovic.desroches@atmel.com>
+Received: from mail-qc0-f182.google.com ([209.85.216.182]:37253 "EHLO
+	mail-qc0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753245AbaENJyv (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 14 May 2014 05:54:51 -0400
+Received: by mail-qc0-f182.google.com with SMTP id e16so2398608qcx.27
+        for <linux-mmc@vger.kernel.org>; Wed, 14 May 2014 02:54:50 -0700 (PDT)
+In-Reply-To: <1399287028-2582-1-git-send-email-peter.guo@bayhubtech.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ludovic Desroches <ludovic.desroches@atmel.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Chris Ball <chris@printf.net>
+To: "peter.guo" <peter.guo@bayhubtech.com>
+Cc: Chris Ball <chris@printf.net>, adam.lee@canonical.com, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, samuel.guan@bayhubtech.com
 
-On 7 May 2014 12:06, Ludovic Desroches <ludovic.desroches@atmel.com> wrote:
-> Some hosts manage several slots. In these case information such as the bus
-> width, chip detect and others are into the slot node. So we have to parse
-> child nodes. If not NULL, slot node will be used instead of the device
-> node.
+On 5 May 2014 12:50, peter.guo <peter.guo@bayhubtech.com> wrote:
+> From: Peter Guo <peter.guo@bayhubtech.com>
 >
-> Signed-off-by: Ludovic Desroches <ludovic.desroches@atmel.com>
-> ---
+> Add O2Micro/BayHubTech chip 8520 subversion B1 SD3.0 support.
+> Add O2Micro/BayHubTech chip 8620 and 8621 SD3.0 support
+> Enable Led function of 8520 chip.
 >
-> Hi,
->
-> Since this patch is only a RFC, I have not yet updated drivers using this
-> function.
->
-> I would like to use mmc_of_parse to reduce code duplication. My issue is that
-> atmel mci is a bit different from others mci host since it can provide
-> several slots, so it allocates several mmc hosts. By the way, it is not the
-> only one.
->
-> When calling mmc_alloc_host, host->parent is set to &pdev->dev. mmc_of_parse
-> uses host->parent->of_node but in my case settings are in the slot nodes so in
-> the child nodes. That's why I would like to have a way to tell which node I
-> want to use.
+> Signed-off-by: Peter Guo <peter.guo@bayhubtech.com>
+> Signed-off-by: Adam Lee <adam.lee@canonical.com>
 
-Seems reasonable, thanks for working on this!
+Thanks Peter, Adam!
 
->
->
-> Regards
->
-> Ludovic
->
->
->
->  drivers/mmc/core/host.c |    9 +++++++--
->  1 file changed, 7 insertions(+), 2 deletions(-)
->
-> diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
-> index fdea825..ed6cea5 100644
-> --- a/drivers/mmc/core/host.c
-> +++ b/drivers/mmc/core/host.c
-> @@ -300,13 +300,15 @@ static inline void mmc_host_clk_sysfs_init(struct mmc_host *host)
->  /**
->   *     mmc_of_parse() - parse host's device-tree node
->   *     @host: host whose node should be parsed.
-> + *     @slot: some devices provide several slots so the node to parse
-> + *     is not the host one.
->   *
->   * To keep the rest of the MMC subsystem unaware of whether DT has been
->   * used to to instantiate and configure this host instance or not, we
->   * parse the properties and set respective generic mmc-host flags and
->   * parameters.
->   */
-> -int mmc_of_parse(struct mmc_host *host)
-> +int mmc_of_parse(struct mmc_host *host, struct device_node *slot)
->  {
->         struct device_node *np;
->         u32 bus_width;
-> @@ -317,7 +319,10 @@ int mmc_of_parse(struct mmc_host *host)
->         if (!host->parent || !host->parent->of_node)
->                 return 0;
->
-> -       np = host->parent->of_node;
-> +       if (slot)
-> +               np = slot;
-> +       else
-> +               np = host->parent->of_node;
->
->         /* "bus-width" is translated to MMC_CAP_*_BIT_DATA flags */
->         if (of_property_read_u32(np, "bus-width", &bus_width) < 0) {
-> --
-> 1.7.9.5
->
-
-How about adding a new API, __mmc_of_parse((struct mmc_host *host,
-struct device_node *slot)
-Then let the old API mmc_of_parse() remain as is, but let it call the
-new API with slot == NULL.
-
-Atmel can then use the new API, but the other drivers can remain as is.
+Unless someone objects, I intend to include this in the next PR I send to Chris.
 
 Kind regards
 Ulf Hansson
+
+> ---
+>  drivers/mmc/host/sdhci-pci-o2micro.c | 78 +++++++++++++++++++++++++++++++++++-
+>  drivers/mmc/host/sdhci-pci-o2micro.h |  3 ++
+>  2 files changed, 80 insertions(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/host/sdhci-pci-o2micro.c b/drivers/mmc/host/sdhci-pci-o2micro.c
+> index f49666b..eafcd92 100644
+> --- a/drivers/mmc/host/sdhci-pci-o2micro.c
+> +++ b/drivers/mmc/host/sdhci-pci-o2micro.c
+> @@ -21,6 +21,45 @@
+>  #include "sdhci-pci.h"
+>  #include "sdhci-pci-o2micro.h"
+>
+> +static void o2_pci_set_baseclk(struct sdhci_pci_chip *chip, u32 value)
+> +{
+> +       u32 scratch_32;
+> +       pci_read_config_dword(chip->pdev,
+> +                             O2_SD_PLL_SETTING, &scratch_32);
+> +
+> +       scratch_32 &= 0x0000FFFF;
+> +       scratch_32 |= value;
+> +
+> +       pci_write_config_dword(chip->pdev,
+> +                              O2_SD_PLL_SETTING, scratch_32);
+> +}
+> +
+> +static void o2_pci_led_enable(struct sdhci_pci_chip *chip)
+> +{
+> +       int ret;
+> +       u32 scratch_32;
+> +
+> +       /* Set led of SD host function enable */
+> +       ret = pci_read_config_dword(chip->pdev,
+> +                                   O2_SD_FUNC_REG0, &scratch_32);
+> +       if (ret)
+> +               return;
+> +
+> +       scratch_32 &= ~O2_SD_FREG0_LEDOFF;
+> +       pci_write_config_dword(chip->pdev,
+> +                              O2_SD_FUNC_REG0, scratch_32);
+> +
+> +       ret = pci_read_config_dword(chip->pdev,
+> +                                   O2_SD_TEST_REG, &scratch_32);
+> +       if (ret)
+> +               return;
+> +
+> +       scratch_32 |= O2_SD_LED_ENABLE;
+> +       pci_write_config_dword(chip->pdev,
+> +                              O2_SD_TEST_REG, scratch_32);
+> +
+> +}
+> +
+>  void sdhci_pci_o2_fujin2_pci_init(struct sdhci_pci_chip *chip)
+>  {
+>         u32 scratch_32;
+> @@ -216,6 +255,40 @@ int sdhci_pci_o2_probe(struct sdhci_pci_chip *chip)
+>                 scratch &= 0x7f;
+>                 pci_write_config_byte(chip->pdev, O2_SD_LOCK_WP, scratch);
+>
+> +               /* DevId=8520 subId= 0x11 or 0x12  Type Chip support */
+> +               if (chip->pdev->device == PCI_DEVICE_ID_O2_FUJIN2) {
+> +                       ret = pci_read_config_dword(chip->pdev,
+> +                                                   O2_SD_FUNC_REG0,
+> +                                                   &scratch_32);
+> +                       scratch_32 = ((scratch_32 & 0xFF000000) >> 24);
+> +
+> +                       /* Check Whether subId is 0x11 or 0x12 */
+> +                       if ((scratch_32 == 0x11) || (scratch_32 == 0x12)) {
+> +                               scratch_32 = 0x2c280000;
+> +
+> +                               /* Set Base Clock to 208MZ */
+> +                               o2_pci_set_baseclk(chip, scratch_32);
+> +                               ret = pci_read_config_dword(chip->pdev,
+> +                                                           O2_SD_FUNC_REG4,
+> +                                                           &scratch_32);
+> +
+> +                               /* Enable Base Clk setting change */
+> +                               scratch_32 |= O2_SD_FREG4_ENABLE_CLK_SET;
+> +                               pci_write_config_dword(chip->pdev,
+> +                                                      O2_SD_FUNC_REG4,
+> +                                                      scratch_32);
+> +
+> +                               /* Set Tuning Window to 4 */
+> +                               pci_write_config_byte(chip->pdev,
+> +                                                     O2_SD_TUNING_CTRL, 0x44);
+> +
+> +                               break;
+> +                       }
+> +               }
+> +
+> +               /* Enable 8520 led function */
+> +               o2_pci_led_enable(chip);
+> +
+>                 /* Set timeout CLK */
+>                 ret = pci_read_config_dword(chip->pdev,
+>                                             O2_SD_CLK_SETTING, &scratch_32);
+> @@ -276,7 +349,7 @@ int sdhci_pci_o2_probe(struct sdhci_pci_chip *chip)
+>                 pci_write_config_byte(chip->pdev, O2_SD_LOCK_WP, scratch);
+>
+>                 ret = pci_read_config_dword(chip->pdev,
+> -                                           O2_SD_FUNC_REG0, &scratch_32);
+> +                                           O2_SD_PLL_SETTING, &scratch_32);
+>
+>                 if ((scratch_32 & 0xff000000) == 0x01000000) {
+>                         scratch_32 &= 0x0000FFFF;
+> @@ -299,6 +372,9 @@ int sdhci_pci_o2_probe(struct sdhci_pci_chip *chip)
+>                                                O2_SD_FUNC_REG4, scratch_32);
+>                 }
+>
+> +               /* Set Tuning Windows to 5 */
+> +               pci_write_config_byte(chip->pdev,
+> +                               O2_SD_TUNING_CTRL, 0x55);
+>                 /* Lock WP */
+>                 ret = pci_read_config_byte(chip->pdev,
+>                                            O2_SD_LOCK_WP, &scratch);
+> diff --git a/drivers/mmc/host/sdhci-pci-o2micro.h b/drivers/mmc/host/sdhci-pci-o2micro.h
+> index dbec4c9..a87ae24 100644
+> --- a/drivers/mmc/host/sdhci-pci-o2micro.h
+> +++ b/drivers/mmc/host/sdhci-pci-o2micro.h
+> @@ -57,6 +57,9 @@
+>  #define O2_SD_UHS2_L1_CTRL     0x35C
+>  #define O2_SD_FUNC_REG3                0x3E0
+>  #define O2_SD_FUNC_REG4                0x3E4
+> +#define O2_SD_LED_ENABLE       BIT(6)
+> +#define O2_SD_FREG0_LEDOFF     BIT(13)
+> +#define O2_SD_FREG4_ENABLE_CLK_SET     BIT(22)
+>
+>  #define O2_SD_VENDOR_SETTING   0x110
+>  #define O2_SD_VENDOR_SETTING2  0x1C8
+> --
+> 2.0.0.rc0
+>
