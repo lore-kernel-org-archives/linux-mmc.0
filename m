@@ -1,55 +1,66 @@
-From: Chris Ball <chris@printf.net>
-Subject: Re: [PATCH] mmc: sdhci: remove mdelay in eMMC tuning
-Date: Wed, 14 May 2014 02:22:43 +0100
-Message-ID: <86wqdprw64.fsf@void.printf.net>
-References: <1399427558-8478-1-git-send-email-nsanders@chromium.org>
-	<CAPDyKFpsm_M2oY3OuVHZ-MCNezT6xwo-HPwfo1pxfrw5ySKfOg@mail.gmail.com>
-	<CANEJEGt1-BYD2kaHJisQ=YBj6k4CJU5-7_bjW+M5TZ_yuMY_TQ@mail.gmail.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH 2/5] mmc: dw_mmc: remove the "supports-highspeed" property.
+Date: Wed, 14 May 2014 13:55:28 +0900
+Message-ID: <5372F740.3020401@samsung.com>
+References: <1399893256-7071-1-git-send-email-jh80.chung@samsung.com>
+ <1399893256-7071-3-git-send-email-jh80.chung@samsung.com>
+ <1399909697.16804.0.camel@linux-builds1>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:41951 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751383AbaENBWq (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 13 May 2014 21:22:46 -0400
-In-Reply-To: <CANEJEGt1-BYD2kaHJisQ=YBj6k4CJU5-7_bjW+M5TZ_yuMY_TQ@mail.gmail.com>
-	(Grant Grundler's message of "Tue, 13 May 2014 18:13:30 -0700")
+Received: from mailout2.samsung.com ([203.254.224.25]:11607 "EHLO
+	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750812AbaENEza (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 14 May 2014 00:55:30 -0400
+Received: from epcpsbgr3.samsung.com
+ (u143.gpu120.samsung.co.kr [203.254.230.143])
+ by mailout2.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+ (7.0.4.24.0) 64bit (built Nov 17 2011))
+ with ESMTP id <0N5J00C5JSCGQ090@mailout2.samsung.com> for
+ linux-mmc@vger.kernel.org; Wed, 14 May 2014 13:55:28 +0900 (KST)
+In-reply-to: <1399909697.16804.0.camel@linux-builds1>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Grant Grundler <grundler@chromium.org>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Nick Sanders <nsanders@chromium.org>, linux-mmc <linux-mmc@vger.kernel.org>, Doug Anderson <dianders@chromium.org>, Chang-Eun Choi-SSI <cu.choi@ssi.samsung.com>
+To: Dinh Nguyen <dinguyen@altera.com>
+Cc: linux-mmc@vger.kernel.org, chris@printf.net, ulf.hansson@linaro.org, tgih.jun@samsung.com, zhangfei.gao@linaro.org
 
-Hi,
+Hi, Dinh.
 
-On Wed, May 14 2014, Grant Grundler wrote:
->>> The delay is left in place for SD Cards, which use
->>> MMC_SEND_TUNING_BLOCK rather than MMC_SEND_TUNING_BLOCK_HS200.
->>> I'm not able to find evidence that this is required for SD in the
->>> specs I have access to, however this delay has been present from
->>> initial checkin for SD so I have preserved the original behavior for
->>> compatibility.
->>>
->>> This has been verified to fix observed glitching on local audio
->>> playback and recording on apps with inbuilt assumptions on storage
->>> latency.
->>>
->>> Signed-off-by: Nick Sanders <nsanders@chromium.org>
->>> Reviewed-by: Grant Grundler <grundler@chromium.org>
->>> Reviewed-by: Doug Anderson <dianders@chromium.org>
+On 05/13/2014 12:48 AM, Dinh Nguyen wrote:
+> On Mon, 2014-05-12 at 20:14 +0900, Jaehoon Chung wrote:
+>> Remove the "support-highspeed" property in dw-mmc.
+>> "support-highspeed" property can be replaced to "cap-sd/mmc-highspeed".
 >>
->> Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
->
-> Ulf,
-> Is your ACK enough to get this to land upstream or does cjb need to
-> respond it's been accepted?
->
-> It doesn't appear to have landed in mmc-next branch yet:
->     http://git.kernel.org/cgit/linux/kernel/git/cjb/mmc.git/log/?h=mmc-next
->
-> apologies if it appears I am being impatient...but it's been almost a week now.
+>> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+>> ---
+>>  .../devicetree/bindings/mmc/exynos-dw-mshc.txt     |    1 -
+>>  .../devicetree/bindings/mmc/k3-dw-mshc.txt         |    1 -
+>>  .../devicetree/bindings/mmc/synopsys-dw-mshc.txt   |    3 ---
+>>  arch/arm/boot/dts/exynos4412-odroidx.dts           |    2 +-
+>>  arch/arm/boot/dts/exynos4412-origen.dts            |    2 +-
+>>  arch/arm/boot/dts/exynos4412-trats2.dts            |    2 +-
+>>  arch/arm/boot/dts/exynos5250-arndale.dts           |    4 ++--
+>>  arch/arm/boot/dts/exynos5250-cros-common.dtsi      |    6 +++---
+>>  arch/arm/boot/dts/exynos5250-smdk5250.dts          |    4 ++--
+>>  arch/arm/boot/dts/exynos5420-arndale-octa.dts      |    4 ++--
+>>  arch/arm/boot/dts/exynos5420-smdk5420.dts          |    4 ++--
+>>  arch/arm/boot/dts/socfpga_arria5.dtsi              |    3 ++-
+>>  arch/arm/boot/dts/socfpga_cyclone5.dtsi            |    3 ++-
+>>  arch/arm/boot/dts/socfpga_vt.dts                   |    3 ++-
+>>  drivers/mmc/host/dw_mmc.c                          |    3 ---
+>>  15 files changed, 20 insertions(+), 25 deletions(-)
+>>
+> 
+> Should exynos5260-xyref5260.dts and exynos5420-peach-pit.dts also get
+> updated?
 
-Sorry about that.  Looks fine, pushed to mmc-next with Ulf's ACK now.
+I didn't find them..? Is it included into dts folder.
 
-- Chris.
--- 
-Chris Ball   <http://printf.net/>
+Best Regards,
+Jaehoon Chung
+> 
+> Dinh
+> 
+> 
+
