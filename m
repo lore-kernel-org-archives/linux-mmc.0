@@ -1,67 +1,67 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [PATCH] mmc: sdhci: remove mdelay in eMMC tuning
-Date: Wed, 14 May 2014 14:18:23 +0200
-Message-ID: <5285574.Jh25nVnT1D@wuerfel>
-References: <1399427558-8478-1-git-send-email-nsanders@chromium.org> <CAPDyKFpsm_M2oY3OuVHZ-MCNezT6xwo-HPwfo1pxfrw5ySKfOg@mail.gmail.com> <CANEJEGt1-BYD2kaHJisQ=YBj6k4CJU5-7_bjW+M5TZ_yuMY_TQ@mail.gmail.com>
+From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH v13 1/2] clk: sunxi: Fixup
+ clk_sunxi_mmc_phase_control to take a clk rather then a hw_clk
+Date: Wed, 14 May 2014 14:23:37 +0200
+Message-ID: <CAPDyKFquQ9bQB0w=wZySw54SMqi4OB+b3CrwQ0TrgSqw_mQLKg@mail.gmail.com>
+References: <1399896288-5826-1-git-send-email-hdegoede@redhat.com>
+	<1399896288-5826-2-git-send-email-hdegoede@redhat.com>
+Reply-To: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7Bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mout.kundenserver.de ([212.227.126.131]:57111 "EHLO
-	mout.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750919AbaENMS3 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 14 May 2014 08:18:29 -0400
-In-Reply-To: <CANEJEGt1-BYD2kaHJisQ=YBj6k4CJU5-7_bjW+M5TZ_yuMY_TQ@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-sunxi+bncBDF57NG2XIHRBSOAZWNQKGQEHUZCQOA-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+In-Reply-To: <1399896288-5826-2-git-send-email-hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+List-Post: <http://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Help: <http://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Archive: <http://groups.google.com/group/linux-sunxi>
+Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+List-Subscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Unsubscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+To: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, Mike Turquette <mturquette-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, =?UTF-8?Q?David_Lanzend=C3=B6rfer?= <david.lanzendoerfer-Z7Kmv9EsliU@public.gmane.org>, Emilio Lopez <emilio-0Z03zUJReD5OxF6Tv1QG9Q@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, devicetree <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: Grant Grundler <grundler@chromium.org>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <cjb@laptop.org>, Nick Sanders <nsanders@chromium.org>, linux-mmc <linux-mmc@vger.kernel.org>, Doug Anderson <dianders@chromium.org>, Chang-Eun Choi-SSI <cu.choi@ssi.samsung.com>
 
-On Tuesday 13 May 2014 18:13:30 Grant Grundler wrote:
-> On Wed, May 7, 2014 at 1:35 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> > On 7 May 2014 03:52, Nick Sanders <nsanders@chromium.org> wrote:
-> >> This patch removes an unneccesary 1ms mdelay in the HS200 tuning
-> >> loop, called 40 times per retuning. Currently this causes a latency
-> >> of >40ms on any emmc accesses triggering wake from runtime PM,
-> >> which can occur for a significant portion of reads on a mostly idle system.
-> >
-> > Aha, so you are actually using "MMC_CAP_RUNTIME_RESUME" here - cool :-).
-> >
-> > I suppose those patches that enables the "cap" has not reached
-> > mainline yet. Any plans on sending them?
-> >
-> >>
-> >> The delay is left in place for SD Cards, which use
-> >> MMC_SEND_TUNING_BLOCK rather than MMC_SEND_TUNING_BLOCK_HS200.
-> >> I'm not able to find evidence that this is required for SD in the
-> >> specs I have access to, however this delay has been present from
-> >> initial checkin for SD so I have preserved the original behavior for
-> >> compatibility.
-> >>
-> >> This has been verified to fix observed glitching on local audio
-> >> playback and recording on apps with inbuilt assumptions on storage
-> >> latency.
-> >>
-> >> Signed-off-by: Nick Sanders <nsanders@chromium.org>
-> >> Reviewed-by: Grant Grundler <grundler@chromium.org>
-> >> Reviewed-by: Doug Anderson <dianders@chromium.org>
-> >
-> > Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
-> 
-> Ulf,
-> Is your ACK enough to get this to land upstream or does cjb need to
-> respond it's been accepted?
-> 
-> It doesn't appear to have landed in mmc-next branch yet:
->     http://git.kernel.org/cgit/linux/kernel/git/cjb/mmc.git/log/?h=mmc-next
-> 
-> apologies if it appears I am being impatient...but it's been almost a week now.
-> 
+On 12 May 2014 14:04, Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
+> __clk_get_hw is supposed to be used by clk providers, not clk consumers.
+>
+> Signed-off-by: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 
-I just stumbled over this thread. Looking at the callers of the
-execute_tuning() function, I see that all three come from non-atomic
-context. How about an add-on patch to turn the mdelay(1) into an
-msleep(1)? That would be much friendlier to other tasks running
-concurrently.
+Reviewed-by: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 
-	Arnd
+> ---
+>  drivers/clk/sunxi/clk-sunxi.c | 3 ++-
+>  include/linux/clk/sunxi.h     | 2 +-
+>  2 files changed, 3 insertions(+), 2 deletions(-)
+>
+> diff --git a/drivers/clk/sunxi/clk-sunxi.c b/drivers/clk/sunxi/clk-sunxi.c
+> index 59f9040..4cc2b2a 100644
+> --- a/drivers/clk/sunxi/clk-sunxi.c
+> +++ b/drivers/clk/sunxi/clk-sunxi.c
+> @@ -510,11 +510,12 @@ CLK_OF_DECLARE(sun7i_a20_gmac, "allwinner,sun7i-a20-gmac-clk",
+>   * clk_sunxi_mmc_phase_control() - configures MMC clock phase control
+>   */
+>
+> -void clk_sunxi_mmc_phase_control(struct clk_hw *hw, u8 sample, u8 output)
+> +void clk_sunxi_mmc_phase_control(struct clk *clk, u8 sample, u8 output)
+>  {
+>         #define to_clk_composite(_hw) container_of(_hw, struct clk_composite, hw)
+>         #define to_clk_factors(_hw) container_of(_hw, struct clk_factors, hw)
+>
+> +       struct clk_hw *hw = __clk_get_hw(clk);
+>         struct clk_composite *composite = to_clk_composite(hw);
+>         struct clk_hw *rate_hw = composite->rate_hw;
+>         struct clk_factors *factors = to_clk_factors(rate_hw);
+> diff --git a/include/linux/clk/sunxi.h b/include/linux/clk/sunxi.h
+> index 1ef5c89..aed28c4 100644
+> --- a/include/linux/clk/sunxi.h
+> +++ b/include/linux/clk/sunxi.h
+> @@ -17,6 +17,6 @@
+>
+>  #include <linux/clk.h>
+>
+> -void clk_sunxi_mmc_phase_control(struct clk_hw *hw, u8 sample, u8 output);
+> +void clk_sunxi_mmc_phase_control(struct clk *clk, u8 sample, u8 output);
+>
+>  #endif
+> --
+> 1.9.0
+>
