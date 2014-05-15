@@ -1,7 +1,7 @@
 From: srinivas.kandagatla@linaro.org
-Subject: [PATCH v2 12/14] mmc: mmci: add support for fbclk to latch data and cmd.
-Date: Thu, 15 May 2014 10:37:49 +0100
-Message-ID: <1400146669-30302-1-git-send-email-srinivas.kandagatla@linaro.org>
+Subject: [PATCH v2 14/14] mmc: mmci: Add Qcom specific pio_read function.
+Date: Thu, 15 May 2014 10:38:04 +0100
+Message-ID: <1400146684-30384-1-git-send-email-srinivas.kandagatla@linaro.org>
 References: <1400146447-29803-1-git-send-email-srinivas.kandagatla@linaro.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1400146447-29803-1-git-send-email-srinivas.kandagatla@linaro.org>
@@ -12,50 +12,99 @@ List-Id: linux-mmc@vger.kernel.org
 
 From: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
 
-This patch adds support to fbclk that is used to latch data and
-cmd on some controllers like SD Card controller in Qcom SOC.
+MCIFIFOCNT register behaviour on Qcom chips is very different than the other
+pl180 integrations. MCIFIFOCNT register contains the number of
+words that are still waiting to be transferred through the FIFO. It keeps
+decrementing once the host CPU reads the MCIFIFO. With the existing logic and
+the MCIFIFOCNT behaviour, mmci_pio_read will loop forever, as the FIFOCNT
+register will always return transfer size before reading the FIFO.
+
+Also the data sheet states that "This register is only useful for debug
+purposes and should not be used for normal operation since it does not reflect
+data which may or may not be in the pipeline".
+
+This patch implements qcom_pio_read function so as existing mmci_pio_read is
+not suitable for Qcom SOCs. qcom_pio_read function is only selected
+based on qcom_fifo flag in variant data structure.
 
 Signed-off-by: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
 ---
- drivers/mmc/host/mmci.c | 5 +++++
- 1 file changed, 5 insertions(+)
+ drivers/mmc/host/mmci.c | 35 +++++++++++++++++++++++++++++++++--
+ 1 file changed, 33 insertions(+), 2 deletions(-)
 
 diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index 05ae654..bc7b80d 100644
+index cf58fec1..94b99d6 100644
 --- a/drivers/mmc/host/mmci.c
 +++ b/drivers/mmc/host/mmci.c
-@@ -54,6 +54,8 @@ static unsigned int fmax = 515633;
-  * @clkreg_enable: enable value for MMCICLOCK register
-  * @clkreg_8bit_bus_enable: enable value for 8 bit bus
-  * @clkreg_neg_edge_enable: enable value for inverted data/cmd output
-+ * @clkreg_fbclk_latch: enable value to select feedback clock to
-+ *			latch data and command comming in.
-  * @datalength_bits: number of bits in the MMCIDATALENGTH register
-  * @fifosize: number of bytes that can be written when MMCI_TXFIFOEMPTY
-  *	      is asserted (likewise for RX)
-@@ -79,6 +81,7 @@ struct variant_data {
- 	unsigned int		clkreg_enable;
- 	unsigned int		clkreg_8bit_bus_enable;
- 	unsigned int		clkreg_neg_edge_enable;
-+	unsigned int		clkreg_fbclk_latch;
- 	unsigned int		datalength_bits;
- 	unsigned int		fifosize;
- 	unsigned int		fifohalfsize;
-@@ -189,6 +192,7 @@ static struct variant_data variant_qcom = {
- 	.clkreg			= MCI_CLK_ENABLE,
- 	.clkreg_enable		= MCI_QCOM_CLK_FLOWENA,
- 	.clkreg_8bit_bus_enable = MCI_QCOM_CLK_WIDEBUS_8,
-+	.clkreg_fbclk_latch	= MCI_QCOM_CLK_FEEDBACK_CLK,
- 	.datactrl_mask_ddrmode	= MCI_QCOM_CLK_DDR_MODE,
- 	.data_cmd_enable	= MCI_QCOM_CSPM_DATCMD,
- 	.blksz_datactrl4	= true,
-@@ -343,6 +347,7 @@ static void mmci_set_clkreg(struct mmci_host *host, unsigned int desired)
- 			host->cclk = host->mclk / (2 * (clk + 1));
- 		}
+@@ -77,6 +77,7 @@ static unsigned int fmax = 515633;
+  *			 are not ignored.
+  * @explicit_mclk_control: enable explicit mclk control in driver.
+  * @qcom_cclk_is_mclk: enable iff card clock is multimedia card adapter clock.
++ * @qcom_fifo: enables qcom specific fifo pio read function.
+  */
+ struct variant_data {
+ 	unsigned int		clkreg;
+@@ -101,6 +102,7 @@ struct variant_data {
+ 	bool			mclk_delayed_writes;
+ 	bool			explicit_mclk_control;
+ 	bool			qcom_cclk_is_mclk;
++	bool			qcom_fifo;
+ };
  
-+		clk |= variant->clkreg_fbclk_latch;
- 		clk |= variant->clkreg_enable;
- 		clk |= MCI_CLK_ENABLE;
- 		/* This hasn't proven to be worthwhile */
+ static struct variant_data variant_arm = {
+@@ -211,6 +213,7 @@ static struct variant_data variant_qcom = {
+ 	.mclk_delayed_writes	= true,
+ 	.explicit_mclk_control	= true,
+ 	.qcom_cclk_is_mclk	= true,
++	.qcom_fifo		= true,
+ };
+ 
+ static inline u32 mmci_readl(struct mmci_host *host, u32 off)
+@@ -1026,6 +1029,29 @@ mmci_cmd_irq(struct mmci_host *host, struct mmc_command *cmd,
+ 	}
+ }
+ 
++static int mmci_qcom_pio_read(struct mmci_host *host, char *buffer,
++			 unsigned int remain)
++{
++	uint32_t	*ptr = (uint32_t *) buffer;
++	int		count = 0;
++	struct variant_data *variant = host->variant;
++	int		fifo_size = variant->fifosize;
++
++	if (remain % 4)
++		remain = ((remain >> 2) + 1) << 2;
++
++	while (readl(host->base + MMCISTATUS) & MCI_RXDATAAVLBL) {
++		*ptr = readl(host->base + MMCIFIFO + (count % fifo_size));
++		ptr++;
++		count += sizeof(uint32_t);
++
++		remain -=  sizeof(uint32_t);
++		if (remain == 0)
++			break;
++	}
++	return count;
++}
++
+ static int mmci_pio_read(struct mmci_host *host, char *buffer, unsigned int remain)
+ {
+ 	void __iomem *base = host->base;
+@@ -1147,8 +1173,13 @@ static irqreturn_t mmci_pio_irq(int irq, void *dev_id)
+ 		remain = sg_miter->length;
+ 
+ 		len = 0;
+-		if (status & MCI_RXACTIVE)
+-			len = mmci_pio_read(host, buffer, remain);
++		if (status & MCI_RXACTIVE) {
++			if (variant->qcom_fifo)
++				len = mmci_qcom_pio_read(host, buffer, remain);
++			else
++				len = mmci_pio_read(host, buffer, remain);
++		}
++
+ 		if (status & MCI_TXACTIVE)
+ 			len = mmci_pio_write(host, buffer, remain, status);
+ 
 -- 
 1.9.1
