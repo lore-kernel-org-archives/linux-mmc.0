@@ -1,35 +1,96 @@
-From: Sascha Hauer <s.hauer@pengutronix.de>
-Subject: Re: How to fix SDIO Operating Frequency in iMX6 device tree
-Date: Thu, 15 May 2014 14:32:28 +0200
-Message-ID: <20140515123228.GI5858@pengutronix.de>
-References: <CA+dawz2qxiVBzKkJVvMMU9wtfLajzN-z=ApmnZ3g8h42AncERQ@mail.gmail.com>
+From: Balaji T K <balajitk@ti.com>
+Subject: [PATCH] mmc: omap_hsmmc: use IS_ERR macro for error checking
+Date: Thu, 15 May 2014 18:53:49 +0530
+Message-ID: <1400160229-2578-1-git-send-email-balajitk@ti.com>
+References: <CAPDyKFqJc92kZn_Yj87q3GJWOq+jftm0UPsShAPREqkMKC5S4g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from metis.ext.pengutronix.de ([92.198.50.35]:47033 "EHLO
-	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753579AbaEOMcl (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 15 May 2014 08:32:41 -0400
-Content-Disposition: inline
-In-Reply-To: <CA+dawz2qxiVBzKkJVvMMU9wtfLajzN-z=ApmnZ3g8h42AncERQ@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain
+Return-path: <linux-omap-owner@vger.kernel.org>
+In-Reply-To: <CAPDyKFqJc92kZn_Yj87q3GJWOq+jftm0UPsShAPREqkMKC5S4g@mail.gmail.com>
+Sender: linux-omap-owner@vger.kernel.org
+To: linux-mmc@vger.kernel.org, chris@printf.net, ulf.hansson@linaro.org
+Cc: linux-omap@vger.kernel.org, Balaji T K <balajitk@ti.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Ashutosh Singh <embedded.ashu@gmail.com>
-Cc: chris@printf.net, linux-mmc@vger.kernel.org, robh+dt@kernel.org, pawel.moll@arm.com, mark.rutland@arm.com, ijc+devicetree@hellion.org.uk, galak@codeaurora.org, shawn.guo@linaro.org, linux-arm-kernel@lists.infradead.org, devicetree <devicetree@vger.kernel.org>
 
-Hi Ashutosh,
+Debounce clock is optional, use IS_ERR macro instead of NULL pointer check.
 
-On Thu, May 15, 2014 at 11:19:01AM +0530, Ashutosh Singh wrote:
-> I want to fixed the SDIO Operating Frequency to 25MHz for one of the
-> SDIO based Wifi module connected to Card slot.
-> How can i fixed it in my dtsi file. I am using iMX6 quard based custom board.
+Signed-off-by: Balaji T K <balajitk@ti.com>
+---
+ drivers/mmc/host/omap_hsmmc.c |   18 +++++++-----------
+ 1 files changed, 7 insertions(+), 11 deletions(-)
 
-Set the max-frequency property in the usdhc device node.
-
-Sascha
-
+diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+index 6b7b755..521eec3 100644
+--- a/drivers/mmc/host/omap_hsmmc.c
++++ b/drivers/mmc/host/omap_hsmmc.c
+@@ -1155,7 +1155,7 @@ static int omap_hsmmc_switch_opcond(struct omap_hsmmc_host *host, int vdd)
+ 
+ 	/* Disable the clocks */
+ 	pm_runtime_put_sync(host->dev);
+-	if (host->dbclk)
++	if (!IS_ERR(host->dbclk))
+ 		clk_disable_unprepare(host->dbclk);
+ 
+ 	/* Turn the power off */
+@@ -1166,7 +1166,7 @@ static int omap_hsmmc_switch_opcond(struct omap_hsmmc_host *host, int vdd)
+ 		ret = mmc_slot(host).set_power(host->dev, host->slot_id, 1,
+ 					       vdd);
+ 	pm_runtime_get_sync(host->dev);
+-	if (host->dbclk)
++	if (!IS_ERR(host->dbclk))
+ 		clk_prepare_enable(host->dbclk);
+ 
+ 	if (ret != 0)
+@@ -1947,12 +1947,8 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
+ 	/*
+ 	 * MMC can still work without debounce clock.
+ 	 */
+-	if (IS_ERR(host->dbclk)) {
+-		host->dbclk = NULL;
+-	} else if (clk_prepare_enable(host->dbclk) != 0) {
++	if (!IS_ERR(host->dbclk) && clk_prepare_enable(host->dbclk))
+ 		dev_warn(mmc_dev(host->mmc), "Failed to enable debounce clk\n");
+-		host->dbclk = NULL;
+-	}
+ 
+ 	/* Since we do only SG emulation, we can have as many segs
+ 	 * as we want. */
+@@ -2103,7 +2099,7 @@ err_irq:
+ 		dma_release_channel(host->rx_chan);
+ 	pm_runtime_put_sync(host->dev);
+ 	pm_runtime_disable(host->dev);
+-	if (host->dbclk)
++	if (!IS_ERR(host->dbclk))
+ 		clk_disable_unprepare(host->dbclk);
+ err1:
+ 	mmc_free_host(mmc);
+@@ -2131,7 +2127,7 @@ static int omap_hsmmc_remove(struct platform_device *pdev)
+ 
+ 	pm_runtime_put_sync(host->dev);
+ 	pm_runtime_disable(host->dev);
+-	if (host->dbclk)
++	if (!IS_ERR(host->dbclk))
+ 		clk_disable_unprepare(host->dbclk);
+ 
+ 	omap_hsmmc_gpio_free(host->pdata);
+@@ -2175,7 +2171,7 @@ static int omap_hsmmc_suspend(struct device *dev)
+ 				OMAP_HSMMC_READ(host->base, HCTL) & ~SDBP);
+ 	}
+ 
+-	if (host->dbclk)
++	if (!IS_ERR(host->dbclk))
+ 		clk_disable_unprepare(host->dbclk);
+ 
+ 	pm_runtime_put_sync(host->dev);
+@@ -2192,7 +2188,7 @@ static int omap_hsmmc_resume(struct device *dev)
+ 
+ 	pm_runtime_get_sync(host->dev);
+ 
+-	if (host->dbclk)
++	if (!IS_ERR(host->dbclk))
+ 		clk_prepare_enable(host->dbclk);
+ 
+ 	if (!(host->mmc->pm_flags & MMC_PM_KEEP_POWER))
 -- 
-Pengutronix e.K.                           |                             |
-Industrial Linux Solutions                 | http://www.pengutronix.de/  |
-Peiner Str. 6-8, 31137 Hildesheim, Germany | Phone: +49-5121-206917-0    |
-Amtsgericht Hildesheim, HRA 2686           | Fax:   +49-5121-206917-5555 |
+1.7.5.4
+
