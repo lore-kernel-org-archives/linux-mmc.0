@@ -1,38 +1,60 @@
 From: srinivas.kandagatla@linaro.org
-Subject: [PATCH v2 01/14] mmc: mmci: use NSEC_PER_SEC macro
-Date: Thu, 15 May 2014 10:36:16 +0100
-Message-ID: <1400146576-29846-1-git-send-email-srinivas.kandagatla@linaro.org>
+Subject: [PATCH v2 03/14] mmc: mmci: Add Qualcomm Id to amba id table
+Date: Thu, 15 May 2014 10:36:36 +0100
+Message-ID: <1400146596-29929-1-git-send-email-srinivas.kandagatla@linaro.org>
 References: <1400146447-29803-1-git-send-email-srinivas.kandagatla@linaro.org>
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1400146447-29803-1-git-send-email-srinivas.kandagatla@linaro.org>
-Sender: linux-arm-msm-owner@vger.kernel.org
+Sender: linux-kernel-owner@vger.kernel.org
 To: Russell King <linux@arm.linux.org.uk>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
 Cc: Chris Ball <chris@printf.net>, linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org, linus.walleij@linaro.org, Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
 
 From: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
 
-This patch replaces a constant used in calculating timeout with a proper
-macro. This is make code more readable.
+This patch adds a fake Qualcomm ID 0x00051180 to the amba_ids, as Qualcomm
+SDCC controller is pl180, but amba id registers read 0x0's.
+The plan is to remove SDCC driver totally and use mmci as the main SD
+controller driver for Qualcomm SOCs.
 
 Signed-off-by: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
 Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
 ---
- drivers/mmc/host/mmci.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ drivers/mmc/host/mmci.c | 15 +++++++++++++++
+ 1 file changed, 15 insertions(+)
 
 diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index a084edd..a38e714 100644
+index a38e714..7bdf4d3 100644
 --- a/drivers/mmc/host/mmci.c
 +++ b/drivers/mmc/host/mmci.c
-@@ -718,7 +718,7 @@ static void mmci_start_data(struct mmci_host *host, struct mmc_data *data)
- 	data->bytes_xfered = 0;
+@@ -160,6 +160,15 @@ static struct variant_data variant_ux500v2 = {
+ 	.pwrreg_nopower		= true,
+ };
  
- 	clks = (unsigned long long)data->timeout_ns * host->cclk;
--	do_div(clks, 1000000000UL);
-+	do_div(clks, NSEC_PER_SEC);
- 
- 	timeout = data->timeout_clks + (unsigned int)clks;
++static struct variant_data variant_qcom = {
++	.fifosize		= 16 * 4,
++	.fifohalfsize		= 8 * 4,
++	.clkreg			= MCI_CLK_ENABLE,
++	.datalength_bits	= 24,
++	.blksz_datactrl4	= true,
++	.pwrreg_powerup		= MCI_PWR_UP,
++};
++
+ static int mmci_card_busy(struct mmc_host *mmc)
+ {
+ 	struct mmci_host *host = mmc_priv(mmc);
+@@ -1750,6 +1759,12 @@ static struct amba_id mmci_ids[] = {
+ 		.mask   = 0xf0ffffff,
+ 		.data	= &variant_ux500v2,
+ 	},
++	/* Qualcomm variants */
++	{
++		.id     = 0x00051180,
++		.mask	= 0x000fffff,
++		.data	= &variant_qcom,
++	},
+ 	{ 0, 0 },
+ };
  
 -- 
 1.9.1
