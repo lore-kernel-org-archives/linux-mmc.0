@@ -1,80 +1,35 @@
-From: srinivas.kandagatla@linaro.org
-Subject: [PATCH v2 08/14] mmc: mmci: add 8bit bus support in variant data
-Date: Thu, 15 May 2014 10:37:16 +0100
-Message-ID: <1400146636-30138-1-git-send-email-srinivas.kandagatla@linaro.org>
-References: <1400146447-29803-1-git-send-email-srinivas.kandagatla@linaro.org>
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
-In-Reply-To: <1400146447-29803-1-git-send-email-srinivas.kandagatla@linaro.org>
-Sender: linux-arm-msm-owner@vger.kernel.org
-To: Russell King <linux@arm.linux.org.uk>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
-Cc: Chris Ball <chris@printf.net>, linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org, linus.walleij@linaro.org, Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+From: Sascha Hauer <s.hauer@pengutronix.de>
+Subject: Re: How to fix SDIO Operating Frequency in iMX6 device tree
+Date: Thu, 15 May 2014 14:32:28 +0200
+Message-ID: <20140515123228.GI5858@pengutronix.de>
+References: <CA+dawz2qxiVBzKkJVvMMU9wtfLajzN-z=ApmnZ3g8h42AncERQ@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from metis.ext.pengutronix.de ([92.198.50.35]:47033 "EHLO
+	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753579AbaEOMcl (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 15 May 2014 08:32:41 -0400
+Content-Disposition: inline
+In-Reply-To: <CA+dawz2qxiVBzKkJVvMMU9wtfLajzN-z=ApmnZ3g8h42AncERQ@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ashutosh Singh <embedded.ashu@gmail.com>
+Cc: chris@printf.net, linux-mmc@vger.kernel.org, robh+dt@kernel.org, pawel.moll@arm.com, mark.rutland@arm.com, ijc+devicetree@hellion.org.uk, galak@codeaurora.org, shawn.guo@linaro.org, linux-arm-kernel@lists.infradead.org, devicetree <devicetree@vger.kernel.org>
 
-From: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+Hi Ashutosh,
 
-This patch adds 8bit bus enable to variant structure giving more flexibility
-to the driver to support more SOCs which have different clock register layout.
+On Thu, May 15, 2014 at 11:19:01AM +0530, Ashutosh Singh wrote:
+> I want to fixed the SDIO Operating Frequency to 25MHz for one of the
+> SDIO based Wifi module connected to Card slot.
+> How can i fixed it in my dtsi file. I am using iMX6 quard based custom board.
 
-Without this patch other new SOCs like Qcom will have to add more code
-to special case them.
+Set the max-frequency property in the usdhc device node.
 
-Signed-off-by: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
----
- drivers/mmc/host/mmci.c | 7 ++++++-
- 1 file changed, 6 insertions(+), 1 deletion(-)
+Sascha
 
-diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index dec70d2..a81f303 100644
---- a/drivers/mmc/host/mmci.c
-+++ b/drivers/mmc/host/mmci.c
-@@ -52,6 +52,7 @@ static unsigned int fmax = 515633;
-  * struct variant_data - MMCI variant-specific quirks
-  * @clkreg: default value for MCICLOCK register
-  * @clkreg_enable: enable value for MMCICLOCK register
-+ * @clkreg_8bit_bus_enable: enable value for 8 bit bus
-  * @datalength_bits: number of bits in the MMCIDATALENGTH register
-  * @fifosize: number of bytes that can be written when MMCI_TXFIFOEMPTY
-  *	      is asserted (likewise for RX)
-@@ -74,6 +75,7 @@ static unsigned int fmax = 515633;
- struct variant_data {
- 	unsigned int		clkreg;
- 	unsigned int		clkreg_enable;
-+	unsigned int		clkreg_8bit_bus_enable;
- 	unsigned int		datalength_bits;
- 	unsigned int		fifosize;
- 	unsigned int		fifohalfsize;
-@@ -116,6 +118,7 @@ static struct variant_data variant_u300 = {
- 	.fifosize		= 16 * 4,
- 	.fifohalfsize		= 8 * 4,
- 	.clkreg_enable		= MCI_ST_U300_HWFCEN,
-+	.clkreg_8bit_bus_enable = MCI_ST_8BIT_BUS,
- 	.datactrl_mask_ddrmode	= MCI_ST_DPSM_DDRMODE,
- 	.datalength_bits	= 16,
- 	.sdio			= true,
-@@ -144,6 +147,7 @@ static struct variant_data variant_ux500 = {
- 	.fifohalfsize		= 8 * 4,
- 	.clkreg			= MCI_CLK_ENABLE,
- 	.clkreg_enable		= MCI_ST_UX500_HWFCEN,
-+	.clkreg_8bit_bus_enable = MCI_ST_8BIT_BUS,
- 	.datactrl_mask_ddrmode	= MCI_ST_DPSM_DDRMODE,
- 	.datalength_bits	= 24,
- 	.sdio			= true,
-@@ -160,6 +164,7 @@ static struct variant_data variant_ux500v2 = {
- 	.fifohalfsize		= 8 * 4,
- 	.clkreg			= MCI_CLK_ENABLE,
- 	.clkreg_enable		= MCI_ST_UX500_HWFCEN,
-+	.clkreg_8bit_bus_enable = MCI_ST_8BIT_BUS,
- 	.datactrl_mask_ddrmode	= MCI_ST_DPSM_DDRMODE,
- 	.datalength_bits	= 24,
- 	.sdio			= true,
-@@ -340,7 +345,7 @@ static void mmci_set_clkreg(struct mmci_host *host, unsigned int desired)
- 	if (host->mmc->ios.bus_width == MMC_BUS_WIDTH_4)
- 		clk |= MCI_4BIT_BUS;
- 	if (host->mmc->ios.bus_width == MMC_BUS_WIDTH_8)
--		clk |= MCI_ST_8BIT_BUS;
-+		clk |= variant->clkreg_8bit_bus_enable;
- 
- 	if (host->mmc->ios.timing == MMC_TIMING_UHS_DDR50)
- 		clk |= MCI_ST_UX500_NEG_EDGE;
 -- 
-1.9.1
+Pengutronix e.K.                           |                             |
+Industrial Linux Solutions                 | http://www.pengutronix.de/  |
+Peiner Str. 6-8, 31137 Hildesheim, Germany | Phone: +49-5121-206917-0    |
+Amtsgericht Hildesheim, HRA 2686           | Fax:   +49-5121-206917-5555 |
