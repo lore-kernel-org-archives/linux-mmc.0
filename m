@@ -1,78 +1,36 @@
-From: Dinh Nguyen <dinguyen@altera.com>
-Subject: Re: [PATCH 2/5] mmc: dw_mmc: remove the "supports-highspeed"
- property.
-Date: Wed, 14 May 2014 15:17:08 -0500
-Message-ID: <1400098628.23670.3.camel@linux-builds1>
-References: <1399893256-7071-1-git-send-email-jh80.chung@samsung.com>
-	 <1399893256-7071-3-git-send-email-jh80.chung@samsung.com>
-	 <1399909697.16804.0.camel@linux-builds1> <5372F740.3020401@samsung.com>
+From: "H. Peter Anvin" <hpa@zytor.com>
+Subject: Re: [PATCH v2 1/3] lib/crc7: Shift crc7() output left 1 bit
+Date: Wed, 14 May 2014 17:37:22 -0700
+Message-ID: <53740C42.3000906@zytor.com>
+References: <20140511100211.1334.qmail@ns.horizon.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bl2lp0207.outbound.protection.outlook.com ([207.46.163.207]:27219
-	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751118AbaENUTx (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 14 May 2014 16:19:53 -0400
-In-Reply-To: <5372F740.3020401@samsung.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20140511100211.1334.qmail@ns.horizon.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: George Spelvin <linux@horizon.com>, pavel@ucw.cz
+Cc: arik@wizery.com, david.gnedt@davizone.at, eliad@wizery.com, jan.nikitenko@gmail.com, laurent.pinchart+renesas@ideasonboard.com, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, linux-spi@vger.kernel.org, linux-wireless@vger.kernel.org, linville@tuxdriver.com, luca@coelho.fi, tony@atomide.com
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: linux-mmc@vger.kernel.org, chris@printf.net, ulf.hansson@linaro.org, tgih.jun@samsung.com, zhangfei.gao@linaro.org
 
-On Wed, 2014-05-14 at 13:55 +0900, Jaehoon Chung wrote:
-> Hi, Dinh.
+On 05/11/2014 03:02 AM, George Spelvin wrote:
+> From 770aa22e6c9c92027e3e21797192ccabb3e7c70e Mon Sep 17 00:00:00 2001
+> From: George Spelvin <linux@horizon.com>
+> Date: Sat, 10 May 2014 10:32:57 -0400
+> Subject: [PATCH v2 1/3] lib/crc7: Shift crc7() output left 1 bit
 > 
-> On 05/13/2014 12:48 AM, Dinh Nguyen wrote:
-> > On Mon, 2014-05-12 at 20:14 +0900, Jaehoon Chung wrote:
-> >> Remove the "support-highspeed" property in dw-mmc.
-> >> "support-highspeed" property can be replaced to "cap-sd/mmc-highspeed".
-> >>
-> >> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
-> >> ---
-> >>  .../devicetree/bindings/mmc/exynos-dw-mshc.txt     |    1 -
-> >>  .../devicetree/bindings/mmc/k3-dw-mshc.txt         |    1 -
-> >>  .../devicetree/bindings/mmc/synopsys-dw-mshc.txt   |    3 ---
-> >>  arch/arm/boot/dts/exynos4412-odroidx.dts           |    2 +-
-> >>  arch/arm/boot/dts/exynos4412-origen.dts            |    2 +-
-> >>  arch/arm/boot/dts/exynos4412-trats2.dts            |    2 +-
-> >>  arch/arm/boot/dts/exynos5250-arndale.dts           |    4 ++--
-> >>  arch/arm/boot/dts/exynos5250-cros-common.dtsi      |    6 +++---
-> >>  arch/arm/boot/dts/exynos5250-smdk5250.dts          |    4 ++--
-> >>  arch/arm/boot/dts/exynos5420-arndale-octa.dts      |    4 ++--
-> >>  arch/arm/boot/dts/exynos5420-smdk5420.dts          |    4 ++--
-> >>  arch/arm/boot/dts/socfpga_arria5.dtsi              |    3 ++-
-> >>  arch/arm/boot/dts/socfpga_cyclone5.dtsi            |    3 ++-
-> >>  arch/arm/boot/dts/socfpga_vt.dts                   |    3 ++-
-> >>  drivers/mmc/host/dw_mmc.c                          |    3 ---
-> >>  15 files changed, 20 insertions(+), 25 deletions(-)
-> >>
-> > 
-> > Should exynos5260-xyref5260.dts and exynos5420-peach-pit.dts also get
-> > updated?
+> This eliminates a 1-bit left shift in every single caller,
+> and makes the inner loop of the CRC computation more efficient.
 > 
-> I didn't find them..? Is it included into dts folder.
-
-Ah sorry, I tested this patch series against linux-next, which has these
-2 patches.
-
-
-81141a027c5d ARM: dts: add dts files for exynos5260-xyref5260 board
-3528dd34b2d3 ARM: dts: Add exynos5420 peach-pit board support
-
-Not sure if you want to fix those two boards up too, but just thought I
-point them out to you.
-
-Dinh
-
+> Renamed crc7 to crc7_be (big-endian) since the interface changed.
 > 
-> Best Regards,
-> Jaehoon Chung
-> > 
-> > Dinh
-> > 
-> > 
+> Also purged #include <linux/crc7.h> from files that don't use it at all.
 > 
+> Signed-off-by: George Spelvin <linux@horizon.com>
 
+If the whole point of this is to use it for MMC/SD cards, why not just
+also subsume the OR 1 and call it crc7_mmc() or something like that.
 
+(Which I'm all for doing... I don't know of any other crc7 users.)
+
+	-hpa
