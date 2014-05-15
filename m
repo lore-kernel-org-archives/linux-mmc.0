@@ -1,7 +1,7 @@
 From: srinivas.kandagatla@linaro.org
-Subject: [PATCH v2 11/14] mmc: mmci: Add support to data commands via variant structure.
-Date: Thu, 15 May 2014 10:37:40 +0100
-Message-ID: <1400146660-30261-1-git-send-email-srinivas.kandagatla@linaro.org>
+Subject: [PATCH v2 12/14] mmc: mmci: add support for fbclk to latch data and cmd.
+Date: Thu, 15 May 2014 10:37:49 +0100
+Message-ID: <1400146669-30302-1-git-send-email-srinivas.kandagatla@linaro.org>
 References: <1400146447-29803-1-git-send-email-srinivas.kandagatla@linaro.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1400146447-29803-1-git-send-email-srinivas.kandagatla@linaro.org>
@@ -12,53 +12,50 @@ List-Id: linux-mmc@vger.kernel.org
 
 From: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
 
-On some SOCs like Qcom there are explicit bits in the command register
-to specify if its a data transfer command or not. So this patch adds
-support to such bits in variant data, giving more flexibility to the
-driver.
+This patch adds support to fbclk that is used to latch data and
+cmd on some controllers like SD Card controller in Qcom SOC.
 
 Signed-off-by: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
 ---
- drivers/mmc/host/mmci.c | 6 ++++++
- 1 file changed, 6 insertions(+)
+ drivers/mmc/host/mmci.c | 5 +++++
+ 1 file changed, 5 insertions(+)
 
 diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index 0a0fc22..05ae654 100644
+index 05ae654..bc7b80d 100644
 --- a/drivers/mmc/host/mmci.c
 +++ b/drivers/mmc/host/mmci.c
-@@ -59,6 +59,7 @@ static unsigned int fmax = 515633;
+@@ -54,6 +54,8 @@ static unsigned int fmax = 515633;
+  * @clkreg_enable: enable value for MMCICLOCK register
+  * @clkreg_8bit_bus_enable: enable value for 8 bit bus
+  * @clkreg_neg_edge_enable: enable value for inverted data/cmd output
++ * @clkreg_fbclk_latch: enable value to select feedback clock to
++ *			latch data and command comming in.
+  * @datalength_bits: number of bits in the MMCIDATALENGTH register
+  * @fifosize: number of bytes that can be written when MMCI_TXFIFOEMPTY
   *	      is asserted (likewise for RX)
-  * @fifohalfsize: number of bytes that can be written when MCI_TXFIFOHALFEMPTY
-  *		  is asserted (likewise for RX)
-+ * @data_cmd_enable: enable value for data commands.
-  * @sdio: variant supports SDIO
-  * @st_clkdiv: true if using a ST-specific clock divider algorithm
-  * @datactrl_mask_ddrmode: ddr mode mask in datactrl register.
-@@ -81,6 +82,7 @@ struct variant_data {
+@@ -79,6 +81,7 @@ struct variant_data {
+ 	unsigned int		clkreg_enable;
+ 	unsigned int		clkreg_8bit_bus_enable;
+ 	unsigned int		clkreg_neg_edge_enable;
++	unsigned int		clkreg_fbclk_latch;
  	unsigned int		datalength_bits;
  	unsigned int		fifosize;
  	unsigned int		fifohalfsize;
-+	unsigned int		data_cmd_enable;
- 	unsigned int		datactrl_mask_ddrmode;
- 	bool			sdio;
- 	bool			st_clkdiv;
-@@ -188,6 +190,7 @@ static struct variant_data variant_qcom = {
+@@ -189,6 +192,7 @@ static struct variant_data variant_qcom = {
+ 	.clkreg			= MCI_CLK_ENABLE,
  	.clkreg_enable		= MCI_QCOM_CLK_FLOWENA,
  	.clkreg_8bit_bus_enable = MCI_QCOM_CLK_WIDEBUS_8,
++	.clkreg_fbclk_latch	= MCI_QCOM_CLK_FEEDBACK_CLK,
  	.datactrl_mask_ddrmode	= MCI_QCOM_CLK_DDR_MODE,
-+	.data_cmd_enable	= MCI_QCOM_CSPM_DATCMD,
+ 	.data_cmd_enable	= MCI_QCOM_CSPM_DATCMD,
  	.blksz_datactrl4	= true,
- 	.datalength_bits	= 24,
- 	.blksz_datactrl4	= true,
-@@ -874,6 +877,9 @@ mmci_start_command(struct mmci_host *host, struct mmc_command *cmd, u32 c)
- 	if (/*interrupt*/0)
- 		c |= MCI_CPSM_INTERRUPT;
+@@ -343,6 +347,7 @@ static void mmci_set_clkreg(struct mmci_host *host, unsigned int desired)
+ 			host->cclk = host->mclk / (2 * (clk + 1));
+ 		}
  
-+	if (mmc_cmd_type(cmd) == MMC_CMD_ADTC)
-+		c |= host->variant->data_cmd_enable;
-+
- 	host->cmd = cmd;
- 
- 	mmci_writel(host, cmd->arg, MMCIARGUMENT);
++		clk |= variant->clkreg_fbclk_latch;
+ 		clk |= variant->clkreg_enable;
+ 		clk |= MCI_CLK_ENABLE;
+ 		/* This hasn't proven to be worthwhile */
 -- 
 1.9.1
