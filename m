@@ -1,381 +1,68 @@
-From: Vasily Khoruzhick <anarsoul@gmail.com>
-Subject: [PATCH] s3cmci: port DMA code to dmaengine API
-Date: Mon, 19 May 2014 21:03:13 +0300
-Message-ID: <1400522593-6366-1-git-send-email-anarsoul@gmail.com>
+From: Andrew Lunn <andrew@lunn.ch>
+Subject: Re: [PATCH RESEND] mmc: dove: fix missing MACH_DOVE dependency
+Date: Mon, 19 May 2014 20:14:47 +0200
+Message-ID: <20140519181447.GA7824@lunn.ch>
+References: <1400522571-10799-1-git-send-email-sebastian.hesselbarth@gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ee0-f48.google.com ([74.125.83.48]:42880 "EHLO
-	mail-ee0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750760AbaESSE4 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 19 May 2014 14:04:56 -0400
-Received: by mail-ee0-f48.google.com with SMTP id e49so3836760eek.7
-        for <linux-mmc@vger.kernel.org>; Mon, 19 May 2014 11:04:55 -0700 (PDT)
+Received: from vps0.lunn.ch ([178.209.37.122]:48051 "EHLO vps0.lunn.ch"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751299AbaESSSD (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 19 May 2014 14:18:03 -0400
+Content-Disposition: inline
+In-Reply-To: <1400522571-10799-1-git-send-email-sebastian.hesselbarth@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <chris@printf.net>, Ben Dooks <ben-linux@fluff.org>, Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
-Cc: Vasily Khoruzhick <anarsoul@gmail.com>
+To: Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>
+Cc: Andrew Lunn <andrew@lunn.ch>, Ulf Hansson <ulf.hansson@linaro.org>, Jason Cooper <jason@lakedaemon.net>, linux-mmc@vger.kernel.org, Chris Ball <chris@printf.net>, linux-kernel@vger.kernel.org, Gregory Clement <gregory.clement@free-electrons.com>, linux-arm-kernel@lists.infradead.org
 
-Utilise new s3c24xx-dma dmaengine driver for DMA ops.
+On Mon, May 19, 2014 at 08:02:51PM +0200, Sebastian Hesselbarth wrote:
+> DT-enabled Dove moved over from ARCH_DOVE in mach-dove to MACH_DOVE in
+> mach-mvebu. As non-DT ARCH_DOVE will stay to rot for a while, add a new
+> DT-only MACH_DOVE Kconfig. This slipped through the cracks and now is
+> a fix to allow to build Dove's SDHCI driver for mach-mvebu on v3.15-rc.
+> 
+> Signed-off-by: Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>
+> Acked-by: Jason Cooper <jason@lakedaemon.net>
 
-Signed-off-by: Vasily Khoruzhick <anarsoul@gmail.com>
----
- drivers/mmc/host/Kconfig  |   9 ---
- drivers/mmc/host/s3cmci.c | 183 +++++++++++++++-------------------------------
- drivers/mmc/host/s3cmci.h |   6 +-
- 3 files changed, 61 insertions(+), 137 deletions(-)
+Tested-by: Andrew Lunn <andrew@lunn.ch>
 
-diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-index 1384f67..45c791c3 100644
---- a/drivers/mmc/host/Kconfig
-+++ b/drivers/mmc/host/Kconfig
-@@ -457,15 +457,6 @@ config MMC_S3C_DMA
- 	  working properly and needs to be debugged before this
- 	  option is useful.
- 
--config MMC_S3C_PIODMA
--	bool "Support for both PIO and DMA"
--	help
--	  Compile both the PIO and DMA transfer routines into the
--	  driver and let the platform select at run-time which one
--	  is best.
--
--	  See notes for the DMA option.
--
- endchoice
- 
- config MMC_SDRICOH_CS
-diff --git a/drivers/mmc/host/s3cmci.c b/drivers/mmc/host/s3cmci.c
-index f237826..9f32a30 100644
---- a/drivers/mmc/host/s3cmci.c
-+++ b/drivers/mmc/host/s3cmci.c
-@@ -12,6 +12,7 @@
-  */
- 
- #include <linux/module.h>
-+#include <linux/dmaengine.h>
- #include <linux/dma-mapping.h>
- #include <linux/clk.h>
- #include <linux/mmc/host.h>
-@@ -24,9 +25,9 @@
- #include <linux/io.h>
- 
- #include <plat/gpio-cfg.h>
--#include <mach/dma.h>
- #include <mach/gpio-samsung.h>
- 
-+#include <linux/platform_data/dma-s3c24xx.h>
- #include <linux/platform_data/mmc-s3cmci.h>
- 
- #include "s3cmci.h"
-@@ -140,10 +141,6 @@ static const int dbgmap_debug = dbg_err | dbg_debug;
- 		dev_dbg(&host->pdev->dev, args);  \
- 	} while (0)
- 
--static struct s3c2410_dma_client s3cmci_dma_client = {
--	.name		= "s3c-mci",
--};
--
- static void finalize_request(struct s3cmci_host *host);
- static void s3cmci_send_request(struct mmc_host *mmc);
- static void s3cmci_reset(struct s3cmci_host *host);
-@@ -256,25 +253,8 @@ static inline bool s3cmci_host_usedma(struct s3cmci_host *host)
- {
- #ifdef CONFIG_MMC_S3C_PIO
- 	return false;
--#elif defined(CONFIG_MMC_S3C_DMA)
--	return true;
--#else
--	return host->dodma;
--#endif
--}
--
--/**
-- * s3cmci_host_canpio - return true if host has pio code available
-- *
-- * Return true if the driver has been compiled with the PIO support code
-- * available.
-- */
--static inline bool s3cmci_host_canpio(void)
--{
--#ifdef CONFIG_MMC_S3C_PIO
-+#else /* CONFIG_MMC_S3C_DMA */
- 	return true;
--#else
--	return false;
- #endif
- }
- 
-@@ -841,11 +821,9 @@ static irqreturn_t s3cmci_irq_cd(int irq, void *dev_id)
- 	return IRQ_HANDLED;
- }
- 
--static void s3cmci_dma_done_callback(struct s3c2410_dma_chan *dma_ch,
--				     void *buf_id, int size,
--				     enum s3c2410_dma_buffresult result)
-+static void s3cmci_dma_done_callback(void *arg)
- {
--	struct s3cmci_host *host = buf_id;
-+	struct s3cmci_host *host = arg;
- 	unsigned long iflags;
- 	u32 mci_csta, mci_dsta, mci_fsta, mci_dcnt;
- 
-@@ -856,45 +834,17 @@ static void s3cmci_dma_done_callback(struct s3c2410_dma_chan *dma_ch,
- 
- 	BUG_ON(!host->mrq);
- 	BUG_ON(!host->mrq->data);
--	BUG_ON(!host->dmatogo);
- 
- 	spin_lock_irqsave(&host->complete_lock, iflags);
- 
--	if (result != S3C2410_RES_OK) {
--		dbg(host, dbg_fail, "DMA FAILED: csta=0x%08x dsta=0x%08x "
--			"fsta=0x%08x dcnt:0x%08x result:0x%08x toGo:%u\n",
--			mci_csta, mci_dsta, mci_fsta,
--			mci_dcnt, result, host->dmatogo);
--
--		goto fail_request;
--	}
--
--	host->dmatogo--;
--	if (host->dmatogo) {
--		dbg(host, dbg_dma, "DMA DONE  Size:%i DSTA:[%08x] "
--			"DCNT:[%08x] toGo:%u\n",
--			size, mci_dsta, mci_dcnt, host->dmatogo);
--
--		goto out;
--	}
--
--	dbg(host, dbg_dma, "DMA FINISHED Size:%i DSTA:%08x DCNT:%08x\n",
--		size, mci_dsta, mci_dcnt);
-+	dbg(host, dbg_dma, "DMA FINISHED\n");
- 
- 	host->dma_complete = 1;
- 	host->complete_what = COMPLETION_FINALIZE;
- 
--out:
- 	tasklet_schedule(&host->pio_tasklet);
- 	spin_unlock_irqrestore(&host->complete_lock, iflags);
--	return;
- 
--fail_request:
--	host->mrq->data->error = -EINVAL;
--	host->complete_what = COMPLETION_FINALIZE;
--	clear_imask(host);
--
--	goto out;
- }
- 
- static void finalize_request(struct s3cmci_host *host)
-@@ -966,7 +916,7 @@ static void finalize_request(struct s3cmci_host *host)
- 	 * DMA channel and the fifo to clear out any garbage. */
- 	if (mrq->data->error != 0) {
- 		if (s3cmci_host_usedma(host))
--			s3c2410_dma_ctrl(host->dma, S3C2410_DMAOP_FLUSH);
-+			dmaengine_terminate_all(host->dma);
- 
- 		if (host->is2440) {
- 			/* Clear failure register and reset fifo. */
-@@ -992,29 +942,6 @@ request_done:
- 	mmc_request_done(host->mmc, mrq);
- }
- 
--static void s3cmci_dma_setup(struct s3cmci_host *host,
--			     enum dma_data_direction source)
--{
--	static enum dma_data_direction last_source = -1;
--	static int setup_ok;
--
--	if (last_source == source)
--		return;
--
--	last_source = source;
--
--	s3c2410_dma_devconfig(host->dma, source,
--			      host->mem->start + host->sdidata);
--
--	if (!setup_ok) {
--		s3c2410_dma_config(host->dma, 4);
--		s3c2410_dma_set_buffdone_fn(host->dma,
--					    s3cmci_dma_done_callback);
--		s3c2410_dma_setflags(host->dma, S3C2410_DMAF_AUTOSTART);
--		setup_ok = 1;
--	}
--}
--
- static void s3cmci_send_command(struct s3cmci_host *host,
- 					struct mmc_command *cmd)
- {
-@@ -1162,43 +1089,44 @@ static int s3cmci_prepare_pio(struct s3cmci_host *host, struct mmc_data *data)
- 
- static int s3cmci_prepare_dma(struct s3cmci_host *host, struct mmc_data *data)
- {
--	int dma_len, i;
- 	int rw = data->flags & MMC_DATA_WRITE;
-+	struct dma_slave_config conf = {
-+		.src_addr = host->mem->start + host->sdidata,
-+		.dst_addr = host->mem->start + host->sdidata,
-+		.src_addr_width = DMA_SLAVE_BUSWIDTH_4_BYTES,
-+		.dst_addr_width = DMA_SLAVE_BUSWIDTH_4_BYTES,
-+	};
- 
- 	BUG_ON((data->flags & BOTH_DIR) == BOTH_DIR);
- 
--	s3cmci_dma_setup(host, rw ? DMA_TO_DEVICE : DMA_FROM_DEVICE);
--	s3c2410_dma_ctrl(host->dma, S3C2410_DMAOP_FLUSH);
--
--	dma_len = dma_map_sg(mmc_dev(host->mmc), data->sg, data->sg_len,
--			     rw ? DMA_TO_DEVICE : DMA_FROM_DEVICE);
--
--	if (dma_len == 0)
--		return -ENOMEM;
--
--	host->dma_complete = 0;
--	host->dmatogo = dma_len;
--
--	for (i = 0; i < dma_len; i++) {
--		int res;
--
--		dbg(host, dbg_dma, "enqueue %i: %08x@%u\n", i,
--		    sg_dma_address(&data->sg[i]),
--		    sg_dma_len(&data->sg[i]));
-+	/* Restore prescaler value */
-+	writel(host->prescaler, host->base + S3C2410_SDIPRE);
- 
--		res = s3c2410_dma_enqueue(host->dma, host,
--					  sg_dma_address(&data->sg[i]),
--					  sg_dma_len(&data->sg[i]));
-+	if (!rw)
-+		conf.direction = DMA_DEV_TO_MEM;
-+	else
-+		conf.direction = DMA_MEM_TO_DEV;
- 
--		if (res) {
--			s3c2410_dma_ctrl(host->dma, S3C2410_DMAOP_FLUSH);
--			return -EBUSY;
--		}
--	}
-+	dma_map_sg(mmc_dev(host->mmc), data->sg, data->sg_len,
-+			     rw ? DMA_TO_DEVICE : DMA_FROM_DEVICE);
- 
--	s3c2410_dma_ctrl(host->dma, S3C2410_DMAOP_START);
-+	dmaengine_slave_config(host->dma, &conf);
-+	host->desc = dmaengine_prep_slave_sg(host->dma, data->sg, data->sg_len,
-+		conf.direction,
-+		DMA_CTRL_ACK | DMA_PREP_INTERRUPT);
-+	if (!host->desc)
-+		goto unmap_exit;
-+	host->desc->callback = s3cmci_dma_done_callback;
-+	host->desc->callback_param = host;
-+	dmaengine_submit(host->desc);
-+	dma_async_issue_pending(host->dma);
- 
- 	return 0;
-+
-+unmap_exit:
-+	dma_unmap_sg(mmc_dev(host->mmc), data->sg, data->sg_len,
-+			     rw ? DMA_TO_DEVICE : DMA_FROM_DEVICE);
-+	return -ENOMEM;
- }
- 
- static void s3cmci_send_request(struct mmc_host *mmc)
-@@ -1676,10 +1604,6 @@ static int s3cmci_probe(struct platform_device *pdev)
- 	host->complete_what 	= COMPLETION_NONE;
- 	host->pio_active 	= XFER_NONE;
- 
--#ifdef CONFIG_MMC_S3C_PIODMA
--	host->dodma		= host->pdata->use_dma;
--#endif
--
- 	host->mem = platform_get_resource(pdev, IORESOURCE_MEM, 0);
- 	if (!host->mem) {
- 		dev_err(&pdev->dev,
-@@ -1765,17 +1689,26 @@ static int s3cmci_probe(struct platform_device *pdev)
- 	/* depending on the dma state, get a dma channel to use. */
- 
- 	if (s3cmci_host_usedma(host)) {
--		host->dma = s3c2410_dma_request(DMACH_SDI, &s3cmci_dma_client,
--						host);
--		if (host->dma < 0) {
-+		struct resource *res;
-+		dma_cap_mask_t mask;
-+
-+		res = platform_get_resource(pdev, IORESOURCE_DMA, 0);
-+		if (!res) {
-+			dev_err(&pdev->dev,
-+				"failed to get dma resource.\n");
-+			ret = -ENOENT;
-+			goto probe_free_gpio_wp;
-+		}
-+
-+		dma_cap_zero(mask);
-+		dma_cap_set(DMA_SLAVE, mask);
-+
-+		host->dma = dma_request_channel(mask,
-+			s3c24xx_dma_filter, (void *)res->start);
-+		if (!host->dma) {
- 			dev_err(&pdev->dev, "cannot get DMA channel.\n");
--			if (!s3cmci_host_canpio()) {
--				ret = -EBUSY;
--				goto probe_free_gpio_wp;
--			} else {
--				dev_warn(&pdev->dev, "falling back to PIO.\n");
--				host->dodma = 0;
--			}
-+			ret = -EBUSY;
-+			goto probe_free_gpio_wp;
- 		}
- 	}
- 
-@@ -1816,7 +1749,7 @@ static int s3cmci_probe(struct platform_device *pdev)
- 	mmc->max_segs		= 128;
- 
- 	dbg(host, dbg_debug,
--	    "probe: mode:%s mapped mci_base:%p irq:%u irq_cd:%u dma:%u.\n",
-+	    "probe: mode:%s mapped mci_base:%p irq:%u irq_cd:%u dma:%p.\n",
- 	    (host->is2440?"2440":""),
- 	    host->base, host->irq, host->irq_cd, host->dma);
- 
-@@ -1852,7 +1785,7 @@ static int s3cmci_probe(struct platform_device *pdev)
- 
-  probe_free_dma:
- 	if (s3cmci_host_usedma(host))
--		s3c2410_dma_free(host->dma, &s3cmci_dma_client);
-+		dma_release_channel(host->dma);
- 
-  probe_free_gpio_wp:
- 	if (!host->pdata->no_wprotect)
-@@ -1914,7 +1847,7 @@ static int s3cmci_remove(struct platform_device *pdev)
- 	tasklet_disable(&host->pio_tasklet);
- 
- 	if (s3cmci_host_usedma(host))
--		s3c2410_dma_free(host->dma, &s3cmci_dma_client);
-+		dma_release_channel(host->dma);
- 
- 	free_irq(host->irq, host);
- 
-diff --git a/drivers/mmc/host/s3cmci.h b/drivers/mmc/host/s3cmci.h
-index c76b53d..09dbbcd 100644
---- a/drivers/mmc/host/s3cmci.h
-+++ b/drivers/mmc/host/s3cmci.h
-@@ -26,7 +26,9 @@ struct s3cmci_host {
- 	void __iomem		*base;
- 	int			irq;
- 	int			irq_cd;
--	int			dma;
-+	struct dma_chan		*dma;
-+	struct dma_async_tx_descriptor
-+				*desc;
- 
- 	unsigned long		clk_rate;
- 	unsigned long		clk_div;
-@@ -36,8 +38,6 @@ struct s3cmci_host {
- 	int			is2440;
- 	unsigned		sdiimsk;
- 	unsigned		sdidata;
--	int			dodma;
--	int			dmatogo;
- 
- 	bool			irq_disabled;
- 	bool			irq_enabled;
--- 
-1.9.3
+Thanks Sebastian
 
+       Andrew
+
+> ---
+> Cc: Chris Ball <chris@printf.net>
+> Cc: Ulf Hansson <ulf.hansson@linaro.org>
+> Cc: Jason Cooper <jason@lakedaemon.net>
+> Cc: Andrew Lunn <andrew@lunn.ch>
+> Cc: Gregory Clement <gregory.clement@free-electrons.com>
+> Cc: linux-mmc@vger.kernel.org
+> Cc: linux-arm-kernel@lists.infradead.org
+> Cc: linux-kernel@vger.kernel.org
+> ---
+>  drivers/mmc/host/Kconfig | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+> 
+> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+> index 8aaf8c1f3f63..37665553ef33 100644
+> --- a/drivers/mmc/host/Kconfig
+> +++ b/drivers/mmc/host/Kconfig
+> @@ -168,7 +168,7 @@ config MMC_SDHCI_ESDHC_IMX
+>  
+>  config MMC_SDHCI_DOVE
+>  	tristate "SDHCI support on Marvell's Dove SoC"
+> -	depends on ARCH_DOVE
+> +	depends on ARCH_DOVE || MACH_DOVE
+>  	depends on MMC_SDHCI_PLTFM
+>  	select MMC_SDHCI_IO_ACCESSORS
+>  	help
+> -- 
+> 1.9.1
+> 
+> 
+> _______________________________________________
+> linux-arm-kernel mailing list
+> linux-arm-kernel@lists.infradead.org
+> http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
