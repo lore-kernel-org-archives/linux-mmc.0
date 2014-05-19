@@ -1,59 +1,50 @@
-From: Tony Lindgren <tony@atomide.com>
-Subject: Re: [PATCH v2 6/6] mmc: omap_hsmmc: split omap-dma header file
-Date: Mon, 19 May 2014 09:54:41 -0700
-Message-ID: <20140519165441.GI4849@atomide.com>
-References: <1399654013-28262-1-git-send-email-balajitk@ti.com>
- <1399654013-28262-7-git-send-email-balajitk@ti.com>
- <20140516214116.GM12881@atomide.com>
- <5379F0C6.6070004@ti.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-omap-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <5379F0C6.6070004@ti.com>
-Sender: linux-omap-owner@vger.kernel.org
-To: Balaji T K <balajitk@ti.com>
-Cc: linux-mmc@vger.kernel.org, chris@printf.net, ulf.hansson@linaro.org, linux-omap@vger.kernel.org, Russell King - ARM Linux <linux@arm.linux.org.uk>
+From: Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>
+Subject: [PATCH RESEND] mmc: dove: fix missing MACH_DOVE dependency
+Date: Mon, 19 May 2014 20:02:51 +0200
+Message-ID: <1400522571-10799-1-git-send-email-sebastian.hesselbarth@gmail.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-ee0-f48.google.com ([74.125.83.48]:56864 "EHLO
+	mail-ee0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751302AbaESSDA (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 19 May 2014 14:03:00 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>
+Cc: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Jason Cooper <jason@lakedaemon.net>, Andrew Lunn <andrew@lunn.ch>, Gregory Clement <gregory.clement@free-electrons.com>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
 
-* Balaji T K <balajitk@ti.com> [140519 04:54]:
-> On Saturday 17 May 2014 03:11 AM, Tony Lindgren wrote:
-> >>-
-> >>-#if defined(CONFIG_DMA_OMAP) || defined(CONFIG_DMA_OMAP_MODULE)
-> >>-bool omap_dma_filter_fn(struct dma_chan *, void *);
-> >>-#else
-> >>-static inline bool omap_dma_filter_fn(struct dma_chan *c, void *d)
-> >>-{
-> >>-	return false;
-> >>-}
-> >>-#endif
-> >>+#include <linux/omap-dmaengine.h>
-> >
-> >Can't the drivers needing this include it directly?
-> >
-> 
-> Yes, I have converted omap_hsmmc as part of this patch.
-> Due to lack of bandwidth, I haven't touched upon all other drivers that include
-> omap-dma.h. Once that is done in other subsystem after this patch gets merged,
-> this include can then be removed from omap-dma.h
+DT-enabled Dove moved over from ARCH_DOVE in mach-dove to MACH_DOVE in
+mach-mvebu. As non-DT ARCH_DOVE will stay to rot for a while, add a new
+DT-only MACH_DOVE Kconfig. This slipped through the cracks and now is
+a fix to allow to build Dove's SDHCI driver for mach-mvebu on v3.15-rc.
 
-OK
+Signed-off-by: Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>
+Acked-by: Jason Cooper <jason@lakedaemon.net>
+---
+Cc: Chris Ball <chris@printf.net>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Jason Cooper <jason@lakedaemon.net>
+Cc: Andrew Lunn <andrew@lunn.ch>
+Cc: Gregory Clement <gregory.clement@free-electrons.com>
+Cc: linux-mmc@vger.kernel.org
+Cc: linux-arm-kernel@lists.infradead.org
+Cc: linux-kernel@vger.kernel.org
+---
+ drivers/mmc/host/Kconfig | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+index 8aaf8c1f3f63..37665553ef33 100644
+--- a/drivers/mmc/host/Kconfig
++++ b/drivers/mmc/host/Kconfig
+@@ -168,7 +168,7 @@ config MMC_SDHCI_ESDHC_IMX
  
-> >Also, has this been tested with make randconfig? Changes like
-> >this can easily cause problems elsewhere..
-> 
-> May be I am missing something, Can you please elaborate ?
+ config MMC_SDHCI_DOVE
+ 	tristate "SDHCI support on Marvell's Dove SoC"
+-	depends on ARCH_DOVE
++	depends on ARCH_DOVE || MACH_DOVE
+ 	depends on MMC_SDHCI_PLTFM
+ 	select MMC_SDHCI_IO_ACCESSORS
+ 	help
+-- 
+1.9.1
 
-You're touching a header included in many places, so you
-need to make sure you're not accidentally breaking anything.
-
-There's an option that allows you to specify some selected
-options like CONFIG_ARCH_OMAP2PLUS=y with KCONFIG_ALLCONFIG
-and then run make randconfig. This should expose quite fast
-if there are some issues for the other drivers.
-
-Also, have you compile tested this with omap1_defconfig?
-
-Regards,
-
-Tony
