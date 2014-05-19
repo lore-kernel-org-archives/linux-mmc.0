@@ -1,52 +1,116 @@
-From: Vasily Khoruzhick <anarsoul@gmail.com>
-Subject: Re: [PATCH] s3cmci: port DMA code to dmaengine API
-Date: Mon, 19 May 2014 22:39:57 +0300
-Message-ID: <CA+E=qVc+gk8zt3MMTQ6qWR0+v3UTww5oufd7v3ffrfnNCBfTUA@mail.gmail.com>
-References: <1400522593-6366-1-git-send-email-anarsoul@gmail.com>
- <7633675.1cAc12AFAY@wuerfel> <CA+E=qVeG8bXowBvdhKpVSYSL08n6ZUVG2LkjhPwjBnbv+egNLw@mail.gmail.com>
- <4667090.Oyf6jd3Lyk@wuerfel>
+From: Bjorn Andersson <bjorn@kryo.se>
+Subject: Re: [PATCH RFC 00/12] Add Qualcomm SD Card Controller support.
+Date: Mon, 19 May 2014 15:08:18 -0700
+Message-ID: <CAJAp7Oj5e8_zqNsHUxex8pd1zh4_sSzZMvp+67YSE39JDkoLAQ@mail.gmail.com>
+References: <1398116624-31052-1-git-send-email-srinivas.kandagatla@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-oa0-f42.google.com ([209.85.219.42]:58738 "EHLO
-	mail-oa0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755077AbaESTkT (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 19 May 2014 15:40:19 -0400
-Received: by mail-oa0-f42.google.com with SMTP id j17so6824262oag.1
-        for <linux-mmc@vger.kernel.org>; Mon, 19 May 2014 12:40:18 -0700 (PDT)
-In-Reply-To: <4667090.Oyf6jd3Lyk@wuerfel>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: <1398116624-31052-1-git-send-email-srinivas.kandagatla@linaro.org>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: srinivas.kandagatla@linaro.org
+Cc: linux-mmc@vger.kernel.org, Russell King <linux@arm.linux.org.uk>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, agross@quicinc.com, linux-arm-msm <linux-arm-msm@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: Chris Ball <chris@printf.net>, Ben Dooks <ben-linux@fluff.org>, Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc@vger.kernel.org, arm-linux <linux-arm-kernel@lists.infradead.org>
 
-On Mon, May 19, 2014 at 10:02 PM, Arnd Bergmann <arnd@arndb.de> wrote:
+On Mon, Apr 21, 2014 at 2:43 PM,  <srinivas.kandagatla@linaro.org> wrote:
+> From: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+[snip]
+>
+> This patches are tested in PIO mode on IFC8064 board with both eMMC and
+> external SD card. I would appreciate any feedback/suggestions on the overall
+> approach.
 
->> Well, at least s3c64xx uses resources for passing dma channel number,
->> and so did I.
->> Btw, It'll make transition to device tree a bit easier.
->
-> Actually it doesn't help with the transition to DT at all, because DT
-> does not use resources for DMA requests. Instead there is a
-> dma_request_slave_channel() interface that gets passed a string to
-> match the DT descriptor of the DMA channel. If you want to enable
-> DT probing while keeping the traditional way alive, you can
-> use dma_request_slave_channel_compat(), although I find it not
-> much easier than open-coding it.
->
-> There is one issue with dma_request_slave_channel_compat and
-> dma_request_channel, which is that you need a pointer to the
-> filter function. In portable drivers that pointer should get passed
-> in platform_data for the non-DT case, along with the data it
-> needs, because there are dma engines that need more than just
-> an integer to identify a slave.
->
-> For this driver, you don't have to go that far, as long as it's
-> ensure that the pointer to the filter function is available to
-> the driver, i.e. you can't have a built-in s3mci driver when the
-> dmaengine driver is a loadable module.
+Hi Srini,
 
-I'll take a look at dma_request_slave_channel_compat(), thanks for a hint!
+I finally got around to give this series a spin on our APQ8064 based
+devices as well. I had a few reported CRC issues on our msm8960 based
+devices, but thinks seems functionally "ok".
+
+On APQ8064, the kernel finds the onboard eMMC and when mounting it I
+get the following:
+
+[    1.624118] mmc0: new high speed MMC card at address 0001
+[    1.627521] mmcblk0: mmc0:0001 MAG2GA 14.5 GiB
+[    1.632714] mmcblk0boot0: mmc0:0001 MAG2GA partition 1 2.00 MiB
+[    1.636989] mmcblk0boot1: mmc0:0001 MAG2GA partition 2 2.00 MiB
+[    1.637393] Freeing unused kernel memory: 332K (c09c6000 - c0a19000)
+[    1.663379] mmcblk0: response CRC error sending r/w cmd command,
+card status 0xb00
+[    1.663659] mmcblk0: error -84 transferring data, sector 30535648,
+nr 8, cmd response 0x900, card status 0xb00
+[    1.669851] mmcblk0: retrying using single block read
+[    1.681534] mmcblk0: response CRC error sending r/w cmd command,
+card status 0xb00
+[    1.686758]  mmcblk0: p1 p2 p3 p4 p5 p6 p7 p8 p9 p10 p11 p12 p13
+p14 p15 p16 p17 p18 p19 p20 p21 p22 p23 p24 p25 p26
+mkdir: can't create directory '/dev': File exists
+[    1.712644]  mmcblk0boot1: unknown partition table
+[    1.717419]  mmcblk0boot0: unknown partition table
+[    2.255625] EXT3-fs (mmcblk0p24): error: couldn't mount because of
+unsupported optional features (40)
+[    2.256687] EXT2-fs (mmcblk0p24): error: couldn't mount because of
+unsupported optional features (40)
+[    2.277945] mmcblk0: error -84 transferring data, sector 160824, nr
+232, cmd response 0x900, card status 0xb00
+[    2.277985] mmcblk0: retrying using single block read
+[    2.288518] mmcblk0: response CRC error sending r/w cmd command,
+card status 0xb00
+[    2.292914] mmcblk0: response CRC error sending r/w cmd command,
+card status 0xb00
+[    2.300985] mmcblk0: response CRC error sending r/w cmd command,
+card status 0xb00
+[    2.311787] mmcblk0: response CRC error sending r/w cmd command,
+card status 0xb00
+[    2.316151] mmcblk0: response CRC error sending r/w cmd command,
+card status 0xb00
+[    2.322986] mmcblk0: response CRC error sending r/w cmd command,
+card status 0xb00
+[    2.329640] end_request: I/O error, dev mmcblk0, sector 160853
+[    2.337266] end_request: I/O error, dev mmcblk0, sector 160856
+[    2.343093] end_request: I/O error, dev mmcblk0, sector 160864
+[    2.348826] end_request: I/O error, dev mmcblk0, sector 160872
+[    2.354720] end_request: I/O error, dev mmcblk0, sector 160880
+[    2.360458] end_request: I/O error, dev mmcblk0, sector 160888
+[    2.366346] end_request: I/O error, dev mmcblk0, sector 160896
+[    2.372175] end_request: I/O error, dev mmcblk0, sector 160904
+[    2.377906] end_request: I/O error, dev mmcblk0, sector 160912
+[    2.383802] end_request: I/O error, dev mmcblk0, sector 160920
+[    2.393204] EXT4-fs (mmcblk0p24): mounted filesystem with ordered
+data mode. Opts: (null)
+[    2.407231] EXT3-fs (mmcblk0p26): error: couldn't mount because of
+unsupported optional features (40)
+[    2.408196] EXT2-fs (mmcblk0p26): error: couldn't mount because of
+unsupported optional features (44)
+[    2.416686] mmcblk0: response CRC error sending r/w cmd command,
+card status 0xb00
+[    2.426058] mmcblk0: response CRC error sending r/w cmd command,
+card status 0xb00
+[    2.446754] mmcblk0: response CRC error sending r/w cmd command,
+card status 0xb00
+[    2.510905] mmcblk0: response CRC error sending r/w cmd command,
+card status 0xb00
+[    2.559272] mmcblk0: response CRC error sending r/w cmd command,
+card status 0xb00
+[    2.622231] mmcblk0: response CRC error sending r/w cmd command,
+card status 0xb00
+[    2.623297] mmcblk0: error -84 transferring data, sector 5492888,
+nr 192, cmd response 0x900, card status 0xb00
+[    2.628702] mmcblk0: retrying using single block read
+[    2.640005] mmcblk0: response CRC error sending r/w cmd command,
+card status 0xb00
+[    2.645574] mmcblk0: response CRC error sending r/w cmd command,
+card status 0xb00
+[    2.652991] mmcblk0: response CRC error sending r/w cmd command,
+card status 0xb00
+[    2.659765] mmcblk0: response CRC error sending r/w cmd command,
+card status 0xb00
+[    2.668126] mmcblk0: response CRC error sending r/w cmd command,
+card status 0xb00
+[    2.674257] JBD2: Failed to read block at offset 283
+[    2.681602] JBD2: recovery failed
+[    2.686819] EXT4-fs (mmcblk0p26): error loading journal
+
+Any suggestions of what I could do to help you debug this?
 
 Regards,
-Vasily
+Bjorn
