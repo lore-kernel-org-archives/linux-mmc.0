@@ -1,133 +1,69 @@
-From: Balaji T K <balajitk@ti.com>
-Subject: Re: [PATCH v2 6/6] mmc: omap_hsmmc: split omap-dma header file
-Date: Mon, 19 May 2014 17:23:42 +0530
-Message-ID: <5379F0C6.6070004@ti.com>
-References: <1399654013-28262-1-git-send-email-balajitk@ti.com> <1399654013-28262-7-git-send-email-balajitk@ti.com> <20140516214116.GM12881@atomide.com>
+From: Mark Rutland <mark.rutland@arm.com>
+Subject: Re: [PATCH 1/3] Documentation: Update Arasan SDHC documentation for
+ the APM X-Gene SoC SDHC DTS binding
+Date: Mon, 19 May 2014 13:32:30 +0100
+Message-ID: <20140519123230.GA3663@leverpostej>
+References: <1400398918-1502-1-git-send-email-lho@apm.com>
+ <1400398918-1502-2-git-send-email-lho@apm.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from arroyo.ext.ti.com ([192.94.94.40]:35442 "EHLO arroyo.ext.ti.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753614AbaESLxw (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 19 May 2014 07:53:52 -0400
-In-Reply-To: <20140516214116.GM12881@atomide.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+Content-Disposition: inline
+In-Reply-To: <1400398918-1502-2-git-send-email-lho@apm.com>
+Content-Language: en-US
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Loc Ho <lho@apm.com>
+Cc: "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, "jcm@redhat.com" <jcm@redhat.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "chris@printf.net" <chris@printf.net>, "michal.simek@xilinx.com" <michal.simek@xilinx.com>, "patches@apm.com" <patches@apm.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Tony Lindgren <tony@atomide.com>
-Cc: linux-mmc@vger.kernel.org, chris@printf.net, ulf.hansson@linaro.org, linux-omap@vger.kernel.org, Russell King - ARM Linux <linux@arm.linux.org.uk>
 
-On Saturday 17 May 2014 03:11 AM, Tony Lindgren wrote:
-> * Balaji T K <balajitk@ti.com> [140509 09:47]:
->> moving dmaengine consumer specific function to omap-dmaengine.h
->> to Resolve build failure seen with sh-allmodconfig:
->>      include/linux/omap-dma.h:171:8: error: expected identifier before numeric constant
->>      make[4]: *** [drivers/mmc/host/omap_hsmmc.o] Error 1
->>
->> Cc: Russell King - ARM Linux <linux@arm.linux.org.uk>
->> Cc: Tony Lindgren <tony@atomide.com>
->> Signed-off-by: Balaji T K <balajitk@ti.com>
->> ---
->>   drivers/mmc/host/omap_hsmmc.c  |    2 +-
->>   include/linux/omap-dma.h       |   19 +------------------
->>   include/linux/omap-dmaengine.h |   21 +++++++++++++++++++++
->>   3 files changed, 23 insertions(+), 19 deletions(-)
->>   create mode 100644 include/linux/omap-dmaengine.h
->>
->> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
->> index cba71d6..6b7b755 100644
->> --- a/drivers/mmc/host/omap_hsmmc.c
->> +++ b/drivers/mmc/host/omap_hsmmc.c
->> @@ -31,7 +31,7 @@
->>   #include <linux/of.h>
->>   #include <linux/of_gpio.h>
->>   #include <linux/of_device.h>
->> -#include <linux/omap-dma.h>
->> +#include <linux/omap-dmaengine.h>
->>   #include <linux/mmc/host.h>
->>   #include <linux/mmc/core.h>
->>   #include <linux/mmc/mmc.h>
->> diff --git a/include/linux/omap-dma.h b/include/linux/omap-dma.h
->> index 41a13e7..999f52d 100644
->> --- a/include/linux/omap-dma.h
->> +++ b/include/linux/omap-dma.h
->> @@ -1,23 +1,6 @@
->> -/*
->> - * OMAP DMA Engine support
->> - *
->> - * This program is free software; you can redistribute it and/or modify
->> - * it under the terms of the GNU General Public License version 2 as
->> - * published by the Free Software Foundation.
->> - */
->>   #ifndef __LINUX_OMAP_DMA_H
->>   #define __LINUX_OMAP_DMA_H
->> -
->> -struct dma_chan;
->> -
->> -#if defined(CONFIG_DMA_OMAP) || defined(CONFIG_DMA_OMAP_MODULE)
->> -bool omap_dma_filter_fn(struct dma_chan *, void *);
->> -#else
->> -static inline bool omap_dma_filter_fn(struct dma_chan *c, void *d)
->> -{
->> -	return false;
->> -}
->> -#endif
->> +#include <linux/omap-dmaengine.h>
->
-> Can't the drivers needing this include it directly?
->
+On Sun, May 18, 2014 at 08:41:56AM +0100, Loc Ho wrote:
+> This patch updates Arasan SDHC documentation for the APM X-Gene SoC SDHC controller
+> DTS binding.
+> 
+> Signed-off-by: Loc Ho <lho@apm.com>
+> ---
+>  .../devicetree/bindings/mmc/arasan,sdhci.txt       |    9 ++++++---
+>  1 files changed, 6 insertions(+), 3 deletions(-)
+> 
+> diff --git a/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
+> index 98ee2ab..8fc4cc4 100644
+> --- a/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
+> +++ b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
+> @@ -8,14 +8,17 @@ Device Tree Bindings for the Arasan SDHCI Controller
+>    [3] Documentation/devicetree/bindings/interrupt-controller/interrupts.txt
+>  
+>  Required Properties:
+> -  - compatible: Compatibility string. Must be 'arasan,sdhci-8.9a'
+> +  - compatible: Compatibility string. Must be 'arasan,sdhci-8.9a' or
+> +                'xgene,arasan,sdhci-8.9a'
 
-Yes, I have converted omap_hsmmc as part of this patch.
-Due to lack of bandwidth, I haven't touched upon all other drivers that include
-omap-dma.h. Once that is done in other subsystem after this patch gets merged,
-this include can then be removed from omap-dma.h
+"xgene" is not a vendor, nor is it documented as such.
 
-> Also, has this been tested with make randconfig? Changes like
-> this can easily cause problems elsewhere..
+>    - reg: From mmc bindings: Register location and length.
+> -  - clocks: From clock bindings: Handles to clock inputs.
+> -  - clock-names: From clock bindings: Tuple including "clk_xin" and "clk_ahb"
+>    - interrupts: Interrupt specifier
+>    - interrupt-parent: Phandle for the interrupt controller that services
+>  		      interrupts for this device.
+>  
+> +Optional Properties:
+> +  - clocks: From clock bindings: Handles to clock inputs.
+> +  - clock-names: From clock bindings: Tuple including "clk_xin" and "clk_ahb"
 
-May be I am missing something, Can you please elaborate ?
-This patch is based on the discussion [1]
-I just moved the dma consumer specific things needed by users
-to a separate file and include the same file in place so that other users
-can be converted one at a time.
+Given that these used to be required, they are presumably still required
+in some cases?
 
-[1]
-https://lkml.org/lkml/2014/1/19/16
->
-> Regards,
->
-> Tony
->
->>   /*
->>    *  Legacy OMAP DMA handling defines and functions
->> diff --git a/include/linux/omap-dmaengine.h b/include/linux/omap-dmaengine.h
->> new file mode 100644
->> index 0000000..2b0b6aa
->> --- /dev/null
->> +++ b/include/linux/omap-dmaengine.h
->> @@ -0,0 +1,21 @@
->> +/*
->> + * OMAP DMA Engine support
->> + *
->> + * This program is free software; you can redistribute it and/or modify
->> + * it under the terms of the GNU General Public License version 2 as
->> + * published by the Free Software Foundation.
->> + */
->> +#ifndef __LINUX_OMAP_DMAENGINE_H
->> +#define __LINUX_OMAP_DMAENGINE_H
->> +
->> +struct dma_chan;
->> +
->> +#if defined(CONFIG_DMA_OMAP) || defined(CONFIG_DMA_OMAP_MODULE)
->> +bool omap_dma_filter_fn(struct dma_chan *, void *);
->> +#else
->> +static inline bool omap_dma_filter_fn(struct dma_chan *c, void *d)
->> +{
->> +	return false;
->> +}
->> +#endif
->> +#endif /* __LINUX_OMAP_DMAENGINE_H */
->> --
->> 1.7.5.4
->>
+If we're going to alter these lines, it'd be nice to clean them up at
+the same time (a list is not a tuple, clocks aren't just phandles).
 
+Cheers,
+Mark.
