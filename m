@@ -1,69 +1,59 @@
-From: Mark Rutland <mark.rutland@arm.com>
-Subject: Re: [PATCH 1/3] Documentation: Update Arasan SDHC documentation for
- the APM X-Gene SoC SDHC DTS binding
-Date: Mon, 19 May 2014 13:32:30 +0100
-Message-ID: <20140519123230.GA3663@leverpostej>
-References: <1400398918-1502-1-git-send-email-lho@apm.com>
- <1400398918-1502-2-git-send-email-lho@apm.com>
+From: Tony Lindgren <tony@atomide.com>
+Subject: Re: [PATCH v2 6/6] mmc: omap_hsmmc: split omap-dma header file
+Date: Mon, 19 May 2014 09:54:41 -0700
+Message-ID: <20140519165441.GI4849@atomide.com>
+References: <1399654013-28262-1-git-send-email-balajitk@ti.com>
+ <1399654013-28262-7-git-send-email-balajitk@ti.com>
+ <20140516214116.GM12881@atomide.com>
+ <5379F0C6.6070004@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-omap-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <1400398918-1502-2-git-send-email-lho@apm.com>
-Content-Language: en-US
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Loc Ho <lho@apm.com>
-Cc: "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, "jcm@redhat.com" <jcm@redhat.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "chris@printf.net" <chris@printf.net>, "michal.simek@xilinx.com" <michal.simek@xilinx.com>, "patches@apm.com" <patches@apm.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+In-Reply-To: <5379F0C6.6070004@ti.com>
+Sender: linux-omap-owner@vger.kernel.org
+To: Balaji T K <balajitk@ti.com>
+Cc: linux-mmc@vger.kernel.org, chris@printf.net, ulf.hansson@linaro.org, linux-omap@vger.kernel.org, Russell King - ARM Linux <linux@arm.linux.org.uk>
 List-Id: linux-mmc@vger.kernel.org
 
-On Sun, May 18, 2014 at 08:41:56AM +0100, Loc Ho wrote:
-> This patch updates Arasan SDHC documentation for the APM X-Gene SoC SDHC controller
-> DTS binding.
+* Balaji T K <balajitk@ti.com> [140519 04:54]:
+> On Saturday 17 May 2014 03:11 AM, Tony Lindgren wrote:
+> >>-
+> >>-#if defined(CONFIG_DMA_OMAP) || defined(CONFIG_DMA_OMAP_MODULE)
+> >>-bool omap_dma_filter_fn(struct dma_chan *, void *);
+> >>-#else
+> >>-static inline bool omap_dma_filter_fn(struct dma_chan *c, void *d)
+> >>-{
+> >>-	return false;
+> >>-}
+> >>-#endif
+> >>+#include <linux/omap-dmaengine.h>
+> >
+> >Can't the drivers needing this include it directly?
+> >
 > 
-> Signed-off-by: Loc Ho <lho@apm.com>
-> ---
->  .../devicetree/bindings/mmc/arasan,sdhci.txt       |    9 ++++++---
->  1 files changed, 6 insertions(+), 3 deletions(-)
+> Yes, I have converted omap_hsmmc as part of this patch.
+> Due to lack of bandwidth, I haven't touched upon all other drivers that include
+> omap-dma.h. Once that is done in other subsystem after this patch gets merged,
+> this include can then be removed from omap-dma.h
+
+OK
+ 
+> >Also, has this been tested with make randconfig? Changes like
+> >this can easily cause problems elsewhere..
 > 
-> diff --git a/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
-> index 98ee2ab..8fc4cc4 100644
-> --- a/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
-> +++ b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
-> @@ -8,14 +8,17 @@ Device Tree Bindings for the Arasan SDHCI Controller
->    [3] Documentation/devicetree/bindings/interrupt-controller/interrupts.txt
->  
->  Required Properties:
-> -  - compatible: Compatibility string. Must be 'arasan,sdhci-8.9a'
-> +  - compatible: Compatibility string. Must be 'arasan,sdhci-8.9a' or
-> +                'xgene,arasan,sdhci-8.9a'
+> May be I am missing something, Can you please elaborate ?
 
-"xgene" is not a vendor, nor is it documented as such.
+You're touching a header included in many places, so you
+need to make sure you're not accidentally breaking anything.
 
->    - reg: From mmc bindings: Register location and length.
-> -  - clocks: From clock bindings: Handles to clock inputs.
-> -  - clock-names: From clock bindings: Tuple including "clk_xin" and "clk_ahb"
->    - interrupts: Interrupt specifier
->    - interrupt-parent: Phandle for the interrupt controller that services
->  		      interrupts for this device.
->  
-> +Optional Properties:
-> +  - clocks: From clock bindings: Handles to clock inputs.
-> +  - clock-names: From clock bindings: Tuple including "clk_xin" and "clk_ahb"
+There's an option that allows you to specify some selected
+options like CONFIG_ARCH_OMAP2PLUS=y with KCONFIG_ALLCONFIG
+and then run make randconfig. This should expose quite fast
+if there are some issues for the other drivers.
 
-Given that these used to be required, they are presumably still required
-in some cases?
+Also, have you compile tested this with omap1_defconfig?
 
-If we're going to alter these lines, it'd be nice to clean them up at
-the same time (a list is not a tuple, clocks aren't just phandles).
+Regards,
 
-Cheers,
-Mark.
+Tony
