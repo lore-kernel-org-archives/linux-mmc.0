@@ -1,195 +1,305 @@
 From: Seungwon Jeon <tgih.jun@samsung.com>
-Subject: RE: [PATCH] mmc: dw_mmc: Make sure we don't get stuck when we get an
- error
-Date: Tue, 20 May 2014 10:51:11 +0900
-Message-ID: <003a01cf73cd$fa2ee160$ee8ca420$%jun@samsung.com>
-References: <1395901126-6141-1-git-send-email-yuvaraj.cd@samsung.com>
- <CAKuRcOL_JVjOfLNspb14kRxcAXjpEwX4WkvmM+izryZbZBE4XA@mail.gmail.com>
- <CAPz6YkVwT0PrcLP1MJy0vVRw811+_7PwsV_ggKxQkqrjOWeWWw@mail.gmail.com>
- <002001cf6c59$b5b5e680$2121b380$%jun@samsung.com>
- <CAD=FV=X=9cTvST5cM=H9H23SMD28cHSExXt3YR=v2AQ6dFJY5w@mail.gmail.com>
- <001b01cf6e67$2183b400$648b1c00$%jun@samsung.com>
+Subject: RE: [PATCHv2] mmc: dw_mmc: change to use recommended reset procedure
+Date: Tue, 20 May 2014 10:49:53 +0900
+Message-ID: <003901cf73cd$cb5c56b0$62150410$%jun@samsung.com>
+References: <1399945121-7387-1-git-send-email-sonnyrao@chromium.org>
+ <002301cf6e68$8809ee00$981dca00$%jun@samsung.com>
+ <CAPz6YkWObQe86MZYmyLrbYOkQ4hHkb2Hcpe8QZWDZCMO5U0f_Q@mail.gmail.com>
+ <002a01cf6e9b$c0538900$40fa9b00$%jun@samsung.com>
+ <CAPz6YkVF4VsgMAi4t=KxRcDU=TDzzRCoSPO-cQa6qMESVSgo9g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-reply-to: <001b01cf6e67$2183b400$648b1c00$%jun@samsung.com>
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-reply-to: <CAPz6YkVF4VsgMAi4t=KxRcDU=TDzzRCoSPO-cQa6qMESVSgo9g@mail.gmail.com>
 Content-language: ko
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: 'Seungwon Jeon' <tgih.jun@samsung.com>, 'Doug Anderson' <dianders@chromium.org>
-Cc: 'Sonny Rao' <sonnyrao@chromium.org>, 'Yuvaraj Kumar' <yuvaraj.cd@gmail.com>, 'Grant Grundler' <grundler@chromium.org>, 'linux-samsung-soc' <linux-samsung-soc@vger.kernel.org>, linux-arm-kernel@lists.infradead.org, 'Jaehoon Chung' <jh80.chung@samsung.com>, 'Chris Ball' <cjb@laptop.org>, 'linux-mmc' <linux-mmc@vger.kernel.org>, 'Kukjin Kim' <kgene.kim@samsung.com>, 'sunil joshi' <joshi@samsung.com>, 'Tomasz Figa' <t.figa@samsung.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: 'Sonny Rao' <sonnyrao@chromium.org>
+Cc: 'Yuvaraj Kumar C D' <yuvaraj.cd@samsung.com>, 'linux-samsung-soc' <linux-samsung-soc@vger.kernel.org>, 'Grant Grundler' <grundler@chromium.org>, 'Tomasz Figa' <t.figa@samsung.com>, 'linux-mmc' <linux-mmc@vger.kernel.org>, 'sunil joshi' <joshi@samsung.com>, 'Douglas Anderson' <dianders@chromium.org>, 'Jaehoon Chung' <jh80.chung@samsung.com>, 'Kukjin Kim' <kgene.kim@samsung.com>, 'Chris Ball' <cjb@laptop.org>, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Tue, May 13, 2014, Seungwon Jeon wrote:
-> Hi Doug,
+On Sat, May 17, 2014, Sonny Rao wrote:
+> On Tue, May 13, 2014 at 4:09 AM, Seungwon Jeon <tgih.jun@samsung.com> wrote:
+> > On Tuesday, May 13, Sonny Rao wrote:
+> >> On Mon, May 12, 2014 at 10:02 PM, Seungwon Jeon <tgih.jun@samsung.com> wrote:
+> >> > As I mentioned in previous version, you put all reset stuff in existing fifo_reset function.
+> >> > Although databook mentions ciu_reset case for SBE error, it's not obvious when ciu_reset is
+> needed
+> >> in other error cases.
+> >> > If you intend to add some robust error handing, it would be better to make another function.
+> >>
+> >> The document I have actually doesn't mention error cases, it describes
+> >> this procedure as "Controller/DMA/FIFO Reset Usage" so I believe it is
+> >> saying this is the correct procedure in all cases, and based on our
+> >> testing it seems to work.  I understand the skepticism, as I shared it
+> >> initially when I saw this, but based on our experience, this is
+> >> correct and it doesn't need to live in a separate function.
+> > I agree this active error handling.
+> > But, existing fifo_reset function is focused on fifo reset purely.
+> > I think your change is close to error recovery and it seems overloaded to basic function.
+> > So, you suggest renaming function for new sequence.
 > 
-> On Tue, May 13, 2014, Doug Anderson wrote:
-> > Seungwon,
-> >
-> > On Sat, May 10, 2014 at 7:11 AM, Seungwon Jeon <tgih.jun@samsung.com> wrote:
-> > > On Fri, May 09, 2014, Sonny Rao wrote:
-> > >> On Thu, May 8, 2014 at 2:42 AM, Yuvaraj Kumar <yuvaraj.cd@gmail.com> wrote:
-> > >> > Any comments on this patch?
-> > >> >
-> > >>
-> > >> I'll just add that without this fix, running the tuning loop for UHS
-> > >> modes is not reliable on dw_mmc because errors will happen and you
-> > >> will eventually hit this race and hang.  This can happen any time
-> > >> there is tuning like during boot or during resume from suspend.
-> > >>
-> > >> > On Thu, Mar 27, 2014 at 11:48 AM, Yuvaraj Kumar C D
-> > >> > <yuvaraj.cd@gmail.com> wrote:
-> > >> >> From: Doug Anderson <dianders@chromium.org>
-> > >> >>
-> > >> >> If we happened to get a data error at just the wrong time the dw_mmc
-> > >> >> driver could get into a state where it would never complete its
-> > >> >> request.  That would leave the caller just hanging there.
-> > >> >>
-> > >> >> We fix this two ways and both of the two fixes on their own appear to
-> > >> >> fix the problems we've seen:
-> > >> >>
-> > >> >> 1. Fix a race in the tasklet where the interrupt setting the data
-> > >> >>    error happens _just after_ we check for it, then we get a
-> > >> >>    EVENT_XFER_COMPLETE.  We fix this by repeating a bit of code.
-> > > I think repeating is not good approach to fix race.
-> > > In your case, XFER_COMPLETE preceded data error and DTO didn't come?
-> > > It seems strange case.
-> > > I want to know actual error value if you can reproduce.
-> >
-> > XFER_COMPLETE didn't necessarily precede data error.  Imagine this scenario:
-> >
-> > 1. Check for data error: nope
-> > 2. Interrupt happens and we get a data error and immediately xfer complete
-> > 3. Check for xfer complete: yup
-> >
-> > That's the state that we are handling.
-> >
-> > The system that dw_mmc uses where the interrupt handler has no locking
-> > makes it incredibly difficult to get things right.  Can you propose an
-> > alternate fix that would avoid the race?
-> Thank you for detailed scenario.
-> You're right.
-> Have you consider using spin_lock() in interrupt handler?
-> Then, we'll need to change spin_lock() to spin_lock_irqsave() in tasklet func.
-> And other locks in driver may need to be adjusted properly.
-> 
-> To return above scenario:
-> 1. Check for data error: nope
-> 2. Check for xfer complete: nope -> escape tasklet.
-> 3. Interrupt happens and we get a data error and immediately xfer complete
-> 4. Check for data error (Again in tasklet) : yup
-> 
-> How about this change?
-> 
-> Thanks,
-> Seungwon Jeon
-> >
-> >
-> > >> >> 2. Fix it so that if we detect that we've got an error in the "data
-> > >> >>    busy" state and we're not going to do anything else we end the
-> > >> >>    request and unblock anyone waiting.
-> > >> >>
-> > >> >> Signed-off-by: Doug Anderson <dianders@chromium.org>
-> > >> >> Signed-off-by: Yuvaraj Kumar C D <yuvaraj.cd@gmail.com>
-> > >> >> ---
-> > >> >>  drivers/mmc/host/dw_mmc.c |   47 +++++++++++++++++++++++++++++++++++++++++++++
-> > >> >>  1 file changed, 47 insertions(+)
-> > >> >>
-> > >> >> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> > >> >> index 1d77431..4c589f1 100644
-> > >> >> --- a/drivers/mmc/host/dw_mmc.c
-> > >> >> +++ b/drivers/mmc/host/dw_mmc.c
-> > >> >> @@ -1300,6 +1300,14 @@ static void dw_mci_tasklet_func(unsigned long priv)
-> > >> >>                         /* fall through */
-> > >> >>
-> > >> >>                 case STATE_SENDING_DATA:
-> > >> >> +                       /*
-> > >> >> +                        * We could get a data error and never a transfer
-> > >> >> +                        * complete so we'd better check for it here.
-> > >> >> +                        *
-> > >> >> +                        * Note that we don't really care if we also got a
-> > >> >> +                        * transfer complete; stopping the DMA and sending an
-> > >> >> +                        * abort won't hurt.
-> > >> >> +                        */
-> > >> >>                         if (test_and_clear_bit(EVENT_DATA_ERROR,
-> > >> >>                                                &host->pending_events)) {
-> > >> >>                                 dw_mci_stop_dma(host);
-> > >> >> @@ -1313,7 +1321,29 @@ static void dw_mci_tasklet_func(unsigned long priv)
-> > >> >>                                 break;
-> > >> >>
-> > >> >>                         set_bit(EVENT_XFER_COMPLETE, &host->completed_events);
-> > >> >> +
-> > >> >> +                       /*
-> > >> >> +                        * Handle an EVENT_DATA_ERROR that might have shown up
-> > >> >> +                        * before the transfer completed.  This might not have
-> > >> >> +                        * been caught by the check above because the interrupt
-> > >> >> +                        * could have gone off between the previous check and
-> > >> >> +                        * the check for transfer complete.
-> > >> >> +                        *
-> > >> >> +                        * Technically this ought not be needed assuming we
-> > >> >> +                        * get a DATA_COMPLETE eventually (we'll notice the
-> > >> >> +                        * error and end the request), but it shouldn't hurt.
-> > >> >> +                        *
-> > >> >> +                        * This has the advantage of sending the stop command.
-> > >> >> +                        */
-> > >> >> +                       if (test_and_clear_bit(EVENT_DATA_ERROR,
-> > >> >> +                                              &host->pending_events)) {
-> > >> >> +                               dw_mci_stop_dma(host);
-> > >> >> +                               send_stop_abort(host, data);
-> > >> >> +                               state = STATE_DATA_ERROR;
-> > >> >> +                               break;
-> > >> >> +                       }
-> > >> >>                         prev_state = state = STATE_DATA_BUSY;
-> > >> >> +
-> > >> >>                         /* fall through */
-> > >> >>
-> > >> >>                 case STATE_DATA_BUSY:
-> > >> >> @@ -1336,6 +1366,23 @@ static void dw_mci_tasklet_func(unsigned long priv)
-> > >> >>                                 /* stop command for open-ended transfer*/
-> > >> >>                                 if (data->stop)
-> > >> >>                                         send_stop_abort(host, data);
-> > >> >> +                       } else {
-> > >> >> +                               /*
-> > >> >> +                                * If we don't have a command complete now we'll
-> > >> >> +                                * never get one since we just reset everything;
-> > >> >> +                                * better end the request.
-> > >> >> +                                *
-> > >> >> +                                * If we do have a command complete we'll fall
-> > >> >> +                                * through to the SENDING_STOP command and
-> > >> >> +                                * everything will be peachy keen.
-> > >> >> +                                *
-> > >> >> +                                * TODO: I guess we shouldn't send a stop?
+> I think the documentation says it should always be done, not just in
+> error recovery.  I can rename the function to dw_mci_reset rather than
+> dw_mci_fifo_reset.  Is that what you mean? Or do you mean make a new
+> function that is only called in error cases?
+Both are okay.
 
-Please remove TODO:
-We already reset controller in dw_mci_data_complete() through "mmc: dw_mmc: change to use recommended reset procedure"?
-I guess it depends on that patch.
-Then, we don't need to stop sequence anymore.
+> 
+> > And look into dw_mci_work_routine_card(). dw_mci_idmac_reset() is redundancy.
+> > I expect it can be cleaned.
+> >
+> > <Quot>
+> >                                 /* Clear down the FIFO */
+> >                                 dw_mci_fifo_reset(host);
+> > #ifdef CONFIG_MMC_DW_IDMAC
+> >                                 dw_mci_idmac_reset(host);
+> > #endif
+> > </Quot>
+> >
+> 
+> Ok, I'll remove that extra reset, thanks for catching.
+> 
+> >>
+> >> > Please check my comments below.
+> >> >
+> >> > On Tue, May 13, 2014, Sonny Rao wrote:
+> >> >> This patch changes the fifo reset code to follow the reset procedure
+> >> >> outlined in the documentation of Synopsys  Mobile storage host databook
+> >> >> 7.2.13.
+> > Please remove this section number.
+> > No needed. It's old version.
+> >
+> 
+> Ok
+> 
+> >> >>
+> >> >> v2: Add Generic DMA support
+> >> >>     per the documentation, move interrupt clear before wait
+> >> >>     make the test for DMA host->use_dma rather than host->using_dma
+> >> >>     add proper return values (although it appears no caller checks)
+> >> >>
+> >> >> Signed-off-by: Sonny Rao <sonnyrao@chromium.org>
+> >> >> Signed-off-by: Yuvaraj Kumar C D <yuvaraj.cd@samsung.com>
+> >> >> ---
+> >> >>  drivers/mmc/host/dw_mmc.c | 55 ++++++++++++++++++++++++++++++++++++++++++++++-
+> >> >>  drivers/mmc/host/dw_mmc.h |  1 +
+> >> >>  2 files changed, 55 insertions(+), 1 deletion(-)
+> >> >>
+> >> >> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> >> >> index 55cd110..aff57e1 100644
+> >> >> --- a/drivers/mmc/host/dw_mmc.c
+> >> >> +++ b/drivers/mmc/host/dw_mmc.c
+> >> >> @@ -2325,6 +2325,7 @@ static bool dw_mci_ctrl_reset(struct dw_mci *host, u32 reset)
+> >> >>
+> >> >>  static inline bool dw_mci_fifo_reset(struct dw_mci *host)
+> >> >>  {
+> >> >> +     u32 flags = SDMMC_CTRL_RESET | SDMMC_CTRL_FIFO_RESET;
+> >> >>       /*
+> >> >>        * Reseting generates a block interrupt, hence setting
+> >> >>        * the scatter-gather pointer to NULL.
+> >> >> @@ -2334,7 +2335,59 @@ static inline bool dw_mci_fifo_reset(struct dw_mci *host)
+> >> >>               host->sg = NULL;
+> >> >>       }
+> >> >>
+> >> >> -     return dw_mci_ctrl_reset(host, SDMMC_CTRL_FIFO_RESET);
+> >> >> +     /*
+> >> >> +      * The recommended method for resetting is to always reset the
+> >> >> +      * controller and the fifo, but differs slightly depending on the mode.
+> >> >> +      * The Generic DMA mode (non IDMAC) also needs to reset DMA where IDMAC
+> >> >> +      * mode resets IDMAC at the end.
+> >> >> +      *
+> >> >> +      */
+> >> >> +#ifndef CONFIG_MMC_DW_IDMAC
+> >> > Is it added for generic DMA?
+> >> > IDMAC should be considered for dma_reseet as well.
+> >> > Please check databook.
+> >> >
+> >>
+> >> Yeah it's a little unclear.  In the "7.2.13 Controller/DMA/FIFO Reset
+> >> Usage" part of the document they mention It is set for what they call
+> >> "generic" DMA, which I think is when there is an external DMA
+> >> controller, and the part below that it says for "DW-DMA/Non-DW-DMA"
+> >> that controller_reset and fifo_reset should be set.   I believe this
+> >> "DW-DMA" case refers to what is called IDMAC.  So, I think it's not
+> >> required for this case, but I admit I'm not sure why they also say
+> >> "Non-DW-DMA". If you know of a good way to differentiate the "Generic
+> >> DMA" case  I can implement it.  It wasn't clear to me if the driver
+> >> even supported this "generic" dma case, but it sounds like it might,
+> >> so I added this code.  In practice, on the Exynos Systems we have,
+> >> which are using IDMAC, the reset procedure seems to work okay without
+> >> the dma_reset bit set, but I cannot test this "generic dma" case.
+> >>
+> >> The other places in the doc where I see them mention the dma_reset bit
+> >> are "7.2.21 Transmission and Reception with Internal DMAC (IDMAC)"
+> >> and the description of the CTRL register, and in "7.1
+> >> Software/Hardware Restrictions" where they say it will terminate any
+> >> pending transfer.
+> > "DW-DMA" means Synopsys's DMA controller not IDMAC.
+> > SDMMC_CTRL_DMA_RESET can apply in all type DMA interface.
+> 
+> So, do you think I should always set that bit if we're using DMA?
+Yes. Although you used it for general dma at first, IDMAC also needs it.
+
+> 
+> >
+> >>
+> >> >> +     if (host->use_dma)
+> >> >> +             flags |= SDMMC_CTRL_DMA_RESET;
+> >> >> +#endif
+> >> >> +     if (dw_mci_ctrl_reset(host, flags)) {
+> >> >> +             /*
+> >> >> +              * In all cases we clear the RAWINTS register to clear any
+> >> >> +              * interrupts.
+> >> >> +              */
+> >> > I think interrupt masking is needed before reset because we will not handle it anymore.
+> >> > And Is there any reason to move interrupt clear here compared with previous version?
+> >>
+> >> Yeah I moved it to match the description in the document more closely.
+> >>  The documents mentioned doing the interrupt clear after setting the
+> >> reset bits, and before waiting for the dma_req bit in the status
+> >> register to clear.  We've been running it with the interrupt clear
+> >> below the loop, for a while, and I just tested it with the clear above
+> >> the wait to make sure it still works properly and I was able to pass
+> >> the tuning process with some errors, so I believe this works fine too,
+> >> and more closely matches the description in the doc that I have.
+> > When I tried ciu_reset, I found some unexpected interrupts occurred.
+> > It means that interrupt handler will run to handle extra interrupts.
+> > Then, we may need mask the interrupt.
+> > Can you check it for test?
+> 
+> You're right.  When I have the controller reset bit set, I see one
+> interrupt coming in shortly after we write the reset bits, which has
+> status bits of 0x180.  This has Response timeout (RTO) and Data CRC
+> error set.  It sounds like some interrupt ocurring may be expected
+> since they say to clear RINTSTS as part of the procedure though.
+Yes, it needs to clear RINTSTS.
+While this interrupt occurs, interrupt handler is called and thus tasklet function is also called.
+Can we handle this unexpected interrupt properly?
+To prevent these calling, we may need interrupt mask before resetting.
+
+> 
+> 
+> >
+> >>
+> >> >> +             mci_writel(host, RINTSTS, 0xFFFFFFFF);
+> >> >> +
+> >> >> +             /* if using dma we wait for dma_req to clear */
+> >> >> +             if (host->use_dma) {
+> >> >> +                     unsigned long timeout = jiffies + msecs_to_jiffies(500);
+> >> >> +                     u32 status;
+> >> >> +                     do {
+> >> >> +                             status = mci_readl(host, STATUS);
+> >> >> +                             if (!(status & SDMMC_STATUS_DMA_REQ))
+> >> >> +                                     break;
+> >> >> +                             cpu_relax();
+> >> > What did you intend here?
+> >> > If you intent busy-wait, how about using sleep instead?
+> >>
+> >> Yes it is a busy-wait.  There is similar code in dw_mci_ctrl_reset,
+> >> where that function is polling without sleeps, so I was trying to
+> >> match that.  The cpu_relax() is something I saw in other busy-waits in
+> >> the kernel, but I'm happy to take it out if you'd like.
+> > In case of ctrl_reset, waiting is during 2 clock.
+> > If this polling status is not long, I'm OK.
+> >
+> >>
+> >> >> +                     } while (time_before(jiffies, timeout));
+> >> >> +
+> >> >> +                     if (status & SDMMC_STATUS_DMA_REQ) {
+> >> >> +                             dev_err(host->dev,
+> >> >> +                                     "%s: Timeout waiting for dma_req to "
+> >> >> +                                     "clear during reset", __func__);
+> >> >> +                             return false;
+> >> >> +                     }
+> >> >> +
+> >> >> +                     /* when using DMA next we reset the fifo again */
+> >> >> +                     dw_mci_ctrl_reset(host, SDMMC_CTRL_FIFO_RESET);
+> >> >> +             }
+> >> >> +     } else {
+> >> >> +             dev_err(host->dev, "%s: Reset bits didn't clear", __func__);
+> >> > If ciu_reset is cleared, clk update below is needed?
+> >>
+> >> I'm honestly not sure what happens if the reset bits don't clear.  The
+> >> docs say controller_reset and dma_reset will auto clear after a number
+> >> of clocks, but fifo_reset will clear "after completion of the reset
+> >> operation"  So in this particular error case I'm not sure if it's
+> >> possible to recover properly or not and might hang, so I thought it
+> >> best to just return the error immediately.
+> > Yes.
+> > But at least if ciu_reset is done successfully, it may need clock update sequence again.
+> > In addition, printing reset bit[2:0] will be helpful for debug information.
+> 
+> The dw_mci_ctrl_reset() function would run this code if some of the
+> bits didn't clear:
+> 
+>         dev_err(host->dev,
+>                 "Timeout resetting block (ctrl reset %#x)\n",
+>                 ctrl & reset);
+> 
+> Does that give you what you're looking for?
+Ah, it was there.
 
 Thanks,
 Seungwon Jeon
 
-> > >> >> +                                */
-> > >> >> +                               if (!test_bit(EVENT_CMD_COMPLETE,
-> > >> >> +                                             &host->pending_events)) {
-> > >> >> +                                       dw_mci_request_end(host, mrq);
-> > >> >> +                                       goto unlock;
-> > >> >> +                               }
-> > > Can you explain what happens above?
-> > > What is it for?
-> >
-> > This was an alternate fix for the above, but appears to actually hit
-> > in practice too.
-> >
-> > Said another way: if we don't add the extra checking for
-> > EVENT_DATA_ERROR (above) we'll end up here.  ...and if we ever get
-> > into this "else" and don't do _something_ then we'll wedge forever.
-> >
-> > -Doug
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
 > 
+> >
+> > Thanks,
+> > Seungwon Jeon
+> >
+> >>
+> >> > Thanks,
+> >> > Seungwon Jeon
+> >> >
+> >> >> +             return false;
+> >> >> +     }
+> >> >> +
+> >> >> +#ifdef CONFIG_MMC_DW_IDMAC
+> >> >> +     /* It is also recommended that we reset and reprogram idmac */
+> >> >> +     dw_mci_idmac_reset(host);
+> >> >> +#endif
+> >> >> +
+> >> >> +     /* After a CTRL reset we need to have CIU set clock registers  */
+> >> >> +     mci_send_cmd(host->cur_slot, SDMMC_CMD_UPD_CLK, 0);
+> >> >> +
+> >> >> +     return true;
+> >> >>  }
+> >> >>
+> >> >>  static inline bool dw_mci_ctrl_all_reset(struct dw_mci *host)
+> >> >> diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
+> >> >> index 6bf24ab..2505804 100644
+> >> >> --- a/drivers/mmc/host/dw_mmc.h
+> >> >> +++ b/drivers/mmc/host/dw_mmc.h
+> >> >> @@ -129,6 +129,7 @@
+> >> >>  #define SDMMC_CMD_INDX(n)            ((n) & 0x1F)
+> >> >>  /* Status register defines */
+> >> >>  #define SDMMC_GET_FCNT(x)            (((x)>>17) & 0x1FFF)
+> >> >> +#define SDMMC_STATUS_DMA_REQ         BIT(31)
+> >> >>  /* FIFOTH register defines */
+> >> >>  #define SDMMC_SET_FIFOTH(m, r, t)    (((m) & 0x7) << 28 | \
+> >> >>                                        ((r) & 0xFFF) << 16 | \
+> >> >> --
+> >> >> 1.9.1.423.g4596e3a
+> >> >>
+> >> >> --
+> >> >> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> >> >> the body of a message to majordomo@vger.kernel.org
+> >> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> >> >
+> >> --
+> >> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> >> the body of a message to majordomo@vger.kernel.org
+> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> >
 > --
 > To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
 > the body of a message to majordomo@vger.kernel.org
