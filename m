@@ -1,67 +1,38 @@
-From: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
-Subject: Re: [PATCH RFC 00/12] Add Qualcomm SD Card Controller support.
-Date: Tue, 20 May 2014 09:10:48 +0100
-Message-ID: <537B0E08.50400@linaro.org>
-References: <1398116624-31052-1-git-send-email-srinivas.kandagatla@linaro.org> <CAJAp7Oj5e8_zqNsHUxex8pd1zh4_sSzZMvp+67YSE39JDkoLAQ@mail.gmail.com>
+From: Vasily Khoruzhick <anarsoul@gmail.com>
+Subject: Re: [PATCH] s3cmci: port DMA code to dmaengine API
+Date: Tue, 20 May 2014 13:22:35 +0300
+Message-ID: <CA+E=qVch0K+raN4dkPK6XzXqOQc4t433UyCJ2Qnc2uymgTq7cA@mail.gmail.com>
+References: <1400522593-6366-1-git-send-email-anarsoul@gmail.com>
+ <7633675.1cAc12AFAY@wuerfel> <CA+E=qVeG8bXowBvdhKpVSYSL08n6ZUVG2LkjhPwjBnbv+egNLw@mail.gmail.com>
+ <4667090.Oyf6jd3Lyk@wuerfel>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAJAp7Oj5e8_zqNsHUxex8pd1zh4_sSzZMvp+67YSE39JDkoLAQ@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Bjorn Andersson <bjorn@kryo.se>
-Cc: linux-mmc@vger.kernel.org, Russell King <linux@arm.linux.org.uk>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, agross@quicinc.com, linux-arm-msm <linux-arm-msm@vger.kernel.org>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-ob0-f176.google.com ([209.85.214.176]:49332 "EHLO
+	mail-ob0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750870AbaETKWz (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 20 May 2014 06:22:55 -0400
+Received: by mail-ob0-f176.google.com with SMTP id wo20so249053obc.21
+        for <linux-mmc@vger.kernel.org>; Tue, 20 May 2014 03:22:55 -0700 (PDT)
+In-Reply-To: <4667090.Oyf6jd3Lyk@wuerfel>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Arnd Bergmann <arnd@arndb.de>
+Cc: Chris Ball <chris@printf.net>, Ben Dooks <ben-linux@fluff.org>, Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, arm-linux <linux-arm-kernel@lists.infradead.org>
 
-Thanks Bjorn for testing this series.
+Hi Arnd,
 
-On 19/05/14 23:08, Bjorn Andersson wrote:
-> On Mon, Apr 21, 2014 at 2:43 PM,<srinivas.kandagatla@linaro.org>  wrote:
->> >From: Srinivas Kandagatla<srinivas.kandagatla@linaro.org>
-> [snip]
->> >
->> >This patches are tested in PIO mode on IFC8064 board with both eMMC and
->> >external SD card. I would appreciate any feedback/suggestions on the overall
->> >approach.
-> Hi Srini,
->
-> I finally got around to give this series a spin on our APQ8064 based
-> devices as well. I had a few reported CRC issues on our msm8960 based
-> devices, but thinks seems functionally "ok".
->
-> On APQ8064, the kernel finds the onboard eMMC and when mounting it I
-> get the following:
->
-> [    1.624118] mmc0: new high speed MMC card at address 0001
-> [    1.627521] mmcblk0: mmc0:0001 MAG2GA 14.5 GiB
-> [    1.632714] mmcblk0boot0: mmc0:0001 MAG2GA partition 1 2.00 MiB
-> [    1.636989] mmcblk0boot1: mmc0:0001 MAG2GA partition 2 2.00 MiB
-> [    1.637393] Freeing unused kernel memory: 332K (c09c6000 - c0a19000)
-> [    1.663379] mmcblk0: response CRC error sending r/w cmd command,
->
-> [    2.292914] mmcblk0: response CRC error sending r/w cmd command,
-> card status 0xb00
-> [    2.300985] mmcblk0: response CRC error sending r/w cmd command,
->
->
-> Any suggestions of what I could do to help you debug this?
->
+On Mon, May 19, 2014 at 10:02 PM, Arnd Bergmann <arnd@arndb.de> wrote:
+> For this driver, you don't have to go that far, as long as it's
+> ensure that the pointer to the filter function is available to
+> the driver, i.e. you can't have a built-in s3mci driver when the
+> dmaengine driver is a loadable module.
 
-There might be couple of reasons why this might happen,
+OK, so I guess I need to add explicit dependency on
+CONFIG_S3C24XX_DMAC for s3cmci driver.
 
-First is the regluators. currently the upstream kernel does not have 
-support for regulators. So, does the eMMC on your board work perfectly 
-fine with the default 2.7v?
+Btw, I didn't understand if it's acceptable to pass DMA channel number
+through DMA resource for non-DT case or not?
 
-secondly it could be eMMC vendor specific quirks.
-
-I stress tested eMMC on IFC6410 and I did not hit any issues as you 
-mentioned.
-
-Are you aware of any such quirks specific to the eMMC on your board?
-
-thanks,
-srini
-
-> Regards,
-> Bjorn
+Regards
+Vasily
