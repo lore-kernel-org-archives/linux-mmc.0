@@ -1,69 +1,34 @@
-From: Tony Lindgren <tony@atomide.com>
-Subject: Re: [PATCH v2 6/6] mmc: omap_hsmmc: split omap-dma header file
-Date: Tue, 20 May 2014 07:50:09 -0700
-Message-ID: <20140520145009.GC27830@atomide.com>
-References: <1399654013-28262-1-git-send-email-balajitk@ti.com>
- <1399654013-28262-7-git-send-email-balajitk@ti.com>
- <20140516214116.GM12881@atomide.com>
- <5379F0C6.6070004@ti.com>
- <20140519165441.GI4849@atomide.com>
- <537B5873.5010006@ti.com>
+From: Stephen Warren <swarren@wwwdotorg.org>
+Subject: Re: [PATCH v2 1/3] mmc: tegra: disable UHS modes
+Date: Tue, 20 May 2014 11:25:54 -0600
+Message-ID: <537B9022.20709@wwwdotorg.org>
+References: <1397526163-20126-1-git-send-email-abrestic@chromium.org> <1397689719-28882-1-git-send-email-abrestic@chromium.org> <1397689719-28882-2-git-send-email-abrestic@chromium.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-omap-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <537B5873.5010006@ti.com>
-Sender: linux-omap-owner@vger.kernel.org
-To: Balaji T K <balajitk@ti.com>
-Cc: linux-mmc@vger.kernel.org, chris@printf.net, ulf.hansson@linaro.org, linux-omap@vger.kernel.org, Russell King - ARM Linux <linux@arm.linux.org.uk>
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from avon.wwwdotorg.org ([70.85.31.133]:57609 "EHLO
+	avon.wwwdotorg.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753587AbaETRZ6 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 20 May 2014 13:25:58 -0400
+In-Reply-To: <1397689719-28882-2-git-send-email-abrestic@chromium.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Andrew Bresticker <abrestic@chromium.org>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Thierry Reding <thierry.reding@gmail.com>, linux-mmc@vger.kernel.org, linux-tegra@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
 
-* Balaji T K <balajitk@ti.com> [140520 06:29]:
-> On Monday 19 May 2014 10:24 PM, Tony Lindgren wrote:
-> >* Balaji T K <balajitk@ti.com> [140519 04:54]:
-> >>On Saturday 17 May 2014 03:11 AM, Tony Lindgren wrote:
-> >>>>-
-> >>>>-#if defined(CONFIG_DMA_OMAP) || defined(CONFIG_DMA_OMAP_MODULE)
-> >>>>-bool omap_dma_filter_fn(struct dma_chan *, void *);
-> >>>>-#else
-> >>>>-static inline bool omap_dma_filter_fn(struct dma_chan *c, void *d)
-> >>>>-{
-> >>>>-	return false;
-> >>>>-}
-> >>>>-#endif
-> >>>>+#include <linux/omap-dmaengine.h>
-> >>>
-> >>>Can't the drivers needing this include it directly?
-> >>>
-> >>
-> >>Yes, I have converted omap_hsmmc as part of this patch.
-> >>Due to lack of bandwidth, I haven't touched upon all other drivers that include
-> >>omap-dma.h. Once that is done in other subsystem after this patch gets merged,
-> >>this include can then be removed from omap-dma.h
-> >
-> >OK
-> >
-> >>>Also, has this been tested with make randconfig? Changes like
-> >>>this can easily cause problems elsewhere..
-> >>
-> >>May be I am missing something, Can you please elaborate ?
-> >
-> >You're touching a header included in many places, so you
-> >need to make sure you're not accidentally breaking anything.
-> >
-> 
-> True
-> 
-> >There's an option that allows you to specify some selected
-> >options like CONFIG_ARCH_OMAP2PLUS=y with KCONFIG_ALLCONFIG
-> >and then run make randconfig. This should expose quite fast
-> >if there are some issues for the other drivers.
-> >
-> >Also, have you compile tested this with omap1_defconfig?
-> >
-> 
-> checked omap1_defconfig and randconfig's, both are OK.
+On 04/16/2014 05:08 PM, Andrew Bresticker wrote:
+> Program TEGRA_SDHCI_VENDOR_MISC_CTRL so that UHS modes aren't advertised
+> in SDHCI_CAPABILITIES_1.  While the Tegra SDHCI controller does support
+> these modes, they require Tegra-specific tuning and calibration routines
+> which the driver does not support yet.
 
-OK thanks:
+What's the status of patches 1 and 2 in this series? I assumed they'd be
+applied to the MMC tree. I've had them applied to my local development
+tree for a while now, so in case this helps:
 
-Acked-by: Tony Lindgren <tony@atomide.com>
+Tested-by: Stephen Warren <swarren@nvidia.com>
+Acked-by: Stephen Warren <swarren@nvidia.com>
+
+(I thought I wrote that before, but I can't find it, so I must have
+forgotten to)
