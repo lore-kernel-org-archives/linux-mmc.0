@@ -1,58 +1,34 @@
-From: Arnd Bergmann <arnd@arndb.de>
+From: Jonas Jensen <jonas.jensen@gmail.com>
 Subject: Re: mmc: moxart: Add MOXA ART SD/MMC driver
-Date: Wed, 21 May 2014 14:33:57 +0200
-Message-ID: <4199288.qtcULgjJrP@wuerfel>
+Date: Wed, 21 May 2014 14:52:36 +0200
+Message-ID: <CACmBeS1BUT_gW02=u89up8Xr+zNFD_BTsiB+3OFR3zODX5uW=g@mail.gmail.com>
 References: <20140521122825.GE23396@mwanda>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7Bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mout.kundenserver.de ([212.227.126.131]:62169 "EHLO
-	mout.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751018AbaEUMeA (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 21 May 2014 08:34:00 -0400
+Received: from mail-ig0-f175.google.com ([209.85.213.175]:37783 "EHLO
+	mail-ig0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750861AbaEUMwg (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 21 May 2014 08:52:36 -0400
+Received: by mail-ig0-f175.google.com with SMTP id uq10so6131067igb.14
+        for <linux-mmc@vger.kernel.org>; Wed, 21 May 2014 05:52:36 -0700 (PDT)
 In-Reply-To: <20140521122825.GE23396@mwanda>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Dan Carpenter <dan.carpenter@oracle.com>
-Cc: jonas.jensen@gmail.com, linux-mmc@vger.kernel.org
+Cc: linux-mmc@vger.kernel.org, Arnd Bergmann <arnd@arndb.de>
 
-On Wednesday 21 May 2014 15:28:25 Dan Carpenter wrote:
+On 21 May 2014 14:28, Dan Carpenter <dan.carpenter@oracle.com> wrote:
 > Hello Jonas Jensen,
-> 
+>
 > The patch 1b66e94e6b99: "mmc: moxart: Add MOXA ART SD/MMC driver"
 > from Apr 9, 2014, leads to the following static checker warning:
-> 
+>
 >         drivers/mmc/host/moxart-mmc.c:691 moxart_remove()
 >         warn: variable dereferenced before check 'mmc' (see line 687)
-> 
-> drivers/mmc/host/moxart-mmc.c
->    684  static int moxart_remove(struct platform_device *pdev)
->    685  {
->    686          struct mmc_host *mmc = dev_get_drvdata(&pdev->dev);
->    687          struct moxart_host *host = mmc_priv(mmc);
->                                            ^^^^^^^^^^^^^
-> Dereference.
-> 
->    688  
->    689          dev_set_drvdata(&pdev->dev, NULL);
->    690  
->    691          if (mmc) {
->                     ^^^
-> Check.
-
-Right, the check should just be removed, because the moxart_remove
-function will not be called unless moxart_probe() has successfully
-set the drvdata.
 
 
-On a related note, I also found two bugs using automated build testing:
+Thanks, I'll post a patch with fixes for this and bugs spotted by Arnd.
 
-a) The driver should use dma_request_slave_channel_reason() instead of
-of_dma_request_slave_channel() so it can be compiled when CONFIG_OF is
-disabled.
-
-b) moxart_remove() contains an extraneous kfree(host), where host is
-a variable that has already been freed at that point.
-
-	Arnd
+Regards,
+Jonas
