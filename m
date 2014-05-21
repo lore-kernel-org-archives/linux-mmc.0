@@ -1,26 +1,44 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: omap_hsmmc: use IS_ERR macro for error checking
-Date: Wed, 21 May 2014 12:10:05 +0200
-Message-ID: <CAPDyKFqPc+ibP+mZgkVDTx-CxrcvaZ2m-y9Vh3JsJ1A+-ugtLQ@mail.gmail.com>
-References: <CAPDyKFqJc92kZn_Yj87q3GJWOq+jftm0UPsShAPREqkMKC5S4g@mail.gmail.com>
-	<1400160229-2578-1-git-send-email-balajitk@ti.com>
+From: Dan Carpenter <dan.carpenter@oracle.com>
+Subject: re: mmc: moxart: Add MOXA ART SD/MMC driver
+Date: Wed, 21 May 2014 15:28:25 +0300
+Message-ID: <20140521122825.GE23396@mwanda>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-omap-owner@vger.kernel.org>
-In-Reply-To: <1400160229-2578-1-git-send-email-balajitk@ti.com>
-Sender: linux-omap-owner@vger.kernel.org
-To: Balaji T K <balajitk@ti.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, linux-omap <linux-omap@vger.kernel.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from userp1040.oracle.com ([156.151.31.81]:19512 "EHLO
+	userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752478AbaEUM2d (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 21 May 2014 08:28:33 -0400
+Content-Disposition: inline
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: jonas.jensen@gmail.com
+Cc: linux-mmc@vger.kernel.org
 
-On 15 May 2014 15:23, Balaji T K <balajitk@ti.com> wrote:
-> Debounce clock is optional, use IS_ERR macro instead of NULL pointer check.
->
-> Signed-off-by: Balaji T K <balajitk@ti.com>
+Hello Jonas Jensen,
 
-Thanks Balaji,
+The patch 1b66e94e6b99: "mmc: moxart: Add MOXA ART SD/MMC driver"
+from Apr 9, 2014, leads to the following static checker warning:
 
-I will include this in the next PR I send to Chris.
+	drivers/mmc/host/moxart-mmc.c:691 moxart_remove()
+	warn: variable dereferenced before check 'mmc' (see line 687)
 
-Kind regards
-Ulf Hansson
+drivers/mmc/host/moxart-mmc.c
+   684  static int moxart_remove(struct platform_device *pdev)
+   685  {
+   686          struct mmc_host *mmc = dev_get_drvdata(&pdev->dev);
+   687          struct moxart_host *host = mmc_priv(mmc);
+                                           ^^^^^^^^^^^^^
+Dereference.
+
+   688  
+   689          dev_set_drvdata(&pdev->dev, NULL);
+   690  
+   691          if (mmc) {
+                    ^^^
+Check.
+
+   692                  if (!IS_ERR(host->dma_chan_tx))
+
+regards,
+dan carpenter
