@@ -1,115 +1,51 @@
-From: Doug Anderson <dianders@chromium.org>
-Subject: [PATCH v2] mmc: dw_mmc: Make sure we don't get stuck when we get an error
-Date: Tue, 20 May 2014 15:07:50 -0700
-Message-ID: <1400623670-2657-1-git-send-email-dianders@chromium.org>
+From: Chris Ball <chris@printf.net>
+Subject: Re: [PATCH v2 1/3] mmc: tegra: disable UHS modes
+Date: Wed, 21 May 2014 01:43:42 +0100
+Message-ID: <86egzormf5.fsf@void.printf.net>
+References: <1397526163-20126-1-git-send-email-abrestic@chromium.org>
+	<1397689719-28882-1-git-send-email-abrestic@chromium.org>
+	<1397689719-28882-2-git-send-email-abrestic@chromium.org>
+	<537B9022.20709@wwwdotorg.org>
+Mime-Version: 1.0
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pd0-f201.google.com ([209.85.192.201]:53779 "EHLO
-	mail-pd0-f201.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750808AbaETWIw (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 20 May 2014 18:08:52 -0400
-Received: by mail-pd0-f201.google.com with SMTP id y10so143193pdj.0
-        for <linux-mmc@vger.kernel.org>; Tue, 20 May 2014 15:08:51 -0700 (PDT)
+Received: from void.printf.net ([89.145.121.20]:45695 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750737AbaEUAnt (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 20 May 2014 20:43:49 -0400
+In-Reply-To: <537B9022.20709@wwwdotorg.org> (Stephen Warren's message of "Tue,
+	20 May 2014 11:25:54 -0600")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>
-Cc: Chris Ball <cjb@laptop.org>, Sonny Rao <sonnyrao@chromium.org>, Grant Grundler <grundler@chromium.org>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, Kukjin Kim <kgene.kim@samsung.com>, sunil joshi <joshi@samsung.com>, Tomasz Figa <t.figa@samsung.com>, Doug Anderson <dianders@chromium.org>, Yuvaraj Kumar C D <yuvaraj.cd@gmail.com>, chris@printf.net, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Stephen Warren <swarren@wwwdotorg.org>
+Cc: Andrew Bresticker <abrestic@chromium.org>, Ulf Hansson <ulf.hansson@linaro.org>, Thierry Reding <thierry.reding@gmail.com>, linux-mmc@vger.kernel.org, linux-tegra@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
 
-If we happened to get a data error at just the wrong time the dw_mmc
-driver could get into a state where it would never complete its
-request.  That would leave the caller just hanging there.
+Hi Stephen,
 
-We fix this two ways and both of the two fixes on their own appear to
-fix the problems we've seen:
+On Tue, May 20 2014, Stephen Warren wrote:
+> On 04/16/2014 05:08 PM, Andrew Bresticker wrote:
+>> Program TEGRA_SDHCI_VENDOR_MISC_CTRL so that UHS modes aren't advertised
+>> in SDHCI_CAPABILITIES_1.  While the Tegra SDHCI controller does support
+>> these modes, they require Tegra-specific tuning and calibration routines
+>> which the driver does not support yet.
+>
+> What's the status of patches 1 and 2 in this series? I assumed they'd be
+> applied to the MMC tree. I've had them applied to my local development
+> tree for a while now, so in case this helps:
+>
+> Tested-by: Stephen Warren <swarren@nvidia.com>
+> Acked-by: Stephen Warren <swarren@nvidia.com>
+>
+> (I thought I wrote that before, but I can't find it, so I must have
+> forgotten to)
 
-1. Fix a race in the tasklet where the interrupt setting the data
-   error happens _just after_ we check for it, then we get a
-   EVENT_XFER_COMPLETE.  We fix this by repeating a bit of code.
-2. Fix it so that if we detect that we've got an error in the "data
-   busy" state and we're not going to do anything else we end the
-   request and unblock anyone waiting.
+We've been waiting for a very large sdhci patchset from Russell to
+land before merging other sdhci patches, but I think we're running
+out of time for that -- so we'll merge this one way or another within
+a few days.
 
-Signed-off-by: Doug Anderson <dianders@chromium.org>
-Signed-off-by: Yuvaraj Kumar C D <yuvaraj.cd@gmail.com>
----
-Changes in v2:
-- Removed TODO
-- Set cmd to NULL before calling dw_mci_request_end()
+Thanks,
 
- drivers/mmc/host/dw_mmc.c | 46 ++++++++++++++++++++++++++++++++++++++++++++++
- 1 file changed, 46 insertions(+)
-
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index cced599..54ec8b0 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -1318,6 +1318,14 @@ static void dw_mci_tasklet_func(unsigned long priv)
- 			/* fall through */
- 
- 		case STATE_SENDING_DATA:
-+			/*
-+			 * We could get a data error and never a transfer
-+			 * complete so we'd better check for it here.
-+			 *
-+			 * Note that we don't really care if we also got a
-+			 * transfer complete; stopping the DMA and sending an
-+			 * abort won't hurt.
-+			 */
- 			if (test_and_clear_bit(EVENT_DATA_ERROR,
- 					       &host->pending_events)) {
- 				dw_mci_stop_dma(host);
-@@ -1331,7 +1339,29 @@ static void dw_mci_tasklet_func(unsigned long priv)
- 				break;
- 
- 			set_bit(EVENT_XFER_COMPLETE, &host->completed_events);
-+
-+			/*
-+			 * Handle an EVENT_DATA_ERROR that might have shown up
-+			 * before the transfer completed.  This might not have
-+			 * been caught by the check above because the interrupt
-+			 * could have gone off between the previous check and
-+			 * the check for transfer complete.
-+			 *
-+			 * Technically this ought not be needed assuming we
-+			 * get a DATA_COMPLETE eventually (we'll notice the
-+			 * error and end the request), but it shouldn't hurt.
-+			 *
-+			 * This has the advantage of sending the stop command.
-+			 */
-+			if (test_and_clear_bit(EVENT_DATA_ERROR,
-+					       &host->pending_events)) {
-+				dw_mci_stop_dma(host);
-+				send_stop_abort(host, data);
-+				state = STATE_DATA_ERROR;
-+				break;
-+			}
- 			prev_state = state = STATE_DATA_BUSY;
-+
- 			/* fall through */
- 
- 		case STATE_DATA_BUSY:
-@@ -1354,6 +1384,22 @@ static void dw_mci_tasklet_func(unsigned long priv)
- 				/* stop command for open-ended transfer*/
- 				if (data->stop)
- 					send_stop_abort(host, data);
-+			} else {
-+				/*
-+				 * If we don't have a command complete now we'll
-+				 * never get one since we just reset everything;
-+				 * better end the request.
-+				 *
-+				 * If we do have a command complete we'll fall
-+				 * through to the SENDING_STOP command and
-+				 * everything will be peachy keen.
-+				 */
-+				if (!test_bit(EVENT_CMD_COMPLETE,
-+					      &host->pending_events)) {
-+					host->cmd = NULL;
-+					dw_mci_request_end(host, mrq);
-+					goto unlock;
-+				}
- 			}
- 
- 			/*
+- Chris.
 -- 
-1.9.1.423.g4596e3a
-
+Chris Ball   <http://printf.net/>
