@@ -1,73 +1,128 @@
 From: Seungwon Jeon <tgih.jun@samsung.com>
-Subject: RE: [PATCH] mmc: dw_mmc: Make sure we don't get stuck when we get an
- error
-Date: Wed, 21 May 2014 18:05:33 +0900
-Message-ID: <000f01cf74d3$d2938b40$77baa1c0$%jun@samsung.com>
-References: <1395901126-6141-1-git-send-email-yuvaraj.cd@samsung.com>
- <CAKuRcOL_JVjOfLNspb14kRxcAXjpEwX4WkvmM+izryZbZBE4XA@mail.gmail.com>
- <CAPz6YkVwT0PrcLP1MJy0vVRw811+_7PwsV_ggKxQkqrjOWeWWw@mail.gmail.com>
- <002001cf6c59$b5b5e680$2121b380$%jun@samsung.com>
- <CAD=FV=X=9cTvST5cM=H9H23SMD28cHSExXt3YR=v2AQ6dFJY5w@mail.gmail.com>
- <001b01cf6e67$2183b400$648b1c00$%jun@samsung.com>
- <003a01cf73cd$fa2ee160$ee8ca420$%jun@samsung.com>
- <CAD=FV=Vtpup1DaAnN1cO4R5CgxMKa0aosw53sj1eKcUPJsEoYg@mail.gmail.com>
+Subject: RE: [PATCH v2] mmc: dw_mmc: Make sure we don't get stuck when we get
+ an error
+Date: Wed, 21 May 2014 18:08:19 +0900
+Message-ID: <001601cf74d4$3547a410$9fd6ec30$%jun@samsung.com>
+References: <1400623670-2657-1-git-send-email-dianders@chromium.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=ks_c_5601-1987
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-reply-to: <CAD=FV=Vtpup1DaAnN1cO4R5CgxMKa0aosw53sj1eKcUPJsEoYg@mail.gmail.com>
+In-reply-to: <1400623670-2657-1-git-send-email-dianders@chromium.org>
 Content-language: ko
 Sender: linux-samsung-soc-owner@vger.kernel.org
-To: 'Doug Anderson' <dianders@chromium.org>
-Cc: 'Sonny Rao' <sonnyrao@chromium.org>, 'Yuvaraj Kumar' <yuvaraj.cd@gmail.com>, 'Grant Grundler' <grundler@chromium.org>, 'linux-samsung-soc' <linux-samsung-soc@vger.kernel.org>, linux-arm-kernel@lists.infradead.org, 'Jaehoon Chung' <jh80.chung@samsung.com>, 'Chris Ball' <cjb@laptop.org>, 'linux-mmc' <linux-mmc@vger.kernel.org>, 'Kukjin Kim' <kgene.kim@samsung.com>, 'sunil joshi' <joshi@samsung.com>, 'Tomasz Figa' <t.figa@samsung.com>
+To: 'Doug Anderson' <dianders@chromium.org>, 'Jaehoon Chung' <jh80.chung@samsung.com>
+Cc: 'Chris Ball' <cjb@laptop.org>, 'Sonny Rao' <sonnyrao@chromium.org>, 'Grant Grundler' <grundler@chromium.org>, 'linux-samsung-soc' <linux-samsung-soc@vger.kernel.org>, 'Kukjin Kim' <kgene.kim@samsung.com>, 'sunil joshi' <joshi@samsung.com>, 'Tomasz Figa' <t.figa@samsung.com>, 'Yuvaraj Kumar C D' <yuvaraj.cd@gmail.com>, chris@printf.net, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
 On Wed, May 21, 2014, Doug Anderson wrote:
-> Seungwon,
+> If we happened to get a data error at just the wrong time the dw_mmc
+> driver could get into a state where it would never complete its
+> request.  That would leave the caller just hanging there.
 > 
-> On Mon, May 19, 2014 at 6:51 PM, Seungwon Jeon <tgih.jun@samsung.com> wrote:
-> >> > >> >> +                       } else {
-> >> > >> >> +                               /*
-> >> > >> >> +                                * If we don't have a command complete now we'll
-> >> > >> >> +                                * never get one since we just reset everything;
-> >> > >> >> +                                * better end the request.
-> >> > >> >> +                                *
-> >> > >> >> +                                * If we do have a command complete we'll fall
-> >> > >> >> +                                * through to the SENDING_STOP command and
-> >> > >> >> +                                * everything will be peachy keen.
-> >> > >> >> +                                *
-> >> > >> >> +                                * TODO: I guess we shouldn't send a stop?
-> >
-> > Please remove TODO:
+> We fix this two ways and both of the two fixes on their own appear to
+> fix the problems we've seen:
 > 
-> OK
+> 1. Fix a race in the tasklet where the interrupt setting the data
+>    error happens _just after_ we check for it, then we get a
+>    EVENT_XFER_COMPLETE.  We fix this by repeating a bit of code.
+> 2. Fix it so that if we detect that we've got an error in the "data
+>    busy" state and we're not going to do anything else we end the
+>    request and unblock anyone waiting.
 > 
-> > We already reset controller in dw_mci_data_complete() through "mmc: dw_mmc: change to use
-> recommended reset procedure"?
-> > I guess it depends on that patch.
-> > Then, we don't need to stop sequence anymore.
-> 
-> Even without that patch we've still pretty much stopped everything in
-> dw_mci_fifo_reset(), so I'm not sure there's any strong dependency.
-> ...but in our tree this did land after the patch you mention, so you
-> could wait until it lands if you want.
-> 
-ciu-reset or stop/abort cmd is needed for recovery of controller FSM after getting error.
-dw_mci_fifo_reset eventually has ciu-reset from that patch.
-I think it's fine to apply after that.
+> Signed-off-by: Doug Anderson <dianders@chromium.org>
+> Signed-off-by: Yuvaraj Kumar C D <yuvaraj.cd@gmail.com>
 
-> 
-> NOTE: We found that on some machines we were getting warnings after
-> enabling tuning and using this patch.  The warnings were benign, but
-> we should probably squash the fix into this patch.  See
-> <https://chromium-review.googlesource.com/#/c/200652/> for details.
-Can it be accessible?
+It will be applied after "mmc: dw_mmc: change to use recommended reset procedure"
+
+Acked-by: Seungwon Jeon <tgih.jun@samsung.com>
 
 Thanks,
 Seungwon Jeon
 
+> ---
+> Changes in v2:
+> - Removed TODO
+> - Set cmd to NULL before calling dw_mci_request_end()
 > 
-> -Doug
+>  drivers/mmc/host/dw_mmc.c | 46 ++++++++++++++++++++++++++++++++++++++++++++++
+>  1 file changed, 46 insertions(+)
+> 
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index cced599..54ec8b0 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -1318,6 +1318,14 @@ static void dw_mci_tasklet_func(unsigned long priv)
+>  			/* fall through */
+> 
+>  		case STATE_SENDING_DATA:
+> +			/*
+> +			 * We could get a data error and never a transfer
+> +			 * complete so we'd better check for it here.
+> +			 *
+> +			 * Note that we don't really care if we also got a
+> +			 * transfer complete; stopping the DMA and sending an
+> +			 * abort won't hurt.
+> +			 */
+>  			if (test_and_clear_bit(EVENT_DATA_ERROR,
+>  					       &host->pending_events)) {
+>  				dw_mci_stop_dma(host);
+> @@ -1331,7 +1339,29 @@ static void dw_mci_tasklet_func(unsigned long priv)
+>  				break;
+> 
+>  			set_bit(EVENT_XFER_COMPLETE, &host->completed_events);
+> +
+> +			/*
+> +			 * Handle an EVENT_DATA_ERROR that might have shown up
+> +			 * before the transfer completed.  This might not have
+> +			 * been caught by the check above because the interrupt
+> +			 * could have gone off between the previous check and
+> +			 * the check for transfer complete.
+> +			 *
+> +			 * Technically this ought not be needed assuming we
+> +			 * get a DATA_COMPLETE eventually (we'll notice the
+> +			 * error and end the request), but it shouldn't hurt.
+> +			 *
+> +			 * This has the advantage of sending the stop command.
+> +			 */
+> +			if (test_and_clear_bit(EVENT_DATA_ERROR,
+> +					       &host->pending_events)) {
+> +				dw_mci_stop_dma(host);
+> +				send_stop_abort(host, data);
+> +				state = STATE_DATA_ERROR;
+> +				break;
+> +			}
+>  			prev_state = state = STATE_DATA_BUSY;
+> +
+>  			/* fall through */
+> 
+>  		case STATE_DATA_BUSY:
+> @@ -1354,6 +1384,22 @@ static void dw_mci_tasklet_func(unsigned long priv)
+>  				/* stop command for open-ended transfer*/
+>  				if (data->stop)
+>  					send_stop_abort(host, data);
+> +			} else {
+> +				/*
+> +				 * If we don't have a command complete now we'll
+> +				 * never get one since we just reset everything;
+> +				 * better end the request.
+> +				 *
+> +				 * If we do have a command complete we'll fall
+> +				 * through to the SENDING_STOP command and
+> +				 * everything will be peachy keen.
+> +				 */
+> +				if (!test_bit(EVENT_CMD_COMPLETE,
+> +					      &host->pending_events)) {
+> +					host->cmd = NULL;
+> +					dw_mci_request_end(host, mrq);
+> +					goto unlock;
+> +				}
+>  			}
+> 
+>  			/*
+> --
+> 1.9.1.423.g4596e3a
+> 
 > --
 > To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
 > the body of a message to majordomo@vger.kernel.org
