@@ -1,51 +1,40 @@
-From: Chris Ball <chris@printf.net>
-Subject: Re: [PATCH v2 1/3] mmc: tegra: disable UHS modes
-Date: Wed, 21 May 2014 01:43:42 +0100
-Message-ID: <86egzormf5.fsf@void.printf.net>
-References: <1397526163-20126-1-git-send-email-abrestic@chromium.org>
-	<1397689719-28882-1-git-send-email-abrestic@chromium.org>
-	<1397689719-28882-2-git-send-email-abrestic@chromium.org>
-	<537B9022.20709@wwwdotorg.org>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: [PATCH v2] s3cmci: port DMA code to dmaengine API
+Date: Wed, 21 May 2014 10:57:34 +0200
+Message-ID: <4563444.HLmgOoMRYe@wuerfel>
+References: <1400617259-6939-1-git-send-email-anarsoul@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7Bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:45695 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750737AbaEUAnt (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 20 May 2014 20:43:49 -0400
-In-Reply-To: <537B9022.20709@wwwdotorg.org> (Stephen Warren's message of "Tue,
-	20 May 2014 11:25:54 -0600")
+Received: from mout.kundenserver.de ([212.227.17.13]:59097 "EHLO
+	mout.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750849AbaEUI5r (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 21 May 2014 04:57:47 -0400
+In-Reply-To: <1400617259-6939-1-git-send-email-anarsoul@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Stephen Warren <swarren@wwwdotorg.org>
-Cc: Andrew Bresticker <abrestic@chromium.org>, Ulf Hansson <ulf.hansson@linaro.org>, Thierry Reding <thierry.reding@gmail.com>, linux-mmc@vger.kernel.org, linux-tegra@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
+To: linux-arm-kernel@lists.infradead.org
+Cc: Vasily Khoruzhick <anarsoul@gmail.com>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Jaehoon Chung <jh80.chung@samsung.com>, Mark Brown <broonie@kernel.org>, Ben Dooks <ben-linux@fluff.org>
 
-Hi Stephen,
+On Tuesday 20 May 2014 23:20:59 Vasily Khoruzhick wrote:
+> index 1384f67..e70e4cf 100644
+> --- a/drivers/mmc/host/Kconfig
+> +++ b/drivers/mmc/host/Kconfig
+> @@ -420,6 +420,7 @@ config MMC_SPI
+>  config MMC_S3C
+>         tristate "Samsung S3C SD/MMC Card Interface support"
+>         depends on ARCH_S3C24XX
+> +       select S3C24XX_DMAC
+>         help
+>           This selects a driver for the MCI interface found in
+>            Samsung's S3C2410, S3C2412, S3C2440, S3C2442 CPUs.
+> 
 
-On Tue, May 20 2014, Stephen Warren wrote:
-> On 04/16/2014 05:08 PM, Andrew Bresticker wrote:
->> Program TEGRA_SDHCI_VENDOR_MISC_CTRL so that UHS modes aren't advertised
->> in SDHCI_CAPABILITIES_1.  While the Tegra SDHCI controller does support
->> these modes, they require Tegra-specific tuning and calibration routines
->> which the driver does not support yet.
->
-> What's the status of patches 1 and 2 in this series? I assumed they'd be
-> applied to the MMC tree. I've had them applied to my local development
-> tree for a while now, so in case this helps:
->
-> Tested-by: Stephen Warren <swarren@nvidia.com>
-> Acked-by: Stephen Warren <swarren@nvidia.com>
->
-> (I thought I wrote that before, but I can't find it, so I must have
-> forgotten to)
+I think you should use 'depends on S3C24XX_DMAC' here.
 
-We've been waiting for a very large sdhci patchset from Russell to
-land before merging other sdhci patches, but I think we're running
-out of time for that -- so we'll merge this one way or another within
-a few days.
+Other than that,
 
-Thanks,
+Acked-by: Arnd Bergmann <arnd@arndb.de>
 
-- Chris.
--- 
-Chris Ball   <http://printf.net/>
+	Arnd
