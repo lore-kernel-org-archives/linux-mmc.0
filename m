@@ -1,49 +1,39 @@
-From: Chris Ball <chris@printf.net>
-Subject: Re: [mmc:mmc-next 79/96] drivers/mmc/host/omap_hsmmc.c:1841:30: error: 'struct dev_pm_info' has no member named 'runtime_status'
-Date: Thu, 22 May 2014 13:41:28 +0100
-Message-ID: <86oayqq93b.fsf@void.printf.net>
-References: <537de770.ItHqmb5BpaXWIlXq%fengguang.wu@intel.com>
-	<CAPDyKFoWABO-k9dh5AvhaJFoF-NRCBz1_G+fJ53MPnzBr42CfQ@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain
+From: Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>
+Subject: Re: [PATCH RESEND] mmc: dove: fix missing MACH_DOVE dependency
+Date: Thu, 22 May 2014 15:04:07 +0200
+Message-ID: <537DF5C7.3010009@gmail.com>
+References: <1400522571-10799-1-git-send-email-sebastian.hesselbarth@gmail.com> <CAPDyKFo8CdyDbJEP0GkFTHdzpkyRBZEp-jAyrU4y8qi__zChkA@mail.gmail.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:48086 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751038AbaEVMlb (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 22 May 2014 08:41:31 -0400
-In-Reply-To: <CAPDyKFoWABO-k9dh5AvhaJFoF-NRCBz1_G+fJ53MPnzBr42CfQ@mail.gmail.com>
-	(Ulf Hansson's message of "Thu, 22 May 2014 14:39:14 +0200")
+Received: from mail-ee0-f46.google.com ([74.125.83.46]:60629 "EHLO
+	mail-ee0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751254AbaEVNEO (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 22 May 2014 09:04:14 -0400
+In-Reply-To: <CAPDyKFo8CdyDbJEP0GkFTHdzpkyRBZEp-jAyrU4y8qi__zChkA@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Andreas Fenkart <afenkart@gmail.com>, linux-mmc <linux-mmc@vger.kernel.org>, Tony Lindgren <tony@atomide.com>, balajitk <balajitk@ti.com>
+Cc: Chris Ball <chris@printf.net>, Jason Cooper <jason@lakedaemon.net>, Andrew Lunn <andrew@lunn.ch>, Gregory Clement <gregory.clement@free-electrons.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-Hi,
-
-On Thu, May 22 2014, Ulf Hansson wrote:
-> I had a second look at Andreas Fenkart's patchset to enable SDIO irq
-> for omap. Those needs an additional iteration, since there are
-> unresolved dependencies to CONFIG_PM_RUNTIME (and possibly to other
-> Kconfigs as well). Apparently I had all the needed Kconfigs enabled
-> while I compile tested them. :-(
+On 05/22/2014 11:09 AM, Ulf Hansson wrote:
+> On 19 May 2014 20:02, Sebastian Hesselbarth
+> <sebastian.hesselbarth@gmail.com> wrote:
+>> DT-enabled Dove moved over from ARCH_DOVE in mach-dove to MACH_DOVE in
+>> mach-mvebu. As non-DT ARCH_DOVE will stay to rot for a while, add a new
+>> DT-only MACH_DOVE Kconfig. This slipped through the cracks and now is
+>> a fix to allow to build Dove's SDHCI driver for mach-mvebu on v3.15-rc.
+>>
+>> Signed-off-by: Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>
+>> Acked-by: Jason Cooper <jason@lakedaemon.net>
 >
-> I tried out doing a local re-base, to remove the related omap patches.
-> If you remove the patches below you won't get any conflicts for
-> omap_hsmmc. Can you do that?
->
-> Andreas:
-> mmc: omap_hsmmc: Enable SDIO interrupt
-> mmc: omap_hsmmc: enable wakeup event for sdio OMAP4
-> mmc: omap_hsmmc: Extend debugfs by SDIO IRQ handling, runtime state
-> mmc: omap_hsmmc: abort runtime suspend if pending sdio irq detected
-> mmc: omap_hsmmc: switch default/idle pinctrl states in runtime hooks
-> mmc: omap_hsmmc: Pin remux workaround to support SDIO interrupt on AM335x
->
-> Balaji:
-> mmc: omap_hsmmc: use IS_ERR macro for error checking
+> Thanks! Picked up for the PR I send to Chris.
 
-Done.  Thanks!
+Ulf, thanks for picking it up. I noticed it will now end up in v3.16
+and not as a fix for v3.15. I'll come back to it, if v3.15 will
+ever become a stable version ;)
 
-- Chris.
--- 
-Chris Ball   <http://printf.net/>
+Anyway, great you are helping Chris to pre-select the mmc patches!
+
+Sebastian
+
