@@ -1,40 +1,85 @@
-From: Maxime Coquelin <maxime.coquelin@st.com>
-Subject: Re: [PATCH 3/8] ARM: STi: DT: Add sdhci pins for stih416
-Date: Thu, 22 May 2014 17:50:49 +0200
-Message-ID: <537E1CD9.5020900@st.com>
-References: <1400771902-26553-1-git-send-email-peter.griffin@linaro.org> <1400771902-26553-4-git-send-email-peter.griffin@linaro.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
-Content-Transfer-Encoding: 7bit
+From: Andrew Bresticker <abrestic@chromium.org>
+Subject: [PATCH v3 2/2] mmc: tegra: fix reporting of base clock frequency
+Date: Thu, 22 May 2014 08:55:36 -0700
+Message-ID: <1400774136-12396-2-git-send-email-abrestic@chromium.org>
+References: <1400774136-12396-1-git-send-email-abrestic@chromium.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mx07-00178001.pphosted.com ([62.209.51.94]:50695 "EHLO
-	mx07-00178001.pphosted.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751146AbaEVPvV (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 22 May 2014 11:51:21 -0400
-In-Reply-To: <1400771902-26553-4-git-send-email-peter.griffin@linaro.org>
+Received: from mail-ob0-f201.google.com ([209.85.214.201]:55752 "EHLO
+	mail-ob0-f201.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751537AbaEVPzo (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 22 May 2014 11:55:44 -0400
+Received: by mail-ob0-f201.google.com with SMTP id wn1so752466obc.0
+        for <linux-mmc@vger.kernel.org>; Thu, 22 May 2014 08:55:44 -0700 (PDT)
+In-Reply-To: <1400774136-12396-1-git-send-email-abrestic@chromium.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Peter Griffin <peter.griffin@linaro.org>, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, patrice.chotard@st.com, srinivas.kandagatla@gmail.com, chris@printf.net, ulf.hansson@linaro.org
-Cc: kernel@stlinux.com, lee.jones@linaro.org, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, Giuseppe Cavallaro <peppe.cavallaro@st.com>
+To: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Stephen Warren <swarren@wwwdotorg.org>, Thierry Reding <thierry.reding@gmail.com>
+Cc: linux-mmc@vger.kernel.org, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Andrew Bresticker <abrestic@chromium.org>
 
+Tegra SDHCI controllers, by default, report a base clock frequency
+of 208Mhz in SDHCI_CAPABILTIES which may or may not be equal to the
+actual base clock frequency.  This is because the clock rate is
+configured by the clock controller, which is external to the SD/MMC
+controller.  Since the SD/MMC controller has no knowledge of how this
+clock is configured, it will simply report the maximum frequency.
+While the reported value can be overridden by setting BASE_CLK_FREQ in
+VENDOR_CLOCK_CTRL on Tegra30 and later SoCs, just set CAP_CLOCK_BASE_BROKEN
+and supply sdhci_pltfm_clk_get_max_clock(), which simply does a
+clk_get_rate(), as the get_max_clock() callback.
 
+Signed-off-by: Andrew Bresticker <abrestic@chromium.org>
+Tested-by: Stephen Warren <swarren@nvidia.com>
+Acked-by: Stephen Warren <swarren@nvidia.com>
+---
+Changes from v2:
+ - rebased on mmc-next
+Changes from v1:
+ - fixed up commit message per Stephen's suggestions
+---
+ drivers/mmc/host/sdhci-tegra.c | 10 +++++++---
+ 1 file changed, 7 insertions(+), 3 deletions(-)
 
-On 05/22/2014 05:18 PM, Peter Griffin wrote:
-> This adds the required pin config for both SDHCI controllers on
-> the stih416 SoC.
->
-> Signed-off-by: Peter Griffin <peter.griffin@linaro.org>
-> Signed-off-by: Giuseppe Cavallaro <peppe.cavallaro@st.com>
-> ---
->   arch/arm/boot/dts/stih416-pinctrl.dtsi | 39 ++++++++++++++++++++++++++++++++++
->   1 file changed, 39 insertions(+)
->
+diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
+index 4375cd4..d93a063 100644
+--- a/drivers/mmc/host/sdhci-tegra.c
++++ b/drivers/mmc/host/sdhci-tegra.c
+@@ -154,13 +154,15 @@ static const struct sdhci_ops tegra_sdhci_ops = {
+ 	.set_bus_width = tegra_sdhci_set_bus_width,
+ 	.reset      = tegra_sdhci_reset,
+ 	.set_uhs_signaling = sdhci_set_uhs_signaling,
++	.get_max_clock = sdhci_pltfm_clk_get_max_clock,
+ };
+ 
+ static const struct sdhci_pltfm_data sdhci_tegra20_pdata = {
+ 	.quirks = SDHCI_QUIRK_BROKEN_TIMEOUT_VAL |
+ 		  SDHCI_QUIRK_SINGLE_POWER_WRITE |
+ 		  SDHCI_QUIRK_NO_HISPD_BIT |
+-		  SDHCI_QUIRK_BROKEN_ADMA_ZEROLEN_DESC,
++		  SDHCI_QUIRK_BROKEN_ADMA_ZEROLEN_DESC |
++		  SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
+ 	.ops  = &tegra_sdhci_ops,
+ };
+ 
+@@ -175,7 +177,8 @@ static const struct sdhci_pltfm_data sdhci_tegra30_pdata = {
+ 		  SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK |
+ 		  SDHCI_QUIRK_SINGLE_POWER_WRITE |
+ 		  SDHCI_QUIRK_NO_HISPD_BIT |
+-		  SDHCI_QUIRK_BROKEN_ADMA_ZEROLEN_DESC,
++		  SDHCI_QUIRK_BROKEN_ADMA_ZEROLEN_DESC |
++		  SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
+ 	.ops  = &tegra_sdhci_ops,
+ };
+ 
+@@ -191,7 +194,8 @@ static const struct sdhci_pltfm_data sdhci_tegra114_pdata = {
+ 		  SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK |
+ 		  SDHCI_QUIRK_SINGLE_POWER_WRITE |
+ 		  SDHCI_QUIRK_NO_HISPD_BIT |
+-		  SDHCI_QUIRK_BROKEN_ADMA_ZEROLEN_DESC,
++		  SDHCI_QUIRK_BROKEN_ADMA_ZEROLEN_DESC |
++		  SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
+ 	.ops  = &tegra_sdhci_ops,
+ };
+ 
+-- 
+1.9.1.423.g4596e3a
 
-
-For all the DT patches, once Lee's comments taken into account, you can 
-add my:
-
-Acked-by: Maxime Coquelin <maxime.coquelin@st.com>
-
-Thanks!
-Maxime
