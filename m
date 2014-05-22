@@ -1,103 +1,74 @@
-From: Andrew Bresticker <abrestic-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
-Subject: [PATCH v3 1/2] mmc: tegra: disable UHS modes
-Date: Thu, 22 May 2014 08:55:35 -0700
-Message-ID: <1400774136-12396-1-git-send-email-abrestic@chromium.org>
-Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>, Thierry Reding <thierry.reding-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Andrew Bresticker <abrestic-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+From: Lee Jones <lee.jones-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH 5/8] ARM: STi: DT: Add sdhci pin configuration for stih415
+Date: Thu, 22 May 2014 16:57:03 +0100
+Message-ID: <20140522155703.GF19747@lee--X1>
+References: <1400771902-26553-1-git-send-email-peter.griffin@linaro.org>
+ <1400771902-26553-6-git-send-email-peter.griffin@linaro.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <1400771902-26553-6-git-send-email-peter.griffin-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Peter Griffin <peter.griffin-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, maxime.coquelin-qxv4g6HH51o@public.gmane.org, patrice.chotard-qxv4g6HH51o@public.gmane.org, srinivas.kandagatla-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org, ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, kernel-F5mvAk5X5gdBDgjK7y7TUQ@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Giuseppe Cavallaro <peppe.cavallaro-qxv4g6HH51o@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Program TEGRA_SDHCI_VENDOR_MISC_CTRL so that UHS modes aren't advertised
-in SDHCI_CAPABILITIES_1.  While the Tegra SDHCI controller does support
-these modes, they require Tegra-specific tuning and calibration routines
-which the driver does not support yet.
+> This patch adds the required pin config for the sdhci controller
+> present in the stih415 SoC.
+>=20
+> Signed-off-by: Peter Griffin <peter.griffin-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> Signed-off-by: Giuseppe Cavallaro <peppe.cavallaro-qxv4g6HH51o@public.gmane.org>
 
-Signed-off-by: Andrew Bresticker <abrestic-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
-Tested-by: Stephen Warren <swarren-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
-Acked-by: Stephen Warren <swarren-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
----
-Changes from v2:
- - rebased on mmc-next
-No changes from v1
----
- drivers/mmc/host/sdhci-tegra.c | 30 +++++++++++++++++++++++-------
- 1 file changed, 23 insertions(+), 7 deletions(-)
+Switch these round - same with all the other patches.
 
-diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
-index 9852476..4375cd4 100644
---- a/drivers/mmc/host/sdhci-tegra.c
-+++ b/drivers/mmc/host/sdhci-tegra.c
-@@ -32,11 +32,17 @@
- 
- /* Tegra SDHOST controller vendor register definitions */
- #define SDHCI_TEGRA_VENDOR_MISC_CTRL		0x120
-+#define SDHCI_MISC_CTRL_ENABLE_SDR104		0x8
-+#define SDHCI_MISC_CTRL_ENABLE_SDR50		0x10
- #define SDHCI_MISC_CTRL_ENABLE_SDHCI_SPEC_300	0x20
-+#define SDHCI_MISC_CTRL_ENABLE_DDR50		0x200
- 
- #define NVQUIRK_FORCE_SDHCI_SPEC_200	BIT(0)
- #define NVQUIRK_ENABLE_BLOCK_GAP_DET	BIT(1)
- #define NVQUIRK_ENABLE_SDHCI_SPEC_300	BIT(2)
-+#define NVQUIRK_DISABLE_SDR50		BIT(3)
-+#define NVQUIRK_DISABLE_SDR104		BIT(4)
-+#define NVQUIRK_DISABLE_DDR50		BIT(5)
- 
- struct sdhci_tegra_soc_data {
- 	const struct sdhci_pltfm_data *pdata;
-@@ -100,20 +106,25 @@ static void tegra_sdhci_reset(struct sdhci_host *host, u8 mask)
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
- 	struct sdhci_tegra *tegra_host = pltfm_host->priv;
- 	const struct sdhci_tegra_soc_data *soc_data = tegra_host->soc_data;
-+	u32 misc_ctrl;
- 
- 	sdhci_reset(host, mask);
- 
- 	if (!(mask & SDHCI_RESET_ALL))
- 		return;
- 
-+	misc_ctrl = sdhci_readw(host, SDHCI_TEGRA_VENDOR_MISC_CTRL);
- 	/* Erratum: Enable SDHCI spec v3.00 support */
--	if (soc_data->nvquirks & NVQUIRK_ENABLE_SDHCI_SPEC_300) {
--		u32 misc_ctrl;
--
--		misc_ctrl = sdhci_readb(host, SDHCI_TEGRA_VENDOR_MISC_CTRL);
-+	if (soc_data->nvquirks & NVQUIRK_ENABLE_SDHCI_SPEC_300)
- 		misc_ctrl |= SDHCI_MISC_CTRL_ENABLE_SDHCI_SPEC_300;
--		sdhci_writeb(host, misc_ctrl, SDHCI_TEGRA_VENDOR_MISC_CTRL);
--	}
-+	/* Don't advertise UHS modes which aren't supported yet */
-+	if (soc_data->nvquirks & NVQUIRK_DISABLE_SDR50)
-+		misc_ctrl &= ~SDHCI_MISC_CTRL_ENABLE_SDR50;
-+	if (soc_data->nvquirks & NVQUIRK_DISABLE_DDR50)
-+		misc_ctrl &= ~SDHCI_MISC_CTRL_ENABLE_DDR50;
-+	if (soc_data->nvquirks & NVQUIRK_DISABLE_SDR104)
-+		misc_ctrl &= ~SDHCI_MISC_CTRL_ENABLE_SDR104;
-+	sdhci_writew(host, misc_ctrl, SDHCI_TEGRA_VENDOR_MISC_CTRL);
- }
- 
- static void tegra_sdhci_set_bus_width(struct sdhci_host *host, int bus_width)
-@@ -170,7 +181,9 @@ static const struct sdhci_pltfm_data sdhci_tegra30_pdata = {
- 
- static struct sdhci_tegra_soc_data soc_data_tegra30 = {
- 	.pdata = &sdhci_tegra30_pdata,
--	.nvquirks = NVQUIRK_ENABLE_SDHCI_SPEC_300,
-+	.nvquirks = NVQUIRK_ENABLE_SDHCI_SPEC_300 |
-+		    NVQUIRK_DISABLE_SDR50 |
-+		    NVQUIRK_DISABLE_SDR104,
- };
- 
- static const struct sdhci_pltfm_data sdhci_tegra114_pdata = {
-@@ -184,6 +197,9 @@ static const struct sdhci_pltfm_data sdhci_tegra114_pdata = {
- 
- static struct sdhci_tegra_soc_data soc_data_tegra114 = {
- 	.pdata = &sdhci_tegra114_pdata,
-+	.nvquirks = NVQUIRK_DISABLE_SDR50 |
-+		    NVQUIRK_DISABLE_DDR50 |
-+		    NVQUIRK_DISABLE_SDR104,
- };
- 
- static const struct of_device_id sdhci_tegra_dt_match[] = {
--- 
-1.9.1.423.g4596e3a
+> ---
+>  arch/arm/boot/dts/stih415-pinctrl.dtsi | 21 +++++++++++++++++++++
+>  arch/arm/boot/dts/stih415.dtsi         | 12 ++++++++++++
+>  2 files changed, 33 insertions(+)
+
+[...]
+
+> diff --git a/arch/arm/boot/dts/stih415.dtsi b/arch/arm/boot/dts/stih4=
+15.dtsi
+> index d6f254f..6579b1d 100644
+> --- a/arch/arm/boot/dts/stih415.dtsi
+> +++ b/arch/arm/boot/dts/stih415.dtsi
+> @@ -218,5 +218,17 @@
+>  			resets	=3D <&powerdown STIH415_KEYSCAN_POWERDOWN>,
+>  				  <&softreset STIH415_KEYSCAN_SOFTRESET>;
+>  		};
+> +
+> +		mmc0: sdhci@fe81e000 {
+> +			compatible =3D "st,sdhci";
+> +			status =3D "disabled";
+> +			reg =3D <0xfe81e000 0x1000>;
+> +			interrupts =3D <GIC_SPI 145 IRQ_TYPE_NONE>;
+> +			interrupt-names =3D "mmcirq";
+> +			pinctrl-names =3D "default";
+> +			pinctrl-0 =3D <&pinctrl_mmc0>;
+> +			clock-names =3D "mmc";
+> +			clocks =3D <&clk_s_a1_ls 1>;
+
+Nit: These would be easier to read if the '=3D's were lined up (using t=
+abs).
+
+> +		};
+>  	};
+>  };
+
+Apart from that:
+
+  Acked-by: Lee Jones <lee.jones-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+
+--=20
+Lee Jones
+Linaro STMicroelectronics Landing Team Lead
+Linaro.org =E2=94=82 Open source software for ARM SoCs
+=46ollow Linaro: Facebook | Twitter | Blog
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" i=
+n
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
