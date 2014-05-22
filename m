@@ -1,64 +1,224 @@
-From: Lee Jones <lee.jones-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH 6/8] ARM: STi: DT: Enable mmc0 for both stih415 and
- stih416 SoCs
-Date: Thu, 22 May 2014 16:41:47 +0100
-Message-ID: <20140522154147.GE19747@lee--X1>
-References: <1400771902-26553-1-git-send-email-peter.griffin@linaro.org>
- <1400771902-26553-7-git-send-email-peter.griffin@linaro.org>
+From: Maxime Coquelin <maxime.coquelin@st.com>
+Subject: Re: [PATCH 1/8] mmc: sdhci-st: Intial support for ST SDHCI controller
+Date: Thu, 22 May 2014 17:41:44 +0200
+Message-ID: <537E1AB8.9000909@st.com>
+References: <1400771902-26553-1-git-send-email-peter.griffin@linaro.org> <1400771902-26553-2-git-send-email-peter.griffin@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <1400771902-26553-7-git-send-email-peter.griffin-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Peter Griffin <peter.griffin-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, maxime.coquelin-qxv4g6HH51o@public.gmane.org, patrice.chotard-qxv4g6HH51o@public.gmane.org, srinivas.kandagatla-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org, ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, kernel-F5mvAk5X5gdBDgjK7y7TUQ@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Giuseppe Cavallaro <peppe.cavallaro-qxv4g6HH51o@public.gmane.org>
+Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1400771902-26553-2-git-send-email-peter.griffin@linaro.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Peter Griffin <peter.griffin@linaro.org>, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, patrice.chotard@st.com, srinivas.kandagatla@gmail.com, chris@printf.net, ulf.hansson@linaro.org
+Cc: kernel@stlinux.com, lee.jones@linaro.org, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, Giuseppe Cavallaro <peppe.cavallaro@st.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On Thu, 22 May 2014, Peter Griffin wrote:
+Hi Peter
 
-> Because the first sdhci controller is present on both stih415 and
-> stih416 SoC which can both populate the b2020 board, it can be
-> enabled in the generic DT file.
->=20
-> Signed-off-by: Peter Griffin <peter.griffin-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-> Signed-off-by: Giuseppe Cavallaro <peppe.cavallaro-qxv4g6HH51o@public.gmane.org>
-
-These are the wrong way around.
-
-You can correct that when adding my:
-
-  Acked-by: Lee Jones <lee.jones-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-
+On 05/22/2014 05:18 PM, Peter Griffin wrote:
+> This platform driver adds initial support for the SDHCI host controller
+> found on STMicroelectronics SoCs.
+>
+> It has been tested on STiH41x b2020 platforms currently.
+>
+> Signed-off-by: Peter Griffin <peter.griffin@linaro.org>
+> Signed-off-by: Giuseppe Cavallaro <peppe.cavallaro@st.com>
 > ---
->  arch/arm/boot/dts/stih41x-b2020x.dtsi | 4 ++++
->  1 file changed, 4 insertions(+)
->=20
-> diff --git a/arch/arm/boot/dts/stih41x-b2020x.dtsi b/arch/arm/boot/dt=
-s/stih41x-b2020x.dtsi
-> index df01c12..f797a06 100644
-> --- a/arch/arm/boot/dts/stih41x-b2020x.dtsi
-> +++ b/arch/arm/boot/dts/stih41x-b2020x.dtsi
-> @@ -8,6 +8,10 @@
->   */
->  / {
->  	soc {
-> +		mmc0: sdhci@fe81e000 {
-> +			status =3D "okay";
-> +		};
-> +
->  		spifsm: spifsm@fe902000 {
->  			#address-cells =3D <1>;
->  			#size-cells    =3D <1>;
+>   drivers/mmc/host/Kconfig    |  12 +++
+>   drivers/mmc/host/Makefile   |   1 +
+>   drivers/mmc/host/sdhci-st.c | 244 ++++++++++++++++++++++++++++++++++++++++++++
+>   3 files changed, 257 insertions(+)
+>   create mode 100644 drivers/mmc/host/sdhci-st.c
+>
 
---=20
-Lee Jones
-Linaro STMicroelectronics Landing Team Lead
-Linaro.org =E2=94=82 Open source software for ARM SoCs
-=46ollow Linaro: Facebook | Twitter | Blog
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" i=
-n
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+[...]
+
+> diff --git a/drivers/mmc/host/sdhci-st.c b/drivers/mmc/host/sdhci-st.c
+> new file mode 100644
+> index 0000000..1790fa7
+> --- /dev/null
+> +++ b/drivers/mmc/host/sdhci-st.c
+> @@ -0,0 +1,244 @@
+> +/*
+> + * Support for SDHCI on STMicroelectronics SoCs
+> + *
+> + * Copyright (C) 2014 STMicroelectronics Ltd
+> + * Author: Giuseppe Cavallaro <peppe.cavallaro@st.com>
+> + *
+> + * Based on sdhci-cns3xxx.c
+> + *
+> + * This program is free software; you can redistribute it and/or modify
+> + * it under the terms of the GNU General Public License version 2 as
+> + * published by the Free Software Foundation.
+> + *
+> + * This program is distributed in the hope that it will be useful,
+> + * but WITHOUT ANY WARRANTY; without even the implied warranty of
+> + * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> + * GNU General Public License for more details.
+> + *
+> + */
+> +
+> +#include <linux/io.h>
+> +#include <linux/of.h>
+> +#include <linux/module.h>
+> +#include <linux/err.h>
+> +#include <linux/of_gpio.h>
+> +#include <linux/mmc/host.h>
+> +#include <linux/reset.h>
+> +
+> +#include "sdhci-pltfm.h"
+> +
+> +struct st_mmc_platform_data {
+> +	struct  reset_control	*rstc;
+> +};
+Since it uses the generic reset framework, could we imagine moving the 
+reset to the sdhci_pltfm_host struct?
+Doing this, we could get rid of st_mmc_platform_data.
+
+
+> +
+> +static int sdhci_st_8bit_width(struct sdhci_host *host, int width)
+> +{
+> +	u8 ctrl;
+> +
+> +	ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL);
+> +
+> +	switch (width) {
+> +	case MMC_BUS_WIDTH_8:
+> +		ctrl |= SDHCI_CTRL_8BITBUS;
+> +		ctrl &= ~SDHCI_CTRL_4BITBUS;
+> +		break;
+> +	case MMC_BUS_WIDTH_4:
+> +		ctrl |= SDHCI_CTRL_4BITBUS;
+> +		ctrl &= ~SDHCI_CTRL_8BITBUS;
+> +		break;
+> +	default:
+> +		ctrl &= ~(SDHCI_CTRL_8BITBUS | SDHCI_CTRL_4BITBUS);
+> +		break;
+You can remove the break here.
+
+> +	}
+> +
+> +	sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
+> +
+> +	return 0;
+> +}
+> +
+> +static unsigned int sdhci_st_get_max_clk(struct sdhci_host *host)
+> +{
+> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> +
+> +	return clk_get_rate(pltfm_host->clk);
+> +}
+> +
+> +static u32 sdhci_st_readl(struct sdhci_host *host, int reg)
+> +{
+> +	u32 ret;
+> +
+> +	switch (reg) {
+> +	case SDHCI_CAPABILITIES:
+> +		ret = readl(host->ioaddr + reg);
+> +		/* Support 3.3V and 1.8V */
+> +		ret &= ~SDHCI_CAN_VDD_300;
+> +		break;
+> +	default:
+> +		ret = readl(host->ioaddr + reg);
+
+Could we use readl_relaxed?
+
+> +	}
+> +	return ret;
+> +}
+> +
+> +static const struct sdhci_ops sdhci_st_ops = {
+> +	.get_max_clock = sdhci_st_get_max_clk,
+> +	.platform_bus_width = sdhci_st_8bit_width,
+> +	.read_l = sdhci_st_readl,
+> +};
+> +
+> +static const struct sdhci_pltfm_data sdhci_st_pdata = {
+> +	.ops = &sdhci_st_ops,
+> +	.quirks = SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC |
+> +	    SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
+> +};
+> +
+> +
+> +static int sdhci_st_probe(struct platform_device *pdev)
+> +{
+> +	struct device_node *np = pdev->dev.of_node;
+> +	struct sdhci_host *host;
+> +	struct st_mmc_platform_data *pdata;
+> +	struct sdhci_pltfm_host *pltfm_host;
+> +	struct clk *clk;
+> +	int ret = 0;
+> +	u16 host_version;
+> +
+> +	dev_dbg(&pdev->dev, "SDHCI ST platform driver\n");
+You can remove this I think.
+
+> +
+> +	pdata = devm_kzalloc(&pdev->dev, sizeof(*pdata), GFP_KERNEL);
+> +	if (!pdata)
+> +		return -ENOMEM;
+> +
+> +	pdata->rstc = devm_reset_control_get(&pdev->dev, NULL);
+> +	if (IS_ERR(pdata->rstc))
+> +		pdata->rstc = NULL;
+> +	else
+> +		reset_control_deassert(pdata->rstc);
+> +
+> +	clk =  devm_clk_get(&pdev->dev, "mmc");
+> +	if (IS_ERR(clk)) {
+> +		dev_err(&pdev->dev, "Perpheral clk not found\n");
+> +		return PTR_ERR(clk);
+> +	}
+> +
+> +	host = sdhci_pltfm_init(pdev, &sdhci_st_pdata, 0);
+> +	if (IS_ERR(host)) {
+> +		dev_err(&pdev->dev, "Failed sdhci_pltfm_init\n");
+> +		return PTR_ERR(host);
+> +	}
+> +
+> +	clk_prepare_enable(clk);
+> +
+> +	host->mmc->caps |= MMC_CAP_8_BIT_DATA | MMC_CAP_BUS_WIDTH_TEST
+> +			| MMC_CAP_1_8V_DDR;
+> +
+> +	if (of_property_read_bool(np, "non-removable"))
+> +		host->mmc->caps |= MMC_CAP_NONREMOVABLE;
+> +
+> +	pltfm_host = sdhci_priv(host);
+> +	pltfm_host->clk = clk;
+> +
+> +	ret = sdhci_add_host(host);
+> +	if (ret) {
+> +		dev_err(&pdev->dev, "Failed sdhci_add_host\n");
+> +		goto err_out;
+> +	}
+> +
+> +	pltfm_host->priv = pdata;
+> +
+> +	platform_set_drvdata(pdev, host);
+> +
+> +	host_version = readw_relaxed((host->ioaddr + SDHCI_HOST_VERSION));
+> +
+> +	dev_dbg(&pdev->dev, "SDHCI ST Initialised: Host Version: 0x%x Vendor Version 0x%x\n",
+> +		host_version, ((host_version & SDHCI_VENDOR_VER_MASK) >>
+> +			       SDHCI_VENDOR_VER_SHIFT));
+Maybe you could change to dev_info here. It might be interresting to 
+always have IP version.
+
+> +
+> +	return 0;
+> +
+> +err_out:
+> +	clk_disable_unprepare(clk);
+> +	sdhci_pltfm_free(pdev);
+> +
+> +	return ret;
+> +}
+
+[...]
+
+Regards,
+Maxime
