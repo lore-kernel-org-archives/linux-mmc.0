@@ -1,76 +1,192 @@
-From: Stephen Warren <swarren@wwwdotorg.org>
-Subject: Re: adding aliases to mmc ... again
-Date: Thu, 22 May 2014 13:23:27 -0600
-Message-ID: <537E4EAF.5000309@wwwdotorg.org>
-References: <1400772623-8390-1-git-send-email-s.hauer@pengutronix.de> <537E22E3.3010601@wwwdotorg.org> <20140522182134.GD15686@pengutronix.de>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+From: Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>
+Subject: [PATCH] mmc: sdhci-dove: use mmc_of_parse() and remove card_tasklet CD handler
+Date: Fri, 23 May 2014 00:16:52 +0200
+Message-ID: <1400797012-32106-1-git-send-email-sebastian.hesselbarth@gmail.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from avon.wwwdotorg.org ([70.85.31.133]:40013 "EHLO
-	avon.wwwdotorg.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751288AbaEVTXa (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 22 May 2014 15:23:30 -0400
-In-Reply-To: <20140522182134.GD15686@pengutronix.de>
+Received: from mail-ee0-f45.google.com ([74.125.83.45]:34153 "EHLO
+	mail-ee0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751097AbaEVVQ7 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 22 May 2014 17:16:59 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Sascha Hauer <s.hauer@pengutronix.de>
-Cc: linux-mmc@vger.kernel.org, Dirk Behme <dirk.behme@de.bosch.com>, Fabio Estevam <festevam@gmail.com>, ptx@pengutronix.de
+To: Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>
+Cc: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Russell King <rmk+kernel@arm.linux.org.uk>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
 
-On 05/22/2014 12:21 PM, Sascha Hauer wrote:
-> On Thu, May 22, 2014 at 10:16:35AM -0600, Stephen Warren wrote:
->> On 05/22/2014 09:30 AM, Sascha Hauer wrote:
->>> Hi all,
->>>
->>> The wish to have persistent MMC block device names for passing a suitable
->>> root=/dev/mmcblkX option came up several times already and has been discussed
->>> at least in these threads:
->>>
->>> http://lists.infradead.org/pipermail/linux-arm-kernel/2012-July/109984.html
->>> https://www.mail-archive.com/linux-mmc@vger.kernel.org/msg22104.html
->>> http://comments.gmane.org/gmane.linux.kernel.mmc/21519
->>>
->>> Several patches have been proposed to nail the slot index to a known number.
->>> Arguments against these patches were:
->>>
->>> - Use an initrd and locate the correct root device there
->>>   even Thomas who suggested this admitted this would be painful to do
->>> - use root=UUID= or root=PARTUUID=
->>>   This generally works but has an important downside. With the UUID
->>>   approach devices which should boot from the internal eMMC may start
->>>   booting from an external SD slot when somebody deliberately inserts
->>>   a SD card with the same UUID.
->>>
->>> The following patches should have the technical issues fixed. It works
->>> by counting the mmc aliases in the devicetree during initialization of
->>> the mmc framework. Those slot numbers will never be assigned to other
->>> hosts.
->>
->> Does it solve the following, which AFAIK has always been the primary
->> argument against aligning block device IDs with controller IDs:
->>
->> - User inserts SD card into MMC controller ID (or alias) 1.
->> - /dev/mmcblk1 now exists
->> - Mount /dev/mmcblk1 on /mnt/tmp
->> - User removes that SD card
->> - /dev/mmcblk1 still exists, since it's mounted so can't be deleted
->> after the card removal.
->> - User inserts SD card into MMC controller ID (or alias) 1.
->> - /dev/mmcblkN (N is something other than 1) now exists
->>
->> Now, the block device ID must be != the original ID, since two block
->> devices exist.
-> 
-> No, it shouldn't solve that, but it's out of scope for this patch. All
-> it solves is to reliably find the rootfs. If the card containing your
-> rootfs is removed you are in trouble anyway and it won't help if it gets
-> the same mmcblkno once it's plugged again. For other devices which don't
-> contain the rootfs there are enough possibilities to find them in userspace.
+Commit f8ec589b86f6
+  "mmc: sdhci-dove: allow GPIOs to be used for card detection on Dove"
+added a gpio based card detect interrupt handler that was hooked up
+into card_tasket.
 
-I don't think there should be any special cases for the root fs.
+Commit 3560db8e247a
+  "mmc: sdhci: push card_tasklet into threaded irq handler"
+now removed that very card_tasklet causing sdhci-dove to fail on build
+with:
+drivers/mmc/host/sdhci-dove.c: In function 'sdhci_dove_carddetect_irq':
+drivers/mmc/host/sdhci-dove.c:42:24: error: 'struct sdhci_host' has no member named 'card_tasklet'
 
-I don't think the disadvantage of the UUID= or PARTUUID= issue you
-mention enough is really an issue in general. If it is for some
-platform, then the root fs should be cryto-signed and validated to
-prevent someone from using the wrong root fs.
+To fix both the build error and get a working gpio card detection without
+card_tasklet, replace sdhci_get_of_property() with more recent
+mmc_of_parse(). It takes care of gpio-based card detect passed through DT
+already and allows to remove the offending code sections dealing with
+removed card_tasklet.
+
+Signed-off-by: Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>
+---
+This patch is based on todays mmc-next and fixes a build error there.
+
+Cc: Chris Ball <chris@printf.net>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Russell King <rmk+kernel@arm.linux.org.uk>
+Cc: linux-mmc@vger.kernel.org
+Cc: linux-arm-kernel@lists.infradead.org
+Cc: linux-kernel@vger.kernel.org
+---
+ drivers/mmc/host/sdhci-dove.c | 74 +++----------------------------------------
+ 1 file changed, 5 insertions(+), 69 deletions(-)
+
+diff --git a/drivers/mmc/host/sdhci-dove.c b/drivers/mmc/host/sdhci-dove.c
+index 0d315f4496c8..e6278ec007d7 100644
+--- a/drivers/mmc/host/sdhci-dove.c
++++ b/drivers/mmc/host/sdhci-dove.c
+@@ -21,28 +21,17 @@
+ 
+ #include <linux/clk.h>
+ #include <linux/err.h>
+-#include <linux/gpio.h>
+ #include <linux/io.h>
+ #include <linux/mmc/host.h>
+ #include <linux/module.h>
+ #include <linux/of.h>
+-#include <linux/of_gpio.h>
+ 
+ #include "sdhci-pltfm.h"
+ 
+ struct sdhci_dove_priv {
+ 	struct clk *clk;
+-	int gpio_cd;
+ };
+ 
+-static irqreturn_t sdhci_dove_carddetect_irq(int irq, void *data)
+-{
+-	struct sdhci_host *host = data;
+-
+-	tasklet_schedule(&host->card_tasklet);
+-	return IRQ_HANDLED;
+-}
+-
+ static u16 sdhci_dove_readw(struct sdhci_host *host, int reg)
+ {
+ 	u16 ret;
+@@ -60,8 +49,6 @@ static u16 sdhci_dove_readw(struct sdhci_host *host, int reg)
+ 
+ static u32 sdhci_dove_readl(struct sdhci_host *host, int reg)
+ {
+-	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+-	struct sdhci_dove_priv *priv = pltfm_host->priv;
+ 	u32 ret;
+ 
+ 	ret = readl(host->ioaddr + reg);
+@@ -71,14 +58,6 @@ static u32 sdhci_dove_readl(struct sdhci_host *host, int reg)
+ 		/* Mask the support for 3.0V */
+ 		ret &= ~SDHCI_CAN_VDD_300;
+ 		break;
+-	case SDHCI_PRESENT_STATE:
+-		if (gpio_is_valid(priv->gpio_cd)) {
+-			if (gpio_get_value(priv->gpio_cd) == 0)
+-				ret |= SDHCI_CARD_PRESENT;
+-			else
+-				ret &= ~SDHCI_CARD_PRESENT;
+-		}
+-		break;
+ 	}
+ 	return ret;
+ }
+@@ -117,28 +96,9 @@ static int sdhci_dove_probe(struct platform_device *pdev)
+ 
+ 	priv->clk = devm_clk_get(&pdev->dev, NULL);
+ 
+-	if (pdev->dev.of_node) {
+-		priv->gpio_cd = of_get_named_gpio(pdev->dev.of_node,
+-						  "cd-gpios", 0);
+-	} else {
+-		priv->gpio_cd = -EINVAL;
+-	}
+-
+-	if (gpio_is_valid(priv->gpio_cd)) {
+-		ret = gpio_request(priv->gpio_cd, "sdhci-cd");
+-		if (ret) {
+-			dev_err(&pdev->dev, "card detect gpio request failed: %d\n",
+-				ret);
+-			return ret;
+-		}
+-		gpio_direction_input(priv->gpio_cd);
+-	}
+-
+ 	host = sdhci_pltfm_init(pdev, &sdhci_dove_pdata, 0);
+-	if (IS_ERR(host)) {
+-		ret = PTR_ERR(host);
+-		goto err_sdhci_pltfm_init;
+-	}
++	if (IS_ERR(host))
++		return PTR_ERR(host);
+ 
+ 	pltfm_host = sdhci_priv(host);
+ 	pltfm_host->priv = priv;
+@@ -146,39 +106,20 @@ static int sdhci_dove_probe(struct platform_device *pdev)
+ 	if (!IS_ERR(priv->clk))
+ 		clk_prepare_enable(priv->clk);
+ 
+-	sdhci_get_of_property(pdev);
++	ret = mmc_of_parse(host->mmc);
++	if (ret)
++		goto err_sdhci_add;
+ 
+ 	ret = sdhci_add_host(host);
+ 	if (ret)
+ 		goto err_sdhci_add;
+ 
+-	/*
+-	 * We must request the IRQ after sdhci_add_host(), as the tasklet only
+-	 * gets setup in sdhci_add_host() and we oops.
+-	 */
+-	if (gpio_is_valid(priv->gpio_cd)) {
+-		ret = request_irq(gpio_to_irq(priv->gpio_cd),
+-				  sdhci_dove_carddetect_irq,
+-				  IRQF_TRIGGER_FALLING | IRQF_TRIGGER_RISING,
+-				  mmc_hostname(host->mmc), host);
+-		if (ret) {
+-			dev_err(&pdev->dev, "card detect irq request failed: %d\n",
+-				ret);
+-			goto err_request_irq;
+-		}
+-	}
+-
+ 	return 0;
+ 
+-err_request_irq:
+-	sdhci_remove_host(host, 0);
+ err_sdhci_add:
+ 	if (!IS_ERR(priv->clk))
+ 		clk_disable_unprepare(priv->clk);
+ 	sdhci_pltfm_free(pdev);
+-err_sdhci_pltfm_init:
+-	if (gpio_is_valid(priv->gpio_cd))
+-		gpio_free(priv->gpio_cd);
+ 	return ret;
+ }
+ 
+@@ -190,11 +131,6 @@ static int sdhci_dove_remove(struct platform_device *pdev)
+ 
+ 	sdhci_pltfm_unregister(pdev);
+ 
+-	if (gpio_is_valid(priv->gpio_cd)) {
+-		free_irq(gpio_to_irq(priv->gpio_cd), host);
+-		gpio_free(priv->gpio_cd);
+-	}
+-
+ 	if (!IS_ERR(priv->clk))
+ 		clk_disable_unprepare(priv->clk);
+ 
+-- 
+1.9.1
 
