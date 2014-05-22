@@ -1,169 +1,47 @@
-From: Hans de Goede <hdegoede@redhat.com>
-Subject: Re: RFC: representing sdio devices oob interrupt, clks, etc. in device
- tree
-Date: Thu, 22 May 2014 13:38:18 +0200
-Message-ID: <537DE1AA.5050606@redhat.com>
-References: <537DC832.3020006@redhat.com> <CAGb2v64VZac2KvAALrScecN89sRnBQoDrKxKMvkte+3G04NXeA@mail.gmail.com>
+From: Chris Ball <chris@printf.net>
+Subject: Re: [GIT PULL] MMC updates for mmc-next for 3.16, take 3
+Date: Thu, 22 May 2014 13:05:16 +0100
+Message-ID: <86zjiaqarn.fsf@void.printf.net>
+References: <CAPDyKFo44fucVebB3f_qby1iWqjyq5P4XPAyD6og5ZWpqgO4=A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:5785 "EHLO mx1.redhat.com"
+Received: from void.printf.net ([89.145.121.20]:58093 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751626AbaEVLjQ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 22 May 2014 07:39:16 -0400
-In-Reply-To: <CAGb2v64VZac2KvAALrScecN89sRnBQoDrKxKMvkte+3G04NXeA@mail.gmail.com>
+	id S1754966AbaEVMFU convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 22 May 2014 08:05:20 -0400
+In-Reply-To: <CAPDyKFo44fucVebB3f_qby1iWqjyq5P4XPAyD6og5ZWpqgO4=A@mail.gmail.com>
+	(Ulf Hansson's message of "Thu, 22 May 2014 12:49:11 +0200")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chen-Yu Tsai <wens@csie.org>
-Cc: Arend van Spriel <arend@broadcom.com>, Sascha Hauer <s.hauer@pengutronix.de>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Maxime Ripard <maxime.ripard@free-electrons.com>, linux-mmc <linux-mmc@vger.kernel.org>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>, devicetree <devicetree@vger.kernel.org>, Olof Johansson <olof@lixom.net>, Mark Brown <broonie@kernel.org>, Russell King - ARM Linux <linux@arm.linux.org.uk>, Fabio Estevam <festevam@gmail.com>, Arnd Bergmann <arnd@arndb.de>, Tomasz Figa <tomasz.figa@gmail.com>, Jyri Sarha <jsarha@ti.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Russell King <rmk+kernel@arm.linux.org.uk>, Stephen Warren <swarren@nvidia.com>, Markus Pargmann <mpa@pengutronix.de>
 
-Hi,
+Hi Ulf,
 
-On 05/22/2014 12:23 PM, Chen-Yu Tsai wrote:
-> Hi,
-> 
-> On Thu, May 22, 2014 at 5:49 PM, Hans de Goede <hdegoede@redhat.com> wrote:
->> Hi All,
->>
->> Arend asked me to test these 2 patches for adding devicetree support to brcmfmac sdio devices:
->> "dt: bindings: add bindings for Broadcom bcm43xx sdio devices"
->> "brcmfmac: add device tree support for SDIO devices"
->> https://groups.google.com/forum/#!msg/linux-sunxi/Zph6zDTnAcw/_-wOO-gnIuQJ
->>
->> Getting this to do anything at all meant also adding this patch:
->>
->> "mmc: Add SDIO function devicetree subnode parsing"
->> https://lkml.org/lkml/2014/4/3/522
->>
->> So that the card / sdio-func devices would actually get their of_node
->> pointer set to the child node under the mmc controller describing
->> the sdio wifi module.
->>
->> But that does not solve the entire problem. Listing the oob-interrupt info
->> in the child node works fine. But listing the brcm,wlan-supply gpio does
->> not. Since these sdio wifi modules are typically soldered onto the
->> board, there mmc controller device tree node has non-removable; set,
->> so the mmc subsystem will try to initialize the sdio device as soon
->> as the mmc driver loads, and if that fails will never look at it again.
->>
->> So we need to have the brcm,wlan-supply gpio driven high *before* the mmc
->> host driver initializes. In case of the brcm,wlan-supply property, this
->> is actually a problem which we've already solved in a number of dts files
->> for allwinner boards, simply create a fixed-regulator with an enable/disable
->> gpio, and set that as vmmc-supply for the mmc-host for the sdio wifi.
->>
->> However the "brcmfmac: add device tree support for SDIO devices" patch
->> also adds support for 2 devicetree controlled clocks. Assuming these need
->> to be ungated before the sdio module will respond to mmc commands, we have
->> the same problem.
-> 
-> Olof posted an RFC series on this very matter:
-> 
->   http://www.spinics.net/lists/linux-mmc/msg24411.html
-> 
-> There was a lengthy discussion, however I don't think the matter was settled.
+On Thu, May 22 2014, Ulf Hansson wrote:
+> Here are a third and final collection of patches for 3.16.
+>
+> I have as you and I discussed (off list), collected the patches from
+> Russell's sdhci patchset. I needed to resolve some conflicts while
+> applying them, but it was manageable. I also omitted the patch which
+> was reported to caused problem with eMMC, (mmc: sdhci: hack up driver
+> to make it more compliant with UHS-1).
 
-Phew that was a long read. Indeed it seems that the matter was not
-entirely settled.  It seems that the discussion did gravitate towards this
-information belonging in child nodes under the host controller node to represent
-the device.
+Pulled, but:
 
-I think we need to do this step by step:
+drivers/mmc/host/sdhci.c: In function =E2=80=98sdhci_set_uhs_signaling=E2=
+=80=99:
+drivers/mmc/host/sdhci.c:1432:12: error: =E2=80=98ios=E2=80=99 undeclar=
+ed (first use
+in this function)
+  else if ((ios->timing =3D=3D MMC_TIMING_UHS_DDR50) ||
+            ^
+drivers/mmc/host/sdhci.c:1432:12: note: each undeclared identifier is
+reported only once for each function it appears in
+make[3]: *** [drivers/mmc/host/sdhci.o] Error 1
 
-1) Right now, for my use case, I really only care about oob interrupts.
-
-If we can agree that we for additional info for sdio devices we will
-be using a child node under the mmc host with #address-cells = <1>;
-#size-cells = <0>; and reg == function number, iow go with Sacha's
-patch to attach an of node to sdio device functions, then that use case
-is covered.
-
-I think this will cover quite a few use-cases already. and it should not
-get in the way of adding fancier stuff, up to doing the entire device
-instantation statically based on the child node, later.
-
-2) Note that my proposal for the clks is very much like Olof's proposal
-in that it tries to keep things KISS, but instead of adding the info
-to the mmc-host node it adds it to the sdio-func child nodes. We could
-ask someone who has an actual use case where power-sequencing with clks
-and/or resets is needed to first implement things along Olof's proposal,
-but then with the clks and resets using standardized properties inside the
-child nodes. This would keep things KISS, again without getting in the
-way of getting fancier later.
-
-3) If someone has a usecase where 2 does not work or become ugly, we can
-then ask that someone to come up with a proposal for something better.
-
-Regards,
-
-Hans
-
-
-
-> 
-> CC-ed everyone from that discussion.
-> 
->> I've been thinking a bit about this, and it is a non trivial problem since
->> sdio devices are normally instantiated when probed, unlike ie spi devices
->> which are instantiated from devicetree.
->>
->> Adding device tree instantiation of sdio devices seems like a bad idea, as
->> then we get 2 vastly different device instantiation paths. Still we need some
->> way to get power and clks setup before the mmc host initializes.
->>
->> Therefor I would like to suggest to add a number of standard properties to
->> mmc-bus child nodes. Making the dts for an mmc host with an sdio device which
->> needs clks setup before it will work look like this:
->>
->>                 mmc3: mmc@01c12000 {
->>                         #address-cells = <1>;
->>                         #size-cells = <0>;
->>                         pinctrl-names = "default";
->>                         pinctrl-0 = <&mmc3_pins_a>;
->>                         vmmc-supply = <&reg_vmmc3>;
->>                         bus-width = <4>;
->>                         non-removable;
->>                         status = "okay";
->>
->>                         brcmf: bcrmf@0 {
->>                                 reg = <0>;
->>                                 compatible = "brcm,bcm43xx-fmac";
->>                                 clocks = <&clk_out_a>, <&clk_out_b>;
->>                                 clock-frequency = <32768>, <26000000>;
->>                                 interrupt-parent = <&pio>;
->>                                 interrupts = <10 4>; /* PH10 / EINT10 */
->>                                 interrupt-names = "host-wake";
->>                                 status = "okay";
->>                         };
->>                 };
->>
->> Where the "clocks" and "clock-frequency" attributes would be something
->> which we standardize in Documentation/devicetree/bindings/mmc/mmc-bus.txt
->>
->> These standard properties would *not* be used by the driver for the
->> childnode device, so as to avoid the chicken and egg problem of that driver
->> needing to enable clks, and it only getting bound to the device after
->> the device has been discovered which requires those clocks.
->>
->> Instead these properties would be parsed by mmc_of_parse, and we will
->> get enabled automatically by mmc_add_host before doing any probing.
->>
->> If the optional clock-frequency property is also set, then mmc_add_host
->> will not only enable the clks but also set them to the specified
->> frequency.
->>
->> Note I've no boards which actually need the clocks, all 3 boards with
->> sdio wifi which I've use a 26MHz crystal directly attached to the module,
->> so once I get the oob interrupt working (this needs some work on
->> the allwinner side) we can merge Arend's patches with the clock bits
->> dropped for now.
->>
->> Still I want to get a discussion going on this, so that when the time
->> comes that we do need it we know how to deal with this, or ideally
->> already have code in place to deal with it.
-> 
-> 
-> Cheers
-> ChenYu
-> 
+- Chris.
+--=20
+Chris Ball   <http://printf.net/>
