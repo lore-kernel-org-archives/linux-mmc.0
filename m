@@ -1,30 +1,38 @@
-From: Riku Voipio <riku.voipio@iki.fi>
+From: Ulf Hansson <ulf.hansson@linaro.org>
 Subject: Re: [PATCH RESEND] mmc: dove: fix missing MACH_DOVE dependency
-Date: Thu, 22 May 2014 11:12:02 +0300
-Message-ID: <20140522081202.GA21151@afflict.kos.to>
+Date: Thu, 22 May 2014 11:09:03 +0200
+Message-ID: <CAPDyKFo8CdyDbJEP0GkFTHdzpkyRBZEp-jAyrU4y8qi__zChkA@mail.gmail.com>
 References: <1400522571-10799-1-git-send-email-sebastian.hesselbarth@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qg0-f49.google.com ([209.85.192.49]:47792 "EHLO
+	mail-qg0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753935AbaEVJJF (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 22 May 2014 05:09:05 -0400
+Received: by mail-qg0-f49.google.com with SMTP id a108so5018985qge.8
+        for <linux-mmc@vger.kernel.org>; Thu, 22 May 2014 02:09:04 -0700 (PDT)
 In-Reply-To: <1400522571-10799-1-git-send-email-sebastian.hesselbarth@gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>
+Cc: Chris Ball <chris@printf.net>, Jason Cooper <jason@lakedaemon.net>, Andrew Lunn <andrew@lunn.ch>, Gregory Clement <gregory.clement@free-electrons.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-On Mon, May 19, 2014@08:02:51PM +0200, Sebastian Hesselbarth wrote:
+On 19 May 2014 20:02, Sebastian Hesselbarth
+<sebastian.hesselbarth@gmail.com> wrote:
 > DT-enabled Dove moved over from ARCH_DOVE in mach-dove to MACH_DOVE in
 > mach-mvebu. As non-DT ARCH_DOVE will stay to rot for a while, add a new
 > DT-only MACH_DOVE Kconfig. This slipped through the cracks and now is
 > a fix to allow to build Dove's SDHCI driver for mach-mvebu on v3.15-rc.
-
-Dove cubox has usually rootfs on mmc, so this patch is very much needed
-for using multiplatform kernel on dove cubox.
-
-Tested-by: Riku Voipio <riku.voipio@iki.fi>
-
+>
 > Signed-off-by: Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>
 > Acked-by: Jason Cooper <jason@lakedaemon.net>
+
+Thanks! Picked up for the PR I send to Chris.
+
+Kind regards
+Ulf Hansson
+
 > ---
 > Cc: Chris Ball <chris@printf.net>
 > Cc: Ulf Hansson <ulf.hansson@linaro.org>
@@ -37,21 +45,20 @@ Tested-by: Riku Voipio <riku.voipio@iki.fi>
 > ---
 >  drivers/mmc/host/Kconfig | 2 +-
 >  1 file changed, 1 insertion(+), 1 deletion(-)
-> 
+>
 > diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
 > index 8aaf8c1f3f63..37665553ef33 100644
 > --- a/drivers/mmc/host/Kconfig
 > +++ b/drivers/mmc/host/Kconfig
 > @@ -168,7 +168,7 @@ config MMC_SDHCI_ESDHC_IMX
->  
+>
 >  config MMC_SDHCI_DOVE
->  	tristate "SDHCI support on Marvell's Dove SoC"
-> -	depends on ARCH_DOVE
-> +	depends on ARCH_DOVE || MACH_DOVE
->  	depends on MMC_SDHCI_PLTFM
->  	select MMC_SDHCI_IO_ACCESSORS
->  	help
-> -- 
+>         tristate "SDHCI support on Marvell's Dove SoC"
+> -       depends on ARCH_DOVE
+> +       depends on ARCH_DOVE || MACH_DOVE
+>         depends on MMC_SDHCI_PLTFM
+>         select MMC_SDHCI_IO_ACCESSORS
+>         help
+> --
 > 1.9.1
-> 
-> 
+>
