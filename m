@@ -1,192 +1,47 @@
-From: Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>
-Subject: [PATCH] mmc: sdhci-dove: use mmc_of_parse() and remove card_tasklet CD handler
-Date: Fri, 23 May 2014 00:16:52 +0200
-Message-ID: <1400797012-32106-1-git-send-email-sebastian.hesselbarth@gmail.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ee0-f45.google.com ([74.125.83.45]:34153 "EHLO
-	mail-ee0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751097AbaEVVQ7 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 22 May 2014 17:16:59 -0400
-Sender: linux-mmc-owner@vger.kernel.org
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: Re: [PATCH v1 01/11] ARM: amba: Add Qualcomm vendor ID.
+Date: Thu, 22 May 2014 23:54:11 +0200
+Message-ID: <CACRpkdbex_0jmx5cL0uLcMcGBvhwfAmNssz4xNQuJ+3d=Dv1zg@mail.gmail.com>
+References: <1398759492-12970-1-git-send-email-srinivas.kandagatla@linaro.org>
+	<1398759542-13017-1-git-send-email-srinivas.kandagatla@linaro.org>
+	<CACRpkdZyEAkJUGC5x6CY65-g97jfyg-TMDoe8JxDMexVx5usSA@mail.gmail.com>
+	<5371E8B7.8000103@linaro.org>
+	<20140513221313.GI20486@codeaurora.org>
+	<CACRpkdZe7NA0CxB=ArWwSRt_BF69sG=BHBz+DY1H4AbabNhC=A@mail.gmail.com>
+	<53764045.5090603@codeaurora.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <53764045.5090603@codeaurora.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Stephen Boyd <sboyd@codeaurora.org>
+Cc: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>, Russell King <linux@arm.linux.org.uk>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, agross@quicinc.com, "linux-arm-msm@vger.kernel.org" <linux-arm-msm@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>
-Cc: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Russell King <rmk+kernel@arm.linux.org.uk>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
 
-Commit f8ec589b86f6
-  "mmc: sdhci-dove: allow GPIOs to be used for card detection on Dove"
-added a gpio based card detect interrupt handler that was hooked up
-into card_tasket.
+On Fri, May 16, 2014 at 6:43 PM, Stephen Boyd <sboyd@codeaurora.org> wrote:
+> On 05/16/14 09:24, Linus Walleij wrote:
+>> On Wed, May 14, 2014 at 12:13 AM, Stephen Boyd <sboyd@codeaurora.org> wrote:
+>>
+>>> Please add a note that this id is fake in the commit text or in
+>>> the code as well.
+>> You just need one of your hardware engineers to add is to one instance
+>> of some test chip round so it exists in any hardware whatsoever and it
+>> is not "fake" anymore...
+>>
+>> This is a bit like device tree, it's defined by the kernel community as much
+>> as by the hardware engineers and it's a little bit of back-and-forth.
+>>
+>
+> Sure, but hardware teams have moved on from this IP so I doubt we can
+> even get them to put it into a test chip. In fact, the devices a
+> generation before the ones Srini is working on (msm8660 for example)
+> have a periph ID of 0x41180 so we need to override that ID in DT with
+> this fake ID for things to even work.
 
-Commit 3560db8e247a
-  "mmc: sdhci: push card_tasklet into threaded irq handler"
-now removed that very card_tasklet causing sdhci-dove to fail on build
-with:
-drivers/mmc/host/sdhci-dove.c: In function 'sdhci_dove_carddetect_irq':
-drivers/mmc/host/sdhci-dove.c:42:24: error: 'struct sdhci_host' has no member named 'card_tasklet'
+Hehe I wasn't really suggesting doing that.
 
-To fix both the build error and get a working gpio card detection without
-card_tasklet, replace sdhci_get_of_property() with more recent
-mmc_of_parse(). It takes care of gpio-based card detect passed through DT
-already and allows to remove the offending code sections dealing with
-removed card_tasklet.
+The point was to illustrate how fragile the border between "real"
+and "fake" is in these cases.
 
-Signed-off-by: Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>
----
-This patch is based on todays mmc-next and fixes a build error there.
-
-Cc: Chris Ball <chris@printf.net>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Russell King <rmk+kernel@arm.linux.org.uk>
-Cc: linux-mmc@vger.kernel.org
-Cc: linux-arm-kernel@lists.infradead.org
-Cc: linux-kernel@vger.kernel.org
----
- drivers/mmc/host/sdhci-dove.c | 74 +++----------------------------------------
- 1 file changed, 5 insertions(+), 69 deletions(-)
-
-diff --git a/drivers/mmc/host/sdhci-dove.c b/drivers/mmc/host/sdhci-dove.c
-index 0d315f4496c8..e6278ec007d7 100644
---- a/drivers/mmc/host/sdhci-dove.c
-+++ b/drivers/mmc/host/sdhci-dove.c
-@@ -21,28 +21,17 @@
- 
- #include <linux/clk.h>
- #include <linux/err.h>
--#include <linux/gpio.h>
- #include <linux/io.h>
- #include <linux/mmc/host.h>
- #include <linux/module.h>
- #include <linux/of.h>
--#include <linux/of_gpio.h>
- 
- #include "sdhci-pltfm.h"
- 
- struct sdhci_dove_priv {
- 	struct clk *clk;
--	int gpio_cd;
- };
- 
--static irqreturn_t sdhci_dove_carddetect_irq(int irq, void *data)
--{
--	struct sdhci_host *host = data;
--
--	tasklet_schedule(&host->card_tasklet);
--	return IRQ_HANDLED;
--}
--
- static u16 sdhci_dove_readw(struct sdhci_host *host, int reg)
- {
- 	u16 ret;
-@@ -60,8 +49,6 @@ static u16 sdhci_dove_readw(struct sdhci_host *host, int reg)
- 
- static u32 sdhci_dove_readl(struct sdhci_host *host, int reg)
- {
--	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
--	struct sdhci_dove_priv *priv = pltfm_host->priv;
- 	u32 ret;
- 
- 	ret = readl(host->ioaddr + reg);
-@@ -71,14 +58,6 @@ static u32 sdhci_dove_readl(struct sdhci_host *host, int reg)
- 		/* Mask the support for 3.0V */
- 		ret &= ~SDHCI_CAN_VDD_300;
- 		break;
--	case SDHCI_PRESENT_STATE:
--		if (gpio_is_valid(priv->gpio_cd)) {
--			if (gpio_get_value(priv->gpio_cd) == 0)
--				ret |= SDHCI_CARD_PRESENT;
--			else
--				ret &= ~SDHCI_CARD_PRESENT;
--		}
--		break;
- 	}
- 	return ret;
- }
-@@ -117,28 +96,9 @@ static int sdhci_dove_probe(struct platform_device *pdev)
- 
- 	priv->clk = devm_clk_get(&pdev->dev, NULL);
- 
--	if (pdev->dev.of_node) {
--		priv->gpio_cd = of_get_named_gpio(pdev->dev.of_node,
--						  "cd-gpios", 0);
--	} else {
--		priv->gpio_cd = -EINVAL;
--	}
--
--	if (gpio_is_valid(priv->gpio_cd)) {
--		ret = gpio_request(priv->gpio_cd, "sdhci-cd");
--		if (ret) {
--			dev_err(&pdev->dev, "card detect gpio request failed: %d\n",
--				ret);
--			return ret;
--		}
--		gpio_direction_input(priv->gpio_cd);
--	}
--
- 	host = sdhci_pltfm_init(pdev, &sdhci_dove_pdata, 0);
--	if (IS_ERR(host)) {
--		ret = PTR_ERR(host);
--		goto err_sdhci_pltfm_init;
--	}
-+	if (IS_ERR(host))
-+		return PTR_ERR(host);
- 
- 	pltfm_host = sdhci_priv(host);
- 	pltfm_host->priv = priv;
-@@ -146,39 +106,20 @@ static int sdhci_dove_probe(struct platform_device *pdev)
- 	if (!IS_ERR(priv->clk))
- 		clk_prepare_enable(priv->clk);
- 
--	sdhci_get_of_property(pdev);
-+	ret = mmc_of_parse(host->mmc);
-+	if (ret)
-+		goto err_sdhci_add;
- 
- 	ret = sdhci_add_host(host);
- 	if (ret)
- 		goto err_sdhci_add;
- 
--	/*
--	 * We must request the IRQ after sdhci_add_host(), as the tasklet only
--	 * gets setup in sdhci_add_host() and we oops.
--	 */
--	if (gpio_is_valid(priv->gpio_cd)) {
--		ret = request_irq(gpio_to_irq(priv->gpio_cd),
--				  sdhci_dove_carddetect_irq,
--				  IRQF_TRIGGER_FALLING | IRQF_TRIGGER_RISING,
--				  mmc_hostname(host->mmc), host);
--		if (ret) {
--			dev_err(&pdev->dev, "card detect irq request failed: %d\n",
--				ret);
--			goto err_request_irq;
--		}
--	}
--
- 	return 0;
- 
--err_request_irq:
--	sdhci_remove_host(host, 0);
- err_sdhci_add:
- 	if (!IS_ERR(priv->clk))
- 		clk_disable_unprepare(priv->clk);
- 	sdhci_pltfm_free(pdev);
--err_sdhci_pltfm_init:
--	if (gpio_is_valid(priv->gpio_cd))
--		gpio_free(priv->gpio_cd);
- 	return ret;
- }
- 
-@@ -190,11 +131,6 @@ static int sdhci_dove_remove(struct platform_device *pdev)
- 
- 	sdhci_pltfm_unregister(pdev);
- 
--	if (gpio_is_valid(priv->gpio_cd)) {
--		free_irq(gpio_to_irq(priv->gpio_cd), host);
--		gpio_free(priv->gpio_cd);
--	}
--
- 	if (!IS_ERR(priv->clk))
- 		clk_disable_unprepare(priv->clk);
- 
--- 
-1.9.1
-
+Yours,
+Linus Walleij
