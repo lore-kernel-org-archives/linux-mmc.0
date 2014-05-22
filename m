@@ -1,60 +1,138 @@
-From: Stephen Warren <swarren@wwwdotorg.org>
-Subject: Re: adding aliases to mmc ... again
-Date: Thu, 22 May 2014 10:16:35 -0600
-Message-ID: <537E22E3.3010601@wwwdotorg.org>
-References: <1400772623-8390-1-git-send-email-s.hauer@pengutronix.de>
+From: Lee Jones <lee.jones-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH 1/8] mmc: sdhci-st: Intial support for ST SDHCI controller
+Date: Thu, 22 May 2014 17:50:36 +0100
+Message-ID: <20140522165036.GK19747@lee--X1>
+References: <1400771902-26553-1-git-send-email-peter.griffin@linaro.org>
+ <1400771902-26553-2-git-send-email-peter.griffin@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from avon.wwwdotorg.org ([70.85.31.133]:37825 "EHLO
-	avon.wwwdotorg.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751039AbaEVQQi (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 22 May 2014 12:16:38 -0400
-In-Reply-To: <1400772623-8390-1-git-send-email-s.hauer@pengutronix.de>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <1400771902-26553-2-git-send-email-peter.griffin-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Peter Griffin <peter.griffin-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, maxime.coquelin-qxv4g6HH51o@public.gmane.org, patrice.chotard-qxv4g6HH51o@public.gmane.org, srinivas.kandagatla-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org, ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, kernel-F5mvAk5X5gdBDgjK7y7TUQ@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Giuseppe Cavallaro <peppe.cavallaro-qxv4g6HH51o@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Sascha Hauer <s.hauer@pengutronix.de>, linux-mmc@vger.kernel.org
-Cc: Dirk Behme <dirk.behme@de.bosch.com>, Fabio Estevam <festevam@gmail.com>, ptx@pengutronix.de
 
-On 05/22/2014 09:30 AM, Sascha Hauer wrote:
-> Hi all,
-> 
-> The wish to have persistent MMC block device names for passing a suitable
-> root=/dev/mmcblkX option came up several times already and has been discussed
-> at least in these threads:
-> 
-> http://lists.infradead.org/pipermail/linux-arm-kernel/2012-July/109984.html
-> https://www.mail-archive.com/linux-mmc@vger.kernel.org/msg22104.html
-> http://comments.gmane.org/gmane.linux.kernel.mmc/21519
-> 
-> Several patches have been proposed to nail the slot index to a known number.
-> Arguments against these patches were:
-> 
-> - Use an initrd and locate the correct root device there
->   even Thomas who suggested this admitted this would be painful to do
-> - use root=UUID= or root=PARTUUID=
->   This generally works but has an important downside. With the UUID
->   approach devices which should boot from the internal eMMC may start
->   booting from an external SD slot when somebody deliberately inserts
->   a SD card with the same UUID.
-> 
-> The following patches should have the technical issues fixed. It works
-> by counting the mmc aliases in the devicetree during initialization of
-> the mmc framework. Those slot numbers will never be assigned to other
-> hosts.
 
-Does it solve the following, which AFAIK has always been the primary
-argument against aligning block device IDs with controller IDs:
+> This platform driver adds initial support for the SDHCI host controll=
+er
+> found on STMicroelectronics SoCs.
+>=20
+> It has been tested on STiH41x b2020 platforms currently.
+>=20
+> Signed-off-by: Peter Griffin <peter.griffin-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> Signed-off-by: Giuseppe Cavallaro <peppe.cavallaro-qxv4g6HH51o@public.gmane.org>
+> ---
+>  drivers/mmc/host/Kconfig    |  12 +++
+>  drivers/mmc/host/Makefile   |   1 +
+>  drivers/mmc/host/sdhci-st.c | 244 ++++++++++++++++++++++++++++++++++=
+++++++++++
+>  3 files changed, 257 insertions(+)
+>  create mode 100644 drivers/mmc/host/sdhci-st.c
 
-- User inserts SD card into MMC controller ID (or alias) 1.
-- /dev/mmcblk1 now exists
-- Mount /dev/mmcblk1 on /mnt/tmp
-- User removes that SD card
-- /dev/mmcblk1 still exists, since it's mounted so can't be deleted
-after the card removal.
-- User inserts SD card into MMC controller ID (or alias) 1.
-- /dev/mmcblkN (N is something other than 1) now exists
+[...]
 
-Now, the block device ID must be != the original ID, since two block
-devices exist.
+> +static int sdhci_st_probe(struct platform_device *pdev)
+> +{
+> +	struct device_node *np =3D pdev->dev.of_node;
+> +	struct sdhci_host *host;
+> +	struct st_mmc_platform_data *pdata;
+> +	struct sdhci_pltfm_host *pltfm_host;
+> +	struct clk *clk;
+> +	int ret =3D 0;
+> +	u16 host_version;
+> +
+> +	dev_dbg(&pdev->dev, "SDHCI ST platform driver\n");
+> +
+> +	pdata =3D devm_kzalloc(&pdev->dev, sizeof(*pdata), GFP_KERNEL);
+> +	if (!pdata)
+> +		return -ENOMEM;
+> +
+> +	pdata->rstc =3D devm_reset_control_get(&pdev->dev, NULL);
+> +	if (IS_ERR(pdata->rstc))
+> +		pdata->rstc =3D NULL;
+> +	else
+> +		reset_control_deassert(pdata->rstc);
+> +
+> +	clk =3D  devm_clk_get(&pdev->dev, "mmc");
+> +	if (IS_ERR(clk)) {
+> +		dev_err(&pdev->dev, "Perpheral clk not found\n");
+> +		return PTR_ERR(clk);
+> +	}
+> +
+> +	host =3D sdhci_pltfm_init(pdev, &sdhci_st_pdata, 0);
+> +	if (IS_ERR(host)) {
+> +		dev_err(&pdev->dev, "Failed sdhci_pltfm_init\n");
+> +		return PTR_ERR(host);
+> +	}
+> +
+> +	clk_prepare_enable(clk);
+
+Move this down as far as it will go.  When do you _need_ the clock
+running by?
+
+> +	host->mmc->caps |=3D MMC_CAP_8_BIT_DATA | MMC_CAP_BUS_WIDTH_TEST
+> +			| MMC_CAP_1_8V_DDR;
+> +
+> +	if (of_property_read_bool(np, "non-removable"))
+> +		host->mmc->caps |=3D MMC_CAP_NONREMOVABLE;
+> +
+> +	pltfm_host =3D sdhci_priv(host);
+> +	pltfm_host->clk =3D clk;
+> +
+> +	ret =3D sdhci_add_host(host);
+> +	if (ret) {
+> +		dev_err(&pdev->dev, "Failed sdhci_add_host\n");
+> +		goto err_out;
+
+If it's possible to move the clk_prepare enable down past here, then
+you only need to do sdhci_pltfm_free() and you can remove all of the
+err_out error path.
+
+> +	}
+> +
+> +	pltfm_host->priv =3D pdata;
+> +
+> +	platform_set_drvdata(pdev, host);
+> +
+> +	host_version =3D readw_relaxed((host->ioaddr + SDHCI_HOST_VERSION))=
+;
+
+Do we want to be doing any error checking for unsupported devices
+here?
+
+[...]
+
+> +static struct platform_driver sdhci_st_driver =3D {
+> +	.probe =3D sdhci_st_probe,
+> +	.remove =3D sdhci_st_remove,
+> +	.driver =3D {
+> +		   .name =3D "sdhci-st",
+> +		   .owner =3D THIS_MODULE,
+> +		   .pm =3D SDHCI_ST_PMOPS,
+> +		   .of_match_table =3D of_match_ptr(st_sdhci_match),
+> +		  },
+
+Tabbing issue here.
+
+> +};
+> +
+> +module_platform_driver(sdhci_st_driver);
+> +
+> +MODULE_DESCRIPTION("SDHCI driver for STMicroelectronics SoCs");
+> +MODULE_AUTHOR("Giuseppe Cavallaro <peppe.cavallaro-qxv4g6HH51o@public.gmane.org>");
+> +MODULE_LICENSE("GPL v2");
+> +MODULE_ALIAS("platform:st-sdhci");
+
+--=20
+Lee Jones
+Linaro STMicroelectronics Landing Team Lead
+Linaro.org =E2=94=82 Open source software for ARM SoCs
+=46ollow Linaro: Facebook | Twitter | Blog
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" i=
+n
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
