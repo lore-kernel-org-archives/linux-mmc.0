@@ -1,85 +1,103 @@
-From: Andrew Bresticker <abrestic@chromium.org>
-Subject: [PATCH v3 2/2] mmc: tegra: fix reporting of base clock frequency
-Date: Thu, 22 May 2014 08:55:36 -0700
-Message-ID: <1400774136-12396-2-git-send-email-abrestic@chromium.org>
-References: <1400774136-12396-1-git-send-email-abrestic@chromium.org>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ob0-f201.google.com ([209.85.214.201]:55752 "EHLO
-	mail-ob0-f201.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751537AbaEVPzo (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 22 May 2014 11:55:44 -0400
-Received: by mail-ob0-f201.google.com with SMTP id wn1so752466obc.0
-        for <linux-mmc@vger.kernel.org>; Thu, 22 May 2014 08:55:44 -0700 (PDT)
-In-Reply-To: <1400774136-12396-1-git-send-email-abrestic@chromium.org>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Andrew Bresticker <abrestic-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+Subject: [PATCH v3 1/2] mmc: tegra: disable UHS modes
+Date: Thu, 22 May 2014 08:55:35 -0700
+Message-ID: <1400774136-12396-1-git-send-email-abrestic@chromium.org>
+Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>, Thierry Reding <thierry.reding-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Andrew Bresticker <abrestic-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Stephen Warren <swarren@wwwdotorg.org>, Thierry Reding <thierry.reding@gmail.com>
-Cc: linux-mmc@vger.kernel.org, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Andrew Bresticker <abrestic@chromium.org>
 
-Tegra SDHCI controllers, by default, report a base clock frequency
-of 208Mhz in SDHCI_CAPABILTIES which may or may not be equal to the
-actual base clock frequency.  This is because the clock rate is
-configured by the clock controller, which is external to the SD/MMC
-controller.  Since the SD/MMC controller has no knowledge of how this
-clock is configured, it will simply report the maximum frequency.
-While the reported value can be overridden by setting BASE_CLK_FREQ in
-VENDOR_CLOCK_CTRL on Tegra30 and later SoCs, just set CAP_CLOCK_BASE_BROKEN
-and supply sdhci_pltfm_clk_get_max_clock(), which simply does a
-clk_get_rate(), as the get_max_clock() callback.
+Program TEGRA_SDHCI_VENDOR_MISC_CTRL so that UHS modes aren't advertised
+in SDHCI_CAPABILITIES_1.  While the Tegra SDHCI controller does support
+these modes, they require Tegra-specific tuning and calibration routines
+which the driver does not support yet.
 
-Signed-off-by: Andrew Bresticker <abrestic@chromium.org>
-Tested-by: Stephen Warren <swarren@nvidia.com>
-Acked-by: Stephen Warren <swarren@nvidia.com>
+Signed-off-by: Andrew Bresticker <abrestic-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+Tested-by: Stephen Warren <swarren-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
+Acked-by: Stephen Warren <swarren-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
 ---
 Changes from v2:
  - rebased on mmc-next
-Changes from v1:
- - fixed up commit message per Stephen's suggestions
+No changes from v1
 ---
- drivers/mmc/host/sdhci-tegra.c | 10 +++++++---
- 1 file changed, 7 insertions(+), 3 deletions(-)
+ drivers/mmc/host/sdhci-tegra.c | 30 +++++++++++++++++++++++-------
+ 1 file changed, 23 insertions(+), 7 deletions(-)
 
 diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
-index 4375cd4..d93a063 100644
+index 9852476..4375cd4 100644
 --- a/drivers/mmc/host/sdhci-tegra.c
 +++ b/drivers/mmc/host/sdhci-tegra.c
-@@ -154,13 +154,15 @@ static const struct sdhci_ops tegra_sdhci_ops = {
- 	.set_bus_width = tegra_sdhci_set_bus_width,
- 	.reset      = tegra_sdhci_reset,
- 	.set_uhs_signaling = sdhci_set_uhs_signaling,
-+	.get_max_clock = sdhci_pltfm_clk_get_max_clock,
+@@ -32,11 +32,17 @@
+ 
+ /* Tegra SDHOST controller vendor register definitions */
+ #define SDHCI_TEGRA_VENDOR_MISC_CTRL		0x120
++#define SDHCI_MISC_CTRL_ENABLE_SDR104		0x8
++#define SDHCI_MISC_CTRL_ENABLE_SDR50		0x10
+ #define SDHCI_MISC_CTRL_ENABLE_SDHCI_SPEC_300	0x20
++#define SDHCI_MISC_CTRL_ENABLE_DDR50		0x200
+ 
+ #define NVQUIRK_FORCE_SDHCI_SPEC_200	BIT(0)
+ #define NVQUIRK_ENABLE_BLOCK_GAP_DET	BIT(1)
+ #define NVQUIRK_ENABLE_SDHCI_SPEC_300	BIT(2)
++#define NVQUIRK_DISABLE_SDR50		BIT(3)
++#define NVQUIRK_DISABLE_SDR104		BIT(4)
++#define NVQUIRK_DISABLE_DDR50		BIT(5)
+ 
+ struct sdhci_tegra_soc_data {
+ 	const struct sdhci_pltfm_data *pdata;
+@@ -100,20 +106,25 @@ static void tegra_sdhci_reset(struct sdhci_host *host, u8 mask)
+ 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+ 	struct sdhci_tegra *tegra_host = pltfm_host->priv;
+ 	const struct sdhci_tegra_soc_data *soc_data = tegra_host->soc_data;
++	u32 misc_ctrl;
+ 
+ 	sdhci_reset(host, mask);
+ 
+ 	if (!(mask & SDHCI_RESET_ALL))
+ 		return;
+ 
++	misc_ctrl = sdhci_readw(host, SDHCI_TEGRA_VENDOR_MISC_CTRL);
+ 	/* Erratum: Enable SDHCI spec v3.00 support */
+-	if (soc_data->nvquirks & NVQUIRK_ENABLE_SDHCI_SPEC_300) {
+-		u32 misc_ctrl;
+-
+-		misc_ctrl = sdhci_readb(host, SDHCI_TEGRA_VENDOR_MISC_CTRL);
++	if (soc_data->nvquirks & NVQUIRK_ENABLE_SDHCI_SPEC_300)
+ 		misc_ctrl |= SDHCI_MISC_CTRL_ENABLE_SDHCI_SPEC_300;
+-		sdhci_writeb(host, misc_ctrl, SDHCI_TEGRA_VENDOR_MISC_CTRL);
+-	}
++	/* Don't advertise UHS modes which aren't supported yet */
++	if (soc_data->nvquirks & NVQUIRK_DISABLE_SDR50)
++		misc_ctrl &= ~SDHCI_MISC_CTRL_ENABLE_SDR50;
++	if (soc_data->nvquirks & NVQUIRK_DISABLE_DDR50)
++		misc_ctrl &= ~SDHCI_MISC_CTRL_ENABLE_DDR50;
++	if (soc_data->nvquirks & NVQUIRK_DISABLE_SDR104)
++		misc_ctrl &= ~SDHCI_MISC_CTRL_ENABLE_SDR104;
++	sdhci_writew(host, misc_ctrl, SDHCI_TEGRA_VENDOR_MISC_CTRL);
+ }
+ 
+ static void tegra_sdhci_set_bus_width(struct sdhci_host *host, int bus_width)
+@@ -170,7 +181,9 @@ static const struct sdhci_pltfm_data sdhci_tegra30_pdata = {
+ 
+ static struct sdhci_tegra_soc_data soc_data_tegra30 = {
+ 	.pdata = &sdhci_tegra30_pdata,
+-	.nvquirks = NVQUIRK_ENABLE_SDHCI_SPEC_300,
++	.nvquirks = NVQUIRK_ENABLE_SDHCI_SPEC_300 |
++		    NVQUIRK_DISABLE_SDR50 |
++		    NVQUIRK_DISABLE_SDR104,
  };
  
- static const struct sdhci_pltfm_data sdhci_tegra20_pdata = {
- 	.quirks = SDHCI_QUIRK_BROKEN_TIMEOUT_VAL |
- 		  SDHCI_QUIRK_SINGLE_POWER_WRITE |
- 		  SDHCI_QUIRK_NO_HISPD_BIT |
--		  SDHCI_QUIRK_BROKEN_ADMA_ZEROLEN_DESC,
-+		  SDHCI_QUIRK_BROKEN_ADMA_ZEROLEN_DESC |
-+		  SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
- 	.ops  = &tegra_sdhci_ops,
+ static const struct sdhci_pltfm_data sdhci_tegra114_pdata = {
+@@ -184,6 +197,9 @@ static const struct sdhci_pltfm_data sdhci_tegra114_pdata = {
+ 
+ static struct sdhci_tegra_soc_data soc_data_tegra114 = {
+ 	.pdata = &sdhci_tegra114_pdata,
++	.nvquirks = NVQUIRK_DISABLE_SDR50 |
++		    NVQUIRK_DISABLE_DDR50 |
++		    NVQUIRK_DISABLE_SDR104,
  };
  
-@@ -175,7 +177,8 @@ static const struct sdhci_pltfm_data sdhci_tegra30_pdata = {
- 		  SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK |
- 		  SDHCI_QUIRK_SINGLE_POWER_WRITE |
- 		  SDHCI_QUIRK_NO_HISPD_BIT |
--		  SDHCI_QUIRK_BROKEN_ADMA_ZEROLEN_DESC,
-+		  SDHCI_QUIRK_BROKEN_ADMA_ZEROLEN_DESC |
-+		  SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
- 	.ops  = &tegra_sdhci_ops,
- };
- 
-@@ -191,7 +194,8 @@ static const struct sdhci_pltfm_data sdhci_tegra114_pdata = {
- 		  SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK |
- 		  SDHCI_QUIRK_SINGLE_POWER_WRITE |
- 		  SDHCI_QUIRK_NO_HISPD_BIT |
--		  SDHCI_QUIRK_BROKEN_ADMA_ZEROLEN_DESC,
-+		  SDHCI_QUIRK_BROKEN_ADMA_ZEROLEN_DESC |
-+		  SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
- 	.ops  = &tegra_sdhci_ops,
- };
- 
+ static const struct of_device_id sdhci_tegra_dt_match[] = {
 -- 
 1.9.1.423.g4596e3a
-
