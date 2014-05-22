@@ -1,61 +1,27 @@
-From: Tony Lindgren <tony@atomide.com>
-Subject: Re: [mmc:mmc-next 79/96] drivers/mmc/host/omap_hsmmc.c:1841:30:
- error: 'struct dev_pm_info' has no member named 'runtime_status'
-Date: Thu, 22 May 2014 07:24:02 -0700
-Message-ID: <20140522142401.GA14489@atomide.com>
-References: <537de770.ItHqmb5BpaXWIlXq%fengguang.wu@intel.com>
- <CAPDyKFoWABO-k9dh5AvhaJFoF-NRCBz1_G+fJ53MPnzBr42CfQ@mail.gmail.com>
- <86oayqq93b.fsf@void.printf.net>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+From: Peter Griffin <peter.griffin@linaro.org>
+Subject: Add SDHCI support for STMicroelectronics SoCs
+Date: Thu, 22 May 2014 16:18:14 +0100
+Message-ID: <1400771902-26553-1-git-send-email-peter.griffin@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mho-03-ewr.mailhop.org ([204.13.248.66]:51014 "EHLO
-	mho-01-ewr.mailhop.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1750788AbaEVOYI (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 22 May 2014 10:24:08 -0400
-Content-Disposition: inline
-In-Reply-To: <86oayqq93b.fsf@void.printf.net>
+Received: from mail-wi0-f177.google.com ([209.85.212.177]:57844 "EHLO
+	mail-wi0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751557AbaEVPSc (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 22 May 2014 11:18:32 -0400
+Received: by mail-wi0-f177.google.com with SMTP id f8so4507398wiw.4
+        for <linux-mmc@vger.kernel.org>; Thu, 22 May 2014 08:18:31 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <chris@printf.net>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Andreas Fenkart <afenkart@gmail.com>, linux-mmc <linux-mmc@vger.kernel.org>, balajitk <balajitk@ti.com>
+To: linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, maxime.coquelin@st.com, patrice.chotard@st.com, srinivas.kandagatla@gmail.com, chris@printf.net, ulf.hansson@linaro.org
+Cc: peter.griffin@linaro.org, kernel@stlinux.com, lee.jones@linaro.org, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org
 
-* Chris Ball <chris@printf.net> [140522 05:42]:
-> Hi,
-> 
-> On Thu, May 22 2014, Ulf Hansson wrote:
-> > I had a second look at Andreas Fenkart's patchset to enable SDIO irq
-> > for omap. Those needs an additional iteration, since there are
-> > unresolved dependencies to CONFIG_PM_RUNTIME (and possibly to other
-> > Kconfigs as well). Apparently I had all the needed Kconfigs enabled
-> > while I compile tested them. :-(
+This series adds a SDHCI platform driver for ST SoCs, along with
+the additional device tree bindings and configuration to enable
+the controller to work properly.
 
-Did you find this out with make randconfig?
+Initially it supports the stih416 and stih415 SoCs, and has
+been tested on a stih416-b2020 board.
 
-> > I tried out doing a local re-base, to remove the related omap patches.
-> > If you remove the patches below you won't get any conflicts for
-> > omap_hsmmc. Can you do that?
-> >
-> > Andreas:
-> > mmc: omap_hsmmc: Enable SDIO interrupt
-> > mmc: omap_hsmmc: enable wakeup event for sdio OMAP4
-> > mmc: omap_hsmmc: Extend debugfs by SDIO IRQ handling, runtime state
-> > mmc: omap_hsmmc: abort runtime suspend if pending sdio irq detected
-> > mmc: omap_hsmmc: switch default/idle pinctrl states in runtime hooks
-> > mmc: omap_hsmmc: Pin remux workaround to support SDIO interrupt on AM335x
-> >
-> > Balaji:
-> > mmc: omap_hsmmc: use IS_ERR macro for error checking
-> 
-> Done.  Thanks!
+regards,
 
-Andreas, can you fix this ASAP? Would be nice to have those
-working for v3.16 :)
+Peter.
 
-Once you have updated patches available I'll include them
-also to my randconfig builds. Unless the Kconfig options
-are nested they are exposed after few builds typically.
-
-Regards,
-
-Tony
