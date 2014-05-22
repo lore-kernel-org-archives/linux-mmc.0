@@ -1,97 +1,60 @@
-From: Lee Jones <lee.jones-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH 2/8] mmc: sdhci-st: STMicroelectronics SDHCI binding
- documentation.
-Date: Thu, 22 May 2014 17:06:43 +0100
-Message-ID: <20140522160643.GI19747@lee--X1>
-References: <1400771902-26553-1-git-send-email-peter.griffin@linaro.org>
- <1400771902-26553-3-git-send-email-peter.griffin@linaro.org>
+From: Stephen Warren <swarren@wwwdotorg.org>
+Subject: Re: adding aliases to mmc ... again
+Date: Thu, 22 May 2014 10:16:35 -0600
+Message-ID: <537E22E3.3010601@wwwdotorg.org>
+References: <1400772623-8390-1-git-send-email-s.hauer@pengutronix.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <1400771902-26553-3-git-send-email-peter.griffin-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Peter Griffin <peter.griffin-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, maxime.coquelin-qxv4g6HH51o@public.gmane.org, patrice.chotard-qxv4g6HH51o@public.gmane.org, srinivas.kandagatla-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org, ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, kernel-F5mvAk5X5gdBDgjK7y7TUQ@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Giuseppe Cavallaro <peppe.cavallaro-qxv4g6HH51o@public.gmane.org>
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from avon.wwwdotorg.org ([70.85.31.133]:37825 "EHLO
+	avon.wwwdotorg.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751039AbaEVQQi (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 22 May 2014 12:16:38 -0400
+In-Reply-To: <1400772623-8390-1-git-send-email-s.hauer@pengutronix.de>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Sascha Hauer <s.hauer@pengutronix.de>, linux-mmc@vger.kernel.org
+Cc: Dirk Behme <dirk.behme@de.bosch.com>, Fabio Estevam <festevam@gmail.com>, ptx@pengutronix.de
 
-> This patch adds the device tree binding documentation for ST
-> SDHCI driver. It contains the differences between the core properties
-> in mmc.txt and the properties used by the sdhci-st driver.
->=20
-> Signed-off-by: Peter Griffin <peter.griffin-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-> Signed-off-by: Giuseppe Cavallaro <peppe.cavallaro-qxv4g6HH51o@public.gmane.org>
-> ---
->  Documentation/devicetree/bindings/mmc/sdhci-st.txt | 26 ++++++++++++=
-++++++++++
->  1 file changed, 26 insertions(+)
->  create mode 100644 Documentation/devicetree/bindings/mmc/sdhci-st.tx=
-t
->=20
-> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-st.txt b/Doc=
-umentation/devicetree/bindings/mmc/sdhci-st.txt
-> new file mode 100644
-> index 0000000..ae3dae0
-> --- /dev/null
-> +++ b/Documentation/devicetree/bindings/mmc/sdhci-st.txt
-> @@ -0,0 +1,26 @@
-> +* STMicroelectronics sdhci-st MMC/SD controller
-> +
-> +This file documents differences between the core properties in mmc.t=
-xt
+On 05/22/2014 09:30 AM, Sascha Hauer wrote:
+> Hi all,
+> 
+> The wish to have persistent MMC block device names for passing a suitable
+> root=/dev/mmcblkX option came up several times already and has been discussed
+> at least in these threads:
+> 
+> http://lists.infradead.org/pipermail/linux-arm-kernel/2012-July/109984.html
+> https://www.mail-archive.com/linux-mmc@vger.kernel.org/msg22104.html
+> http://comments.gmane.org/gmane.linux.kernel.mmc/21519
+> 
+> Several patches have been proposed to nail the slot index to a known number.
+> Arguments against these patches were:
+> 
+> - Use an initrd and locate the correct root device there
+>   even Thomas who suggested this admitted this would be painful to do
+> - use root=UUID= or root=PARTUUID=
+>   This generally works but has an important downside. With the UUID
+>   approach devices which should boot from the internal eMMC may start
+>   booting from an external SD slot when somebody deliberately inserts
+>   a SD card with the same UUID.
+> 
+> The following patches should have the technical issues fixed. It works
+> by counting the mmc aliases in the devicetree during initialization of
+> the mmc framework. Those slot numbers will never be assigned to other
+> hosts.
 
-Where is mmc.txt?
+Does it solve the following, which AFAIK has always been the primary
+argument against aligning block device IDs with controller IDs:
 
-> +and the properties used by the sdhci-st driver
-> +
-> +Required properties:
-> +- compatible: "st,sdhci"
-> +- clocks: card clock, must be "mmc".
+- User inserts SD card into MMC controller ID (or alias) 1.
+- /dev/mmcblk1 now exists
+- Mount /dev/mmcblk1 on /mnt/tmp
+- User removes that SD card
+- /dev/mmcblk1 still exists, since it's mounted so can't be deleted
+after the card removal.
+- User inserts SD card into MMC controller ID (or alias) 1.
+- /dev/mmcblkN (N is something other than 1) now exists
 
-This isn't correct.  I think you mean it must be a phandle to the
-'mmc' clock.  It's also worth referencing the clock DT documentation
-here.
-
-> +Optional properties:
-> +- reset: to provide a reset to the HC.
-
-What is it; integer, string, phandle, something else?
-
-> +- non-removable: non-removable slot (bindings/mmc/mmc.txt).
-
-This however, _is_ a string, so you need to put it in "'s like you did
-with "mmc" above and/or reference the file which documents it.
-
-> +
-> +Example:
-> +
-> +mmc0: sdhci@fe81e000 {
-> +	compatible	=3D "st,sdhci";
-> +	status		=3D "disabled";
-> +	reg		=3D <0xfe81e000 0x1000>;
-> +	interrupts	=3D <GIC_SPI 127 IRQ_TYPE_NONE>;
-> +	interrupt-names	=3D "mmcirq";
-> +	pinctrl-names	=3D "default";
-> +	pinctrl-0	=3D <&pinctrl_mmc0>;
-> +	clock-names	=3D "mmc";
-
-I don't think you need clock-names if you only have one clock.
-
-> +	clocks		=3D <&clk_s_a1_ls 1>;
-> +};
-
-Once fixed you can add my Ack for the next submission:
-
-  Acked-by: Lee Jones <lee.jones-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-
---=20
-Lee Jones
-Linaro STMicroelectronics Landing Team Lead
-Linaro.org =E2=94=82 Open source software for ARM SoCs
-=46ollow Linaro: Facebook | Twitter | Blog
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" i=
-n
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Now, the block device ID must be != the original ID, since two block
+devices exist.
