@@ -1,93 +1,102 @@
-From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH v3 2/2] mmc: tegra: fix reporting of base clock frequency
-Date: Fri, 23 May 2014 09:04:12 +0200
-Message-ID: <CAPDyKFqBcp7PZQ-04s02Jrqscna0UVex2DEbVPYghmRR8g9HnA@mail.gmail.com>
-References: <1400774136-12396-1-git-send-email-abrestic@chromium.org>
-	<1400774136-12396-2-git-send-email-abrestic@chromium.org>
+From: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+Subject: Re: [PATCH v2 00/14] Add Qualcomm SD Card Controller support
+Date: Fri, 23 May 2014 08:13:15 +0100
+Message-ID: <537EF50B.2010101@linaro.org>
+References: <1398116624-31052-1-git-send-email-srinivas.kandagatla@linaro.org> <1400146447-29803-1-git-send-email-srinivas.kandagatla@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1400774136-12396-2-git-send-email-abrestic-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
-Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Andrew Bresticker <abrestic-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
-Cc: Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>, Thierry Reding <thierry.reding-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1400146447-29803-1-git-send-email-srinivas.kandagatla@linaro.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Russell King <linux@arm.linux.org.uk>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
+Cc: Chris Ball <chris@printf.net>, linux-kernel@vger.kernel.org, linus.walleij@linaro.org
 List-Id: linux-mmc@vger.kernel.org
 
-On 22 May 2014 17:55, Andrew Bresticker <abrestic-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org> wrote:
-> Tegra SDHCI controllers, by default, report a base clock frequency
-> of 208Mhz in SDHCI_CAPABILTIES which may or may not be equal to the
-> actual base clock frequency.  This is because the clock rate is
-> configured by the clock controller, which is external to the SD/MMC
-> controller.  Since the SD/MMC controller has no knowledge of how this
-> clock is configured, it will simply report the maximum frequency.
-> While the reported value can be overridden by setting BASE_CLK_FREQ in
-> VENDOR_CLOCK_CTRL on Tegra30 and later SoCs, just set CAP_CLOCK_BASE_BROKEN
-> and supply sdhci_pltfm_clk_get_max_clock(), which simply does a
-> clk_get_rate(), as the get_max_clock() callback.
+Hi Ulf,
+I like to get this patches for v3.16,  any chance of considering these 
+patches to v3.16 ?
+
+--srini
+
+On 15/05/14 10:34, srinivas.kandagatla@linaro.org wrote:
+> From: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
 >
-> Signed-off-by: Andrew Bresticker <abrestic-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
-> Tested-by: Stephen Warren <swarren-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
-> Acked-by: Stephen Warren <swarren-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
-
-Thanks Andrew!
-
-Signed-off-by: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-
-Chris, can you pick this up?
-
-Kind regards
-Ulf Hansson
-
-> ---
-> Changes from v2:
->  - rebased on mmc-next
+> Thankyou everyone for reviewing both RFC and v1 patches.
+>
+> This patch series adds Qualcomm SD Card Controller support in pl180 mmci
+> driver. QCom SDCC is basically a pl180, but bit more customized, some of the
+> register layouts and offsets are different to the ones mentioned in pl180
+> datasheet. The plan is to totally remove the standalone SDCC driver
+> drivers/mmc/host/msm_sdcc.* and start using generic mmci driver for all
+> Qualcomm parts, as we get chance to test on other Qcom boards.
+>
+> To start using the existing mmci driver, a fake amba id for Qualcomm is added
+> in patches:
+>   mmc: mmci: Add Qualcomm Id to amba id table.
+>
+> Second change is, adding a 3 clock cycle delay for register writes on QCOM SDCC
+> registers, which is done in patches:
+>    mmc: mmci: Add register read/write wrappers.
+>    mmc: mmci: Qcomm: Add 3 clock cycle delay after register write
+>
+> Third change is to accommodate CLK, DATCTRL and MMCICLK register layout changes
+> in Qcom SDCC and provide more flexibity in driver to specify these changes via
+> variant datastructure. Which are done in patches:
+>    mmc: mmci: Add Qcom datactrl register variant
+>    mmc: mmci: add ddrmode mask to variant data
+>    mmc: mmci: add 8bit bus support in variant data
+>    mmc: mmci: add edge support to data and command out in variant data.
+>    mmc: mmci: add Qcom specifics of clk and datactrl registers.
+>    mmc: mmci: Add support to data commands via variant structure.
+>    mmc: mmci: add support for fbclk to latch data and cmd.
+>    mmc: mmci: add qcom specific clk control
+>
+> Fourth major change was to add qcom specfic pio read function, the need for
+> this is because the way MCIFIFOCNT register behaved in QCOM SDCC is very
+>   different to the one in pl180. This change is done in patch:
+>    mmc: mmci: Add Qcom specific pio_read function.
+>
+> Last some Qcom unrelated changes/cleanup to driver are done in patches:
+>    mmc: mmci: use NSEC_PER_SEC macro
+>    mmc: mmci: convert register bits to use BIT() macro.
+>
+> This patches are tested in PIO mode on IFC8064 board with both eMMC and
+> external SD card. I would like to get this support in v3.16.
+>
 > Changes from v1:
->  - fixed up commit message per Stephen's suggestions
-> ---
->  drivers/mmc/host/sdhci-tegra.c | 10 +++++++---
->  1 file changed, 7 insertions(+), 3 deletions(-)
+> 	- moved most of the SOC specifics to variant parameters as suggested
+> 	  by Linus W.
+> 	- renamed registers as suggested by Linus W.
+> 	- Added comments in the code as suggested by Linus W.
+> 	- moved out AMBA ID addition patch from this series.
+> 	- rebased the patches to
+> 		git://git.linaro.org/people/ulf.hansson/mmc.git next
+> 	  as suggested by Ulf H.
 >
-> diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
-> index 4375cd4..d93a063 100644
-> --- a/drivers/mmc/host/sdhci-tegra.c
-> +++ b/drivers/mmc/host/sdhci-tegra.c
-> @@ -154,13 +154,15 @@ static const struct sdhci_ops tegra_sdhci_ops = {
->         .set_bus_width = tegra_sdhci_set_bus_width,
->         .reset      = tegra_sdhci_reset,
->         .set_uhs_signaling = sdhci_set_uhs_signaling,
-> +       .get_max_clock = sdhci_pltfm_clk_get_max_clock,
->  };
+> Changes from RFC:
+> 	- moved out clk setup out of spinlock as pointed by Stephen B.
+> 	
+> Thanks,
+> srini
 >
->  static const struct sdhci_pltfm_data sdhci_tegra20_pdata = {
->         .quirks = SDHCI_QUIRK_BROKEN_TIMEOUT_VAL |
->                   SDHCI_QUIRK_SINGLE_POWER_WRITE |
->                   SDHCI_QUIRK_NO_HISPD_BIT |
-> -                 SDHCI_QUIRK_BROKEN_ADMA_ZEROLEN_DESC,
-> +                 SDHCI_QUIRK_BROKEN_ADMA_ZEROLEN_DESC |
-> +                 SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
->         .ops  = &tegra_sdhci_ops,
->  };
+> Srinivas Kandagatla (14):
+>    mmc: mmci: use NSEC_PER_SEC macro
+>    mmc: mmci: convert register bits to use BIT() macro.
+>    mmc: mmci: Add Qualcomm Id to amba id table
+>    mmc: mmci: Add Qcom datactrl register variant
+>    mmc: mmci: Add register read/write wrappers.
+>    mmc: mmci: Qcomm: Add 3 clock cycle delay after register write
+>    mmc: mmci: add ddrmode mask to variant data
+>    mmc: mmci: add 8bit bus support in variant data
+>    mmc: mmci: add edge support to data and command out in variant data.
+>    mmc: mmci: add Qcom specifics of clk and datactrl registers.
+>    mmc: mmci: Add support to data commands via variant structure.
+>    mmc: mmci: add support for fbclk to latch data and cmd.
+>    mmc: mmci: add qcom specific clk control
+>    mmc: mmci: Add Qcom specific pio_read function.
 >
-> @@ -175,7 +177,8 @@ static const struct sdhci_pltfm_data sdhci_tegra30_pdata = {
->                   SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK |
->                   SDHCI_QUIRK_SINGLE_POWER_WRITE |
->                   SDHCI_QUIRK_NO_HISPD_BIT |
-> -                 SDHCI_QUIRK_BROKEN_ADMA_ZEROLEN_DESC,
-> +                 SDHCI_QUIRK_BROKEN_ADMA_ZEROLEN_DESC |
-> +                 SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
->         .ops  = &tegra_sdhci_ops,
->  };
->
-> @@ -191,7 +194,8 @@ static const struct sdhci_pltfm_data sdhci_tegra114_pdata = {
->                   SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK |
->                   SDHCI_QUIRK_SINGLE_POWER_WRITE |
->                   SDHCI_QUIRK_NO_HISPD_BIT |
-> -                 SDHCI_QUIRK_BROKEN_ADMA_ZEROLEN_DESC,
-> +                 SDHCI_QUIRK_BROKEN_ADMA_ZEROLEN_DESC |
-> +                 SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
->         .ops  = &tegra_sdhci_ops,
->  };
->
-> --
-> 1.9.1.423.g4596e3a
+>   drivers/mmc/host/mmci.c | 245 ++++++++++++++++++++++++++++++++++++------------
+>   drivers/mmc/host/mmci.h | 232 +++++++++++++++++++++++++--------------------
+>   2 files changed, 311 insertions(+), 166 deletions(-)
 >
