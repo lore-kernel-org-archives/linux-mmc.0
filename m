@@ -1,73 +1,76 @@
-From: Arend van Spriel <arend@broadcom.com>
-Subject: Re: RFC: representing sdio devices oob interrupt, clks, etc. in device
- tree
-Date: Fri, 23 May 2014 16:54:59 +0200
-Message-ID: <537F6143.3050703@broadcom.com>
-References: <537DC832.3020006@redhat.com> <CAGb2v64VZac2KvAALrScecN89sRnBQoDrKxKMvkte+3G04NXeA@mail.gmail.com> <537DE1AA.5050606@redhat.com> <537E31F7.1030505@gmail.com> <537F1148.3010102@redhat.com> <20140523112239.GB12304@sirena.org.uk> <537F3610.3050104@redhat.com> <537F4B5E.80306@broadcom.com> <537F4CE5.10707@redhat.com>
+From: Tony Lindgren <tony@atomide.com>
+Subject: Re: [PATCH v13 3/7] mmc: omap_hsmmc: Extend debugfs by SDIO IRQ
+ handling, runtime state
+Date: Fri, 23 May 2014 08:14:24 -0700
+Message-ID: <20140523151424.GG2321@atomide.com>
+References: <1400833834-15893-1-git-send-email-afenkart@gmail.com>
+ <1400833834-15893-4-git-send-email-afenkart@gmail.com>
+ <537F3E6E.7060000@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-gw2-out.broadcom.com ([216.31.210.63]:64018 "EHLO
-	mail-gw2-out.broadcom.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752250AbaEWOzV (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 23 May 2014 10:55:21 -0400
-In-Reply-To: <537F4CE5.10707@redhat.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-omap-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <537F3E6E.7060000@ti.com>
+Sender: linux-omap-owner@vger.kernel.org
+To: Balaji T K <balajitk@ti.com>
+Cc: Andreas Fenkart <afenkart@gmail.com>, Chris Ball <chris@printf.net>, Grant Likely <grant.likely@secretlab.ca>, Felipe Balbi <balbi@ti.com>, Andreas Mueller <schnitzeltony@googlemail.com>, Sebastian Reichel <sre@kernel.org>, zonque@gmail.com, galak@codeaurora.org, linux-doc@vger.kernel.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Hans de Goede <hdegoede@redhat.com>
-Cc: Mark Brown <broonie@kernel.org>, Tomasz Figa <tomasz.figa@gmail.com>, Chen-Yu Tsai <wens@csie.org>, Sascha Hauer <s.hauer@pengutronix.de>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Maxime Ripard <maxime.ripard@free-electrons.com>, linux-mmc <linux-mmc@vger.kernel.org>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>, devicetree <devicetree@vger.kernel.org>, Olof Johansson <olof@lixom.net>, Russell King - ARM Linux <linux@arm.linux.org.uk>, Fabio Estevam <festevam@gmail.com>, Arnd Bergmann <arnd@arndb.de>, Jyri Sarha <jsarha@ti.com>
 
-On 05/23/14 15:28, Hans de Goede wrote:
-> Hi,
->
-> On 05/23/2014 03:21 PM, Arend van Spriel wrote:
->> On 05/23/14 13:50, Hans de Goede wrote:
->>> Hi,
->>>
->>> On 05/23/2014 01:22 PM, Mark Brown wrote:
->>>> On Fri, May 23, 2014 at 11:13:44AM +0200, Hans de Goede wrote:
->>>>
->>>>> Thinking more about this, I would like to make one change to my
->>>>> proposal, the mmc-core should only do power up of child-nodes if
->>>>> they have a compatible of: "simple-sdio-powerup". This way
->>>>> when we add something more complex, we can keep the simple powerup
->>>>> code in the mmc core, keeping what we've already using this working
->>>>> and the mmc core won't respond to the child nodes for more complex
->>>>> devices, so it won't conflict with more complex power-up handling
->>>>> handled by some other driver.
->>>>
->>>> Would it not be better to have this be something in the driver struct
->>>> rather than in the device tree?  Putting a compatible in there would be
->>>> encoding details of the Linux implementation in the DT which doesn't
->>>> seem right especially since these are details we're thinking of changing
->>>> later on.
->>>
->>> The compatible is not a Linux specific thing, it is a marking saying
->>> that something needs to take care of enabling the clks (and whatever
->>> else we will make part of the binding for this compatible), before
->>> scanning the mmc bus.
->>>
->>>> Something like have the driver set flags saying if it wants
->>>> to do complicated things.
->>>
->>> Chicken<->   egg, we won't know which driver to use before we've probed
->>> the mmc bus, and we cannot probe the bus before enabling the clks, etc.
->>
->> The approach I took with brcmfmac is that upon module init I search the DT for "brcm,bcm43xx-fmac" compatible and get the clock and/or gpio resource and enable them before registering the sdio driver. The difficulty is probably when using the driver built-in as the clocks and gpios may not be available yet and we can not rely on deferred probing in module init stage.
->
-> I know, and that approach does not work, by the time the brcmfmac loads,
-> the mmc core has long probed the mmc bus and decided no one is home.
+* Balaji T K <balajitk@ti.com> [140523 05:27]:
+> On Friday 23 May 2014 02:00 PM, Andreas Fenkart wrote:
+> >Add SDIO IRQ entries to debugfs entry. Note that PSTATE shows current
+> >state of data lines, incl. SDIO IRQ pending
+> >
+> >Acked-by: Balaji T K <balajitk@ti.com>
+> >Signed-off-by: Andreas Fenkart <afenkart@gmail.com>
+> >
+> >diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+> >index 0125eea..cfd2bfb 100644
+> >--- a/drivers/mmc/host/omap_hsmmc.c
+> >+++ b/drivers/mmc/host/omap_hsmmc.c
+> >@@ -56,6 +56,7 @@
+> >  #define OMAP_HSMMC_RSP54	0x0118
+> >  #define OMAP_HSMMC_RSP76	0x011C
+> >  #define OMAP_HSMMC_DATA		0x0120
+> >+#define OMAP_HSMMC_PSTATE	0x0124
+> >  #define OMAP_HSMMC_HCTL		0x0128
+> >  #define OMAP_HSMMC_SYSCTL	0x012C
+> >  #define OMAP_HSMMC_STAT		0x0130
+> >@@ -1816,10 +1817,23 @@ static int omap_hsmmc_regs_show(struct seq_file *s, void *data)
+> >  {
+> >  	struct mmc_host *mmc = s->private;
+> >  	struct omap_hsmmc_host *host = mmc_priv(mmc);
+> >+#ifdef CONFIG_PM
+> >+	bool suspended;
+> >+#endif
+> >
+> >  	seq_printf(s, "mmc%d:\n", mmc->index);
+> >+	seq_printf(s, "sdio irq mode\t%s\n",
+> >+		   (mmc->caps & MMC_CAP_SDIO_IRQ) ? "interrupt" : "polling");
+> >+
+> >+	if (mmc->caps & MMC_CAP_SDIO_IRQ) {
+> >+		seq_printf(s, "sdio irq \t%s\n",
+> >+			   (host->flags & HSMMC_SDIO_IRQ_ENABLED) ?  "enabled"
+> >+			   : "disabled");
+> >+	}
+> >
+> >  #ifdef CONFIG_PM
+> 
+> shouldn't this be CONFIG_PM_RUNTIME ?
+> 
+> >+	suspended = host->dev->power.runtime_status != RPM_ACTIVE;
+> >+	seq_printf(s, "runtime state\t%s\n", (suspended ? "idle" : "active"));
+> 
+> The whole check for runtime status (and check for CONFIG_PM..) can be removed,
+> since runtime status is available via sysfs
+> 
+> cat /sys/class/mmc_host/mmc<X>/device/power/runtime_status
+> 
+> >  	seq_printf(s, "ctx_loss:\t%d\n", host->context_loss);
+> >  #endif
 
-Ok. That is due to the non-removable property, right? I assumed a mmc 
-rescan, which is (supposedly) triggered upon sdio driver registration, 
-would subsequently find the device.
+Also CONFIG_SYSFS is a bool FYI.
 
 Regards,
-Arend
 
-> Regards,
->
-> Hans
->
-
+Tony
