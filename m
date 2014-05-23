@@ -1,47 +1,50 @@
-From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: [PATCH v1 01/11] ARM: amba: Add Qualcomm vendor ID.
-Date: Thu, 22 May 2014 23:54:11 +0200
-Message-ID: <CACRpkdbex_0jmx5cL0uLcMcGBvhwfAmNssz4xNQuJ+3d=Dv1zg@mail.gmail.com>
-References: <1398759492-12970-1-git-send-email-srinivas.kandagatla@linaro.org>
-	<1398759542-13017-1-git-send-email-srinivas.kandagatla@linaro.org>
-	<CACRpkdZyEAkJUGC5x6CY65-g97jfyg-TMDoe8JxDMexVx5usSA@mail.gmail.com>
-	<5371E8B7.8000103@linaro.org>
-	<20140513221313.GI20486@codeaurora.org>
-	<CACRpkdZe7NA0CxB=ArWwSRt_BF69sG=BHBz+DY1H4AbabNhC=A@mail.gmail.com>
-	<53764045.5090603@codeaurora.org>
+From: "Wang, Yalin" <Yalin.Wang@sonymobile.com>
+Subject: (unknown)
+Date: Fri, 23 May 2014 10:50:03 +0800
+Message-ID: <35FD53F367049845BC99AC72306C23D1029A276569F3@CNBJMBX05.corpusers.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <53764045.5090603@codeaurora.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Stephen Boyd <sboyd@codeaurora.org>
-Cc: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>, Russell King <linux@arm.linux.org.uk>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, agross@quicinc.com, "linux-arm-msm@vger.kernel.org" <linux-arm-msm@vger.kernel.org>
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from cnbjrel01.sonyericsson.com ([219.141.167.165]:15920 "EHLO
+	cnbjrel01.sonyericsson.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751069AbaEWDAN convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 22 May 2014 23:00:13 -0400
+Subject: 
+Content-Language: en-US
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: "'linux-mmc@vger.kernel.org'" <linux-mmc@vger.kernel.org>, "'linux-arch-owner@vger.kernel.org'" <linux-arch-owner@vger.kernel.org>, 'Will Deacon' <will.deacon@arm.com>
 
-On Fri, May 16, 2014 at 6:43 PM, Stephen Boyd <sboyd@codeaurora.org> wrote:
-> On 05/16/14 09:24, Linus Walleij wrote:
->> On Wed, May 14, 2014 at 12:13 AM, Stephen Boyd <sboyd@codeaurora.org> wrote:
->>
->>> Please add a note that this id is fake in the commit text or in
->>> the code as well.
->> You just need one of your hardware engineers to add is to one instance
->> of some test chip round so it exists in any hardware whatsoever and it
->> is not "fake" anymore...
->>
->> This is a bit like device tree, it's defined by the kernel community as much
->> as by the hardware engineers and it's a little bit of back-and-forth.
->>
->
-> Sure, but hardware teams have moved on from this IP so I doubt we can
-> even get them to put it into a test chip. In fact, the devices a
-> generation before the ones Srini is working on (msm8660 for example)
-> have a periph ID of 0x41180 so we need to override that ID in DT with
-> this fake ID for things to even work.
 
-Hehe I wasn't really suggesting doing that.
+Hi
 
-The point was to illustrate how fragile the border between "real"
-and "fake" is in these cases.
+I have a problems that I want create a watchpoint to monitor a data for
+Debug in kernel , but I don't know how to do it ,
+I try the kprobes , but seems it only support create .text section prob=
+e ,
+Can't monitor data access ,  then  I try  perf_event_create to create a=
+ hardware=20
+Data watchpoint , it can work , but has a problem:
+When the data access hit , I don't know how to bypass this time's watch=
+point ,
+This need simulate the data access  or step the break instructions in d=
+ata abort=20
+Exception handler ,  seems kernel don't provide these for perf_event ..
 
-Yours,
-Linus Walleij
+I test this on ARM arch ,=20
+My question is that how to create data watchpoint in kernel ?
+It there some modules  have implemented this ?
+
+Thanks
+
+
+Sony Mobile Communications
+Tel: My Number +18610323092
+yalin.wang@sonymobile.com =A0(shall be a link, optional part)
+
+sonymobile.com
+
+
+
