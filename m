@@ -1,121 +1,49 @@
-From: srinivas.kandagatla@linaro.org
-Subject: [PATCH v3 13/13] mmc: mmci: Add Qcom specific pio_read function.
-Date: Fri, 23 May 2014 13:53:09 +0100
-Message-ID: <1400849589-7626-1-git-send-email-srinivas.kandagatla@linaro.org>
-References: <1400849362-7007-1-git-send-email-srinivas.kandagatla@linaro.org>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1400849362-7007-1-git-send-email-srinivas.kandagatla@linaro.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Russell King <linux@arm.linux.org.uk>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
-Cc: Chris Ball <chris@printf.net>, linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org, linus.walleij@linaro.org, Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+From: Chris Ball <chris@printf.net>
+Subject: Re: [PATCH v3 1/2] mmc: tegra: disable UHS modes
+Date: Fri, 23 May 2014 13:52:42 +0100
+Message-ID: <86fvk0r71h.fsf@void.printf.net>
+References: <1400774136-12396-1-git-send-email-abrestic@chromium.org>
+ <CAPDyKFpt98rbFpvu1uzbOuhCTrO96hzQU2VwNRgJGfoi_7F-OA@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <CAPDyKFpt98rbFpvu1uzbOuhCTrO96hzQU2VwNRgJGfoi_7F-OA@mail.gmail.com>
+ (Ulf Hansson's message of "Fri, 23 May 2014 09:03:33 +0200")
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Stephen Warren <swarren@wwwdotorg.org>, Andrew Bresticker <abrestic@chromium.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Thierry Reding <thierry.reding@gmail.com>, "linux-tegra@vger.kernel.org" <linux-tegra@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
 
-From: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+Hi,
 
-MCIFIFOCNT register behaviour on Qcom chips is very different than the other
-pl180 integrations. MCIFIFOCNT register contains the number of
-words that are still waiting to be transferred through the FIFO. It keeps
-decrementing once the host CPU reads the MCIFIFO. With the existing logic and
-the MCIFIFOCNT behaviour, mmci_pio_read will loop forever, as the FIFOCNT
-register will always return transfer size before reading the FIFO.
+On Fri, May 23 2014, Ulf Hansson wrote:
+> On 22 May 2014 17:55, Andrew Bresticker <abrestic@chromium.org> wrote:
+>> Program TEGRA_SDHCI_VENDOR_MISC_CTRL so that UHS modes aren't advertised
+>> in SDHCI_CAPABILITIES_1.  While the Tegra SDHCI controller does support
+>> these modes, they require Tegra-specific tuning and calibration routines
+>> which the driver does not support yet.
+>>
+>> Signed-off-by: Andrew Bresticker <abrestic@chromium.org>
+>> Tested-by: Stephen Warren <swarren@nvidia.com>
+>> Acked-by: Stephen Warren <swarren@nvidia.com>
+>
+> Thanks Andrew!
+>
+> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+>
+> Chris, can you pick this up?
 
-Also the data sheet states that "This register is only useful for debug
-purposes and should not be used for normal operation since it does not reflect
-data which may or may not be in the pipeline".
+Thanks, pushed to mmc-next for 3.16.
 
-This patch implements qcom_pio_read function so as existing mmci_pio_read is
-not suitable for Qcom SOCs. qcom_pio_read function is only selected
-based on qcom_fifo flag in variant data structure.
-
-Signed-off-by: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
----
- drivers/mmc/host/mmci.c | 46 ++++++++++++++++++++++++++++++++++++++++++++--
- 1 file changed, 44 insertions(+), 2 deletions(-)
-
-diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index f6dfd24..51ce493 100644
---- a/drivers/mmc/host/mmci.c
-+++ b/drivers/mmc/host/mmci.c
-@@ -75,6 +75,7 @@ static unsigned int fmax = 515633;
-  *			 are not ignored.
-  * @explicit_mclk_control: enable explicit mclk control in driver.
-  * @cclk_is_mclk: enable iff card clock is multimedia card adapter clock.
-+ * @qcom_fifo: enables qcom specific fifo pio read function.
-  */
- struct variant_data {
- 	unsigned int		clkreg;
-@@ -98,6 +99,7 @@ struct variant_data {
- 	bool			mclk_delayed_writes;
- 	bool			explicit_mclk_control;
- 	bool			cclk_is_mclk;
-+	bool			qcom_fifo;
- };
- 
- static struct variant_data variant_arm = {
-@@ -208,6 +210,7 @@ static struct variant_data variant_qcom = {
- 	.mclk_delayed_writes	= true,
- 	.explicit_mclk_control	= true,
- 	.cclk_is_mclk	= true,
-+	.qcom_fifo		= true,
- };
- 
- static inline u32 mmci_readl(struct mmci_host *host, u32 off)
-@@ -1022,6 +1025,40 @@ mmci_cmd_irq(struct mmci_host *host, struct mmc_command *cmd,
- 	}
- }
- 
-+static int mmci_qcom_pio_read(struct mmci_host *host, char *buffer,
-+			unsigned int remain)
-+{
-+	u32 *ptr = (u32 *) buffer;
-+	unsigned int count = 0;
-+	unsigned int words, bytes;
-+	unsigned int fsize = host->variant->fifosize;
-+
-+	words = remain >> 2;
-+	bytes = remain % 4;
-+	/* read full words followed by leftover bytes */
-+	if (words) {
-+		while (readl(host->base + MMCISTATUS) & MCI_RXDATAAVLBL) {
-+			*ptr = readl(host->base + MMCIFIFO + (count % fsize));
-+			ptr++;
-+			count += 4;
-+			words--;
-+			if (!words)
-+				break;
-+		}
-+	}
-+
-+	if (unlikely(bytes)) {
-+		unsigned char buf[4];
-+		if (readl(host->base + MMCISTATUS) & MCI_RXDATAAVLBL) {
-+			*buf = readl(host->base + MMCIFIFO + (count % fsize));
-+			memcpy(ptr, buf, bytes);
-+			count += bytes;
-+		}
-+	}
-+
-+	return count;
-+}
-+
- static int mmci_pio_read(struct mmci_host *host, char *buffer, unsigned int remain)
- {
- 	void __iomem *base = host->base;
-@@ -1143,8 +1180,13 @@ static irqreturn_t mmci_pio_irq(int irq, void *dev_id)
- 		remain = sg_miter->length;
- 
- 		len = 0;
--		if (status & MCI_RXACTIVE)
--			len = mmci_pio_read(host, buffer, remain);
-+		if (status & MCI_RXACTIVE) {
-+			if (variant->qcom_fifo)
-+				len = mmci_qcom_pio_read(host, buffer, remain);
-+			else
-+				len = mmci_pio_read(host, buffer, remain);
-+		}
-+
- 		if (status & MCI_TXACTIVE)
- 			len = mmci_pio_write(host, buffer, remain, status);
- 
+- Chris.
 -- 
-1.9.1
+Chris Ball   <http://printf.net/>
