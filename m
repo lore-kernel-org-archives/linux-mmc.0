@@ -1,57 +1,74 @@
-From: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
-Subject: Re: [PATCH v2 12/14] mmc: mmci: add support for fbclk to latch data
- and cmd.
-Date: Fri, 23 May 2014 10:20:38 +0100
-Message-ID: <537F12E6.6070809@linaro.org>
-References: <1400146447-29803-1-git-send-email-srinivas.kandagatla@linaro.org>	<1400146669-30302-1-git-send-email-srinivas.kandagatla@linaro.org> <CACRpkdZtHPZpmFA+JfgMn83+SgZZX4CS+MhAcf_sk2cQKqW1Pw@mail.gmail.com>
+From: Sascha Hauer <s.hauer@pengutronix.de>
+Subject: Re: adding aliases to mmc ... again
+Date: Fri, 23 May 2014 11:23:59 +0200
+Message-ID: <20140523092359.GG15686@pengutronix.de>
+References: <1400772623-8390-1-git-send-email-s.hauer@pengutronix.de>
+ <537E22E3.3010601@wwwdotorg.org>
+ <20140522182134.GD15686@pengutronix.de>
+ <537E4EAF.5000309@wwwdotorg.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
-In-Reply-To: <CACRpkdZtHPZpmFA+JfgMn83+SgZZX4CS+MhAcf_sk2cQKqW1Pw@mail.gmail.com>
-Sender: linux-arm-msm-owner@vger.kernel.org
-To: Linus Walleij <linus.walleij@linaro.org>
-Cc: Russell King <linux@arm.linux.org.uk>, Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-msm@vger.kernel.org" <linux-arm-msm@vger.kernel.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from metis.ext.pengutronix.de ([92.198.50.35]:52575 "EHLO
+	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752543AbaEWJYD (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 23 May 2014 05:24:03 -0400
+Content-Disposition: inline
+In-Reply-To: <537E4EAF.5000309@wwwdotorg.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Stephen Warren <swarren@wwwdotorg.org>
+Cc: linux-mmc@vger.kernel.org, Dirk Behme <dirk.behme@de.bosch.com>, Fabio Estevam <festevam@gmail.com>, ptx@pengutronix.de
 
+On Thu, May 22, 2014 at 01:23:27PM -0600, Stephen Warren wrote:
+> >> Does it solve the following, which AFAIK has always been the primary
+> >> argument against aligning block device IDs with controller IDs:
+> >>
+> >> - User inserts SD card into MMC controller ID (or alias) 1.
+> >> - /dev/mmcblk1 now exists
+> >> - Mount /dev/mmcblk1 on /mnt/tmp
+> >> - User removes that SD card
+> >> - /dev/mmcblk1 still exists, since it's mounted so can't be deleted
+> >> after the card removal.
+> >> - User inserts SD card into MMC controller ID (or alias) 1.
+> >> - /dev/mmcblkN (N is something other than 1) now exists
+> >>
+> >> Now, the block device ID must be != the original ID, since two block
+> >> devices exist.
+> > 
+> > No, it shouldn't solve that, but it's out of scope for this patch. All
+> > it solves is to reliably find the rootfs. If the card containing your
+> > rootfs is removed you are in trouble anyway and it won't help if it gets
+> > the same mmcblkno once it's plugged again. For other devices which don't
+> > contain the rootfs there are enough possibilities to find them in userspace.
+> 
+> I don't think there should be any special cases for the root fs.
+> 
+> I don't think the disadvantage of the UUID= or PARTUUID= issue you
+> mention enough is really an issue in general. If it is for some
+> platform, then the root fs should be cryto-signed and validated to
+> prevent someone from using the wrong root fs.
 
+That argument came up here aswell. Crypto signing would prevent the Kernel
+from starting the wrong userspace, but it would not start the correct one
+either.
+Crypto signing is quite a heavy approach for just making sure to boot from a
+particular device.
+Booting with UUID= is fine for several usecases, but I can't really
+understand why it shouldn't be possible to point with the finger to the
+bootdevice and just boot it. Instead we can just say "boot some device that
+looks like this one".
 
-On 23/05/14 10:12, Linus Walleij wrote:
-> On Thu, May 15, 2014 at 11:37 AM,  <srinivas.kandagatla@linaro.org> wrote:
->
->> From: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
->>
->> This patch adds support to fbclk that is used to latch data and
->> cmd on some controllers like SD Card controller in Qcom SOC.
->>
->> Signed-off-by: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
->
-> (...)
->
-> Isn't this overkill?
+Speaking of which my preferred solution is another one. As a bootloader
+developer it really annoys me that I don't have the possibility to tell
+the kernel to boot a particular device. What I really want to do is to
+pass a devicetree phandle to the kernel for the rootfs (Or a device path
+for the EFI/ACPI guys). This would solve a whole lot of problems here.
 
-I totally agree.
+Sascha
 
-Initially I did do it the way you suggested, but wanted to be more 
-explicit in what its actually doing and I was also not sure if its Ok to 
-add more than one flag in clkreg_enable.
-
->
-> @@ -189,6 +192,7 @@ static struct variant_data variant_qcom = {
->           .clkreg                 = MCI_CLK_ENABLE,
-> -        .clkreg_enable          = MCI_QCOM_CLK_FLOWENA,
-> +       .clkreg_enable          = MCI_QCOM_CLK_FLOWENA |
-> MCI_QCOM_CLK_FEEDBACK_CLK,
->           .clkreg_8bit_bus_enable = MCI_QCOM_CLK_WIDEBUS_8,
->
-
-> Isn't this achieveing exactly the same thing without the extra fields?
-> You unconditionally do it at every enable anyway, don't you?
-I will fix it and send a new version.
-
-Thanks,
-srini
->
-> Yours,
-> Linus Walleij
->
+-- 
+Pengutronix e.K.                           |                             |
+Industrial Linux Solutions                 | http://www.pengutronix.de/  |
+Peiner Str. 6-8, 31137 Hildesheim, Germany | Phone: +49-5121-206917-0    |
+Amtsgericht Hildesheim, HRA 2686           | Fax:   +49-5121-206917-5555 |
