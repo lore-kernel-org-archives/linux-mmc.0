@@ -1,208 +1,74 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: sdhci-dove: use mmc_of_parse() and remove
- card_tasklet CD handler
-Date: Fri, 23 May 2014 08:48:00 +0200
-Message-ID: <CAPDyKFoF77fhYVaLX=nSS1A+mi9BUWHszkKA-stcutcOKovMXw@mail.gmail.com>
-References: <1400797012-32106-1-git-send-email-sebastian.hesselbarth@gmail.com>
+From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH 2/8] mmc: sdhci-st: STMicroelectronics SDHCI binding documentation.
+Date: Fri, 23 May 2014 08:57:54 +0200
+Message-ID: <CAPDyKFrvx5mLcgXTjK5Hap0Vj_edUH4OmHtxHXt4h3Mqa+cxHA@mail.gmail.com>
+References: <1400771902-26553-1-git-send-email-peter.griffin@linaro.org>
+	<1400771902-26553-3-git-send-email-peter.griffin@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qg0-f54.google.com ([209.85.192.54]:58245 "EHLO
-	mail-qg0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751930AbaEWGsB (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 23 May 2014 02:48:01 -0400
-Received: by mail-qg0-f54.google.com with SMTP id q108so7317073qgd.41
-        for <linux-mmc@vger.kernel.org>; Thu, 22 May 2014 23:48:00 -0700 (PDT)
-In-Reply-To: <1400797012-32106-1-git-send-email-sebastian.hesselbarth@gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1400771902-26553-3-git-send-email-peter.griffin-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Peter Griffin <peter.griffin-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Maxime Coquelin <maxime.coquelin-qxv4g6HH51o@public.gmane.org>, Patrice CHOTARD <patrice.chotard-qxv4g6HH51o@public.gmane.org>, srinivas.kandagatla-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, kernel-F5mvAk5X5gdBDgjK7y7TUQ@public.gmane.org, Lee Jones <lee.jones-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Giuseppe Cavallaro <peppe.cavallaro-qxv4g6HH51o@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>, Chris Ball <chris@printf.net>
-Cc: Russell King <rmk+kernel@arm.linux.org.uk>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-On 23 May 2014 00:16, Sebastian Hesselbarth
-<sebastian.hesselbarth@gmail.com> wrote:
-> Commit f8ec589b86f6
->   "mmc: sdhci-dove: allow GPIOs to be used for card detection on Dove"
-> added a gpio based card detect interrupt handler that was hooked up
-> into card_tasket.
+On 22 May 2014 17:18, Peter Griffin <peter.griffin-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
+> This patch adds the device tree binding documentation for ST
+> SDHCI driver. It contains the differences between the core properties
+> in mmc.txt and the properties used by the sdhci-st driver.
 >
-> Commit 3560db8e247a
->   "mmc: sdhci: push card_tasklet into threaded irq handler"
-> now removed that very card_tasklet causing sdhci-dove to fail on build
-> with:
-> drivers/mmc/host/sdhci-dove.c: In function 'sdhci_dove_carddetect_irq':
-> drivers/mmc/host/sdhci-dove.c:42:24: error: 'struct sdhci_host' has no member named 'card_tasklet'
->
-> To fix both the build error and get a working gpio card detection without
-> card_tasklet, replace sdhci_get_of_property() with more recent
-> mmc_of_parse(). It takes care of gpio-based card detect passed through DT
-> already and allows to remove the offending code sections dealing with
-> removed card_tasklet.
->
-> Signed-off-by: Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>
+> Signed-off-by: Peter Griffin <peter.griffin-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> Signed-off-by: Giuseppe Cavallaro <peppe.cavallaro-qxv4g6HH51o@public.gmane.org>
 
-Thanks Sebastian!
+Assuming this patch adds does what is says; the patch1 - adding the
+actual driver will have checkpatch warnings around missing
+DT-bindings.
 
-Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
-
-Chris, can you pick this up?
+Kind regards
+Ulf Hansson
 
 > ---
-> This patch is based on todays mmc-next and fixes a build error there.
+>  Documentation/devicetree/bindings/mmc/sdhci-st.txt | 26 ++++++++++++++++++++++
+>  1 file changed, 26 insertions(+)
+>  create mode 100644 Documentation/devicetree/bindings/mmc/sdhci-st.txt
 >
-> Cc: Chris Ball <chris@printf.net>
-> Cc: Ulf Hansson <ulf.hansson@linaro.org>
-> Cc: Russell King <rmk+kernel@arm.linux.org.uk>
-> Cc: linux-mmc@vger.kernel.org
-> Cc: linux-arm-kernel@lists.infradead.org
-> Cc: linux-kernel@vger.kernel.org
-> ---
->  drivers/mmc/host/sdhci-dove.c | 74 +++----------------------------------------
->  1 file changed, 5 insertions(+), 69 deletions(-)
->
-> diff --git a/drivers/mmc/host/sdhci-dove.c b/drivers/mmc/host/sdhci-dove.c
-> index 0d315f4496c8..e6278ec007d7 100644
-> --- a/drivers/mmc/host/sdhci-dove.c
-> +++ b/drivers/mmc/host/sdhci-dove.c
-> @@ -21,28 +21,17 @@
->
->  #include <linux/clk.h>
->  #include <linux/err.h>
-> -#include <linux/gpio.h>
->  #include <linux/io.h>
->  #include <linux/mmc/host.h>
->  #include <linux/module.h>
->  #include <linux/of.h>
-> -#include <linux/of_gpio.h>
->
->  #include "sdhci-pltfm.h"
->
->  struct sdhci_dove_priv {
->         struct clk *clk;
-> -       int gpio_cd;
->  };
->
-> -static irqreturn_t sdhci_dove_carddetect_irq(int irq, void *data)
-> -{
-> -       struct sdhci_host *host = data;
-> -
-> -       tasklet_schedule(&host->card_tasklet);
-> -       return IRQ_HANDLED;
-> -}
-> -
->  static u16 sdhci_dove_readw(struct sdhci_host *host, int reg)
->  {
->         u16 ret;
-> @@ -60,8 +49,6 @@ static u16 sdhci_dove_readw(struct sdhci_host *host, int reg)
->
->  static u32 sdhci_dove_readl(struct sdhci_host *host, int reg)
->  {
-> -       struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> -       struct sdhci_dove_priv *priv = pltfm_host->priv;
->         u32 ret;
->
->         ret = readl(host->ioaddr + reg);
-> @@ -71,14 +58,6 @@ static u32 sdhci_dove_readl(struct sdhci_host *host, int reg)
->                 /* Mask the support for 3.0V */
->                 ret &= ~SDHCI_CAN_VDD_300;
->                 break;
-> -       case SDHCI_PRESENT_STATE:
-> -               if (gpio_is_valid(priv->gpio_cd)) {
-> -                       if (gpio_get_value(priv->gpio_cd) == 0)
-> -                               ret |= SDHCI_CARD_PRESENT;
-> -                       else
-> -                               ret &= ~SDHCI_CARD_PRESENT;
-> -               }
-> -               break;
->         }
->         return ret;
->  }
-> @@ -117,28 +96,9 @@ static int sdhci_dove_probe(struct platform_device *pdev)
->
->         priv->clk = devm_clk_get(&pdev->dev, NULL);
->
-> -       if (pdev->dev.of_node) {
-> -               priv->gpio_cd = of_get_named_gpio(pdev->dev.of_node,
-> -                                                 "cd-gpios", 0);
-> -       } else {
-> -               priv->gpio_cd = -EINVAL;
-> -       }
-> -
-> -       if (gpio_is_valid(priv->gpio_cd)) {
-> -               ret = gpio_request(priv->gpio_cd, "sdhci-cd");
-> -               if (ret) {
-> -                       dev_err(&pdev->dev, "card detect gpio request failed: %d\n",
-> -                               ret);
-> -                       return ret;
-> -               }
-> -               gpio_direction_input(priv->gpio_cd);
-> -       }
-> -
->         host = sdhci_pltfm_init(pdev, &sdhci_dove_pdata, 0);
-> -       if (IS_ERR(host)) {
-> -               ret = PTR_ERR(host);
-> -               goto err_sdhci_pltfm_init;
-> -       }
-> +       if (IS_ERR(host))
-> +               return PTR_ERR(host);
->
->         pltfm_host = sdhci_priv(host);
->         pltfm_host->priv = priv;
-> @@ -146,39 +106,20 @@ static int sdhci_dove_probe(struct platform_device *pdev)
->         if (!IS_ERR(priv->clk))
->                 clk_prepare_enable(priv->clk);
->
-> -       sdhci_get_of_property(pdev);
-> +       ret = mmc_of_parse(host->mmc);
-> +       if (ret)
-> +               goto err_sdhci_add;
->
->         ret = sdhci_add_host(host);
->         if (ret)
->                 goto err_sdhci_add;
->
-> -       /*
-> -        * We must request the IRQ after sdhci_add_host(), as the tasklet only
-> -        * gets setup in sdhci_add_host() and we oops.
-> -        */
-> -       if (gpio_is_valid(priv->gpio_cd)) {
-> -               ret = request_irq(gpio_to_irq(priv->gpio_cd),
-> -                                 sdhci_dove_carddetect_irq,
-> -                                 IRQF_TRIGGER_FALLING | IRQF_TRIGGER_RISING,
-> -                                 mmc_hostname(host->mmc), host);
-> -               if (ret) {
-> -                       dev_err(&pdev->dev, "card detect irq request failed: %d\n",
-> -                               ret);
-> -                       goto err_request_irq;
-> -               }
-> -       }
-> -
->         return 0;
->
-> -err_request_irq:
-> -       sdhci_remove_host(host, 0);
->  err_sdhci_add:
->         if (!IS_ERR(priv->clk))
->                 clk_disable_unprepare(priv->clk);
->         sdhci_pltfm_free(pdev);
-> -err_sdhci_pltfm_init:
-> -       if (gpio_is_valid(priv->gpio_cd))
-> -               gpio_free(priv->gpio_cd);
->         return ret;
->  }
->
-> @@ -190,11 +131,6 @@ static int sdhci_dove_remove(struct platform_device *pdev)
->
->         sdhci_pltfm_unregister(pdev);
->
-> -       if (gpio_is_valid(priv->gpio_cd)) {
-> -               free_irq(gpio_to_irq(priv->gpio_cd), host);
-> -               gpio_free(priv->gpio_cd);
-> -       }
-> -
->         if (!IS_ERR(priv->clk))
->                 clk_disable_unprepare(priv->clk);
->
+> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-st.txt b/Documentation/devicetree/bindings/mmc/sdhci-st.txt
+> new file mode 100644
+> index 0000000..ae3dae0
+> --- /dev/null
+> +++ b/Documentation/devicetree/bindings/mmc/sdhci-st.txt
+> @@ -0,0 +1,26 @@
+> +* STMicroelectronics sdhci-st MMC/SD controller
+> +
+> +This file documents differences between the core properties in mmc.txt
+> +and the properties used by the sdhci-st driver
+> +
+> +Required properties:
+> +- compatible: "st,sdhci"
+> +- clocks: card clock, must be "mmc".
+> +
+> +Optional properties:
+> +- reset: to provide a reset to the HC.
+> +- non-removable: non-removable slot (bindings/mmc/mmc.txt).
+> +
+> +Example:
+> +
+> +mmc0: sdhci@fe81e000 {
+> +       compatible      = "st,sdhci";
+> +       status          = "disabled";
+> +       reg             = <0xfe81e000 0x1000>;
+> +       interrupts      = <GIC_SPI 127 IRQ_TYPE_NONE>;
+> +       interrupt-names = "mmcirq";
+> +       pinctrl-names   = "default";
+> +       pinctrl-0       = <&pinctrl_mmc0>;
+> +       clock-names     = "mmc";
+> +       clocks          = <&clk_s_a1_ls 1>;
+> +};
 > --
 > 1.9.1
 >
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
