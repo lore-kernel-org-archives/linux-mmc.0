@@ -1,74 +1,119 @@
 From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH 2/8] mmc: sdhci-st: STMicroelectronics SDHCI binding documentation.
-Date: Fri, 23 May 2014 08:57:54 +0200
-Message-ID: <CAPDyKFrvx5mLcgXTjK5Hap0Vj_edUH4OmHtxHXt4h3Mqa+cxHA@mail.gmail.com>
-References: <1400771902-26553-1-git-send-email-peter.griffin@linaro.org>
-	<1400771902-26553-3-git-send-email-peter.griffin@linaro.org>
+Subject: Re: [PATCH v3 1/2] mmc: tegra: disable UHS modes
+Date: Fri, 23 May 2014 09:03:33 +0200
+Message-ID: <CAPDyKFpt98rbFpvu1uzbOuhCTrO96hzQU2VwNRgJGfoi_7F-OA@mail.gmail.com>
+References: <1400774136-12396-1-git-send-email-abrestic@chromium.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1400771902-26553-3-git-send-email-peter.griffin-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Peter Griffin <peter.griffin-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Maxime Coquelin <maxime.coquelin-qxv4g6HH51o@public.gmane.org>, Patrice CHOTARD <patrice.chotard-qxv4g6HH51o@public.gmane.org>, srinivas.kandagatla-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, kernel-F5mvAk5X5gdBDgjK7y7TUQ@public.gmane.org, Lee Jones <lee.jones-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Giuseppe Cavallaro <peppe.cavallaro-qxv4g6HH51o@public.gmane.org>
+Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1400774136-12396-1-git-send-email-abrestic-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Andrew Bresticker <abrestic-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>
+Cc: Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>, Thierry Reding <thierry.reding-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 22 May 2014 17:18, Peter Griffin <peter.griffin-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
-> This patch adds the device tree binding documentation for ST
-> SDHCI driver. It contains the differences between the core properties
-> in mmc.txt and the properties used by the sdhci-st driver.
+On 22 May 2014 17:55, Andrew Bresticker <abrestic-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org> wrote:
+> Program TEGRA_SDHCI_VENDOR_MISC_CTRL so that UHS modes aren't advertised
+> in SDHCI_CAPABILITIES_1.  While the Tegra SDHCI controller does support
+> these modes, they require Tegra-specific tuning and calibration routines
+> which the driver does not support yet.
 >
-> Signed-off-by: Peter Griffin <peter.griffin-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-> Signed-off-by: Giuseppe Cavallaro <peppe.cavallaro-qxv4g6HH51o@public.gmane.org>
+> Signed-off-by: Andrew Bresticker <abrestic-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+> Tested-by: Stephen Warren <swarren-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
+> Acked-by: Stephen Warren <swarren-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
 
-Assuming this patch adds does what is says; the patch1 - adding the
-actual driver will have checkpatch warnings around missing
-DT-bindings.
+Thanks Andrew!
+
+Signed-off-by: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+
+Chris, can you pick this up?
 
 Kind regards
 Ulf Hansson
 
 > ---
->  Documentation/devicetree/bindings/mmc/sdhci-st.txt | 26 ++++++++++++++++++++++
->  1 file changed, 26 insertions(+)
->  create mode 100644 Documentation/devicetree/bindings/mmc/sdhci-st.txt
+> Changes from v2:
+>  - rebased on mmc-next
+> No changes from v1
+> ---
+>  drivers/mmc/host/sdhci-tegra.c | 30 +++++++++++++++++++++++-------
+>  1 file changed, 23 insertions(+), 7 deletions(-)
 >
-> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-st.txt b/Documentation/devicetree/bindings/mmc/sdhci-st.txt
-> new file mode 100644
-> index 0000000..ae3dae0
-> --- /dev/null
-> +++ b/Documentation/devicetree/bindings/mmc/sdhci-st.txt
-> @@ -0,0 +1,26 @@
-> +* STMicroelectronics sdhci-st MMC/SD controller
-> +
-> +This file documents differences between the core properties in mmc.txt
-> +and the properties used by the sdhci-st driver
-> +
-> +Required properties:
-> +- compatible: "st,sdhci"
-> +- clocks: card clock, must be "mmc".
-> +
-> +Optional properties:
-> +- reset: to provide a reset to the HC.
-> +- non-removable: non-removable slot (bindings/mmc/mmc.txt).
-> +
-> +Example:
-> +
-> +mmc0: sdhci@fe81e000 {
-> +       compatible      = "st,sdhci";
-> +       status          = "disabled";
-> +       reg             = <0xfe81e000 0x1000>;
-> +       interrupts      = <GIC_SPI 127 IRQ_TYPE_NONE>;
-> +       interrupt-names = "mmcirq";
-> +       pinctrl-names   = "default";
-> +       pinctrl-0       = <&pinctrl_mmc0>;
-> +       clock-names     = "mmc";
-> +       clocks          = <&clk_s_a1_ls 1>;
-> +};
+> diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
+> index 9852476..4375cd4 100644
+> --- a/drivers/mmc/host/sdhci-tegra.c
+> +++ b/drivers/mmc/host/sdhci-tegra.c
+> @@ -32,11 +32,17 @@
+>
+>  /* Tegra SDHOST controller vendor register definitions */
+>  #define SDHCI_TEGRA_VENDOR_MISC_CTRL           0x120
+> +#define SDHCI_MISC_CTRL_ENABLE_SDR104          0x8
+> +#define SDHCI_MISC_CTRL_ENABLE_SDR50           0x10
+>  #define SDHCI_MISC_CTRL_ENABLE_SDHCI_SPEC_300  0x20
+> +#define SDHCI_MISC_CTRL_ENABLE_DDR50           0x200
+>
+>  #define NVQUIRK_FORCE_SDHCI_SPEC_200   BIT(0)
+>  #define NVQUIRK_ENABLE_BLOCK_GAP_DET   BIT(1)
+>  #define NVQUIRK_ENABLE_SDHCI_SPEC_300  BIT(2)
+> +#define NVQUIRK_DISABLE_SDR50          BIT(3)
+> +#define NVQUIRK_DISABLE_SDR104         BIT(4)
+> +#define NVQUIRK_DISABLE_DDR50          BIT(5)
+>
+>  struct sdhci_tegra_soc_data {
+>         const struct sdhci_pltfm_data *pdata;
+> @@ -100,20 +106,25 @@ static void tegra_sdhci_reset(struct sdhci_host *host, u8 mask)
+>         struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+>         struct sdhci_tegra *tegra_host = pltfm_host->priv;
+>         const struct sdhci_tegra_soc_data *soc_data = tegra_host->soc_data;
+> +       u32 misc_ctrl;
+>
+>         sdhci_reset(host, mask);
+>
+>         if (!(mask & SDHCI_RESET_ALL))
+>                 return;
+>
+> +       misc_ctrl = sdhci_readw(host, SDHCI_TEGRA_VENDOR_MISC_CTRL);
+>         /* Erratum: Enable SDHCI spec v3.00 support */
+> -       if (soc_data->nvquirks & NVQUIRK_ENABLE_SDHCI_SPEC_300) {
+> -               u32 misc_ctrl;
+> -
+> -               misc_ctrl = sdhci_readb(host, SDHCI_TEGRA_VENDOR_MISC_CTRL);
+> +       if (soc_data->nvquirks & NVQUIRK_ENABLE_SDHCI_SPEC_300)
+>                 misc_ctrl |= SDHCI_MISC_CTRL_ENABLE_SDHCI_SPEC_300;
+> -               sdhci_writeb(host, misc_ctrl, SDHCI_TEGRA_VENDOR_MISC_CTRL);
+> -       }
+> +       /* Don't advertise UHS modes which aren't supported yet */
+> +       if (soc_data->nvquirks & NVQUIRK_DISABLE_SDR50)
+> +               misc_ctrl &= ~SDHCI_MISC_CTRL_ENABLE_SDR50;
+> +       if (soc_data->nvquirks & NVQUIRK_DISABLE_DDR50)
+> +               misc_ctrl &= ~SDHCI_MISC_CTRL_ENABLE_DDR50;
+> +       if (soc_data->nvquirks & NVQUIRK_DISABLE_SDR104)
+> +               misc_ctrl &= ~SDHCI_MISC_CTRL_ENABLE_SDR104;
+> +       sdhci_writew(host, misc_ctrl, SDHCI_TEGRA_VENDOR_MISC_CTRL);
+>  }
+>
+>  static void tegra_sdhci_set_bus_width(struct sdhci_host *host, int bus_width)
+> @@ -170,7 +181,9 @@ static const struct sdhci_pltfm_data sdhci_tegra30_pdata = {
+>
+>  static struct sdhci_tegra_soc_data soc_data_tegra30 = {
+>         .pdata = &sdhci_tegra30_pdata,
+> -       .nvquirks = NVQUIRK_ENABLE_SDHCI_SPEC_300,
+> +       .nvquirks = NVQUIRK_ENABLE_SDHCI_SPEC_300 |
+> +                   NVQUIRK_DISABLE_SDR50 |
+> +                   NVQUIRK_DISABLE_SDR104,
+>  };
+>
+>  static const struct sdhci_pltfm_data sdhci_tegra114_pdata = {
+> @@ -184,6 +197,9 @@ static const struct sdhci_pltfm_data sdhci_tegra114_pdata = {
+>
+>  static struct sdhci_tegra_soc_data soc_data_tegra114 = {
+>         .pdata = &sdhci_tegra114_pdata,
+> +       .nvquirks = NVQUIRK_DISABLE_SDR50 |
+> +                   NVQUIRK_DISABLE_DDR50 |
+> +                   NVQUIRK_DISABLE_SDR104,
+>  };
+>
+>  static const struct of_device_id sdhci_tegra_dt_match[] = {
 > --
-> 1.9.1
+> 1.9.1.423.g4596e3a
 >
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
