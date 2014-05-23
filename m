@@ -1,122 +1,52 @@
-From: Andreas Fenkart <afenkart@gmail.com>
-Subject: [PATCH v13 7/7] mmc: omap_hsmmc: Pin remux workaround to support SDIO interrupt on AM335x
-Date: Fri, 23 May 2014 10:30:34 +0200
-Message-ID: <1400833834-15893-8-git-send-email-afenkart@gmail.com>
-References: <1400833834-15893-1-git-send-email-afenkart@gmail.com>
-Return-path: <linux-doc-owner@vger.kernel.org>
-In-Reply-To: <1400833834-15893-1-git-send-email-afenkart@gmail.com>
-Sender: linux-doc-owner@vger.kernel.org
-To: Tony Lindgren <tony@atomide.com>
-Cc: Chris Ball <chris@printf.net>, Grant Likely <grant.likely@secretlab.ca>, Felipe Balbi <balbi@ti.com>, Balaji T K <balajitk@ti.com>, Andreas Mueller <schnitzeltony@googlemail.com>, Sebastian Reichel <sre@kernel.org>, zonque@gmail.com, galak@codeaurora.org, linux-doc@vger.kernel.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, Andreas Fenkart <afenkart@gmail.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: [PATCH] mmc: sdhci-of-esdhc: Fixup compile error
+Date: Fri, 23 May 2014 10:36:44 +0200
+Message-ID: <1400834204-1933-1-git-send-email-ulf.hansson@linaro.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-la0-f52.google.com ([209.85.215.52]:44605 "EHLO
+	mail-la0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751781AbaEWIgu (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 23 May 2014 04:36:50 -0400
+Received: by mail-la0-f52.google.com with SMTP id gl10so3719371lab.25
+        for <linux-mmc@vger.kernel.org>; Fri, 23 May 2014 01:36:48 -0700 (PDT)
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org, Chris Ball <chris@printf.net>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Russell King <rmk+kernel@arm.linux.org.uk>
 
-The am335x can't detect pending cirq in PM runtime suspend.
-This patch reconfigures dat1 as a GPIO before going to suspend.
-SDIO interrupts are detected with the GPIO, the GPIO will only wake
-the module from suspend, SDIO irq detection will still happen through the
-IP block.
+The commit below introduced compile errors, let's fix them.
+mmc: sdhci-of-esdhc: remove platform_suspend/platform_resume callbacks
 
-Idea of remuxing the pins by Tony Lindgren. Code contributions from
-Tony Lindgren and Balaji T K <balajitk@ti.com>
+Cc: Russell King <rmk+kernel@arm.linux.org.uk>
+Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+---
+ drivers/mmc/host/sdhci-of-esdhc.c |    6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
 
-Acked-by: Balaji T K <balajitk@ti.com>
-Signed-off-by: Andreas Fenkart <afenkart@gmail.com>
-Signed-off-by: Tony Lindgren <tony@atomide.com>
-
-diff --git a/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt b/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
-index 0233ba7..76bf087 100644
---- a/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
-+++ b/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
-@@ -57,3 +57,56 @@ Examples:
- 			&edma 25>;
- 		dma-names = "tx", "rx";
- 	};
-+
-+[workaround for missing swakeup on am33xx]
-+
-+This SOC is missing the swakeup line, it will not detect SDIO irq
-+while in suspend.
-+
-+                             ------
-+                             | PRCM |
-+                              ------
-+                               ^ |
-+                       swakeup | | fclk
-+                               | v
-+       ------                -------               -----
-+      | card | -- CIRQ -->  | hsmmc | -- IRQ -->  | CPU |
-+       ------                -------               -----
-+
-+In suspend the fclk is off and the module is disfunctional. Even register reads
-+will fail. A small logic in the host will request fclk restore, when an
-+external event is detected. Once the clock is restored, the host detects the
-+event normally. Since am33xx doesn't have this line it never wakes from
-+suspend.
-+
-+The workaround is to reconfigure the dat1 line as a GPIO upon suspend. To make
-+this work, we need to set the named pinctrl states "default" and "idle".
-+Prepare idle to remux dat1 as a gpio, and default to remux it back as sdio
-+dat1. The MMC driver will then toggle between idle and default state during
-+runtime.
-+
-+In summary:
-+1. select matching 'compatible' section, see example below.
-+2. specify pinctrl states "default" and "idle", "sleep" is optional.
-+3. specify the gpio irq used for detecting sdio irq in suspend
-+
-+If configuration is incomplete, a warning message is emitted "falling back to
-+polling". Also check the "sdio irq mode" in /sys/kernel/debug/mmc0/regs. Mind
-+not every application needs SDIO irq, e.g. MMC cards.
-+
-+	mmc1: mmc@48060100 {
-+		compatible = "ti,am33xx-hsmmc";
-+		...
-+		pinctrl-names = "default", "idle", "sleep"
-+		pinctrl-0 = <&mmc1_pins>;
-+		pinctrl-1 = <&mmc1_idle>;
-+		pinctrl-2 = <&mmc1_sleep>;
-+		...
-+		interrupts-extended = <&intc 64 &gpio2 28 0>;
-+	};
-+
-+	mmc1_idle : pinmux_cirq_pin {
-+		pinctrl-single,pins = <
-+		        0x0f8 0x3f      /* GPIO2_28 */
-+		>;
-+	};
-diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index 760b0ac..1238506 100644
---- a/drivers/mmc/host/omap_hsmmc.c
-+++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -1752,15 +1752,25 @@ static int omap_hsmmc_configure_wake_irq(struct omap_hsmmc_host *host)
- 	 * and need to remux SDIO DAT1 to GPIO for wake-up from idle.
- 	 */
- 	if (host->pdata->controller_flags & OMAP_HSMMC_SWAKEUP_MISSING) {
--		ret = -ENODEV;
--		devm_free_irq(host->dev, host->wake_irq, host);
--		goto err;
-+		if (IS_ERR(host->dev->pins->default_state)) {
-+			dev_info(host->dev, "missing default pinctrl state\n");
-+			ret = -EINVAL;
-+			goto err_free_irq;
-+		}
-+
-+		if (IS_ERR(host->dev->pins->idle_state)) {
-+			dev_info(host->dev, "missing idle pinctrl state\n");
-+			ret = -EINVAL;
-+			goto err_free_irq;
-+		}
- 	}
+diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
+index 605815e..8be4dcf 100644
+--- a/drivers/mmc/host/sdhci-of-esdhc.c
++++ b/drivers/mmc/host/sdhci-of-esdhc.c
+@@ -306,7 +306,7 @@ static int esdhc_of_suspend(struct device *dev)
+ 	return sdhci_suspend_host(host);
+ }
  
- 	OMAP_HSMMC_WRITE(host->base, HCTL,
- 			 OMAP_HSMMC_READ(host->base, HCTL) | IWE);
- 	return 0;
+-static void esdhc_of_resume(device *dev)
++static int esdhc_of_resume(struct device *dev)
+ {
+ 	struct sdhci_host *host = dev_get_drvdata(dev);
+ 	int ret = sdhci_resume_host(host);
+@@ -321,8 +321,8 @@ static void esdhc_of_resume(device *dev)
+ }
  
-+err_free_irq:
-+	devm_free_irq(host->dev, host->wake_irq, host);
- err:
- 	dev_warn(host->dev, "no SDIO IRQ support, falling back to polling\n");
- 	host->wake_irq = 0;
+ static const struct dev_pm_ops esdhc_pmops = {
+-	.suspend	= esdhci_of_suspend,
+-	.resume		= esdhci_of_resume,
++	.suspend	= esdhc_of_suspend,
++	.resume		= esdhc_of_resume,
+ };
+ #define ESDHC_PMOPS (&esdhc_pmops)
+ #else
 -- 
-1.7.10.4
+1.7.9.5
 
