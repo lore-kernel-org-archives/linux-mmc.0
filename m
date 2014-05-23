@@ -1,185 +1,57 @@
-From: Hans de Goede <hdegoede@redhat.com>
-Subject: Re: RFC: representing sdio devices oob interrupt, clks, etc. in device
- tree
-Date: Fri, 23 May 2014 11:13:44 +0200
-Message-ID: <537F1148.3010102@redhat.com>
-References: <537DC832.3020006@redhat.com> <CAGb2v64VZac2KvAALrScecN89sRnBQoDrKxKMvkte+3G04NXeA@mail.gmail.com> <537DE1AA.5050606@redhat.com> <537E31F7.1030505@gmail.com>
+From: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+Subject: Re: [PATCH v2 12/14] mmc: mmci: add support for fbclk to latch data
+ and cmd.
+Date: Fri, 23 May 2014 10:20:38 +0100
+Message-ID: <537F12E6.6070809@linaro.org>
+References: <1400146447-29803-1-git-send-email-srinivas.kandagatla@linaro.org>	<1400146669-30302-1-git-send-email-srinivas.kandagatla@linaro.org> <CACRpkdZtHPZpmFA+JfgMn83+SgZZX4CS+MhAcf_sk2cQKqW1Pw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:18818 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751650AbaEWJOe (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 23 May 2014 05:14:34 -0400
-In-Reply-To: <537E31F7.1030505@gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: <CACRpkdZtHPZpmFA+JfgMn83+SgZZX4CS+MhAcf_sk2cQKqW1Pw@mail.gmail.com>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: Linus Walleij <linus.walleij@linaro.org>
+Cc: Russell King <linux@arm.linux.org.uk>, Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-msm@vger.kernel.org" <linux-arm-msm@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Tomasz Figa <tomasz.figa@gmail.com>, Chen-Yu Tsai <wens@csie.org>
-Cc: Arend van Spriel <arend@broadcom.com>, Sascha Hauer <s.hauer@pengutronix.de>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Maxime Ripard <maxime.ripard@free-electrons.com>, linux-mmc <linux-mmc@vger.kernel.org>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>, devicetree <devicetree@vger.kernel.org>, Olof Johansson <olof@lixom.net>, Mark Brown <broonie@kernel.org>, Russell King - ARM Linux <linux@arm.linux.org.uk>, Fabio Estevam <festevam@gmail.com>, Arnd Bergmann <arnd@arndb.de>, Jyri Sarha <jsarha@ti.com>
 
-Hi,
 
-On 05/22/2014 07:20 PM, Tomasz Figa wrote:
-> Hi,
-> 
-> 
-> On 22.05.2014 13:38, Hans de Goede wrote:
->> On 05/22/2014 12:23 PM, Chen-Yu Tsai wrote:
->>> On Thu, May 22, 2014 at 5:49 PM, Hans de Goede <hdegoede@redhat.com> wrote:
-> 
-> snip
-> 
->>>> I've been thinking a bit about this, and it is a non trivial problem since
->>>> sdio devices are normally instantiated when probed, unlike ie spi devices
->>>> which are instantiated from devicetree.
->>>>
->>>> Adding device tree instantiation of sdio devices seems like a bad idea, as
->>>> then we get 2 vastly different device instantiation paths. Still we need some
->>>> way to get power and clks setup before the mmc host initializes.
-> 
-> What about introducing some extra callbacks to mmc drivers to build
-> driver data and control power?
-> 
-> struct mmc_legacy_device {
-> 	/* ... */
-> 	struct device_node *of_node;
-> 	void *driver_data;
-> };
-> 
-> struct mmc_driver {
-> 	/* ... */
-> 	int (*prepare)(struct mmc_legacy_device *);
-> 	void (*unprepare)(struct mmc_legacy_device *);
-> };
-> 
-> static int my_wlan_prepare(struct mmc_legacy_device *dev)
-> {
-> 	struct my_wlan_data *data;
-> 
-> 	data = kzalloc(...);
-> 	/* ... */
-> 
-> 	of_*();
-> 	clk_*();
-> 	regulator_*();
-> 	/* ... */
-> 
-> 	ret = my_wlan_power_on(data);
-> 	/* ... */
-> 
-> 	dev->driver_data = data;	
-> }
-> 
-> static void my_wlan_unprepare(struct mmc_legacy_device *dev)
-> {
-> 	struct my_wlan_data *data;
-> 
-> 	data = dev->driver_data;
-> 
-> 	my_wlan_power_off(data);
-> 	/* ... */
-> 
-> 	dev->driver_data = NULL;
-> 	kfree(data);
-> }
-> 
-> I don't really like this, especially the fact that this would be highly
-> MMC-specific, while there are other interfaces that also need this
-> problem solved, e.g. USB/HSIC.
 
-I don't really like this either :)  My preferred approach is to just go
-with the most KISS approach for now, and slowly make things more complex
-as needed.
+On 23/05/14 10:12, Linus Walleij wrote:
+> On Thu, May 15, 2014 at 11:37 AM,  <srinivas.kandagatla@linaro.org> wrote:
+>
+>> From: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+>>
+>> This patch adds support to fbclk that is used to latch data and
+>> cmd on some controllers like SD Card controller in Qcom SOC.
+>>
+>> Signed-off-by: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+>
+> (...)
+>
+> Isn't this overkill?
 
-> 
-> I had proposed another solution that would require almost no changes in
-> MMC core and could work for any data interface. You can find it
-> somewhere in the thread mentioned by Chen-Yu. Unfortunately, for reasons
-> that don't appeal to me, it wasn't positively received by MMC people.
-> 
->>>>
->>>> Therefor I would like to suggest to add a number of standard properties to
->>>> mmc-bus child nodes. Making the dts for an mmc host with an sdio device which
->>>> needs clks setup before it will work look like this:
->>>>
->>>>                 mmc3: mmc@01c12000 {
->>>>                         #address-cells = <1>;
->>>>                         #size-cells = <0>;
->>>>                         pinctrl-names = "default";
->>>>                         pinctrl-0 = <&mmc3_pins_a>;
->>>>                         vmmc-supply = <&reg_vmmc3>;
->>>>                         bus-width = <4>;
->>>>                         non-removable;
->>>>                         status = "okay";
->>>>
->>>>                         brcmf: bcrmf@0 {
->>>>                                 reg = <0>;
->>>>                                 compatible = "brcm,bcm43xx-fmac";
->>>>                                 clocks = <&clk_out_a>, <&clk_out_b>;
->>>>                                 clock-frequency = <32768>, <26000000>;
->>>>                                 interrupt-parent = <&pio>;
->>>>                                 interrupts = <10 4>; /* PH10 / EINT10 */
->>>>                                 interrupt-names = "host-wake";
->>>>                                 status = "okay";
->>>>                         };
->>>>                 };
->>>>
->>>> Where the "clocks" and "clock-frequency" attributes would be something
->>>> which we standardize in Documentation/devicetree/bindings/mmc/mmc-bus.txt
-> 
-> I like the binding. It has all properties defined where they belong.
+I totally agree.
 
-I'm glad you like the binding, I really want us to work towards a binding
-where we all agree on the binding bits, so that we can set those in stone,
-then we can go with a simple implementation for now, and move to something
-more complex as needed.
+Initially I did do it the way you suggested, but wanted to be more 
+explicit in what its actually doing and I was also not sure if its Ok to 
+add more than one flag in clkreg_enable.
 
-> 
->>>>
->>>> These standard properties would *not* be used by the driver for the
->>>> childnode device, so as to avoid the chicken and egg problem of that driver
->>>> needing to enable clks, and it only getting bound to the device after
->>>> the device has been discovered which requires those clocks.
->>>>
->>>> Instead these properties would be parsed by mmc_of_parse, and we will
->>>> get enabled automatically by mmc_add_host before doing any probing.
->>>>
->>>> If the optional clock-frequency property is also set, then mmc_add_host
->>>> will not only enable the clks but also set them to the specified
->>>> frequency.
->>>>
-> 
-> I don't like power control and parsing in MMC core, because they are
-> highly chip-specific. Throwing this kind of knowledge to MMC subsystem
-> violates separation and just won't scale as more different WLAN chips
-> show up. However, this is at least not enforced by design of the
-> bindings and so can be changed at any time in future, while having
-> something already working.
+>
+> @@ -189,6 +192,7 @@ static struct variant_data variant_qcom = {
+>           .clkreg                 = MCI_CLK_ENABLE,
+> -        .clkreg_enable          = MCI_QCOM_CLK_FLOWENA,
+> +       .clkreg_enable          = MCI_QCOM_CLK_FLOWENA |
+> MCI_QCOM_CLK_FEEDBACK_CLK,
+>           .clkreg_8bit_bus_enable = MCI_QCOM_CLK_WIDEBUS_8,
+>
 
-Right, the whole idea is to add some simple power up logic to the mmc
-core, as with Olof's original proposal, but make things so that later
-on we can do something more complex as needed.
+> Isn't this achieveing exactly the same thing without the extra fields?
+> You unconditionally do it at every enable anyway, don't you?
+I will fix it and send a new version.
 
-Also note that adding this to the mmc-core has the advantage that
-we don't need to add power-up logic to each sdio driver separately.
-
-Thinking more about this, I would like to make one change to my
-proposal, the mmc-core should only do power up of child-nodes if
-they have a compatible of: "simple-sdio-powerup". This way
-when we add something more complex, we can keep the simple powerup
-code in the mmc core, keeping what we've already using this working
-and the mmc core won't respond to the child nodes for more complex
-devices, so it won't conflict with more complex power-up handling
-handled by some other driver.
-
-FWIW if we ever get truely complex cases I think modeling the
-power-up hardware as a pmic platform device is not a bad idea,
-we would then need to have a generic mmc-host pmic property, which
-would be used both to do the initial powerup before scanning, as
-well as for the sdio device driver to get a handle to the pmic,
-for run time power-management (if desired).
-
-Regards,
-
-Hans
+Thanks,
+srini
+>
+> Yours,
+> Linus Walleij
+>
