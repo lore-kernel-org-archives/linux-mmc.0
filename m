@@ -1,51 +1,81 @@
-From: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
-Subject: Re: [PATCH v2 00/14] Add Qualcomm SD Card Controller support
-Date: Fri, 23 May 2014 09:11:54 +0100
-Message-ID: <537F02CA.5070304@linaro.org>
-References: <1398116624-31052-1-git-send-email-srinivas.kandagatla@linaro.org>	<1400146447-29803-1-git-send-email-srinivas.kandagatla@linaro.org>	<537EF50B.2010101@linaro.org> <CAPDyKFpTXrURM8OzNjO-RRfCFWGct4+_M4D8COdEurUhY46GWg@mail.gmail.com>
+From: Andreas Fenkart <afenkart@gmail.com>
+Subject: Re: [mmc:mmc-next 79/96] drivers/mmc/host/omap_hsmmc.c:1841:30:
+ error: 'struct dev_pm_info' has no member named 'runtime_status'
+Date: Fri, 23 May 2014 10:19:44 +0200
+Message-ID: <CALtMJEDhBFomn8VEu1G=F8fbZBLO=msTnUCzHSpYsQxEc4WtKw@mail.gmail.com>
+References: <537de770.ItHqmb5BpaXWIlXq%fengguang.wu@intel.com>
+	<CAPDyKFoWABO-k9dh5AvhaJFoF-NRCBz1_G+fJ53MPnzBr42CfQ@mail.gmail.com>
+	<86oayqq93b.fsf@void.printf.net>
+	<20140522142401.GA14489@atomide.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
-In-Reply-To: <CAPDyKFpTXrURM8OzNjO-RRfCFWGct4+_M4D8COdEurUhY46GWg@mail.gmail.com>
-Sender: linux-arm-msm-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Russell King <linux@arm.linux.org.uk>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Linus Walleij <linus.walleij@linaro.org>, Bjorn Andersson <bjorn@kryo.se>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qg0-f48.google.com ([209.85.192.48]:44825 "EHLO
+	mail-qg0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750909AbaEWITp (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 23 May 2014 04:19:45 -0400
+Received: by mail-qg0-f48.google.com with SMTP id i50so7634742qgf.35
+        for <linux-mmc@vger.kernel.org>; Fri, 23 May 2014 01:19:44 -0700 (PDT)
+In-Reply-To: <20140522142401.GA14489@atomide.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Tony Lindgren <tony@atomide.com>
+Cc: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, balajitk <balajitk@ti.com>
 
-
-
-On 23/05/14 08:50, Ulf Hansson wrote:
-> On 23 May 2014 09:13, Srinivas Kandagatla
-> <srinivas.kandagatla@linaro.org> wrote:
->> Hi Ulf,
->> I like to get this patches for v3.16,  any chance of considering these
->> patches to v3.16 ?
+2014-05-22 16:24 GMT+02:00 Tony Lindgren <tony@atomide.com>:
+> * Chris Ball <chris@printf.net> [140522 05:42]:
+>> Hi,
+>>
+>> On Thu, May 22 2014, Ulf Hansson wrote:
+>> > I had a second look at Andreas Fenkart's patchset to enable SDIO irq
+>> > for omap. Those needs an additional iteration, since there are
+>> > unresolved dependencies to CONFIG_PM_RUNTIME (and possibly to other
+>> > Kconfigs as well). Apparently I had all the needed Kconfigs enabled
+>> > while I compile tested them. :-(
 >
-> I promise to have them properly reviewed early next week, sorry for
-> taking so long. Let's see where this leads us.
+> Did you find this out with make randconfig?
+
+FYI
+
+after this patch I could deselect CONFIG_PM
+--- a/arch/arm/mach-omap2/Kconfig
++++ b/arch/arm/mach-omap2/Kconfig
+@@ -111,7 +111,6 @@ config ARCH_OMAP2PLUS_TYPICAL
+        select I2C_OMAP
+        select MENELAUS if ARCH_OMAP2
+        select NEON if CPU_V7
+-       select PM_RUNTIME
+        select REGULATOR
+        select TWL4030_CORE if ARCH_OMAP3 || ARCH_OMAP4
+        select TWL4030_POWER if ARCH_OMAP3 || ARCH_OMAP4
+
+
 >
-Thankyou.
-
-> It seems like you had some CRC issues during read/write? Did you
-> manage to resolve that issue?
-
-Bjorn is using different SOC and board than the IFC6410 Am testing on, 
-so its completely different setup.
-on IFC6410 we did lot of stress testing and no issues seen. so 
-suspecting the issues are very specific to that board or the eMMC Bjorn 
-is using.
-
-We are suspecting that the CRC issues are due to the fact that there is 
-no code to manage regulators. My test setup uses dummy regulator, and 
-the eMMC and external SD cards seems to be Ok with default voltages.
-
-Am not sure if thats the same with Bjorn's board.
-
-Thanks,
-srini
+>> > I tried out doing a local re-base, to remove the related omap patches.
+>> > If you remove the patches below you won't get any conflicts for
+>> > omap_hsmmc. Can you do that?
+>> >
+>> > Andreas:
+>> > mmc: omap_hsmmc: Enable SDIO interrupt
+>> > mmc: omap_hsmmc: enable wakeup event for sdio OMAP4
+>> > mmc: omap_hsmmc: Extend debugfs by SDIO IRQ handling, runtime state
+>> > mmc: omap_hsmmc: abort runtime suspend if pending sdio irq detected
+>> > mmc: omap_hsmmc: switch default/idle pinctrl states in runtime hooks
+>> > mmc: omap_hsmmc: Pin remux workaround to support SDIO interrupt on AM335x
+>> >
+>> > Balaji:
+>> > mmc: omap_hsmmc: use IS_ERR macro for error checking
+>>
+>> Done.  Thanks!
 >
-> Kind regards
-> Ulf Hansson
+> Andreas, can you fix this ASAP? Would be nice to have those
+> working for v3.16 :)
+will send out updated patches soon
 >
+> Once you have updated patches available I'll include them
+> also to my randconfig builds. Unless the Kconfig options
+> are nested they are exposed after few builds typically.
 >
+> Regards,
+>
+> Tony
