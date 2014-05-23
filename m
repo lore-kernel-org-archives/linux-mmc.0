@@ -1,24 +1,21 @@
 From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: [PATCH 0/3] mmc: fixed the mmc_of_parse for dwmmc
-Date: Fri, 23 May 2014 19:25:18 +0900
-Message-ID: <1400840721-11050-1-git-send-email-jh80.chung@samsung.com>
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-Sender: linux-samsung-soc-owner@vger.kernel.org
+Subject: [PATCH 3/3] ARM: dts: replace the broken-cd property into slot node
+ for dwmmc.
+Date: Fri, 23 May 2014 19:25:21 +0900
+Message-ID: <1400840721-11050-4-git-send-email-jh80.chung@samsung.com>
+References: <1400840721-11050-1-git-send-email-jh80.chung@samsung.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-reply-to: <1400840721-11050-1-git-send-email-jh80.chung@samsung.com>
+Sender: linux-kernel-owner@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 Cc: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Ludovic Desroches <ludovic.desroches@atmel.com>, Seungwon Jeon <tgih.jun@samsung.com>, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-samsung-soc@vger.kernel.org, Jaehoon Chung <jh80.chung@samsung.com>
 List-Id: linux-mmc@vger.kernel.org
 
-This patch-set is fixed the dw-mmc controller problem.
-dw-mmc controller have the slot, but mmc_of_parse didn't parse the slot sub-node.
-So dw-mmc controller didn't work correctly.
+dw-mmc controller can be support the multiple slot.
+So each slot's property can be difference.
 
-Jaehoon Chung (2):
-  mmc: dw_mmc: use the __mmc_of_parse to parse the slot node
-  ARM: dts: replace the broken-cd property into slot node for dwmmc.
-
-Ludovic Desroches (1):
-  mmc: host: add slot argument to mmc_of_parse
-
+Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+---
  arch/arm/boot/dts/exynos4412-odroidx.dts      |    2 +-
  arch/arm/boot/dts/exynos4412-origen.dts       |    2 +-
  arch/arm/boot/dts/exynos4412-trats2.dts       |    4 ++--
@@ -30,10 +27,236 @@ Ludovic Desroches (1):
  arch/arm/boot/dts/socfpga_arria5.dtsi         |    2 +-
  arch/arm/boot/dts/socfpga_cyclone5.dtsi       |    2 +-
  arch/arm/boot/dts/socfpga_vt.dts              |    2 +-
- drivers/mmc/core/host.c                       |   13 +++++++++----
- drivers/mmc/host/dw_mmc.c                     |   25 ++++++-------------------
- include/linux/mmc/host.h                      |   10 +++++++++-
- 14 files changed, 37 insertions(+), 37 deletions(-)
+ 11 files changed, 13 insertions(+), 13 deletions(-)
 
+diff --git a/arch/arm/boot/dts/exynos4412-odroidx.dts b/arch/arm/boot/dts/exynos4412-odroidx.dts
+index 31db28a..24ec351 100644
+--- a/arch/arm/boot/dts/exynos4412-odroidx.dts
++++ b/arch/arm/boot/dts/exynos4412-odroidx.dts
+@@ -46,7 +46,6 @@
+ 
+ 		num-slots = <1>;
+ 		supports-highspeed;
+-		broken-cd;
+ 		card-detect-delay = <200>;
+ 		samsung,dw-mshc-ciu-div = <3>;
+ 		samsung,dw-mshc-sdr-timing = <2 3>;
+@@ -55,6 +54,7 @@
+ 		slot@0 {
+ 			reg = <0>;
+ 			bus-width = <8>;
++			broken-cd;
+ 		};
+ 	};
+ 
+diff --git a/arch/arm/boot/dts/exynos4412-origen.dts b/arch/arm/boot/dts/exynos4412-origen.dts
+index e2c0dca..ed712a6 100644
+--- a/arch/arm/boot/dts/exynos4412-origen.dts
++++ b/arch/arm/boot/dts/exynos4412-origen.dts
+@@ -129,7 +129,6 @@
+ 
+ 		num-slots = <1>;
+ 		supports-highspeed;
+-		broken-cd;
+ 		card-detect-delay = <200>;
+ 		samsung,dw-mshc-ciu-div = <3>;
+ 		samsung,dw-mshc-sdr-timing = <2 3>;
+@@ -138,6 +137,7 @@
+ 		slot@0 {
+ 			reg = <0>;
+ 			bus-width = <8>;
++			broken-cd;
+ 		};
+ 	};
+ 
+diff --git a/arch/arm/boot/dts/exynos4412-trats2.dts b/arch/arm/boot/dts/exynos4412-trats2.dts
+index 9583563..294a586 100644
+--- a/arch/arm/boot/dts/exynos4412-trats2.dts
++++ b/arch/arm/boot/dts/exynos4412-trats2.dts
+@@ -460,8 +460,6 @@
+ 	mmc@12550000 {
+ 		num-slots = <1>;
+ 		supports-highspeed;
+-		broken-cd;
+-		non-removable;
+ 		card-detect-delay = <200>;
+ 		vmmc-supply = <&vemmc_reg>;
+ 		clock-frequency = <400000000>;
+@@ -475,6 +473,8 @@
+ 		slot@0 {
+ 			reg = <0>;
+ 			bus-width = <8>;
++			non-removable;
++			broken-cd;
+ 		};
+ 	};
+ 
+diff --git a/arch/arm/boot/dts/exynos5250-arndale.dts b/arch/arm/boot/dts/exynos5250-arndale.dts
+index 090f983..0c9a7da 100644
+--- a/arch/arm/boot/dts/exynos5250-arndale.dts
++++ b/arch/arm/boot/dts/exynos5250-arndale.dts
+@@ -400,7 +400,6 @@
+ 		status = "okay";
+ 		num-slots = <1>;
+ 		supports-highspeed;
+-		broken-cd;
+ 		card-detect-delay = <200>;
+ 		samsung,dw-mshc-ciu-div = <3>;
+ 		samsung,dw-mshc-sdr-timing = <2 3>;
+@@ -412,6 +411,7 @@
+ 		slot@0 {
+ 			reg = <0>;
+ 			bus-width = <8>;
++			broken-cd;
+ 		};
+ 	};
+ 
+diff --git a/arch/arm/boot/dts/exynos5250-cros-common.dtsi b/arch/arm/boot/dts/exynos5250-cros-common.dtsi
+index 2c1560d..7ab3b94 100644
+--- a/arch/arm/boot/dts/exynos5250-cros-common.dtsi
++++ b/arch/arm/boot/dts/exynos5250-cros-common.dtsi
+@@ -249,7 +249,6 @@
+ 	mmc@12200000 {
+ 		num-slots = <1>;
+ 		supports-highspeed;
+-		broken-cd;
+ 		card-detect-delay = <200>;
+ 		samsung,dw-mshc-ciu-div = <3>;
+ 		samsung,dw-mshc-sdr-timing = <2 3>;
+@@ -260,6 +259,7 @@
+ 		slot@0 {
+ 			reg = <0>;
+ 			bus-width = <8>;
++			broken-cd;
+ 		};
+ 	};
+ 
+@@ -283,7 +283,6 @@
+ 	mmc@12230000 {
+ 		num-slots = <1>;
+ 		supports-highspeed;
+-		broken-cd;
+ 		card-detect-delay = <200>;
+ 		samsung,dw-mshc-ciu-div = <3>;
+ 		samsung,dw-mshc-sdr-timing = <2 3>;
+@@ -293,6 +292,7 @@
+ 		slot@0 {
+ 			reg = <0>;
+ 			bus-width = <4>;
++			broken-cd;
+ 		};
+ 	};
+ 
+diff --git a/arch/arm/boot/dts/exynos5250-smdk5250.dts b/arch/arm/boot/dts/exynos5250-smdk5250.dts
+index a794a70..feffe24 100644
+--- a/arch/arm/boot/dts/exynos5250-smdk5250.dts
++++ b/arch/arm/boot/dts/exynos5250-smdk5250.dts
+@@ -283,7 +283,6 @@
+ 		status = "okay";
+ 		num-slots = <1>;
+ 		supports-highspeed;
+-		broken-cd;
+ 		card-detect-delay = <200>;
+ 		samsung,dw-mshc-ciu-div = <3>;
+ 		samsung,dw-mshc-sdr-timing = <2 3>;
+@@ -294,6 +293,7 @@
+ 		slot@0 {
+ 			reg = <0>;
+ 			bus-width = <8>;
++			broken-cd;
+ 		};
+ 	};
+ 
+diff --git a/arch/arm/boot/dts/exynos5420-arndale-octa.dts b/arch/arm/boot/dts/exynos5420-arndale-octa.dts
+index 80a3bf4..0d3b467 100644
+--- a/arch/arm/boot/dts/exynos5420-arndale-octa.dts
++++ b/arch/arm/boot/dts/exynos5420-arndale-octa.dts
+@@ -39,7 +39,6 @@
+ 
+ 	mmc@12200000 {
+ 		status = "okay";
+-		broken-cd;
+ 		supports-highspeed;
+ 		card-detect-delay = <200>;
+ 		samsung,dw-mshc-ciu-div = <3>;
+@@ -52,6 +51,7 @@
+ 		slot@0 {
+ 			reg = <0>;
+ 			bus-width = <8>;
++			broken-cd;
+ 		};
+ 	};
+ 
+diff --git a/arch/arm/boot/dts/rk3066a-bqcurie2.dts b/arch/arm/boot/dts/rk3066a-bqcurie2.dts
+index 035df40..62c7484 100644
+--- a/arch/arm/boot/dts/rk3066a-bqcurie2.dts
++++ b/arch/arm/boot/dts/rk3066a-bqcurie2.dts
+@@ -69,7 +69,6 @@
+ 		dwmmc@10218000 { /* wifi */
+ 			num-slots = <1>;
+ 			status = "okay";
+-			non-removable;
+ 
+ 			pinctrl-names = "default";
+ 			pinctrl-0 = <&sd1_clk &sd1_cmd &sd1_bus4>;
+@@ -78,6 +77,7 @@
+ 				reg = <0>;
+ 				bus-width = <4>;
+ 				disable-wp;
++				non-removable;
+ 			};
+ 		};
+ 
+diff --git a/arch/arm/boot/dts/socfpga_arria5.dtsi b/arch/arm/boot/dts/socfpga_arria5.dtsi
+index 6c87b70..9c2b933 100644
+--- a/arch/arm/boot/dts/socfpga_arria5.dtsi
++++ b/arch/arm/boot/dts/socfpga_arria5.dtsi
+@@ -30,11 +30,11 @@
+ 		dwmmc0@ff704000 {
+ 			num-slots = <1>;
+ 			supports-highspeed;
+-			broken-cd;
+ 
+ 			slot@0 {
+ 				reg = <0>;
+ 				bus-width = <4>;
++				broken-cd;
+ 			};
+ 		};
+ 
+diff --git a/arch/arm/boot/dts/socfpga_cyclone5.dtsi b/arch/arm/boot/dts/socfpga_cyclone5.dtsi
+index ca41b0e..c5c7b5f 100644
+--- a/arch/arm/boot/dts/socfpga_cyclone5.dtsi
++++ b/arch/arm/boot/dts/socfpga_cyclone5.dtsi
+@@ -31,11 +31,11 @@
+ 		dwmmc0@ff704000 {
+ 			num-slots = <1>;
+ 			supports-highspeed;
+-			broken-cd;
+ 
+ 			slot@0 {
+ 				reg = <0>;
+ 				bus-width = <4>;
++				broken-cd;
+ 			};
+ 		};
+ 
+diff --git a/arch/arm/boot/dts/socfpga_vt.dts b/arch/arm/boot/dts/socfpga_vt.dts
+index 87d6f75..ff1111e 100644
+--- a/arch/arm/boot/dts/socfpga_vt.dts
++++ b/arch/arm/boot/dts/socfpga_vt.dts
+@@ -44,11 +44,11 @@
+ 		dwmmc0@ff704000 {
+ 			num-slots = <1>;
+ 			supports-highspeed;
+-			broken-cd;
+ 
+ 			slot@0 {
+ 				reg = <0>;
+ 				bus-width = <4>;
++				broken-cd;
+ 			};
+ 		};
+ 
 -- 
 1.7.9.5
