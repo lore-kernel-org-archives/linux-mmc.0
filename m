@@ -1,66 +1,80 @@
 From: Andreas Fenkart <afenkart@gmail.com>
-Subject: [PATCH v13 3/7] mmc: omap_hsmmc: Extend debugfs by SDIO IRQ handling, runtime state
-Date: Fri, 23 May 2014 10:30:30 +0200
-Message-ID: <1400833834-15893-4-git-send-email-afenkart@gmail.com>
+Subject: [PATCH v13 4/7] mmc: omap_hsmmc: enable wakeup event for sdio OMAP4
+Date: Fri, 23 May 2014 10:30:31 +0200
+Message-ID: <1400833834-15893-5-git-send-email-afenkart@gmail.com>
 References: <1400833834-15893-1-git-send-email-afenkart@gmail.com>
-Return-path: <linux-doc-owner@vger.kernel.org>
+Return-path: <linux-omap-owner@vger.kernel.org>
 In-Reply-To: <1400833834-15893-1-git-send-email-afenkart@gmail.com>
-Sender: linux-doc-owner@vger.kernel.org
+Sender: linux-omap-owner@vger.kernel.org
 To: Tony Lindgren <tony@atomide.com>
 Cc: Chris Ball <chris@printf.net>, Grant Likely <grant.likely@secretlab.ca>, Felipe Balbi <balbi@ti.com>, Balaji T K <balajitk@ti.com>, Andreas Mueller <schnitzeltony@googlemail.com>, Sebastian Reichel <sre@kernel.org>, zonque@gmail.com, galak@codeaurora.org, linux-doc@vger.kernel.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, Andreas Fenkart <afenkart@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Add SDIO IRQ entries to debugfs entry. Note that PSTATE shows current
-state of data lines, incl. SDIO IRQ pending
+To detect sdio irqs properly without spurious events,
+OMAP4 needs IWE in CON and CTPL, CLKEXTFREE in HCTL to be set
 
-Acked-by: Balaji T K <balajitk@ti.com>
-Signed-off-by: Andreas Fenkart <afenkart@gmail.com>
+Tested-by: Andreas Fenkart <afenkart@gmail.com>
+Signed-off-by: Balaji T K <balajitk@ti.com>
 
 diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index 0125eea..cfd2bfb 100644
+index cfd2bfb..dfc593e 100644
 --- a/drivers/mmc/host/omap_hsmmc.c
 +++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -56,6 +56,7 @@
- #define OMAP_HSMMC_RSP54	0x0118
- #define OMAP_HSMMC_RSP76	0x011C
- #define OMAP_HSMMC_DATA		0x0120
-+#define OMAP_HSMMC_PSTATE	0x0124
- #define OMAP_HSMMC_HCTL		0x0128
- #define OMAP_HSMMC_SYSCTL	0x012C
- #define OMAP_HSMMC_STAT		0x0130
-@@ -1816,10 +1817,23 @@ static int omap_hsmmc_regs_show(struct seq_file *s, void *data)
- {
- 	struct mmc_host *mmc = s->private;
- 	struct omap_hsmmc_host *host = mmc_priv(mmc);
-+#ifdef CONFIG_PM
-+	bool suspended;
-+#endif
+@@ -94,7 +94,10 @@
+ #define BCE			(1 << 1)
+ #define FOUR_BIT		(1 << 1)
+ #define HSPE			(1 << 2)
++#define IWE			(1 << 24)
+ #define DDR			(1 << 19)
++#define CLKEXTFREE		(1 << 16)
++#define CTPL			(1 << 11)
+ #define DW8			(1 << 5)
+ #define OD			0x1
+ #define STAT_CLEAR		0xFFFFFFFF
+@@ -689,6 +692,9 @@ static int omap_hsmmc_context_restore(struct omap_hsmmc_host *host)
+ 		capa = VS18;
+ 	}
  
- 	seq_printf(s, "mmc%d:\n", mmc->index);
-+	seq_printf(s, "sdio irq mode\t%s\n",
-+		   (mmc->caps & MMC_CAP_SDIO_IRQ) ? "interrupt" : "polling");
++	if (host->mmc->caps & MMC_CAP_SDIO_IRQ)
++		hctl |= IWE;
 +
-+	if (mmc->caps & MMC_CAP_SDIO_IRQ) {
-+		seq_printf(s, "sdio irq \t%s\n",
-+			   (host->flags & HSMMC_SDIO_IRQ_ENABLED) ?  "enabled"
-+			   : "disabled");
-+	}
+ 	OMAP_HSMMC_WRITE(host->base, HCTL,
+ 			OMAP_HSMMC_READ(host->base, HCTL) | hctl);
  
- #ifdef CONFIG_PM
-+	suspended = host->dev->power.runtime_status != RPM_ACTIVE;
-+	seq_printf(s, "runtime state\t%s\n", (suspended ? "idle" : "active"));
- 	seq_printf(s, "ctx_loss:\t%d\n", host->context_loss);
- #endif
+@@ -1681,19 +1687,23 @@ static void omap_hsmmc_init_card(struct mmc_host *mmc, struct mmc_card *card)
+ static void omap_hsmmc_enable_sdio_irq(struct mmc_host *mmc, int enable)
+ {
+ 	struct omap_hsmmc_host *host = mmc_priv(mmc);
+-	u32 irq_mask;
++	u32 irq_mask, con;
+ 	unsigned long flags;
  
-@@ -1827,6 +1841,8 @@ static int omap_hsmmc_regs_show(struct seq_file *s, void *data)
- 	seq_puts(s, "\nregs:\n");
- 	seq_printf(s, "CON:\t\t0x%08x\n",
- 			OMAP_HSMMC_READ(host->base, CON));
-+	seq_printf(s, "PSTATE:\t\t0x%08x\n",
-+		   OMAP_HSMMC_READ(host->base, PSTATE));
- 	seq_printf(s, "HCTL:\t\t0x%08x\n",
- 			OMAP_HSMMC_READ(host->base, HCTL));
- 	seq_printf(s, "SYSCTL:\t\t0x%08x\n",
+ 	spin_lock_irqsave(&host->irq_lock, flags);
+ 
++	con = OMAP_HSMMC_READ(host->base, CON);
+ 	irq_mask = OMAP_HSMMC_READ(host->base, ISE);
+ 	if (enable) {
+ 		host->flags |= HSMMC_SDIO_IRQ_ENABLED;
+ 		irq_mask |= CIRQ_EN;
++		con |= CTPL | CLKEXTFREE;
+ 	} else {
+ 		host->flags &= ~HSMMC_SDIO_IRQ_ENABLED;
+ 		irq_mask &= ~CIRQ_EN;
++		con &= ~(CTPL | CLKEXTFREE);
+ 	}
++	OMAP_HSMMC_WRITE(host->base, CON, con);
+ 	OMAP_HSMMC_WRITE(host->base, IE, irq_mask);
+ 
+ 	/*
+@@ -1744,6 +1754,8 @@ static int omap_hsmmc_configure_wake_irq(struct omap_hsmmc_host *host)
+ 		goto err;
+ 	}
+ 
++	OMAP_HSMMC_WRITE(host->base, HCTL,
++			 OMAP_HSMMC_READ(host->base, HCTL) | IWE);
+ 	return 0;
+ 
+ err:
 -- 
 1.7.10.4
 
