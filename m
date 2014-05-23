@@ -1,80 +1,78 @@
 From: Andreas Fenkart <afenkart@gmail.com>
-Subject: [PATCH v13 4/7] mmc: omap_hsmmc: enable wakeup event for sdio OMAP4
-Date: Fri, 23 May 2014 10:30:31 +0200
-Message-ID: <1400833834-15893-5-git-send-email-afenkart@gmail.com>
+Subject: [PATCH v13 5/7] mmc: omap_hsmmc: abort runtime suspend if pending sdio irq detected
+Date: Fri, 23 May 2014 10:30:32 +0200
+Message-ID: <1400833834-15893-6-git-send-email-afenkart@gmail.com>
 References: <1400833834-15893-1-git-send-email-afenkart@gmail.com>
-Return-path: <linux-omap-owner@vger.kernel.org>
+Return-path: <linux-doc-owner@vger.kernel.org>
 In-Reply-To: <1400833834-15893-1-git-send-email-afenkart@gmail.com>
-Sender: linux-omap-owner@vger.kernel.org
+Sender: linux-doc-owner@vger.kernel.org
 To: Tony Lindgren <tony@atomide.com>
 Cc: Chris Ball <chris@printf.net>, Grant Likely <grant.likely@secretlab.ca>, Felipe Balbi <balbi@ti.com>, Balaji T K <balajitk@ti.com>, Andreas Mueller <schnitzeltony@googlemail.com>, Sebastian Reichel <sre@kernel.org>, zonque@gmail.com, galak@codeaurora.org, linux-doc@vger.kernel.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, Andreas Fenkart <afenkart@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
 
-To detect sdio irqs properly without spurious events,
-OMAP4 needs IWE in CON and CTPL, CLKEXTFREE in HCTL to be set
+On multicores, an sdio irq handler could be running in parallel to
+runtime suspend. In the worst case it could be waiting for the spinlock
+held by the runtime suspend. When runtime suspend is complete and the
+functional clock (fclk) turned off, the irq handler will continue and
+cause a SIGBUS on the first register access.
 
-Tested-by: Andreas Fenkart <afenkart@gmail.com>
-Signed-off-by: Balaji T K <balajitk@ti.com>
+Acked-by: Balaji T K <balajitk@ti.com>
+Signed-off-by: Andreas Fenkart <afenkart@gmail.com>
 
 diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index cfd2bfb..dfc593e 100644
+index dfc593e..aafef29 100644
 --- a/drivers/mmc/host/omap_hsmmc.c
 +++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -94,7 +94,10 @@
- #define BCE			(1 << 1)
- #define FOUR_BIT		(1 << 1)
- #define HSPE			(1 << 2)
-+#define IWE			(1 << 24)
- #define DDR			(1 << 19)
-+#define CLKEXTFREE		(1 << 16)
-+#define CTPL			(1 << 11)
- #define DW8			(1 << 5)
- #define OD			0x1
- #define STAT_CLEAR		0xFFFFFFFF
-@@ -689,6 +692,9 @@ static int omap_hsmmc_context_restore(struct omap_hsmmc_host *host)
- 		capa = VS18;
- 	}
+@@ -107,6 +107,9 @@
+ #define SRD			(1 << 26)
+ #define SOFTRESET		(1 << 1)
  
-+	if (host->mmc->caps & MMC_CAP_SDIO_IRQ)
-+		hctl |= IWE;
++/* PSTATE */
++#define DLEV_DAT(x)		(1 << (20 + (x)))
 +
- 	OMAP_HSMMC_WRITE(host->base, HCTL,
- 			OMAP_HSMMC_READ(host->base, HCTL) | hctl);
- 
-@@ -1681,19 +1687,23 @@ static void omap_hsmmc_init_card(struct mmc_host *mmc, struct mmc_card *card)
- static void omap_hsmmc_enable_sdio_irq(struct mmc_host *mmc, int enable)
+ /* Interrupt masks for IE and ISE register */
+ #define CC_EN			(1 << 0)
+ #define TC_EN			(1 << 1)
+@@ -2432,6 +2435,7 @@ static int omap_hsmmc_runtime_suspend(struct device *dev)
  {
- 	struct omap_hsmmc_host *host = mmc_priv(mmc);
--	u32 irq_mask;
-+	u32 irq_mask, con;
+ 	struct omap_hsmmc_host *host;
  	unsigned long flags;
++	int ret = 0;
  
- 	spin_lock_irqsave(&host->irq_lock, flags);
+ 	host = platform_get_drvdata(to_platform_device(dev));
+ 	omap_hsmmc_context_save(host);
+@@ -2443,14 +2447,29 @@ static int omap_hsmmc_runtime_suspend(struct device *dev)
+ 		/* disable sdio irq handling to prevent race */
+ 		OMAP_HSMMC_WRITE(host->base, ISE, 0);
+ 		OMAP_HSMMC_WRITE(host->base, IE, 0);
+-		OMAP_HSMMC_WRITE(host->base, STAT, STAT_CLEAR);
++
++		if (!(OMAP_HSMMC_READ(host->base, PSTATE) & DLEV_DAT(1))) {
++			/*
++			 * dat1 line low, pending sdio irq
++			 * race condition: possible irq handler running on
++			 * multi-core, abort
++			 */
++			dev_dbg(dev, "pending sdio irq, abort suspend\n");
++			OMAP_HSMMC_WRITE(host->base, STAT, STAT_CLEAR);
++			OMAP_HSMMC_WRITE(host->base, ISE, CIRQ_EN);
++			OMAP_HSMMC_WRITE(host->base, IE, CIRQ_EN);
++			pm_runtime_mark_last_busy(dev);
++			ret = -EBUSY;
++			goto abort;
++		}
  
-+	con = OMAP_HSMMC_READ(host->base, CON);
- 	irq_mask = OMAP_HSMMC_READ(host->base, ISE);
- 	if (enable) {
- 		host->flags |= HSMMC_SDIO_IRQ_ENABLED;
- 		irq_mask |= CIRQ_EN;
-+		con |= CTPL | CLKEXTFREE;
- 	} else {
- 		host->flags &= ~HSMMC_SDIO_IRQ_ENABLED;
- 		irq_mask &= ~CIRQ_EN;
-+		con &= ~(CTPL | CLKEXTFREE);
+ 		WARN_ON(host->flags & HSMMC_WAKE_IRQ_ENABLED);
+ 		enable_irq(host->wake_irq);
+ 		host->flags |= HSMMC_WAKE_IRQ_ENABLED;
  	}
-+	OMAP_HSMMC_WRITE(host->base, CON, con);
- 	OMAP_HSMMC_WRITE(host->base, IE, irq_mask);
++abort:
+ 	spin_unlock_irqrestore(&host->irq_lock, flags);
+-	return 0;
++	return ret;
+ }
  
- 	/*
-@@ -1744,6 +1754,8 @@ static int omap_hsmmc_configure_wake_irq(struct omap_hsmmc_host *host)
- 		goto err;
- 	}
- 
-+	OMAP_HSMMC_WRITE(host->base, HCTL,
-+			 OMAP_HSMMC_READ(host->base, HCTL) | IWE);
- 	return 0;
- 
- err:
+ static int omap_hsmmc_runtime_resume(struct device *dev)
 -- 
 1.7.10.4
 
