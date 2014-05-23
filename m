@@ -1,149 +1,166 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: RFC: representing sdio devices oob interrupt, clks, etc. in
- device tree
-Date: Fri, 23 May 2014 15:34:23 +0200
-Message-ID: <CAPDyKFrAsMxZrHQhofQ_J1Z8rk1DZ5Jvp7bwQKgNQ3u_ga-6sQ@mail.gmail.com>
-References: <537DC832.3020006@redhat.com>
-	<CAGb2v64VZac2KvAALrScecN89sRnBQoDrKxKMvkte+3G04NXeA@mail.gmail.com>
-	<537DE1AA.5050606@redhat.com>
-	<537E31F7.1030505@gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+From: Sascha Hauer <s.hauer@pengutronix.de>
+Subject: [PATCH] mmc: implement driver stage register handling
+Date: Fri, 23 May 2014 15:34:47 +0200
+Message-ID: <1400852087-32442-1-git-send-email-s.hauer@pengutronix.de>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qc0-f172.google.com ([209.85.216.172]:64218 "EHLO
-	mail-qc0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751621AbaEWNeY (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 23 May 2014 09:34:24 -0400
-Received: by mail-qc0-f172.google.com with SMTP id l6so8206382qcy.31
-        for <linux-mmc@vger.kernel.org>; Fri, 23 May 2014 06:34:23 -0700 (PDT)
-In-Reply-To: <537E31F7.1030505@gmail.com>
+Received: from metis.ext.pengutronix.de ([92.198.50.35]:55953 "EHLO
+	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751448AbaEWNew (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 23 May 2014 09:34:52 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Tomasz Figa <tomasz.figa@gmail.com>
-Cc: Hans de Goede <hdegoede@redhat.com>, Chen-Yu Tsai <wens@csie.org>, Arend van Spriel <arend@broadcom.com>, Sascha Hauer <s.hauer@pengutronix.de>, Chris Ball <chris@printf.net>, Maxime Ripard <maxime.ripard@free-electrons.com>, linux-mmc <linux-mmc@vger.kernel.org>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>, devicetree <devicetree@vger.kernel.org>, Olof Johansson <olof@lixom.net>, Mark Brown <broonie@kernel.org>, Russell King - ARM Linux <linux@arm.linux.org.uk>, Fabio Estevam <festevam@gmail.com>, Arnd Bergmann <arnd@arndb.de>, Jyri Sarha <jsarha@ti.com>, Kevin Hilman <khilman@linaro.org>, Linus Walleij <linus.walleij@linaro.org>
+To: linux-mmc@vger.kernel.org
+Cc: linux-arm-kernel@lists.infradead.org, kernel@pengutronix.de, Markus Niebel <Markus.Niebel@tqs.de>, Sascha Hauer <s.hauer@pengutronix.de>
 
-On 22 May 2014 19:20, Tomasz Figa <tomasz.figa@gmail.com> wrote:
-> Hi,
->
->
-> On 22.05.2014 13:38, Hans de Goede wrote:
->> On 05/22/2014 12:23 PM, Chen-Yu Tsai wrote:
->>> On Thu, May 22, 2014 at 5:49 PM, Hans de Goede <hdegoede@redhat.com> wrote:
->
-> snip
->
->>>> I've been thinking a bit about this, and it is a non trivial problem since
->>>> sdio devices are normally instantiated when probed, unlike ie spi devices
->>>> which are instantiated from devicetree.
->>>>
->>>> Adding device tree instantiation of sdio devices seems like a bad idea, as
->>>> then we get 2 vastly different device instantiation paths. Still we need some
->>>> way to get power and clks setup before the mmc host initializes.
->
-> What about introducing some extra callbacks to mmc drivers to build
-> driver data and control power?
->
-> struct mmc_legacy_device {
->         /* ... */
->         struct device_node *of_node;
->         void *driver_data;
-> };
->
-> struct mmc_driver {
->         /* ... */
->         int (*prepare)(struct mmc_legacy_device *);
->         void (*unprepare)(struct mmc_legacy_device *);
-> };
->
-> static int my_wlan_prepare(struct mmc_legacy_device *dev)
-> {
->         struct my_wlan_data *data;
->
->         data = kzalloc(...);
->         /* ... */
->
->         of_*();
->         clk_*();
->         regulator_*();
->         /* ... */
->
->         ret = my_wlan_power_on(data);
->         /* ... */
->
->         dev->driver_data = data;
-> }
->
-> static void my_wlan_unprepare(struct mmc_legacy_device *dev)
-> {
->         struct my_wlan_data *data;
->
->         data = dev->driver_data;
->
->         my_wlan_power_off(data);
->         /* ... */
->
->         dev->driver_data = NULL;
->         kfree(data);
-> }
->
-> I don't really like this, especially the fact that this would be highly
-> MMC-specific, while there are other interfaces that also need this
-> problem solved, e.g. USB/HSIC.
->
-> I had proposed another solution that would require almost no changes in
-> MMC core and could work for any data interface. You can find it
-> somewhere in the thread mentioned by Chen-Yu. Unfortunately, for reasons
-> that don't appeal to me, it wasn't positively received by MMC people.
+The eMMC and the SD-Card specifications describe the optional SET_DSR command.
+During measurements at our lab we found that some cards implementing this feature
+having really strong driver strengts per default. This can lead to voltage peaks
+above the specification of the host on signal edges for data sent from a card to
+the host.
 
-Hi Tomasz,
+Since availability of a given card type may be shorter than the time a certain
+hardware will be produced it is useful to have support for this command (Alternative
+would be changing termination resistors and adapting the driver strength of the
+host to the used card.)
 
-To be clear, I surely liked your proposal, sorry if you interpreted my
-comments differently. I was just eager to see some patches before
-continuing the discussion. :-)
+As the value of the dsr register is board specific this adds a 'dsr' devicetree
+property which is handled in mmc_of_parse.
 
-If remember correctly, our discussion went on hold, while we tried to
-figure out how to handle the probing of the "power controller driver".
-I gave some suggestion, which had some pros and cons. Let's follow up
-on this.
+Signed-off-by: Sascha Hauer <s.hauer@pengutronix.de>
+---
+ Documentation/devicetree/bindings/mmc/mmc.txt |  3 +++
+ drivers/mmc/core/host.c                       |  3 +++
+ drivers/mmc/core/mmc.c                        |  4 ++++
+ drivers/mmc/core/mmc_ops.c                    | 17 +++++++++++++++++
+ drivers/mmc/core/mmc_ops.h                    |  1 +
+ include/linux/mmc/card.h                      |  3 ++-
+ include/linux/mmc/host.h                      |  2 ++
+ 7 files changed, 32 insertions(+), 1 deletion(-)
 
-I start by giving a short re-cap of my view for how to solve this
-problem, which is based upon your idea with the "power controller
-driver".
+diff --git a/Documentation/devicetree/bindings/mmc/mmc.txt b/Documentation/devicetree/bindings/mmc/mmc.txt
+index 9dce540..737203e 100644
+--- a/Documentation/devicetree/bindings/mmc/mmc.txt
++++ b/Documentation/devicetree/bindings/mmc/mmc.txt
+@@ -38,6 +38,9 @@ Optional properties:
+ - mmc-highspeed-ddr-1_2v: eMMC high-speed DDR mode(1.2V I/O) is supported
+ - mmc-hs200-1_8v: eMMC HS200 mode(1.8V I/O) is supported
+ - mmc-hs200-1_2v: eMMC HS200 mode(1.2V I/O) is supported
++- dsr: Content of the optional driver stage register (DSR) as described
++  in JEDEC Standard No. 84-A44, 12.4: Programmable card output driver. Not
++  all MMC cards implement this register and the actual value is card specific.
+ 
+ *NOTE* on CD and WP polarity. To use common for all SD/MMC host controllers line
+ polarity properties, we have to fix the meaning of the "normal" and "inverted"
+diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+index fdea825..eea272e 100644
+--- a/drivers/mmc/core/host.c
++++ b/drivers/mmc/core/host.c
+@@ -447,6 +447,7 @@ int mmc_of_parse(struct mmc_host *host)
+ 		host->caps2 |= MMC_CAP2_HS200_1_8V_SDR;
+ 	if (of_find_property(np, "mmc-hs200-1_2v", &len))
+ 		host->caps2 |= MMC_CAP2_HS200_1_2V_SDR;
++	of_property_read_u32(np, "dsr", &host->dsr);
+ 
+ 	return 0;
+ 
+@@ -515,6 +516,8 @@ struct mmc_host *mmc_alloc_host(int extra, struct device *dev)
+ 	host->max_blk_size = 512;
+ 	host->max_blk_count = PAGE_CACHE_SIZE / 512;
+ 
++	host->dsr = 0xffffffff;
++
+ 	return host;
+ 
+ free:
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index 1ab5f3a..0ab1c44 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -162,6 +162,7 @@ static int mmc_decode_csd(struct mmc_card *card)
+ 	csd->read_partial = UNSTUFF_BITS(resp, 79, 1);
+ 	csd->write_misalign = UNSTUFF_BITS(resp, 78, 1);
+ 	csd->read_misalign = UNSTUFF_BITS(resp, 77, 1);
++	csd->dsr_imp = UNSTUFF_BITS(resp, 76, 1);
+ 	csd->r2w_factor = UNSTUFF_BITS(resp, 26, 3);
+ 	csd->write_blkbits = UNSTUFF_BITS(resp, 22, 4);
+ 	csd->write_partial = UNSTUFF_BITS(resp, 21, 1);
+@@ -970,6 +971,9 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+ 			goto free_card;
+ 	}
+ 
++	if (card->csd.dsr_imp && (host->dsr & 0xffff) == host->dsr)
++		mmc_set_dsr(host);
++
+ 	/*
+ 	 * Select card, as all following commands rely on that.
+ 	 */
+diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
+index f51b5ba..f8af72a 100644
+--- a/drivers/mmc/core/mmc_ops.c
++++ b/drivers/mmc/core/mmc_ops.c
+@@ -93,6 +93,23 @@ int mmc_deselect_cards(struct mmc_host *host)
+ 	return _mmc_select_card(host, NULL);
+ }
+ 
++int mmc_set_dsr(struct mmc_host *host)
++{
++	int err;
++	struct mmc_command cmd = {0};
++
++	cmd.opcode = MMC_SET_DSR;
++
++	cmd.arg = (host->dsr << 16) | 0xffff;
++	cmd.flags = MMC_RSP_NONE | MMC_CMD_AC;
++
++	err = mmc_wait_for_cmd(host, &cmd, MMC_CMD_RETRIES);
++	if (err)
++		return err;
++
++	return 0;
++}
++
+ int mmc_go_idle(struct mmc_host *host)
+ {
+ 	int err;
+diff --git a/drivers/mmc/core/mmc_ops.h b/drivers/mmc/core/mmc_ops.h
+index 80ae9f4..390dac6 100644
+--- a/drivers/mmc/core/mmc_ops.h
++++ b/drivers/mmc/core/mmc_ops.h
+@@ -14,6 +14,7 @@
+ 
+ int mmc_select_card(struct mmc_card *card);
+ int mmc_deselect_cards(struct mmc_host *host);
++int mmc_set_dsr(struct mmc_host *host);
+ int mmc_go_idle(struct mmc_host *host);
+ int mmc_send_op_cond(struct mmc_host *host, u32 ocr, u32 *rocr);
+ int mmc_all_send_cid(struct mmc_host *host, u32 *cid);
+diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+index b730272..ced116f 100644
+--- a/include/linux/mmc/card.h
++++ b/include/linux/mmc/card.h
+@@ -42,7 +42,8 @@ struct mmc_csd {
+ 	unsigned int		read_partial:1,
+ 				read_misalign:1,
+ 				write_partial:1,
+-				write_misalign:1;
++				write_misalign:1,
++				dsr_imp:1;
+ };
+ 
+ struct mmc_ext_csd {
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index cb61ea4..d8d9d68 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -358,6 +358,8 @@ struct mmc_host {
+ 
+ 	unsigned int		slotno;	/* used for sdio acpi binding */
+ 
++	u32			dsr;	/* optional driver stage register (dsr) value */
++
+ 	unsigned long		private[0] ____cacheline_aligned;
+ };
+ 
+-- 
+2.0.0.rc0
 
-1.
-The power controller driver handles the needed _external_ PM resources
-and maintains SOC specific power on sequence, to be able to initialize
-the "non-removable" SDIO card.
-
-To not mix things up, the mmc host will also manages some PM resources
-to be able to serve communication with the SDIO card. These resources
-are typically the SDIO VCC power, the SDIO bus interface clock,
-pinctrl for the interface signals, etc.
-
-2.
-To handle reference counting, we rely on runtime PM, using
-pm_runtime_get|put() of the power controller's struct device.
-
-3.
-By using runtime PM as in 2), we enable the power controller driver to
-keep a centralized control of the PM resources. This will also be
-useful when the resources are shared. For example, like we have on
-ux500 with bluetooth and wlan.
-
-
-If this above seems like a reasonable approach, we still have a few
-things to iron out.
-
-1.
-The power controller driver needs to be probed prior the actual SDIO
-card detection starts, which is managed through a scheduled work
-triggered when the mmc host gets added to the mmc core.
-
-2.
-The mmc core or host, need a handle of the power controller's struct
-device to  be able to invoke pm_runtime_get|put() on it.
-
-Suggestions/comments? They are welcome! :-)
-
-Kind regards
-Ulf Hansson
