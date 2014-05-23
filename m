@@ -1,74 +1,116 @@
-From: Sascha Hauer <s.hauer@pengutronix.de>
-Subject: Re: adding aliases to mmc ... again
-Date: Fri, 23 May 2014 11:23:59 +0200
-Message-ID: <20140523092359.GG15686@pengutronix.de>
-References: <1400772623-8390-1-git-send-email-s.hauer@pengutronix.de>
- <537E22E3.3010601@wwwdotorg.org>
- <20140522182134.GD15686@pengutronix.de>
- <537E4EAF.5000309@wwwdotorg.org>
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: Re: [PATCH v2 14/14] mmc: mmci: Add Qcom specific pio_read function.
+Date: Fri, 23 May 2014 11:31:40 +0200
+Message-ID: <CACRpkdbQ_uNoZpW9w7Yf==wt44wun4e+P7WzMp_t0tuCVeUX_g@mail.gmail.com>
+References: <1400146447-29803-1-git-send-email-srinivas.kandagatla@linaro.org>
+	<1400146684-30384-1-git-send-email-srinivas.kandagatla@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from metis.ext.pengutronix.de ([92.198.50.35]:52575 "EHLO
-	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752543AbaEWJYD (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 23 May 2014 05:24:03 -0400
-Content-Disposition: inline
-In-Reply-To: <537E4EAF.5000309@wwwdotorg.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: <1400146684-30384-1-git-send-email-srinivas.kandagatla@linaro.org>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+Cc: Russell King <linux@arm.linux.org.uk>, Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-msm@vger.kernel.org" <linux-arm-msm@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Stephen Warren <swarren@wwwdotorg.org>
-Cc: linux-mmc@vger.kernel.org, Dirk Behme <dirk.behme@de.bosch.com>, Fabio Estevam <festevam@gmail.com>, ptx@pengutronix.de
 
-On Thu, May 22, 2014 at 01:23:27PM -0600, Stephen Warren wrote:
-> >> Does it solve the following, which AFAIK has always been the primary
-> >> argument against aligning block device IDs with controller IDs:
-> >>
-> >> - User inserts SD card into MMC controller ID (or alias) 1.
-> >> - /dev/mmcblk1 now exists
-> >> - Mount /dev/mmcblk1 on /mnt/tmp
-> >> - User removes that SD card
-> >> - /dev/mmcblk1 still exists, since it's mounted so can't be deleted
-> >> after the card removal.
-> >> - User inserts SD card into MMC controller ID (or alias) 1.
-> >> - /dev/mmcblkN (N is something other than 1) now exists
-> >>
-> >> Now, the block device ID must be != the original ID, since two block
-> >> devices exist.
-> > 
-> > No, it shouldn't solve that, but it's out of scope for this patch. All
-> > it solves is to reliably find the rootfs. If the card containing your
-> > rootfs is removed you are in trouble anyway and it won't help if it gets
-> > the same mmcblkno once it's plugged again. For other devices which don't
-> > contain the rootfs there are enough possibilities to find them in userspace.
-> 
-> I don't think there should be any special cases for the root fs.
-> 
-> I don't think the disadvantage of the UUID= or PARTUUID= issue you
-> mention enough is really an issue in general. If it is for some
-> platform, then the root fs should be cryto-signed and validated to
-> prevent someone from using the wrong root fs.
+On Thu, May 15, 2014 at 11:38 AM,  <srinivas.kandagatla@linaro.org> wrote:
 
-That argument came up here aswell. Crypto signing would prevent the Kernel
-from starting the wrong userspace, but it would not start the correct one
-either.
-Crypto signing is quite a heavy approach for just making sure to boot from a
-particular device.
-Booting with UUID= is fine for several usecases, but I can't really
-understand why it shouldn't be possible to point with the finger to the
-bootdevice and just boot it. Instead we can just say "boot some device that
-looks like this one".
+> From: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+>
+> MCIFIFOCNT register behaviour on Qcom chips is very different than the other
+> pl180 integrations. MCIFIFOCNT register contains the number of
+> words that are still waiting to be transferred through the FIFO. It keeps
+> decrementing once the host CPU reads the MCIFIFO. With the existing logic and
+> the MCIFIFOCNT behaviour, mmci_pio_read will loop forever, as the FIFOCNT
+> register will always return transfer size before reading the FIFO.
+>
+> Also the data sheet states that "This register is only useful for debug
+> purposes and should not be used for normal operation since it does not reflect
+> data which may or may not be in the pipeline".
+>
+> This patch implements qcom_pio_read function so as existing mmci_pio_read is
+> not suitable for Qcom SOCs. qcom_pio_read function is only selected
+> based on qcom_fifo flag in variant data structure.
+>
+> Signed-off-by: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+(...)
 
-Speaking of which my preferred solution is another one. As a bootloader
-developer it really annoys me that I don't have the possibility to tell
-the kernel to boot a particular device. What I really want to do is to
-pass a devicetree phandle to the kernel for the rootfs (Or a device path
-for the EFI/ACPI guys). This would solve a whole lot of problems here.
+> +static int mmci_qcom_pio_read(struct mmci_host *host, char *buffer,
+> +                        unsigned int remain)
+> +{
+> +       uint32_t        *ptr = (uint32_t *) buffer;
 
-Sascha
+Just use u32 like the rest of the driver does.
 
--- 
-Pengutronix e.K.                           |                             |
-Industrial Linux Solutions                 | http://www.pengutronix.de/  |
-Peiner Str. 6-8, 31137 Hildesheim, Germany | Phone: +49-5121-206917-0    |
-Amtsgericht Hildesheim, HRA 2686           | Fax:   +49-5121-206917-5555 |
+> +       int             fifo_size = variant->fifosize;
+> +
+> +       if (remain % 4)
+> +               remain = ((remain >> 2) + 1) << 2;
+
+Insert a comment here so we know what is happening.
+It seems you are rounding up to the nearest divisible
+by four reads. It looks complicated. Does this accomplish
+the same thing?
+
+if (remain % 4) {
+    remain &= ~0x03;
+    remain += 4;
+}
+
+> +       while (readl(host->base + MMCISTATUS) & MCI_RXDATAAVLBL) {
+> +               *ptr = readl(host->base + MMCIFIFO + (count % fifo_size));
+> +               ptr++;
+> +               count += sizeof(uint32_t);
+> +
+> +               remain -=  sizeof(uint32_t);
+
+I already commented that this looks weird. It is a well known fact
+that a u32 is 4 bytes.
+
+count += 4;
+remain -= 4;
+
+works just fine!
+
+> +               if (remain == 0)
+> +                       break;
+> +       }
+> +       return count;
+> +}
+
+And another variant is to count the *number or words*
+to read from the FIFO rather than the number of bytes! I would do it
+like this:
+
+static int mmci_qcom_pio_read(struct mmci_host *host, char *buffer,
+                        unsigned int remain)
+{
+       u32 *ptr = (u32*) buffer;
+       unsigned int count = 0;
+       unsigned int words;
+       unsigned int fifo_size = host->variant->fifosize;
+
+       words = DIV_ROUND_UP(remain, 4);
+       while (readl(host->base + MMCISTATUS) & MCI_RXDATAAVLBL) {
+               *ptr = readl(host->base + MMCIFIFO + (count % fifo_size));
+               ptr++;
+               count += 4;
+               remain--;
+               if (!remain)
+                       break;
+       }
+       return count;
+}
+
+I guess you will run into additional problems when you come to doing
+SDIO. This function can return *more* bytes than asked for, as it rounds
+up. It won't happen with MMC/SD transfers since these are always
+divisible by 8, but it *will* happen on SDIO!
+
+If you look carefully at the comments in mmci_pio_read() you will
+see how this is handled. Are you sure this function cannot be
+augmented to handle the qcom variant as well so you don't get this
+problem further down the road?
+
+Yours,
+Linus Walleij
