@@ -1,116 +1,39 @@
-From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: [PATCH v2 14/14] mmc: mmci: Add Qcom specific pio_read function.
-Date: Fri, 23 May 2014 11:31:40 +0200
-Message-ID: <CACRpkdbQ_uNoZpW9w7Yf==wt44wun4e+P7WzMp_t0tuCVeUX_g@mail.gmail.com>
-References: <1400146447-29803-1-git-send-email-srinivas.kandagatla@linaro.org>
-	<1400146684-30384-1-git-send-email-srinivas.kandagatla@linaro.org>
+From: Johan Rudholm <jrudholm@gmail.com>
+Subject: Re: Question for emmc ioctl sync issue
+Date: Fri, 23 May 2014 11:32:48 +0200
+Message-ID: <CA+20K0A54cRUtf8SN0sRVPLMcL+zt0_VcDegCacPqCFrxG5rRw@mail.gmail.com>
+References: <CAKT61h8cVG_r3girMYAjO+HT9EQG5sPfYw2Yvgx8j6vsD7M4Ng@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
-In-Reply-To: <1400146684-30384-1-git-send-email-srinivas.kandagatla@linaro.org>
-Sender: linux-arm-msm-owner@vger.kernel.org
-To: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
-Cc: Russell King <linux@arm.linux.org.uk>, Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-msm@vger.kernel.org" <linux-arm-msm@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qc0-f182.google.com ([209.85.216.182]:46258 "EHLO
+	mail-qc0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751298AbaEWJct (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 23 May 2014 05:32:49 -0400
+Received: by mail-qc0-f182.google.com with SMTP id e16so7587189qcx.41
+        for <linux-mmc@vger.kernel.org>; Fri, 23 May 2014 02:32:49 -0700 (PDT)
+In-Reply-To: <CAKT61h8cVG_r3girMYAjO+HT9EQG5sPfYw2Yvgx8j6vsD7M4Ng@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Wan ZongShun <mcuos.com@gmail.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-On Thu, May 15, 2014 at 11:38 AM,  <srinivas.kandagatla@linaro.org> wrote:
+Hi Wan,
 
-> From: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+2014-05-19 9:55 GMT+02:00 Wan ZongShun <mcuos.com@gmail.com>:
+> Hi all,
 >
-> MCIFIFOCNT register behaviour on Qcom chips is very different than the other
-> pl180 integrations. MCIFIFOCNT register contains the number of
-> words that are still waiting to be transferred through the FIFO. It keeps
-> decrementing once the host CPU reads the MCIFIFO. With the existing logic and
-> the MCIFIFOCNT behaviour, mmci_pio_read will loop forever, as the FIFOCNT
-> register will always return transfer size before reading the FIFO.
+> I have a question for mmc_blk_ioctl_cmd.
 >
-> Also the data sheet states that "This register is only useful for debug
-> purposes and should not be used for normal operation since it does not reflect
-> data which may or may not be in the pipeline".
->
-> This patch implements qcom_pio_read function so as existing mmci_pio_read is
-> not suitable for Qcom SOCs. qcom_pio_read function is only selected
-> based on qcom_fifo flag in variant data structure.
->
-> Signed-off-by: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
-(...)
+> I did not see any sync code in this function like mutex, semphere.., why?
+> The ioctl will do partition switch as I know, so If more partitions
+> call the ioctl from user layer at the same time, how to sync with
+> them?
 
-> +static int mmci_qcom_pio_read(struct mmci_host *host, char *buffer,
-> +                        unsigned int remain)
-> +{
-> +       uint32_t        *ptr = (uint32_t *) buffer;
+I guess because locking here could result in deadlocks when the device
+is accessed from for instance the block driver. There is no guarantee
+that any commands you send to the card via consecutive calls to the
+ioctl interface are not interlaced by other commands sent via the
+block driver or other ioctl calls.
 
-Just use u32 like the rest of the driver does.
-
-> +       int             fifo_size = variant->fifosize;
-> +
-> +       if (remain % 4)
-> +               remain = ((remain >> 2) + 1) << 2;
-
-Insert a comment here so we know what is happening.
-It seems you are rounding up to the nearest divisible
-by four reads. It looks complicated. Does this accomplish
-the same thing?
-
-if (remain % 4) {
-    remain &= ~0x03;
-    remain += 4;
-}
-
-> +       while (readl(host->base + MMCISTATUS) & MCI_RXDATAAVLBL) {
-> +               *ptr = readl(host->base + MMCIFIFO + (count % fifo_size));
-> +               ptr++;
-> +               count += sizeof(uint32_t);
-> +
-> +               remain -=  sizeof(uint32_t);
-
-I already commented that this looks weird. It is a well known fact
-that a u32 is 4 bytes.
-
-count += 4;
-remain -= 4;
-
-works just fine!
-
-> +               if (remain == 0)
-> +                       break;
-> +       }
-> +       return count;
-> +}
-
-And another variant is to count the *number or words*
-to read from the FIFO rather than the number of bytes! I would do it
-like this:
-
-static int mmci_qcom_pio_read(struct mmci_host *host, char *buffer,
-                        unsigned int remain)
-{
-       u32 *ptr = (u32*) buffer;
-       unsigned int count = 0;
-       unsigned int words;
-       unsigned int fifo_size = host->variant->fifosize;
-
-       words = DIV_ROUND_UP(remain, 4);
-       while (readl(host->base + MMCISTATUS) & MCI_RXDATAAVLBL) {
-               *ptr = readl(host->base + MMCIFIFO + (count % fifo_size));
-               ptr++;
-               count += 4;
-               remain--;
-               if (!remain)
-                       break;
-       }
-       return count;
-}
-
-I guess you will run into additional problems when you come to doing
-SDIO. This function can return *more* bytes than asked for, as it rounds
-up. It won't happen with MMC/SD transfers since these are always
-divisible by 8, but it *will* happen on SDIO!
-
-If you look carefully at the comments in mmci_pio_read() you will
-see how this is handled. Are you sure this function cannot be
-augmented to handle the qcom variant as well so you don't get this
-problem further down the road?
-
-Yours,
-Linus Walleij
+Kind regards, Johan
