@@ -1,71 +1,98 @@
-From: Hans de Goede <hdegoede@redhat.com>
-Subject: Re: RFC: representing sdio devices oob interrupt, clks, etc. in device
- tree
-Date: Fri, 23 May 2014 13:50:40 +0200
-Message-ID: <537F3610.3050104@redhat.com>
-References: <537DC832.3020006@redhat.com> <CAGb2v64VZac2KvAALrScecN89sRnBQoDrKxKMvkte+3G04NXeA@mail.gmail.com> <537DE1AA.5050606@redhat.com> <537E31F7.1030505@gmail.com> <537F1148.3010102@redhat.com> <20140523112239.GB12304@sirena.org.uk>
+From: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+Subject: Re: [PATCH v2 14/14] mmc: mmci: Add Qcom specific pio_read function.
+Date: Fri, 23 May 2014 12:53:07 +0100
+Message-ID: <537F36A3.7020006@linaro.org>
+References: <1400146447-29803-1-git-send-email-srinivas.kandagatla@linaro.org>	<1400146684-30384-1-git-send-email-srinivas.kandagatla@linaro.org> <CACRpkdbQ_uNoZpW9w7Yf==wt44wun4e+P7WzMp_t0tuCVeUX_g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:26806 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751599AbaEWLvk (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 23 May 2014 07:51:40 -0400
-In-Reply-To: <20140523112239.GB12304@sirena.org.uk>
+Received: from mail-wi0-f175.google.com ([209.85.212.175]:50746 "EHLO
+	mail-wi0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752071AbaEWLxM (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 23 May 2014 07:53:12 -0400
+Received: by mail-wi0-f175.google.com with SMTP id f8so704695wiw.8
+        for <linux-mmc@vger.kernel.org>; Fri, 23 May 2014 04:53:10 -0700 (PDT)
+In-Reply-To: <CACRpkdbQ_uNoZpW9w7Yf==wt44wun4e+P7WzMp_t0tuCVeUX_g@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Mark Brown <broonie@kernel.org>
-Cc: Tomasz Figa <tomasz.figa@gmail.com>, Chen-Yu Tsai <wens@csie.org>, Arend van Spriel <arend@broadcom.com>, Sascha Hauer <s.hauer@pengutronix.de>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Maxime Ripard <maxime.ripard@free-electrons.com>, linux-mmc <linux-mmc@vger.kernel.org>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>, devicetree <devicetree@vger.kernel.org>, Olof Johansson <olof@lixom.net>, Russell King - ARM Linux <linux@arm.linux.org.uk>, Fabio Estevam <festevam@gmail.com>, Arnd Bergmann <arnd@arndb.de>, Jyri Sarha <jsarha@ti.com>
+To: Linus Walleij <linus.walleij@linaro.org>
+Cc: Russell King <linux@arm.linux.org.uk>, Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-msm@vger.kernel.org" <linux-arm-msm@vger.kernel.org>
 
-Hi,
+Hi Linus W,
 
-On 05/23/2014 01:22 PM, Mark Brown wrote:
-> On Fri, May 23, 2014 at 11:13:44AM +0200, Hans de Goede wrote:
-> 
->> Thinking more about this, I would like to make one change to my
->> proposal, the mmc-core should only do power up of child-nodes if
->> they have a compatible of: "simple-sdio-powerup". This way
->> when we add something more complex, we can keep the simple powerup
->> code in the mmc core, keeping what we've already using this working
->> and the mmc core won't respond to the child nodes for more complex
->> devices, so it won't conflict with more complex power-up handling
->> handled by some other driver.
-> 
-> Would it not be better to have this be something in the driver struct
-> rather than in the device tree?  Putting a compatible in there would be
-> encoding details of the Linux implementation in the DT which doesn't
-> seem right especially since these are details we're thinking of changing
-> later on.
+On 23/05/14 10:31, Linus Walleij wrote:
+> static int mmci_qcom_pio_read(struct mmci_host *host, char *buffer,
+>                          unsigned int remain)
+> {
+>         u32 *ptr = (u32*) buffer;
+>         unsigned int count = 0;
+>         unsigned int words;
+>         unsigned int fifo_size = host->variant->fifosize;
+>
+>         words = DIV_ROUND_UP(remain, 4);
+>         while (readl(host->base + MMCISTATUS) & MCI_RXDATAAVLBL) {
+>                 *ptr = readl(host->base + MMCIFIFO + (count % fifo_size));
+>                 ptr++;
+>                 count += 4;
+>                 remain--;
+>                 if (!remain)
+>                         break;
+>         }
+>         return count;
+> }
+>
+> I guess you will run into additional problems when you come to doing
+> SDIO. This function can return*more*  bytes than asked for, as it rounds
+> up. It won't happen with MMC/SD transfers since these are always
+> divisible by 8, but it*will*  happen on SDIO!
+That's a good point,
 
-The compatible is not a Linux specific thing, it is a marking saying
-that something needs to take care of enabling the clks (and whatever
-else we will make part of the binding for this compatible), before
-scanning the mmc bus.
+Qualcomm will need SDIO support in future, so I have slightly modified 
+the  code to address this. Other thing I tried was to fit in this in 
+mmci_pio_read, It became very ugly, as the FIFOCNT register behaviour is 
+totally different and there is no way to tell how many bytes are ready 
+to be consumed. So finally I think having a separate pio read for 
+qualcomm looks much neater.
 
-> Something like have the driver set flags saying if it wants
-> to do complicated things.
+final mmci_qcom_pio_read looks like:
 
-Chicken <-> egg, we won't know which driver to use before we've probed
-the mmc bus, and we cannot probe the bus before enabling the clks, etc.
 
->> FWIW if we ever get truely complex cases I think modeling the
->> power-up hardware as a pmic platform device is not a bad idea,
->> we would then need to have a generic mmc-host pmic property, which
->> would be used both to do the initial powerup before scanning, as
->> well as for the sdio device driver to get a handle to the pmic,
->> for run time power-management (if desired).
-> 
-> I don't know if this will ever apply to SDIO but with other buses the
-> complicated bits come when the driver wants to take over some of the
-> power management do things like turn some of the supplies or clocks on
-> and off independently at runtime for low power modes.
+static int mmci_qcom_pio_read(struct mmci_host *host, char *buffer,
+             unsigned int remain)
+{
+     u32 *ptr = (u32*) buffer;
+     unsigned int count = 0;
+     unsigned int words, bytes;
+     unsigned int fifo_size = host->variant->fifosize;
 
-Hmm, good point in that case actually having these things in the
-child node makes most sense, because then the driver can find them
-their. Note that the mmc core enabling things does not mean that
-the driver cannot later disable them if needed.
+     words = remain >> 2;
+     bytes = remain % 4;
+     /* read full words followed by leftover bytes */
+     if (words) {
+         while (readl(host->base + MMCISTATUS) & MCI_RXDATAAVLBL) {
+             *ptr = readl(host->base + MMCIFIFO + (count % fifo_size));
+             ptr++;
+             count += 4;
+             words--;
+             if (!words)
+                 break;
+          }
+     }
 
-Regards,
+     /* read leftover bytes */
+     if (unlikely(bytes)) {
+         unsigned char buf[4];
+         if (readl(host->base + MMCISTATUS) & MCI_RXDATAAVLBL) {
+             *buf = readl(host->base + MMCIFIFO + (count % fifo_size));
+             memcpy(ptr, buf, bytes);
+              count += bytes;
+         }
+     }
 
-Hans
+     return count;
+}
+
+Thanks,
+srini
+
