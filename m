@@ -1,102 +1,42 @@
-From: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
-Subject: Re: [PATCH v2 00/14] Add Qualcomm SD Card Controller support
-Date: Fri, 23 May 2014 08:13:15 +0100
-Message-ID: <537EF50B.2010101@linaro.org>
-References: <1398116624-31052-1-git-send-email-srinivas.kandagatla@linaro.org> <1400146447-29803-1-git-send-email-srinivas.kandagatla@linaro.org>
+From: Olof Johansson <olof@lixom.net>
+Subject: Re: [PATCH RESEND] mmc: dove: fix missing MACH_DOVE dependency
+Date: Fri, 23 May 2014 00:16:55 -0700
+Message-ID: <CAOesGMjyk=n7MyVisfjYze9UuEb7XNv5O+c1Tndc+q1Q=PEetQ@mail.gmail.com>
+References: <1400522571-10799-1-git-send-email-sebastian.hesselbarth@gmail.com>
+	<CAPDyKFo8CdyDbJEP0GkFTHdzpkyRBZEp-jAyrU4y8qi__zChkA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1400146447-29803-1-git-send-email-srinivas.kandagatla@linaro.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Russell King <linux@arm.linux.org.uk>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
-Cc: Chris Ball <chris@printf.net>, linux-kernel@vger.kernel.org, linus.walleij@linaro.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qg0-f41.google.com ([209.85.192.41]:46900 "EHLO
+	mail-qg0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750909AbaEWHQ4 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 23 May 2014 03:16:56 -0400
+Received: by mail-qg0-f41.google.com with SMTP id j5so7509013qga.28
+        for <linux-mmc@vger.kernel.org>; Fri, 23 May 2014 00:16:55 -0700 (PDT)
+In-Reply-To: <CAPDyKFo8CdyDbJEP0GkFTHdzpkyRBZEp-jAyrU4y8qi__zChkA@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>, Chris Ball <chris@printf.net>, Jason Cooper <jason@lakedaemon.net>, Andrew Lunn <andrew@lunn.ch>, Gregory Clement <gregory.clement@free-electrons.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-Hi Ulf,
-I like to get this patches for v3.16,  any chance of considering these 
-patches to v3.16 ?
+On Thu, May 22, 2014 at 2:09 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> On 19 May 2014 20:02, Sebastian Hesselbarth
+> <sebastian.hesselbarth@gmail.com> wrote:
+>> DT-enabled Dove moved over from ARCH_DOVE in mach-dove to MACH_DOVE in
+>> mach-mvebu. As non-DT ARCH_DOVE will stay to rot for a while, add a new
+>> DT-only MACH_DOVE Kconfig. This slipped through the cracks and now is
+>> a fix to allow to build Dove's SDHCI driver for mach-mvebu on v3.15-rc.
+>>
+>> Signed-off-by: Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>
+>> Acked-by: Jason Cooper <jason@lakedaemon.net>
+>
+> Thanks! Picked up for the PR I send to Chris.
 
---srini
+Ulf, you might consider adding your tree to linux-next if this is
+going to be a common work flow for you guys.
 
-On 15/05/14 10:34, srinivas.kandagatla@linaro.org wrote:
-> From: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
->
-> Thankyou everyone for reviewing both RFC and v1 patches.
->
-> This patch series adds Qualcomm SD Card Controller support in pl180 mmci
-> driver. QCom SDCC is basically a pl180, but bit more customized, some of the
-> register layouts and offsets are different to the ones mentioned in pl180
-> datasheet. The plan is to totally remove the standalone SDCC driver
-> drivers/mmc/host/msm_sdcc.* and start using generic mmci driver for all
-> Qualcomm parts, as we get chance to test on other Qcom boards.
->
-> To start using the existing mmci driver, a fake amba id for Qualcomm is added
-> in patches:
->   mmc: mmci: Add Qualcomm Id to amba id table.
->
-> Second change is, adding a 3 clock cycle delay for register writes on QCOM SDCC
-> registers, which is done in patches:
->    mmc: mmci: Add register read/write wrappers.
->    mmc: mmci: Qcomm: Add 3 clock cycle delay after register write
->
-> Third change is to accommodate CLK, DATCTRL and MMCICLK register layout changes
-> in Qcom SDCC and provide more flexibity in driver to specify these changes via
-> variant datastructure. Which are done in patches:
->    mmc: mmci: Add Qcom datactrl register variant
->    mmc: mmci: add ddrmode mask to variant data
->    mmc: mmci: add 8bit bus support in variant data
->    mmc: mmci: add edge support to data and command out in variant data.
->    mmc: mmci: add Qcom specifics of clk and datactrl registers.
->    mmc: mmci: Add support to data commands via variant structure.
->    mmc: mmci: add support for fbclk to latch data and cmd.
->    mmc: mmci: add qcom specific clk control
->
-> Fourth major change was to add qcom specfic pio read function, the need for
-> this is because the way MCIFIFOCNT register behaved in QCOM SDCC is very
->   different to the one in pl180. This change is done in patch:
->    mmc: mmci: Add Qcom specific pio_read function.
->
-> Last some Qcom unrelated changes/cleanup to driver are done in patches:
->    mmc: mmci: use NSEC_PER_SEC macro
->    mmc: mmci: convert register bits to use BIT() macro.
->
-> This patches are tested in PIO mode on IFC8064 board with both eMMC and
-> external SD card. I would like to get this support in v3.16.
->
-> Changes from v1:
-> 	- moved most of the SOC specifics to variant parameters as suggested
-> 	  by Linus W.
-> 	- renamed registers as suggested by Linus W.
-> 	- Added comments in the code as suggested by Linus W.
-> 	- moved out AMBA ID addition patch from this series.
-> 	- rebased the patches to
-> 		git://git.linaro.org/people/ulf.hansson/mmc.git next
-> 	  as suggested by Ulf H.
->
-> Changes from RFC:
-> 	- moved out clk setup out of spinlock as pointed by Stephen B.
-> 	
-> Thanks,
-> srini
->
-> Srinivas Kandagatla (14):
->    mmc: mmci: use NSEC_PER_SEC macro
->    mmc: mmci: convert register bits to use BIT() macro.
->    mmc: mmci: Add Qualcomm Id to amba id table
->    mmc: mmci: Add Qcom datactrl register variant
->    mmc: mmci: Add register read/write wrappers.
->    mmc: mmci: Qcomm: Add 3 clock cycle delay after register write
->    mmc: mmci: add ddrmode mask to variant data
->    mmc: mmci: add 8bit bus support in variant data
->    mmc: mmci: add edge support to data and command out in variant data.
->    mmc: mmci: add Qcom specifics of clk and datactrl registers.
->    mmc: mmci: Add support to data commands via variant structure.
->    mmc: mmci: add support for fbclk to latch data and cmd.
->    mmc: mmci: add qcom specific clk control
->    mmc: mmci: Add Qcom specific pio_read function.
->
->   drivers/mmc/host/mmci.c | 245 ++++++++++++++++++++++++++++++++++++------------
->   drivers/mmc/host/mmci.h | 232 +++++++++++++++++++++++++--------------------
->   2 files changed, 311 insertions(+), 166 deletions(-)
->
+It's partially up to Chris though, if he's OK with patches going into
+your branch more or less being guaranteed to make it into his as well.
+
+
+-Olof
