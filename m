@@ -1,8 +1,7 @@
 From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: [PATCH 3/3] ARM: dts: replace the broken-cd property into slot node
- for dwmmc.
-Date: Fri, 23 May 2014 19:25:21 +0900
-Message-ID: <1400840721-11050-4-git-send-email-jh80.chung@samsung.com>
+Subject: [PATCH 2/3] mmc: dw_mmc: use the __mmc_of_parse to parse the slot node
+Date: Fri, 23 May 2014 19:25:20 +0900
+Message-ID: <1400840721-11050-3-git-send-email-jh80.chung@samsung.com>
 References: <1400840721-11050-1-git-send-email-jh80.chung@samsung.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-reply-to: <1400840721-11050-1-git-send-email-jh80.chung@samsung.com>
@@ -11,252 +10,87 @@ To: linux-mmc@vger.kernel.org
 Cc: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Ludovic Desroches <ludovic.desroches@atmel.com>, Seungwon Jeon <tgih.jun@samsung.com>, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-samsung-soc@vger.kernel.org, Jaehoon Chung <jh80.chung@samsung.com>
 List-Id: linux-mmc@vger.kernel.org
 
-dw-mmc controller can be support the multiple slot.
-So each slot's property can be difference.
+dw-mmc controller have the multiple slot.
+Then it needs to parse the property for each slot.
 
 Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
 ---
- arch/arm/boot/dts/exynos4412-odroidx.dts      |    2 +-
- arch/arm/boot/dts/exynos4412-origen.dts       |    2 +-
- arch/arm/boot/dts/exynos4412-trats2.dts       |    4 ++--
- arch/arm/boot/dts/exynos5250-arndale.dts      |    2 +-
- arch/arm/boot/dts/exynos5250-cros-common.dtsi |    4 ++--
- arch/arm/boot/dts/exynos5250-smdk5250.dts     |    2 +-
- arch/arm/boot/dts/exynos5420-arndale-octa.dts |    2 +-
- arch/arm/boot/dts/rk3066a-bqcurie2.dts        |    2 +-
- arch/arm/boot/dts/socfpga_arria5.dtsi         |    2 +-
- arch/arm/boot/dts/socfpga_cyclone5.dtsi       |    2 +-
- arch/arm/boot/dts/socfpga_vt.dts              |    2 +-
- 11 files changed, 13 insertions(+), 13 deletions(-)
+ drivers/mmc/host/dw_mmc.c |   25 ++++++-------------------
+ 1 file changed, 6 insertions(+), 19 deletions(-)
 
-diff --git a/arch/arm/boot/dts/exynos4412-odroidx.dts b/arch/arm/boot/dts/exynos4412-odroidx.dts
-index 31db28a..24ec351 100644
---- a/arch/arm/boot/dts/exynos4412-odroidx.dts
-+++ b/arch/arm/boot/dts/exynos4412-odroidx.dts
-@@ -46,7 +46,6 @@
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index 1ac227c..d4800f8 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -1015,12 +1015,11 @@ static int dw_mci_get_cd(struct mmc_host *mmc)
+ {
+ 	int present;
+ 	struct dw_mci_slot *slot = mmc_priv(mmc);
+-	struct dw_mci_board *brd = slot->host->pdata;
+ 	struct dw_mci *host = slot->host;
+ 	int gpio_cd = mmc_gpio_get_cd(mmc);
  
- 		num-slots = <1>;
- 		supports-highspeed;
--		broken-cd;
- 		card-detect-delay = <200>;
- 		samsung,dw-mshc-ciu-div = <3>;
- 		samsung,dw-mshc-sdr-timing = <2 3>;
-@@ -55,6 +54,7 @@
- 		slot@0 {
- 			reg = <0>;
- 			bus-width = <8>;
-+			broken-cd;
- 		};
- 	};
+ 	/* Use platform get_cd function, else try onboard card detect */
+-	if (brd->quirks & DW_MCI_QUIRK_BROKEN_CARD_DETECTION)
++	if (slot->quirks & DW_MCI_QUIRK_BROKEN_CARD_DETECTION)
+ 		present = 1;
+ 	else if (!IS_ERR_VALUE(gpio_cd))
+ 		present = gpio_cd;
+@@ -2010,6 +2009,9 @@ static struct dw_mci_of_slot_quirks {
+ 	{
+ 		.quirk	= "disable-wp",
+ 		.id	= DW_MCI_SLOT_QUIRK_NO_WRITE_PROTECT,
++	}, {
++		.quirk	= "broken-cd",
++		.id	= DW_MCI_QUIRK_BROKEN_CARD_DETECTION,
+ 	},
+ };
  
-diff --git a/arch/arm/boot/dts/exynos4412-origen.dts b/arch/arm/boot/dts/exynos4412-origen.dts
-index e2c0dca..ed712a6 100644
---- a/arch/arm/boot/dts/exynos4412-origen.dts
-+++ b/arch/arm/boot/dts/exynos4412-origen.dts
-@@ -129,7 +129,6 @@
+@@ -2088,7 +2090,7 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
+ 	if (host->pdata->caps2)
+ 		mmc->caps2 = host->pdata->caps2;
  
- 		num-slots = <1>;
- 		supports-highspeed;
--		broken-cd;
- 		card-detect-delay = <200>;
- 		samsung,dw-mshc-ciu-div = <3>;
- 		samsung,dw-mshc-sdr-timing = <2 3>;
-@@ -138,6 +137,7 @@
- 		slot@0 {
- 			reg = <0>;
- 			bus-width = <8>;
-+			broken-cd;
- 		};
- 	};
+-	mmc_of_parse(mmc);
++	__mmc_of_parse(mmc, dw_mci_of_find_slot_node(host->dev, slot->id));
  
-diff --git a/arch/arm/boot/dts/exynos4412-trats2.dts b/arch/arm/boot/dts/exynos4412-trats2.dts
-index 9583563..294a586 100644
---- a/arch/arm/boot/dts/exynos4412-trats2.dts
-+++ b/arch/arm/boot/dts/exynos4412-trats2.dts
-@@ -460,8 +460,6 @@
- 	mmc@12550000 {
- 		num-slots = <1>;
- 		supports-highspeed;
--		broken-cd;
--		non-removable;
- 		card-detect-delay = <200>;
- 		vmmc-supply = <&vemmc_reg>;
- 		clock-frequency = <400000000>;
-@@ -475,6 +473,8 @@
- 		slot@0 {
- 			reg = <0>;
- 			bus-width = <8>;
-+			non-removable;
-+			broken-cd;
- 		};
- 	};
+ 	if (host->pdata->blk_settings) {
+ 		mmc->max_segs = host->pdata->blk_settings->max_segs;
+@@ -2231,23 +2233,13 @@ static inline bool dw_mci_ctrl_all_reset(struct dw_mci *host)
+ }
  
-diff --git a/arch/arm/boot/dts/exynos5250-arndale.dts b/arch/arm/boot/dts/exynos5250-arndale.dts
-index 090f983..0c9a7da 100644
---- a/arch/arm/boot/dts/exynos5250-arndale.dts
-+++ b/arch/arm/boot/dts/exynos5250-arndale.dts
-@@ -400,7 +400,6 @@
- 		status = "okay";
- 		num-slots = <1>;
- 		supports-highspeed;
--		broken-cd;
- 		card-detect-delay = <200>;
- 		samsung,dw-mshc-ciu-div = <3>;
- 		samsung,dw-mshc-sdr-timing = <2 3>;
-@@ -412,6 +411,7 @@
- 		slot@0 {
- 			reg = <0>;
- 			bus-width = <8>;
-+			broken-cd;
- 		};
- 	};
+ #ifdef CONFIG_OF
+-static struct dw_mci_of_quirks {
+-	char *quirk;
+-	int id;
+-} of_quirks[] = {
+-	{
+-		.quirk	= "broken-cd",
+-		.id	= DW_MCI_QUIRK_BROKEN_CARD_DETECTION,
+-	},
+-};
+-
+ static struct dw_mci_board *dw_mci_parse_dt(struct dw_mci *host)
+ {
+ 	struct dw_mci_board *pdata;
+ 	struct device *dev = host->dev;
+ 	struct device_node *np = dev->of_node;
+ 	const struct dw_mci_drv_data *drv_data = host->drv_data;
+-	int idx, ret;
++	int ret;
+ 	u32 clock_frequency;
  
-diff --git a/arch/arm/boot/dts/exynos5250-cros-common.dtsi b/arch/arm/boot/dts/exynos5250-cros-common.dtsi
-index 2c1560d..7ab3b94 100644
---- a/arch/arm/boot/dts/exynos5250-cros-common.dtsi
-+++ b/arch/arm/boot/dts/exynos5250-cros-common.dtsi
-@@ -249,7 +249,6 @@
- 	mmc@12200000 {
- 		num-slots = <1>;
- 		supports-highspeed;
--		broken-cd;
- 		card-detect-delay = <200>;
- 		samsung,dw-mshc-ciu-div = <3>;
- 		samsung,dw-mshc-sdr-timing = <2 3>;
-@@ -260,6 +259,7 @@
- 		slot@0 {
- 			reg = <0>;
- 			bus-width = <8>;
-+			broken-cd;
- 		};
- 	};
+ 	pdata = devm_kzalloc(dev, sizeof(*pdata), GFP_KERNEL);
+@@ -2264,11 +2256,6 @@ static struct dw_mci_board *dw_mci_parse_dt(struct dw_mci *host)
+ 		pdata->num_slots = 1;
+ 	}
  
-@@ -283,7 +283,6 @@
- 	mmc@12230000 {
- 		num-slots = <1>;
- 		supports-highspeed;
--		broken-cd;
- 		card-detect-delay = <200>;
- 		samsung,dw-mshc-ciu-div = <3>;
- 		samsung,dw-mshc-sdr-timing = <2 3>;
-@@ -293,6 +292,7 @@
- 		slot@0 {
- 			reg = <0>;
- 			bus-width = <4>;
-+			broken-cd;
- 		};
- 	};
- 
-diff --git a/arch/arm/boot/dts/exynos5250-smdk5250.dts b/arch/arm/boot/dts/exynos5250-smdk5250.dts
-index a794a70..feffe24 100644
---- a/arch/arm/boot/dts/exynos5250-smdk5250.dts
-+++ b/arch/arm/boot/dts/exynos5250-smdk5250.dts
-@@ -283,7 +283,6 @@
- 		status = "okay";
- 		num-slots = <1>;
- 		supports-highspeed;
--		broken-cd;
- 		card-detect-delay = <200>;
- 		samsung,dw-mshc-ciu-div = <3>;
- 		samsung,dw-mshc-sdr-timing = <2 3>;
-@@ -294,6 +293,7 @@
- 		slot@0 {
- 			reg = <0>;
- 			bus-width = <8>;
-+			broken-cd;
- 		};
- 	};
- 
-diff --git a/arch/arm/boot/dts/exynos5420-arndale-octa.dts b/arch/arm/boot/dts/exynos5420-arndale-octa.dts
-index 80a3bf4..0d3b467 100644
---- a/arch/arm/boot/dts/exynos5420-arndale-octa.dts
-+++ b/arch/arm/boot/dts/exynos5420-arndale-octa.dts
-@@ -39,7 +39,6 @@
- 
- 	mmc@12200000 {
- 		status = "okay";
--		broken-cd;
- 		supports-highspeed;
- 		card-detect-delay = <200>;
- 		samsung,dw-mshc-ciu-div = <3>;
-@@ -52,6 +51,7 @@
- 		slot@0 {
- 			reg = <0>;
- 			bus-width = <8>;
-+			broken-cd;
- 		};
- 	};
- 
-diff --git a/arch/arm/boot/dts/rk3066a-bqcurie2.dts b/arch/arm/boot/dts/rk3066a-bqcurie2.dts
-index 035df40..62c7484 100644
---- a/arch/arm/boot/dts/rk3066a-bqcurie2.dts
-+++ b/arch/arm/boot/dts/rk3066a-bqcurie2.dts
-@@ -69,7 +69,6 @@
- 		dwmmc@10218000 { /* wifi */
- 			num-slots = <1>;
- 			status = "okay";
--			non-removable;
- 
- 			pinctrl-names = "default";
- 			pinctrl-0 = <&sd1_clk &sd1_cmd &sd1_bus4>;
-@@ -78,6 +77,7 @@
- 				reg = <0>;
- 				bus-width = <4>;
- 				disable-wp;
-+				non-removable;
- 			};
- 		};
- 
-diff --git a/arch/arm/boot/dts/socfpga_arria5.dtsi b/arch/arm/boot/dts/socfpga_arria5.dtsi
-index 6c87b70..9c2b933 100644
---- a/arch/arm/boot/dts/socfpga_arria5.dtsi
-+++ b/arch/arm/boot/dts/socfpga_arria5.dtsi
-@@ -30,11 +30,11 @@
- 		dwmmc0@ff704000 {
- 			num-slots = <1>;
- 			supports-highspeed;
--			broken-cd;
- 
- 			slot@0 {
- 				reg = <0>;
- 				bus-width = <4>;
-+				broken-cd;
- 			};
- 		};
- 
-diff --git a/arch/arm/boot/dts/socfpga_cyclone5.dtsi b/arch/arm/boot/dts/socfpga_cyclone5.dtsi
-index ca41b0e..c5c7b5f 100644
---- a/arch/arm/boot/dts/socfpga_cyclone5.dtsi
-+++ b/arch/arm/boot/dts/socfpga_cyclone5.dtsi
-@@ -31,11 +31,11 @@
- 		dwmmc0@ff704000 {
- 			num-slots = <1>;
- 			supports-highspeed;
--			broken-cd;
- 
- 			slot@0 {
- 				reg = <0>;
- 				bus-width = <4>;
-+				broken-cd;
- 			};
- 		};
- 
-diff --git a/arch/arm/boot/dts/socfpga_vt.dts b/arch/arm/boot/dts/socfpga_vt.dts
-index 87d6f75..ff1111e 100644
---- a/arch/arm/boot/dts/socfpga_vt.dts
-+++ b/arch/arm/boot/dts/socfpga_vt.dts
-@@ -44,11 +44,11 @@
- 		dwmmc0@ff704000 {
- 			num-slots = <1>;
- 			supports-highspeed;
--			broken-cd;
- 
- 			slot@0 {
- 				reg = <0>;
- 				bus-width = <4>;
-+				broken-cd;
- 			};
- 		};
- 
+-	/* get quirks */
+-	for (idx = 0; idx < ARRAY_SIZE(of_quirks); idx++)
+-		if (of_get_property(np, of_quirks[idx].quirk, NULL))
+-			pdata->quirks |= of_quirks[idx].id;
+-
+ 	if (of_property_read_u32(np, "fifo-depth", &pdata->fifo_depth))
+ 		dev_info(dev, "fifo-depth property not found, using "
+ 				"value of FIFOTH register as default\n");
 -- 
 1.7.9.5
