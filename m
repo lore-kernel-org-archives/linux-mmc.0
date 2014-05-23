@@ -1,69 +1,74 @@
-From: Stephen Warren <swarren@wwwdotorg.org>
-Subject: Re: adding aliases to mmc ... again
-Date: Fri, 23 May 2014 10:02:26 -0600
-Message-ID: <537F7112.8000501@wwwdotorg.org>
-References: <1400772623-8390-1-git-send-email-s.hauer@pengutronix.de> <537E22E3.3010601@wwwdotorg.org> <20140522182134.GD15686@pengutronix.de> <537E4EAF.5000309@wwwdotorg.org> <20140523082936.GC26228@pengutronix.de>
+From: Olof Johansson <olof@lixom.net>
+Subject: Re: [PATCH RESEND] mmc: dove: fix missing MACH_DOVE dependency
+Date: Fri, 23 May 2014 09:26:50 -0700
+Message-ID: <CAOesGMig6YGLsNvnJx-4FM=Q1sen7xU=5Ejpwdu-FzK2D+zd+w@mail.gmail.com>
+References: <1400522571-10799-1-git-send-email-sebastian.hesselbarth@gmail.com>
+	<CAPDyKFo8CdyDbJEP0GkFTHdzpkyRBZEp-jAyrU4y8qi__zChkA@mail.gmail.com>
+	<CAOesGMjyk=n7MyVisfjYze9UuEb7XNv5O+c1Tndc+q1Q=PEetQ@mail.gmail.com>
+	<CAPDyKFp7Sf0sdReOyC8V_-F6ozB6Vh8CEbc+R7eoe6H4t-OmYA@mail.gmail.com>
+	<20140523134152.GA8664@titan.lakedaemon.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from avon.wwwdotorg.org ([70.85.31.133]:41934 "EHLO
-	avon.wwwdotorg.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752126AbaEWQC3 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 23 May 2014 12:02:29 -0400
-In-Reply-To: <20140523082936.GC26228@pengutronix.de>
+Received: from mail-qc0-f173.google.com ([209.85.216.173]:54243 "EHLO
+	mail-qc0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751524AbaEWQ0v (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 23 May 2014 12:26:51 -0400
+Received: by mail-qc0-f173.google.com with SMTP id i8so8396565qcq.18
+        for <linux-mmc@vger.kernel.org>; Fri, 23 May 2014 09:26:50 -0700 (PDT)
+In-Reply-To: <20140523134152.GA8664@titan.lakedaemon.net>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Michael Olbrich <m.olbrich@pengutronix.de>
-Cc: Sascha Hauer <s.hauer@pengutronix.de>, linux-mmc@vger.kernel.org, Dirk Behme <dirk.behme@de.bosch.com>, Fabio Estevam <festevam@gmail.com>, ptx@pengutronix.de
+To: Jason Cooper <jason@lakedaemon.net>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>, Chris Ball <chris@printf.net>, Andrew Lunn <andrew@lunn.ch>, Gregory Clement <gregory.clement@free-electrons.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-On 05/23/2014 02:29 AM, Michael Olbrich wrote:
-> On Thu, May 22, 2014 at 01:23:27PM -0600, Stephen Warren wrote:
->> On 05/22/2014 12:21 PM, Sascha Hauer wrote:
->>> On Thu, May 22, 2014 at 10:16:35AM -0600, Stephen Warren wrote:
->>>> On 05/22/2014 09:30 AM, Sascha Hauer wrote:
->>>>> Hi all,
->>>>>
->>>>> The wish to have persistent MMC block device names for passing a suitable
->>>>> root=/dev/mmcblkX option came up several times already and has been discussed
->>>>> at least in these threads:
->>>>>
->>>>> http://lists.infradead.org/pipermail/linux-arm-kernel/2012-July/109984.html
->>>>> https://www.mail-archive.com/linux-mmc@vger.kernel.org/msg22104.html
->>>>> http://comments.gmane.org/gmane.linux.kernel.mmc/21519
->>>>>
->>>>> Several patches have been proposed to nail the slot index to a known number.
->>>>> Arguments against these patches were:
->>>>>
->>>>> - Use an initrd and locate the correct root device there
->>>>>   even Thomas who suggested this admitted this would be painful to do
->>>>> - use root=UUID= or root=PARTUUID=
->>>>>   This generally works but has an important downside. With the UUID
->>>>>   approach devices which should boot from the internal eMMC may start
->>>>>   booting from an external SD slot when somebody deliberately inserts
->>>>>   a SD card with the same UUID.
->>>>>
->>>>> The following patches should have the technical issues fixed. It works
->>>>> by counting the mmc aliases in the devicetree during initialization of
->>>>> the mmc framework. Those slot numbers will never be assigned to other
->>>>> hosts.
->>>>
->>>> Does it solve the following, which AFAIK has always been the primary
->>>> argument against aligning block device IDs with controller IDs:
->>>>
->>>> - User inserts SD card into MMC controller ID (or alias) 1.
->>>> - /dev/mmcblk1 now exists
->>>> - Mount /dev/mmcblk1 on /mnt/tmp
->>>> - User removes that SD card
->>>> - /dev/mmcblk1 still exists, since it's mounted so can't be deleted
->>>> after the card removal.
->>>> - User inserts SD card into MMC controller ID (or alias) 1.
->>>> - /dev/mmcblkN (N is something other than 1) now exists
->>>>
->>>> Now, the block device ID must be != the original ID, since two block
->>>> devices exist.
-> 
-> We could limit this to non-removable devices. This problem cannot occur
-> there. Would that be acceptable?
+On Fri, May 23, 2014 at 6:41 AM, Jason Cooper <jason@lakedaemon.net> wrote:
+> On Fri, May 23, 2014 at 09:40:55AM +0200, Ulf Hansson wrote:
+>> On 23 May 2014 09:16, Olof Johansson <olof@lixom.net> wrote:
+>> > On Thu, May 22, 2014 at 2:09 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>> >> On 19 May 2014 20:02, Sebastian Hesselbarth
+>> >> <sebastian.hesselbarth@gmail.com> wrote:
+>> >>> DT-enabled Dove moved over from ARCH_DOVE in mach-dove to MACH_DOVE in
+>> >>> mach-mvebu. As non-DT ARCH_DOVE will stay to rot for a while, add a new
+>> >>> DT-only MACH_DOVE Kconfig. This slipped through the cracks and now is
+>> >>> a fix to allow to build Dove's SDHCI driver for mach-mvebu on v3.15-rc.
+>> >>>
+>> >>> Signed-off-by: Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>
+>> >>> Acked-by: Jason Cooper <jason@lakedaemon.net>
+>> >>
+>> >> Thanks! Picked up for the PR I send to Chris.
+>> >
+>> > Ulf, you might consider adding your tree to linux-next if this is
+>> > going to be a common work flow for you guys.
+>>
+>> That's done already. :-) There are patches which makes this visible in
+>> the MAINTAINERS as well, queued for 3.16.
+>>
+>> git://git.linaro.org/people/ulf.hansson/mmc.git next
+>>
+>> Though due to merge conflicts, during this release cycle, I didn't
+>> want to queue any patches besides for the mmci host driver.
+>>
+>> >
+>> > It's partially up to Chris though, if he's OK with patches going into
+>> > your branch more or less being guaranteed to make it into his as well.
+>> >
+>>
+>> Yes, we need to figure out a good work flow when using two separate
+>> trees. Thanks for bringing this up!
+>
+> If you have any questions, please ask.  mvebu has been doing this for
+> several release cycles now, and I'm also doing it for irqchip now.
+>
+> The biggest rule is that once you sign a tag and send a pull-request for
+> it, the branch is immutable up to and including that tag.
 
-That might work.
+...unless you get asked to respin based on review from the person
+you're sending the request to.
+
+This is the main problem with multi-level maintainer trees: It's hard
+to run a stable non-rebasing tree as a downstream tree since there's
+no actual guarantee that it'll go in as-is.
+
+
+-Olof
