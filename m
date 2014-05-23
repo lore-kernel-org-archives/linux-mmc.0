@@ -1,245 +1,208 @@
-From: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
-Subject: Re: [PATCH 1/8] mmc: sdhci-st: Intial support for ST SDHCI controller
-Date: Fri, 23 May 2014 07:18:52 +0100
-Message-ID: <537EE84C.2020607@linaro.org>
-References: <1400771902-26553-1-git-send-email-peter.griffin@linaro.org> <1400771902-26553-2-git-send-email-peter.griffin@linaro.org>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH] mmc: sdhci-dove: use mmc_of_parse() and remove
+ card_tasklet CD handler
+Date: Fri, 23 May 2014 08:48:00 +0200
+Message-ID: <CAPDyKFoF77fhYVaLX=nSS1A+mi9BUWHszkKA-stcutcOKovMXw@mail.gmail.com>
+References: <1400797012-32106-1-git-send-email-sebastian.hesselbarth@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wi0-f170.google.com ([209.85.212.170]:39591 "EHLO
-	mail-wi0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751818AbaEWGS4 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 23 May 2014 02:18:56 -0400
-Received: by mail-wi0-f170.google.com with SMTP id bs8so597299wib.5
-        for <linux-mmc@vger.kernel.org>; Thu, 22 May 2014 23:18:55 -0700 (PDT)
-In-Reply-To: <1400771902-26553-2-git-send-email-peter.griffin@linaro.org>
+Received: from mail-qg0-f54.google.com ([209.85.192.54]:58245 "EHLO
+	mail-qg0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751930AbaEWGsB (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 23 May 2014 02:48:01 -0400
+Received: by mail-qg0-f54.google.com with SMTP id q108so7317073qgd.41
+        for <linux-mmc@vger.kernel.org>; Thu, 22 May 2014 23:48:00 -0700 (PDT)
+In-Reply-To: <1400797012-32106-1-git-send-email-sebastian.hesselbarth@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Peter Griffin <peter.griffin@linaro.org>, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, maxime.coquelin@st.com, patrice.chotard@st.com, srinivas.kandagatla@gmail.com, chris@printf.net, ulf.hansson@linaro.org
-Cc: devicetree@vger.kernel.org, kernel@stlinux.com, linux-mmc@vger.kernel.org, Giuseppe Cavallaro <peppe.cavallaro@st.com>, lee.jones@linaro.org
+To: Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>, Chris Ball <chris@printf.net>
+Cc: Russell King <rmk+kernel@arm.linux.org.uk>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-Hi Pete,
-
-On 22/05/14 16:18, Peter Griffin wrote:
-
+On 23 May 2014 00:16, Sebastian Hesselbarth
+<sebastian.hesselbarth@gmail.com> wrote:
+> Commit f8ec589b86f6
+>   "mmc: sdhci-dove: allow GPIOs to be used for card detection on Dove"
+> added a gpio based card detect interrupt handler that was hooked up
+> into card_tasket.
 >
->   ifeq ($(CONFIG_CB710_DEBUG),y)
->   	CFLAGS-cb710-mmc	+= -DDEBUG
-> diff --git a/drivers/mmc/host/sdhci-st.c b/drivers/mmc/host/sdhci-st.c
-> new file mode 100644
-> index 0000000..1790fa7
-> --- /dev/null
-> +++ b/drivers/mmc/host/sdhci-st.c
-> @@ -0,0 +1,244 @@
-> +/*
-> + * Support for SDHCI on STMicroelectronics SoCs
-> + *
-> + * Copyright (C) 2014 STMicroelectronics Ltd
-> + * Author: Giuseppe Cavallaro <peppe.cavallaro@st.com>
-> + *
-> + * Based on sdhci-cns3xxx.c
-> + *
-> + * This program is free software; you can redistribute it and/or modify
-> + * it under the terms of the GNU General Public License version 2 as
-> + * published by the Free Software Foundation.
-> + *
-> + * This program is distributed in the hope that it will be useful,
-> + * but WITHOUT ANY WARRANTY; without even the implied warranty of
-> + * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> + * GNU General Public License for more details.
-> + *
-> + */
-> +
-> +#include <linux/io.h>
-> +#include <linux/of.h>
-> +#include <linux/module.h>
-> +#include <linux/err.h>
-> +#include <linux/of_gpio.h>
-Do you need this header?
+> Commit 3560db8e247a
+>   "mmc: sdhci: push card_tasklet into threaded irq handler"
+> now removed that very card_tasklet causing sdhci-dove to fail on build
+> with:
+> drivers/mmc/host/sdhci-dove.c: In function 'sdhci_dove_carddetect_irq':
+> drivers/mmc/host/sdhci-dove.c:42:24: error: 'struct sdhci_host' has no member named 'card_tasklet'
+>
+> To fix both the build error and get a working gpio card detection without
+> card_tasklet, replace sdhci_get_of_property() with more recent
+> mmc_of_parse(). It takes care of gpio-based card detect passed through DT
+> already and allows to remove the offending code sections dealing with
+> removed card_tasklet.
+>
+> Signed-off-by: Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>
 
-> +#include <linux/mmc/host.h>
-> +#include <linux/reset.h>
-> +
-> +#include "sdhci-pltfm.h"
-> +
-> +struct st_mmc_platform_data {
-> +	struct  reset_control	*rstc;
-> +};
+Thanks Sebastian!
 
-st_mmc_platform_data name is bit missleading as this data is not part of 
-platform data. Probably you could rename it to struct sdhci_st_data.
-...
-> +
-> +static int sdhci_st_probe(struct platform_device *pdev)
-> +{
-> +	struct device_node *np = pdev->dev.of_node;
-> +	struct sdhci_host *host;
-> +	struct st_mmc_platform_data *pdata;
-> +	struct sdhci_pltfm_host *pltfm_host;
-> +	struct clk *clk;
-> +	int ret = 0;
-> +	u16 host_version;
-> +
-> +	dev_dbg(&pdev->dev, "SDHCI ST platform driver\n");
-> +
-> +	pdata = devm_kzalloc(&pdev->dev, sizeof(*pdata), GFP_KERNEL);
-> +	if (!pdata)
-> +		return -ENOMEM;
-> +
-> +	pdata->rstc = devm_reset_control_get(&pdev->dev, NULL);
-> +	if (IS_ERR(pdata->rstc))
-> +		pdata->rstc = NULL;
-> +	else
-> +		reset_control_deassert(pdata->rstc);
-> +
-> +	clk =  devm_clk_get(&pdev->dev, "mmc");
-> +	if (IS_ERR(clk)) {
-> +		dev_err(&pdev->dev, "Perpheral clk not found\n");
-> +		return PTR_ERR(clk);
-> +	}
-> +
-> +	host = sdhci_pltfm_init(pdev, &sdhci_st_pdata, 0);
-> +	if (IS_ERR(host)) {
-> +		dev_err(&pdev->dev, "Failed sdhci_pltfm_init\n");
-> +		return PTR_ERR(host);
-> +	}
-> +
-> +	clk_prepare_enable(clk);
-> +
-> +	host->mmc->caps |= MMC_CAP_8_BIT_DATA | MMC_CAP_BUS_WIDTH_TEST
-> +			| MMC_CAP_1_8V_DDR;
-> +
-> +	if (of_property_read_bool(np, "non-removable"))
-> +		host->mmc->caps |= MMC_CAP_NONREMOVABLE;
-> +
-> +	pltfm_host = sdhci_priv(host);
-> +	pltfm_host->clk = clk;
-> +
-> +	ret = sdhci_add_host(host);
-> +	if (ret) {
-> +		dev_err(&pdev->dev, "Failed sdhci_add_host\n");
-> +		goto err_out;
-> +	}
-> +
-> +	pltfm_host->priv = pdata;
-> +
-> +	platform_set_drvdata(pdev, host);
+Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 
-Why not platform_set_drvdata(pdev, priv_host);
-As you are not using sdhci_host directly, this will reduced few 
-indirections in the driver.
+Chris, can you pick this up?
 
-
-> +
-> +	host_version = readw_relaxed((host->ioaddr + SDHCI_HOST_VERSION));
-> +
-> +	dev_dbg(&pdev->dev, "SDHCI ST Initialised: Host Version: 0x%x Vendor Version 0x%x\n",
-> +		host_version, ((host_version & SDHCI_VENDOR_VER_MASK) >>
-> +			       SDHCI_VENDOR_VER_SHIFT));
-> +
-> +	return 0;
-> +
-> +err_out:
-> +	clk_disable_unprepare(clk);
-> +	sdhci_pltfm_free(pdev);
-> +
-IP could be left out of reset in this path.
-> +	return ret;
-> +}
-> +
-> +static int sdhci_st_remove(struct platform_device *pdev)
-> +{
-> +	struct sdhci_host *host = platform_get_drvdata(pdev);
-> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> +	struct st_mmc_platform_data *pdata = pltfm_host->priv;
-> +	int ret;
-> +
-> +	clk_disable_unprepare(pltfm_host->clk);
-> +
-> +	ret = sdhci_pltfm_unregister(pdev);
-> +
-> +	if (pdata->rstc)
-> +		reset_control_assert(pdata->rstc);
-> +
-> +	return ret;
-> +}
-> +
-> +#ifdef CONFIG_PM_SLEEP
-> +static int sdhci_st_suspend(struct device *dev)
-> +{
-> +	struct sdhci_host *host = dev_get_drvdata(dev);
-> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> +	struct st_mmc_platform_data *pdata = pltfm_host->priv;
-> +	int ret = sdhci_suspend_host(host);
-> +
-> +	if (ret)
-> +		goto out;
-> +
-> +	if (pdata->rstc)
-> +		reset_control_assert(pdata->rstc);
-> +
-> +	clk_disable_unprepare(pltfm_host->clk);
-> +out:
-> +	return ret;
-> +}
-> +
-> +static int sdhci_st_resume(struct device *dev)
-> +{
-> +	struct sdhci_host *host = dev_get_drvdata(dev);
-> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> +	struct st_mmc_platform_data *pdata = pltfm_host->priv;
-> +
-> +	clk_prepare_enable(pltfm_host->clk);
-> +
-> +	if (pdata->rstc)
-> +		reset_control_deassert(pdata->rstc);
-> +
-> +	return sdhci_resume_host(host);
-> +}
-> +
-
-replace:
-[...
-> +static SIMPLE_DEV_PM_OPS(sdhci_st_pmops, sdhci_st_suspend, sdhci_st_resume);
-> +#define SDHCI_ST_PMOPS (&sdhci_st_pmops)
-> +#else
-> +#define SDHCI_ST_PMOPS NULL
-> +#endif
-...]
-
-with :
-
-#endif
-
-static SIMPLE_DEV_PM_OPS(sdhci_st_pmops, sdhci_st_suspend, sdhci_st_resume);
-
-	
-> +
-> +static const struct of_device_id st_sdhci_match[] = {
-> +	{ .compatible = "st,sdhci" },
-> +	{},
-> +};
-> +
-> +MODULE_DEVICE_TABLE(of, st_sdhci_match);
-> +
-> +static struct platform_driver sdhci_st_driver = {
-> +	.probe = sdhci_st_probe,
-> +	.remove = sdhci_st_remove,
-> +	.driver = {
-> +		   .name = "sdhci-st",
-> +		   .owner = THIS_MODULE,
-> +		   .pm = SDHCI_ST_PMOPS,
-use .pm = sdhci_st_pmops,
-
-> +		   .of_match_table = of_match_ptr(st_sdhci_match),
-> +		  },
-> +};
-> +
-> +module_platform_driver(sdhci_st_driver);
-> +
-> +MODULE_DESCRIPTION("SDHCI driver for STMicroelectronics SoCs");
-> +MODULE_AUTHOR("Giuseppe Cavallaro <peppe.cavallaro@st.com>");
-> +MODULE_LICENSE("GPL v2");
-> +MODULE_ALIAS("platform:st-sdhci");
+> ---
+> This patch is based on todays mmc-next and fixes a build error there.
+>
+> Cc: Chris Ball <chris@printf.net>
+> Cc: Ulf Hansson <ulf.hansson@linaro.org>
+> Cc: Russell King <rmk+kernel@arm.linux.org.uk>
+> Cc: linux-mmc@vger.kernel.org
+> Cc: linux-arm-kernel@lists.infradead.org
+> Cc: linux-kernel@vger.kernel.org
+> ---
+>  drivers/mmc/host/sdhci-dove.c | 74 +++----------------------------------------
+>  1 file changed, 5 insertions(+), 69 deletions(-)
+>
+> diff --git a/drivers/mmc/host/sdhci-dove.c b/drivers/mmc/host/sdhci-dove.c
+> index 0d315f4496c8..e6278ec007d7 100644
+> --- a/drivers/mmc/host/sdhci-dove.c
+> +++ b/drivers/mmc/host/sdhci-dove.c
+> @@ -21,28 +21,17 @@
+>
+>  #include <linux/clk.h>
+>  #include <linux/err.h>
+> -#include <linux/gpio.h>
+>  #include <linux/io.h>
+>  #include <linux/mmc/host.h>
+>  #include <linux/module.h>
+>  #include <linux/of.h>
+> -#include <linux/of_gpio.h>
+>
+>  #include "sdhci-pltfm.h"
+>
+>  struct sdhci_dove_priv {
+>         struct clk *clk;
+> -       int gpio_cd;
+>  };
+>
+> -static irqreturn_t sdhci_dove_carddetect_irq(int irq, void *data)
+> -{
+> -       struct sdhci_host *host = data;
+> -
+> -       tasklet_schedule(&host->card_tasklet);
+> -       return IRQ_HANDLED;
+> -}
+> -
+>  static u16 sdhci_dove_readw(struct sdhci_host *host, int reg)
+>  {
+>         u16 ret;
+> @@ -60,8 +49,6 @@ static u16 sdhci_dove_readw(struct sdhci_host *host, int reg)
+>
+>  static u32 sdhci_dove_readl(struct sdhci_host *host, int reg)
+>  {
+> -       struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> -       struct sdhci_dove_priv *priv = pltfm_host->priv;
+>         u32 ret;
+>
+>         ret = readl(host->ioaddr + reg);
+> @@ -71,14 +58,6 @@ static u32 sdhci_dove_readl(struct sdhci_host *host, int reg)
+>                 /* Mask the support for 3.0V */
+>                 ret &= ~SDHCI_CAN_VDD_300;
+>                 break;
+> -       case SDHCI_PRESENT_STATE:
+> -               if (gpio_is_valid(priv->gpio_cd)) {
+> -                       if (gpio_get_value(priv->gpio_cd) == 0)
+> -                               ret |= SDHCI_CARD_PRESENT;
+> -                       else
+> -                               ret &= ~SDHCI_CARD_PRESENT;
+> -               }
+> -               break;
+>         }
+>         return ret;
+>  }
+> @@ -117,28 +96,9 @@ static int sdhci_dove_probe(struct platform_device *pdev)
+>
+>         priv->clk = devm_clk_get(&pdev->dev, NULL);
+>
+> -       if (pdev->dev.of_node) {
+> -               priv->gpio_cd = of_get_named_gpio(pdev->dev.of_node,
+> -                                                 "cd-gpios", 0);
+> -       } else {
+> -               priv->gpio_cd = -EINVAL;
+> -       }
+> -
+> -       if (gpio_is_valid(priv->gpio_cd)) {
+> -               ret = gpio_request(priv->gpio_cd, "sdhci-cd");
+> -               if (ret) {
+> -                       dev_err(&pdev->dev, "card detect gpio request failed: %d\n",
+> -                               ret);
+> -                       return ret;
+> -               }
+> -               gpio_direction_input(priv->gpio_cd);
+> -       }
+> -
+>         host = sdhci_pltfm_init(pdev, &sdhci_dove_pdata, 0);
+> -       if (IS_ERR(host)) {
+> -               ret = PTR_ERR(host);
+> -               goto err_sdhci_pltfm_init;
+> -       }
+> +       if (IS_ERR(host))
+> +               return PTR_ERR(host);
+>
+>         pltfm_host = sdhci_priv(host);
+>         pltfm_host->priv = priv;
+> @@ -146,39 +106,20 @@ static int sdhci_dove_probe(struct platform_device *pdev)
+>         if (!IS_ERR(priv->clk))
+>                 clk_prepare_enable(priv->clk);
+>
+> -       sdhci_get_of_property(pdev);
+> +       ret = mmc_of_parse(host->mmc);
+> +       if (ret)
+> +               goto err_sdhci_add;
+>
+>         ret = sdhci_add_host(host);
+>         if (ret)
+>                 goto err_sdhci_add;
+>
+> -       /*
+> -        * We must request the IRQ after sdhci_add_host(), as the tasklet only
+> -        * gets setup in sdhci_add_host() and we oops.
+> -        */
+> -       if (gpio_is_valid(priv->gpio_cd)) {
+> -               ret = request_irq(gpio_to_irq(priv->gpio_cd),
+> -                                 sdhci_dove_carddetect_irq,
+> -                                 IRQF_TRIGGER_FALLING | IRQF_TRIGGER_RISING,
+> -                                 mmc_hostname(host->mmc), host);
+> -               if (ret) {
+> -                       dev_err(&pdev->dev, "card detect irq request failed: %d\n",
+> -                               ret);
+> -                       goto err_request_irq;
+> -               }
+> -       }
+> -
+>         return 0;
+>
+> -err_request_irq:
+> -       sdhci_remove_host(host, 0);
+>  err_sdhci_add:
+>         if (!IS_ERR(priv->clk))
+>                 clk_disable_unprepare(priv->clk);
+>         sdhci_pltfm_free(pdev);
+> -err_sdhci_pltfm_init:
+> -       if (gpio_is_valid(priv->gpio_cd))
+> -               gpio_free(priv->gpio_cd);
+>         return ret;
+>  }
+>
+> @@ -190,11 +131,6 @@ static int sdhci_dove_remove(struct platform_device *pdev)
+>
+>         sdhci_pltfm_unregister(pdev);
+>
+> -       if (gpio_is_valid(priv->gpio_cd)) {
+> -               free_irq(gpio_to_irq(priv->gpio_cd), host);
+> -               gpio_free(priv->gpio_cd);
+> -       }
+> -
+>         if (!IS_ERR(priv->clk))
+>                 clk_disable_unprepare(priv->clk);
+>
+> --
+> 1.9.1
 >
