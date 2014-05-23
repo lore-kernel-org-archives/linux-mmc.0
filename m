@@ -1,76 +1,65 @@
-From: Tony Lindgren <tony@atomide.com>
-Subject: Re: [PATCH v13 3/7] mmc: omap_hsmmc: Extend debugfs by SDIO IRQ
- handling, runtime state
-Date: Fri, 23 May 2014 08:14:24 -0700
-Message-ID: <20140523151424.GG2321@atomide.com>
-References: <1400833834-15893-1-git-send-email-afenkart@gmail.com>
- <1400833834-15893-4-git-send-email-afenkart@gmail.com>
- <537F3E6E.7060000@ti.com>
+From: Bjorn Andersson <bjorn@kryo.se>
+Subject: Re: [PATCH v2 00/14] Add Qualcomm SD Card Controller support
+Date: Fri, 23 May 2014 08:20:48 -0700
+Message-ID: <CAJAp7OgkYg12C42yMqL+CJQG3hN2KeNs7L-ZO4b9JMAb_ofYog@mail.gmail.com>
+References: <1398116624-31052-1-git-send-email-srinivas.kandagatla@linaro.org>
+	<1400146447-29803-1-git-send-email-srinivas.kandagatla@linaro.org>
+	<537EF50B.2010101@linaro.org>
+	<CAPDyKFpTXrURM8OzNjO-RRfCFWGct4+_M4D8COdEurUhY46GWg@mail.gmail.com>
+	<537F02CA.5070304@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-omap-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <537F3E6E.7060000@ti.com>
-Sender: linux-omap-owner@vger.kernel.org
-To: Balaji T K <balajitk@ti.com>
-Cc: Andreas Fenkart <afenkart@gmail.com>, Chris Ball <chris@printf.net>, Grant Likely <grant.likely@secretlab.ca>, Felipe Balbi <balbi@ti.com>, Andreas Mueller <schnitzeltony@googlemail.com>, Sebastian Reichel <sre@kernel.org>, zonque@gmail.com, galak@codeaurora.org, linux-doc@vger.kernel.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-oa0-f51.google.com ([209.85.219.51]:33389 "EHLO
+	mail-oa0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751796AbaEWPUs (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 23 May 2014 11:20:48 -0400
+Received: by mail-oa0-f51.google.com with SMTP id n16so5821997oag.10
+        for <linux-mmc@vger.kernel.org>; Fri, 23 May 2014 08:20:48 -0700 (PDT)
+In-Reply-To: <537F02CA.5070304@linaro.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Russell King <linux@arm.linux.org.uk>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Linus Walleij <linus.walleij@linaro.org>
 
-* Balaji T K <balajitk@ti.com> [140523 05:27]:
-> On Friday 23 May 2014 02:00 PM, Andreas Fenkart wrote:
-> >Add SDIO IRQ entries to debugfs entry. Note that PSTATE shows current
-> >state of data lines, incl. SDIO IRQ pending
-> >
-> >Acked-by: Balaji T K <balajitk@ti.com>
-> >Signed-off-by: Andreas Fenkart <afenkart@gmail.com>
-> >
-> >diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-> >index 0125eea..cfd2bfb 100644
-> >--- a/drivers/mmc/host/omap_hsmmc.c
-> >+++ b/drivers/mmc/host/omap_hsmmc.c
-> >@@ -56,6 +56,7 @@
-> >  #define OMAP_HSMMC_RSP54	0x0118
-> >  #define OMAP_HSMMC_RSP76	0x011C
-> >  #define OMAP_HSMMC_DATA		0x0120
-> >+#define OMAP_HSMMC_PSTATE	0x0124
-> >  #define OMAP_HSMMC_HCTL		0x0128
-> >  #define OMAP_HSMMC_SYSCTL	0x012C
-> >  #define OMAP_HSMMC_STAT		0x0130
-> >@@ -1816,10 +1817,23 @@ static int omap_hsmmc_regs_show(struct seq_file *s, void *data)
-> >  {
-> >  	struct mmc_host *mmc = s->private;
-> >  	struct omap_hsmmc_host *host = mmc_priv(mmc);
-> >+#ifdef CONFIG_PM
-> >+	bool suspended;
-> >+#endif
-> >
-> >  	seq_printf(s, "mmc%d:\n", mmc->index);
-> >+	seq_printf(s, "sdio irq mode\t%s\n",
-> >+		   (mmc->caps & MMC_CAP_SDIO_IRQ) ? "interrupt" : "polling");
-> >+
-> >+	if (mmc->caps & MMC_CAP_SDIO_IRQ) {
-> >+		seq_printf(s, "sdio irq \t%s\n",
-> >+			   (host->flags & HSMMC_SDIO_IRQ_ENABLED) ?  "enabled"
-> >+			   : "disabled");
-> >+	}
-> >
-> >  #ifdef CONFIG_PM
-> 
-> shouldn't this be CONFIG_PM_RUNTIME ?
-> 
-> >+	suspended = host->dev->power.runtime_status != RPM_ACTIVE;
-> >+	seq_printf(s, "runtime state\t%s\n", (suspended ? "idle" : "active"));
-> 
-> The whole check for runtime status (and check for CONFIG_PM..) can be removed,
-> since runtime status is available via sysfs
-> 
-> cat /sys/class/mmc_host/mmc<X>/device/power/runtime_status
-> 
-> >  	seq_printf(s, "ctx_loss:\t%d\n", host->context_loss);
-> >  #endif
+On Fri, May 23, 2014 at 1:11 AM, Srinivas Kandagatla
+<srinivas.kandagatla@linaro.org> wrote:
+> On 23/05/14 08:50, Ulf Hansson wrote:
+[...]
+>> It seems like you had some CRC issues during read/write? Did you
+>> manage to resolve that issue?
+>
+>
+> Bjorn is using different SOC and board than the IFC6410 Am testing on, so
+> its completely different setup.
+> on IFC6410 we did lot of stress testing and no issues seen. so suspecting
+> the issues are very specific to that board or the eMMC Bjorn is using.
+>
+> We are suspecting that the CRC issues are due to the fact that there is no
+> code to manage regulators. My test setup uses dummy regulator, and the eMMC
+> and external SD cards seems to be Ok with default voltages.
+>
+> Am not sure if thats the same with Bjorn's board.
 
-Also CONFIG_SYSFS is a bool FYI.
+I started off by using the same setup as you; relying on the boot leaving
+everything in a working condition and using fixed-regulator; with that setup
+I saw the CRC issues.
+
+I then introduced my rpm and regulator driver and it didn't change anything
+related to the CRC error behaviour.
+
+I have verified that I have the right pinconf and the clocks seems to match
+what we have with working codeaurora based SW.
+One thing that I did notice is that we run our devices with
+MMC_CAP_UHS_DDR50, while Qualcomm doesn't, but I have not been
+able to introduce a change in behaviour by modifying the caps.
+
+I do see the same problem both on 8960 and on 8064; although on 8064
+it's much worse.
+
+
+I will do some more debugging to see if I can find any further differences
+in the two setups.
 
 Regards,
-
-Tony
+Bjorn
