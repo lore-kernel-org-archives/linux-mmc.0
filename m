@@ -1,56 +1,44 @@
-From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Subject: Re: [PATCH v7 4/4] memstick: Add realtek USB memstick host driver
-Date: Fri, 23 May 2014 20:47:38 +0900
-Message-ID: <20140523114738.GA7471@kroah.com>
-References: <1397199203-2235-1-git-send-email-rogerable@realtek.com>
- <1397199203-2235-5-git-send-email-rogerable@realtek.com>
- <20140428101010.GR6264@lee--X1>
- <5360ACA4.80503@realtek.com>
+From: Bjorn Andersson <bjorn@kryo.se>
+Subject: Re: [PATCH v2 00/14] Add Qualcomm SD Card Controller support
+Date: Fri, 23 May 2014 16:26:09 -0700
+Message-ID: <CAJAp7Oj3z4_GWHXdBO5+7AVriYh0fxb0XT2UESW-DmpQ9gSGTQ@mail.gmail.com>
+References: <1398116624-31052-1-git-send-email-srinivas.kandagatla@linaro.org>
+	<1400146447-29803-1-git-send-email-srinivas.kandagatla@linaro.org>
+	<537EF50B.2010101@linaro.org>
+	<CAPDyKFpTXrURM8OzNjO-RRfCFWGct4+_M4D8COdEurUhY46GWg@mail.gmail.com>
+	<537F02CA.5070304@linaro.org>
+	<CAJAp7OgkYg12C42yMqL+CJQG3hN2KeNs7L-ZO4b9JMAb_ofYog@mail.gmail.com>
+	<537F7C4B.4010005@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail.linuxfoundation.org ([140.211.169.12]:43942 "EHLO
-	mail.linuxfoundation.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751402AbaEWSlk (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 23 May 2014 14:41:40 -0400
-Content-Disposition: inline
-In-Reply-To: <5360ACA4.80503@realtek.com>
+Received: from mail-oa0-f52.google.com ([209.85.219.52]:50914 "EHLO
+	mail-oa0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751263AbaEWX0L (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 23 May 2014 19:26:11 -0400
+Received: by mail-oa0-f52.google.com with SMTP id eb12so6330720oac.11
+        for <linux-mmc@vger.kernel.org>; Fri, 23 May 2014 16:26:09 -0700 (PDT)
+In-Reply-To: <537F7C4B.4010005@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Roger <rogerable@realtek.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Maxim Levitsky <maximlevitsky@gmail.com>, Alex Dubov <oakad@yahoo.com>, driverdev-devel@linuxdriverproject.org, linux-mmc@vger.kernel.org, Chris Ball <chris@printf.net>, linux-kernel@vger.kernel.org, wei_wang@realsil.com.cn, Andrew Morton <akpm@linux-foundation.org>, Lee Jones <lee.jones@linaro.org>, Oliver Neukum <oneukum@suse.de>, Dan Carpenter <dan.carpenter@oracle.com>, Samuel Ortiz <sameo@linux.intel.com>
+To: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Russell King <linux@arm.linux.org.uk>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Linus Walleij <linus.walleij@linaro.org>
 
-On Wed, Apr 30, 2014 at 03:56:20PM +0800, Roger wrote:
-> On 04/28/2014 06:10 PM, Lee Jones wrote:
-> >> From: Roger Tseng <rogerable@realtek.com>
-> >>
-> >> Realtek USB memstick host driver provides memstick host support based on the
-> >> Realtek USB card reader MFD driver.
-> >>
-> >> Signed-off-by: Roger Tseng <rogerable@realtek.com>
-> >> ---
-> >>   drivers/memstick/host/Kconfig       |  10 +
-> >>   drivers/memstick/host/Makefile      |   1 +
-> >>   drivers/memstick/host/rtsx_usb_ms.c | 839 ++++++++++++++++++++++++++++++++++++
-> >>   3 files changed, 850 insertions(+)
-> >>   create mode 100644 drivers/memstick/host/rtsx_usb_ms.c
-> >
-> > Applied, thanks.
-> >
-> Greg,
-> 
-> Since all patches have been applied and the device is now supported by 
-> the new driver, would you remove the former staging one at 
-> drivers/staging/rts5139? Similar removal had been done for our PCIE 
-> devices in:
-> 
-> commit cd2112220b6b0a35fa12ba988a0dd837515dfaf8
-> Author: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-> Date:   Fri Oct 26 09:03:21 2012 -0700
-> 
->      Staging: remove rts_pstor driver
-> 
+On Fri, May 23, 2014 at 9:50 AM, Srinivas Kandagatla
+<srinivas.kandagatla@linaro.org> wrote:
+> Hi Bjorn,
+>
+> Thanks for the update.
 
-Now removed, thanks.
+Hi Srini,
 
-greg k-h
+After pulling in Ulfs next branch again and reapplying v3 my issues
+are now gone. Not sure what I screwed up when I merged v2, this seems
+to work just fine now. Sorry for the fuzz.
+
+I haven't done any extensive testing, but my CRC issues are definitely
+sorted out. I will go ahead and see if I can get external mmc working
+now as well.
+
+Regards,
+Bjorn
