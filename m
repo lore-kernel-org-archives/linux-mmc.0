@@ -1,49 +1,120 @@
-From: "Wang, Yalin" <Yalin.Wang@sonymobile.com>
-Subject: how to creat watchpoint  in kernel for data access debug
-Date: Fri, 23 May 2014 10:51:17 +0800
-Message-ID: <35FD53F367049845BC99AC72306C23D1029A276569F4@CNBJMBX05.corpusers.net>
-References: <35FD53F367049845BC99AC72306C23D1029A276569F3@CNBJMBX05.corpusers.net>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH RFC] mmc: add slot argument to mmc_of_parse
+Date: Fri, 23 May 2014 13:38:06 +0900
+Message-ID: <537ED0AE.7040901@samsung.com>
+References: <1399457217-22846-1-git-send-email-ludovic.desroches@atmel.com>
+ <CAPDyKFqeunnWmguTH89byNc5Yy+CBY4avMeeon3ZSfNMmGJa9Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from cnbjrel02.sonyericsson.com ([219.141.167.166]:13564 "EHLO
-	cnbjrel02.sonyericsson.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1750985AbaEWDB3 convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 22 May 2014 23:01:29 -0400
-In-Reply-To: <35FD53F367049845BC99AC72306C23D1029A276569F3@CNBJMBX05.corpusers.net>
-Content-Language: en-US
+Received: from mailout3.samsung.com ([203.254.224.33]:52281 "EHLO
+	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751300AbaEWEiS (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 23 May 2014 00:38:18 -0400
+In-reply-to: <CAPDyKFqeunnWmguTH89byNc5Yy+CBY4avMeeon3ZSfNMmGJa9Q@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "Wang, Yalin" <Yalin.Wang@sonymobile.com>, "'linux-mmc@vger.kernel.org'" <linux-mmc@vger.kernel.org>, "'linux-arch-owner@vger.kernel.org'" <linux-arch-owner@vger.kernel.org>, 'Will Deacon' <will.deacon@arm.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>, Ludovic Desroches <ludovic.desroches@atmel.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Chris Ball <chris@printf.net>
 
-Sorry, add a title .
+Hi, All.
 
-Hi
+This patch is working on progress?
+I want to merge this patch for fixing dw-mmc controller problem.
 
-I have a problems that I want create a watchpoint to monitor a data for=
- Debug in kernel , but I don't know how to do it , I try the kprobes , =
-but seems it only support create .text section probe , Can't monitor da=
-ta access ,  then  I try  perf_event_create to create a hardware Data w=
-atchpoint , it can work , but has a problem:
-When the data access hit , I don't know how to bypass this time's watch=
-point , This need simulate the data access  or step the break instructi=
-ons in data abort Exception handler ,  seems kernel don't provide these=
- for perf_event ..
+If this patch didn't work on progress, i will send the patch based-on this patch.
 
-I test this on ARM arch ,
-My question is that how to create data watchpoint in kernel ?
-It there some modules  have implemented this ?
+Best Regards,
+Jaehoon Chung
 
-Thanks
-
-
-Sony Mobile Communications
-Tel: My Number +18610323092
-yalin.wang@sonymobile.com =A0(shall be a link, optional part)
-
-sonymobile.com
-
-
+On 05/14/2014 06:53 PM, Ulf Hansson wrote:
+> On 7 May 2014 12:06, Ludovic Desroches <ludovic.desroches@atmel.com> wrote:
+>> Some hosts manage several slots. In these case information such as the bus
+>> width, chip detect and others are into the slot node. So we have to parse
+>> child nodes. If not NULL, slot node will be used instead of the device
+>> node.
+>>
+>> Signed-off-by: Ludovic Desroches <ludovic.desroches@atmel.com>
+>> ---
+>>
+>> Hi,
+>>
+>> Since this patch is only a RFC, I have not yet updated drivers using this
+>> function.
+>>
+>> I would like to use mmc_of_parse to reduce code duplication. My issue is that
+>> atmel mci is a bit different from others mci host since it can provide
+>> several slots, so it allocates several mmc hosts. By the way, it is not the
+>> only one.
+>>
+>> When calling mmc_alloc_host, host->parent is set to &pdev->dev. mmc_of_parse
+>> uses host->parent->of_node but in my case settings are in the slot nodes so in
+>> the child nodes. That's why I would like to have a way to tell which node I
+>> want to use.
+> 
+> Seems reasonable, thanks for working on this!
+> 
+>>
+>>
+>> Regards
+>>
+>> Ludovic
+>>
+>>
+>>
+>>  drivers/mmc/core/host.c |    9 +++++++--
+>>  1 file changed, 7 insertions(+), 2 deletions(-)
+>>
+>> diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+>> index fdea825..ed6cea5 100644
+>> --- a/drivers/mmc/core/host.c
+>> +++ b/drivers/mmc/core/host.c
+>> @@ -300,13 +300,15 @@ static inline void mmc_host_clk_sysfs_init(struct mmc_host *host)
+>>  /**
+>>   *     mmc_of_parse() - parse host's device-tree node
+>>   *     @host: host whose node should be parsed.
+>> + *     @slot: some devices provide several slots so the node to parse
+>> + *     is not the host one.
+>>   *
+>>   * To keep the rest of the MMC subsystem unaware of whether DT has been
+>>   * used to to instantiate and configure this host instance or not, we
+>>   * parse the properties and set respective generic mmc-host flags and
+>>   * parameters.
+>>   */
+>> -int mmc_of_parse(struct mmc_host *host)
+>> +int mmc_of_parse(struct mmc_host *host, struct device_node *slot)
+>>  {
+>>         struct device_node *np;
+>>         u32 bus_width;
+>> @@ -317,7 +319,10 @@ int mmc_of_parse(struct mmc_host *host)
+>>         if (!host->parent || !host->parent->of_node)
+>>                 return 0;
+>>
+>> -       np = host->parent->of_node;
+>> +       if (slot)
+>> +               np = slot;
+>> +       else
+>> +               np = host->parent->of_node;
+>>
+>>         /* "bus-width" is translated to MMC_CAP_*_BIT_DATA flags */
+>>         if (of_property_read_u32(np, "bus-width", &bus_width) < 0) {
+>> --
+>> 1.7.9.5
+>>
+> 
+> How about adding a new API, __mmc_of_parse((struct mmc_host *host,
+> struct device_node *slot)
+> Then let the old API mmc_of_parse() remain as is, but let it call the
+> new API with slot == NULL.
+> 
+> Atmel can then use the new API, but the other drivers can remain as is.
+> 
+> Kind regards
+> Ulf Hansson
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
 
