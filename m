@@ -1,94 +1,79 @@
-From: Andreas Fenkart <afenkart@gmail.com>
-Subject: Re: [PATCH v13 1/7] mmc: omap_hsmmc: install dummy pm runtime hooks
- if !CONFIG_PM_RUNTIME
-Date: Fri, 23 May 2014 14:10:59 +0200
-Message-ID: <CALtMJEABZgB_vkX6wMrR11VSKgb8F3D-qTahk-5X_x73KW+bJA@mail.gmail.com>
-References: <1400833834-15893-1-git-send-email-afenkart@gmail.com>
-	<1400833834-15893-2-git-send-email-afenkart@gmail.com>
-	<537F1FFC.8070609@ti.com>
+From: Balaji T K <balajitk@ti.com>
+Subject: Re: [PATCH v13 3/7] mmc: omap_hsmmc: Extend debugfs by SDIO IRQ handling,
+ runtime state
+Date: Fri, 23 May 2014 17:56:22 +0530
+Message-ID: <537F3E6E.7060000@ti.com>
+References: <1400833834-15893-1-git-send-email-afenkart@gmail.com> <1400833834-15893-4-git-send-email-afenkart@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-doc-owner@vger.kernel.org>
-In-Reply-To: <537F1FFC.8070609@ti.com>
+In-Reply-To: <1400833834-15893-4-git-send-email-afenkart@gmail.com>
 Sender: linux-doc-owner@vger.kernel.org
-To: Balaji T K <balajitk@ti.com>
-Cc: Tony Lindgren <tony@atomide.com>, Chris Ball <chris@printf.net>, Grant Likely <grant.likely@secretlab.ca>, Felipe Balbi <balbi@ti.com>, Andreas Mueller <schnitzeltony@googlemail.com>, Sebastian Reichel <sre@kernel.org>, Daniel Mack <zonque@gmail.com>, Kumar Gala <galak@codeaurora.org>, linux-doc@vger.kernel.org, linux-mmc <linux-mmc@vger.kernel.org>, linux-omap <linux-omap@vger.kernel.org>
+To: Andreas Fenkart <afenkart@gmail.com>
+Cc: Tony Lindgren <tony@atomide.com>, Chris Ball <chris@printf.net>, Grant Likely <grant.likely@secretlab.ca>, Felipe Balbi <balbi@ti.com>, Andreas Mueller <schnitzeltony@googlemail.com>, Sebastian Reichel <sre@kernel.org>, zonque@gmail.com, galak@codeaurora.org, linux-doc@vger.kernel.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-2014-05-23 12:16 GMT+02:00 Balaji T K <balajitk@ti.com>:
-> On Friday 23 May 2014 02:00 PM, Andreas Fenkart wrote:
->>
->>
->> +#ifdef CONFIG_PM_RUNTIME
+On Friday 23 May 2014 02:00 PM, Andreas Fenkart wrote:
+> Add SDIO IRQ entries to debugfs entry. Note that PSTATE shows current
+> state of data lines, incl. SDIO IRQ pending
 >
+> Acked-by: Balaji T K <balajitk@ti.com>
+> Signed-off-by: Andreas Fenkart <afenkart@gmail.com>
 >
-> AFAIK, omap_hsmmc can build without these changes,
-> So, I think this patch is not needed.
+> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+> index 0125eea..cfd2bfb 100644
+> --- a/drivers/mmc/host/omap_hsmmc.c
+> +++ b/drivers/mmc/host/omap_hsmmc.c
+> @@ -56,6 +56,7 @@
+>   #define OMAP_HSMMC_RSP54	0x0118
+>   #define OMAP_HSMMC_RSP76	0x011C
+>   #define OMAP_HSMMC_DATA		0x0120
+> +#define OMAP_HSMMC_PSTATE	0x0124
+>   #define OMAP_HSMMC_HCTL		0x0128
+>   #define OMAP_HSMMC_SYSCTL	0x012C
+>   #define OMAP_HSMMC_STAT		0x0130
+> @@ -1816,10 +1817,23 @@ static int omap_hsmmc_regs_show(struct seq_file *s, void *data)
+>   {
+>   	struct mmc_host *mmc = s->private;
+>   	struct omap_hsmmc_host *host = mmc_priv(mmc);
+> +#ifdef CONFIG_PM
+> +	bool suspended;
+> +#endif
 >
-> Let me I know If it is not the case.
-
-if do not guard suspend/resume then I have to add guards in patch 1/7:
-
-> @@ -2200,11 +2346,18 @@ static int omap_hsmmc_suspend(struct device *dev)
->         pm_runtime_get_sync(host->dev);
->
->         if (!(host->mmc->pm_flags & MMC_PM_KEEP_POWER)) {
-> -               omap_hsmmc_disable_irq(host);
-> +               OMAP_HSMMC_WRITE(host->base, ISE, 0);
-> +               OMAP_HSMMC_WRITE(host->base, IE, 0);
-> +               OMAP_HSMMC_WRITE(host->base, STAT, STAT_CLEAR);
->                 OMAP_HSMMC_WRITE(host->base, HCTL,
->                                 OMAP_HSMMC_READ(host->base, HCTL) & ~SDBP);
->         }
->
-> +       /* do not wake up due to sdio irq */
-> +       if ((host->mmc->caps & MMC_CAP_SDIO_IRQ) &&
-> +           !(host->mmc->pm_flags & MMC_PM_WAKE_SDIO_IRQ))
-> +               disable_irq(host->wake_irq);
-
-here
-
+>   	seq_printf(s, "mmc%d:\n", mmc->index);
+> +	seq_printf(s, "sdio irq mode\t%s\n",
+> +		   (mmc->caps & MMC_CAP_SDIO_IRQ) ? "interrupt" : "polling");
 > +
->         if (host->dbclk)
->                 clk_disable_unprepare(host->dbclk);
+> +	if (mmc->caps & MMC_CAP_SDIO_IRQ) {
+> +		seq_printf(s, "sdio irq \t%s\n",
+> +			   (host->flags & HSMMC_SDIO_IRQ_ENABLED) ?  "enabled"
+> +			   : "disabled");
+> +	}
 >
-> @@ -2230,6 +2383,10 @@ static int omap_hsmmc_resume(struct device *dev)
->
->         omap_hsmmc_protect_card(host);
->
-> +       if ((host->mmc->caps & MMC_CAP_SDIO_IRQ) &&
-> +           !(host->mmc->pm_flags & MMC_PM_WAKE_SDIO_IRQ))
-> +               enable_irq(host->wake_irq);
-> +
->         pm_runtime_mark_last_busy(host->dev);
->         pm_runtime_put_autosuspend(host->dev);
->         return 0;
-> @@ -2246,22 +2403,51 @@ static int omap_hsmmc_resume(struct device *dev)
->  static int omap_hsmmc_runtime_suspend(struct device *dev)
->  {
->         struct omap_hsmmc_host *host;
-> +       unsigned long flags;
->
->         host = platform_get_drvdata(to_platform_device(dev));
->         omap_hsmmc_context_save(host);
->         dev_dbg(dev, "disabled\n");
->
-> +       spin_lock_irqsave(&host->irq_lock, flags);
-> +       if ((host->mmc->caps & MMC_CAP_SDIO_IRQ) &&
-> +           (host->flags & HSMMC_SDIO_IRQ_ENABLED)) {
-> +               /* disable sdio irq handling to prevent race */
-> +               OMAP_HSMMC_WRITE(host->base, ISE, 0);
-> +               OMAP_HSMMC_WRITE(host->base, IE, 0);
-> +               OMAP_HSMMC_WRITE(host->base, STAT, STAT_CLEAR);
-> +
-> +               WARN_ON(host->flags & HSMMC_WAKE_IRQ_ENABLED);
-> +               enable_irq(host->wake_irq);
+>   #ifdef CONFIG_PM
 
-and here
+shouldn't this be CONFIG_PM_RUNTIME ?
 
-> +               host->flags |= HSMMC_WAKE_IRQ_ENABLED;
-> +       }
-> +       spin_unlock_irqrestore(&host->irq_lock, flags);
->         return 0;
->  }
+> +	suspended = host->dev->power.runtime_status != RPM_ACTIVE;
+> +	seq_printf(s, "runtime state\t%s\n", (suspended ? "idle" : "active"));
+
+The whole check for runtime status (and check for CONFIG_PM..) can be removed,
+since runtime status is available via sysfs
+
+cat /sys/class/mmc_host/mmc<X>/device/power/runtime_status
+
+>   	seq_printf(s, "ctx_loss:\t%d\n", host->context_loss);
+>   #endif
 >
+> @@ -1827,6 +1841,8 @@ static int omap_hsmmc_regs_show(struct seq_file *s, void *data)
+>   	seq_puts(s, "\nregs:\n");
+>   	seq_printf(s, "CON:\t\t0x%08x\n",
+>   			OMAP_HSMMC_READ(host->base, CON));
+> +	seq_printf(s, "PSTATE:\t\t0x%08x\n",
+> +		   OMAP_HSMMC_READ(host->base, PSTATE));
+>   	seq_printf(s, "HCTL:\t\t0x%08x\n",
+>   			OMAP_HSMMC_READ(host->base, HCTL));
+>   	seq_printf(s, "SYSCTL:\t\t0x%08x\n",
+>
+
