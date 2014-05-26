@@ -1,52 +1,127 @@
-From: HUSAM AL SAYED <Husamalsayed@asia.com>
-Subject: Your Urgent reply.
-Date: Mon, 26 May 2014 22:00:48 +0400
-Message-ID: <CAKFyHyqE-jAV0G8GqYW7H_3cUYv2iXVQm5a6-m1VNZWRhKVXAg__47793.8449512751$1401127272$gmane$org@mail.gmail.com>
-Reply-To: Husamalsayed@asia.com
+From: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+Subject: Re: [PATCH v3 10/13] mmc: mmci: add Qcom specifics of clk and datactrl
+ registers.
+Date: Mon, 26 May 2014 22:38:23 +0100
+Message-ID: <5383B44F.30608@linaro.org>
+References: <1400849362-7007-1-git-send-email-srinivas.kandagatla@linaro.org>	<1400849556-7501-1-git-send-email-srinivas.kandagatla@linaro.org> <CAPDyKFpyZU207A515T9xd153DBWGpjP8cqiAZfwvkx7Drefc5A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wg0-f67.google.com ([74.125.82.67]:36304 "EHLO
-	mail-wg0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752100AbaEZSAv (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 26 May 2014 14:00:51 -0400
-Received: by mail-wg0-f67.google.com with SMTP id l18so2647064wgh.10
-        for <linux-mmc@vger.kernel.org>; Mon, 26 May 2014 11:00:50 -0700 (PDT)
+Received: from mail-wg0-f49.google.com ([74.125.82.49]:56669 "EHLO
+	mail-wg0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752040AbaEZVim (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 26 May 2014 17:38:42 -0400
+Received: by mail-wg0-f49.google.com with SMTP id m15so8658879wgh.32
+        for <linux-mmc@vger.kernel.org>; Mon, 26 May 2014 14:38:40 -0700 (PDT)
+In-Reply-To: <CAPDyKFpyZU207A515T9xd153DBWGpjP8cqiAZfwvkx7Drefc5A@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Russell King <linux@arm.linux.org.uk>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-arm-msm@vger.kernel.org, Linus Walleij <linus.walleij@linaro.org>
 
-Dear Friend,
+Hi Ulf,
 
+Thanks for the comments.
 
-Compliments of the day.This mail May be a surprise to you Because you
-did not give me the permission to do so and Neither do you know me but
-before I tell you about myself I want you to please forgive me for
-sending this mail without your permission I have been in search of
-someone with this last name so when I saw you online, I was pushed to
-contact you and see how best we can assist each other. I am Mr. Husam
-Al Sayed, a Bank Officer here in U.A.E. I believe it is the wish of
-God for me to come across you now. I am having an important business
-discussion I wish to share with you which I  believe will interest
-you, because it is in connection with your last name and you are going
-to benefit from it.
+On 26/05/14 14:05, Ulf Hansson wrote:
+> On 23 May 2014 14:52,  <srinivas.kandagatla@linaro.org> wrote:
+>> From: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+>>
+>> This patch adds specifics of clk and datactrl register on Qualcomm SD
+>> Card controller. This patch also populates the Qcom variant data with
+>> these new values specific to Qualcomm SD Card Controller.
+>>
+>> Signed-off-by: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+>> Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
+>> ---
+>>   drivers/mmc/host/mmci.c |  4 ++++
+>>   drivers/mmc/host/mmci.h | 24 ++++++++++++++++++++++++
+>>   2 files changed, 28 insertions(+)
+>>
+>> diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+>> index 17e7f6a..6434f5b1 100644
+>> --- a/drivers/mmc/host/mmci.c
+>> +++ b/drivers/mmc/host/mmci.c
+>> @@ -185,6 +185,10 @@ static struct variant_data variant_qcom = {
+>>          .fifosize               = 16 * 4,
+>>          .fifohalfsize           = 8 * 4,
+>>          .clkreg                 = MCI_CLK_ENABLE,
+>> +       .clkreg_enable          = MCI_QCOM_CLK_FLOWENA |
+>> +                                 MCI_QCOM_CLK_FEEDBACK_CLK,
+>
+> Obviously I don't have the in-depth knowledge about the Qcom variant,
+> but comparing the ST variant here made me think.
+>
+> Using the feeback clock internal logic in the ST variant, requires the
+> corresponding feedback clock pin signal on the board, to be
+> routed/connected. Typically we used this for SD cards, which involved
+> using an external level shifter circuit.
+>
+> Is it correct to enable this bit for all cases, including eMMC?
+>
+You are correct, FBCLK should specific to the board, and I will try to 
+do something on the same lines as ST variant in next version.
 
-One Late peter who was among the death victims in the May 27 2006
-Earthquake disaster in Java, Indonesia that killed over 5,000 people.
-He was in Indonesia on a business trip and that was how he met his
-end. My bank management is yet to know about his death, I knew about
-it because he was my friend and I am his account officer.he did not
-mention any Next of Kin/ Heir when the account was opened, and he was
-not married and no children. Last week my Bank Management requested
-that he should give instructions on what to do about his funds,I know
-this will happen and that is why I have been looking for a means to
-handle the situation,
+> If it is board specific configurations, you should add a DT binding
+> for it - like there are for the ST variant.
+>
+>> +       .clkreg_8bit_bus_enable = MCI_QCOM_CLK_WIDEBUS_8,
+>> +       .datactrl_mask_ddrmode  = MCI_QCOM_CLK_DDR_MODE,
+>>          .blksz_datactrl4        = true,
+>>          .datalength_bits        = 24,
+>>          .blksz_datactrl4        = true,
+>> diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
+>> index cd83ca3..1b93ae7 100644
+>> --- a/drivers/mmc/host/mmci.h
+>> +++ b/drivers/mmc/host/mmci.h
+>> @@ -41,6 +41,22 @@
+>>   /* Modified PL180 on Versatile Express platform */
+>>   #define MCI_ARM_HWFCEN         BIT(12)
+>>
+>> +/* Modified on Qualcomm Integrations */
+>> +#define MCI_QCOM_CLK_WIDEBUS_4 (2 << 10)
+>
+> This is the same as BIT(11), please use MCI_4BIT_BUS instead.
+>
+This is not used in the code, I will clean it up as you suggested, just 
+to be more consistent.
 
-If you are interested send me your private Email Address so that i can
-send you more details of the transaction,
-Thanks for your understanding
+>> +#define MCI_QCOM_CLK_WIDEBUS_8 (3 << 10)
+>
+> Since you converted to use the "BIT" macro a few patches ago, I
+> suggest we should stick to it. How about something below:
+>
+> #define MCI_QCOM_CLK_WIDEBUS_8 BIT (BIT(10) | BIT(11))
+>
+Sounds good, I will fix all such instances in next version.
 
-I am waiting for your reply.
+> Please adopt all defines added in this patch to use the BIT macro.
+>
+>> +#define MCI_QCOM_CLK_FLOWENA   BIT(12)
+>> +#define MCI_QCOM_CLK_INVERTOUT BIT(13)
+>> +
+>> +/* select in latch data and command */
+>> +#define MCI_QCOM_CLK_SEL_IN_SHIFT      (14)
+>
+> BIT (14)?
+>
+>> +#define MCI_QCOM_CLK_SEL_MASK          (0x3)
+>> +#define MCI_QCOM_CLK_SEL_RISING_EDGE   (1)
+>
+> BIT(1)?
+>
+>> +#define MCI_QCOM_CLK_FEEDBACK_CLK      (2 << 14)
+>> +#define MCI_QCOM_CLK_DDR_MODE          (3 << 14)
+>> +
+>> +/* mclk selection */
+>> +#define MCI_QCOM_CLK_SEL_MCLK          (2 << 23)
+>
+> Does this correspond to MCI_CLK_BYPASS? If so, we should maybe state
+> this in a comment?
+>
+No, this is not same as MCI_CLK_BYPASS, its selection between 
+FBCLK/gated MCLK/freerunning MCLK.
 
-Best regards,
-
-Mr. Husam Al Sayed
+Thanks,
+srini
