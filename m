@@ -1,87 +1,136 @@
-From: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: [PATCH 11/11] ARM: dts: sun7i: Add OOB irq support to
- boards with broadcom sdio wifi
-Date: Mon, 26 May 2014 09:48:06 +0200
-Message-ID: <1401090486-4414-12-git-send-email-hdegoede@redhat.com>
-References: <1401090486-4414-1-git-send-email-hdegoede@redhat.com>
-Reply-To: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+From: Ludovic Desroches <ludovic.desroches@atmel.com>
+Subject: Re: [PATCH RFC] mmc: add slot argument to mmc_of_parse
+Date: Mon, 26 May 2014 09:49:23 +0200
+Message-ID: <20140526074923.GC12777@ldesroches-Latitude-E6320>
+References: <1399457217-22846-1-git-send-email-ludovic.desroches@atmel.com>
+ <CAPDyKFqeunnWmguTH89byNc5Yy+CBY4avMeeon3ZSfNMmGJa9Q@mail.gmail.com>
+ <537ED0AE.7040901@samsung.com>
+ <20140526070301.GA12777@ldesroches-Latitude-E6320>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-sunxi+bncBDRZXY4CYYORBYXDROOAKGQEQSD5SHQ-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-In-Reply-To: <1401090486-4414-1-git-send-email-hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-List-Post: <http://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Help: <http://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Archive: <http://groups.google.com/group/linux-sunxi>
-Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
-List-Subscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Unsubscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-To: Linus Walleij <linus.walleij-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Arend van Spriel <arend-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>, "John W. Linville" <linville-2XuSBdqkA4R54TAoqtyWWQ@public.gmane.org>, Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
-Cc: Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Content-Type: text/plain; charset="us-ascii"
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <20140526070301.GA12777@ldesroches-Latitude-E6320>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Chris Ball <chris@printf.net>
 List-Id: linux-mmc@vger.kernel.org
 
-Signed-off-by: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
----
- arch/arm/boot/dts/sun7i-a20-cubietruck.dts | 12 ++++++++++++
- arch/arm/boot/dts/sun7i-a20-i12-tvbox.dts  | 12 ++++++++++++
- 2 files changed, 24 insertions(+)
+On Mon, May 26, 2014 at 09:03:01AM +0200, Ludovic Desroches wrote:
+> Hi,
+> 
+> Sorry I was on vacation, I'll send a cleaner patch updating other drivers
+> this week.
 
-diff --git a/arch/arm/boot/dts/sun7i-a20-cubietruck.dts b/arch/arm/boot/dts/sun7i-a20-cubietruck.dts
-index 3931986..d3dcd8e 100644
---- a/arch/arm/boot/dts/sun7i-a20-cubietruck.dts
-+++ b/arch/arm/boot/dts/sun7i-a20-cubietruck.dts
-@@ -31,12 +31,24 @@
- 		};
- 
- 		mmc3: mmc@01c12000 {
-+			#address-cells = <1>;
-+			#size-cells = <0>;
-+
- 			pinctrl-names = "default";
- 			pinctrl-0 = <&mmc3_pins_a>;
- 			vmmc-supply = <&reg_vmmc3>;
- 			bus-width = <4>;
- 			non-removable;
- 			status = "okay";
-+
-+			brcmf: bcrmf@1 {
-+				reg = <1>;
-+				compatible = "brcm,bcm43xx-fmac";
-+				interrupt-parent = <&pio>;
-+				interrupts = <10 8>; /* PH10 / EINT10 */
-+				interrupt-names = "host-wake";
-+				status = "okay";
-+			};
- 		};
- 
- 		usbphy: phy@01c13400 {
-diff --git a/arch/arm/boot/dts/sun7i-a20-i12-tvbox.dts b/arch/arm/boot/dts/sun7i-a20-i12-tvbox.dts
-index 4aad09c..806f236 100644
---- a/arch/arm/boot/dts/sun7i-a20-i12-tvbox.dts
-+++ b/arch/arm/boot/dts/sun7i-a20-i12-tvbox.dts
-@@ -29,12 +29,24 @@
- 		};
- 
- 		mmc3: mmc@01c12000 {
-+			#address-cells = <1>;
-+			#size-cells = <0>;
-+
- 			pinctrl-names = "default";
- 			pinctrl-0 = <&mmc3_pins_a>;
- 			vmmc-supply = <&reg_vmmc3>;
- 			bus-width = <4>;
- 			non-removable;
- 			status = "okay";
-+
-+			brcmf: bcrmf@1 {
-+				reg = <1>;
-+				compatible = "brcm,bcm43xx-fmac";
-+				interrupt-parent = <&pio>;
-+				interrupts = <10 8>; /* PH10 / EINT10 */
-+				interrupt-names = "host-wake";
-+				status = "okay";
-+			};
- 		};
- 
- 		usbphy: phy@01c13400 {
--- 
-1.9.3
+Continuing to clear out my inbox, I have seen you send a patch for it.
+Thanks. 
+
+> 
+> Regards
+> 
+> Ludovic
+> 
+> On Fri, May 23, 2014 at 01:38:06PM +0900, Jaehoon Chung wrote:
+> > Hi, All.
+> > 
+> > This patch is working on progress?
+> > I want to merge this patch for fixing dw-mmc controller problem.
+> > 
+> > If this patch didn't work on progress, i will send the patch based-on this patch.
+> > 
+> > Best Regards,
+> > Jaehoon Chung
+> > 
+> > On 05/14/2014 06:53 PM, Ulf Hansson wrote:
+> > > On 7 May 2014 12:06, Ludovic Desroches <ludovic.desroches@atmel.com> wrote:
+> > >> Some hosts manage several slots. In these case information such as the bus
+> > >> width, chip detect and others are into the slot node. So we have to parse
+> > >> child nodes. If not NULL, slot node will be used instead of the device
+> > >> node.
+> > >>
+> > >> Signed-off-by: Ludovic Desroches <ludovic.desroches@atmel.com>
+> > >> ---
+> > >>
+> > >> Hi,
+> > >>
+> > >> Since this patch is only a RFC, I have not yet updated drivers using this
+> > >> function.
+> > >>
+> > >> I would like to use mmc_of_parse to reduce code duplication. My issue is that
+> > >> atmel mci is a bit different from others mci host since it can provide
+> > >> several slots, so it allocates several mmc hosts. By the way, it is not the
+> > >> only one.
+> > >>
+> > >> When calling mmc_alloc_host, host->parent is set to &pdev->dev. mmc_of_parse
+> > >> uses host->parent->of_node but in my case settings are in the slot nodes so in
+> > >> the child nodes. That's why I would like to have a way to tell which node I
+> > >> want to use.
+> > > 
+> > > Seems reasonable, thanks for working on this!
+> > > 
+> > >>
+> > >>
+> > >> Regards
+> > >>
+> > >> Ludovic
+> > >>
+> > >>
+> > >>
+> > >>  drivers/mmc/core/host.c |    9 +++++++--
+> > >>  1 file changed, 7 insertions(+), 2 deletions(-)
+> > >>
+> > >> diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+> > >> index fdea825..ed6cea5 100644
+> > >> --- a/drivers/mmc/core/host.c
+> > >> +++ b/drivers/mmc/core/host.c
+> > >> @@ -300,13 +300,15 @@ static inline void mmc_host_clk_sysfs_init(struct mmc_host *host)
+> > >>  /**
+> > >>   *     mmc_of_parse() - parse host's device-tree node
+> > >>   *     @host: host whose node should be parsed.
+> > >> + *     @slot: some devices provide several slots so the node to parse
+> > >> + *     is not the host one.
+> > >>   *
+> > >>   * To keep the rest of the MMC subsystem unaware of whether DT has been
+> > >>   * used to to instantiate and configure this host instance or not, we
+> > >>   * parse the properties and set respective generic mmc-host flags and
+> > >>   * parameters.
+> > >>   */
+> > >> -int mmc_of_parse(struct mmc_host *host)
+> > >> +int mmc_of_parse(struct mmc_host *host, struct device_node *slot)
+> > >>  {
+> > >>         struct device_node *np;
+> > >>         u32 bus_width;
+> > >> @@ -317,7 +319,10 @@ int mmc_of_parse(struct mmc_host *host)
+> > >>         if (!host->parent || !host->parent->of_node)
+> > >>                 return 0;
+> > >>
+> > >> -       np = host->parent->of_node;
+> > >> +       if (slot)
+> > >> +               np = slot;
+> > >> +       else
+> > >> +               np = host->parent->of_node;
+> > >>
+> > >>         /* "bus-width" is translated to MMC_CAP_*_BIT_DATA flags */
+> > >>         if (of_property_read_u32(np, "bus-width", &bus_width) < 0) {
+> > >> --
+> > >> 1.7.9.5
+> > >>
+> > > 
+> > > How about adding a new API, __mmc_of_parse((struct mmc_host *host,
+> > > struct device_node *slot)
+> > > Then let the old API mmc_of_parse() remain as is, but let it call the
+> > > new API with slot == NULL.
+> > > 
+> > > Atmel can then use the new API, but the other drivers can remain as is.
+> > > 
+> > > Kind regards
+> > > Ulf Hansson
+> > > --
+> > > To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> > > the body of a message to majordomo@vger.kernel.org
+> > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> > > 
+> > 
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
