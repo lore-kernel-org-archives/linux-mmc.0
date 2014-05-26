@@ -1,13 +1,13 @@
 From: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: [PATCH 09/11] brcmfmac: Fix OOB interrupt not working
- for BCM43362
-Date: Mon, 26 May 2014 09:48:04 +0200
-Message-ID: <1401090486-4414-10-git-send-email-hdegoede@redhat.com>
+Subject: [PATCH 10/11] ARM: dts: sun7i: Add #interrupt-cells to
+ pinctrl node
+Date: Mon, 26 May 2014 09:48:05 +0200
+Message-ID: <1401090486-4414-11-git-send-email-hdegoede@redhat.com>
 References: <1401090486-4414-1-git-send-email-hdegoede@redhat.com>
 Reply-To: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-sunxi+bncBDRZXY4CYYORBW7DROOAKGQEM7LU5ZA-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+Return-path: <linux-sunxi+bncBDRZXY4CYYORBXXDROOAKGQEFME3JJI-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
 In-Reply-To: <1401090486-4414-1-git-send-email-hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Post: <http://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
 List-Help: <http://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
@@ -19,62 +19,31 @@ To: Linus Walleij <linus.walleij-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Chris
 Cc: Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-It has taken me a long long time to get the OOB interrupt working on the
-AP6210 sdio wifi/bt module found on various Allwinner A20 boards. In the
-end I found these magic register pokes in the cubietruck kernel tree:
-https://github.com/cubieboard2/linux-sunxi/commit/7f08ba395617d17e7a711507503d89a50406fe7a
+From: Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>
 
-I'm not entirely sure if this specific to the AP6210 module, or if this
-should be done for all BCM43362 sdio devices.
+The pinctrl device is also an interrupt controller for external
+interrupts. Add the missing #interrupt-cells property.
 
+Also remove the unused #address-cells property.
+
+Signed-off-by: Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>
 Signed-off-by: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 ---
- drivers/net/wireless/brcm80211/brcmfmac/bcmsdh.c | 18 ++++++++++++++++++
- 1 file changed, 18 insertions(+)
+ arch/arm/boot/dts/sun7i-a20.dtsi | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/drivers/net/wireless/brcm80211/brcmfmac/bcmsdh.c b/drivers/net/wireless/brcm80211/brcmfmac/bcmsdh.c
-index 0fc707c..2369a0f 100644
---- a/drivers/net/wireless/brcm80211/brcmfmac/bcmsdh.c
-+++ b/drivers/net/wireless/brcm80211/brcmfmac/bcmsdh.c
-@@ -39,7 +39,9 @@
- #include <brcm_hw_ids.h>
- #include <brcmu_utils.h>
- #include <brcmu_wifi.h>
-+#include <chipcommon.h>
- #include <soc.h>
-+#include "chip.h"
- #include "dhd_bus.h"
- #include "dhd_dbg.h"
- #include "sdio_host.h"
-@@ -119,6 +121,7 @@ int brcmf_sdiod_intr_register(struct brcmf_sdio_dev *sdiodev)
- {
- 	int ret = 0;
- 	u8 data;
-+	u32 addr, gpiocontrol;
- 	unsigned long flags;
+diff --git a/arch/arm/boot/dts/sun7i-a20.dtsi b/arch/arm/boot/dts/sun7i-a20.dtsi
+index b82642c..19b1ced 100644
+--- a/arch/arm/boot/dts/sun7i-a20.dtsi
++++ b/arch/arm/boot/dts/sun7i-a20.dtsi
+@@ -594,7 +594,7 @@
+ 			clocks = <&apb0_gates 5>;
+ 			gpio-controller;
+ 			interrupt-controller;
+-			#address-cells = <1>;
++			#interrupt-cells = <2>;
+ 			#size-cells = <0>;
+ 			#gpio-cells = <3>;
  
- 	if ((sdiodev->pdata) && (sdiodev->pdata->oob_irq_supported)) {
-@@ -148,6 +151,21 @@ int brcmf_sdiod_intr_register(struct brcmf_sdio_dev *sdiodev)
- 
- 		sdio_claim_host(sdiodev->func[1]);
- 
-+		if (sdiodev->bus_if->chip == BCM43362_CHIP_ID) {
-+			addr = CORE_CC_REG(SI_ENUM_BASE, gpiocontrol);
-+			gpiocontrol = brcmf_sdiod_regrl(sdiodev, addr, &ret);
-+			gpiocontrol |= 0x2;
-+			brcmf_sdiod_regwl(sdiodev, addr, gpiocontrol, &ret);
-+
-+			/* SPROM_ADDR_HIGH ? perhaps the defines name is off */
-+			brcmf_sdiod_regwb(sdiodev, SBSDIO_SPROM_ADDR_HIGH, 0xf,
-+					  &ret);
-+			brcmf_sdiod_regwb(sdiodev, SBSDIO_CHIP_CTRL_DATA, 0,
-+					  &ret);
-+			brcmf_sdiod_regwb(sdiodev, SBSDIO_CHIP_CTRL_EN, 0x2,
-+					  &ret);
-+		}
-+
- 		/* must configure SDIO_CCCR_IENx to enable irq */
- 		data = brcmf_sdiod_regrb(sdiodev, SDIO_CCCR_IENx, &ret);
- 		data |= 1 << SDIO_FUNC_1 | 1 << SDIO_FUNC_2 | 1;
 -- 
 1.9.3
