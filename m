@@ -1,43 +1,114 @@
 From: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
-Subject: Re: [PATCH v3 06/13] mmc: mmci: Qcomm: Add 3 clock cycle delay after
- register write
-Date: Mon, 26 May 2014 18:04:31 +0100
-Message-ID: <5383741F.8010205@linaro.org>
-References: <1400849362-7007-1-git-send-email-srinivas.kandagatla@linaro.org>	<1400849504-7302-1-git-send-email-srinivas.kandagatla@linaro.org> <CAPDyKFoSjXy8ptyrk_wN3N4Ovvy==HpX9S0n0endsh0Ca2kMtA@mail.gmail.com>
+Subject: Re: [PATCH v3 07/13] mmc: mmci: add ddrmode mask to variant data
+Date: Mon, 26 May 2014 18:06:29 +0100
+Message-ID: <53837495.6030002@linaro.org>
+References: <1400849362-7007-1-git-send-email-srinivas.kandagatla@linaro.org>	<1400849515-7343-1-git-send-email-srinivas.kandagatla@linaro.org> <CAPDyKFpdDOepF6YzKnCZPggbA5F=ZjLmA9-6uTUxF7jeYtyiTw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wg0-f42.google.com ([74.125.82.42]:61668 "EHLO
-	mail-wg0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751392AbaEZREg (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 26 May 2014 13:04:36 -0400
-Received: by mail-wg0-f42.google.com with SMTP id y10so8121082wgg.25
-        for <linux-mmc@vger.kernel.org>; Mon, 26 May 2014 10:04:35 -0700 (PDT)
-In-Reply-To: <CAPDyKFoSjXy8ptyrk_wN3N4Ovvy==HpX9S0n0endsh0Ca2kMtA@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: <CAPDyKFpdDOepF6YzKnCZPggbA5F=ZjLmA9-6uTUxF7jeYtyiTw@mail.gmail.com>
+Sender: linux-arm-msm-owner@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: Russell King <linux@arm.linux.org.uk>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-arm-msm@vger.kernel.org, Linus Walleij <linus.walleij@linaro.org>
+List-Id: linux-mmc@vger.kernel.org
 
 
+
+On 26/05/14 10:53, Ulf Hansson wrote:
+> On 23 May 2014 14:51,  <srinivas.kandagatla@linaro.org> wrote:
+>> From: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+>>
+>> This patch adds ddrmode mask to variant structure giving more flexibility
+>> to the driver to support more SOCs which have different datactrl register
+>> layout.
+>>
+>> Without this patch datactrl register is updated with wrong ddrmode mask on non
+>> ST SOCs, resulting in card detection failures.
+>>
+>> Signed-off-by: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+>> Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
+>> ---
+>>   drivers/mmc/host/mmci.c | 8 +++++++-
+>>   1 file changed, 7 insertions(+), 1 deletion(-)
+>>
+>> diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+>> index 1385554..dec70d2 100644
+>> --- a/drivers/mmc/host/mmci.c
+>> +++ b/drivers/mmc/host/mmci.c
+>> @@ -59,6 +59,7 @@ static unsigned int fmax = 515633;
+>>    *               is asserted (likewise for RX)
+>>    * @sdio: variant supports SDIO
+>>    * @st_clkdiv: true if using a ST-specific clock divider algorithm
+>> + * @datactrl_mask_ddrmode: ddr mode mask in datactrl register.
+>>    * @blksz_datactrl16: true if Block size is at b16..b30 position in datactrl register
+>>    * @blksz_datactrl4: true if Block size is at b4..b16 position in datactrl
+>>    *                  register
+>> @@ -76,6 +77,7 @@ struct variant_data {
+>>          unsigned int            datalength_bits;
+>>          unsigned int            fifosize;
+>>          unsigned int            fifohalfsize;
+>> +       unsigned int            datactrl_mask_ddrmode;
+>>          bool                    sdio;
+>>          bool                    st_clkdiv;
+>>          bool                    blksz_datactrl16;
+>> @@ -114,6 +116,7 @@ static struct variant_data variant_u300 = {
+>>          .fifosize               = 16 * 4,
+>>          .fifohalfsize           = 8 * 4,
+>>          .clkreg_enable          = MCI_ST_U300_HWFCEN,
+>> +       .datactrl_mask_ddrmode  = MCI_ST_DPSM_DDRMODE,
+>>          .datalength_bits        = 16,
+>>          .sdio                   = true,
+>>          .pwrreg_powerup         = MCI_PWR_ON,
+>> @@ -126,6 +129,7 @@ static struct variant_data variant_nomadik = {
+>>          .fifosize               = 16 * 4,
+>>          .fifohalfsize           = 8 * 4,
+>>          .clkreg                 = MCI_CLK_ENABLE,
+>> +       .datactrl_mask_ddrmode  = MCI_ST_DPSM_DDRMODE,
+>>          .datalength_bits        = 24,
+>>          .sdio                   = true,
+>>          .st_clkdiv              = true,
+>> @@ -140,6 +144,7 @@ static struct variant_data variant_ux500 = {
+>>          .fifohalfsize           = 8 * 4,
+>>          .clkreg                 = MCI_CLK_ENABLE,
+>>          .clkreg_enable          = MCI_ST_UX500_HWFCEN,
+>> +       .datactrl_mask_ddrmode  = MCI_ST_DPSM_DDRMODE,
+>>          .datalength_bits        = 24,
+>>          .sdio                   = true,
+>>          .st_clkdiv              = true,
+>> @@ -155,6 +160,7 @@ static struct variant_data variant_ux500v2 = {
+>>          .fifohalfsize           = 8 * 4,
+>>          .clkreg                 = MCI_CLK_ENABLE,
+>>          .clkreg_enable          = MCI_ST_UX500_HWFCEN,
+>> +       .datactrl_mask_ddrmode  = MCI_ST_DPSM_DDRMODE,
 >
-> I am not sure I like this approach. For each and every writel
-> (including pio_writes) you will add a few cpu cycles, since you need
-> to  check for "mclk_delayed_writes" no matter of variant.
->
+> Only the ux500v2 supports DDR mode, using the MCI_ST_DPSM_DDRMODE bit.
 
-> How about, adding a new function pointer in the struct mmci_host, for
-> "writel operations" which you could set up in probe phase instead?
->
+Thanks for pointing this out, I was not sure which variants actually 
+used this bit, so just replicated what was there before this change.
 
-Yes, this is an additional check for other variants. I will try the 
-function pointer method that you suggested.
+I will add this flag to only ux500v2 in next version.
+
 
 Thanks,
 srini
-
-
+>
+>>          .datalength_bits        = 24,
+>>          .sdio                   = true,
+>>          .st_clkdiv              = true,
+>> @@ -800,7 +806,7 @@ static void mmci_start_data(struct mmci_host *host, struct mmc_data *data)
+>>                  }
+>>
+>>          if (host->mmc->ios.timing == MMC_TIMING_UHS_DDR50)
+>> -               datactrl |= MCI_ST_DPSM_DDRMODE;
+>> +               datactrl |= variant->datactrl_mask_ddrmode;
+>>
+>>          /*
+>>           * Attempt to use DMA operation mode, if this
+>> --
+>> 1.9.1
+>>
+>
 > Kind regards
 > Ulf Hansson
 >
