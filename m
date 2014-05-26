@@ -1,53 +1,37 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH 1/3] mmc: host: add slot argument to mmc_of_parse
-Date: Mon, 26 May 2014 18:11:01 +0900
-Message-ID: <53830525.3090902@samsung.com>
-References: <1400840721-11050-1-git-send-email-jh80.chung@samsung.com>
- <1400840721-11050-2-git-send-email-jh80.chung@samsung.com>
- <20140526080916.GE12777@ldesroches-Latitude-E6320>
- <5382FD78.3060402@gmail.com>
- <CAPDyKFrZXd30wXJNsO64-Np129_53D=TVv2yBmBhsOxJa0Sm6g@mail.gmail.com>
+From: Hans de Goede <hdegoede@redhat.com>
+Subject: Avoiding / recovering from end bit errors with sdio device (bcm43362)
+Date: Mon, 26 May 2014 11:13:10 +0200
+Message-ID: <538305A6.5000105@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-reply-to: <CAPDyKFrZXd30wXJNsO64-Np129_53D=TVv2yBmBhsOxJa0Sm6g@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Seungwon Jeon <tgih.jun@samsung.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, Tushar Behera <tushar.behera@linaro.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mx1.redhat.com ([209.132.183.28]:52254 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751630AbaEZJNN (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 26 May 2014 05:13:13 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc <linux-mmc@vger.kernel.org>, Arend van Spriel <arend@broadcom.com>
 
-Hi, Ulf.
+Hi All,
 
-On 05/26/2014 05:44 PM, Ulf Hansson wrote:
-> On 26 May 2014 10:38, Jaehoon Chung <jh80.chung@gmail.com> wrote:
->> Hi,
->>
->> On 05/26/2014 05:09 PM, Ludovic Desroches wrote:
->>> On Fri, May 23, 2014 at 07:25:19PM +0900, Jaehoon Chung wrote:
->>>> From: Ludovic Desroches <ludovic.desroches@atmel.com>
->>>>
->>>> Some hosts manage several slots. In these case information such as the
->>>> bus width, chi detect and others are into the slot node. So we have to
->>>
->>> /s/chi detect/chip detect
->> Will fix.
->>
->> Tushar have suggested the rename mmc_of_parse_slot() instead of __mmc_of_parse().
->> I'm not sure which name is better. How about?
->>
->> If never mind, i will change to mmc_of_parse_slot(), then send patch-v2.
-> 
-> I would prefer to keep it as is, but just because that's my taste. :-)
-Ok. I think so.
-I want to merge this patch-set for fixing the dw-mmc problem, before release the 3.16.
+Every few hours (on average) the bcm43362 sdio wifi on 2 different
+model allwinner boards I've throws an EBE error. The error handling
+code successfully send a stop command after this, but still any
+other command after that ends with a data time out error (which again
+gets followed by a successful stop command).
 
-dw-mmc controller also used the slot concept, so some property didn't parse with mmc_of_parse().
+Does this indicate a problem with the sdio device (driver), or could
+this also be triggered by a bug in the mmc host driver?
 
-Best Regards,
-Jaehoon Chung
- 
-> 
-> Kind regards
-> Ulf Hansson
-> 
+One thing worth noticing hereby is that the brcmfmac drivers sdio
+drivestrength table mentions that it is for 1.8v signalling, where
+as the SoC side of things is using 3.3v signalling (this cannot
+be changed).
+
+Any help to further debug this would be greatly appreciated.
+
+Thanks & Regards,
+
+Hans
