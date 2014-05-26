@@ -1,140 +1,113 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v3 13/13] mmc: mmci: Add Qcom specific pio_read function.
-Date: Mon, 26 May 2014 16:34:06 +0200
-Message-ID: <CAPDyKFpGPBcg5zpLgrPbv86ekpVJrdOX-2LaZwoXQRAJwjc++w@mail.gmail.com>
-References: <1400849362-7007-1-git-send-email-srinivas.kandagatla@linaro.org>
-	<1400849589-7626-1-git-send-email-srinivas.kandagatla@linaro.org>
+Subject: Re: [PATCHv2 1/3] mmc: host: add slot argument to mmc_of_parse
+Date: Mon, 26 May 2014 16:37:32 +0200
+Message-ID: <CAPDyKFooaEf-SM4_SbX=mUr_QaYz3zqY6C4y-7hv4RuQrEVcgg@mail.gmail.com>
+References: <1401104107-17651-1-git-send-email-jh80.chung@samsung.com>
+	<1401104107-17651-2-git-send-email-jh80.chung@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
-In-Reply-To: <1400849589-7626-1-git-send-email-srinivas.kandagatla@linaro.org>
-Sender: linux-arm-msm-owner@vger.kernel.org
-To: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
-Cc: Russell King <linux@arm.linux.org.uk>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-arm-msm@vger.kernel.org, Linus Walleij <linus.walleij@linaro.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qg0-f52.google.com ([209.85.192.52]:51368 "EHLO
+	mail-qg0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752263AbaEZOhd (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 26 May 2014 10:37:33 -0400
+Received: by mail-qg0-f52.google.com with SMTP id a108so12069258qge.39
+        for <linux-mmc@vger.kernel.org>; Mon, 26 May 2014 07:37:32 -0700 (PDT)
+In-Reply-To: <1401104107-17651-2-git-send-email-jh80.chung@samsung.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Ludovic Desroches <ludovic.desroches@atmel.com>, "tgih.jun@samsung.com" <tgih.jun@samsung.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>
 
-On 23 May 2014 14:53,  <srinivas.kandagatla@linaro.org> wrote:
-> From: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+On 26 May 2014 13:35, Jaehoon Chung <jh80.chung@samsung.com> wrote:
+> From: Ludovic Desroches <ludovic.desroches@atmel.com>
 >
-> MCIFIFOCNT register behaviour on Qcom chips is very different than the other
-> pl180 integrations. MCIFIFOCNT register contains the number of
-> words that are still waiting to be transferred through the FIFO. It keeps
-> decrementing once the host CPU reads the MCIFIFO. With the existing logic and
-> the MCIFIFOCNT behaviour, mmci_pio_read will loop forever, as the FIFOCNT
-> register will always return transfer size before reading the FIFO.
+> Some hosts manage several slots. In these case information such as the
+> bus width, chip detect and others are into the slot node. So we have to
+> parse child node. If not NULL, slot node will be used instead of the
+> device node.
 >
-> Also the data sheet states that "This register is only useful for debug
-> purposes and should not be used for normal operation since it does not reflect
-> data which may or may not be in the pipeline".
->
-> This patch implements qcom_pio_read function so as existing mmci_pio_read is
-> not suitable for Qcom SOCs. qcom_pio_read function is only selected
-> based on qcom_fifo flag in variant data structure.
->
-> Signed-off-by: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+> Signed-off-by: Ludovic Desroches <ludovic.desroches@atmel.com>
+> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+
+Thanks Jaehoon/Ludovic,
+
+Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+
 > ---
->  drivers/mmc/host/mmci.c | 46 ++++++++++++++++++++++++++++++++++++++++++++--
->  1 file changed, 44 insertions(+), 2 deletions(-)
+> Changelog V2:
+>         - Fix the typo.
 >
-> diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-> index f6dfd24..51ce493 100644
-> --- a/drivers/mmc/host/mmci.c
-> +++ b/drivers/mmc/host/mmci.c
-> @@ -75,6 +75,7 @@ static unsigned int fmax = 515633;
->   *                      are not ignored.
->   * @explicit_mclk_control: enable explicit mclk control in driver.
->   * @cclk_is_mclk: enable iff card clock is multimedia card adapter clock.
-> + * @qcom_fifo: enables qcom specific fifo pio read function.
+>  drivers/mmc/core/host.c  |   13 +++++++++----
+>  include/linux/mmc/host.h |   10 +++++++++-
+>  2 files changed, 18 insertions(+), 5 deletions(-)
+>
+> diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+> index 95cceae..0f677b3 100644
+> --- a/drivers/mmc/core/host.c
+> +++ b/drivers/mmc/core/host.c
+> @@ -298,15 +298,17 @@ static inline void mmc_host_clk_sysfs_init(struct mmc_host *host)
+>  #endif
+>
+>  /**
+> - *     mmc_of_parse() - parse host's device-tree node
+> + *     __mmc_of_parse() - parse host's device-tree node
+>   *     @host: host whose node should be parsed.
+> + *     @slot : some device provide several slots so the node to parse
+> + *             is not the host one.
+>   *
+>   * To keep the rest of the MMC subsystem unaware of whether DT has been
+>   * used to to instantiate and configure this host instance or not, we
+>   * parse the properties and set respective generic mmc-host flags and
+>   * parameters.
 >   */
->  struct variant_data {
->         unsigned int            clkreg;
-> @@ -98,6 +99,7 @@ struct variant_data {
->         bool                    mclk_delayed_writes;
->         bool                    explicit_mclk_control;
->         bool                    cclk_is_mclk;
-> +       bool                    qcom_fifo;
->  };
+> -int mmc_of_parse(struct mmc_host *host)
+> +int __mmc_of_parse(struct mmc_host *host, struct device_node *slot)
+>  {
+>         struct device_node *np;
+>         u32 bus_width;
+> @@ -317,7 +319,10 @@ int mmc_of_parse(struct mmc_host *host)
+>         if (!host->parent || !host->parent->of_node)
+>                 return 0;
 >
->  static struct variant_data variant_arm = {
-> @@ -208,6 +210,7 @@ static struct variant_data variant_qcom = {
->         .mclk_delayed_writes    = true,
->         .explicit_mclk_control  = true,
->         .cclk_is_mclk   = true,
-> +       .qcom_fifo              = true,
->  };
+> -       np = host->parent->of_node;
+> +       if (slot)
+> +               np = slot;
+> +       else
+> +               np = host->parent->of_node;
 >
->  static inline u32 mmci_readl(struct mmci_host *host, u32 off)
-> @@ -1022,6 +1025,40 @@ mmci_cmd_irq(struct mmci_host *host, struct mmc_command *cmd,
->         }
+>         /* "bus-width" is translated to MMC_CAP_*_BIT_DATA flags */
+>         if (of_property_read_u32(np, "bus-width", &bus_width) < 0) {
+> @@ -459,7 +464,7 @@ out:
+>         return ret;
 >  }
 >
-> +static int mmci_qcom_pio_read(struct mmci_host *host, char *buffer,
-> +                       unsigned int remain)
+> -EXPORT_SYMBOL(mmc_of_parse);
+> +EXPORT_SYMBOL(__mmc_of_parse);
+>
+>  /**
+>   *     mmc_alloc_host - initialise the per-host structure.
+> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+> index 7960424..c62af91 100644
+> --- a/include/linux/mmc/host.h
+> +++ b/include/linux/mmc/host.h
+> @@ -372,7 +372,15 @@ struct mmc_host *mmc_alloc_host(int extra, struct device *);
+>  int mmc_add_host(struct mmc_host *);
+>  void mmc_remove_host(struct mmc_host *);
+>  void mmc_free_host(struct mmc_host *);
+> -int mmc_of_parse(struct mmc_host *host);
+> +int __mmc_of_parse(struct mmc_host *host, struct device_node *slot);
+> +/*
+> + * mmc_of_parse - parse host's device-tree node
+> + *     @host: host whose node should be parsed.
+> + */
+> +static inline int mmc_of_parse(struct mmc_host *host)
 > +{
-> +       u32 *ptr = (u32 *) buffer;
-> +       unsigned int count = 0;
-> +       unsigned int words, bytes;
-> +       unsigned int fsize = host->variant->fifosize;
-> +
-> +       words = remain >> 2;
-> +       bytes = remain % 4;
-> +       /* read full words followed by leftover bytes */
-> +       if (words) {
-> +               while (readl(host->base + MMCISTATUS) & MCI_RXDATAAVLBL) {
-> +                       *ptr = readl(host->base + MMCIFIFO + (count % fsize));
-> +                       ptr++;
-> +                       count += 4;
-> +                       words--;
-> +                       if (!words)
-> +                               break;
-> +               }
-> +       }
-> +
-> +       if (unlikely(bytes)) {
-> +               unsigned char buf[4];
-> +               if (readl(host->base + MMCISTATUS) & MCI_RXDATAAVLBL) {
-> +                       *buf = readl(host->base + MMCIFIFO + (count % fsize));
-> +                       memcpy(ptr, buf, bytes);
-> +                       count += bytes;
-> +               }
-> +       }
-> +
-> +       return count;
+> +       return __mmc_of_parse(host, NULL);
 > +}
-> +
->  static int mmci_pio_read(struct mmci_host *host, char *buffer, unsigned int remain)
+>
+>  static inline void *mmc_priv(struct mmc_host *host)
 >  {
->         void __iomem *base = host->base;
-> @@ -1143,8 +1180,13 @@ static irqreturn_t mmci_pio_irq(int irq, void *dev_id)
->                 remain = sg_miter->length;
->
->                 len = 0;
-> -               if (status & MCI_RXACTIVE)
-> -                       len = mmci_pio_read(host, buffer, remain);
-> +               if (status & MCI_RXACTIVE) {
-> +                       if (variant->qcom_fifo)
-> +                               len = mmci_qcom_pio_read(host, buffer, remain);
-> +                       else
-> +                               len = mmci_pio_read(host, buffer, remain);
-> +               }
-
-This is hot path.
-
-As I suggested for the readl and writel wrapper functions, I think it
-would be better to use a function pointer in the struct mmci host,
-which you set up in the probe phase. That means the variant data don't
-need to be checked each an every time this function gets invoked.
-
-> +
->                 if (status & MCI_TXACTIVE)
->                         len = mmci_pio_write(host, buffer, remain, status);
-
-So no changes needed for pio_write at this point? Or those will come later?
-
->
 > --
-> 1.9.1
+> 1.7.9.5
 >
-
-Kind regards
-Ulf Hansson
