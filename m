@@ -1,131 +1,146 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v3 10/13] mmc: mmci: add Qcom specifics of clk and
- datactrl registers.
-Date: Mon, 26 May 2014 15:05:30 +0200
-Message-ID: <CAPDyKFpyZU207A515T9xd153DBWGpjP8cqiAZfwvkx7Drefc5A@mail.gmail.com>
+Subject: Re: [PATCH v3 12/13] mmc: mmci: add explicit clk control
+Date: Mon, 26 May 2014 16:21:26 +0200
+Message-ID: <CAPDyKFqz-O9-Douk96LBuFRD_P1146c_Ld14TgiduBgfBqRi_A@mail.gmail.com>
 References: <1400849362-7007-1-git-send-email-srinivas.kandagatla@linaro.org>
-	<1400849556-7501-1-git-send-email-srinivas.kandagatla@linaro.org>
+	<1400849578-7585-1-git-send-email-srinivas.kandagatla@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qg0-f44.google.com ([209.85.192.44]:40348 "EHLO
-	mail-qg0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751716AbaEZNFb (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 26 May 2014 09:05:31 -0400
-Received: by mail-qg0-f44.google.com with SMTP id i50so12035107qgf.3
-        for <linux-mmc@vger.kernel.org>; Mon, 26 May 2014 06:05:30 -0700 (PDT)
-In-Reply-To: <1400849556-7501-1-git-send-email-srinivas.kandagatla@linaro.org>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: <1400849578-7585-1-git-send-email-srinivas.kandagatla@linaro.org>
+Sender: linux-arm-msm-owner@vger.kernel.org
 To: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
 Cc: Russell King <linux@arm.linux.org.uk>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-arm-msm@vger.kernel.org, Linus Walleij <linus.walleij@linaro.org>
+List-Id: linux-mmc@vger.kernel.org
 
 On 23 May 2014 14:52,  <srinivas.kandagatla@linaro.org> wrote:
 > From: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
 >
-> This patch adds specifics of clk and datactrl register on Qualcomm SD
-> Card controller. This patch also populates the Qcom variant data with
-> these new values specific to Qualcomm SD Card Controller.
+> On Controllers like Qcom SD card controller where cclk is mclk and mclk should
+> be directly controlled by the driver.
+>
+> This patch adds support to control mclk directly in the driver, and also
+> adds explicit_mclk_control and cclk_is_mclk flags in variant structure giving
+> more flexibility to the driver.
 >
 > Signed-off-by: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
 > Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
 > ---
->  drivers/mmc/host/mmci.c |  4 ++++
->  drivers/mmc/host/mmci.h | 24 ++++++++++++++++++++++++
->  2 files changed, 28 insertions(+)
+>  drivers/mmc/host/mmci.c | 30 +++++++++++++++++++++++++-----
+>  1 file changed, 25 insertions(+), 5 deletions(-)
 >
 > diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-> index 17e7f6a..6434f5b1 100644
+> index 5cbf644..f6dfd24 100644
 > --- a/drivers/mmc/host/mmci.c
 > +++ b/drivers/mmc/host/mmci.c
-> @@ -185,6 +185,10 @@ static struct variant_data variant_qcom = {
->         .fifosize               = 16 * 4,
->         .fifohalfsize           = 8 * 4,
->         .clkreg                 = MCI_CLK_ENABLE,
-> +       .clkreg_enable          = MCI_QCOM_CLK_FLOWENA |
-> +                                 MCI_QCOM_CLK_FEEDBACK_CLK,
+> @@ -73,6 +73,8 @@ static unsigned int fmax = 515633;
+>   * @pwrreg_nopower: bits in MMCIPOWER don't controls ext. power supply
+>   * @mclk_delayed_writes: enable delayed writes to ensure, subsequent updates
+>   *                      are not ignored.
+> + * @explicit_mclk_control: enable explicit mclk control in driver.
+> + * @cclk_is_mclk: enable iff card clock is multimedia card adapter clock.
+>   */
+>  struct variant_data {
+>         unsigned int            clkreg;
+> @@ -94,6 +96,8 @@ struct variant_data {
+>         bool                    busy_detect;
+>         bool                    pwrreg_nopower;
+>         bool                    mclk_delayed_writes;
+> +       bool                    explicit_mclk_control;
+> +       bool                    cclk_is_mclk;
 
-Obviously I don't have the in-depth knowledge about the Qcom variant,
-but comparing the ST variant here made me think.
+I can't see why you need to have both these new configurations. Aren't
+"cclk_is_mclk" just a fact when you use "explicit_mclk_control".
 
-Using the feeback clock internal logic in the ST variant, requires the
-corresponding feedback clock pin signal on the board, to be
-routed/connected. Typically we used this for SD cards, which involved
-using an external level shifter circuit.
+I also believe I would prefer something like "qcom_clkdiv" instead.
 
-Is it correct to enable this bit for all cases, including eMMC?
-
-If it is board specific configurations, you should add a DT binding
-for it - like there are for the ST variant.
-
-> +       .clkreg_8bit_bus_enable = MCI_QCOM_CLK_WIDEBUS_8,
-> +       .datactrl_mask_ddrmode  = MCI_QCOM_CLK_DDR_MODE,
->         .blksz_datactrl4        = true,
->         .datalength_bits        = 24,
->         .blksz_datactrl4        = true,
-> diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
-> index cd83ca3..1b93ae7 100644
-> --- a/drivers/mmc/host/mmci.h
-> +++ b/drivers/mmc/host/mmci.h
-> @@ -41,6 +41,22 @@
->  /* Modified PL180 on Versatile Express platform */
->  #define MCI_ARM_HWFCEN         BIT(12)
+>  };
 >
-> +/* Modified on Qualcomm Integrations */
-> +#define MCI_QCOM_CLK_WIDEBUS_4 (2 << 10)
-
-This is the same as BIT(11), please use MCI_4BIT_BUS instead.
-
-> +#define MCI_QCOM_CLK_WIDEBUS_8 (3 << 10)
-
-Since you converted to use the "BIT" macro a few patches ago, I
-suggest we should stick to it. How about something below:
-
-#define MCI_QCOM_CLK_WIDEBUS_8 BIT (BIT(10) | BIT(11))
-
-Please adopt all defines added in this patch to use the BIT macro.
-
-> +#define MCI_QCOM_CLK_FLOWENA   BIT(12)
-> +#define MCI_QCOM_CLK_INVERTOUT BIT(13)
-> +
-> +/* select in latch data and command */
-> +#define MCI_QCOM_CLK_SEL_IN_SHIFT      (14)
-
-BIT (14)?
-
-> +#define MCI_QCOM_CLK_SEL_MASK          (0x3)
-> +#define MCI_QCOM_CLK_SEL_RISING_EDGE   (1)
-
-BIT(1)?
-
-> +#define MCI_QCOM_CLK_FEEDBACK_CLK      (2 << 14)
-> +#define MCI_QCOM_CLK_DDR_MODE          (3 << 14)
-> +
-> +/* mclk selection */
-> +#define MCI_QCOM_CLK_SEL_MCLK          (2 << 23)
-
-Does this correspond to MCI_CLK_BYPASS? If so, we should maybe state
-this in a comment?
-
-> +
->  #define MMCIARGUMENT           0x008
->  #define MMCICOMMAND            0x00c
->  #define MCI_CPSM_RESPONSE      BIT(6)
-> @@ -54,6 +70,14 @@
->  #define MCI_ST_NIEN            BIT(13)
->  #define MCI_ST_CE_ATACMD       BIT(14)
+>  static struct variant_data variant_arm = {
+> @@ -202,6 +206,8 @@ static struct variant_data variant_qcom = {
+>          * for 3 clk cycles.
+>          */
+>         .mclk_delayed_writes    = true,
+> +       .explicit_mclk_control  = true,
+> +       .cclk_is_mclk   = true,
+>  };
 >
-> +/* Modified on Qualcomm Integrations */
-> +#define MCI_QCOM_CSPM_DATCMD           BIT(12)
-> +#define MCI_QCOM_CSPM_MCIABORT         BIT(13)
-> +#define MCI_QCOM_CSPM_CCSENABLE                BIT(14)
-> +#define MCI_QCOM_CSPM_CCSDISABLE       BIT(15)
-> +#define MCI_QCOM_CSPM_AUTO_CMD19       BIT(16)
-> +#define MCI_QCOM_CSPM_AUTO_CMD21       BIT(21)
+>  static inline u32 mmci_readl(struct mmci_host *host, u32 off)
+> @@ -317,7 +323,9 @@ static void mmci_set_clkreg(struct mmci_host *host, unsigned int desired)
+>         host->cclk = 0;
+>
+>         if (desired) {
+> -               if (desired >= host->mclk) {
+> +               if (variant->cclk_is_mclk) {
+> +                       host->cclk = host->mclk;
+> +               } else if (desired >= host->mclk) {
+>                         clk = MCI_CLK_BYPASS;
+>                         if (variant->st_clkdiv)
+>                                 clk |= MCI_ST_UX500_NEG_EDGE;
+> @@ -1354,6 +1362,16 @@ static void mmci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+>         if (!ios->clock && variant->pwrreg_clkgate)
+>                 pwr &= ~MCI_PWR_ON;
+>
+> +       if (ios->clock != host->mclk && host->variant->explicit_mclk_control) {
+
+I suggest you should clarify the statement by adding a pair of extra
+parentheses. Additionally it seems like a good idea to reverse the
+order of the statements, to clarify this is for qcom clock handling
+only.
+
+More important, what I think you really want to do is to compare
+"ios->clock" with it's previous value it had when ->set_ios were
+invoked. Then let a changed value act as the trigger to set a new clk
+rate. Obvoiusly you need to cache the clock rate in the struct mmci
+host to handle this.
+
+> +               int rc = clk_set_rate(host->clk, ios->clock);
+> +               if (rc < 0) {
+> +                       dev_err(mmc_dev(host->mmc),
+> +                               "Error setting clock rate (%d)\n", rc);
+> +               } else {
+> +                       host->mclk = clk_get_rate(host->clk);
+
+So here you actually find out the new clk rate, but shouldn't you
+update "host->mclk" within the spin_lock? Or it might not matter?
+
+> +               }
+> +       }
 > +
->  #define MMCIRESPCMD            0x010
->  #define MMCIRESPONSE0          0x014
->  #define MMCIRESPONSE1          0x018
+>         spin_lock_irqsave(&host->lock, flags);
+>
+>         mmci_set_clkreg(host, ios->clock);
+> @@ -1540,10 +1558,12 @@ static int mmci_probe(struct amba_device *dev,
+>          * is not specified. Either value must not exceed the clock rate into
+>          * the block, of course.
+>          */
+> -       if (mmc->f_max)
+> -               mmc->f_max = min(host->mclk, mmc->f_max);
+> -       else
+> -               mmc->f_max = min(host->mclk, fmax);
+> +       if (!host->variant->explicit_mclk_control) {
+> +               if (mmc->f_max)
+> +                       mmc->f_max = min(host->mclk, mmc->f_max);
+> +               else
+> +                       mmc->f_max = min(host->mclk, fmax);
+> +       }
+
+This means your mmc->f_max value will either be zero or the one you
+provided through DT. And since zero won't work, that means you
+_require_ to get the value from DT. According to the documentation of
+this DT binding, f_max is optional.
+
+So unless you fine another way of dynamically at runtime figure out
+the value of f_max (using the clk API), you need to update the DT
+documentation for mmci.
+
+Additionally, this makes me wonder about f_min. I haven't seen
+anywhere in this patch were that value is being set to proper value,
+right?
+
+>         dev_dbg(mmc_dev(mmc), "clocking block at %u Hz\n", mmc->f_max);
+>
+>         /* Get regulators and the supported OCR mask */
 > --
 > 1.9.1
 >
