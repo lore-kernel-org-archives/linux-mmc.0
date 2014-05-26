@@ -1,13 +1,13 @@
 From: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: [PATCH 07/11] dt: bindings: add bindings for Broadcom
- bcm43xx sdio devices
-Date: Mon, 26 May 2014 09:48:02 +0200
-Message-ID: <1401090486-4414-8-git-send-email-hdegoede@redhat.com>
+Subject: [PATCH 08/11] brcmfmac: add device tree support for
+ SDIO devices
+Date: Mon, 26 May 2014 09:48:03 +0200
+Message-ID: <1401090486-4414-9-git-send-email-hdegoede@redhat.com>
 References: <1401090486-4414-1-git-send-email-hdegoede@redhat.com>
 Reply-To: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-sunxi+bncBDRZXY4CYYORBVPDROOAKGQEARFHENA-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+Return-path: <linux-sunxi+bncBDRZXY4CYYORBWHDROOAKGQE6VUNNDI-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
 In-Reply-To: <1401090486-4414-1-git-send-email-hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Post: <http://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
 List-Help: <http://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
@@ -19,62 +19,148 @@ To: Linus Walleij <linus.walleij-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Chris
 Cc: Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-From: Arend van Spriel <arend-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>
+From: Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>
 
-The Broadcom bcm43xx sdio devices are fullmac devices that may be
-integrated in ARM platforms. Currently, the brcmfmac driver for
-these devices support use of platform data. This patch specifies
-the bindings that allow this platform data to be expressed in the
-devicetree.
+brcmfmac devices can use an out-of-band interrupt on a GPIO line.
+Currently this is specified using platform data. Add support for
+specifying out-of-band interrupt via device tree.
 
-Reviewed-by: Hante Meuleman <meuleman-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>
-Reviewed-by: Franky (Zhenhui) Lin <frankyl-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>
-Reviewed-by: Daniel (Deognyoun) Kim <dekim-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>
-Reviewed-by: Pieter-Paul Giesberts <pieterpg-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>
+Signed-off-by: Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>
+[arend-dY08KVG/lbpWk0Htik3J/w@public.gmane.org: conditionalize more of-code, use driver debug routines]
 Signed-off-by: Arend van Spriel <arend-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>
 [hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org: drop clk / reg_on gpio handling, as there is no consensus
  on how to handle this yet]
-[hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org: move from bindings/staging to bindings]
 Signed-off-by: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 ---
- .../bindings/net/wireless/brcm,bcm43xx-fmac.txt    | 29 ++++++++++++++++++++++
- 1 file changed, 29 insertions(+)
- create mode 100644 Documentation/devicetree/bindings/net/wireless/brcm,bcm43xx-fmac.txt
+ drivers/net/wireless/brcm80211/brcmfmac/Makefile |  2 +
+ drivers/net/wireless/brcm80211/brcmfmac/bcmsdh.c |  4 ++
+ drivers/net/wireless/brcm80211/brcmfmac/of.c     | 56 ++++++++++++++++++++++++
+ drivers/net/wireless/brcm80211/brcmfmac/of.h     | 22 ++++++++++
+ 4 files changed, 84 insertions(+)
+ create mode 100644 drivers/net/wireless/brcm80211/brcmfmac/of.c
+ create mode 100644 drivers/net/wireless/brcm80211/brcmfmac/of.h
 
-diff --git a/Documentation/devicetree/bindings/net/wireless/brcm,bcm43xx-fmac.txt b/Documentation/devicetree/bindings/net/wireless/brcm,bcm43xx-fmac.txt
+diff --git a/drivers/net/wireless/brcm80211/brcmfmac/Makefile b/drivers/net/wireless/brcm80211/brcmfmac/Makefile
+index 1d2ceac..7f8f641 100644
+--- a/drivers/net/wireless/brcm80211/brcmfmac/Makefile
++++ b/drivers/net/wireless/brcm80211/brcmfmac/Makefile
+@@ -44,3 +44,5 @@ brcmfmac-$(CONFIG_BRCMDBG) += \
+ 		dhd_dbg.o
+ brcmfmac-$(CONFIG_BRCM_TRACING) += \
+ 		tracepoint.o
++brcmfmac-$(CONFIG_OF) += \
++		of.o
+diff --git a/drivers/net/wireless/brcm80211/brcmfmac/bcmsdh.c b/drivers/net/wireless/brcm80211/brcmfmac/bcmsdh.c
+index a16e644..0fc707c 100644
+--- a/drivers/net/wireless/brcm80211/brcmfmac/bcmsdh.c
++++ b/drivers/net/wireless/brcm80211/brcmfmac/bcmsdh.c
+@@ -43,6 +43,7 @@
+ #include "dhd_bus.h"
+ #include "dhd_dbg.h"
+ #include "sdio_host.h"
++#include "of.h"
+ 
+ #define SDIOH_API_ACCESS_RETRY_LIMIT	2
+ 
+@@ -1043,6 +1044,9 @@ static int brcmf_ops_sdio_probe(struct sdio_func *func,
+ 	sdiodev->dev = &sdiodev->func[1]->dev;
+ 	sdiodev->pdata = brcmfmac_sdio_pdata;
+ 
++	if (!sdiodev->pdata)
++		brcmf_of_probe(sdiodev);
++
+ 	atomic_set(&sdiodev->suspend, false);
+ 	init_waitqueue_head(&sdiodev->request_word_wait);
+ 	init_waitqueue_head(&sdiodev->request_buffer_wait);
+diff --git a/drivers/net/wireless/brcm80211/brcmfmac/of.c b/drivers/net/wireless/brcm80211/brcmfmac/of.c
 new file mode 100644
-index 0000000..6a0aaf2
+index 0000000..78ff906
 --- /dev/null
-+++ b/Documentation/devicetree/bindings/net/wireless/brcm,bcm43xx-fmac.txt
-@@ -0,0 +1,29 @@
-+Broadcom BCM43xx Fullmac wireless SDIO devices
++++ b/drivers/net/wireless/brcm80211/brcmfmac/of.c
+@@ -0,0 +1,56 @@
++/*
++ * Copyright (c) 2014 Broadcom Corporation
++ *
++ * Permission to use, copy, modify, and/or distribute this software for any
++ * purpose with or without fee is hereby granted, provided that the above
++ * copyright notice and this permission notice appear in all copies.
++ *
++ * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
++ * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
++ * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
++ * SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
++ * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION
++ * OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
++ * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
++ */
++#include <linux/init.h>
++#include <linux/of.h>
++#include <linux/of_irq.h>
++#include <linux/mmc/card.h>
++#include <linux/platform_data/brcmfmac-sdio.h>
++#include <linux/mmc/sdio_func.h>
 +
-+This node provides properties for controlling the Broadcom wireless device. The
-+node is expected to be specified as a child node to the SDIO controller that
-+connects the device to the system.
++#include <defs.h>
++#include "dhd_dbg.h"
++#include "sdio_host.h"
 +
-+Required properties:
++void brcmf_of_probe(struct brcmf_sdio_dev *sdiodev)
++{
++	struct device *dev = sdiodev->dev;
++	struct device_node *np = dev->of_node;
++	int irq;
++	u32 irqf;
++	u32 val;
 +
-+ - compatible : Should be "brcm,bcm43xx-fmac".
++	if (!np || !of_device_is_compatible(np, "brcm,bcm43xx-fmac"))
++		return;
 +
-+Optional properties:
-+ - brcm,drive-strength : drive strength used for SDIO pins on device.
-+	(default = 6mA).
-+ - interrupt-parent : the phandle for the interrupt controller to which the
-+	device interrupts are connected.
-+ - interrupts : specifies attributes for the out-of-band interrupt (host-wake).
-+	When not specified the device will use in-band SDIO interrupts.
-+ - interrupt-names : name of the out-of-band interrupt, which must be set
-+	to "host-wake".
++	sdiodev->pdata = devm_kzalloc(dev, sizeof(*sdiodev->pdata), GFP_KERNEL);
++	if (!sdiodev->pdata)
++		return;
 +
-+Example:
++	irq = irq_of_parse_and_map(np, 0);
++	if (irq < 0) {
++		brcmf_err("interrupt could not be mapped: err=%d\n", irq);
++		devm_kfree(dev, sdiodev->pdata);
++		return;
++	}
++	irqf = irqd_get_trigger_type(irq_get_irq_data(irq));
 +
-+bcm4335 {
-+	compatible = "brcm,bcm43xx-fmac";
-+	brcm,drive-strength = <4>;
-+	interrupt-parent = <&gpx2>;
-+	interrupts = <5 IRQ_TYPE_LEVEL_HIGH>;
-+	interrupt-names = "host-wake";
-+};
++	sdiodev->pdata->oob_irq_supported = true;
++	sdiodev->pdata->oob_irq_nr = irq;
++	sdiodev->pdata->oob_irq_flags = irqf;
++
++	if (of_property_read_u32(np, "brcm,drive-strength", &val) == 0)
++		sdiodev->pdata->drive_strength = val;
++}
+diff --git a/drivers/net/wireless/brcm80211/brcmfmac/of.h b/drivers/net/wireless/brcm80211/brcmfmac/of.h
+new file mode 100644
+index 0000000..5f7c355
+--- /dev/null
++++ b/drivers/net/wireless/brcm80211/brcmfmac/of.h
+@@ -0,0 +1,22 @@
++/*
++ * Copyright (c) 2014 Broadcom Corporation
++ *
++ * Permission to use, copy, modify, and/or distribute this software for any
++ * purpose with or without fee is hereby granted, provided that the above
++ * copyright notice and this permission notice appear in all copies.
++ *
++ * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
++ * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
++ * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
++ * SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
++ * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION
++ * OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
++ * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
++ */
++#ifdef CONFIG_OF
++void brcmf_of_probe(struct brcmf_sdio_dev *sdiodev);
++#else
++static void brcmf_of_probe(struct brcmf_sdio_dev *sdiodev)
++{
++}
++#endif /* CONFIG_OF */
 -- 
 1.9.3
