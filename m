@@ -1,101 +1,93 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v3 07/13] mmc: mmci: add ddrmode mask to variant data
-Date: Mon, 26 May 2014 11:53:47 +0200
-Message-ID: <CAPDyKFpdDOepF6YzKnCZPggbA5F=ZjLmA9-6uTUxF7jeYtyiTw@mail.gmail.com>
+Subject: Re: [PATCH v3 08/13] mmc: mmci: add 8bit bus support in variant data
+Date: Mon, 26 May 2014 12:07:15 +0200
+Message-ID: <CAPDyKFruVPo-k+19pQ4zGrVBH0gqszQ5vphsTAm6HTXUX5riFg@mail.gmail.com>
 References: <1400849362-7007-1-git-send-email-srinivas.kandagatla@linaro.org>
-	<1400849515-7343-1-git-send-email-srinivas.kandagatla@linaro.org>
+	<1400849527-7384-1-git-send-email-srinivas.kandagatla@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
-In-Reply-To: <1400849515-7343-1-git-send-email-srinivas.kandagatla@linaro.org>
-Sender: linux-arm-msm-owner@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1400849527-7384-1-git-send-email-srinivas.kandagatla@linaro.org>
+Sender: linux-kernel-owner@vger.kernel.org
 To: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
 Cc: Russell King <linux@arm.linux.org.uk>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-arm-msm@vger.kernel.org, Linus Walleij <linus.walleij@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 23 May 2014 14:51,  <srinivas.kandagatla@linaro.org> wrote:
+On 23 May 2014 14:52,  <srinivas.kandagatla@linaro.org> wrote:
 > From: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
 >
-> This patch adds ddrmode mask to variant structure giving more flexibility
-> to the driver to support more SOCs which have different datactrl register
-> layout.
+> This patch adds 8bit bus enable to variant structure giving more flexibility
+> to the driver to support more SOCs which have different clock register layout.
 >
-> Without this patch datactrl register is updated with wrong ddrmode mask on non
-> ST SOCs, resulting in card detection failures.
+> Without this patch other new SOCs like Qcom will have to add more code
+> to special case them.
 >
 > Signed-off-by: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
 > Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
 > ---
->  drivers/mmc/host/mmci.c | 8 +++++++-
->  1 file changed, 7 insertions(+), 1 deletion(-)
+>  drivers/mmc/host/mmci.c | 7 ++++++-
+>  1 file changed, 6 insertions(+), 1 deletion(-)
 >
 > diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-> index 1385554..dec70d2 100644
+> index dec70d2..a81f303 100644
 > --- a/drivers/mmc/host/mmci.c
 > +++ b/drivers/mmc/host/mmci.c
-> @@ -59,6 +59,7 @@ static unsigned int fmax = 515633;
->   *               is asserted (likewise for RX)
->   * @sdio: variant supports SDIO
->   * @st_clkdiv: true if using a ST-specific clock divider algorithm
-> + * @datactrl_mask_ddrmode: ddr mode mask in datactrl register.
->   * @blksz_datactrl16: true if Block size is at b16..b30 position in datactrl register
->   * @blksz_datactrl4: true if Block size is at b4..b16 position in datactrl
->   *                  register
-> @@ -76,6 +77,7 @@ struct variant_data {
+> @@ -52,6 +52,7 @@ static unsigned int fmax = 515633;
+>   * struct variant_data - MMCI variant-specific quirks
+>   * @clkreg: default value for MCICLOCK register
+>   * @clkreg_enable: enable value for MMCICLOCK register
+> + * @clkreg_8bit_bus_enable: enable value for 8 bit bus
+>   * @datalength_bits: number of bits in the MMCIDATALENGTH register
+>   * @fifosize: number of bytes that can be written when MMCI_TXFIFOEMPTY
+>   *           is asserted (likewise for RX)
+> @@ -74,6 +75,7 @@ static unsigned int fmax = 515633;
+>  struct variant_data {
+>         unsigned int            clkreg;
+>         unsigned int            clkreg_enable;
+> +       unsigned int            clkreg_8bit_bus_enable;
 >         unsigned int            datalength_bits;
 >         unsigned int            fifosize;
 >         unsigned int            fifohalfsize;
-> +       unsigned int            datactrl_mask_ddrmode;
->         bool                    sdio;
->         bool                    st_clkdiv;
->         bool                    blksz_datactrl16;
-> @@ -114,6 +116,7 @@ static struct variant_data variant_u300 = {
+> @@ -116,6 +118,7 @@ static struct variant_data variant_u300 = {
 >         .fifosize               = 16 * 4,
 >         .fifohalfsize           = 8 * 4,
 >         .clkreg_enable          = MCI_ST_U300_HWFCEN,
-> +       .datactrl_mask_ddrmode  = MCI_ST_DPSM_DDRMODE,
->         .datalength_bits        = 16,
->         .sdio                   = true,
->         .pwrreg_powerup         = MCI_PWR_ON,
-> @@ -126,6 +129,7 @@ static struct variant_data variant_nomadik = {
->         .fifosize               = 16 * 4,
->         .fifohalfsize           = 8 * 4,
->         .clkreg                 = MCI_CLK_ENABLE,
-> +       .datactrl_mask_ddrmode  = MCI_ST_DPSM_DDRMODE,
->         .datalength_bits        = 24,
->         .sdio                   = true,
->         .st_clkdiv              = true,
-> @@ -140,6 +144,7 @@ static struct variant_data variant_ux500 = {
->         .fifohalfsize           = 8 * 4,
->         .clkreg                 = MCI_CLK_ENABLE,
->         .clkreg_enable          = MCI_ST_UX500_HWFCEN,
-> +       .datactrl_mask_ddrmode  = MCI_ST_DPSM_DDRMODE,
->         .datalength_bits        = 24,
->         .sdio                   = true,
->         .st_clkdiv              = true,
-> @@ -155,6 +160,7 @@ static struct variant_data variant_ux500v2 = {
->         .fifohalfsize           = 8 * 4,
->         .clkreg                 = MCI_CLK_ENABLE,
->         .clkreg_enable          = MCI_ST_UX500_HWFCEN,
-> +       .datactrl_mask_ddrmode  = MCI_ST_DPSM_DDRMODE,
+> +       .clkreg_8bit_bus_enable = MCI_ST_8BIT_BUS,
 
-Only the ux500v2 supports DDR mode, using the MCI_ST_DPSM_DDRMODE bit.
-
->         .datalength_bits        = 24,
->         .sdio                   = true,
->         .st_clkdiv              = true,
-> @@ -800,7 +806,7 @@ static void mmci_start_data(struct mmci_host *host, struct mmc_data *data)
->                 }
->
->         if (host->mmc->ios.timing == MMC_TIMING_UHS_DDR50)
-> -               datactrl |= MCI_ST_DPSM_DDRMODE;
-> +               datactrl |= variant->datactrl_mask_ddrmode;
->
->         /*
->          * Attempt to use DMA operation mode, if this
-> --
-> 1.9.1
->
+Linus, will have to confirm this. I don't know if the u300 variant
+support 8-bit.
 
 Kind regards
 Ulf Hansson
+
+>         .datactrl_mask_ddrmode  = MCI_ST_DPSM_DDRMODE,
+>         .datalength_bits        = 16,
+>         .sdio                   = true,
+> @@ -144,6 +147,7 @@ static struct variant_data variant_ux500 = {
+>         .fifohalfsize           = 8 * 4,
+>         .clkreg                 = MCI_CLK_ENABLE,
+>         .clkreg_enable          = MCI_ST_UX500_HWFCEN,
+> +       .clkreg_8bit_bus_enable = MCI_ST_8BIT_BUS,
+>         .datactrl_mask_ddrmode  = MCI_ST_DPSM_DDRMODE,
+>         .datalength_bits        = 24,
+>         .sdio                   = true,
+> @@ -160,6 +164,7 @@ static struct variant_data variant_ux500v2 = {
+>         .fifohalfsize           = 8 * 4,
+>         .clkreg                 = MCI_CLK_ENABLE,
+>         .clkreg_enable          = MCI_ST_UX500_HWFCEN,
+> +       .clkreg_8bit_bus_enable = MCI_ST_8BIT_BUS,
+>         .datactrl_mask_ddrmode  = MCI_ST_DPSM_DDRMODE,
+>         .datalength_bits        = 24,
+>         .sdio                   = true,
+> @@ -340,7 +345,7 @@ static void mmci_set_clkreg(struct mmci_host *host, unsigned int desired)
+>         if (host->mmc->ios.bus_width == MMC_BUS_WIDTH_4)
+>                 clk |= MCI_4BIT_BUS;
+>         if (host->mmc->ios.bus_width == MMC_BUS_WIDTH_8)
+> -               clk |= MCI_ST_8BIT_BUS;
+> +               clk |= variant->clkreg_8bit_bus_enable;
+>
+>         if (host->mmc->ios.timing == MMC_TIMING_UHS_DDR50)
+>                 clk |= MCI_ST_UX500_NEG_EDGE;
+> --
+> 1.9.1
+>
