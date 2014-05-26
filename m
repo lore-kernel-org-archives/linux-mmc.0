@@ -1,105 +1,134 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: [PATCHv2 2/3] mmc: dw_mmc: use the __mmc_of_parse to parse the slot
- node
-Date: Mon, 26 May 2014 20:35:06 +0900
-Message-ID: <1401104107-17651-3-git-send-email-jh80.chung@samsung.com>
-References: <1401104107-17651-1-git-send-email-jh80.chung@samsung.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v3 10/13] mmc: mmci: add Qcom specifics of clk and
+ datactrl registers.
+Date: Mon, 26 May 2014 15:05:30 +0200
+Message-ID: <CAPDyKFpyZU207A515T9xd153DBWGpjP8cqiAZfwvkx7Drefc5A@mail.gmail.com>
+References: <1400849362-7007-1-git-send-email-srinivas.kandagatla@linaro.org>
+	<1400849556-7501-1-git-send-email-srinivas.kandagatla@linaro.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout4.samsung.com ([203.254.224.34]:45987 "EHLO
-	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752083AbaEZLfR (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 26 May 2014 07:35:17 -0400
-In-reply-to: <1401104107-17651-1-git-send-email-jh80.chung@samsung.com>
+Received: from mail-qg0-f44.google.com ([209.85.192.44]:40348 "EHLO
+	mail-qg0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751716AbaEZNFb (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 26 May 2014 09:05:31 -0400
+Received: by mail-qg0-f44.google.com with SMTP id i50so12035107qgf.3
+        for <linux-mmc@vger.kernel.org>; Mon, 26 May 2014 06:05:30 -0700 (PDT)
+In-Reply-To: <1400849556-7501-1-git-send-email-srinivas.kandagatla@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: chris@printf.net, ulf.hansson@linaro.org, ludovic.desroches@atmel.com, tgih.jun@samsung.com, devicetree@vger.kernel.org, linux-samsung-soc@vger.kernel.org, Jaehoon Chung <jh80.chung@samsung.com>
+To: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+Cc: Russell King <linux@arm.linux.org.uk>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-arm-msm@vger.kernel.org, Linus Walleij <linus.walleij@linaro.org>
 
-dw-mmc controller have the multiple slot.
-Then it needs to parse the property for each slot.
+On 23 May 2014 14:52,  <srinivas.kandagatla@linaro.org> wrote:
+> From: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+>
+> This patch adds specifics of clk and datactrl register on Qualcomm SD
+> Card controller. This patch also populates the Qcom variant data with
+> these new values specific to Qualcomm SD Card Controller.
+>
+> Signed-off-by: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+> Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
+> ---
+>  drivers/mmc/host/mmci.c |  4 ++++
+>  drivers/mmc/host/mmci.h | 24 ++++++++++++++++++++++++
+>  2 files changed, 28 insertions(+)
+>
+> diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+> index 17e7f6a..6434f5b1 100644
+> --- a/drivers/mmc/host/mmci.c
+> +++ b/drivers/mmc/host/mmci.c
+> @@ -185,6 +185,10 @@ static struct variant_data variant_qcom = {
+>         .fifosize               = 16 * 4,
+>         .fifohalfsize           = 8 * 4,
+>         .clkreg                 = MCI_CLK_ENABLE,
+> +       .clkreg_enable          = MCI_QCOM_CLK_FLOWENA |
+> +                                 MCI_QCOM_CLK_FEEDBACK_CLK,
 
-Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
----
-Changelog V2:
-	- None
+Obviously I don't have the in-depth knowledge about the Qcom variant,
+but comparing the ST variant here made me think.
 
- drivers/mmc/host/dw_mmc.c |   25 ++++++-------------------
- 1 file changed, 6 insertions(+), 19 deletions(-)
+Using the feeback clock internal logic in the ST variant, requires the
+corresponding feedback clock pin signal on the board, to be
+routed/connected. Typically we used this for SD cards, which involved
+using an external level shifter circuit.
 
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 1ac227c..d4800f8 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -1015,12 +1015,11 @@ static int dw_mci_get_cd(struct mmc_host *mmc)
- {
- 	int present;
- 	struct dw_mci_slot *slot = mmc_priv(mmc);
--	struct dw_mci_board *brd = slot->host->pdata;
- 	struct dw_mci *host = slot->host;
- 	int gpio_cd = mmc_gpio_get_cd(mmc);
- 
- 	/* Use platform get_cd function, else try onboard card detect */
--	if (brd->quirks & DW_MCI_QUIRK_BROKEN_CARD_DETECTION)
-+	if (slot->quirks & DW_MCI_QUIRK_BROKEN_CARD_DETECTION)
- 		present = 1;
- 	else if (!IS_ERR_VALUE(gpio_cd))
- 		present = gpio_cd;
-@@ -2010,6 +2009,9 @@ static struct dw_mci_of_slot_quirks {
- 	{
- 		.quirk	= "disable-wp",
- 		.id	= DW_MCI_SLOT_QUIRK_NO_WRITE_PROTECT,
-+	}, {
-+		.quirk	= "broken-cd",
-+		.id	= DW_MCI_QUIRK_BROKEN_CARD_DETECTION,
- 	},
- };
- 
-@@ -2088,7 +2090,7 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
- 	if (host->pdata->caps2)
- 		mmc->caps2 = host->pdata->caps2;
- 
--	mmc_of_parse(mmc);
-+	__mmc_of_parse(mmc, dw_mci_of_find_slot_node(host->dev, slot->id));
- 
- 	if (host->pdata->blk_settings) {
- 		mmc->max_segs = host->pdata->blk_settings->max_segs;
-@@ -2231,23 +2233,13 @@ static inline bool dw_mci_ctrl_all_reset(struct dw_mci *host)
- }
- 
- #ifdef CONFIG_OF
--static struct dw_mci_of_quirks {
--	char *quirk;
--	int id;
--} of_quirks[] = {
--	{
--		.quirk	= "broken-cd",
--		.id	= DW_MCI_QUIRK_BROKEN_CARD_DETECTION,
--	},
--};
--
- static struct dw_mci_board *dw_mci_parse_dt(struct dw_mci *host)
- {
- 	struct dw_mci_board *pdata;
- 	struct device *dev = host->dev;
- 	struct device_node *np = dev->of_node;
- 	const struct dw_mci_drv_data *drv_data = host->drv_data;
--	int idx, ret;
-+	int ret;
- 	u32 clock_frequency;
- 
- 	pdata = devm_kzalloc(dev, sizeof(*pdata), GFP_KERNEL);
-@@ -2264,11 +2256,6 @@ static struct dw_mci_board *dw_mci_parse_dt(struct dw_mci *host)
- 		pdata->num_slots = 1;
- 	}
- 
--	/* get quirks */
--	for (idx = 0; idx < ARRAY_SIZE(of_quirks); idx++)
--		if (of_get_property(np, of_quirks[idx].quirk, NULL))
--			pdata->quirks |= of_quirks[idx].id;
--
- 	if (of_property_read_u32(np, "fifo-depth", &pdata->fifo_depth))
- 		dev_info(dev, "fifo-depth property not found, using "
- 				"value of FIFOTH register as default\n");
--- 
-1.7.9.5
+Is it correct to enable this bit for all cases, including eMMC?
 
+If it is board specific configurations, you should add a DT binding
+for it - like there are for the ST variant.
+
+> +       .clkreg_8bit_bus_enable = MCI_QCOM_CLK_WIDEBUS_8,
+> +       .datactrl_mask_ddrmode  = MCI_QCOM_CLK_DDR_MODE,
+>         .blksz_datactrl4        = true,
+>         .datalength_bits        = 24,
+>         .blksz_datactrl4        = true,
+> diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
+> index cd83ca3..1b93ae7 100644
+> --- a/drivers/mmc/host/mmci.h
+> +++ b/drivers/mmc/host/mmci.h
+> @@ -41,6 +41,22 @@
+>  /* Modified PL180 on Versatile Express platform */
+>  #define MCI_ARM_HWFCEN         BIT(12)
+>
+> +/* Modified on Qualcomm Integrations */
+> +#define MCI_QCOM_CLK_WIDEBUS_4 (2 << 10)
+
+This is the same as BIT(11), please use MCI_4BIT_BUS instead.
+
+> +#define MCI_QCOM_CLK_WIDEBUS_8 (3 << 10)
+
+Since you converted to use the "BIT" macro a few patches ago, I
+suggest we should stick to it. How about something below:
+
+#define MCI_QCOM_CLK_WIDEBUS_8 BIT (BIT(10) | BIT(11))
+
+Please adopt all defines added in this patch to use the BIT macro.
+
+> +#define MCI_QCOM_CLK_FLOWENA   BIT(12)
+> +#define MCI_QCOM_CLK_INVERTOUT BIT(13)
+> +
+> +/* select in latch data and command */
+> +#define MCI_QCOM_CLK_SEL_IN_SHIFT      (14)
+
+BIT (14)?
+
+> +#define MCI_QCOM_CLK_SEL_MASK          (0x3)
+> +#define MCI_QCOM_CLK_SEL_RISING_EDGE   (1)
+
+BIT(1)?
+
+> +#define MCI_QCOM_CLK_FEEDBACK_CLK      (2 << 14)
+> +#define MCI_QCOM_CLK_DDR_MODE          (3 << 14)
+> +
+> +/* mclk selection */
+> +#define MCI_QCOM_CLK_SEL_MCLK          (2 << 23)
+
+Does this correspond to MCI_CLK_BYPASS? If so, we should maybe state
+this in a comment?
+
+> +
+>  #define MMCIARGUMENT           0x008
+>  #define MMCICOMMAND            0x00c
+>  #define MCI_CPSM_RESPONSE      BIT(6)
+> @@ -54,6 +70,14 @@
+>  #define MCI_ST_NIEN            BIT(13)
+>  #define MCI_ST_CE_ATACMD       BIT(14)
+>
+> +/* Modified on Qualcomm Integrations */
+> +#define MCI_QCOM_CSPM_DATCMD           BIT(12)
+> +#define MCI_QCOM_CSPM_MCIABORT         BIT(13)
+> +#define MCI_QCOM_CSPM_CCSENABLE                BIT(14)
+> +#define MCI_QCOM_CSPM_CCSDISABLE       BIT(15)
+> +#define MCI_QCOM_CSPM_AUTO_CMD19       BIT(16)
+> +#define MCI_QCOM_CSPM_AUTO_CMD21       BIT(21)
+> +
+>  #define MMCIRESPCMD            0x010
+>  #define MMCIRESPONSE0          0x014
+>  #define MMCIRESPONSE1          0x018
+> --
+> 1.9.1
+>
+
+Kind regards
+Ulf Hansson
