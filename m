@@ -1,86 +1,92 @@
-From: Arend van Spriel <arend-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>
-Subject: Re: [PATCH 09/11] brcmfmac: Fix OOB interrupt not
- working for BCM43362
-Date: Mon, 26 May 2014 11:20:54 +0200
-Message-ID: <53830776.1030308@broadcom.com>
-References: <1401090486-4414-1-git-send-email-hdegoede@redhat.com> <1401090486-4414-10-git-send-email-hdegoede@redhat.com>
-Reply-To: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v3 06/13] mmc: mmci: Qcomm: Add 3 clock cycle delay after
+ register write
+Date: Mon, 26 May 2014 11:34:37 +0200
+Message-ID: <CAPDyKFoSjXy8ptyrk_wN3N4Ovvy==HpX9S0n0endsh0Ca2kMtA@mail.gmail.com>
+References: <1400849362-7007-1-git-send-email-srinivas.kandagatla@linaro.org>
+	<1400849504-7302-1-git-send-email-srinivas.kandagatla@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Return-path: <linux-sunxi+bncBCKLZOXH5AIBB6UORSOAKGQE5IEYMCI-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-In-Reply-To: <1401090486-4414-10-git-send-email-hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-List-Post: <http://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Help: <http://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Archive: <http://groups.google.com/group/linux-sunxi>
-Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
-List-Subscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Unsubscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-To: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: Linus Walleij <linus.walleij-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "John W. Linville" <linville-2XuSBdqkA4R54TAoqtyWWQ@public.gmane.org>, Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qc0-f169.google.com ([209.85.216.169]:63821 "EHLO
+	mail-qc0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751443AbaEZJei (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 26 May 2014 05:34:38 -0400
+Received: by mail-qc0-f169.google.com with SMTP id e16so11875605qcx.14
+        for <linux-mmc@vger.kernel.org>; Mon, 26 May 2014 02:34:37 -0700 (PDT)
+In-Reply-To: <1400849504-7302-1-git-send-email-srinivas.kandagatla@linaro.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+Cc: Russell King <linux@arm.linux.org.uk>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-arm-msm@vger.kernel.org, Linus Walleij <linus.walleij@linaro.org>
 
-On 05/26/14 09:48, Hans de Goede wrote:
-> It has taken me a long long time to get the OOB interrupt working on the
-> AP6210 sdio wifi/bt module found on various Allwinner A20 boards. In the
-> end I found these magic register pokes in the cubietruck kernel tree:
-> https://github.com/cubieboard2/linux-sunxi/commit/7f08ba395617d17e7a711507503d89a50406fe7a
+On 23 May 2014 14:51,  <srinivas.kandagatla@linaro.org> wrote:
+> From: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
 >
-> I'm not entirely sure if this specific to the AP6210 module, or if this
-> should be done for all BCM43362 sdio devices.
-
-This magic is not in our host drivers so my guess is that it is board 
-specific. This means the nvram file provided to the firmware should have 
-this specified. Can you send me yours?
-
-Regards,
-Arend
-
-> Signed-off-by: Hans de Goede<hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+> Most of the Qcomm SD card controller registers must be updated to the MCLK
+> domain so subsequent writes to registers will be ignored until 3 clock cycles
+> have passed.
+>
+> This patch adds a 3 clock cycle delay required after writing to controller
+> registers on Qualcomm SOCs. Without this delay all the register writes are not
+> successful, resulting in not detecting cards. The write clock delay is
+> activated by setting up mclk_delayed_writes variable in variant data.
+>
+> Signed-off-by: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+> Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
 > ---
->   drivers/net/wireless/brcm80211/brcmfmac/bcmsdh.c | 18 ++++++++++++++++++
->   1 file changed, 18 insertions(+)
+>  drivers/mmc/host/mmci.c | 12 ++++++++++++
+>  1 file changed, 12 insertions(+)
 >
-> diff --git a/drivers/net/wireless/brcm80211/brcmfmac/bcmsdh.c b/drivers/net/wireless/brcm80211/brcmfmac/bcmsdh.c
-> index 0fc707c..2369a0f 100644
-> --- a/drivers/net/wireless/brcm80211/brcmfmac/bcmsdh.c
-> +++ b/drivers/net/wireless/brcm80211/brcmfmac/bcmsdh.c
-> @@ -39,7 +39,9 @@
->   #include<brcm_hw_ids.h>
->   #include<brcmu_utils.h>
->   #include<brcmu_wifi.h>
-> +#include<chipcommon.h>
->   #include<soc.h>
-> +#include "chip.h"
->   #include "dhd_bus.h"
->   #include "dhd_dbg.h"
->   #include "sdio_host.h"
-> @@ -119,6 +121,7 @@ int brcmf_sdiod_intr_register(struct brcmf_sdio_dev *sdiodev)
->   {
->   	int ret = 0;
->   	u8 data;
-> +	u32 addr, gpiocontrol;
->   	unsigned long flags;
+> diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+> index 881bb24..1385554 100644
+> --- a/drivers/mmc/host/mmci.c
+> +++ b/drivers/mmc/host/mmci.c
+> @@ -67,6 +67,8 @@ static unsigned int fmax = 515633;
+>   * @pwrreg_clkgate: MMCIPOWER register must be used to gate the clock
+>   * @busy_detect: true if busy detection on dat0 is supported
+>   * @pwrreg_nopower: bits in MMCIPOWER don't controls ext. power supply
+> + * @mclk_delayed_writes: enable delayed writes to ensure, subsequent updates
+> + *                      are not ignored.
+>   */
+>  struct variant_data {
+>         unsigned int            clkreg;
+> @@ -83,6 +85,7 @@ struct variant_data {
+>         bool                    pwrreg_clkgate;
+>         bool                    busy_detect;
+>         bool                    pwrreg_nopower;
+> +       bool                    mclk_delayed_writes;
+>  };
 >
->   	if ((sdiodev->pdata)&&  (sdiodev->pdata->oob_irq_supported)) {
-> @@ -148,6 +151,21 @@ int brcmf_sdiod_intr_register(struct brcmf_sdio_dev *sdiodev)
+>  static struct variant_data variant_arm = {
+> @@ -171,6 +174,12 @@ static struct variant_data variant_qcom = {
+>         .datalength_bits        = 24,
+>         .blksz_datactrl4        = true,
+>         .pwrreg_powerup         = MCI_PWR_UP,
+> +       /*
+> +        * On QCom SD card controller, registers must be updated to the
+> +        * MCLK domain so subsequent writes to this register will be ignored
+> +        * for 3 clk cycles.
+> +        */
+> +       .mclk_delayed_writes    = true,
+>  };
 >
->   		sdio_claim_host(sdiodev->func[1]);
->
-> +		if (sdiodev->bus_if->chip == BCM43362_CHIP_ID) {
-> +			addr = CORE_CC_REG(SI_ENUM_BASE, gpiocontrol);
-> +			gpiocontrol = brcmf_sdiod_regrl(sdiodev, addr,&ret);
-> +			gpiocontrol |= 0x2;
-> +			brcmf_sdiod_regwl(sdiodev, addr, gpiocontrol,&ret);
+>  static inline u32 mmci_readl(struct mmci_host *host, u32 off)
+> @@ -181,6 +190,9 @@ static inline u32 mmci_readl(struct mmci_host *host, u32 off)
+>  static inline void mmci_writel(struct mmci_host *host, u32 data, u32 off)
+>  {
+>         writel(data, host->base + off);
 > +
-> +			/* SPROM_ADDR_HIGH ? perhaps the defines name is off */
-> +			brcmf_sdiod_regwb(sdiodev, SBSDIO_SPROM_ADDR_HIGH, 0xf,
-> +					&ret);
-> +			brcmf_sdiod_regwb(sdiodev, SBSDIO_CHIP_CTRL_DATA, 0,
-> +					&ret);
-> +			brcmf_sdiod_regwb(sdiodev, SBSDIO_CHIP_CTRL_EN, 0x2,
-> +					&ret);
-> +		}
-> +
->   		/* must configure SDIO_CCCR_IENx to enable irq */
->   		data = brcmf_sdiod_regrb(sdiodev, SDIO_CCCR_IENx,&ret);
->   		data |= 1<<  SDIO_FUNC_1 | 1<<  SDIO_FUNC_2 | 1;
+> +       if (host->variant->mclk_delayed_writes)
+> +               udelay(DIV_ROUND_UP((3 * USEC_PER_SEC), host->mclk));
+>  }
+
+I am not sure I like this approach. For each and every writel
+(including pio_writes) you will add a few cpu cycles, since you need
+to  check for "mclk_delayed_writes" no matter of variant.
+
+How about, adding a new function pointer in the struct mmci_host, for
+"writel operations" which you could set up in probe phase instead?
+
+Kind regards
+Ulf Hansson
