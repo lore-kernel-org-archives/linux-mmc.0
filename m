@@ -1,159 +1,140 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v3 12/13] mmc: mmci: add explicit clk control
-Date: Mon, 26 May 2014 16:28:22 +0200
-Message-ID: <CAPDyKFqoB0pQ7fV=8QMvkRyh2=ckfRBfX_At6s60sFf1YYnhOw@mail.gmail.com>
+Subject: Re: [PATCH v3 13/13] mmc: mmci: Add Qcom specific pio_read function.
+Date: Mon, 26 May 2014 16:34:06 +0200
+Message-ID: <CAPDyKFpGPBcg5zpLgrPbv86ekpVJrdOX-2LaZwoXQRAJwjc++w@mail.gmail.com>
 References: <1400849362-7007-1-git-send-email-srinivas.kandagatla@linaro.org>
-	<1400849578-7585-1-git-send-email-srinivas.kandagatla@linaro.org>
-	<CAPDyKFqz-O9-Douk96LBuFRD_P1146c_Ld14TgiduBgfBqRi_A@mail.gmail.com>
+	<1400849589-7626-1-git-send-email-srinivas.kandagatla@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-arm-msm-owner@vger.kernel.org>
-In-Reply-To: <CAPDyKFqz-O9-Douk96LBuFRD_P1146c_Ld14TgiduBgfBqRi_A@mail.gmail.com>
+In-Reply-To: <1400849589-7626-1-git-send-email-srinivas.kandagatla@linaro.org>
 Sender: linux-arm-msm-owner@vger.kernel.org
 To: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
 Cc: Russell King <linux@arm.linux.org.uk>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-arm-msm@vger.kernel.org, Linus Walleij <linus.walleij@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 26 May 2014 16:21, Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> On 23 May 2014 14:52,  <srinivas.kandagatla@linaro.org> wrote:
->> From: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
->>
->> On Controllers like Qcom SD card controller where cclk is mclk and mclk should
->> be directly controlled by the driver.
->>
->> This patch adds support to control mclk directly in the driver, and also
->> adds explicit_mclk_control and cclk_is_mclk flags in variant structure giving
->> more flexibility to the driver.
->>
->> Signed-off-by: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
->> Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
->> ---
->>  drivers/mmc/host/mmci.c | 30 +++++++++++++++++++++++++-----
->>  1 file changed, 25 insertions(+), 5 deletions(-)
->>
->> diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
->> index 5cbf644..f6dfd24 100644
->> --- a/drivers/mmc/host/mmci.c
->> +++ b/drivers/mmc/host/mmci.c
->> @@ -73,6 +73,8 @@ static unsigned int fmax = 515633;
->>   * @pwrreg_nopower: bits in MMCIPOWER don't controls ext. power supply
->>   * @mclk_delayed_writes: enable delayed writes to ensure, subsequent updates
->>   *                      are not ignored.
->> + * @explicit_mclk_control: enable explicit mclk control in driver.
->> + * @cclk_is_mclk: enable iff card clock is multimedia card adapter clock.
->>   */
->>  struct variant_data {
->>         unsigned int            clkreg;
->> @@ -94,6 +96,8 @@ struct variant_data {
->>         bool                    busy_detect;
->>         bool                    pwrreg_nopower;
->>         bool                    mclk_delayed_writes;
->> +       bool                    explicit_mclk_control;
->> +       bool                    cclk_is_mclk;
+On 23 May 2014 14:53,  <srinivas.kandagatla@linaro.org> wrote:
+> From: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
 >
-> I can't see why you need to have both these new configurations. Aren't
-> "cclk_is_mclk" just a fact when you use "explicit_mclk_control".
+> MCIFIFOCNT register behaviour on Qcom chips is very different than the other
+> pl180 integrations. MCIFIFOCNT register contains the number of
+> words that are still waiting to be transferred through the FIFO. It keeps
+> decrementing once the host CPU reads the MCIFIFO. With the existing logic and
+> the MCIFIFOCNT behaviour, mmci_pio_read will loop forever, as the FIFOCNT
+> register will always return transfer size before reading the FIFO.
 >
-> I also believe I would prefer something like "qcom_clkdiv" instead.
+> Also the data sheet states that "This register is only useful for debug
+> purposes and should not be used for normal operation since it does not reflect
+> data which may or may not be in the pipeline".
 >
->>  };
->>
->>  static struct variant_data variant_arm = {
->> @@ -202,6 +206,8 @@ static struct variant_data variant_qcom = {
->>          * for 3 clk cycles.
->>          */
->>         .mclk_delayed_writes    = true,
->> +       .explicit_mclk_control  = true,
->> +       .cclk_is_mclk   = true,
->>  };
->>
->>  static inline u32 mmci_readl(struct mmci_host *host, u32 off)
->> @@ -317,7 +323,9 @@ static void mmci_set_clkreg(struct mmci_host *host, unsigned int desired)
->>         host->cclk = 0;
->>
->>         if (desired) {
->> -               if (desired >= host->mclk) {
->> +               if (variant->cclk_is_mclk) {
->> +                       host->cclk = host->mclk;
->> +               } else if (desired >= host->mclk) {
->>                         clk = MCI_CLK_BYPASS;
->>                         if (variant->st_clkdiv)
->>                                 clk |= MCI_ST_UX500_NEG_EDGE;
->> @@ -1354,6 +1362,16 @@ static void mmci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
->>         if (!ios->clock && variant->pwrreg_clkgate)
->>                 pwr &= ~MCI_PWR_ON;
->>
->> +       if (ios->clock != host->mclk && host->variant->explicit_mclk_control) {
+> This patch implements qcom_pio_read function so as existing mmci_pio_read is
+> not suitable for Qcom SOCs. qcom_pio_read function is only selected
+> based on qcom_fifo flag in variant data structure.
 >
-> I suggest you should clarify the statement by adding a pair of extra
-> parentheses. Additionally it seems like a good idea to reverse the
-> order of the statements, to clarify this is for qcom clock handling
-> only.
+> Signed-off-by: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+> ---
+>  drivers/mmc/host/mmci.c | 46 ++++++++++++++++++++++++++++++++++++++++++++--
+>  1 file changed, 44 insertions(+), 2 deletions(-)
 >
-> More important, what I think you really want to do is to compare
-> "ios->clock" with it's previous value it had when ->set_ios were
-> invoked. Then let a changed value act as the trigger to set a new clk
-> rate. Obvoiusly you need to cache the clock rate in the struct mmci
-> host to handle this.
+> diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+> index f6dfd24..51ce493 100644
+> --- a/drivers/mmc/host/mmci.c
+> +++ b/drivers/mmc/host/mmci.c
+> @@ -75,6 +75,7 @@ static unsigned int fmax = 515633;
+>   *                      are not ignored.
+>   * @explicit_mclk_control: enable explicit mclk control in driver.
+>   * @cclk_is_mclk: enable iff card clock is multimedia card adapter clock.
+> + * @qcom_fifo: enables qcom specific fifo pio read function.
+>   */
+>  struct variant_data {
+>         unsigned int            clkreg;
+> @@ -98,6 +99,7 @@ struct variant_data {
+>         bool                    mclk_delayed_writes;
+>         bool                    explicit_mclk_control;
+>         bool                    cclk_is_mclk;
+> +       bool                    qcom_fifo;
+>  };
 >
->> +               int rc = clk_set_rate(host->clk, ios->clock);
->> +               if (rc < 0) {
->> +                       dev_err(mmc_dev(host->mmc),
->> +                               "Error setting clock rate (%d)\n", rc);
->> +               } else {
->> +                       host->mclk = clk_get_rate(host->clk);
+>  static struct variant_data variant_arm = {
+> @@ -208,6 +210,7 @@ static struct variant_data variant_qcom = {
+>         .mclk_delayed_writes    = true,
+>         .explicit_mclk_control  = true,
+>         .cclk_is_mclk   = true,
+> +       .qcom_fifo              = true,
+>  };
 >
-> So here you actually find out the new clk rate, but shouldn't you
-> update "host->mclk" within the spin_lock? Or it might not matter?
+>  static inline u32 mmci_readl(struct mmci_host *host, u32 off)
+> @@ -1022,6 +1025,40 @@ mmci_cmd_irq(struct mmci_host *host, struct mmc_command *cmd,
+>         }
+>  }
 >
->> +               }
->> +       }
->> +
->>         spin_lock_irqsave(&host->lock, flags);
->>
->>         mmci_set_clkreg(host, ios->clock);
->> @@ -1540,10 +1558,12 @@ static int mmci_probe(struct amba_device *dev,
->>          * is not specified. Either value must not exceed the clock rate into
->>          * the block, of course.
->>          */
->> -       if (mmc->f_max)
->> -               mmc->f_max = min(host->mclk, mmc->f_max);
->> -       else
->> -               mmc->f_max = min(host->mclk, fmax);
->> +       if (!host->variant->explicit_mclk_control) {
->> +               if (mmc->f_max)
->> +                       mmc->f_max = min(host->mclk, mmc->f_max);
->> +               else
->> +                       mmc->f_max = min(host->mclk, fmax);
->> +       }
+> +static int mmci_qcom_pio_read(struct mmci_host *host, char *buffer,
+> +                       unsigned int remain)
+> +{
+> +       u32 *ptr = (u32 *) buffer;
+> +       unsigned int count = 0;
+> +       unsigned int words, bytes;
+> +       unsigned int fsize = host->variant->fifosize;
+> +
+> +       words = remain >> 2;
+> +       bytes = remain % 4;
+> +       /* read full words followed by leftover bytes */
+> +       if (words) {
+> +               while (readl(host->base + MMCISTATUS) & MCI_RXDATAAVLBL) {
+> +                       *ptr = readl(host->base + MMCIFIFO + (count % fsize));
+> +                       ptr++;
+> +                       count += 4;
+> +                       words--;
+> +                       if (!words)
+> +                               break;
+> +               }
+> +       }
+> +
+> +       if (unlikely(bytes)) {
+> +               unsigned char buf[4];
+> +               if (readl(host->base + MMCISTATUS) & MCI_RXDATAAVLBL) {
+> +                       *buf = readl(host->base + MMCIFIFO + (count % fsize));
+> +                       memcpy(ptr, buf, bytes);
+> +                       count += bytes;
+> +               }
+> +       }
+> +
+> +       return count;
+> +}
+> +
+>  static int mmci_pio_read(struct mmci_host *host, char *buffer, unsigned int remain)
+>  {
+>         void __iomem *base = host->base;
+> @@ -1143,8 +1180,13 @@ static irqreturn_t mmci_pio_irq(int irq, void *dev_id)
+>                 remain = sg_miter->length;
 >
-> This means your mmc->f_max value will either be zero or the one you
-> provided through DT. And since zero won't work, that means you
-> _require_ to get the value from DT. According to the documentation of
-> this DT binding, f_max is optional.
->
-> So unless you fine another way of dynamically at runtime figure out
-> the value of f_max (using the clk API), you need to update the DT
-> documentation for mmci.
->
-> Additionally, this makes me wonder about f_min. I haven't seen
-> anywhere in this patch were that value is being set to proper value,
-> right?
->
->>         dev_dbg(mmc_dev(mmc), "clocking block at %u Hz\n", mmc->f_max);
->>
->>         /* Get regulators and the supported OCR mask */
->> --
->> 1.9.1
->>
->
-> Kind regards
-> Ulf Hansson
+>                 len = 0;
+> -               if (status & MCI_RXACTIVE)
+> -                       len = mmci_pio_read(host, buffer, remain);
+> +               if (status & MCI_RXACTIVE) {
+> +                       if (variant->qcom_fifo)
+> +                               len = mmci_qcom_pio_read(host, buffer, remain);
+> +                       else
+> +                               len = mmci_pio_read(host, buffer, remain);
+> +               }
 
-And one more thing, just for your information. If you intend to
-support UHS cards, your need to be able to gate the clock though
-->set_ios function, once the clock is 0. Let's handle that in a
-separate patch - if needed though.
+This is hot path.
+
+As I suggested for the readl and writel wrapper functions, I think it
+would be better to use a function pointer in the struct mmci host,
+which you set up in the probe phase. That means the variant data don't
+need to be checked each an every time this function gets invoked.
+
+> +
+>                 if (status & MCI_TXACTIVE)
+>                         len = mmci_pio_write(host, buffer, remain, status);
+
+So no changes needed for pio_write at this point? Or those will come later?
+
+>
+> --
+> 1.9.1
+>
 
 Kind regards
 Ulf Hansson
