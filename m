@@ -1,93 +1,116 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v3 08/13] mmc: mmci: add 8bit bus support in variant data
-Date: Mon, 26 May 2014 12:07:15 +0200
-Message-ID: <CAPDyKFruVPo-k+19pQ4zGrVBH0gqszQ5vphsTAm6HTXUX5riFg@mail.gmail.com>
-References: <1400849362-7007-1-git-send-email-srinivas.kandagatla@linaro.org>
-	<1400849527-7384-1-git-send-email-srinivas.kandagatla@linaro.org>
+From: Mark Brown <broonie@kernel.org>
+Subject: Re: RFC: representing sdio devices oob interrupt, clks, etc. in
+ device tree
+Date: Mon, 26 May 2014 11:38:07 +0100
+Message-ID: <20140526103807.GV22111@sirena.org.uk>
+References: <CAGb2v64VZac2KvAALrScecN89sRnBQoDrKxKMvkte+3G04NXeA@mail.gmail.com>
+ <537DE1AA.5050606@redhat.com>
+ <537E31F7.1030505@gmail.com>
+ <537F1148.3010102@redhat.com>
+ <20140523112239.GB12304@sirena.org.uk>
+ <537F3610.3050104@redhat.com>
+ <20140523162718.GE22111@sirena.org.uk>
+ <53806F26.6050706@redhat.com>
+ <20140525123452.GS22111@sirena.org.uk>
+ <53824294.1090609@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1400849527-7384-1-git-send-email-srinivas.kandagatla@linaro.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
-Cc: Russell King <linux@arm.linux.org.uk>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-arm-msm@vger.kernel.org, Linus Walleij <linus.walleij@linaro.org>
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="F3mDA9xuPwJBqvPm"
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mezzanine.sirena.org.uk ([106.187.55.193]:42872 "EHLO
+	mezzanine.sirena.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751809AbaEZKjG (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 26 May 2014 06:39:06 -0400
+Content-Disposition: inline
+In-Reply-To: <53824294.1090609@redhat.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Hans de Goede <hdegoede@redhat.com>
+Cc: Tomasz Figa <tomasz.figa@gmail.com>, Chen-Yu Tsai <wens@csie.org>, Arend van Spriel <arend@broadcom.com>, Sascha Hauer <s.hauer@pengutronix.de>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Maxime Ripard <maxime.ripard@free-electrons.com>, linux-mmc <linux-mmc@vger.kernel.org>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>, devicetree <devicetree@vger.kernel.org>, Olof Johansson <olof@lixom.net>, Russell King - ARM Linux <linux@arm.linux.org.uk>, Fabio Estevam <festevam@gmail.com>, Arnd Bergmann <arnd@arndb.de>, Jyri Sarha <jsarha@ti.com>
 
-On 23 May 2014 14:52,  <srinivas.kandagatla@linaro.org> wrote:
-> From: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
->
-> This patch adds 8bit bus enable to variant structure giving more flexibility
-> to the driver to support more SOCs which have different clock register layout.
->
-> Without this patch other new SOCs like Qcom will have to add more code
-> to special case them.
->
-> Signed-off-by: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
-> Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
-> ---
->  drivers/mmc/host/mmci.c | 7 ++++++-
->  1 file changed, 6 insertions(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-> index dec70d2..a81f303 100644
-> --- a/drivers/mmc/host/mmci.c
-> +++ b/drivers/mmc/host/mmci.c
-> @@ -52,6 +52,7 @@ static unsigned int fmax = 515633;
->   * struct variant_data - MMCI variant-specific quirks
->   * @clkreg: default value for MCICLOCK register
->   * @clkreg_enable: enable value for MMCICLOCK register
-> + * @clkreg_8bit_bus_enable: enable value for 8 bit bus
->   * @datalength_bits: number of bits in the MMCIDATALENGTH register
->   * @fifosize: number of bytes that can be written when MMCI_TXFIFOEMPTY
->   *           is asserted (likewise for RX)
-> @@ -74,6 +75,7 @@ static unsigned int fmax = 515633;
->  struct variant_data {
->         unsigned int            clkreg;
->         unsigned int            clkreg_enable;
-> +       unsigned int            clkreg_8bit_bus_enable;
->         unsigned int            datalength_bits;
->         unsigned int            fifosize;
->         unsigned int            fifohalfsize;
-> @@ -116,6 +118,7 @@ static struct variant_data variant_u300 = {
->         .fifosize               = 16 * 4,
->         .fifohalfsize           = 8 * 4,
->         .clkreg_enable          = MCI_ST_U300_HWFCEN,
-> +       .clkreg_8bit_bus_enable = MCI_ST_8BIT_BUS,
 
-Linus, will have to confirm this. I don't know if the u300 variant
-support 8-bit.
+--F3mDA9xuPwJBqvPm
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-Kind regards
-Ulf Hansson
+On Sun, May 25, 2014 at 09:20:52PM +0200, Hans de Goede wrote:
+> On 05/25/2014 02:34 PM, Mark Brown wrote:
 
->         .datactrl_mask_ddrmode  = MCI_ST_DPSM_DDRMODE,
->         .datalength_bits        = 16,
->         .sdio                   = true,
-> @@ -144,6 +147,7 @@ static struct variant_data variant_ux500 = {
->         .fifohalfsize           = 8 * 4,
->         .clkreg                 = MCI_CLK_ENABLE,
->         .clkreg_enable          = MCI_ST_UX500_HWFCEN,
-> +       .clkreg_8bit_bus_enable = MCI_ST_8BIT_BUS,
->         .datactrl_mask_ddrmode  = MCI_ST_DPSM_DDRMODE,
->         .datalength_bits        = 24,
->         .sdio                   = true,
-> @@ -160,6 +164,7 @@ static struct variant_data variant_ux500v2 = {
->         .fifohalfsize           = 8 * 4,
->         .clkreg                 = MCI_CLK_ENABLE,
->         .clkreg_enable          = MCI_ST_UX500_HWFCEN,
-> +       .clkreg_8bit_bus_enable = MCI_ST_8BIT_BUS,
->         .datactrl_mask_ddrmode  = MCI_ST_DPSM_DDRMODE,
->         .datalength_bits        = 24,
->         .sdio                   = true,
-> @@ -340,7 +345,7 @@ static void mmci_set_clkreg(struct mmci_host *host, unsigned int desired)
->         if (host->mmc->ios.bus_width == MMC_BUS_WIDTH_4)
->                 clk |= MCI_4BIT_BUS;
->         if (host->mmc->ios.bus_width == MMC_BUS_WIDTH_8)
-> -               clk |= MCI_ST_8BIT_BUS;
-> +               clk |= variant->clkreg_8bit_bus_enable;
->
->         if (host->mmc->ios.timing == MMC_TIMING_UHS_DDR50)
->                 clk |= MCI_ST_UX500_NEG_EDGE;
-> --
-> 1.9.1
->
+> > Why is that a problem - if we have no driver for the device there is no
+> > point in powering it up in the first place is there?
+
+> Well the driver may show up later, so if we only do the power-up once we have
+> a driver, this means we need to re-check if we need to do the powerup later.
+
+Sure.  Does that seem like a problem?
+
+> Also the mmc people are very much against specifying a driver, as that is
+> something which should be probed not specified. I agree with them I've
+> already seen boards were more or less standardized sdio modules from different
+> vendors are used, they have various standard sdio powerup related things, like
+> an enable signal in standard places, but different editions of the boards
+> have different sdio modules soldered on, using different drivers.
+
+If the device isn't specified then presumably it'll power up with the
+default sequence so we shouldn't need to worry about overriding anything
+until we've powered up and enumerated.  The only time that there's a
+problem and would need to specify exactly what the device is in the DTS
+is if we need the custom sequence prior to being able to do that at
+which point I don't see much option.
+
+> I know that the DT is an ABI, and I'm not arguing for removing support for
+> the simple-sdio-powerup compatible from the kernel when a more complex
+> case arrives, nor am I arguing to remove it from the DT for existing working
+> boards. The idea behind the simple-sdio-powerup compatible is that it makes
+> the simple powerup behavior opt-in. So if a new board comes along which
+> requires something more complex, the people working on this can do what ever
+> they want / need without the simple powerup code getting in the way, as
+> long as they don't *add* the simple-sdio-powerup compatible to their *new*
+> DT file.
+
+I don't understand why not powering the device up would be a sensible
+default or why other OSs would also choose to implement things that way.
+It would seem more natural that we would have the custom override in
+place for things that need special handling, not the other way around -
+I think that's really the difference between what we're saying.  My
+expectation would be that we do the standard case by default and then
+have the complex cases override rather than the other way around, that
+way the standard case just works with no effort.
+
+> Basically the idea behind the simple-sdio-powerup compatible is to make
+> the worst case scenario for more complex boards to be the scenario which
+> we have today, i.e. no support for sdio powerup at all, rather then having
+> something in place which actually may get in the way, making things worse
+> then they are today.
+
+Well, if things aren't going to work either way for these devices
+without extra stuff it seems it doesn't much matter but it helps the
+simple case to have things default to working.  If we're in the case
+where we've got a DT that just describes a slot and says to probe it
+then powering the slot up seems sensible; if we're in the case where we
+have explicit information on what's in the slot then that gives us an
+opportunity to key custom behaviour off that explict information.
+
+--F3mDA9xuPwJBqvPm
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+
+iQIcBAEBAgAGBQJTgxmMAAoJELSic+t+oim9ZPcP/0P3P9akVcUKtquJagKxkbbf
+KX4ZBdn6LnaSbb4dH7D++2Hpm2mb1k5r3oYa7hXSGLpszaxfRZmMkmf7YY/QQdzM
+M4VvuwBJukNvTlKr4NP0S9jr+9YrVz/oI2PFANv9vgJTpHXOpce/HmQTd73Z0VH3
+YlgzzpvekFMUWrror30BN4F75h6tGPcAPeO8F1y7jDTtlP8CJk92GDG1AL4U8tdk
+lzzYAV+lvUK/CgeAtLP5C3tTEvcftimDPQcjb1e//IwZiqwiHQUzAhJO6llbKtpZ
+pbcN230khJrX+kDoyyCo21ZOkgemIfmN9TteAOQv8zZdvxOWl1qA0aIvtel3JO3r
+BV9qQ7wFS8wztW614ki9mr2zzwbI1deQs8u5nenas8Bz+XIIbOn4WL2iMx2AwdJJ
+bcmzEMerpVg8ihjQlbC6W5Nh82r3I6iAdjHkkKS2Ip4iUy69w4Dl3QoK/iYYNEoy
+rID+zL7vk9KYlhWWxcUIiFRSSB724PGFgsmv0DtsPEFgpAfVMGZ9gNcjGFTHq3BR
+yPuAAlarvM8Zq1QG5yf6oFtXjlkvRudxtt2zSt3osriueSE2h3tyAm+2RWQRhTIG
+VOy6qSxyIJl+btcLNOJkDaN2RwGCbQ1ftoE9AWxvRvMACP15lul1tNM7XRqJv2G0
+r52BEEpKJl82pOg4dZvt
+=8Bd7
+-----END PGP SIGNATURE-----
+
+--F3mDA9xuPwJBqvPm--
