@@ -1,60 +1,90 @@
-From: Arend van Spriel <arend-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>
-Subject: Re: [PATCH 00/11] sdio wifi oob irq support for sunxi
-Date: Tue, 27 May 2014 18:50:38 +0200
-Message-ID: <5384C25E.70505@broadcom.com>
-References: <1401090486-4414-1-git-send-email-hdegoede@redhat.com> <20140527152614.GB5694@tuxdriver.com>
-Reply-To: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+From: Arend van Spriel <arend@broadcom.com>
+Subject: Re: [PATCH 09/11] brcmfmac: Fix OOB interrupt not working for BCM43362
+Date: Tue, 27 May 2014 19:03:00 +0200
+Message-ID: <5384C544.9000903@broadcom.com>
+References: <1401090486-4414-1-git-send-email-hdegoede@redhat.com> <1401090486-4414-10-git-send-email-hdegoede@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Return-path: <linux-sunxi+bncBCKLZOXH5AIBB44ESOOAKGQE5RR7R5I-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-In-Reply-To: <20140527152614.GB5694-2XuSBdqkA4R54TAoqtyWWQ@public.gmane.org>
-List-Post: <http://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Help: <http://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Archive: <http://groups.google.com/group/linux-sunxi>
-Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
-List-Subscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Unsubscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-To: "John W. Linville" <linville-2XuSBdqkA4R54TAoqtyWWQ@public.gmane.org>
-Cc: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Linus Walleij <linus.walleij-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-gw2-out.broadcom.com ([216.31.210.63]:40585 "EHLO
+	mail-gw2-out.broadcom.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751615AbaE0RDF (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 27 May 2014 13:03:05 -0400
+In-Reply-To: <1401090486-4414-10-git-send-email-hdegoede@redhat.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Hans de Goede <hdegoede@redhat.com>
+Cc: Linus Walleij <linus.walleij@linaro.org>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, "John W. Linville" <linville@tuxdriver.com>, Maxime Ripard <maxime.ripard@free-electrons.com>, Chen-Yu Tsai <wens@csie.org>, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, linux-wireless@vger.kernel.org, devicetree <devicetree@vger.kernel.org>, linux-sunxi@googlegroups.com
 
-On 05/27/14 17:26, John W. Linville wrote:
-> On Mon, May 26, 2014 at 09:47:55AM +0200, Hans de Goede wrote:
->> Hi All,
->>
->> Here is a patch series adding support for oob irqs for the ap6210 sdio wifi
->> modules found on various Allwinner A20 boards.
->>
->> A lot of it is ground work which should be useful for adding oob irq support
->> to other sdio wifi models too.
->>
->> The first 5 patches are sunxi pinctrl patches and should go upstream through
->> the pinctrl tree.
->>
->> Patch 6 adds generic support for having per sdio function child nodes in
->> devicetree and should go upstream through the mmc tree.
->>
->> Patch 7 and 8 add oob irq support to the brcmfmac driver. Patch 9 pokes some
->> magic bits needed to enable the oob irq, this was taken from an android code
->> dump and good do with a good review from someone from Broadcom, Arend ?
+On 05/26/14 09:48, Hans de Goede wrote:
+> It has taken me a long long time to get the OOB interrupt working on the
+> AP6210 sdio wifi/bt module found on various Allwinner A20 boards. In the
+> end I found these magic register pokes in the cubietruck kernel tree:
+> https://github.com/cubieboard2/linux-sunxi/commit/7f08ba395617d17e7a711507503d89a50406fe7a
 >
-> If Arend approves, I'm fine with these going through another appropriate tree.
+> I'm not entirely sure if this specific to the AP6210 module, or if this
+> should be done for all BCM43362 sdio devices.
 
-Not sure in what tree these patches were created (assume some sunxi 
-tree), but if it conflicts with wireless-next I am pretty sure Stephen 
-will find that. I am fine with any tree. Patch 9 indeed has some magic 
-bits that need some clarification, but I will sort that out with Hans.
+Let keep it as this for now. I added some remarks below.
 
 Regards,
 Arend
 
->> Patch 10 and 11 add the necessary dts bits to actually enable the sdio irq
->> and should go upstream through Maxime's dt tree.
->>
->> Please review / merge.
->>
->> Thanks&  Regards,
->>
->> Hans
->>
+> Signed-off-by: Hans de Goede<hdegoede@redhat.com>
+> ---
+>   drivers/net/wireless/brcm80211/brcmfmac/bcmsdh.c | 18 ++++++++++++++++++
+>   1 file changed, 18 insertions(+)
 >
+> diff --git a/drivers/net/wireless/brcm80211/brcmfmac/bcmsdh.c b/drivers/net/wireless/brcm80211/brcmfmac/bcmsdh.c
+> index 0fc707c..2369a0f 100644
+> --- a/drivers/net/wireless/brcm80211/brcmfmac/bcmsdh.c
+> +++ b/drivers/net/wireless/brcm80211/brcmfmac/bcmsdh.c
+> @@ -39,7 +39,9 @@
+>   #include<brcm_hw_ids.h>
+>   #include<brcmu_utils.h>
+>   #include<brcmu_wifi.h>
+> +#include<chipcommon.h>
+>   #include<soc.h>
+> +#include "chip.h"
+>   #include "dhd_bus.h"
+>   #include "dhd_dbg.h"
+>   #include "sdio_host.h"
+> @@ -119,6 +121,7 @@ int brcmf_sdiod_intr_register(struct brcmf_sdio_dev *sdiodev)
+>   {
+>   	int ret = 0;
+>   	u8 data;
+> +	u32 addr, gpiocontrol;
+>   	unsigned long flags;
+>
+>   	if ((sdiodev->pdata)&&  (sdiodev->pdata->oob_irq_supported)) {
+> @@ -148,6 +151,21 @@ int brcmf_sdiod_intr_register(struct brcmf_sdio_dev *sdiodev)
+>
+>   		sdio_claim_host(sdiodev->func[1]);
+>
+> +		if (sdiodev->bus_if->chip == BCM43362_CHIP_ID) {
++			/* assign GPIO to SDIO core */
+> +			addr = CORE_CC_REG(SI_ENUM_BASE, gpiocontrol);
+> +			gpiocontrol = brcmf_sdiod_regrl(sdiodev, addr,&ret);
+> +			gpiocontrol |= 0x2;
+> +			brcmf_sdiod_regwl(sdiodev, addr, gpiocontrol,&ret);
+> +
+> +			/* SPROM_ADDR_HIGH ? perhaps the defines name is off */
+
+These names are all off. These should be:
+SBSDIO_SPROM_ADDR_HIGH = SBSDIO_GPIO_SELECT
+SBSDIO_CHIP_CTRL_DATA = SBSDIO_GPIO_OUT
+SBSDIO_CHIP_CTRL_EN = SBSDIO_GPIO_EN
+
+> +			brcmf_sdiod_regwb(sdiodev, SBSDIO_SPROM_ADDR_HIGH, 0xf,
+> +					&ret);
+> +			brcmf_sdiod_regwb(sdiodev, SBSDIO_CHIP_CTRL_DATA, 0,
+> +					&ret);
+> +			brcmf_sdiod_regwb(sdiodev, SBSDIO_CHIP_CTRL_EN, 0x2,
+> +					&ret);
+> +		}
+> +
+>   		/* must configure SDIO_CCCR_IENx to enable irq */
+>   		data = brcmf_sdiod_regrb(sdiodev, SDIO_CCCR_IENx,&ret);
+>   		data |= 1<<  SDIO_FUNC_1 | 1<<  SDIO_FUNC_2 | 1;
+
