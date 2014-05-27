@@ -1,65 +1,145 @@
-From: Chen-Yu Tsai <wens@csie.org>
-Subject: Re: [PATCH 02/11] pinctrl: sunxi: add IRQCHIP_SKIP_SET_WAKE flag for
- pinctrl irq chip
-Date: Tue, 27 May 2014 17:52:57 +0800
-Message-ID: <CAGb2v66PnSHekfBvUBe=GHqH9Ym+EvjLO7fFuPhULjRMn1EBwA@mail.gmail.com>
-References: <1401090486-4414-1-git-send-email-hdegoede@redhat.com>
- <1401090486-4414-3-git-send-email-hdegoede@redhat.com> <20140527080746.GB4730@lukather>
- <5384563D.2000000@redhat.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCHv2 2/3] mmc: dw_mmc: use the __mmc_of_parse to parse the
+ slot node
+Date: Tue, 27 May 2014 19:07:37 +0900
+Message-ID: <538463E9.30804@samsung.com>
+References: <1401104107-17651-1-git-send-email-jh80.chung@samsung.com>
+ <1401104107-17651-3-git-send-email-jh80.chung@samsung.com>
+ <002e01cf7990$ea98aec0$bfca0c40$%jun@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=EUC-KR
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-vc0-f173.google.com ([209.85.220.173]:35915 "EHLO
-	mail-vc0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751605AbaE0JxS (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 27 May 2014 05:53:18 -0400
-In-Reply-To: <5384563D.2000000@redhat.com>
+Received: from mailout1.samsung.com ([203.254.224.24]:61878 "EHLO
+	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751869AbaE0KHk (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 27 May 2014 06:07:40 -0400
+In-reply-to: <002e01cf7990$ea98aec0$bfca0c40$%jun@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Hans de Goede <hdegoede@redhat.com>
-Cc: Maxime Ripard <maxime.ripard@free-electrons.com>, Linus Walleij <linus.walleij@linaro.org>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Arend van Spriel <arend@broadcom.com>, "John W. Linville" <linville@tuxdriver.com>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-wireless <linux-wireless@vger.kernel.org>, devicetree <devicetree@vger.kernel.org>, linux-sunxi <linux-sunxi@googlegroups.com>
+To: Seungwon Jeon <tgih.jun@samsung.com>, 'Jaehoon Chung' <jh80.chung@samsung.com>, linux-mmc@vger.kernel.org
+Cc: chris@printf.net, ulf.hansson@linaro.org, ludovic.desroches@atmel.com, devicetree@vger.kernel.org, linux-samsung-soc@vger.kernel.org, cpgs@samsung.com
 
-On Tue, May 27, 2014 at 5:09 PM, Hans de Goede <hdegoede@redhat.com> wrote:
-> Hi,
->
-> On 05/27/2014 10:07 AM, Maxime Ripard wrote:
->> On Mon, May 26, 2014 at 09:47:57AM +0200, Hans de Goede wrote:
->>> From: Chen-Yu Tsai <wens@csie.org>
->>>
->>> The sunxi pinctrl irq chip driver does not support wakeup at the
->>> moment. Adding IRQCHIP_SKIP_SET_WAKE lets the irqs work with drivers
->>> using wakeup.
->>>
->>> Also add a name to the irq chip.
->>>
->>> Signed-off-by: Chen-Yu Tsai <wens@csie.org>
->>> Signed-off-by: Hans de Goede <hdegoede@redhat.com>
->>> ---
->>>  drivers/pinctrl/sunxi/pinctrl-sunxi.c | 2 ++
->>>  1 file changed, 2 insertions(+)
->>>
->>> diff --git a/drivers/pinctrl/sunxi/pinctrl-sunxi.c b/drivers/pinctrl/sunxi/pinctrl-sunxi.c
->>> index db9ccd6..ec60c2e 100644
->>> --- a/drivers/pinctrl/sunxi/pinctrl-sunxi.c
->>> +++ b/drivers/pinctrl/sunxi/pinctrl-sunxi.c
->>> @@ -646,6 +646,8 @@ static struct irq_chip sunxi_pinctrl_irq_chip = {
->>>      .irq_mask_ack   = sunxi_pinctrl_irq_mask_ack,
->>>      .irq_unmask     = sunxi_pinctrl_irq_unmask,
->>>      .irq_set_type   = sunxi_pinctrl_irq_set_type,
->>> +    .name           = "sunxi-pio",
->>> +    .flags          = IRQCHIP_SKIP_SET_WAKE,
+Hi, Seungwon
+
+On 05/27/2014 06:49 PM, Seungwon Jeon wrote:
+> Hi Jaehoon,
+> 
+> On Mon, May 26, 2014, Jaehoon Chung wrote:
+>> dw-mmc controller have the multiple slot.
+> Have -> has?
+Fix it.
+
+> 
+>> Then it needs to parse the property for each slot.
 >>
->> I'd rather see the name set to dev_name() or something like that. This
->> will not work that great with multiple pin controller supporting
->> interrupts.
->
-> That would require moving the irq_chip struct to become a member of the
-> sunxi_pinctrl struct. Not undoable, but that seems like something which
-> should be done in a separate patch. So shall I just drop the .name part
-> of this patch for now ?
+>> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+>> ---
+>> Changelog V2:
+>> 	- None
+>>
+>>  drivers/mmc/host/dw_mmc.c |   25 ++++++-------------------
+>>  1 file changed, 6 insertions(+), 19 deletions(-)
+>>
+>> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+>> index 1ac227c..d4800f8 100644
+>> --- a/drivers/mmc/host/dw_mmc.c
+>> +++ b/drivers/mmc/host/dw_mmc.c
+>> @@ -1015,12 +1015,11 @@ static int dw_mci_get_cd(struct mmc_host *mmc)
+>>  {
+>>  	int present;
+>>  	struct dw_mci_slot *slot = mmc_priv(mmc);
+>> -	struct dw_mci_board *brd = slot->host->pdata;
+>>  	struct dw_mci *host = slot->host;
+>>  	int gpio_cd = mmc_gpio_get_cd(mmc);
+>>
+>>  	/* Use platform get_cd function, else try onboard card detect */
+>> -	if (brd->quirks & DW_MCI_QUIRK_BROKEN_CARD_DETECTION)
+>> +	if (slot->quirks & DW_MCI_QUIRK_BROKEN_CARD_DETECTION)
+>>  		present = 1;
+>>  	else if (!IS_ERR_VALUE(gpio_cd))
+>>  		present = gpio_cd;
+>> @@ -2010,6 +2009,9 @@ static struct dw_mci_of_slot_quirks {
+>>  	{
+>>  		.quirk	= "disable-wp",
+>>  		.id	= DW_MCI_SLOT_QUIRK_NO_WRITE_PROTECT,
+>> +	}, {
+>> +		.quirk	= "broken-cd",
+>> +		.id	= DW_MCI_QUIRK_BROKEN_CARD_DETECTION,
+>>  	},
+>>  };
+>>
+>> @@ -2088,7 +2090,7 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
+>>  	if (host->pdata->caps2)
+>>  		mmc->caps2 = host->pdata->caps2;
+>>
+>> -	mmc_of_parse(mmc);
+>> +	__mmc_of_parse(mmc, dw_mci_of_find_slot_node(host->dev, slot->id));
+>>
+>>  	if (host->pdata->blk_settings) {
+>>  		mmc->max_segs = host->pdata->blk_settings->max_segs;
+>> @@ -2231,23 +2233,13 @@ static inline bool dw_mci_ctrl_all_reset(struct dw_mci *host)
+>>  }
+>>
+>>  #ifdef CONFIG_OF
+>> -static struct dw_mci_of_quirks {
+>> -	char *quirk;
+>> -	int id;
+>> -} of_quirks[] = {
+>> -	{
+>> -		.quirk	= "broken-cd",
+>> -		.id	= DW_MCI_QUIRK_BROKEN_CARD_DETECTION,
+>> -	},
+>> -};
+>> -
+> Moving broken-cd to slot_quirks is reasonable.
+> But I think of_quirks should be kept and we can add right quirks.
+> In cae of DW_MCI_QUIRK_IDMAC_DTO and DW_MCI_QUIRK_RETRY_DELAY,
+> we can handle those with dw_mci_of_quirks although we didn't add.
+Ok. 
 
-Please do. AFAIK, .name is only used for the debugfs representation.
-This change was only meant for cosmetic purposes.
+Best Regards,
+Jaehoon Chung
+> 
+>>  static struct dw_mci_board *dw_mci_parse_dt(struct dw_mci *host)
+>>  {
+>>  	struct dw_mci_board *pdata;
+>>  	struct device *dev = host->dev;
+>>  	struct device_node *np = dev->of_node;
+>>  	const struct dw_mci_drv_data *drv_data = host->drv_data;
+>> -	int idx, ret;
+>> +	int ret;
+>>  	u32 clock_frequency;
+>>
+>>  	pdata = devm_kzalloc(dev, sizeof(*pdata), GFP_KERNEL);
+>> @@ -2264,11 +2256,6 @@ static struct dw_mci_board *dw_mci_parse_dt(struct dw_mci *host)
+>>  		pdata->num_slots = 1;
+>>  	}
+>>
+>> -	/* get quirks */
+>> -	for (idx = 0; idx < ARRAY_SIZE(of_quirks); idx++)
+>> -		if (of_get_property(np, of_quirks[idx].quirk, NULL))
+>> -			pdata->quirks |= of_quirks[idx].id;
+>> -
+> Same as above.
+> 
+> Thanks,
+> Seungwon Jeon
+> 
+>>  	if (of_property_read_u32(np, "fifo-depth", &pdata->fifo_depth))
+>>  		dev_info(dev, "fifo-depth property not found, using "
+>>  				"value of FIFOTH register as default\n");
+>> --
+>> 1.7.9.5
+>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
 
-
-ChenYu
