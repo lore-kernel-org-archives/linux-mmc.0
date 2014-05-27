@@ -1,96 +1,93 @@
-From: Arend van Spriel <arend@broadcom.com>
-Subject: Re: RFC: representing sdio devices oob interrupt, clks, etc. in device
- tree
-Date: Tue, 27 May 2014 22:27:43 +0200
-Message-ID: <5384F53F.4020408@broadcom.com>
-References: <20140525123452.GS22111@sirena.org.uk> <53824294.1090609@redhat.com> <20140526103807.GV22111@sirena.org.uk> <538321AB.4050006@redhat.com> <20140526142225.GF22111@sirena.org.uk> <538356DA.7090302@redhat.com> <CAPDyKFqgvaPhMH3PFh7+6u+Am6pWYhxBFdvUZFfekUfpFJxdKw@mail.gmail.com> <53838023.2080807@redhat.com> <CAPDyKFpg_2RQabM044C1hsNTcuxdVVOvw0ZONVRdysk=eom8UA@mail.gmail.com> <20140527175326.GZ12304@sirena.org.uk> <20140527185535.GB27420@quad.lixom.net>
+From: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: [PATCH 09/11] brcmfmac: Fix OOB interrupt not
+ working for BCM43362
+Date: Tue, 27 May 2014 23:28:57 +0200
+Message-ID: <53850399.9000708@redhat.com>
+References: <1401090486-4414-1-git-send-email-hdegoede@redhat.com> <1401090486-4414-10-git-send-email-hdegoede@redhat.com> <5384C544.9000903@broadcom.com>
+Reply-To: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
 Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-gw1-out.broadcom.com ([216.31.210.62]:6955 "EHLO
-	mail-gw1-out.broadcom.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753643AbaE0U1t (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 27 May 2014 16:27:49 -0400
-In-Reply-To: <20140527185535.GB27420@quad.lixom.net>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Return-path: <linux-sunxi+bncBDRZXY4CYYORBKUHSSOAKGQENV3PHDQ-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+In-Reply-To: <5384C544.9000903-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>
+List-Post: <http://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Help: <http://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Archive: <http://groups.google.com/group/linux-sunxi>
+Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+List-Subscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Unsubscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+To: Arend van Spriel <arend-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>
+Cc: Linus Walleij <linus.walleij-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "John W. Linville" <linville-2XuSBdqkA4R54TAoqtyWWQ@public.gmane.org>, Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: Olof Johansson <olof@lixom.net>
-Cc: Mark Brown <broonie@kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Hans de Goede <hdegoede@redhat.com>, Tomasz Figa <tomasz.figa@gmail.com>, Chen-Yu Tsai <wens@csie.org>, Sascha Hauer <s.hauer@pengutronix.de>, Chris Ball <chris@printf.net>, Maxime Ripard <maxime.ripard@free-electrons.com>, linux-mmc <linux-mmc@vger.kernel.org>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>, devicetree <devicetree@vger.kernel.org>, Russell King - ARM Linux <linux@arm.linux.org.uk>, Fabio Estevam <festevam@gmail.com>, Arnd Bergmann <arnd@arndb.de>, Jyri Sarha <jsarha@ti.com>, Linus Walleij <linus.walleij@linaro.org>
 
-On 05/27/14 20:55, Olof Johansson wrote:
-> On Tue, May 27, 2014 at 06:53:26PM +0100, Mark Brown wrote:
->> On Tue, May 27, 2014 at 03:50:33PM +0200, Ulf Hansson wrote:
+Hi,
+
+On 05/27/2014 07:03 PM, Arend van Spriel wrote:
+> On 05/26/14 09:48, Hans de Goede wrote:
+>> It has taken me a long long time to get the OOB interrupt working on the
+>> AP6210 sdio wifi/bt module found on various Allwinner A20 boards. In the
+>> end I found these magic register pokes in the cubietruck kernel tree:
+>> https://github.com/cubieboard2/linux-sunxi/commit/7f08ba395617d17e7a711507503d89a50406fe7a
 >>
->>> To describe the HW in DT, the embedded SDIO card (actually it could be
->>> any type of embedded card) shall be modelled as a child node to the
->>> mmc host in DT. Similar to what you have proposed, but with the
->>> difference that the child node _must_ contain a DT compatible string,
->>> which means a "powerup-driver" can be probed.
->>
->>> Yes, I understand we might need one DT compatible string per board,
->>> but that's because we need to model the hardware - and it differs.
->>
->>> To clarify my view, we do need a "powerup-driver" and the primary
->>> reason is that we must not model "power up sequences" within DT.
->>> Typically I see the "powerup-driver" as a simple platform driver
->>> attached to the platform bus, but I that could of course differ.
->>
->> This then either conflicts with cases where we need to describe the
->> actual contents of the slot with a compatible string or means that the
->> SDIO driver needs to handle powerup sequencing since we should be
->> binding to the first compatible we find.  If the host controller driver
->> and/or subsystem is going to deal with the powering up it's not clear
->> that it specifically needs to be the compatible property that's used
->> to determine the powerup method, it could just be a boolean or a
->> 'power-method = blah' property (where blah is one of a series of strings
->> defining methods).  Alternatively we could have separate nodes for the
->> slot and SDIO device but that feels meh.  What's the hard requirement
->> for it to specifically be a compatible property?
+>> I'm not entirely sure if this specific to the AP6210 module, or if this
+>> should be done for all BCM43362 sdio devices.
 >
-> +1. Just because we have a subnode in a device tree, we don't have to have
-> a driver bind against it. The MMC core code could go down into the subnodes,
-> find a "power-method =<foo>" property and go ahead and parse the rest of it.
-> There's no requirement that we do this through the Linux driver model of
-> probe(), etc.
-
-I prefer a power-method property over compatible matching. The fact that 
-the subnode has a compatible string and properties for the device driver 
-should not matter.
-
->>> The slot will be the first level of child node under the mmc host,
->>> then each slot may have a child node which models the embedded card.
->>> But, let's leave that discussion for now. :-)
->>
->> OK, that's the separate node for the slot and device.
->>
->>> Powerup driver's ->probe():
->>> Typically the "powerup driver" will need to register a few callback
->>> functions towards the mmc core. Typically at mmc_of_parse(), those
->>> callbacks will have to be connected to a particular mmc host.
->>
->>> I would like to see three different callbacks, mirroring each of the
->>> mmc_ios power_mode states MMC_POWER_OFF|UP|ON.
->>
->>> The power up sequence, performed by the mmc core:
->>> The mmc_power_up|off functions, will invoke the registered "powerup
->>> driver's" callbacks if they exists for the particular host it operates
->>> on.
->>
->> There's also the need for the SDIO device to be able to get at the
->> resources provided and actively work with them at runtime if it wants to
->> manage things more actively (partial poweroff for low power states or
->> managing clock rates for example).
+> Let keep it as this for now. I added some remarks below.
 >
-> Again, I think it gets overly complicated by using a full driver for the
-> power management. Abstracted out into something separate and scalable
-> as number of devices grow? Sure, definitely. As a driver? Not convinced.
+> Regards,
+> Arend
+>
+>> Signed-off-by: Hans de Goede<hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+>> ---
+>>   drivers/net/wireless/brcm80211/brcmfmac/bcmsdh.c | 18 ++++++++++++++++++
+>>   1 file changed, 18 insertions(+)
+>>
+>> diff --git a/drivers/net/wireless/brcm80211/brcmfmac/bcmsdh.c b/drivers/net/wireless/brcm80211/brcmfmac/bcmsdh.c
+>> index 0fc707c..2369a0f 100644
+>> --- a/drivers/net/wireless/brcm80211/brcmfmac/bcmsdh.c
+>> +++ b/drivers/net/wireless/brcm80211/brcmfmac/bcmsdh.c
+>> @@ -39,7 +39,9 @@
+>>   #include<brcm_hw_ids.h>
+>>   #include<brcmu_utils.h>
+>>   #include<brcmu_wifi.h>
+>> +#include<chipcommon.h>
+>>   #include<soc.h>
+>> +#include "chip.h"
+>>   #include "dhd_bus.h"
+>>   #include "dhd_dbg.h"
+>>   #include "sdio_host.h"
+>> @@ -119,6 +121,7 @@ int brcmf_sdiod_intr_register(struct brcmf_sdio_dev *sdiodev)
+>>   {
+>>       int ret = 0;
+>>       u8 data;
+>> +    u32 addr, gpiocontrol;
+>>       unsigned long flags;
+>>
+>>       if ((sdiodev->pdata)&&  (sdiodev->pdata->oob_irq_supported)) {
+>> @@ -148,6 +151,21 @@ int brcmf_sdiod_intr_register(struct brcmf_sdio_dev *sdiodev)
+>>
+>>           sdio_claim_host(sdiodev->func[1]);
+>>
+>> +        if (sdiodev->bus_if->chip == BCM43362_CHIP_ID) {
+> +            /* assign GPIO to SDIO core */
+>> +            addr = CORE_CC_REG(SI_ENUM_BASE, gpiocontrol);
+>> +            gpiocontrol = brcmf_sdiod_regrl(sdiodev, addr,&ret);
+>> +            gpiocontrol |= 0x2;
+>> +            brcmf_sdiod_regwl(sdiodev, addr, gpiocontrol,&ret);
+>> +
+>> +            /* SPROM_ADDR_HIGH ? perhaps the defines name is off */
+>
+> These names are all off. These should be:
+> SBSDIO_SPROM_ADDR_HIGH = SBSDIO_GPIO_SELECT
+> SBSDIO_CHIP_CTRL_DATA = SBSDIO_GPIO_OUT
+> SBSDIO_CHIP_CTRL_EN = SBSDIO_GPIO_EN
 
-I think somewhere in the thread Hans already indicated the term 'driver' 
-was a misnomer. While monitoring the discussion I was wondering whether 
-this type of power-up sequence handling is specific to mmc/sdio or could 
-it also apply to say spi, i2c, or whatever. In other words, could the 
-power-up sequence code be placed in drivers/of code.
+Ok, so I guess I should do a pre-patch adding defines for these, should
+these replace the existing defines for these addresses in:
+drivers/net/wireless/brcm80211/brcmfmac/sdio_host.h
+
+Or should the pre-patch add defines with the new names and keep the old
+ones ?
 
 Regards,
-Arend
+
+Hans
