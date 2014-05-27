@@ -1,54 +1,60 @@
-From: Tomasz Figa <tomasz.figa@gmail.com>
-Subject: Re: [PATCH 02/11] pinctrl: sunxi: add IRQCHIP_SKIP_SET_WAKE flag
- for pinctrl irq chip
-Date: Tue, 27 May 2014 18:14:31 +0200
-Message-ID: <5384B9E7.1070405@gmail.com>
-References: <1401090486-4414-1-git-send-email-hdegoede@redhat.com> <1401090486-4414-3-git-send-email-hdegoede@redhat.com> <20140527080746.GB4730@lukather>
+From: Arend van Spriel <arend-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>
+Subject: Re: [PATCH 00/11] sdio wifi oob irq support for sunxi
+Date: Tue, 27 May 2014 18:50:38 +0200
+Message-ID: <5384C25E.70505@broadcom.com>
+References: <1401090486-4414-1-git-send-email-hdegoede@redhat.com> <20140527152614.GB5694@tuxdriver.com>
+Reply-To: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-we0-f170.google.com ([74.125.82.170]:40570 "EHLO
-	mail-we0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752998AbaE0QOg (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 27 May 2014 12:14:36 -0400
-In-Reply-To: <20140527080746.GB4730@lukather>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Return-path: <linux-sunxi+bncBCKLZOXH5AIBB44ESOOAKGQE5RR7R5I-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+In-Reply-To: <20140527152614.GB5694-2XuSBdqkA4R54TAoqtyWWQ@public.gmane.org>
+List-Post: <http://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Help: <http://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Archive: <http://groups.google.com/group/linux-sunxi>
+Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+List-Subscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Unsubscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+To: "John W. Linville" <linville-2XuSBdqkA4R54TAoqtyWWQ@public.gmane.org>
+Cc: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Linus Walleij <linus.walleij-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: Maxime Ripard <maxime.ripard@free-electrons.com>, Hans de Goede <hdegoede@redhat.com>
-Cc: devicetree <devicetree@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, linux-wireless@vger.kernel.org, Linus Walleij <linus.walleij@linaro.org>, linux-sunxi@googlegroups.com, linux-mmc@vger.kernel.org, Chris Ball <chris@printf.net>, "John W. Linville" <linville@tuxdriver.com>, Chen-Yu Tsai <wens@csie.org>, Arend van Spriel <arend@broadcom.com>, linux-arm-kernel@lists.infradead.org
 
-On 27.05.2014 10:07, Maxime Ripard wrote:
-> On Mon, May 26, 2014 at 09:47:57AM +0200, Hans de Goede wrote:
->> From: Chen-Yu Tsai <wens@csie.org>
->> 
->> The sunxi pinctrl irq chip driver does not support wakeup at the 
->> moment. Adding IRQCHIP_SKIP_SET_WAKE lets the irqs work with
->> drivers using wakeup.
->> 
->> Also add a name to the irq chip.
->> 
->> Signed-off-by: Chen-Yu Tsai <wens@csie.org> Signed-off-by: Hans
->> de Goede <hdegoede@redhat.com> --- 
->> drivers/pinctrl/sunxi/pinctrl-sunxi.c | 2 ++ 1 file changed, 2
->> insertions(+)
->> 
->> diff --git a/drivers/pinctrl/sunxi/pinctrl-sunxi.c
->> b/drivers/pinctrl/sunxi/pinctrl-sunxi.c index db9ccd6..ec60c2e
->> 100644 --- a/drivers/pinctrl/sunxi/pinctrl-sunxi.c +++
->> b/drivers/pinctrl/sunxi/pinctrl-sunxi.c @@ -646,6 +646,8 @@
->> static struct irq_chip sunxi_pinctrl_irq_chip = { .irq_mask_ack	=
->> sunxi_pinctrl_irq_mask_ack, .irq_unmask	=
->> sunxi_pinctrl_irq_unmask, .irq_set_type	=
->> sunxi_pinctrl_irq_set_type, +	.name		= "sunxi-pio", +	.flags		=
->> IRQCHIP_SKIP_SET_WAKE,
-> 
-> I'd rather see the name set to dev_name() or something like that.
-> This will not work that great with multiple pin controller
-> supporting interrupts.
+On 05/27/14 17:26, John W. Linville wrote:
+> On Mon, May 26, 2014 at 09:47:55AM +0200, Hans de Goede wrote:
+>> Hi All,
+>>
+>> Here is a patch series adding support for oob irqs for the ap6210 sdio wifi
+>> modules found on various Allwinner A20 boards.
+>>
+>> A lot of it is ground work which should be useful for adding oob irq support
+>> to other sdio wifi models too.
+>>
+>> The first 5 patches are sunxi pinctrl patches and should go upstream through
+>> the pinctrl tree.
+>>
+>> Patch 6 adds generic support for having per sdio function child nodes in
+>> devicetree and should go upstream through the mmc tree.
+>>
+>> Patch 7 and 8 add oob irq support to the brcmfmac driver. Patch 9 pokes some
+>> magic bits needed to enable the oob irq, this was taken from an android code
+>> dump and good do with a good review from someone from Broadcom, Arend ?
+>
+> If Arend approves, I'm fine with these going through another appropriate tree.
 
-Correct me if I'm wrong, but I've always thought that struct irq_chip
-describes a class of IRQ controllers, not particular instances.
+Not sure in what tree these patches were created (assume some sunxi 
+tree), but if it conflicts with wireless-next I am pretty sure Stephen 
+will find that. I am fine with any tree. Patch 9 indeed has some magic 
+bits that need some clarification, but I will sort that out with Hans.
 
-Best regards,
-Tomasz
+Regards,
+Arend
+
+>> Patch 10 and 11 add the necessary dts bits to actually enable the sdio irq
+>> and should go upstream through Maxime's dt tree.
+>>
+>> Please review / merge.
+>>
+>> Thanks&  Regards,
+>>
+>> Hans
+>>
+>
