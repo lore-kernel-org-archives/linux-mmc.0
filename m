@@ -1,134 +1,290 @@
 From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCHv2 2/3] mmc: dw_mmc: use the __mmc_of_parse to parse the
- slot node
-Date: Tue, 27 May 2014 19:07:37 +0900
-Message-ID: <538463E9.30804@samsung.com>
+Subject: Re: [PATCHv2 3/3] ARM: dts: replace the broken-cd property into slot
+ node for dwmmc.
+Date: Tue, 27 May 2014 19:08:47 +0900
+Message-ID: <5384642F.50406@samsung.com>
 References: <1401104107-17651-1-git-send-email-jh80.chung@samsung.com>
- <1401104107-17651-3-git-send-email-jh80.chung@samsung.com>
- <002e01cf7990$ea98aec0$bfca0c40$%jun@samsung.com>
+ <1401104107-17651-4-git-send-email-jh80.chung@samsung.com>
+ <002f01cf7990$fb20b530$f1621f90$%jun@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=EUC-KR
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout1.samsung.com ([203.254.224.24]:61878 "EHLO
-	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751869AbaE0KHk (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 27 May 2014 06:07:40 -0400
-In-reply-to: <002e01cf7990$ea98aec0$bfca0c40$%jun@samsung.com>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-reply-to: <002f01cf7990$fb20b530$f1621f90$%jun@samsung.com>
+Sender: linux-samsung-soc-owner@vger.kernel.org
 To: Seungwon Jeon <tgih.jun@samsung.com>, 'Jaehoon Chung' <jh80.chung@samsung.com>, linux-mmc@vger.kernel.org
 Cc: chris@printf.net, ulf.hansson@linaro.org, ludovic.desroches@atmel.com, devicetree@vger.kernel.org, linux-samsung-soc@vger.kernel.org, cpgs@samsung.com
-
-Hi, Seungwon
+List-Id: linux-mmc@vger.kernel.org
 
 On 05/27/2014 06:49 PM, Seungwon Jeon wrote:
-> Hi Jaehoon,
-> 
-> On Mon, May 26, 2014, Jaehoon Chung wrote:
->> dw-mmc controller have the multiple slot.
-> Have -> has?
-Fix it.
+> Can this be merged with your another patch, " [PATCH 2/5] mmc: dw_mmc: remove the "supports-highspeed" property."?
+
+Sure..
 
 > 
->> Then it needs to parse the property for each slot.
+> On Mon, May 26, 2014, Jaehoon Chung wrote:
+>> dw-mmc controller can be support the multiple slot.
+> can support, it would be better to correct the above message.
+
+Fix it.
+
+Best Regards,
+Jaehoon Chung
+> 
+> Thanks,
+> Seungwon Jeon
+> 
+>> So each slot's property can be difference.
 >>
 >> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
 >> ---
 >> Changelog V2:
 >> 	- None
 >>
->>  drivers/mmc/host/dw_mmc.c |   25 ++++++-------------------
->>  1 file changed, 6 insertions(+), 19 deletions(-)
+>>  arch/arm/boot/dts/exynos4412-odroidx.dts      |    2 +-
+>>  arch/arm/boot/dts/exynos4412-origen.dts       |    2 +-
+>>  arch/arm/boot/dts/exynos4412-trats2.dts       |    4 ++--
+>>  arch/arm/boot/dts/exynos5250-arndale.dts      |    2 +-
+>>  arch/arm/boot/dts/exynos5250-cros-common.dtsi |    4 ++--
+>>  arch/arm/boot/dts/exynos5250-smdk5250.dts     |    2 +-
+>>  arch/arm/boot/dts/exynos5420-arndale-octa.dts |    2 +-
+>>  arch/arm/boot/dts/rk3066a-bqcurie2.dts        |    2 +-
+>>  arch/arm/boot/dts/socfpga_arria5.dtsi         |    2 +-
+>>  arch/arm/boot/dts/socfpga_cyclone5.dtsi       |    2 +-
+>>  arch/arm/boot/dts/socfpga_vt.dts              |    2 +-
+>>  11 files changed, 13 insertions(+), 13 deletions(-)
 >>
->> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
->> index 1ac227c..d4800f8 100644
->> --- a/drivers/mmc/host/dw_mmc.c
->> +++ b/drivers/mmc/host/dw_mmc.c
->> @@ -1015,12 +1015,11 @@ static int dw_mci_get_cd(struct mmc_host *mmc)
->>  {
->>  	int present;
->>  	struct dw_mci_slot *slot = mmc_priv(mmc);
->> -	struct dw_mci_board *brd = slot->host->pdata;
->>  	struct dw_mci *host = slot->host;
->>  	int gpio_cd = mmc_gpio_get_cd(mmc);
+>> diff --git a/arch/arm/boot/dts/exynos4412-odroidx.dts b/arch/arm/boot/dts/exynos4412-odroidx.dts
+>> index 31db28a..24ec351 100644
+>> --- a/arch/arm/boot/dts/exynos4412-odroidx.dts
+>> +++ b/arch/arm/boot/dts/exynos4412-odroidx.dts
+>> @@ -46,7 +46,6 @@
 >>
->>  	/* Use platform get_cd function, else try onboard card detect */
->> -	if (brd->quirks & DW_MCI_QUIRK_BROKEN_CARD_DETECTION)
->> +	if (slot->quirks & DW_MCI_QUIRK_BROKEN_CARD_DETECTION)
->>  		present = 1;
->>  	else if (!IS_ERR_VALUE(gpio_cd))
->>  		present = gpio_cd;
->> @@ -2010,6 +2009,9 @@ static struct dw_mci_of_slot_quirks {
->>  	{
->>  		.quirk	= "disable-wp",
->>  		.id	= DW_MCI_SLOT_QUIRK_NO_WRITE_PROTECT,
->> +	}, {
->> +		.quirk	= "broken-cd",
->> +		.id	= DW_MCI_QUIRK_BROKEN_CARD_DETECTION,
->>  	},
->>  };
+>>  		num-slots = <1>;
+>>  		supports-highspeed;
+>> -		broken-cd;
+>>  		card-detect-delay = <200>;
+>>  		samsung,dw-mshc-ciu-div = <3>;
+>>  		samsung,dw-mshc-sdr-timing = <2 3>;
+>> @@ -55,6 +54,7 @@
+>>  		slot@0 {
+>>  			reg = <0>;
+>>  			bus-width = <8>;
+>> +			broken-cd;
+>>  		};
+>>  	};
 >>
->> @@ -2088,7 +2090,7 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
->>  	if (host->pdata->caps2)
->>  		mmc->caps2 = host->pdata->caps2;
+>> diff --git a/arch/arm/boot/dts/exynos4412-origen.dts b/arch/arm/boot/dts/exynos4412-origen.dts
+>> index e2c0dca..ed712a6 100644
+>> --- a/arch/arm/boot/dts/exynos4412-origen.dts
+>> +++ b/arch/arm/boot/dts/exynos4412-origen.dts
+>> @@ -129,7 +129,6 @@
 >>
->> -	mmc_of_parse(mmc);
->> +	__mmc_of_parse(mmc, dw_mci_of_find_slot_node(host->dev, slot->id));
+>>  		num-slots = <1>;
+>>  		supports-highspeed;
+>> -		broken-cd;
+>>  		card-detect-delay = <200>;
+>>  		samsung,dw-mshc-ciu-div = <3>;
+>>  		samsung,dw-mshc-sdr-timing = <2 3>;
+>> @@ -138,6 +137,7 @@
+>>  		slot@0 {
+>>  			reg = <0>;
+>>  			bus-width = <8>;
+>> +			broken-cd;
+>>  		};
+>>  	};
 >>
->>  	if (host->pdata->blk_settings) {
->>  		mmc->max_segs = host->pdata->blk_settings->max_segs;
->> @@ -2231,23 +2233,13 @@ static inline bool dw_mci_ctrl_all_reset(struct dw_mci *host)
->>  }
+>> diff --git a/arch/arm/boot/dts/exynos4412-trats2.dts b/arch/arm/boot/dts/exynos4412-trats2.dts
+>> index 73be464..37c3cb3 100644
+>> --- a/arch/arm/boot/dts/exynos4412-trats2.dts
+>> +++ b/arch/arm/boot/dts/exynos4412-trats2.dts
+>> @@ -460,8 +460,6 @@
+>>  	mmc@12550000 {
+>>  		num-slots = <1>;
+>>  		supports-highspeed;
+>> -		broken-cd;
+>> -		non-removable;
+>>  		card-detect-delay = <200>;
+>>  		vmmc-supply = <&vemmc_reg>;
+>>  		clock-frequency = <400000000>;
+>> @@ -475,6 +473,8 @@
+>>  		slot@0 {
+>>  			reg = <0>;
+>>  			bus-width = <8>;
+>> +			non-removable;
+>> +			broken-cd;
+>>  		};
+>>  	};
 >>
->>  #ifdef CONFIG_OF
->> -static struct dw_mci_of_quirks {
->> -	char *quirk;
->> -	int id;
->> -} of_quirks[] = {
->> -	{
->> -		.quirk	= "broken-cd",
->> -		.id	= DW_MCI_QUIRK_BROKEN_CARD_DETECTION,
->> -	},
->> -};
->> -
-> Moving broken-cd to slot_quirks is reasonable.
-> But I think of_quirks should be kept and we can add right quirks.
-> In cae of DW_MCI_QUIRK_IDMAC_DTO and DW_MCI_QUIRK_RETRY_DELAY,
-> we can handle those with dw_mci_of_quirks although we didn't add.
-Ok. 
-
-Best Regards,
-Jaehoon Chung
-> 
->>  static struct dw_mci_board *dw_mci_parse_dt(struct dw_mci *host)
->>  {
->>  	struct dw_mci_board *pdata;
->>  	struct device *dev = host->dev;
->>  	struct device_node *np = dev->of_node;
->>  	const struct dw_mci_drv_data *drv_data = host->drv_data;
->> -	int idx, ret;
->> +	int ret;
->>  	u32 clock_frequency;
+>> diff --git a/arch/arm/boot/dts/exynos5250-arndale.dts b/arch/arm/boot/dts/exynos5250-arndale.dts
+>> index 090f983..0c9a7da 100644
+>> --- a/arch/arm/boot/dts/exynos5250-arndale.dts
+>> +++ b/arch/arm/boot/dts/exynos5250-arndale.dts
+>> @@ -400,7 +400,6 @@
+>>  		status = "okay";
+>>  		num-slots = <1>;
+>>  		supports-highspeed;
+>> -		broken-cd;
+>>  		card-detect-delay = <200>;
+>>  		samsung,dw-mshc-ciu-div = <3>;
+>>  		samsung,dw-mshc-sdr-timing = <2 3>;
+>> @@ -412,6 +411,7 @@
+>>  		slot@0 {
+>>  			reg = <0>;
+>>  			bus-width = <8>;
+>> +			broken-cd;
+>>  		};
+>>  	};
 >>
->>  	pdata = devm_kzalloc(dev, sizeof(*pdata), GFP_KERNEL);
->> @@ -2264,11 +2256,6 @@ static struct dw_mci_board *dw_mci_parse_dt(struct dw_mci *host)
->>  		pdata->num_slots = 1;
->>  	}
+>> diff --git a/arch/arm/boot/dts/exynos5250-cros-common.dtsi b/arch/arm/boot/dts/exynos5250-cros-
+>> common.dtsi
+>> index 2c1560d..7ab3b94 100644
+>> --- a/arch/arm/boot/dts/exynos5250-cros-common.dtsi
+>> +++ b/arch/arm/boot/dts/exynos5250-cros-common.dtsi
+>> @@ -249,7 +249,6 @@
+>>  	mmc@12200000 {
+>>  		num-slots = <1>;
+>>  		supports-highspeed;
+>> -		broken-cd;
+>>  		card-detect-delay = <200>;
+>>  		samsung,dw-mshc-ciu-div = <3>;
+>>  		samsung,dw-mshc-sdr-timing = <2 3>;
+>> @@ -260,6 +259,7 @@
+>>  		slot@0 {
+>>  			reg = <0>;
+>>  			bus-width = <8>;
+>> +			broken-cd;
+>>  		};
+>>  	};
 >>
->> -	/* get quirks */
->> -	for (idx = 0; idx < ARRAY_SIZE(of_quirks); idx++)
->> -		if (of_get_property(np, of_quirks[idx].quirk, NULL))
->> -			pdata->quirks |= of_quirks[idx].id;
->> -
-> Same as above.
-> 
-> Thanks,
-> Seungwon Jeon
-> 
->>  	if (of_property_read_u32(np, "fifo-depth", &pdata->fifo_depth))
->>  		dev_info(dev, "fifo-depth property not found, using "
->>  				"value of FIFOTH register as default\n");
+>> @@ -283,7 +283,6 @@
+>>  	mmc@12230000 {
+>>  		num-slots = <1>;
+>>  		supports-highspeed;
+>> -		broken-cd;
+>>  		card-detect-delay = <200>;
+>>  		samsung,dw-mshc-ciu-div = <3>;
+>>  		samsung,dw-mshc-sdr-timing = <2 3>;
+>> @@ -293,6 +292,7 @@
+>>  		slot@0 {
+>>  			reg = <0>;
+>>  			bus-width = <4>;
+>> +			broken-cd;
+>>  		};
+>>  	};
+>>
+>> diff --git a/arch/arm/boot/dts/exynos5250-smdk5250.dts b/arch/arm/boot/dts/exynos5250-smdk5250.dts
+>> index a794a70..feffe24 100644
+>> --- a/arch/arm/boot/dts/exynos5250-smdk5250.dts
+>> +++ b/arch/arm/boot/dts/exynos5250-smdk5250.dts
+>> @@ -283,7 +283,6 @@
+>>  		status = "okay";
+>>  		num-slots = <1>;
+>>  		supports-highspeed;
+>> -		broken-cd;
+>>  		card-detect-delay = <200>;
+>>  		samsung,dw-mshc-ciu-div = <3>;
+>>  		samsung,dw-mshc-sdr-timing = <2 3>;
+>> @@ -294,6 +293,7 @@
+>>  		slot@0 {
+>>  			reg = <0>;
+>>  			bus-width = <8>;
+>> +			broken-cd;
+>>  		};
+>>  	};
+>>
+>> diff --git a/arch/arm/boot/dts/exynos5420-arndale-octa.dts b/arch/arm/boot/dts/exynos5420-arndale-
+>> octa.dts
+>> index 80a3bf4..0d3b467 100644
+>> --- a/arch/arm/boot/dts/exynos5420-arndale-octa.dts
+>> +++ b/arch/arm/boot/dts/exynos5420-arndale-octa.dts
+>> @@ -39,7 +39,6 @@
+>>
+>>  	mmc@12200000 {
+>>  		status = "okay";
+>> -		broken-cd;
+>>  		supports-highspeed;
+>>  		card-detect-delay = <200>;
+>>  		samsung,dw-mshc-ciu-div = <3>;
+>> @@ -52,6 +51,7 @@
+>>  		slot@0 {
+>>  			reg = <0>;
+>>  			bus-width = <8>;
+>> +			broken-cd;
+>>  		};
+>>  	};
+>>
+>> diff --git a/arch/arm/boot/dts/rk3066a-bqcurie2.dts b/arch/arm/boot/dts/rk3066a-bqcurie2.dts
+>> index 035df40..62c7484 100644
+>> --- a/arch/arm/boot/dts/rk3066a-bqcurie2.dts
+>> +++ b/arch/arm/boot/dts/rk3066a-bqcurie2.dts
+>> @@ -69,7 +69,6 @@
+>>  		dwmmc@10218000 { /* wifi */
+>>  			num-slots = <1>;
+>>  			status = "okay";
+>> -			non-removable;
+>>
+>>  			pinctrl-names = "default";
+>>  			pinctrl-0 = <&sd1_clk &sd1_cmd &sd1_bus4>;
+>> @@ -78,6 +77,7 @@
+>>  				reg = <0>;
+>>  				bus-width = <4>;
+>>  				disable-wp;
+>> +				non-removable;
+>>  			};
+>>  		};
+>>
+>> diff --git a/arch/arm/boot/dts/socfpga_arria5.dtsi b/arch/arm/boot/dts/socfpga_arria5.dtsi
+>> index 6c87b70..9c2b933 100644
+>> --- a/arch/arm/boot/dts/socfpga_arria5.dtsi
+>> +++ b/arch/arm/boot/dts/socfpga_arria5.dtsi
+>> @@ -30,11 +30,11 @@
+>>  		dwmmc0@ff704000 {
+>>  			num-slots = <1>;
+>>  			supports-highspeed;
+>> -			broken-cd;
+>>
+>>  			slot@0 {
+>>  				reg = <0>;
+>>  				bus-width = <4>;
+>> +				broken-cd;
+>>  			};
+>>  		};
+>>
+>> diff --git a/arch/arm/boot/dts/socfpga_cyclone5.dtsi b/arch/arm/boot/dts/socfpga_cyclone5.dtsi
+>> index ca41b0e..c5c7b5f 100644
+>> --- a/arch/arm/boot/dts/socfpga_cyclone5.dtsi
+>> +++ b/arch/arm/boot/dts/socfpga_cyclone5.dtsi
+>> @@ -31,11 +31,11 @@
+>>  		dwmmc0@ff704000 {
+>>  			num-slots = <1>;
+>>  			supports-highspeed;
+>> -			broken-cd;
+>>
+>>  			slot@0 {
+>>  				reg = <0>;
+>>  				bus-width = <4>;
+>> +				broken-cd;
+>>  			};
+>>  		};
+>>
+>> diff --git a/arch/arm/boot/dts/socfpga_vt.dts b/arch/arm/boot/dts/socfpga_vt.dts
+>> index 87d6f75..ff1111e 100644
+>> --- a/arch/arm/boot/dts/socfpga_vt.dts
+>> +++ b/arch/arm/boot/dts/socfpga_vt.dts
+>> @@ -44,11 +44,11 @@
+>>  		dwmmc0@ff704000 {
+>>  			num-slots = <1>;
+>>  			supports-highspeed;
+>> -			broken-cd;
+>>
+>>  			slot@0 {
+>>  				reg = <0>;
+>>  				bus-width = <4>;
+>> +				broken-cd;
+>>  			};
+>>  		};
+>>
 >> --
 >> 1.7.9.5
 >>
@@ -142,4 +298,3 @@ Jaehoon Chung
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
 > 
-
