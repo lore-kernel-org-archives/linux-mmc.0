@@ -1,110 +1,125 @@
 From: Seungwon Jeon <tgih.jun@samsung.com>
-Subject: RE: [PATCHv2 1/3] mmc: host: add slot argument to mmc_of_parse
-Date: Tue, 27 May 2014 18:48:13 +0900
-Message-ID: <002d01cf7990$c6faf220$54f0d660$%jun@samsung.com>
+Subject: RE: [PATCHv2 2/3] mmc: dw_mmc: use the __mmc_of_parse to parse the
+ slot node
+Date: Tue, 27 May 2014 18:49:13 +0900
+Message-ID: <002e01cf7990$ea98aec0$bfca0c40$%jun@samsung.com>
 References: <1401104107-17651-1-git-send-email-jh80.chung@samsung.com>
- <1401104107-17651-2-git-send-email-jh80.chung@samsung.com>
+ <1401104107-17651-3-git-send-email-jh80.chung@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ks_c_5601-1987
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-reply-to: <1401104107-17651-2-git-send-email-jh80.chung@samsung.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout2.samsung.com ([203.254.224.25]:12216 "EHLO
+	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752034AbaE0JtQ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 27 May 2014 05:49:16 -0400
+In-reply-to: <1401104107-17651-3-git-send-email-jh80.chung@samsung.com>
 Content-language: ko
-Sender: linux-samsung-soc-owner@vger.kernel.org
+Sender: linux-mmc-owner@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 To: 'Jaehoon Chung' <jh80.chung@samsung.com>, linux-mmc@vger.kernel.org
 Cc: chris@printf.net, ulf.hansson@linaro.org, ludovic.desroches@atmel.com, devicetree@vger.kernel.org, linux-samsung-soc@vger.kernel.org, cpgs@samsung.com
-List-Id: linux-mmc@vger.kernel.org
+
+Hi Jaehoon,
 
 On Mon, May 26, 2014, Jaehoon Chung wrote:
-> From: Ludovic Desroches <ludovic.desroches@atmel.com>
-> 
-> Some hosts manage several slots. In these case information such as the
-> bus width, chip detect and others are into the slot node. So we have to
-> parse child node. If not NULL, slot node will be used instead of the
-> device node.
-> 
-> Signed-off-by: Ludovic Desroches <ludovic.desroches@atmel.com>
-> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+> dw-mmc controller have the multiple slot.
+Have -> has?
 
-Acked-by: Seungwon Jeon <tgih.jun@samsung.com>
+> Then it needs to parse the property for each slot.
+> 
+> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+> ---
+> Changelog V2:
+> 	- None
+> 
+>  drivers/mmc/host/dw_mmc.c |   25 ++++++-------------------
+>  1 file changed, 6 insertions(+), 19 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index 1ac227c..d4800f8 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -1015,12 +1015,11 @@ static int dw_mci_get_cd(struct mmc_host *mmc)
+>  {
+>  	int present;
+>  	struct dw_mci_slot *slot = mmc_priv(mmc);
+> -	struct dw_mci_board *brd = slot->host->pdata;
+>  	struct dw_mci *host = slot->host;
+>  	int gpio_cd = mmc_gpio_get_cd(mmc);
+> 
+>  	/* Use platform get_cd function, else try onboard card detect */
+> -	if (brd->quirks & DW_MCI_QUIRK_BROKEN_CARD_DETECTION)
+> +	if (slot->quirks & DW_MCI_QUIRK_BROKEN_CARD_DETECTION)
+>  		present = 1;
+>  	else if (!IS_ERR_VALUE(gpio_cd))
+>  		present = gpio_cd;
+> @@ -2010,6 +2009,9 @@ static struct dw_mci_of_slot_quirks {
+>  	{
+>  		.quirk	= "disable-wp",
+>  		.id	= DW_MCI_SLOT_QUIRK_NO_WRITE_PROTECT,
+> +	}, {
+> +		.quirk	= "broken-cd",
+> +		.id	= DW_MCI_QUIRK_BROKEN_CARD_DETECTION,
+>  	},
+>  };
+> 
+> @@ -2088,7 +2090,7 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
+>  	if (host->pdata->caps2)
+>  		mmc->caps2 = host->pdata->caps2;
+> 
+> -	mmc_of_parse(mmc);
+> +	__mmc_of_parse(mmc, dw_mci_of_find_slot_node(host->dev, slot->id));
+> 
+>  	if (host->pdata->blk_settings) {
+>  		mmc->max_segs = host->pdata->blk_settings->max_segs;
+> @@ -2231,23 +2233,13 @@ static inline bool dw_mci_ctrl_all_reset(struct dw_mci *host)
+>  }
+> 
+>  #ifdef CONFIG_OF
+> -static struct dw_mci_of_quirks {
+> -	char *quirk;
+> -	int id;
+> -} of_quirks[] = {
+> -	{
+> -		.quirk	= "broken-cd",
+> -		.id	= DW_MCI_QUIRK_BROKEN_CARD_DETECTION,
+> -	},
+> -};
+> -
+Moving broken-cd to slot_quirks is reasonable.
+But I think of_quirks should be kept and we can add right quirks.
+In cae of DW_MCI_QUIRK_IDMAC_DTO and DW_MCI_QUIRK_RETRY_DELAY,
+we can handle those with dw_mci_of_quirks although we didn't add.
+
+>  static struct dw_mci_board *dw_mci_parse_dt(struct dw_mci *host)
+>  {
+>  	struct dw_mci_board *pdata;
+>  	struct device *dev = host->dev;
+>  	struct device_node *np = dev->of_node;
+>  	const struct dw_mci_drv_data *drv_data = host->drv_data;
+> -	int idx, ret;
+> +	int ret;
+>  	u32 clock_frequency;
+> 
+>  	pdata = devm_kzalloc(dev, sizeof(*pdata), GFP_KERNEL);
+> @@ -2264,11 +2256,6 @@ static struct dw_mci_board *dw_mci_parse_dt(struct dw_mci *host)
+>  		pdata->num_slots = 1;
+>  	}
+> 
+> -	/* get quirks */
+> -	for (idx = 0; idx < ARRAY_SIZE(of_quirks); idx++)
+> -		if (of_get_property(np, of_quirks[idx].quirk, NULL))
+> -			pdata->quirks |= of_quirks[idx].id;
+> -
+Same as above.
 
 Thanks,
 Seungwon Jeon
 
-> ---
-> Changelog V2:
-> 	- Fix the typo.
-> 
->  drivers/mmc/core/host.c  |   13 +++++++++----
->  include/linux/mmc/host.h |   10 +++++++++-
->  2 files changed, 18 insertions(+), 5 deletions(-)
-> 
-> diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
-> index 95cceae..0f677b3 100644
-> --- a/drivers/mmc/core/host.c
-> +++ b/drivers/mmc/core/host.c
-> @@ -298,15 +298,17 @@ static inline void mmc_host_clk_sysfs_init(struct mmc_host *host)
->  #endif
-> 
->  /**
-> - *	mmc_of_parse() - parse host's device-tree node
-> + *	__mmc_of_parse() - parse host's device-tree node
->   *	@host: host whose node should be parsed.
-> + *	@slot : some device provide several slots so the node to parse
-> + *		is not the host one.
->   *
->   * To keep the rest of the MMC subsystem unaware of whether DT has been
->   * used to to instantiate and configure this host instance or not, we
->   * parse the properties and set respective generic mmc-host flags and
->   * parameters.
->   */
-> -int mmc_of_parse(struct mmc_host *host)
-> +int __mmc_of_parse(struct mmc_host *host, struct device_node *slot)
->  {
->  	struct device_node *np;
->  	u32 bus_width;
-> @@ -317,7 +319,10 @@ int mmc_of_parse(struct mmc_host *host)
->  	if (!host->parent || !host->parent->of_node)
->  		return 0;
-> 
-> -	np = host->parent->of_node;
-> +	if (slot)
-> +		np = slot;
-> +	else
-> +		np = host->parent->of_node;
-> 
->  	/* "bus-width" is translated to MMC_CAP_*_BIT_DATA flags */
->  	if (of_property_read_u32(np, "bus-width", &bus_width) < 0) {
-> @@ -459,7 +464,7 @@ out:
->  	return ret;
->  }
-> 
-> -EXPORT_SYMBOL(mmc_of_parse);
-> +EXPORT_SYMBOL(__mmc_of_parse);
-> 
->  /**
->   *	mmc_alloc_host - initialise the per-host structure.
-> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-> index 7960424..c62af91 100644
-> --- a/include/linux/mmc/host.h
-> +++ b/include/linux/mmc/host.h
-> @@ -372,7 +372,15 @@ struct mmc_host *mmc_alloc_host(int extra, struct device *);
->  int mmc_add_host(struct mmc_host *);
->  void mmc_remove_host(struct mmc_host *);
->  void mmc_free_host(struct mmc_host *);
-> -int mmc_of_parse(struct mmc_host *host);
-> +int __mmc_of_parse(struct mmc_host *host, struct device_node *slot);
-> +/*
-> + * mmc_of_parse - parse host's device-tree node
-> + *	@host: host whose node should be parsed.
-> + */
-> +static inline int mmc_of_parse(struct mmc_host *host)
-> +{
-> +	return __mmc_of_parse(host, NULL);
-> +}
-> 
->  static inline void *mmc_priv(struct mmc_host *host)
->  {
+>  	if (of_property_read_u32(np, "fifo-depth", &pdata->fifo_depth))
+>  		dev_info(dev, "fifo-depth property not found, using "
+>  				"value of FIFOTH register as default\n");
 > --
 > 1.7.9.5
 > 
@@ -112,3 +127,4 @@ Seungwon Jeon
 > To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
