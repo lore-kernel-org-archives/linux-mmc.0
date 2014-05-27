@@ -1,285 +1,65 @@
-From: Seungwon Jeon <tgih.jun@samsung.com>
-Subject: RE: [PATCHv2 3/3] ARM: dts: replace the broken-cd property into slot
- node for dwmmc.
-Date: Tue, 27 May 2014 18:49:41 +0900
-Message-ID: <002f01cf7990$fb20b530$f1621f90$%jun@samsung.com>
-References: <1401104107-17651-1-git-send-email-jh80.chung@samsung.com>
- <1401104107-17651-4-git-send-email-jh80.chung@samsung.com>
+From: Chen-Yu Tsai <wens@csie.org>
+Subject: Re: [PATCH 02/11] pinctrl: sunxi: add IRQCHIP_SKIP_SET_WAKE flag for
+ pinctrl irq chip
+Date: Tue, 27 May 2014 17:52:57 +0800
+Message-ID: <CAGb2v66PnSHekfBvUBe=GHqH9Ym+EvjLO7fFuPhULjRMn1EBwA@mail.gmail.com>
+References: <1401090486-4414-1-git-send-email-hdegoede@redhat.com>
+ <1401090486-4414-3-git-send-email-hdegoede@redhat.com> <20140527080746.GB4730@lukather>
+ <5384563D.2000000@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ks_c_5601-1987
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-reply-to: <1401104107-17651-4-git-send-email-jh80.chung@samsung.com>
-Content-language: ko
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: 'Jaehoon Chung' <jh80.chung@samsung.com>, linux-mmc@vger.kernel.org
-Cc: chris@printf.net, ulf.hansson@linaro.org, ludovic.desroches@atmel.com, devicetree@vger.kernel.org, linux-samsung-soc@vger.kernel.org, cpgs@samsung.com
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-vc0-f173.google.com ([209.85.220.173]:35915 "EHLO
+	mail-vc0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751605AbaE0JxS (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 27 May 2014 05:53:18 -0400
+In-Reply-To: <5384563D.2000000@redhat.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Hans de Goede <hdegoede@redhat.com>
+Cc: Maxime Ripard <maxime.ripard@free-electrons.com>, Linus Walleij <linus.walleij@linaro.org>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Arend van Spriel <arend@broadcom.com>, "John W. Linville" <linville@tuxdriver.com>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-wireless <linux-wireless@vger.kernel.org>, devicetree <devicetree@vger.kernel.org>, linux-sunxi <linux-sunxi@googlegroups.com>
 
-Can this be merged with your another patch, " [PATCH 2/5] mmc: dw_mmc: remove the "supports-highspeed" property."?
+On Tue, May 27, 2014 at 5:09 PM, Hans de Goede <hdegoede@redhat.com> wrote:
+> Hi,
+>
+> On 05/27/2014 10:07 AM, Maxime Ripard wrote:
+>> On Mon, May 26, 2014 at 09:47:57AM +0200, Hans de Goede wrote:
+>>> From: Chen-Yu Tsai <wens@csie.org>
+>>>
+>>> The sunxi pinctrl irq chip driver does not support wakeup at the
+>>> moment. Adding IRQCHIP_SKIP_SET_WAKE lets the irqs work with drivers
+>>> using wakeup.
+>>>
+>>> Also add a name to the irq chip.
+>>>
+>>> Signed-off-by: Chen-Yu Tsai <wens@csie.org>
+>>> Signed-off-by: Hans de Goede <hdegoede@redhat.com>
+>>> ---
+>>>  drivers/pinctrl/sunxi/pinctrl-sunxi.c | 2 ++
+>>>  1 file changed, 2 insertions(+)
+>>>
+>>> diff --git a/drivers/pinctrl/sunxi/pinctrl-sunxi.c b/drivers/pinctrl/sunxi/pinctrl-sunxi.c
+>>> index db9ccd6..ec60c2e 100644
+>>> --- a/drivers/pinctrl/sunxi/pinctrl-sunxi.c
+>>> +++ b/drivers/pinctrl/sunxi/pinctrl-sunxi.c
+>>> @@ -646,6 +646,8 @@ static struct irq_chip sunxi_pinctrl_irq_chip = {
+>>>      .irq_mask_ack   = sunxi_pinctrl_irq_mask_ack,
+>>>      .irq_unmask     = sunxi_pinctrl_irq_unmask,
+>>>      .irq_set_type   = sunxi_pinctrl_irq_set_type,
+>>> +    .name           = "sunxi-pio",
+>>> +    .flags          = IRQCHIP_SKIP_SET_WAKE,
+>>
+>> I'd rather see the name set to dev_name() or something like that. This
+>> will not work that great with multiple pin controller supporting
+>> interrupts.
+>
+> That would require moving the irq_chip struct to become a member of the
+> sunxi_pinctrl struct. Not undoable, but that seems like something which
+> should be done in a separate patch. So shall I just drop the .name part
+> of this patch for now ?
 
-On Mon, May 26, 2014, Jaehoon Chung wrote:
-> dw-mmc controller can be support the multiple slot.
-can support, it would be better to correct the above message.
+Please do. AFAIK, .name is only used for the debugfs representation.
+This change was only meant for cosmetic purposes.
 
-Thanks,
-Seungwon Jeon
 
-> So each slot's property can be difference.
-> 
-> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
-> ---
-> Changelog V2:
-> 	- None
-> 
->  arch/arm/boot/dts/exynos4412-odroidx.dts      |    2 +-
->  arch/arm/boot/dts/exynos4412-origen.dts       |    2 +-
->  arch/arm/boot/dts/exynos4412-trats2.dts       |    4 ++--
->  arch/arm/boot/dts/exynos5250-arndale.dts      |    2 +-
->  arch/arm/boot/dts/exynos5250-cros-common.dtsi |    4 ++--
->  arch/arm/boot/dts/exynos5250-smdk5250.dts     |    2 +-
->  arch/arm/boot/dts/exynos5420-arndale-octa.dts |    2 +-
->  arch/arm/boot/dts/rk3066a-bqcurie2.dts        |    2 +-
->  arch/arm/boot/dts/socfpga_arria5.dtsi         |    2 +-
->  arch/arm/boot/dts/socfpga_cyclone5.dtsi       |    2 +-
->  arch/arm/boot/dts/socfpga_vt.dts              |    2 +-
->  11 files changed, 13 insertions(+), 13 deletions(-)
-> 
-> diff --git a/arch/arm/boot/dts/exynos4412-odroidx.dts b/arch/arm/boot/dts/exynos4412-odroidx.dts
-> index 31db28a..24ec351 100644
-> --- a/arch/arm/boot/dts/exynos4412-odroidx.dts
-> +++ b/arch/arm/boot/dts/exynos4412-odroidx.dts
-> @@ -46,7 +46,6 @@
-> 
->  		num-slots = <1>;
->  		supports-highspeed;
-> -		broken-cd;
->  		card-detect-delay = <200>;
->  		samsung,dw-mshc-ciu-div = <3>;
->  		samsung,dw-mshc-sdr-timing = <2 3>;
-> @@ -55,6 +54,7 @@
->  		slot@0 {
->  			reg = <0>;
->  			bus-width = <8>;
-> +			broken-cd;
->  		};
->  	};
-> 
-> diff --git a/arch/arm/boot/dts/exynos4412-origen.dts b/arch/arm/boot/dts/exynos4412-origen.dts
-> index e2c0dca..ed712a6 100644
-> --- a/arch/arm/boot/dts/exynos4412-origen.dts
-> +++ b/arch/arm/boot/dts/exynos4412-origen.dts
-> @@ -129,7 +129,6 @@
-> 
->  		num-slots = <1>;
->  		supports-highspeed;
-> -		broken-cd;
->  		card-detect-delay = <200>;
->  		samsung,dw-mshc-ciu-div = <3>;
->  		samsung,dw-mshc-sdr-timing = <2 3>;
-> @@ -138,6 +137,7 @@
->  		slot@0 {
->  			reg = <0>;
->  			bus-width = <8>;
-> +			broken-cd;
->  		};
->  	};
-> 
-> diff --git a/arch/arm/boot/dts/exynos4412-trats2.dts b/arch/arm/boot/dts/exynos4412-trats2.dts
-> index 73be464..37c3cb3 100644
-> --- a/arch/arm/boot/dts/exynos4412-trats2.dts
-> +++ b/arch/arm/boot/dts/exynos4412-trats2.dts
-> @@ -460,8 +460,6 @@
->  	mmc@12550000 {
->  		num-slots = <1>;
->  		supports-highspeed;
-> -		broken-cd;
-> -		non-removable;
->  		card-detect-delay = <200>;
->  		vmmc-supply = <&vemmc_reg>;
->  		clock-frequency = <400000000>;
-> @@ -475,6 +473,8 @@
->  		slot@0 {
->  			reg = <0>;
->  			bus-width = <8>;
-> +			non-removable;
-> +			broken-cd;
->  		};
->  	};
-> 
-> diff --git a/arch/arm/boot/dts/exynos5250-arndale.dts b/arch/arm/boot/dts/exynos5250-arndale.dts
-> index 090f983..0c9a7da 100644
-> --- a/arch/arm/boot/dts/exynos5250-arndale.dts
-> +++ b/arch/arm/boot/dts/exynos5250-arndale.dts
-> @@ -400,7 +400,6 @@
->  		status = "okay";
->  		num-slots = <1>;
->  		supports-highspeed;
-> -		broken-cd;
->  		card-detect-delay = <200>;
->  		samsung,dw-mshc-ciu-div = <3>;
->  		samsung,dw-mshc-sdr-timing = <2 3>;
-> @@ -412,6 +411,7 @@
->  		slot@0 {
->  			reg = <0>;
->  			bus-width = <8>;
-> +			broken-cd;
->  		};
->  	};
-> 
-> diff --git a/arch/arm/boot/dts/exynos5250-cros-common.dtsi b/arch/arm/boot/dts/exynos5250-cros-
-> common.dtsi
-> index 2c1560d..7ab3b94 100644
-> --- a/arch/arm/boot/dts/exynos5250-cros-common.dtsi
-> +++ b/arch/arm/boot/dts/exynos5250-cros-common.dtsi
-> @@ -249,7 +249,6 @@
->  	mmc@12200000 {
->  		num-slots = <1>;
->  		supports-highspeed;
-> -		broken-cd;
->  		card-detect-delay = <200>;
->  		samsung,dw-mshc-ciu-div = <3>;
->  		samsung,dw-mshc-sdr-timing = <2 3>;
-> @@ -260,6 +259,7 @@
->  		slot@0 {
->  			reg = <0>;
->  			bus-width = <8>;
-> +			broken-cd;
->  		};
->  	};
-> 
-> @@ -283,7 +283,6 @@
->  	mmc@12230000 {
->  		num-slots = <1>;
->  		supports-highspeed;
-> -		broken-cd;
->  		card-detect-delay = <200>;
->  		samsung,dw-mshc-ciu-div = <3>;
->  		samsung,dw-mshc-sdr-timing = <2 3>;
-> @@ -293,6 +292,7 @@
->  		slot@0 {
->  			reg = <0>;
->  			bus-width = <4>;
-> +			broken-cd;
->  		};
->  	};
-> 
-> diff --git a/arch/arm/boot/dts/exynos5250-smdk5250.dts b/arch/arm/boot/dts/exynos5250-smdk5250.dts
-> index a794a70..feffe24 100644
-> --- a/arch/arm/boot/dts/exynos5250-smdk5250.dts
-> +++ b/arch/arm/boot/dts/exynos5250-smdk5250.dts
-> @@ -283,7 +283,6 @@
->  		status = "okay";
->  		num-slots = <1>;
->  		supports-highspeed;
-> -		broken-cd;
->  		card-detect-delay = <200>;
->  		samsung,dw-mshc-ciu-div = <3>;
->  		samsung,dw-mshc-sdr-timing = <2 3>;
-> @@ -294,6 +293,7 @@
->  		slot@0 {
->  			reg = <0>;
->  			bus-width = <8>;
-> +			broken-cd;
->  		};
->  	};
-> 
-> diff --git a/arch/arm/boot/dts/exynos5420-arndale-octa.dts b/arch/arm/boot/dts/exynos5420-arndale-
-> octa.dts
-> index 80a3bf4..0d3b467 100644
-> --- a/arch/arm/boot/dts/exynos5420-arndale-octa.dts
-> +++ b/arch/arm/boot/dts/exynos5420-arndale-octa.dts
-> @@ -39,7 +39,6 @@
-> 
->  	mmc@12200000 {
->  		status = "okay";
-> -		broken-cd;
->  		supports-highspeed;
->  		card-detect-delay = <200>;
->  		samsung,dw-mshc-ciu-div = <3>;
-> @@ -52,6 +51,7 @@
->  		slot@0 {
->  			reg = <0>;
->  			bus-width = <8>;
-> +			broken-cd;
->  		};
->  	};
-> 
-> diff --git a/arch/arm/boot/dts/rk3066a-bqcurie2.dts b/arch/arm/boot/dts/rk3066a-bqcurie2.dts
-> index 035df40..62c7484 100644
-> --- a/arch/arm/boot/dts/rk3066a-bqcurie2.dts
-> +++ b/arch/arm/boot/dts/rk3066a-bqcurie2.dts
-> @@ -69,7 +69,6 @@
->  		dwmmc@10218000 { /* wifi */
->  			num-slots = <1>;
->  			status = "okay";
-> -			non-removable;
-> 
->  			pinctrl-names = "default";
->  			pinctrl-0 = <&sd1_clk &sd1_cmd &sd1_bus4>;
-> @@ -78,6 +77,7 @@
->  				reg = <0>;
->  				bus-width = <4>;
->  				disable-wp;
-> +				non-removable;
->  			};
->  		};
-> 
-> diff --git a/arch/arm/boot/dts/socfpga_arria5.dtsi b/arch/arm/boot/dts/socfpga_arria5.dtsi
-> index 6c87b70..9c2b933 100644
-> --- a/arch/arm/boot/dts/socfpga_arria5.dtsi
-> +++ b/arch/arm/boot/dts/socfpga_arria5.dtsi
-> @@ -30,11 +30,11 @@
->  		dwmmc0@ff704000 {
->  			num-slots = <1>;
->  			supports-highspeed;
-> -			broken-cd;
-> 
->  			slot@0 {
->  				reg = <0>;
->  				bus-width = <4>;
-> +				broken-cd;
->  			};
->  		};
-> 
-> diff --git a/arch/arm/boot/dts/socfpga_cyclone5.dtsi b/arch/arm/boot/dts/socfpga_cyclone5.dtsi
-> index ca41b0e..c5c7b5f 100644
-> --- a/arch/arm/boot/dts/socfpga_cyclone5.dtsi
-> +++ b/arch/arm/boot/dts/socfpga_cyclone5.dtsi
-> @@ -31,11 +31,11 @@
->  		dwmmc0@ff704000 {
->  			num-slots = <1>;
->  			supports-highspeed;
-> -			broken-cd;
-> 
->  			slot@0 {
->  				reg = <0>;
->  				bus-width = <4>;
-> +				broken-cd;
->  			};
->  		};
-> 
-> diff --git a/arch/arm/boot/dts/socfpga_vt.dts b/arch/arm/boot/dts/socfpga_vt.dts
-> index 87d6f75..ff1111e 100644
-> --- a/arch/arm/boot/dts/socfpga_vt.dts
-> +++ b/arch/arm/boot/dts/socfpga_vt.dts
-> @@ -44,11 +44,11 @@
->  		dwmmc0@ff704000 {
->  			num-slots = <1>;
->  			supports-highspeed;
-> -			broken-cd;
-> 
->  			slot@0 {
->  				reg = <0>;
->  				bus-width = <4>;
-> +				broken-cd;
->  			};
->  		};
-> 
-> --
-> 1.7.9.5
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+ChenYu
