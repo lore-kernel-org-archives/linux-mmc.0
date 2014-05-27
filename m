@@ -1,65 +1,99 @@
-From: Fabio Estevam <festevam@gmail.com>
-Subject: Re: [PATCH 1/1] mmc: sdhci-esdhc-imx: fix mmc ddr mode regression issue
-Date: Tue, 27 May 2014 11:05:05 -0300
-Message-ID: <CAOMZO5CKCYiMF3d-bC1NOVRV7our-0yxRq1b-F1FhDaVF2Cf=A@mail.gmail.com>
-References: <1399618395-359-1-git-send-email-b29396@freescale.com>
-	<CAPDyKFqp5Pq51hbXG04HEFhMHB7itkWmvD7cqLgBUFwytVv7Hw@mail.gmail.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v3 12/13] mmc: mmci: add explicit clk control
+Date: Tue, 27 May 2014 16:07:41 +0200
+Message-ID: <CAPDyKFqy+UW7QHhJfVCefeWTwTzpzLb2APwxQKhAdzM6Ex_ZrQ@mail.gmail.com>
+References: <1400849362-7007-1-git-send-email-srinivas.kandagatla@linaro.org>
+	<1400849578-7585-1-git-send-email-srinivas.kandagatla@linaro.org>
+	<CAPDyKFqz-O9-Douk96LBuFRD_P1146c_Ld14TgiduBgfBqRi_A@mail.gmail.com>
+	<5383C28D.1060808@linaro.org>
+	<CAPDyKFpD==5wMZa5KbcMpGnZMTyncmGZfc=17j0=YjKT8qq5bg@mail.gmail.com>
+	<5384887F.2060505@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-vc0-f178.google.com ([209.85.220.178]:50901 "EHLO
-	mail-vc0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752123AbaE0OFG (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 27 May 2014 10:05:06 -0400
-Received: by mail-vc0-f178.google.com with SMTP id ij19so7197511vcb.23
-        for <linux-mmc@vger.kernel.org>; Tue, 27 May 2014 07:05:05 -0700 (PDT)
-In-Reply-To: <CAPDyKFqp5Pq51hbXG04HEFhMHB7itkWmvD7cqLgBUFwytVv7Hw@mail.gmail.com>
+Received: from mail-qc0-f170.google.com ([209.85.216.170]:46773 "EHLO
+	mail-qc0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752578AbaE0OHm (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 27 May 2014 10:07:42 -0400
+Received: by mail-qc0-f170.google.com with SMTP id i8so14302929qcq.29
+        for <linux-mmc@vger.kernel.org>; Tue, 27 May 2014 07:07:41 -0700 (PDT)
+In-Reply-To: <5384887F.2060505@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Dong Aisheng <b29396@freescale.com>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Shawn Guo <shawn.guo@linaro.org>, Fabio Estevam <fabio.estevam@freescale.com>
+To: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+Cc: Russell King <linux@arm.linux.org.uk>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-arm-msm@vger.kernel.org, Linus Walleij <linus.walleij@linaro.org>
 
-Hi Ulf,
-
-On Fri, May 9, 2014 at 5:42 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> On 9 May 2014 08:53, Dong Aisheng <b29396@freescale.com> wrote:
->> The regression is caused by the following commit ...
+>> Hmm. Looking a bit deeper into this, we have some additional related
+>> code to fixup. :-)
 >>
->> commit 79f7ae7c45a6ccf04e2908337461dee615f6afb0
->> Author: Seungwon Jeon <tgih.jun@samsung.com>
->> Date:   Fri Mar 14 21:11:56 2014 +0900
+>> In ->probe(), we do clk_set_rate(100MHz), if the mclk > 100MHz. That's
+>> due to the current variants don't support higher frequency than this.
+>> It seems like the Qcom variant may support up to 208MHz? Now, if
+>> that's the case, we need to add "f_max" to the struct variant_data to
+>> store this information, so we can respect different values while doing
+>> clk_set_rate() at ->probe().
 >>
->> mmc: clarify DDR timing mode between SD-UHS and eMMC
->>
->> This change distinguishes DDR timing mode of current
->> mixed usage to clarify device type.
->>
->> Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
->> Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
->> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
->> Signed-off-by: Chris Ball <chris@printf.net>
->>
->> ... and the line below.
->>
->> @@ -1264,7 +1264,7 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
->> goto err;
->>         }
->>                 mmc_card_set_ddr_mode(card);
->> -               mmc_set_timing(card->host, MMC_TIMING_UHS_DDR50);
->> +               mmc_set_timing(card->host, MMC_TIMING_MMC_DDR52);
->>                 mmc_set_bus_width(card->host, bus_width);
->>         }
->> }
->>
->> It's caused by the platform driver was still using MMC_TIMING_UHS_DDR50 for MMC DDR
->> mode which needs update too.
->>
->> Reported-by: Fabio Estevam <fabio.estevam@freescale.com>
->> Reported-by: Shawn Guo <shawn.guo@freescale.com>
->> Signed-off-by: Dong Aisheng <b29396@freescale.com>
+> Yes, qcom SOCs support more than 100Hhz clock.
 >
-> Hi Dong,
+> Probe and clk_set_rate/set_ios should respect this.
 >
-> Thanks for the fix. I will include this in the next PR I send to Chris.
+> On the other thought, Should probe actually care about clocks which are
+> explicitly controlled? It should not even attempt to set any frequency to
+> start with.
 
-It seems this one is still missing in linux-next.
+The 100 MHz is related to constraints set by the specification of the
+IP block, not the MMC/SD/SDIO spec.
+
+Thus at ->probe() we must perform the clk_set_rate().
+
+> mmc-core would set the right frequency depending on the mmc
+> state-machine respecting f_min and f_max.
+> I think for qcom, probe should just check the if f_max and f_min are valid
+> and set them to defaults if any in the same lines as existing code.
+>
+>
+>> While updating mmc->f_max for host->variant->explicit_mclk_control, we
+>> shouldn't care about using the host->mclk as a limiter, instead, use
+>> min(mmc->f_max, host->variant->f_max) and fallback to fmax.
+>>
+> Yes, that's correct, mclk should not be used as limiter. Adding f_max to the
+> variant looks useful.
+>
+>
+>> Not sure how that will affect the logic. :-)
+>>
+>>>
+>>>
+>>>> Additionally, this makes me wonder about f_min. I haven't seen
+>>>> anywhere in this patch were that value is being set to proper value,
+>>>> right?
+>>>>
+>>>
+>>> f_min should be 400000 for qcom, I think with the default mclk frequency
+>>> and
+>>> a divider of 512 used for calculating the f_min is bringing down the
+>>> f_min
+>>> to lessthan 400Kz. Which is why its working fine.
+>>> I think the possibility of mclk default frequency being greater than
+>>> 208Mhz
+>>> is very less. so I could either leave it as it is Or force this to 400000
+>>> all the time for qcom chips.
+>>
+>>
+>> No, this seems like a wrong approach.
+>>
+>> I think you would like to do use the clk_round_rate() find out the
+>> lowest possible rate. Or just use a fixed fallback value somehow.
+>
+>
+> clk_round_rate(mclk, 0) might be more generic, instead of fixed fallback.
+> Let the mmc-core figure out what frequency would be best from its table
+> starting from f_min.
+
+Agree!
+
+clk_round_rate(mclk, 100KHz), might be better though - since that is
+actually the lowest request frequency whatsoever.
+
+Kind regards
+Ulf Hansson
