@@ -1,14 +1,14 @@
 From: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH 03/11] pinctrl: sunxi: Move setting of mux
- to irq type from unmask to set_type
-Date: Tue, 27 May 2014 11:01:03 +0200
-Message-ID: <5384544F.6000806@redhat.com>
-References: <1401090486-4414-1-git-send-email-hdegoede@redhat.com> <1401090486-4414-4-git-send-email-hdegoede@redhat.com> <20140527080952.GC4730@lukather>
+Subject: Re: [PATCH 02/11] pinctrl: sunxi: add
+ IRQCHIP_SKIP_SET_WAKE flag for pinctrl irq chip
+Date: Tue, 27 May 2014 11:09:17 +0200
+Message-ID: <5384563D.2000000@redhat.com>
+References: <1401090486-4414-1-git-send-email-hdegoede@redhat.com> <1401090486-4414-3-git-send-email-hdegoede@redhat.com> <20140527080746.GB4730@lukather>
 Reply-To: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-sunxi+bncBDRZXY4CYYORBXFISGOAKGQEFWZSEYI-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-In-Reply-To: <20140527080952.GC4730@lukather>
+Return-path: <linux-sunxi+bncBDRZXY4CYYORBRNMSGOAKGQEANRZYVA-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+In-Reply-To: <20140527080746.GB4730@lukather>
 List-Post: <http://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
 List-Help: <http://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
 List-Archive: <http://groups.google.com/group/linux-sunxi>
@@ -21,36 +21,41 @@ List-Id: linux-mmc@vger.kernel.org
 
 Hi,
 
-On 05/27/2014 10:09 AM, Maxime Ripard wrote:
-> On Mon, May 26, 2014 at 09:47:58AM +0200, Hans de Goede wrote:
->> With level triggered interrupt mask / unmask will get called for each
->> interrupt, doing the somewhat expensive mux setting on each unmask thus is
->> not a good idea. Instead move it to the set_type callback, which is typically
->> done only once for each irq.
+On 05/27/2014 10:07 AM, Maxime Ripard wrote:
+> On Mon, May 26, 2014 at 09:47:57AM +0200, Hans de Goede wrote:
+>> From: Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>
+>>
+>> The sunxi pinctrl irq chip driver does not support wakeup at the
+>> moment. Adding IRQCHIP_SKIP_SET_WAKE lets the irqs work with drivers
+>> using wakeup.
+>>
+>> Also add a name to the irq chip.
+>>
+>> Signed-off-by: Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>
+>> Signed-off-by: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+>> ---
+>>  drivers/pinctrl/sunxi/pinctrl-sunxi.c | 2 ++
+>>  1 file changed, 2 insertions(+)
+>>
+>> diff --git a/drivers/pinctrl/sunxi/pinctrl-sunxi.c b/drivers/pinctrl/sunxi/pinctrl-sunxi.c
+>> index db9ccd6..ec60c2e 100644
+>> --- a/drivers/pinctrl/sunxi/pinctrl-sunxi.c
+>> +++ b/drivers/pinctrl/sunxi/pinctrl-sunxi.c
+>> @@ -646,6 +646,8 @@ static struct irq_chip sunxi_pinctrl_irq_chip = {
+>>  	.irq_mask_ack	= sunxi_pinctrl_irq_mask_ack,
+>>  	.irq_unmask	= sunxi_pinctrl_irq_unmask,
+>>  	.irq_set_type	= sunxi_pinctrl_irq_set_type,
+>> +	.name		= "sunxi-pio",
+>> +	.flags		= IRQCHIP_SKIP_SET_WAKE,
 > 
-> *This* is the bad idea. Nothing prevents you from calling
-> gpio_get_value whenever you just got your interrupt, that will change
-> the muxing, and never change it back, effectively breaking the
+> I'd rather see the name set to dev_name() or something like that. This
+> will not work that great with multiple pin controller supporting
 > interrupts.
 
-Hmm, interesting point, but your assuming 2 things which are both not true:
-
-1) That calling gpiod_get_value changes the muxing, which is not true, all
-gpiod_get_value variants end up in drivers/gpio/gpiolib.c _gpiod_get_raw_value()
-which does no such thing
-
-2) That unmask will always get called after the gpio_get_value to restore the mux
-setting for us, which is not guaranteed at all. Before this patch set pinctrl-sunxi.c
-was using handle_simple_irq which does not mask / unmask at all.
-
-And even with an irq-handler which masks / unmasks, what if the irq wakes up
-a thread and that thread then does the gpio_get_value ?
-
-Note this is *exactly* what e.g. the mmc gpio card-detect code does, it uses
-a thread to read the gpio for debouncing.
-
-Luckily 2. is not a problem, since 1. means that the mux won't get changed at all
-so we don't need to change it back.
+That would require moving the irq_chip struct to become a member of the
+sunxi_pinctrl struct. Not undoable, but that seems like something which
+should be done in a separate patch. So shall I just drop the .name part
+of this patch for now ?
 
 Regards,
 
