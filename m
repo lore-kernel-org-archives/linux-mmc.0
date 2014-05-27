@@ -1,250 +1,114 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v3 12/13] mmc: mmci: add explicit clk control
-Date: Tue, 27 May 2014 11:32:00 +0200
-Message-ID: <CAPDyKFpD==5wMZa5KbcMpGnZMTyncmGZfc=17j0=YjKT8qq5bg@mail.gmail.com>
-References: <1400849362-7007-1-git-send-email-srinivas.kandagatla@linaro.org>
-	<1400849578-7585-1-git-send-email-srinivas.kandagatla@linaro.org>
-	<CAPDyKFqz-O9-Douk96LBuFRD_P1146c_Ld14TgiduBgfBqRi_A@mail.gmail.com>
-	<5383C28D.1060808@linaro.org>
+From: Seungwon Jeon <tgih.jun@samsung.com>
+Subject: RE: [PATCHv2 1/3] mmc: host: add slot argument to mmc_of_parse
+Date: Tue, 27 May 2014 18:48:13 +0900
+Message-ID: <002d01cf7990$c6faf220$54f0d660$%jun@samsung.com>
+References: <1401104107-17651-1-git-send-email-jh80.chung@samsung.com>
+ <1401104107-17651-2-git-send-email-jh80.chung@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qg0-f46.google.com ([209.85.192.46]:44346 "EHLO
-	mail-qg0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752280AbaE0JcB (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 27 May 2014 05:32:01 -0400
-Received: by mail-qg0-f46.google.com with SMTP id q108so13480219qgd.33
-        for <linux-mmc@vger.kernel.org>; Tue, 27 May 2014 02:32:00 -0700 (PDT)
-In-Reply-To: <5383C28D.1060808@linaro.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=ks_c_5601-1987
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-reply-to: <1401104107-17651-2-git-send-email-jh80.chung@samsung.com>
+Content-language: ko
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: 'Jaehoon Chung' <jh80.chung@samsung.com>, linux-mmc@vger.kernel.org
+Cc: chris@printf.net, ulf.hansson@linaro.org, ludovic.desroches@atmel.com, devicetree@vger.kernel.org, linux-samsung-soc@vger.kernel.org, cpgs@samsung.com
 List-Id: linux-mmc@vger.kernel.org
-To: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
-Cc: Russell King <linux@arm.linux.org.uk>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-arm-msm@vger.kernel.org, Linus Walleij <linus.walleij@linaro.org>
 
-On 27 May 2014 00:39, Srinivas Kandagatla
-<srinivas.kandagatla@linaro.org> wrote:
-> Hi Ulf,
-> Thankyou for the comments.
->
->
-> On 26/05/14 15:21, Ulf Hansson wrote:
->>
->> On 23 May 2014 14:52,  <srinivas.kandagatla@linaro.org> wrote:
->>>
->>> From: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
->>>
->>> On Controllers like Qcom SD card controller where cclk is mclk and mclk
->>> should
->>> be directly controlled by the driver.
->>>
->>> This patch adds support to control mclk directly in the driver, and also
->>> adds explicit_mclk_control and cclk_is_mclk flags in variant structure
->>> giving
->>> more flexibility to the driver.
->>>
->>> Signed-off-by: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
->>> Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
->>> ---
->>>   drivers/mmc/host/mmci.c | 30 +++++++++++++++++++++++++-----
->>>   1 file changed, 25 insertions(+), 5 deletions(-)
->>>
->>> diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
->>> index 5cbf644..f6dfd24 100644
->>> --- a/drivers/mmc/host/mmci.c
->>> +++ b/drivers/mmc/host/mmci.c
->>> @@ -73,6 +73,8 @@ static unsigned int fmax = 515633;
->>>    * @pwrreg_nopower: bits in MMCIPOWER don't controls ext. power supply
->>>    * @mclk_delayed_writes: enable delayed writes to ensure, subsequent
->>> updates
->>>    *                      are not ignored.
->>> + * @explicit_mclk_control: enable explicit mclk control in driver.
->>> + * @cclk_is_mclk: enable iff card clock is multimedia card adapter
->>> clock.
->>>    */
->>>   struct variant_data {
->>>          unsigned int            clkreg;
->>> @@ -94,6 +96,8 @@ struct variant_data {
->>>          bool                    busy_detect;
->>>          bool                    pwrreg_nopower;
->>>          bool                    mclk_delayed_writes;
->>> +       bool                    explicit_mclk_control;
->>> +       bool                    cclk_is_mclk;
->>
->>
->> I can't see why you need to have both these new configurations. Aren't
->> "cclk_is_mclk" just a fact when you use "explicit_mclk_control".
->>
->
->
->> I also believe I would prefer something like "qcom_clkdiv" instead.
->
->
-> There is a subtle difference between both the flags.  Am happy to change it
-> to qcom_clkdiv.
->
->
->>
->>>   };
->>>
->>>   static struct variant_data variant_arm = {
->>> @@ -202,6 +206,8 @@ static struct variant_data variant_qcom = {
->>>           * for 3 clk cycles.
->>>           */
->>>          .mclk_delayed_writes    = true,
->>> +       .explicit_mclk_control  = true,
->>> +       .cclk_is_mclk   = true,
->>>   };
->>>
->>>   static inline u32 mmci_readl(struct mmci_host *host, u32 off)
->>> @@ -317,7 +323,9 @@ static void mmci_set_clkreg(struct mmci_host *host,
->>> unsigned int desired)
->>>          host->cclk = 0;
->>>
->>>          if (desired) {
->>> -               if (desired >= host->mclk) {
->>> +               if (variant->cclk_is_mclk) {
->>> +                       host->cclk = host->mclk;
->>> +               } else if (desired >= host->mclk) {
->>>                          clk = MCI_CLK_BYPASS;
->>>                          if (variant->st_clkdiv)
->>>                                  clk |= MCI_ST_UX500_NEG_EDGE;
->>> @@ -1354,6 +1362,16 @@ static void mmci_set_ios(struct mmc_host *mmc,
->>> struct mmc_ios *ios)
->>>          if (!ios->clock && variant->pwrreg_clkgate)
->>>                  pwr &= ~MCI_PWR_ON;
->>>
->>> +       if (ios->clock != host->mclk &&
->>> host->variant->explicit_mclk_control) {
->>
->>
->> I suggest you should clarify the statement by adding a pair of extra
->> parentheses. Additionally it seems like a good idea to reverse the
->> order of the statements, to clarify this is for qcom clock handling
->> only.
->
-> Yes, sure Will fix this in next version.
->
->
->>
->> More important, what I think you really want to do is to compare
->> "ios->clock" with it's previous value it had when ->set_ios were
->> invoked. Then let a changed value act as the trigger to set a new clk
->> rate. Obvoiusly you need to cache the clock rate in the struct mmci
->> host to handle this.
->
->
-> host->mclk already has this cached value.
+On Mon, May 26, 2014, Jaehoon Chung wrote:
+> From: Ludovic Desroches <ludovic.desroches@atmel.com>
+> 
+> Some hosts manage several slots. In these case information such as the
+> bus width, chip detect and others are into the slot node. So we have to
+> parse child node. If not NULL, slot node will be used instead of the
+> device node.
+> 
+> Signed-off-by: Ludovic Desroches <ludovic.desroches@atmel.com>
+> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
 
-There are no guarantees clk_set_rate() will manage to set the exact
-requested rate as ios->clock. At least if you follow the clk API
-documentation.
+Acked-by: Seungwon Jeon <tgih.jun@samsung.com>
 
->
->
->>
->>> +               int rc = clk_set_rate(host->clk, ios->clock);
->>> +               if (rc < 0) {
->>> +                       dev_err(mmc_dev(host->mmc),
->>> +                               "Error setting clock rate (%d)\n", rc);
->>> +               } else {
->>> +                       host->mclk = clk_get_rate(host->clk);
->>
->>
->> So here you actually find out the new clk rate, but shouldn't you
->> update "host->mclk" within the spin_lock? Or it might not matter?
->>
-> I think it does not matter in this case, as this is the only place mclk gets
-> modified.
+Thanks,
+Seungwon Jeon
 
-OK.
-
->
->>> +               }
->>> +       }
->>> +
->>>          spin_lock_irqsave(&host->lock, flags);
->>>
->>>          mmci_set_clkreg(host, ios->clock);
->>> @@ -1540,10 +1558,12 @@ static int mmci_probe(struct amba_device *dev,
->>>           * is not specified. Either value must not exceed the clock rate
->>> into
->>>           * the block, of course.
->>>           */
->>> -       if (mmc->f_max)
->>> -               mmc->f_max = min(host->mclk, mmc->f_max);
->>> -       else
->>> -               mmc->f_max = min(host->mclk, fmax);
->>> +       if (!host->variant->explicit_mclk_control) {
->>> +               if (mmc->f_max)
->>> +                       mmc->f_max = min(host->mclk, mmc->f_max);
->>> +               else
->>> +                       mmc->f_max = min(host->mclk, fmax);
->>> +       }
->>
->>
->> This means your mmc->f_max value will either be zero or the one you
->> provided through DT. And since zero won't work, that means you
->> _require_ to get the value from DT. According to the documentation of
->> this DT binding, f_max is optional.
->>
->> So unless you fine another way of dynamically at runtime figure out
->> the value of f_max (using the clk API), you need to update the DT
->> documentation for mmci.
->>
->
-> You are right there is a possibility of f_max to be zero.
->
-> This logic could fix it.
->
-> if (host->variant->explicit_mclk_control) {
->         if (mmc->f_max)
->                 mmc->f_max = max(host->mclk, mmc->f_max);
->         else
->                 mmc->f_max = max(host->mclk, fmax);
-> } else {
->         if (mmc->f_max)
->
->                 mmc->f_max = min(host->mclk, mmc->f_max);
->         else
->
->                 mmc->f_max = min(host->mclk, fmax);
-> }
->
-
-Hmm. Looking a bit deeper into this, we have some additional related
-code to fixup. :-)
-
-In ->probe(), we do clk_set_rate(100MHz), if the mclk > 100MHz. That's
-due to the current variants don't support higher frequency than this.
-It seems like the Qcom variant may support up to 208MHz? Now, if
-that's the case, we need to add "f_max" to the struct variant_data to
-store this information, so we can respect different values while doing
-clk_set_rate() at ->probe().
-
-While updating mmc->f_max for host->variant->explicit_mclk_control, we
-shouldn't care about using the host->mclk as a limiter, instead, use
-min(mmc->f_max, host->variant->f_max) and fallback to fmax.
-
-Not sure how that will affect the logic. :-)
-
->
->
->> Additionally, this makes me wonder about f_min. I haven't seen
->> anywhere in this patch were that value is being set to proper value,
->> right?
->>
->
-> f_min should be 400000 for qcom, I think with the default mclk frequency and
-> a divider of 512 used for calculating the f_min is bringing down the f_min
-> to lessthan 400Kz. Which is why its working fine.
-> I think the possibility of mclk default frequency being greater than 208Mhz
-> is very less. so I could either leave it as it is Or force this to 400000
-> all the time for qcom chips.
-
-No, this seems like a wrong approach.
-
-I think you would like to do use the clk_round_rate() find out the
-lowest possible rate. Or just use a fixed fallback value somehow.
-
-Kind regards
-Ulf Hansson
+> ---
+> Changelog V2:
+> 	- Fix the typo.
+> 
+>  drivers/mmc/core/host.c  |   13 +++++++++----
+>  include/linux/mmc/host.h |   10 +++++++++-
+>  2 files changed, 18 insertions(+), 5 deletions(-)
+> 
+> diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+> index 95cceae..0f677b3 100644
+> --- a/drivers/mmc/core/host.c
+> +++ b/drivers/mmc/core/host.c
+> @@ -298,15 +298,17 @@ static inline void mmc_host_clk_sysfs_init(struct mmc_host *host)
+>  #endif
+> 
+>  /**
+> - *	mmc_of_parse() - parse host's device-tree node
+> + *	__mmc_of_parse() - parse host's device-tree node
+>   *	@host: host whose node should be parsed.
+> + *	@slot : some device provide several slots so the node to parse
+> + *		is not the host one.
+>   *
+>   * To keep the rest of the MMC subsystem unaware of whether DT has been
+>   * used to to instantiate and configure this host instance or not, we
+>   * parse the properties and set respective generic mmc-host flags and
+>   * parameters.
+>   */
+> -int mmc_of_parse(struct mmc_host *host)
+> +int __mmc_of_parse(struct mmc_host *host, struct device_node *slot)
+>  {
+>  	struct device_node *np;
+>  	u32 bus_width;
+> @@ -317,7 +319,10 @@ int mmc_of_parse(struct mmc_host *host)
+>  	if (!host->parent || !host->parent->of_node)
+>  		return 0;
+> 
+> -	np = host->parent->of_node;
+> +	if (slot)
+> +		np = slot;
+> +	else
+> +		np = host->parent->of_node;
+> 
+>  	/* "bus-width" is translated to MMC_CAP_*_BIT_DATA flags */
+>  	if (of_property_read_u32(np, "bus-width", &bus_width) < 0) {
+> @@ -459,7 +464,7 @@ out:
+>  	return ret;
+>  }
+> 
+> -EXPORT_SYMBOL(mmc_of_parse);
+> +EXPORT_SYMBOL(__mmc_of_parse);
+> 
+>  /**
+>   *	mmc_alloc_host - initialise the per-host structure.
+> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+> index 7960424..c62af91 100644
+> --- a/include/linux/mmc/host.h
+> +++ b/include/linux/mmc/host.h
+> @@ -372,7 +372,15 @@ struct mmc_host *mmc_alloc_host(int extra, struct device *);
+>  int mmc_add_host(struct mmc_host *);
+>  void mmc_remove_host(struct mmc_host *);
+>  void mmc_free_host(struct mmc_host *);
+> -int mmc_of_parse(struct mmc_host *host);
+> +int __mmc_of_parse(struct mmc_host *host, struct device_node *slot);
+> +/*
+> + * mmc_of_parse - parse host's device-tree node
+> + *	@host: host whose node should be parsed.
+> + */
+> +static inline int mmc_of_parse(struct mmc_host *host)
+> +{
+> +	return __mmc_of_parse(host, NULL);
+> +}
+> 
+>  static inline void *mmc_priv(struct mmc_host *host)
+>  {
+> --
+> 1.7.9.5
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
