@@ -1,14 +1,16 @@
 From: srinivas.kandagatla@linaro.org
-Subject: [PATCH v4 00/13] Add Qualcomm SD Card Controller support
-Date: Wed, 28 May 2014 14:43:28 +0100
-Message-ID: <1401284608-16428-1-git-send-email-srinivas.kandagatla@linaro.org>
+Subject: [PATCH v4 01/13] mmc: mmci: use NSEC_PER_SEC macro
+Date: Wed, 28 May 2014 14:45:55 +0100
+Message-ID: <1401284755-16481-1-git-send-email-srinivas.kandagatla@linaro.org>
+References: <1401284608-16428-1-git-send-email-srinivas.kandagatla@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-we0-f180.google.com ([74.125.82.180]:54871 "EHLO
-	mail-we0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752547AbaE1Npo (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 28 May 2014 09:45:44 -0400
-Received: by mail-we0-f180.google.com with SMTP id q58so2479246wes.11
-        for <linux-mmc@vger.kernel.org>; Wed, 28 May 2014 06:45:43 -0700 (PDT)
+Received: from mail-wi0-f174.google.com ([209.85.212.174]:33078 "EHLO
+	mail-wi0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753791AbaE1NqD (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 28 May 2014 09:46:03 -0400
+Received: by mail-wi0-f174.google.com with SMTP id r20so3739714wiv.13
+        for <linux-mmc@vger.kernel.org>; Wed, 28 May 2014 06:46:02 -0700 (PDT)
+In-Reply-To: <1401284608-16428-1-git-send-email-srinivas.kandagatla@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Russell King <linux@arm.linux.org.uk>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
@@ -16,104 +18,28 @@ Cc: Chris Ball <chris@printf.net>, linux-kernel@vger.kernel.org, linux-arm-msm@v
 
 From: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
 
-Thankyou Linus W, Ulf H and everyone for reviewing RFC to v3 patches.
+This patch replaces a constant used in calculating timeout with a proper
+macro. This is make code more readable.
 
-This patch series adds Qualcomm SD Card Controller support in pl180 mmci
-driver. QCom SDCC is basically a pl180, but bit more customized, some of the
-register layouts and offsets are different to the ones mentioned in pl180
-datasheet. The plan is to totally remove the standalone SDCC driver
-drivers/mmc/host/msm_sdcc.* and start using generic mmci driver for all
-Qualcomm parts, as we get chance to test on other Qcom boards.
+Signed-off-by: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
+---
+ drivers/mmc/host/mmci.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-To start using the existing mmci driver, a fake amba id for Qualcomm is added
-in patches:
- mmc: mmci: Add Qualcomm Id to amba id table.
-
-Second change is, adding a 3 clock cycle delay in between writes to
-CLKCTRL/POWER/DATACTRL/COMMAND registers. Most of the delays are taken care with
-the existing driver except delay for the COMMAND register was too small. 
-This patch fixes it.
-  mmc: mmci: Add enough delay between writes to CMD register.
-
-Third change is to accommodate CLK, DATCTRL and MMCICLK register layout changes
-in Qcom SDCC and provide more flexibity in driver to specify these changes via
-variant datastructure. Which are done in patches:
-  mmc: mmci: Add Qcom datactrl register variant
-  mmc: mmci: add ddrmode mask to variant data
-  mmc: mmci: add 8bit bus support in variant data
-  mmc: mmci: add edge support to data and command out in variant data.
-  mmc: mmci: add Qcom specifics of clk and datactrl registers.
-  mmc: mmci: Add support to data commands via variant structure.
-  mmc: mmci: add f_max to variant structure
-  mmc: mmci: add explicit clk control
-
-Fourth major change was to add qcom specfic pio read function, the need for
-this is because the way MCIFIFOCNT register behaved in QCOM SDCC is very
- different to the one in pl180. This change is done in patch:
-  mmc: mmci: Add Qcom specific pio_read function.
-
-Last some Qcom unrelated changes/cleanup to driver are done in patches:
-  mmc: mmci: use NSEC_PER_SEC macro
-  mmc: mmci: convert register bits to use BIT() macro.
-
-This patches are tested in PIO mode on IFC8064 board with both eMMC and
-external SD card. I would like to get this support in v3.16.
-Bjorn also confirmed that there are no more CRC errors seen on sony platform.
-
-Changes from v3:
-	- moved pio_read to a function pointer so as to reduce additional cycles
-	in hot-path, suggested by Ulf.
-	- simplify the flags used for explicit mclk control, suggested by Ulf.
-	- fixed issues in cacluating f_max and f_min pointed and suggested by Ulf.
-	- removed unessary DDR flags on un-supported STE variants.
-	- used BIT macros as suggested by Ulf.
-	- removed the read/write wrappers with delays, and used most optimal way
-	to introduce the delays to the only registers that require delays.
-
-Changes from v2:
-	- merged fbclk latch patch with clkreg_enable patch as suggested by Linus W.
-	- remove qcom prefix for explicit clk control pointed by Linus W.
-	- cleaned up mmci_qcom_pio_read and consider SDIO as suggested by Linus W.
-
-Changes from v1:
-	- moved most of the SOC specifics to variant parameters as suggested
-	  by Linus W.
-	- renamed registers as suggested by Linus W.
-	- Added comments in the code as suggested by Linus W.
-	- moved out AMBA ID addition patch from this series.
-	- rebased the patches to 
-		git://git.linaro.org/people/ulf.hansson/mmc.git next 
-	  as suggested by Ulf H.
-
-Changes from RFC:
-	- moved out clk setup out of spinlock as pointed by Stephen B.
-
-If its not too late, Am hoping to get this for v3.16.
-
-All these patches are tested on IF6410 board on both eMMC and external SD card.
-
-Thanks,
-srini
-
-Srinivas Kandagatla (13):
-  mmc: mmci: use NSEC_PER_SEC macro
-  mmc: mmci: convert register bits to use BIT() macro.
-  mmc: mmci: Add Qualcomm Id to amba id table
-  mmc: mmci: Add enough delay between writes to CMD register.
-  mmc: mmci: Add Qcom datactrl register variant
-  mmc: mmci: add ddrmode mask to variant data
-  mmc: mmci: add 8bit bus support in variant data
-  mmc: mmci: add edge support to data and command out in variant data.
-  mmc: mmci: add Qcom specifics of clk and datactrl registers.
-  mmc: mmci: Add support to data commands via variant structure.
-  mmc: mmci: add f_max to variant structure
-  mmc: mmci: add explicit clk control
-  mmc: mmci: Add Qcom specific pio_read function.
-
- drivers/mmc/host/mmci.c | 203 +++++++++++++++++++++++++++++++++---------
- drivers/mmc/host/mmci.h | 228 ++++++++++++++++++++++++++----------------------
- 2 files changed, 288 insertions(+), 143 deletions(-)
-
+diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+index a084edd..a38e714 100644
+--- a/drivers/mmc/host/mmci.c
++++ b/drivers/mmc/host/mmci.c
+@@ -718,7 +718,7 @@ static void mmci_start_data(struct mmci_host *host, struct mmc_data *data)
+ 	data->bytes_xfered = 0;
+ 
+ 	clks = (unsigned long long)data->timeout_ns * host->cclk;
+-	do_div(clks, 1000000000UL);
++	do_div(clks, NSEC_PER_SEC);
+ 
+ 	timeout = data->timeout_clks + (unsigned int)clks;
+ 
 -- 
 1.9.1
 
