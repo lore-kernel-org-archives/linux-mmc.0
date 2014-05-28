@@ -1,140 +1,83 @@
-From: srinivas.kandagatla@linaro.org
-Subject: [PATCH v4 13/13] mmc: mmci: Add Qcom specific pio_read function.
-Date: Wed, 28 May 2014 14:48:06 +0100
-Message-ID: <1401284886-16978-1-git-send-email-srinivas.kandagatla@linaro.org>
-References: <1401284608-16428-1-git-send-email-srinivas.kandagatla@linaro.org>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1401284608-16428-1-git-send-email-srinivas.kandagatla@linaro.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Russell King <linux@arm.linux.org.uk>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
-Cc: Chris Ball <chris@printf.net>, linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org, linus.walleij@linaro.org, Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
-List-Id: linux-mmc@vger.kernel.org
-
 From: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+Subject: Re: [PATCH v3 13/13] mmc: mmci: Add Qcom specific pio_read function.
+Date: Wed, 28 May 2014 14:57:22 +0100
+Message-ID: <5385EB42.1060604@linaro.org>
+References: <1400849362-7007-1-git-send-email-srinivas.kandagatla@linaro.org> <1400849589-7626-1-git-send-email-srinivas.kandagatla@linaro.org> <537FD9A7.3010100@codeaurora.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-we0-f173.google.com ([74.125.82.173]:41357 "EHLO
+	mail-we0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752995AbaE1N51 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 28 May 2014 09:57:27 -0400
+Received: by mail-we0-f173.google.com with SMTP id u57so11341192wes.18
+        for <linux-mmc@vger.kernel.org>; Wed, 28 May 2014 06:57:26 -0700 (PDT)
+In-Reply-To: <537FD9A7.3010100@codeaurora.org>
+Sender: linux-mmc-owner@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
+To: Stephen Boyd <sboyd@codeaurora.org>
+Cc: Russell King <linux@arm.linux.org.uk>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, Chris Ball <chris@printf.net>, linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org, linus.walleij@linaro.org
 
-MCIFIFOCNT register behaviour on Qcom chips is very different than the other
-pl180 integrations. MCIFIFOCNT register contains the number of
-words that are still waiting to be transferred through the FIFO. It keeps
-decrementing once the host CPU reads the MCIFIFO. With the existing logic and
-the MCIFIFOCNT behaviour, mmci_pio_read will loop forever, as the FIFOCNT
-register will always return transfer size before reading the FIFO.
+Sorry Stephen for late reply,
+Some reason this mail was filtered in other folders.
 
-Also the data sheet states that "This register is only useful for debug
-purposes and should not be used for normal operation since it does not reflect
-data which may or may not be in the pipeline".
+On 24/05/14 00:28, Stephen Boyd wrote:
+> On 05/23/14 05:53, srinivas.kandagatla@linaro.org wrote:
+>> @@ -1022,6 +1025,40 @@ mmci_cmd_irq(struct mmci_host *host, struct mmc_command *cmd,
+>>   	}
+>>   }
+>>
+>> +static int mmci_qcom_pio_read(struct mmci_host *host, char *buffer,
+>> +			unsigned int remain)
+>> +{
+>> +	u32 *ptr = (u32 *) buffer;
+>> +	unsigned int count = 0;
+>> +	unsigned int words, bytes;
+>> +	unsigned int fsize = host->variant->fifosize;
+>> +
+>> +	words = remain >> 2;
+>> +	bytes = remain % 4;
+>> +	/* read full words followed by leftover bytes */
+>> +	if (words) {
+>> +		while (readl(host->base + MMCISTATUS) & MCI_RXDATAAVLBL) {
+>> +			*ptr = readl(host->base + MMCIFIFO + (count % fsize));
+>
+> This doesn't look endianness agnostic. Shouldn't we use ioread32_rep()
+> to read this fifo?
+Is'nt readl endianess aware?
 
-This patch implements qcom_pio_read function so as existing mmci_pio_read is
-not suitable for Qcom SOCs. qcom_pio_read function is only selected
-based on qcom_fifo flag in variant data structure.
+we can not use ioread32_rep because as we can not reliably know how many 
+words we should read? FIFOCNT would have helped but its not advised to 
+be use as per the datasheet.
 
-Signed-off-by: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
----
- drivers/mmc/host/mmci.c | 45 ++++++++++++++++++++++++++++++++++++++++++++-
- drivers/mmc/host/mmci.h |  1 +
- 2 files changed, 45 insertions(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index 6eb0a29..b68223a 100644
---- a/drivers/mmc/host/mmci.c
-+++ b/drivers/mmc/host/mmci.c
-@@ -73,6 +73,7 @@ static unsigned int fmax = 515633;
-  * @busy_detect: true if busy detection on dat0 is supported
-  * @pwrreg_nopower: bits in MMCIPOWER don't controls ext. power supply
-  * @explicit_mclk_control: enable explicit mclk control in driver.
-+ * @qcom_fifo: enables qcom specific fifo pio read function.
-  */
- struct variant_data {
- 	unsigned int		clkreg;
-@@ -95,6 +96,7 @@ struct variant_data {
- 	bool			busy_detect;
- 	bool			pwrreg_nopower;
- 	bool			explicit_mclk_control;
-+	bool			qcom_fifo;
- };
- 
- static struct variant_data variant_arm = {
-@@ -202,6 +204,7 @@ static struct variant_data variant_qcom = {
- 	.pwrreg_powerup		= MCI_PWR_UP,
- 	.f_max			= 208000000,
- 	.explicit_mclk_control	= true,
-+	.qcom_fifo		= true,
- };
- 
- static int mmci_card_busy(struct mmc_host *mmc)
-@@ -1006,6 +1009,40 @@ mmci_cmd_irq(struct mmci_host *host, struct mmc_command *cmd,
- 	}
- }
- 
-+static int mmci_qcom_pio_read(struct mmci_host *host, char *buffer,
-+			unsigned int remain)
-+{
-+	u32 *ptr = (u32 *) buffer;
-+	unsigned int count = 0;
-+	unsigned int words, bytes;
-+	unsigned int fsize = host->variant->fifosize;
-+
-+	words = remain >> 2;
-+	bytes = remain % 4;
-+	/* read full words followed by leftover bytes */
-+	if (words) {
-+		while (readl(host->base + MMCISTATUS) & MCI_RXDATAAVLBL) {
-+			*ptr = readl(host->base + MMCIFIFO + (count % fsize));
-+			ptr++;
-+			count += 4;
-+			words--;
-+			if (!words)
-+				break;
-+		}
-+	}
-+
-+	if (bytes) {
-+		unsigned char buf[4];
-+		if (readl(host->base + MMCISTATUS) & MCI_RXDATAAVLBL) {
-+			*buf = readl(host->base + MMCIFIFO + (count % fsize));
-+			memcpy(ptr, buf, bytes);
-+			count += bytes;
-+		}
-+	}
-+
-+	return count;
-+}
-+
- static int mmci_pio_read(struct mmci_host *host, char *buffer, unsigned int remain)
- {
- 	void __iomem *base = host->base;
-@@ -1129,7 +1166,8 @@ static irqreturn_t mmci_pio_irq(int irq, void *dev_id)
- 
- 		len = 0;
- 		if (status & MCI_RXACTIVE)
--			len = mmci_pio_read(host, buffer, remain);
-+			len = host->pio_read(host, buffer, remain);
-+
- 		if (status & MCI_TXACTIVE)
- 			len = mmci_pio_write(host, buffer, remain, status);
- 
-@@ -1504,6 +1542,11 @@ static int mmci_probe(struct amba_device *dev,
- 	if (ret)
- 		goto host_free;
- 
-+	if (variant->qcom_fifo)
-+		host->pio_read = mmci_qcom_pio_read;
-+	else
-+		host->pio_read = mmci_pio_read;
-+
- 	host->plat = plat;
- 	host->variant = variant;
- 	host->mclk = clk_get_rate(host->clk);
-diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
-index 1882e20..dc9fe0a 100644
---- a/drivers/mmc/host/mmci.h
-+++ b/drivers/mmc/host/mmci.h
-@@ -229,6 +229,7 @@ struct mmci_host {
- 	/* pio stuff */
- 	struct sg_mapping_iter	sg_miter;
- 	unsigned int		size;
-+	int (*pio_read)(struct mmci_host *h, char *buf, unsigned int remain);
- 
- #ifdef CONFIG_DMA_ENGINE
- 	/* DMA stuff */
--- 
-1.9.1
+
+Thanks,
+srini
+>
+>> +			ptr++;
+>> +			count += 4;
+>> +			words--;
+>> +			if (!words)
+>> +				break;
+>> +		}
+>> +	}
+>> +
+>> +	if (unlikely(bytes)) {
+>> +		unsigned char buf[4];
+>> +		if (readl(host->base + MMCISTATUS) & MCI_RXDATAAVLBL) {
+>> +			*buf = readl(host->base + MMCIFIFO + (count % fsize));
+>> +			memcpy(ptr, buf, bytes);
+>> +			count += bytes;
+>> +		}
+>> +	}
+>> +
+>> +	return count;
+>> +}
+>> +
+>>   static int mmci_pio_read(struct mmci_host *host, char *buffer, unsigned int remain)
+>>   {
+>>   	void __iomem *base = host->base;
+>>
+>
