@@ -1,7 +1,7 @@
 From: srinivas.kandagatla@linaro.org
-Subject: [PATCH v4 07/13] mmc: mmci: add 8bit bus support in variant data
-Date: Wed, 28 May 2014 14:47:02 +0100
-Message-ID: <1401284822-16728-1-git-send-email-srinivas.kandagatla@linaro.org>
+Subject: [PATCH v4 09/13] mmc: mmci: add Qcom specifics of clk and datactrl registers.
+Date: Wed, 28 May 2014 14:47:24 +0100
+Message-ID: <1401284844-16811-1-git-send-email-srinivas.kandagatla@linaro.org>
 References: <1401284608-16428-1-git-send-email-srinivas.kandagatla@linaro.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1401284608-16428-1-git-send-email-srinivas.kandagatla@linaro.org>
@@ -12,70 +12,66 @@ List-Id: linux-mmc@vger.kernel.org
 
 From: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
 
-This patch adds 8bit bus enable to variant structure giving more flexibility
-to the driver to support more SOCs which have different clock register layout.
-
-Without this patch other new SOCs like Qcom will have to add more code
-to special case them.
+This patch adds specifics of clk and datactrl register on Qualcomm SD
+Card controller. This patch also populates the Qcom variant data with
+these new values specific to Qualcomm SD Card Controller.
 
 Signed-off-by: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
 Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
 ---
- drivers/mmc/host/mmci.c | 7 ++++++-
- 1 file changed, 6 insertions(+), 1 deletion(-)
+ drivers/mmc/host/mmci.c |  4 ++++
+ drivers/mmc/host/mmci.h | 17 +++++++++++++++++
+ 2 files changed, 21 insertions(+)
 
 diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index 729105b..2f4cdf3 100644
+index 8deea4a..dbcb952 100644
 --- a/drivers/mmc/host/mmci.c
 +++ b/drivers/mmc/host/mmci.c
-@@ -52,6 +52,7 @@ static unsigned int fmax = 515633;
-  * struct variant_data - MMCI variant-specific quirks
-  * @clkreg: default value for MCICLOCK register
-  * @clkreg_enable: enable value for MMCICLOCK register
-+ * @clkreg_8bit_bus_enable: enable value for 8 bit bus
-  * @datalength_bits: number of bits in the MMCIDATALENGTH register
-  * @fifosize: number of bytes that can be written when MMCI_TXFIFOEMPTY
-  *	      is asserted (likewise for RX)
-@@ -72,6 +73,7 @@ static unsigned int fmax = 515633;
- struct variant_data {
- 	unsigned int		clkreg;
- 	unsigned int		clkreg_enable;
-+	unsigned int		clkreg_8bit_bus_enable;
- 	unsigned int		datalength_bits;
- 	unsigned int		fifosize;
- 	unsigned int		fifohalfsize;
-@@ -113,6 +115,7 @@ static struct variant_data variant_u300 = {
+@@ -179,6 +179,10 @@ static struct variant_data variant_qcom = {
  	.fifosize		= 16 * 4,
  	.fifohalfsize		= 8 * 4,
- 	.clkreg_enable		= MCI_ST_U300_HWFCEN,
-+	.clkreg_8bit_bus_enable = MCI_ST_8BIT_BUS,
- 	.datalength_bits	= 16,
- 	.sdio			= true,
- 	.pwrreg_powerup		= MCI_PWR_ON,
-@@ -139,6 +142,7 @@ static struct variant_data variant_ux500 = {
- 	.fifohalfsize		= 8 * 4,
  	.clkreg			= MCI_CLK_ENABLE,
- 	.clkreg_enable		= MCI_ST_UX500_HWFCEN,
-+	.clkreg_8bit_bus_enable = MCI_ST_8BIT_BUS,
++	.clkreg_enable		= MCI_QCOM_CLK_FLOWENA |
++				  MCI_QCOM_CLK_SELECT_IN_FBCLK,
++	.clkreg_8bit_bus_enable = MCI_QCOM_CLK_WIDEBUS_8,
++	.datactrl_mask_ddrmode	= MCI_QCOM_CLK_SELECT_IN_DDR_MODE,
+ 	.blksz_datactrl4	= true,
  	.datalength_bits	= 24,
- 	.sdio			= true,
- 	.st_clkdiv		= true,
-@@ -154,6 +158,7 @@ static struct variant_data variant_ux500v2 = {
- 	.fifohalfsize		= 8 * 4,
- 	.clkreg			= MCI_CLK_ENABLE,
- 	.clkreg_enable		= MCI_ST_UX500_HWFCEN,
-+	.clkreg_8bit_bus_enable = MCI_ST_8BIT_BUS,
- 	.datactrl_mask_ddrmode	= MCI_ST_DPSM_DDRMODE,
- 	.datalength_bits	= 24,
- 	.sdio			= true,
-@@ -314,7 +319,7 @@ static void mmci_set_clkreg(struct mmci_host *host, unsigned int desired)
- 	if (host->mmc->ios.bus_width == MMC_BUS_WIDTH_4)
- 		clk |= MCI_4BIT_BUS;
- 	if (host->mmc->ios.bus_width == MMC_BUS_WIDTH_8)
--		clk |= MCI_ST_8BIT_BUS;
-+		clk |= variant->clkreg_8bit_bus_enable;
+ 	.pwrreg_powerup		= MCI_PWR_UP,
+diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
+index cd83ca3..706eb513 100644
+--- a/drivers/mmc/host/mmci.h
++++ b/drivers/mmc/host/mmci.h
+@@ -41,6 +41,15 @@
+ /* Modified PL180 on Versatile Express platform */
+ #define MCI_ARM_HWFCEN		BIT(12)
  
- 	if (host->mmc->ios.timing == MMC_TIMING_UHS_DDR50)
- 		clk |= MCI_ST_UX500_NEG_EDGE;
++/* Modified on Qualcomm Integrations */
++#define MCI_QCOM_CLK_WIDEBUS_8	(BIT(10) | BIT(11))
++#define MCI_QCOM_CLK_FLOWENA	BIT(12)
++#define MCI_QCOM_CLK_INVERTOUT	BIT(13)
++
++/* select in latch data and command in */
++#define MCI_QCOM_CLK_SELECT_IN_FBCLK	BIT(15)
++#define MCI_QCOM_CLK_SELECT_IN_DDR_MODE	(BIT(14) | BIT(15))
++
+ #define MMCIARGUMENT		0x008
+ #define MMCICOMMAND		0x00c
+ #define MCI_CPSM_RESPONSE	BIT(6)
+@@ -54,6 +63,14 @@
+ #define MCI_ST_NIEN		BIT(13)
+ #define MCI_ST_CE_ATACMD	BIT(14)
+ 
++/* Modified on Qualcomm Integrations */
++#define MCI_QCOM_CSPM_DATCMD		BIT(12)
++#define MCI_QCOM_CSPM_MCIABORT		BIT(13)
++#define MCI_QCOM_CSPM_CCSENABLE		BIT(14)
++#define MCI_QCOM_CSPM_CCSDISABLE	BIT(15)
++#define MCI_QCOM_CSPM_AUTO_CMD19	BIT(16)
++#define MCI_QCOM_CSPM_AUTO_CMD21	BIT(21)
++
+ #define MMCIRESPCMD		0x010
+ #define MMCIRESPONSE0		0x014
+ #define MMCIRESPONSE1		0x018
 -- 
 1.9.1
