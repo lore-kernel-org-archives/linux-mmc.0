@@ -1,76 +1,73 @@
-From: Tomasz Figa <tomasz.figa@gmail.com>
-Subject: Re: RFC: representing sdio devices oob interrupt, clks, etc. in device
- tree
-Date: Wed, 28 May 2014 13:47:50 +0200
-Message-ID: <5385CCE6.9070204@gmail.com>
-References: <537E31F7.1030505@gmail.com>	<537F1148.3010102@redhat.com>	<20140523112239.GB12304@sirena.org.uk>	<537F3610.3050104@redhat.com>	<20140523162718.GE22111@sirena.org.uk>	<53806F26.6050706@redhat.com>	<20140525123452.GS22111@sirena.org.uk>	<53824294.1090609@redhat.com>	<20140526103807.GV22111@sirena.org.uk>	<538321AB.4050006@redhat.com>	<20140526142225.GF22111@sirena.org.uk>	<538356DA.7090302@redhat.com>	<CAPDyKFqgvaPhMH3PFh7+6u+Am6pWYhxBFdvUZFfekUfpFJxdKw@mail.gmail.com>	<53838023.2080807@redhat.com> <CAPDyKFpg_2RQabM044C1hsNTcuxdVVOvw0ZONVRdysk=eom8UA@mail.gmail.com> <5385AF94.90004@redhat.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH] mmc: core: Remove redundant runtime_idle callback
+Date: Wed, 28 May 2014 20:56:55 +0900
+Message-ID: <5385CF07.8020304@samsung.com>
+References: <1401270245-20163-1-git-send-email-ulf.hansson@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wi0-f177.google.com ([209.85.212.177]:39566 "EHLO
-	mail-wi0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752415AbaE1Lr6 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 28 May 2014 07:47:58 -0400
-In-Reply-To: <5385AF94.90004@redhat.com>
+Received: from mailout1.samsung.com ([203.254.224.24]:57296 "EHLO
+	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752289AbaE1L45 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 28 May 2014 07:56:57 -0400
+Received: from epcpsbgr5.samsung.com
+ (u145.gpu120.samsung.co.kr [203.254.230.145])
+ by mailout1.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+ (7.0.4.24.0) 64bit (built Nov 17 2011))
+ with ESMTP id <0N6A004GP96V4OB0@mailout1.samsung.com> for
+ linux-mmc@vger.kernel.org; Wed, 28 May 2014 20:56:55 +0900 (KST)
+In-reply-to: <1401270245-20163-1-git-send-email-ulf.hansson@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Hans de Goede <hdegoede@redhat.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Mark Brown <broonie@kernel.org>, Chen-Yu Tsai <wens@csie.org>, Arend van Spriel <arend@broadcom.com>, Sascha Hauer <s.hauer@pengutronix.de>, Chris Ball <chris@printf.net>, Maxime Ripard <maxime.ripard@free-electrons.com>, linux-mmc <linux-mmc@vger.kernel.org>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>, devicetree <devicetree@vger.kernel.org>, Olof Johansson <olof@lixom.net>, Russell King - ARM Linux <linux@arm.linux.org.uk>, Fabio Estevam <festevam@gmail.com>, Arnd Bergmann <arnd@arndb.de>, Jyri Sarha <jsarha@ti.com>, Linus Walleij <linus.walleij@linaro.org>
+To: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, Chris Ball <chris@printf.net>
 
-I'm following this discussion continuously, but (un)fortunately I'm on
-vacation right now and don't have much time to work on this, so sorry
-for a very selective reply.
+Looks good to me.
 
-On 28.05.2014 11:42, Hans de Goede wrote:
-> Hi,
+Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
+
+Best Regards,
+Jaehoon Chung
+
+On 05/28/2014 06:44 PM, Ulf Hansson wrote:
+> The runtime PM core handles a runtime_idle callback set to NULL as one
+> returning 0. So, let's just set it to NULL instead.
 > 
-> On 05/27/2014 03:50 PM, Ulf Hansson wrote:
->> [snip]
->>
->> Powerup driver's ->probe():
->> Typically the "powerup driver" will need to register a few callback
->> functions towards the mmc core. Typically at mmc_of_parse(), those
->> callbacks will have to be connected to a particular mmc host.
->>
->> I would like to see three different callbacks, mirroring each of the
->> mmc_ios power_mode states MMC_POWER_OFF|UP|ON.
+> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+> ---
+>  drivers/mmc/core/bus.c |   10 +---------
+>  1 file changed, 1 insertion(+), 9 deletions(-)
 > 
-> Hmm, can't we do something with runtime pm here instead? I would be
-> nice if we could use the platform bus for this instead of inventing
-> a new bus for this. Both from not needing to add extra count pov, but
-> also from the pov of having a solution which other subsystems can
-> later easily copy. I can even envision the parts of mmc_of_parse
-> dealing with this being a separate function taking a child node as
-> argument from day one, which can then hopefully later be moved out
-> of the mmc subsys and be used elsewhere too (*).
+> diff --git a/drivers/mmc/core/bus.c b/drivers/mmc/core/bus.c
+> index d2dbf02..8a1f124 100644
+> --- a/drivers/mmc/core/bus.c
+> +++ b/drivers/mmc/core/bus.c
+> @@ -180,7 +180,6 @@ static int mmc_bus_resume(struct device *dev)
+>  #endif
+>  
+>  #ifdef CONFIG_PM_RUNTIME
+> -
+>  static int mmc_runtime_suspend(struct device *dev)
+>  {
+>  	struct mmc_card *card = mmc_dev_to_card(dev);
+> @@ -196,17 +195,10 @@ static int mmc_runtime_resume(struct device *dev)
+>  
+>  	return host->bus_ops->runtime_resume(host);
+>  }
+> -
+> -static int mmc_runtime_idle(struct device *dev)
+> -{
+> -	return 0;
+> -}
+> -
+>  #endif /* !CONFIG_PM_RUNTIME */
+>  
+>  static const struct dev_pm_ops mmc_bus_pm_ops = {
+> -	SET_RUNTIME_PM_OPS(mmc_runtime_suspend, mmc_runtime_resume,
+> -			mmc_runtime_idle)
+> +	SET_RUNTIME_PM_OPS(mmc_runtime_suspend, mmc_runtime_resume, NULL)
+>  	SET_SYSTEM_SLEEP_PM_OPS(mmc_bus_suspend, mmc_bus_resume)
+>  };
+>  
+> 
 
-This is actually a real use case, because we already have HSIC (USB with
-heavily stripped down physical layer) modems on certain Samsung boards
-and similarly to the kind of SDIO devices being discussed here they
-can't be discovered until a certain power up sequence is done.
-Analogically, the modem chip uses OOB interrupts and certain GPIO lines
-for various purposes and they need to be provided by DT.
-
-Moreover, there are already WLAN chips available that can use HSIC as
-their host interface and I'm not talking here about some exotic
-products, but rather widely recognized products of Broadcom (BCM4335),
-Marvell (88W8797) or Qualcomm Atheros (AR6004).
-
-My conclusion is that I see the discussion here being too much focused
-on MMC, especially considering the fact that the whole problem doesn't
-have anything to do with MMC, which is just used as (one of possible)
-host interface.
-
-IMHO, all we need here is a way to tell the MMC (or HSIC) core when to
-look for a new device and when not (e.g. power down the host controller
-completely). Anything else, including proper power sequencing is up to
-the platform driver of such non-discoverable device - it's only its host
-interface that is discoverable when enabled. I believe this simplistic
-approach would lead to much less new code added, better reusability of
-code (power sequencing independent of host interface) and no need to
-create overly generic code, which usually turns out to be not generic
-enough.
-
-Best regards,
-Tomasz
