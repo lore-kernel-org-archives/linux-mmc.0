@@ -1,42 +1,44 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: [PATCHv3 3/4] mmc: dw_mmc: remove the "supports-highspeed" property.
-Date: Wed, 28 May 2014 14:35:50 +0900
-Message-ID: <1401255351-17653-4-git-send-email-jh80.chung@samsung.com>
-References: <1401255351-17653-1-git-send-email-jh80.chung@samsung.com>
+From: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+Subject: Re: [PATCH v3 08/13] mmc: mmci: add 8bit bus support in variant data
+Date: Wed, 28 May 2014 08:27:31 +0100
+Message-ID: <53858FE3.9040207@linaro.org>
+References: <1400849362-7007-1-git-send-email-srinivas.kandagatla@linaro.org>	<1400849527-7384-1-git-send-email-srinivas.kandagatla@linaro.org> <CAPDyKFruVPo-k+19pQ4zGrVBH0gqszQ5vphsTAm6HTXUX5riFg@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout4.samsung.com ([203.254.224.34]:43438 "EHLO
-	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752603AbaE1FgA (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 28 May 2014 01:36:00 -0400
-In-reply-to: <1401255351-17653-1-git-send-email-jh80.chung@samsung.com>
+Received: from mail-we0-f179.google.com ([74.125.82.179]:62458 "EHLO
+	mail-we0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752882AbaE1H1f (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 28 May 2014 03:27:35 -0400
+Received: by mail-we0-f179.google.com with SMTP id q59so10506517wes.24
+        for <linux-mmc@vger.kernel.org>; Wed, 28 May 2014 00:27:34 -0700 (PDT)
+In-Reply-To: <CAPDyKFruVPo-k+19pQ4zGrVBH0gqszQ5vphsTAm6HTXUX5riFg@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: chris@printf.net, ulf.hansson@linaro.org, ludovic.desroches@atmel.com, tgih.jun@samsung.com, devicetree@vger.kernel.org, linux-samsung-soc@vger.kernel.org, Jaehoon Chung <jh80.chung@samsung.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Russell King <linux@arm.linux.org.uk>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-arm-msm@vger.kernel.org, Linus Walleij <linus.walleij@linaro.org>
 
-Removed the parser for "supports-highspeed".
-It can be parsed with "cap-mmc-highsped" or "cap-sd-highspeed" at
-mmc_of_parse().
+Hi Linus W,
 
-Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
----
- drivers/mmc/host/dw_mmc.c |    3 ---
- 1 file changed, 3 deletions(-)
 
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 3285bdd..34b5210 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -2281,9 +2281,6 @@ static struct dw_mci_board *dw_mci_parse_dt(struct dw_mci *host)
- 			return ERR_PTR(ret);
- 	}
- 
--	if (of_find_property(np, "supports-highspeed", NULL))
--		pdata->caps |= MMC_CAP_SD_HIGHSPEED | MMC_CAP_MMC_HIGHSPEED;
--
- 	return pdata;
- }
- 
--- 
-1.7.9.5
+On 26/05/14 11:07, Ulf Hansson wrote:
+>>          unsigned int            fifosize;
+>> >         unsigned int            fifohalfsize;
+>> >@@ -116,6 +118,7 @@ static struct variant_data variant_u300 = {
+>> >         .fifosize               = 16 * 4,
+>> >         .fifohalfsize           = 8 * 4,
+>> >         .clkreg_enable          = MCI_ST_U300_HWFCEN,
+>> >+       .clkreg_8bit_bus_enable = MCI_ST_8BIT_BUS,
+> Linus, will have to confirm this. I don't know if the u300 variant
+> support 8-bit.
+>
 
+Do you know if u300 supports 8BIT bus?
+
+thanks,
+srini
+
+> Kind regards
+> Ulf Hansson
+>
