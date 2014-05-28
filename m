@@ -1,8 +1,7 @@
 From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: [PATCHv3 2/4] mmc: dw_mmc: use the __mmc_of_parse to parse the slot
- node
-Date: Wed, 28 May 2014 14:35:49 +0900
-Message-ID: <1401255351-17653-3-git-send-email-jh80.chung@samsung.com>
+Subject: [PATCHv3 1/4] mmc: host: add slot argument to mmc_of_parse
+Date: Wed, 28 May 2014 14:35:48 +0900
+Message-ID: <1401255351-17653-2-git-send-email-jh80.chung@samsung.com>
 References: <1401255351-17653-1-git-send-email-jh80.chung@samsung.com>
 Return-path: <linux-samsung-soc-owner@vger.kernel.org>
 In-reply-to: <1401255351-17653-1-git-send-email-jh80.chung@samsung.com>
@@ -11,70 +10,92 @@ To: linux-mmc@vger.kernel.org
 Cc: chris@printf.net, ulf.hansson@linaro.org, ludovic.desroches@atmel.com, tgih.jun@samsung.com, devicetree@vger.kernel.org, linux-samsung-soc@vger.kernel.org, Jaehoon Chung <jh80.chung@samsung.com>
 List-Id: linux-mmc@vger.kernel.org
 
-dw-mmc controller has the multiple slot.
-Then it needs to parse the property for each slot.
+From: Ludovic Desroches <ludovic.desroches@atmel.com>
 
+Some hosts manage several slots. In these case information such as the
+bus width, chip detect and others are into the slot node. So we have to
+parse child node. If not NULL, slot node will be used instead of the
+device node.
+
+Signed-off-by: Ludovic Desroches <ludovic.desroches@atmel.com>
 Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+Acked-by: Seungwon Jeon <tgih.jun@samsung.com>
 ---
 Changelog V3:
-	- Fix typo.
-	- Maintained the dw_mci_of_quirks().
+	- None.
 Changelog V2:
-	- None
+	- Fix the typo.
 
- drivers/mmc/host/dw_mmc.c |   15 ++++++---------
- 1 file changed, 6 insertions(+), 9 deletions(-)
+ drivers/mmc/core/host.c  |   13 +++++++++----
+ include/linux/mmc/host.h |   10 +++++++++-
+ 2 files changed, 18 insertions(+), 5 deletions(-)
 
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 1ac227c..3285bdd 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -1015,12 +1015,11 @@ static int dw_mci_get_cd(struct mmc_host *mmc)
+diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+index 95cceae..0f677b3 100644
+--- a/drivers/mmc/core/host.c
++++ b/drivers/mmc/core/host.c
+@@ -298,15 +298,17 @@ static inline void mmc_host_clk_sysfs_init(struct mmc_host *host)
+ #endif
+ 
+ /**
+- *	mmc_of_parse() - parse host's device-tree node
++ *	__mmc_of_parse() - parse host's device-tree node
+  *	@host: host whose node should be parsed.
++ *	@slot : some device provide several slots so the node to parse
++ *		is not the host one.
+  *
+  * To keep the rest of the MMC subsystem unaware of whether DT has been
+  * used to to instantiate and configure this host instance or not, we
+  * parse the properties and set respective generic mmc-host flags and
+  * parameters.
+  */
+-int mmc_of_parse(struct mmc_host *host)
++int __mmc_of_parse(struct mmc_host *host, struct device_node *slot)
  {
- 	int present;
- 	struct dw_mci_slot *slot = mmc_priv(mmc);
--	struct dw_mci_board *brd = slot->host->pdata;
- 	struct dw_mci *host = slot->host;
- 	int gpio_cd = mmc_gpio_get_cd(mmc);
+ 	struct device_node *np;
+ 	u32 bus_width;
+@@ -317,7 +319,10 @@ int mmc_of_parse(struct mmc_host *host)
+ 	if (!host->parent || !host->parent->of_node)
+ 		return 0;
  
- 	/* Use platform get_cd function, else try onboard card detect */
--	if (brd->quirks & DW_MCI_QUIRK_BROKEN_CARD_DETECTION)
-+	if (slot->quirks & DW_MCI_QUIRK_BROKEN_CARD_DETECTION)
- 		present = 1;
- 	else if (!IS_ERR_VALUE(gpio_cd))
- 		present = gpio_cd;
-@@ -2010,6 +2009,9 @@ static struct dw_mci_of_slot_quirks {
- 	{
- 		.quirk	= "disable-wp",
- 		.id	= DW_MCI_SLOT_QUIRK_NO_WRITE_PROTECT,
-+	}, {
-+		.quirk	= "broken-cd",
-+		.id	= DW_MCI_QUIRK_BROKEN_CARD_DETECTION,
- 	},
- };
+-	np = host->parent->of_node;
++	if (slot)
++		np = slot;
++	else
++		np = host->parent->of_node;
  
-@@ -2088,7 +2090,7 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
- 	if (host->pdata->caps2)
- 		mmc->caps2 = host->pdata->caps2;
+ 	/* "bus-width" is translated to MMC_CAP_*_BIT_DATA flags */
+ 	if (of_property_read_u32(np, "bus-width", &bus_width) < 0) {
+@@ -459,7 +464,7 @@ out:
+ 	return ret;
+ }
  
--	mmc_of_parse(mmc);
-+	__mmc_of_parse(mmc, dw_mci_of_find_slot_node(host->dev, slot->id));
+-EXPORT_SYMBOL(mmc_of_parse);
++EXPORT_SYMBOL(__mmc_of_parse);
  
- 	if (host->pdata->blk_settings) {
- 		mmc->max_segs = host->pdata->blk_settings->max_segs;
-@@ -2234,12 +2236,7 @@ static inline bool dw_mci_ctrl_all_reset(struct dw_mci *host)
- static struct dw_mci_of_quirks {
- 	char *quirk;
- 	int id;
--} of_quirks[] = {
--	{
--		.quirk	= "broken-cd",
--		.id	= DW_MCI_QUIRK_BROKEN_CARD_DETECTION,
--	},
--};
-+} of_quirks[] = {};
+ /**
+  *	mmc_alloc_host - initialise the per-host structure.
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index 7960424..c62af91 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -372,7 +372,15 @@ struct mmc_host *mmc_alloc_host(int extra, struct device *);
+ int mmc_add_host(struct mmc_host *);
+ void mmc_remove_host(struct mmc_host *);
+ void mmc_free_host(struct mmc_host *);
+-int mmc_of_parse(struct mmc_host *host);
++int __mmc_of_parse(struct mmc_host *host, struct device_node *slot);
++/*
++ * mmc_of_parse - parse host's device-tree node
++ *	@host: host whose node should be parsed.
++ */
++static inline int mmc_of_parse(struct mmc_host *host)
++{
++	return __mmc_of_parse(host, NULL);
++}
  
- static struct dw_mci_board *dw_mci_parse_dt(struct dw_mci *host)
+ static inline void *mmc_priv(struct mmc_host *host)
  {
 -- 
 1.7.9.5
