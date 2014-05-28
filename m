@@ -1,7 +1,7 @@
 From: srinivas.kandagatla@linaro.org
-Subject: [PATCH v4 09/13] mmc: mmci: add Qcom specifics of clk and datactrl registers.
-Date: Wed, 28 May 2014 14:47:24 +0100
-Message-ID: <1401284844-16811-1-git-send-email-srinivas.kandagatla@linaro.org>
+Subject: [PATCH v4 10/13] mmc: mmci: Add support to data commands via variant structure.
+Date: Wed, 28 May 2014 14:47:33 +0100
+Message-ID: <1401284853-16853-1-git-send-email-srinivas.kandagatla@linaro.org>
 References: <1401284608-16428-1-git-send-email-srinivas.kandagatla@linaro.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1401284608-16428-1-git-send-email-srinivas.kandagatla@linaro.org>
@@ -12,66 +12,54 @@ List-Id: linux-mmc@vger.kernel.org
 
 From: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
 
-This patch adds specifics of clk and datactrl register on Qualcomm SD
-Card controller. This patch also populates the Qcom variant data with
-these new values specific to Qualcomm SD Card Controller.
+On some SOCs like Qcom there are explicit bits in the command register
+to specify if its a data transfer command or not. So this patch adds
+support to such bits in variant data, giving more flexibility to the
+driver.
 
 Signed-off-by: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
 Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
 ---
- drivers/mmc/host/mmci.c |  4 ++++
- drivers/mmc/host/mmci.h | 17 +++++++++++++++++
- 2 files changed, 21 insertions(+)
+ drivers/mmc/host/mmci.c | 6 ++++++
+ 1 file changed, 6 insertions(+)
 
 diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index 8deea4a..dbcb952 100644
+index dbcb952..fd40f9a 100644
 --- a/drivers/mmc/host/mmci.c
 +++ b/drivers/mmc/host/mmci.c
-@@ -179,6 +179,10 @@ static struct variant_data variant_qcom = {
- 	.fifosize		= 16 * 4,
- 	.fifohalfsize		= 8 * 4,
- 	.clkreg			= MCI_CLK_ENABLE,
-+	.clkreg_enable		= MCI_QCOM_CLK_FLOWENA |
-+				  MCI_QCOM_CLK_SELECT_IN_FBCLK,
-+	.clkreg_8bit_bus_enable = MCI_QCOM_CLK_WIDEBUS_8,
-+	.datactrl_mask_ddrmode	= MCI_QCOM_CLK_SELECT_IN_DDR_MODE,
+@@ -59,6 +59,7 @@ static unsigned int fmax = 515633;
+  *	      is asserted (likewise for RX)
+  * @fifohalfsize: number of bytes that can be written when MCI_TXFIFOHALFEMPTY
+  *		  is asserted (likewise for RX)
++ * @data_cmd_enable: enable value for data commands.
+  * @sdio: variant supports SDIO
+  * @st_clkdiv: true if using a ST-specific clock divider algorithm
+  * @datactrl_mask_ddrmode: ddr mode mask in datactrl register.
+@@ -79,6 +80,7 @@ struct variant_data {
+ 	unsigned int		datalength_bits;
+ 	unsigned int		fifosize;
+ 	unsigned int		fifohalfsize;
++	unsigned int		data_cmd_enable;
+ 	unsigned int		datactrl_mask_ddrmode;
+ 	bool			sdio;
+ 	bool			st_clkdiv;
+@@ -183,6 +185,7 @@ static struct variant_data variant_qcom = {
+ 				  MCI_QCOM_CLK_SELECT_IN_FBCLK,
+ 	.clkreg_8bit_bus_enable = MCI_QCOM_CLK_WIDEBUS_8,
+ 	.datactrl_mask_ddrmode	= MCI_QCOM_CLK_SELECT_IN_DDR_MODE,
++	.data_cmd_enable	= MCI_QCOM_CSPM_DATCMD,
  	.blksz_datactrl4	= true,
  	.datalength_bits	= 24,
  	.pwrreg_powerup		= MCI_PWR_UP,
-diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
-index cd83ca3..706eb513 100644
---- a/drivers/mmc/host/mmci.h
-+++ b/drivers/mmc/host/mmci.h
-@@ -41,6 +41,15 @@
- /* Modified PL180 on Versatile Express platform */
- #define MCI_ARM_HWFCEN		BIT(12)
+@@ -852,6 +855,9 @@ mmci_start_command(struct mmci_host *host, struct mmc_command *cmd, u32 c)
+ 	if (/*interrupt*/0)
+ 		c |= MCI_CPSM_INTERRUPT;
  
-+/* Modified on Qualcomm Integrations */
-+#define MCI_QCOM_CLK_WIDEBUS_8	(BIT(10) | BIT(11))
-+#define MCI_QCOM_CLK_FLOWENA	BIT(12)
-+#define MCI_QCOM_CLK_INVERTOUT	BIT(13)
++	if (mmc_cmd_type(cmd) == MMC_CMD_ADTC)
++		c |= host->variant->data_cmd_enable;
 +
-+/* select in latch data and command in */
-+#define MCI_QCOM_CLK_SELECT_IN_FBCLK	BIT(15)
-+#define MCI_QCOM_CLK_SELECT_IN_DDR_MODE	(BIT(14) | BIT(15))
-+
- #define MMCIARGUMENT		0x008
- #define MMCICOMMAND		0x00c
- #define MCI_CPSM_RESPONSE	BIT(6)
-@@ -54,6 +63,14 @@
- #define MCI_ST_NIEN		BIT(13)
- #define MCI_ST_CE_ATACMD	BIT(14)
+ 	host->cmd = cmd;
  
-+/* Modified on Qualcomm Integrations */
-+#define MCI_QCOM_CSPM_DATCMD		BIT(12)
-+#define MCI_QCOM_CSPM_MCIABORT		BIT(13)
-+#define MCI_QCOM_CSPM_CCSENABLE		BIT(14)
-+#define MCI_QCOM_CSPM_CCSDISABLE	BIT(15)
-+#define MCI_QCOM_CSPM_AUTO_CMD19	BIT(16)
-+#define MCI_QCOM_CSPM_AUTO_CMD21	BIT(21)
-+
- #define MMCIRESPCMD		0x010
- #define MMCIRESPONSE0		0x014
- #define MMCIRESPONSE1		0x018
+ 	writel(cmd->arg, base + MMCIARGUMENT);
 -- 
 1.9.1
