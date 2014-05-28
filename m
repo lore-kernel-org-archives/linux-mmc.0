@@ -1,59 +1,80 @@
-From: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH 03/11] pinctrl: sunxi: Move setting of mux
- to irq type from unmask to set_type
-Date: Wed, 28 May 2014 11:51:52 +0200
-Message-ID: <5385B1B8.8070803@redhat.com>
-References: <1401090486-4414-1-git-send-email-hdegoede@redhat.com> <1401090486-4414-4-git-send-email-hdegoede@redhat.com> <CACRpkdZcGJTXfcxN_sogm+hYHM56d_VxtuZqth0t-c2mgAJ0vA@mail.gmail.com> <20140528093653.GN4730@lukather>
-Reply-To: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v3 10/13] mmc: mmci: add Qcom specifics of clk and
+ datactrl registers.
+Date: Wed, 28 May 2014 12:03:15 +0200
+Message-ID: <CAPDyKFp5mJt7mWYEmknp=E62pM3xfmj1+B=B2dn9BLPfAJqYhQ@mail.gmail.com>
+References: <1400849362-7007-1-git-send-email-srinivas.kandagatla@linaro.org>
+	<1400849556-7501-1-git-send-email-srinivas.kandagatla@linaro.org>
+	<CAPDyKFpyZU207A515T9xd153DBWGpjP8cqiAZfwvkx7Drefc5A@mail.gmail.com>
+	<5383B44F.30608@linaro.org>
+	<5385AF47.8030909@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-sunxi+bncBDRZXY4CYYORBQHDS2OAKGQEWPALZOY-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-In-Reply-To: <20140528093653.GN4730@lukather>
-List-Post: <http://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Help: <http://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Archive: <http://groups.google.com/group/linux-sunxi>
-Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
-List-Subscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Unsubscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-To: Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, Linus Walleij <linus.walleij-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Arend van Spriel <arend-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>, "John W. Linville" <linville-2XuSBdqkA4R54TAoqtyWWQ@public.gmane.org>, Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-wireless <linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, devicetree <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-sunxi <linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: <5385AF47.8030909@linaro.org>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+Cc: Russell King <linux@arm.linux.org.uk>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-arm-msm@vger.kernel.org, Linus Walleij <linus.walleij@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi,
-
-On 05/28/2014 11:36 AM, Maxime Ripard wrote:
-> On Tue, May 27, 2014 at 04:18:29PM +0200, Linus Walleij wrote:
->> On Mon, May 26, 2014 at 9:47 AM, Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
->>
->>> With level triggered interrupt mask / unmask will get called for each
->>> interrupt, doing the somewhat expensive mux setting on each unmask thus is
->>> not a good idea. Instead move it to the set_type callback, which is typically
->>> done only once for each irq.
+On 28 May 2014 11:41, Srinivas Kandagatla
+<srinivas.kandagatla@linaro.org> wrote:
+> Hi Ulf,
+>
+>
+> On 26/05/14 22:38, Srinivas Kandagatla wrote:
+>>>>
+>>>>   2 files changed, 28 insertions(+)
+>>>>
+>>>> diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+>>>> index 17e7f6a..6434f5b1 100644
+>>>> --- a/drivers/mmc/host/mmci.c
+>>>> +++ b/drivers/mmc/host/mmci.c
+>>>> @@ -185,6 +185,10 @@ static struct variant_data variant_qcom = {
+>>>>          .fifosize               = 16 * 4,
+>>>>          .fifohalfsize           = 8 * 4,
+>>>>          .clkreg                 = MCI_CLK_ENABLE,
+>>>> +       .clkreg_enable          = MCI_QCOM_CLK_FLOWENA |
+>>>> +                                 MCI_QCOM_CLK_FEEDBACK_CLK,
 >>>
->>> Signed-off-by: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
->>
->> Yes move it out of mask/unmask but no, not into set_type().
->>
->> Can you not use the irqchip startup()/shutdown() callbacks
->> instead?
-> 
-> I think we can use irq_request_resources then
-> https://lkml.org/lkml/2014/3/12/307
+>>>
+>>> Obviously I don't have the in-depth knowledge about the Qcom variant,
+>>> but comparing the ST variant here made me think.
+>>>
+>>> Using the feeback clock internal logic in the ST variant, requires the
+>>> corresponding feedback clock pin signal on the board, to be
+>>> routed/connected. Typically we used this for SD cards, which involved
+>>> using an external level shifter circuit.
+>>>
+>>> Is it correct to enable this bit for all cases, including eMMC?
+>>>
+>> You are correct, FBCLK should specific to the board, and I will try to
+>> do something on the same lines as ST variant in next version.
+>
+> I get lot of I/O errors when I remove this flag for test.
 
-Sounds good, I'll modify the patch to move it here before posting a v2 of
-this series. Note v2 likely won't happen till this weekend, -ENOTIME.
+Running eMMC I suppose?
 
-> We could even merge the gpio_to_irq code into it.
+>
+> I rechecked schematics and datasheet, the feedback clk that we refer here is
+> the the feedback clk from CLK pad, there is no separate input pad for fbclk.
+> So I think this is internally feedbacked clk.
+>
+> This selection is configuring bits to latch data and command coming in using
+> feedback clock from CLK pad.
 
-Erm, no we need that as a separate function for the gpio_chip's to_irq
-callback.
+Seems like it's strange to have this bit configurable then. I guess it
+would  be hard to tell under what circumstances you don't want this
+bit set.
 
-> It's called in __setup_irq, so it's guaranteed to be called, and it
-> will bail out early without doing anything, since it's one of the
-> first thing __setup_irq does.
+Anyway, it's not a big deal to me - let's keep it as is for now.
 
-Right, as I said above, this sounds good.
+Kind regards
+Ulf Hansson
 
-Regards,
-
-Hans
+>
+> I will make sure that the macro is named more appropriately to reflect the
+> same.
+>
+> thanks,
+> srini
