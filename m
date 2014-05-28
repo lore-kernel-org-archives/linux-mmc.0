@@ -1,60 +1,97 @@
-From: Hans de Goede <hdegoede@redhat.com>
-Subject: Re: RFC: representing sdio devices oob interrupt, clks, etc. in device
- tree
-Date: Wed, 28 May 2014 12:27:35 +0200
-Message-ID: <5385BA17.9040301@redhat.com>
-References: <537E31F7.1030505@gmail.com>	<537F1148.3010102@redhat.com>	<20140523112239.GB12304@sirena.org.uk>	<537F3610.3050104@redhat.com>	<20140523162718.GE22111@sirena.org.uk>	<53806F26.6050706@redhat.com>	<20140525123452.GS22111@sirena.org.uk>	<53824294.1090609@redhat.com>	<20140526103807.GV22111@sirena.org.uk>	<538321AB.4050006@redhat.com>	<20140526142225.GF22111@sirena.org.uk>	<538356DA.7090302@redhat.com>	<CAPDyKFqgvaPhMH3PFh7+6u+Am6pWYhxBFdvUZFfekUfpFJxdKw@mail.gmail.com>	<53838023.2080807@redhat.com> <CAPDyKFpg_2RQabM044C1hsNTcuxdVVOvw0ZONVRdysk=eom8UA@mail.gmail.com> <5385AF94.90004@redhat.com> <5385B689.5000802@broadcom.com>
+From: Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
+Subject: Re: [PATCH 02/11] pinctrl: sunxi: add
+ IRQCHIP_SKIP_SET_WAKE flag for pinctrl irq chip
+Date: Wed, 28 May 2014 12:29:12 +0200
+Message-ID: <20140528102912.GP4730@lukather>
+References: <1401090486-4414-1-git-send-email-hdegoede@redhat.com>
+ <1401090486-4414-3-git-send-email-hdegoede@redhat.com>
+ <20140527080746.GB4730@lukather>
+ <5384B9E7.1070405@gmail.com>
+Reply-To: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:58623 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750780AbaE1K2j (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 28 May 2014 06:28:39 -0400
-In-Reply-To: <5385B689.5000802@broadcom.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="WoqaC9TUMqqIOlla"
+Return-path: <linux-sunxi+bncBD2ZNBF5VYJRBM7VS2OAKGQEH4QIZYI-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <5384B9E7.1070405-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+List-Post: <http://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Help: <http://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Archive: <http://groups.google.com/group/linux-sunxi>
+Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+List-Subscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Unsubscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+To: Tomasz Figa <tomasz.figa-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, devicetree <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Linus Walleij <linus.walleij-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, "John W. Linville" <linville-2XuSBdqkA4R54TAoqtyWWQ@public.gmane.org>, Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>, Arend van Spriel <arend-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: Arend van Spriel <arend@broadcom.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Mark Brown <broonie@kernel.org>, Tomasz Figa <tomasz.figa@gmail.com>, Chen-Yu Tsai <wens@csie.org>, Sascha Hauer <s.hauer@pengutronix.de>, Chris Ball <chris@printf.net>, Maxime Ripard <maxime.ripard@free-electrons.com>, linux-mmc <linux-mmc@vger.kernel.org>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>, devicetree <devicetree@vger.kernel.org>, Olof Johansson <olof@lixom.net>, Russell King - ARM Linux <linux@arm.linux.org.uk>, Fabio Estevam <festevam@gmail.com>, Arnd Bergmann <arnd@arndb.de>, Jyri Sarha <jsarha@ti.com>, Linus Walleij <linus.walleij@linaro.org>
 
-Hi,
 
-On 05/28/2014 12:12 PM, Arend van Spriel wrote:
+--WoqaC9TUMqqIOlla
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-<snip>
+On Tue, May 27, 2014 at 06:14:31PM +0200, Tomasz Figa wrote:
+> On 27.05.2014 10:07, Maxime Ripard wrote:
+> > On Mon, May 26, 2014 at 09:47:57AM +0200, Hans de Goede wrote:
+> >> From: Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>
+> >>=20
+> >> The sunxi pinctrl irq chip driver does not support wakeup at the=20
+> >> moment. Adding IRQCHIP_SKIP_SET_WAKE lets the irqs work with
+> >> drivers using wakeup.
+> >>=20
+> >> Also add a name to the irq chip.
+> >>=20
+> >> Signed-off-by: Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org> Signed-off-by: Hans
+> >> de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> ---=20
+> >> drivers/pinctrl/sunxi/pinctrl-sunxi.c | 2 ++ 1 file changed, 2
+> >> insertions(+)
+> >>=20
+> >> diff --git a/drivers/pinctrl/sunxi/pinctrl-sunxi.c
+> >> b/drivers/pinctrl/sunxi/pinctrl-sunxi.c index db9ccd6..ec60c2e
+> >> 100644 --- a/drivers/pinctrl/sunxi/pinctrl-sunxi.c +++
+> >> b/drivers/pinctrl/sunxi/pinctrl-sunxi.c @@ -646,6 +646,8 @@
+> >> static struct irq_chip sunxi_pinctrl_irq_chip =3D { .irq_mask_ack	=3D
+> >> sunxi_pinctrl_irq_mask_ack, .irq_unmask	=3D
+> >> sunxi_pinctrl_irq_unmask, .irq_set_type	=3D
+> >> sunxi_pinctrl_irq_set_type, +	.name		=3D "sunxi-pio", +	.flags		=3D
+> >> IRQCHIP_SKIP_SET_WAKE,
+> >=20
+> > I'd rather see the name set to dev_name() or something like that.
+> > This will not work that great with multiple pin controller
+> > supporting interrupts.
+>=20
+> Correct me if I'm wrong, but I've always thought that struct irq_chip
+> describes a class of IRQ controllers, not particular instances.
 
->>>> Yes, although I must admit that have not thought about how to deal with
->>>> slots, I've no experience with the mmc slots concept at all, or is slot
->>>> just a different name for sdio function ?
->>>
->>> Some mmc hosts may support more than one slot. Thus they can operate
->>> on more than one card.
->>>
->>> Currently, there are no support for this in the mmc core. There can
->>> only be one card per host, but that's due to software limitation of
->>> the mmc stack.  Following your suggestion; modelling the card as child
->>> node under the mmc host, can easily be extended to support more than
->>> one slot.
->>
->> Actually what I'm suggesting is based on Sascha Hauer's
->> "mmc: Add SDIO function devicetree subnode parsing"
->>
->> Patch, which models the sdio functions as child nodes, (with the
->> one with reg =<0>  being the card itself) this also makes sense since each
->> sdio-function gets its own device representing it, so having one child node
->> per sdio-functions leads to one child node per device which seems sensible.
-> 
-> To complicate thing, for brcmfmac the sdio functions are not considered individual devices. This means that brcmfmac creates one driver instance which claims multiple sdio functions.
+It's not said as such in <linux/irq.h>, but maybe..
 
-Right, but that is not really important for the overall device tree model
-we can just put all the info brcmfmac needs in the child-node for sdio-func 1,
-and then the driver can get to it since it claims both functions anyways,
-that is actually what the oob irq support patchset I posted a few days ago
-does. But that patch-set is missing the extra slot level in the child-nodes,
-so if we agree we want that extra level in the hierarchy I'll need to fix
-that for v2 of the set.
+Maxime
 
-Regards,
+--=20
+Maxime Ripard, Free Electrons
+Embedded Linux, Kernel and Android engineering
+http://free-electrons.com
 
-Hans
+--WoqaC9TUMqqIOlla
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1
+
+iQIcBAEBAgAGBQJThbp4AAoJEBx+YmzsjxAgO+YP/1tgXqWtrqhq+Q/xQU21eIZL
+IVHDJk7YAKxmsccXfq8Wvk0OLQP1vSWwbzOlMBvhIkf2Qk4VtzCu3NPVeEN9JkuT
+AOqgaplWRvPyv0QGuWMkr2JGwFaV/7ZkUqZKVV7oYxpV+85Uu5IrgV7+s9HeO7HA
+cErjaNfLQPKv2hibwPWarQATiUteYFjhKhl9Waa/LIF/jP1zrP4ZCeRqDUj4JAEM
+3Tv2cwkkVuq46GNAMcNQYflIKXXhyY3fLgzAvjqupcBB3sTGpLEr9MaOdCJdSNPc
+HbW7TOlw/rvbD57AOn1AKbGAW94sY6Kq9ttcVfgf6C70I/XfCAN7jlwwhBgl6+zk
+0TZilmTuIa29TRjNVRwyhkCPKibErMnw9eRVEP+dXDZ5kIdAYhn/fO08Ecfj7PFh
+3jLIQI+Cnv+JOxV5w9AskPRrcnvqL8WZGB2W0zZMREuhaBRsJ4SarPp1po9hbFPu
+5g4e5RNzH52wKu2FltKSzIMhoX2cEYpbLaOebW1tUHZ6/KP8cA2ZPKmdN0R/7mtS
+XiQyTfJBMxhxMqLf5jGwmLxupwbqWW44SiSLNyCmmX8ejIh3MLQqBu6ahKzgO8Dr
+oVw1XTmSfDz7VCmzq3JQELwDJju7BIvL4GUKlMAEUwU1fI1GvhH2OQhNhvAS8lEt
+WjDO3hfKWu6GuQHV/Yit
+=9RTz
+-----END PGP SIGNATURE-----
+
+--WoqaC9TUMqqIOlla--
