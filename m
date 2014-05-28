@@ -1,7 +1,7 @@
 From: srinivas.kandagatla@linaro.org
-Subject: [PATCH v4 04/13] mmc: mmci: Add enough delay between writes to CMD register.
-Date: Wed, 28 May 2014 14:46:26 +0100
-Message-ID: <1401284786-16604-1-git-send-email-srinivas.kandagatla@linaro.org>
+Subject: [PATCH v4 05/13] mmc: mmci: Add Qcom datactrl register variant
+Date: Wed, 28 May 2014 14:46:38 +0100
+Message-ID: <1401284798-16645-1-git-send-email-srinivas.kandagatla@linaro.org>
 References: <1401284608-16428-1-git-send-email-srinivas.kandagatla@linaro.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1401284608-16428-1-git-send-email-srinivas.kandagatla@linaro.org>
@@ -12,36 +12,53 @@ List-Id: linux-mmc@vger.kernel.org
 
 From: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
 
-On Qcom SD Card controller POWER, CLKCTRL, DATACTRL and COMMAND registers
-should be updated in MCLK domain, and writes to these registers must be
-separated by three MCLK cycles. This resitriction is not applicable for
-other registers. Any subsequent writes to these register will be ignored
-until 3 MCLK have passed.
-
-One usec delay between two CMD register writes is not sufficient in the
-card identification phase where the CCLK is very low. This patch replaces
-a static 1 usec delay to use mmci_reg_delay function which can provide
-correct delay depending on the cclk frequency.
-
-Without this patch the card is not detected.
+Instance of this IP on Qualcomm's SOCs has bit different layout for datactrl
+register. Bit position datactrl[16:4] hold the true block size instead of power
+of 2.
 
 Signed-off-by: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
 ---
- drivers/mmc/host/mmci.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ drivers/mmc/host/mmci.c | 6 ++++++
+ 1 file changed, 6 insertions(+)
 
 diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index 86f25a9..aa2d381 100644
+index aa2d381..23401b0 100644
 --- a/drivers/mmc/host/mmci.c
 +++ b/drivers/mmc/host/mmci.c
-@@ -818,7 +818,7 @@ mmci_start_command(struct mmci_host *host, struct mmc_command *cmd, u32 c)
+@@ -60,6 +60,8 @@ static unsigned int fmax = 515633;
+  * @sdio: variant supports SDIO
+  * @st_clkdiv: true if using a ST-specific clock divider algorithm
+  * @blksz_datactrl16: true if Block size is at b16..b30 position in datactrl register
++ * @blksz_datactrl4: true if Block size is at b4..b16 position in datactrl
++ *		     register
+  * @pwrreg_powerup: power up value for MMCIPOWER register
+  * @signal_direction: input/out direction of bus signals can be indicated
+  * @pwrreg_clkgate: MMCIPOWER register must be used to gate the clock
+@@ -75,6 +77,7 @@ struct variant_data {
+ 	bool			sdio;
+ 	bool			st_clkdiv;
+ 	bool			blksz_datactrl16;
++	bool			blksz_datactrl4;
+ 	u32			pwrreg_powerup;
+ 	bool			signal_direction;
+ 	bool			pwrreg_clkgate;
+@@ -164,6 +167,7 @@ static struct variant_data variant_qcom = {
+ 	.fifosize		= 16 * 4,
+ 	.fifohalfsize		= 8 * 4,
+ 	.clkreg			= MCI_CLK_ENABLE,
++	.blksz_datactrl4	= true,
+ 	.datalength_bits	= 24,
+ 	.pwrreg_powerup		= MCI_PWR_UP,
+ };
+@@ -739,6 +743,8 @@ static void mmci_start_data(struct mmci_host *host, struct mmc_data *data)
  
- 	if (readl(base + MMCICOMMAND) & MCI_CPSM_ENABLE) {
- 		writel(0, base + MMCICOMMAND);
--		udelay(1);
-+		mmci_reg_delay(host);
- 	}
+ 	if (variant->blksz_datactrl16)
+ 		datactrl = MCI_DPSM_ENABLE | (data->blksz << 16);
++	else if (variant->blksz_datactrl4)
++		datactrl = MCI_DPSM_ENABLE | (data->blksz << 4);
+ 	else
+ 		datactrl = MCI_DPSM_ENABLE | blksz_bits << 4;
  
- 	c |= cmd->opcode | MCI_CPSM_ENABLE;
 -- 
 1.9.1
