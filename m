@@ -1,73 +1,127 @@
-From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: [PATCH v3 13/13] mmc: mmci: Add Qcom specific pio_read function.
-Date: Thu, 29 May 2014 09:43:42 +0200
-Message-ID: <CACRpkdb_ozxL3wAVf7FJr-0A2tWGHkfXeXf5sWaW6h_yzK4QvA@mail.gmail.com>
-References: <1400849362-7007-1-git-send-email-srinivas.kandagatla@linaro.org>
-	<1400849589-7626-1-git-send-email-srinivas.kandagatla@linaro.org>
-	<537FD9A7.3010100@codeaurora.org>
-	<5385EB42.1060604@linaro.org>
+From: Andreas Fenkart <afenkart@gmail.com>
+Subject: =?UTF-8?q?=5BPATCH=20v14=200/6=5D=20mmc=3A=20omap=5Fhsmmc=3A=20Enable=20SDIO=20IRQ?=
+Date: Thu, 29 May 2014 10:27:59 +0200
+Message-ID: <1401352085-22781-1-git-send-email-afenkart@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
-In-Reply-To: <5385EB42.1060604@linaro.org>
-Sender: linux-arm-msm-owner@vger.kernel.org
-To: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
-Cc: Stephen Boyd <sboyd@codeaurora.org>, Russell King <linux@arm.linux.org.uk>, Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-msm@vger.kernel.org" <linux-arm-msm@vger.kernel.org>
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-omap-owner@vger.kernel.org>
+Sender: linux-omap-owner@vger.kernel.org
+To: Tony Lindgren <tony@atomide.com>
+Cc: Chris Ball <chris@printf.net>, Grant Likely <grant.likely@secretlab.ca>, Felipe Balbi <balbi@ti.com>, Balaji T K <balajitk@ti.com>, Andreas Mueller <schnitzeltony@googlemail.com>, Sebastian Reichel <sre@kernel.org>, zonque@gmail.com, galak@codeaurora.org, linux-doc@vger.kernel.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, Andreas Fenkart <afenkart@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On Wed, May 28, 2014 at 3:57 PM, Srinivas Kandagatla
-<srinivas.kandagatla@linaro.org> wrote:
+Hi Balaji, Tony, Ulf, all
 
->> This doesn't look endianness agnostic. Shouldn't we use ioread32_rep()
->> to read this fifo?
->
-> Is'nt readl endianess aware?
+v14
+- drop all ifdef/endif introduced by v13
+-- rely on pinctrl_lookup_state to prevent ifdef CONFIG_PM
+-- benefit: all code is compile tested no matter the configuration
+-- drawback: require wake_irq/pinctrl configuration even when
+   runtime suspend is not configured
+- drop runtime state from debugfs output
+- rebased onto current mmc-next 06732b84b4cf
 
-At least once a year read through arch/arm/include/asm/io.h
+v13
+- fix compile breaks if !CONFIG_PM
+- additional patch: install dummy pm runtime hooks if !CONFIG_PM_RUNTIM=
+E
 
-static inline u32 __raw_readl(const volatile void __iomem *addr)
-{
-        u32 val;
-        asm volatile("ldr %1, %0"
-                     : "+Qo" (*(volatile u32 __force *)addr),
-                       "=r" (val));
-        return val;
-}
-(...)
-#define readl_relaxed(c) ({ u32 __r = le32_to_cpu((__force __le32) \
-                                        __raw_readl(c)); __r; })
-(...)
-#define readl(c)                ({ u32 __v = readl_relaxed(c);
-__iormb(); __v; })
+v12
+- drop !CONFIG_OF compile break only exists when
+  #undef CONFIG_OF after include headers 1/7(Sebastian Reichel)
+- do not emit "falling back to polling" if wake_irq not specified
+  since MMC does not need it, and it might confuse users
+  only emit if pinmux default/idle is not present or claiming
+  the irq failed 2/7(Balaji)
+- dropped out-of-tree patches 6/7(Balaji)
+- mention "ti,am33xx-hsmmc" compatible section in bindings
+  documentation 1/5
 
-readl() reads in little endian.
+v11
+- split !CONFIG_OF compile break into separate patch
+- enable IWE/CLKEXTFREE in CON/HCTL register needed for omap4
+- '&' vs '&&' in omap_hsmmc_resume, 1/5 (Andreas M=C3=BCller)
+- #define DLEV_DAT instead of BIT(21) 2/5 (Balaji)
+- pinctrl_pm_select_default_state() removed, 4/5 (Balaji)
+- drop _irqsave/_irqrestore from omap_hsmmc_wake_irq handler since it
+  can't be preempted by same priority omap_hsmmc_irq handler 1/5(Joel F=
+ernandes)
+- replace devres_open_group by explicit devm_free calls 1/5 (Balaji)
+- disable_irq_nosync wake_irq since we handle it thread safe 1/5 (Balaj=
+i)
+- drop 'gpio_dat1' pinctrl states and rework documentation 5/5 (Balaji)
 
-All PrimeCells are little endian, trouble would occur if and only if
-this cell was
-used on a big endian CPU, like an ARM used in BE mode, if the macros
-didn't look exactly like this.
+v10
+- bug fix on multi-core, untested
+- incorporated changes from Balaji
+- use devres / RAII mechanism to configure wake_up /
+  sdio irq capabilities
+- drop pinctrl state 'active'
+  rely on driver-model states 'default', 'idle'
+- add specific 'gpio_dat1' state for am335x SWAKEUP hack
+- reorganized patches; +1 patch multi-core bugfix / +1 for pinctrl
+- rebased 455c6fdbd21916 / cherry-picks from mmc-next
 
-Thanks to the fact that readl() is always LE things work smoothly.
+v9
+- extended comment about why wake-irq is needed
+- drop double '(' ')' around card_detect_irq
+- drop final '.' in in subject line of patch
 
-Then to the question whether to use ioread32() instead:
+v8
+- rebased on top of Tony Lindgren<tony@atomide.com> changes
+  - improved changelog describing the earlier work
+  - improved wakeup irq setup
+  - works for am3730 es platform now
+- my changes on top:
+  - compile tested with #undef CONFIG_OF
+  - disable wake_irq in handler to prevent infinite loop =20
+  - fixed typo and added comment about wake-irq
 
-#define ioread32(p)     ({ unsigned int __v = le32_to_cpu((__force
-__le32)__raw_readl(p)); __iormb(); __v; })
+v7
+- rebase on 3.14.0-rc3-49726-g77e15ec
+- split omap_hsmmc_pin_init due to regression on omap-3730 platform
 
-Same thing as readl(). The only reason to use ioread32() rather than
-readl() is that some archs do not support readl() but only ioread32().
-However for that to be a problem, these archs must be utilizing that
-primecell! And if they do there are two ways to solve it: either change
-the entire world to use ioread/write32 or simply just define readl() and
-friends for that arch in its io.h file.
+v6
+- rebase on Linux 3.13-rc3
+- reformatting debugfs
 
-I'd say don't touch it right now.
+v5
+- fix compile error introduced by last minute one line fix
 
-> we can not use ioread32_rep because as we can not reliably know how many
-> words we should read? FIFOCNT would have helped but its not advised to be
-> use as per the datasheet.
+v4:
+- switch to interrupts-extended format
+- drop ti,swakeup-missing flag convert to comaptible section
 
-You are right. readsl() or ioread32_rep() isn't used for this reason.
+v3:
+- removed gpio_irq from platform_data
 
-Yours,
-Linus Walleij
+v2:
+- incorparated changes as suggested by reviewers
+- simplified workaround for am335x, gpio will now only wake
+  the module from runtime suspend, not handle the sdio irq
+  itself=20
+
+Andreas Fenkart (6):
+  mmc: omap_hsmmc: Enable SDIO interrupt
+  mmc: omap_hsmmc: Extend debugfs by SDIO IRQ handling, runtime state
+  mmc: omap_hsmmc: enable wakeup event for sdio OMAP4
+  mmc: omap_hsmmc: abort runtime suspend if pending sdio irq detected
+  mmc: omap_hsmmc: switch default/idle pinctrl states in runtime hooks
+  mmc: omap_hsmmc: Pin remux workaround to support SDIO interrupt on
+    AM335x
+
+ .../devicetree/bindings/mmc/ti-omap-hsmmc.txt      |   54 ++++
+ drivers/mmc/host/omap_hsmmc.c                      |  283 ++++++++++++=
+++++++--
+ include/linux/platform_data/mmc-omap.h             |    1 +
+ 3 files changed, 317 insertions(+), 21 deletions(-)
+
+--=20
+1.7.10.4
+
+--
+To unsubscribe from this list: send the line "unsubscribe linux-omap" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
