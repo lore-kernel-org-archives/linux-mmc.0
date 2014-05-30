@@ -1,78 +1,84 @@
-From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: [PATCH v3 13/13] mmc: mmci: Add Qcom specific pio_read function.
-Date: Fri, 30 May 2014 11:00:11 +0200
-Message-ID: <CACRpkdaEEYYfE8adDKjU7j4onnExQD2z3S+DOh5KnrKhNOHW9Q@mail.gmail.com>
-References: <1400849362-7007-1-git-send-email-srinivas.kandagatla@linaro.org>
-	<1400849589-7626-1-git-send-email-srinivas.kandagatla@linaro.org>
-	<537FD9A7.3010100@codeaurora.org>
-	<5385EB42.1060604@linaro.org>
-	<CACRpkdb_ozxL3wAVf7FJr-0A2tWGHkfXeXf5sWaW6h_yzK4QvA@mail.gmail.com>
-	<5387DF42.5020506@codeaurora.org>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v4 06/13] mmc: mmci: add ddrmode mask to variant data
+Date: Fri, 30 May 2014 11:35:01 +0200
+Message-ID: <CAPDyKFraGdp2QUHzhjoe5mO6ZyuS08notgkxpRB5A_GpYtyXTw@mail.gmail.com>
+References: <1401284608-16428-1-git-send-email-srinivas.kandagatla@linaro.org>
+	<1401284807-16686-1-git-send-email-srinivas.kandagatla@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-oa0-f48.google.com ([209.85.219.48]:47938 "EHLO
-	mail-oa0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755029AbaE3JAM (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 30 May 2014 05:00:12 -0400
-Received: by mail-oa0-f48.google.com with SMTP id g18so1533700oah.7
-        for <linux-mmc@vger.kernel.org>; Fri, 30 May 2014 02:00:11 -0700 (PDT)
-In-Reply-To: <5387DF42.5020506@codeaurora.org>
+Received: from mail-qg0-f44.google.com ([209.85.192.44]:61476 "EHLO
+	mail-qg0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754750AbaE3JfB (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 30 May 2014 05:35:01 -0400
+Received: by mail-qg0-f44.google.com with SMTP id i50so4591161qgf.31
+        for <linux-mmc@vger.kernel.org>; Fri, 30 May 2014 02:35:01 -0700 (PDT)
+In-Reply-To: <1401284807-16686-1-git-send-email-srinivas.kandagatla@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Stephen Boyd <sboyd@codeaurora.org>
-Cc: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>, Russell King <linux@arm.linux.org.uk>, Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-msm@vger.kernel.org" <linux-arm-msm@vger.kernel.org>
+To: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+Cc: Russell King <linux@arm.linux.org.uk>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-msm@vger.kernel.org" <linux-arm-msm@vger.kernel.org>, Linus Walleij <linus.walleij@linaro.org>
 
-On Fri, May 30, 2014 at 3:30 AM, Stephen Boyd <sboyd@codeaurora.org> wrote:
-
-> Hm... that doesn't sound right. Please see this thread on lkml[1], and
-> also this video from Ben H.[2]
-
-But Benji is talking about the *PCI BUS*, and this is raw register
-access. He just says that "This is how a BE CPU is normally
-wired to a LE bus" we have no idea whether that is actually the
-case on any existing system with this peripheral. Such things
-have to be tested.
-
-> My understanding is that this is a fifo
-> so I would think we want to use the ioread32_rep() function here (or
-> other "string" io functionality). Otherwise we're going to byteswap the
-> data that we're trying to interpret as a buffer and big endian CPUs
-> won't work.
-
-You don't know that until you have tested on real BE ARM
-hardware with this PrimeCell. How do you know the SoC
-designers will have been smart enough to insert byte swap
-logic?
-
->> You are right. readsl() or ioread32_rep() isn't used for this reason.
+On 28 May 2014 15:46,  <srinivas.kandagatla@linaro.org> wrote:
+> From: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
 >
-> We could always use a size of 1 right?
+> This patch adds ddrmode mask to variant structure giving more flexibility
+> to the driver to support more SOCs which have different datactrl register
+> layout.
+>
+> Without this patch datactrl register is updated with wrong ddrmode mask on non
+> ST SOCs, resulting in card detection failures.
 
-What do you mean? Do you mean using:
+The above statement seems not correct. We don't have any issues
+currently, right. :-)
 
-ioread32_rep(io, buf, 1)?
+Kind regards
+Ulf Hansson
 
-Notice this is totally equivalent to readsl() in arm/include/asm/io.h:
-
-#define readsl(p,d,l)           __raw_readsl(p,d,l)
-#define ioread32_rep(p,d,c)     __raw_readsl(p,d,c)
-
-The semantic effect is switching from readl() -> readsl() or
-conversely ioread32 -> ioread32_rep() which will use
-__raw accessors in native endianness rather than LE access.
-
-Which is what you want if the bus will do byte swapping. Which
-we don't know if it does, because noone has such a system and
-can verify.
-
-If the native bus is not byte swapping this will just force you to
-use cpu_to_le32() on the result. That is not helpful at all.
-
-We need to experiment with real BE hardware with this
-PrimeCell to determine whether to do this, and until that is
-done just don't try to outsmart the hardware by thinking ahead
-and designing for the unknown, that will just fail.
-
-Yours,
-Linus Walleij
+>
+> Signed-off-by: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+> Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
+> ---
+>  drivers/mmc/host/mmci.c | 5 ++++-
+>  1 file changed, 4 insertions(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+> index 23401b0..729105b 100644
+> --- a/drivers/mmc/host/mmci.c
+> +++ b/drivers/mmc/host/mmci.c
+> @@ -59,6 +59,7 @@ static unsigned int fmax = 515633;
+>   *               is asserted (likewise for RX)
+>   * @sdio: variant supports SDIO
+>   * @st_clkdiv: true if using a ST-specific clock divider algorithm
+> + * @datactrl_mask_ddrmode: ddr mode mask in datactrl register.
+>   * @blksz_datactrl16: true if Block size is at b16..b30 position in datactrl register
+>   * @blksz_datactrl4: true if Block size is at b4..b16 position in datactrl
+>   *                  register
+> @@ -74,6 +75,7 @@ struct variant_data {
+>         unsigned int            datalength_bits;
+>         unsigned int            fifosize;
+>         unsigned int            fifohalfsize;
+> +       unsigned int            datactrl_mask_ddrmode;
+>         bool                    sdio;
+>         bool                    st_clkdiv;
+>         bool                    blksz_datactrl16;
+> @@ -152,6 +154,7 @@ static struct variant_data variant_ux500v2 = {
+>         .fifohalfsize           = 8 * 4,
+>         .clkreg                 = MCI_CLK_ENABLE,
+>         .clkreg_enable          = MCI_ST_UX500_HWFCEN,
+> +       .datactrl_mask_ddrmode  = MCI_ST_DPSM_DDRMODE,
+>         .datalength_bits        = 24,
+>         .sdio                   = true,
+>         .st_clkdiv              = true,
+> @@ -779,7 +782,7 @@ static void mmci_start_data(struct mmci_host *host, struct mmc_data *data)
+>                 }
+>
+>         if (host->mmc->ios.timing == MMC_TIMING_UHS_DDR50)
+> -               datactrl |= MCI_ST_DPSM_DDRMODE;
+> +               datactrl |= variant->datactrl_mask_ddrmode;
+>
+>         /*
+>          * Attempt to use DMA operation mode, if this
+> --
+> 1.9.1
+>
