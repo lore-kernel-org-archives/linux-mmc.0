@@ -1,7 +1,7 @@
 From: srinivas.kandagatla@linaro.org
-Subject: [PATCH v5 08/13] mmc: mmci: add edge support to data and command out in variant data.
-Date: Fri, 30 May 2014 18:14:01 +0100
-Message-ID: <1401470041-27154-1-git-send-email-srinivas.kandagatla@linaro.org>
+Subject: [PATCH v5 10/13] mmc: mmci: add f_max to variant structure
+Date: Fri, 30 May 2014 18:14:26 +0100
+Message-ID: <1401470066-27236-1-git-send-email-srinivas.kandagatla@linaro.org>
 References: <1401469918-26817-1-git-send-email-srinivas.kandagatla@linaro.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1401469918-26817-1-git-send-email-srinivas.kandagatla@linaro.org>
@@ -12,63 +12,102 @@ List-Id: linux-mmc@vger.kernel.org
 
 From: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
 
-This patch adds edge support for data and command out to variant structure
-giving more flexibility to the driver to support more SOCs which have
-different clock register layout.
-
-Without this patch other new SOCs like Qcom will have to add more code to
-special case them
+Some of the controller have maximum supported frequency, This patch adds
+support in variant data structure to specify such restrictions. This
+gives more flexibility in calculating the f_max before passing it to
+mmc-core.
 
 Signed-off-by: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
-Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
 ---
- drivers/mmc/host/mmci.c | 6 +++++-
- 1 file changed, 5 insertions(+), 1 deletion(-)
+ drivers/mmc/host/mmci.c | 13 +++++++++++--
+ 1 file changed, 11 insertions(+), 2 deletions(-)
 
 diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index fa3ad83..4c95a9b 100644
+index 8534c29..55d39d2 100644
 --- a/drivers/mmc/host/mmci.c
 +++ b/drivers/mmc/host/mmci.c
-@@ -53,6 +53,7 @@ static unsigned int fmax = 515633;
-  * @clkreg: default value for MCICLOCK register
-  * @clkreg_enable: enable value for MMCICLOCK register
-  * @clkreg_8bit_bus_enable: enable value for 8 bit bus
-+ * @clkreg_neg_edge_enable: enable value for inverted data/cmd output
-  * @datalength_bits: number of bits in the MMCIDATALENGTH register
-  * @fifosize: number of bytes that can be written when MMCI_TXFIFOEMPTY
-  *	      is asserted (likewise for RX)
-@@ -74,6 +75,7 @@ struct variant_data {
- 	unsigned int		clkreg;
- 	unsigned int		clkreg_enable;
- 	unsigned int		clkreg_8bit_bus_enable;
-+	unsigned int		clkreg_neg_edge_enable;
- 	unsigned int		datalength_bits;
- 	unsigned int		fifosize;
- 	unsigned int		fifohalfsize;
-@@ -143,6 +145,7 @@ static struct variant_data variant_ux500 = {
- 	.clkreg			= MCI_CLK_ENABLE,
- 	.clkreg_enable		= MCI_ST_UX500_HWFCEN,
- 	.clkreg_8bit_bus_enable = MCI_ST_8BIT_BUS,
-+	.clkreg_neg_edge_enable	= MCI_ST_UX500_NEG_EDGE,
- 	.datalength_bits	= 24,
+@@ -67,6 +67,7 @@ static unsigned int fmax = 515633;
+  * @blksz_datactrl4: true if Block size is at b4..b16 position in datactrl
+  *		     register
+  * @pwrreg_powerup: power up value for MMCIPOWER register
++ * @f_max: maximum clk frequency supported by the controller.
+  * @signal_direction: input/out direction of bus signals can be indicated
+  * @pwrreg_clkgate: MMCIPOWER register must be used to gate the clock
+  * @busy_detect: true if busy detection on dat0 is supported
+@@ -87,6 +88,7 @@ struct variant_data {
+ 	bool			blksz_datactrl16;
+ 	bool			blksz_datactrl4;
+ 	u32			pwrreg_powerup;
++	u32			f_max;
+ 	bool			signal_direction;
+ 	bool			pwrreg_clkgate;
+ 	bool			busy_detect;
+@@ -98,6 +100,7 @@ static struct variant_data variant_arm = {
+ 	.fifohalfsize		= 8 * 4,
+ 	.datalength_bits	= 16,
+ 	.pwrreg_powerup		= MCI_PWR_UP,
++	.f_max			= 100000000,
+ };
+ 
+ static struct variant_data variant_arm_extended_fifo = {
+@@ -105,6 +108,7 @@ static struct variant_data variant_arm_extended_fifo = {
+ 	.fifohalfsize		= 64 * 4,
+ 	.datalength_bits	= 16,
+ 	.pwrreg_powerup		= MCI_PWR_UP,
++	.f_max			= 100000000,
+ };
+ 
+ static struct variant_data variant_arm_extended_fifo_hwfc = {
+@@ -113,6 +117,7 @@ static struct variant_data variant_arm_extended_fifo_hwfc = {
+ 	.clkreg_enable		= MCI_ARM_HWFCEN,
+ 	.datalength_bits	= 16,
+ 	.pwrreg_powerup		= MCI_PWR_UP,
++	.f_max			= 100000000,
+ };
+ 
+ static struct variant_data variant_u300 = {
+@@ -123,6 +128,7 @@ static struct variant_data variant_u300 = {
+ 	.datalength_bits	= 16,
+ 	.sdio			= true,
+ 	.pwrreg_powerup		= MCI_PWR_ON,
++	.f_max			= 100000000,
+ 	.signal_direction	= true,
+ 	.pwrreg_clkgate		= true,
+ 	.pwrreg_nopower		= true,
+@@ -136,6 +142,7 @@ static struct variant_data variant_nomadik = {
  	.sdio			= true,
  	.st_clkdiv		= true,
-@@ -159,6 +162,7 @@ static struct variant_data variant_ux500v2 = {
- 	.clkreg			= MCI_CLK_ENABLE,
- 	.clkreg_enable		= MCI_ST_UX500_HWFCEN,
- 	.clkreg_8bit_bus_enable = MCI_ST_8BIT_BUS,
-+	.clkreg_neg_edge_enable	= MCI_ST_UX500_NEG_EDGE,
- 	.datactrl_mask_ddrmode	= MCI_ST_DPSM_DDRMODE,
- 	.datalength_bits	= 24,
+ 	.pwrreg_powerup		= MCI_PWR_ON,
++	.f_max			= 100000000,
+ 	.signal_direction	= true,
+ 	.pwrreg_clkgate		= true,
+ 	.pwrreg_nopower		= true,
+@@ -152,6 +159,7 @@ static struct variant_data variant_ux500 = {
  	.sdio			= true,
-@@ -313,7 +317,7 @@ static void mmci_set_clkreg(struct mmci_host *host, unsigned int desired)
- 		clk |= variant->clkreg_8bit_bus_enable;
- 
- 	if (host->mmc->ios.timing == MMC_TIMING_UHS_DDR50)
--		clk |= MCI_ST_UX500_NEG_EDGE;
-+		clk |= variant->clkreg_neg_edge_enable;
- 
- 	mmci_write_clkreg(host, clk);
- }
+ 	.st_clkdiv		= true,
+ 	.pwrreg_powerup		= MCI_PWR_ON,
++	.f_max			= 100000000,
+ 	.signal_direction	= true,
+ 	.pwrreg_clkgate		= true,
+ 	.busy_detect		= true,
+@@ -171,6 +179,7 @@ static struct variant_data variant_ux500v2 = {
+ 	.st_clkdiv		= true,
+ 	.blksz_datactrl16	= true,
+ 	.pwrreg_powerup		= MCI_PWR_ON,
++	.f_max			= 100000000,
+ 	.signal_direction	= true,
+ 	.pwrreg_clkgate		= true,
+ 	.busy_detect		= true,
+@@ -1471,8 +1480,8 @@ static int mmci_probe(struct amba_device *dev,
+ 	 * so we try to adjust the clock down to this,
+ 	 * (if possible).
+ 	 */
+-	if (host->mclk > 100000000) {
+-		ret = clk_set_rate(host->clk, 100000000);
++	if (host->mclk > variant->f_max) {
++		ret = clk_set_rate(host->clk, variant->f_max);
+ 		if (ret < 0)
+ 			goto clk_disable;
+ 		host->mclk = clk_get_rate(host->clk);
 -- 
 1.9.1
