@@ -1,85 +1,60 @@
-From: Stephen Boyd <sboyd@codeaurora.org>
-Subject: Re: [PATCH v3 13/13] mmc: mmci: Add Qcom specific pio_read function.
-Date: Thu, 29 May 2014 18:30:42 -0700
-Message-ID: <5387DF42.5020506@codeaurora.org>
-References: <1400849362-7007-1-git-send-email-srinivas.kandagatla@linaro.org> <1400849589-7626-1-git-send-email-srinivas.kandagatla@linaro.org> <537FD9A7.3010100@codeaurora.org> <5385EB42.1060604@linaro.org> <CACRpkdb_ozxL3wAVf7FJr-0A2tWGHkfXeXf5sWaW6h_yzK4QvA@mail.gmail.com>
+From: Jingoo Han <jg1.han@samsung.com>
+Subject: [PATCH] mmc: sdhci-s3c: call sdhci_card_event() instead of card tasklet
+Date: Fri, 30 May 2014 12:56:21 +0900
+Message-ID: <000c01cf7bbb$1e190250$5a4b06f0$%han@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=US-ASCII
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
-In-Reply-To: <CACRpkdb_ozxL3wAVf7FJr-0A2tWGHkfXeXf5sWaW6h_yzK4QvA@mail.gmail.com>
-Sender: linux-arm-msm-owner@vger.kernel.org
-To: Linus Walleij <linus.walleij@linaro.org>
-Cc: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>, Russell King <linux@arm.linux.org.uk>, Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-msm@vger.kernel.org" <linux-arm-msm@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout1.samsung.com ([203.254.224.24]:21602 "EHLO
+	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751919AbaE3D4i (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 29 May 2014 23:56:38 -0400
+Received: from epcpsbgr3.samsung.com
+ (u143.gpu120.samsung.co.kr [203.254.230.143])
+ by mailout1.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+ (7.0.4.24.0) 64bit (built Nov 17 2011))
+ with ESMTP id <0N6D00JZAC9XMIB0@mailout1.samsung.com> for
+ linux-mmc@vger.kernel.org; Fri, 30 May 2014 12:56:21 +0900 (KST)
+Content-language: ko
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: 'Ulf Hansson' <ulf.hansson@linaro.org>, 'Chris Ball' <chris@printf.net>
+Cc: linux-mmc@vger.kernel.org, 'Ben Dooks' <ben-linux@fluff.org>, 'Jaehoon Chung' <jh80.chung@samsung.com>, 'Seungwon Jeon' <tgih.jun@samsung.com>, 'Jingoo Han' <jg1.han@samsung.com>
 
-On 05/29/14 00:43, Linus Walleij wrote:
-> On Wed, May 28, 2014 at 3:57 PM, Srinivas Kandagatla
-> <srinivas.kandagatla@linaro.org> wrote:
->
->>> This doesn't look endianness agnostic. Shouldn't we use ioread32_rep()
->>> to read this fifo?
->> Is'nt readl endianess aware?
-> At least once a year read through arch/arm/include/asm/io.h
->
-> static inline u32 __raw_readl(const volatile void __iomem *addr)
-> {
->         u32 val;
->         asm volatile("ldr %1, %0"
->                      : "+Qo" (*(volatile u32 __force *)addr),
->                        "=r" (val));
->         return val;
-> }
-> (...)
-> #define readl_relaxed(c) ({ u32 __r = le32_to_cpu((__force __le32) \
->                                         __raw_readl(c)); __r; })
-> (...)
-> #define readl(c)                ({ u32 __v = readl_relaxed(c);
-> __iormb(); __v; })
->
-> readl() reads in little endian.
->
-> All PrimeCells are little endian, trouble would occur if and only if
-> this cell was
-> used on a big endian CPU, like an ARM used in BE mode, if the macros
-> didn't look exactly like this.
->
-> Thanks to the fact that readl() is always LE things work smoothly.
->
-> Then to the question whether to use ioread32() instead:
->
-> #define ioread32(p)     ({ unsigned int __v = le32_to_cpu((__force
-> __le32)__raw_readl(p)); __iormb(); __v; })
->
-> Same thing as readl(). The only reason to use ioread32() rather than
-> readl() is that some archs do not support readl() but only ioread32().
-> However for that to be a problem, these archs must be utilizing that
-> primecell! And if they do there are two ways to solve it: either change
-> the entire world to use ioread/write32 or simply just define readl() and
-> friends for that arch in its io.h file.
->
-> I'd say don't touch it right now.
+The card tasklet was removed by the commit 3560db8 (mmc: sdhci:
+push card_tasklet into threaded irq handler). However, the task
+let has been used by sdhci_s3c_notify_change() in order to handle
+GPIO detection. Then, it calls sdhci_tasklet_card().
 
-Hm... that doesn't sound right. Please see this thread on lkml[1], and
-also this video from Ben H.[2] My understanding is that this is a fifo
-so I would think we want to use the ioread32_rep() function here (or
-other "string" io functionality). Otherwise we're going to byteswap the
-data that we're trying to interpret as a buffer and big endian CPUs
-won't work.
+The card tasklet eventually called sdhci_card_event(). Thus,
+the sdhci_card_event() should be called directly instead of
+the card tasklet.
 
->
->> we can not use ioread32_rep because as we can not reliably know how many
->> words we should read? FIFOCNT would have helped but its not advised to be
->> use as per the datasheet.
-> You are right. readsl() or ioread32_rep() isn't used for this reason.
->
->
+This patch also fixes the following build error.
+drivers/mmc/host/sdhci-s3c.c: In function 'sdhci_s3c_notify_change'
+drivers/mmc/host/sdhci-s3c.c:402:25: error: 'struct sdhci_host' has no member named 'card_tasklet'
 
-We could always use a size of 1 right?
+Signed-off-by: Jingoo Han <jg1.han@samsung.com>
+---
+ drivers/mmc/host/sdhci-s3c.c |    3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
 
-[1] https://lkml.org/lkml/2012/10/22/671
-[2] http://linuxplumbers.ubicast.tv/videos/big-and-little-endian-inside-out/
-
+diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
+index 781b8a9..4386e91 100644
+--- a/drivers/mmc/host/sdhci-s3c.c
++++ b/drivers/mmc/host/sdhci-s3c.c
+@@ -399,7 +399,8 @@ static void sdhci_s3c_notify_change(struct platform_device *dev, int state)
+ 			clk_disable_unprepare(sc->clk_io);
+ #endif
+ 		}
+-		tasklet_schedule(&host->card_tasklet);
++		host->mmc->ops->card_event(host->mmc);
++		mmc_detect_change(host->mmc, msecs_to_jiffies(200));
+ 		spin_unlock_irqrestore(&host->lock, flags);
+ 	}
+ }
 -- 
-Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum,
-hosted by The Linux Foundation
+1.7.10.4
+
+
