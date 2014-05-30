@@ -1,66 +1,58 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCHv3 3/4] mmc: dw_mmc: remove the "supports-highspeed"
- property.
-Date: Fri, 30 May 2014 17:12:25 +0900
-Message-ID: <53883D69.4010701@samsung.com>
-References: <1401255351-17653-1-git-send-email-jh80.chung@samsung.com>
- <1401255351-17653-4-git-send-email-jh80.chung@samsung.com>
- <CAPDyKFpTTYHtkKjFmbPi6P_xfdfd8Fv8qfpKZMfpQBppRNZLwg@mail.gmail.com>
+From: Hans de Goede <hdegoede@redhat.com>
+Subject: Re: RFC: representing sdio devices oob interrupt, clks, etc. in device
+ tree
+Date: Fri, 30 May 2014 10:17:05 +0200
+Message-ID: <53883E81.3060109@redhat.com>
+References: <53824294.1090609@redhat.com> <20140526103807.GV22111@sirena.org.uk> <538321AB.4050006@redhat.com> <20140526142225.GF22111@sirena.org.uk> <538356DA.7090302@redhat.com> <CAPDyKFqgvaPhMH3PFh7+6u+Am6pWYhxBFdvUZFfekUfpFJxdKw@mail.gmail.com> <53838023.2080807@redhat.com> <CAPDyKFpg_2RQabM044C1hsNTcuxdVVOvw0ZONVRdysk=eom8UA@mail.gmail.com> <5385AF94.90004@redhat.com> <5385CCE6.9070204@gmail.com> <20140528164326.GB5099@sirena.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-reply-to: <CAPDyKFpTTYHtkKjFmbPi6P_xfdfd8Fv8qfpKZMfpQBppRNZLwg@mail.gmail.com>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Ludovic Desroches <ludovic.desroches@atmel.com>, "tgih.jun@samsung.com" <tgih.jun@samsung.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mx1.redhat.com ([209.132.183.28]:22860 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1755222AbaE3ISE (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 30 May 2014 04:18:04 -0400
+In-Reply-To: <20140528164326.GB5099@sirena.org.uk>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Mark Brown <broonie@kernel.org>, Tomasz Figa <tomasz.figa@gmail.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Chen-Yu Tsai <wens@csie.org>, Arend van Spriel <arend@broadcom.com>, Sascha Hauer <s.hauer@pengutronix.de>, Chris Ball <chris@printf.net>, Maxime Ripard <maxime.ripard@free-electrons.com>, linux-mmc <linux-mmc@vger.kernel.org>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>, devicetree <devicetree@vger.kernel.org>, Olof Johansson <olof@lixom.net>, Russell King - ARM Linux <linux@arm.linux.org.uk>, Fabio Estevam <festevam@gmail.com>, Arnd Bergmann <arnd@arndb.de>, Jyri Sarha <jsarha@ti.com>, Linus Walleij <linus.walleij@linaro.org>
 
-Hi, Ulf.
+Hi,
 
-On 05/30/2014 05:01 PM, Ulf Hansson wrote:
-> On 28 May 2014 07:35, Jaehoon Chung <jh80.chung@samsung.com> wrote:
->> Removed the parser for "supports-highspeed".
->> It can be parsed with "cap-mmc-highsped" or "cap-sd-highspeed" at
->> mmc_of_parse().
->>
->> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
->> ---
->>  drivers/mmc/host/dw_mmc.c |    3 ---
->>  1 file changed, 3 deletions(-)
->>
->> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
->> index 3285bdd..34b5210 100644
->> --- a/drivers/mmc/host/dw_mmc.c
->> +++ b/drivers/mmc/host/dw_mmc.c
->> @@ -2281,9 +2281,6 @@ static struct dw_mci_board *dw_mci_parse_dt(struct dw_mci *host)
->>                         return ERR_PTR(ret);
->>         }
->>
->> -       if (of_find_property(np, "supports-highspeed", NULL))
->> -               pdata->caps |= MMC_CAP_SD_HIGHSPEED | MMC_CAP_MMC_HIGHSPEED;
->> -
+On 05/28/2014 06:43 PM, Mark Brown wrote:
+> On Wed, May 28, 2014 at 01:47:50PM +0200, Tomasz Figa wrote:
+
+<snip>
+
+>> IMHO, all we need here is a way to tell the MMC (or HSIC) core when to
+>> look for a new device and when not (e.g. power down the host controller
+>> completely). Anything else, including proper power sequencing is up to
+>> the platform driver of such non-discoverable device - it's only its host
+>> interface that is discoverable when enabled. I believe this simplistic
+>> approach would lead to much less new code added, better reusability of
+>> code (power sequencing independent of host interface) and no need to
+>> create overly generic code, which usually turns out to be not generic
+>> enough.
 > 
-> According to DT guys, normally we shouldn't remove DT bindings. Thus,
-> you need to keep this, unless you can get some of the DT guys to ack
-> it.
-As you mentioned, this patch didn't need, right?
+> We then have the problem of working out where that platform driver comes
+> from, for many of these buses the device can be completely described as
+> just a device on the parent bus with some resources connected.
 
-> 
-> Though, you still want to move the DTs to use common mmc bindings. And
-> you could mark the documentation of the above binding as deprecated.
-I added the comment for deprecated into dw-mmc dt-binding doc file.
-"[PATCHv3,4/4] ARM: dts: replace the slot property into slot sub-node for dwmmc."
+Right, I think what we should do is focus on the DT description for this
+first and then worry about the implementation later.
 
-I think this patch can be discarded. then everything is ok.!? :)
+I believe that at the DT level this all should be represented as a child-node
+under the host controller. Following that reasoning it makes perfect sense
+to just focus on mmc for now, while keeping in mind that it would be nice if
+what comes out of this will be re-usable.
 
-If i'm wrong, let me know, plz.
+I've done a detailed, updated proposal for the mmc case (with admittedly
+some implementation comments in there) in my last mail, but unfortunately
+I've seen little response to that. Can people please reply to my
+proposal where we've 2 levels of child nodes, one per mmc slot, and then the
+slot nodes has card / sdio-func child nodes, see my last mail.
 
-Thank you for sharing the information.
+Regards,
 
-Best Regards,
-Jaehoon Chung
-> 
-> Kind regards
-> Ulf Hansson
-> 
+Hans
