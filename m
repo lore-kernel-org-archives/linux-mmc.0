@@ -1,32 +1,81 @@
-From: Ben Dooks <ben@trinity.fluff.org>
-Subject: Re: [PATCH 1/3] mmc: block: add block number limitation flag for
- lultiple block read
-Date: Fri, 30 May 2014 12:46:54 +0100
-Message-ID: <20140530114654.GF6241@trinity.fluff.org>
-References: <87ppivpn25.wl%kuninori.morimoto.gx@renesas.com>
- <87oayfpn14.wl%kuninori.morimoto.gx@renesas.com>
- <538864C1.2040203@samsung.com>
+From: Seungwon Jeon <tgih.jun@samsung.com>
+Subject: RE: [PATCHv3 3/4] mmc: dw_mmc: remove the "supports-highspeed"
+ property.
+Date: Fri, 30 May 2014 21:51:56 +0900
+Message-ID: <001a01cf7c05$f02a2bd0$d07e8370$%jun@samsung.com>
+References: <1401255351-17653-1-git-send-email-jh80.chung@samsung.com>
+ <1401255351-17653-4-git-send-email-jh80.chung@samsung.com>
+ <CAPDyKFpTTYHtkKjFmbPi6P_xfdfd8Fv8qfpKZMfpQBppRNZLwg@mail.gmail.com>
+ <53883D69.4010701@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-sh-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <538864C1.2040203@samsung.com>
-Sender: linux-sh-owner@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>, Chris Ball <cjb@laptop.org>, Simon <horms@verge.net.au>, Magnus <magnus.damm@gmail.com>, Linux-SH <linux-sh@vger.kernel.org>, Kuninori Morimoto <kuninori.morimoto.gx@gmail.com>, linux-mmc@vger.kernel.org
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-reply-to: <53883D69.4010701@samsung.com>
+Content-language: ko
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: 'Jaehoon Chung' <jh80.chung@samsung.com>, 'Ulf Hansson' <ulf.hansson@linaro.org>
+Cc: 'linux-mmc' <linux-mmc@vger.kernel.org>, 'Chris Ball' <chris@printf.net>, 'Ludovic Desroches' <ludovic.desroches@atmel.com>, devicetree@vger.kernel.org, 'linux-samsung-soc' <linux-samsung-soc@vger.kernel.org>, cpgs@samsung.com
 List-Id: linux-mmc@vger.kernel.org
 
-On Fri, May 30, 2014 at 08:00:17PM +0900, Jaehoon Chung wrote:
-> Hi, Kuninori.
+On Fri, May 30, 2014, Jaehoon Chung wrote:
+> Hi, Ulf.
 > 
-> Subject has the typo. lultiple -> multiple?
-> I didn't know why you need this patch. Would you use the MMC_CAP2_NO_MULTI_READ?
-> And I think...it's not good that used the card's capability flags to fix your H/W bug.
+> On 05/30/2014 05:01 PM, Ulf Hansson wrote:
+> > On 28 May 2014 07:35, Jaehoon Chung <jh80.chung@samsung.com> wrote:
+> >> Removed the parser for "supports-highspeed".
+> >> It can be parsed with "cap-mmc-highsped" or "cap-sd-highspeed" at
+> >> mmc_of_parse().
+> >>
+> >> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+> >> ---
+> >>  drivers/mmc/host/dw_mmc.c |    3 ---
+> >>  1 file changed, 3 deletions(-)
+> >>
+> >> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> >> index 3285bdd..34b5210 100644
+> >> --- a/drivers/mmc/host/dw_mmc.c
+> >> +++ b/drivers/mmc/host/dw_mmc.c
+> >> @@ -2281,9 +2281,6 @@ static struct dw_mci_board *dw_mci_parse_dt(struct dw_mci *host)
+> >>                         return ERR_PTR(ret);
+> >>         }
+> >>
+> >> -       if (of_find_property(np, "supports-highspeed", NULL))
+> >> -               pdata->caps |= MMC_CAP_SD_HIGHSPEED | MMC_CAP_MMC_HIGHSPEED;
+> >> -
+> >
+> > According to DT guys, normally we shouldn't remove DT bindings. Thus,
+> > you need to keep this, unless you can get some of the DT guys to ack
+> > it.
+> As you mentioned, this patch didn't need, right?
+> 
+> >
+> > Though, you still want to move the DTs to use common mmc bindings. And
+> > you could mark the documentation of the above binding as deprecated.
+> I added the comment for deprecated into dw-mmc dt-binding doc file.
+> "[PATCHv3,4/4] ARM: dts: replace the slot property into slot sub-node for dwmmc."
+> 
+> I think this patch can be discarded. then everything is ok.!? :)
+Once decided to turn common mmc bindings instead of driver-specific,
+host driver shall not need old one.
+I think we can remove it.
 
-If you do that, then there is around a 8-10x performance penalty.
+Thanks,
+Seungwon Jeon
 
--- 
-Ben Dooks, ben@fluff.org, http://www.fluff.org/ben/
-
-Large Hadron Colada: A large Pina Colada that makes the universe disappear.
-
+> 
+> If i'm wrong, let me know, plz.
+> 
+> Thank you for sharing the information.
+> 
+> Best Regards,
+> Jaehoon Chung
+> >
+> > Kind regards
+> > Ulf Hansson
+> >
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
