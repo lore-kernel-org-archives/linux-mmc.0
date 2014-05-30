@@ -1,7 +1,7 @@
 From: srinivas.kandagatla@linaro.org
-Subject: [PATCH v5 03/13] mmc: mmci: Add Qualcomm specific register defines.
-Date: Fri, 30 May 2014 18:13:08 +0100
-Message-ID: <1401469988-26947-1-git-send-email-srinivas.kandagatla@linaro.org>
+Subject: [PATCH v5 04/13] mmc: mmci: Add enough delay between writes to CMD register.
+Date: Fri, 30 May 2014 18:13:20 +0100
+Message-ID: <1401470000-26989-1-git-send-email-srinivas.kandagatla@linaro.org>
 References: <1401469918-26817-1-git-send-email-srinivas.kandagatla@linaro.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1401469918-26817-1-git-send-email-srinivas.kandagatla@linaro.org>
@@ -12,49 +12,36 @@ List-Id: linux-mmc@vger.kernel.org
 
 From: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
 
-This patch adds a Qualcomm SD Card controller specific register variations
-to header file. Qualcomm SDCC controller is pl180, with slight changes in
-the register layout from standard pl180 register set.
+On Qcom SD Card controller POWER, CLKCTRL, DATACTRL and COMMAND registers
+should be updated in MCLK domain, and writes to these registers must be
+separated by three MCLK cycles. This resitriction is not applicable for
+other registers. Any subsequent writes to these register will be ignored
+until 3 MCLK have passed.
+
+One usec delay between two CMD register writes is not sufficient in the
+card identification phase where the CCLK is very low. This patch replaces
+a static 1 usec delay to use mmci_reg_delay function which can provide
+correct delay depending on the cclk frequency.
+
+Without this patch the card is not detected.
 
 Signed-off-by: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
 ---
- drivers/mmc/host/mmci.h | 17 +++++++++++++++++
- 1 file changed, 17 insertions(+)
+ drivers/mmc/host/mmci.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
-index cd83ca3..706eb513 100644
---- a/drivers/mmc/host/mmci.h
-+++ b/drivers/mmc/host/mmci.h
-@@ -41,6 +41,15 @@
- /* Modified PL180 on Versatile Express platform */
- #define MCI_ARM_HWFCEN		BIT(12)
+diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+index a38e714..ed20bf5 100644
+--- a/drivers/mmc/host/mmci.c
++++ b/drivers/mmc/host/mmci.c
+@@ -810,7 +810,7 @@ mmci_start_command(struct mmci_host *host, struct mmc_command *cmd, u32 c)
  
-+/* Modified on Qualcomm Integrations */
-+#define MCI_QCOM_CLK_WIDEBUS_8	(BIT(10) | BIT(11))
-+#define MCI_QCOM_CLK_FLOWENA	BIT(12)
-+#define MCI_QCOM_CLK_INVERTOUT	BIT(13)
-+
-+/* select in latch data and command in */
-+#define MCI_QCOM_CLK_SELECT_IN_FBCLK	BIT(15)
-+#define MCI_QCOM_CLK_SELECT_IN_DDR_MODE	(BIT(14) | BIT(15))
-+
- #define MMCIARGUMENT		0x008
- #define MMCICOMMAND		0x00c
- #define MCI_CPSM_RESPONSE	BIT(6)
-@@ -54,6 +63,14 @@
- #define MCI_ST_NIEN		BIT(13)
- #define MCI_ST_CE_ATACMD	BIT(14)
+ 	if (readl(base + MMCICOMMAND) & MCI_CPSM_ENABLE) {
+ 		writel(0, base + MMCICOMMAND);
+-		udelay(1);
++		mmci_reg_delay(host);
+ 	}
  
-+/* Modified on Qualcomm Integrations */
-+#define MCI_QCOM_CSPM_DATCMD		BIT(12)
-+#define MCI_QCOM_CSPM_MCIABORT		BIT(13)
-+#define MCI_QCOM_CSPM_CCSENABLE		BIT(14)
-+#define MCI_QCOM_CSPM_CCSDISABLE	BIT(15)
-+#define MCI_QCOM_CSPM_AUTO_CMD19	BIT(16)
-+#define MCI_QCOM_CSPM_AUTO_CMD21	BIT(21)
-+
- #define MMCIRESPCMD		0x010
- #define MMCIRESPONSE0		0x014
- #define MMCIRESPONSE1		0x018
+ 	c |= cmd->opcode | MCI_CPSM_ENABLE;
 -- 
 1.9.1
