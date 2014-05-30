@@ -1,84 +1,73 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v4 06/13] mmc: mmci: add ddrmode mask to variant data
-Date: Fri, 30 May 2014 11:35:01 +0200
-Message-ID: <CAPDyKFraGdp2QUHzhjoe5mO6ZyuS08notgkxpRB5A_GpYtyXTw@mail.gmail.com>
+Subject: Re: [PATCH v4 03/13] mmc: mmci: Add Qualcomm Id to amba id table
+Date: Fri, 30 May 2014 11:39:00 +0200
+Message-ID: <CAPDyKFqf-=WJ7RRpk-n4zc6rm1gEuW42Jc3zzCkWSL6mdYFh1g@mail.gmail.com>
 References: <1401284608-16428-1-git-send-email-srinivas.kandagatla@linaro.org>
-	<1401284807-16686-1-git-send-email-srinivas.kandagatla@linaro.org>
+	<1401284779-16563-1-git-send-email-srinivas.kandagatla@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qg0-f44.google.com ([209.85.192.44]:61476 "EHLO
-	mail-qg0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754750AbaE3JfB (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 30 May 2014 05:35:01 -0400
-Received: by mail-qg0-f44.google.com with SMTP id i50so4591161qgf.31
-        for <linux-mmc@vger.kernel.org>; Fri, 30 May 2014 02:35:01 -0700 (PDT)
-In-Reply-To: <1401284807-16686-1-git-send-email-srinivas.kandagatla@linaro.org>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: <1401284779-16563-1-git-send-email-srinivas.kandagatla@linaro.org>
+Sender: linux-arm-msm-owner@vger.kernel.org
 To: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
 Cc: Russell King <linux@arm.linux.org.uk>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-msm@vger.kernel.org" <linux-arm-msm@vger.kernel.org>, Linus Walleij <linus.walleij@linaro.org>
+List-Id: linux-mmc@vger.kernel.org
 
 On 28 May 2014 15:46,  <srinivas.kandagatla@linaro.org> wrote:
 > From: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
 >
-> This patch adds ddrmode mask to variant structure giving more flexibility
-> to the driver to support more SOCs which have different datactrl register
-> layout.
+> This patch adds a fake Qualcomm ID 0x00051180 to the amba_ids, as Qualcomm
+> SDCC controller is pl180, but amba id registers read 0x0's.
+> The plan is to remove SDCC driver totally and use mmci as the main SD
+> controller driver for Qualcomm SOCs.
 >
-> Without this patch datactrl register is updated with wrong ddrmode mask on non
-> ST SOCs, resulting in card detection failures.
+> Signed-off-by: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+> Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
+> ---
+>  drivers/mmc/host/mmci.c | 14 ++++++++++++++
+>  1 file changed, 14 insertions(+)
+>
+> diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+> index a38e714..86f25a9 100644
+> --- a/drivers/mmc/host/mmci.c
+> +++ b/drivers/mmc/host/mmci.c
+> @@ -160,6 +160,14 @@ static struct variant_data variant_ux500v2 = {
+>         .pwrreg_nopower         = true,
+>  };
+>
+> +static struct variant_data variant_qcom = {
+> +       .fifosize               = 16 * 4,
+> +       .fifohalfsize           = 8 * 4,
+> +       .clkreg                 = MCI_CLK_ENABLE,
+> +       .datalength_bits        = 24,
+> +       .pwrreg_powerup         = MCI_PWR_UP,
+> +};
+> +
+>  static int mmci_card_busy(struct mmc_host *mmc)
+>  {
+>         struct mmci_host *host = mmc_priv(mmc);
+> @@ -1750,6 +1758,12 @@ static struct amba_id mmci_ids[] = {
+>                 .mask   = 0xf0ffffff,
+>                 .data   = &variant_ux500v2,
+>         },
+> +       /* Qualcomm variants */
+> +       {
+> +               .id     = 0x00051180,
+> +               .mask   = 0x000fffff,
+> +               .data   = &variant_qcom,
+> +       },
+>         { 0, 0 },
+>  };
 
-The above statement seems not correct. We don't have any issues
-currently, right. :-)
+Shouldn't this patch be moved to very end of this patchset?
+
+If we would apply this patch on it's own - the Qcom variant wouldn't
+work, right?
 
 Kind regards
 Ulf Hansson
 
 >
-> Signed-off-by: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
-> Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
-> ---
->  drivers/mmc/host/mmci.c | 5 ++++-
->  1 file changed, 4 insertions(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-> index 23401b0..729105b 100644
-> --- a/drivers/mmc/host/mmci.c
-> +++ b/drivers/mmc/host/mmci.c
-> @@ -59,6 +59,7 @@ static unsigned int fmax = 515633;
->   *               is asserted (likewise for RX)
->   * @sdio: variant supports SDIO
->   * @st_clkdiv: true if using a ST-specific clock divider algorithm
-> + * @datactrl_mask_ddrmode: ddr mode mask in datactrl register.
->   * @blksz_datactrl16: true if Block size is at b16..b30 position in datactrl register
->   * @blksz_datactrl4: true if Block size is at b4..b16 position in datactrl
->   *                  register
-> @@ -74,6 +75,7 @@ struct variant_data {
->         unsigned int            datalength_bits;
->         unsigned int            fifosize;
->         unsigned int            fifohalfsize;
-> +       unsigned int            datactrl_mask_ddrmode;
->         bool                    sdio;
->         bool                    st_clkdiv;
->         bool                    blksz_datactrl16;
-> @@ -152,6 +154,7 @@ static struct variant_data variant_ux500v2 = {
->         .fifohalfsize           = 8 * 4,
->         .clkreg                 = MCI_CLK_ENABLE,
->         .clkreg_enable          = MCI_ST_UX500_HWFCEN,
-> +       .datactrl_mask_ddrmode  = MCI_ST_DPSM_DDRMODE,
->         .datalength_bits        = 24,
->         .sdio                   = true,
->         .st_clkdiv              = true,
-> @@ -779,7 +782,7 @@ static void mmci_start_data(struct mmci_host *host, struct mmc_data *data)
->                 }
->
->         if (host->mmc->ios.timing == MMC_TIMING_UHS_DDR50)
-> -               datactrl |= MCI_ST_DPSM_DDRMODE;
-> +               datactrl |= variant->datactrl_mask_ddrmode;
->
->         /*
->          * Attempt to use DMA operation mode, if this
 > --
 > 1.9.1
 >
