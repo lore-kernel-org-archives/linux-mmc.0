@@ -1,68 +1,85 @@
-From: Loc Ho <lho@apm.com>
-Subject: Re: [PATCH 1/3] Documentation: Update Arasan SDHC documentation for
- the APM X-Gene SoC SDHC DTS binding
-Date: Thu, 29 May 2014 11:54:52 -0700
-Message-ID: <CAPw-ZTn_gN4k24JcWWnMSi5LgRdRm30=-BsNSVmx6ymN-2=GFw@mail.gmail.com>
-References: <1400398918-1502-1-git-send-email-lho@apm.com>
-	<1400398918-1502-2-git-send-email-lho@apm.com>
-	<20140519123230.GA3663@leverpostej>
+From: Stephen Boyd <sboyd@codeaurora.org>
+Subject: Re: [PATCH v3 13/13] mmc: mmci: Add Qcom specific pio_read function.
+Date: Thu, 29 May 2014 18:30:42 -0700
+Message-ID: <5387DF42.5020506@codeaurora.org>
+References: <1400849362-7007-1-git-send-email-srinivas.kandagatla@linaro.org> <1400849589-7626-1-git-send-email-srinivas.kandagatla@linaro.org> <537FD9A7.3010100@codeaurora.org> <5385EB42.1060604@linaro.org> <CACRpkdb_ozxL3wAVf7FJr-0A2tWGHkfXeXf5sWaW6h_yzK4QvA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from exprod5og108.obsmtp.com ([64.18.0.186]:34560 "HELO
-	exprod5og108.obsmtp.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with SMTP id S1752268AbaE2Syx (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 29 May 2014 14:54:53 -0400
-Received: by mail-qg0-f52.google.com with SMTP id a108so2248536qge.25
-        for <linux-mmc@vger.kernel.org>; Thu, 29 May 2014 11:54:52 -0700 (PDT)
-In-Reply-To: <20140519123230.GA3663@leverpostej>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: <CACRpkdb_ozxL3wAVf7FJr-0A2tWGHkfXeXf5sWaW6h_yzK4QvA@mail.gmail.com>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: Linus Walleij <linus.walleij@linaro.org>
+Cc: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>, Russell King <linux@arm.linux.org.uk>, Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-msm@vger.kernel.org" <linux-arm-msm@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Mark Rutland <mark.rutland@arm.com>
-Cc: "chris@printf.net" <chris@printf.net>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, "michal.simek@xilinx.com" <michal.simek@xilinx.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "jcm@redhat.com" <jcm@redhat.com>, "patches@apm.com" <patches@apm.com>
 
-Hi Mark,
-
->> diff --git a/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
->> index 98ee2ab..8fc4cc4 100644
->> --- a/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
->> +++ b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
->> @@ -8,14 +8,17 @@ Device Tree Bindings for the Arasan SDHCI Controller
->>    [3] Documentation/devicetree/bindings/interrupt-controller/interrupts.txt
->>
->>  Required Properties:
->> -  - compatible: Compatibility string. Must be 'arasan,sdhci-8.9a'
->> +  - compatible: Compatibility string. Must be 'arasan,sdhci-8.9a' or
->> +                'xgene,arasan,sdhci-8.9a'
+On 05/29/14 00:43, Linus Walleij wrote:
+> On Wed, May 28, 2014 at 3:57 PM, Srinivas Kandagatla
+> <srinivas.kandagatla@linaro.org> wrote:
 >
-> "xgene" is not a vendor, nor is it documented as such.
+>>> This doesn't look endianness agnostic. Shouldn't we use ioread32_rep()
+>>> to read this fifo?
+>> Is'nt readl endianess aware?
+> At least once a year read through arch/arm/include/asm/io.h
+>
+> static inline u32 __raw_readl(const volatile void __iomem *addr)
+> {
+>         u32 val;
+>         asm volatile("ldr %1, %0"
+>                      : "+Qo" (*(volatile u32 __force *)addr),
+>                        "=r" (val));
+>         return val;
+> }
+> (...)
+> #define readl_relaxed(c) ({ u32 __r = le32_to_cpu((__force __le32) \
+>                                         __raw_readl(c)); __r; })
+> (...)
+> #define readl(c)                ({ u32 __v = readl_relaxed(c);
+> __iormb(); __v; })
+>
+> readl() reads in little endian.
+>
+> All PrimeCells are little endian, trouble would occur if and only if
+> this cell was
+> used on a big endian CPU, like an ARM used in BE mode, if the macros
+> didn't look exactly like this.
+>
+> Thanks to the fact that readl() is always LE things work smoothly.
+>
+> Then to the question whether to use ioread32() instead:
+>
+> #define ioread32(p)     ({ unsigned int __v = le32_to_cpu((__force
+> __le32)__raw_readl(p)); __iormb(); __v; })
+>
+> Same thing as readl(). The only reason to use ioread32() rather than
+> readl() is that some archs do not support readl() but only ioread32().
+> However for that to be a problem, these archs must be utilizing that
+> primecell! And if they do there are two ways to solve it: either change
+> the entire world to use ioread/write32 or simply just define readl() and
+> friends for that arch in its io.h file.
+>
+> I'd say don't touch it right now.
 
-I will change to "apm".
+Hm... that doesn't sound right. Please see this thread on lkml[1], and
+also this video from Ben H.[2] My understanding is that this is a fifo
+so I would think we want to use the ioread32_rep() function here (or
+other "string" io functionality). Otherwise we're going to byteswap the
+data that we're trying to interpret as a buffer and big endian CPUs
+won't work.
 
 >
->>    - reg: From mmc bindings: Register location and length.
->> -  - clocks: From clock bindings: Handles to clock inputs.
->> -  - clock-names: From clock bindings: Tuple including "clk_xin" and "clk_ahb"
->>    - interrupts: Interrupt specifier
->>    - interrupt-parent: Phandle for the interrupt controller that services
->>                     interrupts for this device.
->>
->> +Optional Properties:
->> +  - clocks: From clock bindings: Handles to clock inputs.
->> +  - clock-names: From clock bindings: Tuple including "clk_xin" and "clk_ahb"
+>> we can not use ioread32_rep because as we can not reliably know how many
+>> words we should read? FIFOCNT would have helped but its not advised to be
+>> use as per the datasheet.
+> You are right. readsl() or ioread32_rep() isn't used for this reason.
 >
-> Given that these used to be required, they are presumably still required
-> in some cases?
-
->From the driver point of view, it is optional as it no longer requires
-this. But from usage point of view, if an HW requires this to work
-correctly, then it musts be provided.
-
->
-> If we're going to alter these lines, it'd be nice to clean them up at
-> the same time (a list is not a tuple, clocks aren't just phandles).
 >
 
-I will update this.
+We could always use a size of 1 right?
 
--Loc
+[1] https://lkml.org/lkml/2012/10/22/671
+[2] http://linuxplumbers.ubicast.tv/videos/big-and-little-endian-inside-out/
+
+-- 
+Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum,
+hosted by The Linux Foundation
