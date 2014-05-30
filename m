@@ -1,111 +1,231 @@
-From: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
-Subject: Re: [PATCH v4 09/13] mmc: mmci: add Qcom specifics of clk and datactrl
- registers.
-Date: Fri, 30 May 2014 10:59:44 +0100
-Message-ID: <53885690.8050003@linaro.org>
-References: <1401284608-16428-1-git-send-email-srinivas.kandagatla@linaro.org>	<1401284844-16811-1-git-send-email-srinivas.kandagatla@linaro.org> <CAPDyKFqiu8y4oOOKCLNEuGZ8KajvE3AuDnO7M7re9SPjB7+vbg@mail.gmail.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v4 12/13] mmc: mmci: add explicit clk control
+Date: Fri, 30 May 2014 12:25:14 +0200
+Message-ID: <CAPDyKFoGB=0QPTOWMFvP2riLbJK=Mn1__nafJQky0f41Zo+i8g@mail.gmail.com>
+References: <1401284608-16428-1-git-send-email-srinivas.kandagatla@linaro.org>
+	<1401284878-16937-1-git-send-email-srinivas.kandagatla@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wg0-f51.google.com ([74.125.82.51]:50073 "EHLO
-	mail-wg0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755221AbaE3J7u (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 30 May 2014 05:59:50 -0400
-Received: by mail-wg0-f51.google.com with SMTP id x13so1715424wgg.22
-        for <linux-mmc@vger.kernel.org>; Fri, 30 May 2014 02:59:49 -0700 (PDT)
-In-Reply-To: <CAPDyKFqiu8y4oOOKCLNEuGZ8KajvE3AuDnO7M7re9SPjB7+vbg@mail.gmail.com>
+Received: from mail-qg0-f52.google.com ([209.85.192.52]:44249 "EHLO
+	mail-qg0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932342AbaE3KZQ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 30 May 2014 06:25:16 -0400
+Received: by mail-qg0-f52.google.com with SMTP id a108so4638250qge.39
+        for <linux-mmc@vger.kernel.org>; Fri, 30 May 2014 03:25:15 -0700 (PDT)
+In-Reply-To: <1401284878-16937-1-git-send-email-srinivas.kandagatla@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
+To: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
 Cc: Russell King <linux@arm.linux.org.uk>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-msm@vger.kernel.org" <linux-arm-msm@vger.kernel.org>, Linus Walleij <linus.walleij@linaro.org>
 
+On 28 May 2014 15:47,  <srinivas.kandagatla@linaro.org> wrote:
+> From: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+>
+> On Controllers like Qcom SD card controller where cclk is mclk and mclk should
+> be directly controlled by the driver.
+>
+> This patch adds support to control mclk directly in the driver, and also
+> adds explicit_mclk_control flag in variant structure giving more flexibility
+> to the driver.
+>
+> Signed-off-by: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+> ---
+>  drivers/mmc/host/mmci.c | 96 ++++++++++++++++++++++++++++++++-----------------
+>  drivers/mmc/host/mmci.h |  2 ++
+>  2 files changed, 65 insertions(+), 33 deletions(-)
+>
+> diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+> index 202f2d5..6eb0a29 100644
+> --- a/drivers/mmc/host/mmci.c
+> +++ b/drivers/mmc/host/mmci.c
+> @@ -72,6 +72,7 @@ static unsigned int fmax = 515633;
+>   * @pwrreg_clkgate: MMCIPOWER register must be used to gate the clock
+>   * @busy_detect: true if busy detection on dat0 is supported
+>   * @pwrreg_nopower: bits in MMCIPOWER don't controls ext. power supply
+> + * @explicit_mclk_control: enable explicit mclk control in driver.
+>   */
+>  struct variant_data {
+>         unsigned int            clkreg;
+> @@ -93,6 +94,7 @@ struct variant_data {
+>         bool                    pwrreg_clkgate;
+>         bool                    busy_detect;
+>         bool                    pwrreg_nopower;
+> +       bool                    explicit_mclk_control;
+>  };
+>
+>  static struct variant_data variant_arm = {
+> @@ -199,6 +201,7 @@ static struct variant_data variant_qcom = {
+>         .datalength_bits        = 24,
+>         .pwrreg_powerup         = MCI_PWR_UP,
+>         .f_max                  = 208000000,
+> +       .explicit_mclk_control  = true,
 
+This should go in patch3 instead.
 
-On 30/05/14 10:55, Ulf Hansson wrote:
-> On 28 May 2014 15:47,  <srinivas.kandagatla@linaro.org> wrote:
->> From: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
->>
->> This patch adds specifics of clk and datactrl register on Qualcomm SD
->> Card controller. This patch also populates the Qcom variant data with
->> these new values specific to Qualcomm SD Card Controller.
->>
->> Signed-off-by: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
->> Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
->> ---
->>   drivers/mmc/host/mmci.c |  4 ++++
->>   drivers/mmc/host/mmci.h | 17 +++++++++++++++++
->>   2 files changed, 21 insertions(+)
->>
->> diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
->> index 8deea4a..dbcb952 100644
->> --- a/drivers/mmc/host/mmci.c
->> +++ b/drivers/mmc/host/mmci.c
->> @@ -179,6 +179,10 @@ static struct variant_data variant_qcom = {
->>          .fifosize               = 16 * 4,
->>          .fifohalfsize           = 8 * 4,
->>          .clkreg                 = MCI_CLK_ENABLE,
->> +       .clkreg_enable          = MCI_QCOM_CLK_FLOWENA |
->> +                                 MCI_QCOM_CLK_SELECT_IN_FBCLK,
->> +       .clkreg_8bit_bus_enable = MCI_QCOM_CLK_WIDEBUS_8,
->> +       .datactrl_mask_ddrmode  = MCI_QCOM_CLK_SELECT_IN_DDR_MODE,
+>  };
 >
-> This stuff should go in patch3.
+>  static int mmci_card_busy(struct mmc_host *mmc)
+> @@ -301,7 +304,9 @@ static void mmci_set_clkreg(struct mmci_host *host, unsigned int desired)
+>         host->cclk = 0;
+>
+>         if (desired) {
+> -               if (desired >= host->mclk) {
+> +               if (variant->explicit_mclk_control) {
+> +                       host->cclk = host->mclk;
+> +               } else if (desired >= host->mclk) {
+>                         clk = MCI_CLK_BYPASS;
+>                         if (variant->st_clkdiv)
+>                                 clk |= MCI_ST_UX500_NEG_EDGE;
+> @@ -1340,6 +1345,18 @@ static void mmci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+>         if (!ios->clock && variant->pwrreg_clkgate)
+>                 pwr &= ~MCI_PWR_ON;
+>
+> +       if ((host->variant->explicit_mclk_control) &&
+> +           (ios->clock != host->mclk_req)) {
+> +               int rc = clk_set_rate(host->clk, ios->clock);
+> +               if (rc < 0) {
+> +                       dev_err(mmc_dev(host->mmc),
+> +                               "Error setting clock rate (%d)\n", rc);
+> +               } else {
+> +                       host->mclk = clk_get_rate(host->clk);
+> +                       host->mclk_req = ios->clock;
+> +               }
+> +       }
+> +
+>         spin_lock_irqsave(&host->lock, flags);
+>
+>         mmci_set_clkreg(host, ios->clock);
+> @@ -1490,19 +1507,6 @@ static int mmci_probe(struct amba_device *dev,
+>         host->plat = plat;
+>         host->variant = variant;
+>         host->mclk = clk_get_rate(host->clk);
+> -       /*
+> -        * According to the spec, mclk is max 100 MHz,
+> -        * so we try to adjust the clock down to this,
+> -        * (if possible).
+> -        */
+> -       if (host->mclk > host->variant->f_max) {
+> -               ret = clk_set_rate(host->clk, host->variant->f_max);
+> -               if (ret < 0)
+> -                       goto clk_disable;
+> -               host->mclk = clk_get_rate(host->clk);
+> -               dev_dbg(mmc_dev(mmc), "eventual mclk rate: %u Hz\n",
+> -                       host->mclk);
+> -       }
 
-Yes, I will merge patch3 and this change-set in next version.
+The above code is relevant for Qcom as well, I don't think you need
+change/move it.
 
 >
->>          .blksz_datactrl4        = true,
->>          .datalength_bits        = 24,
->>          .pwrreg_powerup         = MCI_PWR_UP,
->> diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
->> index cd83ca3..706eb513 100644
->> --- a/drivers/mmc/host/mmci.h
->> +++ b/drivers/mmc/host/mmci.h
->> @@ -41,6 +41,15 @@
->>   /* Modified PL180 on Versatile Express platform */
->>   #define MCI_ARM_HWFCEN         BIT(12)
->>
->> +/* Modified on Qualcomm Integrations */
->> +#define MCI_QCOM_CLK_WIDEBUS_8 (BIT(10) | BIT(11))
->> +#define MCI_QCOM_CLK_FLOWENA   BIT(12)
->> +#define MCI_QCOM_CLK_INVERTOUT BIT(13)
->> +
->> +/* select in latch data and command in */
->> +#define MCI_QCOM_CLK_SELECT_IN_FBCLK   BIT(15)
->> +#define MCI_QCOM_CLK_SELECT_IN_DDR_MODE        (BIT(14) | BIT(15))
->> +
->>   #define MMCIARGUMENT           0x008
->>   #define MMCICOMMAND            0x00c
->>   #define MCI_CPSM_RESPONSE      BIT(6)
->> @@ -54,6 +63,14 @@
->>   #define MCI_ST_NIEN            BIT(13)
->>   #define MCI_ST_CE_ATACMD       BIT(14)
->>
->> +/* Modified on Qualcomm Integrations */
->> +#define MCI_QCOM_CSPM_DATCMD           BIT(12)
->> +#define MCI_QCOM_CSPM_MCIABORT         BIT(13)
->> +#define MCI_QCOM_CSPM_CCSENABLE                BIT(14)
->> +#define MCI_QCOM_CSPM_CCSDISABLE       BIT(15)
->> +#define MCI_QCOM_CSPM_AUTO_CMD19       BIT(16)
->> +#define MCI_QCOM_CSPM_AUTO_CMD21       BIT(21)
->> +
+>         host->phybase = dev->res.start;
+>         host->base = devm_ioremap_resource(&dev->dev, &dev->res);
+> @@ -1511,25 +1515,51 @@ static int mmci_probe(struct amba_device *dev,
+>                 goto clk_disable;
+>         }
 >
-> Maybe you should have one patch in the beginning of the patchset, that
-> adds all the new QCOM bits in the header file? Instead of splitting
-> them up?
-Ok, I will do that in next version.
+> -       /*
+> -        * The ARM and ST versions of the block have slightly different
+> -        * clock divider equations which means that the minimum divider
+> -        * differs too.
+> -        */
+> -       if (variant->st_clkdiv)
+> -               mmc->f_min = DIV_ROUND_UP(host->mclk, 257);
 
-Thanks,
-srini
+I think you could simplify the change of fixing with f_min and f_max.
+
+Start by, just add another statement here "else if
+(variant->explicit_mclk_control)" and do the clk_round_rate()
+
+> -       else
+> -               mmc->f_min = DIV_ROUND_UP(host->mclk, 512);
+> -       /*
+> -        * If no maximum operating frequency is supplied, fall back to use
+> -        * the module parameter, which has a (low) default value in case it
+> -        * is not specified. Either value must not exceed the clock rate into
+> -        * the block, of course.
+> -        */
+> -       if (mmc->f_max)
+> -               mmc->f_max = min(host->mclk, mmc->f_max);
+> -       else
+> -               mmc->f_max = min(host->mclk, fmax);
+
+Further replace the above with:
+if (mmc->f_max)
+     mmc->f_max = variant->explicit_mclk_control ? min(mmc->f_max,
+variant->f_max) : min(host->mclk, mmc->f_max);
+else
+     mmc->f_max = variant->explicit_mclk_control ? fmax : min(host->mclk, fmax);
+
+That should do it, right?
+
+> +       if (variant->explicit_mclk_control) {
+> +               /* get the nearest minimum clock to 100Khz */
+> +               mmc->f_min = clk_round_rate(host->clk, 100000);
+> +
+> +               if (mmc->f_max)
+> +                       mmc->f_max = min(host->variant->f_max, mmc->f_max);
+> +               else
+> +                       mmc->f_max = min(host->variant->f_max, fmax);
+> +
+> +       } else {
+> +               /*
+> +                * According to the spec, mclk is max 100 MHz,
+> +                * so we try to adjust the clock down to this,
+> +                * (if possible).
+> +                */
+> +               if (host->mclk > host->variant->f_max) {
+> +                       ret = clk_set_rate(host->clk, host->variant->f_max);
+> +                       if (ret < 0)
+> +                               goto clk_disable;
+> +                       host->mclk = clk_get_rate(host->clk);
+> +                       dev_dbg(mmc_dev(mmc), "eventual mclk rate: %u Hz\n",
+> +                               host->mclk);
+> +               }
+> +               /*
+> +                * The ARM and ST versions of the block have slightly different
+> +                * clock divider equations which means that the minimum divider
+> +                * differs too.
+> +                */
+> +               if (variant->st_clkdiv)
+> +                       mmc->f_min = DIV_ROUND_UP(host->mclk, 257);
+> +               else
+> +                       mmc->f_min = DIV_ROUND_UP(host->mclk, 512);
+> +               /*
+> +                * If no maximum operating frequency is supplied, fall back to
+> +                * use the module parameter, which has a (low) default value in
+> +                * case it is not specified. Either value must not exceed the
+> +                * clock rate into the block, of course.
+> +                */
+> +               if (mmc->f_max)
+> +                       mmc->f_max = min(host->mclk, mmc->f_max);
+> +               else
+> +                       mmc->f_max = min(host->mclk, fmax);
+> +
+> +       }
+> +
+>         dev_dbg(mmc_dev(mmc), "clocking block at %u Hz\n", mmc->f_max);
 >
->>   #define MMCIRESPCMD            0x010
->>   #define MMCIRESPONSE0          0x014
->>   #define MMCIRESPONSE1          0x018
->> --
->> 1.9.1
->>
+>         /* Get regulators and the supported OCR mask */
+> diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
+> index 706eb513..1882e20 100644
+> --- a/drivers/mmc/host/mmci.h
+> +++ b/drivers/mmc/host/mmci.h
+> @@ -208,6 +208,8 @@ struct mmci_host {
+>         spinlock_t              lock;
 >
-> Kind regards
-> Ulf Hansson
+>         unsigned int            mclk;
+> +       /* cached value of requested clk in set_ios */
+> +       unsigned int            mclk_req;
+
+How about "clock_cache" instead?
+
+>         unsigned int            cclk;
+>         u32                     pwr_reg;
+>         u32                     pwr_reg_add;
+> --
+> 1.9.1
 >
+
+Kind regards
+Ulf Hansson
