@@ -1,67 +1,64 @@
 From: srinivas.kandagatla@linaro.org
-Subject: [PATCH v5 13/13] mmc: mmci: Add Qualcomm Id to amba id table
-Date: Fri, 30 May 2014 18:15:07 +0100
-Message-ID: <1401470107-27359-1-git-send-email-srinivas.kandagatla@linaro.org>
+Subject: [PATCH v5 09/13] mmc: mmci: Add support to data commands via variant structure.
+Date: Fri, 30 May 2014 18:14:13 +0100
+Message-ID: <1401470053-27195-1-git-send-email-srinivas.kandagatla@linaro.org>
 References: <1401469918-26817-1-git-send-email-srinivas.kandagatla@linaro.org>
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-we0-f170.google.com ([74.125.82.170]:54361 "EHLO
+	mail-we0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S964847AbaE3ROU (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 30 May 2014 13:14:20 -0400
+Received: by mail-we0-f170.google.com with SMTP id u57so2365337wes.29
+        for <linux-mmc@vger.kernel.org>; Fri, 30 May 2014 10:14:19 -0700 (PDT)
 In-Reply-To: <1401469918-26817-1-git-send-email-srinivas.kandagatla@linaro.org>
-Sender: linux-kernel-owner@vger.kernel.org
+Sender: linux-mmc-owner@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 To: Russell King <linux@arm.linux.org.uk>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
 Cc: Chris Ball <chris@printf.net>, linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org, linus.walleij@linaro.org, Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
-List-Id: linux-mmc@vger.kernel.org
 
 From: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
 
-This patch adds a fake Qualcomm ID 0x00051180 to the amba_ids, as Qualcomm
-SDCC controller is pl180, but amba id registers read 0x0's.
-The plan is to remove SDCC driver totally and use mmci as the main SD
-controller driver for Qualcomm SOCs.
+On some SOCs like Qcom there are explicit bits in the command register
+to specify if its a data transfer command or not. So this patch adds
+support to such bits in variant data, giving more flexibility to the
+driver.
 
 Signed-off-by: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
 ---
- drivers/mmc/host/mmci.c | 23 +++++++++++++++++++++++
- 1 file changed, 23 insertions(+)
+ drivers/mmc/host/mmci.c | 5 +++++
+ 1 file changed, 5 insertions(+)
 
 diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index 7a11522..b07c3c3 100644
+index 4c95a9b..8534c29 100644
 --- a/drivers/mmc/host/mmci.c
 +++ b/drivers/mmc/host/mmci.c
-@@ -190,6 +190,23 @@ static struct variant_data variant_ux500v2 = {
- 	.pwrreg_nopower		= true,
- };
+@@ -59,6 +59,7 @@ static unsigned int fmax = 515633;
+  *	      is asserted (likewise for RX)
+  * @fifohalfsize: number of bytes that can be written when MCI_TXFIFOHALFEMPTY
+  *		  is asserted (likewise for RX)
++ * @data_cmd_enable: enable value for data commands.
+  * @sdio: variant supports SDIO
+  * @st_clkdiv: true if using a ST-specific clock divider algorithm
+  * @datactrl_mask_ddrmode: ddr mode mask in datactrl register.
+@@ -79,6 +80,7 @@ struct variant_data {
+ 	unsigned int		datalength_bits;
+ 	unsigned int		fifosize;
+ 	unsigned int		fifohalfsize;
++	unsigned int		data_cmd_enable;
+ 	unsigned int		datactrl_mask_ddrmode;
+ 	bool			sdio;
+ 	bool			st_clkdiv;
+@@ -839,6 +841,9 @@ mmci_start_command(struct mmci_host *host, struct mmc_command *cmd, u32 c)
+ 	if (/*interrupt*/0)
+ 		c |= MCI_CPSM_INTERRUPT;
  
-+static struct variant_data variant_qcom = {
-+	.fifosize		= 16 * 4,
-+	.fifohalfsize		= 8 * 4,
-+	.clkreg			= MCI_CLK_ENABLE,
-+	.clkreg_enable		= MCI_QCOM_CLK_FLOWENA |
-+				  MCI_QCOM_CLK_SELECT_IN_FBCLK,
-+	.clkreg_8bit_bus_enable = MCI_QCOM_CLK_WIDEBUS_8,
-+	.datactrl_mask_ddrmode	= MCI_QCOM_CLK_SELECT_IN_DDR_MODE,
-+	.data_cmd_enable	= MCI_QCOM_CSPM_DATCMD,
-+	.blksz_datactrl4	= true,
-+	.datalength_bits	= 24,
-+	.pwrreg_powerup		= MCI_PWR_UP,
-+	.f_max			= 208000000,
-+	.explicit_mclk_control	= true,
-+	.qcom_fifo		= true,
-+};
++	if (mmc_cmd_type(cmd) == MMC_CMD_ADTC)
++		c |= host->variant->data_cmd_enable;
 +
- static int mmci_card_busy(struct mmc_host *mmc)
- {
- 	struct mmci_host *host = mmc_priv(mmc);
-@@ -1832,6 +1849,12 @@ static struct amba_id mmci_ids[] = {
- 		.mask   = 0xf0ffffff,
- 		.data	= &variant_ux500v2,
- 	},
-+	/* Qualcomm variants */
-+	{
-+		.id     = 0x00051180,
-+		.mask	= 0x000fffff,
-+		.data	= &variant_qcom,
-+	},
- 	{ 0, 0 },
- };
+ 	host->cmd = cmd;
  
+ 	writel(cmd->arg, base + MMCIARGUMENT);
 -- 
 1.9.1
+
