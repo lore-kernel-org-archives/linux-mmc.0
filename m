@@ -1,13 +1,13 @@
 From: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: [PATCH v2 2/4] dt: bindings: mmc: Add sdio function
- subnode documentation
-Date: Sat, 31 May 2014 21:03:32 +0200
-Message-ID: <1401563014-13856-3-git-send-email-hdegoede@redhat.com>
+Subject: [PATCH v2 1/4] dt: bindings: mmc: Document the practice
+ of using subnodes for slots
+Date: Sat, 31 May 2014 21:03:31 +0200
+Message-ID: <1401563014-13856-2-git-send-email-hdegoede@redhat.com>
 References: <1401563014-13856-1-git-send-email-hdegoede@redhat.com>
 Reply-To: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-sunxi+bncBDRZXY4CYYORBFGPVCOAKGQEKD3NRZA-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+Return-path: <linux-sunxi+bncBDRZXY4CYYORBEOPVCOAKGQEBRMP4AI-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
 In-Reply-To: <1401563014-13856-1-git-send-email-hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Post: <http://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
 List-Help: <http://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
@@ -19,83 +19,81 @@ To: Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, Ulf Hansson <ulf
 Cc: Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, Arend van Spriel <arend-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>, Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-From: Sascha Hauer <s.hauer-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org>
+The following existing MMC host controller bindings use slot subnodes:
 
-While SDIO devices are runtime probable they sometimes need nonprobable
-additional information on embedded systems, like an additional gpio
-interrupt or a clock. This binding describes how to add child nodes to the
-devicetree to supply this information.
+Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt
+Documentation/devicetree/bindings/mmc/k3-dw-mshc.txt
+Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt
+Documentation/devicetree/bindings/mmc/socfpga-dw-mshc.txt
+Documentation/devicetree/bindings/mmc/atmel-hsmci.txt
+Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.txt
 
-Signed-off-by: Sascha Hauer <s.hauer-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org>
-[hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org: Updated the bindings to put the sdio functions inside
- slot subnodes]
+This commit documents this practice in the standard mmc bindings documentation.
+
 Signed-off-by: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 ---
- Documentation/devicetree/bindings/mmc/mmc.txt | 49 +++++++++++++++++++++++++++
- 1 file changed, 49 insertions(+)
+ Documentation/devicetree/bindings/mmc/mmc.txt | 46 ++++++++++++++++++++++++++-
+ 1 file changed, 45 insertions(+), 1 deletion(-)
 
 diff --git a/Documentation/devicetree/bindings/mmc/mmc.txt b/Documentation/devicetree/bindings/mmc/mmc.txt
-index 44c9e53..2903775 100644
+index 9dce540..44c9e53 100644
 --- a/Documentation/devicetree/bindings/mmc/mmc.txt
 +++ b/Documentation/devicetree/bindings/mmc/mmc.txt
-@@ -81,6 +81,27 @@ if a property is specified at both the host and the slot level the slot
- level takes precedence.
+@@ -60,7 +60,31 @@ Optional SDIO properties:
+ - keep-power-in-suspend: Preserves card power during a suspend/resume cycle
+ - enable-sdio-wakeup: Enables wake up of host system on SDIO IRQ assertion
  
- 
-+Use of Function subnodes
-+------------------------
+-Example:
 +
-+On embedded systems the cards connected to a host may need additional
-+properties. These can be specified in subnodes to the slot subnodes, with
-+the card / SDIO-function identified by the standard 'reg' property.
-+Note that the use of slot subnodes is mandatory in this case.
-+Which information exactly can be specified depends on the bindings for the
-+SDIO function driver for the node, as specified by the compatible string.
++Use of slot subnodes
++--------------------
 +
-+Required slot subnode properties when using function subnodes:
++Some hosts have multiple MMC slots connected to a single MMC host, in this
++case each slot gets its own subnode representing the slot:
++
++Required host node properties when using slots:
 +- #address-cells: should be one. The cell is the slot id.
 +- #size-cells: should be zero.
 +
-+Required function subnode properties:
-+- compatible: name of SDIO function following generic names recommended practice
-+- reg: Must contain the SDIO function number of the function this subnode
-+       describes. A value of 0 denotes the memory SD function, values from
-+       1 to 7 denote the SDIO functions.
++Required slot subnode properties:
++- reg: Must contain the MMC host slot number of the slot this subnode
++       describes. Slot numbers start at 0.
++
++Optional slot subnode properties:
++Any of the optional host node properties can be used inside a slot node too,
++if a property is specified at both the host and the slot level the slot
++level takes precedence.
 +
 +
- Examples
- --------
++Examples
++--------
++
++Basic example:
  
-@@ -118,3 +139,31 @@ mmc0: mmc@f0008000 {
- 		bus-width = <4>;
- 	};
- };
+ sdhci@ab000000 {
+ 	compatible = "sdhci";
+@@ -74,3 +98,23 @@ sdhci@ab000000 {
+ 	keep-power-in-suspend;
+ 	enable-sdio-wakeup;
+ }
 +
-+Example with sdio function subnodes:
++Example with slot subnodes:
 +
-+mmc3: mmc@01c12000 {
++mmc0: mmc@f0008000 {
++	compatible = "atmel,hsmci";
++	reg = <0xf0008000 0x600>;
++	interrupts = <12 4>;
 +	#address-cells = <1>;
 +	#size-cells = <0>;
-+
-+	pinctrl-names = "default";
-+	pinctrl-0 = <&mmc3_pins_a>;
-+	vmmc-supply = <&reg_vmmc3>;
-+	bus-width = <4>;
-+	non-removable;
-+	status = "okay";
-+
-+	mmc3_slot0: mmc3_slot@0 {
-+		#address-cells = <1>;
-+		#size-cells = <0>;
++	slot@0 {
 +		reg = <0>;
-+
-+		brcmf: bcrmf@1 {
-+			reg = <1>;
-+			compatible = "brcm,bcm43xx-fmac";
-+			interrupt-parent = <&pio>;
-+			interrupts = <10 8>; /* PH10 / EINT10 */
-+			interrupt-names = "host-wake";
-+		};
++		bus-width = <4>;
++		cd-gpios = <&pioD 15 0>
++		cd-inverted;
++	};
++	slot@1 {
++		reg = <1>;
++		bus-width = <4>;
 +	};
 +};
 -- 
