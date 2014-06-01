@@ -1,100 +1,386 @@
-From: Shawn Guo <shawn.guo@linaro.org>
-Subject: Re: [PATCH 5/5] ARM: dts: imx51-babbage: Fix esdhc setup
-Date: Sun, 1 Jun 2014 23:22:19 +0800
-Message-ID: <20140601152216.GD11061@dragon>
-References: <1400848384-3226-1-git-send-email-s.hauer@pengutronix.de>
- <1400848384-3226-6-git-send-email-s.hauer@pengutronix.de>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+From: Vasily Khoruzhick <anarsoul@gmail.com>
+Subject: [PATCH v3] s3cmci: port DMA code to dmaengine API
+Date: Sun,  1 Jun 2014 20:22:09 +0300
+Message-ID: <1401643329-6460-1-git-send-email-anarsoul@gmail.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bn1blp0190.outbound.protection.outlook.com ([207.46.163.190]:42433
-	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1752353AbaFAPWc (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sun, 1 Jun 2014 11:22:32 -0400
-Content-Disposition: inline
-In-Reply-To: <1400848384-3226-6-git-send-email-s.hauer@pengutronix.de>
+Received: from mail-we0-f169.google.com ([74.125.82.169]:53410 "EHLO
+	mail-we0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752113AbaFARYR (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 1 Jun 2014 13:24:17 -0400
+Received: by mail-we0-f169.google.com with SMTP id u56so4171952wes.28
+        for <linux-mmc@vger.kernel.org>; Sun, 01 Jun 2014 10:24:16 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Sascha Hauer <s.hauer@pengutronix.de>
-Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, kernel@pengutronix.de, Dong Aisheng <b29396@freescale.com>
+To: Arnd Bergmann <arnd@arndb.de>, arm-linux <linux-arm-kernel@lists.infradead.org>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Jaehoon Chung <jh80.chung@samsung.com>, Mark Brown <broonie@kernel.org>, Ben Dooks <ben-linux@fluff.org>
+Cc: Vasily Khoruzhick <anarsoul@gmail.com>
 
-On Fri, May 23, 2014 at 02:33:04PM +0200, Sascha Hauer wrote:
-> - Move cd/wp pinctrl from the hog group to the esdhc groups
-> - use gpio for card detection / write protection on esdhc2 since
->   the controller based detection does not work
+Utilise new s3c24xx-dma dmaengine driver for DMA ops.
 
-I tracked it a little bit and found that the controller based detection
-works fine with v3.13 and starts being broken from v3.14-rc1.  The
-offending commit seems to be 89d7e5c13122 (mmc: sdhci-esdhc-imx: add
-runtime pm support).
+Signed-off-by: Vasily Khoruzhick <anarsoul@gmail.com>
+---
+v2: - Don't store async dma descriptor, it's not used
+    - Request DMA channel via dma_request_slave_channel_compat() and use
+      hardcoded DMA channel.
+    - Add dependency on S3C24XX_DMAC (s3cmci uses filter function from it)
+v3: - Use 'depends' instead of 'select' in Kconfig
+    - Drop useless controller registers reads from dma completion callback
 
-I will probably apply the patch as it is anyway.  But I'm wondering if
-we should fix the regression and keep maintaining the support of
-controller based cd/wp in sdhci-esdhc-imx driver.
+ drivers/mmc/host/Kconfig  |  10 +--
+ drivers/mmc/host/s3cmci.c | 180 +++++++++++++---------------------------------
+ drivers/mmc/host/s3cmci.h |   4 +-
+ 3 files changed, 52 insertions(+), 142 deletions(-)
 
-Shawn
+diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+index 1384f67..0cd10e3 100644
+--- a/drivers/mmc/host/Kconfig
++++ b/drivers/mmc/host/Kconfig
+@@ -420,6 +420,7 @@ config MMC_SPI
+ config MMC_S3C
+ 	tristate "Samsung S3C SD/MMC Card Interface support"
+ 	depends on ARCH_S3C24XX
++	depends on S3C24XX_DMAC
+ 	help
+ 	  This selects a driver for the MCI interface found in
+           Samsung's S3C2410, S3C2412, S3C2440, S3C2442 CPUs.
+@@ -457,15 +458,6 @@ config MMC_S3C_DMA
+ 	  working properly and needs to be debugged before this
+ 	  option is useful.
+ 
+-config MMC_S3C_PIODMA
+-	bool "Support for both PIO and DMA"
+-	help
+-	  Compile both the PIO and DMA transfer routines into the
+-	  driver and let the platform select at run-time which one
+-	  is best.
+-
+-	  See notes for the DMA option.
+-
+ endchoice
+ 
+ config MMC_SDRICOH_CS
+diff --git a/drivers/mmc/host/s3cmci.c b/drivers/mmc/host/s3cmci.c
+index f237826..0d115a8 100644
+--- a/drivers/mmc/host/s3cmci.c
++++ b/drivers/mmc/host/s3cmci.c
+@@ -12,6 +12,7 @@
+  */
+ 
+ #include <linux/module.h>
++#include <linux/dmaengine.h>
+ #include <linux/dma-mapping.h>
+ #include <linux/clk.h>
+ #include <linux/mmc/host.h>
+@@ -27,6 +28,7 @@
+ #include <mach/dma.h>
+ #include <mach/gpio-samsung.h>
+ 
++#include <linux/platform_data/dma-s3c24xx.h>
+ #include <linux/platform_data/mmc-s3cmci.h>
+ 
+ #include "s3cmci.h"
+@@ -140,10 +142,6 @@ static const int dbgmap_debug = dbg_err | dbg_debug;
+ 		dev_dbg(&host->pdev->dev, args);  \
+ 	} while (0)
+ 
+-static struct s3c2410_dma_client s3cmci_dma_client = {
+-	.name		= "s3c-mci",
+-};
+-
+ static void finalize_request(struct s3cmci_host *host);
+ static void s3cmci_send_request(struct mmc_host *mmc);
+ static void s3cmci_reset(struct s3cmci_host *host);
+@@ -256,25 +254,8 @@ static inline bool s3cmci_host_usedma(struct s3cmci_host *host)
+ {
+ #ifdef CONFIG_MMC_S3C_PIO
+ 	return false;
+-#elif defined(CONFIG_MMC_S3C_DMA)
++#else /* CONFIG_MMC_S3C_DMA */
+ 	return true;
+-#else
+-	return host->dodma;
+-#endif
+-}
+-
+-/**
+- * s3cmci_host_canpio - return true if host has pio code available
+- *
+- * Return true if the driver has been compiled with the PIO support code
+- * available.
+- */
+-static inline bool s3cmci_host_canpio(void)
+-{
+-#ifdef CONFIG_MMC_S3C_PIO
+-	return true;
+-#else
+-	return false;
+ #endif
+ }
+ 
+@@ -841,60 +822,24 @@ static irqreturn_t s3cmci_irq_cd(int irq, void *dev_id)
+ 	return IRQ_HANDLED;
+ }
+ 
+-static void s3cmci_dma_done_callback(struct s3c2410_dma_chan *dma_ch,
+-				     void *buf_id, int size,
+-				     enum s3c2410_dma_buffresult result)
++static void s3cmci_dma_done_callback(void *arg)
+ {
+-	struct s3cmci_host *host = buf_id;
++	struct s3cmci_host *host = arg;
+ 	unsigned long iflags;
+-	u32 mci_csta, mci_dsta, mci_fsta, mci_dcnt;
+-
+-	mci_csta = readl(host->base + S3C2410_SDICMDSTAT);
+-	mci_dsta = readl(host->base + S3C2410_SDIDSTA);
+-	mci_fsta = readl(host->base + S3C2410_SDIFSTA);
+-	mci_dcnt = readl(host->base + S3C2410_SDIDCNT);
+ 
+ 	BUG_ON(!host->mrq);
+ 	BUG_ON(!host->mrq->data);
+-	BUG_ON(!host->dmatogo);
+ 
+ 	spin_lock_irqsave(&host->complete_lock, iflags);
+ 
+-	if (result != S3C2410_RES_OK) {
+-		dbg(host, dbg_fail, "DMA FAILED: csta=0x%08x dsta=0x%08x "
+-			"fsta=0x%08x dcnt:0x%08x result:0x%08x toGo:%u\n",
+-			mci_csta, mci_dsta, mci_fsta,
+-			mci_dcnt, result, host->dmatogo);
+-
+-		goto fail_request;
+-	}
+-
+-	host->dmatogo--;
+-	if (host->dmatogo) {
+-		dbg(host, dbg_dma, "DMA DONE  Size:%i DSTA:[%08x] "
+-			"DCNT:[%08x] toGo:%u\n",
+-			size, mci_dsta, mci_dcnt, host->dmatogo);
+-
+-		goto out;
+-	}
+-
+-	dbg(host, dbg_dma, "DMA FINISHED Size:%i DSTA:%08x DCNT:%08x\n",
+-		size, mci_dsta, mci_dcnt);
++	dbg(host, dbg_dma, "DMA FINISHED\n");
+ 
+ 	host->dma_complete = 1;
+ 	host->complete_what = COMPLETION_FINALIZE;
+ 
+-out:
+ 	tasklet_schedule(&host->pio_tasklet);
+ 	spin_unlock_irqrestore(&host->complete_lock, iflags);
+-	return;
+ 
+-fail_request:
+-	host->mrq->data->error = -EINVAL;
+-	host->complete_what = COMPLETION_FINALIZE;
+-	clear_imask(host);
+-
+-	goto out;
+ }
+ 
+ static void finalize_request(struct s3cmci_host *host)
+@@ -966,7 +911,7 @@ static void finalize_request(struct s3cmci_host *host)
+ 	 * DMA channel and the fifo to clear out any garbage. */
+ 	if (mrq->data->error != 0) {
+ 		if (s3cmci_host_usedma(host))
+-			s3c2410_dma_ctrl(host->dma, S3C2410_DMAOP_FLUSH);
++			dmaengine_terminate_all(host->dma);
+ 
+ 		if (host->is2440) {
+ 			/* Clear failure register and reset fifo. */
+@@ -992,29 +937,6 @@ request_done:
+ 	mmc_request_done(host->mmc, mrq);
+ }
+ 
+-static void s3cmci_dma_setup(struct s3cmci_host *host,
+-			     enum dma_data_direction source)
+-{
+-	static enum dma_data_direction last_source = -1;
+-	static int setup_ok;
+-
+-	if (last_source == source)
+-		return;
+-
+-	last_source = source;
+-
+-	s3c2410_dma_devconfig(host->dma, source,
+-			      host->mem->start + host->sdidata);
+-
+-	if (!setup_ok) {
+-		s3c2410_dma_config(host->dma, 4);
+-		s3c2410_dma_set_buffdone_fn(host->dma,
+-					    s3cmci_dma_done_callback);
+-		s3c2410_dma_setflags(host->dma, S3C2410_DMAF_AUTOSTART);
+-		setup_ok = 1;
+-	}
+-}
+-
+ static void s3cmci_send_command(struct s3cmci_host *host,
+ 					struct mmc_command *cmd)
+ {
+@@ -1162,43 +1084,45 @@ static int s3cmci_prepare_pio(struct s3cmci_host *host, struct mmc_data *data)
+ 
+ static int s3cmci_prepare_dma(struct s3cmci_host *host, struct mmc_data *data)
+ {
+-	int dma_len, i;
+ 	int rw = data->flags & MMC_DATA_WRITE;
++	struct dma_async_tx_descriptor *desc;
++	struct dma_slave_config conf = {
++		.src_addr = host->mem->start + host->sdidata,
++		.dst_addr = host->mem->start + host->sdidata,
++		.src_addr_width = DMA_SLAVE_BUSWIDTH_4_BYTES,
++		.dst_addr_width = DMA_SLAVE_BUSWIDTH_4_BYTES,
++	};
+ 
+ 	BUG_ON((data->flags & BOTH_DIR) == BOTH_DIR);
+ 
+-	s3cmci_dma_setup(host, rw ? DMA_TO_DEVICE : DMA_FROM_DEVICE);
+-	s3c2410_dma_ctrl(host->dma, S3C2410_DMAOP_FLUSH);
+-
+-	dma_len = dma_map_sg(mmc_dev(host->mmc), data->sg, data->sg_len,
+-			     rw ? DMA_TO_DEVICE : DMA_FROM_DEVICE);
+-
+-	if (dma_len == 0)
+-		return -ENOMEM;
+-
+-	host->dma_complete = 0;
+-	host->dmatogo = dma_len;
+-
+-	for (i = 0; i < dma_len; i++) {
+-		int res;
+-
+-		dbg(host, dbg_dma, "enqueue %i: %08x@%u\n", i,
+-		    sg_dma_address(&data->sg[i]),
+-		    sg_dma_len(&data->sg[i]));
++	/* Restore prescaler value */
++	writel(host->prescaler, host->base + S3C2410_SDIPRE);
+ 
+-		res = s3c2410_dma_enqueue(host->dma, host,
+-					  sg_dma_address(&data->sg[i]),
+-					  sg_dma_len(&data->sg[i]));
++	if (!rw)
++		conf.direction = DMA_DEV_TO_MEM;
++	else
++		conf.direction = DMA_MEM_TO_DEV;
+ 
+-		if (res) {
+-			s3c2410_dma_ctrl(host->dma, S3C2410_DMAOP_FLUSH);
+-			return -EBUSY;
+-		}
+-	}
++	dma_map_sg(mmc_dev(host->mmc), data->sg, data->sg_len,
++			     rw ? DMA_TO_DEVICE : DMA_FROM_DEVICE);
+ 
+-	s3c2410_dma_ctrl(host->dma, S3C2410_DMAOP_START);
++	dmaengine_slave_config(host->dma, &conf);
++	desc = dmaengine_prep_slave_sg(host->dma, data->sg, data->sg_len,
++		conf.direction,
++		DMA_CTRL_ACK | DMA_PREP_INTERRUPT);
++	if (!desc)
++		goto unmap_exit;
++	desc->callback = s3cmci_dma_done_callback;
++	desc->callback_param = host;
++	dmaengine_submit(desc);
++	dma_async_issue_pending(host->dma);
+ 
+ 	return 0;
++
++unmap_exit:
++	dma_unmap_sg(mmc_dev(host->mmc), data->sg, data->sg_len,
++			     rw ? DMA_TO_DEVICE : DMA_FROM_DEVICE);
++	return -ENOMEM;
+ }
+ 
+ static void s3cmci_send_request(struct mmc_host *mmc)
+@@ -1676,10 +1600,6 @@ static int s3cmci_probe(struct platform_device *pdev)
+ 	host->complete_what 	= COMPLETION_NONE;
+ 	host->pio_active 	= XFER_NONE;
+ 
+-#ifdef CONFIG_MMC_S3C_PIODMA
+-	host->dodma		= host->pdata->use_dma;
+-#endif
+-
+ 	host->mem = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+ 	if (!host->mem) {
+ 		dev_err(&pdev->dev,
+@@ -1765,17 +1685,17 @@ static int s3cmci_probe(struct platform_device *pdev)
+ 	/* depending on the dma state, get a dma channel to use. */
+ 
+ 	if (s3cmci_host_usedma(host)) {
+-		host->dma = s3c2410_dma_request(DMACH_SDI, &s3cmci_dma_client,
+-						host);
+-		if (host->dma < 0) {
++		dma_cap_mask_t mask;
++
++		dma_cap_zero(mask);
++		dma_cap_set(DMA_SLAVE, mask);
++
++		host->dma = dma_request_slave_channel_compat(mask,
++			s3c24xx_dma_filter, (void *)DMACH_SDI, &pdev->dev, "rx-tx");
++		if (!host->dma) {
+ 			dev_err(&pdev->dev, "cannot get DMA channel.\n");
+-			if (!s3cmci_host_canpio()) {
+-				ret = -EBUSY;
+-				goto probe_free_gpio_wp;
+-			} else {
+-				dev_warn(&pdev->dev, "falling back to PIO.\n");
+-				host->dodma = 0;
+-			}
++			ret = -EBUSY;
++			goto probe_free_gpio_wp;
+ 		}
+ 	}
+ 
+@@ -1816,7 +1736,7 @@ static int s3cmci_probe(struct platform_device *pdev)
+ 	mmc->max_segs		= 128;
+ 
+ 	dbg(host, dbg_debug,
+-	    "probe: mode:%s mapped mci_base:%p irq:%u irq_cd:%u dma:%u.\n",
++	    "probe: mode:%s mapped mci_base:%p irq:%u irq_cd:%u dma:%p.\n",
+ 	    (host->is2440?"2440":""),
+ 	    host->base, host->irq, host->irq_cd, host->dma);
+ 
+@@ -1852,7 +1772,7 @@ static int s3cmci_probe(struct platform_device *pdev)
+ 
+  probe_free_dma:
+ 	if (s3cmci_host_usedma(host))
+-		s3c2410_dma_free(host->dma, &s3cmci_dma_client);
++		dma_release_channel(host->dma);
+ 
+  probe_free_gpio_wp:
+ 	if (!host->pdata->no_wprotect)
+@@ -1914,7 +1834,7 @@ static int s3cmci_remove(struct platform_device *pdev)
+ 	tasklet_disable(&host->pio_tasklet);
+ 
+ 	if (s3cmci_host_usedma(host))
+-		s3c2410_dma_free(host->dma, &s3cmci_dma_client);
++		dma_release_channel(host->dma);
+ 
+ 	free_irq(host->irq, host);
+ 
+diff --git a/drivers/mmc/host/s3cmci.h b/drivers/mmc/host/s3cmci.h
+index c76b53d..cc2e46c 100644
+--- a/drivers/mmc/host/s3cmci.h
++++ b/drivers/mmc/host/s3cmci.h
+@@ -26,7 +26,7 @@ struct s3cmci_host {
+ 	void __iomem		*base;
+ 	int			irq;
+ 	int			irq_cd;
+-	int			dma;
++	struct dma_chan		*dma;
+ 
+ 	unsigned long		clk_rate;
+ 	unsigned long		clk_div;
+@@ -36,8 +36,6 @@ struct s3cmci_host {
+ 	int			is2440;
+ 	unsigned		sdiimsk;
+ 	unsigned		sdidata;
+-	int			dodma;
+-	int			dmatogo;
+ 
+ 	bool			irq_disabled;
+ 	bool			irq_enabled;
+-- 
+1.9.3
 
-> - Fix cd gpio polarity for esdhc1. This is wrong and currently
->   only works because the imx esdhc driver ignores the polarity.
-> 
-> Signed-off-by: Sascha Hauer <s.hauer@pengutronix.de>
-> ---
->  arch/arm/boot/dts/imx51-babbage.dts | 14 +++++++-------
->  1 file changed, 7 insertions(+), 7 deletions(-)
-> 
-> diff --git a/arch/arm/boot/dts/imx51-babbage.dts b/arch/arm/boot/dts/imx51-babbage.dts
-> index 9e9deb2..28d4553 100644
-> --- a/arch/arm/boot/dts/imx51-babbage.dts
-> +++ b/arch/arm/boot/dts/imx51-babbage.dts
-> @@ -134,15 +134,15 @@
->  &esdhc1 {
->  	pinctrl-names = "default";
->  	pinctrl-0 = <&pinctrl_esdhc1>;
-> -	fsl,cd-controller;
-> -	fsl,wp-controller;
-> +	cd-gpios = <&gpio1 0 GPIO_ACTIVE_LOW>;
-> +	wp-gpios = <&gpio1 1 GPIO_ACTIVE_HIGH>;
->  	status = "okay";
->  };
->  
->  &esdhc2 {
->  	pinctrl-names = "default";
->  	pinctrl-0 = <&pinctrl_esdhc2>;
-> -	cd-gpios = <&gpio1 6 GPIO_ACTIVE_HIGH>;
-> +	cd-gpios = <&gpio1 6 GPIO_ACTIVE_LOW>;
->  	wp-gpios = <&gpio1 5 GPIO_ACTIVE_HIGH>;
->  	status = "okay";
->  };
-> @@ -300,10 +300,6 @@
->  	imx51-babbage {
->  		pinctrl_hog: hoggrp {
->  			fsl,pins = <
-> -				MX51_PAD_GPIO1_0__SD1_CD     0x20d5
-> -				MX51_PAD_GPIO1_1__SD1_WP     0x20d5
-> -				MX51_PAD_GPIO1_5__GPIO1_5    0x100
-> -				MX51_PAD_GPIO1_6__GPIO1_6    0x100
->  				MX51_PAD_EIM_A27__GPIO2_21   0x5
->  				MX51_PAD_CSPI1_SS0__GPIO4_24 0x85
->  				MX51_PAD_CSPI1_SS1__GPIO4_25 0x85
-> @@ -330,6 +326,8 @@
->  
->  		pinctrl_esdhc1: esdhc1grp {
->  			fsl,pins = <
-> +				MX51_PAD_GPIO1_0__GPIO1_0		0x20d5
-> +				MX51_PAD_GPIO1_1__GPIO1_1		0x20d5
->  				MX51_PAD_SD1_CMD__SD1_CMD		0x400020d5
->  				MX51_PAD_SD1_CLK__SD1_CLK		0x20d5
->  				MX51_PAD_SD1_DATA0__SD1_DATA0		0x20d5
-> @@ -341,6 +339,8 @@
->  
->  		pinctrl_esdhc2: esdhc2grp {
->  			fsl,pins = <
-> +				MX51_PAD_GPIO1_5__GPIO1_5		0x100
-> +				MX51_PAD_GPIO1_6__GPIO1_6		0x100
->  				MX51_PAD_SD2_CMD__SD2_CMD		0x400020d5
->  				MX51_PAD_SD2_CLK__SD2_CLK		0x20d5
->  				MX51_PAD_SD2_DATA0__SD2_DATA0		0x20d5
-> -- 
-> 2.0.0.rc0
-> 
