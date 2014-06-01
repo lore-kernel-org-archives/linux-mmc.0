@@ -1,76 +1,100 @@
-From: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH v2 1/4] dt: bindings: mmc: Document the
- practice of using subnodes for slots
-Date: Sun, 01 Jun 2014 11:23:48 +0200
-Message-ID: <538AF124.9040106@redhat.com>
-References: <1401563014-13856-1-git-send-email-hdegoede@redhat.com>	<1401563014-13856-2-git-send-email-hdegoede@redhat.com> <CAOesGMisqtPWKY6N5ch36c0VyBP1Pu725cehBU+2gYtKXQs=hQ@mail.gmail.com>
-Reply-To: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+From: Shawn Guo <shawn.guo@linaro.org>
+Subject: Re: [PATCH 5/5] ARM: dts: imx51-babbage: Fix esdhc setup
+Date: Sun, 1 Jun 2014 23:22:19 +0800
+Message-ID: <20140601152216.GD11061@dragon>
+References: <1400848384-3226-1-git-send-email-s.hauer@pengutronix.de>
+ <1400848384-3226-6-git-send-email-s.hauer@pengutronix.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Return-path: <linux-sunxi+bncBDRZXY4CYYORBL7CVOOAKGQE767OKUY-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-In-Reply-To: <CAOesGMisqtPWKY6N5ch36c0VyBP1Pu725cehBU+2gYtKXQs=hQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Post: <http://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Help: <http://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Archive: <http://groups.google.com/group/linux-sunxi>
-Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
-List-Subscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Unsubscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-To: Olof Johansson <olof-nZhT3qVonbNeoWH0uzbU5w@public.gmane.org>, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
-Cc: Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Sascha Hauer <s.hauer-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org>, Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, Arend van Spriel <arend-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>, Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, devicetree <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Type: text/plain; charset="us-ascii"
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-bn1blp0190.outbound.protection.outlook.com ([207.46.163.190]:42433
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1752353AbaFAPWc (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Sun, 1 Jun 2014 11:22:32 -0400
+Content-Disposition: inline
+In-Reply-To: <1400848384-3226-6-git-send-email-s.hauer@pengutronix.de>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Sascha Hauer <s.hauer@pengutronix.de>
+Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, kernel@pengutronix.de, Dong Aisheng <b29396@freescale.com>
 
-Hi,
+On Fri, May 23, 2014 at 02:33:04PM +0200, Sascha Hauer wrote:
+> - Move cd/wp pinctrl from the hog group to the esdhc groups
+> - use gpio for card detection / write protection on esdhc2 since
+>   the controller based detection does not work
 
-On 05/31/2014 10:13 PM, Olof Johansson wrote:
-> On Sat, May 31, 2014 at 12:03 PM, Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
->> The following existing MMC host controller bindings use slot subnodes:
->>
->> Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt
->> Documentation/devicetree/bindings/mmc/k3-dw-mshc.txt
->> Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt
->> Documentation/devicetree/bindings/mmc/socfpga-dw-mshc.txt
->> Documentation/devicetree/bindings/mmc/atmel-hsmci.txt
->> Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.txt
->>
->> This commit documents this practice in the standard mmc bindings documentation.
->>
->> Signed-off-by: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
->
-> There are today only two drivers that use this kind of binding, dw_mmc
-> and the at91 one.
+I tracked it a little bit and found that the controller based detection
+works fine with v3.13 and starts being broken from v3.14-rc1.  The
+offending commit seems to be 89d7e5c13122 (mmc: sdhci-esdhc-imx: add
+runtime pm support).
 
-Correct.
+I will probably apply the patch as it is anyway.  But I'm wondering if
+we should fix the regression and keep maintaining the support of
+controller based cd/wp in sdhci-esdhc-imx driver.
 
-> Neither seems to actually ever have been used with
-> more than one slot. I doubt anyone building an exynos-based system
-> will ever do a multi-slot solution, and it seems that the at91 driver
-> doesn't actually handle more than one slot.
->
-> I'm personally not that excited about complicating the bindings by
-> opening up for this -- I would rather work towards removing the
-> concept of slots if it's one of those things that are going to remain
-> unused. We have actually been talking about reworking the dw_mmc
-> binding to remove the slot concept (and simplify the driver by doing
-> so).
+Shawn
 
-I'm fine with removing the slot subnode, I added it because of it being
-brought up in the powerup sequence discussion. I explicitly asked there
-if adding such a subnode level was seen as desirable but nobody
-answered :|
-
-Anyways, either way works for me. I can do a v3 dropping the slot subnode
-level again. I would really like to move forward with a decision on how-to
-represent non probable info for sdio devices in device nodes. So do you
-have any other remarks other then that the slot subnode should be dropped ?
-And if not can you please review and ack (*) v3 of this patch-set once
-I've send it?
-
-Chris Ball and Ulf Hansson, what is your take on this, are you willing to
-take this patch set? And do you want it with or without the slot subnodes ?
-
-Thanks & Regards,
-
-Hans
-
-
-*) Assuming you don't find any issues
+> - Fix cd gpio polarity for esdhc1. This is wrong and currently
+>   only works because the imx esdhc driver ignores the polarity.
+> 
+> Signed-off-by: Sascha Hauer <s.hauer@pengutronix.de>
+> ---
+>  arch/arm/boot/dts/imx51-babbage.dts | 14 +++++++-------
+>  1 file changed, 7 insertions(+), 7 deletions(-)
+> 
+> diff --git a/arch/arm/boot/dts/imx51-babbage.dts b/arch/arm/boot/dts/imx51-babbage.dts
+> index 9e9deb2..28d4553 100644
+> --- a/arch/arm/boot/dts/imx51-babbage.dts
+> +++ b/arch/arm/boot/dts/imx51-babbage.dts
+> @@ -134,15 +134,15 @@
+>  &esdhc1 {
+>  	pinctrl-names = "default";
+>  	pinctrl-0 = <&pinctrl_esdhc1>;
+> -	fsl,cd-controller;
+> -	fsl,wp-controller;
+> +	cd-gpios = <&gpio1 0 GPIO_ACTIVE_LOW>;
+> +	wp-gpios = <&gpio1 1 GPIO_ACTIVE_HIGH>;
+>  	status = "okay";
+>  };
+>  
+>  &esdhc2 {
+>  	pinctrl-names = "default";
+>  	pinctrl-0 = <&pinctrl_esdhc2>;
+> -	cd-gpios = <&gpio1 6 GPIO_ACTIVE_HIGH>;
+> +	cd-gpios = <&gpio1 6 GPIO_ACTIVE_LOW>;
+>  	wp-gpios = <&gpio1 5 GPIO_ACTIVE_HIGH>;
+>  	status = "okay";
+>  };
+> @@ -300,10 +300,6 @@
+>  	imx51-babbage {
+>  		pinctrl_hog: hoggrp {
+>  			fsl,pins = <
+> -				MX51_PAD_GPIO1_0__SD1_CD     0x20d5
+> -				MX51_PAD_GPIO1_1__SD1_WP     0x20d5
+> -				MX51_PAD_GPIO1_5__GPIO1_5    0x100
+> -				MX51_PAD_GPIO1_6__GPIO1_6    0x100
+>  				MX51_PAD_EIM_A27__GPIO2_21   0x5
+>  				MX51_PAD_CSPI1_SS0__GPIO4_24 0x85
+>  				MX51_PAD_CSPI1_SS1__GPIO4_25 0x85
+> @@ -330,6 +326,8 @@
+>  
+>  		pinctrl_esdhc1: esdhc1grp {
+>  			fsl,pins = <
+> +				MX51_PAD_GPIO1_0__GPIO1_0		0x20d5
+> +				MX51_PAD_GPIO1_1__GPIO1_1		0x20d5
+>  				MX51_PAD_SD1_CMD__SD1_CMD		0x400020d5
+>  				MX51_PAD_SD1_CLK__SD1_CLK		0x20d5
+>  				MX51_PAD_SD1_DATA0__SD1_DATA0		0x20d5
+> @@ -341,6 +339,8 @@
+>  
+>  		pinctrl_esdhc2: esdhc2grp {
+>  			fsl,pins = <
+> +				MX51_PAD_GPIO1_5__GPIO1_5		0x100
+> +				MX51_PAD_GPIO1_6__GPIO1_6		0x100
+>  				MX51_PAD_SD2_CMD__SD2_CMD		0x400020d5
+>  				MX51_PAD_SD2_CLK__SD2_CLK		0x20d5
+>  				MX51_PAD_SD2_DATA0__SD2_DATA0		0x20d5
+> -- 
+> 2.0.0.rc0
+> 
