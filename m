@@ -1,99 +1,50 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [GIT PULL] MMC for v.3.16
-Date: Mon, 2 Jun 2014 14:03:27 +0200
-Message-ID: <CAPDyKFpkKNx17ha=WWAp4-6w3k4pRYSHUhOWHv1G+1_wAEBceA@mail.gmail.com>
+From: Dinh Nguyen <dinh.linux@gmail.com>
+Subject: Re: [PATCHv3 4/4] ARM: dts: replace the slot property into slot sub-node
+ for dwmmc.
+Date: Mon, 02 Jun 2014 08:08:48 -0500
+Message-ID: <538C7760.2070909@gmail.com>
+References: <1401255351-17653-1-git-send-email-jh80.chung@samsung.com> <1401255351-17653-5-git-send-email-jh80.chung@samsung.com> <001d01cf7c06$420dea90$c629bfb0$%jun@samsung.com> <1834387.xgX8NLRvfH@phil>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qa0-f48.google.com ([209.85.216.48]:39784 "EHLO
-	mail-qa0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754110AbaFBMD2 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 2 Jun 2014 08:03:28 -0400
-Received: by mail-qa0-f48.google.com with SMTP id i13so2555302qae.35
-        for <linux-mmc@vger.kernel.org>; Mon, 02 Jun 2014 05:03:28 -0700 (PDT)
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1;
+	format=flowed
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-Reply-To: <1834387.xgX8NLRvfH@phil>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: =?ISO-8859-1?Q?Heiko_St=FCbner?= <heiko@sntech.de>, Seungwon Jeon <tgih.jun@samsung.com>
+Cc: 'Jaehoon Chung' <jh80.chung@samsung.com>, linux-mmc@vger.kernel.org, chris@printf.net, ulf.hansson@linaro.org, ludovic.desroches@atmel.com, devicetree@vger.kernel.org, linux-samsung-soc@vger.kernel.org, dinguyen@altera.com, cpgs@samsung.com
 List-Id: linux-mmc@vger.kernel.org
-To: Linus <torvalds@linux-foundation.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Russell King <rmk+kernel@arm.linux.org.uk>, Chris Ball <chris@printf.net>
-
-Hi Linus,
-
-This is the first PR I send to you as I am co-maintaining the MMC
-subsystem with Chris Ball. You will receive a separate PR for MMC from
-him as well, as usual.
-
-These patches are mainly updates for the mmci driver and have been
-tested in linux-next.
-
-Some ARM SoC related patches are also included and those have been
-acked from the corresponding maintainers to go through my mmc tree.
-
-Some more details in the signed tag.
-
-Kind regards
-Ulf Hansson
 
 
-The following changes since commit 89ca3b881987f5a4be4c5dbaa7f0df12bbdde2fd:
 
-  Linux 3.15-rc4 (2014-05-04 18:14:42 -0700)
+On 05/30/2014 01:15 PM, Heiko St=FCbner wrote:
+> Am Freitag, 30. Mai 2014, 21:54:13 schrieb Seungwon Jeon:
+>> + Dinh Nguyen <dinguyen@altera.com>
+>> + Heiko Stuebner <heiko@sntech.de>
+>>
+>> On Wed, May 28, 2014, Jaehoon Chung wrote:
+>>> dw-mmc controller can support the multiple slot.
+>>> So each slot's property can be difference.
+>>> And "support-highspeed" property in dw-mmc is deprecated.
+>>> "support-highspeed" property can be replaced to "cap-sd/mmc-highspe=
+ed".
+>>>
+>>> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+>>
+>> Looks good to me.
+>>
+>> Acked-by: Seungwon Jeon <tgih.jun@samsung.com>
+>
+> the rockchip part also looks ok to me
+>
+> Acked-by: Heiko Stuebner <heiko@sntech.de>
+>
+>
+>>
 
-are available in the git repository at:
+=46or the socfpga parts:
 
-  git://git.linaro.org/people/ulf.hansson/mmc.git tags/mmc-v3.16-1
+Acked-by: Dinh Nguyen <dinguyen@altera.com>
 
-for you to fetch changes up to 8c3a05b489ef097f86bf87c64192456553f57781:
-
-  mmc: mmci: Enforce DMA configuration through DT (2014-06-02 11:20:25 +0200)
-
-----------------------------------------------------------------
-Updates for mmci driver:
- - Put the device into low power state at system suspend.
- - Convert to the common mmc DT parser.
- - Add missing DT bindings needed for ux500.
-
-Updates for ARM ux500|u300:
- - Convert to the common mmc DT bindings.
- - Remove redundant board file for mmci platform data.
-
-----------------------------------------------------------------
-Ulf Hansson (22):
-      mmc: mmci: Mask IRQs for all variants during runtime suspend
-      mmc: mmci: Let runtime PM callbacks be available for CONFIG_PM
-      mmc: mmci: Put the device into low power state at system suspend
-      mmc: mmci: Convert to the mmc gpio API
-      mmc: mmci: Convert to devm functions
-      mmc: mmci: Update DT documentation
-      mmc: mmci: Add DT bindings for signal direction
-      mmc: mmci: Add DT bindings for feedback clock pin
-      mmc: mmci: Use the common mmc DT parser
-      ARM: ux500: Add mmci signal directions and feeback clock in DT for href
-      ARM: ux500: Convert to the common mmc DT bindings for highspeed mode
-      ARM: nomadik: Convert to the common mmc DT bindings for highspeed mode
-      ARM: u300: Convert to the common mmc DT bindings for highspeed mode
-      mmc: mmci: Mark the DT bindings for highspeed mode as deprecated
-      mmc: mmci: Enable MMC_CAP_CMD23
-      ARM: ux500: Add the mmc capabilities flags to DT
-      ARM: ux500: Add a vmmc regulator through DT for the poped eMMC for href
-      ARM: ux500: Remove redundant board file for mmci platform data
-      mmc: mmci: Enforce DT for signal direction and feedback clock
-      mmc: mmci: Enforce mmc capabilities through DT
-      mmc: mmci: Enforce max frequency configuration through DT
-      mmc: mmci: Enforce DMA configuration through DT
-
- Documentation/devicetree/bindings/mmc/mmci.txt |   54 +++-
- arch/arm/boot/dts/ste-ccu9540.dts              |    6 +-
- arch/arm/boot/dts/ste-href.dtsi                |   19 +-
- arch/arm/boot/dts/ste-nomadik-stn8815.dtsi     |    4 +-
- arch/arm/boot/dts/ste-snowball.dts             |    4 +-
- arch/arm/boot/dts/ste-u300.dts                 |    4 +-
- arch/arm/mach-lpc32xx/phy3250.c                |    3 -
- arch/arm/mach-ux500/Makefile                   |    3 +-
- arch/arm/mach-ux500/board-mop500-sdi.c         |  166 ------------
- arch/arm/mach-ux500/board-mop500.h             |    5 -
- arch/arm/mach-ux500/cpu-db8500.c               |    4 -
- drivers/mmc/host/mmci.c                        |  324 ++++++------------------
- drivers/mmc/host/mmci.h                        |   14 +-
- include/linux/amba/mmci.h                      |   42 ---
- 14 files changed, 169 insertions(+), 483 deletions(-)
- delete mode 100644 arch/arm/mach-ux500/board-mop500-sdi.c
+Thanks,
+Dinh
