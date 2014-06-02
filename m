@@ -1,34 +1,35 @@
-From: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH v2 1/4] dt: bindings: mmc: Document the
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [linux-sunxi] [PATCH v2 1/4] dt: bindings: mmc: Document the
  practice of using subnodes for slots
-Date: Mon, 02 Jun 2014 10:33:37 +0200
-Message-ID: <538C36E1.40507@redhat.com>
-References: <1401563014-13856-1-git-send-email-hdegoede@redhat.com>	<1401563014-13856-2-git-send-email-hdegoede@redhat.com>	<CAOesGMisqtPWKY6N5ch36c0VyBP1Pu725cehBU+2gYtKXQs=hQ@mail.gmail.com>	<538AF124.9040106@redhat.com> <CAPDyKFon5J6aUTzSmqGn_pkxgud26=+KBW0pkim-adMmWG_xXg@mail.gmail.com>
-Reply-To: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+Date: Mon, 02 Jun 2014 17:38:42 +0900
+Message-ID: <538C3812.9060705@samsung.com>
+References: <1401563014-13856-1-git-send-email-hdegoede@redhat.com>
+ <1401563014-13856-2-git-send-email-hdegoede@redhat.com>
+ <CAOesGMisqtPWKY6N5ch36c0VyBP1Pu725cehBU+2gYtKXQs=hQ@mail.gmail.com>
+ <538AF124.9040106@redhat.com>
+ <CAPDyKFon5J6aUTzSmqGn_pkxgud26=+KBW0pkim-adMmWG_xXg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-sunxi+bncBDRZXY4CYYORB3PNWCOAKGQE3ZDULDI-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-In-Reply-To: <CAPDyKFon5J6aUTzSmqGn_pkxgud26=+KBW0pkim-adMmWG_xXg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Post: <http://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Help: <http://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Archive: <http://groups.google.com/group/linux-sunxi>
-Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
-List-Subscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Unsubscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Olof Johansson <olof-nZhT3qVonbNeoWH0uzbU5w@public.gmane.org>, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, Sascha Hauer <s.hauer-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org>, Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, Arend van Spriel <arend-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>, Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, devicetree <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout3.samsung.com ([203.254.224.33]:13367 "EHLO
+	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752383AbaFBIip (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 2 Jun 2014 04:38:45 -0400
+In-reply-to: <CAPDyKFon5J6aUTzSmqGn_pkxgud26=+KBW0pkim-adMmWG_xXg@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, Hans de Goede <hdegoede@redhat.com>
+Cc: Olof Johansson <olof@lixom.net>, linux-sunxi@googlegroups.com, Chris Ball <chris@printf.net>, Sascha Hauer <s.hauer@pengutronix.de>, Maxime Ripard <maxime.ripard@free-electrons.com>, Arend van Spriel <arend@broadcom.com>, Chen-Yu Tsai <wens@csie.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, devicetree <devicetree@vger.kernel.org>
 
-Hi,
-
-On 06/02/2014 10:29 AM, Ulf Hansson wrote:
-> On 1 June 2014 11:23, Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
+On 06/02/2014 05:29 PM, Ulf Hansson wrote:
+> On 1 June 2014 11:23, Hans de Goede <hdegoede@redhat.com> wrote:
 >> Hi,
 >>
 >>
 >> On 05/31/2014 10:13 PM, Olof Johansson wrote:
 >>>
->>> On Sat, May 31, 2014 at 12:03 PM, Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+>>> On Sat, May 31, 2014 at 12:03 PM, Hans de Goede <hdegoede@redhat.com>
 >>> wrote:
 >>>>
 >>>> The following existing MMC host controller bindings use slot subnodes:
@@ -43,7 +44,7 @@ On 06/02/2014 10:29 AM, Ulf Hansson wrote:
 >>>> This commit documents this practice in the standard mmc bindings
 >>>> documentation.
 >>>>
->>>> Signed-off-by: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+>>>> Signed-off-by: Hans de Goede <hdegoede@redhat.com>
 >>>
 >>>
 >>> There are today only two drivers that use this kind of binding, dw_mmc
@@ -83,17 +84,6 @@ On 06/02/2014 10:29 AM, Ulf Hansson wrote:
 > 
 > I certainly appreciate you working actively on this Hans, I will look
 > into the patchset as soon as I can.
-
-Thanks. If I read you correctly below, then you want the slot nodes
-to be removed, correct? In that case it is probably best if you wait reviewing
-until I've done a v3, with the slot nodes removed. I hope to find some time
-to do this this evening (CET).
-
-Regards,
-
-Hans
-
-
 > 
 > I share Olof's view about the slot nodes, we must not add DT bindings
 > that isn't really needed.
@@ -106,6 +96,14 @@ Hans
 > 
 > Thus I suggest we should clean-up host drivers to support only one
 > card per host, and entirely skip the slot concept.
+
+Well, almost platform is used the only one card per host, although some controller is supported the slot concept.
+But we don't know that controller should be used the multi slot per host, in future.
+So I think we can't skip the slot concept.
+
+Best Regards,
+Jaehoon Chung
+
 > 
 > Kind regards
 > Uffe
@@ -117,3 +115,5 @@ Hans
 >>
 >>
 >> *) Assuming you don't find any issues
+> 
+
