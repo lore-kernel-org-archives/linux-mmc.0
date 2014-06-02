@@ -1,39 +1,46 @@
-From: Lee Jones <lee.jones@linaro.org>
-Subject: Re: Add SDHCI support for STMicroelectronics SoCs
-Date: Mon, 2 Jun 2014 14:53:02 +0100
-Message-ID: <20140602135302.GB4146@lee--X1>
-References: <1400771902-26553-1-git-send-email-peter.griffin@linaro.org>
- <537E1B55.1090807@st.com>
- <20140602102930.GB437@griffinp-ThinkPad-X1-Carbon-2nd>
+From: Ben Dooks <ben@trinity.fluff.org>
+Subject: Re: [GIT PULL] MMC for v.3.16
+Date: Mon, 2 Jun 2014 15:37:20 +0100
+Message-ID: <20140602143720.GB19809@trinity.fluff.org>
+References: <CAPDyKFpkKNx17ha=WWAp4-6w3k4pRYSHUhOWHv1G+1_wAEBceA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ie0-f173.google.com ([209.85.223.173]:49347 "EHLO
-	mail-ie0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754776AbaFBNxI (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 2 Jun 2014 09:53:08 -0400
-Received: by mail-ie0-f173.google.com with SMTP id lx4so4491708iec.18
-        for <linux-mmc@vger.kernel.org>; Mon, 02 Jun 2014 06:53:08 -0700 (PDT)
+Received: from trinity.fluff.org ([89.16.178.74]:45938 "EHLO trinity.fluff.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754595AbaFBOhY (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 2 Jun 2014 10:37:24 -0400
 Content-Disposition: inline
-In-Reply-To: <20140602102930.GB437@griffinp-ThinkPad-X1-Carbon-2nd>
+In-Reply-To: <CAPDyKFpkKNx17ha=WWAp4-6w3k4pRYSHUhOWHv1G+1_wAEBceA@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Peter Griffin <peter.griffin@linaro.org>
-Cc: Maxime Coquelin <maxime.coquelin@st.com>, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, patrice.chotard@st.com, srinivas.kandagatla@gmail.com, chris@printf.net, ulf.hansson@linaro.org, kernel@stlinux.com, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Linus <torvalds@linux-foundation.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Russell King <rmk+kernel@arm.linux.org.uk>, Chris Ball <chris@printf.net>
 
-> > >Initially it supports the stih416 and stih415 SoCs, and has
-> > >been tested on a stih416-b2020 board.
-> >=20
-> > In next version, could you also add  drivers/mmc/host/sdhci-st.c in
-> > the ARM/STI ARCHITECTURE field of MAINTAINERS file?
->=20
-> Was out on hols last week. I have fixed it in v2.
+On Mon, Jun 02, 2014 at 02:03:27PM +0200, Ulf Hansson wrote:
+> Hi Linus,
+> 
+> This is the first PR I send to you as I am co-maintaining the MMC
+> subsystem with Chris Ball. You will receive a separate PR for MMC from
+> him as well, as usual.
+> 
+> These patches are mainly updates for the mmci driver and have been
+> tested in linux-next.
+> 
+> Some ARM SoC related patches are also included and those have been
+> acked from the corresponding maintainers to go through my mmc tree.
+> 
+> Some more details in the signed tag.
+> 
+> Kind regards
+> Ulf Hansson
 
-This should be in its own patch.
+Hi, is it too late to get the sh-mmcif driver cleanups in? I posted
+them some time ago but they do not seem to have been applied.
 
---=20
-Lee Jones
-Linaro STMicroelectronics Landing Team Lead
-Linaro.org =E2=94=82 Open source software for ARM SoCs
-=46ollow Linaro: Facebook | Twitter | Blog
+
+-- 
+Ben Dooks, ben@fluff.org, http://www.fluff.org/ben/
+
+Large Hadron Colada: A large Pina Colada that makes the universe disappear.
+
