@@ -1,148 +1,144 @@
-From: Tony Lindgren <tony@atomide.com>
-Subject: Re: [PATCH v14 6/6] mmc: omap_hsmmc: Pin remux workaround to support
- SDIO interrupt on AM335x
-Date: Mon, 2 Jun 2014 15:38:14 -0700
-Message-ID: <20140602223814.GD11004@atomide.com>
-References: <1401352085-22781-1-git-send-email-afenkart@gmail.com>
- <1401352085-22781-7-git-send-email-afenkart@gmail.com>
- <538738F8.8000807@ti.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-doc-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <538738F8.8000807@ti.com>
-Sender: linux-doc-owner@vger.kernel.org
-To: Balaji T K <balajitk@ti.com>
-Cc: Andreas Fenkart <afenkart@gmail.com>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Grant Likely <grant.likely@secretlab.ca>, Felipe Balbi <balbi@ti.com>, Andreas Mueller <schnitzeltony@googlemail.com>, Sebastian Reichel <sre@kernel.org>, zonque@gmail.com, galak@codeaurora.org, linux-doc@vger.kernel.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org
+From: Jon Pry <jonpry@gmail.com>
+Subject: [RFC][PATCH] Fix for Intel Baytrail-T errata regarding the non-functioning mmc_pwr pin
+Date: Mon,  2 Jun 2014 19:54:14 -0400
+Message-ID: <1401753254-32729-1-git-send-email-jonpry@gmail.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qg0-f41.google.com ([209.85.192.41]:32773 "EHLO
+	mail-qg0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932130AbaFBXyV (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 2 Jun 2014 19:54:21 -0400
+Received: by mail-qg0-f41.google.com with SMTP id j5so11916561qga.14
+        for <linux-mmc@vger.kernel.org>; Mon, 02 Jun 2014 16:54:20 -0700 (PDT)
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: Jon Pry <jonpry@gmail.com>
 
-* Balaji T K <balajitk@ti.com> [140529 06:42]:
-> On Thursday 29 May 2014 01:58 PM, Andreas Fenkart wrote:
-> >The am335x can't detect pending cirq in PM runtime suspend.
-> >This patch reconfigures dat1 as a GPIO before going to suspend.
-> >SDIO interrupts are detected with the GPIO, the GPIO will only wake
-> >the module from suspend, SDIO irq detection will still happen through the
-> >IP block.
-> >
-> >Idea of remuxing the pins by Tony Lindgren. Code contributions from
-> >Tony Lindgren and Balaji T K <balajitk@ti.com>
-> >
-> >Signed-off-by: Andreas Fenkart <afenkart@gmail.com>
-> >Signed-off-by: Tony Lindgren <tony@atomide.com>
-> 
-> Acked-by: Balaji T K <balajitk@ti.com>
-> 
-> Hi Chris/Ulf,
-> 
-> Can you please queue this series for 3.16
+This bug effects Asus T100 as well as other Baytrail-T devices. 
+Erratum in question can be found at 
+http://www.intel.com/content/dam/www/public/us/en/documents/specification-updates/atom-Z36xxx-Z37xxx-spec-update.pdf
 
-Yes please, not seeing these in linux next yet.
-
-Regards,
-
-Tony
+Signed-off-by: Jon Pry <jonpry <at> gmail.com>
+---
+diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
+index ebb3f39..ebed2a0 100644
+--- a/drivers/mmc/host/sdhci-acpi.c
++++ b/drivers/mmc/host/sdhci-acpi.c
+@@ -123,7 +123,7 @@ static const struct sdhci_acpi_slot sdhci_acpi_slot_int_emmc = {
  
-> >diff --git a/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt b/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
-> >index 0233ba7..76bf087 100644
-> >--- a/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
-> >+++ b/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
-> >@@ -57,3 +57,56 @@ Examples:
-> >  			&edma 25>;
-> >  		dma-names = "tx", "rx";
-> >  	};
-> >+
-> >+[workaround for missing swakeup on am33xx]
-> >+
-> >+This SOC is missing the swakeup line, it will not detect SDIO irq
-> >+while in suspend.
-> >+
-> >+                             ------
-> >+                             | PRCM |
-> >+                              ------
-> >+                               ^ |
-> >+                       swakeup | | fclk
-> >+                               | v
-> >+       ------                -------               -----
-> >+      | card | -- CIRQ -->  | hsmmc | -- IRQ -->  | CPU |
-> >+       ------                -------               -----
-> >+
-> >+In suspend the fclk is off and the module is disfunctional. Even register reads
-> >+will fail. A small logic in the host will request fclk restore, when an
-> >+external event is detected. Once the clock is restored, the host detects the
-> >+event normally. Since am33xx doesn't have this line it never wakes from
-> >+suspend.
-> >+
-> >+The workaround is to reconfigure the dat1 line as a GPIO upon suspend. To make
-> >+this work, we need to set the named pinctrl states "default" and "idle".
-> >+Prepare idle to remux dat1 as a gpio, and default to remux it back as sdio
-> >+dat1. The MMC driver will then toggle between idle and default state during
-> >+runtime.
-> >+
-> >+In summary:
-> >+1. select matching 'compatible' section, see example below.
-> >+2. specify pinctrl states "default" and "idle", "sleep" is optional.
-> >+3. specify the gpio irq used for detecting sdio irq in suspend
-> >+
-> >+If configuration is incomplete, a warning message is emitted "falling back to
-> >+polling". Also check the "sdio irq mode" in /sys/kernel/debug/mmc0/regs. Mind
-> >+not every application needs SDIO irq, e.g. MMC cards.
-> >+
-> >+	mmc1: mmc@48060100 {
-> >+		compatible = "ti,am33xx-hsmmc";
-> >+		...
-> >+		pinctrl-names = "default", "idle", "sleep"
-> >+		pinctrl-0 = <&mmc1_pins>;
-> >+		pinctrl-1 = <&mmc1_idle>;
-> >+		pinctrl-2 = <&mmc1_sleep>;
-> >+		...
-> >+		interrupts-extended = <&intc 64 &gpio2 28 0>;
-> >+	};
-> >+
-> >+	mmc1_idle : pinmux_cirq_pin {
-> >+		pinctrl-single,pins = <
-> >+		        0x0f8 0x3f      /* GPIO2_28 */
-> >+		>;
-> >+	};
-> >diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-> >index 0febb17..35ac2e4 100644
-> >--- a/drivers/mmc/host/omap_hsmmc.c
-> >+++ b/drivers/mmc/host/omap_hsmmc.c
-> >@@ -1754,15 +1754,33 @@ static int omap_hsmmc_configure_wake_irq(struct omap_hsmmc_host *host)
-> >  	 * and need to remux SDIO DAT1 to GPIO for wake-up from idle.
-> >  	 */
-> >  	if (host->pdata->controller_flags & OMAP_HSMMC_SWAKEUP_MISSING) {
-> >-		ret = -ENODEV;
-> >-		devm_free_irq(host->dev, host->wake_irq, host);
-> >-		goto err;
-> >+		struct pinctrl *p = devm_pinctrl_get(host->dev);
-> >+		if (!p) {
-> >+			ret = -ENODEV;
-> >+			goto err_free_irq;
-> >+		}
-> >+		if (IS_ERR(pinctrl_lookup_state(p, PINCTRL_STATE_DEFAULT))) {
-> >+			dev_info(host->dev, "missing default pinctrl state\n");
-> >+			devm_pinctrl_put(p);
-> >+			ret = -EINVAL;
-> >+			goto err_free_irq;
-> >+		}
-> >+
-> >+		if (IS_ERR(pinctrl_lookup_state(p, PINCTRL_STATE_IDLE))) {
-> >+			dev_info(host->dev, "missing idle pinctrl state\n");
-> >+			devm_pinctrl_put(p);
-> >+			ret = -EINVAL;
-> >+			goto err_free_irq;
-> >+		}
-> >+		devm_pinctrl_put(p);
-> >  	}
-> >
-> >  	OMAP_HSMMC_WRITE(host->base, HCTL,
-> >  			 OMAP_HSMMC_READ(host->base, HCTL) | IWE);
-> >  	return 0;
-> >
-> >+err_free_irq:
-> >+	devm_free_irq(host->dev, host->wake_irq, host);
-> >  err:
-> >  	dev_warn(host->dev, "no SDIO IRQ support, falling back to polling\n");
-> >  	host->wake_irq = 0;
-> >
-> 
+ static const struct sdhci_acpi_slot sdhci_acpi_slot_int_sdio = {
+ 	.quirks  = SDHCI_QUIRK_BROKEN_CARD_DETECTION,
+-	.quirks2 = SDHCI_QUIRK2_HOST_OFF_CARD_ON,
++	.quirks2 = SDHCI_QUIRK2_HOST_OFF_CARD_ON | SDHCI_QUIRK2_BROKEN_POWER_ENABLE,
+ 	.caps    = MMC_CAP_NONREMOVABLE | MMC_CAP_POWER_OFF_CARD,
+ 	.flags   = SDHCI_ACPI_RUNTIME_PM,
+ 	.pm_caps = MMC_PM_KEEP_POWER,
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 9a79fc4..5a0e928 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -22,6 +22,7 @@
+ #include <linux/scatterlist.h>
+ #include <linux/regulator/consumer.h>
+ #include <linux/pm_runtime.h>
++#include <linux/gpio.h>
+ 
+ #include <linux/leds.h>
+ 
+@@ -1261,6 +1262,10 @@ static inline void sdhci_update_clock(struct sdhci_host *host)
+ 	sdhci_set_clock(host, clock);
+ }
+ 
++static inline void sdhci_set_power_quirk(unsigned short power) {
++	gpio_set_value(SDHCI_POWER_QUIRK_GPIO, power);
++}
++
+ static int sdhci_set_power(struct sdhci_host *host, unsigned short power)
+ {
+ 	u8 pwr = 0;
+@@ -1292,6 +1297,9 @@ static int sdhci_set_power(struct sdhci_host *host, unsigned short power)
+ 		sdhci_writeb(host, 0, SDHCI_POWER_CONTROL);
+ 		if (host->quirks2 & SDHCI_QUIRK2_CARD_ON_NEEDS_BUS_ON)
+ 			sdhci_runtime_pm_bus_off(host);
++		/* The intel Bay Trail SoCs need to assert a GPIO as a work around */
++		if (host->quirks2 & SDHCI_QUIRK2_BROKEN_POWER_ENABLE)
++			sdhci_set_power_quirk(0);
+ 		return 0;
+ 	}
+ 
+@@ -1311,8 +1319,14 @@ static int sdhci_set_power(struct sdhci_host *host, unsigned short power)
+ 
+ 	pwr |= SDHCI_POWER_ON;
+ 
++
+ 	sdhci_writeb(host, pwr, SDHCI_POWER_CONTROL);
+ 
++	/* The intel Bay Trail SoCs need to assert a GPIO as a work around */
++	if (host->quirks2 & SDHCI_QUIRK2_BROKEN_POWER_ENABLE)
++		sdhci_set_power_quirk(1);
++
++
+ 	if (host->quirks2 & SDHCI_QUIRK2_CARD_ON_NEEDS_BUS_ON)
+ 		sdhci_runtime_pm_bus_on(host);
+ 
+@@ -2820,6 +2841,18 @@ int sdhci_add_host(struct sdhci_host *host)
+ 		host->flags &= ~SDHCI_USE_SDMA;
+ 	}
+ 
++    if ((host->quirks2 & SDHCI_QUIRK2_BROKEN_POWER_ENABLE)) {
++        printk("Using GPIO for power enable as it is marked broken\n");
++        if (gpio_request(SDHCI_POWER_QUIRK_GPIO, "SDIO_PWR_EN") < 0) {
++            printk("Unable to request GPIO. SDIO may be broken.");
++			host->quirks2 = host->quirks2 & ~SDHCI_QUIRK2_BROKEN_POWER_ENABLE;
++        }
++        else if (gpio_direction_output(SDHCI_POWER_QUIRK_GPIO, 0) < 0) {
++            printk("Unable to set GPIO direction. SDIO may be broken.");
++			host->quirks2 = host->quirks2 & ~SDHCI_QUIRK2_BROKEN_POWER_ENABLE;
++        }
++    }
++
+ 	if ((host->version >= SDHCI_SPEC_200) &&
+ 		(caps[0] & SDHCI_CAN_DO_ADMA2))
+ 		host->flags |= SDHCI_USE_ADMA;
+@@ -3325,6 +3358,10 @@ void sdhci_remove_host(struct sdhci_host *host, int dead)
+ 	tasklet_kill(&host->card_tasklet);
+ 	tasklet_kill(&host->finish_tasklet);
+ 
++    if (host->quirks2 & SDHCI_QUIRK2_BROKEN_POWER_ENABLE) {
++        gpio_free(SDHCI_POWER_QUIRK_GPIO);
++    }
++
+ 	if (host->vmmc) {
+ 		regulator_disable(host->vmmc);
+ 		regulator_put(host->vmmc);
+diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+index 0a3ed01..027fcd1 100644
+--- a/drivers/mmc/host/sdhci.h
++++ b/drivers/mmc/host/sdhci.h
+@@ -84,11 +84,12 @@
+ #define   SDHCI_CTRL_ADMA64	0x18
+ #define   SDHCI_CTRL_8BITBUS	0x20
+ 
+ #define SDHCI_POWER_CONTROL	0x29
+ #define  SDHCI_POWER_ON		0x01
+ #define  SDHCI_POWER_180	0x0A
+ #define  SDHCI_POWER_300	0x0C
+ #define  SDHCI_POWER_330	0x0E
++#define SDHCI_POWER_QUIRK_GPIO 195 /*GPIO offset 41 of SCORE device is SD3_PWR_EN*/
+ 
+ #define SDHCI_BLOCK_GAP_CONTROL	0x2A
+ 
+diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
+index 7be12b8..92cec16 100644
+--- a/include/linux/mmc/sdhci.h
++++ b/include/linux/mmc/sdhci.h
+@@ -102,6 +102,9 @@ struct sdhci_host {
+ #define SDHCI_QUIRK2_BROKEN_HS200			(1<<6)
+ /* Controller does not support DDR50 */
+ #define SDHCI_QUIRK2_BROKEN_DDR50			(1<<7)
++/* Controller cannot initialize power (must use GPIO instead) */
++#define SDHCI_QUIRK2_BROKEN_POWER_ENABLE		(1<<8)
++
+ 
+ 	int irq;		/* Device IRQ */
+ 	void __iomem *ioaddr;	/* Mapped address */
