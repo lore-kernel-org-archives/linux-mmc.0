@@ -1,7 +1,7 @@
 From: srinivas.kandagatla@linaro.org
-Subject: [PATCH v6 04/12] mmc: mmci: Add Qcom datactrl register variant
-Date: Mon,  2 Jun 2014 10:09:06 +0100
-Message-ID: <1401700146-11588-1-git-send-email-srinivas.kandagatla@linaro.org>
+Subject: [PATCH v6 06/12] mmc: mmci: add 8bit bus support in variant data
+Date: Mon,  2 Jun 2014 10:09:23 +0100
+Message-ID: <1401700163-11670-1-git-send-email-srinivas.kandagatla@linaro.org>
 References: <1401699818-11329-1-git-send-email-srinivas.kandagatla@linaro.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1401699818-11329-1-git-send-email-srinivas.kandagatla@linaro.org>
@@ -12,45 +12,70 @@ List-Id: linux-mmc@vger.kernel.org
 
 From: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
 
-Instance of this IP on Qualcomm's SOCs has bit different layout for datactrl
-register. Bit position datactrl[16:4] hold the true block size instead of power
-of 2.
+This patch adds 8bit bus enable to variant structure giving more flexibility
+to the driver to support more SOCs which have different clock register layout.
+
+Without this patch other new SOCs like Qcom will have to add more code
+to special case them.
 
 Signed-off-by: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
 Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
 ---
- drivers/mmc/host/mmci.c | 5 +++++
- 1 file changed, 5 insertions(+)
+ drivers/mmc/host/mmci.c | 7 ++++++-
+ 1 file changed, 6 insertions(+), 1 deletion(-)
 
 diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index ed20bf5..72981f6 100644
+index ad7e538..fa3ad83 100644
 --- a/drivers/mmc/host/mmci.c
 +++ b/drivers/mmc/host/mmci.c
-@@ -60,6 +60,8 @@ static unsigned int fmax = 515633;
-  * @sdio: variant supports SDIO
-  * @st_clkdiv: true if using a ST-specific clock divider algorithm
-  * @blksz_datactrl16: true if Block size is at b16..b30 position in datactrl register
-+ * @blksz_datactrl4: true if Block size is at b4..b16 position in datactrl
-+ *		     register
-  * @pwrreg_powerup: power up value for MMCIPOWER register
-  * @signal_direction: input/out direction of bus signals can be indicated
-  * @pwrreg_clkgate: MMCIPOWER register must be used to gate the clock
-@@ -75,6 +77,7 @@ struct variant_data {
- 	bool			sdio;
- 	bool			st_clkdiv;
- 	bool			blksz_datactrl16;
-+	bool			blksz_datactrl4;
- 	u32			pwrreg_powerup;
- 	bool			signal_direction;
- 	bool			pwrreg_clkgate;
-@@ -731,6 +734,8 @@ static void mmci_start_data(struct mmci_host *host, struct mmc_data *data)
+@@ -52,6 +52,7 @@ static unsigned int fmax = 515633;
+  * struct variant_data - MMCI variant-specific quirks
+  * @clkreg: default value for MCICLOCK register
+  * @clkreg_enable: enable value for MMCICLOCK register
++ * @clkreg_8bit_bus_enable: enable value for 8 bit bus
+  * @datalength_bits: number of bits in the MMCIDATALENGTH register
+  * @fifosize: number of bytes that can be written when MMCI_TXFIFOEMPTY
+  *	      is asserted (likewise for RX)
+@@ -72,6 +73,7 @@ static unsigned int fmax = 515633;
+ struct variant_data {
+ 	unsigned int		clkreg;
+ 	unsigned int		clkreg_enable;
++	unsigned int		clkreg_8bit_bus_enable;
+ 	unsigned int		datalength_bits;
+ 	unsigned int		fifosize;
+ 	unsigned int		fifohalfsize;
+@@ -113,6 +115,7 @@ static struct variant_data variant_u300 = {
+ 	.fifosize		= 16 * 4,
+ 	.fifohalfsize		= 8 * 4,
+ 	.clkreg_enable		= MCI_ST_U300_HWFCEN,
++	.clkreg_8bit_bus_enable = MCI_ST_8BIT_BUS,
+ 	.datalength_bits	= 16,
+ 	.sdio			= true,
+ 	.pwrreg_powerup		= MCI_PWR_ON,
+@@ -139,6 +142,7 @@ static struct variant_data variant_ux500 = {
+ 	.fifohalfsize		= 8 * 4,
+ 	.clkreg			= MCI_CLK_ENABLE,
+ 	.clkreg_enable		= MCI_ST_UX500_HWFCEN,
++	.clkreg_8bit_bus_enable = MCI_ST_8BIT_BUS,
+ 	.datalength_bits	= 24,
+ 	.sdio			= true,
+ 	.st_clkdiv		= true,
+@@ -154,6 +158,7 @@ static struct variant_data variant_ux500v2 = {
+ 	.fifohalfsize		= 8 * 4,
+ 	.clkreg			= MCI_CLK_ENABLE,
+ 	.clkreg_enable		= MCI_ST_UX500_HWFCEN,
++	.clkreg_8bit_bus_enable = MCI_ST_8BIT_BUS,
+ 	.datactrl_mask_ddrmode	= MCI_ST_DPSM_DDRMODE,
+ 	.datalength_bits	= 24,
+ 	.sdio			= true,
+@@ -305,7 +310,7 @@ static void mmci_set_clkreg(struct mmci_host *host, unsigned int desired)
+ 	if (host->mmc->ios.bus_width == MMC_BUS_WIDTH_4)
+ 		clk |= MCI_4BIT_BUS;
+ 	if (host->mmc->ios.bus_width == MMC_BUS_WIDTH_8)
+-		clk |= MCI_ST_8BIT_BUS;
++		clk |= variant->clkreg_8bit_bus_enable;
  
- 	if (variant->blksz_datactrl16)
- 		datactrl = MCI_DPSM_ENABLE | (data->blksz << 16);
-+	else if (variant->blksz_datactrl4)
-+		datactrl = MCI_DPSM_ENABLE | (data->blksz << 4);
- 	else
- 		datactrl = MCI_DPSM_ENABLE | blksz_bits << 4;
- 
+ 	if (host->mmc->ios.timing == MMC_TIMING_UHS_DDR50)
+ 		clk |= MCI_ST_UX500_NEG_EDGE;
 -- 
 1.9.1
