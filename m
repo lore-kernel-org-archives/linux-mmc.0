@@ -1,73 +1,99 @@
-From: Peter Griffin <peter.griffin@linaro.org>
-Subject: Re: [PATCH 1/8] mmc: sdhci-st: Intial support for ST SDHCI controller
-Date: Mon, 2 Jun 2014 12:06:39 +0100
-Message-ID: <20140602110639.GA1483@griffinp-ThinkPad-X1-Carbon-2nd>
-References: <1400771902-26553-1-git-send-email-peter.griffin@linaro.org>
- <1400771902-26553-2-git-send-email-peter.griffin@linaro.org>
- <20140522165036.GK19747@lee--X1>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: [GIT PULL] MMC for v.3.16
+Date: Mon, 2 Jun 2014 14:03:27 +0200
+Message-ID: <CAPDyKFpkKNx17ha=WWAp4-6w3k4pRYSHUhOWHv1G+1_wAEBceA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20140522165036.GK19747@lee--X1>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Lee Jones <lee.jones@linaro.org>
-Cc: linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, maxime.coquelin@st.com, patrice.chotard@st.com, srinivas.kandagatla@gmail.com, chris@printf.net, ulf.hansson@linaro.org, kernel@stlinux.com, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, Giuseppe Cavallaro <peppe.cavallaro@st.com>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qa0-f48.google.com ([209.85.216.48]:39784 "EHLO
+	mail-qa0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754110AbaFBMD2 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 2 Jun 2014 08:03:28 -0400
+Received: by mail-qa0-f48.google.com with SMTP id i13so2555302qae.35
+        for <linux-mmc@vger.kernel.org>; Mon, 02 Jun 2014 05:03:28 -0700 (PDT)
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Linus <torvalds@linux-foundation.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Russell King <rmk+kernel@arm.linux.org.uk>, Chris Ball <chris@printf.net>
 
-Hi Lee,
+Hi Linus,
 
-Thanks for your feedback, all your other comments will be fixed in v2. 
-However see comments below for this patch
+This is the first PR I send to you as I am co-maintaining the MMC
+subsystem with Chris Ball. You will receive a separate PR for MMC from
+him as well, as usual.
 
-> > +	clk_prepare_enable(clk);
-> 
-> Move this down as far as it will go.  When do you _need_ the clock
-> running by?
-> 
-> > +	host->mmc->caps |= MMC_CAP_8_BIT_DATA | MMC_CAP_BUS_WIDTH_TEST
-> > +			| MMC_CAP_1_8V_DDR;
-> > +
-> > +	if (of_property_read_bool(np, "non-removable"))
-> > +		host->mmc->caps |= MMC_CAP_NONREMOVABLE;
-> > +
-> > +	pltfm_host = sdhci_priv(host);
-> > +	pltfm_host->clk = clk;
-> > +
-> > +	ret = sdhci_add_host(host);
-> > +	if (ret) {
-> > +		dev_err(&pdev->dev, "Failed sdhci_add_host\n");
-> > +		goto err_out;
-> 
-> If it's possible to move the clk_prepare enable down past here, then
-> you only need to do sdhci_pltfm_free() and you can remove all of the
-> err_out error path.
+These patches are mainly updates for the mmci driver and have been
+tested in linux-next.
 
-No its not possible. sdhci_add_host() reads registers on
-the IP, if the clock isn't enabled the system can hang.
+Some ARM SoC related patches are also included and those have been
+acked from the corresponding maintainers to go through my mmc tree.
 
-> 
-> > +	}
-> > +
-> > +	pltfm_host->priv = pdata;
-> > +
-> > +	platform_set_drvdata(pdev, host);
-> > +
-> > +	host_version = readw_relaxed((host->ioaddr + SDHCI_HOST_VERSION));
-> 
-> Do we want to be doing any error checking for unsupported devices
-> here?
+Some more details in the signed tag.
 
-Not that I'm aware of. This is just a debug print I added as it is useful
-for debugging. Its not unheard for software folks not to be told that the
-IP version has changed in a new SoC, so comparing dmesg traces of working
-kernels with non working ones which include IP versions etc can often
-shed some light on whats happening.
+Kind regards
+Ulf Hansson
 
-Arguably if the maintainers think its helpful then it could be added in 
-sdhci_add_host(), and every platform would benefit. Or if its deemed 
-not helpful then it can be removed!
 
-Cheers,
+The following changes since commit 89ca3b881987f5a4be4c5dbaa7f0df12bbdde2fd:
 
-Peter.
+  Linux 3.15-rc4 (2014-05-04 18:14:42 -0700)
+
+are available in the git repository at:
+
+  git://git.linaro.org/people/ulf.hansson/mmc.git tags/mmc-v3.16-1
+
+for you to fetch changes up to 8c3a05b489ef097f86bf87c64192456553f57781:
+
+  mmc: mmci: Enforce DMA configuration through DT (2014-06-02 11:20:25 +0200)
+
+----------------------------------------------------------------
+Updates for mmci driver:
+ - Put the device into low power state at system suspend.
+ - Convert to the common mmc DT parser.
+ - Add missing DT bindings needed for ux500.
+
+Updates for ARM ux500|u300:
+ - Convert to the common mmc DT bindings.
+ - Remove redundant board file for mmci platform data.
+
+----------------------------------------------------------------
+Ulf Hansson (22):
+      mmc: mmci: Mask IRQs for all variants during runtime suspend
+      mmc: mmci: Let runtime PM callbacks be available for CONFIG_PM
+      mmc: mmci: Put the device into low power state at system suspend
+      mmc: mmci: Convert to the mmc gpio API
+      mmc: mmci: Convert to devm functions
+      mmc: mmci: Update DT documentation
+      mmc: mmci: Add DT bindings for signal direction
+      mmc: mmci: Add DT bindings for feedback clock pin
+      mmc: mmci: Use the common mmc DT parser
+      ARM: ux500: Add mmci signal directions and feeback clock in DT for href
+      ARM: ux500: Convert to the common mmc DT bindings for highspeed mode
+      ARM: nomadik: Convert to the common mmc DT bindings for highspeed mode
+      ARM: u300: Convert to the common mmc DT bindings for highspeed mode
+      mmc: mmci: Mark the DT bindings for highspeed mode as deprecated
+      mmc: mmci: Enable MMC_CAP_CMD23
+      ARM: ux500: Add the mmc capabilities flags to DT
+      ARM: ux500: Add a vmmc regulator through DT for the poped eMMC for href
+      ARM: ux500: Remove redundant board file for mmci platform data
+      mmc: mmci: Enforce DT for signal direction and feedback clock
+      mmc: mmci: Enforce mmc capabilities through DT
+      mmc: mmci: Enforce max frequency configuration through DT
+      mmc: mmci: Enforce DMA configuration through DT
+
+ Documentation/devicetree/bindings/mmc/mmci.txt |   54 +++-
+ arch/arm/boot/dts/ste-ccu9540.dts              |    6 +-
+ arch/arm/boot/dts/ste-href.dtsi                |   19 +-
+ arch/arm/boot/dts/ste-nomadik-stn8815.dtsi     |    4 +-
+ arch/arm/boot/dts/ste-snowball.dts             |    4 +-
+ arch/arm/boot/dts/ste-u300.dts                 |    4 +-
+ arch/arm/mach-lpc32xx/phy3250.c                |    3 -
+ arch/arm/mach-ux500/Makefile                   |    3 +-
+ arch/arm/mach-ux500/board-mop500-sdi.c         |  166 ------------
+ arch/arm/mach-ux500/board-mop500.h             |    5 -
+ arch/arm/mach-ux500/cpu-db8500.c               |    4 -
+ drivers/mmc/host/mmci.c                        |  324 ++++++------------------
+ drivers/mmc/host/mmci.h                        |   14 +-
+ include/linux/amba/mmci.h                      |   42 ---
+ 14 files changed, 169 insertions(+), 483 deletions(-)
+ delete mode 100644 arch/arm/mach-ux500/board-mop500-sdi.c
