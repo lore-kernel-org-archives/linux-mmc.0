@@ -1,15 +1,15 @@
 From: srinivas.kandagatla@linaro.org
-Subject: [PATCH v6 08/12] mmc: mmci: Add support to data commands via variant structure.
-Date: Mon,  2 Jun 2014 10:09:39 +0100
-Message-ID: <1401700179-11752-1-git-send-email-srinivas.kandagatla@linaro.org>
+Subject: [PATCH v6 07/12] mmc: mmci: add edge support to data and command out in variant data.
+Date: Mon,  2 Jun 2014 10:09:30 +0100
+Message-ID: <1401700170-11711-1-git-send-email-srinivas.kandagatla@linaro.org>
 References: <1401699818-11329-1-git-send-email-srinivas.kandagatla@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wi0-f182.google.com ([209.85.212.182]:49689 "EHLO
-	mail-wi0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753563AbaFBJJo (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 2 Jun 2014 05:09:44 -0400
-Received: by mail-wi0-f182.google.com with SMTP id r20so4201130wiv.9
-        for <linux-mmc@vger.kernel.org>; Mon, 02 Jun 2014 02:09:43 -0700 (PDT)
+Received: from mail-wi0-f178.google.com ([209.85.212.178]:33650 "EHLO
+	mail-wi0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753517AbaFBJJf (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 2 Jun 2014 05:09:35 -0400
+Received: by mail-wi0-f178.google.com with SMTP id cc10so4106519wib.11
+        for <linux-mmc@vger.kernel.org>; Mon, 02 Jun 2014 02:09:34 -0700 (PDT)
 In-Reply-To: <1401699818-11329-1-git-send-email-srinivas.kandagatla@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
@@ -18,47 +18,64 @@ Cc: Chris Ball <chris@printf.net>, linux-kernel@vger.kernel.org, linux-arm-msm@v
 
 From: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
 
-On some SOCs like Qcom there are explicit bits in the command register
-to specify if its a data transfer command or not. So this patch adds
-support to such bits in variant data, giving more flexibility to the
-driver.
+This patch adds edge support for data and command out to variant structure
+giving more flexibility to the driver to support more SOCs which have
+different clock register layout.
+
+Without this patch other new SOCs like Qcom will have to add more code to
+special case them
 
 Signed-off-by: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
 Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
 ---
- drivers/mmc/host/mmci.c | 5 +++++
- 1 file changed, 5 insertions(+)
+ drivers/mmc/host/mmci.c | 6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
 
 diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index 4c95a9b..8534c29 100644
+index fa3ad83..4c95a9b 100644
 --- a/drivers/mmc/host/mmci.c
 +++ b/drivers/mmc/host/mmci.c
-@@ -59,6 +59,7 @@ static unsigned int fmax = 515633;
+@@ -53,6 +53,7 @@ static unsigned int fmax = 515633;
+  * @clkreg: default value for MCICLOCK register
+  * @clkreg_enable: enable value for MMCICLOCK register
+  * @clkreg_8bit_bus_enable: enable value for 8 bit bus
++ * @clkreg_neg_edge_enable: enable value for inverted data/cmd output
+  * @datalength_bits: number of bits in the MMCIDATALENGTH register
+  * @fifosize: number of bytes that can be written when MMCI_TXFIFOEMPTY
   *	      is asserted (likewise for RX)
-  * @fifohalfsize: number of bytes that can be written when MCI_TXFIFOHALFEMPTY
-  *		  is asserted (likewise for RX)
-+ * @data_cmd_enable: enable value for data commands.
-  * @sdio: variant supports SDIO
-  * @st_clkdiv: true if using a ST-specific clock divider algorithm
-  * @datactrl_mask_ddrmode: ddr mode mask in datactrl register.
-@@ -79,6 +80,7 @@ struct variant_data {
+@@ -74,6 +75,7 @@ struct variant_data {
+ 	unsigned int		clkreg;
+ 	unsigned int		clkreg_enable;
+ 	unsigned int		clkreg_8bit_bus_enable;
++	unsigned int		clkreg_neg_edge_enable;
  	unsigned int		datalength_bits;
  	unsigned int		fifosize;
  	unsigned int		fifohalfsize;
-+	unsigned int		data_cmd_enable;
- 	unsigned int		datactrl_mask_ddrmode;
- 	bool			sdio;
- 	bool			st_clkdiv;
-@@ -839,6 +841,9 @@ mmci_start_command(struct mmci_host *host, struct mmc_command *cmd, u32 c)
- 	if (/*interrupt*/0)
- 		c |= MCI_CPSM_INTERRUPT;
+@@ -143,6 +145,7 @@ static struct variant_data variant_ux500 = {
+ 	.clkreg			= MCI_CLK_ENABLE,
+ 	.clkreg_enable		= MCI_ST_UX500_HWFCEN,
+ 	.clkreg_8bit_bus_enable = MCI_ST_8BIT_BUS,
++	.clkreg_neg_edge_enable	= MCI_ST_UX500_NEG_EDGE,
+ 	.datalength_bits	= 24,
+ 	.sdio			= true,
+ 	.st_clkdiv		= true,
+@@ -159,6 +162,7 @@ static struct variant_data variant_ux500v2 = {
+ 	.clkreg			= MCI_CLK_ENABLE,
+ 	.clkreg_enable		= MCI_ST_UX500_HWFCEN,
+ 	.clkreg_8bit_bus_enable = MCI_ST_8BIT_BUS,
++	.clkreg_neg_edge_enable	= MCI_ST_UX500_NEG_EDGE,
+ 	.datactrl_mask_ddrmode	= MCI_ST_DPSM_DDRMODE,
+ 	.datalength_bits	= 24,
+ 	.sdio			= true,
+@@ -313,7 +317,7 @@ static void mmci_set_clkreg(struct mmci_host *host, unsigned int desired)
+ 		clk |= variant->clkreg_8bit_bus_enable;
  
-+	if (mmc_cmd_type(cmd) == MMC_CMD_ADTC)
-+		c |= host->variant->data_cmd_enable;
-+
- 	host->cmd = cmd;
+ 	if (host->mmc->ios.timing == MMC_TIMING_UHS_DDR50)
+-		clk |= MCI_ST_UX500_NEG_EDGE;
++		clk |= variant->clkreg_neg_edge_enable;
  
- 	writel(cmd->arg, base + MMCIARGUMENT);
+ 	mmci_write_clkreg(host, clk);
+ }
 -- 
 1.9.1
 
