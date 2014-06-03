@@ -1,43 +1,155 @@
-From: Chris Ball <chris@printf.net>
-Subject: Re: [PATCH v4] mmc: add a driver for the Renesas usdhi6rol0 SD/SDIO host controller
-Date: Tue, 03 Jun 2014 02:26:36 +0100
-Message-ID: <86r436pyur.fsf@void.printf.net>
-References: <Pine.LNX.4.64.1405312005390.20582@axis700.grange>
+From: Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
+Subject: Re: [PATCH v2 1/4] dt: bindings: mmc: Document the
+ practice of using subnodes for slots
+Date: Tue, 03 Jun 2014 10:50:07 +0900
+Message-ID: <538D29CF.9070102@samsung.com>
+References: <1401563014-13856-1-git-send-email-hdegoede@redhat.com>
+ <1401563014-13856-2-git-send-email-hdegoede@redhat.com>
+ <CAOesGMisqtPWKY6N5ch36c0VyBP1Pu725cehBU+2gYtKXQs=hQ@mail.gmail.com>
+ <538AF124.9040106@redhat.com>
+ <CAPDyKFon5J6aUTzSmqGn_pkxgud26=+KBW0pkim-adMmWG_xXg@mail.gmail.com>
+ <538C3812.9060705@samsung.com>
+ <CAPDyKFp1KcQaOAqKBA7xrq85mVoNFecqO8QLT3EBzST6Giv-Sw@mail.gmail.com>
+Reply-To: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:56647 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750767AbaFCB0n (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 2 Jun 2014 21:26:43 -0400
-In-Reply-To: <Pine.LNX.4.64.1405312005390.20582@axis700.grange> (Guennadi
-	Liakhovetski's message of "Sat, 31 May 2014 20:38:51 +0200 (CEST)")
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-sunxi+bncBDQ7HQ4ZVQOBBXWTWSOAKGQESH4HFGQ-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+In-reply-to: <CAPDyKFp1KcQaOAqKBA7xrq85mVoNFecqO8QLT3EBzST6Giv-Sw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+List-Post: <http://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Help: <http://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Archive: <http://groups.google.com/group/linux-sunxi>
+Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+List-Subscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Unsubscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
+Cc: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Olof Johansson <olof-nZhT3qVonbNeoWH0uzbU5w@public.gmane.org>, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, Sascha Hauer <s.hauer-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org>, Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, Arend van Spriel <arend-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>, Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, devicetree <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Seungwon Jeon <tgih.jun-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Cc: linux-mmc@vger.kernel.org, Phil Edworthy <phil.edworthy@renesas.com>, devicetree@vger.kernel.org, Rob Herring <robh+dt@kernel.org>, Grant Likely <grant.likely@linaro.org>
 
-Hi Guennadi,
++Suegnwon Jeon
 
-On Sat, May 31 2014, Guennadi Liakhovetski wrote:
-> This patch adds a driver for the Renesas usdhi6rol0 SD/SDIO host controller
-> in both PIO and DMA modes.
->
-> Signed-off-by: Guennadi Liakhovetski <g.liakhovetski+renesas@gmail.com>
-> ---
->
-> v4: replaced several numerical values with macros
->
->  .../devicetree/bindings/mmc/usdhi6rol0.txt         |   33 +
->  drivers/mmc/host/Kconfig                           |    6 +
->  drivers/mmc/host/Makefile                          |    1 +
->  drivers/mmc/host/usdhi6rol0.c                      | 1847 ++++++++++++++++++++
->  4 files changed, 1887 insertions(+)
->  create mode 100644 Documentation/devicetree/bindings/mmc/usdhi6rol0.txt
->  create mode 100644 drivers/mmc/host/usdhi6rol0.c
+On 06/02/2014 05:48 PM, Ulf Hansson wrote:
+> On 2 June 2014 10:38, Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org> wrote:
+>> On 06/02/2014 05:29 PM, Ulf Hansson wrote:
+>>> On 1 June 2014 11:23, Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
+>>>> Hi,
+>>>>
+>>>>
+>>>> On 05/31/2014 10:13 PM, Olof Johansson wrote:
+>>>>>
+>>>>> On Sat, May 31, 2014 at 12:03 PM, Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+>>>>> wrote:
+>>>>>>
+>>>>>> The following existing MMC host controller bindings use slot subnodes:
+>>>>>>
+>>>>>> Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt
+>>>>>> Documentation/devicetree/bindings/mmc/k3-dw-mshc.txt
+>>>>>> Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt
+>>>>>> Documentation/devicetree/bindings/mmc/socfpga-dw-mshc.txt
+>>>>>> Documentation/devicetree/bindings/mmc/atmel-hsmci.txt
+>>>>>> Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.txt
+>>>>>>
+>>>>>> This commit documents this practice in the standard mmc bindings
+>>>>>> documentation.
+>>>>>>
+>>>>>> Signed-off-by: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+>>>>>
+>>>>>
+>>>>> There are today only two drivers that use this kind of binding, dw_mmc
+>>>>> and the at91 one.
+>>>>
+>>>>
+>>>> Correct.
+>>>>
+>>>>
+>>>>> Neither seems to actually ever have been used with
+>>>>> more than one slot. I doubt anyone building an exynos-based system
+>>>>> will ever do a multi-slot solution, and it seems that the at91 driver
+>>>>> doesn't actually handle more than one slot.
+>>>>>
+>>>>> I'm personally not that excited about complicating the bindings by
+>>>>> opening up for this -- I would rather work towards removing the
+>>>>> concept of slots if it's one of those things that are going to remain
+>>>>> unused. We have actually been talking about reworking the dw_mmc
+>>>>> binding to remove the slot concept (and simplify the driver by doing
+>>>>> so).
+>>>>
+>>>>
+>>>> I'm fine with removing the slot subnode, I added it because of it being
+>>>> brought up in the powerup sequence discussion. I explicitly asked there
+>>>> if adding such a subnode level was seen as desirable but nobody
+>>>> answered :|
+>>>>
+>>>> Anyways, either way works for me. I can do a v3 dropping the slot subnode
+>>>> level again. I would really like to move forward with a decision on how-to
+>>>> represent non probable info for sdio devices in device nodes. So do you
+>>>> have any other remarks other then that the slot subnode should be dropped ?
+>>>> And if not can you please review and ack (*) v3 of this patch-set once
+>>>> I've send it?
+>>>>
+>>>> Chris Ball and Ulf Hansson, what is your take on this, are you willing to
+>>>> take this patch set? And do you want it with or without the slot subnodes ?
+>>>
+>>> I certainly appreciate you working actively on this Hans, I will look
+>>> into the patchset as soon as I can.
+>>>
+>>> I share Olof's view about the slot nodes, we must not add DT bindings
+>>> that isn't really needed.
+>>>
+>>> Regarding the slot subnodes; Jaehoon Chung recently posted a patchset
+>>> for adding the parsing of it, intended for dwmmc. I withdraw my ack
+>>> for it, and let's try to go in the other direction instead.
+>>>
+>>> [PATCHv3 0/4] mmc: fixed the mmc_of_parse for dwmmc.
+>>>
+>>> Thus I suggest we should clean-up host drivers to support only one
+>>> card per host, and entirely skip the slot concept.
+>>
+>> Well, almost platform is used the only one card per host, although some controller is supported the slot concept.
+>> But we don't know that controller should be used the multi slot per host, in future.
+>> So I think we can't skip the slot concept.
+> 
+> The mmc core only supports one card per host.
 
-Thanks, looks good, pushed to mmc-next for 3.16.
+Right, mmc core supports one card per host, but host controller can be supported the multiple slot, right?
+Of course, it should be handled at host controller, not core.
+> 
+> Adding DT bindings for something that seems unlikely to be supported
+> in future, seems like a bad idea. It's better to add it when/if
+> needed.
+If some SoC use the multiple slot for dw-mmc controller, we can't prevent to use the multiple slot.
+So i'm not sure that host controller's subnode didn't need to support.
+Right. this is bad idea, i also hope that it will not use the multiple slot at dw-mmc in future.
 
-- Chris.
--- 
-Chris Ball   <http://printf.net/>
+To Seungwon,
+
+how about this?
+
+Best Regards,
+Jaehoon Chung
+> 
+> Kind regards
+> Uffe
+> 
+>>
+>> Best Regards,
+>> Jaehoon Chung
+>>
+>>>
+>>> Kind regards
+>>> Uffe
+>>>
+>>>>
+>>>> Thanks & Regards,
+>>>>
+>>>> Hans
+>>>>
+>>>>
+>>>> *) Assuming you don't find any issues
+>>>
+>>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> .
+> 
