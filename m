@@ -1,52 +1,38 @@
-From: Will Deacon <will.deacon@arm.com>
-Subject: Re: how to creat watchpoint  in kernel for data access debug
-Date: Tue, 3 Jun 2014 17:45:12 +0100
-Message-ID: <20140603164512.GT23149@arm.com>
-References: <35FD53F367049845BC99AC72306C23D1029A276569F3@CNBJMBX05.corpusers.net>
- <35FD53F367049845BC99AC72306C23D1029A276569F4@CNBJMBX05.corpusers.net>
- <20140523134550.GB21319@arm.com>
- <35FD53F367049845BC99AC72306C23D1029A276569FC@CNBJMBX05.corpusers.net>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+From: Loc Ho <lho@apm.com>
+Subject: [PATCH v2 0/3] mmc: Add APM X-Gene SoC SDHC controller support to Arasan SDHCI driver
+Date: Tue,  3 Jun 2014 15:13:02 -0600
+Message-ID: <1401829985-5212-1-git-send-email-lho@apm.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from cam-admin0.cambridge.arm.com ([217.140.96.50]:37537 "EHLO
-	cam-admin0.cambridge.arm.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S965053AbaFCQpH (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 3 Jun 2014 12:45:07 -0400
-Content-Disposition: inline
-In-Reply-To: <35FD53F367049845BC99AC72306C23D1029A276569FC@CNBJMBX05.corpusers.net>
+Received: from exprod5og107.obsmtp.com ([64.18.0.184]:34836 "HELO
+	exprod5og107.obsmtp.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with SMTP id S1754632AbaFCVNZ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 3 Jun 2014 17:13:25 -0400
+Received: by mail-pd0-f169.google.com with SMTP id w10so5165251pde.0
+        for <linux-mmc@vger.kernel.org>; Tue, 03 Jun 2014 14:13:24 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "Wang, Yalin" <Yalin.Wang@sonymobile.com>
-Cc: "'linux-mmc@vger.kernel.org'" <linux-mmc@vger.kernel.org>, "'linux-arch-owner@vger.kernel.org'" <linux-arch-owner@vger.kernel.org>
+To: chris@printf.net, ulf.hansson@linaro.org, michal.simek@xilinx.com
+Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, jcm@redhat.com, patches@apm.com, Loc Ho <lho@apm.com>
 
-On Sat, May 24, 2014 at 04:48:20AM +0100, Wang, Yalin wrote:
-> Hi  Will,
+This patch adds support for the APM X-Gene SoC SDHC controller to Arasan
+SDHCI driver.
 
-Hello,
+v2:
+* Update binding documentation
+* Change compatible string from "xgene,arasan" to "apm,arasan"
 
-Sorry for the delayed reply, it took me a while to work out what your issue
-is.
+Signed-off-by: Loc Ho <lho@apm.com>
+---
+Loc Ho (3):
+  Documentation: Update Arasan SDHC documentation for the APM X-Gene
+    SoC SDHC DTS binding
+  mmc: Add APM X-Gene SoC SDHC controller support to Arasan SDHCI
+    driver
+  arm64: Add APM X-Gene SoC SDHC controller DTS entry
 
-> Thanks for your suggestion,
-> The scenario that I encounter is a little special :
-> I found our kernel memory will be corrupt in stability test ,
-> Seems that someone write a memory that doesn't belong to it .
-> But I can't find who does it , the bug is hard to reproduce ,
-> So I want make a debug SW in kernel , which can monitor some data access,
-> When someone access it , the callback function can check if it's right .
-> If it's wrong, then crash the kernel do get a ram dump .
-> 
-> 
-> So kgdb or perf seems not suitable in this condition ,
-> We need users to use devices, not just test the device in Lab .
+ .../devicetree/bindings/mmc/arasan,sdhci.txt       |   16 ++-
+ arch/arm64/boot/dts/apm-storm.dtsi                 |    8 ++
+ drivers/mmc/host/Kconfig                           |    4 +-
+ drivers/mmc/host/sdhci-of-arasan.c                 |  126 ++++++++++++++++++--
+ 4 files changed, 140 insertions(+), 14 deletions(-)
 
-I think Google did something similar to this with ChromeOS on the
-Exynos5-based chromebooks:
-
-  https://chromium-review.googlesource.com/#/c/188479/3/arch/arm/kernel/hw_breakpoint.c
-
-I don't think that has a place in the mainline kernel, but you could
-certainly adapt it for your debugging purposes.
-
-Will
