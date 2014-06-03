@@ -1,60 +1,58 @@
-From: Mark Rutland <mark.rutland@arm.com>
-Subject: Re: [PATCHv3 3/4] mmc: dw_mmc: remove the "supports-highspeed"
- property.
-Date: Tue, 3 Jun 2014 14:43:13 +0100
-Message-ID: <20140603134313.GE1310@leverpostej>
-References: <1401255351-17653-1-git-send-email-jh80.chung@samsung.com>
- <1401255351-17653-4-git-send-email-jh80.chung@samsung.com>
- <CAPDyKFpTTYHtkKjFmbPi6P_xfdfd8Fv8qfpKZMfpQBppRNZLwg@mail.gmail.com>
+From: Grant Likely <grant.likely@secretlab.ca>
+Subject: Re: lockdep dump on devtree_lock (involving esdhc)
+Date: Tue, 3 Jun 2014 15:10:54 +0100
+Message-ID: <CACxGe6ufSLJUnsM9emkDUeGHojmb37JeY8_OFMnSdrB_oMeScg@mail.gmail.com>
+References: <20130611233330.GA15342@home.buserror.net> <alpine.LFD.2.02.1306120948430.22970@ionos>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <CAPDyKFpTTYHtkKjFmbPi6P_xfdfd8Fv8qfpKZMfpQBppRNZLwg@mail.gmail.com>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Ludovic Desroches <ludovic.desroches@atmel.com>, "tgih.jun@samsung.com" <tgih.jun@samsung.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-ig0-f174.google.com ([209.85.213.174]:64664 "EHLO
+	mail-ig0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751761AbaFCOLR (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 3 Jun 2014 10:11:17 -0400
+Received: by mail-ig0-f174.google.com with SMTP id h3so4757052igd.13
+        for <linux-mmc@vger.kernel.org>; Tue, 03 Jun 2014 07:11:16 -0700 (PDT)
+In-Reply-To: <alpine.LFD.2.02.1306120948430.22970@ionos>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Thomas Gleixner <tglx@linutronix.de>
+Cc: Scott Wood <scottwood@freescale.com>, Jerry Huang <Chang-Ming.Huang@freescale.com>, devicetree-discuss <devicetree-discuss@lists.ozlabs.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-On Fri, May 30, 2014 at 09:01:16AM +0100, Ulf Hansson wrote:
-> On 28 May 2014 07:35, Jaehoon Chung <jh80.chung@samsung.com> wrote:
-> > Removed the parser for "supports-highspeed".
-> > It can be parsed with "cap-mmc-highsped" or "cap-sd-highspeed" at
-> > mmc_of_parse().
-> >
-> > Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
-> > ---
-> >  drivers/mmc/host/dw_mmc.c |    3 ---
-> >  1 file changed, 3 deletions(-)
-> >
-> > diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> > index 3285bdd..34b5210 100644
-> > --- a/drivers/mmc/host/dw_mmc.c
-> > +++ b/drivers/mmc/host/dw_mmc.c
-> > @@ -2281,9 +2281,6 @@ static struct dw_mci_board *dw_mci_parse_dt(struct dw_mci *host)
-> >                         return ERR_PTR(ret);
-> >         }
-> >
-> > -       if (of_find_property(np, "supports-highspeed", NULL))
-> > -               pdata->caps |= MMC_CAP_SD_HIGHSPEED | MMC_CAP_MMC_HIGHSPEED;
-> > -
-> 
-> According to DT guys, normally we shouldn't remove DT bindings. Thus,
-> you need to keep this, unless you can get some of the DT guys to ack
-> it.
+On Wed, Jun 12, 2013 at 8:49 AM, Thomas Gleixner <tglx@linutronix.de> wrote:
+> On Tue, 11 Jun 2013, Scott Wood wrote:
+>
+>> I get the following lockdump output on p2020rdb using
+>> v3.10-rc5-43-g34376a5.  While it's not particularly polite for the
+>> esdhc driver to be calling OF functions while holding another lock which
+>> can be acquired from interrupt context, why is devtree_lock usually
+>> acquired in an irqsafe manner but sometimes not?
+>>
+>> Both types of usage were added by the same commit:
+>>
+>> commit d6d3c4e656513dcea61ce900f0ecb9ca820ee7cd
+>> Author: Thomas Gleixner <tglx@linutronix.de>
+>> Date:   Wed Feb 6 15:30:56 2013 -0500
+>>
+>>     OF: convert devtree lock from rw_lock to raw spinlock
+>>
+>> Stephen, you asked about this here:
+>> http://lkml.indiana.edu/hypermail/linux/kernel/1302.1/01383.html
+>>
+>> Did you ever get an answer?
+>
+> https://patchwork.kernel.org/patch/2470731/
+>
+>> I'm also curious why devtree_lock was made raw to begin with...
+>> Iterating over a device tree doesn't seem like something you'd want to
+>> trust to be low-latency.
+>
+> The reason is that it's taken in low level cpu bringup code and I did
+> not find a different solution. :(
 
-In general, yes. Unless there's a compelling reason to drop a binding,
-and all users are happy with it being dropped, then there's not much
-point in removing it. It's usually not possible to get agreement because
-it's usually nto possible to know the full set of users, so in general
-we can't drop or change stuff.
+Hey, Thomas,
 
-> Though, you still want to move the DTs to use common mmc bindings. And
-> you could mark the documentation of the above binding as deprecated.
+Do you remember where the offending code is? I'm looking at completely
+refactoring FDT locking so I'd like to take a crack and solving the
+cpu bringup problem.
 
-Deprecated bindings can be supported even if discouraged. As far as I
-can see, keeping the existing binding along side the new one looks
-relatively simple in this case.
-
-Thanks,
-Mark.
+g.
