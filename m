@@ -1,144 +1,124 @@
-From: Jon Pry <jonpry@gmail.com>
-Subject: [RFC][PATCH] Fix for Intel Baytrail-T errata regarding the non-functioning mmc_pwr pin
-Date: Mon,  2 Jun 2014 19:54:14 -0400
-Message-ID: <1401753254-32729-1-git-send-email-jonpry@gmail.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qg0-f41.google.com ([209.85.192.41]:32773 "EHLO
-	mail-qg0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932130AbaFBXyV (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 2 Jun 2014 19:54:21 -0400
-Received: by mail-qg0-f41.google.com with SMTP id j5so11916561qga.14
-        for <linux-mmc@vger.kernel.org>; Mon, 02 Jun 2014 16:54:20 -0700 (PDT)
-Sender: linux-mmc-owner@vger.kernel.org
+From: Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
+Subject: Re: [PATCH v2 1/4] dt: bindings: mmc: Document the
+ practice of using subnodes for slots
+Date: Tue, 03 Jun 2014 10:13:26 +0900
+Message-ID: <538D2136.5030008@samsung.com>
+References: <1401563014-13856-1-git-send-email-hdegoede@redhat.com>
+ <1401563014-13856-2-git-send-email-hdegoede@redhat.com>
+ <CAOesGMisqtPWKY6N5ch36c0VyBP1Pu725cehBU+2gYtKXQs=hQ@mail.gmail.com>
+ <538AF124.9040106@redhat.com>
+ <CAPDyKFon5J6aUTzSmqGn_pkxgud26=+KBW0pkim-adMmWG_xXg@mail.gmail.com>
+ <538C3812.9060705@samsung.com> <538C39CA.4020301@samsung.com>
+ <CAPDyKFodJc6bT=TPSLxWkXXE6t9mE0rv9Y3vp2iBW9N_NEw77g@mail.gmail.com>
+Reply-To: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-sunxi+bncBDQ7HQ4ZVQOBBOOCWSOAKGQEYDO4U4Q-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+In-reply-to: <CAPDyKFodJc6bT=TPSLxWkXXE6t9mE0rv9Y3vp2iBW9N_NEw77g-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+List-Post: <http://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Help: <http://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Archive: <http://groups.google.com/group/linux-sunxi>
+Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+List-Subscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Unsubscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
+Cc: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Olof Johansson <olof-nZhT3qVonbNeoWH0uzbU5w@public.gmane.org>, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, Sascha Hauer <s.hauer-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org>, Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, Arend van Spriel <arend-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>, Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, devicetree <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Seungwon Jeon <tgih.jun-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: Jon Pry <jonpry@gmail.com>
 
-This bug effects Asus T100 as well as other Baytrail-T devices. 
-Erratum in question can be found at 
-http://www.intel.com/content/dam/www/public/us/en/documents/specification-updates/atom-Z36xxx-Z37xxx-spec-update.pdf
++ Seungwon Jeon
 
-Signed-off-by: Jon Pry <jonpry <at> gmail.com>
----
-diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
-index ebb3f39..ebed2a0 100644
---- a/drivers/mmc/host/sdhci-acpi.c
-+++ b/drivers/mmc/host/sdhci-acpi.c
-@@ -123,7 +123,7 @@ static const struct sdhci_acpi_slot sdhci_acpi_slot_int_emmc = {
- 
- static const struct sdhci_acpi_slot sdhci_acpi_slot_int_sdio = {
- 	.quirks  = SDHCI_QUIRK_BROKEN_CARD_DETECTION,
--	.quirks2 = SDHCI_QUIRK2_HOST_OFF_CARD_ON,
-+	.quirks2 = SDHCI_QUIRK2_HOST_OFF_CARD_ON | SDHCI_QUIRK2_BROKEN_POWER_ENABLE,
- 	.caps    = MMC_CAP_NONREMOVABLE | MMC_CAP_POWER_OFF_CARD,
- 	.flags   = SDHCI_ACPI_RUNTIME_PM,
- 	.pm_caps = MMC_PM_KEEP_POWER,
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 9a79fc4..5a0e928 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -22,6 +22,7 @@
- #include <linux/scatterlist.h>
- #include <linux/regulator/consumer.h>
- #include <linux/pm_runtime.h>
-+#include <linux/gpio.h>
- 
- #include <linux/leds.h>
- 
-@@ -1261,6 +1262,10 @@ static inline void sdhci_update_clock(struct sdhci_host *host)
- 	sdhci_set_clock(host, clock);
- }
- 
-+static inline void sdhci_set_power_quirk(unsigned short power) {
-+	gpio_set_value(SDHCI_POWER_QUIRK_GPIO, power);
-+}
-+
- static int sdhci_set_power(struct sdhci_host *host, unsigned short power)
- {
- 	u8 pwr = 0;
-@@ -1292,6 +1297,9 @@ static int sdhci_set_power(struct sdhci_host *host, unsigned short power)
- 		sdhci_writeb(host, 0, SDHCI_POWER_CONTROL);
- 		if (host->quirks2 & SDHCI_QUIRK2_CARD_ON_NEEDS_BUS_ON)
- 			sdhci_runtime_pm_bus_off(host);
-+		/* The intel Bay Trail SoCs need to assert a GPIO as a work around */
-+		if (host->quirks2 & SDHCI_QUIRK2_BROKEN_POWER_ENABLE)
-+			sdhci_set_power_quirk(0);
- 		return 0;
- 	}
- 
-@@ -1311,8 +1319,14 @@ static int sdhci_set_power(struct sdhci_host *host, unsigned short power)
- 
- 	pwr |= SDHCI_POWER_ON;
- 
-+
- 	sdhci_writeb(host, pwr, SDHCI_POWER_CONTROL);
- 
-+	/* The intel Bay Trail SoCs need to assert a GPIO as a work around */
-+	if (host->quirks2 & SDHCI_QUIRK2_BROKEN_POWER_ENABLE)
-+		sdhci_set_power_quirk(1);
-+
-+
- 	if (host->quirks2 & SDHCI_QUIRK2_CARD_ON_NEEDS_BUS_ON)
- 		sdhci_runtime_pm_bus_on(host);
- 
-@@ -2820,6 +2841,18 @@ int sdhci_add_host(struct sdhci_host *host)
- 		host->flags &= ~SDHCI_USE_SDMA;
- 	}
- 
-+    if ((host->quirks2 & SDHCI_QUIRK2_BROKEN_POWER_ENABLE)) {
-+        printk("Using GPIO for power enable as it is marked broken\n");
-+        if (gpio_request(SDHCI_POWER_QUIRK_GPIO, "SDIO_PWR_EN") < 0) {
-+            printk("Unable to request GPIO. SDIO may be broken.");
-+			host->quirks2 = host->quirks2 & ~SDHCI_QUIRK2_BROKEN_POWER_ENABLE;
-+        }
-+        else if (gpio_direction_output(SDHCI_POWER_QUIRK_GPIO, 0) < 0) {
-+            printk("Unable to set GPIO direction. SDIO may be broken.");
-+			host->quirks2 = host->quirks2 & ~SDHCI_QUIRK2_BROKEN_POWER_ENABLE;
-+        }
-+    }
-+
- 	if ((host->version >= SDHCI_SPEC_200) &&
- 		(caps[0] & SDHCI_CAN_DO_ADMA2))
- 		host->flags |= SDHCI_USE_ADMA;
-@@ -3325,6 +3358,10 @@ void sdhci_remove_host(struct sdhci_host *host, int dead)
- 	tasklet_kill(&host->card_tasklet);
- 	tasklet_kill(&host->finish_tasklet);
- 
-+    if (host->quirks2 & SDHCI_QUIRK2_BROKEN_POWER_ENABLE) {
-+        gpio_free(SDHCI_POWER_QUIRK_GPIO);
-+    }
-+
- 	if (host->vmmc) {
- 		regulator_disable(host->vmmc);
- 		regulator_put(host->vmmc);
-diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index 0a3ed01..027fcd1 100644
---- a/drivers/mmc/host/sdhci.h
-+++ b/drivers/mmc/host/sdhci.h
-@@ -84,11 +84,12 @@
- #define   SDHCI_CTRL_ADMA64	0x18
- #define   SDHCI_CTRL_8BITBUS	0x20
- 
- #define SDHCI_POWER_CONTROL	0x29
- #define  SDHCI_POWER_ON		0x01
- #define  SDHCI_POWER_180	0x0A
- #define  SDHCI_POWER_300	0x0C
- #define  SDHCI_POWER_330	0x0E
-+#define SDHCI_POWER_QUIRK_GPIO 195 /*GPIO offset 41 of SCORE device is SD3_PWR_EN*/
- 
- #define SDHCI_BLOCK_GAP_CONTROL	0x2A
- 
-diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
-index 7be12b8..92cec16 100644
---- a/include/linux/mmc/sdhci.h
-+++ b/include/linux/mmc/sdhci.h
-@@ -102,6 +102,9 @@ struct sdhci_host {
- #define SDHCI_QUIRK2_BROKEN_HS200			(1<<6)
- /* Controller does not support DDR50 */
- #define SDHCI_QUIRK2_BROKEN_DDR50			(1<<7)
-+/* Controller cannot initialize power (must use GPIO instead) */
-+#define SDHCI_QUIRK2_BROKEN_POWER_ENABLE		(1<<8)
-+
- 
- 	int irq;		/* Device IRQ */
- 	void __iomem *ioaddr;	/* Mapped address */
+On 06/02/2014 05:52 PM, Ulf Hansson wrote:
+> On 2 June 2014 10:46, Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org> wrote:
+>> On 06/02/2014 05:38 PM, Jaehoon Chung wrote:
+>>> On 06/02/2014 05:29 PM, Ulf Hansson wrote:
+>>>> On 1 June 2014 11:23, Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
+>>>>> Hi,
+>>>>>
+>>>>>
+>>>>> On 05/31/2014 10:13 PM, Olof Johansson wrote:
+>>>>>>
+>>>>>> On Sat, May 31, 2014 at 12:03 PM, Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+>>>>>> wrote:
+>>>>>>>
+>>>>>>> The following existing MMC host controller bindings use slot subnodes:
+>>>>>>>
+>>>>>>> Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt
+>>>>>>> Documentation/devicetree/bindings/mmc/k3-dw-mshc.txt
+>>>>>>> Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt
+>>>>>>> Documentation/devicetree/bindings/mmc/socfpga-dw-mshc.txt
+>>>>>>> Documentation/devicetree/bindings/mmc/atmel-hsmci.txt
+>>>>>>> Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.txt
+>>>>>>>
+>>>>>>> This commit documents this practice in the standard mmc bindings
+>>>>>>> documentation.
+>>>>>>>
+>>>>>>> Signed-off-by: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+>>>>>>
+>>>>>>
+>>>>>> There are today only two drivers that use this kind of binding, dw_mmc
+>>>>>> and the at91 one.
+>>>>>
+>>>>>
+>>>>> Correct.
+>>>>>
+>>>>>
+>>>>>> Neither seems to actually ever have been used with
+>>>>>> more than one slot. I doubt anyone building an exynos-based system
+>>>>>> will ever do a multi-slot solution, and it seems that the at91 driver
+>>>>>> doesn't actually handle more than one slot.
+>>>>>>
+>>>>>> I'm personally not that excited about complicating the bindings by
+>>>>>> opening up for this -- I would rather work towards removing the
+>>>>>> concept of slots if it's one of those things that are going to remain
+>>>>>> unused. We have actually been talking about reworking the dw_mmc
+>>>>>> binding to remove the slot concept (and simplify the driver by doing
+>>>>>> so).
+>>>>>
+>>>>>
+>>>>> I'm fine with removing the slot subnode, I added it because of it being
+>>>>> brought up in the powerup sequence discussion. I explicitly asked there
+>>>>> if adding such a subnode level was seen as desirable but nobody
+>>>>> answered :|
+>>>>>
+>>>>> Anyways, either way works for me. I can do a v3 dropping the slot subnode
+>>>>> level again. I would really like to move forward with a decision on how-to
+>>>>> represent non probable info for sdio devices in device nodes. So do you
+>>>>> have any other remarks other then that the slot subnode should be dropped ?
+>>>>> And if not can you please review and ack (*) v3 of this patch-set once
+>>>>> I've send it?
+>>>>>
+>>>>> Chris Ball and Ulf Hansson, what is your take on this, are you willing to
+>>>>> take this patch set? And do you want it with or without the slot subnodes ?
+>>>>
+>>>> I certainly appreciate you working actively on this Hans, I will look
+>>>> into the patchset as soon as I can.
+>>>>
+>>>> I share Olof's view about the slot nodes, we must not add DT bindings
+>>>> that isn't really needed.
+>>>>
+>>>> Regarding the slot subnodes; Jaehoon Chung recently posted a patchset
+>>>> for adding the parsing of it, intended for dwmmc. I withdraw my ack
+>>>> for it, and let's try to go in the other direction instead.
+>>>>
+>>>> [PATCHv3 0/4] mmc: fixed the mmc_of_parse for dwmmc.
+>>>>
+>>>> Thus I suggest we should clean-up host drivers to support only one
+>>>> card per host, and entirely skip the slot concept.
+>>>
+>>> Well, almost platform is used the only one card per host, although some controller is supported the slot concept.
+>>> But we don't know that controller should be used the multi slot per host, in future.
+>>> So I think we can't skip the slot concept.
+>> If we need to change the dw-mmc controller, let me know, plz.
+>> I want to fix this problem before release the 3.16.
+>> Actually, i think it can remove the subnode, if ensure not to use multi-slot at dwmmc.
+> 
+> That seems like the best approach. Please try to remove the subnodes
+> and make use of mmc_of_parse, as is.
+> 
+> Kind regards
+> Uffe
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
