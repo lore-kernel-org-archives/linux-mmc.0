@@ -1,72 +1,82 @@
 From: Peter Griffin <peter.griffin@linaro.org>
-Subject: [PATCH v2 00/10] Add SDHCI support for STMicroelectronics SoCs
-Date: Wed,  4 Jun 2014 17:07:24 +0100
-Message-ID: <1401898054-686-1-git-send-email-peter.griffin@linaro.org>
+Subject: [PATCH v2 03/10] ARM: STi: DT: Add sdhci pins for stih416
+Date: Wed,  4 Jun 2014 17:07:27 +0100
+Message-ID: <1401898054-686-4-git-send-email-peter.griffin@linaro.org>
+References: <1401898054-686-1-git-send-email-peter.griffin@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wi0-f181.google.com ([209.85.212.181]:42677 "EHLO
-	mail-wi0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752102AbaFDQHk (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 4 Jun 2014 12:07:40 -0400
-Received: by mail-wi0-f181.google.com with SMTP id n15so1794767wiw.2
-        for <linux-mmc@vger.kernel.org>; Wed, 04 Jun 2014 09:07:38 -0700 (PDT)
+Received: from mail-wi0-f179.google.com ([209.85.212.179]:38013 "EHLO
+	mail-wi0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752208AbaFDQHn (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 4 Jun 2014 12:07:43 -0400
+Received: by mail-wi0-f179.google.com with SMTP id bs8so1798062wib.6
+        for <linux-mmc@vger.kernel.org>; Wed, 04 Jun 2014 09:07:41 -0700 (PDT)
+In-Reply-To: <1401898054-686-1-git-send-email-peter.griffin@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: peter.griffin@linaro.org, chris@printf.net, ulf.hansson@linaro.org, maxime.coquelin@st.com, patrice.chotard@st.com, srinivas.kandagatla@gmail.com
 Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org
 
-This series adds a SDHCI platform driver for ST SoCs, along with
-the additional device tree bindings and configuration to enable
-the controller to work properly.
+This adds the required pin config for both SDHCI controllers on
+the stih416 SoC.
 
-Initially it supports the stih416 and stih415 SoCs, and has
-been tested on a stih416-b2020 board.
+Signed-off-by: Giuseppe Cavallaro <peppe.cavallaro@st.com>
+Signed-off-by: Peter Griffin <peter.griffin@linaro.org>
+Acked-by: Lee Jones <lee.jones@linaro.org>
+Acked-by: Maxime Coquelin <maxime.coquelin@st.com>
+---
+ arch/arm/boot/dts/stih416-pinctrl.dtsi | 39 ++++++++++++++++++++++++++++++++++
+ 1 file changed, 39 insertions(+)
 
-regards,
-
-Peter.
-
-Changes since v1
-- Whitespace cleanups
-- Use readl_relaxed io accessor
-- Add update to MAINTAINERS
-- Remove reset controller code from platform driver
-- Remove #ifdef around sleep ops
-- Use sdhci_pltfm_clk_get_max_clock lib function
-- Pass bus-width etc through board device tree node
-- Remove unncessary header
-- Remove / change some debug messages
-- Remove final break from switch case
-
-Peter Griffin (10):
-  mmc: sdhci-st: Intial support for ST SDHCI controller
-  mmc: sdhci-st: ST Microelectronics SDHCI binding documentation.
-  ARM: STi: DT: Add sdhci pins for stih416
-  ARM: STi: DT: Add sdhci controller for stih416
-  ARM: STi: DT: Add sdhci pin configuration for stih415
-  ARM: STi: DT: Add sdhci controller for stih415
-  ARM: STi: DT: Enable mmc0 for both stih415 and stih416 SoCs
-  ARM: STi: DT: Enable second sdhci controller for stih416 b2020 boards.
-  ARM: update multi_v7_defconfig for STI
-  MAINTAINERS: Add sdhci-st file to ARCH/STI architecture
-
- Documentation/devicetree/bindings/mmc/sdhci-st.txt |  33 ++++
- MAINTAINERS                                        |   1 +
- arch/arm/boot/dts/stih415-pinctrl.dtsi             |  21 +++
- arch/arm/boot/dts/stih415.dtsi                     |  12 ++
- arch/arm/boot/dts/stih416-b2020-revE.dts           |   6 +
- arch/arm/boot/dts/stih416-b2020.dts                |   8 +
- arch/arm/boot/dts/stih416-pinctrl.dtsi             |  39 ++++
- arch/arm/boot/dts/stih416.dtsi                     |  24 +++
- arch/arm/boot/dts/stih41x-b2020.dtsi               |   4 +
- arch/arm/boot/dts/stih41x-b2020x.dtsi              |   4 +
- arch/arm/configs/multi_v7_defconfig                |   1 +
- drivers/mmc/host/Kconfig                           |  12 ++
- drivers/mmc/host/Makefile                          |   1 +
- drivers/mmc/host/sdhci-st.c                        | 201 +++++++++++++++++++++
- 14 files changed, 367 insertions(+)
- create mode 100644 Documentation/devicetree/bindings/mmc/sdhci-st.txt
- create mode 100644 drivers/mmc/host/sdhci-st.c
-
+diff --git a/arch/arm/boot/dts/stih416-pinctrl.dtsi b/arch/arm/boot/dts/stih416-pinctrl.dtsi
+index 6252188..dad1f24 100644
+--- a/arch/arm/boot/dts/stih416-pinctrl.dtsi
++++ b/arch/arm/boot/dts/stih416-pinctrl.dtsi
+@@ -467,6 +467,45 @@
+ 					};
+ 				};
+ 			};
++
++			mmc0 {
++				pinctrl_mmc0: mmc0 {
++					st,pins {
++						mmcclk  = <&PIO13 4 ALT4 BIDIR_PU NICLK 0 CLK_B>;
++						data0   = <&PIO14 4 ALT4 BIDIR_PU BYPASS 0>;
++						data1   = <&PIO14 5 ALT4 BIDIR_PU BYPASS 0>;
++						data2   = <&PIO14 6 ALT4 BIDIR_PU BYPASS 0>;
++						data3   = <&PIO14 7 ALT4 BIDIR_PU BYPASS 0>;
++						cmd     = <&PIO15 1 ALT4 BIDIR_PU BYPASS 0>;
++						wp      = <&PIO15 3 ALT4 IN>;
++						data4   = <&PIO16 4 ALT4 BIDIR_PU BYPASS 0>;
++						data5   = <&PIO16 5 ALT4 BIDIR_PU BYPASS 0>;
++						data6   = <&PIO16 6 ALT4 BIDIR_PU BYPASS 0>;
++						data7   = <&PIO16 7 ALT4 BIDIR_PU BYPASS 0>;
++						pwr     = <&PIO17 1 ALT4 OUT>;
++						cd      = <&PIO17 2 ALT4 IN>;
++						led     = <&PIO17 3 ALT4 OUT>;
++					};
++				};
++			};
++			mmc1 {
++				pinctrl_mmc1: mmc1 {
++					st,pins {
++						mmcclk  = <&PIO15 0 ALT3 BIDIR_PU NICLK 0 CLK_B>;
++						data0   = <&PIO13 7 ALT3 BIDIR_PU BYPASS 0>;
++						data1   = <&PIO14 1 ALT3 BIDIR_PU BYPASS 0>;
++						data2   = <&PIO14 2 ALT3 BIDIR_PU BYPASS 0>;
++						data3   = <&PIO14 3 ALT3 BIDIR_PU BYPASS 0>;
++						cmd     = <&PIO15 4 ALT3 BIDIR_PU BYPASS 0>;
++						data4   = <&PIO15 6 ALT3 BIDIR_PU BYPASS 0>;
++						data5   = <&PIO15 7 ALT3 BIDIR_PU BYPASS 0>;
++						data6   = <&PIO16 0 ALT3 BIDIR_PU BYPASS 0>;
++						data7   = <&PIO16 1 ALT3 BIDIR_PU BYPASS 0>;
++						pwr     = <&PIO16 2 ALT3 OUT>;
++						nreset  = <&PIO13 6 ALT3 OUT>;
++					};
++				};
++			};
+ 		};
+ 
+ 		pin-controller-fvdp-fe {
 -- 
 1.9.1
 
