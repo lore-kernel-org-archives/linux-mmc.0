@@ -1,81 +1,60 @@
 From: Ben Dooks <ben.dooks@codethink.co.uk>
-Subject: [PATCH 3/6] mmc: sh-mmcif: use devm_ for clock management
-Date: Wed,  4 Jun 2014 12:42:10 +0100
-Message-ID: <1401882133-11050-4-git-send-email-ben.dooks@codethink.co.uk>
+Subject: [PATCH 5/6] mmc: sh-mmcif: no need to call pm_runtime_suspend on error
+Date: Wed,  4 Jun 2014 12:42:12 +0100
+Message-ID: <1401882133-11050-6-git-send-email-ben.dooks@codethink.co.uk>
 References: <1401882133-11050-1-git-send-email-ben.dooks@codethink.co.uk>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from ducie-dc1.codethink.co.uk ([185.25.241.215]:45914 "EHLO
+Received: from ducie-dc1.codethink.co.uk ([185.25.241.215]:45935 "EHLO
 	ducie-dc1.codethink.co.uk" rhost-flags-OK-FAIL-OK-FAIL)
-	by vger.kernel.org with ESMTP id S1752049AbaFDLm3 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 4 Jun 2014 07:42:29 -0400
+	by vger.kernel.org with ESMTP id S1752574AbaFDLme (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 4 Jun 2014 07:42:34 -0400
 In-Reply-To: <1401882133-11050-1-git-send-email-ben.dooks@codethink.co.uk>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 Cc: linux-kernel@lists.codethink.co.uk, ulf.hansson@linaro.org, chris@printf.net, magnus.damm@opensource.se, linus-sh@vger.kernel.org, horms@verge.net.au, Ben Dooks <ben.dooks@codethink.co.uk>
 
-Use the devm_clk_get() code to get the clock and allow it to be freed
-automatically on release.
+The pm_runtime call should implicitly disable the device once the
+probe is over if there is no explicit reference gained. There is no
+need to call pm_runtime_suspend() before the pm_runtime_disable()
+call.
 
 Signed-off-by: Ben Dooks <ben.dooks@codethink.co.uk>
 ---
- drivers/mmc/host/sh_mmcif.c | 18 ++++++++----------
- 1 file changed, 8 insertions(+), 10 deletions(-)
+ drivers/mmc/host/sh_mmcif.c | 6 ++----
+ 1 file changed, 2 insertions(+), 4 deletions(-)
 
 diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
-index 3ed54c8..ae278a5 100644
+index cc6858d..b378aa0 100644
 --- a/drivers/mmc/host/sh_mmcif.c
 +++ b/drivers/mmc/host/sh_mmcif.c
-@@ -1389,7 +1389,7 @@ static int sh_mmcif_probe(struct platform_device *pdev)
- 
- 	ret = mmc_of_parse(mmc);
- 	if (ret < 0)
--		goto eofparse;
-+		goto err_host;
- 
- 	host		= mmc_priv(mmc);
- 	host->mmc	= mmc;
-@@ -1419,19 +1419,19 @@ static int sh_mmcif_probe(struct platform_device *pdev)
- 	pm_runtime_enable(&pdev->dev);
- 	host->power = false;
- 
--	host->hclk = clk_get(&pdev->dev, NULL);
-+	host->hclk = devm_clk_get(&pdev->dev, NULL);
- 	if (IS_ERR(host->hclk)) {
- 		ret = PTR_ERR(host->hclk);
- 		dev_err(&pdev->dev, "cannot get clock: %d\n", ret);
--		goto eclkget;
-+		goto err_pm;
- 	}
- 	ret = sh_mmcif_clk_update(host);
- 	if (ret < 0)
--		goto eclkupdate;
-+		goto err_pm;
- 
- 	ret = pm_runtime_resume(&pdev->dev);
- 	if (ret < 0)
--		goto eresume;
+@@ -1443,7 +1443,7 @@ static int sh_mmcif_probe(struct platform_device *pdev)
+ 					sh_mmcif_irqt, 0, name, host);
+ 	if (ret) {
+ 		dev_err(&pdev->dev, "request_irq error (%s)\n", name);
+-		goto err_irq;
 +		goto err_clk;
+ 	}
+ 	if (irq[1] >= 0) {
+ 		ret = devm_request_threaded_irq(&pdev->dev, irq[1],
+@@ -1451,7 +1451,7 @@ static int sh_mmcif_probe(struct platform_device *pdev)
+ 						0, "sh_mmc:int", host);
+ 		if (ret) {
+ 			dev_err(&pdev->dev, "request_irq error (sh_mmc:int)\n");
+-			goto err_irq;
++			goto err_clk;
+ 		}
+ 	}
  
- 	INIT_DELAYED_WORK(&host->timeout_work, mmcif_timeout_work);
+@@ -1478,8 +1478,6 @@ static int sh_mmcif_probe(struct platform_device *pdev)
  
-@@ -1482,13 +1482,11 @@ ereqirq1:
- 	free_irq(irq[0], host);
- ereqirq0:
- 	pm_runtime_suspend(&pdev->dev);
--eresume:
-+err_clk:
+ emmcaddh:
+ erqcd:
+-err_irq:
+-	pm_runtime_suspend(&pdev->dev);
+ err_clk:
  	clk_disable_unprepare(host->hclk);
--eclkupdate:
--	clk_put(host->hclk);
--eclkget:
-+err_pm:
- 	pm_runtime_disable(&pdev->dev);
--eofparse:
-+err_host:
- 	mmc_free_host(mmc);
- 	return ret;
- }
+ err_pm:
 -- 
 2.0.0.rc2
 
