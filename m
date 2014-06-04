@@ -1,83 +1,86 @@
-From: Peter Griffin <peter.griffin-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+From: Peter Griffin <peter.griffin@linaro.org>
 Subject: Re: [PATCH 1/8] mmc: sdhci-st: Intial support for ST SDHCI controller
-Date: Wed, 4 Jun 2014 09:37:27 +0100
-Message-ID: <20140604083727.GA23469@griffinp-ThinkPad-X1-Carbon-2nd>
+Date: Wed, 4 Jun 2014 12:05:18 +0100
+Message-ID: <20140604110518.GA1722@griffinp-ThinkPad-X1-Carbon-2nd>
 References: <1400771902-26553-1-git-send-email-peter.griffin@linaro.org>
  <1400771902-26553-2-git-send-email-peter.griffin@linaro.org>
- <537EE84C.2020607@linaro.org>
+ <537E1AB8.9000909@st.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wg0-f43.google.com ([74.125.82.43]:52433 "EHLO
+	mail-wg0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752294AbaFDLF1 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 4 Jun 2014 07:05:27 -0400
+Received: by mail-wg0-f43.google.com with SMTP id l18so8062523wgh.26
+        for <linux-mmc@vger.kernel.org>; Wed, 04 Jun 2014 04:05:26 -0700 (PDT)
 Content-Disposition: inline
-In-Reply-To: <537EE84C.2020607-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Srinivas Kandagatla <srinivas.kandagatla-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, maxime.coquelin-qxv4g6HH51o@public.gmane.org, patrice.chotard-qxv4g6HH51o@public.gmane.org, srinivas.kandagatla-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org, ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kernel-F5mvAk5X5gdBDgjK7y7TUQ@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Giuseppe Cavallaro <peppe.cavallaro-qxv4g6HH51o@public.gmane.org>, lee.jones-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
+In-Reply-To: <537E1AB8.9000909@st.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Maxime Coquelin <maxime.coquelin@st.com>
+Cc: linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, patrice.chotard@st.com, srinivas.kandagatla@gmail.com, chris@printf.net, ulf.hansson@linaro.org, kernel@stlinux.com, lee.jones@linaro.org, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, Giuseppe Cavallaro <peppe.cavallaro@st.com>
 
-Hi Srini,
+Hi Maxime,
 
-Thanks for reviewing, see my comments below: -
-
-On Fri, 23 May 2014, Srinivas Kandagatla wrote:
+Thanks fo reviewing, see my comments below: -
 
 > >+struct st_mmc_platform_data {
 > >+	struct  reset_control	*rstc;
 > >+};
+> Since it uses the generic reset framework, could we imagine moving
+> the reset to the sdhci_pltfm_host struct?
+> Doing this, we could get rid of st_mmc_platform_data.
+
+Yes I agree, I will send some RFC patches which moves the reset controller
+stuff into the generic code.
+
+For v2 of this series I've removed the reset code, as stih416 doesn't have
+seperate reset line each controller, so it will mainly be 
+useful for stih407 SoC, which needs additional patches on top of this 
+set.
+
+> >+	switch (width) {
+> >+	case MMC_BUS_WIDTH_8:
+> >+		ctrl |= SDHCI_CTRL_8BITBUS;
+> >+		ctrl &= ~SDHCI_CTRL_4BITBUS;
+> >+		break;
+> >+	case MMC_BUS_WIDTH_4:
+> >+		ctrl |= SDHCI_CTRL_4BITBUS;
+> >+		ctrl &= ~SDHCI_CTRL_8BITBUS;
+> >+		break;
+> >+	default:
+> >+		ctrl &= ~(SDHCI_CTRL_8BITBUS | SDHCI_CTRL_4BITBUS);
+> >+		break;
+> You can remove the break here.
+
+Ok, removed in v2
+
+> >+	switch (reg) {
+> >+	case SDHCI_CAPABILITIES:
+> >+		ret = readl(host->ioaddr + reg);
+> >+		/* Support 3.3V and 1.8V */
+> >+		ret &= ~SDHCI_CAN_VDD_300;
+> >+		break;
+> >+	default:
+> >+		ret = readl(host->ioaddr + reg);
 > 
-> st_mmc_platform_data name is bit missleading as this data is not
-> part of platform data. Probably you could rename it to struct
-> sdhci_st_data.
+> Could we use readl_relaxed?
 
-I've now removed this reset controller code for v2, as based on Maxime's feedback
-I think this would be better off going in the generic code, so all 
-platforms could benefit if they have a reset controller implementation.
+Yes, I've updated to use readl_relaxed in v2
 
-I plan to send some RFC patches which implement this seperately to this series.
+> >+	dev_dbg(&pdev->dev, "SDHCI ST platform driver\n");
+> You can remove this I think.
 
-> >+	pltfm_host->priv = pdata;
-> >+
-> >+	platform_set_drvdata(pdev, host);
-> 
-> Why not platform_set_drvdata(pdev, priv_host);
-> As you are not using sdhci_host directly, this will reduced few
-> indirections in the driver.
+Removed in v2
 
-Your right, and I was going to change this, but with the re-think on the reset
-controller code above I will now need sdhci_host so would prefer to leave it as
-is for now.
+> >+		host_version, ((host_version & SDHCI_VENDOR_VER_MASK) >>
+> >+			       SDHCI_VENDOR_VER_SHIFT));
+> Maybe you could change to dev_info here. It might be interresting to
+> always have IP version.
 
-> >+err_out:
-> >+	clk_disable_unprepare(clk);
-> >+	sdhci_pltfm_free(pdev);
-> >+
-> IP could be left out of reset in this path.
+Changed to dev_info in v2
 
-Good spot, I'll remember this when I add the reset code
-back in :-)
-
-> 
-> replace:
-> [...
-> >+static SIMPLE_DEV_PM_OPS(sdhci_st_pmops, sdhci_st_suspend, sdhci_st_resume);
-> >+#define SDHCI_ST_PMOPS (&sdhci_st_pmops)
-> >+#else
-> >+#define SDHCI_ST_PMOPS NULL
-> >+#endif
-> ...]
-> 
-> with :
-> 
-> #endif
-> 
-> static SIMPLE_DEV_PM_OPS(sdhci_st_pmops, sdhci_st_suspend, sdhci_st_resume);
-
-Fixed in v2
-
-regards,
+Regards,
 
 Peter.
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
