@@ -1,43 +1,45 @@
-From: Peter Griffin <peter.griffin@linaro.org>
-Subject: [PATCH v3 10/10] MAINTAINERS: Add sdhci-st file to ARCH/STI
- architecture
-Date: Wed,  4 Jun 2014 17:30:24 +0100
-Message-ID: <1401899424-1365-11-git-send-email-peter.griffin@linaro.org>
-References: <1401899424-1365-1-git-send-email-peter.griffin@linaro.org>
+From: Will Deacon <will.deacon@arm.com>
+Subject: Re: how to creat watchpoint  in kernel for data access debug
+Date: Wed, 4 Jun 2014 19:01:39 +0100
+Message-ID: <20140604180139.GD27881@arm.com>
+References: <35FD53F367049845BC99AC72306C23D1029A276569F3@CNBJMBX05.corpusers.net>
+ <35FD53F367049845BC99AC72306C23D1029A276569F4@CNBJMBX05.corpusers.net>
+ <20140523134550.GB21319@arm.com>
+ <35FD53F367049845BC99AC72306C23D1029A276569FC@CNBJMBX05.corpusers.net>
+ <20140603164512.GT23149@arm.com>
+ <35FD53F367049845BC99AC72306C23D1029A27656A2F@CNBJMBX05.corpusers.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <1401899424-1365-1-git-send-email-peter.griffin@linaro.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, chris@printf.net, ulf.hansson@linaro.org, maxime.coquelin@st.com, patrice.chotard@st.com, srinivas.kandagatla@gmail.com
-Cc: peter.griffin@linaro.org, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, kernel@stlinux.com
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from cam-admin0.cambridge.arm.com ([217.140.96.50]:53744 "EHLO
+	cam-admin0.cambridge.arm.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1750717AbaFDSBg (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 4 Jun 2014 14:01:36 -0400
+Content-Disposition: inline
+In-Reply-To: <35FD53F367049845BC99AC72306C23D1029A27656A2F@CNBJMBX05.corpusers.net>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: "Wang, Yalin" <Yalin.Wang@sonymobile.com>
+Cc: "'linux-mmc@vger.kernel.org'" <linux-mmc@vger.kernel.org>, "'linux-arch-owner@vger.kernel.org'" <linux-arch-owner@vger.kernel.org>
 
-Signed-off-by: Peter Griffin <peter.griffin@linaro.org>
----
- MAINTAINERS | 1 +
- 1 file changed, 1 insertion(+)
+On Wed, Jun 04, 2014 at 04:05:03AM +0100, Wang, Yalin wrote:
+> Hi  Will,
+> 
+> Thanks for your proposal,
+> The patch google made is just like
+> The one I tried before ,
+> Then the problems come :
+> After register the perf_event callback,
+> In the callback function ,
+> In google's patch , it is  function crbug_345917_handler( ),
+> It just call panic( ) ,
+> But My callback function will do some check ,
+> Sometimes, I want to bypass this time's breakpoint,
+> Problems is that I don't know how to bypass it,
+> If I return directly in the callback function ,
+> The breakpoint will trap again and again endless ..
 
-diff --git a/MAINTAINERS b/MAINTAINERS
-index 6dc67b1..19dc265 100644
---- a/MAINTAINERS
-+++ b/MAINTAINERS
-@@ -1306,6 +1306,7 @@ F:	drivers/pinctrl/pinctrl-st.c
- F:	drivers/media/rc/st_rc.c
- F:	drivers/i2c/busses/i2c-st.c
- F:	drivers/tty/serial/st-asc.c
-+F:	drivers/mmc/host/sdhci-st.c
- 
- ARM/TECHNOLOGIC SYSTEMS TS7250 MACHINE SUPPORT
- M:	Lennert Buytenhek <kernel@wantstofly.org>
--- 
-1.9.1
+Take a look at enable_single_step, which uses mismatch breakpoints to try
+and do the step.
+
+Will
