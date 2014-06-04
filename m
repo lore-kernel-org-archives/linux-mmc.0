@@ -1,66 +1,78 @@
 From: Peter Griffin <peter.griffin@linaro.org>
-Subject: [PATCH v2 08/10] ARM: STi: DT: Enable second sdhci controller for stih416 b2020 boards.
-Date: Wed,  4 Jun 2014 17:07:32 +0100
-Message-ID: <1401898054-686-9-git-send-email-peter.griffin@linaro.org>
-References: <1401898054-686-1-git-send-email-peter.griffin@linaro.org>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wg0-f45.google.com ([74.125.82.45]:50196 "EHLO
-	mail-wg0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751098AbaFDQHr (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 4 Jun 2014 12:07:47 -0400
-Received: by mail-wg0-f45.google.com with SMTP id m15so8560145wgh.28
-        for <linux-mmc@vger.kernel.org>; Wed, 04 Jun 2014 09:07:46 -0700 (PDT)
-In-Reply-To: <1401898054-686-1-git-send-email-peter.griffin@linaro.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Subject: [PATCH v3 02/10] mmc: sdhci-st: ST Microelectronics SDHCI binding
+ documentation.
+Date: Wed,  4 Jun 2014 17:30:16 +0100
+Message-ID: <1401899424-1365-3-git-send-email-peter.griffin@linaro.org>
+References: <1401899424-1365-1-git-send-email-peter.griffin@linaro.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <1401899424-1365-1-git-send-email-peter.griffin@linaro.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, chris@printf.net, ulf.hansson@linaro.org, maxime.coquelin@st.com, patrice.chotard@st.com, srinivas.kandagatla@gmail.com
+Cc: peter.griffin@linaro.org, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, kernel@stlinux.com, Giuseppe Cavallaro <peppe.cavallaro@st.com>
 List-Id: linux-mmc@vger.kernel.org
-To: peter.griffin@linaro.org, chris@printf.net, ulf.hansson@linaro.org, maxime.coquelin@st.com, patrice.chotard@st.com, srinivas.kandagatla@gmail.com
-Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org
 
-The second controller is only present on the stih416 SoC. Also
-mark this as non-removeable as its eMMC.
+This patch adds the device tree binding documentation for the ST
+SDHCI driver. It documents the differences between the core properties
+described by mmc.txt and the properties used by the sdhci-st driver.
 
 Signed-off-by: Giuseppe Cavallaro <peppe.cavallaro@st.com>
 Signed-off-by: Peter Griffin <peter.griffin@linaro.org>
 Acked-by: Lee Jones <lee.jones@linaro.org>
 Acked-by: Maxime Coquelin <maxime.coquelin@st.com>
 ---
- arch/arm/boot/dts/stih416-b2020-revE.dts | 6 ++++++
- arch/arm/boot/dts/stih416-b2020.dts      | 8 ++++++++
- 2 files changed, 14 insertions(+)
+ Documentation/devicetree/bindings/mmc/sdhci-st.txt | 33 ++++++++++++++++++++++
+ 1 file changed, 33 insertions(+)
+ create mode 100644 Documentation/devicetree/bindings/mmc/sdhci-st.txt
 
-diff --git a/arch/arm/boot/dts/stih416-b2020-revE.dts b/arch/arm/boot/dts/stih416-b2020-revE.dts
-index ba0fa2c..68dfdaf 100644
---- a/arch/arm/boot/dts/stih416-b2020-revE.dts
-+++ b/arch/arm/boot/dts/stih416-b2020-revE.dts
-@@ -31,5 +31,11 @@
- 		ethernet1: dwmac@fef08000 {
- 			snps,reset-gpio = <&PIO0 7>;
- 		};
+diff --git a/Documentation/devicetree/bindings/mmc/sdhci-st.txt b/Documentation/devicetree/bindings/mmc/sdhci-st.txt
+new file mode 100644
+index 0000000..7527db4
+--- /dev/null
++++ b/Documentation/devicetree/bindings/mmc/sdhci-st.txt
+@@ -0,0 +1,33 @@
++* STMicroelectronics sdhci-st MMC/SD controller
 +
-+		mmc1: sdhci@fe81f000 {
-+			status       = "okay";
-+			bus-width    = <8>;
-+			non-removable;
-+		};
- 	};
- };
-diff --git a/arch/arm/boot/dts/stih416-b2020.dts b/arch/arm/boot/dts/stih416-b2020.dts
-index 4e2df66..d42ff1d 100644
---- a/arch/arm/boot/dts/stih416-b2020.dts
-+++ b/arch/arm/boot/dts/stih416-b2020.dts
-@@ -12,4 +12,12 @@
- / {
- 	model = "STiH416 B2020";
- 	compatible = "st,stih416-b2020", "st,stih416";
++This file documents the differences between the core properties in
++Documentation/devicetree/bindings/mmc/mmc.txt and the properties
++used by the sdhci-st driver.
 +
-+	soc {
-+		mmc1: sdhci@fe81f000 {
-+			status       = "okay";
-+			bus-width    = <8>;
-+			non-removable;
-+		};
-+	};
- };
++Required properties:
++- compatible :  Must be "st,sdhci"
++- clock-names : Should be "mmc"
++                See: Documentation/devicetree/bindings/resource-names.txt
++- clocks :      Phandle of the clock used by the sdhci controler
++                See: Documentation/devicetree/bindings/clock/clock-bindings.txt
++
++Optional properties:
++- non-removable: non-removable slot
++                 See: Documentation/devicetree/bindings/mmc/mmc.txt
++- bus-width: Number of data lines
++                 See: Documentation/devicetree/bindings/mmc/mmc.txt
++
++Example:
++
++mmc0: sdhci@fe81e000 {
++	compatible	= "st,sdhci";
++	status		= "disabled";
++	reg		= <0xfe81e000 0x1000>;
++	interrupts	= <GIC_SPI 127 IRQ_TYPE_NONE>;
++	interrupt-names	= "mmcirq";
++	pinctrl-names	= "default";
++	pinctrl-0	= <&pinctrl_mmc0>;
++	clock-names	= "mmc";
++	clocks		= <&clk_s_a1_ls 1>;
++	bus-width       = <8>
++};
 -- 
 1.9.1
-
