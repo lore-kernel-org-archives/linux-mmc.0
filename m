@@ -1,67 +1,63 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 6/6] mmc: sh-mmcif: final error path cleanup
-Date: Wed, 4 Jun 2014 15:02:10 +0200
-Message-ID: <CAPDyKFqa+nOxMMO49NcPuKzqPsAGWdp7=mjc-UuHYD=bp5_tgg@mail.gmail.com>
-References: <1401882133-11050-1-git-send-email-ben.dooks@codethink.co.uk>
-	<1401882133-11050-7-git-send-email-ben.dooks@codethink.co.uk>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+From: Markus Pargmann <mpa@pengutronix.de>
+Subject: [PATCH] mmc: sdhci: Remove unused ret variables
+Date: Wed,  4 Jun 2014 15:24:29 +0200
+Message-ID: <1401888269-15564-1-git-send-email-mpa@pengutronix.de>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qa0-f50.google.com ([209.85.216.50]:50017 "EHLO
-	mail-qa0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753013AbaFDNCM (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 4 Jun 2014 09:02:12 -0400
-Received: by mail-qa0-f50.google.com with SMTP id j15so6833673qaq.23
-        for <linux-mmc@vger.kernel.org>; Wed, 04 Jun 2014 06:02:11 -0700 (PDT)
-In-Reply-To: <1401882133-11050-7-git-send-email-ben.dooks@codethink.co.uk>
+Received: from metis.ext.pengutronix.de ([92.198.50.35]:47041 "EHLO
+	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752566AbaFDNYq (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 4 Jun 2014 09:24:46 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ben Dooks <ben.dooks@codethink.co.uk>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, linux-kernel@lists.codethink.co.uk, Chris Ball <chris@printf.net>, magnus.damm@opensource.se, linus-sh@vger.kernel.org, Simon Horman <horms@verge.net.au>
+To: Chris Ball <chris@printf.net>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, kernel@pengutronix.de, Markus Pargmann <mpa@pengutronix.de>
 
-On 4 June 2014 13:42, Ben Dooks <ben.dooks@codethink.co.uk> wrote:
-> Remove the error path items that are no longer needed. The mmc card-detect
-> code cleans up after itself (and registers with devm) and the host error
-> is the same as the clock disable.
->
-> Signed-off-by: Ben Dooks <ben.dooks@codethink.co.uk>
+Remove those unused ret variables to make it obvious that these function
+will not return any errors in the current implementation.
 
-Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+Signed-off-by: Markus Pargmann <mpa@pengutronix.de>
+---
+ drivers/mmc/host/sdhci.c | 7 +++----
+ 1 file changed, 3 insertions(+), 4 deletions(-)
 
-> ---
->  drivers/mmc/host/sh_mmcif.c | 6 ++----
->  1 file changed, 2 insertions(+), 4 deletions(-)
->
-> diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
-> index b378aa0..35c77ad 100644
-> --- a/drivers/mmc/host/sh_mmcif.c
-> +++ b/drivers/mmc/host/sh_mmcif.c
-> @@ -1458,14 +1458,14 @@ static int sh_mmcif_probe(struct platform_device *pdev)
->         if (pd && pd->use_cd_gpio) {
->                 ret = mmc_gpio_request_cd(mmc, pd->cd_gpio, 0);
->                 if (ret < 0)
-> -                       goto erqcd;
-> +                       goto err_clk;
->         }
->
->         mutex_init(&host->thread_lock);
->
->         ret = mmc_add_host(mmc);
->         if (ret < 0)
-> -               goto emmcaddh;
-> +               goto err_clk;
->
->         dev_pm_qos_expose_latency_limit(&pdev->dev, 100);
->
-> @@ -1476,8 +1476,6 @@ static int sh_mmcif_probe(struct platform_device *pdev)
->         clk_disable_unprepare(host->hclk);
->         return ret;
->
-> -emmcaddh:
-> -erqcd:
->  err_clk:
->         clk_disable_unprepare(host->hclk);
->  err_pm:
-> --
-> 2.0.0.rc2
->
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 47055f3..77c1c27 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -2643,7 +2643,6 @@ static void sdhci_runtime_pm_bus_off(struct sdhci_host *host)
+ int sdhci_runtime_suspend_host(struct sdhci_host *host)
+ {
+ 	unsigned long flags;
+-	int ret = 0;
+ 
+ 	/* Disable tuning since we are suspending */
+ 	if (host->flags & SDHCI_USING_RETUNING_TIMER) {
+@@ -2663,14 +2662,14 @@ int sdhci_runtime_suspend_host(struct sdhci_host *host)
+ 	host->runtime_suspended = true;
+ 	spin_unlock_irqrestore(&host->lock, flags);
+ 
+-	return ret;
++	return 0;
+ }
+ EXPORT_SYMBOL_GPL(sdhci_runtime_suspend_host);
+ 
+ int sdhci_runtime_resume_host(struct sdhci_host *host)
+ {
+ 	unsigned long flags;
+-	int ret = 0, host_flags = host->flags;
++	int host_flags = host->flags;
+ 
+ 	if (host_flags & (SDHCI_USE_SDMA | SDHCI_USE_ADMA)) {
+ 		if (host->ops->enable_dma)
+@@ -2709,7 +2708,7 @@ int sdhci_runtime_resume_host(struct sdhci_host *host)
+ 
+ 	spin_unlock_irqrestore(&host->lock, flags);
+ 
+-	return ret;
++	return 0;
+ }
+ EXPORT_SYMBOL_GPL(sdhci_runtime_resume_host);
+ 
+-- 
+2.0.0.rc2
+
