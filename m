@@ -1,96 +1,141 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: autosleep suspend too frquent problem
-Date: Tue, 3 Jun 2014 23:53:23 +0200
-Message-ID: <CAPDyKFqnC1u_Nhe7sJrAzBc8YktDUJC4KAKTPtYVK-Qk6mmk0A@mail.gmail.com>
-References: <35FD53F367049845BC99AC72306C23D1029A27656A2D@CNBJMBX05.corpusers.net>
-	<20140603120128.GA5080@amd.pavel.ucw.cz>
+From: Peter Guo <peter.guo@bayhubtech.com>
+Subject: RE: [PATCH v3] mmc: sdhci-pci-o2micro: Add SeaBird SeaEagle SD3
+ support
+Date: Wed, 4 Jun 2014 02:03:24 +0000
+Message-ID: <d21e5b126cc34679bb6a620c340aa5dc@CO2PR04MB651.namprd04.prod.outlook.com>
+References: <1399287028-2582-1-git-send-email-peter.guo@bayhubtech.com>
+ <CAPDyKFr6sKcZfBuzNi69d21nSYm17oy7j64eXwLdd4dyPqXe+A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-pm-owner@vger.kernel.org>
-In-Reply-To: <20140603120128.GA5080@amd.pavel.ucw.cz>
-Sender: linux-pm-owner@vger.kernel.org
-To: Pavel Machek <pavel@ucw.cz>
-Cc: "Wang, Yalin" <Yalin.Wang@sonymobile.com>, "len.brown@intel.com" <len.brown@intel.com>, "rjw@sisk.pl" <rjw@sisk.pl>, "linux-pm@vger.kernel.org" <linux-pm@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-bl2lp0211.outbound.protection.outlook.com ([207.46.163.211]:31497
+	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1752110AbaFDCDl (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 3 Jun 2014 22:03:41 -0400
+In-Reply-To: <CAPDyKFr6sKcZfBuzNi69d21nSYm17oy7j64eXwLdd4dyPqXe+A@mail.gmail.com>
+Content-Language: en-US
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Chris Ball <chris@printf.net>, "adam.lee@canonical.com" <adam.lee@canonical.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Samuel Guan <samuel.guan@bayhubtech.com>
 
-On 3 June 2014 14:01, Pavel Machek <pavel@ucw.cz> wrote:
-> Hi!
->
->
->> I found sd card sometimes are damaged/ destroyed
->> On our devices .
->> And seems it is caused by kernel's frequently suspend/resume,
->> Because during suspend/resume, the driver will suspend/resume sdcard
->> Very frequently, this will damaged the sdcard sometimes, and the dam=
-age
->> is not recoverable ..
->>
->> Sometimes kernel will enter suspend and exit suspend very frequently=
-,
->> Especially when the system is in idle, but some driver is not idle,
->> And it will  wake up the system by irq frequently.
->> By our power test result, if system enter suspend /resume very frequ=
-ently,
->> Will consume more power , because it will enable /disable many devic=
-es
->> During a short time .
->>
->> I make a patch to prevent the system to enter suspend/resume state
->> More than one time during 2 seconds=EF=BC=9A
->
-> It is good you managed to diagnose the problem, but this si not the
-> right solution.
->
-> Either:
->
-> 1) don't power down SD card during system suspend
-
-NAK. The amount of power a card (even if there are good behaving cards
-as well) may utilize, in powered but idle state could be significant.
-I have seen cases of constant power consumption of several mA here.
-
->
-> or maybe even better
->
-> 2) don't power _up_ SD card during system resume. Let it be powered
-> down until the first access.
-
-Good news! This is "almost" supported already by the mmc subsystem.
-
-If your mmc host has set the capability flag MMC_CAP_RUNTIME_RESUME,
-that means the card won't be powered up (and initialized) until the
-next request.
-
-However, for removable cards (!MMC_CAP_NONREMOVABLE), during system
-resume phase, the mmc core will trigger a "rescan" of the card, to
-verify it has not been removed. Thus, unfortunate for this use case,
-the first request (for removable cards) will be triggered during the
-system resume phase.
-
-I suppose we should add some extra conditions/flags which makes the
-mmc core to handle the above scenario. Actually I have been thinking
-of putting together a patch for this, but it never pops up on the top
-of my TODO list. :-)
-
-Additionally, I wonder if this bouncing up and down from suspend to
-resume, could have other negative impact for other subsystems? Is it
-just a mmc subsystem problem? I am not so sure.
-
-Kind regards
-Ulf Hansson
-
->
-> Thanks,
->                                                                      =
-   Pavel
-> --
-> (english) http://www.livejournal.com/~pavelmachek
-> (cesky, pictures) http://atrey.karlin.mff.cuni.cz/~pavel/picture/hors=
-es/blog.html
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-kerne=
-l" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> Please read the FAQ at  http://www.tux.org/lkml/
+SGkgSGFuc3NvbiwNCg0KSGF2ZSB5b3UgaW5jbHVkZSB0aGlzIHBhdGNoIHRvIFBSPyBJZiBzbyBj
+b3VsZCB5b3UgdGVsbCBtZSBhdCB3aGljaCBnaXQgIHJlcG9zaXRvcnkgaXQgaXMuICANCg0KQlIN
+ClBldGVyLkd1bw0KDQotLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KRnJvbTogVWxmIEhhbnNz
+b24gW21haWx0bzp1bGYuaGFuc3NvbkBsaW5hcm8ub3JnXSANClNlbnQ6IFdlZG5lc2RheSwgTWF5
+IDE0LCAyMDE0IDU6NTUgUE0NClRvOiBQZXRlciBHdW8NCkNjOiBDaHJpcyBCYWxsOyBhZGFtLmxl
+ZUBjYW5vbmljYWwuY29tOyBsaW51eC1tbWM7IGxpbnV4LWtlcm5lbEB2Z2VyLmtlcm5lbC5vcmc7
+IFNhbXVlbCBHdWFuDQpTdWJqZWN0OiBSZTogW1BBVENIIHYzXSBtbWM6IHNkaGNpLXBjaS1vMm1p
+Y3JvOiBBZGQgU2VhQmlyZCBTZWFFYWdsZSBTRDMgc3VwcG9ydA0KDQpPbiA1IE1heSAyMDE0IDEy
+OjUwLCBwZXRlci5ndW8gPHBldGVyLmd1b0BiYXlodWJ0ZWNoLmNvbT4gd3JvdGU6DQo+IEZyb206
+IFBldGVyIEd1byA8cGV0ZXIuZ3VvQGJheWh1YnRlY2guY29tPg0KPg0KPiBBZGQgTzJNaWNyby9C
+YXlIdWJUZWNoIGNoaXAgODUyMCBzdWJ2ZXJzaW9uIEIxIFNEMy4wIHN1cHBvcnQuDQo+IEFkZCBP
+Mk1pY3JvL0JheUh1YlRlY2ggY2hpcCA4NjIwIGFuZCA4NjIxIFNEMy4wIHN1cHBvcnQgRW5hYmxl
+IExlZCANCj4gZnVuY3Rpb24gb2YgODUyMCBjaGlwLg0KPg0KPiBTaWduZWQtb2ZmLWJ5OiBQZXRl
+ciBHdW8gPHBldGVyLmd1b0BiYXlodWJ0ZWNoLmNvbT4NCj4gU2lnbmVkLW9mZi1ieTogQWRhbSBM
+ZWUgPGFkYW0ubGVlQGNhbm9uaWNhbC5jb20+DQoNClRoYW5rcyBQZXRlciwgQWRhbSENCg0KVW5s
+ZXNzIHNvbWVvbmUgb2JqZWN0cywgSSBpbnRlbmQgdG8gaW5jbHVkZSB0aGlzIGluIHRoZSBuZXh0
+IFBSIEkgc2VuZCB0byBDaHJpcy4NCg0KS2luZCByZWdhcmRzDQpVbGYgSGFuc3Nvbg0KDQo+IC0t
+LQ0KPiAgZHJpdmVycy9tbWMvaG9zdC9zZGhjaS1wY2ktbzJtaWNyby5jIHwgNzggDQo+ICsrKysr
+KysrKysrKysrKysrKysrKysrKysrKysrKysrKysrLQ0KPiAgZHJpdmVycy9tbWMvaG9zdC9zZGhj
+aS1wY2ktbzJtaWNyby5oIHwgIDMgKysNCj4gIDIgZmlsZXMgY2hhbmdlZCwgODAgaW5zZXJ0aW9u
+cygrKSwgMSBkZWxldGlvbigtKQ0KPg0KPiBkaWZmIC0tZ2l0IGEvZHJpdmVycy9tbWMvaG9zdC9z
+ZGhjaS1wY2ktbzJtaWNyby5jIA0KPiBiL2RyaXZlcnMvbW1jL2hvc3Qvc2RoY2ktcGNpLW8ybWlj
+cm8uYw0KPiBpbmRleCBmNDk2NjZiLi5lYWZjZDkyIDEwMDY0NA0KPiAtLS0gYS9kcml2ZXJzL21t
+Yy9ob3N0L3NkaGNpLXBjaS1vMm1pY3JvLmMNCj4gKysrIGIvZHJpdmVycy9tbWMvaG9zdC9zZGhj
+aS1wY2ktbzJtaWNyby5jDQo+IEBAIC0yMSw2ICsyMSw0NSBAQA0KPiAgI2luY2x1ZGUgInNkaGNp
+LXBjaS5oIg0KPiAgI2luY2x1ZGUgInNkaGNpLXBjaS1vMm1pY3JvLmgiDQo+DQo+ICtzdGF0aWMg
+dm9pZCBvMl9wY2lfc2V0X2Jhc2VjbGsoc3RydWN0IHNkaGNpX3BjaV9jaGlwICpjaGlwLCB1MzIg
+DQo+ICt2YWx1ZSkgew0KPiArICAgICAgIHUzMiBzY3JhdGNoXzMyOw0KPiArICAgICAgIHBjaV9y
+ZWFkX2NvbmZpZ19kd29yZChjaGlwLT5wZGV2LA0KPiArICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICBPMl9TRF9QTExfU0VUVElORywgJnNjcmF0Y2hfMzIpOw0KPiArDQo+ICsgICAgICAgc2Ny
+YXRjaF8zMiAmPSAweDAwMDBGRkZGOw0KPiArICAgICAgIHNjcmF0Y2hfMzIgfD0gdmFsdWU7DQo+
+ICsNCj4gKyAgICAgICBwY2lfd3JpdGVfY29uZmlnX2R3b3JkKGNoaXAtPnBkZXYsDQo+ICsgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICBPMl9TRF9QTExfU0VUVElORywgc2NyYXRjaF8zMik7
+IH0NCj4gKw0KPiArc3RhdGljIHZvaWQgbzJfcGNpX2xlZF9lbmFibGUoc3RydWN0IHNkaGNpX3Bj
+aV9jaGlwICpjaGlwKSB7DQo+ICsgICAgICAgaW50IHJldDsNCj4gKyAgICAgICB1MzIgc2NyYXRj
+aF8zMjsNCj4gKw0KPiArICAgICAgIC8qIFNldCBsZWQgb2YgU0QgaG9zdCBmdW5jdGlvbiBlbmFi
+bGUgKi8NCj4gKyAgICAgICByZXQgPSBwY2lfcmVhZF9jb25maWdfZHdvcmQoY2hpcC0+cGRldiwN
+Cj4gKyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgTzJfU0RfRlVOQ19SRUcwLCAm
+c2NyYXRjaF8zMik7DQo+ICsgICAgICAgaWYgKHJldCkNCj4gKyAgICAgICAgICAgICAgIHJldHVy
+bjsNCj4gKw0KPiArICAgICAgIHNjcmF0Y2hfMzIgJj0gfk8yX1NEX0ZSRUcwX0xFRE9GRjsNCj4g
+KyAgICAgICBwY2lfd3JpdGVfY29uZmlnX2R3b3JkKGNoaXAtPnBkZXYsDQo+ICsgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICBPMl9TRF9GVU5DX1JFRzAsIHNjcmF0Y2hfMzIpOw0KPiArDQo+
+ICsgICAgICAgcmV0ID0gcGNpX3JlYWRfY29uZmlnX2R3b3JkKGNoaXAtPnBkZXYsDQo+ICsgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIE8yX1NEX1RFU1RfUkVHLCAmc2NyYXRjaF8z
+Mik7DQo+ICsgICAgICAgaWYgKHJldCkNCj4gKyAgICAgICAgICAgICAgIHJldHVybjsNCj4gKw0K
+PiArICAgICAgIHNjcmF0Y2hfMzIgfD0gTzJfU0RfTEVEX0VOQUJMRTsNCj4gKyAgICAgICBwY2lf
+d3JpdGVfY29uZmlnX2R3b3JkKGNoaXAtPnBkZXYsDQo+ICsgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICBPMl9TRF9URVNUX1JFRywgc2NyYXRjaF8zMik7DQo+ICsNCj4gK30NCj4gKw0KPiAg
+dm9pZCBzZGhjaV9wY2lfbzJfZnVqaW4yX3BjaV9pbml0KHN0cnVjdCBzZGhjaV9wY2lfY2hpcCAq
+Y2hpcCkgIHsNCj4gICAgICAgICB1MzIgc2NyYXRjaF8zMjsNCj4gQEAgLTIxNiw2ICsyNTUsNDAg
+QEAgaW50IHNkaGNpX3BjaV9vMl9wcm9iZShzdHJ1Y3Qgc2RoY2lfcGNpX2NoaXAgKmNoaXApDQo+
+ICAgICAgICAgICAgICAgICBzY3JhdGNoICY9IDB4N2Y7DQo+ICAgICAgICAgICAgICAgICBwY2lf
+d3JpdGVfY29uZmlnX2J5dGUoY2hpcC0+cGRldiwgTzJfU0RfTE9DS19XUCwgDQo+IHNjcmF0Y2gp
+Ow0KPg0KPiArICAgICAgICAgICAgICAgLyogRGV2SWQ9ODUyMCBzdWJJZD0gMHgxMSBvciAweDEy
+ICBUeXBlIENoaXAgc3VwcG9ydCAqLw0KPiArICAgICAgICAgICAgICAgaWYgKGNoaXAtPnBkZXYt
+PmRldmljZSA9PSBQQ0lfREVWSUNFX0lEX08yX0ZVSklOMikgew0KPiArICAgICAgICAgICAgICAg
+ICAgICAgICByZXQgPSBwY2lfcmVhZF9jb25maWdfZHdvcmQoY2hpcC0+cGRldiwNCj4gKyAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIE8yX1NEX0ZVTkNf
+UkVHMCwNCj4gKyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICZzY3JhdGNoXzMyKTsNCj4gKyAgICAgICAgICAgICAgICAgICAgICAgc2NyYXRjaF8zMiA9
+ICgoc2NyYXRjaF8zMiAmIDB4RkYwMDAwMDApID4+IA0KPiArIDI0KTsNCj4gKw0KPiArICAgICAg
+ICAgICAgICAgICAgICAgICAvKiBDaGVjayBXaGV0aGVyIHN1YklkIGlzIDB4MTEgb3IgMHgxMiAq
+Lw0KPiArICAgICAgICAgICAgICAgICAgICAgICBpZiAoKHNjcmF0Y2hfMzIgPT0gMHgxMSkgfHwg
+KHNjcmF0Y2hfMzIgPT0gMHgxMikpIHsNCj4gKyAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICBzY3JhdGNoXzMyID0gMHgyYzI4MDAwMDsNCj4gKw0KPiArICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgIC8qIFNldCBCYXNlIENsb2NrIHRvIDIwOE1aICovDQo+ICsgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgbzJfcGNpX3NldF9iYXNlY2xrKGNoaXAsIHNjcmF0Y2hfMzIpOw0K
+PiArICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHJldCA9IHBjaV9yZWFkX2NvbmZpZ19k
+d29yZChjaGlwLT5wZGV2LA0KPiArICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICBPMl9TRF9GVU5DX1JFRzQsDQo+ICsgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIA0KPiArICZzY3Jh
+dGNoXzMyKTsNCj4gKw0KPiArICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIC8qIEVuYWJs
+ZSBCYXNlIENsayBzZXR0aW5nIGNoYW5nZSAqLw0KPiArICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgIHNjcmF0Y2hfMzIgfD0gTzJfU0RfRlJFRzRfRU5BQkxFX0NMS19TRVQ7DQo+ICsgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgcGNpX3dyaXRlX2NvbmZpZ19kd29yZChjaGlwLT5w
+ZGV2LA0KPiArICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgTzJfU0RfRlVOQ19SRUc0LA0KPiArICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgc2NyYXRjaF8zMik7DQo+ICsNCj4gKyAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAvKiBTZXQgVHVuaW5nIFdpbmRvdyB0byA0ICovDQo+ICsgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgcGNpX3dyaXRlX2NvbmZpZ19ieXRlKGNoaXAtPnBk
+ZXYsDQo+ICsgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgIA0KPiArIE8yX1NEX1RVTklOR19DVFJMLCAweDQ0KTsNCj4gKw0KPiArICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgIGJyZWFrOw0KPiArICAgICAgICAgICAgICAgICAgICAgICB9DQo+
+ICsgICAgICAgICAgICAgICB9DQo+ICsNCj4gKyAgICAgICAgICAgICAgIC8qIEVuYWJsZSA4NTIw
+IGxlZCBmdW5jdGlvbiAqLw0KPiArICAgICAgICAgICAgICAgbzJfcGNpX2xlZF9lbmFibGUoY2hp
+cCk7DQo+ICsNCj4gICAgICAgICAgICAgICAgIC8qIFNldCB0aW1lb3V0IENMSyAqLw0KPiAgICAg
+ICAgICAgICAgICAgcmV0ID0gcGNpX3JlYWRfY29uZmlnX2R3b3JkKGNoaXAtPnBkZXYsDQo+ICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgTzJfU0RfQ0xLX1NFVFRJ
+TkcsIA0KPiAmc2NyYXRjaF8zMik7IEBAIC0yNzYsNyArMzQ5LDcgQEAgaW50IHNkaGNpX3BjaV9v
+Ml9wcm9iZShzdHJ1Y3Qgc2RoY2lfcGNpX2NoaXAgKmNoaXApDQo+ICAgICAgICAgICAgICAgICBw
+Y2lfd3JpdGVfY29uZmlnX2J5dGUoY2hpcC0+cGRldiwgTzJfU0RfTE9DS19XUCwgDQo+IHNjcmF0
+Y2gpOw0KPg0KPiAgICAgICAgICAgICAgICAgcmV0ID0gcGNpX3JlYWRfY29uZmlnX2R3b3JkKGNo
+aXAtPnBkZXYsDQo+IC0gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+TzJfU0RfRlVOQ19SRUcwLCAmc2NyYXRjaF8zMik7DQo+ICsgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgTzJfU0RfUExMX1NFVFRJTkcsIA0KPiArICZzY3JhdGNoXzMy
+KTsNCj4NCj4gICAgICAgICAgICAgICAgIGlmICgoc2NyYXRjaF8zMiAmIDB4ZmYwMDAwMDApID09
+IDB4MDEwMDAwMDApIHsNCj4gICAgICAgICAgICAgICAgICAgICAgICAgc2NyYXRjaF8zMiAmPSAw
+eDAwMDBGRkZGOyBAQCAtMjk5LDYgKzM3Miw5IEBAIA0KPiBpbnQgc2RoY2lfcGNpX28yX3Byb2Jl
+KHN0cnVjdCBzZGhjaV9wY2lfY2hpcCAqY2hpcCkNCj4gICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICBPMl9TRF9GVU5DX1JFRzQsIHNjcmF0Y2hfMzIpOw0KPiAg
+ICAgICAgICAgICAgICAgfQ0KPg0KPiArICAgICAgICAgICAgICAgLyogU2V0IFR1bmluZyBXaW5k
+b3dzIHRvIDUgKi8NCj4gKyAgICAgICAgICAgICAgIHBjaV93cml0ZV9jb25maWdfYnl0ZShjaGlw
+LT5wZGV2LA0KPiArICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIE8yX1NEX1RVTklOR19D
+VFJMLCAweDU1KTsNCj4gICAgICAgICAgICAgICAgIC8qIExvY2sgV1AgKi8NCj4gICAgICAgICAg
+ICAgICAgIHJldCA9IHBjaV9yZWFkX2NvbmZpZ19ieXRlKGNoaXAtPnBkZXYsDQo+ICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBPMl9TRF9MT0NLX1dQLCAmc2NyYXRj
+aCk7IA0KPiBkaWZmIC0tZ2l0IGEvZHJpdmVycy9tbWMvaG9zdC9zZGhjaS1wY2ktbzJtaWNyby5o
+IA0KPiBiL2RyaXZlcnMvbW1jL2hvc3Qvc2RoY2ktcGNpLW8ybWljcm8uaA0KPiBpbmRleCBkYmVj
+NGM5Li5hODdhZTI0IDEwMDY0NA0KPiAtLS0gYS9kcml2ZXJzL21tYy9ob3N0L3NkaGNpLXBjaS1v
+Mm1pY3JvLmgNCj4gKysrIGIvZHJpdmVycy9tbWMvaG9zdC9zZGhjaS1wY2ktbzJtaWNyby5oDQo+
+IEBAIC01Nyw2ICs1Nyw5IEBADQo+ICAjZGVmaW5lIE8yX1NEX1VIUzJfTDFfQ1RSTCAgICAgMHgz
+NUMNCj4gICNkZWZpbmUgTzJfU0RfRlVOQ19SRUczICAgICAgICAgICAgICAgIDB4M0UwDQo+ICAj
+ZGVmaW5lIE8yX1NEX0ZVTkNfUkVHNCAgICAgICAgICAgICAgICAweDNFNA0KPiArI2RlZmluZSBP
+Ml9TRF9MRURfRU5BQkxFICAgICAgIEJJVCg2KQ0KPiArI2RlZmluZSBPMl9TRF9GUkVHMF9MRURP
+RkYgICAgIEJJVCgxMykNCj4gKyNkZWZpbmUgTzJfU0RfRlJFRzRfRU5BQkxFX0NMS19TRVQgICAg
+IEJJVCgyMikNCj4NCj4gICNkZWZpbmUgTzJfU0RfVkVORE9SX1NFVFRJTkcgICAweDExMA0KPiAg
+I2RlZmluZSBPMl9TRF9WRU5ET1JfU0VUVElORzIgIDB4MUM4DQo+IC0tDQo+IDIuMC4wLnJjMA0K
+Pg0K
