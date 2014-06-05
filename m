@@ -1,44 +1,49 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: [PATCH 0/4] randconfig fixes for mmc
-Date: Thu,  5 Jun 2014 23:14:37 +0200
-Message-ID: <1402002881-1986640-1-git-send-email-arnd@arndb.de>
+From: Markus Mayer <markus.mayer@linaro.org>
+Subject: [PATCH v2 0/3] mmc: sdhci: Use mmc core regulator infrastucture
+Date: Thu, 5 Jun 2014 15:00:02 -0700
+Message-ID: <1402005605-24197-1-git-send-email-markus.mayer@linaro.org>
+Mime-Version: 1.0
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mout.kundenserver.de ([212.227.126.187]:52305 "EHLO
-	mout.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752497AbaFEVPa (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 5 Jun 2014 17:15:30 -0400
+Received: from mail-gw1-out.broadcom.com ([216.31.210.62]:57020 "EHLO
+	mail-gw1-out.broadcom.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752432AbaFEWAx (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 5 Jun 2014 18:00:53 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <chris@printf.net>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, Arnd Bergmann <arnd@arndb.de>, Ludovic Desroches <ludovic.desroches@atmel.com>, Nicolas Pitre <nico@fluxnic.net>, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, Jason Cooper <jason@lakedaemon.net>, Andrew Lunn <andrew@lunn.ch>, linux-omap@vger.kernel.org, Jarkko Nikula <jarkko.nikula@bitmer.com>
+To: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Tim Kryger <tim.kryger@gmail.com>, Mike Looijmans <mike.looijmans@topic.nl>, Andrew Bresticker <abrestic@chromium.org>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 
-Hi Chris, Ulf,
+This series switches the common SDHCI code over to use mmc_host's
+regulator pointers rather than keeping its own set.
 
-These are small fixes from my randconfig testing, almost all for
-older bugs, please apply to a tree you see appropriate.
+In addition, we can now re-use the newly introduced local "mmc" pointer
+in several other function calls in lieu of using host->mmc.
 
-	Arnd
+The first patch in the series has been posted before
+(https://lkml.org/lkml/2014/4/24/947). The two follow-on patches have
+not. Patches 2 & 3 could be squashed together if the maintainers are so
+inclined.
 
-Arnd Bergmann (4):
-  mmc: atmel-mci: incude asm/cacheclush.h
-  mmc: mvsdio: avoid compiler warning
-  mmc: omap: don't select TPS65010
-  mmc: simplify SDHCI Kconfig dependencies
+This series is based on mmc-next.
 
- drivers/mmc/host/Kconfig     | 10 ++++------
- drivers/mmc/host/atmel-mci.c |  1 +
- drivers/mmc/host/mvsdio.c    |  2 +-
- 3 files changed, 6 insertions(+), 7 deletions(-)
+Changes from v1:
+  - Resolved merge conflicts resulting from RMK's MMC series. The most
+    significant conflict was the move of regulator code from
+    sdhci_do_set_ios() to sdhci_set_power().
+  - Added follow-on patches 2 & 3 of the series.
+  - Updated Tim Kryger's e-mail address.
+
+Markus Mayer (2):
+  mmc: sdhci: Use existing mmc pointer calling mmc_regulator_set_ocr()
+  mmc: sdhci: Replace host->mmc with mmc where possible
+
+Tim Kryger (1):
+  mmc: sdhci: Use mmc core regulator infrastucture
+
+ drivers/mmc/host/sdhci.c  | 113 ++++++++++++++++++----------------------------
+ include/linux/mmc/sdhci.h |   3 --
+ 2 files changed, 44 insertions(+), 72 deletions(-)
 
 -- 
-1.8.3.2
-
-Cc: Ludovic Desroches <ludovic.desroches@atmel.com>
-Cc: Nicolas Pitre <nico@fluxnic.net>
-Cc: Chris Ball <chris@printf.net>
-Cc: Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
-Cc: Jason Cooper <jason@lakedaemon.net>
-Cc: Andrew Lunn <andrew@lunn.ch>
-Cc: linux-mmc@vger.kernel.org
-Cc: linux-omap@vger.kernel.org
-Cc: Jarkko Nikula <jarkko.nikula@bitmer.com>
+1.9.1
