@@ -1,63 +1,67 @@
-From: Tushar Behera <trblinux@gmail.com>
-Subject: Re: [PATCHv4 2/2] ARM: dts: unuse the slot-node and deprecated support-highspeed
- for dw-mmc.
-Date: Thu, 05 Jun 2014 08:39:17 +0530
-Message-ID: <538FDF5D.9060400@gmail.com>
-References: <1401934928-7300-1-git-send-email-jh80.chung@samsung.com> <1401934928-7300-3-git-send-email-jh80.chung@samsung.com>
+From: "Wang, Yalin" <Yalin.Wang@sonymobile.com>
+Subject: RE: how to creat watchpoint  in kernel for data access debug
+Date: Thu, 5 Jun 2014 11:40:02 +0800
+Message-ID: <35FD53F367049845BC99AC72306C23D1029A27656A34@CNBJMBX05.corpusers.net>
+References: <35FD53F367049845BC99AC72306C23D1029A276569F3@CNBJMBX05.corpusers.net>
+ <35FD53F367049845BC99AC72306C23D1029A276569F4@CNBJMBX05.corpusers.net>
+ <20140523134550.GB21319@arm.com>
+ <35FD53F367049845BC99AC72306C23D1029A276569FC@CNBJMBX05.corpusers.net>
+ <20140603164512.GT23149@arm.com>
+ <35FD53F367049845BC99AC72306C23D1029A27656A2F@CNBJMBX05.corpusers.net>
+ <20140604180139.GD27881@arm.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pd0-f179.google.com ([209.85.192.179]:65219 "EHLO
-	mail-pd0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752004AbaFEDJt (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 4 Jun 2014 23:09:49 -0400
-In-Reply-To: <1401934928-7300-3-git-send-email-jh80.chung@samsung.com>
+Received: from cnbjrel02.sonyericsson.com ([219.141.167.166]:12968 "EHLO
+	cnbjrel02.sonyericsson.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1750944AbaFEDkG convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 4 Jun 2014 23:40:06 -0400
+In-Reply-To: <20140604180139.GD27881@arm.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc@vger.kernel.org
-Cc: chris@printf.net, ulf.hansson@linaro.org, tgih.jun@samsung.com, devicetree@vger.kernel.org, heiko@sntech.de, dinguyen@altera.com, mark.rutland@arm.com, tushar.behera@linaro.org
+To: 'Will Deacon' <will.deacon@arm.com>
+Cc: "'linux-mmc@vger.kernel.org'" <linux-mmc@vger.kernel.org>, "'linux-arch-owner@vger.kernel.org'" <linux-arch-owner@vger.kernel.org>
 
-On 06/05/2014 07:52 AM, Jaehoon Chung wrote:
-> dw-mmc controller can support the multiple slot.
+Hi  Will,
 
-'the' can be omitted, /s/slot/slots/
+Thanks for your point out very much ,
+I see your meaning ,
+And I do a try ,
+But Seems it can just work when you register a 
+Perf event with a NULL callback function,
 
-> But, there is not use-case anywhere. So we don't need to support the
+https://git.kernel.org/cgit/linux/kernel/git/will/linux.git/tree/arch/arm/kernel/hw_breakpoint.c#n758
 
-/s/is not use-case/are no use-cases/
+i don't know why it design like this?
+If it can always step the watchpoint,
+Will be suitable for my use.
 
-> slot-node for dw-mmc controller.
-> And "support-highspeed" property in dw-mmc is deprecated.
-> "support-highspeed" property can be replaced to "cap-sd/mmc-highspeed".
+Thanks 
+
+-----Original Message-----
+From: Will Deacon [mailto:will.deacon@arm.com] 
+Sent: Thursday, June 05, 2014 2:02 AM
+To: Wang, Yalin
+Cc: 'linux-mmc@vger.kernel.org'; 'linux-arch-owner@vger.kernel.org'
+Subject: Re: how to creat watchpoint in kernel for data access debug
+
+On Wed, Jun 04, 2014 at 04:05:03AM +0100, Wang, Yalin wrote:
+> Hi  Will,
 > 
-> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+> Thanks for your proposal,
+> The patch google made is just like
+> The one I tried before ,
+> Then the problems come :
+> After register the perf_event callback, In the callback function , In 
+> google's patch , it is  function crbug_345917_handler( ), It just call 
+> panic( ) , But My callback function will do some check , Sometimes, I 
+> want to bypass this time's breakpoint, Problems is that I don't know 
+> how to bypass it, If I return directly in the callback function , The 
+> breakpoint will trap again and again endless ..
 
-[ ... ]
+Take a look at enable_single_step, which uses mismatch breakpoints to try and do the step.
 
-> diff --git a/Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt
-> index 532b1d4..60d90c9 100644
-> --- a/Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt
-> +++ b/Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt
-> @@ -46,13 +46,14 @@ Required Properties:
->        - if CIU clock divider value is 0 (that is divide by 1), both tx and rx
->          phase shift clocks should be 0.
->  
-> -Required properties for a slot:
-> +Required properties for a slot (Deprecated - Support the one slot per host):
-
-"Support only one slot per host" ?
-
->  
->  * gpios: specifies a list of gpios used for command, clock and data bus. The
->    first gpio is the command line and the second gpio is the clock line. The
->    rest of the gpios (depending on the bus-width property) are the data lines in
->    no particular order. The format of the gpio specifier depends on the gpio
->    controller.
-> + (Deprecated - Refer to Documentaion/devicetree/binding/samsung-pinctrl.txt)
-
-Update reference:
-Documentation/devicetree/bindings/pinctrl/samsung-pinctrl.txt
-
--- 
-Tushar Behera
+Will
