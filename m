@@ -1,188 +1,358 @@
-From: Michal Simek <michal.simek@xilinx.com>
-Subject: Re: [PATCH v2 2/3] mmc: Add APM X-Gene SoC SDHC controller support
- to Arasan SDHCI driver
-Date: Thu, 5 Jun 2014 09:33:51 +0200
-Message-ID: <4512f27a-e87d-4cb0-998c-10180f4ff1be@BN1AFFO11FD041.protection.gbl>
-References: <1401829985-5212-1-git-send-email-lho@apm.com>
- <1401829985-5212-2-git-send-email-lho@apm.com>
- <1401829985-5212-3-git-send-email-lho@apm.com>
- <9432f705-fd6a-44a6-8e04-c0455f0a551c@BN1AFFO11FD054.protection.gbl>
- <CAPw-ZT=-_VkuUFN3RMrmOazPdOynmGHN86pP7ue5psOuDtjskg@mail.gmail.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCHv5 2/2] ARM: dts: unuse the slot-node and deprecated
+ supports-highspeed for dw-mmc.
+Date: Thu, 05 Jun 2014 16:41:15 +0900
+Message-ID: <53901F1B.8030908@samsung.com>
+References: <1401943439-8146-1-git-send-email-jh80.chung@samsung.com>
+ <1401943439-8146-3-git-send-email-jh80.chung@samsung.com>
+ <CAPDyKFrzny2UqtU0DHyy4TLEaEoPU=z_QfjNHvoYTcKoX=bv2g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <CAPw-ZT=-_VkuUFN3RMrmOazPdOynmGHN86pP7ue5psOuDtjskg@mail.gmail.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Loc Ho <lho@apm.com>, Michal Simek <michal.simek@xilinx.com>
-Cc: "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Jon Masters <jcm@redhat.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "chris@printf.net" <chris@printf.net>, "patches@apm.com" <patches@apm.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout2.samsung.com ([203.254.224.25]:48111 "EHLO
+	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750777AbaFEHl2 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 5 Jun 2014 03:41:28 -0400
+In-reply-to: <CAPDyKFrzny2UqtU0DHyy4TLEaEoPU=z_QfjNHvoYTcKoX=bv2g@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, "tgih.jun@samsung.com" <tgih.jun@samsung.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, =?UTF-8?B?SGVpa28gU3TDvGJuZXI=?= <heiko@sntech.de>, dinguyen@altera.com, Mark Rutland <mark.rutland@arm.com>, Tushar Behera <tushar.behera@linaro.org>
 
-Hi,
+Hi, Ulf.
 
-On 06/05/2014 01:15 AM, Loc Ho wrote:
-> Hi,
-> 
->>>  #define SDHCI_ARASAN_CLK_CTRL_OFFSET 0x2c
->>> @@ -34,6 +36,19 @@
->>>   */
->>>  struct sdhci_arasan_data {
->>>       struct clk      *clk_ahb;
->>> +     struct platform_device *pdev;
->>> +     void __iomem    *ahb_aim_csr;
->>> +     const struct sdhci_arasan_ahb_ops *ahb_ops;
->>> +};
->>> +
->>> +/**
->>> + * struct sdhci_arasan_ahb_ops
->>> + * @init_ahb Initialize translation bus
->>> + * @xlat_addr        Set up an 64-bit addressing translation
+If we know whether card is eMMC or SD, then just use only cap-mmc-highspeed or cap-sd-highspeed, isn't?
+In exynos series's case, i know the card is eMMC or SD, so use one of them.
+But i didn't know whether card is eMMC or SD at other SoC, so added all property.
+Do you think it need to add all property?
+
+snip[...]
+>>         };
 >>
->> This definitely breaking kernel-doc format. Please fix.
+>>         mmc@12220000 {
+>>                 num-slots = <1>;
+>> -               supports-highspeed;
+>>                 card-detect-delay = <200>;
+>>                 samsung,dw-mshc-ciu-div = <3>;
+>>                 samsung,dw-mshc-sdr-timing = <2 3>;
+>>                 samsung,dw-mshc-ddr-timing = <1 2>;
+>>                 pinctrl-names = "default";
+>>                 pinctrl-0 = <&sd2_clk &sd2_cmd &sd2_cd &sd2_bus4>;
+>> -
+>> -               slot@0 {
+>> -                       reg = <0>;
+>> -                       bus-width = <4>;
+>> -                       wp-gpios = <&gpc2 1 0>;
+>> -               };
+>> +               bus-width = <4>;
+>> +               wp-gpios = <&gpc2 1 0>;
 > 
-> I will add the missing ":".
+> cap-sd-highspeed?
+> cap-mmc-highspeed?
+
+Sorry, missed.
+
+Best Regards,
+Jaehoon Chung
+
 > 
->>> +                     sdhci_arasan->ahb_ops->xlat_addr(sdhci_arasan,
->>> +                             sg_dma_address(host->data->sg));
->>> +     }
->>> +     writel(val, host->ioaddr + reg);
->>> +}
+>>         };
 >>
->> The same code was submitted in v1 and Arnd commented it but you are still keeping
->> it here. Why?
+>>         mmc@12230000 {
+>>                 num-slots = <1>;
+>> -               supports-highspeed;
+>> -               broken-cd;
+>>                 card-detect-delay = <200>;
+>> +               broken-cd;
+>>                 samsung,dw-mshc-ciu-div = <3>;
+>>                 samsung,dw-mshc-sdr-timing = <2 3>;
+>>                 samsung,dw-mshc-ddr-timing = <1 2>;
+>>                 /* See board-specific dts files for pin setup */
+>> -
+>> -               slot@0 {
+>> -                       reg = <0>;
+>> -                       bus-width = <4>;
+>> -               };
+>> +               bus-width = <4>;
+>> +               cap-sd-highspeed;
 > 
-> I responded back to Arnd. If I move this code to IO MMU, what do I do
-> when we enable the actual IO MMU? The structure for the bus type only
-> has one IO MMU pointer. We would need to IO MMU pointer and not sure
-> how the IO MMU framework would handle this.
-
-Then good time to start investigating this.
-
->>
->>> +
->>>  static struct sdhci_ops sdhci_arasan_ops = {
->>> +     .write_l = sdhci_arasan_writel,
->>>       .get_max_clock = sdhci_pltfm_clk_get_max_clock,
->>>       .get_timeout_clock = sdhci_arasan_get_timeout_clock,
->>>  };
->>> @@ -121,13 +150,83 @@ static int sdhci_arasan_resume(struct device *dev)
->>>  static SIMPLE_DEV_PM_OPS(sdhci_arasan_dev_pm_ops, sdhci_arasan_suspend,
->>>                        sdhci_arasan_resume);
->>>
->>> +static int sdhci_arasan_xgene_init_ahb(struct sdhci_arasan_data *data)
->>> +{
->>> +     #define AIM_SIZE_CTL_OFFSET     0x00000004
->>> +     #define  AIM_EN_N_WR(src)       (((u32) (src) << 31) & 0x80000000)
->>> +     #define  ARSB_WR(src)           (((u32) (src) << 24) & 0x0f000000)
->>> +     #define  AWSB_WR(src)           (((u32) (src) << 20) & 0x00f00000)
->>> +     #define  AIM_MASK_N_WR(src)     (((u32) (src)) & 0x000fffff)
->>
->> Remove that one more space between #define and name.
->> I am not fan of having these defines just here - move them to the top.
->>
->> Also these macros are used just here at one location.
->> Isn't it better just to define that BITS you want to setup instead of
->> these macros which are hardly to read?
+> cap-mmc-highspeed?
 > 
-> The only field that is single bit is AIM_EN_N_WR. All others are
-> multiple bit fields. Either I write them in the code or use these
-> defines. Would it be better if I just write them in the code?
-
->From my point of view will be the best to compose one macro like
-#define AIM_EN_N_WR	BIT(31)
-...
-#define AIM...INIT_VAL	(AIM_EN_N_WR |... )
-
-
-
->>> +static void sdhci_arasn_xgene_xlat_addr(struct sdhci_arasan_data *data,
->>> +                                    u64 dma_addr)
->>> +{
->>> +     #define AIM_AXI_HI_OFFSET       0x0000000c
->>> +     #define  AIM_AXI_ADDRESS_HI_N_WR(src) \
->>> +                                     (((u32) (src) << 20) & 0xfff00000)
+>>         };
 >>
->> ditto with indentation.
->> 20 should be shift
->> 0xfff00000 is mask.
+>>         spi_1: spi@12d30000 {
+>> diff --git a/arch/arm/boot/dts/exynos5250-smdk5250.dts b/arch/arm/boot/dts/exynos5250-smdk5250.dts
+>> index a794a70..e00ffc6 100644
+>> --- a/arch/arm/boot/dts/exynos5250-smdk5250.dts
+>> +++ b/arch/arm/boot/dts/exynos5250-smdk5250.dts
+>> @@ -282,7 +282,6 @@
+>>         mmc@12200000 {
+>>                 status = "okay";
+>>                 num-slots = <1>;
+>> -               supports-highspeed;
+>>                 broken-cd;
+>>                 card-detect-delay = <200>;
+>>                 samsung,dw-mshc-ciu-div = <3>;
+>> @@ -290,29 +289,22 @@
+>>                 samsung,dw-mshc-ddr-timing = <1 2>;
+>>                 pinctrl-names = "default";
+>>                 pinctrl-0 = <&sd0_clk &sd0_cmd &sd0_bus4 &sd0_bus8>;
+>> -
+>> -               slot@0 {
+>> -                       reg = <0>;
+>> -                       bus-width = <8>;
+>> -               };
+>> +               bus-width = <8>;
+>> +               cap-mmc-highspeed;
+> 
+> cap-sd-highspeed?
+> 
+>>         };
 >>
->> Also you should take this opportunity and add function description
->> in kernel doc to be exactly clear what this function is doing.
+>>         mmc@12220000 {
+>>                 status = "okay";
+>>                 num-slots = <1>;
+>> -               supports-highspeed;
+>>                 card-detect-delay = <200>;
+>>                 samsung,dw-mshc-ciu-div = <3>;
+>>                 samsung,dw-mshc-sdr-timing = <2 3>;
+>>                 samsung,dw-mshc-ddr-timing = <1 2>;
+>>                 pinctrl-names = "default";
+>>                 pinctrl-0 = <&sd2_clk &sd2_cmd &sd2_cd &sd2_bus4>;
+>> -
+>> -               slot@0 {
+>> -                       reg = <0>;
+>> -                       bus-width = <4>;
+>> -                       disable-wp;
+>> -               };
+>> +               bus-width = <4>;
+>> +               disable-wp;
+>> +               cap-sd-highspeed;
 > 
-> The function is pretty small, simply and don't believe it needs
-> function description.
-
-That documentation is for everybody not just for you who write the code.
-Simple description will be useful.
-
-
->>> +
->>> +     if (!data->ahb_aim_csr)
->>> +             return;
->>> +
->>> +     writel(AIM_AXI_ADDRESS_HI_N_WR(dma_addr >> 32),
->>> +             data->ahb_aim_csr + AIM_AXI_HI_OFFSET);
->>> +}
->>> +
->>> +static const struct sdhci_arasan_ahb_ops xgene_ahb_ops = {
->>> +     .init_ahb = sdhci_arasan_xgene_init_ahb,
->>> +     .xlat_addr = sdhci_arasn_xgene_xlat_addr,
->>> +};
->>> +
->>> +static const struct of_device_id sdhci_arasan_of_match[] = {
->>> +     { .compatible = "arasan,sdhci-8.9a" },
->>> +     { .compatible = "apm,arasan,sdhci-8.9a", .data = &xgene_ahb_ops },
->>> +     { }
->>> +};
->>> +MODULE_DEVICE_TABLE(of, sdhci_arasan_of_match);
->>> +
->>>  static int sdhci_arasan_probe(struct platform_device *pdev)
->>>  {
->>>       int ret;
->>> -     struct clk *clk_xin;
->>> +     struct clk *clk_xin = NULL;
->>>       struct sdhci_host *host;
->>>       struct sdhci_pltfm_host *pltfm_host;
->>>       struct sdhci_arasan_data *sdhci_arasan;
->>> +     const struct of_device_id *of_id =
->>> +                     of_match_device(sdhci_arasan_of_match, &pdev->dev);
->>> +     struct resource *res;
->>>
->>>       sdhci_arasan = devm_kzalloc(&pdev->dev, sizeof(*sdhci_arasan),
->>>                       GFP_KERNEL);
->>> @@ -136,8 +235,9 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
->>>
->>>       sdhci_arasan->clk_ahb = devm_clk_get(&pdev->dev, "clk_ahb");
->>>       if (IS_ERR(sdhci_arasan->clk_ahb)) {
->>> -             dev_err(&pdev->dev, "clk_ahb clock not found.\n");
->>> -             return PTR_ERR(sdhci_arasan->clk_ahb);
->>> +             /* Clock is optional */
->>> +             sdhci_arasan->clk_ahb = NULL;
->>> +             goto skip_clk;
+> cap-mmc-highspeed?
+> 
+>>         };
 >>
->> Clocks are optional for your SoC but they are necessary for Zynq.
->> You can't just skip clocks for zynq because if DT is wrong clocks won't be enabled
->> and even checked.
->> Does it mean that there are no clocks for this IP?
+>>         spi_1: spi@12d30000 {
+>> diff --git a/arch/arm/boot/dts/exynos5250-snow.dts b/arch/arm/boot/dts/exynos5250-snow.dts
+>> index 1ce1088..2245278 100644
+>> --- a/arch/arm/boot/dts/exynos5250-snow.dts
+>> +++ b/arch/arm/boot/dts/exynos5250-snow.dts
+>> @@ -190,10 +190,8 @@
+>>          */
+>>         mmc@12230000 {
+>>                 status = "okay";
+>> -               slot@0 {
+>> -                       pinctrl-names = "default";
+>> -                       pinctrl-0 = <&sd3_clk &sd3_cmd &sd3_bus4>;
+>> -               };
+>> +               pinctrl-names = "default";
+>> +               pinctrl-0 = <&sd3_clk &sd3_cmd &sd3_bus4>;
+>>         };
+>>
+>>         usb@12110000 {
+>> diff --git a/arch/arm/boot/dts/exynos5420-arndale-octa.dts b/arch/arm/boot/dts/exynos5420-arndale-octa.dts
+>> index 80a3bf4..752715a 100644
+>> --- a/arch/arm/boot/dts/exynos5420-arndale-octa.dts
+>> +++ b/arch/arm/boot/dts/exynos5420-arndale-octa.dts
+>> @@ -40,7 +40,6 @@
+>>         mmc@12200000 {
+>>                 status = "okay";
+>>                 broken-cd;
+>> -               supports-highspeed;
+>>                 card-detect-delay = <200>;
+>>                 samsung,dw-mshc-ciu-div = <3>;
+>>                 samsung,dw-mshc-sdr-timing = <0 4>;
+>> @@ -48,16 +47,12 @@
+>>                 pinctrl-names = "default";
+>>                 pinctrl-0 = <&sd0_clk &sd0_cmd &sd0_bus4 &sd0_bus8>;
+>>                 vmmc-supply = <&ldo10_reg>;
+>> -
+>> -               slot@0 {
+>> -                       reg = <0>;
+>> -                       bus-width = <8>;
+>> -               };
+>> +               bus-width = <8>;
+>> +               cap-mmc-highspeed;
 > 
-> The clock for X-Gene is enabled by the time Linux boot. As the clock
-> in programmed in the SDHC register, it knows the clock frequency.
+> cap-sd-highspeed?
 > 
->> Or do you miss clock driver?
+>>         };
+>>
+>>         mmc@12220000 {
+>>                 status = "okay";
+>> -               supports-highspeed;
+>>                 card-detect-delay = <200>;
+>>                 samsung,dw-mshc-ciu-div = <3>;
+>>                 samsung,dw-mshc-sdr-timing = <2 3>;
+>> @@ -65,11 +60,8 @@
+>>                 pinctrl-names = "default";
+>>                 pinctrl-0 = <&sd2_clk &sd2_cmd &sd2_cd &sd2_bus4>;
+>>                 vmmc-supply = <&ldo10_reg>;
+>> -
+>> -               slot@0 {
+>> -                       reg = <0>;
+>> -                       bus-width = <4>;
+>> -               };
+>> +               bus-width = <4>;
+>> +               cap-sd-highspeed;
 > 
-> The clock will be configured by the FW and left out intentionally as
-> this will also support ACPI boot.
+> cap-mmc-highspeed?
+> 
+>>         };
+>>
+>>         hsi2c_4: i2c@12CA0000 {
+>> diff --git a/arch/arm/boot/dts/exynos5420-smdk5420.dts b/arch/arm/boot/dts/exynos5420-smdk5420.dts
+>> index 6910485..7f5e35b 100644
+>> --- a/arch/arm/boot/dts/exynos5420-smdk5420.dts
+>> +++ b/arch/arm/boot/dts/exynos5420-smdk5420.dts
+>> @@ -71,34 +71,26 @@
+>>         mmc@12200000 {
+>>                 status = "okay";
+>>                 broken-cd;
+>> -               supports-highspeed;
+>>                 card-detect-delay = <200>;
+>>                 samsung,dw-mshc-ciu-div = <3>;
+>>                 samsung,dw-mshc-sdr-timing = <0 4>;
+>>                 samsung,dw-mshc-ddr-timing = <0 2>;
+>>                 pinctrl-names = "default";
+>>                 pinctrl-0 = <&sd0_clk &sd0_cmd &sd0_bus4 &sd0_bus8>;
+>> -
+>> -               slot@0 {
+>> -                       reg = <0>;
+>> -                       bus-width = <8>;
+>> -               };
+>> +               bus-width = <8>;
+>> +               cap-mmc-highspeed;
+> 
+> cap-sd-highspeed?
+> 
+>>         };
+>>
+>>         mmc@12220000 {
+>>                 status = "okay";
+>> -               supports-highspeed;
+>>                 card-detect-delay = <200>;
+>>                 samsung,dw-mshc-ciu-div = <3>;
+>>                 samsung,dw-mshc-sdr-timing = <2 3>;
+>>                 samsung,dw-mshc-ddr-timing = <1 2>;
+>>                 pinctrl-names = "default";
+>>                 pinctrl-0 = <&sd2_clk &sd2_cmd &sd2_cd &sd2_bus4>;
+>> -
+>> -               slot@0 {
+>> -                       reg = <0>;
+>> -                       bus-width = <4>;
+>> -               };
+>> +               bus-width = <4>;
+>> +               cap-sd-highspeed;
+> 
+> cap-mmc-highspeed?
+> 
+>>         };
+>>
+>>         dp-controller@145B0000 {
+>> diff --git a/arch/arm/boot/dts/rk3066a-bqcurie2.dts b/arch/arm/boot/dts/rk3066a-bqcurie2.dts
+>> index 035df40..0e618d5 100644
+>> --- a/arch/arm/boot/dts/rk3066a-bqcurie2.dts
+>> +++ b/arch/arm/boot/dts/rk3066a-bqcurie2.dts
+>> @@ -58,12 +58,8 @@
+>>                         pinctrl-names = "default";
+>>                         pinctrl-0 = <&sd0_clk &sd0_cmd &sd0_cd &sd0_bus4>;
+>>                         vmmc-supply = <&vcc_sd0>;
+>> -
+>> -                       slot@0 {
+>> -                               reg = <0>;
+>> -                               bus-width = <4>;
+>> -                               disable-wp;
+>> -                       };
+>> +                       bus-width = <4>;
+>> +                       disable-wp;
+>>                 };
+>>
+>>                 dwmmc@10218000 { /* wifi */
+>> @@ -73,12 +69,8 @@
+>>
+>>                         pinctrl-names = "default";
+>>                         pinctrl-0 = <&sd1_clk &sd1_cmd &sd1_bus4>;
+>> -
+>> -                       slot@0 {
+>> -                               reg = <0>;
+>> -                               bus-width = <4>;
+>> -                               disable-wp;
+>> -                       };
+>> +                       bus-width = <4>;
+>> +                       disable-wp;
+>>                 };
+>>
+>>                 gpio-keys {
+>> diff --git a/arch/arm/boot/dts/socfpga_arria5.dtsi b/arch/arm/boot/dts/socfpga_arria5.dtsi
+>> index 6c87b70..1da0e81 100644
+>> --- a/arch/arm/boot/dts/socfpga_arria5.dtsi
+>> +++ b/arch/arm/boot/dts/socfpga_arria5.dtsi
+>> @@ -29,12 +29,13 @@
+>>
+>>                 dwmmc0@ff704000 {
+>>                         num-slots = <1>;
+>> -                       supports-highspeed;
+>> -                       broken-cd;
+>>
+>>                         slot@0 {
+>>                                 reg = <0>;
+>>                                 bus-width = <4>;
+>> +                               broken-cd;
+>> +                               cap-mmc-highspeed;
+>> +                               cap-sd-highspeed;
+>>                         };
+>>                 };
+>>
+>> diff --git a/arch/arm/boot/dts/socfpga_cyclone5.dtsi b/arch/arm/boot/dts/socfpga_cyclone5.dtsi
+>> index ca41b0e..c4ebf65 100644
+>> --- a/arch/arm/boot/dts/socfpga_cyclone5.dtsi
+>> +++ b/arch/arm/boot/dts/socfpga_cyclone5.dtsi
+>> @@ -30,13 +30,10 @@
+>>
+>>                 dwmmc0@ff704000 {
+>>                         num-slots = <1>;
+>> -                       supports-highspeed;
+>>                         broken-cd;
+>> -
+>> -                       slot@0 {
+>> -                               reg = <0>;
+>> -                               bus-width = <4>;
+>> -                       };
+>> +                       bus-width = <4>;
+>> +                       cap-mmc-highspeed;
+>> +                       cap-sd-highspeed;
+>>                 };
+>>
+>>                 ethernet@ff702000 {
+>> diff --git a/arch/arm/boot/dts/socfpga_vt.dts b/arch/arm/boot/dts/socfpga_vt.dts
+>> index 87d6f75..07e7206 100644
+>> --- a/arch/arm/boot/dts/socfpga_vt.dts
+>> +++ b/arch/arm/boot/dts/socfpga_vt.dts
+>> @@ -43,13 +43,10 @@
+>>
+>>                 dwmmc0@ff704000 {
+>>                         num-slots = <1>;
+>> -                       supports-highspeed;
+>>                         broken-cd;
+>> -
+>> -                       slot@0 {
+>> -                               reg = <0>;
+>> -                               bus-width = <4>;
+>> -                       };
+>> +                       bus-width = <4>;
+>> +                       cap-mmc-highspeed;
+>> +                       cap-sd-highspeed;
+>>                 };
+>>
+>>                 ethernet@ff700000 {
+>> --
+>> 1.7.9.5
+>>
+> 
+> Kind regards
+> Ulf Hansson
+> 
 
-Not a problem if this is what you like but you can't just break Zynq by this change
-which is what you are doing right now.
-
-Thanks,
-Michal
