@@ -1,49 +1,42 @@
-From: Lee Jones <lee.jones@linaro.org>
-Subject: Re: [PATCH v3 10/10] MAINTAINERS: Add sdhci-st file to ARCH/STI
- architecture
-Date: Thu, 5 Jun 2014 15:26:12 +0100
-Message-ID: <20140605142612.GC24240@lee--X1>
-References: <1401899424-1365-1-git-send-email-peter.griffin@linaro.org>
- <1401899424-1365-11-git-send-email-peter.griffin@linaro.org>
+From: Randy Dunlap <rdunlap@infradead.org>
+Subject: Re: linux-next: Tree for Jun 5 (mmc/host/usdhi6ro10.c)
+Date: Thu, 05 Jun 2014 10:07:24 -0700
+Message-ID: <5390A3CC.2020309@infradead.org>
+References: <20140605192853.0344d9d3@canb.auug.org.au>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ie0-f172.google.com ([209.85.223.172]:42733 "EHLO
-	mail-ie0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751058AbaFEO0T (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 5 Jun 2014 10:26:19 -0400
-Received: by mail-ie0-f172.google.com with SMTP id at1so745288iec.31
-        for <linux-mmc@vger.kernel.org>; Thu, 05 Jun 2014 07:26:19 -0700 (PDT)
-Content-Disposition: inline
-In-Reply-To: <1401899424-1365-11-git-send-email-peter.griffin@linaro.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20140605192853.0344d9d3@canb.auug.org.au>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Stephen Rothwell <sfr@canb.auug.org.au>, linux-next@vger.kernel.org
+Cc: LKML <linux-kernel@vger.kernel.org>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, Guennadi Liakhovetski <g.liakhovetski@gmx.de>
 List-Id: linux-mmc@vger.kernel.org
-To: Peter Griffin <peter.griffin@linaro.org>
-Cc: linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, chris@printf.net, ulf.hansson@linaro.org, maxime.coquelin@st.com, patrice.chotard@st.com, srinivas.kandagatla@gmail.com, kernel@stlinux.com, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org
 
-> Signed-off-by: Peter Griffin <peter.griffin@linaro.org>
-> ---
->  MAINTAINERS | 1 +
->  1 file changed, 1 insertion(+)
+On 06/05/2014 02:28 AM, Stephen Rothwell wrote:
+> Hi all,
+> 
+> The powerpc allyesconfig is again broken more than usual.
+> 
+> Our build server is down today, so this linux-next will not get the
+> usual builds done, sorry.
+> 
+> Changes since 20140604:
+> 
+> 
+> The mmc tree lost its build failure.
 
-Acked-by: Lee Jones <lee.jones@linaro.org>
+but has a bunch of printk format warnings on x86_64:
 
-> diff --git a/MAINTAINERS b/MAINTAINERS
-> index 6dc67b1..19dc265 100644
-> --- a/MAINTAINERS
-> +++ b/MAINTAINERS
-> @@ -1306,6 +1306,7 @@ F:	drivers/pinctrl/pinctrl-st.c
->  F:	drivers/media/rc/st_rc.c
->  F:	drivers/i2c/busses/i2c-st.c
->  F:	drivers/tty/serial/st-asc.c
-> +F:	drivers/mmc/host/sdhci-st.c
-> =20
->  ARM/TECHNOLOGIC SYSTEMS TS7250 MACHINE SUPPORT
->  M:	Lennert Buytenhek <kernel@wantstofly.org>
 
---=20
-Lee Jones
-Linaro STMicroelectronics Landing Team Lead
-Linaro.org =E2=94=82 Open source software for ARM SoCs
-=46ollow Linaro: Facebook | Twitter | Blog
+../drivers/mmc/host/usdhi6rol0.c:359:2: warning: format '%zd' expects argument of type 'signed size_t', but argument 4 has type 'unsigned int' [-Wformat]
+../drivers/mmc/host/usdhi6rol0.c:359:2: warning: format '%zd' expects argument of type 'signed size_t', but argument 5 has type 'unsigned int' [-Wformat]
+../drivers/mmc/host/usdhi6rol0.c:462:2: warning: format '%u' expects argument of type 'unsigned int', but argument 7 has type 'size_t' [-Wformat]
+../drivers/mmc/host/usdhi6rol0.c:491:3: warning: format '%zd' expects argument of type 'signed size_t', but argument 4 has type 'unsigned int' [-Wformat]
+../drivers/mmc/host/usdhi6rol0.c:491:3: warning: format '%zd' expects argument of type 'signed size_t', but argument 5 has type 'unsigned int' [-Wformat]
+../drivers/mmc/host/usdhi6rol0.c:898:2: warning: format '%x' expects argument of type 'unsigned int', but argument 9 has type 'size_t' [-Wformat]
+../drivers/mmc/host/usdhi6rol0.c:1668:3: warning: format '%x' expects argument of type 'unsigned int', but argument 6 has type 'size_t' [-Wformat]
+
+
+-- 
+~Randy
