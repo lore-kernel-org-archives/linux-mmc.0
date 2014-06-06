@@ -1,7 +1,7 @@
 From: <micky_ching@realsil.com.cn>
-Subject: [PATCH 2/2] mmc: rtsx: add support for async request
-Date: Fri, 6 Jun 2014 15:05:45 +0800
-Message-ID: <7b58fb0b0915ea0b0838404c74ec22a3b6e5f5a8.1402037565.git.micky_ching@realsil.com.cn>
+Subject: [PATCH 1/2] mfd: rtsx: add dma transfer function
+Date: Fri, 6 Jun 2014 15:05:44 +0800
+Message-ID: <9021eae37d96aa027d00ae4a7b6cd84dbbd1b6b5.1402037564.git.micky_ching@realsil.com.cn>
 References: <cover.1402037562.git.micky_ching@realsil.com.cn>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -23,257 +23,156 @@ List-Id: linux-mmc@vger.kernel.org
 
 From: Micky Ching <micky_ching@realsil.com.cn>
 
-Add support for non-blocking request, pre_req() runs dma_map_sg() and
-post_req() runs dma_unmap_sg(). This patch can increase card read/write
-speed, especially for high speed card and slow speed CPU.
-
-Test on intel i3(800MHz - 2.3GHz) performance mode(2.3GHz), SD card
-clock 208MHz
-
-run dd if=/dev/mmcblk0 of=/dev/null bs=64k count=1024
-before:
-67108864 bytes (67 MB) copied, 0.85427 s, 78.6 MB/s
-after:
-67108864 bytes (67 MB) copied, 0.74799 s, 89.7 MB/s
+rtsx driver using a single function for transfer data, dma map/unmap are
+placed in one fix function. We need map/unmap dma in different place(for
+mmc async driver), so add three function for dma map, dma transfer and
+dma unmap.
 
 Signed-off-by: Micky Ching <micky_ching@realsil.com.cn>
 ---
- drivers/mmc/host/rtsx_pci_sdmmc.c |  133 +++++++++++++++++++++++++++++++++++--
- 1 file changed, 127 insertions(+), 6 deletions(-)
+ drivers/mfd/rtsx_pcr.c       |   76 ++++++++++++++++++++++++++----------------
+ include/linux/mfd/rtsx_pci.h |    6 ++++
+ 2 files changed, 54 insertions(+), 28 deletions(-)
 
-diff --git a/drivers/mmc/host/rtsx_pci_sdmmc.c b/drivers/mmc/host/rtsx_pci_sdmmc.c
-index 1c68e0d..a2c0858 100644
---- a/drivers/mmc/host/rtsx_pci_sdmmc.c
-+++ b/drivers/mmc/host/rtsx_pci_sdmmc.c
-@@ -24,6 +24,7 @@
- #include <linux/highmem.h>
- #include <linux/delay.h>
- #include <linux/platform_device.h>
-+#include <linux/workqueue.h>
- #include <linux/mmc/host.h>
- #include <linux/mmc/mmc.h>
- #include <linux/mmc/sd.h>
-@@ -36,7 +37,10 @@ struct realtek_pci_sdmmc {
- 	struct rtsx_pcr		*pcr;
- 	struct mmc_host		*mmc;
- 	struct mmc_request	*mrq;
-+	struct workqueue_struct *workq;
-+#define SDMMC_WORKQ_NAME	"rtsx_pci_sdmmc_workq"
- 
-+	struct work_struct	work;
- 	struct mutex		host_mutex;
- 
- 	u8			ssc_depth;
-@@ -48,6 +52,11 @@ struct realtek_pci_sdmmc {
- 	int			power_state;
- #define SDMMC_POWER_ON		1
- #define SDMMC_POWER_OFF		0
-+
-+	unsigned int		sg_count;
-+	s32			cookie;
-+	unsigned int		cookie_sg_count;
-+	bool			using_cookie;
- };
- 
- static inline struct device *sdmmc_dev(struct realtek_pci_sdmmc *host)
-@@ -86,6 +95,77 @@ static void sd_print_debug_regs(struct realtek_pci_sdmmc *host)
- #define sd_print_debug_regs(host)
- #endif /* DEBUG */
- 
-+/*
-+ * sd_pre_dma_transfer - do dma_map_sg() or using cookie
-+ *
-+ * @pre: if called in pre_req()
-+ * return:
-+ *	0 - do dma_map_sg()
-+ *	1 - using cookie
-+ */
-+static int sd_pre_dma_transfer(struct realtek_pci_sdmmc *host,
-+		struct mmc_data *data, bool pre)
-+{
-+	struct rtsx_pcr *pcr = host->pcr;
-+	int read = data->flags & MMC_DATA_READ;
-+	int count = 0;
-+	int using_cookie = 0;
-+
-+	if (!pre && data->host_cookie && data->host_cookie != host->cookie) {
-+		dev_err(sdmmc_dev(host),
-+			"error: data->host_cookie = %d, host->cookie = %d\n",
-+			data->host_cookie, host->cookie);
-+		data->host_cookie = 0;
-+	}
-+
-+	if (pre || data->host_cookie != host->cookie) {
-+		count = rtsx_pci_dma_map_sg(pcr, data->sg, data->sg_len, read);
-+	} else {
-+		count = host->cookie_sg_count;
-+		using_cookie = 1;
-+	}
-+
-+	if (pre) {
-+		host->cookie_sg_count = count;
-+		if (++host->cookie < 0)
-+			host->cookie = 1;
-+		data->host_cookie = host->cookie;
-+	} else {
-+		host->sg_count = count;
-+	}
-+
-+	return using_cookie;
-+}
-+
-+static void sdmmc_pre_req(struct mmc_host *mmc, struct mmc_request *mrq,
-+		bool is_first_req)
-+{
-+	struct realtek_pci_sdmmc *host = mmc_priv(mmc);
-+	struct mmc_data *data = mrq->data;
-+
-+	if (data->host_cookie) {
-+		dev_err(sdmmc_dev(host),
-+			"error: reset data->host_cookie = %d\n",
-+			data->host_cookie);
-+		data->host_cookie = 0;
-+	}
-+
-+	sd_pre_dma_transfer(host, data, true);
-+	dev_dbg(sdmmc_dev(host), "pre dma sg: %d\n", host->cookie_sg_count);
-+}
-+
-+static void sdmmc_post_req(struct mmc_host *mmc, struct mmc_request *mrq,
-+		int err)
-+{
-+	struct realtek_pci_sdmmc *host = mmc_priv(mmc);
-+	struct rtsx_pcr *pcr = host->pcr;
-+	struct mmc_data *data = mrq->data;
-+	int read = data->flags & MMC_DATA_READ;
-+
-+	rtsx_pci_dma_unmap_sg(pcr, data->sg, data->sg_len, read);
-+	data->host_cookie = 0;
-+}
-+
- static int sd_read_data(struct realtek_pci_sdmmc *host, u8 *cmd, u16 byte_cnt,
- 		u8 *buf, int buf_len, int timeout)
+diff --git a/drivers/mfd/rtsx_pcr.c b/drivers/mfd/rtsx_pcr.c
+index 1d15735..d01b8c2 100644
+--- a/drivers/mfd/rtsx_pcr.c
++++ b/drivers/mfd/rtsx_pcr.c
+@@ -337,40 +337,64 @@ static void rtsx_pci_add_sg_tbl(struct rtsx_pcr *pcr,
+ int rtsx_pci_transfer_data(struct rtsx_pcr *pcr, struct scatterlist *sglist,
+ 		int num_sg, bool read, int timeout)
  {
-@@ -415,7 +495,7 @@ static int sd_rw_multi(struct realtek_pci_sdmmc *host, struct mmc_request *mrq)
+-	struct completion trans_done;
+-	u8 dir;
+-	int err = 0, i, count;
+-	long timeleft;
+-	unsigned long flags;
+-	struct scatterlist *sg;
+-	enum dma_data_direction dma_dir;
+-	u32 val;
+-	dma_addr_t addr;
+-	unsigned int len;
++	int err = 0, count;
  
- 	rtsx_pci_send_cmd_no_wait(pcr);
- 
--	err = rtsx_pci_transfer_data(pcr, data->sg, data->sg_len, read, 10000);
-+	err = rtsx_pci_dma_transfer(pcr, data->sg, host->sg_count, read, 10000);
- 	if (err < 0) {
- 		sd_clear_error(host);
- 		return err;
-@@ -640,12 +720,24 @@ static int sd_tuning_rx(struct realtek_pci_sdmmc *host, u8 opcode)
- 	return 0;
- }
- 
--static void sdmmc_request(struct mmc_host *mmc, struct mmc_request *mrq)
-+static inline int sd_rw_cmd(struct mmc_command *cmd)
- {
--	struct realtek_pci_sdmmc *host = mmc_priv(mmc);
-+	return mmc_op_multi(cmd->opcode) ||
-+		(cmd->opcode == MMC_READ_SINGLE_BLOCK) ||
-+		(cmd->opcode == MMC_WRITE_BLOCK);
+ 	dev_dbg(&(pcr->pci->dev), "--> %s: num_sg = %d\n", __func__, num_sg);
++	count = rtsx_pci_dma_map_sg(pcr, sglist, num_sg, read);
++	if (count < 1)
++		return -EINVAL;
++	dev_dbg(&(pcr->pci->dev), "DMA mapping count: %d\n", count);
++
++	err = rtsx_pci_dma_transfer(pcr, sglist, count, read, timeout);
++
++	rtsx_pci_dma_unmap_sg(pcr, sglist, num_sg, read);
++
++	return err;
 +}
++EXPORT_SYMBOL_GPL(rtsx_pci_transfer_data);
 +
-+static void sd_request(struct work_struct *work)
++int rtsx_pci_dma_map_sg(struct rtsx_pcr *pcr, struct scatterlist *sglist,
++		int num_sg, bool read)
 +{
-+	struct realtek_pci_sdmmc *host = container_of(work,
-+			struct realtek_pci_sdmmc, work);
- 	struct rtsx_pcr *pcr = host->pcr;
-+
-+	struct mmc_host *mmc = host->mmc;
-+	struct mmc_request *mrq = host->mrq;
- 	struct mmc_command *cmd = mrq->cmd;
- 	struct mmc_data *data = mrq->data;
-+
- 	unsigned int data_size = 0;
- 	int err;
++	enum dma_data_direction dir = read ? DMA_FROM_DEVICE : DMA_TO_DEVICE;
  
-@@ -677,13 +769,13 @@ static void sdmmc_request(struct mmc_host *mmc, struct mmc_request *mrq)
- 	if (mrq->data)
- 		data_size = data->blocks * data->blksz;
+-	/* don't transfer data during abort processing */
+ 	if (pcr->remove_pci)
+ 		return -EINVAL;
  
--	if (!data_size || mmc_op_multi(cmd->opcode) ||
--			(cmd->opcode == MMC_READ_SINGLE_BLOCK) ||
--			(cmd->opcode == MMC_WRITE_BLOCK)) {
-+	if (!data_size || sd_rw_cmd(cmd)) {
- 		sd_send_cmd_get_rsp(host, cmd);
+ 	if ((sglist == NULL) || (num_sg <= 0))
+ 		return -EINVAL;
  
- 		if (!cmd->error && data_size) {
- 			sd_rw_multi(host, mrq);
-+			if (!host->using_cookie)
-+				sdmmc_post_req(host->mmc, host->mrq, 0);
- 
- 			if (mmc_op_multi(cmd->opcode) && mrq->stop)
- 				sd_send_cmd_get_rsp(host, mrq->stop);
-@@ -712,6 +804,21 @@ finish:
- 	mmc_request_done(mmc, mrq);
- }
- 
-+static void sdmmc_request(struct mmc_host *mmc, struct mmc_request *mrq)
-+{
-+	struct realtek_pci_sdmmc *host = mmc_priv(mmc);
-+	struct mmc_data *data = mrq->data;
-+
-+	mutex_lock(&host->host_mutex);
-+	host->mrq = mrq;
-+	mutex_unlock(&host->host_mutex);
-+
-+	if (sd_rw_cmd(mrq->cmd))
-+		host->using_cookie = sd_pre_dma_transfer(host, data, false);
-+
-+	queue_work(host->workq, &host->work);
+-	if (read) {
+-		dir = DEVICE_TO_HOST;
+-		dma_dir = DMA_FROM_DEVICE;
+-	} else {
+-		dir = HOST_TO_DEVICE;
+-		dma_dir = DMA_TO_DEVICE;
+-	}
++	return dma_map_sg(&(pcr->pci->dev), sglist, num_sg, dir);
 +}
++EXPORT_SYMBOL_GPL(rtsx_pci_dma_map_sg);
+ 
+-	count = dma_map_sg(&(pcr->pci->dev), sglist, num_sg, dma_dir);
+-	if (count < 1) {
+-		dev_err(&(pcr->pci->dev), "scatterlist map failed\n");
++void rtsx_pci_dma_unmap_sg(struct rtsx_pcr *pcr, struct scatterlist *sglist,
++		int num_sg, bool read)
++{
++	enum dma_data_direction dir = read ? DMA_FROM_DEVICE : DMA_TO_DEVICE;
 +
- static int sd_set_bus_width(struct realtek_pci_sdmmc *host,
- 		unsigned char bus_width)
- {
-@@ -1144,6 +1251,8 @@ out:
++	dma_unmap_sg(&(pcr->pci->dev), sglist, num_sg, dir);
++}
++EXPORT_SYMBOL_GPL(rtsx_pci_dma_unmap_sg);
++
++int rtsx_pci_dma_transfer(struct rtsx_pcr *pcr, struct scatterlist *sglist,
++		int count, bool read, int timeout)
++{
++	struct completion trans_done;
++	struct scatterlist *sg;
++	dma_addr_t addr;
++	long timeleft;
++	unsigned long flags;
++	unsigned int len;
++	int i, err = 0;
++	u32 val;
++	u8 dir = read ? DEVICE_TO_HOST : HOST_TO_DEVICE;
++
++	if (pcr->remove_pci)
++		return -ENODEV;
++
++	if ((sglist == NULL) || (count < 1))
+ 		return -EINVAL;
+-	}
+-	dev_dbg(&(pcr->pci->dev), "DMA mapping count: %d\n", count);
+ 
+ 	val = ((u32)(dir & 0x01) << 29) | TRIG_DMA | ADMA_MODE;
+ 	pcr->sgi = 0;
+@@ -400,12 +424,10 @@ int rtsx_pci_transfer_data(struct rtsx_pcr *pcr, struct scatterlist *sglist,
+ 	}
+ 
+ 	spin_lock_irqsave(&pcr->lock, flags);
+-
+ 	if (pcr->trans_result == TRANS_RESULT_FAIL)
+ 		err = -EINVAL;
+ 	else if (pcr->trans_result == TRANS_NO_DEVICE)
+ 		err = -ENODEV;
+-
+ 	spin_unlock_irqrestore(&pcr->lock, flags);
+ 
+ out:
+@@ -413,8 +435,6 @@ out:
+ 	pcr->done = NULL;
+ 	spin_unlock_irqrestore(&pcr->lock, flags);
+ 
+-	dma_unmap_sg(&(pcr->pci->dev), sglist, num_sg, dma_dir);
+-
+ 	if ((err < 0) && (err != -ENODEV))
+ 		rtsx_pci_stop_cmd(pcr);
+ 
+@@ -423,7 +443,7 @@ out:
+ 
+ 	return err;
  }
+-EXPORT_SYMBOL_GPL(rtsx_pci_transfer_data);
++EXPORT_SYMBOL_GPL(rtsx_pci_dma_transfer);
  
- static const struct mmc_host_ops realtek_pci_sdmmc_ops = {
-+	.pre_req = sdmmc_pre_req,
-+	.post_req = sdmmc_post_req,
- 	.request = sdmmc_request,
- 	.set_ios = sdmmc_set_ios,
- 	.get_ro = sdmmc_get_ro,
-@@ -1222,10 +1331,16 @@ static int rtsx_pci_sdmmc_drv_probe(struct platform_device *pdev)
- 		return -ENOMEM;
- 
- 	host = mmc_priv(mmc);
-+	host->workq = create_singlethread_workqueue(SDMMC_WORKQ_NAME);
-+	if (!host->workq) {
-+		mmc_free_host(mmc);
-+		return -ENOMEM;
-+	}
- 	host->pcr = pcr;
- 	host->mmc = mmc;
- 	host->pdev = pdev;
- 	host->power_state = SDMMC_POWER_OFF;
-+	INIT_WORK(&host->work, sd_request);
- 	platform_set_drvdata(pdev, host);
- 	pcr->slots[RTSX_SD_CARD].p_dev = pdev;
- 	pcr->slots[RTSX_SD_CARD].card_event = rtsx_pci_sdmmc_card_event;
-@@ -1253,6 +1368,8 @@ static int rtsx_pci_sdmmc_drv_remove(struct platform_device *pdev)
- 	pcr->slots[RTSX_SD_CARD].card_event = NULL;
- 	mmc = host->mmc;
- 
-+	cancel_work_sync(&host->work);
-+
- 	mutex_lock(&host->host_mutex);
- 	if (host->mrq) {
- 		dev_dbg(&(pdev->dev),
-@@ -1271,6 +1388,10 @@ static int rtsx_pci_sdmmc_drv_remove(struct platform_device *pdev)
- 	mmc_remove_host(mmc);
- 	host->eject = true;
- 
-+	flush_workqueue(host->workq);
-+	destroy_workqueue(host->workq);
-+	host->workq = NULL;
-+
- 	mmc_free_host(mmc);
- 
- 	dev_dbg(&(pdev->dev),
+ int rtsx_pci_read_ppbuf(struct rtsx_pcr *pcr, u8 *buf, int buf_len)
+ {
+diff --git a/include/linux/mfd/rtsx_pci.h b/include/linux/mfd/rtsx_pci.h
+index a383597..74346d5 100644
+--- a/include/linux/mfd/rtsx_pci.h
++++ b/include/linux/mfd/rtsx_pci.h
+@@ -943,6 +943,12 @@ void rtsx_pci_send_cmd_no_wait(struct rtsx_pcr *pcr);
+ int rtsx_pci_send_cmd(struct rtsx_pcr *pcr, int timeout);
+ int rtsx_pci_transfer_data(struct rtsx_pcr *pcr, struct scatterlist *sglist,
+ 		int num_sg, bool read, int timeout);
++int rtsx_pci_dma_map_sg(struct rtsx_pcr *pcr, struct scatterlist *sglist,
++		int num_sg, bool read);
++void rtsx_pci_dma_unmap_sg(struct rtsx_pcr *pcr, struct scatterlist *sglist,
++		int num_sg, bool read);
++int rtsx_pci_dma_transfer(struct rtsx_pcr *pcr, struct scatterlist *sglist,
++		int count, bool read, int timeout);
+ int rtsx_pci_read_ppbuf(struct rtsx_pcr *pcr, u8 *buf, int buf_len);
+ int rtsx_pci_write_ppbuf(struct rtsx_pcr *pcr, u8 *buf, int buf_len);
+ int rtsx_pci_card_pull_ctl_enable(struct rtsx_pcr *pcr, int card);
 -- 
 1.7.9.5
