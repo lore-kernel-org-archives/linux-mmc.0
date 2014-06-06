@@ -1,178 +1,88 @@
-From: <micky_ching@realsil.com.cn>
-Subject: [PATCH 1/2] mfd: rtsx: add dma transfer function
-Date: Fri, 6 Jun 2014 15:05:44 +0800
-Message-ID: <9021eae37d96aa027d00ae4a7b6cd84dbbd1b6b5.1402037564.git.micky_ching@realsil.com.cn>
-References: <cover.1402037562.git.micky_ching@realsil.com.cn>
+From: Pavel Machek <pavel@ucw.cz>
+Subject: Re: autosleep suspend too frquent problem
+Date: Fri, 6 Jun 2014 12:30:56 +0200
+Message-ID: <20140606103056.GA2175@amd.pavel.ucw.cz>
+References: <35FD53F367049845BC99AC72306C23D1029A27656A2D@CNBJMBX05.corpusers.net>
+ <20140603120128.GA5080@amd.pavel.ucw.cz>
+ <CAPDyKFqnC1u_Nhe7sJrAzBc8YktDUJC4KAKTPtYVK-Qk6mmk0A@mail.gmail.com>
+ <35FD53F367049845BC99AC72306C23D1029A27656A38@CNBJMBX05.corpusers.net>
+ <20140605135108.GA14162@amd.pavel.ucw.cz>
+ <35FD53F367049845BC99AC72306C23D1029A27656A3E@CNBJMBX05.corpusers.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
-In-Reply-To: <cover.1402037562.git.micky_ching@realsil.com.cn>
-List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
-List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel>
-List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
-List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
-List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
-Errors-To: driverdev-devel-bounces@linuxdriverproject.org
-Sender: driverdev-devel-bounces@linuxdriverproject.org
-To: sameo@linux.intel.com, lee.jones@linaro.org, chris@printf.net, ulf.hansson@linaro.org
-Cc: gregkh@linuxfoundation.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, wei_wang@realsil.com.cn, rogerable@realtek.com, devel@linuxdriverproject.org, dan.carpenter@oracle.com
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from atrey.karlin.mff.cuni.cz ([195.113.26.193]:38426 "EHLO
+	atrey.karlin.mff.cuni.cz" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751058AbaFFKa6 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 6 Jun 2014 06:30:58 -0400
+Content-Disposition: inline
+In-Reply-To: <35FD53F367049845BC99AC72306C23D1029A27656A3E@CNBJMBX05.corpusers.net>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: "Wang, Yalin" <Yalin.Wang@sonymobile.com>
+Cc: 'Ulf Hansson' <ulf.hansson@linaro.org>, "linux-pm@vger.kernel.org" <linux-pm@vger.kernel.org>, "len.brown@intel.com" <len.brown@intel.com>, "rjw@sisk.pl" <rjw@sisk.pl>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>
 
-From: Micky Ching <micky_ching@realsil.com.cn>
+On Fri 2014-06-06 10:59:13, Wang, Yalin wrote:
+> Hi  Pavel,
+> 
+> 
+> This is kernel log from a Android phone:
+> 
+> <6>[ 7262.353794] PM: suspend exit 2014-05-07 21:19:17.438320072 UTC
+> <6>[ 7262.353820] PM: suspend entry 2014-05-07 21:19:17.438348353 UTC
+> <6>[ 7264.822367] PM: suspend exit 2014-05-07 21:19:19.906892259 UTC
+> <6>[ 7264.822391] PM: suspend entry 2014-05-07 21:19:19.906919447 UTC
+> <6>[ 7266.100346] PM: suspend exit 2014-05-07 21:19:21.184872206 UTC
+> <6>[ 7266.100371] PM: suspend entry 2014-05-07 21:19:21.184899342 UTC
+> <6>[ 7268.650852] PM: suspend exit 2014-05-07 21:19:23.735377778 UTC
+> <6>[ 7268.650876] PM: suspend entry 2014-05-07 21:19:23.735404393 UTC
+> <6>[ 7269.023665] PM: suspend exit 2014-05-07 21:19:26.398622725 UTC
+> <6>[ 7269.023691] PM: suspend entry 2014-05-07 21:19:26.398651787 UTC
+> <6>[ 7269.232675] PM: suspend exit 2014-05-07 21:19:28.959217201 UTC
+> <6>[ 7269.250878] PM: suspend entry 2014-05-07 21:19:28.977414076 UTC
+> <6>[ 7269.256004] PM: suspend exit 2014-05-07 21:19:28.982547202 UTC
+> <6>[ 7269.260040] PM: suspend entry 2014-05-07 21:19:28.986580588 UTC
+> <6>[ 7269.265169] PM: suspend exit 2014-05-07 21:19:28.991711785 UTC
+> <6>[ 7269.269311] PM: suspend entry 2014-05-07 21:19:28.995851004 UTC
+> <6>[ 7270.410962] PM: suspend exit 2014-05-07 21:19:30.137503920 UTC
+> <6>[ 7270.410986] PM: suspend entry 2014-05-07 21:19:30.137529389 UTC
+> <6>[ 7272.970123] PM: suspend exit 2014-05-07 21:19:32.696662461 UTC
+> <6>[ 7272.973330] PM: suspend entry 2014-05-07 21:19:32.699869909 UTC
+> <6>[ 7275.534527] PM: suspend exit 2014-05-07 21:19:35.261069387 UTC
+> <6>[ 7275.534551] PM: suspend entry 2014-05-07 21:19:35.261095846 UTC
+> <6>[ 7275.556227] PM: suspend exit 2014-05-07 21:19:35.282769491 UTC
+> <6>[ 7275.579152] PM: suspend entry 2014-05-07 21:19:35.305686210 UTC
+> <6>[ 7275.822618] PM: suspend exit 2014-05-07 21:19:37.918187092 UTC
+> <6>[ 7275.822644] PM: suspend entry 2014-05-07 21:19:37.918215894 UTC
+> <6>[ 7276.122721] PM: suspend exit 2014-05-07 21:19:40.479243344 UTC
+> <6>[ 7276.122745] PM: suspend entry 2014-05-07 21:19:40.479269125 UTC
+> <6>[ 7278.578212] PM: suspend exit 2014-05-07 21:19:42.934733395 UTC
+> <6>[ 7278.578237] PM: suspend entry 2014-05-07 21:19:42.934761520 UTC
+> 
+> You can see there is several times suspend / resume status change 
+> Form 2014-05-07 21:19:28. 959217201  to 2014-05-07 21:19:28.995851004
+> 
+> There is also some suspend fail in this log , the suspend return -EBUSY  
+> Because of driver wake up system during suspend process .
+> 
+> During our power test , suspend frequently like this will consume more
+> Power , because it will suspend/resume lots of
+> Devices . Why don't we make a time window to make sure there is no more than
+> 1 time suspend during the time window ?
 
-rtsx driver using a single function for transfer data, dma map/unmap are
-placed in one fix function. We need map/unmap dma in different place(for
-mmc async driver), so add three function for dma map, dma transfer and
-dma unmap.
+If you can optimize power consumption on your hardware, by all means
+go ahead. But arbitrary limit "don't suspend more than twice a second"
+is probably not a way to go... not without some analysis.
 
-Signed-off-by: Micky Ching <micky_ching@realsil.com.cn>
----
- drivers/mfd/rtsx_pcr.c       |   76 ++++++++++++++++++++++++++----------------
- include/linux/mfd/rtsx_pci.h |    6 ++++
- 2 files changed, 54 insertions(+), 28 deletions(-)
+You may want to take a look at n900 -- it uses regular idle, not
+suspend, to save power. 
 
-diff --git a/drivers/mfd/rtsx_pcr.c b/drivers/mfd/rtsx_pcr.c
-index 1d15735..d01b8c2 100644
---- a/drivers/mfd/rtsx_pcr.c
-+++ b/drivers/mfd/rtsx_pcr.c
-@@ -337,40 +337,64 @@ static void rtsx_pci_add_sg_tbl(struct rtsx_pcr *pcr,
- int rtsx_pci_transfer_data(struct rtsx_pcr *pcr, struct scatterlist *sglist,
- 		int num_sg, bool read, int timeout)
- {
--	struct completion trans_done;
--	u8 dir;
--	int err = 0, i, count;
--	long timeleft;
--	unsigned long flags;
--	struct scatterlist *sg;
--	enum dma_data_direction dma_dir;
--	u32 val;
--	dma_addr_t addr;
--	unsigned int len;
-+	int err = 0, count;
- 
- 	dev_dbg(&(pcr->pci->dev), "--> %s: num_sg = %d\n", __func__, num_sg);
-+	count = rtsx_pci_dma_map_sg(pcr, sglist, num_sg, read);
-+	if (count < 1)
-+		return -EINVAL;
-+	dev_dbg(&(pcr->pci->dev), "DMA mapping count: %d\n", count);
-+
-+	err = rtsx_pci_dma_transfer(pcr, sglist, count, read, timeout);
-+
-+	rtsx_pci_dma_unmap_sg(pcr, sglist, num_sg, read);
-+
-+	return err;
-+}
-+EXPORT_SYMBOL_GPL(rtsx_pci_transfer_data);
-+
-+int rtsx_pci_dma_map_sg(struct rtsx_pcr *pcr, struct scatterlist *sglist,
-+		int num_sg, bool read)
-+{
-+	enum dma_data_direction dir = read ? DMA_FROM_DEVICE : DMA_TO_DEVICE;
- 
--	/* don't transfer data during abort processing */
- 	if (pcr->remove_pci)
- 		return -EINVAL;
- 
- 	if ((sglist == NULL) || (num_sg <= 0))
- 		return -EINVAL;
- 
--	if (read) {
--		dir = DEVICE_TO_HOST;
--		dma_dir = DMA_FROM_DEVICE;
--	} else {
--		dir = HOST_TO_DEVICE;
--		dma_dir = DMA_TO_DEVICE;
--	}
-+	return dma_map_sg(&(pcr->pci->dev), sglist, num_sg, dir);
-+}
-+EXPORT_SYMBOL_GPL(rtsx_pci_dma_map_sg);
- 
--	count = dma_map_sg(&(pcr->pci->dev), sglist, num_sg, dma_dir);
--	if (count < 1) {
--		dev_err(&(pcr->pci->dev), "scatterlist map failed\n");
-+void rtsx_pci_dma_unmap_sg(struct rtsx_pcr *pcr, struct scatterlist *sglist,
-+		int num_sg, bool read)
-+{
-+	enum dma_data_direction dir = read ? DMA_FROM_DEVICE : DMA_TO_DEVICE;
-+
-+	dma_unmap_sg(&(pcr->pci->dev), sglist, num_sg, dir);
-+}
-+EXPORT_SYMBOL_GPL(rtsx_pci_dma_unmap_sg);
-+
-+int rtsx_pci_dma_transfer(struct rtsx_pcr *pcr, struct scatterlist *sglist,
-+		int count, bool read, int timeout)
-+{
-+	struct completion trans_done;
-+	struct scatterlist *sg;
-+	dma_addr_t addr;
-+	long timeleft;
-+	unsigned long flags;
-+	unsigned int len;
-+	int i, err = 0;
-+	u32 val;
-+	u8 dir = read ? DEVICE_TO_HOST : HOST_TO_DEVICE;
-+
-+	if (pcr->remove_pci)
-+		return -ENODEV;
-+
-+	if ((sglist == NULL) || (count < 1))
- 		return -EINVAL;
--	}
--	dev_dbg(&(pcr->pci->dev), "DMA mapping count: %d\n", count);
- 
- 	val = ((u32)(dir & 0x01) << 29) | TRIG_DMA | ADMA_MODE;
- 	pcr->sgi = 0;
-@@ -400,12 +424,10 @@ int rtsx_pci_transfer_data(struct rtsx_pcr *pcr, struct scatterlist *sglist,
- 	}
- 
- 	spin_lock_irqsave(&pcr->lock, flags);
--
- 	if (pcr->trans_result == TRANS_RESULT_FAIL)
- 		err = -EINVAL;
- 	else if (pcr->trans_result == TRANS_NO_DEVICE)
- 		err = -ENODEV;
--
- 	spin_unlock_irqrestore(&pcr->lock, flags);
- 
- out:
-@@ -413,8 +435,6 @@ out:
- 	pcr->done = NULL;
- 	spin_unlock_irqrestore(&pcr->lock, flags);
- 
--	dma_unmap_sg(&(pcr->pci->dev), sglist, num_sg, dma_dir);
--
- 	if ((err < 0) && (err != -ENODEV))
- 		rtsx_pci_stop_cmd(pcr);
- 
-@@ -423,7 +443,7 @@ out:
- 
- 	return err;
- }
--EXPORT_SYMBOL_GPL(rtsx_pci_transfer_data);
-+EXPORT_SYMBOL_GPL(rtsx_pci_dma_transfer);
- 
- int rtsx_pci_read_ppbuf(struct rtsx_pcr *pcr, u8 *buf, int buf_len)
- {
-diff --git a/include/linux/mfd/rtsx_pci.h b/include/linux/mfd/rtsx_pci.h
-index a383597..74346d5 100644
---- a/include/linux/mfd/rtsx_pci.h
-+++ b/include/linux/mfd/rtsx_pci.h
-@@ -943,6 +943,12 @@ void rtsx_pci_send_cmd_no_wait(struct rtsx_pcr *pcr);
- int rtsx_pci_send_cmd(struct rtsx_pcr *pcr, int timeout);
- int rtsx_pci_transfer_data(struct rtsx_pcr *pcr, struct scatterlist *sglist,
- 		int num_sg, bool read, int timeout);
-+int rtsx_pci_dma_map_sg(struct rtsx_pcr *pcr, struct scatterlist *sglist,
-+		int num_sg, bool read);
-+void rtsx_pci_dma_unmap_sg(struct rtsx_pcr *pcr, struct scatterlist *sglist,
-+		int num_sg, bool read);
-+int rtsx_pci_dma_transfer(struct rtsx_pcr *pcr, struct scatterlist *sglist,
-+		int count, bool read, int timeout);
- int rtsx_pci_read_ppbuf(struct rtsx_pcr *pcr, u8 *buf, int buf_len);
- int rtsx_pci_write_ppbuf(struct rtsx_pcr *pcr, u8 *buf, int buf_len);
- int rtsx_pci_card_pull_ctl_enable(struct rtsx_pcr *pcr, int card);
+> I remember Android use wakelock for suspend in older linux kernel ,
+> The wakelock will make some time window check to make sure
+> Not suspend frequently ,  could autosleep also add this ?
+
+Are you sure autosleep does not already have equivalent functionality?
+									Pavel
 -- 
-1.7.9.5
+(english) http://www.livejournal.com/~pavelmachek
+(cesky, pictures) http://atrey.karlin.mff.cuni.cz/~pavel/picture/horses/blog.html
