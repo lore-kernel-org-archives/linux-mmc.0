@@ -1,54 +1,36 @@
-From: Ludovic Desroches <ludovic.desroches@atmel.com>
-Subject: Re: [PATCH 1/4] mmc: atmel-mci: incude asm/cacheclush.h
-Date: Fri, 6 Jun 2014 08:27:58 +0200
-Message-ID: <20140606062757.GD2782@ldesroches-Latitude-E6320>
-References: <1402002881-1986640-1-git-send-email-arnd@arndb.de>
- <1402002881-1986640-2-git-send-email-arnd@arndb.de>
+From: <micky_ching@realsil.com.cn>
+Subject: [PATCH 0/2] mmc: rtsx: add support for async request
+Date: Fri, 6 Jun 2014 15:05:43 +0800
+Message-ID: <cover.1402037562.git.micky_ching@realsil.com.cn>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eusmtp01.atmel.com ([212.144.249.243]:15201 "EHLO
-	eusmtp01.atmel.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751495AbaFFG2E (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 6 Jun 2014 02:28:04 -0400
-Content-Disposition: inline
-In-Reply-To: <1402002881-1986640-2-git-send-email-arnd@arndb.de>
+Received: from rtits2.realtek.com ([60.250.210.242]:41789 "EHLO
+	rtits2.realtek.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752124AbaFFHBq (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 6 Jun 2014 03:01:46 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, Ludovic Desroches <ludovic.desroches@atmel.com>
+To: sameo@linux.intel.com, lee.jones@linaro.org, chris@printf.net, ulf.hansson@linaro.org
+Cc: devel@linuxdriverproject.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, gregkh@linuxfoundation.org, dan.carpenter@oracle.com, rogerable@realtek.com, wei_wang@realsil.com.cn, Micky Ching <micky_ching@realsil.com.cn>
 
-On Thu, Jun 05, 2014 at 11:14:38PM +0200, Arnd Bergmann wrote:
-> This avoids a build error due to the use of flush_dcache_page.
-> 
-> drivers/mmc/host/atmel-mci.c: In function 'atmci_read_data_pio':
-> drivers/mmc/host/atmel-mci.c:1870:5: error: implicit declaration of function 'flush_dcache_page' [-Werror=implicit-function-declaration]
->      flush_dcache_page(sg_page(sg));
->      ^
-> 
-> Signed-off-by: Arnd Bergmann <arnd@arndb.de>
+From: Micky Ching <micky_ching@realsil.com.cn>
 
-Acked-by: Ludovic Desroches <ludovic.desroches@atmel.com>
+Add support for sd/mmc async request, which makes next request do dma_map_sg()
+while previous request transfering data. This behaviour can improve card io
+performance more than 10%.
 
-Thanks
+Since rtsx mfd driver only provide a single function for transfering data,
+so add three split functions for rtsx mmc driver.
 
-> Cc: Ludovic Desroches <ludovic.desroches@atmel.com>
-> ---
->  drivers/mmc/host/atmel-mci.c | 1 +
->  1 file changed, 1 insertion(+)
-> 
-> diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
-> index aece7ca..bb585d9 100644
-> --- a/drivers/mmc/host/atmel-mci.c
-> +++ b/drivers/mmc/host/atmel-mci.c
-> @@ -37,6 +37,7 @@
->  #include <linux/atmel-mci.h>
->  #include <linux/atmel_pdc.h>
->  
-> +#include <asm/cacheflush.h>
->  #include <asm/io.h>
->  #include <asm/unaligned.h>
->  
-> -- 
-> 1.8.3.2
-> 
+Micky Ching (2):
+  mfd: rtsx: add dma transfer function
+  mmc: rtsx: add support for async request
+
+ drivers/mfd/rtsx_pcr.c            |   76 +++++++++++++--------
+ drivers/mmc/host/rtsx_pci_sdmmc.c |  133 +++++++++++++++++++++++++++++++++++--
+ include/linux/mfd/rtsx_pci.h      |    6 ++
+ 3 files changed, 181 insertions(+), 34 deletions(-)
+
+--
+1.7.9.5
