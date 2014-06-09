@@ -1,98 +1,68 @@
-From: Shawn Guo <shawn.guo@linaro.org>
-Subject: Re: [PATCH 5/5] ARM: dts: imx51-babbage: Fix esdhc setup
-Date: Mon, 9 Jun 2014 11:41:00 +0800
-Message-ID: <20140609034058.GF11061@dragon>
-References: <1400848384-3226-1-git-send-email-s.hauer@pengutronix.de>
- <1400848384-3226-6-git-send-email-s.hauer@pengutronix.de>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: RFC: representing sdio devices oob interrupt, clks, etc. in
+ device tree
+Date: Mon, 9 Jun 2014 16:07:54 +0200
+Message-ID: <CAPDyKFo+OPDj0Bs_1JOgdqFAOwfcsUSV5=tijCVgRxE5s2vrbQ@mail.gmail.com>
+References: <538321AB.4050006@redhat.com>
+	<20140526142225.GF22111@sirena.org.uk>
+	<538356DA.7090302@redhat.com>
+	<CAPDyKFqgvaPhMH3PFh7+6u+Am6pWYhxBFdvUZFfekUfpFJxdKw@mail.gmail.com>
+	<53838023.2080807@redhat.com>
+	<CAPDyKFpg_2RQabM044C1hsNTcuxdVVOvw0ZONVRdysk=eom8UA@mail.gmail.com>
+	<20140527175326.GZ12304@sirena.org.uk>
+	<CAPDyKFqCwSfnbXJffQeMUMLEgZPcqjEMhbTXxi4HKOKqExQ70g@mail.gmail.com>
+	<20140528110351.GI12304@sirena.org.uk>
+	<CAPDyKFo_xHSKzoeKJb5sh+O3cMGsnqx_yVivpw8Tk72whPHGLQ@mail.gmail.com>
+	<20140604155529.GP2520@sirena.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-Content-Disposition: inline
-In-Reply-To: <1400848384-3226-6-git-send-email-s.hauer@pengutronix.de>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Sascha Hauer <s.hauer@pengutronix.de>
-Cc: linux-mmc@vger.kernel.org, kernel@pengutronix.de, linux-arm-kernel@lists.infradead.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qa0-f45.google.com ([209.85.216.45]:38092 "EHLO
+	mail-qa0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752520AbaFIOH4 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 9 Jun 2014 10:07:56 -0400
+Received: by mail-qa0-f45.google.com with SMTP id hw13so7831632qab.18
+        for <linux-mmc@vger.kernel.org>; Mon, 09 Jun 2014 07:07:55 -0700 (PDT)
+In-Reply-To: <20140604155529.GP2520@sirena.org.uk>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Mark Brown <broonie@kernel.org>, Hans de Goede <hdegoede@redhat.com>, Tomasz Figa <tomasz.figa@gmail.com>, Arend van Spriel <arend@broadcom.com>, Olof Johansson <olof@lixom.net>
+Cc: Chen-Yu Tsai <wens@csie.org>, Sascha Hauer <s.hauer@pengutronix.de>, Chris Ball <chris@printf.net>, Maxime Ripard <maxime.ripard@free-electrons.com>, linux-mmc <linux-mmc@vger.kernel.org>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>, devicetree <devicetree@vger.kernel.org>, Russell King - ARM Linux <linux@arm.linux.org.uk>, Fabio Estevam <festevam@gmail.com>, Arnd Bergmann <arnd@arndb.de>, Jyri Sarha <jsarha@ti.com>, Linus Walleij <linus.walleij@linaro.org>
 
-On Fri, May 23, 2014 at 02:33:04PM +0200, Sascha Hauer wrote:
-> - Move cd/wp pinctrl from the hog group to the esdhc groups
-> - use gpio for card detection / write protection on esdhc2 since
->   the controller based detection does not work
-> - Fix cd gpio polarity for esdhc1. This is wrong and currently
->   only works because the imx esdhc driver ignores the polarity.
-> 
-> Signed-off-by: Sascha Hauer <s.hauer@pengutronix.de>
-> ---
->  arch/arm/boot/dts/imx51-babbage.dts | 14 +++++++-------
->  1 file changed, 7 insertions(+), 7 deletions(-)
-> 
-> diff --git a/arch/arm/boot/dts/imx51-babbage.dts b/arch/arm/boot/dts/imx51-babbage.dts
-> index 9e9deb2..28d4553 100644
-> --- a/arch/arm/boot/dts/imx51-babbage.dts
-> +++ b/arch/arm/boot/dts/imx51-babbage.dts
-> @@ -134,15 +134,15 @@
->  &esdhc1 {
->  	pinctrl-names = "default";
->  	pinctrl-0 = <&pinctrl_esdhc1>;
-> -	fsl,cd-controller;
-> -	fsl,wp-controller;
-> +	cd-gpios = <&gpio1 0 GPIO_ACTIVE_LOW>;
-> +	wp-gpios = <&gpio1 1 GPIO_ACTIVE_HIGH>;
->  	status = "okay";
->  };
->  
->  &esdhc2 {
->  	pinctrl-names = "default";
->  	pinctrl-0 = <&pinctrl_esdhc2>;
-> -	cd-gpios = <&gpio1 6 GPIO_ACTIVE_HIGH>;
-> +	cd-gpios = <&gpio1 6 GPIO_ACTIVE_LOW>;
->  	wp-gpios = <&gpio1 5 GPIO_ACTIVE_HIGH>;
->  	status = "okay";
->  };
-> @@ -300,10 +300,6 @@
->  	imx51-babbage {
->  		pinctrl_hog: hoggrp {
->  			fsl,pins = <
-> -				MX51_PAD_GPIO1_0__SD1_CD     0x20d5
-> -				MX51_PAD_GPIO1_1__SD1_WP     0x20d5
-> -				MX51_PAD_GPIO1_5__GPIO1_5    0x100
-> -				MX51_PAD_GPIO1_6__GPIO1_6    0x100
->  				MX51_PAD_EIM_A27__GPIO2_21   0x5
->  				MX51_PAD_CSPI1_SS0__GPIO4_24 0x85
->  				MX51_PAD_CSPI1_SS1__GPIO4_25 0x85
-> @@ -330,6 +326,8 @@
->  
->  		pinctrl_esdhc1: esdhc1grp {
->  			fsl,pins = <
-> +				MX51_PAD_GPIO1_0__GPIO1_0		0x20d5
-> +				MX51_PAD_GPIO1_1__GPIO1_1		0x20d5
+On 4 June 2014 17:55, Mark Brown <broonie@kernel.org> wrote:
+> On Tue, Jun 03, 2014 at 12:57:52PM +0200, Ulf Hansson wrote:
+>> On 28 May 2014 13:03, Mark Brown <broonie@kernel.org> wrote:
+>
+>> > No, runtime PM isn't really fine grained - I'm talking about things
+>> > like starting and stopping individual resources or configuring them.
+>
+>> Are you saying that you have several levels of quiescent mode of your
+>> external chip?
+>
+> Partly, but also there can be active modes that don't use all
+> functionality and hence can leave some of the inputs powered down (for
+> example if a reference clock is used for some feature that isn't used
+> all the time then that reference clock may be able to be powered down
+> when the function is not in use).  The device isn't suspended but it can
+> do without some of the resources it has.
+>
+>> I am a bit puzzled of how such library should look like, but I suppose
+>> we need to be able to go to different power states through it.
+>> Typically the library may be invoked both from the mmc core to do
+>> power up/off and from the sdio func driver to handle power save.
+>
+>> Does it make sense to you as well?
+>
+> Yes, certainly for the power up/down and runtime PM type operations.
 
-The pad config value 0x20d5 still makes sense here when switching to
-GPIO function?  Probably should be 0x100 like what we have in esdhc2grp?
+For your information; I have started implementing a library to handle
+power sequences. I intend to have this separated from mmc, to let
+other subsystems re-use the same code.
 
-Shawn
+It will not require a compatible string, but instead use something
+like 'power-method = blah' property.
 
->  				MX51_PAD_SD1_CMD__SD1_CMD		0x400020d5
->  				MX51_PAD_SD1_CLK__SD1_CLK		0x20d5
->  				MX51_PAD_SD1_DATA0__SD1_DATA0		0x20d5
-> @@ -341,6 +339,8 @@
->  
->  		pinctrl_esdhc2: esdhc2grp {
->  			fsl,pins = <
-> +				MX51_PAD_GPIO1_5__GPIO1_5		0x100
-> +				MX51_PAD_GPIO1_6__GPIO1_6		0x100
->  				MX51_PAD_SD2_CMD__SD2_CMD		0x400020d5
->  				MX51_PAD_SD2_CLK__SD2_CLK		0x20d5
->  				MX51_PAD_SD2_DATA0__SD2_DATA0		0x20d5
-> -- 
-> 2.0.0.rc0
-> 
+I intend to post this as an RFC in couple of days.
+
+Kind regards
+Uffe
