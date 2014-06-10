@@ -1,57 +1,37 @@
-From: Roman Pen <r.peniaev@gmail.com>
-Subject: [PATCH] mmc: mxs: fix card detection in case of 'broken-cd' flag set
-Date: Tue, 10 Jun 2014 23:57:02 +0900
-Message-ID: <1402412222-18020-1-git-send-email-r.peniaev@gmail.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pd0-f176.google.com ([209.85.192.176]:57858 "EHLO
-	mail-pd0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750743AbaFJO5O (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 10 Jun 2014 10:57:14 -0400
-Sender: linux-mmc-owner@vger.kernel.org
+From: Kumar Gala <galak@codeaurora.org>
+Subject: [PATCH] mmc: sdhci-msm: Fix crash due to missing ops functions
+Date: Tue, 10 Jun 2014 13:49:05 -0500
+Message-ID: <1402426145-11180-1-git-send-email-galak@codeaurora.org>
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Kumar Gala <galak@codeaurora.org>, linux-mmc@vger.kernel.org, rmk+kernel@arm.linux.org.uk, linux-arm-msm@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-Cc: Roman Pen <r.peniaev@gmail.com>, Chris Ball <chris@printf.net>, Sascha Hauer <s.hauer@pengutronix.de>, Fabio Estevam <fabio.estevam@freescale.com>, Shawn Guo <shawn.guo@linaro.org>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-In case of reboot my olinuxino imx23 board does not see
-mmc card any more. mmc_rescan is being called by delayed
-work in loop, but mxs_mmc_get_cd always returns 0, so we
-will never pass the card detection check and will not do
-further card inition.
+Recent changes in sdhci core need to get reflected in sdhci_msm_ops otherwise
+we ended up dereferencing null pointers in the ops struct and crash.
 
-This patch is just an attempt to partially revert the patch
-a91fe279ae of Sascha Hauer, where it is claimed that upper
-layer will handle broken card detection using the polling
-logic and MMC_CAP_NEEDS_POLL capability, but seems it is not
-true, because upper logic still expects 1 from 'get_cd'.
-
-So, here we always return 1 (card present) in case of
-MMC_CAP_NEEDS_POLL capability set.
-
-Signed-off-by: Roman Pen <r.peniaev@gmail.com>
-CC: Chris Ball <chris@printf.net>
-CC: Sascha Hauer <s.hauer@pengutronix.de>
-CC: Fabio Estevam <fabio.estevam@freescale.com>
-CC: Shawn Guo <shawn.guo@linaro.org>
-CC: Ulf Hansson <ulf.hansson@linaro.org>
-CC: linux-mmc@vger.kernel.org
-CC: linux-kernel@vger.kernel.org
+Signed-off-by: Kumar Gala <galak@codeaurora.org>
 ---
- drivers/mmc/host/mxs-mmc.c | 3 ++-
- 1 file changed, 2 insertions(+), 1 deletion(-)
+ drivers/mmc/host/sdhci-msm.c | 4 ++++
+ 1 file changed, 4 insertions(+)
 
-diff --git a/drivers/mmc/host/mxs-mmc.c b/drivers/mmc/host/mxs-mmc.c
-index 073e871..9187ce1 100644
---- a/drivers/mmc/host/mxs-mmc.c
-+++ b/drivers/mmc/host/mxs-mmc.c
-@@ -82,7 +82,8 @@ static int mxs_mmc_get_cd(struct mmc_host *mmc)
- 	if (ret >= 0)
- 		return ret;
+diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+index acb0e9e..0d6cee0 100644
+--- a/drivers/mmc/host/sdhci-msm.c
++++ b/drivers/mmc/host/sdhci-msm.c
+@@ -467,7 +467,11 @@ static const struct of_device_id sdhci_msm_dt_match[] = {
+ MODULE_DEVICE_TABLE(of, sdhci_msm_dt_match);
  
--	present = !(readl(ssp->base + HW_SSP_STATUS(ssp)) &
-+	present = mmc->caps & MMC_CAP_NEEDS_POLL ||
-+		!(readl(ssp->base + HW_SSP_STATUS(ssp)) &
- 			BM_SSP_STATUS_CARD_DETECT);
+ static struct sdhci_ops sdhci_msm_ops = {
++	.set_clock = sdhci_set_clock,
++	.set_bus_width = sdhci_set_bus_width,
+ 	.platform_execute_tuning = sdhci_msm_execute_tuning,
++	.reset = sdhci_reset,
++	.set_uhs_signaling = sdhci_set_uhs_signaling,
+ };
  
- 	if (mmc->caps2 & MMC_CAP2_CD_ACTIVE_HIGH)
+ static int sdhci_msm_probe(struct platform_device *pdev)
 -- 
-1.9.1
-
+The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum,
+hosted by The Linux Foundation
