@@ -1,60 +1,57 @@
-From: Lothar =?UTF-8?B?V2HDn21hbm4=?= <LW@KARO-electronics.de>
-Subject: Re: [PATCH 5/5] ARM: dts: imx51-babbage: Fix esdhc setup
-Date: Tue, 10 Jun 2014 10:01:59 +0200
-Message-ID: <20140610100159.7a45f9e1@ipc1.ka-ro>
-References: <1400848384-3226-1-git-send-email-s.hauer@pengutronix.de>
-	<1400848384-3226-6-git-send-email-s.hauer@pengutronix.de>
-	<20140609034058.GF11061@dragon>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+From: Roman Pen <r.peniaev@gmail.com>
+Subject: [PATCH] mmc: mxs: fix card detection in case of 'broken-cd' flag set
+Date: Tue, 10 Jun 2014 23:57:02 +0900
+Message-ID: <1402412222-18020-1-git-send-email-r.peniaev@gmail.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail.karo-electronics.de ([81.173.242.67]:65083 "EHLO
-	mail.karo-electronics.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751908AbaFJICU convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 10 Jun 2014 04:02:20 -0400
-In-Reply-To: <20140609034058.GF11061@dragon>
+Received: from mail-pd0-f176.google.com ([209.85.192.176]:57858 "EHLO
+	mail-pd0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750743AbaFJO5O (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 10 Jun 2014 10:57:14 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Shawn Guo <shawn.guo@linaro.org>
-Cc: Sascha Hauer <s.hauer@pengutronix.de>, linux-mmc@vger.kernel.org, kernel@pengutronix.de, linux-arm-kernel@lists.infradead.org
+Cc: Roman Pen <r.peniaev@gmail.com>, Chris Ball <chris@printf.net>, Sascha Hauer <s.hauer@pengutronix.de>, Fabio Estevam <fabio.estevam@freescale.com>, Shawn Guo <shawn.guo@linaro.org>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-Hi,
+In case of reboot my olinuxino imx23 board does not see
+mmc card any more. mmc_rescan is being called by delayed
+work in loop, but mxs_mmc_get_cd always returns 0, so we
+will never pass the card detection check and will not do
+further card inition.
 
-Shawn Guo wrote:
-> On Fri, May 23, 2014 at 02:33:04PM +0200, Sascha Hauer wrote:
-> > - Move cd/wp pinctrl from the hog group to the esdhc groups
-> > - use gpio for card detection / write protection on esdhc2 since
-> >   the controller based detection does not work
-> > - Fix cd gpio polarity for esdhc1. This is wrong and currently
-> >   only works because the imx esdhc driver ignores the polarity.
-> >=20
-[...]
-> > @@ -330,6 +326,8 @@
-> > =20
-> >  		pinctrl_esdhc1: esdhc1grp {
-> >  			fsl,pins =3D <
-> > +				MX51_PAD_GPIO1_0__GPIO1_0		0x20d5
-> > +				MX51_PAD_GPIO1_1__GPIO1_1		0x20d5
->=20
-> The pad config value 0x20d5 still makes sense here when switching to
-> GPIO function?  Probably should be 0x100 like what we have in esdhc2g=
-rp?
->
-The pad config 0x20d5 doesn't make any sense at all because according
-to the Ref. Manual only bits 0..2 and 4..8 (mask 0x01f7) are defined fo=
-r
-those pads. Thus 0x2000 doesn't serve any purpose at all.
+This patch is just an attempt to partially revert the patch
+a91fe279ae of Sascha Hauer, where it is claimed that upper
+layer will handle broken card detection using the polling
+logic and MMC_CAP_NEEDS_POLL capability, but seems it is not
+true, because upper logic still expects 1 from 'get_cd'.
 
+So, here we always return 1 (card present) in case of
+MMC_CAP_NEEDS_POLL capability set.
 
-Lothar Wa=C3=9Fmann
---=20
-___________________________________________________________
+Signed-off-by: Roman Pen <r.peniaev@gmail.com>
+CC: Chris Ball <chris@printf.net>
+CC: Sascha Hauer <s.hauer@pengutronix.de>
+CC: Fabio Estevam <fabio.estevam@freescale.com>
+CC: Shawn Guo <shawn.guo@linaro.org>
+CC: Ulf Hansson <ulf.hansson@linaro.org>
+CC: linux-mmc@vger.kernel.org
+CC: linux-kernel@vger.kernel.org
+---
+ drivers/mmc/host/mxs-mmc.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
 
-Ka-Ro electronics GmbH | Pascalstra=C3=9Fe 22 | D - 52076 Aachen
-Phone: +49 2408 1402-0 | Fax: +49 2408 1402-10
-Gesch=C3=A4ftsf=C3=BChrer: Matthias Kaussen
-Handelsregistereintrag: Amtsgericht Aachen, HRB 4996
+diff --git a/drivers/mmc/host/mxs-mmc.c b/drivers/mmc/host/mxs-mmc.c
+index 073e871..9187ce1 100644
+--- a/drivers/mmc/host/mxs-mmc.c
++++ b/drivers/mmc/host/mxs-mmc.c
+@@ -82,7 +82,8 @@ static int mxs_mmc_get_cd(struct mmc_host *mmc)
+ 	if (ret >= 0)
+ 		return ret;
+ 
+-	present = !(readl(ssp->base + HW_SSP_STATUS(ssp)) &
++	present = mmc->caps & MMC_CAP_NEEDS_POLL ||
++		!(readl(ssp->base + HW_SSP_STATUS(ssp)) &
+ 			BM_SSP_STATUS_CARD_DETECT);
+ 
+ 	if (mmc->caps2 & MMC_CAP2_CD_ACTIVE_HIGH)
+-- 
+1.9.1
 
-www.karo-electronics.de | info@karo-electronics.de
-___________________________________________________________
