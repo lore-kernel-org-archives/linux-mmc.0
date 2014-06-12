@@ -1,59 +1,65 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 0/4] randconfig fixes for mmc
-Date: Thu, 12 Jun 2014 11:00:46 +0200
-Message-ID: <CAPDyKFozMSButjeUg4TrE87hhd2=ZhJoEYasiK9nL5gFKsGoXg@mail.gmail.com>
-References: <1402002881-1986640-1-git-send-email-arnd@arndb.de>
+Subject: [GIT PULL] MMC fixes for v.3.16
+Date: Thu, 12 Jun 2014 11:27:16 +0200
+Message-ID: <CAPDyKFqjSgZs3o5qPjsFzrEHPt5_b7hwdLkqq3CdEM-OjST0JQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qa0-f48.google.com ([209.85.216.48]:41175 "EHLO
-	mail-qa0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932868AbaFLJAs (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 12 Jun 2014 05:00:48 -0400
-Received: by mail-qa0-f48.google.com with SMTP id x12so1242150qac.7
-        for <linux-mmc@vger.kernel.org>; Thu, 12 Jun 2014 02:00:47 -0700 (PDT)
-In-Reply-To: <1402002881-1986640-1-git-send-email-arnd@arndb.de>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Linus <torvalds@linux-foundation.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Cc: Chris Ball <chris@printf.net>
 List-Id: linux-mmc@vger.kernel.org
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>, Ludovic Desroches <ludovic.desroches@atmel.com>, Nicolas Pitre <nico@fluxnic.net>, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, Jason Cooper <jason@lakedaemon.net>, Andrew Lunn <andrew@lunn.ch>, linux-omap <linux-omap@vger.kernel.org>, Jarkko Nikula <jarkko.nikula@bitmer.com>
 
-On 5 June 2014 23:14, Arnd Bergmann <arnd@arndb.de> wrote:
-> Hi Chris, Ulf,
->
-> These are small fixes from my randconfig testing, almost all for
-> older bugs, please apply to a tree you see appropriate.
+Hi Linus,
 
-Thanks Arnd!
+Here are some mmc fixes for 3.16.
 
-Applied for fixes.
+- Fix some various compiler warnings.
+- Make atmel-mci compile again.
+- Fix regression for sdhci-msm.
+
+Information also collected in the signed tag.
 
 Kind regards
-Uffe
+Ulf Hansson
 
->
->         Arnd
->
-> Arnd Bergmann (4):
->   mmc: atmel-mci: incude asm/cacheclush.h
->   mmc: mvsdio: avoid compiler warning
->   mmc: omap: don't select TPS65010
->   mmc: simplify SDHCI Kconfig dependencies
->
->  drivers/mmc/host/Kconfig     | 10 ++++------
->  drivers/mmc/host/atmel-mci.c |  1 +
->  drivers/mmc/host/mvsdio.c    |  2 +-
->  3 files changed, 6 insertions(+), 7 deletions(-)
->
-> --
-> 1.8.3.2
->
-> Cc: Ludovic Desroches <ludovic.desroches@atmel.com>
-> Cc: Nicolas Pitre <nico@fluxnic.net>
-> Cc: Chris Ball <chris@printf.net>
-> Cc: Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
-> Cc: Jason Cooper <jason@lakedaemon.net>
-> Cc: Andrew Lunn <andrew@lunn.ch>
-> Cc: linux-mmc@vger.kernel.org
-> Cc: linux-omap@vger.kernel.org
-> Cc: Jarkko Nikula <jarkko.nikula@bitmer.com>
+
+The following changes since commit 5c02c392cd2320e8d612376d6b72b6548a680923:
+
+  Merge tag 'virtio-next-for-linus' of
+git://git.kernel.org/pub/scm/linux/kernel/git/rusty/linux (2014-06-11
+21:10:33 -0700)
+
+are available in the git repository at:
+
+
+  git://git.linaro.org/people/ulf.hansson/mmc.git tags/mmc-v3.16-2
+
+for you to fetch changes up to 5d01b7684b7ebade6d9ea9c94a31357aec731ecd:
+
+  mmc: simplify SDHCI Kconfig dependencies (2014-06-12 10:51:14 +0200)
+
+----------------------------------------------------------------
+- Fix some various compiler warnings.
+- Make atmel-mci compile again.
+- Fix regression for sdhci-msm.
+
+----------------------------------------------------------------
+Arnd Bergmann (4):
+      mmc: atmel-mci: incude asm/cacheclush.h
+      mmc: mvsdio: avoid compiler warning
+      mmc: omap: don't select TPS65010
+      mmc: simplify SDHCI Kconfig dependencies
+
+Guennadi Liakhovetski (1):
+      mmc: usdhi6rol0: fix compiler warnings
+
+Stephen Boyd (1):
+      mmc: sdhci-msm: Fix fallout from sdhci refactoring
+
+ drivers/mmc/host/Kconfig      |   10 ++++------
+ drivers/mmc/host/atmel-mci.c  |    1 +
+ drivers/mmc/host/mvsdio.c     |    2 +-
+ drivers/mmc/host/sdhci-msm.c  |    4 ++++
+ drivers/mmc/host/usdhi6rol0.c |   10 +++++-----
+ 5 files changed, 15 insertions(+), 12 deletions(-)
