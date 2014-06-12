@@ -1,45 +1,38 @@
-From: Chris Ball <chris@printf.net>
-Subject: Re: [PATCH v4] mmc: add a driver for the Renesas usdhi6rol0 SD/SDIO host controller
-Date: Wed, 11 Jun 2014 23:07:09 +0100
-Message-ID: <86tx7rm776.fsf@void.printf.net>
-References: <Pine.LNX.4.64.1405312005390.20582@axis700.grange>
-	<86y4x3mfhc.fsf@void.printf.net>
-	<Pine.LNX.4.64.1406112218060.2586@axis700.grange>
+From: Linus Torvalds <torvalds@linux-foundation.org>
+Subject: Re: [GIT PULL] MMC updates for 3.16-rc1
+Date: Wed, 11 Jun 2014 21:27:31 -0700
+Message-ID: <CA+55aFyEbFLFWLKP5kHw85qTRNoviFk8LhivxXJgAMROdvJtsg@mail.gmail.com>
+References: <86ha3so84o.fsf@void.printf.net>
+	<CA+55aFxBwteZeUHG+Z-cdLU_YCO4f8TDuYvGmXc0-v9M1H11+g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([89.145.121.20]:51581 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752885AbaFKWHQ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 11 Jun 2014 18:07:16 -0400
-In-Reply-To: <Pine.LNX.4.64.1406112218060.2586@axis700.grange> (Guennadi
-	Liakhovetski's message of "Wed, 11 Jun 2014 22:20:07 +0200 (CEST)")
+Received: from mail-vc0-f176.google.com ([209.85.220.176]:42401 "EHLO
+	mail-vc0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750787AbaFLE1c (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 12 Jun 2014 00:27:32 -0400
+In-Reply-To: <CA+55aFxBwteZeUHG+Z-cdLU_YCO4f8TDuYvGmXc0-v9M1H11+g@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Cc: linux-mmc@vger.kernel.org, Phil Edworthy <phil.edworthy@renesas.com>, devicetree@vger.kernel.org, Rob Herring <robh+dt@kernel.org>, Grant Likely <grant.likely@linaro.org>, Ulf Hansson <ulf.hansson@linaro.org>
+To: Chris Ball <chris@printf.net>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+Cc: Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, linux-mmc@vger.kernel.org
 
-Hi,
-
-On Wed, Jun 11 2014, Guennadi Liakhovetski wrote:
->> Please send fixes for the compiler warnings, potential-null mrq,
+On Tue, Jun 10, 2014 at 2:50 PM, Linus Torvalds
+<torvalds@linux-foundation.org> wrote:
 >
-> Sure, it's on my todo for Saturday, is this ok?
+> Also, that new drivers/mmc/host/usdhi6rol0.c driver is one f*cking
+> noisy compile, and knisr certainly has never been tested in a 64-bit
+> environment. Please either fix it, or make it depend on BROKEN.
 
-Cool, thanks.
+Guys? Seriously, if that driver isn't fixed, I'm going to mark it
+broken myself. It pretty much generates as many lines of warnings as
+the rest of my "allmodconfig" build combined.
 
->> and
->> perhaps add an ARCH_ dependency to stop this building on x86_64.
->
-> Is there a specific reason to only build it on ARM? It can be used with 
-> various architectures, but we can make it depend on COMPILE_TEST (or 
-> whatever that option is called), but I'm not sure that's required.
+It's extremely annoying, and the crazy warnings are likely to hide
+potential real problems elsewhere, so right now that driver has
+negative value. I do a lot of allmodconfig builds during the merge
+window, and I am not going to look at that warning much longer.
 
-Mainly that it looked like it wasn't intended for 64-bit systems,
-but if that's untrue then I guess it's okay to leave it building.
-Of course, you could depend on each of the architectures you're
-aware of it being potentially used on, rather than just ARM.
+Fix it promptly, or it gets disabled.
 
-- Chris.
--- 
-Chris Ball   <http://printf.net/>
+            Linus
