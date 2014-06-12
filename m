@@ -1,60 +1,39 @@
-From: Lee Jones <lee.jones@linaro.org>
-Subject: Re: [GIT PULL] MMC updates for 3.16-rc1
-Date: Thu, 12 Jun 2014 08:17:44 +0100
-Message-ID: <20140612071744.GA11421@lee--X1>
-References: <86ha3so84o.fsf@void.printf.net>
- <CA+55aFxBwteZeUHG+Z-cdLU_YCO4f8TDuYvGmXc0-v9M1H11+g@mail.gmail.com>
+From: Ludovic Desroches <ludovic.desroches@atmel.com>
+Subject: [PATCH] mmc: atmel-mci: add 0x600 IP version
+Date: Thu, 12 Jun 2014 09:47:45 +0200
+Message-ID: <1402559265-18340-1-git-send-email-ludovic.desroches@atmel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <CA+55aFxBwteZeUHG+Z-cdLU_YCO4f8TDuYvGmXc0-v9M1H11+g@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: Chris Ball <chris@printf.net>, Mike Turquette <mturquette@linaro.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, linux-mmc@vger.kernel.org
+Content-Type: text/plain
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from eusmtp01.atmel.com ([212.144.249.243]:7114 "EHLO
+	eusmtp01.atmel.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932194AbaFLHrv (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 12 Jun 2014 03:47:51 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org, chris@printf.net, linux-arm-kernel@lists.infradead.org
+Cc: nicolas.ferre@atmel.com
 
-On Tue, 10 Jun 2014, Linus Torvalds wrote:
+From: Nicolas Ferre <nicolas.ferre@atmel.com>
 
-> On Tue, Jun 10, 2014 at 12:51 PM, Chris Ball <chris@printf.net> wrote=
-:
-> >
-> >  These patches have been tested in
-> > linux-next, and there are three minor conflicts which I've resolved=
- on
-> > my mmc-updates-for-3.16-rc1-merged branch.
->=20
-> Your merged branch is incorrect as far as I can tell, and dropped
-> commit a8246fedacad ("dmaengine: omap: hide filter_fn for built-in
-> drivers").
->=20
-> And I'm not sure why the sunxi driver (by David Lanzend=C3=B6rfer) an=
-d the
-> Realtek driver (by Roger Tseng) got merged in two different trees.
-> It's clearly the same patches and drivers, but I got them first
-> through the MFD tree (Realtek) and the clock tree (sunxi) trees and
-> now the MMC tree.
->=20
-> Don't you guys talk to each other? The Realtek driver is even marked
-> as Acked-by Chris Ball in the MFD tree.
+Signed-off-by: Nicolas Ferre <nicolas.ferre@atmel.com>
+Acked-by: Ludovic Desroches <ludovic.desroches@atmel.com>
+---
+ drivers/mmc/host/atmel-mci.c |    1 +
+ 1 file changed, 1 insertion(+)
 
-Yes, we do talk to each other.  Branch ib-mfd-mmc-memstick-3.16 was
-created as a result.  Based on no facts at all, I'm guessing that the
-shared (immutable) branch wasn't applied correctly in the MMC tree.
+diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
+index 1b4b064..9c4c191 100644
+--- a/drivers/mmc/host/atmel-mci.c
++++ b/drivers/mmc/host/atmel-mci.c
+@@ -2306,6 +2306,7 @@ static void __init atmci_get_cap(struct atmel_mci *host)
+ 
+ 	/* keep only major version number */
+ 	switch (version & 0xf00) {
++	case 0x600:
+ 	case 0x500:
+ 		host->caps.has_odd_clk_div = 1;
+ 	case 0x400:
+-- 
+1.7.9.5
 
-> Also, that new drivers/mmc/host/usdhi6rol0.c driver is one f*cking
-> noisy compile, and knisr certainly has never been tested in a 64-bit
-> environment. Please either fix it, or make it depend on BROKEN.
->=20
-> Grr.
->=20
-> Anyway, pulled, merged correctly, and pushed out..
->=20
->                 Linus
-
---=20
-Lee Jones
-Linaro STMicroelectronics Landing Team Lead
-Linaro.org =E2=94=82 Open source software for ARM SoCs
-=46ollow Linaro: Facebook | Twitter | Blog
