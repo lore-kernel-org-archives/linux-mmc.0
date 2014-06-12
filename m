@@ -1,103 +1,49 @@
-From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-Subject: Re: [PATCH] mmc: usdhi6rol0: fix compiler warnings
-Date: Thu, 12 Jun 2014 11:31:04 +0200 (CEST)
-Message-ID: <Pine.LNX.4.64.1406121129590.6071@axis700.grange>
-References: <Pine.LNX.4.64.1406112327250.2586@axis700.grange>
- <CAPDyKFpZidz-CUZ-EmHyOxLk6tQXzrg9++FafgOhTs241YQ80g@mail.gmail.com>
+From: Chris Ball <chris@printf.net>
+Subject: Re: [GIT PULL] MMC updates for 3.16-rc1
+Date: Thu, 12 Jun 2014 13:19:00 +0100
+Message-ID: <86lht2mibv.fsf@void.printf.net>
+References: <86ha3so84o.fsf@void.printf.net>
+	<CA+55aFxBwteZeUHG+Z-cdLU_YCO4f8TDuYvGmXc0-v9M1H11+g@mail.gmail.com>
+	<20140612071744.GA11421@lee--X1>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mout.kundenserver.de ([212.227.17.10]:58385 "EHLO
-	mout.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932720AbaFLJbQ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 12 Jun 2014 05:31:16 -0400
-In-Reply-To: <CAPDyKFpZidz-CUZ-EmHyOxLk6tQXzrg9++FafgOhTs241YQ80g@mail.gmail.com>
+Received: from void.printf.net ([89.145.121.20]:53876 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752728AbaFLMTF convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 12 Jun 2014 08:19:05 -0400
+In-Reply-To: <20140612071744.GA11421@lee--X1> (Lee Jones's message of "Thu, 12
+	Jun 2014 08:17:44 +0100")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Randy Dunlap <rdunlap@infradead.org>, Phil Edworthy <phil.edworthy@renesas.com>
+To: Lee Jones <lee.jones@linaro.org>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>, Mike Turquette <mturquette@linaro.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
 
-Hi Ulf,
+Hi,
 
-On Thu, 12 Jun 2014, Ulf Hansson wrote:
+On Thu, Jun 12 2014, Lee Jones wrote:
+>> And I'm not sure why the sunxi driver (by David Lanzend=C3=B6rfer) a=
+nd the
+>> Realtek driver (by Roger Tseng) got merged in two different trees.
+>> It's clearly the same patches and drivers, but I got them first
+>> through the MFD tree (Realtek) and the clock tree (sunxi) trees and
+>> now the MMC tree.
+>>=20
+>> Don't you guys talk to each other? The Realtek driver is even marked
+>> as Acked-by Chris Ball in the MFD tree.
+>
+> Yes, we do talk to each other.  Branch ib-mfd-mmc-memstick-3.16 was
+> created as a result.  Based on no facts at all, I'm guessing that the
+> shared (immutable) branch wasn't applied correctly in the MMC tree.
 
-> On 11 June 2014 23:30, Guennadi Liakhovetski <g.liakhovetski@gmx.de> wrote:
-> > Fix a number of wrong print formats.
-> >
-> > Signed-off-by: Guennadi Liakhovetski <g.liakhovetski+renesas@gmail.com>
-> 
-> Thanks Guennadi! Applied for fixes.
+Yes, our fault -- I gave my Ack, but then Ulf sent me the driver in his
+PR and I pulled it.  Sorry for all the trouble, it was the first cycle
+with Ulf and I co-maintaining, and a larger set of commits than usual.
+We'll make sure to do better.
 
-Thanks for your quick help!
+Thanks,
 
-Regards
-Guennadi
-
-> Kind regards
-> Uffe
-> 
-> > ---
-> >
-> > Chris, the "possibl NULL mrq" warning is bogus. It cannot be NULL in the
-> > USDHI6_WAIT_FOR_STOP state. But if you prefer, I can fix that one too.
-> >
-> >  drivers/mmc/host/usdhi6rol0.c | 10 +++++-----
-> >  1 file changed, 5 insertions(+), 5 deletions(-)
-> >
-> > diff --git a/drivers/mmc/host/usdhi6rol0.c b/drivers/mmc/host/usdhi6rol0.c
-> > index eb2bbbe..f0a39eb 100644
-> > --- a/drivers/mmc/host/usdhi6rol0.c
-> > +++ b/drivers/mmc/host/usdhi6rol0.c
-> > @@ -357,7 +357,7 @@ static void *usdhi6_sg_map(struct usdhi6_host *host)
-> >
-> >         WARN(host->pg.page, "%p not properly unmapped!\n", host->pg.page);
-> >         if (WARN(sg_dma_len(sg) % data->blksz,
-> > -                "SG size %zd isn't a multiple of block size %zd\n",
-> > +                "SG size %u isn't a multiple of block size %u\n",
-> >                  sg_dma_len(sg), data->blksz))
-> >                 return NULL;
-> >
-> > @@ -459,7 +459,7 @@ static void usdhi6_sg_advance(struct usdhi6_host *host)
-> >         done = (host->page_idx << PAGE_SHIFT) + host->offset;
-> >         total = host->sg->offset + sg_dma_len(host->sg);
-> >
-> > -       dev_dbg(mmc_dev(host->mmc), "%s(): %zu of %zu @ %u\n", __func__,
-> > +       dev_dbg(mmc_dev(host->mmc), "%s(): %zu of %zu @ %zu\n", __func__,
-> >                 done, total, host->offset);
-> >
-> >         if (done < total && host->offset) {
-> > @@ -489,7 +489,7 @@ static void usdhi6_sg_advance(struct usdhi6_host *host)
-> >                 host->sg = next;
-> >
-> >                 if (WARN(next && sg_dma_len(next) % data->blksz,
-> > -                        "SG size %zd isn't a multiple of block size %zd\n",
-> > +                        "SG size %u isn't a multiple of block size %u\n",
-> >                          sg_dma_len(next), data->blksz))
-> >                         data->error = -EINVAL;
-> >
-> > @@ -896,7 +896,7 @@ static void usdhi6_request_done(struct usdhi6_host *host)
-> >         struct mmc_data *data = mrq->data;
-> >
-> >         if (WARN(host->pg.page || host->head_pg.page,
-> > -                "Page %p or %p not unmapped: wait %u, CMD%d(%c) @ +0x%x %ux%u in SG%u!\n",
-> > +                "Page %p or %p not unmapped: wait %u, CMD%d(%c) @ +0x%zx %ux%u in SG%u!\n",
-> >                  host->pg.page, host->head_pg.page, host->wait, mrq->cmd->opcode,
-> >                  data ? (data->flags & MMC_DATA_READ ? 'R' : 'W') : '-',
-> >                  data ? host->offset : 0, data ? data->blocks : 0,
-> > @@ -1666,7 +1666,7 @@ static void usdhi6_timeout_work(struct work_struct *work)
-> >         case USDHI6_WAIT_FOR_READ:
-> >         case USDHI6_WAIT_FOR_WRITE:
-> >                 dev_dbg(mmc_dev(host->mmc),
-> > -                       "%c: page #%u @ +0x%x %ux%u in SG%u. Current SG %u bytes @ %u\n",
-> > +                       "%c: page #%u @ +0x%zx %ux%u in SG%u. Current SG %u bytes @ %u\n",
-> >                         data->flags & MMC_DATA_READ ? 'R' : 'W', host->page_idx,
-> >                         host->offset, data->blocks, data->blksz, data->sg_len,
-> >                         sg_dma_len(host->sg), host->sg->offset);
-> > --
-> > 1.9.3
-> >
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
+- Chris.
+--=20
+Chris Ball   <http://printf.net/>
