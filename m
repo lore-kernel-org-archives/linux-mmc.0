@@ -1,53 +1,162 @@
-From: micky <micky_ching@realsil.com.cn>
-Subject: Re: [PATCH 2/2] mmc: rtsx: add support for async request
-Date: Mon, 16 Jun 2014 17:09:15 +0800
-Message-ID: <539EB43B.8070707@realsil.com.cn>
-References: <cover.1402037562.git.micky_ching@realsil.com.cn>	<7b58fb0b0915ea0b0838404c74ec22a3b6e5f5a8.1402037565.git.micky_ching@realsil.com.cn>
- <CAPDyKFq1wYZRbuwhLjTMbwN1KYgKuNuZDb7t8FV78Pa=W85oqg@mail.gmail.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [RFC][PATCH] Fix for Intel Baytrail-T errata regarding the
+ non-functioning mmc_pwr pin
+Date: Mon, 16 Jun 2014 11:06:57 +0200
+Message-ID: <CAPDyKFr8kfjMBVnqhx31RUrK=uKaqUgwzcbdi6BmEtYCc0-_1g@mail.gmail.com>
+References: <1401753254-32729-1-git-send-email-jonpry@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"; Format="flowed"
-Content-Transfer-Encoding: 7bit
-Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
-In-Reply-To: <CAPDyKFq1wYZRbuwhLjTMbwN1KYgKuNuZDb7t8FV78Pa=W85oqg@mail.gmail.com>
-List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
-List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel>
-List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
-List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
-List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
-Errors-To: driverdev-devel-bounces@linuxdriverproject.org
-Sender: driverdev-devel-bounces@linuxdriverproject.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Samuel Ortiz <sameo@linux.intel.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Chris Ball <chris@printf.net>, Wei WANG <wei_wang@realsil.com.cn>, Roger <rogerable@realtek.com>, devel@linuxdriverproject.org, Lee Jones <lee.jones@linaro.org>, Dan Carpenter <dan.carpenter@oracle.com>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qa0-f47.google.com ([209.85.216.47]:53199 "EHLO
+	mail-qa0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754922AbaFPJG6 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 16 Jun 2014 05:06:58 -0400
+Received: by mail-qa0-f47.google.com with SMTP id hw13so5729008qab.20
+        for <linux-mmc@vger.kernel.org>; Mon, 16 Jun 2014 02:06:57 -0700 (PDT)
+In-Reply-To: <1401753254-32729-1-git-send-email-jonpry@gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Jon Pry <jonpry@gmail.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>
 
-On 06/16/2014 04:42 PM, Ulf Hansson wrote:
->> @@ -36,7 +37,10 @@ struct realtek_pci_sdmmc {
->> >         struct rtsx_pcr         *pcr;
->> >         struct mmc_host         *mmc;
->> >         struct mmc_request      *mrq;
->> >+       struct workqueue_struct *workq;
->> >+#define SDMMC_WORKQ_NAME       "rtsx_pci_sdmmc_workq"
->> >
->> >+       struct work_struct      work;
-> I am trying to understand why you need a work/workqueue to implement
-> this feature. Is that really the case?
+On 3 June 2014 01:54, Jon Pry <jonpry@gmail.com> wrote:
+> This bug effects Asus T100 as well as other Baytrail-T devices.
+> Erratum in question can be found at
+> http://www.intel.com/content/dam/www/public/us/en/documents/specification-updates/atom-Z36xxx-Z37xxx-spec-update.pdf
 >
-> Could you elaborate on the reasons?
-Hi Uffe,
+> Signed-off-by: Jon Pry <jonpry <at> gmail.com>
+> ---
+> diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
+> index ebb3f39..ebed2a0 100644
+> --- a/drivers/mmc/host/sdhci-acpi.c
+> +++ b/drivers/mmc/host/sdhci-acpi.c
+> @@ -123,7 +123,7 @@ static const struct sdhci_acpi_slot sdhci_acpi_slot_int_emmc = {
+>
+>  static const struct sdhci_acpi_slot sdhci_acpi_slot_int_sdio = {
+>         .quirks  = SDHCI_QUIRK_BROKEN_CARD_DETECTION,
+> -       .quirks2 = SDHCI_QUIRK2_HOST_OFF_CARD_ON,
+> +       .quirks2 = SDHCI_QUIRK2_HOST_OFF_CARD_ON | SDHCI_QUIRK2_BROKEN_POWER_ENABLE,
+>         .caps    = MMC_CAP_NONREMOVABLE | MMC_CAP_POWER_OFF_CARD,
+>         .flags   = SDHCI_ACPI_RUNTIME_PM,
+>         .pm_caps = MMC_PM_KEEP_POWER,
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index 9a79fc4..5a0e928 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -22,6 +22,7 @@
+>  #include <linux/scatterlist.h>
+>  #include <linux/regulator/consumer.h>
+>  #include <linux/pm_runtime.h>
+> +#include <linux/gpio.h>
+>
+>  #include <linux/leds.h>
+>
+> @@ -1261,6 +1262,10 @@ static inline void sdhci_update_clock(struct sdhci_host *host)
+>         sdhci_set_clock(host, clock);
+>  }
+>
+> +static inline void sdhci_set_power_quirk(unsigned short power) {
+> +       gpio_set_value(SDHCI_POWER_QUIRK_GPIO, power);
+> +}
+> +
 
-we need return as fast as possible in mmc_host_ops request(ops->request) 
-callback,
-so the mmc core can continue handle next request.
-when next request everything is ready, it will wait previous done(if not 
-done),
-then call ops->request().
+I would suggest you to implement this through a gpio regulator instead.
 
-we can't use atomic context, because we use mutex_lock() to protect
-resource, and we have to hold the lock during handle request.
-So I use workq, we just queue a work and return in ops->request(),
-The mmc core can continue without blocking at ops->request().
+In that way, you likely don't have to change that much in driver, right?
 
-Best Regards.
-micky.
+Kind regards
+Uffe
+
+>  static int sdhci_set_power(struct sdhci_host *host, unsigned short power)
+>  {
+>         u8 pwr = 0;
+> @@ -1292,6 +1297,9 @@ static int sdhci_set_power(struct sdhci_host *host, unsigned short power)
+>                 sdhci_writeb(host, 0, SDHCI_POWER_CONTROL);
+>                 if (host->quirks2 & SDHCI_QUIRK2_CARD_ON_NEEDS_BUS_ON)
+>                         sdhci_runtime_pm_bus_off(host);
+> +               /* The intel Bay Trail SoCs need to assert a GPIO as a work around */
+> +               if (host->quirks2 & SDHCI_QUIRK2_BROKEN_POWER_ENABLE)
+> +                       sdhci_set_power_quirk(0);
+>                 return 0;
+>         }
+>
+> @@ -1311,8 +1319,14 @@ static int sdhci_set_power(struct sdhci_host *host, unsigned short power)
+>
+>         pwr |= SDHCI_POWER_ON;
+>
+> +
+>         sdhci_writeb(host, pwr, SDHCI_POWER_CONTROL);
+>
+> +       /* The intel Bay Trail SoCs need to assert a GPIO as a work around */
+> +       if (host->quirks2 & SDHCI_QUIRK2_BROKEN_POWER_ENABLE)
+> +               sdhci_set_power_quirk(1);
+> +
+> +
+>         if (host->quirks2 & SDHCI_QUIRK2_CARD_ON_NEEDS_BUS_ON)
+>                 sdhci_runtime_pm_bus_on(host);
+>
+> @@ -2820,6 +2841,18 @@ int sdhci_add_host(struct sdhci_host *host)
+>                 host->flags &= ~SDHCI_USE_SDMA;
+>         }
+>
+> +    if ((host->quirks2 & SDHCI_QUIRK2_BROKEN_POWER_ENABLE)) {
+> +        printk("Using GPIO for power enable as it is marked broken\n");
+> +        if (gpio_request(SDHCI_POWER_QUIRK_GPIO, "SDIO_PWR_EN") < 0) {
+> +            printk("Unable to request GPIO. SDIO may be broken.");
+> +                       host->quirks2 = host->quirks2 & ~SDHCI_QUIRK2_BROKEN_POWER_ENABLE;
+> +        }
+> +        else if (gpio_direction_output(SDHCI_POWER_QUIRK_GPIO, 0) < 0) {
+> +            printk("Unable to set GPIO direction. SDIO may be broken.");
+> +                       host->quirks2 = host->quirks2 & ~SDHCI_QUIRK2_BROKEN_POWER_ENABLE;
+> +        }
+> +    }
+> +
+>         if ((host->version >= SDHCI_SPEC_200) &&
+>                 (caps[0] & SDHCI_CAN_DO_ADMA2))
+>                 host->flags |= SDHCI_USE_ADMA;
+> @@ -3325,6 +3358,10 @@ void sdhci_remove_host(struct sdhci_host *host, int dead)
+>         tasklet_kill(&host->card_tasklet);
+>         tasklet_kill(&host->finish_tasklet);
+>
+> +    if (host->quirks2 & SDHCI_QUIRK2_BROKEN_POWER_ENABLE) {
+> +        gpio_free(SDHCI_POWER_QUIRK_GPIO);
+> +    }
+> +
+>         if (host->vmmc) {
+>                 regulator_disable(host->vmmc);
+>                 regulator_put(host->vmmc);
+> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+> index 0a3ed01..027fcd1 100644
+> --- a/drivers/mmc/host/sdhci.h
+> +++ b/drivers/mmc/host/sdhci.h
+> @@ -84,11 +84,12 @@
+>  #define   SDHCI_CTRL_ADMA64    0x18
+>  #define   SDHCI_CTRL_8BITBUS   0x20
+>
+>  #define SDHCI_POWER_CONTROL    0x29
+>  #define  SDHCI_POWER_ON                0x01
+>  #define  SDHCI_POWER_180       0x0A
+>  #define  SDHCI_POWER_300       0x0C
+>  #define  SDHCI_POWER_330       0x0E
+> +#define SDHCI_POWER_QUIRK_GPIO 195 /*GPIO offset 41 of SCORE device is SD3_PWR_EN*/
+>
+>  #define SDHCI_BLOCK_GAP_CONTROL        0x2A
+>
+> diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
+> index 7be12b8..92cec16 100644
+> --- a/include/linux/mmc/sdhci.h
+> +++ b/include/linux/mmc/sdhci.h
+> @@ -102,6 +102,9 @@ struct sdhci_host {
+>  #define SDHCI_QUIRK2_BROKEN_HS200                      (1<<6)
+>  /* Controller does not support DDR50 */
+>  #define SDHCI_QUIRK2_BROKEN_DDR50                      (1<<7)
+> +/* Controller cannot initialize power (must use GPIO instead) */
+> +#define SDHCI_QUIRK2_BROKEN_POWER_ENABLE               (1<<8)
+> +
+>
+>         int irq;                /* Device IRQ */
+>         void __iomem *ioaddr;   /* Mapped address */
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
