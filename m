@@ -1,179 +1,84 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v4 2/2] mmc: sdhci: Replace host->mmc with mmc where possible
-Date: Mon, 16 Jun 2014 10:23:49 +0200
-Message-ID: <CAPDyKFp7ccn8yJqgs=49V32injEBG=95ANh1vHKXKpS9OyJvXQ@mail.gmail.com>
-References: <1402679637-27611-1-git-send-email-markus.mayer@linaro.org>
-	<1402679637-27611-3-git-send-email-markus.mayer@linaro.org>
+Subject: Re: [PATCHv7 1/2] mmc: dw_mmc: replace "disable-wp" from slot's quirk
+ to host's quirk
+Date: Mon, 16 Jun 2014 10:30:27 +0200
+Message-ID: <CAPDyKFoxEs8k4ou0AyknL7-u7KYkg1==imNMSEv=imUS4KABNg@mail.gmail.com>
+References: <1402633867-25155-1-git-send-email-jh80.chung@samsung.com>
+	<1402633867-25155-2-git-send-email-jh80.chung@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qc0-f169.google.com ([209.85.216.169]:57345 "EHLO
-	mail-qc0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751260AbaFPIXu (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 16 Jun 2014 04:23:50 -0400
-Received: by mail-qc0-f169.google.com with SMTP id c9so7356899qcz.28
-        for <linux-mmc@vger.kernel.org>; Mon, 16 Jun 2014 01:23:49 -0700 (PDT)
-In-Reply-To: <1402679637-27611-3-git-send-email-markus.mayer@linaro.org>
+Received: from mail-qa0-f42.google.com ([209.85.216.42]:64982 "EHLO
+	mail-qa0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754103AbaFPIa2 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 16 Jun 2014 04:30:28 -0400
+Received: by mail-qa0-f42.google.com with SMTP id dc16so7133505qab.29
+        for <linux-mmc@vger.kernel.org>; Mon, 16 Jun 2014 01:30:27 -0700 (PDT)
+In-Reply-To: <1402633867-25155-2-git-send-email-jh80.chung@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Markus Mayer <markus.mayer@linaro.org>
-Cc: Chris Ball <chris@printf.net>, Tim Kryger <tim.kryger@gmail.com>, Mike Looijmans <mike.looijmans@topic.nl>, Andrew Bresticker <abrestic@chromium.org>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, "tgih.jun@samsung.com" <tgih.jun@samsung.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "Heiko St.bner" <heiko@sntech.de>, dinguyen@altera.com, Mark Rutland <mark.rutland@arm.com>, Tushar Behera <tushar.behera@linaro.org>
 
-On 13 June 2014 19:13, Markus Mayer <markus.mayer@linaro.org> wrote:
-> After the switch to the MMC core regulator infrastucture, we already
-> have a local "mmc" pointer in various functions. There is no longer a
-> need to access the data structure via host->mmc.
+On 13 June 2014 06:31, Jaehoon Chung <jh80.chung@samsung.com> wrote:
+> Replaced the "disable-wp" into host's quirks.
+> (Because the slot-node is removed at dt-file.)
 >
-> Signed-off-by: Markus Mayer <markus.mayer@linaro.org>
-> Reviewed-by: Matt Porter <mporter@linaro.org>
+> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
 
-Hi Markus,
+Thanks!
 
-Could you run checkpatch? There were some warnings to handle.
+Applied for next.
 
 Kind regards
-Ulf Hansson
+Uffe
 
 > ---
->  drivers/mmc/host/sdhci.c | 30 +++++++++++++++---------------
->  1 file changed, 15 insertions(+), 15 deletions(-)
+> Changelog V6/V7:
+>         -None
+> Changelog V5:
+>         - Modify comment.
+> Changelog V4:
+>         - Rename Subject
+>                 "[PATCHv3 2/4] mmc: dw_mmc: use the __mmc_of_parse to parse the slot node"
+>         - Replace the "disable-wp" into host's quirks, according to remove the slot-node at dt-file.
+> Changelog V3:
+>         - Fix typo.
+>         - Maintained the dw_mci_of_quirks().
+> Changelog V2:
+>         - None
 >
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index ee524b0..54b5304 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -1287,7 +1287,7 @@ static void sdhci_set_power(struct sdhci_host *host, unsigned char mode,
+>  drivers/mmc/host/dw_mmc.c |   10 ++++------
+>  1 file changed, 4 insertions(+), 6 deletions(-)
 >
->         if (!IS_ERR(mmc->supply.vmmc)) {
->                 spin_unlock_irq(&host->lock);
-> -               mmc_regulator_set_ocr(host->mmc, mmc->supply.vmmc, vdd);
-> +               mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, vdd);
->                 spin_lock_irq(&host->lock);
->         }
->  }
-> @@ -1449,7 +1449,7 @@ static void sdhci_do_set_ios(struct sdhci_host *host, struct mmc_ios *ios)
->                 spin_unlock_irqrestore(&host->lock, flags);
->                 if (!IS_ERR(mmc->supply.vmmc) &&
->                     ios->power_mode == MMC_POWER_OFF)
-> -                       mmc_regulator_set_ocr(host->mmc, mmc->supply.vmmc, 0);
-> +                       mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, 0);
->                 return;
->         }
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index 1ac227c..99fc939 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -2006,12 +2006,7 @@ static struct device_node *dw_mci_of_find_slot_node(struct device *dev, u8 slot)
+>  static struct dw_mci_of_slot_quirks {
+>         char *quirk;
+>         int id;
+> -} of_slot_quirks[] = {
+> -       {
+> -               .quirk  = "disable-wp",
+> -               .id     = DW_MCI_SLOT_QUIRK_NO_WRITE_PROTECT,
+> -       },
+> -};
+> +} of_slot_quirks[] = {};
 >
-> @@ -1734,7 +1734,7 @@ static int sdhci_do_start_signal_voltage_switch(struct sdhci_host *host,
->                                                     3600000);
->                         if (ret) {
->                                 pr_warning("%s: Switching to 3.3V signalling voltage "
-> -                                               " failed\n", mmc_hostname(host->mmc));
-> +                                               " failed\n", mmc_hostname(mmc));
->                                 return -EIO;
->                         }
->                 }
-> @@ -1747,7 +1747,7 @@ static int sdhci_do_start_signal_voltage_switch(struct sdhci_host *host,
->                         return 0;
->
->                 pr_warning("%s: 3.3V regulator output did not became stable\n",
-> -                               mmc_hostname(host->mmc));
-> +                               mmc_hostname(mmc));
->
->                 return -EAGAIN;
->         case MMC_SIGNAL_VOLTAGE_180:
-> @@ -1756,7 +1756,7 @@ static int sdhci_do_start_signal_voltage_switch(struct sdhci_host *host,
->                                         1700000, 1950000);
->                         if (ret) {
->                                 pr_warning("%s: Switching to 1.8V signalling voltage "
-> -                                               " failed\n", mmc_hostname(host->mmc));
-> +                                               " failed\n", mmc_hostname(mmc));
->                                 return -EIO;
->                         }
->                 }
-> @@ -1777,7 +1777,7 @@ static int sdhci_do_start_signal_voltage_switch(struct sdhci_host *host,
->                         return 0;
->
->                 pr_warning("%s: 1.8V regulator output did not became stable\n",
-> -                               mmc_hostname(host->mmc));
-> +                               mmc_hostname(mmc));
->
->                 return -EAGAIN;
->         case MMC_SIGNAL_VOLTAGE_120:
-> @@ -1786,7 +1786,7 @@ static int sdhci_do_start_signal_voltage_switch(struct sdhci_host *host,
->                                                     1300000);
->                         if (ret) {
->                                 pr_warning("%s: Switching to 1.2V signalling voltage "
-> -                                               " failed\n", mmc_hostname(host->mmc));
-> +                                               " failed\n", mmc_hostname(mmc));
->                                 return -EIO;
->                         }
->                 }
-> @@ -2826,12 +2826,12 @@ int sdhci_add_host(struct sdhci_host *host)
->                  * (128) and potentially one alignment transfer for
->                  * each of those entries.
->                  */
-> -               host->adma_desc = dma_alloc_coherent(mmc_dev(host->mmc),
-> +               host->adma_desc = dma_alloc_coherent(mmc_dev(mmc),
->                                                      ADMA_SIZE, &host->adma_addr,
->                                                      GFP_KERNEL);
->                 host->align_buffer = kmalloc(128 * 4, GFP_KERNEL);
->                 if (!host->adma_desc || !host->align_buffer) {
-> -                       dma_free_coherent(mmc_dev(host->mmc), ADMA_SIZE,
-> +                       dma_free_coherent(mmc_dev(mmc), ADMA_SIZE,
->                                           host->adma_desc, host->adma_addr);
->                         kfree(host->align_buffer);
->                         pr_warning("%s: Unable to allocate ADMA "
-> @@ -2844,7 +2844,7 @@ int sdhci_add_host(struct sdhci_host *host)
->                         pr_warning("%s: unable to allocate aligned ADMA descriptor\n",
->                                    mmc_hostname(mmc));
->                         host->flags &= ~SDHCI_USE_ADMA;
-> -                       dma_free_coherent(mmc_dev(host->mmc), ADMA_SIZE,
-> +                       dma_free_coherent(mmc_dev(mmc), ADMA_SIZE,
->                                           host->adma_desc, host->adma_addr);
->                         kfree(host->align_buffer);
->                         host->adma_desc = NULL;
-> @@ -2859,7 +2859,7 @@ int sdhci_add_host(struct sdhci_host *host)
->          */
->         if (!(host->flags & (SDHCI_USE_SDMA | SDHCI_USE_ADMA))) {
->                 host->dma_mask = DMA_BIT_MASK(64);
-> -               mmc_dev(host->mmc)->dma_mask = &host->dma_mask;
-> +               mmc_dev(mmc)->dma_mask = &host->dma_mask;
->         }
->
->         if (host->version >= SDHCI_SPEC_300)
-> @@ -2965,7 +2965,7 @@ int sdhci_add_host(struct sdhci_host *host)
->                 mmc->caps |= MMC_CAP_SD_HIGHSPEED | MMC_CAP_MMC_HIGHSPEED;
->
->         if ((host->quirks & SDHCI_QUIRK_BROKEN_CARD_DETECTION) &&
-> -           !(host->mmc->caps & MMC_CAP_NONREMOVABLE))
-> +           !(mmc->caps & MMC_CAP_NONREMOVABLE))
->                 mmc->caps |= MMC_CAP_NEEDS_POLL;
->
->         /* If there are external regulators, get them */
-> @@ -3261,7 +3261,7 @@ void sdhci_remove_host(struct sdhci_host *host, int dead)
->
->                 if (host->mrq) {
->                         pr_err("%s: Controller removed during "
-> -                               " transfer!\n", mmc_hostname(host->mmc));
-> +                               " transfer!\n", mmc_hostname(mmc));
->
->                         host->mrq->cmd->error = -ENOMEDIUM;
->                         tasklet_schedule(&host->finish_tasklet);
-> @@ -3272,7 +3272,7 @@ void sdhci_remove_host(struct sdhci_host *host, int dead)
->
->         sdhci_disable_card_detection(host);
->
-> -       mmc_remove_host(host->mmc);
-> +       mmc_remove_host(mmc);
->
->  #ifdef SDHCI_USE_LEDS_CLASS
->         led_classdev_unregister(&host->led);
-> @@ -3296,7 +3296,7 @@ void sdhci_remove_host(struct sdhci_host *host, int dead)
->                 regulator_disable(mmc->supply.vqmmc);
->
->         if (host->adma_desc)
-> -               dma_free_coherent(mmc_dev(host->mmc), ADMA_SIZE,
-> +               dma_free_coherent(mmc_dev(mmc), ADMA_SIZE,
->                                   host->adma_desc, host->adma_addr);
->         kfree(host->align_buffer);
+>  static int dw_mci_of_get_slot_quirks(struct device *dev, u8 slot)
+>  {
+> @@ -2238,6 +2233,9 @@ static struct dw_mci_of_quirks {
+>         {
+>                 .quirk  = "broken-cd",
+>                 .id     = DW_MCI_QUIRK_BROKEN_CARD_DETECTION,
+> +       }, {
+> +               .quirk  = "disable-wp",
+> +               .id     = DW_MCI_SLOT_QUIRK_NO_WRITE_PROTECT,
+>         },
+>  };
 >
 > --
-> 1.9.1
+> 1.7.9.5
 >
