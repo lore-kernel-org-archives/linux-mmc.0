@@ -1,138 +1,50 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v14 0/6] mmc: omap_hsmmc: Enable SDIO IRQ
-Date: Mon, 16 Jun 2014 11:26:36 +0200
-Message-ID: <CAPDyKFrFoDabt=2eC_p7SsDB1x+DNKdAY4V9xTTJ4XNnAaQ4oA@mail.gmail.com>
-References: <1401352085-22781-1-git-send-email-afenkart@gmail.com>
+Subject: Re: [PATCH 1/1] mmc: moxart: Remove unneeded version.h inclusion
+Date: Mon, 16 Jun 2014 11:30:18 +0200
+Message-ID: <CAPDyKFo8gHfa+Wf309EmU3FJ-H-mvzBQXVKU4NzYmgcpcr4=tg@mail.gmail.com>
+References: <1400731605-1261-1-git-send-email-sachin.kamat@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-doc-owner@vger.kernel.org>
-In-Reply-To: <1401352085-22781-1-git-send-email-afenkart@gmail.com>
-Sender: linux-doc-owner@vger.kernel.org
-To: Andreas Fenkart <afenkart@gmail.com>
-Cc: Tony Lindgren <tony@atomide.com>, Chris Ball <chris@printf.net>, Grant Likely <grant.likely@secretlab.ca>, Felipe Balbi <balbi@ti.com>, Balaji T K <balajitk@ti.com>, Andreas Mueller <schnitzeltony@googlemail.com>, Sebastian Reichel <sre@kernel.org>, Daniel Mack <zonque@gmail.com>, Kumar Gala <galak@codeaurora.org>, linux-doc@vger.kernel.org, linux-mmc <linux-mmc@vger.kernel.org>, linux-omap <linux-omap@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qc0-f174.google.com ([209.85.216.174]:50705 "EHLO
+	mail-qc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754816AbaFPJaT (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 16 Jun 2014 05:30:19 -0400
+Received: by mail-qc0-f174.google.com with SMTP id x13so7384786qcv.33
+        for <linux-mmc@vger.kernel.org>; Mon, 16 Jun 2014 02:30:18 -0700 (PDT)
+In-Reply-To: <1400731605-1261-1-git-send-email-sachin.kamat@linaro.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Sachin Kamat <sachin.kamat@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Jonas Jensen <jonas.jensen@gmail.com>
 
-On 29 May 2014 10:27, Andreas Fenkart <afenkart@gmail.com> wrote:
-> Hi Balaji, Tony, Ulf, all
+On 22 May 2014 06:06, Sachin Kamat <sachin.kamat@linaro.org> wrote:
+> version.h inclusion is not needed as suggested by versioncheck.
 >
-> v14
-> - drop all ifdef/endif introduced by v13
-> -- rely on pinctrl_lookup_state to prevent ifdef CONFIG_PM
-> -- benefit: all code is compile tested no matter the configuration
-> -- drawback: require wake_irq/pinctrl configuration even when
->    runtime suspend is not configured
-> - drop runtime state from debugfs output
-> - rebased onto current mmc-next 06732b84b4cf
+> Signed-off-by: Sachin Kamat <sachin.kamat@linaro.org>
+> Cc: Jonas Jensen <jonas.jensen@gmail.com>
 
 Thanks! Applied for next.
 
 Kind regards
-Ulf Hansson
+Uffe
 
+> ---
+>  drivers/mmc/host/moxart-mmc.c |    1 -
+>  1 file changed, 1 deletion(-)
 >
-> v13
-> - fix compile breaks if !CONFIG_PM
-> - additional patch: install dummy pm runtime hooks if !CONFIG_PM_RUNT=
-IME
+> diff --git a/drivers/mmc/host/moxart-mmc.c b/drivers/mmc/host/moxart-mmc.c
+> index 74924a04026e..b4b1efbf6c16 100644
+> --- a/drivers/mmc/host/moxart-mmc.c
+> +++ b/drivers/mmc/host/moxart-mmc.c
+> @@ -13,7 +13,6 @@
+>   * warranty of any kind, whether express or implied.
+>   */
 >
-> v12
-> - drop !CONFIG_OF compile break only exists when
->   #undef CONFIG_OF after include headers 1/7(Sebastian Reichel)
-> - do not emit "falling back to polling" if wake_irq not specified
->   since MMC does not need it, and it might confuse users
->   only emit if pinmux default/idle is not present or claiming
->   the irq failed 2/7(Balaji)
-> - dropped out-of-tree patches 6/7(Balaji)
-> - mention "ti,am33xx-hsmmc" compatible section in bindings
->   documentation 1/5
->
-> v11
-> - split !CONFIG_OF compile break into separate patch
-> - enable IWE/CLKEXTFREE in CON/HCTL register needed for omap4
-> - '&' vs '&&' in omap_hsmmc_resume, 1/5 (Andreas M=C3=BCller)
-> - #define DLEV_DAT instead of BIT(21) 2/5 (Balaji)
-> - pinctrl_pm_select_default_state() removed, 4/5 (Balaji)
-> - drop _irqsave/_irqrestore from omap_hsmmc_wake_irq handler since it
->   can't be preempted by same priority omap_hsmmc_irq handler 1/5(Joel=
- Fernandes)
-> - replace devres_open_group by explicit devm_free calls 1/5 (Balaji)
-> - disable_irq_nosync wake_irq since we handle it thread safe 1/5 (Bal=
-aji)
-> - drop 'gpio_dat1' pinctrl states and rework documentation 5/5 (Balaj=
-i)
->
-> v10
-> - bug fix on multi-core, untested
-> - incorporated changes from Balaji
-> - use devres / RAII mechanism to configure wake_up /
->   sdio irq capabilities
-> - drop pinctrl state 'active'
->   rely on driver-model states 'default', 'idle'
-> - add specific 'gpio_dat1' state for am335x SWAKEUP hack
-> - reorganized patches; +1 patch multi-core bugfix / +1 for pinctrl
-> - rebased 455c6fdbd21916 / cherry-picks from mmc-next
->
-> v9
-> - extended comment about why wake-irq is needed
-> - drop double '(' ')' around card_detect_irq
-> - drop final '.' in in subject line of patch
->
-> v8
-> - rebased on top of Tony Lindgren<tony@atomide.com> changes
->   - improved changelog describing the earlier work
->   - improved wakeup irq setup
->   - works for am3730 es platform now
-> - my changes on top:
->   - compile tested with #undef CONFIG_OF
->   - disable wake_irq in handler to prevent infinite loop
->   - fixed typo and added comment about wake-irq
->
-> v7
-> - rebase on 3.14.0-rc3-49726-g77e15ec
-> - split omap_hsmmc_pin_init due to regression on omap-3730 platform
->
-> v6
-> - rebase on Linux 3.13-rc3
-> - reformatting debugfs
->
-> v5
-> - fix compile error introduced by last minute one line fix
->
-> v4:
-> - switch to interrupts-extended format
-> - drop ti,swakeup-missing flag convert to comaptible section
->
-> v3:
-> - removed gpio_irq from platform_data
->
-> v2:
-> - incorparated changes as suggested by reviewers
-> - simplified workaround for am335x, gpio will now only wake
->   the module from runtime suspend, not handle the sdio irq
->   itself
->
-> Andreas Fenkart (6):
->   mmc: omap_hsmmc: Enable SDIO interrupt
->   mmc: omap_hsmmc: Extend debugfs by SDIO IRQ handling, runtime state
->   mmc: omap_hsmmc: enable wakeup event for sdio OMAP4
->   mmc: omap_hsmmc: abort runtime suspend if pending sdio irq detected
->   mmc: omap_hsmmc: switch default/idle pinctrl states in runtime hook=
-s
->   mmc: omap_hsmmc: Pin remux workaround to support SDIO interrupt on
->     AM335x
->
->  .../devicetree/bindings/mmc/ti-omap-hsmmc.txt      |   54 ++++
->  drivers/mmc/host/omap_hsmmc.c                      |  283 ++++++++++=
-++++++++--
->  include/linux/platform_data/mmc-omap.h             |    1 +
->  3 files changed, 317 insertions(+), 21 deletions(-)
->
+> -#include <linux/version.h>
+>  #include <linux/module.h>
+>  #include <linux/init.h>
+>  #include <linux/platform_device.h>
 > --
-> 1.7.10.4
+> 1.7.9.5
 >
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" =
-in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
