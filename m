@@ -1,162 +1,138 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [RFC][PATCH] Fix for Intel Baytrail-T errata regarding the
- non-functioning mmc_pwr pin
-Date: Mon, 16 Jun 2014 11:06:57 +0200
-Message-ID: <CAPDyKFr8kfjMBVnqhx31RUrK=uKaqUgwzcbdi6BmEtYCc0-_1g@mail.gmail.com>
-References: <1401753254-32729-1-git-send-email-jonpry@gmail.com>
+Subject: Re: [PATCH v14 0/6] mmc: omap_hsmmc: Enable SDIO IRQ
+Date: Mon, 16 Jun 2014 11:26:36 +0200
+Message-ID: <CAPDyKFrFoDabt=2eC_p7SsDB1x+DNKdAY4V9xTTJ4XNnAaQ4oA@mail.gmail.com>
+References: <1401352085-22781-1-git-send-email-afenkart@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qa0-f47.google.com ([209.85.216.47]:53199 "EHLO
-	mail-qa0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754922AbaFPJG6 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 16 Jun 2014 05:06:58 -0400
-Received: by mail-qa0-f47.google.com with SMTP id hw13so5729008qab.20
-        for <linux-mmc@vger.kernel.org>; Mon, 16 Jun 2014 02:06:57 -0700 (PDT)
-In-Reply-To: <1401753254-32729-1-git-send-email-jonpry@gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-doc-owner@vger.kernel.org>
+In-Reply-To: <1401352085-22781-1-git-send-email-afenkart@gmail.com>
+Sender: linux-doc-owner@vger.kernel.org
+To: Andreas Fenkart <afenkart@gmail.com>
+Cc: Tony Lindgren <tony@atomide.com>, Chris Ball <chris@printf.net>, Grant Likely <grant.likely@secretlab.ca>, Felipe Balbi <balbi@ti.com>, Balaji T K <balajitk@ti.com>, Andreas Mueller <schnitzeltony@googlemail.com>, Sebastian Reichel <sre@kernel.org>, Daniel Mack <zonque@gmail.com>, Kumar Gala <galak@codeaurora.org>, linux-doc@vger.kernel.org, linux-mmc <linux-mmc@vger.kernel.org>, linux-omap <linux-omap@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Jon Pry <jonpry@gmail.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>
 
-On 3 June 2014 01:54, Jon Pry <jonpry@gmail.com> wrote:
-> This bug effects Asus T100 as well as other Baytrail-T devices.
-> Erratum in question can be found at
-> http://www.intel.com/content/dam/www/public/us/en/documents/specification-updates/atom-Z36xxx-Z37xxx-spec-update.pdf
+On 29 May 2014 10:27, Andreas Fenkart <afenkart@gmail.com> wrote:
+> Hi Balaji, Tony, Ulf, all
 >
-> Signed-off-by: Jon Pry <jonpry <at> gmail.com>
-> ---
-> diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
-> index ebb3f39..ebed2a0 100644
-> --- a/drivers/mmc/host/sdhci-acpi.c
-> +++ b/drivers/mmc/host/sdhci-acpi.c
-> @@ -123,7 +123,7 @@ static const struct sdhci_acpi_slot sdhci_acpi_slot_int_emmc = {
->
->  static const struct sdhci_acpi_slot sdhci_acpi_slot_int_sdio = {
->         .quirks  = SDHCI_QUIRK_BROKEN_CARD_DETECTION,
-> -       .quirks2 = SDHCI_QUIRK2_HOST_OFF_CARD_ON,
-> +       .quirks2 = SDHCI_QUIRK2_HOST_OFF_CARD_ON | SDHCI_QUIRK2_BROKEN_POWER_ENABLE,
->         .caps    = MMC_CAP_NONREMOVABLE | MMC_CAP_POWER_OFF_CARD,
->         .flags   = SDHCI_ACPI_RUNTIME_PM,
->         .pm_caps = MMC_PM_KEEP_POWER,
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 9a79fc4..5a0e928 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -22,6 +22,7 @@
->  #include <linux/scatterlist.h>
->  #include <linux/regulator/consumer.h>
->  #include <linux/pm_runtime.h>
-> +#include <linux/gpio.h>
->
->  #include <linux/leds.h>
->
-> @@ -1261,6 +1262,10 @@ static inline void sdhci_update_clock(struct sdhci_host *host)
->         sdhci_set_clock(host, clock);
->  }
->
-> +static inline void sdhci_set_power_quirk(unsigned short power) {
-> +       gpio_set_value(SDHCI_POWER_QUIRK_GPIO, power);
-> +}
-> +
+> v14
+> - drop all ifdef/endif introduced by v13
+> -- rely on pinctrl_lookup_state to prevent ifdef CONFIG_PM
+> -- benefit: all code is compile tested no matter the configuration
+> -- drawback: require wake_irq/pinctrl configuration even when
+>    runtime suspend is not configured
+> - drop runtime state from debugfs output
+> - rebased onto current mmc-next 06732b84b4cf
 
-I would suggest you to implement this through a gpio regulator instead.
-
-In that way, you likely don't have to change that much in driver, right?
+Thanks! Applied for next.
 
 Kind regards
-Uffe
+Ulf Hansson
 
->  static int sdhci_set_power(struct sdhci_host *host, unsigned short power)
->  {
->         u8 pwr = 0;
-> @@ -1292,6 +1297,9 @@ static int sdhci_set_power(struct sdhci_host *host, unsigned short power)
->                 sdhci_writeb(host, 0, SDHCI_POWER_CONTROL);
->                 if (host->quirks2 & SDHCI_QUIRK2_CARD_ON_NEEDS_BUS_ON)
->                         sdhci_runtime_pm_bus_off(host);
-> +               /* The intel Bay Trail SoCs need to assert a GPIO as a work around */
-> +               if (host->quirks2 & SDHCI_QUIRK2_BROKEN_POWER_ENABLE)
-> +                       sdhci_set_power_quirk(0);
->                 return 0;
->         }
 >
-> @@ -1311,8 +1319,14 @@ static int sdhci_set_power(struct sdhci_host *host, unsigned short power)
+> v13
+> - fix compile breaks if !CONFIG_PM
+> - additional patch: install dummy pm runtime hooks if !CONFIG_PM_RUNT=
+IME
 >
->         pwr |= SDHCI_POWER_ON;
+> v12
+> - drop !CONFIG_OF compile break only exists when
+>   #undef CONFIG_OF after include headers 1/7(Sebastian Reichel)
+> - do not emit "falling back to polling" if wake_irq not specified
+>   since MMC does not need it, and it might confuse users
+>   only emit if pinmux default/idle is not present or claiming
+>   the irq failed 2/7(Balaji)
+> - dropped out-of-tree patches 6/7(Balaji)
+> - mention "ti,am33xx-hsmmc" compatible section in bindings
+>   documentation 1/5
 >
-> +
->         sdhci_writeb(host, pwr, SDHCI_POWER_CONTROL);
+> v11
+> - split !CONFIG_OF compile break into separate patch
+> - enable IWE/CLKEXTFREE in CON/HCTL register needed for omap4
+> - '&' vs '&&' in omap_hsmmc_resume, 1/5 (Andreas M=C3=BCller)
+> - #define DLEV_DAT instead of BIT(21) 2/5 (Balaji)
+> - pinctrl_pm_select_default_state() removed, 4/5 (Balaji)
+> - drop _irqsave/_irqrestore from omap_hsmmc_wake_irq handler since it
+>   can't be preempted by same priority omap_hsmmc_irq handler 1/5(Joel=
+ Fernandes)
+> - replace devres_open_group by explicit devm_free calls 1/5 (Balaji)
+> - disable_irq_nosync wake_irq since we handle it thread safe 1/5 (Bal=
+aji)
+> - drop 'gpio_dat1' pinctrl states and rework documentation 5/5 (Balaj=
+i)
 >
-> +       /* The intel Bay Trail SoCs need to assert a GPIO as a work around */
-> +       if (host->quirks2 & SDHCI_QUIRK2_BROKEN_POWER_ENABLE)
-> +               sdhci_set_power_quirk(1);
-> +
-> +
->         if (host->quirks2 & SDHCI_QUIRK2_CARD_ON_NEEDS_BUS_ON)
->                 sdhci_runtime_pm_bus_on(host);
+> v10
+> - bug fix on multi-core, untested
+> - incorporated changes from Balaji
+> - use devres / RAII mechanism to configure wake_up /
+>   sdio irq capabilities
+> - drop pinctrl state 'active'
+>   rely on driver-model states 'default', 'idle'
+> - add specific 'gpio_dat1' state for am335x SWAKEUP hack
+> - reorganized patches; +1 patch multi-core bugfix / +1 for pinctrl
+> - rebased 455c6fdbd21916 / cherry-picks from mmc-next
 >
-> @@ -2820,6 +2841,18 @@ int sdhci_add_host(struct sdhci_host *host)
->                 host->flags &= ~SDHCI_USE_SDMA;
->         }
+> v9
+> - extended comment about why wake-irq is needed
+> - drop double '(' ')' around card_detect_irq
+> - drop final '.' in in subject line of patch
 >
-> +    if ((host->quirks2 & SDHCI_QUIRK2_BROKEN_POWER_ENABLE)) {
-> +        printk("Using GPIO for power enable as it is marked broken\n");
-> +        if (gpio_request(SDHCI_POWER_QUIRK_GPIO, "SDIO_PWR_EN") < 0) {
-> +            printk("Unable to request GPIO. SDIO may be broken.");
-> +                       host->quirks2 = host->quirks2 & ~SDHCI_QUIRK2_BROKEN_POWER_ENABLE;
-> +        }
-> +        else if (gpio_direction_output(SDHCI_POWER_QUIRK_GPIO, 0) < 0) {
-> +            printk("Unable to set GPIO direction. SDIO may be broken.");
-> +                       host->quirks2 = host->quirks2 & ~SDHCI_QUIRK2_BROKEN_POWER_ENABLE;
-> +        }
-> +    }
-> +
->         if ((host->version >= SDHCI_SPEC_200) &&
->                 (caps[0] & SDHCI_CAN_DO_ADMA2))
->                 host->flags |= SDHCI_USE_ADMA;
-> @@ -3325,6 +3358,10 @@ void sdhci_remove_host(struct sdhci_host *host, int dead)
->         tasklet_kill(&host->card_tasklet);
->         tasklet_kill(&host->finish_tasklet);
+> v8
+> - rebased on top of Tony Lindgren<tony@atomide.com> changes
+>   - improved changelog describing the earlier work
+>   - improved wakeup irq setup
+>   - works for am3730 es platform now
+> - my changes on top:
+>   - compile tested with #undef CONFIG_OF
+>   - disable wake_irq in handler to prevent infinite loop
+>   - fixed typo and added comment about wake-irq
 >
-> +    if (host->quirks2 & SDHCI_QUIRK2_BROKEN_POWER_ENABLE) {
-> +        gpio_free(SDHCI_POWER_QUIRK_GPIO);
-> +    }
-> +
->         if (host->vmmc) {
->                 regulator_disable(host->vmmc);
->                 regulator_put(host->vmmc);
-> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-> index 0a3ed01..027fcd1 100644
-> --- a/drivers/mmc/host/sdhci.h
-> +++ b/drivers/mmc/host/sdhci.h
-> @@ -84,11 +84,12 @@
->  #define   SDHCI_CTRL_ADMA64    0x18
->  #define   SDHCI_CTRL_8BITBUS   0x20
+> v7
+> - rebase on 3.14.0-rc3-49726-g77e15ec
+> - split omap_hsmmc_pin_init due to regression on omap-3730 platform
 >
->  #define SDHCI_POWER_CONTROL    0x29
->  #define  SDHCI_POWER_ON                0x01
->  #define  SDHCI_POWER_180       0x0A
->  #define  SDHCI_POWER_300       0x0C
->  #define  SDHCI_POWER_330       0x0E
-> +#define SDHCI_POWER_QUIRK_GPIO 195 /*GPIO offset 41 of SCORE device is SD3_PWR_EN*/
+> v6
+> - rebase on Linux 3.13-rc3
+> - reformatting debugfs
 >
->  #define SDHCI_BLOCK_GAP_CONTROL        0x2A
+> v5
+> - fix compile error introduced by last minute one line fix
 >
-> diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
-> index 7be12b8..92cec16 100644
-> --- a/include/linux/mmc/sdhci.h
-> +++ b/include/linux/mmc/sdhci.h
-> @@ -102,6 +102,9 @@ struct sdhci_host {
->  #define SDHCI_QUIRK2_BROKEN_HS200                      (1<<6)
->  /* Controller does not support DDR50 */
->  #define SDHCI_QUIRK2_BROKEN_DDR50                      (1<<7)
-> +/* Controller cannot initialize power (must use GPIO instead) */
-> +#define SDHCI_QUIRK2_BROKEN_POWER_ENABLE               (1<<8)
-> +
+> v4:
+> - switch to interrupts-extended format
+> - drop ti,swakeup-missing flag convert to comaptible section
 >
->         int irq;                /* Device IRQ */
->         void __iomem *ioaddr;   /* Mapped address */
+> v3:
+> - removed gpio_irq from platform_data
+>
+> v2:
+> - incorparated changes as suggested by reviewers
+> - simplified workaround for am335x, gpio will now only wake
+>   the module from runtime suspend, not handle the sdio irq
+>   itself
+>
+> Andreas Fenkart (6):
+>   mmc: omap_hsmmc: Enable SDIO interrupt
+>   mmc: omap_hsmmc: Extend debugfs by SDIO IRQ handling, runtime state
+>   mmc: omap_hsmmc: enable wakeup event for sdio OMAP4
+>   mmc: omap_hsmmc: abort runtime suspend if pending sdio irq detected
+>   mmc: omap_hsmmc: switch default/idle pinctrl states in runtime hook=
+s
+>   mmc: omap_hsmmc: Pin remux workaround to support SDIO interrupt on
+>     AM335x
+>
+>  .../devicetree/bindings/mmc/ti-omap-hsmmc.txt      |   54 ++++
+>  drivers/mmc/host/omap_hsmmc.c                      |  283 ++++++++++=
+++++++++--
+>  include/linux/platform_data/mmc-omap.h             |    1 +
+>  3 files changed, 317 insertions(+), 21 deletions(-)
+>
 > --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> 1.7.10.4
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" =
+in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
