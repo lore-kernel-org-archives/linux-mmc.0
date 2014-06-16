@@ -1,54 +1,65 @@
-From: Alex Elder <elder@ieee.org>
-Subject: Re: [PATCH] ARM: bcm_defconfig: re-enable BCM Kona SDHCI driver
-Date: Mon, 16 Jun 2014 14:12:36 -0500
-Message-ID: <539F41A4.1090606@ieee.org>
-References: <1402941376-29594-1-git-send-email-mporter@linaro.org>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH] ARM: multi_v7_defconfig: re-enable SDHCI drivers
+Date: Mon, 16 Jun 2014 23:16:01 +0200
+Message-ID: <CAPDyKFr98GfBZuUbod+JnvbEEyDC+Unninetw=-=6o8muQw_NQ@mail.gmail.com>
+References: <1402937442-7623-1-git-send-email-swarren@wwwdotorg.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ig0-f178.google.com ([209.85.213.178]:35568 "EHLO
-	mail-ig0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755804AbaFPTMQ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 16 Jun 2014 15:12:16 -0400
-Received: by mail-ig0-f178.google.com with SMTP id hn18so3336592igb.17
-        for <linux-mmc@vger.kernel.org>; Mon, 16 Jun 2014 12:12:15 -0700 (PDT)
-In-Reply-To: <1402941376-29594-1-git-send-email-mporter@linaro.org>
+Received: from mail-qa0-f41.google.com ([209.85.216.41]:47551 "EHLO
+	mail-qa0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932514AbaFPVQD (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 16 Jun 2014 17:16:03 -0400
+Received: by mail-qa0-f41.google.com with SMTP id cm18so8237665qab.28
+        for <linux-mmc@vger.kernel.org>; Mon, 16 Jun 2014 14:16:02 -0700 (PDT)
+In-Reply-To: <1402937442-7623-1-git-send-email-swarren@wwwdotorg.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Matt Porter <mporter@linaro.org>, arm@kernel.org
-Cc: Linux MMC List <linux-mmc@vger.kernel.org>, Linux ARM Kernel List <linux-arm-kernel@lists.infradead.org>
+To: Stephen Warren <swarren@wwwdotorg.org>
+Cc: "arm@kernel.org" <arm@kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, linux-mmc <linux-mmc@vger.kernel.org>, Stephen Warren <swarren@nvidia.com>
 
-On 06/16/2014 12:56 PM, Matt Porter wrote:
-> Since 5d01b7684b7e "mmc: simplify SDHCI Kconfig dependencies",
-> MMC_SDHCI_PLTFM is no longer selected by the BCM Kona SDHCI
-> driver which is enabled in this defconfig. This results in the
-> SDHCI driver not being built and a boot failure. Explictly
-> enable MMC_SDHCI_PLTFM in bcm_defconfig so the BCM Kona SDHCI
-> driver is built.
-> 
+On 16 June 2014 18:50, Stephen Warren <swarren@wwwdotorg.org> wrote:
+> From: Stephen Warren <swarren@nvidia.com>
+>
+> Following 5d01b7684b7e "mmc: simplify SDHCI Kconfig dependencies",
+> SDHCI drivers that use MMC_SDHCI_PLTFM no longer select it, but
+> instead depend on it. This means that multi_v7_defconfig no longer
+> selects it, and hence many SDHCI drivers are no longer enabled.
+> Explicitly enable MMC_SDHCI_PLTFM to solve this.
+>
 > Fixes: 5d01b7684b7e ("mmc: simplify SDHCI Kconfig dependencies")
-> Signed-off-by: Matt Porter <mporter@linaro.org>
+> Signed-off-by: Stephen Warren <swarren@nvidia.com>
 
-Works for me.
+Reviewed-by: Ulf Hansson <ulf.hansson@linaro.org>
 
-Tested-by: Alex Elder <elder@linaro.org>
+I suppose this goes through arm-soc, otherwise ping me if you want me
+to handle it as a fix for 3.16.
+
+Kind regards
+Uffe
 
 > ---
->  arch/arm/configs/bcm_defconfig | 1 +
+> This is a fix for 3.16, and based directly on v3.16-rc1.
+>
+>  arch/arm/configs/multi_v7_defconfig | 1 +
 >  1 file changed, 1 insertion(+)
-> 
-> diff --git a/arch/arm/configs/bcm_defconfig b/arch/arm/configs/bcm_defconfig
-> index 9d13dae..dcfc559 100644
-> --- a/arch/arm/configs/bcm_defconfig
-> +++ b/arch/arm/configs/bcm_defconfig
-> @@ -98,6 +98,7 @@ CONFIG_MMC_UNSAFE_RESUME=y
->  CONFIG_MMC_BLOCK_MINORS=32
->  CONFIG_MMC_TEST=y
+>
+> diff --git a/arch/arm/configs/multi_v7_defconfig b/arch/arm/configs/multi_v7_defconfig
+> index e2d62048e198..17d9462b9fb9 100644
+> --- a/arch/arm/configs/multi_v7_defconfig
+> +++ b/arch/arm/configs/multi_v7_defconfig
+> @@ -300,6 +300,7 @@ CONFIG_MMC=y
+>  CONFIG_MMC_BLOCK_MINORS=16
+>  CONFIG_MMC_ARMMMCI=y
 >  CONFIG_MMC_SDHCI=y
 > +CONFIG_MMC_SDHCI_PLTFM=y
->  CONFIG_MMC_SDHCI_BCM_KONA=y
->  CONFIG_NEW_LEDS=y
->  CONFIG_LEDS_CLASS=y
-> 
-
+>  CONFIG_MMC_SDHCI_OF_ARASAN=y
+>  CONFIG_MMC_SDHCI_ESDHC_IMX=y
+>  CONFIG_MMC_SDHCI_DOVE=y
+> --
+> 1.8.1.5
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
