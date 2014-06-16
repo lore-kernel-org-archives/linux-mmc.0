@@ -1,45 +1,54 @@
-From: John Stultz <john.stultz@linaro.org>
-Subject: Re: [PATCH V2 3/3] mmc: mmci: Reverse IRQ handling for the arm_variant
-Date: Mon, 16 Jun 2014 11:58:02 -0700
-Message-ID: <CALAqxLWs5HLhLo+BspcgyJe0O++PB1HU2G1GpsoQ=cVP34=v=A@mail.gmail.com>
-References: <1402906147-26596-1-git-send-email-ulf.hansson@linaro.org>
+From: Alex Elder <elder@ieee.org>
+Subject: Re: [PATCH] ARM: bcm_defconfig: re-enable BCM Kona SDHCI driver
+Date: Mon, 16 Jun 2014 14:12:36 -0500
+Message-ID: <539F41A4.1090606@ieee.org>
+References: <1402941376-29594-1-git-send-email-mporter@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-vc0-f180.google.com ([209.85.220.180]:60179 "EHLO
-	mail-vc0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755441AbaFPS6D (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 16 Jun 2014 14:58:03 -0400
-Received: by mail-vc0-f180.google.com with SMTP id im17so5413530vcb.11
-        for <linux-mmc@vger.kernel.org>; Mon, 16 Jun 2014 11:58:02 -0700 (PDT)
-In-Reply-To: <1402906147-26596-1-git-send-email-ulf.hansson@linaro.org>
+Received: from mail-ig0-f178.google.com ([209.85.213.178]:35568 "EHLO
+	mail-ig0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755804AbaFPTMQ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 16 Jun 2014 15:12:16 -0400
+Received: by mail-ig0-f178.google.com with SMTP id hn18so3336592igb.17
+        for <linux-mmc@vger.kernel.org>; Mon, 16 Jun 2014 12:12:15 -0700 (PDT)
+In-Reply-To: <1402941376-29594-1-git-send-email-mporter@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Russell King <linux@arm.linux.org.uk>, Peter Maydell <peter.maydell@linaro.org>, linux-mmc@vger.kernel.org, Chris Ball <chris@printf.net>
+To: Matt Porter <mporter@linaro.org>, arm@kernel.org
+Cc: Linux MMC List <linux-mmc@vger.kernel.org>, Linux ARM Kernel List <linux-arm-kernel@lists.infradead.org>
 
-On Mon, Jun 16, 2014 at 1:09 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> Commit "mmc: mmci: Handle CMD irq before DATA irq", caused an issue
-> when using the ARM model of the PL181 and running QEMU.
->
-> The bug was reported for the following QEMU version:
-> $ qemu-system-arm -version
-> QEMU emulator version 2.0.0 (Debian 2.0.0+dfsg-2ubuntu1.1), Copyright
-> (c) 2003-2008 Fabrice Bellard
->
-> To resolve the problem, let's restore the old behavior were the DATA
-> irq is handled prior the CMD irq, but only for the arm_variant, which
-> the problem was reported for.
->
-> Reported-by: John Stultz <john.stultz@linaro.org>
-> Cc: Peter Maydell <peter.maydell@linaro.org>
-> Cc: Russell King <linux@arm.linux.org.uk>
-> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+On 06/16/2014 12:56 PM, Matt Porter wrote:
+> Since 5d01b7684b7e "mmc: simplify SDHCI Kconfig dependencies",
+> MMC_SDHCI_PLTFM is no longer selected by the BCM Kona SDHCI
+> driver which is enabled in this defconfig. This results in the
+> SDHCI driver not being built and a boot failure. Explictly
+> enable MMC_SDHCI_PLTFM in bcm_defconfig so the BCM Kona SDHCI
+> driver is built.
+> 
+> Fixes: 5d01b7684b7e ("mmc: simplify SDHCI Kconfig dependencies")
+> Signed-off-by: Matt Porter <mporter@linaro.org>
 
-Hey Ulf,
-  Thanks for sending these out (though I wasn't cc'ed on this 3'rd
-patch). The first two apply for me, but this one doesn't. What should
-I be basing this off of?
+Works for me.
 
-thanks
--john
+Tested-by: Alex Elder <elder@linaro.org>
+
+> ---
+>  arch/arm/configs/bcm_defconfig | 1 +
+>  1 file changed, 1 insertion(+)
+> 
+> diff --git a/arch/arm/configs/bcm_defconfig b/arch/arm/configs/bcm_defconfig
+> index 9d13dae..dcfc559 100644
+> --- a/arch/arm/configs/bcm_defconfig
+> +++ b/arch/arm/configs/bcm_defconfig
+> @@ -98,6 +98,7 @@ CONFIG_MMC_UNSAFE_RESUME=y
+>  CONFIG_MMC_BLOCK_MINORS=32
+>  CONFIG_MMC_TEST=y
+>  CONFIG_MMC_SDHCI=y
+> +CONFIG_MMC_SDHCI_PLTFM=y
+>  CONFIG_MMC_SDHCI_BCM_KONA=y
+>  CONFIG_NEW_LEDS=y
+>  CONFIG_LEDS_CLASS=y
+> 
+
