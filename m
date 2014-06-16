@@ -1,68 +1,45 @@
-From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH 23/38] mmc: sdhci: convert sdhci_set_uhs_signaling() into
- a library function
-Date: Mon, 16 Jun 2014 18:10:55 +0200
-Message-ID: <CAPDyKFoeZLMCNpMMyLKKES+CUmTXt1g1rCPLB6HKXy9AMw1Zng@mail.gmail.com>
-References: <20140423185534.GA26756@n2100.arm.linux.org.uk>
-	<E1Wd2Wd-0003vp-S2@rmk-PC.arm.linux.org.uk>
-	<20140616104615.GA10701@n2100.arm.linux.org.uk>
-	<CAPDyKFrp8JokqBbo3rg2i6WYykU1C9CuPF0FL7AOHh=Gcp5=hg@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <CAPDyKFrp8JokqBbo3rg2i6WYykU1C9CuPF0FL7AOHh=Gcp5=hg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Russell King - ARM Linux <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>
-Cc: Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Barry Song <baohua-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, spear-devel-nkJGhpqTU55BDgjK7y7TUQ@public.gmane.org, Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>, Anton Vorontsov <anton-9xeibp6oKSgdnm+yROfE0A@public.gmane.org>, Michal Simek <michal.simek-gjFFaj9aHVfQT0dZR+AlfA@public.gmane.org>, Thierry Reding <thierry.reding-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Viresh Kumar <viresh.linux-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Ben Dooks <ben-linux-elnMNo+KYs3YtjvyW6yDsg@public.gmane.org>, "linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linuxppc-dev-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+From: Stephen Warren <swarren@wwwdotorg.org>
+Subject: [PATCH] ARM: multi_v7_defconfig: re-enable SDHCI drivers
+Date: Mon, 16 Jun 2014 10:50:42 -0600
+Message-ID: <1402937442-7623-1-git-send-email-swarren@wwwdotorg.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from avon.wwwdotorg.org ([70.85.31.133]:45757 "EHLO
+	avon.wwwdotorg.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932068AbaFPQut (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 16 Jun 2014 12:50:49 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: arm@kernel.org
+Cc: linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, Stephen Warren <swarren@nvidia.com>
 
-On 16 June 2014 14:17, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
-> On 16 June 2014 12:46, Russell King - ARM Linux <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org> wrote:
->> On Wed, Apr 23, 2014 at 08:08:07PM +0100, Russell King wrote:
->>> @@ -1507,25 +1529,7 @@ static void sdhci_do_set_ios(struct sdhci_host *host, struct mmc_ios *ios)
->>>                       host->ops->set_clock(host, host->clock);
->>>               }
->>>
->>> -             if (host->ops->set_uhs_signaling)
->>> -                     host->ops->set_uhs_signaling(host, ios->timing);
->>> -             else {
->>> -                     ctrl_2 = sdhci_readw(host, SDHCI_HOST_CONTROL2);
->>> -                     /* Select Bus Speed Mode for host */
->>> -                     ctrl_2 &= ~SDHCI_CTRL_UHS_MASK;
->>> -                     if ((ios->timing == MMC_TIMING_MMC_HS200) ||
->>> -                         (ios->timing == MMC_TIMING_UHS_SDR104))
->>> -                             ctrl_2 |= SDHCI_CTRL_UHS_SDR104;
->>> -                     else if (ios->timing == MMC_TIMING_UHS_SDR12)
->>> -                             ctrl_2 |= SDHCI_CTRL_UHS_SDR12;
->>> -                     else if (ios->timing == MMC_TIMING_UHS_SDR25)
->>> -                             ctrl_2 |= SDHCI_CTRL_UHS_SDR25;
->>> -                     else if (ios->timing == MMC_TIMING_UHS_SDR50)
->>> -                             ctrl_2 |= SDHCI_CTRL_UHS_SDR50;
->>> -                     else if (ios->timing == MMC_TIMING_UHS_DDR50)
->>> -                             ctrl_2 |= SDHCI_CTRL_UHS_DDR50;
->>> -                     sdhci_writew(host, ctrl_2, SDHCI_HOST_CONTROL2);
->>> -             }
->>> +             host->ops->set_uhs_signaling(host, ios->timing);
->>>
->>>               if (!(host->quirks2 & SDHCI_QUIRK2_PRESET_VALUE_BROKEN) &&
->>>                               ((ios->timing == MMC_TIMING_UHS_SDR12) ||
->>
->> Whoever decided to poorly pick these patches up against my will has
->> slightly messed this patch up - whereas my original patch left the
->> code correctly formatted, when whoever applied this patch did so, they
->> left an additional blank line in the above.
->
+From: Stephen Warren <swarren@nvidia.com>
 
-[snip]
+Following 5d01b7684b7e "mmc: simplify SDHCI Kconfig dependencies",
+SDHCI drivers that use MMC_SDHCI_PLTFM no longer select it, but
+instead depend on it. This means that multi_v7_defconfig no longer
+selects it, and hence many SDHCI drivers are no longer enabled.
+Explicitly enable MMC_SDHCI_PLTFM to solve this.
 
-> Please, feel free to send a patch to fixup my misstake. I will happily apply it.
+Fixes: 5d01b7684b7e ("mmc: simplify SDHCI Kconfig dependencies")
+Signed-off-by: Stephen Warren <swarren@nvidia.com>
+---
+This is a fix for 3.16, and based directly on v3.16-rc1.
 
-I had a second look to fix it up myself, but I just can't find that
-your patch was different than the one I applied (beside the conflict I
-resolved).
+ arch/arm/configs/multi_v7_defconfig | 1 +
+ 1 file changed, 1 insertion(+)
 
-If you do find any other issue regarding the patches in this patchset
-- please let me know and I will try to help.
+diff --git a/arch/arm/configs/multi_v7_defconfig b/arch/arm/configs/multi_v7_defconfig
+index e2d62048e198..17d9462b9fb9 100644
+--- a/arch/arm/configs/multi_v7_defconfig
++++ b/arch/arm/configs/multi_v7_defconfig
+@@ -300,6 +300,7 @@ CONFIG_MMC=y
+ CONFIG_MMC_BLOCK_MINORS=16
+ CONFIG_MMC_ARMMMCI=y
+ CONFIG_MMC_SDHCI=y
++CONFIG_MMC_SDHCI_PLTFM=y
+ CONFIG_MMC_SDHCI_OF_ARASAN=y
+ CONFIG_MMC_SDHCI_ESDHC_IMX=y
+ CONFIG_MMC_SDHCI_DOVE=y
+-- 
+1.8.1.5
 
-Kind regards
-Uffe
