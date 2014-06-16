@@ -1,49 +1,34 @@
-From: Stephen Warren <swarren@wwwdotorg.org>
-Subject: Re: [PATCH] ARM: bcm_defconfig: re-enable BCM Kona SDHCI driver
-Date: Mon, 16 Jun 2014 16:16:39 -0600
-Message-ID: <539F6CC7.4010002@wwwdotorg.org>
-References: <1402941376-29594-1-git-send-email-mporter@linaro.org> <20140616215512.GC23430@n2100.arm.linux.org.uk>
+From: John Stultz <john.stultz@linaro.org>
+Subject: Re: [PATCH V2 3/3] mmc: mmci: Reverse IRQ handling for the arm_variant
+Date: Mon, 16 Jun 2014 15:41:11 -0700
+Message-ID: <CALAqxLXQeYA8jt_hLrJSuWtt7j3t2iZSZjEVAX7ScODAgrmVbA@mail.gmail.com>
+References: <1402906147-26596-1-git-send-email-ulf.hansson@linaro.org>
+	<CALAqxLWs5HLhLo+BspcgyJe0O++PB1HU2G1GpsoQ=cVP34=v=A@mail.gmail.com>
+	<CAPDyKFqK5G0j7ZKAYJqD+ZqBFCjuLTw=NtjBcAsfM=Xzd4cghA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from avon.wwwdotorg.org ([70.85.31.133]:50753 "EHLO
-	avon.wwwdotorg.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756141AbaFPWQm (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 16 Jun 2014 18:16:42 -0400
-In-Reply-To: <20140616215512.GC23430@n2100.arm.linux.org.uk>
+Received: from mail-vc0-f174.google.com ([209.85.220.174]:33428 "EHLO
+	mail-vc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932538AbaFPWlM (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 16 Jun 2014 18:41:12 -0400
+Received: by mail-vc0-f174.google.com with SMTP id hy4so5667304vcb.33
+        for <linux-mmc@vger.kernel.org>; Mon, 16 Jun 2014 15:41:11 -0700 (PDT)
+In-Reply-To: <CAPDyKFqK5G0j7ZKAYJqD+ZqBFCjuLTw=NtjBcAsfM=Xzd4cghA@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: Russell King - ARM Linux <linux@arm.linux.org.uk>, Matt Porter <mporter@linaro.org>, arm@kernel.org, Linux MMC List <linux-mmc@vger.kernel.org>, Linux ARM Kernel List <linux-arm-kernel@lists.infradead.org>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Russell King <linux@arm.linux.org.uk>, Peter Maydell <peter.maydell@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>
 
-On 06/16/2014 03:55 PM, Russell King - ARM Linux wrote:
-> On Mon, Jun 16, 2014 at 01:56:16PM -0400, Matt Porter wrote:
->> Since 5d01b7684b7e "mmc: simplify SDHCI Kconfig dependencies",
->> MMC_SDHCI_PLTFM is no longer selected by the BCM Kona SDHCI
->> driver which is enabled in this defconfig. This results in the
->> SDHCI driver not being built and a boot failure. Explictly
->> enable MMC_SDHCI_PLTFM in bcm_defconfig so the BCM Kona SDHCI
->> driver is built.
-> 
-> I really don't understand why MMC_SDHCI_PLTFM isn't selected by the
-> sub-drivers.  sdhci-pltfm.c is a library module, which is only
-> useful with one of the sub-drivers enabled.
-> 
-> So, rather than providing a multitude of dependent options, why not
-> present people with:
-> 
->  + sdhci drivers
->    + sdhci pci
->    + sdhci acpi
->    + Arasan
->    + Freescale eSDHC
->    + Nintendo Wii
->    + Dove
-> 
-> and leave MMC_SDHCI_PLTFM as a hidden option whose purpose is to
-> enable building of sdhci-pltfm.c.
+On Mon, Jun 16, 2014 at 2:20 PM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> This patch based upon my latest mmc tree and the next branch. I tried
+> to apply it for 3.15, and I think you will be able resolve the
+> conflict - I should be quite trivial.
 
-CC'ing Arnd, as author of 5d01b7684b7e "mmc: simplify SDHCI Kconfig
-dependencies". I also forgot to do that on the patch that fixed
-multi_v7_defconfig for this:-(
+No worries. I just didn't want to waste time resolving it if it was
+logically dependent on some other change.
+
+I'll give it a shot and get back to you.
+
+thanks
+-john
