@@ -1,152 +1,273 @@
-From: Arend van Spriel <arend@broadcom.com>
-Subject: Re: [PATCH] brcmfmac: prevent watchdog from interfering with scanning
- and connecting
-Date: Mon, 16 Jun 2014 10:15:24 +0200
-Message-ID: <539EA79C.7010206@broadcom.com>
-References: <539E8559.3010601@linux.intel.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v4 1/2] mmc: sdhci: Use mmc core regulator infrastucture
+Date: Mon, 16 Jun 2014 10:22:29 +0200
+Message-ID: <CAPDyKFoo+MUSGwZu6Z81g47TccDGYdWF5Vc1A5ETEvYrZOeeMA@mail.gmail.com>
+References: <1402679637-27611-1-git-send-email-markus.mayer@linaro.org>
+	<1402679637-27611-2-git-send-email-markus.mayer@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-gw2-out.broadcom.com ([216.31.210.63]:45791 "EHLO
-	mail-gw2-out.broadcom.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754272AbaFPIPh (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 16 Jun 2014 04:15:37 -0400
-In-Reply-To: <539E8559.3010601@linux.intel.com>
+Received: from mail-qa0-f46.google.com ([209.85.216.46]:43814 "EHLO
+	mail-qa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754196AbaFPIWa (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 16 Jun 2014 04:22:30 -0400
+Received: by mail-qa0-f46.google.com with SMTP id i13so6799252qae.5
+        for <linux-mmc@vger.kernel.org>; Mon, 16 Jun 2014 01:22:29 -0700 (PDT)
+In-Reply-To: <1402679637-27611-2-git-send-email-markus.mayer@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "Fu, Zhonghui" <zhonghui.fu@linux.intel.com>, brudley@broadcom.com, Franky Lin <frankyl@broadcom.com>, meuleman@broadcom.com, linville@tuxdriver.com, pieterpg@broadcom.com, dekim@broadcom.com, mcgrof@do-not-panic.com, antonio@open-mesh.com, johannes.berg@intel.com
-Cc: linux-wireless@vger.kernel.org, brcm80211-dev-list@broadcom.com, netdev@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, Russell King <linux@arm.linux.org.uk>
+To: Markus Mayer <markus.mayer@linaro.org>
+Cc: Chris Ball <chris@printf.net>, Tim Kryger <tim.kryger@gmail.com>, Mike Looijmans <mike.looijmans@topic.nl>, Andrew Bresticker <abrestic@chromium.org>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 
-On 16-06-14 07:49, Fu, Zhonghui wrote:
->  From 14485894add32aedacb3e486ebb2cc2b73861abf Mon Sep 17 00:00:00 2001
-> From: Fu zhonghui <zhonghui.fu@linux.intel.com>
-> Date: Wed, 11 Jun 2014 11:06:55 +0800
-> Subject: [PATCH] brcmfmac: prevent watchdog from interfering with scanning and connecting
+On 13 June 2014 19:13, Markus Mayer <markus.mayer@linaro.org> wrote:
+> From: Tim Kryger <tim.kryger@gmail.com>
 >
-> Watchdog in brcmfmac driver may make WiFi chip enter sleep mode
-> before completion of scanning or connecting.
+> Switch the common SDHCI code over to use mmc_host's regulator pointers
+> and remove the ones in the sdhci_host structure.  Additionally, use the
+> common mmc_regulator_get_supply function to get the regulators and set
+> the ocr_avail mask.
 >
-> This will lead to scanning or connecting failure.
+> This change sets the ocr_avail directly based upon the voltage ranges
+> supported which ensures ocr_avail is set correctly while allowing the
+> use of regulators that can't provide exactly 1.8v, 3.0v, or 3.3v.
 >
-> Increasing temporarily idle-time threshold during scanning or
-> connecting can ensure scanning or connecting success without
-> watchdog interference.
+> Signed-off-by: Tim Kryger <tim.kryger@gmail.com>
+> Signed-off-by: Markus Mayer <markus.mayer@linaro.org>
+> Reviewed-by: Matt Porter <mporter@linaro.org>
 
-Are you sure you are not having runtime PM enabled. That could be your 
-problem as the host controller code disables sdio irqs. Please see this 
-thread [1]. For our device runtime pm should not be enabled, but I am 
-not sure if that is taken into account in mmc_attach_sdio() (see code 
-below).
+Thanks!
 
-Gr. AvS
+Applied for next.
 
-[1] http://www.spinics.net/lists/linux-mmc/msg25978.html
+Kind regards
+Uffe
 
---8<----------------------------------------------------------------
-
-	/*
-	 * Enable runtime PM only if supported by host+card+board
-	 */
-	if (host->caps & MMC_CAP_POWER_OFF_CARD) {
-		/*
-		 * Let runtime PM core know our card is active
-		 */
-		err = pm_runtime_set_active(&card->dev);
-		if (err)
-			goto remove;
-
-		/*
-		 * Enable runtime PM for this card
-		 */
-		pm_runtime_enable(&card->dev);
-	}
-
-> Signed-off-by: Fu zhonghui <zhonghui.fu@linux.intel.com>
 > ---
->   drivers/net/wireless/brcm80211/brcmfmac/dhd_sdio.c |   18 ++++++++++++++++--
->   .../net/wireless/brcm80211/brcmfmac/wl_cfg80211.c  |    3 ++-
->   2 files changed, 18 insertions(+), 3 deletions(-)
+>  drivers/mmc/host/sdhci.c  | 97 ++++++++++++++++++-----------------------------
+>  include/linux/mmc/sdhci.h |  3 --
+>  2 files changed, 36 insertions(+), 64 deletions(-)
 >
-> diff --git a/drivers/net/wireless/brcm80211/brcmfmac/dhd_sdio.c b/drivers/net/wireless/brcm80211/brcmfmac/dhd_sdio.c
-> index 13c89a0..729deab 100644
-> --- a/drivers/net/wireless/brcm80211/brcmfmac/dhd_sdio.c
-> +++ b/drivers/net/wireless/brcm80211/brcmfmac/dhd_sdio.c
-> @@ -34,6 +34,7 @@
->   #include <linux/vmalloc.h>
->   #include <linux/platform_data/brcmfmac-sdio.h>
->   #include <linux/moduleparam.h>
-> +#include <net/cfg80211.h>
->   #include <asm/unaligned.h>
->   #include <defs.h>
->   #include <brcmu_wifi.h>
-> @@ -43,6 +44,10 @@
->   #include "sdio_host.h"
->   #include "chip.h"
->   #include "nvram.h"
-> +#include "dhd.h"
-> +#include "fwil_types.h"
-> +#include "p2p.h"
-> +#include "wl_cfg80211.h"
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index 47055f3..ee524b0 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -1223,6 +1223,7 @@ EXPORT_SYMBOL_GPL(sdhci_set_clock);
+>  static void sdhci_set_power(struct sdhci_host *host, unsigned char mode,
+>                             unsigned short vdd)
+>  {
+> +       struct mmc_host *mmc = host->mmc;
+>         u8 pwr = 0;
 >
->   #define DCMD_RESP_TIMEOUT  2000	/* In milli second */
+>         if (mode != MMC_POWER_OFF) {
+> @@ -1284,9 +1285,9 @@ static void sdhci_set_power(struct sdhci_host *host, unsigned char mode,
+>                         mdelay(10);
+>         }
 >
-> @@ -307,6 +312,7 @@ struct rte_console {
->   					 * when idle
->   					 */
->   #define BRCMF_IDLE_INTERVAL	1
-> +#define BRCMF_IDLE_INTERVAL_SCANNING_CONNECTING	100
+> -       if (host->vmmc) {
+> +       if (!IS_ERR(mmc->supply.vmmc)) {
+>                 spin_unlock_irq(&host->lock);
+> -               mmc_regulator_set_ocr(host->mmc, host->vmmc, vdd);
+> +               mmc_regulator_set_ocr(host->mmc, mmc->supply.vmmc, vdd);
+>                 spin_lock_irq(&host->lock);
+>         }
+>  }
+> @@ -1440,13 +1441,15 @@ static void sdhci_do_set_ios(struct sdhci_host *host, struct mmc_ios *ios)
+>  {
+>         unsigned long flags;
+>         u8 ctrl;
+> +       struct mmc_host *mmc = host->mmc;
 >
->   #define KSO_WAIT_US 50
->   #define MAX_KSO_ATTEMPTS (PMU_MAX_TRANSITION_DLY/KSO_WAIT_US)
-> @@ -3613,9 +3619,9 @@ void brcmf_sdio_isr(struct brcmf_sdio *bus)
+>         spin_lock_irqsave(&host->lock, flags);
 >
->   static bool brcmf_sdio_bus_watchdog(struct brcmf_sdio *bus)
->   {
-> -#ifdef DEBUG
->   	struct brcmf_bus *bus_if = dev_get_drvdata(bus->sdiodev->dev);
-> -#endif	/* DEBUG */
-> +	struct brcmf_cfg80211_info *cfg = bus_if->drvr->config;
-> +	struct brcmf_if *ifp = cfg->pub->iflist[0];
+>         if (host->flags & SDHCI_DEVICE_DEAD) {
+>                 spin_unlock_irqrestore(&host->lock, flags);
+> -               if (host->vmmc && ios->power_mode == MMC_POWER_OFF)
+> -                       mmc_regulator_set_ocr(host->mmc, host->vmmc, 0);
+> +               if (!IS_ERR(mmc->supply.vmmc) &&
+> +                   ios->power_mode == MMC_POWER_OFF)
+> +                       mmc_regulator_set_ocr(host->mmc, mmc->supply.vmmc, 0);
+>                 return;
+>         }
 >
->   	brcmf_dbg(TIMER, "Enter\n");
+> @@ -1707,6 +1710,7 @@ static void sdhci_enable_sdio_irq(struct mmc_host *mmc, int enable)
+>  static int sdhci_do_start_signal_voltage_switch(struct sdhci_host *host,
+>                                                 struct mmc_ios *ios)
+>  {
+> +       struct mmc_host *mmc = host->mmc;
+>         u16 ctrl;
+>         int ret;
 >
-> @@ -3678,6 +3684,14 @@ static bool brcmf_sdio_bus_watchdog(struct brcmf_sdio *bus)
+> @@ -1725,8 +1729,9 @@ static int sdhci_do_start_signal_voltage_switch(struct sdhci_host *host,
+>                 ctrl &= ~SDHCI_CTRL_VDD_180;
+>                 sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
 >
->   	/* On idle timeout clear activity flag and/or turn off clock */
->   	if ((bus->idletime > 0) && (bus->clkstate == CLK_AVAIL)) {
+> -               if (host->vqmmc) {
+> -                       ret = regulator_set_voltage(host->vqmmc, 2700000, 3600000);
+> +               if (!IS_ERR(mmc->supply.vqmmc)) {
+> +                       ret = regulator_set_voltage(mmc->supply.vqmmc, 2700000,
+> +                                                   3600000);
+>                         if (ret) {
+>                                 pr_warning("%s: Switching to 3.3V signalling voltage "
+>                                                 " failed\n", mmc_hostname(host->mmc));
+> @@ -1746,8 +1751,8 @@ static int sdhci_do_start_signal_voltage_switch(struct sdhci_host *host,
+>
+>                 return -EAGAIN;
+>         case MMC_SIGNAL_VOLTAGE_180:
+> -               if (host->vqmmc) {
+> -                       ret = regulator_set_voltage(host->vqmmc,
+> +               if (!IS_ERR(mmc->supply.vqmmc)) {
+> +                       ret = regulator_set_voltage(mmc->supply.vqmmc,
+>                                         1700000, 1950000);
+>                         if (ret) {
+>                                 pr_warning("%s: Switching to 1.8V signalling voltage "
+> @@ -1776,8 +1781,9 @@ static int sdhci_do_start_signal_voltage_switch(struct sdhci_host *host,
+>
+>                 return -EAGAIN;
+>         case MMC_SIGNAL_VOLTAGE_120:
+> -               if (host->vqmmc) {
+> -                       ret = regulator_set_voltage(host->vqmmc, 1100000, 1300000);
+> +               if (!IS_ERR(mmc->supply.vqmmc)) {
+> +                       ret = regulator_set_voltage(mmc->supply.vqmmc, 1100000,
+> +                                                   1300000);
+>                         if (ret) {
+>                                 pr_warning("%s: Switching to 1.2V signalling voltage "
+>                                                 " failed\n", mmc_hostname(host->mmc));
+> @@ -2962,25 +2968,22 @@ int sdhci_add_host(struct sdhci_host *host)
+>             !(host->mmc->caps & MMC_CAP_NONREMOVABLE))
+>                 mmc->caps |= MMC_CAP_NEEDS_POLL;
+>
+> +       /* If there are external regulators, get them */
+> +       if (mmc_regulator_get_supply(mmc) == -EPROBE_DEFER)
+> +               return -EPROBE_DEFER;
 > +
-> +		if (test_bit(BRCMF_SCAN_STATUS_BUSY, &cfg->scan_status) ||
-> +		    test_bit(BRCMF_VIF_STATUS_CONNECTING, &ifp->vif->sme_state)) {
-> +			bus->idletime = BRCMF_IDLE_INTERVAL_SCANNING_CONNECTING;
-> +		} else {
-> +			bus->idletime = BRCMF_IDLE_INTERVAL;
-> +		}
+>         /* If vqmmc regulator and no 1.8V signalling, then there's no UHS */
+> -       host->vqmmc = regulator_get_optional(mmc_dev(mmc), "vqmmc");
+> -       if (IS_ERR_OR_NULL(host->vqmmc)) {
+> -               if (PTR_ERR(host->vqmmc) < 0) {
+> -                       pr_info("%s: no vqmmc regulator found\n",
+> -                               mmc_hostname(mmc));
+> -                       host->vqmmc = NULL;
+> -               }
+> -       } else {
+> -               ret = regulator_enable(host->vqmmc);
+> -               if (!regulator_is_supported_voltage(host->vqmmc, 1700000,
+> -                       1950000))
+> +       if (!IS_ERR(mmc->supply.vqmmc)) {
+> +               ret = regulator_enable(mmc->supply.vqmmc);
+> +               if (!regulator_is_supported_voltage(mmc->supply.vqmmc, 1700000,
+> +                                                   1950000))
+>                         caps[1] &= ~(SDHCI_SUPPORT_SDR104 |
+>                                         SDHCI_SUPPORT_SDR50 |
+>                                         SDHCI_SUPPORT_DDR50);
+>                 if (ret) {
+>                         pr_warn("%s: Failed to enable vqmmc regulator: %d\n",
+>                                 mmc_hostname(mmc), ret);
+> -                       host->vqmmc = NULL;
+> +                       mmc->supply.vqmmc = NULL;
+>                 }
+>         }
+>
+> @@ -3041,34 +3044,6 @@ int sdhci_add_host(struct sdhci_host *host)
+>
+>         ocr_avail = 0;
+>
+> -       host->vmmc = regulator_get_optional(mmc_dev(mmc), "vmmc");
+> -       if (IS_ERR_OR_NULL(host->vmmc)) {
+> -               if (PTR_ERR(host->vmmc) < 0) {
+> -                       pr_info("%s: no vmmc regulator found\n",
+> -                               mmc_hostname(mmc));
+> -                       host->vmmc = NULL;
+> -               }
+> -       }
+> -
+> -#ifdef CONFIG_REGULATOR
+> -       /*
+> -        * Voltage range check makes sense only if regulator reports
+> -        * any voltage value.
+> -        */
+> -       if (host->vmmc && regulator_get_voltage(host->vmmc) > 0) {
+> -               ret = regulator_is_supported_voltage(host->vmmc, 2700000,
+> -                       3600000);
+> -               if ((ret <= 0) || (!(caps[0] & SDHCI_CAN_VDD_330)))
+> -                       caps[0] &= ~SDHCI_CAN_VDD_330;
+> -               if ((ret <= 0) || (!(caps[0] & SDHCI_CAN_VDD_300)))
+> -                       caps[0] &= ~SDHCI_CAN_VDD_300;
+> -               ret = regulator_is_supported_voltage(host->vmmc, 1700000,
+> -                       1950000);
+> -               if ((ret <= 0) || (!(caps[0] & SDHCI_CAN_VDD_180)))
+> -                       caps[0] &= ~SDHCI_CAN_VDD_180;
+> -       }
+> -#endif /* CONFIG_REGULATOR */
+> -
+>         /*
+>          * According to SD Host Controller spec v3.00, if the Host System
+>          * can afford more than 150mA, Host Driver should set XPC to 1. Also
+> @@ -3077,8 +3052,8 @@ int sdhci_add_host(struct sdhci_host *host)
+>          * value.
+>          */
+>         max_current_caps = sdhci_readl(host, SDHCI_MAX_CURRENT);
+> -       if (!max_current_caps && host->vmmc) {
+> -               u32 curr = regulator_get_current_limit(host->vmmc);
+> +       if (!max_current_caps && !IS_ERR(mmc->supply.vmmc)) {
+> +               u32 curr = regulator_get_current_limit(mmc->supply.vmmc);
+>                 if (curr > 0) {
+>
+>                         /* convert to SDHCI_MAX_CURRENT format */
+> @@ -3118,8 +3093,11 @@ int sdhci_add_host(struct sdhci_host *host)
+>                                    SDHCI_MAX_CURRENT_MULTIPLIER;
+>         }
+>
+> +       if (mmc->ocr_avail)
+> +               ocr_avail &= mmc->ocr_avail;
 > +
->   		if (++bus->idlecount >= bus->idletime) {
->   			bus->idlecount = 0;
->   			if (bus->activity) {
-> diff --git a/drivers/net/wireless/brcm80211/brcmfmac/wl_cfg80211.c b/drivers/net/wireless/brcm80211/brcmfmac/wl_cfg80211.c
-> index be19852..e76517e 100644
-> --- a/drivers/net/wireless/brcm80211/brcmfmac/wl_cfg80211.c
-> +++ b/drivers/net/wireless/brcm80211/brcmfmac/wl_cfg80211.c
-> @@ -913,6 +913,8 @@ brcmf_cfg80211_escan(struct wiphy *wiphy, struct brcmf_cfg80211_vif *vif,
->   		return -EAGAIN;
->   	}
+>         if (host->ocr_mask)
+> -               ocr_avail = host->ocr_mask;
+> +               ocr_avail &= host->ocr_mask;
 >
-> +	set_bit(BRCMF_SCAN_STATUS_BUSY, &cfg->scan_status);
-> +
->   	/* If scan req comes for p2p0, send it over primary I/F */
->   	if (vif == cfg->p2p.bss_idx[P2PAPI_BSSCFG_DEVICE].vif)
->   		vif = cfg->p2p.bss_idx[P2PAPI_BSSCFG_PRIMARY].vif;
-> @@ -933,7 +935,6 @@ brcmf_cfg80211_escan(struct wiphy *wiphy, struct brcmf_cfg80211_vif *vif,
->   	}
+>         mmc->ocr_avail = ocr_avail;
+>         mmc->ocr_avail_sdio = ocr_avail;
+> @@ -3273,6 +3251,7 @@ EXPORT_SYMBOL_GPL(sdhci_add_host);
 >
->   	cfg->scan_request = request;
-> -	set_bit(BRCMF_SCAN_STATUS_BUSY, &cfg->scan_status);
->   	if (escan_req) {
->   		cfg->escan_info.run = brcmf_run_escan;
->   		err = brcmf_p2p_scan_prep(wiphy, request, vif);
-> -- 1.7.1
+>  void sdhci_remove_host(struct sdhci_host *host, int dead)
+>  {
+> +       struct mmc_host *mmc = host->mmc;
+>         unsigned long flags;
 >
-
+>         if (dead) {
+> @@ -3310,15 +3289,11 @@ void sdhci_remove_host(struct sdhci_host *host, int dead)
+>
+>         tasklet_kill(&host->finish_tasklet);
+>
+> -       if (host->vmmc) {
+> -               regulator_disable(host->vmmc);
+> -               regulator_put(host->vmmc);
+> -       }
+> +       if (!IS_ERR(mmc->supply.vmmc))
+> +               regulator_disable(mmc->supply.vmmc);
+>
+> -       if (host->vqmmc) {
+> -               regulator_disable(host->vqmmc);
+> -               regulator_put(host->vqmmc);
+> -       }
+> +       if (!IS_ERR(mmc->supply.vqmmc))
+> +               regulator_disable(mmc->supply.vqmmc);
+>
+>         if (host->adma_desc)
+>                 dma_free_coherent(mmc_dev(host->mmc), ADMA_SIZE,
+> diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
+> index 08abe99..09ebe57 100644
+> --- a/include/linux/mmc/sdhci.h
+> +++ b/include/linux/mmc/sdhci.h
+> @@ -104,9 +104,6 @@ struct sdhci_host {
+>
+>         const struct sdhci_ops *ops;    /* Low level hw interface */
+>
+> -       struct regulator *vmmc;         /* Power regulator (vmmc) */
+> -       struct regulator *vqmmc;        /* Signaling regulator (vccq) */
+> -
+>         /* Internal data */
+>         struct mmc_host *mmc;   /* MMC structure */
+>         u64 dma_mask;           /* custom DMA mask */
+> --
+> 1.9.1
+>
