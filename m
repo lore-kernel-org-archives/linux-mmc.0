@@ -1,53 +1,62 @@
-From: Haojian Zhuang <haojian.zhuang@gmail.com>
-Subject: Re: [PATCH v2] mmc: Add hardware dependencies for sdhci-pxav3 and sdhci-pxav2
-Date: Tue, 17 Jun 2014 08:21:02 +0800
-Message-ID: <CAN1soZw-_YQO9gMEbs6ZGVE9V+pnVL1Qu3zyfu_ErekZtbcTuw@mail.gmail.com>
-References: <20140616141803.7d1e2b8a@endymion.delvare>
+From: micky <micky_ching@realsil.com.cn>
+Subject: Re: [PATCH 2/2] mmc: rtsx: add support for async request
+Date: Tue, 17 Jun 2014 09:04:18 +0800
+Message-ID: <539F9412.3010209@realsil.com.cn>
+References: <cover.1402037562.git.micky_ching@realsil.com.cn>	<7b58fb0b0915ea0b0838404c74ec22a3b6e5f5a8.1402037565.git.micky_ching@realsil.com.cn>	<CAPDyKFq1wYZRbuwhLjTMbwN1KYgKuNuZDb7t8FV78Pa=W85oqg@mail.gmail.com>	<539EB43B.8070707@realsil.com.cn>
+ <CAPDyKFqKDAqvacwCVKM8KLjxfykpBq38MS_RgWCcA7+He4_S5w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20140616141803.7d1e2b8a@endymion.delvare>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Jean Delvare <jdelvare@suse.de>
-Cc: linux-mmc@vger.kernel.org, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Eric Miao <eric.y.miao@gmail.com>
+Content-Type: text/plain; charset="us-ascii"; Format="flowed"
+Content-Transfer-Encoding: 7bit
+Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
+In-Reply-To: <CAPDyKFqKDAqvacwCVKM8KLjxfykpBq38MS_RgWCcA7+He4_S5w@mail.gmail.com>
+List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
+List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel>
+List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
+List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
+List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
+Errors-To: driverdev-devel-bounces@linuxdriverproject.org
+Sender: driverdev-devel-bounces@linuxdriverproject.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Samuel Ortiz <sameo@linux.intel.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Chris Ball <chris@printf.net>, Wei WANG <wei_wang@realsil.com.cn>, Roger <rogerable@realtek.com>, devel@linuxdriverproject.org, Lee Jones <lee.jones@linaro.org>, Dan Carpenter <dan.carpenter@oracle.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On Mon, Jun 16, 2014 at 8:18 PM, Jean Delvare <jdelvare@suse.de> wrote:
-> I seem to understand that the sdhci-pxav3 and sdhci-pxav2 drivers are
-> only needed on the MMP architecture. So add a hardware dependency on
-> ARCH_MMP, so that other users don't get to build useless drivers.
+On 06/16/2014 08:40 PM, Ulf Hansson wrote:
+> On 16 June 2014 11:09, micky <micky_ching@realsil.com.cn> wrote:
+>> On 06/16/2014 04:42 PM, Ulf Hansson wrote:
+>>>> @@ -36,7 +37,10 @@ struct realtek_pci_sdmmc {
+>>>>>          struct rtsx_pcr         *pcr;
+>>>>>          struct mmc_host         *mmc;
+>>>>>          struct mmc_request      *mrq;
+>>>>> +       struct workqueue_struct *workq;
+>>>>> +#define SDMMC_WORKQ_NAME       "rtsx_pci_sdmmc_workq"
+>>>>>
+>>>>> +       struct work_struct      work;
+>>> I am trying to understand why you need a work/workqueue to implement
+>>> this feature. Is that really the case?
+>>>
+>>> Could you elaborate on the reasons?
+>> Hi Uffe,
+>>
+>> we need return as fast as possible in mmc_host_ops request(ops->request)
+>> callback,
+>> so the mmc core can continue handle next request.
+>> when next request everything is ready, it will wait previous done(if not
+>> done),
+>> then call ops->request().
+>>
+>> we can't use atomic context, because we use mutex_lock() to protect
+> ops->request should never executed in atomic context. Is that your concern?
+Yes.
 >
-> Signed-off-by: Jean Delvare <jdelvare@suse.de>
-> Cc: Chris Ball <chris@printf.net>
-> Cc: Ulf Hansson <ulf.hansson@linaro.org>
-> Cc: Eric Miao <eric.y.miao@gmail.com>
-> Cc: Haojian Zhuang <haojian.zhuang@gmail.com>
-> ---
-> Changes since v1:
->  * Rebased on kernel 3.16-rc1
+>> resource, and we have to hold the lock during handle request.
+>> So I use workq, we just queue a work and return in ops->request(),
+>> The mmc core can continue without blocking at ops->request().
+>>
+>> Best Regards.
+>> micky.
+> Kind regards
+> Uffe
+> .
 >
->  drivers/mmc/host/Kconfig |    2 ++
->  1 file changed, 2 insertions(+)
->
-> --- linux-3.16-rc1.orig/drivers/mmc/host/Kconfig        2014-06-16 14:03:26.195946537 +0200
-> +++ linux-3.16-rc1/drivers/mmc/host/Kconfig     2014-06-16 14:04:02.128663037 +0200
-> @@ -217,6 +217,7 @@ config MMC_SDHCI_PXAV3
->         tristate "Marvell MMP2 SD Host Controller support (PXAV3)"
->         depends on CLKDEV_LOOKUP
->         depends on MMC_SDHCI_PLTFM
-> +       depends on ARCH_MMP || COMPILE_TEST
->         default CPU_MMP2
->         help
->           This selects the Marvell(R) PXAV3 SD Host Controller.
-> @@ -229,6 +230,7 @@ config MMC_SDHCI_PXAV2
->         tristate "Marvell PXA9XX SD Host Controller support (PXAV2)"
->         depends on CLKDEV_LOOKUP
->         depends on MMC_SDHCI_PLTFM
-> +       depends on ARCH_MMP || COMPILE_TEST
->         default CPU_PXA910
->         help
->           This selects the Marvell(R) PXAV2 SD Host Controller.
->
->
-
-Acked-by: Haojian Zhuang <haojian.zhuang@gmail.com>
