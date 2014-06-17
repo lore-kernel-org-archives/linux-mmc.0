@@ -1,93 +1,90 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 2/2] mmc: rtsx: add support for async request
-Date: Tue, 17 Jun 2014 09:45:31 +0200
-Message-ID: <CAPDyKFqK8mLGc82FfEoxdHG7mioX7JmtFDO=18XZRkwQ4ykU2g@mail.gmail.com>
-References: <cover.1402037562.git.micky_ching@realsil.com.cn>
- <7b58fb0b0915ea0b0838404c74ec22a3b6e5f5a8.1402037565.git.micky_ching@realsil.com.cn>
- <CAPDyKFq1wYZRbuwhLjTMbwN1KYgKuNuZDb7t8FV78Pa=W85oqg@mail.gmail.com>
- <539EB43B.8070707@realsil.com.cn>
- <CAPDyKFqKDAqvacwCVKM8KLjxfykpBq38MS_RgWCcA7+He4_S5w@mail.gmail.com>
- <539F9412.3010209@realsil.com.cn>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
-In-Reply-To: <539F9412.3010209@realsil.com.cn>
-List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
-List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel>
-List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
-List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
-List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
-Errors-To: driverdev-devel-bounces@linuxdriverproject.org
-Sender: driverdev-devel-bounces@linuxdriverproject.org
-To: micky <micky_ching@realsil.com.cn>
-Cc: Samuel Ortiz <sameo@linux.intel.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Chris Ball <chris@printf.net>, Wei WANG <wei_wang@realsil.com.cn>, Roger <rogerable@realtek.com>, devel@linuxdriverproject.org, Lee Jones <lee.jones@linaro.org>, Dan Carpenter <dan.carpenter@oracle.com>
+From: Robin van der Gracht <robin@protonic.nl>
+Subject: [PATCH] mmc: mxs-mmc: Introducing regulator support.
+Date: Tue, 17 Jun 2014 12:07:11 +0200
+Message-ID: <1402999631-4256-1-git-send-email-robin@protonic.nl>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from protonic.xs4all.nl ([83.163.252.89]:17437 "EHLO
+	protonic.xs4all.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753889AbaFQK0G (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 17 Jun 2014 06:26:06 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: chris@printf.net, ulf.hansson@linaro.org, Robin van der Gracht <robin@protonic.nl>
 
-On 17 June 2014 03:04, micky <micky_ching@realsil.com.cn> wrote:
-> On 06/16/2014 08:40 PM, Ulf Hansson wrote:
->>
->> On 16 June 2014 11:09, micky <micky_ching@realsil.com.cn> wrote:
->>>
->>> On 06/16/2014 04:42 PM, Ulf Hansson wrote:
->>>>>
->>>>> @@ -36,7 +37,10 @@ struct realtek_pci_sdmmc {
->>>>>>
->>>>>>          struct rtsx_pcr         *pcr;
->>>>>>          struct mmc_host         *mmc;
->>>>>>          struct mmc_request      *mrq;
->>>>>> +       struct workqueue_struct *workq;
->>>>>> +#define SDMMC_WORKQ_NAME       "rtsx_pci_sdmmc_workq"
->>>>>>
->>>>>> +       struct work_struct      work;
->>>>
->>>> I am trying to understand why you need a work/workqueue to implement
->>>> this feature. Is that really the case?
->>>>
->>>> Could you elaborate on the reasons?
->>>
->>> Hi Uffe,
->>>
->>> we need return as fast as possible in mmc_host_ops request(ops->request)
->>> callback,
->>> so the mmc core can continue handle next request.
->>> when next request everything is ready, it will wait previous done(if not
->>> done),
->>> then call ops->request().
->>>
->>> we can't use atomic context, because we use mutex_lock() to protect
->>
->> ops->request should never executed in atomic context. Is that your
->> concern?
->
-> Yes.
+Signed-off-by: Robin van der Gracht <robin@protonic.nl>
+---
+ drivers/mmc/host/mxs-mmc.c | 37 +++++++++++++++++++++++++++++--------
+ 1 file changed, 29 insertions(+), 8 deletions(-)
 
-Okay. Unless I missed your point, I don't think you need the work/workqueue.
+diff --git a/drivers/mmc/host/mxs-mmc.c b/drivers/mmc/host/mxs-mmc.c
+index 073e871..efe8ae1 100644
+--- a/drivers/mmc/host/mxs-mmc.c
++++ b/drivers/mmc/host/mxs-mmc.c
+@@ -66,10 +66,12 @@ struct mxs_mmc_host {
+ 	struct mmc_request		*mrq;
+ 	struct mmc_command		*cmd;
+ 	struct mmc_data			*data;
++	struct regulator                *vmmc;
+ 
+ 	unsigned char			bus_width;
+ 	spinlock_t			lock;
+ 	int				sdio_irq_en;
++	unsigned char                   power_mode;
+ };
+ 
+ static int mxs_mmc_get_cd(struct mmc_host *mmc)
+@@ -502,6 +504,30 @@ static void mxs_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 	else
+ 		host->bus_width = 0;
+ 
++	if (ios->power_mode != host->power_mode) {
++		switch (ios->power_mode) {
++		case MMC_POWER_OFF:
++			if (host->vmmc) {
++				if (regulator_disable(host->vmmc)) {
++					dev_err(mmc_dev(host->mmc),
++					"Failed to disable vmmc regulator\n");
++				}
++			}
++			break;
++		case MMC_POWER_UP:
++			if (host->vmmc) {
++				if (regulator_enable(host->vmmc)) {
++					dev_err(mmc_dev(host->mmc),
++					"Failed to enable vmmc regulator\n");
++				}
++			}
++			break;
++		default:
++			break;
++		}
++		host->power_mode = ios->power_mode;
++	}
++
+ 	if (ios->clock)
+ 		mxs_ssp_set_clk_rate(&host->ssp, ios->clock);
+ }
+@@ -597,16 +623,11 @@ static int mxs_mmc_probe(struct platform_device *pdev)
+ 
+ 	host->mmc = mmc;
+ 	host->sdio_irq_en = 0;
++	host->power_mode = MMC_POWER_OFF;
+ 
+ 	reg_vmmc = devm_regulator_get(&pdev->dev, "vmmc");
+-	if (!IS_ERR(reg_vmmc)) {
+-		ret = regulator_enable(reg_vmmc);
+-		if (ret) {
+-			dev_err(&pdev->dev,
+-				"Failed to enable vmmc regulator: %d\n", ret);
+-			goto out_mmc_free;
+-		}
+-	}
++	if (!IS_ERR(reg_vmmc))
++		host->vmmc = reg_vmmc;
+ 
+ 	ssp->clk = devm_clk_get(&pdev->dev, NULL);
+ 	if (IS_ERR(ssp->clk)) {
+-- 
+1.9.1
 
-Because, ops->request isn't ever executed in atomic context. That's
-due to the mmc core, which handles the async mechanism, are waiting
-for a completion variable in process context, before it invokes the
-ops->request() callback.
-
-That completion variable will be kicked, from your host driver, when
-you invoke mmc_request_done(), .
-
-Kind regards
-Uffe
-
->>
->>
->>> resource, and we have to hold the lock during handle request.
->>> So I use workq, we just queue a work and return in ops->request(),
->>> The mmc core can continue without blocking at ops->request().
->>>
->>> Best Regards.
->>> micky.
->>
->> Kind regards
->> Uffe
->> .
->>
->
