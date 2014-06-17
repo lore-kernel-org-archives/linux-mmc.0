@@ -1,62 +1,30 @@
 From: micky <micky_ching@realsil.com.cn>
-Subject: Re: [PATCH 2/2] mmc: rtsx: add support for async request
-Date: Tue, 17 Jun 2014 09:04:18 +0800
-Message-ID: <539F9412.3010209@realsil.com.cn>
-References: <cover.1402037562.git.micky_ching@realsil.com.cn>	<7b58fb0b0915ea0b0838404c74ec22a3b6e5f5a8.1402037565.git.micky_ching@realsil.com.cn>	<CAPDyKFq1wYZRbuwhLjTMbwN1KYgKuNuZDb7t8FV78Pa=W85oqg@mail.gmail.com>	<539EB43B.8070707@realsil.com.cn>
- <CAPDyKFqKDAqvacwCVKM8KLjxfykpBq38MS_RgWCcA7+He4_S5w@mail.gmail.com>
+Subject: Re: [PATCH 1/2] mfd: rtsx: add dma transfer function
+Date: Tue, 17 Jun 2014 09:08:49 +0800
+Message-ID: <539F9521.50706@realsil.com.cn>
+References: <cover.1402037562.git.micky_ching@realsil.com.cn> <9021eae37d96aa027d00ae4a7b6cd84dbbd1b6b5.1402037564.git.micky_ching@realsil.com.cn> <20140616122032.GS14323@lee--X1>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"; Format="flowed"
-Content-Transfer-Encoding: 7bit
-Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
-In-Reply-To: <CAPDyKFqKDAqvacwCVKM8KLjxfykpBq38MS_RgWCcA7+He4_S5w@mail.gmail.com>
-List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
-List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel>
-List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
-List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
-List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
-Errors-To: driverdev-devel-bounces@linuxdriverproject.org
-Sender: driverdev-devel-bounces@linuxdriverproject.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Samuel Ortiz <sameo@linux.intel.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Chris Ball <chris@printf.net>, Wei WANG <wei_wang@realsil.com.cn>, Roger <rogerable@realtek.com>, devel@linuxdriverproject.org, Lee Jones <lee.jones@linaro.org>, Dan Carpenter <dan.carpenter@oracle.com>
+Content-Type: text/plain; charset=UTF-8;
+	format=flowed
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from rtits2.realtek.com ([60.250.210.242]:55404 "EHLO
+	rtits2.realtek.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751592AbaFQBEe (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 16 Jun 2014 21:04:34 -0400
+In-Reply-To: <20140616122032.GS14323@lee--X1>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Lee Jones <lee.jones@linaro.org>
+Cc: sameo@linux.intel.com, chris@printf.net, ulf.hansson@linaro.org, devel@linuxdriverproject.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, gregkh@linuxfoundation.org, dan.carpenter@oracle.com, rogerable@realtek.com, wei_wang@realsil.com.cn
 
-On 06/16/2014 08:40 PM, Ulf Hansson wrote:
-> On 16 June 2014 11:09, micky <micky_ching@realsil.com.cn> wrote:
->> On 06/16/2014 04:42 PM, Ulf Hansson wrote:
->>>> @@ -36,7 +37,10 @@ struct realtek_pci_sdmmc {
->>>>>          struct rtsx_pcr         *pcr;
->>>>>          struct mmc_host         *mmc;
->>>>>          struct mmc_request      *mrq;
->>>>> +       struct workqueue_struct *workq;
->>>>> +#define SDMMC_WORKQ_NAME       "rtsx_pci_sdmmc_workq"
->>>>>
->>>>> +       struct work_struct      work;
->>> I am trying to understand why you need a work/workqueue to implement
->>> this feature. Is that really the case?
->>>
->>> Could you elaborate on the reasons?
->> Hi Uffe,
->>
->> we need return as fast as possible in mmc_host_ops request(ops->request)
->> callback,
->> so the mmc core can continue handle next request.
->> when next request everything is ready, it will wait previous done(if not
->> done),
->> then call ops->request().
->>
->> we can't use atomic context, because we use mutex_lock() to protect
-> ops->request should never executed in atomic context. Is that your concern?
-Yes.
->
->> resource, and we have to hold the lock during handle request.
->> So I use workq, we just queue a work and return in ops->request(),
->> The mmc core can continue without blocking at ops->request().
->>
->> Best Regards.
->> micky.
-> Kind regards
-> Uffe
-> .
->
+On 06/16/2014 08:20 PM, Lee Jones wrote:
+> I don't see any glaring issues with this patch.  Does it rely on the
+> first patch, or vise versa, or can it just be applied?
+Hi Jones,
+
+[PATCH 2/2] need function defined in [PATCH 1/2]=EF=BC=8C
+so we provide interface in [mfd] and called in [mmc].
+
+Best Regards.
+micky.
