@@ -1,90 +1,62 @@
-From: Robin van der Gracht <robin@protonic.nl>
-Subject: [PATCH] mmc: mxs-mmc: Introducing regulator support.
-Date: Tue, 17 Jun 2014 12:07:11 +0200
-Message-ID: <1402999631-4256-1-git-send-email-robin@protonic.nl>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: [PATCH] ARM: bcm_defconfig: re-enable BCM Kona SDHCI driver
+Date: Tue, 17 Jun 2014 13:46:50 +0200
+Message-ID: <201406171346.51153.arnd@arndb.de>
+References: <1402941376-29594-1-git-send-email-mporter@linaro.org> <20140616215512.GC23430@n2100.arm.linux.org.uk> <539F6CC7.4010002@wwwdotorg.org>
+Mime-Version: 1.0
+Content-Type: Text/Plain;
+  charset="iso-8859-1"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from protonic.xs4all.nl ([83.163.252.89]:17437 "EHLO
-	protonic.xs4all.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753889AbaFQK0G (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 17 Jun 2014 06:26:06 -0400
+Received: from mout.kundenserver.de ([212.227.126.130]:55464 "EHLO
+	mout.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755804AbaFQLrO (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 17 Jun 2014 07:47:14 -0400
+In-Reply-To: <539F6CC7.4010002@wwwdotorg.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: chris@printf.net, ulf.hansson@linaro.org, Robin van der Gracht <robin@protonic.nl>
+To: Stephen Warren <swarren@wwwdotorg.org>
+Cc: Russell King - ARM Linux <linux@arm.linux.org.uk>, Matt Porter <mporter@linaro.org>, arm@kernel.org, Linux MMC List <linux-mmc@vger.kernel.org>, Linux ARM Kernel List <linux-arm-kernel@lists.infradead.org>
 
-Signed-off-by: Robin van der Gracht <robin@protonic.nl>
----
- drivers/mmc/host/mxs-mmc.c | 37 +++++++++++++++++++++++++++++--------
- 1 file changed, 29 insertions(+), 8 deletions(-)
+On Tuesday 17 June 2014, Stephen Warren wrote:
+> On 06/16/2014 03:55 PM, Russell King - ARM Linux wrote:
+> > On Mon, Jun 16, 2014 at 01:56:16PM -0400, Matt Porter wrote:
+> >> Since 5d01b7684b7e "mmc: simplify SDHCI Kconfig dependencies",
+> >> MMC_SDHCI_PLTFM is no longer selected by the BCM Kona SDHCI
+> >> driver which is enabled in this defconfig. This results in the
+> >> SDHCI driver not being built and a boot failure. Explictly
+> >> enable MMC_SDHCI_PLTFM in bcm_defconfig so the BCM Kona SDHCI
+> >> driver is built.
+> > 
+> > I really don't understand why MMC_SDHCI_PLTFM isn't selected by the
+> > sub-drivers.  sdhci-pltfm.c is a library module, which is only
+> > useful with one of the sub-drivers enabled.
+> > 
+> > So, rather than providing a multitude of dependent options, why not
+> > present people with:
+> > 
+> >  + sdhci drivers
+> >    + sdhci pci
+> >    + sdhci acpi
+> >    + Arasan
+> >    + Freescale eSDHC
+> >    + Nintendo Wii
+> >    + Dove
+> >
+> > and leave MMC_SDHCI_PLTFM as a hidden option whose purpose is to
+> > enable building of sdhci-pltfm.c.
+> 
+> CC'ing Arnd, as author of 5d01b7684b7e "mmc: simplify SDHCI Kconfig
+> dependencies". I also forgot to do that on the patch that fixed
+> multi_v7_defconfig for this:-(
 
-diff --git a/drivers/mmc/host/mxs-mmc.c b/drivers/mmc/host/mxs-mmc.c
-index 073e871..efe8ae1 100644
---- a/drivers/mmc/host/mxs-mmc.c
-+++ b/drivers/mmc/host/mxs-mmc.c
-@@ -66,10 +66,12 @@ struct mxs_mmc_host {
- 	struct mmc_request		*mrq;
- 	struct mmc_command		*cmd;
- 	struct mmc_data			*data;
-+	struct regulator                *vmmc;
- 
- 	unsigned char			bus_width;
- 	spinlock_t			lock;
- 	int				sdio_irq_en;
-+	unsigned char                   power_mode;
- };
- 
- static int mxs_mmc_get_cd(struct mmc_host *mmc)
-@@ -502,6 +504,30 @@ static void mxs_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 	else
- 		host->bus_width = 0;
- 
-+	if (ios->power_mode != host->power_mode) {
-+		switch (ios->power_mode) {
-+		case MMC_POWER_OFF:
-+			if (host->vmmc) {
-+				if (regulator_disable(host->vmmc)) {
-+					dev_err(mmc_dev(host->mmc),
-+					"Failed to disable vmmc regulator\n");
-+				}
-+			}
-+			break;
-+		case MMC_POWER_UP:
-+			if (host->vmmc) {
-+				if (regulator_enable(host->vmmc)) {
-+					dev_err(mmc_dev(host->mmc),
-+					"Failed to enable vmmc regulator\n");
-+				}
-+			}
-+			break;
-+		default:
-+			break;
-+		}
-+		host->power_mode = ios->power_mode;
-+	}
-+
- 	if (ios->clock)
- 		mxs_ssp_set_clk_rate(&host->ssp, ios->clock);
- }
-@@ -597,16 +623,11 @@ static int mxs_mmc_probe(struct platform_device *pdev)
- 
- 	host->mmc = mmc;
- 	host->sdio_irq_en = 0;
-+	host->power_mode = MMC_POWER_OFF;
- 
- 	reg_vmmc = devm_regulator_get(&pdev->dev, "vmmc");
--	if (!IS_ERR(reg_vmmc)) {
--		ret = regulator_enable(reg_vmmc);
--		if (ret) {
--			dev_err(&pdev->dev,
--				"Failed to enable vmmc regulator: %d\n", ret);
--			goto out_mmc_free;
--		}
--	}
-+	if (!IS_ERR(reg_vmmc))
-+		host->vmmc = reg_vmmc;
- 
- 	ssp->clk = devm_clk_get(&pdev->dev, NULL);
- 	if (IS_ERR(ssp->clk)) {
--- 
-1.9.1
+I think doing it the other way round as Russell suggested is a good
+idea, and we can definitely do that. We have a similar situation in
+other subsystems, sometimes we do it one way and sometimes the other.
 
+The problem I was addressing in my patch was that the SDHCI driver
+in particular was mixing the two approaches, which is much worse
+as that can cause Kconfig dependency loops and is rather confusing.
+I picked the approach that seemed simpler at the time.
+
+	Arnd
