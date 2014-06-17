@@ -1,30 +1,40 @@
-From: micky <micky_ching@realsil.com.cn>
-Subject: Re: [PATCH 1/2] mfd: rtsx: add dma transfer function
-Date: Tue, 17 Jun 2014 09:08:49 +0800
-Message-ID: <539F9521.50706@realsil.com.cn>
-References: <cover.1402037562.git.micky_ching@realsil.com.cn> <9021eae37d96aa027d00ae4a7b6cd84dbbd1b6b5.1402037564.git.micky_ching@realsil.com.cn> <20140616122032.GS14323@lee--X1>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: [PATCH] ARM: multi_v7_defconfig: re-enable SDHCI drivers
+Date: Tue, 17 Jun 2014 09:12:44 +0200
+Message-ID: <7509698.bYIWhMVMID@wuerfel>
+References: <1402937442-7623-1-git-send-email-swarren@wwwdotorg.org> <CAPDyKFr98GfBZuUbod+JnvbEEyDC+Unninetw=-=6o8muQw_NQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7Bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from rtits2.realtek.com ([60.250.210.242]:55404 "EHLO
-	rtits2.realtek.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751592AbaFQBEe (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 16 Jun 2014 21:04:34 -0400
-In-Reply-To: <20140616122032.GS14323@lee--X1>
+Received: from mout.kundenserver.de ([212.227.17.13]:52224 "EHLO
+	mout.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752675AbaFQHM5 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 17 Jun 2014 03:12:57 -0400
+In-Reply-To: <CAPDyKFr98GfBZuUbod+JnvbEEyDC+Unninetw=-=6o8muQw_NQ@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Lee Jones <lee.jones@linaro.org>
-Cc: sameo@linux.intel.com, chris@printf.net, ulf.hansson@linaro.org, devel@linuxdriverproject.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, gregkh@linuxfoundation.org, dan.carpenter@oracle.com, rogerable@realtek.com, wei_wang@realsil.com.cn
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Stephen Warren <swarren@wwwdotorg.org>, "arm@kernel.org" <arm@kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, linux-mmc <linux-mmc@vger.kernel.org>, Stephen Warren <swarren@nvidia.com>
 
-On 06/16/2014 08:20 PM, Lee Jones wrote:
-> I don't see any glaring issues with this patch.  Does it rely on the
-> first patch, or vise versa, or can it just be applied?
-Hi Jones,
+On Monday 16 June 2014 23:16:01 Ulf Hansson wrote:
+> On 16 June 2014 18:50, Stephen Warren <swarren@wwwdotorg.org> wrote:
+> > From: Stephen Warren <swarren@nvidia.com>
+> >
+> > Following 5d01b7684b7e "mmc: simplify SDHCI Kconfig dependencies",
+> > SDHCI drivers that use MMC_SDHCI_PLTFM no longer select it, but
+> > instead depend on it. This means that multi_v7_defconfig no longer
+> > selects it, and hence many SDHCI drivers are no longer enabled.
+> > Explicitly enable MMC_SDHCI_PLTFM to solve this.
+> >
+> > Fixes: 5d01b7684b7e ("mmc: simplify SDHCI Kconfig dependencies")
+> > Signed-off-by: Stephen Warren <swarren@nvidia.com>
+> 
+> Reviewed-by: Ulf Hansson <ulf.hansson@linaro.org>
+> 
+> I suppose this goes through arm-soc, otherwise ping me if you want me
+> to handle it as a fix for 3.16.
 
-[PATCH 2/2] need function defined in [PATCH 1/2]=EF=BC=8C
-so we provide interface in [mfd] and called in [mmc].
+I've added it to the fixes branch now, thanks!
 
-Best Regards.
-micky.
+	Arnd
