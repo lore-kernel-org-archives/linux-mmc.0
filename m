@@ -1,83 +1,100 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: core: Add DT bindings for card detect debounce time
-Date: Wed, 18 Jun 2014 15:47:31 +0200
-Message-ID: <CAPDyKFoZ=zjKg5bUMnK_X2XOatT=XSAnBDpYqu0Q2VOkM7hOOA@mail.gmail.com>
-References: <1399649837-27286-1-git-send-email-balajitk@ti.com>
+From: Tim Kryger <tim.kryger@gmail.com>
+Subject: Re: MMC error on Exynos4210 board
+Date: Wed, 18 Jun 2014 07:11:11 -0700
+Message-ID: <CAD7vxxJrRd7nrhZBRWH=43r7AMopz1w30aMRHqMO9PvaZYOpHg@mail.gmail.com>
+References: <CAK5sBcEB5GnjiR37DXDAeKYBWKw_4NTDM=pKCVK=0oKFDBjSbw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-doc-owner@vger.kernel.org>
-In-Reply-To: <1399649837-27286-1-git-send-email-balajitk@ti.com>
-Sender: linux-doc-owner@vger.kernel.org
-To: Balaji T K <balajitk@ti.com>, Linus Walleij <linus.walleij@linaro.org>, Alexandre Courbot <gnurou@gmail.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, linux-doc@vger.kernel.org
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-Reply-To: <CAK5sBcEB5GnjiR37DXDAeKYBWKw_4NTDM=pKCVK=0oKFDBjSbw@mail.gmail.com>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: Sachin Kamat <spk.linux@gmail.com>
+Cc: markus.mayer@linaro.org, Matt Porter <mporter@linaro.org>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 9 May 2014 17:37, Balaji T K <balajitk@ti.com> wrote:
-> Provide an option to get CD debounce time from DT
+On Wed, Jun 18, 2014 at 4:33 AM, Sachin Kamat <spk.linux@gmail.com> wrote:
+> Hi Tim,
 >
-> Signed-off-by: Balaji T K <balajitk@ti.com>
-> ---
->  Documentation/devicetree/bindings/mmc/mmc.txt |    1 +
->  drivers/mmc/core/host.c                       |    6 +++++-
->  2 files changed, 6 insertions(+), 1 deletions(-)
+> I see the below error on Exynos4210 based Origen board with linux-next
+> (20140618).
+> Reverting the below commit works fine.
 >
-> diff --git a/Documentation/devicetree/bindings/mmc/mmc.txt b/Documentation/devicetree/bindings/mmc/mmc.txt
-> index 9dce540..fae590b 100644
-> --- a/Documentation/devicetree/bindings/mmc/mmc.txt
-> +++ b/Documentation/devicetree/bindings/mmc/mmc.txt
-> @@ -17,6 +17,7 @@ Optional properties:
->  - bus-width: Number of data lines, can be <1>, <4>, or <8>.  The default
->    will be <1> if the property is absent.
->  - wp-gpios: Specify GPIOs for write protection, see gpio binding
-> +- cd-debounce-us: debounce time in microseconds for card detect gpio.
->  - cd-inverted: when present, polarity on the CD line is inverted. See the note
->    below for the case, when a GPIO is used for the CD line
->  - wp-inverted: when present, polarity on the WP line is inverted. See the note
-> diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
-> index fdea825..59cd3a0 100644
-> --- a/drivers/mmc/core/host.c
-> +++ b/drivers/mmc/core/host.c
-> @@ -313,6 +313,7 @@ int mmc_of_parse(struct mmc_host *host)
->         bool explicit_inv_wp, gpio_inv_wp = false;
->         enum of_gpio_flags flags;
->         int len, ret, gpio;
-> +       unsigned int debounce;
+> Commit: 8d02e775a6 "mmc: sdhci: Use mmc core regulator infrastucture"
 >
->         if (!host->parent || !host->parent->of_node)
->                 return 0;
-> @@ -367,6 +368,9 @@ int mmc_of_parse(struct mmc_host *host)
->                 if (of_find_property(np, "broken-cd", &len))
->                         host->caps |= MMC_CAP_NEEDS_POLL;
+> Any ideas?
 >
-> +               if (of_property_read_u32(np, "cd-debounce-us", &debounce) < 0)
-> +                       debounce = 0;
-> +
-
-Hi Balaji,
-
-Sorry for a late reply.
-
-I am wondering whether this should be a generic gpio of property,
-instead of a mmc specific thing.
-
-I have added Linus Walleij and Alexandre Courbot, the maintainers of
-gpio. Let's see if they can point us in a direction.
-
->                 gpio = of_get_named_gpio_flags(np, "cd-gpios", 0, &flags);
->                 if (gpio == -EPROBE_DEFER)
->                         return gpio;
-> @@ -374,7 +378,7 @@ int mmc_of_parse(struct mmc_host *host)
->                         if (!(flags & OF_GPIO_ACTIVE_LOW))
->                                 gpio_inv_cd = true;
+> ***************
 >
-> -                       ret = mmc_gpio_request_cd(host, gpio, 0);
-> +                       ret = mmc_gpio_request_cd(host, gpio, debounce);
->                         if (ret < 0) {
->                                 dev_err(host->parent,
->                                         "Failed to request CD GPIO #%d: %d!\n",
-> --
-> 1.7.5.4
+> -- [    2.068992] sdhci: Secure Digital Host Controller Interface driver
+> [    2.075059] sdhci: Copyright(c) Pierre Ossman
+> [    2.079762] of_get_named_gpiod_flags: can't parse gpios property of
+> node '/sdhci@12510000[0]'
+> [    2.088021] s3c-sdhci 12510000.sdhci: clock source 2: mmc_busclk.2
+> (50000000 Hz)
+> [    2.095322] of_get_named_gpiod_flags: can't parse gpios property of
+> node '/sdhci@12510000[0]'
+> [    2.103794] of_get_named_gpiod_flags: can't parse gpios property of
+> node '/sdhci@12510000[0]'
+> [    2.112478] s3c-sdhci 12510000.sdhci: No vqmmc regulator found
+> [    2.118117] mmc0: Hardware doesn't report any support voltages.
+> [    2.124004] s3c-sdhci 12510000.sdhci: sdhci_add_host() failed
+> [    2.130080] of_get_named_gpiod_flags: can't parse gpios property of
+> node '/sdhci@12530000[0]'
+> [    2.138352] s3c-sdhci 12530000.sdhci: clock source 2: mmc_busclk.2
+> (16666667 Hz)
+> [    2.145661] of_get_named_gpiod_flags: can't parse gpios property of
+> node '/sdhci@12530000[0]'
+> [    2.154139] of_get_named_gpiod_flags: can't parse gpios property of
+> node '/sdhci@12530000[0]'
+> [    2.162834] s3c-sdhci 12530000.sdhci: No vqmmc regulator found
+> [    2.168464] mmc0: Hardware doesn't report any support voltages.
+> [    2.174349] s3c-sdhci 12530000.sdhci: sdhci_add_host() failed
+> [    2.180281] Synopsys Designware Multimedia Card Interface Driver
+> [    2.188131] usbcore: registered new interface driver usbhid
+> [    2.192287] usbhid: USB HID core driver
+> [    2.196329] TCP: cubic registered
+> [    2.199362] NET: Registered protocol family 17
+> [    2.203917] NET: Registered protocol family 15
+> [    2.208404] Registering SWP/SWPB emulation handler
+> [    2.214357] of_get_named_gpiod_flags exited with status 0
+> [    2.218430] of_get_named_gpiod_flags exited with status 0
+> [    2.223803] of_get_named_gpiod_flags exited with status 0
+> [    2.229170] of_get_named_gpiod_flags exited with status 0
+> [    2.234560] of_get_named_gpiod_flags exited with status 0
+> [    2.239953] gpio-229: gpiod_set_debounce: missing set() or
+> set_debounce() operations
+> [    2.247773] gpio-230: gpiod_set_debounce: missing set() or
+> set_debounce() operations
+> [    2.255473] gpio-228: gpiod_set_debounce: missing set() or
+> set_debounce() operations
+> [    2.263221] gpio-227: gpiod_set_debounce: missing set() or
+> set_debounce() operations
+> [    2.270918] gpio-226: gpiod_set_debounce: missing set() or
+> set_debounce() operations
+> [    2.278899] input: gpio_keys as /devices/gpio_keys/input/input0
+> [    2.285196] s3c-rtc 10070000.rtc: setting system clock to
+> 2000-01-01 00:00:00 UTC (946684800)
+> [    2.295072] VDD_G3D_1.1V: disabling
+> [    2.304744] VADC_3.3V: disabling
+> [    2.312095] VDD_AUD_1.8V: disabling
+> [    2.319714] VMIPI_1.1V: disabling
+> [    2.327193] VDD_ABB_3.3V: disabling
+> [    2.332779] VMEM_VDD_2.8V: disabling
+> [    2.336148] Waiting for root device /dev/mmcblk0p1...
 >
+> *************
+> Regards,
+> Sachin.
 
-Kind regards
-Uffe
+Would you mind reverting just this part of the commit to see if it
+clears up your trouble?
+
+>         if (host->ocr_mask)
+> -               ocr_avail = host->ocr_mask;
+> +               ocr_avail &= host->ocr_mask;
+>
+>         mmc->ocr_avail = ocr_avail;
+>         mmc->ocr_avail_sdio = ocr_avail;
+
+Thanks,
+Tim Kryger
