@@ -1,119 +1,64 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 2/2] mmc: rtsx: add support for async request
-Date: Wed, 18 Jun 2014 09:39:46 +0200
-Message-ID: <CAPDyKFqBy2jamW3EwMk64Cj85RvUmvAtE-ZFef-8R-Jt1Wu40Q@mail.gmail.com>
+From: Lee Jones <lee.jones@linaro.org>
+Subject: Re: [PATCH 1/2] mfd: rtsx: add dma transfer function
+Date: Wed, 18 Jun 2014 09:00:56 +0100
+Message-ID: <20140618080056.GM21030@lee--X1>
 References: <cover.1402037562.git.micky_ching@realsil.com.cn>
- <7b58fb0b0915ea0b0838404c74ec22a3b6e5f5a8.1402037565.git.micky_ching@realsil.com.cn>
- <CAPDyKFq1wYZRbuwhLjTMbwN1KYgKuNuZDb7t8FV78Pa=W85oqg@mail.gmail.com>
- <539EB43B.8070707@realsil.com.cn>
- <CAPDyKFqKDAqvacwCVKM8KLjxfykpBq38MS_RgWCcA7+He4_S5w@mail.gmail.com>
- <539F9412.3010209@realsil.com.cn>
- <CAPDyKFqK8mLGc82FfEoxdHG7mioX7JmtFDO=18XZRkwQ4ykU2g@mail.gmail.com>
- <53A0E89F.9010006@realsil.com.cn>
+ <9021eae37d96aa027d00ae4a7b6cd84dbbd1b6b5.1402037564.git.micky_ching@realsil.com.cn>
+ <20140616122032.GS14323@lee--X1>
+ <CAPDyKFpJ5tToJOk6try-jrRCCzcKtJkszNE5Nuc3Uarhpta1BQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
-In-Reply-To: <53A0E89F.9010006@realsil.com.cn>
-List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
-List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel>
-List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
-List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
-List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
-Errors-To: driverdev-devel-bounces@linuxdriverproject.org
-Sender: driverdev-devel-bounces@linuxdriverproject.org
-To: micky <micky_ching@realsil.com.cn>
-Cc: Samuel Ortiz <sameo@linux.intel.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Chris Ball <chris@printf.net>, Wei WANG <wei_wang@realsil.com.cn>, Roger <rogerable@realtek.com>, devel@linuxdriverproject.org, Lee Jones <lee.jones@linaro.org>, Dan Carpenter <dan.carpenter@oracle.com>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-ie0-f181.google.com ([209.85.223.181]:37079 "EHLO
+	mail-ie0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S933338AbaFRIBD (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 18 Jun 2014 04:01:03 -0400
+Received: by mail-ie0-f181.google.com with SMTP id y20so388363ier.26
+        for <linux-mmc@vger.kernel.org>; Wed, 18 Jun 2014 01:01:01 -0700 (PDT)
+Content-Disposition: inline
+In-Reply-To: <CAPDyKFpJ5tToJOk6try-jrRCCzcKtJkszNE5Nuc3Uarhpta1BQ@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: micky <micky_ching@realsil.com.cn>, Samuel Ortiz <sameo@linux.intel.com>, Chris Ball <chris@printf.net>, devel@linuxdriverproject.org, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Dan Carpenter <dan.carpenter@oracle.com>, Roger <rogerable@realtek.com>, Wei WANG <wei_wang@realsil.com.cn>
 
-On 18 June 2014 03:17, micky <micky_ching@realsil.com.cn> wrote:
-> On 06/17/2014 03:45 PM, Ulf Hansson wrote:
->>
->> On 17 June 2014 03:04, micky <micky_ching@realsil.com.cn> wrote:
->>>
->>> On 06/16/2014 08:40 PM, Ulf Hansson wrote:
->>>>
->>>> On 16 June 2014 11:09, micky <micky_ching@realsil.com.cn> wrote:
->>>>>
->>>>> On 06/16/2014 04:42 PM, Ulf Hansson wrote:
->>>>>>>
->>>>>>> @@ -36,7 +37,10 @@ struct realtek_pci_sdmmc {
->>>>>>>>
->>>>>>>>           struct rtsx_pcr         *pcr;
->>>>>>>>           struct mmc_host         *mmc;
->>>>>>>>           struct mmc_request      *mrq;
->>>>>>>> +       struct workqueue_struct *workq;
->>>>>>>> +#define SDMMC_WORKQ_NAME       "rtsx_pci_sdmmc_workq"
->>>>>>>>
->>>>>>>> +       struct work_struct      work;
->>>>>>
->>>>>> I am trying to understand why you need a work/workqueue to implement
->>>>>> this feature. Is that really the case?
->>>>>>
->>>>>> Could you elaborate on the reasons?
->>>>>
->>>>> Hi Uffe,
->>>>>
->>>>> we need return as fast as possible in mmc_host_ops
->>>>> request(ops->request)
->>>>> callback,
->>>>> so the mmc core can continue handle next request.
->>>>> when next request everything is ready, it will wait previous done(if
->>>>> not
->>>>> done),
->>>>> then call ops->request().
->>>>>
->>>>> we can't use atomic context, because we use mutex_lock() to protect
->>>>
->>>> ops->request should never executed in atomic context. Is that your
->>>> concern?
->>>
->>> Yes.
->>
->> Okay. Unless I missed your point, I don't think you need the
->> work/workqueue.
->
-> any other method?
->
->>
->> Because, ops->request isn't ever executed in atomic context. That's
->> due to the mmc core, which handles the async mechanism, are waiting
->> for a completion variable in process context, before it invokes the
->> ops->request() callback.
->>
->> That completion variable will be kicked, from your host driver, when
->> you invoke mmc_request_done(), .
->
-> Sorry, I don't understand here, how kicked?
+On Mon, 16 Jun 2014, Ulf Hansson wrote:
 
-mmc_request_done()
-    ->mrq->done()
-        ->mmc_wait_done()
-            ->complete(&mrq->completion);
+> On 16 June 2014 14:20, Lee Jones <lee.jones@linaro.org> wrote:
+> >> From: Micky Ching <micky_ching@realsil.com.cn>
+> >>
+> >> rtsx driver using a single function for transfer data, dma map/unm=
+ap are
+> >> placed in one fix function. We need map/unmap dma in different pla=
+ce(for
+> >> mmc async driver), so add three function for dma map, dma transfer=
+ and
+> >> dma unmap.
+> >>
+> >> Signed-off-by: Micky Ching <micky_ching@realsil.com.cn>
+> >> ---
+> >>  drivers/mfd/rtsx_pcr.c       |   76 ++++++++++++++++++++++++++---=
+-------------
+> >>  include/linux/mfd/rtsx_pci.h |    6 ++++
+> >>  2 files changed, 54 insertions(+), 28 deletions(-)
+> >
+> > I don't see any glaring issues with this patch.  Does it rely on th=
+e
+> > first patch, or vise versa, or can it just be applied?
+>=20
+> The mmc part in patch2 relies on this one, but please go ahead and
+> apply the mfd patch if you see it good.
+>=20
+> I can later provide my ack for the mmc parts, in patch2, when it's a
+> reviewed properly and thus you can take it through your tree.
 
->
-> I think the flow is:
-> - not wait for first req
-> - init mrq->done
-> - ops->request()                         ---         A.rtsx: start queue
-> work.
-> - continue fetch next req
-> - prepare next req ok,
-> - wait previous done.                --- B.(mmc_request_done() may be called
-> at any time from A to B)
-> - init mrq->done
-> - ops->request()                         ---         C.rtsx: start queue
-> next work.
-> ...
-> and seems no problem.
+There's no rush.  Once you're happy with the MMC patch, Micky can
+submit them both again with my Ack on the MFD part and I'll take them
+as a set.
 
-Right, I don't think there are any _problem_ by using the workqueue as
-you have implemented, but I am questioning if it's correct. Simply
-because I don't think there are any reasons to why you need a
-workqueue, it doesn't solve any problem for you - it just adds
-overhead.
-
-Kind regards
-Ulf Hansson
+--=20
+Lee Jones
+Linaro STMicroelectronics Landing Team Lead
+Linaro.org =E2=94=82 Open source software for ARM SoCs
+=46ollow Linaro: Facebook | Twitter | Blog
