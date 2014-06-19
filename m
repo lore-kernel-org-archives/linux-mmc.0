@@ -1,66 +1,63 @@
-From: Hans de Goede <hdegoede@redhat.com>
-Subject: Re: [RFC 1/2] pwrseq: Add subsystem to handle complex power sequences
-Date: Thu, 19 Jun 2014 16:23:26 +0200
-Message-ID: <53A2F25E.80200@redhat.com>
-References: <1403183091-27876-1-git-send-email-ulf.hansson@linaro.org> <1403183091-27876-2-git-send-email-ulf.hansson@linaro.org> <53A2EDCA.8080000@redhat.com>
+From: Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>
+Subject: Re: [PATCH 23/38] mmc: sdhci: convert sdhci_set_uhs_signaling() into
+ a library function
+Date: Thu, 19 Jun 2014 09:57:06 -0600
+Message-ID: <53A30852.2090405@wwwdotorg.org>
+References: <20140423185534.GA26756@n2100.arm.linux.org.uk> <E1Wd2Wd-0003vp-S2@rmk-PC.arm.linux.org.uk> <20140616104615.GA10701@n2100.arm.linux.org.uk> <CAPDyKFrp8JokqBbo3rg2i6WYykU1C9CuPF0FL7AOHh=Gcp5=hg@mail.gmail.com> <20140619122830.GP32514@n2100.arm.linux.org.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:22589 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1757372AbaFSOXw (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 19 Jun 2014 10:23:52 -0400
-In-Reply-To: <53A2EDCA.8080000@redhat.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20140619122830.GP32514-l+eeeJia6m9vn6HldHNs0ANdhmdF6hFW@public.gmane.org>
+Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Russell King - ARM Linux <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Olof Johansson <olof-nZhT3qVonbNeoWH0uzbU5w@public.gmane.org>
+Cc: Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Barry Song <baohua-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, spear-devel-nkJGhpqTU55BDgjK7y7TUQ@public.gmane.org, Anton Vorontsov <anton-9xeibp6oKSgdnm+yROfE0A@public.gmane.org>, Michal Simek <michal.simek-gjFFaj9aHVfQT0dZR+AlfA@public.gmane.org>, Thierry Reding <thierry.reding-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Viresh Kumar <viresh.linux-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Ben Dooks <ben-linux-elnMNo+KYs3YtjvyW6yDsg@public.gmane.org>, "linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linuxppc-dev-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, linux-pm@vger.kernel.org, linux-arm-kernel@lists.infradead.org, devicetree@vger.kernel.org
 
-Hi,
-
-On 06/19/2014 04:03 PM, Hans de Goede wrote:
-> Hi,
+On 06/19/2014 06:28 AM, Russell King - ARM Linux wrote:
+> On Mon, Jun 16, 2014 at 02:17:30PM +0200, Ulf Hansson wrote:
+>> Anyway, we did get some folks to test the patches and was thus fairly
+>> confident that we could merge them. Chris asked me to try to collect
+>> them in a PR for him, so I did. Sorry if I managed to screw some
+>> things up, there were several conflicts and actual regressions, which
+>> I tried to take care of.
+>>
+>> The mmc people were also very helping in sending patches to fixup
+>> related regressions, immediately after we merged your patchset. Thus
+>> together I think we managed to pull it off.
 > 
-
-<snip>
-
-> Also I'm not sold on how you're making this a devm only thing, and
-> are using devres_alloc to not only allocate memory for resource tracking,
-> but also the actual backing struct, that is not how devres_alloc is
-> intended to be used AFAIK.
+> I tend to look through slightly less rose-tinted glasses.
 > 
-> A problem with having this one always devm managed is that it makes it
-> hard to use in library functions without side effects.
+> The fact is... there's loads of ARM platforms which now fail in Olof's
+> build/boot testing, and they all seem to have a very similar pattern:
 > 
-> e.g. if you look at how your using this in mmc_of_parse in the next
-> patch, this gives mmc_of_parse the side-effect of having allocated
-> and bound the power-seq method, even if mmc_of_parse later
-> fails on e.g. gpio binding. If then for some reason the mmc host
-> probe method decides to not propagate the mmc_of_parse method
-> error (leading to freeing of all devm managed resources), then this is
-> undesirable.
+> hummingboard:
+> [    1.149688] sdhci: Secure Digital Host Controller Interface driver
+> [    1.155901] sdhci: Copyright(c) Pierre Ossman
+> ...
+> [    1.253630] Waiting for root device /dev/mmcblk0p2...
+> [   60.325469] imx-sdma 20ec000.sdma: firmware not found
+> ~$off
+> # PYBOOT: Exception: timeout
 > 
-> Where as with a non devm version, it would be clear that on error
-> mmc_of_parse would need to explicitly release the pwrseq again.
+> jetson:
+> [    2.261355] Waiting for root device /dev/mmcblk0p1...
 > 
-> I realize that pwrseq implementations likely will want to use
-> devm functions too, and I'm a great fan of devm. But this is something
-> to keep in mind. At a minimum the description of of_mmc_parse needs
-> to get updated with info about it having potential side-effects even
-> when it fails, and that failure should always be treated as a fatal
-> error and cause the host probe method to fail.
+> wandboard:
+> [    1.186870] sdhci: Secure Digital Host Controller Interface driver
+> [    1.193075] sdhci: Copyright(c) Pierre Ossman
+> ...
+> [    1.291064] Waiting for root device /dev/mmcblk0p2...
 
-Thinking more about this, it may be a good idea to give the pwrseq
-its own struct device, turning it into a virtual device, this way the
-pwrseq-method can use devm managed resources bound to this device,
-we can set the of_node of this device to the actual powerseq
-childnode and it gets its own sysfs dir in which we could do useful things
-such as have an attribute to query the current power state.
+Any SDHCI failures in Linus' tree (but not linux-next) that occur only
+in multi_v7_defconfig are likely solved by:
 
-This would also mean introducing a non devm version of devm_pwrseq_get
-+ an explicit release, which would be useful to avoid the side-effects
-mentioned above when used in library functions such as mmc_of_parse.
+http://lists.infradead.org/pipermail/linux-arm-kernel/2014-June/264012.html
 
-Regards,
+[PATCH] ARM: multi_v7_defconfig: re-enable SDHCI drivers
 
-Hans
+> Whether these are caused by the patch set or not is anyone's guess,
+> because we (a) don't know what's causing these failures, and (b)
+> my patch series was never tested on anything but iMX6.
+
+I thought that I'd tested at least some of it on Tegra.
