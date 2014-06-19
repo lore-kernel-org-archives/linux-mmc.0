@@ -1,175 +1,97 @@
-From: Arend van Spriel <arend@broadcom.com>
-Subject: Re: [PATCH] brcmfmac: prevent watchdog from interfering with scanning
- and connecting
-Date: Thu, 19 Jun 2014 18:37:56 +0200
-Message-ID: <53A311E4.301@broadcom.com>
-References: <539E8559.3010601@linux.intel.com> <539EA79C.7010206@broadcom.com> <53A30F96.3010206@linux.intel.com>
+From: Olof Johansson <olof@lixom.net>
+Subject: Re: [PATCH 23/38] mmc: sdhci: convert sdhci_set_uhs_signaling() into
+ a library function
+Date: Thu, 19 Jun 2014 10:02:16 -0700
+Message-ID: <CAOesGMh_8JSMzZQXVncBGmiTN6B--udY11kX=xmD5_TWRsUiSg@mail.gmail.com>
+References: <20140423185534.GA26756@n2100.arm.linux.org.uk>
+	<E1Wd2Wd-0003vp-S2@rmk-PC.arm.linux.org.uk>
+	<20140616104615.GA10701@n2100.arm.linux.org.uk>
+	<CAPDyKFrp8JokqBbo3rg2i6WYykU1C9CuPF0FL7AOHh=Gcp5=hg@mail.gmail.com>
+	<20140619122830.GP32514@n2100.arm.linux.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-gw3-out.broadcom.com ([216.31.210.64]:52649 "EHLO
-	mail-gw3-out.broadcom.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757558AbaFSQiG (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 19 Jun 2014 12:38:06 -0400
-In-Reply-To: <53A30F96.3010206@linux.intel.com>
+Received: from mail-ve0-f174.google.com ([209.85.128.174]:52385 "EHLO
+	mail-ve0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S933062AbaFSRCR (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 19 Jun 2014 13:02:17 -0400
+Received: by mail-ve0-f174.google.com with SMTP id jx11so2593173veb.33
+        for <linux-mmc@vger.kernel.org>; Thu, 19 Jun 2014 10:02:17 -0700 (PDT)
+In-Reply-To: <20140619122830.GP32514@n2100.arm.linux.org.uk>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "Fu, Zhonghui" <zhonghui.fu@linux.intel.com>, brudley@broadcom.com, Franky Lin <frankyl@broadcom.com>, meuleman@broadcom.com, linville@tuxdriver.com, pieterpg@broadcom.com, dekim@broadcom.com, mcgrof@do-not-panic.com, antonio@open-mesh.com, johannes.berg@intel.com
-Cc: linux-wireless@vger.kernel.org, brcm80211-dev-list@broadcom.com, netdev@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, Russell King <linux@arm.linux.org.uk>
+To: Russell King - ARM Linux <linux@arm.linux.org.uk>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>, Barry Song <baohua@kernel.org>, spear-devel <spear-devel@list.st.com>, Stephen Warren <swarren@wwwdotorg.org>, Anton Vorontsov <anton@enomsg.org>, Michal Simek <michal.simek@xilinx.com>, Thierry Reding <thierry.reding@gmail.com>, Viresh Kumar <viresh.linux@gmail.com>, Ben Dooks <ben-linux@fluff.org>, "linux-tegra@vger.kernel.org" <linux-tegra@vger.kernel.org>, linuxppc-dev <linuxppc-dev@lists.ozlabs.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 
-On 19-06-14 18:28, Fu, Zhonghui wrote:
+On Thu, Jun 19, 2014 at 5:28 AM, Russell King - ARM Linux
+<linux@arm.linux.org.uk> wrote:
+> On Mon, Jun 16, 2014 at 02:17:30PM +0200, Ulf Hansson wrote:
+>> Anyway, we did get some folks to test the patches and was thus fairly
+>> confident that we could merge them. Chris asked me to try to collect
+>> them in a PR for him, so I did. Sorry if I managed to screw some
+>> things up, there were several conflicts and actual regressions, which
+>> I tried to take care of.
+>>
+>> The mmc people were also very helping in sending patches to fixup
+>> related regressions, immediately after we merged your patchset. Thus
+>> together I think we managed to pull it off.
 >
-> On 2014/6/16 16:15, Arend van Spriel wrote:
->> On 16-06-14 07:49, Fu, Zhonghui wrote:
->>>   From 14485894add32aedacb3e486ebb2cc2b73861abf Mon Sep 17 00:00:00 2001
->>> From: Fu zhonghui <zhonghui.fu@linux.intel.com>
->>> Date: Wed, 11 Jun 2014 11:06:55 +0800
->>> Subject: [PATCH] brcmfmac: prevent watchdog from interfering with scanning and connecting
->>>
->>> Watchdog in brcmfmac driver may make WiFi chip enter sleep mode
->>> before completion of scanning or connecting.
->>>
->>> This will lead to scanning or connecting failure.
->>>
->>> Increasing temporarily idle-time threshold during scanning or
->>> connecting can ensure scanning or connecting success without
->>> watchdog interference.
->>
->> Are you sure you are not having runtime PM enabled. That could be your problem as the host controller code disables sdio irqs. Please see this thread [1]. For our device runtime pm should not be enabled, but I am not sure if that is taken into account in mmc_attach_sdio() (see code below).
-> I have tried brcmfmac driver with "CONFIG_PM_RUNTIME is not set", and scanning and connecting  always succeeded. This means that CONFIG_PM_RUNTIME should not be set if we use SDIO WiFi device driven by brcmfmac driver, right?
-
-Depends which kernel you are using. In 3.16-rc1 the sdio interrupt issue 
-has been fixed so you should be fine to use CONFIG_PM_RUNTIME. Here is 
-the commit
-
-commit be138554a7923658ded799b0e8794d9c1d08a6e5
-Author: Russell King <rmk+kernel@arm.linux.org.uk>
-Date:   Fri Apr 25 12:55:56 2014 +0100
-
-     mmc: sdhci: allow sdio interrupts while sdhci runtime suspended
-
-Regards,
-Arend
-
-> Thanks,
-> Zhonghui
->>
->> Gr. AvS
->>
->> [1] http://www.spinics.net/lists/linux-mmc/msg25978.html
->>
->> --8<----------------------------------------------------------------
->>
->>      /*
->>       * Enable runtime PM only if supported by host+card+board
->>       */
->>      if (host->caps & MMC_CAP_POWER_OFF_CARD) {
->>          /*
->>           * Let runtime PM core know our card is active
->>           */
->>          err = pm_runtime_set_active(&card->dev);
->>          if (err)
->>              goto remove;
->>
->>          /*
->>           * Enable runtime PM for this card
->>           */
->>          pm_runtime_enable(&card->dev);
->>      }
->>
->>> Signed-off-by: Fu zhonghui <zhonghui.fu@linux.intel.com>
->>> ---
->>>    drivers/net/wireless/brcm80211/brcmfmac/dhd_sdio.c |   18 ++++++++++++++++--
->>>    .../net/wireless/brcm80211/brcmfmac/wl_cfg80211.c  |    3 ++-
->>>    2 files changed, 18 insertions(+), 3 deletions(-)
->>>
->>> diff --git a/drivers/net/wireless/brcm80211/brcmfmac/dhd_sdio.c b/drivers/net/wireless/brcm80211/brcmfmac/dhd_sdio.c
->>> index 13c89a0..729deab 100644
->>> --- a/drivers/net/wireless/brcm80211/brcmfmac/dhd_sdio.c
->>> +++ b/drivers/net/wireless/brcm80211/brcmfmac/dhd_sdio.c
->>> @@ -34,6 +34,7 @@
->>>    #include <linux/vmalloc.h>
->>>    #include <linux/platform_data/brcmfmac-sdio.h>
->>>    #include <linux/moduleparam.h>
->>> +#include <net/cfg80211.h>
->>>    #include <asm/unaligned.h>
->>>    #include <defs.h>
->>>    #include <brcmu_wifi.h>
->>> @@ -43,6 +44,10 @@
->>>    #include "sdio_host.h"
->>>    #include "chip.h"
->>>    #include "nvram.h"
->>> +#include "dhd.h"
->>> +#include "fwil_types.h"
->>> +#include "p2p.h"
->>> +#include "wl_cfg80211.h"
->>>
->>>    #define DCMD_RESP_TIMEOUT  2000    /* In milli second */
->>>
->>> @@ -307,6 +312,7 @@ struct rte_console {
->>>                         * when idle
->>>                         */
->>>    #define BRCMF_IDLE_INTERVAL    1
->>> +#define BRCMF_IDLE_INTERVAL_SCANNING_CONNECTING    100
->>>
->>>    #define KSO_WAIT_US 50
->>>    #define MAX_KSO_ATTEMPTS (PMU_MAX_TRANSITION_DLY/KSO_WAIT_US)
->>> @@ -3613,9 +3619,9 @@ void brcmf_sdio_isr(struct brcmf_sdio *bus)
->>>
->>>    static bool brcmf_sdio_bus_watchdog(struct brcmf_sdio *bus)
->>>    {
->>> -#ifdef DEBUG
->>>        struct brcmf_bus *bus_if = dev_get_drvdata(bus->sdiodev->dev);
->>> -#endif    /* DEBUG */
->>> +    struct brcmf_cfg80211_info *cfg = bus_if->drvr->config;
->>> +    struct brcmf_if *ifp = cfg->pub->iflist[0];
->>>
->>>        brcmf_dbg(TIMER, "Enter\n");
->>>
->>> @@ -3678,6 +3684,14 @@ static bool brcmf_sdio_bus_watchdog(struct brcmf_sdio *bus)
->>>
->>>        /* On idle timeout clear activity flag and/or turn off clock */
->>>        if ((bus->idletime > 0) && (bus->clkstate == CLK_AVAIL)) {
->>> +
->>> +        if (test_bit(BRCMF_SCAN_STATUS_BUSY, &cfg->scan_status) ||
->>> +            test_bit(BRCMF_VIF_STATUS_CONNECTING, &ifp->vif->sme_state)) {
->>> +            bus->idletime = BRCMF_IDLE_INTERVAL_SCANNING_CONNECTING;
->>> +        } else {
->>> +            bus->idletime = BRCMF_IDLE_INTERVAL;
->>> +        }
->>> +
->>>            if (++bus->idlecount >= bus->idletime) {
->>>                bus->idlecount = 0;
->>>                if (bus->activity) {
->>> diff --git a/drivers/net/wireless/brcm80211/brcmfmac/wl_cfg80211.c b/drivers/net/wireless/brcm80211/brcmfmac/wl_cfg80211.c
->>> index be19852..e76517e 100644
->>> --- a/drivers/net/wireless/brcm80211/brcmfmac/wl_cfg80211.c
->>> +++ b/drivers/net/wireless/brcm80211/brcmfmac/wl_cfg80211.c
->>> @@ -913,6 +913,8 @@ brcmf_cfg80211_escan(struct wiphy *wiphy, struct brcmf_cfg80211_vif *vif,
->>>            return -EAGAIN;
->>>        }
->>>
->>> +    set_bit(BRCMF_SCAN_STATUS_BUSY, &cfg->scan_status);
->>> +
->>>        /* If scan req comes for p2p0, send it over primary I/F */
->>>        if (vif == cfg->p2p.bss_idx[P2PAPI_BSSCFG_DEVICE].vif)
->>>            vif = cfg->p2p.bss_idx[P2PAPI_BSSCFG_PRIMARY].vif;
->>> @@ -933,7 +935,6 @@ brcmf_cfg80211_escan(struct wiphy *wiphy, struct brcmf_cfg80211_vif *vif,
->>>        }
->>>
->>>        cfg->scan_request = request;
->>> -    set_bit(BRCMF_SCAN_STATUS_BUSY, &cfg->scan_status);
->>>        if (escan_req) {
->>>            cfg->escan_info.run = brcmf_run_escan;
->>>            err = brcmf_p2p_scan_prep(wiphy, request, vif);
->>> -- 1.7.1
->>>
->>
->> --
->> To unsubscribe from this list: send the line "unsubscribe linux-kernel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->> Please read the FAQ at  http://www.tux.org/lkml/
+> I tend to look through slightly less rose-tinted glasses.
 >
+> The fact is... there's loads of ARM platforms which now fail in Olof's
+> build/boot testing, and they all seem to have a very similar pattern:
+>
+> hummingboard:
+> [    1.149688] sdhci: Secure Digital Host Controller Interface driver
+> [    1.155901] sdhci: Copyright(c) Pierre Ossman
+> ...
+> [    1.253630] Waiting for root device /dev/mmcblk0p2...
+> [   60.325469] imx-sdma 20ec000.sdma: firmware not found
+> ~$off
+> # PYBOOT: Exception: timeout
+>
+> jetson:
+> [    2.261355] Waiting for root device /dev/mmcblk0p1...
+>
+> wandboard:
+> [    1.186870] sdhci: Secure Digital Host Controller Interface driver
+> [    1.193075] sdhci: Copyright(c) Pierre Ossman
+> ...
+> [    1.291064] Waiting for root device /dev/mmcblk0p2...
+>
+> Whether these are caused by the patch set or not is anyone's guess,
+> because we (a) don't know what's causing these failures, and (b)
+> my patch series was never tested on anything but iMX6.
+>
+> I'm pretty certain that the hummingboard failure is not related to
+> my series as that's one of the platforms I did test my series on.
+>
+> There's more failures which look like possibly something in core MMC is
+> rather screwed, as OMAP5 (which doesn't use SDHCI) is also failing at
+> a similar point.
+>
+> What these failures /do/ mean is that when I'm pushing my ARM for-next
+> branch out, Olof's builder picks it up and runs a build across it, and
+> the report returns a whole load of failures.  A whole load of failures
+> means that those platforms haven't tested my changes, which means the
+> quality of testing is much lower than it should be.
+>
+> With 26 passing and 15 failing, that's over 1/3 of platforms failing,
+> which means 1/3 aren't getting tested.
+>
+> This level of failure has been going on for quite a while now, and (afaik)
+> it remains uninvestigated and undiagnosed.  (This is one of the complaints
+> I have about Olof's build/boot test system, much of the information about
+> the build and boot is hidden away and unpublished, which makes it almost
+> impossible for third parties to diagnose any problem there.  I've given up
+> looking at most of Olof's build/boot mails because of this - it's just
+> not interesting to see the same abbreviated boot failure logs which give
+> no useful information time and time again.)
 
+Most of this is because I want to avoid sending huuuge emails out with
+the failures. I'll add a push of the full log to arm-soc.lixom.net and
+include a link to it in the emails, similar to how I do the build
+logs. I'll let you know when I've made that change.
+
+
+-Olof
