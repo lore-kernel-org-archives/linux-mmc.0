@@ -1,100 +1,130 @@
-From: Tim Kryger <tim.kryger@gmail.com>
-Subject: Re: MMC error on Exynos4210 board
-Date: Wed, 18 Jun 2014 07:11:11 -0700
-Message-ID: <CAD7vxxJrRd7nrhZBRWH=43r7AMopz1w30aMRHqMO9PvaZYOpHg@mail.gmail.com>
-References: <CAK5sBcEB5GnjiR37DXDAeKYBWKw_4NTDM=pKCVK=0oKFDBjSbw@mail.gmail.com>
+From: micky <micky_ching@realsil.com.cn>
+Subject: Re: [PATCH 2/2] mmc: rtsx: add support for async request
+Date: Thu, 19 Jun 2014 09:57:13 +0800
+Message-ID: <53A24379.2060502@realsil.com.cn>
+References: <cover.1402037562.git.micky_ching@realsil.com.cn>	<7b58fb0b0915ea0b0838404c74ec22a3b6e5f5a8.1402037565.git.micky_ching@realsil.com.cn>	<CAPDyKFq1wYZRbuwhLjTMbwN1KYgKuNuZDb7t8FV78Pa=W85oqg@mail.gmail.com>	<539EB43B.8070707@realsil.com.cn>	<CAPDyKFqKDAqvacwCVKM8KLjxfykpBq38MS_RgWCcA7+He4_S5w@mail.gmail.com>	<539F9412.3010209@realsil.com.cn>	<CAPDyKFqK8mLGc82FfEoxdHG7mioX7JmtFDO=18XZRkwQ4ykU2g@mail.gmail.com>	<53A0E89F.9010006@realsil.com.cn>	<CAPDyKFqBy2jamW3EwMk64Cj85RvUmvAtE-ZFef-8R-Jt1Wu40Q@mail.gmail.com>	<53A16517.7050705@realsil.com.cn>
+ <CAPDyKFog22CiW5PqfOiikuz2JcYArj2qB0YvoK5FiQqrJfA3oQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-Reply-To: <CAK5sBcEB5GnjiR37DXDAeKYBWKw_4NTDM=pKCVK=0oKFDBjSbw@mail.gmail.com>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Sachin Kamat <spk.linux@gmail.com>
-Cc: markus.mayer@linaro.org, Matt Porter <mporter@linaro.org>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"; Format="flowed"
+Content-Transfer-Encoding: 7bit
+Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
+In-Reply-To: <CAPDyKFog22CiW5PqfOiikuz2JcYArj2qB0YvoK5FiQqrJfA3oQ@mail.gmail.com>
+List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
+List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel>
+List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
+List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
+List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
+Errors-To: driverdev-devel-bounces@linuxdriverproject.org
+Sender: driverdev-devel-bounces@linuxdriverproject.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Samuel Ortiz <sameo@linux.intel.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Chris Ball <chris@printf.net>, Wei WANG <wei_wang@realsil.com.cn>, Roger <rogerable@realtek.com>, devel@linuxdriverproject.org, Lee Jones <lee.jones@linaro.org>, Dan Carpenter <dan.carpenter@oracle.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On Wed, Jun 18, 2014 at 4:33 AM, Sachin Kamat <spk.linux@gmail.com> wrote:
-> Hi Tim,
+On 06/18/2014 07:03 PM, Ulf Hansson wrote:
+> On 18 June 2014 12:08, micky <micky_ching@realsil.com.cn> wrote:
+>> On 06/18/2014 03:39 PM, Ulf Hansson wrote:
+>>> On 18 June 2014 03:17, micky <micky_ching@realsil.com.cn> wrote:
+>>>> On 06/17/2014 03:45 PM, Ulf Hansson wrote:
+>>>>> On 17 June 2014 03:04, micky <micky_ching@realsil.com.cn> wrote:
+>>>>>> On 06/16/2014 08:40 PM, Ulf Hansson wrote:
+>>>>>>> On 16 June 2014 11:09, micky <micky_ching@realsil.com.cn> wrote:
+>>>>>>>> On 06/16/2014 04:42 PM, Ulf Hansson wrote:
+>>>>>>>>>> @@ -36,7 +37,10 @@ struct realtek_pci_sdmmc {
+>>>>>>>>>>>             struct rtsx_pcr         *pcr;
+>>>>>>>>>>>             struct mmc_host         *mmc;
+>>>>>>>>>>>             struct mmc_request      *mrq;
+>>>>>>>>>>> +       struct workqueue_struct *workq;
+>>>>>>>>>>> +#define SDMMC_WORKQ_NAME       "rtsx_pci_sdmmc_workq"
+>>>>>>>>>>>
+>>>>>>>>>>> +       struct work_struct      work;
+>>>>>>>>> I am trying to understand why you need a work/workqueue to implement
+>>>>>>>>> this feature. Is that really the case?
+>>>>>>>>>
+>>>>>>>>> Could you elaborate on the reasons?
+>>>>>>>> Hi Uffe,
+>>>>>>>>
+>>>>>>>> we need return as fast as possible in mmc_host_ops
+>>>>>>>> request(ops->request)
+>>>>>>>> callback,
+>>>>>>>> so the mmc core can continue handle next request.
+>>>>>>>> when next request everything is ready, it will wait previous done(if
+>>>>>>>> not
+>>>>>>>> done),
+>>>>>>>> then call ops->request().
+>>>>>>>>
+>>>>>>>> we can't use atomic context, because we use mutex_lock() to protect
+>>>>>>> ops->request should never executed in atomic context. Is that your
+>>>>>>> concern?
+>>>>>> Yes.
+>>>>> Okay. Unless I missed your point, I don't think you need the
+>>>>> work/workqueue.
+>>>> any other method?
+>>>>
+>>>>> Because, ops->request isn't ever executed in atomic context. That's
+>>>>> due to the mmc core, which handles the async mechanism, are waiting
+>>>>> for a completion variable in process context, before it invokes the
+>>>>> ops->request() callback.
+>>>>>
+>>>>> That completion variable will be kicked, from your host driver, when
+>>>>> you invoke mmc_request_done(), .
+>>>> Sorry, I don't understand here, how kicked?
+>>> mmc_request_done()
+>>>       ->mrq->done()
+>>>           ->mmc_wait_done()
+>>>               ->complete(&mrq->completion);
+>>>
+>>>> I think the flow is:
+>>>> - not wait for first req
+>>>> - init mrq->done
+>>>> - ops->request()                         ---         A.rtsx: start queue
+>>>> work.
+>>>> - continue fetch next req
+>>>> - prepare next req ok,
+>>>> - wait previous done.                --- B.(mmc_request_done() may be
+>>>> called
+>>>> at any time from A to B)
+>>>> - init mrq->done
+>>>> - ops->request()                         ---         C.rtsx: start queue
+>>>> next work.
+>>>> ...
+>>>> and seems no problem.
+>>> Right, I don't think there are any _problem_ by using the workqueue as
+>>> you have implemented, but I am questioning if it's correct. Simply
+>>> because I don't think there are any reasons to why you need a
+>>> workqueue, it doesn't solve any problem for you - it just adds
+>>> overhead.
+>> Hi Uffe,
+>>
+>> we have two driver under mfd, the rtsx-mmc and rtsx-ms,
+>> we use mutex lock(pcr_mutex) to protect resource,
+>> when we handle mmc request, we need hold the mutex until we finish the
+>> request,
+>> so it will not interruptted by rtsx-ms request.
+> Ahh, I see. Now, _that_ explains why you want the workqueue. :-) Thanks!
 >
-> I see the below error on Exynos4210 based Origen board with linux-next
-> (20140618).
-> Reverting the below commit works fine.
+>> If we not use workq, once the request hold the mutex, we have to wait until
+>> the request finish,
+>> then release mutex, so the mmc core is blocking at here.
+>> To implement nonblocking request, we have to use workq.
+> One minor suggestion below, please consider this as an optimization
+> which goes outside the context of this patch.
 >
-> Commit: 8d02e775a6 "mmc: sdhci: Use mmc core regulator infrastucture"
->
-> Any ideas?
->
-> ***************
->
-> -- [    2.068992] sdhci: Secure Digital Host Controller Interface driver
-> [    2.075059] sdhci: Copyright(c) Pierre Ossman
-> [    2.079762] of_get_named_gpiod_flags: can't parse gpios property of
-> node '/sdhci@12510000[0]'
-> [    2.088021] s3c-sdhci 12510000.sdhci: clock source 2: mmc_busclk.2
-> (50000000 Hz)
-> [    2.095322] of_get_named_gpiod_flags: can't parse gpios property of
-> node '/sdhci@12510000[0]'
-> [    2.103794] of_get_named_gpiod_flags: can't parse gpios property of
-> node '/sdhci@12510000[0]'
-> [    2.112478] s3c-sdhci 12510000.sdhci: No vqmmc regulator found
-> [    2.118117] mmc0: Hardware doesn't report any support voltages.
-> [    2.124004] s3c-sdhci 12510000.sdhci: sdhci_add_host() failed
-> [    2.130080] of_get_named_gpiod_flags: can't parse gpios property of
-> node '/sdhci@12530000[0]'
-> [    2.138352] s3c-sdhci 12530000.sdhci: clock source 2: mmc_busclk.2
-> (16666667 Hz)
-> [    2.145661] of_get_named_gpiod_flags: can't parse gpios property of
-> node '/sdhci@12530000[0]'
-> [    2.154139] of_get_named_gpiod_flags: can't parse gpios property of
-> node '/sdhci@12530000[0]'
-> [    2.162834] s3c-sdhci 12530000.sdhci: No vqmmc regulator found
-> [    2.168464] mmc0: Hardware doesn't report any support voltages.
-> [    2.174349] s3c-sdhci 12530000.sdhci: sdhci_add_host() failed
-> [    2.180281] Synopsys Designware Multimedia Card Interface Driver
-> [    2.188131] usbcore: registered new interface driver usbhid
-> [    2.192287] usbhid: USB HID core driver
-> [    2.196329] TCP: cubic registered
-> [    2.199362] NET: Registered protocol family 17
-> [    2.203917] NET: Registered protocol family 15
-> [    2.208404] Registering SWP/SWPB emulation handler
-> [    2.214357] of_get_named_gpiod_flags exited with status 0
-> [    2.218430] of_get_named_gpiod_flags exited with status 0
-> [    2.223803] of_get_named_gpiod_flags exited with status 0
-> [    2.229170] of_get_named_gpiod_flags exited with status 0
-> [    2.234560] of_get_named_gpiod_flags exited with status 0
-> [    2.239953] gpio-229: gpiod_set_debounce: missing set() or
-> set_debounce() operations
-> [    2.247773] gpio-230: gpiod_set_debounce: missing set() or
-> set_debounce() operations
-> [    2.255473] gpio-228: gpiod_set_debounce: missing set() or
-> set_debounce() operations
-> [    2.263221] gpio-227: gpiod_set_debounce: missing set() or
-> set_debounce() operations
-> [    2.270918] gpio-226: gpiod_set_debounce: missing set() or
-> set_debounce() operations
-> [    2.278899] input: gpio_keys as /devices/gpio_keys/input/input0
-> [    2.285196] s3c-rtc 10070000.rtc: setting system clock to
-> 2000-01-01 00:00:00 UTC (946684800)
-> [    2.295072] VDD_G3D_1.1V: disabling
-> [    2.304744] VADC_3.3V: disabling
-> [    2.312095] VDD_AUD_1.8V: disabling
-> [    2.319714] VMIPI_1.1V: disabling
-> [    2.327193] VDD_ABB_3.3V: disabling
-> [    2.332779] VMEM_VDD_2.8V: disabling
-> [    2.336148] Waiting for root device /dev/mmcblk0p1...
->
-> *************
-> Regards,
-> Sachin.
+> There are cases when I think you should be able to skip the overhead
+> from scheduling the work from ->request(). Those cases can be
+> described as when the mutex are available which can be tested by using
+> mutex_trylock().
+Thanks for your suggestion.
 
-Would you mind reverting just this part of the commit to see if it
-clears up your trouble?
+we need schedule the work every time mmc core call ops->request(),
+if we want to handle request, we need hold mutex and do the work.
+so mutex_trylock() will not help decrease overhead.
+if we not schedule the work, the ops->request will do nothing.
 
->         if (host->ocr_mask)
-> -               ocr_avail = host->ocr_mask;
-> +               ocr_avail &= host->ocr_mask;
+Best Regards.
+micky
+> Kind regards
+> Uffe
+> .
 >
->         mmc->ocr_avail = ocr_avail;
->         mmc->ocr_avail_sdio = ocr_avail;
-
-Thanks,
-Tim Kryger
