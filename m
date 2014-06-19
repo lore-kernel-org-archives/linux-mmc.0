@@ -1,89 +1,97 @@
-From: Tim Kryger <tim.kryger@gmail.com>
+From: Sachin Kamat <spk.linux@gmail.com>
 Subject: Re: MMC error on Exynos4210 board
-Date: Thu, 19 Jun 2014 01:42:04 -0700
-Message-ID: <CAD7vxxJ2mrk9Wrhw+0rB1Afk5zUsR05a1P8aeyou9JPVk6sCrA@mail.gmail.com>
+Date: Thu, 19 Jun 2014 14:19:05 +0530
+Message-ID: <CAK5sBcFCbhBCbgss=KU=__gxpb7KUm6GWhO_MWQAqRgkvCagwQ@mail.gmail.com>
 References: <CAK5sBcEB5GnjiR37DXDAeKYBWKw_4NTDM=pKCVK=0oKFDBjSbw@mail.gmail.com>
 	<CAD7vxxJrRd7nrhZBRWH=43r7AMopz1w30aMRHqMO9PvaZYOpHg@mail.gmail.com>
 	<CAK5sBcHqjmT7rcXLPkP3WHBdcphJjhm2aBfy4ksbXakNUfVYYw@mail.gmail.com>
+	<CAD7vxxJ2mrk9Wrhw+0rB1Afk5zUsR05a1P8aeyou9JPVk6sCrA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-Reply-To: <CAK5sBcHqjmT7rcXLPkP3WHBdcphJjhm2aBfy4ksbXakNUfVYYw@mail.gmail.com>
+In-Reply-To: <CAD7vxxJ2mrk9Wrhw+0rB1Afk5zUsR05a1P8aeyou9JPVk6sCrA@mail.gmail.com>
 Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Sachin Kamat <spk.linux@gmail.com>
-Cc: Markus Mayer <markus.mayer@linaro.org>, Matt Porter <mporter@linaro.org>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>
+To: Tim Kryger <tim.kryger@gmail.com>
+Cc: Markus Mayer <markus.mayer@linaro.org>, Matt Porter <mporter@linaro.org>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, Yuvaraj C D <yuvaraj.cd@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, "tgih.jun@samsung.com" <tgih.jun@samsung.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On Wed, Jun 18, 2014 at 8:54 PM, Sachin Kamat <spk.linux@gmail.com> wrote:
++cc Some relevant guys from Samsung
 
->> On Wed, Jun 18, 2014 at 4:33 AM, Sachin Kamat <spk.linux@gmail.com> wrote:
+On Thu, Jun 19, 2014 at 2:12 PM, Tim Kryger <tim.kryger@gmail.com> wrote:
+> On Wed, Jun 18, 2014 at 8:54 PM, Sachin Kamat <spk.linux@gmail.com> wrote:
+>
+>>> On Wed, Jun 18, 2014 at 4:33 AM, Sachin Kamat <spk.linux@gmail.com> wrote:
+>
+>>>> I see the below error on Exynos4210 based Origen board with linux-next
+>>>> (20140618).
+>>>> Reverting the below commit works fine.
+>>>>
+>>>> Commit: 8d02e775a6 "mmc: sdhci: Use mmc core regulator infrastucture"
+>
+>>>>
+>>>> -- [    2.068992] sdhci: Secure Digital Host Controller Interface driver
+>>>> [    2.075059] sdhci: Copyright(c) Pierre Ossman
+>>>> [    2.079762] of_get_named_gpiod_flags: can't parse gpios property of
+>>>> node '/sdhci@12510000[0]'
+>>>> [    2.088021] s3c-sdhci 12510000.sdhci: clock source 2: mmc_busclk.2
+>>>> (50000000 Hz)
+>>>> [    2.095322] of_get_named_gpiod_flags: can't parse gpios property of
+>>>> node '/sdhci@12510000[0]'
+>>>> [    2.103794] of_get_named_gpiod_flags: can't parse gpios property of
+>>>> node '/sdhci@12510000[0]'
+>>>> [    2.112478] s3c-sdhci 12510000.sdhci: No vqmmc regulator found
+>>>> [    2.118117] mmc0: Hardware doesn't report any support voltages.
+>>>> [    2.124004] s3c-sdhci 12510000.sdhci: sdhci_add_host() failed
+>>>> [    2.130080] of_get_named_gpiod_flags: can't parse gpios property of
+>>>> node '/sdhci@12530000[0]'
+>>>> [    2.138352] s3c-sdhci 12530000.sdhci: clock source 2: mmc_busclk.2
+>>>> (16666667 Hz)
+>>>> [    2.145661] of_get_named_gpiod_flags: can't parse gpios property of
+>>>> node '/sdhci@12530000[0]'
+>>>> [    2.154139] of_get_named_gpiod_flags: can't parse gpios property of
+>>>> node '/sdhci@12530000[0]'
+>>>> [    2.162834] s3c-sdhci 12530000.sdhci: No vqmmc regulator found
+>>>> [    2.168464] mmc0: Hardware doesn't report any support voltages.
+>>>> [    2.174349] s3c-sdhci 12530000.sdhci: sdhci_add_host() failed
+>
+>>>> [    2.336148] Waiting for root device /dev/mmcblk0p1...
+>
+>> FYI, the board has a 2.8V fixed regulator supply connected to the MMC.
+>> You may refer to arch/arm/boot/dts/exynos4210-origen.dts for more details.
+>
+> A 2.8v regulator results in mmc->ocr_avail being set to MMC_VDD_27_28
+> | MMC_VDD_28_29.
+>
+> The SDHCI capabilities register only indicates support of three voltage levels
+>   - 1.8v: SDHCI_CAN_VDD_180 => MMC_VDD_165_195
+>   - 3.0v: SDHCI_CAN_VDD_300 => MMC_VDD_29_30 | MMC_VDD_30_31
+>   - 3.3v: SDHCI_CAN_VDD_330 => MMC_VDD_32_33 | MMC_VDD_33_34
+>
+> Even if all capability bits of the host controller were set, there
+> still wouldn't be any overlap.  Thus you see a "Hardware doesn't
+> report any support voltages" message.
+>
+> Previously, this issue was being swept under the rug by cec2e21 mmc:
+> sdhci: Use regulator min/max voltage range according to spec.  That
+> change hacked up the voltage range checks such that with your 2.8v
+> fixed regulator, the driver would believe the host could support
+> MMC_VDD_29_30 | MMC_VDD_30_31 | MMC_VDD_32_33 | MMC_VDD_33_34.  The
+> driver would start down the path of commanding 3.3v-3.4v (the highest
+> voltage range believed to be supported).  At the last second, the
+> driver would see the regulator was fixed and blindly skip over the set
+> voltage operation, saving it from failure.
+>
+> Since my patch eliminates the bogus voltage range checks, your board
+> is now getting caught playing too loose with the SDHCI regulator
+> voltages.
+>
+> Furthermore, the fixed regulator special-case logic that helped hide
+> your issue should also be considered for removal given that fixed
+> regulators now behave properly thanks to c00dc35 regulator: core:
+> Allow regulator_set_voltage for fixed regulators.
 
->>> I see the below error on Exynos4210 based Origen board with linux-next
->>> (20140618).
->>> Reverting the below commit works fine.
->>>
->>> Commit: 8d02e775a6 "mmc: sdhci: Use mmc core regulator infrastucture"
+Thanks for the detailed explanation. What do you propose to get this fixed?
 
->>>
->>> -- [    2.068992] sdhci: Secure Digital Host Controller Interface driver
->>> [    2.075059] sdhci: Copyright(c) Pierre Ossman
->>> [    2.079762] of_get_named_gpiod_flags: can't parse gpios property of
->>> node '/sdhci@12510000[0]'
->>> [    2.088021] s3c-sdhci 12510000.sdhci: clock source 2: mmc_busclk.2
->>> (50000000 Hz)
->>> [    2.095322] of_get_named_gpiod_flags: can't parse gpios property of
->>> node '/sdhci@12510000[0]'
->>> [    2.103794] of_get_named_gpiod_flags: can't parse gpios property of
->>> node '/sdhci@12510000[0]'
->>> [    2.112478] s3c-sdhci 12510000.sdhci: No vqmmc regulator found
->>> [    2.118117] mmc0: Hardware doesn't report any support voltages.
->>> [    2.124004] s3c-sdhci 12510000.sdhci: sdhci_add_host() failed
->>> [    2.130080] of_get_named_gpiod_flags: can't parse gpios property of
->>> node '/sdhci@12530000[0]'
->>> [    2.138352] s3c-sdhci 12530000.sdhci: clock source 2: mmc_busclk.2
->>> (16666667 Hz)
->>> [    2.145661] of_get_named_gpiod_flags: can't parse gpios property of
->>> node '/sdhci@12530000[0]'
->>> [    2.154139] of_get_named_gpiod_flags: can't parse gpios property of
->>> node '/sdhci@12530000[0]'
->>> [    2.162834] s3c-sdhci 12530000.sdhci: No vqmmc regulator found
->>> [    2.168464] mmc0: Hardware doesn't report any support voltages.
->>> [    2.174349] s3c-sdhci 12530000.sdhci: sdhci_add_host() failed
-
->>> [    2.336148] Waiting for root device /dev/mmcblk0p1...
-
-> FYI, the board has a 2.8V fixed regulator supply connected to the MMC.
-> You may refer to arch/arm/boot/dts/exynos4210-origen.dts for more details.
-
-A 2.8v regulator results in mmc->ocr_avail being set to MMC_VDD_27_28
-| MMC_VDD_28_29.
-
-The SDHCI capabilities register only indicates support of three voltage levels
-  - 1.8v: SDHCI_CAN_VDD_180 => MMC_VDD_165_195
-  - 3.0v: SDHCI_CAN_VDD_300 => MMC_VDD_29_30 | MMC_VDD_30_31
-  - 3.3v: SDHCI_CAN_VDD_330 => MMC_VDD_32_33 | MMC_VDD_33_34
-
-Even if all capability bits of the host controller were set, there
-still wouldn't be any overlap.  Thus you see a "Hardware doesn't
-report any support voltages" message.
-
-Previously, this issue was being swept under the rug by cec2e21 mmc:
-sdhci: Use regulator min/max voltage range according to spec.  That
-change hacked up the voltage range checks such that with your 2.8v
-fixed regulator, the driver would believe the host could support
-MMC_VDD_29_30 | MMC_VDD_30_31 | MMC_VDD_32_33 | MMC_VDD_33_34.  The
-driver would start down the path of commanding 3.3v-3.4v (the highest
-voltage range believed to be supported).  At the last second, the
-driver would see the regulator was fixed and blindly skip over the set
-voltage operation, saving it from failure.
-
-Since my patch eliminates the bogus voltage range checks, your board
-is now getting caught playing too loose with the SDHCI regulator
-voltages.
-
-Furthermore, the fixed regulator special-case logic that helped hide
-your issue should also be considered for removal given that fixed
-regulators now behave properly thanks to c00dc35 regulator: core:
-Allow regulator_set_voltage for fixed regulators.
-
--Tim
+-- 
+Regards,
+Sachin.
