@@ -1,117 +1,88 @@
-From: Sachin Kamat <spk.linux@gmail.com>
-Subject: Re: MMC error on Exynos4210 board
-Date: Thu, 19 Jun 2014 16:10:40 +0530
-Message-ID: <CAK5sBcF=5NYd-tuvRrQk7Yq_r_oUYftpNuHcz7iJ8TGNWkG0iA@mail.gmail.com>
-References: <CAK5sBcEB5GnjiR37DXDAeKYBWKw_4NTDM=pKCVK=0oKFDBjSbw@mail.gmail.com>
-	<CAD7vxxJrRd7nrhZBRWH=43r7AMopz1w30aMRHqMO9PvaZYOpHg@mail.gmail.com>
-	<CAK5sBcHqjmT7rcXLPkP3WHBdcphJjhm2aBfy4ksbXakNUfVYYw@mail.gmail.com>
-	<CAD7vxxJ2mrk9Wrhw+0rB1Afk5zUsR05a1P8aeyou9JPVk6sCrA@mail.gmail.com>
-	<CAK5sBcFCbhBCbgss=KU=__gxpb7KUm6GWhO_MWQAqRgkvCagwQ@mail.gmail.com>
-	<CAD7vxxK5a_Nc4DjP8x4-=Um6xi=kPa=3sRZdvBuNBXMLUEEimA@mail.gmail.com>
+From: Russell King - ARM Linux <linux@arm.linux.org.uk>
+Subject: Re: [PATCH 23/38] mmc: sdhci: convert sdhci_set_uhs_signaling()
+	into a library function
+Date: Thu, 19 Jun 2014 13:28:31 +0100
+Message-ID: <20140619122830.GP32514@n2100.arm.linux.org.uk>
+References: <20140423185534.GA26756@n2100.arm.linux.org.uk> <E1Wd2Wd-0003vp-S2@rmk-PC.arm.linux.org.uk> <20140616104615.GA10701@n2100.arm.linux.org.uk> <CAPDyKFrp8JokqBbo3rg2i6WYykU1C9CuPF0FL7AOHh=Gcp5=hg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-Reply-To: <CAD7vxxK5a_Nc4DjP8x4-=Um6xi=kPa=3sRZdvBuNBXMLUEEimA@mail.gmail.com>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Tim Kryger <tim.kryger@gmail.com>
-Cc: Markus Mayer <markus.mayer@linaro.org>, Matt Porter <mporter@linaro.org>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, Yuvaraj C D <yuvaraj.cd@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, "tgih.jun@samsung.com" <tgih.jun@samsung.com>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from gw-1.arm.linux.org.uk ([78.32.30.217]:35405 "EHLO
+	pandora.arm.linux.org.uk" rhost-flags-OK-OK-OK-FAIL)
+	by vger.kernel.org with ESMTP id S932300AbaFSM2q (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 19 Jun 2014 08:28:46 -0400
+Content-Disposition: inline
+In-Reply-To: <CAPDyKFrp8JokqBbo3rg2i6WYykU1C9CuPF0FL7AOHh=Gcp5=hg@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, Olof Johansson <olof@lixom.net>
+Cc: Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>, Barry Song <baohua@kernel.org>, spear-devel@list.st.com, Stephen Warren <swarren@wwwdotorg.org>, Anton Vorontsov <anton@enomsg.org>, Michal Simek <michal.simek@xilinx.com>, Thierry Reding <thierry.reding@gmail.com>, Viresh Kumar <viresh.linux@gmail.com>, Ben Dooks <ben-linux@fluff.org>, "linux-tegra@vger.kernel.org" <linux-tegra@vger.kernel.org>, linuxppc-dev@lists.ozlabs.org, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 
-On Thu, Jun 19, 2014 at 2:40 PM, Tim Kryger <tim.kryger@gmail.com> wrote:
-> On Thu, Jun 19, 2014 at 1:49 AM, Sachin Kamat <spk.linux@gmail.com> wrote:
->> +cc Some relevant guys from Samsung
->>
->> On Thu, Jun 19, 2014 at 2:12 PM, Tim Kryger <tim.kryger@gmail.com> wrote:
->>> On Wed, Jun 18, 2014 at 8:54 PM, Sachin Kamat <spk.linux@gmail.com> wrote:
->>>
->>>>> On Wed, Jun 18, 2014 at 4:33 AM, Sachin Kamat <spk.linux@gmail.com> wrote:
->>>
->>>>>> I see the below error on Exynos4210 based Origen board with linux-next
->>>>>> (20140618).
->>>>>> Reverting the below commit works fine.
->>>>>>
->>>>>> Commit: 8d02e775a6 "mmc: sdhci: Use mmc core regulator infrastucture"
->>>
->>>>>>
->>>>>> -- [    2.068992] sdhci: Secure Digital Host Controller Interface driver
->>>>>> [    2.075059] sdhci: Copyright(c) Pierre Ossman
->>>>>> [    2.079762] of_get_named_gpiod_flags: can't parse gpios property of
->>>>>> node '/sdhci@12510000[0]'
->>>>>> [    2.088021] s3c-sdhci 12510000.sdhci: clock source 2: mmc_busclk.2
->>>>>> (50000000 Hz)
->>>>>> [    2.095322] of_get_named_gpiod_flags: can't parse gpios property of
->>>>>> node '/sdhci@12510000[0]'
->>>>>> [    2.103794] of_get_named_gpiod_flags: can't parse gpios property of
->>>>>> node '/sdhci@12510000[0]'
->>>>>> [    2.112478] s3c-sdhci 12510000.sdhci: No vqmmc regulator found
->>>>>> [    2.118117] mmc0: Hardware doesn't report any support voltages.
->>>>>> [    2.124004] s3c-sdhci 12510000.sdhci: sdhci_add_host() failed
->>>>>> [    2.130080] of_get_named_gpiod_flags: can't parse gpios property of
->>>>>> node '/sdhci@12530000[0]'
->>>>>> [    2.138352] s3c-sdhci 12530000.sdhci: clock source 2: mmc_busclk.2
->>>>>> (16666667 Hz)
->>>>>> [    2.145661] of_get_named_gpiod_flags: can't parse gpios property of
->>>>>> node '/sdhci@12530000[0]'
->>>>>> [    2.154139] of_get_named_gpiod_flags: can't parse gpios property of
->>>>>> node '/sdhci@12530000[0]'
->>>>>> [    2.162834] s3c-sdhci 12530000.sdhci: No vqmmc regulator found
->>>>>> [    2.168464] mmc0: Hardware doesn't report any support voltages.
->>>>>> [    2.174349] s3c-sdhci 12530000.sdhci: sdhci_add_host() failed
->>>
->>>>>> [    2.336148] Waiting for root device /dev/mmcblk0p1...
->>>
->>>> FYI, the board has a 2.8V fixed regulator supply connected to the MMC.
->>>> You may refer to arch/arm/boot/dts/exynos4210-origen.dts for more details.
->>>
->>> A 2.8v regulator results in mmc->ocr_avail being set to MMC_VDD_27_28
->>> | MMC_VDD_28_29.
->>>
->>> The SDHCI capabilities register only indicates support of three voltage levels
->>>   - 1.8v: SDHCI_CAN_VDD_180 => MMC_VDD_165_195
->>>   - 3.0v: SDHCI_CAN_VDD_300 => MMC_VDD_29_30 | MMC_VDD_30_31
->>>   - 3.3v: SDHCI_CAN_VDD_330 => MMC_VDD_32_33 | MMC_VDD_33_34
->>>
->>> Even if all capability bits of the host controller were set, there
->>> still wouldn't be any overlap.  Thus you see a "Hardware doesn't
->>> report any support voltages" message.
->>>
->>> Previously, this issue was being swept under the rug by cec2e21 mmc:
->>> sdhci: Use regulator min/max voltage range according to spec.  That
->>> change hacked up the voltage range checks such that with your 2.8v
->>> fixed regulator, the driver would believe the host could support
->>> MMC_VDD_29_30 | MMC_VDD_30_31 | MMC_VDD_32_33 | MMC_VDD_33_34.  The
->>> driver would start down the path of commanding 3.3v-3.4v (the highest
->>> voltage range believed to be supported).  At the last second, the
->>> driver would see the regulator was fixed and blindly skip over the set
->>> voltage operation, saving it from failure.
->>>
->>> Since my patch eliminates the bogus voltage range checks, your board
->>> is now getting caught playing too loose with the SDHCI regulator
->>> voltages.
->>>
->>> Furthermore, the fixed regulator special-case logic that helped hide
->>> your issue should also be considered for removal given that fixed
->>> regulators now behave properly thanks to c00dc35 regulator: core:
->>> Allow regulator_set_voltage for fixed regulators.
->>
->> Thanks for the detailed explanation. What do you propose to get this fixed?
->
-> I'm not really sure of the best path forward.  I suppose you could
-> modify your device tree to lie about the voltage of the fixed
-> regulator.  Changing it to 3.0v should allow it to boot up but that is
-> definitely a hack.
+On Mon, Jun 16, 2014 at 02:17:30PM +0200, Ulf Hansson wrote:
+> Anyway, we did get some folks to test the patches and was thus fairly
+> confident that we could merge them. Chris asked me to try to collect
+> them in a PR for him, so I did. Sorry if I managed to screw some
+> things up, there were several conflicts and actual regressions, which
+> I tried to take care of.
+> 
+> The mmc people were also very helping in sending patches to fixup
+> related regressions, immediately after we merged your patchset. Thus
+> together I think we managed to pull it off.
 
-Or I could simply remove the vmmc-supply property altogether (as it is optional)
-and get the board to work.
+I tend to look through slightly less rose-tinted glasses.
 
-> It would be nice if the driver could be extended
-> to handle the peculiarities of your board in a deliberate manner but
-> limiting the common sdhci driver to supporting only the three voltages
-> from the spec also seems sensible.
+The fact is... there's loads of ARM platforms which now fail in Olof's
+build/boot testing, and they all seem to have a very similar pattern:
 
-Until such time that the driver gets fixed to handle 2.8V fixed supply your
-current patch leaves several of Exynos boards broken for now.
+hummingboard:
+[    1.149688] sdhci: Secure Digital Host Controller Interface driver
+[    1.155901] sdhci: Copyright(c) Pierre Ossman
+...
+[    1.253630] Waiting for root device /dev/mmcblk0p2...
+[   60.325469] imx-sdma 20ec000.sdma: firmware not found
+~$off
+# PYBOOT: Exception: timeout
+
+jetson:
+[    2.261355] Waiting for root device /dev/mmcblk0p1...
+
+wandboard:
+[    1.186870] sdhci: Secure Digital Host Controller Interface driver
+[    1.193075] sdhci: Copyright(c) Pierre Ossman
+...
+[    1.291064] Waiting for root device /dev/mmcblk0p2...
+
+Whether these are caused by the patch set or not is anyone's guess,
+because we (a) don't know what's causing these failures, and (b)
+my patch series was never tested on anything but iMX6.
+
+I'm pretty certain that the hummingboard failure is not related to
+my series as that's one of the platforms I did test my series on.
+
+There's more failures which look like possibly something in core MMC is
+rather screwed, as OMAP5 (which doesn't use SDHCI) is also failing at
+a similar point.
+
+What these failures /do/ mean is that when I'm pushing my ARM for-next
+branch out, Olof's builder picks it up and runs a build across it, and
+the report returns a whole load of failures.  A whole load of failures
+means that those platforms haven't tested my changes, which means the
+quality of testing is much lower than it should be.
+
+With 26 passing and 15 failing, that's over 1/3 of platforms failing,
+which means 1/3 aren't getting tested.
+
+This level of failure has been going on for quite a while now, and (afaik)
+it remains uninvestigated and undiagnosed.  (This is one of the complaints
+I have about Olof's build/boot test system, much of the information about
+the build and boot is hidden away and unpublished, which makes it almost
+impossible for third parties to diagnose any problem there.  I've given up
+looking at most of Olof's build/boot mails because of this - it's just
+not interesting to see the same abbreviated boot failure logs which give
+no useful information time and time again.)
+
+We need to get on top of these failures and get them sorted.
 
 -- 
-Regards,
-Sachin.
+FTTC broadband for 0.8mile line: now at 9.7Mbps down 460kbps up... slowly
+improving, and getting towards what was expected from it.
