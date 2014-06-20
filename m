@@ -1,57 +1,70 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [RFC 1/2] pwrseq: Add subsystem to handle complex power sequences
-Date: Fri, 20 Jun 2014 17:42:19 +0200
-Message-ID: <4224745.HqdT4QrZdr@wuerfel>
-References: <1403183091-27876-1-git-send-email-ulf.hansson@linaro.org>
- <1403183091-27876-2-git-send-email-ulf.hansson@linaro.org>
+From: Anton Vorontsov <anton@enomsg.org>
+Subject: Re: [RFC PATCH 1/7] mmc: sdhci: add quirk for broken 3.0V support
+Date: Fri, 20 Jun 2014 13:26:38 -0700
+Message-ID: <20140620202638.GA21349@teo>
+References: <1403256928-11359-1-git-send-email-Vincent.Yang@tw.fujitsu.com>
+ <1403256928-11359-2-git-send-email-Vincent.Yang@tw.fujitsu.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <1403183091-27876-2-git-send-email-ulf.hansson@linaro.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: linux-arm-kernel@lists.infradead.org
-Cc: Mark Rutland <mark.rutland@arm.com>, devicetree@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Russell King <linux@arm.linux.org.uk>, Pawel Moll <pawel.moll@arm.com>, linux-pm@vger.kernel.org, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Linus Walleij <linus.walleij@linaro.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Chris Ball <chris@printf.net>, Hans de Goede <hdegoede@redhat.com>, Chen-Yu Tsai <wens@csie.org>, Rob Herring <robh+dt@kernel.org>, Mark Brown <broonie@kernel.org>, Olof Johansson <olof@lixom.net>, Arend van Spriel <arend@broadcom.com>, Sascha Hauer <s.hauer@pengutronix.de>, Tomasz Figa <tomasz.figa@gmail.com>, Alexandre Courbot <gnurou@gmail.com>
+Content-Type: text/plain; charset=utf-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-pa0-f48.google.com ([209.85.220.48]:33184 "EHLO
+	mail-pa0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754657AbaFTU0p (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 20 Jun 2014 16:26:45 -0400
+Received: by mail-pa0-f48.google.com with SMTP id et14so3485582pad.7
+        for <linux-mmc@vger.kernel.org>; Fri, 20 Jun 2014 13:26:45 -0700 (PDT)
+Content-Disposition: inline
+In-Reply-To: <1403256928-11359-2-git-send-email-Vincent.Yang@tw.fujitsu.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Vincent Yang <vincent.yang.fujitsu@gmail.com>
+Cc: chris@printf.net, linux-mmc@vger.kernel.org, linuxppc-dev@lists.ozlabs.org, patches@linaro.org, andy.green@linaro.org, Vincent.Yang@tw.fujitsu.com
 
-On Thursday 19 June 2014 15:04:50 Ulf Hansson wrote:
-> +Power sequence DT bindings
-> +
-> +Each power sequence method has a corresponding "power-method" property string.
-> +This property shall be set in a subnode for a device. That subnode should also
-> +describe resourses which are specific to that power method.
-> +
-> +Do note, power sequences as such isn't encoded through DT. Instead those are
-> +implemented by each power method.
-> +
-> +Required subnode properties:
-> +- power-method: should contain the string for the power method to bind.
-> +
-> +       Supported power methods: None.
-> +
-> +Example:
-> +
-> +Note, the "clock" power method in this example isn't actually supported, but
-> +used to visualize how a childnode could be described.
+On Fri, Jun 20, 2014 at 05:35:22PM +0800, Vincent Yang wrote:
+> This patch defines a quirk for platforms unable
+> to enable 3.0V support.
+> It is a preparation and will be used by Fujitsu
+> SDHCI controller f_sdh30 driver.
+> 
+> Signed-off-by: Vincent Yang <Vincent.Yang@tw.fujitsu.com>
 
-I'm not too thrilled about adding another top-level concept for these.
-This seems to duplicate some things that pm-domains do, but does them
-in a somewhata different way. Would it be possible to instead integrate
-it into the pm-domain code?
+I don't think you need this patch. Instead, you can exclude 3V using the
+voltage-ranges = <> in the device tree.
 
-I also agree with Olof that having a standalone child device node is
-not the best representation. If you want to represent an SDIO device
-device that has some references to clocks, regulators, etc, then put
-that device into the tree and give it those properties.
-That would also let you worry about the sequencing in driver code rather
-than trying to come up with a completely generic model for it.
+Thanks,
 
-	Arnd
+Anton
+
+>  drivers/mmc/host/sdhci.c  | 3 +++
+>  include/linux/mmc/sdhci.h | 2 ++
+>  2 files changed, 5 insertions(+)
+> 
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index 47055f3..523075f 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -3069,6 +3069,9 @@ int sdhci_add_host(struct sdhci_host *host)
+>  	}
+>  #endif /* CONFIG_REGULATOR */
+>  
+> +	if (host->quirks2 & SDHCI_QUIRK2_NO_3_0_V)
+> +		caps[0] &= ~SDHCI_CAN_VDD_300;
+> +
+>  	/*
+>  	 * According to SD Host Controller spec v3.00, if the Host System
+>  	 * can afford more than 150mA, Host Driver should set XPC to 1. Also
+> diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
+> index 08abe99..cac0958 100644
+> --- a/include/linux/mmc/sdhci.h
+> +++ b/include/linux/mmc/sdhci.h
+> @@ -98,6 +98,8 @@ struct sdhci_host {
+>  #define SDHCI_QUIRK2_BROKEN_HS200			(1<<6)
+>  /* Controller does not support DDR50 */
+>  #define SDHCI_QUIRK2_BROKEN_DDR50			(1<<7)
+> +/* The system physically doesn't support 3.0v, even if the host does */
+> +#define SDHCI_QUIRK2_NO_3_0_V				(1<<8)
+>  
+>  	int irq;		/* Device IRQ */
+>  	void __iomem *ioaddr;	/* Mapped address */
+> -- 
+> 1.9.0
