@@ -1,76 +1,59 @@
-From: "Chen, Alvin" <alvin.chen@intel.com>
-Subject: [PATCH] mmc: sdhci-pci: Quark SDIO host controller supporting
-Date: Fri, 20 Jun 2014 09:13:56 -0700
-Message-ID: <1403280836-26943-2-git-send-email-alvin.chen@intel.com>
-References: <1403280836-26943-1-git-send-email-alvin.chen@intel.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1403280836-26943-1-git-send-email-alvin.chen@intel.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Chris Ball <chris@printf.net>, Bjorn Helgaas <bhelgaas@google.com>
-Cc: linux-mmc@vger.kernel.org, linux-pci@vger.kernel.org, linux-kernel@vger.kernel.org
+From: Vincent Yang <vincent.yang.fujitsu@gmail.com>
+Subject: [RFC PATCH 1/7] mmc: sdhci: add quirk for broken 3.0V support
+Date: Fri, 20 Jun 2014 17:35:22 +0800
+Message-ID: <1403256928-11359-2-git-send-email-Vincent.Yang@tw.fujitsu.com>
+References: <1403256928-11359-1-git-send-email-Vincent.Yang@tw.fujitsu.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-pd0-f173.google.com ([209.85.192.173]:35964 "EHLO
+	mail-pd0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S933582AbaFTJfg (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 20 Jun 2014 05:35:36 -0400
+Received: by mail-pd0-f173.google.com with SMTP id r10so2797133pdi.4
+        for <linux-mmc@vger.kernel.org>; Fri, 20 Jun 2014 02:35:36 -0700 (PDT)
+In-Reply-To: <1403256928-11359-1-git-send-email-Vincent.Yang@tw.fujitsu.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: chris@printf.net, linux-mmc@vger.kernel.org
+Cc: anton@enomsg.org, linuxppc-dev@lists.ozlabs.org, patches@linaro.org, andy.green@linaro.org, Vincent.Yang@tw.fujitsu.com
 
-From: Derek Browne <Derek.Browne@intel.com>
+This patch defines a quirk for platforms unable
+to enable 3.0V support.
+It is a preparation and will be used by Fujitsu
+SDHCI controller f_sdh30 driver.
 
-On Intel Quark, there is a SDIO host controller. This patch is added to
-enable the SDIO host controller.
-
-Signed-off-by: Derek Browne <Derek.Browne@intel.com>
-Signed-off-by: Alvin (Weike) Chen <alvin.chen@intel.com>
+Signed-off-by: Vincent Yang <Vincent.Yang@tw.fujitsu.com>
 ---
- drivers/mmc/host/sdhci-pci.c |   12 ++++++++++++
- include/linux/pci_ids.h      |    2 ++
- 2 files changed, 14 insertions(+)
+ drivers/mmc/host/sdhci.c  | 3 +++
+ include/linux/mmc/sdhci.h | 2 ++
+ 2 files changed, 5 insertions(+)
 
-diff --git a/drivers/mmc/host/sdhci-pci.c b/drivers/mmc/host/sdhci-pci.c
-index 52c42fc..1aeeefc 100644
---- a/drivers/mmc/host/sdhci-pci.c
-+++ b/drivers/mmc/host/sdhci-pci.c
-@@ -103,6 +103,10 @@ static const struct sdhci_pci_fixes sdhci_cafe = {
- 			  SDHCI_QUIRK_BROKEN_TIMEOUT_VAL,
- };
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 47055f3..523075f 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -3069,6 +3069,9 @@ int sdhci_add_host(struct sdhci_host *host)
+ 	}
+ #endif /* CONFIG_REGULATOR */
  
-+static const struct sdhci_pci_fixes sdhci_intel_qrk = {
-+	.quirks		= SDHCI_QUIRK_NO_HISPD_BIT,
-+};
++	if (host->quirks2 & SDHCI_QUIRK2_NO_3_0_V)
++		caps[0] &= ~SDHCI_CAN_VDD_300;
 +
- static int mrst_hc_probe_slot(struct sdhci_pci_slot *slot)
- {
- 	slot->host->mmc->caps |= MMC_CAP_8_BIT_DATA;
-@@ -753,6 +757,14 @@ static const struct pci_device_id pci_ids[] = {
+ 	/*
+ 	 * According to SD Host Controller spec v3.00, if the Host System
+ 	 * can afford more than 150mA, Host Driver should set XPC to 1. Also
+diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
+index 08abe99..cac0958 100644
+--- a/include/linux/mmc/sdhci.h
++++ b/include/linux/mmc/sdhci.h
+@@ -98,6 +98,8 @@ struct sdhci_host {
+ #define SDHCI_QUIRK2_BROKEN_HS200			(1<<6)
+ /* Controller does not support DDR50 */
+ #define SDHCI_QUIRK2_BROKEN_DDR50			(1<<7)
++/* The system physically doesn't support 3.0v, even if the host does */
++#define SDHCI_QUIRK2_NO_3_0_V				(1<<8)
  
- 	{
- 		.vendor		= PCI_VENDOR_ID_INTEL,
-+		.device		= PCI_DEVICE_ID_INTEL_QRK_SD,
-+		.subvendor	= PCI_ANY_ID,
-+		.subdevice	= PCI_ANY_ID,
-+		.driver_data	= (kernel_ulong_t)&sdhci_intel_qrk,
-+	},
-+
-+	{
-+		.vendor		= PCI_VENDOR_ID_INTEL,
- 		.device		= PCI_DEVICE_ID_INTEL_MRST_SD0,
- 		.subvendor	= PCI_ANY_ID,
- 		.subdevice	= PCI_ANY_ID,
-diff --git a/include/linux/pci_ids.h b/include/linux/pci_ids.h
-index d4de24b..5bba2c3 100644
---- a/include/linux/pci_ids.h
-+++ b/include/linux/pci_ids.h
-@@ -2557,6 +2557,7 @@
- #define PCI_DEVICE_ID_INTEL_MFD_EMMC0	0x0823
- #define PCI_DEVICE_ID_INTEL_MFD_EMMC1	0x0824
- #define PCI_DEVICE_ID_INTEL_MRST_SD2	0x084F
-+#define PCI_DEVICE_ID_INTEL_QUARK_ILB	0x095E
- #define PCI_DEVICE_ID_INTEL_I960	0x0960
- #define PCI_DEVICE_ID_INTEL_I960RM	0x0962
- #define PCI_DEVICE_ID_INTEL_CENTERTON_ILB	0x0c60
-@@ -2579,6 +2580,7 @@
- #define PCI_DEVICE_ID_INTEL_82840_HB	0x1a21
- #define PCI_DEVICE_ID_INTEL_82845_HB	0x1a30
- #define PCI_DEVICE_ID_INTEL_IOAT	0x1a38
-+#define PCI_DEVICE_ID_INTEL_QRK_SD	0x08A7
- #define PCI_DEVICE_ID_INTEL_COUGARPOINT_LPC_MIN	0x1c41
- #define PCI_DEVICE_ID_INTEL_COUGARPOINT_LPC_MAX	0x1c5f
- #define PCI_DEVICE_ID_INTEL_PATSBURG_LPC_0	0x1d40
+ 	int irq;		/* Device IRQ */
+ 	void __iomem *ioaddr;	/* Mapped address */
 -- 
-1.7.9.5
+1.9.0
+
