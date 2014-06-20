@@ -1,37 +1,57 @@
-From: Matt Porter <mporter@linaro.org>
-Subject: Re: [patch] mmc: sdhci-bcm-kona: | vs & typo in debug code
-Date: Fri, 20 Jun 2014 07:41:31 -0400
-Message-ID: <20140620114131.GA18931@beef>
-References: <20140620071901.GA22779@mwanda>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: [RFC 1/2] pwrseq: Add subsystem to handle complex power sequences
+Date: Fri, 20 Jun 2014 17:42:19 +0200
+Message-ID: <4224745.HqdT4QrZdr@wuerfel>
+References: <1403183091-27876-1-git-send-email-ulf.hansson@linaro.org>
+ <1403183091-27876-2-git-send-email-ulf.hansson@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <kernel-janitors-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20140620071901.GA22779@mwanda>
-Sender: kernel-janitors-owner@vger.kernel.org
-To: Dan Carpenter <dan.carpenter@oracle.com>
-Cc: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Grant Likely <grant.likely@linaro.org>, Rob Herring <robh+dt@kernel.org>, Christian Daudt <csd@broadcom.com>, Russell King <rmk+kernel@arm.linux.org.uk>, Sachin Kamat <sachin.kamat@linaro.org>, Markus Mayer <markus.mayer@linaro.org>, Tim Kryger <tim.kryger@linaro.org>, Axel Lin <axel.lin@ingics.com>, linux-mmc@vger.kernel.org, kernel-janitors@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <1403183091-27876-2-git-send-email-ulf.hansson@linaro.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: linux-arm-kernel@lists.infradead.org
+Cc: Mark Rutland <mark.rutland@arm.com>, devicetree@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Russell King <linux@arm.linux.org.uk>, Pawel Moll <pawel.moll@arm.com>, linux-pm@vger.kernel.org, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Linus Walleij <linus.walleij@linaro.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Chris Ball <chris@printf.net>, Hans de Goede <hdegoede@redhat.com>, Chen-Yu Tsai <wens@csie.org>, Rob Herring <robh+dt@kernel.org>, Mark Brown <broonie@kernel.org>, Olof Johansson <olof@lixom.net>, Arend van Spriel <arend@broadcom.com>, Sascha Hauer <s.hauer@pengutronix.de>, Tomasz Figa <tomasz.figa@gmail.com>, Alexandre Courbot <gnurou@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On Fri, Jun 20, 2014 at 10:19:01AM +0300, Dan Carpenter wrote:
-> The debug printk says that 8bit is always true because of a '|' vs '&'
-> typo.
-> 
-> Signed-off-by: Dan Carpenter <dan.carpenter@oracle.com>
+On Thursday 19 June 2014 15:04:50 Ulf Hansson wrote:
+> +Power sequence DT bindings
+> +
+> +Each power sequence method has a corresponding "power-method" property string.
+> +This property shall be set in a subnode for a device. That subnode should also
+> +describe resourses which are specific to that power method.
+> +
+> +Do note, power sequences as such isn't encoded through DT. Instead those are
+> +implemented by each power method.
+> +
+> +Required subnode properties:
+> +- power-method: should contain the string for the power method to bind.
+> +
+> +       Supported power methods: None.
+> +
+> +Example:
+> +
+> +Note, the "clock" power method in this example isn't actually supported, but
+> +used to visualize how a childnode could be described.
 
-Acked-by: Matt Porter <mporter@linaro.org>
+I'm not too thrilled about adding another top-level concept for these.
+This seems to duplicate some things that pm-domains do, but does them
+in a somewhata different way. Would it be possible to instead integrate
+it into the pm-domain code?
 
-> 
-> diff --git a/drivers/mmc/host/sdhci-bcm-kona.c b/drivers/mmc/host/sdhci-bcm-kona.c
-> index dd780c3..2d3f3c0 100644
-> --- a/drivers/mmc/host/sdhci-bcm-kona.c
-> +++ b/drivers/mmc/host/sdhci-bcm-kona.c
-> @@ -290,7 +290,7 @@ static int sdhci_bcm_kona_probe(struct platform_device *pdev)
->  		host->quirks |= SDHCI_QUIRK_BROKEN_CARD_DETECTION;
->  
->  	dev_dbg(dev, "is_8bit=%c\n",
-> -		(host->mmc->caps | MMC_CAP_8_BIT_DATA) ? 'Y' : 'N');
-> +		(host->mmc->caps & MMC_CAP_8_BIT_DATA) ? 'Y' : 'N');
->  
->  	ret = sdhci_bcm_kona_sd_reset(host);
->  	if (ret)
+I also agree with Olof that having a standalone child device node is
+not the best representation. If you want to represent an SDIO device
+device that has some references to clocks, regulators, etc, then put
+that device into the tree and give it those properties.
+That would also let you worry about the sequencing in driver code rather
+than trying to come up with a completely generic model for it.
+
+	Arnd
