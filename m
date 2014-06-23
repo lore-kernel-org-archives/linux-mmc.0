@@ -1,47 +1,48 @@
-From: Maxime Coquelin <maxime.coquelin-qxv4g6HH51o@public.gmane.org>
-Subject: Re: [PATCH v3 09/10] ARM: update multi_v7_defconfig for STI
-Date: Mon, 23 Jun 2014 12:53:16 +0200
-Message-ID: <53A8071C.8090309@st.com>
-References: <1401899424-1365-1-git-send-email-peter.griffin@linaro.org> <1401899424-1365-10-git-send-email-peter.griffin@linaro.org>
+From: Maxime Coquelin <maxime.coquelin@st.com>
+Subject: Re: [PATCH v3 10/10] MAINTAINERS: Add sdhci-st file to ARCH/STI architecture
+Date: Mon, 23 Jun 2014 12:54:12 +0200
+Message-ID: <53A80754.9000900@st.com>
+References: <1401899424-1365-1-git-send-email-peter.griffin@linaro.org> <1401899424-1365-11-git-send-email-peter.griffin@linaro.org>
 Mime-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha1;
 	protocol="application/pgp-signature";
-	boundary="HOR5cGsoHwLw1fvDJL46tjJwuNhfCgpws"
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1401899424-1365-10-git-send-email-peter.griffin-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Peter Griffin <peter.griffin-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org, ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, patrice.chotard-qxv4g6HH51o@public.gmane.org, srinivas.kandagatla-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org
-Cc: kernel-F5mvAk5X5gdBDgjK7y7TUQ@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+	boundary="EOOXtWS7XOREkUW9Lh7gKmdeVvUII2idw"
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mx08-00178001.pphosted.com ([91.207.212.93]:57006 "EHLO
+	mx08-00178001.pphosted.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752813AbaFWKyo (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 23 Jun 2014 06:54:44 -0400
+In-Reply-To: <1401899424-1365-11-git-send-email-peter.griffin@linaro.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Peter Griffin <peter.griffin@linaro.org>, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, chris@printf.net, ulf.hansson@linaro.org, patrice.chotard@st.com, srinivas.kandagatla@gmail.com
+Cc: kernel@stlinux.com, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org
 
---HOR5cGsoHwLw1fvDJL46tjJwuNhfCgpws
+--EOOXtWS7XOREkUW9Lh7gKmdeVvUII2idw
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: quoted-printable
 
 
 
 On 06/04/2014 06:30 PM, Peter Griffin wrote:
-> This patch enables SDHCI STI platform driver.
->=20
-> Signed-off-by: Peter Griffin <peter.griffin-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> ---=20
-> arch/arm/configs/multi_v7_defconfig | 1 + 1 file changed, 1
-> insertion(+)
+> Signed-off-by: Peter Griffin <peter.griffin@linaro.org>
 
-Acked-by: Maxime Coquelin <maxime.coquelin-qxv4g6HH51o@public.gmane.org>
+Acked-by: Maxime Coquelin <maxime.coquelin@st.com>
 
+> --- MAINTAINERS | 1 + 1 file changed, 1 insertion(+)
 >=20
-> diff --git a/arch/arm/configs/multi_v7_defconfig
-> b/arch/arm/configs/multi_v7_defconfig index d4e8a47..48951fc
-> 100644 --- a/arch/arm/configs/multi_v7_defconfig +++
-> b/arch/arm/configs/multi_v7_defconfig @@ -277,6 +277,7 @@
-> CONFIG_MMC_SDHCI_TEGRA=3Dy CONFIG_MMC_SDHCI_DOVE=3Dy=20
-> CONFIG_MMC_SDHCI_SPEAR=3Dy CONFIG_MMC_SDHCI_BCM_KONA=3Dy=20
-> +CONFIG_MMC_SDHCI_ST=3Dy CONFIG_MMC_OMAP=3Dy CONFIG_MMC_OMAP_HS=3Dy=20
-> CONFIG_MMC_MVSDIO=3Dy
+> diff --git a/MAINTAINERS b/MAINTAINERS index 6dc67b1..19dc265
+> 100644 --- a/MAINTAINERS +++ b/MAINTAINERS @@ -1306,6 +1306,7 @@ F:
+> drivers/pinctrl/pinctrl-st.c F:	drivers/media/rc/st_rc.c F:
+> drivers/i2c/busses/i2c-st.c F:	drivers/tty/serial/st-asc.c +F:
+> drivers/mmc/host/sdhci-st.c
+>=20
+> ARM/TECHNOLOGIC SYSTEMS TS7250 MACHINE SUPPORT M:	Lennert Buytenhek
+> <kernel@wantstofly.org>
 >=20
 
 
---HOR5cGsoHwLw1fvDJL46tjJwuNhfCgpws
+--EOOXtWS7XOREkUW9Lh7gKmdeVvUII2idw
 Content-Type: application/pgp-signature; name="signature.asc"
 Content-Description: OpenPGP digital signature
 Content-Disposition: attachment; filename="signature.asc"
@@ -49,23 +50,19 @@ Content-Disposition: attachment; filename="signature.asc"
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v1.4.11 (GNU/Linux)
 
-iQIcBAEBAgAGBQJTqAccAAoJEMo4jShGhw+JhAsQAJabGblynDfRLIeG3CEVIRaA
-b3osDGHMYdd9sdrVTv6StOnXcqqBUu0Wv3JQqVuEpDWUOmE8bHKFaD+aw+TzNXwo
-WqgIf03PuPOLmRq40EOm8QR/mREJBIMG8DK9lGu8u3yc1A9VJ/mTMEhAocKLRKdf
-0LzKa7HzkTaweciI7iX+x88OJcVuXM+XfHZXo4iN1st0+gF0C0Kuxw2CNG9xl4yn
-87urXkstu5LydtwcsMZaNlgVqBStOc3SmGW8yGZwh/awCv5Noz6uM0iBalTJ4by0
-Bkg0GyarO8rtLsY+o9n+J0tHukfOV/OPSy2TKz8Gu9r6KeTyaiXOG41WaoJj+p55
-Sph061gPCMFaKUUS4nwzTEnr0ctBgmeCt2WTF8F7InlqpvYB3FIg0tkl1yCvzBZs
-+bJjPdxYSGN05yl6l2qVO1tbXL/tm27THfgx2gF1PkR973TUzzE2nDrbFY0oiejK
-uNVngzOZF4B3aq2fd88hzVDccj2FRuKnZrvVQV6bxbvAovEjc5Qy0zewWr1HPU2r
-2FBrI4m/hZtDFBqmCv4NPYO7R4HvEh1WYED6TwXKIDTP/P7MjLF7B24hus3yDnBb
-jwvtcLnZIJbzalPKPHozXvUQgYdHRlaagcK9WmID9ccVMkq7oNCyQybSrALMpsQE
-xJYigi0kj1loffStSPKG
-=zZ5P
+iQIcBAEBAgAGBQJTqAdUAAoJEMo4jShGhw+Jr5kP/26TFEhqQcxPolwQTqNrgLLT
+F2LY4sY7tTqRrSPkIeQ4tfe30tveb2twhKpNmDmjcwGaAc5YZUYpaaB0PZHEGiMl
+njGybn7cgPdhU8NX/FKEQCXjgFmEvbwnC4UOEsL107NUBH9TD+60kTAV+bwjxFXJ
+gVQHrZIclJRNhHAshiMR2ogc3AaMcpmLEBOYCBeNl80VrTiCG/N2ZNELEdNtD0ZO
+DESnlbDRJX46KHyKQZPuEcHh6HkXMsZ8dPaj+f8rLg1vyHZF+4qkMypl7inEbOba
+kNQR2k7KM3ZFaFmLewBcGixu7EY5+Z9/qKXbof5DFpP3F88Zx56oyVEIacEfpa2H
+qhE9b+sdZj5F0ZpKiLvUZZWZgsfZAYGl0TyRJAFteMIOWutTJUClYfp2GNtJ2UFB
+G2ARN52ZGDFXYgMvh+wYOeg+a2Fy+wWO8cOa/hXnHHtH/rrHocTYPn4xH35rLjyI
+4TDk9k4zalBD52u6AZ7jXGcHNHNrjrtyOVfgohRNLZNFBq1xlR/7ekMXcjykqBH3
+PUkjcUiZLURSonV1UmBJAqRQLjcE+iXeCXQUylCqDv6lvbUnY05KOmJxB5TPEgxD
+62dr152nsYYOOk6kahKR/DeGMDSgSBmn0pDQVEKoPG3/dWhSjWLhNY2h1/vnkr3i
+LDxHOuxTk8YlrSgZA/zZ
+=CFTR
 -----END PGP SIGNATURE-----
 
---HOR5cGsoHwLw1fvDJL46tjJwuNhfCgpws--
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+--EOOXtWS7XOREkUW9Lh7gKmdeVvUII2idw--
