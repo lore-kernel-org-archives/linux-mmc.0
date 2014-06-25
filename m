@@ -1,71 +1,45 @@
-From: Kukjin Kim <kgene.kim@samsung.com>
-Subject: RE: [PATCH] ARM: dts: update mmc node with hs-200 mode
-Date: Wed, 25 Jun 2014 19:24:57 +0900
-Message-ID: <01ed01cf905f$b6b21250$241636f0$@samsung.com>
-References: <1403689886-14573-1-git-send-email-yuvaraj.cd@samsung.com>
+From: Sachin Kamat <spk.linux@gmail.com>
+Subject: Re: [PATCH 1/1] mmc: host: Kconfig: Update SDHCI S3C entry
+Date: Wed, 25 Jun 2014 16:27:02 +0530
+Message-ID: <CAK5sBcHp74qqa=EU5TfSpCO+VWbYnQx+QFQado6S75bhRfiCDQ@mail.gmail.com>
+References: <1403690286-1264-1-git-send-email-sachin.kamat@samsung.com>
+	<4605637.HIkriDj1YF@wuerfel>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-reply-to: <1403689886-14573-1-git-send-email-yuvaraj.cd@samsung.com>
-Content-language: ko
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: 'Yuvaraj Kumar C D' <yuvaraj.cd@gmail.com>, linux-samsung-soc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, jh80.chung@samsung.com, cjb@laptop.org, tgih.jun@samsung.com, linux-mmc@vger.kernel.org, ulf.hansson@linaro.org, devicetree@vger.kernel.org, 'Doug Anderson' <dianders@chromium.org>
-Cc: sonnyrao@chromium.org, t.figa@samsung.com, joshi@samsung.com, ks.giri@samsung.com, prashanth.g@samsung.com, alim.akhtar@samsung.com, rahul.sharma@samsung.com, 'Yuvaraj Kumar C D' <yuvaraj.cd@samsung.com>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-lb0-f173.google.com ([209.85.217.173]:38588 "EHLO
+	mail-lb0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753096AbaFYK5E (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 25 Jun 2014 06:57:04 -0400
+Received: by mail-lb0-f173.google.com with SMTP id s7so1705278lbd.4
+        for <linux-mmc@vger.kernel.org>; Wed, 25 Jun 2014 03:57:02 -0700 (PDT)
+In-Reply-To: <4605637.HIkriDj1YF@wuerfel>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Arnd Bergmann <arnd@arndb.de>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, chris@printf.net, Ulf Hansson <ulf.hansson@linaro.org>, "tgih.jun@samsung.com" <tgih.jun@samsung.com>, Doug Anderson <dianders@chromium.org>
 
-Yuvaraj Kumar C D wrote:
-> 
-+ Doug
+On Wed, Jun 25, 2014 at 3:38 PM, Arnd Bergmann <arnd@arndb.de> wrote:
+> On Wednesday 25 June 2014 15:28:06 Sachin Kamat wrote:
+>> All Exynos4 SoC based boards have SDHCI controller and mostly
+>> use SD mounted filesystem. Hence it makes sense to default it
+>> to yes on Exynos4 platform. While at it also fix a couple of
+>> typos in the help text.
+>>
+>> Signed-off-by: Sachin Kamat <sachin.kamat@samsung.com>
+>> Cc: Doug Anderson <dianders@chromium.org>
+>>
+>
+> I'm not following that reasoning. We don't normally 'default y'
+> peripheral drivers at all, but just enable them in the defconfig.
 
-Hi,
+Doug and I had a small private discussion whereby defaulting commonly
+used features across platforms to 'yes' seemed sensible to avoid end users
+from trying to figure out the options and dependencies themselves when
+trying to build their own configs.
 
-> This patch updates hs-200 device tree property from
-> caps2-mmc-hs200-1.8v to mmc-hs200-1.8v for peach-pit
-> and peach-pi boards.
-> 
-> Signed-off-by: Yuvaraj Kumar C D <yuvaraj.cd@samsung.com>
+Probably Doug can add more or correct me here.
 
-Already I've queued same patch into my local but waiting for dependencies for
-push to my tree in git.kernel.org:
-
-http://www.spinics.net/lists/arm-kernel/msg341198.html
-
-Thanks,
-Kukjin
-
-> ---
->  arch/arm/boot/dts/exynos5420-peach-pit.dts |    2 +-
->  arch/arm/boot/dts/exynos5800-peach-pi.dts  |    2 +-
->  2 files changed, 2 insertions(+), 2 deletions(-)
-> 
-> diff --git a/arch/arm/boot/dts/exynos5420-peach-pit.dts b/arch/arm/boot/dts/exynos5420-
-> peach-pit.dts
-> index 1cf9df0..056a6fa 100644
-> --- a/arch/arm/boot/dts/exynos5420-peach-pit.dts
-> +++ b/arch/arm/boot/dts/exynos5420-peach-pit.dts
-> @@ -186,7 +186,7 @@
->  	status = "okay";
->  	num-slots = <1>;
->  	broken-cd;
-> -	caps2-mmc-hs200-1_8v;
-> +	mmc-hs200-1_8v;
->  	supports-highspeed;
->  	non-removable;
->  	card-detect-delay = <200>;
-> diff --git a/arch/arm/boot/dts/exynos5800-peach-pi.dts b/arch/arm/boot/dts/exynos5800-
-> peach-pi.dts
-> index 2c2c137..bb3ee76 100644
-> --- a/arch/arm/boot/dts/exynos5800-peach-pi.dts
-> +++ b/arch/arm/boot/dts/exynos5800-peach-pi.dts
-> @@ -171,7 +171,7 @@
->  	status = "okay";
->  	num-slots = <1>;
->  	broken-cd;
-> -	caps2-mmc-hs200-1_8v;
-> +	mmc-hs200-1_8v;
->  	supports-highspeed;
->  	non-removable;
->  	card-detect-delay = <200>;
-> --
-> 1.7.10.4
+-- 
+Regards,
+Sachin.
