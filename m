@@ -1,48 +1,33 @@
-From: Sachin Kamat <sachin.kamat@samsung.com>
-Subject: [PATCH 1/1] mmc: host: Kconfig: Update SDHCI S3C entry
-Date: Wed, 25 Jun 2014 15:28:06 +0530
-Message-ID: <1403690286-1264-1-git-send-email-sachin.kamat@samsung.com>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: [PATCH 1/1] mmc: host: Kconfig: Update SDHCI S3C entry
+Date: Wed, 25 Jun 2014 12:08:01 +0200
+Message-ID: <4605637.HIkriDj1YF@wuerfel>
+References: <1403690286-1264-1-git-send-email-sachin.kamat@samsung.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7Bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pd0-f181.google.com ([209.85.192.181]:53040 "EHLO
-	mail-pd0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753248AbaFYKB0 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 25 Jun 2014 06:01:26 -0400
-Received: by mail-pd0-f181.google.com with SMTP id v10so1458480pde.40
-        for <linux-mmc@vger.kernel.org>; Wed, 25 Jun 2014 03:01:25 -0700 (PDT)
+Received: from mout.kundenserver.de ([212.227.126.187]:56987 "EHLO
+	mout.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750851AbaFYKIM (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 25 Jun 2014 06:08:12 -0400
+In-Reply-To: <1403690286-1264-1-git-send-email-sachin.kamat@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: chris@printf.net, ulf.hansson@linaro.org, tgih.jun@samsung.com, spk.linux@gmail.com, Doug Anderson <dianders@chromium.org>
+To: Sachin Kamat <sachin.kamat@samsung.com>
+Cc: linux-mmc@vger.kernel.org, chris@printf.net, ulf.hansson@linaro.org, tgih.jun@samsung.com, spk.linux@gmail.com, Doug Anderson <dianders@chromium.org>
 
-All Exynos4 SoC based boards have SDHCI controller and mostly
-use SD mounted filesystem. Hence it makes sense to default it
-to yes on Exynos4 platform. While at it also fix a couple of
-typos in the help text.
+On Wednesday 25 June 2014 15:28:06 Sachin Kamat wrote:
+> All Exynos4 SoC based boards have SDHCI controller and mostly
+> use SD mounted filesystem. Hence it makes sense to default it
+> to yes on Exynos4 platform. While at it also fix a couple of
+> typos in the help text.
+> 
+> Signed-off-by: Sachin Kamat <sachin.kamat@samsung.com>
+> Cc: Doug Anderson <dianders@chromium.org>
+> 
 
-Signed-off-by: Sachin Kamat <sachin.kamat@samsung.com>
-Cc: Doug Anderson <dianders@chromium.org>
----
- drivers/mmc/host/Kconfig |    5 +++--
- 1 file changed, 3 insertions(+), 2 deletions(-)
+I'm not following that reasoning. We don't normally 'default y'
+peripheral drivers at all, but just enable them in the defconfig.
 
-diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-index a5652548230a..fe812dd876df 100644
---- a/drivers/mmc/host/Kconfig
-+++ b/drivers/mmc/host/Kconfig
-@@ -193,10 +193,11 @@ config MMC_SDHCI_TEGRA
- config MMC_SDHCI_S3C
- 	tristate "SDHCI support on Samsung S3C SoC"
- 	depends on MMC_SDHCI && PLAT_SAMSUNG
-+	default y if ARCH_EXYNOS4
- 	help
- 	  This selects the Secure Digital Host Controller Interface (SDHCI)
--	  often referrered to as the HSMMC block in some of the Samsung S3C
--	  range of SoC.
-+	  often referred to as the HSMMC block in some of the Samsung S3C
-+	  range of SoCs.
- 
- 	  If you have a controller with this interface, say Y or M here.
- 
--- 
-1.7.9.5
-
+	Arnd
