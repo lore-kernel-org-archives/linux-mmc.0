@@ -1,94 +1,82 @@
-From: Doug Anderson <dianders@chromium.org>
-Subject: Re: [PATCH 1/3] mmc: dw_mmc: use mmc_regulator_get_supply to handle regulators
-Date: Tue, 24 Jun 2014 21:00:34 -0700
-Message-ID: <CAD=FV=WXWttq294yn+eB5x3N0ztoMhpwacqdLB3OfRk+UK+Abg@mail.gmail.com>
-References: <1403520321-2431-1-git-send-email-yuvaraj.cd@samsung.com>
-	<1403520321-2431-2-git-send-email-yuvaraj.cd@samsung.com>
-	<CAD=FV=UGjm9y3XoBgWKjw9kp9W=ZrwB-S6Lh7T_LBUgCQZn1ag@mail.gmail.com>
-	<53AA3F78.3080804@samsung.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-vc0-f178.google.com ([209.85.220.178]:51533 "EHLO
-	mail-vc0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750699AbaFYEAf (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 25 Jun 2014 00:00:35 -0400
-Received: by mail-vc0-f178.google.com with SMTP id ij19so1330502vcb.9
-        for <linux-mmc@vger.kernel.org>; Tue, 24 Jun 2014 21:00:34 -0700 (PDT)
-In-Reply-To: <53AA3F78.3080804@samsung.com>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Tim Kryger <tim.kryger@gmail.com>
+Subject: [PATCH] mmc: sdhci: Improve external VDD regulator support
+Date: Wed, 25 Jun 2014 00:25:34 -0700
+Message-ID: <1403681134-12616-1-git-send-email-tim.kryger@gmail.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Sachin Kamat <spk.linux@gmail.com>
+Cc: Tim Kryger <tim.kryger@gmail.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: Yuvaraj Kumar C D <yuvaraj.cd@gmail.com>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Chris Ball <cjb@laptop.org>, Seungwon Jeon <tgih.jun@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Sonny Rao <sonnyrao@chromium.org>, Tomasz Figa <t.figa@samsung.com>, Kukjin Kim <kgene.kim@samsung.com>, sunil joshi <joshi@samsung.com>, ks.giri@samsung.com, Prashanth G <prashanth.g@samsung.com>, Alim Akhtar <alim.akhtar@samsung.com>, Yuvaraj Kumar C D <yuvaraj.cd@samsung.com>
 
-Jaehoon,
+A standard compliant SDHCI can itself supply VDD at 1.8, 3.0, or 3.3v.
+Several vendors ignore this and instead rely upon external regulators
+to supply VDD.  While the external regulators typically can supply one
+of the standard SDHCI voltage levels, there is no real reason for this
+to be a hard requirement.
 
-On Tue, Jun 24, 2014 at 8:18 PM, Jaehoon Chung <jh80.chung@samsung.com> wrote:
-> On 06/25/2014 03:00 AM, Doug Anderson wrote:
->> Yuvaraj,
->>
->> On Mon, Jun 23, 2014 at 3:45 AM, Yuvaraj Kumar C D <yuvaraj.cd@gmail.com> wrote:
->>> This patch makes use of mmc_regulator_get_supply() to handle
->>> the vmmc and vqmmc regulators.Also it moves the code handling
->>> the these regulators to dw_mci_set_ios().It turned on the vmmc
->>> and vqmmc during MMC_POWER_UP and MMC_POWER_ON,and turned off
->>> during MMC_POWER_OFF.
->>>
->>> Signed-off-by: Yuvaraj Kumar C D <yuvaraj.cd@samsung.com>
->>> ---
->>>  drivers/mmc/host/dw_mmc.c |   71 ++++++++++++++++++++++-----------------------
->>>  drivers/mmc/host/dw_mmc.h |    2 ++
->>>  2 files changed, 36 insertions(+), 37 deletions(-)
->>
->> Perhaps you could CC me on the whole series for the next version since
->> I was involved in privately reviewing previous versions?
->>
->> Overall caveat for my review is that I'm nowhere near an SD/MMC expert.
->>
->>
->>> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
->>> index 1ac227c..f5cabce 100644
->>> --- a/drivers/mmc/host/dw_mmc.c
->>> +++ b/drivers/mmc/host/dw_mmc.c
->>> @@ -937,6 +937,7 @@ static void dw_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
->>>         struct dw_mci_slot *slot = mmc_priv(mmc);
->>>         const struct dw_mci_drv_data *drv_data = slot->host->drv_data;
->>>         u32 regs;
->>> +       int ret;
->>>
->>>         switch (ios->bus_width) {
->>>         case MMC_BUS_WIDTH_4:
->>> @@ -975,16 +976,41 @@ static void dw_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
->>>
->>>         switch (ios->power_mode) {
->>>         case MMC_POWER_UP:
->>> +               if ((!IS_ERR(mmc->supply.vmmc)) &&
->>> +                               !test_bit(DW_MMC_CARD_POWERED, &slot->flags)) {
->>> +                       ret = regulator_enable(mmc->supply.vmmc);
->>> +                       if (!ret)
->>> +                               set_bit(DW_MMC_CARD_POWERED, &slot->flags);
->
-> MMC_CARD_POWERED? I didn't know why it needs.
+This patch alters the SDHCI driver such that external VDD regulators
+that provide voltages other than the three mentioned above may be used
+so long as they can supply a voltage that meets the needs of the card.
 
-I think the idea was to make sure that regulator enables/disables were
-balanced.  ...but if the mmc core does this for us then we probably
-don't need to worry.
+In the case that an external VDD regulator is provided, it is reasonable
+to ignore the voltage capabilities of the host controller and allow the
+external regulator to set the OCR mask.  Additionally, there is no need
+to convert a VDD voltage request into one of the standard SDHCI voltage
+levels or program it in the host controller's power control register.
 
+Signed-off-by: Tim Kryger <tim.kryger@gmail.com>
+Tested-by: Sachin Kamat <spk.linux@gmail.com>
+---
 
->>> +               }
->>
->> As per below, I'm not sure why you'd want to turn on vqmmc and vmmc at
->> different times.
-> In my case, in order to prevent the H/W mis-operation, it turns on vqmmc and vmmc at different times.
+This change corrects a regression observed on Exynos platforms that was
+triggered by "mmc: sdhci: Use mmc core regulator infrastucture"
 
-OK!  Can you explain more?  What instance is one powered but not the other?
+https://www.mail-archive.com/linux-mmc@vger.kernel.org/msg27101.html
 
-I know that we talked to an SD Card manufacturer who told us that
-powering their IO lines without their main power rail was a bad thing
-(and we in fact saw this causing problems on SD cards).  I would guess
-that means that you're either powering vmmc before vqmmc or that vqmmc
-somehow doesn't directly enable pullups for IO lines.
+ drivers/mmc/host/sdhci.c |   16 +++++++++-------
+ 1 file changed, 9 insertions(+), 7 deletions(-)
 
-If you need vmmc before vqmmc then I'm curious about why...
-
--Doug
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index c23a872..07a2426 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -1226,6 +1226,13 @@ static void sdhci_set_power(struct sdhci_host *host, unsigned char mode,
+ 	struct mmc_host *mmc = host->mmc;
+ 	u8 pwr = 0;
+ 
++	if (!IS_ERR(mmc->supply.vmmc)) {
++		spin_unlock_irq(&host->lock);
++		mmc_regulator_set_ocr(host->mmc, mmc->supply.vmmc, vdd);
++		spin_lock_irq(&host->lock);
++		return;
++	}
++
+ 	if (mode != MMC_POWER_OFF) {
+ 		switch (1 << vdd) {
+ 		case MMC_VDD_165_195:
+@@ -1284,12 +1291,6 @@ static void sdhci_set_power(struct sdhci_host *host, unsigned char mode,
+ 		if (host->quirks & SDHCI_QUIRK_DELAY_AFTER_POWER)
+ 			mdelay(10);
+ 	}
+-
+-	if (!IS_ERR(mmc->supply.vmmc)) {
+-		spin_unlock_irq(&host->lock);
+-		mmc_regulator_set_ocr(host->mmc, mmc->supply.vmmc, vdd);
+-		spin_lock_irq(&host->lock);
+-	}
+ }
+ 
+ /*****************************************************************************\
+@@ -3092,8 +3093,9 @@ int sdhci_add_host(struct sdhci_host *host)
+ 				   SDHCI_MAX_CURRENT_MULTIPLIER;
+ 	}
+ 
++	/* If OCR set by external regulators, use it instead */
+ 	if (mmc->ocr_avail)
+-		ocr_avail &= mmc->ocr_avail;
++		ocr_avail = mmc->ocr_avail;
+ 
+ 	if (host->ocr_mask)
+ 		ocr_avail &= host->ocr_mask;
+-- 
+1.7.9.5
