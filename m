@@ -1,19 +1,19 @@
 From: Doug Anderson <dianders@chromium.org>
 Subject: Re: [PATCH 1/1] mmc: host: Kconfig: Update SDHCI S3C entry
-Date: Wed, 25 Jun 2014 09:55:51 -0700
-Message-ID: <CAD=FV=XC=PGoeSr6rdtyNRY493zccdk5F=_yHpyP-exFqDG=jw@mail.gmail.com>
+Date: Wed, 25 Jun 2014 09:55:50 -0700
+Message-ID: <CAD=FV=UwEwP73wTa8Lm=u4WLcJBUu7PEzoJKoBuiaf21ciCeuw@mail.gmail.com>
 References: <1403690286-1264-1-git-send-email-sachin.kamat@samsung.com>
 	<4605637.HIkriDj1YF@wuerfel>
 	<CAK5sBcHp74qqa=EU5TfSpCO+VWbYnQx+QFQado6S75bhRfiCDQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-oa0-f41.google.com ([209.85.219.41]:52771 "EHLO
-	mail-oa0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757879AbaFYQzw (ORCPT
+Received: from mail-ve0-f171.google.com ([209.85.128.171]:61971 "EHLO
+	mail-ve0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757426AbaFYQzw (ORCPT
 	<rfc822;linux-mmc@vger.kernel.org>); Wed, 25 Jun 2014 12:55:52 -0400
-Received: by mail-oa0-f41.google.com with SMTP id l6so2474340oag.0
-        for <linux-mmc@vger.kernel.org>; Wed, 25 Jun 2014 09:55:51 -0700 (PDT)
+Received: by mail-ve0-f171.google.com with SMTP id jz11so2329542veb.30
+        for <linux-mmc@vger.kernel.org>; Wed, 25 Jun 2014 09:55:50 -0700 (PDT)
 In-Reply-To: <CAK5sBcHp74qqa=EU5TfSpCO+VWbYnQx+QFQado6S75bhRfiCDQ@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
