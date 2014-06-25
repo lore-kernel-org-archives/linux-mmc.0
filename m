@@ -1,275 +1,372 @@
 From: Seungwon Jeon <tgih.jun@samsung.com>
-Subject: RE: [PATCH 1/3] mmc: dw_mmc: use mmc_regulator_get_supply to handle
- regulators
-Date: Wed, 25 Jun 2014 20:18:47 +0900
-Message-ID: <001201cf9067$3c5b2070$b5116150$%jun@samsung.com>
+Subject: RE: [PATCH 3/3] mmc: dw_mmc: Support voltage changes
+Date: Wed, 25 Jun 2014 22:08:54 +0900
+Message-ID: <001501cf9076$9de45000$d9acf000$%jun@samsung.com>
 References: <1403520321-2431-1-git-send-email-yuvaraj.cd@samsung.com>
- <1403520321-2431-2-git-send-email-yuvaraj.cd@samsung.com>
- <CAD=FV=UGjm9y3XoBgWKjw9kp9W=ZrwB-S6Lh7T_LBUgCQZn1ag@mail.gmail.com>
- <53AA3F78.3080804@samsung.com>
+ <1403520321-2431-4-git-send-email-yuvaraj.cd@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=ks_c_5601-1987
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-reply-to: <53AA3F78.3080804@samsung.com>
+In-reply-to: <1403520321-2431-4-git-send-email-yuvaraj.cd@samsung.com>
 Content-language: ko
 Sender: linux-samsung-soc-owner@vger.kernel.org
-To: 'Jaehoon Chung' <jh80.chung@samsung.com>, 'Doug Anderson' <dianders@chromium.org>, 'Yuvaraj Kumar C D' <yuvaraj.cd@gmail.com>
-Cc: 'linux-samsung-soc' <linux-samsung-soc@vger.kernel.org>, linux-arm-kernel@lists.infradead.org, 'Chris Ball' <cjb@laptop.org>, linux-mmc@vger.kernel.org, 'Ulf Hansson' <ulf.hansson@linaro.org>, 'Sonny Rao' <sonnyrao@chromium.org>, 'Tomasz Figa' <t.figa@samsung.com>, 'Kukjin Kim' <kgene.kim@samsung.com>, 'sunil joshi' <joshi@samsung.com>, ks.giri@samsung.com, 'Prashanth G' <prashanth.g@samsung.com>, 'Alim Akhtar' <alim.akhtar@samsung.com>, 'Yuvaraj Kumar C D' <yuvaraj.cd@samsung.com>
+To: 'Yuvaraj Kumar C D' <yuvaraj.cd@gmail.com>, linux-samsung-soc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, jh80.chung@samsung.com, cjb@laptop.org, linux-mmc@vger.kernel.org, ulf.hansson@linaro.org
+Cc: sonnyrao@chromium.org, t.figa@samsung.com, kgene.kim@samsung.com, joshi@samsung.com, ks.giri@samsung.com, prashanth.g@samsung.com, alim.akhtar@samsung.com, 'Doug Anderson' <dianders@chromium.org>, 'Yuvaraj Kumar C D' <yuvaraj.cd@samsung.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Yuvaraj.
-
-This patch looks like similar Jaehoon's.
-Is it resending?
-Anyway, I added some comments below.
-
-
-On Wed, June 25, 2014, Jaehoon Chung wrote:
-> On 06/25/2014 03:00 AM, Doug Anderson wrote:
-> > Yuvaraj,
-> >
-> > On Mon, Jun 23, 2014 at 3:45 AM, Yuvaraj Kumar C D <yuvaraj.cd@gmail.com> wrote:
-> >> This patch makes use of mmc_regulator_get_supply() to handle
-> >> the vmmc and vqmmc regulators.Also it moves the code handling
-> >> the these regulators to dw_mci_set_ios().It turned on the vmmc
-> >> and vqmmc during MMC_POWER_UP and MMC_POWER_ON,and turned off
-> >> during MMC_POWER_OFF.
-> >>
-> >> Signed-off-by: Yuvaraj Kumar C D <yuvaraj.cd@samsung.com>
-> >> ---
-> >>  drivers/mmc/host/dw_mmc.c |   71 ++++++++++++++++++++++-----------------------
-> >>  drivers/mmc/host/dw_mmc.h |    2 ++
-> >>  2 files changed, 36 insertions(+), 37 deletions(-)
-> >
-> > Perhaps you could CC me on the whole series for the next version since
-> > I was involved in privately reviewing previous versions?
-> >
-> > Overall caveat for my review is that I'm nowhere near an SD/MMC expert.
-> >
-> >
-> >> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> >> index 1ac227c..f5cabce 100644
-> >> --- a/drivers/mmc/host/dw_mmc.c
-> >> +++ b/drivers/mmc/host/dw_mmc.c
-> >> @@ -937,6 +937,7 @@ static void dw_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
-> >>         struct dw_mci_slot *slot = mmc_priv(mmc);
-> >>         const struct dw_mci_drv_data *drv_data = slot->host->drv_data;
-> >>         u32 regs;
-> >> +       int ret;
-> >>
-> >>         switch (ios->bus_width) {
-> >>         case MMC_BUS_WIDTH_4:
-> >> @@ -975,16 +976,41 @@ static void dw_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
-> >>
-> >>         switch (ios->power_mode) {
-> >>         case MMC_POWER_UP:
-> >> +               if ((!IS_ERR(mmc->supply.vmmc)) &&
-> >> +                               !test_bit(DW_MMC_CARD_POWERED, &slot->flags)) {
-> >> +                       ret = regulator_enable(mmc->supply.vmmc);
-> >> +                       if (!ret)
-> >> +                               set_bit(DW_MMC_CARD_POWERED, &slot->flags);
+On Mon, June 23, 2014, Yuvaraj Kumar C D wrote:
+> Subject: [PATCH 3/3] mmc: dw_mmc: Support voltage changes
 > 
-> MMC_CARD_POWERED? I didn't know why it needs.
-Also, ios->vdd is missed. Use mmc_regulator_set_ocr() instead of regulator_enable() for vmmc.
-And with mmc_regulator_set_ocr(), we don't need to check additional flag for enable/disable.
-It does that already.
+> From: Doug Anderson <dianders@chromium.org>
+> 
+> For UHS cards we need the ability to switch voltages from 3.3V to
+> 1.8V.  Add support to the dw_mmc driver to handle this.  Note that
+> dw_mmc needs a little bit of extra code since the interface needs a
+> special bit programmed to the CMD register while CMD11 is progressing.
+> This means adding a few extra states to the state machine to track.
+
+Overall new additional states makes it complicated.
+Can we do that in other way?
 
 > 
-> >> +               }
-> >
-> > As per below, I'm not sure why you'd want to turn on vqmmc and vmmc at
-> > different times.
-> In my case, in order to prevent the H/W mis-operation, it turns on vqmmc and vmmc at different times.
+> Signed-off-by: Doug Anderson <dianders@chromium.org>
+> Signed-off-by: Yuvaraj Kumar C D <yuvaraj.cd@samsung.com>
 > 
-> >
-> > Also: if you fail to turn on either of the regulators it feels like
-> > you should print a pretty nasty error message since your device will
-> > almost certainly not work.
-> >
-> >
-> >>                 set_bit(DW_MMC_CARD_NEED_INIT, &slot->flags);
-> >>                 regs = mci_readl(slot->host, PWREN);
-> >>                 regs |= (1 << slot->id);
-> >>                 mci_writel(slot->host, PWREN, regs);
-> >>                 break;
-> >>         case MMC_POWER_OFF:
-> >> +               if (!IS_ERR(mmc->supply.vqmmc) &&
-> >> +                               test_bit(DW_MMC_IO_POWERED, &slot->flags)) {
-> >> +                       ret = regulator_disable(mmc->supply.vqmmc);
-> >> +                       if (!ret)
-> >> +                               clear_bit(DW_MMC_IO_POWERED, &slot->flags);
-> >> +               }
-> >> +               if (!IS_ERR(mmc->supply.vmmc) &&
-> >> +                               test_bit(DW_MMC_CARD_POWERED, &slot->flags)) {
-> >> +                       ret = regulator_disable(mmc->supply.vmmc);
-> >> +                       if (!ret)
-> >> +                               clear_bit(DW_MMC_CARD_POWERED, &slot->flags);
-> >> +               }
-> >>                 regs = mci_readl(slot->host, PWREN);
-> >>                 regs &= ~(1 << slot->id);
-> >>                 mci_writel(slot->host, PWREN, regs);
-> >>                 break;
-> >> +       case MMC_POWER_ON:
-> >> +               if (!IS_ERR(mmc->supply.vqmmc) &&
-> >> +                               !test_bit(DW_MMC_IO_POWERED, &slot->flags)) {
-You can use regulator_is_enabled() instead of flag bit, DW_MMC_IO_POWERED.
-Important thing is that if powering vmmc failed at MMC_POWER_UP, vqmmc should not be powered.
-Please consider Doug's mentions below.
+> ---
+>  drivers/mmc/host/dw_mmc.c  |  145 +++++++++++++++++++++++++++++++++++++++++---
+>  drivers/mmc/host/dw_mmc.h  |    5 +-
+>  include/linux/mmc/dw_mmc.h |    2 +
+>  3 files changed, 142 insertions(+), 10 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index e034bce..38eb548 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -29,6 +29,7 @@
+>  #include <linux/irq.h>
+>  #include <linux/mmc/host.h>
+>  #include <linux/mmc/mmc.h>
+> +#include <linux/mmc/sd.h>
+>  #include <linux/mmc/sdio.h>
+>  #include <linux/mmc/dw_mmc.h>
+>  #include <linux/bitops.h>
+> @@ -235,10 +236,13 @@ err:
+>  }
+>  #endif /* defined(CONFIG_DEBUG_FS) */
+> 
+> +static void mci_send_cmd(struct dw_mci_slot *slot, u32 cmd, u32 arg);
+> +
+>  static u32 dw_mci_prepare_command(struct mmc_host *mmc, struct mmc_command *cmd)
+>  {
+>  	struct mmc_data	*data;
+>  	struct dw_mci_slot *slot = mmc_priv(mmc);
+> +	struct dw_mci *host = slot->host;
+>  	const struct dw_mci_drv_data *drv_data = slot->host->drv_data;
+>  	u32 cmdr;
+>  	cmd->error = -EINPROGRESS;
+> @@ -254,6 +258,32 @@ static u32 dw_mci_prepare_command(struct mmc_host *mmc, struct mmc_command *cmd)
+>  	else if (cmd->opcode != MMC_SEND_STATUS && cmd->data)
+>  		cmdr |= SDMMC_CMD_PRV_DAT_WAIT;
+> 
+> +	if (cmd->opcode == SD_SWITCH_VOLTAGE) {
+> +		u32 clk_en_a;
+> +
+> +		/* Special bit makes CMD11 not die */
+> +		cmdr |= SDMMC_CMD_VOLT_SWITCH;
+> +
+> +		/* Change state to continue to handle CMD11 weirdness */
+> +		WARN_ON(slot->host->state != STATE_SENDING_CMD);
+> +		slot->host->state = STATE_SENDING_CMD11;
+> +
+> +		/*
+> +		 * We need to disable clock stop while doing voltage switch
+> +		 * according to 7.4.1.2 Voltage Switch Normal Scenario.
+> +		 *
+> +		 * It's assumed that by the next time the CLKENA is updated
+> +		 * (when we set the clock next) that the voltage change will
+> +		 * be over, so we don't bother setting any bits to synchronize
+> +		 * with dw_mci_setup_bus().
+> +		 */
+> +		clk_en_a = mci_readl(host, CLKENA);
+> +		clk_en_a &= ~(SDMMC_CLKEN_LOW_PWR << slot->id);
+> +		mci_writel(host, CLKENA, clk_en_a);
+> +		mci_send_cmd(slot, SDMMC_CMD_UPD_CLK |
+> +			     SDMMC_CMD_PRV_DAT_WAIT, 0);
+dw_mci_disable_low_power() can be used here.
 
-> >> +                       ret = regulator_enable(mmc->supply.vqmmc);
-> >> +                       if (!ret)
-> >> +                               set_bit(DW_MMC_IO_POWERED, &slot->flags);
-> >> +               }
-> >>         default:
-> >>                 break;
-> >>         }
-> >> @@ -2067,7 +2093,13 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
-> >>                 mmc->f_max = freq[1];
-> >>         }
-> >>
-> >> -       mmc->ocr_avail = MMC_VDD_32_33 | MMC_VDD_33_34;
-> >> +       /*if there are external regulators, get them*/
-> >> +       ret = mmc_regulator_get_supply(mmc);
-> >> +       if (ret == -EPROBE_DEFER)
-> >> +               goto err_setup_bus;
-> >> +
-> >> +       if (!mmc->ocr_avail)
-> >> +               mmc->ocr_avail = MMC_VDD_32_33 | MMC_VDD_33_34;
-> >>
-> >>         if (host->pdata->caps)
-> >>                 mmc->caps = host->pdata->caps;
-> >> @@ -2133,7 +2165,7 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
-> >>
-> >>  err_setup_bus:
-> >>         mmc_free_host(mmc);
-> >> -       return -EINVAL;
-> >> +       return ret;
-> >>  }
-> >>
-> >>  static void dw_mci_cleanup_slot(struct dw_mci_slot *slot, unsigned int id)
-> >> @@ -2375,24 +2407,6 @@ int dw_mci_probe(struct dw_mci *host)
-> >>                 }
-> >>         }
-> >>
-> >> -       host->vmmc = devm_regulator_get_optional(host->dev, "vmmc");
-> >> -       if (IS_ERR(host->vmmc)) {
-> >> -               ret = PTR_ERR(host->vmmc);
-> >> -               if (ret == -EPROBE_DEFER)
-> >> -                       goto err_clk_ciu;
-> >> -
-> >> -               dev_info(host->dev, "no vmmc regulator found: %d\n", ret);
-> >> -               host->vmmc = NULL;
-> >> -       } else {
-> >> -               ret = regulator_enable(host->vmmc);
-> >> -               if (ret) {
-> >> -                       if (ret != -EPROBE_DEFER)
-> >> -                               dev_err(host->dev,
-> >> -                                       "regulator_enable fail: %d\n", ret);
-> >> -                       goto err_clk_ciu;
-> >> -               }
-> >> -       }
-> >> -
-> >>         host->quirks = host->pdata->quirks;
-> >>
-> >>         spin_lock_init(&host->lock);
-> >> @@ -2536,8 +2550,6 @@ err_workqueue:
-> >>  err_dmaunmap:
-> >>         if (host->use_dma && host->dma_ops->exit)
-> >>                 host->dma_ops->exit(host);
-> >> -       if (host->vmmc)
-> >> -               regulator_disable(host->vmmc);
-> >>
-> >>  err_clk_ciu:
-> >>         if (!IS_ERR(host->ciu_clk))
-> >> @@ -2573,9 +2585,6 @@ void dw_mci_remove(struct dw_mci *host)
-> >>         if (host->use_dma && host->dma_ops->exit)
-> >>                 host->dma_ops->exit(host);
-> >>
-> >> -       if (host->vmmc)
-> >> -               regulator_disable(host->vmmc);
-> >> -
-> >>         if (!IS_ERR(host->ciu_clk))
-> >>                 clk_disable_unprepare(host->ciu_clk);
-> >>
-> >> @@ -2592,9 +2601,6 @@ EXPORT_SYMBOL(dw_mci_remove);
-> >>   */
-> >>  int dw_mci_suspend(struct dw_mci *host)
-> >>  {
-> >> -       if (host->vmmc)
-> >> -               regulator_disable(host->vmmc);
-> >> -
-> >
-> > Just to check: have you tested suspend/resume with the various
-> > combinations of "keep-power-in-suspend" and "non-removable" with your
-> > patch.  I remember some of the logic being a bit complicated...
-Please check it and give some updates/result in next version.
+> +	}
+> +
+>  	if (cmd->flags & MMC_RSP_PRESENT) {
+>  		/* We expect a response, so set this bit */
+>  		cmdr |= SDMMC_CMD_RESP_EXP;
+> @@ -776,11 +806,15 @@ static void dw_mci_setup_bus(struct dw_mci_slot *slot, bool force_clkinit)
+>  	unsigned int clock = slot->clock;
+>  	u32 div;
+>  	u32 clk_en_a;
+> +	u32 sdmmc_cmd_bits = SDMMC_CMD_UPD_CLK | SDMMC_CMD_PRV_DAT_WAIT;
+> +
+> +	/* We must continue to set bit 28 in CMD until the change is complete */
+> +	if (host->state == STATE_WAITING_CMD11_DONE)
+> +		sdmmc_cmd_bits |= SDMMC_CMD_VOLT_SWITCH;
+I didn't get the reason SDMMC_CMD_VOLT_SWITCH is needed during clock update(enable/disable)
+Can you explain it in details?
+
+> 
+>  	if (!clock) {
+>  		mci_writel(host, CLKENA, 0);
+> -		mci_send_cmd(slot,
+> -			     SDMMC_CMD_UPD_CLK | SDMMC_CMD_PRV_DAT_WAIT, 0);
+> +		mci_send_cmd(slot, sdmmc_cmd_bits, 0);
+>  	} else if (clock != host->current_speed || force_clkinit) {
+>  		div = host->bus_hz / clock;
+>  		if (host->bus_hz % clock && host->bus_hz > clock)
+> @@ -804,15 +838,13 @@ static void dw_mci_setup_bus(struct dw_mci_slot *slot, bool force_clkinit)
+>  		mci_writel(host, CLKSRC, 0);
+> 
+>  		/* inform CIU */
+> -		mci_send_cmd(slot,
+> -			     SDMMC_CMD_UPD_CLK | SDMMC_CMD_PRV_DAT_WAIT, 0);
+> +		mci_send_cmd(slot, sdmmc_cmd_bits, 0);
+> 
+>  		/* set clock to desired speed */
+>  		mci_writel(host, CLKDIV, div);
+> 
+>  		/* inform CIU */
+> -		mci_send_cmd(slot,
+> -			     SDMMC_CMD_UPD_CLK | SDMMC_CMD_PRV_DAT_WAIT, 0);
+> +		mci_send_cmd(slot, sdmmc_cmd_bits, 0);
+> 
+>  		/* enable clock; only low power if no SDIO */
+>  		clk_en_a = SDMMC_CLKEN_ENABLE << slot->id;
+> @@ -821,8 +853,7 @@ static void dw_mci_setup_bus(struct dw_mci_slot *slot, bool force_clkinit)
+>  		mci_writel(host, CLKENA, clk_en_a);
+> 
+>  		/* inform CIU */
+> -		mci_send_cmd(slot,
+> -			     SDMMC_CMD_UPD_CLK | SDMMC_CMD_PRV_DAT_WAIT, 0);
+> +		mci_send_cmd(slot, sdmmc_cmd_bits, 0);
+> 
+>  		/* keep the clock with reflecting clock dividor */
+>  		slot->__clk_old = clock << div;
+> @@ -898,6 +929,17 @@ static void dw_mci_queue_request(struct dw_mci *host, struct dw_mci_slot *slot,
+> 
+>  	slot->mrq = mrq;
+> 
+> +	if (host->state == STATE_WAITING_CMD11_DONE) {
+> +		dev_warn(&slot->mmc->class_dev,
+> +			 "Voltage change didn't complete\n");
+> +		/*
+> +		 * this case isn't expected to happen, so we can
+> +		 * either crash here or just try to continue on
+> +		 * in the closest possible state
+> +		 */
+> +		host->state = STATE_IDLE;
+> +	}
+> +
+>  	if (host->state == STATE_IDLE) {
+>  		host->state = STATE_SENDING_CMD;
+>  		dw_mci_start_request(host, slot);
+> @@ -993,6 +1035,9 @@ static void dw_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+>  	/* Slot specific timing and width adjustment */
+>  	dw_mci_setup_bus(slot, false);
+> 
+> +	if (slot->host->state == STATE_WAITING_CMD11_DONE && ios->clock != 0)
+> +		slot->host->state = STATE_IDLE;
+> +
+>  	switch (ios->power_mode) {
+>  	case MMC_POWER_UP:
+>  		if ((!IS_ERR(mmc->supply.vmmc)) &&
+> @@ -1039,6 +1084,68 @@ static void dw_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+>  	}
+>  }
+> 
+> +static int dw_mci_card_busy(struct mmc_host *mmc)
+> +{
+> +	struct dw_mci_slot *slot = mmc_priv(mmc);
+> +	u32 status;
+> +
+> +	/*
+> +	 * Check the busy bit which is low when DAT[3:0]
+> +	 * (the data lines) are 0000
+> +	 */
+> +	status = mci_readl(slot->host, STATUS);
+> +
+> +	return !!(status & SDMMC_STATUS_BUSY);
+> +}
+> +
+> +static int dw_mci_switch_voltage(struct mmc_host *mmc, struct mmc_ios *ios)
+> +{
+> +	struct dw_mci_slot *slot = mmc_priv(mmc);
+> +	struct dw_mci *host = slot->host;
+> +	u32 uhs;
+> +	u32 v18 = SDMMC_UHS_18V << slot->id;
+> +	int min_uv, max_uv;
+> +	int ret;
+> +
+> +	/*
+> +	 * Program the voltage.  Note that some instances of dw_mmc may use
+> +	 * the UHS_REG for this.  For other instances (like exynos) the UHS_REG
+> +	 * does no harm but you need to set the regulator directly.  Try both.
+> +	 */
+> +	uhs = mci_readl(host, UHS_REG);
+> +	if (ios->signal_voltage == MMC_SIGNAL_VOLTAGE_330) {
+> +		min_uv = 2700000;
+> +		max_uv = 3600000;
+> +		uhs &= ~v18;
+> +	} else {
+> +		min_uv = 1700000;
+> +		max_uv = 1950000;
+> +		uhs |= v18;
+> +	}
+> +	if (!IS_ERR(mmc->supply.vqmmc)) {
+> +		ret = regulator_set_voltage(mmc->supply.vqmmc, min_uv, max_uv);
+> +
+> +		/*
+> +		 * Only complain if regulator claims that it's not in the 1.8V
+> +		 * range.  This avoids a bunch of errors in the case that
+> +		 * we've got a fixed 1.8V regulator but the core SD code still
+> +		 * thinks it ought to try to switch to 3.3 and then back to 1.8
+> +		 */
+> +		if (ret) {
+I think if ret is error, printing message and returning error is good.
+Currently, just returning '0' though it fails.
+
+> +			int cur_voltage = 0;
+> +
+> +			cur_voltage = regulator_get_voltage(mmc->supply.vqmmc);
+> +			if (cur_voltage < 1700000 || cur_voltage > 1950000)
+> +				dev_warn(&mmc->class_dev,
+> +					 "Regulator set error %d: %d - %d\n",
+> +					 ret, min_uv, max_uv);
+> +		}
+> +	}
+> +	mci_writel(host, UHS_REG, uhs);
+> +
+> +	return 0;
+> +}
+> +
+>  static int dw_mci_get_ro(struct mmc_host *mmc)
+>  {
+>  	int read_only;
+> @@ -1180,6 +1287,9 @@ static const struct mmc_host_ops dw_mci_ops = {
+>  	.get_cd			= dw_mci_get_cd,
+>  	.enable_sdio_irq	= dw_mci_enable_sdio_irq,
+>  	.execute_tuning		= dw_mci_execute_tuning,
+> +	.card_busy		= dw_mci_card_busy,
+> +	.start_signal_voltage_switch = dw_mci_switch_voltage,
+> +
+>  };
+> 
+>  static void dw_mci_request_end(struct dw_mci *host, struct mmc_request *mrq)
+> @@ -1203,7 +1313,11 @@ static void dw_mci_request_end(struct dw_mci *host, struct mmc_request *mrq)
+>  		dw_mci_start_request(host, slot);
+>  	} else {
+>  		dev_vdbg(host->dev, "list empty\n");
+> -		host->state = STATE_IDLE;
+> +
+> +		if (host->state == STATE_SENDING_CMD11)
+> +			host->state = STATE_WAITING_CMD11_DONE;
+> +		else
+> +			host->state = STATE_IDLE;
+>  	}
+> 
+>  	spin_unlock(&host->lock);
+> @@ -1314,8 +1428,10 @@ static void dw_mci_tasklet_func(unsigned long priv)
+> 
+>  		switch (state) {
+>  		case STATE_IDLE:
+> +		case STATE_WAITING_CMD11_DONE:
+>  			break;
+> 
+> +		case STATE_SENDING_CMD11:
+>  		case STATE_SENDING_CMD:
+>  			if (!test_and_clear_bit(EVENT_CMD_COMPLETE,
+>  						&host->pending_events))
+> @@ -1870,6 +1986,15 @@ static irqreturn_t dw_mci_interrupt(int irq, void *dev_id)
+>  	}
+> 
+>  	if (pending) {
+> +		/* Check volt switch first, since it can look like an error */
+> +		if ((host->state == STATE_SENDING_CMD11) &&
+> +		    (pending & SDMMC_INT_VOLT_SWITCH)) {
+> +			mci_writel(host, RINTSTS, SDMMC_INT_VOLT_SWITCH);
+> +			pending &= ~SDMMC_INT_VOLT_SWITCH;
+> +			dw_mci_cmd_interrupt(host,
+> +					     pending | SDMMC_INT_CMD_DONE);
+Artificially adding SDMMC_INT_CMD_DONE to pending is needed to complete cmd handling?
+Is there any reason?
 
 Thanks,
 Seungwon Jeon
 
-> >
-> >
-> >>         return 0;
-> >>  }
-> >>  EXPORT_SYMBOL(dw_mci_suspend);
-> >> @@ -2603,15 +2609,6 @@ int dw_mci_resume(struct dw_mci *host)
-> >>  {
-> >>         int i, ret;
-> >>
-> >> -       if (host->vmmc) {
-> >> -               ret = regulator_enable(host->vmmc);
-> >> -               if (ret) {
-> >> -                       dev_err(host->dev,
-> >> -                               "failed to enable regulator: %d\n", ret);
-> >> -                       return ret;
-> >> -               }
-> >> -       }
-> >> -
-> >>         if (!dw_mci_ctrl_all_reset(host)) {
-> >>                 ret = -ENODEV;
-> >>                 return ret;
-> >> diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
-> >> index 738fa24..5c95d00 100644
-> >> --- a/drivers/mmc/host/dw_mmc.h
-> >> +++ b/drivers/mmc/host/dw_mmc.h
-> >
-> > As I mentioned in my previous review, you should be removing "struct
-> > regulator *vmmc; /* Power regulator */" from "struct dw_mci" since
-> > you're no longer populating it.
-> >
-> >
-> >> @@ -225,6 +225,8 @@ struct dw_mci_slot {
-> >>         unsigned long           flags;
-> >>  #define DW_MMC_CARD_PRESENT    0
-> >>  #define DW_MMC_CARD_NEED_INIT  1
-> >> +#define DW_MMC_CARD_POWERED    2
-> >> +#define DW_MMC_IO_POWERED      3
-> >
-> > I don't really think you should have two bits here.  From my
-> > understanding of SD cards there should be very little reason to have
-> > vqmmc and vmmc not powered at the same time.
-> >
-> > If vqmmc is powered but vmmc is not powered then you'll get leakage
-> > and the card can pull power through the IO lines which is bad for the
-> > card.
-> >
-> > I don't think that powering vmmc without vqmmc for a short time is
-> > terribly bad but I can't quite see a good use case.  Essentially
-> > you're powering the card but not able to talk to it, right?  I'm not
-> > sure what the state of the IO lines would be (either driven low or
-> > floating) since presumably the pullups on the lines are powered by
-> > vqmmc too.
-> >
-> >
-> >>         int                     id;
-> >>         int                     last_detect_state;
-> >>  };
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> >
+> +		}
+> +
+>  		if (pending & DW_MCI_CMD_ERROR_FLAGS) {
+>  			mci_writel(host, RINTSTS, DW_MCI_CMD_ERROR_FLAGS);
+>  			host->cmd_status = pending;
+> @@ -1975,7 +2100,9 @@ static void dw_mci_work_routine_card(struct work_struct *work)
+> 
+>  					switch (host->state) {
+>  					case STATE_IDLE:
+> +					case STATE_WAITING_CMD11_DONE:
+>  						break;
+> +					case STATE_SENDING_CMD11:
+>  					case STATE_SENDING_CMD:
+>  						mrq->cmd->error = -ENOMEDIUM;
+>  						if (!mrq->data)
+> diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
+> index 5c95d00..af1d35f 100644
+> --- a/drivers/mmc/host/dw_mmc.h
+> +++ b/drivers/mmc/host/dw_mmc.h
+> @@ -99,6 +99,7 @@
+>  #define SDMMC_INT_HLE			BIT(12)
+>  #define SDMMC_INT_FRUN			BIT(11)
+>  #define SDMMC_INT_HTO			BIT(10)
+> +#define SDMMC_INT_VOLT_SWITCH		BIT(10) /* overloads bit 10! */
+>  #define SDMMC_INT_DRTO			BIT(9)
+>  #define SDMMC_INT_RTO			BIT(8)
+>  #define SDMMC_INT_DCRC			BIT(7)
+> @@ -113,6 +114,7 @@
+>  /* Command register defines */
+>  #define SDMMC_CMD_START			BIT(31)
+>  #define SDMMC_CMD_USE_HOLD_REG	BIT(29)
+> +#define SDMMC_CMD_VOLT_SWITCH		BIT(28)
+>  #define SDMMC_CMD_CCS_EXP		BIT(23)
+>  #define SDMMC_CMD_CEATA_RD		BIT(22)
+>  #define SDMMC_CMD_UPD_CLK		BIT(21)
+> @@ -129,6 +131,7 @@
+>  #define SDMMC_CMD_INDX(n)		((n) & 0x1F)
+>  /* Status register defines */
+>  #define SDMMC_GET_FCNT(x)		(((x)>>17) & 0x1FFF)
+> +#define SDMMC_STATUS_BUSY		BIT(9)
+>  /* FIFOTH register defines */
+>  #define SDMMC_SET_FIFOTH(m, r, t)	(((m) & 0x7) << 28 | \
+>  					 ((r) & 0xFFF) << 16 | \
+> @@ -149,7 +152,7 @@
+>  #define SDMMC_GET_VERID(x)		((x) & 0xFFFF)
+>  /* Card read threshold */
+>  #define SDMMC_SET_RD_THLD(v, x)		(((v) & 0x1FFF) << 16 | (x))
+> -
+> +#define SDMMC_UHS_18V			BIT(0)
+>  /* Register access macros */
+>  #define mci_readl(dev, reg)			\
+>  	__raw_readl((dev)->regs + SDMMC_##reg)
+> diff --git a/include/linux/mmc/dw_mmc.h b/include/linux/mmc/dw_mmc.h
+> index babaea9..9e31564 100644
+> --- a/include/linux/mmc/dw_mmc.h
+> +++ b/include/linux/mmc/dw_mmc.h
+> @@ -26,6 +26,8 @@ enum dw_mci_state {
+>  	STATE_DATA_BUSY,
+>  	STATE_SENDING_STOP,
+>  	STATE_DATA_ERROR,
+> +	STATE_SENDING_CMD11,
+> +	STATE_WAITING_CMD11_DONE,
+>  };
+> 
+>  enum {
+> --
+> 1.7.10.4
 > 
 > --
 > To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
