@@ -1,64 +1,73 @@
 From: Vincent Yang <vincent.yang.fujitsu@gmail.com>
-Subject: [RFC PATCH v2 0/6] mmc: sdhci: adding support for a new Fujitsu sdhci IP
-Date: Thu, 26 Jun 2014 14:23:26 +0800
-Message-ID: <1403763812-5495-1-git-send-email-Vincent.Yang@tw.fujitsu.com>
+Subject: [RFC PATCH v2 1/6] mmc: sdhci: add quirk for voltage switch callback
+Date: Thu, 26 Jun 2014 14:23:27 +0800
+Message-ID: <1403763812-5495-2-git-send-email-Vincent.Yang@tw.fujitsu.com>
+References: <1403763812-5495-1-git-send-email-Vincent.Yang@tw.fujitsu.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pa0-f54.google.com ([209.85.220.54]:63819 "EHLO
-	mail-pa0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753060AbaFZGXk (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 26 Jun 2014 02:23:40 -0400
+Received: from mail-pd0-f182.google.com ([209.85.192.182]:35804 "EHLO
+	mail-pd0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753060AbaFZGXn (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 26 Jun 2014 02:23:43 -0400
+In-Reply-To: <1403763812-5495-1-git-send-email-Vincent.Yang@tw.fujitsu.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: chris@printf.net, linux-mmc@vger.kernel.org
 Cc: devicetree@vger.kernel.org, anton@enomsg.org, linuxppc-dev@lists.ozlabs.org, patches@linaro.org, andy.green@linaro.org, jaswinder.singh@linaro.org, Vincent.Yang@tw.fujitsu.com
 
-Hi,
-We are adding support for a new Fujitsu sdhci IP.
+This patch defines a quirk to do a callback when
+switching voltages so do controller-specific
+actions.
+It is a preparation and will be used by Fujitsu
+SDHCI controller f_sdh30 driver.
 
-These patches are against v3.16-rc1 mainline since nothing in
-mmc-next at this moment.
+Signed-off-by: Vincent Yang <Vincent.Yang@tw.fujitsu.com>
+---
+ drivers/mmc/host/sdhci.c  | 5 +++++
+ drivers/mmc/host/sdhci.h  | 1 +
+ include/linux/mmc/sdhci.h | 2 ++
+ 3 files changed, 8 insertions(+)
 
-These patches are tested on 3.16-rc1 integration tree.
-
-We welcome any comment and advice about how to make any
-improvements or better align them with upstream.
-
-Changes from v1:
-- Add sufficient description in DT binding ducument
-- Remove one patch "mmc: sdhci: add quirk for broken 3.0V support" and use
-  voltage-ranges = <> in the device tree instead
-
-Thanks a lot!
-
-Best regards,
-Vincent Yang
-
-
-Vincent Yang (6):
-  mmc: sdhci: add quirk for voltage switch callback
-  mmc: sdhci: add quirk for tuning work around
-  mmc: sdhci: add quirk for single block transactions
-  mmc: sdhci: host: add new f_sdh30
-  mmc: core: hold SD Clock before CMD11 during Signal Voltage Switch
-    Procedure
-  mmc: core: add manual resume capability
-
- .../devicetree/bindings/mmc/sdhci-fujitsu.txt      |  35 ++
- drivers/mmc/core/core.c                            |   8 +-
- drivers/mmc/core/sd.c                              |   4 +
- drivers/mmc/host/Kconfig                           |   7 +
- drivers/mmc/host/Makefile                          |   1 +
- drivers/mmc/host/sdhci.c                           |  15 +-
- drivers/mmc/host/sdhci.h                           |   1 +
- drivers/mmc/host/sdhci_f_sdh30.c                   | 435 +++++++++++++++++++++
- drivers/mmc/host/sdhci_f_sdh30.h                   |  40 ++
- include/linux/mmc/host.h                           |  14 +
- include/linux/mmc/sdhci.h                          |   6 +
- 11 files changed, 561 insertions(+), 5 deletions(-)
- create mode 100644 Documentation/devicetree/bindings/mmc/sdhci-fujitsu.txt
- create mode 100644 drivers/mmc/host/sdhci_f_sdh30.c
- create mode 100644 drivers/mmc/host/sdhci_f_sdh30.h
-
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 47055f3..d62262b 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -1763,6 +1763,11 @@ static int sdhci_do_start_signal_voltage_switch(struct sdhci_host *host,
+ 		ctrl |= SDHCI_CTRL_VDD_180;
+ 		sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
+ 
++		/* Some controller need to do more when switching */
++		if ((host->quirks2 & SDHCI_QUIRK2_VOLTAGE_SWITCH) &&
++		    host->ops->voltage_switch)
++			host->ops->voltage_switch(host);
++
+ 		/* Wait for 5ms */
+ 		usleep_range(5000, 5500);
+ 
+diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+index 4a5cd5e..63c7a46 100644
+--- a/drivers/mmc/host/sdhci.h
++++ b/drivers/mmc/host/sdhci.h
+@@ -292,6 +292,7 @@ struct sdhci_ops {
+ 	void    (*adma_workaround)(struct sdhci_host *host, u32 intmask);
+ 	void	(*platform_init)(struct sdhci_host *host);
+ 	void    (*card_event)(struct sdhci_host *host);
++	void	(*voltage_switch)(struct sdhci_host *host);
+ };
+ 
+ #ifdef CONFIG_MMC_SDHCI_IO_ACCESSORS
+diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
+index 08abe99..5433f04 100644
+--- a/include/linux/mmc/sdhci.h
++++ b/include/linux/mmc/sdhci.h
+@@ -98,6 +98,8 @@ struct sdhci_host {
+ #define SDHCI_QUIRK2_BROKEN_HS200			(1<<6)
+ /* Controller does not support DDR50 */
+ #define SDHCI_QUIRK2_BROKEN_DDR50			(1<<7)
++/* Do a callback when switching voltages so do controller-specific actions */
++#define SDHCI_QUIRK2_VOLTAGE_SWITCH			(1<<8)
+ 
+ 	int irq;		/* Device IRQ */
+ 	void __iomem *ioaddr;	/* Mapped address */
 -- 
 1.9.0
 
