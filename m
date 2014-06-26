@@ -1,65 +1,64 @@
-From: Hsin-Hsiang Tseng <hsinhsiangtseng@gmail.com>
-Subject: Re: Seeking correct git repo
-Date: Thu, 26 Jun 2014 09:08:38 +0800
-Message-ID: <CAC1bqKhcnQET-WH-UTRLNj-QoiiZVFF0r=XCB9rNCFTYoMtW8w@mail.gmail.com>
-References: <53AB22F9.40503@webtuner.tv>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+From: Vincent Yang <vincent.yang.fujitsu@gmail.com>
+Subject: [RFC PATCH v2 0/6] mmc: sdhci: adding support for a new Fujitsu sdhci IP
+Date: Thu, 26 Jun 2014 14:23:26 +0800
+Message-ID: <1403763812-5495-1-git-send-email-Vincent.Yang@tw.fujitsu.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wi0-f179.google.com ([209.85.212.179]:33827 "EHLO
-	mail-wi0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757251AbaFZBIk (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 25 Jun 2014 21:08:40 -0400
-Received: by mail-wi0-f179.google.com with SMTP id cc10so146222wib.0
-        for <linux-mmc@vger.kernel.org>; Wed, 25 Jun 2014 18:08:38 -0700 (PDT)
-In-Reply-To: <53AB22F9.40503@webtuner.tv>
+Received: from mail-pa0-f54.google.com ([209.85.220.54]:63819 "EHLO
+	mail-pa0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753060AbaFZGXk (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 26 Jun 2014 02:23:40 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Derek Simkowiak <derek@webtuner.tv>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: chris@printf.net, linux-mmc@vger.kernel.org
+Cc: devicetree@vger.kernel.org, anton@enomsg.org, linuxppc-dev@lists.ozlabs.org, patches@linaro.org, andy.green@linaro.org, jaswinder.singh@linaro.org, Vincent.Yang@tw.fujitsu.com
 
-I have the same question too.
+Hi,
+We are adding support for a new Fujitsu sdhci IP.
 
-I think we can't get a patch from Linux stable, which isn't accepted
-by community.
+These patches are against v3.16-rc1 mainline since nothing in
+mmc-next at this moment.
 
-I used a hard way to get a relative patch which i want by copy source
-code from URL and recompile...
+These patches are tested on 3.16-rc1 integration tree.
 
-Best Regards,
-Hsinhsiang
+We welcome any comment and advice about how to make any
+improvements or better align them with upstream.
 
-2014-06-26 3:28 GMT+08:00 Derek Simkowiak <derek@webtuner.tv>:
->      Hello,
-> A while ago, Romain wrote a small eMMC 5.0 patch that Ulf ack'd:
->
-> http://comments.gmane.org/gmane.linux.kernel.mmc/23795
->
-> I need this patch for my hardware.  But I don't see this patch in Linux
-> stable (even though there are more recent patches from Seungwon Jeon in
-> there), and I don't see it at the MMC repo either:
->
-> $ git clone git://git.kernel.org/pub/scm/linux/kernel/git/cjb/mmc.git
->
-> # Where's the patch? I checked all branches...
->
-> $ git branch -a
-> * master
->   remotes/origin/HEAD -> origin/master
->   remotes/origin/master
->   remotes/origin/mmc-next
->   remotes/origin/mmc-updates-for-3.16-rc1-merged
->
->
-> Can you please tell me, what is the repo and branch where this patch was
-> submitted?  The only reference I have to this patch is the email archive at
-> the URL above.
->
->
-> Thank You,
-> Derek
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Changes from v1:
+- Add sufficient description in DT binding ducument
+- Remove one patch "mmc: sdhci: add quirk for broken 3.0V support" and use
+  voltage-ranges = <> in the device tree instead
+
+Thanks a lot!
+
+Best regards,
+Vincent Yang
+
+
+Vincent Yang (6):
+  mmc: sdhci: add quirk for voltage switch callback
+  mmc: sdhci: add quirk for tuning work around
+  mmc: sdhci: add quirk for single block transactions
+  mmc: sdhci: host: add new f_sdh30
+  mmc: core: hold SD Clock before CMD11 during Signal Voltage Switch
+    Procedure
+  mmc: core: add manual resume capability
+
+ .../devicetree/bindings/mmc/sdhci-fujitsu.txt      |  35 ++
+ drivers/mmc/core/core.c                            |   8 +-
+ drivers/mmc/core/sd.c                              |   4 +
+ drivers/mmc/host/Kconfig                           |   7 +
+ drivers/mmc/host/Makefile                          |   1 +
+ drivers/mmc/host/sdhci.c                           |  15 +-
+ drivers/mmc/host/sdhci.h                           |   1 +
+ drivers/mmc/host/sdhci_f_sdh30.c                   | 435 +++++++++++++++++++++
+ drivers/mmc/host/sdhci_f_sdh30.h                   |  40 ++
+ include/linux/mmc/host.h                           |  14 +
+ include/linux/mmc/sdhci.h                          |   6 +
+ 11 files changed, 561 insertions(+), 5 deletions(-)
+ create mode 100644 Documentation/devicetree/bindings/mmc/sdhci-fujitsu.txt
+ create mode 100644 drivers/mmc/host/sdhci_f_sdh30.c
+ create mode 100644 drivers/mmc/host/sdhci_f_sdh30.h
+
+-- 
+1.9.0
+
