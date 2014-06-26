@@ -1,156 +1,255 @@
-From: Mark Rutland <mark.rutland@arm.com>
-Subject: Re: [RFC PATCH v2 4/6] mmc: sdhci: host: add new f_sdh30
-Date: Thu, 26 Jun 2014 12:03:51 +0100
-Message-ID: <20140626110351.GN15240@leverpostej>
-References: <1403763812-5495-1-git-send-email-Vincent.Yang@tw.fujitsu.com>
- <1403763812-5495-5-git-send-email-Vincent.Yang@tw.fujitsu.com>
+From: Yuvaraj Kumar <yuvaraj.cd@gmail.com>
+Subject: Re: [PATCH 1/3] mmc: dw_mmc: use mmc_regulator_get_supply to handle regulators
+Date: Thu, 26 Jun 2014 16:51:22 +0530
+Message-ID: <CAKuRcO+OaknUtj9mJ+SQJPMj70hdLTMkDYCXq4L5JdwzDKdj6g@mail.gmail.com>
+References: <1403520321-2431-1-git-send-email-yuvaraj.cd@samsung.com>
+	<1403520321-2431-2-git-send-email-yuvaraj.cd@samsung.com>
+	<CAD=FV=UGjm9y3XoBgWKjw9kp9W=ZrwB-S6Lh7T_LBUgCQZn1ag@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from cam-admin0.cambridge.arm.com ([217.140.96.50]:53106 "EHLO
-	cam-admin0.cambridge.arm.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1754661AbaFZLEP (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 26 Jun 2014 07:04:15 -0400
-Content-Disposition: inline
-In-Reply-To: <1403763812-5495-5-git-send-email-Vincent.Yang@tw.fujitsu.com>
-Content-Language: en-US
+Received: from mail-qa0-f54.google.com ([209.85.216.54]:55050 "EHLO
+	mail-qa0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755679AbaFZLVX (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 26 Jun 2014 07:21:23 -0400
+In-Reply-To: <CAD=FV=UGjm9y3XoBgWKjw9kp9W=ZrwB-S6Lh7T_LBUgCQZn1ag@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Vincent Yang <vincent.yang.fujitsu@gmail.com>
-Cc: "chris@printf.net" <chris@printf.net>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "anton@enomsg.org" <anton@enomsg.org>, "linuxppc-dev@lists.ozlabs.org" <linuxppc-dev@lists.ozlabs.org>, "patches@linaro.org" <patches@linaro.org>, "andy.green@linaro.org" <andy.green@linaro.org>, "jaswinder.singh@linaro.org" <jaswinder.singh@linaro.org>, "Vincent.Yang@tw.fujitsu.com" <Vincent.Yang@tw.fujitsu.com>
+To: Doug Anderson <dianders@chromium.org>
+Cc: linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Jaehoon Chung <jh80.chung@samsung.com>, Chris Ball <cjb@laptop.org>, Seungwon Jeon <tgih.jun@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Sonny Rao <sonnyrao@chromium.org>, Tomasz Figa <t.figa@samsung.com>, Kukjin Kim <kgene.kim@samsung.com>, sunil joshi <joshi@samsung.com>, ks.giri@samsung.com, Prashanth G <prashanth.g@samsung.com>, Alim Akhtar <alim.akhtar@samsung.com>, Yuvaraj Kumar C D <yuvaraj.cd@samsung.com>
 
-On Thu, Jun 26, 2014 at 07:23:30AM +0100, Vincent Yang wrote:
-> This patch adds new host controller driver for
-> Fujitsu SDHCI controller f_sdh30.
+Doug
+
+On Tue, Jun 24, 2014 at 11:30 PM, Doug Anderson <dianders@chromium.org> wrote:
+> Yuvaraj,
 >
-> Signed-off-by: Vincent Yang <Vincent.Yang@tw.fujitsu.com>
-> ---
->  .../devicetree/bindings/mmc/sdhci-fujitsu.txt      |  35 +++
->  drivers/mmc/host/Kconfig                           |   7 +
->  drivers/mmc/host/Makefile                          |   1 +
->  drivers/mmc/host/sdhci_f_sdh30.c                   | 346 +++++++++++++++++++++
->  drivers/mmc/host/sdhci_f_sdh30.h                   |  40 +++
->  5 files changed, 429 insertions(+)
->  create mode 100644 Documentation/devicetree/bindings/mmc/sdhci-fujitsu.txt
->  create mode 100644 drivers/mmc/host/sdhci_f_sdh30.c
->  create mode 100644 drivers/mmc/host/sdhci_f_sdh30.h
+> On Mon, Jun 23, 2014 at 3:45 AM, Yuvaraj Kumar C D <yuvaraj.cd@gmail.com> wrote:
+>> This patch makes use of mmc_regulator_get_supply() to handle
+>> the vmmc and vqmmc regulators.Also it moves the code handling
+>> the these regulators to dw_mci_set_ios().It turned on the vmmc
+>> and vqmmc during MMC_POWER_UP and MMC_POWER_ON,and turned off
+>> during MMC_POWER_OFF.
+>>
+>> Signed-off-by: Yuvaraj Kumar C D <yuvaraj.cd@samsung.com>
+>> ---
+>>  drivers/mmc/host/dw_mmc.c |   71 ++++++++++++++++++++++-----------------------
+>>  drivers/mmc/host/dw_mmc.h |    2 ++
+>>  2 files changed, 36 insertions(+), 37 deletions(-)
 >
-> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-fujitsu.txt b/Documentation/devicetree/bindings/mmc/sdhci-fujitsu.txt
-> new file mode 100644
-> index 0000000..40add438
-> --- /dev/null
-> +++ b/Documentation/devicetree/bindings/mmc/sdhci-fujitsu.txt
-> @@ -0,0 +1,35 @@
-> +* Fujitsu SDHCI controller
-> +
-> +This file documents differences between the core properties in mmc.txt
-> +and the properties used by the sdhci_f_sdh30 driver.
-> +
-> +Required properties:
-> +- compatible: "fujitsu,f_sdh30"
-
-Please use '-' rather than '_' in compatible strings.
-
-This seems to be the name of the driver. What is the precise name of the
-IP block?
-
-> +- voltage-ranges : two cells are required, first cell specifies minimum
-> +  slot voltage (mV), second cell specifies maximum slot voltage (mV).
-> +  Several ranges could be specified.
-
-Describe this as a list of pairs, it's confusing otherwise.
-
-I'm not sure I follow what having multiple pairs implies.
-
-> +Optional properties:
-> +- gpios: This is one optional gpio for controlling a power mux which
-> +  switches between two power supplies. 3.3V is selected when gpio is high,
-> +  and 1.8V is selected when gpio is low. This voltage is used for signal
-> +  level.
-
-Give this a more descriptive name, like power-mux-gpios. That will match
-up with the style of cd-gpios and wp-gpios.
-
-> +- clocks: Must contain an entry for each entry in clock-names. It is a
-> +  list of phandles and clock-specifier pairs.
-> +  See ../clocks/clock-bindings.txt for details.
-> +- clock-names: Should contain the following two entries:
-> +       "sd_sd4clk" - clock primarily used for tuning process
-> +       "sd_bclk"   - base clock for sdhci controller
-> +
-> +Example:
-> +
-> +       sdhci1: sdio@36600000 {
-> +               compatible = "fujitsu,f_sdh30";
-> +               reg = <0 0x36600000 0x1000>;
-> +               interrupts = <0 172 0x4>,
-> +                            <0 173 0x4>;
-> +               voltage-ranges = <1800 1800 3300 3300>;
-
-Place brackets around each pair to make this clearer:
-
-	voltage-ranges = <1800 1800>, <3300 3300>;
-
-[...]
-
-> +       if (!of_property_read_u32(pdev->dev.of_node, "vendor-hs200",
-> +                                 &priv->vendor_hs200))
-> +               dev_info(dev, "Applying vendor-hs200 setting\n");
-> +       else
-> +               priv->vendor_hs200 = 0;
-
-This wasn't in the binding document, and a grep for "vendor-hs200" in a
-v3.16-rc2 tree found me nothing.
-
-Please document this.
-
-> +
-> +       if (!of_property_read_u32(pdev->dev.of_node, "bus-width", &bus_width)) {
-> +               if (bus_width == 8) {
-> +                       dev_info(dev, "Applying 8 bit bus width\n");
-> +                       host->mmc->caps |= MMC_CAP_8_BIT_DATA;
-> +               }
-> +       }
-
-What if bus-width is not 8, or is not present?
-
-> +
-> +       ret = mmc_of_parse_voltage(pdev->dev.of_node, &host->ocr_mask);
-> +       if (ret) {
-> +               dev_err(dev, "%s: parse voltage error\n", __func__);
-> +               goto err_voltage;
-> +       }
-> +
-> +       host->hw_name = DRIVER_NAME;
-> +       host->ops = &sdhci_f_sdh30_ops;
-> +       host->irq = irq;
-> +
-> +       host->ioaddr = of_iomap(pdev->dev.of_node, 0);
-> +       if (!host->ioaddr) {
-> +               dev_err(dev, "%s: failed to remap registers\n", __func__);
-> +               ret = -ENXIO;
-> +               goto err_remap;
-> +       }
-> +
-> +       priv->clk_sd4 = of_clk_get(pdev->dev.of_node, 0);
-> +       if (!IS_ERR(priv->clk_sd4)) {
-> +               ret = clk_prepare_enable(priv->clk_sd4);
-> +               if (ret < 0) {
-> +                       dev_err(dev, "Failed to enable sd4 clock: %d\n", ret);
-> +                       goto err_clk1;
-> +               }
-> +       }
-> +       priv->clk_b = of_clk_get(pdev->dev.of_node, 1);
-> +       if (!IS_ERR(priv->clk_b)) {
-> +               ret = clk_prepare_enable(priv->clk_b);
-> +               if (ret < 0) {
-> +                       dev_err(dev, "Failed to enable clk_b clock: %d\n", ret);
-> +                       goto err_clk2;
-> +               }
-> +       }
-
-Given you gave these names, get these by name rather than index. It's
-less surprising and more flexible.
-
-Thanks,
-Mark.
+> Perhaps you could CC me on the whole series for the next version since
+> I was involved in privately reviewing previous versions?
+It was just accidental missing you in the CC .Surely i will add you in
+CC for next versions.
+>
+> Overall caveat for my review is that I'm nowhere near an SD/MMC expert.
+>
+>
+>> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+>> index 1ac227c..f5cabce 100644
+>> --- a/drivers/mmc/host/dw_mmc.c
+>> +++ b/drivers/mmc/host/dw_mmc.c
+>> @@ -937,6 +937,7 @@ static void dw_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+>>         struct dw_mci_slot *slot = mmc_priv(mmc);
+>>         const struct dw_mci_drv_data *drv_data = slot->host->drv_data;
+>>         u32 regs;
+>> +       int ret;
+>>
+>>         switch (ios->bus_width) {
+>>         case MMC_BUS_WIDTH_4:
+>> @@ -975,16 +976,41 @@ static void dw_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+>>
+>>         switch (ios->power_mode) {
+>>         case MMC_POWER_UP:
+>> +               if ((!IS_ERR(mmc->supply.vmmc)) &&
+>> +                               !test_bit(DW_MMC_CARD_POWERED, &slot->flags)) {
+>> +                       ret = regulator_enable(mmc->supply.vmmc);
+>> +                       if (!ret)
+>> +                               set_bit(DW_MMC_CARD_POWERED, &slot->flags);
+>> +               }
+>
+> As per below, I'm not sure why you'd want to turn on vqmmc and vmmc at
+> different times.
+As you can see people's have different opinion on this.When i had a
+look at the other drivers in the subsystem which does in the same flow
+as above.However i will change in the next version.
+>
+> Also: if you fail to turn on either of the regulators it feels like
+> you should print a pretty nasty error message since your device will
+> almost certainly not work.
+Yes. I will add a error message.
+>
+>
+>>                 set_bit(DW_MMC_CARD_NEED_INIT, &slot->flags);
+>>                 regs = mci_readl(slot->host, PWREN);
+>>                 regs |= (1 << slot->id);
+>>                 mci_writel(slot->host, PWREN, regs);
+>>                 break;
+>>         case MMC_POWER_OFF:
+>> +               if (!IS_ERR(mmc->supply.vqmmc) &&
+>> +                               test_bit(DW_MMC_IO_POWERED, &slot->flags)) {
+>> +                       ret = regulator_disable(mmc->supply.vqmmc);
+>> +                       if (!ret)
+>> +                               clear_bit(DW_MMC_IO_POWERED, &slot->flags);
+>> +               }
+>> +               if (!IS_ERR(mmc->supply.vmmc) &&
+>> +                               test_bit(DW_MMC_CARD_POWERED, &slot->flags)) {
+>> +                       ret = regulator_disable(mmc->supply.vmmc);
+>> +                       if (!ret)
+>> +                               clear_bit(DW_MMC_CARD_POWERED, &slot->flags);
+>> +               }
+>>                 regs = mci_readl(slot->host, PWREN);
+>>                 regs &= ~(1 << slot->id);
+>>                 mci_writel(slot->host, PWREN, regs);
+>>                 break;
+>> +       case MMC_POWER_ON:
+>> +               if (!IS_ERR(mmc->supply.vqmmc) &&
+>> +                               !test_bit(DW_MMC_IO_POWERED, &slot->flags)) {
+>> +                       ret = regulator_enable(mmc->supply.vqmmc);
+>> +                       if (!ret)
+>> +                               set_bit(DW_MMC_IO_POWERED, &slot->flags);
+>> +               }
+>>         default:
+>>                 break;
+>>         }
+>> @@ -2067,7 +2093,13 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
+>>                 mmc->f_max = freq[1];
+>>         }
+>>
+>> -       mmc->ocr_avail = MMC_VDD_32_33 | MMC_VDD_33_34;
+>> +       /*if there are external regulators, get them*/
+>> +       ret = mmc_regulator_get_supply(mmc);
+>> +       if (ret == -EPROBE_DEFER)
+>> +               goto err_setup_bus;
+>> +
+>> +       if (!mmc->ocr_avail)
+>> +               mmc->ocr_avail = MMC_VDD_32_33 | MMC_VDD_33_34;
+>>
+>>         if (host->pdata->caps)
+>>                 mmc->caps = host->pdata->caps;
+>> @@ -2133,7 +2165,7 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
+>>
+>>  err_setup_bus:
+>>         mmc_free_host(mmc);
+>> -       return -EINVAL;
+>> +       return ret;
+>>  }
+>>
+>>  static void dw_mci_cleanup_slot(struct dw_mci_slot *slot, unsigned int id)
+>> @@ -2375,24 +2407,6 @@ int dw_mci_probe(struct dw_mci *host)
+>>                 }
+>>         }
+>>
+>> -       host->vmmc = devm_regulator_get_optional(host->dev, "vmmc");
+>> -       if (IS_ERR(host->vmmc)) {
+>> -               ret = PTR_ERR(host->vmmc);
+>> -               if (ret == -EPROBE_DEFER)
+>> -                       goto err_clk_ciu;
+>> -
+>> -               dev_info(host->dev, "no vmmc regulator found: %d\n", ret);
+>> -               host->vmmc = NULL;
+>> -       } else {
+>> -               ret = regulator_enable(host->vmmc);
+>> -               if (ret) {
+>> -                       if (ret != -EPROBE_DEFER)
+>> -                               dev_err(host->dev,
+>> -                                       "regulator_enable fail: %d\n", ret);
+>> -                       goto err_clk_ciu;
+>> -               }
+>> -       }
+>> -
+>>         host->quirks = host->pdata->quirks;
+>>
+>>         spin_lock_init(&host->lock);
+>> @@ -2536,8 +2550,6 @@ err_workqueue:
+>>  err_dmaunmap:
+>>         if (host->use_dma && host->dma_ops->exit)
+>>                 host->dma_ops->exit(host);
+>> -       if (host->vmmc)
+>> -               regulator_disable(host->vmmc);
+>>
+>>  err_clk_ciu:
+>>         if (!IS_ERR(host->ciu_clk))
+>> @@ -2573,9 +2585,6 @@ void dw_mci_remove(struct dw_mci *host)
+>>         if (host->use_dma && host->dma_ops->exit)
+>>                 host->dma_ops->exit(host);
+>>
+>> -       if (host->vmmc)
+>> -               regulator_disable(host->vmmc);
+>> -
+>>         if (!IS_ERR(host->ciu_clk))
+>>                 clk_disable_unprepare(host->ciu_clk);
+>>
+>> @@ -2592,9 +2601,6 @@ EXPORT_SYMBOL(dw_mci_remove);
+>>   */
+>>  int dw_mci_suspend(struct dw_mci *host)
+>>  {
+>> -       if (host->vmmc)
+>> -               regulator_disable(host->vmmc);
+>> -
+>
+> Just to check: have you tested suspend/resume with the various
+> combinations of "keep-power-in-suspend" and "non-removable" with your
+> patch.  I remember some of the logic being a bit complicated...
+Tested suspend/resume with the non-removable.Will do more testing with
+combination of "keep-power-in-suspend" and "non-removable".
+>
+>
+>>         return 0;
+>>  }
+>>  EXPORT_SYMBOL(dw_mci_suspend);
+>> @@ -2603,15 +2609,6 @@ int dw_mci_resume(struct dw_mci *host)
+>>  {
+>>         int i, ret;
+>>
+>> -       if (host->vmmc) {
+>> -               ret = regulator_enable(host->vmmc);
+>> -               if (ret) {
+>> -                       dev_err(host->dev,
+>> -                               "failed to enable regulator: %d\n", ret);
+>> -                       return ret;
+>> -               }
+>> -       }
+>> -
+>>         if (!dw_mci_ctrl_all_reset(host)) {
+>>                 ret = -ENODEV;
+>>                 return ret;
+>> diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
+>> index 738fa24..5c95d00 100644
+>> --- a/drivers/mmc/host/dw_mmc.h
+>> +++ b/drivers/mmc/host/dw_mmc.h
+>
+> As I mentioned in my previous review, you should be removing "struct
+> regulator *vmmc; /* Power regulator */" from "struct dw_mci" since
+> you're no longer populating it.
+ok
+>
+>
+>> @@ -225,6 +225,8 @@ struct dw_mci_slot {
+>>         unsigned long           flags;
+>>  #define DW_MMC_CARD_PRESENT    0
+>>  #define DW_MMC_CARD_NEED_INIT  1
+>> +#define DW_MMC_CARD_POWERED    2
+>> +#define DW_MMC_IO_POWERED      3
+>
+> I don't really think you should have two bits here.  From my
+> understanding of SD cards there should be very little reason to have
+> vqmmc and vmmc not powered at the same time.
+I think if i can use mmc_regulator_set_ocr(), we don't need additional
+flag.But for tps65090 mmc_regulator_get_ocr() and
+mmc_regulator_set_ocr() is failing as its a fixed-regulator.
+>
+> If vqmmc is powered but vmmc is not powered then you'll get leakage
+> and the card can pull power through the IO lines which is bad for the
+> card.
+>
+> I don't think that powering vmmc without vqmmc for a short time is
+> terribly bad but I can't quite see a good use case.  Essentially
+> you're powering the card but not able to talk to it, right?  I'm not
+> sure what the state of the IO lines would be (either driven low or
+> floating) since presumably the pullups on the lines are powered by
+> vqmmc too.
+>
+>
+>>         int                     id;
+>>         int                     last_detect_state;
+>>  };
